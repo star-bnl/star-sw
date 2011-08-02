@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.27 2010/09/02 21:31:14 prindle Exp $
+ * $Id: StEStructSupport.cxx,v 1.28 2011/08/02 20:42:24 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -12,7 +12,6 @@
  *
  ***********************************************************************/
 #include "StEStructSupport.h"
-#include "StEStructPool/Correlations/StEStructMaxB.h"
 #include "Stiostream.h"
 #include <sstream>
 #include "Stsstream.h"
@@ -108,6 +107,7 @@ StEStructSupport::StEStructSupport(TFile* tf, int bgmode, float* npairs) : mtf(t
   mPairWeighting = true;
   mIdenticalPair = true;
   mYtYtNormalization = false;
+  mYtYtVolumeNormalization = false;
 
   // Scan file for number of z-buffer bins
   getNZBins();
@@ -143,7 +143,7 @@ int StEStructSupport::getNZBins(){
     return mNumZBins;
 };
 //---------------------------------------------------------
-// We have been calculating \Delta\rho/rhoin different multiplicity/z bins
+// We have been calculating \Delta\rho/rho in different multiplicity/z bins
 // then averaging using the number of pairs as a weight.
 // This heavily favors slightly larger multiplicities..
 // These get*Number routines are so I can try multiplicity weighting.
@@ -476,6 +476,33 @@ void StEStructSupport::rescale(TH2D** hists) {
                 // Seems that bins with small number of counts (the case for large Yt in YtYt plots)
                 // can skew the scaling when we scale as above.
                 hists[i+4]->Scale(hists[i]->Integral()/hists[i+4]->Integral());
+            } else if (mYtYtVolumeNormalization) {
+                // Scale so integral of \Delta\rho/sqrt(\rho) = 0;
+                TH2D *tmpA = (TH2D *) hists[i]->Clone();
+                tmpA->Reset();
+                TH2D *tmpB = (TH2D *) hists[i]->Clone();
+                tmpB->Reset();
+                for (int ix=1;ix<=tmpA->GetNbinsX();ix++) {
+                    for (int iy=1;iy<=tmpA->GetNbinsY();iy++) {
+                        double valS = hists[i]->GetBinContent(ix,iy);
+                        double valR = hists[i+4]->GetBinContent(ix,iy);
+                        if (valR > 0) {
+                            tmpA->SetBinContent(ix,iy,valS/sqrt(valR));
+                        } else {
+                            tmpA->SetBinContent(ix,iy,0);
+                        }
+                        tmpB->SetBinContent(ix,iy,sqrt(valR));
+                    }
+                }
+                double num = tmpA->Integral();
+                double den = tmpB->Integral();
+                if (den > 0) {
+                    hists[i+4]->Scale(num/den);
+                } else {
+                    hists[i+4]->Scale(0);
+                }
+                delete tmpA;
+                delete tmpB;
             } else {
                 // We know how many sibling and mixed events there were.
                 // In this normalization we should be able to integrate (weighted with an
@@ -535,6 +562,33 @@ void StEStructSupport::rescale(TH2D** hists, int zBin) {
                 // Seems that bins with small number of counts (the case for large Yt in YtYt plots)
                 // can skew the scaling when we scale as above.
                 hists[i+4]->Scale(hists[i]->Integral()/hists[i+4]->Integral());
+            } else if (mYtYtVolumeNormalization) {
+                // Scale so integral of \Delta\rho/sqrt(\rho) = 0;
+                TH2D *tmpA = (TH2D *) hists[i]->Clone();
+                tmpA->Reset();
+                TH2D *tmpB = (TH2D *) hists[i]->Clone();
+                tmpB->Reset();
+                for (int ix=1;ix<=tmpA->GetNbinsX();ix++) {
+                    for (int iy=1;iy<=tmpA->GetNbinsY();iy++) {
+                        double valS = hists[i]->GetBinContent(ix,iy);
+                        double valR = hists[i+4]->GetBinContent(ix,iy);
+                        if (valR > 0) {
+                            tmpA->SetBinContent(ix,iy,valS/sqrt(valR));
+                        } else {
+                            tmpA->SetBinContent(ix,iy,0);
+                        }
+                        tmpB->SetBinContent(ix,iy,sqrt(valR));
+                    }
+                }
+                double num = tmpA->Integral();
+                double den = tmpB->Integral();
+                if (den > 0) {
+                    hists[i+4]->Scale(num/den);
+                } else {
+                    hists[i+4]->Scale(0);
+                }
+                delete tmpA;
+                delete tmpB;
             } else {
                 // We know how many sibling and mixed events there were.
                 // In this normalization we should be able to integrate (weighted with an
@@ -563,7 +617,7 @@ TH2D** StEStructSupport::getPtHists(const char* name, int zBin){
           return retVal;
       }
   }
-  
+
   retVal=new TH2D*[32];
 
   for(int i=0;i<_pair_totalmax;i++){
@@ -576,6 +630,26 @@ TH2D** StEStructSupport::getPtHists(const char* name, int zBin){
     mtf->GetObject(hprname.Data(),retVal[i+8]);
     mtf->GetObject(hpaname.Data(),retVal[i+16]);
     mtf->GetObject(hpbname.Data(),retVal[i+24]);
+    // Adjust errors on Pr, Pa and Pb. Current error is sqrt(bin content).
+    // Error on p_t is roughly \sigma_{p_t}  = 0.015 * p_t
+    // We kind of interchange sums of squares and squares of sums to get following.
+    double n, pa, pb, er, ea, eb;
+    for (int ix=1;ix<=retVal[i+8]->GetNbinsX();ix++) {
+        for (int iy=1;iy<=retVal[i+8]->GetNbinsY();iy++) {
+            // Adjust sibling histograms for p_t uncertainties
+            // First four groups of retVal are ++, +-, -+ and -- for sibling.
+            // Second four are for mixed.
+            n = retVal[i]->GetBinContent(ix,iy);
+            pa = retVal[i+16]->GetBinContent(ix,iy);
+            pb = retVal[i+24]->GetBinContent(ix,iy);
+            er = (0.015*pa*pb/n)*sqrt(2/n);
+            ea = (0.015*pa)/sqrt(n);
+            eb = (0.015*pb)/sqrt(n);
+            retVal[i+8]->SetBinError(ix,iy,er);
+            retVal[i+16]->SetBinError(ix,iy,ea);
+            retVal[i+24]->SetBinError(ix,iy,eb);
+        }
+    }
   }
 
   return retVal;
@@ -613,21 +687,26 @@ void StEStructSupport::rescalePt(TH2D** hists, int zBin) {
     double nMix = hNum->GetEntries();
 
     for(int i=0;i<4;i++) {
+        double dx = (hists[i]->GetXaxis())->GetBinWidth(1);
+        double dy = (hists[i]->GetYaxis())->GetBinWidth(1);
+        double binFactor = dx*dy;
+        double nSibPairs = hists[i]->Integral();
+        double nMixPairs = hists[i+4]->Integral();
+        double norm;
+        if (nMixPairs > 0) {
+            norm = nSibPairs/(nMixPairs*nSib*binFactor);
+        } else {
+            norm = 0;
+        }
         for (int j=0;j<4;j++) {
             if (hists[i+4*j]->Integral() > 0) {
-                double binFactor = 1.0;
-                double dx = (hists[i+8*j]->GetXaxis())->GetBinWidth(1);
-                double dy = (hists[i+8*j]->GetYaxis())->GetBinWidth(1);
-                binFactor = dx*dy;
                 // divinding by ex*ey converts all input hists from counts to densities, so all operations and final result should also be density.
                 if(i==0 && !msilent) cout << "Scaling with Nevents " << nSib << " and binFactor " << binFactor << endl;
                 hists[i+8*j]->Scale(1.0/(nSib*binFactor));
 
-                double nSibPairs = hists[i+8*j]->Integral();
-                double nMixPairs = hists[i+4+8*j]->Integral();
                 if (mPairNormalization) {
                     if (nMixPairs > 0) {
-                        hists[i+4+8*j]->Scale(nSibPairs/nMixPairs);
+                        hists[i+4+8*j]->Scale(norm);
                     } else {
                         hists[i+4+8*j]->Scale(0);
                     }
@@ -847,7 +926,7 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
             cout << "@@@@@ In buildCommon: using d^2N/detadphi = " << sqrtRho << endl;
         }
         for (int iType=0;iType<4;iType++) {
-            // >>>>>
+            // This 1/4 is because for CI we add four histograms together, each one of which has been normalized.
             retVal[iType]->Scale(1./4.);
             if (0 < sqrtRho) {
                 if (0 == opt) {
@@ -918,19 +997,51 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
 
         // Calculate quantity we were asked for.
         for (int iType=0;iType<4;iType++) {
+            // If rho and rho_ref are empty we skip the calculation
+            if ((0 == retVal[iType]->Integral()) && (0 == retVal[iType]->GetMaximum()) &&
+                (0 == retVal[iType+4]->Integral()) && (0 == retVal[iType+4]->GetMaximum())) {
+                continue;
+            }
             retVal[iType]->Scale(wIdentical[iType]);
             retVal[iType+4]->Scale(wIdentical[iType]);
             if (3 == opt) {        // \Delta\rho/\rho_ref,  Calculate \rho_sib/\rho_ref. Subtract 1 later.
+                bool message = false;
                 retVal[iType]->Divide(retVal[iType+4]);
                 for (int ix=1;ix<=retVal[iType]->GetNbinsX();ix++) {
                     for (int iy=1;iy<=retVal[iType]->GetNbinsY();iy++) {
                         double rhoSib = retVal[iType]->GetBinContent(ix,iy);
-                        retVal[iType]->SetBinContent(ix,iy,rhoSib-1);
+                        if (0 == rhoSib) {
+                            message = true;
+                        } else {
+                            retVal[iType]->SetBinContent(ix,iy,rhoSib-1);
+                        }
                     }
                 }
+                if (message) {
+                    cout << "!!!!! Had at least one empty bin in Pt histogram " << name;
+                    cout << " type " << iType << " option 3 !!!!!" << endl;
+                }
             } else if (4 == opt) { // \rho_sib - \rho_ref
+                bool message = false;
+                for (int ix=1;ix<=retVal[iType]->GetNbinsX();ix++) {
+                    for (int iy=1;iy<=retVal[iType]->GetNbinsY();iy++) {
+                        if (0 == retVal[iType]->GetBinContent(ix,iy)) {
+                            message = true;
+                        }
+                    }
+                }
+                if (message) {
+                    cout << "!!!!! Had at least one empty bin in Pt histogram " << name;
+                    cout << " type " << iType << " option 4!!!!!" << endl;
+                }
                 retVal[iType]->Add(retVal[iType+4],-1);
-            } else if (5 == opt) { // \Delta\rho/sqrt(\rho_ref. Need to calculate errors by hand.
+            } else if (5 == opt) { // \Delta\rho/sqrt(\rho_ref). Need to calculate errors by hand.
+                TH1 *hNum;
+                double nSib = 0;
+                for (int zBin=0;zBin<mNumZBins;zBin++) {
+                    TString hSibName("NEventsSib_zBuf_");  hSibName += zBin;  mtf->GetObject(hSibName.Data(),hNum);
+                    nSib += hNum->Integral();
+                }
                 for (int ix=1;ix<=retVal[iType]->GetNbinsX();ix++) {
                     for (int iy=1;iy<=retVal[iType]->GetNbinsY();iy++) {
                         double rhoSib = retVal[iType]->GetBinContent(ix,iy);
@@ -939,13 +1050,15 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
                         double eRhoRef = retVal[iType+4]->GetBinError(ix,iy);
                         if (rhoRef > 0) {
                             double eVal2 = eRhoSib*eRhoSib/rhoRef +
-                                           eRhoRef*eRhoRef*pow(rhoSib/rhoRef+1,2)/rhoRef;
+                                           0.25*eRhoRef*eRhoRef*pow(rhoSib/rhoRef+1,2)/rhoRef;
                             double val = (rhoSib-rhoRef)/sqrt(rhoRef);
                             retVal[iType]->SetBinContent(ix,iy,val);
-                            retVal[iType]->SetBinError(ix,iy,val,sqrt(eVal2));
+                            retVal[iType]->SetBinError(ix,iy,sqrt(eVal2));
                         } else {
+                            double eVal2 = eRhoSib*eRhoSib + 1;
                             retVal[iType]->SetBinContent(ix,iy,0);
-                            retVal[iType]->SetBinError(ix,iy,0);
+                            // Not sure about this error.
+                            retVal[iType]->SetBinError(ix,iy,sqrt(eVal2/nSib));
                         }
                     }
                 }
@@ -1012,12 +1125,26 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf, int z
         // Actually calculate \rho/\rho_{ref} - 1 so errors are correct.
         // Don't know a convenient way to subtract one from every bin!!!!
         for (int i=0;i<4;i++) {
+            // If rho and rho_ref are empty we skip the calculation
+            if ((0 == retVal[i]->Integral()) && (0 == retVal[i]->GetMaximum()) &&
+                (0 == retVal[i+4]->Integral()) && (0 == retVal[i+4]->GetMaximum())) {
+                continue;
+            }
+            bool message = false;
             retVal[i]->Divide(retVal[i+4]);                        // rho/rho_{ref}
             for (int ix=1;ix<=retVal[i]->GetNbinsX();ix++) {
                 for (int iy=1;iy<=retVal[i]->GetNbinsY();iy++) {
                     double val = retVal[i]->GetBinContent(ix,iy);
-                    retVal[i]->SetBinContent(ix,iy,val-1);         // delta-rho/rho_{ref}
+                    if (val == 0) {
+                        message = true;
+                    } else {
+                        retVal[i]->SetBinContent(ix,iy,val-1);         // delta-rho/rho_{ref}
+                    }
                 }
+            }
+            if (message) {
+                cout << "!!!!! Had at least one empty bin in N histogram " << name;
+                cout << " zBin " << zBin << " type " << i << "!!!!!" << endl;
             }
         }
     }
@@ -1107,7 +1234,7 @@ TH2D** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract) 
         cout << "@@@@@ In buildPtCommon: using d^2N/detadphi = " << sqrtRho << endl;
     }
     for (int iType=0;iType<4;iType++) {
-        // >>>>>
+        // This 1/4 is because for CI we add four histograms together, each one of which has been normalized.
         retVal[iType]->Scale(1./4.);
         if (0 < sqrtRho) {
             if (0 == opt) {
@@ -1184,6 +1311,13 @@ TH2D** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract, 
 
     for (int i=0;i<4;i++) {
         if (subtract) {
+            // Zero errors of mixed events. Rationale is that those errors are
+            // already included in the sibling.
+            for (int ix=1;ix<=mixVal[i]->GetNbinsX();ix++) {
+                for (int iy=1;iy<=mixVal[i]->GetNbinsY();iy++) {
+                    mixVal[i]->SetBinError(ix,iy,0);
+                }
+            }
             retVal[i]->Add(mixVal[i],-1);  // Subtract mixed event artifacts
         }
         retVal[i]->Divide(hlocal[i+4]);
@@ -1768,8 +1902,15 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.28  2011/08/02 20:42:24  prindle
+ * Added YtYtVolumeNormalization.
+ *   Fixed calculation of error for YtYt \Delta\rho/sqrt(\rho_{ref})
+ *   Added error calculation for p_t histograms
+ *   Added warning when either \rho_{sib} or \rho_{ref} has an empty bin. Set ratio
+ *    bin to 0 instead of -1.
+ *
  * Revision 1.27  2010/09/02 21:31:14  prindle
- * Support: Can't find evidence that YtYt correlation depends on z vertex.
+ *   Support: Can't find evidence that YtYt correlation depends on z vertex.
  *            Add numerators and denominators then take ratio. Need a new
  *            rescale method independent of z bin. Looks like we can normalize
  *            mixed so \int{sib/mix} = number of bins (what we have recently been
