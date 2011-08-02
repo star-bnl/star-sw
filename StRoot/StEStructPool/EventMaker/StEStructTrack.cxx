@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.cxx,v 1.9 2010/09/02 21:26:29 prindle Exp $
+ * $Id: StEStructTrack.cxx,v 1.10 2011/08/02 20:36:57 prindle Exp $
  *
  * Author: Jeff Porter merge of code from Aya Ishihara and Jeff Reid
  *
@@ -91,8 +91,8 @@ void StEStructTrack::FillTransientData(){
   evalXt();
   evalCurvature();
   evalFourMomentum();
-  evalPID();
   evalMass();
+  evalPID();
   
 };
 
@@ -132,74 +132,135 @@ void StEStructTrack::evalPID(){
     //     pi = 1
     //     K  = 2
     //     p  = 3
+
+    // If there is ToF information and dEdx information require it to be consistent.
+    // For Hijing we seem to have mDedx = mBeta = 0. Use tight cuts on mPIDpi_dEdx etc.
     float pi = fabs(mPIDpi_dEdx);
     float k  = fabs(mPIDk_dEdx);
     float p  = fabs(mPIDp_dEdx);
-    bool dpi     = false;
-    bool dK      = false;
-    bool dp      = false;
-    mPID_dEdx = false;
-    if (fabs(pi)<2  && fabs(k)>2 && fabs(p)>2) {
-        dpi = true;
-        mPID_dEdx = true;
-    } else if (fabs(pi)>2  && fabs(k)<2 && fabs(p)>2) {
-        dK = true;
-        mPID_dEdx = true;
-    } else if (fabs(pi)>2  && fabs(k)>2 && fabs(p)<2) {
-        dp = true;
-        mPID_dEdx = true;
+    int dpi     = 0;
+    int dK      = 0;
+    int dp      = 0;
+    int mPID_dEdx = 0;
+    if (mDedx > 0) {
+        mPID_dEdx = 1;
+        if (fabs(pi)<2) {
+            dpi = 1;
+            if (fabs(k)>2 && fabs(p)>2) {
+                dpi = 2;
+                mPID_dEdx = 2;
+            }
+        }
+        if (fabs(k)<2) {
+            dK = 1;
+            if (fabs(pi)>2  && fabs(p)>2) {
+                dK = 2;
+                mPID_dEdx = 2;
+            }
+        }
+        if (fabs(p)<2) {
+            dp = 1;
+            if (fabs(pi)>2  && fabs(k)>2) {
+                dp = 2;
+                mPID_dEdx = 2;
+            }
+        }
     }
 
     // Something like 30% of tracks have no ToF?
-    // Is a ToF hit the is not within a PID band more important than a missing ToF hit?
+    // Is a ToF hit that is not within a PID band more important than a missing ToF hit?
+// The widths of the mass bands expand rapidly with p_t, so pi and K have a big overlap by 1.5 GeV/c.
+// Try a hard mass cut as it appears the yields fall off so there is little ambiguity.
     double tnpi = mPIDpi_ToF;
     double tnK  = mPIDk_ToF;
     double tnp  = mPIDp_ToF;
-    bool tpi    = false;
-    bool tK     = false;
-    bool tp     = false;
-    bool mPID_ToF = false;
-    if (fabs(tnpi)<2  && fabs(tnK)>2 && fabs(tnp)>2) {
-        tpi = true;
-        mPID_ToF = true;
-    } else if (fabs(tnpi)>2  && fabs(tnK)<2 && fabs(tnp)>2) {
-        tK = true;
-        mPID_ToF = true;
-    } else if (fabs(tnpi)>2  && fabs(tnK)>2 && fabs(tnp)<2) {
-        tp = true;
-        mPID_ToF = true;
+    int tpi    = 0;
+    int tK     = 0;
+    int tp     = 0;
+    int mPID_ToF = 0;
+    if (mBeta > 0) {
+        mPID_ToF = 1;
+        if (0.05 < mMass && mMass <= 0.25) {
+            mPID_ToF = 2;
+            tpi = 2;
+        } else if (0.4 < mMass && mMass <= 0.65) {
+            mPID_ToF = 2;
+            tK = 2;
+        } else if (0.8 < mMass && mMass <= 1.15) {
+            mPID_ToF = 2;
+            tp = 2;
+        }
     }
- 
-    if (mPID_dEdx && mPID_ToF) {
-        if (dpi && tpi) {
+
+    if (mPID_dEdx==2 && mPID_ToF==2) {
+        // Both ToF and dEdx identified particle. Require they agree. 
+        if (dpi==2 && tpi==2) {
             mPID = 1;
-        } else if (dK && tK) {
+        } else if (dK==2 && tK==2) {
             mPID = 2;
-        } else if (dp && tp) {
+        } else if (dp==2 && tp==2) {
             mPID = 3;
         } else {
             mPID = 0;
         }
-    } else if (mPID_dEdx) {
-        if (dpi) {
+    } else if (mPID_dEdx==2) {
+        // Only dEdx identified particle. ToF can be ambiguous but must be consistent if it is there
+        if (mPID_ToF==1) {
+            if (dpi==2 && tpi==1) {
+                mPID = 1;
+            } else if (dK==2 && tK==1) {
+                mPID = 2;
+            } else if (dp==2 && tp==1) {
+                mPID = 3;
+            } else {
+                mPID = 0;
+            }
+        } else {
+            if (dpi==2) {
+                mPID = 1;
+            } else if (dK==2) {
+                mPID = 2;
+            } else if (dp==2) {
+                mPID = 3;
+            } else {
+                mPID = 0;
+            }
+        }
+    } else if (mPID_ToF==2) {
+        // Only ToF identified particle. dEdx can be ambiguous but must be consistent if it is there
+        if (mPID_dEdx==1) {
+            if (tpi==2 && dpi==1) {
+                mPID = 1;
+            } else if (tK==2 && dK==1) {
+                mPID = 2;
+            } else if (tp==2 && dp==1) {
+                mPID = 3;
+            } else {
+                mPID = 0;
+            }
+        } else {
+            if (tpi==2) {
+                mPID = 1;
+            } else if (tK==2) {
+                mPID = 2;
+            } else if (tp==2) {
+                mPID = 3;
+            } else {
+                mPID = 0;
+            }
+        }
+    } else if (0 == mDedx && 0 == mBeta) {
+        if (pi < 0.1 && tpi < 0.1) {
             mPID = 1;
-        } else if (dK) {
+        } else if (k < 0.1 && tnK < 0.1) {
             mPID = 2;
-        } else if (dp) {
+        } else if (p < 0.1 && tnp < 0.1) {
             mPID = 3;
         } else {
             mPID = 0;
         }
     } else {
-        if (tpi) {
-            mPID = 1;
-        } else if (tK) {
-            mPID = 2;
-        } else if (tp) {
-            mPID = 3;
-        } else {
-            mPID = 0;
-        }
+        mPID = 0;
     }
 };
 
@@ -351,8 +412,13 @@ Float_t StEStructTrack::DcaGlobal() const {
 /**********************************************************************
  *
  * $Log: StEStructTrack.cxx,v $
+ * Revision 1.10  2011/08/02 20:36:57  prindle
+ * Event: modifications for ZDCCoincidence
+ *   Track: big changes in evalPID. These should be superseded when TOF-dEdx
+ *          space is understood better.
+ *
  * Revision 1.9  2010/09/02 21:26:29  prindle
- * Track: Added ToF pid information, modify dEdx, add combined pid code.
+ *   Track: Added ToF pid information, modify dEdx, add combined pid code.
  *
  * Revision 1.8  2010/03/02 21:47:18  prindle
  *   Support to retrieve track radius when it crosses endplate

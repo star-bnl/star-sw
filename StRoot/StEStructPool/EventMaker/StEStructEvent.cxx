@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.12 2008/05/01 23:41:44 prindle Exp $
+ * $Id: StEStructEvent.cxx,v 1.13 2011/08/02 20:36:57 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -37,14 +37,15 @@ StEStructEvent::StEStructEvent() {
 //-------------------------------------------------------
 StEStructEvent::StEStructEvent(StEStructEvent& e){
 
-  mRunID      =e.RunID();
-  mEventTime  =e.EventTime();
-  mVx         =e.Vx();
-  mVy         =e.Vy();
-  mVz         =e.Vz();
-  mBField     =e.BField();
-  mZDCe       =e.ZDCe();
-  mZDCw       =e.ZDCw();
+  mRunID          = e.RunID();
+  mEventTime      = e.EventTime();
+  mVx             = e.Vx();
+  mVy             = e.Vy();
+  mVz             = e.Vz();
+  mBField         = e.BField();
+  mZDCe           = e.ZDCe();
+  mZDCw           = e.ZDCw();
+  mZDCCoincidence = e.ZDCCoincidence();
 
   mNtrack=0;
   fTracks = new TClonesArray("StEStructTrack", 1200);
@@ -255,8 +256,13 @@ void StEStructEvent::SetPhiWgt(const char* weightFile) {
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.13  2011/08/02 20:36:57  prindle
+ * Event: modifications for ZDCCoincidence
+ *   Track: big changes in evalPID. These should be superseded when TOF-dEdx
+ *          space is understood better.
+ *
  * Revision 1.12  2008/05/01 23:41:44  prindle
- * Just different comments.
+ *   Just different comments.
  *
  * Revision 1.11  2007/02/05 17:20:09  msd
  * Added include statement
