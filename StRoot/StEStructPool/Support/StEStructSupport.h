@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.18 2010/09/02 21:31:14 prindle Exp $
+ * $Id: StEStructSupport.h,v 1.19 2011/08/02 20:42:24 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -38,6 +38,7 @@ public:
   bool  mPairWeighting;
   bool  mIdenticalPair;
   bool  mYtYtNormalization;
+  bool  mYtYtVolumeNormalization;
   
   bool  goodName(const char* name); // test if name is one of ours
   bool  goodName_zBuf(const char* name, int zBin); // test if name is one of ours with zBuffer.
@@ -140,8 +141,15 @@ inline bool StEStructSupport::silent() { return msilent; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.19  2011/08/02 20:42:24  prindle
+ * Added YtYtVolumeNormalization.
+ *   Fixed calculation of error for YtYt \Delta\rho/sqrt(\rho_{ref})
+ *   Added error calculation for p_t histograms
+ *   Added warning when either \rho_{sib} or \rho_{ref} has an empty bin. Set ratio
+ *    bin to 0 instead of -1.
+ *
  * Revision 1.18  2010/09/02 21:31:14  prindle
- * Support: Can't find evidence that YtYt correlation depends on z vertex.
+ *   Support: Can't find evidence that YtYt correlation depends on z vertex.
  *            Add numerators and denominators then take ratio. Need a new
  *            rescale method independent of z bin. Looks like we can normalize
  *            mixed so \int{sib/mix} = number of bins (what we have recently been
