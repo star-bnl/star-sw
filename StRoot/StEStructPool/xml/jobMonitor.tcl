@@ -1187,80 +1187,141 @@ proc ::jobMonitor::qacctJob {} {
 proc ::jobMonitor::submitSelected {} {
     global env
 
+    if {[catch {exec star-submit}] || [string first OPTIONS [exec star-submit]] < 0} {
+        set oldStarSubmit true
+    } else {
+        set oldStarSubmit false
+        set sessionFile [glob $::jobMonitor::scriptDir/*.session.xml]
+    }
+
     set dontWarn true
-    foreach job $::jobMonitor::actionList {
-        set fName [file join $::jobMonitor::scriptDir sched$job.csh]
-        set f [open $fName]
-        set runCmd ""
-        while { [gets $f line] >= 0 } {
-            # Look for a line starting with a comment and having bsub
-            # somewhere before -q.
-            # No guarrantee this is the right command, but...
-            if {[regexp {^#.*bsub.*-q.*} $line]} {
-                set runCmd [string map {
-                        "# "   ""
-                        "["    "\\["
-                        "]"    "\\]"
-                        "("    "\\("
-                        ")"    "\\)"
-                         } $line]
-                break
-            }
-            # If script is submitted to SGE the command is qsub.
-            # Expect to have a -o switch. (Is this always true?)
-            # No guarrantee this is the right command, but...
-            if {[regexp {^#.*qsub.*-o.*} $line]} {
-                set runCmd [string map {
-                        "# "   ""
-                        "["    "\\["
-                        "]"    "\\]"
-                        "("    "\\("
-                        ")"    "\\)"
-                         } $line]
-                break
-            }
-            # If script is submitted to condor wwe actually have a simple submission command.
-            # (Comment for previous section claimed that was condor, but I must have mis-understood.
-            #  In any case it works at pdsf.)
-            if {[regexp {^#.*condor_submit} $line]} {
-                set runCmd [string map {"# "   ""} $line]
-                break
-            }
-        }
-        if {[string length $runCmd] == 0} {
-            puts "Failed to find job submission command in file $fName!!!!"
-        } else {
-            # At rcf the scheduler splits the job submission into cd and then bsub
-            # commands (as opposed to putting the path into the script name.)
-            set start 0
-            while {[set end [string first ";" $runCmd $start]] > 0} {
-                set cmd [string range $runCmd $start $end]
-                if {[catch {eval $cmd}]} {
-                    eval exec $cmd
+    if {$oldStarSubmit} {
+        # The following block is the star-submit up to star-submit-1.8, perhaps even some star-submit-1.10 versions
+        foreach job $::jobMonitor::actionList {
+            set fName [file join $::jobMonitor::scriptDir sched$job.csh]
+            set f [open $fName]
+            set runCmd ""
+            while { [gets $f line] >= 0 } {
+                # Look for a line starting with a comment and having bsub
+                # somewhere before -q.
+                # No guarrantee this is the right command, but...
+                if {[regexp {^#.*bsub.*-q.*} $line]} {
+                    set runCmd [string map {
+                            "# "   ""
+                            "["    "\\["
+                            "]"    "\\]"
+                            "("    "\\("
+                            ")"    "\\)"
+                             } $line]
+                    break
                 }
-                set start [expr $end+1]
-            }
-            # Condor is warning about log file on NFS possibly causing corruption.
-            # Warn user one time.
-            # That NFS message went away.
-            # Looks like condor is returning a non-zero value or writing a normal message to
-            # stderr. Ignore errors (by setting dontWarn true before loop).
-            if {[catch {eval exec [string range $runCmd $start end]} err] && !$dontWarn} {
-                if {"ok" eq [tk_messageBox -icon warning \
-                                   -title "condor warning" \
-                                   -type okcancel \
-                                   -message "Warning message $err.\
-                                             \
-                                             Click ok to ignore all job submission warnings, cancel to halt job submission"]} {
-                    set dontWarn true
-                } else {
-                    return
+                # If script is submitted to SGE the command is qsub.
+                # Expect to have a -o switch. (Is this always true?)
+                # No guarrantee this is the right command, but...
+                if {[regexp {^#.*qsub.*-o.*} $line]} {
+                    set runCmd [string map {
+                            "# "   ""
+                            "["    "\\["
+                            "]"    "\\]"
+                            "("    "\\("
+                            ")"    "\\)"
+                             } $line]
+                    break
+                }
+                # If script is submitted to condor wwe actually have a simple submission command.
+                # (Comment for previous section claimed that was condor, but I must have mis-understood.
+                #  In any case it works at pdsf.)
+                if {[regexp {^#.*condor_submit} $line]} {
+                    set runCmd [string map {"# "   ""} $line]
+                    break
                 }
             }
-            set ::jobMonitor::var$job "SUBM"
-            $::jobMonitor::bWindow.f2.text.stat$job configure -fg orange
+            if {[string length $runCmd] == 0} {
+                puts "Failed to find job submission command in file $fName!!!!"
+            } else {
+                # At rcf the scheduler splits the job submission into cd and then bsub
+                # commands (as opposed to putting the path into the script name.)
+                set start 0
+                while {[set end [string first ";" $runCmd $start]] > 0} {
+                    set cmd [string range $runCmd $start $end]
+                    if {[catch {eval $cmd}]} {
+                        eval exec $cmd
+                    }
+                    set start [expr $end+1]
+                }
+                # Condor is warning about log file on NFS possibly causing corruption.
+                # Warn user one time.
+                # That NFS message went away.
+                # Looks like condor is returning a non-zero value or writing a normal message to
+                # stderr. Ignore errors (by setting dontWarn true before loop).
+                if {[catch {eval exec [string range $runCmd $start end]} err] && !$dontWarn} {
+                    if {"ok" eq [tk_messageBox -icon warning \
+                                       -title "condor warning" \
+                                       -type okcancel \
+                                       -message "Warning message $err.\
+                                                 \
+                                                 Click ok to ignore all job submission warnings, cancel to halt job submission"]} {
+                        set dontWarn true
+                    } else {
+                        return
+                    }
+                }
+                set ::jobMonitor::var$job "SUBM"
+                $::jobMonitor::bWindow.f2.text.stat$job configure -fg orange
+            }
+            close $f
         }
-        close $f
+    } else {
+        # New(er) star-submit command likes to use a range of numbers
+        # First pass creates list of lists with each sublist being a sequence of succesive numbers.
+        # Some of the sublists may be single numbers. Collect all those and submit as comma separated list.
+        set nList [list]
+        foreach job $::jobMonitor::actionList {
+            lappend nList [lindex [split $job _] 1]
+        }
+        set nList [lsort -integer $nList]
+        set j [lindex $nList 0]
+        set currList [list $j]
+        set jobLists [list]
+        foreach k  [lrange $nList 1 end] {
+            if {$k == $j+1} {
+                lappend currList $k
+            } else {
+                lappend jobLists $currList
+                set currList [list $k]
+            }
+            set j $k
+        }
+        lappend jobLists $currList
+
+        # We are using the index number of the job to look for consecutive jobs and
+        # talk with star-submit. Out internal buttons and variables want the whole name and
+        # I assume all jobs in the group have the same name with the index appended.
+        set job [lindex $::jobMonitor::actionList 0]
+        set jobName [lindex [split $job _] 0]
+
+        set curr [pwd]
+        cd $::jobMonitor::scriptDir
+        set miscLists [list]
+        foreach j $jobLists {
+            if {[llength $j] > 1} {
+                exec star-submit -r [lindex $j 0]-[lindex $j end] $sessionFile
+                foreach b $j {
+                    set ::jobMonitor::var${jobName}_$b "SUBM"
+                    $::jobMonitor::bWindow.f2.text.stat${jobName}_$b configure -fg orange
+                }
+            } else {
+                lappend miscLists $j
+            }
+        }
+        if {[llength $miscLists] > 0} {
+            exec star-submit -r [join $miscLists ,] $sessionFile
+            foreach b $miscLists {
+                set ::jobMonitor::var${jobName}_$b "SUBM"
+                $::jobMonitor::bWindow.f2.text.stat${jobName}_$b configure -fg orange
+            }
+        }
+        cd $curr
     }
     if {[info exists env(DOMAINNAME)] && ($env(DOMAINNAME) eq "nersc.gov")} {
         catch {exec use_stardata.pl}
@@ -1301,7 +1362,9 @@ proc ::jobMonitor::killSelected {} {
             set jName [string map {condor csh} $jobName]
             foreach {clusterId procId cmd} $condClustList {
                 # See comment after next use of getJobName as far as use of file tail here.
-                if {[file tail $cmd] eq [file tail $jName]} {
+                # Used to get command name from csh file. Latest (on Sept. 17, 2010) changed this.
+                # if {[file tail $cmd] eq [file tail $jName]} {}
+                if {[file rootname [file tail $cmd]] eq "sched$job"} {
                     # By default condor_rm only works on node job was submitted from.
                     # Can parse *.condor.log file to find submission node.
                     # Log file has ip address but the < and > required by condor_rm are being
@@ -1389,7 +1452,8 @@ proc ::jobMonitor::releaseJobs {} {
         set jName [string map {condor csh} $jobName]
         foreach {clusterId procId cmd} $condClustList {
             # See comment after next use of getJobName as far as use of file tail here.
-            if {[file tail $cmd] eq [file tail $jName]} {
+            # if {[file tail $cmd] eq [file tail $jName]} {}
+            if {[file rootname [file tail $cmd]] eq "sched$job"} {
                 # By default condor_rm only works on node job was submitted from.
                 # Can parse *.condor.log file to find submission node.
                 # Log file has ip address but the < and > required by condor_rm are being
@@ -1484,7 +1548,9 @@ proc ::jobMonitor::updateStatusIndicators {{job ""}} {
                 # Not sure I want to use file tail here.
                 # It looks like there has been a change to using the full path for the
                 # jobName.
-                if {[file tail $cmd] eq [file tail $jName]} {
+                # Used to get command name from csh file. Latest (on Sept. 17, 2010) changed this.
+                # if {[file tail $cmd] eq [file tail $jName]} {}
+                if {[file rootname [file tail $cmd]] eq "sched$job"} {
                     if {$jobStat == 1} {
                         set ST I
                     } elseif {$jobStat == 2} {

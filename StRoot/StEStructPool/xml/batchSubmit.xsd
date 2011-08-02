@@ -256,24 +256,29 @@ hell is in this directory.
             <xs:enumeration value='CuCu200GeVProductionMinBias2007ic' Comment='tag for 2005, 200GeV CuCu minimum bias trigger (2007ic production)'/>
             <xs:enumeration value='2007ProductionMinBias' Comment='tag for 2007, 200GeV AuAu minimum bias produced for PMD'/>
             <xs:enumeration value='2007LowLuminosity' Comment='tag for 2007, 200GeV AuAu minimum bias Low Luminosity trigger set'/>
+            <xs:enumeration value='AuAu200GeVMinBias2010' Comment='tag for 2010, 200GeV AuAu minimum bias trigger which I am supposed to QA'/>
             <xs:enumeration value='AuAu200GeVProductionMinBias2004'  Comment='tag for 2004, 200GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu200GeVProductionMinBiasA2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger for early in run'/>
             <xs:enumeration value='AuAu200GeVProductionMinBiasB2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger for late in run'/>
             <xs:enumeration value='AuAu200GeVProductionLow2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger low luminosity sample'/>
             <xs:enumeration value='AuAu200GeVProductionMid2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger mid luminosity sample'/>
             <xs:enumeration value='AuAu200GeVProductionHigh2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger high luminosity sample'/>
-            <xs:enumeration value='AuAu62GeVMinBias2004'  Comment='tag for 2004, 62GeV AuAu minimum bias trigger'/>
-            <xs:enumeration value='AuAu39GeVMinBias2010'  Comment='tag for 2010, 39GeV AuAu minimum bias trigger'/>
-            <xs:enumeration value='AuAu11GeVMinBias2010'  Comment='tag for 2010, 11GeV AuAu minimum bias trigger'/>
-            <xs:enumeration value='AuAu7GeVMinBias2010'   Comment='tag for 2010,  7GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu200GeVMinBias2001' Comment='tag for 2001, 200GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu200GeVCentral2001' Comment='tag for 2001, 200GeV AuAu central trigger'/>
+            <xs:enumeration value='AuAu62GeVMinBias2010'  Comment='tag for 2010, 62GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu62GeVMinBias2004'  Comment='tag for 2004, 62GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu39GeVMinBias2010'  Comment='tag for 2010, 39GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu19GeVMinBias2011'  Comment='tag for 2011, 19.6GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu11GeVMinBias2010'  Comment='tag for 2010, 11GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu7GeVMinBias2010'   Comment='tag for 2010,  7.7GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='dAu200GeVMinBias2003' Comment='tag for 2003, 200GeV dAu minimum bias trigger'/>
             <xs:enumeration value='ppMinBias' Comment='tag for 2001, 200GeV pp minimum bias trigger'/>
             <xs:enumeration value='ppProductionMinBias2005' Comment='tag for 2005, 200GeV pp minimum bias trigger'/>
             <xs:enumeration value='pp400MinBias2005' Comment='tag for 2005, 400GeV pp minimum bias trigger'/>
             <xs:enumeration value='pp2006MinBias2006' Comment='tag for 2006, 200GeV pp minimum bias trigger'/>
+            <xs:enumeration value='pp2pp_VPDMB_2009' Comment='tag for 2009, 200GeV minimum bias trigger during pp2pp running'/>
             <xs:enumeration value='ppProductionMB622006' Comment='tag for 2006, 62GeV pp minimum bias trigger'/>
+            <xs:enumeration value='production2009_200GeV_Single' Comment='tag for 2009, 200GeV pp VPD trigger'/>
         </xs:restriction>
         <xs:attribute name='Comment' type='xs:string' use='required'/>
     </xs:complexType>
@@ -300,6 +305,9 @@ hell is in this directory.
         <xs:enumeration value='primaryVertexZ'>
             <xs:Comment>min, max Z vertex position</xs:Comment>
         </xs:enumeration>
+        <xs:enumeration value='primaryVPDVertex'>
+            <xs:Comment>min, max distance between primary and VPD vertex positions</xs:Comment>
+        </xs:enumeration>
         <xs:enumeration value='primaryVertexRadius'>
             <xs:Comment>min, max radius for primary vertex position</xs:Comment>
         </xs:enumeration>
@@ -309,8 +317,14 @@ hell is in this directory.
         <xs:enumeration value='pileup'>
             <xs:Comment>Exclude events with predicted pileup vertex between min and max distances.</xs:Comment>
         </xs:enumeration>
+        <xs:enumeration value='singleSideVertex'>
+            <xs:Comment>Exclude events with vertex on only one side of TPC. Match pileup finder within min and max distances.</xs:Comment>
+        </xs:enumeration>
         <xs:enumeration value='goodToFFraction'>
             <xs:Comment>Mean s=nToF/ndEdx ratio, limit on |nToF-s*ndEdx|</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='goodPrimaryFraction'>
+            <xs:Comment>Require nGlobal/a - nPrimary less than b,  a and b are min and max cut values</xs:Comment>
         </xs:enumeration>
     </xs:restriction>
 </xs:simpleType>
@@ -389,6 +403,9 @@ hell is in this directory.
         </xs:enumeration>
         <xs:enumeration value='Eta'>
             <xs:Comment>min, max values for eta</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='NTOFEMass'>
+            <xs:Comment>min, max values for distance of mas we reject as electrons (can be &lt;0)</xs:Comment>
         </xs:enumeration>
         <xs:enumeration value='NSigmaElectron'>
             <xs:Comment>min, max values for distance from dE/dx electon expectation</xs:Comment>
@@ -652,6 +669,7 @@ hell is in this directory.
             <xs:enumeration value='4' Comment='Alternate mode (should put purpose of mode here)'/>
             <xs:enumeration value='5' Comment='Cuts in dEdx and phi_Delta spaces.'/>
             <xs:enumeration value='8' Comment='Yt-Yt cuts. Examining soft-hard LS pair cuts.'/>
+            <xs:enumeration value='9' Comment='Pt-Pt cuts. Mostly for CMS proton ridge.'/>
         </xs:restriction>
     </xs:complexType>
 </xs:simpleType>
