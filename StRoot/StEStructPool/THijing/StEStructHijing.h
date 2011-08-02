@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.h,v 1.7 2009/02/03 14:30:23 fisyak Exp $
+ * $Id: StEStructHijing.h,v 1.8 2011/08/02 20:43:07 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -23,6 +23,8 @@ class StEStructTrackCuts;
 
 class StEStructHijing : public StEStructEventReader {
 
+ public:
+
   THijing* mHijing;
   StEStructEventCuts* mECuts;
   StEStructTrackCuts* mTCuts;
@@ -38,8 +40,6 @@ class StEStructHijing : public StEStructEventReader {
   int  countGoodTracks();
 
   int mEventCount;
-
- public:
 
   StEStructHijing();
   StEStructHijing(THijing* hijing,

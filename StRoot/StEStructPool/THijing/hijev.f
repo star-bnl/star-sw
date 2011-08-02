@@ -88,6 +88,8 @@ CCC#include "headpss.inc"
 *
        hipr1(10) = ptjet           ! Pt jet
 *   
+       hipr1(16) = 2.0           ! Change Q0. Don't seem to have as a parameter!!
+*   
 *****  Initialize HIJING 
           call hijset(efrm,frame,proj,targ,iap,izp,iat,izt)
           IFIRST = 1
@@ -119,11 +121,14 @@ C
       PRINT *,'CALL RANLUX(RVEC,LEN) to generate random numbers (V115)'
       end
 *
-* $Id: hijev.f,v 1.2 2010/03/02 21:49:14 prindle Exp $
+* $Id: hijev.f,v 1.3 2011/08/02 20:43:07 prindle Exp $
 *
 * $Log: hijev.f,v $
+* Revision 1.3  2011/08/02 20:43:07  prindle
+* Changed value of Q0. Probably should put it back.
+*
 * Revision 1.2  2010/03/02 21:49:14  prindle
-* Save and restore random seeds for event
+*   Save and restore random seeds for event
 *   (Used to sort events by multiplicity if desired)
 *
 * Revision 1.1  2005/09/14 17:28:27  msd
