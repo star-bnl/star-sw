@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.h,v 1.9 2008/05/01 23:41:45 prindle Exp $
+ * $Id: StEStructEvent.h,v 1.10 2011/08/02 20:36:57 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -40,6 +40,7 @@ class StEStructEvent : public TObject {
 
   Float_t mZDCe;                     // ZDC East
   Float_t mZDCw;                     // ZDC West
+  Float_t mZDCCoincidence;           // ZDC Coincidence rate
 
   unsigned short mRefMult;            // not used for determining centrality, stored for comparison
   double mctbMult;                    
@@ -78,6 +79,7 @@ class StEStructEvent : public TObject {
 
   Float_t ZDCe() const { return mZDCe; }
   Float_t ZDCw() const { return mZDCw; }
+  Float_t ZDCCoincidence() const { return mZDCCoincidence; }
   
   unsigned short RefMult() const { return mRefMult; }
   double ctbMult() const { return mctbMult; }
@@ -105,6 +107,7 @@ class StEStructEvent : public TObject {
 
   void SetZDCe(const Float_t zdce) { mZDCe = zdce; }
   void SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
+  void SetZDCCoincidence(const Float_t zdccoincidence) { mZDCCoincidence = zdccoincidence; }
 
   void SetRefMult(const unsigned short mult) { mRefMult = mult; }
   void SetctbMult(const double mult) { mctbMult = mult; }
@@ -133,8 +136,13 @@ class StEStructEvent : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructEvent.h,v $
+ * Revision 1.10  2011/08/02 20:36:57  prindle
+ * Event: modifications for ZDCCoincidence
+ *   Track: big changes in evalPID. These should be superseded when TOF-dEdx
+ *          space is understood better.
+ *
  * Revision 1.9  2008/05/01 23:41:45  prindle
- * Just different comments.
+ *   Just different comments.
  *
  * Revision 1.8  2007/05/27 22:45:18  msd
  * Added Npos() and Nneg().

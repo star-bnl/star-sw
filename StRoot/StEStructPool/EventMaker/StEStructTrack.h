@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.h,v 1.9 2010/09/02 21:26:29 prindle Exp $
+ * $Id: StEStructTrack.h,v 1.10 2011/08/02 20:36:57 prindle Exp $
  *
  * Author: Jeff Porter merge of work from Aya Ishihara and Jeff Reid
  *
@@ -265,9 +265,11 @@ inline void  StEStructTrack::evalPt(){ mPt=sqrt((mPx*mPx)+(mPy*mPy)); }
 inline void  StEStructTrack::evalPtot(){ mPtot=sqrt((mPx*mPx)+(mPy*mPy)+(mPz*mPz)); }
 inline void  StEStructTrack::evalMass() {
     if (mBeta >= 1.0) {
-        mMass = 0;
-    } else {
+        mMass = -mPtot * sqrt( 1- pow(mBeta,-2));
+    } else if (mBeta > 0) {
         mMass = mPtot * sqrt( pow(mBeta,-2) - 1);
+    } else {
+        mMass = 0;
     }
 }
 inline const StThreeVectorF& StEStructTrack::NominalTpcExitPoint() const { return mNominalTpcExitPoint; }
@@ -289,8 +291,13 @@ inline int      StEStructTrack::getYtBin() const { return mytbin; };
 /***********************************************************************
  *
  * $Log: StEStructTrack.h,v $
+ * Revision 1.10  2011/08/02 20:36:57  prindle
+ * Event: modifications for ZDCCoincidence
+ *   Track: big changes in evalPID. These should be superseded when TOF-dEdx
+ *          space is understood better.
+ *
  * Revision 1.9  2010/09/02 21:26:29  prindle
- * Track: Added ToF pid information, modify dEdx, add combined pid code.
+ *   Track: Added ToF pid information, modify dEdx, add combined pid code.
  *
  * Revision 1.8  2010/03/02 21:47:18  prindle
  *   Support to retrieve track radius when it crosses endplate
