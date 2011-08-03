@@ -65,8 +65,8 @@ void doMuDstEvents(const Char_t *fileList = "test.lis",
   //matchMaker->SetDebug(1);
   matchMaker->setMuDstIn(kTRUE);
   /// start with ideal geometry and change to setAlignFileName in second iteration
-  matchMaker->setAlignFileName("/star/u/huck/TofAlignment/dat/geomAlign_rnd1.txt");
-  //   matchMaker->setIdealGeometry(kTRUE);   
+  matchMaker->setAlignFileName("/star/u/huck/TofAlignment19GeV/geomAlign1.txt");
+  //matchMaker->setIdealGeometry(kTRUE);   
   matchMaker->setCalculateAlign(kTRUE);
 
   //
