@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.66 2011/07/20 20:43:41 perev Exp $
+* $Id: g2t_volume_id.g,v 1.67 2011/08/03 20:11:53 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.67  2011/08/03 20:11:53  jwebb
+* Add MTD to the g2t hit tables.
+*
 * Revision 1.66  2011/07/20 20:43:41  perev
 * Fsc added
 *
@@ -154,7 +157,7 @@
       Integer          module,layer
       Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
-      Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/,ifsc/0/
+      Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/,ifsc/0/,imtd/0/
       Integer          istVersion/0/,istLayer/0/
 *     FPD
       Integer          n1,n2,ew,nstb,ch,sl
@@ -196,9 +199,10 @@
       Structure  EMCG { Version, int Onoff, int fillMode}
       Structure  ISMG { Layer, Rin,            Rout,        TotalLength, code}
 
-      Structure  FMCG { Version } ! FMS/FPD++/FPD geometry
-      Structure  FPDG { Version } ! FPD geometry
-      Structure  FSCG { Version } ! FSC geometry
+      Structure  FMCG { Version }         ! FMS/FPD++/FPD geometry
+      Structure  FPDG { Version }         ! FPD geometry
+      Structure  FSCG { Version }         ! FSC geometry
+      Structure  MTDG { Version, Config } ! MTD geometry
 
       logical    first/.true./
       logical    printOnce/.true./
@@ -220,6 +224,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           USE  /DETM/FPDM/FPDG  stat=ifpd
           USE  /DETM/FPDM/FMCG  stat=ifms
           USE  /DETM/FSCM/FSCG  stat=ifsc
+          USE  /DETM/MUTD/MTDG  stat=imtd
 
           call RBPOPD
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
@@ -782,6 +787,15 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *24*                                 Dmitry Arkhipkin
       else if (Csys=='fsc') then
         volume_id = numbv(1);
+
+*25*                                 Frank Geurts
+      else if (Csys=='mtd') then
+        sector = numbv(1)
+        module = numbv(2)
+        layer  = numbv(3)
+        volume_id = 1000*sector + 100*module + layer
+      
+
       else
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif

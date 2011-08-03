@@ -1,6 +1,9 @@
 struct g2t_track {
-  /* $Id: g2t_track.idl,v 1.14 2011/07/20 20:44:44 perev Exp $
+  /* $Id: g2t_track.idl,v 1.15 2011/08/03 20:11:57 jwebb Exp $
      $Log: g2t_track.idl,v $
+     Revision 1.15  2011/08/03 20:11:57  jwebb
+     Add MTD to the g2t hit tables.
+
      Revision 1.14  2011/07/20 20:44:44  perev
      Fsc added
 
@@ -45,6 +48,7 @@ struct g2t_track {
        long      hit_fgt_p;  /* Id of first fgt hit on track linked list */
        long      hit_fpd_p;  /* Id of first fpd hit on track linked list */
        long      hit_fsc_p;  /* Id of first fsc hit on track linked list */
+       long      hit_mtd_p;  /* Id of first mtd hit on track linked list */
        long      hit_mwc_p;  /* Id of first mwc hit on track linked list */
        long      hit_pgc_p;  /* Id of first pgc hit on track linked list */
        long      hit_pmd_p;  /* Id of first psc hit on track linked list */
@@ -71,6 +75,7 @@ struct g2t_track {
        long      n_fgt_hit;  /* Nhits in fgt */
        long      n_fpd_hit;  /* Nhits in fpd */
        long      n_fsc_hit;  /* Nhits in fsc */
+       long      n_mtd_hit;  /* Nhits in mtd */
        long      n_mwc_hit;  /* Nhits in mwc */
        long      n_pgc_hit;  /* Nhits in pgc  ???  */
        long      n_pmd_hit;  /* Nhits in pmd (PMD) */
