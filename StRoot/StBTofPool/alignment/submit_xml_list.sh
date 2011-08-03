@@ -4,7 +4,7 @@
 # starver DEV   <- was used before
 #if ($#argv == 1) 
 #then
-        set workdir=(/star/u/huck/TofAlignment/)
+        set workdir=(/star/u/huck/TofAlignment19GeV/)
         cd $workdir
         starver dev
         set outdir=($workdir"rootout/")
@@ -39,11 +39,11 @@
           echo ' starver dev ' >> ${fullfilename}
           echo ' root4star -q -b '$rootarg >> ${fullfilename}
           echo ' </command> ' >> ${fullfilename}
-          echo ' <stdout URL="file:/star/u/huck/TofAlignment/$JOBID.out" />' >> ${fullfilename}
-          echo ' <stderr URL="file:/star/u/huck/TofAlignment/$JOBID.err" />' >> ${fullfilename}
+          echo ' <stdout URL="file:'$outdir'$JOBID.out" />' >> ${fullfilename}
+          echo ' <stderr URL="file:'$outdir'$JOBID.err" />' >> ${fullfilename}
           echo '  <SandBox>' >> ${fullfilename}
           echo '   <Package>' >> ${fullfilename}
-          echo '    <File>file:/star/u/huck/TofAlignment/doMuDstEvents.C</File>' >> ${fullfilename}
+          echo '    <File>file:'$workdir'doMuDstEvents.C</File>' >> ${fullfilename}
           echo '   </Package>' >> ${fullfilename}
           echo ' </SandBox>' >> ${fullfilename}
           echo '</job>' >> ${fullfilename}
