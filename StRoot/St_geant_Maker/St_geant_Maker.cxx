@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.138 2011/07/20 17:37:12 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.139 2011/08/03 20:12:24 jwebb Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.139  2011/08/03 20:12:24  jwebb
+// Add mtd to the geant maker.
+//
 // Revision 1.138  2011/07/20 17:37:12  perev
 // Fsc added
 //
@@ -529,6 +532,7 @@
 #include "g2t/St_g2t_bbc_Module.h"
 #include "g2t/St_g2t_fpd_Module.h"
 #include "g2t/St_g2t_fsc_Module.h"
+#include "g2t/St_g2t_mtd_Module.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StarCallf77.h" 
 #include "StMagF.h"
@@ -1255,6 +1259,16 @@ Int_t St_geant_Maker::Make()
     iRes = g2t_fsc(g2t_track,g2t_fsc_hit); if (Debug() > 1) g2t_fsc_hit->Print(0,10);
     //           ==============================
   }
+
+  nhits = 0;
+  geant3->Gfnhit("MUTH","MGAP", nhits);
+  if (nhits>0) {
+    St_g2t_mtd_hit *g2t_mtd_hit = new St_g2t_mtd_hit("g2t_mtd_hit",nhits);
+    m_DataSet->Add(g2t_mtd_hit);
+    iRes = g2t_mtd(g2t_track,g2t_mtd_hit); if (Debug() > 1) g2t_mtd_hit->Print(0,10);
+    //           ==============================
+  }
+  
 
 
   //------------------------all bloody detectors done--------------------//
