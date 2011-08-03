@@ -174,8 +174,8 @@ MediumMagboltz::SetSplittingFunctionFlat() {
 void
 MediumMagboltz::EnableDeexcitation() {
 
-  std::cout << className << "::EnableDeexcitation:\n";
   if (usePenning) {
+    std::cout << className << "::EnableDeexcitation:\n";
     std::cout << "    Penning transfer will be switched off.\n";
   }
   // if (useRadTrap) {
@@ -1578,7 +1578,7 @@ MediumMagboltz::Mixer(const bool verbose) {
   std::ofstream outfile;
   if (useCsOutput) {
     outfile.open("cs.txt", std::ios::out);
-    outfile << "# \n";
+    outfile << "# energy [eV] vs. cross-section [cm2]\n";
   }
 
   // Loop over the gases in the mixture.  
@@ -1635,6 +1635,12 @@ MediumMagboltz::Mixer(const bool verbose) {
     double van = fraction[iGas] * prefactor;
         
     int np = np0;
+    if (useCsOutput) {
+      outfile << "# elastic\n";
+      outfile << "# ionisation (gross)\n";
+      outfile << "# attachment\n";
+      outfile << "# ionisation (counting)\n";
+    }
     // Elastic scattering
     ++nTerms;
     scatModel[np] = kEl[1];
@@ -1695,6 +1701,9 @@ MediumMagboltz::Mixer(const bool verbose) {
         // Inelastic collision
         csType[np] = nCsTypes * iGas + ElectronCollisionTypeInelastic;
       }
+      if (useCsOutput) {
+        outfile << "#" << description[np] << "\n";
+      } 
     }
     nTerms += nIn;
     // Loop over the energy table.
@@ -4473,7 +4482,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
     }  
   } 
 
-  if (debug || verbose) {
+  if ((debug || verbose) && nDeexcitations > 0) {
     std::cout << className << "::ComputeDeexcitationTable:\n";
     std::cout << "      Level  Energy [eV]   "
               << "                 Lifetimes [ns]\n";
