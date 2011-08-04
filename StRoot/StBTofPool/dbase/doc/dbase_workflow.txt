@@ -1,4 +1,4 @@
-TOF INL/TDIG database workflow
+**** TOF INL/TDIG database workflow ****
 
 * determine timestamp (typically assigned by S&C coordinator at run-start)
 * double check the following ingredients:
@@ -20,8 +20,15 @@ setenv DB_ACCESS_MODE write
 root4star -b -l -q macros/storetofTDIGOnTray.C
 
 
+**** TOF alignment workflow ****
+* determine timestamp (usually only once per run period)
+* increment seconds in case of a new version
+* update store macro with new location (and recommit to CVS)
+root4star -b -l -q 'macros/storetofGeomAlign.C'
+root4star -b -l -q 'macros/readtofGeomAlign.C("2011-01-01 00:00:00")'
 
-TOF calibration database workflow
+
+**** TOF calibration database workflow ****
 
 * determine timestamp
 * increment seconds in case of a new version
