@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.17 2011/07/27 16:13:58 geurts Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.18 2011/08/04 19:14:02 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.18  2011/08/04 19:14:02  geurts
+ * Bug fix: allow ideal geometry setting in the case an alignment file is used [Patrick]
+ *
  * Revision 1.17  2011/07/27 16:13:58  geurts
  * Alignment calibration modifications [Patrick Huck]:
  *  -  modified to open the local Z window cut to determine the z offset
@@ -199,7 +202,7 @@ Int_t StBTofMatchMaker::Init(){
 
   // for alignment calculate, we start from ideal geometry
   if(mCalculateAlign) {
-    mUseIdealGeometry = kTRUE;
+    if (mAlignFileName=="") mUseIdealGeometry = kTRUE;
     mZLocalCut = 5.0;
   }
 
