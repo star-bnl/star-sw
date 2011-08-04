@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.25 2011/07/18 06:27:39 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.26 2011/08/04 19:50:01 cpowell Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.26  2011/08/04 19:50:01  cpowell
+// Flag included to embed Pythia events. This excludes StPrepEmbedmaker from the chain and runs starsim before reconstruction.
+//
 // Revision 1.25  2011/07/18 06:27:39  zhux
 // The chain for p+p 500 P09ig production added
 //
@@ -34,7 +37,10 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
 		  const Double_t mult=100,
                   const std::vector<Int_t> triggers = 0,
                   const Char_t *prodName = "P08iepp",
-                  const Char_t* type = "FlatPt"){
+                  const Char_t* type = "FlatPt",
+									const bool bPythia = false,
+									const Char_t *fzdfile="test.fzd"
+									){
   // production chains for P08ic - p+p, Au+Au 9 GeV and d+Au
   TString prodP08iepp("DbV20081117 B2008a ITTF IAna ppOpt l3onl emcDY2 fpd ftpc trgd ZDCvtx NosvtIT NossdIT Corr4 OSpaceZ2 OGridLeak3D VFMCE -hitfilt");
 //  TString prodP08icpp("DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine,VFMCE,TpxClu -VFPPV -hitfilt");
@@ -63,23 +69,25 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   TString geomP10ik(geomP10ih); // Same chain as P10ih
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
+  TString chain2OptPythia("fzin,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
 //  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
   chain2Opt += " ";
+  chain2OptPythia += " ";
 
   TString chain3Opt("");
-  if (prodName == "P08icpp")           { chain3Opt = prodP08icpp;       chain2Opt += geomP08ic; }
-  else if (prodName == "P08iepp")      { chain3Opt = prodP08iepp;       chain2Opt += geomP08ic; }
-  else if (prodName == "P08icAuAu9")   { chain3Opt = prodP08icAuAu9;    chain2Opt += geomP08ic; }
-  else if (prodName == "P08icdAu")     { chain3Opt = prodP08icdAu;      chain2Opt += geomP08ic; }
-  else if (prodName == "P08iedAu")     { chain3Opt = prodP08iedAu;      chain2Opt += geomP08ic; }
-  else if (prodName == "P08icAuAu200") { chain3Opt = prodP08icAuAu200;  chain2Opt += geomP08ic; }
-  else if (prodName == "P09igpp500")   { chain3Opt = prodP09igpp500;    chain2Opt += geomP10ic; }
-  else if (prodName == "P10iapp")      { chain3Opt = prodP10iapp;       chain2Opt += geomP10ih; }
-  else if (prodName == "P10icpp200")   { chain3Opt = prodP10icpp200;    chain2Opt += geomP10ic; }
-  else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih; }
-  else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ik; }
+  if (prodName == "P08icpp")           { chain3Opt = prodP08icpp;       chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
+  else if (prodName == "P08iepp")      { chain3Opt = prodP08iepp;       chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
+  else if (prodName == "P08icAuAu9")   { chain3Opt = prodP08icAuAu9;    chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
+  else if (prodName == "P08icdAu")     { chain3Opt = prodP08icdAu;      chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
+  else if (prodName == "P08iedAu")     { chain3Opt = prodP08iedAu;      chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
+  else if (prodName == "P08icAuAu200") { chain3Opt = prodP08icAuAu200;  chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
+  else if (prodName == "P09igpp500")   { chain3Opt = prodP09igpp500;    chain2Opt += geomP10ic; chain2OptPythia += geomP08ic;}
+  else if (prodName == "P10iapp")      { chain3Opt = prodP10iapp;       chain2Opt += geomP10ih; chain2OptPythia += geomP08ih;}
+  else if (prodName == "P10icpp200")   { chain3Opt = prodP10icpp200;    chain2Opt += geomP10ic; chain2OptPythia += geomP08ic;}
+  else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih; chain2OptPythia += geomP08ih;}
+  else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih; chain2OptPythia += geomP08ih;}
+  else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih; chain2OptPythia += geomP08ih;}
+  else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ik; chain2OptPythia += geomP08ik;}
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
@@ -116,10 +124,31 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   chain1->SetName("One"); 
   Chain->cd();
   //________________________________________________________________________________  
-  bfc(-1,chain2Opt);
-  chain2 = chain;
-  chain2->SetName("Two"); 
-  Chain->cd();
+  if(bPythia){
+		StMaker *saveMk = 0;
+		//bfc(-1,chain2OptPythia);
+  	chain2 = new StBFChain("Two");
+  	saveMk = chain2->cd();
+  	chain2->SetFlags(chain2OptPythia);
+  	chain2->Set_IO_Files(fzdfile);
+  	chain2->Load();
+  	chain2->Instantiate();
+  	if (chain2->GetOption("TRS")){
+    	StTrsMaker *trsMk = (StTrsMaker *) chain2->GetMaker("Trs");
+    	if (! trsMk) {
+      	cout << "Cannot find Trs in chain2" << endl;
+      	return;
+    	}
+    	trsMk->setNormalFactor(1.32);
+  	}
+  	saveMk->cd();
+	}
+	else {
+		bfc(-1,chain2Opt);
+  	chain2 = chain;
+  	chain2->SetName("Two"); 
+  	Chain->cd();
+	}
 #if 0
   if (chain2->GetOption("TRS")){
     StTrsMaker *trsMk = (StTrsMaker *) chain2->GetMaker("Trs");
@@ -155,7 +184,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
 	  mixer->SetInput("Input1","TpxRaw/.data/Event");
         }
 
-  if (chain2Opt.Contains("TpcRS",TString::kIgnoreCase)) {
+  if (chain2Opt.Contains("TpcRS",TString::kIgnoreCase) && !bPythia) {
     mixer->SetInput("Input2","TpcRS/Event");
   } else {
     mixer->SetInput("Input2","Trs/.const/Event");
@@ -209,39 +238,40 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   gMessMgr->QAInfo() << Form("Run on %s in %s",gSystem->HostName(),gSystem->WorkingDirectory()) << endm;
   gMessMgr->QAInfo() << Form("with %s", Chain->GetCVS()) << endm;
   // embedded particle set
-  StPrepEmbedMaker *embMk = (StPrepEmbedMaker *) Chain->Maker("PrepEmbed");
-  if (! embMk) return;
-  cout << "bfcMixer: Setting PID: "<<pid<<endl;
-  embMk->SetTagFile(tagfile);
-  //            pTlow,ptHigh,etaLow,etaHigh,phiLow,phiHigh
-  embMk->SetOpt(  pt_low,    pt_high,  eta_low,    eta_high,    0.,   6.283185, type); 
-  //                pid, mult
-  embMk->SetPartOpt(  pid,mult);
+	if(!bPythia){
+	  // embedded particle set
+	  StPrepEmbedMaker *embMk = (StPrepEmbedMaker *) Chain->Maker("PrepEmbed");
+  	if (! embMk) return;
+ 		cout << "bfcMixer: Setting PID: "<<pid<<endl;
+  	embMk->SetTagFile(tagfile);
+  	//            pTlow,ptHigh,etaLow,etaHigh,phiLow,phiHigh
+  	embMk->SetOpt(  pt_low,    pt_high,  eta_low,    eta_high,    0.,   6.283185, type); 
+  	//                pid, mult
+  	embMk->SetPartOpt(  pid,mult);
 
-  // Default is no event selections
-  embMk->SetSkipMode(kTRUE);
+  	// Default is no event selections
+  	embMk->SetSkipMode(kTRUE);
 
-  // Make trigger and z-vertex cuts (only if SkipMode is true)
-  // Trigger cut
-  //   Can put multiple trigger id's 
-  if ( !triggers.empty() ){
-    for(std::vector<Int_t>::iterator iter = triggers.begin(); iter != triggers.end(); iter++){
-      embMk->SetTrgOpt((*iter)) ;
-    }
-  }
-
-  // z-vertex cuts
-  embMk->SetZVertexCut(vzlow, vzhigh) ;
-
-  // vr = sqrt{vx^2 + vy^2} cut
-  embMk->SetVrCut(vr);
+  	// Make trigger and z-vertex cuts (only if SkipMode is true)
+  	// Trigger cut
+  	//   Can put multiple trigger id's 
+  	if ( !triggers.empty() ){
+  	  for(std::vector<Int_t>::iterator iter = triggers.begin(); iter != triggers.end(); iter++){
+    	  embMk->SetTrgOpt((*iter)) ;
+    	}
+  	}
+  	// z-vertex cuts
+  	embMk->SetZVertexCut(vzlow, vzhigh) ;
+  	// vr = sqrt{vx^2 + vy^2} cut
+  	embMk->SetVrCut(vr);
+	}
 
   TAttr::SetDebug(0);
   Chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
   Chain->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
   Chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
   Chain->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
-  Chain->SetAttr(".Privilege",1,"StPrepEmbedMaker::*"); //It is also IO maker
+  if(!bPythia)Chain->SetAttr(".Privilege",1,"StPrepEmbedMaker::*"); //It is also IO maker
   //  Chain->SetDEBUG(0);
   if (Nevents < 0) return;
   Int_t iInit = Chain->Init();
