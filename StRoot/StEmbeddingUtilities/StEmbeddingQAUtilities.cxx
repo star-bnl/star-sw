@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.13 2011/04/26 20:27:22 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.14 2011/08/05 00:26:50 cpowell Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.14  2011/08/05 00:26:50  cpowell
+ * Fix by Xianglei related to the update in StMiniMcMaker for calculating dcaGl of StTinyRcTrack
+ *
  * Revision 1.13  2011/04/26 20:27:22  hmasui
  * Add isGamma function
  *
@@ -591,7 +594,7 @@ Bool_t StEmbeddingQAUtilities::isNHitToNPossOk(const Float_t ratio) const
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQAUtilities::isDcaOk(const Float_t dca) const
 {
-  return ( dca >= 0.0 && dca < mDcaCut ) ;
+  return ( dca > -mDcaCut && dca < mDcaCut ) ;
 }
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQAUtilities::isNSigmaOk(const Float_t nsigma) const
