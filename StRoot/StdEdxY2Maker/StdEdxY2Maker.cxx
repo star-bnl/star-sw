@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.69 2010/12/07 16:52:19 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.70 2011/08/09 15:51:10 fisyak Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -57,7 +57,7 @@ using namespace units;
 const static StPidParticle NHYPS = kPidHe3;//kPidTriton;
 const static Int_t tZero= 19950101;
 const static Int_t tMin = 20090301;
-const static Int_t tMax = 20100705;
+const static Int_t tMax = 20110705;
 const static TDatime t0(tZero,0);
 const static Int_t timeOffSet = t0.Convert();
 const static Int_t NdEdxMax  = 60;
@@ -334,6 +334,7 @@ Int_t StdEdxY2Maker::Make(){
     if (!node) continue;
     StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
     StPrimaryTrack *pTrack = static_cast<StPrimaryTrack*>(node->track(primary));
+    //#if 0 /* no primary vertex cuts for Cosmics */
 #if 1 /* No primary track cut */
     if (TESTBIT(m_Mode, kCalibration)) {
       if (! pTrack) continue; // reject non primary tracks
@@ -344,6 +345,7 @@ Int_t StdEdxY2Maker::Make(){
 #endif
     }
 #endif
+    //#endif /* no primary vertex cuts for Cosmics */
     StTrack *track = 0;
     StTrack *tracks[2] = {gTrack, pTrack};
     if (! TESTBIT(m_Mode, kDoNotCorrectdEdx)) {
@@ -533,9 +535,6 @@ Int_t StdEdxY2Maker::Make(){
 	}
 	Double_t pad = tpcHit->pad();
 	if (pad == 0) pad = Pad.pad();
-	Double_t edge = pad;
-	if (edge > 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)) 
-	  edge -= gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row) + 1;
 	if (Pad.timeBucket() < 0         ||
 	    Pad.timeBucket() >= numberOfTimeBins) {
 	  gMessMgr->Warning() << "StdEdxY2Maker:: TimeBucket out of range: " 
@@ -580,7 +579,6 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].sector = sector; 
 	CdEdx[NdEdx].row    = row;
 	CdEdx[NdEdx].pad    = Pad.pad();
-	CdEdx[NdEdx].edge   = edge;
 	CdEdx[NdEdx].pad    = (Int_t) Pad.pad();
 	CdEdx[NdEdx].edge   = CdEdx[NdEdx].pad;
 	if (CdEdx[NdEdx].edge > 0.5*gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)) 
@@ -591,8 +589,6 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].dE     = tpcHit->charge();
 	//	CdEdx[NdEdx].dCharge= tpcHit->chargeModified()/tpcHit->charge() - 1.;
 	CdEdx[NdEdx].dCharge= tpcHit->chargeModified() - tpcHit->charge();
-	StTpcdEdxCorrection::ESector kTpcInOut     = StTpcdEdxCorrection::kTpcOuter;
-	if (row <= 13) kTpcInOut = StTpcdEdxCorrection::kTpcInner;
 	Int_t p1 = tpcHit->minPad();
 	Int_t p2 = tpcHit->maxPad();
 	Int_t t1 = tpcHit->minTmbk();
