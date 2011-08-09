@@ -129,14 +129,20 @@ foreach $file (("system.rootrc","root.mimes")){
 	} else {
 	    # ! $FIXIT or -e etc/$file.new
 	    if ( ! -e "etc/$file.new" && -e "etc/$file" ){
-		# create one
-		$ilink = $link  = readlink("etc/$file");
+		#if ($FIXIT){
+		    # create one
+		if ( -l "etc/$file"){
+		    $ilink = $link  = readlink("etc/$file");
+		} else {
+		    $ilink = $link = "etc/$file";
+		}
 		$link .= ".new";
+
 		if ( ! -e $link ){
 		    # create a copy of $ROOT/$ROOT_LEVEL/root/etc/$file
 		    if ( ! open(FI,"$ilink") ){  die "Cannot open R $ilink ($!)\n";}
 		    if ( ! open(FO,">$link") ){  die "Cannot open W $link ($!)\n";}
-		    while ( defined($Line = <FI>)){
+		    while ( defined($line = <FI>)){
 			chomp($line);
 			print FO "$line\n";
 		    }
@@ -146,6 +152,7 @@ foreach $file (("system.rootrc","root.mimes")){
 		if ( link($link,"etc/$file.new") ){
 		    print " INFO etc/$file.new created\n";
 		}
+		#}
 	    }
 
 	    # This also requires an arg because we do not want to alter anything
