@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.14 2011/07/20 17:57:52 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.15 2011/08/12 15:32:54 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,7 +14,15 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.15  2011/08/12 15:32:54  jwebb
+ * Added anti-hypertriton.  Mapped hyper-triton and anti-hyper-triton to
+ * geant IDs 6[12]053 and 6[12]054, with two decay modes:
+ *
+ *     H3(lambda) --> He3 pi-    61053    antiparticle=61054
+ *     H3(lambda) --> d p pi-    62053    antiparticle=62054
+ *
  * Revision 1.14  2011/07/20 17:57:52  jwebb
+ *
  * Updated StParticleTable to provide access to anti-nuclei via the "geant" ID.
  *
  * Revision 1.13  2011/03/30 17:32:50  jwebb
@@ -83,6 +91,8 @@ long _undefined_particle_id = 2000000000;
 #include "StAntiTriton.hh"
 #include "StAntiAlpha.hh"
 #include "StAntiHelium3.hh"
+#include "StAntiHyperTriton.hh"
+#include "StHyperTriton.hh"
 
 
 StParticleTable* StParticleTable::mParticleTable = 0;
@@ -97,8 +107,10 @@ StParticleTable::StParticleTable()
     //
     typedef mGeantPdgMapType::value_type geantPdgPairType;
 
-#define Geant2Pdg(X,Y, NAME) {				\
-      /** NAME	*/					\
+    // Helper macro to map geant ID to PDG ID.  A "DCAY" mode is also specificied, and doxygen comments
+    // added to the source code.
+#define Geant2Pdg(X,Y, DCAY) {				\
+      /** DCAY	*/					\
       /** Geant ID: X	*/				\
       /** PDG ID:   Y	*/				\
       /** */						\
@@ -160,6 +172,9 @@ StParticleTable::StParticleTable()
     Geant2Pdg(48, kUndefined, Geantino ); // The mythical geantino 
     Geant2Pdg(49, kUndefined, Helium3  ); // Helium3
     Geant2Pdg(50, 22,         Cerenkov ); // Cerenkov photons
+
+    Geant2Pdg(54, kUndefined, AntiHelium3 ); // AntiHelium3 );
+
     ///@} 
 
     
@@ -269,6 +284,15 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 50048, kUndefined, anti-He3 );
     ///@}
 
+    ///@addtogroup ANTIHYPERNUCLEI
+    ///Definitions of anti-hypernuclei
+    ///@{
+       Geant2Pdg( 61053, kHyperTriton,         H3(Lambda) --> He3 piminus );
+       Geant2Pdg( 61054, kAntiHyperTriton, AntiH3(Lambda) --> AntiHe3 piplus );
+       Geant2Pdg( 62053, kHyperTriton,         H3(Lambda) --> d p piminus );
+       Geant2Pdg( 62054, kAntiHyperTriton, AntiH3(Lambda) --> dbar pbar piplus );	
+    ///@}
+
 
 #undef Geant2Pdg
 
@@ -358,9 +382,26 @@ StParticleDefinition* StParticleTable::findParticleByGeantId(int geantId) const
     case 50047:
         p = StAntiAlpha::instance();
         break;
-    case 50048:
+
+    case 50049:
+    case 54:
         p = StAntiHelium3::instance();
         break;
+
+    case 60053:
+    case 61053:
+    case 62053:
+      p = StHyperTriton::instance();
+      break;
+    case 60054:
+    case 61054:
+    case 62054:
+      p = StAntiHyperTriton::instance();
+      break;
+      
+
+
+
 
     default:
 	mGeantPdgMapType::const_iterator i =  mGeantPdgMap.find(geantId);
