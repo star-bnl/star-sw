@@ -1,7 +1,17 @@
 
-* $Id: gstar_part.g,v 1.32 2011/03/15 22:39:54 jwebb Exp $
+* $Id: gstar_part.g,v 1.33 2011/08/12 15:33:40 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.33  2011/08/12 15:33:40  jwebb
+* Added anti-hypertriton.  Mapped hyper-triton and anti-hyper-triton to
+* geant IDs 6[12]053 and 6[12]054, with two decay modes:
+*
+*     H3(lambda) --> He3 pi-    61053    antiparticle=61054
+*     H3(lambda) --> d p pi-    62053    antiparticle=62054
+*
+* Added antideuteron (gid=53) and antitriton (gid=54) to enable inclusion
+* in hypertriton decays.
+*
 * Revision 1.32  2011/03/15 22:39:54  jwebb
 * (1) Corrected mistakes in the Omega_plus, Omega_minus and XiMinus and XiPlus
 *     definitions of particles.
@@ -139,6 +149,15 @@ MODULE gstar_part Is the STAR Particle Database
    Integer kGtNINO / 6 /! A geantino
    Integer kGtHION / 8 /! A heavy ion
    Integer kGtCKOV / 7 /! A cherenkov photon (note mistake in geant manual)
+
+* --------------------------------------------------------------------------
+*
+* Particle ID 54 is reserved for anti-He3 to enable anti-hypertriton decay mode
+
+
+
+
+
 
 * --------------------------------------------------------------------------
 *
@@ -445,6 +464,15 @@ MODULE gstar_part Is the STAR Particle Database
                         pdg       = UNDEFINED        ,
                         trktyp    = kGtHION
 
+  PARTICLE antiDeuteron code      = 53               , 
+                        mass      = 1.876            ,
+                        charge    = -1.0             ,
+                        tlife     = STABLE           ,
+                        pdg       = UNDEFINED        ,
+                        trktyp    = kGtHION
+
+
+
   PARTICLE antiTriton   code      = 50046            ,
                         mass      = 2.809            ,
                         charge    = -1.0             ,
@@ -465,6 +493,64 @@ MODULE gstar_part Is the STAR Particle Database
                         tlife     = STABLE           ,
                         pdg       = UNDEFINED        ,
                         trktyp    = kGtHION
+
+       PARTICLE antiHelium3  code      = 54               ,
+                             mass      = 2.809            ,
+                             charge    = -2.0             ,
+                             tlife     = STABLE           ,
+                             pdg       = UNDEFINED        ,
+                             trktyp    = kGtHION
+
+
+   """Define all hyper-nuclei with offset 60000"""
+* Particle hyperTriton  code      = 60053            ,   ! Placeholder for hypertriton
+*                       mass      = 2.911            ,   ! with all decay modes
+*                       charge    = 1                ,
+*                       tlife     = 2.6320e-10       ,
+*                       pdg       = UNDEFINED        ,
+*                       trktyp    = kGtHION          ,
+*                       bratio    = { , ...}         ,
+*                       mode      = { , ...}      
+                        
+* Particle antiHyperTriton code   = 60054 , ...
+
+Particle hyperTriton_he3_pi_minus code      = 61053            ,
+                                  mass      = 2.99131          , 
+                                  charge    = 1                ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          ,
+                                  bratio    = {1,}             ,
+                                  mode      = {004909,}
+
+Particle anti_hyperTriton_he3_pi_plus  code      = 61054       ,
+                                  mass      = 2.99131          , 
+                                  charge    = +1               ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          ,
+                                  bratio    = {1,}             ,
+                                  mode      = {005408,}
+
+
+Particle hyperTriton_d_p_pi_minus code      = 62053            ,
+                                  mass      = 2.99131          ,
+                                  charge    = -1               ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          ,
+                                  bratio    = {1,}             ,
+                                  mode      = {091445,}
+
+Particle anti_hyperTriton_db_pb_pi code      = 62054  ,
+                                  mass      = 2.99131          ,
+                                  charge    = -1               ,
+                                  tlife     = 2.6320e-10       ,
+                                  pdg       = UNDEFINED        ,
+                                  trktyp    = kGtHADR          ,
+                                  bratio    = {1,}             ,
+                                  mode      = {081553,}
+
 
                         
 
