@@ -94,8 +94,11 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4};
       case kLeft|kRite     : 	// Left fits, no Hit, Rite fits
       case kLeft|kRite|kHit: 	// Left fits,now Hit, Rite fits
       {
+
+        int ret = Propagate(node,preNode,dir);
+        if (ret) return ret;
+#if 0
         const StvNode *losNode = (dir)? preNode:node;
-#if 1
         node->mPP[dir] = node->mFP[1-dir];
         StvFitPars delPre = preNode->mFP[dir]-preNode->mPP[1-dir];
         breakNode = (dir)? node:preNode;
@@ -209,6 +212,42 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4};
 
   }//endMainLoop
   return 0;
+}
+//_____________________________________________________________________________
+int StvKalmanTrackFitter::Propagate(StvNode  *node,const StvNode *preNode,int dir)
+{
+  const StvNode *losNode = (dir)? preNode:node;
+  do { //Attempt to propagate with linear approximation;
+    node->mPP[dir] = node->mFP[1-dir];
+    StvFitPars delPre = preNode->mFP[dir]-preNode->mPP[1-dir];
+    if (delPre.TooBig(preNode->mFP[dir])) 	break;
+    StvFitPars del    = delPre*preNode->mDer[dir];
+    if (del.TooBig(node->mPP[dir]))    		break; 
+    node->mPP[dir]+= del;node->mFP[dir]=node->mPP[dir];
+//        node->mPP[dir]+= ((preNode->mFP[dir]-preNode->mPP[1-dir])*node->mDer[dir]);
+    node->mPE[dir] = preNode->mFE[dir]*node->mDer[dir];
+    node->mPE[dir].SetHz(node->mPP[dir]._hz);
+    node->mPE[dir].Add(losNode->mELossData,node->mPP[dir]);
+    if(node->mPE[dir].Check()) break; 
+    return 0;
+  } while(0);
+
+//		Propagate with THelixTrack
+  const double *P = node->mFP[1-dir].P;
+  THelixTrack myHlx;
+  preNode->mFP[dir].get(&myHlx);
+  preNode->mFE[dir].Get(&myHlx);
+  double dS = myHlx.Path(P);
+  myHlx.Move(dS);
+  double rho = myHlx.GetRho();
+  rho += rho*losNode->GetELoss().mdPtidL*dS;
+  myHlx.Set(rho);
+  node->mPP[dir].set(&myHlx,preNode->mFP[dir]._hz);
+  node->mPE[dir].Set(&myHlx,preNode->mFP[dir]._hz);
+  node->mPE[dir].Add(losNode->mELossData,node->mPP[dir]);
+  if(node->mPE[dir].Check())  return 1; 
+  return 0;
+  
 }
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)
