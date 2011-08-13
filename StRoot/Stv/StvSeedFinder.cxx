@@ -24,7 +24,7 @@ void StvSeedFinder::Show()
   fDraw->UpdateModified();
 }
 //_____________________________________________________________________________
-void StvSeedFinder::ShowRest()
+void StvSeedFinder::ShowRest(EDraw3DStyle style)
 {
    if (!fDraw) fDraw = NewDraw();
    std::vector<StvHit*> myHits;  
@@ -35,7 +35,7 @@ void StvSeedFinder::ShowRest()
      if (stiHit->timesUsed()) continue;
      myHits.push_back(stiHit);
    }
-   fDraw->Hits(myHits,kUnusedHit);
+   fDraw->Hits(myHits,style);
    fDraw->UpdateModified();
 }
 //_____________________________________________________________________________
