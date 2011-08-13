@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.4 2011/07/19 20:00:17 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.5 2011/08/13 22:58:19 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -120,7 +120,7 @@ StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath)
    int seed = 0;
    if (did == kTpcId) {
 //   enum {zPrompt = 205,rMiddle=124};
-     enum {zPrompt = 205,rMiddle=100};
+     enum {zPrompt = 205,rMiddle=0};
      hard <<=1; hard |= (fabs(xyz[2]) > zPrompt);
      if (xyz[0]*xyz[0]+xyz[1]*xyz[1] >rMiddle*rMiddle) seed = 1;
    }
