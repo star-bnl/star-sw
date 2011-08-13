@@ -51,55 +51,64 @@ int StvKalmanTrackFinder::FindTracks()
 static int trkShow=0;
 static int kitShow=0;
 //  DoShow(2);
-  int nTrk = 0,nAdded=0,nHits=0,nSeed=0;
+  int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSeed=0;
 static StvToolkit *kit = StvToolkit::Inst();
 static StvConst  *kons = StvConst::Inst();
   StvSeedFinder *sf = kit->SeedFinder();
   double aveRes=0,aveXi2=0;
   mCurrTrak = 0;
-  while ((mSeedHelx = sf->NextSeed())) 
-  {
-    nSeed++;
-						if (sf->DoShow())  sf->Show();
+  int myMinHits = 10;
 
-    if (!mCurrTrak) mCurrTrak = kit->GetTrack();
-    mCurrTrak->CutTail();	//Clean track from previous failure
-    nAdded = FindTrack(0);
-    if (!nAdded) 			continue;
-    assert(!mCurrTrak->Check("One",1));
+  for (int repeat=0; repeat<5; repeat++) {
+    nTrk = 0;
+    while ((mSeedHelx = sf->NextSeed())) 
+    {
+      nSeed++;
+						if (sf->DoShow())  sf->Show();
+      if (!mCurrTrak) mCurrTrak = kit->GetTrack();
+      mCurrTrak->CutTail();	//Clean track from previous failure
+      nAdded = FindTrack(0);
+      if (!nAdded) 				continue;
+      assert(!mCurrTrak->Check("One",1));
 						if (trkShow)mCurrTrak->Show();
-    int ans = 0,fail=13;
-//		Refit track   
-    do {
-      ans = Refit(1);
+      int ans = 0,fail=13;
+  //		Refit track   
+      do {
+	ans = Refit(1);
+	nHits = mCurrTrak->GetNHits();
+	if (nHits<kons->mMinHits)		break;
+	if (ans) 				continue;
+	if (mCurrTrak->Check("Two",1+2))  	continue;
+	nAdded = FindTrack(1);
+	assert(!mCurrTrak->Check("THree",2));
+  // few hits added. Refit track to beam again 
+	ans = Refit(0);
+	if (ans) 				continue;
+	if(mCurrTrak->Check("Four",3))		continue;
+      } while((fail=0));		
+      if (fail) 				continue;
       nHits = mCurrTrak->GetNHits();
-      if (nHits<3)			break;
-      if (ans) 				continue;
-      assert(!mCurrTrak->Check("Two",1+2));
-      nAdded = FindTrack(1);
-      assert(!mCurrTrak->Check("THree",2));
-// few hits added. Refit track to beam again 
-      ans = Refit(0);
-      if (ans) 				continue;
-      assert(!mCurrTrak->Check("Four",3));
-    } while((fail=0));		
-    if (fail) 				continue;
-    nHits = mCurrTrak->GetNHits();
-    if (nHits < kons->mMinHits)		continue;
-    StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
-    if (node) node->UpdateDca();
-    kit->GetTracks().push_back(mCurrTrak);
-    nTrk++;
-    aveRes += mCurrTrak->GetRes();
-    aveXi2 += mCurrTrak->GetXi2();
-    mCurrTrak=0;
-  }
+      if (nHits < myMinHits)			continue;
+      StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
+      if (node) node->UpdateDca();
+      kit->GetTracks().push_back(mCurrTrak);
+      nTrk++;
+      aveRes += mCurrTrak->GetRes();
+      aveXi2 += mCurrTrak->GetXi2();
+      mCurrTrak=0;
+    }
+    if (!nTrk) 					break;
+    nTrkTot+=nTrk;
+    myMinHits = kons->mMinHits;
+    sf->Again();
+  } //end repeat loop
+
 if (kitShow)  kit->Show();
 if (sf->DoShow()>1)  sf->ShowRest();
 if (StvDraw::Jnst()) StvDraw::Wait();
-  if (nTrk) {aveRes/=nTrk; aveXi2/=nTrk;}
-  Info("FindTracks","aveRes = %g aveXi2=%g",aveRes,aveXi2);
-  return nTrk;
+  if (nTrkTot) {aveRes/=nTrkTot; aveXi2/=nTrkTot;}
+  Info("FindTracks","tracks=%d aveRes = %g aveXi2=%g",nTrkTot,aveRes,aveXi2);
+  return nTrkTot;
 }
 //_____________________________________________________________________________
 int StvKalmanTrackFinder::FindTrack(int idir)
@@ -237,8 +246,8 @@ if (DoShow()) {
       nHits++;
       node->SetXi2(myXi2,idir);
       node->SetHE(fitt->GetHitErrs());
-      assert(!par[1].check("AfterFitter"));
-      assert(!err[1].Check("AfterFitter"));
+      assert(nHits<=5 || !par[1].check("AfterFitter"));
+      assert(nHits<=5 || !err[1].Check("AfterFitter"));
       node->SetFit(par[1],err[1],idir);
       par[0]=par[1]; err[0]=err[1];
     }
@@ -332,12 +341,12 @@ static const StvConst       *kon = StvConst::Inst();
     for (int iter=0;iter<5;iter++) {
       for (int ihlx = 0; ihlx <10; ihlx++) {
 	int nHits = mCurrTrak->GetNHits();
-	if (nHits<10) return 10;
+	if (nHits<kon->mMinHits) return 10;
 	tkf->Helix(mCurrTrak,1|2);
 	StvNode *node = tkf->GetWorstNode();
 	assert(node);
 	double badXi2 = tkf->GetWorstXi2();
-	if (badXi2<kon->mXi2Hlx && ihlx) break;
+	if (badXi2<kon->mXi2Hlx) break;
 	node->SetHit(0);
       }
       ans = tkf->Refit(mCurrTrak,idir,0);
