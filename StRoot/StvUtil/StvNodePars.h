@@ -6,6 +6,7 @@
 #include <math.h>
 #include "THelixTrack.h"
 
+class StvNodePars;
 class StvFitPars;
 class StvFitErrs;
 class StvImpact;
@@ -26,10 +27,10 @@ public:
   StvFitPars():mH(0),mZ(0),mA(0),mL(0),mP(0){}
   StvFitPars(double h,double z):mH(h),mZ(z),mA(0),mL(0),mP(0){}
   StvFitPars(const double *arr) 		{memcpy(&mH,arr,5*sizeof(mH));}
-const StvFitPars &operator*(Mtx55D_t &t) const;    
+const StvFitPars &operator*(const Mtx55D_t &t) const;    
         void Print(const char *tit=0) const;
          int Check(const char *tit=0) const;
-         int TooBig() const;
+         int TooBig(const StvNodePars &np) const;
       double *Arr() 				{return &mH;}
 const double *Arr()  const 			{return &mH;}
   double &operator[](int i) 			{return (&mH)[i];}
