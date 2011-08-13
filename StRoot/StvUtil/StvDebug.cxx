@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <assert.h>
 #include <map>
 #include <string>
@@ -17,10 +18,20 @@ typedef std::map<std::string, TCanvas*>   myCanMap_t;
 typedef myCanMap_t::const_iterator myCanIter_t;
 myCanMap_t myCanMap;
 //______________________________________________________________________________ 
-void StvDebug::Break(int key)
+int StvDebug::Break(int key)
 { static int kto=-2010;
-  if (kto != key) return;
+  if (kto != key) return 0;
   printf ("BOT OHO %d\n",key);
+  return 1;
+}
+//______________________________________________________________________________ 
+int StvDebug::Break(double x,double y,double z)
+{ static double myX=-9999,myY=-9999,myZ=-9999;
+  if (fabs(x-myX)>0.2) return 0;
+  if (fabs(y-myY)>0.2) return 0;
+  if (fabs(z-myZ)>0.5) return 0;
+  printf ("BOT OHO %g==%g %g==%g %g==%g\n",x,myX,y,myY,z,myZ);
+  return 1;
 }
 //______________________________________________________________________________ 
 void StvDebug::Count(const char *key,double val)
