@@ -13,13 +13,21 @@ typedef std::multimap<float,StvHit*> Stv1stHitMap;
 typedef Stv1stHitMap::iterator Stv1stHitMapIter;
 class StMultiKeyMapIter;
 
-class StvDefaultSelector 
+class StvConeSelector 
 {
 public:
-  StvDefaultSelector();
- ~StvDefaultSelector(){;}
+  StvConeSelector();
+ ~StvConeSelector(){;}
 
+void Reset() 			{mJst=-1;}
 void Prepare();
+void Update();
+void AddHit(const float *x);
+void SetErr(float err) 		{mErr=err;}
+void SetXYStep(float stp) 	{mZStep=0;   mXYStep=stp;}
+void SetZStep (float stp) 	{mZStep=stp; mXYStep=0  ;}
+
+
 int  Reject(const float x[3]);	// 0  :x accepted
 				// >0 :x rejected
 				//-1 =x     accepted and lims updated
@@ -29,24 +37,25 @@ void UpdateLims();		//Update XYZ limits
 public:
 //		Input data
 char  mBeg[1];
-const float *mX;
+int   mJst;
+float mErr;
+float mXYStep;
+float mZStep;
 float mRxy2;
+float mZ2;
 float mDir[3]; 		// track direction
-float mAng; 		// (cone angle)/2
-float mLen[2];		// l<mLen[0]: ACCEPTED and mLen[1]=mLen[0]
+float mLen;		// cone length 
 //		Calculated data
 
-float mSin; 		// (sin(angle/2)
-float mCos; 		// (cos(angle/2)
-float mDelta[3]; 	// 
-			// l<mLen[1]: ACCEPTED and mLen[1]=l
+float mTan; 		// (tan(cone angle/2)
 float mLim[2][3];
 //		Output data
 float mHitLen;
-float mHitCos;
+float mHitPrj;
+const float *mX[100];
+const float *mHit;
+float mS[100];
 char  mEnd[1];
-
-
 };
 
 class StvDefaultSeedFinder : public StvSeedFinder
@@ -56,6 +65,7 @@ public:
    ~StvDefaultSeedFinder(){;}
   const THelixTrack* NextSeed();
   void      Clear(const char *opt="");
+  void      Again();
   void      Reset();
   void      Print(const char *opt="") const {;}
 
@@ -71,7 +81,7 @@ StMultiKeyMapIter 	*fMultiIter;
 Stv1stHitMap  		*f1stHitMap;
 Stv1stHitMapIter  	*f1stHitMapIter;
 char mEnd[1];
-StvDefaultSelector       mSel;
+StvConeSelector       mSel;
 ClassDef(StvDefaultSeedFinder,0);
 };
 
