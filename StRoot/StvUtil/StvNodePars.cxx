@@ -17,10 +17,10 @@ static double MAXTAN = 100;
 //                              x   y   z  psi   pt  tan      cur
 static double MAXNODPARS[]   ={555,555,555,6.66,111, MAXTAN+1, .1};
 //                              h  z   a    l  ptin
-static double MAXFITPARS[]   ={22,22, .5 , .5 ,20};
-static double BIGFITPARS[]   ={1. ,1., .1 , .1 ,1};
-static double MAXFITERR[5]   ={.3,.3 ,.03 ,.03 ,1};
-static double MAXERRFACT     = 3;
+static const double MAXFITPARS[]   ={22,22, .5 , .5 ,20};
+static const double BIGFITPARS[]   ={0.1 ,0.1, .2 , .2 ,0.1},BIGFITPART=0.05;
+static const double MAXFITERR[5]   ={.3,.3 ,.03 ,.03 ,1};
+static const double MAXERRFACT     = 3;
 //______________________________________________________________________________ 
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B)
 {
@@ -224,12 +224,16 @@ static StvFitPars fp;
   fp.mH = dx*(     -sub._sinCA)+ dy*(      sub._cosCA);
   fp.mZ = dx*(-sinL*sub._cosCA)+ dy*(-sinL*sub._sinCA) +dz*cosL;
   fp.mA = (_psi -sub._psi );
+  if (fp.mA < -M_PI) fp.mA += M_PI*2;
+  if (fp.mA >  M_PI) fp.mA -= M_PI*2;
   fp.mP = (_ptin-sub._ptin);
   double tL = (_tanl-sub._tanl)/(1+_tanl*sub._tanl);
   if (fabs(tL)<0.05) { fp.mL = tL*(1-tL*tL/3); }
   else               { fp.mL = atan(tL)      ; }
+  if (fp.mL < -M_PI) fp.mL += M_PI*2;
+  if (fp.mL >  M_PI) fp.mL -= M_PI*2;
 
-  fp.Check("StvNodePars::operator-");
+//  fp.Check("StvNodePars::operator-");
   return fp;
 }
 //______________________________________________________________________________
@@ -459,9 +463,14 @@ static const char *N="HZALP";
   }
 }
 //_____________________________________________________________________________
-int StvFitPars::TooBig() const
+int StvFitPars::TooBig(const StvNodePars &np) const
 {
-  for (int i=0;i<5;i++) {if (fabs(Arr()[i]) > BIGFITPARS[i]) return 1;};
+  
+  double space = BIGFITPART*(fabs(np._x)+fabs(np._y)+fabs(np._z));
+  for (int i=0;i<2;i++) {if (fabs(Arr()[i]) > BIGFITPARS[i]+space) return i+1;};
+  for (int i=2;i<4;i++) {if (fabs(Arr()[i]) > BIGFITPARS[i]      ) return i+1;};
+
+  if (fabs(mP) > BIGFITPARS[4]+fabs(np._ptin)*BIGFITPART)     	   return 4+1;
   return 0;
 }
 //_____________________________________________________________________________
@@ -515,11 +524,11 @@ void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs 
 //double mP;	// 1/pt with curvature sign
 
   enum {jRad=0,jPhi,jZ,jTan,jPsi,jPti};
-  enum {jPhiPhi=0
-       ,jPhiZ  ,jZZ
-       ,jPhiTan,jZTan,jTanTan
-       ,jPhiPsi,jZPsi,jTanPsi,jPsiPsi
-       ,jPhiPti,jZPti,jTanPti,jPsiPti,jPtiPti};
+  enum {jRPhiRPhi=0
+       ,jRPhiZ  ,jZZ
+       ,jRPhiTan,jZTan,jTanTan
+       ,jRPhiPsi,jZPsi,jTanPsi,jPsiPsi
+       ,jRPhiPti,jZPti,jTanPti,jPsiPti,jPtiPti};
   double rxy = getRxy();
   radPar[jRad] = rxy;
   radPar[jPhi] = atan2(_y,_x);
@@ -544,36 +553,30 @@ void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs 
                         ,{                0,              0, 1}};
 
 
+  double radDca[3][3];
 
+  TCL::mxmpy1(radFrame[0],dcaFrame[0],radDca[0],3,3,3);
+  if (fabs(radDca[0][0])<1e-5) {
+    radDca[0][0] = (radDca[0][0]<0)? -1e-5:1e-5;}
 
-  double proj[3][3] = {{0}};
-  double D0R0 = TCL::vdot(dcaFrame[0],radFrame[0],3);
-//  assert(fabs(D0R0)>1e-6);
-  if (fabs(D0R0)<1e-6) D0R0 = 1e-6;
-
-  for (int i=0;i<3;i++) {
-    proj[i][i] = 1;
-    for (int j=0;j<3;j++) {
-       proj[i][j] -= dcaFrame[0][i]*radFrame[0][j]/D0R0;
-  }  }
-  double qwe[3][3];
-  TCL::mxmpy1(proj[0],dcaFrame[1],qwe[0],3,3,2);
   double asd[2][2];
+  for (int i=0;i<2;i++) {
+  for (int j=0;j<2;j++) {
+    asd[i][j] = radDca[i+1][j+1] - radDca[i+1][0]*radDca[0][j+1]/radDca[0][0];}}
 
-  TCL::mxmpy(radFrame[1],qwe[0],asd[0],2,3,2);
-  //asd[0][0] == dYrad/dHfit
-  //asd[0][1] == dYrad/dZfit
-  //asd[1][0] == dZrad/dHfit
-  //asd[1][1] == dZrad/dZfit
-  double T[5][5] = {{asd[0][0]/rxy, asd[0][1]/rxy, 0       ,0,0}
-                   ,{asd[1][0]    , asd[1][1]    , 0       ,0,0}
-                   ,{            0,             0, 0,1./cos2L,0}
-                   ,{            0,             0, 1       ,0,0}
-                   ,{            0,             0, 0       ,0,1}};
-                   
-
+  double T[5][5] = {{asd[0][0], asd[0][1], 0,        0, 0}
+                   ,{asd[1][0], asd[1][1], 0,        0,	0}
+                   ,{        0,         0, 0, 1./cos2L, 0}
+                   ,{        0,         0, 1,        0, 0}
+                   ,{        0,         0, 0,        0, 1}};
 
   TCL::trasat(T[0],fitErr->Arr(),radErr,5,5); 
+  
+  double dia[5];
+  for (int i=0,li=0;i<5;li+=++i) {
+    dia[i]= radErr[li+i];assert(dia[i]>0);
+    for (int j=0;j<i;j++) {
+      assert(radErr[li+j]*radErr[li+j]< dia[i]*dia[j]); }}
 
 
 }
@@ -585,7 +588,7 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
     ///     y =   impact*cos(Psi)
   imp->mImp = _x*(-_sinCA) + _y*(_cosCA);
   double tst = _x*(_cosCA) + _y*(_sinCA);
-  assert(fabs(imp->mImp) > 1000*fabs(tst));
+  assert(fabs(tst)<1e-5 || fabs(imp->mImp) > 1000*fabs(tst));
   imp->mZ   = _z;
   imp->mPsi = _psi;
   imp->mPti = _ptin;
@@ -607,11 +610,11 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
   TCL::ucopy(qwe,&imp->mImpImp,15);
 }
 //______________________________________________________________________________
-const StvFitPars &StvFitPars::operator*(Mtx55D_t &t) const  
+const StvFitPars &StvFitPars::operator*(const Mtx55D_t &t) const  
 {
 static StvFitPars myPars;
   TCL::vmatl(t[0],Arr(),myPars.Arr(),5,5);
-  assert(!myPars.Check("StvFitPars::operator*") || 1);
+//  assert(!myPars.Check("StvFitPars::operator*") || 1);
   return myPars;
 }
 //_____________________________________________________________________________
