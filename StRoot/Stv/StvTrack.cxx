@@ -327,11 +327,11 @@ void StvTrack::MakeFitTally()
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 //_____________________________________________________________________________
-enum {kTotHits=10	//Min number hits for track
-     ,kGoodHits=5	//Min number good hits for track
+enum {kTotHits=6	//Min number hits for track
+     ,kGoodHits=3	//Min number good hits for track
      ,kContHits=2	//Min length of good hit sequence
-     ,kContNits=8	//Max length of acceptable non hit sequence
-     ,kTotNits=15	//Max number of acceptable non hits
+     ,kContNits=13	//Max length of acceptable non hit sequence
+     ,kTotNits=20	//Max number of acceptable non hits
      };
 //_____________________________________________________________________________
 void StvHitCount::AddHit()
@@ -355,9 +355,9 @@ void StvHitCount::AddNit()
 int StvHitCount::Reject() const
 {
   int rej = 0;
-  if (nGoodHits<kGoodHits) rej+=1;
+  if (nGoodHits+nContHits<kGoodHits) rej+=1;
   if (nTotHits <kTotHits ) rej+=2;
-//if (nTotNits > kTotNits) rej+=4;
+//if (nTotNits+nContNits> kTotNits) rej+=4;
 
   return rej;
 }
