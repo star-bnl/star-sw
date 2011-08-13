@@ -7,7 +7,8 @@ class StvDebug
 {
 public:	
   StvDebug(){}
-static void Break(int kount);
+static  int Break(int kount);
+static  int Break(double x,double y,double z);
 static void Count(const char *key,double val=0);
 static void Sumary();
 static void Reset();
