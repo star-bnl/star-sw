@@ -13,13 +13,15 @@
 #include "TH1F.h"
 #include "TProfile.h"
 #endif //APPROX_DEBUG
+#include "StvUtil/StvDebug.h"
 #include "Stv/StvDraw.h"
 void myBreak(int);
-enum {kMinHits=5,kMaxHits = 115,kFstAng=70,kErrFakt=5,kLenFakt=5,kStpFakt=3};
+enum {kMinHits=5,kMaxHits = 10,kFstAng=88,kErrFakt=5,kLenFakt=5,kStpFakt=3};
+static const double kFstTan = tan(kFstAng*M_PI/180);
 static const double kMinCos = 0.1;
 
 ClassImp(StvDefaultSeedFinder)
-static const float TpcOuterDeltaR = 10, kTpcHitErr = 0.2;
+static const float TpcOuterDeltaR = 15, kTpcHitErr = 0.2;
 
 //_____________________________________________________________________________
 StvDefaultSeedFinder::StvDefaultSeedFinder(const char *name):StvSeedFinder(name)
@@ -57,6 +59,11 @@ void StvDefaultSeedFinder::Reset()
   *f1stHitMapIter = f1stHitMap->begin();
 }    
 //_____________________________________________________________________________
+void StvDefaultSeedFinder::Again()
+{
+  *f1stHitMapIter = f1stHitMap->begin();
+}
+//_____________________________________________________________________________
 //	Start of Local auxiliary routines
 inline static void Lagrange3Int (float t,float T1,float T2,float coe[3])
 {
@@ -93,6 +100,11 @@ inline static void ZLine3Der (float T1,float T2,float coe[3])
   coe[2] = (T2-aT)/det/3;
 }  
 //_____________________________________________________________________________
+inline static float Dot(const float dir[3],const float pnt[3])
+{
+   return dir[0]*pnt[0]+dir[1]*pnt[1]+dir[2]*pnt[2];
+}
+//_____________________________________________________________________________
 inline static float Impact2(const float dir[3],const float pnt[3])
 {
    float imp[3];
@@ -108,113 +120,78 @@ const THelixTrack* StvDefaultSeedFinder::NextSeed()
 static int myDeb = 0;
 std::vector<TObject*> mySeedObjs;
 
-  StvHit *fstHit,*lstHit,*selHit=0; 
-  float deltaR = TpcOuterDeltaR;
+  StvHit *fstHit,*selHit=0; 
+  mSel.SetXYStep(TpcOuterDeltaR);
+  mSel.SetErr(kTpcHitErr*kErrFakt);
+
   for (;(*f1stHitMapIter)!=f1stHitMap->end();++(*f1stHitMapIter)) {//1st hit loop
     fstHit = (*(*f1stHitMapIter)).second;
     assert(fstHit);
-
+    const float *fstX = fstHit->x();
+    int myBreak = StvDebug::Break(fstX[0],fstX[1],fstX[2]); if(myBreak){}
 
     if (fstHit->timesUsed()) continue;
 
     fSeedHits.clear();
+    mSel.Reset();
 if (myDeb>0) {fDraw->Clear();mySeedObjs.clear();}
-    float  L[100];L[0]=0; 
-    float step=0,stepSum=0,stepXY;
-    const float *X[100];
     selHit = fstHit;
 
-if(myDeb>0) { 
-const float *p=X[0];
-TObject* fstObj =fDraw->Point(p[0],p[1],p[2],kUsedHit);
-mySeedObjs.push_back(fstObj);
-fDraw->UpdateModified();StvDraw::Wait();
-}
-    float *D = mSel.mDir; 
+    int selJkk = -11;
+
     while (1) { //Search next hit 
 //		Add info from selected hit
       fSeedHits.push_back(selHit); selHit->addTimesUsed();fNUsed[0]++;
-      lstHit=selHit;
-      int jst = fSeedHits.size()-1;
-      X[jst] = lstHit->x();
-      mSel.mX = X[jst];
-      mSel.mRxy2 = mSel.mX[0]*mSel.mX[0] + mSel.mX[1]*mSel.mX[1];
-      if (jst) {
-	const float *x0 = X[jst-1];
-	const float *x1 = X[jst  ];
-	for (int i=0;i<3;i++) { D[i]=x1[i]-x0[i];}
-        stepXY = D[0]*D[0]+D[1]*D[1];
-        step = sqrt(stepXY+D[2]*D[2]); stepXY=sqrt(stepXY);
-        stepSum += step;
-        L[jst] = L[jst-1]+stepXY;	    
-      }
+if (selJkk>=0) printf("***Selected*** selJkk = %d\n",selJkk);
 
-
-      switch (fSeedHits.size()) {
-
-        case 1: {//1 hit. Looking second Hit
-	  float r = sqrt(mSel.mRxy2+mSel.mX[2]*mSel.mX[2]);
-     	  D[0]= -mSel.mX[0]/r;
-     	  D[1]= -mSel.mX[1]/r;
-     	  D[2]= -mSel.mX[2]/r;
-     	  mSel.mLen[0] = deltaR/sqrt((1.-D[2])*(1+D[2]));
-     	  mSel.mLen[1] = mSel.mLen[0]*3;
-     	  mSel.mAng = M_PI/180	*kFstAng;
-	} ;break;
-
-        case 2: {//2 hits. Looking 3rd  one
-     	  for (int i=0;i<3;i++) { D[i]/=step;}
-          float cosLa = sqrt((1.-D[2])*(1+D[2]));
-          assert (cosLa > 0.9*kMinCos);
-	  mSel.mLen[0] = deltaR/cosLa;
-     	  mSel.mLen[1] = mSel.mLen[0]	*kLenFakt;
-	  float bigStep = step*kStpFakt;
-          if (mSel.mLen[1]>bigStep) mSel.mLen[1]=bigStep;
-     	  mSel.mAng = kTpcHitErr/step*kErrFakt;
-	} ;break;
-
-        default: {//3+ hits. Looking one more
-
-          float T1 = L[jst-1],T2 = L[jst];
-          float coe[3];
-	  Lagrange3Der (T2,T1,T2,coe);
-          D[0] = coe[0]*X[jst-2][0]+coe[1]*X[jst-1][0]+coe[2]*X[jst][0];
-          D[1] = coe[0]*X[jst-2][1]+coe[1]*X[jst-1][1]+coe[2]*X[jst][1];
-          ZLine3Der    (   T1,T2,coe);
-          D[2] = coe[0]*X[jst-2][2]+coe[1]*X[jst-1][2]+coe[2]*X[jst][2];
-          float nor = sqrt(D[0]*D[0]+D[1]*D[1]+D[2]*D[2]);
-          D[0]/=nor;D[1]/=nor;D[2]/=nor;
-     	  float cosLa = sqrt((1.-D[2])*(1+D[2]));
-          assert (cosLa > 0.9*kMinCos) ;
-	  mSel.mLen[0] = deltaR/cosLa;
-     	  mSel.mLen[1] = mSel.mLen[0]	*kLenFakt;
-	  float bigStep = (stepSum/jst)*kStpFakt;
-          if (mSel.mLen[1]>bigStep) mSel.mLen[1]=bigStep;
-     	  mSel.mAng = kTpcHitErr/stepSum*kErrFakt;
-
-        }
-      }//end switch
-
+      mSel.AddHit(selHit->x());
       mSel.Prepare();
       fMultiIter->Set(fMultiHits->GetTop(),mSel.mLim[0],mSel.mLim[1]);
       selHit=0; 
+      selJkk = -11;
       float minLen = 1e11;
       TObject *selObj=0;
       for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 
       { 
 	StvHit *nexHit = (StvHit*)node->GetObj();
         if (nexHit->timesUsed()) continue;
+
+
+static const float myHits[][3]=
+// {{2.00477,-98.8,-196.035}
+// ,{2.70094,-93.6,-186.455}
+// ,{3.24008,-88.8,-176.757}
+// ,{3.85773,-84  ,-166.854}
+// ,{4.37594,-79.2,-157.731}
+// ,{4.8732 ,-74.4,-147.316}
+// ,{5.14539,-69.6,-137.009}
+// ,{5.49086,-64.8,-127.662}
+// ,{5.53797,-60  ,-118.081}
+
+{{43.2743,107.113,115.202}
+,{31.803,107.732,120.926}
+,{14.4888,104,129.818}
+,{3.80539,98.8,135.668}
+,{-2.97312,93.6,139.992}
+,{-8.53727,88.8,143.778}
+,{-12.2537,84,146.685}
+,{0}};
+const float *myX = nexHit->x();
+double myMin=0.5,myDif=0;
+int jkk=-1;
+for (int jk=0;myHits[jk][0];jk++) {
+  myDif = 0; for (int j=0;j<3;j++) {  myDif +=fabs(myX[j]-myHits[jk][j]);}
+  if (myDif>myMin) continue;
+  jkk=jk;}
+ if (jkk>=0) { printf("jkk=%d %g %g %g\n",jkk,myX[0],myX[1],myX[2]);}
+
 	int ans = mSel.Reject(nexHit->x());
 	if (ans>0) continue;
-	if (ans<0) fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
 	if (minLen>mSel.mHitLen) { //Selecting the best
           delete selObj; minLen=mSel.mHitLen; selHit=nexHit;
-
-if(myDeb>0) {
-const float *p=nexHit->x();
-selObj = fDraw->Point(p[0],p[1],p[2],kUsedHit);
-fDraw->UpdateModified();fDraw->Wait();
-} 
+          selJkk = jkk;
+          mSel.Update();fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
+//          if (jkk>=0) printf("jkk=%d accepted\n",jkk);
 
         } //endSelecting the best
       } //endMultiIter loop
@@ -289,61 +266,140 @@ const double BAD_RHO=0.1;
 }    
 //_____________________________________________________________________________
 //_____________________________________________________________________________
-StvDefaultSelector::StvDefaultSelector()
+StvConeSelector::StvConeSelector()
 {
   memset(mBeg,0,mBeg-mBeg+1);
 }
 //_____________________________________________________________________________
-void StvDefaultSelector::Prepare()
+void StvConeSelector::AddHit(const float *x)
 {
-  memset(mLim[0],0,sizeof(mLim));
-  if (mAng <0.3) {mSin = mAng     ;mCos = 1-mAng*mAng/2;}
-  else           {mSin = sin(mAng);mCos = sqrt((1.-mSin)*(1.+mSin));}
+  mX[++mJst]=x;
+  mHit = x;
+  assert(mJst<100);
+}
+//_____________________________________________________________________________
+void StvConeSelector::Prepare()
+{
+static int nCall=0; nCall++;
+StvDebug::Break(nCall);
 
-  for (int i=0;i<3;i++) {
-    mDelta[i] = sqrt(mDir[(i+1)%3]*mDir[(i+1)%3]+mDir[(i+2)%3]*mDir[(i+2)%3]);
-    mDelta[i] *=mSin;
+  float stp=0;
+  int kase = mJst; if (kase>2) kase = 2;
+
+  switch(kase) {
+  
+    case 0: {
+      for (int i=0;i<3;i++) {mDir[i]=-mHit[i];}
+      mDir[2]/=2;stp=0;
+      for (int i=0;i<3;i++) {stp+=mDir[i]*mDir[i];}
+      stp = sqrt(stp);
+      for (int i=0;i<3;i++) {mDir[i]/=stp;}
+      mS[0]=0;
+      mTan = kFstTan;
+    }; break;
+
+    case 1: {
+      stp=0;
+      for (int i=0;i<3;i++) {mDir[i]=mHit[i]-mX[mJst-1][i]; stp+=mDir[i]*mDir[i];}
+      stp = sqrt(stp );
+      for (int i=0;i<3;i++) {mDir[i]/=stp;}
+      mS[1]=stp;
+      mTan = mErr/stp;
+    }; break;
+
+
+    case 2: {
+      stp=0;
+      for (int i=0;i<3;i++) {float qwe=mHit[i]-mX[mJst-1][i]; stp+=qwe*qwe;}
+      stp = sqrt(stp );
+      mS[mJst]=stp;
+      mTan = mErr/(mS[mJst]+mS[mJst-1])/sqrt(3.);
+      float T1 = mS[mJst-1],T2 = mS[mJst]+T1;
+      float coe[3];
+      Lagrange3Der (T2,T1,T2,coe);
+
+      mDir[0] = coe[0]*mX[mJst-2][0]+coe[1]*mX[mJst-1][0]+coe[2]*mHit[0];
+      mDir[1] = coe[0]*mX[mJst-2][1]+coe[1]*mX[mJst-1][1]+coe[2]*mHit[1];
+      mDir[2] = coe[0]*mX[mJst-2][2]+coe[1]*mX[mJst-1][2]+coe[2]*mHit[2];
+      stp=0;
+      for (int i=0;i<3;i++) {stp+=mDir[i]*mDir[i];}
+      stp = sqrt(stp );
+      for (int i=0;i<3;i++) {mDir[i]/=stp;}
+    }; break;
+
+    default: assert(0 && "Wrong case");
   }
+  mRxy2 = mHit[0]*mHit[0]+mHit[1]*mHit[1];
+   
+  mLen=0;
+  if (mXYStep>0) {
+    float cosLa = sqrt((1.-mDir[2])*(1+mDir[2]));
+    if (cosLa<1./kLenFakt) cosLa= 1./kLenFakt;
+    mLen = mXYStep/cosLa;
+  }
+  if (mZStep>0) {
+    float sinLa = fabs(mDir[2]);
+    if (sinLa<1./kLenFakt) sinLa= 1./kLenFakt;
+    mLen = mZStep/sinLa;
+  }
+  assert(mLen>0);
+
+
   UpdateLims();
 
 }   
 //_____________________________________________________________________________
-void  StvDefaultSelector::UpdateLims()
+void  StvConeSelector::UpdateLims()
 {
-  memset(mLim[0],0,sizeof(mLim));
   for (int i=0;i<3;i++) {
-    float bnd = (mDir[i]+mDelta[i])*mLen[1];
-    if (mLim[0][i]>bnd) mLim[0][i]=bnd;
-    if (mLim[1][i]<bnd) mLim[1][i]=bnd;
-
-    bnd = (mDir[i]-mDelta[i])*mLen[1];
-    if (mLim[0][i]>bnd) mLim[0][i]=bnd;
-    if (mLim[1][i]<bnd) mLim[1][i]=bnd;
-
-    mLim[0][i]+=mX[i]; mLim[1][i]+=mX[i];
+    float qwe = mLen*mDir[i];
+    float asd = mLen*mTan*sqrt(fabs(1-mDir[i]*mDir[i]));
+    float lim = qwe - asd - mErr;
+    mLim[0][i] = (qwe<-mErr) ? qwe:-mErr;
+    lim = qwe + asd + mErr;
+    mLim[1][i] = (qwe> mErr) ? qwe: mErr;
+    mLim[0][i]+=mHit[i]; mLim[1][i]+=mHit[i];
   }
+
+  for (int j=0;j<3;j++) {
+    float xx = mHit[j]+mDir[j]*mLen*0.1;
+    assert(xx>=mLim[0][j]);
+    assert(xx<=mLim[1][j]);
+          xx = mHit[j]+mDir[j]*mLen*0.9;
+    assert(xx>=mLim[0][j]);
+    assert(xx<=mLim[1][j]);
+  }
+
+//  for (int j=0;j<3;j++) {mLim[0][j]=-999; mLim[1][j]=999;}
+
+
+
 }
 //_____________________________________________________________________________
-int  StvDefaultSelector::Reject(const float x[3])
+int  StvConeSelector::Reject(const float x[3])
 {
    float myRxy2 = x[0]*x[0]+x[1]*x[1];
-   if (myRxy2>mRxy2 && fabs(x[2])>fabs(mX[2])) 	return 1;
-   if (myRxy2>mRxy2                          ) 	return 2;
-   float xx[3] = {x[0]-mX[0],x[1]-mX[1],x[2]-mX[2]};
+   if (myRxy2>mRxy2 && fabs(x[2])>fabs(mHit[2])) 	return 1;
+   if (myRxy2>mRxy2 ) 					return 2;
+   float xx[3] = {x[0]-mHit[0],x[1]-mHit[1],x[2]-mHit[2]};
    float r2xy = xx[0]*xx[0]+xx[1]*xx[1];
    float z2 = xx[2]*xx[2];
-   if (r2xy < (kMinCos*kMinCos)*z2) 		return 3;		
-   mHitLen = (r2xy+z2);
-   if (mHitLen  < 1e-8) 			return 4;
-   float imp2 = Impact2(mDir,xx);
-   float lim2 = (kTpcHitErr*kErrFakt)*(kTpcHitErr*kErrFakt);
-   lim2 += mHitLen*mSin*mSin;
-   if (imp2 > lim2)          	return 5;
-   mHitLen = sqrt(mHitLen);
-   if (mHitLen>mLen[1]) 	return 6;
-   if (mLen[1]<=mLen[0]) 	return 0;
-
-   mLen[1] = (mHitLen>mLen[0])? mHitLen:mLen[0];
-   UpdateLims();
+   if (r2xy < (kMinCos*kMinCos)*z2) 	return 3;		
+   mHitLen = sqrt(r2xy+z2);
+   if (mHitLen  < 1e-4) 		return 4;
+   mHitPrj = Dot(xx,mDir);
+   if (mHitPrj<1e-4)			return 5;
+   if (mHitPrj>mLen) 			return 6;
+   float imp = sqrt(Impact2(mDir,xx));
+   float lim = (mErr) + mHitPrj*mTan;
+   if (imp > lim)          		return 7;
    return -1;
 }
+//_____________________________________________________________________________
+void StvConeSelector::Update()
+{
+   mLen = mHitPrj;
+   UpdateLims();
+}
+
+
