@@ -103,13 +103,14 @@ double StvFitter::Xi2(const StvHit *hit)
 //		DCA track position
   switch (mKase) {
     case 0: {
-    mHitErrCalc = (StvHitErrCalculator*)mHitPlane->GetHitErrCalc();
-    assert(mHitErrCalc);
-    mHitErrCalc->SetTrack(tD);
-    const StHitPlane *hp = hit->detector(); 
-    const Mtx33F_t &hD = hp->GetDir(hit->x());
-    mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
+      mHitErrCalc = (StvHitErrCalculator*)mHitPlane->GetHitErrCalc();
+      assert(mHitErrCalc);
+      mHitErrCalc->SetTrack(tD);
+      const StHitPlane *hp = hit->detector(); 
+      const Mtx33F_t &hD = hp->GetDir(hit->x());
+      mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
     }; break;
+
     case 1: assert(0 && "Wrong case 1");
 
     case 2: {
@@ -128,9 +129,9 @@ double StvFitter::Xi2(const StvHit *hit)
   mDcaP=VDOT(mDcaFrame[1],dca);
   mDcaL=VDOT(mDcaFrame[2],dca);
 
-  double G[3] = {mInErrs->mHH
-                ,mInErrs->mHZ
-                ,mInErrs->mZZ};
+  double G[3] = {mInErrs->mHH,mInErrs->mHZ,mInErrs->mZZ};
+  if (mKase!=2) {for (int j=0;j<3;j++) {G[j]+=mHitErrs[j];}}
+
 //  (BB*dX*dX-2*BA*dX*dY+AAdY*dY)/det 
   mXi2 = MyXi2(G,mDcaP,mDcaL);
   return mXi2 ; 
@@ -169,7 +170,7 @@ static int nCall=0; nCall++;
   double myXi2 = JoinTwo(2,myHitPars.Arr(),myHitErrs.Arr()
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
 		        ,  myJrkPars.Arr(),mOtErrs->Arr());
-  assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
+  assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2+1));
 
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
@@ -186,14 +187,14 @@ static int nCall=0; nCall++;
 
 //		New Z ortogonal to X (track direction)
   StvFitPars myHitPars(mDcaP, mDcaL );
-  StvFitErrs myHitErrs(0,0,0);
   StvFitPars myTrkPars;
   StvFitPars myJrkPars;
   assert(mTkErrs.Sign()>0);
 
-  double myXi2 = JoinTwo(2,myHitPars.Arr(),myHitErrs.Arr()
+  double myXi2 = JoinTwo(2,myHitPars.Arr(),mHitErrs
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
-		        ,  myJrkPars.Arr(),mOtErrs->Arr());
+		        ,  myJrkPars.Arr(),mOtErrs->Arr(),1);
+  if (myXi2){}
 //??????  assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
   assert(fabs(myJrkPars[0]-myHitPars[0])<1e-6);
   assert(fabs(myJrkPars[1]-myHitPars[1])<1e-6);
@@ -207,7 +208,7 @@ static int nCall=0; nCall++;
 int StvFitter::Jpdate()
 {
   *mOtPars = *mJnPars; (*mOtPars)+=mQQPars;
-  assert(!mOtPars->check());
+//  assert(!mOtPars->check());
   *mOtErrs =  mQQErrs;   
    mOtErrs->SetHz(mOtPars->_hz);
   return 0;
@@ -215,38 +216,50 @@ int StvFitter::Jpdate()
 //______________________________________________________________________________
 double StvFitter::JoinTwo(int nP1,const double *P1,const double *E1
                          ,int nP2,const double *P2,const double *E2
-	                 ,              double *PJ,      double *EJ)
+	                 ,              double *PJ,      double *EJ
+			 ,int mode)
 {
-
+// 		mode=0 normal case
+//		mode=1 assign to vertex where 1st nP1 words of PJ must be == P1
   assert(nP1<=nP2);
   int nE1 = nP1*(nP1+1)/2;
   int nE2 = nP2*(nP2+1)/2;
-  TArrayD ard(nE2*6);
+  TArrayD ard(nE2*6+nP2*nP2+nP1*nP2);
   double *a = ard.GetArray();  
   double *sumE 		= (a);
   double *sumEI 	= (a+=nE2);
   double *e2sumEIe2 	= (a+=nE2);
   double *subP 		= (a+=nE2);
   double *sumEIsubP	= (a+=nE2);
+  double *E2U           = (a+=nE2);
+  double *E2UsumEI      = (a+=nP2*nP2);
+
   double chi2=3e33;
 
 
   do {//empty loop
 //  	Join errors
-    TCL::vadd(E2,E1,sumE,nE1);
+    if (!mode) {TCL::vadd (E2,E1,sumE,nE1);}
+    else       {TCL::ucopy(E2,   sumE,nE1);}
     TCL::trsinv(sumE,sumEI,nP1);
     TCL::vsub  (P1  ,P2   ,subP   ,nP1);
     TCL::trasat(subP,sumEI,&chi2,1,nP1); 
-    if (!EJ) break;
+    if (!EJ) 	break;
 
     TCL::trqsq (E2  ,sumEI,e2sumEIe2,nP2); 
     TCL::vsub(E2,e2sumEIe2,EJ,nE2);
+    if (!mode)  break;
+    TCL::trupck(E2,E2U,nP2);
+    TCL::trats(E2U,sumEI,E2UsumEI,nP2,nP1);
+    TCL::trasat(E2UsumEI,E1,E2U,nP2,nP1);
+    TCL::vadd(E2U,EJ,EJ,nE2);
+      
   } while(0);
 //  	Join params
-  if (PJ) {
-    TCL::tras(subP     ,sumEI,sumEIsubP,1,nP1);
-    TCL::tras(sumEIsubP,E2   ,PJ       ,1,nP2);
-    TCL::vadd(PJ       ,P2   ,PJ         ,nP2);
-  }
+  if (!PJ) return chi2;
+  TCL::tras(subP     ,sumEI,sumEIsubP,1,nP1);
+  TCL::tras(sumEIsubP,E2   ,PJ       ,1,nP2);
+  TCL::vadd(PJ       ,P2   ,PJ         ,nP2);
+
   return chi2;
 }
