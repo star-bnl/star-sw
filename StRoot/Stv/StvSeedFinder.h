@@ -6,6 +6,7 @@
 #include "THelixTrack.h"
 #include "TNamed.h"
 #include "StvStl.h"
+#include "StDraw3D.h"
 /// \class StvSeedFinder
 class StvDraw;
 class StvHit;
@@ -21,12 +22,13 @@ public:
   virtual const THelixTrack *NextSeed()	=0;
   virtual void      Reset()		=0;
   virtual void      Clear(const char* opt="");
+  virtual void      Again(){}
 
 const StvHits *GetHits() const 	{return &fSeedHits;}
 
 static StvSeedFinder* Inst()		{return fgSeedFinder;}
           void Show();
-          void ShowRest();
+          void ShowRest(EDraw3DStyle style = kUnusedHit);
            int DoShow() const 		{return fDoShow;}
           void DoShow(int lev);
 static    StvDraw *NewDraw();
