@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.8 2011/07/19 20:05:37 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.9 2011/08/13 23:00:50 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.9  2011/08/13 23:00:50  perev
+ * wrong order o vtx accounted
+ *
  * Revision 1.8  2011/07/19 20:05:37  perev
  * Dca00 for primary into StvPull
  *
@@ -601,7 +604,7 @@ void getTpt(const StvNode *node,float  x[6],float  e[15])
 {
   enum {jRad=0,jPhi,jZ,jTan,jPsi,jPti};
 static const double DEG = 180./M_PI;
-static       double fak[6] = {1,0,1,1,DEG,0};
+static  double fak[6] = {1,DEG,1,1,DEG,1};
 static const int toUpp[15] = 	{0,
 				 1,  5,
 				 2,  6,  9,
@@ -611,15 +614,12 @@ static const int toUpp[15] = 	{0,
   double xx[6],ee[15];
   const StvNodePars &fp = node->GetFP();
   fp.GetRadial(xx,ee,&node->GetFE());
-  fak[jPhi] = DEG*xx[jRad];
-  fak[jPti] = fp.getCharge()*fabs(xx[jPti]);
 
-  for (int i=0;i<6;i++) {x[i] = (float)(fak[i]*xx[i]);}
+  for (int i=0;i<6;i++) {x[i] = (float)(xx[i]);}
   if (!e) return;
 
   x[0] = (float)xx[0];
   for (int i=0,li=0;i< 5;li+=++i) {
-    x[i+1]=(float)xx[i+1];
     for (int j=0;j<=i;j++) {
       e[toUpp[li+j]] = (float)(ee[li+j]*fak[i+1]*fak[j+1]);
   } }
@@ -865,17 +865,17 @@ void StvStEventFiller::fillEventPrimaries()
     
     pTrack = 0;
     for (mVertN=0; (vertex = mEvent->primaryVertex(mVertN));mVertN++) {
+      if (kTrack->IsPrimary()!=mVertN+1)	continue;
       StThreeVectorD vertexPosition = vertex->position();
       double zPrim = vertexPosition.z();
       // loop over StvKalmanTracks
       float globalDca = impactParameter(gTrack,vertexPosition);
       if (fabs(minDca) > fabs(globalDca)) minDca = globalDca;
  
-      if (kTrack->IsPrimary()!=mVertN+1)	continue;
       const StvNode *lastNode = kTrack->GetNode(StvTrack::kPrimPoint);
       StvHit *pHit = lastNode->GetHit();
       assert (pHit);
-      if (fabs(pHit->x()[2]-zPrim)>0.1)		continue;//not this primary
+      assert (fabs(pHit->x()[2]-zPrim)<0.001);//not this primary
 
       fillTrackCount1++;
       // detector info
@@ -900,10 +900,14 @@ void StvStEventFiller::fillEventPrimaries()
       }
       if (pTrack->numberOfPossiblePoints()<10) 		break;
       if (pTrack->geometry()->momentum().mag()<0.1) 	break;
+      double qwe = pTrack->geometry()->momentum().phi()
+                 - ((StGlobalTrack*)gTrack)->dcaGeometry()->psi();
+      StvDebug::Count("psiPr-PsiGl",qwe/M_PI*180);
+
+
       fillTrackCountG++;
       break;
     } //end of verteces
-//??      kTrack->setDca(minDca);
       gTrack->setImpactParameter(minDca);
       if (pTrack) pTrack->setImpactParameter(minDca);
 
@@ -962,33 +966,19 @@ void StvStEventFiller::fillGeometry(StTrack* gTrack, const StvTrack* track, bool
   //cout << "StvStEventFiller::fillGeometry() -I- Started"<<endl;
   assert(gTrack);
   assert(track) ;
-  const StvNode* node = track->GetNode((!outer)? StvTrack::kFirstPoint:StvTrack::kLastPoint);
+  
+  StvTrack::EPointType needType = (!outer)? StvTrack::kFirstPoint:StvTrack::kLastPoint;
+  if (!outer && gTrack->type() == primary) needType = StvTrack::kPrimPoint;
+  const StvNode* node = track->GetNode(needType);
+  assert(node);
   StvHit *ihit = node->GetHit();
   StThreeVectorF nodpos(position(node));
   StThreeVectorF hitpos(position(ihit));
 
-  double dif = (hitpos-nodpos).mag();
-
-  if (dif>3.) {
-    dif = nodpos.z()-hitpos.z();
-    printf("***Track(%d) DIFF TOO BIG %g \n",track->GetId(),dif);
-    printf("H=%g %g %g N =%g %g %g\n",hitpos.x()   ,hitpos.y()   ,hitpos.z()
-		                     ,nodpos.x(),nodpos.y(),nodpos.z());
-     
-    assert(fabs(dif)<50.);
-  }
 
     // making some checks.  Seems the curvature is infinity sometimes and
   // the origin is sometimes filled with nan's...
   
-  int ibad = nodpos.bad();
-  if (ibad) {
-      cout << "StvStEventFiller::fillGeometry() Encountered non-finite numbers!!!! Bail out completely!!! " << endl;
-      cout << "StThreeVectorF::bad() = " << ibad << endl;
-      cout << "Last node had:" << endl;
-      cout << "nodpos        " << nodpos << endl;
-      abort();
-  }
   StTrackGeometry* geometry =new StHelixModel(short(getCharge(node)),
 					      getPhi(node),
 					      fabs(getCurvature(node)),
