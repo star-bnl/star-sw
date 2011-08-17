@@ -72,6 +72,7 @@ class PmdClean{
 
   static Int_t BadChain_y12d0[30];
   static Int_t BadChain_y12d114[30];
+  static Int_t BadChain_y12d172[30];
 
   ClassDef(PmdClean,1)               // macro for rootcint
 
