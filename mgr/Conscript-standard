@@ -696,28 +696,17 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #    }
     }
 
-    if ( $pkg =~ m/^Sti$/) {  # For use CATracker
-	if ($env1->{DEBUG} =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for Sti with gcc432
-	    $envNoDeb = $env->clone('DEBUG' => '-g');
-	    for ($i = 0; $i < $#src; $i++) {
-		if ($src[$i] =~ /StiVMCToolKit\.cxx/) {
-		    my @objfiles = Objects $envNoDeb ($src[$i]);
-		    $src[$i] = $objfiles[0];
-		    last;
-		}
-	    }
-	} else {
-	    #if ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3)) {
-	    #
-	    # do not switch on gcc version but on CATracker for now
-	    #
-	    if (  -e "StRoot/TPCCATracker" && 
-		  ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3))  	){
-	    	$CXXFLAGS .= "  -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION -msse -msse2";
-	    	#    $CXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE"; # uncomment for CA Efficiencies output
-	    	$LIBS = "-lTPCCATracker -lVc -lTBB ". $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
-	    }
+    if ( $pkg =~ m/^Sti$/) {  
+      if ($env1->{DEBUG} =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for Sti with gcc432
+	$envNoDeb = $env->clone('DEBUG' => '-g');
+	for ($i = 0; $i < $#src; $i++) {
+	  if ($src[$i] =~ /StiVMCToolKit\.cxx/) {
+	    my @objfiles = Objects $envNoDeb ($src[$i]);
+	    $src[$i] = $objfiles[0];
+	    last;
+	  }
 	}
+      }
     }
 
     if ( $#idlM > -1 ) {
@@ -1165,6 +1154,54 @@ if ( $#src > -1 ) {
       Depends $envg, [($SO_PKG)], ($libs); #print "libs = $libs\n";
       $env2 = $envg;
     }
+    if ($pkg =~ m/^Sti$/) { # For use CATracker
+      if (  -e "StRoot/TPCCATracker" && 
+	    ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3))  	){
+	$SO_PKG_PLAIN = $pkg . "CA";
+	printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+	$SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+	$envCA = $env2->clone('SUFOBJ'   => "CA.o",
+			      'CXXFLAGS' => $CXXFLAGS . "  -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION -msse -msse2");
+	my @ListCA = qw( StiKalmanTrack.cxx StiKalmanTrackFinder.cxx StiKalmanTrackNode.cxx StiTPCCATrackerInterface.cxx StiTpcSeedFinder.cxx);
+	my $ListCA = join('|',@ListCA);
+	@PlainObj = ();
+	@Obj = ();
+#	print "$#src => @src \n";
+	my @o;
+	for(my $i = 0; $i < $#src; $i++) {
+	  my $s = $src[$i];
+	  $o[0] = $s;
+	  if ($s !~ m/\.o$/) {@o = Objects $env2 ($s);}
+	  push  @Obj, $o[0];
+#	  print "$s => $src[$i]\n";
+	  if ($s =~ m/$ListCA/) {@o = Objects $envCA ($s); push @PlainObj, $o[0];}
+	  else                  {push @PlainObj, $o[0];}
+	}
+	@src = @Obj;
+#	print "$#src => @src \n";
+#	print "$#PlainObj => @PlainObj \n";
+	
+	$envPlain = $env2->clone('LIBPATH'  => $LIB, # . $main::PATH_SEPARATOR . $env->{Packages}->{ROOT}->{LIBDIR},
+				 'LIBS'     => "-lTPCCATracker -lVc -lTBB ");# . $env->{Packages}->{ROOT}->{LIBS} . " -lEG");
+      }
+    }
+    if ($pkg =~ m/^StGenericVertexMaker$/) { # For Stv no Sti 
+      $SO_PKG_PLAIN = $pkg . "NoSti";
+      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+      $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+      @PlainObj = ();
+      @Obj = Objects $env2  (@src);
+#      print "$#src => @src \n";
+#      print "$#Obj => @Obj \n";
+      foreach my $o (@Obj) {
+#	print "o ++++++> $o\n";
+	if ($o =~ m/\/StiPPVertex\//) {next;}
+	push @PlainObj, $o;
+      }
+      @src = @Obj;
+#      print "$#src => @src \n";
+#      print "$#PlainObj => @PlainObj \n";
+    }
     LinkedModule $env2 $SO_PKG, @src;
     Install $env2 $LIB,         $SO_PKG;
     my $lib = $LIB . "/" . $SO_PKG;
@@ -1239,7 +1276,6 @@ sub script::alpha_arcom { #
   my $flag = `$cmd`; if ($?) {exit 2;}
   return 1;
 }
-
 #_________________________________________________________________________________
 
 
