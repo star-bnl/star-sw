@@ -8,6 +8,6 @@
 
 struct fgtMapping { 
 
-   long  Mapping[37000];   /* fgt channel mapping */
+   long  Mapping[51200];   /* fgt channel mapping */
 
  };  
