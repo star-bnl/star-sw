@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.20 2011/04/19 22:50:08 fisyak Exp $
+ * $Id: StMuIOMaker.cxx,v 1.21 2011/08/18 18:41:36 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  * Made it integrated to StIOMaker for applying Grid Collector 
@@ -272,7 +272,7 @@ void StMuIOMaker::openMuWrite() {
   TTree *tree = mChain->GetTree();
   mOutTree = new TTree("MuDst", "StMuDst", mSplit);
 #if ROOT_VERSION_CODE < ROOT_VERSION(5,26,0)
-  Long64_t MAXLONG=(Long64_t) TMath::Power(2,sizeof(Long64_t)*8)-1; // 1900000000 <=> 1.9 GB
+  Long64_t MAXLONG=100000000000LL; // 100 GB
   LOG_INFO << "Tree size MAX will be " << (float) MAXLONG/1000/1000/1000 << " GB " << endm;
   mOutTree->SetMaxTreeSize(MAXLONG); // limited to 1.9 GB  - set to maximum
 #endif
@@ -310,6 +310,9 @@ void StMuIOMaker::closeMuWrite(){
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.21  2011/08/18 18:41:36  fisyak
+ * set max. tree size = 100 GB
+ *
  * Revision 1.20  2011/04/19 22:50:08  fisyak
  * Use default size of TTree (100 GB) for ROOT >= 5.26.0
  *
