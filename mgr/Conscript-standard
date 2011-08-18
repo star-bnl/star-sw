@@ -1168,8 +1168,7 @@ if ( $#src > -1 ) {
 	@Obj = ();
 #	print "$#src => @src \n";
 	my @o;
-	for(my $i = 0; $i < $#src; $i++) {
-	  my $s = $src[$i];
+	foreach my $s (@src) {
 	  $o[0] = $s;
 	  if ($s !~ m/\.o$/) {@o = Objects $env2 ($s);}
 	  push  @Obj, $o[0];
