@@ -700,9 +700,9 @@ Bfc_st BFC[] = { // standard chains
 
   // Some global Sti stuff including vertexing
   {"StiPulls" ,"","","",                                         "","", "Request to make Sti Pulls",kFALSE},
-  {"Sti"      ,"Sti","","SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
+  {"Sti"      ,"Sti","","svtDb,ssdDb,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
    ,                                    "StEventUtilities,Sti,StiUtilities,StiMaker" ,"Sti tracker",kFALSE},
-  {"StiCA"    ,"Sti","","-Sti,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
+  {"StiCA"    ,"StiCA","","svtDb,ssdDb,-Sti,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
    ,                          "StEventUtilities,libEG,StiCA,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
   {"Stv"     ,"Stv","","-TpcIT,-SvtIT,-SsdIT","StvMaker"
    ,"libHist,libHistPainter,libVMC,StarVMCApplication,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker" 
@@ -713,8 +713,8 @@ Bfc_st BFC[] = { // standard chains
   {"StiVMCLibs","","","detDb,StarMagField","",                      "","ITTF:load StiVMC libraries",kFALSE},
   {"laserIT" ,"","","","",                               "TpcIT","use Sti for laser reconstruction",kFALSE},
   {"TpcIT", "","","TpcDb,ITTF","","tpc_T,dbutil,detDb,StarMagField,magF,StiTpc","Sti tracking: TPC",kFALSE},
-  {"SvtIT"     ,""  ,"","svtDb,ITTF","","StSvtClassLibrary,StSvtDbMaker,StiSvt","Sti tracking: SVT",kFALSE},
-  {"SsdIT"     ,""  ,"","ssdDb,ITTF",""       ,",StSsdUtil,StSsdDbMaker,StiSsd","Sti tracking: SSD",kFALSE},
+  {"SvtIT"     ,""  ,"","ITTF","","StSvtClassLibrary,StSvtDbMaker,StiSvt","Sti tracking: SVT",kFALSE},
+  {"SsdIT"     ,""  ,"","ITTF",""        ,"StSsdUtil,StSsdDbMaker,StiSsd","Sti tracking: SSD",kFALSE},
   {"HpdIT"  ,""  ,"","ITTF",""                               ,"Sti,StiRnD","Sti tracking: Hpd geom",kFALSE},
   {"PixelIT",""  ,"","ITTF",""                             ,"Sti,StiRnD","Sti tracking: Pixel geom",kFALSE},
   {"IstIT"  ,""  ,"","ITTF",""                               ,"Sti,StiRnD","Sti tracking: Ist geom",kFALSE},
