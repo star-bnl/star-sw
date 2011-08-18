@@ -703,7 +703,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                    "StEventUtilities,Sti,StiUtilities,StiMaker" ,"Sti tracker",kFALSE},
   {"StiCA"    ,"StiCA","","svtDb,ssdDb,-Sti,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
    ,                          "StEventUtilities,libEG,StiCA,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
-  {"Stv"     ,"Stv","","-TpcIT,-SvtIT,-SsdIT","StvMaker"
+  {"Stv"     ,"Stv","","-TpcIT,-SvtIT,-SsdIT,gen_T,sim_T","StvMaker"
    ,"libHist,libHistPainter,libVMC,StarVMCApplication,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker" 
    ,                                                                                          "Stv",kFALSE},
   {"StvCA"    ,"StvCA","","","",""                                        ,"place holder for StvCA",kFALSE},
