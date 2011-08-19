@@ -1,0 +1,150 @@
+      MODULE IDSMGEO1    simplified  beam support cone for 2012
+      Created   4/10/2011
+      Author Jan Balewski MIT
+      +CDE,agecom,gcunit,gconst.
+      CONTENT IDSM,OSCA,WSCC,WSCD,WSCO,WSCP,TPRR,TPRT
+      REAL inR, outR,lengthZ, centerZ,      z1,z2,k,phi1,phi2,sinA, cosA, outRflat,
+             boxR, resR, angR,m
+
+      STRUCTURE IDSG { version,lenM,rM,lenW,rW,thick,zStart,angDel,angFlat,r1Res,
+            r2Res,rrRes,dangRes,dxRes,dyRes}
+      STRUCTURE IDSA { version,x,y,z,thetax,thetay,thetaz,phix,phiy,phiz}
+      FILL IDSG		! IDS Geometry data,46.1cm=inner radii of IFC
+      version = 1.0 ! Versioning of the IDS geometry
+      zStart = 0. !  Z position of middle cone
+      thick = 0.3 !  thickens of any element
+      lenM = 100. ! Z length of  middle cone
+      rM = 6. !  radii of middle cone
+      lenW = 120. ! Z lenght of west cone
+      rW = 41. !  radii of west cone
+      angFlat = 106. !  angle (deg) for center of flat
+      angDel = 36. !  opening angle (deg) of flat
+      rrRes = 44. !  radial distance of  for TPC resistor tubes
+      r1Res = 1.17 !  inner radii for TPC resistor tubes
+      r2Res = 1.27 !  outer radii for TPC resistor tubes
+      dangRes = 11.3 !  opening angle (deg) for TPC resistor tubes
+      dxRes = 0.13 !  thicknessfor TPC resistor
+      dyRes = 2. !  dy for TPC resistor
+      ENDFILL
+      FILL IDSA		! Alignment of the IDSM geometry within the CAVE
+      version = 1.0 ! Default alignment of IDSM at (0,0,0) with no rotation
+      x = 0.0 ! x-alignment
+      y = 0.0 ! y-alignment
+      z = 0.0 ! z-alignment
+      thetax = 90.0 ! align x`-axis 90 degrees in theta wrt cave
+      phix =  0.0 ! align x`-axis  0 degrees in phi   wrt cave
+      thetay = 90.0 ! align y`-axis 90 degrees in theta wrt cave
+      phiy = 90.0 ! align y`-axis  0 degrees in phi   wrt cave
+      thetaz =  0.0 ! align z`-axis  0 degrees in theta wrt cave
+      phiz =  0.0 ! align z`-axis  0 degrees in phi   wrt cave
+      ENDFILL
+      COMPONENT C A=12 Z=6 W=1
+      MIXTURE CFiber dens=1.713
+      COMPONENT AL A=27 Z=13 W=2.
+      COMPONENT O A=16 Z=8 W=3.
+      MIXTURE Alumina dens=3.90
+      COMPONENT Si A=28.08 Z=14 W=0.6*1*28./60.
+      COMPONENT O A=16 Z=8 W=0.6*2*16./60.
+      COMPONENT C A=12 Z=6 W=0.4*8*12./174.
+      COMPONENT H A=1 Z=1 W=0.4*14*1./174.
+      COMPONENT O A=16 Z=8 W=0.4*4*16./174.
+      MIXTURE FR4 dens=1.80
+      inR     = IDSG_rM - IDSG_thick/2.
+      outR    = IDSG_rrRes + IDSG_r2Res
+      lengthZ = IDSG_lenM + 2.*IDSG_lenW
+      centerZ = 0.
+      phi1=IDSG_angFlat-IDSG_angDel/2.
+      phi2=IDSG_angFlat+IDSG_angDel/2.
+      sinA = sin( IDSG_angflat * degrad )
+      cosA = cos( IDSG_angflat * degrad )
+      outRflat = IDSG_rW * cos(IDSG_angDel * degrad )
+      boxR     = (outRflat + inR + IDSG_thick)/2.
+      CREATE IDSM
+      POSITION IDSM x=IDSA_x y=IDSA_y z=IDSA_z thetax=IDSA_thetax phix=IDSA_phix  _
+	thetay=IDSA_thetay phiy=IDSA_phiy thetaz=IDSA_thetaz phiz=IDSA_phiz 
+      ! ---------------------------------------------------------------------------------- IDSM
+      BLOCK IDSM   mother volume for beam support cone
+      ATTRIBUTE IDSM seen=0 colo=6
+      MATERIAL Air
+      SHAPE tube rmin=inR rmax=outR dz=lengthZ/2.
+      CREATE OSCA
+      POSITION OSCA z=0 
+      DO k = 0, 1
+      z1=lengthZ/2-IDSG_lenW/2.
+      z2=IDSG_lenM/2.-IDSG_thick
+      IF ( k.eq.1 ) THEN
+      z1=-lengthZ/2+IDSG_lenW/2.
+      z2=-IDSG_lenM/2.+IDSG_thick/2.
+      ENDIF
+      CREATE WSCC
+      POSITION WSCC z=z1 
+      CREATE WSCD
+      POSITION WSCD z=z2 
+      END DO
+      DO m = 0, 1
+      angR = IDSG_angFlat - IDSG_dangRes/2.
+      IF ( m.eq.1 ) THEN
+      angR = IDSG_angFlat+IDSG_dangRes/2.
+      ENDIF
+      CREATE TPRT
+      POSITION TPRT x=IDSG_rrRes*cos(angR/180.*3.1416)  _
+	y=IDSG_rrRes*sin(angR/180.*3.1416) z=0 
+      END DO
+      CREATE TPRR
+      POSITION TPRR x=IDSG_rrRes*cosA y=IDSG_rrRes*sinA z=0 alphaz=IDSG_angFlat 
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- OSCA
+      BLOCK OSCA   middle cylinder, carbon fiber
+      ATTRIBUTE OSCA seen=1 colo=5
+      MATERIAL CFiber
+      SHAPE tube rmin=inR rmax=inR+IDSG_thick,
+            dz=IDSG_lenM/2.
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- WSCC
+      BLOCK WSCC    east/west cylinder, carbon fiber
+      ATTRIBUTE WSCC seen=0 colo=4
+      MATERIAL Air
+      SHAPE tube rmin=IDSG_rW-IDSG_thick/2. rmax=IDSG_rW+IDSG_thick/2.,
+            dz=IDSG_lenW/2.
+      CREATE WSCO
+      POSITION WSCO z=0 
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- WSCO
+      BLOCK WSCO    circle carbon fiber
+      ATTRIBUTE WSCO seen=1 colo=4
+      MATERIAL CFiber
+      SHAPE tube rmin=IDSG_rW-IDSG_thick/2. rmax=IDSG_rW+IDSG_thick/2.,
+            dz=IDSG_lenW/2.
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- WSCD
+      BLOCK WSCD    east/west disk, carbon fiber
+      ATTRIBUTE WSCD seen=0 colo=2
+      MATERIAL Air
+      SHAPE tube rmin=IDSG_rM-IDSG_thick/2. rmax=IDSG_rW+IDSG_thick/2.,
+            dz=IDSG_thick/2.
+      CREATE WSCP
+      POSITION WSCP z=0 
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- WSCP
+      BLOCK WSCP    circle carbon fiber
+      ATTRIBUTE WSCP seen=1 colo=6
+      MATERIAL CFiber
+      SHAPE tube rmin=IDSG_rM-IDSG_thick/2. rmax=IDSG_rW+IDSG_thick/2.,
+            dz=IDSG_thick/2.
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- TPRR
+      BLOCK TPRR    TPC resistor
+      ATTRIBUTE TPRR seen=1 colo=2
+      MATERIAL Alumina
+      SHAPE box dx=IDSG_dxRes/2 dy=IDSG_dyRes/2.,
+            dz=lengthZ/2.
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- TPRT
+      BLOCK TPRT   resistor protection,  carbon fiber
+      ATTRIBUTE TPRT seen=1 colo=3
+      MATERIAL FR4
+      SHAPE tube rmin=IDSG_r1Res rmax=IDSG_r2Res,
+            dz=lengthZ/2.
+      ENDBLOCK
+      <W> '===>> 	[End AgML Module IDSMGEO1]	 <<==='; (A32,/,/);
+      END! Module IDSMGEO1
