@@ -141,51 +141,58 @@
 
  <!--  mmmmmmmmmmmmm  good MATERIALS mmmmmmmmmmmmmmmmm    -->   
 <Mixture name="FR4" dens="1.80"  >
-    <Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
-    <Component name="O" a="16" z="8" w="0.6*2*16./60."  />
-    <Component name="C" a="12" z="6" w="0.4*8*12./174."  />
-    <Component name="H" a="1"  z="1" w="0.4*14*1./174."  />
-    <Component name="O" a="16" z="8" w="0.4*4*16./174."  />
+    <Component name="Si" a="28.08" z="14" w="0.281"  />
+    <Component name="O"  a="16"    z="8"  w="0.467"  />
+    <Component name="C"  a="12"    z="6"  w="0.220"  />
+    <Component name="H"  a="1"     z="1"  w="0.032" />
 </Mixture>
 
-<!--  mmmmmmmmmmmmm  temporary MATERIALS with very approximate composition - needs later inspection - Jan B -->
 
 <!--  Note, material for volumes: FGVN, FGZC, FGVG,FGVR should NOT account for the  frame nor spacer 
       since thos are placed independently in to those volumes -->
 
-<Mixture name="badNomexMix" dens="0.12"  ><!--  now made out of FR4 -->
-    <Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
-    <Component name="O" a="16" z="8" w="0.6*2*16./60."  />
-    <Component name="C" a="12" z="6" w="0.4*8*12./174."  />
-    <Component name="H" a="1" z="1" w="0.4*14*1./174."  />
+<Mixture name="NomexMix" dens="0.089"  > <!-- computed by Willie -->
+    <Component name="O"  a="16"   z="8"  w="0.089"  />
+    <Component name="C"  a="12"   z="6"  w="0.802"  />
+    <Component name="H"  a="1"    z="1"  w="0.023"  />
+    <Component name="Cl" a="35.5" z="17" w="0.019"  />
+    <Component name="N"  a="14"   z="7"  w="0.025"  />  
+    <Component name="Al" a="27"   z="13" w="0.003" />
+    <Component name="Cu" a="63.5" z="29" w="0.039" />
 </Mixture>
         
+<Mixture name="GemMix" dens="0.079"  > <!-- computed by Willie -->
+    <Component name="O"  a="16"   z="8"  w="0.093"  />
+    <Component name="C"  a="12"   z="6"  w="0.305"  />
+    <Component name="H"  a="1"    z="1"  w="0.012"  />
+    <Component name="N"  a="14"   z="7"  w="0.032"  />  
+    <Component name="Cu" a="63.5" z="29" w="0.558" />
+</Mixture>
+        
+<Mixture name="ReadMix" dens="0.356"  > <!-- computed by Willie -->
+    <Component name="O"  a="16"   z="8"  w="0.161"  />
+    <Component name="C"  a="12"   z="6"  w="0.509"  />
+    <Component name="H"  a="1"    z="1"  w="0.020"  />
+    <Component name="N"  a="14"   z="7"  w="0.051"  />  
+    <Component name="Al" a="27"   z="13" w="0.003" />
+    <Component name="Cu" a="63.5" z="29" w="0.256" />
+</Mixture>
+       
+ <!--  mmmmmmmmmmmmm  temporary 'bad' MATERIALS with very approximate composition - needs later inspection - Jan B -->
+
 <Mixture name="badArCO2Mix" dens="0.0018015" isvol="1"  ><!--  now made out of ArCO2_70_30 -->
-   <Component name="Ar" a="39.95" z="18." w="0.7"  />
-   <Component name="C" a="12.01" z="6." w="0.3*1*12.01/44.01"  />
-   <Component name="O" a="16." z="8." w="0.3*2*16./44.01"  />
-</Mixture>
-
-<Mixture name="badGemMix" dens="0.08"  ><!--  now made out of FR4 -->
-    <Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
-    <Component name="O" a="16" z="8" w="0.6*2*16./60."  />
-    <Component name="C" a="12" z="6" w="0.4*8*12./174."  />
-    <Component name="H" a="1" z="1" w="0.4*14*1./174."  />
-</Mixture>
-
-<Mixture name="badReadMix" dens="0.36"  ><!--  now made out of FR4 -->
-    <Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
-    <Component name="O" a="16" z="8" w="0.6*2*16./60."  />
-    <Component name="C" a="12" z="6" w="0.4*8*12./174."  />
-    <Component name="H" a="1" z="1" w="0.4*14*1./174."  />
+   <Component name="Ar" a="39.95" z="18." w="0.700"  />
+   <Component name="O"  a="16."   z="8."  w="0.218"  />
+   <Component name="C"  a="12.01" z="6."  w="0.082"  />
 </Mixture>
 
 
 <Mixture name="badElecMix" dens="4."  ><!--  now made out of FR4 -->
-    <Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
-    <Component name="O" a="16" z="8" w="0.6*2*16./60."  />
-    <Component name="C" a="12" z="6" w="0.4*8*12./174."  />
-    <Component name="H" a="1" z="1" w="0.4*14*1./174."  />
+    <Component name="O"  a="16"   z="8"  w="0.093"  />
+    <Component name="C"  a="12"   z="6"  w="0.305"  />
+    <Component name="H"  a="1"    z="1"  w="0.012"  />
+    <Component name="N"  a="14"   z="7"  w="0.032"  />  
+    <Component name="Cu" a="63.5" z="29" w="0.558" />
 </Mixture>
 
         
@@ -280,7 +287,7 @@ flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 
 <Volume       name="FGVN" comment="quad nomex mixture volume"  >
     <Attribute for="FGVN" seen="0" colo="5"  />
-    <Material name="badNomexMix"  />
+    <Material name="NomexMix"  />
     <Shape type="TUBS"  rmin="diskInR"  rmax="diskOutR" dz="volNomexDZ/2." phi1="0." phi2="90." />
 
    <!--  FFFFFFFFFFFFFFFFFFF   place spacer frame 3 TIMES with an offset in Z and some overlap to make it thicker -->
@@ -387,7 +394,7 @@ flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 
 <Volume       name="FGVG" comment="quad 3GEM  mixture volume"  >
     <Attribute for="FGVG" seen="0" colo="6"  />
-    <Material name="badGemMix"  />
+    <Material name="GemMix"  />
     <Shape type="TUBS"  rmin="diskInR"  rmax="diskOutR" dz="volGemDZ/2." phi1="0." phi2="90." />
 
     <!--  FFFFFFFFFFFFFFFFFFF   place spacer frame 3 TIMES with an offset in Z and some overlap to make it thicker -->
@@ -437,7 +444,7 @@ flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 
 <Volume       name="FGVR" comment="quad readout mixture volume"  >
     <Attribute for="FGVR" seen="0" colo="5"  />
-    <Material name="badReadMix"  />
+    <Material name="ReadMix"  />
     <Shape type="TUBS"  rmin="diskInR"  rmax="diskOutR" dz="volReadDZ/2." phi1="0." phi2="90." />
 
     <!--  place spacer frame -->
