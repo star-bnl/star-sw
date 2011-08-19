@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.7 2011/07/19 20:02:30 perev Exp $
+// $Id: StvMaker.cxx,v 1.8 2011/08/19 02:42:05 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -127,13 +127,6 @@ Int_t StvMaker::Finish()
 //_____________________________________________________________________________
 Int_t StvMaker::Init()
 {
-  TString geom(GetChainOpt()->GetGeometry());
-  StTGeoHelper::Inst()->Load(geom);
-  StVMCApplication *app = new StVMCApplication("y2009a", "StVMC application");
-  StvMCInitApp *ini = new StvMCInitApp();
-  app->SetInit(ini);
-  
-  app->Init();
 
   return StMaker::Init();
 }
@@ -150,6 +143,21 @@ Int_t StvMaker::InitRun(int run)
 static int initialized = 0;
   if (!initialized)
   {
+  TString geom(GetChainOpt()->GetGeometry());
+  if (geom.Length()) {//Geometry defined in option
+     StTGeoHelper::Inst()->Load(geom);
+  } else { // Geometry via DBMaker
+    TDataSet *myGeo = GetDataBase("VmcGeometry");
+    assert(myGeo);
+    geom = myGeo->GetName();
+    geom.ReplaceAll("Geometry.","");
+    geom.ReplaceAll(".C","");
+  }
+
+  StVMCApplication *app = new StVMCApplication(geom, "StVMC application");
+  StvMCInitApp *ini = new StvMCInitApp();
+  app->SetInit(ini);
+  app->Init();
 
   StTGeoHelper::Inst()->SetActive(kTpcId,1,new StvTpcActive);
   StTGeoHelper::Inst()->Init(1+2+4);
