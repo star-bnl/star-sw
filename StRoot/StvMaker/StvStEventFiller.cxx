@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.9 2011/08/13 23:00:50 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.10 2011/08/19 02:40:43 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.10  2011/08/19 02:40:43  perev
+ * Add errors
+ *
  * Revision 1.9  2011/08/13 23:00:50  perev
  * wrong order o vtx accounted
  *
@@ -1282,6 +1285,7 @@ static int nCall=0; nCall++;
   if (!node) return;
 
   const StvNodePars &fp = node->GetFP();
+  const StvFitErrs  &fe = node->GetFE();
   int dets[kMaxDetectorId][3];
   getAllPointCount(track,dets);
   StvPullTrk aux;
@@ -1304,6 +1308,13 @@ static int nCall=0; nCall++;
   aux.mRxy     = v3.perp();
   aux.mPhi     = v3.phi();
   aux.mZ       = v3.z();
+
+  aux.mPtErr   = sqrt(fe.mPP)*aux.mPt*aux.mPt;
+  aux.mPsiErr  = sqrt(fe.mAA);
+  aux.mDipErr  = sqrt(fe.mLL);
+  aux.mRxyErr  = sqrt(fe.mHH);
+  aux.mZErr    = sqrt(fe.mZZ);
+
   mPullEvent->Add(aux,gloPri);
   if (!gloPri)    { 
     double ar[7];
