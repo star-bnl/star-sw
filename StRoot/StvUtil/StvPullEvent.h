@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StvPullEvent.h,v 1.3 2011/07/19 20:10:31 perev Exp $
+ * $Id: StvPullEvent.h,v 1.4 2011/08/19 16:27:06 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StvPullEvent.h,v $
+ * Revision 1.4  2011/08/19 16:27:06  perev
+ * track errors added
+ *
  * Revision 1.3  2011/07/19 20:10:31  perev
  * Dca00 added
  *
@@ -93,6 +96,12 @@ float mDip;			//track Dip in global  Stv frame
 float mRxy;			//Rxy of track begining 
 float mPhi;			//Phi angle of track begining
 float mZ;
+//				Errors
+float mPtErr;        		//pt error
+float mPsiErr;			//track Psi error
+float mDipErr;			//track Dip error
+float mRxyErr;			//Rxy error 
+float mZErr;			//z error
 char mEnd[1];
   ClassDef(StvPullTrk,3);
 };

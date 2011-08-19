@@ -181,7 +181,7 @@ static int nCall=0; nCall++;
     if (trkG->nAllHits < 15)    continue; 
     double ar[7];
     ar[0] = cos(trkG->mPhi-trkG->mPsi);
-    assert(fabs(ar[0])<1e-3);
+//    assert(fabs(ar[0])<1e-3);
     ar[0] = trkG->mRxy*cos(trkG->mPhi);
     ar[1] = trkG->mRxy*sin(trkG->mPhi);
     ar[2] = trkG->mZ;
