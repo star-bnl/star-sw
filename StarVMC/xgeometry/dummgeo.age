@@ -1,0 +1,4 @@
+      MODULE dummgeo   Dummy dummy geometry
+      +CDE,agecom,gcunit.
+      <W> '===>> 	[End AgML Module dummgeo]	 <<==='; (A32,/,/);
+      END! Module dummgeo
