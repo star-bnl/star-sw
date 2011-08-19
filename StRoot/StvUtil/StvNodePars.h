@@ -128,6 +128,7 @@ double GetHz() const   ;//?? 	{ return mHz ;}
   const double *Arr() const 	{ return &mHH;}
         double *Arr()       	{ return &mHH;}
 double &operator[](int i) 	{ return Arr()[i];}
+double  operator[](int i) const	{ return Arr()[i];}
   void operator*=(double f) {for (int i=0;i<kNErrs;i++){Arr()[i]*=f;};}
   void Add(const StvELossData &el,const StvNodePars &pa);
   void Backward();
