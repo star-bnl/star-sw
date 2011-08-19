@@ -256,7 +256,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			
 			if ( $xml =~ m/Compat/ ){
 			    Depends $env [$pref.$agF], "#$xml";
-			    Command $env [$pref.$agF], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);			    
+			    Command $env [$pref.$agF], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+
 			} else {
 			    Depends $env [$pref.$agX, $pref.$agH, $pref.$agF], "#$xml";
 			    Depends $env [$agO], $pref.$agX, $pref.$agH;
@@ -518,6 +519,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$FPPFLAGS = " -DATLAS_UNIX -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
         # $FPPFLAGS = $env1->{Packages}->{CERNLIB}->{FPPFLAGS} . " -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
         # $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
+
     } elsif ( $pkg =~ m/^g2t/ || $pkg =~ m/^gstar/ || $pkg =~ m/^geometry/ ) {
 	$SO_MAP  = "";
 	$FCPATH  = $INCLUDE;
@@ -525,6 +527,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
 	$FCPATH .= $main::PATH_SEPARATOR . $env1->{ENV}->{CERN_ROOT} . "/include";
         # $FCPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
+
+    } elsif ( $pkg =~ /^xgeometry/ ){
+	$LIBS .= " -lStarMagFieldNoDict ";
+	#my $libs = "-lStarMagFieldNoDict";	
+
+
     } elsif ($pkg =~ m/TGeant3|StarVMCApplication|StVMCMaker/) {
 	$CPPPATH =  $env1->{ENV}->{ROOT} . "/" .$env1->{ENV}->{ROOT_LEVEL} . "/geant3/TGeant3"
 	    . $main::PATH_SEPARATOR . $CPPPATH;
@@ -1120,7 +1128,8 @@ if ( $#src > -1 ) {
       Depends $env2 $SO_PKG, $libpkg;
     }
   }
-  #  print "SO_PKG = $SO_PKG\n";
+  # print "-=-=-=-=- SO_PKG = $SO_PKG $pkg -=-=-=-=-=-\n";
+  # print "SO_PKG = $SO_PKG\n";
   if ($SO_PKG) {
     script::Keep $SO_PKG;
     if ($pkg =~ m/StarMagField/) {
@@ -1134,7 +1143,7 @@ if ( $#src > -1 ) {
       printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
       $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
     }
-    if ($pkg =~ m/^geometry/) {
+    if ($pkg =~ m/^geometry/ ){
       $SO_PKG_PLAIN = $pkg . "NoField";
       printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
       $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
