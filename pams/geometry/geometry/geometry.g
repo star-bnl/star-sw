@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.231 2011/07/20 20:23:47 jwebb Exp $
+* $Id: geometry.g,v 1.232 2011/08/19 16:44:14 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.232  2011/08/19 16:44:14  jwebb
+* Definition of Y2012 geometry tag (1st cut).
+*
 * Revision 1.231  2011/07/20 20:23:47  jwebb
 * Upgr23 tag defined with FSC geometry and FMS in open position.
 *
@@ -1794,8 +1797,8 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
 ]
 c ===============================================================================
 
-
-REPLACE [exe upgr2012;] with ["y2012 FGT upgrade studies";
+REPLACE [exe upgr2012;] with [exe y2012;]
+REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
     exe BTOF67;      "time of flight";
     exe CALB02;      "updated bemc model";
@@ -2532,9 +2535,13 @@ If LL>0
                  Geom = 'Y2011   ';
                  exe y2011; }
 
-  Case upgr2012 { upgr2012 : FGT upgrade studies for 2012;
-                 Geom = 'upgr2012';
-                 exe upgr2012; }
+  Case upgr2012 { y2012 : Y2012 geometry first cut;
+                 Geom = 'y2012   ';
+                 exe y2012; }
+
+  Case y2012 { y2012 : Y2012 geometry first cut;
+                 Geom = 'y2012   ';
+                 exe y2012; }
 
 
 ****************************************************************************************
