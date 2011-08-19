@@ -380,10 +380,6 @@ Bfc_st BFC[] = { // standard chains
   {"useBTOF4Vtx"    ,""  ,"","",""                 ,"","Use BTOF track matching for vertex ranking",kFALSE},
   {"svt1hit",""  ,"","",""                                     ,"","Use 1 SVT hit only combination",kFALSE},
   {"CtbMatchVtx"    ,""  ,"","VFMinuit",""              ,"","... CTB Matching ON in Vertex Finding",kFALSE},
-  {"VFPPV"          ,""  ,"","",""                      
-   ,            "St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
-  {"VFPPVnoCTB"     ,""  ,"","",""               
-   ,     "St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker","... Pile-up proof vertex finder, noCTB",kFALSE},
   {"VFMinuit"       ,""  ,"","genvtx",""                ,"","... Generic VF will use Minuit method",kFALSE},
   {"VFMinuit2"      ,""  ,"","genvtx","",  "","... Generic VF will use Minuit method w/rank mode 2",kFALSE},
   {"VFMinuit3"      ,""  ,"","genvtx","",  "","... Generic VF will use Minuit method w/rank mode 3",kFALSE},
@@ -698,11 +694,17 @@ Bfc_st BFC[] = { // standard chains
   
   
   // Some global Sti stuff including vertexing
-  {"StiPulls" ,"","","",                                         "","", "Request to make Sti Pulls",kFALSE},
-  {"Sti"      ,"Sti","","svtDb,ssdDb,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
-   ,                                    "StEventUtilities,Sti,StiUtilities,StiMaker" ,"Sti tracker",kFALSE},
-  {"StiCA"    ,"StiCA","","svtDb,ssdDb,-Sti,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
-   ,                          "StEventUtilities,libEG,StiCA,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
+  {"StiPulls" ,"","",""                                         ,"","", "Request to make Sti Pulls",kFALSE},
+  {"StiLib"   ,"","",""                                                        ,"","Sti","Load Sti",kFALSE},
+  {"StiCALib" ,"","",""                                                   ,"","StiCA","Load Sti+CA",kFALSE},
+  {"StiTpc"   ,"","","TpcDb,ITTF,tpc_T,dbutil,detDb,StarMagField,magF"   ,"","StiTpc","Load StiTpc",kFALSE},
+  {"StiSvt"   ,"",""," "                  ,"","StSvtClassLibrary,StSvtDbMaker,StiSvt","Load StiSvt",kFALSE},
+  {"StiSsd"   ,"","",""                           ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSvt",kFALSE},
+  {"StiLibs"  ,"","","StiTpc,StiSvt,StiSsd"                         ,"","","Load Sti Detector libs",kFALSE},
+  {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
+   ,                                         "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
+  {"StiCA"    ,"StiCA","","-Sti,-StiLib,StiCALib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
+   ,                                "StEventUtilities,libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
   {"Stv"     ,"Stv","","-TpcIT,-SvtIT,-SsdIT,gen_T,sim_T","StvMaker"
    ,"libHist,libHistPainter,libVMC,StarVMCApplication,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker" 
    ,                                                                                          "Stv",kFALSE},
@@ -710,10 +712,10 @@ Bfc_st BFC[] = { // standard chains
   {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
    ,                                      "StEventUtilities,StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
   {"StiVMCLibs","","","detDb,StarMagField","",                      "","ITTF:load StiVMC libraries",kFALSE},
-  {"laserIT" ,"","","","",                               "TpcIT","use Sti for laser reconstruction",kFALSE},
-  {"TpcIT", "","","TpcDb,ITTF","","tpc_T,dbutil,detDb,StarMagField,magF,StiTpc","Sti tracking: TPC",kFALSE},
-  {"SvtIT"     ,""  ,"","ITTF","","StSvtClassLibrary,StSvtDbMaker,StiSvt","Sti tracking: SVT",kFALSE},
-  {"SsdIT"     ,""  ,"","ITTF",""        ,"StSsdUtil,StSsdDbMaker,StiSsd","Sti tracking: SSD",kFALSE},
+  {"laserIT"  ,"","","","",                              "TpcIT","use Sti for laser reconstruction",kFALSE},
+  {"TpcIT"    ,"","","StiTpc,ITTF"                                       ,"","","Sti tracking: TPC",kFALSE},
+  {"SvtIT"    ,"","","StiSvt,ITTF"                                       ,"","","Sti tracking: SVT",kFALSE},
+  {"SsdIT"    ,"","","StiSsd,ITTF"                                       ,"","","Sti tracking: SSD",kFALSE},
   {"HpdIT"  ,""  ,"","ITTF",""                               ,"Sti,StiRnD","Sti tracking: Hpd geom",kFALSE},
   {"PixelIT",""  ,"","ITTF",""                             ,"Sti,StiRnD","Sti tracking: Pixel geom",kFALSE},
   {"IstIT"  ,""  ,"","ITTF",""                               ,"Sti,StiRnD","Sti tracking: Ist geom",kFALSE},
@@ -722,6 +724,10 @@ Bfc_st BFC[] = { // standard chains
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
   {"genvtx"      ,""  ,"","ctf_T,EEmcUtil","StGenericVertexMaker",
    "St_ctf,St_ctf_Maker,Minuit,StGenericVertexMakerNoSti", "Generic Vertex Finder",kFALSE},
+  {"VFPPV"          ,""  ,"","ctf_T",""                      
+   ,            "St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
+  {"VFPPVnoCTB"     ,""  ,"","ctf_T",""               
+   ,     "St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker","... Pile-up proof vertex finder, noCTB",kFALSE},
   {"StiRnD"   ,"","","",                                  "","StiRnD", "Load StiRnD shared library",kFALSE},
   {"BeamBack" ,"","","StEvent","StBeamBackMaker","StBeamBackMaker",
    "Beam background tracker in the TPC",kFALSE},
