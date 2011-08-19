@@ -313,11 +313,12 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 		}
 
 		if(do_log) {
-		    if(rdo->rdo == 6) {
-			 LOG(NOTE,"\tRDO %d: evt %d: trg %d: RHIC %u, CSR 0x%08X, data 0x%08X [t %d], bytes %u, delta %d",rdo->rdo,hdr->ev_cou,i,
+		    if(rdo->rdo == 1) {
+			 LOG(TERR,"\tRDO %d: evt %d: trg %d: RHIC %u, CSR 0x%08X, data 0x%08X [t %d], bytes %u, delta %d",rdo->rdo,hdr->ev_cou,i,
 		    		rdo->trg[i].rhic_counter,
 		    		rdo->trg[i].csr,
-		    		rdo->trg[i].data,rdo->trg[i].data&0xFFF,
+		    		rdo->trg[i].data,
+				rdo->trg[i].data&0xFFF,
 		    		words*4,
 		    		rh_delta) ;
 		    }
