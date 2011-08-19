@@ -25,7 +25,7 @@ void cacheGeometry( const Char_t *tag, const Char_t *addons )
   if ( file->IsZombie() )
     {
       delete file;
-      gROOT -> ProcessLine(".L StarVMC/Geometry/macros/loadStarGeometry.C");
+      gROOT -> ProcessLine(".L loadStarGeometry.C");
 
       // Load development geometry
       loadDevStarGeometry(tag);

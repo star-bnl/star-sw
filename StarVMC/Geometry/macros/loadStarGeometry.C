@@ -4,11 +4,14 @@ Geometry *build = 0;
 void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
 {
   TString tag = mytag;
-  gSystem->AddIncludePath(" -IStRoot -Igeom -IStarVMC ");
+  gSystem->AddIncludePath(" -IStRoot -Igeom -IStarVMC -IStarVMC/Geometry/macros ");
 
   gROOT   -> LoadMacro("Load.C");
   //$$$  Load("libSt_g2t, libStarMagField.so, St_geant_Maker");
-  Load(".$STAR_HOST_SYS/lib/StarAgmlLib.so");
+  //  Load(".$STAR_HOST_SYS/lib/StarAgmlLib.so");
+  Load("StarAgmlLib.so");
+  Load("libGeometry.so");
+  Load("libStarGeometry.so");
 
   gErrorIgnoreLevel=9999;
 
@@ -16,8 +19,9 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
   AgBlock::SetStacker( new StarTGeoStacker() );
 
   // Load the master geometry libraries
-  gROOT->ProcessLine(".L .$STAR_HOST_SYS/lib/libGeometry.so");
-  gROOT->ProcessLine(".L .$STAR_HOST_SYS/lib/libStarGeometry.so");
+  //  gROOT->ProcessLine(".L libGeometry.so");
+  //  gROOT->ProcessLine(".L libStarGeometry.so");
+
 
   // Instantiate the geometry builder
   build = new Geometry(); 
@@ -57,7 +61,9 @@ void loadDevStarGeometry( const Char_t *mytag="upgr2012" )
 
   gROOT   -> LoadMacro("Load.C");
   //$$$  Load("libSt_g2t, libStarMagField.so, St_geant_Maker");
-  Load(".$STAR_HOST_SYS/lib/StarAgmlLib.so");
+  Load("StarAgmlLib.so");
+  Load("libGeometry.so");
+  Load("libStarGeometry.so");
 
   gErrorIgnoreLevel=9999;
 
@@ -65,8 +71,7 @@ void loadDevStarGeometry( const Char_t *mytag="upgr2012" )
   AgBlock::SetStacker( new StarTGeoStacker() );
 
   // Load the master geometry libraries
-  gROOT->ProcessLine(".L .$STAR_HOST_SYS/lib/libGeometry.so");
-  gROOT->ProcessLine(".L .$STAR_HOST_SYS/lib/libStarGeometry.so");
+
 
   // Instantiate the geometry builder
   build = new Geometry(); 
