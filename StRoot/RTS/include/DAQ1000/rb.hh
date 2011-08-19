@@ -23,7 +23,7 @@ public:
 	// copied over from rorc.h
 	typedef rorcReadyFifo_t rbFifo_t ;
 
-	rb(int board, int ch, int fifo_cou, u_int buff_bytes) { }  ;
+	rb(int board, int ch, int fifo_cou, u_int buff_bytes) { emulation = 0 ;}  ;
 	virtual ~rb() { } ;
 
 
@@ -54,14 +54,19 @@ public:
 	virtual int link_check() { return 0 ; } ;
 
 	virtual int get_free_fifos() { return 0 ; } ;
+
+	virtual void emu_place_event(int ix, char *event, int bytes) { return ; } ;
 	
 	u_int alloced_bytes ;
 	int configd ;
+	int emulation ;
 
 protected:
 
 	int board ;
 	int ch ;	// also port!
+
+	int emu_fifo_length[128] ;
 
 	char *buff ;	// buffer addresses
 	int fifo_cou ;		// set at code startup
