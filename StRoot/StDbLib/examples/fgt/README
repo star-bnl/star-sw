@@ -1,0 +1,13 @@
+
+ Brief "How-To" compile and use standalone version of the StDbLib:
+
+ 1. cvs co StRoot/StDbLib;
+ 2. cd StRoot/StDbLib; make;
+ 3. cd StRoot/StDbLib/examples/fgt; make;
+ 4. $> ./read_table_fgt 
+
+ NOTE: by default, DB API will connect to offline db pool. If you want to use it in online domain, please 
+ place dbServers.xml file to your home directory, so it will override default settings.
+
+ If you have more questions, please contact STAR DB Administrator ( "Dmitry Arkhipkin" <arkhipkin@bnl.gov> )
+
