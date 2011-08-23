@@ -61,7 +61,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   nNodes = ReadInteger(token, 0, readerror);
   token = strtok(NULL, " ");
   nElements = ReadInteger(token, 0, readerror);
-  printf("Read %i nodes and %i elements from file %s.\n",
+  printf("    Read %i nodes and %i elements from file %s.\n",
          nNodes, nElements, header.c_str());
   if (readerror) {
     printf("ComponentElmer::Initialise:\n");

@@ -82,6 +82,8 @@ class ComponentFieldMap : public ComponentBase {
     void DisableCheckMapIndices() {checkMultipleElement = false;}
     void EnableDeleteBackgroundElements()  {deleteBackground = true;}
     void DisableDeleteBackgroundElements() {deleteBackground = false;}
+
+    friend class ViewFEMesh;
     
   protected:
   

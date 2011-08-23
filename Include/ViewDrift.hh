@@ -59,6 +59,8 @@ class ViewDrift {
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
 
+    friend class ViewFEMesh;
+
   private:
 
     std::string className;

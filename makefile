@@ -178,6 +178,11 @@ $(OBJDIR)/GeometryRoot.o: \
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@    
 
+$(OBJDIR)/ViewFEMesh.o: \
+	$(SRCDIR)/ViewFEMesh.cc $(INCDIR)/ViewFEMesh.hh \
+	$(INCDIR)/ComponentFieldMap.hh
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/ViewField.o: \
 	$(SRCDIR)/ViewField.cc $(INCDIR)/ViewField.hh \
 	$(INCDIR)/Sensor.hh
