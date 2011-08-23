@@ -163,6 +163,9 @@ class StFgtGeom
 		].upperSpan;
 	}
 
+	//  Please note that the following functions do NOT access the STAR
+	//  database to find mapping information. They assume the most
+	//  straight-forward mapping scheme and use that.
 	static Short_t getNaiveGeoIdFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
@@ -203,6 +206,34 @@ class StFgtGeom
 		getNaiveGeoIdFromElecCoord( rdo, arm, apv, channel ),
 		disc, quadrant, layer, ordinate, lowerSpan, upperSpan
 	    );
+	}
+
+	//  This is similar to the above functions, but it takes electronic
+	//  coordinates and only returns the final ordinate. This is here
+	//  primarily so that it can be used as a drop in replacement for
+	//  older code that has similar functionality.
+	static Double_t getNaiveMapping(
+	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+	)
+	{
+	    if ( apv >= 12 )
+		return
+		    mStrips[ mNaiveMapping[ (apv-12)*128+channel ] ].ordinate;
+	    else
+		return
+		    mStrips[ mNaiveMapping[ apv*128+channel ] ].ordinate;
+	}
+
+	static bool isNaiveR(
+	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+	)
+	{
+	    if ( apv >= 12 )
+		return
+		    mNaiveMapping[ (apv-12)*128+channel ] >= 720;
+	    else
+		return
+		    mNaiveMapping[ apv*128+channel ] >= 720;
 	}
 
 	static const Int_t kNumStrips = 1440;
