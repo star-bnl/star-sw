@@ -4,12 +4,17 @@
 // \author Anselm Vossen (avossen@indiana.edu)
 //
 
+#include "DAQ_READER/daq_det.h"
+#include "DAQ_FGT/
+
 class StFgtRawMaker : public StRTSBaseMaker
 {
 
  protected:
   StEvent*  mEvent;
   StFgtDB*  mDb;
+  fgt_adc_t *mFgtRawData;
+
 
  public: 
   StFgtRawMaker(const char* name="FgtRaw");
