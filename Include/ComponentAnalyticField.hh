@@ -44,24 +44,24 @@ class ComponentAnalyticField : public ComponentBase {
 
     // Add a wire at (x, y) .
     void AddWire(const double x, const double y, const double diameter, 
-                 const double voltage, const char label,
+                 const double voltage, const std::string label,
                  const double length = 100., 
                  const double tension = 50., const double rho = 19.3,
 		 const int ntrap = 5);    
     // Add a tube.
     void AddTube(const double radius, const double voltage, 
-                 const int nEdges, const char label);
+                 const int nEdges, const std::string label);
     // Add a plane at constant x
-    void AddPlaneX(const double x, const double voltage, const char label);    
+    void AddPlaneX(const double x, const double voltage, const std::string label);    
     // Add a plane at constant y
-    void AddPlaneY(const double y, const double voltage, const char label);
+    void AddPlaneY(const double y, const double voltage, const std::string label);
     
     void AddStripOnPlaneX(const char direction, const double x,
                           const double smin, const double smax, 
-                          const char label, const double gap = -1.);
+                          const std::string label, const double gap = -1.);
     void AddStripOnPlaneY(const char direction, const double y,
                           const double smin, const double smax, 
-                          const char label, const double gap = -1.);
+                          const std::string label, const double gap = -1.);
 
     // Set the periodic length [cm] in x/y direction
     void SetPeriodicityX(const double s);
@@ -93,7 +93,7 @@ class ComponentAnalyticField : public ComponentBase {
     // D2   round tubes with axial periodicity
     // D3   polygonal tubes without axial periodicity     
 
-    void AddReadout(const char label);
+    void AddReadout(const std::string label);
     
     void EnableChargeCheck()  {chargeCheck = true;}
     void DisableChargeCheck() {chargeCheck = false;}
@@ -101,15 +101,15 @@ class ComponentAnalyticField : public ComponentBase {
     int GetNumberOfWires() {return nWires;}
     bool GetWire(const int i, 
                  double& x, double& y, double& diameter, 
-                 double& voltage, char& label, double& length,
+                 double& voltage, std::string& label, double& length,
                  double& charge, int& ntrap);
     
     int GetNumberOfPlanesX();
     int GetNumberOfPlanesY();
-    bool GetPlaneX(const int i, double& x, double& voltage, char& label);
-    bool GetPlaneY(const int i, double& y, double& voltage, char& label);
+    bool GetPlaneX(const int i, double& x, double& voltage, std::string& label);
+    bool GetPlaneY(const int i, double& y, double& voltage, std::string& label);
 
-    bool GetTube(double& r, double& voltage, int& nEdges, char& label); 
+    bool GetTube(double& r, double& voltage, int& nEdges, std::string& label); 
   
 
   private:
@@ -145,7 +145,7 @@ class ComponentAnalyticField : public ComponentBase {
     int mfexp;
     
     int nReadout;
-    std::vector<char> readout;
+    std::vector<std::string> readout;
     
     // Wires
     int nWires;
@@ -160,7 +160,7 @@ class ComponentAnalyticField : public ComponentBase {
       // Charge
       double e;
       // Label
-      char type;
+      std::string type;
       // Length
       double u;
       // Readout group
@@ -215,7 +215,7 @@ class ComponentAnalyticField : public ComponentBase {
     
     struct strip {
       // Label
-      char type;
+      std::string type;
       // Readout group
       int ind;
       // Coordinates
@@ -225,7 +225,7 @@ class ComponentAnalyticField : public ComponentBase {
     
     struct plane {
       // Labels
-      char type;
+      std::string type;
       // Readout group
       int ind;
       // Background weighting fields

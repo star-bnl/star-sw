@@ -127,9 +127,10 @@ ComponentAnalyticField::WeightingField(
   
   if (label.empty()) return;
   int index = -1;
-  const char lbl = label[0];
+  // const char lbl = label[0];
   for (int i = nReadout; i--;) {
-    if (readout[i] == lbl) {
+    // if (readout[i] == lbl) {
+    if (readout[i] == label) {
       index = i;
       break;
     }
@@ -280,7 +281,7 @@ ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin,
 void 
 ComponentAnalyticField::AddWire(const double x, const double y, 
                       const double diameter, 
-                      const double voltage, const char label,
+                      const double voltage, const std::string label,
                       const double length, const double tension, double rho, const int ntrap) {
                                 
   // Check if the provided parameters make sense.
@@ -337,7 +338,7 @@ ComponentAnalyticField::AddWire(const double x, const double y,
 
 void 
 ComponentAnalyticField::AddTube(const double radius, const double voltage, 
-                                const int nEdges, const char label) {
+                                const int nEdges, const std::string label) {
                                 
   // Check if the provided parameters make sense.
   if (radius <= 0.0) {
@@ -378,7 +379,7 @@ ComponentAnalyticField::AddTube(const double radius, const double voltage,
 }
 
 void 
-ComponentAnalyticField::AddPlaneX(const double x, const double v, const char lab) {
+ComponentAnalyticField::AddPlaneX(const double x, const double v, const std::string lab) {
 
   if (ynplan[0] && ynplan[1]) {
     std::cerr << className << "::AddPlaneX:\n";
@@ -407,7 +408,7 @@ ComponentAnalyticField::AddPlaneX(const double x, const double v, const char lab
 }
 
 void 
-ComponentAnalyticField::AddPlaneY(const double y, const double v, const char lab) {
+ComponentAnalyticField::AddPlaneY(const double y, const double v, const std::string lab) {
 
   if (ynplan[2] && ynplan[3]) {
     std::cerr << className << "::AddPlaneY:\n";
@@ -438,7 +439,7 @@ ComponentAnalyticField::AddPlaneY(const double y, const double v, const char lab
 void 
 ComponentAnalyticField::AddStripOnPlaneX(const char direction, const double x,
                                          const double smin, const double smax, 
-                                         const char label, const double gap) {
+                                         const std::string label, const double gap) {
   
   if (!ynplan[0] && !ynplan[1]) {
     std:: cerr << className << "::AddStripOnPlaneX:\n";
@@ -492,7 +493,7 @@ ComponentAnalyticField::AddStripOnPlaneX(const char direction, const double x,
 void 
 ComponentAnalyticField::AddStripOnPlaneY(const char direction, const double y,
                                          const double smin, const double smax, 
-                                         const char label, const double gap) {
+                                         const std::string label, const double gap) {
 
   if (!ynplan[2] && !ynplan[3]) {
     std:: cerr << className << "::AddStripOnPlaneY:\n";
@@ -730,7 +731,7 @@ bool
 ComponentAnalyticField::GetWire(const int i, 
                                 double& x, double& y, 
                                 double& diameter, double& voltage,
-                                char& label, double& length,
+                                std::string& label, double& length,
                                 double& charge, int& ntrap ) {
 
   if (i < 0 || i >= nWires) {
@@ -752,7 +753,7 @@ ComponentAnalyticField::GetWire(const int i,
 bool
 ComponentAnalyticField::GetPlaneX(const int i, 
                                   double& x, double& voltage, 
-                                  char& label) {
+                                  std::string& label) {
 
   if (i < 0 || i >= 2 || (i == 1 && !ynplan[1])) {
     std::cerr << className << "::GetPlaneX:\n";
@@ -770,7 +771,7 @@ ComponentAnalyticField::GetPlaneX(const int i,
 bool
 ComponentAnalyticField::GetPlaneY(const int i,
                                   double& y, double& voltage,
-                                  char& label) {
+                                  std::string& label) {
 
   if (i < 0 || i >= 2 || (i == 1 && !ynplan[3])) {
     std::cerr << className << "::GetPlaneY:\n";
@@ -787,7 +788,7 @@ ComponentAnalyticField::GetPlaneY(const int i,
 
 bool
 ComponentAnalyticField::GetTube(double& r, double& voltage, int& nEdges,
-                                char& label) {
+                                std::string& label) {
 
   if (!tube) return false;
   r = cotube;
@@ -1971,7 +1972,7 @@ ComponentAnalyticField::PrepareStrips() {
 }
 
 void
-ComponentAnalyticField::AddReadout(const char label) {
+ComponentAnalyticField::AddReadout(const std::string label) {
 
   // Check if this readout group already exists.
   for (int i = 0; i < nReadout; ++i) {

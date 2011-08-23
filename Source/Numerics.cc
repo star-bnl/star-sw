@@ -791,8 +791,9 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
       std::vector<double>& yAxis, 
       std::vector<double>& zAxis, 
       int nx, int ny, int nz, 
-      double  xx, double yy, double zz, double f, int iOrder) {
+      double xx, double yy, double zz, double f, int iOrder) {
 
+  std::cout << nx << ", " << ny << ", " << nz << "\n";
  //-----------------------------------------------------------------------
  //   BOXIN3 - interpolation of order 1 and 2 in an irregular rectangular
  //            3-dimensional grid.
@@ -803,7 +804,6 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
   int iY0 = 0, iY1 = 0;
   int iZ0 = 0, iZ1 = 0;
   double fX[4], fY[4], fZ[4];
-
 
   // Ensure we are in the grid.
   const double x = std::min(std::max(xx, std::min(xAxis[0], xAxis[nx - 1])), std::max(xAxis[0], xAxis[nx - 1]));
@@ -1212,12 +1212,13 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
   }
 
   f = 0.;
-  for (int i = iX0; i < iX1; i++) {
-    for (int j = iY0; j < iY1; j++) {
-      for (int k = iZ0; k < iZ1; k++) {
-        f += value[i][j][k] * fX[i - iX0 + 1] * 
-                              fY[j - iY0 + 1] * 
-                              fZ[k - iZ0 + 1];
+  for (int i = iX0; i <= iX1; i++) {
+    for (int j = iY0; j <= iY1; j++) {
+      for (int k = iZ0; k <= iZ1; k++) {
+        std::cout << "i = " << i << ", j = " << j << ", k = " << k << "\n";
+        std::cout << "value: " << value[i][j][k] << "\n";
+        std::cout << "fX = " << fX[i - iX0] << ", fY = " << fY[j - iY0] << ", fZ = " << fZ[k - iZ0] << "\n";
+        f += value[i][j][k] * fX[i - iX0] * fY[j - iY0] * fZ[k - iZ0];
       }
     }
   }

@@ -364,7 +364,16 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     abortReason = StatusLeftDriftMedium;
   }
 
-  double e = Max(sqrt(ex * ex + ey * ey + ez * ez), Small);
+  double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (e < Small) {
+    std::cerr << className << "::DriftLine:\n";
+    std::cerr << "    Electric field at initial position is too small:\n";
+    std::cerr << "      ex = " << ex << " V/cm\n";
+    std::cerr << "      ey = " << ey << " V/cm\n";
+    std::cerr << "      ez = " << ez << " V/cm\n";
+    ok = false;
+    abortReason = StatusCalculationAbandoned;
+  } 
 
   if (useBfield) {
     sensor->MagneticField(x, y, z, bx, by, bz, status);
@@ -399,10 +408,23 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       std::cerr << className << "::DriftLine:\n";
       std::cerr << "    Unknown drift line type (" << q << ").\n";
       std::cerr << "    Program bug!\n";
+      ok = false;
+      abortReason = StatusCalculationAbandoned;
       return false;
     }    
-    v = Max(sqrt(vx * vx + vy * vy + vz * vz), Small);
-    
+    v = sqrt(vx * vx + vy * vy + vz * vz);
+    if (v < Small) {
+      std::cerr << className << "::DriftLine:\n"; 
+      std::cerr << "    Drift velocity at (" 
+                << x << ", " << y << ", " << z << ") is too small:\n";
+      std::cerr << "      vx = " << vx << " cm/ns\n";
+      std::cerr << "      vy = " << vy << " cm/ns\n";
+      std::cerr << "      vz = " << vz << " cm/ns\n";
+      ok = false;
+      abortReason = StatusCalculationAbandoned;
+      break;
+    }
+
     // Determine the time step.
     switch (stepModel) {
       case 0:
@@ -549,7 +571,18 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       break;
     }
 
-    e = Max(sqrt(ex * ex + ey * ey + ez * ez), Small);
+    e = sqrt(ex * ex + ey * ey + ez * ez);
+    if (e < Small) {
+      std::cerr << className << "::DriftLine:\n";
+      std::cerr << "    Electric field at (" 
+                << x << ", " << y << ", " << z << ") is too small:\n";
+      std::cerr << "      ex = " << ex << " V/cm\n";
+      std::cerr << "      ey = " << ey << " V/cm\n";
+      std::cerr << "      ez = " << ez << " V/cm\n";
+      ok = false;
+      abortReason = StatusCalculationAbandoned;
+      break;
+    }
     // Add the new point to drift line.
     point.x = x; point.y = y; point.z = z; point.t += delta;
     drift.push_back(point);

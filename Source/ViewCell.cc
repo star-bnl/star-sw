@@ -602,30 +602,30 @@ ViewCell::Plot(const bool use3d) {
   // Get the number of wires.
   int nWires = component->GetNumberOfWires();
   int nWireTypes = 0;
-  std::vector<char> wireTypes;
+  std::vector<std::string> wireTypes;
   wireTypes.clear();
 
   // Loop over the wires.
   for (int i = nWires; i--;) {
     double xw = 0., yw = 0., dw = 0., vw = 0., lw = 0., qw = 0.;
-    char label;
+    std::string lbl;
     int type = -1;
     int nTrap;
-    component->GetWire(i, xw, yw, dw, vw, label, lw, qw, nTrap);
+    component->GetWire(i, xw, yw, dw, vw, lbl, lw, qw, nTrap);
     // Check if other wires with the same label already exist.
     if (nWireTypes == 0) {
-      wireTypes.push_back(label);
+      wireTypes.push_back(lbl);
       type = 0;
       ++nWireTypes;
     } else {
       for (int j = nWireTypes; j--;) {
-        if (label == wireTypes[j]) {
+        if (lbl == wireTypes[j]) {
           type = j;
           break;
         }
       }
       if (type < 0) {
-        wireTypes.push_back(label);
+        wireTypes.push_back(lbl);
         type = nWireTypes;
         ++nWireTypes;
       }
@@ -655,8 +655,8 @@ ViewCell::Plot(const bool use3d) {
   int nPlanesX = component->GetNumberOfPlanesX();
   for (int i = nPlanesX; i--;) {
     double xp = 0., vp = 0.;
-    char label;
-    component->GetPlaneX(i, xp, vp, label);
+    std::string lbl;
+    component->GetPlaneX(i, xp, vp, lbl);
     for (int nx = nMinX; nx <= nMaxX; ++nx) {
       double x = xp + nx * sx;
       if (x < x0 || x > x1) continue;
@@ -674,8 +674,8 @@ ViewCell::Plot(const bool use3d) {
   int nPlanesY = component->GetNumberOfPlanesY();
   for (int i = nPlanesY; i--;) {
     double yp = 0., vp = 0.;
-    char label;
-    component->GetPlaneY(i, yp, vp, label);
+    std::string lbl;
+    component->GetPlaneY(i, yp, vp, lbl);
     for (int ny = nMinY; ny <= nMaxY; ++ny) {
       double y = yp + ny * sy;
       if (y < y0 || y > y1) continue;
@@ -691,8 +691,8 @@ ViewCell::Plot(const bool use3d) {
 
   double rt = 0., vt = 0.;
   int nt = 0;
-  char label;
-  if (component->GetTube(rt, vt, nt, label)) {
+  std::string lbl;
+  if (component->GetTube(rt, vt, nt, lbl)) {
     if (use3d) {
       ViewCellTube newTube(0., 0., 0., rt, nt);
       tubes3d.push_back(newTube);
