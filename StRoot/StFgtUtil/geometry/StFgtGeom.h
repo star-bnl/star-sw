@@ -170,10 +170,17 @@ class StFgtGeom
 	    Short_t disc = int(arm/2) + (rdo-1)*3;
 	    Short_t quadrant = (arm & 1)*2 + int( apv/12 );
 
-	    return
-	    (
-		disc*kNumFgtQuadrants + quadrant
-	    ) * kNumFgtLayers + mNaiveMapping[ (apv-12)*128+channel ];
+	    if ( apv >= 12 )
+		return
+		(
+		    disc*kNumFgtQuadrants + quadrant
+		) * kNumFgtLayers + mNaiveMapping[ (apv-12)*128+channel ];
+	    else
+		return
+		(
+		    disc*kNumFgtQuadrants + quadrant
+		) * kNumFgtLayers + mNaiveMapping[ apv*128+channel ];
+
 	}
 
 	static std::string getNaiveGeoNameFromElecCoord(
