@@ -10,7 +10,8 @@
 
 //ClassImp(StFgtGeom)
 
-//  Initialize our physical coordinate database here.
+//  Initialize our physical coordinate database here. These are:
+//  isPhi?, ordinate, lowerSpan, upperSpan
 StFgtGeomData StFgtGeom::mStrips[] =
 {
     { false, 38.1571, 0.8905733, 1.53935776 },
