@@ -359,6 +359,7 @@ Bfc_st BFC[] = { // standard chains
   {"OGridLeak"   ,""  ,"","",""                                          ,"","Grid Leak correction",kFALSE},
   {"OGridLeak3D" ,""  ,"","",""                                       ,"","3D Grid Leak correction",kFALSE},
   {"OGGVoltErr"  ,""  ,"","",""                                   ,"","GG voltage error correction",kFALSE},
+  {"OSectorAlign",""  ,"","",""                        ,"","Sector alignment distortion correction",kFALSE},
   {"AlignSectors",""  ,"","",""                            ,"","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"DbRichSca"   ,""  ,"","detdb","","",                    "Force reading of Rich scalers from DB",kFALSE},
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
