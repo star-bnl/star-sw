@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.59 2011/01/18 14:39:43 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.60 2011/08/23 22:14:24 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.60  2011/08/23 22:14:24  genevb
+ * Introduce sector alignment distortion corrections
+ *
  * Revision 1.59  2011/01/18 14:39:43  fisyak
  * Clean up TpcDb interfaces and Tpc coordinate transformation
  *
@@ -267,6 +270,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     if( IAttr("OGridLeak")  ) mask |= ( kGridLeak     << 1);
     if( IAttr("OGridLeak3D")) mask |= ( k3DGridLeak   << 1);
     if( IAttr("OGGVoltErr") ) mask |= ( kGGVoltError  << 1);
+    if( IAttr("OSectorAlign"))mask |= ( kSectorAlign  << 1);
     LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;
