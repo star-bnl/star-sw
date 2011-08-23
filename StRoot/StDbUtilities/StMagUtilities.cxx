@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.84 2010/10/28 19:10:59 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.85 2011/08/23 22:15:10 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.85  2011/08/23 22:15:10  genevb
+ * Introduce sector alignment distortion corrections and big speed improvements to Poisson relaxations
+ *
  * Revision 1.84  2010/10/28 19:10:59  genevb
  * Provide for  usage of tpcHVPlanes and GG Voltage Error
  *
@@ -307,9 +310,10 @@ enum   DistortSelect                                                  <br>
   kSpaceChargeR2     = 0x800,    // Bit 12                            <br>
   kShortedRing       = 0x1000,   // Bit 13                            <br>
   kFast2DBMap        = 0x2000,   // Bit 14                            <br>
-  kGridLeak          = 0x4000    // Bit 15                            <br>
-  k3DGridLeak        = 0x8000    // Bit 16                            <br>
-  kGGVoltError       = 0x10000   // Bit 17                            <br>
+  kGridLeak          = 0x4000,   // Bit 15                            <br>
+  k3DGridLeak        = 0x8000,   // Bit 16                            <br>
+  kGGVoltError       = 0x10000,  // Bit 17                            <br>
+  kSectorAlign       = 0x20000   // Bit 18                            <br>
 } ;                                                                   <br>
 
 Note that the option flag used in the chain is 2x larger 
@@ -348,7 +352,8 @@ To do:  <br>
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
 static Float_t  gRescale = 1.0 ;        // Multiplicative factor (allows re-scaling wrt which map read)
-StMagUtilities *StMagUtilities::fgInstance = 0;
+StMagUtilities *StMagUtilities::fgInstance = 0 ;
+static const Float_t  PiOver12 = TMath::Pi()/12. ;  // Commonly used constant
 
 //________________________________________
 
@@ -726,7 +731,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
 
   mDistortionMode = mode;
   if ( !( mode & ( kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 
-                         | kShortedRing | kFast2DBMap | kGridLeak | k3DGridLeak | kGGVoltError ))) 
+                         | kShortedRing | kFast2DBMap | kGridLeak | k3DGridLeak | kGGVoltError | kSectorAlign ))) 
     {
        mDistortionMode |= kFast2DBMap ;
        mDistortionMode |= kPadrow13 ;
@@ -1019,6 +1024,13 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
 
   if (mDistortionMode & kGGVoltError) {
       UndoGGVoltErrorDistortion ( Xprime1, Xprime2, Sector ) ;
+      for (unsigned int i=0; i<3; ++i) {
+          Xprime1[i] = Xprime2[i];
+      }
+  }
+
+  if (mDistortionMode & kSectorAlign) {
+      UndoSectorAlignDistortion ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
           Xprime1[i] = Xprime2[i];
       }
@@ -1393,7 +1405,7 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;               // Phi ranges from pi to -pi
-  phi0   =  ( (Int_t)((TMath::Abs(phi)+PI/12.)/(PI/6.) + 6.0 ) - 6.0 ) * PI/6. ;
+  phi0   =  ( (Int_t)((TMath::Abs(phi)+PiOver12)/(PI/6.) + 6.0 ) - 6.0 ) * PI/6. ;
   if ( phi < 0 ) phi0 *= -1. ;
   y      =  r * TMath::Cos( phi0 - phi ) ;
   z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
@@ -1799,7 +1811,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	    } // All cases normalized to have same total charge as the Uniform Charge case == 1.0 * Volume of West End of TPC
 	}
 
-      PoissonRelaxation( ArrayV, Charge, EroverEz, ROWS, COLUMNS, ITERATIONS ) ;
+      PoissonRelaxation( ArrayV, Charge, EroverEz, ITERATIONS ) ;
 
       //Interpolate results onto standard grid for Electric Fields
       Int_t ilow=0, jlow=0 ;
@@ -2126,7 +2138,7 @@ void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprim
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
-  z = LimitZ ( Sector ,x ) ;                        // Protect against discontinuity at CM
+  z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
   Interpolate2DEdistortion( ORDER, r, z, GGVoltErrorEr, Er_integral ) ;
   Ephi_integral = 0.0 ;  // Efield is symmetric in phi
@@ -2734,16 +2746,16 @@ void StMagUtilities::Search( const Int_t N, const Float_t Xarray[], const Float_
     NOTE: In order for this algorith to work, the number of rows and columns must be a power of 2 plus one.  
     So ROWS == 2**M + 1 and COLUMNS == 2**N + 1.  The number of ROWS and COLUMNS can be different.
  */
-void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, TMatrix &EroverEz,
-					const Int_t ROWS, const Int_t COLUMNS, const Int_t ITERATIONS )
+void StMagUtilities::PoissonRelaxation( TMatrix &ArrayVM, TMatrix &ChargeM, TMatrix &EroverEzM,
+					const Int_t ITERATIONS )
 {
 
+  const Int_t    ROWS        =  ArrayVM.GetNrows() ;
+  const Int_t    COLUMNS     =  ArrayVM.GetNcols() ;
   const Float_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
   const Float_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
   const Float_t  Ratio       =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
   //const Float_t  Four        =  2.0 + 2.0*Ratio ;
-
-  TMatrix  ArrayE(ROWS,COLUMNS) ;
 
   //Check that number of ROWS and COLUMNS is suitable for a binary expansion
 
@@ -2752,6 +2764,17 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, 
   if ( !IsPowerOfTwo(COLUMNS-1) )
     { cout << "StMagUtilities::PoissonRelaxation - Error in the number of COLUMNS.  Must be 2**N - 1" << endl ; exit(1) ; }
   
+  // Because performance of this relaxation is important, we access the arrays directly
+  Float_t *ArrayE,*ArrayV,*Charge,*SumCharge,*EroverEz ;
+
+  TMatrix  ArrayEM(ROWS,COLUMNS) ;
+  TMatrix  SumChargeM(ROWS,COLUMNS) ;
+  ArrayE    = ArrayEM.GetMatrixArray() ;
+  SumCharge = SumChargeM.GetMatrixArray() ;
+  ArrayV    = ArrayVM.GetMatrixArray() ;
+  Charge    = ChargeM.GetMatrixArray() ;
+  EroverEz  = EroverEzM.GetMatrixArray() ;
+
   //Solve Poisson's equation in cylindrical coordinates by relaxation technique
   //Allow for different size grid spacing in R and Z directions
   //Use a binary expansion of the matrix to speed up the solution of the problem
@@ -2762,6 +2785,14 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, 
 
   for ( Int_t count = 0 ; count < loops ; count++ ) {  // Do several loops as the matrix expands and the resolution increases
 
+    // array index offsets ending in '__' are units of rows
+    // e.g. one__ == 1 row, i__ == i rows
+    // array index offset with '__' in the middle are units of rows and columns
+    // e.g. i__j == i rows and j columns
+    Int_t one__  = i_one*COLUMNS;
+    Int_t half__ = one__ / 2;
+    Int_t half   = j_one / 2;
+        
     Float_t tempGRIDSIZER = GRIDSIZER * i_one ;
     Float_t tempRatio     = Ratio * i_one * i_one / ( j_one * j_one ) ;
     Float_t tempFourth    = 1.0 / (2.0 + 2.0*tempRatio) ;
@@ -2773,28 +2804,27 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, 
       coef2[i] = 1.0 - tempGRIDSIZER/(2*Radius);
     }
 
-    TMatrix SumCharge(ROWS,COLUMNS) ;
-
     for ( Int_t i = i_one ; i < ROWS-1 ; i += i_one ) {
+      Int_t i__ = i*COLUMNS;
       Float_t Radius = IFCRadius + i_one*GRIDSIZER ;
       for ( Int_t j = j_one ; j < COLUMNS-1 ; j += j_one ) {
-	if ( i_one == 1 && j_one == 1 ) SumCharge(i,j) = Charge(i,j) ;
-	else {           // Add up all enclosed charge within 1/2 unit in all directions
-	  Float_t weight = 0.0 ;
-	  Float_t sum    = 0.0 ;
-	  SumCharge(i,j) = 0.0 ;
-	  for ( Int_t ii = i-i_one/2 ; ii <= i+i_one/2 ; ii++ ) {
-	    for ( Int_t jj = j-j_one/2 ; jj <= j+j_one/2 ; jj++ ) {
-	      if ( ii == i-i_one/2 || ii == i+i_one/2 || jj == j-j_one/2 || jj == j+j_one/2 ) weight = 0.5 ;
-	      else
-		weight = 1.0 ;
-	      SumCharge(i,j) += Charge(ii,jj)*weight*Radius ;   // Note that this is cylindrical geometry
-	      sum += weight*Radius ;
-	    }
-	  }
-	  SumCharge(i,j) /= sum ;
-	}
-        SumCharge(i,j) *= tempGRIDSIZER*tempGRIDSIZER; // just saving a step later on
+        Int_t i__j = i__ + j;
+        if ( i_one == 1 && j_one == 1 ) SumCharge[i__j] = Charge[i__j] ;
+        else {           // Add up all enclosed charge within 1/2 unit in all directions
+          Float_t weight = 0.0 ;
+          Float_t sum    = 0.0 ;
+          SumCharge[i__j]= 0.0 ;
+          for ( Int_t ii = i-i_one/2 ; ii <= i+i_one/2 ; ii++ ) {
+            for ( Int_t jj = j-j_one/2 ; jj <= j+j_one/2 ; jj++ ) {
+              if ( ii == i-i_one/2 || ii == i+i_one/2 || jj == j-j_one/2 || jj == j+j_one/2 ) weight = 0.5 ;
+              else weight = 1.0 ;
+              SumCharge[i__j]  += Charge[ii*COLUMNS+jj]*weight*Radius ;   // Note that this is cylindrical geometry
+              sum += weight*Radius ;
+            }
+          }
+          SumCharge[i__j] /= sum ;
+        }
+        SumCharge[i__j] *= tempGRIDSIZER*tempGRIDSIZER; // just saving a step later on
        }
     }
 
@@ -2807,39 +2837,47 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, 
       OverRelaxcoef5 = OverRelaxM1 / OverRelaxtempFourth ; 
 
       for ( Int_t i = i_one ; i < ROWS-1 ; i += i_one ) {
-	for ( Int_t j = j_one ; j < COLUMNS-1 ; j += j_one ) {
+        Int_t i__ = i*COLUMNS;
+        for ( Int_t j = j_one ; j < COLUMNS-1 ; j += j_one ) {
+          Int_t i__j = i__ + j;
 
-	  ArrayV(i,j) = (   coef2[i]       *   ArrayV(i-i_one,j)
-			  + tempRatio      * ( ArrayV(i,j-j_one) + ArrayV(i,j+j_one) )
-			  - OverRelaxcoef5 *   ArrayV(i,j) 
-			  + coef1[i]       *   ArrayV(i+i_one,j) 
-			  + SumCharge(i,j) 
-			) * OverRelaxtempFourth;
+          ArrayV[i__j] = (  coef2[i]       *   ArrayV[i__j - one__]
+                          + tempRatio      * ( ArrayV[i__j - j_one] + ArrayV[i__j + j_one] )
+                          + coef1[i]       *   ArrayV[i__j + one__] 
+                          + SumCharge[i__j] 
+                        ) * OverRelaxtempFourth
+                        - OverRelaxM1 * ArrayV[i__j] ;
 
-	}
+        }
       }
 
       if ( k == ITERATIONS ) {       // After full solution is achieved, copy low resolution solution into higher res array
-	for ( Int_t i = i_one ; i < ROWS-1 ; i += i_one ) {
-	  for ( Int_t j = j_one ; j < COLUMNS-1 ; j += j_one ) {
+        for ( Int_t i = i_one ; i < ROWS-1 ; i += i_one ) {
+          Int_t i__ = i*COLUMNS;
+          for ( Int_t j = j_one ; j < COLUMNS-1 ; j += j_one ) {
+            Int_t i__j = i__ + j;
 
-	    if ( i_one > 1 ) {              
-	      ArrayV(i+i_one/2,j)                    =  ( ArrayV(i+i_one,j) + ArrayV(i,j)     ) / 2 ;
-	      if ( i == i_one )  ArrayV(i-i_one/2,j) =  ( ArrayV(0,j)       + ArrayV(i_one,j) ) / 2 ;
-	    }
-	    if ( j_one > 1 ) {
-	      ArrayV(i,j+j_one/2)                    =  ( ArrayV(i,j+j_one) + ArrayV(i,j) )     / 2 ;
-	      if ( j == j_one )  ArrayV(i,j-j_one/2) =  ( ArrayV(i,0)       + ArrayV(i,j_one) ) / 2 ;
-	    }
-	    if ( i_one > 1 && j_one > 1 ) {
-	      ArrayV(i+i_one/2,j+j_one/2) =  ( ArrayV(i+i_one,j+j_one) + ArrayV(i,j) ) / 2 ;
-	      if ( i == i_one ) ArrayV(i-i_one/2,j-j_one/2) =   ( ArrayV(0,j-j_one) + ArrayV(i_one,j) ) / 2 ;
-	      if ( j == j_one ) ArrayV(i-i_one/2,j-j_one/2) =   ( ArrayV(i-i_one,0) + ArrayV(i,j_one) ) / 2 ;
-	      // Note that this leaves a point at the upper left and lower right corners uninitialized.  Not a big deal.
-	    }
+            if ( i_one > 1 ) {              
+              ArrayV[i__j + half__]            =  ( ArrayV[i__j + one__]        + ArrayV[i__j]        ) / 2 ;
+              if ( i == i_one )
+                ArrayV[i__j - half__]          =  ( ArrayV[j]                   + ArrayV[one__ + j]   ) / 2 ;
+            }
+            if ( j_one > 1 ) {
+              ArrayV[i__j + half]              =  ( ArrayV[i__j + j_one]        + ArrayV[i__j]        ) / 2 ;
+              if ( j == j_one )
+                ArrayV[i__j - half]            =  ( ArrayV[i__]                 + ArrayV[i__ + j_one] ) / 2 ;
 
-	  }
-	}
+              if ( i_one > 1 ) { // i_one > 1 && j_one > 1
+                ArrayV[i__j + half__ + half]   = ( ArrayV[i__j + one__ + j_one] + ArrayV[i__j]        ) / 2 ;
+                if ( i == i_one )
+                  ArrayV[i__j - half__ - half] = ( ArrayV[j - j_one]            + ArrayV[one__ + j]   ) / 2 ;
+                if ( j == j_one )
+                  ArrayV[i__j - half__ - half] = ( ArrayV[i__ - one__]          + ArrayV[i__ + j_one] ) / 2 ;
+                // Note that this leaves a point at the upper left and lower right corners uninitialized.  Not a big deal.
+              }
+            }
+          }
+        }
       }
 
     }
@@ -2848,9 +2886,9 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, 
        TCanvas*  c1 =  new TCanvas("Volts","Volts",50,50,840,600) ;  // JT test
        c1 -> cd() ;        // JT test
        c1 -> Clear() ;
-       TH2F* h1  = new TH2F(ArrayV)  ;  // JT test  
+       TH2F* h1  = new TH2F(ArrayVM)  ;  // JT test  
        h1 -> DrawCopy("lego") ;      // JT test
-       ArrayV -> Draw("lego") ; // JT test
+       ArrayVM -> Draw("lego") ; // JT test
        c1 -> Update() ;
        cout << "Hit any key to continue" << endl ;  // JT test
        Char_t anychar ;    // JT test
@@ -2862,32 +2900,46 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, 
 
   }      
 
+  Float_t coef10,coef12 ;
+  coef10 = -0.5 / GRIDSIZER ;                // For differential in r
+  coef12 = (GRIDSIZEZ/3.0) / (-1*StarMagE) ; // For integrals over z
+
+  Int_t one__ = COLUMNS;
+
   //Differentiate V(r) and solve for E(r) using special equations for the first and last row
   //Integrate E(r)/E(z) from point of origin to pad plane
 
   for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
-    {	  
+    {
       // Differentiate in R
-      for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  ArrayE(i,j) = -1 * ( ArrayV(i+1,j) - ArrayV(i-1,j) ) / (2*GRIDSIZER) ;
-      ArrayE(0,j)      =  -1 * ( -0.5*ArrayV(2,j) + 2.0*ArrayV(1,j) - 1.5*ArrayV(0,j) ) / GRIDSIZER ;  
-      ArrayE(ROWS-1,j) =  -1 * ( 1.5*ArrayV(ROWS-1,j) - 2.0*ArrayV(ROWS-2,j) + 0.5*ArrayV(ROWS-3,j) ) / GRIDSIZER ; 
+      for ( Int_t i = 1 ; i < ROWS-1 ; i++ ) {
+        Int_t i__j = i*COLUMNS + j;
+        ArrayE[i__j] = coef10 * ( ArrayV[i__j + one__] - ArrayV[i__j - one__] ) ;
+      }
+      Int_t r__j = (ROWS-1)*one__ + j;
+      ArrayE[j]    = coef10 * ( - ArrayV[2*one__ + j] + 4*ArrayV[one__ + j]    - 3*ArrayV[j]              ) ;
+      ArrayE[r__j] = coef10 * ( 3*ArrayV[r__j]        - 4*ArrayV[r__j - one__] +   ArrayV[r__j - 2*one__] ) ; 
       // Integrate over Z
       for ( Int_t i = 0 ; i < ROWS ; i++ ) 
-	{
-	  Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
-	  EroverEz(i,j) = 0.0 ;
-	  for ( Int_t k = j ; k < COLUMNS ; k++ ) 
-	    { 
-	      EroverEz(i,j)  +=  Index*(GRIDSIZEZ/3.0)*ArrayE(i,k)/(-1*StarMagE) ;
-	      if ( Index != 4 )  Index = 4; else Index = 2 ;
-	    }
-	  if ( Index == 4 ) EroverEz(i,j)  -=  (GRIDSIZEZ/3.0)*ArrayE(i,COLUMNS-1)/ (-1*StarMagE) ;
-	  if ( Index == 2 ) EroverEz(i,j)  +=  
-			      (GRIDSIZEZ/3.0)*(0.5*ArrayE(i,COLUMNS-2)-2.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	  if ( j == COLUMNS-2 ) EroverEz(i,j) =  
-				  (GRIDSIZEZ/3.0)*(1.5*ArrayE(i,COLUMNS-2)+1.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	  if ( j == COLUMNS-1 ) EroverEz(i,j) =  0.0 ;
-	}
+        {
+          Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
+          Int_t i__  = i*COLUMNS;
+          Int_t i__j = i__ + j;
+          Int_t i__c = i__ + COLUMNS-1;
+          EroverEz[i__j] = 0.0 ;
+          if ( j == COLUMNS-2 ) EroverEz[i__j] = coef12 * 1.5 * (ArrayE[i__c - 1] + ArrayE[i__c]) ;
+          else if ( j != COLUMNS-1 )
+          {
+            for ( Int_t k = i__j ; k <= i__c ; k++ ) 
+            { 
+              EroverEz[i__j]  +=  Index*ArrayE[k] ;
+              if ( Index != 4 )  Index = 4; else Index = 2 ;
+            }
+            if ( Index == 4 )      EroverEz[i__j] -= ArrayE[i__c] ;
+            else if ( Index == 2 ) EroverEz[i__j] += (0.5*ArrayE[i__c - 1] - 2.5*ArrayE[i__c]) ;
+            EroverEz[i__j] *= coef12 ;
+          }
+        }
     }
 
 }
@@ -2912,27 +2964,34 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, 
 
  */
 void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **ArrayofCharge, TMatrix **ArrayofEroverEz, 
-					  TMatrix **ArrayofEPhioverEz,
-					  const Int_t ROWS, const Int_t COLUMNS,  const Int_t PHISLICES, const Float_t DELTAPHI, 
-					  const Int_t ITERATIONS, const Int_t SYMMETRY )
+                                          TMatrix **ArrayofEPhioverEz,
+                                          const Int_t PHISLICES, const Float_t DELTAPHI, 
+                                          const Int_t ITERATIONS, const Int_t SYMMETRY )
 {
 
+  const Int_t    ROWS        =  ArrayofArrayV[0]->GetNrows();
+  const Int_t    COLUMNS     =  ArrayofArrayV[0]->GetNcols();  
   const Float_t  GRIDSIZEPHI =  DELTAPHI ;
   const Float_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
   const Float_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
   const Float_t  RatioPhi    =  GRIDSIZER*GRIDSIZER / (GRIDSIZEPHI*GRIDSIZEPHI) ;
   const Float_t  RatioZ      =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
 
-  TMatrix ArrayE(ROWS,COLUMNS) ;
 
   //Check that the number of ROWS and COLUMNS is suitable for a binary expansion
   if ( !IsPowerOfTwo((ROWS-1))    )
-    { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of ROWS.  Must be 2**M - 1" << endl ; exit(1) ; }
+  { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of ROWS.  Must be 2**M - 1" << endl ; exit(1) ; }
   if ( !IsPowerOfTwo((COLUMNS-1)) )
-    { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of COLUMNS.  Must be 2**N - 1" << endl ; exit(1) ; }
+  { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of COLUMNS.  Must be 2**N - 1" << endl ; exit(1) ; }
   if ( PHISLICES <= 3   )
-    { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of PHISLICES.  Must be larger than 3" << endl ; exit(1) ; }
+  { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of PHISLICES.  Must be larger than 3" << endl ; exit(1) ; }
   
+  // Because performance of this relaxation is important, we access the arrays directly
+  Float_t *ArrayE,*ArrayV,*ArrayVM,*ArrayVP,*Charge,*SumCharge,*EroverEz,*EPhioverEz ;
+
+  TMatrix ArrayEM(ROWS,COLUMNS) ;
+  ArrayE = ArrayEM.GetMatrixArray() ;
+
   //Solve Poisson's equation in cylindrical coordinates by relaxation technique
   //Allow for different size grid spacing in R and Z directions
   //Use a binary expansion of the matrix to speed up the solution of the problem
@@ -2946,9 +3005,21 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
   TMatrix *ArrayofSumCharge[1000] ;    // Create temporary arrays to store low resolution charge arrays
   if  ( PHISLICES > 1000 ) { cout << "StMagUtilities::Poisson3D  PHISLICES > 1000 is not allowed (nor wise) " << endl ; exit(1) ; }  
   for ( Int_t i = 0 ; i < PHISLICES ; i++ ) { ArrayofSumCharge[i] = new TMatrix(ROWS,COLUMNS) ; }
+  Float_t OverRelaxers[ITERATIONS];
+  for ( Int_t k = 1 ; k <= ITERATIONS; k++ ) {
+    OverRelaxers[k-1] = 1.0 + TMath::Sqrt( TMath::Cos( (k*TMath::PiOver2())/ITERATIONS ) ) ; // Over-relaxation index, >= 1 but < 2
+  }
 
   for ( Int_t count = 0 ; count < loops ; count++ ) {  // START the master loop and do the binary expansion
    
+    // array index offsets ending in '__' are units of rows
+    // e.g. one__ == 1 row, i__ == i rows
+    // array index offset with '__' in the middle are units of rows and columns
+    // e.g. i__j == i rows and j columns
+    Int_t one__  = i_one*COLUMNS;
+    Int_t half__ = one__ / 2;
+    Int_t half   = j_one / 2;
+    
     Float_t  tempGRIDSIZER   =  GRIDSIZER  * i_one ;
     Float_t  tempRatioPhi    =  RatioPhi * i_one * i_one ; // Used to be divided by ( m_one * m_one ) when m_one was != 1
     Float_t  tempRatioZ      =  RatioZ   * i_one * i_one / ( j_one * j_one ) ;
@@ -2963,94 +3034,103 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
     }
 
     for ( Int_t m = 0 ; m < PHISLICES ; m++ ) {
-      TMatrix &Charge    = *ArrayofCharge[m] ;
-      TMatrix &SumCharge = *ArrayofSumCharge[m] ;
+      Charge    = ArrayofCharge[m]->GetMatrixArray() ;
+      SumCharge = ArrayofSumCharge[m]->GetMatrixArray() ;
       for ( Int_t i = i_one ; i < ROWS-1 ; i += i_one ) {
-	Float_t Radius = IFCRadius + i*GRIDSIZER ;
-	for ( Int_t j = j_one ; j < COLUMNS-1 ; j += j_one ) {
-	  if ( i_one == 1 && j_one == 1 ) SumCharge(i,j) = Charge(i,j) ;
-	  else {           // Add up all enclosed charge within 1/2 unit in all directions
-	    Float_t weight = 0.0 ;
-	    Float_t sum    = 0.0 ;
-	    SumCharge(i,j) = 0.0 ;
-	    for ( Int_t ii = i-i_one/2 ; ii <= i+i_one/2 ; ii++ ) {
-	      for ( Int_t jj = j-j_one/2 ; jj <= j+j_one/2 ; jj++ ) {
-		if ( ii == i-i_one/2 || ii == i+i_one/2 || jj == j-j_one/2 || jj == j+j_one/2 ) weight = 0.5 ;
-		else
-		  weight = 1.0 ; 
-		SumCharge(i,j) += Charge(ii,jj)*weight*Radius ;  
-		sum += weight*Radius ;
-	      }
-	    }
-	    SumCharge(i,j) /= sum ;
-	  }
-          SumCharge(i,j) *= tempGRIDSIZER*tempGRIDSIZER; // just saving a step later on
-	}
+        Int_t i__ = i*COLUMNS;
+        Float_t Radius = IFCRadius + i*GRIDSIZER ;
+        for ( Int_t j = j_one ; j < COLUMNS-1 ; j += j_one ) {
+          Int_t i__j = i__ + j;
+          if ( i_one == 1 && j_one == 1 ) SumCharge[i__j] = Charge[i__j] ;
+          else {           // Add up all enclosed charge within 1/2 unit in all directions
+            Float_t weight = 0.0 ;
+            Float_t sum    = 0.0 ;
+            SumCharge[i__j]= 0.0 ;
+            for ( Int_t ii = i-i_one/2 ; ii <= i+i_one/2 ; ii++ ) {
+              for ( Int_t jj = j-j_one/2 ; jj <= j+j_one/2 ; jj++ ) {
+                if ( ii == i-i_one/2 || ii == i+i_one/2 || jj == j-j_one/2 || jj == j+j_one/2 ) weight = 0.5 ;
+                else weight = 1.0 ; 
+                SumCharge[i__j] += Charge[ii*COLUMNS+jj]*weight*Radius ;  
+                sum += weight*Radius ;
+              }
+            }
+            SumCharge[i__j] /= sum ;
+          }
+          SumCharge[i__j] *= tempGRIDSIZER*tempGRIDSIZER; // just saving a step later on
+        }
       }
     }
 
     for ( Int_t k = 1 ; k <= ITERATIONS; k++ ) {
-
-      Float_t OverRelax   = 1.0 + TMath::Sqrt( TMath::Cos( (k*TMath::PiOver2())/ITERATIONS ) ) ; // Over-relaxation index, >= 1 but < 2
+      Float_t OverRelax   = OverRelaxers[k-1];
       Float_t OverRelaxM1 = OverRelax - 1.0 ;
-      Float_t OverRelaxcoef4[ROWS], OverRelaxcoef5[ROWS] ;
+      Float_t OverRelaxcoef4[ROWS] ;
       for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one ) { 
-	OverRelaxcoef4[i] = OverRelax * coef4[i] ;
-	OverRelaxcoef5[i] = OverRelaxM1 / OverRelaxcoef4[i] ; 
+        OverRelaxcoef4[i] = OverRelax * coef4[i] ;
       }
+
 
       for ( Int_t m = 0 ; m < PHISLICES ; m++ ) {
 
-	m_plus  = m + 1;
-	m_minus = m - 1 ; 
-	if (SYMMETRY==1) {  // Reflection symmetry in phi (e.g. symmetry at sector boundaries, or half sectors, etc.)
-	  if ( m_plus  > PHISLICES-1 ) m_plus  = PHISLICES - 2 ;
-	  if ( m_minus < 0 )           m_minus = 1 ;
-	}
-	else { // No Symmetries in phi, no boundaries, the calculation is continuous across all phi
-	  if ( m_plus  > PHISLICES-1 ) m_plus  = m + 1 - PHISLICES ;
-	  if ( m_minus < 0 )           m_minus = m - 1 + PHISLICES ;
-	}
-	TMatrix &ArrayV    =  *ArrayofArrayV[m] ;
-	TMatrix &ArrayVP   =  *ArrayofArrayV[m_plus] ;
-	TMatrix &ArrayVM   =  *ArrayofArrayV[m_minus] ;
-	TMatrix &SumCharge =  *ArrayofSumCharge[m] ;
+        m_plus  = m + 1;
+        m_minus = m - 1 ; 
+        if (SYMMETRY==1) {  // Reflection symmetry in phi (e.g. symmetry at sector boundaries, or half sectors, etc.)
+          if ( m_plus  > PHISLICES-1 ) m_plus  = PHISLICES - 2 ;
+          if ( m_minus < 0 )           m_minus = 1 ;
+        }
+        else { // No Symmetries in phi, no boundaries, the calculation is continuous across all phi
+          if ( m_plus  > PHISLICES-1 ) m_plus  = 0 ;
+          if ( m_minus < 0 )           m_minus = PHISLICES - 1 ;
+        }
+        ArrayV  = ArrayofArrayV[m]->GetMatrixArray();
+        ArrayVP = ArrayofArrayV[m_plus]->GetMatrixArray();
+        ArrayVM = ArrayofArrayV[m_minus]->GetMatrixArray();
+        SumCharge = ArrayofSumCharge[m]->GetMatrixArray() ;
+        for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one )  {
+          Int_t i__ = i*COLUMNS;
+          for ( Int_t j = j_one ; j < COLUMNS-1 ; j+=j_one ) {
+            Int_t i__j = i__ + j;
 
-	for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one )  {
-	  for ( Int_t j = j_one ; j < COLUMNS-1 ; j+=j_one ) {
+            ArrayV[i__j] = (  coef2[i]          *   ArrayV[i__j - one__]
+                            + tempRatioZ        * ( ArrayV[i__j - j_one]  + ArrayV[i__j + j_one] )
+                            + coef1[i]          *   ArrayV[i__j + one__]
+                            + coef3[i]          * ( ArrayVP[i__j]         + ArrayVM[i__j]        )
+                            + SumCharge[i__j]
+                           ) * OverRelaxcoef4[i]
+                           - OverRelaxM1*ArrayV[i__j] ;     // Note: over-relax the solution at each step.  This speeds up the convergance.
 
-            ArrayV(i,j) = (   coef2[i]          *   ArrayV(i-i_one,j)
-			    + tempRatioZ        * ( ArrayV(i,j-j_one)  +  ArrayV(i,j+j_one) )
-			    - OverRelaxcoef5[i] *   ArrayV(i,j) 
-			    + coef1[i]          *   ArrayV(i+i_one,j)  
-			    + coef3[i]          * ( ArrayVP(i,j)       +  ArrayVM(i,j) )
-			    + SumCharge(i,j) 
-			  ) * OverRelaxcoef4[i] ;     // Note: over-relax the solution at each step.  This speeds up the convergance.
+          }
+        }
 
-	  }
-	}
+        if ( k == ITERATIONS && ( i_one > 1 || j_one > 1 ) ) {       // After full solution is achieved, copy low resolution solution into higher res array
+          for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one )  {
+            Int_t i__ = i*COLUMNS;
+            for ( Int_t j = j_one ; j < COLUMNS-1 ; j+=j_one ) {
+              Int_t i__j = i__ + j;
+              
+              if ( i_one > 1 ) {              
+                ArrayV[i__j + half__]            =  ( ArrayV[i__j + one__]        + ArrayV[i__j]        ) / 2 ;
+                if ( i == i_one )
+                  ArrayV[i__j - half__]          =  ( ArrayV[j]                   + ArrayV[one__ + j]   ) / 2 ;
+              }
 
-	if ( k == ITERATIONS ) {       // After full solution is achieved, copy low resolution solution into higher res array
-	  for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one )  {
-	    for ( Int_t j = j_one ; j < COLUMNS-1 ; j+=j_one ) {
-	      
-	      if ( i_one > 1 ) {              
-		ArrayV(i+i_one/2,j)                    =  ( ArrayV(i+i_one,j) + ArrayV(i,j)     ) / 2 ;
-		if ( i == i_one )  ArrayV(i-i_one/2,j) =  ( ArrayV(0,j)       + ArrayV(i_one,j) ) / 2 ;
-	      }
-	      if ( j_one > 1 ) {
-		ArrayV(i,j+j_one/2)                    =  ( ArrayV(i,j+j_one) + ArrayV(i,j) )     / 2 ;
-		if ( j == j_one )  ArrayV(i,j-j_one/2) =  ( ArrayV(i,0)       + ArrayV(i,j_one) ) / 2 ;
-	      }
-	      if ( i_one > 1 && j_one > 1 ) {
-		ArrayV(i+i_one/2,j+j_one/2) =  ( ArrayV(i+i_one,j+j_one) + ArrayV(i,j) ) / 2 ;
-		if ( i == i_one ) ArrayV(i-i_one/2,j-j_one/2) =   ( ArrayV(0,j-j_one) + ArrayV(i_one,j) ) / 2 ;
-		if ( j == j_one ) ArrayV(i-i_one/2,j-j_one/2) =   ( ArrayV(i-i_one,0) + ArrayV(i,j_one) ) / 2 ;
-		// Note that this leaves a point at the upper left and lower right corners uninitialized.  Not a big deal.
-	      }
-	    }	    
-	  }
-	}
+              if ( j_one > 1 ) {
+                ArrayV[i__j + half]              =  ( ArrayV[i__j + j_one]        + ArrayV[i__j]        ) / 2 ;
+                if ( j == j_one )
+                  ArrayV[i__j - half]            =  ( ArrayV[i__]                 + ArrayV[i__ + j_one] ) / 2 ;
+
+                if ( i_one > 1 ) { // i_one > 1 && j_one > 1
+                  ArrayV[i__j + half__ + half]   = ( ArrayV[i__j + one__ + j_one] + ArrayV[i__j]        ) / 2 ;
+                  if ( i == i_one )
+                    ArrayV[i__j - half__ - half] = ( ArrayV[j - j_one]            + ArrayV[one__ + j]   ) / 2 ;
+                  if ( j == j_one )
+                    ArrayV[i__j - half__ - half] = ( ArrayV[i__ - one__]          + ArrayV[i__ + j_one] ) / 2 ;
+                  // Note that this leaves a point at the upper left and lower right corners uninitialized.  Not a big deal.
+                }
+              }
+            }
+          }
+        }
 
       }
     }      
@@ -3060,40 +3140,56 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
 
   }
   
+
+  Float_t coef10,coef11,coef12 ;
+  coef10 = -0.5 / GRIDSIZER ;                // For differential in r
+  coef11 = -0.5 / GRIDSIZEPHI ;              // For differential in phi
+  coef12 = (GRIDSIZEZ/3.0) / (-1*StarMagE) ; // For integrals over z
+
+  Int_t one__ = COLUMNS;
+
   //Differentiate V(r) and solve for E(r) using special equations for the first and last row
   //Integrate E(r)/E(z) from point of origin to pad plane
 
   for ( Int_t m = 0 ; m < PHISLICES ; m++ )
     {
-      TMatrix &ArrayV    =  *ArrayofArrayV[m] ;
-      TMatrix &EroverEz  =  *ArrayofEroverEz[m] ;
+      ArrayV = ArrayofArrayV[m]->GetMatrixArray();
+      EroverEz = ArrayofEroverEz[m]->GetMatrixArray();
       
       for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
-	{	  
-	  // Differentiate in R
-	  for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  ArrayE(i,j) = -1 * ( ArrayV(i+1,j) - ArrayV(i-1,j) ) / (2*GRIDSIZER) ;
-	  ArrayE(0,j)      =  -1 * ( -0.5*ArrayV(2,j) + 2.0*ArrayV(1,j) - 1.5*ArrayV(0,j) ) / GRIDSIZER ;  
-	  ArrayE(ROWS-1,j) =  -1 * ( 1.5*ArrayV(ROWS-1,j) - 2.0*ArrayV(ROWS-2,j) + 0.5*ArrayV(ROWS-3,j) ) / GRIDSIZER ; 
-	  // Integrate over Z
-	  for ( Int_t i = 0 ; i < ROWS ; i++ ) 
-	    {
-	      Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
-	      EroverEz(i,j) = 0.0 ;
-	      for ( Int_t k = j ; k < COLUMNS ; k++ ) 
-		{ 
-		  EroverEz(i,j)  +=  Index*(GRIDSIZEZ/3.0)*ArrayE(i,k)/(-1*StarMagE) ;
-		  if ( Index != 4 )  Index = 4; else Index = 2 ;
-		}
-	      if ( Index == 4 ) EroverEz(i,j)  -=  (GRIDSIZEZ/3.0)*ArrayE(i,COLUMNS-1)/ (-1*StarMagE) ;
-	      if ( Index == 2 ) EroverEz(i,j)  +=  
-				(GRIDSIZEZ/3.0)*(0.5*ArrayE(i,COLUMNS-2)-2.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	      if ( j == COLUMNS-2 ) EroverEz(i,j) =  
-				    (GRIDSIZEZ/3.0)*(1.5*ArrayE(i,COLUMNS-2)+1.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	      if ( j == COLUMNS-1 ) EroverEz(i,j) =  0.0 ;
-	    }
-	}
+        {
+          // Differentiate in R
+          for ( Int_t i = 1 ; i < ROWS-1 ; i++ ) {
+            Int_t i__j = i*COLUMNS + j;
+            ArrayE[i__j] = coef10 * ( ArrayV[i__j + one__] - ArrayV[i__j - one__] ) ;
+          }
+          Int_t r__j = (ROWS-1)*one__ + j;
+          ArrayE[j]    = coef10 * ( - ArrayV[2*one__ + j] + 4*ArrayV[one__ + j]    - 3*ArrayV[j]              ) ;
+          ArrayE[r__j] = coef10 * ( 3*ArrayV[r__j]        - 4*ArrayV[r__j - one__] +   ArrayV[r__j - 2*one__] ) ;
+          // Integrate over Z
+          for ( Int_t i = 0 ; i < ROWS ; i++ ) 
+            {
+              Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
+              Int_t i__  = i*COLUMNS;
+              Int_t i__j = i__ + j;
+              Int_t i__c = i__ + COLUMNS-1;
+              EroverEz[i__j] = 0.0;
+              if ( j == COLUMNS-2 ) EroverEz[i__j] = coef12 * 1.5 * (ArrayE[i__c - 1] + ArrayE[i__c]) ;
+              else if ( j != COLUMNS-1 )
+                {
+                  for ( Int_t k = i__j ; k <= i__c ; k++ ) 
+                    { 
+                      EroverEz[i__j]  +=  Index*ArrayE[k] ;
+                      if ( Index != 4 )  Index = 4; else Index = 2 ;
+                    }
+                  if ( Index == 4 )      EroverEz[i__j] -= ArrayE[i__c] ;
+                  else if ( Index == 2 ) EroverEz[i__j] += (0.5*ArrayE[i__c - 1] - 2.5*ArrayE[i__c]) ;
+                  EroverEz[i__j] *= coef12 ;
+                }
+            }
+        }
       // if ( m == 0 ) { TCanvas*  c1 =  new TCanvas("ErOverEz","ErOverEz",50,50,840,600) ;  c1 -> cd() ;
-      // EroverEz.Draw("surf") ; } // JT test
+      // ArrayofEroverEz[m]->Draw("surf") ; } // JT test
     }
 
   //Differentiate V(r) and solve for E(phi) 
@@ -3101,49 +3197,55 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
 
   for ( Int_t m = 0 ; m < PHISLICES ; m++ )
     {
-	m_plus  = m + 1;
-	m_minus = m - 1 ; 
-	if (SYMMETRY==1) { // Reflection symmetry in phi (e.g. symmetry at sector boundaries, or half sectors, etc.)
-	  if ( m_plus  > PHISLICES-1 ) m_plus  = PHISLICES - 2 ;
-	  if ( m_minus < 0 )           m_minus = 1 ;
-	}
-	else { // No Symmetries in phi, no boundaries, the calculations is continuous across all phi
-	  if ( m_plus  > PHISLICES-1 ) m_plus  = m + 1 - PHISLICES ;
-	  if ( m_minus < 0 )           m_minus = m - 1 + PHISLICES ;
-	}
-      TMatrix &ArrayVP     =  *ArrayofArrayV[m_plus] ;
-      TMatrix &ArrayVM     =  *ArrayofArrayV[m_minus] ;
-      TMatrix &EPhioverEz  =  *ArrayofEPhioverEz[m] ;
+      m_plus  = m + 1;
+      m_minus = m - 1 ; 
+      if (SYMMETRY==1) { // Reflection symmetry in phi (e.g. symmetry at sector boundaries, or half sectors, etc.)
+        if ( m_plus  > PHISLICES-1 ) m_plus  = PHISLICES - 2 ;
+        if ( m_minus < 0 )           m_minus = 1 ;
+      }
+      else { // No Symmetries in phi, no boundaries, the calculations is continuous across all phi
+        if ( m_plus  > PHISLICES-1 ) m_plus  = 0 ;
+        if ( m_minus < 0 )           m_minus = PHISLICES - 1 ;
+      }
+      ArrayVP =  ArrayofArrayV[m_plus]->GetMatrixArray() ;
+      ArrayVM =  ArrayofArrayV[m_minus]->GetMatrixArray() ;
+      EPhioverEz =  ArrayofEPhioverEz[m]->GetMatrixArray() ;
       for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
-	{	  
-	  // Differentiate in Phi
-	  for ( Int_t i = 0 ; i < ROWS ; i++ )  
-	    {
-	      Float_t Radius = IFCRadius + i*GRIDSIZER ;
-	      ArrayE(i,j) = -1 * ( ArrayVP(i,j) - ArrayVM(i,j) ) / (2*Radius*GRIDSIZEPHI) ;
-	    }
-	  // Integrate over Z
-	  for ( Int_t i = 0 ; i < ROWS ; i++ ) 
-	    {
-	      Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
-	      EPhioverEz(i,j) = 0.0 ;
-	      for ( Int_t k = j ; k < COLUMNS ; k++ ) 
-		{ 
-		  EPhioverEz(i,j)  +=  Index*(GRIDSIZEZ/3.0)*ArrayE(i,k)/(-1*StarMagE) ;
-		  if ( Index != 4 )  Index = 4; else Index = 2 ;
-		}
-	      if ( Index == 4 ) EPhioverEz(i,j)  -=  (GRIDSIZEZ/3.0)*ArrayE(i,COLUMNS-1)/ (-1*StarMagE) ;
-	      if ( Index == 2 ) EPhioverEz(i,j)  +=  
-				(GRIDSIZEZ/3.0)*(0.5*ArrayE(i,COLUMNS-2)-2.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	      if ( j == COLUMNS-2 ) EPhioverEz(i,j) =  
-				    (GRIDSIZEZ/3.0)*(1.5*ArrayE(i,COLUMNS-2)+1.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	      if ( j == COLUMNS-1 ) EPhioverEz(i,j) =  0.0 ;
-	    }
-	}
+        {
+          // Differentiate in Phi
+          for ( Int_t i = 0 ; i < ROWS ; i++ )  
+            {
+              Int_t i__j = i*COLUMNS + j;
+              Float_t Radius = IFCRadius + i*GRIDSIZER ;
+              ArrayE[i__j] = coef11 * ( ArrayVP[i__j] - ArrayVM[i__j] ) / Radius ;
+            }
+          // Integrate over Z
+          for ( Int_t i = 0 ; i < ROWS ; i++ ) 
+            {
+              Int_t i__  = i*COLUMNS;
+              Int_t i__j = i__ + j;
+              Int_t i__c = i__ + COLUMNS-1;
+              Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
+              EPhioverEz[i__j] = 0.0 ;
+              if ( j == COLUMNS-2 ) EPhioverEz[i__j] = coef12 * 1.5 * (ArrayE[i__c - 1] + ArrayE[i__c]) ;
+              else if ( j != COLUMNS-1 )
+                {
+                  for ( Int_t k = i__j ; k <= i__c ; k++ ) 
+                    { 
+                      EPhioverEz[i__j]  +=  Index*ArrayE[k] ;
+                      if ( Index != 4 )  Index = 4; else Index = 2 ;
+                    }
+                  if ( Index == 4 )      EPhioverEz[i__j] -= ArrayE[i__c] ;
+                  else if ( Index == 2 ) EPhioverEz[i__j] +=  (0.5*ArrayE[i__c - 1] - 2.5*ArrayE[i__c]) ;
+                  EPhioverEz[i__j] *= coef12 ;
+                }
+            }
+        }
       // if ( m == 5 ) { TCanvas* c2 =  new TCanvas("ArrayE","ArrayE",50,50,840,600) ;  c2 -> cd() ;
-      // ArrayE.Draw("surf") ; } // JT test
+      // ArrayEM.Draw("surf") ; } // JT test
     }
   
+
   for ( Int_t m = 0 ; m < PHISLICES ; m++ )
     {
       ArrayofSumCharge[m] -> Delete() ;
@@ -3999,11 +4101,16 @@ Int_t StMagUtilities::IsPowerOfTwo(Int_t i)
 
 void StMagUtilities::SectorNumber( Int_t& Sector , const Float_t x[] )
 {
-  if (Sector > 0) return                ;  // Already valid
+  if ( Sector > 0 ) return              ;  // Already valid
   Float_t phi = TMath::ATan2(x[1],x[0]) ;
+  SectorNumber( Sector, phi, x[2] )     ;
+}
+void StMagUtilities::SectorNumber( Int_t& Sector , Float_t phi, const Float_t z )
+{
+  if ( Sector > 0 ) return              ;  // Already valid
   if ( phi < 0 ) phi += TMath::TwoPi()  ;  // Use range from 0-360
-  Sector = ( ( 30 - (int)(12*phi/TMath::Pi()) )%24 ) / 2 ;
-  if ( x[2] < 0 ) Sector = 24 - Sector  ;  // Note that order of these two if statements is important
+  Sector = ( ( 30 - (int)(phi/PiOver12) )%24 ) / 2 ;
+  if ( z < 0 ) Sector = 24 - Sector     ;  // Note that order of these two if statements is important
   else if ( Sector == 0 ) Sector = 12   ;
 }
 
@@ -4019,9 +4126,9 @@ void StMagUtilities::SectorNumber( Int_t& Sector , const Float_t x[] )
 Float_t StMagUtilities::LimitZ( Int_t& Sector , const Float_t x[] )
 {
   Float_t z = x[2];
-  SectorNumber( Sector, x ) ;
-  if (Sector <= 12 && z < 0.2) z = 0.2 ;
-  else if (Sector >= 13 && z > -0.2) z = -0.2 ;
+  SectorNumber( Sector, 0, z ) ;
+  if ( Sector <= 12 && z < 0.2 ) z = 0.2 ;
+  else if ( Sector >= 13 && z > -0.2 ) z = -0.2 ;
   return z ;
 }
 
@@ -4102,7 +4209,7 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
 	    } 
 	}
 
-      PoissonRelaxation( ArrayV, Charge, EroverEz, ROWS, COLUMNS, ITERATIONS ) ;
+      PoissonRelaxation( ArrayV, Charge, EroverEz, ITERATIONS ) ;
 
       DoOnce = 1 ;      
 
@@ -4288,7 +4395,7 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
       //Solve Poisson's equation in 3D cylindrical coordinates by relaxation technique
       //Allow for different size grid spacing in R and Z directions
 
-      Poisson3DRelaxation( ArrayofArrayV, ArrayofCharge, ArrayofEroverEz, ArrayofEPhioverEz, ROWS, COLUMNS, PHISLICES, 
+      Poisson3DRelaxation( ArrayofArrayV, ArrayofCharge, ArrayofEroverEz, ArrayofEPhioverEz, PHISLICES, 
 			   GRIDSIZEPHI, ITERATIONS, SYMMETRY) ;
 
       //Interpolate results onto a custom grid which is used just for the grid leak calculation.
@@ -4331,9 +4438,9 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
   phi_prime = phi ;
   if ( SYMMETRY == 1 ) 
     {
-      Int_t   N = (int)(phi/(TMath::Pi()/12.0))  ;
-      phi_prime = phi - N * TMath::Pi() / 12.0 ;
-      if ( TMath::Power(-1,N) < 0 ) phi_prime = TMath::Pi() / 12.0 - phi_prime ; // Note that 
+      Int_t   N = (int)(phi/PiOver12)  ;
+      phi_prime = phi - N * PiOver12 ;
+      if ( TMath::Power(-1,N) < 0 ) phi_prime = PiOver12 - phi_prime ; // Note that 
       if ( TMath::Power(-1,N) < 0 ) FLIP = -1 ;     // Note change of sign.  Assume reflection symmetry!!
     }
 
@@ -4363,6 +4470,287 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
   Xprime[1] = r * TMath::Sin(phi) ;
   Xprime[2] = x[2] ;
 
+}
+
+//________________________________________
+
+  
+/// 3D Sector Alignment Distortion Calculation
+/*!
+  Calculate the 3D distortions due to z displacements caused by mis-alignment of the inner and outer sectors.
+  Original work by Gene VanBuren, and J. Thomas 
+  Method:
+  Determine the potential offsets at the innermost and outermost
+  points of the Inner and Outer Sector grids along this phi angle,
+  then interpolate to any poinr between the two.
+  Also interpolate radially to zero out to the field cages.
+ 
+*/
+void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
+{ 
+     
+  const Int_t   ORDER       =    1  ;  // Linear interpolation = 1, Quadratic = 2         
+  const Int_t   neR3D       =   73  ;  // Number of rows in the interpolation table for the Electric field
+  const Int_t   ITERATIONS  =  100  ;  // Depends on setting for the OverRelaxation parameter ... check results carefully
+  const Int_t   ROWS        =  257  ;  // ( 2**n + 1 )  eg. 65, 129, 257, 513, 1025
+  const Int_t   COLUMNS     =   65  ;  // ( 2**m + 1 )  eg. 65, 129, 257, 513
+  const Int_t   PHISLICES   =  180  ;  // ( 12*(2*n + 1) )  eg. 60, 84, 108 ; Note interaction with "GRIDSIZEPHI"
+                                       //                   avoids phi at sector boundaries
+  const Int_t   PHISLICES1  =  PHISLICES+1   ;  // ( 24*n )  eg. 24, 72, 144 ;
+  const Float_t GRIDSIZEPHI =  TMath::TwoPi() / PHISLICES ;
+  const Float_t GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
+  const Float_t GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
+
+  const Float_t INNERGGSpan  = 68.0 ;
+  const Float_t OUTERGGSpan  = 68.8 ;
+  const Float_t INNERGGFirst = 53.0 ;
+  const Float_t INNERGGLast  = INNERGGFirst + INNERGGSpan ;
+  const Float_t OUTERGGFirst = INNERGGLast  + GAP13_14    ;
+  const Float_t OUTERGGLast  = OUTERGGFirst + OUTERGGSpan ;
+
+  static TMatrix *ArrayofArrayV[PHISLICES]   , *ArrayofCharge[PHISLICES]      ; 
+  static TMatrix *ArrayofEroverEzW[PHISLICES], *ArrayofEPhioverEzW[PHISLICES] ; 
+  static TMatrix *ArrayofEroverEzE[PHISLICES], *ArrayofEPhioverEzE[PHISLICES] ; 
+
+  static Float_t  Rlist[ROWS], Zedlist[COLUMNS] ;
+
+  static Int_t DoOnce = 0 ;
+
+  static TMatrix *ArrayoftiltEr[PHISLICES1] ;
+  static TMatrix *ArrayoftiltEphi[PHISLICES1] ;
+
+  // Use custom list of radii because we need extra resolution near the gap
+  static Float_t eRadius[neR3D] = {   50.0,   60.0,   70.0,   80.0,   90.0, 
+                                     100.0,  104.0,  106.5,  109.0,  111.5, 
+                                     114.0,  115.0,  116.0,  117.0,  118.0,  
+                                     118.5,  118.75, 119.0,  119.25, 119.5, 
+                                     119.75, 120.0,  120.25, 120.5,  120.75, 
+                                     121.0,  121.25, 121.5,  121.75, 122.0,  
+                                     122.25, 122.5,  122.75, 123.0,  123.25, 
+                                     123.5,  123.75, 124.0,  124.25, 124.5,  
+                                     124.75, 125.0,  125.25, 125.5,  126.0, 
+                                     126.25, 126.5,  126.75, 127.0,  127.25,  
+                                     127.5,  128.0,  128.5,  129.0,  129.5,  
+                                     130.0,  130.5,  131.0,  131.5,  132.0,  
+                                     133.0,  135.0,  137.5,  140.0,  145.0,  
+                                     150.0,  160.0,  170.0,  180.0,  190.0,  
+                                     195.0,  198.0,  200.0 } ;
+
+  static Float_t Philist [PHISLICES1] ; // Note that there will be rapid changes near 15 degrees on padrow 13
+  static Int_t   SeclistW[PHISLICES1] ;
+  static Int_t   SeclistE[PHISLICES1] ;
+  static Float_t SecPhis [PHISLICES1] ;
+
+  Float_t  Er_integral, Ephi_integral ;
+  Float_t  r, phi, z ;
+  //Int_t lastSec = -1;
+
+
+  Xprime[0] = x[0] ;  
+  Xprime[1] = x[1] ; 
+  Xprime[2] = x[2] ; 
+
+  if ( DoOnce == 0 )
+    {
+      cout << "StMagUtilities::UndoSectorAlign Please wait for the tables to fill ...  ~5 seconds * PHISLICES" << endl ;
+      
+      for ( Int_t k = 0 ; k < PHISLICES1 ; k++ )
+        {
+          Philist[k] = GRIDSIZEPHI * k ;
+          Int_t k2 = (12*k+PHISLICES/2)/PHISLICES;
+          SeclistW[k] = (14-k2)%12+1;
+          SeclistE[k] = (k2+8)%12+13;
+          SecPhis[k] = GRIDSIZEPHI * (k2*PHISLICES/12-k) ;
+        }
+      
+      for ( Int_t k = 0 ; k < PHISLICES1 ; k++ )
+        {
+          ArrayoftiltEr[k]   =  new TMatrix(neR3D,EMap_nZ) ;
+          ArrayoftiltEphi[k] =  new TMatrix(neR3D,EMap_nZ) ;
+        }
+      
+      for ( Int_t k = 0 ; k < PHISLICES ; k++ )
+      {
+        ArrayofArrayV[k]      =  new TMatrix(ROWS,COLUMNS) ;
+        ArrayofCharge[k]      =  new TMatrix(ROWS,COLUMNS) ;
+        ArrayofEroverEzW[k]   =  new TMatrix(ROWS,COLUMNS) ;
+        ArrayofEPhioverEzW[k] =  new TMatrix(ROWS,COLUMNS) ;
+        ArrayofEroverEzE[k]   =  new TMatrix(ROWS,COLUMNS) ;
+        ArrayofEPhioverEzE[k] =  new TMatrix(ROWS,COLUMNS) ;
+      }
+
+      for ( Int_t m = -1; m < 2 ; m+=2 ) // west (m = -1), then east (m = 1)
+        {
+          TMatrix** ArrayofEroverEz   = ( m < 0 ? ArrayofEroverEzW   : ArrayofEroverEzE   ) ;
+          TMatrix** ArrayofEPhioverEz = ( m < 0 ? ArrayofEPhioverEzW : ArrayofEPhioverEzE ) ;
+          Int_t*    Seclist           = ( m < 0 ? SeclistW           : SeclistE           ) ;
+          
+          
+          for ( Int_t k = 0 ; k < PHISLICES ; k++ )
+            {
+              TMatrix &ArrayV    =  *ArrayofArrayV[k] ;
+              TMatrix &Charge    =  *ArrayofCharge[k] ;
+              
+              //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.
+              for ( Int_t i = 0 ; i < ROWS ; i++ )  
+                {
+                  Rlist[i] = IFCRadius + i*GRIDSIZER ;
+                  for ( Int_t j = 0 ; j < COLUMNS ; j++ )  // Fill Vmatrix with Boundary Conditions
+                    {
+                      Zedlist[j]  = j * GRIDSIZEZ ;
+                      ArrayV(i,j) = 0.0 ; 
+                      Charge(i,j) = 0.0 ;
+                    }
+                }      
+              
+              Double_t tanSecPhi = TMath::Tan(SecPhis[k]);
+              Double_t cosSecPhi = TMath::Cos(SecPhis[k]);
+              Double_t secSecPhi = 1.0/cosSecPhi;
+              Double_t iOffsetFirst, iOffsetLast, oOffsetFirst, oOffsetLast;
+
+              if (thedb)
+                {
+
+                  Double_t local[3] = {0,0,0};
+                  Double_t master[3];
+                  
+
+                  // To test internal sector alignment parameters only:
+                  //const TGeoHMatrix& iAlignMatrix = thedb->SubSInner2SupS(Seclist[k]);
+                  //const TGeoHMatrix& oAlignMatrix = thedb->SubSOuter2SupS(Seclist[k]);
+                  
+                  // For sector alignment with respect to the TPC
+                  const TGeoHMatrix& iAlignMatrix = thedb->SubSInner2Tpc(Seclist[k]);
+                  const TGeoHMatrix& oAlignMatrix = thedb->SubSOuter2Tpc(Seclist[k]);
+                  
+                  // For debugging the rotation matrices
+                  /*
+                  if (SeclistW[k] != lastSec) {
+                    iAlignMatrix.Print();
+                    oAlignMatrix.Print();
+                    lastSec=SeclistW[k];
+                  }
+                  */
+                  
+                  // For the alignment, 'local' is the ideal position of the point
+                  // on the endcap, and 'master' is the real position of that point.
+                  // For this distortion, we will only worry about z displacements.
+
+                  local[0] = m * INNERGGFirst * tanSecPhi;
+                  local[1] = INNERGGFirst;
+                  iAlignMatrix.LocalToMaster(local,master);
+                  iOffsetFirst = (TPC_Z0 + m * master[2]) * StarMagE;
+                  
+                  local[0] = m * INNERGGLast  * tanSecPhi;
+                  local[1] = INNERGGLast;
+                  iAlignMatrix.LocalToMaster(local,master);
+                  iOffsetLast  = (TPC_Z0 + m * master[2]) * StarMagE;
+                  
+                  local[0] = m * OUTERGGFirst * tanSecPhi;
+                  local[1] = OUTERGGFirst;
+                  oAlignMatrix.LocalToMaster(local,master);
+                  oOffsetFirst = (TPC_Z0 + m * master[2]) * StarMagE;
+                  
+                  local[0] = m * OUTERGGLast  * tanSecPhi;
+                  local[1] = OUTERGGLast;
+                  oAlignMatrix.LocalToMaster(local,master);
+                  oOffsetLast  = (TPC_Z0 + m * master[2]) * StarMagE;
+
+                } else {
+
+                  // toy models (not reading from DB)
+                  // this model is 1 (0.5) mm at OUTERGGFirst of Sec 12 (24)
+                  iOffsetFirst = 0;
+                  iOffsetLast = 0;
+                  oOffsetFirst = (Seclist[k] == 12 || Seclist[k] == 24 ?
+                                  0.1 * StarMagE * (1.5 - Seclist[k]/24.) : 0);
+                  oOffsetLast = 0;
+
+                }
+
+
+              
+              for ( Int_t i = 1 ; i < ROWS-2 ; i++ ) 
+                { 
+                  Double_t Radius = IFCRadius + i*GRIDSIZER ;
+                  Double_t local_y  = Radius * cosSecPhi ;
+                  Double_t tempV;
+                  if (local_y <= INNERGGFirst)
+                    tempV = iOffsetFirst*(Radius - IFCRadius)/(INNERGGFirst*secSecPhi - IFCRadius);
+                  else if (local_y <= INNERGGLast)
+                    tempV = iOffsetFirst + (iOffsetLast -iOffsetFirst)*(local_y-INNERGGFirst)/INNERGGSpan;
+                  else if (local_y <= OUTERGGFirst)
+                    tempV = iOffsetLast  + (oOffsetFirst-iOffsetLast) *(local_y-INNERGGLast) /GAP13_14;
+                  else if (local_y <= OUTERGGLast)
+                    tempV = oOffsetFirst + (oOffsetLast -oOffsetFirst)*(local_y-OUTERGGFirst)/OUTERGGSpan;
+                  else
+                    tempV = oOffsetLast*(OFCRadius - Radius)/(OFCRadius - OUTERGGLast*secSecPhi);
+                  ArrayV(i,COLUMNS-1) = tempV;
+                }
+            }      
+            
+          //Solve Poisson's equation in 3D cylindrical coordinates by relaxation technique
+          //Allow for different size grid spacing in R and Z directions
+          
+          Poisson3DRelaxation( ArrayofArrayV, ArrayofCharge, ArrayofEroverEz, ArrayofEPhioverEz, PHISLICES, 
+                              GRIDSIZEPHI, ITERATIONS, 0) ;
+        } // m (west/east) loop
+      
+          
+      //Interpolate results onto a custom grid which is used just for the grid leak calculation.
+      
+      for ( Int_t k = 0 ; k < PHISLICES1 ; k++ )
+        {
+          TMatrix &tiltEr   = *ArrayoftiltEr[k] ;
+          TMatrix &tiltEphi = *ArrayoftiltEphi[k] ;
+          phi = Philist[k == PHISLICES ? 0 : k] ;
+          for ( Int_t i = 0 ; i < EMap_nZ ; i++ ) 
+            {
+              z = TMath::Abs(eZList[i]) ;
+              TMatrix** ArrayofEroverEz   = ( eZList[i] > 0 ? ArrayofEroverEzW   : ArrayofEroverEzE   ) ;
+              TMatrix** ArrayofEPhioverEz = ( eZList[i] > 0 ? ArrayofEPhioverEzW : ArrayofEPhioverEzE ) ;
+              for ( Int_t j = 0 ; j < neR3D ; j++ ) 
+                { 
+                  r = eRadius[j] ;
+                  tiltEr(j,i)    = Interpolate3DTable( ORDER,r,z,phi,ROWS,COLUMNS,PHISLICES,Rlist,Zedlist,Philist,ArrayofEroverEz )   ;
+                  tiltEphi(j,i)  = Interpolate3DTable( ORDER,r,z,phi,ROWS,COLUMNS,PHISLICES,Rlist,Zedlist,Philist,ArrayofEPhioverEz ) ;
+                }
+            }
+        }
+      
+      for ( Int_t k = 0 ; k < PHISLICES ; k++ )
+        {
+          ArrayofArrayV[k]      -> Delete() ;
+          ArrayofCharge[k]      -> Delete() ;
+          ArrayofEroverEzW[k]   -> Delete() ;  
+          ArrayofEPhioverEzW[k] -> Delete() ;  
+          ArrayofEroverEzE[k]   -> Delete() ;  
+          ArrayofEPhioverEzE[k] -> Delete() ;  
+        }
+          
+      DoOnce = 1 ;      
+      
+    }
+  
+  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
+  
+  // Assume symmetry in Z when looking up data in tables, below
+  Er_integral   = Interpolate3DTable( ORDER, r, z, phi, neR3D, EMap_nZ, PHISLICES1, eRadius, eZList, Philist, ArrayoftiltEr )   ;
+  Ephi_integral = Interpolate3DTable( ORDER, r, z, phi, neR3D, EMap_nZ, PHISLICES1, eRadius, eZList, Philist, ArrayoftiltEphi ) ;
+  
+  if ( r > 0.0 ) 
+    {
+      phi =  phi - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+    }
+  
+  Xprime[0] = r * TMath::Cos(phi) ;
+  Xprime[1] = r * TMath::Sin(phi) ;
+  Xprime[2] = x[2] ;
+  
 }
 
 

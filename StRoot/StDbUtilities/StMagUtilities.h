@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.47 2010/10/28 19:10:59 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.48 2011/08/23 22:15:10 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.48  2011/08/23 22:15:10  genevb
+ * Introduce sector alignment distortion corrections and big speed improvements to Poisson relaxations
+ *
  * Revision 1.47  2010/10/28 19:10:59  genevb
  * Provide for  usage of tpcHVPlanes and GG Voltage Error
  *
@@ -164,7 +167,8 @@ enum   DistortSelect
   kFast2DBMap        = 0x2000,   // Bit 14
   kGridLeak          = 0x4000,   // Bit 15
   k3DGridLeak        = 0x8000,   // Bit 16
-  kGGVoltError       = 0x10000   // Bit 17
+  kGGVoltError       = 0x10000,  // Bit 17
+  kSectorAlign       = 0x20000   // Bit 18
 } ;
 enum   EBMapSizes
 {
@@ -224,6 +228,7 @@ class StMagUtilities {
   virtual void    Search ( const Int_t N, const Float_t Xarray[], const Float_t x, Int_t &low ) ;
   virtual Int_t   IsPowerOfTwo (Int_t i) ;
   virtual void    SectorNumber ( Int_t& Sector , const Float_t x[] ) ;
+  virtual void    SectorNumber ( Int_t& Sector , Float_t phi, const Float_t z ) ;
   virtual Float_t LimitZ (Int_t& Sector, const Float_t x[] ) ;
   virtual Float_t Interpolate ( const Float_t Xarray[], const Float_t Yarray[], 
 				const Int_t ORDER, const Float_t x ) ;
@@ -242,12 +247,12 @@ class StMagUtilities {
   virtual void    Interpolate3DEdistortion ( const Int_t ORDER, const Float_t r, const Float_t phi, const Float_t z, 
 					     const Float_t Er[EMap_nZ][EMap_nPhi][EMap_nR], const Float_t Ephi[EMap_nZ][EMap_nPhi][EMap_nR], 
 					     Float_t &Er_value, Float_t &Ephi_value ) ;
-  virtual void    PoissonRelaxation  ( TMatrix &ArrayV, const TMatrix &Charge, TMatrix &EroverEz, 
-                                       const Int_t ROWS, const Int_t COLUMNS, const Int_t ITERATIONS ) ;
+  virtual void    PoissonRelaxation  ( TMatrix &ArrayV, TMatrix &Charge, TMatrix &EroverEz, 
+                                       const Int_t ITERATIONS ) ;
 
   virtual void    Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **ArrayofCharge, TMatrix **ArrayofEroverEz, 
 				       TMatrix **ArrayofEPhioverEz,
-				       const Int_t ROWS, const Int_t COLUMNS,  const Int_t PHISLICES, const Float_t DeltaPhi, 
+				       const Int_t PHISLICES, const Float_t DeltaPhi, 
 				       const Int_t ITERATIONS, const Int_t SYMMETRY) ;
 
   Int_t    mDistortionMode;             // Distortion mode - determines which corrections are run
@@ -339,6 +344,7 @@ class StMagUtilities {
   virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoShortedRingDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
   virtual void    UndoGGVoltErrorDistortion ( const Float_t x[], Float_t Xprime[], Int_t Sector = -1 ) ;
+  virtual void    UndoSectorAlignDistortion ( const Float_t x[], Float_t Xprime[], Int_t Sector = -1 ) ;
 
   virtual void    FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3],
 					     const Prime PrimaryOrGlobal, 
