@@ -678,7 +678,7 @@ ostream &AgStructure::Out( ostream &out )
 //
 // ===========================================================================================
 //
-//                        Get/SetMember ( member, value )
+//                         Get/SetMember ( member, value )
 //
 // Below you will find 12 very similar member functions which I could not figure out how
 // to template.  They provide Get and Set methods for any data member (public,private
@@ -1564,6 +1564,7 @@ Bool_t AgStructure::AgDetpAdd( const Char_t *name, const Char_t *member, Array_t
   return false;
 }
 
+
 Bool_t AgStructure::AgDetpSet()
 {
 
@@ -1630,7 +1631,10 @@ Bool_t AgStructure::AgDetpSet()
       // Get the name of the member variable
       TString member = obj->GetName();
 
-      std::cout << Form("Configure /DETP/%s/%s::/%s",fname.Data(),destination->GetName(),member.Data()) << std::endl;
+      std::cout << Form(">>> Configure /DETP/%s/%s::/%-20s <<<",fname.Data(),destination->GetName(),member.Data()) << std::endl;
+      //      TString myname = fname;
+      //      myname.ToLower();
+      //      gROOT->ProcessLine( Form ("std::cout << %s.%s << std::endl",myname.Data(),member.Data()) );
 
       // Now copy the member variable to the destination in the folder
       // and into the current structure

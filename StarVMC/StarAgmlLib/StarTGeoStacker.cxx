@@ -722,10 +722,9 @@ Bool_t sanityCheck( TGeoVolume *volume )
   if ( shape->Capacity() <= 0. )
     { Int_t old=gErrorIgnoreLevel;    
       gErrorIgnoreLevel=1; // Some warnings will not be supressed
-      std::cout << "==========================================================================================================" << std::endl;
-      AgBlock::module()->Warning("sanityCheck",Form("Attempt to place shape with L^3=0"));
-      volume -> Print();
-      volume -> InspectShape();
+      AgBlock::module()->Warning("sanityCheck",Form("Attempt to place volume %s with L^3=0",volume->GetName()));
+      //      volume -> Print();
+      //      volume -> InspectShape();
       gErrorIgnoreLevel=old;
       return false;
     }
@@ -1237,8 +1236,8 @@ struct _StarTGeoStackerDummy_
 
     TGeoManager *manager = new TGeoManager("dyson","The STAR Geometry Manager");
     manager -> BuildDefaultMaterials();
-    TBrowser *browser = new TBrowser();
-    browser->Add( manager->GetListOfShapes(), "Shapes" );
+    //    TBrowser *browser = new TBrowser();
+    //    browser->Add( manager->GetListOfShapes(), "Shapes" );
 
     StarTGeoStacker::mClassMap[ AgShape::kBbox ] = "TGeoBBox";
     StarTGeoStacker::mClassMap[ AgShape::kTrd1 ] = "TGeoTrd1";

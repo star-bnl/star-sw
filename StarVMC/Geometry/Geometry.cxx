@@ -75,7 +75,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   // Select y2009a configuration
   geom.Use("select", tag );
 
-  std::cout << "ConstructGeometry: tag = " << tag << std::endl;
+  //  std::cout << "ConstructGeometry: tag = " << tag << std::endl;
 
   // Cave goes first as it must be present to place things into
   geom.success_cave = ConstructCave( geom.caveFlag, geom.caveStat );  
@@ -175,13 +175,10 @@ void Geometry::StarsimGeometry( const Char_t *tag )
 AgModule *Geometry::CreateModule( const Char_t *module, const Char_t *top )
 {
 
-  std::cout << std::endl;
-  std::cout << "Create Module " << module;
-  if (top) std::cout << " top volume = " << top;
-  std::cout << std::endl;
-  std::cout << std::endl;
 
-
+  if (top) {
+    std::cout << ">>> Setting top volume = " << top << " <<<" << std::endl;
+  }
 
   // Set the current module to this
   _module = this;
@@ -191,13 +188,10 @@ AgModule *Geometry::CreateModule( const Char_t *module, const Char_t *top )
 
   // Import the module's name space
   TString cmd = "using namespace "+NAME+";";
-  std::cout << "Setting namespace: " << cmd.Data() << std::endl;
   gROOT->ProcessLine(cmd);
 
   // Now create the requested module and return a pointer to it
   TClass *_class = TClass::GetClass(module);
-
-  std::cout << _class -> GetName() << std::endl;
 
   if (!_class )
     {
@@ -410,10 +404,6 @@ Bool_t Geometry::ConstructBtof( const Char_t *flag, Bool_t go )
       AgStructure::AgDetpAdd("Btog_t","Z0",(Float_t)btofGeom.tofZ0);      
     }
 
-  std::cout << "================================================================== btofgeo ==" << std::endl;
-  std::cout << "select="<<btofGeom.select.Data() << std::endl;
-  std::cout << "module="<<btofGeom.module.Data() << std::endl;
-
   if ( go )
   if ( !CreateModule( btofGeom.module ) )
     {
@@ -599,9 +589,6 @@ Bool_t Geometry::ConstructSisd( const Char_t *flag, Bool_t go )
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructMagp( const Char_t *flag, Bool_t go )
 {
-  std::cout << std::endl;
-  std::cout << "Construct MAGP with flag "<<flag<< std::endl;
-  std::cout << std::endl;
 
   if ( !magpGeom.Use( "select", flag ) )
     {
@@ -622,8 +609,6 @@ Bool_t Geometry::ConstructMagp( const Char_t *flag, Bool_t go )
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructCave( const Char_t *flag, Bool_t go )
 {
-
-  std::cout << "Building the WAH with flag " << flag << std::endl;
 
   if ( !caveGeom.Use( "select", flag ) )
     {
