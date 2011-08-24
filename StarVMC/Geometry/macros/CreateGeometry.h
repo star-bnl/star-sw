@@ -13,9 +13,16 @@ TDataSet *CreateGeometry(const Char_t *name="y2011") {
   const Char_t *path  = ".:./StarVMC/Geometry/macros:$STAR/StarVMC/Geometry/macros";
   Char_t *file = gSystem->Which(path,"loadStarGeometry.C",kReadPermission);
 
+  // Load the geometry macro
   gROOT -> ProcessLine( Form(".L %s",file ) );
+
+  // Instantiate the geometry
   loadStarGeometry( name );
-  
+
+  // Now drop the geometry macro
+  gROOT -> ProcessLine( Form(".U %s",file ) );
+
+  // Wrap TGeoManager in a TDataSet and return it
   if ( gGeoManager ) 
     {
       geom = new TObjectSet("Geometry",gGeoManager);

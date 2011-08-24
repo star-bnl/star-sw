@@ -24,6 +24,7 @@ void StarGeometryDb()
   //
   // Setup STAR Geometries y2000 to present
   //
+  std::cout << ">>> Setup";
   y2000(); geom.Last(); setTitle("Year 2000 Production Geometry"); geom.select="y2000pro"; geom.fill();
   y2001(); geom.Last(); setTitle("Year 2001 Production Geometry"); geom.select="y2001pro"; geom.fill();
   y2002(); geom.Last(); setTitle("Year 2002 Production Geometry"); geom.select="y2002pro"; geom.fill();
@@ -39,6 +40,7 @@ void StarGeometryDb()
 
   y2012(); geom.Last(); setTitle("Year 2012 Development Geometry"); geom.select="y2012dev"; geom.fill();
   y2013(); geom.Last(); setTitle("Year 2013 Development Geometry"); geom.select="y2013dev"; geom.fill();
+  std::cout << "<<<" << std::endl;
 
 }
 
@@ -49,7 +51,7 @@ void y2000()
   //replace [exe y2000;] with [;"corrected: MWC readout, RICH reconstructed position, no TOF ";
   //                            "actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder"
   //                             exe TPCE00; exe VPDDof; exe ECALof; exe FTPCof;  exe SVTT00; exe CALB00; exe MFLD23;  ]
-  std::cout << "+ Creating STAR y2000 Geometries" << std::endl;
+  std::cout << " y2000 " << std::flush;
   geom.select   = "y2000";
   geom.tpceFlag = "TPCE00"; geom.tpceStat = 1;
   geom.svttFlag = "SVTT00"; geom.ftpcStat = 1;
@@ -75,7 +77,7 @@ void y2001()
   //" by 250 um insterad of 150 um."
   //" -- Obsoleted CorrNum = 1;"
   // exe TPCE00;        exe SVT101;        exe FTPC00;        exe BTOF42;         exe RICH02;        exe ECAL31;         exe CALBa0;         exe MFLD53;
-  std::cout << "+ Creating STAR y2001 Geometries" << std::endl;  
+  std::cout << " y2001 "<< std::flush;;  
   geom.select   = "y2001";
   geom.svttFlag = "SVT101"; geom.svttStat = 1;
   geom.btofFlag = "BTOF42"; geom.btofStat = 1;
@@ -94,7 +96,7 @@ void y2002()
   //replace [exe y2002;] with ["january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD";                           
   //        exe TPCE00;         exe SVT100;         exe RICH02;         exe BTOF42;         exe CALBa0; 
   //        exe ECALof;        exe BBCMon;         exe FPDM00;         exe VPDD02;         exe MFLD54;
-  std::cout << "+ Creating STAR y2002 Geometries" << std::endl;
+  std::cout << " y2002 "<< std::flush;;
   geom.select   = "y2002";
   geom.svttFlag = "SVT100"; geom.svttStat = 1;
   geom.ecalFlag = "ECALof"; geom.ecalStat = 0;
@@ -110,7 +112,7 @@ void y2002()
 }
         
 void y2003()
-{   std::cout << "+ Creating STAR y2003 Geometries" << std::endl;
+{   std::cout << " y2003 "<< std::flush;;
 
   //
   // Defaults for y2003
@@ -204,7 +206,7 @@ void y2003()
 
 
 void y2004()
-{ std::cout << "+ Creating STAR y2004 Geometries" << std::endl;
+{ std::cout << " y2004 "<< std::flush;;
 
   //
   // Defaults for y2004
@@ -299,7 +301,7 @@ void y2004()
 void y2005()
 { 
 
-  std::cout << "+ Creating STAR y2005 Geometries" << std::endl;
+  std::cout << " y2005 "<< std::flush;;
   // Switch on some detectors by default
   geom.bbcmFlag = "BBCMon"; geom.bbcmStat = 1;
 
@@ -417,7 +419,7 @@ void y2005()
 
 void y2006()
 {
-  std::cout << "+ Creating STAR y2006 Geometries" << std::endl;
+  std::cout << " y2006 "<< std::flush;;
   //replace [exe y2006;] with [ "y2006 baseline which is Y2005D+fixed TPC backplane+New SSD"
   //                exe SVT306; exe SCON02; exe BTOF84; exe CALB01; exe ECAL31;	exe BBCMon; exe FPDM01; exe VPDD04; 
   //                exe MFLD54; exe FTPC01; exe PHMD02; exe FTRO01; exe SISD35; exe TPCE03; exe mutd01; exe cave03;
@@ -493,7 +495,7 @@ void y2006()
 
 void y2007()
 {
-  std::cout << "+ Creating STAR y2007 Geometries" << std::endl;
+  std::cout << " y2007 "<< std::flush;;
   //  replace [exe y2007;] with ["y2006 baseline which is Y2006+FMS"
   //           exe SVT306x; exe SCON02; exe BTOFa5; exe CALB02; exe ECAL31;
   //           exe EMCUTS(eemc,0);   "disable 10 keV calorimeter cuts";
@@ -556,7 +558,7 @@ void y2007()
 
 void y2008() 
 {
-  std::cout << "+ Creating STAR y2008 Geometries" << std::endl;
+  std::cout << " y2008 "<< std::flush;;
   //replace [exe y2008;] with [;
   //{ "y2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now"
   //    exe SCON02;    exe TPCE03;    exe BTOFb6;    exe CALB02;    exe ECAL31;
@@ -619,7 +621,7 @@ void y2008()
 
 void y2009()
 {
-  std::cout << "+ Creating STAR y2009 Geometries" << std::endl;
+  std::cout << " y2009 "<< std::flush;;
   geom.upstFlag = "UPSTon"; geom.upstStat=1;
 
 
@@ -713,7 +715,7 @@ void y2009()
 
 void y2010()
 {
-  std::cout << "+ Creating STAR y2010 Geometries" << std::endl;
+  std::cout << " y2010 "<< std::flush;;
   //replace [exe y2010;] with [;
   //{ "y2010 baseline: y2009a+full tof+phmd, blessed 04/13 jcw"
   //  exe y2009a; 
@@ -776,7 +778,7 @@ void y2010()
 
 void y2011()
 {
-  std::cout << "+ Creating STAR y2011 Geometries" << std::endl;
+  std::cout << " y2011 "<< std::flush;;
   /*
 REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC envelope radius and TOF";
     exe SCON13;      "support cone without SVT and new cable weight estimates";
@@ -824,7 +826,7 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
 
 void y2012()
 {
-  std::cout << "+ Creating STAR y2012 Geometries" << std::endl;
+  std::cout << " y2012 "<< std::flush;;
   geom.Use("select","y2011");
 
   geom.select = "upgr2012"; {
@@ -846,9 +848,7 @@ void y2012()
 void y2013()
 {
 
-  std::cout << "+ Creating STAR y2013 Geometries" << std::endl;
-
-
+  std::cout << " y2013 "<< std::flush;;
 
   geom.Use("select","upgr2012");
   geom.select = "upgr2013"; {
