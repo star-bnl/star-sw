@@ -24,8 +24,12 @@ void cacheGeometry( const Char_t *tag, const Char_t *addons )
   TFile *file = new TFile(Form("%s.root",tag));
   if ( file->IsZombie() )
     {
+
       delete file;
-      gROOT -> ProcessLine(".L loadStarGeometry.C");
+
+      const Char_t *path  = ".:./StarVMC/Geometry/macros/:$STAR/StarVMC/Geometry/macros/";
+      Char_t *file = gSystem->Which(path,"loadStarGeometry.C",kReadPermission);
+      gROOT -> ProcessLine(Form(".L %s",file));
 
       // Load development geometry
       loadDevStarGeometry(tag);
