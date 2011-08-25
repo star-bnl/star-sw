@@ -183,6 +183,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       } else {
 	ADC = dE/mAdc2GeV;
 	dE = Adc2GeVReal*m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,ADC,TMath::Abs(CdEdx.zG));
+	if (dE <= 0) return 3;
       }
       goto ENDL;
     case kTpcdCharge:
