@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.14 2011/08/05 00:26:50 cpowell Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.15 2011/08/25 17:37:26 cpowell Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.15  2011/08/25 17:37:26  cpowell
+ * Remove use of function getGeantId(const UInt_t geantid)
+ *
  * Revision 1.14  2011/08/05 00:26:50  cpowell
  * Fix by Xianglei related to the update in StMiniMcMaker for calculating dcaGl of StTinyRcTrack
  *
@@ -430,7 +433,7 @@ StParticleDefinition* StEmbeddingQAUtilities::getParticleDefinition(const UInt_t
     assert(0);
   }
 
-  return StParticleTable::instance()->findParticleByGeantId(getGeantId(geantid));
+  return StParticleTable::instance()->findParticleByGeantId(geantid);
 }
 
 //__________________________________________________________________________________________
@@ -439,7 +442,7 @@ Bool_t StEmbeddingQAUtilities::isGeantIdOk(const UInt_t geantid) const
   /// Check geant id in StParticleTable
   ///  Take into account the modulus of geantid by 10k
 
-  return StParticleTable::instance()->containsGeantId(getGeantId(geantid));
+  return StParticleTable::instance()->containsGeantId(geantid);
 }
 
 //__________________________________________________________________________________________
