@@ -1456,6 +1456,7 @@ StFgtGeomData StFgtGeom::mStrips[] =
     { true, 0.0323748, 37.0723, 38.25 }
 };
 
+//  This initialized an idealized mapping.
 Int_t StFgtGeom::mNaiveMapping[] =
 {
     9,

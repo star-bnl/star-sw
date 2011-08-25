@@ -26,8 +26,10 @@ struct StFgtGeomData
     Double_t upperSpan;
 };
 
-//  StFgtGeom is a singleton class. Only one of it needs to exist in any
-//  program.
+//  StFgtGeom is a "singleton" class. Only one of it needs to exist in any
+//  program. However, because the data contained in this class is entirely
+//  static, the class itself is also entirely static. No instances of this
+//  class can be created.
 class StFgtGeom
 {
     public:
@@ -42,6 +44,9 @@ class StFgtGeom
 	~StFgtGeom() {}
 	*/
 
+	//  For all functions where they appear: Disc can be >= 0 (in theory,
+	//  although only values 0-5 work at the moment, I believe). Quadrant
+	//  is 0-3.  Layer is 'P' or 'R'. Strip is 0-720
 	static Short_t encodeGeoId(
 	    Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
 	)
@@ -166,6 +171,9 @@ class StFgtGeom
 	//  Please note that the following functions do NOT access the STAR
 	//  database to find mapping information. They assume the most
 	//  straight-forward mapping scheme and use that.
+	//  For those functions that have them, currently rdo can be 1-2, arm
+	//  can be 0-5, apv can be 0-23 (although 10, 11, 22, and 23 are not
+	//  technically valid) and channel is 0-127.
 	static Short_t getNaiveGeoIdFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
