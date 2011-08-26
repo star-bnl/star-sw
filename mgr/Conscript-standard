@@ -116,6 +116,7 @@ if ($pkg eq "RTS") {
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS" 
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/src" 
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" 
+            .  $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSRC}
 	    .  $main::PATH_SEPARATOR . $CPPPATH;
     my @src = ();
     #  print "srcL : @srcL\n";
@@ -129,7 +130,8 @@ if ($pkg eq "RTS") {
     @src = ();
 }
 my @VF_daq_pkgs = qw(StDAQMaker StTofHitMaker  StTpcHitMaker StEmcRawMaker  StEEmcPoolmuEztPanitkin  
-		     StBEMCPlots Stl3RawReaderMaker StBTofHitMaker StMtdHitMaker StPmdReadMaker); 
+		     StBEMCPlots Stl3RawReaderMaker StBTofHitMaker StMtdHitMaker StPmdReadMaker 
+		     St_pp2pp_Maker); 
 my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src" 
     . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
     . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include";
@@ -138,7 +140,7 @@ my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src"
 if (!$OnlinePackage) { $OnlinePackage=grep(m/$pkg/,@VF_daq_pkgs); }
 
 if ($OnlinePackage) {
-    $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . "#OnlTools" . $main::PATH_SEPARATOR . $CPPPATH;
+    $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . "#OnlTools" . $main::PATH_SEPARATOR . $CPPPATH . $main::PATH_SEPARATOR . "/usr/include/libxml2";
 }
 if ( $pkg eq "OnlinePlots") {
   $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure"
@@ -1234,7 +1236,8 @@ if ( $#src > -1 ) {
 	  . $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC"
 	    . $main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS"
 	      . $main::PATH_SEPARATOR . "#StRoot/RTS/src"
-		. $main::PATH_SEPARATOR . "StRoot/RTS/src/EVP_READER";
+		. $main::PATH_SEPARATOR . "StRoot/RTS/src/EVP_READER"
+            .  $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSRC};
       $envRTS = $env2->clone('Package'  => $pkg,
 			     'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
 			     'CPPPATH'  => $cpppath,
