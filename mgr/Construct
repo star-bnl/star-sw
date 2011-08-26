@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.168 2011/01/05 21:43:25 jeromel Exp $
+# $Id: Construct,v 1.169 2011/08/26 14:31:02 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -241,7 +241,6 @@ my  $excludeDirList = "^(" . join ("|", @excludeDirList) . ")\$";
 
 #print "$excludeDirList\n";
 my  $items = "(";
-
 if ( defined($SKIP_DIRS) ){ $items .= join("|",split(" ",$SKIP_DIRS));}
 if ($USE_64BITS and $USE_64BITS != "0"){
   if ($items ne "(") { $item .= "|";}
@@ -257,6 +256,8 @@ if ($STAR_SYS =~ /x86_darwin/) {
   if ($items ne '(') {$items .= "|";}
   $items .= "StStarLogger|StEventDisplayMaker|St_geom_Maker"; # if no QT
 }
+if ($items ne '(') {$items .= "|";}
+$items .= "StBTofPool";
 if ($items ne '(') {$items .= ')';}
 else               {$items  = "";}
 #print "skip $items\n";
@@ -376,12 +377,13 @@ my @sysdirlist = qw(asps/Simulation/agetof
 		    StDb 
 		   );
 
-#if (!($USE_64BITS and $USE_64BITS != "0")){
+if (!($USE_64BITS and $USE_64BITS != "0")){
   push @sysdirlist, "asps/rexe";
   push @sysdirlist, "asps/Simulation/geant321";
   push @sysdirlist, "asps/Simulation/gcalor";
   push @sysdirlist, "asps/Simulation/starsim";
-#}
+  push @sysdirlist, "OnlTools";
+}
 
 
 
