@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.169 2011/08/26 14:31:02 fisyak Exp $
+# $Id: Construct,v 1.170 2011/08/26 20:43:56 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -265,7 +265,7 @@ else               {$items  = "";}
 # list of targets
 #
 
-foreach my $dir( "pams", "OnlTools", "StRoot", "StDb" ,"StPiD", "StarVMC" ) {
+foreach my $dir( "pams", "StRoot", "StDb" ,"StPiD", "StarVMC" ) {
   next if !-d $dir and !-l $dir;
   opendir( DIR, $dir ) or die "Can't open $dir\n";
   my @subdirS = readdir DIR;
