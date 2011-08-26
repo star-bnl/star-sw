@@ -484,7 +484,7 @@ protected:
 virtual const void *GetObj(const void *cont,int lev,int idx) const =0; 
 virtual       int  GetSize(const void *cont,int lev        ) const =0; 
 public:
-virtual void Reset(const StEvent *evt=0){Reset((evt)?GetContainer(evt):0);}
+virtual void Reset(const StEvent *evt=0);
 virtual void Reset(const void *cont);
 virtual StDetectorId DetectorId() const = 0;
 virtual int          HitPlaneId() const{return 0;};

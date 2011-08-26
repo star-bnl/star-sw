@@ -1332,8 +1332,16 @@ TString ts;
 //________________________________________________________________________________
 void StHitIter::Reset(const void *cont)
 {
- if (cont) fCont = cont; fKase=kINI;
+  fKase=kINI; fLev=0;
+  if (cont) fCont = cont; 
 }  
+//________________________________________________________________________________
+void StHitIter::Reset(const StEvent *evt)
+{
+  fKase=kINI; fLev=0;  
+  if (!evt) return;
+  fCont = GetContainer(evt);
+}
 //________________________________________________________________________________
 int StHitIter::operator++()
 {
@@ -1655,8 +1663,8 @@ void StEventHitIter::Reset(const StEvent *ev)
   fJter = 0;
   if (ev) fStEvent = ev;
   for (int jk=0;jk<fNter;jk++) {fIter[jk]->Reset(fStEvent);}
+  StHitIter::Reset((void*)0);
 }
-
 //________________________________________________________________________________
 int StEventHitIter::operator++()
 {
