@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.583 2011/08/23 22:26:48 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.584 2011/08/26 14:23:35 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -778,7 +778,9 @@ Int_t StBFChain::Init() {
       SetAttr(".call","SetActive(0)","StTagsMaker::");
       SetAttr(".call","SetActive(0)","StStrangeMuDstMaker::");
     }
+#if 1
     // force load of geometry for VMC and Sti
+    
     if (GetOption("Sti") || GetOption("StiCA") || 
 	GetOption("Stv") || GetOption("StvCA") || 
 	GetOption("StiVMC") ||GetOption("VMC") || 
@@ -788,11 +790,14 @@ Int_t StBFChain::Init() {
 	TString dbTag("r");
 	dbTag += DbAlias[i].tag;
 	if (GetOption(dbTag)) {
-	  const Char_t *path  = "./StarDb/VmcGeometry:$STAR/StarDb/VmcGeometry";
+	  TString path("./StarDb/AgiGeometry:$STAR/StarDb/AgiGeometry");
+	  if (GetOption("AgML")) {
+	    path  = "./StarDb/AgMLGeometry:$STAR/StarDb/AgMLGeometry";
+	  }
 	  TString geom("Geometry.");
 	  geom +=  DbAlias[i].geometry;
 	  geom += ".C";
-	  Char_t *file = gSystem->Which(path,geom,kReadPermission);
+	  Char_t *file = gSystem->Which(path.Data(),geom,kReadPermission);
 	  if (file) {
 	    LOG_INFO << "StBFChain::Init force load of " << file << endm;
 	    TString command = ".L "; command += file;
@@ -801,12 +806,13 @@ Int_t StBFChain::Init() {
 	    command.ReplaceAll(".L ",".U ");
 	    gInterpreter->ProcessLine(command);
 	  } else {
-	    LOG_INFO << "StBFChain::Init file for geomtry tag  " << geom << " has not been found"  << endm;
+	    LOG_INFO << "StBFChain::Init file for geometry tag  " << geom << " has not been found in path" << path << endm;
 	  }
 	  break;
 	}
       }
     }
+#endif
   }
   return iok;
 }
@@ -1415,6 +1421,8 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
 */
 void StBFChain::SetDbOptions(StMaker *mk){
   if (! mk ) return;
+  if (GetOption("AgML")) mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
+  else                   mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
   Int_t i;
   Int_t Idate=0,Itime=0;
   for (i = 1; i < fNoChainOptions; i++) {

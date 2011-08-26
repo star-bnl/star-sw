@@ -26,6 +26,9 @@ Bfc_st BFC[] = { // standard chains
   {"DbV1007"     ,""  ,"","db,ry1h"        ,"","",                "20011007/0 Db Version for p01hi",kFALSE},
   {"DbV1107"     ,""  ,"","db,ry1h"        ,"","",          "20011107/0 Db Version for pass1 p01gk",kFALSE},
   {"DbV1211"     ,""  ,"","db,ry1h"        ,"","",           "20011211/0 Db Version for prod p01gl",kFALSE},
+
+  {"AgML"        ,""  ,"",""                              ,"","","alias VmcGeomtry to AgMLGeometry",kFALSE},
+  {"Agi"         ,""  ,"",""     ,"","","alias VmcGeomtry to AgiGeometry (gstar original geometry)",kFALSE},
   
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
