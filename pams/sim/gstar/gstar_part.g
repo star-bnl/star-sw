@@ -1,8 +1,24 @@
 
-* $Id: gstar_part.g,v 1.33 2011/08/12 15:33:40 jwebb Exp $
+* $Id: gstar_part.g,v 1.34 2011/08/29 20:30:54 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.34  2011/08/29 20:30:54  jwebb
+* Added K+ --> e+ pi0 nu and K- --> e- pi0 nu to satisfy an emedding
+* request http://drupal.star.bnl.gov/STAR/starsimrequests/2010/aug/31/ke3-pp-200-gev-run9
+*
+* Also added the other top 6 decay modes as 10011 -- 15011 and 10012 -- 15012.
+*
+* 10011 : K+ --> m+ nu
+* 11011 : K+ --> pi+ pi0
+* 12011 : K+ --> pi+ pi+ pi-
+* 13011 : K+ --> e+ nu pi0
+* 14011 : K+ --> m+ nu pi0
+* 15011 : K+ --> pi+ pi0 pi0
+*
+* and similar for K- decay modes
+*
 * Revision 1.33  2011/08/12 15:33:40  jwebb
+*
 * Added anti-hypertriton.  Mapped hyper-triton and anti-hyper-triton to
 * geant IDs 6[12]053 and 6[12]054, with two decay modes:
 *
@@ -317,6 +333,47 @@ MODULE gstar_part Is the STAR Particle Database
 * Redefinition of 'standard' particles are assigned GID 10000+
 
 
+*************************************************************************************
+*  KAON+ GID=11
+
+   PARTICLE KAON_PLUS code=10011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={0504,}
+
+   PARTICLE KAON_PLUS code=11011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={0807,}
+
+   PARTICLE KAON_PLUS code=12011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={080809,}
+
+   PARTICLE KAON_PLUS code=13011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={020407,}
+
+   PARTICLE KAON_PLUS code=14011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={050407,}
+
+   PARTICLE KAON_PLUS code=15011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={080707,}
+
+   PARTICLE KAON_MINUS code=10012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={0604,}
+
+   PARTICLE KAON_MINUS code=11012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={0907,}
+
+   PARTICLE KAON_MINUS code=12012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={090908,}
+
+   PARTICLE KAON_MINUS code=13012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={030407,}
+
+   PARTICLE KAON_MINUS code=14012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={060407,}
+
+   PARTICLE KAON_MINUS code=15012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
+                      trktyp=4 bratio={1.0,} mode={090707,}
+
+
+
   """ Omega_plus --> lambdaBar K+ substitutes for standard GID 32 """
   PARTICLE Omega_plus  code=40001 pdg=0     ,
                   mass=1.67245              ,
@@ -334,7 +391,7 @@ MODULE gstar_part Is the STAR Particle Database
              bratio  = {1.000,}             ,
              mode    = {1409,}              ,
              trktyp  = kGtNEUT
-
+ 
   """ Omega_minus --> lambda + K- substitutes for standard GID 24 """
   PARTICLE Omega_minus code=40002 pdg=0     ,
                   mass=1.67245              ,
