@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.15 2011/08/12 15:32:54 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.16 2011/08/29 20:28:26 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,7 +14,14 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.16  2011/08/29 20:28:26  jwebb
+ * Added K+ --> e+ pi0 nu and K- --> e- pi0 nu to satisfy an emedding
+ * request http://drupal.star.bnl.gov/STAR/starsimrequests/2010/aug/31/ke3-pp-200-gev-run9
+ *
+ * Also added the other top 6 decay modes as 10011 -- 15011 and 10012 -- 15012.
+ *
  * Revision 1.15  2011/08/12 15:32:54  jwebb
+ *
  * Added anti-hypertriton.  Mapped hyper-triton and anti-hyper-triton to
  * geant IDs 6[12]053 and 6[12]054, with two decay modes:
  *
@@ -265,6 +272,24 @@ StParticleTable::StParticleTable()
        Geant2Pdg(10150,  223,  omega --> e+ e- );
        Geant2Pdg(10151,  333,  phi --> K+ K- );
        Geant2Pdg(11151,  333,  phi --> e+ e- );
+
+    Geant2Pdg(10011, 321,  Kaon+ --> mu+ nu );    // K+
+    Geant2Pdg(10012, -321, Kaon- --> mu- nu );   // K-
+
+    Geant2Pdg(11011, 321,  Kaon+ --> pi+ pi0 );    // K+
+    Geant2Pdg(11012, -321, Kaon- --> pi- pi0 );   // K-
+
+    Geant2Pdg(12011, 321,  Kaon+ --> 2 pi+ pi- );    // K+
+    Geant2Pdg(12012, -321, Kaon- --> 2 pi- pi+ );   // K-
+
+    Geant2Pdg(13011, 321,  Kaon+ --> e+ nu pi0 );    // K+
+    Geant2Pdg(13012, -321, Kaon- --> e- nu pi0 );   // K-
+
+    Geant2Pdg(14011, 321,  Kaon+ --> mu+ nu pi0 );    // K+
+    Geant2Pdg(14012, -321, Kaon- --> mu- nu pi0 );   // K-
+
+    Geant2Pdg(15011, 321,  Kaon+ --> pi+ pi0 pi0 );    // K+
+    Geant2Pdg(15012, -321, Kaon- --> pi- pi0 pi0 );   // K-
              
        Geant2Pdg( 40001,  3334, Omega-); 
        Geant2Pdg( 40002, -3334, Omega+); 
