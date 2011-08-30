@@ -7,7 +7,7 @@
 #include <math.h>
 
 #include "DisplayDefs.h"
-#include <libxml/xmlreader.h>
+#include <libxml2/libxml/xmlreader.h>
 #include "RTS/include/rtsLog.h"
 
 DisplayProperty::DisplayProperty()
