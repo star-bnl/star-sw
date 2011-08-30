@@ -17,12 +17,20 @@ void loadStarGeometry( const Char_t *mytag="y2009a" )
 
   ///////////////////////////////////////////////////////////
   //
+  // This is the name of the file in which we cache the AgML
+  // geometry
+  //
+  TString filename = ((StBFChain*)StMaker::GetTopChain())->GetFileOut();
+  filename.ReplaceAll(".root",".geom.root");
+
+  ///////////////////////////////////////////////////////////
+  //
   // If there is an existing AgML geometry, load from a cached file
   //
   if ( AgModule::Find("HALL") )
     {
       std::cout << Form(">>> AgML geometry detected.  Loading from %s.C <<<",mytag) << std::endl;
-      TFile *file = new TFile(Form("%s.root",mytag));
+      TFile *file = new TFile(filename);
       gGeoManager = (TGeoManager *)file->Get(mytag);
       assert(gGeoManager);
       return;
@@ -38,8 +46,7 @@ void loadStarGeometry( const Char_t *mytag="y2009a" )
 
   gGeoManager->CloseGeometry();
 
-  TString filename = ((StBFChain*)StMaker::GetTopChain())->GetFileOut();
-  filename.ReplaceAll(".root",".geom.root");
+
   TFile *file = new TFile( filename, "recreate" );
   file->cd();
   gGeoManager->Write();
