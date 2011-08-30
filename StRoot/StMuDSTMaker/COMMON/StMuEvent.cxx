@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.25 2010/05/29 16:36:52 tone421 Exp $
+ * $Id: StMuEvent.cxx,v 1.26 2011/08/30 14:41:26 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -91,7 +91,6 @@ void StMuEvent::fill(const StEvent* event){
     DEBUGVALUE2(event->type());
     DEBUGVALUE2(event->info()->time());
     DEBUGMESSAGE2("no trigger detector collection, creating dummy");
-    mEventInfo.setTime(0);
   }
   else {
     mVpdTriggerDetector = event->triggerDetectorCollection()->vpd();
@@ -268,6 +267,9 @@ float StMuEvent::nearestVertexZ(int vtx_id){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.26  2011/08/30 14:41:26  fisyak
+ * Keep DAQ time for the event untouched
+ *
  * Revision 1.25  2010/05/29 16:36:52  tone421
  * Added pointer protection to StTriggerData member
  *
