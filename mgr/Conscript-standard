@@ -57,7 +57,7 @@ if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
 } else {
     $pkg = File::Basename::basename($Dir);               # print "Run cons in $Dir for $PKG\n";
     $PKG = $pkg;
-    $OnlinePackage=true if $Dir =~ /^OnlTools/;
+    $OnlinePackage=true if $Dir =~ /^OnlTools/;# and $pkg ne "OnlinePlots";
 }
 
 $env1 = $env->clone('Package'  => $pkg);
@@ -116,7 +116,6 @@ if ($pkg eq "RTS") {
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS" 
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/src" 
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" 
-            .  $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSRC}
 	    .  $main::PATH_SEPARATOR . $CPPPATH;
     my @src = ();
     #  print "srcL : @srcL\n";
@@ -140,7 +139,8 @@ my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src"
 if (!$OnlinePackage) { $OnlinePackage=grep(m/$pkg/,@VF_daq_pkgs); }
 
 if ($OnlinePackage) {
-    $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . "#OnlTools" . $main::PATH_SEPARATOR . $CPPPATH . $main::PATH_SEPARATOR . "/usr/include/libxml2";
+    $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . "#OnlTools" . $main::PATH_SEPARATOR . $CPPPATH;
+#. "/usr/include/libxml2" . $main::PATH_SEPARATOR 
 }
 if ( $pkg eq "OnlinePlots") {
   $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure"
@@ -1236,8 +1236,7 @@ if ( $#src > -1 ) {
 	  . $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC"
 	    . $main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS"
 	      . $main::PATH_SEPARATOR . "#StRoot/RTS/src"
-		. $main::PATH_SEPARATOR . "StRoot/RTS/src/EVP_READER"
-            .  $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSRC};
+		. $main::PATH_SEPARATOR . "StRoot/RTS/src/EVP_READER";
       $envRTS = $env2->clone('Package'  => $pkg,
 			     'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
 			     'CPPPATH'  => $cpppath,
