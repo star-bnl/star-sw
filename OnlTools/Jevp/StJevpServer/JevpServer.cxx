@@ -205,7 +205,7 @@ void JevpServer::getMessage() {
   s = mon->Select();
   LOG(DBG, "back from select");
   CP;
-  if((int)s <= 0) {
+  if((long)s <= 0) {
     LOG(WARN, "Got a timeout or an error: %d",s);
     return;
   }
@@ -1830,7 +1830,7 @@ int JevpServer::calculateAndUpdateRunStatus(BuilderStatus *changedBuilder)
 {
   char *newstatus = runStatus.status;
 
-  if(!changedBuilder->official) return NULL;
+  if(!changedBuilder->official) return 0;
 
   TListIter next(&builders);
   BuilderStatus *curr;

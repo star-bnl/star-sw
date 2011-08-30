@@ -294,9 +294,9 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
   plots[n]->getHisto(0)->setLegArgs("l");
   plots[n]->getHisto(1)->setLegArgs("l");
 
-  int q_idx = ((int)&contents.h15_tpc_sec1 - (int)contents.array) / (sizeof(TH1 *));
-  int qs_idx = ((int)&contents.h120_chargeStep_s1 - (int)contents.array) / (sizeof(TH1 *));
-  int cl_qs_idx = ((int)&extras.cl120_chargeStep_s1 - (int)extras.array) / (sizeof(TH1 *));
+  long q_idx = ((long)&contents.h15_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
+  long qs_idx = ((long)&contents.h120_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
+  long cl_qs_idx = ((long)&extras.cl120_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
   
   for(int i=0;i<24;i++) {
     plots[i+q_idx]->setDrawOpts((char *)"colz");
@@ -336,9 +336,9 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
     int has_cld=0;
 
     // printf("aa\n");
-    int q_idx = ((int)&contents.h15_tpc_sec1 - (int)contents.array) / (sizeof(TH1 *));
-    int qs_idx = ((int)&contents.h120_chargeStep_s1 - (int)contents.array) / (sizeof(TH1 *));
-    int cl_qs_idx = ((int)&extras.cl120_chargeStep_s1 - (int)extras.array) / (sizeof(TH1 *));
+    long q_idx = ((long)&contents.h15_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
+    long qs_idx = ((long)&contents.h120_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
+    long cl_qs_idx = ((long)&extras.cl120_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
 
     // printf("q qs cl:  %d %d %d 0x%x 0x%x\n",q_idx,qs_idx,cl_qs_idx,&extras.cl120_chargeStep_s1,extras.array);
     // printf("bb\n"); 

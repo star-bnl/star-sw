@@ -1637,7 +1637,7 @@ void JevpGui::jl_JevpLogic()
     }
     
     //printf("Got something ret=%d mess=0x%x\n",ret,mess);
-    int x = (int)mess->GetClass();
+    long x = (int)mess->GetClass();
 
     LOG(DBG,"--->0x%x\n",x);// , x[0],x[1],x[2],x[3]);
 
