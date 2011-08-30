@@ -1234,8 +1234,8 @@ struct _StarTGeoStackerDummy_
 {
   _StarTGeoStackerDummy_(){
 
-    TGeoManager *manager = new TGeoManager("dyson","The STAR Geometry Manager");
-    manager -> BuildDefaultMaterials();
+    //$$$    TGeoManager *manager = new TGeoManager("dyson","The STAR Geometry Manager");
+    //$$$    manager -> BuildDefaultMaterials();
     //    TBrowser *browser = new TBrowser();
     //    browser->Add( manager->GetListOfShapes(), "Shapes" );
 
