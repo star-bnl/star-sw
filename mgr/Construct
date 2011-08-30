@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.171 2011/08/30 15:53:10 fisyak Exp $
+# $Id: Construct,v 1.172 2011/08/30 16:00:50 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -256,8 +256,8 @@ if ($STAR_SYS =~ /x86_darwin/) {
   if ($items ne '(') {$items .= "|";}
   $items .= "StStarLogger|StEventDisplayMaker|St_geom_Maker"; # if no QT
 }
-if ($items ne '(') {$items .= "|";}
-$items .= "StBTofPool";
+#if ($items ne '(') {$items .= "|";}
+#$items .= "StBTofPool";
 if ($items ne '(') {$items .= ')';}
 else               {$items  = "";}
 #print "skip $items\n";
