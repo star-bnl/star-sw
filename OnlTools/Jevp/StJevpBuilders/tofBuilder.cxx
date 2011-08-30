@@ -298,7 +298,7 @@ void tofBuilder::startrun(daqReader *rdr) {
   ReadValidBunchidPhase();
   ReadTraymaskoutList();
 
-  int TOF_L0_trg_idx = ((int)&contents.TOF_L0_trg[0] - (int)&contents) / 4;
+  long TOF_L0_trg_idx = ((long)&contents.TOF_L0_trg[0] - (long)&contents) / 4;
 
   //printf("labels\n");
 

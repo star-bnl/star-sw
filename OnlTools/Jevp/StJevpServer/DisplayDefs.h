@@ -48,7 +48,7 @@ class DisplayNode {
   int matchTags(char *tags);
 
   int nSiblings() { 
-    LOG(DBG, "nsibs:   %s  next=0x%x",name,(unsigned int) next);
+    LOG(DBG, "nsibs:   %s  next=0x%x",name,(unsigned long) next);
     if(!next) return 0; 
     return next->nSiblings() + 1;
   }
