@@ -1,3 +1,10 @@
+//  Averages the requested FTPC extra temperature reading for the requested time period
+//  All readings below minValueForAverage are rejected
+//  Run twice: 
+//            The first time with minValueForAverage = minGasTemperature
+//            The second time with minValueForAverage = minumum temperature according to 
+//            temperature plot
+
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -26,7 +33,7 @@ inline Double_t to_double(const T& t)
 
 
 void getAvgExtraTemps(std::string dbpath = "Conditions_ftpc/ftpcTemps/extra1East", std::string minTime = "2009-06-16 00:00:00", 
-	std::string maxTime = "2009-06-29 23:59:59") {
+	std::string maxTime = "2009-06-29 23:59:59", Double_t minValueForAverage = 20.0) {
 
 	std::string::size_type pos = dbpath.find_last_not_of("/");
 	if ( pos == (dbpath.length()-1) ) {
@@ -64,6 +71,7 @@ void getAvgExtraTemps(std::string dbpath = "Conditions_ftpc/ftpcTemps/extra1East
 	sql.append(maxTime);
 	sql.append("'");
 
+
     res = db->Query(sql.c_str());
 	int nrows = res->GetRowCount();
 	if (nrows <= 0) {
@@ -82,6 +90,7 @@ void getAvgExtraTemps(std::string dbpath = "Conditions_ftpc/ftpcTemps/extra1East
     Int_t timeMax = to_int(row->GetField(1));
     Int_t timeDiff = timeMax - timeMin;
     Int_t timeNbins = to_int(row->GetField(2));
+cout<<"minTime ="<<minTime<<" maxTime = "<<maxTime<<" timeNbins = "<<timeNbins<<endl;
 
 //    Double_t valMin = to_double(row->GetField(3));
 //    Double_t valMax = to_double(row->GetField(4));
@@ -135,17 +144,28 @@ void getAvgExtraTemps(std::string dbpath = "Conditions_ftpc/ftpcTemps/extra1East
 	}
 
     int i = 0;
+    int ngood = 0;
+    int nreject = 0;
     Double_t extraAverage = 0; 
     while ((row = res->Next())) {
         i++;
         if (i%100 == 0) {
             std::cout << "  working on " << i << "th row \n";
         }
-        h1->Fill(to_int(row->GetField(0)) - timeMin, to_double(row->GetField(1)));
-        extraAverage += to_double(row->GetField(1));
+        if (to_double(row->GetField(1))>=minValueForAverage) {
+           h1->Fill(to_int(row->GetField(0)) - timeMin, to_double(row->GetField(1)));
+           extraAverage += to_double(row->GetField(1));
+           cout<<"i = "<<i<<" extra temp "<<row->GetField(1)<<endl;
+           ngood++;
+        }
+        else { 
+            cout<<"i = "<<i<<" extra temp "<<row->GetField(1)<<" rejected"<<endl;
+            nreject++;
+        }
     }
 	
-   cout<<mParam<<" = ("<<extraAverage<<"/ i  = "<<i<<") = "<<extraAverage/i<<endl;
+   cout<<mParam<<" = ("<<extraAverage<<"/ ngood  = "<<ngood<<") = "<<extraAverage/ngood<<endl;
+   cout<<"Rejected "<<nreject<<" readings lower than "<<minValueForAverage<<endl;
    delete res;
    delete db;
 
