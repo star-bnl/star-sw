@@ -3,6 +3,8 @@
  */
 TDataSet *CreateGeometry(const Char_t *name="y2011") {
 
+  std::cout << "=====================================>>> CreateGeometry " << name << " <<<=====================================" << std::endl;
+
   TObjectSet *geom = NULL;
 
   // Check for existing geometries and return (NULL) 
@@ -22,6 +24,13 @@ TDataSet *CreateGeometry(const Char_t *name="y2011") {
 
   // Instantiate the geometry
   loadStarGeometry( name );
+
+  // Make damn sure we have a navigator... 
+  assert(gGeoManager);
+  //  if ( !gGeoManager->GetCurrentNavigator() )
+  //    {
+  //      gGeoManager->AddNavigator( new TGeoNavigator() );
+  //    }
 
   // Wrap TGeoManager in a TDataSet and return it
   if ( gGeoManager ) 

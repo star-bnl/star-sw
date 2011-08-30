@@ -6,21 +6,45 @@ void loadStarGeometry( const Char_t *mytag="y2009a" )
 
   TString tag = mytag;
   gSystem->AddIncludePath(" -IStRoot -Igeom -IStarVMC -IStarVMC/Geometry/macros ");
-
-  gROOT   -> LoadMacro("Load.C");
-
-  Load("StarAgmlLib.so");                        // AgML support library
-  Load("libGeometry.so");                        // Geometry Steering
-  Load("libStarGeometry.so");                    // Geometry Modules
-
   gErrorIgnoreLevel=9999;                        // Silence ROOT warnings for now
 
+  if ( gGeoManager==NULL ) 
+    {
+      gGeoManager = new TGeoManager(mytag,Form("%s/AgML",mytag));
+    }
+
   AgBlock::SetStacker( new StarTGeoStacker() );  // Creates TGeo geometry
+
+  ///////////////////////////////////////////////////////////
+  //
+  // If there is an existing AgML geometry, load from a cached file
+  //
+  if ( AgModule::Find("HALL") )
+    {
+      std::cout << Form(">>> AgML geometry detected.  Loading from %s.C <<<",mytag) << std::endl;
+      TFile *file = new TFile(Form("%s.root",mytag));
+      gGeoManager = (TGeoManager *)file->Get(mytag);
+      assert(gGeoManager);
+      return;
+    }
 
   build = new Geometry();                        // Instantiate the geometry
   build -> ConstructGeometry ( tag );            
 
+  /**
   gGeoManager->CloseGeometry();
+  gGeoManager->Export(Form("%s.C",mytag));
+  **/
+
+  gGeoManager->CloseGeometry();
+
+  TString filename = ((StBFChain*)StMaker::GetTopChain())->GetFileOut();
+  filename.ReplaceAll(".root",".geom.root");
+  TFile *file = new TFile( filename, "recreate" );
+  file->cd();
+  gGeoManager->Write();
+  file->Close();
+  delete file;
 
   gErrorIgnoreLevel=0;                           // Enable ROOT warnings
 
