@@ -25,14 +25,14 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
                               std::string unit) {  
 
   ready = false;
-
   // Keep track of the success
   bool ok = true;
 
   // Buffer for reading
   const int size = 100;
   char line[size];
-   // Open the material list
+  
+  // Open the material list
   std::ifstream fmplist;
   fmplist.open(mplist.c_str(), std::ios::in);
   if (fmplist.fail()) {
@@ -42,19 +42,28 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
     printf("    The file perhaps does not exist.\n");
     return false;
   }
-  
+
   // Read the material list
   nMaterials = 0;
-  int il = 0;
+  int il = 0, icurrmat = -1;
   bool readerror = false;
   while (fmplist.getline(line, size, '\n')) {
     il++;
+    // Skip page feed
+    if (strcmp(line,"1") == 0) {
+      fmplist.getline(line, size, '\n'); il++;
+      fmplist.getline(line, size, '\n'); il++;
+      fmplist.getline(line, size, '\n'); il++;
+      fmplist.getline(line, size, '\n'); il++;
+      fmplist.getline(line, size, '\n'); il++;
+      continue;
+    }
     // Split the line in tokens
     char* token = NULL;
     token = strtok(line, " ");
     // Skip blank lines and headers
-    if (!token || strcmp(token, " ") == 0 || strcmp(token, "\n") == 0 || 
-        strcmp(token, "TEMPERATURE") == 0 || strcmp(token, "PROPERTY=") == 0 ||
+    if (!token || strcmp(token," ") == 0 || strcmp(token,"\n") == 0 || 
+        strcmp(token,"TEMPERATURE") == 0 || strcmp(token,"PROPERTY=") == 0 ||
         int(token[0]) == 10 || int(token[0]) == 13) continue;
     // Read number of materials, 
     // ensure it does not exceed the maximum and initialise the list
@@ -79,8 +88,59 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
         printf("ComponentAnsys121::Initialise:\n");
         printf("    Number of materials: %d\n", nMaterials);
       }
+    } else if (strcmp(token, "MATERIAL") == 0) {
+      // Version 12 format: read material number
+      token = strtok(NULL, " ");
+      token = strtok(NULL, " "); 
+      icurrmat = ReadInteger(token, -1, readerror);
+      if (readerror) {
+        printf("ComponentAnsys121::Initialise:\n");
+        printf("    Error reading file %s (line %d).\n", mplist.c_str(), il);
+        fmplist.close();
+        ok = false;
+        return false;
+      }
+    } else if (strcmp(token,"TEMP") == 0) {
+      // Version 12 format: read property tag and value
+      token = strtok(NULL, " ");
+      int itype = 0;
+      if (strncmp(token,"PERX",4) == 0) {
+        itype = 1;
+      } else if (strncmp(token,"RSVX",4) == 0) {
+        itype = 2;
+      } else {
+        printf("ComponentAnsys121::Initialise:\n");
+        printf("    Found unknown material property flag %s\n", token);
+        printf("    on material properties file %s (line %d).\n",
+               mplist.c_str(), il);
+        ok = false;
+      }
+      fmplist.getline(line, size, '\n'); il++;
+      token = NULL;
+      token = strtok(line, " ");
+      if (icurrmat < 1 || icurrmat > nMaterials) {
+        printf("ComponentAnsys121::Initialise:\n");
+        printf("    Found out-of-range current material index %d \n", 
+               icurrmat);
+        printf("    in material properties file %s.\n", mplist.c_str());
+        ok = false;
+        readerror = false;
+      } else if (itype == 1) {
+        materials[icurrmat - 1].eps = ReadDouble(token, -1, readerror);
+      } else if (itype == 2) {
+        materials[icurrmat - 1].ohm = ReadDouble(token, -1, readerror);
+      }
+      if (readerror) {
+        printf("ComponentAnsys121::Initialise:\n");
+        printf("    Error reading file %s (line %d).\n", mplist.c_str(), il);
+        fmplist.close();
+        ok = false;
+        return false;
+      }
     } else if (strcmp(token,"PROPERTY") == 0) {
-      token = strtok(NULL, " "); token = strtok(NULL, " ");
+      // Version 11 format
+      token = strtok(NULL, " ");
+      token = strtok(NULL, " ");
       int itype = 0;
       if (strcmp(token,"PERX") == 0) {
         itype = 1;
@@ -88,9 +148,9 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
         itype = 2;
       } else {
         printf("ComponentAnsys121::Initialise:\n");
-        printf("    Found unknown material property flag %s \n", token);
-        printf("     on material properties file %s (line %d).\n",
-	       mplist.c_str(), il);
+        printf("    Found unknown material property flag %s\n", token);
+        printf("    on material properties file %s (line %d).\n",
+               mplist.c_str(), il);
         ok = false;
       }
       token = strtok(NULL, " ");
@@ -98,14 +158,14 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
       int imat = ReadInteger(token, -1, readerror);
       if (readerror) {
         printf("ComponentAnsys121::Initialise:\n");
-        printf("     Error reading file %s (line %d).\n", mplist.c_str(), il);
+        printf("    Error reading file %s (line %d).\n", mplist.c_str(), il);
         fmplist.close();
         ok = false;
         return false;
       } else if (imat < 1 || imat > nMaterials) {
-        printf("ComponentAnsys121::Initialise\n");
-        printf("    Found out-of-range material index %d in\n", imat);
-        printf("     material properties file %s.\n", mplist.c_str());
+        printf("ComponentAnsys121::Initialise:\n");
+        printf("    Found out-of-range material index %d \n", imat);
+        printf("    in material properties file %s.\n", mplist.c_str());
         ok = false;
       } else {
         fmplist.getline(line, size, '\n'); il++;
@@ -120,7 +180,7 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
         }
         if (readerror) {
           printf("ComponentAnsys121::Initialise:\n");
-          printf("     Error reading file %s (line %d).\n", mplist.c_str(), il);
+          printf("    Error reading file %s (line %d).\n", mplist.c_str(), il);
           fmplist.close();
           ok = false;
           return false;
@@ -128,9 +188,11 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
       }
     }
   }
+  
   // Close the file
   fmplist.close();
-   // Find the lowest epsilon, check for eps = 0, set default drift media
+
+  // Find the lowest epsilon, check for eps = 0, set default drift media
   double epsmin = -1; int iepsmin = -1;
   for (int imat = 0; imat < nMaterials; ++imat) {
     if (materials[imat].eps < 0) continue;
@@ -144,24 +206,26 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
       iepsmin = imat;
     }
   }
+  
   if (iepsmin < 0) {
     printf("ComponentAnsys121::Initialise:\n");
-    printf("     No material with positive permittivity found in\n");
-    printf("     material list %s.\n", mplist.c_str());
+    printf("    No material with positive permittivity found \n");
+    printf("    in material list %s.\n", mplist.c_str());
     ok = false;
   } else {
     for (int imat = 0; imat < nMaterials; ++imat) {
       if (imat == iepsmin) {
         materials[imat].driftmedium = true;
       } else {
-         materials[imat].driftmedium = false;
+        materials[imat].driftmedium = false;
       }
     }
   }
+  
   // Tell how many lines read
   printf("ComponentAnsys121::Initialise:\n");
-  printf("    Read properties of %d materials\n", nMaterials);
-  printf("    from file %s.\n", mplist.c_str());
+  printf("    Read properties of %d materials from file %s.\n", 
+         nMaterials, mplist.c_str());
   if (debug) PrintMaterials();
   
   // Open the element list
