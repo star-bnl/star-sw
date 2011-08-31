@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.172 2011/08/30 16:00:50 fisyak Exp $
+# $Id: Construct,v 1.173 2011/08/31 23:20:39 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -387,7 +387,7 @@ if (!($USE_64BITS and $USE_64BITS != "0")){
   push @sysdirlist, "OnlTools/StOnlineDisplay";
 }
 
-print "sysdirlist = @sysdirlist \n subdirs = @subdirs\n";
+#print "sysdirlist = @sysdirlist \n subdirs = @subdirs\n";
 
 foreach $dir(@sysdirlist , @subdirs ) {
     if ( -d $dir or -l $dir ) {
