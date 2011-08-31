@@ -69,7 +69,6 @@ static StvConst  *kons = StvConst::Inst();
       mCurrTrak->CutTail();	//Clean track from previous failure
       nAdded = FindTrack(0);
       if (!nAdded) 				continue;
-      assert(!mCurrTrak->Check("One",1));
 						if (trkShow)mCurrTrak->Show();
       int ans = 0,fail=13;
   //		Refit track   
@@ -80,7 +79,7 @@ static StvConst  *kons = StvConst::Inst();
 	if (ans) 				continue;
 	if (mCurrTrak->Check("Two",1+2))  	continue;
 	nAdded = FindTrack(1);
-	assert(!mCurrTrak->Check("THree",2));
+	if (mCurrTrak->Check("THree",2))	continue;
   // few hits added. Refit track to beam again 
 	ans = Refit(0);
 	if (ans) 				continue;
