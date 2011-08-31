@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.10 2011/08/19 02:40:43 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.11 2011/08/31 19:50:17 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.11  2011/08/31 19:50:17  perev
+ * fix assert for small rxy
+ *
  * Revision 1.10  2011/08/19 02:40:43  perev
  * Add errors
  *
@@ -1253,7 +1256,7 @@ static int nCall = 0; nCall++;
   gTrack->setDcaGeometry(dca);
   dca->set(&myImp.mImp,&myImp.mImpImp);
   StvDebug::Count("DcaGeo",dca->params()[0]);
-  assert(fabs(pars.getRxy()-fabs(dca->params()[0]))<1e-2*pars.getRxy());
+  assert(fabs(pars.getRxy()-fabs(dca->params()[0]))<1e-2*(1+pars.getRxy()));
 
 }
 //_____________________________________________________________________________
