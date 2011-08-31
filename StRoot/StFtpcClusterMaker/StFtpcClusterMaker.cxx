@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.106  2011/08/31 16:39:37  jcs
+// output ampSlope contents to LOG_INFO
+//
 // Revision 1.105  2010/12/17 14:54:56  jcs
 // For embedding, read raw data from StFtpcMixerMaker tables
 //
@@ -695,8 +698,9 @@ Int_t StFtpcClusterMaker::Make()
      LOG_INFO<<"          angleOffsetWest           = "<<dbReader.angleOffsetWest()<<endm;
      LOG_INFO<<"          angleOffsetEast           = "<<dbReader.angleOffsetEast()<<endm;
      LOG_INFO<<"          minChargeWindow           = "<<dbReader.minChargeWindow()<<endm;
+     LOG_INFO << "        using gain table: amplitudeSlope(1,0) = "<<dbReader.amplitudeSlope(1,0)<<",  amplitudeSlope(1,1) = "<<dbReader.amplitudeSlope(1,1)<< endm;
   }
-        LOG_DEBUG<<" Using microsecondsPerTimebin = "<<dbReader.microsecondsPerTimebin()<<" for this event"<<endm;
+     LOG_DEBUG<<" Using microsecondsPerTimebin = "<<dbReader.microsecondsPerTimebin()<<" for this event"<<endm;
 
   // Test if input data is real data (DAQ)
 
