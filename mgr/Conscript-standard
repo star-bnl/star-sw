@@ -128,15 +128,15 @@ if ($pkg eq "RTS") {
     @srcL = @src;
     @src = ();
 }
-my @VF_daq_pkgs = qw(StDAQMaker StTofHitMaker  StTpcHitMaker StEmcRawMaker  StEEmcPoolmuEztPanitkin  
-		     StBEMCPlots Stl3RawReaderMaker StBTofHitMaker StMtdHitMaker StPmdReadMaker 
-		     St_pp2pp_Maker); 
+my @DAQ_pkgs = qw(StDAQMaker StTofHitMaker  StTpcHitMaker StEmcRawMaker  StEEmcPoolmuEztPanitkin  
+		  StBEMCPlots Stl3RawReaderMaker StBTofHitMaker StMtdHitMaker StPmdReadMaker 
+		  St_pp2pp_Maker); 
 my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src" 
-    . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
-    . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include";
+                     . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
+                     . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include";
 
 
-if (!$OnlinePackage) { $OnlinePackage=grep(m/$pkg/,@VF_daq_pkgs); }
+if (!$OnlinePackage) { $OnlinePackage=grep(m/$pkg/,@DAQ_pkgs); }
 
 if ($OnlinePackage) {
     $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . "#OnlTools" . $main::PATH_SEPARATOR . $CPPPATH;
@@ -175,7 +175,9 @@ my @g77pkgs = qw(geometry gen sim tls minicern geant3);
 my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath\n" if $param::debug;
 
 
-# some compiler specific treatments below
+#+
+# some compiler specific treatments below, global or conditional
+#-
 if( $FC eq 'pgf77'){
   if ($DirPath  =~ /$g77pkgs/ or $DirPath !~ /pams/) {
     $FC       = $env1->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
@@ -203,7 +205,10 @@ if ($FC eq 'g77' or $FC eq 'gfortran'){
     }
 }
 
-
+#+
+# Now we treat anything which is neither sim nor gen
+# This will include all makers
+#-
 if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "\t--- Regular case treatment (not gen not sim) ---\n" if $param::debug;
   
@@ -482,9 +487,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	      $pkg =~ m/^StTriggerUtilities$/ ||
 	      $pkg =~ m/^Stv$/                ||
 	      $pkg =~ m/^Sti/ && $pkg !~ m/StiVMC/) {
+
 	$CPPPATH = "#" . $Dir;
-#    $CPPPATH = $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . $CPPATH;
-    
+
 	print "WARNING Package $pkg requires a glob() to be called\n" if $param::debug;
     
 	foreach my $subdir ( glob("$Dir/*") ){
@@ -504,6 +509,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#$SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
     
 	#print "-=-=-=-=-=-= SO_PKG = $SO_PKG\n";
+	if ( $pkg =~ m/^StJetMaker$/ ){
+	    $CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
+	}
+
+
 
     } elsif ( $pkg =~ m/^StDaqLib$/ ) {
 	$CPPPATH = "#" . $Dir;
