@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.17 2011/05/27 18:25:32 genevb Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.18 2011/08/31 23:24:53 perev Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -104,6 +104,7 @@ StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
   for (Int_t trackIt = 0; trackIt < mTrackStore->GetEntriesFast();++trackIt) {
     
     StFtpcTrack* kTrack = (StFtpcTrack*)mTrackStore->At(trackIt);
+    if (kTrack->GetP()<=1e-6) continue; 	//sanity check (VP)
     StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
     FillDetectorInfo(detInfo, kTrack, kTRUE);
     // track node where the new StTrack will reside
@@ -195,7 +196,8 @@ StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
     map<StFtpcTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
 
     if (itKtrack == mTrkNodeMap.end()) {
-      throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
+      continue;
+//      throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
     }
     
     StTrackNode* currentTrackNode = (*itKtrack).second;
