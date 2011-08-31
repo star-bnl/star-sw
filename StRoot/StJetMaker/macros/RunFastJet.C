@@ -3,6 +3,13 @@
 // Texas A&M University
 // 31 Aug 2011
 //
+// $Id: RunFastJet.C,v 1.2 2011/08/31 18:03:29 pibero Exp $
+//
+// $Log: RunFastJet.C,v $
+// Revision 1.2  2011/08/31 18:03:29  pibero
+// Minor updates
+//
+//
 
 void RunFastJet(int nevents = 1e6,
 		 const char* mudstfile = "/star/data60/reco/production2009_200Gev_Single/FullField/P10ic/2009/151/10151044/st_physics_adc_10151044_raw_6320004.MuDst.root",
@@ -13,18 +20,6 @@ void RunFastJet(int nevents = 1e6,
   cout << "Read MuDst file:\t" << mudstfile << endl;
   cout << "Write jet file:\t" << jetfile << endl;
   cout << "Write skim file:\t" << skimfile << endl;
-
-#if 0
-  // Load fastjet libraries
-  assert(gSystem->Load("$HOME/fastjet-2.4.4/src/.libs/libfastjet.so") == 0);
-  assert(gSystem->Load("$HOME/fastjet-2.4.4/plugins/CDFCones/.libs/libCDFConesPlugin.so") == 0);
-  assert(gSystem->Load("$HOME/fastjet-2.4.4/plugins/NestedDefs/.libs/libNestedDefsPlugin.so") == 0);
-  assert(gSystem->Load("$HOME/fastjet-2.4.4/plugins/Jade/.libs/libJadePlugin.so") == 0);
-  assert(gSystem->Load("$HOME/fastjet-2.4.4/plugins/EECambridge/.libs/libEECambridgePlugin.so") == 0);
-  assert(gSystem->Load("$HOME/fastjet-2.4.4/plugins/SISCone/siscone/siscone/.libs/libsiscone.so") == 0);
-  assert(gSystem->Load("$HOME/fastjet-2.4.4/plugins/SISCone/siscone/siscone/spherical/.libs/libsiscone_spherical.so") == 0);
-  assert(gSystem->Load("$HOME/fastjet-2.4.4/plugins/SISCone/.libs/libSISConePlugin.so") == 0);
-#endif
 
   gROOT->Macro("loadMuDst.C");
   gROOT->Macro("LoadLogger.C");
