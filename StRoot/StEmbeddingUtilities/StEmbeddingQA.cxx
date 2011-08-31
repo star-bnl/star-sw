@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.20 2011/04/01 05:05:49 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.21 2011/08/31 18:04:48 cpowell Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.21  2011/08/31 18:04:48  cpowell
+ * Extended the range of hGeantId
+ *
  * Revision 1.20  2011/04/01 05:05:49  hmasui
  * Track selections by StEmbeddingQAUtilities. Added 1/pt(RC)-1/pt(MC) vs pt, and pt dependent Ncommon vs NhitFit histograms
  *
@@ -333,7 +336,7 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
     utility->setStyle(mhNParticles[ic]);
 
     // Initialize geantid histogram. Increase the bin and maximum in order to cover id > 10k
-    mhGeantId[ic] = new TH1D(Form("hGeantId_%d", ic), Form("Geantid, %s", utility->getCategoryTitle(ic).Data()), 60000, 0, 60000) ;
+    mhGeantId[ic] = new TH1D(Form("hGeantId_%d", ic), Form("Geantid, %s", utility->getCategoryTitle(ic).Data()), 100000, 0, 100000) ;
     mhGeantId[ic]->SetXTitle("Geantid");
 
     utility->setStyle(mhGeantId[ic]);
