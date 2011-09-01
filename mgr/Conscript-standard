@@ -509,10 +509,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#$SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
     
 	#print "-=-=-=-=-=-= SO_PKG = $SO_PKG\n";
-	if ( $pkg =~ m/^StJetMaker$/ ){
-	    $CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
-	}
 
+    } elsif ( $pkg =~ m/^StJetFinder$/ ){
+	$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
 
 
     } elsif ( $pkg =~ m/^StDaqLib$/ ) {
