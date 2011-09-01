@@ -10,13 +10,7 @@ namespace IDSMGEO1 // $NMSPC
       ClassDef(Idsg_t,1); 
       public: 
       Float_t version; 
-      Float_t lenm; 
-      Float_t rm; 
-      Float_t lenw; 
-      Float_t rw; 
-      Float_t thick; 
-      Float_t zstart; 
-      Float_t angdel; 
+      Float_t rf; 
       Float_t angflat; 
       Float_t r1res; 
       Float_t r2res; 
@@ -27,13 +21,7 @@ namespace IDSMGEO1 // $NMSPC
       Idsg_t() : AgStructure("Idsg_t","User-defined AgML structure") 
       { 
          version=0; 
-         lenm=0; 
-         rm=0; 
-         lenw=0; 
-         rw=0; 
-         thick=0; 
-         zstart=0; 
-         angdel=0; 
+         rf=0; 
          angflat=0; 
          r1res=0; 
          r2res=0; 
@@ -87,65 +75,89 @@ namespace IDSMGEO1 // $NMSPC
       virtual void End(){ }; 
       ClassDef(IDSM,1); 
    }; 
-   // ---------------------------------------------------------------------- OSCA -- 
-   ///@defgroup OSCA_doc 
-   ///@class OSCA 
-   ///@brief middle cylinder, carbon fiber 
-   class OSCA : public AgBlock 
+   // ---------------------------------------------------------------------- SUCA -- 
+   ///@defgroup SUCA_doc 
+   ///@class SUCA 
+   ///@brief central CFiber tube 
+   class SUCA : public AgBlock 
    {  public: 
-      OSCA() : AgBlock("OSCA","middle cylinder, carbon fiber"){ }; 
-      ~OSCA(){ }; 
+      SUCA() : AgBlock("SUCA","central CFiber tube"){ }; 
+      ~SUCA(){ }; 
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
-      ClassDef(OSCA,1); 
+      ClassDef(SUCA,1); 
    }; 
-   // ---------------------------------------------------------------------- WSCC -- 
-   ///@defgroup WSCC_doc 
-   ///@class WSCC 
-   ///@brief  east/west cylinder, carbon fiber 
-   class WSCC : public AgBlock 
+   // ---------------------------------------------------------------------- SUCB -- 
+   ///@defgroup SUCB_doc 
+   ///@class SUCB 
+   ///@brief small Alu ring at central tube 
+   class SUCB : public AgBlock 
    {  public: 
-      WSCC() : AgBlock("WSCC"," east/west cylinder, carbon fiber"){ }; 
-      ~WSCC(){ }; 
+      SUCB() : AgBlock("SUCB","small Alu ring at central tube"){ }; 
+      ~SUCB(){ }; 
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
-      ClassDef(WSCC,1); 
+      ClassDef(SUCB,1); 
    }; 
-   // ---------------------------------------------------------------------- WSCO -- 
-   ///@defgroup WSCO_doc 
-   ///@class WSCO 
-   ///@brief  circle carbon fiber 
-   class WSCO : public AgBlock 
+   // ---------------------------------------------------------------------- SUCC -- 
+   ///@defgroup SUCC_doc 
+   ///@class SUCC 
+   ///@brief CFiber cone section 
+   class SUCC : public AgBlock 
    {  public: 
-      WSCO() : AgBlock("WSCO"," circle carbon fiber"){ }; 
-      ~WSCO(){ }; 
+      SUCC() : AgBlock("SUCC","CFiber cone section"){ }; 
+      ~SUCC(){ }; 
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
-      ClassDef(WSCO,1); 
+      ClassDef(SUCC,1); 
    }; 
-   // ---------------------------------------------------------------------- WSCD -- 
-   ///@defgroup WSCD_doc 
-   ///@class WSCD 
-   ///@brief  east/west disk, carbon fiber 
-   class WSCD : public AgBlock 
+   // ---------------------------------------------------------------------- SUCD -- 
+   ///@defgroup SUCD_doc 
+   ///@class SUCD 
+   ///@brief large Alu ring at cone 
+   class SUCD : public AgBlock 
    {  public: 
-      WSCD() : AgBlock("WSCD"," east/west disk, carbon fiber"){ }; 
-      ~WSCD(){ }; 
+      SUCD() : AgBlock("SUCD","large Alu ring at cone"){ }; 
+      ~SUCD(){ }; 
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
-      ClassDef(WSCD,1); 
+      ClassDef(SUCD,1); 
    }; 
-   // ---------------------------------------------------------------------- WSCP -- 
-   ///@defgroup WSCP_doc 
-   ///@class WSCP 
-   ///@brief  circle carbon fiber 
-   class WSCP : public AgBlock 
+   // ---------------------------------------------------------------------- SUCE -- 
+   ///@defgroup SUCE_doc 
+   ///@class SUCE 
+   ///@brief East or West CFiber tube 
+   class SUCE : public AgBlock 
    {  public: 
-      WSCP() : AgBlock("WSCP"," circle carbon fiber"){ }; 
-      ~WSCP(){ }; 
+      SUCE() : AgBlock("SUCE","East or West CFiber tube"){ }; 
+      ~SUCE(){ }; 
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
-      ClassDef(WSCP,1); 
+      ClassDef(SUCE,1); 
+   }; 
+   // ---------------------------------------------------------------------- SUCF -- 
+   ///@defgroup SUCF_doc 
+   ///@class SUCF 
+   ///@brief large Alu ring at the end of west cylinder 
+   class SUCF : public AgBlock 
+   {  public: 
+      SUCF() : AgBlock("SUCF","large Alu ring at the end of west cylinder"){ }; 
+      ~SUCF(){ }; 
+      virtual void Block( AgCreate c ); 
+      virtual void End(){ }; 
+      ClassDef(SUCF,1); 
+   }; 
+   // ---------------------------------------------------------------------- SUCG -- 
+   ///@defgroup SUCG_doc 
+   ///@class SUCG 
+   ///@brief large Alu end disk 
+   class SUCG : public AgBlock 
+   {  public: 
+      SUCG() : AgBlock("SUCG","large Alu end disk"){ }; 
+      ~SUCG(){ }; 
+      virtual void Block( AgCreate c ); 
+      virtual void End(){ }; 
+      ClassDef(SUCG,1); 
    }; 
    // ---------------------------------------------------------------------- TPRR -- 
    ///@defgroup TPRR_doc 
@@ -170,6 +182,18 @@ namespace IDSMGEO1 // $NMSPC
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
       ClassDef(TPRT,1); 
+   }; 
+   // ---------------------------------------------------------------------- FGCB -- 
+   ///@defgroup FGCB_doc 
+   ///@class FGCB 
+   ///@brief FGT cables mixture  
+   class FGCB : public AgBlock 
+   {  public: 
+      FGCB() : AgBlock("FGCB","FGT cables mixture "){ }; 
+      ~FGCB(){ }; 
+      virtual void Block( AgCreate c ); 
+      virtual void End(){ }; 
+      ClassDef(FGCB,1); 
    }; 
    /// \class IdsmGeo1 
    /// \brief  simplified  beam support cone for 2012  
