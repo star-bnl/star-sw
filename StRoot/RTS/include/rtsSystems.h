@@ -82,15 +82,17 @@
 #define TCD_BSMD        15      //
 #define TCD_CTB         16	// trigger-only
 #define TCD_BTOW        17      //
-#define TCD_FTPC        18      //
-#define TCD_PMD         19      //
-#define TCD_20          20      // empty, Nov, 2008
+#define TCD_FTPC        18      // gone in Sep '11
+#define TCD_PMD         19      // gone in Sep '11
+#define TCD_GMT         20      // WAS: empty, Nov, 2008
 #define TCD_VPD		21      // trigger-only
 
 
 
-// 2010 Group definitions...
+// 2012 Group definitions...
 #define FTP_GRP		0
+#define SS2_GRP		0	// same as old FTPC
+
 #define PP_GRP	        1
 #define ETOW_GRP	2   
 #define BTOW_GRP	3
@@ -98,8 +100,14 @@
 #define TOF_GRP	        5
 #define ESMD_GRP	6
 #define TPX_GRP		7
+
 #define PMD_GRP         8
+#define PXL_GRP		8	// same as old PMD
+
 #define FGT_GRP         9
+#define IST_GRP		10
+#define RPII_GRP	11
+#define GMT_GRP		14
 #define MTD_GRP		15
 
 /* RTS Node Id, Tonko, 11/06/2000
@@ -457,7 +465,7 @@ so we keep it here for source compatibility
 #define SL3_NODES(x)	((L3_SYSTEM<<12) | (SL3_SUBSYS<<8) | (x)) 
 #define GL3_NODES(x)	((L3_SYSTEM<<12) | (GL3_SUBSYS<<8) | (x)) 
 #define GL3_NODE	GL3_NODES(1) 
-#define GL3_NODE_COUNT	6		// maximum count of nodes per run epoch
+#define GL3_NODE_COUNT	10		// maximum count of nodes per run epoch
 
 #define L3EVP_NODE      ((L3_SYSTEM<<12) | 1)
 #define L3DISP_NODE     ((L3_SYSTEM<<12) | 2)
@@ -639,28 +647,28 @@ extern inline int rts2tcd(int rts)
 		TCD_TOF,	//2
 		TCD_BTOW,	//3
 		-1,		//4: FPD gone...
-		TCD_FTPC,	//5
+		TCD_FTPC,	//5: FTPC 
 		-1,		//6
 		-1,		//7
 		-1,		//8
 		-1,		//9
 		-1,		//10
 		-1,		//11
-		TCD_PMD,	//12
+		TCD_PMD,	//12: PMD
 		-1,		//13: SSD gone...
 		TCD_ETOW,	//14
-		-1,		//15
+		-1,		//15: generic DAQ
 		TCD_FGT,	//16
 		TCD_PP,		//17
 		TCD_BSMD,	//18
 		TCD_ESMD,	//19
 		TCD_TPX,	//20
-		-1,		//21 HFT
+		-1,		//21 PXL
 		TCD_MTD,	//22 MTD
-		-1,		//23
-		-1,		//24
-		-1,		//25
-		-1,		//26
+		-1,		//23 IST
+		-1,		//24 SS2
+		-1,		//25 RPII
+		TCD_GMT		//26 GMT
 		-1,		//27
 		-1,		//28
 		-1,		//29
@@ -695,7 +703,7 @@ extern inline int tcd2rts(int tcd)
         BTOW_SYSTEM,	//17
         FTP_SYSTEM,	//18
         PMD_SYSTEM,	//19
-        -1,		//20 EMPTY ; TPC was here... removed Sep 08
+        GMT_SYSTEM,	//20 GMT; EMPTY until Aug 11; TPC was here... removed Sep 08
         -1,		//21 VPD
         -1,		//22
         -1,		//23
@@ -760,6 +768,9 @@ extern inline u_int grp2rts_mask(int grp)
 	if(grp & (1 << MTD_GRP)) {
 	  ret |= (1 << MTD_SYSTEM);
 	}
+	if(grp & (1 << GMT_GRP)) {
+	  ret |= (1 << GMT_SYSTEM);
+	}
 
 	return ret ;
 }
@@ -769,32 +780,43 @@ extern inline int rts2grp(int rts)
 {
   switch(rts)
     {
-      // Instance doesn't matter...
-    case FTP_ID:
-      return FTP_GRP;
-    case PP_ID:
-      return PP_GRP;
-    case ETOW_ID:
-      return ETOW_GRP;
-    case ESMD_ID:
-      return ESMD_GRP;
-    case BTOW_ID:
-      return BTOW_GRP;
-    case BSMD_ID:
-      return BSMD_GRP;
-    case TOF_ID:
-      return TOF_GRP;
-    case TPX_ID:
-      return TPX_GRP;
-    case PMD_ID:
-      return PMD_GRP;
-    case FGT_ID:
-      return FGT_GRP;
-    case MTD_ID:
-      return MTD_GRP;
-    default:
-	return 31 ;	// this is an ERROR!
-    }
+	// Instance doesn't matter...
+	case FTP_ID:
+		return FTP_GRP;
+	case PP_ID:
+		return PP_GRP;
+	case ETOW_ID:
+		return ETOW_GRP;
+	case ESMD_ID:
+		return ESMD_GRP;
+	case BTOW_ID:
+		return BTOW_GRP;
+	case BSMD_ID:
+		return BSMD_GRP;
+	case TOF_ID:
+		return TOF_GRP;
+	case TPX_ID:
+		return TPX_GRP;
+	case PMD_ID:
+		return PMD_GRP;
+	case FGT_ID:
+		return FGT_GRP;
+	case MTD_ID:
+		return MTD_GRP;
+	case GMT_ID :
+		return GMT_GRP;
+	// Tonko, Aug 11: filled them all
+	case SS2_ID :
+		return SS2_GRP;
+	case PXL_ID :
+		return PXL_GRP;
+	case IST_ID :
+		return IST_GRP ;
+	case RPII_ID :
+		return RPII_GRP ;
+	default:
+		return 31 ;	// this is an ERROR since groups < 16
+   }
 }
 
 
