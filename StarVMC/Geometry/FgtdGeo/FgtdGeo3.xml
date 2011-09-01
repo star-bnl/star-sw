@@ -2,7 +2,7 @@
 
 <Module name="FGTDGEO3" comment=" forward GEM tracking detector for 2012 "  >
 
-   <Created date="  4/12/2011 "  />
+   <Created date="  8/25/2011 "  />
    <Author name="Jan Balewski MIT, Wei-Ming Zhang KSU"  />
 
    <CDE>AGECOM,GCUNIT,GCONST</CDE>
@@ -43,10 +43,11 @@
   -->
 <Content  >
       FGTM, FGTD, FGTQ,                    <!-- FGT mother, disk, quadrant -->
-      FGVN, FGZC, FGVG, FGVR, FGVE,        <!-- Z-divisin on the quadrant  nomex+sens+gem+read+elec    -->
+      FGVN, FGZC, FGVG, FGVR, FGVE,        <!-- Z-segmentation of the quadrant nomex+sens+gem+read+elec   -->
       FGQA, FGQB, FGQC, FGQD, FGQE, FGQF,  <!-- elements of the spacer frame -->     
       FGXA, FGXB, FGXC, FGXD,              <!-- elements of the spacer grid  -->     
-      FGWA, FGWB, FGWC, FGWD, FGWE         <!-- electronic chips, connectors, gas feed -->
+      FGWA, FGWB, FGWC, FGWD, FGWE        <!-- electronic chips, connectors, gas feed -->
+   
 </Content>
 
 <!--    
@@ -74,14 +75,13 @@
 <varlist  type="float"  comment=" quadrant sensitive volume" >  volSensDZ/0.312/ </varlist>
 <varlist  type="float"  comment=" quadrant 3GEM vol mix" >      volGemDZ/0.612/ </varlist>
 <varlist  type="float"  comment=" quad readout plane vol mix" > volReadDZ/0.246/ </varlist>
-<varlist  type="float"  comment=" quadrant electronis vol mix" >   volElecDZ/5.0/ </varlist>
+<varlist  type="float"  comment=" quad electronis vol mix" >    volElecDZ/4.3/ </varlist>
 
-<varlist  type="float"  comment=" generic thickness of electronics boards" >   elecWidth/0.6/ </varlist>
-<varlist  type="float"  comment=" small elec board " >                         elecAdy/2./ </varlist>
-<varlist  type="float"  comment=" larger elec board " >                        elecCdy/4./ </varlist>
-<varlist  type="float"  comment=" gas tube R " >                               elecDr/0.6/ </varlist>
+<varlist  type="float"  comment=" generic thickness of electronics boards" >   elecWidth/0.16/ </varlist>
+<varlist  type="float"  comment=" half of terminator board  at Rin" >          elecAdy/1.4/ </varlist>
+<varlist  type="float"  comment=" half of interconnect board  at Rout" >       elecCdy/4.5/ </varlist>
 <varlist  type="float"  comment=" gas tube phi (deg) " >                       elecDang/9./ </varlist>
-<varlist  type="float"  comment=" HV elec board " >                            elecElen/15./ </varlist>
+<varlist  type="float"  comment=" HV elec board " >                            elecElen/22.5/ </varlist>
 
 
 <varlist type="REAL"  >
@@ -126,13 +126,23 @@
   Version 1.0  has 6 full disks
  ============================================================
   -->
-<Fill name="FGST" comment="FGT Geometry data"  >
+<Fill name="FGST" comment="FGT Geometry with 6 full disks"  >
    <var name="config" value="1.0" comment="versioning of the FGST geometry data" />
-
    <var name="startZ" value="70." comment=" position of sensitive volume of the 1st disk"  />
    <var name="diskStepZ" value="10." comment=" disk separation along Z"  />
    <var name="ndisk"   value="6"    comment="number of disks" />
    <var name="nQuad"   value="4"    comment="number quadrants in a disks" />
+    
+</Fill>
+
+
+
+<Fill name="FGST" comment="FGT Geometry with one quadrant in one disk"  >
+   <var name="config" value="2.0" comment="versioning of the FGST geometry data" />
+   <var name="startZ" value="70." comment=" position of sensitive volume of the 1st disk"  />
+   <var name="diskStepZ" value="10." comment=" disk separation along Z"  />
+   <var name="ndisk"   value="1"    comment="number of disks" />
+   <var name="nQuad"   value="1"    comment="number quadrants in a disks" />
     
 </Fill>
 
@@ -151,32 +161,80 @@
 <!--  Note, material for volumes: FGVN, FGZC, FGVG,FGVR should NOT account for the  frame nor spacer 
       since thos are placed independently in to those volumes -->
 
-<Mixture name="NomexMix" dens="0.089"  > <!-- computed by Willie -->
-    <Component name="O"  a="16"   z="8"  w="0.089"  />
-    <Component name="C"  a="12"   z="6"  w="0.802"  />
+<Mixture name="NomexMix" dens="0.090"  > <!-- computed by Willie -->
+    <Component name="O"  a="16"   z="8"  w="0.090"  />
+    <Component name="C"  a="12"   z="6"  w="0.796"  />
     <Component name="H"  a="1"    z="1"  w="0.023"  />
     <Component name="Cl" a="35.5" z="17" w="0.019"  />
     <Component name="N"  a="14"   z="7"  w="0.025"  />  
-    <Component name="Al" a="27"   z="13" w="0.003" />
+    <Component name="Al" a="27"   z="13" w="0.002" />
     <Component name="Cu" a="63.5" z="29" w="0.039" />
+    <Component name="Ar" a="39.9" z="18" w="0.006" />
 </Mixture>
         
 <Mixture name="GemMix" dens="0.079"  > <!-- computed by Willie -->
-    <Component name="O"  a="16"   z="8"  w="0.093"  />
-    <Component name="C"  a="12"   z="6"  w="0.305"  />
-    <Component name="H"  a="1"    z="1"  w="0.012"  />
-    <Component name="N"  a="14"   z="7"  w="0.032"  />  
-    <Component name="Cu" a="63.5" z="29" w="0.558" />
+    <Component name="O"  a="16"   z="8"  w="0.095"  />
+    <Component name="C"  a="12"   z="6"  w="0.301"  />
+    <Component name="H"  a="1"    z="1"  w="0.011"  />
+    <Component name="N"  a="14"   z="7"  w="0.032"  />
+    <Component name="Cu" a="63.5" z="29" w="0.547" />
+    <Component name="Ar" a="39.9" z="18" w="0.014" />
 </Mixture>
         
 <Mixture name="ReadMix" dens="0.356"  > <!-- computed by Willie -->
-    <Component name="O"  a="16"   z="8"  w="0.161"  />
-    <Component name="C"  a="12"   z="6"  w="0.509"  />
+    <Component name="O"  a="16"   z="8"  w="0.160"  />
+    <Component name="C"  a="12"   z="6"  w="0.508"  />
     <Component name="H"  a="1"    z="1"  w="0.020"  />
     <Component name="N"  a="14"   z="7"  w="0.051"  />  
     <Component name="Al" a="27"   z="13" w="0.003" />
-    <Component name="Cu" a="63.5" z="29" w="0.256" />
-</Mixture>
+    <Component name="Cu" a="63.5" z="29" w="0.255" />
+    <Component name="Ar" a="39.9" z="18" w="0.003" />
+</Mixture> 
+       
+<Mixture name="APVMix" dens="2.535"  > <!-- computed by Willie -->
+    <Component name="Si" a="28.1" z="14" w="0.191"  />
+    <Component name="O"  a="16"   z="8"  w="0.359"  />
+    <Component name="C"  a="12"   z="6"  w="0.276"  />
+    <Component name="H"  a="1"    z="1"  w="0.034"  />
+    <Component name="Cl" a="35.5" z="17" w="0.018"  />
+    <Component name="Cu" a="63.5" z="29" w="0.122" />
+</Mixture> 
+       
+<Mixture name="HVMix" dens="2.681"  > <!-- computed by Willie -->
+    <Component name="Si" a="28.1" z="14" w="0.127"  />
+    <Component name="O"  a="16"   z="8"  w="0.271"  />
+    <Component name="C"  a="12"   z="6"  w="0.278"  />
+    <Component name="H"  a="1"    z="1"  w="0.026"  />
+    <Component name="Cu" a="63.5" z="29" w="0.122" />
+    <Component name="Fe" a="55.8" z="26" w="0.214"  />  
+    <Component name="Cr" a="52.0" z="24" w="0.054"  />  
+    <Component name="Ni" a="58.7" z="28" w="0.030"  />  
+</Mixture> 
+       
+<Mixture name="ConMix" dens="1.816"  > <!-- computed by Willie -->
+    <Component name="Si" a="28.1" z="14" w="0.122"  />
+    <Component name="O"  a="16"   z="8"  w="0.273"  />
+    <Component name="C"  a="12"   z="6"  w="0.441"  />
+    <Component name="H"  a="1"    z="1"  w="0.032"  />
+    <Component name="N"  a="14"   z="7"  w="0.009"  />  
+    <Component name="Cu" a="63.5" z="29" w="0.046" />
+    <Component name="Fe" a="55.8" z="26" w="0.055"  />  
+    <Component name="Cr" a="52.0" z="24" w="0.014"  />  
+    <Component name="Ni" a="58.7" z="28" w="0.008"  />  
+</Mixture> 
+       
+<Mixture name="TermMix" dens="2.35"  > <!-- computed by Willie -->
+    <Component name="Si" a="28.1" z="14" w="0.153"  />
+    <Component name="O"  a="16"   z="8"  w="0.214"  />
+    <Component name="C"  a="12"   z="6"  w="0.455"  />
+    <Component name="H"  a="1"    z="1"  w="0.009"  />
+    <Component name="Cu" a="63.5" z="29" w="0.169" />
+</Mixture> 
+       
+<Mixture name="Brass" dens="8.4"  > 
+    <Component name="Cu" a="63.5" z="29" w="0.63" />
+    <Component name="Zn" a="65.4" z="30" w="0.37" />
+</Mixture> 
        
  <!--  mmmmmmmmmmmmm  temporary 'bad' MATERIALS with very approximate composition - needs later inspection - Jan B -->
 
@@ -200,7 +258,7 @@
 <Use struct="FGGG" />
 <Use struct="FGST" select="config" value="FGGG_FgstConfig" />
 
-<!--  mmmmmmmmmmmm  COMMON COMPUTATIONS mmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+<!--  mmmmmmmmmmmm  COMMON COMPUTATIONS mmmmmm30mmmmmmmmmmmmmmmmmmmmm -->
 
 <!--  Quad disk depth: sum of 5 mix-volumes -->
 diskLenZ=volNomexDZ+volSensDZ+volGemDZ+volReadDZ+volElecDZ
@@ -281,9 +339,9 @@ flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 </Volume> 
 
 
-<!--  qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq        QUAD VOL     N O M E X          qqqqqqqqqqqqqqqqqqqqqqq -->    
-<!--  qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq        QUAD VOL     N O M E X          qqqqqqqqqqqqqqqqqqqqqqq -->    
-<!--  qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq        QUAD VOL     N O M E X          qqqqqqqqqqqqqqqqqqqqqqq -->    
+<!--  qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq        QUAD VOL     N O M E X         qqqqqqqqqqqqqqqqqqqqqqq -->    
+<!--  qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq        QUAD VOL     N O M E X         qqqqqqqqqqqqqqqqqqqqqqq -->    
+<!--  qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq        QUAD VOL     N O M E X         qqqqqqqqqqqqqqqqqqqqqqq -->    
 
 <Volume       name="FGVN" comment="quad nomex mixture volume"  >
     <Attribute for="FGVN" seen="0" colo="5"  />
@@ -479,9 +537,9 @@ flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 
 
     <Create    block="FGWA"  />
-    <Placement block="FGWA" x="diskInR+elecWidth"  y="elecAdy/2." />
+    <Placement block="FGWA" x="diskInR+frameWidth*0.7"  y="elecAdy/2." />
     <Create    block="FGWA"  />
-    <Placement block="FGWA" y="diskInR+elecWidth"  x="elecAdy/2." >
+    <Placement block="FGWA" y="diskInR+frameWidth*0.7"  x="elecAdy/2." >
            <Rotation alphaz="90."  />
        </Placement>
 
@@ -494,19 +552,25 @@ flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
  
 
     <Create    block="FGWC"  />
-    <Placement block="FGWC" x="diskOutR-elecWidth"  y="elecCdy/2." />
+    <Placement block="FGWC" x="diskOutR-frameWidth*0.7"  y="elecCdy/2." />
     <Create    block="FGWC"  />
-    <Placement block="FGWC" y="diskOutR-elecWidth"  x="elecCdy/2." >
+    <Placement block="FGWC" y="diskOutR-frameWidth*0.7"  x="elecCdy/2." >
            <Rotation alphaz="90."  />
        </Placement>
 
     <Create    block="FGWD"  />
-    <Placement block="FGWD" x="(diskOutR-elecDr)*cos(elecDang*degrad)"  y="(diskOutR-elecDr)*sin(elecDang*degrad)" />
-        <Create    block="FGWD"  />
-    <Placement block="FGWD" y="(diskOutR-elecDr)*cos(elecDang*degrad)"  x="(diskOutR-elecDr)*sin(elecDang*degrad)" />
+    <Placement block="FGWD" x="(diskOutR-frameWidth/2.)*cos(elecDang*degrad)"  y="(diskOutR-frameWidth/2.)*sin(elecDang*degrad)" >
+           <Rotation alphax="90."  />
+         </Placement>
+
+    <Create    block="FGWD"  />
+    <Placement block="FGWD" y="(diskOutR-frameWidth/2.)*cos(elecDang*degrad)"  x="(diskOutR-frameWidth/2.)*sin(elecDang*degrad)" >
+           <Rotation alphax="90."  />
+           <Rotation alphaz="90."  />
+         </Placement>
     
      <Create         block="FGWE"  />
-     <Placement block="FGWE" x="(flatOutR-frameWidth/2.)*cos(flatPerpAng*degrad)" y="(flatOutR-frameWidth/2.)*sin(flatPerpAng*degrad)"      z="(-volElecDZ+elecWidth)/2." >
+     <Placement block="FGWE" x="(flatOutR-frameWidth/2.)*cos(flatPerpAng*degrad)" y="(flatOutR-frameWidth/2.)*sin(flatPerpAng*degrad)"    >
                 <Rotation alphaz="flatPerpAng-90."  />
      </Placement>
 
@@ -519,7 +583,7 @@ flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 <!-- FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF      elements of the spacer Frame --> 
 
 <Volume       name="FGQA" comment="A-spacer frame"  >
-    <Attribute for="FGQA" seen="0" colo="4"  />
+    <Attribute for="FGQA" seen="1" colo="4"  />
     <Material name="FR4"  />
     <Shape type="BOX" dz="frameDZ/2." dx="frameWidth/2." dy="(diskOutR-diskInR-frameWidth)/2."/> 
 </Volume>
@@ -594,37 +658,37 @@ flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 <!-- EEEEEEEEEEEEEEEEEEEEEEEEEEEEE elements of electronic and gass feeds -->
 <Volume       name="FGWA" comment="A-elec, bar " >
     <Attribute for="FGWA" seen="1" colo="1"  />
-    <Material name="badElecMix"  />
-    <Shape type="BOX" dz="volElecDZ/2."  dy="elecAdy/2." dx="elecWidth/2." />
+    <Material name="TermMix"  />
+    <Shape type="BOX" dz="2.7/2."  dy="elecAdy/2." dx="0.3/2." />
 </Volume>
 
 
-<Volume       name="FGWB" comment="B-elec, bar " >
+<Volume       name="FGWB" comment="APV board " >
     <Attribute for="FGWB" seen="1" colo="1"  />
-    <Material name="badElecMix"  />
-    <Shape type="BOX" dz="volElecDZ/2."  dx="(diskOutR-diskInR)/2.-elecWidth*2." dy="elecWidth/2." />
+    <Material name="APVMix"  />
+    <Shape type="BOX" dz="4.04/2."  dx="25.92/2." dy="elecWidth/2." />
 </Volume>
 
 
-<Volume       name="FGWC" comment="C-elec, bar " >
+<Volume       name="FGWC" comment="interconnect board wider " >
     <Attribute for="FGWC" seen="1" colo="1"  />
-    <Material name="badElecMix"  />
-    <Shape type="BOX" dz="volElecDZ/2."  dy="elecCdy/2." dx="elecWidth/2." />
+    <Material name="ConMix"  />
+    <Shape type="BOX" dz="3.15/2."  dy="elecCdy/2." dx="0.3/2." />
 </Volume> 
 
 
-<Volume       name="FGWD" comment="D-elec, gas tube ">
+<Volume       name="FGWD" comment="gas feed connection ">
     <Attribute for="FGWD" seen="1" colo="1"  />
-    <Material name="badElecMix"  />
-    <Shape type="TUBE"  rmin="0.1"  rmax="elecDr"   dz="volElecDZ/2." />
+    <Material name="Brass"  />
+    <Shape type="TUBE"  rmin="0.2"  rmax="0.5"   dz="2.1/2." />
 </Volume> 
 
 
 
-<Volume       name="FGWE" comment="W-elec, gas tube ">
+<Volume       name="FGWE" comment="HV board  ">
     <Attribute for="FGWE" seen="1" colo="1"  />
-    <Material name="badElecMix"  />
-    <Shape type="BOX" dz="elecWidth/2."  dy="frameWidth/2." dx="elecElen/2." /> 
+    <Material name="HVMix"  />
+    <Shape type="BOX" dz="volElecDZ/2."  dy="elecWidth/2." dx="elecElen/2." /> 
 </Volume> 
 
 
