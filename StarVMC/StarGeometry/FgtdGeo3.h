@@ -268,10 +268,10 @@ namespace FGTDGEO3 // $NMSPC
    // ---------------------------------------------------------------------- FGWB -- 
    ///@defgroup FGWB_doc 
    ///@class FGWB 
-   ///@brief B-elec, bar  
+   ///@brief APV board  
    class FGWB : public AgBlock 
    {  public: 
-      FGWB() : AgBlock("FGWB","B-elec, bar "){ }; 
+      FGWB() : AgBlock("FGWB","APV board "){ }; 
       ~FGWB(){ }; 
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
@@ -280,10 +280,10 @@ namespace FGTDGEO3 // $NMSPC
    // ---------------------------------------------------------------------- FGWC -- 
    ///@defgroup FGWC_doc 
    ///@class FGWC 
-   ///@brief C-elec, bar  
+   ///@brief interconnect board wider  
    class FGWC : public AgBlock 
    {  public: 
-      FGWC() : AgBlock("FGWC","C-elec, bar "){ }; 
+      FGWC() : AgBlock("FGWC","interconnect board wider "){ }; 
       ~FGWC(){ }; 
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
@@ -292,10 +292,10 @@ namespace FGTDGEO3 // $NMSPC
    // ---------------------------------------------------------------------- FGWD -- 
    ///@defgroup FGWD_doc 
    ///@class FGWD 
-   ///@brief D-elec, gas tube  
+   ///@brief gas feed connection  
    class FGWD : public AgBlock 
    {  public: 
-      FGWD() : AgBlock("FGWD","D-elec, gas tube "){ }; 
+      FGWD() : AgBlock("FGWD","gas feed connection "){ }; 
       ~FGWD(){ }; 
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
@@ -304,10 +304,10 @@ namespace FGTDGEO3 // $NMSPC
    // ---------------------------------------------------------------------- FGWE -- 
    ///@defgroup FGWE_doc 
    ///@class FGWE 
-   ///@brief W-elec, gas tube  
+   ///@brief HV board   
    class FGWE : public AgBlock 
    {  public: 
-      FGWE() : AgBlock("FGWE","W-elec, gas tube "){ }; 
+      FGWE() : AgBlock("FGWE","HV board  "){ }; 
       ~FGWE(){ }; 
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 

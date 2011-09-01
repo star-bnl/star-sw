@@ -131,33 +131,27 @@
           ///@}     
           ///@addtogroup FgtdGeo3_vars     
           ///@{        
-                float volelecdz=5.0;        
+                float volelecdz=4.3;        
                 //        
-                /// float volelecdz=5.0        
+                /// float volelecdz=4.3        
           ///@}     
           ///@addtogroup FgtdGeo3_vars     
           ///@{        
-                float elecwidth=0.6;        
+                float elecwidth=0.16;        
                 //        
-                /// float elecwidth=0.6        
+                /// float elecwidth=0.16        
           ///@}     
           ///@addtogroup FgtdGeo3_vars     
           ///@{        
-                float elecady=2.;        
+                float elecady=1.4;        
                 //        
-                /// float elecady=2.        
+                /// float elecady=1.4        
           ///@}     
           ///@addtogroup FgtdGeo3_vars     
           ///@{        
-                float eleccdy=4.;        
+                float eleccdy=4.5;        
                 //        
-                /// float eleccdy=4.        
-          ///@}     
-          ///@addtogroup FgtdGeo3_vars     
-          ///@{        
-                float elecdr=0.6;        
-                //        
-                /// float elecdr=0.6        
+                /// float eleccdy=4.5        
           ///@}     
           ///@addtogroup FgtdGeo3_vars     
           ///@{        
@@ -167,9 +161,9 @@
           ///@}     
           ///@addtogroup FgtdGeo3_vars     
           ///@{        
-                float elecelen=15.;        
+                float elecelen=22.5;        
                 //        
-                /// float elecelen=15.        
+                /// float elecelen=22.5        
           ///@}     
           ///@addtogroup FgtdGeo3_vars     
           ///@{        
@@ -1151,8 +1145,8 @@
                       }           
                       { AgPlacement place = AgPlacement("FGWA","FGVE");              
                             /// Add daughter volume FGWA to mother FGVE              
-                            place.TranslateX(diskinr+elecwidth);              
-                            /// Translate x = diskinr+elecwidth              
+                            place.TranslateX(diskinr+framewidth*0.7);              
+                            /// Translate x = diskinr+framewidth*0.7              
                             place.TranslateY(elecady/2.);              
                             /// Translate y = elecady/2.              
                             _stacker -> Position( AgBlock::Find("FGWA"), place );              
@@ -1167,8 +1161,8 @@
                             /// Add daughter volume FGWA to mother FGVE              
                             place.TranslateX(elecady/2.);              
                             /// Translate x = elecady/2.              
-                            place.TranslateY(diskinr+elecwidth);              
-                            /// Translate y = diskinr+elecwidth              
+                            place.TranslateY(diskinr+framewidth*0.7);              
+                            /// Translate y = diskinr+framewidth*0.7              
                             place.AlphaZ(90.);              
                             /// Rotate: AlphaZ = 90.              
                             /// G3 Reference: thetax = 90              
@@ -1223,8 +1217,8 @@
                       }           
                       { AgPlacement place = AgPlacement("FGWC","FGVE");              
                             /// Add daughter volume FGWC to mother FGVE              
-                            place.TranslateX(diskoutr-elecwidth);              
-                            /// Translate x = diskoutr-elecwidth              
+                            place.TranslateX(diskoutr-framewidth*0.7);              
+                            /// Translate x = diskoutr-framewidth*0.7              
                             place.TranslateY(eleccdy/2.);              
                             /// Translate y = eleccdy/2.              
                             _stacker -> Position( AgBlock::Find("FGWC"), place );              
@@ -1239,8 +1233,8 @@
                             /// Add daughter volume FGWC to mother FGVE              
                             place.TranslateX(eleccdy/2.);              
                             /// Translate x = eleccdy/2.              
-                            place.TranslateY(diskoutr-elecwidth);              
-                            /// Translate y = diskoutr-elecwidth              
+                            place.TranslateY(diskoutr-framewidth*0.7);              
+                            /// Translate y = diskoutr-framewidth*0.7              
                             place.AlphaZ(90.);              
                             /// Rotate: AlphaZ = 90.              
                             /// G3 Reference: thetax = 90              
@@ -1259,10 +1253,18 @@
                       }           
                       { AgPlacement place = AgPlacement("FGWD","FGVE");              
                             /// Add daughter volume FGWD to mother FGVE              
-                            place.TranslateX((diskoutr-elecdr)*cos(elecdang*degrad));              
-                            /// Translate x = (diskoutr-elecdr)*cos(elecdang*degrad)              
-                            place.TranslateY((diskoutr-elecdr)*sin(elecdang*degrad));              
-                            /// Translate y = (diskoutr-elecdr)*sin(elecdang*degrad)              
+                            place.TranslateX((diskoutr-framewidth/2.)*cos(elecdang*degrad));              
+                            /// Translate x = (diskoutr-framewidth/2.)*cos(elecdang*degrad)              
+                            place.TranslateY((diskoutr-framewidth/2.)*sin(elecdang*degrad));              
+                            /// Translate y = (diskoutr-framewidth/2.)*sin(elecdang*degrad)              
+                            place.AlphaX(90.);              
+                            /// Rotate: AlphaX = 90.              
+                            /// G3 Reference: thetax = 90              
+                            /// G3 Reference: phix = 0              
+                            /// G3 Reference: thetay = 90              
+                            /// G3 Reference: phiy = 90              
+                            /// G3 Reference: thetaz = 0              
+                            /// G3 Reference: phiz = 0              
                             _stacker -> Position( AgBlock::Find("FGWD"), place );              
                       } // end placement of FGWD           
                       _create = AgCreate("FGWD");           
@@ -1273,10 +1275,26 @@
                       }           
                       { AgPlacement place = AgPlacement("FGWD","FGVE");              
                             /// Add daughter volume FGWD to mother FGVE              
-                            place.TranslateX((diskoutr-elecdr)*sin(elecdang*degrad));              
-                            /// Translate x = (diskoutr-elecdr)*sin(elecdang*degrad)              
-                            place.TranslateY((diskoutr-elecdr)*cos(elecdang*degrad));              
-                            /// Translate y = (diskoutr-elecdr)*cos(elecdang*degrad)              
+                            place.TranslateX((diskoutr-framewidth/2.)*sin(elecdang*degrad));              
+                            /// Translate x = (diskoutr-framewidth/2.)*sin(elecdang*degrad)              
+                            place.TranslateY((diskoutr-framewidth/2.)*cos(elecdang*degrad));              
+                            /// Translate y = (diskoutr-framewidth/2.)*cos(elecdang*degrad)              
+                            place.AlphaX(90.);              
+                            /// Rotate: AlphaX = 90.              
+                            /// G3 Reference: thetax = 90              
+                            /// G3 Reference: phix = 0              
+                            /// G3 Reference: thetay = 90              
+                            /// G3 Reference: phiy = 90              
+                            /// G3 Reference: thetaz = 0              
+                            /// G3 Reference: phiz = 0              
+                            place.AlphaZ(90.);              
+                            /// Rotate: AlphaZ = 90.              
+                            /// G3 Reference: thetax = 90              
+                            /// G3 Reference: phix = 0              
+                            /// G3 Reference: thetay = 90              
+                            /// G3 Reference: phiy = 90              
+                            /// G3 Reference: thetaz = 0              
+                            /// G3 Reference: phiz = 0              
                             _stacker -> Position( AgBlock::Find("FGWD"), place );              
                       } // end placement of FGWD           
                       _create = AgCreate("FGWE");           
@@ -1291,8 +1309,6 @@
                             /// Translate x = (flatoutr-framewidth/2.)*cos(flatperpang*degrad)              
                             place.TranslateY((flatoutr-framewidth/2.)*sin(flatperpang*degrad));              
                             /// Translate y = (flatoutr-framewidth/2.)*sin(flatperpang*degrad)              
-                            place.TranslateZ((-volelecdz+elecwidth)/2.);              
-                            /// Translate z = (-volelecdz+elecwidth)/2.              
                             place.AlphaZ(flatperpang-90.);              
                             /// Rotate: AlphaZ = flatperpang-90.              
                             /// G3 Reference: thetax = 90              
@@ -1316,7 +1332,7 @@
                         mCurrent = this;           
                         Bool_t _same_shape = true;           
                       { AgAttribute attr = AgAttribute("FGQA");              
-                            attr.par("seen")=0;              
+                            attr.par("seen")=1;              
                             attr.par("colo")=4;              
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
@@ -1676,17 +1692,17 @@
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
-                      /// Material badElecMix            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Badelecmix");              
+                      /// Material TermMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Termmix");              
                             _material = mat;              
                       }           
                       {  AgShape shape = AgShape("Bbox");              
                             shape     .Inherit( AgBlock::previous() );              
                             create     .SetParameters(shape);              
-                            shape.par("dx")=elecwidth/2.;              
+                            shape.par("dx")=0.3/2.;              
                             shape.par("dy")=elecady/2.;              
-                            shape.par("dz")=volelecdz/2.;              
-                            /// Shape Bbox dx=elecwidth/2. dy=elecady/2. dz=volelecdz/2.               
+                            shape.par("dz")=2.7/2.;              
+                            /// Shape Bbox dx=0.3/2. dy=elecady/2. dz=2.7/2.               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
                             if (_same_shape) goto END_OF_FGWA;              
@@ -1710,17 +1726,17 @@
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
-                      /// Material badElecMix            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Badelecmix");              
+                      /// Material APVMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Apvmix");              
                             _material = mat;              
                       }           
                       {  AgShape shape = AgShape("Bbox");              
                             shape     .Inherit( AgBlock::previous() );              
                             create     .SetParameters(shape);              
-                            shape.par("dx")=(diskoutr-diskinr)/2.-elecwidth*2.;              
+                            shape.par("dx")=25.92/2.;              
                             shape.par("dy")=elecwidth/2.;              
-                            shape.par("dz")=volelecdz/2.;              
-                            /// Shape Bbox dx=(diskoutr-diskinr)/2.-elecwidth*2. dy=elecwidth/2. dz=volelecdz/2.               
+                            shape.par("dz")=4.04/2.;              
+                            /// Shape Bbox dx=25.92/2. dy=elecwidth/2. dz=4.04/2.               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
                             if (_same_shape) goto END_OF_FGWB;              
@@ -1744,17 +1760,17 @@
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
-                      /// Material badElecMix            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Badelecmix");              
+                      /// Material ConMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Conmix");              
                             _material = mat;              
                       }           
                       {  AgShape shape = AgShape("Bbox");              
                             shape     .Inherit( AgBlock::previous() );              
                             create     .SetParameters(shape);              
-                            shape.par("dx")=elecwidth/2.;              
+                            shape.par("dx")=0.3/2.;              
                             shape.par("dy")=eleccdy/2.;              
-                            shape.par("dz")=volelecdz/2.;              
-                            /// Shape Bbox dx=elecwidth/2. dy=eleccdy/2. dz=volelecdz/2.               
+                            shape.par("dz")=3.15/2.;              
+                            /// Shape Bbox dx=0.3/2. dy=eleccdy/2. dz=3.15/2.               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
                             if (_same_shape) goto END_OF_FGWC;              
@@ -1778,17 +1794,17 @@
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
-                      /// Material badElecMix            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Badelecmix");              
+                      /// Material Brass            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Brass");              
                             _material = mat;              
                       }           
                       {  AgShape shape = AgShape("Tube");              
                             shape     .Inherit( AgBlock::previous() );              
                             create     .SetParameters(shape);              
-                            shape.par("rmin")=0.1;              
-                            shape.par("rmax")=elecdr;              
-                            shape.par("dz")=volelecdz/2.;              
-                            /// Shape Tube rmin=0.1 rmax=elecdr dz=volelecdz/2.               
+                            shape.par("rmin")=0.2;              
+                            shape.par("rmax")=0.5;              
+                            shape.par("dz")=2.1/2.;              
+                            /// Shape Tube rmin=0.2 rmax=0.5 dz=2.1/2.               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
                             if (_same_shape) goto END_OF_FGWD;              
@@ -1812,17 +1828,17 @@
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
-                      /// Material badElecMix            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Badelecmix");              
+                      /// Material HVMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Hvmix");              
                             _material = mat;              
                       }           
                       {  AgShape shape = AgShape("Bbox");              
                             shape     .Inherit( AgBlock::previous() );              
                             create     .SetParameters(shape);              
                             shape.par("dx")=elecelen/2.;              
-                            shape.par("dy")=framewidth/2.;              
-                            shape.par("dz")=elecwidth/2.;              
-                            /// Shape Bbox dx=elecelen/2. dy=framewidth/2. dz=elecwidth/2.               
+                            shape.par("dy")=elecwidth/2.;              
+                            shape.par("dz")=volelecdz/2.;              
+                            /// Shape Bbox dx=elecelen/2. dy=elecwidth/2. dz=volelecdz/2.               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
                             if (_same_shape) goto END_OF_FGWE;              
@@ -1837,7 +1853,7 @@
        {        
              ///@addtogroup FgtdGeo3_revision        
              ///@{           
-                   /// Created:   4/12/2011            
+                   /// Created:   8/25/2011            
              ///@}        
              ///@addtogroup FgtdGeo3_revision        
              ///@{           
@@ -1894,6 +1910,24 @@
                    fgst.fill();           
              ///@}        
              //        
+             // ---------------------------------------------------------------------------------------------------        
+             ///@addtogroup fgst_doc        
+             ///@{           
+                   ++fgst._index;           
+                   fgst . config = 2.0; // versioning of the FGST geometry data           
+                   /// fgst . config = 2.0; // versioning of the FGST geometry data           
+                   fgst . startz = 70.; //  position of sensitive volume of the 1st disk           
+                   /// fgst . startz = 70.; //  position of sensitive volume of the 1st disk           
+                   fgst . diskstepz = 10.; //  disk separation along Z           
+                   /// fgst . diskstepz = 10.; //  disk separation along Z           
+                   fgst . ndisk = 1; // number of disks           
+                   /// fgst . ndisk = 1; // number of disks           
+                   fgst . nquad = 1; // number quadrants in a disks           
+                   /// fgst . nquad = 1; // number quadrants in a disks           
+                   //           
+                   fgst.fill();           
+             ///@}        
+             //        
              /// Component Si	a=28.08	z=14	w=0.281        
              /// Component O	a=16	z=8	w=0.467        
              /// Component C	a=12	z=6	w=0.220        
@@ -1909,59 +1943,160 @@
                    _material = mix;           
                    _material.lock();           
              }        
-             /// Component O	a=16	z=8	w=0.089        
-             /// Component C	a=12	z=6	w=0.802        
+             /// Component O	a=16	z=8	w=0.090        
+             /// Component C	a=12	z=6	w=0.796        
              /// Component H	a=1	z=1	w=0.023        
              /// Component Cl	a=35.5	z=17	w=0.019        
              /// Component N	a=14	z=7	w=0.025        
-             /// Component Al	a=27	z=13	w=0.003        
+             /// Component Al	a=27	z=13	w=0.002        
              /// Component Cu	a=63.5	z=29	w=0.039        
-             /// Mixture NomexMix dens=0.089        
+             /// Component Ar	a=39.9	z=18	w=0.006        
+             /// Mixture NomexMix dens=0.090        
              {  AgMaterial &mix = AgMaterial::Get("Nomexmix");           
-                   mix.Component("O",16,8,0.089);           
-                   mix.Component("C",12,6,0.802);           
+                   mix.Component("O",16,8,0.090);           
+                   mix.Component("C",12,6,0.796);           
                    mix.Component("H",1,1,0.023);           
                    mix.Component("Cl",35.5,17,0.019);           
                    mix.Component("N",14,7,0.025);           
-                   mix.Component("Al",27,13,0.003);           
+                   mix.Component("Al",27,13,0.002);           
                    mix.Component("Cu",63.5,29,0.039);           
-                   mix.par("dens")=0.089;           
+                   mix.Component("Ar",39.9,18,0.006);           
+                   mix.par("dens")=0.090;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           
              }        
-             /// Component O	a=16	z=8	w=0.093        
-             /// Component C	a=12	z=6	w=0.305        
-             /// Component H	a=1	z=1	w=0.012        
+             /// Component O	a=16	z=8	w=0.095        
+             /// Component C	a=12	z=6	w=0.301        
+             /// Component H	a=1	z=1	w=0.011        
              /// Component N	a=14	z=7	w=0.032        
-             /// Component Cu	a=63.5	z=29	w=0.558        
+             /// Component Cu	a=63.5	z=29	w=0.547        
+             /// Component Ar	a=39.9	z=18	w=0.014        
              /// Mixture GemMix dens=0.079        
              {  AgMaterial &mix = AgMaterial::Get("Gemmix");           
-                   mix.Component("O",16,8,0.093);           
-                   mix.Component("C",12,6,0.305);           
-                   mix.Component("H",1,1,0.012);           
+                   mix.Component("O",16,8,0.095);           
+                   mix.Component("C",12,6,0.301);           
+                   mix.Component("H",1,1,0.011);           
                    mix.Component("N",14,7,0.032);           
-                   mix.Component("Cu",63.5,29,0.558);           
+                   mix.Component("Cu",63.5,29,0.547);           
+                   mix.Component("Ar",39.9,18,0.014);           
                    mix.par("dens")=0.079;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           
              }        
-             /// Component O	a=16	z=8	w=0.161        
-             /// Component C	a=12	z=6	w=0.509        
+             /// Component O	a=16	z=8	w=0.160        
+             /// Component C	a=12	z=6	w=0.508        
              /// Component H	a=1	z=1	w=0.020        
              /// Component N	a=14	z=7	w=0.051        
              /// Component Al	a=27	z=13	w=0.003        
-             /// Component Cu	a=63.5	z=29	w=0.256        
+             /// Component Cu	a=63.5	z=29	w=0.255        
+             /// Component Ar	a=39.9	z=18	w=0.003        
              /// Mixture ReadMix dens=0.356        
              {  AgMaterial &mix = AgMaterial::Get("Readmix");           
-                   mix.Component("O",16,8,0.161);           
-                   mix.Component("C",12,6,0.509);           
+                   mix.Component("O",16,8,0.160);           
+                   mix.Component("C",12,6,0.508);           
                    mix.Component("H",1,1,0.020);           
                    mix.Component("N",14,7,0.051);           
                    mix.Component("Al",27,13,0.003);           
-                   mix.Component("Cu",63.5,29,0.256);           
+                   mix.Component("Cu",63.5,29,0.255);           
+                   mix.Component("Ar",39.9,18,0.003);           
                    mix.par("dens")=0.356;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component Si	a=28.1	z=14	w=0.191        
+             /// Component O	a=16	z=8	w=0.359        
+             /// Component C	a=12	z=6	w=0.276        
+             /// Component H	a=1	z=1	w=0.034        
+             /// Component Cl	a=35.5	z=17	w=0.018        
+             /// Component Cu	a=63.5	z=29	w=0.122        
+             /// Mixture APVMix dens=2.535        
+             {  AgMaterial &mix = AgMaterial::Get("Apvmix");           
+                   mix.Component("Si",28.1,14,0.191);           
+                   mix.Component("O",16,8,0.359);           
+                   mix.Component("C",12,6,0.276);           
+                   mix.Component("H",1,1,0.034);           
+                   mix.Component("Cl",35.5,17,0.018);           
+                   mix.Component("Cu",63.5,29,0.122);           
+                   mix.par("dens")=2.535;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component Si	a=28.1	z=14	w=0.127        
+             /// Component O	a=16	z=8	w=0.271        
+             /// Component C	a=12	z=6	w=0.278        
+             /// Component H	a=1	z=1	w=0.026        
+             /// Component Cu	a=63.5	z=29	w=0.122        
+             /// Component Fe	a=55.8	z=26	w=0.214        
+             /// Component Cr	a=52.0	z=24	w=0.054        
+             /// Component Ni	a=58.7	z=28	w=0.030        
+             /// Mixture HVMix dens=2.681        
+             {  AgMaterial &mix = AgMaterial::Get("Hvmix");           
+                   mix.Component("Si",28.1,14,0.127);           
+                   mix.Component("O",16,8,0.271);           
+                   mix.Component("C",12,6,0.278);           
+                   mix.Component("H",1,1,0.026);           
+                   mix.Component("Cu",63.5,29,0.122);           
+                   mix.Component("Fe",55.8,26,0.214);           
+                   mix.Component("Cr",52.0,24,0.054);           
+                   mix.Component("Ni",58.7,28,0.030);           
+                   mix.par("dens")=2.681;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component Si	a=28.1	z=14	w=0.122        
+             /// Component O	a=16	z=8	w=0.273        
+             /// Component C	a=12	z=6	w=0.441        
+             /// Component H	a=1	z=1	w=0.032        
+             /// Component N	a=14	z=7	w=0.009        
+             /// Component Cu	a=63.5	z=29	w=0.046        
+             /// Component Fe	a=55.8	z=26	w=0.055        
+             /// Component Cr	a=52.0	z=24	w=0.014        
+             /// Component Ni	a=58.7	z=28	w=0.008        
+             /// Mixture ConMix dens=1.816        
+             {  AgMaterial &mix = AgMaterial::Get("Conmix");           
+                   mix.Component("Si",28.1,14,0.122);           
+                   mix.Component("O",16,8,0.273);           
+                   mix.Component("C",12,6,0.441);           
+                   mix.Component("H",1,1,0.032);           
+                   mix.Component("N",14,7,0.009);           
+                   mix.Component("Cu",63.5,29,0.046);           
+                   mix.Component("Fe",55.8,26,0.055);           
+                   mix.Component("Cr",52.0,24,0.014);           
+                   mix.Component("Ni",58.7,28,0.008);           
+                   mix.par("dens")=1.816;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component Si	a=28.1	z=14	w=0.153        
+             /// Component O	a=16	z=8	w=0.214        
+             /// Component C	a=12	z=6	w=0.455        
+             /// Component H	a=1	z=1	w=0.009        
+             /// Component Cu	a=63.5	z=29	w=0.169        
+             /// Mixture TermMix dens=2.35        
+             {  AgMaterial &mix = AgMaterial::Get("Termmix");           
+                   mix.Component("Si",28.1,14,0.153);           
+                   mix.Component("O",16,8,0.214);           
+                   mix.Component("C",12,6,0.455);           
+                   mix.Component("H",1,1,0.009);           
+                   mix.Component("Cu",63.5,29,0.169);           
+                   mix.par("dens")=2.35;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component Cu	a=63.5	z=29	w=0.63        
+             /// Component Zn	a=65.4	z=30	w=0.37        
+             /// Mixture Brass dens=8.4        
+             {  AgMaterial &mix = AgMaterial::Get("Brass");           
+                   mix.Component("Cu",63.5,29,0.63);           
+                   mix.Component("Zn",65.4,30,0.37);           
+                   mix.par("dens")=8.4;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           
