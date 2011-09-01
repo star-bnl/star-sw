@@ -29,9 +29,9 @@
        // ---------------------------------------------------------------------------------------------------     
           ///@addtogroup IdsmGeo1_vars     
           ///@{        
-                Float_t inr,outr,lengthz,centerz,z1,z2,k,phi1,phi2,sina,cosa,outrflat,boxr,resr,angr,m;        
+                Float_t inr,outr,lengthz,k,sina,cosa,resr,angr,m,pm;        
                 //        
-                /// Float_t inr,outr,lengthz,centerz,z1,z2,k,phi1,phi2,sina,cosa,outrflat,boxr,resr,angr,m        
+                /// Float_t inr,outr,lengthz,k,sina,cosa,resr,angr,m,pm        
           ///@}     
           //  -----------------------------------------------------     
           /// @defgroup idsg_doc     
@@ -41,13 +41,7 @@
           /// AgML structure members:     
           ///                             
           ///Float_t version;     
-          ///Float_t lenm;     
-          ///Float_t rm;     
-          ///Float_t lenw;     
-          ///Float_t rw;     
-          ///Float_t thick;     
-          ///Float_t zstart;     
-          ///Float_t angdel;     
+          ///Float_t rf;     
           ///Float_t angflat;     
           ///Float_t r1res;     
           ///Float_t r2res;     
@@ -94,7 +88,7 @@
                         Bool_t _same_shape = true;           
                       { AgAttribute attr = AgAttribute("IDSM");              
                             attr.par("seen")=0;              
-                            attr.par("colo")=6;              
+                            attr.par("colo")=4;              
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
@@ -114,52 +108,114 @@
                             if (_same_shape) goto END_OF_IDSM;              
                             _stacker -> Build(this);              
                       }           
-                      _create = AgCreate("OSCA");           
+                      _create = AgCreate("SUCA");           
                       {              
                             AgShape myshape; // undefined shape              
-                            ///Create OSCA              
-                            Create("OSCA");               
+                            ///Create SUCA              
+                            Create("SUCA");               
                       }           
-                      { AgPlacement place = AgPlacement("OSCA","IDSM");              
-                            /// Add daughter volume OSCA to mother IDSM              
+                      { AgPlacement place = AgPlacement("SUCA","IDSM");              
+                            /// Add daughter volume SUCA to mother IDSM              
                             place.TranslateZ(0);              
                             /// Translate z = 0              
-                            _stacker -> Position( AgBlock::Find("OSCA"), place );              
-                      } // end placement of OSCA           
+                            _stacker -> Position( AgBlock::Find("SUCA"), place );              
+                      } // end placement of SUCA           
                       /// Loop on k from 0 to 1 step=1           
                       for ( k=0; (1>0)? (k<=1):(k>=1); k+=1 )           
                       {              
-                            z1=lengthz/2-idsg.lenw/2.;              
-                            z2=idsg.lenm/2.-idsg.thick;              
-                            if ( k==1 )              
-                            {                 
-                                  z1=-lengthz/2+idsg.lenw/2.;                 
-                                  z2=-idsg.lenm/2.+idsg.thick/2.;                 
-                            }              
-                            _create = AgCreate("WSCC");              
+                            pm=1.-2*k;              
+                            _create = AgCreate("SUCB");              
                             {                 
                                   AgShape myshape; // undefined shape                 
-                                  ///Create WSCC                 
-                                  Create("WSCC");                  
+                                  ///Create SUCB                 
+                                  Create("SUCB");                  
                             }              
-                            { AgPlacement place = AgPlacement("WSCC","IDSM");                 
-                                  /// Add daughter volume WSCC to mother IDSM                 
-                                  place.TranslateZ(z1);                 
-                                  /// Translate z = z1                 
-                                  _stacker -> Position( AgBlock::Find("WSCC"), place );                 
-                            } // end placement of WSCC              
-                            _create = AgCreate("WSCD");              
+                            { AgPlacement place = AgPlacement("SUCB","IDSM");                 
+                                  /// Add daughter volume SUCB to mother IDSM                 
+                                  place.TranslateZ(pm*55.35);                 
+                                  /// Translate z = pm*55.35                 
+                                  _stacker -> Position( AgBlock::Find("SUCB"), place );                 
+                            } // end placement of SUCB              
+                            if ( k==0 )              
+                            {                 
+                                  _create = AgCreate("SUCC");                 
+                                  {                    
+                                        AgShape myshape; // undefined shape                    
+                                        ///Create SUCC                    
+                                        Create("SUCC");                     
+                                  }                 
+                                  { AgPlacement place = AgPlacement("SUCC","IDSM");                    
+                                        /// Add daughter volume SUCC to mother IDSM                    
+                                        place.TranslateZ(59.55);                    
+                                        /// Translate z = 59.55                    
+                                        _stacker -> Position( AgBlock::Find("SUCC"), place );                    
+                                  } // end placement of SUCC                 
+                            }              
+                            else              
+                            {                 
+                                  { AgPlacement place = AgPlacement("SUCC","IDSM");                    
+                                        /// Add daughter volume SUCC to mother IDSM                    
+                                        place.TranslateZ(-59.55);                    
+                                        /// Translate z = -59.55                    
+                                        place.AlphaX(180.);                    
+                                        /// Rotate: AlphaX = 180.                    
+                                        /// G3 Reference: thetax = 90                    
+                                        /// G3 Reference: phix = 0                    
+                                        /// G3 Reference: thetay = 90                    
+                                        /// G3 Reference: phiy = 90                    
+                                        /// G3 Reference: thetaz = 0                    
+                                        /// G3 Reference: phiz = 0                    
+                                        _stacker -> Position( AgBlock::Find("SUCC"), place );                    
+                                  } // end placement of SUCC                 
+                            }              
+                            _create = AgCreate("SUCD");              
                             {                 
                                   AgShape myshape; // undefined shape                 
-                                  ///Create WSCD                 
-                                  Create("WSCD");                  
+                                  ///Create SUCD                 
+                                  Create("SUCD");                  
                             }              
-                            { AgPlacement place = AgPlacement("WSCD","IDSM");                 
-                                  /// Add daughter volume WSCD to mother IDSM                 
-                                  place.TranslateZ(z2);                 
-                                  /// Translate z = z2                 
-                                  _stacker -> Position( AgBlock::Find("WSCD"), place );                 
-                            } // end placement of WSCD              
+                            { AgPlacement place = AgPlacement("SUCD","IDSM");                 
+                                  /// Add daughter volume SUCD to mother IDSM                 
+                                  place.TranslateZ(pm*63.41);                 
+                                  /// Translate z = pm*63.41                 
+                                  _stacker -> Position( AgBlock::Find("SUCD"), place );                 
+                            } // end placement of SUCD              
+                            _create = AgCreate("SUCE");              
+                            {                 
+                                  AgShape myshape; // undefined shape                 
+                                  ///Create SUCE                 
+                                  Create("SUCE");                  
+                            }              
+                            { AgPlacement place = AgPlacement("SUCE","IDSM");                 
+                                  /// Add daughter volume SUCE to mother IDSM                 
+                                  place.TranslateZ(pm*144.52);                 
+                                  /// Translate z = pm*144.52                 
+                                  _stacker -> Position( AgBlock::Find("SUCE"), place );                 
+                            } // end placement of SUCE              
+                            _create = AgCreate("SUCF");              
+                            {                 
+                                  AgShape myshape; // undefined shape                 
+                                  ///Create SUCF                 
+                                  Create("SUCF");                  
+                            }              
+                            { AgPlacement place = AgPlacement("SUCF","IDSM");                 
+                                  /// Add daughter volume SUCF to mother IDSM                 
+                                  place.TranslateZ(pm*224.52);                 
+                                  /// Translate z = pm*224.52                 
+                                  _stacker -> Position( AgBlock::Find("SUCF"), place );                 
+                            } // end placement of SUCF              
+                            _create = AgCreate("SUCG");              
+                            {                 
+                                  AgShape myshape; // undefined shape                 
+                                  ///Create SUCG                 
+                                  Create("SUCG");                  
+                            }              
+                            { AgPlacement place = AgPlacement("SUCG","IDSM");                 
+                                  /// Add daughter volume SUCG to mother IDSM                 
+                                  place.TranslateZ(pm*225.4);                 
+                                  /// Translate z = pm*225.4                 
+                                  _stacker -> Position( AgBlock::Find("SUCG"), place );                 
+                            } // end placement of SUCG              
                       }           
                       /// Loop on m from 0 to 1 step=1           
                       for ( m=0; (1>0)? (m<=1):(m>=1); m+=1 )           
@@ -186,6 +242,46 @@
                                   _stacker -> Position( AgBlock::Find("TPRT"), place );                 
                             } // end placement of TPRT              
                       }           
+                      _create = AgCreate("FGCB");           
+                      {              
+                            AgShape myshape; // undefined shape              
+                            ///Create FGCB              
+                            Create("FGCB");               
+                      }           
+                      { AgPlacement place = AgPlacement("FGCB","IDSM");              
+                            /// Add daughter volume FGCB to mother IDSM              
+                            place.TranslateZ(lengthz/2.);              
+                            /// Translate z = lengthz/2.              
+                            place.AlphaZ(16);              
+                            /// Rotate: AlphaZ = 16              
+                            /// G3 Reference: thetax = 90              
+                            /// G3 Reference: phix = 0              
+                            /// G3 Reference: thetay = 90              
+                            /// G3 Reference: phiy = 90              
+                            /// G3 Reference: thetaz = 0              
+                            /// G3 Reference: phiz = 0              
+                            _stacker -> Position( AgBlock::Find("FGCB"), place );              
+                      } // end placement of FGCB           
+                      _create = AgCreate("FGCB");           
+                      {              
+                            AgShape myshape; // undefined shape              
+                            ///Create FGCB              
+                            Create("FGCB");               
+                      }           
+                      { AgPlacement place = AgPlacement("FGCB","IDSM");              
+                            /// Add daughter volume FGCB to mother IDSM              
+                            place.TranslateZ(lengthz/2.);              
+                            /// Translate z = lengthz/2.              
+                            place.AlphaZ(180.+16);              
+                            /// Rotate: AlphaZ = 180.+16              
+                            /// G3 Reference: thetax = 90              
+                            /// G3 Reference: phix = 0              
+                            /// G3 Reference: thetay = 90              
+                            /// G3 Reference: phiy = 90              
+                            /// G3 Reference: thetaz = 0              
+                            /// G3 Reference: phiz = 0              
+                            _stacker -> Position( AgBlock::Find("FGCB"), place );              
+                      } // end placement of FGCB           
                       _create = AgCreate("TPRR");           
                       {              
                             AgShape myshape; // undefined shape              
@@ -215,199 +311,245 @@
                 ///@}        
           } // End Block IDSM     
           // ---------------------------------------------------------------------------------------------------     
-          void OSCA::Block( AgCreate create )     
+          void SUCA::Block( AgCreate create )     
           {         
-                ///@addtogroup OSCA_doc        
+                ///@addtogroup SUCA_doc        
                 ///@{           
                         AgBlock *_save = mCurrent;           
                         mCurrent = this;           
                         Bool_t _same_shape = true;           
-                      { AgAttribute attr = AgAttribute("OSCA");              
-                            attr.par("seen")=1;              
-                            attr.par("colo")=5;              
-                            attr.Inherit( AgBlock::previous() );               
-                            _attribute = attr;              
-                      }           
-                      /// Material CFiber            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Cfiber");              
-                            _material = mat;              
-                      }           
-                      {  AgShape shape = AgShape("Tube");              
-                            shape     .Inherit( AgBlock::previous() );              
-                            create     .SetParameters(shape);              
-                            shape.par("rmin")=inr;              
-                            shape.par("rmax")=inr+idsg.thick;              
-                            shape.par("dz")=idsg.lenm/2.;              
-                            /// Shape Tube rmin=inr rmax=inr+idsg.thick dz=idsg.lenm/2.               
-                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
-                            _shape = shape;              
-                            if (_same_shape) goto END_OF_OSCA;              
-                            _stacker -> Build(this);              
-                      }           
-                      END_OF_OSCA:           
-                      mCurrent = _save;           
-                ///@}        
-          } // End Block OSCA     
-          // ---------------------------------------------------------------------------------------------------     
-          void WSCC::Block( AgCreate create )     
-          {         
-                ///@addtogroup WSCC_doc        
-                ///@{           
-                        AgBlock *_save = mCurrent;           
-                        mCurrent = this;           
-                        Bool_t _same_shape = true;           
-                      { AgAttribute attr = AgAttribute("WSCC");              
-                            attr.par("seen")=0;              
-                            attr.par("colo")=4;              
-                            attr.Inherit( AgBlock::previous() );               
-                            _attribute = attr;              
-                      }           
-                      /// Material Air            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Air");              
-                            _material = mat;              
-                      }           
-                      {  AgShape shape = AgShape("Tube");              
-                            shape     .Inherit( AgBlock::previous() );              
-                            create     .SetParameters(shape);              
-                            shape.par("rmin")=idsg.rw-idsg.thick/2.;              
-                            shape.par("rmax")=idsg.rw+idsg.thick/2.;              
-                            shape.par("dz")=idsg.lenw/2.;              
-                            /// Shape Tube rmin=idsg.rw-idsg.thick/2. rmax=idsg.rw+idsg.thick/2. dz=idsg.lenw/2.               
-                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
-                            _shape = shape;              
-                            if (_same_shape) goto END_OF_WSCC;              
-                            _stacker -> Build(this);              
-                      }           
-                      _create = AgCreate("WSCO");           
-                      {              
-                            AgShape myshape; // undefined shape              
-                            ///Create WSCO              
-                            Create("WSCO");               
-                      }           
-                      { AgPlacement place = AgPlacement("WSCO","WSCC");              
-                            /// Add daughter volume WSCO to mother WSCC              
-                            place.TranslateZ(0);              
-                            /// Translate z = 0              
-                            _stacker -> Position( AgBlock::Find("WSCO"), place );              
-                      } // end placement of WSCO           
-                      END_OF_WSCC:           
-                      mCurrent = _save;           
-                ///@}        
-          } // End Block WSCC     
-          // ---------------------------------------------------------------------------------------------------     
-          void WSCO::Block( AgCreate create )     
-          {         
-                ///@addtogroup WSCO_doc        
-                ///@{           
-                        AgBlock *_save = mCurrent;           
-                        mCurrent = this;           
-                        Bool_t _same_shape = true;           
-                      { AgAttribute attr = AgAttribute("WSCO");              
-                            attr.par("seen")=1;              
-                            attr.par("colo")=4;              
-                            attr.Inherit( AgBlock::previous() );               
-                            _attribute = attr;              
-                      }           
-                      /// Material CFiber            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Cfiber");              
-                            _material = mat;              
-                      }           
-                      {  AgShape shape = AgShape("Tube");              
-                            shape     .Inherit( AgBlock::previous() );              
-                            create     .SetParameters(shape);              
-                            shape.par("rmin")=idsg.rw-idsg.thick/2.;              
-                            shape.par("rmax")=idsg.rw+idsg.thick/2.;              
-                            shape.par("dz")=idsg.lenw/2.;              
-                            /// Shape Tube rmin=idsg.rw-idsg.thick/2. rmax=idsg.rw+idsg.thick/2. dz=idsg.lenw/2.               
-                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
-                            _shape = shape;              
-                            if (_same_shape) goto END_OF_WSCO;              
-                            _stacker -> Build(this);              
-                      }           
-                      END_OF_WSCO:           
-                      mCurrent = _save;           
-                ///@}        
-          } // End Block WSCO     
-          // ---------------------------------------------------------------------------------------------------     
-          void WSCD::Block( AgCreate create )     
-          {         
-                ///@addtogroup WSCD_doc        
-                ///@{           
-                        AgBlock *_save = mCurrent;           
-                        mCurrent = this;           
-                        Bool_t _same_shape = true;           
-                      { AgAttribute attr = AgAttribute("WSCD");              
-                            attr.par("seen")=0;              
-                            attr.par("colo")=2;              
-                            attr.Inherit( AgBlock::previous() );               
-                            _attribute = attr;              
-                      }           
-                      /// Material Air            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Air");              
-                            _material = mat;              
-                      }           
-                      {  AgShape shape = AgShape("Tube");              
-                            shape     .Inherit( AgBlock::previous() );              
-                            create     .SetParameters(shape);              
-                            shape.par("rmin")=idsg.rm-idsg.thick/2.;              
-                            shape.par("rmax")=idsg.rw+idsg.thick/2.;              
-                            shape.par("dz")=idsg.thick/2.;              
-                            /// Shape Tube rmin=idsg.rm-idsg.thick/2. rmax=idsg.rw+idsg.thick/2. dz=idsg.thick/2.               
-                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
-                            _shape = shape;              
-                            if (_same_shape) goto END_OF_WSCD;              
-                            _stacker -> Build(this);              
-                      }           
-                      _create = AgCreate("WSCP");           
-                      {              
-                            AgShape myshape; // undefined shape              
-                            ///Create WSCP              
-                            Create("WSCP");               
-                      }           
-                      { AgPlacement place = AgPlacement("WSCP","WSCD");              
-                            /// Add daughter volume WSCP to mother WSCD              
-                            place.TranslateZ(0);              
-                            /// Translate z = 0              
-                            _stacker -> Position( AgBlock::Find("WSCP"), place );              
-                      } // end placement of WSCP           
-                      END_OF_WSCD:           
-                      mCurrent = _save;           
-                ///@}        
-          } // End Block WSCD     
-          // ---------------------------------------------------------------------------------------------------     
-          void WSCP::Block( AgCreate create )     
-          {         
-                ///@addtogroup WSCP_doc        
-                ///@{           
-                        AgBlock *_save = mCurrent;           
-                        mCurrent = this;           
-                        Bool_t _same_shape = true;           
-                      { AgAttribute attr = AgAttribute("WSCP");              
+                      { AgAttribute attr = AgAttribute("SUCA");              
                             attr.par("seen")=1;              
                             attr.par("colo")=6;              
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
-                      /// Material CFiber            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Cfiber");              
+                      /// Material CFRPMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Cfrpmix");              
                             _material = mat;              
                       }           
                       {  AgShape shape = AgShape("Tube");              
                             shape     .Inherit( AgBlock::previous() );              
                             create     .SetParameters(shape);              
-                            shape.par("rmin")=idsg.rm-idsg.thick/2.;              
-                            shape.par("rmax")=idsg.rw+idsg.thick/2.;              
-                            shape.par("dz")=idsg.thick/2.;              
-                            /// Shape Tube rmin=idsg.rm-idsg.thick/2. rmax=idsg.rw+idsg.thick/2. dz=idsg.thick/2.               
+                            shape.par("rmin")=21.5;              
+                            shape.par("rmax")=21.6;              
+                            shape.par("dz")=112./2.;              
+                            /// Shape Tube rmin=21.5 rmax=21.6 dz=112./2.               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
-                            if (_same_shape) goto END_OF_WSCP;              
+                            if (_same_shape) goto END_OF_SUCA;              
                             _stacker -> Build(this);              
                       }           
-                      END_OF_WSCP:           
+                      END_OF_SUCA:           
                       mCurrent = _save;           
                 ///@}        
-          } // End Block WSCP     
+          } // End Block SUCA     
+          // ---------------------------------------------------------------------------------------------------     
+          void SUCB::Block( AgCreate create )     
+          {         
+                ///@addtogroup SUCB_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("SUCB");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=1;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material SUCMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Sucmix");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Tube");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("rmin")=21.6;              
+                            shape.par("rmax")=22.7;              
+                            shape.par("dz")=1.3/2.;              
+                            /// Shape Tube rmin=21.6 rmax=22.7 dz=1.3/2.               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_SUCB;              
+                            _stacker -> Build(this);              
+                      }           
+                      END_OF_SUCB:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block SUCB     
+          // ---------------------------------------------------------------------------------------------------     
+          void SUCC::Block( AgCreate create )     
+          {         
+                ///@addtogroup SUCC_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("SUCC");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=6;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material CFRPMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Cfrpmix");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Cone");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("dz")=7.1/2.;              
+                            shape.par("rmn1")=21.6;              
+                            shape.par("rmx1")=22.75;              
+                            shape.par("rmn2")=38.75;              
+                            shape.par("rmx2")=39.9;              
+                            /// Shape Cone dz=7.1/2. rmn1=21.6 rmx1=22.75 rmn2=38.75 rmx2=39.9               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_SUCC;              
+                            _stacker -> Build(this);              
+                      }           
+                      END_OF_SUCC:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block SUCC     
+          // ---------------------------------------------------------------------------------------------------     
+          void SUCD::Block( AgCreate create )     
+          {         
+                ///@addtogroup SUCD_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("SUCD");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=1;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material SUCMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Sucmix");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Tube");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("rmin")=37.8;              
+                            shape.par("rmax")=39.9;              
+                            shape.par("dz")=0.62/2.;              
+                            /// Shape Tube rmin=37.8 rmax=39.9 dz=0.62/2.               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_SUCD;              
+                            _stacker -> Build(this);              
+                      }           
+                      END_OF_SUCD:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block SUCD     
+          // ---------------------------------------------------------------------------------------------------     
+          void SUCE::Block( AgCreate create )     
+          {         
+                ///@addtogroup SUCE_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("SUCE");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=6;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material CFRPMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Cfrpmix");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Tube");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("rmin")=39.8;              
+                            shape.par("rmax")=39.9;              
+                            shape.par("dz")=161.6/2.;              
+                            /// Shape Tube rmin=39.8 rmax=39.9 dz=161.6/2.               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_SUCE;              
+                            _stacker -> Build(this);              
+                      }           
+                      END_OF_SUCE:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block SUCE     
+          // ---------------------------------------------------------------------------------------------------     
+          void SUCF::Block( AgCreate create )     
+          {         
+                ///@addtogroup SUCF_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("SUCF");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=1;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material AlPure            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Alpure");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Tube");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("rmin")=40.;              
+                            shape.par("rmax")=40.5;              
+                            shape.par("dz")=1.6/2.;              
+                            /// Shape Tube rmin=40. rmax=40.5 dz=1.6/2.               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_SUCF;              
+                            _stacker -> Build(this);              
+                      }           
+                      END_OF_SUCF:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block SUCF     
+          // ---------------------------------------------------------------------------------------------------     
+          void SUCG::Block( AgCreate create )     
+          {         
+                ///@addtogroup SUCG_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("SUCG");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=1;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material AlPure            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Alpure");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Tube");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("rmin")=10.3;              
+                            shape.par("rmax")=40.5;              
+                            shape.par("dz")=0.16/2.;              
+                            /// Shape Tube rmin=10.3 rmax=40.5 dz=0.16/2.               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_SUCG;              
+                            _stacker -> Build(this);              
+                      }           
+                      END_OF_SUCG:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block SUCG     
           // ---------------------------------------------------------------------------------------------------     
           void TPRR::Block( AgCreate create )     
           {         
@@ -476,49 +618,76 @@
                       mCurrent = _save;           
                 ///@}        
           } // End Block TPRT     
+          // ---------------------------------------------------------------------------------------------------     
+          void FGCB::Block( AgCreate create )     
+          {         
+                ///@addtogroup FGCB_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("FGCB");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=1;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material badFgtCables            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Badfgtcables");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Tubs");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("rmin")=idsg.rrres-1.;              
+                            shape.par("rmax")=idsg.rrres+0.5;              
+                            shape.par("phi1")=-10.;              
+                            shape.par("phi2")=10.;              
+                            shape.par("dz")=lengthz/4.;              
+                            /// Shape Tubs rmin=idsg.rrres-1. rmax=idsg.rrres+0.5 phi1=-10. phi2=10. dz=lengthz/4.               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_FGCB;              
+                            _stacker -> Build(this);              
+                      }           
+                      END_OF_FGCB:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block FGCB     
     // ----------------------------------------------------------------------- geoctr
        void IdsmGeo1::ConstructGeometry()     
        {        
              ///@addtogroup IdsmGeo1_revision        
              ///@{           
-                   /// Created:   4/10/2011            
+                   /// Created:   8/30/2011            
              ///@}        
              ///@addtogroup IdsmGeo1_revision        
              ///@{           
                    /// Author: Jan Balewski MIT            
              ///@}        
              AddBlock("IDSM");        
-             AddBlock("OSCA");        
-             AddBlock("WSCC");        
-             AddBlock("WSCD");        
-             AddBlock("WSCO");        
-             AddBlock("WSCP");        
              AddBlock("TPRR");        
              AddBlock("TPRT");        
+             AddBlock("FGCB");        
+             AddBlock("SUCA");        
+             AddBlock("SUCB");        
+             AddBlock("SUCC");        
+             AddBlock("SUCD");        
+             AddBlock("SUCE");        
+             AddBlock("SUCF");        
+             AddBlock("SUCG");        
              // ---------------------------------------------------------------------------------------------------        
              ///@addtogroup idsg_doc        
              ///@{           
                    ++idsg._index;           
                    idsg . version = 1.0; // Versioning of the IDS geometry           
                    /// idsg . version = 1.0; // Versioning of the IDS geometry           
-                   idsg . zstart = 0.; //  Z position of middle cone           
-                   /// idsg . zstart = 0.; //  Z position of middle cone           
-                   idsg . thick = 0.3; //  thickens of any element           
-                   /// idsg . thick = 0.3; //  thickens of any element           
-                   idsg . lenm = 100.; // Z length of  middle cone           
-                   /// idsg . lenm = 100.; // Z length of  middle cone           
-                   idsg . rm = 6.; //  radii of middle cone           
-                   /// idsg . rm = 6.; //  radii of middle cone           
-                   idsg . lenw = 120.; // Z lenght of west cone           
-                   /// idsg . lenw = 120.; // Z lenght of west cone           
-                   idsg . rw = 41.; //  radii of west cone           
-                   /// idsg . rw = 41.; //  radii of west cone           
+                   idsg . rf = 8.0; //  radii of inner volume boundary           
+                   /// idsg . rf = 8.0; //  radii of inner volume boundary           
                    idsg . angflat = 106.; //  angle (deg) for center of flat           
                    /// idsg . angflat = 106.; //  angle (deg) for center of flat           
-                   idsg . angdel = 36.; //  opening angle (deg) of flat           
-                   /// idsg . angdel = 36.; //  opening angle (deg) of flat           
-                   idsg . rrres = 44.; //  radial distance of  for TPC resistor tubes           
-                   /// idsg . rrres = 44.; //  radial distance of  for TPC resistor tubes           
+                   idsg . rrres = 43.; //  radial distance of  for TPC resistor tubes           
+                   /// idsg . rrres = 43.; //  radial distance of  for TPC resistor tubes           
                    idsg . r1res = 1.17; //  inner radii for TPC resistor tubes           
                    /// idsg . r1res = 1.17; //  inner radii for TPC resistor tubes           
                    idsg . r2res = 1.27; //  outer radii for TPC resistor tubes           
@@ -537,8 +706,8 @@
              ///@addtogroup idsa_doc        
              ///@{           
                    ++idsa._index;           
-                   idsa . version = 1.0; // Default alignment of IDSM at (0,0,0) with no rotation           
-                   /// idsa . version = 1.0; // Default alignment of IDSM at (0,0,0) with no rotation           
+                   idsa . version = 2.0; // Default alignment of IDSM at (0,0,0) with no rotation           
+                   /// idsa . version = 2.0; // Default alignment of IDSM at (0,0,0) with no rotation           
                    idsa . x = 0.0; // x-alignment           
                    /// idsa . x = 0.0; // x-alignment           
                    idsa . y = 0.0; // y-alignment           
@@ -561,11 +730,79 @@
                    idsa.fill();           
              ///@}        
              //        
-             /// Component C	a=12	z=6	w=1        
-             /// Mixture CFiber dens=1.713        
-             {  AgMaterial &mix = AgMaterial::Get("Cfiber");           
-                   mix.Component("C",12,6,1);           
-                   mix.par("dens")=1.713;           
+             // ---------------------------------------------------------------------------------------------------        
+             ///@addtogroup idsa_doc        
+             ///@{           
+                   ++idsa._index;           
+                   idsa . version = 2.0; // Default alignment of IDSM at (0,0,0) with no rotation           
+                   /// idsa . version = 2.0; // Default alignment of IDSM at (0,0,0) with no rotation           
+                   idsa . x = 0.0; // x-alignment           
+                   /// idsa . x = 0.0; // x-alignment           
+                   idsa . y = 0.0; // y-alignment           
+                   /// idsa . y = 0.0; // y-alignment           
+                   idsa . z = 0.0; // z-alignment           
+                   /// idsa . z = 0.0; // z-alignment           
+                   idsa . thetax = 90.0; // align x`-axis 90 degrees in theta wrt cave           
+                   /// idsa . thetax = 90.0; // align x`-axis 90 degrees in theta wrt cave           
+                   idsa . phix =  0.0; // align x`-axis  0 degrees in phi   wrt cave           
+                   /// idsa . phix =  0.0; // align x`-axis  0 degrees in phi   wrt cave           
+                   idsa . thetay = 90.0; // align y`-axis 90 degrees in theta wrt cave           
+                   /// idsa . thetay = 90.0; // align y`-axis 90 degrees in theta wrt cave           
+                   idsa . phiy = 90.0; // align y`-axis  0 degrees in phi   wrt cave           
+                   /// idsa . phiy = 90.0; // align y`-axis  0 degrees in phi   wrt cave           
+                   idsa . thetaz =  0.0; // align z`-axis  0 degrees in theta wrt cave           
+                   /// idsa . thetaz =  0.0; // align z`-axis  0 degrees in theta wrt cave           
+                   idsa . phiz =  0.0; // align z`-axis  0 degrees in phi   wrt cave           
+                   /// idsa . phiz =  0.0; // align z`-axis  0 degrees in phi   wrt cave           
+                   //           
+                   idsa.fill();           
+             ///@}        
+             //        
+             /// Component O	a=16	z=8	w=0.062        
+             /// Component C	a=12	z=6	w=0.892        
+             /// Component H	a=1	z=1	w=0.019        
+             /// Component Cl	a=35.5	z=17	w=0.027        
+             /// Mixture CFRPMix dens=1.78        
+             {  AgMaterial &mix = AgMaterial::Get("Cfrpmix");           
+                   mix.Component("O",16,8,0.062);           
+                   mix.Component("C",12,6,0.892);           
+                   mix.Component("H",1,1,0.019);           
+                   mix.Component("Cl",35.5,17,0.027);           
+                   mix.par("dens")=1.78;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component AL	a=27	z=13	w=1.        
+             /// Mixture AlPure dens=2.80        
+             {  AgMaterial &mix = AgMaterial::Get("Alpure");           
+                   mix.Component("AL",27,13,1.);           
+                   mix.par("dens")=2.80;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component AL	a=27	z=13	w=0.747        
+             /// Component Cu	a=63.5	z=29	w=0.012        
+             /// Component Fe	a=55.8	z=26	w=0.056        
+             /// Component Cr	a=52.0	z=24	w=0.014        
+             /// Component Ni	a=58.7	z=28	w=0.008        
+             /// Component Zn	a=65.4	z=30	w=0.045        
+             /// Component Ti	a=47.9	z=22	w=0.094        
+             /// Component V	a=50.9	z=23	w=0.004        
+             /// Component Mg	a=24.3	z=12	w=0.020        
+             /// Mixture SUCMix dens=3.4        
+             {  AgMaterial &mix = AgMaterial::Get("Sucmix");           
+                   mix.Component("AL",27,13,0.747);           
+                   mix.Component("Cu",63.5,29,0.012);           
+                   mix.Component("Fe",55.8,26,0.056);           
+                   mix.Component("Cr",52.0,24,0.014);           
+                   mix.Component("Ni",58.7,28,0.008);           
+                   mix.Component("Zn",65.4,30,0.045);           
+                   mix.Component("Ti",47.9,22,0.094);           
+                   mix.Component("V",50.9,23,0.004);           
+                   mix.Component("Mg",24.3,12,0.020);           
+                   mix.par("dens")=3.4;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           
@@ -598,16 +835,30 @@
                    _material = mix;           
                    _material.lock();           
              }        
-             inr     = idsg.rm - idsg.thick/2.;        
+             /// Component CU	a=63.54	z=29	w=0.586        
+             /// Component C	a=12.01	z=6	w=0.259        
+             /// Component O	a=15.999	z=8	w=0.138        
+             /// Component H	a=1.00794	z=1	w=0.017        
+             /// Mixture badFgtCables dens=2.68        
+             {  AgMaterial &mix = AgMaterial::Get("Badfgtcables");           
+                   mix.Component("CU",63.54,29,0.586);           
+                   mix.Component("C",12.01,6,0.259);           
+                   mix.Component("O",15.999,8,0.138);           
+                   mix.Component("H",1.00794,1,0.017);           
+                   mix.par("dens")=2.68;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// USE idsg version=1.0;        
+             idsg.Use("version",(Float_t)1.0);        
+             /// USE idsa version=1.0;        
+             idsa.Use("version",(Float_t)1.0);        
+             inr     = idsg.rf;        
              outr    = idsg.rrres + idsg.r2res;        
-             lengthz = idsg.lenm + 2.*idsg.lenw;        
-             centerz = 0.;        
-             phi1=idsg.angflat-idsg.angdel/2.;        
-             phi2=idsg.angflat+idsg.angdel/2.;        
+             lengthz = 460.;        
              sina = sin( idsg.angflat * degrad );        
              cosa = cos( idsg.angflat * degrad );        
-             outrflat = idsg.rw * cos(idsg.angdel * degrad );        
-             boxr     = (outrflat + inr + idsg.thick)/2.;        
              _create = AgCreate("IDSM");        
              {           
                    AgShape myshape; // undefined shape           
