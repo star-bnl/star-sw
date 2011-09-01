@@ -3,6 +3,7 @@ Geometry *build = 0;
 
 void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
 {
+
   TString tag = mytag;
   gSystem->AddIncludePath(" -IStRoot -Igeom -IStarVMC -IStarVMC/Geometry/macros ");
 
@@ -10,8 +11,8 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
   //$$$  Load("libSt_g2t, libStarMagField.so, St_geant_Maker");
   //  Load(".$STAR_HOST_SYS/lib/StarAgmlLib.so");
   Load("StarAgmlLib.so");
-  Load("libGeometry.so");
   Load("libStarGeometry.so");
+  Load("libGeometry.so");
 
   gErrorIgnoreLevel=9999;
 
@@ -34,9 +35,9 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
   // Setup a geometry control structure for testing purposes
   //  
   gROOT->ProcessLine(Form(".!mkdir %s",mytag));
-
   if ( agml )
     {
+      if ( !gGeoManager ) new TGeoManager(tag,tag+" | dyson");	
       build -> ConstructGeometry ( tag );
     }
   else
