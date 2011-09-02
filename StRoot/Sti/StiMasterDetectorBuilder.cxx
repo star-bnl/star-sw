@@ -65,7 +65,7 @@ void StiMasterDetectorBuilder::build(StMaker&source)
 	}
     }
   if (gGeoManagerSV) {
-    SafeDelete(gGeoManager);
+//VP    SafeDelete(gGeoManager);
     gGeoManager = gGeoManagerSV;
   }
   cout << "StiMasterDetectorBuilder::build() -I- Done"<<endl;
