@@ -70,22 +70,22 @@
 	...
 	TCD_ID 21 -> VME 0x1F000000
 */
-#define TCD_ESMD        6
-#define TCD_BBC         7	// trigger-only
-#define TCD_ETOW        8
-#define TCD_MTD_QT      9	// trigger-only
-#define TCD_FGT         10	// Aug 26, 2009: was FPD's before
-#define TCD_TOF         11      //
-#define TCD_PP          12      // added Oct 20, 07
-#define TCD_MTD         13      // added Oct 5, 2010
-#define TCD_TPX		14	// codes VME 0x18000000; added on 18 Oct 07; Tonko
-#define TCD_BSMD        15      //
-#define TCD_CTB         16	// trigger-only
-#define TCD_BTOW        17      //
-#define TCD_FTPC        18      // gone in Sep '11
-#define TCD_PMD         19      // gone in Sep '11
-#define TCD_GMT         20      // WAS: empty, Nov, 2008
-#define TCD_VPD		21      // trigger-only
+#define TCD_ESMD        6	//0x10,
+#define TCD_BBC         7	//0x11, trigger-only
+#define TCD_ETOW        8	//0x12,
+#define TCD_MTD_QT      9	//0x13, trigger-only
+#define TCD_FGT         10	//0x14, Aug 26, 2009: was FPD's before
+#define TCD_TOF         11      //0x15,
+#define TCD_PP          12      //0x16
+#define TCD_MTD         13      //0x17
+#define TCD_TPX		14	//0x18
+#define TCD_BSMD        15      //0x19
+#define TCD_CTB         16	//0x1A, trigger-only
+#define TCD_BTOW        17      //0x1B
+#define TCD_FTPC        18      //0x1C; gone in Sep '11
+#define TCD_PMD         19      //0x1D; gone in Sep '11
+#define TCD_GMT         20      //0x1E; WAS: empty, Nov, 2008
+#define TCD_VPD		21      //0x1F trigger-only
 
 
 
