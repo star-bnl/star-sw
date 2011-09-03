@@ -205,6 +205,7 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 		// 2: null
 
 		int arm_mask = (d[3] >> 8) & 0x3F ;
+		LOG(NOTE,"ARC Header: format %d, ARM mask 0x%02x",format_code,arm_mask);
 
 		u_int *dta = d + 6 ;	// start at the 6th word
 
@@ -220,10 +221,14 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 
 			if(arm_id != arm) {
 				LOG(ERR,"RDO %d: Bad ARM ID: expect %d, have %d",r,arm,arm_id) ;
+				LOG(ERR,"0x%08x 0x%08x 0x%08x",*(dta-2),*(dta-1),*dta);
 				continue ;
 			}
 
 			u_int apv_mask = *dta & 0x00FFFFFF ;
+			dta++ ;
+
+			// would get monitor register values from this word (not implemented yet, but need to skip over of course)
 			dta++ ;
 
 
@@ -274,11 +279,25 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 				}
 
 				// set of Gerard's hadrcoded hacks...
-
-				if((apv < 12) || (apv >= 22)) {
+				// [Gerard]: Modified "my" hardcoded hacks so it would work regardless of which APV's (except #23) are used, despite that the length code is not properly filled in.
+				// This is necessary to support present cosmic ray test setup at STAR, original plan was no good (I forgot we would need different APV channels to support the other half of quadrant readout).
+				// This here remains still quite a hack, I must fix the length code but that is slightly nontrivial for today
+				// This will fail perhaps very occasionally if the data word is just exactly right to make it fail... pretty unlikely I hope!
+				// It also fails if ever APV #23 is recognized / non-truncated. That shouldn't happen, of course (in FGT! not IST!)
+				if (apv==23) {
+				  dta += 3;
+				  continue;
+				}
+				u_long expect0 = *(dta-2);
+				expect0 = (expect0 & 0xffffffe0)|((expect0+1) & 0x0000001f); // increment just the APV id
+				u_long expect1 = *(dta-1);
+				// look for the signature of a skipped APV -- the expected header for next APV found at dta+3 !!
+				// of course, it could be a fluke, then we will mess up, accept that risk
+				if((*(dta+3)==expect0) && (*(dta+4)==expect1)) {
 					dta += 3 ;
 					continue ;
 				}
+				// END of the hacks to deal with skipped APV's
 	
 	
 				fgt_adc_t *fgt_d = (fgt_adc_t *) adc->request(FGT_TB_COU*FGT_CH_COU) ;
@@ -315,8 +334,6 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 
 				LOG(TERR,"Diff %d",dta-o_dta) ;
 				*/
-
-
 
 				for(int ch=0;ch<128;ch++) {
 					int rch = 32*(ch%4) + 8*(ch/4) - 31*(ch/16) ;
