@@ -34,7 +34,7 @@
 #include <DAQ_HLT/daq_hlt.h>
 #include <DAQ_FGT/daq_fgt.h>
 #include <DAQ_MTD/daq_mtd.h>
-#include <DAQ_GMT/daq_gmt.h>
+//#include <DAQ_GMT/daq_gmt.h>
 
 // I wrapped more complicated detectors inside their own functions
 // for this example
@@ -53,7 +53,7 @@ static int pp2pp_doer(daqReader *rdr, const char *do_print) ;
 static int l3_doer(daqReader *rdr, const char *do_print) ;
 static int fgt_doer(daqReader *rdr, const char *do_print) ;
 static int mtd_doer(daqReader *rdr, const char *do_print) ;
-static int gmt_doer(daqReader *rdr, const char *do_print) ;
+//static int gmt_doer(daqReader *rdr, const char *do_print) ;
 
 int main(int argc, char *argv[])
 {
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
 		if(mtd_doer(evp,print_det)) LOG(INFO,"MTD found") ;
 
 		/*************************** GMT **************************/
-		if(gmt_doer(evp,print_det)) LOG(INFO,"GMT found") ;
+		//if(gmt_doer(evp,print_det)) LOG(INFO,"GMT found") ;
 		
 
 
@@ -1030,6 +1030,7 @@ static int mtd_doer(daqReader *rdr, const char *do_print)
 	return found ;
 }
 
+#if 0
 static int gmt_doer(daqReader *rdr, const char *do_print)
 {
 	int found = 0 ;
@@ -1063,3 +1064,4 @@ static int gmt_doer(daqReader *rdr, const char *do_print)
 	return found ;
 }
 
+#endif
