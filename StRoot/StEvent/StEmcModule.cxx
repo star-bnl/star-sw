@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcModule.cxx,v 2.4 2004/07/20 17:07:49 perev Exp $
+ * $Id: StEmcModule.cxx,v 2.5 2011/09/06 21:33:02 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcModule.cxx,v $
+ * Revision 2.5  2011/09/06 21:33:02  ullrich
+ * Bug in getEnergy() corrected (Justin Stevens)
+ *
  * Revision 2.4  2004/07/20 17:07:49  perev
  * Pavlinov corrs for TBrowser
  *
@@ -28,47 +31,47 @@
 #include <TBrowser.h>
 //#include <StAutoBrowse.h>
 
-static const char rcsid[] = "$Id: StEmcModule.cxx,v 2.4 2004/07/20 17:07:49 perev Exp $";
+static const char rcsid[] = "$Id: StEmcModule.cxx,v 2.5 2011/09/06 21:33:02 ullrich Exp $";
 
 ClassImp(StEmcModule)
 
 StEmcModule::StEmcModule() { /* noop */ }
 
 StEmcModule::~StEmcModule() { /* noop */ }
-  
+
 unsigned int
 StEmcModule::numberOfHits() const {return mHits.size();}
 
 void
 StEmcModule::printNumberOfHits() const 
 {
-  if(numberOfHits()==0) printf(" ** no hits ** : module number is unknown **");
-  else                  printf(" m %i : nhits %i\n", mHits[0]->module(), numberOfHits()); 
-  return;
+    if(numberOfHits()==0) printf(" ** no hits ** : module number is unknown **");
+    else                  printf(" m %i : nhits %i\n", mHits[0]->module(), numberOfHits()); 
+    return;
 }
 
 double 
 StEmcModule::getEnergy(const int pri) const
 {
-  float eM=0., e=0.;
-  int det;
-  if(mHits.size()>0) {
-    det = mHits[0]->detector()-kBarrelEmcTowerIdentifier + 1;
-    for(unsigned int i=0; i<mHits.size(); i++) {
-      e   = mHits[i]->energy();
-      eM += e;
-      if(pri>1) {
-        int id = mHits[i]->softId(det);
-        printf(" %3i hits : id %i : adc %i : e %9.4f", 
-        i+1, id, mHits[i]->adc(), e);
-        if(e<=0)  printf(" !!");
-        printf("\n");
-      }
+    float eM=0., e=0.;
+    int det;
+    if(mHits.size()>0) {
+        det = mHits[0]->detector()-kBarrelEmcTowerIdentifier + 1;
+        for(unsigned int i=0; i<mHits.size(); i++) {
+            e   = mHits[i]->energy();
+            eM += e;
+            if(pri>1) {
+                int id = mHits[i]->softId(det);
+                printf(" %3i hits : id %i : adc %i : e %9.4f", 
+                       i+1, id, mHits[i]->adc(), e);
+                if(e<=0)  printf(" !!");
+                printf("\n");
+            }
+        }
+        if(pri>0) printf("det %i : m %i : Energy %9.3f GeV/C\n", 
+                         det, mHits[0]->module(), eM);
     }
-    if(pri>0) printf("det %i : m %i : Energy %9.3f GeV/C\n", 
-    det, mHits[0]->module(), eM);
-  }
-  return e;
+    return eM;
 }
 
 const StSPtrVecEmcRawHit&
@@ -79,16 +82,16 @@ StEmcModule::hits() {return mHits; }
 
 // 15-sep-2003 by PAI
 /*
-void  StEmcModule::Browse(TBrowser *b)
-{
-  if(IsFolder()) StAutoBrowse::Browse(this, b);
-//  b->Add(&mHits); // no good
-//  TClass::AutoBrowse(&mHits, b); // no good
-}
-*/
+ void  StEmcModule::Browse(TBrowser *b)
+ {
+ if(IsFolder()) StAutoBrowse::Browse(this, b);
+ //  b->Add(&mHits); // no good
+ //  TClass::AutoBrowse(&mHits, b); // no good
+ }
+ */
 
 bool  StEmcModule::IsFolder() const
 {
-  if(mHits.size()>0) return kTRUE;
-  else               return kFALSE;
+    if(mHits.size()>0) return kTRUE;
+    else               return kFALSE;
 }
