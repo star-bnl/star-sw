@@ -6,6 +6,10 @@
 
 // Event Flag Definition
 
+typedef unsigned int u_int;
+typedef unsigned short u_short;
+typedef unsigned char u_char;
+
 #define CMD2_PING     0x01
 #define CMD2_DATA     0x02
 #define CMD2_RELEASE  0x03

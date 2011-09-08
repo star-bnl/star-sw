@@ -159,24 +159,25 @@ public:
   //
   // l25abort --> 1 = l2 abort
   //              2 = l2 timeout
-  int doEvent(gbPayload *pay, EvtDescData *evt, UINT32 l1trg, UINT32 l2trg, UINT32 l25abort, UINT32 token, UINT32 eventNumber)
+  int doEvent(gbPayload *pay, EvtDescData *evt, UINT32 l1trg_lo, UINT32 l2trg_lo, UINT32 l25abort, UINT32 token, UINT32 eventNumber, UINT32 l1trg_hi=0, UINT32 l2trg_hi=0)
   {
     // Stays big endian
     EvtDescData *paydesc = (EvtDescData *)pay->eventDesc;
     memcpy(paydesc, evt, sizeof(EvtDescData));
 
-    // 
-
     pay->gbPayloadVersion = l2h32(GB_PAYLOAD_VERSION);
-
     pay->eventNumber = l2h32(eventNumber);
     pay->token = l2h32(token);
 
     // The rest should be little endian 
-    pay->L1summary[0] = l2h32(l1trg);
-    pay->L2summary[0] = l2h32(l2trg);
-    pay->L3summary[0] = l2h32(l2trg);
-    pay->evp = l2h32(evpAssign(l2trg, 0));
+    pay->L1summary[0] = l2h32(l1trg_lo);
+    pay->L1summary[1] = l2h32(l1trg_hi);
+    pay->L2summary[0] = l2h32(l2trg_lo);
+    pay->L3summary[0] = l2h32(l2trg_lo);
+    pay->L2summary[1] = l2h32(l2trg_hi);
+    pay->L3summary[1] = l2h32(l2trg_hi);
+
+    pay->evp = l2h32(evpAssign(l2trg_lo, 0));
     pay->L3summary[3] = pay->evp;
     
 #ifdef __vxworks
@@ -225,7 +226,7 @@ public:
 
     if(pay->flags & EVBFLAG_L25ABORT) {
       LOG(DBG, "Sending L25Abort: token=%d event=%d 1l=0x%x l2=0x%x l2abort=%d",
-	  token, eventNumber, l1trg, l2trg, l25abort);
+	  token, eventNumber, l1trg_lo, l2trg_hi, l25abort);
     }
 
     return 0;

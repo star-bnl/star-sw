@@ -154,6 +154,7 @@
 #define TRG_HISUB_TASK	    211			/* Tonko, requested by John, Mar 16, 2006 */
 #define TRG_QT_TASK         212
 #define TRG_SCA_MON_TASK    213
+#define TRG_SHARE_TASK      214
 
 #define MYRI_MSG_SND        220    // board 3
 #define MYRI_MSG_SND_2      221    // board 4

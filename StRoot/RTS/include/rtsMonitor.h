@@ -72,6 +72,36 @@ struct rtsMonRequired           /* this represents the minimum packet necessary 
   unsigned int state ;          /* 0 OFF, 1 ON, 2 AUX */
 };
 
+// Added by jml:   I need the bare header which I use to construct
+// local monitor structures.
+//
+// ie:   struct jmlRtsMonL1Full {
+//          rtsMonHeader head;
+//          rtsMonL1 l1;
+//       };
+//
+// Then it is easy to send, I can use sizeof, I only need one variable
+// etc...   The user words in rtsMonStruct always screws me up...
+
+struct rtsMonHeader {
+	unsigned int size ;		/* size in bytes of this message */
+	unsigned int node ;		/* RTS Node Id of this sender */
+	unsigned int task ;		/* RTS TaskId of the sender */
+	unsigned int version ;		/* version of this struct - see RTS_MON_VERSION */
+	unsigned int tim ;		/* current time in UNIX seconds */
+	unsigned int state ;		/* RC States */
+	unsigned int tknIn ;		/* last announced token */
+	unsigned int tknOut ;		/* last released token */
+	unsigned int tknBad ;		/* last erroneus token */
+	unsigned int couEvtsIn ;	/* tokens currently in the system */
+	unsigned int couEvtsRun ;	/* events in this run */
+	unsigned int couEvtsAll ;	/* events since boot */
+	unsigned int couEvtsBad ;	/* rejected events because of errors in this run */
+	unsigned int busy ;		/* % of time the system was BUSY i.e. incapable of new events */
+	unsigned int evtsSec ;		/* input rate in events/second */
+	unsigned int kbSecEvb ;		/* rate in kB/sec to the EVB */
+	unsigned int kbSecAux ;		/* rate in kB/sec to the L3 system */
+};
 
 struct rtsMonStruct {
 /* these MUST be present! */
@@ -285,6 +315,83 @@ struct rtsMonDET {
 	u_char rb_status[12] ;	// USED in DDL dets!
 	u_int dbg_ctrs[10] ;	// 10 debug counters
 } ;
+
+
+
+//////////////////////////
+//  2011 L0/L1 updates
+//////////////////////////
+
+// This is the only packet coming from L0
+//
+// Standard packet + TCU fired by trigger.
+//
+struct rts2011MonL0 {
+  rtsMonHeader head;
+
+  struct {
+    u_int off_id;
+    u_int fired;
+    u_int rate;
+  } trg[TRIGGERS_MAX + 1];
+};
+
+// This is the only packet coming from L1
+//
+// Standard packet + L1 counters by trigger.
+//
+struct rts2011MonL1 {
+  rtsMonHeader head;
+
+  struct {
+    u_int rate;
+    u_int deadtime;
+  } scaler[TRIGGERS_MAX + 1];
+  
+  u_int detector_dead[16];
+};
+
+
+// This is the update to the evbSuperMon struct
+//
+struct rts2011EvbxSuperMon {
+  rtsMonHeader head;
+
+  // General
+  u_int mb_run;     // total data size for this run
+  u_int gb_free;    // free disk space
+  u_int gb_all;     // total disk space
+
+  // RCF
+  u_int files_sent;     // sent within last resets on the hour
+  u_int files_waiting;  // waiting to be sent
+
+  // By trigger Information
+  struct {
+    u_int off_id ;	   // offline id number i.e. 5001
+  
+    u_int fired ;	   // received from trigger
+    u_int fired_rate;
+
+    u_int built ;	   // events built _successfully_
+    u_int built_rate;
+
+    u_int l1_abort;
+    u_int l1_abort_rate;
+
+    u_int l2_abort;
+    u_int l2_abort_rate;
+
+    u_int l3_abort;
+    u_int l3_abort_rate;
+
+    u_int err;
+    u_int err_rate;
+
+    u_int stream;	   // which stream evts sent to
+  } trgs[TRIGGERS_MAX+1] ;
+};
+
 
 
 #endif
