@@ -28,6 +28,7 @@ void RunJetFinder2(int nevents = 100,
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
+  gSystem->Load("libfastjet.so");
   gSystem->Load("StJetFinder");
   gSystem->Load("StJetSkimEvent");
   gSystem->Load("StJets");

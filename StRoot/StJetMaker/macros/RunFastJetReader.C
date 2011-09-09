@@ -38,6 +38,7 @@ void RunFastJetReader(
     gSystem->Load("StSpinDbMaker");
     gSystem->Load("StEmcTriggerMaker");
     gSystem->Load("StTriggerUtilities");
+    gSystem->Load("libfastjet.so");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetEvent");
     gSystem->Load("StRandomSelector");

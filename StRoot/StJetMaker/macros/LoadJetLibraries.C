@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: LoadJetLibraries.C,v 1.14 2009/02/04 22:14:39 kocolosk Exp $
+// $Id: LoadJetLibraries.C,v 1.15 2011/09/09 16:44:13 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 void LoadJetLibraries()
@@ -44,6 +44,7 @@ void LoadJetLibraries_DEV()
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
+  gSystem->Load("libfastjet.so");
   gSystem->Load("StJetFinder");
   gSystem->Load("StJets");
   gSystem->Load("StJetSkimEvent");
