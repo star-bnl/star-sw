@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.80 2011/05/21 15:33:30 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.81 2011/09/09 12:53:19 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.81  2011/09/09 12:53:19  jcs
+// use the same cluster finding parameters for debug (fdbg) that are used for production
+//
 // Revision 1.80  2011/05/21 15:33:30  jcs
 // make corrections to save correct ChargeSum for clusters (one line of code
 // was deleted inadvertently with update 1.79 and the wrong conversion between
@@ -368,21 +371,6 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   DeltaPad = mDb->deltaPad();
 
   mMinChargeWindow = mDb->minChargeWindow();
-
-// Set FTPC inner cathode offsets = 0
-  mOffsetCathodeWest = 0.0;
-  mOffsetCathodeEast = 0.0;
-  mAngleOffsetWest =   0.0;
-  mAngleOffsetEast =   0.0;
-
-
-// Set ftpcClusterPars
-  MAXPEAKS = 160;  
-
-// Set FTPC Cluster Geometry values for cluster/laser analysis
-  mMinChargeWindow = 30;
-  mMaxPadlengthOut = 30; 
-  mMaxTimelengthOut = 30;
 
   mhpad = hpad;
   mhtime = htime;
@@ -2129,8 +2117,6 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
   
   // shift time => radius to correct for the offset of the inner cathode :
 
-  if (fabs(mOffsetCathodeWest)>0 || fabs(mOffsetCathodeEast)>0)
-    {
 
       if (iRow<10) // correct for west chamber
 	TimeCoordinate=(0.999997-0.09739494018294076*mOffsetCathodeWest*cos(Peak->Phi-mAngleOffsetWest))*TimeCoordinate;
@@ -2188,7 +2174,6 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
           - PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
 		+ mDb->radiansPerBoundary())+halfpi;
       }
-    }
 
   // ===================================================================
     
