@@ -37,6 +37,7 @@ void RunJetReader(int nevents=10,
     gSystem->Load("StJetSkimEvent");
     gSystem->Load("StTriggerUtilities");
     gSystem->Load("StJetEvent");
+    gSystem->Load("libfastjet.so");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
 

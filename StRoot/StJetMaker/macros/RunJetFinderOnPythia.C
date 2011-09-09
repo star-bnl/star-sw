@@ -32,6 +32,7 @@ void RunJetFinderOnPythia(int nevents = 2000,
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
+  gSystem->Load("libfastjet.so");
   gSystem->Load("StJetFinder");
   gSystem->Load("StJetSkimEvent");
   gSystem->Load("StJets");
