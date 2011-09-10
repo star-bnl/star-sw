@@ -229,8 +229,8 @@ Sensor::IsInArea(const double x, const double y, const double z) {
   }
   
   if (x >= xMinUser && x <= xMaxUser &&
-	  y >= yMinUser && y <= yMaxUser &&
-	  z >= zMinUser && z <= zMaxUser) {
+      y >= yMinUser && y <= yMaxUser &&
+      z >= zMinUser && z <= zMaxUser) {
     if (debug) {
       std::cout << className << "::IsInArea:\n";
       std::cout << "    (" << x << ", " << y << ", " << z << ") "

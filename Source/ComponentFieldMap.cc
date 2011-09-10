@@ -13,9 +13,10 @@
 namespace Garfield {
 
 ComponentFieldMap::ComponentFieldMap() :
+  is3d(true),
   nElements(-1), lastElement(-1), 
   nNodes(-1), nMaterials(-1),
-  hasWeightingField(false),
+  nWeightingFields(0),
   hasBoundingBox(false), 
   deleteBackground(true), checkMultipleElement(false),
   warning(false) {
@@ -25,6 +26,8 @@ ComponentFieldMap::ComponentFieldMap() :
   materials.clear();
   elements.clear();
   nodes.clear();
+  wfields.clear();
+  wfieldsOk.clear();
 
 }
 
@@ -2340,8 +2343,13 @@ ComponentFieldMap::SetRange() {
   xMaxBoundingBox = mapxmax;
   yMinBoundingBox = mapymin;
   yMaxBoundingBox = mapymax;
-  zMinBoundingBox = mapzmin;
-  zMaxBoundingBox = mapzmax;
+  if (is3d) {
+    zMinBoundingBox = mapzmin;
+    zMaxBoundingBox = mapzmax;
+  } else {
+    mapzmin = zMinBoundingBox;
+    mapzmax = zMaxBoundingBox;
+  }
   hasBoundingBox = true;
 
   // Display the range if requested.
@@ -2352,7 +2360,7 @@ ComponentFieldMap::SetRange() {
 void 
 ComponentFieldMap::PrintRange() {
 
-  printf("ComponentFieldMap::PrintRange:\n");
+  std::cout << className << "::PrintRange:\n";
   printf("        Dimensions of the elementary block\n");
   printf("            %15g < x < %-15g cm,\n", mapxmin, mapxmax);
   printf("            %15g < y < %-15g cm,\n", mapymin, mapymax);

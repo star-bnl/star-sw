@@ -24,7 +24,8 @@ class ComponentFieldMap : public ComponentBase {
     void PrintRange();
     // Returns the current sensor size
     virtual 
-    bool IsInBoundingBox(const double x, const double y, const double z);       virtual
+    bool IsInBoundingBox(const double x, const double y, const double z);
+    virtual
     bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
                         double& xmax, double& ymax, double& zmax);
  
@@ -86,7 +87,9 @@ class ComponentFieldMap : public ComponentBase {
     friend class ViewFEMesh;
     
   protected:
-  
+
+    bool is3d;
+ 
     // Elements
     int nElements;
     struct element {
@@ -106,8 +109,8 @@ class ComponentFieldMap : public ComponentBase {
       double x, y, z;
       // Potential
       double v;
-      // Weighting potential
-      double w;
+      // Weighting potentials
+      std::vector<double> w;
     };
     std::vector<node> nodes;
 
@@ -124,8 +127,9 @@ class ComponentFieldMap : public ComponentBase {
     };
     std::vector<material> materials;
 
-    bool hasWeightingField;
-    std::string wfield;
+    int nWeightingFields;
+    std::vector<std::string> wfields;
+    std::vector<bool> wfieldsOk;
 
     // Bounding box
     bool hasBoundingBox;
