@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.4 2011/08/24 14:30:44 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.5 2011/09/11 08:06:36 avossen Exp $
 /
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.5  2011/09/11 08:06:36  avossen
+//  added cosmic maker
+//
 //  Revision 1.4  2011/08/24 14:30:44  avossen
 //  Continued raw maker development
 //
@@ -27,11 +30,19 @@ Int_t StFgtRawMaker::Make()
 Bool_t FillHits()
 {
 
-  StRtsTable* rts_tbl = this->GetNextDaqElement("fgt/adc");
-if(rts_tbl)
-  mFgtRawData=(fgt_adc_t*)*rts_tbl.begin();
- 
+  while(this->GetNextDaqElement("fgt/adc"))
+    {
+      StRtsTable=rts_tbl=DaqDta();
+      mFgtRawData=(fgt_adc_t*)*rts_tbl.begin();
+      //get pad by Pad() etc (see rtsbasemaker functionality)
+      //get geo
+      //construct hit
+      StFgtRawHit hit(geoId,);
+      StFgtDisc disc;
+      //getDisc
+      disc.getRawHitArray().pushback(hit);
 
+    }
 //now grab the constants from the header file, loop over the raw data and fill the hits...
 
 
@@ -41,23 +52,26 @@ Bool_t StFgtRawMaker::PrepareEnvironment()
 {
   mEvent=0;
   mEvent = (StEvent*)GetInputDS("StEvent");
-  StFgtRawCollection *fgt= NULL;
+  mFgtEvent= NULL;
   if(mEvent)
     {
-      fgt=mEvent->fgtRawCollection();
+      mFgtEvent=mEvent->fgtEvent();
     }
   else
     {
       mEvent=new StEvent();
       AddData(mEvent);
-      fgt=mEvent->fgtRawCollection();
+      mFgtEvent=mEvent->fgtEvent();
     }
   if(!fgt)
     {
-      fgt=new StFgtRawCollection();
-      mEvent->setFgtRawCollection(fgt);
-      LOG_DEBUG << "::prepareEnvironment() has added a non existing StEmcCollection()"<<endm;
+      mFgtEvent=new StFgtEvent();
+      mEvent->setFgtEvent(mFgtEvent);
+      LOG_DEBUG << "::prepareEnvironment() has added a non existing StFgtEvent()"<<endm;
     }
+  //construct the correct number of disc objects
+  constructDiscs();
+
 }
 
 
