@@ -115,10 +115,10 @@ ViewFEMesh::Plot() {
   // Set up a canvas if one does not already exist.
   if (canvas == 0) {
     canvas = new TCanvas();
-    canvas->Range(xMin, yMin, xMax, yMax);
     canvas->SetTitle(label.c_str());
     if (hasExternalCanvas) hasExternalCanvas = false;
   }
+  canvas->Range(xMin, yMin, xMax, yMax);
 
   // Plot the elements
   DrawElements();  
