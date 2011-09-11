@@ -1,5 +1,5 @@
 //
-// $Id: StTrackMateMaker.cxx,v 1.2 2009/11/10 20:57:28 fisyak Exp $
+// $Id: StTrackMateMaker.cxx,v 1.3 2011/09/11 01:27:10 fisyak Exp $
 //
 #include <iostream>
 #include <map>
@@ -39,7 +39,7 @@ using std::vector;
 size_t buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<StHit*,StTrack*>& htMap);
 float getTpcDedx(StTrack* trk);
 
-static const char rcsid[] = "$Id: StTrackMateMaker.cxx,v 1.2 2009/11/10 20:57:28 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrackMateMaker.cxx,v 1.3 2011/09/11 01:27:10 fisyak Exp $";
 ClassImp(StTrackMateMaker)
 // tpt => old
 // sti => new
@@ -141,6 +141,7 @@ Int_t StTrackMateMaker::Make(){
     gMessMgr->QAInfo() << "Event1: Run "<< rEvent1->runId() << " Event1 No: " << rEvent1->id() << endm;
     gMessMgr->QAInfo() << "Event2: Run "<< rEvent2->runId() << " Event2 No: " << rEvent2->id() << endm;
     gMessMgr->QAInfo() << "Vertex Positions" << endm;
+    assert (rEvent1->runId() == rEvent2->runId() && rEvent1->id() == rEvent2->id());
     if (rEvent1->primaryVertex() ) {
 	gMessMgr->QAInfo() << "Event1: Vertex Position " << rEvent1->primaryVertex()->position() << endm;
     }
@@ -263,6 +264,7 @@ Int_t StTrackMateMaker::Make(){
 	++origTrkCounter;
 	vector<StTrackPing> candidates(20,initTrackPing); //make sure it's filled with null pointers and zeros
 	size_t nCandidates = 0;
+	if (! trk1->detectorInfo()) continue;
 	StPtrVecHit trkhits1 = trk1->detectorInfo()->hits(kTpcId);
 	
 	for (StPtrVecHitIterator hIterTrk = trkhits1.begin(); hIterTrk != trkhits1.end(); ++hIterTrk) {
@@ -367,7 +369,8 @@ Int_t StTrackMateMaker::Make(){
 	set<StTrack*>::iterator itTrk2 = find(assocTracks2.begin(),assocTracks2.end(),trk2);
 	if (itTrk2==assocTracks2.end()) {
 	    ++newOnlyCounter;    	    
-	    StTrack* ptrk2 = trk2->node()->track(primary);
+	    StTrack* ptrk2 = 0;
+	    if (trk2->node()) ptrk2 = trk2->node()->track(primary);
 	    Fill(0,0,trk2,ptrk2,-2);
 	}
     }    

@@ -12,6 +12,9 @@ size_t buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<StHit*,StTrack*>&
     size_t failedInserts = 0;
     for (size_t it = 0; it<nodes.size(); ++it) {
 	StTrack* track = nodes[it]->track(global);
+	if (! track) continue;
+	if (track->flag() <= 0) continue;
+	if (! track->detectorInfo()) continue;
 	StPtrVecHit hits = track->detectorInfo()->hits(kTpcId);
 	for (StPtrVecHitIterator hIterTrk = hits.begin(); hIterTrk != hits.end(); ++hIterTrk) {
 	    StHit* hit = *hIterTrk;
