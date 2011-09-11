@@ -307,7 +307,7 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		trg[0].t = 4097;	// trigger only contrib...
 	}
 	else {
-		if(in_words <= 3) {	// minimum if not trigger-only
+		if(in_words < 3) {	// minimum if not trigger-only
 			err |= 1 ;
 			LOG(ERR,"[%d] bad word count %d <= 3",rdo,in_words);
 		}

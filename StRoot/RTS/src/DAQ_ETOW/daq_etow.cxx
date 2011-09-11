@@ -231,3 +231,70 @@ daq_dta *daq_etow::handle_adc()
 
 	return adc ;
 }
+
+int daq_etow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
+{
+	const int ETOW_DDL_BYTES = 2100 ;
+	int buff_bytes = words * 4 ;
+	int rdo1 = rdo + 1 ;
+
+	u_short *us = (u_short *)addr ;
+
+	u_short t_hi = l2h16(us[2]) ;
+	u_short t_lo = l2h16(us[3]) ;
+
+	int err = 0 ;
+
+	if(buff_bytes != ETOW_DDL_BYTES) {
+		err |= 1 ;
+		LOG(ERR,"Received %d bytes, expect %d!?",buff_bytes,ETOW_DDL_BYTES) ;
+	}
+
+	if((t_lo & 0xFF00) || (t_hi & 0xFFF0)) {	//error
+		err |= 1 ;
+		LOG(ERR,"Corrupt token: t_hi 0x%04X, t_lo 0x%04X",t_hi,t_lo) ;
+
+		// sanitize
+		t_lo &= 0xFF ;
+		t_hi &= 0xF ;
+
+	}
+
+
+	// L0 part
+	trg[0].t = t_hi*256 + t_lo ;
+	trg[0].daq = 0 ;
+	trg[0].trg = 4 ;	// BTOW does not give the correct L0, only L2 so we invent 4
+	trg[0].rhic = l2h16(us[4]) ;
+	
+	// L2 part
+	trg[1].t = trg[0].t ;	// copy over token
+	trg[1].trg = 15 ;	// for now! us[0] ;	// this is where the trg cmd ought to be
+	trg[1].daq = us[1] ;
+	trg[1].rhic = trg[0].rhic + 1 ;
+
+	if(us[2] != 0xF) {
+		err |= 1 ;
+		LOG(ERR,"trg cmd not 15 == 0x%04X",us[0]) ;
+	}
+
+	if(trg[0].t == 0) {
+		err |= 1 ;
+		LOG(ERR,"token 0!") ;
+	}
+
+	if(err) {
+		LOG(WARN,"RDO %d: 0x%04X 0x%04X 0x%04X 0x%04X 0x%04X",rdo1, us[0],us[1],us[2],us[3],us[4]) ;
+		
+	}
+
+	if(err & 1) {	// critical
+		return -1 ;
+	}
+
+	return 2 ;
+
+
+
+}
+

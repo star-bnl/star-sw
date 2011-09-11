@@ -33,6 +33,10 @@ public:
 
 	virtual daq_dta  *get(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0) ;
 
+
+	int get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt) ;
+
+
 	void help() const {
 		printf("%s\n%s\n",GetCVS(),help_string) ;
 	}
