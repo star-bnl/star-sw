@@ -1000,7 +1000,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.25 2011/02/05 18:56:18 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.26 2011/09/11 18:40:56 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
@@ -1155,7 +1155,7 @@ void tpxGain::compare(char *fname, int mysec)
 		LOG(INFO,"gain_compare: sector %d: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
 	}
 
-	LOG(INFO,"gain_compare: sector %d: gain %f +- %f, T0 %f +- %f",mysec,dg_mean, dg_rms, dt_mean, dt_rms) ;
+//	LOG(INFO,"gain_compare: sector %d: gain %f +- %f, T0 %f +- %f",mysec,dg_mean, dg_rms, dt_mean, dt_rms) ;
 
 	return ;
 }

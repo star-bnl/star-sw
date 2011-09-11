@@ -26,10 +26,15 @@
 #define TPX_TCU_RHIC_TIME_0		99.0		// some number....
 
 // new, FY11, TCD
-#define TPX_TCD_PED_STOP		177
-#define TPX_TCD_START			179
-#define TPX_TCD_STOP			182
-#define TPX_TCD_TIME_0			182.175466		// measured around Dec 2010
+//#define TPX_TCD_PED_STOP		177
+//#define TPX_TCD_START			179
+//#define TPX_TCD_STOP			182
+//#define TPX_TCD_TIME_0		182.175466		// measured around Dec 2010
+
+#define TPX_TCD_PED_STOP		175
+#define TPX_TCD_START			176
+#define TPX_TCD_STOP			179
+#define TPX_TCD_TIME_0			176.6
 
 /* FY10 and previous value.
    In FY11 this will change due to:

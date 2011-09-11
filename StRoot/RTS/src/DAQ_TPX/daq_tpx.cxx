@@ -1255,12 +1255,12 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 	}	// end of sector loop
 
 
-	cld->rewind() ;	// wind data pointers to the beginning so that they can be used
+	cld->rewind() ;	// wind data pointers to the beginning so that they can be used 
 	
 	// and now run the afterburner if any found...
 	if(found_broken_edges && !fcf_afterburner_disable) {
 		// prepare afterburner
-		const int FCF_MAX_MERGED_COU = 128 ;
+		const int FCF_MAX_MERGED_COU = 256 ;
 
 		daq_cld *merged_store[25][FCF_MAX_MERGED_COU] ;
 		int merged_cou[25] ;

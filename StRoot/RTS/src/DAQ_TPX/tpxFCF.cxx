@@ -31,6 +31,7 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 
 	if(likely(cou == 0)) return 0 ;	// most cases like this...
 
+	//printf("Start\n") ;
 
 	merged = 0 ;
 
@@ -41,31 +42,43 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 
 
 		if(l->charge == 0) continue ;	// already merged
-		
+		if(l->flags & FCF_BROKEN_EDGE) ;
+		else continue ;
+
+		int type = 0 ;
 		
 		for(int j=0;j<cou;j++) {
 			int ok = 0 ;
-			if(i==j) continue ;
+
+
+			if(j<=i) continue ;
 
 			daq_cld *r = store[j] ;	// right guy
 		
 			if(r->charge == 0) continue ;	// already merged!
-
+			if(r->flags & FCF_BROKEN_EDGE) ;
+			else continue ;
 
 			if(r->p1==13) {	// right
 				if(l->p2 != 12) continue ;
+				type = 1 ;
 			}
 			else if(r->p2==12) {
 				if(l->p1 != 13) continue ;
+				type = 2 ;
 			}
 			else if(r->p1==131) {
 				if(l->p2 != 130) continue ;
+				type = 3 ;
 			}
 			else if(r->p2==130) {
 				if(l->p1 != 131) continue ;
+				type = 4 ;
 			}
-
-
+			else {	// can happen if one was deconvoluted...
+				continue ;
+				type = 5 ;
+			}
 
 			if((r->t1 >= l->t1) && (r->t1 <= l->t2)) ok = 1 ;
 			if((r->t2 >= l->t1) && (r->t2 <= l->t2)) ok = 1 ;
@@ -91,9 +104,10 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 			double charge = l->charge + r->charge ;
 
 			/*
-			printf("can merge: L: [%d:%d] %f, R: [%d:%d] %f\n",
-			       l->p1,l->p2,l->tb,
-			       r->p1,r->p2,r->tb) ;
+			printf("can merge %d: L%d: [%d:%d] %f, f %d, R%d: [%d:%d] %f f %d\n",
+			       type,
+			       i,l->p1,l->p2,l->tb,l->flags,
+			       merge_ix,r->p1,r->p2,r->tb,r->flags) ;
 			*/
 
 			l->tb = (l->tb * l->charge + r->tb * r->charge) / charge ;
@@ -116,6 +130,8 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 				l->charge = (u_short) charge ;
 			}
 
+			l->flags &= ~FCF_BROKEN_EDGE ;
+
 			// and kill the right guy!
 			r->flags |= FCF_DEAD_EDGE  ;
 			r->charge = 0 ;
@@ -133,6 +149,7 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 
 		if(l->flags & (FCF_ONEPAD | FCF_DEAD_EDGE)) {	// is this is still on, kill it with dead edge
 			l->flags |= FCF_DEAD_EDGE ;
+			l->charge = 0 ;
 		}
 		else {
 			l->flags &= ~FCF_BROKEN_EDGE ;	// remove this flag since we ran the afterburner
@@ -195,10 +212,24 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 	p1 = (p_tmp >> 8) & 0x7 ;
 	p2 = (p_tmp >> 11) & 0x7 ;
 
-	t1 = (u_int)t - t1 ;
-	t2 = (u_int)t + t2 ;
-	p1 = (u_int)p - p1 ;
-	p2 = (u_int)p + p2 ;
+/*
+	if(((int)t-t1) < 0) {
+		printf("Tb %f %f %d %d\n",p,t,t1,t2) ;
+		//t1 = 0 ;
+	}
+
+	if(((int)p-p1) < 1) {
+		printf("Pad %f %f %d %d\n",p,t,p1,p2) ;
+		//p1 = 1 ;
+	}
+*/
+
+	t1 = (int)t - t1 ;
+	t2 = (int)t + t2 ;
+
+
+	p1 = (int)p - p1 ;
+	p2 = (int)p + p2 ;
 
 	dc->t1 = t1 ;
 	dc->t2 = t2 ;
@@ -879,6 +910,10 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 							cur->p1 = p+1 ;
 							cur->p_ave = (p+1) * cur->f_charge ;
 
+							// Added in FY12
+							cur->t_min = cur->t1 ;
+							cur->t_max = cur->t2 ;
+
 						}
 						
 
@@ -1049,7 +1084,8 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 						}
 						// will dump for onepad
 						old->p2 = p ;
-						old->p1 = 201 ;
+						//old->p1 = 201 ; was in FY11
+						old->p1 = p ;
 						dump(old,r) ;
 					}
 					else {
