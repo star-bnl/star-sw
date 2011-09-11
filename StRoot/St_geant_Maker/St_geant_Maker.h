@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.50 2010/08/10 16:35:33 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.51 2011/09/11 20:57:14 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.51  2011/09/11 20:57:14  fisyak
+// Add kinematics definition via MuDst, Clean up
+//
 // Revision 1.50  2010/08/10 16:35:33  fisyak
 // Add initialization of starsim parameter tables after opening zebra-file
 //
@@ -120,24 +123,17 @@ protected:
   virtual TShape  *MakeShape(TString *name, Int_t ivo);
   virtual TVolume *MakeVolume(TString *name, Int_t ivo, Int_t Nlevel, Int_t *Names, Int_t *Numbers);
   virtual void ClearRootGeoms();
-
  private:
 
   St_geom_gdat *m_geom_gdat;
-#if 0
-  virtual void   BookHist();
-  virtual void   FillHist();
-#endif
-public: 
+ public: 
                   St_geant_Maker(const char *name="geant",
 				 Int_t nwgeant=20,Int_t nwpaw=0, Int_t iwtype=0);
    virtual       ~St_geant_Maker(){};
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
    virtual Int_t  InitRun(Int_t run);
-#if 1
    virtual void   SetDateTime(int idat=0,int itim=0);//
-#endif
            void   SetFieldOpt(const char *opt) {mFieldOpt = opt;}
    virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
    virtual void   Draw(const char* opt="IN");
@@ -171,13 +167,8 @@ public:
    virtual Int_t    Agstroot();
    virtual Int_t    AgstHits();
    virtual Int_t    G2t_volume_id(const Char_t *name, Int_t *numbv);
-#if 1
    virtual Int_t    Agvolume(TVolume *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
    			     Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar, char mat[21]);
-#else
-   virtual Int_t    Agvolume(void *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
-			     Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar);
-#endif
    virtual void     Agnzgete (Int_t &ILK, Int_t &IDE,
 			      Int_t &NPART, Int_t &IRUN,
 			      Int_t &IEVT, const Char_t *CGNAM,
@@ -192,14 +183,14 @@ public:
    virtual void     Dzddiv(Int_t& idiv ,Int_t &Ldummy,
 			   const Char_t* path,const Char_t* opt,
 			   Int_t& one,Int_t &two,Int_t &three,Int_t& iw);
-#if 0   
-  TGeoVolume* Ag2Geom();
-#endif
 #ifdef DetectorIndex
   void        DetSetIndex();
   void        DumpIndex(const Char_t *name, const Char_t *vers, const Char_t *fmt, TArrayI &NVmax, TArrayI &Ids);
 #endif
   TString GetVolumeSrcFile(const char *volumeName) const;
+  Int_t   KinematicsFromMuDst(Int_t flag=0);
+  Int_t   SetDatimeFromMuDst();
+  static St_geant_Maker *instance() {return fgGeantMk;}
  protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -209,16 +200,8 @@ public:
    static St_geant_Maker *fgGeantMk; //!
    TString           mInitialization; // !
    TString           mFieldOpt; // !
-
-   // histogram pointers:
-  TH1F     *m_histvx;        //! geant g2t_vertex table, x of prim vtx
-  TH1F     *m_histvy;        //! geant g2t_vertex table, y of prim vtx
-  TH1F     *m_histvz;        //! geant g2t_vertex table, z of prim vtx
-   
-
-
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.50 2010/08/10 16:35:33 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.51 2011/09/11 20:57:14 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
