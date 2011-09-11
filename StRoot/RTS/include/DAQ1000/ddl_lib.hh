@@ -34,6 +34,7 @@ public:
 	int get_free_fifos() ;
 
 	void emu_place_event(int ix, char *data, int bytes) ;
+	void emu_go() ;
 
 	u_int status ;	// bitmask: xxx1=requested; xx1x=opened; x1xx=error
 //	u_int alloced ;	// how many bytes we used of physmem...

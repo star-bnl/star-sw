@@ -56,6 +56,7 @@ public:
 	virtual int get_free_fifos() { return 0 ; } ;
 
 	virtual void emu_place_event(int ix, char *event, int bytes) { return ; } ;
+	virtual void emu_go() { return ; } ;
 	
 	u_int alloced_bytes ;
 	int configd ;
