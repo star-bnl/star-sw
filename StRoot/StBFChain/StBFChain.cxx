@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.584 2011/08/26 14:23:35 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.585 2011/09/12 22:21:47 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -342,7 +342,7 @@ Int_t StBFChain::Instantiate()
       ProcessLine(Form("((St_geant_Maker *) %p)->SetNwGEANT(%i);",mk,NwGeant));
       if (GetOption("Higz")) ProcessLine(Form("((St_geant_Maker *) %p)->SetIwtype(1);",mk));
       if (GetOption("paw"))  ProcessLine(Form("((St_geant_Maker *) %p)->SetNwPAW(2);",mk));
-      if (GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed")) {
+      if (GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed") || GetOption("mtin")) {
 	mk->SetActive(kTRUE);
 	if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
       }
@@ -403,6 +403,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("EastOff"))   mk->SetAttr("EastOff"    ,kTRUE);
       if (GetOption("WestOff"))   mk->SetAttr("WestOff"    ,kTRUE);
       if (GetOption("laserIT"))   mk->SetAttr("laserIT"    ,kTRUE);
+      if (GetOption("Alignment")) mk->SetAttr("Alignment"  ,kTRUE);
       mk->PrintAttr();
     }
     //		Sti(ITTF) end
@@ -793,6 +794,9 @@ Int_t StBFChain::Init() {
 	  TString path("./StarDb/AgiGeometry:$STAR/StarDb/AgiGeometry");
 	  if (GetOption("AgML")) {
 	    path  = "./StarDb/AgMLGeometry:$STAR/StarDb/AgMLGeometry";
+	  }
+	  if (GetOption("VmcGeo")) {
+	    path  = "./StarDb/VmcGeoGeometry:$STAR/StarDb/VmcGeoGeometry";
 	  }
 	  TString geom("Geometry.");
 	  geom +=  DbAlias[i].geometry;
@@ -1194,7 +1198,9 @@ void StBFChain::SetFlags(const Char_t *Chain)
       }
     }
     if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || GetOption("Stv")  || GetOption("StvCA") || GetOption("StiVMC"))) {
-      SetOption("Sti","Default,ITTF");
+      TString STAR_LEVEL(gSystem->Getenv("STAR_LEVEL"));
+      if (STAR_LEVEL == ".DEV2")  SetOption("StiCA","Default,ITTF");
+      else                        SetOption("Sti"  ,"Default,ITTF");
     }  
     if (GetOption("Stv")  || GetOption("StvCA")) {
       SetOption("-TpcIT","Default,Stv");
@@ -1401,7 +1407,7 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
       if (GetOption("hadr_off")) GeometryOpt += " hadr_off=1";
       ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
     }
-    if ((GetOption("fzin") || GetOption("ntin")) && fInFile != "")
+    if ((GetOption("fzin") || GetOption("ntin") || GetOption("mtin")) && fInFile != "")
       ProcessLine(Form("((St_geant_Maker *) %p)->SetInputFile(\"%s\")",geantMk,fInFile.Data()));
   }
 }
@@ -1421,8 +1427,9 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
 */
 void StBFChain::SetDbOptions(StMaker *mk){
   if (! mk ) return;
-  if (GetOption("AgML")) mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
-  else                   mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
+  if      (GetOption("AgML")  ) mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
+  else if (GetOption("VmcGeo")) mk->SetAlias("VmcGeometry","db/.const/StarDb/VmcGeoGeometry");
+  else                          mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
   Int_t i;
   Int_t Idate=0,Itime=0;
   for (i = 1; i < fNoChainOptions; i++) {
@@ -1449,24 +1456,26 @@ void StBFChain::SetDbOptions(StMaker *mk){
 
     db->SetDateTime(FDateS,FTimeS);
   } else {
-    const DbAlias_t *DbAlias = GetDbAliases();
-    Int_t found = 0;
-    for (Int_t i = 0; DbAlias[i].tag; i++) {
-      if (GetOption(DbAlias[i].tag,kFALSE)) {
-	db->SetDateTime(DbAlias[i].tag);
-	found = i;
-	break;
+    if (! GetOption("mtin")) {
+      const DbAlias_t *DbAlias = GetDbAliases();
+      Int_t found = 0;
+      for (Int_t i = 0; DbAlias[i].tag; i++) {
+	if (GetOption(DbAlias[i].tag,kFALSE)) {
+	  db->SetDateTime(DbAlias[i].tag);
+	  found = i;
+	  break;
+	}
       }
-    }
-    if (! found) {gMessMgr->QAInfo() << "StBFChain::SetDbOptions() Chain has not set a time-stamp" << endm;}
-    // Show date settings
-    gMessMgr->QAInfo() << db->GetName()
-		       << " Maker set time = "
+      if (! found) {gMessMgr->QAInfo() << "StBFChain::SetDbOptions() Chain has not set a time-stamp" << endm;}
+      // Show date settings
+      gMessMgr->QAInfo() << db->GetName()
+			 << " Maker set time = "
 		       << db->GetDateTime().GetDate() << "."
-		       << db->GetDateTime().GetTime() << endm;
-    if (GetOption("SIMU") && m_EvtHddr) {
-      gMessMgr->QAInfo() << GetName() << " Chain set time from  " << db->GetName() << endm;
-      m_EvtHddr->SetDateTime(db->GetDateTime());
+			 << db->GetDateTime().GetTime() << endm;
+      if (GetOption("SIMU") && m_EvtHddr) {
+	gMessMgr->QAInfo() << GetName() << " Chain set time from  " << db->GetName() << endm;
+	m_EvtHddr->SetDateTime(db->GetDateTime());
+      }
     }
   }
   // MaxEntry over-write

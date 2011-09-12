@@ -27,8 +27,9 @@ Bfc_st BFC[] = { // standard chains
   {"DbV1107"     ,""  ,"","db,ry1h"        ,"","",          "20011107/0 Db Version for pass1 p01gk",kFALSE},
   {"DbV1211"     ,""  ,"","db,ry1h"        ,"","",           "20011211/0 Db Version for prod p01gl",kFALSE},
 
-  {"AgML"        ,""  ,"",""                              ,"","","alias VmcGeomtry to AgMLGeometry",kFALSE},
-  {"Agi"         ,""  ,"",""     ,"","","alias VmcGeomtry to AgiGeometry (gstar original geometry)",kFALSE},
+  {"AgML"        ,""  ,"","-Agi,-VmcGeo"                  ,"","","alias VmcGeomtry to AgMLGeometry",kFALSE},
+  {"Agi" ,""  ,"","-AgML,-VmcGeo","","","alias VmcGeomtry to AgiGeometry (gstar original geometry)",kFALSE},
+  {"VmcGeo"      ,"-AgML,-Agi"  ,"",""                          ,"","","alias VmcGeomtry to VmcGeo",kFALSE},
   
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -461,11 +462,11 @@ Bfc_st BFC[] = { // standard chains
 #endif
   {"PmdUtil"     ,""  ,"","","",                                       "StPmdUtil","Load StPmdUtil",kFALSE},
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
+  {"Stu"         ,""  ,"","","",                         "StEventUtilities","Load StEventUtilities",kFALSE},
 #ifndef  __NoStrangeMuDst__
-  {"MuDSTDeps"   ,""  ,"","StEvent","","StEventUtilities,StStrangeMuDstMaker,Tree"
-   ,                                                          "Load MuDST misc. dependencies (all)",kFALSE},
-#else /* ! __NoStrangeMuDst__ */
-  {"MuDSTDeps"   ,"" ,"","StEvent","","StEventUtilities,Tree","Load MuDST misc. dependencies (all)",kFALSE},
+  {"MuDSTDeps"   ,"","","StEvent,Stu","","StStrangeMuDstMaker,Tree","Load MuDST misc. dependencies",kFALSE},
+#else /* ! __NoStrangeMuDst__  StMuDSTMaker has to be compiled with -D__NO_STRANGE_MUDST__*/
+  {"MuDSTDeps"   ,"" ,"","StEvent,Stu",             "","Tree","Load MuDST misc. dependencies (all)",kFALSE},
 #endif /* __NoStrangeMuDst__ */
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil",""
    ,                                                            "StMuDSTMaker","Load MuDST library",kFALSE},
@@ -476,6 +477,7 @@ Bfc_st BFC[] = { // standard chains
   {"geantL","","","geomT,gen_T,sim_T,StarMagField,geomNoField","","Geom,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
 #endif
+  {"gstarLib","","",""                                                 ,"","gstar","Load gstar lib",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -493,6 +495,8 @@ Bfc_st BFC[] = { // standard chains
   {"detDb","detDb","","db","StDetectorDbMaker","StDetectorDbMaker","Load and run StDetectorDbMaker",kFALSE},
   {"magF"        ,"MagField","","StDbT,db,detDb","StMagFMaker","StarMagField,StMagF",
    "Mag.field map with scale factor from Db",kFALSE},
+  {"mtin"        ,"geant"  ,"","paw,-fzin,-geant,-gstar,geantL,paw,gstarLib,-magF","St_geant_Maker",
+                                                                    "gstar","read event from MuDst",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,detDb,StarMagField,magF"    ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"dbutil"      ,""     ,"","detDb,StDbT"                 ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"svtDb"       ,"svtDb","","tpcDb,SvtCL", "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
@@ -507,8 +511,8 @@ Bfc_st BFC[] = { // standard chains
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   // for simulation on fly Event time stamp is set outside of the simulation makers
-  {"ntin"        ,"geant"  ,"","paw,-fzin,-geant,-gstar,Simu,geantL,paw","St_geant_Maker",
-   "gstar","read event generated Hbook nt-file",kFALSE},
+  {"ntin"        ,"geant"  ,"","paw,-fzin,-geant,-gstar,Simu,geantL,paw","St_geant_Maker"
+                                                       "gstar","read event generated Hbook nt-file",kFALSE},
   {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker",
    "Prepare kinematics for embedding",kFALSE},
   
@@ -732,6 +736,12 @@ Bfc_st BFC[] = { // standard chains
   {"NoSsdIT"     ,""  ,"","-SsdIT",""                    ,"","ITTF: track with switch off SSD geom",kFALSE},
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
   {"StiRnD"   ,"","","",                                  "","StiRnD", "Load StiRnD shared library",kFALSE},
+  {"Alignment"   ,"","","",                   "","", "Sti Tpc Alignment, reconstruction per sector",kFALSE},
+  {"Sti"      ,"Sti","","SCL,StEvent,Stu,StiLibs,StDbT,TpcIT,StiUtil,compend,tbutil","StiMaker",
+                                                                     "Sti,StiMaker" ,"ITTF tracker",kFALSE},
+  {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,Stu,StDbT,TpcDb,compend","StiVMCMaker"
+   ,                                                       "StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
+  {"StiPulls" ,"","","Sti",                                      "","", "Request to make Sti Pulls",kFALSE},
   {"BeamBack" ,"","","StEvent","StBeamBackMaker","StBeamBackMaker",
    "Beam background tracker in the TPC",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker",
@@ -811,7 +821,7 @@ Bfc_st BFC[] = { // standard chains
   {"RichSpectra"         ,"","",""                      ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                         ,"StMaker","StChain","",kFALSE},
   {"TpcTag"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},   
-  {"Flow"        ,"","TagsChain","StEvent"         ,"StFlowMaker","StEventUtilities,StFlowMaker","",kFALSE},
+  {"Flow"        ,"","TagsChain","StEvent,Stu"                      ,"StFlowMaker","StFlowMaker","",kFALSE},
   {"FlowTag"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},   
   {"FlowAnalysis","","TagsChain","StEvent,Flow"     ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
 #ifndef __NoStrangeMuDst__
