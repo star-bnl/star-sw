@@ -348,8 +348,8 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
 
   if (hasTimeWindow && (t0 < tMin || t0 > tMax)) {
     std::cerr << className << "::DriftLine:\n";
-    std::cerr << "    Starting time " << t0 
-              << " is outside the specified time window.\n";
+    std::cerr << "    Starting time " << t0 << " is outside the specified\n";
+    std::cerr << "    time window (" << tMin << ", " << tMax << ").\n";
     ok = false;
     abortReason = StatusOutsideTimeWindow;
   }
@@ -445,13 +445,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         std::cerr << "    Unknown stepping model.\n";
         return false;
     }
-
-    // Make sure the time is still within the specified interval.
-    if (hasTimeWindow && point.t + delta > tMax) {
-      abortReason = StatusOutsideTimeWindow;
-      break;
-    }
-        
+ 
     // Draw a random diffusion direction in the particle frame.
     if (useDiffusion) {
       d = sqrt(v * delta);
@@ -588,6 +582,12 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     drift.push_back(point);
     ++nDrift;
  
+    // Check if the time is still within the specified interval.
+    if (hasTimeWindow && point.t > tMax) {
+      abortReason = StatusOutsideTimeWindow;
+      break;
+    }
+
     if (useBfield) {
       sensor->MagneticField(x, y, z, bx, by, bz, status);
       bx *= Tesla2Internal; by *= Tesla2Internal; bz *= Tesla2Internal;
@@ -714,7 +714,8 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   endPoint.x1 = drift[nDrift - 1].x;
   endPoint.y1 = drift[nDrift - 1].y;
   endPoint.z1 = drift[nDrift - 1].z;
-  
+  endPoint.t1 = drift[nDrift - 1].t;
+ 
   if (debug) {
     const int nNewElectrons = nElectrons - nElectronsOld;
     const int nNewHoles = nHoles - nHolesOld;
