@@ -15,6 +15,8 @@ extern "C" Double_t ctq5pd_(int*,int*,double*,double*,int*);
 extern "C" void num_(double*,double*,double*,double*,double*,double*,double*,double*,double*,double*,double*);
 extern "C" void denom_(double*,double*,double*,double*,double*,double*,double*,double*,double*,double*,double*);
 extern "C" void polpar_(double*,double*,double*,double*,double*,double*,double*,double*);
+extern "C" void dssvini2009_(int*);
+extern "C" void dssvfit2009_(double*,double*, double*, double*, double*, double*, double*, double*);
 //extern "C" void parpol_(int*, double*, double*, double* ,double* , double*, double*, double*, double*, double*, double*);
 //extern "C" void parpol2_(int*, double*, double*, double* ,double* , double*, double*, double*, double*, double*, double*);
 //extern "C" void unpolar_(int*, double*, double*, double*, int*);
@@ -79,6 +81,7 @@ private:
     double df1_NLO_p070,df2_NLO_p070,weight_NLO_p070;   //NLO P070 polarized pdf, unpolarized pdf and weight = df1*df2*partonic_all/f1/f2
 
     double df1_NLO_DSSV,df2_NLO_DSSV,weight_NLO_DSSV;   //NLO de Florian, Sassot, Stratman, & Vogelsang PDF
+    double df1_NLO_DSSV2009,df2_NLO_DSSV2009,weight_NLO_DSSV2009;   //NLO de Florian, Sassot, Stratman, & Vogelsang PDF with RHIC Run 9 data
 
     double df1_NLO_LSS1,df2_NLO_LSS1,weight_NLO_LSS1;   //NLO Leader, Sidorov, & Stamenov PDF Scenario 1/2/3
     double df1_NLO_LSS2,df2_NLO_LSS2,weight_NLO_LSS2;   //NLO Leader, Sidorov, & Stamenov PDF Scenario 1/2/3
@@ -122,6 +125,9 @@ public:
     //DSSV PDF
     static Double_t get_polPDF_NLO_DSSV(int flavor, double x1, double Q2);
 
+    //DSSV 2009 PDF
+    static Double_t get_polPDF_NLO_DSSV2009(int flavor, double x1, double Q2);
+
     //LSS PDF
     static Double_t get_polPDF_NLO_LSS1(int flavor, double x1, double Q2);
     static Double_t get_polPDF_NLO_LSS2(int flavor, double x1, double Q2);
@@ -159,7 +165,7 @@ public:
     const St_particle* particleTable() const { return particleTabPtr; }
     
     virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.9 2008/05/20 21:10:51 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
+        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.10 2011/09/13 16:23:58 pibero Exp $ built "__DATE__" "__TIME__ ; 
         return cvs;
     }
 

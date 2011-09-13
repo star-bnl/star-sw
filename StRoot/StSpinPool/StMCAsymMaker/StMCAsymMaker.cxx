@@ -31,6 +31,8 @@ StMCAsymMaker::~StMCAsymMaker() {
 }
 
 Int_t StMCAsymMaker::Init() {
+    int iset = 0;
+    dssvini2009_(&iset);
     return StMaker::Init();
 }
 
@@ -131,6 +133,10 @@ void StMCAsymMaker::Zero() {
     df1_NLO_DSSV=0;
     df2_NLO_DSSV=0;
     weight_NLO_DSSV=0;
+
+    df1_NLO_DSSV2009=0;
+    df2_NLO_DSSV2009=0;
+    weight_NLO_DSSV2009=0;
 
     df1_NLO_LSS1=0;
     df2_NLO_LSS1=0;
@@ -413,6 +419,13 @@ Int_t StMCAsymMaker::Make() {
       f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
       weight_NLO_DSSV=(df1_NLO_DSSV*df2_NLO_DSSV*partonic_all)/(f1_NLO*f2_NLO);
       
+      //NLO DSSV 2009
+      df1_NLO_DSSV2009=get_polPDF_NLO_DSSV2009(flavor1,x1,Q2);
+      df2_NLO_DSSV2009=get_polPDF_NLO_DSSV2009(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_DSSV2009=(df1_NLO_DSSV/f1_NLO)*(df2_NLO_DSSV/f2_NLO)*partonic_all;
+      
       //NLO LSS SCENARIO 1
       df1_NLO_LSS1=get_polPDF_NLO_LSS1(flavor1,x1,Q2);
       df2_NLO_LSS1=get_polPDF_NLO_LSS1(flavor2,x2,Q2);
@@ -568,6 +581,7 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     pythia->setDF1(StPythiaEvent::GS_NLOB, df1_NLO_GSB);
     pythia->setDF1(StPythiaEvent::GS_NLOC, df1_NLO_GSC);
     pythia->setDF1(StPythiaEvent::DSSV, df1_NLO_DSSV);
+    pythia->setDF1(StPythiaEvent::DSSV2009, df1_NLO_DSSV2009);
     pythia->setDF1(StPythiaEvent::LSS1, df1_NLO_LSS1);
     pythia->setDF1(StPythiaEvent::LSS2, df1_NLO_LSS2);
     pythia->setDF1(StPythiaEvent::LSS3, df1_NLO_LSS3);
@@ -599,6 +613,7 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     pythia->setDF2(StPythiaEvent::GS_NLOB, df2_NLO_GSB);
     pythia->setDF2(StPythiaEvent::GS_NLOC, df2_NLO_GSC);
     pythia->setDF2(StPythiaEvent::DSSV, df2_NLO_DSSV);
+    pythia->setDF2(StPythiaEvent::DSSV2009, df2_NLO_DSSV2009);
     pythia->setDF2(StPythiaEvent::LSS1, df2_NLO_LSS1);
     pythia->setDF2(StPythiaEvent::LSS2, df2_NLO_LSS2);
     pythia->setDF2(StPythiaEvent::LSS3, df2_NLO_LSS3);
@@ -1113,6 +1128,32 @@ Double_t StMCAsymMaker::get_polPDF_NLO_DSSV(int flavor, double x, double Q2){
     if ((abs(flavor)>=4)&&(abs(flavor)<=6)) pdf=parpol[4];
 
     return pdf;
+}
+
+//DSSV 2009 NLO
+Double_t StMCAsymMaker::get_polPDF_NLO_DSSV2009(int flavor, double x, double Q2){
+
+    double duv=0,ddv=0,dubar=0,ddbar=0,dstr=0,dglu=0;
+
+    if (x>=1.0e-5&&x<=1.0&&Q2>=1.0&&Q2<=1.0e5) {
+      dssvfit2009_(&x,&Q2,&duv,&ddv,&dubar,&ddbar,&dstr,&dglu);
+      switch (flavor) {
+      case  1: return (ddv+ddbar)/x; //dv + dsea quark
+      case  2: return (duv+dubar)/x; //uv + usea quark
+      case -1: return ddbar/x;	//dbar==dsea quark
+      case -2: return dubar/x;	//ubar==usea quark
+      case  3:
+      case -3: return dstr/x;	//s==sbar quark
+      case 21: return dglu/x;	//gluon
+      case  4:
+      case -4:
+      case  5:
+      case -5:
+      case  6:
+      case -6: return dstr/x;
+      }
+    }
+    return 1000;
 }
 
 //LSS NLO Scenario 1
