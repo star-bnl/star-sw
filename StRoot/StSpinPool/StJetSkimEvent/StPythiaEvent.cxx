@@ -4,6 +4,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.cxx,v $
+// Revision 1.4  2011/09/13 16:24:21  pibero
+// Added DSSV2009 grid
+//
 // Revision 1.3  2010/10/04 19:18:29  pibero
 // Fix copy constructor and assignment operator. Thanks, Alice!
 //
@@ -63,7 +66,7 @@ StPythiaEvent::StPythiaEvent(const StPythiaEvent& t)
     mX2         = t.mX2;
     mPartonALL  = t.mPartonALL;
     
-    for(int i=0; i<30; i++) {
+    for(int i=0; i<NPDF; i++) {
         mDF1[i] = t.mDF1[i];
         mDF2[i] = t.mDF2[i];
     }
@@ -99,7 +102,7 @@ StPythiaEvent& StPythiaEvent::operator=(const StPythiaEvent& rhs)
     mX2         = rhs.mX2;
     mPartonALL  = rhs.mPartonALL;
     
-    for(int i=0; i<30; i++) {
+    for(int i=0; i<NPDF; i++) {
         mDF1[i] = rhs.mDF1[i];
         mDF2[i] = rhs.mDF2[i];
     }
