@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.6 2011/09/13 10:06:43 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.7 2011/09/13 18:35:42 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.7  2011/09/13 18:35:42  avossen
+//  added RTS header files
+//
 //  Revision 1.6  2011/09/13 10:06:43  avossen
 //  *** empty log message ***
 //
@@ -28,7 +31,7 @@ Int_t StFgtRawMaker::Make()
     { LOG_WARN <<"Could not prepare the environment to process the event "<<endm; }
   FillHits();
 
-}
+};
 
 Bool_t StFgtRawMaker::FillHits()
 {
@@ -72,7 +75,7 @@ Bool_t StFgtRawMaker::FillHits()
 	}
     }
 //now grab the constants from the header file, loop over the raw data and fill the hits...
-}
+};
 
 Bool_t StFgtRawMaker::PrepareEnvironment()
 {
@@ -97,7 +100,6 @@ Bool_t StFgtRawMaker::PrepareEnvironment()
       mEvent->setFgtEvent(mFgtEvent);
       LOG_DEBUG << "::prepareEnvironment() has added a non existing StFgtEvent()"<<endm;
     }
-}
-
+};
 
 ClassImp(StFgtRawMaker);

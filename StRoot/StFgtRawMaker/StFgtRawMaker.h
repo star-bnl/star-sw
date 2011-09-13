@@ -18,9 +18,8 @@
 #include <StDaqLib/GENERIC/EventReader.hh>
 #include <StDAQMaker/StDAQReader.h>
 #include <StMessMgr.h>
-#include "RTS/src/DAQ_READER/daq_det.h"
 #include "DAQ_FGT/daq_fgt.h"
-#include "RTS/src/DAQ_READER/daq_dta.h"
+#include "DAQ_READER/daq_dta.h"
 #include "StFgtUtil/geometry/StFgtGeomDefs.h"
 #include "StFgtUtil/geometry/StFgtGeom.h"
 #include "StChain/StRTSBaseMaker.h"
@@ -50,7 +49,8 @@ class StFgtRawMaker : public StRTSBaseMaker
  private:
   Bool_t PrepareEnvironment();
 
-  ClassDef(StFgtRawMaker,1)
+
+  ClassDef(StFgtRawMaker,1);
 };
 
 #endif

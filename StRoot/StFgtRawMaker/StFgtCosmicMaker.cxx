@@ -1,4 +1,3 @@
-
 #include "StFgtCosmicMaker.h"
 
 void StFgtCosmicMaker::PrepareEnvironment()
@@ -80,10 +79,12 @@ Int_t StFgtCosmicMaker::Make()
 	}
     }
   return 0;
-}
+};
+
 void StFgtCosmicMaker::clearHits()
 {
   if(mFgtEvent)
     mFgtEvent->Clear();
-}
+};
+
 ClassImp(StFgtCosmicMaker);
