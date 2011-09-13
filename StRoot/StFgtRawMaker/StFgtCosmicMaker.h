@@ -35,7 +35,8 @@ class StFgtCosmicMaker : public StFgtRawMaker
  private:
   void clearHits();
   StFgtEvent* mFgtEvent;
-  daqReader *mRdr ;
+  daqReader *mRdr;
+
   ClassDef(StFgtCosmicMaker,1);
 
 };
