@@ -12,18 +12,31 @@
 #ifndef STAR_StFgtCosmicMaker_HH
 #define STAR_StFgtCosmicMaker_HH
 #include "StFgtRawMaker.h"
+#include <DAQ_READER/daqReader.h>
 
 class StFgtCosmicMaker : public StFgtRawMaker
 {
 
  public: 
-  StFgtEvent& fgtEvent();
+  StFgtCosmicMaker();
+  StFgtCosmicMaker(char* daqFileName, int numDiscs);
+  StFgtEvent& currentFgtEvent();
+  int setFilename(string filename);
+
+  virtual ~StFgtCosmicMaker(){};
 
  protected:
   virtual void constructDiscs();
+  virtual void PrepareEnvironment();
+  //advance to the next event
   virtual Int_t Make();
- private:
-  ClassDef(StFgtCosmicMaker,1)
-}
 
+
+ private:
+  void clearHits();
+  StFgtEvent* mFgtEvent;
+  daqReader *mRdr ;
+  ClassDef(StFgtCosmicMaker,1);
+
+};
 #endif
