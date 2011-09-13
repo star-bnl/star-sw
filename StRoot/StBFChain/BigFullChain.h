@@ -1,4 +1,4 @@
-#define __KEEP_TPCDAQ_FCF__ /* remove St_tpcdaq_Maker and StRTSClientFCFMaker. not yet ready */
+//#define __KEEP_TPCDAQ_FCF__ /* remove St_tpcdaq_Maker and StRTSClientFCFMaker. not yet ready */
 //#define __NoStrangeMuDst__
 //#define __NoDisplay__
 Bfc_st BFC[] = { // standard chains
@@ -29,7 +29,7 @@ Bfc_st BFC[] = { // standard chains
 
   {"AgML"        ,""  ,"","-Agi,-VmcGeo"                  ,"","","alias VmcGeomtry to AgMLGeometry",kFALSE},
   {"Agi" ,""  ,"","-AgML,-VmcGeo","","","alias VmcGeomtry to AgiGeometry (gstar original geometry)",kFALSE},
-  {"VmcGeo"      ,"-AgML,-Agi"  ,"",""                          ,"","","alias VmcGeomtry to VmcGeo",kFALSE},
+  {"VmcGeo"      ,""  ,"","-AgML,-Agi"                    ,"",""      ,"alias VmcGeomtry to VmcGeo",kFALSE},
   
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -506,16 +506,14 @@ Bfc_st BFC[] = { // standard chains
   {"eemcDb"      ,"eeDb" ,"","db",               "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb"       ,"fmsDb","","db",                  "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
   
-  
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   // for simulation on fly Event time stamp is set outside of the simulation makers
   {"ntin"        ,"geant"  ,"","paw,-fzin,-geant,-gstar,Simu,geantL,paw","St_geant_Maker"
-                                                       "gstar","read event generated Hbook nt-file",kFALSE},
-  {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker",
-   "Prepare kinematics for embedding",kFALSE},
-  
+   ,                                                   "gstar","read event generated Hbook nt-file",kFALSE},
+  {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker"
+   ,                                                             "Prepare kinematics for embedding",kFALSE},
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
@@ -543,13 +541,8 @@ Bfc_st BFC[] = { // standard chains
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
 #endif 
   {"Trs","Trs","tpcChain","scl,tpcDB,TrsToF,StEvent,EmbeddingShortCut","StTrsMaker","StTrsMaker","",kFALSE},
-#if 0
-  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut,NoSimuDb","StTpcRSMaker"
-   ,"libMathMore,StdEdxY2Maker,StTpcRSMaker",                          "New Tpc Response Simulator",kFALSE},
-#else
   {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut","StTpcRSMaker"
    ,"libMathMore,StdEdxY2Maker,StTpcRSMaker",                          "New Tpc Response Simulator",kFALSE},
-#endif
   {"EmbeddingShortCut","","","",              "","","Short Cut for StdEdxY2Maker and StTpcHitMover",kFALSE},
   {"StMcEvent"   ,"","","gen_t,sim_T"                                            ,"","StMcEvent","",kFALSE},
   {"McEvent" ,"","","StEvent,tpcDb,EEmcUtil,EmcUtil,StMcEvent","StMcEventMaker","StMcEventMaker","",kFALSE},
@@ -661,7 +654,6 @@ Bfc_st BFC[] = { // standard chains
    "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
   {"EEss" ,"eess","","EEfs",
    "StEEmcSlowMaker","StEEmcSimulatorMaker","EEMC slow simulator",kFALSE},
-  
   // BTOF related chains
   //  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
   //                                                                           "StChain","BTOF Chain",kFALSE}, 
@@ -698,7 +690,6 @@ Bfc_st BFC[] = { // standard chains
   // fms
   {"fmsdat"     ,"","", "StEvent,fmsdb", 
    "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",kFALSE},
-  
   
   // Some global Sti stuff including vertexing
   {"genvtx"      ,""  ,"","ctf_T,EEmcUtil","StGenericVertexMaker"
