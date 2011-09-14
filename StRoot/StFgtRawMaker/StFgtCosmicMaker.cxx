@@ -87,4 +87,4 @@ void StFgtCosmicMaker::clearHits()
     mFgtEvent->Clear();
 };
 
-ClassImp(StFgtCosmicMaker);
+//ClassImp(StFgtCosmicMaker);

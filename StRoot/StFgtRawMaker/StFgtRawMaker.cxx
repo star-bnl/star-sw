@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.7 2011/09/13 18:35:42 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.8 2011/09/14 15:44:11 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.8  2011/09/14 15:44:11  avossen
+//  took out the root cint stuff so it compiles
+//
 //  Revision 1.7  2011/09/13 18:35:42  avossen
 //  added RTS header files
 //
@@ -102,4 +105,4 @@ Bool_t StFgtRawMaker::PrepareEnvironment()
     }
 };
 
-ClassImp(StFgtRawMaker);
+//ClassImp(StFgtRawMaker);
