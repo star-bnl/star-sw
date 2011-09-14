@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.17 2010/12/02 18:31:43 rcorliss Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.18 2011/09/14 14:23:20 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -17,6 +17,9 @@
 #include "StEEmcUtil/database/StEEmcDb.h"   
 #include "StEEmcUtil/database/EEmcDbItem.h"  
 
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+
 #include "St2009WMaker.h"
 //--------------------------------------
 //--------------------------------------
@@ -30,13 +33,17 @@ St2009WMaker::accessTrig(){ // return non-zero on abort
       L0 and L2, and set the l2bitET flag to true if so.
     */
     
-    //#if 0  //remove L0 emulator for now //JS
     if (!passes_L0()) return -1;
-    //#endif
-    
     hA[0]->Fill("BHT3Id",1.);
     if(!passes_L2()) return -2;
     hA[0]->Fill("L2wId",1.);
+
+    if(isMC>300){
+      StMuEvent* muEve = mMuDstMaker->muDst()->event();
+      StL0Trigger *trig=&(muEve->l0Trigger());
+      wEve.bx48=trig->bunchCrossingId();
+      wEve.bx7=trig->bunchCrossingId7bit(par_inpRunNo);
+    }
 
     wEve.l2bitET=true;
     return 0; // we haven't set everything, but it should be good enough for simu.
@@ -44,9 +51,8 @@ St2009WMaker::accessTrig(){ // return non-zero on abort
 
   StMuEvent* muEve = mMuDstMaker->muDst()->event();
 
-
   //collect info for the luminosity monitor
-   int highestT=0;
+  int highestT=0;
   int highestM=0;  
   for (int m=0;m<300;m++)
     {
@@ -59,10 +65,10 @@ St2009WMaker::accessTrig(){ // return non-zero on abort
     }
   int highestPhi, tempPhi, tempEta;
   int awaySum[16];
-int totalSum=0;
- for (int i=0;i<16;i++) awaySum[i]=0;
+  int totalSum=0;
+  for (int i=0;i<16;i++) awaySum[i]=0;
 
- patchToEtaPhi(highestM,&tempEta,&highestPhi);
+  patchToEtaPhi(highestM,&tempEta,&highestPhi);
   
   for (int m=0;m<300;m++)
     {
@@ -80,12 +86,11 @@ int totalSum=0;
   wEve.trigTotalSum=totalSum;
   //
 
-
   StMuTriggerIdCollection *tic=&(muEve->triggerIdCollection());
   assert(tic);
   const StTriggerId &l1=tic->l1();
   vector<unsigned int> idL=l1.triggerIds();
-
+  
   //  printf("nTrig=%d, trigID: ",idL.size());
   for(unsigned int i=0;i<idL.size(); i++){
     char txt[100];
@@ -120,6 +125,10 @@ int totalSum=0;
   if(wEve.l2bitRnd) {
     hA[0]->Fill("L2wRnd",1.);
     hA[61]->Fill(wEve.bx7);
+    for (int m=0;m<300;m++){
+      int val=muEve->emcTriggerDetector().highTower(m);
+      hA[7]->Fill(val);
+    }
   }
 
   if(!wEve.l2bitET)  return -3; // drop L2W-random accepts
@@ -133,7 +142,6 @@ int totalSum=0;
   for (int m=0;m<300;m++)	{
     int val=muEve->emcTriggerDetector().highTower(m);
     if(wEve.l2bitET) hA[6]->Fill(val);
-    if(wEve.l2bitRnd) hA[7]->Fill(val);
     if(val<par_DsmThres) continue;
     if(wEve.l2bitET) hA[8]->Fill(m);
     //printf("Fired L0 HT m=%d val=%d\n",m,val);
@@ -164,6 +172,11 @@ St2009WMaker::accessVertex(){ // return non-zero on abort
     const StThreeVectorF &r=V->position();
     //   StThreeVectorF &er=V->posError();
     hA[11]->Fill(r.z());
+
+    //add vertex weighting here to get quick turnaround 
+    if(isMC>=350)
+      hA[190]->Fill(r.z(),hReweight->GetBinContent(hReweight->FindBin(r.z())));
+
     nVer++; // count valid vertices
     if(fabs(r.z()) > par_vertexZ) continue;
     WeveVertex wv;
@@ -227,13 +240,7 @@ St2009WMaker::accessTracks(){ // return non-zero on abort
       if ( mTpcFilter[secID-1].accept(prTr)==false) continue;
 
       if (secID==20) continue; //remove poorly calibrated sector
-      //weight MC tracks for TPC efficiency
-      int etaID=getEtaBin(ro.pseudoRapidity());
-      float eff=effWeight(secID,etaID);
-      //statistically remove MC tracks to match data
-      if(isMC>=20)
-        if(rejectMcTr(eff)) continue;
-
+      
       //accepted ......
 
       hA[21]->Fill(prTr->nHitsFit());
@@ -650,85 +657,10 @@ St2009WMaker::hadronicRecoil(){ //add up all vector pt outside of 'nearJet' regi
   }
 }
 
-//______________________________________
-//______________________________________
-int
-St2009WMaker::getEtaBin(float etaDet){ //finds eta bin for TPC efficiency study
-
-  int etaBin=-999;
-  float lower=-1.1;
-  float upper=-0.88;
-  for(int i=0; i<10 ; i++){
-    if(etaDet>lower && etaDet<upper){
-      etaBin=i+1;
-      break;
-    }
-    else{
-      lower+=0.22;
-      upper+=0.22;
-    }
-  }
-  //cout<<etaBin<<" "<<etaDet<<endl;
-
-  return etaBin;
-}
-
-//______________________________________
-//______________________________________
-float
-St2009WMaker::effWeight(int sec, int etaBin) {//get hardcoded efficiency weight
-
-  //efficiencies to weight rcf MC to match TPC (nominal)
-  float mWeight1[24]={0,0,0,0,0,0,0,0,0,0,0,0,1.19522,0.910479,1.07122,1.07989,1.13317,0.855825,0.883967,0.691748,0.941225,1.1615,1.10507,1.0695};
-  float mWeight2[24]={0,0,0,0,0,0,0,0,0,0,0,0,0.975417,0.838659,0.946154,1.02447,0.961646,0.878426,0.911033,0.682689,0.984267,0.947439,0.838561,0.944369};
-  float mWeight3[24]={0,0,0,0,0,0,0,0,0,0,0,0,0.926815,0.882508,0.94955,0.900702,1.13093,0.880694,0.877705,0.639519,0.956478,0.966306,0.904457,0.925828};
-  float mWeight4[24]={0,0,0,0,0,0,0,0,0,0,0,0,0.84201,0.850908,0.944188,0.889854,0.996161,0.841836,0.803917,0,0.882842,0.909536,0.861358,0.903681};
-  float mWeight5[24]={0,0,0,0,0,0,0,0,0,0,0,0,0.620464,0.803735,0.914859,0.84525,0.870705,0.777359,0.762303,0,0.786327,0.807986,0.842887,0.746316};
-  float mWeight6[24]={0.891183,0.801216,0.770534,3.56901,0.727625,0.639829,0.770953,0.771122,0.889902,0.76456,1.00574,0.656416,0,0,0,0,0,0,0,0,0,0,0,0};
-  float mWeight7[24]={0.944223,0.859784,1.01796,3.67559,0.805458,0.74916,0.975564,0.858266,0.924696,0.880289,1.13059,0.807253,0,0,0,0,0,0,0,0,0,0,0,0};
-  float mWeight8[24]={1.05474,0.90098,1.03432,1.78416,0.760239,0.80522,0.845988,0.870007,0.930332,0.863707,2.31695,0.875647,0,0,0,0,0,0,0,0,0,0,0,0};
-  float mWeight9[24]={1.08587,0.972307,0.905523,1.76568,0.890595,0.735797,0.855093,1.03733,0.885698,0.940467,2.42633,0.802553,0,0,0,0,0,0,0,0,0,0,0,0};
-  float mWeight10[24]={0.917455,0.968876,1.04223,1.71853,1.14654,0.727342,0.890291,1.15992,0.891355,0.920007,2.72449,1.08866,0,0,0,0,0,0,0,0,0,0,0,0};
-
-  if(etaBin==1)
-    return mWeight1[sec-1];
-  else if(etaBin==2)
-    return mWeight2[sec-1];
-  else if(etaBin==3)
-    return mWeight3[sec-1];
-  else if(etaBin==4)
-    return mWeight4[sec-1];
-  else if(etaBin==5)
-    return mWeight5[sec-1];
-  else if(etaBin==6)
-    return mWeight6[sec-1];
-  else if(etaBin==7)
-    return mWeight7[sec-1];
-  else if(etaBin==8)
-    return mWeight8[sec-1];
-  else if(etaBin==9)
-    return mWeight9[sec-1];
-  else if(etaBin==10)
-    return mWeight10[sec-1];
-  else
-    return 1;
-}
-
-
-//______________________________________
-//______________________________________
-bool
-St2009WMaker::rejectMcTr(float effic){ //reject track in MC to match TPC efficiency in data
-  float testVal=mRand->Rndm();
-  if(testVal>effic)
-    return true;
-  else
-    return false;
-}
-
-
-
 //$Log: St2009W_accessMuDst.cxx,v $
+//Revision 1.18  2011/09/14 14:23:20  stevens4
+//update used for cross section PRD paper
+//
 //Revision 1.17  2010/12/02 18:31:43  rcorliss
 //updated lumi code to match the starnote version
 //

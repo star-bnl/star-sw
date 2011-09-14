@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.24 2010/04/27 16:53:45 stevens4 Exp $
+// $Id: St2009W_algo.cxx,v 1.25 2011/09/14 14:23:20 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -7,6 +7,11 @@
 #include "WeventDisplay.h"
 #include "StSpinPool/StJets/StJet.h"
 #include "StSpinPool/StJets/TowerToJetIndex.h"
+
+//muDst needed for zdcRate
+#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
+#include <StMuDSTMaker/COMMON/StMuDst.h>
+#include <StMuDSTMaker/COMMON/StMuEvent.h>
 
 #include "St2009WMaker.h"
 
@@ -33,7 +38,6 @@ St2009WMaker::find_W_boson(){
       if(fabs(T.primP.Eta()) > par_leptonEta) continue;      
       hA[0]->Fill("eta1",1.);
 
-
       //signal plots w/o EEMC in veto
       if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
 	if(T.awayTotET_noEEMC < 8)//old awayside pt cut
@@ -42,8 +46,12 @@ St2009WMaker::find_W_boson(){
 	  hA[140]->Fill(T.cluster.ET);
           if (T.prMuTrack->charge() < 0) {
             hA[184+3]->Fill(T.cluster.ET);
+	    hA[200+3]->Fill(T.primP.Eta(),T.cluster.ET);
+	    hA[280+3]->Fill(abs(T.primP.Eta()),T.cluster.ET);
           } else if (T.prMuTrack->charge() > 0) {
             hA[184+4]->Fill(T.cluster.ET);
+	    hA[200+4]->Fill(T.primP.Eta(),T.cluster.ET);
+	    hA[280+4]->Fill(abs(T.primP.Eta()),T.cluster.ET);
           }
         }
       }
@@ -51,7 +59,7 @@ St2009WMaker::find_W_boson(){
       if(T.cluster.ET /T.nearTotET< par_nearTotEtFrac) continue; // too large nearET
 
       hA[20]->Fill("noNear",1.);
-      hA[112]->Fill( T.cluster.ET); // for Joe
+      hA[113]->Fill( T.cluster.ET); // for Joe
       hA[50]->Fill(T.awayTpcPT);
       hA[51]->Fill(T.awayBtowET);
       hA[54]->Fill(T.awayTotET); 
@@ -65,35 +73,46 @@ St2009WMaker::find_W_boson(){
       hA[134]->Fill(T.cluster.ET,T.sPtBalance);
       hA[135]->Fill(T.awayTotET,T.sPtBalance);
 
-      for (int i=0; i<=20; i++) {
-	//  float awayTot_cut = 10.+2.*((float) i);
-        for (int j=0; j<=20; j++) {
-          float pTBal_cut = 5.+((float) j);
-          if (T.sPtBalance<pTBal_cut) { 
-            if (T.prMuTrack->charge() < 0) {
-              hA[142+i]->Fill(T.cluster.ET,j);
-            } else if (T.prMuTrack->charge() > 0) {
-              hA[163+i]->Fill(T.cluster.ET,j);
-            }
-          }
-        }
+      int i=0;
+      //background variations for systematic
+      for (int j=0; j<=20; j++) { //loop over possible sPtBal cuts
+	float pTBal_cut = 5.+((float) j);
+	if (T.sPtBalance<pTBal_cut) { //background
+	  if (T.prMuTrack->charge() < 0) {
+	    hA[142+i]->Fill(T.cluster.ET,j);
+	    hA[210+j]->Fill(T.primP.Eta(),T.cluster.ET);
+	    hA[290+j]->Fill(abs(T.primP.Eta()),T.cluster.ET);
+	  } else if (T.prMuTrack->charge() > 0) {
+	    hA[163+i]->Fill(T.cluster.ET,j);
+	    hA[231+j]->Fill(T.primP.Eta(),T.cluster.ET);
+	    hA[311+j]->Fill(abs(T.primP.Eta()),T.cluster.ET);
+	  }
+	}
       }
-
+      
       //plots for backg sub yield
       if(T.sPtBalance>par_ptBalance ) {
         hA[136]->Fill(T.cluster.ET);//signal
         hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
         if (T.prMuTrack->charge() < 0) {
           hA[184+1]->Fill(T.cluster.ET);
+	  hA[200+1]->Fill(T.primP.Eta(),T.cluster.ET);
+	  hA[280+1]->Fill(abs(T.primP.Eta()),T.cluster.ET);
         } else if (T.prMuTrack->charge() > 0) {
           hA[184+2]->Fill(T.cluster.ET);
+	  hA[200+2]->Fill(T.primP.Eta(),T.cluster.ET);
+	  hA[280+2]->Fill(abs(T.primP.Eta()),T.cluster.ET);
         }
       } else {
         hA[137]->Fill(T.cluster.ET);//background
         if (T.prMuTrack->charge() < 0) {
           hA[184+5]->Fill(T.cluster.ET);
+	  hA[200+5]->Fill(T.primP.Eta(),T.cluster.ET);
+	  hA[280+5]->Fill(abs(T.primP.Eta()),T.cluster.ET);
         } else if (T.prMuTrack->charge() > 0) {
           hA[184+6]->Fill(T.cluster.ET);
+	  hA[200+6]->Fill(T.primP.Eta(),T.cluster.ET);
+	  hA[280+6]->Fill(abs(T.primP.Eta()),T.cluster.ET);
         }
       }
 
@@ -115,9 +134,10 @@ St2009WMaker::find_W_boson(){
       //::::::::::::::::::::::::::::::::::::::::::::::::
       //:::::accepted W events for x-section :::::::::::
       //::::::::::::::::::::::::::::::::::::::::::::::::
+      wEve.wTag=true;
 
       hA[20]->Fill("noAway",1.0);  
-      hA[113]->Fill( T.cluster.ET);//for Joe
+      hA[114]->Fill( T.cluster.ET);//for Joe
 
       hA[90]->Fill( T.cluster.ET); 
       hA[92]->Fill( T.cluster.ET,T.glMuTrack->dEdx()*1e6); 
@@ -135,7 +155,28 @@ St2009WMaker::find_W_boson(){
       hA[99]->Fill( T.prMuTrack->eta());
       hA[20]->Fill("goldW",1.);
       nGoldW++;
-    
+
+      //some final plots for comparing to embedding
+      float zdcRate=mMuDstMaker->muDst()->event()->runInfo().zdcCoincidenceRate();
+      hA[260]->Fill(zdcRate,wEve.bx7);
+      hA[261]->Fill(zdcRate,wEve.vertex.size());
+      hA[262]->Fill(zdcRate,T.prMuTrack->nHitsFit());
+      float hitFrac=1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss();
+      hA[263]->Fill(zdcRate,hitFrac);
+      hA[264]->Fill(zdcRate,T.prMuTrack->globalTrack()->lastPoint().perp());
+      hA[265]->Fill(zdcRate,T.prMuTrack->globalTrack()->firstPoint().perp());
+      hA[266]->Fill(zdcRate,T.prMuTrack->pt());
+      hA[267]->Fill(zdcRate,T.prMuTrack->globalTrack()->chi2());
+      hA[268]->Fill(zdcRate,1./T.prMuTrack->pt());
+      hA[269]->Fill(zdcRate,T.glMuTrack->dca().mag());
+      hA[270]->Fill(zdcRate,T.glMuTrack->dcaD());
+      hA[271]->Fill(zdcRate,T.glMuTrack->dcaZ());
+
+      if(V.funnyRank<10) {
+	hA[272]->Fill(zdcRate,T.glMuTrack->pt());
+	hA[273]->Fill(zdcRate,1./T.glMuTrack->pt());
+      }
+
     }// loop over tracks
   }// loop over vertices
   if(nGoldW>0)
@@ -328,6 +369,7 @@ St2009WMaker::findNearJet(){
       hA[41]->Fill( T.cluster.ET,T.nearEmcET-T.cluster.ET);
       float nearTotETfrac=T.cluster.ET/ T.nearTotET;
       hA[42]->Fill(nearTotETfrac);
+      hA[192]->Fill(T.cluster.ET,nearTotETfrac);
   
     } // end of loop over tracks
   }// end of loop over vertices
@@ -357,14 +399,26 @@ St2009WMaker::matchTrack2Cluster(){
       hA[33]->Fill( T.cluster.ET);
       hA[34]->Fill(T.cluster.adcSum,trackPT);
       hA[110]->Fill( T.cluster.ET);
+      if (T.cluster.ET <par_clustET) continue; // too low energy
+      hA[20]->Fill("CL",1.);
+
+      //.. spacial separation (track - cluster)
+      TVector3 D=T.pointTower.R-T.cluster.position;
+      hA[43]->Fill( T.cluster.energy,D.Mag());
+      hA[44]->Fill( T.cluster.position.z(),D.z());
+      float delPhi=T.pointTower.R.DeltaPhi(T.cluster.position);
+      //   printf("aaa %f %f %f   phi=%f\n",D.x(),D.y(),D.z(),delPhi);
+      hA[45]->Fill( T.cluster.energy,Rcylinder*delPhi);// wrong?
+      hA[46]->Fill( D.Mag());
+
+      if(D.Mag()>par_delR3D) continue; 
+      hA[20]->Fill("#Delta R",1.);
+      hA[111]->Fill( T.cluster.ET);
 
       // ........compute surroinding cluster energy
       int iEta=T.cluster.iEta;
       int iPhi=T.cluster.iPhi;
       T.cl4x4=sumBtowPatch(iEta-1,iPhi-1,4,4,zVert); // needed for lumi monitor
-      if (T.cluster.ET <par_clustET) continue; // too low energy
-      hA[20]->Fill("CL",1.);
-
       hA[37]->Fill( T.cl4x4.ET);
       hA[38]->Fill(T.cluster.energy, T.cl4x4.energy-T.cluster.energy);
       
@@ -375,24 +429,12 @@ St2009WMaker::matchTrack2Cluster(){
 
       float frac24=T.cluster.ET/(T.cl4x4.ET);
       hA[39]->Fill(frac24);
+      hA[191]->Fill(T.cluster.ET,frac24);
       if(frac24<par_clustFrac24) continue;
-  
-      hA[20]->Fill("fr24",1.);
- 
-      //.. spacial separation (track - cluster)
-      TVector3 D=T.pointTower.R-T.cluster.position;
-
-      hA[43]->Fill( T.cluster.energy,D.Mag());
-      hA[44]->Fill( T.cluster.position.z(),D.z());
-      float delPhi=T.pointTower.R.DeltaPhi(T.cluster.position);
-      //   printf("aaa %f %f %f   phi=%f\n",D.x(),D.y(),D.z(),delPhi);
-      hA[45]->Fill( T.cluster.energy,Rcylinder*delPhi);// wrong?
-      hA[46]->Fill( D.Mag());
-
-      if(D.Mag()>par_delR3D) continue; 
       T.isMatch2Cl=true; // cluster is matched to TPC track
-      hA[20]->Fill("#Delta R",1.);
-      hA[111]->Fill( T.cluster.ET);
+
+      hA[20]->Fill("fr24",1.);
+      hA[112]->Fill( T.cluster.ET);
       
       nTr++;
     }// end of one vertex
@@ -594,6 +636,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.25  2011/09/14 14:23:20  stevens4
+// update used for cross section PRD paper
+//
 // Revision 1.24  2010/04/27 16:53:45  stevens4
 // add code to remove events tagged as Zs from W candidates
 //

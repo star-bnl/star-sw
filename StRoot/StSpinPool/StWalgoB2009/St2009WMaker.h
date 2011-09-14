@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.15 2010/12/02 18:31:43 rcorliss Exp $
+// $Id: St2009WMaker.h,v 1.16 2011/09/14 14:23:20 stevens4 Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -101,6 +101,8 @@ class St2009WMaker : public StMaker {
   int use_gains_file;
   float gains_BTOW[4801];
 
+  TH1F* hReweight; char* nameReweight;
+  
  public: // to overwrite default params from .C macro
   void useEtow(int x){ par_useEtow=x; }
   void setVertexCuts(float zm, int npv) {
@@ -123,6 +125,7 @@ class St2009WMaker : public StMaker {
   void setJetChrgScaleMC(float x){ par_mcJetChrgScale=x; }
 
   void setGainsFile(char* x) {gains_file=x; use_gains_file=1;}
+  void setNameReweight(char* x) {nameReweight=x;}
 
  private:   
 
@@ -162,10 +165,6 @@ class St2009WMaker : public StMaker {
   StJet* getJet(int i){return (StJet*)mJets->At(i);}
   TClonesArray* getJets(TString branchName);
 
-  //for TPC efficiency study
-  int getEtaBin(float etaDet);
-  float effWeight(int sec, int etaBin);
-  bool rejectMcTr(float effic);
   TRandom3 *mRand;
 
   // tools
@@ -178,7 +177,7 @@ class St2009WMaker : public StMaker {
 
   // histograms
   TObjArray *HList;
-  enum {mxHA=200}; TH1 * hA[mxHA];
+  enum {mxHA=350}; TH1 * hA[mxHA];
     
   void initHistos();
   void initGeom();
@@ -201,7 +200,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.15 2010/12/02 18:31:43 rcorliss Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.16 2011/09/14 14:23:20 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -212,6 +211,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.16  2011/09/14 14:23:20  stevens4
+// update used for cross section PRD paper
+//
 // Revision 1.15  2010/12/02 18:31:43  rcorliss
 // updated lumi code to match the starnote version
 //

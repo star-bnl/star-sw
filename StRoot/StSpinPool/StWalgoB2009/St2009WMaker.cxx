@@ -1,5 +1,5 @@
 
-// $Id: St2009WMaker.cxx,v 1.15 2010/05/04 12:14:35 balewski Exp $
+// $Id: St2009WMaker.cxx,v 1.16 2011/09/14 14:23:20 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -10,7 +10,6 @@
 #include <TH2.h>
 #include <StMessMgr.h>
 #include <StThreeVectorF.hh>
-
 
 //MuDst
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -55,7 +54,7 @@ St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   nInpEve= nTrigEve= nAccEve=0; 
 
   //... MC trigger simulator
-  par_l0emulAdcThresh=30;
+  par_l0emulAdcThresh=31;
   par_l2emulSeedThresh=5.0;
   par_l2emulClusterThresh=13.0;
 
@@ -88,7 +87,7 @@ St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   
   //... search for W's
   par_awayDeltaPhi=0.7; // (rad) away-'cone' size
-  par_highET=28.; // (GeV), cut-off for final W-cluster ET
+  par_highET=25.; // (GeV), cut-off for final W-cluster ET
   par_ptBalance=15.; // (GeV), ele cluster vector + jet sum vector
   par_leptonEta=1.0; // bracket acceptance
 
@@ -144,6 +143,13 @@ St2009WMaker::Init(){
       f1 >> str; f1 >> str;
     }
   }
+
+  if(isMC >= 350){ // load vertex reweighting histo
+    TString filename="/star/u/stevens4/wAnalysis/efficXsec/zVertReweight.root";
+    TFile* reweightFile = new TFile(filename);
+    cout<<"Re-weighting vertex z distribution with '"<<nameReweight<<"' histo from file "<<endl<<filename<<endl;
+    hReweight = (TH1F*) reweightFile->Get(nameReweight);
+  }    
  
   if(isMC) par_minPileupVert=1;
 
@@ -159,12 +165,10 @@ St2009WMaker::Init(){
     if(sec==5 && par_inpRunNo>=10098029) Rout=140.;
     if(sec==6 ) Rout=140.;
     if(sec==20 && par_inpRunNo>=10095120 && par_inpRunNo<=10099078 ) Rout=140.;
-
+    
     mTpcFilter[isec].setCuts(par_nFitPts,par_nHitFrac,Rin,Rout);
     mTpcFilter[isec].init("sec",sec,HList);
   }
-
-
 
   return StMaker::Init();
 }
@@ -176,19 +180,38 @@ St2009WMaker::InitRun(int runNo){
   LOG_INFO<<Form("::InitRun(%d) start",runNo)<<endm;
   mBarrelTables->loadTables(this );
   
-#if 0 
-  float airPres=St_tpcGasC::instance()-> barometricPressure();
-  LOG_INFO<<Form("::InitRun(%d) AirPressure=%.2f",runNo, airPres)<<endm;
-  if(runNo==1000000) {
-    LOG_WARN<<Form("::InitRun(%d) ??? , it is OK for M-C ",runNo)<<endm;
+  //get run number from MuDst name for embedding (each file goes through InitRun since each has different geneated runNum < 5000)
+  if(isMC>=350){ 
+    const char *file = mMuDstMaker->GetFile();
+    const char *p1=strstr(file,"adc_");
+    int run=atoi(p1+4);
+    par_inpRunNo=run;
+  
+    LOG_INFO<<Form("::InitRun(%d) reset TPC cuts",par_inpRunNo)<<endm;
+    for(int isec=0;isec<mxTpcSec;isec++) {
+      int sec=isec+1;
+      float Rin=par_trackRin,Rout=par_trackRout;
+      //.... Rin ..... changes
+      if(sec==4  && par_inpRunNo>=10090089) Rin=125.;
+      if(sec==11 && par_inpRunNo>=10083013) Rin=125.;
+      if(sec==15 && par_inpRunNo>=10088096 && par_inpRunNo<=10090112 ) Rin=125.;
+      //.... Rout ..... changes
+      if(sec==5 && par_inpRunNo>=10098029) Rout=140.;
+      if(sec==6 ) Rout=140.;
+      if(sec==20 && par_inpRunNo>=10095120 && par_inpRunNo<=10099078 ) Rout=140.;
+      
+      //reset cuts for TPC filter based on runNum for embedding
+      if(Rin != par_trackRin || Rout!=par_trackRout)
+        LOG_INFO<<"Sector "<<sec<<" cuts aren't default: Rin="<<Rin<<" and Rout="<<Rout<<endl; 
+      mTpcFilter[isec].setCuts(par_nFitPts,par_nHitFrac,Rin,Rout);
+    }
   }
-#endif
 
   mRunNo=runNo;
   if(runNo>1000000) assert(mRunNo==par_inpRunNo); // what a hack, assurs TPC cuts change w/ time for data, JB. It will crash if multiple runs are analyzed by the same job.
 
    LOG_INFO<<Form("::InitRun(%d) done, W-algo params: trigID: bht3=%d L2W=%d  isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, primEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n BTOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x2/ET4x4>%0.2f  ET2x2/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n Counters Thresholds: track>%.1f GeV, tower>%.1f GeV  Use ETOW: flag=%d ScaleFact=%.2f\nBtowScaleFacor=%.2f\n W selection highET>%.1f awayDelPhi<%.1frad  ptBalance>%.1fGeV  |leptonEta|<%.1f",
-		 mRunNo,par_bht3TrgID, par_l2wTrgID,isMC,
+		 par_inpRunNo,par_bht3TrgID, par_l2wTrgID,isMC,
 		 par_minPileupVert,par_vertexZ,
 		 par_nFitPts,par_nHitFrac,  par_trackRin,  par_trackRout, par_trackPt,
 		  par_kSigPed, par_AdcThres,par_maxADC,par_clustET,par_clustFrac24,par_nearTotEtFrac,
@@ -378,6 +401,9 @@ St2009WMaker::getJets(TString branchName){
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.16  2011/09/14 14:23:20  stevens4
+// update used for cross section PRD paper
+//
 // Revision 1.15  2010/05/04 12:14:35  balewski
 // runs now w/o jet tree
 //
@@ -426,6 +452,9 @@ St2009WMaker::getJets(TString branchName){
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.16  2011/09/14 14:23:20  stevens4
+// update used for cross section PRD paper
+//
 // Revision 1.15  2010/05/04 12:14:35  balewski
 // runs now w/o jet tree
 //

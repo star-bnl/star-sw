@@ -1,4 +1,4 @@
-// $Id: St2009Wlumi_histo.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009Wlumi_histo.cxx,v 1.2 2011/09/14 14:23:21 stevens4 Exp $
 //
 //*-- Author : Ross Corliss, MIT
 
@@ -78,6 +78,22 @@ St2009WlumiMaker::initHistos(){
   sprintf(txt,"Single Beam Background Counts vs Time;run number;Background BHT3 counts");
   hA[18]=h=new TH1F(core+"SBBvsT",txt,200000,10000000,10200000);
 
+  sprintf(txt,"blah");
+  hA[19]=h=new TH1F(core+"SoftBHT3",txt,200000,10000000,10200000);
+  hA[20]=h=new TH1F(core+"HardBHT3",txt,200000,10000000,10200000);
+  hA[21]=h=new TH1F(core+"AbortGap1",txt,200000,10000000,10200000);
+  hA[22]=h=new TH1F(core+"AbortGap2",txt,200000,10000000,10200000);
+  hA[23]=h=new TH1F(core+"ScaledBHT3",txt,200000,10000000,10200000);
+  hA[24]=h=new TH1F(core+"effLumi",txt,200000,10000000,10200000);
+  hA[25]=h=new TH1F(core+"nBHT3coin_coinBin",txt,16,0,16);
+
+  for (int i=0;i<16;i++) {
+    hA[30+i]=h=new TH1F(core+Form("nBTH3coin_coinBin%d",i),txt,200000,10000000,10200000);
+    hA[50+i]=h=new TH1F(core+Form("AbortGap1_coinBin%d",i),txt,200000,10000000,10200000);
+    hA[70+i]=h=new TH1F(core+Form("AbortGap2_coinBin%d",i),txt,200000,10000000,10200000);
+    hA[90+i]=h=new TH1F(core+Form("awaySum_coinBin%d",i),txt,400,0.,400.);
+   
+  }
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
@@ -91,6 +107,9 @@ St2009WlumiMaker::initHistos(){
 
 
 // $Log: St2009Wlumi_histo.cxx,v $
+// Revision 1.2  2011/09/14 14:23:21  stevens4
+// update used for cross section PRD paper
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //
