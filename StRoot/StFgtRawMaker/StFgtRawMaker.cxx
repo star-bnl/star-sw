@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.8 2011/09/14 15:44:11 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.9 2011/09/14 17:21:19 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.9  2011/09/14 17:21:19  avossen
+//  using dev allows cint to compile.
+//
 //  Revision 1.8  2011/09/14 15:44:11  avossen
 //  took out the root cint stuff so it compiles
 //
@@ -105,4 +108,4 @@ Bool_t StFgtRawMaker::PrepareEnvironment()
     }
 };
 
-//ClassImp(StFgtRawMaker);
+ClassImp(StFgtRawMaker);
