@@ -305,8 +305,8 @@
                                   /// Add daughter volume FGTQ to mother FGTD                 
                                   place.TranslateZ(0.);                 
                                   /// Translate z = 0.                 
-                                  place.AlphaZ((1-quad)*90.);                 
-                                  /// Rotate: AlphaZ = (1-quad)*90.                 
+                                  place.AlphaZ((1-quad)*90.*fgst.config);                 
+                                  /// Rotate: AlphaZ = (1-quad)*90.*fgst.config                 
                                   /// G3 Reference: thetax = 90                 
                                   /// G3 Reference: phix = 0                 
                                   /// G3 Reference: thetay = 90                 
@@ -1886,8 +1886,8 @@
              ///@addtogroup fggg_doc        
              ///@{           
                    ++fggg._index;           
-                   fggg . fgstconfig = 1.0; // selection of no. of disks and quadrants            
-                   /// fggg . fgstconfig = 1.0; // selection of no. of disks and quadrants            
+                   fggg . fgstconfig = 2.0; // selection of no. of disks and quadrants            
+                   /// fggg . fgstconfig = 2.0; // selection of no. of disks and quadrants            
                    //           
                    fggg.fill();           
              ///@}        
@@ -1920,10 +1920,10 @@
                    /// fgst . startz = 70.; //  position of sensitive volume of the 1st disk           
                    fgst . diskstepz = 10.; //  disk separation along Z           
                    /// fgst . diskstepz = 10.; //  disk separation along Z           
-                   fgst . ndisk = 1; // number of disks           
-                   /// fgst . ndisk = 1; // number of disks           
-                   fgst . nquad = 1; // number quadrants in a disks           
-                   /// fgst . nquad = 1; // number quadrants in a disks           
+                   fgst . ndisk = 6; // number of disks           
+                   /// fgst . ndisk = 6; // number of disks           
+                   fgst . nquad = 2; // number quadrants in a disks           
+                   /// fgst . nquad = 2; // number quadrants in a disks           
                    //           
                    fgst.fill();           
              ///@}        

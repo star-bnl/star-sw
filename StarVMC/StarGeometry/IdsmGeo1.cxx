@@ -29,9 +29,9 @@
        // ---------------------------------------------------------------------------------------------------     
           ///@addtogroup IdsmGeo1_vars     
           ///@{        
-                Float_t inr,outr,lengthz,k,sina,cosa,resr,angr,m,pm;        
+                Float_t inr,outr,lengthz,k,sina,cosa,resr,angres,m,pm,angrail,rrail,dphihv;        
                 //        
-                /// Float_t inr,outr,lengthz,k,sina,cosa,resr,angr,m,pm        
+                /// Float_t inr,outr,lengthz,k,sina,cosa,resr,angres,m,pm,angrail,rrail,dphihv        
           ///@}     
           //  -----------------------------------------------------     
           /// @defgroup idsg_doc     
@@ -49,6 +49,9 @@
           ///Float_t dangres;     
           ///Float_t dxres;     
           ///Float_t dyres;     
+          ///Float_t fgtstartz;     
+          ///Float_t fgtdiskstepz;     
+          ///Int_t fgtndisk;     
           ///Int_t _index;     
           //     
           Idsg_t idsg;     
@@ -87,7 +90,7 @@
                         mCurrent = this;           
                         Bool_t _same_shape = true;           
                       { AgAttribute attr = AgAttribute("IDSM");              
-                            attr.par("seen")=0;              
+                            attr.par("seen")=1;              
                             attr.par("colo")=4;              
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
@@ -220,10 +223,10 @@
                       /// Loop on m from 0 to 1 step=1           
                       for ( m=0; (1>0)? (m<=1):(m>=1); m+=1 )           
                       {              
-                            angr = idsg.angflat - idsg.dangres/2.;              
+                            angres = idsg.angflat - idsg.dangres/2.;              
                             if ( m==1 )              
                             {                 
-                                  angr = idsg.angflat+idsg.dangres/2.;                 
+                                  angres = idsg.angflat+idsg.dangres/2.;                 
                             }              
                             _create = AgCreate("TPRT");              
                             {                 
@@ -233,55 +236,15 @@
                             }              
                             { AgPlacement place = AgPlacement("TPRT","IDSM");                 
                                   /// Add daughter volume TPRT to mother IDSM                 
-                                  place.TranslateX(idsg.rrres*cos(angr/180.*3.1416));                 
-                                  /// Translate x = idsg.rrres*cos(angr/180.*3.1416)                 
-                                  place.TranslateY(idsg.rrres*sin(angr/180.*3.1416));                 
-                                  /// Translate y = idsg.rrres*sin(angr/180.*3.1416)                 
+                                  place.TranslateX(idsg.rrres*cos(angres/180.*3.1416));                 
+                                  /// Translate x = idsg.rrres*cos(angres/180.*3.1416)                 
+                                  place.TranslateY(idsg.rrres*sin(angres/180.*3.1416));                 
+                                  /// Translate y = idsg.rrres*sin(angres/180.*3.1416)                 
                                   place.TranslateZ(0);                 
                                   /// Translate z = 0                 
                                   _stacker -> Position( AgBlock::Find("TPRT"), place );                 
                             } // end placement of TPRT              
                       }           
-                      _create = AgCreate("FGCB");           
-                      {              
-                            AgShape myshape; // undefined shape              
-                            ///Create FGCB              
-                            Create("FGCB");               
-                      }           
-                      { AgPlacement place = AgPlacement("FGCB","IDSM");              
-                            /// Add daughter volume FGCB to mother IDSM              
-                            place.TranslateZ(lengthz/2.);              
-                            /// Translate z = lengthz/2.              
-                            place.AlphaZ(16);              
-                            /// Rotate: AlphaZ = 16              
-                            /// G3 Reference: thetax = 90              
-                            /// G3 Reference: phix = 0              
-                            /// G3 Reference: thetay = 90              
-                            /// G3 Reference: phiy = 90              
-                            /// G3 Reference: thetaz = 0              
-                            /// G3 Reference: phiz = 0              
-                            _stacker -> Position( AgBlock::Find("FGCB"), place );              
-                      } // end placement of FGCB           
-                      _create = AgCreate("FGCB");           
-                      {              
-                            AgShape myshape; // undefined shape              
-                            ///Create FGCB              
-                            Create("FGCB");               
-                      }           
-                      { AgPlacement place = AgPlacement("FGCB","IDSM");              
-                            /// Add daughter volume FGCB to mother IDSM              
-                            place.TranslateZ(lengthz/2.);              
-                            /// Translate z = lengthz/2.              
-                            place.AlphaZ(180.+16);              
-                            /// Rotate: AlphaZ = 180.+16              
-                            /// G3 Reference: thetax = 90              
-                            /// G3 Reference: phix = 0              
-                            /// G3 Reference: thetay = 90              
-                            /// G3 Reference: phiy = 90              
-                            /// G3 Reference: thetaz = 0              
-                            /// G3 Reference: phiz = 0              
-                            _stacker -> Position( AgBlock::Find("FGCB"), place );              
-                      } // end placement of FGCB           
                       _create = AgCreate("TPRR");           
                       {              
                             AgShape myshape; // undefined shape              
@@ -306,6 +269,47 @@
                             /// G3 Reference: phiz = 0              
                             _stacker -> Position( AgBlock::Find("TPRR"), place );              
                       } // end placement of TPRR           
+                      /// Loop on m from 0 to 1 step=1           
+                      for ( m=0; (1>0)? (m<=1):(m>=1); m+=1 )           
+                      {              
+                            angrail=90./180.*3.1416;              
+                            if ( m==1 )              
+                            {                 
+                                  angrail = angrail+3.1416;                 
+                            }              
+                            _create = AgCreate("FGRL");              
+                            {                 
+                                  AgShape myshape; // undefined shape                 
+                                  ///Create FGRL                 
+                                  Create("FGRL");                  
+                            }              
+                            { AgPlacement place = AgPlacement("FGRL","IDSM");                 
+                                  /// Add daughter volume FGRL to mother IDSM                 
+                                  place.TranslateX(rrail*cos(angrail));                 
+                                  /// Translate x = rrail*cos(angrail)                 
+                                  place.TranslateY(rrail*sin(angrail));                 
+                                  /// Translate y = rrail*sin(angrail)                 
+                                  place.TranslateZ(146.57);                 
+                                  /// Translate z = 146.57                 
+                                  _stacker -> Position( AgBlock::Find("FGRL"), place );                 
+                            } // end placement of FGRL              
+                            _create = AgCreate("FGHV");              
+                            {                 
+                                  AgShape myshape; // undefined shape                 
+                                  ///Create FGHV                 
+                                  Create("FGHV");                  
+                            }              
+                            { AgPlacement place = AgPlacement("FGHV","IDSM");                 
+                                  /// Add daughter volume FGHV to mother IDSM                 
+                                  place.TranslateX(rrail*cos(angrail+3.));                 
+                                  /// Translate x = rrail*cos(angrail+3.)                 
+                                  place.TranslateY(rrail*sin(angrail+3.));                 
+                                  /// Translate y = rrail*sin(angrail+3.)                 
+                                  place.TranslateZ(idsg.fgtstartz-idsg.fgtdiskstepz/.2);                 
+                                  /// Translate z = idsg.fgtstartz-idsg.fgtdiskstepz/.2                 
+                                  _stacker -> Position( AgBlock::Find("FGHV"), place );                 
+                            } // end placement of FGHV              
+                      }           
                       END_OF_IDSM:           
                       mCurrent = _save;           
                 ///@}        
@@ -619,41 +623,75 @@
                 ///@}        
           } // End Block TPRT     
           // ---------------------------------------------------------------------------------------------------     
-          void FGCB::Block( AgCreate create )     
+          void FGRL::Block( AgCreate create )     
           {         
-                ///@addtogroup FGCB_doc        
+                ///@addtogroup FGRL_doc        
                 ///@{           
                         AgBlock *_save = mCurrent;           
                         mCurrent = this;           
                         Bool_t _same_shape = true;           
-                      { AgAttribute attr = AgAttribute("FGCB");              
+                      { AgAttribute attr = AgAttribute("FGRL");              
                             attr.par("seen")=1;              
                             attr.par("colo")=1;              
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
-                      /// Material badFgtCables            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Badfgtcables");              
+                      /// Material RailMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Railmix");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Tube");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("rmin")=0.9;              
+                            shape.par("rmax")=1.0;              
+                            shape.par("dz")=165.6/2.;              
+                            /// Shape Tube rmin=0.9 rmax=1.0 dz=165.6/2.               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_FGRL;              
+                            _stacker -> Build(this);              
+                      }           
+                      END_OF_FGRL:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block FGRL     
+          // ---------------------------------------------------------------------------------------------------     
+          void FGHV::Block( AgCreate create )     
+          {         
+                ///@addtogroup FGHV_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("FGHV");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=1;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material CableMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Cablemix");              
                             _material = mat;              
                       }           
                       {  AgShape shape = AgShape("Tubs");              
                             shape     .Inherit( AgBlock::previous() );              
                             create     .SetParameters(shape);              
-                            shape.par("rmin")=idsg.rrres-1.;              
-                            shape.par("rmax")=idsg.rrres+0.5;              
-                            shape.par("phi1")=-10.;              
-                            shape.par("phi2")=10.;              
-                            shape.par("dz")=lengthz/4.;              
-                            /// Shape Tubs rmin=idsg.rrres-1. rmax=idsg.rrres+0.5 phi1=-10. phi2=10. dz=lengthz/4.               
+                            shape.par("rmin")=rrail-0.5;              
+                            shape.par("rmax")=rrail+0.5;              
+                            shape.par("phi1")=-dphihv/2.;              
+                            shape.par("phi2")=dphihv;              
+                            shape.par("dz")=idsg.fgtdiskstepz;              
+                            /// Shape Tubs rmin=rrail-0.5 rmax=rrail+0.5 phi1=-dphihv/2. phi2=dphihv dz=idsg.fgtdiskstepz               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
-                            if (_same_shape) goto END_OF_FGCB;              
+                            if (_same_shape) goto END_OF_FGHV;              
                             _stacker -> Build(this);              
                       }           
-                      END_OF_FGCB:           
+                      END_OF_FGHV:           
                       mCurrent = _save;           
                 ///@}        
-          } // End Block FGCB     
+          } // End Block FGHV     
     // ----------------------------------------------------------------------- geoctr
        void IdsmGeo1::ConstructGeometry()     
        {        
@@ -668,7 +706,6 @@
              AddBlock("IDSM");        
              AddBlock("TPRR");        
              AddBlock("TPRT");        
-             AddBlock("FGCB");        
              AddBlock("SUCA");        
              AddBlock("SUCB");        
              AddBlock("SUCC");        
@@ -676,12 +713,14 @@
              AddBlock("SUCE");        
              AddBlock("SUCF");        
              AddBlock("SUCG");        
+             AddBlock("FGRL");        
+             AddBlock("FGHV");        
              // ---------------------------------------------------------------------------------------------------        
              ///@addtogroup idsg_doc        
              ///@{           
                    ++idsg._index;           
-                   idsg . version = 1.0; // Versioning of the IDS geometry           
-                   /// idsg . version = 1.0; // Versioning of the IDS geometry           
+                   idsg . version = 2.0; // Versioning of the IDS geometry            
+                   /// idsg . version = 2.0; // Versioning of the IDS geometry            
                    idsg . rf = 8.0; //  radii of inner volume boundary           
                    /// idsg . rf = 8.0; //  radii of inner volume boundary           
                    idsg . angflat = 106.; //  angle (deg) for center of flat           
@@ -698,6 +737,12 @@
                    /// idsg . dxres = 0.13; //  thicknessfor TPC resistor           
                    idsg . dyres = 2.; //  dy for TPC resistor           
                    /// idsg . dyres = 2.; //  dy for TPC resistor           
+                   idsg . fgtstartz = 70.; //  position of sensitive volume of the 1st disk           
+                   /// idsg . fgtstartz = 70.; //  position of sensitive volume of the 1st disk           
+                   idsg . fgtdiskstepz = 10.; //  disk separation along Z           
+                   /// idsg . fgtdiskstepz = 10.; //  disk separation along Z           
+                   idsg . fgtndisk = 6; // number of disks           
+                   /// idsg . fgtndisk = 6; // number of disks           
                    //           
                    idsg.fill();           
              ///@}        
@@ -734,8 +779,8 @@
              ///@addtogroup idsa_doc        
              ///@{           
                    ++idsa._index;           
-                   idsa . version = 2.0; // Default alignment of IDSM at (0,0,0) with no rotation           
-                   /// idsa . version = 2.0; // Default alignment of IDSM at (0,0,0) with no rotation           
+                   idsa . version = 1.0; // Default alignment of IDSM at (0,0,0) with no rotation            
+                   /// idsa . version = 1.0; // Default alignment of IDSM at (0,0,0) with no rotation            
                    idsa . x = 0.0; // x-alignment           
                    /// idsa . x = 0.0; // x-alignment           
                    idsa . y = 0.0; // y-alignment           
@@ -807,6 +852,48 @@
                    _material = mix;           
                    _material.lock();           
              }        
+             /// Component O	a=16	z=8	w=0.032        
+             /// Component C	a=12	z=6	w=0.471        
+             /// Component H	a=1	z=1	w=0.011        
+             /// Component Cl	a=35.5	z=17	w=0.014        
+             /// Component AL	a=27	z=13	w=0.472        
+             /// Mixture RailMix dens=3.384        
+             {  AgMaterial &mix = AgMaterial::Get("Railmix");           
+                   mix.Component("O",16,8,0.032);           
+                   mix.Component("C",12,6,0.471);           
+                   mix.Component("H",1,1,0.011);           
+                   mix.Component("Cl",35.5,17,0.014);           
+                   mix.Component("AL",27,13,0.472);           
+                   mix.par("dens")=3.384;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component Si	a=28.08	z=14	w=0.131        
+             /// Component O	a=16	z=8	w=0.117        
+             /// Component C	a=12	z=6	w=0.193        
+             /// Component H	a=1	z=1	w=0.024        
+             /// Component AL	a=27	z=13	w=0.143        
+             /// Component Cu	a=63.5	z=29	w=0.106        
+             /// Component F	a=19.	z=9	w=0.254        
+             /// Component Na	a=23.	z=11	w=0.015        
+             /// Component Ca	a=40.1	z=20	w=0.017        
+             /// Mixture CableMix dens=1.755        
+             {  AgMaterial &mix = AgMaterial::Get("Cablemix");           
+                   mix.Component("Si",28.08,14,0.131);           
+                   mix.Component("O",16,8,0.117);           
+                   mix.Component("C",12,6,0.193);           
+                   mix.Component("H",1,1,0.024);           
+                   mix.Component("AL",27,13,0.143);           
+                   mix.Component("Cu",63.5,29,0.106);           
+                   mix.Component("F",19.,9,0.254);           
+                   mix.Component("Na",23.,11,0.015);           
+                   mix.Component("Ca",40.1,20,0.017);           
+                   mix.par("dens")=1.755;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
              /// Component AL	a=27	z=13	w=2.        
              /// Component O	a=16	z=8	w=3.        
              /// Mixture Alumina dens=3.90        
@@ -818,34 +905,17 @@
                    _material = mix;           
                    _material.lock();           
              }        
-             /// Component Si	a=28.08	z=14	w=0.6*1*28./60.        
-             /// Component O	a=16	z=8	w=0.6*2*16./60.        
-             /// Component C	a=12	z=6	w=0.4*8*12./174.        
-             /// Component H	a=1	z=1	w=0.4*14*1./174.        
-             /// Component O	a=16	z=8	w=0.4*4*16./174.        
+             /// Component Si	a=28.08	z=14	w=0.281        
+             /// Component O	a=16	z=8	w=0.467        
+             /// Component C	a=12	z=6	w=0.220        
+             /// Component H	a=1	z=1	w=0.032        
              /// Mixture FR4 dens=1.80        
              {  AgMaterial &mix = AgMaterial::Get("Fr4");           
-                   mix.Component("Si",28.08,14,0.6*1*28./60.);           
-                   mix.Component("O",16,8,0.6*2*16./60.);           
-                   mix.Component("C",12,6,0.4*8*12./174.);           
-                   mix.Component("H",1,1,0.4*14*1./174.);           
-                   mix.Component("O",16,8,0.4*4*16./174.);           
+                   mix.Component("Si",28.08,14,0.281);           
+                   mix.Component("O",16,8,0.467);           
+                   mix.Component("C",12,6,0.220);           
+                   mix.Component("H",1,1,0.032);           
                    mix.par("dens")=1.80;           
-                   mix.lock();           
-                   _material = mix;           
-                   _material.lock();           
-             }        
-             /// Component CU	a=63.54	z=29	w=0.586        
-             /// Component C	a=12.01	z=6	w=0.259        
-             /// Component O	a=15.999	z=8	w=0.138        
-             /// Component H	a=1.00794	z=1	w=0.017        
-             /// Mixture badFgtCables dens=2.68        
-             {  AgMaterial &mix = AgMaterial::Get("Badfgtcables");           
-                   mix.Component("CU",63.54,29,0.586);           
-                   mix.Component("C",12.01,6,0.259);           
-                   mix.Component("O",15.999,8,0.138);           
-                   mix.Component("H",1.00794,1,0.017);           
-                   mix.par("dens")=2.68;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           
@@ -859,6 +929,8 @@
              lengthz = 460.;        
              sina = sin( idsg.angflat * degrad );        
              cosa = cos( idsg.angflat * degrad );        
+             rrail=41.5;        
+             dphihv=0.79;        
              _create = AgCreate("IDSM");        
              {           
                    AgShape myshape; // undefined shape           
