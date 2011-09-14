@@ -59,7 +59,7 @@
       STRUCTURE FGGG { FgstConfig}
       STRUCTURE FGST { config,startZ,diskStepZ,int ndisk,int nQuad}
       FILL FGGG		! FGT Geometry Control Structure
-      FgstConfig = 1.0 ! selection of no. of disks and quadrants
+      FgstConfig = 2.0 ! selection of no. of disks and quadrants
       ENDFILL
       FILL FGST		! FGT Geometry with 6 full disks
       config = 1.0 ! versioning of the FGST geometry data
@@ -72,8 +72,8 @@
       config = 2.0 ! versioning of the FGST geometry data
       startZ = 70. !  position of sensitive volume of the 1st disk
       diskStepZ = 10. !  disk separation along Z
-      ndisk = 1 ! number of disks
-      nQuad = 1 ! number quadrants in a disks
+      ndisk = 6 ! number of disks
+      nQuad = 2 ! number quadrants in a disks
       ENDFILL
       COMPONENT Si A=28.08 Z=14 W=0.281
       COMPONENT O A=16 Z=8 W=0.467
@@ -177,7 +177,7 @@
       SHAPE tube rmin=diskInR rmax=diskOutR dz=diskLenZ/2.0
       DO quad = 1, FGST_nQuad
       CREATE FGTQ
-      POSITION FGTQ z=0. alphaz=(1-quad)*90. 
+      POSITION FGTQ z=0. alphaz=(1-quad)*90.*FGST_config 
       END DO
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- FGTQ
