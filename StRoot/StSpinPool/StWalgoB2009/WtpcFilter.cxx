@@ -1,4 +1,4 @@
-// $Id: WtpcFilter.cxx,v 1.2 2010/01/21 00:15:25 balewski Exp $
+// $Id: WtpcFilter.cxx,v 1.3 2011/09/14 14:23:21 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -48,6 +48,7 @@ WtpcFilter::init(const char *core, int sec, TObjArray *HListX) {
 //--------------------------------------
 bool
 WtpcFilter::accept( const StMuTrack  *prTr){
+
   hA[0]->Fill("inp",1.);
 
   hA[2]->Fill(prTr->nHitsFit());
@@ -147,6 +148,6 @@ WtpcFilter::initHistos() {
   }
   
   //  HList->ls();
-  //  LOG_INFO<<Form("TpcFilter-%s::initHistos done",name.Data())<<endm;
+  //LOG_INFO<<Form("TpcFilter-%s::initHistos done",name.Data())<<endm;
 
 }

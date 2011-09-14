@@ -19,7 +19,7 @@ St2009ZMaker::initHistos(){
   memset(hA,0,sizeof(hA));
   TList *Lx;  TLine *ln;
   TH1 *h; float yMax=1e3;
-  char txt[1000];
+  char txt[1000], txt0[100];;
   int nCase=16;
 
   hA[0]=h=new TH1F(core+"EventType",core+" event type",nCase,0,nCase);
@@ -103,6 +103,22 @@ St2009ZMaker::initHistos(){
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
   hA[34]=h=new TH2F(core+"Ene_Deta","final Z: cluster energy vs. detector eta; barrel eta bin; 2x2 Energy (GeV)",40,0,40,50,0,100);
+
+  //for stack plots
+  char tt2[][200]={"max 2x2","track matched","2x2 / 4x4","no near ET","no away ET"};
+  for(int i=0;i<5;i++){
+    //opposite sign pairs
+    sprintf(txt,"Unlike Charge pairs, cut=%s; Invariant Mass (GeV/c^2)",tt2[i]);
+    sprintf(txt0,"%sZmassUnlike%d",core.Data(),i);
+    hA[40+i]=h=new TH1F(txt0,txt, 100,0,200);   h->SetFillColor(kYellow);
+    //like sign pairs
+    sprintf(txt,"Like Charge pairs, cut=%s; Invariant Mass (GeV/c^{2})",tt2[i]);
+    sprintf(txt0,"%sZmassLike%d",core.Data(),i);
+    hA[50+i]=h=new TH1F(txt0,txt, 100,0,200);   h->SetFillColor(kYellow);
+  }
+  
+  hA[60]=h=new TH2F(core+"ZmassUnlike_zdc","Unlike Charge pairs vs ZDC coinc. rate; ZDC coincidence rate; Invariant Mass (GeV/c^2)",100,0,200000,100,0,200);
+  hA[61]=h=new TH2F(core+"ZmassLike_zdc","Like Charge pairs vs ZDC coinc. rate; ZDC coincidence rate; Invariant Mass (GeV/c^2)",100,0,200000,100,0,200);
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {

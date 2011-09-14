@@ -1,4 +1,4 @@
-// $Id: St2009WlumiMaker.cxx,v 1.2 2010/12/02 18:31:43 rcorliss Exp $
+// $Id: St2009WlumiMaker.cxx,v 1.3 2011/09/14 14:23:21 stevens4 Exp $
 //
 //*-- Author : Ross Corliss, MIT
 
@@ -177,18 +177,21 @@ St2009WlumiMaker::sortTrigger(){
     if (wMK->passes_L0())
       {
 	nBHT3_software_L0++;
-	  hA[1]->Fill(weve->bx7);
+	//hA[1]->Fill(weve->bx7);
 	//printf("passes_L0\n");
 	for (int i=0;i<16;i++)
 	  {
+	    //fill histo for awayside sum
+	    hA[90+i]->Fill(weve->trigAwaySum[i]);
+ 
 	    //printf("AwaySum[%d]=%d\n",i,weve->trigAwaySum[i]);
-	  if (weve->trigAwaySum[i]>thresh[i]) //for bg test
-	    {
-	      //printf("Passes coin(%d)!\n",i);
-	      nBHT3[i]++;
-	      //printf("Passes coin(%d)(%d)\n",i,nBHT3[i]);
-	      nBx[i][weve->bx7]++;
-	    }
+	    if (weve->trigAwaySum[i]>=thresh[i]) //for bg test
+	      {
+		//printf("Passes coin(%d)!\n",i);
+		nBHT3[i]++;
+		//printf("Passes coin(%d)(%d)\n",i,nBHT3[i]);
+		nBx[i][weve->bx7]++;
+	      }
 	  }
       }
   }
@@ -214,6 +217,9 @@ St2009WlumiMaker::getAbortGapCounts(int angle, int *n1, int* n2){
 }
 
 // $Log: St2009WlumiMaker.cxx,v $
+// Revision 1.3  2011/09/14 14:23:21  stevens4
+// update used for cross section PRD paper
+//
 // Revision 1.2  2010/12/02 18:31:43  rcorliss
 // updated lumi code to match the starnote version
 //

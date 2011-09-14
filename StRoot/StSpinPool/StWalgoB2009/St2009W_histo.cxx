@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.19 2010/11/09 23:00:50 balewski Exp $
+// $Id: St2009W_histo.cxx,v 1.20 2011/09/14 14:23:21 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -71,8 +71,8 @@ St2009WMaker::initHistos(){
   hA[20]=h=new TH1F("muStatTrk","W-algo:  track  count; cases",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kGreen); h->SetLineWidth(2);
-  char keyT[][200]={"101","pt1","nHit","Hfrac","Rin","Rout","ptOK","@B","CL","fr24",
-		    "#Delta R","noNear","noAway","goldW"};
+  char keyT[][200]={"101","pt1","nHit","Hfrac","Rin","Rout","ptOK","@B","CL","#Delta R","fr24",
+		    "noNear","noAway","goldW"};
 	     
   for(int i=0;i<14;i++) h->Fill(keyT[i],0.); // preset the order of keys
 
@@ -146,6 +146,8 @@ St2009WMaker::initHistos(){
 
   // .... track-EMC distance cuts
   hA[43]=h=new TH2F("muBdist1","3D Distance(track-cluster) vs. 2x2 E;2x2 cluster E (GeV); | distance | (cm)",50,0,80,50,0,25);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,par_delR3D,1.e6,par_delR3D);  ln->SetLineColor(kRed);  Lx->Add(ln);
   hA[44]=h=new TH2F("muBdist2","#Delta Z   (track-cluster) vs.Z-clust; Z-cluster (cm); #Delta Z (cm)",100,-300,300,40,-20,20);
   hA[45]=h=new TH2F("muBdist3","R#Delta #phi   (track-cluster) vs. 2x2 E;2x2 cluster E (GeV); R#Delta #phi (cm)",50,0,80,80,-20,20);
   hA[46]=h=new TH1F("muBdist4","3D Distance(track-cluster) vs. 2x2 E;| 3D distance |   (cm)",100,0,50);
@@ -221,14 +223,14 @@ St2009WMaker::initHistos(){
   // free 100-109
 
   //..... series of electron ET plots after succesive cuts
-  char tt2[][200]={"max 2x2","track matched","no near ET","no away ET"};
-  for(int i=0;i<4;i++){
+  char tt2[][200]={"max 2x2","track matched","2x2 / 4x4","no near ET","no away ET"};
+  for(int i=0;i<5;i++){
     sprintf(txt,"electron candidate, cut=%s; 2x2 ET (GeV)",tt2[i]);
     sprintf(txt0,"muETlive%d",i);
     hA[110+i]=h=new TH1F(txt0,txt, 100,0,100);
   }
   
-  //free 114-131
+  //free 115-131
 
   hA[117]=h=new TH2F("mujetQAeta_phi","Input Jet phi vs eta ;  eta ; phi ",50,-3,3,63,-PI,PI);
   hA[118]=h=new TH1F("mujetQApt","Input Jet pt; pt;",100,0,100);
@@ -271,7 +273,68 @@ St2009WMaker::initHistos(){
   hA[184+6] = new TH1F("pos_muclustpTbal_back","pos_muclustpTbal_back",100,0,100);
   hA[184+5] = new TH1F("neg_muclustpTbal_back","neg_muclustpTbal_back",100,0,100);
 
+  hA[190] = new TH1F("muZvReweight","Reweight Z vertex to match data",100,-200,200);
+
+  //algo efficiency ET dependence
+  hA[191]=h=new TH2F("muBclET24R_ET","ratio (2x2/4x4) cluster ET vs 2x2 cluster ET ; 2x2 cluster ET (GeV); fraction: cluster ET 2x2/ 4x4 ET",100,0,100,100,0,1.2);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,par_clustFrac24,1.e6,par_clustFrac24);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  hA[192]=h=new TH2F("muBclEjetE2D_ET","ratio (2x2/nearCone) ET vs. 2x2 cluster ET; 2x2 cluster ET (GeV); ET(cone-2x2) (GeV)",100,0,100,100,0,1.2);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,par_nearTotEtFrac,1.e6,par_nearTotEtFrac);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
+  //eta dependent signal and background
+  hA[200+2] = new TH2F("pos_muclustpTbal_wE_etaBin","pos_muclustpTbal_wE_etaBin",100,-1,1,100,0,100);
+  hA[200+1] = new TH2F("neg_muclustpTbal_wE_etaBin","neg_muclustpTbal_wE_etaBin",100,-1,1,100,0,100);
+  hA[200+4] = new TH2F("pos_muclustpTbal_noE_etaBin","pos_muclustpTbal_noE_etaBin",100,-1,1,100,0,100);
+  hA[200+3] = new TH2F("neg_muclustpTbal_noE_etaBin","neg_muclustpTbal_noE_etaBin",100,-1,1,100,0,100);
+  hA[200+6] = new TH2F("pos_muclustpTbal_back_etaBin","pos_muclustpTbal_back_etaBin",100,-1,1,100,0,100);
+  hA[200+5] = new TH2F("neg_muclustpTbal_back_etaBin","neg_muclustpTbal_back_etaBin",100,-1,1,100,0,100);
+
+  //eta dependent histos for background subtraction systematic
+  for (int i=0; i<=20; i++) {
+    sprintf(str,"neg_failsPtBal_sPtBal_bin_%d",i);
+    hA[210+i] = new TH2F(str,str,100,-1,1,100,0,100);
+  }
+  for (int i=0; i<=20; i++) {
+    sprintf(str,"pos_failsPtBal_sPtBal_bin_%d",i);
+    hA[231+i] = new TH2F(str,str,100,-1,1,100,0,100);
+  }
+
+  //some golden W plots for comparison to embedding
+  hA[260]=h=new TH2F("muWbX7","L2W-ET events vs. bXing; bXing= raw bx7",100,0,200000,128,-0.5,127.5);
+  hA[261]=h=new TH2F("muWNV","#  vertices per event, rank>0 & Z in range; # of vertices",100,0,200000,10,0,10);
+
+  hA[262]=h=new TH2F("muWTrNfit","prim tr nFitP; nFitPoints",100,0,200000,50,0,50);
+  hA[263]=h=new TH2F("muWTrFitFrac","prim tr nFitFrac; nFit/nPoss ",100,0,200000,50,0,1.1);
   
+  hA[264]=h=new TH2F("muWTrRxyOut","prim tr last hit filter; Rxy (cm)",100,0,200000,60,100,220.);
+  hA[265]=h=new TH2F("muWTrRxyIn","prim tr 1st hit  filter; Rxy (cm)",100,0,200000,60,50,170.);
+  hA[266]=h=new TH2F("muWTrPt1","primary track PT ; track PT (GeV/c)",100,0,200000,160,0,80);
+  hA[267]=h=new TH2F("muWTrch2","track glob chi2/dof X-Y",100,0,200000,100,0,5);
+  hA[268]=h=new TH2F("muWTrInvPt","primary track 1/PT",100,0,200000,100,0,0.1);
+  hA[269]=h=new TH2F("muWglDcaGold","Track glob vertex abs(DCA), final W; |DCA| (cm)",100,0,200000,100,0,5);
+  hA[270]=h=new TH2F("muWglsDcaGold","Track glob signed DCA, final W; sDCA (cm)",100,0,200000,100,-5,5);
+  hA[271]=h=new TH2F("muWglDcaZGold","Track glob Z DCA, final W; DCAZ (cm)",100,0,200000,100,-5,5);
+  hA[272]=h=new TH2F("muWglPt1TrVert","Track global Pt, final W from one track vertices",100,0,200000,160,0,80);
+  hA[273]=h=new TH2F("muWglInvPt1TrVert","Track global 1/Pt, final W from one track vertices",100,0,200000,100,0,0.1);
+
+  //2 eta bins for x-section ratio
+  hA[280+2] = new TH2F("pos_muclustpTbal_wE_etaBin2","pos_muclustpTbal_wE_etaBin2",100,0,1,100,0,100);
+  hA[280+1] = new TH2F("neg_muclustpTbal_wE_etaBin2","neg_muclustpTbal_wE_etaBin2",100,0,1,100,0,100);
+  hA[280+4] = new TH2F("pos_muclustpTbal_noE_etaBin2","pos_muclustpTbal_noE_etaBin2",100,0,1,100,0,100);
+  hA[280+3] = new TH2F("neg_muclustpTbal_noE_etaBin2","neg_muclustpTbal_noE_etaBin2",100,0,1,100,0,100);
+  hA[280+6] = new TH2F("pos_muclustpTbal_back_etaBin2","pos_muclustpTbal_back_etaBin2",100,0,1,100,0,100);
+  hA[280+5] = new TH2F("neg_muclustpTbal_back_etaBin2","neg_muclustpTbal_back_etaBin2",100,0,1,100,0,100);
+  //eta dependent histos for background subtraction systematic
+  for (int i=0; i<=20; i++) {
+    sprintf(str,"neg_failsPtBal_sPtBal_bin_%d_etaBin2",i);
+    hA[290+i] = new TH2F(str,str,100,0,1,100,0,100);
+  }
+  for (int i=0; i<=20; i++) {
+    sprintf(str,"pos_failsPtBal_sPtBal_bin_%d_etaBin2",i);
+    hA[311+i] = new TH2F(str,str,100,0,1,100,0,100);
+  }
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
@@ -285,6 +348,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.20  2011/09/14 14:23:21  stevens4
+// update used for cross section PRD paper
+//
 // Revision 1.19  2010/11/09 23:00:50  balewski
 // added chi2/dof for East & West TPC separately
 //

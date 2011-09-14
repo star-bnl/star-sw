@@ -1,4 +1,4 @@
-// $Id: Wevent2009.h,v 1.7 2010/12/02 18:31:43 rcorliss Exp $
+// $Id: Wevent2009.h,v 1.8 2011/09/14 14:23:21 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -192,7 +192,7 @@ class Wevent2009 {
 
   int id; // eventID
   int bx7, bx48; // raw from muDst
-  bool zTag;
+  bool zTag,wTag;
   vector < WeveVertex> vertex;
   WeveBEMC bemc;
   WeveETOW etow;  
@@ -205,6 +205,7 @@ class Wevent2009 {
     l2bitET=l2bitRnd=0;
     bx7=bx48=-1;
     zTag=false;
+    wTag=false;
     vertex.clear();
     bemc.clear();
     etow.clear(); 
@@ -226,6 +227,9 @@ class Wevent2009 {
 
 
 // $Log: Wevent2009.h,v $
+// Revision 1.8  2011/09/14 14:23:21  stevens4
+// update used for cross section PRD paper
+//
 // Revision 1.7  2010/12/02 18:31:43  rcorliss
 // updated lumi code to match the starnote version
 //

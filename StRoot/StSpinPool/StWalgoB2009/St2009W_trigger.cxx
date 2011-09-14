@@ -1,8 +1,9 @@
-// $Id: St2009W_trigger.cxx,v 1.5 2010/12/02 18:31:43 rcorliss Exp $
+// $Id: St2009W_trigger.cxx,v 1.6 2011/09/14 14:23:21 stevens4 Exp $
 //
 //*-- Author : Ross Corliss, MIT
 
 #include "St2009WMaker.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 
 //________________________________________________
@@ -32,17 +33,50 @@ St2009WMaker::passes_L2(){
     E_T>13.0GeV.  These thresholds are the defaults, but can be set
     from the macro if a different value is needed.
   */
-  for (int i=0;i<mxBtow;i++)
-    if (wEve.bemc.statTile[0][i]==0)//zero means good
-      if (wEve.bemc.eneTile[0][i]>par_l2emulSeedThresh){
-	int ieta=-1; int iphi=-1;
-	float etaF=positionBtow[i].Eta();
-	float phiF=positionBtow[i].Phi();
-	L2algoEtaPhi2IJ(etaF, phiF,ieta,iphi);
-	WeveCluster c=maxBtow2x2(ieta,iphi,0);
-	if (c.ET>par_l2emulClusterThresh) return true;
+  
+  for (int i=0;i<mxBtow;i++) //loop all towers
+    if (wEve.bemc.statTile[0][i]==0) {//zero means good
+      float adc = wEve.bemc.adcTile[0][i];
+      float ET = adc*60./4096.; //ideal gains
+      if (ET>par_l2emulSeedThresh) { // pass single tower thresh
+	
+	int iEta,iPhi; //get eta and phi bins for tower
+	if( L2algoEtaPhi2IJ(positionBtow[i].Eta(),positionBtow[i].Phi(),iEta,iPhi)) continue;
+	
+	float maxET=0;
+	
+	//sum 2x2 cluster with ideal gains
+	int I0=iEta-1; int J0=iPhi-1; 
+	for(int I=I0;I<=I0+1;I++){ //loop eta
+	  for(int J=J0;J<=J0+1;J++) { //loop phi
+	    WeveCluster CL;CL.iEta=I;CL.iPhi=J; //tmp clus
+	    for(int i=I;i<I+2;i++){//trim in eta-direction
+	      if(i<0) continue;
+	      if(i>=mxBTetaBin) continue;
+	      for(int j=J;j<J+2;j++) {// wrap up in phi
+		int jj=(j+mxBTphiBin)%mxBTphiBin;// keep it pos
+		
+		int softID = mapBtowIJ2ID[ i+ jj*mxBTetaBin];
+		float adc = wEve.bemc.adcTile[kBTow][softID-1];
+		if(adc<=0) continue; // skip towers w/o energy
+		float ET = adc*60./4096.;
+		CL.nTower++;
+		CL.ET+=ET;
+		CL.adcSum+=adc;
+	      }
+	    }
+	    
+	    if(maxET>CL.ET) continue;
+	    maxET=CL.ET;
+	  }
+	}
+	
+	//passes L2 theshold
+	if(maxET>par_l2emulClusterThresh) return true;
       }
+    }
   return false;
+
 }
 
  void 
@@ -71,6 +105,9 @@ St2009WMaker::passes_L2(){
  }
 
 //$Log: St2009W_trigger.cxx,v $
+//Revision 1.6  2011/09/14 14:23:21  stevens4
+//update used for cross section PRD paper
+//
 //Revision 1.5  2010/12/02 18:31:43  rcorliss
 //updated lumi code to match the starnote version
 //

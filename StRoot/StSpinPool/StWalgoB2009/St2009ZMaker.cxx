@@ -1,4 +1,4 @@
-// $Id: St2009ZMaker.cxx,v 1.10 2010/05/01 01:31:44 balewski Exp $
+// $Id: St2009ZMaker.cxx,v 1.11 2011/09/14 14:23:21 stevens4 Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -7,6 +7,11 @@
 #include "St2009WMaker.h"
 #include "WeventDisplay.h"
 #include "St2009ZMaker.h"
+
+//muDst needed for zdcRate
+#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
+#include <StMuDSTMaker/COMMON/StMuDst.h>
+#include <StMuDSTMaker/COMMON/StMuEvent.h>
 
 ClassImp(St2009ZMaker)
 
@@ -73,6 +78,7 @@ void
 St2009ZMaker::find_Z_boson(){
   const float PI=TMath::Pi();
   Wevent2009 &wEve=wMK->wEve;
+  float zdcRate=wMK->mMuDstMaker->muDst()->event()->runInfo().zdcCoincidenceRate();
   // printf("========= find_Z_boson() \n");
   
   hA[31]->Fill(wEve.vertex.size());
@@ -84,7 +90,64 @@ St2009ZMaker::find_Z_boson(){
     WeveVertex &V=wEve.vertex[iv];
     hA[32]->Fill(V.eleTrack.size());
     if(V.eleTrack.size()<2) continue;
-    hA[0]->Fill("TT",1.); // at least 2 isolated tracks exist
+    hA[0]->Fill("TT",1.); // at least 2 tracks exist
+
+    //fill stack plots before doing full Z algo below
+    for(uint itStack=0;itStack<V.eleTrack.size()-1;itStack++) {
+      WeveEleTrack &stackT1=V.eleTrack[itStack]; //get first track
+      
+      //make plot of mached clusters
+      if(stackT1.pointTower.id==0) continue;
+      for (uint itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
+	WeveEleTrack &stackT2=V.eleTrack[itStack2]; //get second track
+	if(stackT2.pointTower.id==0) continue;
+	// invariant mass of "matched clusters"
+	if(stackT1.prMuTrack->charge()*stackT2.prMuTrack->charge()<0) hA[40]->Fill(calcMass(stackT1,stackT2)); //opposite-sign 
+	else hA[50]->Fill(calcMass(stackT1,stackT2));
+      }
+    
+      //make plot of clusters passing deltaR cut
+      if(stackT1.cluster.ET<par_clusterEtZ) continue;
+      TVector3 stackD1=stackT1.pointTower.R-stackT1.cluster.position;
+      if(stackD1.Mag()>par_delR3DZ) continue;
+      for (uint itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
+	WeveEleTrack &stackT2=V.eleTrack[itStack2]; //get second track
+	if(stackT2.cluster.ET<par_clusterEtZ) continue;
+	TVector3 stackD2=stackT2.pointTower.R-stackT2.cluster.position;
+	if(stackD2.Mag()>par_delR3DZ) continue;
+	// invariant mass of clusters passing deltaR cut
+	if(stackT1.prMuTrack->charge()*stackT2.prMuTrack->charge()<0) hA[41]->Fill(calcMass(stackT1,stackT2)); //opposite-sign 
+	else hA[51]->Fill(calcMass(stackT1,stackT2));
+      }
+
+      //make plot of clusters passing 2x2/4x4 cut
+      if(stackT1.cluster.ET/stackT1.cl4x4.ET < par_clustFrac24Z) continue;
+      for (uint itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
+	WeveEleTrack &stackT2=V.eleTrack[itStack2]; //get second track
+	if(stackT2.cluster.ET<par_clusterEtZ) continue;
+	TVector3 stackD2=stackT2.pointTower.R-stackT2.cluster.position;
+	if(stackD2.Mag()>par_delR3DZ) continue;
+	if(stackT2.cluster.ET/stackT2.cl4x4.ET < par_clustFrac24Z) continue;
+	// invariant mass of clusters passing 2x2/4x4 cut
+	if(stackT1.prMuTrack->charge()*stackT2.prMuTrack->charge()<0) hA[42]->Fill(calcMass(stackT1,stackT2)); //opposite-sign 
+	else hA[52]->Fill(calcMass(stackT1,stackT2));
+      }
+
+      //make plot of clusters passing near cone cut
+      if(stackT1.cluster.ET/stackT1.nearTotET < par_nearTotEtFracZ) continue;
+      for (uint itStack2=itStack+1;itStack2<V.eleTrack.size();itStack2++) {
+	WeveEleTrack &stackT2=V.eleTrack[itStack2]; //get second track
+	if(stackT2.cluster.ET<par_clusterEtZ) continue;
+	if(stackT2.cluster.ET/stackT2.cl4x4.ET < par_clustFrac24Z) continue;
+	TVector3 stackD2=stackT2.pointTower.R-stackT2.cluster.position;
+	if(stackD2.Mag()>par_delR3DZ) continue;
+	if(stackT2.cluster.ET/stackT2.nearTotET < par_nearTotEtFracZ) continue;
+	// invariant mass of clusters passing near cone cut
+	if(stackT1.prMuTrack->charge()*stackT2.prMuTrack->charge()<0) hA[43]->Fill(calcMass(stackT1,stackT2)); //opposite-sign 
+	else hA[53]->Fill(calcMass(stackT1,stackT2));
+      }
+
+    }
 
     //only one Z can come from a vertex, and it should be the highest-energy object
     //hence, the two highest-et clusters should correspond to the z.  Pick those 
@@ -149,6 +212,8 @@ St2009ZMaker::find_Z_boson(){
 	int Q1Q2=T1.prMuTrack->charge()*T2.prMuTrack->charge();
 	if (Q1Q2==1) { //..  same sign , can't be Z-> e+ e-
 	  hA[14]->Fill(mass);
+	  hA[54]->Fill(calcMass(T1,T2));
+	  hA[61]->Fill(zdcRate,calcMass(T1,T2));
 	  continue;
 	}
 
@@ -159,6 +224,9 @@ St2009ZMaker::find_Z_boson(){
 	hA[33]->Fill(T2.cluster.ET,T2.prMuTrack->charge()/T2.prMuTrack->pt()); 
 	hA[34]->Fill(T1.pointTower.iEta ,T1.cluster.energy);
 	hA[34]->Fill(T2.pointTower.iEta ,T2.cluster.energy);
+	hA[44]->Fill(calcMass(T1,T2));
+	hA[60]->Fill(zdcRate,calcMass(T1,T2));
+
 #if 0
 	printf("RCC:  Found Z w/ invmass=%f\n",mass);
         printJan(&T1);
@@ -224,7 +292,26 @@ St2009ZMaker::find_Z_boson(){
 }
 
 
+//_____________________________________________________________________________
+//
+float
+St2009ZMaker::calcMass(WeveEleTrack T1, WeveEleTrack T2){
+  float e1=T1.cluster.energy;
+  float e2=T2.cluster.energy;
+  TVector3 p1=T1.primP; p1.SetMag(e1);//cluster.position;
+  TVector3 p2=T2.primP; p2.SetMag(e2);//cluster.position;
+  TVector3 psum=p1+p2;
+  float mass2=(e1+e2)*(e1+e2)-(psum.Dot(psum));
+  if(mass2<1.) return 0; 
+  float mass=sqrt(mass2);
+  
+  return mass;
+}
+
 // $Log: St2009ZMaker.cxx,v $
+// Revision 1.11  2011/09/14 14:23:21  stevens4
+// update used for cross section PRD paper
+//
 // Revision 1.10  2010/05/01 01:31:44  balewski
 // added W->JJ code & JES calibration
 //
