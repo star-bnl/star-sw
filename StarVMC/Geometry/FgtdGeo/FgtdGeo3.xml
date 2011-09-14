@@ -117,7 +117,7 @@
    ============================================================
   -->
 <Fill name="FGGG" comment="FGT Geometry Control Structure">
-   <var name="FgstConfig" value="1.0" comment="selection of no. of disks and quadrants " />
+   <var name="FgstConfig" value="2.0" comment="selection of no. of disks and quadrants " />
 </Fill>
 
 
@@ -141,8 +141,8 @@
    <var name="config" value="2.0" comment="versioning of the FGST geometry data" />
    <var name="startZ" value="70." comment=" position of sensitive volume of the 1st disk"  />
    <var name="diskStepZ" value="10." comment=" disk separation along Z"  />
-   <var name="ndisk"   value="1"    comment="number of disks" />
-   <var name="nQuad"   value="1"    comment="number quadrants in a disks" />
+   <var name="ndisk"   value="6"    comment="number of disks" />
+   <var name="nQuad"   value="2"    comment="number quadrants in a disks" />
     
 </Fill>
 
@@ -308,7 +308,7 @@ flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
     <Do var="quad" from="1" to="FGST_nQuad"  >
        <Create    block="FGTQ"  />
        <Placement block="FGTQ" z="0." >
-           <Rotation alphaz="(1-quad)*90."  />
+           <Rotation alphaz="(1-quad)*90.*FGST_config"  />
        </Placement>
      </Do>
   
