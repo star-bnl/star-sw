@@ -18,6 +18,9 @@ namespace IDSMGEO1 // $NMSPC
       Float_t dangres; 
       Float_t dxres; 
       Float_t dyres; 
+      Float_t fgtstartz; 
+      Float_t fgtdiskstepz; 
+      Int_t fgtndisk; 
       Idsg_t() : AgStructure("Idsg_t","User-defined AgML structure") 
       { 
          version=0; 
@@ -29,6 +32,9 @@ namespace IDSMGEO1 // $NMSPC
          dangres=0; 
          dxres=0; 
          dyres=0; 
+         fgtstartz=0; 
+         fgtdiskstepz=0; 
+         fgtndisk=0; 
          _index=0; 
       } 
       ~ Idsg_t(){ /* nada */ }; 
@@ -183,17 +189,29 @@ namespace IDSMGEO1 // $NMSPC
       virtual void End(){ }; 
       ClassDef(TPRT,1); 
    }; 
-   // ---------------------------------------------------------------------- FGCB -- 
-   ///@defgroup FGCB_doc 
-   ///@class FGCB 
-   ///@brief FGT cables mixture  
-   class FGCB : public AgBlock 
+   // ---------------------------------------------------------------------- FGRL -- 
+   ///@defgroup FGRL_doc 
+   ///@class FGRL 
+   ///@brief FGT rail  
+   class FGRL : public AgBlock 
    {  public: 
-      FGCB() : AgBlock("FGCB","FGT cables mixture "){ }; 
-      ~FGCB(){ }; 
+      FGRL() : AgBlock("FGRL","FGT rail "){ }; 
+      ~FGRL(){ }; 
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
-      ClassDef(FGCB,1); 
+      ClassDef(FGRL,1); 
+   }; 
+   // ---------------------------------------------------------------------- FGHV -- 
+   ///@defgroup FGHV_doc 
+   ///@class FGHV 
+   ///@brief FGT cables mixture  
+   class FGHV : public AgBlock 
+   {  public: 
+      FGHV() : AgBlock("FGHV","FGT cables mixture "){ }; 
+      ~FGHV(){ }; 
+      virtual void Block( AgCreate c ); 
+      virtual void End(){ }; 
+      ClassDef(FGHV,1); 
    }; 
    /// \class IdsmGeo1 
    /// \brief  simplified  beam support cone for 2012  
