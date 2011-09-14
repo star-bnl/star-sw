@@ -2,14 +2,17 @@
       Created   8/30/2011
       Author Jan Balewski MIT
       +CDE,agecom,gcunit,gconst.
-      CONTENT IDSM,TPRR,TPRT,FGCB,
-      SUCA,  SUCB, SUCC, SUCD, SUCE, SUCF, SUCG
-      REAL inR, outR,lengthZ,     k,sinA, cosA, resR, angR,m,pm
+      CONTENT IDSM,TPRR,TPRT,
+      SUCA,  SUCB, SUCC, SUCD, SUCE, SUCF, SUCG,
+      FGRL,FGHV
+      REAL inR, outR,lengthZ,     k,sinA, cosA, resR, angRes,m,pm, angRail, rRail,
+             dPhiHV
 
-      STRUCTURE IDSG { version,rF,angFlat,r1Res,r2Res,rrRes,dangRes,dxRes,dyRes}
+      STRUCTURE IDSG { version,rF,angFlat,r1Res,r2Res,rrRes,dangRes,dxRes,dyRes,fgtStartZ,
+            fgtDiskStepZ,int fgtNdisk}
       STRUCTURE IDSA { version,x,y,z,thetax,thetay,thetaz,phix,phiy,phiz}
       FILL IDSG		! IDS Geometry data,46.1cm=inner radii of IFC
-      version = 1.0 ! Versioning of the IDS geometry
+      version = 2.0 ! Versioning of the IDS geometry
       rF = 8.0 !  radii of inner volume boundary
       angFlat = 106. !  angle (deg) for center of flat
       rrRes = 43. !  radial distance of  for TPC resistor tubes
@@ -18,6 +21,9 @@
       dangRes = 11.3 !  opening angle (deg) for TPC resistor tubes
       dxRes = 0.13 !  thicknessfor TPC resistor
       dyRes = 2. !  dy for TPC resistor
+      fgtStartZ = 70. !  position of sensitive volume of the 1st disk
+      fgtDiskStepZ = 10. !  disk separation along Z
+      fgtNdisk = 6 ! number of disks
       ENDFILL
       FILL IDSA		! Alignment of the IDSM geometry within the CAVE no FGT cables
       version = 2.0 ! Default alignment of IDSM at (0,0,0) with no rotation
@@ -32,7 +38,7 @@
       phiz =  0.0 ! align z`-axis  0 degrees in phi   wrt cave
       ENDFILL
       FILL IDSA		! Alignment of the IDSM geometry within the CAVE with cables
-      version = 2.0 ! Default alignment of IDSM at (0,0,0) with no rotation
+      version = 1.0 ! Default alignment of IDSM at (0,0,0) with no rotation
       x = 0.0 ! x-alignment
       y = 0.0 ! y-alignment
       z = 0.0 ! z-alignment
@@ -60,20 +66,30 @@
       COMPONENT V A=50.9 Z=23 W=0.004
       COMPONENT Mg A=24.3 Z=12 W=0.020
       MIXTURE SUCMix dens=3.4
+      COMPONENT O A=16 Z=8 W=0.032
+      COMPONENT C A=12 Z=6 W=0.471
+      COMPONENT H A=1 Z=1 W=0.011
+      COMPONENT Cl A=35.5 Z=17 W=0.014
+      COMPONENT AL A=27 Z=13 W=0.472
+      MIXTURE RailMix dens=3.384
+      COMPONENT Si A=28.08 Z=14 W=0.131
+      COMPONENT O A=16 Z=8 W=0.117
+      COMPONENT C A=12 Z=6 W=0.193
+      COMPONENT H A=1 Z=1 W=0.024
+      COMPONENT AL A=27 Z=13 W=0.143
+      COMPONENT Cu A=63.5 Z=29 W=0.106
+      COMPONENT F A=19. Z=9 W=0.254
+      COMPONENT Na A=23. Z=11 W=0.015
+      COMPONENT Ca A=40.1 Z=20 W=0.017
+      MIXTURE CableMix dens=1.755
       COMPONENT AL A=27 Z=13 W=2.
       COMPONENT O A=16 Z=8 W=3.
       MIXTURE Alumina dens=3.90
-      COMPONENT Si A=28.08 Z=14 W=0.6*1*28./60.
-      COMPONENT O A=16 Z=8 W=0.6*2*16./60.
-      COMPONENT C A=12 Z=6 W=0.4*8*12./174.
-      COMPONENT H A=1 Z=1 W=0.4*14*1./174.
-      COMPONENT O A=16 Z=8 W=0.4*4*16./174.
+      COMPONENT Si A=28.08 Z=14 W=0.281
+      COMPONENT O A=16 Z=8 W=0.467
+      COMPONENT C A=12 Z=6 W=0.220
+      COMPONENT H A=1 Z=1 W=0.032
       MIXTURE FR4 dens=1.80
-      COMPONENT CU A=63.54 Z=29 W=0.586
-      COMPONENT C A=12.01 Z=6 W=0.259
-      COMPONENT O A=15.999 Z=8 W=0.138
-      COMPONENT H A=1.00794 Z=1 W=0.017
-      MIXTURE badFgtCables dens=2.68
       use IDSG version=1.0
       use IDSA version=1.0
       inR     = IDSG_rF
@@ -81,12 +97,14 @@
       lengthZ = 460.
       sinA = sin( IDSG_angflat * degrad )
       cosA = cos( IDSG_angflat * degrad )
+      rRail=41.5
+      dPhiHV=0.79
       CREATE IDSM
       POSITION IDSM x=IDSA_x y=IDSA_y z=IDSA_z thetax=IDSA_thetax phix=IDSA_phix  _
 	thetay=IDSA_thetay phiy=IDSA_phiy thetaz=IDSA_thetaz phiz=IDSA_phiz 
       ! ---------------------------------------------------------------------------------- IDSM
       BLOCK IDSM   mother volume for beam support cone
-      ATTRIBUTE IDSM seen=0 colo=4
+      ATTRIBUTE IDSM seen=1 colo=4
       MATERIAL Air
       SHAPE tube rmin=inR rmax=outR dz=lengthZ/2.
       CREATE SUCA
@@ -111,20 +129,27 @@
       POSITION SUCG z=pm*225.4 
       END DO
       DO m = 0, 1
-      angR = IDSG_angFlat - IDSG_dangRes/2.
+      angRes = IDSG_angFlat - IDSG_dangRes/2.
       IF ( m.eq.1 ) THEN
-      angR = IDSG_angFlat+IDSG_dangRes/2.
+      angRes = IDSG_angFlat+IDSG_dangRes/2.
       ENDIF
       CREATE TPRT
-      POSITION TPRT x=IDSG_rrRes*cos(angR/180.*3.1416)  _
-	y=IDSG_rrRes*sin(angR/180.*3.1416) z=0 
+      POSITION TPRT x=IDSG_rrRes*cos(angRes/180.*3.1416)  _
+	y=IDSG_rrRes*sin(angRes/180.*3.1416) z=0 
       END DO
-      CREATE FGCB
-      POSITION FGCB z=lengthZ/2. alphaz=16 
-      CREATE FGCB
-      POSITION FGCB z=lengthZ/2. alphaz=180.+16 
       CREATE TPRR
       POSITION TPRR x=IDSG_rrRes*cosA y=IDSG_rrRes*sinA z=0 alphaz=IDSG_angFlat 
+      DO m = 0, 1
+      angRail=90./180.*3.1416
+      IF ( m.eq.1 ) THEN
+      angRail = angRail+3.1416
+      ENDIF
+      CREATE FGRL
+      POSITION FGRL x=rRail*cos(angRail) y=rRail*sin(angRail) z=146.57 
+      CREATE FGHV
+      POSITION FGHV x=rRail*cos(angRail+3.) y=rRail*sin(angRail+3.)  _
+	z=IDSG_fgtStartZ-IDSG_fgtDiskStepZ/.2 
+      END DO
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- SUCA
       BLOCK SUCA   central CFiber tube
@@ -183,12 +208,18 @@
       SHAPE tube rmin=IDSG_r1Res rmax=IDSG_r2Res,
             dz=lengthZ/2.
       ENDBLOCK
-      ! ---------------------------------------------------------------------------------- FGCB
-      BLOCK FGCB   FGT cables mixture
-      ATTRIBUTE FGCB seen=1 colo=1
-      MATERIAL badFgtCables
-      SHAPE tubs rmin=IDSG_rrRes-1. rmax=IDSG_rrRes+0.5,
-            phi1=-10. phi2=10. dz=lengthZ/4.
+      ! ---------------------------------------------------------------------------------- FGRL
+      BLOCK FGRL   FGT rail
+      ATTRIBUTE FGRL seen=1 colo=1
+      MATERIAL RailMix
+      SHAPE tube rmin=0.9 rmax=1.0 dz=165.6/2.
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- FGHV
+      BLOCK FGHV   FGT cables mixture
+      ATTRIBUTE FGHV seen=1 colo=1
+      MATERIAL CableMix
+      SHAPE tubs rmin=rRail-0.5 rmax=rRail+0.5,
+            phi1=-dPhiHV/2. phi2=dPhiHV dz=IDSG_fgtDiskStepZ
       ENDBLOCK
       <W> '===>> 	[End AgML Module IDSMGEO1]	 <<==='; (A32,/,/);
       END! Module IDSMGEO1
