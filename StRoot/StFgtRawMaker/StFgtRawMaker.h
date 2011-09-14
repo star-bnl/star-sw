@@ -48,7 +48,7 @@ class StFgtRawMaker : public StRTSBaseMaker
 
  private:
   Bool_t PrepareEnvironment();
-  //  ClassDef(StFgtRawMaker,1);
+  ClassDef(StFgtRawMaker,1);
 };
 
 #endif
