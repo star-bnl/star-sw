@@ -1,4 +1,4 @@
-//#define __KEEP_TPCDAQ_FCF__ /* remove St_tpcdaq_Maker and StRTSClientFCFMaker. not yet ready */
+#define __KEEP_TPCDAQ_FCF__ /* remove St_tpcdaq_Maker and StRTSClientFCFMaker. not yet ready */
 //#define __NoStrangeMuDst__
 //#define __NoDisplay__
 Bfc_st BFC[] = { // standard chains
