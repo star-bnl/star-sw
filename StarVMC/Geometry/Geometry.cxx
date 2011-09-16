@@ -107,15 +107,13 @@ void Geometry::ConstructGeometry( const Char_t *tag )
 
   // Tracking detectors
   geom.success_tpce = ConstructTpce( geom.tpceFlag, geom.tpceStat );
+
+  geom.success_svtt = ConstructSvtt( geom.svttFlag, geom.svttStat ); // SVT must preceed FTPC
+  geom.success_sisd = ConstructSisd( geom.sisdFlag, geom.sisdStat );
+
   geom.success_ftpc = ConstructFtpc( geom.ftpcFlag, geom.ftpcStat );
   geom.success_ftro = ConstructFtro( geom.ftroFlag, geom.ftroStat );
   geom.success_fgtd = ConstructFgtd( geom.fgtdFlag, geom.fgtdStat );
-
-
-  geom.success_svtt = ConstructSvtt( geom.svttFlag, geom.svttStat );
-  geom.success_sisd = ConstructSisd( geom.sisdFlag, geom.sisdStat );
-  //  ConstructSvtt( geom.svttFlag, geom.svttStat );
-  //  ConstructSisd("SISDof");
 		
   // Calorimetry
   geom.success_calb = ConstructCalb( geom.calbFlag, geom.calbStat );
@@ -423,7 +421,7 @@ Bool_t Geometry::ConstructVpdd( const Char_t *flag, Bool_t go )
     }
 
   AgStructure::AgDetpNew( vpddGeom.module, Form("Vertex Position Detector with configuration %s",flag));
-  AgStructure::AgDetpAdd( "Vpdv_t", "vpdconfig", (Float_t)vpddGeom.config );
+  AgStructure::AgDetpAdd( "Vpdv_t", "vpdconfig", (Int_t)vpddGeom.config );
 
   if ( go )
   if ( !CreateModule( vpddGeom.module ) )
@@ -1037,7 +1035,7 @@ Bool_t Geometry::PipeInit() // Does this break the config=-1 scheme?
   pipeGeom.select="PIPE00"; {
     pipeGeom.config=-1; 
     pipeGeom.flag=-1;
-    pipeGeom.module="PipeGeo0"; 
+    pipeGeom.module="PipeGeo00"; 
     pipeGeom.SetTitle("Simplest");
     pipeGeom.fill();
   }
@@ -1050,16 +1048,29 @@ Bool_t Geometry::PipeInit() // Does this break the config=-1 scheme?
     pipeGeom.SetTitle("Default Pipe");
     pipeGeom.fill();
   }
-  //replace [exe PIPE04;] with [ "The new pipe according to Kai"; PipeConfig   = 4;
-  //                             "pipe wrap only" ;               PipeFlag     = 0;]
-  pipeGeom.select="PIPE04"; pipeGeom.config=4; pipeGeom.flag=0; pipeGeom.fill();
-  //replace [exe PIPE14;] with [ "The new pipe according to Kai"; PipeConfig   = 4;
-  //                             "pipe wrap only" ;               PipeFlag     = 1;]
-  pipeGeom.select="PIPE14"; pipeGeom.config=4; pipeGeom.flag=1; pipeGeom.fill();
+
+  pipeGeom.select="PIPE04"; {
+    pipeGeom.config=4; 
+    pipeGeom.flag=0; 
+    pipeGeom.module="PipeGeo";
+    pipeGeom.fill();
+  }
+
+  pipeGeom.select="PIPE14"; {
+    pipeGeom.config=4; 
+    pipeGeom.flag=1;
+    pipeGeom.module="PipeGeo";
+    pipeGeom.fill();
+  }
 
 
   // Pipe ala UPGR16 geometry
-  pipeGeom.select="PIPE06"; pipeGeom.config=6; pipeGeom.flag=0; pipeGeom.fill();
+  pipeGeom.select="PIPE06"; {
+    pipeGeom.config=6; 
+    pipeGeom.flag=0; 
+    pipeGeom.module="PipeGeo";
+    pipeGeom.fill();
+  }
 
   return true;
 }
@@ -1117,20 +1128,55 @@ Bool_t Geometry::SisdInit()
 
 Bool_t Geometry::SvttInit()
 {
-  //replace [exe SVTTof;] with ["SVTT version"; SVTT=off; SvttConfig = -1;]
-  svttGeom.select="SVTTof"; svttGeom.config=-1; svttGeom.fill();
-  //replace [exe SVTT00;] with ["SVTT version"; SVTT=on;
-  //                             SvttConfig = 0; svtWater=off; nSvtVafer=7; nSvtLayer=6;]
-  svttGeom.select="SVTT00"; svttGeom.config=0; svttGeom.water=0; svttGeom.nwafer=7; svttGeom.nlayer=6; svttGeom.fill();
-  //replace [exe SVT100;] with ["SVTT version"; SVTT=on;
-  //                             SvttConfig = 0; svtWater=on; nSvtVafer=0; nSvtLayer=-3; svtWaferDim=0;]
-  svttGeom.select="SVTT100"; svttGeom.config=0; svttGeom.water=1; svttGeom.nwafer=0; svttGeom.nlayer=3; svttGeom.waferdim=0; svttGeom.fill();
-  //replace [exe SVT101;] with ["SVTT version"; SVTT=on;
-  //                             SvttConfig = 1; svtWater=on ; nSvtLayer=6;]
-  svttGeom.select="SVTT101"; svttGeom.config=1; svttGeom.water=1; svttGeom.nlayer=6; svttGeom.fill();  
-  //replace [exe SVT102;] with ["SVTT version"; SVTT=on;
-  //                             SvttConfig = 2; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
-  //                             SvshConfig = 0; "No SVT shield";]
+
+  svttGeom.select="SVTTof"; {
+    svttGeom.config=-1; 
+    svttGeom.fill();
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // Uses SvttGeo.xml
+  //
+  svttGeom.module="SvttGeo";    
+
+  svttGeom.select="SVTT00"; {
+    svttGeom.config=0; 
+    svttGeom.water=0; 
+    svttGeom.nwafer=7; 
+    svttGeom.nlayer=6; 
+    svttGeom.fill();
+  }
+
+  svttGeom.select="SVTT100"; {
+    svttGeom.config=0; 
+    svttGeom.water=1; 
+    svttGeom.nwafer=0; 
+    svttGeom.nlayer=3; 
+    svttGeom.waferdim=0; 
+    svttGeom.fill();
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // Uses SvttGeo1.xml
+  //
+  svttGeom.module = "SvttGeo1";
+
+  svttGeom.select="SVTT101"; {
+    svttGeom.config=1; 
+    svttGeom.water=1; 
+    svttGeom.nlayer=6; 
+    svttGeom.fill();  
+  }
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // Uses SvttGeo2.xml
+  //
+  svttGeom.module = "SvttGeo2";
+
   svttGeom.select="SVTT102"; 
   {
     svttGeom.config=2; 
@@ -1141,9 +1187,13 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=0;
     svttGeom.fill();  
   }
-  //replace [exe SVT103;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig = 3; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
-  //                              SvshConfig = 0; "No SVT shield";]
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // Uses SvttGeo3.xml
+  //
+  svttGeom.module = "SvttGeo3";
+
   svttGeom.select="SVT103"; 
   {
     svttGeom.config=3; 
@@ -1154,22 +1204,7 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=0;
     svttGeom.fill();      
   }
-  //replace [exe SVT106;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig = 6; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
-  //                              SvshConfig = 0; "No SVT shield";]
-  svttGeom.select="SVT106"; 
-  {
-    svttGeom.config=6;
-    svttGeom.water=1; 
-    svttGeom.nwafer=0; 
-    svttGeom.nlayer=6; 
-    svttGeom.waferdim=0; 
-    svttGeom.svshconfig=0;
-    svttGeom.fill();          
-  }
-  //replace [exe SVT203;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig = 3; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
-  //                              SvshConfig = 2; "SVT shield";]
+
   svttGeom.select="SVT203"; 
   {
     svttGeom.config=3;
@@ -1180,9 +1215,31 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=2;
     svttGeom.fill();          
   }
-  //replace [exe SVT204;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig = 4; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
-  //                              SvshConfig = 2; "SVT shield";]
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // Uses SvttGeo6.xml
+  //
+  svttGeom.module = "SvttGeo6";
+
+  svttGeom.select="SVT106"; 
+  {
+    svttGeom.config=6;
+    svttGeom.water=1; 
+    svttGeom.nwafer=0; 
+    svttGeom.nlayer=6; 
+    svttGeom.waferdim=0; 
+    svttGeom.svshconfig=0;
+    svttGeom.fill();          
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // Uses SvttGeo4.xml
+  //
+  svttGeom.module="SvttGeo4";
+
   svttGeom.select="SVT204"; 
   {
     svttGeom.config=4;
@@ -1193,9 +1250,7 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=2;
     svttGeom.fill();          
   }
-  //replace [exe SVT304;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig = 4; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
-  //                              SvshConfig = 3; "SVT shield";]
+
   svttGeom.select="SVT304"; 
   {
     svttGeom.config=4;
@@ -1206,10 +1261,14 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=3;
     svttGeom.fill();          
   }
-  //replace [exe SVT206;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig = 6; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
-  //                              SvshConfig = 2; "SVT shield";]
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////
   //
+  // Uses SvttGeo6.xml
+  //
+  svttGeom.module="SvttGeo6";
+
   svttGeom.select="SVT206"; 
   {
     svttGeom.config=6;
@@ -1220,9 +1279,7 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=2;
     svttGeom.fill();          
   }
-  //replace [exe SVT306;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig =  6; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
-  //                              SvshConfig = 3; "SVT shield";]
+
   svttGeom.select="SVT306"; 
   {
     svttGeom.config=6;
@@ -1233,9 +1290,8 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=3;
     svttGeom.fill();          
   }
-  //replace [exe SVT306x;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig =  6; svtWater=on; nSvtVafer=0; nSvtLayer=7; svtWaferDim=0;
-  //                              SvshConfig = 3; "SVT shield";]
+
+
   svttGeom.select="SVT306x";
   {
     svttGeom.config=6;
@@ -1246,9 +1302,13 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=3;
     svttGeom.fill();          
   }
-  //replace [exe SVT310x;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig = 10; svtWater=on; nSvtVafer=0; nSvtLayer=7; svtWaferDim=0;
-  //                              SvshConfig = 3; "SVT shield";]
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // Uses SvttGeo10.xml
+  //
+  svttGeom.module="SvttGeo6";
+
   svttGeom.select="SVT310x";
   {
     svttGeom.config=10;
@@ -1259,9 +1319,14 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=3;
     svttGeom.fill();          
   }
-  //replace [exe SVT211;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig = 11; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
-  //                              SvshConfig = 2; "SVT shield";]
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  //
+  // Uses SvttGeo11.xml
+  //
+  svttGeom.module="SvttGeo11";
+
   svttGeom.select="SVT211";
   {
     svttGeom.config=11;
@@ -1272,9 +1337,7 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=2;
     svttGeom.fill();          
   }
-  //replace [exe SVT311;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig = 11; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
-  //                              SvshConfig = 3; "SVT shield";]
+
   svttGeom.select="SVT311";
   {
     svttGeom.config=11;
@@ -1285,8 +1348,7 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=3;
     svttGeom.fill();          
   }
-  //replace [exe SVT312;] with ["SVTT version"; exe SVT311; SvttConfig = 12;]
-  //
+
   svttGeom.select="SVT312";
   {
     svttGeom.config=12;
@@ -1297,9 +1359,7 @@ Bool_t Geometry::SvttInit()
     svttGeom.svshconfig=3;
     svttGeom.fill();          
   }
-  //replace [exe SVT312x;] with ["SVTT version"; SVTT=on;
-  //                              SvttConfig = 12; svtWater=on; nSvtVafer=0; nSvtLayer=7; svtWaferDim=0;
-  //                              SvshConfig = 3; "SVT shield";]
+
   svttGeom.select="SVT312x";
   {
     svttGeom.config     = 12;
@@ -1308,10 +1368,11 @@ Bool_t Geometry::SvttInit()
     svttGeom.nlayer     = 7; 
     svttGeom.waferdim   = 0; 
     svttGeom.svshconfig = 3;
-    svttGeom.module     = "SvttGeo11";
     svttGeom.fill();          
   }
+
   return true;
+
 }
 
 Bool_t Geometry::BtofInit()
