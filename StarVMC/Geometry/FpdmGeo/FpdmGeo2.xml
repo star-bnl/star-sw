@@ -562,18 +562,29 @@
             
         </Block>
         
+
         <Block name="FLGF" comment="is Lead Glass detector"  >
-            <Mixture name="PbG" dens="FLGM_Density" radl="FLGM_RadLen"  >
+
+<!-- AgSTAR neglects RADL when creating mixtures.  Original geometry specified
+        Mixture name="PbG" dens="FLGM_Density" radl="FLGM_RadLen"
+     but will calculate radiation length in GsMIXT call. -->
+
+            <Mixture name="PbG" dens="FLGM_Density" >
                 <Component name="Pb" a="207.19" z="82" w=".60712"  />
-                <Component name="K" a="39.102" z="19" w=".02324"  />
+                <Component name="K"  a="39.102" z="19" w=".02324"  />
                 <Component name="Si" a="28.088" z="14" w=".14771"  />
-                <Component name="O" a="15.999" z="8" w=".22041"  />
+                <Component name="O"  a="15.999" z="8"  w=".22041"  />
                 <Component name="As" a="74.922" z="33" w=".00152"  />
             </Mixture>
-            
             <Medium name="leadglass" isvol="1 "  />
+
             <Attribute for="FLGF" seen="1" colo="4"  />
-            <Shape type="BOX" dz="FLGG_depth/2" dx="FLGG_Width/2" dy="FLGG_Width/2"  />
+
+            <Shape type="BOX" 
+                   dz="FLGG_depth/2" 
+                   dx="FLGG_Width/2" 
+                   dy="FLGG_Width/2"  />
+
             <Call expr="ag_imed,'CUTELE',flgm_CritEne" routine="GSTPAR"  />
 
             <Instrument block="FLGF">
