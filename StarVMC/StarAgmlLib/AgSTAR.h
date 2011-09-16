@@ -4,7 +4,6 @@
 #include "TObject.h"
 #include "TString.h"
 
-Int_t agexist( TString name );
-
+Int_t agexist( TString name, Bool_t casesens=false );
 
 #endif
