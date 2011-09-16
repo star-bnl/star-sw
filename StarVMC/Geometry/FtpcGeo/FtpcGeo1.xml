@@ -293,23 +293,20 @@
         <Create block="FTPC"  />
 
         <If expr="agexist('SVTT')!=0"  >
-            <Placement z="position" konly="'MANY'" block="FTPC" in="SVTT"  >
-            </Placement>
-            
-            <Placement z="-position" konly="'MANY'" block="FTPC" in="SVTT"  >
+
+            <Placement block="FTPC" in="SVTT" z="+position" konly="'MANY'"/>            
+            <Placement block="FTPC" in="SVTT" z="-position" konly="'MANY'">
                 <Rotation thetaz="180"  />
             </Placement>
             
-            <Else  >
-                <Placement z="position" konly="'MANY'" block="FTPC" in="CAVE"  >
-                </Placement>
+        <Else  >
+
+            <Placement block="FTPC" in="CAVE" z="+position" konly="'MANY'"/>            
+            <Placement block="FTPC" in="CAVE" z="-position" konly="'MANY'">
+                <Rotation thetaz="180"  />
+            </Placement>
                 
-                <Placement z="-position" konly="'MANY'" block="FTPC" in="CAVE"  >
-                    <Rotation thetaz="180"  />
-                </Placement>
-                
-            </Else>
-            
+        </Else>            
         </If>
         
 
