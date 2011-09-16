@@ -639,7 +639,7 @@
                       /// Component Si	a=28.088	z=14	w=.14771           
                       /// Component O	a=15.999	z=8	w=.22041           
                       /// Component As	a=74.922	z=33	w=.00152           
-                      /// Mixture PbG dens=flgm_density radl=flgm_radlen           
+                      /// Mixture PbG dens=flgm_density           
                       {  AgMaterial &mix = AgMaterial::Get("Pbg");              
                             mix.Component("Pb",207.19,82,.60712);              
                             mix.Component("K",39.102,19,.02324);              
@@ -647,7 +647,6 @@
                             mix.Component("O",15.999,8,.22041);              
                             mix.Component("As",74.922,33,.00152);              
                             mix.par("dens")=flgm.density;              
-                            mix.par("radl")=flgm.radlen;              
                             mix.lock();              
                             _material = mix;              
                             _material.lock();              

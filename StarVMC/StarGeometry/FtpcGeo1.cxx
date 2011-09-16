@@ -2574,8 +2574,8 @@
              {           
                    { AgPlacement place = AgPlacement("FTPC","SVTT");              
                          /// Add daughter volume FTPC to mother SVTT              
-                         place.TranslateZ(position);              
-                         /// Translate z = position              
+                         place.TranslateZ(+position);              
+                         /// Translate z = +position              
                          place.par("only")=AgPlacement::kMany;              
                          /// Overlap: agplacement::kmany              
                          _stacker -> Position( AgBlock::Find("FTPC"), place );              
@@ -2601,8 +2601,8 @@
              {           
                    { AgPlacement place = AgPlacement("FTPC","CAVE");              
                          /// Add daughter volume FTPC to mother CAVE              
-                         place.TranslateZ(position);              
-                         /// Translate z = position              
+                         place.TranslateZ(+position);              
+                         /// Translate z = +position              
                          place.par("only")=AgPlacement::kMany;              
                          /// Overlap: agplacement::kmany              
                          _stacker -> Position( AgBlock::Find("FTPC"), place );              
