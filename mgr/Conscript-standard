@@ -128,9 +128,26 @@ if ($pkg eq "RTS") {
     @srcL = @src;
     @src = ();
 }
-my @DAQ_pkgs = qw(StDAQMaker StTofHitMaker  StTpcHitMaker StEmcRawMaker  StEEmcPoolmuEztPanitkin  
-		  StBEMCPlots Stl3RawReaderMaker StBTofHitMaker StMtdHitMaker StPmdReadMaker 
-		  St_pp2pp_Maker); 
+
+# Some directories will need extra includes for the RTS DAQ reader
+my @DAQ_pkgs = qw(StDAQMaker StTofHitMaker StTpcHitMaker StEEmcPoolmuEztPanitkin  
+		  StBEMCPlots StBTofHitMaker StMtdHitMaker StPmdReadMaker St_pp2pp_Maker); 
+# But any *Raw* in StRoot/ would have this automatically done / handled
+if ( -d "StRoot" ){
+    my @Apkgs = grep(/Raw/,glob("./StRoot/*"));
+    my $pkg;
+    if ( $#Apkgs != -1 ){
+	print "Found ".($#Apkgs+1)." Raw packages:";
+	foreach $pkg (@Apkgs){ 
+	    $pkg    =~ s/.*StRoot\///g;
+	    print " [$pkg]";
+	    push(@DAQ_pkgs,$pkg);
+	}
+	print "\n";
+    }
+}
+
+
 my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src" 
                      . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
                      . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include";
