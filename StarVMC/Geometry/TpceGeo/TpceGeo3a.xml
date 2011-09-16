@@ -2154,7 +2154,14 @@
 
         <Block name="TPAD" comment="is a REAL padrow WITH dimensions defined at positioning time"  >
 
-            <Attribute for="TPAD" seen="1" colo="2" />
+
+            <Attribute for="TPAD" seen="1" colo="2" serial="1" cond="TPRS_width&lt;1.5" />
+            <Attribute for="TPAD" seen="1" colo="2" serial="2" cond="TPRS_width&gt;1.5" />
+<!--
+  n.b. This is an explicit hack to get around the issue in the stacker where I
+       cannot detect changes to the medium and create a new volume.  We invoke
+       serialization instead.
+  -->
             <Material name="p10"  />
             <Material isvol="1" stemax="2.5*tprs_width" name="sensitive_gas"  />
             <Medium name="TPAD_p10" isvol="1" stemax="2.5*tprs_width" deemax="0.00175367" stmin="0.0294056" />

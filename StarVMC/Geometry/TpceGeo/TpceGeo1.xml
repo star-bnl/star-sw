@@ -481,7 +481,10 @@
         </Block>
         
         <Block name="TPAD" comment="is a real padrow with dimensions defined at positioning time"  >
-            <Attribute for="TPAD" seen="0" colo="2"  />
+
+            <Attribute for="TPAD" seen="0" colo="2" serial="1" cond="TPRS_width&lt;1.5" />
+            <Attribute for="TPAD" seen="0" colo="2" serial="2" cond="TPRS_width&gt;1.5" />
+
             <Material name="p10"  />
             <Material stemax="2.5*tprs_width" isvol="1" name="sensitive_gas"  />
             <Shape type="BOX" dz="0" dx="0" dy="0"  />
