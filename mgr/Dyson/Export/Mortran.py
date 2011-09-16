@@ -1170,15 +1170,23 @@ class Attribute(Handler):
     def setParent(self,p): self.parent = p    
     def startElement(self,tag,attr):
         self.name = attr.get('for')
+        self.cond = attr.get('cond')
         for a in _agstar_attribute_list:
             v = attr.get(a,None)
             if ( v != None ):
                 self.style.append( "%s=%s"%( a, v ) )
     def endElement(self,tag):
+        if self.cond:
+            form ( 'if %s {'% self.cond )
+        
         line = "ATTRIBUTE %s "% self.name
         for a in self.style:
             line += "%s "%a
         form( line )
+
+        if self.cond:
+            form ( '}')
+        
 
 # --
 

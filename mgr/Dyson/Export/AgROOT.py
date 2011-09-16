@@ -1781,8 +1781,9 @@ class Attribute(Handler):
     def setParent(self,p): self.parent = p    
     def startElement(self,tag,attr):
         self.name = attr.get('for')
+        self.cond = attr.get('cond',None)
 
-        checkAttributes( tag, attr, _agstar_attribute_list, ['for'] )        
+        checkAttributes( tag, attr, _agstar_attribute_list, ['for','cond'] )       
         
         for a in _agstar_attribute_list:
             v = attr.get(a,None)
@@ -1791,6 +1792,12 @@ class Attribute(Handler):
                 self.style.append( 'attr.par("%s")=%s;'%( a, v ) )
 
     def endElement(self,tag):
+
+        # Add conditional 
+        if self.cond:
+            self.cond = replacements(self.cond).lower()
+            document.impl( 'if ( %s )'%self.cond, unit=current )
+        
         document.impl( '{ AgAttribute attr = AgAttribute("%s");'%self.name, unit=current )
         for a in self.style:
             a = replacements(a)
