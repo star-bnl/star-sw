@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.85 2011/08/23 22:15:10 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.86 2011/09/16 21:52:30 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.86  2011/09/16 21:52:30  genevb
+ * Minor fixes for sector misalignment: output statement, and outermost radius
+ *
  * Revision 1.85  2011/08/23 22:15:10  genevb
  * Introduce sector alignment distortion corrections and big speed improvements to Poisson relaxations
  *
@@ -2226,6 +2229,7 @@ void StMagUtilities::ReadField( )
   if ( mDistortionMode & kGridLeak )      printf (" + GridLeak") ;
   if ( mDistortionMode & k3DGridLeak )    printf (" + 3DGridLeak") ;
   if ( mDistortionMode & kGGVoltError )   printf (" + GGVoltError") ;
+  if ( mDistortionMode & kSectorAlign )   printf (" + Sector Misalignment") ;
 
   printf("\n");
   
@@ -4670,7 +4674,7 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
 
 
               
-              for ( Int_t i = 1 ; i < ROWS-2 ; i++ ) 
+              for ( Int_t i = 1 ; i < ROWS-1 ; i++ ) 
                 { 
                   Double_t Radius = IFCRadius + i*GRIDSIZER ;
                   Double_t local_y  = Radius * cosSecPhi ;
