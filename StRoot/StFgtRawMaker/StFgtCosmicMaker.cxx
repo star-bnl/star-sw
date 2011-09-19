@@ -19,7 +19,7 @@ StFgtCosmicMaker::StFgtCosmicMaker()
 };
 StFgtCosmicMaker::StFgtCosmicMaker(char* daqFileName, int numDiscs)
 {
-  mFgtEvent=new StFgtEvent();
+  mFgtEvent=new StFgtEvent(0, numDiscs);
 
   mRdr = new daqReader(daqFileName) ;	
 
@@ -87,4 +87,4 @@ void StFgtCosmicMaker::clearHits()
     mFgtEvent->Clear();
 };
 
-ClassImp(StFgtCosmicMaker);
+//ClassImp(StFgtCosmicMaker);
