@@ -16,7 +16,8 @@ extern "C" void num_(double*,double*,double*,double*,double*,double*,double*,dou
 extern "C" void denom_(double*,double*,double*,double*,double*,double*,double*,double*,double*,double*,double*);
 extern "C" void polpar_(double*,double*,double*,double*,double*,double*,double*,double*);
 extern "C" void dssvini2009a_(int*);
-extern "C" void dssvfit2009a_(double*,double*, double*, double*, double*, double*, double*, double*);
+extern "C" void dssvfit2009a_(double*,double*,double*,double*,double*,double*,double*,double*);
+extern "C" double dinteg_(double (*)(double&),double&,double&,double&);
 //extern "C" void parpol_(int*, double*, double*, double* ,double* , double*, double*, double*, double*, double*, double*);
 //extern "C" void parpol2_(int*, double*, double*, double* ,double* , double*, double*, double*, double*, double*, double*);
 //extern "C" void unpolar_(int*, double*, double*, double*, int*);
@@ -152,6 +153,7 @@ public:
     static Double_t getPartonicALL(double s, double t, double u, int pid, int flavor1, int flavor2, int flavor3, int flavor4);
 
     static Double_t getProtonA1(double x, double Q2);
+    static double get_polPDF_firstMoment(int pdf, int flavor, double Q2, double xmin, double xmax, double epsilon = 1.0e-3);
 
     StMCAsymMaker(const char *name="MCAsym");
     virtual  ~StMCAsymMaker();
@@ -165,7 +167,7 @@ public:
     const St_particle* particleTable() const { return particleTabPtr; }
     
     virtual const char *GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.11 2011/09/13 20:03:55 pibero Exp $ built "__DATE__" "__TIME__ ; 
+        static const char cvs[]="Tag $Name:  $ $Id: StMCAsymMaker.h,v 1.12 2011/09/19 18:58:39 pibero Exp $ built "__DATE__" "__TIME__ ; 
         return cvs;
     }
 
