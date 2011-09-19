@@ -1527,3 +1527,65 @@ Double_t StMCAsymMaker::getProtonA1(Double_t x,Double_t Q2){
   return A1;
 
 }
+
+struct PDFWrapper {
+  typedef double (*PDF)(int,double,double);
+
+  static const PDF pdfs[StPythiaEvent::NPDF];
+  static PDF pdf;
+  static int flavor;
+  static double Q2;
+
+  static void setPdfFlavorQ2(int pdf, int flavor, double Q2)
+  {
+    PDFWrapper::pdf = pdfs[pdf];
+    PDFWrapper::flavor = flavor;
+    PDFWrapper::Q2 = Q2;
+  }
+
+  static double eval(double& x) {  return pdf(flavor,x,Q2); }
+};
+
+const PDFWrapper::PDF PDFWrapper::pdfs[StPythiaEvent::NPDF] = {
+  StMCAsymMaker::get_polPDF_LO,
+  StMCAsymMaker::get_polPDF_NLO, // STD
+  StMCAsymMaker::get_polPDF_NLO_g0,
+  StMCAsymMaker::get_polPDF_NLO_gmax,
+  StMCAsymMaker::get_polPDF_NLO_gmin,
+  StMCAsymMaker::get_polPDF_NLO_m015,
+  StMCAsymMaker::get_polPDF_NLO_m030,
+  StMCAsymMaker::get_polPDF_NLO_m045,
+  StMCAsymMaker::get_polPDF_NLO_m060,
+  StMCAsymMaker::get_polPDF_NLO_m075,
+  StMCAsymMaker::get_polPDF_NLO_m090,
+  StMCAsymMaker::get_polPDF_NLO_m105,
+  StMCAsymMaker::get_polPDF_NLO_p030,
+  StMCAsymMaker::get_polPDF_NLO_p045,
+  StMCAsymMaker::get_polPDF_NLO_p060,
+  StMCAsymMaker::get_polPDF_NLO_p070,
+  StMCAsymMaker::get_polPDF_NLO_GSA,
+  StMCAsymMaker::get_polPDF_NLO_GSB,
+  StMCAsymMaker::get_polPDF_NLO_GSC,
+  StMCAsymMaker::get_polPDF_NLO_DSSV,
+  StMCAsymMaker::get_polPDF_NLO_LSS1,
+  StMCAsymMaker::get_polPDF_NLO_LSS2,
+  StMCAsymMaker::get_polPDF_NLO_LSS3,
+  StMCAsymMaker::get_polPDF_NLO_AAC1,
+  StMCAsymMaker::get_polPDF_NLO_AAC2,
+  StMCAsymMaker::get_polPDF_NLO_AAC3,
+  StMCAsymMaker::get_polPDF_NLO_BB1,
+  StMCAsymMaker::get_polPDF_NLO_BB2,
+  StMCAsymMaker::get_polPDF_NLO_DNS1,
+  StMCAsymMaker::get_polPDF_NLO_DNS2,
+  StMCAsymMaker::get_polPDF_NLO_DSSV2009a
+};
+
+PDFWrapper::PDF PDFWrapper::pdf = 0;
+int PDFWrapper::flavor = 0;
+double PDFWrapper::Q2 = 0;
+
+double StMCAsymMaker::get_polPDF_firstMoment(int pdf, int flavor, double Q2, double xmin, double xmax, double epsilon)
+{
+  PDFWrapper::setPdfFlavorQ2(pdf,flavor,Q2);
+  return dinteg_(PDFWrapper::eval,xmin,xmax,epsilon);
+}
