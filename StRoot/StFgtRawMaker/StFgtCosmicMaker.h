@@ -37,7 +37,7 @@ class StFgtCosmicMaker : public StFgtRawMaker
   StFgtEvent* mFgtEvent;
   daqReader *mRdr;
 
-    ClassDef(StFgtCosmicMaker,1);
+  //ClassDef(StFgtCosmicMaker,1);
 
 };
 #endif
