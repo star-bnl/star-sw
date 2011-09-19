@@ -231,7 +231,7 @@ Bool_t Compare( TGeoVolume *volume, AgShape *agshape )
 #undef check
 #undef angle
 
-
+/************************************************************************* unused
 Bool_t IsSameMaterial( TGeoMaterial *t, AgMaterial *a )
 {
   if ( t == NULL )  
@@ -253,6 +253,7 @@ Bool_t IsSameMaterial( TGeoMaterial *t, AgMaterial *a )
   return true;
 }
 
+
 Bool_t isShapeValid( TGeoShape *shape )
 {
   TString _class = shape->ClassName();
@@ -270,7 +271,7 @@ Bool_t isShapeValid( TGeoShape *shape )
 
   return true;
 }
-
+*************************************************************************/
 
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -389,7 +390,8 @@ TGeoMedium *GetMedium( TString name, AgMedium *medium )
   return NULL;
 }
 
-//
+
+/******************************************************************** Unused 
 // Is there a daughter volume already placed at the given position
 //
 Bool_t IsItThere( TGeoVolume *volume, TGeoVolume *mother, TGeoMatrix *matrix )
@@ -410,7 +412,7 @@ Bool_t IsItThere( TGeoVolume *volume, TGeoVolume *mother, TGeoMatrix *matrix )
 
   return false;
 }
-
+*************************************************************************/
 
 // ------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------- BEGIN --
@@ -455,20 +457,23 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
   mAttribute.Inherit( AgBlock::previous() );
 
   
-
+  //
   /////////////////////////////////////////////////////////////////////////
   //
   // Perform the creation of the material, medium, shape, etc...
   //
   /////////////////////////////////////////////////////////////////////////
+  //
 
   TString       mod_name     = module->GetName();
   TString       blk_name     = block->GetName();
 
   TString       mat_name     = mMaterial.GetName();
 
+  //
   // If no material was specified, copy the material definition from the previous
   // block into this block.
+  //
   if ( mat_name == "None" )
     {
       AgMaterial *mine = block -> material();
@@ -481,9 +486,11 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
       
     }
 
-
-  TGeoMaterial *material      = gGeoManager->GetMaterial( mat_name );   // Lookup existing material
-  if ( !material )                                                                      // Create if it doesn't exist
+  //
+  // Lookup the material.  If it is not found, create a new one.
+  //
+  TGeoMaterial *material      = gGeoManager->GetMaterial( mat_name );                  
+  if ( !material )                                                                     
     {
       material = BuildMaterial( mMaterial );
       material -> SetName(mat_name);
@@ -496,23 +503,31 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
   __DEBUG_BUILD__ material -> Print();
 #endif
 
+  //
   // Medium name
+  //
   TString       med_name     = mMedium.GetName();  
   TString       fqmed_name   = mod_name + "_" + blk_name + " " + med_name;
 
-  
+  //
   // It is possible that medium parameters were set in the material.
   // IF THEY ARE, then OVERWRITE... note that this hack probably
   // breaks inheritance.
+  //
   const Char_t *keys[]={"isvol","ifield","fieldm","tmaxfd","stemax","deemax","epsil","stmin"};
   for ( int i=0;i<8;i++ )
-    if ( mMaterial.isSet(keys[i])) mMedium.par(keys[i])=mMaterial.par(keys[i]);     
+    if ( mMaterial.isSet(keys[i])) 
+      {
+	mMedium.par(keys[i])=mMaterial.par(keys[i]);     
+      }
 
+  //
+  // Get the medium.  If it does not exist, create it.
+  //
   TGeoMedium   *medium = ::GetMedium( fqmed_name, &mMedium );
-  if ( !medium )                                                                                     // Create if it doesn't exist
+  if ( !medium )                                             
     {
 
-      //    Int_t mat_id = material->GetUniqueID();
       medium = new TGeoMedium(  fqmed_name,
 				numed++,
 				material->GetUniqueID(),
@@ -529,7 +544,7 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
       medium  -> SetTitle(Form("Medium %s last touched in block %s of module %s",med_name.Data(),block->GetName(),module->GetName()));
 
     }
-
+  
 
 #ifdef __DEBUG_BUILD__
   __DEBUG_BUILD__ medium -> Print();
@@ -569,7 +584,11 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
     }
 
   //
+  /////////////////////////////////////////////////////////////////////////////////
+  //
   // Creation of a volume based on a shape
+  //
+  /////////////////////////////////////////////////////////////////////////////////
   //
   TString volume_title;
   if ( mShape.type() != AgShape::kDivision )
@@ -696,7 +715,8 @@ TGeoVolume *makeCopyVolume( TGeoVolume *org, AgShape shape, Bool_t copyDaughters
   //
   TGeoVolume *vol = org->MakeCopyVolume( shape.Make() );
 
-  vol->SetTitle(Form("Parameterized volume with shape %s",shape.GetName()));
+  //$$$  vol->SetTitle(Form("Parameterized volume with shape %s",shape.GetName()));
+  vol -> SetTitle( org -> GetTitle() );
 
   if ( copyDaughters )
     {
@@ -747,6 +767,9 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
   TString block_name = block->GetName();
   assert(block);
 
+  Bool_t TPAD = block_name=="TPAD"; // temp for debugging
+
+
   //
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -758,14 +781,6 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
   TString     mother_name  = mother_block -> nickname();
   TGeoVolume *mother       = mVolumeTable[ mother_name ];
   TGeoVolume *daughter     = 0;
-
-
-  if ( !mother_block )
-    { gErrorIgnoreLevel=1; 
-      std::cout << "Position(AgBlock *b, AgPlacement p) " << Form("Could not find mother %s",mother_name.Data()) << std::endl;
-      assert(mother);
-    }
-	
 
   //
   //////////////////////////////////////////////////////////////////////////////
@@ -860,8 +875,10 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
 	  assert( block->shape()->parameterized() );
 	}
 
+      //
       // Flag this as a paramterized shape which will pick up its shape
       // parameters from the pos_shape object
+      //
       parameterized = true; 
 
 
@@ -927,16 +944,16 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
       // Add volumes with the same name to the list of sisters
       sisters.push_back(vol);
 
+      //
+      /////////////////////////////////////////////////////////////
+      //
       // If the shape is a parameterized shape, we will copy/clone
-      // the specified shape
-      if ( parameterized )
-	{
-	  daughter = makeCopyVolume( vol, pos_shape );
-	  break;
-	}
-
-      // Look for volumes which match the block's shape
-      if ( ! ::Compare( vol, block->shape() ) ) continue;
+      // the specified shape and break.
+      //
+      //    >>> I believe this fails on serialization... <<<
+      //
+      /////////////////////////////////////////////////////////////
+      //
 
       // Require matching serial numbers
       Double_t vol_serial = -999.0;
@@ -944,6 +961,17 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
 	{
 	  if ( (att_serial != vol_serial) && att_serial > -999.0 ) continue;
 	}
+
+      if ( parameterized )
+	{
+	  daughter = makeCopyVolume( vol, pos_shape );
+	  //	  if ( TPAD ) daughter->Print();
+	  break;
+	}
+
+      // Look for volumes which match the block's shape
+      if ( ! ::Compare( vol, block->shape() ) ) continue;
+
 
 
       daughter = vol;
@@ -961,6 +989,13 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
 	// Add volumes with the same name to the list of sisters
 	sisters.push_back(vol);
 
+	// Require matching serial numbers
+	Double_t vol_serial = -999.0;
+	if ( GetFloatValue( "serial", vol->GetTitle(), vol_serial ) )
+	{
+	  if ( (att_serial != vol_serial) && att_serial > -999.0 ) continue;
+	}
+
 	// If the shape is a parameterized shape, we will copy/clone
 	// the specified shape
 	if ( parameterized )
@@ -972,12 +1007,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
 	// Look for volumes which match the block's shape
 	if ( ! ::Compare( vol, block->shape() ) ) continue;
 
-	// Require matching serial numbers
-	Double_t vol_serial = -999.0;
-	if ( GetFloatValue( "serial", vol->GetTitle(), vol_serial ) )
-	{
-	  if ( (att_serial != vol_serial) && att_serial > -999.0 ) continue;
-	}
+
 
 	daughter = vol;
       };
