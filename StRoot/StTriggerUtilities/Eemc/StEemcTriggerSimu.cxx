@@ -55,6 +55,7 @@ ClassImp(StEemcTriggerSimu);
 
 StEemcTriggerSimu::StEemcTriggerSimu() {
   //  printf("The StEemcTriggerSimu constructor\n");
+  mOnlineMode = false;
   nInpEve=0;
   mHList=0;
   mDbE=0;
@@ -179,7 +180,8 @@ StEemcTriggerSimu::InitRun(int runnumber){
   
   memset(feePed,0,sizeof(feePed));
   memset(feeMask,0xff,sizeof(feeMask)); // mask everything as bad
-  getEemcFeeMask();
+  memset(ped,0,sizeof(ped));
+  getEemcFeeMask();		// get offline mask & ped
 
   const TDatime& dbtime = StMaker::GetChain()->GetDBTime();
   mYear = dbtime.GetYear();
@@ -191,7 +193,14 @@ StEemcTriggerSimu::InitRun(int runnumber){
   //char text[1000];
   //sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),mYear);  
   //EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
-  EemcTrigUtil::getFeePed4(dbtime,mxChan,feePed);
+  if (mOnlineMode) {
+    LOG_INFO << "Using EEMC ONLINE pedestals" << endm;
+    EemcTrigUtil::getFeePed4(dbtime,mxChan,feePed);
+  }
+  else {
+    LOG_INFO << "Using EEMC OFFLINE pedestals" << endm;
+    transform(ped,ped+mxCr*mxChan,feePed,computePed4);
+  }
 
   if( mYear == 2006 ){ // #### modified line by Liaoyuan 
     DsmThreshold thresholds;
@@ -464,6 +473,55 @@ StEemcTriggerSimu::getEemcAdc(){
 //==================================================
 //==================================================
 
+int StEemcTriggerSimu::computePed4(float ped)
+{
+  //
+  //     def computePed4(self):    
+  //         ### create btow dictionary (ie arrays) for ped4 and status 
+  //         '''self.btowPed4 = {}
+  //         self.btowStatus = {}
+  //         for i in range(6):
+  //             self.btowPed4[i] = {}
+  //             self.btowPed4[i] = {}
+  //         for btower in self.btow:
+  //             if btower.pedMean > 24:
+  //                 ped4 = (22-int(btower.pedMean))/4
+  //             else:
+  //                 ped4 = (25-int(btower.pedMean))/4
+  //             btower.ped4 = int(ped4)    
+  //             self.btowPed4[btower.crate][btower.channel] = btower.ped4
+  //             self.btowStatus[btower.crate][btower.channel] = btower.status'''
+  //
+  //         ### create etow dictionary (ie arrays) for ped4 and status
+  //         self.etowPed4 = {}
+  //         self.etowStatus = {}
+  //         self.etowPedMean = {}
+  //         for i in range(6):
+  //             self.etowPed4[i+1] = {}
+  //             self.etowStatus[i+1] = {}
+  //             self.etowPedMean[i+1] = {}
+  //         for etower in self.etow.values():
+  //             roundedPedMean = etower.pedMean+0.5
+  //             if roundedPedMean>24:
+  //                 ped4 = (22-int(roundedPedMean))/4.0
+  //             else:
+  //                 ped4 = (25-int(roundedPedMean))/4.0
+  //             etower.ped4 = int(ped4)
+  //             self.etowPed4[etower.crate][etower.channel] = etower.ped4
+  //             self.etowStatus[etower.crate][etower.channel] = etower.status
+  //             self.etowPedMean[etower.crate][etower.channel] = etower.pedMean
+  //
+  ped += 0.5;
+  if (ped > 24)
+    ped = (22-int(ped))/4.0;
+  else
+    ped = (25-int(ped))/4.0;
+  return int(ped);
+}
+
+//==================================================
+//==================================================
+
 void 
 StEemcTriggerSimu::getDsm0123inputs(){
   /*
@@ -605,8 +663,9 @@ StEemcTriggerSimu::getEemcFeeMask() {
       if (killIt) x->print();
       int rdo = (x->crate-1)*mxChan+ich;
       feeMask[rdo] = killIt;
-      LOG_DEBUG << Form("crate=%d chan=%d rdo=%d name=%s tube=%s sec=%d sub=%c eta=%d stat=0x%04x fail=0x%04x killIt=%d",
-			x->crate,x->chan,rdo,x->name,x->tube,x->sec,x->sub,x->eta,x->stat,x->fail,killIt) << endm;
+      ped[rdo] = x->ped;
+      LOG_DEBUG << Form("crate=%d chan=%d rdo=%d name=%s tube=%s sec=%d sub=%c eta=%d stat=0x%04x fail=0x%04x killIt=%d ped=%f",
+			x->crate,x->chan,rdo,x->name,x->tube,x->sec,x->sub,x->eta,x->stat,x->fail,killIt,x->ped) << endm;
     } // end of chan loop
   }// end of crate loop
 }
@@ -676,6 +735,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.39  2011/09/20 13:32:43  pibero
+// Added support for using EEMC offline pedestals (default)
+//
 // Revision 1.38  2010/08/03 15:00:56  rfatemi
 // revert to kDontCare
 //

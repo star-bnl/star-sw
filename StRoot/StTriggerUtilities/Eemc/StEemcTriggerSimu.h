@@ -34,6 +34,7 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
  public:
   enum {kOnlyAdc=0,kAdcAndTrig, kAdcCompareTrig};
   void setConfig(int x) {mConfig=x;}
+  void setOnlineMode(bool flag = true) { mOnlineMode = flag; } // default = offline
 
  private:
   StEEmcDb *mDbE;
@@ -42,6 +43,7 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   TString  mSetupPath;
 
   int mConfig; // see enum
+  bool mOnlineMode;
   enum {nThr=3};
   int mHTthr[nThr], mTPthr[nThr],mHTTPthrSelc;
 
@@ -49,7 +51,7 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   int nInpEve;    
   bool mDumpEve;
   void getEemcAdc();
-  void readPed4(char *path, int crate);
+  static int computePed4(float ped);
   void getDsm0123inputs();
 
   enum {mxAH=1000};
@@ -62,6 +64,7 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   int rawAdc [mxCr*mxChan]; // *** 'chan' is counting faster***,
   int feePed [mxCr*mxChan]; // do NOT change this memory allocation scheme w/o 
   int feeMask[mxCr*mxChan];// understanding details  of  EEfeeTPTree::compute()
+  float ped[mxCr*mxChan];
  
   //   Endcap FEE_TP+DSM0...3 Tree emulators processing ADC
  public:
@@ -147,6 +150,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.22  2011/09/20 13:32:43  pibero
+// Added support for using EEMC offline pedestals (default)
+//
 // Revision 1.21  2010/06/29 16:53:27  pibero
 // Now, the trigger simulator fills in the StEmcTriggerDetector structure
 // same as data for MC.
