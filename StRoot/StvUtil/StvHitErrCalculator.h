@@ -13,7 +13,7 @@ class StvHitErrCalculator : public TNamed {
 public:	
 enum {kMaxPars=10};
 
-StvHitErrCalculator(const char *name="StvDefaultHitErrs");
+StvHitErrCalculator(const char *name="");
         void SetPars(const double *par);
         void SetTrack(const double tkDir[3]);
         void SetTrack(const float  tkDir[3]);
@@ -22,6 +22,7 @@ virtual void CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR
 virtual void CalcDcaDers(double dRR[kMaxPars][3]);
 virtual  int GetNPars() const 			{return 4;}
 const double *GetPars() const 			{return mPar ;}
+static StvHitErrCalculator *Inst(const char *name);
 static void Test(double phiG=33,double lamG=33);
 static void Dest(double phiG=33,double lamG=33);
 protected:

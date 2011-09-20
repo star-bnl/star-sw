@@ -7,6 +7,13 @@
 #include "StvUtil/StvNodePars.h"
 #include "Stv/StvHit.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include <map>
+#include <string>
+
+static std::map<std::string,StvHitErrCalculator *> calcMap;
+
+
+
 // //______________________________________________________________________________
 // double Det33(double T[3][3])
 // {
@@ -21,6 +28,17 @@ ClassImp(StvHitErrCalculator)
 StvHitErrCalculator::StvHitErrCalculator(const char *name):TNamed(name,"")
 {
   memset(mPar,0,sizeof(mPar));
+  if (!*GetName()) return;
+  StvHitErrCalculator *&calc = calcMap[GetName()];
+  assert(!calc);
+  calc = this;
+}
+//______________________________________________________________________________
+StvHitErrCalculator *StvHitErrCalculator::Inst(const char *name)
+{
+  StvHitErrCalculator *calc = calcMap[name];
+  assert(calc);
+  return calc;
 }
 //______________________________________________________________________________
 void StvHitErrCalculator::SetPars(const double *par)
