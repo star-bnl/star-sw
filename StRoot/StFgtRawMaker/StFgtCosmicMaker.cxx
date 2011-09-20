@@ -1,4 +1,8 @@
 #include "StFgtCosmicMaker.h"
+#include "StRoot/StFgtUtil/geometry/StFgtGeomDefs.h"
+#include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
+#include "DAQ_FGT/daq_fgt.h"
+#include "DAQ_READER/daq_dta.h"
 
 void StFgtCosmicMaker::PrepareEnvironment()
 {
@@ -6,22 +10,29 @@ void StFgtCosmicMaker::PrepareEnvironment()
 
 };
 
-void StFgtCosmicMaker::constructDiscs()
-{
+// void StFgtCosmicMaker::constructDiscs()
+// {
+// };
 
-};
-
-StFgtCosmicMaker::StFgtCosmicMaker()
+StFgtCosmicMaker::StFgtCosmicMaker( const Char_t* name ) : StFgtRawMaker( name )
 {
   //default are 6 discs, let's just leave it at that, most of them will be empty
   mFgtEvent=new StFgtEvent();
 
 };
-StFgtCosmicMaker::StFgtCosmicMaker(char* daqFileName, int numDiscs)
+StFgtCosmicMaker::StFgtCosmicMaker( const Char_t* name, const Char_t* daqFileName, Int_t numDiscs) : StFgtRawMaker( name )
 {
+   LOG_INFO << "Constructing the fgt event" << endm;
+
   mFgtEvent=new StFgtEvent(0, numDiscs);
 
-  mRdr = new daqReader(daqFileName) ;	
+   LOG_INFO << "constructing the daq reader" << endm;
+
+  // unfortunately, the daqReader has some constness issues to be
+  // fixed.  Until they are, must remove constness of the filename.
+  mRdr = new daqReader( const_cast< Char_t* >( daqFileName) ) ;	
+
+   LOG_INFO << "done constructing" << endm;
 
 
 };
@@ -87,4 +98,4 @@ void StFgtCosmicMaker::clearHits()
     mFgtEvent->Clear();
 };
 
-//ClassImp(StFgtCosmicMaker);
+ClassImp(StFgtCosmicMaker);

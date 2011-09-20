@@ -2,9 +2,13 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.10 2011/09/19 21:12:36 sgliske Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.11 2011/09/20 15:53:09 sgliske Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.11  2011/09/20 15:53:09  sgliske
+//  Update so that everything compiles nicely
+//  and so that one can execute the macro/simpleTestStandTest.C file
+//
 //  Revision 1.10  2011/09/19 21:12:36  sgliske
 //  update
 //
@@ -28,6 +32,16 @@
 //
 //
 
+#include "StRoot/St_base/StMessMgr.h"
+#include "StRoot/St_base/Stypes.h"
+#include "StRoot/StFgtUtil/geometry/StFgtGeomDefs.h"
+#include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
+#include "StRoot/StChain/StRtsTable.h"
+#include "StRoot/StEvent/StEvent.h"
+#include "DAQ_FGT/daq_fgt.h"
+#include "DAQ_READER/daq_dta.h"
+
+
 #include "StFgtRawMaker.h"
 
 
@@ -38,11 +52,11 @@ Int_t StFgtRawMaker::Make()
   LOG_DEBUG <<"StEmcRawMaker::Make()******************************************************************"<<endm;
   if(!PrepareEnvironment())
     { LOG_WARN <<"Could not prepare the environment to process the event "<<endm; }
-  FillHits();
+  return FillHits();
 
 };
 
-Bool_t StFgtRawMaker::FillHits()
+Int_t StFgtRawMaker::FillHits()
 {
 
   Short_t quadrant=0;      
@@ -64,7 +78,7 @@ Bool_t StFgtRawMaker::FillHits()
       //works because '*' operator is giving your the row
       for(StRtsTable::iterator it=rts_tbl->begin();it!=rts_tbl->end();it++)
 	{
-	  mFgtRawData=(fgt_adc_t*)*it;
+	  fgt_adc_t *mFgtRawData=(fgt_adc_t*)*it;
 	  rdo=rts_tbl->Rdo();
 	  //this is different from rts_example
 	  channel=mFgtRawData->ch;
@@ -84,11 +98,12 @@ Bool_t StFgtRawMaker::FillHits()
 	}
     }
 //now grab the constants from the header file, loop over the raw data and fill the hits...
+  return kStOK;
 };
 
-Bool_t StFgtRawMaker::PrepareEnvironment()
+Int_t StFgtRawMaker::PrepareEnvironment()
 {
-  mEvent=0;
+  StEvent* mEvent=0;
   Short_t numDiscs=6; //or get the number of discs
   mEvent = (StEvent*)GetInputDS("StEvent");
   mFgtEvent= NULL;
@@ -109,6 +124,17 @@ Bool_t StFgtRawMaker::PrepareEnvironment()
       mEvent->setFgtEvent(mFgtEvent);
       LOG_DEBUG << "::prepareEnvironment() has added a non existing StFgtEvent()"<<endm;
     }
+  return kStOK;
 };
 
-//ClassImp(StFgtRawMaker);
+StFgtRawMaker::StFgtRawMaker(const Char_t* name) : StRTSBaseMaker( "adc", name ) {
+   LOG_INFO << "StFgtRawMaker constructed" << endm;
+   // nothing else to do
+};
+
+
+StFgtRawMaker::~StFgtRawMaker(){
+   // nothing to do
+};
+
+ClassImp(StFgtRawMaker);
