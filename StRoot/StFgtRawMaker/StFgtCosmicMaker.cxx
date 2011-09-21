@@ -1,8 +1,8 @@
 #include "StFgtCosmicMaker.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeomDefs.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
-#include "DAQ_FGT/daq_fgt.h"
-#include "DAQ_READER/daq_dta.h"
+#include "RTS/src/DAQ_FGT/daq_fgt.h"
+#include "RTS/src/DAQ_READER/daq_dta.h"
 #include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
 
 StFgtCosmicMaker::StFgtCosmicMaker( const Char_t* name, const Char_t *daqFileName ) :
@@ -47,11 +47,11 @@ Int_t StFgtCosmicMaker::Init(){
 Int_t StFgtCosmicMaker::Make()
 {
 
-  Short_t quadrant=0;      
-  Char_t layer=0;
-  Double_t ordinate=0;
-  Double_t lowerSpan=0;
-  Double_t upperSpan=0;
+   //Short_t quadrant=0;      
+   //Char_t layer=0;
+   //Double_t ordinate=0;
+   //Double_t lowerSpan=0;
+   //Double_t upperSpan=0;
   Int_t rdo=0;
   Int_t arm=0;
   Int_t apv=0;
@@ -86,9 +86,14 @@ Int_t StFgtCosmicMaker::Make()
 	  rdo=dd->rdo;
 	  timebin=f[i].tb;
           Short_t discIdx=0;  // will be set with getNaivePhysCoordFromElecCoord
+          Short_t quad=0;
+          Short_t strip=0;
+          Char_t layer=0;
 
 	  Short_t geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
-	  StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
+	  StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
+
+	  //StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
 
           // hack for the moment
           if( arm == 0 ){
@@ -99,13 +104,11 @@ Int_t StFgtCosmicMaker::Make()
              discIdx = 2;
              apv -= 12;
           };
-          geoId = StFgtGeom::encodeGeoId( discIdx, 0, layer, channel );
+          geoId = StFgtGeom::encodeGeoId( discIdx, 0, layer, strip );
 
 	  StFgtRawHit hit(geoId,adc,timebin);
 	  StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
 
-//           if( !i )
-//              cout << "x disc " << discIdx << endl;
 
 	  if(pDisc)
 	    pDisc->getRawHitArray().PushBack(hit);
