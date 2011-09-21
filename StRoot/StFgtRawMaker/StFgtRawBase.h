@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRawBase.h,v 1.1 2011/09/21 17:49:33 sgliske Exp $
+ * $Id: StFgtRawBase.h,v 1.2 2011/09/21 19:31:31 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRawBase.h,v $
+ * Revision 1.2  2011/09/21 19:31:31  sgliske
+ * minor update
+ *
  * Revision 1.1  2011/09/21 17:49:33  sgliske
  * alternate base class with more
  *  functionality and not an StMaker
@@ -28,9 +31,10 @@
 #ifndef _ST_FGT_BASE_RAW_MAKER_H_
 #define _ST_FGT_BASE_RAW_MAKER_H_
 
+//#include <TObject.h>
 #include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
 
-class StFgtRawBase  {
+class StFgtRawBase {
  public:
    // constructors
    StFgtRawBase( UInt_t numDiscs = 6, Int_t numRawHits = 20, Int_t numClusters = 5, Int_t numPoints = 1 );
