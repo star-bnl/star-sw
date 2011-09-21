@@ -1,10 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtCosmicMaker.h,v 1.8 2011/09/21 00:39:56 avossen Exp $
+//  $Id: StFgtCosmicMaker.h,v 1.9 2011/09/21 17:49:32 sgliske Exp $
 //  $Log: StFgtCosmicMaker.h,v $
-//  Revision 1.8  2011/09/21 00:39:56  avossen
-//  added simple Fgt maker base class
+//  Revision 1.9  2011/09/21 17:49:32  sgliske
+//  alternate base class with more
+//   functionality and not an StMaker
 //
 //  Revision 1.7  2011/09/20 15:53:09  sgliske
 //  Update so that everything compiles nicely
@@ -19,32 +20,38 @@
 
 #ifndef STAR_StFgtCosmicMaker_HH
 #define STAR_StFgtCosmicMaker_HH
-#include "StFgtBaseMaker.h"
+
+#include "StFgtRawMaker.h"
+#include "StRoot/St_base/StMessMgr.h"
+#include "StRoot/St_base/Stypes.h"
+
 #include <DAQ_READER/daqReader.h>
 
-class StFgtCosmicMaker : public StFgtBaseMaker
+class StFgtCosmicMaker : public StFgtRawBase, public StMaker
 {
 
  public: 
-  StFgtCosmicMaker( const Char_t* name = "FgtCosmicMaker" );
-  StFgtCosmicMaker( const Char_t* name, const Char_t* daqFileName, Int_t numDiscs);
-  StFgtEvent& currentFgtEvent();
-  Int_t setFilename(string filename);
+  StFgtCosmicMaker( const Char_t* name = "FgtCosmicMaker", const Char_t *daqFileName = "" );
+  virtual ~StFgtCosmicMaker();
 
-  virtual ~StFgtCosmicMaker(){};
+  void setFilename( std::string filename );
+
+  virtual Int_t Init();
+  virtual Int_t Make();
+  virtual void Clear( Option_t *opts = "" );
 
  protected:
-  //virtual void constructDiscs();
-  virtual void PrepareEnvironment();
-  //advance to the next event
-  virtual Int_t Make();
-
 
  private:
-  void clearHits();
+  std::string mDaqFileName;
   daqReader *mRdr;
 
   ClassDef(StFgtCosmicMaker,1);
 
 };
+
+// inline functions
+
+inline void StFgtCosmicMaker::setFilename( std::string filename ){ mDaqFileName = filename; };
+
 #endif

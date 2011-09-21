@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: simpleTestStandTest.C,v 1.3 2011/09/21 17:23:56 avossen Exp $
+ * $Id: simpleTestStandTest.C,v 1.4 2011/09/21 17:49:35 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: simpleTestStandTest.C,v $
- * Revision 1.3  2011/09/21 17:23:56  avossen
- * added virtual base classes
+ * Revision 1.4  2011/09/21 17:49:35  sgliske
+ * alternate base class with more
+ *  functionality and not an StMaker
  *
  * Revision 1.2  2011/09/21 00:39:57  avossen
  * added simple Fgt maker base class
@@ -23,21 +24,31 @@
  *
  **************************************************************************/
 
+// forward declarations
+class StChain;
 class StFgtCosmicMaker;
 class StEvent;
 class StFgtEvent;
 
+StChain *analysisChain      = 0;
+StFgtCosmicMaker *cosmicMkr = 0;
+
 int simpleTestStandTest( const Char_t *filename = "testfile.sfs",
                          Int_t nevents = 10,
-                         Int_t numDiscs = 3 ){
+                         Int_t numDiscs = 6 ){
 
    LoadLibs();
    Int_t ierr = 0;
 
+   cout << "Constructing the chain" << endl;
+   analysisChain = new StChain("eemcAnalysisChain");
+
    cout << "Constructing the maker" << endl;
-   StFgtCosmicMaker *cosmicMkr = new StFgtCosmicMaker( "cosmicMaker", filename, numDiscs );
+   cosmicMkr = new StFgtCosmicMaker( "cosmicMaker", filename );
+   cosmicMkr->setNumDiscs( numDiscs );
+
    cout << "Initializing" << endl;
-   ierr = cosmicMkr->Init();
+   ierr = analysisChain->Init();
 
    if( ierr ){
       cout << "Error initializing" << endl;
@@ -49,10 +60,31 @@ int simpleTestStandTest( const Char_t *filename = "testfile.sfs",
 
    for( int i=0; i<nevents && !ierr; ++i ){
 
-      cosmicMkr->Clear();
-      ierr = cosmicMkr->Make();
+      cout << "event number " << i << endl;
 
+      cout << "clear" << endl;
+      analysisChain->Clear();
+
+      cout << "make" << endl;
+      ierr = analysisChain->Make();
+
+      // count number of events
+      StFgtEvent *fgtEventPtr = cosmicMkr->getFgtEventPtr();
+      for( Int_t disc = 0; disc < numDiscs; ++disc ){
+         StFgtDisc *discPtr = fgtEventPtr->getDiscPtr( disc );
+         if( discPtr )
+            cout << "\tDisc " << disc << ", number of raw hits " << discPtr->getNumRawHits() << endl;
+      };
    };
+
+   //
+   // Calls the ::Finish() method on all makers
+   //
+   cout << "finish" << endl;
+   analysisChain->Finish(); 
+
+   cout << "all done" << endl;
+   return;
 };
 
 
@@ -64,9 +96,9 @@ void LoadLibs() {
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("StEvent");
-  gSystem->Load("RTS");
   cout << "loaded StEvent library" << endl;
 
   gSystem->Load("StFgtUtil");
   gSystem->Load("StFgtRawMaker");
+  gSystem->Load("RTS");
 };
