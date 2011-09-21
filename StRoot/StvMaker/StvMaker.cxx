@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.9 2011/08/24 19:43:55 perev Exp $
+// $Id: StvMaker.cxx,v 1.10 2011/09/21 22:57:12 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -141,17 +141,18 @@ Int_t StvMaker::InitDetectors()
 Int_t StvMaker::InitRun(int run)
 {
 static int initialized = 0;
-  if (!initialized)
-  {
-  TString geom(GetChainOpt()->GetGeometry());
-  if (geom.Length()) {//Geometry defined in option
-     StTGeoHelper::Inst()->Load(geom);
-  } else { // Geometry via DBMaker
-    TDataSet *myGeo = GetDataBase("VmcGeometry");
-    assert(myGeo);
+  if (initialized) return 0;
+  TString geom;
+// 		Geometry via DBMaker
+  TDataSet *myGeo = GetDataBase("VmcGeometry");
+  if (myGeo) {
     geom = myGeo->GetName();
     geom.ReplaceAll("Geometry.","");
     geom.ReplaceAll(".C","");
+  } else {
+    geom = GetChainOpt()->GetGeometry();
+    assert(geom.Length());
+    StTGeoHelper::Inst()->Load(geom);
   }
 
   StVMCApplication *app = new StVMCApplication(geom, "StVMC application");
@@ -192,7 +193,6 @@ static int initialized = 0;
   InitPulls();
   mVertexFinder = new StvStarVertexFinder("GenericVertex");
 //  InitDetectors();
-  }
   
   return StMaker::InitRun(run);
 }
