@@ -122,8 +122,14 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 			l->flags |= r->flags ;		// merge flags
 			l->flags &= ~FCF_ONEPAD ;	// remove onepad, by dedfinition.
 
+			// bug fixed...
 			if(charge > (double)0x7FFF) {
-				l->charge = (u_short) (charge / 1024.0) ;
+				
+				int ch = (int) (charge+1) ;	// roundoff
+
+				ch /= 1024 ;	// do what FCF does...
+
+				l->charge = (u_short) ch * 1024 ;	// do what decoder does...
 				l->flags |= FCF_BIG_CHARGE ;
 			}
 			else {
@@ -147,7 +153,7 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 
 //		printf("AfterB: %2d: P [%d:%d], T [%d:%d], flags %d, charge %d\n",i,l->p1,l->p2,l->t1,l->t2,l->flags,l->charge) ;
 
-		if(l->flags & (FCF_ONEPAD | FCF_DEAD_EDGE)) {	// is this is still on, kill it with dead edge
+		if(l->flags & (FCF_ONEPAD | FCF_DEAD_EDGE | FCF_ROW_EDGE)) {	// is this is still on, kill it with dead edge
 			l->flags |= FCF_DEAD_EDGE ;
 			l->charge = 0 ;
 		}
@@ -192,12 +198,17 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 	cha = *p_buff >> 16 ;
 
 	if(cha >= 0x8000) {	// special case of very large charge...
-//printf("Big cha: 0x%08X\n",cha) ;
+//printf("1: Big cha: 0x%08X %d; %f %f\n",cha,cha,p,t) ;
 
 		fla |= FCF_BIG_CHARGE ;
 		cha = (cha & 0x7FFF) * 1024 ;
-		if(cha == 0) cha = 0x8000;	// exaclty
-//printf("Big cha: 0x%08X\n",cha) ;
+//		if(cha == 0) cha = 0x8000;	// exaclty, but can't be I think...
+
+//printf("2: Big cha: 0x%08X %d\n",cha,cha) ;
+
+		// quasi fix of the very large problem...
+		if(cha > 0xFFFF) cha = 0xFFFF ;	// because the daq_cld structure has charge as a short... damn...
+
 	}
 
 	p_tmp = *p_buff & 0xFFFF ;	// reuse p_tmp
@@ -212,17 +223,6 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 	p1 = (p_tmp >> 8) & 0x7 ;
 	p2 = (p_tmp >> 11) & 0x7 ;
 
-/*
-	if(((int)t-t1) < 0) {
-		printf("Tb %f %f %d %d\n",p,t,t1,t2) ;
-		//t1 = 0 ;
-	}
-
-	if(((int)p-p1) < 1) {
-		printf("Pad %f %f %d %d\n",p,t,p1,p2) ;
-		//p1 = 1 ;
-	}
-*/
 
 	t1 = (int)t - t1 ;
 	t2 = (int)t + t2 ;
@@ -235,7 +235,7 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 	dc->t2 = t2 ;
 	dc->p1 = p1 ;
 	dc->p2 = p2 ;
-	dc->charge = cha ;
+	dc->charge = cha ;	// this is a problem for BIG_CHARGE... it will strip the upper bits... unsolved.
 	dc->flags = fla ;
 	dc->pad = p ;
 	dc->tb = t ;
