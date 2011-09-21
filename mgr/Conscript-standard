@@ -131,20 +131,11 @@ if ($pkg eq "RTS") {
 
 # Some directories will need extra includes for the RTS DAQ reader
 my @DAQ_pkgs = qw(StDAQMaker StTofHitMaker StTpcHitMaker StEEmcPoolmuEztPanitkin  
-		  StBEMCPlots StBTofHitMaker StMtdHitMaker StPmdReadMaker St_pp2pp_Maker); 
+		  StBEMCPlots StBTofHitMaker StMtdHitMaker StPmdReadMaker St_pp2pp_Maker
+		); 
 # But any *Raw* in StRoot/ would have this automatically done / handled
-if ( -d "StRoot" ){
-    my @Apkgs = grep(/Raw/,glob("./StRoot/*"));
-    my $pkg;
-    if ( $#Apkgs != -1 ){
-	print "Found ".($#Apkgs+1)." Raw packages:";
-	foreach $pkg (@Apkgs){ 
-	    $pkg    =~ s/.*StRoot\///g;
-	    print " [$pkg]";
-	    push(@DAQ_pkgs,$pkg);
-	}
-	print "\n";
-    }
+if ( $pkg =~ m/Raw/ ){
+  push(@DAQ_pkgs,$pkg);
 }
 
 
@@ -702,7 +693,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
 
     }  elsif ( $pkg =~ m/^TPCCATracker$/) {
-	$CPPPATH .=
+        $CPPPATH .=
 	    $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/code";
 	#    $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/TBB/include";
 	#    print "CPPPATH => $CPPPATH\n";
@@ -716,22 +707,23 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$extraCXXFLAGS .= " -DNODEBUG";
 	$CXXFLAGS .= $extraCXXFLAGS;
 	# c++ `root-config --ldflags` -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
-#    # stand - alone 
-#    my $libs = "-lTPCCATracker -lVc -lTBB ". $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
-#    $envTPCCA = $env->clone('Package' => $pkg,
-#			    'EXTRA_CXXFLAGS' => $extraCXXFLAGS,
-#			    'CPPPATH'  => $CPPPATH,
-#			    'LIBPATH'  => $LIB . $main::PATH_SEPARATOR .$env->{Packages}->{ROOT}->{LIBDIR},
-#			    'LIBS'     => $libs
-#			   );
-#    my @programs = qw(./StRoot/TPCCATracker/CA.C);
-#    foreach my $progD (@programs) {
-#      my $prog = File::Basename::basename($progD,".C");
-#      Program      $envTPCCA $prog, ("#" . $progD);
-#      Install $envTPCCA $BIN, $prog;
-#    }
+	# stand - alone in .DEV2 only
+	if ($env->{STAR_VERSION} eq '.DEV2') {
+	  my $libs = "-lTPCCATracker -lVc -lTBB ". $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
+	  $envTPCCA = $env->clone('Package' => $pkg,
+				  'EXTRA_CXXFLAGS' => $extraCXXFLAGS,# . " -DDRAW", # -DHLTCA_STANDALONE
+				  'CPPPATH'  => $CPPPATH,
+				  'LIBPATH'  => $LIB . $main::PATH_SEPARATOR .$env->{Packages}->{ROOT}->{LIBDIR},
+				  'LIBS'     => $libs
+				 );
+	  my @programs = ($DirPath . "/CA.C");
+	  foreach my $progD (@programs) {
+	    my $prog = File::Basename::basename($progD,".C");
+	    Program      $envTPCCA $prog, ("#" . $progD);
+	    Install $envTPCCA $BIN, $prog;
+	  }
+	}
     }
-
     if ( $pkg =~ m/^Sti$/) {  
       if ($env1->{DEBUG} =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for Sti with gcc432
 	$envNoDeb = $env->clone('DEBUG' => '-g');
