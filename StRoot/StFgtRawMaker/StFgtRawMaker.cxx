@@ -2,11 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.12 2011/09/21 00:39:56 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.13 2011/09/21 17:49:34 sgliske Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
-//  Revision 1.12  2011/09/21 00:39:56  avossen
-//  added simple Fgt maker base class
+//  Revision 1.13  2011/09/21 17:49:34  sgliske
+//  alternate base class with more
+//   functionality and not an StMaker
 //
 //  Revision 1.11  2011/09/20 15:53:09  sgliske
 //  Update so that everything compiles nicely
@@ -53,91 +54,114 @@ Int_t StFgtRawMaker::Make()
   TStopwatch clock;
   clock.Start();
   LOG_DEBUG <<"StEmcRawMaker::Make()******************************************************************"<<endm;
-  if(!PrepareEnvironment())
-    { LOG_WARN <<"Could not prepare the environment to process the event "<<endm; }
-  return FillHits();
 
+  if( !mIsInitialized )
+     {
+        LOG_ERROR << "Not initialized" << endm;
+        return kStFatal;
+     }
+  else
+     {
+        return FillHits();
+     };
 };
 
 Int_t StFgtRawMaker::FillHits()
 {
 
-  Short_t quadrant=0;      
-  Char_t layer=0;
-  Double_t ordinate=0;
-  Double_t lowerSpan=0;
-  Double_t upperSpan=0;
-  Int_t rdo=0;
-  Int_t arm=0;
-  Int_t apv=0;
-  Int_t channel=0;
-  Short_t adc=0;
-  Short_t timebin=0;
-  Short_t discIdx=0;
+   Short_t quadrant=0;      
+   Char_t layer=0;
+   Double_t ordinate=0;
+   Double_t lowerSpan=0;
+   Double_t upperSpan=0;
+   Int_t rdo=0;
+   Int_t arm=0;
+   Int_t apv=0;
+   Int_t channel=0;
+   Short_t adc=0;
+   Short_t timebin=0;
+   Short_t discIdx=0;
 
-  while(this->GetNextDaqElement("fgt/adc"))
-    {
-      StRtsTable* rts_tbl=DaqDta();
-      //works because '*' operator is giving your the row
-      for(StRtsTable::iterator it=rts_tbl->begin();it!=rts_tbl->end();it++)
-	{
-	  fgt_adc_t *mFgtRawData=(fgt_adc_t*)*it;
-	  rdo=rts_tbl->Rdo();
-	  //this is different from rts_example
-	  channel=mFgtRawData->ch;
-	  timebin=mFgtRawData->tb;
-	  //look at rts_example for the mapping 
-	  adc=mFgtRawData->adc;
-	  arm=rts_tbl->Sector();
-	  apv=rts_tbl->Pad();
-	  Short_t geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
-	  StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
-	  StFgtRawHit hit(geoId,adc,timebin);
-	  StFgtDisc* pDisc=mFgtEvent->getDiscPtr(discIdx);
-	  if(pDisc)
-	    pDisc->getRawHitArray().PushBack(hit);
-	  else
-	    { LOG_WARN <<"Could not access disc "<<endm; }
-	}
-    }
-//now grab the constants from the header file, loop over the raw data and fill the hits...
-  return kStOK;
+   //now grab the constants from the header file, loop over the raw data and fill the hits...
+   while(this->GetNextDaqElement("fgt/adc"))
+      {
+         StRtsTable* rts_tbl=DaqDta();
+         //works because '*' operator is giving your the row
+         for(StRtsTable::iterator it=rts_tbl->begin();it!=rts_tbl->end();it++)
+            {
+               fgt_adc_t *mFgtRawData=(fgt_adc_t*)*it;
+               rdo=rts_tbl->Rdo();
+               //this is different from rts_example
+               channel=mFgtRawData->ch;
+               timebin=mFgtRawData->tb;
+               //look at rts_example for the mapping 
+               adc=mFgtRawData->adc;
+               arm=rts_tbl->Sector();
+               apv=rts_tbl->Pad();
+               Short_t geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
+               StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
+
+               StFgtRawHit hit(geoId,adc,timebin);
+               StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
+               if(pDisc)
+                  pDisc->getRawHitArray().PushBack( hit );
+               else
+                  { LOG_WARN <<"Could not access disc " << discIdx << endm; }
+            }
+      }
+
+   return kStOK;
 };
 
-Int_t StFgtRawMaker::PrepareEnvironment()
+Int_t StFgtRawMaker::Init()
 {
-  StEvent* mEvent=0;
-  Short_t numDiscs=6; //or get the number of discs
-  mEvent = (StEvent*)StRTSBaseMaker::GetInputDS("StEvent");
-  mFgtEvent= NULL;
-  if(mEvent)
-    {
-      mFgtEvent=mEvent->fgtEvent();
-    }
-  else
-    {
-      mEvent=new StEvent();
-      //hmmm.... see stEmcrawmaker
-      StRTSBaseMaker::AddData(mEvent);
-      mFgtEvent=mEvent->fgtEvent();
-    }
-  if(!mFgtEvent)
-    {
-      mFgtEvent=new StFgtEvent(numDiscs);
-      mEvent->setFgtEvent(mFgtEvent);
-      LOG_DEBUG << "::prepareEnvironment() has added a non existing StFgtEvent()"<<endm;
-    }
-  return kStOK;
+   Int_t ierr = kStOk;
+
+   if( !mIsInitialized ){
+      ierr = constructFgtEvent();
+
+      if( ierr || !mFgtEventPtr )
+         {
+            LOG_FATAL << "Error constructing FgtEvent" << endm;
+            ierr = kStFatal;
+         };
+
+      if( !ierr ){
+         StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
+         if(!mEvent)
+            {
+               mEvent=new StEvent();
+               //hmmm.... see stEmcrawmaker
+               AddData(mEvent);
+            }
+
+         mEvent->setFgtEvent( mFgtEventPtr );
+
+         mIsInitialized = 1;
+      };
+   };
+
+   return ierr;
 };
 
-StFgtRawMaker::StFgtRawMaker(const Char_t* name) : StFgtBaseMaker( name, "fgt" ), StRTSBaseMaker("fgt",name) {
-   LOG_INFO << "StFgtRawMaker constructed" << endm;
-   // nothing else to do
-};
+ StFgtRawMaker::StFgtRawMaker(const Char_t* name) :
+    StRTSBaseMaker( "adc", name ),
+    StFgtRawBase(),
+    mIsInitialized(0)
+       {
+          // nothing else to do
+       };
 
 
-StFgtRawMaker::~StFgtRawMaker(){
-   // nothing to do
+StFgtRawMaker::~StFgtRawMaker()
+   {
+      // nothing to do
+   };
+
+void StFgtRawMaker::Clear( Option_t *opts )
+{
+   if( mFgtEventPtr )
+      mFgtEventPtr->Clear( opts );
 };
 
 ClassImp(StFgtRawMaker);
