@@ -1,8 +1,8 @@
 //\class StFgtBaseMaker
 //\author Anselm Vossen (avossen@indiana.edu)
-// 
+// :
 //
-// 
+// :
 //
 
 #ifndef STAR_StFgtBaseMaker_HH
