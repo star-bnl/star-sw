@@ -1,8 +1,12 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtCosmicMaker.h,v 1.9 2011/09/21 17:49:32 sgliske Exp $
+//  $Id: StFgtCosmicMaker.h,v 1.10 2011/09/21 19:30:51 sgliske Exp $
 //  $Log: StFgtCosmicMaker.h,v $
+//  Revision 1.10  2011/09/21 19:30:51  sgliske
+//  Need RTS/src in path to DAQ_* directores
+//  so other non-RAW-makers can find the headers
+//
 //  Revision 1.9  2011/09/21 17:49:32  sgliske
 //  alternate base class with more
 //   functionality and not an StMaker
@@ -25,7 +29,7 @@
 #include "StRoot/St_base/StMessMgr.h"
 #include "StRoot/St_base/Stypes.h"
 
-#include <DAQ_READER/daqReader.h>
+#include "RTS/src/DAQ_READER/daqReader.h"
 
 class StFgtCosmicMaker : public StFgtRawBase, public StMaker
 {
