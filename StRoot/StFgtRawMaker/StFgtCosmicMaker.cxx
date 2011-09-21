@@ -14,25 +14,25 @@ void StFgtCosmicMaker::PrepareEnvironment()
 // {
 // };
 
-StFgtCosmicMaker::StFgtCosmicMaker( const Char_t* name ) : StFgtRawMaker( name )
+StFgtCosmicMaker::StFgtCosmicMaker( const Char_t* makerName ) : StFgtBaseMaker( makerName )
 {
   //default are 6 discs, let's just leave it at that, most of them will be empty
+
   mFgtEvent=new StFgtEvent();
 
 };
-StFgtCosmicMaker::StFgtCosmicMaker( const Char_t* name, const Char_t* daqFileName, Int_t numDiscs) : StFgtRawMaker( name )
+StFgtCosmicMaker::StFgtCosmicMaker( const Char_t* makerName, const Char_t* daqFileName, Int_t numDiscs) : StFgtBaseMaker( makerName )
 {
-   LOG_INFO << "Constructing the fgt event" << endm;
-
-  mFgtEvent=new StFgtEvent(0, numDiscs);
-
-   LOG_INFO << "constructing the daq reader" << endm;
+  //   LOG_INFO << "Constructing the fgt event" << endm;
+   mFgtEvent=new StFgtEvent(0, numDiscs);
+   //   cout <<"helow world"<<endl;
+   //   LOG_INFO << "constructing the daq reader" << endm;
 
   // unfortunately, the daqReader has some constness issues to be
   // fixed.  Until they are, must remove constness of the filename.
   mRdr = new daqReader( const_cast< Char_t* >( daqFileName) ) ;	
 
-   LOG_INFO << "done constructing" << endm;
+  //   LOG_INFO << "done constructing" << endm;
 
 
 };
@@ -41,7 +41,6 @@ StFgtCosmicMaker::StFgtCosmicMaker( const Char_t* name, const Char_t* daqFileNam
 //read next event from daq file and fill the fgtevent
 Int_t StFgtCosmicMaker::Make()
 {
-
   Short_t quadrant=0;      
   Char_t layer=0;
   Double_t ordinate=0;
@@ -84,7 +83,9 @@ Int_t StFgtCosmicMaker::Make()
 	  StFgtRawHit hit(geoId,adc,timebin);
 	  StFgtDisc* pDisc=mFgtEvent->getDiscPtr(discIdx);
 	  if(pDisc)
-	    pDisc->getRawHitArray().PushBack(hit);
+	    {
+	      pDisc->getRawHitArray().PushBack(hit);
+	    }
 	  else
 	    { LOG_WARN <<"Could not access disc "<<endm; }
 	}

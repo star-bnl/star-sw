@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.11 2011/09/20 15:53:09 sgliske Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.12 2011/09/21 00:39:56 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.12  2011/09/21 00:39:56  avossen
+//  added simple Fgt maker base class
+//
 //  Revision 1.11  2011/09/20 15:53:09  sgliske
 //  Update so that everything compiles nicely
 //  and so that one can execute the macro/simpleTestStandTest.C file
@@ -105,7 +108,7 @@ Int_t StFgtRawMaker::PrepareEnvironment()
 {
   StEvent* mEvent=0;
   Short_t numDiscs=6; //or get the number of discs
-  mEvent = (StEvent*)GetInputDS("StEvent");
+  mEvent = (StEvent*)StRTSBaseMaker::GetInputDS("StEvent");
   mFgtEvent= NULL;
   if(mEvent)
     {
@@ -115,7 +118,7 @@ Int_t StFgtRawMaker::PrepareEnvironment()
     {
       mEvent=new StEvent();
       //hmmm.... see stEmcrawmaker
-      AddData(mEvent);
+      StRTSBaseMaker::AddData(mEvent);
       mFgtEvent=mEvent->fgtEvent();
     }
   if(!mFgtEvent)
@@ -127,7 +130,7 @@ Int_t StFgtRawMaker::PrepareEnvironment()
   return kStOK;
 };
 
-StFgtRawMaker::StFgtRawMaker(const Char_t* name) : StRTSBaseMaker( "adc", name ) {
+StFgtRawMaker::StFgtRawMaker(const Char_t* name) : StFgtBaseMaker( name, "fgt" ), StRTSBaseMaker("fgt",name) {
    LOG_INFO << "StFgtRawMaker constructed" << endm;
    // nothing else to do
 };

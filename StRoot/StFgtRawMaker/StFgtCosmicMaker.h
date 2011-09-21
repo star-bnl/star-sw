@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtCosmicMaker.h,v 1.7 2011/09/20 15:53:09 sgliske Exp $
+//  $Id: StFgtCosmicMaker.h,v 1.8 2011/09/21 00:39:56 avossen Exp $
 //  $Log: StFgtCosmicMaker.h,v $
+//  Revision 1.8  2011/09/21 00:39:56  avossen
+//  added simple Fgt maker base class
+//
 //  Revision 1.7  2011/09/20 15:53:09  sgliske
 //  Update so that everything compiles nicely
 //  and so that one can execute the macro/simpleTestStandTest.C file
@@ -16,10 +19,10 @@
 
 #ifndef STAR_StFgtCosmicMaker_HH
 #define STAR_StFgtCosmicMaker_HH
-#include "StFgtRawMaker.h"
+#include "StFgtBaseMaker.h"
 #include <DAQ_READER/daqReader.h>
 
-class StFgtCosmicMaker : public StFgtRawMaker
+class StFgtCosmicMaker : public StFgtBaseMaker
 {
 
  public: 
@@ -39,7 +42,6 @@ class StFgtCosmicMaker : public StFgtRawMaker
 
  private:
   void clearHits();
-  StFgtEvent* mFgtEvent;
   daqReader *mRdr;
 
   ClassDef(StFgtCosmicMaker,1);
