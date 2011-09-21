@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtRawMaker.h,v 1.12 2011/09/21 00:39:56 avossen Exp $
+//  $Id: StFgtRawMaker.h,v 1.13 2011/09/21 17:23:56 avossen Exp $
 //  $Log: StFgtRawMaker.h,v $
+//  Revision 1.13  2011/09/21 17:23:56  avossen
+//  added virtual base classes
+//
 //  Revision 1.12  2011/09/21 00:39:56  avossen
 //  added simple Fgt maker base class
 //
@@ -31,7 +34,7 @@
 //#include <StDAQMaker/StDAQReader.h>
 //#include "StRoot/StFgtUtil/database/StFgtDb.h"
 
-class StFgtRawMaker : public StRTSBaseMaker, StFgtBaseMaker
+class StFgtRawMaker : virtual public StRTSBaseMaker, StFgtBaseMaker
 {
  protected:
    // StEvent*  mEvent;

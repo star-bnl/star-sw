@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: simpleTestStandTest.C,v 1.2 2011/09/21 00:39:57 avossen Exp $
+ * $Id: simpleTestStandTest.C,v 1.3 2011/09/21 17:23:56 avossen Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: simpleTestStandTest.C,v $
+ * Revision 1.3  2011/09/21 17:23:56  avossen
+ * added virtual base classes
+ *
  * Revision 1.2  2011/09/21 00:39:57  avossen
  * added simple Fgt maker base class
  *
@@ -61,6 +64,7 @@ void LoadLibs() {
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("StEvent");
+  gSystem->Load("RTS");
   cout << "loaded StEvent library" << endl;
 
   gSystem->Load("StFgtUtil");

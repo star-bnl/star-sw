@@ -14,7 +14,7 @@
 #include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
 
 
-class StFgtBaseMaker : public StMaker
+class StFgtBaseMaker : virtual public StMaker
 {
 
  public:
