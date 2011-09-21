@@ -49,7 +49,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.50 2011/09/18 22:39:48 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.51 2011/09/21 15:34:31 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -183,7 +183,7 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
     LOG_INFO << "StTpcRSMaker:: use Tpc dE/dx correction from calibaration" << endm;
     Int_t Mask = -1; // 22 bits
     CLRBIT(Mask,StTpcdEdxCorrection::kAdcCorrection);
-    m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask);
+    m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
   }
   if (TESTBIT(m_Mode,kDistortion)) {
     LOG_INFO << "StTpcRSMaker:: use Tpc distortion correction" << endm;
@@ -348,14 +348,13 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
 	params[0] = gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();                     // w = width of pad       
 	params[1] = gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
 	params[2] = gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                         // s = wire spacing       
-	//    params[3] = anodeWireRadius;                                                   // a = Anode wire radius  
+	params[3] = St_TpcResponseSimulatorC::instance()->K3IP();
 	params[4] = 0;
 	params[5] = gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch();
       } else {    
 	params[0] = gStTpcDb->PadPlaneGeometry()->outerSectorPadWidth();                    // w = width of pad       
 	params[1] = gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation();// h = Anode-Cathode gap   
 	params[2] = gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                        // s = wire spacing       
-	//      params[3] = gStTpcDb->WirePlaneGeometry()->anodeWireRadius();               // a = Anode wire radius  
 	params[3] = St_TpcResponseSimulatorC::instance()->K3OP();
 	params[4] = 0;
 	params[5] = gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
@@ -919,9 +918,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  TRVector xyzRangeL(3, xRange*rX, xRange*rY, 0.);
 	  Double_t *cxyz = unit.xyz();
 	  TRMatrix L2L(3,3, 
-		       cxyz[2], - cxyz[0]*cxyz[2], cxyz[0],
-		       cxyz[0], - cxyz[1]*cxyz[2], cxyz[1],
-		       0.0    , cxyz[0]*cxyz[0] + cxyz[1]*cxyz[1], cxyz[2]);
+		       cxyz[2], - cxyz[0]*cxyz[2]                  , cxyz[0],
+		       cxyz[0], - cxyz[1]*cxyz[2]                  , cxyz[1],
+		       0.0    ,   cxyz[0]*cxyz[0] + cxyz[1]*cxyz[1], cxyz[2]);
 	  TRVector xyzR(L2L,TRArray::kAxB,xyzRangeL);
 	  if (Debug()%10 > 2) {
 	    LOG_INFO << "xyzRangeL: " << xyzRangeL << endm;
@@ -1568,8 +1567,11 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.50 2011/09/18 22:39:48 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.51 2011/09/21 15:34:31 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.51  2011/09/21 15:34:31  fisyak
+// Restore K3IP parameter
+//
 // Revision 1.50  2011/09/18 22:39:48  fisyak
 // Extend dN/dx table (H.Bichsel 09/12/2011) to fix bug #2174 and #2181, clean-up
 //
