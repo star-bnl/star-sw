@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: simpleTestStandTest.C,v 1.1 2011/09/20 15:53:09 sgliske Exp $
+ * $Id: simpleTestStandTest.C,v 1.2 2011/09/21 00:39:57 avossen Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: simpleTestStandTest.C,v $
+ * Revision 1.2  2011/09/21 00:39:57  avossen
+ * added simple Fgt maker base class
+ *
  * Revision 1.1  2011/09/20 15:53:09  sgliske
  * Update so that everything compiles nicely
  * and so that one can execute the macro/simpleTestStandTest.C file
@@ -30,7 +33,6 @@ int simpleTestStandTest( const Char_t *filename = "testfile.sfs",
 
    cout << "Constructing the maker" << endl;
    StFgtCosmicMaker *cosmicMkr = new StFgtCosmicMaker( "cosmicMaker", filename, numDiscs );
-
    cout << "Initializing" << endl;
    ierr = cosmicMkr->Init();
 
