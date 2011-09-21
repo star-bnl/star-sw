@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.15 2011/07/19 19:10:15 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.16 2011/09/21 23:03:24 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -136,7 +136,7 @@ int StTGeoHelper::Load(const char *geo)
            ,gGeoManager->GetName(),gGeoManager->GetTitle());
     return -1; 
   }
-  TString ts("$STAR/StarDb/VmcGeometry/");
+  TString ts("$STAR/StarDb/AgiGeometry/");
   ts+=geo; ts+=".h";
   int ierr=0;
   Long_t ans = gROOT->Macro(ts, &ierr); if (ans){};
@@ -650,7 +650,7 @@ const char *StTGeoHelper::GetPath() const
 //_____________________________________________________________________________
 void StTGeoHelper::Test()
 {
-   gROOT->Macro("$STAR/StarDb/VmcGeometry/y2009.h");
+   gROOT->Macro("$STAR/StarDb/AgiGeometry/y2009.h");
    StTGeoHelper &hlp = *StTGeoHelper::Instance();
    hlp.Init(1+2);
 //   hlp.ls("p");
