@@ -193,6 +193,7 @@ StEemcTriggerSimu::InitRun(int runnumber){
   //char text[1000];
   //sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),mYear);  
   //EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
+
   if (mOnlineMode) {
     LOG_INFO << "Using EEMC ONLINE pedestals" << endm;
     EemcTrigUtil::getFeePed4(dbtime,mxChan,feePed);
@@ -200,6 +201,15 @@ StEemcTriggerSimu::InitRun(int runnumber){
   else {
     LOG_INFO << "Using EEMC OFFLINE pedestals" << endm;
     transform(ped,ped+mxCr*mxChan,feePed,computePed4);
+  }
+
+  LOG_INFO << "cr\tchan\tped\tped4" << endm;
+
+  for (int crate = 1; crate <= mxCr; ++crate) {
+    for (int chan = 0; chan < 120; ++chan) {
+      int rdo = (crate-1)*mxChan+chan;
+      LOG_INFO << crate << '\t' << chan << '\t' << ped[rdo] << '\t' << feePed[rdo] << endm;
+    }
   }
 
   if( mYear == 2006 ){ // #### modified line by Liaoyuan 
@@ -735,6 +745,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.40  2011/09/22 01:03:12  pibero
+// Log crate, channel, pedestal and ped4
+//
 // Revision 1.39  2011/09/20 13:32:43  pibero
 // Added support for using EEMC offline pedestals (default)
 //
