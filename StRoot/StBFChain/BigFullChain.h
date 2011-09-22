@@ -695,6 +695,7 @@ Bfc_st BFC[] = { // standard chains
   {"genvtx"      ,""  ,"","ctf_T,EEmcUtil","StGenericVertexMaker"
    ,"St_ctf,St_ctf_Maker,Minuit,StGenericVertexMakerNoSti",                 "Generic Vertex Finder",kFALSE},
   {"StiPulls" ,"","",""                                         ,"","", "Request to make Sti Pulls",kFALSE},
+  {"StvPulls" ,"","",""                                         ,"","", "Request to make Stv Pulls",kFALSE},
   {"StiLib"   ,"","",""                                                        ,"","Sti","Load Sti",kFALSE},
   {"StiCALib" ,"","",""                                                   ,"","StiCA","Load Sti+CA",kFALSE},
   {"StiTpc"   ,"","","TpcDb,ITTF,tpc_T,dbutil,detDb,StarMagField,magF"   ,"","StiTpc","Load StiTpc",kFALSE},

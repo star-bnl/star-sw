@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.585 2011/09/12 22:21:47 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.586 2011/09/22 16:33:15 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -371,7 +371,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("Embedding")) mk->SetAttr("Embedding",kTRUE);
     }
     //		Sti(ITTF) start
-    if (maker == "StiMaker" || maker == "StiVMCMaker") {
+    if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "Stv") {
       if (GetOption("NoSvtIT")) mk->SetAttr("useSvt"	,kFALSE);
       else
 	if (GetOption("SvtIT")){
@@ -398,7 +398,8 @@ Int_t StBFChain::Instantiate()
 	mk->SetAttr("activeHpd",kTRUE);
       }
 
-      if (GetOption("StiPulls"))  mk->SetAttr("makePulls"  ,kTRUE);
+      if (GetOption("StiPulls") || 
+	  GetOption("StvPulls"))  mk->SetAttr("makePulls"  ,kTRUE);
       if (GetOption("skip1row"))  mk->SetAttr("skip1row"   ,kTRUE);
       if (GetOption("EastOff"))   mk->SetAttr("EastOff"    ,kTRUE);
       if (GetOption("WestOff"))   mk->SetAttr("WestOff"    ,kTRUE);
