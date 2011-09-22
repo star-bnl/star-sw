@@ -34,7 +34,6 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
  public:
   enum {kOnlyAdc=0,kAdcAndTrig, kAdcCompareTrig};
   void setConfig(int x) {mConfig=x;}
-  void setOnlineMode(bool flag = true) { mOnlineMode = flag; } // default = offline
 
  private:
   StEEmcDb *mDbE;
@@ -43,7 +42,8 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   TString  mSetupPath;
 
   int mConfig; // see enum
-  bool mOnlineMode;
+  int mPedMode;
+  TString mPedFile;
   enum {nThr=3};
   int mHTthr[nThr], mTPthr[nThr],mHTTPthrSelc;
 
@@ -61,17 +61,24 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
   //  local event storage
   enum {mxCr=6, mxChan=128};
+  int getRdo(int crate, int chan) const { return (crate-1)*mxChan+chan; }
+  int getCrate(int rdo) const { return rdo/mxChan+1; }
+  int getChannel(int rdo) const { return rdo%mxChan; }
   int rawAdc [mxCr*mxChan]; // *** 'chan' is counting faster***,
   int feePed [mxCr*mxChan]; // do NOT change this memory allocation scheme w/o 
   int feeMask[mxCr*mxChan];// understanding details  of  EEfeeTPTree::compute()
   float ped[mxCr*mxChan];
- 
+
+public: 
+  //  pedestal treatment
+  enum { kOnline, kOffline, kLocal };
+  void setPedMode(int pedmode) { mPedMode = pedmode; }
+  void setPedFile(const char* pedfile) { mPedFile = pedfile; }
+
   //   Endcap FEE_TP+DSM0...3 Tree emulators processing ADC
- public:
   EEfeeTPTree *feeTPTreeADC;
   EEdsm0Tree  * dsm0TreeADC;
   EEdsm1Tree  * dsm1TreeADC; 
- public:
   EMCdsm2Tree * dsm2TreeADC;
   
   // #### modified by Liaoyuan ####
@@ -150,6 +157,13 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.23  2011/09/22 15:55:21  pibero
+// Added EEMC pedestal modes:
+//
+// kOnline  = use online pedestals
+// kOffline = use offline pedestals
+// kLocal   = use pedestals from a local file (format: crate channel pedestal ped4)
+//
 // Revision 1.22  2011/09/20 13:32:43  pibero
 // Added support for using EEMC offline pedestals (default)
 //

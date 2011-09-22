@@ -55,7 +55,7 @@ ClassImp(StEemcTriggerSimu);
 
 StEemcTriggerSimu::StEemcTriggerSimu() {
   //  printf("The StEemcTriggerSimu constructor\n");
-  mOnlineMode = false;
+  mPedMode = kOffline;
   nInpEve=0;
   mHList=0;
   mDbE=0;
@@ -177,11 +177,10 @@ StEemcTriggerSimu::triggerDecision(int trigId) {
 void  
 StEemcTriggerSimu::InitRun(int runnumber){
 
-  
+  memset(ped,0,sizeof(ped));
   memset(feePed,0,sizeof(feePed));
   memset(feeMask,0xff,sizeof(feeMask)); // mask everything as bad
-  memset(ped,0,sizeof(ped));
-  getEemcFeeMask();		// get offline mask & ped
+  getEemcFeeMask();		// get offline mask
 
   const TDatime& dbtime = StMaker::GetChain()->GetDBTime();
   mYear = dbtime.GetYear();
@@ -194,20 +193,46 @@ StEemcTriggerSimu::InitRun(int runnumber){
   //sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),mYear);  
   //EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
 
-  if (mOnlineMode) {
+  switch (mPedMode) {
+  case kOnline:
     LOG_INFO << "Using EEMC ONLINE pedestals" << endm;
     EemcTrigUtil::getFeePed4(dbtime,mxChan,feePed);
-  }
-  else {
+    break;
+
+  case kOffline:
     LOG_INFO << "Using EEMC OFFLINE pedestals" << endm;
-    transform(ped,ped+mxCr*mxChan,feePed,computePed4);
+    assert(mDbE);
+    for (int crate = 1; crate <= mxCr; ++crate) {
+      for (int chan = 0; chan < mxChan; ++chan) {
+	const EEmcDbItem* x = mDbE->getByCrate(crate,chan);
+	if (!x) continue; // skip not mapped channels
+	int rdo = getRdo(crate,chan);
+	ped[rdo] = x->ped;
+	feePed[rdo] = computePed4(x->ped);
+      } // for chan
+    } // for crate
+    break;
+
+  case kLocal:
+    LOG_INFO << "Using EEMC LOCAL pedestals from file " << mPedFile << endm;
+    ifstream pedfile(mPedFile);
+    assert(pedfile);
+    int crate, chan, iped;
+    float fped;
+    while (pedfile >> crate >> chan >> fped >> iped) {
+      int rdo = getRdo(crate,chan);
+      ped[rdo] = fped;
+      feePed[rdo] = iped;
+    }
+    pedfile.close();
+    break;
   }
 
   LOG_INFO << "cr\tchan\tped\tped4" << endm;
 
   for (int crate = 1; crate <= mxCr; ++crate) {
     for (int chan = 0; chan < 120; ++chan) {
-      int rdo = (crate-1)*mxChan+chan;
+      int rdo = getRdo(crate,chan);
       LOG_INFO << crate << '\t' << chan << '\t' << ped[rdo] << '\t' << feePed[rdo] << endm;
     }
   }
@@ -441,7 +466,7 @@ StEemcTriggerSimu::getEemcAdc(){
     
 	assert(x->crate >= 1 && x->crate <=  6);
 	assert(x->chan  >= 0 && x->chan  < 120);
-	int rdo = (x->crate-1)*mxChan+x->chan;
+	int rdo = getRdo(x->crate,x->chan);
 	rawAdc[rdo] = AdcRead;
 
 	//LOG_DEBUG << Form("crate=%d chan=%d rdo=%d adc=%d",x->crate,x->chan,rdo,AdcRead) << endm;
@@ -466,7 +491,7 @@ StEemcTriggerSimu::getEemcAdc(){
 	      // Db ranges: sector=1-12,sub=A-E,eta=1-12,type=T,P-R; slow method
 	      const EEmcDbItem* x = mDbE->getTile(sec,sub,eta,'T');
 	      if (!x) continue;
-	      int rdo = (x->crate-1)*mxChan+x->chan;
+	      int rdo = getRdo(x->crate,x->chan);
 	      rawAdc[rdo] = adc;
 	      //LOG_DEBUG << Form("crate=%d chan=%d rdo=%d adc=%d",x->crate,x->chan,rdo,adc) << endm;
 	    } // End loop over hits
@@ -671,9 +696,8 @@ StEemcTriggerSimu::getEemcFeeMask() {
       if (!x) continue; // skip not mapped channels
       bool killIt = (x->stat & EEMCSTAT_HOTHT) || (x->fail & EEMCFAIL_GARBG);
       if (killIt) x->print();
-      int rdo = (x->crate-1)*mxChan+ich;
+      int rdo = getRdo(x->crate,ich);
       feeMask[rdo] = killIt;
-      ped[rdo] = x->ped;
       LOG_DEBUG << Form("crate=%d chan=%d rdo=%d name=%s tube=%s sec=%d sub=%c eta=%d stat=0x%04x fail=0x%04x killIt=%d ped=%f",
 			x->crate,x->chan,rdo,x->name,x->tube,x->sec,x->sub,x->eta,x->stat,x->fail,killIt,x->ped) << endm;
     } // end of chan loop
@@ -745,6 +769,13 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.41  2011/09/22 15:55:21  pibero
+// Added EEMC pedestal modes:
+//
+// kOnline  = use online pedestals
+// kOffline = use offline pedestals
+// kLocal   = use pedestals from a local file (format: crate channel pedestal ped4)
+//
 // Revision 1.40  2011/09/22 01:03:12  pibero
 // Log crate, channel, pedestal and ped4
 //
