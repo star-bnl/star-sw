@@ -62,8 +62,10 @@ Int_t StFgtCosmicMaker::Make()
   //char *ret =
   mRdr->get(0,EVP_TYPE_ANY);
   if(mRdr->status == EVP_STAT_EOR) {
-    LOG_DEBUG <<"End of File reached..."<<endl;
-    return kStEOF;	
+     //LOG_DEBUG <<"End of File reached..."<<endm;
+     //return kStEOF;	
+     cout <<"End of File reached..."<<endl;
+     return kStOk;
   }
   daq_dta *dd = 0;
   dd = mRdr->det("fgt")->get("adc");
