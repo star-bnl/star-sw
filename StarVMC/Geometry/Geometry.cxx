@@ -90,10 +90,6 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   // Beam pipe is always there, but configuration may change
   geom.success_pipe = ConstructPipe( geom.pipeFlag, geom.pipeStat );
 
-  // Add in the support cone
-  geom.success_scon = ConstructScon( geom.sconFlag, geom.sconStat );
-  geom.success_idsm = ConstructIdsm( geom.idsmFlag, geom.idsmStat );
-
   // Minbias trigger and vertex positioning detectors
   geom.success_bbcm = ConstructBbcm("BBCMon",       geom.bbcmStat );
   geom.success_vpdd = ConstructVpdd( geom.vpddFlag, geom.vpddStat );
@@ -108,8 +104,13 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   // Tracking detectors
   geom.success_tpce = ConstructTpce( geom.tpceFlag, geom.tpceStat );
 
-  geom.success_svtt = ConstructSvtt( geom.svttFlag, geom.svttStat ); // SVT must preceed FTPC
-  geom.success_sisd = ConstructSisd( geom.sisdFlag, geom.sisdStat );
+  geom.success_svtt = ConstructSvtt( geom.svttFlag, geom.svttStat ); // SVT must preceede FTPC and SISD
+  geom.success_sisd = ConstructSisd( geom.sisdFlag, geom.sisdStat ); // 
+
+  // Add in the support cone
+  geom.success_scon = ConstructScon( geom.sconFlag, geom.sconStat ); // support cone before SVT
+  geom.success_idsm = ConstructIdsm( geom.idsmFlag, geom.idsmStat );
+
 
   geom.success_ftpc = ConstructFtpc( geom.ftpcFlag, geom.ftpcStat );
   geom.success_ftro = ConstructFtro( geom.ftroFlag, geom.ftroStat );
@@ -570,7 +571,16 @@ Bool_t Geometry::ConstructSisd( const Char_t *flag, Bool_t go )
       AgStructure::AgDetpAdd( "Ssdp_t", "placement", 1 );
     }
 
-  Int_t config = sisdGeom.config % 10;
+  Int_t config = sisdGeom.config;
+  Int_t level  = 0;
+  if ( config > 10 )
+    {
+
+      level = config / 10;  
+      if ( level <= 5 ) config = config % 10;
+      
+    }
+
   AgStructure::AgDetpAdd("Ssdp_t","config",config);
     
   if (go)
@@ -1105,24 +1115,17 @@ Bool_t Geometry::SisdInit()
     sisdGeom.module="Meh";
     sisdGeom.fill();
   }
-  //replace [exe SISD02;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig= 2;]
-  sisdGeom.select="SISD02"; sisdGeom.config=2;  sisdGeom.module="SisdGeo"; sisdGeom.fill();
-  //replace [exe SISD12;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=12;]
-  sisdGeom.select="SISD12"; sisdGeom.config=12; sisdGeom.module="SisdGeom2"; sisdGeom.fill();
-  //replace [exe SISD22;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=22;]
+
+  sisdGeom.select="SISD02"; sisdGeom.config= 2; sisdGeom.module="SisdGeo";  sisdGeom.fill();
+  sisdGeom.select="SISD12"; sisdGeom.config=12; sisdGeom.module="SisdGeo2"; sisdGeom.fill();
   sisdGeom.select="SISD22"; sisdGeom.config=22; sisdGeom.module="SisdGeo2"; sisdGeom.fill();
-  //replace [exe SISD23;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=23;]
-  sisdGeom.select="SISD23"; sisdGeom.config=23; sisdGeom.module="SisdGeom3"; sisdGeom.fill();
-  //replace [exe SISD24;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=24;]
-  sisdGeom.select="SISD24"; sisdGeom.config=24; sisdGeom.module="SisdGeom4"; sisdGeom.fill();
-  //replace [exe SISD35;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=35;]
-  sisdGeom.select="SISD35"; sisdGeom.config=35; sisdGeom.module="SisdGeom6"; sisdGeom.fill();
-  //replace [exe SISD55;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=55;]
+  sisdGeom.select="SISD23"; sisdGeom.config=23; sisdGeom.module="SisdGeo3"; sisdGeom.fill();
+  sisdGeom.select="SISD24"; sisdGeom.config=24; sisdGeom.module="SisdGeo4"; sisdGeom.fill();
+  sisdGeom.select="SISD35"; sisdGeom.config=35; sisdGeom.module="SisdGeo6"; sisdGeom.fill();
   sisdGeom.select="SISD55"; sisdGeom.config=55; sisdGeom.module="SisdGeo6"; sisdGeom.fill();
-  //replace [exe SISD65;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=65;]
   sisdGeom.select="SISD65"; sisdGeom.config=65; sisdGeom.module="SisdGeo6"; sisdGeom.fill();
-  //replace [exe SISD75;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=75;]
   sisdGeom.select="SISD75"; sisdGeom.config=75; sisdGeom.module="SisdGeo6"; sisdGeom.fill();
+
   return true;
 }
 
