@@ -15,65 +15,65 @@
         
 
         <Structure name="VPDV"  >
-            <var name="version" type="float"  />
-            <var name="vpdconfig" type="int"  />
+            <var name="version"   type="float"  />
+            <var name="vpdconfig" type="float"  />
         </Structure>
         
         <Structure name="VPDG"  >
-            <var name="version" type="float"  />
+            <var name="version"  type="float"  />
             <var name="zposEast" type="float"  />
             <var name="zposWest" type="float"  />
-            <var name="rmin" type="float"  />
-            <var name="rmax" type="float"  />
-            <var name="BPwidth" type="float"  />
+            <var name="rmin"     type="float"  />
+            <var name="rmax"     type="float"  />
+            <var name="BPwidth"  type="float"  />
             <var name="BPlength" type="float"  />
-            <var name="BPthick" type="float"  />
+            <var name="BPthick"  type="float"  />
             <var name="BXheight" type="float"  />
             <var name="BXlength" type="float"  />
-            <var name="BXwidth" type="float"  />
-            <var name="BXthick" type="float"  />
-            <var name="BXzposC" type="float"  />
-            <var name="FPwidth" type="float"  />
+            <var name="BXwidth"  type="float"  />
+            <var name="BXthick"  type="float"  />
+            <var name="BXzposC"  type="float"  />
+            <var name="FPwidth"  type="float"  />
             <var name="FPheight" type="float"  />
-            <var name="FPthick" type="float"  />
+            <var name="FPthick"  type="float"  />
             <var name="FPAwidth" type="float"  />
-            <var name="FPAhght" type="float"  />
-            <var name="FPChght" type="float"  />
-            <var name="FPHhght" type="float"  />
+            <var name="FPAhght"  type="float"  />
+            <var name="FPChght"  type="float"  />
+            <var name="FPHhght"  type="float"  />
             <var name="FPHwidth" type="float"  />
             <var name="FPHthick" type="float"  />
-            <var name="STthick" type="float"  />
+            <var name="STthick"  type="float"  />
             <var name="STheight" type="float"  />
-            <var name="STangle" type="float"  />
+            <var name="STangle"  type="float"  />
             <var name="STdiagsz" type="float"  />
-            <var name="SCwidth" type="float"  />
+            <var name="SCwidth"  type="float"  />
             <var name="SCheight" type="float"  />
             <var name="SClength" type="float"  />
-            <var name="SCthick" type="float"  />
+            <var name="SCthick"  type="float"  />
             <var name="CLheight" type="float"  />
-            <var name="CLwidth" type="float"  />
+            <var name="CLwidth"  type="float"  />
             <var name="CLlength" type="float"  />
-            <var name="CLthick" type="float"  />
-            <var name="DETlen" type="float"  />
-            <var name="DETrad" type="float"  />
+            <var name="CLthick"  type="float"  />
+            <var name="DETlen"   type="float"  />
+            <var name="DETrad"   type="float"  />
             <var name="DETfront" type="float"  />
-            <var name="ConvThk" type="float"  />
-            <var name="RadiThk" type="float"  />
-            <var name="EleLeng" type="float"  />
-            <var name="DrLayer" type="float"  />
-            <var name="NumPMT" type="float"  />
-            <var name="PMTwall" type="float"  />
-            <var name="PMTrad" type="float"  />
-            <var name="PMTlen" type="float"  />
+            <var name="ConvThk"  type="float"  />
+            <var name="RadiThk"  type="float"  />
+            <var name="EleLeng"  type="float"  />
+            <var name="DrLayer"  type="float"  />
+            <var name="NumPMT"   type="float"  />
+            <var name="PMTwall"  type="float"  />
+            <var name="PMTrad"   type="float"  />
+            <var name="PMTlen"   type="float"  />
             <var name="IBchoice" type="float"  />
-            <var name="IBPosYc" type="float"  />
-            <var name="IBPosZc" type="float"  />
-            <var name="IBLeng" type="float"  />
+            <var name="IBPosYc"  type="float"  />
+            <var name="IBPosZc"  type="float"  />
+            <var name="IBLeng"   type="float"  />
             <var name="IBthickH" type="float"  />
             <var name="IBthickV" type="float"  />
             <var name="IBheight" type="float"  />
-            <var name="IBwidth" type="float"  />
-            <var name="IBwlen" type="float"  />
+            <var name="IBwidth"  type="float"  />
+            <var name="IBwlen"   type="float"  />
             <var name="IBwhghtF" type="float"  />
             <var name="IBwhghtB" type="float"  />
         </Structure>
