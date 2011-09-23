@@ -535,7 +535,7 @@ void AgMaterial::Component( const Char_t *name, Double_t a, Double_t z, Double_t
   mZ.push_back(z);
   mW.push_back(weight);
   
-  if ( weight > 1 )       // If we detect an atomic formula, set as atomic formula
+  if ( weight >= 1.0 )       // If we detect an atomic formula, set as atomic formula
     {
       mType=kCompound;
     }
