@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.67 2011/08/03 20:11:53 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.68 2011/09/23 21:54:32 perev Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.68  2011/09/23 21:54:32  perev
+* FGT two numbers id now
+*
 * Revision 1.67  2011/08/03 20:11:53  jwebb
 * Add MTD to the g2t hit tables.
 *
@@ -725,7 +728,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 *20*                                 Kai Schweda
       else if (Csys=='fgt') then
-        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+        volume_id = numbv(1)*100 + numbv(2)
 
 *21*                                 Gerrit van Nieuwenhuizen
       else if (Csys=='igt') then
