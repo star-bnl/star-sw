@@ -8,7 +8,7 @@ gfile o [1]
 detp geom y2008 field=-5.0
 gexec $STAR_LIB/geometry.so
 gclose all
-gexec  $STAR_LIB/libpythia_6410.so
+gexec  $STAR_LIB/libpythia_6410t.so
 gexec  $STAR_LIB/bpythia.so
 
 * sample II
