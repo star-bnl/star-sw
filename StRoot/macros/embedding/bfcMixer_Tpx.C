@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.26 2011/08/04 19:50:01 cpowell Exp $
+// $Id: bfcMixer_Tpx.C,v 1.27 2011/09/23 02:47:40 cpowell Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.27  2011/09/23 02:47:40  cpowell
+// Chain for p+p 200 P10ic production added. Setup for W embedding included.
+//
 // Revision 1.26  2011/08/04 19:50:01  cpowell
 // Flag included to embed Pythia events. This excludes StPrepEmbedmaker from the chain and runs starsim before reconstruction.
 //
@@ -54,6 +57,9 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
    TString prodP10icpp200("DbV20100301 pp2009c ITTF BEmcChkStat btof Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
    // production chain for P09ig p+p 500 GeV RFF & FF
    TString prodP09igpp500("DbV20091225 pp2009c ITTF BEmcChkStat btof Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
+   // production chain for P11b p+p 500 GeV run 2009  st_W reproduction with fixed bug for Pt >= 20GeV (not using VFMCE)
+   TString prodP11ibpp500("DbV20110310 OGGVoltErr pp2009c ITTF VFPPVnoCTB BEmcChkStat beamLine Corr4 OSpaceZ2 OGridLeak3D");
+	 prodP11ibpp500 += " VFPPVnoCTB beamLine TpxClu -VFMinuit -hitfilt";
 
   // BES Run10 chains
   TString prodP10ihAuAu39("DbV20100909 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
@@ -68,26 +74,31 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   TString geomP10ih("ry2010");
   TString geomP10ik(geomP10ih); // Same chain as P10ih
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
-  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
-  TString chain2OptPythia("fzin,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
+  TString chain2Opt("gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
 //  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
+	if(bPythia){
+		chain2Opt += ",fzin";
+	}
+	else {
+		chain2Opt += ",NoInput,PrepEmbed";
+	}
   chain2Opt += " ";
-  chain2OptPythia += " ";
 
   TString chain3Opt("");
-  if (prodName == "P08icpp")           { chain3Opt = prodP08icpp;       chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
-  else if (prodName == "P08iepp")      { chain3Opt = prodP08iepp;       chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
-  else if (prodName == "P08icAuAu9")   { chain3Opt = prodP08icAuAu9;    chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
-  else if (prodName == "P08icdAu")     { chain3Opt = prodP08icdAu;      chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
-  else if (prodName == "P08iedAu")     { chain3Opt = prodP08iedAu;      chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
-  else if (prodName == "P08icAuAu200") { chain3Opt = prodP08icAuAu200;  chain2Opt += geomP08ic; chain2OptPythia += geomP08ic;}
-  else if (prodName == "P09igpp500")   { chain3Opt = prodP09igpp500;    chain2Opt += geomP10ic; chain2OptPythia += geomP08ic;}
-  else if (prodName == "P10iapp")      { chain3Opt = prodP10iapp;       chain2Opt += geomP10ih; chain2OptPythia += geomP08ih;}
-  else if (prodName == "P10icpp200")   { chain3Opt = prodP10icpp200;    chain2Opt += geomP10ic; chain2OptPythia += geomP08ic;}
-  else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih; chain2OptPythia += geomP08ih;}
-  else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih; chain2OptPythia += geomP08ih;}
-  else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih; chain2OptPythia += geomP08ih;}
-  else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ik; chain2OptPythia += geomP08ik;}
+  if (prodName == "P08icpp")           { chain3Opt = prodP08icpp;       chain2Opt += geomP08ic;}
+  else if (prodName == "P08iepp")      { chain3Opt = prodP08iepp;       chain2Opt += geomP08ic;}
+  else if (prodName == "P08icAuAu9")   { chain3Opt = prodP08icAuAu9;    chain2Opt += geomP08ic;}
+  else if (prodName == "P08icdAu")     { chain3Opt = prodP08icdAu;      chain2Opt += geomP08ic;}
+  else if (prodName == "P08iedAu")     { chain3Opt = prodP08iedAu;      chain2Opt += geomP08ic;}
+  else if (prodName == "P08icAuAu200") { chain3Opt = prodP08icAuAu200;  chain2Opt += geomP08ic;}
+  else if (prodName == "P09igpp500")   { chain3Opt = prodP09igpp500;    chain2Opt += geomP10ic;}
+  else if (prodName == "P11ibpp500")   { chain3Opt = prodP11ibpp500;    chain2Opt += geomP10ic;}
+  else if (prodName == "P10iapp")      { chain3Opt = prodP10iapp;       chain2Opt += geomP10ih;}
+  else if (prodName == "P10icpp200")   { chain3Opt = prodP10icpp200;    chain2Opt += geomP10ic;}
+  else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih;}
+  else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih;}
+  else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih;}
+  else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ik;}
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
@@ -102,6 +113,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   else if (prodName == "P08iedAu")     { chain3Opt += geomP08ic; }
   else if (prodName == "P08icAuAu200") { chain3Opt += geomP08ic; }
   else if (prodName == "P09igpp500")   { chain3Opt += geomP10ic; }
+  else if (prodName == "P11ibpp500")   { chain3Opt += geomP10ic; }
   else if (prodName == "P10iapp")      { chain3Opt += geomP10ih; }
   else if (prodName == "P10icpp200")   { chain3Opt += geomP10ic; }
   else if (prodName == "P10ihAuAu39")  { chain3Opt += geomP10ih; }
@@ -125,14 +137,10 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   Chain->cd();
   //________________________________________________________________________________  
   if(bPythia){
-		StMaker *saveMk = 0;
-		//bfc(-1,chain2OptPythia);
-  	chain2 = new StBFChain("Two");
-  	saveMk = chain2->cd();
-  	chain2->SetFlags(chain2OptPythia);
-  	chain2->Set_IO_Files(fzdfile);
-  	chain2->Load();
-  	chain2->Instantiate();
+    bfc(-1,chain2Opt,fzdfile);
+  	chain2 = chain;
+  	chain2->SetName("Two"); 
+  	Chain->cd();
   	if (chain2->GetOption("TRS")){
     	StTrsMaker *trsMk = (StTrsMaker *) chain2->GetMaker("Trs");
     	if (! trsMk) {
@@ -141,7 +149,6 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
     	}
     	trsMk->setNormalFactor(1.32);
   	}
-  	saveMk->cd();
 	}
 	else {
 		bfc(-1,chain2Opt);
@@ -184,7 +191,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
 	  mixer->SetInput("Input1","TpxRaw/.data/Event");
         }
 
-  if (chain2Opt.Contains("TpcRS",TString::kIgnoreCase) && !bPythia) {
+  if (chain2Opt.Contains("TpcRS",TString::kIgnoreCase)) {
     mixer->SetInput("Input2","TpcRS/Event");
   } else {
     mixer->SetInput("Input2","Trs/.const/Event");
@@ -239,7 +246,6 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   gMessMgr->QAInfo() << Form("with %s", Chain->GetCVS()) << endm;
   // embedded particle set
 	if(!bPythia){
-	  // embedded particle set
 	  StPrepEmbedMaker *embMk = (StPrepEmbedMaker *) Chain->Maker("PrepEmbed");
   	if (! embMk) return;
  		cout << "bfcMixer: Setting PID: "<<pid<<endl;
