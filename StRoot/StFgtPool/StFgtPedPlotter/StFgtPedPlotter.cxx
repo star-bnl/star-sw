@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedPlotter.cxx,v 1.1 2011/09/22 21:21:59 sgliske Exp $
+ * $Id: StFgtPedPlotter.cxx,v 1.2 2011/09/24 02:14:10 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedPlotter.cxx,v $
+ * Revision 1.2  2011/09/24 02:14:10  sgliske
+ * updated FGT cosmic QA
+ *
  * Revision 1.1  2011/09/22 21:21:59  sgliske
  * creation
  *
@@ -76,6 +79,7 @@ Int_t StFgtPedPlotter::makePlots(){
          Int_t i = iter->second;
 
          TGraphErrors* gr = makePlot( X[i], Y[i], E[i], timebin );
+         //cout << "Plot for time bin " << timebin << ' ' << gr << endl;
 
          if( gr && gr->GetN() ){
             mGraphVec[i] = gr;
@@ -113,21 +117,25 @@ Int_t StFgtPedPlotter::fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E ){
             if( disc == mDiscId && quad == mQuadId ){
                Int_t i = mTimeBinMap[ timebin ];
 
-               if( mPlotVsStrip ){
-                  x = strip + (layer == 'R')*kNumFgtStripsPerLayer;
+               if( mPlotVsStrip == 'R' ){
+                  x = (strip == 'R') ? strip : -1;
+               } else if( mPlotVsStrip == 'P' ){
+                  x = (strip == 'P') ? strip : -1;
                } else {
-                  ierr = 2;
-                  cerr << "Not yet programmed" << endl;
+                  x = strip + (layer == 'R')*kNumFgtStripsPerLayer;  // need to fix this
+                  std::cerr << "WARNING: asked for vs. channel but getting vs. strip" << endl;
                };
 
-               X[i].push_back( x );
-               Y[i].push_back( ped );
-               E[i].push_back( stdev );
+               if( x >= 0 ){
+                  X[i].push_back( x );
+                  Y[i].push_back( ped );
+                  E[i].push_back( stdev );
 
-               if( ped+stdev > mMaxY )
-                  mMaxY = (ped+stdev);
-               if( x > mMaxX )
-                  mMaxX = x;
+                  if( ped+stdev > mMaxY )
+                     mMaxY = (ped+stdev);
+                  if( x > mMaxX )
+                     mMaxX = x;
+               };
             };
          };
 
