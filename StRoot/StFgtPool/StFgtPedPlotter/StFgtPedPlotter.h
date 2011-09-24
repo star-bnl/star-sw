@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedPlotter.h,v 1.1 2011/09/22 21:22:01 sgliske Exp $
+ * $Id: StFgtPedPlotter.h,v 1.2 2011/09/24 02:14:10 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedPlotter.h,v $
+ * Revision 1.2  2011/09/24 02:14:10  sgliske
+ * updated FGT cosmic QA
+ *
  * Revision 1.1  2011/09/22 21:22:01  sgliske
  * creation
  *
@@ -58,7 +61,7 @@ class StFgtPedPlotter {
    // modifiers
    void setReadFromFile( const Char_t* filename );
    void setTimeBinMask( Short_t mask = 0xFF );
-   void setPlotVsStrip( Bool_t doIt = 1 );
+   void setPlotVsStrip( Char_t type = 'R' );
    void setDisc( Short_t discId );
    void setQuad( Short_t quadId );
 
@@ -77,7 +80,7 @@ class StFgtPedPlotter {
 
    // what to plot
    Short_t mDiscId, mQuadId;
-   Bool_t mPlotVsStrip;
+   Char_t mPlotVsStrip;
 
    // to load the data
    virtual Int_t fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E );
@@ -109,10 +112,14 @@ inline StFgtPedPlotter::StFgtPedPlotter() :
 inline StFgtPedPlotter::~StFgtPedPlotter(){ /* */ };
 
 inline void StFgtPedPlotter::setTimeBinMask( Short_t mask ){ mTimeBinMask = mask; };
-inline void StFgtPedPlotter::setPlotVsStrip( Bool_t doIt ){ mPlotVsStrip = doIt; };
 inline void StFgtPedPlotter::setDisc( Short_t discId ){ mDiscId = discId; };
 inline void StFgtPedPlotter::setQuad( Short_t quadId ){ mQuadId = quadId; };
 inline void StFgtPedPlotter::setReadFromFile( const Char_t* filename ){ mFileNameIn = filename; };
+
+inline void StFgtPedPlotter::setPlotVsStrip( Char_t strip ){
+   strip = toupper( strip );
+   mPlotVsStrip = ( (strip == 'R' || strip == 'P') ? strip : 'c' );
+};
 
 inline Float_t StFgtPedPlotter::getMaxX() const { return mMaxX; };
 inline Float_t StFgtPedPlotter::getMaxY() const { return mMaxY; };
