@@ -13,10 +13,30 @@ AgModule::AgModule( const Char_t *name, const Char_t *comment ) : AgBlock(name,c
 // ---------------------------------------------------------------------------------------------
 AgBlock *AgModule::AddBlock( const Char_t *name )
 {
-  AgBlock *block = mBlocks[ name ];
+
+  TString Name      = name;
+  TString Module    = GetName();
+  TString NameSpace = Module;  NameSpace.ToUpper();
+
+  Module.ToUpper();
+  Name = Module + "::" + Name;
+
+  // Get block from list of blocks defined in this module
+  AgBlock *block = mBlocks[ name ];   
+
   if ( !block )
     {
-      TClass *_class = TClass::GetClass( name );
+
+      //
+      // If it doesn't exist, consult the ROOT dictionary to find the class.
+      // We will create a new instance of this block and add it to the local
+      // list of blocks, and to the global block table.  
+      //
+      // We ensure at this point that the class we obtain is from the namespace
+      // implied by the module name.
+      //
+      TClass *_class = TClass::GetClass( Name );
+
       if ( !_class )
       {
     	  Warning("AgModule::AddBlock(const Char_t *name)",Form("Block %s declared in content but not defined.",name));
@@ -26,6 +46,18 @@ AgBlock *AgModule::AddBlock( const Char_t *name )
       block = mBlocks[name];
       block -> Init();
       block -> SetModule( this );
+
+      //
+      // We store the block in the master block table.  NOTE WELL -- we may
+      // not have solved all namespace issues here.  Ideally we should be
+      // hashing the block name according to the namespace... i.e.
+      //
+      //   mBlockTable[ NameSpace + "::" + name ] = block.
+      //
+      // The problem is one of accessing... there are some cases where Find
+      // may not work properly.  This needs to be revisited.  For now, this
+      // workaround seems to do the trick.
+      //
       AgBlock::mBlockTable[ name ] = block; // add block to the block table
     } 
   return block;
