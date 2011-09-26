@@ -178,7 +178,9 @@ AgModule *Geometry::CreateModule( const Char_t *module, const Char_t *top )
   if (top) {
     std::cout << ">>> Setting top volume = " << top << " <<<" << std::endl;
   }
-
+  else {
+    std::cout << ">>> Creating module    = " << module << " <<<" << std::endl;
+  }
   // Set the current module to this
   _module = this;
 
@@ -422,7 +424,7 @@ Bool_t Geometry::ConstructVpdd( const Char_t *flag, Bool_t go )
     }
 
   AgStructure::AgDetpNew( vpddGeom.module, Form("Vertex Position Detector with configuration %s",flag));
-  AgStructure::AgDetpAdd( "Vpdv_t", "vpdconfig", (Int_t)vpddGeom.config );
+  AgStructure::AgDetpAdd( "Vpdv_t", "vpdconfig", (Float_t)vpddGeom.config );
 
   if ( go )
   if ( !CreateModule( vpddGeom.module ) )
@@ -511,6 +513,9 @@ Bool_t Geometry::ConstructMutd( const Char_t *flag, Bool_t go )
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructFtro( const Char_t *flag, Bool_t go )
 {
+
+  /* Add FTRO select */
+
   AgStructure::AgDetpNew( "FtroGeo", Form("Forward TPC Readout configuration"));
 
   if ( go )
@@ -525,13 +530,22 @@ Bool_t Geometry::ConstructFtro( const Char_t *flag, Bool_t go )
 Bool_t Geometry::ConstructSvtt( const Char_t *flag, Bool_t go )
 {
 
+
+  if ( !svttGeom.Use("select",flag) ) 
+    {
+      Error(GetName(),Form("Cannot locate configuration %s",flag));
+      return false;
+    }
+
+
   AgStructure::AgDetpNew( svttGeom.module, Form("Silicon Vertex Detector Configuration"));
 
-  AgStructure::AgDetpAdd("Svtg_t","config",    svttGeom.config );           // SVTT configuration
-  AgStructure::AgDetpAdd("Svtg_t","coneconfig",ftpcGeom.config );           // Support cone configuration
+  AgStructure::AgDetpAdd("Svtg_t","config",       (float)svttGeom.config );       // SVTT configuration
+  AgStructure::AgDetpAdd("Svtg_t","conever",      (float)sconGeom.config );       // Support cone configuration
+
 
   if ( svttGeom.svshconfig>0 ) {
-    AgStructure::AgDetpAdd("Svtg_t","supportver", svttGeom.svshconfig );
+    AgStructure::AgDetpAdd("Svtg_t","supportver", (float)svttGeom.svshconfig );
   }
 
   /**
@@ -539,14 +553,18 @@ Bool_t Geometry::ConstructSvtt( const Char_t *flag, Bool_t go )
    * the 11 different versions of the geometry and its tight coupling
    * to the inner recesses of STAR.
    */
-  if ( svttGeom.nlayer    < 7 )    AgStructure::AgDetpAdd("Svtg_t", "nlayer", svttGeom.nlayer );
-  if ( svttGeom.n1stlayer > 1 )    AgStructure::AgDetpAdd("Svtg_t", "nmin",   svttGeom.n1stlayer );
-  if ( pipeGeom.config   >= 4 )    AgStructure::AgDetpAdd("Svtg_t", "ifmany", 1 );
+  if ( svttGeom.nlayer    < 7 )    AgStructure::AgDetpAdd("Svtg_t", "nlayer",    (int)  svttGeom.nlayer );
+  if ( svttGeom.n1stlayer > 1 )    AgStructure::AgDetpAdd("Svtg_t", "nmin",      (float)svttGeom.n1stlayer );
+  if ( pipeGeom.config   >= 4 )    AgStructure::AgDetpAdd("Svtg_t", "ifmany",    (float)1 );
+
   /* !!! SELECTS VERSION 3 -- Need to apply versioning scheme to AgStructure manipulation !!! */
-  if ( svttGeom.nwafer    > 0 )    AgStructure::AgDetpAdd("Svtl_t(3)", "nwafer", 1 ); 
-  if ( svttGeom.waferdim  > 0 )    AgStructure::AgDetpAdd("Swca_t", "waferwid", svttGeom.waferdim );
-  if ( svttGeom.waferdim  > 0 )    AgStructure::AgDetpAdd("Swca_t", "waferlen", svttGeom.waferdim );
-  if ( svttGeom.water    == 0 )    AgStructure::AgDetpAdd("Swam_t", "len",      0. );
+  if ( svttGeom.nwafer    > 0 )    AgStructure::AgDetpAdd("Svtl_t(3)", "nwafer", (float)1 ); 
+  assert(svttGeom.nwafer==0 ); 
+  /* !!! ================================================================================ !!! */
+
+  if ( svttGeom.waferdim  > 0 )    AgStructure::AgDetpAdd("Swca_t", "waferwid",  (float)svttGeom.waferdim );
+  if ( svttGeom.waferdim  > 0 )    AgStructure::AgDetpAdd("Swca_t", "waferlen",  (float)svttGeom.waferdim );
+  if ( svttGeom.water    == 0 )    AgStructure::AgDetpAdd("Swam_t", "len",       (float)0. );
   
 
 
@@ -561,6 +579,8 @@ Bool_t Geometry::ConstructSvtt( const Char_t *flag, Bool_t go )
 
 Bool_t Geometry::ConstructSisd( const Char_t *flag, Bool_t go )
 {
+
+  /* Add SISD select */
 
   AgStructure::AgDetpNew( sisdGeom.module, Form("Silicon Strip Detector Configuration") );
 
