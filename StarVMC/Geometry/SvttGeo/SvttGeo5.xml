@@ -17,7 +17,7 @@
         
         <Structure name="SVTG"  >
             <var name="Version" type="float"  />
-            <var name="Nlayer" type="float"  />
+            <var name="Nlayer" type="int"  />
             <var name="RsizeMin" type="float"  />
             <var name="RsizeMax" type="float"  />
             <var name="ZsizeMax" type="float"  />
@@ -140,7 +140,7 @@
         </Structure>
         
         <Structure name="SVTL"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Nladder" type="float"  />
             <var name="Nwafer" type="float"  />
             <var name="Radius" type="float"  />
@@ -169,7 +169,7 @@
         </Structure>
         
         <Structure name="SCBP"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Len" type="float"  />
             <var name="Rmin1" type="float"  />
             <var name="Rmax1" type="float"  />
@@ -179,7 +179,7 @@
         </Structure>
         
         <Structure name="SFEP"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Len" type="float"  />
             <var name="Rmin1" type="float"  />
             <var name="Rmax1" type="float"  />
@@ -190,7 +190,7 @@
         </Structure>
         
         <Structure name="SWCX"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Length" type="float"  />
             <var name="dR" type="float"  />
             <var name="offset" type="float"  />
@@ -598,10 +598,10 @@
         
 
         <Mixture name="ALKAP" dens="1.432"  >
-            <Component name="C5" a="12" z="6" w="5"  />
-            <Component name="H4" a="1" z="1" w="4"  />
-            <Component name="O2" a="16" z="8" w="2"  />
-            <Component name="Al" a="27" z="13" w="0.2302"  />
+            <Component name="C5" a="12" z="6" w="10000*5"  />
+            <Component name="H4" a="1" z="1" w="10000*4"  />
+            <Component name="O2" a="16" z="8" w="10000*2"  />
+            <Component name="Al" a="27" z="13" w="10000*0.2302"  />
         </Mixture>
         
         <If expr="swam_Len&gt;0"  >

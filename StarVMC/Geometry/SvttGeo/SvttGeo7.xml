@@ -17,7 +17,7 @@
         
         <Structure name="SVTG"  >
             <var name="Version" type="float"  />
-            <var name="Nlayer" type="float"  />
+            <var name="Nlayer" type="int"  />
             <var name="RsizeMin" type="float"  />
             <var name="RsizeMax" type="float"  />
             <var name="ZsizeMax" type="float"  />
@@ -143,7 +143,7 @@
         </Structure>
         
         <Structure name="SVTL"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Nladder" type="float"  />
             <var name="Nwafer" type="float"  />
             <var name="Radius" type="float"  />
@@ -172,7 +172,7 @@
         </Structure>
         
         <Structure name="SCBP"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Len" type="float"  />
             <var name="Rmin1" type="float"  />
             <var name="Rmax1" type="float"  />
@@ -182,7 +182,7 @@
         </Structure>
         
         <Structure name="SFEP"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Len" type="float"  />
             <var name="Rmin1" type="float"  />
             <var name="Rmax1" type="float"  />
@@ -193,7 +193,7 @@
         </Structure>
         
         <Structure name="SWCX"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Length" type="float"  />
             <var name="dR" type="float"  />
             <var name="offset" type="float"  />
@@ -624,17 +624,17 @@
         
 
         <Mixture name="ALKAP" dens="1.432"  >
-            <Component name="C5" a="12" z="6" w="5"  />
-            <Component name="H4" a="1" z="1" w="4"  />
-            <Component name="O2" a="16" z="8" w="2"  />
-            <Component name="Al" a="27" z="13" w="0.2302"  />
+            <Component name="C5" a="12" z="6" w="10000*5"  />
+            <Component name="H4" a="1" z="1" w="10000*4"  />
+            <Component name="O2" a="16" z="8" w="10000*2"  />
+            <Component name="Al" a="27" z="13" w="10000*0.2302"  />
         </Mixture>
         
         <Mixture name="SSDALMY" dens="1.40845"  >
-            <Component name="C5" a="12" z="6" w="5"  />
-            <Component name="H4" a="1" z="1" w="4"  />
-            <Component name="O2" a="16" z="8" w="2"  />
-            <Component name="Al" a="27" z="13" w="0.0986"  />
+            <Component name="C5" a="12" z="6" w="10000*5"  />
+            <Component name="H4" a="1" z="1" w="10000*4"  />
+            <Component name="O2" a="16" z="8" w="10000*2"  />
+            <Component name="Al" a="27" z="13" w="10000*0.0986"  />
         </Mixture>
         
         <If expr="swam_Len&gt;0"  >
@@ -769,7 +769,7 @@
             </Placement>
             
             radmax=svtg_rSizeMax 
-            <Do var="ilayer" from="svtg_Nmin" to="min(6,nint(svtg_Nlayer))"  >
+            <Do var="ilayer" from="svtg_Nmin" to="min(6,svtg_Nlayer)"  >
                 <If expr="ilayer&lt;6"  >
                     <Use struct="SVTL" select="layer" value="ilayer+1 "  />
                     radmax=svtl_radius 
@@ -966,7 +966,10 @@
 
 
             rmin=svtl_radius-ladthk 
-            rmax=sqrt((svtl_radius)**2+(swca_WaferWid/2)**2)+elethk 
+<!--        rmax=sqrt((svtl_radius)**2+(swca_WaferWid/2)**2)+elethk   -->
+            rmax  = svtl_radius*svtl_radius
+            rmax += swca_waferwid * swca_waferwid / 4.0
+            rmax  = sqrt(rmax) + elethk
             
             rmax=min(rmax,radmax-ladthk) 
 
@@ -1265,8 +1268,16 @@
             <Material name="Copper"  />
             <Attribute for="SCBL" seen="1" colo="3"  />
 
-            sq=SCBP_Len**2/(SCBP_Rmin2-SCBP_Rmin1)**2 
-            A=pi*(SCBP_Rmin1**2+SCBP_Rmin2**2)*sqrt(1+sq) 
+<!--        sq=SCBP_Len**2/(SCBP_Rmin2-SCBP_Rmin1)**2 
+            A=pi*(SCBP_Rmin1**2+SCBP_Rmin2**2)*sqrt(1+sq) -->
+
+            sq  = (scbp_len*scbp_len)
+            sq /= (scbp_rmin2-scbp_rmin1)
+            sq /= (scbp_rmin2-scbp_rmin1)
+               
+            A   = pi
+            A  *= (scbp_rmin1*scbp_rmin1 + scbp_rmin2*scbp_rmin2)
+            A  *= sqrt(1+sq)
 
             CuThk=(SCBP_Vol/A)*sqrt(1.0+1.0/sq) 
 
@@ -1277,8 +1288,16 @@
             <Material name="Water"  />
             <Attribute for="SFED" seen="1" colo="1"  />
 
-            sq=SFEP_Len**2/(SFEP_Rmin2-SFEP_Rmin1)**2 
-            A=pi*(SFEP_Rmin1**2+SFEP_Rmin2**2)*sqrt(1+sq) 
+<!--        sq=SFEP_Len**2/(SFEP_Rmin2-SFEP_Rmin1)**2 
+            A=pi*(SFEP_Rmin1**2+SFEP_Rmin2**2)*sqrt(1+sq) -->
+
+            sq  = sfep_len * sfep_len
+            sq /= (sfep_rmin2 - sfep_rmin1)
+            sq /= (sfep_rmin2 - sfep_rmin1)
+
+            A   = pi
+            A  *= (sfep_rmin1*sfep_rmin1 + sfep_rmin2+sfep_rmin2)
+            A  *= sqrt(1+sq)
 
             CuThk=(SFEP_Vol/A)*sqrt(1.0+1.0/sq) 
 
@@ -1293,8 +1312,16 @@
             
             <Attribute for="SPLS" seen="1" colo="6"  />
 
-            sq=SFEP_Len**2/(SFEP_Rmin2-SFEP_Rmin1)**2 
-            A=pi*(SFEP_Rmin1**2+SFEP_Rmin2**2)*sqrt(1+sq) 
+<!--        sq=SFEP_Len**2/(SFEP_Rmin2-SFEP_Rmin1)**2 
+            A=pi*(SFEP_Rmin1**2+SFEP_Rmin2**2)*sqrt(1+sq)  -->
+
+            sq  = sfep_len * sfep_len
+            sq /= (sfep_rmin2 - sfep_rmin1)
+            sq /= (sfep_rmin2 - sfep_rmin1)
+
+            A   = pi
+            A  *= (sfep_rmin1*sfep_rmin1 + sfep_rmin2+sfep_rmin2)
+            A  *= sqrt(1+sq)
 
             CuThk=(SFEP_Vol/A)*sqrt(1.0+1.0/sq) 
 
@@ -1414,14 +1441,20 @@
         <Block name="SIRT" comment="is the SVT inner end ring tube"  >
             <Material name="Berillium"  />
             <Attribute for="SIRT" seen="1" colo="2"  />
-            ir_rmin=serg_IrngPrMn*(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.)) 
+<!--        ir_rmin=serg_IrngPrMn*(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.))  -->
+            ir_rmin  = cos(pi/8.0)
+            ir_rmin += sqrt( tan(pi/8.0)*tan(pi/8.0) - sin(pi/8.0)*sin(pi/8.0) )
+            ir_rmin *= serg_irngprmn
             <Shape type="TUBE" rmax="serg_IrngTrMx" rmin="ir_rmin" dz="serg_EndRngTh/2"  />
         </Block>
         
         <Block name="SIRP" comment="is the SVT inner end ring polycone (overlaps tube)"  >
             <Material name="Berillium"  />
             <Attribute for="SIRP" seen="1" colo="2"  />
-            rou=serg_IrngTrMx/(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.)) 
+<!--        rou=serg_IrngTrMx/(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.))  -->
+            rou  = cos(pi/8.0)
+            rou += sqrt( tan(pi/8.0)*tan(pi/8.0) - sin(pi/8.0)*sin(pi/8.0) )
+            rou  = serg_irngtrmx / rou
             <Shape type="PGON" phi1="0" rmn="{serg_IrngPrMn,serg_IrngPrMn}" rmx="{rou,rou}" nz="2" npdiv="8" dphi="360" zi="{-serg_EndRngTh/2,+serg_EndRngTh/2}"  />
         </Block>
         
@@ -1577,7 +1610,11 @@
             rmax=ssup_Con4IdMn+roffset 
             zmin=ssup_Rodlen/2+ssup_GrphThk 
             zmax=ssup_Cone3zmx 
-            cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.) 
+<!--        cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.)  -->
+            cone_len  = (zmax-zmin)*(zmax-zmin)
+            cone_len += (rmax-rmin)*(rmax-rmin)
+            cone_len  = sqrt(cone_len)
+
             cone_sin=(rmax-rmin)/cone_len 
             cone_cos=(zmax-zmin)/cone_len 
             angle=asin(cone_sin)*180/pi 
@@ -1610,7 +1647,11 @@
             zmin=ssup_Cone3zmx 
             zmax=ssup_Cone4zmx 
 
-            cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.) 
+<!--        cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.)  -->
+            cone_len  = (zmax-zmin)*(zmax-zmin)
+            cone_len += (rmax-rmin)*(rmax-rmin)
+            cone_len  = sqrt(cone_len)
+
             cone_sin=(rmax-rmin)/cone_len 
             cone_cos=(zmax-zmin)/cone_len 
 

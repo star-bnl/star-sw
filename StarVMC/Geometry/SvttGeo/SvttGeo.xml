@@ -16,7 +16,7 @@
         
         <Structure name="SVTG"  >
             <var name="Version" type="float"  />
-            <var name="Nlayer" type="float"  />
+            <var name="Nlayer" type="int"  />
             <var name="RsizeMin" type="float"  />
             <var name="RsizeMax" type="float"  />
             <var name="ZsizeMax" type="float"  />
@@ -135,7 +135,7 @@
         </Structure>
         
         <Structure name="SVTL"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Nladder" type="float"  />
             <var name="Nwafer" type="float"  />
             <var name="Radius" type="float"  />
@@ -420,17 +420,17 @@
         </Mixture>
 
         <Mixture name="ALKAP" dens="1.432"  >
-            <Component name="C5" a="12" z="6" w="5"  />
-            <Component name="H4" a="1" z="1" w="4"  />
-            <Component name="O2" a="16" z="8" w="2"  />
-            <Component name="Al" a="27" z="13" w="0.2302"  />
+            <Component name="C5" a="12" z="6" w="10000*5"  />
+            <Component name="H4" a="1" z="1" w="10000*4"  />
+            <Component name="O2" a="16" z="8" w="10000*2"  />
+            <Component name="Al" a="27" z="13" w="10000*0.2302"  />
         </Mixture>
         
         <Mixture name="SSDALMY" dens="1.40845"  >
-            <Component name="C5" a="12" z="6" w="5"  />
-            <Component name="H4" a="1" z="1" w="4"  />
-            <Component name="O2" a="16" z="8" w="2"  />
-            <Component name="Al" a="27" z="13" w="0.0986"  />
+            <Component name="C5" a="12" z="6" w="10000*5"  />
+            <Component name="H4" a="1" z="1" w="10000*4"  />
+            <Component name="O2" a="16" z="8" w="10000*2"  />
+            <Component name="Al" a="27" z="13" w="10000*0.0986"  />
         </Mixture>
         
 
@@ -556,7 +556,7 @@
             
             radmax=svtg_rSizeMax 
 
-            <Do var="ilayer" from="1" to="min(6,nint(svtg_Nlayer))"  >
+            <Do var="ilayer" from="1" to="min(6,svtg_Nlayer)"  >
                 <If expr="ilayer&lt;6"  >
                     <Use struct="SVTL" select="layer" value="ilayer+1 "  />
                     radmax=svtl_radius 
@@ -625,7 +625,10 @@
 
 
             rmin=svtl_radius-ladthk 
-            rmax=sqrt((svtl_radius)**2+(swca_WaferWid/2)**2)+elethk 
+<!--        rmax=sqrt((svtl_radius)**2+(swca_WaferWid/2)**2)+elethk  -->
+            rmax  = svtl_radius*svtl_radius
+            rmax += swca_waferwid * swca_waferwid / 4.0
+            rmax  = sqrt(rmax) + elethk
 
             rmax=min(rmax,radmax-ladthk) 
             
@@ -893,14 +896,25 @@
         <Block name="SIRT" comment="is the SVT inner end ring tube"  >
             <Material name="Berillium"  />
             <Attribute for="SIRT" seen="1" colo="2"  />
-            ir_rmin=serg_IrngPrMn*(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.)) 
+<!--
+            ir_rmin = serg_IrngPrMn * (cos(pi/8.) + sqrt( tan(pi/8.)**2-sin(pi/8.)**2))
+-->
+            ir_rmin  = cos(pi/8.0)
+            ir_rmin += sqrt( tan(pi/8.0)*tan(pi/8.0) - sin(pi/8.0)*sin(pi/8.0) )
+            ir_rmin *= serg_irngprmn
             <Shape type="TUBE" rmax="serg_IrngTrMx" rmin="ir_rmin" dz="serg_EndRngTh/2"  />
         </Block>
         
         <Block name="SIRP" comment="is the SVT inner end ring polycone (overlaps tube)"  >
             <Material name="Berillium"  />
-            <Attribute for="SIRP" seen="1" colo="2"  />
+            <Attribute for="SIRP" seen="1" colo="2"  />            
+<!--
             rou=serg_IrngTrMx/(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.)) 
+  -->
+            rou  = cos(pi/8.0)
+            rou += sqrt( tan(pi/8.0)*tan(pi/8.0) - sin(pi/8.0)*sin(pi/8.0) )
+            rou  = serg_irngtrmx / rou
+
             <Shape type="PGON" phi1="0" rmn="{serg_IrngPrMn,serg_IrngPrMn}" rmx="{rou,rou}" nz="2" npdiv="8" dphi="360" zi="{-serg_EndRngTh/2,+serg_EndRngTh/2}"  />
         </Block>
         
@@ -1056,7 +1070,11 @@
             rmax=ssup_Con4IdMn+roffset 
             zmin=ssup_Rodlen/2+ssup_GrphThk 
             zmax=ssup_Cone3zmx 
-            cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.) 
+<!--        cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.)  -->
+            cone_len  = (zmax-zmin)*(zmax-zmin)
+            cone_len += (rmax-rmin)*(rmax-rmin)
+            cone_len  = sqrt(cone_len)
+
             cone_sin=(rmax-rmin)/cone_len 
             cone_cos=(zmax-zmin)/cone_len 
             angle=asin(cone_sin)*180/3.1416 
@@ -1086,7 +1104,11 @@
             rmax=ssup_Con4IdMx+roffset 
             zmin=ssup_Cone3zmx 
             zmax=ssup_Cone4zmx 
-            cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.) 
+<!--        cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.)  -->
+            cone_len  = (zmax-zmin)*(zmax-zmin)
+            cone_len += (rmax-rmin)*(rmax-rmin)
+            cone_len  = sqrt(cone_len)
+
             cone_sin=(rmax-rmin)/cone_len 
             cone_cos=(zmax-zmin)/cone_len 
             angle=asin(cone_sin)*180/3.1416 
