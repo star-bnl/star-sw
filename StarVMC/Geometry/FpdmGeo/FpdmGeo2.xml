@@ -53,11 +53,11 @@
         </Structure>
         
         <Structure name="FLGM"  >
-            <var name="Type" type="float"  />
-            <var name="Density" type="float"  />
-            <var name="RadLen" type="float"  />
-            <var name="PbCont" type="float"  />
-            <var name="CritEne" type="float"  />
+            <var name="Type"     type="int"    />
+            <var name="Density"  type="float"  />
+            <var name="RadLen"   type="float"  />
+            <var name="PbCont"   type="float"  />
+            <var name="CritEne"  type="float"  />
             <var name="MoliereR" type="float"  />
         </Structure>
         
@@ -472,8 +472,10 @@
             
 
             <If expr="FBXD_Type.eq.3"  >
+
                 <Use struct="FLGG" select="Type" value="2 "  />
                 <Use struct="FLGM" select="Type" value="2 "  />
+
                 wid  = FLGG_Width + FLGG_DGap  
                 ztot = FLGG_Depth/2.0 
                 rtot = 14*wid/2.0 
@@ -486,18 +488,14 @@
                     <Do var="j" from="1" to="14"  >
                         <If expr="i.gt.5.and.i.lt.10.and.j.gt.5.and.j.lt.10"  >
                             x1=x1-wid 
-                            <Else  >
-                                <Create block="FLGF"  />
-                                <Placement y="y1" x="x1" z="z1" block="FLGF"  >
-                                </Placement>
-                                
-                                x1=x1-wid 
-                            </Else>
-                            
+                        <Else  >
+                            <Create    block="FLGF"  />
+                            <Placement block="FLGF" y="y1" x="x1" z="z1" />                                
+                            x1=x1-wid 
+                        </Else>                            
                         </If>
                         
-                    </Do>
-                    
+                    </Do>                    
                     y1=y1-wid            
                 </Do>
                 
@@ -590,6 +588,7 @@
             <Instrument block="FLGF">
                 <Hit meas="elos" nbits="0" min="0" max="50" />
             </Instrument>
+
         </Block>
         
         <Block name="FPCT" comment="is Photo Cathode"  >
