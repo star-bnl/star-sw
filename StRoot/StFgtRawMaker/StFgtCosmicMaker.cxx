@@ -108,9 +108,9 @@ Int_t StFgtCosmicMaker::Make()
           };
           geoId = StFgtGeom::encodeGeoId( discIdx, 0, layer, strip );
 
-	  StFgtRawHit hit(geoId,adc,timebin);
+          Char_t type = 0;    // raw adc, no correction yet.
+	  StFgtRawHit hit(geoId,adc,type,timebin);
 	  StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
-
 
 	  if(pDisc)
 	    pDisc->getRawHitArray().PushBack(hit);
