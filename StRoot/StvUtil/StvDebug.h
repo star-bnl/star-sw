@@ -12,6 +12,8 @@ static  int Break(double x,double y,double z);
 static void Count(const char *key,double val=0);
 static void Sumary();
 static void Reset();
+static  int Level();
+static int& Flag(const char *key);
 private:
 static void Draw(int nH,TH1** H);
 #if 0

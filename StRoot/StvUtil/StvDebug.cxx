@@ -14,9 +14,15 @@
 typedef std::map<std::string, TH1F*>   myDebMap_t;
 typedef myDebMap_t::const_iterator myDebIter_t;
 static  myDebMap_t  myDebMap;
+
 typedef std::map<std::string, TCanvas*>   myCanMap_t;
 typedef myCanMap_t::const_iterator myCanIter_t;
 myCanMap_t myCanMap;
+
+typedef std::map<std::string, int>   myIntMap_t;
+myIntMap_t myIntMap;
+
+
 //______________________________________________________________________________ 
 int StvDebug::Break(int key)
 { static int kto=-2010;
@@ -83,4 +89,16 @@ static int nCall=0; nCall++;
   for (int i=0;i<nH;i++) { C->cd(i+1); H[i]->Draw(); }
 
   C->Modified();C->Update();
+}
+//______________________________________________________________________________ 
+int StvDebug::Level()
+{
+static const char *StvDebugLevel = gSystem->Getenv("StvDebugLevel");
+  if (!StvDebugLevel) return 0;
+  return StvDebugLevel[0]-'0';
+}
+//______________________________________________________________________________ 
+int &StvDebug::Flag(const char *key)
+{
+  return myIntMap[key];
 }
