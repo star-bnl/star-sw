@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.13 2011/09/21 17:49:34 sgliske Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.14 2011/09/26 14:23:06 sgliske Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.14  2011/09/26 14:23:06  sgliske
+//  Update for new 'Char_t mType' field in StFgtRawHit
+//
 //  Revision 1.13  2011/09/21 17:49:34  sgliske
 //  alternate base class with more
 //   functionality and not an StMaker
@@ -101,7 +104,8 @@ Int_t StFgtRawMaker::FillHits()
                Short_t geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
                StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
 
-               StFgtRawHit hit(geoId,adc,timebin);
+               Char_t type = 0;    // TODO: set this according to the database???
+               StFgtRawHit hit(geoId,adc,type,timebin);
                StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
                if(pDisc)
                   pDisc->getRawHitArray().PushBack( hit );
