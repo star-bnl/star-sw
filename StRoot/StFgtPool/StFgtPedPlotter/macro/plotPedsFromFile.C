@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: plotPedsFromFile.C,v 1.1 2011/09/22 21:22:03 sgliske Exp $
+ * $Id: plotPedsFromFile.C,v 1.2 2011/09/26 16:55:52 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: plotPedsFromFile.C,v $
+ * Revision 1.2  2011/09/26 16:55:52  sgliske
+ * Continued work on cosmic QA plots
+ *
  * Revision 1.1  2011/09/22 21:22:03  sgliske
  * creation
  *
@@ -28,7 +31,7 @@ int plotPedsFromFile( const Char_t *filenameIn = "testfile.Ped.txt",
                       Short_t quad = 0,
                       Char_t* quadName = "FGT #010",
                       Short_t timeBin = 4,
-                      Bool_t plotVsStrip = 1 ){
+                      Char_t plotVsStrip = 'c' ){
    LoadLibs();
    Int_t ierr = 0;
 
@@ -55,14 +58,20 @@ int plotPedsFromFile( const Char_t *filenameIn = "testfile.Ped.txt",
       can = new TCanvas("can","Pedistal Canvas",900,400);
       can->SetRightMargin( 0.02 );
 
-      Int_t width = 1280;
-      if( plotVsStrip )
-         width = 2*720;
+      Float_t xlow = 0;
+      Float_t xhigh = 1280;
+      if( plotVsStrip == 'R' ){
+         xlow = 10;
+         xhigh = 40;
+      } else if ( plotVsStrip == 'P' ){
+         xlow = 0;
+         xhigh = 6.28/4;
+      };
 
       //Float_t maxX = pedPlotter->getMaxX();
       Float_t maxY = pedPlotter->getMaxY()*1.05;
 
-      TH2F *hist = new TH2F ("hist", "", 1, 0, width, 1, 0, maxY );
+      TH2F *hist = new TH2F ("hist", "", 1, xlow, xhigh, 1, 0, maxY );
       hist->Draw("H");
 
       const TGraphErrors* gr = pedPlotter->getGraph( timeBin );

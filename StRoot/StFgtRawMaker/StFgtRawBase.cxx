@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRawBase.cxx,v 1.1 2011/09/21 17:49:33 sgliske Exp $
+ * $Id: StFgtRawBase.cxx,v 1.2 2011/09/26 16:55:53 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRawBase.cxx,v $
+ * Revision 1.2  2011/09/26 16:55:53  sgliske
+ * Continued work on cosmic QA plots
+ *
  * Revision 1.1  2011/09/21 17:49:33  sgliske
  * alternate base class with more
  *  functionality and not an StMaker
@@ -30,7 +33,8 @@ StFgtRawBase::StFgtRawBase( UInt_t numDiscs, Int_t numRawHits, Int_t numClusters
    mNumDiscs( numDiscs ),
    mNumRawHits( numRawHits ),
    mNumClusters( numClusters ),
-   mNumPoints( numPoints )
+   mNumPoints( numPoints ),
+   mEOF( 0 )
 {
    // nothing else to do
 };

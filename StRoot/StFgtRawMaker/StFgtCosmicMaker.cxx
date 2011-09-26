@@ -65,6 +65,7 @@ Int_t StFgtCosmicMaker::Make()
      //LOG_DEBUG <<"End of File reached..."<<endm;
      //return kStEOF;	
      cout <<"End of File reached..."<<endl;
+     mEOF = 1;
      return kStOk;
   }
   daq_dta *dd = 0;
@@ -111,6 +112,10 @@ Int_t StFgtCosmicMaker::Make()
           Char_t type = 0;    // raw adc, no correction yet.
 	  StFgtRawHit hit(geoId,adc,type,timebin);
 	  StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
+
+          // HACK: since don't yet have geoId->APV/channel mapping,
+          // encode in the charge field for now
+          hit.setCharge( 128*apv + channel );
 
 	  if(pDisc)
 	    pDisc->getRawHitArray().PushBack(hit);
