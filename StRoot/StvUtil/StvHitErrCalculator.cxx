@@ -80,9 +80,9 @@ void StvHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][
   mSl = Nt[2],mCl = sqrt((1-mSl)*(1+mSl));
   mSp = Nt[1]/mCl, mCp = Nt[0]/mCl;
   hRr[0] = (mPar[kThkDet]*mSp*mSp   + mPar[kWidTrk])
-           / (mCp*mCp);
+           / (mCp*mCp) + mPar[kYErr];
   hRr[2] = (mPar[kThkDet]*(mSl*mSl) + mPar[kWidTrk]*((mSp*mSl)*(mSp*mSl)+mCp*mCp))
-           / ((mCp*mCl)*(mCp*mCl));
+           / ((mCp*mCl)*(mCp*mCl)) + mPar[kZErr];
   hRr[1] = (mPar[kThkDet]           + mPar[kWidTrk])*(mSp*mSl)/(mCp*mCp*mCl);
 
 }  
