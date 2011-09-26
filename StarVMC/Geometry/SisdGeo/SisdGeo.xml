@@ -15,7 +15,7 @@
         
         <Structure name="SSDP"  >
             <var name="Version" type="float"  />
-            <var name="config" type="int"  />
+            <var name="config"  type="float"  />
             <var name="placement" type="int"  />
         </Structure>
         

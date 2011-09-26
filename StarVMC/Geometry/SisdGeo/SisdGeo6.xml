@@ -10,12 +10,12 @@
         </CDE>
         
         <Content  >
-            SFMO,SFLM,SFDM,SFSW,SFSD,SFSL,SFSM,SFLT,SFLU,SFFK,SFFL,SFKK,SFKL,SFRA,SFRS,SFFX,SFPI,SFPJ,SFAA,SFAM,SFAB,SFAS,SAPP,SAPC,SAPS,SAPT,SFLA,SFLB,SFLC,SFES,SFEB,SFCO,SFCM,SFCB,SFCS,SFKF,SFKS,SSBS,SSBB,SFPR,SFPB,SSST,SSSS,SSRS,SSRT,SSLB,SBCH,SBCV,SBFH,SBFV,SSLT,SCMP,SCVM,SCVB,SCVS,SOSH
+            SFMO,SFLM,SFDM,SFSW,SFSD,SFSL,SFSM,SFLT,SFLU,SFFK,SFFL,SFKK,SFKL,SFRA,SFRS,SFFX,SFPI,SFPJ,SFAA,SFAM,SFAB,SFAS,SAPP,SAPC,SAPS,SAPT,SFLA,SFLB,SFLC,SFES,SFEB,SFCO,SFCM,SFCB,SFCS,SFKF,SFKS,SSBS,SSBB,SFPR,SFPB,SSST,SSSS,SSRS,SSRT,SSLB,SBCH,SBCV,SBFH,SBFV,SSLT,SCMP,SCVM,SCVB,SCVS,SOSK
         </Content>
         
         <Structure name="SSDP"  >
-            <var name="Version" type="float"  />
-            <var name="config" type="int"  />
+            <var name="Version"   type="float"  />
+            <var name="config"    type="int"  />
             <var name="placement" type="int"  />
         </Structure>
         
@@ -24,7 +24,7 @@
         </varlist>
         
         <Structure name="SFJP"  >
-            <var name="Version" type="float"  />
+            <var name="Version" type="int"  />
             <var name="AlphaZ" type="float"  />
             <var name="AlphaZH" type="float"  />
             <var name="SSST_Rmin" type="float"  />
@@ -187,7 +187,7 @@
         </Structure>
         
         <Structure name="SFPA"  >
-            <var name="Version" type="float"  />
+            <var name="Version" type="int"  />
             <var name="rmin" type="float"  />
             <var name="rmax" type="float"  />
             <var name="Len" type="float"  />
@@ -528,10 +528,8 @@
             dthk = SFPA_smThk + SFPA_gpThk 
 
             <If expr="ConfigB.ge.7"  >
-                <Create block="SOSH"  />
-                <Placement block="SOSH"  >
-                </Placement>
-                
+                <Create    block="SOSK"  />
+                <Placement block="SOSK"  />                
             </If>
             
 
@@ -1652,17 +1650,17 @@
         
 
 
-        <Block name="SOSH" comment="is the separation shield cylinder"  >
+        <Block name="SOSK" comment="is the separation shield cylinder"  >
             <Mixture name="SSDALMY" dens="1.40845"  >
-                <Component name="C5" a="12" z="6" w="5"  />
-                <Component name="H4" a="1" z="1" w="4"  />
-                <Component name="O2" a="16" z="8" w="2"  />
-                <Component name="Al" a="27" z="13" w="0.0986"  />
+                <Component name="C5" a="12" z="6" w="10000*5"  />
+                <Component name="H4" a="1" z="1" w="10000*4"  />
+                <Component name="O2" a="16" z="8" w="10000*2"  />
+                <Component name="Al" a="27" z="13" w="10000*0.0986"  />
             </Mixture>
             
 
             <Material name="SSDALMY"  />
-            <Attribute for="SOSH" seen="1" colo="3"  />
+            <Attribute for="SOSK" seen="1" colo="3"  />
             <Shape type="TUBE" rmax="SFPA_SOutROut" rmin="SFPA_SOutRInn" dz="SFPA_SOutLen"  />
         </Block>
         
