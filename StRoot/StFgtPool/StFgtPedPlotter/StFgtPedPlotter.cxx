@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedPlotter.cxx,v 1.2 2011/09/24 02:14:10 sgliske Exp $
+ * $Id: StFgtPedPlotter.cxx,v 1.3 2011/09/26 16:55:52 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedPlotter.cxx,v $
+ * Revision 1.3  2011/09/26 16:55:52  sgliske
+ * Continued work on cosmic QA plots
+ *
  * Revision 1.2  2011/09/24 02:14:10  sgliske
  * updated FGT cosmic QA
  *
@@ -105,28 +108,39 @@ Int_t StFgtPedPlotter::fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E ){
       Int_t timebin, geoId;
       Short_t disc, quad, strip;
       Char_t layer;
-      Float_t ped, stdev, x;
+      Float_t ped, stdev, x = 0;
 
       while( !fin.eof() && !ierr ){
          fin >> geoId >> timebin >> ped >> stdev;
 
          if( 1<<timebin & mTimeBinMask ){
+            Double_t pos, high, low;
 
-            StFgtGeom::decodeGeoId( geoId, disc, quad, layer, strip );
+            //StFgtGeom::decodeGeoId( geoId, disc, quad, layer, strip );
+            StFgtGeom::getPhysicalCoordinate( geoId, disc, quad, layer, pos, high, low );
+
+            Bool_t pass = 1;
 
             if( disc == mDiscId && quad == mQuadId ){
                Int_t i = mTimeBinMap[ timebin ];
 
                if( mPlotVsStrip == 'R' ){
-                  x = (strip == 'R') ? strip : -1;
+                  x = pos;
+                  //x = (strip == 'R') ? strip : -1;
+                  pass = ( layer == mPlotVsStrip );
                } else if( mPlotVsStrip == 'P' ){
-                  x = (strip == 'P') ? strip : -1;
+                  x = pos;
+                  //x = (strip == 'P') ? strip : -1;
+                  pass = ( layer == mPlotVsStrip );
                } else {
-                  x = strip + (layer == 'R')*kNumFgtStripsPerLayer;  // need to fix this
-                  std::cerr << "WARNING: asked for vs. channel but getting vs. strip" << endl;
+                  // HACK: set out of range until mapping function available
+                  x = -1;
                };
 
-               if( x >= 0 ){
+               if( x && pass ){
+//                   cout << mPlotVsStrip << ' ' << x << ' ' << ped << ' ' << stdev << " | "
+//                        << geoId << ' ' << disc << ' ' << quad << ' ' << layer << ' ' << high << ' ' << low << endl;
+
                   X[i].push_back( x );
                   Y[i].push_back( ped );
                   E[i].push_back( stdev );
@@ -153,9 +167,16 @@ TGraphErrors* StFgtPedPlotter::makePlot( std::vector< Float_t >& x,
                                          std::vector< Float_t >& e,
                                          Int_t timebin ){
    TGraphErrors* gr = 0;
-   Int_t width = 1280;
-   if( mPlotVsStrip )
-      width = 2*kNumFgtStripsPerLayer;
+//    Float_t xlow = 0;
+//    Float_t xhigh = 1280;
+//    Int_t nbins = 1280;
+//    if( mPlotVsStrip == 'R' ){
+//       xlow = 100;
+//       xhigh = 400;
+//    } else if ( mPlotVsStrip == 'P' ){
+//       xlow = 0;
+//       xhigh = 6.28/4;
+//    };
 
    if( !x.empty() && x.size() == y.size() && y.size() == e.size() ){
       // need to copy to array
@@ -172,14 +193,15 @@ TGraphErrors* StFgtPedPlotter::makePlot( std::vector< Float_t >& x,
       gr = new TGraphErrors( x.size(), xArr, yArr, 0, eArr );
       std::stringstream ss;
       ss << "Pedistals vs. ";
-      if( mPlotVsStrip )
-         ss << "Strip Id";
+      if( mPlotVsStrip == 'R' || mPlotVsStrip == 'P' )
+         ss << "Strip Position";
       else
          ss << "Channel";
 
-      if( mPlotVsStrip )
-         ss << "; Strip Id. (#phi = 0-" << kNumFgtStripsPerLayer-1
-            << ", r = " << kNumFgtStripsPerLayer << '-' << 2*kNumFgtStripsPerLayer-1 << ")";
+      if( mPlotVsStrip == 'R' )
+         ss << "; r Strip Pos. [cm]";
+      else if( mPlotVsStrip == 'P' )
+         ss << "; #phi Strip Pos. [cm]";
       else
          ss << "; 128x(APV Num) + Channel Id.";
 

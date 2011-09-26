@@ -148,7 +148,7 @@ class StFgtGeom
 	static void getPhysicalCoordinate(
 	    const std::string & geoName,
 	    Short_t & disc, Short_t & quadrant, Char_t & layer,
-	    Double_t ordinate, Double_t lowerSpan, Double_t upperSpan
+	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
 	)
 	{
 	    Short_t strip;
