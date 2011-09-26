@@ -25,7 +25,7 @@
         
         <Structure name="SVTG"  >
             <var name="Version" type="float"  />
-            <var name="Nlayer" type="float"  />
+            <var name="Nlayer" type="int"  />
             <var name="RsizeMin" type="float"  />
             <var name="RsizeMax" type="float"  />
             <var name="ZsizeMax" type="float"  />
@@ -151,7 +151,7 @@
         </Structure>
         
         <Structure name="SVTL"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Nladder" type="float"  />
             <var name="Nwafer" type="float"  />
             <var name="Radius" type="float"  />
@@ -180,7 +180,7 @@
         </Structure>
         
         <Structure name="SCBP"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Len" type="float"  />
             <var name="Rmin1" type="float"  />
             <var name="Rmax1" type="float"  />
@@ -190,18 +190,18 @@
         </Structure>
         
         <Structure name="SFEP"  >
-            <var name="Layer" type="float"  />
-            <var name="Len" type="float"  />
-            <var name="Rmin1" type="float"  />
-            <var name="Rmax1" type="float"  />
-            <var name="Rmin2" type="float"  />
-            <var name="Rmax2" type="float"  />
-            <var name="Vol" type="float"  />
+            <var name="Layer"    type="int"  />
+            <var name="Len"      type="float"  />
+            <var name="Rmin1"    type="float"  />
+            <var name="Rmax1"    type="float"  />
+            <var name="Rmin2"    type="float"  />
+            <var name="Rmax2"    type="float"  />
+            <var name="Vol"      type="float"  />
             <var name="VolPlast" type="float"  />
         </Structure>
         
         <Structure name="SWCX"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Length" type="float"  />
             <var name="dR" type="float"  />
             <var name="offset" type="float"  />
@@ -636,18 +636,18 @@
         </Mixture>
                 
 
-        <Mixture name="ALKAP" dens="1.432"  >
-            <Component name="C5" a="12" z="6" w="5"  />
-            <Component name="H4" a="1" z="1" w="4"  />
-            <Component name="O2" a="16" z="8" w="2"  />
-            <Component name="Al" a="27" z="13" w="0.2302"  />
+        <Mixture name="ALKAP" dens="1.432"  >               
+            <Component name="C5" a="12" z="6"  w="10000*5"  />
+            <Component name="H4" a="1"  z="1"  w="10000*4"  />
+            <Component name="O2" a="16" z="8"  w="10000*2"  />
+            <Component name="Al" a="27" z="13" w="10000*0.2302"  />
         </Mixture>
         
         <Mixture name="SSDALMY" dens="1.40845"  >
-            <Component name="C5" a="12" z="6" w="5"  />
-            <Component name="H4" a="1" z="1" w="4"  />
-            <Component name="O2" a="16" z="8" w="2"  />
-            <Component name="Al" a="27" z="13" w="0.0986"  />
+            <Component name="C5" a="12" z="6"  w="10000*5"  />
+            <Component name="H4" a="1"  z="1"  w="10000*4"  />
+            <Component name="O2" a="16" z="8"  w="10000*2"  />
+            <Component name="Al" a="27" z="13" w="10000*0.0986"  />
         </Mixture>
         
         <If expr="swam_Len&gt;0"  >
@@ -785,7 +785,7 @@
             </Placement>
             
             radmax=svtg_rSizeMax 
-            <Do var="ilayer" from="svtg_Nmin" to="min(6,nint(svtg_Nlayer))"  >
+            <Do var="ilayer" from="svtg_Nmin" to="min(6,svtg_Nlayer)"  >
                 <If expr="ilayer&lt;6"  >
                     <Use struct="SVTL" select="layer" value="ilayer+1 "  />
                     radmax=svtl_radius 
@@ -819,19 +819,11 @@
                 
             </If>
             
-            <Create block="SISH"  />
-            <Placement block="SISH"  >
-            </Placement>
-            
-            <Create block="SOSH"  />
-            <Placement block="SOSH"  >
-            </Placement>
+            <Create block="SISH"  />            <Placement block="SISH"  />            
+            <Create block="SOSH"  />            <Placement block="SOSH"  />
             
             <If expr="svtg_Nlayer&gt;6"  >
-                <Create block="SSSH"  />
-                <Placement block="SSSH"  >
-                </Placement>
-                
+            <Create block="SSSH"  />            <Placement block="SSSH"  />                
             </If>
             
             <Create block="SALM"  />
@@ -843,8 +835,7 @@
             
 
             <Create block="SCBM"  />
-            <Placement y="0.0" x="0.0" z="SWAM_Zmin-SCBP_Len" block="SCBM"  >
-            </Placement>
+            <Placement y="0.0" x="0.0" z="SWAM_Zmin-SCBP_Len" block="SCBM"  />
             
             <Placement y="0.0" x="0.0" z="-(SWAM_Zmin-SCBP_Len)" block="SCBM"  >
                 <Rotation thetaz="180.0"  />
@@ -969,9 +960,18 @@
         </Block>
         
         <Block name="SLYD" comment="is a single SVT layer"  >
+<!--
+*     Note: clearance between layers is very small. If you have to change
+*     any of the thicknesses in ladthk or elethk, you should make SLYD
+*     visible and check clearances. (wkw)
 
+*     ladthk is the ladder HALF thickness, wafer is at mid-plane
+  -->
             ladthk = swca_WaferThk/2+swca_RoHaThk+swca_WafCarTh 
 
+<!--
+*     elethk is the electronics+electronic carrier full thickness
+  -->
             elethk=2.0*selc_BeThk+selc_WatThk+selc_BeOThk+selc_AgPdThk 
             elethk=elethk+selc_GlassThk+selc_DyeThk 
             deg=180.0/svtl_Nladder 
@@ -979,38 +979,51 @@
 
             <Material name="Air"  />
             <Attribute for="SLYD" seen="0" colo="1"  />
-
-
+<!--
+* Note: in case of layer conflict (outer layer starts too early),
+*       we can neglect some minor material loss in the corner of electronics,
+*       but not in the center of sensitive wafers (this would change dE/dx).
+*       Make sure here that a layer ends up before the next layer starts
+  -->
             rmin=svtl_radius-ladthk 
-            rmax=sqrt((svtl_radius)**2+(swca_WaferWid/2)**2)+elethk 
-            <If expr="(rmax&gt;radmax-ladthk)"  >
-            </If>
+
+<!--
+            rmax = sqrt((svtl_radius)**2+(swca_WaferWid/2)**2)+elethk 
+  -->
+            rmax  = svtl_radius*svtl_radius
+            rmax += swca_waferwid * swca_waferwid / 4.0
+            rmax  = sqrt(rmax) + elethk
+
+            <If expr="(rmax&gt;radmax-ladthk)"> <!-- Insert diagnostic output --> </If>
             
             rmax=min(rmax,radmax-ladthk) 
-            <If expr="(Rmax&lt;Rmin)"  >
-            </If>
+            <If expr="(Rmax&lt;Rmin)"><!-- Insert diagnostic output --> </If>
             
-            <Shape type="TUBE" rmax="rmax" rmin="rmin" dz="swca_Length/2"  />
+            <Shape type="TUBE" rmax="rmax" rmin="rmin" dz="swca_Length/2" />
 
-            <Create block="SLSD"  />
+            <Create block="SLSD"/>
+
         </Block>
         
         <Block name="SLSD" comment="is a single ladder mother (sector of tube)"  >
             <Attribute for="SLSD" seen="0" colo="1"  />
-            <If expr="svtg_Nlayer&lt;0"  >
+
+            <If expr="svtg_Nlayer&lt;0"  >   
+
                 <Shape type="DIVISION" ndiv="1" c0="-90" iaxis="2"  />
+
+            <Else>
+ 
+                <If expr="svtg_version==1"  >
+                c0=-deg*mod(ilayer,2)+svtg_Angoff*int((ilayer-1)/2)  
                 <Else  >
-                    <If expr="svtg_version==1"  >
-                        c0=-deg*mod(ilayer,2)+svtg_Angoff*int((ilayer-1)/2)  
-                        <Else  >
-                            c0=90-deg*mod(ilayer,2) 
-                        </Else>
-                        
-                    </If>
+                c0=90-deg*mod(ilayer,2) 
+                </Else>                        
+                </If>
                     
-                    <Shape type="DIVISION" ndiv="svtl_Nladder" c0="c0" iaxis="2"  />
-                </Else>
-                
+                <Shape type="DIVISION" ndiv="svtl_Nladder" c0="c0" iaxis="2"  />
+
+            </Else>                
             </If>
             
             <Create block="SLDI"  />
@@ -1215,59 +1228,82 @@
         </Block>
         
         <Block name="SCBM" comment="is the mother for the bundle of cables going from PCBs"  >
+        <!-- 
+          Issues in SCBM.  Daughter volume dimensions are incorrect.  Specifically the outer
+          radii of the cones.
+          -->
+
+
             <Material name="Air"  />
             <Attribute for="SCBM" seen="0" colo="1"  />
             <Shape type="TUBE" rmax="SWAM_Rmax" rmin="radii(1)" dz="SCBP_Len"  />
 
 
             <Do var="ilayer" from="1" to="4"  >
+
                 <Use struct="SCBP" select="Layer" value="ilayer "  />
-                <Create block="SCBL"  />
-                <Placement y="0.0" x="0.0" z="0.0" block="SCBL"  >
-                </Placement>
-                
+                <Create block="SCBL"  /> <Placement block="SCBL" y="0.0" x="0.0" z="0.0" />                
+
             </Do>
             
-
             <Do var="ilayer" from="1" to="3"  >
-                <Use struct="SFEP" select="Layer" value="ilayer "  />
-                <Create block="SFED"  />
-                <Placement y="0.0" x="0.0" z="0.0" block="SFED"  >
-                </Placement>
-                
 
-                <Create block="SPLS"  />
-                <Placement y="0.0" x="0.0" z="0.0" block="SPLS"  >
-                </Placement>
+                <Use struct="SFEP" select="Layer" value="ilayer "  />
+
+                <Create block="SFED"  />    <Placement block="SFED" y="0.0" x="0.0" z="0.0" />
+                <Create block="SPLS"  />    <Placement block="SPLS" y="0.0" x="0.0" z="0.0" />
                 
             </Do>
             
-
-
         </Block>
         
         <Block name="SCBL" comment="is the bundle of cables going from PCBs to manifolds"  >
             <Material name="Copper"  />
             <Attribute for="SCBL" seen="1" colo="3"  />
 
+<!--
             sq=SCBP_Len**2/(SCBP_Rmin2-SCBP_Rmin1)**2 
             A=pi*(SCBP_Rmin1**2+SCBP_Rmin2**2)*sqrt(1+sq) 
+  -->
+
+            sq  = (scbp_len*scbp_len)
+            sq /= (scbp_rmin2-scbp_rmin1)
+            sq /= (scbp_rmin2-scbp_rmin1)
+               
+            A   = pi
+            A  *= (scbp_rmin1*scbp_rmin1 + scbp_rmin2*scbp_rmin2)
+            A  *= sqrt(1+sq)
 
             CuThk=(SCBP_Vol/A)*sqrt(1.0+1.0/sq) 
 
-            <Shape type="CONE" rmn1="SCBP_Rmin1" rmn2="SCBP_Rmin2" rmx2="SCBP_Rmin2+CuThk" rmx1="SCBP_Rmin1+CuThk" dz="SCBP_Len"  />
+            <Shape type="CONE" rmn1="SCBP_Rmin1"       rmn2="SCBP_Rmin2" 
+                               rmx1="SCBP_Rmin1+CuThk" rmx2="SCBP_Rmin2+CuThk"  
+                               dz="SCBP_Len"  />
         </Block>
         
         <Block name="SFED" comment="is the watrer in the bundle of pipes going to manifolds"  >
             <Material name="Water"  />
             <Attribute for="SFED" seen="1" colo="1"  />
 
+<!--
             sq=SFEP_Len**2/(SFEP_Rmin2-SFEP_Rmin1)**2 
             A=pi*(SFEP_Rmin1**2+SFEP_Rmin2**2)*sqrt(1+sq) 
+-->
+
+            sq  = sfep_len * sfep_len
+            sq /= (sfep_rmin2 - sfep_rmin1)
+            sq /= (sfep_rmin2 - sfep_rmin1)
+
+            A   = pi
+            A  *= (sfep_rmin1*sfep_rmin1 + sfep_rmin2+sfep_rmin2)
+            A  *= sqrt(1+sq)
 
             CuThk=(SFEP_Vol/A)*sqrt(1.0+1.0/sq) 
 
-            <Shape type="CONE" rmn1="SFEP_Rmin1" rmn2="SFEP_Rmin2" rmx2="SFEP_Rmin2+CuThk" rmx1="SFEP_Rmin1+CuThk" dz="SFEP_Len"  />
+            <Shape type="CONE" rmn1="SFEP_Rmin1"       rmn2="SFEP_Rmin2" 
+                               rmx1="SFEP_Rmin1+CuThk" rmx2="SFEP_Rmin2+CuThk"
+                               dz="SFEP_Len"  />
+
         </Block>
         
         <Block name="SPLS" comment="is the plastic walls of the bundle of pipes going to manifolds"  >
@@ -1277,9 +1313,17 @@
             </Mixture>
             
             <Attribute for="SPLS" seen="1" colo="6"  />
-
+<!--
             sq=SFEP_Len**2/(SFEP_Rmin2-SFEP_Rmin1)**2 
             A=pi*(SFEP_Rmin1**2+SFEP_Rmin2**2)*sqrt(1+sq) 
+  -->
+            sq  = sfep_len * sfep_len
+            sq /= (sfep_rmin2 - sfep_rmin1)
+            sq /= (sfep_rmin2 - sfep_rmin1)
+
+            A   = pi
+            A  *= (sfep_rmin1*sfep_rmin1 + sfep_rmin2+sfep_rmin2)
+            A  *= sqrt(1+sq)
 
             CuThk=(SFEP_Vol/A)*sqrt(1.0+1.0/sq) 
 
@@ -1343,23 +1387,31 @@
         
         <Block name="SBOI" comment="is the Berillia layer"  >
             <Mixture name="BeO" dens="2.85"  >
-                <Component name="Be" a="9" z="4" w="1"  />
-                <Component name="O" a="16" z="8" w="1"  />
+                <Component name="Be" a="9" z="4" w="1.0"  />
+                <Component name="O" a="16" z="8" w="1.0"  />
             </Mixture>            
             <Attribute for="SBOI" seen="1" colo="6" 
                        serial="0" />
-            <Shape type="BOX" dz="selc_BeOThk/2" dx="selc_ElcaWid/2" dy="svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)"  />
+            <Shape type="BOX" 
+                   dx="selc_ElcaWid/2" dy="svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)" 
+                   dz="selc_BeOThk/2" 
+                   />
+
         </Block>
         
         <Block name="SAGP" comment="is the Silver-Palladium layer"  >
             <Mixture name="AgPd" dens="11.25"  >
-                <Component name="Ag" a="108" z="47" w="1"  />
-                <Component name="Pd" a="106" z="46" w="1"  />
+                <Component name="Ag" a="108" z="47" w="1.0" />
+                <Component name="Pd" a="106" z="46" w="1.0" />
             </Mixture>
             
-            <Attribute for="SAGP" seen="1" colo="2" 
-                       serial="0" />
-            <Shape type="BOX" dz="selc_AgPdThk/2" dx="selc_ElcaWid/2" dy="svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)"  />
+            <Attribute for="SAGP" seen="1" colo="2" serial="0" />
+
+            <Shape type="BOX" dx="selc_ElcaWid/2" 
+                              dy="svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)" 
+                              dz="selc_AgPdThk/2" />
+
+
         </Block>
         
         <Block name="SGLA" comment="is the insulating glass layer"  >
@@ -1395,15 +1447,28 @@
         <Block name="SIRT" comment="is the SVT inner end ring tube"  >
             <Material name="Berillium"  />
             <Attribute for="SIRT" seen="1" colo="2"  />
+<!--
             ir_rmin = serg_IrngPrMn * (cos(pi/8.) + sqrt( tan(pi/8.)**2-sin(pi/8.)**2))
+-->
+            ir_rmin  = cos(pi/8.0)
+            ir_rmin += sqrt( tan(pi/8.0)*tan(pi/8.0) - sin(pi/8.0)*sin(pi/8.0) )
+            ir_rmin *= serg_irngprmn
+
             <Shape type="TUBE" rmax="serg_IrngTrMx" rmin="ir_rmin" dz="serg_EndRngTh/2"  />
         </Block>
         
         <Block name="SIRP" comment="is the SVT inner end ring polycone (overlaps tube)"  >
             <Material name="Berillium"  />
             <Attribute for="SIRP" seen="1" colo="2"  />
+<!--
             rou=serg_IrngTrMx/(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.)) 
+  -->
+            rou  = cos(pi/8.0)
+            rou += sqrt( tan(pi/8.0)*tan(pi/8.0) - sin(pi/8.0)*sin(pi/8.0) )
+            rou  = serg_irngtrmx / rou
+
             <Shape type="PGON" phi1="0" rmn="{serg_IrngPrMn,serg_IrngPrMn}" rmx="{rou,rou}" nz="2" npdiv="8" dphi="360" zi="{-serg_EndRngTh/2,+serg_EndRngTh/2}"  />
+
         </Block>
         
         <Block name="SOER" comment="is the SVT outer end ring"  >
@@ -1558,12 +1623,20 @@
             rmax=ssup_Con4IdMn+roffset 
             zmin=ssup_Rodlen/2+ssup_GrphThk 
             zmax=ssup_Cone3zmx 
+<!--
             cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.) 
+-->
+            cone_len  = (zmax-zmin)*(zmax-zmin)
+            cone_len += (rmax-rmin)*(rmax-rmin)
+            cone_len  = sqrt(cone_len)
+              
             cone_sin=(rmax-rmin)/cone_len 
             cone_cos=(zmax-zmin)/cone_len 
+
             angle=asin(cone_sin)*180/pi 
             xpos=rmin+0.5*(rmax-rmin)+ssup_HosRmx*cone_cos 
             zpos=-ssup_HosRmx*cone_sin 
+
             <Attribute for="SHMA" seen="0" colo="1"  />
             <Shape type="DIVISION" ndiv="ssup_Nhoses" c0="0.0" iaxis="2"  />
             <Create block="SWHO"  />
@@ -1591,7 +1664,13 @@
             zmin=ssup_Cone3zmx 
             zmax=ssup_Cone4zmx 
 
+<!--
             cone_len=sqrt((zmax-zmin)**2.+(rmax-rmin)**2.) 
+-->
+            cone_len  = (zmax-zmin)*(zmax-zmin)
+            cone_len += (rmax-rmin)*(rmax-rmin)
+            cone_len  = sqrt(cone_len)
+
             cone_sin=(rmax-rmin)/cone_len 
             cone_cos=(zmax-zmin)/cone_len 
 

@@ -15,7 +15,7 @@
         
         <Structure name="SVTG"  >
             <var name="Version" type="float"  />
-            <var name="Nlayer" type="float"  />
+            <var name="Nlayer" type="int"  />
             <var name="RsizeMin" type="float"  />
             <var name="RsizeMax" type="float"  />
             <var name="ZsizeMax" type="float"  />
@@ -134,7 +134,7 @@
         </Structure>
         
         <Structure name="SVTL"  >
-            <var name="Layer" type="float"  />
+            <var name="Layer" type="int"  />
             <var name="Nladder" type="float"  />
             <var name="Nwafer" type="float"  />
             <var name="Radius" type="float"  />
@@ -420,17 +420,17 @@
         </Mixture>
 
         <Mixture name="ALKAP" dens="1.432"  >
-            <Component name="C5" a="12" z="6" w="5"  />
-            <Component name="H4" a="1" z="1" w="4"  />
-            <Component name="O2" a="16" z="8" w="2"  />
-            <Component name="Al" a="27" z="13" w="0.2302"  />
+            <Component name="C5" a="12" z="6" w="10000*5"  />
+            <Component name="H4" a="1" z="1" w="10000*4"  />
+            <Component name="O2" a="16" z="8" w="10000*2"  />
+            <Component name="Al" a="27" z="13" w="10000*0.2302"  />
         </Mixture>
         
         <Mixture name="SSDALMY" dens="1.40845"  >
-            <Component name="C5" a="12" z="6" w="5"  />
-            <Component name="H4" a="1" z="1" w="4"  />
-            <Component name="O2" a="16" z="8" w="2"  />
-            <Component name="Al" a="27" z="13" w="0.0986"  />
+            <Component name="C5" a="12" z="6" w="10000*5"  />
+            <Component name="H4" a="1" z="1" w="10000*4"  />
+            <Component name="O2" a="16" z="8" w="10000*2"  />
+            <Component name="Al" a="27" z="13" w="10000*0.0986"  />
         </Mixture>
         
         <If expr="swam_Len&gt;0"  >
@@ -555,7 +555,7 @@
             </Placement>
             
             radmax=svtg_rSizeMax 
-            <Do var="ilayer" from="1" to="min(6,nint(svtg_Nlayer))"  >
+            <Do var="ilayer" from="1" to="min(6,svtg_Nlayer)"  >
                 <If expr="ilayer&lt;6"  >
                     <Use struct="SVTL" select="layer" value="ilayer+1 "  />
                     radmax=svtl_radius 
