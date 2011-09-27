@@ -240,7 +240,7 @@ Int_t Geometry::numberOfVolumes( const Char_t *vol )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructEcal( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
 
   // Select the endcap data structure indicated by the flag
   if ( !ecalGeom.Use( "select", flag ) )
@@ -271,7 +271,8 @@ Bool_t Geometry::ConstructEcal( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructBbcm( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
+
   if ( !bbcmGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -295,7 +296,8 @@ Bool_t Geometry::ConstructBbcm( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructPipe( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
+
   if ( !pipeGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -317,7 +319,7 @@ Bool_t Geometry::ConstructPipe( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructFpdm( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
   if ( !fpdmGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -335,7 +337,8 @@ Bool_t Geometry::ConstructFpdm( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructTpce( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
+
   if ( !tpceGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -363,7 +366,8 @@ Bool_t Geometry::ConstructTpce( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructCalb( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
+
   if ( !calbGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -390,7 +394,8 @@ Bool_t Geometry::ConstructCalb( const Char_t *flag, Bool_t go )
 
 // -------------------------------------------------------------------
 Bool_t Geometry::ConstructBtof( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
+
   if ( !btofGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -416,7 +421,8 @@ Bool_t Geometry::ConstructBtof( const Char_t *flag, Bool_t go )
 
 // -------------------------------------------------------------------
 Bool_t Geometry::ConstructVpdd( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
+
   if ( !vpddGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -437,7 +443,7 @@ Bool_t Geometry::ConstructVpdd( const Char_t *flag, Bool_t go )
 
 // -------------------------------------------------------------------
 Bool_t Geometry::ConstructPhmd( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
 
   if ( !phmdGeom.Use( "select", flag ) )
     {
@@ -459,7 +465,7 @@ Bool_t Geometry::ConstructPhmd( const Char_t *flag, Bool_t go )
 
 // -------------------------------------------------------------------
 Bool_t Geometry::ConstructFtpc( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
 
   if ( !ftpcGeom.Use( "select", flag ) )
     {
@@ -490,7 +496,8 @@ Bool_t Geometry::ConstructFtpc( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructMutd( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
+
   if ( !mutdGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -512,7 +519,7 @@ Bool_t Geometry::ConstructMutd( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructFtro( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
 
   /* Add FTRO select */
 
@@ -528,8 +535,7 @@ Bool_t Geometry::ConstructFtro( const Char_t *flag, Bool_t go )
 }
 
 Bool_t Geometry::ConstructSvtt( const Char_t *flag, Bool_t go )
-{
-
+{ if (!go) return false;
 
   if ( !svttGeom.Use("select",flag) ) 
     {
@@ -539,7 +545,6 @@ Bool_t Geometry::ConstructSvtt( const Char_t *flag, Bool_t go )
 
 
   AgStructure::AgDetpNew( svttGeom.module, Form("Silicon Vertex Detector Configuration"));
-
   AgStructure::AgDetpAdd("Svtg_t","config",       (float)svttGeom.config );       // SVTT configuration
   AgStructure::AgDetpAdd("Svtg_t","conever",      (float)sconGeom.config );       // Support cone configuration
 
@@ -578,7 +583,7 @@ Bool_t Geometry::ConstructSvtt( const Char_t *flag, Bool_t go )
 }
 
 Bool_t Geometry::ConstructSisd( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
 
   /* Add SISD select */
 
@@ -616,7 +621,7 @@ Bool_t Geometry::ConstructSisd( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructMagp( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
 
   if ( !magpGeom.Use( "select", flag ) )
     {
@@ -636,7 +641,7 @@ Bool_t Geometry::ConstructMagp( const Char_t *flag, Bool_t go )
 }
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructCave( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
 
   if ( !caveGeom.Use( "select", flag ) )
     {
@@ -657,7 +662,7 @@ Bool_t Geometry::ConstructCave( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructScon( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
   if ( !sconGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -669,9 +674,14 @@ Bool_t Geometry::ConstructScon( const Char_t *flag, Bool_t go )
       return true;
     }
 
+  /*
+   * Note: This likely fails... Svtg_t is defined in multiple geometries,...
+   * and AgDetpAdd _should_ pick up all of them...
+   */
+
+
   AgStructure::AgDetpNew( "SconGeo", Form("Support Cone Configuration configuration %s",flag));
   AgStructure::AgDetpAdd( "Svtg_t", "conever", (Float_t)sconGeom.config );
-
 
   if ( go )
   if ( !CreateModule( sconGeom.module  ) )
@@ -685,7 +695,7 @@ Bool_t Geometry::ConstructScon( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructUpst( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
   if ( !upstGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -703,7 +713,7 @@ Bool_t Geometry::ConstructUpst( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructZcal( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
   if ( !zcalGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -721,7 +731,7 @@ Bool_t Geometry::ConstructZcal( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructRich( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
   if ( !richGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -739,7 +749,7 @@ Bool_t Geometry::ConstructRich( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
 
   
 
@@ -773,7 +783,7 @@ Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
 
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructIdsm( const Char_t *flag, Bool_t go )
-{
+{ if (!go) return false;
   if ( !idsmGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
