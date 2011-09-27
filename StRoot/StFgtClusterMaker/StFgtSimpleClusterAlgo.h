@@ -14,21 +14,21 @@
 #ifndef STAR_StFgtSimpleClusterAlgo_HH
 #define STAR_StFgtSimpleClusterAlgo_HH
 
-#include "StFgtIClusteralgo.h"
+#include "StFgtIClusterAlgo.h"
 
 class StFgtSimpleClusterAlgo :public StFgtIClusterAlgo
 {
   StFgtSimpleClusterAlgo();
 
-  virtual Int_t doClustering();
+  virtual Int_t doClustering(const StFgtRawHitArray&, StFgtClusterArray&);
   virtual Int_t Init(StFgtEvent* mEvent);
 
  protected:
   StFgtEvent* mFgtEvent;
-  bool mInitialized;
-
+ private:
+  Bool_t mIsInitialized;
   ClassDef(StFgtSimpleClusterAlgo,1);
-}
+};
 
 
 #endif

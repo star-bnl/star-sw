@@ -1,5 +1,8 @@
-// $Id: StFgtIClusterAlgo.h,v 1.3 2011/09/27 17:19:05 avossen Exp $
+// $Id: StFgtIClusterAlgo.h,v 1.4 2011/09/27 22:14:27 avossen Exp $
 // $Log: StFgtIClusterAlgo.h,v $
+// Revision 1.4  2011/09/27 22:14:27  avossen
+// cluster maker compiles
+//
 // Revision 1.3  2011/09/27 17:19:05  avossen
 // simple cluster makers
 //
@@ -19,14 +22,16 @@
 #define STAR_StFgtIClusterAlgo_HH
 
 #include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
+#include "StRoot/StEvent/StFgtEvent/StFgtClusterArray.h"
+#include "StRoot/StEvent/StFgtEvent/StFgtRawHitArray.h"
 
 class StFgtIClusterAlgo
 {
  public:
   //subclasses must implement this function that takes raw hits from StEvent and fills the Cluster collection
-  virtual Int_t doClustering()=0;
+  virtual Int_t doClustering(const StFgtRawHitArray&, StFgtClusterArray&)=0;
   virtual Int_t Init(StFgtEvent* mEvent)=0;
   
-}
+};
 
 #endif

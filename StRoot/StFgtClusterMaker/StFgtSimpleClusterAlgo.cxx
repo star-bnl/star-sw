@@ -9,19 +9,22 @@
 #include "StFgtSimpleClusterAlgo.h"
 
 
-StFgtSimpleClusterAlgo():mInitialized(false)
+StFgtSimpleClusterAlgo::StFgtSimpleClusterAlgo():mIsInitialized(0)
 {
   //nothing else to do....
 };
 
 Int_t StFgtSimpleClusterAlgo::Init(StFgtEvent* mEvent)
 {
-  mInitialized=true;
-
+  mIsInitialized=true;
 };
 
-Int_t StFgtSimpleClusterAlgo::doClustering()
+Int_t StFgtSimpleClusterAlgo::doClustering(const StFgtRawHitArray& hits, StFgtClusterArray& clusters)
 {
+
+
+
+
 
 };
 
