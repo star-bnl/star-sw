@@ -15,10 +15,11 @@
 #include <math.h>
 #include <TString.h>
 
-
+#include "StMaker.h"
+#include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
+#include "StFgtIClusterAlgo.h"
 #include "StRoot/St_base/StMessMgr.h"
 #include "StRoot/St_base/Stypes.h"
-
 
 
 class StFgtClusterMaker : public StMaker
