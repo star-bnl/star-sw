@@ -207,7 +207,7 @@ class StFgtGeom
 	static void getNaivePhysCoordFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel,
 	    Short_t & disc, Short_t & quadrant, Char_t & layer,
-	    Double_t ordinate, Double_t lowerSpan, Double_t upperSpan
+	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
 	)
 	{
 	    getPhysicalCoordinate(
