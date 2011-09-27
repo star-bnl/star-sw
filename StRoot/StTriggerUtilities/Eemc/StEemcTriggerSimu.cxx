@@ -228,12 +228,12 @@ StEemcTriggerSimu::InitRun(int runnumber){
     break;
   }
 
-  LOG_INFO << "cr\tchan\tped\tped4" << endm;
+  LOG_INFO << "rdo\tcr\tchan\tsta\tped\tped4" << endm;
 
   for (int crate = 1; crate <= mxCr; ++crate) {
     for (int chan = 0; chan < 120; ++chan) {
       int rdo = getRdo(crate,chan);
-      LOG_INFO << crate << '\t' << chan << '\t' << ped[rdo] << '\t' << feePed[rdo] << endm;
+      LOG_INFO << rdo << '\t' << crate << '\t' << chan << '\t' << feeMask[rdo] << '\t' << ped[rdo] << '\t' << feePed[rdo] << endm;
     }
   }
 
@@ -769,6 +769,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.42  2011/09/27 19:23:52  pibero
+// Added rdo and status
+//
 // Revision 1.41  2011/09/22 15:55:21  pibero
 // Added EEMC pedestal modes:
 //
