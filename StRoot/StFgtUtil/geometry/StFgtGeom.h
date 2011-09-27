@@ -271,7 +271,7 @@ class StFgtGeom
 	static int phiStripLOCId_number() { return mPhiStripLOCId_number; }
 
 	static inline double phiQuadXaxis(int iquad);
-	static inline bool inDisk( TVector3 rLab );
+	static inline bool inDisc( TVector3 rLab );
 	static inline int getQuad( double phiLab );
 
 	//  This is NOT a candidate for inlining.  This returns false if it is
