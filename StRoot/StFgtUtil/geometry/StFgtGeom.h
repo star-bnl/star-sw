@@ -49,7 +49,7 @@ class StFgtGeom
 	//  For all functions where they appear: Disc can be >= 0 (in theory,
 	//  although only values 0-5 work at the moment, I believe). Quadrant
 	//  is 0-3.  Layer is 'P' or 'R'. Strip is 0-720
-	static Short_t encodeGeoId(
+	static Int_t encodeGeoId(
 	    Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
 	)
 	{
@@ -111,7 +111,7 @@ class StFgtGeom
 	    return encodeGeoName( disc, quadrant, layer, strip );
 	}
 
-	static Short_t translateGeoNameToGeoId( const std::string & geoName )
+	static Int_t translateGeoNameToGeoId( const std::string & geoName )
 	{
 	    Short_t disc, quadrant, strip;
 	    Char_t layer;
@@ -176,7 +176,7 @@ class StFgtGeom
 	//  For those functions that have them, currently rdo can be 1-2, arm
 	//  can be 0-5, apv can be 0-23 (although 10, 11, 22, and 23 are not
 	//  technically valid) and channel is 0-127.
-	static Short_t getNaiveGeoIdFromElecCoord(
+	static Int_t getNaiveGeoIdFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
 	{
