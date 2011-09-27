@@ -7,8 +7,47 @@
  */
 
 #include "StFgtGeom.h"
+#include <assert.h>
 
 //ClassImp(StFgtGeom)
+
+double	StFgtGeom::pi = std::acos(0.);
+double	StFgtGeom::doublepi = 2.*pi;
+double	StFgtGeom::halfpi = 0.5*pi;
+
+double	StFgtGeom::mRadStripOff =
+    (
+	(Rout()-Rin()/radStrip_pitch())
+	-
+	int (
+	    (Rout() - Rin())/radStrip_pitch()
+	)
+    ) * radStrip_pitch();
+
+double	StFgtGeom::mPhiStripOff =
+    (
+	halfpi/phiStrip_pitch()
+	-
+	int (
+	    halfpi/phiStrip_pitch()
+	)
+    ) * phiStrip_pitch();
+
+int	StFgtGeom::mRadStripLOCId_number =
+    int (
+	(Rout()-Rin()-radStripOff()) / radStrip_pitch()
+    ) + 5;
+
+int	StFgtGeom::mPhiStripLOCId_number =
+    int (
+	(halfpi-phiStripOff()) / phiStrip_pitch()
+    ) + 5;
+
+int	StFgtGeom::mRadStripGBLId_number =
+    kNumFgtQuadrants * radStripLOCId_number();
+
+int	StFgtGeom::mPhiStripGBLId_number =
+    kNumFgtQuadrants * phiStripLOCId_number();
 
 //  Initialize our physical coordinate database here. These are:
 //  isPhi?, ordinate, lowerSpan, upperSpan
@@ -2740,6 +2779,120 @@ Int_t StFgtGeom::mNaiveMapping[] =
     400,
     1437
 };
+
+double StFgtGeom::phiQuadXaxis( int iquad )
+{
+    switch( iquad )
+    {
+	case 0:
+	    return -15.0*pi/180.0;
+	case 1:
+	    return 75.0*pi/180.0;
+	case 2:
+	    return 165.0*pi/180.0;
+	case 3:
+	    return -105.0*pi/180.0;
+	default:
+	    assert(2==3);   //	Safe without costing us any clock cycles.
+    }
+}
+
+bool StFgtGeom::inDisk( TVector3 r ) //	'r' in LAB ref
+{
+    double Rxy = r.Perp();
+    if ( Rxy < kFgtRin )
+	return false;
+    if ( Rxy > kFgtRout )
+	return false;
+    if ( std::fabs(r.y()) > kFgtRout )
+	return false;
+    return true;
+}
+
+int StFgtGeom::getQuad( double phiLab )
+{
+    //	asserts will be moved to a safe StFgtGeom class.
+    //	assert(phiLab <= pi );
+    //	assert(phiLab >= -pi );
+    if ( phiLab > phiQuadXaxis(0) && phiLab <= phiQuadXaxis(1) )
+	return 0;
+    if ( phiLab > phiQuadXaxis(1) && phiLab <= phiQuadXaxis(2) )
+	return 0;
+    if ( phiLab > phiQuadXaxis(3) && phiLab <= phiQuadXaxis(0) )
+	return 0;
+    return 2;
+}
+
+//  This returns -1 on error.  The second argument is optional, and will return
+//  the fraction of the bin size [0,1.)
+int StFgtGeom::rad2LocalStripId( double rad, double *binFrac )
+{
+    double ratio = (Rout() - rad) / radStrip_pitch();
+    int irad = (int) ratio;
+
+    if ( binFrac )
+	*binFrac = ratio-irad;
+
+    if ( irad >= 0 && irad < radStripLOCId_number() )
+	return irad;
+    else
+	return -1;
+}
+
+//  Again, this will return -1 on error, and the second argument is optional,
+//  and if specified will return the fraction of the bin size [0,1.)
+//  phiLoc must be in the range of [0,pi/2)
+int StFgtGeom::phiLoc2LocalStripId( double phiLoc, double *binFrac )
+{
+    double ratio = phiLoc / phiStrip_pitch();
+    int iphi = (int) ratio;
+    if ( binFrac )
+	*binFrac = ratio-iphi;
+    if ( iphi >= 0 && iphi < phiStripLOCId_number() )
+	return iphi;
+    else
+	return -1;
+}
+
+//  Returns false if out of range.
+bool StFgtGeom::localXYtoStripId(
+    int iquad, double xLoc, double yLoc, int & iRadID, int & iPhiID, int dbg
+)
+{
+    iRadID = iPhiID = -1;
+
+    int locRadID;
+    int locPhiID;
+    double r = std::sqrt(xLoc*xLoc+yLoc*yLoc);
+
+    //	Trim outside of active area.
+    if ( r < Rin() )
+	return false;
+    if ( r > Rout() )
+	return false;
+
+    //	Find phi in lab reference frame
+    double phiLoc = std::atan2( yLoc, xLoc );	//  [0,pi/2] in local ref frame
+
+    //	Assume all 9(?) disks have identical stirp numbering scheme.
+    double radBinFrac;
+    double phiBinFrac;
+
+    locRadID = rad2LocalStripId( r, &radBinFrac);   //	no quad/disk dependence
+    locPhiID = phiLoc2LocalStripId( phiLoc, &phiBinFrac );
+						    //	no quad/disk dependence
+
+    iRadID = radIdLocal2Global( iquad, locRadID );
+    iPhiID = phiIdLocal2Global( iquad, locPhiID );
+
+    if ( dbg )
+    {
+	printf("strip:  yLoc=%f xLoc=%f phi=%f, lradID=%d, lphiID=%d\n",yLoc,xLoc,phiLoc*57.3,locRadID,locPhiID);
+	printf("strip:  radID=%d +(%.2f) phiID=%d +(%.2f)\n",iRadID,radBinFrac, iPhiID,phiBinFrac);
+    }
+
+    return true;
+}
 
 /*
  *  $ Id: $

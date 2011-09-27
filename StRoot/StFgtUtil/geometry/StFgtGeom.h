@@ -10,9 +10,11 @@
 #define _ST_FGT_GEOM_H_
 
 #include <TObject.h>
+#include <TVector3.h>
 #include <string>
 #include <sstream>
 #include <cstdlib>
+#include <cmath>
 
 #include "StFgtGeomDefs.h"
 
@@ -244,6 +246,51 @@ class StFgtGeom
 		    mNaiveMapping[ apv*128+channel ] >= 720;
 	}
 
+	//  Jan's necessary functions start here.  These were written by Jan,
+	//  modified slightly by me.
+	static double Rin()	{ return kFgtRin; }
+	static double Rmid()	{ return kFgtRmid; }
+	static double Rout()	{ return kFgtRout; }
+
+	static double radStrip_pitch() { return kFgtRadPitch; }		//  cm
+	static double phiStrip_pitch() { return kFgtPhiPitch/Rout(); }	//  rad
+
+	static double yLimit() { return kFgtRout; }
+
+	//  deadQuadEdge is in cm, local ref frame
+	static double deadQuadEdge()	{ return kFgtDeadQuadEdge; }
+	static double maxTof()		{ return 80.e-9; }  //	seconds
+	static double minPmag()		{ return 0.005; }   //	GeV of track
+							    //	momentum
+
+
+	static double radStripOff() { return mRadStripOff; }
+	static double phiStripOff() { return mPhiStripOff; }
+
+	static int radStripLOCId_number() { return mRadStripLOCId_number; }
+	static int phiStripLOCId_number() { return mPhiStripLOCId_number; }
+
+	static inline double phiQuadXaxis(int iquad);
+	static inline bool inDisk( TVector3 rLab );
+	static inline int getQuad( double phiLab );
+
+	//  This is NOT a candidate for inlining.  This returns false if it is
+	//  out of range.
+	static bool localXYtoStripId(
+	    int iquad, double x, double y,
+	    int & iRadID, int & iPhiID,
+	    int dbg=0
+	);
+
+	//  Jan's definitions.
+	static const double kFgtRout		= 37.1;	    //	cm
+	static const double kFgtRmid		= 18.8;	    //	cm
+	static const double kFgtRin		= 11.5;	    //	cm
+	static const double kFgtRadPitch	=  0.08;    //	800 mu
+	static const double kFgtPhiPitch	=  0.06;    //	600 mu
+	static const double kFgtDeadQuadEdge	=  0.1;	    //	cm
+
+	//  Standard definitions.
 	static const Int_t kNumStrips = 1440;
 	static const Int_t kNumChannels = 1280;
 
@@ -256,10 +303,39 @@ class StFgtGeom
 	StFgtGeom& operator=( const StFgtGeom& );
 	*/
 
+	//  Various constants used in Jan's conversion functions.
+	static double pi;
+	static double doublepi;
+	static double halfpi;
+	static double mRadStripOff;
+	static double mPhiStripOff;
+	static int mRadStripLOCId_number;
+	static int mPhiStripLOCId_number;
+	static int mRadStripGBLId_number;
+	static int mPhiStripGBLId_number;
+
 	//  ---Private member variables---
 	static StFgtGeomData mStrips[ kNumStrips ];
 
 	static Int_t mNaiveMapping[ kNumChannels ];
+
+	//  What follows are some private functions to help with the
+	//  localXYtoStripID function.  These are also written by Jan, modified
+	//  slightly by me.
+
+	//  These next two return -1 on error.
+	static inline int rad2LocalStripId( double rad, double *binFrac=0 );
+	static inline int phiLoc2LocalStripId( double phiLoc, double *binFrac=0 );
+
+	static int radIdLocal2Global( int iquad, int radId )
+	{
+	    return radId + radStripLOCId_number() * iquad;
+	}
+
+	static int phiIdLocal2Global( int iquad, int phiId )
+	{
+	    return phiId + phiStripLOCId_number() * iquad;
+	}
 
     //ClassDef(StFgtGeom, 1)
 };
