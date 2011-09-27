@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedPlotter.h,v 1.2 2011/09/24 02:14:10 sgliske Exp $
+ * $Id: StFgtPedPlotter.h,v 1.3 2011/09/27 00:49:00 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedPlotter.h,v $
+ * Revision 1.3  2011/09/27 00:49:00  sgliske
+ * cosmic QA update
+ *
  * Revision 1.2  2011/09/24 02:14:10  sgliske
  * updated FGT cosmic QA
  *
@@ -64,6 +67,7 @@ class StFgtPedPlotter {
    void setPlotVsStrip( Char_t type = 'R' );
    void setDisc( Short_t discId );
    void setQuad( Short_t quadId );
+   void setQuadName( const Char_t *name );
 
    // typedef
    typedef std::vector< std::vector< Float_t > > VecVec_t;
@@ -81,6 +85,7 @@ class StFgtPedPlotter {
    // what to plot
    Short_t mDiscId, mQuadId;
    Char_t mPlotVsStrip;
+   std::string mQuadName;
 
    // to load the data
    virtual Int_t fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E );
@@ -114,6 +119,7 @@ inline StFgtPedPlotter::~StFgtPedPlotter(){ /* */ };
 inline void StFgtPedPlotter::setTimeBinMask( Short_t mask ){ mTimeBinMask = mask; };
 inline void StFgtPedPlotter::setDisc( Short_t discId ){ mDiscId = discId; };
 inline void StFgtPedPlotter::setQuad( Short_t quadId ){ mQuadId = quadId; };
+inline void StFgtPedPlotter::setQuadName( const Char_t* name ){ mQuadName = name; };
 inline void StFgtPedPlotter::setReadFromFile( const Char_t* filename ){ mFileNameIn = filename; };
 
 inline void StFgtPedPlotter::setPlotVsStrip( Char_t strip ){

@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedPlotter.cxx,v 1.3 2011/09/26 16:55:52 sgliske Exp $
+ * $Id: StFgtPedPlotter.cxx,v 1.4 2011/09/27 00:49:00 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedPlotter.cxx,v $
+ * Revision 1.4  2011/09/27 00:49:00  sgliske
+ * cosmic QA update
+ *
  * Revision 1.3  2011/09/26 16:55:52  sgliske
  * Continued work on cosmic QA plots
  *
@@ -46,6 +49,7 @@ Int_t StFgtPedPlotter::makePlots(){
 
    // decide how many time bins are present
    mTimeBinMap.clear();
+
    for( Int_t i=0, k=-1; i<mMaxNumTimeBins; ++i )
       if( 1<<i & mTimeBinMask )
          mTimeBinMap[i] = ++k;
@@ -85,6 +89,7 @@ Int_t StFgtPedPlotter::makePlots(){
          //cout << "Plot for time bin " << timebin << ' ' << gr << endl;
 
          if( gr && gr->GetN() ){
+            //cout << "\tsuccess" << endl;
             mGraphVec[i] = gr;
          };
       };
@@ -106,12 +111,13 @@ Int_t StFgtPedPlotter::fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E ){
 
    if( !ierr ){
       Int_t timebin, geoId;
-      Short_t disc, quad, strip;
+      Short_t disc, quad; //, strip;
       Char_t layer;
       Float_t ped, stdev, x = 0;
 
       while( !fin.eof() && !ierr ){
          fin >> geoId >> timebin >> ped >> stdev;
+         //cout << geoId << ' ' << timebin << ' ' << ped << ' ' << stdev << endl;
 
          if( 1<<timebin & mTimeBinMask ){
             Double_t pos, high, low;
@@ -154,6 +160,7 @@ Int_t StFgtPedPlotter::fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E ){
          };
 
          // check to see if at the end of the file
+         fin >> std::ws;
          fin.peek();
       };
    };
@@ -192,11 +199,20 @@ TGraphErrors* StFgtPedPlotter::makePlot( std::vector< Float_t >& x,
 
       gr = new TGraphErrors( x.size(), xArr, yArr, 0, eArr );
       std::stringstream ss;
-      ss << "Pedistals vs. ";
+
+       if( mPlotVsStrip == 'R' )
+         ss << "r-strips: ";
+      else if( mPlotVsStrip == 'P' )
+         ss << "#phi-strips: ";
+
+      ss << "Pedestals vs. ";
       if( mPlotVsStrip == 'R' || mPlotVsStrip == 'P' )
-         ss << "Strip Position";
+         ss << "Position";
       else
          ss << "Channel";
+
+      if( !mQuadName.empty() )
+         ss << ", Quad " << mQuadName;
 
       if( mPlotVsStrip == 'R' )
          ss << "; r Strip Pos. [cm]";

@@ -123,6 +123,22 @@ Int_t StFgtCosmicMaker::Make()
 	    { LOG_WARN <<"Could not access disc "<<endm; }
 	}
     }
+
+  // clear events that do not have a complete set of channels
+  Bool_t eventOK = 1;
+  for( UInt_t i = 0; i < mNumDiscs && eventOK; ++i ){
+     StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr( i );
+     if( pDisc )
+        eventOK = ( pDisc->getNumRawHits() == 7*1280 );
+  };
+  if( !eventOK ){
+     for( UInt_t i = 0; i < mNumDiscs; ++i ){
+        StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr( i );
+        if( pDisc )
+           pDisc->ClearRawHitArray();
+     };
+  };
+
   return kStOk;
 };
 

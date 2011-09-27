@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: plotPedsFromFile.C,v 1.2 2011/09/26 16:55:52 sgliske Exp $
+ * $Id: plotPedsFromFile.C,v 1.3 2011/09/27 00:49:00 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: plotPedsFromFile.C,v $
+ * Revision 1.3  2011/09/27 00:49:00  sgliske
+ * cosmic QA update
+ *
  * Revision 1.2  2011/09/26 16:55:52  sgliske
  * Continued work on cosmic QA plots
  *
@@ -31,7 +34,7 @@ int plotPedsFromFile( const Char_t *filenameIn = "testfile.Ped.txt",
                       Short_t quad = 0,
                       Char_t* quadName = "FGT #010",
                       Short_t timeBin = 4,
-                      Char_t plotVsStrip = 'c' ){
+                      Char_t plotVsStrip = 'R' ){
    LoadLibs();
    Int_t ierr = 0;
 
@@ -45,6 +48,7 @@ int plotPedsFromFile( const Char_t *filenameIn = "testfile.Ped.txt",
 
    cout << "making the graphs" << endl;
    ierr = pedPlotter->makePlots();
+   cout << "\tdone" << endl;
 
    if( ierr ){
       cerr << "Error making plots" << endl;
@@ -55,7 +59,7 @@ int plotPedsFromFile( const Char_t *filenameIn = "testfile.Ped.txt",
       gStyle->SetTitleBorderSize(0);
       gStyle->SetTitleTextColor(kRed);
 
-      can = new TCanvas("can","Pedistal Canvas",900,400);
+      can = new TCanvas("can","Pedistal Canvas",400,401);
       can->SetRightMargin( 0.02 );
 
       Float_t xlow = 0;
