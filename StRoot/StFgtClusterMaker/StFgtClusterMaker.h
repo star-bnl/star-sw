@@ -15,8 +15,10 @@
 #include <math.h>
 #include <TString.h>
 
+
 #include "StRoot/St_base/StMessMgr.h"
 #include "StRoot/St_base/Stypes.h"
+
 
 
 class StFgtClusterMaker : public StMaker
@@ -27,6 +29,11 @@ class StFgtClusterMaker : public StMaker
   virtual Int_t Init();
   virtual Int_t Make();
   virtual void Clear( Option_t *opts = "" );
+
+ protected:
+  StFgtIClusterAlgo* pClusterAlgo;
+
+  ClassDef(StFgtClusterMaker,1);
 
 
 }

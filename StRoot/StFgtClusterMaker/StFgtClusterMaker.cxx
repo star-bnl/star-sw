@@ -23,8 +23,16 @@ Int_t StFgtClusterMaker::Make()
      }
   else
      {
+       ///get hits
+
+
+       //invoce algo
+
+
+
        
-     };
+     }
+};
 
 
 Int_t StFgtClusterMaker::Init()
@@ -37,9 +45,12 @@ Int_t StFgtClusterMaker::Init()
 
  StFgtClusterMaker::StFgtCluster(const Char_t* name): mIsInitialized(0),StMaker("fgt");
    {
-
      SetName(name);
    };
 
 
-};
+
+
+
+
+ClassImp(StFgtClusterMaker);
