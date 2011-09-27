@@ -294,7 +294,7 @@ class StFgtGeom
 	static const Int_t kNumStrips = 1440;
 	static const Int_t kNumChannels = 1280;
 
-    private:
+    protected:
 	/*  Not sure that these have a point anymore.
 	StFgtGeom() {};
 
