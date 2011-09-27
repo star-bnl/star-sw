@@ -26,7 +26,7 @@ class StFgtCosmicTestStandGeom:public StFgtGeom
 
 	    
   
-         static Int_t getNaiveGeoIdFromCosmicStandElecCoordin
+         static Int_t getNaiveGeoIdFromElecCoordin
 	   (
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	    )
