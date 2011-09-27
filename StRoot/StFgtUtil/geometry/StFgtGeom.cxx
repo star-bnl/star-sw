@@ -2797,7 +2797,7 @@ double StFgtGeom::phiQuadXaxis( int iquad )
     }
 }
 
-bool StFgtGeom::inDisk( TVector3 r ) //	'r' in LAB ref
+bool StFgtGeom::inDisc( TVector3 r ) //	'r' in LAB ref
 {
     double Rxy = r.Perp();
     if ( Rxy < kFgtRin )
