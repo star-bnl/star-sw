@@ -2800,11 +2800,10 @@ double StFgtGeom::phiQuadXaxis( int iquad )
 bool StFgtGeom::inDisc( TVector3 r ) //	'r' in LAB ref
 {
     double Rxy = r.Perp();
+    //printf("StFgtGeom::inDisc Rxy=%f Rin=%f Rout=%f\n",Rxy,kFgtRin,kFgtRout);
     if ( Rxy < kFgtRin )
 	return false;
     if ( Rxy > kFgtRout )
-	return false;
-    if ( std::fabs(r.y()) > kFgtRout )
 	return false;
     return true;
 }
