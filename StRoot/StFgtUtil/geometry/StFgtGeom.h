@@ -187,12 +187,14 @@ class StFgtGeom
 		return
 		(
 		    disc*kNumFgtQuadrants + quadrant
-		) * kNumFgtLayers + mNaiveMapping[ (apv-12)*128+channel ];
+		) * kNumFgtLayers * kNumFgtStripsPerLayer
+		    + mNaiveMapping[ (apv-12)*128+channel ];
 	    else
 		return
 		(
 		    disc*kNumFgtQuadrants + quadrant
-		) * kNumFgtLayers + mNaiveMapping[ apv*128+channel ];
+		) * kNumFgtLayers * kNumFgtStripsPerLayer
+		    + mNaiveMapping[ apv*128+channel ];
 
 	}
 
@@ -240,10 +242,10 @@ class StFgtGeom
 	{
 	    if ( apv >= 12 )
 		return
-		    mNaiveMapping[ (apv-12)*128+channel ] >= 720;
+		    mNaiveMapping[ (apv-12)*128+channel ] < 720;
 	    else
 		return
-		    mNaiveMapping[ apv*128+channel ] >= 720;
+		    mNaiveMapping[ apv*128+channel ] < 720;
 	}
 
 	//  Jan's necessary functions start here.  These were written by Jan,
