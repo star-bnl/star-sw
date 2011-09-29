@@ -11,7 +11,7 @@
 
 //ClassImp(StFgtGeom)
 
-double	StFgtGeom::pi = std::acos(0.);
+double	StFgtGeom::pi = 2.*std::acos(0.);
 double	StFgtGeom::doublepi = 2.*pi;
 double	StFgtGeom::halfpi = 0.5*pi;
 
@@ -2914,8 +2914,11 @@ bool StFgtGeom::localXYtoStripId(
 }
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.8 2011/09/29 18:34:53 sgliske Exp $
+ *  $Id: StFgtGeom.cxx,v 1.9 2011/09/29 18:45:49 wwitzke Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.9  2011/09/29 18:45:49  wwitzke
+ *  Fixed bug with calculation of pi.  Weird.
+ *
  *  Revision 1.8  2011/09/29 18:34:53  sgliske
  *  Fixed phiQuadXaxis, added asserts to getQuad,and added reverse lookup: elec. coord. from geoId
  *
