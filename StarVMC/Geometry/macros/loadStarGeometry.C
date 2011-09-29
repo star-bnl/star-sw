@@ -84,6 +84,7 @@ void loadDevStarGeometry( const Char_t *mytag="upgr2012" )
   //
   // Setup a geometry control structure for testing purposes
   //  
+  if ( !gGeoManager ) new TGeoManager(tag,tag+" | dyson");	
   gROOT->ProcessLine(Form(".!mkdir %s",mytag));
   build -> ConstructGeometry ( tag );
   
