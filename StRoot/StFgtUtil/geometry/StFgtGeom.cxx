@@ -50,7 +50,9 @@ int	StFgtGeom::mPhiStripGBLId_number =
     kNumFgtQuadrants * phiStripLOCId_number();
 
 //  Initialize our physical coordinate database here. These are:
-//  isPhi?, ordinate, lowerSpan, upperSpan
+//  isPhi?, ordinate, lowerSpan, upperSpa
+//  The index corresponds to (apv*128)+channel (assuming that the apv is in
+//  [0,12).  If apv is in [12,24), then the index is (apv-12)*128+channel.
 StFgtGeomData StFgtGeom::mStrips[] =
 {
     { false, 38.1571, 0.8905733, 1.53935776 },
