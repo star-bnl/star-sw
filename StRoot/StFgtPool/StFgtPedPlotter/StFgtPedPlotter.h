@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedPlotter.h,v 1.3 2011/09/27 00:49:00 sgliske Exp $
+ * $Id: StFgtPedPlotter.h,v 1.4 2011/09/29 18:39:43 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedPlotter.h,v $
+ * Revision 1.4  2011/09/29 18:39:43  sgliske
+ * Update for geoId->elecCoord function now in StFgtCosmicTestStandGeom
+ *
  * Revision 1.3  2011/09/27 00:49:00  sgliske
  * cosmic QA update
  *
@@ -123,8 +126,7 @@ inline void StFgtPedPlotter::setQuadName( const Char_t* name ){ mQuadName = name
 inline void StFgtPedPlotter::setReadFromFile( const Char_t* filename ){ mFileNameIn = filename; };
 
 inline void StFgtPedPlotter::setPlotVsStrip( Char_t strip ){
-   strip = toupper( strip );
-   mPlotVsStrip = ( (strip == 'R' || strip == 'P') ? strip : 'c' );
+   mPlotVsStrip = ( (strip == 'R' || strip == 'r' || strip == 'P') ? strip : 'c' );
 };
 
 inline Float_t StFgtPedPlotter::getMaxX() const { return mMaxX; };
