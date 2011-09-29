@@ -49,6 +49,137 @@ int	StFgtGeom::mRadStripGBLId_number =
 int	StFgtGeom::mPhiStripGBLId_number =
     kNumFgtQuadrants * phiStripLOCId_number();
 
+// function to setup the reverse mapping based on the forward mapping
+void StFgtGeom::makeReverseNaiveMappingValid(){
+   for( Int_t *p = mReverseNaiveMapping; p != &mNaiveMapping[2*kNumFgtStripsPerLayer]; ++p )
+      (*p) = 0;
+
+   Int_t i = 0;
+   for( const Int_t *p = mNaiveMapping; p != &mNaiveMapping[kNumChannels]; ++p, ++i )
+      mReverseNaiveMapping[ (*p) ] = i;
+
+   mReverseNaiveMappingValid = 1;
+};
+
+double StFgtGeom::phiQuadXaxis( int iquad )
+{
+    switch( iquad )
+    {
+	case 0:
+	    return -15.0*pi/180.0;
+	case 1:
+	    return -105.0*pi/180.0;
+	case 2:
+	    return 165.0*pi/180.0;
+	case 3:
+	    return 75.0*pi/180.0;
+	default:
+	    assert(2==3);   //	Safe without costing us any clock cycles.
+    }
+}
+
+bool StFgtGeom::inDisc( TVector3 r ) //	'r' in LAB ref
+{
+    double Rxy = r.Perp();
+    //printf("StFgtGeom::inDisc Rxy=%f Rin=%f Rout=%f\n",Rxy,kFgtRin,kFgtRout);
+    if ( Rxy < kFgtRin )
+	return false;
+    if ( Rxy > kFgtRout )
+	return false;
+    return true;
+}
+
+int StFgtGeom::getQuad( double phiLab )
+{
+  //asserts will be moved to a safe StFgtGeom class.
+  /*jb*/ assert(phiLab <= pi );
+  /*jb*/ assert(phiLab >= -pi );
+  if ( phiLab > phiQuadXaxis(0) && phiLab <= phiQuadXaxis(1) )
+    return 0;
+  if ( phiLab > phiQuadXaxis(1) && phiLab <= phiQuadXaxis(2) )
+    return 1;
+  if ( phiLab > phiQuadXaxis(2) && phiLab <= phiQuadXaxis(3) )
+    return 2;
+  return 3;
+}
+
+//  This returns -1 on error.  The second argument is optional, and will return
+//  the fraction of the bin size [0,1.)
+int StFgtGeom::rad2LocalStripId( double rad, double *binFrac )
+{
+    double ratio = (Rout() - rad) / radStrip_pitch();
+    int irad = (int) ratio;
+
+    if ( binFrac )
+	*binFrac = ratio-irad;
+
+    if ( irad >= 0 && irad < radStripLOCId_number() )
+	return irad;
+    else
+	return -1;
+}
+
+//  Again, this will return -1 on error, and the second argument is optional,
+//  and if specified will return the fraction of the bin size [0,1.)
+//  phiLoc must be in the range of [0,pi/2)
+int StFgtGeom::phiLoc2LocalStripId( double phiLoc, double *binFrac )
+{
+    double ratio = phiLoc / phiStrip_pitch();
+    int iphi = (int) ratio;
+    if ( binFrac )
+	*binFrac = ratio-iphi;
+    if ( iphi >= 0 && iphi < phiStripLOCId_number() )
+	return iphi;
+    else
+	return -1;
+}
+
+//  Returns false if out of range.
+bool StFgtGeom::localXYtoStripId(
+    int iquad, double xLoc, double yLoc, int & iRadID, int & iPhiID, int dbg
+)
+{
+    iRadID = iPhiID = -1;
+
+    int locRadID;
+    int locPhiID;
+    double r = std::sqrt(xLoc*xLoc+yLoc*yLoc);
+
+    //	Trim outside of active area.
+    if ( r < Rin() )
+	return false;
+    if ( r > Rout() )
+	return false;
+
+    //	Find phi in lab reference frame
+    double phiLoc = std::atan2( yLoc, xLoc );	//  [0,pi/2] in local ref frame
+
+    //	Assume all 9(?) disks have identical stirp numbering scheme.
+    double radBinFrac;
+    double phiBinFrac;
+
+    locRadID = rad2LocalStripId( r, &radBinFrac);   //	no quad/disk dependence
+    locPhiID = phiLoc2LocalStripId( phiLoc, &phiBinFrac );
+						    //	no quad/disk dependence
+
+    iRadID = radIdLocal2Global( iquad, locRadID );
+    iPhiID = phiIdLocal2Global( iquad, locPhiID );
+
+    if ( dbg )
+    {
+	printf("strip:  yLoc=%f xLoc=%f phi=%f, lradID=%d, lphiID=%d\n",yLoc,xLoc,phiLoc*57.3,locRadID,locPhiID);
+	printf("strip:  radID=%d +(%.2f) phiID=%d +(%.2f)\n",iRadID,radBinFrac, iPhiID,phiBinFrac);
+    }
+
+    return true;
+}
+
+// Whether the reverse map is valid
+Bool_t StFgtGeom::mReverseNaiveMappingValid = 0;
+
+// The reverse map data member
+Int_t StFgtGeom::mReverseNaiveMapping[ 2*kNumFgtStripsPerLayer ];
+
 //  Initialize our physical coordinate database here. These are:
 //  isPhi?, ordinate, lowerSpan, upperSpan
 //  The index corresponds to (apv*128)+channel (assuming that the apv is in
@@ -2782,140 +2913,13 @@ Int_t StFgtGeom::mNaiveMapping[] =
     1437
 };
 
-// Whether the reverse map is valid
-Bool_t StFgtGeom::mReverseNaiveMappingValid = 0;
-
-// The reverse map data member
-Int_t StFgtGeom::mReverseNaiveMapping[ 2*kNumFgtStripsPerLayer ];
-
-// function to setup the reverse mapping based on the forward mapping
-void StFgtGeom::makeReverseNaiveMappingValid(){
-   for( Int_t *p = mReverseNaiveMapping; p != &mNaiveMapping[2*kNumFgtStripsPerLayer]; ++p )
-      (*p) = 0;
-
-   Int_t i = 0;
-   for( const Int_t *p = mNaiveMapping; p != &mNaiveMapping[kNumChannels]; ++p, ++i )
-      mReverseNaiveMapping[ (*p) ] = i;
-
-   mReverseNaiveMappingValid = 1;
-};
-
-double StFgtGeom::phiQuadXaxis( int iquad )
-{
-    switch( iquad )
-    {
-	case 0:
-	    return -15.0*pi/180.0;
-	case 1:
-	    return -105.0*pi/180.0;
-	case 2:
-	    return 165.0*pi/180.0;
-	case 3:
-	    return 75.0*pi/180.0;
-	default:
-	    assert(2==3);   //	Safe without costing us any clock cycles.
-    }
-}
-
-bool StFgtGeom::inDisc( TVector3 r ) //	'r' in LAB ref
-{
-    double Rxy = r.Perp();
-    //printf("StFgtGeom::inDisc Rxy=%f Rin=%f Rout=%f\n",Rxy,kFgtRin,kFgtRout);
-    if ( Rxy < kFgtRin )
-	return false;
-    if ( Rxy > kFgtRout )
-	return false;
-    return true;
-}
-
-int StFgtGeom::getQuad( double phiLab )
-{
-  //asserts will be moved to a safe StFgtGeom class.
-  /*jb*/ assert(phiLab <= pi );
-  /*jb*/ assert(phiLab >= -pi );
-  if ( phiLab > phiQuadXaxis(0) && phiLab <= phiQuadXaxis(1) )
-    return 0;
-  if ( phiLab > phiQuadXaxis(1) && phiLab <= phiQuadXaxis(2) )
-    return 1;
-  if ( phiLab > phiQuadXaxis(2) && phiLab <= phiQuadXaxis(3) )
-    return 2;
-  return 3;
-}
-
-//  This returns -1 on error.  The second argument is optional, and will return
-//  the fraction of the bin size [0,1.)
-int StFgtGeom::rad2LocalStripId( double rad, double *binFrac )
-{
-    double ratio = (Rout() - rad) / radStrip_pitch();
-    int irad = (int) ratio;
-
-    if ( binFrac )
-	*binFrac = ratio-irad;
-
-    if ( irad >= 0 && irad < radStripLOCId_number() )
-	return irad;
-    else
-	return -1;
-}
-
-//  Again, this will return -1 on error, and the second argument is optional,
-//  and if specified will return the fraction of the bin size [0,1.)
-//  phiLoc must be in the range of [0,pi/2)
-int StFgtGeom::phiLoc2LocalStripId( double phiLoc, double *binFrac )
-{
-    double ratio = phiLoc / phiStrip_pitch();
-    int iphi = (int) ratio;
-    if ( binFrac )
-	*binFrac = ratio-iphi;
-    if ( iphi >= 0 && iphi < phiStripLOCId_number() )
-	return iphi;
-    else
-	return -1;
-}
-
-//  Returns false if out of range.
-bool StFgtGeom::localXYtoStripId(
-    int iquad, double xLoc, double yLoc, int & iRadID, int & iPhiID, int dbg
-)
-{
-    iRadID = iPhiID = -1;
-
-    int locRadID;
-    int locPhiID;
-    double r = std::sqrt(xLoc*xLoc+yLoc*yLoc);
-
-    //	Trim outside of active area.
-    if ( r < Rin() )
-	return false;
-    if ( r > Rout() )
-	return false;
-
-    //	Find phi in lab reference frame
-    double phiLoc = std::atan2( yLoc, xLoc );	//  [0,pi/2] in local ref frame
-
-    //	Assume all 9(?) disks have identical stirp numbering scheme.
-    double radBinFrac;
-    double phiBinFrac;
-
-    locRadID = rad2LocalStripId( r, &radBinFrac);   //	no quad/disk dependence
-    locPhiID = phiLoc2LocalStripId( phiLoc, &phiBinFrac );
-						    //	no quad/disk dependence
-
-    iRadID = radIdLocal2Global( iquad, locRadID );
-    iPhiID = phiIdLocal2Global( iquad, locPhiID );
-
-    if ( dbg )
-    {
-	printf("strip:  yLoc=%f xLoc=%f phi=%f, lradID=%d, lphiID=%d\n",yLoc,xLoc,phiLoc*57.3,locRadID,locPhiID);
-	printf("strip:  radID=%d +(%.2f) phiID=%d +(%.2f)\n",iRadID,radBinFrac, iPhiID,phiBinFrac);
-    }
-
-    return true;
-}
-
 /*
- *  $Id: StFgtGeom.cxx,v 1.9 2011/09/29 18:45:49 wwitzke Exp $
+ *  $Id: StFgtGeom.cxx,v 1.10 2011/09/29 18:52:03 wwitzke Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.10  2011/09/29 18:52:03  wwitzke
+ *  Changed the ordering of the items in the file.  The big arrays are now towards
+ *  the bottom. This was to facilitate editing and maintenance.
+ *
  *  Revision 1.9  2011/09/29 18:45:49  wwitzke
  *  Fixed bug with calculation of pi.  Weird.
  *
