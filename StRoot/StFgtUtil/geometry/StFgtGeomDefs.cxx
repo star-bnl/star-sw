@@ -28,7 +28,10 @@ const Int_t kNumFgtStripsPerLayer = 720;
 
 
 /*
- * $ Id: $
- * $ Log: $
+ * $Id: StFgtGeomDefs.cxx,v 1.2 2011/09/29 18:34:53 sgliske Exp $
+ * $Log: StFgtGeomDefs.cxx,v $
+ * Revision 1.2  2011/09/29 18:34:53  sgliske
+ * Fixed phiQuadXaxis, added asserts to getQuad,and added reverse lookup: elec. coord. from geoId
+ *
  *
  */

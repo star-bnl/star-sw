@@ -198,6 +198,30 @@ class StFgtGeom
 
 	}
 
+	static void getNaiveElecCoordFromGeoId(
+            Int_t geoId, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
+	)
+	{
+           Short_t disc, quadrant, strip;
+           Char_t layer;
+
+           decodeGeoId( geoId, disc, quadrant, layer, strip );
+
+           if( !mReverseNaiveMappingValid )
+              makeReverseNaiveMappingValid();
+
+           Int_t key = ( (layer=='P')*kNumFgtStripsPerLayer + strip );
+           channel = mReverseNaiveMapping[ key ];
+           apv = channel / 128;
+           channel %= 128;
+
+           if( quadrant % 2 )
+              apv += 12;
+
+           rdo = disc/3+1;
+           arm = (disc % 3)*2 + (quadrant>1);
+	}
+
 	static std::string getNaiveGeoNameFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
@@ -298,6 +322,7 @@ class StFgtGeom
 	static const Int_t kNumChannels = 1280;
 	static const Int_t kFgtMxDisk=6;    /* max # of  FGT disks @ STAR */
 	static const Int_t kFgtMxQuad=4;    /* max # of quadrants in single FGT disk */
+        static const Int_t kNumFgtStripsPerLayer = 720;
 
     protected:
 	/*  Not sure that these have a point anymore.
@@ -322,7 +347,13 @@ class StFgtGeom
 	//  ---Private member variables---
 	static StFgtGeomData mStrips[ kNumStrips ];
 
+        // maps from (apv*128 + channel) to ((layer=='P')*kNumFgtStripsPerLayer + stripID)
 	static Int_t mNaiveMapping[ kNumChannels ];
+
+        // reverse mapping: ((layer=='P')*kNumFgtStripsPerLayer + stripID) to (apv*128 + channel)
+        static Bool_t mReverseNaiveMappingValid;
+	static Int_t mReverseNaiveMapping[ 2*kNumFgtStripsPerLayer ];
+        static void makeReverseNaiveMappingValid();
 
 	//  What follows are some private functions to help with the
 	//  localXYtoStripID function.  These are also written by Jan, modified

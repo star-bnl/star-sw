@@ -55,17 +55,52 @@ class StFgtCosmicTestStandGeom:public StFgtGeom
 	       }
 	     
 	     if ( apv >= 12 )
-	       return
-		 (
-		  disc*kNumFgtQuadrants + quadrant
-		  ) * kNumFgtLayers + mNaiveMapping[ (apv-12)*128+channel ];
-	     else
-	       return
-		 (
-		  disc*kNumFgtQuadrants + quadrant
-		  ) * kNumFgtLayers + mNaiveMapping[ apv*128+channel ];
+                apv -= 12;
+
+             return
+                ( disc*kNumFgtQuadrants + quadrant ) * kNumFgtLayers
+                + mNaiveMapping[ apv*128+channel ];
 	   }
 	   
+	static void getNaiveElecCoordFromGeoId(
+            Int_t geoId, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
+	)
+	{
+           // start with doing the same as for FGT-in-star 
+           Short_t disc, quadrant, strip;
+           Char_t layer;
+
+           decodeGeoId( geoId, disc, quadrant, layer, strip );
+
+           if( !mReverseNaiveMappingValid )
+              makeReverseNaiveMappingValid();
+
+           Int_t key = ( (layer=='P')*kNumFgtStripsPerLayer + strip );
+           channel = mReverseNaiveMapping[ key ];
+           apv = channel / 128;
+           channel %= 128;
+
+           if( quadrant % 2 )
+              apv += 12;
+
+           rdo = disc/3+1;
+           arm = (disc % 3)*2 + (quadrant>1);
+
+           // set apv into range 0-11
+           apv %= 12;
+
+           // adjust values
+           if( quadrant == 0 ){
+              if( disc == 0 ){
+                 arm = 0; 
+              } else if( disc == 1 ){
+                 arm = 1;
+              } else if( disc == 2 ){
+                 arm = 1;
+                 apv += 12;
+              };
+           };
+        };
 	 
 
 };
@@ -73,7 +108,10 @@ class StFgtCosmicTestStandGeom:public StFgtGeom
 #endif
 
 /*
- *  $ Id: $
- *  $ Log: $
+ *  $Id: StFgtCosmicTestStandGeom.h,v 1.3 2011/09/29 18:34:53 sgliske Exp $
+ *  $Log: StFgtCosmicTestStandGeom.h,v $
+ *  Revision 1.3  2011/09/29 18:34:53  sgliske
+ *  Fixed phiQuadXaxis, added asserts to getQuad,and added reverse lookup: elec. coord. from geoId
+ *
  *
  */

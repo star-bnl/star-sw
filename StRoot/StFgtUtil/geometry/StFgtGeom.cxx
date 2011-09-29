@@ -50,7 +50,7 @@ int	StFgtGeom::mPhiStripGBLId_number =
     kNumFgtQuadrants * phiStripLOCId_number();
 
 //  Initialize our physical coordinate database here. These are:
-//  isPhi?, ordinate, lowerSpan, upperSpa
+//  isPhi?, ordinate, lowerSpan, upperSpan
 //  The index corresponds to (apv*128)+channel (assuming that the apv is in
 //  [0,12).  If apv is in [12,24), then the index is (apv-12)*128+channel.
 StFgtGeomData StFgtGeom::mStrips[] =
@@ -2782,6 +2782,24 @@ Int_t StFgtGeom::mNaiveMapping[] =
     1437
 };
 
+// Whether the reverse map is valid
+Bool_t StFgtGeom::mReverseNaiveMappingValid = 0;
+
+// The reverse map data member
+Int_t StFgtGeom::mReverseNaiveMapping[ 2*kNumFgtStripsPerLayer ];
+
+// function to setup the reverse mapping based on the forward mapping
+void StFgtGeom::makeReverseNaiveMappingValid(){
+   for( Int_t *p = mReverseNaiveMapping; p != &mNaiveMapping[2*kNumFgtStripsPerLayer]; ++p )
+      (*p) = 0;
+
+   Int_t i = 0;
+   for( const Int_t *p = mNaiveMapping; p != &mNaiveMapping[kNumChannels]; ++p, ++i )
+      mReverseNaiveMapping[ (*p) ] = i;
+
+   mReverseNaiveMappingValid = 1;
+};
+
 double StFgtGeom::phiQuadXaxis( int iquad )
 {
     switch( iquad )
@@ -2789,11 +2807,11 @@ double StFgtGeom::phiQuadXaxis( int iquad )
 	case 0:
 	    return -15.0*pi/180.0;
 	case 1:
-	    return 75.0*pi/180.0;
+	    return -105.0*pi/180.0;
 	case 2:
 	    return 165.0*pi/180.0;
 	case 3:
-	    return -105.0*pi/180.0;
+	    return 75.0*pi/180.0;
 	default:
 	    assert(2==3);   //	Safe without costing us any clock cycles.
     }
@@ -2812,16 +2830,16 @@ bool StFgtGeom::inDisc( TVector3 r ) //	'r' in LAB ref
 
 int StFgtGeom::getQuad( double phiLab )
 {
-    //	asserts will be moved to a safe StFgtGeom class.
-    //	assert(phiLab <= pi );
-    //	assert(phiLab >= -pi );
-    if ( phiLab > phiQuadXaxis(0) && phiLab <= phiQuadXaxis(1) )
-	return 0;
-    if ( phiLab > phiQuadXaxis(1) && phiLab <= phiQuadXaxis(2) )
-	return 0;
-    if ( phiLab > phiQuadXaxis(3) && phiLab <= phiQuadXaxis(0) )
-	return 0;
+  //asserts will be moved to a safe StFgtGeom class.
+  /*jb*/ assert(phiLab <= pi );
+  /*jb*/ assert(phiLab >= -pi );
+  if ( phiLab > phiQuadXaxis(0) && phiLab <= phiQuadXaxis(1) )
+    return 0;
+  if ( phiLab > phiQuadXaxis(1) && phiLab <= phiQuadXaxis(2) )
+    return 1;
+  if ( phiLab > phiQuadXaxis(2) && phiLab <= phiQuadXaxis(3) )
     return 2;
+  return 3;
 }
 
 //  This returns -1 on error.  The second argument is optional, and will return
@@ -2896,7 +2914,10 @@ bool StFgtGeom::localXYtoStripId(
 }
 
 /*
- *  $ Id: $
- *  $ Log: $
+ *  $Id: StFgtGeom.cxx,v 1.8 2011/09/29 18:34:53 sgliske Exp $
+ *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.8  2011/09/29 18:34:53  sgliske
+ *  Fixed phiQuadXaxis, added asserts to getQuad,and added reverse lookup: elec. coord. from geoId
+ *
  *
  */
