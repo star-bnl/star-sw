@@ -1,6 +1,6 @@
 #include "StFgtCosmicMaker.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeomDefs.h"
-#include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
+#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
 #include "RTS/src/DAQ_FGT/daq_fgt.h"
 #include "RTS/src/DAQ_READER/daq_dta.h"
 #include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
@@ -89,25 +89,24 @@ Int_t StFgtCosmicMaker::Make()
 	  rdo=dd->rdo;
 	  timebin=f[i].tb;
           Short_t discIdx=0;  // will be set with getNaivePhysCoordFromElecCoord
-          Short_t quad=0;
-          Short_t strip=0;
-          Char_t layer=0;
 
-	  Short_t geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
-	  StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
+	  Short_t geoId = StFgtCosmicTestStandGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
 
-	  //StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
-
-          // hack for the moment
-          if( arm == 0 ){
-             discIdx = 0;
-          } else if ( apv < 12 ) {
-             discIdx = 1;
-          } else {
-             discIdx = 2;
-             apv -= 12;
-          };
-          geoId = StFgtGeom::encodeGeoId( discIdx, 0, layer, strip );
+          // remove hack
+//        Short_t quad=0;
+//        Short_t strip=0;
+//        Char_t layer=0;
+// 	  StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
+// 	  StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
+//        if( arm == 0 ){
+//           discIdx = 0;
+//        } else if ( apv < 12 ) {
+//           discIdx = 1;
+//        } else {
+//           discIdx = 2;
+//           apv -= 12;
+//        };
+//        geoId = StFgtGeom::encodeGeoId( discIdx, 0, layer, strip );
 
           Char_t type = 0;    // raw adc, no correction yet.
 	  StFgtRawHit hit(geoId,adc,type,timebin);
@@ -115,7 +114,7 @@ Int_t StFgtCosmicMaker::Make()
 
           // HACK: since don't yet have geoId->APV/channel mapping,
           // encode in the charge field for now
-          hit.setCharge( 128*apv + channel );
+          // hit.setCharge( 128*apv + channel );
 
 	  if(pDisc)
 	    pDisc->getRawHitArray().PushBack(hit);

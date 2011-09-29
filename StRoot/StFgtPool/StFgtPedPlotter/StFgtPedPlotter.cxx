@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedPlotter.cxx,v 1.4 2011/09/27 00:49:00 sgliske Exp $
+ * $Id: StFgtPedPlotter.cxx,v 1.5 2011/09/29 18:39:43 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedPlotter.cxx,v $
+ * Revision 1.5  2011/09/29 18:39:43  sgliske
+ * Update for geoId->elecCoord function now in StFgtCosmicTestStandGeom
+ *
  * Revision 1.4  2011/09/27 00:49:00  sgliske
  * cosmic QA update
  *
@@ -38,7 +41,7 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
-#include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
+#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
 
 // since this isn't defined elsewhere (yet)
 // set to 8 so that it doesn't matter if bins are 0-6 or 1-7
@@ -88,10 +91,8 @@ Int_t StFgtPedPlotter::makePlots(){
          TGraphErrors* gr = makePlot( X[i], Y[i], E[i], timebin );
          //cout << "Plot for time bin " << timebin << ' ' << gr << endl;
 
-         if( gr && gr->GetN() ){
-            //cout << "\tsuccess" << endl;
+         if( gr && gr->GetN() )
             mGraphVec[i] = gr;
-         };
       };
    };
 
@@ -130,17 +131,17 @@ Int_t StFgtPedPlotter::fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E ){
             if( disc == mDiscId && quad == mQuadId ){
                Int_t i = mTimeBinMap[ timebin ];
 
-               if( mPlotVsStrip == 'R' ){
+               if( mPlotVsStrip == 'r' || mPlotVsStrip == 'R' ){
+                  pass = ( layer == 'R' );
+                  pass &= ( mPlotVsStrip == 'R' ? (low > 0.785) : (low < 0.785) );
                   x = pos;
-                  //x = (strip == 'R') ? strip : -1;
-                  pass = ( layer == mPlotVsStrip );
                } else if( mPlotVsStrip == 'P' ){
                   x = pos;
-                  //x = (strip == 'P') ? strip : -1;
                   pass = ( layer == mPlotVsStrip );
                } else {
-                  // HACK: set out of range until mapping function available
-                  x = -1;
+                  Int_t rdo, arm, apv, channel;
+                  StFgtCosmicTestStandGeom::getNaiveElecCoordFromGeoId(geoId,rdo,arm,apv,channel);
+                  x = 128*apv + channel;
                };
 
                if( x && pass ){
@@ -164,6 +165,9 @@ Int_t StFgtPedPlotter::fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E ){
          fin.peek();
       };
    };
+
+   if( mMaxY > 4096 )
+      mMaxY = 4096;
 
    return ierr;
 };
@@ -200,13 +204,15 @@ TGraphErrors* StFgtPedPlotter::makePlot( std::vector< Float_t >& x,
       gr = new TGraphErrors( x.size(), xArr, yArr, 0, eArr );
       std::stringstream ss;
 
-       if( mPlotVsStrip == 'R' )
-         ss << "r-strips: ";
+      if( mPlotVsStrip == 'r' )
+         ss << "r-strips, cham. 1: ";
+      else if( mPlotVsStrip == 'R' )
+         ss << "r-strips, cham. 2: ";
       else if( mPlotVsStrip == 'P' )
          ss << "#phi-strips: ";
 
       ss << "Pedestals vs. ";
-      if( mPlotVsStrip == 'R' || mPlotVsStrip == 'P' )
+      if( mPlotVsStrip == 'R' || mPlotVsStrip == 'r' || mPlotVsStrip == 'P' )
          ss << "Position";
       else
          ss << "Channel";
@@ -214,7 +220,7 @@ TGraphErrors* StFgtPedPlotter::makePlot( std::vector< Float_t >& x,
       if( !mQuadName.empty() )
          ss << ", Quad " << mQuadName;
 
-      if( mPlotVsStrip == 'R' )
+      if( mPlotVsStrip == 'r' || mPlotVsStrip == 'R' )
          ss << "; r Strip Pos. [cm]";
       else if( mPlotVsStrip == 'P' )
          ss << "; #phi Strip Pos. [cm]";

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: plotPedsFromFile.C,v 1.3 2011/09/27 00:49:00 sgliske Exp $
+ * $Id: plotPedsFromFile.C,v 1.4 2011/09/29 18:39:43 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: plotPedsFromFile.C,v $
+ * Revision 1.4  2011/09/29 18:39:43  sgliske
+ * Update for geoId->elecCoord function now in StFgtCosmicTestStandGeom
+ *
  * Revision 1.3  2011/09/27 00:49:00  sgliske
  * cosmic QA update
  *
@@ -34,7 +37,7 @@ int plotPedsFromFile( const Char_t *filenameIn = "testfile.Ped.txt",
                       Short_t quad = 0,
                       Char_t* quadName = "FGT #010",
                       Short_t timeBin = 4,
-                      Char_t plotVsStrip = 'R' ){
+                      Char_t plotVsStrip = 'c' ){
    LoadLibs();
    Int_t ierr = 0;
 
