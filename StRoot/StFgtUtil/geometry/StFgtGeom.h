@@ -286,10 +286,6 @@ class StFgtGeom
 
 	//  deadQuadEdge is in cm, local ref frame
 	static double deadQuadEdge()	{ return kFgtDeadQuadEdge; }
-	static double maxTof()		{ return 80.e-9; }  //	seconds
-	static double minPmag()		{ return 0.005; }   //	GeV of track
-							    //	momentum
-
 
 	static double radStripOff() { return mRadStripOff; }
 	static double phiStripOff() { return mPhiStripOff; }
@@ -298,8 +294,9 @@ class StFgtGeom
 	static int phiStripLOCId_number() { return mPhiStripLOCId_number; }
 
 	static  double phiQuadXaxis(int iquad);
-	static  bool inDisc( TVector3 rLab );
-	static  int getQuad( double phiLab );
+	static  bool inDisc( TVector3 rLab );	
+	static  bool belowFlat( TVector3 rLoc );
+	static  int  getQuad( double phiLab );
 
 	//  This is NOT a candidate for inlining.  This returns false if it is
 	//  out of range.
@@ -313,12 +310,14 @@ class StFgtGeom
 	static const double kFgtRout		= 38.25;    //	cm ,
 	static const double kFgtRmid		= 19.125;   //	cm, at Rout/2.
 	static const double kFgtRin		= 11.5;	    //	cm, 
+	static const double kFgtRflat		= 35.85;    //	cm, 
+	static const double kFgtPhiflat		= 31.0/180.*3.1416;//  rad 
 	static const double kFgtRadPitch	=  0.09538; //	nominal '800 mu pitch'
 	static const double kFgtPhiPitch	=  0.08;    //	800 mu, at outer radi or at Rmid
 	static const double kFgtDeadQuadEdge	=  1.2;	    // (cm) effective dead area along quadrant edges
 
 	//  Standard definitions.
-	static const Int_t kNumStrips = 1440;
+	static const Int_t kNumStrips = 1440; //remove? JAN
 	static const Int_t kNumChannels = 1280;
 	static const Int_t kFgtMxDisk=6;    /* max # of  FGT disks @ STAR */
 	static const Int_t kFgtMxQuad=4;    /* max # of quadrants in single FGT disk */

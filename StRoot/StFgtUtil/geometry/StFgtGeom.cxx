@@ -89,18 +89,27 @@ bool StFgtGeom::inDisc( TVector3 r ) //	'r' in LAB ref
     return true;
 }
 
+bool StFgtGeom::belowFlat( TVector3 r ) //	'r' in LOC ref
+{
+  double Rf = r.X()*cos(kFgtPhiflat) + r.Y()*sin(kFgtPhiflat);
+  //printf("StFgtGeom::belowFlat  Rf=%f Rflat=%f \n",Rf,kFgtRflat);
+  if ( Rf > kFgtRflat )   
+    return false;
+  return true;
+}
+
 int StFgtGeom::getQuad( double phiLab )
 {
-  //asserts will be moved to a safe StFgtGeom class.
-  /*jb*/ assert(phiLab <= pi );
-  /*jb*/ assert(phiLab >= -pi );
-  if ( phiLab > phiQuadXaxis(0) && phiLab <= phiQuadXaxis(1) )
-    return 0;
-  if ( phiLab > phiQuadXaxis(1) && phiLab <= phiQuadXaxis(2) )
+  printf("StFgtGeom::getQuad phiLab/rad=%f\n", phiLab );
+  assert(phiLab <= pi );
+  assert(phiLab >= -pi );
+  if ( phiLab > phiQuadXaxis(1) && phiLab <= phiQuadXaxis(0) )
     return 1;
-  if ( phiLab > phiQuadXaxis(2) && phiLab <= phiQuadXaxis(3) )
-    return 2;
-  return 3;
+  if ( phiLab > phiQuadXaxis(0) && phiLab <= phiQuadXaxis(3) )
+    return 0;
+  if ( phiLab > phiQuadXaxis(3) && phiLab <= phiQuadXaxis(2) )
+    return 3;
+  return 2;
 }
 
 //  This returns -1 on error.  The second argument is optional, and will return
@@ -2914,8 +2923,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.10 2011/09/29 18:52:03 wwitzke Exp $
+ *  $Id: StFgtGeom.cxx,v 1.11 2011/09/29 21:35:47 balewski Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.11  2011/09/29 21:35:47  balewski
+ *  more functions, fixing phi error for quadrant recognision
+ *
  *  Revision 1.10  2011/09/29 18:52:03  wwitzke
  *  Changed the ordering of the items in the file.  The big arrays are now towards
  *  the bottom. This was to facilitate editing and maintenance.
