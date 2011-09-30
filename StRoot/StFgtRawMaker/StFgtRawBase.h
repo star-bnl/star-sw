@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRawBase.h,v 1.3 2011/09/26 16:55:53 sgliske Exp $
+ * $Id: StFgtRawBase.h,v 1.4 2011/09/30 17:24:39 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRawBase.h,v $
+ * Revision 1.4  2011/09/30 17:24:39  sgliske
+ * LOG_* bug solved, so can now return kStEof
+ *
  * Revision 1.3  2011/09/26 16:55:53  sgliske
  * Continued work on cosmic QA plots
  *
@@ -72,8 +75,6 @@ class StFgtRawBase {
    Int_t mNumClusters;
    Int_t mNumPoints;
 
-  Bool_t mEOF; // HACK since LOG_* seg. faults
-
  private:   
    ClassDef(StFgtRawBase,1);
 }; 
@@ -97,8 +98,5 @@ inline void StFgtRawBase::setNumDiscs( UInt_t num ){ mNumDiscs = num; };
 inline void StFgtRawBase::setNumRawHits( Int_t num ){ mNumRawHits = num; };
 inline void StFgtRawBase::setNumClusters( Int_t num ){ mNumClusters = num; };
 inline void StFgtRawBase::setNumPoints( Int_t num ){ mNumPoints = num; };
-
-// accessor
-inline Bool_t StFgtRawBase::atEOF() const{ return mEOF; }; // HACK since LOG_* seg. faults
 
 #endif
