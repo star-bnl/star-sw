@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRawBase.h,v 1.4 2011/09/30 17:24:39 sgliske Exp $
+ * $Id: StFgtRawBase.h,v 1.5 2011/09/30 19:08:12 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRawBase.h,v $
+ * Revision 1.5  2011/09/30 19:08:12  sgliske
+ * general update
+ *
  * Revision 1.4  2011/09/30 17:24:39  sgliske
  * LOG_* bug solved, so can now return kStEof
  *
@@ -58,8 +61,6 @@ class StFgtRawBase {
    // accessors
    StFgtEvent* getFgtEventPtr();
    const StFgtEvent* getFgtEventPtr() const;
-
-   Bool_t atEOF() const; // HACK since LOG_* seg. faults
 
    // modifiers
    void setNumDiscs( UInt_t num );

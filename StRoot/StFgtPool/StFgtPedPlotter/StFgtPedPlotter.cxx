@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedPlotter.cxx,v 1.5 2011/09/29 18:39:43 sgliske Exp $
+ * $Id: StFgtPedPlotter.cxx,v 1.6 2011/09/30 19:09:07 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedPlotter.cxx,v $
+ * Revision 1.6  2011/09/30 19:09:07  sgliske
+ * general update
+ *
  * Revision 1.5  2011/09/29 18:39:43  sgliske
  * Update for geoId->elecCoord function now in StFgtCosmicTestStandGeom
  *
@@ -40,6 +43,8 @@
 using std::cerr;
 using std::cout;
 using std::endl;
+
+#include <TGraphErrors.h>
 
 #include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
 
@@ -88,8 +93,8 @@ Int_t StFgtPedPlotter::makePlots(){
          Int_t timebin =  iter->first;
          Int_t i = iter->second;
 
-         TGraphErrors* gr = makePlot( X[i], Y[i], E[i], timebin );
-         //cout << "Plot for time bin " << timebin << ' ' << gr << endl;
+         TGraph* gr = makePlot( X[i], Y[i], E[i], timebin );
+         cout << "Plot for time bin " << timebin << ' ' << gr << endl;
 
          if( gr && gr->GetN() )
             mGraphVec[i] = gr;
@@ -141,7 +146,7 @@ Int_t StFgtPedPlotter::fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E ){
                } else {
                   Int_t rdo, arm, apv, channel;
                   StFgtCosmicTestStandGeom::getNaiveElecCoordFromGeoId(geoId,rdo,arm,apv,channel);
-                  x = 128*apv + channel;
+                  x = 128*(apv%12) + channel;
                };
 
                if( x && pass ){
@@ -152,8 +157,11 @@ Int_t StFgtPedPlotter::fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E ){
                   Y[i].push_back( ped );
                   E[i].push_back( stdev );
 
-                  if( ped+stdev > mMaxY )
-                     mMaxY = (ped+stdev);
+                  Float_t maxY = stdev;
+                  if( !mDoPlotStDev  )
+                     maxY += ped;
+                  if( maxY > mMaxY )
+                     mMaxY = maxY;
                   if( x > mMaxX )
                      mMaxX = x;
                };
@@ -173,11 +181,11 @@ Int_t StFgtPedPlotter::fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E ){
 };
 
 // for each time bin
-TGraphErrors* StFgtPedPlotter::makePlot( std::vector< Float_t >& x,
+TGraph* StFgtPedPlotter::makePlot( std::vector< Float_t >& x,
                                          std::vector< Float_t >& y,
                                          std::vector< Float_t >& e,
                                          Int_t timebin ){
-   TGraphErrors* gr = 0;
+   TGraph* gr = 0;
 //    Float_t xlow = 0;
 //    Float_t xhigh = 1280;
 //    Int_t nbins = 1280;
@@ -189,6 +197,7 @@ TGraphErrors* StFgtPedPlotter::makePlot( std::vector< Float_t >& x,
 //       xhigh = 6.28/4;
 //    };
 
+   cout << "sizes " << x.size() << ' ' << y.size() << ' ' << e.size() << endl;
    if( !x.empty() && x.size() == y.size() && y.size() == e.size() ){
       // need to copy to array
       Float_t *xArr = new Float_t[ x.size() ];
@@ -201,7 +210,10 @@ TGraphErrors* StFgtPedPlotter::makePlot( std::vector< Float_t >& x,
          eArr[i] = e[i];
       };
 
-      gr = new TGraphErrors( x.size(), xArr, yArr, 0, eArr );
+      if( mDoPlotStDev )
+         gr = new TGraph( x.size(), xArr, eArr );
+      else
+         gr = new TGraphErrors( x.size(), xArr, yArr, 0, eArr );
       std::stringstream ss;
 
       if( mPlotVsStrip == 'r' )
@@ -211,7 +223,11 @@ TGraphErrors* StFgtPedPlotter::makePlot( std::vector< Float_t >& x,
       else if( mPlotVsStrip == 'P' )
          ss << "#phi-strips: ";
 
-      ss << "Pedestals vs. ";
+      ss << "Pedestal ";
+      if( mDoPlotStDev )
+         ss << "St. Dev. ";
+      ss << "vs. ";
+
       if( mPlotVsStrip == 'R' || mPlotVsStrip == 'r' || mPlotVsStrip == 'P' )
          ss << "Position";
       else
@@ -230,14 +246,18 @@ TGraphErrors* StFgtPedPlotter::makePlot( std::vector< Float_t >& x,
       ss << "; ADC Value";
 
       gr->SetTitle( ss.str().data() );
+
+      if( mDoPlotStDev )
+         gr->SetMarkerStyle(20);
    };
 
    return gr;
 };
 
-const TGraphErrors* StFgtPedPlotter::getGraph( Int_t timebin ) const {
+const TGraph* StFgtPedPlotter::getGraph( Int_t timebin ) const {
    std::map< Int_t, Int_t >::const_iterator iter = mTimeBinMap.find( timebin );
    return (iter == mTimeBinMap.end() ? 0 : mGraphVec[ iter->second ]);
 };
+
 
 ClassImp( StFgtPedPlotter );
