@@ -151,5 +151,48 @@ typedef struct {
 } TriggerDataBlk;
   
 
+
+
+// jml - 9/12/11
+// 
+// These are the data blocks transferred from L1 --> L2 via stp
+// Back engineered and relabled.
+// Originally there were multiple instances of these structures in a very confusing set of 
+// of local directories and trgStructures.h etc...   Many structs were not consistent
+//
+// The 2011 nomenclature is just to differentiate between these structs and the obsolete ones.  The 
+// underlying format does not change in 2011
+
+// These are the datum that L1 creates...  
+typedef struct {
+  EvtDescData    EvtDesc;                     /* L1 Event Descriptor Data */  
+  L1_DSM_Data    L1_DSM;                      /* L1 DSM Data */
+  TrgSumData     TrgSum;                      /* Summary data */
+} L1DataType2011;
+
+// This is the specialized L1 version of the dsmMemcpy2Buf packet
+// which is shipped L1-->L2    Note that the size is 876 bytes which is not 8 byte aligned
+// The start of this buffer has to be 8 byte aligned for STP sends, however...
+typedef struct {
+  int src_nodeId;                             /* Source nodeId */
+  int cur_token;
+  int Npre;
+  int Npost;
+  unsigned int localClock;                    /* Local DSM clock */   
+  int numGroup;                               /* Number of DSMs in first group */
+  int numDSM;                                 /* Total number of DSMs */
+  int byteCount;                              /* Ensure alignment of long long */
+
+  //long long dsmData[RAW_MAX_LEN*11/8];      /* Make this 8-byte aligned */
+  L1DataType2011 l1Data;                     // This is the true format of the "dsmData" for L1
+} L1_Data_Block2011;
+
+// This structure is for internal use in L1.   This structure has a length that is 8-byte
+// aligned so that elements of an array remain 8 byte aligned.
+typedef struct {
+  L1_Data_Block2011 l1;
+  UINT32 pad;
+} L1_Data_Storage2011;
+
 #endif
 
