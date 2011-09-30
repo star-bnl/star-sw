@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedPlotter.h,v 1.4 2011/09/29 18:39:43 sgliske Exp $
+ * $Id: StFgtPedPlotter.h,v 1.5 2011/09/30 19:09:07 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedPlotter.h,v $
+ * Revision 1.5  2011/09/30 19:09:07  sgliske
+ * general update
+ *
  * Revision 1.4  2011/09/29 18:39:43  sgliske
  * Update for geoId->elecCoord function now in StFgtCosmicTestStandGeom
  *
@@ -40,7 +43,7 @@
 #include <vector>
 #include <map>
 #include <Rtypes.h>
-#include <TGraphErrors.h>
+#include <TGraph.h>
 
 class StFgtPedPlotter {
  public:
@@ -60,7 +63,7 @@ class StFgtPedPlotter {
    Int_t makePlots();
 
    // accessor
-   const TGraphErrors* getGraph( Int_t timebin ) const;
+   const TGraph* getGraph( Int_t timebin ) const;
    Float_t getMaxX() const;
    Float_t getMaxY() const;
 
@@ -68,6 +71,7 @@ class StFgtPedPlotter {
    void setReadFromFile( const Char_t* filename );
    void setTimeBinMask( Short_t mask = 0xFF );
    void setPlotVsStrip( Char_t type = 'R' );
+   void setPlotStDev( Bool_t doId );
    void setDisc( Short_t discId );
    void setQuad( Short_t quadId );
    void setQuadName( const Char_t *name );
@@ -88,16 +92,17 @@ class StFgtPedPlotter {
    // what to plot
    Short_t mDiscId, mQuadId;
    Char_t mPlotVsStrip;
+   Bool_t mDoPlotStDev;
    std::string mQuadName;
 
    // to load the data
    virtual Int_t fillData( VecVec_t& X, VecVec_t& Y, VecVec_t& E );
 
    // for each time bin
-   TGraphErrors* makePlot( std::vector< Float_t >& x, std::vector< Float_t >& y, std::vector< Float_t >& e, Int_t timebin );
+   TGraph* makePlot( std::vector< Float_t >& x, std::vector< Float_t >& y, std::vector< Float_t >& e, Int_t timebin );
 
-   // storing the graphs
-   std::vector< TGraphErrors* > mGraphVec;
+   // storing the graphs (ped +/- st. dev.)
+   std::vector< TGraph* > mGraphVec;
 
    // for keeping track of time bins
    std::map< Int_t, Int_t > mTimeBinMap;
@@ -128,6 +133,8 @@ inline void StFgtPedPlotter::setReadFromFile( const Char_t* filename ){ mFileNam
 inline void StFgtPedPlotter::setPlotVsStrip( Char_t strip ){
    mPlotVsStrip = ( (strip == 'R' || strip == 'r' || strip == 'P') ? strip : 'c' );
 };
+
+inline void StFgtPedPlotter::setPlotStDev( Bool_t doIt ){ mDoPlotStDev = doIt; };
 
 inline Float_t StFgtPedPlotter::getMaxX() const { return mMaxX; };
 inline Float_t StFgtPedPlotter::getMaxY() const { return mMaxY; };

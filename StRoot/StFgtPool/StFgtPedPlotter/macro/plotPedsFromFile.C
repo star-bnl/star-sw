@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: plotPedsFromFile.C,v 1.4 2011/09/29 18:39:43 sgliske Exp $
+ * $Id: plotPedsFromFile.C,v 1.5 2011/09/30 19:09:07 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: plotPedsFromFile.C,v $
+ * Revision 1.5  2011/09/30 19:09:07  sgliske
+ * general update
+ *
  * Revision 1.4  2011/09/29 18:39:43  sgliske
  * Update for geoId->elecCoord function now in StFgtCosmicTestStandGeom
  *
@@ -36,8 +39,9 @@ int plotPedsFromFile( const Char_t *filenameIn = "testfile.Ped.txt",
                       Short_t disc = 0,
                       Short_t quad = 0,
                       Char_t* quadName = "FGT #010",
-                      Short_t timeBin = 4,
-                      Char_t plotVsStrip = 'c' ){
+                      Char_t plotVsStrip = 'c',
+                      Bool_t doPlotStDev = 1,
+                      Short_t timeBin = 4 ){
    LoadLibs();
    Int_t ierr = 0;
 
@@ -48,6 +52,7 @@ int plotPedsFromFile( const Char_t *filenameIn = "testfile.Ped.txt",
    pedPlotter->setPlotVsStrip( plotVsStrip );
    pedPlotter->setDisc( disc );
    pedPlotter->setQuad( quad );
+   pedPlotter->setPlotStDev( doPlotStDev );
 
    cout << "making the graphs" << endl;
    ierr = pedPlotter->makePlots();
@@ -62,8 +67,17 @@ int plotPedsFromFile( const Char_t *filenameIn = "testfile.Ped.txt",
       gStyle->SetTitleBorderSize(0);
       gStyle->SetTitleTextColor(kRed);
 
-      can = new TCanvas("can","Pedistal Canvas",400,401);
+      Int_t width = 1800;
+      Int_t height = 600;
+      if( plotVsStrip == 'R' || plotVsStrip == 'r' || plotVsStrip == 'P' ){
+         width /= 3;
+         height = width+1;
+      };
+
+      can = new TCanvas("can","Pedistal Canvas",width,height);
       can->SetRightMargin( 0.02 );
+      can->SetGridx(0);
+      can->SetGridy(0);
 
       Float_t xlow = 0;
       Float_t xhigh = 1280;
@@ -77,6 +91,8 @@ int plotPedsFromFile( const Char_t *filenameIn = "testfile.Ped.txt",
 
       //Float_t maxX = pedPlotter->getMaxX();
       Float_t maxY = pedPlotter->getMaxY()*1.05;
+      if( maxY < 512 )
+         maxY = 512;
 
       TH2F *hist = new TH2F ("hist", "", 1, xlow, xhigh, 1, 0, maxY );
       hist->Draw("H");
@@ -84,6 +100,10 @@ int plotPedsFromFile( const Char_t *filenameIn = "testfile.Ped.txt",
       const TGraphErrors* gr = pedPlotter->getGraph( timeBin );
       if( gr ){
          gr->SetLineColor( kBlue );
+         gr->SetMarkerStyle( 20 );
+         gr->SetMarkerSize( 0.4 );
+         if( doPlotStDev )
+            gr->SetMarkerColor( kBlue );
          gr->Draw("PE same");
          hist->SetTitle( gr->GetTitle() );
       };
@@ -110,6 +130,7 @@ void LoadLibs() {
 //   gSystem->Load("StEvent");
 //   cout << "loaded StEvent library" << endl;
 
+  gSystem->Load("StUtilities");
   gSystem->Load("StFgtUtil");
   gSystem->Load("StFgtPedPlotter");
 };
