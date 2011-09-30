@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRawBase.cxx,v 1.2 2011/09/26 16:55:53 sgliske Exp $
+ * $Id: StFgtRawBase.cxx,v 1.3 2011/09/30 17:24:39 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRawBase.cxx,v $
+ * Revision 1.3  2011/09/30 17:24:39  sgliske
+ * LOG_* bug solved, so can now return kStEof
+ *
  * Revision 1.2  2011/09/26 16:55:53  sgliske
  * Continued work on cosmic QA plots
  *
@@ -33,8 +36,7 @@ StFgtRawBase::StFgtRawBase( UInt_t numDiscs, Int_t numRawHits, Int_t numClusters
    mNumDiscs( numDiscs ),
    mNumRawHits( numRawHits ),
    mNumClusters( numClusters ),
-   mNumPoints( numPoints ),
-   mEOF( 0 )
+   mNumPoints( numPoints )
 {
    // nothing else to do
 };

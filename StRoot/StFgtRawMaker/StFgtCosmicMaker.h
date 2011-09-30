@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtCosmicMaker.h,v 1.10 2011/09/21 19:30:51 sgliske Exp $
+//  $Id: StFgtCosmicMaker.h,v 1.11 2011/09/30 17:24:39 sgliske Exp $
 //  $Log: StFgtCosmicMaker.h,v $
+//  Revision 1.11  2011/09/30 17:24:39  sgliske
+//  LOG_* bug solved, so can now return kStEof
+//
 //  Revision 1.10  2011/09/21 19:30:51  sgliske
 //  Need RTS/src in path to DAQ_* directores
 //  so other non-RAW-makers can find the headers
@@ -24,6 +27,8 @@
 
 #ifndef STAR_StFgtCosmicMaker_HH
 #define STAR_StFgtCosmicMaker_HH
+
+#include <set>
 
 #include "StFgtRawMaker.h"
 #include "StRoot/St_base/StMessMgr.h"

@@ -62,11 +62,8 @@ Int_t StFgtCosmicMaker::Make()
   //char *ret =
   mRdr->get(0,EVP_TYPE_ANY);
   if(mRdr->status == EVP_STAT_EOR) {
-     //LOG_DEBUG <<"End of File reached..."<<endm;
-     //return kStEOF;	
-     cout <<"End of File reached..."<<endl;
-     mEOF = 1;
-     return kStOk;
+     LOG_DEBUG <<"End of File reached..."<<endm;
+     return kStEOF;	
   }
   daq_dta *dd = 0;
   dd = mRdr->det("fgt")->get("adc");
@@ -92,21 +89,43 @@ Int_t StFgtCosmicMaker::Make()
 
 	  Short_t geoId = StFgtCosmicTestStandGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
 
-          // remove hack
-//        Short_t quad=0;
-//        Short_t strip=0;
-//        Char_t layer=0;
-// 	  StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
-// 	  StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
-//        if( arm == 0 ){
-//           discIdx = 0;
-//        } else if ( apv < 12 ) {
-//           discIdx = 1;
-//        } else {
-//           discIdx = 2;
-//           apv -= 12;
-//        };
-//        geoId = StFgtGeom::encodeGeoId( discIdx, 0, layer, strip );
+//           if( timebin == 4 )
+//              cout << "a " << geoId << ' ' << rdo << ' ' << arm << ' ' << apv << ' ' << channel << endl;
+
+          // debug:
+          Short_t quad=0;
+          Short_t strip=0;
+          Char_t layer=0;
+
+          //Double_t ordinate, lowerSpan, upperSpan;
+	  //StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quad,layer,ordinate,lowerSpan,upperSpan);
+
+//           if( timebin == 4 ){
+//              StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
+//              cout << "b " << geoId << ' ' << discIdx << ' ' << quad << ' ' << layer << ' ' << strip << endl;
+//           };
+
+	  Int_t geoId2 = StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
+          StFgtGeom::decodeGeoId( geoId2, discIdx, quad, layer, strip );
+          if( arm == 0 ){
+             discIdx = 0;
+          } else if ( apv < 12 ) {
+             discIdx = 1;
+          } else {
+             discIdx = 2;
+             apv -= 12;
+          };
+          geoId2 = StFgtGeom::encodeGeoId( discIdx, 0, layer, strip );
+//           if( timebin == 4 )
+//              cout << "c " << geoId2 << ' ' << discIdx << ' ' << 0 << ' ' << layer << ' ' << strip << endl;
+
+          if( geoId != geoId2 ){
+             StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
+             cout << "geom: " << geoId << ' ' << discIdx << ' ' << quad << ' ' << layer << ' ' << strip << endl;
+
+             StFgtGeom::decodeGeoId( geoId2, discIdx, quad, layer, strip );
+             cout << "hack: " << geoId2 << ' ' << discIdx << ' ' << quad << ' ' << layer << ' ' << strip << endl;
+          };
 
           Char_t type = 0;    // raw adc, no correction yet.
 	  StFgtRawHit hit(geoId,adc,type,timebin);
@@ -115,6 +134,9 @@ Int_t StFgtCosmicMaker::Make()
           // HACK: since don't yet have geoId->APV/channel mapping,
           // encode in the charge field for now
           // hit.setCharge( 128*apv + channel );
+
+          // debug
+
 
 	  if(pDisc)
 	    pDisc->getRawHitArray().PushBack(hit);
@@ -138,6 +160,13 @@ Int_t StFgtCosmicMaker::Make()
      };
   };
 
+  // debug
+//   for( UInt_t i = 0; i < mNumDiscs; ++i ){
+//      StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr( i );
+//      if( pDisc )
+//         cout << "mkr: disc " << i << " nhits " << pDisc->getNumRawHits() << endl;
+//   };
+
   return kStOk;
 };
 
@@ -146,5 +175,6 @@ void StFgtCosmicMaker::Clear( Option_t *opts )
    if( mFgtEventPtr )
       mFgtEventPtr->Clear( opts );
 };
+
 
 ClassImp(StFgtCosmicMaker);
