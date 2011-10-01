@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCAParam.h,v 1.3 2010/08/10 22:44:47 mzyzak Exp $
+// @(#) $Id: AliHLTTPCCAParam.h,v 1.4 2011/10/01 00:23:44 perev Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -108,6 +108,7 @@ class AliHLTTPCCAParam
     void SetTrackChi2Cut( float v ) {  fTrackChi2Cut = v; }
     void SetMaxTrackMatchDRow( int v ) {  fMaxTrackMatchDRow = v; }
     void SetHitPickUpFactor( float v ) {  fHitPickUpFactor = v; }
+    void SetRecoType( int reco)        {  fRecoType = reco; }
 
 ///mvz start 20.01.2010
 /*    void GetClusterErrors2( int iRow, float z, float sinPhi, float cosPhi, float DzDs, float &Err2Y, float &Err2Z ) const;
@@ -159,6 +160,7 @@ class AliHLTTPCCAParam
     float fTrackChi2Cut;// cut for track Chi^2/NDF
 
     float fRowX[AliHLTTPCCAParameters::NumberOfRows];// X-coordinate of rows 
+    int   fRecoType;		   // 0=Sti error parametrization; 1=Stv
     float fParamS0Par[2][3][7];    // cluster error parameterization coeficients
     float fPolinomialFieldBz[6];   // field coefficients
 
