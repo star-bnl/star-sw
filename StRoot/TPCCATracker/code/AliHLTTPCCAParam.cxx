@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.3 2010/08/10 22:44:47 mzyzak Exp $
+// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.4 2011/10/01 00:23:44 perev Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -30,6 +30,7 @@ AliHLTTPCCAParam::AliHLTTPCCAParam()
     fZMin( 0.0529937 ), fZMax( 249.778 ), fErrX( 0 ), fErrY( 0 ), fErrZ( 0.228808 ), fPadPitch( 0.4 ), fBz( -5. ),
     fHitPickUpFactor( 1. ),
     fMaxTrackMatchDRow( 4 ), fTrackConnectionFactor( 3.5 ), fTrackChiCut( 3.5 ), fTrackChi2Cut( 10 ) // are rewrited from file. See operator>>()
+   ,fRecoType(0) //Default is Sti
 {
   // constructor
 ///mvz start
@@ -216,6 +217,7 @@ void AliHLTTPCCAParam::GetClusterErrors2( int iRow, float z, float sinPhi, float
 }*/
 void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const AliHLTTPCCATrackParam &t, float &Err2Y, float &Err2Z ) const
 {
+enum {kYErr=0,kZErr=1,kWidTrk=2,kThkDet=3,kYDiff=4,kZDiff=5};
   float z = t.Z();
   const int type = errorType( iRow );
   z = (200. - CAMath::Abs(z)) * 0.01;
@@ -227,11 +229,28 @@ void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const AliHLTTPCCATrackParam 
   float tg2Phi = sin2Phi/cos2Phi;
 
   float tg2Lambda = t.DzDs()*t.DzDs();
-
+ 
   const float *c = fParamS0Par[0][type];
-  Err2Y = c[0] + c[1]*z/cos2Phi + c[2]*tg2Phi;
-  Err2Z = c[3] + c[4]*z*(1.f+tg2Lambda) + c[5]*tg2Lambda;
+  switch (fRecoType) {
+  case 0: {/*Sti*/
+    Err2Y = c[0] + c[1]*z/cos2Phi + c[2]*tg2Phi;
+    Err2Z = c[3] + c[4]*z*(1.f+tg2Lambda) + c[5]*tg2Lambda;
+    break;}
 
+  case 1: {/*Sti*/ 
+    float cos2lambda = 1/(tg2Lambda+1);
+    float sin2lambda = tg2Lambda*cos2lambda;
+    z = (210. - CAMath::Abs(z)) * 0.01;
+
+    Err2Y = (c[kThkDet]*sin2Phi   + c[kWidTrk])
+             / (cos2Phi)             + c[kYErr] + c[kYDiff]*z;
+    Err2Z = (c[kThkDet]*(sin2lambda) + c[kWidTrk]*((sin2Phi)*(sin2lambda)+cos2Phi))
+             / (cos2Phi*cos2lambda)  + c[kZErr] + c[kZDiff]*z;
+   break; }  
+   default: assert(0);
+  }  
+    
+    
   if(Err2Y<1e-6) Err2Y = 1e-6;
   if(Err2Z<1e-6) Err2Z = 1e-6;
 
