@@ -29,9 +29,9 @@
        // ---------------------------------------------------------------------------------------------------     
           ///@addtogroup IdsmGeo1_vars     
           ///@{        
-                Float_t inr,outr,lengthz,k,sina,cosa,resr,angres,m,pm,angrail,rrail,dphihv;        
+                Float_t inr,outr,lengthz,k,sina,cosa,resr,angres,m,pm,j,angrail,rrail,dphihv,angfgtcbl;        
                 //        
-                /// Float_t inr,outr,lengthz,k,sina,cosa,resr,angres,m,pm,angrail,rrail,dphihv        
+                /// Float_t inr,outr,lengthz,k,sina,cosa,resr,angres,m,pm,j,angrail,rrail,dphihv,angfgtcbl        
           ///@}     
           //  -----------------------------------------------------     
           /// @defgroup idsg_doc     
@@ -90,7 +90,7 @@
                         mCurrent = this;           
                         Bool_t _same_shape = true;           
                       { AgAttribute attr = AgAttribute("IDSM");              
-                            attr.par("seen")=1;              
+                            attr.par("seen")=0;              
                             attr.par("colo")=4;              
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
@@ -272,7 +272,7 @@
                       /// Loop on m from 0 to 1 step=1           
                       for ( m=0; (1>0)? (m<=1):(m>=1); m+=1 )           
                       {              
-                            angrail=90./180.*3.1416;              
+                            angrail=16./180.*3.1416;              
                             if ( m==1 )              
                             {                 
                                   angrail = angrail+3.1416;                 
@@ -293,22 +293,41 @@
                                   /// Translate z = 146.57                 
                                   _stacker -> Position( AgBlock::Find("FGRL"), place );                 
                             } // end placement of FGRL              
-                            _create = AgCreate("FGHV");              
+                      }           
+                      /// Loop on m from 1 to 4 step=1           
+                      for ( m=1; (1>0)? (m<=4):(m>=4); m+=1 )           
+                      {              
+                            angfgtcbl=-90./180.*3.1416;              
+                            /// Loop on k from 1 to idsg.fgtndisk step=1              
+                            for ( k=1; (1>0)? (k<=idsg.fgtndisk):(k>=idsg.fgtndisk); k+=1 )              
                             {                 
-                                  AgShape myshape; // undefined shape                 
-                                  ///Create FGHV                 
-                                  Create("FGHV");                  
+                                  if ( not ((idsg.version==2.0)||(k==1)||(m<=3))) { continue; }                 
+                                  pm=1;                 
+                                  if ( (k==1)||(k==3)||(k==5) )                 
+                                  {                    
+                                        pm=-1;                    
+                                  }                 
+                                  /// Loop on j from k to 16 step=1                 
+                                  for ( j=k; (1>0)? (j<=16):(j>=16); j+=1 )                 
+                                  {                    
+                                        _create = AgCreate("FGHV");                    
+                                        {                       
+                                              AgShape myshape; // undefined shape                       
+                                              ///Create FGHV                       
+                                              Create("FGHV");                        
+                                        }                    
+                                        { AgPlacement place = AgPlacement("FGHV","IDSM");                       
+                                              /// Add daughter volume FGHV to mother IDSM                       
+                                              place.TranslateX((rrail+0.5*pm)*cos(angfgtcbl+(dphihv*(m+2.2*k-pm*.8))));                       
+                                              /// Translate x = (rrail+0.5*pm)*cos(angfgtcbl+(dphihv*(m+2.2*k-pm*.8)))                       
+                                              place.TranslateY((rrail+0.5*pm)*sin(angfgtcbl+(dphihv*(m+2.2*k - pm*.8))));                       
+                                              /// Translate y = (rrail+0.5*pm)*sin(angfgtcbl+(dphihv*(m+2.2*k - pm*.8)))                       
+                                              place.TranslateZ(idsg.fgtstartz+idsg.fgtdiskstepz*(j-0.5));                       
+                                              /// Translate z = idsg.fgtstartz+idsg.fgtdiskstepz*(j-0.5)                       
+                                              _stacker -> Position( AgBlock::Find("FGHV"), place );                       
+                                        } // end placement of FGHV                    
+                                  }                 
                             }              
-                            { AgPlacement place = AgPlacement("FGHV","IDSM");                 
-                                  /// Add daughter volume FGHV to mother IDSM                 
-                                  place.TranslateX(rrail*cos(angrail+3.));                 
-                                  /// Translate x = rrail*cos(angrail+3.)                 
-                                  place.TranslateY(rrail*sin(angrail+3.));                 
-                                  /// Translate y = rrail*sin(angrail+3.)                 
-                                  place.TranslateZ(idsg.fgtstartz-idsg.fgtdiskstepz/.2);                 
-                                  /// Translate z = idsg.fgtstartz-idsg.fgtdiskstepz/.2                 
-                                  _stacker -> Position( AgBlock::Find("FGHV"), place );                 
-                            } // end placement of FGHV              
                       }           
                       END_OF_IDSM:           
                       mCurrent = _save;           
@@ -632,7 +651,7 @@
                         Bool_t _same_shape = true;           
                       { AgAttribute attr = AgAttribute("FGRL");              
                             attr.par("seen")=1;              
-                            attr.par("colo")=1;              
+                            attr.par("colo")=2;              
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
@@ -674,15 +693,13 @@
                       {  AgMaterial mat = AgMaterial::CopyMaterial("Cablemix");              
                             _material = mat;              
                       }           
-                      {  AgShape shape = AgShape("Tubs");              
+                      {  AgShape shape = AgShape("Tube");              
                             shape     .Inherit( AgBlock::previous() );              
                             create     .SetParameters(shape);              
-                            shape.par("rmin")=rrail-0.5;              
-                            shape.par("rmax")=rrail+0.5;              
-                            shape.par("phi1")=-dphihv/2.;              
-                            shape.par("phi2")=dphihv;              
-                            shape.par("dz")=idsg.fgtdiskstepz;              
-                            /// Shape Tubs rmin=rrail-0.5 rmax=rrail+0.5 phi1=-dphihv/2. phi2=dphihv dz=idsg.fgtdiskstepz               
+                            shape.par("rmin")=0.;              
+                            shape.par("rmax")=0.43;              
+                            shape.par("dz")=idsg.fgtdiskstepz/2.;              
+                            /// Shape Tube rmin=0. rmax=0.43 dz=idsg.fgtdiskstepz/2.               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
                             if (_same_shape) goto END_OF_FGHV;              
@@ -697,11 +714,11 @@
        {        
              ///@addtogroup IdsmGeo1_revision        
              ///@{           
-                   /// Created:   8/30/2011            
+                   /// Created:   9/23/2011            
              ///@}        
              ///@addtogroup IdsmGeo1_revision        
              ///@{           
-                   /// Author: Jan Balewski MIT            
+                   /// Author: Jan Balewski MIT, Willie Leight MIT (material mixes)            
              ///@}        
              AddBlock("IDSM");        
              AddBlock("TPRR");        
@@ -719,8 +736,40 @@
              ///@addtogroup idsg_doc        
              ///@{           
                    ++idsg._index;           
-                   idsg . version = 2.0; // Versioning of the IDS geometry            
-                   /// idsg . version = 2.0; // Versioning of the IDS geometry            
+                   idsg . version = 1.0; // 2012 Versionin of the IDS geometry            
+                   /// idsg . version = 1.0; // 2012 Versionin of the IDS geometry            
+                   idsg . rf = 8.0; //  radii of inner volume boundary           
+                   /// idsg . rf = 8.0; //  radii of inner volume boundary           
+                   idsg . angflat = 106.; //  angle (deg) for center of flat           
+                   /// idsg . angflat = 106.; //  angle (deg) for center of flat           
+                   idsg . rrres = 43.; //  radial distance of  for TPC resistor tubes           
+                   /// idsg . rrres = 43.; //  radial distance of  for TPC resistor tubes           
+                   idsg . r1res = 1.17; //  inner radii for TPC resistor tubes           
+                   /// idsg . r1res = 1.17; //  inner radii for TPC resistor tubes           
+                   idsg . r2res = 1.27; //  outer radii for TPC resistor tubes           
+                   /// idsg . r2res = 1.27; //  outer radii for TPC resistor tubes           
+                   idsg . dangres = 11.3; //  opening angle (deg) for TPC resistor tubes           
+                   /// idsg . dangres = 11.3; //  opening angle (deg) for TPC resistor tubes           
+                   idsg . dxres = 0.13; //  thicknessfor TPC resistor           
+                   /// idsg . dxres = 0.13; //  thicknessfor TPC resistor           
+                   idsg . dyres = 2.; //  dy for TPC resistor           
+                   /// idsg . dyres = 2.; //  dy for TPC resistor           
+                   idsg . fgtstartz = 70.; //  position of sensitive volume of the 1st disk           
+                   /// idsg . fgtstartz = 70.; //  position of sensitive volume of the 1st disk           
+                   idsg . fgtdiskstepz = 10.; //  disk separation along Z           
+                   /// idsg . fgtdiskstepz = 10.; //  disk separation along Z           
+                   idsg . fgtndisk = 6; // number of disks           
+                   /// idsg . fgtndisk = 6; // number of disks           
+                   //           
+                   idsg.fill();           
+             ///@}        
+             //        
+             // ---------------------------------------------------------------------------------------------------        
+             ///@addtogroup idsg_doc        
+             ///@{           
+                   ++idsg._index;           
+                   idsg . version = 2.0; // 2013 versionin of the IDS geometry            
+                   /// idsg . version = 2.0; // 2013 versionin of the IDS geometry            
                    idsg . rf = 8.0; //  radii of inner volume boundary           
                    /// idsg . rf = 8.0; //  radii of inner volume boundary           
                    idsg . angflat = 106.; //  angle (deg) for center of flat           
@@ -791,8 +840,8 @@
                    /// idsa . thetax = 90.0; // align x`-axis 90 degrees in theta wrt cave           
                    idsa . phix =  0.0; // align x`-axis  0 degrees in phi   wrt cave           
                    /// idsa . phix =  0.0; // align x`-axis  0 degrees in phi   wrt cave           
-                   idsa . thetay = 90.0; // align y`-axis 90 degrees in theta wrt cave           
-                   /// idsa . thetay = 90.0; // align y`-axis 90 degrees in theta wrt cave           
+                   idsa . thetay = 90.0; // align y`-axis 90 degrees in thetangRail+(0.1+dPhiHV*k)*(-1+2*pm)a wrt cave           
+                   /// idsa . thetay = 90.0; // align y`-axis 90 degrees in thetangRail+(0.1+dPhiHV*k)*(-1+2*pm)a wrt cave           
                    idsa . phiy = 90.0; // align y`-axis  0 degrees in phi   wrt cave           
                    /// idsa . phiy = 90.0; // align y`-axis  0 degrees in phi   wrt cave           
                    idsa . thetaz =  0.0; // align z`-axis  0 degrees in theta wrt cave           
@@ -926,11 +975,11 @@
              idsa.Use("version",(Float_t)1.0);        
              inr     = idsg.rf;        
              outr    = idsg.rrres + idsg.r2res;        
-             lengthz = 460.;        
+             lengthz = 470.;        
              sina = sin( idsg.angflat * degrad );        
              cosa = cos( idsg.angflat * degrad );        
              rrail=41.5;        
-             dphihv=0.79;        
+             dphihv=0.03;        
              _create = AgCreate("IDSM");        
              {           
                    AgShape myshape; // undefined shape           

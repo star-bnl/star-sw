@@ -25,7 +25,7 @@ namespace SISDGEO6 // $NMSPC
    { 
       ClassDef(Sfjp_t,1); 
       public: 
-      Float_t version; 
+      Int_t version; 
       Float_t alphaz; 
       Float_t alphazh; 
       Float_t ssst_rmin; 
@@ -353,7 +353,7 @@ namespace SISDGEO6 // $NMSPC
    { 
       ClassDef(Sfpa_t,1); 
       public: 
-      Float_t version; 
+      Int_t version; 
       Float_t rmin; 
       Float_t rmax; 
       Float_t len; 
@@ -1073,17 +1073,17 @@ namespace SISDGEO6 // $NMSPC
       virtual void End(){ }; 
       ClassDef(SCVS,1); 
    }; 
-   // ---------------------------------------------------------------------- SOSH -- 
-   ///@defgroup SOSH_doc 
-   ///@class SOSH 
+   // ---------------------------------------------------------------------- SOSK -- 
+   ///@defgroup SOSK_doc 
+   ///@class SOSK 
    ///@brief is the separation shield cylinder 
-   class SOSH : public AgBlock 
+   class SOSK : public AgBlock 
    {  public: 
-      SOSH() : AgBlock("SOSH","is the separation shield cylinder"){ }; 
-      ~SOSH(){ }; 
+      SOSK() : AgBlock("SOSK","is the separation shield cylinder"){ }; 
+      ~SOSK(){ }; 
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
-      ClassDef(SOSH,1); 
+      ClassDef(SOSK,1); 
    }; 
    /// \class SisdGeo6 
    /// \brief   is the Silicon Strip Detector with TUP modifications  

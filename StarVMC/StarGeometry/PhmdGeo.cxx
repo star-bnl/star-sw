@@ -331,7 +331,7 @@
                                   }                 
                                   if ( (itype==3) )                 
                                   {                    
-                                        xpos=xpos;                    
+                                        xpos1=xpos1 + sizen(pmdg.mx(itype-1))/2 - pmdg.boundary-2.25*pmdg.th_air;                    
                                   }                 
                                   if ( (itype==4) )                 
                                   {                    
@@ -339,7 +339,7 @@
                                   }                 
                                   if ( (itype==5) )                 
                                   {                    
-                                        xpos=xpos + 2.*xsize1-xsize;                    
+                                        xpos1 = xpos1+2.*xsize1-xsize+ sizen(pmdg.mx(itype-1))/2.-ysize +3*pmdg.boundary*root32;                    
                                   }                 
                                   ypos = ypos-ylen0;                 
                                   _create = AgCreate("PHSR");                 

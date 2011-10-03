@@ -105,7 +105,7 @@
           ///                             
           /// AgML structure members:     
           ///                             
-          ///Float_t type;     
+          ///Int_t type;     
           ///Float_t density;     
           ///Float_t radlen;     
           ///Float_t pbcont;     
@@ -285,7 +285,7 @@
                       /// USE flgg type=1 ;           
                       flgg.Use("type",(Float_t)1 );           
                       /// USE flgm type=1 ;           
-                      flgm.Use("type",(Float_t)1 );           
+                      flgm.Use("type",(Int_t)1 );           
                       wid  =  flgg.width + flgg.dgap + flgg.althick*2;           
                       ztot = (flgg.depth + flgg.althick + flgg.mumetdz)/2.0;           
                       rtot = fbxd.nx*wid/2.0;           
@@ -396,7 +396,7 @@
                             /// USE flgg type=2 ;              
                             flgg.Use("type",(Float_t)2 );              
                             /// USE flgm type=2 ;              
-                            flgm.Use("type",(Float_t)2 );              
+                            flgm.Use("type",(Int_t)2 );              
                             wid  = flgg.width + flgg.dgap;              
                             ztot = flgg.depth/2.0;              
                             rtot = 14*wid/2.0;              

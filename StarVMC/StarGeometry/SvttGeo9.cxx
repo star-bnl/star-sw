@@ -35,7 +35,7 @@
           /// AgML structure members:     
           ///                             
           ///Float_t version;     
-          ///Float_t nlayer;     
+          ///Int_t nlayer;     
           ///Float_t rsizemin;     
           ///Float_t rsizemax;     
           ///Float_t zsizemax;     
@@ -214,7 +214,7 @@
           ///                             
           /// AgML structure members:     
           ///                             
-          ///Float_t layer;     
+          ///Int_t layer;     
           ///Float_t nladder;     
           ///Float_t nwafer;     
           ///Float_t radius;     
@@ -259,7 +259,7 @@
           ///                             
           /// AgML structure members:     
           ///                             
-          ///Float_t layer;     
+          ///Int_t layer;     
           ///Float_t len;     
           ///Float_t rmin1;     
           ///Float_t rmax1;     
@@ -277,7 +277,7 @@
           ///                             
           /// AgML structure members:     
           ///                             
-          ///Float_t layer;     
+          ///Int_t layer;     
           ///Float_t len;     
           ///Float_t rmin1;     
           ///Float_t rmax1;     
@@ -296,7 +296,7 @@
           ///                             
           /// AgML structure members:     
           ///                             
-          ///Float_t layer;     
+          ///Int_t layer;     
           ///Float_t length;     
           ///Float_t dr;     
           ///Float_t offset;     
@@ -2331,16 +2331,16 @@
                    _material = mix;           
                    _material.lock();           
              }        
-             /// Component C5	a=12	z=6	w=5        
-             /// Component H4	a=1	z=1	w=4        
-             /// Component O2	a=16	z=8	w=2        
-             /// Component Al	a=27	z=13	w=0.2302        
+             /// Component C5	a=12	z=6	w=10000*5        
+             /// Component H4	a=1	z=1	w=10000*4        
+             /// Component O2	a=16	z=8	w=10000*2        
+             /// Component Al	a=27	z=13	w=10000*0.2302        
              /// Mixture ALKAP dens=1.432        
              {  AgMaterial &mix = AgMaterial::Get("Alkap");           
-                   mix.Component("C5",12,6,5);           
-                   mix.Component("H4",1,1,4);           
-                   mix.Component("O2",16,8,2);           
-                   mix.Component("Al",27,13,0.2302);           
+                   mix.Component("C5",12,6,10000*5);           
+                   mix.Component("H4",1,1,10000*4);           
+                   mix.Component("O2",16,8,10000*2);           
+                   mix.Component("Al",27,13,10000*0.2302);           
                    mix.par("dens")=1.432;           
                    mix.lock();           
                    _material = mix;           

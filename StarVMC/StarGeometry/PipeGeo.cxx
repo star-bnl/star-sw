@@ -35,7 +35,7 @@
           /// AgML structure members:     
           ///                             
           ///Float_t version;     
-          ///Int_t pipeconfig;     
+          ///Float_t pipeconfig;     
           ///Int_t pipeflag;     
           ///Int_t _index;     
           //     

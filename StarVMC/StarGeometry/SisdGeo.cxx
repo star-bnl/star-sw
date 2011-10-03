@@ -35,7 +35,7 @@
           /// AgML structure members:     
           ///                             
           ///Float_t version;     
-          ///Int_t config;     
+          ///Float_t config;     
           ///Int_t placement;     
           ///Int_t _index;     
           //     

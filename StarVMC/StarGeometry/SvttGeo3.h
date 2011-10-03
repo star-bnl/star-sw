@@ -10,7 +10,7 @@ namespace SVTTGEO3 // $NMSPC
       ClassDef(Svtg_t,1); 
       public: 
       Float_t version; 
-      Float_t nlayer; 
+      Int_t nlayer; 
       Float_t rsizemin; 
       Float_t rsizemax; 
       Float_t zsizemax; 
@@ -285,7 +285,7 @@ namespace SVTTGEO3 // $NMSPC
    { 
       ClassDef(Svtl_t,1); 
       public: 
-      Float_t layer; 
+      Int_t layer; 
       Float_t nladder; 
       Float_t nwafer; 
       Float_t radius; 
@@ -351,7 +351,7 @@ namespace SVTTGEO3 // $NMSPC
    { 
       ClassDef(Scbp_t,1); 
       public: 
-      Float_t layer; 
+      Int_t layer; 
       Float_t len; 
       Float_t rmin1; 
       Float_t rmax1; 
@@ -375,7 +375,7 @@ namespace SVTTGEO3 // $NMSPC
    { 
       ClassDef(Sfep_t,1); 
       public: 
-      Float_t layer; 
+      Int_t layer; 
       Float_t len; 
       Float_t rmin1; 
       Float_t rmax1; 
@@ -401,7 +401,7 @@ namespace SVTTGEO3 // $NMSPC
    { 
       ClassDef(Swcx_t,1); 
       public: 
-      Float_t layer; 
+      Int_t layer; 
       Float_t length; 
       Float_t dr; 
       Float_t offset; 
