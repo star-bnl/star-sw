@@ -59,9 +59,10 @@ void StvDefaultSeedFinder::Reset()
   *f1stHitMapIter = f1stHitMap->begin();
 }    
 //_____________________________________________________________________________
-void StvDefaultSeedFinder::Again()
+int StvDefaultSeedFinder::Again()
 {
   *f1stHitMapIter = f1stHitMap->begin();
+   return 1;
 }
 //_____________________________________________________________________________
 //	Start of Local auxiliary routines
@@ -218,52 +219,6 @@ if (myDeb>0){for (int i=0;i<(int)mySeedObjs.size();i++) {delete mySeedObjs[i];}}
   fNSeeds[1]+=fNSeeds[0]; fNUsed[1]+= fNUsed[0];
   return 0;
 }
-//_____________________________________________________________________________
-const THelixTrack *StvDefaultSeedFinder::Approx()
-{
-static int nCall=0; nCall++;
-
-#ifdef APPROX_DEBUG
-static TCanvas *myCanvas=0;
-static TH1  *H[2];
-if(!myCanvas) {
-   myCanvas=new TCanvas("Approx","",600,800);
-   H[0] = new TH1F("Xi2","Xi2", 100,0,5);
-   H[1] = new TProfile("nHits ","nHits",  30,0,30);
-   myCanvas->Divide(1,2);
-   for (int i=0;i<2;i++) {myCanvas->cd(i+1); H[i]->Draw();}
-}
-#endif // APPROX_DEBUG
-
-const double BAD_XI2=333*kTpcHitErr*kTpcHitErr;
-const double BAD_RHO=0.1;
-
-//		Loop over nodes and collect global xyz
-
-  THelixFitter &circ = fHelix;
-  circ.Clear();
-  int nNode=fSeedHits.size();
-  for (int iNode = 0; iNode<nNode;++iNode) {
-    const StvHit * hit = fSeedHits[iNode];
-    circ.Add(hit->x()[0],hit->x()[1],hit->x()[2]);
-  }  
-  double Xi2 =circ.Fit();
-//   float myDir[3];
-//   TCL::vsub(fSeedHits[nNode-1]->x(),fSeedHits[0]->x(),myDir,3);
-//   assert(myDir[0]*circ.Dir()[0]+myDir[1]*circ.Dir()[1]>0);
-
-#ifdef APPROX_DEBUG
-  H[0]->Fill(log(Xi2)/log(10.));
-  H[1]->Fill(nNode,Xi2);
-#endif // APPROX_DEBUG
-  if (Xi2>BAD_XI2) return 0; //Xi2 too bad, no updates
-  if (fabs(circ.GetRho()) >BAD_RHO) return 0;
-
-  const float *fx = fSeedHits[0]->x();
-  const double dx[3]={fx[0],fx[1],fx[2]};
-  double l = fHelix.Path(dx); fHelix.Move(l);
-  return &fHelix;
-}    
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 StvConeSelector::StvConeSelector()
