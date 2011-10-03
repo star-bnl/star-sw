@@ -75,7 +75,23 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   // Select y2009a configuration
   geom.Use("select", tag );
 
-  //  std::cout << "ConstructGeometry: tag = " << tag << std::endl;
+  // And apply the flags to each subsystem
+#define Initialize(sys){						\
+    std::cout << #sys << ": " << geom.sys##Flag.Data()<<"\t";		\
+    if (! sys##Geom.Use("select", geom. sys##Flag) ) {	Int_t _save = gErrorIgnoreLevel; gErrorIgnoreLevel=0; \
+      Warning(GetName(),Form("Could not initialize %s with flag %s",#sys, geom.sys##Flag.Data())); \
+      gErrorIgnoreLevel=_save;						\
+    }									\
+  }
+  std::cout << "== Geometry.cxx ==============================================================================================" << std::endl;
+  std::cout << "Initializing subsystem geometry flags" << std::endl;
+  Initialize(cave);  Initialize(magp);  Initialize(pipe);  Initialize(bbcm); std::cout << std::endl;
+  Initialize(vpdd);  Initialize(zcal);  Initialize(btof);  Initialize(mutd); std::cout << std::endl;
+  Initialize(phmd);  Initialize(svtt);  Initialize(sisd);  Initialize(scon); std::cout << std::endl;
+  Initialize(idsm);  Initialize(ftpc);  Initialize(ftro);  Initialize(fgtd); std::cout << std::endl;
+  Initialize(calb);  Initialize(ecal);  Initialize(fpdm);  Initialize(upst); std::cout << std::endl;
+  std::cout << "==============================================================================================================" << std::endl;
+
 
   // Cave goes first as it must be present to place things into
   geom.success_cave = ConstructCave( geom.caveFlag, geom.caveStat );  
@@ -305,8 +321,8 @@ Bool_t Geometry::ConstructPipe( const Char_t *flag, Bool_t go )
     }
 
   AgStructure::AgDetpNew( pipeGeom.module, Form("Beam pipe with config %s",flag) );
-  AgStructure::AgDetpAdd( "Pipv_t", "pipeconfig", (Int_t)pipeGeom.config );
-  AgStructure::AgDetpAdd( "Pipv_t", "pipeflag",   (Int_t)pipeGeom.flag );
+  AgStructure::AgDetpAdd( "Pipv_t", "pipeconfig", (Float_t)pipeGeom.config );
+  AgStructure::AgDetpAdd( "Pipv_t", "pipeflag",     (Int_t)pipeGeom.flag );
 
   if ( go )
   if ( !CreateModule( pipeGeom.module ) )
@@ -506,7 +522,9 @@ Bool_t Geometry::ConstructMutd( const Char_t *flag, Bool_t go )
   if (!go) return true;
 
   AgStructure::AgDetpNew( mutdGeom.module, Form("Muon Tagging Detector with configuration %s",flag));
-  AgStructure::AgDetpAdd( "Mtdg_t", "config", mutdGeom.config );
+  if ( mutdGeom.config == 4 ||
+       mutdGeom.config == 5 ) 
+    AgStructure::AgDetpAdd( "Mtdg_t", "config", (Float_t)mutdGeom.config );
 
   if ( !CreateModule( mutdGeom.module ) )
     {
@@ -543,10 +561,17 @@ Bool_t Geometry::ConstructSvtt( const Char_t *flag, Bool_t go )
       return false;
     }
 
-
   AgStructure::AgDetpNew( svttGeom.module, Form("Silicon Vertex Detector Configuration"));
   AgStructure::AgDetpAdd("Svtg_t","config",       (float)svttGeom.config );       // SVTT configuration
   AgStructure::AgDetpAdd("Svtg_t","conever",      (float)sconGeom.config );       // Support cone configuration
+  std::cout << "=== sconGeom.config = " << sconGeom.config << " ===" << std::endl;
+  std::cout << "=== sconGeom.select = " << sconGeom.select.Data() << " ===" << std::endl;
+  /** 
+   *  Things are tangled up a bit here... sconGeom.config hasn't been resolved
+   *  yet.  I have been doing this at the start of each constructor.  Instead,
+   *  perhaps I should be applying the geometry flags to the geometry descriptors
+   *  before calling the constructors...
+   */
 
 
   if ( svttGeom.svshconfig>0 ) {
