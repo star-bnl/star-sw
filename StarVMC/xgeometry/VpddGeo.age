@@ -7,7 +7,7 @@
       CONTENT VPDD,VPBP,VPBO,VPBA,VPBB,VPBX,VFEE,VLEM,VPIP,VPFP,VPFA,VPFB,VPFC,VPBI,
             VPST,VPSC,VPSA,VPSB,VPSV,VPSW,VRNG,VSEC,VDET,VXST,VCNV,VPMT,VRAD,VPCL,VPCF,VPCV,
             VPCH,VDTI,IBEM,IBEH,IBEV,IBEW
-      STRUCTURE VPDV { version,int vpdconfig}
+      STRUCTURE VPDV { version,vpdconfig}
       STRUCTURE VPDG { version,zposEast,zposWest,rmin,rmax,BPwidth,BPlength,BPthick,
             BXheight,BXlength,BXwidth,BXthick,BXzposC,FPwidth,FPheight,FPthick,FPAwidth,FPAhght,
             FPChght,FPHhght,FPHwidth,FPHthick,STthick,STheight,STangle,STdiagsz,SCwidth,

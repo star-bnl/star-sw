@@ -1,18 +1,32 @@
       MODULE IDSMGEO1    simplified  beam support cone for 2012
-      Created   8/30/2011
-      Author Jan Balewski MIT
+      Created   9/23/2011
+      Author Jan Balewski MIT, Willie Leight MIT (material mixes)
       +CDE,agecom,gcunit,gconst.
       CONTENT IDSM,TPRR,TPRT,
       SUCA,  SUCB, SUCC, SUCD, SUCE, SUCF, SUCG,
       FGRL,FGHV
-      REAL inR, outR,lengthZ,     k,sinA, cosA, resR, angRes,m,pm, angRail, rRail,
-             dPhiHV
+      REAL inR, outR,lengthZ,     k,sinA, cosA, resR, angRes,m,pm, j,angRail, rRail,
+             dPhiHV, angFgtCbl
 
       STRUCTURE IDSG { version,rF,angFlat,r1Res,r2Res,rrRes,dangRes,dxRes,dyRes,fgtStartZ,
             fgtDiskStepZ,int fgtNdisk}
       STRUCTURE IDSA { version,x,y,z,thetax,thetay,thetaz,phix,phiy,phiz}
       FILL IDSG		! IDS Geometry data,46.1cm=inner radii of IFC
-      version = 2.0 ! Versioning of the IDS geometry
+      version = 1.0 ! 2012 Versionin of the IDS geometry
+      rF = 8.0 !  radii of inner volume boundary
+      angFlat = 106. !  angle (deg) for center of flat
+      rrRes = 43. !  radial distance of  for TPC resistor tubes
+      r1Res = 1.17 !  inner radii for TPC resistor tubes
+      r2Res = 1.27 !  outer radii for TPC resistor tubes
+      dangRes = 11.3 !  opening angle (deg) for TPC resistor tubes
+      dxRes = 0.13 !  thicknessfor TPC resistor
+      dyRes = 2. !  dy for TPC resistor
+      fgtStartZ = 70. !  position of sensitive volume of the 1st disk
+      fgtDiskStepZ = 10. !  disk separation along Z
+      fgtNdisk = 6 ! number of disks
+      ENDFILL
+      FILL IDSG		! IDS Geometry data,46.1cm=inner radii of IFC
+      version = 2.0 ! 2013 versionin of the IDS geometry
       rF = 8.0 !  radii of inner volume boundary
       angFlat = 106. !  angle (deg) for center of flat
       rrRes = 43. !  radial distance of  for TPC resistor tubes
@@ -44,7 +58,7 @@
       z = 0.0 ! z-alignment
       thetax = 90.0 ! align x`-axis 90 degrees in theta wrt cave
       phix =  0.0 ! align x`-axis  0 degrees in phi   wrt cave
-      thetay = 90.0 ! align y`-axis 90 degrees in theta wrt cave
+      thetay = 90.0 ! align y`-axis 90 degrees in thetangRail+(0.1+dPhiHV*k)*(-1+2*pm)a wrt cave
       phiy = 90.0 ! align y`-axis  0 degrees in phi   wrt cave
       thetaz =  0.0 ! align z`-axis  0 degrees in theta wrt cave
       phiz =  0.0 ! align z`-axis  0 degrees in phi   wrt cave
@@ -94,17 +108,17 @@
       use IDSA version=1.0
       inR     = IDSG_rF
       outR    = IDSG_rrRes + IDSG_r2Res
-      lengthZ = 460.
+      lengthZ = 470.
       sinA = sin( IDSG_angflat * degrad )
       cosA = cos( IDSG_angflat * degrad )
       rRail=41.5
-      dPhiHV=0.79
+      dPhiHV=0.03
       CREATE IDSM
       POSITION IDSM x=IDSA_x y=IDSA_y z=IDSA_z thetax=IDSA_thetax phix=IDSA_phix  _
 	thetay=IDSA_thetay phiy=IDSA_phiy thetaz=IDSA_thetaz phiz=IDSA_phiz 
       ! ---------------------------------------------------------------------------------- IDSM
       BLOCK IDSM   mother volume for beam support cone
-      ATTRIBUTE IDSM seen=1 colo=4
+      ATTRIBUTE IDSM seen=0 colo=4
       MATERIAL Air
       SHAPE tube rmin=inR rmax=outR dz=lengthZ/2.
       CREATE SUCA
@@ -140,15 +154,28 @@
       CREATE TPRR
       POSITION TPRR x=IDSG_rrRes*cosA y=IDSG_rrRes*sinA z=0 alphaz=IDSG_angFlat 
       DO m = 0, 1
-      angRail=90./180.*3.1416
+      angRail=16./180.*3.1416
       IF ( m.eq.1 ) THEN
       angRail = angRail+3.1416
       ENDIF
       CREATE FGRL
       POSITION FGRL x=rRail*cos(angRail) y=rRail*sin(angRail) z=146.57 
+      END DO
+      DO m = 1, 4
+      angFgtCbl=-90./180.*3.1416
+      DO k = 1, IDSG_fgtnDisk
+      CHECK (IDSG_version.eq.2.0).or.(k.eq.1).or.(m.le.3)
+      pm=1
+      IF ( (k.eq.1).or.(k.eq.3).or.(k.eq.5) ) THEN
+      pm=-1
+      ENDIF
+      DO j = k, 16
       CREATE FGHV
-      POSITION FGHV x=rRail*cos(angRail+3.) y=rRail*sin(angRail+3.)  _
-	z=IDSG_fgtStartZ-IDSG_fgtDiskStepZ/.2 
+      POSITION FGHV x=(rRail+0.5*pm)*cos(angFgtCbl+(dPhiHV*(m+2.2*k-pm*.8)))  _
+	y=(rRail+0.5*pm)*sin(angFgtCbl+(dPhiHV*(m+2.2*k - pm*.8)))  _
+	z=IDSG_fgtStartZ+IDSG_fgtDiskStepZ*(j-0.5) 
+      END DO
+      END DO
       END DO
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- SUCA
@@ -210,7 +237,7 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- FGRL
       BLOCK FGRL   FGT rail
-      ATTRIBUTE FGRL seen=1 colo=1
+      ATTRIBUTE FGRL seen=1 colo=2
       MATERIAL RailMix
       SHAPE tube rmin=0.9 rmax=1.0 dz=165.6/2.
       ENDBLOCK
@@ -218,8 +245,7 @@
       BLOCK FGHV   FGT cables mixture
       ATTRIBUTE FGHV seen=1 colo=1
       MATERIAL CableMix
-      SHAPE tubs rmin=rRail-0.5 rmax=rRail+0.5,
-            phi1=-dPhiHV/2. phi2=dPhiHV dz=IDSG_fgtDiskStepZ
+      SHAPE tube rmin=0. rmax=0.43 dz=IDSG_fgtDiskStepZ/2.
       ENDBLOCK
       <W> '===>> 	[End AgML Module IDSMGEO1]	 <<==='; (A32,/,/);
       END! Module IDSMGEO1

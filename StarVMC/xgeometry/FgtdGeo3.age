@@ -1,8 +1,8 @@
-      MODULE FGTDGEO3    forward GEM tracking detector for 2012
-      Created   8/25/2011
-      Author Jan Balewski MIT, Wei-Ming Zhang KSU
+      MODULE FGTDGEO3    forward GEM tracking detector for 2012 , 2013
+      Created   9/23/2011
+      Author Jan Balewski MIT, Wei-Ming Zhang KSU, Willie Leight MIT (material mixes)
       +CDE,agecom,gcunit,gconst.
-      CONTENT FGTM, FGTD, FGTQ,
+      CONTENT FGTM, FGTD, FGTQ,  FGTH,
       FGVN, FGZC, FGVG, FGVR, FGVE,
       FGQA, FGQB, FGQC, FGQD, FGQE, FGQF,
       FGXA, FGXB, FGXC, FGXD,
@@ -59,9 +59,9 @@
       STRUCTURE FGGG { FgstConfig}
       STRUCTURE FGST { config,startZ,diskStepZ,int ndisk,int nQuad}
       FILL FGGG		! FGT Geometry Control Structure
-      FgstConfig = 2.0 ! selection of no. of disks and quadrants
+      FgstConfig = 1.0 ! selection of no. of disks and quadrants
       ENDFILL
-      FILL FGST		! FGT Geometry with 6 full disks
+      FILL FGST		! FGT Geometry  for year 2012
       config = 1.0 ! versioning of the FGST geometry data
       startZ = 70. !  position of sensitive volume of the 1st disk
       diskStepZ = 10. !  disk separation along Z
@@ -73,7 +73,7 @@
       startZ = 70. !  position of sensitive volume of the 1st disk
       diskStepZ = 10. !  disk separation along Z
       ndisk = 6 ! number of disks
-      nQuad = 2 ! number quadrants in a disks
+      nQuad = 4 ! number quadrants in a disks
       ENDFILL
       COMPONENT Si A=28.08 Z=14 W=0.281
       COMPONENT O A=16 Z=8 W=0.467
@@ -111,15 +111,15 @@
       COMPONENT Cl A=35.5 Z=17 W=0.018
       COMPONENT Cu A=63.5 Z=29 W=0.122
       MIXTURE APVMix dens=2.535
-      COMPONENT Si A=28.1 Z=14 W=0.127
-      COMPONENT O A=16 Z=8 W=0.271
-      COMPONENT C A=12 Z=6 W=0.278
-      COMPONENT H A=1 Z=1 W=0.026
-      COMPONENT Cu A=63.5 Z=29 W=0.122
-      COMPONENT Fe A=55.8 Z=26 W=0.214
-      COMPONENT Cr A=52.0 Z=24 W=0.054
-      COMPONENT Ni A=58.7 Z=28 W=0.030
-      MIXTURE HVMix dens=2.681
+      COMPONENT Si A=28.1 Z=14 W=0.113
+      COMPONENT O A=16 Z=8 W=0.241
+      COMPONENT C A=12 Z=6 W=0.248
+      COMPONENT H A=1 Z=1 W=0.023
+      COMPONENT Cu A=63.5 Z=29 W=0.109
+      COMPONENT Fe A=55.8 Z=26 W=0.191
+      COMPONENT Cr A=52.0 Z=24 W=0.048
+      COMPONENT Ni A=58.7 Z=28 W=0.027
+      MIXTURE HVMix dens=3.009
       COMPONENT Si A=28.1 Z=14 W=0.122
       COMPONENT O A=16 Z=8 W=0.273
       COMPONENT C A=12 Z=6 W=0.441
@@ -142,13 +142,7 @@
       COMPONENT Ar A=39.95 Z=18. W=0.700
       COMPONENT O A=16. Z=8. W=0.218
       COMPONENT C A=12.01 Z=6. W=0.082
-      MIXTURE badArCO2Mix isvol=1 dens=0.0018015
-      COMPONENT O A=16 Z=8 W=0.093
-      COMPONENT C A=12 Z=6 W=0.305
-      COMPONENT H A=1 Z=1 W=0.012
-      COMPONENT N A=14 Z=7 W=0.032
-      COMPONENT Cu A=63.5 Z=29 W=0.558
-      MIXTURE badElecMix dens=4.
+      MIXTURE ArCO2Mix isvol=1 dens=0.0018015
       use FGGG
       use FGST config=FGGG_FgstConfig
       diskLenZ=volNomexDZ+volSensDZ+volGemDZ+volReadDZ+volElecDZ
@@ -166,8 +160,13 @@
       SHAPE tube rmin=diskInR rmax=diskOutR dz=fgtLenZ/2.0
       DO disk = 1, FGST_ndisk
       diskZ=-fgtLenZ/2. +diskLenZ/2. + (disk-1.0)*FGST_diskStepZ
+      IF ( (FGST_config.eq.2.0).or.(disk.le.1) ) THEN
       CREATE FGTD
       POSITION FGTD z=diskZ alphaz=quadTiltAng 
+      ELSE
+      CREATE FGTH
+      POSITION FGTH z=diskZ alphaz=quadTiltAng 
+      ENDIF
       END DO
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- FGTD
@@ -177,7 +176,17 @@
       SHAPE tube rmin=diskInR rmax=diskOutR dz=diskLenZ/2.0
       DO quad = 1, FGST_nQuad
       CREATE FGTQ
-      POSITION FGTQ z=0. alphaz=(1-quad)*90.*FGST_config 
+      POSITION FGTQ z=0. alphaz=(1-quad)*90. 
+      END DO
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- FGTH
+      BLOCK FGTH   mother volume for FGT disk
+      ATTRIBUTE FGTH seen=1 colo=7
+      MATERIAL Air
+      SHAPE tube rmin=diskInR rmax=diskOutR dz=diskLenZ/2.0
+      DO quad = 1, 2
+      CREATE FGTQ
+      POSITION FGTQ z=0. alphaz=(1-quad)*90. 
       END DO
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- FGTQ
@@ -231,7 +240,7 @@
       ! ---------------------------------------------------------------------------------- FGZC
       BLOCK FGZC   sensitive volume
       ATTRIBUTE FGZC seen=1 colo=1
-      MATERIAL badArCO2Mix
+      MATERIAL ArCO2Mix
       MATERIAL Sensitive_fgt_gas isvol=1
       SHAPE tubs rmin=diskInR rmax=diskOutR phi1=0.,
             phi2=90. dz=volSensDZ/2.

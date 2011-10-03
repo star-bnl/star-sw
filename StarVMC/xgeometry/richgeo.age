@@ -1,8 +1,8 @@
-* $Id: richgeo.age,v 1.1 2011/08/19 18:43:50 jwebb Exp $
+* $Id: richgeo.age,v 1.2 2011/10/03 22:45:40 jwebb Exp $
 *
 * $Log: richgeo.age,v $
-* Revision 1.1  2011/08/19 18:43:50  jwebb
-* AgSTAR geometry modules derived from the AgML source code.
+* Revision 1.2  2011/10/03 22:45:40  jwebb
+* Integrating 9/23 version of FGT.  Definition of "complete" and "y2012".
 *
 * Revision 1.12  2001/04/09 15:31:37  nevski
 * second version of cerenkov light properties introduced

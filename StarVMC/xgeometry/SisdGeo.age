@@ -5,7 +5,7 @@
       +CDE,gconst.
       +CDE,gcunit.
       CONTENT SFMO,SFLM,SFDM,SFSW,SFSD,SFSM,SFSS,SFCP,SFCW,SFCF,SFCT,SFCX
-      STRUCTURE SSDP { Version,int config,int placement}
+      STRUCTURE SSDP { Version,config,int placement}
       STRUCTURE SFPA { Version,rmin,rmax,Len,rad,nssd,dmWid,dmThk,dmLen,smWid,smThk,
             smLen,ssLen,wpLen,sdlen,tilt,cprad,cpral,cfrad,gpThk,int laddermap(20),ladderAngle(20),
             ladderTilt(20),LadderRadius(20)}

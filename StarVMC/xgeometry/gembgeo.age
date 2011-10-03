@@ -1,8 +1,8 @@
-* $Id: gembgeo.age,v 1.1 2011/08/19 18:43:50 jwebb Exp $
+* $Id: gembgeo.age,v 1.2 2011/10/03 22:45:40 jwebb Exp $
 *
 * $Log: gembgeo.age,v $
-* Revision 1.1  2011/08/19 18:43:50  jwebb
-* AgSTAR geometry modules derived from the AgML source code.
+* Revision 1.2  2011/10/03 22:45:40  jwebb
+* Integrating 9/23 version of FGT.  Definition of "complete" and "y2012".
 *
 * Revision 1.1  2005/06/28 16:16:24  potekhin
 * Gem barrel tracker code created by Nikolai and Gerrit.

@@ -158,10 +158,10 @@
       position=ftpg_Zstart+ftpg_totLen/2
       CREATE FTPC
       IF ( agexist('SVTT')!=0 ) THEN
-      POSITION FTPC in SVTT z=position konly='MANY' 
+      POSITION FTPC in SVTT z=+position konly='MANY' 
       POSITION FTPC in SVTT z=-position thetaz=180 konly='MANY' 
       ELSE
-      POSITION FTPC in CAVE z=position konly='MANY' 
+      POSITION FTPC in CAVE z=+position konly='MANY' 
       POSITION FTPC in CAVE z=-position thetaz=180 konly='MANY' 
       ENDIF
       ! ---------------------------------------------------------------------------------- FTPC

@@ -6,7 +6,7 @@
       +CDE,gcunit.
       CONTENT SVTT,SCON,SGRA,STAP,STAC,SHLA,SHLB,SBRG,SOES,SOSM,SCRW,SIES,SISM,SBSP,
             SAKM,SBMM,SMRD,SBMO,SBMI,SCKM,SBRL,SBRX,SBSR,SBCR,SCMY
-      STRUCTURE SVTG { Version,Nlayer,RsizeMin,RsizeMax,ZsizeMax,Angoff,SupportVer,
+      STRUCTURE SVTG { Version,int Nlayer,RsizeMin,RsizeMax,ZsizeMax,Angoff,SupportVer,
             ConeVer,ifMany,Nmin}
       STRUCTURE SWCA { Version,Length,WaferWid,WaferLen,WaferThk,RohaThk,WafCarWd,
             WafCarTh,WaferGap,Drift,strutlen}
@@ -21,13 +21,13 @@
       STRUCTURE SERG { Version,IrngTrMx,IrngPrMn,OrngRmin,OrngRmax,EndRngTh,EndRngZm}
       STRUCTURE SELC { Version,BeThk,WatThk,BeOThk,DyeThk,DyeWid,DyeSpc,ElcaWid,AgPdThk,
             GlassThk,CabThk,CabWid}
-      STRUCTURE SVTL { Layer,Nladder,Nwafer,Radius,BareEdge,PcbLen,PcbWidth,PcbThk,
+      STRUCTURE SVTL { int Layer,Nladder,Nwafer,Radius,BareEdge,PcbLen,PcbWidth,PcbThk,
             PcbGap}
       STRUCTURE SSLD { Version,SInRInn,SInROut,SInLen,SSepRInn,SSepROut,SSepLen,SOutRInn,
             SOutROut,SOutLen,AlMeshId,AlMeshOd,AlMshThk,AlMshPos}
-      STRUCTURE SCBP { Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol}
-      STRUCTURE SFEP { Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol,VolPlast}
-      STRUCTURE SWCX { Layer,Length,dR,offset,rad,wall,rOffset}
+      STRUCTURE SCBP { int Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol}
+      STRUCTURE SFEP { int Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol,VolPlast}
+      STRUCTURE SWCX { int Layer,Length,dR,offset,rad,wall,rOffset}
       STRUCTURE SOUP { Version,Length,Rout,dR,Phi1,Phi2,DiamOut,DiamIn}
       INTEGER iLayer,s,side,ilad,iwaf,i,j
 
@@ -357,10 +357,10 @@
       COMPONENT C A=12 Z=6 W=0.4*8*12./174.
       COMPONENT H A=1 Z=1 W=0.4*14*1./174.
       MIXTURE G10 dens=1.7
-      COMPONENT C5 A=12 Z=6 W=5
-      COMPONENT H4 A=1 Z=1 W=4
-      COMPONENT O2 A=16 Z=8 W=2
-      COMPONENT Al A=27 Z=13 W=0.2302
+      COMPONENT C5 A=12 Z=6 W=10000*5
+      COMPONENT H4 A=1 Z=1 W=10000*4
+      COMPONENT O2 A=16 Z=8 W=10000*2
+      COMPONENT Al A=27 Z=13 W=10000*0.2302
       MIXTURE ALKAP dens=1.432
       IF ( swam_Len>0 ) THEN
       COMPONENT H2 A=1 Z=1 W=2
