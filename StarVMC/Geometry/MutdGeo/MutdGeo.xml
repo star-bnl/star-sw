@@ -12,9 +12,7 @@
         <Content  >
             MUTD,MUSC,MTRA,MXTR,MMTC,MXSA,MPMT,MMRP
         </Content>
-        
-
-
+       
         <Structure name="MTDG"  >
             <var name="version" type="float"  />
             <var name="Rpmtin" type="float"  />
@@ -136,11 +134,11 @@
             <var name="Rmrpcin" value="403.60" comment=" mrpc box inner radius "  />
             <var name="Rmrpcout" value="411.22" comment=" mrpc box outer radius       "  />
 
-            <var name="Rmin" value="390.00" comment=" inner radius of the magnet system "  />
-            <var name="Rmax" value="435.00" comment=" outer radius of the magnet system "  />
-            <var name="dz" value="246.0" comment=" CTB/TOF tube half length "  />
+            <var name="Rmin"   value="390.00" comment=" inner radius of the magnet system "  />
+            <var name="Rmax"   value="435.00" comment=" outer radius of the magnet system "  />
+            <var name="dz"     value="246.0" comment=" CTB/TOF tube half length "  />
             <var name="Length" value="500.00" comment=" slightly longer than full length of the trays "  />
-            <var name="Radii" value="{390.093,420.093}" comment=" radii of trays "  />
+            <var name="Radii"  value="{390.093,420.093}" comment=" radii of trays "  />
         </Fill>
         
 
@@ -246,12 +244,13 @@
         </Mixture>
         
 
-        <Create block="MUTD"  />
-        <Placement block="MUTD" in="Cave"  >
-        </Placement>
+        <Create    block="MUTD"  />
+        <Placement block="MUTD" in="Cave" />
         
 
+<!--                         Muon Detector Mother                           -->
         <Block name="MUTD" comment="is the muon detector mother"  >
+
             <Material name="Air"  />
             <Medium name="Standard"  />
             <Attribute for="MAGP" seen="0" colo="1"  />
@@ -263,47 +262,38 @@
             <Create block="MUSC"  />
             <Placement block="MUSC"  >
                 <Rotation alphaz="BarPhi/2.0+BarPhi"  />
-            </Placement>
-            
-
-
+            </Placement>            
 
         </Block>
         
+<!--                         Muon Detector Sector                           -->
         <Block name="MUSC" comment="is a sector of MUON Trigger Barrel Scintillators"  >
-            <Attribute for="MUSC" seen="0" colo="1"  />
 
+            <Attribute for="MUSC" seen="0" colo="1"  />
             <Shape type="Tubs" phi2="5.0" phi1="-5.0"  />
 
             <Do var="Ntray" from="1" to="2"  >
-                <Create block="MTRA"  />
-                <Placement x="MTDG_Radii(Ntray)+(MTRY_SupFullH+MTRY_height+MTRY_StripT)/2.0" block="MTRA"  >
-                </Placement>
-                
 
-                <Create block="MPMT"  />
-                <Placement y="0" x="3.12/2+1.5+MTDG_Rpmtin" z="0" block="MPMT"  >
-                </Placement>
+                <Create    block="MTRA"  />
+                <Placement block="MTRA" x="MTDG_Radii(Ntray)+(MTRY_SupFullH+MTRY_height+MTRY_StripT)/2.0" />
+               
+                <Create    block="MPMT"  />
+                <Placement block="MPMT" y="0" x="3.12/2+1.5+MTDG_Rpmtin" z="0" />
                 
-                <Create block="MMRP"  />
-                <Placement y="0" x="2.50/2.+MTDG_Rmrpcin" z="0" block="MMRP"  >
-                </Placement>
-                
-
+                <Create    block="MMRP"  />
+                <Placement block="MMRP" y="0" x="2.50/2.+MTDG_Rmrpcin" z="0" />
             </Do>
             
 
         </Block>
         
         <Block name="MTRA" comment="is one full tray plus supporting structure for CTB/TOF"  >
+
             <Attribute for="MTRA" seen="1" colo="2"  />
-
-
             <Shape type="BOX" dx="(MTRY_SupFullH+MTRY_height+MTRY_StripT)/2" dy="MTRY_Width/2"  />
-            <Create block="MXTR"  />
-            <Placement x="(MTRY_SupFullH+MTRY_StripT)/2" z="(MTDG_dz-MTRY_length)/2" block="MXTR"  >
-            </Placement>
-            
+
+            <Create    block="MXTR"  />
+            <Placement block="MXTR" x="(MTRY_SupFullH+MTRY_StripT)/2" z="(MTDG_dz-MTRY_length)/2" />            
 
         </Block>
         
@@ -312,9 +302,8 @@
             <Material name="Aluminium"  />
 
             <Shape type="BOX" dz="MTRY_length/2" dx="MTRY_height/2"  />
-            <Create block="MMTC"  />
-            <Placement block="MMTC"  >
-            </Placement>
+            <Create    block="MMTC"  />
+            <Placement block="MMTC"  />
             
         </Block>
         
@@ -326,15 +315,23 @@
 
             zpos  =  (MTRY_length-MTBB_Slab1Len)/2-MTRY_WallThk-MTBB_Wrap 
             xpos  =  -MTRY_Height/2+MTBB_Slab1x 
-            <Create block="MXSA"  />
-            <Placement dz="MTBB_Slab1Len/2" dx="MTBB_SlabThck/2" dy="MTBB_SlabWid/2" x="xpos" z="zpos" block="MXSA"  >
-            </Placement>
+
+            <Create    block="MXSA"  />
+            <Placement block="MXSA" x="xpos" z="zpos" 
+                       dz="MTBB_Slab1Len/2" 
+                       dx="MTBB_SlabThck/2" 
+                       dy="MTBB_SlabWid/2" />
+
             
             zpos  =  (MTRY_length-MTBB_Slab2Len)/2-MTRY_WallThk-MTBB_Wrap-MTBB_Shim 
             xpos  =  -MTRY_Height/2+MTBB_Slab2x 
-            <Create block="MXSA"  />
-            <Placement dz="MTBB_Slab2Len/2" dx="MTBB_SlabThck/2" dy="MTBB_SlabWid/2" x="xpos" z="-zpos" block="MXSA"  >
-            </Placement>
+
+            <Create    block="MXSA"  />
+            <Placement block="MXSA" x="xpos" z="-zpos"
+                       dz="MTBB_Slab2Len/2" 
+                       dx="MTBB_SlabThck/2" 
+                       dy="MTBB_SlabWid/2" />
+
             
         </Block>
         
