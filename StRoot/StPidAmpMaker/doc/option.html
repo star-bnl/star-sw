@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html><body bgcolor="#ffffff">
+
+  <head>
+    <title>option</title>
+  </head>
+
+  <body>
+<p> <font color=#EE1110> Fit options:</font></p>
+<br>"I"------fit individual de/dx~p/z band. If the ChannelCollection is a default ChannelCollection, a file "<font color=green>ChannelCollectionName</font>+Bands.root" will be produced.
+<br>"B"------fit dedx~beta*gamma instead of fit individual de/dx~p/z band. this will cause one set of fitted band parameters for all particle types. A file "<font color=green>ChannelCollectionName</font>+BGBands.root" will be produced.
+<br>"A"------fit amplitude. A file "<font color=green>ChannelCollectionName</font>+Amp.root" will be produced.
+<br>"R"------fit resolution.
+<br>"T"------iterate de/dx~beta*gamma fitting twice. if "B" is not slected, this option will be ignored.
+<br>
+<br>A <font color=green>ChannelCollectionName</font> is sth like"nhitsBin_0_10_20_45_ptBin_0_Infinity_", it depends on what ChannelCollection the user have added into the StPidAmpManager.
+<br>
+<br> Please note:
+<br>1. Amplitude fitting or resolution fitting won't make sense if the band does not get fitted first. So if "A" or "R" is selected, either "I" or "B" should be selected. If the user forget to do so, the code will pick up  "B". 
+<br>2. Only the "*BGBand.root" file contains the calibration constant.
+
+<p> <font color=#EE1110> Draw options:</font></p>
+<br>"I"------draw individual band fitting (dedx~p/z for each particle type).
+<br>"B"------draw de/dx~beta*gamma fitting. If no "B" in the fit option, this option will be ignored.
+<br>"A"------draw amplitude fitting.
+<br>"R"------draw resolution fitting.
+
+    <hr>
+    <address><a href="mailto:aihong@rcf.rhic.bnl.gov">Aihong Tang</a></address>
+<!-- Created: Tue Feb 15 16:15:38 EST 2000 -->
+<!-- hhmts start -->
+Last modified: Thu Mar  9 09:47:38 EST 2000
+<!-- hhmts end -->
+  </body>
+</html>
