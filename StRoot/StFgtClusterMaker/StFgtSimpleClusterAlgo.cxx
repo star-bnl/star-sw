@@ -101,6 +101,8 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
       clusters.pushBack(*newCluster);
       delete newCluster;
     }
+
+  return kStOk;
 };
 
 

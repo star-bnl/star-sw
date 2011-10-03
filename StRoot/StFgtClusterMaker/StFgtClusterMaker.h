@@ -31,6 +31,8 @@ class StFgtClusterMaker : public StMaker
   virtual Int_t Make();
   virtual void Clear( Option_t *opts = "" );
 
+  Int_t setClusterAlgo(StFgtIClusterAlgo*);
+
  protected:
   StFgtIClusterAlgo* pClusterAlgo;
   StFgtEvent *mFgtEventPtr;
