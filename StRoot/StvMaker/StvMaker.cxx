@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.10 2011/09/21 22:57:12 perev Exp $
+// $Id: StvMaker.cxx,v 1.11 2011/10/03 20:11:42 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -75,6 +75,7 @@ More detailed: 				<br>
 #include "StvHitLoader.h"
 #include "Stv/StvToolkit.h"
 #include "Stv/StvDefaultSeedFinder.h"
+#include "Stv/StvCASeedFinder.h"
 #include "Stv/StvKalmanTrackFinder.h"
 #include "StvTGSelectors.h"
 #include "StvUtil/StvHitErrCalculator.h"
@@ -181,11 +182,30 @@ static int initialized = 0;
   StvToolkit *kit =StvToolkit::Inst();
   kit->SetHitLoader(new StvHitLoader);
   kit->HitLoader()->Init();
-  if (SAttr("HitLoadOpt")) StTGeoHelper::Inst()->SetOpt(IAttr("HitLoadOpt"));
+  if (*SAttr("HitLoadOpt")) StTGeoHelper::Inst()->SetOpt(IAttr("HitLoadOpt"));
+
+//		Choose seed finders
+  const char *seeds = SAttr("seedFinders");
+  if (!*seeds) seeds = "Default";
+  int jl=0,jr=-1;
+  while(1) 
+  {
+    jr = strcspn(seeds+jl," ,")+jl; if (jl>=jr) break;
+    TString chunk(seeds+jl,jr-jl);
+    if      (chunk.CompareTo("CA"      ,TString::kIgnoreCase)==0) {
+      assert(gSystem->Load("Vc.so")		<=0);
+      assert(gSystem->Load("TPCCATracker.so")	<=0);
+      kit->SetSeedFinder (new StvCASeedFinder);}
+    else if (chunk.CompareTo("Default",TString::kIgnoreCase)==0 ) {
+      kit->SetSeedFinder (new StvDefaultSeedFinder); }
+    if (!seeds[jr]) break;
+    jl = jr + 1;
+  };
 
 
-  kit->SetSeedFinder (new StvDefaultSeedFinder);
+
   kit->SetTrackFinder(new StvKalmanTrackFinder);
+
   new StvConst();
   new StvFitter();
   new StvKalmanTrackFitter();

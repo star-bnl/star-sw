@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.5 2011/08/13 22:58:19 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.6 2011/10/03 20:11:42 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -65,6 +65,7 @@ Int_t StvHitLoader::Init()
 //_____________________________________________________________________________
 int StvHitLoader::LoadHits(const StEvent *stev)
 {
+static int nCall=0; nCall++;
 static int myGraph=0;
 StvDraw *myDraw=0;
 StvHits *myHits=0;
