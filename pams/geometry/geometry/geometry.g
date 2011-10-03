@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.232 2011/08/19 16:44:14 jwebb Exp $
+* $Id: geometry.g,v 1.233 2011/10/03 22:03:06 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.233  2011/10/03 22:03:06  jwebb
+* Redefined the "complete" geometry for use in anticipated simulations with
+* FGT.  Did not add the HFT as we do not yet have a geometry for that.
+*
 * Revision 1.232  2011/08/19 16:44:14  jwebb
 * Definition of Y2012 geometry tag (1st cut).
 *
@@ -1240,7 +1244,8 @@ replace [exe VPDD07;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConf
 
 
 replace [exe FGTD02;] with  [;FGTD=on;FgtdConfig=2;  "GEM forward tracker"]
-replace [exe FGTDv31;] with [;FGTD=on;FgtdConfig=31; "FGT v3 6 disks"]
+replace [exe FGTDv31;] with [;FGTD=on;FgtdConfig=31; "FGT v3 5 half plus one full disk"]
+replace [exe FGTDv32;] with [;FGTD=on;FgtdConfig=32; "FGT v3 6 disks"]
 
 replace [exe IDSMv1;] with [;IDSM=on;IdsmConfig=1; "Inner Detector Support"]
 
@@ -1361,22 +1366,22 @@ replace [exe y2003x;] with [ "same as y2003b but with full calorimeters and PHMD
 
 
 *********  (in)complete   ***
-replace [exe COMPLETE;] with ["New Complete+correction 3 in 2003 geometry:";
-                              "TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD";
-                              "(complete tag has been out of date since 2003)x";
-         exe SVT204;
-         exe BTOF52;
-         exe CALBc0;
-         exe ECAL33;
-         exe BBCMon;
-         exe FPDM00;
-         exe TPCE01;
-         exe FTPC00;
-         exe PHMD01;
-         exe SISDof;
-         exe PIPE04; 
-         exe PIXL01;
-         ]
+!$$$    [exe COMPLETE;] with ["New Complete+correction 3 in 2003 geometry:";
+!$$$                          "TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD";
+!$$$                          "(complete tag has been out of date since 2003)x";
+!$$$     exe SVT204;
+!$$$     exe BTOF52;
+!$$$     exe CALBc0;
+!$$$     exe ECAL33;
+!$$$     exe BBCMon;
+!$$$     exe FPDM00;
+!$$$     exe TPCE01;
+!$$$     exe FTPC00;
+!$$$     exe PHMD01;
+!$$$     exe SISDof;
+!$$$     exe PIPE04; 
+!$$$     exe PIXL01;
+!$$$     ]
 
 
 
@@ -1797,7 +1802,7 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
 ]
 c ===============================================================================
 
-REPLACE [exe upgr2012;] with [exe y2012;]
+!$$$    [exe upgr2012;] with [exe y2012;]   upgrade 2012 retired
 REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
     exe BTOF67;      "time of flight";
@@ -1820,6 +1825,28 @@ REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe FGTDv31;     "FGT v3 6 disks";
 ]
 
+
+REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2013.  Currently just complete FGT.  HFT when available."
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMD02;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD05;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+
+    exe IDSMv1;      "Inner detector support";
+    exe FGTDv32;     "FGT v3 6 disks";
+]
 
 
 !//______________________________________________________________________________
@@ -2180,6 +2207,7 @@ If LL>0
 *************************************************************************************************************
   Case COMPLETE  { New Complete + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                  exe complete;
+                 geom = 'complete';
                }
 ****************************************************************************************
 * corrected: MWC readout, RICH reconstructed position, no TOF
@@ -4267,6 +4295,7 @@ c     write(*,*) 'FSTD'
 
      IF FgtdConfig>30 {                                           """Apply FGT configuration and construct geometry"""
         IF FgtdConfig==31 { Call AgDETP add ( 'FGTG.FgstConfig=', 1.0, 1 ); }
+        IF FgtdConfig==32 { Call AgDetp add ( 'FGTG.FgstConfig=', 2.0, 1 ); }
         Call FgtdGeo3
      }
 
