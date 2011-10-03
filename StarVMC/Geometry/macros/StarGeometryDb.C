@@ -25,21 +25,33 @@ void StarGeometryDb()
   // Setup STAR Geometries y2000 to present
   //
   std::cout << ">>> Setup";
-  y2000(); geom.Last(); setTitle("Year 2000 Production Geometry"); geom.select="y2000pro"; geom.fill();
-  y2001(); geom.Last(); setTitle("Year 2001 Production Geometry"); geom.select="y2001pro"; geom.fill();
-  y2002(); geom.Last(); setTitle("Year 2002 Production Geometry"); geom.select="y2002pro"; geom.fill();
-  y2003(); geom.Last(); setTitle("Year 2003 Production Geometry"); geom.select="y2003pro"; geom.fill();
-  y2004(); geom.Last(); setTitle("Year 2004 Production Geometry"); geom.select="y2004pro"; geom.fill();
-  y2005(); geom.Last(); setTitle("Year 2005 Production Geometry"); geom.select="y2005pro"; geom.fill();
-  y2006(); geom.Last(); setTitle("Year 2006 Production Geometry"); geom.select="y2006pro"; geom.fill();
-  y2007(); geom.Last(); setTitle("Year 2007 Production Geometry"); geom.select="y2007pro"; geom.fill();
-  y2008(); geom.Last(); setTitle("Year 2008 Production Geometry"); geom.select="y2008pro"; geom.fill();
-  y2009(); geom.Last(); setTitle("Year 2009 Production Geometry"); geom.select="y2009pro"; geom.fill();
-  y2010(); geom.Last(); setTitle("Year 2010 Production Geometry"); geom.select="y2010pro"; geom.fill();
-  y2011(); geom.Last(); setTitle("Year 2011 Production Geometry"); geom.select="y2011pro"; geom.fill();
-
+  y2000(); geom.Last(); setTitle("Year 2000 Production Geometry");  geom.select="y2000pro"; geom.fill();
+  y2001(); geom.Last(); setTitle("Year 2001 Production Geometry");  geom.select="y2001pro"; geom.fill();
+  y2002(); geom.Last(); setTitle("Year 2002 Production Geometry");  geom.select="y2002pro"; geom.fill();
+  y2003(); geom.Last(); setTitle("Year 2003 Production Geometry");  geom.select="y2003pro"; geom.fill();
+  y2004(); geom.Last(); setTitle("Year 2004 Production Geometry");  geom.select="y2004pro"; geom.fill();
+  y2005(); geom.Last(); setTitle("Year 2005 Production Geometry");  geom.select="y2005pro"; geom.fill();
+  y2006(); geom.Last(); setTitle("Year 2006 Production Geometry");  geom.select="y2006pro"; geom.fill();
+  y2007(); geom.Last(); setTitle("Year 2007 Production Geometry");  geom.select="y2007pro"; geom.fill();
+  y2008(); geom.Last(); setTitle("Year 2008 Production Geometry");  geom.select="y2008pro"; geom.fill();
+  y2009(); geom.Last(); setTitle("Year 2009 Production Geometry");  geom.select="y2009pro"; geom.fill();
+  y2010(); geom.Last(); setTitle("Year 2010 Production Geometry");  geom.select="y2010pro"; geom.fill();
+  y2011(); geom.Last(); setTitle("Year 2011 Production Geometry");  geom.select="y2011pro"; geom.fill();
   y2012(); geom.Last(); setTitle("Year 2012 Development Geometry"); geom.select="y2012dev"; geom.fill();
-  y2013(); geom.Last(); setTitle("Year 2013 Development Geometry"); geom.select="y2013dev"; geom.fill();
+
+
+  //
+  // Geometries for studying future versions of the detector
+  //
+  complete(); geom.Last(); setTitle("Extrapolation of STAR to y2013.  Currently just FGT + IDSM."); geom.select="future"; geom.fill();
+
+  //
+  // Geometries for eRHIC studies
+  //
+  estar(); geom.Last(); setTitle("eSTAR simulation geometries."); 
+
+				    
+
   std::cout << "<<<" << std::endl;
 
 }
@@ -829,12 +841,25 @@ void y2012()
   std::cout << " y2012 "<< std::flush;;
   geom.Use("select","y2011");
 
-  geom.select = "upgr2012"; {
+  geom.select = "y2012"; {
+    // ================================================ 
+    geom.caveFlag = "CAVE04";  geom.caveStat = 1;
     // ================================================ 
     geom.sconFlag = "SCONof"; geom.sconStat = 0;
     geom.ftroFlag = "FTROof"; geom.ftroStat = 0;
     geom.ftpcFlag = "FTPCof"; geom.ftpcStat = 0;
     geom.svttFlag = "SVTTof"; geom.svttStat = 0;
+    // ================================================ 
+    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
+    geom.btofFlag = "BTOF67";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1;
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD04";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPE12";  geom.pipeStat = 1;
+    setTitle("First cut");
     // ================================================ 
     geom.idsmFlag = "IDSM01";   geom.idsmStat = 1;
     geom.fgtdFlag = "FGTD31";   geom.fgtdStat=1;
@@ -844,6 +869,94 @@ void y2012()
   };
 
 }
+
+void complete()
+{
+  std::cout << " y2012 "<< std::flush;;
+  geom.Use("select","y2011");
+
+  geom.select = "complete"; {
+    // ================================================ 
+    geom.caveFlag = "CAVE04";  geom.caveStat = 1;
+    // ================================================ 
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    // ================================================ 
+    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
+    geom.btofFlag = "BTOF67";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1;
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD04";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPE12";  geom.pipeStat = 1;
+    setTitle("First cut");
+    // ================================================ 
+    geom.idsmFlag = "IDSM01";  geom.idsmStat = 1;
+    geom.fgtdFlag = "FGTD32";  geom.fgtdStat=1;
+    // ================================================ 
+    setTitle("Upgrade studies with 6 complete FGT disks");
+    geom.fill();
+  };
+
+}
+
+
+
+void estar()
+{
+  std::cout << " estar "<< std::flush;;
+
+  geom.select = "eStar"; {
+    // ================================================ The 4th version of the CAVE
+    geom.caveFlag = "CAVE04";  geom.caveStat = 1;
+    // ================================================ Disable old STAR inner detectors
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    // ================================================ Tracking, calorimetry, etc..
+    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
+    geom.btofFlag = "BTOF67";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1;
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD04";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPE12";  geom.pipeStat = 1;
+    setTitle("First cut");
+    // ================================================ The new Inner Detectors
+    geom.idsmFlag = "IDSM01";  geom.idsmStat = 1;
+    geom.fgtdFlag = "FGTD31";  geom.fgtdStat = 1;
+    // ================================================ 
+    setTitle("Upgrade studies with 6 complete FGT disks");
+    geom.fill();
+  };
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void y2013()
 {
@@ -876,89 +989,3 @@ void y2013()
 }
 
 
-#if 0
-
-!//______________________________________________________________________________
-replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
-                            exe SVTTof; exe FTPCof; exe BTOF66; exe CALBc0; exe ECAL31;
-                            exe BBCMon; exe FPDM00; exe MFLD54;
-                            DensConfig = 1; "gas density correction"
-                            SupoConfig = 1; "FTPC Support"
-                            exe PHMD01; exe SISD65; exe PIPE00; exe PIXL00; exe ISTB00;
-                            exe FSTDof; exe FGTD02; 
-"* On Gerrit request, we disable the cone:"
-                            exe ITSPof; "prototype of the Inner Tracker SuPport structure"]
-
-!//______________________________________________________________________________
-replace [exe UPGR16;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
-                     SVTT=off; "no SVT  at all in this configuration"
-                     ftpc=off; "no FTPC at all in this configuration"
-                     SCON=off;
-                     ConeConfig=2 " new cable weight estimate ";
-
-* X.Dong
-                 "ctb: central trigger barrer             ";
-                     Itof=6 " call btofgeo6 ";
-* NEW CONFIG!
-                     tofX0= 0.00;
-                     tofZ0=-0.50;
-                     BtofConfig=6;
-
-                  "CALB"
-                     emsEdit=on
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                     CalbConfig = 2
-                  "ECAL"
-                     EcalConfig=1   " west wheel "
-                     ecalFill=3     " all sectors filled "
-                  "beam-beam counter "
-                     BBCM=on
-                  "forward pion detector "
-                     FPDM=on
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-                     SvshConfig = 0; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 0;
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 1;
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 65;
-* careful! Achtung!
-                   PipeConfig=6;   " thinner pipe"
-                   PipeFlag = 0;    "no wrap,no shild"
-
-                   PIXL=off;        " put the pixel detector in"
-                   PixlConfig=-1;   " Simplest.Gerrit"
-
-                   ISTB=on;  "IST barrel"
-                   IstbConfig=-1;
-
-                   FSTD=off;  "no pixel based forward tracker in this tag"
-                   FstdConfig=0;
-
-* Forward STAR tracker disk
-                   FGTD=on;  "GEM forward tracker"
-                   FgtdConfig=3;
-* On Gerrit request, we disable the cone:
-                   ITSP=off; "prototype of the Inner Tracker SuPport structure"
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-                  "We need an even bigger Cave"
-                     CaveConfig = 4;
-]
-!//______________________________________________________________________________
-replace [exe UPGR16a;] with ["upgr16 +tpc2009"
-			      exe upgr16;exe TPCE04;]
-
-!//______________________________________________________________________________
-replace [exe UPGR22;] with ["upgr16a + fhcm01"
-			      exe upgr16a;exe FHCM01;]
-
-
-#endif
