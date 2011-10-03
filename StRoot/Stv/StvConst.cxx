@@ -24,6 +24,7 @@ StvConst::StvConst(const char *name):TNamed(name,"")
   mMinP2       	= 0.003*0.003;	//Geant3 cut for too small momentum**2	
   mMaxWindow   	= 3.;	//Maximal window to search hits
   mMinHits 	= 5;	//Min number of hits allowed
+  mGoodHits 	=15;	//Good number of hits allowed
 
 
 }

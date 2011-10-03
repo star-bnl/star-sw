@@ -23,6 +23,7 @@ public:
       float     mMinP2;		        //Minimal allowed momentum**2
       float     mMaxWindow;		//Maximal window to search hits
         int     mMinHits;		//Min number of hits allowed
+        int     mGoodHits;		//Good number of hits in track
       char   	mEnd[1];
 static StvConst *mgConst;
 ClassDef(StvConst,0)//
