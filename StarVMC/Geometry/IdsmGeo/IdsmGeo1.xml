@@ -2,8 +2,8 @@
 
 <Module name="IDSMGEO1" comment=" simplified  beam support cone for 2012 "  >
 
-   <Created date="  8/30/2011 "  />
-   <Author name="Jan Balewski MIT "  />
+   <Created date="  9/23/2011 "  />
+   <Author name="Jan Balewski MIT, Willie Leight MIT (material mixes) "  />
    <CDE>AGECOM,GCUNIT,GCONST</CDE>
 
 <!-- User defined Geant volumes -->
@@ -15,7 +15,8 @@
 
 <!-- ===============================================================================
      
-  new Support Cone (mother volume=IDSG) consit of
+  new Support Cone (mother volume=IDSG) is place at an offset and tilt defined by IDSA
+  IDSG consits of
   * 3 carbon fiber (CF)  cylinders, 2 CF cones,  and 6 Alu rings, volumes: SUCA-SUCF
  tpc resistor chain volumes: TPRR,TPRT 
                        (simplified implementation, East= -West)
@@ -30,7 +31,7 @@
 <!-- mmmmmmmmmm  local work-variables  mmmmmmmmmmmmmmm -->
 <varlist type="REAL"  >
       inR, outR,lengthZ
-     k,sinA, cosA, resR, angRes,m,pm, angRail, rRail, dPhiHV
+     k,sinA, cosA, resR, angRes,m,pm, j,angRail, rRail, dPhiHV, angFgtCbl
 </varlist>
 
 
@@ -75,7 +76,7 @@
 
 
 <Fill name="IDSG" comment="IDS Geometry data,46.1cm=inner radii of IFC"  >
-   <var name="version" value="2.0"     comment="Versioning of the IDS geometry " />
+   <var name="version" value="1.0"     comment="2012 Versionin of the IDS geometry " />
    <var name="rF" value="8.0" comment=" radii of inner volume boundary"  />
    <var name="angFlat" value="106." comment=" angle (deg) for center of flat"  />
    <var name="rrRes" value="43."  comment=" radial distance of  for TPC resistor tubes"  />
@@ -89,7 +90,24 @@
    <var name="fgtStartZ" value="70." comment=" position of sensitive volume of the 1st disk"  />
    <var name="fgtDiskStepZ" value="10." comment=" disk separation along Z"  />
    <var name="fgtNdisk"   value="6"    comment="number of disks" />
+</Fill>
 
+
+<Fill name="IDSG" comment="IDS Geometry data,46.1cm=inner radii of IFC"  >
+   <var name="version" value="2.0"     comment="2013 versionin of the IDS geometry " />
+   <var name="rF" value="8.0" comment=" radii of inner volume boundary"  />
+   <var name="angFlat" value="106." comment=" angle (deg) for center of flat"  />
+   <var name="rrRes" value="43."  comment=" radial distance of  for TPC resistor tubes"  />
+   <var name="r1Res" value="1.17" comment=" inner radii for TPC resistor tubes"  />
+   <var name="r2Res" value="1.27" comment=" outer radii for TPC resistor tubes"  />
+
+   <var name="dangRes" value="11.3" comment=" opening angle (deg) for TPC resistor tubes"  />
+   <var name="dxRes" value="0.13"   comment=" thicknessfor TPC resistor"  />
+   <var name="dyRes" value="2."     comment=" dy for TPC resistor"  />
+
+   <var name="fgtStartZ" value="70." comment=" position of sensitive volume of the 1st disk"  />
+   <var name="fgtDiskStepZ" value="10." comment=" disk separation along Z"  />
+   <var name="fgtNdisk"   value="6"    comment="number of disks" />
 </Fill>
 
 
@@ -120,7 +138,7 @@
 
    <var name="thetax"  value="90.0"   comment="align x`-axis 90 degrees in theta wrt cave" />
    <var name="phix"    value=" 0.0"   comment="align x`-axis  0 degrees in phi   wrt cave" />
-   <var name="thetay"  value="90.0"   comment="align y`-axis 90 degrees in theta wrt cave" />
+   <var name="thetay"  value="90.0"   comment="align y`-axis 90 degrees in thetangRail+(0.1+dPhiHV*k)*(-1+2*pm)a wrt cave" />
    <var name="phiy"    value="90.0"   comment="align y`-axis  0 degrees in phi   wrt cave" />
    <var name="thetaz"  value=" 0.0"   comment="align z`-axis  0 degrees in theta wrt cave" />
    <var name="phiz"    value=" 0.0"   comment="align z`-axis  0 degrees in phi   wrt cave" />
@@ -201,12 +219,12 @@
 
 inR     = IDSG_rF
 outR    = IDSG_rrRes + IDSG_r2Res
-lengthZ = 460.
+lengthZ = 470.
 
 sinA = sin( IDSG_angflat * degrad )
 cosA = cos( IDSG_angflat * degrad )
 rRail=41.5
-dPhiHV=0.79
+dPhiHV=0.03
 
 <!--  ASSEMBLE GEOMETRY, start with placing main volume in cave -->
 
@@ -225,7 +243,7 @@ dPhiHV=0.79
 
 <Volume       name="IDSM" comment="mother volume for beam support cone" >
 
-    <Attribute for="IDSM" seen="1" colo="4"  />
+    <Attribute for="IDSM" seen="0" colo="4"  />
     <Material name="Air"  />
 
     <Shape type="TUBE" rmin="inR"    rmax="outR"   dz="lengthZ/2."  />
@@ -287,10 +305,10 @@ dPhiHV=0.79
     </Placement>
 
 
-   <!--  place FGT rails & cables  -->
+     <!--  place FGT rails  -->
      <Do var="m" from="0" to="1" >
 
-     angRail=90./180.*3.1416
+     angRail=16./180.*3.1416
       <If expr="m.eq.1"  >
              angRail = angRail+3.1416
       </If>
@@ -298,8 +316,28 @@ dPhiHV=0.79
       <Create    block="FGRL"/>
       <Placement block="FGRL"  z="146.57"  y="rRail*sin(angRail)" x="rRail*cos(angRail)"  />
 
-      <Create    block="FGHV"/>
-      <Placement block="FGHV"  z="IDSG_fgtStartZ-IDSG_fgtDiskStepZ/.2"  y="rRail*sin(angRail+3.)" x="rRail*cos(angRail+3.)"  />
+     </Do>
+ 
+     <!--  place FGT  cables , m  counts quadrants -->
+     <Do var="m" from="1" to="4" >
+
+      angFgtCbl=-90./180.*3.1416
+      <!--  place FGT cables per disk  -->  
+      <Do var="k" from="1" to="IDSG_fgtnDisk">
+             <Check expr="(IDSG_version.eq.2.0).or.(k.eq.1).or.(m.le.3)" />
+              pm=1
+              <If expr="(k.eq.1).or.(k.eq.3).or.(k.eq.5)"  >
+                 pm=-1
+               </If>
+              <!--  place FGT cable segments  -->  
+              <Do var="j" from="k" to="16"> 
+ 
+              <!-- the code below  is executed if the above expression is true -->
+                <Create    block="FGHV"/>
+                <Placement block="FGHV"  z="IDSG_fgtStartZ+IDSG_fgtDiskStepZ*(j-0.5)"  y="(rRail+0.5*pm)*sin(angFgtCbl+(dPhiHV*(m+2.2*k - pm*.8)))" x="(rRail+0.5*pm)*cos(angFgtCbl+(dPhiHV*(m+2.2*k-pm*.8)))"  />
+              
+         </Do>
+    </Do>
     </Do>
 
 
@@ -365,8 +403,9 @@ dPhiHV=0.79
     <Shape type="TUBE"  rmin="IDSG_r1Res"  rmax="IDSG_r2Res" dz="lengthZ/2."  />
 </Volume>
 
+ 
  <Volume       name="FGRL" comment="FGT rail ">
-    <Attribute for="FGRL" seen="1" colo="1"  />
+    <Attribute for="FGRL" seen="1" colo="2"  />
     <Material name="RailMix"  />
     <Shape type="TUBE"  rmin="0.9" rmax="1.0"     dz="165.6/2." />
 </Volume>
@@ -375,9 +414,8 @@ dPhiHV=0.79
 <Volume       name="FGHV" comment="FGT cables mixture ">
     <Attribute for="FGHV" seen="1" colo="1"  />
     <Material name="CableMix"  />
-    <Shape type="TUBS"  rmin="rRail-0.5" rmax="rRail+0.5"  phi1="-dPhiHV/2."  phi2="dPhiHV"  dz="IDSG_fgtDiskStepZ" />
+   <Shape type="TUBE"  rmin="0." rmax="0.43"     dz="IDSG_fgtDiskStepZ/2." />
 </Volume>
-
 
 
 
