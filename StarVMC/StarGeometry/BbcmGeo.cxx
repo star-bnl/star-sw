@@ -61,15 +61,15 @@
           //     
           ///@addtogroup BbcmGeo_vars     
           ///@{        
-                Float_t actr,srad,lrad,ztotal,x0,y0,theta0,phi0,xtrip,ytrip,rtrip,thetrip,rsing,thesing;        
+                float actr,srad,lrad,ztotal,x0,y0,theta0,phi0,xtrip,ytrip,rtrip,thetrip,rsing,thesing;        
                 //        
-                /// Float_t actr,srad,lrad,ztotal,x0,y0,theta0,phi0,xtrip,ytrip,rtrip,thetrip,rsing,thesing        
+                /// float actr,srad,lrad,ztotal,x0,y0,theta0,phi0,xtrip,ytrip,rtrip,thetrip,rsing,thesing        
           ///@}     
           ///@addtogroup BbcmGeo_vars     
           ///@{        
-                Int_t i_trip,j_sing;        
+                int i_trip=0,j_sing=0;        
                 //        
-                /// Int_t i_trip,j_sing        
+                /// int i_trip=0,j_sing=0        
           ///@}     
        BbcmGeo::BbcmGeo()     
          : AgModule("BbcmGeo"," is the Beam Beam Counter Modules GEOmetry ")     
@@ -458,7 +458,7 @@
                       // _medium.par("CUTNEU") = 0.001;           
                       // _medium.par("CUTHAD") = 0.001;           
                       // _medium.par("CUTMUO") = 0.001;           
-                      // _medium.par("BIRK1") = 1.;           
+                      // _medium.par("BIRK1") = 1.000;           
                       // _medium.par("BIRK2") = 0.013;           
                       // _medium.par("BIRK3") = 9.6E-6;           
                       END_OF_BPOL:           
@@ -470,7 +470,7 @@
        {        
              ///@addtogroup BbcmGeo_revision        
              ///@{           
-                   /// Created:    15 march 2002            
+                   /// Created: 15 march 2002           
              ///@}        
              ///@addtogroup BbcmGeo_revision        
              ///@{           
@@ -506,20 +506,20 @@
              ///@addtogroup hexg_doc        
              ///@{           
                    ++hexg._index;           
-                   hexg . type = 1; //  1 for small hex tile, 2 for large tile            
-                   /// hexg . type = 1; //  1 for small hex tile, 2 for large tile            
-                   hexg . irad = 4.174; //  inscribing circle radius =9.64/2*sin(60)=4.174            
-                   /// hexg . irad = 4.174; //  inscribing circle radius =9.64/2*sin(60)=4.174            
-                   hexg . clad = 0.1; //  cladding thickness            
-                   /// hexg . clad = 0.1; //  cladding thickness            
-                   hexg . thick = 1.0; //  thickness of tile            
-                   /// hexg . thick = 1.0; //  thickness of tile            
-                   hexg . zoffset = 1.5; //  z-offset from center of BBCW (1), or BBCE (2)            
-                   /// hexg . zoffset = 1.5; //  z-offset from center of BBCW (1), or BBCE (2)            
-                   hexg . xoffset = 0.0; //  x-offset center from beam for BBCW (1), or BBCE (2)            
-                   /// hexg . xoffset = 0.0; //  x-offset center from beam for BBCW (1), or BBCE (2)            
-                   hexg . yoffset = 0.0; //  y-offset center from beam for BBCW (1), or BBCE (2)            
-                   /// hexg . yoffset = 0.0; //  y-offset center from beam for BBCW (1), or BBCE (2)            
+                   hexg . type = 1; // 1 for small hex tile, 2 for large tile            
+                   /// hexg . type = 1; // 1 for small hex tile, 2 for large tile            
+                   hexg . irad = 4.174; // inscribing circle radius =9.64/2*sin(60)=4.174            
+                   /// hexg . irad = 4.174; // inscribing circle radius =9.64/2*sin(60)=4.174            
+                   hexg . clad = 0.1; // cladding thickness            
+                   /// hexg . clad = 0.1; // cladding thickness            
+                   hexg . thick = 1.0; // thickness of tile            
+                   /// hexg . thick = 1.0; // thickness of tile            
+                   hexg . zoffset = 1.5; // z-offset from center of BBCW (1), or BBCE (2)            
+                   /// hexg . zoffset = 1.5; // z-offset from center of BBCW (1), or BBCE (2)            
+                   hexg . xoffset = 0.0; // x-offset center from beam for BBCW (1), or BBCE (2)            
+                   /// hexg . xoffset = 0.0; // x-offset center from beam for BBCW (1), or BBCE (2)            
+                   hexg . yoffset = 0.0; // y-offset center from beam for BBCW (1), or BBCE (2)            
+                   /// hexg . yoffset = 0.0; // y-offset center from beam for BBCW (1), or BBCE (2)            
                    //           
                    hexg.fill();           
              ///@}        
@@ -528,20 +528,20 @@
              ///@addtogroup hexg_doc        
              ///@{           
                    ++hexg._index;           
-                   hexg . type = 2; //  1 for small hex tile, 2 for large tile            
-                   /// hexg . type = 2; //  1 for small hex tile, 2 for large tile            
-                   hexg . irad = 16.697; //  inscribing circle radius (4x that of small one)            
-                   /// hexg . irad = 16.697; //  inscribing circle radius (4x that of small one)            
-                   hexg . clad = 0.1; //  cladding of tile            
-                   /// hexg . clad = 0.1; //  cladding of tile            
-                   hexg . thick = 1.0; //  thickness of tile            
-                   /// hexg . thick = 1.0; //  thickness of tile            
-                   hexg . zoffset = -1.5; //  z-offset from center of BBCW (1), or BBCE (2)            
-                   /// hexg . zoffset = -1.5; //  z-offset from center of BBCW (1), or BBCE (2)            
-                   hexg . xoffset = 0.0; //  x-offset center from beam for BBCW (1), or BBCE (2)            
-                   /// hexg . xoffset = 0.0; //  x-offset center from beam for BBCW (1), or BBCE (2)            
-                   hexg . yoffset = 0.0; //  y-offset center from beam for BBCW (1), or BBCE (2)            
-                   /// hexg . yoffset = 0.0; //  y-offset center from beam for BBCW (1), or BBCE (2)            
+                   hexg . type = 2; // 1 for small hex tile, 2 for large tile            
+                   /// hexg . type = 2; // 1 for small hex tile, 2 for large tile            
+                   hexg . irad = 16.697; // inscribing circle radius (4x that of small one)            
+                   /// hexg . irad = 16.697; // inscribing circle radius (4x that of small one)            
+                   hexg . clad = 0.1; // cladding of tile            
+                   /// hexg . clad = 0.1; // cladding of tile            
+                   hexg . thick = 1.0; // thickness of tile            
+                   /// hexg . thick = 1.0; // thickness of tile            
+                   hexg . zoffset = -1.5; // z-offset from center of BBCW (1), or BBCE (2)            
+                   /// hexg . zoffset = -1.5; // z-offset from center of BBCW (1), or BBCE (2)            
+                   hexg . xoffset = 0.0; // x-offset center from beam for BBCW (1), or BBCE (2)            
+                   /// hexg . xoffset = 0.0; // x-offset center from beam for BBCW (1), or BBCE (2)            
+                   hexg . yoffset = 0.0; // y-offset center from beam for BBCW (1), or BBCE (2)            
+                   /// hexg . yoffset = 0.0; // y-offset center from beam for BBCW (1), or BBCE (2)            
                    //           
                    hexg.fill();           
              ///@}        
@@ -549,16 +549,16 @@
              /// USE bbcg _index=1;        
              bbcg.Use();        
              // Print<level=%i> fmt=%s fortran format statements not supported        
-             /// Component C5	a=12	z=6	w=5*10000        
-             /// Component H4	a=1	z=1	w=4*10000        
-             /// Component O2	a=16	z=8	w=2*10000        
-             /// Component Al	a=27	z=13	w=0.2302*10000        
+             /// Component C5	a=12	z=6	w=5      *10000        
+             /// Component H4	a=1	z=1	w=4      *10000        
+             /// Component O2	a=16	z=8	w=2      *10000        
+             /// Component Al	a=27	z=13	w=0.2302 *10000        
              /// Mixture ALKAP dens=1.432        
              {  AgMaterial &mix = AgMaterial::Get("Alkap");           
-                   mix.Component("C5",12,6,5*10000);           
-                   mix.Component("H4",1,1,4*10000);           
-                   mix.Component("O2",16,8,2*10000);           
-                   mix.Component("Al",27,13,0.2302*10000);           
+                   mix.Component("C5",12,6,5      *10000);           
+                   mix.Component("H4",1,1,4      *10000);           
+                   mix.Component("O2",16,8,2      *10000);           
+                   mix.Component("Al",27,13,0.2302 *10000);           
                    mix.par("dens")=1.432;           
                    mix.lock();           
                    _material = mix;           
@@ -566,12 +566,12 @@
              }        
              /// USE hexg type=1 ;        
              hexg.Use("type",(Float_t)1 );        
-             srad = hexg.irad*6.0;        
-             ztotal = hexg.thick+2*abs(hexg.zoffset);        
+             srad   = hexg.irad*6.0;;        
+             ztotal = hexg.thick+2*abs(hexg.zoffset);;        
              /// USE hexg type=2 ;        
              hexg.Use("type",(Float_t)2 );        
-             lrad = hexg.irad*6.0;        
-             ztotal = ztotal+hexg.thick+2*abs(hexg.zoffset)  ;// hexg.zoffset is negative for large (type=2);        
+             lrad   = hexg.irad*6.0;;        
+             ztotal = ztotal+hexg.thick+2*abs(hexg.zoffset);;        
              _create = AgCreate("BBCM");        
              {           
                    AgShape myshape; // undefined shape           

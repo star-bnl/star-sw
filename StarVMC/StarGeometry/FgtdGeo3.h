@@ -61,6 +61,18 @@ namespace FGTDGEO3 // $NMSPC
       virtual void End(){ }; 
       ClassDef(FGTD,1); 
    }; 
+   // ---------------------------------------------------------------------- FGTH -- 
+   ///@defgroup FGTH_doc 
+   ///@class FGTH 
+   ///@brief mother volume for FGT disk 
+   class FGTH : public AgBlock 
+   {  public: 
+      FGTH() : AgBlock("FGTH","mother volume for FGT disk"){ }; 
+      ~FGTH(){ }; 
+      virtual void Block( AgCreate c ); 
+      virtual void End(){ }; 
+      ClassDef(FGTH,1); 
+   }; 
    // ---------------------------------------------------------------------- FGTQ -- 
    ///@defgroup FGTQ_doc 
    ///@class FGTQ 
@@ -314,7 +326,7 @@ namespace FGTDGEO3 // $NMSPC
       ClassDef(FGWE,1); 
    }; 
    /// \class FgtdGeo3 
-   /// \brief  forward GEM tracking detector for 2012  
+   /// \brief  forward GEM tracking detector for 2012 , 2013 
    class FgtdGeo3 : public AgModule 
    { 
       public: 

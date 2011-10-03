@@ -10,7 +10,7 @@ namespace VPDDGEO // $NMSPC
       ClassDef(Vpdv_t,1); 
       public: 
       Float_t version; 
-      Int_t vpdconfig; 
+      Float_t vpdconfig; 
       Vpdv_t() : AgStructure("Vpdv_t","User-defined AgML structure") 
       { 
          version=0; 

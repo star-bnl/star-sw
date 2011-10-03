@@ -200,7 +200,7 @@
           Fgst_t fgst;     
           //     
        FgtdGeo3::FgtdGeo3()     
-         : AgModule("FgtdGeo3"," forward GEM tracking detector for 2012 ")     
+         : AgModule("FgtdGeo3"," forward GEM tracking detector for 2012 , 2013")     
        {        
        }     
           // ---------------------------------------------------------------------------------------------------     
@@ -237,26 +237,52 @@
                       for ( disk=1; (1>0)? (disk<=fgst.ndisk):(disk>=fgst.ndisk); disk+=1 )           
                       {              
                             diskz=-fgtlenz/2. +disklenz/2. + (disk-1.0)*fgst.diskstepz;              
-                            _create = AgCreate("FGTD");              
+                            if ( (fgst.config==2.0)||(disk<=1) )              
                             {                 
-                                  AgShape myshape; // undefined shape                 
-                                  ///Create FGTD                 
-                                  Create("FGTD");                  
+                                  _create = AgCreate("FGTD");                 
+                                  {                    
+                                        AgShape myshape; // undefined shape                    
+                                        ///Create FGTD                    
+                                        Create("FGTD");                     
+                                  }                 
+                                  { AgPlacement place = AgPlacement("FGTD","FGTM");                    
+                                        /// Add daughter volume FGTD to mother FGTM                    
+                                        place.TranslateZ(diskz);                    
+                                        /// Translate z = diskz                    
+                                        place.AlphaZ(quadtiltang);                    
+                                        /// Rotate: AlphaZ = quadtiltang                    
+                                        /// G3 Reference: thetax = 90                    
+                                        /// G3 Reference: phix = 0                    
+                                        /// G3 Reference: thetay = 90                    
+                                        /// G3 Reference: phiy = 90                    
+                                        /// G3 Reference: thetaz = 0                    
+                                        /// G3 Reference: phiz = 0                    
+                                        _stacker -> Position( AgBlock::Find("FGTD"), place );                    
+                                  } // end placement of FGTD                 
                             }              
-                            { AgPlacement place = AgPlacement("FGTD","FGTM");                 
-                                  /// Add daughter volume FGTD to mother FGTM                 
-                                  place.TranslateZ(diskz);                 
-                                  /// Translate z = diskz                 
-                                  place.AlphaZ(quadtiltang);                 
-                                  /// Rotate: AlphaZ = quadtiltang                 
-                                  /// G3 Reference: thetax = 90                 
-                                  /// G3 Reference: phix = 0                 
-                                  /// G3 Reference: thetay = 90                 
-                                  /// G3 Reference: phiy = 90                 
-                                  /// G3 Reference: thetaz = 0                 
-                                  /// G3 Reference: phiz = 0                 
-                                  _stacker -> Position( AgBlock::Find("FGTD"), place );                 
-                            } // end placement of FGTD              
+                            else              
+                            {                 
+                                  _create = AgCreate("FGTH");                 
+                                  {                    
+                                        AgShape myshape; // undefined shape                    
+                                        ///Create FGTH                    
+                                        Create("FGTH");                     
+                                  }                 
+                                  { AgPlacement place = AgPlacement("FGTH","FGTM");                    
+                                        /// Add daughter volume FGTH to mother FGTM                    
+                                        place.TranslateZ(diskz);                    
+                                        /// Translate z = diskz                    
+                                        place.AlphaZ(quadtiltang);                    
+                                        /// Rotate: AlphaZ = quadtiltang                    
+                                        /// G3 Reference: thetax = 90                    
+                                        /// G3 Reference: phix = 0                    
+                                        /// G3 Reference: thetay = 90                    
+                                        /// G3 Reference: phiy = 90                    
+                                        /// G3 Reference: thetaz = 0                    
+                                        /// G3 Reference: phiz = 0                    
+                                        _stacker -> Position( AgBlock::Find("FGTH"), place );                    
+                                  } // end placement of FGTH                 
+                            }              
                       }           
                       END_OF_FGTM:           
                       mCurrent = _save;           
@@ -305,8 +331,8 @@
                                   /// Add daughter volume FGTQ to mother FGTD                 
                                   place.TranslateZ(0.);                 
                                   /// Translate z = 0.                 
-                                  place.AlphaZ((1-quad)*90.*fgst.config);                 
-                                  /// Rotate: AlphaZ = (1-quad)*90.*fgst.config                 
+                                  place.AlphaZ((1-quad)*90.);                 
+                                  /// Rotate: AlphaZ = (1-quad)*90.                 
                                   /// G3 Reference: thetax = 90                 
                                   /// G3 Reference: phix = 0                 
                                   /// G3 Reference: thetay = 90                 
@@ -320,6 +346,64 @@
                       mCurrent = _save;           
                 ///@}        
           } // End Block FGTD     
+          // ---------------------------------------------------------------------------------------------------     
+          void FGTH::Block( AgCreate create )     
+          {         
+                ///@addtogroup FGTH_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("FGTH");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=7;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material Air            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Air");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Tube");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("rmin")=diskinr;              
+                            shape.par("rmax")=diskoutr;              
+                            shape.par("dz")=disklenz/2.0;              
+                            /// Shape Tube rmin=diskinr rmax=diskoutr dz=disklenz/2.0               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_FGTH;              
+                            _stacker -> Build(this);              
+                      }           
+                      /// Loop on quad from 1 to 2 step=1           
+                      for ( quad=1; (1>0)? (quad<=2):(quad>=2); quad+=1 )           
+                      {              
+                            _create = AgCreate("FGTQ");              
+                            {                 
+                                  AgShape myshape; // undefined shape                 
+                                  ///Create FGTQ                 
+                                  Create("FGTQ");                  
+                            }              
+                            { AgPlacement place = AgPlacement("FGTQ","FGTH");                 
+                                  /// Add daughter volume FGTQ to mother FGTH                 
+                                  place.TranslateZ(0.);                 
+                                  /// Translate z = 0.                 
+                                  place.AlphaZ((1-quad)*90.);                 
+                                  /// Rotate: AlphaZ = (1-quad)*90.                 
+                                  /// G3 Reference: thetax = 90                 
+                                  /// G3 Reference: phix = 0                 
+                                  /// G3 Reference: thetay = 90                 
+                                  /// G3 Reference: phiy = 90                 
+                                  /// G3 Reference: thetaz = 0                 
+                                  /// G3 Reference: phiz = 0                 
+                                  _stacker -> Position( AgBlock::Find("FGTQ"), place );                 
+                            } // end placement of FGTQ              
+                      }           
+                      END_OF_FGTH:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block FGTH     
           // ---------------------------------------------------------------------------------------------------     
           void FGTQ::Block( AgCreate create )     
           {         
@@ -571,8 +655,8 @@
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
-                      /// Material badArCO2Mix            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Badarco2mix");              
+                      /// Material ArCO2Mix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Arco2mix");              
                             _material = mat;              
                       }           
                       /// Material Sensitive_fgt_gas isvol=1            
@@ -1853,15 +1937,16 @@
        {        
              ///@addtogroup FgtdGeo3_revision        
              ///@{           
-                   /// Created:   8/25/2011            
+                   /// Created:   9/23/2011            
              ///@}        
              ///@addtogroup FgtdGeo3_revision        
              ///@{           
-                   /// Author: Jan Balewski MIT, Wei-Ming Zhang KSU           
+                   /// Author: Jan Balewski MIT, Wei-Ming Zhang KSU, Willie Leight MIT (material mixes)           
              ///@}        
              AddBlock("FGTM");        
              AddBlock("FGTD");        
              AddBlock("FGTQ");        
+             AddBlock("FGTH");        
              AddBlock("FGVN");        
              AddBlock("FGZC");        
              AddBlock("FGVG");        
@@ -1886,8 +1971,8 @@
              ///@addtogroup fggg_doc        
              ///@{           
                    ++fggg._index;           
-                   fggg . fgstconfig = 2.0; // selection of no. of disks and quadrants            
-                   /// fggg . fgstconfig = 2.0; // selection of no. of disks and quadrants            
+                   fggg . fgstconfig = 1.0; // selection of no. of disks and quadrants            
+                   /// fggg . fgstconfig = 1.0; // selection of no. of disks and quadrants            
                    //           
                    fggg.fill();           
              ///@}        
@@ -1922,8 +2007,8 @@
                    /// fgst . diskstepz = 10.; //  disk separation along Z           
                    fgst . ndisk = 6; // number of disks           
                    /// fgst . ndisk = 6; // number of disks           
-                   fgst . nquad = 2; // number quadrants in a disks           
-                   /// fgst . nquad = 2; // number quadrants in a disks           
+                   fgst . nquad = 4; // number quadrants in a disks           
+                   /// fgst . nquad = 4; // number quadrants in a disks           
                    //           
                    fgst.fill();           
              ///@}        
@@ -2025,25 +2110,25 @@
                    _material = mix;           
                    _material.lock();           
              }        
-             /// Component Si	a=28.1	z=14	w=0.127        
-             /// Component O	a=16	z=8	w=0.271        
-             /// Component C	a=12	z=6	w=0.278        
-             /// Component H	a=1	z=1	w=0.026        
-             /// Component Cu	a=63.5	z=29	w=0.122        
-             /// Component Fe	a=55.8	z=26	w=0.214        
-             /// Component Cr	a=52.0	z=24	w=0.054        
-             /// Component Ni	a=58.7	z=28	w=0.030        
-             /// Mixture HVMix dens=2.681        
+             /// Component Si	a=28.1	z=14	w=0.113        
+             /// Component O	a=16	z=8	w=0.241        
+             /// Component C	a=12	z=6	w=0.248        
+             /// Component H	a=1	z=1	w=0.023        
+             /// Component Cu	a=63.5	z=29	w=0.109        
+             /// Component Fe	a=55.8	z=26	w=0.191        
+             /// Component Cr	a=52.0	z=24	w=0.048        
+             /// Component Ni	a=58.7	z=28	w=0.027        
+             /// Mixture HVMix dens=3.009        
              {  AgMaterial &mix = AgMaterial::Get("Hvmix");           
-                   mix.Component("Si",28.1,14,0.127);           
-                   mix.Component("O",16,8,0.271);           
-                   mix.Component("C",12,6,0.278);           
-                   mix.Component("H",1,1,0.026);           
-                   mix.Component("Cu",63.5,29,0.122);           
-                   mix.Component("Fe",55.8,26,0.214);           
-                   mix.Component("Cr",52.0,24,0.054);           
-                   mix.Component("Ni",58.7,28,0.030);           
-                   mix.par("dens")=2.681;           
+                   mix.Component("Si",28.1,14,0.113);           
+                   mix.Component("O",16,8,0.241);           
+                   mix.Component("C",12,6,0.248);           
+                   mix.Component("H",1,1,0.023);           
+                   mix.Component("Cu",63.5,29,0.109);           
+                   mix.Component("Fe",55.8,26,0.191);           
+                   mix.Component("Cr",52.0,24,0.048);           
+                   mix.Component("Ni",58.7,28,0.027);           
+                   mix.par("dens")=3.009;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           
@@ -2104,30 +2189,13 @@
              /// Component Ar	a=39.95	z=18.	w=0.700        
              /// Component O	a=16.	z=8.	w=0.218        
              /// Component C	a=12.01	z=6.	w=0.082        
-             /// Mixture badArCO2Mix isvol=1 dens=0.0018015        
-             {  AgMaterial &mix = AgMaterial::Get("Badarco2mix");           
+             /// Mixture ArCO2Mix isvol=1 dens=0.0018015        
+             {  AgMaterial &mix = AgMaterial::Get("Arco2mix");           
                    mix.Component("Ar",39.95,18.,0.700);           
                    mix.Component("O",16.,8.,0.218);           
                    mix.Component("C",12.01,6.,0.082);           
                    mix.par("isvol")=1;           
                    mix.par("dens")=0.0018015;           
-                   mix.lock();           
-                   _material = mix;           
-                   _material.lock();           
-             }        
-             /// Component O	a=16	z=8	w=0.093        
-             /// Component C	a=12	z=6	w=0.305        
-             /// Component H	a=1	z=1	w=0.012        
-             /// Component N	a=14	z=7	w=0.032        
-             /// Component Cu	a=63.5	z=29	w=0.558        
-             /// Mixture badElecMix dens=4.        
-             {  AgMaterial &mix = AgMaterial::Get("Badelecmix");           
-                   mix.Component("O",16,8,0.093);           
-                   mix.Component("C",12,6,0.305);           
-                   mix.Component("H",1,1,0.012);           
-                   mix.Component("N",14,7,0.032);           
-                   mix.Component("Cu",63.5,29,0.558);           
-                   mix.par("dens")=4.;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           

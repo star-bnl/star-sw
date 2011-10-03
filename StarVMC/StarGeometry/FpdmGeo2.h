@@ -103,7 +103,7 @@ namespace FPDMGEO2 // $NMSPC
    { 
       ClassDef(Flgm_t,1); 
       public: 
-      Float_t type; 
+      Int_t type; 
       Float_t density; 
       Float_t radlen; 
       Float_t pbcont; 

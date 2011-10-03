@@ -10,7 +10,7 @@ namespace SISDGEO4 // $NMSPC
       ClassDef(Ssdp_t,1); 
       public: 
       Float_t version; 
-      Int_t config; 
+      Float_t config; 
       Int_t placement; 
       Ssdp_t() : AgStructure("Ssdp_t","User-defined AgML structure") 
       { 

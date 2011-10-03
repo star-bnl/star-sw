@@ -10,7 +10,7 @@ namespace SVTTGEO1 // $NMSPC
       ClassDef(Svtg_t,1); 
       public: 
       Float_t version; 
-      Float_t nlayer; 
+      Int_t nlayer; 
       Float_t rsizemin; 
       Float_t rsizemax; 
       Float_t zsizemax; 
@@ -277,7 +277,7 @@ namespace SVTTGEO1 // $NMSPC
    { 
       ClassDef(Svtl_t,1); 
       public: 
-      Float_t layer; 
+      Int_t layer; 
       Float_t nladder; 
       Float_t nwafer; 
       Float_t radius; 

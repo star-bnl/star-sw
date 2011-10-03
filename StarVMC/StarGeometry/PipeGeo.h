@@ -10,7 +10,7 @@ namespace PIPEGEO // $NMSPC
       ClassDef(Pipv_t,1); 
       public: 
       Float_t version; 
-      Int_t pipeconfig; 
+      Float_t pipeconfig; 
       Int_t pipeflag; 
       Pipv_t() : AgStructure("Pipv_t","User-defined AgML structure") 
       { 
