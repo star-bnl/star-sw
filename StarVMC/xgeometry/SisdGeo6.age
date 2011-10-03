@@ -7,30 +7,30 @@
       CONTENT SFMO,SFLM,SFDM,SFSW,SFSD,SFSL,SFSM,SFLT,SFLU,SFFK,SFFL,SFKK,SFKL,SFRA,
             SFRS,SFFX,SFPI,SFPJ,SFAA,SFAM,SFAB,SFAS,SAPP,SAPC,SAPS,SAPT,SFLA,SFLB,SFLC,SFES,
             SFEB,SFCO,SFCM,SFCB,SFCS,SFKF,SFKS,SSBS,SSBB,SFPR,SFPB,SSST,SSSS,SSRS,SSRT,SSLB,
-            SBCH,SBCV,SBFH,SBFV,SSLT,SCMP,SCVM,SCVB,SCVS,SOSH
+            SBCH,SBCV,SBFH,SBFV,SSLT,SCMP,SCVM,SCVB,SCVS,SOSK
       STRUCTURE SSDP { Version,int config,int placement}
       INTEGER ConfigA,ConfigB
 
-      STRUCTURE SFJP { Version,AlphaZ,AlphaZH,SSST_Rmin,SSST_Rmax,SSST_Width,SSST_Pz,
-            SSSS_Rmin,SSSS_Width,SSRS_Rmin,SSLB_Dx,SSLB_Px,SSLB_Dy,SSLB_Dz,SSBQ_Dx,SSBQ_Dy,
-            SSBQ_Dz,SSCR_ThA,SSCR_ThD,SSCR_Wd,SSCR_Hl,SSCR_Vl,SSLT_Px,SSLT_Rmax,SSLT_Dz,SCMP_Dx,
-            SCMP_Dy,SCMP_Dz,SCMP_Px,SCVM_Dz,SCVM_Dx,SCVM_Px,SCVM_Dy,SCVM_Pz,SCVB_Dy,SCVS_Dx,
-            SCVS_Dy,SCVS_Px,SCVS_Py,SFCO_Dx,SFCO_Dy,SFCO_Dz,SFCO_Px,SFCO_Py,SFCM_Dx,SFCS_Dz,
-            SFKF_Dy,SFKF_Dz,SFKF_Dx,SFKF_Px,SFKF_Py,SFKS_Dx,SFKS_Px,SFKS_Py,SFPR_Py,SFPB_Py,
-            SFPB_Py2,SFCB_Dx,SSBS_Dy,SSBS_Dx,SSBB_Dx,SSBB_Dz,FLEX_Di,SFPB_Dx,SFPB_Dy,
-            SFPBDz,SAPP_Dxe,SAPP_Dxz,SAPP_Dy,SAPP_Dz,SAPP_Py1,SAPP_Py2,SAPP_Py3,SFAM_Dxe,SFAM_Dxz,
-            SFAM_Dy,SFAM_Dz,SFAM_DZs,SFLA_Dx,SFLA_Dy,SFLA_Dz,SFLB_Dz,SFLC_Dz,SFEB_Dx,SFEB_Dz,
-            SFES_Dx,SFFK_Dxe,SFFK_Dy,SFFX_Dye,SFFK_Dz,SFFL_Dx,SFFK_Dxz,SFFK_Px,SFFK_Py1,
-            SFFK_Py2,SFKL_Px,SFKK_Dy,SFLU_Dz,SFLU_h1,SFLU_bl1,SFRA_Dx,SFRA_Dy,SFRA_Py,SFRA_Dz,
-            SFRA_Pz,SFSW_Dy,SFSW_Dz,SFRS_Dx,SFRS_Dy,SFRS_Px,SFRS_Py,SFSM_Ll,SFFX_Dx,SFFX_Dyz,
-            SFPI_Rmin,SFPI_Rmax,SFPI_Px,SFPI_Py1,SFPI_Py2,SFPI_Pz,SFPJ_Dx1,SFPJ_Dx2,SFPJ_Dy,
-            SFPJ_Dz,SFAA_Dx,SFAA_Dy,SFAA_Dz,SFAA_Px1,SFAA_Px2,SFAA_Px3,SFAA_Pz1,SFAA_Pz2,
-            SFAA_Pz3,SFSL_Dx,SFSL_Dy,SFSL_Dz,SFSD_Dx,SFSD_Dy,SFSD_Dz,SFLA_Px,SFLA_Py,SFLC_Px,
-            SFLC_Py,SFES_Px,SFES_Py,SFES_Pz,SFEB_Px,SFEB_Py}
+      STRUCTURE SFJP { int Version,AlphaZ,AlphaZH,SSST_Rmin,SSST_Rmax,SSST_Width,
+            SSST_Pz,SSSS_Rmin,SSSS_Width,SSRS_Rmin,SSLB_Dx,SSLB_Px,SSLB_Dy,SSLB_Dz,SSBQ_Dx,SSBQ_Dy,
+            SSBQ_Dz,SSCR_ThA,SSCR_ThD,SSCR_Wd,SSCR_Hl,SSCR_Vl,SSLT_Px,SSLT_Rmax,SSLT_Dz,
+            SCMP_Dx,SCMP_Dy,SCMP_Dz,SCMP_Px,SCVM_Dz,SCVM_Dx,SCVM_Px,SCVM_Dy,SCVM_Pz,SCVB_Dy,
+            SCVS_Dx,SCVS_Dy,SCVS_Px,SCVS_Py,SFCO_Dx,SFCO_Dy,SFCO_Dz,SFCO_Px,SFCO_Py,SFCM_Dx,
+            SFCS_Dz,SFKF_Dy,SFKF_Dz,SFKF_Dx,SFKF_Px,SFKF_Py,SFKS_Dx,SFKS_Px,SFKS_Py,SFPR_Py,
+            SFPB_Py,SFPB_Py2,SFCB_Dx,SSBS_Dy,SSBS_Dx,SSBB_Dx,SSBB_Dz,FLEX_Di,SFPB_Dx,SFPB_Dy,
+            SFPBDz,SAPP_Dxe,SAPP_Dxz,SAPP_Dy,SAPP_Dz,SAPP_Py1,SAPP_Py2,SAPP_Py3,SFAM_Dxe,
+            SFAM_Dxz,SFAM_Dy,SFAM_Dz,SFAM_DZs,SFLA_Dx,SFLA_Dy,SFLA_Dz,SFLB_Dz,SFLC_Dz,SFEB_Dx,
+            SFEB_Dz,SFES_Dx,SFFK_Dxe,SFFK_Dy,SFFX_Dye,SFFK_Dz,SFFL_Dx,SFFK_Dxz,SFFK_Px,SFFK_Py1,
+            SFFK_Py2,SFKL_Px,SFKK_Dy,SFLU_Dz,SFLU_h1,SFLU_bl1,SFRA_Dx,SFRA_Dy,SFRA_Py,
+            SFRA_Dz,SFRA_Pz,SFSW_Dy,SFSW_Dz,SFRS_Dx,SFRS_Dy,SFRS_Px,SFRS_Py,SFSM_Ll,SFFX_Dx,
+            SFFX_Dyz,SFPI_Rmin,SFPI_Rmax,SFPI_Px,SFPI_Py1,SFPI_Py2,SFPI_Pz,SFPJ_Dx1,SFPJ_Dx2,
+            SFPJ_Dy,SFPJ_Dz,SFAA_Dx,SFAA_Dy,SFAA_Dz,SFAA_Px1,SFAA_Px2,SFAA_Px3,SFAA_Pz1,SFAA_Pz2,
+            SFAA_Pz3,SFSL_Dx,SFSL_Dy,SFSL_Dz,SFSD_Dx,SFSD_Dy,SFSD_Dz,SFLA_Px,SFLA_Py,
+            SFLC_Px,SFLC_Py,SFES_Px,SFES_Py,SFES_Pz,SFEB_Px,SFEB_Py}
       STRUCTURE SFPB { Hhight,Khight,Hbase,Kbase,Fsize,Zcoor}
-      STRUCTURE SFPA { Version,rmin,rmax,Len,SOutRInn,SOutROut,SOutLen,rad,nssd,dmWid,
-            dmThk,dmLen,smWid,smThk,smLen,ssLen,wpLen,sdlen,tilt,cprad,cpral,cfrad,gpThk,
-            int laddermap(20),ladderAngle(20),ladderTilt(20),LadderRadius(20)}
+      STRUCTURE SFPA { int Version,rmin,rmax,Len,SOutRInn,SOutROut,SOutLen,rad,nssd,
+            dmWid,dmThk,dmLen,smWid,smThk,smLen,ssLen,wpLen,sdlen,tilt,cprad,cpral,cfrad,
+            gpThk,int laddermap(20),ladderAngle(20),ladderTilt(20),LadderRadius(20)}
       INTEGER ilad,iwaf,jwaf,nc
 
       REAL wafpckLen,dthk,radtilt,ang
@@ -349,8 +349,8 @@
             dz=SFPA_Len/2
       dthk = SFPA_smThk + SFPA_gpThk
       IF ( ConfigB.ge.7 ) THEN
-      CREATE SOSH
-      POSITION SOSH 
+      CREATE SOSK
+      POSITION SOSK 
       ENDIF
       CREATE SFLM
       DO ilad = 1, 20
@@ -1194,15 +1194,15 @@
       SHAPE box dx=SFJP_SCVS_Dx/2. dy=SFJP_SCVS_Dy/2.,
             dz=SFJP_SCVM_Dz/2
       ENDBLOCK
-      ! ---------------------------------------------------------------------------------- SOSH
-      BLOCK SOSH   is the separation shield cylinder
-      COMPONENT C5 A=12 Z=6 W=5
-      COMPONENT H4 A=1 Z=1 W=4
-      COMPONENT O2 A=16 Z=8 W=2
-      COMPONENT Al A=27 Z=13 W=0.0986
+      ! ---------------------------------------------------------------------------------- SOSK
+      BLOCK SOSK   is the separation shield cylinder
+      COMPONENT C5 A=12 Z=6 W=10000*5
+      COMPONENT H4 A=1 Z=1 W=10000*4
+      COMPONENT O2 A=16 Z=8 W=10000*2
+      COMPONENT Al A=27 Z=13 W=10000*0.0986
       MIXTURE SSDALMY dens=1.40845
       MATERIAL SSDALMY
-      ATTRIBUTE SOSH seen=1 colo=3
+      ATTRIBUTE SOSK seen=1 colo=3
       SHAPE tube rmin=SFPA_SOutRInn rmax=SFPA_SOutROut,
             dz=SFPA_SOutLen
       ENDBLOCK

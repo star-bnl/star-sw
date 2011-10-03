@@ -383,7 +383,12 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TPAD
       BLOCK TPAD   is a real padrow with dimensions defined at positioning time
-      ATTRIBUTE TPAD seen=0 colo=2
+      if TPRS_width<1.5 {
+      ATTRIBUTE TPAD seen=0 colo=2 serial=1
+      }
+      if TPRS_width>1.5 {
+      ATTRIBUTE TPAD seen=0 colo=2 serial=2
+      }
       MATERIAL p10
       MATERIAL sensitive_gas isvol=1 stemax=2.5*tprs_width
       SHAPE box dx=0 dy=0 dz=0

@@ -5,7 +5,7 @@
       +CDE,gcunit.
       CONTENT PIPE,PIPC,PIPO,PIPS,PIPB,PIPT,PFLO,PFLT,PVAC,PVAO,PVAS,PVAB,PRIS,PRID,
             PRIB,PIPI,PVAI,PVAT,PWRP,PSLD
-      STRUCTURE PIPV { version,int pipeconfig,int pipeflag}
+      STRUCTURE PIPV { version,pipeconfig,int pipeflag}
       STRUCTURE PIPG { config,BeInnR,BeOutR,BeLeng,char material,S1InnR,S1OutR,S1Leng,
             S2InnR,S2OutR,S2Leng,S3InnR,S3OutR,S3Leng,S4InnR,S4OutR,S4Leng,Flange1T,Flange1R,
             ConeLen,RibNum,RibSpa,RibThk,RibOutR,RibCent,WrpInnR,WrpOutR,WrpLeng,SldInnR,

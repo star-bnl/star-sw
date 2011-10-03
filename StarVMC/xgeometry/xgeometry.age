@@ -1,7 +1,10 @@
-* $Id: xgeometry.age,v 1.1 2011/08/19 18:43:50 jwebb Exp $
+* $Id: xgeometry.age,v 1.2 2011/10/03 22:45:40 jwebb Exp $
 * $Log: xgeometry.age,v $
-* Revision 1.1  2011/08/19 18:43:50  jwebb
-* AgSTAR geometry modules derived from the AgML source code.
+* Revision 1.2  2011/10/03 22:45:40  jwebb
+* Integrating 9/23 version of FGT.  Definition of "complete" and "y2012".
+*
+* Revision 1.232  2011/08/19 16:44:14  jwebb
+* Definition of Y2012 geometry tag (1st cut).
 *
 * Revision 1.231  2011/07/20 20:23:47  jwebb
 * Upgr23 tag defined with FSC geometry and FMS in open position.

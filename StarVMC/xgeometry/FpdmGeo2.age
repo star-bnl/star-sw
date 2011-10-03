@@ -9,7 +9,7 @@
       STRUCTURE FPOS { iMod,iType,X,Y,Z,AY}
       STRUCTURE FBXD { Type,Height,Depth,NX,NY,XOffset,ZOffset,PSOffset,SmdOff}
       STRUCTURE FLGG { Type,Width,Depth,DGap,AlThick,PhCathDz,PhCathR,MuMetDz,MuMetR}
-      STRUCTURE FLGM { Type,Density,RadLen,PbCont,CritEne,MoliereR}
+      STRUCTURE FLGM { int Type,Density,RadLen,PbCont,CritEne,MoliereR}
       STRUCTURE PBPD { Z,Width,Height,Thick}
       STRUCTURE FMXG { Version,Sapex,Sbase,Sgap,NStrip,G10Width,G10hgt,G10Thick}
       INTEGER ChkvSim,iMod,iType,Type,PbPlate

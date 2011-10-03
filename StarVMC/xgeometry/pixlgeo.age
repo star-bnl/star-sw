@@ -176,10 +176,10 @@ endblock
 
       END
 
-* $Id: pixlgeo.age,v 1.1 2011/08/19 18:43:50 jwebb Exp $
+* $Id: pixlgeo.age,v 1.2 2011/10/03 22:45:40 jwebb Exp $
 * $Log: pixlgeo.age,v $
-* Revision 1.1  2011/08/19 18:43:50  jwebb
-* AgSTAR geometry modules derived from the AgML source code.
+* Revision 1.2  2011/10/03 22:45:40  jwebb
+* Integrating 9/23 version of FGT.  Definition of "complete" and "y2012".
 *
 * Revision 1.10  2004/04/21 22:45:57  potekhin
 * Killed the extraneous line with angular offset of 90
@@ -379,10 +379,10 @@ endblock
 *
       END
 
-* $Id: pixlgeo.age,v 1.1 2011/08/19 18:43:50 jwebb Exp $
+* $Id: pixlgeo.age,v 1.2 2011/10/03 22:45:40 jwebb Exp $
 * $Log: pixlgeo.age,v $
-* Revision 1.1  2011/08/19 18:43:50  jwebb
-* AgSTAR geometry modules derived from the AgML source code.
+* Revision 1.2  2011/10/03 22:45:40  jwebb
+* Integrating 9/23 version of FGT.  Definition of "complete" and "y2012".
 *
 * Revision 1.4  2005/01/06 01:59:40  potekhin
 * Added an important comment, corrected a typo in another
@@ -550,10 +550,10 @@ endblock
 
       END
 
-* $Id: pixlgeo.age,v 1.1 2011/08/19 18:43:50 jwebb Exp $
+* $Id: pixlgeo.age,v 1.2 2011/10/03 22:45:40 jwebb Exp $
 * $Log: pixlgeo.age,v $
-* Revision 1.1  2011/08/19 18:43:50  jwebb
-* AgSTAR geometry modules derived from the AgML source code.
+* Revision 1.2  2011/10/03 22:45:40  jwebb
+* Integrating 9/23 version of FGT.  Definition of "complete" and "y2012".
 *
 * Revision 1.2  2005/07/14 23:03:54  potekhin
 * Removed obsolete CVS rlog comments, changed the color

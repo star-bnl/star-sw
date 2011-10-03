@@ -1,16 +1,14 @@
-      MODULE BBCMGEO    is the Beam Beam Counter Modules GEOmetry
-      Created    15 march 2002
+      MODULE BbcmGeo    is the Beam Beam Counter Modules GEOmetry
+      Created 15 march 2002
       Author Yiqun Wang
-      +CDE,agecom.
-      +CDE,gconst.
-      +CDE,gcunit.
+      +CDE,agecom,gconst,gcunit.
       CONTENT BBCM,BBCA,THXM,SHXT,BPOL,CLAD
       STRUCTURE BBCG { version,onoff(3),zdis(2)}
       STRUCTURE HEXG { type,irad,clad,thick,zoffset,xoffset,yoffset}
-      REAL actr,srad,lrad,ztotal,x0,y0,theta0,phi0,xtrip,ytrip,rtrip,thetrip,rsing,
+      real *4 actr,srad,lrad,ztotal,x0,y0,theta0,phi0,xtrip,ytrip,rtrip,thetrip,rsing,
             thesing
 
-      INTEGER I_trip,J_sing
+      Integer *4 I_trip/0/,J_sing/0/
 
       FILL BBCG		! BBC geometry
       Version = 1.0 !  Geometry version
@@ -18,37 +16,37 @@
       zdis  = {   374.24,  -374.24} !   z-coord from center in STAR (715/2+6*2.54+1=373.8) 
       ENDFILL
       FILL HEXG		! hexagon tile geometry
-      Type = 1 !  1 for small hex tile, 2 for large tile
-      irad = 4.174 !  inscribing circle radius =9.64/2*sin(60)=4.174
-      clad = 0.1 !  cladding thickness
-      thick = 1.0 !  thickness of tile
-      zoffset = 1.5 !  z-offset from center of BBCW (1), or BBCE (2)
-      xoffset = 0.0 !  x-offset center from beam for BBCW (1), or BBCE (2)
-      yoffset = 0.0 !  y-offset center from beam for BBCW (1), or BBCE (2)
+      Type = 1 ! 1 for small hex tile, 2 for large tile
+      irad = 4.174 ! inscribing circle radius =9.64/2*sin(60)=4.174
+      clad = 0.1 ! cladding thickness
+      thick = 1.0 ! thickness of tile
+      zoffset = 1.5 ! z-offset from center of BBCW (1), or BBCE (2)
+      xoffset = 0.0 ! x-offset center from beam for BBCW (1), or BBCE (2)
+      yoffset = 0.0 ! y-offset center from beam for BBCW (1), or BBCE (2)
       ENDFILL
       FILL HEXG		! hexagon tile geometry
-      Type = 2 !  1 for small hex tile, 2 for large tile
-      irad = 16.697 !  inscribing circle radius (4x that of small one)
-      clad = 0.1 !  cladding of tile
-      thick = 1.0 !  thickness of tile
-      zoffset = -1.5 !  z-offset from center of BBCW (1), or BBCE (2)
-      xoffset = 0.0 !  x-offset center from beam for BBCW (1), or BBCE (2)
-      yoffset = 0.0 !  y-offset center from beam for BBCW (1), or BBCE (2)
+      Type = 2 ! 1 for small hex tile, 2 for large tile
+      irad = 16.697 ! inscribing circle radius (4x that of small one)
+      clad = 0.1 ! cladding of tile
+      thick = 1.0 ! thickness of tile
+      zoffset = -1.5 ! z-offset from center of BBCW (1), or BBCE (2)
+      xoffset = 0.0 ! x-offset center from beam for BBCW (1), or BBCE (2)
+      yoffset = 0.0 ! y-offset center from beam for BBCW (1), or BBCE (2)
       ENDFILL
       use BBCG
       Prin1 bbcg_version;
       ('BBCMGEO version ', F4.2)
-      COMPONENT C5 A=12 Z=6 W=5*10000
-      COMPONENT H4 A=1 Z=1 W=4*10000
-      COMPONENT O2 A=16 Z=8 W=2*10000
-      COMPONENT Al A=27 Z=13 W=0.2302*10000
+      COMPONENT C5 A=12 Z=6 W=5      *10000
+      COMPONENT H4 A=1 Z=1 W=4      *10000
+      COMPONENT O2 A=16 Z=8 W=2      *10000
+      COMPONENT Al A=27 Z=13 W=0.2302 *10000
       MIXTURE ALKAP dens=1.432
       use HEXG type=1
-      srad = hexg_irad*6.0
-      ztotal = hexg_thick+2*abs(hexg_zoffset)
+      srad   = hexg_irad*6.0;
+      ztotal = hexg_thick+2*abs(hexg_zoffset);
       use HEXG type=2
-      lrad = hexg_irad*6.0
-      ztotal = ztotal+hexg_thick+2*abs(hexg_zoffset)  ! hexg_zoffset is negative for Large (type=2)
+      lrad   = hexg_irad*6.0;
+      ztotal = ztotal+hexg_thick+2*abs(hexg_zoffset);
       CREATE BBCM
       IF ( bbcg_OnOff(1)==1|bbcg_OnOff(1)==3 ) THEN
       POSITION BBCM in CAVE x=0 y=0 z=bbcg_zdis(1) 
@@ -146,10 +144,10 @@
       Call GStPar(ag_imed, 'CUTNEU', 0.001)
       Call GStPar(ag_imed, 'CUTHAD', 0.001)
       Call GStPar(ag_imed, 'CUTMUO', 0.001)
-      Call GStPar(ag_imed, 'BIRK1', 1.)
+      Call GStPar(ag_imed, 'BIRK1', 1.000)
       Call GStPar(ag_imed, 'BIRK2', 0.013)
       Call GStPar(ag_imed, 'BIRK3', 9.6E-6)
       HITS BPOL tof:16:C(0,1.0E-6) birk:0:C(0,10)
       ENDBLOCK
-      <W> '===>> 	[End AgML Module BBCMGEO]	 <<==='; (A32,/,/);
-      END! Module BBCMGEO
+      <W> '===>> 	[End AgML Module BbcmGeo]	 <<==='; (A32,/,/);
+      END! Module BbcmGeo

@@ -1,8 +1,8 @@
-* $Id: fpdmgeo.age,v 1.1 2011/08/19 18:43:49 jwebb Exp $
+* $Id: fpdmgeo.age,v 1.2 2011/10/03 22:45:40 jwebb Exp $
 * $Name:  $
 * $Log: fpdmgeo.age,v $
-* Revision 1.1  2011/08/19 18:43:49  jwebb
-* AgSTAR geometry modules derived from the AgML source code.
+* Revision 1.2  2011/10/03 22:45:40  jwebb
+* Integrating 9/23 version of FGT.  Definition of "complete" and "y2012".
 *
 * Revision 1.12  2011/02/28 16:20:01  jwebb
 * Switched from fortran-style to mortran-style continuation lines.

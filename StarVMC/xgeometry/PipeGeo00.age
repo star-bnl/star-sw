@@ -4,7 +4,7 @@
       +CDE,agecom.
       +CDE,gcunit.
       CONTENT PIPE,PIPC,PVAC
-      STRUCTURE PIPV { version,int pipeconfig}
+      STRUCTURE PIPV { version,pipeconfig}
       STRUCTURE PIPG { config,BeInnR,BeOutR,BeLeng}
       REAL Vacuum
 

@@ -13,7 +13,7 @@
       SCRW,SGLA,SBSP,SAKM,SCKM,SBSR,SBCR,SBRX,SBRL,SBMM,
       SBMO,SBMI,SMRD,SALM,SISH,SSSH,SOSH,SCBM,SCBL,SFED,
       SPLS,SOUM,SOUR
-      STRUCTURE SVTG { Version,Nlayer,RsizeMin,RsizeMax,ZsizeMax,Angoff,SupportVer,
+      STRUCTURE SVTG { Version,int Nlayer,RsizeMin,RsizeMax,ZsizeMax,Angoff,SupportVer,
             ConeVer,ifMany,Nmin}
       STRUCTURE SWCA { Version,Length,WaferWid,WaferLen,WaferThk,RohaThk,WafCarWd,
             WafCarTh,WaferGap,Drift,strutlen,SensWid,SensLen,SensGir}
@@ -28,13 +28,13 @@
       STRUCTURE SERG { Version,IrngTrMx,IrngPrMn,OrngRmin,OrngRmax,EndRngTh,EndRngZm}
       STRUCTURE SELC { Version,BeThk,WatThk,BeOThk,DyeThk,DyeWid,DyeSpc,ElcaWid,AgPdThk,
             GlassThk,CabThk,CabWid}
-      STRUCTURE SVTL { Layer,Nladder,Nwafer,Radius,BareEdge,PcbLen,PcbWidth,PcbThk,
+      STRUCTURE SVTL { int Layer,Nladder,Nwafer,Radius,BareEdge,PcbLen,PcbWidth,PcbThk,
             PcbGap}
       STRUCTURE SSLD { Version,SInRInn,SInROut,SInLen,SSepRInn,SSepROut,SSepLen,SOutRInn,
             SOutROut,SOutLen,AlMeshId,AlMeshOd,AlMshThk,AlMshPos}
-      STRUCTURE SCBP { Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol}
-      STRUCTURE SFEP { Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol,VolPlast}
-      STRUCTURE SWCX { Layer,Length,dR,offset,rad,wall,rOffset}
+      STRUCTURE SCBP { int Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol}
+      STRUCTURE SFEP { int Layer,Len,Rmin1,Rmax1,Rmin2,Rmax2,Vol,VolPlast}
+      STRUCTURE SWCX { int Layer,Length,dR,offset,rad,wall,rOffset}
       STRUCTURE SOUP { Version,Length,Rout,dR,Phi1,Phi2,DiamOut,DiamIn}
       INTEGER iLayer,s,side,ilad,iwaf,i,j
 
@@ -385,15 +385,15 @@
       COMPONENT C A=12 Z=6 W=0.4*8*12./174.
       COMPONENT H A=1 Z=1 W=0.4*14*1./174.
       MIXTURE G10 dens=1.7
-      COMPONENT C5 A=12 Z=6 W=5
-      COMPONENT H4 A=1 Z=1 W=4
-      COMPONENT O2 A=16 Z=8 W=2
-      COMPONENT Al A=27 Z=13 W=0.2302
+      COMPONENT C5 A=12 Z=6 W=10000*5
+      COMPONENT H4 A=1 Z=1 W=10000*4
+      COMPONENT O2 A=16 Z=8 W=10000*2
+      COMPONENT Al A=27 Z=13 W=10000*0.2302
       MIXTURE ALKAP dens=1.432
-      COMPONENT C5 A=12 Z=6 W=5
-      COMPONENT H4 A=1 Z=1 W=4
-      COMPONENT O2 A=16 Z=8 W=2
-      COMPONENT Al A=27 Z=13 W=0.0986
+      COMPONENT C5 A=12 Z=6 W=10000*5
+      COMPONENT H4 A=1 Z=1 W=10000*4
+      COMPONENT O2 A=16 Z=8 W=10000*2
+      COMPONENT Al A=27 Z=13 W=10000*0.0986
       MIXTURE SSDALMY dens=1.40845
       IF ( swam_Len>0 ) THEN
       COMPONENT H2 A=1 Z=1 W=2
@@ -463,7 +463,7 @@
       POSITION SROD y=ssup_rodDist+ssup_rodOD/2 
       POSITION SROD y=-ssup_rodDist-ssup_rodOD/2 
       radmax=svtg_rSizeMax
-      DO ilayer = svtg_Nmin, min(6,nint(svtg_Nlayer))
+      DO ilayer = svtg_Nmin, min(6,svtg_Nlayer)
       IF ( ilayer<6 ) THEN
       use SVTL layer=ilayer+1
       radmax=svtl_radius
@@ -582,7 +582,9 @@
       MATERIAL Air
       ATTRIBUTE SLYD seen=0 colo=1
       rmin=svtl_radius - ladthk
-      rmax=sqrt((svtl_radius)**2 + (swca_WaferWid/2)**2) + elethk
+      rmax  = svtl_radius*svtl_radius
+      rmax + = swca_waferwid*swca_waferwid/4.0
+      rmax  = sqrt(rmax) + elethk
       IF ( (rmax>radmax-ladthk) ) THEN
       ENDIF
       rmax=min(rmax,radmax - ladthk)
@@ -767,8 +769,12 @@
       BLOCK SCBL   is the bundle of cables going from PCBs to manifolds
       MATERIAL Copper
       ATTRIBUTE SCBL seen=1 colo=3
-      sq=SCBP_Len**2/(SCBP_Rmin2 - SCBP_Rmin1)**2
-      A=pi*(SCBP_Rmin1**2 + SCBP_Rmin2**2)*sqrt(1 + sq)
+      sq  =(scbp_len*scbp_len)
+      sq/=(scbp_rmin2 - scbp_rmin1)
+      sq/=(scbp_rmin2 - scbp_rmin1)
+      A   = pi
+      A*=(scbp_rmin1*scbp_rmin1 + scbp_rmin2*scbp_rmin2)
+      A*= sqrt(1 + sq)
       CuThk=(SCBP_Vol/A)*sqrt(1.0 + 1.0/sq)
       SHAPE cone dz=SCBP_Len rmn1=SCBP_Rmin1 rmx1=SCBP_Rmin1+CuThk,
             rmn2=SCBP_Rmin2 rmx2=SCBP_Rmin2+CuThk
@@ -777,8 +783,12 @@
       BLOCK SFED   is the watrer in the bundle of pipes going to manifolds
       MATERIAL Water
       ATTRIBUTE SFED seen=1 colo=1
-      sq=SFEP_Len**2/(SFEP_Rmin2 - SFEP_Rmin1)**2
-      A=pi*(SFEP_Rmin1**2 + SFEP_Rmin2**2)*sqrt(1 + sq)
+      sq  = sfep_len*sfep_len
+      sq/=(sfep_rmin2 - sfep_rmin1)
+      sq/=(sfep_rmin2 - sfep_rmin1)
+      A   = pi
+      A*=(sfep_rmin1*sfep_rmin1 + sfep_rmin2 + sfep_rmin2)
+      A*= sqrt(1 + sq)
       CuThk=(SFEP_Vol/A)*sqrt(1.0 + 1.0/sq)
       SHAPE cone dz=SFEP_Len rmn1=SFEP_Rmin1 rmx1=SFEP_Rmin1+CuThk,
             rmn2=SFEP_Rmin2 rmx2=SFEP_Rmin2+CuThk
@@ -789,8 +799,12 @@
       COMPONENT H2 A=1 Z=1 W=2
       MIXTURE CH2 dens=0.935
       ATTRIBUTE SPLS seen=1 colo=6
-      sq=SFEP_Len**2/(SFEP_Rmin2 - SFEP_Rmin1)**2
-      A=pi*(SFEP_Rmin1**2 + SFEP_Rmin2**2)*sqrt(1 + sq)
+      sq  = sfep_len*sfep_len
+      sq/=(sfep_rmin2 - sfep_rmin1)
+      sq/=(sfep_rmin2 - sfep_rmin1)
+      A   = pi
+      A*=(sfep_rmin1*sfep_rmin1 + sfep_rmin2 + sfep_rmin2)
+      A*= sqrt(1 + sq)
       CuThk=(SFEP_Vol/A)*sqrt(1.0 + 1.0/sq)
       SHAPE cone dz=SFEP_Len rmn1=SFEP_Rmin1+0.2,
             rmx1=SFEP_Rmin1+0.2+CuThk rmn2=SFEP_Rmin2+0.2,
@@ -843,8 +857,8 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- SBOI
       BLOCK SBOI   is the Berillia layer
-      COMPONENT Be A=9 Z=4 W=1
-      COMPONENT O A=16 Z=8 W=1
+      COMPONENT Be A=9 Z=4 W=1.0
+      COMPONENT O A=16 Z=8 W=1.0
       MIXTURE BeO dens=2.85
       ATTRIBUTE SBOI seen=1 colo=6 serial=0
       SHAPE box dx=selc_ElcaWid/2 dy=svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap),
@@ -852,8 +866,8 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- SAGP
       BLOCK SAGP   is the Silver-Palladium layer
-      COMPONENT Ag A=108 Z=47 W=1
-      COMPONENT Pd A=106 Z=46 W=1
+      COMPONENT Ag A=108 Z=47 W=1.0
+      COMPONENT Pd A=106 Z=46 W=1.0
       MIXTURE AgPd dens=11.25
       ATTRIBUTE SAGP seen=1 colo=2 serial=0
       SHAPE box dx=selc_ElcaWid/2 dy=svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap),
@@ -893,7 +907,9 @@
       BLOCK SIRT   is the SVT inner end ring tube
       MATERIAL Berillium
       ATTRIBUTE SIRT seen=1 colo=2
-      ir_rmin = serg_IrngPrMn*(cos(pi/8.) + sqrt(tan(pi/8.)**2 - sin(pi/8.)**2))
+      ir_rmin  = cos(pi/8.0)
+      ir_rmin + = sqrt(tan(pi/8.0)*tan(pi/8.0) - sin(pi/8.0)*sin(pi/8.0))
+      ir_rmin*= serg_irngprmn
       SHAPE tube rmin=ir_rmin rmax=serg_IrngTrMx,
             dz=serg_EndRngTh/2
       ENDBLOCK
@@ -901,7 +917,9 @@
       BLOCK SIRP   is the SVT inner end ring polycone (overlaps tube)
       MATERIAL Berillium
       ATTRIBUTE SIRP seen=1 colo=2
-      rou=serg_IrngTrMx/(cos(pi/8.) + sqrt(tan(pi/8.)**2. - sin(pi/8.)**2.))
+      rou  = cos(pi/8.0)
+      rou + = sqrt(tan(pi/8.0)*tan(pi/8.0) - sin(pi/8.0)*sin(pi/8.0))
+      rou  = serg_irngtrmx/rou
       SHAPE pgon phi1=0 dphi=360 npdiv=8 nz=2,
             zi={-serg_EndRngTh/2,+serg_EndRngTh/2} rmn={serg_IrngPrMn,
             serg_IrngPrMn} rmx={rou,rou}
@@ -1066,7 +1084,9 @@
       rmax=ssup_Con4IdMn + roffset
       zmin=ssup_Rodlen/2 + ssup_GrphThk
       zmax=ssup_Cone3zmx
-      cone_len=sqrt((zmax - zmin)**2. + (rmax - rmin)**2.)
+      cone_len  =(zmax - zmin)*(zmax - zmin)
+      cone_len + =(rmax - rmin)*(rmax - rmin)
+      cone_len  = sqrt(cone_len)
       cone_sin=(rmax - rmin)/cone_len
       cone_cos=(zmax - zmin)/cone_len
       angle=asin(cone_sin)*180/pi
@@ -1096,7 +1116,9 @@
       rmax=ssup_Con4IdMx + roffset
       zmin=ssup_Cone3zmx
       zmax=ssup_Cone4zmx
-      cone_len=sqrt((zmax - zmin)**2. + (rmax - rmin)**2.)
+      cone_len  =(zmax - zmin)*(zmax - zmin)
+      cone_len + =(rmax - rmin)*(rmax - rmin)
+      cone_len  = sqrt(cone_len)
       cone_sin=(rmax - rmin)/cone_len
       cone_cos=(zmax - zmin)/cone_len
       angle=asin(cone_sin)*180/pi
