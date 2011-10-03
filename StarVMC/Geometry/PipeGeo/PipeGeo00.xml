@@ -15,8 +15,8 @@
         
 
         <Structure name="PIPV"  >
-            <var name="version" type="float"  />
-            <var name="pipeconfig" type="int"  />
+            <var name="version"    type="float"  />
+            <var name="pipeconfig" type="float"  />
         </Structure>
         
         <Structure name="PIPG"  >

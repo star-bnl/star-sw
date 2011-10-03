@@ -15,9 +15,9 @@
         
 
         <Structure name="PIPV"  >
-            <var name="version" type="float"  />
-            <var name="pipeconfig" type="int"  />
-            <var name="pipeflag" type="int"  />
+            <var name="version"    type="float"  />
+            <var name="pipeconfig" type="float"  />
+            <var name="pipeflag"   type="int"  />
         </Structure>
         
         <Structure name="PIPG"  >
@@ -65,10 +65,11 @@
         
         WrpThk = (3.+1.5)*2*MIL_p 
         SldThk = (3.+0.1)  *MIL_p 
+
         <Fill name="PIPV" comment="Beam pipe version"  >
-            <var name="version" value="1" comment=" geometry version "  />
+            <var name="version"    value="1" comment=" geometry version "  />
             <var name="pipeConfig" value="2" comment=" pipe version (2 is the default, unfortunately) "  />
-            <var name="pipeFlag" value="0" comment=" 1=PWRP !2=PSLD "  />
+            <var name="pipeFlag"   value="0" comment=" 1=PWRP !2=PSLD "  />
         </Fill>
         
 
@@ -227,10 +228,7 @@
             </Placement>
             
             <If expr="iand(PIPV_pipeFlag,1).ne.0"  >
-                <Create block="PWRP"  />
-                <Placement z="pipg_WrpLeng/2" block="PWRP"  >
-                </Placement>
-                
+                <Create block="PWRP" /><Placement block="PWRP" z="pipg_WrpLeng/2"/> 
             </If>
             
             <If expr="iand(PIPV_pipeFlag,2).ne.0"  >
