@@ -14,7 +14,7 @@
         <Content  >
             SCON,SCMY,SGRA,SBSP,SAKM,SCKM,SBMM,SBMI,SBMO,SMRD,SBRL,SBRX,SBSR,SBCR,SROD,SROH,SRON,SROI
         </Content>
-        
+
         <Structure name="SVTG"  >
             <var name="Version" type="float"  />
             <var name="Nlayer" type="float"  />
@@ -515,20 +515,10 @@
             <Shape type="ELTU" p2="ssup_RodOD/2" dz="ssup_RodLen/2" p1="ssup_RodODx/2"  />
 
             <If expr="ssup_version&gt;=4.00"  >
-                <Create block="SRON"  />
-                <Placement block="SRON"  >
-                </Placement>
-                
-
-                <Else  >
-
-                    <Create block="SROH"  />
-                    <Placement block="SROH"  >
-                    </Placement>
-                    
-
-                </Else>
-                
+                <Create    block="SRON"  />                <Placement block="SRON"  />                
+            <Else  >
+                <Create    block="SROH"  />                <Placement block="SROH"  />                    
+            </Else>                
             </If>
             
 
