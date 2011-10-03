@@ -246,7 +246,7 @@
                     </If>
                     
                     <If expr="(Itype==3)"  >
-                        xpos=xpos  
+xpos1=xpos1 + SizeN(pmdg_Mx(Itype-1))/2 - pmdg_boundary-2.25*pmdg_th_air
                     </If>
                     
                     <If expr="(Itype==4)"  >
@@ -254,7 +254,7 @@
                     </If>
                     
                     <If expr="(Itype==5)"  >
-                        xpos=xpos + 2.*xsize1-xsize  
+xpos1 = xpos1+2.*xsize1-xsize+ SizeN(pmdg_Mx(Itype-1))/2.-ysize +3*pmdg_boundary*root32
                     </If>
                     
                     ypos = ypos-ylen0 
