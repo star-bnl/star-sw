@@ -791,11 +791,7 @@ Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
 
 
   AgStructure::AgDetpNew( fgtdGeom.module, Form("Forward GEM Tracker with configuration %s", flag));
-
-
   AgStructure::AgDetpAdd( "Fggg_t", "fgstconfig", (Float_t) (fgtdGeom.config%30) );
-
-
 
   if ( go )
   if ( !CreateModule( fgtdGeom.module  ) )
@@ -1668,9 +1664,16 @@ Bool_t Geometry::RichInit()
 
 Bool_t Geometry::FgtdInit()
 {
+
+  // No FGT
   fgtdGeom.select="FGTDof";   fgtdGeom.module="None";     fgtdGeom.config=0;    fgtdGeom.fill();
+  // Turn on the legacy FGT
   fgtdGeom.select="FGTDon";   fgtdGeom.module="FgtdGeo2"; fgtdGeom.config=1;    fgtdGeom.fill();
+  // Production FGT
+  // 31 -- y2012 config w/ one full disk and 5 dual quadrant disks
   fgtdGeom.select="FGTD31";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=31;   fgtdGeom.fill();
+  // 32 -- anticipated full config y2013 and beyond
+  fgtdGeom.select="FGTD32";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=32;   fgtdGeom.fill();
   /*
     fgtdGeom.select="FGTD32";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=32;   fgtdGeom.fill();
     fgtdGeom.select="FGTD33";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=33;   fgtdGeom.fill();
