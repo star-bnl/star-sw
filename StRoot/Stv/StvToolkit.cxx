@@ -109,7 +109,7 @@ void StvToolkit::Clear(const char*)
   if (StvDraw::Jnst())  StvDraw::Jnst()->Clear();
   if (mTraks)		mTraks->clear();
   if (mHitLoader)   	mHitLoader->Clear();
-  if (mSeedFinder)  	mSeedFinder->Clear();
+  if (mSeedFinders)  	mSeedFinders->Clear();
   if (mTrakFinder)  	mTrakFinder->Clear();
 
   if (mTrackFactory)	mTrackFactory->clear();
@@ -127,7 +127,7 @@ void StvToolkit::Clear(const char*)
 //_____________________________________________________________________________
 void StvToolkit::Reset()
 {
-  if (mSeedFinder)  	mSeedFinder->Reset();
+  if (mSeedFinders)  	mSeedFinders->Reset();
   if (mTrakFinder)  	mTrakFinder->Reset();
 
 }//______________________________________________________________________________
@@ -144,4 +144,11 @@ double StvToolkit::GetHz(const double *x) const
 double StvToolkit::GetHz(const float *x) const
 { double xx[3]={x[0],x[1],x[2]};
   return GetHz(xx);
+}
+//______________________________________________________________________________
+void StvToolkit::SetSeedFinder(StvSeedFinder *seedFinder )
+{
+  assert(seedFinder);
+  if (!mSeedFinders) mSeedFinders = new StvSeedFinders;
+  mSeedFinders->push_back(seedFinder);
 }
