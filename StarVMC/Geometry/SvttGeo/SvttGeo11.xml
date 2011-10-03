@@ -615,6 +615,8 @@
         <Use struct="SVTG"  />
         <Use struct="SWCA"  />
         <Use struct="SELC"  />
+        <!-- AgStructure likely to issue a warning here when we cannot find a version gt 2.
+             This is how the AgSTAR file is setup -->
         <Use struct="SSUP" select="version" value="SVTG_ConeVer "  />
         <Use struct="SSUB"  />
         <Use struct="SERG"  />
@@ -1244,15 +1246,10 @@
 
             <Do var="ilayer" from="1" to="3"  >
                 <Use struct="SFEP" select="Layer" value="ilayer "  />
-                <Create block="SFED"  />
-                <Placement y="0.0" x="0.0" z="0.0" block="SFED"  >
-                </Placement>
-                
 
-                <Create block="SPLS"  />
-                <Placement y="0.0" x="0.0" z="0.0" block="SPLS"  >
-                </Placement>
-                
+                <Create block="SFED"  />    <Placement block="SFED" y="0.0" x="0.0" z="0.0" />
+                <Create block="SPLS"  />    <Placement block="SPLS" y="0.0" x="0.0" z="0.0" />
+
             </Do>
             
 
@@ -1293,7 +1290,6 @@
             A   = pi
             A  *= (sfep_rmin1*sfep_rmin1 + sfep_rmin2+sfep_rmin2)
             A  *= sqrt(1+sq)
-
 
             CuThk=(SFEP_Vol/A)*sqrt(1.0+1.0/sq) 
 
