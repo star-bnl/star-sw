@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.58 2010/03/19 18:32:05 fine Exp $
+// $Id: StDraw3D.h,v 1.59 2011/10/03 23:55:38 perev Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -317,6 +317,9 @@ public:
     void Draw3DTest();
     static void ShowTest();
     static void ShowDetectorTest(const char *detectorName="StarDetectorUnfolding");
+private:
+    void Init();
+
     ClassDef(StDraw3D,0);
 };
 #endif
