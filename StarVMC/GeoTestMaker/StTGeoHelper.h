@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.14 2011/07/19 19:10:09 perev Exp $
+// $Id: StTGeoHelper.h,v 1.15 2011/10/03 20:47:16 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -47,7 +47,7 @@ typedef std::map< unsigned int, StHitPlane*>    StHitPlaneHardMap;
 typedef std::pair<unsigned int, StHitPlane*>    StHitPlaneHardPair;
 typedef StHitPlaneHardMap::const_iterator       StHitPlaneHardMapIter;
 
-typedef std::vector<void*>                      StVoidArr;
+class StVoidArr:public std::vector<void*>{};
 
 
 typedef std::map< const TString, StHitPlane*, InvertLtStr>  StHitPlanePathMap;
