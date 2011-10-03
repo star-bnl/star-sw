@@ -65,12 +65,11 @@ public:
    ~StvDefaultSeedFinder(){;}
   const THelixTrack* NextSeed();
   void      Clear(const char *opt="");
-  void      Again();
+  int       Again();
   void      Reset();
   void      Print(const char *opt="") const {;}
 
 protected:
-  const THelixTrack* Approx();
 
 private:
 char mBeg[1];
