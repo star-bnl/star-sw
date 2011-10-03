@@ -11,6 +11,7 @@
 class StvGeoLoader;
 class StvHitLoader;
 class StvSeedFinder;
+class StvSeedFinders;
 class StvTrackFinder;
 class StvEventFiller;
 class StvHit;
@@ -35,7 +36,7 @@ void Finish();
 
 StvGeoLoader 	*GeoLoader();
 StvHitLoader 	*HitLoader()  const	{return mHitLoader ;}
-StvSeedFinder   *SeedFinder() const	{return mSeedFinder;}
+StvSeedFinders  *SeedFinders() const	{return mSeedFinders;}
 StvTrackFinder  *TrackFinder() const	{return mTrakFinder;}
 StvEventFiller  *EventFiller() const	{return mEventFiller;}
 double          GetHz(const double *x) const;
@@ -56,7 +57,7 @@ void            FreeTrack(StvTrack* &stiTrak);
 
 
 void SetHitLoader  (StvHitLoader   *loadHits   ){ mHitLoader   = loadHits   ;}
-void SetSeedFinder (StvSeedFinder  *seedFinder ){ mSeedFinder  = seedFinder ;}
+void SetSeedFinder (StvSeedFinder  *seedFinder );
 void SetTrackFinder(StvTrackFinder *trackFinder){ mTrakFinder  = trackFinder;}
 void SetEventFiller(StvEventFiller *eventFiller){ mEventFiller = eventFiller;}
 
@@ -67,7 +68,7 @@ protected:
 char           	mBeg[1];
 StvGeoLoader   	*mGeoLoader;
 StvHitLoader   	*mHitLoader;
-StvSeedFinder  	*mSeedFinder;
+StvSeedFinders  *mSeedFinders;
 StvTrackFinder 	*mTrakFinder;
 StvTracks 	*mTraks;
 StvEventFiller  *mEventFiller;

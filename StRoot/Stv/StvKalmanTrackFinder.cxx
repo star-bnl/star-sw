@@ -51,60 +51,62 @@ int StvKalmanTrackFinder::FindTracks()
 static int trkShow=0;
 static int kitShow=0;
 //  DoShow(2);
-  int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSeed=0;
+  int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSeed=0,nSeedTot=0;
 static StvToolkit *kit = StvToolkit::Inst();
 static StvConst  *kons = StvConst::Inst();
-  StvSeedFinder *sf = kit->SeedFinder();
+  StvSeedFinders *sfs = kit->SeedFinders();
   double aveRes=0,aveXi2=0;
   mCurrTrak = 0;
-  int myMinHits = 10;
 
-  for (int repeat=0; repeat<5; repeat++) {
-    nTrk = 0;
-    while ((mSeedHelx = sf->NextSeed())) 
-    {
-      nSeed++;
-						if (sf->DoShow())  sf->Show();
-      if (!mCurrTrak) mCurrTrak = kit->GetTrack();
-      mCurrTrak->CutTail();	//Clean track from previous failure
-      nAdded = FindTrack(0);
-      if (!nAdded) 				continue;
-						if (trkShow)mCurrTrak->Show();
-      int ans = 0,fail=13;
-  //		Refit track   
-      do {
-	ans = Refit(1);
+  for (int isf=0;isf<sfs->size();isf++) { //Loop over seed finders
+    StvSeedFinder* sf = (*sfs)[isf];
+    int myMinHits = kons->mMinHits;
+    if(sf->Again()) myMinHits = kons->mGoodHits;
+    for (int repeat =0;repeat<5;repeat++) {//Repeat search the same seed finder 
+      nTrk = 0;nSeed=0;
+      while ((mSeedHelx = sf->NextSeed())) 
+      {
+	nSeed++;
+						  if (sf->DoShow())  sf->Show();
+	if (!mCurrTrak) mCurrTrak = kit->GetTrack();
+	mCurrTrak->CutTail();	//Clean track from previous failure
+	nAdded = FindTrack(0);
+	if (!nAdded) 				continue;
+	int ans = 0,fail=13;
+    //		Refit track   
+	do {
+	  ans = Refit(1);
+	  nHits = mCurrTrak->GetNHits();
+	  if (nHits<myMinHits)			break;
+	  if (ans) 				continue;
+	  if (mCurrTrak->Check("Two",1+2))  	continue;
+	  nAdded = FindTrack(1);
+	  if (mCurrTrak->Check("THree",2))	continue;
+    // few hits added. Refit track to beam again 
+	  ans = Refit(0);
+	  if (ans) 				continue;
+	  if(mCurrTrak->Check("Four",3))	continue;
+	} while((fail=0));		
+	if (fail) 				continue;
 	nHits = mCurrTrak->GetNHits();
-	if (nHits<kons->mMinHits)		break;
-	if (ans) 				continue;
-	if (mCurrTrak->Check("Two",1+2))  	continue;
-	nAdded = FindTrack(1);
-	if (mCurrTrak->Check("THree",2))	continue;
-  // few hits added. Refit track to beam again 
-	ans = Refit(0);
-	if (ans) 				continue;
-	if(mCurrTrak->Check("Four",3))		continue;
-      } while((fail=0));		
-      if (fail) 				continue;
-      nHits = mCurrTrak->GetNHits();
-      if (nHits < myMinHits)			continue;
-      StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
-      if (node) node->UpdateDca();
-      kit->GetTracks().push_back(mCurrTrak);
-      nTrk++;
-      aveRes += mCurrTrak->GetRes();
-      aveXi2 += mCurrTrak->GetXi2();
-      mCurrTrak=0;
-    }
-    if (!nTrk) 					break;
-    nTrkTot+=nTrk;
-    myMinHits = kons->mMinHits;
-    sf->Again();
-  } //end repeat loop
+	if (nHits < myMinHits)			continue;
+	StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
+	if (node) node->UpdateDca();
+	kit->GetTracks().push_back(mCurrTrak);
+	nTrk++;
+	aveRes += mCurrTrak->GetRes();
+	aveXi2 += mCurrTrak->GetXi2();
+	mCurrTrak=0;
+      }
+      myMinHits = kons->mMinHits;
+      nTrkTot+=nTrk; nSeedTot+=nSeed;
+      Info("FindTracks:","SeedFinder(%s) Seeds=%d Tracks=%d ratio=%d\%\n"
+          ,sf->GetName(),nSeed,nTrk,(100*nTrk)/(nSeed+1));
+      
+      if (!nTrk || !sf->Again()) break;
+    }//End of repeat
+  }//End of seed finders
 
-if (kitShow)  kit->Show();
-if (sf->DoShow()>1)  sf->ShowRest();
-if (StvDraw::Jnst()) StvDraw::Wait();
   if (nTrkTot) {aveRes/=nTrkTot; aveXi2/=nTrkTot;}
   Info("FindTracks","tracks=%d aveRes = %g aveXi2=%g",nTrkTot,aveRes,aveXi2);
   return nTrkTot;
