@@ -22,7 +22,10 @@ class Geom_t : public AgStructure
   SetDetector(tpce);  SetDetector(calb);  SetDetector(scon);  SetDetector(svtt);
   SetDetector(phmd);  SetDetector(upst);  SetDetector(zcal);  SetDetector(cave);
   SetDetector(magp);  SetDetector(bbcm);  SetDetector(sisd);  SetDetector(rich);
-  SetDetector(mfld);  SetDetector(fgtd);  SetDetector(idsm);
+  SetDetector(mfld);  SetDetector(fgtd);  SetDetector(idsm);  
+
+  SetDetector(istd); // placeholder for IST
+  SetDetector(pxld); // placeholder for PXL
 
       ecalCuts=1;
       calbCuts=1;
@@ -47,6 +50,9 @@ class Geom_t : public AgStructure
   AddDetector(phmd);  AddDetector(upst);  AddDetector(zcal);  AddDetector(cave);
   AddDetector(magp);  AddDetector(bbcm);  AddDetector(sisd);  AddDetector(rich);
   AddDetector(mfld);  AddDetector(fgtd);  AddDetector(idsm);
+
+  AddDetector(istd);
+  AddDetector(pxld);
 
   Int_t ecalCuts;
   Int_t calbCuts;
@@ -422,13 +428,37 @@ class IdsmGeom_t : public AgStructure
     TString module;
     Int_t config;
 };
+// ----------------------------------------------------------------------
+class IstdGeom_t : public AgStructure
+{ public:
+  ClassDef(IstdGeom_t,1);
+  IstdGeom_t(): AgStructure("IstdGeom_t","STAR ISTD Master Geometry Table")
+    {
+      select="ISTDon"; module="IstdGeo"; config=1;
+    }
+    TString select;
+    TString module;
+    Int_t config;
+};
+// ----------------------------------------------------------------------
+class PxldGeom_t : public AgStructure
+{ public:
+  ClassDef(PxldGeom_t,1);
+  PxldGeom_t(): AgStructure("PxldGeom_t","STAR PXLD Master Geometry Table")
+    {
+      select="PXLDon"; module="PxldGeo"; config=1;
+    }
+    TString select;
+    TString module;
+    Int_t config;
+};
 
 //////////////////////////////////////////////////////////
 //
 class Geometry : public AgModule
 {
  public:
-
+  
   Geometry();
   ~Geometry(){ /* nada */ };
 
@@ -451,7 +481,10 @@ class Geometry : public AgModule
   Bool_t SvttInit();  Bool_t BtofInit();  Bool_t TpceInit();
   Bool_t VpddInit();  Bool_t MagpInit();  Bool_t UpstInit();
   Bool_t ZcalInit();  Bool_t FtroInit();  Bool_t RichInit();
-  Bool_t FgtdInit();  Bool_t IdsmInit();
+  Bool_t FgtdInit();  Bool_t IdsmInit();  
+
+  Bool_t IstdInit(){ /* placeholder */ return false; }
+  Bool_t PxldInit(){ /* placeholder */ return false; }
 
   Bool_t GeomInit();
 
@@ -478,6 +511,9 @@ class Geometry : public AgModule
   Bool_t ConstructRich( const Char_t *flag, Bool_t go=false ); // RICH is deprecated
   Bool_t ConstructFgtd( const Char_t *flag, Bool_t go=true );
   Bool_t ConstructIdsm( const Char_t *flag, Bool_t go=true );
+
+  Bool_t ConstructIstd( const Char_t *flag, Bool_t go=false ) { /* placeholder */ return false; }
+  Bool_t ConstructPxld( const Char_t *flag, Bool_t go=false ) { /* placeholder */ return false; }
 
  public:
   AgModule *CreateModule( const Char_t *name, const Char_t *top = NULL );
