@@ -1,5 +1,8 @@
-// $Id: StFgtIClusterAlgo.h,v 1.4 2011/09/27 22:14:27 avossen Exp $
+// $Id: StFgtIClusterAlgo.h,v 1.5 2011/10/03 19:39:46 avossen Exp $
 // $Log: StFgtIClusterAlgo.h,v $
+// Revision 1.5  2011/10/03 19:39:46  avossen
+// compiling version of simple cluster maker, changed PushBack->pushBack energy->charge in ClusterArray and Cluster
+//
 // Revision 1.4  2011/09/27 22:14:27  avossen
 // cluster maker compiles
 //
@@ -29,8 +32,8 @@ class StFgtIClusterAlgo
 {
  public:
   //subclasses must implement this function that takes raw hits from StEvent and fills the Cluster collection
-  virtual Int_t doClustering(const StFgtRawHitArray&, StFgtClusterArray&)=0;
-  virtual Int_t Init(StFgtEvent* mEvent)=0;
+  virtual Int_t doClustering(StFgtRawHitArray&, StFgtClusterArray&)=0;
+  virtual Int_t Init()=0;
   
 };
 
