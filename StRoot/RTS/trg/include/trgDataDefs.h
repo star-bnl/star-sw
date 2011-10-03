@@ -18,6 +18,7 @@
 *     Note:  PrePost data will only be available on local trigger disks and
 *     will not be present in event files.
 ******************************************************************************/
+#include "daqFormats.h"
 #define FORMAT_VERSION        0x09013040      /* 30 Jan 2009; Version 4.0 Format: yymmddvv */
 #define MAX_TRG_BLK_SIZE          122880      /* Current total: 113.25k bytes for pre/post non-zero suppressed data.  Allow 120k */
 #define MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
