@@ -15,15 +15,15 @@
 void StFgtClusterMaker::Clear(Option_t *opts)
 {
 
-}
+};
 Int_t StFgtClusterMaker::Make()
 {
   Int_t ierr = kStOk;
   TStopwatch clock;
   clock.Start();
-  LOG_DEBUG <<"StEmcRawMaker::Make()******************************************************************"<<endm;
+  LOG_DEBUG <<"StClusterMaker::Make()******************************************************************"<<endm;
 
-  if( !mIsInitialized )
+  if( !mIsInitialized || !pClusterAlgo)
     {
       LOG_ERROR << "Not initialized" << endm;
       return kStFatal;
@@ -36,7 +36,13 @@ Int_t StFgtClusterMaker::Make()
 	  StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
 	  if(pDisc)
 	    {
-	      pClusterAlgo->doClustering(pDisc->getRawHitArray(),pDisc->getClusterArray());
+	      Int_t loc_ierr=pClusterAlgo->doClustering(pDisc->getRawHitArray(),pDisc->getClusterArray());
+	      if(loc_ierr!=kStOk)
+		{
+		  LOG_WARN <<"StClusterMaker::Make(): clustering for disc " << discIdx << " returned " << loc_ierr <<endm;
+		  if(loc_ierr>ierr)
+		    ierr=loc_ierr;
+		}
 	    }
 	}
     }
@@ -45,6 +51,12 @@ Int_t StFgtClusterMaker::Make()
 
 };
 
+
+Int_t StFgtClusterMaker::setClusterAlgo(StFgtIClusterAlgo* algo)
+{
+  pClusterAlgo=algo;
+  return kStOk;
+}
 
 Int_t StFgtClusterMaker::Init()
 {
@@ -76,7 +88,7 @@ Int_t StFgtClusterMaker::Init()
 };
   
   
-StFgtClusterMaker::StFgtClusterMaker(const Char_t* rawBaseMakerName, const Char_t* name) : StMaker("fgt"),mFgtEventPtr(0),mFgtEventMakerName( rawBaseMakerName ),mIsInitialized(0)
+StFgtClusterMaker::StFgtClusterMaker(const Char_t* rawBaseMakerName, const Char_t* name) : StMaker("fgt"),mFgtEventPtr(0),mFgtEventMakerName( rawBaseMakerName ),mIsInitialized(0),pClusterAlgo(0)
 {
   SetName(name);
 };
