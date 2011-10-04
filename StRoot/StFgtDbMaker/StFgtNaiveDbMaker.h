@@ -7,17 +7,33 @@
 #endif
 
 #include "StFgtDbMaker.h"
+// $Id: StFgtNaiveDbMaker.h,v 1.2 2011/10/04 02:59:35 balewski Exp $
+
+
+/* \class StFgtNaiveDbMaker        
+\author Stephen Gliske
+
+*/
 
 class StFgtNaiveDbMaker : public StFgtDbMaker {
 
  public: 
 
-  virtual double gain(double locX, double locY, int iDisk);
+  // tmp, FGT gains hardcoded as a function
+  double gridAttenuation(float xLoc, float yLoc); // range [0,1]
+  double PchargeFraction(float xLoc, float yLoc); // range [0,1]
+  double PstripGain(int iStrip, int iQuad, int iDisc);
+  double RstripGain(int iStrip, int iQuad, int iDisc);
+
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtNaiveDbMaker.h,v 1.1.1.1 2011/10/03 03:46:57 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtNaiveDbMaker.h,v 1.2 2011/10/04 02:59:35 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtNaiveDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
+// $Log: StFgtNaiveDbMaker.h,v $
+// Revision 1.2  2011/10/04 02:59:35  balewski
+// added guestimates of gains, grid absorption, charge sharing
+//
