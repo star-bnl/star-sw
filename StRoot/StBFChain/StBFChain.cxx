@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.586 2011/09/22 16:33:15 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.587 2011/10/04 00:51:38 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -371,7 +371,11 @@ Int_t StBFChain::Instantiate()
       if (GetOption("Embedding")) mk->SetAttr("Embedding",kTRUE);
     }
     //		Sti(ITTF) start
-    if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "Stv") {
+    if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "Stv" || maker == "StvCA") {
+      if ( maker == "StvCA" ) {
+	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder
+	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
+      }
       if (GetOption("NoSvtIT")) mk->SetAttr("useSvt"	,kFALSE);
       else
 	if (GetOption("SvtIT")){
