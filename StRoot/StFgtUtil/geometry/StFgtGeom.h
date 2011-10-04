@@ -314,6 +314,7 @@ class StFgtGeom
 	static const double kFgtPhiflat		= 31.0/180.*3.1416;//  rad 
 	static const double kFgtRadPitch	=  0.09538; //	nominal '800 mu pitch'
 	static const double kFgtPhiPitch	=  0.08;    //	800 mu, at outer radi or at Rmid
+	static const double kFgtPhiAnglePitch	=  0.002094; 
 	static const double kFgtDeadQuadEdge	=  1.2;	    // (cm) effective dead area along quadrant edges
 
 	//  Standard definitions.
