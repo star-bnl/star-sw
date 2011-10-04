@@ -11,10 +11,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.45 2011/06/10 18:56:18 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.46 2011/10/04 15:13:46 pibero Exp $
 
 // MySQL C API
-#include "mysql.h"
+//#include "mysql.h"
+#include <mysql/mysql.h>
 
 // DSM crates
 #include "RTS/trg/include/trgConfNum.h"
@@ -715,6 +716,9 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.46  2011/10/04 15:13:46  pibero
+ * Use system path for mysql.h include file
+ *
  * Revision 1.45  2011/06/10 18:56:18  pibero
  * Updated meaning of mMCflag variable: 0=data, 1=simulation, 2=embedding
  *
