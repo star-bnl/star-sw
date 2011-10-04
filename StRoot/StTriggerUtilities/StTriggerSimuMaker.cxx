@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.46 2011/10/04 15:13:46 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.47 2011/10/04 18:29:16 pibero Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -177,6 +177,12 @@ Int_t StTriggerSimuMaker::InitRun(int runNumber) {
       mSimulators[3] = emc;
       if (!get2009DsmRegistersFromOfflineDatabase(runNumber) && !get2009DsmRegistersFromOnlineDatabase(runNumber)) {
 	LOG_WARN << "Can't get 2009 DSM registers" << endm;
+      }
+      LOG_INFO << "Overwriting the following registers:" << endm;
+      overwrite2009DsmRegisters();
+      if (mChangeJPThresh) {
+	LOG_INFO << "Shift the following registers by " << mChangeJPThresh << ":" << endm;
+	changeJetPatchTh();
       }
     }
 
@@ -564,95 +570,6 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
   LOG_INFO << "The following registers have new values:" << endm;
 
-  // Shift all JP thresholds by mChangeJPThresh
-  if (mChangeJPThresh) {
-    for (int reg = 0; reg < 3; ++reg) {
-      int value = bemc->get2009_DSMLayer1_Result()->getRegister(reg);
-      value += mChangeJPThresh;
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "BEMC-JP-th" << reg
-	       << setw(20) << value
-	       << endm;
-      bemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
-    }
-
-    for (int reg = 0; reg < 3; ++reg) {
-      int value = eemc->get2009_DSMLayer1_Result()->getRegister(reg);
-      value += mChangeJPThresh;
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "EEMC-JP-th" << reg
-	       << setw(20) << value
-	       << endm;
-      eemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
-    }
-
-    for (int reg = 0; reg < 3; ++reg) {
-      int value = emc->get2009_DSMLayer2_Result()->getRegister(reg);
-      value += mChangeJPThresh;
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "BEMC-EEMC-overlap-JP-th" << reg
-	       << setw(20) << value
-	       << endm;
-      emc->get2009_DSMLayer2_Result()->setRegister(reg,value);
-    }
-  }
-
-  // Overwrite thresholds from database if set explicitly
-  for (int reg = 0; reg < 3; ++reg) {
-    int value = mBarrelJetPatchTh[reg];
-    if (value != -1) {
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "BEMC-JP-th" << reg
-	       << setw(20) << value
-	       << endm;
-      bemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
-    }
-  }
-
-  for (int reg = 0; reg < 4; ++reg) {
-    int value = mBarrelHighTowerTh[reg];
-    if (value != -1) {
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "BEMC-HT-th" << reg
-	       << setw(20) << value
-	       << endm;
-      bemc->get2009_DSMLayer0_Result()->setRegister(reg,value);
-    }
-  }
-
-  for (int reg = 0; reg < 3; ++reg) {
-    int value = mEndcapJetPatchTh[reg];
-    if (value != -1) {
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "EEMC-JP-th" << reg
-	       << setw(20) << value
-	       << endm;
-      eemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
-    }
-  }
-
-  for (int reg = 0; reg < 2; ++reg) {
-    int value = mEndcapHighTowerTh[reg];
-    if (value != -1) {
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "EEMC-HT-th" << reg
-	       << setw(20) << value
-	       << endm;
-      eemc->get2009_DSMLayer0_Result()->setRegister(reg,value);
-    }
-  }
-
-  for (int reg = 0; reg < 3; ++reg) {
-    int value = mOverlapJetPatchTh[reg];
-    if (value != -1) {
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "BEMC-EEMC-overlap-JP-th" << reg
-	       << setw(20) << value
-	       << endm;
-      emc->get2009_DSMLayer2_Result()->setRegister(reg,value);
-    }
-  }
-
   // Trigger definitions
 
   TriggerDefinition triggers[32];
@@ -714,8 +631,102 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   return true;
 }
 
+void StTriggerSimuMaker::overwrite2009DsmRegisters()
+{
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = mBarrelJetPatchTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "BEMC-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      bemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+    }
+  }
+
+  for (int reg = 0; reg < 4; ++reg) {
+    int value = mBarrelHighTowerTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "BEMC-HT-th" << reg
+	       << setw(20) << value
+	       << endm;
+      bemc->get2009_DSMLayer0_Result()->setRegister(reg,value);
+    }
+  }
+
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = mEndcapJetPatchTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "EEMC-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      eemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+    }
+  }
+
+  for (int reg = 0; reg < 2; ++reg) {
+    int value = mEndcapHighTowerTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "EEMC-HT-th" << reg
+	       << setw(20) << value
+	       << endm;
+      eemc->get2009_DSMLayer0_Result()->setRegister(reg,value);
+    }
+  }
+
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = mOverlapJetPatchTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "BEMC-EEMC-overlap-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      emc->get2009_DSMLayer2_Result()->setRegister(reg,value);
+    }
+  }
+}
+
+void StTriggerSimuMaker::changeJetPatchTh()
+{
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = bemc->get2009_DSMLayer1_Result()->getRegister(reg);
+    value += mChangeJPThresh;
+    LOG_INFO << setw(20) << reg
+	     << setw(30) << "BEMC-JP-th" << reg
+	     << setw(20) << value
+	     << endm;
+    bemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+  }
+
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = eemc->get2009_DSMLayer1_Result()->getRegister(reg);
+    value += mChangeJPThresh;
+    LOG_INFO << setw(20) << reg
+	     << setw(30) << "EEMC-JP-th" << reg
+	     << setw(20) << value
+	     << endm;
+    eemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+  }
+
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = emc->get2009_DSMLayer2_Result()->getRegister(reg);
+    value += mChangeJPThresh;
+    LOG_INFO << setw(20) << reg
+	     << setw(30) << "BEMC-EEMC-overlap-JP-th" << reg
+	     << setw(20) << value
+	     << endm;
+    emc->get2009_DSMLayer2_Result()->setRegister(reg,value);
+  }
+}
+
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.47  2011/10/04 18:29:16  pibero
+ * *** empty log message ***
+ *
  * Revision 1.46  2011/10/04 15:13:46  pibero
  * Use system path for mysql.h include file
  *
