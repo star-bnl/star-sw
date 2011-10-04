@@ -6,7 +6,7 @@
 #include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
 
 StFgtCosmicMaker::StFgtCosmicMaker( const Char_t* name, const Char_t *daqFileName ) :
-   StFgtRawBase(), StMaker( name ), mDaqFileName( daqFileName ), mRdr(0)
+   StFgtRawBase(), StMaker( name ), mCutShortEvents(0), mDaqFileName( daqFileName ), mRdr(0)
 {
    //LOG_INFO << "OK?" << endm;
 
@@ -128,18 +128,21 @@ Int_t StFgtCosmicMaker::Make()
 	}
     }
 
-  // clear events that do not have a complete set of channels
-  Bool_t eventOK = 1;
-  for( UInt_t i = 0; i < mNumDiscs && eventOK; ++i ){
-     StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr( i );
-     if( pDisc )
-        eventOK = ( pDisc->getNumRawHits() == 7*1280 );
-  };
-  if( !eventOK ){
-     for( UInt_t i = 0; i < mNumDiscs; ++i ){
+
+  if( mCutShortEvents ){
+     // clear events that do not have a complete set of channels
+     Bool_t eventOK = 1;
+     for( UInt_t i = 0; i < mNumDiscs && eventOK; ++i ){
         StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr( i );
         if( pDisc )
-           pDisc->ClearRawHitArray();
+           eventOK = ( pDisc->getNumRawHits() == 7*1280 );
+     };
+     if( !eventOK ){
+        for( UInt_t i = 0; i < mNumDiscs; ++i ){
+           StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr( i );
+           if( pDisc )
+              pDisc->ClearRawHitArray();
+        };
      };
   };
 

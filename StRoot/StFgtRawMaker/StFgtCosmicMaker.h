@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtCosmicMaker.h,v 1.11 2011/09/30 17:24:39 sgliske Exp $
+//  $Id: StFgtCosmicMaker.h,v 1.12 2011/10/04 18:38:59 sgliske Exp $
 //  $Log: StFgtCosmicMaker.h,v $
+//  Revision 1.12  2011/10/04 18:38:59  sgliske
+//  made cut on short events optional
+//
 //  Revision 1.11  2011/09/30 17:24:39  sgliske
 //  LOG_* bug solved, so can now return kStEof
 //
@@ -49,7 +52,10 @@ class StFgtCosmicMaker : public StFgtRawBase, public StMaker
   virtual Int_t Make();
   virtual void Clear( Option_t *opts = "" );
 
+  void cutShortEvents( Bool_t doIt = 1 );
+
  protected:
+  Bool_t mCutShortEvents;
 
  private:
   std::string mDaqFileName;
@@ -62,5 +68,6 @@ class StFgtCosmicMaker : public StFgtRawBase, public StMaker
 // inline functions
 
 inline void StFgtCosmicMaker::setFilename( std::string filename ){ mDaqFileName = filename; };
+inline void StFgtCosmicMaker::cutShortEvents( Bool_t doIt ){ mCutShortEvents = doIt; };
 
 #endif
