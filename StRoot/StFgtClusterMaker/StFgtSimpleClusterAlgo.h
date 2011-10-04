@@ -16,9 +16,14 @@
 
 #include "StFgtIClusterAlgo.h"
 #include "StRoot/StEvent/StFgtEvent/StFgtRawHit.h"
+#include "StRoot/St_base/StMessMgr.h"
+#include "StRoot/St_base/Stypes.h"
+
 
 class StFgtSimpleClusterAlgo :public StFgtIClusterAlgo
 {
+
+ public:
   StFgtSimpleClusterAlgo();
 
   virtual Int_t doClustering(StFgtRawHitArray&, StFgtClusterArray&);

@@ -8,7 +8,7 @@
 
 #include "StFgtMaxClusterAlgo.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
-
+#include <iostream>
 
 StFgtMaxClusterAlgo::StFgtMaxClusterAlgo():mIsInitialized(0)
 {
@@ -22,6 +22,7 @@ Int_t StFgtMaxClusterAlgo::Init()
 
 Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArray& clusters)
 {
+  cout <<"doing max clustering, we look at " << hits.getEntries() << " hits " << endl;
   //we make use of the fact, that the hits are already sorted by geoId
   StFgtRawHitConstPtrVec mSortPtr;
   hits.getSortedPtrVec(mSortPtr);
