@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.10 2011/05/20 16:11:22 fisyak Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.11 2011/10/04 14:43:46 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -458,6 +458,7 @@ void AliHLTTPCCAMerger::UnpackSlices()
     }
 #ifdef DO_MERGER_PERF
 ///mvz start
+    if (slices[iSlice]->fOutTracks1) delete[] slices[iSlice]->fOutTracks1;
     slices[iSlice]->fOutTracks1 = new AliHLTTPCCAOutTrack [nTracksCurrent-NTracksPrev];
     for (int i=0; i<nTracksCurrent-NTracksPrev; i++)
     {
@@ -1154,6 +1155,8 @@ if(number == 0 ){
       }
     }
   }
+  
+  delete[] NeighSlice;
 }
 
 void AliHLTTPCCAMerger::Merging(int number)
@@ -1496,6 +1499,10 @@ void AliHLTTPCCAMerger::Merging(int number)
 
       for(int iClu=0; iClu < nHits; iClu++) tmpH[nH + iClu] = fClusterInfos[hits[iClu]];
       nH += nHits;
+
+      delete[] hits2;
+      delete[] Zhits;
+      delete[] index;
 //std::cout  << "  " << track.NClusters() << "  " << nH << std::endl;
     }
   }
