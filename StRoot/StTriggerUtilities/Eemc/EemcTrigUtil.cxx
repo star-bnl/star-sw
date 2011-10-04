@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <pwd.h>
 #include <algorithm>
 
 using namespace std;
@@ -147,8 +148,9 @@ static TDatime getTimeStampFromDates(const TDatime& date, const vector<TDatime>&
 
 void EemcTrigUtil::getFeePed4(const TDatime& date, int mxChan, int *feePed4)
 {
-  //static const char* dir = "/afs/rhic.bnl.gov/star/users/pibero/public/StarTrigSimuSetup/ped";
-  static const char* dir = "/star/u/pibero/public/StarTrigSimuSetup/ped";
+  char dir[FILENAME_MAX];
+  struct passwd* pw = getpwnam("pibero");
+  sprintf(dir,"%s/public/StarTrigSimuSetup/ped",pw->pw_dir);
   vector<TDatime> dates;
   scanPed4DirForDates(dir,dates);
   TDatime timeStamp = getTimeStampFromDates(date,dates);
