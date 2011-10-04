@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCASliceOutput.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCASliceOutput.cxx,v 1.2 2011/10/04 14:43:46 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -31,9 +31,22 @@ int AliHLTTPCCASliceOutput::EstimateSize( int nOfTracks, int nOfTrackClusters )
     + sizeof( float )
     + sizeof( UChar_t );
 
-  return sizeof( AliHLTTPCCASliceOutput )
-    + sizeof( AliHLTTPCCASliceTrack ) * nOfTracks
-    + kClusterDataSize * nOfTrackClusters;
+
+  const int aligmentMaxSize =  
+    sizeof( AliHLTTPCCASliceTrack ) + kClusterDataSize; // aligment during AssignMemory 
+  return 
+    sizeof( AliHLTTPCCASliceTrack ) * nOfTracks 
+    + kClusterDataSize * nOfTrackClusters 
+    + aligmentMaxSize; 
+                
+    // return 
+    //   RequiredMemory(fTracks, fNTracks) + 
+    // RequiredMemory( fClusterUnpackedYZ, fNTrackClusters ) + 
+    // RequiredMemory( fClusterUnpackedX,  fNTrackClusters ) + 
+    // RequiredMemory( fClusterIDrc,       fNTrackClusters ) + 
+    // RequiredMemory( fClusterPackedYZ,   fNTrackClusters ) + 
+    // RequiredMemory( fClusterPackedAmp,  fNTrackClusters ); 
+  
 }
 
 void AliHLTTPCCASliceOutput::SetPointers()

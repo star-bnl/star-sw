@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.4 2010/08/26 15:05:52 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.5 2011/10/04 14:43:46 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -142,6 +142,7 @@ void AliHLTTPCCATracker::RecalculateTrackMemorySize( int MaxNTracks, int MaxNHit
   debugWO() << "RecalculateTrackMemorySize( " << MaxNTracks << ", " << MaxNHits << ")" << endl;
   fTrackMemorySize = 0;
   fTrackMemorySize += sizeof( void * );
+  fTrackMemorySize += sizeof(AliHLTTPCCASliceOutput); 
   fTrackMemorySize += AliHLTTPCCASliceOutput::EstimateSize( MaxNTracks, MaxNHits );
   fTrackMemorySize += RequiredMemory( fOutTracks, MaxNTracks );
 }
@@ -160,6 +161,7 @@ void  AliHLTTPCCATracker::SetPointersTracks( int MaxNTracks, int MaxNHits )
 
   AlignTo<sizeof( void * )>( mem );
   fOutput = new( mem ) AliHLTTPCCASliceOutput;
+  mem += sizeof(AliHLTTPCCASliceOutput);
   mem += AliHLTTPCCASliceOutput::EstimateSize( MaxNTracks, MaxNHits );
 
   // memory for output tracks
@@ -229,10 +231,12 @@ void AliHLTTPCCATracker::WriteOutput()
 
   const int tracksSize = fTracks.size();
   for ( int trackIndex = 0; trackIndex < tracksSize; ++trackIndex ) {
+    // if (!fTracks[trackIndex]) continue;
     const Track &track = *fTracks[trackIndex];
     const short numberOfHits = track.NumberOfHits();
     if ( numberOfHits <= 0 ) {
       // might happen. See TrackletSelector.
+      delete fTracks[trackIndex];
       continue;
     }
 
@@ -304,6 +308,7 @@ void AliHLTTPCCATracker::WriteOutput()
     assert( fNOutTrackHits - oldOut.FirstHitRef() == numberOfHits );
     assert( fNOutTrackHits < 10 * fData.NumberOfHits() );
     // old stuff -- end
+    delete fTracks[trackIndex];
   }
 
   timer.Stop();
