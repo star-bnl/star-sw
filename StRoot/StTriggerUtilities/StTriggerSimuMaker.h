@@ -59,7 +59,10 @@ private:
   int mEndcapJetPatchTh[3];
   int mEndcapHighTowerTh[2];
   int mOverlapJetPatchTh[3];
+  void overwrite2009DsmRegisters();
+
   int mChangeJPThresh;
+  void changeJetPatchTh();
 
   /// detailed results for individual trigger simulations
   map<int,StTriggerSimuResult> mResults;
@@ -120,9 +123,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.28 2011/06/10 18:56:18 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.29 2011/10/04 18:29:16 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.29  2011/10/04 18:29:16  pibero
+// *** empty log message ***
+//
 // Revision 1.28  2011/06/10 18:56:18  pibero
 // Updated meaning of mMCflag variable: 0=data, 1=simulation, 2=embedding
 //
