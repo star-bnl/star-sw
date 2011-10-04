@@ -1,4 +1,4 @@
-// $Id: StFgtNaiveDbMaker.cxx,v 1.2 2011/10/04 02:59:34 balewski Exp $
+// $Id: StFgtNaiveDbMaker.cxx,v 1.3 2011/10/04 03:06:29 balewski Exp $
 /* \class StFgtNaiveDbMaker        
 \author Stephen Gliske
 
@@ -27,9 +27,9 @@ StFgtNaiveDbMaker::gridAttenuation(float xLoc, float yLoc){ // range [0,1]
     double eps=(r-rA[i])/par_delR;
     if(fabs(eps)>3) continue; // skip if too far
     att*= 1. - exp(-eps*eps/sqrt(2));
-    printf(" Ri=%d  eps=%f\n", i,eps);
+    //printf(" Ri=%d  eps=%f\n", i,eps);
   }
-  printf("r=%f att=%f  \n", r,att);
+  //printf("r=%f att=%f  \n", r,att);
 
   //Phi edges: X, Y-axis
   for(int i=0;i<2;i++) {
@@ -38,7 +38,7 @@ StFgtNaiveDbMaker::gridAttenuation(float xLoc, float yLoc){ // range [0,1]
     if (i==1) eps=(xLoc- 1.2)/par_delR;
     if(fabs(eps)>3.) continue; // skip if too far
     att*= 1. - exp(-eps*eps/sqrt(2));
-    printf(" XYi=%d  eps=%f\n", i,eps);
+    //printf(" XYi=%d  eps=%f\n", i,eps);
   }
 
   
@@ -50,7 +50,7 @@ StFgtNaiveDbMaker::gridAttenuation(float xLoc, float yLoc){ // range [0,1]
     double eps=del/par_delR;
     if(fabs(eps)>3.) continue; // skip if too far
     att*= 1. - exp(-eps*eps/sqrt(2));
-    printf(" Gphi=%ddeg  eps=%f\n", 30*(1+i),eps);
+    //printf(" Gphi=%ddeg  eps=%f\n", 30*(1+i),eps);
   }
 
   return att;
@@ -83,6 +83,9 @@ StFgtNaiveDbMaker::RstripGain(int iStrip, int iQuad, int iDisc){
 
 
 // $Log: StFgtNaiveDbMaker.cxx,v $
+// Revision 1.3  2011/10/04 03:06:29  balewski
+// cleanup
+//
 // Revision 1.2  2011/10/04 02:59:34  balewski
 // added guestimates of gains, grid absorption, charge sharing
 //
