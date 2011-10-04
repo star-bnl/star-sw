@@ -16,6 +16,9 @@
 
 class StFgtMaxClusterAlgo :public StFgtIClusterAlgo
 {
+
+
+ public:
   StFgtMaxClusterAlgo();
 
   virtual Int_t doClustering(StFgtRawHitArray&, StFgtClusterArray&);
