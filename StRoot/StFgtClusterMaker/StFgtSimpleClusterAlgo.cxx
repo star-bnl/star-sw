@@ -48,7 +48,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
       isPhi=(layer=='P');
       isR=(!isPhi);
 
-      bool adjacentStrips=(((abs(prvOrdinate-ordinate)<StFgtGeom::kFgtPhiPitch) &&isPhi)|| ((abs(prvOrdinate-ordinate)<StFgtGeom::kFgtRadPitch) && isR));
+      bool adjacentStrips=(((abs(prvOrdinate-ordinate)<StFgtGeom::kFgtPhiAnglePitch) &&isPhi)|| ((abs(prvOrdinate-ordinate)<StFgtGeom::kFgtRadPitch) && isR));
       //if the strip is adjacent to the last one or if we are looking at the first strip in the list
       if((layer==prvLayer && adjacentStrips)||prvLayer==noLayer) 
 	{
