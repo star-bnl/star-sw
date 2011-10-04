@@ -1,3 +1,8 @@
+// $Id: StFgtDbMaker.cxx,v 1.2 2011/10/04 02:59:34 balewski Exp $
+/* \class StFgtDbMaker        
+\author Stephen Gliske
+
+*/
 
 #include "StFgtDbMaker.h"
 #include "TDataSetIter.h"
@@ -21,7 +26,7 @@ Int_t StFgtDbMaker::Init()
 }
 //_____________________________________________________________________________
 Int_t StFgtDbMaker::InitRun(Int_t runNumber) {
-
+  LOG_INFO << Form("StFgtDbMaker::InitRun(), run=%d",runNumber)<<endm;
 
   return kStOK;
 }
@@ -47,7 +52,7 @@ Int_t StFgtDbMaker::Finish()
   return kStOK;
 }
 
-Double_t StFgtDbMaker::gain(double loX, double Y, int d)
-{
-
-}
+// $Log: StFgtDbMaker.cxx,v $
+// Revision 1.2  2011/10/04 02:59:34  balewski
+// added guestimates of gains, grid absorption, charge sharing
+//
