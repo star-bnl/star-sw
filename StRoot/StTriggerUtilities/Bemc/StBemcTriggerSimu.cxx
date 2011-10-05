@@ -344,7 +344,8 @@ StTriggerSimuDecision StBemcTriggerSimu::triggerDecision(int trigId) {
 //==================================================
 void StBemcTriggerSimu::getTowerStatus(){
   
-  for (int i=0;i<kNTowers;i++) TowerStatus[i]=1;
+  fill(TowerStatus,TowerStatus+kNTowers,1);
+  fill(numMaskTow,numMaskTow+kNPatches,0);
   
   if (mConfig==kOnline) {
     for (Int_t cr=1; cr <= kNCrates; cr++){
