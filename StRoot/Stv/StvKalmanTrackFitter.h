@@ -7,6 +7,8 @@
 /// \class StvKalmanTrackFitter
 class StvTrack;
 class StvNode;
+class THelixTrack;
+class THelixFitter;
 
 class StvKalmanTrackFitter : public StvTrackFitter
 {
@@ -17,11 +19,16 @@ public:
   virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node);
            int Propagate(StvNode  *node,const StvNode *preNode,int dir);
   virtual  int Helix(StvTrack *trak,int mode);
+  virtual  int Check(StvTrack *trak);
+  virtual  int Check(const StvNodePars &parA,const StvFitErrs &errA,
+		     const StvNodePars &parB,const StvFitErrs &errB);
+  virtual  THelixTrack* GetHelix() const;
   virtual void Clear(const char *opt="");
   
 
 protected:
 char mBeg[1];
+THelixFitter *mHelx;
 char mEnd[1];
 
 ClassDef(StvKalmanTrackFitter,0);
