@@ -18,6 +18,7 @@ StFgtMaxClusterAlgo::StFgtMaxClusterAlgo():mIsInitialized(0)
 Int_t StFgtMaxClusterAlgo::Init()
 {
   mIsInitialized=true;
+  return kStOk;
 };
 
 Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArray& clusters)
@@ -35,23 +36,21 @@ Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArra
   Int_t phiGeoId, rGeoId;
   bool isPhi, isR;
 
-
   for(StFgtRawHitConstPtrVec::iterator it=mSortPtr.begin();it!=mSortPtr.end();it++)
     {
       StFgtGeom::getPhysicalCoordinate((*it)->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
       isPhi=(layer=='P');
       isR=(!isPhi);
-
-
-      if(isR && ((*it)->getCharge() > maxRCharge))
+      //      cout <<"charge is: " << (*it)->getAdc() <<  " maxRcharge: " <<maxRCharge <<" maxPhicharge: " << maxPhiCharge << " isPhi: "<< isPhi <<endl;
+      if(isR && ((*it)->getAdc() > maxRCharge))
 	{
-	  maxRCharge=(*it)->getCharge();
+	  maxRCharge=(*it)->getAdc();
 	  rOrdinate=ordinate;
 	  rGeoId=(*it)->getGeoId();
 	}
-      if(isPhi && ((*it)->getCharge() > maxPhiCharge))
+      if(isPhi && ((*it)->getAdc() > maxPhiCharge))
 	{
-	  maxPhiCharge=(*it)->getCharge();
+	  maxPhiCharge=(*it)->getAdc();
 	  phiOrdinate=ordinate;
 	  phiGeoId=(*it)->getGeoId();
 	}
@@ -59,29 +58,34 @@ Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArra
 
   if(maxRCharge>0)
     {
-      StFgtCluster newCluster;
+      cout <<"have maxR" <<endl;
+      StFgtCluster newCluster(rGeoId,'R',rOrdinate,maxRCharge);
       //new cluster was started but not included yet..
-      newCluster.setLayer('R');
-      newCluster.setKey(rGeoId);
-      newCluster.setPosition(rOrdinate);
-      newCluster.setCharge(maxRCharge);
-      clusters.pushBack(newCluster);
+      //      cout <<"1" <<endl;
+      //      newCluster.setLayer('R');
+      //      newCluster.setKey(rGeoId);
+      //      newCluster.setPosition(rOrdinate);
+      //      newCluster.setCharge(maxRCharge);
+      cout <<"about to push" <<endl;
+          clusters.pushBack(newCluster);
+      cout <<"clusters have now " << clusters.getEntries() <<endl;
     } 
   if(maxPhiCharge>0)
     {
+      cout <<"have maxPhi" <<endl;
       StFgtCluster newCluster;
       //new cluster was started but not included yet..
       newCluster.setLayer('P');
       newCluster.setKey(phiGeoId);
       newCluster.setPosition(phiOrdinate);
       newCluster.setCharge(maxPhiCharge);
-      clusters.pushBack(newCluster);
+            clusters.pushBack(newCluster);
+      cout <<"added phi cluster clusters have now " << clusters.getEntries() <<endl;
     } 
 
   return kStOk;
 };
 
 
-
-
 ClassImp(StFgtMaxClusterAlgo);
+
