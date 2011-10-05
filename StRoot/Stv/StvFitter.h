@@ -37,6 +37,7 @@ static double JoinTwo(int nP1,const double *P1,const double *E1
                      ,int nP2,const double *P2,const double *E2
 	             ,              double *PJ,      double *EJ
                      ,int mode=0);	
+static void Test();
 protected:
       char         mBeg[1];
       int          mKase; //0=fit to hit,1=refit,2=fit to vertex

@@ -6,6 +6,7 @@
 #include "StvFitter.h"
 #include "StvUtil/StvNodePars.h"
 #include "StvHit.h"
+#include "StvUtil/StvDebug.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 
@@ -109,6 +110,9 @@ double StvFitter::Xi2(const StvHit *hit)
       const StHitPlane *hp = hit->detector(); 
       const Mtx33F_t &hD = hp->GetDir(hit->x());
       mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
+      StvDebug::Count("HHhit",sqrt(mHitErrs[0]));
+      StvDebug::Count("ZZhit",sqrt(mHitErrs[2]));
+
     }; break;
 
     case 1: assert(0 && "Wrong case 1");
@@ -175,6 +179,27 @@ static int nCall=0; nCall++;
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
   mOtErrs->SetHz(mOtPars->_hz);
+if (StvDebug::Level()) {
+if (StvDebug::Flag("BigPt")) {
+  double iRR,hRR,oRR,eRR; 
+  iRR = mInErrs->mHH;
+  hRR = mHitErrs[0];
+  oRR = mOtErrs->mHH;
+  eRR = 1./(1/iRR + 1/hRR);
+  int rxy = mInPars->getRxy();
+  printf("%3d Fitter iHH=%g hHH=%g oHH=%g (%g)\n",rxy,iRR,hRR,oRR,eRR);
+
+  iRR = mInErrs->mZZ;
+  hRR = mHitErrs[2];
+  oRR = mOtErrs->mZZ;
+  eRR = 1./(1/iRR + 1/hRR);
+  printf("              iZZ=%g hZZ=%g oZZ=%g (%g)\n",iRR,hRR,oRR,eRR);
+
+
+} }
+
+
+
 
   return 0;
 }  
@@ -262,4 +287,69 @@ double StvFitter::JoinTwo(int nP1,const double *P1,const double *E1
   TCL::vadd(PJ       ,P2   ,PJ         ,nP2);
 
   return chi2;
+}
+//______________________________________________________________________________
+void StvFitter::Test()
+{
+  double A[5]={1,2,3,4,5};
+  double AA[15]=
+  {1
+  ,0,2
+  ,0,0,3
+  ,0,0,0,4
+  ,0,0,0,0,5};
+  double DA[5]={1,2,3,4,5};
+  
+  double B[5]={6,7,8,9,10};
+  double BB[15]=
+  {6
+  ,0,7
+  ,0,0,8
+  ,0,0,0,9
+  ,0,0,0,0,10};
+  double DB[5]={6,7,8,9,10};
+  
+  double C[5],DC[5],CC[15],myC[5];
+  
+  for (int i=0;i<5;i++) {
+    C[i] = (A[i]/DA[i]+ B[i]/DB[i])/(1/DA[i]+ 1/DB[i]);
+    DC[i] = 1/(1/DA[i]+ 1/DB[i]);
+    printf("%d C=%g (%g)\n",i,C[i],DC[i]);
+  }
+  
+  
+  JoinTwo(5,A,AA,5,B,BB,myC,CC);
+  printf("Result =");
+  for (int i=0;i<5;i++) {printf(" %g",myC[i]);}
+  printf("\nError matrix =\n");
+  for (int i=0,li=0;i< 5;li+=++i) {
+    for (int j=0;j<=i; j++) { printf("%g\t",CC[li+j]);}
+    printf("\n");
+  }
+
+
+ BB[5]=1e3;BB[9]=1e3;BB[14]=1e3;
+
+  printf("  JoinTwo(5,A,AA,5,B,BB,myC,CC)\n");
+  JoinTwo(5,A,AA,5,B,BB,myC,CC);
+  printf("Result =");
+  for (int i=0;i<5;i++) {printf(" %g",myC[i]);}
+  printf("\nError matrix =\n");
+  for (int i=0,li=0;i< 5;li+=++i) {
+    for (int j=0;j<=i; j++) { printf("%g\t",CC[li+j]);}
+    printf("\n");
+  }
+  printf("  JoinTwo(2,B,BB,5,A,AA,myC,CC)\n");
+  JoinTwo(2,B,BB,5,A,AA,myC,CC);
+  printf("Result =");
+  for (int i=0;i<5;i++) {printf(" %g",myC[i]);}
+  printf("\nError matrix =\n");
+  for (int i=0,li=0;i< 5;li+=++i) {
+    for (int j=0;j<=i; j++) { printf("%g\t",CC[li+j]);}
+    printf("\n");
+  }
+
+
+
+
 }
