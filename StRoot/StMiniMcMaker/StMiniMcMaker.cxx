@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.38 2011/07/19 19:18:05 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.39 2011/10/05 23:07:50 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.39  2011/10/05 23:07:50  perev
+ * Commrnt++
+ *
  * Revision 1.38  2011/07/19 19:18:05  perev
  * Error handling fixed
  *
@@ -168,6 +171,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.39  2011/10/05 23:07:50  perev
+ * Commrnt++
+ *
  * Revision 1.38  2011/07/19 19:18:05  perev
  * Error handling fixed
  *
@@ -324,7 +330,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.38 2011/07/19 19:18:05 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.39 2011/10/05 23:07:50 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -1775,7 +1781,7 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     // the indices of the error matrix correspond to
     // 0 - error on y (track position along pad row direction)
     // 1 - error on z (track position along drift direction)
-    // 2 - error on C*x0 where C is the track curvature and x0 is the helix center position along x
+    // 2 - error on Psi 
     // 3 - error on pt, 
     // 4 - error on tan(dipAngle)
 
@@ -2777,9 +2783,12 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 
 //______________________________________________________________________________
 //
-// $Id: StMiniMcMaker.cxx,v 1.38 2011/07/19 19:18:05 perev Exp $
+// $Id: StMiniMcMaker.cxx,v 1.39 2011/10/05 23:07:50 perev Exp $
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.39  2011/10/05 23:07:50  perev
+// Commrnt++
+//
 // Revision 1.38  2011/07/19 19:18:05  perev
 // Error handling fixed
 //
@@ -2800,6 +2809,9 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 //
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.39  2011/10/05 23:07:50  perev
+// Commrnt++
+//
 // Revision 1.38  2011/07/19 19:18:05  perev
 // Error handling fixed
 //
