@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.18 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.19 2011/10/05 20:59:44 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.19  2011/10/05 20:59:44  perev
+ * Comments++
+ *
  * Revision 2.18  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -83,7 +86,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.18 2009/11/23 16:34:07 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.19 2011/10/05 20:59:44 perev Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -224,21 +227,21 @@ StTrackFitTraits::covariantMatrix() const
     StMatrixF m(5,5);
     if (mCovariantMatrix.GetSize() == 15) {
 #define mCovariantMatrix ((TArrayF&)mCovariantMatrix)         //temporary HACK VP
-        m(1,1) = mCovariantMatrix[0];
-        m(1,2) = m(2,1) = mCovariantMatrix[1];
+        m(1,1) = mCovariantMatrix[0];			//yy
+        m(1,2) = m(2,1) = mCovariantMatrix[1];		//
         m(1,3) = m(3,1) = mCovariantMatrix[2];
         m(1,4) = m(4,1) = mCovariantMatrix[3];
         m(1,5) = m(5,1) = mCovariantMatrix[4];
-        m(2,2) = mCovariantMatrix[5];
+        m(2,2) = mCovariantMatrix[5];			//zz
         m(2,3) = m(3,2) = mCovariantMatrix[6];
         m(2,4) = m(4,2) = mCovariantMatrix[7];
         m(2,5) = m(5,2) = mCovariantMatrix[8];
-        m(3,3) = mCovariantMatrix[9];
+        m(3,3) = mCovariantMatrix[9];			//tanLtanL
         m(3,4) = m(4,3) = mCovariantMatrix[10];
         m(3,5) = m(5,3) = mCovariantMatrix[11];
-        m(4,4) = mCovariantMatrix[12];
-        m(4,5) = m(5,4) = mCovariantMatrix[13];
-        m(5,5) = mCovariantMatrix[14];
+        m(4,4) = mCovariantMatrix[12];			//PsiPsi deg
+        m(4,5) = m(5,4) = mCovariantMatrix[13];		
+        m(5,5) = mCovariantMatrix[14];			//PtiPti
 #undef mCovariantMatrix                                 //temporary HACK VP
     }
     return m;
