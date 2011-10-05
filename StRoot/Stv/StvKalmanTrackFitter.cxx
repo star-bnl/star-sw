@@ -41,7 +41,8 @@ int  StvKalmanTrackFitter::Refit(StvTrack *trak,int dir,int mode)
 ///     mode=1 Join
 ///     fit direction is imagined from left to rite
 static int nCall=0; nCall++;
-static const double kBigErrFact = 10;
+//static const double kBigErrFact = 10;
+static const double kBigErrFact = 16;
 
 static StvFitter *fitt = StvFitter::Inst();
 static StvConst  *kons = StvConst::Inst();
@@ -97,38 +98,6 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4};
 
         int ret = Propagate(node,preNode,dir);
         if (ret) return ret;
-#if 0
-        const StvNode *losNode = (dir)? preNode:node;
-        node->mPP[dir] = node->mFP[1-dir];
-        StvFitPars delPre = preNode->mFP[dir]-preNode->mPP[1-dir];
-        breakNode = (dir)? node:preNode;
-        if (delPre.TooBig()) return 1;
-        StvFitPars del    = delPre*preNode->mDer[dir];
-        if (del.TooBig())    return 2;; 
-        node->mPP[dir]+= del;node->mFP[dir]=node->mPP[dir];
-//        node->mPP[dir]+= ((preNode->mFP[dir]-preNode->mPP[1-dir])*node->mDer[dir]);
-        node->mPE[dir] = preNode->mFE[dir]*node->mDer[dir];
-        node->mPE[dir].SetHz(node->mPP[dir]._hz);
-        node->mPE[dir].Add(losNode->mELossData,node->mPP[dir]);
-        if(node->mPE[dir].Check()) { StvDebug::Count("mFE[dir].Check");
-	                             /*trak->CutTail(breakNode);*/ return 3;}; 
-#endif //0
-#if 0
-        const double *P = node->mFP[1-dir].P;
-        THelixTrack myHlx;
-        preNode->mFP[dir].get(&myHlx);
-        preNode->mFE[dir].Get(&myHlx);
-	double dS = myHlx.Path(P);
-        myHlx.Move(dS);
-        double rho = myHlx.GetRho();
-        rho += rho*losNode->GetELoss().mdPtidL*dS;
-        myHlx.Set(rho);
-        node->mPP[dir].set(&myHlx,preNode->mFP[dir]._hz);
-        node->mPE[dir].Set(&myHlx,preNode->mFP[dir]._hz);
-        node->mPE[dir].Add(losNode->mELossData,node->mPP[dir]);
-        if(node->mPE[dir].Check()) { StvDebug::Count("mFE[dir].Check");
-	                             /*trak->CutTail(breakNode);*/ return 3;}; 
-#endif //0
         break;
       }  
 
@@ -294,13 +263,19 @@ static StvFitter *fitt = StvFitter::Inst();
   return 0;
 }   
 //_____________________________________________________________________________
+THelixTrack* StvKalmanTrackFitter::GetHelix() const {return mHelx;}
+//_____________________________________________________________________________
 int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
 {
 // mode.bit0 = use err
 // mode.bit1 = update track
 // mode.bit2 = print
 
-  THelixFitter hlx;
+  if (!mode) mode = 4;
+  
+  if (!mHelx) mHelx = new THelixFitter;
+  mHelx->Clear();
+  THelixFitter& hlx = *mHelx;
   int iNode=0;
   StvNode *fstNode = 0,*lstNode = 0,*node=0,*preNode=0;
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
@@ -310,9 +285,14 @@ int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
     if (!fstNode) fstNode = node;
     lstNode = node;
     hlx.Add(hit->x()[0],hit->x()[1],hit->x()[2]);
-    double cos2l = node->GetFP()._tanl; cos2l = 1/(1+cos2l*cos2l);
-    const double *rr = node->GetHE();    
-    if(mode&1) hlx.AddErr( rr[0],rr[2]*cos2l);
+    if(mode&1) {	//Account errors
+      double cos2li = node->GetFP()._tanl; cos2li = (1+cos2li*cos2li);
+      const double *rr = node->GetHE();    
+      StvDebug::Count("HHhlx",sqrt(rr[0]));
+      StvDebug::Count("ZZhlx",sqrt(rr[2]));
+
+      hlx.AddErr( rr[0],rr[2]*cos2li);
+    }
   }  
   mXi2 =hlx.Fit();
   if(mode&1) hlx.MakeErrs();
@@ -323,6 +303,7 @@ int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
   int nHits = 0;
   iNode = 0;node=0;
   double dHit[3],tstXi2=0;
+
 //		Find total energy loss and update length
   double totLoss = 0,totLen=0;
   THelixTrack myHlx(hlx);
@@ -338,74 +319,82 @@ int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
     if (on) totLoss += node->GetELoss().mdPtidL*dS;
     if (node == fstNode) on=1;
     if (node == lstNode) on=0;
+    if (!hit) continue;
+    const THEmx_t *emx = myHlx.Emx();
+    const double  *rr  = node->GetHE();    
+//??    assert(emx->mHH < rr[0]);
+    double cos2li = 1.+pow(node->GetFP()._tanl,2); 
+//??    assert(emx->mZZ < rr[2]*cos2li);
   }
 
-//	Now find the middle iterator & node
-  double midLoss = 0.5*fabs(totLoss),midLen=0; totLoss = 0;
-  StvNodeIter midIt; iNode = 0; node=0;totLen=0;
-  on = 0;
-  for (midIt=trak->begin();midIt!=trak->end(); ++midIt) {
-    preNode = node; node = *midIt; iNode++;
-    if (preNode) {
-      double dS = node->mLen-preNode->mLen; midLen+=dS;
-      if (on) totLoss += fabs(node->GetELoss().mdPtidL*dS);
-    }
-    if (node == fstNode) on=1;
-    if (node == lstNode) on=0;
-    if (totLoss>= midLoss) break; 
-  }
-//  		Now update  
-  mWorstNode = 0;mWorstXi2=0;
-  for (int idir = 0; idir<2; idir++) { 
-    StvNodeIter itEnd;
-    if (idir) { itEnd = trak->end()		;}
-    else      { itEnd = trak->begin();--itEnd	;}
-
-    myHlx=hlx; myHlx.Move(midLen);
-    node =0;
-    for (StvNodeIter it=midIt;it!=itEnd; (idir)? ++it:--it) {
-      preNode = node; node = *it; iNode++;
-      StvNodePars FP = node->GetFP(2);
-      StvFitErrs  FE = node->GetFE(2);
-      const StvHit *hit = node->GetHit();
-      const double *X = FP.P;
-      if (hit) {for (int i=0;i<3;i++) {dHit[i]=hit->x()[i];};X = dHit;}
-      double dS = (node->GetType()==StvNode::kDcaNode)? myHlx.Path(0.,0.) : myHlx.Path(X);
-      double Fhlx[5][5],Fstv[5][5];
-      myHlx.Move(dS,Fhlx);
-      if (preNode) { //Update helix
-        double rho = myHlx.GetRho();
-        rho += rho*node->GetELoss().mdPtidL*dS;
-        myHlx.Set(rho);
+  if (mode&2) { //	Now find the middle iterator & node
+    double midLoss = 0.5*fabs(totLoss),midLen=0; totLoss = 0;
+    StvNodeIter midIt; iNode = 0; node=0;totLen=0;
+    on = 0;
+    for (midIt=trak->begin();midIt!=trak->end(); ++midIt) {
+      preNode = node; node = *midIt; iNode++;
+      if (preNode) {
+	double dS = node->mLen-preNode->mLen; midLen+=dS;
+	if (on) totLoss += fabs(node->GetELoss().mdPtidL*dS);
       }
-      FP.set(&myHlx,FP._hz); 
-      FE.Set(&myHlx,FP._hz); 
-      if (mode&2){
+      if (node == fstNode) on=1;
+      if (node == lstNode) on=0;
+      if (totLoss>= midLoss) break; 
+    }
+
+  //  		Now update  
+    mWorstNode = 0;mWorstXi2=0;
+    for (int idir = 0; idir<2; idir++) { 
+      StvNodeIter itEnd;
+      if (idir) { itEnd = trak->end()		;}
+      else      { itEnd = trak->begin();--itEnd	;}
+
+      myHlx=hlx; myHlx.Move(midLen);
+      node =0;
+      for (StvNodeIter it=midIt;it!=itEnd; (idir)? ++it:--it) {
+	preNode = node; node = *it; iNode++;
+	StvNodePars FP = node->GetFP(2);
+	StvFitErrs  FE = node->GetFE(2);
+	const StvHit *hit = node->GetHit();
+	const double *X = FP.P;
+	if (hit) {for (int i=0;i<3;i++) {dHit[i]=hit->x()[i];};X = dHit;}
+	double dS = (node->GetType()==StvNode::kDcaNode)? myHlx.Path(0.,0.) : myHlx.Path(X);
+	double Fhlx[5][5],Fstv[5][5];
+	myHlx.Move(dS,Fhlx);
+	if (preNode) { //Update helix
+          double rho = myHlx.GetRho();
+          rho += rho*node->GetELoss().mdPtidL*dS;
+          myHlx.Set(rho);
+	}
+	FP.set(&myHlx,FP._hz); 
+	FE.Set(&myHlx,FP._hz); 
         node->SetPre(FP,FE,0);node->SetPre(FP,FE,1);
         node->SetFit(FP,FE,0);node->SetFit(FP,FE,1);
         if (preNode) {FP.convert(Fstv,Fhlx); node->SetDer(Fstv,idir);}    
-      }
-      if (hit) {
-	nHits++;
-        double cosL = myHlx.GetCos(), tanL = myHlx.GetTan();
-        const double *pos = myHlx.Pos();
-        const double *dir = myHlx.Dir();
-        const double *hRR = node->GetHE();
-        const double dX[3] = { X[0]-pos[0],X[1]-pos[1],X[2]-pos[2]};
-        double delta = (dX[0]*dir[1]-dX[1]*dir[0])/cosL;
-        double myXi2 = delta /(FE.mHH+hRR[0]) *delta;
-        double nL[3] = { -dir[0]*tanL,-dir[1]*tanL, cosL};
-        delta = dX[0]*nL[0]+dX[1]*nL[1]+dX[2]*nL[2];
-        myXi2 += delta /(FE.mZZ+hRR[2]) *delta;
-        if (mWorstXi2 < myXi2) { mWorstXi2 = myXi2; mWorstNode = node;}
-        tstXi2 +=  myXi2;
-        if (mode&2){ node->SetXi2(myXi2,0);node->SetXi2(myXi2,1);}
-      } 
-  } 
-  tstXi2/=nHits*3-5;
-  double qqq = mXi2;if (qqq){};
-//VP    assert(fabs(mXi2-tstXi2)<0.1*(mXi2+tstXi2));
-  }
+
+	if (hit) {
+	  nHits++;
+          double cosL = myHlx.GetCos(), tanL = myHlx.GetTan();
+          const double *pos = myHlx.Pos();
+          const double *dir = myHlx.Dir();
+          const double *hRR = node->GetHE();
+          const double dX[3] = { X[0]-pos[0],X[1]-pos[1],X[2]-pos[2]};
+          double delta = (dX[0]*dir[1]-dX[1]*dir[0])/cosL;
+          double myXi2 = delta /(FE.mHH+hRR[0]) *delta;
+          double nL[3] = { -dir[0]*tanL,-dir[1]*tanL, cosL};
+          delta = dX[0]*nL[0]+dX[1]*nL[1]+dX[2]*nL[2];
+          myXi2 += delta /(FE.mZZ+hRR[2]) *delta;
+          if (mWorstXi2 < myXi2) { mWorstXi2 = myXi2; mWorstNode = node;}
+          tstXi2 +=  myXi2;
+          if (mode&2){ node->SetXi2(myXi2,0);node->SetXi2(myXi2,1);}
+	} 
+    } 
+    tstXi2/=nHits*3-5;
+    double qqq = mXi2;if (qqq){};
+  //VP    assert(fabs(mXi2-tstXi2)<0.1*(mXi2+tstXi2));
+    }
+  } //End of update
+
   if (!mode || mode&4) {//Printout only
     double myPsi = atan2(hlx.Dir()[1],hlx.Dir()[0]);
     double myTan = tan(asin(hlx.Dir()[2]));
@@ -429,4 +418,60 @@ int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
   }
   return 0;
 }
-  
+//_____________________________________________________________________________
+int StvKalmanTrackFitter::Check(StvTrack *trak)
+{
+static int nCall = 0; nCall++;
+   if (!StvDebug::Level()) 		return 0;
+   if (!StvDebug::Flag("BigPt"))	return 0;
+   if (trak->size()<10)			return 0;
+   Helix(trak,1);  
+   StvNode *node = trak->GetNode(StvTrack::kFirstPoint);
+// StvNode *node = trak->front();
+   double s = mHelx->Path(node->GetFP().P);
+   mHelx->Move(s);
+   const StvFitErrs &fe = node->GetFE();
+   StvFitErrs my;
+   my.Set(mHelx,fe.mHz);
+
+
+#define OLEG(a,b) (2*fabs(a-b)/(fabs(a)+fabs(b)+1e-11))
+  int ierr = 0;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    if (OLEG(my[li+i],fe[li+i])<0.3) continue;
+     ierr = ierr*10+i+1;
+     printf(" Err.%d = %g != %g\n",i,fe[li+i],my[li+i]);
+  };
+//  assert(!ierr);
+  return ierr;
+}
+//_____________________________________________________________________________
+int StvKalmanTrackFitter::Check(const StvNodePars &parA,const StvFitErrs &errA,
+				const StvNodePars &parB,const StvFitErrs &errB)
+{
+  if (!StvDebug::Level()) 	return 0;
+  if (!StvDebug::Flag("BigPt")) return 0;
+
+  THelixTrack helx;
+  parA.get(&helx);  
+  errA.Get(&helx);  
+  double s = helx.Path(parB.P);  
+  helx.Move(s);
+  StvFitErrs my;
+  my.Set(&helx,errB.mHz);
+  int ierr = 0;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    if (OLEG(my[li+i],errB[li+i])<0.1) continue;
+    ierr = ierr*10+i+1;
+     printf(" Err.%d = %g != %g\n",i,errB[li+i],my[li+i]);
+  };
+  int rxy = parB.getRxy();
+  printf("%3d Propagate HHold=%g HHnow=%g(%g) len=%g\n",rxy,errA.mHH,errB.mHH,my.mHH,s);
+  printf("              ZZold=%g ZZnow=%g(%g)       \n",    errA.mZZ,errB.mZZ,my.mZZ  );
+
+//  assert(!ierr);
+  return ierr;
+}
+   
+   
+   
