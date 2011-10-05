@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.23 2011/07/19 19:20:21 perev Exp $
+// $Id: StObject.cxx,v 1.24 2011/10/05 23:13:19 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.24  2011/10/05 23:13:19  perev
+// Remove redundant now cleaning
+//
 // Revision 1.23  2011/07/19 19:20:21  perev
 // More accurate counter handling
 //
@@ -316,13 +319,13 @@ void StXRefManager::Open(StXRef *xref)
      fgManagerList.push_front(man);
      fgManager   = man;
   }
+  if (man->fTally > StObject::fgTally) StObject::fgTally=man->fTally;
   man->fLev++;
   if (man->fMain==0) {
      man->fMain  = xref->GetMain();
   } else {
      xref->SetMain(man->fMain);
   }
-  if (man->fLev==1) StObject::fgTally = man->fTally;
 }
 //_____________________________________________________________________________
 void StXRefManager::Close(StXRef *xref)
@@ -408,19 +411,19 @@ void StXRefManager::Update ()
 //_____________________________________________________________________________
 void StXRefManager::Clear (Option_t*)
 {
-  ULong_t **page = (ULong_t**)fObjTab.GetList();
-  if (!page) return;
-  for (;page; page = (ULong_t**)page[0]) {
-    if (!page) 		break;
-    if (!page[1]) 	continue;
-    for (int i=0;i<(int)TPageMap::kPAGE;i++) {
-      if (!page[i+2]) 	break;
-      ((TObject*)page[i+2])->SetUniqueID(0);
-    }
-  }
-  fTally = 0;
-  fObjTab.Clear();
-  StObject::fgTally=0;
+//   ULong_t **page = (ULong_t**)fObjTab.GetList();
+//   if (!page) return;
+//   for (;page; page = (ULong_t**)page[0]) {
+//     if (!page) 		break;
+//     if (!page[1]) 	continue;
+//     for (int i=0;i<(int)TPageMap::kPAGE;i++) {
+//       if (!page[i+2]) 	break;
+//       ((TObject*)page[i+2])->SetUniqueID(0);
+//     }
+//   }
+//   fTally = 0;
+//   fObjTab.Clear();
+//   StObject::fgTally=0;
 }
 
 //_____________________________________________________________________________
