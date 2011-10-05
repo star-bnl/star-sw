@@ -1,5 +1,8 @@
-// $Id: StObject.h,v 1.16 2011/07/19 19:20:17 perev Exp $
+// $Id: StObject.h,v 1.17 2011/10/05 23:09:34 perev Exp $
 // $Log: StObject.h,v $
+// Revision 1.17  2011/10/05 23:09:34  perev
+// Warnoff
+//
 // Revision 1.16  2011/07/19 19:20:17  perev
 // More accurate counter handling
 //
@@ -121,7 +124,7 @@ public:
 virtual ~StXRefMain();
 virtual  	void  		Split()=0;
 virtual	       	StXRefMain     *MakeMain() {return this;}
-virtual		      void      Synchro(int toMain){};
+virtual		      void      Synchro(int){};
 ClassDef(StXRefMain,1)
 };
 
