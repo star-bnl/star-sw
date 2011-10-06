@@ -75,6 +75,8 @@ class AgMaterial : public TNamed
   /// The locking mechanism is provided to protect the main material database.
   /// Users may change their materials at will.
   void   lock(){ mLock=true; }
+
+  Float_t sumWeights();
  
  private:
  protected:
