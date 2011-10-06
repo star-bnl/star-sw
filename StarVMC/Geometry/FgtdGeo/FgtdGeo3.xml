@@ -213,8 +213,7 @@
     <Component name="H"  a="1"    z="1"  w="0.023"  />
     <Component name="Cu" a="63.5" z="29" w="0.109" />
     <Component name="Fe" a="55.8" z="26" w="0.019"  />  
-    <Component name="Cr" a="52.0" z="24" w="0.005"  />  
-    <Component name="Ni" a="58.7" z="28" w="0.003"  />  
+    <Component name="Cr" a="52.0" z="24" w="0.008"  />  
     <Component name="Pb" a="207"  z="82" w="0.096"  />  
     <Component name="Sn" a="118.7" z="50" w="0.143"  />  
 </Mixture> 
@@ -226,9 +225,8 @@
     <Component name="H"  a="1"    z="1"  w="0.023"  />
     <Component name="N"  a="14"   z="7"  w="0.009"  />  
     <Component name="Cu" a="63.5" z="29" w="0.045" />
-    <Component name="Fe" a="55.8" z="26" w="0.055"  />  
-    <Component name="Cr" a="52.0" z="24" w="0.014"  />  
-    <Component name="Ni" a="58.7" z="28" w="0.008"  />  
+    <Component name="Fe" a="55.8" z="26" w="0.055"  />  <!--   <Component name="Cr" a="52.0" z="24" w="0.014"  />   -->
+    <Component name="Ni" a="58.7" z="28" w="0.022"  />  
     <Component name="Pb" a="207"  z="82" w="0.081"  />  
     <Component name="Sn" a="118.7" z="50" w="0.121"  />  
 </Mixture> 
