@@ -420,7 +420,10 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $ Id: $
- *  $ Log: $
+ *  $Id: StFgtGeom.h,v 1.16 2011/10/06 15:16:15 sgliske Exp $
+ *  $Log: StFgtGeom.h,v $
+ *  Revision 1.16  2011/10/06 15:16:15  sgliske
+ *  fixed spaces before Log: and Id:
+ *
  *
  */
