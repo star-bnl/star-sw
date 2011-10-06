@@ -311,7 +311,7 @@ TGeoMaterial *BuildMaterial( AgMaterial &ag_material )
   switch ( ag_material.type() )
     {
     case( AgMaterial::kMixture ):
-      if ( ag_material.sumWeights() < 1.0 ) 
+      if ( ag_material.sumWeights() - 1.0 < -1.0E-5 ) 
 	{	  
 	  std::cout << "Warning: sum of all weights does not add up to 1.0" << std::endl;
 	  ag_material.Print();
