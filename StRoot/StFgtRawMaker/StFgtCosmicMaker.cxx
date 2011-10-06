@@ -19,26 +19,25 @@ StFgtCosmicMaker::~StFgtCosmicMaker(){
 };
 
 Int_t StFgtCosmicMaker::Init(){
-   cerr << "initializing" << endl;
+   //LOG_INFO << "initializing" << endm;
 
    Int_t ierr = constructFgtEvent();
 
-   cerr << "event constructed" << endl;
+   //LOG_INFO << "event constructed" << endm;
 
    if( ierr || !mFgtEventPtr )
       {
-         cerr << "error" << endl;
          LOG_FATAL << "Error constructing FgtEvent" << endm;
          ierr = kStFatal;
       };
 
-  cerr << "constructing daqReader" << endl;
+   //LOG_INFO << "constructing daqReader" << endm;
 
   // unfortunately, the daqReader has some constness issues to be
   // fixed.  Until they are, must remove constness of the filename.
   mRdr = new daqReader( const_cast< Char_t* >( mDaqFileName.data() ) ); 	
 
-  cerr << "done with init" << endl;
+  //LOG_INFO << "done with init" << endm;
 
   return ierr;
 };
@@ -68,14 +67,14 @@ Int_t StFgtCosmicMaker::Make()
   daq_dta *dd = 0;
   dd = mRdr->det("fgt")->get("adc");
       
-  //cout << "z starting event " << GetEventNumber() << ", dd at " << dd << endl;
+  //LOG_INFO << "z starting event " << GetEventNumber() << ", dd at " << dd << endm;
 
   while(dd && dd->iterate()) 
     {
       fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
 
-//       cout << "y Arm, Apv, Rdo = " << arm << ' ' << apv << ' ' << rdo
-//            << ", number of hits " << dd->ncontent << endl;
+//       LOG_INFO << "y Arm, Apv, Rdo = " << arm << ' ' << apv << ' ' << rdo
+//            << ", number of hits " << dd->ncontent << endm;
 
       for(u_int i=0;i<dd->ncontent;i++) 
 	{
@@ -88,6 +87,10 @@ Int_t StFgtCosmicMaker::Make()
           Short_t discIdx=0;  // will be set with getNaivePhysCoordFromElecCoord
 
 	  Short_t geoId = StFgtCosmicTestStandGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
+
+          Short_t quad, strip;
+          Char_t layer;
+          StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
 
           /* DEBUGGING
              Short_t quad=0;
@@ -110,10 +113,10 @@ Int_t StFgtCosmicMaker::Make()
 
              if( geoId != geoId2 ){
              StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
-             cout << "geom: " << geoId << ' ' << discIdx << ' ' << quad << ' ' << layer << ' ' << strip << endl;
+             LOG_INFO << "geom: " << geoId << ' ' << discIdx << ' ' << quad << ' ' << layer << ' ' << strip << endm;
 
              StFgtGeom::decodeGeoId( geoId2, discIdx, quad, layer, strip );
-             cout << "hack: " << geoId2 << ' ' << discIdx << ' ' << quad << ' ' << layer << ' ' << strip << endl;
+             LOG_INFO << "hack: " << geoId2 << ' ' << discIdx << ' ' << quad << ' ' << layer << ' ' << strip << endm;
              };
           */
 
@@ -150,7 +153,7 @@ Int_t StFgtCosmicMaker::Make()
 //   for( UInt_t i = 0; i < mNumDiscs; ++i ){
 //      StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr( i );
 //      if( pDisc )
-//         cout << "mkr: disc " << i << " nhits " << pDisc->getNumRawHits() << endl;
+//         LOG_INFO << "mkr: disc " << i << " nhits " << pDisc->getNumRawHits() << endm;
 //   };
 
   return kStOk;
