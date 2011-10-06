@@ -123,6 +123,8 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   geom.success_svtt = ConstructSvtt( geom.svttFlag, geom.svttStat ); // SVT must preceede FTPC and SISD
   geom.success_sisd = ConstructSisd( geom.sisdFlag, geom.sisdStat ); // 
 
+  geom.success_pixl = ConstructPixl( geom.pixlFlag, geom.pixlStat ); // OLD development pixel detector
+
   // Add in the support cone
   geom.success_scon = ConstructScon( geom.sconFlag, geom.sconStat ); // support cone before SVT
   geom.success_idsm = ConstructIdsm( geom.idsmFlag, geom.idsmStat );
@@ -820,7 +822,29 @@ Bool_t Geometry::ConstructIdsm( const Char_t *flag, Bool_t go )
   return true;
 }
 
+// ---------------------------------------------------------------------- This is the old development pixel detector
+Bool_t Geometry::ConstructPixl( const Char_t *flag, Bool_t go )
+{                                                  if (!go) return false;
 
+  if ( !pixlGeom.Use("select",flag) )
+    {
+      Error( GetName(), Form("Cannot locate configuration %s",flag) );
+      return false;
+    }
+
+  AgStructure::AgDetpNew(pixlGeom.module, Form("PIXL Configuration %s",flag));
+  AgStructure::AgDetpAdd("Pxlv_t","ladver",   2.0f );
+  AgStructure::AgDetpAdd("Pxlv_t","location", pixlGeom.location );
+
+
+  if (go) if ( !CreateModule(pixlGeom.module) ) {
+    Warning(GetName(),Form("Could not create module %s",pixlGeom.module.Data()));
+    return false;
+  }
+
+  return true;
+
+}
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -1138,10 +1162,10 @@ Bool_t Geometry::PipeInit() // Does this break the config=-1 scheme?
 
 Bool_t Geometry::PixlInit() // Probably breaks config=-1 scheme
 {
-  //replace [exe PIXL00;] with [ "Simplest.Gerrit" PIXL=on; PixlConfig=-1;]
+  pixlGeom.module="PixlGeo3";
   pixlGeom.select="PIXL00"; pixlGeom.config=-1; pixlGeom.fill(); 
-  //replace [exe PIXL01;] with [ "Put the pixel detector in" PIXL=on; PixlConfig=1;]
   pixlGeom.select="PIXL01"; pixlGeom.config=1; pixlGeom.fill();
+  pixlGeom.select="PIXL02"; pixlGeom.config=1; pixlGeom.location=2.0; pixlGeom.fill();
   return true;
 }
 
