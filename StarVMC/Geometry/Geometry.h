@@ -22,7 +22,7 @@ class Geom_t : public AgStructure
   SetDetector(tpce);  SetDetector(calb);  SetDetector(scon);  SetDetector(svtt);
   SetDetector(phmd);  SetDetector(upst);  SetDetector(zcal);  SetDetector(cave);
   SetDetector(magp);  SetDetector(bbcm);  SetDetector(sisd);  SetDetector(rich);
-  SetDetector(mfld);  SetDetector(fgtd);  SetDetector(idsm);  
+  SetDetector(mfld);  SetDetector(fgtd);  SetDetector(idsm);  SetDetector(pixl);
 
   SetDetector(istd); // placeholder for IST
   SetDetector(pxld); // placeholder for PXL
@@ -49,7 +49,7 @@ class Geom_t : public AgStructure
   AddDetector(tpce);  AddDetector(calb);  AddDetector(scon);  AddDetector(svtt);
   AddDetector(phmd);  AddDetector(upst);  AddDetector(zcal);  AddDetector(cave);
   AddDetector(magp);  AddDetector(bbcm);  AddDetector(sisd);  AddDetector(rich);
-  AddDetector(mfld);  AddDetector(fgtd);  AddDetector(idsm);
+  AddDetector(mfld);  AddDetector(fgtd);  AddDetector(idsm);  AddDetector(pixl);
 
   AddDetector(istd);
   AddDetector(pxld);
@@ -245,12 +245,13 @@ class PixlGeom_t : public AgStructure
   ClassDef(PixlGeom_t,1);
   PixlGeom_t(): AgStructure("PixlGeom_t","STAR Pixel Detector Master Geometry Table")
     {
-      select="default"; module="PixlGeo"; config=-1;
+      select="default"; module="PixlGeo3"; config=-1; location=1.0;
     }
   ~PixlGeom_t(){ };
   TString select;
   TString module;
   Int_t config;
+  Float_t location;
 };
 
 // ----------------------------------------------------------------------
@@ -434,7 +435,7 @@ class IstdGeom_t : public AgStructure
   ClassDef(IstdGeom_t,1);
   IstdGeom_t(): AgStructure("IstdGeom_t","STAR ISTD Master Geometry Table")
     {
-      select="ISTDon"; module="IstdGeo"; config=1;
+      select="ISTDon"; module="IstdGeo"; config=1; 
     }
     TString select;
     TString module;
@@ -509,11 +510,18 @@ class Geometry : public AgModule
   Bool_t ConstructUpst( const Char_t *flag, Bool_t go=true );
   Bool_t ConstructZcal( const Char_t *flag, Bool_t go=true );
   Bool_t ConstructRich( const Char_t *flag, Bool_t go=false ); // RICH is deprecated
+
+  Bool_t ConstructPixl( const Char_t *flag, Bool_t go=true );
+
+  // FGT and new inner support cone
   Bool_t ConstructFgtd( const Char_t *flag, Bool_t go=true );
   Bool_t ConstructIdsm( const Char_t *flag, Bool_t go=true );
 
+
+  // New Inner Detectors
   Bool_t ConstructIstd( const Char_t *flag, Bool_t go=false ) { /* placeholder */ return false; }
   Bool_t ConstructPxld( const Char_t *flag, Bool_t go=false ) { /* placeholder */ return false; }
+  
 
  public:
   AgModule *CreateModule( const Char_t *name, const Char_t *top = NULL );
