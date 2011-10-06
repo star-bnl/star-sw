@@ -1053,10 +1053,15 @@ void FEFcn::Eval(int npar, double* gradp, double& fvalp, double* par, int flag)
   mXi2 = myXi2/myN;
   if (!mN00) {
     mN00 = (int)(log(double(myN))/log(2.)); 
-    mN00 = 1<<mN00; mVal00=fval/mN00;}
+    mN00 = 1<<mN00; mVal00=fval/mN00;
+    printf("FEFcn::Eval mVal00 = %g mN00=%d\n",mVal00,mN00);
+  }
 
   fvalp = fval/mN00-mVal00;
-  if (flag==2)   {for (int i=0;i<mNPars;i++){gradp[i]=grad[i]/mN00;}}
+static const double oleg = 1e-4;
+  for (int ip=0;ip<npar;ip++) { fvalp += oleg*0.5*par[ip]*par[ip];}
+  if (flag==2)   {
+    for (int i=0;i<mNPars;i++){gradp[i]=grad[i]/mN00+oleg*par[i];}}
 }
 //______________________________________________________________________________
 //______________________________________________________________________________
