@@ -13,7 +13,10 @@ enum StFgtLayer_t { FGT_R_LAYER = 'R', FGT_PHI_LAYER = 'P' };
 #endif
 
 /*
- * $ Id: $
- * $ Log: $
+ * $Id: StFgtEnums.h,v 1.4 2011/10/06 15:17:39 sgliske Exp $
+ * $Log: StFgtEnums.h,v $
+ * Revision 1.4  2011/10/06 15:17:39  sgliske
+ * CVS says it updated the file, but I don't see a change
+ *
  *
  */
