@@ -29,15 +29,15 @@
        // ---------------------------------------------------------------------------------------------------     
           ///@addtogroup PixlGeo3_vars     
           ///@{        
-                Float_t angle,anglepos,anglecorr,raddeg;        
+                float angle,anglepos,anglecorr,raddeg;        
                 //        
-                /// Float_t angle,anglepos,anglecorr,raddeg        
+                /// float angle,anglepos,anglecorr,raddeg        
           ///@}     
           ///@addtogroup PixlGeo3_vars     
           ///@{        
-                Int_t nladder,nsector,nextraladder;        
+                int nladder,nsector,nextraladder;        
                 //        
-                /// Int_t nladder,nsector,nextraladder        
+                /// int nladder,nsector,nextraladder        
           ///@}     
           //  -----------------------------------------------------     
           /// @defgroup pxlv_doc     
@@ -48,6 +48,7 @@
           ///                             
           ///Int_t version;     
           ///Float_t ladver;     
+          ///Float_t location;     
           ///Int_t _index;     
           //     
           Pxlv_t pxlv;     
@@ -425,6 +426,8 @@
                    /// pxlv . version = 1.0; //  config version            
                    pxlv . ladver = 1.0; //  Ladder Version            
                    /// pxlv . ladver = 1.0; //  Ladder Version            
+                   pxlv . location = 1.0; // Location: 1=CAVE, 2=IDSM           
+                   /// pxlv . location = 1.0; // Location: 1=CAVE, 2=IDSM           
                    //           
                    pxlv.fill();           
              ///@}        
@@ -680,22 +683,40 @@
                    ///Create PXMO           
                    Create("PXMO");            
              }        
-             { AgPlacement place = AgPlacement("PXMO","CAVE");           
-                   /// Add daughter volume PXMO to mother CAVE           
-                   place.par("only")=AgPlacement::kOnly;           
-                   /// Overlap: agplacement::konly           
-                   _stacker -> Position( AgBlock::Find("PXMO"), place );           
-             } // end placement of PXMO        
+             if ( pxlv.location==1.0 )        
+             {           
+                   { AgPlacement place = AgPlacement("PXMO","CAVE");              
+                         /// Add daughter volume PXMO to mother CAVE              
+                         _stacker -> Position( AgBlock::Find("PXMO"), place );              
+                   } // end placement of PXMO           
+             }        
+             else        
+             {           
+                   { AgPlacement place = AgPlacement("PXMO","IDSM");              
+                         /// Add daughter volume PXMO to mother IDSM              
+                         _stacker -> Position( AgBlock::Find("PXMO"), place );              
+                   } // end placement of PXMO           
+             }        
              _create = AgCreate("PXBX");        
              {           
                    AgShape myshape; // undefined shape           
                    ///Create PXBX           
                    Create("PXBX");            
              }        
-             { AgPlacement place = AgPlacement("PXBX","CAVE");           
-                   /// Add daughter volume PXBX to mother CAVE           
-                   _stacker -> Position( AgBlock::Find("PXBX"), place );           
-             } // end placement of PXBX        
+             if ( pxlv.location==1.0 )        
+             {           
+                   { AgPlacement place = AgPlacement("PXBX","CAVE");              
+                         /// Add daughter volume PXBX to mother CAVE              
+                         _stacker -> Position( AgBlock::Find("PXBX"), place );              
+                   } // end placement of PXBX           
+             }        
+             else        
+             {           
+                   { AgPlacement place = AgPlacement("PXBX","IDSM");              
+                         /// Add daughter volume PXBX to mother IDSM              
+                         _stacker -> Position( AgBlock::Find("PXBX"), place );              
+                   } // end placement of PXBX           
+             }        
        }; // PixlGeo3     
  }; // namespace PixlGeo3  
  

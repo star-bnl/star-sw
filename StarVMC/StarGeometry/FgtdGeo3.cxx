@@ -1937,7 +1937,7 @@
        {        
              ///@addtogroup FgtdGeo3_revision        
              ///@{           
-                   /// Created:   9/23/2011            
+                   /// Created:   10/04/2011            
              ///@}        
              ///@addtogroup FgtdGeo3_revision        
              ///@{           
@@ -2092,19 +2092,23 @@
                    _material.lock();           
              }        
              /// Component Si	a=28.1	z=14	w=0.191        
-             /// Component O	a=16	z=8	w=0.359        
-             /// Component C	a=12	z=6	w=0.276        
-             /// Component H	a=1	z=1	w=0.034        
-             /// Component Cl	a=35.5	z=17	w=0.018        
+             /// Component O	a=16	z=8	w=0.339        
+             /// Component C	a=12	z=6	w=0.213        
+             /// Component H	a=1	z=1	w=0.028        
+             /// Component Cl	a=35.5	z=17	w=0.009        
              /// Component Cu	a=63.5	z=29	w=0.122        
+             /// Component Pb	a=207	z=82	w=0.039        
+             /// Component Sn	a=118.7	z=50	w=0.059        
              /// Mixture APVMix dens=2.535        
              {  AgMaterial &mix = AgMaterial::Get("Apvmix");           
                    mix.Component("Si",28.1,14,0.191);           
-                   mix.Component("O",16,8,0.359);           
-                   mix.Component("C",12,6,0.276);           
-                   mix.Component("H",1,1,0.034);           
-                   mix.Component("Cl",35.5,17,0.018);           
+                   mix.Component("O",16,8,0.339);           
+                   mix.Component("C",12,6,0.213);           
+                   mix.Component("H",1,1,0.028);           
+                   mix.Component("Cl",35.5,17,0.009);           
                    mix.Component("Cu",63.5,29,0.122);           
+                   mix.Component("Pb",207,82,0.039);           
+                   mix.Component("Sn",118.7,50,0.059);           
                    mix.par("dens")=2.535;           
                    mix.lock();           
                    _material = mix;           
@@ -2115,9 +2119,11 @@
              /// Component C	a=12	z=6	w=0.248        
              /// Component H	a=1	z=1	w=0.023        
              /// Component Cu	a=63.5	z=29	w=0.109        
-             /// Component Fe	a=55.8	z=26	w=0.191        
-             /// Component Cr	a=52.0	z=24	w=0.048        
-             /// Component Ni	a=58.7	z=28	w=0.027        
+             /// Component Fe	a=55.8	z=26	w=0.019        
+             /// Component Cr	a=52.0	z=24	w=0.005        
+             /// Component Ni	a=58.7	z=28	w=0.003        
+             /// Component Pb	a=207	z=82	w=0.096        
+             /// Component Sn	a=118.7	z=50	w=0.143        
              /// Mixture HVMix dens=3.009        
              {  AgMaterial &mix = AgMaterial::Get("Hvmix");           
                    mix.Component("Si",28.1,14,0.113);           
@@ -2125,52 +2131,62 @@
                    mix.Component("C",12,6,0.248);           
                    mix.Component("H",1,1,0.023);           
                    mix.Component("Cu",63.5,29,0.109);           
-                   mix.Component("Fe",55.8,26,0.191);           
-                   mix.Component("Cr",52.0,24,0.048);           
-                   mix.Component("Ni",58.7,28,0.027);           
+                   mix.Component("Fe",55.8,26,0.019);           
+                   mix.Component("Cr",52.0,24,0.005);           
+                   mix.Component("Ni",58.7,28,0.003);           
+                   mix.Component("Pb",207,82,0.096);           
+                   mix.Component("Sn",118.7,50,0.143);           
                    mix.par("dens")=3.009;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           
              }        
              /// Component Si	a=28.1	z=14	w=0.122        
-             /// Component O	a=16	z=8	w=0.273        
-             /// Component C	a=12	z=6	w=0.441        
-             /// Component H	a=1	z=1	w=0.032        
+             /// Component O	a=16	z=8	w=0.225        
+             /// Component C	a=12	z=6	w=0.297        
+             /// Component H	a=1	z=1	w=0.023        
              /// Component N	a=14	z=7	w=0.009        
-             /// Component Cu	a=63.5	z=29	w=0.046        
+             /// Component Cu	a=63.5	z=29	w=0.045        
              /// Component Fe	a=55.8	z=26	w=0.055        
              /// Component Cr	a=52.0	z=24	w=0.014        
              /// Component Ni	a=58.7	z=28	w=0.008        
+             /// Component Pb	a=207	z=82	w=0.081        
+             /// Component Sn	a=118.7	z=50	w=0.121        
              /// Mixture ConMix dens=1.816        
              {  AgMaterial &mix = AgMaterial::Get("Conmix");           
                    mix.Component("Si",28.1,14,0.122);           
-                   mix.Component("O",16,8,0.273);           
-                   mix.Component("C",12,6,0.441);           
-                   mix.Component("H",1,1,0.032);           
+                   mix.Component("O",16,8,0.225);           
+                   mix.Component("C",12,6,0.297);           
+                   mix.Component("H",1,1,0.023);           
                    mix.Component("N",14,7,0.009);           
-                   mix.Component("Cu",63.5,29,0.046);           
+                   mix.Component("Cu",63.5,29,0.045);           
                    mix.Component("Fe",55.8,26,0.055);           
                    mix.Component("Cr",52.0,24,0.014);           
                    mix.Component("Ni",58.7,28,0.008);           
+                   mix.Component("Pb",207,82,0.081);           
+                   mix.Component("Sn",118.7,50,0.121);           
                    mix.par("dens")=1.816;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           
              }        
-             /// Component Si	a=28.1	z=14	w=0.153        
-             /// Component O	a=16	z=8	w=0.214        
-             /// Component C	a=12	z=6	w=0.455        
-             /// Component H	a=1	z=1	w=0.009        
-             /// Component Cu	a=63.5	z=29	w=0.169        
-             /// Mixture TermMix dens=2.35        
+             /// Component Si	a=28.1	z=14	w=0.141        
+             /// Component O	a=16	z=8	w=0.196        
+             /// Component C	a=12	z=6	w=0.419        
+             /// Component H	a=1	z=1	w=0.008        
+             /// Component Cu	a=63.5	z=29	w=0.156        
+             /// Component Pb	a=207	z=82	w=0.032        
+             /// Component Sn	a=118.7	z=50	w=0.048        
+             /// Mixture TermMix dens=2.55        
              {  AgMaterial &mix = AgMaterial::Get("Termmix");           
-                   mix.Component("Si",28.1,14,0.153);           
-                   mix.Component("O",16,8,0.214);           
-                   mix.Component("C",12,6,0.455);           
-                   mix.Component("H",1,1,0.009);           
-                   mix.Component("Cu",63.5,29,0.169);           
-                   mix.par("dens")=2.35;           
+                   mix.Component("Si",28.1,14,0.141);           
+                   mix.Component("O",16,8,0.196);           
+                   mix.Component("C",12,6,0.419);           
+                   mix.Component("H",1,1,0.008);           
+                   mix.Component("Cu",63.5,29,0.156);           
+                   mix.Component("Pb",207,82,0.032);           
+                   mix.Component("Sn",118.7,50,0.048);           
+                   mix.par("dens")=2.55;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           

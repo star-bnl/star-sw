@@ -11,10 +11,12 @@ namespace PIXLGEO3 // $NMSPC
       public: 
       Int_t version; 
       Float_t ladver; 
+      Float_t location; 
       Pxlv_t() : AgStructure("Pxlv_t","User-defined AgML structure") 
       { 
          version=0; 
          ladver=0; 
+         location=0; 
          _index=0; 
       } 
       ~ Pxlv_t(){ /* nada */ }; 
