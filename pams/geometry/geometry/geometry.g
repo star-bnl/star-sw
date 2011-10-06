@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.235 2011/10/06 15:52:05 jwebb Exp $
+* $Id: geometry.g,v 1.236 2011/10/06 19:54:48 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.236  2011/10/06 19:54:48  jwebb
+* Moved IDSM earlier in the call sequence.
+*
 * Revision 1.235  2011/10/06 15:52:05  jwebb
 * Added dev13 tag.
 *
@@ -4264,6 +4267,11 @@ c     write(*,*) 'CALB';
    if (ZCAL)   { write(*,*) 'ZCAL';Call zcalgeo;}
    if (MAGP)   { write(*,*) 'MAGP';Call magpgeo;}
 
+   IF IDSM { "Inner detector support module" 
+
+      Call AgDETP new ('IDSM')
+      Call IdsmGeo1
+   }
 
    if (MUTD) {
      Call AgDetp NEW ('MUTD')
@@ -4316,13 +4324,6 @@ c     write(*,*) 'FSTD'
       endif
       Call fstdgeo
    endif
-
-   IF IDSM {
-
-      Call AgDETP new ('IDSM')
-      Call IdsmGeo1
-
-   }
 
 
    IF (FGTD) THEN                                            
