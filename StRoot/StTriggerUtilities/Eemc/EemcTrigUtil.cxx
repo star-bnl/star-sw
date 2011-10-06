@@ -121,11 +121,11 @@ static int filter(const struct dirent* d)
 
 static TDatime getDateTime(struct dirent* d)
 {
-  if (strcmp(d->d_name,"05.06.2009") == 0) return TDatime(2009,5, 6,10, 0,0);
-  if (strcmp(d->d_name,"05.13.2009") == 0) return TDatime(2009,5,13,17, 0,0);
-  if (strcmp(d->d_name,"05.17.2009") == 0) return TDatime(2009,5,17,23,30,0);
-  if (strcmp(d->d_name,"05.20.2009") == 0) return TDatime(2009,5,20, 7, 0,0);
-  if (strcmp(d->d_name,"06.06.2009") == 0) return TDatime(2009,6, 6,18, 0,0);
+  if (strcmp(d->d_name,"05.06.2009") == 0) return TDatime("2009-05-06 10:00:00");
+  if (strcmp(d->d_name,"05.13.2009") == 0) return TDatime("2009-05-13 17:00:00");
+  if (strcmp(d->d_name,"05.17.2009") == 0) return TDatime("2009-05-17 23:30:00");
+  if (strcmp(d->d_name,"05.20.2009") == 0) return TDatime("2009-05-20 07:00:00");
+  if (strcmp(d->d_name,"06.06.2009") == 0) return TDatime("2009-06-06 18:00:00");
   int month, day, year;
   sscanf(d->d_name,"%2d.%2d.%4d",&month,&day,&year);
   return TDatime(year,month,day,0,0,0);
