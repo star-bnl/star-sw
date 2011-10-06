@@ -1,9 +1,9 @@
-// $Id: StFgtDbMaker.h,v 1.3 2011/10/06 19:01:44 balewski Exp $
+// $Id: StFgtDbMaker.h,v 1.4 2011/10/06 19:03:58 balewski Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
 */
-// jan 12
+
 #ifndef STFGTDBMAKER_H
 #define STFGTDBMAKER_H
 
@@ -11,8 +11,12 @@
 #include "StMaker.h"
 #endif
 
+class fgtElosCutoff_st;
+
+
 class StFgtDbMaker : public StMaker {
  private:
+  fgtElosCutoff_st *mLossTab;
 
  public: 
   StFgtDbMaker(const char *name="FgtDb");
@@ -23,16 +27,18 @@ class StFgtDbMaker : public StMaker {
   virtual Int_t  Finish();
   virtual void   Clear(const char *opt);
 
+  Float_t eLossTab(int bin); //  built from BichselELossProbHighBG.dat used to reject very high and unrealistic loss value
+
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.3 2011/10/06 19:01:44 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.4 2011/10/06 19:03:58 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
-// Revision 1.3  2011/10/06 19:01:44  balewski
-// *** empty log message ***
+// Revision 1.4  2011/10/06 19:03:58  balewski
+// access Elos table from STAR DB
 //
 // Revision 1.2  2011/10/04 02:59:34  balewski
 // added guestimates of gains, grid absorption, charge sharing
