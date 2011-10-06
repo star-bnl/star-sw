@@ -2120,8 +2120,7 @@
              /// Component H	a=1	z=1	w=0.023        
              /// Component Cu	a=63.5	z=29	w=0.109        
              /// Component Fe	a=55.8	z=26	w=0.019        
-             /// Component Cr	a=52.0	z=24	w=0.005        
-             /// Component Ni	a=58.7	z=28	w=0.003        
+             /// Component Cr	a=52.0	z=24	w=0.008        
              /// Component Pb	a=207	z=82	w=0.096        
              /// Component Sn	a=118.7	z=50	w=0.143        
              /// Mixture HVMix dens=3.009        
@@ -2132,8 +2131,7 @@
                    mix.Component("H",1,1,0.023);           
                    mix.Component("Cu",63.5,29,0.109);           
                    mix.Component("Fe",55.8,26,0.019);           
-                   mix.Component("Cr",52.0,24,0.005);           
-                   mix.Component("Ni",58.7,28,0.003);           
+                   mix.Component("Cr",52.0,24,0.008);           
                    mix.Component("Pb",207,82,0.096);           
                    mix.Component("Sn",118.7,50,0.143);           
                    mix.par("dens")=3.009;           
@@ -2148,8 +2146,7 @@
              /// Component N	a=14	z=7	w=0.009        
              /// Component Cu	a=63.5	z=29	w=0.045        
              /// Component Fe	a=55.8	z=26	w=0.055        
-             /// Component Cr	a=52.0	z=24	w=0.014        
-             /// Component Ni	a=58.7	z=28	w=0.008        
+             /// Component Ni	a=58.7	z=28	w=0.022        
              /// Component Pb	a=207	z=82	w=0.081        
              /// Component Sn	a=118.7	z=50	w=0.121        
              /// Mixture ConMix dens=1.816        
@@ -2161,8 +2158,7 @@
                    mix.Component("N",14,7,0.009);           
                    mix.Component("Cu",63.5,29,0.045);           
                    mix.Component("Fe",55.8,26,0.055);           
-                   mix.Component("Cr",52.0,24,0.014);           
-                   mix.Component("Ni",58.7,28,0.008);           
+                   mix.Component("Ni",58.7,28,0.022);           
                    mix.Component("Pb",207,82,0.081);           
                    mix.Component("Sn",118.7,50,0.121);           
                    mix.par("dens")=1.816;           
