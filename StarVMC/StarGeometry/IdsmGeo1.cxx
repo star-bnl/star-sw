@@ -381,17 +381,17 @@
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
-                      /// Material SUCMix            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Sucmix");              
+                      /// Material SUCBMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Sucbmix");              
                             _material = mat;              
                       }           
                       {  AgShape shape = AgShape("Tube");              
                             shape     .Inherit( AgBlock::previous() );              
                             create     .SetParameters(shape);              
                             shape.par("rmin")=21.6;              
-                            shape.par("rmax")=22.7;              
+                            shape.par("rmax")=22.4;              
                             shape.par("dz")=1.3/2.;              
-                            /// Shape Tube rmin=21.6 rmax=22.7 dz=1.3/2.               
+                            /// Shape Tube rmin=21.6 rmax=22.4 dz=1.3/2.               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
                             if (_same_shape) goto END_OF_SUCB;              
@@ -451,17 +451,17 @@
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
-                      /// Material SUCMix            
-                      {  AgMaterial mat = AgMaterial::CopyMaterial("Sucmix");              
+                      /// Material SUCDMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Sucdmix");              
                             _material = mat;              
                       }           
                       {  AgShape shape = AgShape("Tube");              
                             shape     .Inherit( AgBlock::previous() );              
                             create     .SetParameters(shape);              
-                            shape.par("rmin")=37.8;              
+                            shape.par("rmin")=38.6;              
                             shape.par("rmax")=39.9;              
                             shape.par("dz")=0.62/2.;              
-                            /// Shape Tube rmin=37.8 rmax=39.9 dz=0.62/2.               
+                            /// Shape Tube rmin=38.6 rmax=39.9 dz=0.62/2.               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
                             if (_same_shape) goto END_OF_SUCD;              
@@ -714,7 +714,7 @@
        {        
              ///@addtogroup IdsmGeo1_revision        
              ///@{           
-                   /// Created:   9/23/2011            
+                   /// Created:   10/04/2011            
              ///@}        
              ///@addtogroup IdsmGeo1_revision        
              ///@{           
@@ -876,27 +876,44 @@
                    _material = mix;           
                    _material.lock();           
              }        
-             /// Component AL	a=27	z=13	w=0.747        
-             /// Component Cu	a=63.5	z=29	w=0.012        
-             /// Component Fe	a=55.8	z=26	w=0.056        
-             /// Component Cr	a=52.0	z=24	w=0.014        
-             /// Component Ni	a=58.7	z=28	w=0.008        
-             /// Component Zn	a=65.4	z=30	w=0.045        
-             /// Component Ti	a=47.9	z=22	w=0.094        
-             /// Component V	a=50.9	z=23	w=0.004        
-             /// Component Mg	a=24.3	z=12	w=0.020        
-             /// Mixture SUCMix dens=3.4        
-             {  AgMaterial &mix = AgMaterial::Get("Sucmix");           
-                   mix.Component("AL",27,13,0.747);           
-                   mix.Component("Cu",63.5,29,0.012);           
-                   mix.Component("Fe",55.8,26,0.056);           
-                   mix.Component("Cr",52.0,24,0.014);           
-                   mix.Component("Ni",58.7,28,0.008);           
-                   mix.Component("Zn",65.4,30,0.045);           
-                   mix.Component("Ti",47.9,22,0.094);           
-                   mix.Component("V",50.9,23,0.004);           
-                   mix.Component("Mg",24.3,12,0.020);           
-                   mix.par("dens")=3.4;           
+             /// Component O	a=16	z=8	w=0.043        
+             /// Component C	a=12	z=6	w=0.635        
+             /// Component H	a=1	z=1	w=0.014        
+             /// Component Cl	a=35.5	z=17	w=0.019        
+             /// Component AL	a=27	z=13	w=0.017        
+             /// Component Ti	a=47.9	z=22	w=0.260        
+             /// Component V	a=50.9	z=23	w=0.012        
+             /// Mixture SUCBMix dens=2.46        
+             {  AgMaterial &mix = AgMaterial::Get("Sucbmix");           
+                   mix.Component("O",16,8,0.043);           
+                   mix.Component("C",12,6,0.635);           
+                   mix.Component("H",1,1,0.014);           
+                   mix.Component("Cl",35.5,17,0.019);           
+                   mix.Component("AL",27,13,0.017);           
+                   mix.Component("Ti",47.9,22,0.260);           
+                   mix.Component("V",50.9,23,0.012);           
+                   mix.par("dens")=2.46;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component O	a=16	z=8	w=0.048        
+             /// Component C	a=12	z=6	w=0.694        
+             /// Component H	a=1	z=1	w=0.015        
+             /// Component Cl	a=35.5	z=17	w=0.021        
+             /// Component AL	a=27	z=13	w=0.013        
+             /// Component Ti	a=47.9	z=22	w=0.200        
+             /// Component V	a=50.9	z=23	w=0.009        
+             /// Mixture SUCDMix dens=2.37        
+             {  AgMaterial &mix = AgMaterial::Get("Sucdmix");           
+                   mix.Component("O",16,8,0.048);           
+                   mix.Component("C",12,6,0.694);           
+                   mix.Component("H",1,1,0.015);           
+                   mix.Component("Cl",35.5,17,0.021);           
+                   mix.Component("AL",27,13,0.013);           
+                   mix.Component("Ti",47.9,22,0.200);           
+                   mix.Component("V",50.9,23,0.009);           
+                   mix.par("dens")=2.37;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           
