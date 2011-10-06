@@ -76,7 +76,7 @@ class AgMaterial : public TNamed
   /// Users may change their materials at will.
   void   lock(){ mLock=true; }
 
-  Float_t sumWeights();
+  Double_t sumWeights();
  
  private:
  protected:
