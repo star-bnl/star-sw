@@ -119,16 +119,21 @@ static int filter(const struct dirent* d)
   return sscanf(d->d_name,"%2d.%2d.%4d",&month,&day,&year) == 3;
 }
 
-static TDatime getDateTime(struct dirent* d)
+static TDatime getDefaultDateTime(const char* dirname)
 {
-  if (strcmp(d->d_name,"05.06.2009") == 0) return TDatime("2009-05-06 10:00:00");
-  if (strcmp(d->d_name,"05.13.2009") == 0) return TDatime("2009-05-13 17:00:00");
-  if (strcmp(d->d_name,"05.17.2009") == 0) return TDatime("2009-05-17 23:30:00");
-  if (strcmp(d->d_name,"05.20.2009") == 0) return TDatime("2009-05-20 07:00:00");
-  if (strcmp(d->d_name,"06.06.2009") == 0) return TDatime("2009-06-06 18:00:00");
   int month, day, year;
-  sscanf(d->d_name,"%2d.%2d.%4d",&month,&day,&year);
+  sscanf(dirname,"%2d.%2d.%4d",&month,&day,&year);
   return TDatime(year,month,day,0,0,0);
+}
+
+static TDatime getDateTime(const char* dirname)
+{
+  if (strcmp(dirname,"05.06.2009") == 0) return TDatime("2009-05-06 10:00:00");
+  if (strcmp(dirname,"05.13.2009") == 0) return TDatime("2009-05-13 17:00:00");
+  if (strcmp(dirname,"05.17.2009") == 0) return TDatime("2009-05-17 23:30:00");
+  if (strcmp(dirname,"05.20.2009") == 0) return TDatime("2009-05-20 07:00:00");
+  if (strcmp(dirname,"06.06.2009") == 0) return TDatime("2009-06-06 18:00:00");
+  return getDefaultDateTime(dirname);
 }
 
 static void scanPed4DirForDates(const char* dir, vector<TDatime>& dates)
@@ -137,7 +142,7 @@ static void scanPed4DirForDates(const char* dir, vector<TDatime>& dates)
   int n = scandir(dir,&namelist,filter,0);
   if (n == -1) return;
   while (n--) {
-    dates.push_back(getDateTime(namelist[n]));
+    dates.push_back(getDateTime(namelist[n]->d_name));
     free(namelist[n]);
   }
   free(namelist);
