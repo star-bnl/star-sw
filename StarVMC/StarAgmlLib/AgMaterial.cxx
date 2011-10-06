@@ -609,3 +609,15 @@ void AgMaterial::Component( Int_t ic, TString &name, Double_t &a, Double_t &z, D
   name=mC[ic]; a=mA[ic]; z=mZ[ic]; w=mW[ic];
   return;
 }
+
+Float_t AgMaterial::sumWeights()
+{
+  Int_t nc = mC.size();
+  Float_t sumw = 0.0;
+  for ( Int_t i =0;i<nc;i++ )
+    {
+      sumw += mW[i];
+    }
+  return sumw;
+}
+// ==============================================================================================================
