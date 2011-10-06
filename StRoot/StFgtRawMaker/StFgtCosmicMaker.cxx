@@ -122,7 +122,7 @@ Int_t StFgtCosmicMaker::Make()
 	  StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
 
 	  if(pDisc)
-	    pDisc->getRawHitArray().PushBack(hit);
+	    pDisc->getRawHitArray().pushBack(hit);
 	  else
 	    { LOG_WARN <<"Could not access disc "<<endm; }
 	}

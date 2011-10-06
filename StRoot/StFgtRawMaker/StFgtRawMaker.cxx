@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.14 2011/09/26 14:23:06 sgliske Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.15 2011/10/06 15:19:43 sgliske Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.15  2011/10/06 15:19:43  sgliske
+//  StFgtRawHitArray::PushBack -> pushBack
+//
 //  Revision 1.14  2011/09/26 14:23:06  sgliske
 //  Update for new 'Char_t mType' field in StFgtRawHit
 //
@@ -108,7 +111,7 @@ Int_t StFgtRawMaker::FillHits()
                StFgtRawHit hit(geoId,adc,type,timebin);
                StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
                if(pDisc)
-                  pDisc->getRawHitArray().PushBack( hit );
+                  pDisc->getRawHitArray().pushBack( hit );
                else
                   { LOG_WARN <<"Could not access disc " << discIdx << endm; }
             }
