@@ -26,7 +26,7 @@ class StFgtCosmicTestStandGeom:public StFgtGeom
 
 	    
   
-         static Int_t getNaiveGeoIdFromElecCoordin
+         static Int_t getNaiveGeoIdFromElecCoord
 	   (
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	    )
@@ -58,7 +58,7 @@ class StFgtCosmicTestStandGeom:public StFgtGeom
                 apv -= 12;
 
              return
-                ( disc*kNumFgtQuadrants + quadrant ) * kNumFgtLayers
+                ( disc*kNumFgtQuadrants + quadrant ) * kNumFgtLayers * kNumFgtStripsPerLayer
                 + mNaiveMapping[ apv*128+channel ];
 	   }
 	   
@@ -108,8 +108,11 @@ class StFgtCosmicTestStandGeom:public StFgtGeom
 #endif
 
 /*
- *  $Id: StFgtCosmicTestStandGeom.h,v 1.3 2011/09/29 18:34:53 sgliske Exp $
+ *  $Id: StFgtCosmicTestStandGeom.h,v 1.4 2011/10/06 15:17:27 sgliske Exp $
  *  $Log: StFgtCosmicTestStandGeom.h,v $
+ *  Revision 1.4  2011/10/06 15:17:27  sgliske
+ *  CVS says it updated the file, but I don't see a change
+ *
  *  Revision 1.3  2011/09/29 18:34:53  sgliske
  *  Fixed phiQuadXaxis, added asserts to getQuad,and added reverse lookup: elec. coord. from geoId
  *
