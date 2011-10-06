@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.233 2011/10/03 22:03:06 jwebb Exp $
+* $Id: geometry.g,v 1.234 2011/10/06 14:54:00 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.234  2011/10/06 14:54:00  jwebb
+* Added DEV13 geometry.  Removed pmd from y2012.  Added pixl to complete.
+*
 * Revision 1.233  2011/10/03 22:03:06  jwebb
 * Redefined the "complete" geometry for use in anticipated simulations with
 * FGT.  Did not add the HFT as we do not yet have a geometry for that.
@@ -1117,6 +1120,8 @@ replace [exe PIPE14;] with [ "The new pipe according to Kai"; PipeConfig = 4;
 
 replace [exe PIXL00;] with [ "Simplest.Gerrit" PIXL=on; PixlConfig=-1;]
 replace [exe PIXL01;] with [ "Put the pixel detector in" PIXL=on; PixlConfig=1;]
+replace [exe PIXL02;] with [ "Add the pixle detector to the IDSM"; PIXL=on; PixlConfig=6; ]
+
 replace [exe RICHof;] with [;RICH=off;]
 replace [exe RICH02;] with [;RICH=on; richPos=2; richConfig=2;]
 
@@ -1815,7 +1820,7 @@ REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe VPDD07;      "Latest version of VPD";
     exe FTPCof;      "FTPC";
     exe SVTTof;      "No SVT";
-    exe PHMD02;      "Photon mult detector on";
+    exe PHMDof;      "Photon mult detector on";
     exe SISDof;      "No sisd";
     exe MUTD05;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
@@ -1824,6 +1829,31 @@ REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe IDSMv1;      "Inner detector support";
     exe FGTDv31;     "FGT v3 6 disks";
 ]
+
+REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD05;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+
+    exe IDSMv1;      "Inner detector support";
+    exe FGTDv31;     "FGT v3 6 disks";
+
+    exe PIXL02;      "Development version of the pixl detector";
+]
+
 
 
 REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2013.  Currently just complete FGT.  HFT when available."
@@ -1846,6 +1876,8 @@ REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2013.  Currently j
 
     exe IDSMv1;      "Inner detector support";
     exe FGTDv32;     "FGT v3 6 disks";
+
+    exe PIXL02;      "Development version of the pixl detector";
 ]
 
 
@@ -4244,9 +4276,10 @@ c    write(*,*) 'CALB'
      if (PixlConfig==2) Call pixlgeo1
      if (PixlConfig==3) Call pixlgeo2
      if (PixlConfig==4) Call pixlgeo3
-     if (PixlConfig==5) {
+     if (PixlConfig>=5) {
            call AgDETP new ('PIXL')
            call AgDETP add ('PXLV.LadVer=',2.0,1)
+           if PixlConfig==6 { call AgDetp add('PXLV.location=',2.0,1); }
            call pixlgeo3
      }
    }
