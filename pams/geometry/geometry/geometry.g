@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.236 2011/10/06 19:54:48 jwebb Exp $
+* $Id: geometry.g,v 1.237 2011/10/06 20:38:22 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.237  2011/10/06 20:38:22  jwebb
+* Fixed FGT setup.
+*
 * Revision 1.236  2011/10/06 19:54:48  jwebb
 * Moved IDSM earlier in the call sequence.
 *
@@ -4335,8 +4338,8 @@ c     write(*,*) 'FSTD'
      if (FgtdConfig==3)    Call fgtdgeo2
 
      IF FgtdConfig>30 {                                           """Apply FGT configuration and construct geometry"""
-        IF FgtdConfig==31 { Call AgDETP add ( 'FGTG.FgstConfig=', 1.0, 1 ); }
-        IF FgtdConfig==32 { Call AgDetp add ( 'FGTG.FgstConfig=', 2.0, 1 ); }
+        IF FgtdConfig==31 { Call AgDETP add ( 'FGGG.FgstConfig=', 1.0, 1 ); }
+        IF FgtdConfig==32 { Call AgDetp add ( 'FGGG.FgstConfig=', 2.0, 1 ); }
         Call FgtdGeo3
      }
 
