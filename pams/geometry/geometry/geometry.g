@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.234 2011/10/06 14:54:00 jwebb Exp $
+* $Id: geometry.g,v 1.235 2011/10/06 15:52:05 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.235  2011/10/06 15:52:05  jwebb
+* Added dev13 tag.
+*
 * Revision 1.234  2011/10/06 14:54:00  jwebb
 * Added DEV13 geometry.  Removed pmd from y2012.  Added pixl to complete.
 *
@@ -1827,7 +1830,7 @@ REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe PIPE12;      "The beam pipe";
 
     exe IDSMv1;      "Inner detector support";
-    exe FGTDv31;     "FGT v3 6 disks";
+    exe FGTDv31;     "FGT v3 5 half + 1 full disks";
 ]
 
 REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
@@ -1849,7 +1852,7 @@ REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
     exe PIPE12;      "The beam pipe";
 
     exe IDSMv1;      "Inner detector support";
-    exe FGTDv31;     "FGT v3 6 disks";
+    exe FGTDv32;     "FGT v3 6 disks";
 
     exe PIXL02;      "Development version of the pixl detector";
 ]
@@ -2602,6 +2605,10 @@ If LL>0
   Case y2012 { y2012 : Y2012 geometry first cut;
                  Geom = 'y2012   ';
                  exe y2012; }
+
+  Case dev13 { dev13 : y2013 stufies;
+                 Geom = 'dev13   ';
+                 exe dev13; }
 
 
 ****************************************************************************************
