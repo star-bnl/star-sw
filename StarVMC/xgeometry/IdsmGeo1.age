@@ -1,5 +1,5 @@
       MODULE IDSMGEO1    simplified  beam support cone for 2012
-      Created   9/23/2011
+      Created   10/04/2011
       Author Jan Balewski MIT, Willie Leight MIT (material mixes)
       +CDE,agecom,gcunit,gconst.
       CONTENT IDSM,TPRR,TPRT,
@@ -70,16 +70,22 @@
       MIXTURE CFRPMix dens=1.78
       COMPONENT AL A=27 Z=13 W=1.
       MIXTURE AlPure dens=2.80
-      COMPONENT AL A=27 Z=13 W=0.747
-      COMPONENT Cu A=63.5 Z=29 W=0.012
-      COMPONENT Fe A=55.8 Z=26 W=0.056
-      COMPONENT Cr A=52.0 Z=24 W=0.014
-      COMPONENT Ni A=58.7 Z=28 W=0.008
-      COMPONENT Zn A=65.4 Z=30 W=0.045
-      COMPONENT Ti A=47.9 Z=22 W=0.094
-      COMPONENT V A=50.9 Z=23 W=0.004
-      COMPONENT Mg A=24.3 Z=12 W=0.020
-      MIXTURE SUCMix dens=3.4
+      COMPONENT O A=16 Z=8 W=0.043
+      COMPONENT C A=12 Z=6 W=0.635
+      COMPONENT H A=1 Z=1 W=0.014
+      COMPONENT Cl A=35.5 Z=17 W=0.019
+      COMPONENT AL A=27 Z=13 W=0.017
+      COMPONENT Ti A=47.9 Z=22 W=0.260
+      COMPONENT V A=50.9 Z=23 W=0.012
+      MIXTURE SUCBMix dens=2.46
+      COMPONENT O A=16 Z=8 W=0.048
+      COMPONENT C A=12 Z=6 W=0.694
+      COMPONENT H A=1 Z=1 W=0.015
+      COMPONENT Cl A=35.5 Z=17 W=0.021
+      COMPONENT AL A=27 Z=13 W=0.013
+      COMPONENT Ti A=47.9 Z=22 W=0.200
+      COMPONENT V A=50.9 Z=23 W=0.009
+      MIXTURE SUCDMix dens=2.37
       COMPONENT O A=16 Z=8 W=0.032
       COMPONENT C A=12 Z=6 W=0.471
       COMPONENT H A=1 Z=1 W=0.011
@@ -187,8 +193,8 @@
       ! ---------------------------------------------------------------------------------- SUCB
       BLOCK SUCB   small Alu ring at central tube
       ATTRIBUTE SUCB seen=1 colo=1
-      MATERIAL SUCMix
-      SHAPE tube rmin=21.6 rmax=22.7 dz=1.3/2.
+      MATERIAL SUCBMix
+      SHAPE tube rmin=21.6 rmax=22.4 dz=1.3/2.
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- SUCC
       BLOCK SUCC   CFiber cone section
@@ -200,8 +206,8 @@
       ! ---------------------------------------------------------------------------------- SUCD
       BLOCK SUCD   large Alu ring at cone
       ATTRIBUTE SUCD seen=1 colo=1
-      MATERIAL SUCMix
-      SHAPE tube rmin=37.8 rmax=39.9 dz=0.62/2.
+      MATERIAL SUCDMix
+      SHAPE tube rmin=38.6 rmax=39.9 dz=0.62/2.
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- SUCE
       BLOCK SUCE   East or West CFiber tube

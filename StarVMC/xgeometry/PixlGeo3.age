@@ -3,12 +3,12 @@
       Author Andrew Rose
       +CDE,agecom.
       +CDE,gcunit.
-      REAL angle,anglePos,angleCorr,raddeg
+      real *4 angle,anglePos,angleCorr,raddeg
 
-      INTEGER nLadder,nSector,nExtraLadder
+      Integer *4 nLadder,nSector,nExtraLadder
 
       CONTENT PXMO,PSEC,PLMO,PLAC,PLPS,PXBX
-      STRUCTURE PXLV { int version,LadVer}
+      STRUCTURE PXLV { int version,LadVer,location}
       STRUCTURE PXLD { version,TotalLength,LadderWidth,LadderThk,PassiveThk,ActiveThk,
             Rin,Rout}
       STRUCTURE PIXG { Ladder,r,a,pOffset,aOffset}
@@ -16,6 +16,7 @@
       FILL PXLV		! Pixel ladder data
       Version = 1.0 !  config version
       LadVer = 1.0 !  Ladder Version
+      location = 1.0 ! Location: 1=CAVE, 2=IDSM
       ENDFILL
       FILL PXLD		! Pixel ladder data
       Version = 1.0 !  version
@@ -113,9 +114,17 @@
       use PXLD version=PXLV_LadVer
       raddeg=3.14159265/180.0
       CREATE PXMO
-      POSITION PXMO in CAVE konly='ONLY' 
+      IF ( PXLV_location==1.0 ) THEN
+      POSITION PXMO in CAVE 
+      ELSE
+      POSITION PXMO in IDSM 
+      ENDIF
       CREATE PXBX
+      IF ( PXLV_location==1.0 ) THEN
       POSITION PXBX in CAVE 
+      ELSE
+      POSITION PXBX in IDSM 
+      ENDIF
       ! ---------------------------------------------------------------------------------- PXMO
       BLOCK PXMO   is the mother of the pixel detector volumes
       MATERIAL Air
