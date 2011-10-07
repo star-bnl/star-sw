@@ -39,6 +39,8 @@
     Create and initialize structures defining detector parameters
   mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm     -->
 
+<Structure name="IDSC"><var name="version" /></Structure>
+
 <Structure name="IDSG" >
    <var name="version" type="float" />
    <var name="rF" />
@@ -73,6 +75,10 @@
    <var name="phiz"    type="float" />
 
 </Structure>
+
+<Fill name="IDSC" comment="IDS control structure">
+    <var name="version" value="1.0" comment="Versioning of the IDSM geometry" />
+</Fill>
 
 
 <Fill name="IDSG" comment="IDS Geometry data,46.1cm=inner radii of IFC"  >
@@ -128,22 +134,7 @@
 
 </Fill>
 
-<Fill name="IDSA" comment="Alignment of the IDSM geometry within the CAVE with cables">
 
-   <var name="version" value="1.0"    comment="Default alignment of IDSM at (0,0,0) with no rotation " />   
-
-   <var name="x"       value="0.0"    comment="x-alignment" />
-   <var name="y"       value="0.0"    comment="y-alignment" />
-   <var name="z"       value="0.0"    comment="z-alignment" />
-
-   <var name="thetax"  value="90.0"   comment="align x`-axis 90 degrees in theta wrt cave" />
-   <var name="phix"    value=" 0.0"   comment="align x`-axis  0 degrees in phi   wrt cave" />
-   <var name="thetay"  value="90.0"   comment="align y`-axis 90 degrees in thetangRail+(0.1+dPhiHV*k)*(-1+2*pm)a wrt cave" />
-   <var name="phiy"    value="90.0"   comment="align y`-axis  0 degrees in phi   wrt cave" />
-   <var name="thetaz"  value=" 0.0"   comment="align z`-axis  0 degrees in theta wrt cave" />
-   <var name="phiz"    value=" 0.0"   comment="align z`-axis  0 degrees in phi   wrt cave" />
-
-</Fill>
 
         
 <!--  mmmmmmmmmmmmm  MATERIALS mmmmmmmmmmmmmmmmm    -->   
@@ -222,7 +213,7 @@
 <!--  mmmmmmmmmmmm initial  COMPUTATION mmmmmmmmmmmmmmmmmmmmmmmmmmm -->
 
 
-<Use struct="IDSG" select="version" value="1.0" />
+<Use struct="IDSG" select="version" value="IDSC_version" />
 <Use struct="IDSA" select="version" value="1.0" />
 
 
