@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.237 2011/10/06 20:38:22 jwebb Exp $
+* $Id: geometry.g,v 1.238 2011/10/07 19:44:45 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.238  2011/10/07 19:44:45  jwebb
+* Switched versions of the PIXL detector.
+*
 * Revision 1.237  2011/10/06 20:38:22  jwebb
 * Fixed FGT setup.
 *
@@ -1261,7 +1264,8 @@ replace [exe FGTD02;] with  [;FGTD=on;FgtdConfig=2;  "GEM forward tracker"]
 replace [exe FGTDv31;] with [;FGTD=on;FgtdConfig=31; "FGT v3 5 half plus one full disk"]
 replace [exe FGTDv32;] with [;FGTD=on;FgtdConfig=32; "FGT v3 6 disks"]
 
-replace [exe IDSMv1;] with [;IDSM=on;IdsmConfig=1; "Inner Detector Support"]
+replace [exe IDSM01;] with [;IDSM=on;IdsmConfig=1; "Inner Detector Support"]
+replace [exe IDSM02;] with [;IDSM=on;IdsmConfig=2; "Inner Detector Support"]
 
 replace [exe FSTDof;] with  [;FSTD=off;]
 replace [exe ITSPof;] with  [;ITSP=off;] "prototype of the Inner Tracker SuPport structure"
@@ -1835,7 +1839,7 @@ REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
 
-    exe IDSMv1;      "Inner detector support";
+    exe IDSM01;      "Inner detector support";
     exe FGTDv31;     "FGT v3 5 half + 1 full disks";
 ]
 
@@ -1857,7 +1861,7 @@ REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
 
-    exe IDSMv1;      "Inner detector support";
+    exe IDSM02;      "Inner detector support";
     exe FGTDv32;     "FGT v3 6 disks";
 
     exe PIXL02;      "Development version of the pixl detector";
@@ -1883,7 +1887,7 @@ REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2013.  Currently j
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
 
-    exe IDSMv1;      "Inner detector support";
+    exe IDSM02;      "Inner detector support";
     exe FGTDv32;     "FGT v3 6 disks";
 
     exe PIXL02;      "Development version of the pixl detector";
@@ -4273,6 +4277,7 @@ c     write(*,*) 'CALB';
    IF IDSM { "Inner detector support module" 
 
       Call AgDETP new ('IDSM')
+      Call AgDETP add ('IDSC.version=',IdsmConfig,1)
       Call IdsmGeo1
    }
 
@@ -4294,11 +4299,16 @@ c    write(*,*) 'CALB'
      if (PixlConfig==2) Call pixlgeo1
      if (PixlConfig==3) Call pixlgeo2
      if (PixlConfig==4) Call pixlgeo3
-     if (PixlConfig>=5) {
+     if (PixlConfig==5) {
            call AgDETP new ('PIXL')
            call AgDETP add ('PXLV.LadVer=',2.0,1)
-           if PixlConfig==6 { call AgDetp add('PXLV.location=',2.0,1); }
            call pixlgeo3
+     }
+     IF PixlConfig==6 {
+           call AgDetp new ('PIXL')
+           call AgDetp add ('PXLV.LadVer=',2.0,1)
+           call AgDetp add ('PXLV.location=',2.0,1)
+           call pixlgeo4
      }
    }
 
