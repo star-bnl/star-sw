@@ -2088,6 +2088,13 @@ class Placement(Handler):
         z     = attr.get('z',None)
         only  = attr.get('konly',None)
         copy  = attr.get('ncopy',None)
+        cond  = attr.get('if',None)   # conditional placement
+
+        if cond:
+            cond = replacements(cond)
+            cond = cond.lower()
+            
+        self.cond = cond
 
         # Validate attributes
 #       checkAttributes( tag, attr, ['in','x','y','z','konly','ncopy'], ['block'] )  # plus shape stuff
@@ -2097,6 +2104,7 @@ class Placement(Handler):
 
             # Navigate up the xml stack until we find the parent
             # block or module, then set into accordingly.
+            
             parent = self.parent
             while parent!= None:
 
@@ -2133,6 +2141,9 @@ class Placement(Handler):
         self.block = block
         self.into  = into
         self.pos   = [x, y, z, only, copy]
+
+        # If provided, add the conditional to the placement
+        if cond:            document.impl( 'if ( %s )'%cond, unit=current )
         
         document.impl( '{ AgPlacement place = AgPlacement("%s","%s");' %( block, into ), unit=current )
         document.impl( '/// Add daughter volume %s to mother %s'%(block,into), unit=current )
