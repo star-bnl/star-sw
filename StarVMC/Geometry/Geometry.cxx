@@ -813,6 +813,9 @@ Bool_t Geometry::ConstructIdsm( const Char_t *flag, Bool_t go )
       return false;      
     }
 
+  AgStructure::AgDetpNew( idsmGeom.module, Form("Inner Detector Support Module with configuration %s",flag));
+  AgStructure::AgDetpAdd( "Idsc_t", "version", (Float_t)idsmGeom.config );
+
   if ( go )
   if ( !CreateModule( idsmGeom.module  ) )
     {
@@ -1165,6 +1168,8 @@ Bool_t Geometry::PixlInit() // Probably breaks config=-1 scheme
   pixlGeom.module="PixlGeo3";
   pixlGeom.select="PIXL00"; pixlGeom.config=-1; pixlGeom.fill(); 
   pixlGeom.select="PIXL01"; pixlGeom.config=1; pixlGeom.fill();
+
+  pixlGeom.module="PixlGeo4";
   pixlGeom.select="PIXL02"; pixlGeom.config=1; pixlGeom.location=2.0; pixlGeom.fill();
   return true;
 }
@@ -1711,6 +1716,7 @@ Bool_t Geometry::IdsmInit()
   idsmGeom.select="IDSMof"; idsmGeom.module="None"    ; idsmGeom.config=0; idsmGeom.fill();
   idsmGeom.select="IDSMon"; idsmGeom.module="IdsmGeo1"; idsmGeom.config=1; idsmGeom.fill();
   idsmGeom.select="IDSM01"; idsmGeom.module="IdsmGeo1"; idsmGeom.config=1; idsmGeom.fill();
+  idsmGeom.select="IDSM02"; idsmGeom.module="IdsmGeo1"; idsmGeom.config=2; idsmGeom.fill();
   return true;
 }
 
