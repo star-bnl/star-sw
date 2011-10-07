@@ -135,7 +135,8 @@ my @DAQ_pkgs = qw(StDAQMaker StTofHitMaker StTpcHitMaker StEEmcPoolmuEztPanitkin
 		); 
 # But any *Raw* in StRoot/ would have this automatically done / handled
 if ( $pkg =~ m/Raw/ ){
-  push(@DAQ_pkgs,$pkg);
+    print "Found [$pkg] as Raw package\n";
+    push(@DAQ_pkgs,$pkg);
 }
 
 
