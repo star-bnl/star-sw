@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.11 2011/08/31 19:50:17 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.12 2011/10/07 19:35:46 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.12  2011/10/07 19:35:46  perev
+ * StTrack::mKey short==>int
+ *
  * Revision 1.11  2011/08/31 19:50:17  perev
  * fix assert for small rxy
  *
@@ -787,7 +790,7 @@ void StvStEventFiller::fillEvent()
 	  // filling successful, set up relationships between objects
 	  detInfoVec.push_back(detInfo);
 	  //cout <<"Setting key: "<<(unsigned short)(trNodeVec.size())<<endl;
-	  gTrack->setKey((unsigned short)kTrack->GetId());
+	  gTrack->setKey(kTrack->GetId());
 	  trackNode->addTrack(gTrack);
 	  trNodeVec.push_back(trackNode);
 	  // reuse the utility to fill the topology map
@@ -795,7 +798,7 @@ void StvStEventFiller::fillEvent()
 	  // having the proper track->detectorInfo() relationship
 	  // and a valid StDetectorInfo object.
 	  //cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
-	  gTrkNodeMap.insert(map<const StvTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
+	  gTrkNodeMap[kTrack]=trackNode;
 	  if (trackNode->entries(global)<1)
 	    cout << "StvStEventFiller::fillEvent() -E- Track Node has no entries!! -------------------------" << endl;  
           int ibad = gTrack->bad();
@@ -851,14 +854,12 @@ void StvStEventFiller::fillEventPrimaries()
   mTrackNumber=0;
   for (StvTrackConstIter tkIter= mTracks->begin(); tkIter!=mTracks->end();++tkIter) {
     kTrack = *tkIter;
-    if (!accept(kTrack)) 			continue;
-    map<const StvTrack*, StTrackNode*>::iterator itKtrack = gTrkNodeMap.find(kTrack);
-    if (itKtrack == gTrkNodeMap.end())  	continue;//Stv global was rejected
+    if (!accept(kTrack)) continue;
+    nTRack = gTrkNodeMap[kTrack]; 
+    if (!nTRack)	 continue;
     mTrackNumber++;
-
-    nTRack = (*itKtrack).second;
     assert(nTRack->entries()<=10);
-    assert(nTRack->entries(global)); 
+    assert(nTRack->entries(global)==1); 
 
     //double globalDca = nTRack->track(global)->impactParameter();
     //Even though this is filling of primary tracks, there are certain
