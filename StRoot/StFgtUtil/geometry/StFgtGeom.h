@@ -360,7 +360,7 @@ class StFgtGeom
 	//  slightly by me.
 
 	//  These next two return -1 on error.
-	static inline int rad2LocalStripId( double rad, double *binFrac=0 );
+	static inline int rad2LocalStripId( double rad, double phi, double *binFrac=0 );
 	static inline int phiLoc2LocalStripId( double phiLoc, double *binFrac=0 );
 
 	static int radIdLocal2Global( int iquad, int radId )
@@ -420,8 +420,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.16 2011/10/06 15:16:15 sgliske Exp $
+ *  $Id: StFgtGeom.h,v 1.17 2011/10/07 03:42:38 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.17  2011/10/07 03:42:38  rfatemi
+ *  Updates to get strip Id from radius r
+ *
  *  Revision 1.16  2011/10/06 15:16:15  sgliske
  *  fixed spaces before Log: and Id:
  *
