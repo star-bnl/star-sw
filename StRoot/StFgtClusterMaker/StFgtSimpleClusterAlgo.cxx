@@ -53,7 +53,8 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
       if((layer==prvLayer && adjacentStrips)||prvLayer==noLayer) 
 	{
 	  //should really be charge...
-	  accuCharge+=(*it)->getCharge();  
+	  // accuCharge+=(*it)->getCharge();  
+	  accuCharge+=(*it)->getAdc();  
 	  meanOrdinate+=ordinate;
 	  numStrips++;
 	  newCluster->pushBack((*it)->getGeoId());
@@ -72,7 +73,8 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
 	      clusters.pushBack(*newCluster);
 	      //
 	      delete newCluster;
-	      accuCharge=(*it)->getCharge();
+	      //	      accuCharge=(*it)->getCharge();
+	      accuCharge=(*it)->getAdc();
 	      meanOrdinate=ordinate;
 	      numStrips=1;
 	      newCluster=new StFgtCluster((*it)->getGeoId(),layer,ordinate,accuCharge);

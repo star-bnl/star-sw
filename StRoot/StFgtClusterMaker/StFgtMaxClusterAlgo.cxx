@@ -67,7 +67,7 @@ Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArra
       //      newCluster.setPosition(rOrdinate);
       //      newCluster.setCharge(maxRCharge);
       cout <<"about to push" <<endl;
-          clusters.pushBack(newCluster);
+      clusters.pushBack(newCluster);
       cout <<"clusters have now " << clusters.getEntries() <<endl;
     } 
   if(maxPhiCharge>0)
