@@ -16,13 +16,13 @@ double	StFgtGeom::doublepi = 2.*pi;
 double	StFgtGeom::halfpi = 0.5*pi;
 
 double	StFgtGeom::mRadStripOff =
-    (
+   (
 	(Rout()-Rin()/radStrip_pitch())
 	-
 	int (
 	    (Rout() - Rin())/radStrip_pitch()
 	)
-    ) * radStrip_pitch();
+	) * radStrip_pitch();
 
 double	StFgtGeom::mPhiStripOff =
     (
@@ -34,7 +34,7 @@ double	StFgtGeom::mPhiStripOff =
     ) * phiStrip_pitch();
 
 int	StFgtGeom::mRadStripLOCId_number =
-    int (
+  int (
 	(Rout()-Rin()-radStripOff()) / radStrip_pitch()
     ) + 5;
 
@@ -114,18 +114,53 @@ int StFgtGeom::getQuad( double phiLab )
 
 //  This returns -1 on error.  The second argument is optional, and will return
 //  the fraction of the bin size [0,1.)
-int StFgtGeom::rad2LocalStripId( double rad, double *binFrac )
+int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
 {
-    double ratio = (Rout() - rad) / radStrip_pitch();
-    int irad = (int) ratio;
 
-    if ( binFrac )
-	*binFrac = ratio-irad;
+  //calculate strip number from outer radius of foil and locations of hit in radius
+  double ratio = (Rout() - rad) / radStrip_pitch();
+  int irad = (int) ratio;
 
-    if ( irad >= 0 && irad < radStripLOCId_number() )
-	return irad;
-    else
-	return -1;
+  //if phi = 45-90,135-180,0--45, -90-135,  then strips are 001-280  and flag =0  
+  Int_t Phi_flag = 0;
+  
+  //if phi = 0-45,90-135,-45--90, -135--180,  then strips are 401-680  and flag =1  
+  for ( int n = -2; n < 2; n++)
+    {
+      int low = halfpi*n;
+      int high = low + pi/4;
+      
+      if ((phiLoc >= low)&&(phiLoc < high)) Phi_flag = 1;
+    }
+
+  //only exception are for strips 14-25 that extend over the midway point 
+  //this is so ugly but what can I do - it is the hardware!
+  if ((irad<26)&&(irad>13)) {
+    
+    for ( int n = -2; n < 2; n++)
+      {
+	int low = 0.57+(n*halfpi);  //0.57-pi  ,0.57-halfpi  ,0.57     ,0.57+halfpi
+	int high =n*halfpi + halfpi;//-halfpi ,0            ,halfpi   ,pi
+	if ((phiLoc > low)&&(phiLoc <= high)) Phi_flag = 0;
+
+      }    
+  }
+    
+  if (Phi_flag == 1) irad+=400;
+  
+  if ( binFrac )
+    *binFrac = ratio-irad;
+  
+  Int_t checkHighRad =  (Rout() - Rin()) / radStrip_pitch();
+  Int_t checkLowRad  = 0;
+  if (Phi_flag ==1 ) {
+    checkHighRad +=400;
+    checkLowRad +=0;
+  }
+  if ( irad > checkLowRad && irad <= checkHighRad)
+    return irad;
+  else
+    return -1;
 }
 
 //  Again, this will return -1 on error, and the second argument is optional,
@@ -167,9 +202,8 @@ bool StFgtGeom::localXYtoStripId(
     double radBinFrac;
     double phiBinFrac;
 
-    locRadID = rad2LocalStripId( r, &radBinFrac);   //	no quad/disk dependence
-    locPhiID = phiLoc2LocalStripId( phiLoc, &phiBinFrac );
-						    //	no quad/disk dependence
+    locRadID = rad2LocalStripId( r, phiLoc, &radBinFrac);   //	no quad/disk dependence
+    locPhiID = phiLoc2LocalStripId( phiLoc, &phiBinFrac );  //	no quad/disk dependence
 
     iRadID = radIdLocal2Global( iquad, locRadID );
     iPhiID = phiIdLocal2Global( iquad, locPhiID );
@@ -2923,8 +2957,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.11 2011/09/29 21:35:47 balewski Exp $
+ *  $Id: StFgtGeom.cxx,v 1.12 2011/10/07 03:42:54 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.12  2011/10/07 03:42:54  rfatemi
+ *  Update to rad2LocalStripId
+ *
  *  Revision 1.11  2011/09/29 21:35:47  balewski
  *  more functions, fixing phi error for quadrant recognision
  *
