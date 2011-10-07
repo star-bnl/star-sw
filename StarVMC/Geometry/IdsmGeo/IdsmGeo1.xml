@@ -119,7 +119,7 @@
 
 <Fill name="IDSA" comment="Alignment of the IDSM geometry within the CAVE no FGT cables">
 
-   <var name="version" value="2.0"    comment="Default alignment of IDSM at (0,0,0) with no rotation" />   
+   <var name="version" value="1.0"    comment="Default alignment of IDSM at (0,0,0) with no rotation" />   
 
    <var name="x"       value="0.0"    comment="x-alignment" />
    <var name="y"       value="0.0"    comment="y-alignment" />
@@ -213,6 +213,7 @@
 <!--  mmmmmmmmmmmm initial  COMPUTATION mmmmmmmmmmmmmmmmmmmmmmmmmmm -->
 
 
+<Use struct="IDSC" />
 <Use struct="IDSG" select="version" value="IDSC_version" />
 <Use struct="IDSA" select="version" value="1.0" />
 
