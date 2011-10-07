@@ -1351,6 +1351,7 @@ class Placement(Handler):
         self.z     = attr.get('z',None)
         self.only  = attr.get('konly',None)
         self.copy  = attr.get('ncopy',None)
+        self.cond  = attr.get('if',   None)
 
         self.attr  = attr
 
@@ -1361,6 +1362,10 @@ class Placement(Handler):
         mother = self.attr.pop('in',None)
         copy   = self.attr.pop('ncopy',None)
         only   = self.attr.pop('konly',None)
+        cond   = self.attr.pop('if', None)
+
+
+        if cond: formatter( 'IF %s {'%cond )
 
         output = 'POSITION %s '% block.upper()        
 
@@ -1387,7 +1392,9 @@ class Placement(Handler):
 
 ##        self.form(output,cchar='_')
 ##        form(output,cchar='_')
+        
         formatter( output, cchar='_' )
+        if cond: formatter( '}' )
         
     def add(self,thingy):
         self.contents.append(thingy)

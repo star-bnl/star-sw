@@ -1896,9 +1896,13 @@ class Placement(Container):
     Places a volume within a mother volume.  The syntax of the placement
     statement is
 
-    <Placement block="BLOCK" in="MOTHER" x="X" y="Y" z="Z" konly="KONLY" ncopy="NCOPY">
-    ...
+    <Placement block="BLOCK" in="MOTHER" x="X" y="Y" z="Z" konly="KONLY" ncopy="NCOPY" if="expr" >
+       ... rotation commands ...
     </Placement>
+
+    or if no rotations are needed ...
+
+    <Placement block="BLOCK" in="MOTHER" x="X" y="Y" z="Z" konly="KONLY" ncopy="NCOPY" if="expr" /> 
 
     required:
 
@@ -1908,16 +1912,29 @@ class Placement(Container):
 
       MOTHER -- specifies the mother volume into which the daughter will
                 be placed.  If ommitted, the mother volume will default
-                to the volume which created the daughter block.
+                to the volume which created the daughter block, or the
+                CAVE if the volume was created within the scope of the
+                module.
+                
       X,Y,Z  -- specifies the position of the volume within the mother's
-                coordinate system.
+                coordinate system.  The translation will be carried out
+                before any rotations.
   
       KONLY  -- Possible values are ONLY and MANY.  Default is ONLY, and
                 indicates that the volume does not overlap any other
                 volumes.  The MANY option should be used when volumes are
                 allowed to overlap.
                 
-                NOTE-- need to document behavior here.
+      if     -- Specifies an expression which, if true, will allow the volume
+                to be placed.  If false, the volume will not be placed.
+
+                e.g.
+
+                <Do var="i" from="1" to="10">
+                <Placement block="ABCD" y="+10.0" z="i*2.0" if="i<=5" />
+                <Placement block="ABCD" y="-10.0" z="i*3.0" if="i>=5" />
+                </Do>
+                
 
     """
     def __init(self):
