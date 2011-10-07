@@ -900,7 +900,7 @@ void dev13()
     // ================================================ 
     geom.pixlFlag = "PIXL01";  geom.pixlStat = 1;
     // ================================================ 
-    geom.idsmFlag = "IDSM01";  geom.idsmStat = 1;
+    geom.idsmFlag = "IDSM02";  geom.idsmStat = 1;
     geom.fgtdFlag = "FGTD32";  geom.fgtdStat=1;
     // ================================================ 
     //
