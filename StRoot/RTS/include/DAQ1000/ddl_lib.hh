@@ -30,6 +30,7 @@ public:
 	int get(char **addr, u_int *status) ;		// returns word count; 0 for no data; negative for error
 	int get_priority(char **addr, u_int *status, int *ix=0) ;		// returns word count; 0 for no data; negative for error
 	int free(char *addr) ;		// return the particular buffer to the free pile
+	int free_ix(int ix) ;
 
 	int get_free_fifos() ;
 

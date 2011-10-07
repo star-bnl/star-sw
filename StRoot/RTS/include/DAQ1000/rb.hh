@@ -47,6 +47,8 @@ public:
 	}
 
 	virtual int free(char *addr) = 0 ;
+	virtual int free_ix(int ix) = 0 ;
+
 	virtual int mark(char *addr, u_int how=0) = 0 ;
 
 	virtual int inject(int token) { return -1 ; } ;	// for emulation
