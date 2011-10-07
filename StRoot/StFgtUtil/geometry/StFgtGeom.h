@@ -355,13 +355,14 @@ class StFgtGeom
 	static Int_t mReverseNaiveMapping[ 2*kNumFgtStripsPerLayer ];
         static void makeReverseNaiveMappingValid();
 
-	//  What follows are some private functions to help with the
+ public:
+	//  What follows are some functions to help with the
 	//  localXYtoStripID function.  These are also written by Jan, modified
 	//  slightly by me.
 
 	//  These next two return -1 on error.
-	static inline int rad2LocalStripId( double rad, double phi, double *binFrac=0 );
-	static inline int phiLoc2LocalStripId( double phiLoc, double *binFrac=0 );
+	static  int rad2LocalStripId( double rad, double phi, double *binFrac=0 );
+	static  int phiLoc2LocalStripId( double phiLoc, double *binFrac=0 );
 
 	static int radIdLocal2Global( int iquad, int radId )
 	{
@@ -373,7 +374,6 @@ class StFgtGeom
 	    return phiId + phiStripLOCId_number() * iquad;
 	}
 
-    //ClassDef(StFgtGeom, 1)
 };
 
 #endif
@@ -420,8 +420,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.17 2011/10/07 03:42:38 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.18 2011/10/07 19:43:32 balewski Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.18  2011/10/07 19:43:32  balewski
+ *  make method public
+ *
  *  Revision 1.17  2011/10/07 03:42:38  rfatemi
  *  Updates to get strip Id from radius r
  *
