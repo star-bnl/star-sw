@@ -8,6 +8,8 @@
 
 #include "StFgtGeom.h"
 #include <assert.h>
+#include <iostream>
+#include <algorithm>
 
 //ClassImp(StFgtGeom)
 
@@ -117,10 +119,24 @@ int StFgtGeom::getQuad( double phiLab )
 int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
 {
 
-  //calculate strip number from outer radius of foil and locations of hit in radius
-  double ratio = (Rout() - rad) / radStrip_pitch();
-  int irad = (int) ratio;
+  int rbins = ((Rlast() - Rfirst())/radStrip_pitch())+1;//
 
+  double rstrip[rbins];//array that holds r location of strips
+
+  //fill array of rstrip with difference between passed radius and strip r location values
+  double min_r_diff = radStrip_pitch();
+  int rindex = -1;//index in array is the strip value
+  for ( int i =0; i < rbins; i++)
+    {
+      rstrip[i] = fabs(i*radStrip_pitch() + Rfirst() - rad);
+      if (rstrip[i] < min_r_diff) 
+	{
+	  min_r_diff = rstrip[i];
+	  rindex = i;
+
+	}
+    }
+  
   //if phi = 45-90,135-180,0--45, -90-135,  then strips are 001-280  and flag =0  
   Int_t Phi_flag = 0;
   
@@ -135,7 +151,7 @@ int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
 
   //only exception are for strips 14-25 that extend over the midway point 
   //this is so ugly but what can I do - it is the hardware!
-  if ((irad<26)&&(irad>13)) {
+  if ((rindex<26)&&(rindex>13)) {
     
     for ( int n = -2; n < 2; n++)
       {
@@ -146,19 +162,18 @@ int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
       }    
   }
     
-  if (Phi_flag == 1) irad+=400;
+  if (Phi_flag == 1) rindex+=400;
   
-  if ( binFrac )
-    *binFrac = ratio-irad;
+  Int_t checkHighRad = rbins;// max r strip value
+  Int_t checkLowRad  = 0;// min r strip values 
+  if (Phi_flag ==1 ) 
+    {
+      checkHighRad +=400;
+      checkLowRad +=400;
+    }
   
-  Int_t checkHighRad =  (Rout() - Rin()) / radStrip_pitch();
-  Int_t checkLowRad  = 0;
-  if (Phi_flag ==1 ) {
-    checkHighRad +=400;
-    checkLowRad +=0;
-  }
-  if ( irad > checkLowRad && irad <= checkHighRad)
-    return irad;
+  if (( rindex >= checkLowRad ) && (rindex <= checkHighRad) && ( rad >= Rin() ) && ( rad <= Rout() )) 
+    return rindex;
   else
     return -1;
 }
@@ -2957,8 +2972,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.12 2011/10/07 03:42:54 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.13 2011/10/09 13:37:10 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.13  2011/10/09 13:37:10  rfatemi
+ *  Update rad2LocalStripId
+ *
  *  Revision 1.12  2011/10/07 03:42:54  rfatemi
  *  Update to rad2LocalStripId
  *
