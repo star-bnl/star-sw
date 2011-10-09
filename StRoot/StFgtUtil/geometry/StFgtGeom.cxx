@@ -17,23 +17,7 @@ double	StFgtGeom::pi = 2.*std::acos(0.);
 double	StFgtGeom::doublepi = 2.*pi;
 double	StFgtGeom::halfpi = 0.5*pi;
 
-double	StFgtGeom::mRadStripOff =
-   (
-	(Rout()-Rin()/radStrip_pitch())
-	-
-	int (
-	    (Rout() - Rin())/radStrip_pitch()
-	)
-	) * radStrip_pitch();
 
-double	StFgtGeom::mPhiStripOff =
-    (
-	halfpi/phiStrip_pitch()
-	-
-	int (
-	    halfpi/phiStrip_pitch()
-	)
-    ) * phiStrip_pitch();
 
 int	StFgtGeom::mRadStripLOCId_number =
   int (
@@ -114,12 +98,14 @@ int StFgtGeom::getQuad( double phiLab )
   return 2;
 }
 
-//  This returns -1 on error.  The second argument is optional, and will return
-//  the fraction of the bin size [0,1.)
+//This function takes in a radius and a LOCAL phi values (0-90 degrees)
+//It returns the closest r strip to the input radius,phi pair
+//If there are not strips implemented on the detector at that r,phi 
+//then it returns -1
 int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
 {
 
-  int rbins = ((Rlast() - Rfirst())/radStrip_pitch())+1;//
+  int rbins = ((Rlast() - Rfirst())/radStrip_pitch())+1;//280 strips on each side of the quadrant
 
   double rstrip[rbins];//array that holds r location of strips
 
@@ -128,42 +114,40 @@ int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
   int rindex = -1;//index in array is the strip value
   for ( int i =0; i < rbins; i++)
     {
-      rstrip[i] = fabs(i*radStrip_pitch() + Rfirst() - rad);
+      rstrip[i] = fabs(-i*radStrip_pitch() + Rlast() - rad);
       if (rstrip[i] < min_r_diff) 
 	{
 	  min_r_diff = rstrip[i];
 	  rindex = i;
-
 	}
     }
   
-  //if phi = 45-90,135-180,0--45, -90-135,  then strips are 001-280  and flag =0  
+  //if phi = 45-90 (135-180,0--45, -90-135),  then strips are 0-279  and flag =0  
   Int_t Phi_flag = 0;
   
-  //if phi = 0-45,90-135,-45--90, -135--180,  then strips are 401-680  and flag =1  
-  for ( int n = -2; n < 2; n++)
-    {
-      int low = halfpi*n;
-      int high = low + pi/4;
-      
-      if ((phiLoc >= low)&&(phiLoc < high)) Phi_flag = 1;
-    }
+  //if phi = 0-45 (90-135,-45--90, -135--180)  then strips are 400-678  and flag =1  
+  if ((phiLoc >= 0)&&(phiLoc < pi/4)) Phi_flag = 1;
+ 
 
-  //only exception are for strips 14-25 that extend over the midway point 
+  //only exception are for strips 13-24 that extend over the midway point 
   //this is so ugly but what can I do - it is the hardware!
-  if ((rindex<26)&&(rindex>13)) {
+  if ((rindex<25)&&(rindex>12)) 
+    {
     
-    for ( int n = -2; n < 2; n++)
-      {
-	int low = 0.57+(n*halfpi);  //0.57-pi  ,0.57-halfpi  ,0.57     ,0.57+halfpi
-	int high =n*halfpi + halfpi;//-halfpi ,0            ,halfpi   ,pi
-	if ((phiLoc > low)&&(phiLoc <= high)) Phi_flag = 0;
-
-      }    
-  }
+      if ((phiLoc > 0.57)&&(phiLoc <= halfpi)) Phi_flag = 0;  
+      
+    }
     
   if (Phi_flag == 1) rindex+=400;
   
+  //Last make a series of checks to be sure that there are strips in the phi region for strips  0 - 24 and 400-424
+  if (((rindex < 25)&&(rindex >=0)) || (( rindex < 425 )&&( rindex >= 400)))
+    {
+      if (phiLoc > (Rstrip_Phi_High(rindex))) rindex = -1;
+      if (phiLoc < (Rstrip_Phi_Low(rindex))) rindex = -1;								   
+    }
+
+
   Int_t checkHighRad = rbins;// max r strip value
   Int_t checkLowRad  = 0;// min r strip values 
   if (Phi_flag ==1 ) 
@@ -171,11 +155,110 @@ int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
       checkHighRad +=400;
       checkLowRad +=400;
     }
+
+  if (( rindex < checkLowRad ) || (rindex >= checkHighRad) || ( rad < Rin() ) || ( rad > Rout() ))  rindex = -1;
+    
+  return rindex;
   
-  if (( rindex >= checkLowRad ) && (rindex <= checkHighRad) && ( rad >= Rin() ) && ( rad <= Rout() )) 
-    return rindex;
-  else
-    return -1;
+}
+
+double StFgtGeom::Rstrip_Phi_High(int rindex){
+  
+  double phi;
+
+  
+  double hold[25]={0.19153084,
+		   0.19847378,
+		   0.20559055,
+		   0.21289241,
+		   0.22039270,
+		   0.22809740,
+		   0.23603912,
+		   0.24422818,
+		   0.25268644,
+		   0.26143829,
+		   0.27050272,
+		   0.27993242,
+		   0.28975896,
+		   0.30003085,
+		   0.31080764,
+		   0.32215264,
+		   0.33418531,
+		   0.34702006,
+		   0.36082815,
+		   0.37585491,
+		   0.39245105,
+		   0.41125997,
+		   0.43341014,
+		   0.46165336,
+		   0.50945919};
+  
+  double high[kNumFgtStripsPerLayer];
+
+  for (int i = 0; i < 25; i++)
+    {
+      high[i+400]=hold[i];
+    }
+
+  for (int i = 425; i < 680; i++)
+    {
+      high[i]=0.7866672;
+    }
+
+  for (int i = 0;i<280; i++)
+    {
+      high[i] = halfpi;
+    }
+
+  if (((rindex >=0)&&(rindex < 280))||((rindex < 680)&&(rindex >=400)))
+    phi = high[rindex];    
+
+  return phi;
+}
+
+double StFgtGeom::Rstrip_Phi_Low(int rindex){
+  
+  double phi;
+
+  double low[kNumFgtStripsPerLayer]={0.8905733,
+				     0.88363036,
+				     0.87651359,
+				     0.86921173,
+				     0.86171144,
+				     0.85400674,
+				     0.84606502,
+				     0.83787596,
+				     0.82941770,
+				     0.82066585,
+				     0.81160142,
+				     0.80217172,
+				     0.79234517,
+				     0.78207329,
+				     0.77129650,
+				     0.75995149,
+				     0.74791883,
+				     0.73508408,
+				     0.72127599,
+				     0.70624922,
+				     0.68965309,
+				     0.67084417,
+				     0.64869399,
+				     0.62045077,
+				     0.57264494};
+  
+  for ( int i = 25; i< 280; i++)
+    {
+      low[i] = 0.7866672;
+    }
+  
+  //note all other values are set to zero which isn't completely true.  
+  //On other side of quadrant we have low values of 0.03 - 0.05.  
+  //For now we go with simple approach
+
+  if (((rindex >=0)&&(rindex < 280))||((rindex < 680)&&(rindex >=400)))
+    phi = low[rindex];
+  
+  return phi;
 }
 
 //  Again, this will return -1 on error, and the second argument is optional,
@@ -2972,8 +3055,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.13 2011/10/09 13:37:10 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.14 2011/10/09 16:24:21 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.14  2011/10/09 16:24:21  rfatemi
+ *  Update rad2LocalStripId
+ *
  *  Revision 1.13  2011/10/09 13:37:10  rfatemi
  *  Update rad2LocalStripId
  *
