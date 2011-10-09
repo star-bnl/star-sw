@@ -15,6 +15,8 @@
 #include <sstream>
 #include <cstdlib>
 #include <cmath>
+#include <iostream>
+#include <algorithm>
 
 #include "StFgtGeomDefs.h"
 
@@ -278,6 +280,8 @@ class StFgtGeom
 	static double Rin()	{ return kFgtRin; }
 	static double Rmid()	{ return kFgtRmid; }
 	static double Rout()	{ return kFgtRout; }
+	static double Rfirst()  { return kFgtRfirst; }
+	static double Rlast()   { return kFgtRlast;}
 
 	static double radStrip_pitch() { return kFgtRadPitch; }		//  cm
 	static double phiStrip_pitch() { return kFgtPhiPitch/Rout(); }	//  rad
@@ -308,8 +312,10 @@ class StFgtGeom
 
 	//  Jan's definitions for the final 400-800 micron pitch design
 	static const double kFgtRout		= 38.25;    //	cm ,
+	static const double kFgtRlast           = 38.1571;  // location of last R strip before Rout
 	static const double kFgtRmid		= 19.125;   //	cm, at Rout/2.
 	static const double kFgtRin		= 11.5;	    //	cm, 
+	static const double kFgtRfirst          = 11.5385;  // location of first R strip after Rin
 	static const double kFgtRflat		= 35.85;    //	cm, 
 	static const double kFgtPhiflat		= 31.0/180.*3.1416;//  rad 
 	static const double kFgtRadPitch	=  0.09538; //	nominal '800 mu pitch'
@@ -420,8 +426,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.18 2011/10/07 19:43:32 balewski Exp $
+ *  $Id: StFgtGeom.h,v 1.19 2011/10/09 13:36:44 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.19  2011/10/09 13:36:44  rfatemi
+ *  Update with Rlast and Rfirst for location of R strips
+ *
  *  Revision 1.18  2011/10/07 19:43:32  balewski
  *  make method public
  *
