@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.130 2010/09/06 18:06:38 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.131 2011/10/10 20:28:15 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -832,6 +832,9 @@
     $mysqllibdir =~ s/include/$LLIB/;
 
     # print "DEBUG :: $mysqllibdir\n";
+    # Note - there is a trick here - the first element uses mysqllibdir
+    #        which is dreived from where the INC is found hence subject to 
+    #        USE_LOCAL_MYSQL switch. This may not have been obvious.
     my ($MYSQLLIBDIR,$MYSQLLIB) =
 	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
 			 $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
