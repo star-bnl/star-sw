@@ -162,6 +162,7 @@ class SyntaxHandler ( ContentHandler ):
         self.addToken( 'Gsckov'    , Language.Gsckov        )
         # ===================================================
         self.addToken( 'Print'     , Language.Print         )
+        self.addToken( 'Info'      , Language.Info          )
         # ===================================================
         self.addToken( 'Replace'   , Language.Replace       )
         # ===================================================        

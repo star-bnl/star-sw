@@ -2619,6 +2619,71 @@ class Gsckov(Handler):
 
 
 # ====================================================================================================
+class Info(Handler):
+    def __init__(self):
+        self.level=0
+        self.tag=None
+        self.format=0
+        self.args=[]
+        Handler.__init__(self)
+    def setParent(self,p):
+        self.parent = p
+    def startElement(self,tag,attr):
+        self.tag = attr.get('tag',None)
+        self.level = attr.get('level',0)
+        self.format= attr.get('format')
+    def characters(self,content):
+        content=content.strip()
+        for ele in content.split(','):
+            self.args.append(ele)
+
+    def descriptors(self):
+        array  = self.format.split('{')
+        mylist = ""
+
+        # Loop over all elements
+        for element in array:
+
+            # If the element is a format descriptor
+            if '}' in element:
+                # Strip the right bracket
+                element=element.strip('}')
+                # Get the last character
+                last = element[ len(element) - 1 ].lower()
+
+                assert( last in "idf" )
+                
+                # Get the rest
+                rest = element[ 0 : len(element) - 1 ]
+                # And append the descriptor to the list
+                mylist += "%%%s%s "%(rest,last)
+
+            else:
+                mylist += element
+
+
+
+        return mylist
+
+    def endElement(self,tag):
+
+        # Get the list of descriptors
+        desc = self.descriptors()
+
+        # Add to the Form...
+        output = 'std::cout << Form("%s",'%desc
+                
+        for i,a in enumerate(self.args):
+            a = a.strip()
+            if i and i<len(self.args): output += ' ,'
+            output += '%s'%a
+
+        output = replacements(output)
+            
+        output += ') << std::endl;'
+        document.impl(output,unit=current)
+
+
 class Print(Handler):
 
     def __init__(self):
