@@ -1711,12 +1711,86 @@ class Instrument(Handler):
 
         
     
-# ====================================================================================================            
+# ====================================================================================================       
 class Gsckov(Handler):
     def __init__(self): Handler.__init__(self)
     def setParent(self,p): self.parent = p        
     pass
 # ====================================================================================================
+class Info(Handler):
+    def __init__(self):
+        self.level=0
+        self.tag=None
+        self.format=0
+        self.args=[]
+        Handler.__init__(self)
+    def setParent(self,p):
+        self.parent = p
+    def startElement(self,tag,attr):
+        self.tag = attr.get('tag',None)
+        self.level = attr.get('level',0)
+        self.format= attr.get('format')
+    def characters(self,content):
+        content=content.strip()
+        for ele in content.split(','):
+            self.args.append(ele)
+
+    def descriptors(self):
+        array  = self.format.split('{')
+        mylist = ""
+
+        stripLast = True
+
+        # Loop over all elements
+        for element in array:
+
+            # If the element is a format descriptor
+            if '}' in element:
+                # Strip the right bracket
+                element=element.strip('}')
+                # Get the last character
+                last = element[ len(element) - 1 ].upper()
+                assert( last in "IDF" )
+                # Get the rest
+                rest = element[ 0 : len(element) - 1 ]
+                # And append the descriptor to the list
+                mylist += "', %s%s, '"%(last,rest)
+                stripLast = True                
+
+            # Otherwise append the element
+            else:
+                mylist += element
+                stripLast = False
+
+        if stripLast:
+            mylist=mylist.strip(", '")
+
+
+        return mylist
+    
+    def endElement(self,tag):
+        output = '<W> '
+        for i,a in enumerate(self.args):
+            a = a.strip()
+            if i and i<len(self.args): output += ' ,'
+            output += '%s'%a
+        output += ';'
+
+        # Get the list of descriptors
+        desc = self.descriptors()
+        output += "  ('" + desc + ");"
+
+        
+        form( output )
+
+        
+        
+
+    
+            
+    
+# ====================================================================================================
+
 class Print(Handler):
     def __init__(self):
         self.level  = 0

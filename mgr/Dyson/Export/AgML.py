@@ -1880,7 +1880,27 @@ class Print(Container):
         self.format = 0
         self.args   = []        
         Container.__init__(self,firstKey='level')
-    def setParent(self,p): self.parent = p        
+    def setParent(self,p): self.parent = p
+
+class Info(Container):
+    """
+    The Info tag is the only support I/O mechanism in AgML.  The syntax is
+
+    <Info format="... {A.Bx} ..."> var1, val1, ... </Info>.
+
+    The format attribute is a string which contains the text to be output and
+    one format descriptor for every variable and/or value to be printed.  The
+    format descriptors take the form
+
+    {A.Bx}
+
+    Where A is the width of the field, B is an (optional) number of places past
+    the decimal point and x is one of f, d or i for floats, doubles and integers.
+    Each format descriptor is wrapped in brackets.
+    """
+    def __init__(self):
+        Container.__init__(self)
+    def setParent(self,p): self.parent=p
 
 class Replace(Container):
     """
