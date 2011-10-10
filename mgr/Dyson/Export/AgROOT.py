@@ -2635,6 +2635,7 @@ class Info(Handler):
     def characters(self,content):
         content=content.strip()
         for ele in content.split(','):
+            ele = ele.lower()
             self.args.append(ele)
 
     def descriptors(self):
@@ -2659,6 +2660,8 @@ class Info(Handler):
                 mylist += "%%%s%s "%(rest,last)
 
             else:
+                #element = element.lower()
+                #element = replacements(element)
                 mylist += element
 
 
