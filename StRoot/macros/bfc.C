@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.180 2011/10/10 19:54:13 jeromel Exp $
+// $Id: bfc.C,v 1.181 2011/10/10 21:19:11 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -50,13 +50,31 @@ void Load(const Char_t *options){
       Char_t *mysql = "libmysqlclient";
 
       //
-      // May use USE_64BITS - the x8664 should do it for now
+      // May use USE_64BITS - the x8664 work fine too
       //
-      Char_t *libs[]  = {"", "/usr/mysql/lib/","/usr/lib/", "/usr/lib/mysql/", 0}; // "$ROOTSYS/mysql-4.1.20/lib/",
-      //Char_t *libs[]  = {"/usr/lib/", 0};
+      //if ( gSystem->Getenv("USE_LOCAL_MYSQL") ){
+      //Char_t *libs[]  = {"", 
+      //			   "$OPTSTAR/lib",
+      //			   "$OPTSTAR/lib/mysql",
+      //			   "/usr/lib/", 
+      //			   "/usr/lib/mysql/", 
+      //			   "/usr/mysql/lib/",
+      //			   NULL}; 
+      //} else {
+	Char_t *libs[]  = {"", 
+			   "/usr/lib/", 
+			   "/usr/lib/mysql/", 
+			   "/usr/mysql/lib/",
+			   "$OPTSTAR/lib",
+			   "$OPTSTAR/lib/mysql",
+			   NULL}; 
+      //}
+
+
       TString Arch( gSystem->GetBuildArch() );
       Bool_t i64 = kFALSE;
-      if (Arch.Contains("x8664")) i64 = kTRUE;
+      if ( gSystem->Getenv("USE_64BITS")==1 || Arch.Contains("x8664")) i64 = kTRUE;
+
       Int_t i = 0;
       while ((libs[i])) {
 	TString lib(libs[i]);
