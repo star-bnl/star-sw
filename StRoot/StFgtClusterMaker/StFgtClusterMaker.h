@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id
-//   $Log
+//   $Id: StFgtClusterMaker.h,v 1.6 2011/10/10 20:35:08 avossen Exp $
+//   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.6  2011/10/10 20:35:08  avossen
+//   fixed strip-cluster association in MaxCluster algo, made other files cvs compliant
+//
 //
 
 #ifndef STAR_StFgtClusterMaker_HH

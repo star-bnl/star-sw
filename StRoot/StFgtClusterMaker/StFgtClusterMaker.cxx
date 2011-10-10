@@ -2,8 +2,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id
-//   $Log
+//   $Id: StFgtClusterMaker.cxx,v 1.6 2011/10/10 20:35:08 avossen Exp $
+//   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.6  2011/10/10 20:35:08  avossen
+//   fixed strip-cluster association in MaxCluster algo, made other files cvs compliant
+//
 //
 //
 
@@ -38,7 +41,7 @@ Int_t StFgtClusterMaker::Make()
 	  StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
 	  if(pDisc)
 	    {
-	      cout <<"disc: " << discIdx << " has " << pDisc->getRawHitArray().getEntries() <<endl;
+	      //	      cout <<"disc: " << discIdx << " has " << pDisc->getRawHitArray().getEntries() <<endl;
 	      Int_t loc_ierr=pClusterAlgo->doClustering(pDisc->getRawHitArray(),pDisc->getClusterArray());
 	      if(loc_ierr!=kStOk)
 		{
@@ -63,7 +66,7 @@ Int_t StFgtClusterMaker::setClusterAlgo(StFgtIClusterAlgo* algo)
 
 Int_t StFgtClusterMaker::Init()
 {
-  cout <<"cluster init " <<endl;
+  //  cout <<"cluster init " <<endl;
   Int_t ierr = kStOk;
   TObject *dataMaker = GetMaker( mFgtEventMakerName.data());
   if( !dataMaker ){
@@ -75,19 +78,19 @@ Int_t StFgtClusterMaker::Init()
       if( dataMaker->InheritsFrom( "StFgtCosmicMaker" ) ){
 	StFgtCosmicMaker* maker = static_cast< StFgtCosmicMaker* >( dataMaker );
 	mFgtEventPtr = maker->getFgtEventPtr();
-	cout <<" have cosmic  maker "<< endl;
+	//	cout <<" have cosmic  maker "<< endl;
       } 
       else if ( dataMaker->InheritsFrom( "StFgtRawMaker" ) ){
       StFgtRawMaker* maker = static_cast< StFgtRawMaker* >( dataMaker );
       mFgtEventPtr = maker->getFgtEventPtr();
-      cout <<" have raw  maker "<< endl;
+      //      cout <<" have raw  maker "<< endl;
       }
     }
     
   if( !mFgtEventPtr ){
     LOG_FATAL << "::Init() could not get pointer to StFgtEvent" << endm;
     ierr = kStFatal;
-    cout <<"no pointer at all..." <<endl;
+
   }
 
   mIsInitialized=true;
@@ -97,7 +100,6 @@ Int_t StFgtClusterMaker::Init()
   
 StFgtClusterMaker::StFgtClusterMaker(const Char_t* rawBaseMakerName, const Char_t* name) : StMaker("fgt"),mFgtEventPtr(0),mFgtEventMakerName( rawBaseMakerName ),mIsInitialized(0),pClusterAlgo(0)
 {
-  cout <<"cluster maker will use " << mFgtEventMakerName <<endl;
   SetName(name);
 };
 
