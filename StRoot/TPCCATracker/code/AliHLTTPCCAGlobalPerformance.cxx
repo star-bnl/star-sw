@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.11 2010/08/18 20:46:09 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.12 2011/10/10 11:47:02 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -232,7 +232,7 @@ void AliHLTTPCCAGlobalPerformance::FillHistos()
       }
       if(MCindex == -1)
       {
-        break;
+        continue;
       }
 
       // track resolutions
