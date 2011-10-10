@@ -362,6 +362,47 @@ Double_t StTpcHitErrors::calcError(Int_t iXZ, Int_t sec, Int_t row, Double_t _z,
 }
 #include "St_tpcStatusC.h"
 MakeChairInstance(tpcStatus,Calibrations/tpc/tpcStatus);
+#include "St_TpcAvgCurrentC.h"
+MakeChairInstance(TpcAvgCurrent,Calibrations/tpc/TpcAvgCurrent);
+//________________________________________________________________________________
+Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t row) {
+  if (row <  1 || row > 45) return -1;
+  if (row <  3) return 1;
+  if (row <  7) return 2;
+  if (row < 10) return 3;
+  if (row < 14) return 4;
+  if (row < 22) return 5;
+  if (row < 30) return 6;
+  if (row < 38) return 7;
+  return 8;
+}
+//________________________________________________________________________________
+Int_t St_TpcAvgCurrentC::ChannelFromSocket(Int_t socket) {
+  Int_t channel = -1;
+  switch (socket) {
+  case 1:
+  case 2 : channel = 1; break;
+  case 3:
+  case 4:  channel = 2; break;
+  case 5:
+  case 6:  channel = 3; break;
+  case 7:
+  case 8:
+  case 17: channel = 4; break;
+  case 9:
+  case 10:
+  case 18: channel = 5; break;
+  case 11:
+  case 12: channel = 6; break;
+  case 13:
+  case 14: channel = 7; break;
+  case 15:
+  case 16:
+  case 19: channel = 8; break;
+  default:              break;
+  }
+  return channel;
+}
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
