@@ -1,6 +1,9 @@
 //
-//  $Id
-//  $Log
+//  $Id: StFgtMaxClusterAlgo.h,v 1.3 2011/10/10 20:35:08 avossen Exp $
+//  $Log: StFgtMaxClusterAlgo.h,v $
+//  Revision 1.3  2011/10/10 20:35:08  avossen
+//  fixed strip-cluster association in MaxCluster algo, made other files cvs compliant
+//
 //
 // \class StFgtMaxClusterAlgo
 // \author Anselm Vossen (avossen@indiana.edu)

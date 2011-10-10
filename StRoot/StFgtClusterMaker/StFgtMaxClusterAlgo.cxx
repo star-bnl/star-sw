@@ -1,6 +1,9 @@
 //
-//  $Id
-//  $Log
+//  $Id: StFgtMaxClusterAlgo.cxx,v 1.5 2011/10/10 20:35:08 avossen Exp $
+//  $Log: StFgtMaxClusterAlgo.cxx,v $
+//  Revision 1.5  2011/10/10 20:35:08  avossen
+//  fixed strip-cluster association in MaxCluster algo, made other files cvs compliant
+//
 //
 // \class StFgtMaxClusterAlgo
 // \author Anselm Vossen (avossen@indiana.edu)
@@ -23,7 +26,7 @@ Int_t StFgtMaxClusterAlgo::Init()
 
 Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArray& clusters)
 {
-  cout <<"doing max clustering, we look at " << hits.getEntries() << " hits " << endl;
+
   //we make use of the fact, that the hits are already sorted by geoId
   StFgtRawHitConstPtrVec mSortPtr;
   hits.getSortedPtrVec(mSortPtr);
@@ -58,29 +61,29 @@ Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArra
 
   if(maxRCharge>0)
     {
-      cout <<"have maxR" <<endl;
+      //      cout <<"have maxR" <<endl;
       StFgtCluster newCluster(rGeoId,'R',rOrdinate,maxRCharge);
+      newCluster.pushBack(rGeoId);
       //new cluster was started but not included yet..
       //      cout <<"1" <<endl;
       //      newCluster.setLayer('R');
       //      newCluster.setKey(rGeoId);
       //      newCluster.setPosition(rOrdinate);
       //      newCluster.setCharge(maxRCharge);
-      cout <<"about to push" <<endl;
       clusters.pushBack(newCluster);
-      cout <<"clusters have now " << clusters.getEntries() <<endl;
     } 
   if(maxPhiCharge>0)
     {
-      cout <<"have maxPhi" <<endl;
+
       StFgtCluster newCluster;
       //new cluster was started but not included yet..
       newCluster.setLayer('P');
       newCluster.setKey(phiGeoId);
       newCluster.setPosition(phiOrdinate);
       newCluster.setCharge(maxPhiCharge);
-            clusters.pushBack(newCluster);
-      cout <<"added phi cluster clusters have now " << clusters.getEntries() <<endl;
+      newCluster.pushBack(phiGeoId);
+      clusters.pushBack(newCluster);
+
     } 
 
   return kStOk;

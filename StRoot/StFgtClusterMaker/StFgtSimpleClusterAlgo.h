@@ -1,6 +1,9 @@
 ///
-// $Id
-// $Log
+// $Id: StFgtSimpleClusterAlgo.h,v 1.5 2011/10/10 20:35:08 avossen Exp $
+// $Log: StFgtSimpleClusterAlgo.h,v $
+// Revision 1.5  2011/10/10 20:35:08  avossen
+// fixed strip-cluster association in MaxCluster algo, made other files cvs compliant
+//
 //
 //  \author Anselm Vossen (avossen@indiana.edu) 
 //  \class StFgtSimpleClusterAlgo
