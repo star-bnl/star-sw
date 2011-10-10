@@ -29,6 +29,8 @@ struct TpcResponseSimulator {
   float  tauCO;                /* =   0  */
   float  SigmaJitterTI;        /* = 0.2  for Tpx inner */
   float  SigmaJitterTO;        /* = 0.2  for Tpx outer */
+  float  SigmaJitterXI;        /* = 0.0  for Tpx inner */
+  float  SigmaJitterXO;        /* = 0.0  for Tpx outer */
   float  longitudinalDiffusion;/*   cm/sqrt(cm)  */
   float  transverseDiffusion;  /*   cm/sqrt(cm)  */
   float  NoElPerAdc;           /* = 335, No. of electrons per 1 ADC count */
