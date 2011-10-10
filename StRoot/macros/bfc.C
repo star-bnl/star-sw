@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.178 2010/09/08 15:44:41 genevb Exp $
+// $Id: bfc.C,v 1.178.2.1 2011/10/10 20:04:02 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -52,7 +52,7 @@ void Load(const Char_t *options){
       //
       // ATTENTION: The below will FAIL for 64 bits systems (JL 2009/10/22)
       //
-      Char_t *libs[]  = {"", "/usr/mysql/lib/","/usr/lib/", 0}; // "$ROOTSYS/mysql-4.1.20/lib/",
+      Char_t *libs[]  = {"", "/usr/lib/mysql/","/usr/lib/", 0}; // "$ROOTSYS/mysql-4.1.20/lib/",
       //Char_t *libs[]  = {"/usr/lib/", 0};
       Int_t i = 0;
       while ((libs[i])) {
