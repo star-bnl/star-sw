@@ -31,6 +31,7 @@
 #include "StiKalmanTrack.h"
 
 #include <vector>
+#include <algorithm>
 using std::vector;
 
 #include <string>
@@ -98,10 +99,9 @@ void StiTPCCATrackerInterface::Run()
 
   TStopwatch timer;
   timer.Start();
-  
+
   MakeSettings();
   MakeHits();
-
 
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
     // put data in performance
@@ -161,7 +161,6 @@ void StiTPCCATrackerInterface::Run()
   timer.Stop();
   fPreparationTime_real += timer.RealTime();
   fPreparationTime_cpu += timer.CpuTime();    
-
 } // void StiTPCCATrackerInterface::Run()
 
 void StiTPCCATrackerInterface::RunPerformance()
@@ -170,7 +169,7 @@ void StiTPCCATrackerInterface::RunPerformance()
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
   TStopwatch timer;
   timer.Start();
-      
+    
   assert(fStiTracks  != 0);
   assert(fStiTracker != 0);
 
@@ -291,15 +290,15 @@ void StiTPCCATrackerInterface::MakeSettings()
   const int NRows = 45;
 
   Float_t R[NRows] = {   60.000,  64.800,  69.600,  74.400,  79.200, //  5  //TODO initialize from StRoot
-			 84.000,  88.800,  93.600,  98.800, 104.000, // 10
-			 109.200, 114.400, 119.600, 
-			 127.195, 129.195, // 15
-			 131.195, 133.195, 135.195, 137.195, 139.195, // 20
-			 141.195, 143.195, 145.195, 147.195, 149.195, // 25
-			 151.195, 153.195, 155.195, 157.195, 159.195, // 30
-			 161.195, 163.195, 165.195, 167.195, 169.195, // 35
-			 171.195, 173.195, 175.195, 177.195, 179.195, // 40
-			 181.195, 183.195, 185.195, 187.195, 189.195};// 45
+                         84.000,  88.800,  93.600,  98.800, 104.000, // 10
+                         109.200, 114.400, 119.600, 
+                         127.195, 129.195, // 15
+                         131.195, 133.195, 135.195, 137.195, 139.195, // 20
+                         141.195, 143.195, 145.195, 147.195, 149.195, // 25
+                         151.195, 153.195, 155.195, 157.195, 159.195, // 30
+                         161.195, 163.195, 165.195, 167.195, 169.195, // 35
+                         171.195, 173.195, 175.195, 177.195, 179.195, // 40
+                         181.195, 183.195, 185.195, 187.195, 189.195};// 45
 
   for ( int iSlice = 0; iSlice < NSlices; iSlice++ ) {
     AliHLTTPCCAParam SlicePar;
@@ -313,26 +312,26 @@ void StiTPCCATrackerInterface::MakeSettings()
     if (sector > 12) beta = (24-sector)*2.*TMath::Pi()/12.;
     else             beta =     sector *2.*TMath::Pi()/12.;
     SlicePar.SetAlpha  ( beta );
-    SlicePar.SetDAlpha  ( 30*TMath::DegToRad() );			//TODO initialize from StRoot
+    SlicePar.SetDAlpha  ( 30*TMath::DegToRad() );                        //TODO initialize from StRoot
     SlicePar.SetCosAlpha ( TMath::Cos(SlicePar.Alpha()) );
     SlicePar.SetSinAlpha ( TMath::Sin(SlicePar.Alpha()) );
     SlicePar.SetAngleMin ( SlicePar.Alpha() - 0.5*SlicePar.DAlpha() );
     SlicePar.SetAngleMax ( SlicePar.Alpha() + 0.5*SlicePar.DAlpha() );
-    SlicePar.SetRMin     (  51. );					//TODO initialize from StRoot
-    SlicePar.SetRMax     ( 194. );					//TODO initialize from StRoot
-    SlicePar.SetErrX     (   0. );					//TODO initialize from StRoot
-    SlicePar.SetErrY     (   0.12 ); // 0.06  for Inner			//TODO initialize from StRoot
-    SlicePar.SetErrZ     (   0.16 ); // 0.12  for Inner		NodePar->fitPars()	//TODO initialize from StRoot
+    SlicePar.SetRMin     (  51. );                                        //TODO initialize from StRoot
+    SlicePar.SetRMax     ( 194. );                                        //TODO initialize from StRoot
+    SlicePar.SetErrX     (   0. );                                        //TODO initialize from StRoot
+    SlicePar.SetErrY     (   0.12 ); // 0.06  for Inner                        //TODO initialize from StRoot
+    SlicePar.SetErrZ     (   0.16 ); // 0.12  for Inner                NodePar->fitPars()        //TODO initialize from StRoot
       //   SlicePar.SetPadPitch (   0.675 );// 0.335 -"-
     float x[3]={0,0,0},b[3];
     StarMagField::Instance()->BField(x,b);
     SlicePar.SetBz       ( - b[2] );   // change sign because change z
     if (sector <= 12) {
-      SlicePar.SetZMin     (   0. );					//TODO initialize from StRoot
-      SlicePar.SetZMax     ( 210. );					//TODO initialize from StRoot
+      SlicePar.SetZMin     (   0. );                                        //TODO initialize from StRoot
+      SlicePar.SetZMax     ( 210. );                                        //TODO initialize from StRoot
     } else {
-      SlicePar.SetZMin     (-210. );					//TODO initialize from StRoot
-      SlicePar.SetZMax     (   0. );					//TODO initialize from StRoot
+      SlicePar.SetZMin     (-210. );                                        //TODO initialize from StRoot
+      SlicePar.SetZMax     (   0. );                                        //TODO initialize from StRoot
     }
     for( int iR = 0; iR < NRows; iR++){
       SlicePar.SetRowX(iR, R[iR]);
@@ -397,7 +396,7 @@ void StiTPCCATrackerInterface::MakeHits()
     vector<StiHit*>::iterator  stop  = tempvec.end();
     for (vector<StiHit*>::iterator cit = start; cit != stop; cit++) {
 
-	// get local coordinates. take into account distortion
+        // get local coordinates. take into account distortion
       StiHit *hit = *cit;
       if (! hit->stHit()) continue;
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
@@ -405,7 +404,7 @@ void StiTPCCATrackerInterface::MakeHits()
       StGlobalCoordinate glob(tpcHit->position());
       tran(glob,loc,tpcHit->sector(),tpcHit->padrow());
 
-	// obtain seed Hit
+        // obtain seed Hit
       SeedHit_t hitc;
       hitc.mMinPad  = fSeedFinder->padp((Int_t) tpcHit->minPad(),  tpcHit->padrow()-1);
       hitc.mMaxPad  = fSeedFinder->padp((Int_t) tpcHit->maxPad(),  tpcHit->padrow()-1);
@@ -421,14 +420,14 @@ void StiTPCCATrackerInterface::MakeHits()
       hitc.hit  = hit;
       fSeedHits.push_back(hitc);
 
-	// convert to CA Hit
+        // convert to CA Hit
       AliHLTTPCCAGBHit caHit;
       caHit.SetIRow( hitc.padrow );
 //      caHit.SetX( hit->x() );
       caHit.SetX( hit->position() ); // take position of the row
       caHit.SetY( - hit->y() );
       caHit.SetZ( - hit->z() );
-	// caHit.SetErrX(   );
+        // caHit.SetErrX(   );
       caHit.SetErrY( 0.12 );// TODO: read parameters from somewhere 
       caHit.SetErrZ( 0.16 );
       caHit.SetISlice( tpcHit->sector() - 1 );
@@ -562,6 +561,9 @@ void StiTPCCATrackerInterface::MakeSeeds()
   }
 } // void StiTPCCATrackerInterface::MakeSeeds()
 
+bool myfunction (AliHLTTPCCALocalMCPoint i,AliHLTTPCCALocalMCPoint j) { 
+  return (i.TrackI() < j.TrackI()) || ( i.TrackI()==j.TrackI() && i.IRow() < j.IRow() ); 
+}
   /// fill fPerformance by MCTracks, MCPoints and Hit-MCPointsMatch
 void StiTPCCATrackerInterface::FillPerformance(const vector<AliHLTTPCCAGBHit>& caHits, const vector<int>& idsTruth, vector<AliHLTTPCCAMCTrack>& mcTracks, vector<AliHLTTPCCALocalMCPoint>& mcPoints, vector<AliHLTTPCCAHitLabel>& hitLabels)
 {
@@ -578,8 +580,14 @@ void StiTPCCATrackerInterface::FillPerformance(const vector<AliHLTTPCCAGBHit>& c
     static  StTpcLocalSectorDirection         dirSect;
     StTpcCoordinateTransform transform(gStTpcDb);
     int nMCTracks = Track->GetNRows();
- 
-    g2t_track_st *track = Track->GetTable();
+    const g2t_track_st *track = Track->GetTable();
+    
+    vector<int> truthToIndex; // need for finding MCPoints to MCTracks correspondence
+    truthToIndex.resize(nMCTracks+1,-1);
+    
+    const g2t_tpc_hit_st *mcTpcHit = mcTpcHits->GetTable();
+    const Int_t nMcTpcHits = mcTpcHits->GetNRows();
+     
     AliHLTTPCCAMCTrack mcTrack;
     for (Int_t l = 0; l < nMCTracks; l++, track++) {
       if (! track->n_tpc_hit) continue;
@@ -590,109 +598,106 @@ void StiTPCCATrackerInterface::FillPerformance(const vector<AliHLTTPCCAGBHit>& c
       Float_t      q     = part->Charge();
       mcTrack.SetP ( track->ptot );
       mcTrack.SetPt( track->pt );
-	//      mcTrack.SetNHits( track->n_tpc_hit ); // it is not really what we need. See below
+        //      mcTrack.SetNHits( track->n_tpc_hit ); // it is not really what we need. See below
       for (Int_t i = 0; i < 3; i++) { // TODO
-	mcTrack.SetPar( i, ((i>=1)?-1:1) * 0 );
+        mcTrack.SetPar( i, ((i>=1)?-1:1) * 0 );
       }
       for (Int_t i = 0; i < 3; i++) {
-	mcTrack.SetPar( 3+i, ((i>=1)?-1:1) * track->p[i]/mcTrack.P() );
+        mcTrack.SetPar( 3+i, ((i>=1)?-1:1) * track->p[i]/mcTrack.P() );
       }
       mcTrack.SetPar(6, q/mcTrack.P()/3 ); // q=3q      
       mcTrack.SetNTurns( 1 ); // TODO: read from somewhere
-      mcTrack.SetFirstMCPointID(mcPoints.size());
       const int idTruth = l+1;
 
-      g2t_tpc_hit_st *mcTpcHit = mcTpcHits->GetTable();
-      const Int_t nMcTpcHits = mcTpcHits->GetNRows();
-	//count hits
-      int NMCHits = 0;
-      for (Int_t j = 0; j < nMcTpcHits; j++, mcTpcHit++) {
-	Int_t is     =  mcTpcHit->volume_id/100000;
-	if (is) continue;
-	if (mcTpcHit->track_p != l+1) continue;
-	NMCHits++;
-      }
-      mcTrack.SetNMCPoints(NMCHits);
-
-      mcTpcHit = mcTpcHits->GetTable();
-      int qpSign = fabs(mcTrack.Par(6))/mcTrack.Par(6);
-      for (Int_t j = 0; j < nMcTpcHits; j++, mcTpcHit++) {
-	AliHLTTPCCALocalMCPoint mcPoint;
-	Int_t is     =  mcTpcHit->volume_id/100000;
-	if (is) continue;
-	if (mcTpcHit->track_p != idTruth) continue;
-
-        mcPoint.SetIRow( mcTpcHit->volume_id%100 - 1 );
-        mcPoint.SetISlice( (mcTpcHit->volume_id/100)%100 - 1 );
-
-	Int_t sector = (mcTpcHit->volume_id%100000)/100;
-	Int_t row    =  mcTpcHit->volume_id%100;
-
-          // get detector
-        StiDetectorBuilder* detectorBuilder = 0;
-        StiDetectorGroups *groups=StiToolkit::instance()->getDetectorGroups();
-        vector<StiGenericDetectorGroup *>::iterator it = groups->begin();
-        for (; it != groups->end(); ++it) {
-          StiGenericDetectorGroup *group = *it;
-          detectorBuilder = group->getDetectorBuilder();
-          TString builderName = (const char*)(detectorBuilder->getName().c_str());
-          if (builderName == "TpcBuilder")
-            break;
-        }
-        int sectorTpm = sector - 1;
-        if (sectorTpm >= 12)    sectorTpm = 11 - (sectorTpm - 11)%12;
-        StiDetector* detector = detectorBuilder->getDetector(row-1,sectorTpm);
-
-        static StiHit tmpStiHit; // used for convert only
-
-          // Get XYZ
-        StTpcHit* mpTmp = new StTpcHit;
-        double energyTmp = 0.;
-        tmpStiHit.setGlobal(detector, mpTmp, mcTpcHit->x[0], mcTpcHit->x[1], mcTpcHit->x[2], energyTmp);
-        mcPoint.SetX( tmpStiHit.x() );
-        mcPoint.SetY( - tmpStiHit.y() );
-        mcPoint.SetZ( - tmpStiHit.z() );
-
-          // Get P
-	StGlobalDirection  gDir(mcTpcHit->p[0],mcTpcHit->p[1],mcTpcHit->p[2]);
-	transform(gDir,dirSect,sector,row);
-        double px = mcTpcHit->p[0], py = mcTpcHit->p[1], pz_new = mcTpcHit->p[2], px_new, py_new;
-        double angle = detector->getPlacement()->getNormalRefAngle();
-        px_new =  cos(angle)*px + sin(angle)*py;
-        py_new = -sin(angle)*px + cos(angle)*py;
-
-        mcPoint.SetPx( px_new );
-        mcPoint.SetPy( - py_new );
-        mcPoint.SetPz( - pz_new );
-        mcPoint.SetQP( double(qpSign) / sqrt(px_new*px_new + py_new*py_new + pz_new*pz_new) );
-        mcPoint.SetTrackI( mcTracks.size() );
-        mcPoint.SetTrackID(idTruth);
-
-
-	mcPoints.push_back(mcPoint);
-      } // mcPoints
-
-	// full labes in correspondence to hit array.
-      int nHits = caHits.size();
-      int iHit = 0;
-      int j = 0;
-      for (;; ++j ) {
-        for (; iHit < nHits; iHit++){
-          if (idsTruth[iHit] == idTruth) break;
-        }
-        if (iHit == nHits) break;
-        AliHLTTPCCAHitLabel &l = hitLabels[iHit];
-        l.fLab[0] = mcTracks.size();
-        l.fLab[1] = -1;
-        l.fLab[2] = -1;
-        iHit++;
-      }// j
-      mcTrack.SetNHits( j );
-
+      truthToIndex[idTruth] = mcTracks.size();
       mcTracks.push_back(mcTrack);
     } // for iMCTrack
-  }
+    
+      // get hits
+    const int nHits = caHits.size();
+    for (int iHit = 0; iHit < nHits; iHit++){
+      const int iTrack = truthToIndex[idsTruth[iHit]];
+      if (iTrack == -1) continue;
+      AliHLTTPCCAHitLabel &l = hitLabels[iHit];
+      l.fLab[0] = iTrack;
+      l.fLab[1] = -1;
+      l.fLab[2] = -1;
+      mcTracks[iTrack].SetNHits( 1 + mcTracks[iTrack].NHits() );
+    } // j
+      
+      // get MCPoints
+    for (Int_t iP = 0; iP < nMcTpcHits; iP++, mcTpcHit++) {
+      AliHLTTPCCALocalMCPoint mcPoint;
+      Int_t is     =  mcTpcHit->volume_id/100000;
+      if (is) continue;
+      const int iTrack = truthToIndex[mcTpcHit->track_p];
+      if (iTrack == -1) continue;
+      AliHLTTPCCAMCTrack& mcTrack = mcTracks[iTrack];
+      
+      mcPoint.SetIRow( mcTpcHit->volume_id%100 - 1 );
+      mcPoint.SetISlice( (mcTpcHit->volume_id/100)%100 - 1 );
 
+      Int_t sector = (mcTpcHit->volume_id%100000)/100;
+      Int_t row    =  mcTpcHit->volume_id%100;
+
+        // get detector
+      StiDetectorBuilder* detectorBuilder = 0;
+      StiDetectorGroups *groups=StiToolkit::instance()->getDetectorGroups();
+      vector<StiGenericDetectorGroup *>::iterator it = groups->begin();
+      for (; it != groups->end(); ++it) {
+        StiGenericDetectorGroup *group = *it;
+        detectorBuilder = group->getDetectorBuilder();
+        TString builderName = (const char*)(detectorBuilder->getName().c_str());
+        if (builderName == "TpcBuilder")
+          break;
+      }
+      int sectorTpm = sector - 1;
+      if (sectorTpm >= 12)    sectorTpm = 11 - (sectorTpm - 11)%12;
+      StiDetector* detector = detectorBuilder->getDetector(row-1,sectorTpm);
+
+      static StiHit tmpStiHit; // used for convert only
+
+        // Get XYZ
+      StTpcHit* mpTmp = new StTpcHit;
+      double energyTmp = 0.;
+      tmpStiHit.setGlobal(detector, mpTmp, mcTpcHit->x[0], mcTpcHit->x[1], mcTpcHit->x[2], energyTmp);
+      mcPoint.SetX( tmpStiHit.x() );
+      mcPoint.SetY( - tmpStiHit.y() );
+      mcPoint.SetZ( - tmpStiHit.z() );
+
+        // Get P
+      StGlobalDirection  gDir(mcTpcHit->p[0],mcTpcHit->p[1],mcTpcHit->p[2]);
+      transform(gDir,dirSect,sector,row);
+      double px = mcTpcHit->p[0], py = mcTpcHit->p[1], pz_new = mcTpcHit->p[2], px_new, py_new;
+      double angle = detector->getPlacement()->getNormalRefAngle();
+      px_new =  cos(angle)*px + sin(angle)*py;
+      py_new = -sin(angle)*px + cos(angle)*py;
+
+      mcPoint.SetPx( px_new );
+      mcPoint.SetPy( - py_new );
+      mcPoint.SetPz( - pz_new );
+      const int qpSign = fabs(mcTrack.Par(6))/mcTrack.Par(6);
+      mcPoint.SetQP( double( qpSign ) / sqrt(px_new*px_new + py_new*py_new + pz_new*pz_new) );
+      mcPoint.SetTrackI( iTrack );
+      mcPoint.SetTrackID( mcTpcHit->track_p );
+
+      mcPoints.push_back(mcPoint);
+    } // for mcPoints
+    
+    std::sort( mcPoints.begin(), mcPoints.end(), myfunction );
+    mcTracks[0].SetFirstMCPointID(0);
+    int iPLast = 0;
+    int iTr = 0;
+    for( int iP = 0; iP < mcPoints.size(); ++iP ) {
+      if ( mcPoints[iP].TrackI() != iTr ) {
+        mcTracks[iTr].SetNMCPoints(iP - iPLast);
+        iPLast = iP;
+        iTr = mcPoints[iP].TrackI();
+        mcTracks[iTr].SetFirstMCPointID(iP);
+      }
+    }
+    mcTracks[iTr].SetNMCPoints(mcPoints.size() - iPLast);
+  }
 } // void StiTPCCATrackerInterface::FillPerformance()
 
 void StiTPCCATrackerInterface::FillStiPerformance()
@@ -716,7 +721,7 @@ void StiTPCCATrackerInterface::FillStiPerformance()
     AliHLTTPCCAGBTrack GBTrack;
     int nTrackHits = 0;
 
-	// get local coordinates. take into account distortion
+        // get local coordinates. take into account distortion
 
     for(unsigned iH=0; iH<hits_v.size(); iH++)
     {
@@ -727,7 +732,7 @@ void StiTPCCATrackerInterface::FillStiPerformance()
       StGlobalCoordinate glob(tpcHit->position());
       tran(glob,loc,tpcHit->sector(),tpcHit->padrow());
 
-	// convert to CA Hit
+        // convert to CA Hit
       AliHLTTPCCAGBHit caHit;
       caHit.SetIRow( tpcHit->padrow()-1 );
       caHit.SetX( hit->position() ); // take position of the row
@@ -745,7 +750,7 @@ void StiTPCCATrackerInterface::FillStiPerformance()
       
       fStiCaHits.push_back(caHit);
     }
-    	
+            
     if(!(track->getInnerMostTPCHitNode(0))) continue;
     StiKalmanTrackNode *NodePar = track->getInnerMostTPCHitNode(0);
 //    std::cout <<"node x  "<< track->getInnerMostTPCHitNode(0)->getX() << std::endl << std::endl;
