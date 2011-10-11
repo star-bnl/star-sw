@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.10 2005/11/22 21:44:51 fisyak Exp $
+ * $Id: StMcHit.cc,v 2.11 2011/10/11 01:17:03 perev Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.11  2011/10/11 01:17:03  perev
+ * Comments++
+ *
  * Revision 2.10  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -47,16 +50,16 @@
 #include "TString.h"
 #include "tables/St_g2t_hits_Table.h"
 #include "StMcTrack.hh"
-static const char rcsid[] = "$Id: StMcHit.cc,v 2.10 2005/11/22 21:44:51 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcHit.cc,v 2.11 2011/10/11 01:17:03 perev Exp $";
 ClassImp(StMcHit);
 StMcHit::StMcHit()
     : mPosition(0.,0.,0.), mdE(0),mdS(0),mParentTrack(0)
 { /* noop */   }
 
 StMcHit::StMcHit(const StThreeVectorF& x,const StThreeVectorF& p,
-		 float de, float ds, long k, long volId, StMcTrack* parent)
+		 float de, float ds, long key, long volId, StMcTrack* parent)
     : mPosition(x), mLocalMomentum(p),
-      mdE(de), mdS(ds), mKey(k), mVolumeId(volId),
+      mdE(de), mdS(ds), mKey(key), mVolumeId(volId),
       mParentTrack(parent)
 { /* noop */ }
 

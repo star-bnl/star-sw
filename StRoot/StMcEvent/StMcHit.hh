@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.10 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcHit.hh,v 2.11 2011/10/11 01:16:40 perev Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.11  2011/10/11 01:16:40  perev
+ * Comments++
+ *
  * Revision 2.10  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -65,9 +68,8 @@ public:
     kMatched = BIT(23) // if hit has matched with reconstructed one
   };
     StMcHit();
-    StMcHit(const StThreeVectorF&,const StThreeVectorF&,
-	  float, float, long, long,
-	  StMcTrack*);
+    StMcHit(const StThreeVectorF& x,const StThreeVectorF& p,
+		 float de, float ds, long key, long volId, StMcTrack* parent);
     StMcHit(g2t_hits_st*);
     // StMcHit(const StSvtHit&);                  use default
     // const StMcHit & operator=(const StMcHit&);   use default
