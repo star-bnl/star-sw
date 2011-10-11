@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.13 2009/07/24 19:08:06 perev Exp $
+ * $Id: StMcEventTypes.hh,v 2.14 2011/10/11 01:15:35 perev Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.14  2011/10/11 01:15:35  perev
+ * Mtd added
+ *
  * Revision 2.13  2009/07/24 19:08:06  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -91,6 +94,8 @@
 #include "StMcTofHitCollection.hh"
 #include "StMcBTofHit.hh"
 #include "StMcBTofHitCollection.hh"
+#include "StMcMtdHit.hh"
+#include "StMcMtdHitCollection.hh"
 #include "StMcPixelHit.hh"
 #include "StMcPixelHitCollection.hh"
 #include "StMcPixelLayerHitCollection.hh"
