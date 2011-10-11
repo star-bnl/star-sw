@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcContainers.hh,v 2.14 2009/07/24 19:08:06 perev Exp $
+ * $Id: StMcContainers.hh,v 2.15 2011/10/11 01:09:39 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcContainers.hh,v $
+ * Revision 2.15  2011/10/11 01:09:39  perev
+ * Mtd added
+ *
  * Revision 2.14  2009/07/24 19:08:06  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -45,6 +48,9 @@
  * accordingly.
  *
  * $Log: StMcContainers.hh,v $
+ * Revision 2.15  2011/10/11 01:09:39  perev
+ * Mtd added
+ *
  * Revision 2.14  2009/07/24 19:08:06  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -122,9 +128,9 @@ class StMcIstHit;
 class StMcFgtHit;
 class StMcTofHit;
 class StMcBTofHit;
+class StMcMtdHit;
 class StMcTrack;
    
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
 // Owners
 typedef vector<StMcHit*>     StSPtrVecMcHit;     
 typedef vector<StMcVertex*>  StSPtrVecMcVertex; 
@@ -140,6 +146,7 @@ typedef vector<StMcIstHit*>  StSPtrVecMcIstHit;
 typedef vector<StMcFgtHit*>  StSPtrVecMcFgtHit; 
 typedef vector<StMcTofHit*>  StSPtrVecMcTofHit; 
 typedef vector<StMcBTofHit*>  StSPtrVecMcBTofHit; 
+typedef vector<StMcMtdHit*>  StSPtrVecMcMtdHit; 
 typedef vector<StMcTrack*>   StSPtrVecMcTrack;  
 // Not owners
 typedef vector<StMcVertex*>  StPtrVecMcVertex; 
@@ -156,43 +163,8 @@ typedef vector<StMcIstHit*>  StPtrVecMcIstHit;
 typedef vector<StMcFgtHit*>  StPtrVecMcFgtHit; 
 typedef vector<StMcTofHit*>  StPtrVecMcTofHit; 
 typedef vector<StMcBTofHit*>  StPtrVecMcBTofHit; 
+typedef vector<StMcMtdHit*>  StPtrVecMcMtdHit; 
 typedef vector<StMcTrack*>   StPtrVecMcTrack; 
-#else
-//Owners
-typedef vector<StMcHit*, allocator<StMcHit*> >          StSPtrVecMcHit; 
-typedef vector<StMcVertex*, allocator<StMcVertex*> >    StSPtrVecMcVertex; 
-typedef vector<StMcCalorimeterHit*, allocator<StMcCalorimeterHit*> > 
-StSPtrVecMcCalorimeterHit;  
-typedef vector<StMcSvtHit*, allocator<StMcSvtHit*> >    StSPtrVecMcSvtHit; 
-typedef vector<StMcSsdHit*, allocator<StMcSsdHit*> >    StSPtrVecMcSsdHit; 
-typedef vector<StMcTpcHit*, allocator<StMcTpcHit*> >    StSPtrVecMcTpcHit; 
-typedef vector<StMcFtpcHit*, allocator<StMcFtpcHit*> >  StSPtrVecMcFtpcHit; 
-typedef vector<StMcRichHit*, allocator<StMcRichHit*> >  StSPtrVecMcRichHit; 
-typedef vector<StMcCtbHit*, allocator<StMcCtbHit*> >    StSPtrVecMcCtbHit; 
-typedef vector<StMcPixelHit*, allocator<StMcPixelHit*> >  StSPtrVecMcPixelHit; 
-typedef vector<StMcIstHit*, allocator<StMcIstHit*> >    StSPtrVecMcIstHit; 
-typedef vector<StMcFgtHit*, allocator<StMcFgtHit*> >    StSPtrVecMcFgtHit; 
-typedef vector<StMcTofHit*, allocator<StMcTofHit*> >    StSPtrVecMcTofHit; 
-typedef vector<StMcBTofHit*, allocator<StMcBTofHit*> >    StSPtrVecMcBTofHit; 
-typedef vector<StMcTrack*, allocator<StMcTrack*> >      StSPtrVecMcTrack; 
-// Not owners
-typedef vector<StMcVertex*, allocator<StMcVertex*> >    StPtrVecMcVertex; 
-typedef vector<StMcCalorimeterHit*, allocator<StMcCalorimeterHit*> > StPtrVecMcCalorimeterHit;  
-typedef vector<StMcHit*, allocator<StMcHit*> >          StPtrVecMcHit; 
-typedef vector<StMcSvtHit*, allocator<StMcSvtHit*> >    StPtrVecMcSvtHit; 
-typedef vector<StMcSsdHit*, allocator<StMcSsdHit*> >    StPtrVecMcSsdHit; 
-typedef vector<StMcTpcHit*, allocator<StMcTpcHit*> >    StPtrVecMcTpcHit; 
-typedef vector<StMcFtpcHit*, allocator<StMcFtpcHit*> >  StPtrVecMcFtpcHit; 
-typedef vector<StMcRichHit*, allocator<StMcRichHit*> >  StPtrVecMcRichHit; 
-typedef vector<StMcCtbHit*, allocator<StMcCtbHit*> >    StPtrVecMcCtbHit; 
-typedef vector<StMcPixelHit*, allocator<StMcPixelHit*> >  StPtrVecMcPixelHit; 
-typedef vector<StMcIstHit*, allocator<StMcIstHit*> >    StPtrVecMcIstHit;
-typedef vector<StMcFgtHit*, allocator<StMcFgtHit*> >    StPtrVecMcFgtHit; 
-typedef vector<StMcTofHit*, allocator<StMcTofHit*> >    StPtrVecMcTofHit; 
-typedef vector<StMcBTofHit*, allocator<StMcBTofHit*> >    StPtrVecMcBTofHit; 
-typedef vector<StMcTrack*, allocator<StMcTrack*> >      StPtrVecMcTrack; 
-
-#endif // no template default arguments
 //Iterators
 typedef StPtrVecMcVertex::iterator  StMcVertexIterator; 
 typedef StPtrVecMcCalorimeterHit::iterator  StMcCalorimeterHitIterator; 
@@ -208,6 +180,7 @@ typedef StPtrVecMcIstHit::iterator  StMcIstHitIterator;
 typedef StPtrVecMcFgtHit::iterator  StMcFgtHitIterator; 
 typedef StPtrVecMcTofHit::iterator  StMcTofHitIterator; 
 typedef StPtrVecMcBTofHit::iterator  StMcBTofHitIterator; 
+typedef StPtrVecMcMtdHit::iterator  StMcMtdHitIterator; 
 typedef StPtrVecMcTrack::iterator   StMcTrackIterator; 
 //Const Iterators
 typedef StPtrVecMcVertex::const_iterator  StMcVertexConstIterator; 
@@ -224,6 +197,7 @@ typedef StPtrVecMcIstHit::const_iterator  StMcIstHitConstIterator;
 typedef StPtrVecMcFgtHit::const_iterator  StMcFgtHitConstIterator; 
 typedef StPtrVecMcTofHit::const_iterator  StMcTofHitConstIterator; 
 typedef StPtrVecMcBTofHit::const_iterator  StMcBTofHitConstIterator; 
+typedef StPtrVecMcMtdHit::const_iterator  StMcMtdHitConstIterator; 
 typedef StPtrVecMcTrack::const_iterator   StMcTrackConstIterator; 
 //     ClassDef(StMcContainers,0)
 #endif //StMcContainers

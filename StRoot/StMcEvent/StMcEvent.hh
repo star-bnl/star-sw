@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.30 2011/07/20 17:35:35 perev Exp $
+ * $Id: StMcEvent.hh,v 2.31 2011/10/11 01:12:18 perev Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.31  2011/10/11 01:12:18  perev
+ * Mtd added
+ *
  * Revision 2.30  2011/07/20 17:35:35  perev
  * Fsc added
  *
@@ -143,6 +146,7 @@ class StMcSsdHitCollection;
 #include "StMcEmcHitCollection.hh"
 class StMcTofHitCollection;
 class StMcBTofHitCollection;
+class StMcMtdHitCollection;
 class StMcPixelHitCollection;
 class StMcIstHitCollection;
 class StMcFgtHitCollection;
@@ -151,16 +155,17 @@ class g2t_event_st;
 
 class StMcEvent : public TDataSet {
     
- public:
+public:
   StMcEvent();  
   StMcEvent(g2t_event_st*);
   virtual ~StMcEvent();
   
   int operator==(const StMcEvent&) const;
   int operator!=(const StMcEvent&) const;
-  
+private:  
   void initToZero();
   void makeColls();
+public:
   
   
   //"Get" Methods
@@ -225,7 +230,9 @@ class StMcEvent : public TDataSet {
   const StMcTofHitCollection*    tofHitCollection() const {return mTofHits;}
   StMcBTofHitCollection*         btofHitCollection()       {return mBTofHits;}		
   const StMcBTofHitCollection*   btofHitCollection() const {return mBTofHits;}
-  			      
+  StMcMtdHitCollection*          mtdHitCollection()        {return mMtdHits;}           
+  const StMcMtdHitCollection*    mtdHitCollection() const  {return mMtdHits;}
+ 			      
   StMcEmcHitCollection*         eemcHitCollection()       {return emcHitCollection("EemcHits");}
   const StMcEmcHitCollection*   eemcHitCollection() const {return emcHitCollection("EemcHits");}
   StMcEmcHitCollection*         eprsHitCollection()       {return emcHitCollection("EprsHits");}
@@ -276,6 +283,7 @@ class StMcEvent : public TDataSet {
   void setCtbHitCollection(StMcCtbHitCollection*);              
   void setTofHitCollection(StMcTofHitCollection*);
   void setBTofHitCollection(StMcBTofHitCollection*);
+  void setMtdHitCollection(StMcMtdHitCollection*);
   void setPixelHitCollection(StMcPixelHitCollection*);       
   void setIstHitCollection(StMcIstHitCollection*); 
   void setFgtHitCollection(StMcFgtHitCollection*);       
@@ -311,6 +319,7 @@ class StMcEvent : public TDataSet {
   StMcCtbHitCollection*          mCtbHits;
   StMcTofHitCollection*          mTofHits;
   StMcBTofHitCollection*         mBTofHits;
+  StMcMtdHitCollection*          mMtdHits;
   StMcPixelHitCollection*        mPixelHits;
   StMcIstHitCollection*          mIstHits;
   StMcFgtHitCollection*          mFgtHits;
@@ -322,7 +331,7 @@ class StMcEvent : public TDataSet {
  private:
   const StMcEvent& operator=(const StMcEvent&);
   StMcEvent(const StMcEvent&);
-  ClassDef(StMcEvent,2)
+  ClassDef(StMcEvent,3)
 };
 
 ostream&  operator<<(ostream& os, const StMcEvent&);
