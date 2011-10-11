@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.72 2011/07/20 17:36:32 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.73 2011/10/11 01:24:57 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.73  2011/10/11 01:24:57  perev
+ * Mtd added
+ *
  * Revision 1.72  2011/07/20 17:36:32  perev
  * Fsc added
  *
@@ -287,6 +290,7 @@ using std::find;
 #include "tables/St_g2t_ftp_hit_Table.h"
 #include "tables/St_g2t_rch_hit_Table.h"
 #include "tables/St_g2t_ctf_hit_Table.h"
+#include "tables/St_g2t_mtd_hit_Table.h"
 #include "tables/St_g2t_svt_hit_Table.h"
 #include "tables/St_g2t_ssd_hit_Table.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
@@ -310,7 +314,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.72 2011/07/20 17:36:32 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.73 2011/10/11 01:24:57 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -350,6 +354,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseCtb         (kTRUE),
     doUseTofp        (kFALSE),
     doUseTof         (kTRUE),
+    doUseMtd         (kTRUE),
     doUseEemc        (kTRUE),
     doUseFpd         (kTRUE),
     doUseFsc         (kTRUE),
@@ -475,6 +480,7 @@ Int_t StMcEventMaker::Make()
     St_g2t_ctf_hit *g2t_ctb_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_ctb_hit"); // Added CTB Hits
     St_g2t_ctf_hit *g2t_tof_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_tof_hit");
     St_g2t_ctf_hit *g2t_tfr_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_tfr_hit");
+    St_g2t_mtd_hit *g2t_mtd_hitTablePointer =  (St_g2t_mtd_hit *) geantDstI("g2t_mtd_hit");
     St_g2t_emc_hit *g2t_eem_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_eem_hit");
     St_g2t_emc_hit *g2t_esm_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_esm_hit");
     St_g2t_emc_hit *g2t_fpd_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_fpd_hit"); // Added FPD Hits
@@ -585,6 +591,14 @@ Int_t StMcEventMaker::Make()
 	    tfrHitTable = g2t_tfr_hitTablePointer->GetTable();
 	else
 	    if (Debug()) cerr << "Table g2t_tfr_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
+	// MTD Hit Tables
+	//
+	g2t_mtd_hit_st *mtdHitTable = 0;
+	if (g2t_mtd_hitTablePointer)
+	    mtdHitTable = g2t_mtd_hitTablePointer->GetTable();
+	else
+	    if (Debug()) cerr << "Table g2t_mtd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	//
 	// BEMC and BPRS Hit Table
@@ -1226,6 +1240,7 @@ Int_t StMcEventMaker::Make()
 	AddHits(ctb,ctb,Ctb);
 	AddHits(tof,tof,Tof);
 	AddHits(tfr,tof,Tof);
+//VP	AddHits(mtd,mtd,Mtd);
 	AddHits(pix,pixel,Pixel);
 	AddHits(ist,ist,Ist);
 	AddHits(fgt,fgt,Fgt);

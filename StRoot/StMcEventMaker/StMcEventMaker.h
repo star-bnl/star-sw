@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.24 2011/07/20 17:36:52 perev Exp $
+ * $Id: StMcEventMaker.h,v 1.25 2011/10/11 01:24:52 perev Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.25  2011/10/11 01:24:52  perev
+ * Mtd added
+ *
  * Revision 1.24  2011/07/20 17:36:52  perev
  * Fsc added
  *
@@ -112,7 +115,7 @@ public:
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.24 2011/07/20 17:36:52 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.25 2011/10/11 01:24:52 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -129,6 +132,7 @@ public:
     Bool_t  doUseCtb;              //!
     Bool_t  doUseTofp;             //!
     Bool_t  doUseTof;              //!
+    Bool_t  doUseMtd;              //!
     Bool_t  doUseEemc;             //!
     Bool_t  doUseFpd;		   //!
     Bool_t  doUseFsc;		   //!

@@ -743,6 +743,7 @@ Bfc_st BFC[] = { // standard chains
    "StChain","BTOF Chain",kFALSE}, 
   {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker",
    "BTOF Simulator",kFALSE},
+  {"mtdSim"    ,"","MtdChain","","StMtdSimMaker","StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti
   {"btofMatch"  ,"","BTofChain","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker",
