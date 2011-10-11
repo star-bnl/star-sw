@@ -217,6 +217,8 @@
 <Use struct="IDSG" select="version" value="IDSC_version" />
 <Use struct="IDSA" select="version" value="1.0" />
 
+<Info format="Inner Detector Support Module with IDSC_version = {5.2f}">IDSC_version</Info>
+
 
 inR     = IDSG_rF
 outR    = IDSG_rrRes + IDSG_r2Res
