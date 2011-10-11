@@ -301,7 +301,7 @@ class StFgtGeom
 	static  bool inDisc( TVector3 rLab );	
 	static  bool belowFlat( TVector3 rLoc );
 	static  int  getQuad( double phiLab );
-
+	
 	//  This is NOT a candidate for inlining.  This returns false if it is
 	//  out of range.
 	static bool localXYtoStripId(
@@ -369,6 +369,9 @@ class StFgtGeom
 	//  These next two return -1 on error.
 	static  int rad2LocalStripId( double rad, double phi, double *binFrac=0 );
 	static  int phiLoc2LocalStripId( double phiLoc, double *binFrac=0 );
+	
+	static double Rstrip_Phi_High(int rindex);//return upper phi range for an r strip
+	static double Rstrip_Phi_Low (int rindex);//return lower phi range for an r strip
 
 	static int radIdLocal2Global( int iquad, int radId )
 	{
@@ -426,8 +429,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.19 2011/10/09 13:36:44 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.20 2011/10/11 15:56:15 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.20  2011/10/11 15:56:15  rfatemi
+ *  add in new access functions
+ *
  *  Revision 1.19  2011/10/09 13:36:44  rfatemi
  *  Update with Rlast and Rfirst for location of R strips
  *
