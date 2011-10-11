@@ -18,6 +18,24 @@ double	StFgtGeom::doublepi = 2.*pi;
 double	StFgtGeom::halfpi = 0.5*pi;
 
 
+double	StFgtGeom::mRadStripOff =
+    (
+	(Rout()-Rin()/radStrip_pitch())
+	-
+	int (
+	    (Rout() - Rin())/radStrip_pitch()
+	)
+    ) * radStrip_pitch();
+
+double	StFgtGeom::mPhiStripOff =
+    (
+	halfpi/phiStrip_pitch()
+	-
+	int (
+	    halfpi/phiStrip_pitch()
+	)
+    ) * phiStrip_pitch();
+
 
 int	StFgtGeom::mRadStripLOCId_number =
   int (
@@ -3055,8 +3073,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.14 2011/10/09 16:24:21 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.15 2011/10/11 17:52:22 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.15  2011/10/11 17:52:22  rfatemi
+ *  Put back mRadStripOff and mPhiStripOff
+ *
  *  Revision 1.14  2011/10/09 16:24:21  rfatemi
  *  Update rad2LocalStripId
  *
