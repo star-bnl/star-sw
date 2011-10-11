@@ -1,3 +1,5 @@
+#ifndef __BigFullChain_h__
+#define __BigFullChain_h__
 #define __KEEP_TPCDAQ_FCF__ /* remove St_tpcdaq_Maker and StRTSClientFCFMaker. not yet ready */
 //#define __NoStrangeMuDst__
 //#define __NoDisplay__
@@ -27,7 +29,8 @@ Bfc_st BFC[] = { // standard chains
   {"DbV1107"     ,""  ,"","db,ry1h"        ,"","",          "20011107/0 Db Version for pass1 p01gk",kFALSE},
   {"DbV1211"     ,""  ,"","db,ry1h"        ,"","",           "20011211/0 Db Version for prod p01gl",kFALSE},
 
-  {"AgML"        ,""  ,"","-Agi,-VmcGeo"                  ,"","","alias VmcGeomtry to AgMLGeometry",kFALSE},
+  {"AgML"        ,""  ,"","-Agi,-VmcGeo","","StarAgmlLib,StarGeometry,Geometry"
+   ,                                                             "alias VmcGeomtry to AgMLGeometry",kFALSE},
   {"Agi" ,""  ,"","-AgML,-VmcGeo","","","alias VmcGeomtry to AgiGeometry (gstar original geometry)",kFALSE},
   {"VmcGeo"      ,""  ,"","-AgML,-Agi"                    ,"",""      ,"alias VmcGeomtry to VmcGeo",kFALSE},
   
@@ -445,14 +448,14 @@ Bfc_st BFC[] = { // standard chains
   {"rts"         ,""  ,"","",""                                                ,"RTS","load libRTS",kFALSE},
   {"daq"         ,""  ,"","rts",""                         ,"StDaqLib,StDAQMaker","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
-  {"SvtCL"       ,""  ,"","",""                                     ,"libGeom,StSvtClassLibrary","",kFALSE},
+  {"SvtCL"       ,""  ,"","",""                                        ,"Geom,StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
   {"BTofUtil"    ,""  ,"","",""                                     ,"StBTofUtil","Load StBTofUtil",kFALSE},
   {"MtdUtil"    ,""  ,"","",                                        "","StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent"     ,""  ,"","globT,SCL,TRGDef,StBichsel,EmcUtil",""         ,"StEvent","Load StEvent",kFALSE},
-  {"SsdUtil"     ,""  ,"","StarMagField,StEvent",""            ,"libGeom,StSsdUtil","Load SSD Util",kFALSE},
+  {"SsdUtil"     ,""  ,"","StarMagField,StEvent",""               ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T,geomT,StDbT",""                      ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
 #if 0
@@ -493,10 +496,10 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"db"          ,"db"   ,"","StDbT"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb","detDb","","db","StDetectorDbMaker","StDetectorDbMaker","Load and run StDetectorDbMaker",kFALSE},
-  {"magF"        ,"MagField","","StDbT,db,detDb","StMagFMaker","StarMagField,StMagF",
-   "Mag.field map with scale factor from Db",kFALSE},
-  {"mtin"        ,"geant"  ,"","paw,-fzin,-geant,-gstar,geantL,paw,gstarLib,-magF","St_geant_Maker",
-                                                                    "gstar","read event from MuDst",kFALSE},
+  {"magF"        ,"MagField","","StDbT,db,detDb","StMagFMaker","StarMagField,StMagF"
+   ,                                                      "Mag.field map with scale factor from Db",kFALSE},
+  {"mtin"        ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
+   ,                                                                "gstar","read event from MuDst",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,detDb,StarMagField,magF"    ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"dbutil"      ,""     ,"","detDb,StDbT"                 ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"svtDb"       ,"svtDb","","tpcDb,SvtCL", "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
@@ -518,14 +521,15 @@ Bfc_st BFC[] = { // standard chains
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
   {"VMCAppl" ,"","","geomT,gen_t,sim_T,tpcDB,svtDb,ssdDb,RootVMC,","","StarVMCApplication","VMC G3",kFALSE},
-  {"VMC"         ,"geant","","Simu,VMCAppl,-geant","StVMCMaker",           "StVMCMaker","VMC Maker",kFALSE},
-  {"VMCPassive"  ,"geant","","VMCAppl"    ,"StVMCMaker",   "StVMCMaker","VMC Maker in Passive Mode",kFALSE},
+  {"VMC"         ,"geant","","Simu,VMCAppl,-geant,VmcGeo","StVMCMaker",    "StVMCMaker","VMC Maker",kFALSE},
+  {"VMCPassive"  ,"geant","","VMCAppl,VmcGeo","StVMCMaker","StVMCMaker","VMC Maker in Passive Mode",kFALSE},
   {"trg"         ,"trg","l0Chain","trg_T,globT,db","St_trg_Maker","St_trg,St_trg_Maker",
    "trigger analysis for Year 2001-2005 data",kFALSE},
   {"TRGDef"      ,""  ,"","",""                          ,"StTriggerDataMaker","Load StTriggerData",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
   {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker",
    "<Early StEvent creation>",kFALSE},
+  {"LaserAvEv"          ,"","",""                        ,"StLaserAvEventMaker","StLaserAvEvent","",kFALSE},
   {"l0"          ,"l0Chain","","globT,ctf,trg"                              ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db" ,"St_ctf_Maker","St_ctf,St_ctf_Maker","ToF simulation",kFALSE},
   {"mwc"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
@@ -731,25 +735,23 @@ Bfc_st BFC[] = { // standard chains
   {"Alignment"   ,"","","",                   "","", "Sti Tpc Alignment, reconstruction per sector",kFALSE},
   {"Sti"      ,"Sti","","SCL,StEvent,Stu,StiLibs,StDbT,TpcIT,StiUtil,compend,tbutil","StiMaker",
                                                                      "Sti,StiMaker" ,"ITTF tracker",kFALSE},
-  {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,Stu,StDbT,TpcDb,compend","StiVMCMaker"
-   ,                                                       "StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
   {"StiPulls" ,"","","Sti",                                      "","", "Request to make Sti Pulls",kFALSE},
-  {"BeamBack" ,"","","StEvent","StBeamBackMaker","StBeamBackMaker",
-   "Beam background tracker in the TPC",kFALSE},
-  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker",
-   "Bichsel method used for dEdx",kFALSE},
+  {"BeamBack" ,"","","StEvent","StBeamBackMaker","StBeamBackMaker"
+   ,                                                           "Beam background tracker in the TPC",kFALSE},
+  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker"
+   ,                                                                 "Bichsel method used for dEdx",kFALSE},
   // final TOF combo
-  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib,geant","StMaker",
-   "StChain","BTOF Chain",kFALSE}, 
-  {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker",
-   "BTOF Simulator",kFALSE},
-  {"mtdSim"    ,"","MtdChain","","StMtdSimMaker","StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
+  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib,geant","StMaker"
+   ,                                                                         "StChain","BTOF Chain",kFALSE}, 
+  {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker"
+   ,                                                                               "BTOF Simulator",kFALSE},
+  {"mtdSim"    ,"","MtdChain","","StMtdSimMaker",           "StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti
-  {"btofMatch"  ,"","BTofChain","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker",
-   "TPC-BTOF track matching",kFALSE},
-  {"btofCalib"  ,"","BTofChain","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker",
-   "BTOF calibration",kFALSE},
+  {"btofMatch"  ,"","BTofChain","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker"
+   ,                                                                      "TPC-BTOF track matching",kFALSE},
+  {"btofCalib"  ,"","BTofChain","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker"
+   ,                                                                             "BTOF calibration",kFALSE},
   
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
@@ -773,8 +775,8 @@ Bfc_st BFC[] = { // standard chains
   {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
   {"pmdSim"    ,"","","PmdUtil","StPmdSimulatorMaker","StPmdSimulatorMaker","Hit Simulator for PMD",kFALSE},
   {"pmdClust"  ,"pmdClust","","","StPmdClusterMaker",    "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
-  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
-   "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
+  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker"
+   ,                                              "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
 #ifndef __NoStrangeMuDst__
   {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker"
    ,                                                                      "Find Kinks from StEvent",kFALSE},
@@ -808,8 +810,9 @@ Bfc_st BFC[] = { // standard chains
   {"l3count"     ,"","",""                              ,"Stl3CounterMaker","Stl3RawReaderMaker","",kFALSE},
   {"bbcSim"         ,"","","db","StBbcSimulationMaker"      ,"StBbcSimulationMaker","BBC Simulator",kFALSE},
   {"analysis"    ,"","","StEvent"        ,"StAnalysisMaker","StAnalysisMaker","Example of Analysis",kFALSE},
-  {"compend"     ,"","","event,detDb","StEventCompendiumMaker","StEventCompendiumMaker",
-   "Fill event summary in ITTF Chain",kFALSE},
+  {"compend"     ,"","","event,detDb","StEventCompendiumMaker","StEventCompendiumMaker"
+   ,                                                             "Fill event summary in ITTF Chain",kFALSE},
+  {"TpcAligner"    ,"","","Alignment"         ,"StTpcAlignerMaker","StTpcAlignerMaker","TpcAligner",kFALSE},
   {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
   {"RichSpectra"         ,"","",""                      ,"","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                         ,"StMaker","StChain","",kFALSE},
@@ -982,7 +985,7 @@ Bfc_st BFC[] = { // standard chains
   {"Test.VeryFast.ITTF","","","TpcFastSim,Simu,sfs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,"
    "SvtCL,tpc_T,globT,tls,db,tpcDB,svtDb,svtIT,ssdIT,ITTF,Idst,event,analysis,EventQA,tags,Tree,logger,"
    "EvOut,StarMagField,FieldOn,IAna,CMuDst"                                               ,"","","",kFALSE},
-  {"Test.default.ITTF","","","Trs,Simu,sss,svt,ssd,fss,bbcSim,IdTruth,MakeEvent,"
+  {"Test.default.ITTF","","","TpcRS,Simu,sss,svt,ssd,fss,bbcSim,IdTruth,MakeEvent,genvtx,"
    "miniMcMk,McAna,Test.reco.ITTF,CMuDst"                                                 ,"","","",kFALSE},
   {"Test.default.y2005g.ITTF","","","Test.default.ITTF,sdt20050130,noSimuDb"              ,"","","",kFALSE},
   {"Test.default.y2007g.ITTF","","","Test.default.ITTF,sdt20070322,noSimuDb"              ,"","","",kFALSE},
@@ -1145,3 +1148,4 @@ Bfc_st BFC[] = { // standard chains
   {"Aliased     ","time stamps","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE}
 };
+#endif /* __BigFullChain_h__ */
