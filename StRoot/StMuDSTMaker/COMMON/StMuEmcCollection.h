@@ -32,7 +32,7 @@ class StMuEmcCollection: public TObject
                       StMuEmcCollection(const StMuEmcCollection&);
     virtual           ~StMuEmcCollection();
     void              clear(Option_t *option="");     
-    virtual void      Clear(Option_t *option=""){clear();}     
+    virtual void      Clear(Option_t */* option="" */){clear();}     
     void              DeleteThis();
     
     int               getTowerADC(int id, int detector = bemc) const;    
