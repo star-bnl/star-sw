@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.38 2011/04/08 01:25:51 fisyak Exp $
+ * $Id: StMuTrack.h,v 1.39 2011/10/11 20:35:43 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -118,6 +118,11 @@ class StMuTrack : public TObject {
 	TArrayI getTower(bool useExitRadius=false, int det=1) const; //Get Tower track is pointing too -  1=BTOW, 3=BSMDE, 4=BSMDP //1=BTOW, 3=BSMDE, 4=BSMDP Returns TVector tower. tower[0] is module, tower[1] is eta, tower[2] is sub, and tower[3] is id
 	double energyBEMC() const;
 	bool matchBEMC() const;
+  Int_t            idTruth() const { return mIdTruth;}
+  Int_t            qaTruth() const { return mQuality; }
+  Int_t           idParentVx() const {return mIdParentVx;}
+  void            setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+  void         setIdParentVx(Int_t id) {mIdParentVx = id;}
 
 protected:
   Short_t mId;
@@ -174,11 +179,6 @@ protected:
   void fillMuBTofPidTraits(const StTrack*); /// dongx
   static StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm; ///< StuProbabilityPidAlgorithm, we will use the same algorithm for all tracks
   static double mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
-  Int_t            idTruth() const { return mIdTruth;}
-  Int_t            qaTruth() const { return mQuality; }
-  Int_t           idParentVx() const {return mIdParentVx;}
-  void            setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
-  void         setIdParentVx(Int_t id) {mIdParentVx = id;}
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
@@ -234,6 +234,9 @@ inline const StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0)
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.39  2011/10/11 20:35:43  fisyak
+ * Make idTruth public
+ *
  * Revision 1.38  2011/04/08 01:25:51  fisyak
  * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
  *
