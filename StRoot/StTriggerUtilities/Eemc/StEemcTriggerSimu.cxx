@@ -480,11 +480,13 @@ StEemcTriggerSimu::getEemcAdc(){
     if (StEvent* event = (StEvent*)StMaker::GetChain()->GetDataSet("StEvent")) {
       if (StEmcCollection* emc = event->emcCollection()) {
 	if (StEmcDetector* det = emc->detector(kEndcapEmcTowerId)) {
+	  int ntowers = 0;
 	  for (unsigned int sec = 1; sec <= det->numberOfModules(); ++sec) { // 1-12
-	    StSPtrVecEmcRawHit& hits = det->module(sec)->hits();
+	    const StSPtrVecEmcRawHit& hits = det->module(sec)->hits();
+	    ntowers += hits.size();
 	    //LOG_DEBUG << Form("sector=%d: nhits=%d",sec,hits.size()) << endm;
 	    for (size_t i = 0; i < hits.size(); ++i) {
-	      StEmcRawHit* hit = hits[i];
+	      const StEmcRawHit* hit = hits[i];
 	      char sub = hit->sub()-1+'A'; // 'A'-'E'
 	      int  eta = hit->eta(); // 1-12
 	      int  adc = hit->adc(); // raw ADC
@@ -496,6 +498,7 @@ StEemcTriggerSimu::getEemcAdc(){
 	      //LOG_DEBUG << Form("crate=%d chan=%d rdo=%d adc=%d",x->crate,x->chan,rdo,adc) << endm;
 	    } // End loop over hits
 	  } // End loop over sectors
+	  assert(ntowers == 720);
 	} // if (det)
       } // if (emc)
     } // if (event)
@@ -769,6 +772,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.43  2011/10/11 09:41:51  pibero
+// Make sure there are 720 towers in EEMC
+//
 // Revision 1.42  2011/09/27 19:23:52  pibero
 // Added rdo and status
 //
