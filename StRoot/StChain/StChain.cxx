@@ -148,18 +148,18 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 #else
 // Add a record to MySQL tracking Db     
 //  LOG_QA << "SequenceValue="<< mNTotal
-  LOG_UCM 
-         << "StageID=" << "'1'"
-         << ",MessageKey=" << "'MemUsed'" 
-         << ",MessageValue='" << int(StMemStat::Used())
-         << "'" << endm;
+//    LOG_UCM 
+//          << "StageID=" << "'1'"
+//          << ",MessageKey=" << "'MemUsed'" 
+//          << ",MessageValue='" << int(StMemStat::Used())
+//          << "'" << endm;
          
 //  LOG_QA << "SequenceValue="<<mNTotal 
-  LOG_UCM 
-         << "StageID=" << "'1'"
-         << ",MessageKey=" << "'ProgSize'"
-         << ",MessageValue='" << int(StMemStat::ProgSize())
-         << "'" << endm;
+  // LOG_UCM 
+//          << "StageID=" << "'1'"
+//          << ",MessageKey=" << "'ProgSize'"
+//          << ",MessageValue='" << int(StMemStat::ProgSize())
+//          << "'" << endm;
 #endif         
 #endif                
   if (jBeg > 1) Skip(jBeg-1);
@@ -215,18 +215,18 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 #else
 // Add a record to MySQL tracking Db     
 //  LOG_QA << "SequenceValue="       << mNTotal
-  LOG_UCM
-         << "StageID=" << "'3'"
-         << ",MessageKey=" << "'Cpu'"
-         << ",MessageValue='" << evnt.GetCpuTime("QAInfo:")
-         << "'" << endm;
+  // LOG_UCM
+//          << "StageID=" << "'3'"
+//          << ",MessageKey=" << "'Cpu'"
+//          << ",MessageValue='" << evnt.GetCpuTime("QAInfo:")
+//          << "'" << endm;
 
 //  LOG_QA << "SequenceValue="       << mNFailed
-  LOG_UCM 
-         << "StageID=" << "'3'"
-         << ",MessageKey=" << "'RealTime'" 
-         << ",MessageValue='" << evnt.GetRealTime("QAInfo:")
-         << "'" << endm;
+  // LOG_UCM 
+//          << "StageID=" << "'3'"
+//          << ",MessageKey=" << "'RealTime'" 
+//          << ",MessageValue='" << evnt.GetRealTime("QAInfo:")
+//          << "'" << endm;
 #endif
 #endif                
   }
@@ -261,18 +261,18 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 // Add a record to MySQL tracking Db     
 
 //   LOG_QA << "SequenceValue="       << mNTotal
-  LOG_UCM 
-         << "StageID=" << "'3'"
-         << ",MessageKey=" << "'MemUsed'"  
-         << ",MessageValue='" << int(StMemStat::Used())
-         << "'" << endm;
+  // LOG_UCM 
+//          << "StageID=" << "'3'"
+//          << ",MessageKey=" << "'MemUsed'"  
+//          << ",MessageValue='" << int(StMemStat::Used())
+//          << "'" << endm;
 
 //   LOG_QA << "SequenceValue="       << mNFailed
-  LOG_UCM 
-         << "StageID=" << "'3'"
-         << ",MessageKey=" << "'ProgSize'"
-         << ",MessageValue='" << int(StMemStat::ProgSize())
-         << "'" << endm;
+  // LOG_UCM 
+//          << "StageID=" << "'3'"
+//          << ",MessageKey=" << "'ProgSize'"
+//          << ",MessageValue='" << int(StMemStat::ProgSize())
+//          << "'" << endm;
 #endif         
    if (GetLogger()) GetLogger()->Close();
 
@@ -282,8 +282,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.78 2011/06/20 15:13:50 fisyak Exp $
+// $Id: StChain.cxx,v 1.79 2011/10/11 16:01:48 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.79  2011/10/11 16:01:48  perev
+// Remove redundant printouts
+//
 // Revision 1.78  2011/06/20 15:13:50  fisyak
 // Force to call Finish with SIGTERM signal obtained from condor_vacate_job after time limit reached
 //
