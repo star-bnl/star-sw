@@ -2,8 +2,10 @@
 //                                                                      //
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
+// Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
+//                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.181 2011/10/10 21:19:11 jeromel Exp $
+// $Id: bfc.C,v 1.182 2011/10/11 13:48:49 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -43,32 +45,39 @@ void Load(const Char_t *options){
     }
     if (!TString(options).Contains("nodefault",TString::kIgnoreCase) || 
 	TString(options).Contains("cern",TString::kIgnoreCase)) {
-      gSystem->Load("libminicern"); cout << "libminicern";
+      gSystem->Load("libminicern"); 
+      cout << "libminicern" ;
     }
     if (!TString(options).Contains("nodefault",TString::kIgnoreCase) || 
 	TString(options).Contains("mysql",TString::kIgnoreCase)) {
       Char_t *mysql = "libmysqlclient";
+      //Char_t *mysql = "libmimerS"; // just to test it picks from OPTSTAR
 
       //
       // May use USE_64BITS - the x8664 work fine too
       //
-      //if ( gSystem->Getenv("USE_LOCAL_MYSQL") ){
-      //Char_t *libs[]  = {"", 
-      //			   "$OPTSTAR/lib",
-      //			   "$OPTSTAR/lib/mysql",
-      //			   "/usr/lib/", 
-      //			   "/usr/lib/mysql/", 
-      //			   "/usr/mysql/lib/",
-      //			   NULL}; 
-      //} else {
-	Char_t *libs[]  = {"", 
-			   "/usr/lib/", 
-			   "/usr/lib/mysql/", 
-			   "/usr/mysql/lib/",
-			   "$OPTSTAR/lib",
-			   "$OPTSTAR/lib/mysql",
-			   NULL}; 
-      //}
+      Char_t *libsLocal[]= {"",
+	                    "$OPTSTAR/lib/",
+			    "$OPTSTAR/lib/mysql/",
+			    "/usr/lib/", 
+			    "/usr/lib/mysql/", 
+			    "/usr/mysql/lib/",
+			    NULL}; 
+      Char_t *libsGlbal[]= {"", 
+			    "/usr/lib/", 
+			    "/usr/lib/mysql/", 
+			    "/usr/mysql/lib/",
+			    "$OPTSTAR/lib/",
+			    "$OPTSTAR/lib/mysql/",
+			    NULL}; 
+
+      Char_t **libs;
+
+      if ( gSystem->Getenv("USE_LOCAL_MYSQL") ){
+	libs = libsLocal;
+      } else {
+	libs = libsGlbal;
+      }
 
 
       TString Arch( gSystem->GetBuildArch() );
@@ -78,11 +87,13 @@ void Load(const Char_t *options){
       Int_t i = 0;
       while ((libs[i])) {
 	TString lib(libs[i]);
+	//cout << "Found " << lib << endl;
 	if (i64) lib.ReplaceAll("/lib","/lib64");
 	lib += mysql;
 	lib = gSystem->ExpandPathName(lib.Data());
 	if (gSystem->DynamicPathName(lib,kTRUE)) {
-	  gSystem->Load(lib.Data()); cout << " + " << lib.Data();
+	  gSystem->Load(lib.Data()); 
+	  cout << " + " << mysql << " from " << lib.Data();
 	  break;
 	}
 	i++;
@@ -94,9 +105,9 @@ void Load(const Char_t *options){
   // Look up for the logger option
   Bool_t needLogger  = kFALSE;
   if (gSystem->Load("liblog4cxx.so") >=  0) {             //  StMemStat::PrintMem("load log4cxx");
-    cout << "+liblog4cxx.so";
+    cout << " + liblog4cxx.so";
     if(gSystem->Load("libStStarLogger.so") >= 0) {              //  StMemStat::PrintMem("load log4cxx");
-      cout << " +libStStarLogger.so";
+      cout << " + libStStarLogger.so";
       gROOT->ProcessLine("StLoggerManager::StarLoggerInit();"); 
     }
   }
