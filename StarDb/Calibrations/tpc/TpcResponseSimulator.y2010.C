@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2010.C,v 1.8 2010/10/28 23:41:54 fisyak Exp $
+// $Id: TpcResponseSimulator.y2010.C,v 1.9 2011/10/11 19:09:23 fisyak Exp $
 // $Log: TpcResponseSimulator.y2010.C,v $
+// Revision 1.9  2011/10/11 19:09:23  fisyak
+// Add Yi Guo's tables for Run XI AuAu200 RFF dE/dx calibration
+//
 // Revision 1.8  2010/10/28 23:41:54  fisyak
 // extra t0 off set for Altro chip
 //
@@ -53,10 +56,12 @@ TDataSet *CreateTable() {
   row.tauXO                 =  74.6e-9;// secs Tpx Outer integration time 
   row.tauCI                 =   0;  
   row.tauCO                 =   0;  
-  row.SigmaJitterTI         = 0.25;//ad  0.0;// b for Tpx inner 
-  row.SigmaJitterTO         = 0.25;//ad  0.0;// b for Tpx outer 
+  row.SigmaJitterTI         = 0.5*(0.25+0.57);// C: 0.57;// 0.25;//ad  0.0;// b for Tpx inner 
+  row.SigmaJitterTO         = 0.8*0.51;       // C: 0.51;// 0.25;//ad  0.0;// b for Tpx outer 
+  row.SigmaJitterXI         = 0.;
+  row.SigmaJitterXO         = 0.;
   row.longitudinalDiffusion = 0.0370;// 0.0232;//K  0.0370;J // cm/sqrt(cm)   ; // 0.0232; from Laser Fit
-  row.transverseDiffusion   = 0.06336*1.1585; //i; 0.06336*1.17; //h 0.06336; //  cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
+  row.transverseDiffusion   =  0.06336*1.1585; // C: 0.06336;// *1.1585; //i; 0.06336*1.17; //h 0.06336; //  cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        = 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        = 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
@@ -79,15 +84,19 @@ TDataSet *CreateTable() {
   //   FitP->Draw("sqrt(sigma**2-2.73752e-01**2):y>>DIi","(i&&j&&j<14)/(dsigma**2)","profwsame")
   //   FitP->Draw("sqrt(sigma**2-2.51855e-01**2):y>>DOo","(i&&j&&j>=14)/(dsigma**2)","profwsame")
   const Double_t RowSigmaTrs[4] = {//  2.88735e-01, 2.49370e-01 
-    /* WE */  2.19714e-01, -3.33329e-03,  // Inner
-    /* WE */  1.39679e-01,  7.26005e-04}; // Outer
+    /* WE */  2.19714e-01 + 1.63694e-01, -3.33329e-03,  // Inner
+    /* WE */  1.39679e-01 + 0.88994e-01,  7.26005e-04}; // Outer
+  // Sigma => SecRow3CGFTpcRS_2010_AuAu200 : Inner = 3.30597e-01; Outer = 2.85255e-01;
+  //          SecRow3CGFdaq_2010_AuAu200:    Inner = 3.68904e-01; Outer = 2.98815e-01;
+  // Dif:                                            1.63694e-01          0.88994e-01
   Float_t *b = &row.SecRowSigIW[0];
   for (Int_t i = 0; i < 8; i++) {
     b[i] = RowSigmaTrs[i%4];
   }
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
-  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
+  //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
+  row.T0offset   =  0.50+1.65131e-01-3.39101e-01; // TpcT->Draw("fRcHit.mMcl_t/64-3.0*0.055*Frequency-fMcHit.mMcl_t:fMcHit.mPosition.mX3>>T(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
