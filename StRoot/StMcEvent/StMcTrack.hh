@@ -6,11 +6,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.26 2011/07/20 17:36:09 perev Exp $
+ * $Id: StMcTrack.hh,v 2.27 2011/10/11 01:22:24 perev Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.hh,v $
+ * Revision 2.27  2011/10/11 01:22:24  perev
+ * Not used anymore or ever
+ *
  * Revision 2.26  2011/07/20 17:36:09  perev
  * Fsc added
  *
@@ -180,6 +183,8 @@ public:
   const StPtrVecMcCalorimeterHit& bsmdpHits() const { return mBsmdpHits; }
   StPtrVecMcTofHit& tofHits() { return mTofHits; }
   const StPtrVecMcTofHit& tofHits() const { return mTofHits; }
+  StPtrVecMcMtdHit& mtdHits() { return mMtdHits; }
+  const StPtrVecMcMtdHit& mtdHits() const { return mMtdHits; }
   StPtrVecMcCalorimeterHit& eemcHits() { return mEemcHits; }
   const StPtrVecMcCalorimeterHit& eemcHits() const { return mEemcHits; }
   StPtrVecMcCalorimeterHit& eprsHits() { return mEprsHits; }
@@ -224,6 +229,7 @@ public:
     void setBsmdeHits(StPtrVecMcCalorimeterHit&); 
     void setBsmdpHits(StPtrVecMcCalorimeterHit&); 
     void setTofHits(StPtrVecMcTofHit&); 
+    void setMtdHits(StPtrVecMcMtdHit&); 
     void setEemcHits(StPtrVecMcCalorimeterHit&); 
     void setEprsHits(StPtrVecMcCalorimeterHit&); 
     void setEsmduHits(StPtrVecMcCalorimeterHit&); 
@@ -252,6 +258,7 @@ public:
     void addBsmdeHit(StMcCalorimeterHit*); 
     void addBsmdpHit(StMcCalorimeterHit*); 
     void addTofHit(StMcTofHit*); 
+    void addMtdHit(StMcMtdHit*); 
     void addEemcHit(StMcCalorimeterHit*); 
     void addEprsHit(StMcCalorimeterHit*); 
     void addEsmduHit(StMcCalorimeterHit*); 
@@ -273,6 +280,7 @@ public:
     void removeBsmdeHit(StMcCalorimeterHit*); 
     void removeBsmdpHit(StMcCalorimeterHit*); 
     void removeTofHit(StMcTofHit*); 
+    void removeMtdHit(StMcMtdHit*); 
     void removeEemcHit(StMcCalorimeterHit*); 
     void removeEprsHit(StMcCalorimeterHit*); 
     void removeEsmduHit(StMcCalorimeterHit*); 
@@ -301,6 +309,7 @@ protected:
     StPtrVecMcCalorimeterHit mBsmdeHits; 
     StPtrVecMcCalorimeterHit mBsmdpHits; 
     StPtrVecMcTofHit         mTofHits; 
+    StPtrVecMcMtdHit         mMtdHits; 
     StPtrVecMcCalorimeterHit mEemcHits; 
     StPtrVecMcCalorimeterHit mEprsHits; 
     StPtrVecMcCalorimeterHit mEsmduHits; 
@@ -318,7 +327,7 @@ protected:
     long                     mKey;     
     long                     mEventGenLabel; 
   Bool_t                   mIsPrimary;
-    ClassDef(StMcTrack,1)
+    ClassDef(StMcTrack,2)
 };
 #endif
 

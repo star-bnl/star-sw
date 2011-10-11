@@ -9,11 +9,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.30 2011/07/20 17:35:53 perev Exp $
+ * $Id: StMcTrack.cc,v 2.31 2011/10/11 01:22:24 perev Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.31  2011/10/11 01:22:24  perev
+ * Not used anymore or ever
+ *
  * Revision 2.30  2011/07/20 17:35:53  perev
  * Fsc added
  *
@@ -74,8 +77,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.30 2011/07/20 17:35:53 perev Exp $
+ * $Id: StMcTrack.cc,v 2.31 2011/10/11 01:22:24 perev Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.31  2011/10/11 01:22:24  perev
+ * Not used anymore or ever
+ *
  * Revision 2.30  2011/07/20 17:35:53  perev
  * Fsc added
  *
@@ -205,7 +211,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.30 2011/07/20 17:35:53 perev Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.31 2011/10/11 01:22:24 perev Exp $";
 
 ClassImp(StMcTrack);
 
@@ -266,6 +272,7 @@ StMcTrack::~StMcTrack() {
     mBsmdeHits.clear();
     mBsmdpHits.clear();
     mTofHits.clear();
+    mMtdHits.clear();
     mEemcHits.clear();
     mEprsHits.clear();
     mEsmduHits.clear();
@@ -321,6 +328,7 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Bsmde Hits: " << t.bsmdeHits().size() << endl;
     os << "No. Bsmdp Hits: " << t.bsmdpHits().size() << endl;
     os << "No. Tof   Hits: " << t.tofHits().size()   << endl;
+    os << "No. Mtd   Hits: " << t.mtdHits().size()   << endl;
     os << "No. Eemc  Hits: " << t.eemcHits().size()  << endl;
     os << "No. Eprs  Hits: " << t.eprsHits().size()  << endl;
     os << "No. Esmdu Hits: " << t.esmduHits().size() << endl;
@@ -364,6 +372,7 @@ void StMcTrack::Print(Option_t *option) const {
 	 << "Bse" 
 	 << "Bsp" 
 	 << "Tof" 
+	 << "Mtd" 
 	 << "Emc" 
 	 << "Eps" 
 	 << "Esu" 
@@ -381,7 +390,7 @@ void StMcTrack::Print(Option_t *option) const {
   Double_t y = rapidity();
   if (TMath::Abs(y) > 999.999) y = TMath::Sign(999.999, y);
     cout << 
-      Form("%8s%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%3i%6i%3i%3i%6i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i",
+      Form("%8s%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%3i%6i%3i%3i%6i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i",
 	   Name.Data(),
 	   fourMomentum().x(), fourMomentum().y(), fourMomentum().z(), fourMomentum().t(), 
 	   pt(),
@@ -402,6 +411,7 @@ void StMcTrack::Print(Option_t *option) const {
 	   bsmdeHits().size(),
 	   bsmdpHits().size(),
 	   tofHits().size(),
+	   mtdHits().size(),
 	   eemcHits().size(),
 	   eprsHits().size(),
 	   esmduHits().size(),
@@ -441,6 +451,8 @@ void StMcTrack::setBsmdeHits(StPtrVecMcCalorimeterHit& val) { mBsmdeHits = val; 
 void StMcTrack::setBsmdpHits(StPtrVecMcCalorimeterHit& val) { mBsmdpHits = val; }
 
 void StMcTrack::setTofHits(StPtrVecMcTofHit& val) { mTofHits = val; }
+
+void StMcTrack::setMtdHits(StPtrVecMcMtdHit& val) { mMtdHits = val; }
 
 void StMcTrack::setEemcHits(StPtrVecMcCalorimeterHit& val) { mEemcHits = val; }
 
@@ -523,6 +535,11 @@ void StMcTrack::addBsmdpHit(StMcCalorimeterHit* hit)
 void StMcTrack::addTofHit(StMcTofHit* hit)
 {
   mTofHits.push_back(hit);
+}
+
+void StMcTrack::addMtdHit(StMcMtdHit* hit)
+{
+  mMtdHits.push_back(hit);
 }
 
 void StMcTrack::addEemcHit(StMcCalorimeterHit* hit)
@@ -654,6 +671,14 @@ void StMcTrack::removeTofHit(StMcTofHit* hit)
     }
 }
 
+void StMcTrack::removeMtdHit(StMcMtdHit* hit)
+{
+    StMcMtdHitIterator iter = find(mMtdHits.begin(), mMtdHits.end(), hit);
+    if (iter != mMtdHits.end()){
+        mMtdHits.erase(iter);
+    }
+}
+
 void StMcTrack::removeEemcHit(StMcCalorimeterHit* hit)
 {
     removeCalorimeterHit(mEemcHits, hit);
@@ -717,6 +742,7 @@ const StPtrVecMcHit *StMcTrack::Hits(StDetectorId Id) const {
   case kFtpcWestId:  	  	
   case kFtpcEastId:  	  	coll = (StPtrVecMcHit *) &mFtpcHits; break;             
   case kTofId:       	  	coll = (StPtrVecMcHit *) &mTofHits; break; 	           	 
+  case kMtdId:       	  	coll = (StPtrVecMcHit *) &mMtdHits; break; 	           	 
   case kCtbId:       	  	coll = (StPtrVecMcHit *) &mCtbHits; break; 	           	 
   case kSsdId:       	  	coll = (StPtrVecMcHit *) &mSsdHits; break; 	         
   case kBarrelEmcTowerId:    	break; 
@@ -750,6 +776,7 @@ const StPtrVecMcCalorimeterHit *StMcTrack::CalorimeterHits(StDetectorId Id) cons
   case kFtpcWestId:  	  	
   case kFtpcEastId:  	  	break;             
   case kTofId:       	  	break; 	           	 
+  case kMtdId:       	  	break; 	           	 
   case kCtbId:       	  	break; 	           	 
   case kSsdId:       	  	break; 	         
   case kBarrelEmcTowerId:    	coll = (StPtrVecMcCalorimeterHit *) &mBemcHits;  break; 
