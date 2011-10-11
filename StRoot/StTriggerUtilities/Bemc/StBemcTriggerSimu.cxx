@@ -274,6 +274,7 @@ void StBemcTriggerSimu::InitRun(int runnumber){
   //mDecoder->SetDateTime(mHeadMaker->GetDBTime().GetDate(), mHeadMaker->GetDBTime().GetTime());
  
   assert(starDb);
+  mDecoder->SetDateTime(starDb->GetDateTime().GetDate(),starDb->GetDateTime().GetTime());
   getTowerStatus();
   getDSM_TPStatus();
   getDSM_HTStatus();
