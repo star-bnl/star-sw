@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.587 2011/10/04 00:51:38 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.588 2011/10/11 19:50:20 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -801,7 +801,7 @@ Int_t StBFChain::Init() {
 	    path  = "./StarDb/AgMLGeometry:$STAR/StarDb/AgMLGeometry";
 	  }
 	  if (GetOption("VmcGeo")) {
-	    path  = "./StarDb/VmcGeoGeometry:$STAR/StarDb/VmcGeoGeometry";
+	    path  = "./StarDb/VmcGeo:$STAR/StarDb/VmcGeo";
 	  }
 	  TString geom("Geometry.");
 	  geom +=  DbAlias[i].geometry;
@@ -1433,7 +1433,7 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
 void StBFChain::SetDbOptions(StMaker *mk){
   if (! mk ) return;
   if      (GetOption("AgML")  ) mk->SetAlias("VmcGeometry","db/.const/StarDb/AgMLGeometry");
-  else if (GetOption("VmcGeo")) mk->SetAlias("VmcGeometry","db/.const/StarDb/VmcGeoGeometry");
+  else if (GetOption("VmcGeo")) mk->SetAlias("VmcGeometry","db/.const/StarDb/VmcGeo");
   else                          mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
   Int_t i;
   Int_t Idate=0,Itime=0;
