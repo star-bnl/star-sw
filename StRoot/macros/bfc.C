@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.182 2011/10/11 13:48:49 jeromel Exp $
+// $Id: bfc.C,v 1.183 2011/10/11 14:11:55 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -48,7 +48,10 @@ void Load(const Char_t *options){
       gSystem->Load("libminicern"); 
       cout << "libminicern" ;
     }
-    if (!TString(options).Contains("nodefault",TString::kIgnoreCase) || 
+
+    
+    if (!strstr(gProgName,"root4star")                               ||
+	!TString(options).Contains("nodefault",TString::kIgnoreCase) || 
 	TString(options).Contains("mysql",TString::kIgnoreCase)) {
       Char_t *mysql = "libmysqlclient";
       //Char_t *mysql = "libmimerS"; // just to test it picks from OPTSTAR
