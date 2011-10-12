@@ -43,7 +43,7 @@ int StPythiaEventMaker::Make()
   getVertex();
   getParticles();
 
-  LOG_INFO << *mPythiaEvent << endm;
+  LOG_DEBUG << *mPythiaEvent << endm;
 
   mTree->Fill();
 
