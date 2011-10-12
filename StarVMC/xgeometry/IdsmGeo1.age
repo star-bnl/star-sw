@@ -8,9 +8,13 @@
       REAL inR, outR,lengthZ,     k,sinA, cosA, resR, angRes,m,pm, j,angRail, rRail,
              dPhiHV, angFgtCbl
 
+      STRUCTURE IDSC { version}
       STRUCTURE IDSG { version,rF,angFlat,r1Res,r2Res,rrRes,dangRes,dxRes,dyRes,fgtStartZ,
             fgtDiskStepZ,int fgtNdisk}
       STRUCTURE IDSA { version,x,y,z,thetax,thetay,thetaz,phix,phiy,phiz}
+      FILL IDSC		! IDS control structure
+      version = 1.0 ! Versioning of the IDSM geometry
+      ENDFILL
       FILL IDSG		! IDS Geometry data,46.1cm=inner radii of IFC
       version = 1.0 ! 2012 Versionin of the IDS geometry
       rF = 8.0 !  radii of inner volume boundary
@@ -40,25 +44,13 @@
       fgtNdisk = 6 ! number of disks
       ENDFILL
       FILL IDSA		! Alignment of the IDSM geometry within the CAVE no FGT cables
-      version = 2.0 ! Default alignment of IDSM at (0,0,0) with no rotation
-      x = 0.0 ! x-alignment
-      y = 0.0 ! y-alignment
-      z = 0.0 ! z-alignment
-      thetax = 90.0 ! align x`-axis 90 degrees in theta wrt cave
-      phix =  0.0 ! align x`-axis  0 degrees in phi   wrt cave
-      thetay = 90.0 ! align y`-axis 90 degrees in theta wrt cave
-      phiy = 90.0 ! align y`-axis  0 degrees in phi   wrt cave
-      thetaz =  0.0 ! align z`-axis  0 degrees in theta wrt cave
-      phiz =  0.0 ! align z`-axis  0 degrees in phi   wrt cave
-      ENDFILL
-      FILL IDSA		! Alignment of the IDSM geometry within the CAVE with cables
       version = 1.0 ! Default alignment of IDSM at (0,0,0) with no rotation
       x = 0.0 ! x-alignment
       y = 0.0 ! y-alignment
       z = 0.0 ! z-alignment
       thetax = 90.0 ! align x`-axis 90 degrees in theta wrt cave
       phix =  0.0 ! align x`-axis  0 degrees in phi   wrt cave
-      thetay = 90.0 ! align y`-axis 90 degrees in thetangRail+(0.1+dPhiHV*k)*(-1+2*pm)a wrt cave
+      thetay = 90.0 ! align y`-axis 90 degrees in theta wrt cave
       phiy = 90.0 ! align y`-axis  0 degrees in phi   wrt cave
       thetaz =  0.0 ! align z`-axis  0 degrees in theta wrt cave
       phiz =  0.0 ! align z`-axis  0 degrees in phi   wrt cave
@@ -110,8 +102,10 @@
       COMPONENT C A=12 Z=6 W=0.220
       COMPONENT H A=1 Z=1 W=0.032
       MIXTURE FR4 dens=1.80
-      use IDSG version=1.0
+      use IDSC
+      use IDSG version=IDSC_version
       use IDSA version=1.0
+      <W> IDSC_version;  ('Inner Detector Support Module with IDSC_version = ', F5.2);
       inR     = IDSG_rF
       outR    = IDSG_rrRes + IDSG_r2Res
       lengthZ = 470.
