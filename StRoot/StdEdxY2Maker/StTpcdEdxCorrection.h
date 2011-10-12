@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.2 2010/09/01 21:24:13 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.3 2011/10/12 15:27:28 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -41,7 +41,7 @@ class StTpcdEdxCorrection : public TObject {
     kAdcCorrection    , //R
     kTpcdCharge       , //D
     kTpcrCharge       , //D
-    kTpcAvCurrent     ,
+    kTpcCurrentCorrection,
     kTpcRowQ          ,
     kTpcSecRowB       , //S
     kTpcSecRowC       , //S

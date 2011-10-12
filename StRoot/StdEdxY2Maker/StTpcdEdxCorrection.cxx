@@ -28,7 +28,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   m_Corrections[kEdge                ] = dEdxCorrection_t("TpcEdge"             ,"Dependence of the Gain on distance from Chamber edge");
   m_Corrections[kTpcdCharge          ] = dEdxCorrection_t("TpcdCharge"          ,"ADC/Clustering undershoot correction");
   m_Corrections[kTpcrCharge          ] = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction");
-  m_Corrections[kTpcAvCurrent        ] = dEdxCorrection_t("TpcAvCurrent"        ,"Correction due to sagg of Voltage due to anode current");
+  m_Corrections[kTpcCurrentCorrection] = dEdxCorrection_t("TpcCurrentCorrection"        ,"Correction due to sagg of Voltage due to anode current");
   m_Corrections[kTpcRowQ             ] = dEdxCorrection_t("TpcRowQ"         	,"Gas gain correction for row versus accumulated charge, absolute normalization");
   m_Corrections[kTpcSecRowB          ] = dEdxCorrection_t("TpcSecRowB"         	,"Gas gain correction for sector/row");
   m_Corrections[kTpcSecRowC          ] = dEdxCorrection_t("TpcSecRowC"         	,"Additional Gas gain correction for sector/row");
@@ -192,7 +192,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       dE *=  TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(2+kTpcOutIn,CdEdx.dCharge));
       goto ENDL;
     case kTpcZDC: VarX = (CdEdx.Zdc > 0) ? TMath::Log10(CdEdx.Zdc) : 0; break;
-    case kTpcAvCurrent:
+    case kTpcCurrentCorrection:
       VarX = CdEdx.Crow;
       break;
     case kTpcrCharge:
