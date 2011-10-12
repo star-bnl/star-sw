@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.70 2011/08/09 15:51:10 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.71 2011/10/12 15:27:28 fisyak Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -53,6 +53,7 @@ using namespace units;
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcAvCurrentC.h"
+#include "StDetectorDbMaker/St_TpcAvgCurrentC.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
 const static StPidParticle NHYPS = kPidHe3;//kPidTriton;
 const static Int_t tZero= 19950101;
@@ -285,10 +286,6 @@ Int_t StdEdxY2Maker::Finish() {
 Int_t StdEdxY2Maker::Make(){ 
   static const Double_t RA[2]        = { 154.484, 81.42}; // Outer/ Inner average Radii
   static const Double_t WireLenth[2] = {   3.6e5, 1.6e5}; 
-  Double_t              QAcumm[2]    = {St_tpcAvCurrentC::instance()->chargeO(), St_tpcAvCurrentC::instance()->chargeI()};
-  Double_t              QL[2]        = {QAcumm[0]*RA[0]*RA[0]/WireLenth[0], QAcumm[1]*RA[1]*RA[1]/WireLenth[1]};
-  Double_t              Current[2]   = {St_tpcAvCurrentC::instance()->currentO(),St_tpcAvCurrentC::instance()->currentI()};
-  Double_t              CL[2]        = {Current[0]*RA[0], Current[1]*RA[1]};
   static  StTimer timer;
   static  StTpcLocalSectorCoordinate        localSect[4];
   static  StTpcPadCoordinate                PadOfTrack, Pad;
@@ -578,6 +575,8 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].QSumA = 0;
 	CdEdx[NdEdx].sector = sector; 
 	CdEdx[NdEdx].row    = row;
+	Double_t              QAcumm = St_TpcAvgCurrentC::instance()->AcChargeRow(sector,row); // C
+	Double_t              QL      = QAcumm*RA[kTpcOutIn]*RA[kTpcOutIn]/WireLenth[kTpcOutIn];  // C * cm**2
 	CdEdx[NdEdx].pad    = Pad.pad();
 	CdEdx[NdEdx].pad    = (Int_t) Pad.pad();
 	CdEdx[NdEdx].edge   = CdEdx[NdEdx].pad;
@@ -612,8 +611,8 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].xyzD[2] = localDirectionOfTrack.position().z();
 	CdEdx[NdEdx].ZdriftDistance = localSect[3].position().z();
 	CdEdx[NdEdx].zG      = tpcHit->position().z();
-	CdEdx[NdEdx].Qcm     = 1e6*QL[kTpcOutIn]/tpcHit->position().perp2(); // uC/cm
-	CdEdx[NdEdx].Crow    =     CL[kTpcOutIn]/tpcHit->position().perp();
+	CdEdx[NdEdx].Qcm     = 1e6*QL/tpcHit->position().perp2(); // uC/cm
+	CdEdx[NdEdx].Crow    = St_TpcAvgCurrentC::instance()->AvCurrRow(sector,row);
 	if (St_trigDetSumsC::instance())	CdEdx[NdEdx].Zdc     = St_trigDetSumsC::instance()->zdcX();
 	Bool_t doIT = kTRUE;
 	if (TESTBIT(m_Mode,kEmbedding)) doIT = kFALSE;
@@ -1014,7 +1013,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 				   150,10,160., 500,-1.,4.);
 #endif
 	TPoints[z][t]   = new TH2F(Form("TPoints%s%s",N[t],ZN.Data()),
-				   Form("%s versus no. of measured points for %s",T[t],ZT.Data()),
+				   Form("%s versus Length in Tpc  for %s",T[t],ZT.Data()),
 				   150,10,160., 500,-1.,4.);
       }
     }
@@ -1110,11 +1109,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     VoltageC  = new TH3F("VoltageC","log(dE/dx)_{corrected} - row & log(I(pi)) versus Row and Voltage", 
 			 NumberOfRows,0.5, NumberOfRows+0.5,410,990.,1400.,nZBins,ZdEdxMin,ZdEdxMax);
     AcCharge  = new TH3F("AcCharge","log(dE/dx)_{corrected} - row & log(I(pi)) versus Row and Accumulated Charge [C]", 
-			 NumberOfRows,0.5, NumberOfRows+0.5,110,5.,100.,nZBins,ZdEdxMin,ZdEdxMax);
+			 NumberOfRows,0.5, NumberOfRows+0.5,110,0.,5.,nZBins,ZdEdxMin,ZdEdxMax);
     AvCurrent  = new TH3F("AvCurrent","log(dE/dx)_{corrected} - row & log(I(pi)) versus Row and Average Current [#{mu}A]", 
-			 NumberOfRows,0.5, NumberOfRows+0.5,200,0.,200.,nZBins,ZdEdxMin,ZdEdxMax);
+			 NumberOfRows,0.5, NumberOfRows+0.5,210,0.0,1.0,nZBins,ZdEdxMin,ZdEdxMax);
     Qcm  = new TH3F("Qcm","log(dE/dx)_{corrected} - row & log(I(pi)) versus Row and Accumulated Charge [uC/cm]", 
-		    NumberOfRows,0.5, NumberOfRows+0.5,500,0.,1000.,nZBins,ZdEdxMin,ZdEdxMax);
+		    NumberOfRows,0.5, NumberOfRows+0.5,100,0.,10.,nZBins,ZdEdxMin,ZdEdxMax);
     //     GainMonitor  = new TH2F("GainMonitor","log(dE/dx)_{corrected} - log(I(pi)) versus GainMonitor", 
     // 			    100,70.,120.,nZBins,ZdEdxMin,ZdEdxMax);
     Time   = new TH2F("Time","log(dE/dx)_{uncorrected} - log(I(pi)) versus Date& Time", 
