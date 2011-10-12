@@ -33,6 +33,12 @@ void bfcSpin(int nevents = 2000,
   // 6. Trigger filter
   // 7. TPC maker
 
+  // Use full BEMC detector
+  StEmcSimulatorMaker* emcSim = (StEmcSimulatorMaker*)chain->GetMaker("EmcSimulator");
+  emcSim->setCheckStatus(kBarrelEmcTowerId,false);
+  emcSim->setMakeFullDetector(kBarrelEmcTowerId,true);
+  emcSim->setDoZeroSuppression(kBarrelEmcTowerId,false);
+
   // Use full EEMC detector
   StEEmcFastMaker* eefs = dynamic_cast<StEEmcFastMaker*>(chain->GetMaker("eefs"));
   assert(eefs);
