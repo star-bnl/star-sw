@@ -1,6 +1,8 @@
 
 void plCalcZeffic(char* iPath="/star/u/stevens4/wAnalysis/efficXsec/outEmb/gainUp2/"){
 
+  system("mkdir -p plots/");
+
   char* core0; 
   core0="Ze+e-Interf";
   
