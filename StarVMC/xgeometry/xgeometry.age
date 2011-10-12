@@ -1,7 +1,7 @@
-* $Id: xgeometry.age,v 1.7 2011/10/12 18:27:33 jwebb Exp $
+* $Id: xgeometry.age,v 1.8 2011/10/12 21:45:38 jwebb Exp $
 * $Log: xgeometry.age,v $
-* Revision 1.7  2011/10/12 18:27:33  jwebb
-* Trying to debug interaction between build and CVS.
+* Revision 1.8  2011/10/12 21:45:38  jwebb
+* Another debugging commit.
 *
 * Revision 1.238  2011/10/07 19:44:45  jwebb
 * Switched versions of the PIXL detector.
@@ -4441,5 +4441,5 @@ c  =============================================================================
       MODULE xgeometry   STARSIM interface to the XML geometries
       +CDE,agecom,gcunit.
       call geometry
-      <W> '===>> 	[End AgML Module xgeometry]	 <<==='; (A32,/,/);
+      <W> ' '; ('===>>     [End AgML Module xgeometry compatability module ] <<===', A1);
       END! Module xgeometry
