@@ -1,6 +1,6 @@
 #include "IdsmGeo1.h"  
  // ---------------------------------------------------------------------------------------------------  
- //  
+ //   
  #include "StarVMC/StarAgmlLib/StarAgmlStacker.h"  
  //  
  #include "StarVMC/StarAgmlLib/AgMaterial.h"  
