@@ -2,7 +2,7 @@
 #define __IdsmGeo1__ 
  
 #include "StarVMC/StarAgmlLib/AgModule.h" 
-   
+ 
 namespace IDSMGEO1 // $NMSPC 
 { 
    class Idsc_t : public AgStructure 
