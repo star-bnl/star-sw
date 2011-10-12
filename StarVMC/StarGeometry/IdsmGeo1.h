@@ -5,6 +5,18 @@
  
 namespace IDSMGEO1 // $NMSPC 
 { 
+   class Idsc_t : public AgStructure 
+   { 
+      ClassDef(Idsc_t,1); 
+      public: 
+      Float_t version; 
+      Idsc_t() : AgStructure("Idsc_t","User-defined AgML structure") 
+      { 
+         version=0; 
+         _index=0; 
+      } 
+      ~ Idsc_t(){ /* nada */ }; 
+   }; 
    class Idsg_t : public AgStructure 
    { 
       ClassDef(Idsg_t,1); 
