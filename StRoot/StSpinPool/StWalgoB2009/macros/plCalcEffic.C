@@ -2,6 +2,8 @@
 ofstream spreadsheet("./effic.csv");
 
 void plCalcEffic(int charge = 2){
+  system("mkdir -p plots/");
+
   if(charge == 2){
     plCalcEfficX(0);
     plCalcEfficX(1);

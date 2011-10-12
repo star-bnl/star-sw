@@ -51,10 +51,10 @@ int rdMuWana(
     printf("OutF=%s=\n",outF.Data());
   } 
   else if(isMC < 400) { //embedding run with geant files
-    char *file1;
-    if(isMC==350) file1=strstr(file,"W"); 
-    if(isMC==351) file1=strstr(file,"Wtau"); 
-    if(isMC==352) file1=strstr(file,"Z"); 
+    char *file1; char *file2;
+    if(isMC==350) { file2=strstr(file,"/W");    file1=strstr(file2,"W"); }
+    if(isMC==351) { file2=strstr(file,"/Wtau"); file1=strstr(file2,"Wtau"); }
+    if(isMC==352) { file2=strstr(file,"/Z");    file1=strstr(file2,"Z"); } 
     assert(file1);  printf("file1=%s=\n",file1);
     outF=file1; outF.ReplaceAll(".lis","");
     TString nameReweight=file1; nameReweight.ReplaceAll(".lis","");
@@ -438,6 +438,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.45  2011/10/12 20:38:35  stevens4
+// update from GPC code review
+//
 // Revision 1.44  2011/09/14 15:40:41  stevens4
 // update used for cross section PRD paper
 //

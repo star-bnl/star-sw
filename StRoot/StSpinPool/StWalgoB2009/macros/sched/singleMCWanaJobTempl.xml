@@ -9,10 +9,10 @@
 	<command>
                 echo "inpPath="&inpPath;" fillNo="&fillNo; 
                 echo "inpList=" $FILELIST
-		stardev;
+		starver SL11d;
                 echo $STAR
                 pwd
-                ln -s &codePath;/rdMuWana.C
+                ln -s &codePath;/StRoot/StSpinPool/StWalgoB2009/macros/rdMuWana.C
                 ln -s &codePath;/.sl53_gcc432
                 ls -al
                 setenv filename `cat $FILELIST`

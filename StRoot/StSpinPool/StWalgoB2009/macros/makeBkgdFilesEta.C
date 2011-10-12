@@ -16,8 +16,9 @@
 // region.  It is less sensitive to low statistics fluctuations.
 //
 // ********************************************************
+#include <algorithm>
 
-void makeBkgdFilesEta(int charge, int two_or_four, int etaLow=0, int etaHigh=100) {
+void makeBkgdFilesEta(int charge=1, int two_or_four=4, int etaLow=0, int etaHigh=100) {
 
   // ******************************************************
   // Read in the data set and all the histograms needed 
