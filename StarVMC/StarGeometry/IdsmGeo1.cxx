@@ -34,6 +34,18 @@
                 /// Float_t inr,outr,lengthz,k,sina,cosa,resr,angres,m,pm,j,angrail,rrail,dphihv,angfgtcbl        
           ///@}     
           //  -----------------------------------------------------     
+          /// @defgroup idsc_doc     
+          /// \class Idsc_t     
+          /// \brief User-defined structure     
+          ///                             
+          /// AgML structure members:     
+          ///                             
+          ///Float_t version;     
+          ///Int_t _index;     
+          //     
+          Idsc_t idsc;     
+          //     
+          //  -----------------------------------------------------     
           /// @defgroup idsg_doc     
           /// \class Idsg_t     
           /// \brief User-defined structure     
@@ -733,6 +745,16 @@
              AddBlock("FGRL");        
              AddBlock("FGHV");        
              // ---------------------------------------------------------------------------------------------------        
+             ///@addtogroup idsc_doc        
+             ///@{           
+                   ++idsc._index;           
+                   idsc . version = 1.0; // Versioning of the IDSM geometry           
+                   /// idsc . version = 1.0; // Versioning of the IDSM geometry           
+                   //           
+                   idsc.fill();           
+             ///@}        
+             //        
+             // ---------------------------------------------------------------------------------------------------        
              ///@addtogroup idsg_doc        
              ///@{           
                    ++idsg._index;           
@@ -800,8 +822,8 @@
              ///@addtogroup idsa_doc        
              ///@{           
                    ++idsa._index;           
-                   idsa . version = 2.0; // Default alignment of IDSM at (0,0,0) with no rotation           
-                   /// idsa . version = 2.0; // Default alignment of IDSM at (0,0,0) with no rotation           
+                   idsa . version = 1.0; // Default alignment of IDSM at (0,0,0) with no rotation           
+                   /// idsa . version = 1.0; // Default alignment of IDSM at (0,0,0) with no rotation           
                    idsa . x = 0.0; // x-alignment           
                    /// idsa . x = 0.0; // x-alignment           
                    idsa . y = 0.0; // y-alignment           
@@ -814,34 +836,6 @@
                    /// idsa . phix =  0.0; // align x`-axis  0 degrees in phi   wrt cave           
                    idsa . thetay = 90.0; // align y`-axis 90 degrees in theta wrt cave           
                    /// idsa . thetay = 90.0; // align y`-axis 90 degrees in theta wrt cave           
-                   idsa . phiy = 90.0; // align y`-axis  0 degrees in phi   wrt cave           
-                   /// idsa . phiy = 90.0; // align y`-axis  0 degrees in phi   wrt cave           
-                   idsa . thetaz =  0.0; // align z`-axis  0 degrees in theta wrt cave           
-                   /// idsa . thetaz =  0.0; // align z`-axis  0 degrees in theta wrt cave           
-                   idsa . phiz =  0.0; // align z`-axis  0 degrees in phi   wrt cave           
-                   /// idsa . phiz =  0.0; // align z`-axis  0 degrees in phi   wrt cave           
-                   //           
-                   idsa.fill();           
-             ///@}        
-             //        
-             // ---------------------------------------------------------------------------------------------------        
-             ///@addtogroup idsa_doc        
-             ///@{           
-                   ++idsa._index;           
-                   idsa . version = 1.0; // Default alignment of IDSM at (0,0,0) with no rotation            
-                   /// idsa . version = 1.0; // Default alignment of IDSM at (0,0,0) with no rotation            
-                   idsa . x = 0.0; // x-alignment           
-                   /// idsa . x = 0.0; // x-alignment           
-                   idsa . y = 0.0; // y-alignment           
-                   /// idsa . y = 0.0; // y-alignment           
-                   idsa . z = 0.0; // z-alignment           
-                   /// idsa . z = 0.0; // z-alignment           
-                   idsa . thetax = 90.0; // align x`-axis 90 degrees in theta wrt cave           
-                   /// idsa . thetax = 90.0; // align x`-axis 90 degrees in theta wrt cave           
-                   idsa . phix =  0.0; // align x`-axis  0 degrees in phi   wrt cave           
-                   /// idsa . phix =  0.0; // align x`-axis  0 degrees in phi   wrt cave           
-                   idsa . thetay = 90.0; // align y`-axis 90 degrees in thetangRail+(0.1+dPhiHV*k)*(-1+2*pm)a wrt cave           
-                   /// idsa . thetay = 90.0; // align y`-axis 90 degrees in thetangRail+(0.1+dPhiHV*k)*(-1+2*pm)a wrt cave           
                    idsa . phiy = 90.0; // align y`-axis  0 degrees in phi   wrt cave           
                    /// idsa . phiy = 90.0; // align y`-axis  0 degrees in phi   wrt cave           
                    idsa . thetaz =  0.0; // align z`-axis  0 degrees in theta wrt cave           
@@ -986,10 +980,13 @@
                    _material = mix;           
                    _material.lock();           
              }        
-             /// USE idsg version=1.0;        
-             idsg.Use("version",(Float_t)1.0);        
+             /// USE idsc _index=1;        
+             idsc.Use();        
+             /// USE idsg version=idsc.version;        
+             idsg.Use("version",(Float_t)idsc.version);        
              /// USE idsa version=1.0;        
              idsa.Use("version",(Float_t)1.0);        
+             std::cout << Form("Inner Detector Support Module with IDSC.version = %5.2f ",idsc.version) << std::endl;        
              inr     = idsg.rf;        
              outr    = idsg.rrres + idsg.r2res;        
              lengthz = 470.;        
