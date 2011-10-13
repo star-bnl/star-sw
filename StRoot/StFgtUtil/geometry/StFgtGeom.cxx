@@ -174,7 +174,7 @@ int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
       checkLowRad +=400;
     }
 
-  if (( rindex < checkLowRad ) || (rindex >= checkHighRad) || ( rad < Rin() ) || ( rad > Rout() ))  rindex = -1;
+  if (( rindex < checkLowRad ) || (rindex >= checkHighRad) || ( rad < (Rfirst() - (radStrip_pitch()/2))) || ( rad > ( Rlast() + (radStrip_pitch()/2) ) ) )  rindex = -1;
     
   return rindex;
   
@@ -3073,8 +3073,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.15 2011/10/11 17:52:22 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.16 2011/10/13 15:41:36 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.16  2011/10/13 15:41:36  rfatemi
+ *  change acceptance area for hits to Rlast + 1/2 pitch or Rfirst - 1/2 pitch
+ *
  *  Revision 1.15  2011/10/11 17:52:22  rfatemi
  *  Put back mRadStripOff and mPhiStripOff
  *
