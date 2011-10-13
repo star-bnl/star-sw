@@ -838,6 +838,27 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
     geom.fill();
   }
 
+  geom.select = "y2011a"; {
+    geom.sconFlag = "SCON14"; geom.sconStat = 1;
+    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
+    geom.btofFlag = "BTOF67"; geom.btofStat = 1;
+    geom.calbFlag = "CALB02"; geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6"; geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon"; geom.bbcmStat = 1;
+    geom.fpdmFlag = "FPDM03"; geom.fpdmStat = 1;
+    geom.vpddFlag = "VPDD07"; geom.vpddStat = 1;
+    geom.ftpcFlag = "FTPC01"; geom.ftpcStat = 1;
+    geom.svttFlag = "SVTTof"; geom.svttStat = 0;
+    geom.phmdFlag = "PHMD02"; geom.phmdStat = 1;
+    geom.sisdFlag = "SISDof"; geom.sisdStat = 0;
+    geom.ftroFlag = "FTRO01"; geom.ftroStat = 1;
+    geom.mutdFlag = "MUTD04"; geom.mutdStat = 1;
+    geom.caveFlag = "CAVE04"; geom.caveStat = 1;
+    geom.pipeFlag = "PIPE12"; geom.pipeStat = 1;
+    setTitle("Production geometry y2011a");
+    geom.fill();
+  }
+
 }
 
 
