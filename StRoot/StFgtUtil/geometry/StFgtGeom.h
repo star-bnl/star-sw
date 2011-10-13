@@ -294,22 +294,11 @@ class StFgtGeom
 	static double radStripOff() { return mRadStripOff; }
 	static double phiStripOff() { return mPhiStripOff; }
 
-	static int radStripLOCId_number() { return mRadStripLOCId_number; }
-	static int phiStripLOCId_number() { return mPhiStripLOCId_number; }
-
 	static  double phiQuadXaxis(int iquad);
 	static  bool inDisc( TVector3 rLab );	
 	static  bool belowFlat( TVector3 rLoc );
 	static  int  getQuad( double phiLab );
 	
-	//  This is NOT a candidate for inlining.  This returns false if it is
-	//  out of range.
-	static bool localXYtoStripId(
-	    int iquad, double x, double y,
-	    int & iRadID, int & iPhiID,
-	    int dbg=0
-	);
-
 	//  Jan's definitions for the final 400-800 micron pitch design
 	static const double kFgtRout		= 38.25;    //	cm ,
 	static const double kFgtRlast           = 38.1571;  // location of last R strip before Rout
@@ -324,7 +313,7 @@ class StFgtGeom
 	static const double kFgtDeadQuadEdge	=  1.2;	    // (cm) effective dead area along quadrant edges
 
 	//  Standard definitions.
-	static const Int_t kNumStrips = 1440; //remove? JAN
+	static const Int_t kNumStrips = 1440; 
 	static const Int_t kNumChannels = 1280;
 	static const Int_t kFgtMxDisk=6;    /* max # of  FGT disks @ STAR */
 	static const Int_t kFgtMxQuad=4;    /* max # of quadrants in single FGT disk */
@@ -373,16 +362,6 @@ class StFgtGeom
 	static double Rstrip_Phi_High(int rindex);//return upper phi range for an r strip
 	static double Rstrip_Phi_Low (int rindex);//return lower phi range for an r strip
 
-	static int radIdLocal2Global( int iquad, int radId )
-	{
-	    return radId + radStripLOCId_number() * iquad;
-	}
-
-	static int phiIdLocal2Global( int iquad, int phiId )
-	{
-	    return phiId + phiStripLOCId_number() * iquad;
-	}
-
 };
 
 #endif
@@ -429,8 +408,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.20 2011/10/11 15:56:15 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.21 2011/10/13 21:02:15 balewski Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.21  2011/10/13 21:02:15  balewski
+ *  cleanup of not needed intermediate methods
+ *
  *  Revision 1.20  2011/10/11 15:56:15  rfatemi
  *  add in new access functions
  *
