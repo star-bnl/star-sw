@@ -46,13 +46,13 @@ int	StFgtGeom::mPhiStripLOCId_number =
     int (
 	(halfpi-phiStripOff()) / phiStrip_pitch()
     ) + 5;
-
+#if 0
 int	StFgtGeom::mRadStripGBLId_number =
     kNumFgtQuadrants * radStripLOCId_number();
 
 int	StFgtGeom::mPhiStripGBLId_number =
     kNumFgtQuadrants * phiStripLOCId_number();
-
+#endif
 // function to setup the reverse mapping based on the forward mapping
 void StFgtGeom::makeReverseNaiveMappingValid(){
    for( Int_t *p = mReverseNaiveMapping; p != &mNaiveMapping[2*kNumFgtStripsPerLayer]; ++p )
@@ -288,49 +288,10 @@ int StFgtGeom::phiLoc2LocalStripId( double phiLoc, double *binFrac )
     int iphi = (int) ratio;
     if ( binFrac )
 	*binFrac = ratio-iphi;
-    if ( iphi >= 0 && iphi < phiStripLOCId_number() )
+    if ( iphi >= 0 && iphi < kNumFgtStripsPerLayer )
 	return iphi;
     else
 	return -1;
-}
-
-//  Returns false if out of range.
-bool StFgtGeom::localXYtoStripId(
-    int iquad, double xLoc, double yLoc, int & iRadID, int & iPhiID, int dbg
-)
-{
-    iRadID = iPhiID = -1;
-
-    int locRadID;
-    int locPhiID;
-    double r = std::sqrt(xLoc*xLoc+yLoc*yLoc);
-
-    //	Trim outside of active area.
-    if ( r < Rin() )
-	return false;
-    if ( r > Rout() )
-	return false;
-
-    //	Find phi in lab reference frame
-    double phiLoc = std::atan2( yLoc, xLoc );	//  [0,pi/2] in local ref frame
-
-    //	Assume all 9(?) disks have identical stirp numbering scheme.
-    double radBinFrac;
-    double phiBinFrac;
-
-    locRadID = rad2LocalStripId( r, phiLoc, &radBinFrac);   //	no quad/disk dependence
-    locPhiID = phiLoc2LocalStripId( phiLoc, &phiBinFrac );  //	no quad/disk dependence
-
-    iRadID = radIdLocal2Global( iquad, locRadID );
-    iPhiID = phiIdLocal2Global( iquad, locPhiID );
-
-    if ( dbg )
-    {
-	printf("strip:  yLoc=%f xLoc=%f phi=%f, lradID=%d, lphiID=%d\n",yLoc,xLoc,phiLoc*57.3,locRadID,locPhiID);
-	printf("strip:  radID=%d +(%.2f) phiID=%d +(%.2f)\n",iRadID,radBinFrac, iPhiID,phiBinFrac);
-    }
-
-    return true;
 }
 
 // Whether the reverse map is valid
@@ -3073,8 +3034,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.16 2011/10/13 15:41:36 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.17 2011/10/13 21:02:15 balewski Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.17  2011/10/13 21:02:15  balewski
+ *  cleanup of not needed intermediate methods
+ *
  *  Revision 1.16  2011/10/13 15:41:36  rfatemi
  *  change acceptance area for hits to Rlast + 1/2 pitch or Rfirst - 1/2 pitch
  *
