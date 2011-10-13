@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.47 2011/04/25 21:25:09 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.48 2011/10/13 17:52:22 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.48  2011/10/13 17:52:22  perev
+ * Comment++
+ *
  * Revision 2.47  2011/04/25 21:25:09  ullrich
  * Modifications to hold MTD data.
  *
@@ -205,8 +208,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.47 2011/04/25 21:25:09 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.47 2011/04/25 21:25:09 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.48 2011/10/13 17:52:22 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.48 2011/10/13 17:52:22 perev Exp $";
 
 ClassImp(StEvent)
 
@@ -1291,6 +1294,7 @@ void StEvent::Split()
     assert(clu);
     TDataSetIter next(this);
     TDataSet *ds;
+//		Delete all the old EventBranches
     while ((ds=next())) {
 	if (ds->IsA()!=StEventBranch::Class()) continue;
 	Remove(ds); delete ds;
@@ -1345,7 +1349,8 @@ void StEvent::Streamer(TBuffer &R__b)
 	while ((ds=next())) {
 	    if (ds->IsA()==StEventBranch::Class()) break;
 	}
-	if (!ds) Split();
+	if (!ds) {//Not splited yet
+	  Split();}
 	
 	R__c = R__b.WriteVersion(Class(), kTRUE);
 	StXRefMain::Streamer(R__b);
