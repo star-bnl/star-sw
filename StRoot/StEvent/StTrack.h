@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.26 2011/04/26 21:41:29 fisyak Exp $
+ * $Id: StTrack.h,v 2.27 2011/10/13 21:25:27 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -58,6 +58,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.27  2011/10/13 21:25:27  perev
+ * setting IdTruth from the hits is added
+ *
  * Revision 2.26  2011/04/26 21:41:29  fisyak
  * Make mKey Int_t instead of UShort_t (no. of tracks might be more that 64k)
  *
@@ -207,11 +210,12 @@ public:
     void         setNode(StTrackNode*);
     int          bad() const;
     void         setNumberOfPossiblePoints(unsigned char, StDetectorId);
-    void         setSeedQuality(UShort_t qa) {mSeedQuality = qa;}
-    Int_t           idTruth() const { return mIdTruth;}
-    Int_t           qaTruth() const { return mQuality; }
+    void         setSeedQuality(UShort_t qa) 		{mSeedQuality = qa;}
+    Int_t           idTruth() const 			{ return mIdTruth;}
+    Int_t           qaTruth() const 			{ return mQuality; }
     Int_t           idParentVx() const {return mIdParentVx;}
-    void         setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+    void         setIdTruth(Int_t idtru,Int_t qatru=0) 	{mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+    void         setIdTruth(); 				//setting on hits info
     void         setIdParentVx(Int_t id) {mIdParentVx = id;}
     
 protected:
