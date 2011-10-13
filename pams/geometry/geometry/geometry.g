@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.238 2011/10/07 19:44:45 jwebb Exp $
+* $Id: geometry.g,v 1.239 2011/10/13 18:23:58 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.239  2011/10/13 18:23:58  jwebb
+* Added production geometry tag y2011a.  Tag y2011a is consistent with the y2011
+* geometry tag, as it exists in the SL11c and SL11d libraries.  y2011a should be
+* used for any reproduction of production series PL11ic and PL11id.
+*
 * Revision 1.238  2011/10/07 19:44:45  jwebb
 * Switched versions of the PIXL detector.
 *
@@ -1818,6 +1823,27 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
 ]
+
+REPLACE [exe y2011a;] with ["y2011a: Pro.  consistent with production series P11ic and P11id";
+    exe SCON14;      "support cone without SVT and new cable weight estimates and SROD fix";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPC01;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMD02;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe FTRO01;      "FTPC readout";
+    exe MUTD04;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+]
 c ===============================================================================
 
 !$$$    [exe upgr2012;] with [exe y2012;]   upgrade 2012 retired
@@ -2607,6 +2633,12 @@ If LL>0
   Case y2011   { Y2011: baseline y2011 geometry, placeholder added 07/30/2010
                  Geom = 'Y2011   ';
                  exe y2011; }
+
+  Case y2011a   { Y2011a: Production quality tag
+                 Geom = 'Y2011a  ';
+                 exe y2011a; }
+
+
 
   Case upgr2012 { y2012 : Y2012 geometry first cut;
                  Geom = 'y2012   ';
