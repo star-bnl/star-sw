@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.36 2011/04/26 21:41:29 fisyak Exp $
+ * $Id: StTrack.cxx,v 2.37 2011/10/13 21:25:27 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.37  2011/10/13 21:25:27  perev
+ * setting IdTruth from the hits is added
+ *
  * Revision 2.36  2011/04/26 21:41:29  fisyak
  * Make mKey Int_t instead of UShort_t (no. of tracks might be more that 64k)
  *
@@ -124,6 +127,7 @@
  * Completely Revised for New Version
  *
  **************************************************************************/
+#include <map>
 #include "TClass.h"
 #include "StMath.hh"
 #include "StTrack.h"
@@ -134,9 +138,10 @@
 #include "StTrackPidTraits.h"
 #include "StTrackNode.h"
 #include "StThreeVectorD.hh"
+#include "StHit.h"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.36 2011/04/26 21:41:29 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.37 2011/10/13 21:25:27 perev Exp $";
 
 StTrack::StTrack()
 {
@@ -550,3 +555,35 @@ void StTrack::Streamer(TBuffer &R__b)
        Class()->WriteBuffer(R__b,this);
     }
 } 
+//________________________________________________________________________________
+void StTrack::setIdTruth() // match with IdTruth
+{
+
+  const StTrackDetectorInfo* di = detectorInfo();
+  if (!di) return;
+  const StPtrVecHit& vh = di->hits();
+
+  typedef std::map< int,float>  myMap_t;
+  typedef std::pair<int,float>  myPair_t;
+  typedef myMap_t::const_iterator myIter_t;
+  myMap_t  idTruths;
+    
+// 		Loop to store all the mc track keys and quality of every reco hit on the track.
+    int nHits = vh.size(),id=0,qa=0;
+    for (int hi=0;hi<nHits; hi++) {
+	const StHit* rHit = vh[hi]; 
+        id = rHit->idTruth(); if (!id) continue;
+	qa = rHit->qaTruth(); if (!qa) qa = 1;
+        idTruths[id]+=qa;
+    }
+    if (!qa) return;		//no simu hits
+    int tkBest=0; float qaBest=0,qaSum=0;
+    for (myIter_t it=idTruths.begin(); it!=idTruths.end();++it) {
+       qaSum+=(*it).second;
+       if ((*it).second<qaBest)	continue;
+       tkBest=(*it).first; qaBest=(*it).second;
+    }
+    if (tkBest> 0xffff) return;
+    int avgQua= 100*qaBest/(qaSum+1e-10)+0.5;
+    setIdTruth(tkBest,avgQua);
+}
