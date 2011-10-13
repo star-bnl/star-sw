@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.7 2011/10/10 20:35:08 avossen Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.8 2011/10/13 20:35:22 balewski Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.8  2011/10/13 20:35:22  balewski
+//  cleanup, added missing return value
+//
 //  Revision 1.7  2011/10/10 20:35:08  avossen
 //  fixed strip-cluster association in MaxCluster algo, made other files cvs compliant
 //
@@ -20,6 +23,7 @@ StFgtSimpleClusterAlgo::StFgtSimpleClusterAlgo():mIsInitialized(0)
 Int_t StFgtSimpleClusterAlgo::Init()
 {
   mIsInitialized=true;
+  return 0; // ?,jan
 };
 
 Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArray& clusters)
