@@ -919,7 +919,7 @@ void dev13()
     geom.mutdFlag = "MUTD04";  geom.mutdStat = 1;
     geom.pipeFlag = "PIPE12";  geom.pipeStat = 1;
     // ================================================ 
-    geom.pixlFlag = "PIXL01";  geom.pixlStat = 1;
+    geom.pixlFlag = "PIXL02";  geom.pixlStat = 1; 
     // ================================================ 
     geom.idsmFlag = "IDSM02";  geom.idsmStat = 1;
     geom.fgtdFlag = "FGTD32";  geom.fgtdStat=1;
