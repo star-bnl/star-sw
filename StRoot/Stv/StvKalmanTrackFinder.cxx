@@ -174,7 +174,11 @@ Mtx55D_t derivFit;
 //+++++++++++++++++++++++++++++++++++++
     assert(!(mySkip && !idive));
     totLen+=mDive->GetLength();
-    nNode++; assert(nNode<200);
+    nNode++;		// assert(nNode<200);
+    if (nNode>200) { //Something very wrong
+      Error("FindTrack","Too many nodes =200 Skip track");
+      return 0;
+    }
     if (idive >= kDiveBreak) 			break;
     par[0]=par[1]; err[0]=err[1];
     if (fabs(par[0]._z)  > myConst->mZMax  ) 	break;
