@@ -147,19 +147,19 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
          << "'" << endm;
 #else
 // Add a record to MySQL tracking Db     
-//  LOG_QA << "SequenceValue="<< mNTotal
-//    LOG_UCM 
-//          << "StageID=" << "'1'"
-//          << ",MessageKey=" << "'MemUsed'" 
-//          << ",MessageValue='" << int(StMemStat::Used())
-//          << "'" << endm;
+// LOG_QA << "SequenceValue="<< mNTotal
+   LOG_UCM 
+         << "StageID=" << "'1'"
+         << ",MessageKey=" << "'MemUsed'" 
+         << ",MessageValue='" << int(StMemStat::Used())
+         << "'" << endm;
          
-//  LOG_QA << "SequenceValue="<<mNTotal 
-  // LOG_UCM 
-//          << "StageID=" << "'1'"
-//          << ",MessageKey=" << "'ProgSize'"
-//          << ",MessageValue='" << int(StMemStat::ProgSize())
-//          << "'" << endm;
+// LOG_QA << "SequenceValue="<<mNTotal 
+   LOG_UCM 
+         << "StageID=" << "'1'"
+         << ",MessageKey=" << "'ProgSize'"
+         << ",MessageValue='" << int(StMemStat::ProgSize())
+         << "'" << endm;
 #endif         
 #endif                
   if (jBeg > 1) Skip(jBeg-1);
@@ -282,8 +282,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.79 2011/10/11 16:01:48 perev Exp $
+// $Id: StChain.cxx,v 1.80 2011/10/13 20:06:53 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.80  2011/10/13 20:06:53  perev
+// Put removed UCM messages back(req JL)
+//
 // Revision 1.79  2011/10/11 16:01:48  perev
 // Remove redundant printouts
 //
