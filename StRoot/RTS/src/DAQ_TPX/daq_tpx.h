@@ -58,7 +58,7 @@ private:
 
 	u_int *fcf_tmp_storage ;
 	
-	static const int FCF_TMP_BYTES = (1024*1024) ;	// for local FCF
+	static const int FCF_TMP_BYTES = (128*1024) ;	// for local FCF
 
 	static const int MAX_SEC = 24 ;
 	static const int MAX_RDO = 6 ;

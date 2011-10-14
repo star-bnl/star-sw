@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.h,v 1.3 2009/03/04 04:57:36 dongx Exp $
+ * $Id: StBTofINLCorr.h,v 1.4 2009/12/14 19:38:30 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,10 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.h,v $
+ * Revision 1.4  2009/12/14 19:38:30  dongx
+ * - mNValidBoards set by the read-in database entrie instead of a hard-coded number
+ * - clean up mNValidTrays and related functions (not needed since previous versions)
+ *
  * Revision 1.3  2009/03/04 04:57:36  dongx
  * INL arrays changed from float to short - memory occupied reduced by a factor of 2
  *
@@ -60,9 +64,7 @@ class StBTofINLCorr{
   Int_t mBoardId2Index[mNBoardIdMAX];   // index in mNTDIGMAX for board #Id
   Short_t mINLCorr[mNTDIGMAX][mNChanOnTDIG][mNChanMAX];
 
-  Int_t mNValidTrays;
-
-  static const Int_t mNValidBoards = 1023;
+  Int_t mNValidBoards;
   
  public:
   StBTofINLCorr();
@@ -79,9 +81,6 @@ class StBTofINLCorr{
   /// To get the INL correction tables for vpds
   float getVpdINLCorr(StBeamDirection eastwest, int globalTdcChan, int bin);
   
-  void setNValidTrays(int ntrays);
 };
-
-inline void StBTofINLCorr::setNValidTrays(int ntrays) { mNValidTrays = ntrays; }
 
 #endif

@@ -1,6 +1,13 @@
-* $Id: fpdmgeo.g,v 1.10 2009/11/10 02:14:30 perev Exp $
+* $Id: fpdmgeo.g,v 1.12 2011/02/28 16:20:01 jwebb Exp $
 * $Name:  $
 * $Log: fpdmgeo.g,v $
+* Revision 1.12  2011/02/28 16:20:01  jwebb
+* Switched from fortran-style to mortran-style continuation lines.
+*
+* Revision 1.11  2010/02/05 21:26:59  jwebb
+* All materials are now defined locally, so that changes to medium properties
+* do not affect other detectors.
+*
 * Revision 1.10  2009/11/10 02:14:30  perev
 * Where GSTPAR, set local material avoid bug in gphysi
 *
@@ -299,7 +306,8 @@ FILL FLGC                                  ! one Copy of FPD
 * ----------------------------------------------------------------------------
 Block FPDM is one FPD West volume 
       Material  Air
-      Medium    standard
+      Material  FPDM_Air isvol=0
+c$$$  Medium    standard
       Attribute PCON   seen=1 colo=7				!  lightblue
       shape     tube   dz=fpdg_zlen/2 rmin=fpdg_Rmin rmax=fpdg_Radius
 
@@ -354,6 +362,7 @@ EndBlock
 Block FMSS is steel support of the EndCap module
       Attribute FMSS      seen=1    colo=1		! black	
       Material  Iron
+      Material  FPDM_Iron isvol=0
       Shape     CONS   dz=(fmcc_zend-fmcc_zorig)/2,
                 Rmn1=fmcs_Zorig*Tan_Low-d2  Rmn2=fmcs_Zend*Tan_Low-d2,
                 Rmx1=fmcs_Zorig*Tan_Upp+dup Rmx2=fmcs_Zend*Tan_Upp+dup,
@@ -366,7 +375,7 @@ EndBlock
 * ----------------------------------------------------------------------------
 Block FMOD is one module  of the EM EndCap
       Attribute FMOD      seen=1    colo=3			! green
-      Material  Air
+      Material  FPDM_Air
       Shape     CONS   dz=(fmcc_zend-fmcc_zorig)/2,
                 Rmn1=fmcs_Zorig*Tan_Low-dd  Rmn2=fmcs_Zend*Tan_Low-dd,
                 Rmx1=fmcs_Zorig*Tan_Upp+dup Rmx2=fmcs_Zend*Tan_Upp+dup
@@ -406,8 +415,9 @@ endblock
 Block FPSE is a single EM section
       Attribute FPSE   seen=1  colo=1 
       Material Air
-      Material Air_FPSE isVol=0
-      Medium standard
+      Material FPDM_Air_FPSE isvol=0
+c$$$      Material Air_FPSE isVol=0
+c$$$      Medium standard
 *
       Shape     CONS  dz=secwid/2,  
                 rmn1=(section-diff)*Tan_Low-dd  rmn2=(section+secwid-diff)*Tan_Low-dd,
@@ -452,7 +462,7 @@ endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block FPER  is a EM sesection period (super layer)
 *
-      Material  Air 
+      Material  FPDM_Air 
       Attribute FPER   seen=1  colo=1
       Shape     CONS   dz=Cell/2, 
                 phi1=fmcs_PhiMin/fmcs_Nsector,
@@ -524,7 +534,7 @@ EndBlock
 Block FSCI  is the active scintillator (polystyren) layer  
 *
   Material  POLYSTYREN
-      Material  Cpolystyren   Isvol=1
+      Material  FPDM_polystyren   Isvol=1
       Attribute FSCI   seen=1   colo=7   fill=0   	! lightblue
 *     local z goes along the radius, y is the thickness
       Shape     TRD1   dy=fsec_scint(fmcs_type)/2  dz=(RTop-RBot)/2-fmcs_GapCel
@@ -545,6 +555,7 @@ endblock
 Block FLED  is lead absorber Plate 
 *
       Material  Lead
+      Material  FPDM_Lead isvol=0
       Attribute FLED   seen=1   colo=3  fill=1			! green
       Shape     TRD1   dy=fmcs_Plate/2  dz=(RTop-RBot)/2
       Call GSTPAR (ag_imed,'CUTGAM',0.00008)
@@ -559,6 +570,7 @@ endblock
 Block FFLP  is First Aluminium plate 
 *
       Material  Aluminium
+      Material  FPDM_Aluminium isvol=0
       Attribute FFLP   seen=1  colo=3 fill=1			! green
       Shape     TUBS   dz=SecWid/2,
                        rmin=(section-diff)*Tan_Low,
@@ -571,15 +583,15 @@ endblock
 * ----------------------------------------------------------------------------
 Block FXFP  is SS laminated plate
 *
-      Material  Iron
+      Material FPDM_Iron
       Attribute FXFP   seen=1  colo=6 fill=1		! violet
       Shape     TRD1   dy=fmcs_PlateS/2  dz=(RTop-RBot)/2
 endblock
 * ----------------------------------------------------------------------------
 Block FSHM  is the SHower Max  section
 *
-      Material  Air 
-      Material  Stra_Air isvol=0
+      Material  FPDM_Air 
+c$$$      Material  Stra_Air isvol=0
       Attribute FSHM   seen=1   colo=4			!  blue
       Shape     CONS   dz=SecWid/2,
                 phi1=fmcs_PhiMin/fmcs_Nsupsec,
@@ -634,6 +646,7 @@ Block FXGT  is the G10 layer in the SMax
       Component H     A=1      Z=1    W=0.4*14*1./174.
       Component O     A=16     Z=8    W=0.4*4*16./174.
       Mixture   g10   Dens=1.7
+      
       Attribute FXGT   seen=1   colo=7
       Shape     CONS   dz=msecwd/2,
                 phi1=fmcs_PhiMin/fmcs_Nsupsec,
@@ -647,7 +660,7 @@ EndBlock
 Block FXSG  is the Shower max  Gap for scintillator strips
 *
       Attribute FXSG   seen=1   colo=7			! black
-      Material  Air   
+      Material  FPDM_Air   
       Shape     CONS   dz=msecwd/2,
                 phi1=fmcs_PhiMin/fmcs_Nsupsec,
 		phi2=fmcs_PhiMax/fmcs_Nsupsec,
@@ -733,8 +746,8 @@ endblock
 * ----------------------------------------------------------------------------
 Block FHMS is  sHower Max Strip
 *
-      Material  POLYSTYREN
-      Material  Cpolystyren   Isvol=1
+      Material  FPDM_POLYSTYREN
+c      Material  Cpolystyren   Isvol=1
       Attribute FHMS      seen=1    colo=2		! red
       Shape     TRD1 dx1=0 dx2=fmxg_Sbase/2 dy=len/2 dz=fmxg_Sapex/2
       Call GSTPAR (ag_imed,'CUTGAM',0.00008)
@@ -751,6 +764,7 @@ Endblock
 Block FALP  is ALuminium  Plate in shower max 
 *
       Material  Aluminium
+      Material  FPDM_Aluminium_FALP isvol=0
       Attribute FALP   seen=1  colo=1
       Shape     CONS   dz=msecwd/2,
                 phi1=fmcs_PhiMin/fmcs_Nsupsec,
@@ -765,7 +779,7 @@ endblock
 * ----------------------------------------------------------------------------
 Block FSSP  is stainless steel  Plate 
 *
-      Material  Iron      
+      Material  FPDM_Iron      
       Attribute FSSP   seen=1  colo=6 fill=1	
       Shape     CONS   dz=Fmcs_PlateB/2,
                 phi1=fmcs_PhiMin/fmcs_Nsupsec,
@@ -779,8 +793,8 @@ endblock
 *                  draw emdi 120 180 150  1 14  .12 .12
 * ---------------------------------------------------------------------------
 Block FLGD is one Pb-Glass fpd detector
-      Material  Air
-      Medium    standard
+      Material  FPDM_Air
+c$$$      Medium    standard
       Attribute FLGD seen=1 colo=1
       shape box dz= ztot,
                 dy=(FLGG_NEta*FLGG_Width + (FLGG_NEta+1.0)*FLGG_DGap)/2.0,
@@ -796,7 +810,7 @@ Block FLGD is one Pb-Glass fpd detector
 EndBlock
 * ----------------------------------------------------------------------------
 Block FLGT is one PbG Tower
-      material Air
+      material FPDM_Air
       Attribute FLGT seen=1 colo=2
       Shape box	dz=ztot,
 		dx=FLGG_Width/2.0+FLGG_AlThick,
@@ -805,13 +819,12 @@ Block FLGT is one PbG Tower
       Create and Position FWAL z=-ztot+(FLGG_AlThick+FLGG_depth)/2.0
       Create and Position FUMT z=-ztot+FLGG_AlThick+FLGG_depth+FLGG_MuMetDz/2.0
       Create and Position FPRB z=-ztot+FLGG_AlThick+FLGG_depth+FLGG_SiRubDz/2.0
-      Create and Position FPCT z=-ztot+FLGG_AlThick+FLGG_depth+FLGG_SiRubDz
-     >                                +FLGG_PhCathDz/2.0
+      Create and Position FPCT z=-ztot+FLGG_AlThick+FLGG_depth+FLGG_SiRubDz+FLGG_PhCathDz/2.0
 
 Endblock
 * ----------------------------------------------------------------------------
 Block FWAL is almunum wrapper
-      material Aluminium
+      material FPDM_Aluminium
       Attribute FWAL seen=1 colo=3
       Shape box	dz=FLGG_Depth/2.0+FLGG_AlThick/2.0,
 		dx=FLGG_Width/2.0+FLGG_AlThick,
@@ -830,7 +843,10 @@ Block FLGR is Lead Glass detector
       Component O     A=15.999 Z=8    W=.22041
       Component As    A=74.922 Z=33   W=.00152
       Mixture   PbG   Dens=FLGM_Density Radl=FLGM_RadLen
-      Medium leadglass ISVOL=1
+
+c$$$      Medium leadglass ISVOL=1
+      Material FPDM_PbGlass isvol=1
+
       Attribute FLGR  seen=1    colo=4		! red
       Shape     box dz=FLGG_depth/2 dx=FLGG_Width/2 dy=FLGG_Width/2
 
@@ -844,6 +860,7 @@ Endblock
 * ----------------------------------------------------------------------------
 Block FPRB is silicon rubber
       material silicon
+      material FPDM_silicon isvol=1
       Attribute FPRB seen=1 colo=5
       Shape tube dz=FLGG_SiRubDz/2.0 rmin=0 rmax=FLGG_PhCathR
       if(fpdg_ChkvSim==1) CALL GSCKOV(%Imed,N,E,ABSCO_SiRub,EFFIC_All,RINDEX_SiRub)
@@ -851,7 +868,8 @@ Endblock
 * ----------------------------------------------------------------------------
 Block FPCT is Photo Cathode
       material Air
-      Medium PhotCath ISVOL=1
+c$$$      Medium PhotCath ISVOL=1
+      Material FPDM_Air_FPCT isvol=1
       Attribute LPCT seen=1 colo=6
       Shape tube dz=FLGG_PhCathDz/2.0 rmin=0 rmax=FLGG_PhCathR
       if(fpdg_ChkvSim==1) then
@@ -863,6 +881,7 @@ Endblock
 * ----------------------------------------------------------------------------
 Block FUMT is mu metal
       material iron
+      Material FPDM_Iron_FUMT isvol=0
       Attribute LUMT  seen=1    colo=1
       Shape tube dz=FLGG_MuMetDz/2.0 rmin=FLGG_PhCathR rmax=FLGG_MuMetR
       if(fpdg_ChkvSim==1) CALL GSCKOV(%Imed,N,E,ABSCO_MuMet,EFFIC_All,RINDEX_MuMet)

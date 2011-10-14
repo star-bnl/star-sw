@@ -1,14 +1,11 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.2 2009/12/08 15:14:24 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.1 2008/06/01 05:31:42 tai Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
-// Revision 1.2  2009/12/08 15:14:24  pibero
-// Added Pythia tune per Helen Caines request.
-//
 // Revision 1.1  2008/06/01 05:31:42  tai
 // moved StPythiaEvent to StSpinPool/StJetSkimEvent
 //
@@ -58,7 +55,6 @@ public:
   int runId() const;
   int eventId() const;
   int processId() const;
-  int tune() const;
   TVector3& vertex();
   const TVector3& vertex() const;
   float s() const;
@@ -84,7 +80,6 @@ public:
   void setRunId(int id);
   void setEventId(int id);
   void setProcessId(int id);
-  void setTune(int tune);
   void setVertex(const TVector3& v);
   void setS(float s);
   void setT(float t);
@@ -105,7 +100,6 @@ private:
   int mRunId;
   int mEventId;
   int mProcessId;
-  int mTune;
   TVector3 mVertex;
   float mS;
   float mT;
@@ -122,13 +116,12 @@ private:
   
   TClonesArray* mParticles;
   
-  ClassDef(StPythiaEvent, 4);
+  ClassDef(StPythiaEvent, 3);
 };
 
 inline int StPythiaEvent::runId() const { return mRunId; }
 inline int StPythiaEvent::eventId() const { return mEventId; }
 inline int StPythiaEvent::processId() const { return mProcessId; }
-inline int StPythiaEvent::tune() const { return mTune; }
 inline TVector3& StPythiaEvent::vertex() { return mVertex; }
 inline const TVector3& StPythiaEvent::vertex() const { return mVertex; }
 inline float StPythiaEvent::s() const { return mS; }
@@ -207,7 +200,6 @@ inline void StPythiaEvent::Clear(Option_t* option)
     mRunId = 0;
     mEventId = 0;
     mProcessId = 0;
-    mTune = 0;
     mVertex.SetXYZ(0, 0, 0);
     mS = 0;
     mT = 0;
@@ -230,7 +222,6 @@ inline void StPythiaEvent::Clear(Option_t* option)
 inline void StPythiaEvent::setRunId(int id) { mRunId = id; }
 inline void StPythiaEvent::setEventId(int id) { mEventId = id; }
 inline void StPythiaEvent::setProcessId(int id) { mProcessId = id; }
-inline void StPythiaEvent::setTune(int tune) { mTune = tune; }
 inline void StPythiaEvent::setVertex(const TVector3& v) { mVertex = v; }
 inline void StPythiaEvent::setS(float s) { mS = s; }
 inline void StPythiaEvent::setT(float t) { mT = t; }

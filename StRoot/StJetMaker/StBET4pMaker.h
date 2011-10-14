@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.13 2009/12/09 05:12:02 pibero Exp $
+// $Id: StBET4pMaker.h,v 1.12 2009/09/03 23:36:09 pibero Exp $
 #ifndef STBET4PMAKER_H
 #define STBET4PMAKER_H
 
@@ -31,8 +31,7 @@ public:
     
   void Clear(Option_t* opt = "");
 
-  const StThreeVectorF& getVertex() const { return _vertex; }
-  FourList& getTracks() { return _tracks; }
+  FourList &getTracks();
 
   void setUseTPC(bool v = true)      { _useTPC      = v; }
   void setUseBEMC(bool v = true)     { _useBEMC     = v; }
@@ -52,7 +51,7 @@ public:
   StBET4pMakerImp* GetImp() { return _imp; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.13 2009/12/09 05:12:02 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.12 2009/09/03 23:36:09 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -79,7 +78,6 @@ private:
 
   StjeTrackListToStMuTrackFourVecList& _track2four;
   StjeTowerEnergyListToStMuTrackFourVecList& _energy2four;
-  StThreeVectorF _vertex;
   FourList _tracks;
 
   bool isBemcCorrupted() const;

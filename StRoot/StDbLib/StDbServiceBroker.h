@@ -66,7 +66,7 @@ class StDbServiceBroker
   std::vector<ChapiDbHost>::const_iterator MyBestHost;
   void FormHostList();
   void PrintHostList();
-  void RecommendHost();
+  int RecommendHost();
   short MyStatus;  // see namespace st_db_service_broker
 
  public:

@@ -1,73 +1,58 @@
-// $Id: StjMCMuDst.cxx,v 1.9 2009/12/09 05:12:20 pibero Exp $
+// $Id: StjMCMuDst.cxx,v 1.6 2009/08/23 16:19:52 pibero Exp $
 
 #include <StjMCMuDst.h>
 
 #include <StMaker.h>
 
+#include <StMuDSTMaker/COMMON/StMuEvent.h>
+#include <StMuDSTMaker/COMMON/StMuDst.h>
+#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
+
 #include <TDataSet.h>
 #include <TDataSetIter.h>
 
-#include <tables/St_g2t_event_Table.h>
-#include <tables/St_g2t_vertex_Table.h>
 #include <tables/St_particle_Table.h>
 
 #include <TLorentzVector.h>
-
-StThreeVectorF StjMCMuDst::getMCVertex() const
-{
-  if (TDataSet* Event = _maker->GetDataSet("geant")) {
-    TDataSetIter geantDstI(Event);
-    if (const St_g2t_vertex* g2t_vertex_descriptor = (const St_g2t_vertex*)geantDstI("g2t_vertex"))
-      if (const g2t_vertex_st* g2t_vertex_table = g2t_vertex_descriptor->GetTable())
-	return StThreeVectorF(g2t_vertex_table[0].ge_x);
-  }
-  return StThreeVectorF(-999,-999,-999);
-}
 
 StjMCParticleList StjMCMuDst::getMCParticleList()
 {
   StjMCParticleList theList;
 
-  if (TDataSet* Event = _maker->GetDataSet("geant")) {
+  TDataSet* Event = _maker->GetDataSet("geant");
+  if (Event) {
     TDataSetIter geantDstI(Event);
+    const St_particle* particleTabPtr = (St_particle*)geantDstI("particle");
+    if (particleTabPtr) {
+      const particle_st* particleTable = particleTabPtr->GetTable();
+      if (particleTable) {
+	StMuDstMaker* uDstMaker = dynamic_cast<StMuDstMaker*>(_maker->GetMaker("MuDst"));
+	if (uDstMaker) {
+	  StjMCParticle particle;
+	  particle.runNumber = uDstMaker->muDst()->event()->runId();
+	  particle.eventId = uDstMaker->muDst()->event()->eventId();
+	  particle.vertexZ = uDstMaker->muDst()->event()->primaryVertexPosition().z();
 
-    // Get run number and event number from table g2t_event
-    int runNumber   = -1;
-    int eventNumber = -1;
+	  for (int i = 0; i < particleTabPtr->GetNRows(); ++i) {
+	    // Final state particles only
+	    if (particleTable[i].isthep == 1) {
+	      particle.status          = particleTable[i].isthep;
+	      particle.mcparticleId    = i + 1;
+	      particle.pdg             = particleTable[i].idhep;
+	      particle.firstMotherId   = particleTable[i].jmohep[0];
+	      particle.lastMotherId    = particleTable[i].jmohep[1];
+	      particle.firstDaughterId = particleTable[i].jdahep[0];
+	      particle.lastDaughterId  = particleTable[i].jdahep[1];
 
-    if (const St_g2t_event* g2t_event_descriptor = (const St_g2t_event*)geantDstI("g2t_event")) {
-      if (const g2t_event_st* g2t_event_table = g2t_event_descriptor->GetTable()) {
-	runNumber   = g2t_event_table->n_run;
-	eventNumber = g2t_event_table->n_event;
-      }
-    }
+	      TLorentzVector p4(particleTable[i].phep);
+	      particle.pt  = p4.Pt();
+	      particle.eta = p4.Eta();
+	      particle.phi = p4.Phi();
+	      particle.m   = p4.M();
+	      particle.e   = p4.E();
 
-    // Get particles from table particle
-    if (const St_particle* particle_descriptor = (const St_particle*)geantDstI("particle")) {
-      if (const particle_st* particle_table = particle_descriptor->GetTable()) {
-	for (int i = 0; i < particle_descriptor->GetNRows(); ++i) {
-	  // Final state particles only
-	  if (particle_table[i].isthep == 1) {
-	    StjMCParticle particle;
-	    particle.runNumber       = runNumber;
-	    particle.eventId         = eventNumber;	
-	    particle.status          = particle_table[i].isthep;
-	    particle.mcparticleId    = i+1;
-	    particle.pdg             = particle_table[i].idhep;
-	    particle.firstMotherId   = particle_table[i].jmohep[0];
-	    particle.lastMotherId    = particle_table[i].jmohep[1];
-	    particle.firstDaughterId = particle_table[i].jdahep[0];
-	    particle.lastDaughterId  = particle_table[i].jdahep[1];
-	    particle.vertexZ         = particle_table[i].vhep[2];
-
-	    TLorentzVector p4(particle_table[i].phep);
-	    particle.pt  = p4.Pt();
-	    particle.eta = p4.Eta();
-	    particle.phi = p4.Phi();
-	    particle.m   = p4.M();
-	    particle.e   = p4.E();
-
-	    theList.push_back(particle);
+	      theList.push_back(particle);
+	    }
 	  }
 	}
       }
@@ -76,3 +61,4 @@ StjMCParticleList StjMCMuDst::getMCParticleList()
 
   return theList;
 }
+

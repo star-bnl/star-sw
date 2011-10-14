@@ -30,9 +30,6 @@ libpmd.a : $(OBJS)
 
 daq_pmd.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_pmd.o: ../../../../StRoot/RTS/include/rtsSystems.h
-daq_pmd.o: ../SFS/sfs_index.h
-daq_pmd.o: ../SFS/fs_index.h
-daq_pmd.o: ../SFS/sfs_base.h
 daq_pmd.o: ../DAQ_READER/daqReader.h
 daq_pmd.o: ../DAQ_READER/daqConfig.h
 daq_pmd.o: ../DAQ_READER/daq_dta.h

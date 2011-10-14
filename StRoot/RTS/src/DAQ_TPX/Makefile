@@ -54,7 +54,6 @@ daq_tpx.o: ../DAQ_READER/daq_dta_structs.h
 daq_tpx.o: ../DAQ_TPC/daq_tpc.h
 daq_tpx.o: ../DAQ_READER/daq_det.h
 daq_tpx.o: ../../../../StRoot/RTS/include/TPC/trans_table.hh
-daq_tpx.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
 daq_tpx.o: ../../../../StRoot/RTS/include/DAQ1000/ddl_struct.h
 daq_tpx.o: daq_tpx.h
 daq_tpx.o: tpxCore.h

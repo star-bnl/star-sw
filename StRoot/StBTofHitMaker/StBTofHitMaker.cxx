@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.13 2009/10/27 16:17:54 fine Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.14 2009/12/14 19:39:44 dongx Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -78,7 +78,6 @@ Int_t StBTofHitMaker::InitRun(Int_t runnumber)
   mNValidTrays = mBTofDaqMap->numberOfValidTrays();
 
   mBTofINLCorr = new StBTofINLCorr();
-  mBTofINLCorr->setNValidTrays(mNValidTrays);
   mBTofINLCorr->initFromDbase(this);
   LOG_INFO << " Initialize INL table ... " << endm;
 
