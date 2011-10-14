@@ -1,6 +1,0 @@
-<StDbServer>
-<server> offline in online </server>
-<host> onldb2.starp.bnl.gov </host>
-<port> 3601 </port>
-<socket> /tmp/mysql.3316.sock </socket>
-</StDbServer>
