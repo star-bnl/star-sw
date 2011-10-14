@@ -123,12 +123,11 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   geom.success_svtt = ConstructSvtt( geom.svttFlag, geom.svttStat ); // SVT must preceede FTPC and SISD
   geom.success_sisd = ConstructSisd( geom.sisdFlag, geom.sisdStat ); // 
 
-  geom.success_pixl = ConstructPixl( geom.pixlFlag, geom.pixlStat ); // OLD development pixel detector
-
   // Add in the support cone
   geom.success_scon = ConstructScon( geom.sconFlag, geom.sconStat ); // support cone before SVT
   geom.success_idsm = ConstructIdsm( geom.idsmFlag, geom.idsmStat );
 
+  geom.success_pixl = ConstructPixl( geom.pixlFlag, geom.pixlStat ); // OLD development pixel detector (must follow idsm, scon)
 
   geom.success_ftpc = ConstructFtpc( geom.ftpcFlag, geom.ftpcStat );
   geom.success_ftro = ConstructFtro( geom.ftroFlag, geom.ftroStat );
@@ -836,8 +835,10 @@ Bool_t Geometry::ConstructPixl( const Char_t *flag, Bool_t go )
     }
 
   AgStructure::AgDetpNew(pixlGeom.module, Form("PIXL Configuration %s",flag));
-  AgStructure::AgDetpAdd("Pxlv_t","ladver",   2.0f );
-  AgStructure::AgDetpAdd("Pxlv_t","location", pixlGeom.location );
+  /* Not required for PixlGeo4 --> pixlgeo00
+     AgStructure::AgDetpAdd("Pxlv_t","ladver",   2.0f );
+     AgStructure::AgDetpAdd("Pxlv_t","location", pixlGeom.location );
+  */
 
 
   if (go) if ( !CreateModule(pixlGeom.module) ) {
@@ -1151,12 +1152,19 @@ Bool_t Geometry::PipeInit() // Does this break the config=-1 scheme?
     pipeGeom.fill();
   }
 
-
   // Pipe ala UPGR16 geometry
   pipeGeom.select="PIPE06"; {
     pipeGeom.config=6; 
     pipeGeom.flag=0; 
     pipeGeom.module="PipeGeo";
+    pipeGeom.fill();
+  }
+
+  // New beam pipe
+  pipeGeom.select="PIPE20"; {
+    pipeGeom.config=0;
+    pipeGeom.flag=0;
+    pipeGeom.module="PipeGeo1";
     pipeGeom.fill();
   }
 
