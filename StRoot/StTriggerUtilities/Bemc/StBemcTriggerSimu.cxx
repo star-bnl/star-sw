@@ -862,11 +862,6 @@ void StBemcTriggerSimu::FEEout2009()
 	int triggerPatch = TriggerPatchFromTowerId[towerId-1];
 	int ht, pa;
 	simulateFEEaction(hit->adc(),FEEped[towerId-1],bitConvValue[triggerPatch],ht,pa,debug);
-#if 0
-	if (triggerPatch == 228 || triggerPatch == 229) {
-	  LOG_INFO << Form("triggerPatch=%d towerId=%d mod=%d eta=%d sub=%d adc=%d E=%.3f addr=%x ht=%d pa=%d",triggerPatch,towerId,hit->module(),hit->eta(),hit->sub(),hit->adc(),hit->energy(),hit,ht,pa) << endm;
-	}
-#endif
 	HT6bit_adc_holder[towerId-1] = ht;
 	if (ht > L0_HT_ADC[triggerPatch]) L0_HT_ADC[triggerPatch] = ht;
 	L0_TP_ADC[triggerPatch] += pa;
@@ -874,6 +869,18 @@ void StBemcTriggerSimu::FEEout2009()
     } // for i
   } // for m
 
+  // Make sure BTOW has 4800 hits. Towers with no physics signal are just
+  // set to pedestal. This is achieved in real data and embedding macros with:
+  //
+  // StEmcADCtoEMaker* bemcAdc = new StEmcADCtoEMaker;
+  // bemcAdc->saveAllStEvent(true);
+  //
+  // and in simulation macros:
+  //
+  // StEmcSimulatorMaker* emcSim = (StEmcSimulatorMaker*)chain->GetMaker("EmcSimulator");
+  // emcSim->setCheckStatus(kBarrelEmcTowerId,false);
+  // emcSim->setMakeFullDetector(kBarrelEmcTowerId,true);
+  // emcSim->setDoZeroSuppression(kBarrelEmcTowerId,false);
   assert(nhits == kNTowers);
 
   // TP277 HT output is always higher by one unit
@@ -890,11 +897,6 @@ void StBemcTriggerSimu::FEEout2009()
 	simulateFEELUT(L0_TP_ADC[triggerPatch],formula[crate-1][seq],LUTscale[crate-1][seq],LUTped[crate-1][seq],LUTsig[crate-1][seq],LUTpow[crate-1][seq],0,0,numMaskTow[triggerPatch],pedTargetValue,lut,debug);
 	L0_TP_ADC[triggerPatch] = TP6bit_adc_holder[triggerPatch] = lut;
       }
-#if 0
-      if (triggerPatch == 228 || triggerPatch == 229) {
-	LOG_INFO << Form("triggerPatch=%d HT=%d TPsum=%d",triggerPatch,L0_HT_ADC[triggerPatch],L0_TP_ADC[triggerPatch]) << endm;
-      }
-#endif
     } // for seq
   } // for crate
 }
