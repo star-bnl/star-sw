@@ -177,6 +177,7 @@ Fill EXSE           ! Third SMD section
       JSect    = 3                           ! Section number   
       Zshift   = 1.215                       ! Section width
       sectype  = {1,0,2,1,0,2}               ! 1-V,2-U,3-cutV,4-cutU    
+EndFill
 
 *----------------------------------------------------------------------------
 *

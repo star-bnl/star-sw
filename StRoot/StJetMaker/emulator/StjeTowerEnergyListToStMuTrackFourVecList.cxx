@@ -1,4 +1,4 @@
-// $Id: StjeTowerEnergyListToStMuTrackFourVecList.cxx,v 1.4 2009/12/09 05:12:12 pibero Exp $
+// $Id: StjeTowerEnergyListToStMuTrackFourVecList.cxx,v 1.3 2009/09/04 17:30:20 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeTowerEnergyListToStMuTrackFourVecList.h"
 
@@ -18,7 +18,7 @@ FourList StjeTowerEnergyListToStMuTrackFourVecList::operator()(const StjTowerEne
 
     TLorentzVector p4 = _energyTo4p(*tower);
 
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, createTowerEmu(*tower), 0, p4, 0, tower->towerId, tower->detectorId);
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, createTowerEmu(*tower), p4, 0, tower->towerId, tower->detectorId);
 
     ret.push_back(pmu);
   }

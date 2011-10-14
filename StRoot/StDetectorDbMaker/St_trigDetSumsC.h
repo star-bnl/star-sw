@@ -43,7 +43,6 @@ class St_trigDetSumsC : public TChair {
   // leading to erroneous numbers.
   // validity margin parameter is passed (probably from spaceChargeCor)
   Double_t validity(double& newval) {
-    if (fMargin==0) return newval;
 
     if (!fgTableCopy)
       fgTableCopy = new St_trigDetSums(*((St_trigDetSums*) Table()));
@@ -51,6 +50,15 @@ class St_trigDetSumsC : public TChair {
     // reference pointer to previous table's data
     double& oldval = *((double*) (((char*) (fgTableCopy->GetTable())) +
                       (((char*) &newval) - ((char*) Struct(0)))));
+
+    // Corrupt scalers >1e9 seen in Run 9 (not possible at RHIC)
+    // Will return previous value, unless it is also corrupt,
+    // otherwise an unphysical value (-1) which can be used to trap problems
+    double CORRUPT = 1e9;
+    if (newval > CORRUPT || newval < 0)
+      return (oldval > CORRUPT  || oldval < 0 ? -1 : oldval);
+
+    if (fMargin == 0) return newval;
 
     // Use newval for low rates, below (x2-margin), outside (multiple+/-margin)
     if ((oldval < 100) ||

@@ -2,22 +2,21 @@ class StChain;
 StChain *chain=0;
 int spinSort=false;
 int useEtow=2;// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
-int isJustin=true;
-bool isRoss=true; 
+int isJustin=true; 
 int geant=false;
 
 int rdMuWana(
 	     int nEve=1e3,
 	     char* inDir   = "",// make it empty for scheduler 
-	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
+	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.1/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
 	     int isMC=0 // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
  ) { 
 
 
-  if(isMC==1) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppWprod.lis";
-  if(isMC==2) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD2_ppQCD10_inf_filter.lis";
-  if(isMC==3) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppZprod.lis";
+  if(isMC==1) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.1/fillListA/mcSetD1_ppWprod.lis";
+  if(isMC==2) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.1/fillListA/mcSetD2_ppQCD10_inf_filter.lis";
+  if(isMC==3) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.1/fillListA/mcSetD1_ppZprod.lis";
   if(isMC==4) file  = "fillListA/mcSetD1_ppWplusProd.lis";
   if(isMC==5) file  = "fillListA/mcSetD1_ppWminusProd.lis";
   if(isMC==6) file  = "fillListA/mcSetD1_ppWdec.lis";
@@ -75,7 +74,7 @@ int rdMuWana(
   assert( !gSystem->Load("StEEmcUtil"));
   assert( !gSystem->Load("StEEmcDbMaker"));
   cout << " loading done " << endl;
-  assert( !gSystem->Load("StWalgoB2009"));
+  assert( !gSystem->Load("St2009Wana"));
   if(spinSort)  assert( !gSystem->Load("StSpinDbMaker"));
   
   // libraries for access to MC record         
@@ -121,7 +120,7 @@ int rdMuWana(
     // .... Barrel....
     dbMk->SetFlavor("sim","bemcPed"); // set all ped=0
     dbMk->SetFlavor("sim","bemcStatus");  // ideal, all=on
-    dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains 
+    
     dbMk->SetFlavor("sim","bsmdePed"); // set all ped=0
     dbMk->SetFlavor("sim","bsmdeCalib"); // load those, not used in algo
     dbMk->SetFlavor("sim","bsmdeStatus"); // ideal, all=on
@@ -139,9 +138,9 @@ int rdMuWana(
     dbMk->SetFlavor("Wbose","bsmdeCalib"); // Willie's relative gains E-plane
     dbMk->SetFlavor("Wbose","bsmdpCalib"); // P-plane
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
-    dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
   }
 
+  dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
     
   //.... load EEMC database
   StEEmcDbMaker*  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
@@ -196,18 +195,7 @@ int rdMuWana(
     pubJSMk->attachWalgoMaker(WmuMk); 
     pubJSMk->setHList(HList); 
   }
-
-  if (isRoss){
-    ZMk=new St2009ZMaker("Z"); 
-    ZMk->attachWalgoMaker(WmuMk);
-    ZMk->setHList(HList); 
-    ZMk->setNearEtFrac(0.25);
-    ZMk->setClusterMinEt(25);
-    ZMk->set4x4fmax(0.90);
-    ZMk->setMinZMass(60);
-    ZMk->setMaxZMass(150);
-  }
-
+  
   TChain* tree=muMk->chain(); assert(tree);
   int nEntries=(int) tree->GetEntries();
   printf("total eve in muDst chain =%d\n",nEntries);  // return ;
@@ -256,15 +244,6 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
-// Revision 1.4  2009/12/08 17:00:06  balewski
-// *** empty log message ***
-//
-// Revision 1.3  2009/12/08 16:53:01  balewski
-// *** empty log message ***
-//
-// Revision 1.2  2009/12/07 20:57:48  rcorliss
-// Updated rdMuWana macro to include Z finder and use current directory for the test files hardcoded in.
-//
 // Revision 1.1  2009/11/23 23:00:20  balewski
 // code moved spin-pool
 //

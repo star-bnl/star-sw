@@ -1,3 +1,26 @@
+* Human-readable units
+  Replace [GeV] with [*1.0E+0]
+  Replace [MeV] with [*1.0E-3]
+  Replace [keV] with [*1.0E-6]
+
+* Fake Subroutine for passing a structure and setting cuts
+* based on the contents of that structure
+  Replace [SET EmCuts(#)] with [
+         IF ( #1_Version .gt. 0 ) THEN
+            Call GsTPar( ag_imed, 'CUTGAM', #1_CUTGAM );
+            Call GsTPar( ag_imed, 'CUTELE', #1_CUTELE );
+            Call GsTPar( ag_imed, 'CUTHAD', #1_CUTHAD );
+            Call GsTPar( ag_imed, 'CUTNEU', #1_CUTNEU );
+            Call GsTPar( ag_imed, 'CUTMUO', #1_CUTMUO );
+            Call GsTPar( ag_imed, 'DCUTE',  #1_DCUTE  );
+            Call GsTPar( ag_imed, 'DCUTM',  #1_DCUTM  );
+            Call GsTPar( ag_imed, 'BCUTE',  #1_BCUTE  );
+            Call GsTPar( ag_imed, 'BCUTM',  #1_BCUTM  );
+         ENDIF
+   ]
+
+
+
 c*****************************************************************************
 Module ECALGEO6 is the EM EndCap Calorimeter GEOmetry
 c--
@@ -33,6 +56,10 @@ c*****************************************************************************
       Structure  EXSE {Jsect,Zshift,Sectype(6)}
 
       Structure  ESMD {Version, front_layer, back_layer, spacer_layer, base, apex }
+
+      Structure  ECUT {Version, Absorber, Sensitive, Blah }
+      Structure  EABS {Version, CUTGAM, CUTELE, CUTNEU, CUTHAD, CUTMUO, DCUTE, DCUTM, BCUTE, BCUTM }
+      Structure  ESEN {Version, CUTGAM, CUTELE, CUTNEU, CUTHAD, CUTMUO, DCUTE, DCUTM, BCUTE, BCUTM }
 
       Integer    I_section,J_section,Ie,is,isec,istrip,Nstr,Type,ii,jj,
                  cut,fsect,lsect,ihalf,filled,i,j,k,i_sector
@@ -79,7 +106,7 @@ Fill  EMCS                          ! EM Endcap Calorimeter geometry
       ZOrg     = 268.763            ! calorimeter origin in z
       ZEnd     = 310.007            ! Calorimeter end in z
       EtaMin   = 1.086              ! upper feducial eta cut 
-      EtaMax   = 2.0,               ! lower feducial eta cut
+      EtaMax   = 2.0                ! lower feducial eta cut
       PhiMin   = -90                ! Min phi 
       PhiMax   = 90                 ! Max phi
       Offset   = 0.0                ! offset in x
@@ -114,7 +141,7 @@ Fill  EMCS                          ! EM Endcap Calorimeter geometry
       ZOrg     = 268.763            ! calorimeter origin in z
       ZEnd     = 310.007            ! Calorimeter end in z
       EtaMin   = 1.086              ! upper feducial eta cut 
-      EtaMax   = 2.0,               ! lower feducial eta cut
+      EtaMax   = 2.0                ! lower feducial eta cut
       PhiMin   = -90                ! Min phi 
       PhiMax   = 90                 ! Max phi
       Offset   = 0.0                ! offset in x
@@ -239,6 +266,137 @@ Fill EXSE           ! Third SMD section
       Zshift   = 1.215                       ! Section width
       sectype  = {1,0,2,1,0,2}               ! 1-V,2-U,3-cutV,4-cutU    
 c--
+c--
+Fill ECUT                  ! cut selection
+    Version   = 1          ! selector
+    Absorber  = 0          ! absorber cuts
+    Sensitive = 0          ! sensitive cuts
+    Blah      = 1      ! meh
+
+Fill EABS                  ! The values below are the untuned defaults in the original geometry
+    Version = 0            ! versioning
+    CutGAM  =  80 keV      ! gamma transport cut
+    CutELE  =   1 MeV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =   1 MeV      ! electron delta ray cut
+    DCutM   =   1 MeV      ! muon delta ray cut
+    BCutE   = 100 keV      ! electron brem cut
+    BCutM   =   1 MeV      ! muon brem cut     
+
+Fill EABS                  ! EM cuts in absorbing material
+    Version =   1          ! versioning
+    CutGAM  =  10 keV      ! gamma transport cut
+    CutELE  =  10 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =  10 keV      ! electron delta ray cut
+    DCutM   =  10 keV      ! muon delta ray cut
+    BCutE   =  10 keV      ! electron brem cut
+    BCutM   =  10 keV      ! muon brem cut
+
+Fill EABS                  ! EM cuts in absorbing material
+    Version =   2          ! versioning
+    CutGAM  =  30 keV      ! gamma transport cut
+    CutELE  =  30 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =  30 keV      ! electron delta ray cut
+    DCutM   =  30 keV      ! muon delta ray cut
+    BCutE   =  30 keV      ! electron brem cut
+    BCutM   =  30 keV      ! muon brem cut
+
+Fill EABS                  ! EM cuts in absorbing material
+    Version =   3          ! versioning
+    CutGAM  = 100 keV      ! gamma transport cut
+    CutELE  = 100 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   = 100 keV      ! electron delta ray cut
+    DCutM   = 100 keV      ! muon delta ray cut
+    BCutE   = 100 keV      ! electron brem cut
+    BCutM   = 100 keV      ! muon brem cut
+
+Fill EABS                  ! EM cuts in absorbing material
+    Version =   4          ! versioning
+    CutGAM  =   1 MeV      ! gamma transport cut
+    CutELE  =   1 MeV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =   1 MeV      ! electron delta ray cut
+    DCutM   =   1 MeV      ! muon delta ray cut
+    BCutE   =   1 MeV      ! electron brem cut
+    BCutM   =   1 MeV      ! muon brem cut
+
+
+
+Fill ESEN                  ! The values below are the untuned defaults in the original geometry
+    Version = 0            ! versioning
+    CutGAM  =  80 keV      ! gamma transport cut
+    CutELE  =   1 MeV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =   1 MeV      ! electron delta ray cut
+    DCutM   =   1 MeV      ! muon delta ray cut
+    BCutE   = 100 keV      ! electron brem cut
+    BCutM   =   1 MeV      ! muon brem cut     
+
+Fill ESEN                  ! EM cuts in absorbing material
+    Version =   1          ! versioning
+    CutGAM  =  10 keV      ! gamma transport cut
+    CutELE  =  10 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =  10 keV      ! electron delta ray cut
+    DCutM   =  10 keV      ! muon delta ray cut
+    BCutE   =  10 keV      ! electron brem cut
+    BCutM   =  10 keV      ! muon brem cut
+
+Fill ESEN                  ! EM cuts in absorbing material
+    Version =   2          ! versioning
+    CutGAM  =  30 keV      ! gamma transport cut
+    CutELE  =  30 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =  30 keV      ! electron delta ray cut
+    DCutM   =  30 keV      ! muon delta ray cut
+    BCutE   =  30 keV      ! electron brem cut
+    BCutM   =  30 keV      ! muon brem cut
+
+Fill ESEN                  ! EM cuts in absorbing material
+    Version =   3          ! versioning
+    CutGAM  = 100 keV      ! gamma transport cut
+    CutELE  = 100 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   = 100 keV      ! electron delta ray cut
+    DCutM   = 100 keV      ! muon delta ray cut
+    BCutE   = 100 keV      ! electron brem cut
+    BCutM   = 100 keV      ! muon brem cut
+
+Fill ESEN                  ! EM cuts in absorbing material
+    Version =   4          ! versioning
+    CutGAM  =   1 MeV      ! gamma transport cut
+    CutELE  =   1 MeV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =   1 MeV      ! electron delta ray cut
+    DCutM   =   1 MeV      ! muon delta ray cut
+    BCutE   =   1 MeV      ! electron brem cut
+    BCutM   =   1 MeV      ! muon brem cut
+
+
+c--
 c----------------------------------------------------------------------------
 c--                                                                 Materials
 c--
@@ -291,6 +449,9 @@ c--
       Use    EMCS   Version=2   
       Use    EETR    
 c--
+      Use    ECUT   Version=1
+      Use    EABS   Version=ECUT_Absorber
+      Use    ESEN   Version=ECUT_Sensitive
 c----------------------------------------------------------------------------
 c-- Calculate frequently used quantities
 c--
@@ -313,7 +474,11 @@ c--
 c----------------------------------------------------------------------------
 c--                                                                     BEGIN
       Prin0 emcg_version
-        ('ecalgeo version: ',F4.2) 
+        ('ecalgeo version: ', F4.2) 
+      Prin0 ecut_absorber
+        ('  absorber cuts=',  F4.2 )
+      Prin0 ecut_sensitive
+        ('  sensitive cuts=', F4.2 )
 c--
       IF (emcg_OnOff>0) THEN
 c--
@@ -375,6 +540,7 @@ c-- Creates:
 c-- + EAGA
 c--
       Material  Air
+      Material  ECAL_Air isvol=0
       Attribute ECAL   seen=0 colo=7                           !  lightblue
 c--
       Shape     CONE   dz=(emcs_zend-emcs_zorg)/2,
@@ -383,6 +549,8 @@ c--
                        rmx1=emcs_zorg*tan_upp+dup,
                        rmx2=emcs_zend*tan_upp+dup
 c--
+c--   Setup absorber-type cuts
+      Set EmCuts (EABS)
 c--
       DO ihalf=1,2
 c--
@@ -413,7 +581,7 @@ c-- + EMSS -- steel support block
 c-- + ECGH -- air gap between the two halves
 c--
 C--                        
-      Material  AIR
+      Material  ECAL_Air
       Attribute EAGA      seen=0    colo=1   serial=FILLED           ! BLACK
 C--
       Shape     CONS   dz=(emcs_zend-emcs_zorg)/2,
@@ -455,13 +623,17 @@ c--
       Component  Cr      A=51.9960  Z=24  W=0.19
       Component  Ni      A=58.6934  Z=28  W=0.09
       Component  Fe      A=55.8450  Z=26  W=0.72
-      Mixture    Steel   DENS=8.03
+      Mixture    Ecal_Steel   DENS=8.03
 c--
       Attribute EMSS      seen=1    colo=1              ! BLACK
       Shape     CONS   dz=(emcs_zend-emcs_zorg)/2,
                 rmn1=emcs_zorg*tan_low-d2 rmn2=emcs_zend*tan_low-d2,
                 rmx1=emcs_zorg*tan_upp+dup rmx2=emcs_zend*tan_upp+dup,
                 phi1=emcs_phimin phi2=emcs_phimax
+c--
+c--   Setup absorber-type cuts
+      Set EmCuts (EABS)
+
 c--
 c--   Aluminium front plate 
 C--
@@ -612,7 +784,7 @@ c--           of spaghetti code, turns around and creates esec, which is
 c--           responsible for creating the radiators before and after the
 c--           smd layers.
 C--
-      Material  AIR
+      Material  ECAL_Air
       Attribute ECVO   seen=1 colo=3                            ! GREEN
       Shape     CONS   dz=zwidth/2,
                 rmn1=zslice*tan_low-dd,
@@ -650,7 +822,7 @@ c-- CreateS:
 c-- + ESPL -- SHOWER MAXIMUM DETECTOR PLANES
 c-- + ERSM -- TIE RODS W/IN THE SHOWER MAXIMUM DETECTOR
 c--
-      Material  AIR 
+      Material  ECAL_Air
       Attribute ESHM   seen=1   colo=4           !  BLUE
 c--
       Shape     CONS   dz=zwidth/2,
@@ -718,7 +890,7 @@ c--
 c-- Creates:
 c-- + ECHC -- THE STAINLESS STEEL COVER FOR 1/2 OF THE EEMC.
 c--
-      Material  AIR
+      Material  ECAL_Air
       Attribute ECGH   seen=0 colo=7                            !  LIGHTBLUE
       Shape     TRD1   dz=(emcs_zend-emcs_zorg)/2,
                 dy =(emcs_gaphalf+emcs_cover)/2,
@@ -759,7 +931,7 @@ c----------------------------------------------------------------- Block ECHC --
 c--
 Block ECHC                                            is steel endcap half cover
 c--
-      Material  steel
+      Material  ecal_steel
       Attribute ECHC      seen=1    colo=1              ! BLACK
 c--
       Shape     TRAP   dz=(curcl-curr)/2,
@@ -782,7 +954,7 @@ c----------------------------------------------------------------- Block ESSP --
 c--
 Block ESSP                                        is stainless steel  back plate 
 c--
-      Material  steel
+      Material  ecal_steel
       Attribute ESSP   seen=1  colo=6 fill=1    
       Shape     CONS   dz=emcs_bckplate/2,
                        rmn1=zslice*tan_low-dd,
@@ -801,7 +973,7 @@ c----------------------------------------------------------------- Block EPSB --
 c--
 Block EPSB  IS A PROJECTILE STAINLESS STEEL BAR
 C--
-      Material  Steel
+      Material  Ecal_Steel
       Attribute EPSB   seen=1  colo=6 FILL=1    
       Shape     TRAP   dz=(emcs_zend-emcs_zorg)/2,
 	            thet=p,
@@ -824,7 +996,7 @@ c----------------------------------------------------------------- Block ERCM --
 c--
 Block ERCM                    is stainless steel tie rod in calorimeter sections
 c--
-      Material  Steel
+      Material  Ecal_Steel
       Attribute ERSM     seen=1  colo=6 FILL=1    
 c--
       Shape     TUBE   dz=zwidth/2,
@@ -844,7 +1016,7 @@ c----------------------------------------------------------------- Block ERSM --
 c--
 Block ERSM                             is stainless steel tie rod in shower max
 c--
-      Material  Steel
+      Material  Ecal_Steel
       Attribute ERSM       seen=1  colo=6 FILL=1    
 c--
       Shape     TUBE dz=zwidth/2,
@@ -866,7 +1038,7 @@ c--   fsect -- first section to create
 c--   lsect -- last section to create
 c--
       Attribute EMOD      seen=1    colo=3  serial=FILLED         ! GREEN
-      Material  Air
+      Material  ECAL_Air
       Shape     CONS   dz=zwidth/2,
                 phi1=emcs_phimin/emcs_nsupsec,
                 phi2=emcs_phimax/emcs_nsupsec,
@@ -915,8 +1087,7 @@ c----------------------------------------------------------------- Block ESEC --
 c--
 Block ESEC                                              is a single em section
 
-      Material  AIR
-      Medium    standard
+      Material  ECAL_Air
       Attribute ESEC seen=1 colo=1 serial=filled  lsty=2
 c--
       Shape     CONS  dz=secwid/2,  
@@ -1019,10 +1190,7 @@ c----------------------------------------------------------------- Block EMGT --
 c--
 Block EMGT                                               is a 30 degree megatile
 c--
-      Material  Air
-c--   Create a local copy of Air so that changes to tracking parameters below
-c--   stay local.
-      Material  ECAL_Air isVol=0               
+      Material  ECAL_Air
       Attribute EMGT   seen=1  colo=1    lsty=2
 c--
       Shape     CONS  dz=megatile/2,
@@ -1039,6 +1207,8 @@ c--   layers.   --JCW 11/10/09
 c--
         Call GSTPAR (ag_imed,'CUTGAM',0.00001)
         Call GSTPAR (ag_imed,'CUTELE',0.00001)
+c--     Set absorber-type cuts
+        Set EmCuts(EABS)
 c--
       DO isec=1,nint(emcs_nslices)
 c--
@@ -1061,6 +1231,7 @@ c--   Creates:
 c--   + ETAR -- The pseudo-rapidity divivisions in the megatiles
 c--
       Material  Polystyren
+      Material  ECAL_Polystyren isvol=0
       Attribute EPER       seen=1  colo=1   lsty=1
 c--
 c--
@@ -1072,6 +1243,9 @@ c--
                 rmn2=(current+megatile)*tan_low-dd,
                 rmx1=(current)*tan_upp+dup,
                 rmx2=(current+megatile)*tan_upp+dup
+c--
+c--   Absorber-type cuts
+      Set EmCuts(EABS)
 c--
       curcl = current+megatile/2 
       DO ie = 1, nint(eetr_neta)
@@ -1106,7 +1280,7 @@ c-- local y is the thickness of the layer
 c--
 Block ETAR is a single calorimeter cell, containing scintillator, fiber router, etc...
 c--
-      Material  POLYSTYREN
+      Material  ECAL_POLYSTYREN
       Attribute ETAR   seen=1  colo=4  lsty=1                         ! BLUE
 c--
       Shape TRD1 dy=megatile/2 dz=(rtop-rbot)/2,
@@ -1142,6 +1316,8 @@ c--   The original block of cuts from the cvs file
       Call GSTPAR (ag_imed,'CUTNEU', 0.001)
       Call GSTPAR (ag_imed,'CUTHAD', 0.001)
       Call GSTPAR (ag_imed,'CUTMUO', 0.001)
+c--   Set sensitive cuts
+      Set EmCuts (ESEN)
 c--   Define Birks law parameters
       Call GSTPAR (ag_imed,'BIRK1',1.)
       Call GSTPAR (ag_imed,'BIRK2',0.013)
@@ -1160,7 +1336,7 @@ c--
 c-- Creates:
 c-- + ELED -- the business end of the calorimeter...
 c--
-      Material STEEL
+      Material ECAL_STEEL
 c--
       Attribute ERAD   seen=1  colo=6 fill=1    lsty=1        ! VIOLET
       Shape     CONS  dz=radiator/2, 
@@ -1201,6 +1377,9 @@ c--   The original block of cuts from the cvs file
       Call GSTPAR (ag_imed,'CUTNEU', 0.001)
       Call GSTPAR (ag_imed,'CUTHAD', 0.001)
       Call GSTPAR (ag_imed,'CUTMUO', 0.001)
+
+      Set EmCuts(EABS)
+
 c--
 EndBlock
 c--
@@ -1211,6 +1390,7 @@ c--
 Block EFLP                 is the aluminum (aluminium) front plate of the endcap
 c--
       Material  ALUMINIUM
+      Material  ECAL_ALUMINIUM isvol=0
       Attribute EFLP   seen=1  colo=3  fill=1   lsty=1                   ! GREEN
       Shape     CONS   dz=emcs_front/2,
                 rmn1=68.813 rmn2=68.813,
@@ -1218,6 +1398,7 @@ c--
                 rmx2=(zslice+zwidth)*tan_upp+dup,
                 phi1=emcs_phimin phi2=emcs_phimax
 c--
+      Set EmCuts(EABS)
 EndBlock
 
 c----------------------------------------------------------------- Block EALP --
@@ -1242,6 +1423,7 @@ c--
       CALL GsTPar (AG_IMED,'LOSS',1.)
       CALL GsTPar (AG_IMED,'STRA',1.)
 c--
+      Set EmCuts(EABS)
 EndBlock
 
 
@@ -1252,7 +1434,7 @@ c----------------------------------------------------------------- Block ESPL --
 c--
 Block ESPL                         is the logical volume containing an SMD plane
 c--
-      Material  Air 
+      Material  ECAL_Air 
       Attribute ESPL   seen=1   colo=4   lsty=4
       Shape     TUBS   dz=emcs_gapsmd/3/2,
                 rmin=section*tan_low-1.526,
@@ -1323,7 +1505,7 @@ c-- + EFLS -- front cover for SMD planes
 c-- + EBLS -- back cover for SMD planes
 c--
       Attribute EXSG   seen=1   colo=7   serial=cut   lsty=3   ! MEH
-      Material  Air
+      Material  ECAL_Air
       Shape     TUBS   dz=emcs_gapsmd/3/2,
                 rmin=section*tan_low-1.526,
                 rmax=(section-secwid/2)*tan_upp+dup,
@@ -1386,7 +1568,6 @@ c--
 Block EHMS                                     defines the triangular SMD strips
 c--
       Material  Polystyren 
-c--   Copy polystyren and name the copied material ECAL_smdstrip.  This is done
 c--   to make sure that GsTPar calls below stay w/in the EHMS block. --JCW 11/10/09
       Material  ECAL_smdstrip isvol=1
       Attribute EHMS      seen=1    colo=2  serial=cut  lsty=1        ! red
@@ -1402,7 +1583,8 @@ c--   Define Birks law parameters
       Call GSTPAR (ag_imed,'BIRK1',1.)
       Call GSTPAR (ag_imed,'BIRK2',0.0130)
       Call GSTPAR (ag_imed,'BIRK3',9.6E-6)
-
+c--   Sensitive cuts
+      Set EmCuts (ESEN)
       HITS EHMS     Birk:0:(0,10)  
 c--
 Endblock! EHMS
@@ -1410,6 +1592,7 @@ c-----------------------------------------------------------------------------
 
 c---
 c-- Several thin layers of material are applied to the front and back of the 
+c--   Copy polystyren and name the copied material ECAL_smdstrip.  This is done
 c-- SMD planes to provide structural support.  We combine these layers into
 c-- a single effective volume, which is affixed to the base of the SMD
 c-- strips.  As with the SMD strips, z along the depth, y is length
@@ -1438,6 +1621,8 @@ c--
 
       Attribute EFLS seen=1 colo=22 lsty=1
       Shape     TRD1 dz=esmd_front_layer/2 dy=length/2 dx1=esmd_base/2 dx2=esmd_base/2 
+
+      Set EmCuts(EABS)
 c--
 EndBlock! EFLS
 
@@ -1464,6 +1649,8 @@ c--
 c--
       Attribute EFLS seen=1 colo=22 lsty=1
       Shape     TRD1 dz=esmd_back_layer/2 dy=length/2 dx1=esmd_base/2 dx2=esmd_base/2 
+
+      Set EmCuts(EABS)
 c--
 EndBlock! EFLS
 
@@ -1505,6 +1692,8 @@ c--
               rmax=(section+msecwd)*Tan_Upp,
               phi1=emcs_PhiMin/emcs_Nsupsec,
               phi2=emcs_PhiMax/emcs_Nsupsec
+c--
+      Set EmCuts(EABS)
 c--
 EndBlock
 c--
@@ -1690,8 +1879,18 @@ c 		B) Introduced sector overlaps
 c 		C) All other changes are documentede here:
 c	 	   http://drupal.star.bnl.gov/STAR/subsys/eemc/endcap-geometry-update-2009
 c
-c $Id: ecalgeo6.g,v 1.1 2009/11/16 22:07:53 jwebb Exp $
+c $Id: ecalgeo6.g,v 1.4 2010/09/09 17:08:45 jwebb Exp $
 c $Log: ecalgeo6.g,v $
+c Revision 1.4  2010/09/09 17:08:45  jwebb
+c Removed stray comma (typo) from EMCS fill statement.
+c
+c Revision 1.3  2009/12/22 18:27:15  jwebb
+c Corrected error in definition of 10 keV cuts for bcutm.
+c
+c Revision 1.2  2009/12/22 13:38:49  jwebb
+c Added options to change the geant tracking cuts for electrons and photons in
+c all volumes to 10, 30, 100 or 1000 keV.
+c
 c Revision 1.1  2009/11/16 22:07:53  jwebb
 c Version 6.1 of the EEMC geometry.
 c

@@ -81,6 +81,7 @@ class StMultiKeyMapIter
 public:
 StMultiKeyMapIter(const StMultiKeyNode *node,const float *kMin=0,const float *kMax=0);
 void          Set(const StMultiKeyNode *node,const float *kMin=0,const float *kMax=0);
+void       Update(const float *kMin=0,const float *kMax=0);
 
 ~StMultiKeyMapIter();
 StMultiKeyNode *operator*() const { return (StMultiKeyNode*)mStk[mLev];}

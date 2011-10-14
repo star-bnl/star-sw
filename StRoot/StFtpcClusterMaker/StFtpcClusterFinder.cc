@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.77 2009/11/25 19:50:15 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.78 2009/12/11 15:41:06 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.78  2009/12/11 15:41:06  jcs
+// For laser run use laserTZero and no inner cathode correction
+//
 // Revision 1.77  2009/11/25 19:50:15  jcs
 // remove all references to StFtpcSoftwareMonitor
 //
@@ -358,10 +361,12 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
 
   mMinChargeWindow = mDb->minChargeWindow();
 
-  mOffsetCathodeWest = mDb->offsetCathodeWest();
-  mOffsetCathodeEast = mDb->offsetCathodeEast();
-  mAngleOffsetWest = mDb->angleOffsetWest();
-  mAngleOffsetEast = mDb->angleOffsetEast();
+// Set FTPC inner cathode offsets = 0
+  mOffsetCathodeWest = 0.0;
+  mOffsetCathodeEast = 0.0;
+  mAngleOffsetWest =   0.0;
+  mAngleOffsetEast =   0.0;
+
 
 // Set ftpcClusterPars
   MAXPEAKS = 160;  
@@ -370,10 +375,6 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   mMinChargeWindow = 30;
   mMaxPadlengthOut = 30; 
   mMaxTimelengthOut = 30;
-
-// Set FTPC rotation angle offsets = 0  
-  mAngleOffsetWest =   0.0;
-  mAngleOffsetEast =   0.0;
 
   mhpad = hpad;
   mhtime = htime;
@@ -1952,26 +1953,29 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
 
     
   /* calculate phi angle from pad position */
-  Peak->Phi = mDb->radiansPerBoundary() / 2 
-    + ((Peak->PadPosition-1) + 0.5) * mDb->radiansPerPad()
-    + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
-			   + mDb->radiansPerBoundary())+halfpi;
-    
+    // for FTPC West
+  if (iRow <10) {
+    Peak->Phi = mDb->radiansPerBoundary() / 2 
+      + ((Peak->PadPosition-1) + 0.5) * mDb->radiansPerPad()
+      + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
+       	    + mDb->radiansPerBoundary())+halfpi;
+  }
+    // for FTPC East
   /* Invert pad number (== Peak->PadPosition) for FTPC East  */
   /* (not yet understood where and why pad numbers were inverted) */
   if (iRow >= 10) {
     Peak->Phi = mDb->radiansPerBoundary() / 2 
       + (159.5 - (Peak->PadPosition-1))* mDb->radiansPerPad()
       - PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
-			     + mDb->radiansPerBoundary())+halfpi;
-  }
+	    + mDb->radiansPerBoundary())+halfpi;
+  } 
 
   // ===================================================================
   
   // shift time => radius to correct for the offset of the inner cathode :
 
-//JCS  if (fabs(mOffsetCathodeWest)>0 || fabs(mOffsetCathodeEast)>0)
-//JCS    {
+  if (fabs(mOffsetCathodeWest)>0 || fabs(mOffsetCathodeEast)>0)
+    {
 
       if (iRow<10) // correct for west chamber
 	TimeCoordinate=(0.999997-0.09739494018294076*mOffsetCathodeWest*cos(Peak->Phi-mAngleOffsetWest))*TimeCoordinate;
@@ -2013,20 +2017,23 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
       
       
       /* calculate phi angle from pad position */
-      Peak->Phi = mDb->radiansPerBoundary() / 2 
-	+ ((Peak->PadPosition-1) + 0.5) * mDb->radiansPerPad()
-	+ PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
-			       + mDb->radiansPerBoundary())+halfpi;
-//JCS    }
-  
-  /* Invert pad number (== Peak->PadPosition) for FTPC East  */
-  /* (not yet understood where and why pad numbers were inverted) */
-  if (iRow >= 10) {
-    Peak->Phi = mDb->radiansPerBoundary() / 2 
-      + (159.5 - (Peak->PadPosition-1))* mDb->radiansPerPad()
-      - PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
-			     + mDb->radiansPerBoundary())+halfpi;
-  }
+      // for FTPC West
+      if (iRow < 10) {
+        Peak->Phi = mDb->radiansPerBoundary() / 2 
+	  + ((Peak->PadPosition-1) + 0.5) * mDb->radiansPerPad()
+	  + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
+		+ mDb->radiansPerBoundary())+halfpi;
+      }
+      // for FTPC East
+      /* Invert pad number (== Peak->PadPosition) for FTPC East  */
+      /* (not yet understood where and why pad numbers were inverted) */
+      if (iRow >= 10) {
+        Peak->Phi = mDb->radiansPerBoundary() / 2 
+          + (159.5 - (Peak->PadPosition-1))* mDb->radiansPerPad()
+          - PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
+		+ mDb->radiansPerBoundary())+halfpi;
+      }
+    }
 
   // ===================================================================
     

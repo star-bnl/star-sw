@@ -3,7 +3,6 @@
 
 #include "TChair.h"
 #include "tables/St_spaceChargeCor_Table.h"
-#include "StDetectorDbRichScalers.h"
 #include "StDetectorDbMagnet.h"
 #include "StChain/StChain.h"
 

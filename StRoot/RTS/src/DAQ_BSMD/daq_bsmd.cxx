@@ -704,25 +704,19 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 	// grab crc from the last word
 	int last_ix = words - 1 ;
-#if 1
-#define	 G_CONST  0x04C11DB7 
 
 	u_int crc_in_data = d32[last_ix] ;
-	register u_int crc = 0xFFFFFFFF ;
+	u_int crc = 0xFFFFFFFF ;
 	if(crc_in_data) {	
 		for(int i=0;i<last_ix;i++) {
-			u_int datum ;
+			const u_int g = 0x04C11DB7 ;
 
-			datum = d32[i] ;
-			register u_int data_j ;
-			register u_int crc_31 ;
-
-			for(register int j=31;j>=0;j--) {
-				data_j = (datum >> j) & 1 ;
-				crc_31 = (crc & 0x80000000) ? 1 : 0 ;
+			for(int j=31;j>=0;j--) {
+				u_int data_j = (d32[i] >> j) & 1 ;
+				u_int crc_31 = (crc & 0x80000000) ? 1 : 0 ;
 
 				if(crc_31 == data_j) {
-					crc = (crc<<1) ^ G_CONST ;
+					crc = (crc<<1) ^ g ;
 				}
 				else {
 					crc = (crc<<1) ;
@@ -737,7 +731,7 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}	
 
 	LOG(DBG,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
-#endif
+
 	// misc signatures and errors from the header
 	if(d32[1] != BSMD_SIGNATURE) {	// "BSMD"
 		LOG(ERR,"RDO %d: bad header sig 0x%08X, expect 0x%08X",rdo,d32[1], BSMD_SIGNATURE) ;
@@ -810,7 +804,6 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		break ;
 	}
 
-#if 0	// skip for the temporary 0x8129 V
 
 	// get mesg_length
 	int mesg_length = d32[last_ix-1] & 0xFFF ;	// 12 bits only
@@ -849,15 +842,13 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		t_cou++ ;
 	}
 
+	int main_length = d32[last_ix - 2 - mesg_length] & 0xFFFF ;
 
-	int trailer_event = d32[last_ix - 2 - mesg_length] & 0xFFFF ;
-
-
-	if(trailer_event != d32[0]) {
-		LOG(ERR,"RDO %d: bad trailer event 0x%08X != header 0x%08X",rdo,trailer_event,d32[0]) ;
+	if(main_length != 2410) {
+		LOG(ERR,"RDO %d: bad main_length %d",rdo,main_length) ;
 		bad |= 2 ;
 	}
-#endif
+
 
 	// HACK!!!!
 	trg[t_cou].t = trg[0].t ;

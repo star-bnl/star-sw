@@ -13,6 +13,7 @@ static int gMyId=0;
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
+static void random_shuffle(std::vector<StMultiKeyNode*> &arr); // shuffle elements 
 //______________________________________________________________________________
 StMultiKeyMap::StMultiKeyMap(int nkeys) 
 {
@@ -59,7 +60,8 @@ void StMultiKeyMap::MakeTree()
    assert(!mTop);
    int nNodes = mArr.size();
    if (!nNodes) return;
-   std::random_shuffle( mArr.begin(),mArr.end() ); // shuffle elements 
+//   std::random_shuffle( mArr.begin(),mArr.end() ); // shuffle elements 
+   random_shuffle(mArr); 
    mTop =  mArr[0];
    for (int i=1;i<nNodes;i++) {mTop->Add(mArr[i]);}
 
@@ -281,6 +283,7 @@ int StMultiKeyNode::ls(const char *file) const
 StMultiKeyMapIter::StMultiKeyMapIter(const StMultiKeyNode *node,const float *kMin,const float *kMax)
   :mMinMax(0),mStk(32)
 {
+  if (!node) return;
   Set(node,kMin,kMax);
 }
 //______________________________________________________________________________
@@ -302,6 +305,13 @@ void StMultiKeyMapIter::Set(const StMultiKeyNode *node,const float *kMin,const f
   mLev = 0; mStk[0]=0;
   Down(node);
   SelfCheck();
+}
+//______________________________________________________________________________
+void StMultiKeyMapIter::Update(const float *kMin,const float *kMax)
+{
+  int sk = mNK*sizeof(mKMin[0]);
+  if (kMin) memcpy(mKMin,kMin,sk);
+  if (kMax) memcpy(mKMax,kMax,sk);
 }
 //______________________________________________________________________________
 StMultiKeyMapIter::~StMultiKeyMapIter()
@@ -411,6 +421,17 @@ int StMultiKeyMapIter::FilterRite(const StMultiKeyNode *node) const
     }//end ik switch
   }//end bounds switch
   return 0;
+}
+//______________________________________________________________________________
+void random_shuffle(std::vector<StMultiKeyNode*> &arr)
+{
+  int n = arr.size(); if (n<=3) return;
+  unsigned int u=n/2,us=1000000007;
+  int jr=n-1;
+  while (0<jr) {
+    int jj = (u+=us)%jr;
+    StMultiKeyNode *v = arr[jj]; arr[jj]=arr[jr]; arr[jr]=v; jr--;
+  }
 }
 //______________________________________________________________________________
 //______________________________________________________________________________

@@ -14,7 +14,6 @@
 
 class StJetTrack;
 class StJetTower;
-class StJetParticle;
 
 class StJetCandidate : public TObject {
 public:
@@ -42,27 +41,23 @@ public:
   float detEta() const { return mDetEta; }
   float sumTrackPt() const;
   float sumTowerPt() const;
-  float sumPt() const { return sumTrackPt() + sumTowerPt(); }
-  float neutralFraction() const { return sumTowerPt() / sumPt(); }
-  float chargedFraction() const { return sumTrackPt() / sumPt(); }
+  float neutralFraction() const { return sumTowerPt() / mPt; }
+  float chargedFraction() const { return sumTrackPt() / mPt; }
   StJetTrack* leadingChargedParticle() const;
   float deltaPhi(const StJetCandidate* jet) const { return momentum().DeltaPhi(jet->momentum()); }
   float deltaR(const StJetCandidate* jet) const { return momentum().DeltaR(jet->momentum()); }
 
   int numberOfTracks() const { return mTracks.GetEntriesFast(); }
   int numberOfTowers() const { return mTowers.GetEntriesFast(); }
-  int numberOfParticles() const { return mParticles.GetEntriesFast(); }
 
   StJetTrack* track(int i) const { return (StJetTrack*)mTracks.At(i); }
   StJetTower* tower(int i) const { return (StJetTower*)mTowers.At(i); }
-  StJetParticle* particle(int i) const { return (StJetParticle*)mParticles.At(i); }
 
   StJetTrack* getTrackById(int id) const;
   StJetTower* getTowerById(int id) const;
 
   const TRefArray& tracks() const { return mTracks; }
   const TRefArray& towers() const { return mTowers; }
-  const TRefArray& particles() const { return mParticles; }
 
   // Utility functions to get jet patch eta and phi from jet patch id and vice-versa
   static bool getJetPatchEtaPhi(int id, float& eta, float& phi);
@@ -72,7 +67,6 @@ public:
   void setPxPyPzE(float px, float py, float pz, float E);
   StJetTrack* addTrack(StJetTrack* track) { mTracks.Add((TObject*)track); return (StJetTrack*)mTracks.Last(); }
   StJetTower* addTower(StJetTower* tower) { mTowers.Add((TObject*)tower); return (StJetTower*)mTowers.Last(); }
-  StJetParticle* addParticle(StJetParticle* particle) { mParticles.Add((TObject*)particle); return (StJetParticle*)mParticles.Last(); }
 
 private:
   float mPt;
@@ -83,9 +77,8 @@ private:
 
   TRefArray mTracks;
   TRefArray mTowers;
-  TRefArray mParticles;
 
-  ClassDef(StJetCandidate,2);
+  ClassDef(StJetCandidate, 1);
 };
 
 inline TLorentzVector StJetCandidate::fourMomentum() const

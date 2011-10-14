@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.19 2009/12/04 19:51:30 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.18 2009/11/17 01:43:21 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"
@@ -95,9 +95,8 @@ class StuDraw3DEvent : public virtual StDraw3D
                   ,  Color_t col
                   ,  Style_t sty= Style_t(-1)
                   ,  Size_t siz = Size_t (-1));
-     virtual void EmcHits(const StEvent* event, const char *det="bemc");
-     virtual TObject *EmcHit(Int_t emcHitsSoftId, Color_t col,Style_t sty,Size_t siz, const char *det="bemc" );
      virtual TObject *EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t sty,Size_t siz,const char *det="bemc");
+     virtual void EmcHits(const StEvent* event, const char *det="bemc");
      template <class T> TObject *Vector(const StThreeVector<T> &vector, EDraw3DStyle sty=kVtx);
      ClassDef(StuDraw3DEvent,0);
 };

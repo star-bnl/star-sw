@@ -231,7 +231,20 @@ Bfc_st BFC[] = { // standard chains
               "Production chain for 2009 data - no Corr, no VF (+l3, bcc/fpd, ftpc, e/b-emc, trig)",kFALSE},
 
 
+   
+  // chains for year 10
+  {"B2010","","","ry2010,in,tpcX,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","","",
+                                                                   "Base chain for 2010 ITTF (tpc)",kFALSE},
 
+  {"P2010a","" ,"",  // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt
+   "B2010,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
+                    "","","Production chain for 2010 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc)",kFALSE},
+  {"pp2010a","" ,"", // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt,VFPPVnoCTB
+   "B2010,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis",
+             "","","Production chain for 2010 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no VF)",kFALSE},   
+   
+  
+   
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},
@@ -274,6 +287,7 @@ Bfc_st BFC[] = { // standard chains
   {"Debug1"      ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
   {"Debug2"      ,""  ,"",""                                            ,"","","Set debug flag = 2",kFALSE},
   {"IdTruth"     ,""  ,"",""              ,"","","Enable IdTruth association in StAssociationMaker",kFALSE},
+  {"OldMiniMc"   ,""  ,"",""                           ,"","","Keep pre-2008 convention for MiniMc",kFALSE},
   {"useInTracker",""  ,"","","",""    ,"switch from EGR to Sti global tracks in StAssociationMaker",kFALSE},
   {"noRepeat"    ,""  ,"",""                                        ,"","","No repeat in Messenger",kFALSE},
   {"noHistos"    ,""  ,"",""                                    ,"","","Disables Attributes histos",kFALSE},
@@ -430,44 +444,61 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"db"          ,"db"   ,"","StDbT"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb","detDb","","db","StDetectorDbMaker","StDetectorDbMaker","Load and run StDetectorDbMaker",kFALSE},
-  {"magF"        ,"MagField","","StDbT,db","StMagFMaker","StarMagField,StMagF"
-   ,                                                      "Mag.field map with scale factor from Db",kFALSE},
+  {"magF"        ,"MagField","","StDbT,db","StMagFMaker","StarMagField,StMagF",
+                                                          "Mag.field map with scale factor from Db",kFALSE},
   {"dbutil"      ,""     ,"","detDb,StDbT"                 ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db,StarMagField"            ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"svtDb"       ,"svtDb","","tpcDb,SvtCL", "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
-  {"ssdDb"    ,"ssdDb","","tpcDb,SsdUtil","StSsdDbMaker","StSsdDbMaker","Load and run StSsdDbMaker",kFALSE},
-  {"eemcDb"      ,"eeDb" ,"","db",                               "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
+  {"ssdDb"      ,"ssdDb","","tpcDb,SsdUtil","StSsdDbMaker","StSsdDbMaker","Load and run SsdDbMaker",kFALSE},
+  {"eemcDb"      ,"eeDb" ,"","db",               "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
+  {"fmsDb"       ,"fmsDb","","db",                  "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
+
+
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   // for simulation on fly Event time stamp is set outside of the simulation makers
-  {"ntin"        ,"geant"  ,"","paw,-fzin,-geant,-gstar,Simu,geantL,paw","St_geant_Maker"
-   ,                                                   "gstar","read event generated Hbook nt-file",kFALSE},
-  {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker"
-   ,                                                             "Prepare kinematics for embedding",kFALSE},
+  {"ntin"        ,"geant"  ,"","paw,-fzin,-geant,-gstar,Simu,geantL,paw","St_geant_Maker",
+                                                       "gstar","read event generated Hbook nt-file",kFALSE},
+  {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker",
+                                                                 "Prepare kinematics for embedding",kFALSE},
+
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
   {"VMCAppl" ,"","","geomT,gen_t,sim_T,tpcDB,svtDb,ssdDb,RootVMC,","","StarVMCApplication","VMC G3",kFALSE},
   {"VMC"         ,"geant","","Simu,VMCAppl,-geant","StVMCMaker",           "StVMCMaker","VMC Maker",kFALSE},
   {"VMCPassive"  ,"geant","","VMCAppl"    ,"StVMCMaker",   "StVMCMaker","VMC Maker in Passive Mode",kFALSE},
-  {"trg"         ,"trg","l0Chain","trg_T,globT,db","St_trg_Maker","St_trg,St_trg_Maker"
-   ,                                                     "trigger analysis for Year 2001-2005 data",kFALSE},
+
+
+  {"trg"         ,"trg","l0Chain","trg_T,globT,db","St_trg_Maker","St_trg,St_trg_Maker",
+                                                         "trigger analysis for Year 2001-2005 data",kFALSE},
   {"TRGDef"      ,""  ,"","",""                          ,"StTriggerDataMaker","Load StTriggerData",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
-  {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker"
-   ,                                                                     "<Early StEvent creation>",kFALSE},
+
+
+  // fms
+  {"fmsdat"     ,"","", "StEvent,fmsdb", 
+                                     "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",kFALSE},
+
+
+  {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker",
+                                                                         "<Early StEvent creation>",kFALSE},
+
+
   {"l0"          ,"l0Chain","","globT,ctf,trg"                              ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db" ,"St_ctf_Maker","St_ctf,St_ctf_Maker","ToF simulation",kFALSE},
   {"mwc"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"ppMCTrig"    ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"pp2pp"       ,"","","",                              "St_pp2pp_Maker","St_pp2pp_Maker","pp->pp",kFALSE},
   {"tpc"         ,"","","fcf,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use tpcI,fcf instead",kFALSE},
   {"tpcI" ,"tpcChain","","tpc_T,globT,db,tpcDB,TpcHitMover",    "StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
-  {"Trs","Trs","tpcChain","scl,tpcDB,TrsToF,StEvent,EmbeddingShortCut","StTrsMaker","StTrsMaker","",kFALSE},
-  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut","StTpcRSMaker","libMathMore,StTpcRSMaker"
-   ,                                                                   "New Tpc Response Simulator",kFALSE},
-  {"EmbeddingShortCut","","","","","","" ,"Embedding Short Cut for StdEdxY2Maker and StTpcHitMover",kFALSE},
+  {"Trs","Trs","tpcChain",    "scl,tpcDB,TrsToF,StEvent,EmbedShortCut","StTrsMaker","StTrsMaker","",kFALSE},
+  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbedShortCut","StTpcRSMaker","libMathMore,StTpcRSMaker",
+                                                                       "New Tpc Response Simulator",kFALSE},
+
+  {"EmbedShortCut","","","",                  "","","Short Cut for StdEdxY2Maker and StTpcHitMover",kFALSE},
   {"StMcEvent"   ,"","","gen_t,sim_T"                                            ,"","StMcEvent","",kFALSE},
   {"McEvent" ,"","","StEvent,tpcDb,EEmcUtil,EmcUtil,StMcEvent","StMcEventMaker","StMcEventMaker","",kFALSE},
   {"Mixer"       ,"tpc_raw","","daq","StMixerMaker"                   ,"StTrsMaker,StMixerMaker","",kFALSE},
@@ -785,6 +816,8 @@ Bfc_st BFC[] = { // standard chains
   {"EvOutOnly"   ,""  ,"","EvOut,Tree,noTags"                        ,"","","Only event.root files",kFALSE},
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE},
   {"Notpc_daq"   ,""  ,"","-tpc_daq"                                            ,"","","No tpc_daq",kFALSE},
+
+   
   {"Calibration chains","------------","-----------","-----------------------------------","","","",kFALSE},
   {"LanaDV","","","MakeEvent,trgd,in,tpc_daq,tpcI,fcf,LaserIT,VFMinuit,Lana,Analysis,Corr4,NosvtIT,NossdIT",
    "",""                                                                                 ,"get LDV",kFALSE},

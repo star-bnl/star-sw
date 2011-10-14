@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.h,v 1.7 2009/12/08 15:33:57 fisyak Exp $
+ * $Id: StarMagField.h,v 1.8 2009/12/11 14:19:07 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.h,v $
+ * Revision 1.8  2009/12/11 14:19:07  fisyak
+ * switch from define to enum
+ *
  * Revision 1.7  2009/12/08 15:33:57  fisyak
  * Hold replacement defines via enum till StMagUtilities will be updated
  *
@@ -59,26 +62,10 @@
 #include <stdlib.h>
 #include <Stiostream.h>
 #include <Rtypes.h>
-#if 1
-#define  nZ               57            // Standard STAR B field Map. Number of Z points in table
-#define  nR               28            // Number of R points in table
-#define  nPhi             37            // Number of Phi points in table
-#define  nZSteel          16
-#define  nRSteel         115
-#define  nPhiSteel        25
-#if 0
-#define  neZ              69            // Standard STAR E field Map. Number of Z points in table
-#define  neR              33            // Number of R points in table
-#define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
-#endif
-#endif
-class StarMagField 
-{
+class StarMagField  {
  public:
   enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
-#if 0
   enum   ESmFSizes {nZ = 57, nR = 28, nPhi = 37, nZSteel = 16, nRSteel = 115, nPhiSteel = 25};
-#endif
   static  void    Search ( Int_t N, const Float_t Xarray[], Float_t x, Int_t &low ) ;
   virtual Float_t Interpolate ( const Float_t Xarray[], const Float_t Yarray[], 
 				const Int_t ORDER, const Float_t x ) ;

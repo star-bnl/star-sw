@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.h,v 1.11 2009/11/10 19:28:51 fine Exp $
+ * $Id: StRTSBaseMaker.h,v 1.12 2010/02/01 01:46:59 fine Exp $
  * StRTSBaseMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -52,8 +52,11 @@ class StRTSBaseMaker : public StMaker
       StRtsTable *GetNext(const char* bank);
 
       virtual StRtsTable *GetNextRaw();
+      virtual StRtsTable *GetNextRaw(int sec);
       virtual StRtsTable *GetNextAdc();
+      virtual StRtsTable *GetNextAdc(int sec);
       virtual StRtsTable *GetNextLegacy();
+      virtual StRtsTable *GetNextLegacy(int sec);
 
    public:
 

@@ -1,8 +1,7 @@
-// $Id: StBET4pMaker.cxx,v 1.11 2009/12/09 05:12:02 pibero Exp $
+// $Id: StBET4pMaker.cxx,v 1.10 2009/09/03 23:36:09 pibero Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
-#include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
 #include "StjeTrackListToStMuTrackFourVecList.h"
 #include "StjeTowerEnergyListToStMuTrackFourVecList.h"
@@ -69,8 +68,6 @@ Int_t StBET4pMaker::Make()
 
   if (_bemcEnergySumCalculator->sumEmcEt() > 200.) return kStOk;
 
-  _vertex = _uDstMaker->muDst()->event()->primaryVertexPosition();
-
   pair<StjTrackList, StjTowerEnergyList> trackAndEnergyList = _imp->getTrackAndEnergyList();
 
   FourList tpc4pList = _track2four(trackAndEnergyList.first);
@@ -80,6 +77,11 @@ Int_t StBET4pMaker::Make()
   _tracks.insert(_tracks.end(), energy4pList.begin(), energy4pList.end());
 
   return StMaker::Make();
+}
+
+FourList &StBET4pMaker::getTracks()
+{
+  return _tracks;
 }
 
 bool StBET4pMaker::isBemcCorrupted() const
