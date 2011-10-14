@@ -30,7 +30,7 @@ class JetFourVec
   float pz; ///pz of four vector
   float en; ///energy of four vector
   int code; ///pdg code of four vector
-
+ 
  public:
   JetFourVec(); ///blank constructor
   JetFourVec(JetFourVec*); ///copy constructor
@@ -87,7 +87,7 @@ class StDijetFilter : public StMCFilter
 
   float mRecohadron; ///amount hadron energy is shifted in reco stage
   float mRecolepton; ///amount lepton energy is shifted in reco stage
-
+  int *nEvents;
   double mVertex[3]; ///vertex location
 
   float dR(StGenParticle*,StGenParticle*) const; ///distance between particles in eta x phi space
