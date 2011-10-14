@@ -75,12 +75,18 @@ private:
   Int_t DSM_HTStatus[kNPatches];           //DSM_HTStatus only set online
   Int_t DSM_TPStatus[kNPatches];           //DSM_TPStatus only set online
   Int_t TowerStatus[kNTowers];             //tower status as determined online or offline
+  Float_t TowerGain[kNTowers];             //tower gain
   unsigned long bitConvValue[kNTowers];    //gives window used to determine HT6Bit from adc10
   Int_t year,timestamp,yyyymmdd,hhmmss;
+
+  // BEMC mapping from BEMC decoder
+  int TriggerPatchFromTowerId[kNTowers];
+  int TriggerPatchFromCrate[kNCrates][kNSeq];
 
   Int_t adc12[kNTowers];                   //12 bit adc from StEvent -> NOT pedestal adjusted!
   Int_t adc10[kNTowers],adc08[kNTowers];   //ped adjusted 10 and 8 bit adc
   Float_t ped12[kNTowers];                 //12 and 10 bit pedestal
+  Int_t FEEped[kNTowers];                  //FEE pedestal
   Int_t HTadc06[kNTowers];                 //6bit HT ADC for each tower
   
   unsigned long pedTargetValue;            //value FEE shifts pedestal to (12 bit)
@@ -138,7 +144,10 @@ private:
   void getDSM_HTStatus();
   void getLUT();
   void getPed();
+  void GetTriggerPatchFromCrate(int crate, int seq, int& triggerPatch) const;
   void FEEout();
+  void FEEini2009();
+  void FEEout2009();
   void get2006_DSMLayer0();
   void get2006_DSMLayer1();
   void get2006_DSMLayer2();

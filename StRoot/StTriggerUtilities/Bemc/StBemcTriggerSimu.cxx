@@ -1,3 +1,4 @@
+#include "BEMC_DSM_decoder.h"
 #include "StBemcTriggerSimu.h"
 
 //General
@@ -270,35 +271,30 @@ void StBemcTriggerSimu::Init(){
 void StBemcTriggerSimu::InitRun(int runnumber){
   LOG_DEBUG<<"StBemcTriggerSimu::InitRun() -- " << runnumber << '\t' << mHeadMaker->GetDate() << '\t' << mHeadMaker->GetTime() << endm;
   
-  //mDecoder->SetDateTime(mHeadMaker->GetDate(), mHeadMaker->GetTime());
-  //mDecoder->SetDateTime(mHeadMaker->GetDBTime().GetDate(), mHeadMaker->GetDBTime().GetTime());
- 
   assert(starDb);
-  mDecoder->SetDateTime(starDb->GetDateTime().GetDate(),starDb->GetDateTime().GetTime());
-  getTowerStatus();
-  getDSM_TPStatus();
-  getDSM_HTStatus();
-  getLUT();
-  getPed();
 
+  const TDatime& dbTime = starDb->GetDBTime();
 
-  //timestamp=starDb->GetDateTime().Get();
-  //year=starDb->GetDateTime().GetYear(); 
-  //yyyymmdd=starDb->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
-  //hhmmss=starDb->GetDateTime().GetTime(); //form of 123623 (i.e. 12:36:23) 
-  timestamp=starDb->GetDBTime().Get();
-  year=starDb->GetDBTime().GetYear(); 
-  yyyymmdd=starDb->GetDBTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
-  hhmmss=starDb->GetDBTime().GetTime(); //form of 123623 (i.e. 12:36:23)
+  timestamp = dbTime.Get();
+  year      = dbTime.GetYear();
+  yyyymmdd  = dbTime.GetDate(); //form of 19971224 (i.e. 24/12/1997)
+  hhmmss    = dbTime.GetTime(); //form of 123623 (i.e. 12:36:23)
 
+  mDecoder->SetDateTime(dbTime);
 
- //Get FEE window for HT from support class for offline operation
-  //online replaced this with Db call in getPed()
-  HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(year);
-  
-  //for ( int tpid=0;tpid<kNPatches;tpid++) numMaskTow[tpid]=0;
+  if (year < 2009) {
+    getTowerStatus();
+    getDSM_TPStatus();
+    getDSM_HTStatus();
+    getLUT();
+    getPed();
 
-  if (year >= 2009) {
+    //Get FEE window for HT from support class for offline operation
+    //online replaced this with Db call in getPed()
+    HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(year);
+  }
+  else {
+    FEEini2009();
     mAllTriggers.clear();
   }
 }
@@ -501,8 +497,11 @@ void StBemcTriggerSimu::getLUT(){
 void StBemcTriggerSimu::Make(){
   
   mEvent = static_cast<StEvent*> ( mHeadMaker->GetDataSet("StEvent") );
-  
-  FEEout();
+
+  if (year < 2009)
+    FEEout();
+  else
+    FEEout2009();
 
   //pp
   if (year==2006){
@@ -750,6 +749,153 @@ void StBemcTriggerSimu::FEEout() {
     LOG_DEBUG << line << endm;
   }
 }
+
+void StBemcTriggerSimu::GetTriggerPatchFromCrate(int crate, int seq, int& triggerPatch) const
+{
+  triggerPatch = (340-10*crate)%150+seq;
+  if (crate <= 15) triggerPatch += 150;
+}
+
+void StBemcTriggerSimu::FEEini2009()
+{
+  const bool debug = false;
+
+  mTables->getTriggerPedestalShift((int&)pedTargetValue);
+  LOG_INFO << "pedTargetValue\t" << pedTargetValue << endm;
+  fill(numMaskTow,numMaskTow+kNPatches,0);
+  LOG_INFO << "towerId\ttriggerPatch\tcrate\tseq\tstatus\tpedestal\tFEEpedestal\tgain" << endm;
+  for (int towerId = 1; towerId <= kNTowers; ++towerId) {
+    int crate, seq, status, triggerPatch;
+    float rms;
+    mDecoder->GetCrateFromTowerId(towerId,crate,seq);
+    mDecoder->GetTriggerPatchFromTowerId(towerId,triggerPatch);
+    TriggerPatchFromTowerId[towerId-1] = triggerPatch;
+    switch (mConfig) {
+    case kOnline:
+      mTables->getTriggerTowerStatus(crate,seq,status);
+      mTables->getTriggerPedestal(crate,seq,ped12[towerId-1]);
+      break;
+    case kOffline:
+      mTables->getStatus(BTOW,towerId,status);
+      mTables->getPedestal(BTOW,towerId,0,ped12[towerId-1],rms);
+      break;
+    default:
+      assert(mConfig == kOnline || mConfig == kOffline);
+      break;
+    } // switch mConfig
+    TowerStatus[towerId-1] = status == 1 || status == 18;
+    if (!TowerStatus[towerId-1]) ++numMaskTow[triggerPatch];
+    FEEped[towerId-1] = getFEEpedestal(ped12[towerId-1],pedTargetValue,debug);
+    mTables->getCalib(BTOW,towerId,1,TowerGain[towerId-1]);
+    LOG_INFO << Form("%d\t%d\t%d\t%d\t%d\t%.2f\t%d\t%.5f",towerId,triggerPatch,crate,seq,status,ped12[towerId-1],FEEped[towerId-1],TowerGain[towerId-1]) << endm;
+  } // for towerId
+
+  // These towers are swapped for Run 9
+  // and cross trigger patch boundaries:
+  // 4054 <---> 4014 (TP227 <---> TP236)
+  // 4055 <---> 4015 (TP227 <---> TP236)
+  // 4056 <---> 4016 (TP227 <---> TP236)
+  // 4057 <---> 4017 (TP229 <---> TP238)
+  swap(TriggerPatchFromTowerId[4054-1],TriggerPatchFromTowerId[4014-1]);
+  swap(TriggerPatchFromTowerId[4055-1],TriggerPatchFromTowerId[4015-1]);
+  swap(TriggerPatchFromTowerId[4056-1],TriggerPatchFromTowerId[4016-1]);
+  swap(TriggerPatchFromTowerId[4057-1],TriggerPatchFromTowerId[4017-1]);
+
+  // Tower 1907 (TP13) has huge pedestal (2068.39) for time stamp 2009-06-28 05:32:20. Kill it.
+  if (yyyymmdd == 20090628 && hhmmss == 53220) TowerStatus[1907-1] = 0;
+
+  LOG_INFO << "triggerPatch\tcrate\tseq\tHTsta\tTPsta\tbitConv\tformula\tLUTscale\tLUTped\tLUTsig\tLUTpow\tpar4\tpar5\tnumMaskTow" << endm;
+  for (int crate = 1; crate <= kNCrates; ++crate) {
+    for (int seq = 0; seq < kNSeq; ++seq) {
+      int triggerPatch;
+      GetTriggerPatchFromCrate(crate,seq,triggerPatch);
+      TriggerPatchFromCrate[crate-1][seq] = triggerPatch;
+      mTables->getTriggerHighTowerStatus(triggerPatch,DSM_HTStatus[triggerPatch]);
+      mTables->getTriggerPatchStatus(triggerPatch,DSM_TPStatus[triggerPatch]);
+      mTables->getTriggerBitConv(crate,seq,(int&)bitConvValue[triggerPatch]);
+      mTables->getTriggerFormulaTag(crate,seq,formula[crate-1][seq]);
+      int parameters[6];
+      mTables->getTriggerFormulaParameters(crate,seq,parameters);
+      LUTscale[crate-1][seq] = parameters[0];
+      LUTped  [crate-1][seq] = parameters[1];
+      LUTsig  [crate-1][seq] = parameters[2];
+      LUTpow  [crate-1][seq] = parameters[3];
+      LOG_INFO << Form("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",triggerPatch,crate,seq,DSM_HTStatus[triggerPatch],DSM_TPStatus[triggerPatch],bitConvValue[triggerPatch],formula[crate-1][seq],parameters[0],parameters[1],parameters[2],parameters[3],parameters[4],parameters[5],numMaskTow[triggerPatch]) << endm;
+    } // for seq
+  } // for crate
+
+  // Special cases:
+  // TP90-99 don't let the BEMC configuration software overwrite their power-up default values
+  // with settings from the database. Furthermore, the bitConv bits for TP92-93 are flaky;
+  // most of the time bitConv=2, but sometimes bitConv=0.
+  fill(bitConvValue+90,bitConvValue+100,2);
+  // TP277 TPsum output is always 0. HT output is higher by 1.
+  DSM_TPStatus[277] = 0;
+}
+
+void StBemcTriggerSimu::FEEout2009()
+{
+  const bool debug = false;
+
+  StEmcCollection* emc = mEvent->emcCollection();
+  if (!emc) {
+    LOG_WARN << "No StEmcCollection" << endm;
+    return;
+  }
+
+  StEmcDetector* det = emc->detector(kBarrelEmcTowerId);
+  if (!det) {
+    LOG_WARN << "No StEmcDetector" << endm;
+    return;
+  }
+
+  // FEE action
+  int nhits = 0;
+
+  for (size_t m = 1; m <= det->numberOfModules(); ++m) {
+    const StSPtrVecEmcRawHit& hits = det->module(m)->hits();
+    nhits += hits.size();
+    for (size_t i = 0; i < hits.size(); ++i) {
+      const StEmcRawHit* hit = hits[i];
+      int towerId = hit->softId(BTOW);
+      if (TowerStatus[towerId-1]) {
+	int triggerPatch = TriggerPatchFromTowerId[towerId-1];
+	int ht, pa;
+	simulateFEEaction(hit->adc(),FEEped[towerId-1],bitConvValue[triggerPatch],ht,pa,debug);
+#if 0
+	if (triggerPatch == 228 || triggerPatch == 229) {
+	  LOG_INFO << Form("triggerPatch=%d towerId=%d mod=%d eta=%d sub=%d adc=%d E=%.3f addr=%x ht=%d pa=%d",triggerPatch,towerId,hit->module(),hit->eta(),hit->sub(),hit->adc(),hit->energy(),hit,ht,pa) << endm;
+	}
+#endif
+	HT6bit_adc_holder[towerId-1] = ht;
+	if (ht > L0_HT_ADC[triggerPatch]) L0_HT_ADC[triggerPatch] = ht;
+	L0_TP_ADC[triggerPatch] += pa;
+      }	// if TowerStatus
+    } // for i
+  } // for m
+
+  assert(nhits == kNTowers);
+
+  // FEE LUT
+  for (int crate = 1; crate <= kNCrates; ++crate) {
+    for (int seq = 0; seq < kNSeq; ++seq) {
+      int triggerPatch = TriggerPatchFromCrate[crate-1][seq];
+      if (!DSM_HTStatus[triggerPatch]) L0_HT_ADC[triggerPatch] = 0;
+      if (!DSM_TPStatus[triggerPatch]) L0_TP_ADC[triggerPatch] = 0;
+      else {
+	int lut;
+	simulateFEELUT(L0_TP_ADC[triggerPatch],formula[crate-1][seq],LUTscale[crate-1][seq],LUTped[crate-1][seq],LUTsig[crate-1][seq],LUTpow[crate-1][seq],0,0,numMaskTow[triggerPatch],pedTargetValue,lut,debug);
+	L0_TP_ADC[triggerPatch] = TP6bit_adc_holder[triggerPatch] = lut;
+      }
+#if 0
+      if (triggerPatch == 228 || triggerPatch == 229) {
+	LOG_INFO << Form("triggerPatch=%d HT=%d TPsum=%d",triggerPatch,L0_HT_ADC[triggerPatch],L0_TP_ADC[triggerPatch]) << endm;
+      }
+#endif
+    } // for seq
+  } // for crate
+}
+
 
 //==================================================
 //==================================================
