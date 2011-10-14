@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.8 2011/10/13 20:35:22 balewski Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.9 2011/10/14 18:45:27 avossen Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.9  2011/10/14 18:45:27  avossen
+//  fixed some bugs in simple cluster algo
+//
 //  Revision 1.8  2011/10/13 20:35:22  balewski
 //  cleanup, added missing return value
 //
@@ -34,7 +37,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
   hits.getSortedPtrVec(mSortPtr);
   Short_t disc, quadrant,prvDisc,prvQuad;
   Char_t layer,prvLayer;
-  Double_t ordinate, lowerSpan, upperSpan, prvOrdinate, prvLowerSpan, prvUpperSpan;
+  Double_t ordinate, lowerSpan, upperSpan, prvOrdinate;
   Int_t prvGeoId;
   Double_t accuCharge=0; 
   Double_t meanOrdinate=0;
@@ -44,8 +47,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
   bool isPhi, isR;
 
   StFgtCluster* newCluster=0;
-  if(mSortPtr.size()!=0)
-    newCluster=new StFgtCluster();
+
 
 
 
@@ -55,51 +57,65 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
       isPhi=(layer=='P');
       isR=(!isPhi);
 
+      if(prvLayer==noLayer)//first hit
+	{
+	  accuCharge=(*it)->getAdc();  
+	  newCluster=new StFgtCluster((*it)->getGeoId(),layer,ordinate,accuCharge);
+	  newCluster->pushBack((*it)->getGeoId());
+	  meanOrdinate=ordinate;
+	  prvLayer=layer;
+	  prvGeoId=(*it)->getGeoId();
+	  numStrips=1;
+	  prvOrdinate=ordinate;
+	  //go to next hit
+	  continue;
+	}
+
+
       bool adjacentStrips=(((abs(prvOrdinate-ordinate)<StFgtGeom::kFgtPhiAnglePitch) &&isPhi)|| ((abs(prvOrdinate-ordinate)<StFgtGeom::kFgtRadPitch) && isR));
-      //if the strip is adjacent to the last one or if we are looking at the first strip in the list
-      if((layer==prvLayer && adjacentStrips)||prvLayer==noLayer) 
+      //if the strip is adjacent to the last one? Then we add it to the cluster
+      if((layer==prvLayer && adjacentStrips)&& prvLayer!=noLayer) 
 	{
 	  //should really be charge...
-	  // accuCharge+=(*it)->getCharge();  
-	  accuCharge+=(*it)->getAdc();  
+	  //accuCharge+=(*it)->getCharge();  
+	  accuCharge+=(*it)->getAdc();
 	  meanOrdinate+=ordinate;
 	  numStrips++;
 	  newCluster->pushBack((*it)->getGeoId());
+	  prvLayer=layer;
+	  prvGeoId=(*it)->getGeoId();
+	  prvOrdinate=ordinate;
 	}
       else
-	{
-	  //make sure that we are not in the beginning
+	{//we are looking at a new cluster because we are not at the beginning and the new strip is not adjacent to the old one
 	  //set charge, push back cluster, start new one
-	  if(prvLayer!=noLayer)
-	    {
-	      //set layer etc of cluster
-	      newCluster->setLayer(prvLayer);
-	      newCluster->setKey(prvGeoId);
-	      newCluster->setCharge(accuCharge);
-	      newCluster->setPosition(meanOrdinate/numStrips);
-	      clusters.pushBack(*newCluster);
-	      //
-	      delete newCluster;
-	      //	      accuCharge=(*it)->getCharge();
-	      accuCharge=(*it)->getAdc();
-	      meanOrdinate=ordinate;
-	      numStrips=1;
-	      newCluster=new StFgtCluster((*it)->getGeoId(),layer,ordinate,accuCharge);
-
-	      //add the current stuff
-	      newCluster->pushBack((*it)->getGeoId());
-	      prvLayer=layer;
-	      prvGeoId=(*it)->getGeoId();
-	      prvDisc=disc;
-	      prvQuad=quadrant;
-	      prvOrdinate=ordinate;
-	      prvLowerSpan=lowerSpan;
-	      prvUpperSpan=upperSpan;
-	    }
+	  //set layer etc of cluster
+	  newCluster->setLayer(prvLayer);
+	  newCluster->setKey(prvGeoId);
+	  newCluster->setCharge(accuCharge);
+	  newCluster->setPosition(meanOrdinate/numStrips);
+	  if(numStrips<=10)
+	    clusters.pushBack(*newCluster);
+	  //	      cout <<"cluster has size: " << numStrips <<endl;
+	  //
+	  delete newCluster;
+	  //	      	      accuCharge=(*it)->getCharge();
+	  accuCharge=(*it)->getAdc();
+	  meanOrdinate=ordinate;
+	  numStrips=1;
+	  newCluster=new StFgtCluster((*it)->getGeoId(),layer,ordinate,accuCharge);
+	  
+	  //add the current stuff
+	  newCluster->pushBack((*it)->getGeoId());
+	  prvLayer=layer;
+	  prvGeoId=(*it)->getGeoId();
+	  prvDisc=disc;
+	  prvQuad=quadrant;
+	  prvOrdinate=ordinate;
 	}
     }
 
-
+  //if there has been any 1+ clusters, we have to add the last cluster to the list
   if(newCluster)
     {
       //new cluster was started but not included yet..
@@ -107,7 +123,9 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
       newCluster->setKey(prvGeoId);
       newCluster->setPosition(meanOrdinate/numStrips);
       newCluster->setCharge(accuCharge);
-      clusters.pushBack(*newCluster);
+      if(numStrips<=10)
+	clusters.pushBack(*newCluster);
+      //      cout <<"cluster has size: " << numStrips <<endl;
       delete newCluster;
     }
 
