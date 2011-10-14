@@ -229,6 +229,8 @@ public:
   
   /// default tables come from emcSim or adc2e, but you can supply your own if you prefer
   void setTables(StBemcTables *tab) { mTables = tab; }
+  StEmcDecoder* getDecoder() const { return mDecoder; }
+  StBemcTables* getTables() const { return mTables; }
   
   //out of FEE into DSM layer0
   Int_t* getBEMC_FEE_HT_ADC() {return L0_HT_ADC;}
