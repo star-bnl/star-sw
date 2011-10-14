@@ -39,12 +39,14 @@ StBemcTriggerSimu::StBemcTriggerSimu()
   mDecoder  = new StEmcDecoder();
   mDbThres  = new StBemcTriggerDbThresholds();
   mGeo      = StEmcGeom::getEmcGeom("bemc");
+  mAdc2e    = 0;
   starDb    = NULL;
   mTables   = NULL;
   mHList    = NULL;
   mConfig   = 0;
   mB001     = new DSMLayer_B001_2009;
   mB101     = new DSMLayer_B101_2009;
+
 }
 //==================================================
 //==================================================
@@ -77,12 +79,12 @@ void StBemcTriggerSimu::Init(){
     mTables = emcSim->getTables();
   }
   else {
-    StEmcADCtoEMaker *adc2e = static_cast<StEmcADCtoEMaker*> ( mHeadMaker->GetMakerInheritsFrom("StEmcADCtoEMaker") );
-    if(!adc2e) {
+    mAdc2e = static_cast<StEmcADCtoEMaker*> ( mHeadMaker->GetMakerInheritsFrom("StEmcADCtoEMaker") );
+    if(!mAdc2e) {
       LOG_FATAL << "StBemcTriggerSimu couldn't find StEmcADCtoEMaker in chain" << endm;
       assert(0);
     }
-    mTables = adc2e->getBemcData()->getTables();
+    mTables = mAdc2e->getBemcData()->getTables();
   }
 
   mDbThres->LoadTimeStamps();
@@ -320,6 +322,11 @@ void StBemcTriggerSimu::Clear(){
   
   mFiredTriggers.clear();
   mJpsiCandidates.clear();
+}
+//==================================================
+//==================================================
+bool StBemcTriggerSimu::isCorrupted() const {
+  return mMCflag != 1 && mAdc2e->isCorrupted();
 }
 //==================================================
 //==================================================

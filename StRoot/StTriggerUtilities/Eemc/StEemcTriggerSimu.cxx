@@ -423,6 +423,17 @@ StEemcTriggerSimu::Make(){
 //==================================================
 //==================================================
 
+// All tower ADCs are set to zero for corrupted events
+
+bool StEemcTriggerSimu::isCorrupted() const {
+  for (int rdo = 0; rdo < mxCr*mxChan; ++rdo)
+    if (rawAdc[rdo]) return false;
+  return true;
+}
+
+//==================================================
+//==================================================
+
 bool 
 StEemcTriggerSimu::getHttpInfo(int tpId, EemcHttpInfo &httpInfo){
   httpInfo.clear();
@@ -772,6 +783,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.44  2011/10/14 22:33:45  pibero
+// Add functions to test for data corruption in calorimeters
+//
 // Revision 1.43  2011/10/11 09:41:51  pibero
 // Make sure there are 720 towers in EEMC
 //

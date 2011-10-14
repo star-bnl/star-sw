@@ -35,6 +35,7 @@ using std::map;
 class StEvent;
 class StEmcDecoder;
 class StEmcGeom;
+class StEmcADCtoEMaker;
 class StBemcTables;
 class St_db_Maker;
 class StBemcTriggerDbThresholds;
@@ -65,6 +66,7 @@ private:
   // pointers to useful objects -- but we don't own them
   StEvent *mEvent;
   StEmcGeom *mGeo;
+  StEmcADCtoEMaker* mAdc2e;
   StBemcTables *mTables;
   St_db_Maker *starDb;
   StTriggerSimuMaker *mHeadMaker;
@@ -210,6 +212,7 @@ public:
   void Clear();
   void Make();
   
+  bool isCorrupted() const;
   StTriggerSimuDecision triggerDecision(int trigId);
   const vector<int>& triggerIds() const { return mFiredTriggers; }
 

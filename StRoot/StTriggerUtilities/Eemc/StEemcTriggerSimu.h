@@ -129,6 +129,7 @@ public:
   void setSetupPath(char *x) { mSetupPath=x;}
   void Clear();
   void Make();
+  bool isCorrupted() const;
   void getEemcFeeMask();
   void setHList(TObjArray * x){mHList=x;}
   void addTriggerList(vector<int>& trgList);
@@ -157,6 +158,9 @@ public:
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.24  2011/10/14 22:33:45  pibero
+// Add functions to test for data corruption in calorimeters
+//
 // Revision 1.23  2011/09/22 15:55:21  pibero
 // Added EEMC pedestal modes:
 //
