@@ -829,7 +829,7 @@ void StBemcTriggerSimu::FEEini2009()
   // with settings from the database. Furthermore, the bitConv bits for TP92-93 are flaky;
   // most of the time bitConv=2, but sometimes bitConv=0.
   fill(bitConvValue+90,bitConvValue+100,2);
-  // TP277 TPsum output is always 0. HT output is higher by 1.
+  // TP277 TPsum output is always 0
   DSM_TPStatus[277] = 0;
 }
 
@@ -875,6 +875,9 @@ void StBemcTriggerSimu::FEEout2009()
   } // for m
 
   assert(nhits == kNTowers);
+
+  // TP277 HT output is always higher by one unit
+  ++L0_HT_ADC[277];
 
   // FEE LUT
   for (int crate = 1; crate <= kNCrates; ++crate) {
