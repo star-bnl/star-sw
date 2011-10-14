@@ -52,10 +52,6 @@ particle_def S11_def("S11", "S11",
 		       1535.0*MeV/c_squared, 1*eplus, 
 		       0, 1, 0.5, spin_def(0.5, 0.5));
 
-//particle_def P_1_1_def("roper", "roper", 
-//		       1440.0*MeV/c_squared, 1*eplus, 
-//		       0, 1, 0.5, spin_def(0.5, 0.5));
-
 // light unflavored mesons
 particle_def pi_plus_meson_def("pi_plus_meson","pi+",139.56755*MeV/c_squared, 
 			       eplus, 0, 0, 1.0, spin_def(1.0, 1.0));
@@ -78,18 +74,12 @@ particle_def deuteron_def("deuteron","dtr",
 particle_def alpha_particle_def("alpha_particle","alpha",
 				3727.417*MeV/c_squared, 
 				2*eplus, 0, 0, 0.0, spin_def(0.0, 0.0));
-/*
-particle_def electron("electron", 0.51099906, -1, 1, 0, 0.5, 0.0);
-particle_def positron("positron",electron);
-particle_def proton("proton", 938.27231, 1, 0, 1, 0.5, 0.5);
-particle_def anti_proton("",proton);
-particle_def neutron("neutron",939.56563, 0, 0, 0, 0.5, -0.5);
-particle_def anti_neutron("",neutron);
-particle_def pi_plus_meson("pi_plus_meson",139.56755, 1, 0, 0, 1.0, 1.0);
-particle_def pi_minus_meson("pi_plus_meson",139.56755, -1, 0, 0, -1.0, -1.0);
-particle_def pi_0_meson("pi_0_meson",134.9734, 0, 0, 0, 0, 0);
-particle_def alpha_particle("alpha_particle",3727.417, 2, 0, 0, 0.0, 0.0);
-*/
+
+
+particle_def user_particle_def("user_particle", "X", 
+                               139.56755 * MeV / c_squared, 
+			       eplus, 0, 0, 0.0, spin_def(0.0, 0.0));
+
 /*
 particle_def* allapardef[pqallapardef]={
   &electron_def,
@@ -189,6 +179,18 @@ particle_def* particle_def::get_particle_def(const String& fnotation)
     }
   }
   return NULL;
+}
+
+void particle_def::set_mass(const double m) {
+
+  mass = m * MeV / c_squared;
+
+}
+
+void particle_def::set_charge(const double z) {
+
+  charge = z * eplus;
+
 }
 
 void particle_def::print(ostream & file)

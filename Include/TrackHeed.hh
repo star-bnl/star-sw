@@ -75,6 +75,10 @@ class TrackHeed : public Track {
     void SetEnergyMesh(const double e0, const double e1,
                        const int nsteps);
 
+    // Define particle mass and charge (for exotic particles).
+    // For standard particles Track::SetParticle should be used.
+    void SetParticleUser(const double m, const double z);
+
   private:
 
     // Prevent usage of copy constructor and assignment operator

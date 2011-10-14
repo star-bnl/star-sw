@@ -4,6 +4,7 @@
 #include "ViewDrift.hh"
 #include "Track.hh"
 #include "FundamentalConstants.hh"
+#include "GarfieldConstants.hh"
 
 namespace Garfield {
 
@@ -69,7 +70,7 @@ Track::SetParticle(std::string part) {
     q = 2; mass = 1875.612793e6; spin = 2;
     particleName = "d";
   } else {
-    std::cerr << "Track::SetParticle:\n";
+    std::cerr << className << "::SetParticle:\n";
     std::cerr << "    Particle " << part << " is not defined.\n";
   }
 
@@ -79,7 +80,7 @@ void
 Track::SetEnergy(const double e) {
   
   if (e <= mass) {
-    std::cerr << "Track::SetEnergy:\n";
+    std::cerr << className << "::SetEnergy:\n";
     std::cerr << "    Particle energy must be greater than the mass.\n"; 
     return;
   }
@@ -95,7 +96,7 @@ void
 Track::SetBetaGamma(const double bg) {
 
   if (bg <= 0.) {
-    std::cerr << "Track::SetBetaGamma:\n";
+    std::cerr << className << "::SetBetaGamma:\n";
     std::cerr << "    Particle speed must be greater than zero.\n";
     return;
   }
@@ -111,7 +112,7 @@ void
 Track::SetBeta(const double beta) {
 
   if (beta <= 0. && beta >= 1.) {
-    std::cerr << "Track::SetBeta:\n";
+    std::cerr << className << "::SetBeta:\n";
     std::cerr << "    Particle speed must be between zero" 
               << " and speed of light.\n"; 
     return;
@@ -127,7 +128,7 @@ void
 Track::SetGamma(const double gamma) {
 
   if (gamma <= 1.) {
-    std::cerr << "Track::SetGamma:\n";
+    std::cerr << className << "::SetGamma:\n";
     std::cerr << "    Particle speed must be greater than zero.\n";
     return;
   }
@@ -142,7 +143,7 @@ void
 Track::SetMomentum(const double p) {
 
   if (p <= 0.) {
-    std::cerr << "Track::SetMomentum:\n";
+    std::cerr << className << "::SetMomentum:\n";
     std::cerr << "    Particle momentum must be greater than zero.\n"; 
     return;
   }
@@ -158,7 +159,7 @@ void
 Track::SetKineticEnergy(const double ekin) {
 
   if (ekin <= 0.) {
-    std::cerr << "Track::SetKineticEnergy:\n";
+    std::cerr << className << "::SetKineticEnergy:\n";
     std::cerr << "    Kinetic energy must be greater than zero.\n";
     return;
   }
@@ -174,7 +175,7 @@ void
 Track::SetSensor(Sensor* s) {
 
   if (s == 0) {
-    std::cerr << "Track::SetSensor:\n";
+    std::cerr << className << "::SetSensor:\n";
     std::cerr << "    Sensor pointer is null.\n";
     return;
   }
@@ -187,7 +188,7 @@ void
 Track::EnablePlotting(ViewDrift* view) {
 
   if (view == 0) {
-    std::cerr << "Track::EnablePlotting:\n";
+    std::cerr << className << "::EnablePlotting:\n";
     std::cerr << "    Pointer is null.\n";
     return;
   }
@@ -218,7 +219,7 @@ void
 Track::PlotCluster(const double x0, const double y0, const double z0) {
 
   if (plotId < 0 || !usePlotting || viewer == 0) {
-    std::cerr << "Track::PlotCluster:\n";
+    std::cerr << className << "::PlotCluster:\n";
     std::cerr << "    No track set. Program bug!\n";
     return;
   }

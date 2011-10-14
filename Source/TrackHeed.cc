@@ -282,6 +282,11 @@ TrackHeed::NewTrack(
     particleType = &anti_proton_def;
   } else if (particleName == "d") {
     particleType = &deuteron_def;
+  } else if (particleName == "exotic") {
+    // User defined particle
+    user_particle_def.set_mass(mass * 1.e-6);
+    user_particle_def.set_charge(q);
+    particleType = &user_particle_def;
   } else {
     // Not a predefined particle, use muon definition.
     if (q > 0.) {
@@ -960,6 +965,26 @@ TrackHeed::SetEnergyMesh(const double e0, const double e1,
   emax *= 1.e-6;
   nEnergyIntervals = nsteps;
 
+}
+
+void
+TrackHeed::SetParticleUser(const double m, const double z) {
+
+  if (fabs(z) < Small) {
+    std::cerr << className << "::SetParticleUser:\n";
+    std::cerr << "    Particle cannot have zero charge.\n";
+    return;
+  } 
+  if (m < Small) {
+    std::cerr << className << "::SetParticleUser:\n";
+    std::cerr << "    Particle mass must be greater than zero.\n";
+  }
+  q = z;
+  mass = m; 
+  isElectron = false;
+  spin = 0;
+  particleName = "exotic";
+ 
 }
 
 bool

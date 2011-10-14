@@ -105,9 +105,12 @@ class particle_def: public RegPassivePtr
   void print(ostream & file);
   static void printall(ostream & file);
 
+  void set_mass(const double m);
+  void set_charge(const double z);
+
   //private:
   //static AbsList< particle_def* > logbook;
-public:  // declared public, but not modify externnally.
+public:  // declared public, but not modify externally.
   // Actually it is private, but the static function can not be
   // declared public somewhy
   static AbsList< particle_def* >& get_logbook(void);
@@ -152,6 +155,10 @@ extern particle_def K_minus_meson_def;
 
 extern particle_def deuteron_def;
 extern particle_def alpha_particle_def;
+
+// "exotic" particles with properties specified by user
+extern particle_def user_particle_def;
+
 //const int pqallapardef=50;
 //extern int qallapardef; // user can define more particles
 //extern particle_def* allapardef[pqallapardef];

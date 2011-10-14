@@ -1890,8 +1890,13 @@ MediumMagboltz::Mixer(const bool verbose) {
     for (int k = 1; k < nTerms; ++k) {
       cf[iE][k] += cf[iE][k - 1];
     }
-    const double eroot = sqrt(eStep * (iE + 0.5));
-    cfTot[iE] *= eroot;
+    const double ekin = eStep * (iE + 0.5);
+    cfTot[iE] *= sqrt(ekin);
+    // Use relativistic expression at high energies.
+    if (ekin > 1.e3) {
+      cfTot[iE] *= sqrt(1. + 0.5 * ekin / ElectronMass) / 
+                   (1. + ekin / ElectronMass); 
+    }
   }
   
   if (eFinal > eMinLog) {
@@ -1911,9 +1916,9 @@ MediumMagboltz::Mixer(const bool verbose) {
       for (int k = 1; k < nTerms; ++k) {
         cfLog[iE][k] += cfLog[iE][k - 1];
       }
-      const double eroot = sqrt(eMinLog * pow(rLog, iE) * 
-                                (1. + rLog) / 2.);
-      cfTotLog[iE] *= eroot;
+      const double ekin = eMinLog * pow(rLog, iE) * (1. + rLog) / 2.;
+      cfTotLog[iE] *= sqrt(ekin) * sqrt(1. + 0.5 * ekin / ElectronMass) /
+                      (1. + ekin / ElectronMass);
     }
   }
   
