@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.cxx,v 1.5 2011/10/10 20:35:08 avossen Exp $
+//  $Id: StFgtMaxClusterAlgo.cxx,v 1.6 2011/10/14 18:45:27 avossen Exp $
 //  $Log: StFgtMaxClusterAlgo.cxx,v $
+//  Revision 1.6  2011/10/14 18:45:27  avossen
+//  fixed some bugs in simple cluster algo
+//
 //  Revision 1.5  2011/10/10 20:35:08  avossen
 //  fixed strip-cluster association in MaxCluster algo, made other files cvs compliant
 //
@@ -38,7 +41,7 @@ Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArra
   Double_t phiOrdinate,rOrdinate;
   Int_t phiGeoId, rGeoId;
   bool isPhi, isR;
-
+  //  cout <<"we have " << mSortPtr.size() << " points " <<endl;
   for(StFgtRawHitConstPtrVec::iterator it=mSortPtr.begin();it!=mSortPtr.end();it++)
     {
       StFgtGeom::getPhysicalCoordinate((*it)->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
@@ -65,11 +68,12 @@ Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArra
       StFgtCluster newCluster(rGeoId,'R',rOrdinate,maxRCharge);
       newCluster.pushBack(rGeoId);
       //new cluster was started but not included yet..
-      //      cout <<"1" <<endl;
+      //      cout <<"1" <<e ndl;
       //      newCluster.setLayer('R');
       //      newCluster.setKey(rGeoId);
       //      newCluster.setPosition(rOrdinate);
       //      newCluster.setCharge(maxRCharge);
+      //      cout <<" new r cluster " << endl;
       clusters.pushBack(newCluster);
     } 
   if(maxPhiCharge>0)
@@ -83,7 +87,7 @@ Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArra
       newCluster.setCharge(maxPhiCharge);
       newCluster.pushBack(phiGeoId);
       clusters.pushBack(newCluster);
-
+      //      cout <<" new phi cluster " << endl;
     } 
 
   return kStOk;
