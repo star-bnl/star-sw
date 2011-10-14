@@ -1091,11 +1091,11 @@
       myG1=TPCG_WheelR2 - (TPCG_WheelTotalRibWidth - TPCG_WheelRibWidth)/2
       SHAPE pgon phi1=-15 dphi=30 npdiv=1 nz=4,
             zi={zWheel1,zWheel1+TPCG_WheelRibHeight,zWheel1+TPCG_WheelRibHeight,
-            TPCG_LengthW/2} rmn={,
-            TPCG_WheelR1-TPCG_WheelTotalRibWidth/2,TPCG_WheelR1-TPCG_WheelTotalRibWidth/2,
+            TPCG_LengthW/2} rmn={TPCG_WheelR1-TPCG_WheelTotalRibWidth/2,
+            TPCG_WheelR1-TPCG_WheelTotalRibWidth/2,
             TPCG_WheelR1-TPCG_WheelRibWidth/2,
             TPCG_WheelR1-TPCG_WheelRibWidth/2},
-            rmx={ TPCG_WheelR1+TPCG_WheelTotalRibWidth/2,
+            rmx={TPCG_WheelR1+TPCG_WheelTotalRibWidth/2,
             TPCG_WheelR1+TPCG_WheelTotalRibWidth/2,
             TPCG_WheelR1+TPCG_WheelRibWidth/2,TPCG_WheelR1+TPCG_WheelRibWidth/2}
       ENDBLOCK
