@@ -22,6 +22,8 @@ StDijetFilter::StDijetFilter():StMCFilter("dijet")
   mAddmidpoints = true;
   mStablemidpoints = true;
   mSplitmerge = true;
+  nEvents = new int;
+  (*nEvents) = 0;
 
   mParticleEtaRange = 3.5;
   mJetEtaHigh = 1.3;
@@ -45,11 +47,12 @@ StDijetFilter::StDijetFilter():StMCFilter("dijet")
 //_______________________________________________________________
 StDijetFilter::~StDijetFilter()
 {
-
+  delete nEvents;
 }
 //_______________________________________________________________
 int StDijetFilter::RejectEG(const StGenParticleMaster &ptl) const
 {
+  (*nEvents)++;
   return 0;
 }//_______________________________________________________________
 int StDijetFilter::RejectGT(const StGenParticleMaster &ptl) const
@@ -93,8 +96,10 @@ int StDijetFilter::RejectGT(const StGenParticleMaster &ptl) const
       vector<JetFourVec*>::iterator jfiter;
       for(unsigned int l = 0; l < finalparticles.size(); l++){
 	if(finalparticles[l]->getEn()*sin(finalparticles[l]->Theta()) < mAssoc)continue;
+
+	
 	jfiter = find(jf.begin(),jf.end(),finalparticles[l]);
-	if(dR(finalparticles[l],j) > mRcone && jfiter == jf.end())continue;
+      	if(dR(finalparticles[l],j) > mRcone && jfiter == jf.end())continue;
 	if(dR(finalparticles[l],j) > mRcone && jfiter != jf.end()){
 	  jf.erase(jfiter);
 	  nChange++;
@@ -137,10 +142,11 @@ int StDijetFilter::RejectGT(const StGenParticleMaster &ptl) const
     dijetFour.push_back(dj);
   }
   if(j)delete j;
-
+  int nTrJets = 0;
   dj = 0;
   for(unsigned int k = 0; k < jetFour.size(); k++){
     JetFourVec* j = recoJet(jetFour[k],v);
+    if(j->getEn()*sin(j->Theta()) > 4 && fabs(j->Eta()) < 2.5) nTrJets++;
     if(j->Eta() < mJetEtaHigh && j->Eta() > mJetEtaLow){
       dj = new JetFourVec(j);
       dijetFourReco.push_back(dj);
@@ -171,12 +177,12 @@ int StDijetFilter::RejectGT(const StGenParticleMaster &ptl) const
     delete dj;
     dj = 0;
   }
-
+  cout << "\n" <<"agrdl: event "<<(*nEvents)<<" "<<nJets<<" "<<nTrJets<<" "<<yesdijet<<endl;
   for(unsigned int k = 0; k < finalparticles.size(); k++)
     delete finalparticles[k];
   finalparticles.clear();
-
-  if(yesdijet == 0) return 1;
+ 
+  //if(yesdijet == 0) return 1;
 
   return 0;
 }
