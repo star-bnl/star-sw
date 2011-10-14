@@ -1209,6 +1209,8 @@ class Shape(Handler):
         for a in args:
             val = attr.get(a)
             if ( val != None ):
+                # strip all white space from val
+                val = ''.join( val.split(' ') )
                 self.arglist.append( "%s=%s"%(a,val) )
         output="SHAPE %s "%mytype
         for a in self.arglist:
