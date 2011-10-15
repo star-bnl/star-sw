@@ -1,7 +1,8 @@
 #include "BEMC_DSM_decoder.h"
 
-#include <math.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
 #include <iostream>
 using namespace std;
 
