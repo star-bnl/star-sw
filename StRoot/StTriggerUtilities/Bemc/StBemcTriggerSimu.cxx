@@ -833,12 +833,28 @@ void StBemcTriggerSimu::FEEini2009()
   } // for crate
 
   // Special cases:
+
   // TP90-99 don't let the BEMC configuration software overwrite their power-up default values
   // with settings from the database. Furthermore, the bitConv bits for TP92-93 are flaky;
   // most of the time bitConv=2, but sometimes bitConv=0.
   fill(bitConvValue+90,bitConvValue+100,2);
+
   // TP277 TPsum output is always 0
   DSM_TPStatus[277] = 0;
+
+  // TP50-59 have wrong config for run 10128030 (Start 2009-05-08 08:52:14 GMT) to 10129011 (Stop 2009-05-09 07:38:42 GMT)
+  if (TDatime("2009-05-08 08:52:14").Get() <= timestamp && timestamp <= TDatime("2009-05-09 07:38:42").Get()) {
+    bitConvValue[50] = 2;
+    bitConvValue[51] = 2;
+    bitConvValue[52] = 3;
+    bitConvValue[53] = 3;
+    bitConvValue[54] = 2;
+    bitConvValue[55] = 2;
+    bitConvValue[56] = 2;
+    bitConvValue[57] = 2;
+    bitConvValue[58] = 3;
+    bitConvValue[59] = 3;
+  }
 }
 
 void StBemcTriggerSimu::FEEout2009()
