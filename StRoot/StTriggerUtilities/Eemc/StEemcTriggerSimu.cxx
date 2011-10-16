@@ -189,9 +189,9 @@ StEemcTriggerSimu::InitRun(int runnumber){
 
   LOG_INFO<<Form("Eemc::InitRun()  yyyymmdd=%d  hhmmss=%06d\n", yyyymmdd, hhmmss )<<endm;
 
-  //char text[1000];
-  //sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),mYear);  
-  //EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
+  fill(highTowerMask,highTowerMask+90,1); // all channels good
+  fill(patchSumMask,patchSumMask+90,1); // all channels good
+  EemcTrigUtil::getFeeOutMask(dbtime,highTowerMask,patchSumMask);
 
   switch (mPedMode) {
   case kOnline:
@@ -318,7 +318,7 @@ StEemcTriggerSimu::Make(){
 
   // ************** Emulation of trigger based on ADC ************ 
   getEemcAdc();   //  processed raw ADC
-  feeTPTreeADC->compute(rawAdc,feePed,feeMask); 
+  feeTPTreeADC->compute(rawAdc,feePed,feeMask,highTowerMask,patchSumMask);
 
   // LOG_DEBUG messages
   LOG_DEBUG << "EEMC trigger patch format is HT/TPsum" << endm;
@@ -783,6 +783,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.45  2011/10/16 17:41:59  pibero
+// Implement EEMC FEE HT & TP masks
+//
 // Revision 1.44  2011/10/14 22:33:45  pibero
 // Add functions to test for data corruption in calorimeters
 //

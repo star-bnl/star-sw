@@ -67,6 +67,8 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   int rawAdc [mxCr*mxChan]; // *** 'chan' is counting faster***,
   int feePed [mxCr*mxChan]; // do NOT change this memory allocation scheme w/o 
   int feeMask[mxCr*mxChan];// understanding details  of  EEfeeTPTree::compute()
+  int highTowerMask[90]; // mask applied to high tower output of FEE
+  int patchSumMask[90]; // mask applied to patch sum output of FEE
   float ped[mxCr*mxChan];
 
 public: 
@@ -158,6 +160,9 @@ public:
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.25  2011/10/16 17:41:59  pibero
+// Implement EEMC FEE HT & TP masks
+//
 // Revision 1.24  2011/10/14 22:33:45  pibero
 // Add functions to test for data corruption in calorimeters
 //

@@ -1,5 +1,6 @@
 #include <dirent.h>
 #include <pwd.h>
+#include <cstdio>
 #include <algorithm>
 
 using namespace std;
@@ -186,6 +187,101 @@ void EemcTrigUtil::getFeePed4(const TDatime& date, int mxChan, int *feePed4)
       }
     }
   }
+}
+
+//==================================================
+//==================================================
+
+static int maskFilter(const struct dirent* d)
+{
+  int month, day, year;
+  return sscanf(d->d_name,"eec.%02d-%02d-%02d.dat",&month,&day,&year) == 3;
+}
+
+static TDatime getMaskDateTime(const char* maskfile)
+{
+  int month, day, year;
+  sscanf(maskfile,"eec.%02d-%02d-%02d.dat",&month,&day,&year);
+  return TDatime(2000+year,month,day,0,0,0);
+}
+
+static void scanMaskDirForDates(const char* dir, vector<TDatime>& dates)
+{
+  struct dirent** namelist;
+  int n = scandir(dir,&namelist,maskFilter,0);
+  if (n == -1) return;
+  while (n--) {
+    dates.push_back(getMaskDateTime(namelist[n]->d_name));
+    free(namelist[n]);
+  }
+  free(namelist);
+  sort(dates.begin(),dates.end());
+}
+
+void EemcTrigUtil::getFeeOutMask(const char* maskfile, int* highTowerMask, int* patchSumMask)
+{
+  FILE* fp = fopen(maskfile,"r");
+  if (fp) {
+    char line[100];
+    while (fgets(line,sizeof(line),fp) != NULL) {
+      if (*line == '#') continue;
+      int jetpatch, triggerpatch;
+      char s1[3], s2[3];
+      *s1 = *s2 = 0;
+      int n = sscanf(line,"%d %d %s %s\n",&jetpatch,&triggerpatch,s1,s2);
+      if (n > 2) {
+	int dsm, chan, triggerpatch2;
+	getDsmAndChannelFromSteveJetPatchAndTriggerPatch(jetpatch,triggerpatch,dsm,chan);
+	getTriggerPatchFromDsmAndChannel(dsm,chan,triggerpatch2);
+	LOG_INFO << Form("JP=%d TP=%d %s %s (%d)",jetpatch,triggerpatch,s1,s2,triggerpatch2) << endm;
+	if (strncmp(s1,"HT",2) == 0 || strncmp(s2,"HT",2) == 0) highTowerMask[triggerpatch2] = 0;
+	if (strncmp(s1,"TP",2) == 0 || strncmp(s2,"TP",2) == 0)  patchSumMask[triggerpatch2] = 0;
+      }
+    }
+  }
+  fclose(fp);
+}
+
+void EemcTrigUtil::getDsmAndChannelFromSteveJetPatchAndTriggerPatch(int jetpatch, int triggerpatch, int& dsm, int& chan)
+{
+  // See Steve Vigdor's EEMC Trigger Patches document
+  static const int dsmMap[6][15] = {
+    { 7,7,8,7,7,8,7,7,8,7,7,8,7,7,8 },
+    { 9,9,8,9,9,8,9,9,8,9,9,8,9,9,8 },
+    { 1,1,2,1,1,2,1,1,2,1,1,2,1,1,2 },
+    { 3,3,2,3,3,2,3,3,2,3,3,2,3,3,2 },
+    { 4,4,5,4,4,5,4,4,5,4,4,5,4,4,5 },
+    { 6,6,5,6,6,5,6,6,5,6,6,5,6,6,5 }
+  };
+  static const int chanMap[6][15] = {
+    { 0,1,0,2,3,1,4,5,2,6,7,3,8,9,4 },
+    { 0,1,5,2,3,6,4,5,7,6,7,8,8,9,9 },
+    { 0,1,0,2,3,1,4,5,2,6,7,3,8,9,4 },
+    { 0,1,5,2,3,6,4,5,7,6,7,8,8,9,9 },
+    { 0,1,0,2,3,1,4,5,2,6,7,3,8,9,4 },
+    { 0,1,5,2,3,6,4,5,7,6,7,8,8,9,9 }
+  };
+  dsm  =  dsmMap[jetpatch-1][triggerpatch-1];
+  chan = chanMap[jetpatch-1][triggerpatch-1];
+}
+
+void EemcTrigUtil::getTriggerPatchFromDsmAndChannel(int dsm, int chan, int& triggerpatch)
+{
+  triggerpatch = (dsm-1)*10+chan;
+}
+
+void EemcTrigUtil::getFeeOutMask(const TDatime& date, int* highTowerMask, int* patchSumMask)
+{
+  char maskdir[FILENAME_MAX];
+  struct passwd* pw = getpwnam("pibero");
+  sprintf(maskdir,"%s/public/StarTrigSimuSetup/mask",pw->pw_dir);
+  vector<TDatime> dates;
+  scanMaskDirForDates(maskdir,dates);
+  TDatime timestamp = getTimeStampFromDates(date,dates);
+  char maskfile[FILENAME_MAX];
+  sprintf(maskfile,"%s/eec.%02d-%02d-%02d.dat",maskdir,timestamp.GetMonth(),timestamp.GetDay(),timestamp.GetYear()%100);
+  LOG_INFO << "Using mask file " << maskfile << endm;
+  getFeeOutMask(maskfile,highTowerMask,patchSumMask);
 }
 
 //==================================================

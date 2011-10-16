@@ -1,7 +1,7 @@
 #ifndef EEfeeTP_h
 #define EEfeeTP_h
 /**************************************************************
- * $Id: EEfeeTP.h,v 1.2 2009/11/19 15:48:40 balewski Exp $
+ * $Id: EEfeeTP.h,v 1.3 2011/10/16 17:41:59 pibero Exp $
  * compute Endcap FEE response for a single trigger patch (TP)
  **************************************************************/
 #include <stdlib.h> 
@@ -28,7 +28,7 @@ public:
 
   EEfeeTP( int xcrate, const char *TPname, int lenH, int xcha0L, int xcha0H=-1);
 
-  void  compute(int *adcA, int *ped4A, int *maskA);
+  void  compute(int *adcA, int *ped4A, int *maskA, int highTowerMask, int patchSumMask);
   void  print(int k=0) const;
   void  clear();
   //..... transient values
@@ -45,6 +45,9 @@ public:
 
 /*
  * $Log: EEfeeTP.h,v $
+ * Revision 1.3  2011/10/16 17:41:59  pibero
+ * Implement EEMC FEE HT & TP masks
+ *
  * Revision 1.2  2009/11/19 15:48:40  balewski
  * add (char*) to many strings to make SL5 happ, few other adjustments
  *

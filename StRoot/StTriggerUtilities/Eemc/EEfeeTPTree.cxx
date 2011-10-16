@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEfeeTPTree.cxx,v 1.4 2009/11/18 21:27:15 pibero Exp $
+ * $Id: EEfeeTPTree.cxx,v 1.5 2011/10/16 17:41:59 pibero Exp $
  **************************************************************/
 
 #include <iostream>
@@ -62,14 +62,14 @@ EEfeeTPTree::clear() {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEfeeTPTree::compute(int *rawAdc, int *feePed,int *feeMask) {
+EEfeeTPTree::compute(int *rawAdc, int *feePed, int *feeMask, int* highTowerMask, int* patchSumMask) {
   int i;
 
   for(i=0;i<mxTP;i++) {
     if( feeTP[i]==0) continue; // skip uninitialized TP
     int icr=feeTP[i]->getCrateID()-1;
     int off=icr*mxChan;
-    feeTP[i]->compute(rawAdc+off, feePed+off, feeMask+off);
+    feeTP[i]->compute(rawAdc+off, feePed+off, feeMask+off, highTowerMask[i], patchSumMask[i]);
   }  
 }
 
@@ -133,6 +133,9 @@ EEfeeTPTree::print( int k) {
 #endif 
 /*
  * $Log: EEfeeTPTree.cxx,v $
+ * Revision 1.5  2011/10/16 17:41:59  pibero
+ * Implement EEMC FEE HT & TP masks
+ *
  * Revision 1.4  2009/11/18 21:27:15  pibero
  * Fix memory leak.
  *

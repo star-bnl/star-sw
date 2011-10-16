@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEfeeTP.cxx,v 1.2 2009/11/19 15:48:40 balewski Exp $
+ * $Id: EEfeeTP.cxx,v 1.3 2011/10/16 17:41:59 pibero Exp $
  **************************************************************/
 
 #include <iostream>
@@ -43,7 +43,7 @@ EEfeeTP::clear() {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEfeeTP::compute(int *adcA, int *ped4A, int *maskA){
+EEfeeTP::compute(int *adcA, int *ped4A, int *maskA, int highTowerMask, int patchSumMask){
   // input: arrays for the same crate
 
   int i;
@@ -98,6 +98,9 @@ EEfeeTP::compute(int *adcA, int *ped4A, int *maskA){
   // take lowest 6 bits of TPsum8b w/ over & underflow protection
   if (TPsum6b <0 ) TPsum6b=0;
   if (TPsum6b > 62) TPsum6b=62;
+
+  if (!highTowerMask) HT6b = 0;
+  if (!patchSumMask) TPsum6b = 0;
 }
 
 
@@ -122,6 +125,9 @@ EEfeeTP::print( int k) const {
 
 /*
  * $Log: EEfeeTP.cxx,v $
+ * Revision 1.3  2011/10/16 17:41:59  pibero
+ * Implement EEMC FEE HT & TP masks
+ *
  * Revision 1.2  2009/11/19 15:48:40  balewski
  * add (char*) to many strings to make SL5 happ, few other adjustments
  *

@@ -33,12 +33,19 @@ class EemcTrigUtil {
   static void getDsmThresholds(int yyyymmdd, int hhmmss, DsmThreshold &thresholds);
   static void getFeePed4(const char *path,int yyyymmdd, int hhmmss, int mxChan, int *feePed4);
   static void getFeePed4(const TDatime& date, int mxChan, int* feePed4);
+  static void getFeeOutMask(const char* maskfile, int* highTowerMask, int* patchSumMask);
+  static void getFeeOutMask(const TDatime& date, int* highTowerMask, int* patchSumMask);
+  static void getDsmAndChannelFromSteveJetPatchAndTriggerPatch(int jetpatch, int triggerpatch, int& dsm, int& chan);
+  static void getTriggerPatchFromDsmAndChannel(int dsm, int chan, int& triggerpatch);
 };
 
 //
-// $Id: EemcTrigUtil.h,v 1.3 2009/11/18 19:12:13 pibero Exp $
+// $Id: EemcTrigUtil.h,v 1.4 2011/10/16 17:41:59 pibero Exp $
 //
 // $Log: EemcTrigUtil.h,v $
+// Revision 1.4  2011/10/16 17:41:59  pibero
+// Implement EEMC FEE HT & TP masks
+//
 // Revision 1.3  2009/11/18 19:12:13  pibero
 // Added Endcap FEE pedestals for all years.
 // The code will scan the setup directory /afs/rhic.bnl.gov/star/users/pibero/public/StarTrigSimuSetup/ped
