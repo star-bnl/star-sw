@@ -808,8 +808,9 @@ void StBemcTriggerSimu::FEEini2009()
   swap(TriggerPatchFromTowerId[4056-1],TriggerPatchFromTowerId[4016-1]);
   swap(TriggerPatchFromTowerId[4057-1],TriggerPatchFromTowerId[4017-1]);
 
-  // Tower 1907 (TP13) has huge pedestal (2068.39) for time stamp 2009-06-28 05:32:20. Kill it.
-  if (yyyymmdd == 20090628 && hhmmss == 53220) TowerStatus[1907-1] = 0;
+  // Tower 1907 (TP13) has huge pedestal (2068.39) starting with run 10154060
+  // and time stamp 2009-06-03 20:38:58 GMT. Mask it off.
+  if (timestamp >= TDatime("2009-06-03 20:38:58").Get()) TowerStatus[1907-1] = 0;
 
   LOG_INFO << "triggerPatch\tcrate\tseq\tHTsta\tTPsta\tbitConv\tformula\tLUTscale\tLUTped\tLUTsig\tLUTpow\tpar4\tpar5\tnumMaskTow" << endm;
   for (int crate = 1; crate <= kNCrates; ++crate) {
