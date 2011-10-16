@@ -79,7 +79,8 @@ private:
   Int_t TowerStatus[kNTowers];             //tower status as determined online or offline
   Float_t TowerGain[kNTowers];             //tower gain
   unsigned long bitConvValue[kNTowers];    //gives window used to determine HT6Bit from adc10
-  Int_t year,timestamp,yyyymmdd,hhmmss;
+  Int_t year,yyyymmdd,hhmmss;
+  UInt_t timestamp;
 
   // BEMC mapping from BEMC decoder
   int TriggerPatchFromTowerId[kNTowers];
