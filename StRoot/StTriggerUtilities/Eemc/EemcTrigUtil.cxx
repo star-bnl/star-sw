@@ -117,27 +117,17 @@ EemcTrigUtil::getFeePed4(const char *path,int yyyyyymmdd, int hhmmss, int mxChan
 static int filter(const struct dirent* d)
 {
   int month, day, year;
-  return sscanf(d->d_name,"%2d.%2d.%4d",&month,&day,&year) == 3;
-}
-
-static TDatime getDefaultDateTime(const char* dirname)
-{
-  int month, day, year;
-  sscanf(dirname,"%2d.%2d.%4d",&month,&day,&year);
-  return TDatime(year,month,day,0,0,0);
+  return strlen(d->d_name) == 10 && sscanf(d->d_name,"%d.%d.%d",&month,&day,&year) == 3;
 }
 
 static TDatime getDateTime(const char* dirname)
 {
-  if (strcmp(dirname,"05.06.2009") == 0) return TDatime("2009-05-06 10:00:00");
-  if (strcmp(dirname,"05.13.2009") == 0) return TDatime("2009-05-13 17:00:00");
-  if (strcmp(dirname,"05.17.2009") == 0) return TDatime("2009-05-17 23:30:00");
-  if (strcmp(dirname,"05.20.2009") == 0) return TDatime("2009-05-20 07:00:00");
-  if (strcmp(dirname,"06.06.2009") == 0) return TDatime("2009-06-06 18:00:00");
-  return getDefaultDateTime(dirname);
+  int month, day, year;
+  sscanf(dirname,"%d.%d.%d",&month,&day,&year);
+  return TDatime(year,month,day,0,0,0);
 }
 
-static void scanPed4DirForDates(const char* dir, vector<TDatime>& dates)
+static void scanDirForDates(const char* dir, vector<TDatime>& dates)
 {
   struct dirent** namelist;
   int n = scandir(dir,&namelist,filter,0);
@@ -163,7 +153,15 @@ void EemcTrigUtil::getFeePed4(const TDatime& date, int mxChan, int *feePed4)
   struct passwd* pw = getpwnam("pibero");
   sprintf(dir,"%s/public/StarTrigSimuSetup/ped",pw->pw_dir);
   vector<TDatime> dates;
-  scanPed4DirForDates(dir,dates);
+  scanDirForDates(dir,dates);
+  // Adjust times
+  for (size_t i = 0; i < dates.size(); ++i) {
+    if (dates[i].GetDate() == 20090506) dates[i].Set("2009-05-06 10:00:00");
+    if (dates[i].GetDate() == 20090513) dates[i].Set("2009-05-13 17:00:00");
+    if (dates[i].GetDate() == 20090517) dates[i].Set("2009-05-17 23:30:00");
+    if (dates[i].GetDate() == 20090520) dates[i].Set("2009-05-20 07:00:00");
+    if (dates[i].GetDate() == 20090606) dates[i].Set("2009-06-06 18:00:00");
+  }
   TDatime timeStamp = getTimeStampFromDates(date,dates);
   TString timeStampString = Form("%02d.%02d.%4d",timeStamp.GetMonth(),timeStamp.GetDay(),timeStamp.GetYear());
   char pathname[FILENAME_MAX];
@@ -195,13 +193,13 @@ void EemcTrigUtil::getFeePed4(const TDatime& date, int mxChan, int *feePed4)
 static int maskFilter(const struct dirent* d)
 {
   int month, day, year;
-  return sscanf(d->d_name,"eec.%02d-%02d-%02d.dat",&month,&day,&year) == 3;
+  return strlen(d->d_name) == 16 && sscanf(d->d_name,"eec.%d-%d-%d.dat",&month,&day,&year) == 3;
 }
 
 static TDatime getMaskDateTime(const char* maskfile)
 {
   int month, day, year;
-  sscanf(maskfile,"eec.%02d-%02d-%02d.dat",&month,&day,&year);
+  sscanf(maskfile,"eec.%d-%d-%d.dat",&month,&day,&year);
   return TDatime(2000+year,month,day,0,0,0);
 }
 
@@ -230,9 +228,8 @@ void EemcTrigUtil::getFeeOutMask(const char* maskfile, int* highTowerMask, int* 
       *s1 = *s2 = 0;
       int n = sscanf(line,"%d %d %s %s\n",&jetpatch,&triggerpatch,s1,s2);
       if (n > 2) {
-	int dsm, chan, triggerpatch2;
-	getDsmAndChannelFromSteveJetPatchAndTriggerPatch(jetpatch,triggerpatch,dsm,chan);
-	getTriggerPatchFromDsmAndChannel(dsm,chan,triggerpatch2);
+	int triggerpatch2;
+	getTriggerPatchFromSteveJetPatchAndTriggerPatch(jetpatch,triggerpatch,triggerpatch2);
 	LOG_INFO << Form("JP=%d TP=%d %s %s (%d)",jetpatch,triggerpatch,s1,s2,triggerpatch2) << endm;
 	if (strncmp(s1,"HT",2) == 0 || strncmp(s2,"HT",2) == 0) highTowerMask[triggerpatch2] = 0;
 	if (strncmp(s1,"TP",2) == 0 || strncmp(s2,"TP",2) == 0)  patchSumMask[triggerpatch2] = 0;
@@ -270,6 +267,13 @@ void EemcTrigUtil::getTriggerPatchFromDsmAndChannel(int dsm, int chan, int& trig
   triggerpatch = (dsm-1)*10+chan;
 }
 
+void EemcTrigUtil::getTriggerPatchFromSteveJetPatchAndTriggerPatch(int jetpatch, int triggerpatch, int& triggerpatch2)
+{
+  int dsm, chan;
+  getDsmAndChannelFromSteveJetPatchAndTriggerPatch(jetpatch,triggerpatch,dsm,chan);
+  getTriggerPatchFromDsmAndChannel(dsm,chan,triggerpatch2);
+}
+
 void EemcTrigUtil::getFeeOutMask(const TDatime& date, int* highTowerMask, int* patchSumMask)
 {
   char maskdir[FILENAME_MAX];
@@ -282,6 +286,57 @@ void EemcTrigUtil::getFeeOutMask(const TDatime& date, int* highTowerMask, int* p
   sprintf(maskfile,"%s/eec.%02d-%02d-%02d.dat",maskdir,timestamp.GetMonth(),timestamp.GetDay(),timestamp.GetYear()%100);
   LOG_INFO << "Using mask file " << maskfile << endm;
   getFeeOutMask(maskfile,highTowerMask,patchSumMask);
+}
+
+void EemcTrigUtil::getFeeBoardFromSteveTriggerPatch(int triggerpatch, int& board)
+{
+  // See Steve Vigdor's EEMC Trigger Patches document
+  static const int boardMap[15] = { 1,3,1,1,3,1,2,4,2,2,4,2,3,4,3 };
+  board = boardMap[triggerpatch-1];
+}
+
+void EemcTrigUtil::getFeeBoardMask(const TDatime& date, int* highTower)
+{
+  char maskdir[FILENAME_MAX];
+  struct passwd* pw = getpwnam("pibero");
+  sprintf(maskdir,"%s/public/StarTrigSimuSetup/mask",pw->pw_dir);
+  vector<TDatime> dates;
+  scanDirForDates(maskdir,dates);
+  TDatime timestamp = getTimeStampFromDates(date,dates);
+  char timestampString[12];
+  sprintf(timestampString,"/%02d.%02d.%4d",timestamp.GetMonth(),timestamp.GetDay(),timestamp.GetYear());
+  strcat(maskdir,timestampString);
+  LOG_INFO << "Using mask directory " << maskdir << endm;
+  for (int jetpatch = 1; jetpatch <= 6; ++jetpatch) {
+    int boardmask[5];
+    fill(boardmask,boardmask+5,0);
+    char maskfile[FILENAME_MAX];
+    sprintf(maskfile,"%s/tower-%d-current_beam_config.dat",maskdir,jetpatch);
+    LOG_INFO << "Scanning mask file " << maskfile << endm;
+    FILE* fp = fopen(maskfile,"r");
+    if (fp) {
+      int value;
+      char name[100];
+      while (fscanf(fp,"%x %s\n",&value,name) != EOF) {
+	if (strcmp(name,"board1mask") == 0) boardmask[0] = value;
+	if (strcmp(name,"board2mask") == 0) boardmask[1] = value;
+	if (strcmp(name,"board3mask") == 0) boardmask[2] = value;
+	if (strcmp(name,"board4mask") == 0) boardmask[3] = value;
+	if (strcmp(name,"board5mask") == 0) boardmask[4] = value;
+      }
+    }
+    fclose(fp);
+    for (int triggerpatch = 1; triggerpatch <= 15; ++triggerpatch) {
+      int board = 0;
+      getFeeBoardFromSteveTriggerPatch(triggerpatch,board);
+      if (boardmask[board-1]) {
+	int triggerpatch2;
+	getTriggerPatchFromSteveJetPatchAndTriggerPatch(jetpatch,triggerpatch,triggerpatch2);
+	highTower[triggerpatch2] = 0;
+	LOG_INFO << Form("JP=%d TP=%d Brd=%d (%d)",jetpatch,triggerpatch,board,triggerpatch2) << endm;
+      }
+    }
+  }
 }
 
 //==================================================
