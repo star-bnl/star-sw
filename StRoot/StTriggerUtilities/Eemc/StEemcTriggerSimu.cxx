@@ -191,7 +191,9 @@ StEemcTriggerSimu::InitRun(int runnumber){
 
   fill(highTowerMask,highTowerMask+90,1); // all channels good
   fill(patchSumMask,patchSumMask+90,1); // all channels good
+
   EemcTrigUtil::getFeeOutMask(dbtime,highTowerMask,patchSumMask);
+  EemcTrigUtil::getFeeBoardMask(dbtime,highTowerMask);
 
   switch (mPedMode) {
   case kOnline:
@@ -783,6 +785,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.46  2011/10/16 21:43:44  pibero
+// Implement EEMC FEE boards HT masks
+//
 // Revision 1.45  2011/10/16 17:41:59  pibero
 // Implement EEMC FEE HT & TP masks
 //

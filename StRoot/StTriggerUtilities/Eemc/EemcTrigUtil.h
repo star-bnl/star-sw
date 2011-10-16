@@ -37,12 +37,18 @@ class EemcTrigUtil {
   static void getFeeOutMask(const TDatime& date, int* highTowerMask, int* patchSumMask);
   static void getDsmAndChannelFromSteveJetPatchAndTriggerPatch(int jetpatch, int triggerpatch, int& dsm, int& chan);
   static void getTriggerPatchFromDsmAndChannel(int dsm, int chan, int& triggerpatch);
+  static void getTriggerPatchFromSteveJetPatchAndTriggerPatch(int jetpatch, int triggerpatch, int& triggerpatch2);
+  static void getFeeBoardMask(const TDatime& date, int* highTower);
+  static void getFeeBoardFromSteveTriggerPatch(int triggerpatch, int& board);
 };
 
 //
-// $Id: EemcTrigUtil.h,v 1.4 2011/10/16 17:41:59 pibero Exp $
+// $Id: EemcTrigUtil.h,v 1.5 2011/10/16 21:43:44 pibero Exp $
 //
 // $Log: EemcTrigUtil.h,v $
+// Revision 1.5  2011/10/16 21:43:44  pibero
+// Implement EEMC FEE boards HT masks
+//
 // Revision 1.4  2011/10/16 17:41:59  pibero
 // Implement EEMC FEE HT & TP masks
 //
