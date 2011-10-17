@@ -2,8 +2,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.6 2011/10/10 20:35:08 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.7 2011/10/17 21:42:02 balewski Exp $
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.7  2011/10/17 21:42:02  balewski
+//   added tmp interface to fgt-simu-maker
+//
 //   Revision 1.6  2011/10/10 20:35:08  avossen
 //   fixed strip-cluster association in MaxCluster algo, made other files cvs compliant
 //
@@ -14,6 +17,7 @@
 #include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
 #include "StRoot/StFgtRawMaker/StFgtCosmicMaker.h"
 #include "StRoot/StFgtRawMaker/StFgtRawMaker.h"
+#include "StFgtSimulator/StFgtSlowSimuMaker.h"
 
 void StFgtClusterMaker::Clear(Option_t *opts)
 {
@@ -85,8 +89,13 @@ Int_t StFgtClusterMaker::Init()
       mFgtEventPtr = maker->getFgtEventPtr();
       //      cout <<" have raw  maker "<< endl;
       }
+      else if (strstr(mFgtEventMakerName.data(),"FgtSlowSimu")) {
+	// try to fetch data from FgtSlow-simu in a different way
+	mFgtEventPtr = ((StFgtSlowSimuMaker*)dataMaker)->mFgtEvent; 
+      }    
     }
     
+
   if( !mFgtEventPtr ){
     LOG_FATAL << "::Init() could not get pointer to StFgtEvent" << endm;
     ierr = kStFatal;
