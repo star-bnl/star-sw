@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.199 2011/10/17 00:14:34 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.200 2011/10/17 12:16:10 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.200  2011/10/17 12:16:10  fisyak
+// Comment out request  DoAlignment for Track Finder
+//
 // Revision 1.199  2011/10/17 00:14:34  fisyak
 // Move handles for IdTruth to StEvent
 //
@@ -634,7 +637,9 @@ Int_t StiMaker::InitRun(int run)
         _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
         if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
         if ( IAttr("useTiming"    )) _tracker->setTiming();
+#if 0
 	if ( IAttr("Alignment"    )) _tracker->DoAlignment(kTRUE);
+#endif
         _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
 
 //        if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
