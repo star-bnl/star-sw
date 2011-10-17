@@ -182,7 +182,7 @@ int StDijetFilter::RejectGT(const StGenParticleMaster &ptl) const
     delete finalparticles[k];
   finalparticles.clear();
  
-  //if(yesdijet == 0) return 1;
+  if(yesdijet == 0) return 1;
 
   return 0;
 }
