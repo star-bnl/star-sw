@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.198 2011/04/05 22:49:16 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.199 2011/10/17 00:14:34 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.199  2011/10/17 00:14:34  fisyak
+// Move handles for IdTruth to StEvent
+//
 // Revision 1.198  2011/04/05 22:49:16  fisyak
 // Add safety marging
 //
@@ -419,7 +422,9 @@ More detailed: 				<br>
 #include "Sti/StiTimer.h"
 #include "StiDetectorVolume.h"
 #include "StarMagField.h"
+#if 0
 #include "StG2TrackVertexMap.h"
+#endif
 #include "StTpcDb/StTpcDb.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
 #include "StSvtDbMaker/StSvtDbMaker.h"
@@ -465,7 +470,7 @@ StiMaker::StiMaker(const Char_t *name) :
   SetAttr("useEventFiller"      ,kTRUE);
   SetAttr("useTracker"          ,kTRUE);
   SetAttr("useVertexFinder"     ,kTRUE);
-
+  SetAttr("Alignment"           ,kFALSE);
   if (strstr(gSystem->Getenv("STAR"),".DEV"))
      SetAttr("useAux",kTRUE); // Auxiliary info added to output for evaluation
 }
@@ -521,7 +526,7 @@ Int_t StiMaker::Init()
   StiDebug::Init();
   StiTimer::Init("StiTrackFinder::find() TIMING"
 	        ,StiTimer::fgFindTimer,StiTimer::fgFindTally);
-  
+  if (IAttr("Alignment")) SetAttr(".Privilege",kTRUE);
   _loaderHitFilter = 0; // not using this yet.
   mTotPrimTks[1] = IAttr("maxTotPrims");
   if (*SAttr("maxRefiter")) StiKalmanTrack::setMaxRefiter(IAttr("maxRefiter"));
@@ -629,7 +634,7 @@ Int_t StiMaker::InitRun(int run)
         _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
         if (*SAttr("useTreeSearch")) _tracker->setComb(IAttr("useTreeSearch"));
         if ( IAttr("useTiming"    )) _tracker->setTiming();
-
+	if ( IAttr("Alignment"    )) _tracker->DoAlignment(kTRUE);
         _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
 
 //        if (*SAttr("useMCS")) StiKalmanTrackNode::setMCS(IAttr("useMCS"));
@@ -662,9 +667,11 @@ Int_t StiMaker::Make()
 
   eventIsFinished = false;
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
+#if 0
   St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track");   
   St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");   
   StG2TrackVertexMap::instance(g2t_track,g2t_vertex);
+#endif
   if (!event) return kStWarn;
 
   if (_tracker) {
@@ -740,7 +747,7 @@ Int_t StiMaker::Make()
 
 	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
               if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
-	      if (_eventFiller) {_eventFiller->fillEventPrimaries(); fillVxFlags();}
+	      if (_eventFiller) {_eventFiller->fillEventPrimaries(); /* fillVxFlags(); */}
               if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
 	    }
 	}
@@ -754,7 +761,7 @@ Int_t StiMaker::Make()
   if (iAns) return iAns;
   if (iAnz) return iAnz;
   if (mTotPrimTks[1] && mTotPrimTks[0]>mTotPrimTks[1]) return kStStop;
-
+  if (IAttr("Alignment") &&  ! _tracker->getNTracks()) return kStErr;
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -848,6 +855,7 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
   }
   return fVolume;
 }
+#if 0
 //_____________________________________________________________________________
 void StiMaker::fillVxFlags() {// set vertices IdTruth if any
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
@@ -892,3 +900,4 @@ void StiMaker::fillVxFlags() {// set vertices IdTruth if any
     }
   }
 }
+#endif

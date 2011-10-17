@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.96 2011/07/19 19:07:20 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.97 2011/10/17 00:14:34 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.97  2011/10/17 00:14:34  fisyak
+ * Move handles for IdTruth to StEvent
+ *
  * Revision 2.96  2011/07/19 19:07:20  perev
  * Remove previous tracks & vertices in StEvrent added
  *
@@ -493,7 +496,6 @@ using namespace std;
 
 //StiMaker
 #include "StiMaker/StiStEventFiller.h"
-#include "StG2TrackVertexMap.h"
 #include "TMath.h"
 #define NICE(angle) StiKalmanTrackNode::nice((angle))
 
@@ -1081,6 +1083,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
 	}
       }
     }
+#if 0
     // Propagate hit IdTruth info to track one.
     struct trackPing {
       Int_t  Id;
@@ -1133,6 +1136,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
 	gTrack->setIdParentVx(IdVx);
       }
     }
+#endif
   }
 }
 //_____________________________________________________________________________
