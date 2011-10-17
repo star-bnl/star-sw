@@ -540,7 +540,11 @@ Bool_t Geometry::ConstructMutd( const Char_t *flag, Bool_t go )
 Bool_t Geometry::ConstructFtro( const Char_t *flag, Bool_t go )
 { if (!go) return false;
 
-  /* Add FTRO select */
+  if ( !ftroGeom.Use("select",flag) )
+    {
+      Error(GetName(),Form("Cannot locate configuration %s",flag));
+      return false;
+    }
 
   AgStructure::AgDetpNew( "FtroGeo", Form("Forward TPC Readout configuration"));
 
@@ -1730,8 +1734,9 @@ Bool_t Geometry::IdsmInit()
 
 Bool_t Geometry::FtroInit()
 {
-  ftroGeom.select="FTROon"; ftroGeom.module="FtroGeo"; ftroGeom.fill();
-  ftroGeom.select="FTROof"; ftroGeom.module="None";    ftroGeom.fill();
+  ftroGeom.select="FTROon"; ftroGeom.module="FtroGeo"; ftroGeom.config=1; ftroGeom.fill();
+  ftroGeom.select="FTROof"; ftroGeom.module="None";    ftroGeom.config=0; ftroGeom.fill();
+  ftroGeom.select="FTRO01"; ftroGeom.module="FtroGeo"; ftroGeom.config=1; ftroGeom.fill();
   return true;
 }
 
