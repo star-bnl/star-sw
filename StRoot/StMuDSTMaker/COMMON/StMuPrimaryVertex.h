@@ -4,7 +4,7 @@
  * Simple class to store primary vertices. Data members are a mainly a copy of 
  * StPrimaryVertex
  *
- * $Id: StMuPrimaryVertex.h,v 1.6 2011/04/08 01:25:51 fisyak Exp $ 
+ * $Id: StMuPrimaryVertex.h,v 1.7 2011/10/17 00:19:14 fisyak Exp $ 
  */
 
 #include "TObject.h"
@@ -79,9 +79,13 @@ class StMuPrimaryVertex : public TObject {
   UShort_t         mQuality; // quality of this information (percentage of tracks coming the above MC Vertex)
   Int_t            mIdParent;
 };
+ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v);
 #endif
 /*
  * $Log: StMuPrimaryVertex.h,v $
+ * Revision 1.7  2011/10/17 00:19:14  fisyak
+ * Active handing of IdTruth
+ *
  * Revision 1.6  2011/04/08 01:25:51  fisyak
  * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
  *

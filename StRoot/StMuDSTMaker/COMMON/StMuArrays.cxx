@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.23 2011/05/04 19:51:31 tone421 Exp $
+ * $Id: StMuArrays.cxx,v 1.24 2011/10/17 00:19:13 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -138,7 +138,7 @@ int* StMuArrays::fmsArrayCounters = StMuArrays::pmdArrayCounters     +__NPMDARRA
 int* StMuArrays::tofArrayCounters = StMuArrays::fmsArrayCounters     +__NFMSARRAYS__;
 int* StMuArrays::btofArrayCounters = StMuArrays::tofArrayCounters    +__NTOFARRAYS__;  // dongx
 int* StMuArrays::eztArrayCounters = StMuArrays::btofArrayCounters    +__NBTOFARRAYS__;  // dongx
-
+ClassImp(StMuArrays);
 StMuArrays::StMuArrays()
 {
 #ifndef __NO_STRANGE_MUDST__
@@ -164,6 +164,9 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.24  2011/10/17 00:19:13  fisyak
+ * Active handing of IdTruth
+ *
  * Revision 1.23  2011/05/04 19:51:31  tone421
  * Added MTD infomation
  *

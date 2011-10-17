@@ -1,6 +1,7 @@
 #ifndef __StMuMcVertex_h__
 #define __StMuMcVertex_h__
 #include "tables/St_g2t_vertex_Table.h" 
+#include "StThreeVectorF.hh"
 
 class StMuMcVertex : public TObject {
  public:
@@ -13,6 +14,8 @@ class StMuMcVertex : public TObject {
   Int_t IsIntermedate()        const {return mIsInterm;}    /* flags intermediate vertex */	
   Int_t Time()                 const {return mTime;}        /* GEANT vertex production time */
   const StThreeVectorF &XyzV() const {return *&mXyzV;}      /* GEANT vertex coordinate (Cartesian) */
+  Int_t IdParTrk()             const {return mIdParTrk;}
+  virtual void Print(Option_t* option = "") const;          //
  private:
   Int_t   mId;
   Int_t   mNoDaughters;
@@ -22,4 +25,5 @@ class StMuMcVertex : public TObject {
   StThreeVectorF mXyzV;
   ClassDef(StMuMcVertex,1)
 };
+ostream&              operator<<(ostream& os, StMuMcVertex const & v);
 #endif

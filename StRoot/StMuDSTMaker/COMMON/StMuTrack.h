@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.39 2011/10/11 20:35:43 fisyak Exp $
+ * $Id: StMuTrack.h,v 1.40 2011/10/17 00:19:14 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -228,12 +228,15 @@ inline void StMuTrack::setBTofPidTraits(const StMuBTofPidTraits& pid) { mBTofPid
 inline const StMuTrack* StMuTrack::globalTrack() const { return (mIndex2Global>=0) ? (StMuTrack*)StMuDst::array(muGlobal)->UncheckedAt(mIndex2Global) :0;}
 inline const StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectra>=0) ? (StRichSpectra*)StMuDst::array(muRich)->UncheckedAt(mIndex2RichSpectra) : 0;}
 inline const StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (StMuBTofHit*)StMuDst::btofArray(muBTofHit)->UncheckedAt(mIndex2BTofHit) :0;} /// dongx
-
+ostream&              operator<<(ostream& os, StMuTrack const & v);
 #endif
 
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.40  2011/10/17 00:19:14  fisyak
+ * Active handing of IdTruth
+ *
  * Revision 1.39  2011/10/11 20:35:43  fisyak
  * Make idTruth public
  *

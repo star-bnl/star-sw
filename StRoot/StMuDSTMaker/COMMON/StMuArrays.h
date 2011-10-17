@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.22 2011/05/04 19:51:32 tone421 Exp $
+ * $Id: StMuArrays.h,v 1.23 2011/10/17 00:19:13 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -12,7 +12,7 @@
 */
 #ifndef StMuArrays_hh
 #define StMuArrays_hh
-
+#include "Rtypes.h"
 /// @enum emcTypes enumeration to to index the emcArrays
 //enum emcTypes {muEmc=0};
 enum emcTypes {muEmcTow=0, muEmcPrs, muEmcSmde, muEmcSmdp, muEEmcPrs, muEEmcSmdu, muEEmcSmdv};
@@ -114,6 +114,7 @@ class StMuArrays {
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
     static int*   btofArrayCounters;// [__NBTOFARRAYS__   ]  // dongx
     static int*    eztArrayCounters;// [__NEZARRAYS__    ]
+    ClassDef(StMuArrays,0)
 };
 
 #endif
@@ -121,6 +122,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.23  2011/10/17 00:19:13  fisyak
+ * Active handing of IdTruth
+ *
  * Revision 1.22  2011/05/04 19:51:32  tone421
  * Added MTD infomation
  *

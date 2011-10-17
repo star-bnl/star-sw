@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.46 2011/04/08 01:25:51 fisyak Exp $
+ * $Id: StMuTrack.cxx,v 1.47 2011/10/17 00:19:14 fisyak Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -26,7 +26,7 @@
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "THelixTrack.h"
 #include "TMath.h"
-
+#include "TString.h"
 namespace {
 	const StThreeVectorF gDummy(-999,-999,-999);
 }
@@ -454,7 +454,7 @@ void StMuTrack::fillMuBTofPidTraits(const StTrack* t) {
     }    
   }
 }
-
+#if 0
 void StMuTrack::Print(Option_t *option) const {
   //
   // Print out some of the essential track info. 
@@ -497,6 +497,23 @@ void StMuTrack::Print(Option_t *option) const {
   //cout << "\t inner helix origin " << pr_track->helix().origin() << endl; 
 
 }
+#endif
+ostream&  operator<<(ostream& os, const StMuTrack& v) {
+  if      (v.type() == global)  os << "Gl ";
+  else if (v.type() == primary) os << "Pr ";
+  else                          os << "   ";
+  os << Form("id:%5i fl:%5i vx:%3i p:%8.3f %8.3f %8.3f",v.id(),v.flag(),v.vertexIndex(), v.p().x(), v.p().y(), v.p().z());
+  os << Form(" q:%2i eta:%6.3f phi:%6.3f pT: %6.3f",v.charge(),v.eta(),v.phi(),v.pt());
+  os << Form(" DCA:%6.3f %6.3f %6.3f",v.dca().x(),v.dca().y(),v.dca().z());
+  os << Form("Total hits:%2i fitted:%2i poss:%2i",v.nHits(),v.nHitsFit(),v.nHitsPoss());
+  os << Form(" Points F: %6.3f %6.3f %6.3f L: %6.3f %6.3f %6.3f", 
+	     v.firstPoint().x(),v.firstPoint().y(),v.firstPoint().z(),
+	     v.lastPoint().x(),v.lastPoint().y(),v.lastPoint().z());
+  os << Form(" idT %4i qa %2i",v.idTruth(), v.qaTruth());
+  return os;
+}
+
+void StMuTrack::Print(Option_t *option) const {cout << *this << endl;}
 
 const StMuTrack* StMuTrack::primaryTrack() const {
 
@@ -645,6 +662,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.47  2011/10/17 00:19:14  fisyak
+ * Active handing of IdTruth
+ *
  * Revision 1.46  2011/04/08 01:25:51  fisyak
  * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
  *
