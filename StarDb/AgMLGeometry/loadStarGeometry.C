@@ -29,9 +29,8 @@ void loadStarGeometry( const Char_t *mytag="y2009a" )
   //
   if ( AgModule::Find("HALL") )
     {
-      std::cout << Form(">>> AgML geometry detected.  Loading from %s.C <<<",mytag) << std::endl;
-      TFile *file = new TFile(filename);
-      gGeoManager = (TGeoManager *)file->Get(mytag);
+      std::cout << Form(">>> AgML geometry detected.  Loading from %s <<<",filename.Data()) << std::endl;
+      TGeoManager::Import( filename );
       assert(gGeoManager);
       return;
     }
