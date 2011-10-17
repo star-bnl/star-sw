@@ -55,9 +55,10 @@ Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
   PixlInit(); SconInit(); SisdInit(); SvttInit(); BtofInit(); TpceInit(); VpddInit();
   UpstInit(); ZcalInit(); FtroInit(); RichInit(); PhmdInit(); FgtdInit(); IdsmInit();
 
-  GeomInit();
+  const Char_t *path = ".:StarVMC/Geometry/macros/:$STAR/StarVMC/Geometry/macros/";
+  const Char_t *file = gSystem->Which( path, "StarGeometryDb.C", kReadPermission );
 
-  gROOT -> ProcessLine(".x StarVMC/Geometry/macros/StarGeometryDb.C");
+  gROOT -> ProcessLine( Form(".x %s",file) );
 
 }
 
