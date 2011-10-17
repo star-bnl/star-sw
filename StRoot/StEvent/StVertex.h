@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.11 2011/03/31 19:29:01 fisyak Exp $
+ * $Id: StVertex.h,v 2.12 2011/10/17 00:13:49 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
+ * Revision 2.12  2011/10/17 00:13:49  fisyak
+ * Add handles for IdTruth info
+ *
  * Revision 2.11  2011/03/31 19:29:01  fisyak
  * Add IdTruth information for tracks and vertices
  *
@@ -97,6 +100,7 @@ public:
     Int_t            idParent() const { return mIdParent;}
     void          setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
     void          setIdParent(Int_t id) {mIdParent = id;}
+    void          setIdTruth(); 				//setting on track info
 protected:
     StVertexId    mType;
     Int_t         mFlag;

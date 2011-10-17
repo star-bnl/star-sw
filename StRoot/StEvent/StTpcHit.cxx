@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.18 2011/03/31 19:25:13 fisyak Exp $
+ * $Id: StTpcHit.cxx,v 2.19 2011/10/17 00:13:49 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
+ * Revision 2.19  2011/10/17 00:13:49  fisyak
+ * Add handles for IdTruth info
+ *
  * Revision 2.18  2011/03/31 19:25:13  fisyak
  * Keep ADC value for cluster
  *
@@ -71,7 +74,7 @@
  **************************************************************************/
 #include "StTpcHit.h"
 #include "StTrack.h"
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.18 2011/03/31 19:25:13 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.19 2011/10/17 00:13:49 fisyak Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -91,7 +94,7 @@ ostream&  operator<<(ostream& os, const StTpcHit& v)
 {
     return os << Form("Tpc s/r %3i/%3i ",v.sector(),v.padrow())
 	      << *((StHit *)&v)
-	      << Form(" min/max pad %3i/%3i npad %2i min/max t %3i/%3i ntime %2i time %10.3f pad %10.3f adc %4i",
+	      << Form(" pmin/max %3i/%3i np %2i tmin/max %3i/%3i nt %2i tm %6.2f pad %6.2f adc %4i",
 		      (Int_t)  v.minPad(), (Int_t)  v.maxPad(),(Int_t) v.padsInHit(), 
 		      (Int_t) v.minTmbk(), (Int_t) v.maxTmbk(),(Int_t) v.timeBucketsInHit(),
 		      v.timeBucket(),v.pad(), v.adc());  

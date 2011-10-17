@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.41 2011/04/25 21:25:09 ullrich Exp $
+ * $Id: StEvent.h,v 2.42 2011/10/17 00:13:49 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.42  2011/10/17 00:13:49  fisyak
+ * Add handles for IdTruth info
+ *
  * Revision 2.41  2011/04/25 21:25:09  ullrich
  * Modifications to hold MTD data.
  *
@@ -319,6 +322,7 @@ public:
     void setL1Trigger(StL1Trigger*);
     void setL3Trigger(StL3Trigger*);
     void setHltEvent(StHltEvent*);
+    void setIdTruth();
     void addPrimaryVertex(StPrimaryVertex*, StPrimaryVertexOrder = orderByNumberOfDaughters);
     void addCalibrationVertex(StCalibrationVertex*);
     void addDetectorState(StDetectorState*);

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.20 2011/05/12 22:25:48 fisyak Exp $
+ * $Id: StTpcHit.h,v 2.21 2011/10/17 00:13:49 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.21  2011/10/17 00:13:49  fisyak
+ * Add handles for IdTruth info
+ *
  * Revision 2.20  2011/05/12 22:25:48  fisyak
  * Restore hit errors as persistent, add sort to TpcHit
  *
@@ -91,21 +94,21 @@ public:
     StTpcHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
              UInt_t hw, float q, UChar_t c = 0,
-	     UShort_t idTruth=0, UShort_t quality=0,
-	     UShort_t id =0,
+	     UShort_t IdTruth=0, UShort_t quality=0,
+	     UShort_t Id =0,
 	     Short_t mnpad=0, Short_t mxpad=0, Short_t mntmbk=0,
-	     Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0, UShort_t adc = 0) 
-      :  StHit(p, e, hw, q, c, idTruth, quality, id), mAdc(adc) {setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0;}
+	     Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0, UShort_t Adc = 0) 
+      :  StHit(p, e, hw, q, c, IdTruth, quality, Id), mAdc(Adc) {setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0;}
     ~StTpcHit() {}
 
-    void* operator new(size_t sz,void *p) { return p;}
+    void* operator new(size_t /* sz */,void *p) { return p;}
     void* operator new(size_t) { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 
-    void     setChargeModified(Float_t charge) {mChargeModified = charge;}
+    void     setChargeModified(Float_t Charge) {mChargeModified = Charge;}
     void     setPadTmbk(Float_t cl_x, Float_t cl_t) { mMcl_x = TMath::Nint(cl_x*64);  mMcl_t = TMath::Nint(cl_t*64);}
     void     setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk);
-    void     setAdc(UShort_t adc = 0) {mAdc = adc;}
+    void     setAdc(UShort_t Adc = 0) {mAdc = Adc;}
     UInt_t   sector() const {return bits(4, 5);}   // bits 4-8  -> 1-24
     UInt_t   padrow() const {return bits(9, 6);}   // bits 9-14 -> 1-45
     UInt_t   padsInHit()   const {return maxPad() - minPad() + 1;} 
@@ -126,7 +129,6 @@ public:
       StTpcHit *hit = (StTpcHit *) obj;
       if (sector() > hit->sector()) return kTRUE;
       if (padrow() > hit->padrow()) return kTRUE;
-      if (sector() > hit->sector()) return kTRUE;
       if (TMath::Abs(position().z()) > TMath::Abs(hit->position().z())) return kTRUE;
       return kFALSE;
     }

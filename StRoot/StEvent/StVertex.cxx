@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.10 2009/11/23 16:34:08 fisyak Exp $
+ * $Id: StVertex.cxx,v 2.11 2011/10/17 00:13:49 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
+ * Revision 2.11  2011/10/17 00:13:49  fisyak
+ * Add handles for IdTruth info
+ *
  * Revision 2.10  2009/11/23 16:34:08  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -49,6 +52,8 @@
 #include "TFile.h"
 #include "StVertex.h"
 #include "StTrack.h"
+#include "StG2TrackVertexMap.h"
+
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
@@ -56,7 +61,7 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.10 2009/11/23 16:34:08 fisyak Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.11 2011/10/17 00:13:49 fisyak Exp $";
 
 StVertex::StVertex()
 {
@@ -164,6 +169,42 @@ void StVertex::Streamer(TBuffer &R__b)
        Class()->WriteBuffer(R__b,this);
     }
 } 
+//________________________________________________________________________________
+void StVertex::setIdTruth() { // match with IdTruth
 
+ 
+  typedef std::map< int,float>  myMap_t;
+  typedef std::pair<int,float>  myPair_t;
+  typedef myMap_t::const_iterator myIter_t;
+  myMap_t  idTruths;
+  
+  // 		Loop to store all the mc track keys and quality of every reco hit on the track.
+  UInt_t Ntracks = numberOfDaughters();
+  Int_t IdVx = 0;
+  Int_t qa = 0;
+  for (UInt_t l = 0; l < Ntracks; l++) {
+    const StTrack *pTrack = daughter(l);
+    if (! pTrack) continue;
+    Int_t IdTk = pTrack->idTruth();
+    if (IdTk <= 0) continue;
+    IdVx = pTrack->idParentVx();
+    if (IdVx <= 0) continue;
+    qa = pTrack->qaTruth(); if (!qa) qa = 1;
+    idTruths[IdVx] += qa;
+  }
+  if (! idTruths.size()) return;		//no simu info
+  Int_t vxBest = 0; 
+  Float_t qaBest = 0, qaSum = 0;
+  for (myIter_t it=idTruths.begin(); it!=idTruths.end(); ++it) {
+    qaSum += (*it).second;
+    if ((*it).second < qaBest) continue;
+    vxBest = (*it).first; qaBest = (*it).second;
+  }
+  if (vxBest <= 0 || vxBest > 0xffff) return;
+  Int_t avgQua = 100*qaBest/(qaSum+1e-10)+0.5;
+  setIdTruth(vxBest,avgQua);
+  Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(vxBest);
+  setIdParent(IdParentTk);
+}
 
 
