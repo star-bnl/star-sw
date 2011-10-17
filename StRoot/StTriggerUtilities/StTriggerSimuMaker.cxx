@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.47 2011/10/04 18:29:16 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.48 2011/10/17 06:19:11 pibero Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -453,13 +453,13 @@ bool StTriggerSimuMaker::getTriggerThresholds(int runNumber)
 
 bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 {
-  // Open connection to Run 9 database
+  // Open connection to online database
 
   MYSQL mysql;
   const char* host = "dbbak.starp.bnl.gov";
   const char* user = "";
   const char* pass = "";
-  unsigned int port = 3408;
+  unsigned int port = 3400+GetDBTime().GetYear()%100-1;
   const char* database = "Conditions_rts";
   const char* unix_socket = NULL;
   unsigned long client_flag = 0;
@@ -724,6 +724,9 @@ void StTriggerSimuMaker::changeJetPatchTh()
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.48  2011/10/17 06:19:11  pibero
+ * Specify online database for each year
+ *
  * Revision 1.47  2011/10/04 18:29:16  pibero
  * *** empty log message ***
  *
