@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.48 2011/10/13 17:52:22 perev Exp $
+ * $Id: StEvent.cxx,v 2.49 2011/10/17 00:13:49 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.49  2011/10/17 00:13:49  fisyak
+ * Add handles for IdTruth info
+ *
  * Revision 2.48  2011/10/13 17:52:22  perev
  * Comment++
  *
@@ -203,13 +206,14 @@
 #include "StAutoBrowse.h"
 #include "StEventBranch.h"
 #include "StHltEvent.h"
-
+#include "StTrackNode.h"
+#include "StTrack.h"
 #ifndef ST_NO_NAMESPACES
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.48 2011/10/13 17:52:22 perev Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.48 2011/10/13 17:52:22 perev Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.49 2011/10/17 00:13:49 fisyak Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.49 2011/10/17 00:13:49 fisyak Exp $";
 
 ClassImp(StEvent)
 
@@ -1381,4 +1385,30 @@ void StEvent::addHitCollection(StSPtrVecHit* p, const Char_t *name) {
 void StEvent::removeHitCollection(const Char_t *name) {
   TObjectSet *set = (TObjectSet *) FindByName(name);
   if (set) set->Delete();
+}
+//________________________________________________________________________________
+void StEvent::setIdTruth() {
+  StSPtrVecTrackNode& trackNode = trackNodes();
+  UInt_t nTracks = trackNode.size();
+  StTrackNode *node=0;
+  for (UInt_t i = 0; i < nTracks; i++) {
+    node = trackNode[i]; 
+    if (!node) continue;
+    UInt_t notr = node->entries();
+    for (UInt_t t = 0; t < notr; t++) {
+      StTrack *track = node->track(t);
+      track->setIdTruth();
+    }
+  }
+  // loop over all type of vertices
+  Int_t noOfPrimaryVertices = numberOfPrimaryVertices();
+  for (Int_t i = 0;  i < noOfPrimaryVertices; i++) primaryVertex(i)->setIdTruth();
+  Int_t noOfCalibrationVertices = numberOfCalibrationVertices();
+  for (Int_t i = 0;  i < noOfCalibrationVertices; i++) calibrationVertex(i)->setIdTruth();
+  Int_t noOfv0Vertices = v0Vertices().size();
+  for (Int_t i = 0;  i < noOfv0Vertices; i++) ((StVertex *) v0Vertices()[i])->setIdTruth();
+  Int_t noOfxiVertices = xiVertices().size();
+  for (Int_t i = 0;  i < noOfxiVertices; i++) ((StVertex *) xiVertices()[i])->setIdTruth();
+  Int_t noOfkinkVertices = kinkVertices().size();
+  for (Int_t i = 0;  i < noOfkinkVertices; i++) ((StVertex *) kinkVertices()[i])->setIdTruth();
 }

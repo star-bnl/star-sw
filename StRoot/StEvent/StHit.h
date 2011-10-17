@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.26 2011/05/12 22:25:48 fisyak Exp $
+ * $Id: StHit.h,v 2.27 2011/10/17 00:13:49 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.27  2011/10/17 00:13:49  fisyak
+ * Add handles for IdTruth info
+ *
  * Revision 2.26  2011/05/12 22:25:48  fisyak
  * Restore hit errors as persistent, add sort to TpcHit
  *
@@ -143,7 +146,7 @@ public:
     void setTrackReferenceCount(unsigned char);
     void setHardwarePosition(unsigned int);
     void setPositionError(const StThreeVectorF&);
-    void setId(int id)			{mId = id;}
+    void setId(int Id)			{mId = Id;}
     void setIdTruth(Int_t idtru,Int_t qatru=0);
     void SetNextHit(StHit *next = 0) 	{mNextHit = next;}
 
