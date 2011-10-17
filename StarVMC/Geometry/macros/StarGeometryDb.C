@@ -634,6 +634,20 @@ void y2008()
     geom.fill();
   }
 
+  geom.Use("select","y2008c");
+  geom.select="y2008d"; {
+    geom.sconFlag = "SCON14"; geom.sconStat = 1;
+    geom.fill();
+  }
+
+  geom.Use("select","y2008d");
+  geom.select="y2008e"; {
+    geom.calbFlag = "CALB02"; geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6"; geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.fill();
+  }
+
+
 }
 
 void y2009()
@@ -724,8 +738,11 @@ void y2009()
     geom.fill();
   }
 
-  geom.Use("select","y2009c"); {
+  geom.Use("select","y2009c"); 
+  geom.select="y2009d";
+  {
     geom.sconFlag = "SCON14"; geom.sconStat = 1;
+    geom.fill();
   }
 
 }
@@ -791,6 +808,14 @@ void y2010()
     setTitle("y2010a with TPC radius/TOF fix");
     geom.fill();
   }
+
+  geom.Use("select","y2010b");
+  geom.select="y2010c";
+  {
+    geom.sconFlag="SCON14"; geom.sconStat=1;
+    geom.fill();
+  }
+
 }
 
 void y2011()
