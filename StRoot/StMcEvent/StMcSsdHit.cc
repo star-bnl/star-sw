@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSsdHit.cc,v 2.5 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcSsdHit.cc,v 2.6 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcSsdHit.cc,v $
+ * Revision 2.6  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.5  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -28,37 +31,11 @@
  *
  *
  **************************************************************************/
-#include "StThreeVectorF.hh"
-
 #include "StMcSsdHit.hh"
-#include "tables/St_g2t_ssd_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcSsdHit.cc,v 2.5 2005/11/22 21:44:52 fisyak Exp $";
-#ifdef POOL
-StMemoryPool StMcSsdHit::mPool(sizeof(StMcSsdHit));
-#endif
+static const char rcsid[] = "$Id: StMcSsdHit.cc,v 2.6 2011/10/17 00:24:00 fisyak Exp $";
 
 ClassImp(StMcSsdHit);
-StMcSsdHit::StMcSsdHit() : StMcHit(StThreeVectorF(0, 0, 0),
-				   StThreeVectorF(0, 0, 0),
-				   0, 0, 0, 0, 0) {}
-StMcSsdHit::StMcSsdHit(const StThreeVectorF& x,const StThreeVectorF& p,
-			 const float de, const float ds, const long key,
-			 const long id,
-			 StMcTrack* parent)  : StMcHit(x, p, de, ds, key, id, parent)
-{ /* noop */ }
-
-StMcSsdHit::StMcSsdHit(g2t_ssd_hit_st* pt)
-: StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
-	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
-	  pt->de,
-	  pt->ds,
-	  pt->id,
-	  pt->volume_id,
-	  0)
-{/* noop */ }
-
-StMcSsdHit::~StMcSsdHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcSsdHit& h)
 {
@@ -71,9 +48,4 @@ ostream&  operator<<(ostream& os, const StMcSsdHit& h)
 }
 
 //________________________________________________________________________________
-void StMcSsdHit::Print(Option_t *option) const {
-  cout << "SsdHit\t"; 
-  StMcHit::Print();
-  cout << "\tladder : " << ladder() 
-       << "\twafer : "  << wafer();
-}
+void StMcSsdHit::Print(Option_t *option) const {cout << *this;}

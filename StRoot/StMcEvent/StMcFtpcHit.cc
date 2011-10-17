@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.cc,v 2.14 2005/11/22 21:44:51 fisyak Exp $
+ * $Id: StMcFtpcHit.cc,v 2.15 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcFtpcHit.cc,v $
+ * Revision 2.15  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.14  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -64,34 +67,10 @@
 #include "StThreeVectorF.hh"
 
 #include "StMcFtpcHit.hh"
-#include "tables/St_g2t_ftp_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.14 2005/11/22 21:44:51 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.15 2011/10/17 00:24:00 fisyak Exp $";
 
 ClassImp(StMcFtpcHit);
-#ifdef POOL
-StMemoryPool StMcFtpcHit::mPool(sizeof(StMcFtpcHit));
-#endif
-StMcFtpcHit::StMcFtpcHit() : StMcHit(StThreeVectorF(0, 0, 0),
-				     StThreeVectorF(0, 0, 0),
-				     0, 0, 0, 0, 0) {}
-StMcFtpcHit::StMcFtpcHit(const StThreeVectorF& x,const StThreeVectorF& p,
-			 const float de, const float ds, const long key,
-			 const long id,
-			 StMcTrack* parent)  : StMcHit(x, p, de, ds, key, id, parent)
-{ /* noop */ }
-
-StMcFtpcHit::StMcFtpcHit(g2t_ftp_hit_st* pt)
-: StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
-	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
-	  pt->de,
-	  pt->ds,
-	  pt->id,
-	  pt->volume_id,
-	  0)
-{/* noop */ }
-
-StMcFtpcHit::~StMcFtpcHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcFtpcHit& h)
 {
@@ -102,7 +81,7 @@ ostream&  operator<<(ostream& os, const StMcFtpcHit& h)
     return os;
 }
 
-unsigned long
+ULong_t
 StMcFtpcHit::plane() const
 {
     if (mVolumeId<1000) return (mVolumeId/100 - 1)*10 + (mVolumeId)%100; // for backward compatibility
@@ -113,7 +92,7 @@ StMcFtpcHit::plane() const
     return (mVolumeId/1000 - 1)*10 + (mVolumeId/10)%100;
 }
 
-unsigned long
+ULong_t
 StMcFtpcHit::sector() const
 {
     if (mVolumeId < 1000) return 99999; // for backward compatibility

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHit.hh,v 2.4 2005/09/28 21:30:14 fisyak Exp $
+ * $Id: StMcCtbHit.hh,v 2.5 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcCtbHit.hh,v $
+ * Revision 2.5  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.4  2005/09/28 21:30:14  fisyak
  * Persistent StMcEvent
  *
@@ -24,42 +27,23 @@
 #define StMcCtbHit_hh
 
 #include "StMcHit.hh"
-#include "StMemoryPool.hh"
-
-class StMcTrack;
-class g2t_ctf_hit_st;
+#include "tables/St_g2t_ctf_hit_Table.h"
 
 class StMcCtbHit : public StMcHit {
 public:
-    StMcCtbHit();
-    StMcCtbHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float,  const long, const long, StMcTrack*);
-    StMcCtbHit(g2t_ctf_hit_st*);
-    virtual ~StMcCtbHit();
-    int operator==(const StMcCtbHit&) const;
-    int operator!=(const StMcCtbHit&) const;
-    void get_slat_tray(unsigned int & slat, unsigned int & tray) const;
-    float tof() const;
-#ifdef POOL
-    void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }
-#endif    
+  StMcCtbHit(){}
+  StMcCtbHit(const StThreeVectorF& x,const StThreeVectorF& p,
+	     Float_t de, Float_t ds, Float_t tof, Long_t k, Long_t volId, StMcTrack* parent=0) : 
+    StMcHit(x,p,de,ds,tof,k,volId,parent) {}
+  StMcCtbHit(g2t_ctf_hit_st* pt) : StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
+					   StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
+					   pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0) {}
+  virtual ~StMcCtbHit() {}
+  void get_slat_tray(unsigned int & slat, unsigned int & tray) const;
 private:
-#ifdef POOL
-    static StMemoryPool mPool; 
-#endif
-    float               mTof;
-    ClassDef(StMcCtbHit,1)
+  ClassDef(StMcCtbHit,2)
 };
 
 ostream&  operator<<(ostream& os, const StMcCtbHit&);
-
-inline float
-StMcCtbHit::tof() const
-{
-    return mTof;
-}
-
-
 
 #endif

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.hh,v 2.11 2005/11/22 21:44:51 fisyak Exp $
+ * $Id: StMcFtpcHit.hh,v 2.12 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcFtpcHit.hh,v $
+ * Revision 2.12  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.11  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -59,34 +62,25 @@
 #define StMcFtpcHit_hh
 
 #include "StMcHit.hh"
-#include "StMemoryPool.hh"
-
-class StMcTrack;
-class g2t_ftp_hit_st;
-
-#if !defined(ST_NO_NAMESPACES)
-#endif
+#include "tables/St_g2t_ftp_hit_Table.h" 
 
 class StMcFtpcHit : public StMcHit {
 public:
-    StMcFtpcHit();
-    StMcFtpcHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float, const long, const long, StMcTrack*);
-    StMcFtpcHit(g2t_ftp_hit_st*);
-    ~StMcFtpcHit();
-#ifdef POOL
-    void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }
-#endif
-    unsigned long plane() const; // 1-20, where 1-10 = West and 11-20 = East
-    unsigned long sector() const; // 1-6
+  StMcFtpcHit() {}
+  StMcFtpcHit(const StThreeVectorF& x,const StThreeVectorF& p,
+	      Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0) : 
+    StMcHit(x,p,de,ds,tof,k,volId,parent) {}
+  StMcFtpcHit(g2t_ftp_hit_st* pt, Float_t cl_x=0, Float_t cl_t=0) : 
+    StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
+	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 
+	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0) {}
+  ~StMcFtpcHit() {}
+  ULong_t plane() const; // 1-20, where 1-10 = West and 11-20 = East
+  ULong_t sector() const; // 1-6
   virtual void Print(Option_t *option="") const; // *MENU* 
-   
+
 private:
-#ifdef POOL
-    static StMemoryPool mPool; 
-#endif
-    ClassDef(StMcFtpcHit,1)
+    ClassDef(StMcFtpcHit,2)
 };
 
 ostream&  operator<<(ostream& os, const StMcFtpcHit&);

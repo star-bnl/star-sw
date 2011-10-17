@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.cc,v 2.9 2009/02/06 15:56:46 fisyak Exp $
+ * $Id: StMcPixelHit.cc,v 2.10 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcPixelHit.cc,v $
+ * Revision 2.10  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.9  2009/02/06 15:56:46  fisyak
  * Jonathan: decoding for upgr15 geometry
  *
@@ -34,63 +37,25 @@
  *
  *
  **************************************************************************/
-#include "StThreeVectorF.hh"
-
 #include "StMcPixelHit.hh"
 #include "tables/St_g2t_pix_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.9 2009/02/06 15:56:46 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.10 2011/10/17 00:24:00 fisyak Exp $";
 
 #ifdef POOL
 StMemoryPool StMcPixelHit::mPool(sizeof(StMcPixelHit));
 #endif
 ClassImp(StMcPixelHit);
-
-StMcPixelHit::StMcPixelHit() : StMcHit(StThreeVectorF(0, 0, 0),
-				       StThreeVectorF(0, 0, 0),
-				       0, 0, 0, 0, 0) {}
-StMcPixelHit::StMcPixelHit(const StThreeVectorF& x,const StThreeVectorF& p,
-			 const float de, const float ds, const long key,
-			 const long id,
-			 StMcTrack* parent)  : StMcHit(x, p, de, ds, key, id, parent)
-{ /* noop */ }
-
-StMcPixelHit::StMcPixelHit(g2t_pix_hit_st* pt)
-: StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
-	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
-	  pt->de,
-	  pt->ds,
-	  pt->id,
-	  pt->volume_id,
-	  0)
-{/* noop */ }
-
-StMcPixelHit::~StMcPixelHit() {/* noop */ }
-
 ostream&  operator<<(ostream& os, const StMcPixelHit& h)
 {
     os << "PixelHit" << endl;
     os << *((StMcHit *) &h);
     os << "Layer           : " << h.layer() << endl;
+    os << "Ladder          : " << h.ladder() << endl;
   return os;
 }
 
-unsigned long
-StMcPixelHit::layer() const
-{
-  unsigned long iLayer=mVolumeId/1000000;
-  return iLayer;
-}
-
-unsigned long
-StMcPixelHit::ladder() const
-{
-  unsigned long iLadder = (mVolumeId%1000000)/10000;
-  return iLadder;
-}
 //________________________________________________________________________________
 void StMcPixelHit::Print(Option_t *option) const {
-  cout << "PixelHit\t"; 
-  StMcHit::Print();
-  cout  << "\tLayer: " << layer();  
+  cout << *this << endl;
 }

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHit.cc,v 2.6 2007/03/06 19:48:17 calderon Exp $
+ * $Id: StMcCtbHit.cc,v 2.7 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcCtbHit.cc,v $
+ * Revision 2.7  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.6  2007/03/06 19:48:17  calderon
  * Added filling of g2t_ctf_hit.ds into StMcCtbHit.
  *
@@ -27,32 +30,11 @@
  * accordingly.
  */
 #include "StMcCtbHit.hh"
-#include "tables/St_g2t_ctf_hit_Table.h"
-static const char rcsid[] = "$Id: StMcCtbHit.cc,v 2.6 2007/03/06 19:48:17 calderon Exp $";
+static const char rcsid[] = "$Id: StMcCtbHit.cc,v 2.7 2011/10/17 00:24:00 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcCtbHit::mPool(sizeof(StMcCtbHit));
 #endif
 ClassImp(StMcCtbHit)
-StMcCtbHit::StMcCtbHit() { /* noop */ };
-
-StMcCtbHit::StMcCtbHit(const StThreeVectorF& x,const StThreeVectorF& p,
-			 const float de, const float ds, const long key,
-			 const long id,
-			 StMcTrack* parent)  : StMcHit(x, p, de, ds, key, id, parent)
-{ /* noop */ }
-
-
-StMcCtbHit::StMcCtbHit(g2t_ctf_hit_st* pt)
-: StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
-	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
-	  pt->de,
-	  pt->ds,
-	  pt->id,
-	  pt->volume_id,
-	  0), mTof(pt->tof)
-{/* noop */ }
-
-StMcCtbHit::~StMcCtbHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StMcCtbHit& h)
 {

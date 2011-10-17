@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.cc,v 2.8 2009/02/06 15:36:45 fisyak Exp $
+ * $Id: StMcIstHit.cc,v 2.9 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcIstHit.cc,v $
+ * Revision 2.9  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.8  2009/02/06 15:36:45  fisyak
  * Jonathan: decoding for upgr15 geometry
  *
@@ -42,41 +45,21 @@
 
 
 #include "StMcIstHit.hh"
-#include "tables/St_g2t_ist_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.8 2009/02/06 15:36:45 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.9 2011/10/17 00:24:00 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcIstHit::mPool(sizeof(StMcIstHit));
 #endif
 ClassImp(StMcIstHit);
-
-StMcIstHit::StMcIstHit(const StThreeVectorF& x,const StThreeVectorF& p,
-			 const float de, const float ds, const long key,
-			 const long id,
-			 StMcTrack* parent)  : StMcHit(x, p, de, ds, key, id, parent)
-{ /* noop */ }
-
-StMcIstHit::StMcIstHit(g2t_ist_hit_st* pt)
-: StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
-	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
-	  pt->de,
-	  pt->ds,
-	  pt->id,
-	  pt->volume_id,
-	  0)
-{/* noop */ }
-
-StMcIstHit::~StMcIstHit() {/* noop */ }
-
 ostream&  operator<<(ostream& os, const StMcIstHit& h)
 {
     os << "IstHit" << endl;
     os << *((StMcHit *) &h);
     os << "Layer           : " << h.layer() << endl;
-  return os;
+    return os;
 }
 
-unsigned long
+ULong_t
 StMcIstHit::layer() const
 {
   //Only one ist layer now (WL, 03/13/08)
@@ -95,7 +78,7 @@ StMcIstHit::layer() const
   return 1;
 }
 
-unsigned long
+ULong_t
 StMcIstHit::ladder() const
 {
   //unsigned long iModule = (mVolumeId%1000000)/10000;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSsdLadderHitCollection.hh,v 2.1 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcSsdLadderHitCollection.hh,v 2.2 2011/10/17 00:24:01 fisyak Exp $
  *
  * Author: Fabrice Retiere/Kai Schweda, Aug 2003
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMcSsdLadderHitCollection.hh,v $
+ * Revision 2.2  2011/10/17 00:24:01  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.1  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -42,16 +45,16 @@ class StMcSsdLadderHitCollection : public StObject
 public:
   StMcSsdLadderHitCollection() {}
   virtual ~StMcSsdLadderHitCollection() {}
-
+private:
+    enum { mMaxNumberOfWafers = 16 };
+    StMcSsdWaferHitCollection  mWafers[mMaxNumberOfWafers];
+public:
     unsigned long numberOfHits() const;
   unsigned int  numberOfWafers() const {return mMaxNumberOfWafers;}
     
     StMcSsdWaferHitCollection*       wafer(unsigned int);
     const StMcSsdWaferHitCollection* wafer(unsigned int) const;
     
-private:
-    enum { mMaxNumberOfWafers = 16 };
-    StMcSsdWaferHitCollection  mWafers[mMaxNumberOfWafers];
     ClassDef(StMcSsdLadderHitCollection,1)
 };
 #endif

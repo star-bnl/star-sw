@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.hh,v 2.11 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcTpcHit.hh,v 2.12 2011/10/17 00:24:01 fisyak Exp $
  * $Log: StMcTpcHit.hh,v $
+ * Revision 2.12  2011/10/17 00:24:01  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.11  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -58,55 +61,40 @@
 #define StMcTpcHit_hh
 
 #include "StMcHit.hh"
-#include "StMemoryPool.hh"
-
-class StMcTrack;
-class g2t_tpc_hit_st;
-
-#if !defined(ST_NO_NAMESPACES)
-#endif
+#include "tables/St_g2t_tpc_hit_Table.h"  
 
 class StMcTpcHit : public StMcHit {
 public:
-    StMcTpcHit();
-    StMcTpcHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float,  const long, const long, StMcTrack*);
-    StMcTpcHit(g2t_tpc_hit_st*);
-    ~StMcTpcHit();
+  StMcTpcHit() {}
+  StMcTpcHit(const StThreeVectorF& x,const StThreeVectorF& p,
+	     Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0, 
+	     Float_t adc = 0, Float_t cl_x = 0, Float_t cl_t = 0): 
+    StMcHit(x,p,de,ds,tof,k,volId,parent), mAdc(adc), mMcl_x(cl_x), mMcl_t(cl_t) {}
+  StMcTpcHit(g2t_tpc_hit_st* pt): 
+    StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
+	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 
+	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0), 
+    mLgamma(pt->lgam), mAdc(pt->adc), mMcl_x(pt->pad), mMcl_t(pt->timebucket) {}
+  virtual ~StMcTpcHit() {}
+  ULong_t sector()     const { return (mVolumeId%10000)/100; }// 1-24
+  ULong_t padrow()     const { return (mVolumeId%100); }      // 1-45
 
-#ifdef POOL
-    void* operator new(size_t, void *p)     { return p; }
-    void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }
-#endif
-    unsigned long sector()     const; // 1-24
-    unsigned long padrow()     const; // 1-45
-
-    unsigned long isDet()      const {return mVolumeId/100000;}
-    float         lgamma()     const {return mLgamma;}
-    virtual void Print(Option_t *option="") const; // *MENU* 
+  ULong_t isDet()      const { return mVolumeId/100000; }     // pseudo pad row
+  Float_t lgamma()     const { return mLgamma;}
+  Float_t adc()        const { return mAdc;}
+  Float_t pad()        const { return mMcl_x;}
+  Float_t timeBucket() const { return mMcl_t;}
+  
+  virtual void Print(Option_t *option="") const; // *MENU* 
   
 private:
-#ifdef POOL
-    static StMemoryPool         mPool; 
-#endif
-    float                       mLgamma; //  ALOG10(GEKin/AMass) from g2t_tpc_hit
-    ClassDef(StMcTpcHit,1)
+  Float_t     mLgamma; //  ALOG10(GEKin/AMass) from g2t_tpc_hit
+  Float_t     mAdc;        
+  Float_t     mMcl_x;      /* average pad */
+  Float_t     mMcl_t;      /* average timebucket */
+  ClassDef(StMcTpcHit,2)
 };
 
 ostream&  operator<<(ostream& os, const StMcTpcHit&);
-
-inline unsigned long
-StMcTpcHit::sector() const
-{
-    // volume Id = 10000 * some junk + 100 * sector + padrow
-    return (mVolumeId%10000)/100;   //  sector=[1,24]
-}
-
-inline unsigned long
-StMcTpcHit::padrow() const
-{
-    return (mVolumeId%100);   // padrow=[1-45]
-}
 
 #endif

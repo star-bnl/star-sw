@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcRichHit.cc,v 2.7 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcRichHit.cc,v 2.8 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcRichHit.cc,v $
+ * Revision 2.8  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.7  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -30,34 +33,9 @@
  *
  **************************************************************************/
 #include "StMcRichHit.hh"
-#include "tables/St_g2t_rch_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.7 2005/09/28 21:30:15 fisyak Exp $";
-#ifdef POOL
-StMemoryPool StMcRichHit::mPool(sizeof(StMcRichHit));
-#endif
+static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.8 2011/10/17 00:24:00 fisyak Exp $";
 ClassImp(StMcRichHit);
-StMcRichHit::StMcRichHit() { /* noop */ };
-
-StMcRichHit::StMcRichHit(const StThreeVectorF& x,const StThreeVectorF& p,
-			 const float de, const float ds, const long key,
-			 const long id,
-			 StMcTrack* parent)  : StMcHit(x, p, de, ds, key, id, parent)
-{ /* noop */ }
-
-
-StMcRichHit::StMcRichHit(g2t_rch_hit_st* pt)
-: StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
-	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
-	  pt->de,
-	  0,
-	  pt->id,
-	  pt->volume_id,
-	  0),
-  mTof(pt->tof)
-{/* noop */ }
-
-StMcRichHit::~StMcRichHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StMcRichHit& h)
 {

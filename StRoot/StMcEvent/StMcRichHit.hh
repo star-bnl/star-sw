@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcRichHit.hh,v 2.8 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcRichHit.hh,v 2.9 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcRichHit.hh,v $
+ * Revision 2.9  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.8  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -38,56 +41,26 @@
 #define StMcRichHit_hh
 
 #include "StMcHit.hh"
-#ifdef POOL
-#include "StMemoryPool.hh"
-#endif
-
-class StMcTrack;
-class g2t_rch_hit_st;
+#include "tables/St_g2t_rch_hit_Table.h"
 
 class StMcRichHit : public StMcHit {
 public:
-    StMcRichHit();
-    StMcRichHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float,  const long, const long, StMcTrack*);
-    StMcRichHit(g2t_rch_hit_st*);
-    ~StMcRichHit();
-    int operator==(const StMcRichHit&) const;
-    int operator!=(const StMcRichHit&) const;
+  StMcRichHit() {}
+  StMcRichHit(const StThreeVectorF& x,const StThreeVectorF& p,
+	     Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0) : 
+    StMcHit(x,p,de,ds,tof,k,volId,parent) {}
+  StMcRichHit(g2t_rch_hit_st* pt) : 
+    StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
+	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 
+	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0) {}
+  ~StMcRichHit() {}
 
-    unsigned short  pad() const;
-    unsigned short  row() const;
-    float           tof() const;
-#ifdef POOL
-    void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }
-#endif
+  UShort_t  pad() const {return (mVolumeId & 0xff);}  // first 8 bits
+  UShort_t  row() const {return ( (mVolumeId>>8) & 0xff);}  // second 8 bits
 private:
-#ifdef POOL
-    static StMemoryPool mPool; 
-#endif
-    float               mTof;
     ClassDef(StMcRichHit,1)
 };
 
 ostream&  operator<<(ostream& os, const StMcRichHit&);
-
-inline unsigned short
-StMcRichHit::pad() const
-{
-    return (mVolumeId & 0xff);  // first 8 bits
-}
-
-inline unsigned short
-StMcRichHit::row() const
-{
-    return ( (mVolumeId>>8) & 0xff);  // second 8 bits
-}
-
-inline float
-StMcRichHit::tof() const
-{
-    return mTof;
-}
 
 #endif
