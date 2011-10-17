@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.55 2011/05/04 19:51:32 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.56 2011/10/17 00:19:13 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -50,8 +50,6 @@ TClonesArray** StMuDst::strangeArrays= 0;
 #include "StMuMcVertex.h"
 #include "StMuMcTrack.h"
 TClonesArray** StMuDst::mcArrays= 0;
-ClassImp(StMuMcVertex);
-ClassImp(StMuMcTrack);
 TClonesArray** StMuDst::emcArrays    = 0;
 TClonesArray** StMuDst::fmsArrays    = 0;
 TClonesArray** StMuDst::pmdArrays    = 0;
@@ -740,6 +738,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.56  2011/10/17 00:19:13  fisyak
+ * Active handing of IdTruth
+ *
  * Revision 1.55  2011/05/04 19:51:32  tone421
  * Added MTD infomation
  *

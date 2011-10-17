@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.104 2011/08/18 18:41:36 fisyak Exp $
+ * $Id: StMuDstMaker.cxx,v 1.105 2011/10/17 00:19:13 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -90,6 +90,7 @@
 #include "THack.h"
 #include "StMuMcVertex.h"
 #include "StMuMcTrack.h"
+#include "StG2TrackVertexMap.h"
 
 ClassImp(StMuDstMaker)
 
@@ -896,8 +897,15 @@ void StMuDstMaker::closeWrite(){
 void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
 
   DEBUGMESSAGE2("");
+  try {
+    fillMC();
+  }
+  catch(StMuException e) {
+    e.print();
+    throw e;
+  }
 
- try {
+  try {
     fillEvent(ev);
 	fillL3AlgorithmInfo(ev);
     fillDetectorStates(ev);
@@ -960,13 +968,6 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   }
   }
 #endif
-  try {
-    fillMC();
-  }
-  catch(StMuException e) {
-    e.print();
-    throw e;
-  }
   mStMuDst->set(this);
   mStMuDst->fixTofTrackIndices();
   mStMuDst->fixTrackIndicesG(mStMuDst->numberOfPrimaryVertices());
@@ -1429,6 +1430,8 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
 void StMuDstMaker::fillMC() {
   St_g2t_track  *g2t_track  = (St_g2t_track  *) GetDataSet("geant/g2t_track");  if (!g2t_track)  return;
   St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex"); if (!g2t_vertex) return;
+  StG2TrackVertexMap::instance(g2t_track,g2t_vertex);
+  mStEvent->setIdTruth();
   StMuMcVertex *mcvx = 0;
   StMuMcTrack  *mctr = 0;
   g2t_vertex_st  *vertex =  g2t_vertex->GetTable();
@@ -1632,6 +1635,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.105  2011/10/17 00:19:13  fisyak
+ * Active handing of IdTruth
+ *
  * Revision 1.104  2011/08/18 18:41:36  fisyak
  * set max. tree size = 100 GB
  *

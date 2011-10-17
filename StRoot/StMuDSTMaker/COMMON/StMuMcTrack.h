@@ -1,7 +1,8 @@
+// $Id: StMuMcTrack.h,v 1.2 2011/10/17 00:19:14 fisyak Exp $
 #ifndef __StMuMcTrack_h__
 #define __StMuMcTrack_h__
 #include "tables/St_g2t_track_Table.h" 
-
+#include "StThreeVectorF.hh"
 class StMuMcTrack : public TObject {
  public:
   enum EHIT {ktpc, ksvt, kssd,
@@ -72,6 +73,7 @@ class StMuMcTrack : public TObject {
   Float_t               pT         ()  const {return mpT;         } /* Transverse momentum */	 	   
   Float_t        	Ptot       ()  const {return mPtot;       } /* Total momentum */	 	   
   Float_t        	Rapidity   ()  const {return mRapidity;   } /* Rapidity */                        
+  virtual void Print(Option_t* option = "") const;  ///< Print track info
  private:
   Int_t          mGePid;       /* GEANT particle id */
   Int_t          mId;          /* primary key */
@@ -89,4 +91,9 @@ class StMuMcTrack : public TObject {
   Float_t        mRapidity;    /* Rapidity */
   ClassDef(StMuMcTrack,1)
 };
+ostream&              operator<<(ostream& os, StMuMcTrack const & v);
 #endif
+// $Log: StMuMcTrack.h,v $
+// Revision 1.2  2011/10/17 00:19:14  fisyak
+// Active handing of IdTruth
+//
