@@ -21,17 +21,55 @@ and reconstruction.
 0. Starting Points
 --------------------------------------------------------------------------------------------
 
-   Checking out the code
-   $ cvs co StarGeometry/Modules          # contains production geometries
-   $ cvs co StarGeometry/Devel            # contains development geometries
-   $ cons
 
-   Loading the STAR geometry in ROOT 
-   $ root.exe
-   root.exe[0] gROOT->LoadMacro("loadStarGeometry.C")
-   root.exe[1] loadStarGeometry("y2009a");
+    For the casual user
+    -------------------
+ 
+    AgML is currently available in the eval library.
+ 
+    $ starver eval
+ 
+    The AgML geometries are created in starsim using the xgeometry.so library.
+   
+    starsim> detp geom y2012
+    starsim> gexec $STAR_LIB/xgeometry.so
+    starsim> gclos all
+ 
+    When reconstructing events using the big full chain, you should add the "agml"
+    option to your chain:
+ 
+    root [0] .L bfc.C
+    root [1] bfc(0,"y2012 agml ...",...);
+ 
+ 
+    For the geometry developer
+    --------------------------
+ 
+    Check out the code
+ 
+    $ cvs co StarVMC/Geometry
+    $ cons                                 # compile once to create c++ and mortran files
+    $ cons                                 # compile a second time to compile the libraries
+                                           # this will take a while.  go have coffee.
+ 
+    The BbcmGeo.xml file in StarVMC/Geometry/BbcmGeo/ has been annotated, and may be
+    a useful module to study along with this user's guide.
+ 
+    You can now edit the geometry file you want to work with.  When you're done making
+    changes, you should
+    $ cons +StarVMC/Geometry
+    $ cons +StarVMC/StarGeometry
+    $ cons +StarVMC/xgeometry
+ 
+    You can visualize your changes using ROOT's OpenGL tools and event viewer.  An
+    example macro is provided
+ 
+    root [0] .L StarVMC/Geometry/macros/viewStarGeometry.C
+    root [1] viewStarGeometry("tag");       // where tag is a valid geometry tag.
+
 
    Getting a list of materials
+   ---------------------------
    root.exe[2] AgMaterial::List()
 
 --------------------------------------------------------------------------------------------
@@ -105,15 +143,16 @@ and reconstruction.
        Members of structures should be accessed using the '.' operator.
        In other words, the structure
 
-       <Struct name="STRX" comment="Structure X">
+       <Structure name="STRX" comment="Structure X">
           <var name="x" type="float"/>
           <var name="y" type="float"/>
-       </Struct>
+       </Structure>
 
        has two members, x and y.  They may be accessed in code blocks using
+       the "_" operator --
 
-       x = strx.x;
-       y = strx.y;
+       x = strx_x;
+       y = strx_y;
 
    1.3 Volume Naming Conventions
 
@@ -138,6 +177,25 @@ and reconstruction.
    and branching statements (i.e. For-loops and If-statements).  Arithmetic and logical
    expressions are implented as a subset of the c-programming language, which we
    refere to as LessC.
+
+
+   Printing Information
+   --------------------
+   
+   The Info tag is the only support I/O mechanism in AgML.  The syntax is
+
+   <Info format="... {A.Bx} ..."> var1, val1, ... </Info>.
+
+   The format attribute is a string which contains the text to be output and
+   one format descriptor for every variable and/or value to be printed.  The
+   format descriptors take the form
+
+   {A.Bx}
+
+   Where A is the width of the field, B is an (optional) number of places past
+   the decimal point and x is one of f, d or i for floats, doubles and integers.
+   Each format descriptor is wrapped in brackets.
+   
 
    Variables and Structures:
    -------------------------
@@ -475,6 +533,15 @@ and reconstruction.
       </Volume>
 
 
+      The Material, Medium, Attribute and Shape operators support a conditional
+      attribute.  The above code can be reduced to
+
+      <Material name="Iron"      if="i.le.5" />
+      <Material name="Air"       if="i.gt.5" />
+      <Shape    type="Box"       if="i.le.5"     dx="10" dy="10" dz="100" />
+      <Shape    type="Tube"      if="i.gt.5"     rmin="0" rmax="10" dz="100" />
+
+
    3.2 Volume Creation
 
    The Volume block is essentially a constructor for the volume.  In order to instantiate
@@ -661,6 +728,25 @@ and reconstruction.
       radl="radiation length in cm"
       absl="hadronic absorption length in cm"
 
+   Conditional Material
+   --------------------
+
+   In the event that you wish to define several related volumes with different
+   materials, you may make the Material declaration subject to a conditional
+   expression.  The material command then becomes
+
+   <Material name="material-name" material-parameters if="expression" />
+
+   where the expression is any logical expression involving variables
+   declared in the module.  When defining a volume with a changing material,
+   care must be taken to ensure that multiple versions of the volume will
+   be created.  AgML only detects changes to shape for generating a new
+   volume.  In cases where the shape remains constant, the serial option
+   should be used to ensure new volumes are created...
+
+   e.g. <Attribute for="VOLA" serial="unique-index" />
+
+
 --------------------------------------------------------------------------------------------
 5. Media
 --------------------------------------------------------------------------------------------
@@ -700,6 +786,25 @@ and reconstruction.
       stmin=        0
 
       One should consult the geant manual (routine gstmed) for meaning
+
+   Conditional Medium
+   ------------------
+
+   In the event that you wish to define several related volumes with different
+   mediums, you may make the Medium declaration subject to a conditional
+   expression.  The medium command then becomes
+
+   <Medium name="medium-name" medium-parameters if="expression" />
+
+   where the expression is any logical expression involving variables
+   declared in the module.  When defining a volume with a changing medium,
+   care must be taken to ensure that multiple versions of the volume will
+   be created.  AgML only detects changes to shape for generating a new
+   volume.  In cases where the shape remains constant, the serial option
+   should be used to ensure new volumes are created...
+
+   e.g. <Attribute for="VOLA" serial="unique-index" />
+
 
 --------------------------------------------------------------------------------------------
 6. Shapes
@@ -750,6 +855,14 @@ and reconstruction.
    <Volume block="ABCD" comment="A parameterized volume box" />
    <Shape type="box" dx="0" dy="0" dz="0" />
    </Volume>
+
+   The type of the shape may not be parameterized.  However, one can make the
+   shape subject to a conditional arguement using the form
+
+   <Shape type="type-specifier" shape-parameters if="expression" />
+
+   Where the expression is a logical expression involving any variables 
+   in the module.
 
    ==================
    Shape Declarations
@@ -936,11 +1049,15 @@ and reconstruction.
    division -- indicates that the specified volume is a division of the mother volume
 
 
+
+
 --------------------------------------------------------------------------------------------
 Obscurata
 --------------------------------------------------------------------------------------------
 
-There are some corners of the AgSTAR language which are not quite
+There are a few places where we wish to inject code only into the Mortran
+description of the detector, or the ROOT description.  For those cases an
+Export tag is provided.
 
 <Export language="Mortran|AgROOT|AgML|AgDL">
    [code]
