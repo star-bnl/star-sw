@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.37 2011/02/15 18:56:09 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.38 2011/10/17 15:36:37 fisyak Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.38  2011/10/17 15:36:37  fisyak
+ * increment version no.
+ *
  * Revision 2.37  2011/02/15 18:56:09  ullrich
  * New access fct for ZDCSMD, new ZDCSMD map, spinBit() modified.
  *
@@ -344,7 +347,7 @@ protected:
 
     unsigned int mDebug; //!
 
-    ClassDef(StTriggerData,5) 
+    ClassDef(StTriggerData,6) 
 };
 
 inline void StTriggerData::swapI(unsigned int *var){
