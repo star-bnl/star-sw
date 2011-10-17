@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.11 2011/10/17 00:13:49 fisyak Exp $
+ * $Id: StVertex.cxx,v 2.12 2011/10/17 15:35:49 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
+ * Revision 2.12  2011/10/17 15:35:49  fisyak
+ * Comment's fix
+ *
  * Revision 2.11  2011/10/17 00:13:49  fisyak
  * Add handles for IdTruth info
  *
@@ -61,7 +64,7 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.11 2011/10/17 00:13:49 fisyak Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.12 2011/10/17 15:35:49 fisyak Exp $";
 
 StVertex::StVertex()
 {
@@ -171,14 +174,11 @@ void StVertex::Streamer(TBuffer &R__b)
 } 
 //________________________________________________________________________________
 void StVertex::setIdTruth() { // match with IdTruth
-
- 
   typedef std::map< int,float>  myMap_t;
   typedef std::pair<int,float>  myPair_t;
   typedef myMap_t::const_iterator myIter_t;
   myMap_t  idTruths;
-  
-  // 		Loop to store all the mc track keys and quality of every reco hit on the track.
+  // Loop to store all the mc vertex keys and quality of every reco track on the vertex.
   UInt_t Ntracks = numberOfDaughters();
   Int_t IdVx = 0;
   Int_t qa = 0;
