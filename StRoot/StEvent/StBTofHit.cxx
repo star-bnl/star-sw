@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHit.cxx,v 2.3 2009/03/04 04:36:58 ullrich Exp $
+ * $Id: StBTofHit.cxx,v 2.4 2011/10/17 15:37:04 fisyak Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHit.cxx,v $
+ * Revision 2.4  2011/10/17 15:37:04  fisyak
+ * One line print out
+ *
  * Revision 2.3  2009/03/04 04:36:58  ullrich
  * Added missing check for valid pointer to operator<<
  *
@@ -102,10 +105,10 @@ ostream&
 operator<<(ostream &os, const StBTofHit& hit)
 {
     os << " Tray:" << hit.tray() << "  Module:" << hit.module()
-       << " Cell:" << hit.cell() << endl
+       << " Cell:" << hit.cell() 
        << " LeTime " << hit.leadingEdgeTime() 
-       << " TeTime " << hit.trailingEdgeTime() << endl
-       << " Track " << (hit.associatedTrack() ? hit.associatedTrack()->key() : 0) << endl
-       << " IdTruth " << hit.idTruth() << " Quality " << hit.qaTruth() << endl;
+       << " TeTime " << hit.trailingEdgeTime() 
+       << " Track " << (hit.associatedTrack() ? hit.associatedTrack()->key() : 0) 
+       << " IdTruth " << hit.idTruth() << " Quality " << hit.qaTruth();
     return os;
 }
