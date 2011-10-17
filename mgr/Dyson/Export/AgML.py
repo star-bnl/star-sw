@@ -524,6 +524,77 @@ and reconstruction.
    Translations will be executed first.  Followed by the rotations, evaluated in the
    order in which they are specified.
 
+   3.4 Sensitive Volumes
+
+   Sensitive volumes are declared in two ways.  First, in either the medium or material
+   declaration the isvol=1 flag is set.  Second, an instrumentation block is declared
+   as follows...
+
+   <Volume name="VOLA" ... >
+      <Material ... />
+      <Medium   ... />
+      <Shape    ... />
+
+      <Instrument block="VOLA" >
+          <Hit meas="x"     bins="0.1" opts="S" />
+          <Hit meas="y"     bins="0.1"          />
+          <Hit meas="z"     bins="0.1"          />
+          <Hit meas="cx"    nbits="10" />
+          <Hit meas="cy"    nbits="10" />
+          <Hit meas="cz"    nbits="10" />
+          <Hit meas="step"  bins="0.1" />
+          <Hit meas="slen"  bins="0.1" min="0" max="600" />
+          <Hit meas="ptot"  nbits="16" min="0" max="100" />
+          <Hit meas="tof"   nbits="18" min="0" max="1.0E-6" />
+          <Hit meas="eloss" nbits="16" min="0" max="0.01" />
+      </Instrument>
+      
+   </Volume>
+
+   Inside each instrumentation block, one or more hits are declared.  The Hit
+   declaration specifies what quantity is to be stored and with what resolution
+   and / or binning.
+
+   The "meas" attribute specifies which quantity is to be stored.  Possible
+   values are
+
+   x,  y,  z  -- the local coordinates w/in the detector volume
+   xx, yy, zz -- the global coordinates relative to the top volume
+   cx, cy, cz -- the cosines of the angles of the track
+
+   step       -- the stepsize of the track in the current tracking step
+   slen       -- the pathlength of the track through the volume in the current
+                 tracking step
+   ptot       -- the total momentum of the track
+   tof        -- the time of flight of the track to the current point
+   eloss      -- the energy lost by the track in the current tracking step
+   birk       -- the energy lost corrected by Birk's formula (relevant for
+                 scintillators)
+   lgam       -- log(gamma)
+
+   The "opts" flag specifies one of three options.  The definition is copied from
+   the AGI manual:
+
+   R - Rounding   -  local  (for this measurement only):
+       calculated bin size is rounded to 2 decimal digits
+   S - SingleStep -  global (for all measurements, bit 1 in IOPTION)
+       Even if Geant breakes path in a sensetive volume into several
+       steps, hit is regestered as if it was a single step from the
+       entry to the exit point.
+   C - Calorimery -  global (for all measurements, bit 4 in IOPTION)
+       1 is saved in hits ITRACK instead of actual track number.
+       This allows to sum up energies of all particles in the same
+       event in the cumulative part. pn: coded 28.05.95
+
+   The "bins" flag specifies the width of the binning used to store the hit.
+   When specified, the min and max of the binning may be inferred from the type
+   of hit declared.  These may also be specified using the "min" and "max"
+   attributes.
+
+   The "bits" flag specifies the number of bits in which to pack the result,
+   with "min" and "max" specifying the range of the value to pack.  If
+   nbits="0", then the value will be packed as a floating point value.
+   
 
 --------------------------------------------------------------------------------------------
 4. Materials
