@@ -12,9 +12,9 @@ typedef unsigned char UINT8 ;
 #include <SECTOR/sector.h>	// for the size constants
 
 // Don't kill everybody else while John & Jeff work on trigger structs...
-#ifndef TRG_VERSION
-#define TRG_VERSION 0x32
-#endif
+//#ifndef TRG_VERSION
+//#define TRG_VERSION 0x32
+//#endif
 
 #if (TRG_VERSION == 0x20)
 #include <TRG/trgStructures_20.h>
