@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.6 2011/10/10 20:35:08 avossen Exp $
+//   $Id: StFgtClusterMaker.h,v 1.7 2011/10/17 21:42:02 balewski Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.7  2011/10/17 21:42:02  balewski
+//   added tmp interface to fgt-simu-maker
+//
 //   Revision 1.6  2011/10/10 20:35:08  avossen
 //   fixed strip-cluster association in MaxCluster algo, made other files cvs compliant
 //
@@ -36,12 +39,14 @@ class StFgtClusterMaker : public StMaker
 
   Int_t setClusterAlgo(StFgtIClusterAlgo*);
 
+ private:
+  Bool_t mIsInitialized;
+
  protected:
   StFgtIClusterAlgo* pClusterAlgo;
   StFgtEvent *mFgtEventPtr;
   std::string mFgtEventMakerName;
- private:
-  Bool_t mIsInitialized;
+
   ClassDef(StFgtClusterMaker,1);
 
 };
