@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.12 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcSvtHit.hh,v 2.13 2011/10/17 00:24:01 fisyak Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.13  2011/10/17 00:24:01  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.12  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -59,70 +62,29 @@
 #define StMcSvtHit_hh
 
 #include "StMcHit.hh"
-#include "StMemoryPool.hh"
-
-class StMcTrack;
-class g2t_svt_hit_st;
-
-#if !defined(ST_NO_NAMESPACES)
-#endif
+#include "tables/St_g2t_svt_hit_Table.h"
 
 class StMcSvtHit : public StMcHit {
 public:
-    StMcSvtHit();
-    StMcSvtHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float, const long, const long, 
-	     StMcTrack*);
-    StMcSvtHit(g2t_svt_hit_st*);
-    ~StMcSvtHit();
-#ifdef POOL
-    void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }
-#endif
-    unsigned long layer() const;      // layer=[1,6] with SSD [1-8]
-    unsigned long ladder() const;     // ladder=[1-8] with SSD [1-20]
-    unsigned long wafer() const;      // wafer=[1-7] with SSD [1-16]
-    unsigned long barrel() const;     // barrel=[1-3] with SSD [1-4]
-    unsigned long hybrid() const;
+  StMcSvtHit() {}
+  StMcSvtHit(const StThreeVectorF& x,const StThreeVectorF& p,
+	     Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0) : 
+    StMcHit(x,p,de,ds,tof,k,volId,parent) {}
+  StMcSvtHit(g2t_svt_hit_st* pt) : 
+    StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
+	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 
+	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0) {}
+  ~StMcSvtHit() {}
+  ULong_t layer()  const {return  (mVolumeId%10000)/1000;}      // layer=[1,6] with SSD [1-8]
+  ULong_t ladder() const {return   (mVolumeId)%100;}   // ladder=[1-8] with SSD [1-20]
+  ULong_t wafer() const  {return   mVolumeId%10000 < 7101 ?  ((mVolumeId)%1000)/100 :  (((mVolumeId%10000)/100)-70);}  // wafer=[1-7] with SSD [1-16]
+  ULong_t barrel() const {return  (layer()+1)/2; }    // barrel=[1-3] with SSD [1-4]
+  ULong_t hybrid() const {return  0; } 
   virtual void Print(Option_t *option="") const; // *MENU* 
 protected:
-#ifdef POOL
-    static StMemoryPool mPool;  
-#endif
-    ClassDef(StMcSvtHit,1)
+    ClassDef(StMcSvtHit,2)
 };
 
 ostream&  operator<<(ostream& os, const StMcSvtHit&);
-
-inline unsigned long
-StMcSvtHit::layer() const
-{
-    // Volume Id: 1000*layer + 100*wafer + ladder (Helen, Nov 99)
-    return (mVolumeId)/1000;
-}
-
-inline unsigned long
-StMcSvtHit::ladder() const
-{
-    // Volume Id: 1000*layer + 100*wafer + ladder (Helen, Nov 99)
-    return (mVolumeId)%100 ;
-}
-
-inline unsigned long
-StMcSvtHit::wafer() const
-{
-    // Volume Id: 1000*layer + 100*wafer + ladder (Helen, Nov 99)
-
-    if (mVolumeId < 7101) // SVT
-	return ((mVolumeId)%1000)/100;
-    else // SSD
-	return ((mVolumeId/100)-70);
-}
-
-inline unsigned long
-StMcSvtHit::barrel() const { return (layer()+1)/2; }
-
-inline unsigned long
-StMcSvtHit::hybrid() const { return 0; } // to be implemented
 
 #endif

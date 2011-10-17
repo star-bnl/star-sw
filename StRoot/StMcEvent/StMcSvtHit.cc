@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.cc,v 2.12 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcSvtHit.cc,v 2.13 2011/10/17 00:24:01 fisyak Exp $
  * $Log: StMcSvtHit.cc,v $
+ * Revision 2.13  2011/10/17 00:24:01  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.12  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -52,34 +55,9 @@
  *
  **************************************************************************/
 #include "StMcSvtHit.hh"
-#include "tables/St_g2t_svt_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.12 2005/11/22 21:44:52 fisyak Exp $";
-#ifdef POOL
-StMemoryPool StMcSvtHit::mPool(sizeof(StMcSvtHit));
-#endif
+static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.13 2011/10/17 00:24:01 fisyak Exp $";
 ClassImp(StMcSvtHit);
-
-StMcSvtHit::StMcSvtHit() { /* noop */ };
-
-StMcSvtHit::StMcSvtHit(const StThreeVectorF& x,const StThreeVectorF& p,
-		       const float de, const float ds, const long key,
-		       const long id,
-		       StMcTrack* parent)  : StMcHit(x, p, de, ds, key, id, parent)
-{ /* noop */ }
-
-
-StMcSvtHit::StMcSvtHit(g2t_svt_hit_st* pt)
-: StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
-	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
-	  pt->de,
-	  pt->ds,
-	  pt->id,
-	  pt->volume_id,
-	  0)
-{/* noop */ }
-
-StMcSvtHit::~StMcSvtHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StMcSvtHit& h)
 {

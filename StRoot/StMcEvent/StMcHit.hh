@@ -1,9 +1,9 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.11 2011/10/11 01:16:40 perev Exp $
+ * $Id: StMcHit.hh,v 2.12 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcHit.hh,v $
- * Revision 2.11  2011/10/11 01:16:40  perev
- * Comments++
+ * Revision 2.12  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
  *
  * Revision 2.10  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
@@ -58,55 +58,60 @@
 #include "StObject.h"
 #include "Stiostream.h"
 #include "StThreeVectorF.hh"
-
-class StMcTrack;
-class g2t_hits_st;
+#include "tables/St_g2t_hits_Table.h"
+#include "StMcTrack.hh"
 
 class StMcHit : public StObject {
 public:
   enum EMcHitBits {
     kMatched = BIT(23) // if hit has matched with reconstructed one
   };
-    StMcHit();
-    StMcHit(const StThreeVectorF& x,const StThreeVectorF& p,
-		 float de, float ds, long key, long volId, StMcTrack* parent);
-    StMcHit(g2t_hits_st*);
+  StMcHit()  : mPosition(0,0,0), mLocalMomentum(0,0,0), mdE(0),mdS(0),mTof(0),mVolumeId(0),mParentTrack(0) {}
+  StMcHit(const StThreeVectorF& x,const StThreeVectorF& p,
+	  Float_t de, Float_t ds, Float_t tof, Long_t k, Long_t volId, StMcTrack* parent=0)
+    : mPosition(x), mLocalMomentum(p), mdE(de), mdS(ds), mTof(tof), mKey(k), mVolumeId(volId),  mParentTrack(parent) {}
+  StMcHit(g2t_hits_st* pt) : mPosition(pt->x[0],pt->x[1],pt->x[2]), mLocalMomentum(pt->p[0],pt->p[1],pt->p[2]),
+			     mdE(pt->de), mdS(pt->ds), mTof(pt->tof), mKey(pt->id), mVolumeId(0),
+			     mParentTrack(0) {}
     // StMcHit(const StSvtHit&);                  use default
     // const StMcHit & operator=(const StMcHit&);   use default
-    virtual ~StMcHit();
+  virtual ~StMcHit() {}
     
-    int operator==(const StMcHit&) const;
-    int operator!=(const StMcHit&) const;
+  Int_t operator==(const StMcHit& h) const;
+  Int_t operator!=(const StMcHit& h) const {return !(*this == h); }
     
 
   // "Get" Methods
-    virtual const StThreeVectorF&      position() const { return mPosition;}
-    virtual const StThreeVectorF& localMomentum() const { return mLocalMomentum;}
-    virtual float                            dE() const { return mdE; }
-    virtual float                            dS() const { return mdS; }
-    virtual long                            key() const { return mKey; }
-    virtual long                       volumeId() const { return mVolumeId; }
-    virtual StMcTrack*              parentTrack() const	{ return mParentTrack; }	
+  virtual const StThreeVectorF&      position() const { return mPosition;}
+  virtual const StThreeVectorF& localMomentum() const { return mLocalMomentum;}
+  virtual Float_t                            dE() const { return mdE; }
+  virtual Float_t                            dS() const { return mdS; }
+  virtual Float_t                         tof() const { return mTof; }
+  virtual Long_t                            key() const { return mKey; }
+  virtual Long_t                       volumeId() const { return mVolumeId; }
+  virtual StMcTrack*              parentTrack() const { return mParentTrack; }	
   // "Set" Methods
 
-    virtual void setPosition(const StThreeVectorF&);
-    virtual void setLocalMomentum(const StThreeVectorF&);
-    virtual void setdE(float);
-    virtual void setdS(float);
-    virtual void setKey(long);
-    virtual void setVolumeId(long);
-    virtual void setParentTrack(StMcTrack*);
-    virtual void Print(Option_t *option="") const; // *MENU* 
+  virtual void setPosition(const StThreeVectorF& val) { mPosition = val; }
+  virtual void setLocalMomentum(const StThreeVectorF& val) { mLocalMomentum = val; }
+  virtual void setdE(Float_t val) { mdE = val; }
+  virtual void setdS(Float_t  val) { mdS = val; }
+  virtual void setTof(Float_t tof) {mTof = tof;}
+  virtual void setKey(Long_t val) { mKey = val; }
+  virtual void setVolumeId(Long_t val) { mVolumeId = val; }
+  virtual void setParentTrack(StMcTrack* val) { mParentTrack = val; }
+  virtual void Print(Option_t *option="") const; // *MENU* 
     
 protected:
-    StThreeVectorF       mPosition;
-    StThreeVectorF       mLocalMomentum;
-    float                mdE;
-    float                mdS;
-    long                 mKey;
-    long                 mVolumeId;
-    StMcTrack*           mParentTrack;
-  ClassDef(StMcHit,1)
+  StThreeVectorF       mPosition;
+  StThreeVectorF       mLocalMomentum;
+  Float_t              mdE;
+  Float_t              mdS;
+  Float_t              mTof;    
+  Long_t               mKey;
+  Long_t               mVolumeId;
+  StMcTrack*           mParentTrack;
+  ClassDef(StMcHit,2)
 };
 ostream&  operator<<(ostream& os, const StMcHit&);
 #endif

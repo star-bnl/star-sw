@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSsdHit.hh,v 2.5 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcSsdHit.hh,v 2.6 2011/10/17 00:24:01 fisyak Exp $
  * $Log: StMcSsdHit.hh,v $
+ * Revision 2.6  2011/10/17 00:24:01  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.5  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -30,35 +33,26 @@
 #define StMcSsdHit_hh
 
 #include "StMcHit.hh"
-#ifdef POOL
-#include "StMemoryPool.hh"
-#endif
-
-class StMcTrack;
-class g2t_ssd_hit_st;
+#include "tables/St_g2t_ssd_hit_Table.h" 
 
 
 class StMcSsdHit : public StMcHit {
 public:
-    StMcSsdHit();
-  StMcSsdHit(const StThreeVectorF&,const StThreeVectorF&,
-	       const float, const float, const long, const long, StMcTrack*);
-    StMcSsdHit(g2t_ssd_hit_st*);
-    ~StMcSsdHit();
-
-#ifdef POOL
-    void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }
-#endif
-  unsigned long ladder() const {return  mVolumeId%100;     }
-  unsigned long wafer()  const {return ((mVolumeId-7000)/100)%100;}
+  StMcSsdHit() {}
+  StMcSsdHit(const StThreeVectorF& x,const StThreeVectorF& p,
+	     Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0) : 
+    StMcHit(x,p,de,ds,tof,k,volId,parent) {}
+  StMcSsdHit(g2t_ssd_hit_st* pt) : 
+    StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
+	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 
+	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0) {}
+  ~StMcSsdHit() {}
+  ULong_t ladder() const {return  mVolumeId%100;     }
+  ULong_t wafer()  const {return ((mVolumeId%10000-7000)/100)%100;}
   virtual void Print(Option_t *option="") const; // *MENU* 
     
 private:
-#ifdef POOL
-    static StMemoryPool mPool; 
-#endif
-    ClassDef(StMcSsdHit,1)
+    ClassDef(StMcSsdHit,2)
 };
 
 ostream&  operator<<(ostream& os, const StMcSsdHit&);

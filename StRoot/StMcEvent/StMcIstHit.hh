@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.hh,v 2.9 2009/02/06 15:38:13 fisyak Exp $
+ * $Id: StMcIstHit.hh,v 2.10 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcIstHit.hh,v $
+ * Revision 2.10  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.9  2009/02/06 15:38:13  fisyak
  * Jonathan: decoding for upgr15 geometry
  *
@@ -44,43 +47,42 @@
 #define StMcIstHit_hh
 
 #include "StMcHit.hh"
-#include "StMemoryPool.hh"
+#include "tables/St_g2t_ist_hit_Table.h" 
 
-class StMcTrack;
-class g2t_ist_hit_st;
-
-#if !defined(ST_NO_NAMESPACES)
-#endif
 
 class StMcIstHit : public StMcHit {
 public:
-    StMcIstHit() : StMcHit() {}
-    StMcIstHit(const StThreeVectorF&,const StThreeVectorF&,
-	       const float, const float, const long, const long, StMcTrack*);
-    StMcIstHit(g2t_ist_hit_st*);
-    ~StMcIstHit();
-    
+  StMcIstHit() : StMcHit() {}
+  StMcIstHit(const StThreeVectorF& x,const StThreeVectorF& p,
+	     Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0) : 
+    StMcHit(x,p,de,ds,tof,k,volId,parent) {}
+  StMcIstHit(g2t_ist_hit_st* pt) : 
+    StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
+	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 
+	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0) {}
+  ~StMcIstHit() {}
+  
 #ifdef POOL
-    void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }
+  void* operator new(size_t)     { return mPool.alloc(); }
+  void  operator delete(void* p) { mPool.free(p); }
 #endif
-    
-    unsigned long layer() const; // 
-    unsigned long ladder() const; // 
-    
-    // Willie: Added function wafer() to return wafer number (1-12)
-    unsigned long wafer() const;
-    virtual void Print(Option_t *option="") const; // *MENU* 
-    
+  
+  unsigned long layer() const; // 
+  unsigned long ladder() const; // 
+  
+  // Willie: Added function wafer() to return wafer number (1-12)
+  unsigned long wafer() const;
+  
+  // Willie: Added function wafer() to return wafer number (1-10,1-13 for layers 1,2)
+  // and side() to return ladder side (1=inner,2=outer)
+  ULong_t wafer() {return ((mVolumeId/100)%20);}
+  ULong_t side() {return (mVolumeId%10);} //1=inner; 2=outer;
+  virtual void Print(Option_t *option="") const; // *MENU* 
+  
 private:
-    
-#ifdef POOL
-    static StMemoryPool mPool; 
-#endif
-    ClassDef(StMcIstHit,1)
+  
+  ClassDef(StMcIstHit,2)
 };
 
 ostream&  operator<<(ostream& os, const StMcIstHit&);
-
-
 #endif

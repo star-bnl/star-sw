@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.hh,v 2.6 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcPixelHit.hh,v 2.7 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcPixelHit.hh,v $
+ * Revision 2.7  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.6  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -28,38 +31,26 @@
  **************************************************************************/
 #ifndef StMcPixelHit_hh
 #define StMcPixelHit_hh
-
 #include "StMcHit.hh"
-#include "StMemoryPool.hh"
-
-class StMcTrack;
-class g2t_pix_hit_st;
-
-#if !defined(ST_NO_NAMESPACES)
-#endif
+#include "tables/St_g2t_pix_hit_Table.h" 
 
 class StMcPixelHit : public StMcHit {
 public:
-    StMcPixelHit();
-  StMcPixelHit(const StThreeVectorF&,const StThreeVectorF&,
-	       const float, const float, const long, const long, StMcTrack*);
-    StMcPixelHit(g2t_pix_hit_st*);
-    ~StMcPixelHit();
-#ifdef POOL
-    void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }
-#endif
-
-    unsigned long layer() const; // 1-2
-    unsigned long ladder() const; // 1-6, 1-18
+  StMcPixelHit() {}
+  StMcPixelHit(const StThreeVectorF& x,const StThreeVectorF& p,
+	     Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0) : 
+    StMcHit(x,p,de,ds,tof,k,volId,parent) {}
+  StMcPixelHit(g2t_pix_hit_st* pt) : 
+    StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
+	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 
+	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0) {}
+  ~StMcPixelHit() {}
+  ULong_t layer() const {return mVolumeId/1000000;}
+  ULong_t ladder() const { return  (mVolumeId%1000000)/10000;} // 1-6, 1-18
   virtual void Print(Option_t *option="") const; // *MENU* 
-    
+  
 private:
-
-#ifdef POOL
-    static StMemoryPool mPool; 
-#endif
-    ClassDef(StMcPixelHit,1)
+  ClassDef(StMcPixelHit,2)
 };
 
 ostream&  operator<<(ostream& os, const StMcPixelHit&);

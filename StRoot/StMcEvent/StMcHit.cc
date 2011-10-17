@@ -1,9 +1,9 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.11 2011/10/11 01:17:03 perev Exp $
+ * $Id: StMcHit.cc,v 2.12 2011/10/17 00:24:00 fisyak Exp $
  * $Log: StMcHit.cc,v $
- * Revision 2.11  2011/10/11 01:17:03  perev
- * Comments++
+ * Revision 2.12  2011/10/17 00:24:00  fisyak
+ * Add time of flight for hits
  *
  * Revision 2.10  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
@@ -48,40 +48,8 @@
  **************************************************************************/
 #include "StMcHit.hh"
 #include "TString.h"
-#include "tables/St_g2t_hits_Table.h"
-#include "StMcTrack.hh"
-static const char rcsid[] = "$Id: StMcHit.cc,v 2.11 2011/10/11 01:17:03 perev Exp $";
+static const Char_t rcsid[] = "$Id: StMcHit.cc,v 2.12 2011/10/17 00:24:00 fisyak Exp $";
 ClassImp(StMcHit);
-StMcHit::StMcHit()
-    : mPosition(0.,0.,0.), mdE(0),mdS(0),mParentTrack(0)
-{ /* noop */   }
-
-StMcHit::StMcHit(const StThreeVectorF& x,const StThreeVectorF& p,
-		 float de, float ds, long key, long volId, StMcTrack* parent)
-    : mPosition(x), mLocalMomentum(p),
-      mdE(de), mdS(ds), mKey(key), mVolumeId(volId),
-      mParentTrack(parent)
-{ /* noop */ }
-
-StMcHit::StMcHit(g2t_hits_st* pt)
-{
-  mdE = pt->de;
-  mdS = pt->ds;
-  mKey = pt->id;
-  // Decode position.
-  mPosition.setX(pt->x[0]); 
-  mPosition.setY(pt->x[1]);
-  mPosition.setZ(pt->x[2]);
-  mLocalMomentum.setX(pt->p[0]); 
-  mLocalMomentum.setY(pt->p[1]);
-  mLocalMomentum.setZ(pt->p[2]);
-  mParentTrack = 0;
-  // For parent track, the g2t_hits table only gives the id of 
-  // the parent track :  pt->track_p  .  We need to decode this and assign
-  // mParentTrack to the pointer to the parent track.
-}
-
-StMcHit::~StMcHit() { /* noop */ }
     
 int StMcHit::operator==(const StMcHit& h) const
 {
@@ -89,44 +57,21 @@ int StMcHit::operator==(const StMcHit& h) const
            h.mdE   == mdE && h.mdS == mdS ;
 }
 
-int StMcHit::operator!=(const StMcHit& h) const
-{
-    return !(*this == h);  // use operator==()
-}
-
-void StMcHit::setPosition(const StThreeVectorF& val) { mPosition = val; }
-
-void StMcHit::setLocalMomentum(const StThreeVectorF& val) { mLocalMomentum = val; }
-
-void StMcHit::setdE(float val) { mdE = val; }
-
-void StMcHit::setdS(float val) { mdS = val; }
-
-void StMcHit::setKey(long val) { mKey = val; }
-
-void StMcHit::setVolumeId(long val) { mVolumeId = val; }
-
-void StMcHit::setParentTrack(StMcTrack* val) { mParentTrack = val; }
-    
 ostream& operator<<(ostream& os, const StMcHit& h)
 {
     if (h.parentTrack())
-	os << "Key, parent Key : " << Form("%5i/%5i",h.key(),h.parentTrack()->key()) << endl;
-    else                   os << "Key             : " << Form("%5i/undef",h.key()) << endl;
-    os << "Position xyz    : "   << Form("%8.2f%8.2f%8.2f",h.position().x(), h.position().y(), h.position().z()) << endl;
+      os << "Key, parent Key : " << Form("%5i/%5i",h.key(),h.parentTrack()->key()) << endl;
+    else 
+      os << "Key             : " << Form("%5i/undef",h.key()) << endl;
+    os << "Position xyz    : " << Form("%8.2f%8.2f%8.2f",h.position().x(), h.position().y(), h.position().z()) << endl;
     os << "Local Momentum  : " << Form("%8.2f%8.2f%8.2f",h.localMomentum().x()  ,h.localMomentum().y()  ,h.localMomentum().z())  << endl;
-    os << "dE              : "    << Form("%8.2f",1e6*h.dE())  << endl;
-    os << "dS              : "    << Form("%8.2f",h.dS()) << endl;
+    os << "dE              : " << Form("%8.2f keV",1e6*h.dE())  << endl;
+    os << "dS              : " << Form("%8.2f cm",h.dS()) << endl;
+    os << "tof             : " << Form("%8.2f ns",h.tof()*1e9) << endl;
     os << "VolId           : " << h.volumeId() << endl;
     return os;
 }
 //________________________________________________________________________________
 void StMcHit::Print(Option_t *option) const {
-  if (parentTrack()) cout  << Form("%5i/%5i",key(),parentTrack()->key());
-  else               cout  << Form("%5i/undef",key());
-  cout    << "\txyz: "   << Form("%8.2f%8.2f%8.2f",position().x(), position().y(), position().z()) 
-	  << "\tpxyzL: " << Form("%8.2f%8.2f%8.2f",localMomentum().x()  ,localMomentum().y()  ,localMomentum().z())  
-	  << "\tdE: "    << Form("%8.2f",1e6*dE())  
-	  << "\tdS: "    << Form("%8.2f",dS()) 
-	  << "\tVolId: " << volumeId();
+  cout << *this << endl;
 }

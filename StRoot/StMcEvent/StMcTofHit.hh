@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTofHit.hh,v 2.5 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcTofHit.hh,v 2.6 2011/10/17 00:24:01 fisyak Exp $
  * $Log: StMcTofHit.hh,v $
+ * Revision 2.6  2011/10/17 00:24:01  fisyak
+ * Add time of flight for hits
+ *
  * Revision 2.5  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -26,39 +29,26 @@
 #define StMcTofHit_hh
 
 #include "StMcHit.hh"
-#include "StMemoryPool.hh"
-
-class StMcTrack;
-class g2t_ctf_hit_st;
+#include "tables/St_g2t_ctf_hit_Table.h"  
 
 class StMcTofHit : public StMcHit {
 public:
-  StMcTofHit();
-  StMcTofHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float,  const long, const long, StMcTrack*);
-  StMcTofHit(g2t_ctf_hit_st*);
-  virtual ~StMcTofHit();
-  int operator==(const StMcTofHit&) const;
-  int operator!=(const StMcTofHit&) const;
-  float tof() const;
-  float sTrack() const;
-#ifdef POOL
-  void* operator new(size_t)     { return mPool.alloc(); }
-  void  operator delete(void* p) { mPool.free(p); }
-#endif
+  StMcTofHit() {}
+  StMcTofHit(const StThreeVectorF& x,const StThreeVectorF& p,
+	     Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0) : 
+    StMcHit(x,p,de,ds,tof,k,volId,parent) {}
+  StMcTofHit(g2t_ctf_hit_st* pt, Float_t cl_x=0, Float_t cl_t=0): 
+    StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
+	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 
+	    pt->de, pt->ds, pt->tof, pt->id, pt->volume_id, 0) {}
+  ~StMcTofHit() {}
+  Float_t sTrack() const {return mStrack;}
   virtual void Print(Option_t *option="") const; // *MENU* 
 private:
-#ifdef POOL
-  static StMemoryPool mPool; 
-#endif
-  float               mTof; 
-  float               mStrack; 
-  ClassDef(StMcTofHit,1)
+  Float_t               mStrack; 
+  ClassDef(StMcTofHit,2)
 };
 
 ostream&  operator<<(ostream& os, const StMcTofHit&);
-
-inline float StMcTofHit::tof()  const {return mTof;}
-inline float StMcTofHit::sTrack() const {return mStrack;}
 
 #endif
