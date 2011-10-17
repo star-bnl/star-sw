@@ -81,6 +81,7 @@ static StvConst  *kons = StvConst::Inst();
 	  if (ans) 				continue;
 	  if (mCurrTrak->Check("Two",1+2))  	continue;
 	  nAdded = FindTrack(1);
+          if (nAdded<0)				break;
 	  if (mCurrTrak->Check("THree",2))	continue;
     // few hits added. Refit track to beam again 
 	  ans = Refit(0);
@@ -120,6 +121,7 @@ static const StvConst   *myConst = StvConst::Inst();
 static       StvToolkit *kit     = StvToolkit::Inst();
 static       StvFitter  *fitt    = StvFitter::Inst();
 
+StvDebug::Break(nCall);
 StvNodePars par[2];
 StvFitErrs  err[2];
 int mySkip=0,idive = 0,nNode=0,nHits=0;
@@ -251,8 +253,7 @@ if (DoShow()) {
       nHits++;
       node->SetXi2(myXi2,idir);
       node->SetHE(fitt->GetHitErrs());
-      assert(nHits<=5 || !par[1].check("AfterFitter"));
-      assert(nHits<=5 || !err[1].Check("AfterFitter"));
+      if (nHits>5 && par[1].check("AfterFitter")) return -1;
       node->SetFit(par[1],err[1],idir);
       par[0]=par[1]; err[0]=err[1];
     }
