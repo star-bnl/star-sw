@@ -9,6 +9,13 @@
 #include <stdio.h>
 #include <math.h>
 #include "l3CoordinateTransformer.h"
+
+
+#ifndef TRG_VERSION
+#define TRG_VERSION 0x32
+#endif
+
+
 #include "daqFormats.h"
 #include "L3/L3Formats.h"
 

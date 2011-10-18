@@ -8,6 +8,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
+#ifndef TRG_VERSION
+#define TRG_VERSION 0x32
+#endif
+
 #include "daqFormats.h"
 #include "FtfTrack.h"
 //#include "l3List.h"

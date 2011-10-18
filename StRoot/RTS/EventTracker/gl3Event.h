@@ -11,6 +11,11 @@
 #ifndef GL3EVENT 
 #define GL3EVENT 
 
+
+#ifndef TRG_VERSION
+#define TRG_VERSION 0x32
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

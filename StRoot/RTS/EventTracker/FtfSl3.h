@@ -24,6 +24,11 @@
 #ifndef FTFSL3
 #define FTFSL3
 
+
+#ifndef TRG_VERSION
+#define TRG_VERSION 0x32
+#endif
+
 #include "l3CoordinateTransformer.h"
 #include "FtfFinder.h"
 #include "FtfDedx.h"
