@@ -3,6 +3,9 @@
 #include <arpa/inet.h>
 
 #include <rtsLog.h>
+
+#define TRG_VERSION 0x32
+
 #include <daqFormats.h>
 #include <rts.h>
 #include <rtsSystems.h>

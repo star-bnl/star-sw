@@ -1,3 +1,6 @@
+#ifndef TRG_VERSION
+#define TRG_VERSION 0x32
+#endif
 
 #include <stdio.h>
 #include <unistd.h>

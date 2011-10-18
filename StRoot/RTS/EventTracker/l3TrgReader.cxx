@@ -1,6 +1,11 @@
 #include "l3TrgReader.h"
 #include <rtsLog.h>
 #include <stdio.h>
+
+#ifndef TRG_VERSION
+#define TRG_VERSION 0x32
+#endif
+
 #include "daqFormats.h"
 //#include "TRG/trgStructures.h"
 

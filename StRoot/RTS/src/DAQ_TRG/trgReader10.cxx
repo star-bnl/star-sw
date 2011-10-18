@@ -3,11 +3,14 @@
 #include <arpa/inet.h>
 #include <rtsLog.h>
 #include <rtsSystems.h>
-#include <daqFormats.h>
+
 
 //#include <evpSupport.h>
 
+#ifndef TRG_VERSION
 #define TRG_VERSION 0x32
+#endif
+
 #include <daqFormats.h>
 #include <rts.h>  // for the sake of swap32 entry
 

@@ -49,6 +49,11 @@
 **:           aug 10, 2001  ppy get rid of bFieldPolarity, this should be handle somewhere else
 **:<------------------------------------------------------------------*/
 
+
+#ifndef TRG_VERSION
+#define TRG_VERSION 0x32
+#endif
+
 #include <stdlib.h>
 #include "FtfSl3.h"
 #include "rts.h"

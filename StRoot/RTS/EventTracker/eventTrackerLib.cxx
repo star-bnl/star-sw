@@ -1,5 +1,9 @@
 // Switch between l3t and ftf in sl3.h!!!
 
+#ifndef TRG_VERSION
+#define TRG_VERSION 0x32
+#endif
+
 #include <unistd.h>
 #include <string.h>
 #include <setjmp.h>

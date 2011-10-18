@@ -1,3 +1,7 @@
+#ifndef TRG_VERSION
+#define TRG_VERSION 0x32
+#endif
+
 #include "gl3EMC.h"
 
 #include "gl3Event.h"
