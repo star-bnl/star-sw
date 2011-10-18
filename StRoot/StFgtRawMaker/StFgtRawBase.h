@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRawBase.h,v 1.5 2011/09/30 19:08:12 sgliske Exp $
+ * $Id: StFgtRawBase.h,v 1.6 2011/10/18 03:16:08 avossen Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRawBase.h,v $
+ * Revision 1.6  2011/10/18 03:16:08  avossen
+ * make compatible with chain like event saving, first step
+ *
  * Revision 1.5  2011/09/30 19:08:12  sgliske
  * general update
  *
@@ -56,7 +59,7 @@ class StFgtRawBase {
    StFgtRawBase& operator=(const StFgtRawBase&);
 
    // Construct the StFgtEvent
-   Int_t constructFgtEvent();
+   virtual Int_t constructFgtEvent();
 
    // accessors
    StFgtEvent* getFgtEventPtr();

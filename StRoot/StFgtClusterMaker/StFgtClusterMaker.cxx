@@ -2,8 +2,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.8 2011/10/18 01:18:50 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.9 2011/10/18 03:16:00 avossen Exp $
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.9  2011/10/18 03:16:00  avossen
+//   make compatible with chain like event saving, first step
+//
 //   Revision 1.8  2011/10/18 01:18:50  avossen
 //   changed data access method to GetInputDS called from Make()
 //
@@ -30,16 +33,20 @@ void StFgtClusterMaker::Clear(Option_t *opts)
 
 Int_t StFgtClusterMaker::PrepareEnvironment()
 {
+
   StEvent* mEvent=0;
   mEvent=(StEvent*)GetInputDS("StEvent");
+
   mFgtEventPtr=NULL;
   if(mEvent)
     {
       mFgtEventPtr=mEvent->fgtEvent();
+
     }
   else
     {
       //in other makers we would construct a new event here, but this doesn't make sense for the cluster maker
+	LOG_ERROR << "could not find StEvent in  cluster maker" << endm;
       return kStErr;
     }
   return kStOK;
@@ -52,11 +59,13 @@ Int_t StFgtClusterMaker::Make()
   TStopwatch clock;
   clock.Start();
   LOG_DEBUG <<"StClusterMaker::Make()******************************************************************"<<endm;
-  if( !mIsInitialized || !pClusterAlgo|| !PrepareEnvironment())
+  if( !mIsInitialized || !pClusterAlgo|| (PrepareEnvironment()!=kStOK))
     {
       LOG_ERROR << "cluster maker not initialized" << endm;
       if(!pClusterAlgo) 
 	LOG_ERROR << "no cluster algo " << endm;
+      if(!mIsInitialized) 
+	LOG_ERROR << "really not initialzied... " << endm;
       return kStFatal;
     }
   else
