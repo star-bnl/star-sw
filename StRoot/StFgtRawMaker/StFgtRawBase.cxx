@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRawBase.cxx,v 1.3 2011/09/30 17:24:39 sgliske Exp $
+ * $Id: StFgtRawBase.cxx,v 1.4 2011/10/18 03:16:08 avossen Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRawBase.cxx,v $
+ * Revision 1.4  2011/10/18 03:16:08  avossen
+ * make compatible with chain like event saving, first step
+ *
  * Revision 1.3  2011/09/30 17:24:39  sgliske
  * LOG_* bug solved, so can now return kStEof
  *
@@ -29,7 +32,7 @@
  **************************************************************************/
 
 #include "StFgtRawBase.h"
-
+#include "StRoot/StEvent/StEvent.h"
 // constructors
 StFgtRawBase::StFgtRawBase( UInt_t numDiscs, Int_t numRawHits, Int_t numClusters, Int_t numPoints ) :
    mFgtEventPtr( 0 ),
@@ -51,6 +54,8 @@ StFgtRawBase::StFgtRawBase( const StFgtRawBase& rhs ) :
    // in this case, construct the event here
    if( rhs.mFgtEventPtr )
       mFgtEventPtr = new StFgtEvent( *(rhs.mFgtEventPtr) );
+
+
 };
 
 // equals operator
@@ -72,11 +77,6 @@ StFgtRawBase& StFgtRawBase::operator=( const StFgtRawBase& rhs ){
    return *this;
 };
 
-Int_t StFgtRawBase::constructFgtEvent(){
-   if( mFgtEventPtr )
-      delete mFgtEventPtr;
+Int_t StFgtRawBase::constructFgtEvent(){return kStOK;};
 
-   mFgtEventPtr = new StFgtEvent( mNumDiscs, mNumRawHits, mNumClusters, mNumPoints );
 
-   return ( mFgtEventPtr ? kStOk : kStErr );
-};

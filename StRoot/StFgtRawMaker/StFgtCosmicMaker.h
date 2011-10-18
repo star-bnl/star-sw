@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtCosmicMaker.h,v 1.12 2011/10/04 18:38:59 sgliske Exp $
+//  $Id: StFgtCosmicMaker.h,v 1.13 2011/10/18 03:16:08 avossen Exp $
 //  $Log: StFgtCosmicMaker.h,v $
+//  Revision 1.13  2011/10/18 03:16:08  avossen
+//  make compatible with chain like event saving, first step
+//
 //  Revision 1.12  2011/10/04 18:38:59  sgliske
 //  made cut on short events optional
 //
@@ -51,6 +54,7 @@ class StFgtCosmicMaker : public StFgtRawBase, public StMaker
   virtual Int_t Init();
   virtual Int_t Make();
   virtual void Clear( Option_t *opts = "" );
+  virtual Int_t constructFgtEvent();
 
   void cutShortEvents( Bool_t doIt = 1 );
 

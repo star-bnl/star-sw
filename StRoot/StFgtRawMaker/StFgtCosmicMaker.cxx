@@ -1,4 +1,5 @@
 #include "StFgtCosmicMaker.h"
+#include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeomDefs.h"
 #include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
 #include "RTS/src/DAQ_FGT/daq_fgt.h"
@@ -16,6 +17,37 @@ StFgtCosmicMaker::StFgtCosmicMaker( const Char_t* name, const Char_t *daqFileNam
 StFgtCosmicMaker::~StFgtCosmicMaker(){
    if( mRdr )
       delete mRdr;
+};
+
+Int_t StFgtCosmicMaker::constructFgtEvent()
+{
+
+  if( mFgtEventPtr )
+      delete mFgtEventPtr;
+
+   mFgtEventPtr = new StFgtEvent( mNumDiscs, mNumRawHits, mNumClusters, mNumPoints );
+   StEvent* mEvent=0;
+   //   mEvent=(StEvent*)GetInputDS("StEvent");
+   //we assume that for the cosmic stand this is where the event is created
+   if(!mEvent)
+     {
+       mEvent=new StEvent();
+       AddData(mEvent);
+       cout <<" attaching..." <<endl;
+     }
+
+
+   if(mEvent&& mFgtEventPtr)
+     {
+       mEvent->setFgtEvent(mFgtEventPtr);
+       LOG_DEBUG<<"cosmic maker added new event and fgtEvent" <<endm;
+     }
+   else
+     {
+       LOG_ERROR<<"cosmic maker could not create events" <<endl;
+     }
+
+   return ( mFgtEventPtr ? kStOk : kStErr );
 };
 
 Int_t StFgtCosmicMaker::Init(){
@@ -122,6 +154,7 @@ Int_t StFgtCosmicMaker::Make()
 
           Char_t type = 0;    // raw adc, no correction yet.
 	  StFgtRawHit hit(geoId,adc,type,timebin);
+	  hit.setCharge(adc);
 	  StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
 
 	  if(pDisc)
