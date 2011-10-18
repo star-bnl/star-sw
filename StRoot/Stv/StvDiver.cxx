@@ -349,10 +349,9 @@ static int nCall=0; nCall++;
     memcpy((*fDeriv)[0],R[0],sizeof(R));
   }
 
-  assert(fabs(fHelix->Pos()[0]-pos[0])<0.3*(dL+1));
-  assert(fabs(fHelix->Pos()[1]-pos[1])<0.3*(dL+1));
-  assert(fabs(fHelix->Pos()[2]-pos[2])<0.3*(dL+1));
-
+  double delta=0,*Pos = fHelix->Pos();
+  for (int j=0;j<3;j++) {delta+=fabs(Pos[j]-pos[j]);} 
+  if (delta>0.3*(dL+1)) return kDiveBreak;
 
   THEmx_t *emx = fHelix->Emx();
   assert(emx->mCC>0);
@@ -402,10 +401,7 @@ int StvMCStepping::IsDca00(int begEnd)
       double rho0 = fHelix->GetRho();
       double delta = rho0-rho1;
       if (fabs(delta) > 1e-6*fabs(rho1)) { // significant change of curvature
-         delta = (delta*dcaL)/(rho1*dL);
-         double rho1 = rho0/(1+delta);
-         double rho = (fabs(delta)>1e-2)? rho0*log(1+delta)/delta:(rho0+rho1)/2;
-         th.Set(rho);
+         th.Set((2*rho0+rho1)/3);
          if (ans==kDiveDca) dcaL = th.Path(0.,0.);
       }
   //		Update end position
