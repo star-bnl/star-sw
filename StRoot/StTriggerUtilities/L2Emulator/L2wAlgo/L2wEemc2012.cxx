@@ -5,7 +5,7 @@
 #include <math.h>
 
 /***********************************************************
- * $Id: L2wEemc2012.cxx,v 1.2 2011/10/19 15:39:45 jml Exp $
+ * $Id: L2wEemc2012.cxx,v 1.3 2011/10/19 16:12:12 jml Exp $
  * \author Jan Balewski, MIT, 2008 
  ***********************************************************
  * Descripion: see .h
@@ -19,7 +19,7 @@
 
 //=================================================
 //=================================================
-L2wEemc2012::L2wEemc2012(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid,  db, outDir, false,true, resOff ) { 
+L2wEemc2012::L2wEemc2012(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom2012 *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid,  db, outDir, false,true, resOff ) { 
   /* called one per days
      all memory allocation must be done here
   */
@@ -139,6 +139,9 @@ L2wEemc2012::createHisto() {
 
 /**********************************************************************
   $Log: L2wEemc2012.cxx,v $
+  Revision 1.3  2011/10/19 16:12:12  jml
+  more 2012 stuff
+
   Revision 1.2  2011/10/19 15:39:45  jml
   2012
 

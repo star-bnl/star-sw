@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 /**********************************************************
- * $Id: L2pedAlgo12.cxx,v 1.2 2011/10/19 15:39:44 jml Exp $
+ * $Id: L2pedAlgo12.cxx,v 1.3 2011/10/19 16:12:12 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  **********************************************************
  * Descripion:
@@ -14,7 +14,7 @@
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
   #include "../L2algoUtil/L2EmcDb2012.h"
-  #include "../L2algoUtil/L2EmcGeom.h"
+  #include "../L2algoUtil/L2EmcGeom2012.h"
   #include "../L2algoUtil/L2Histo.h"
 #else
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb2012.h"
@@ -26,7 +26,7 @@
 
 //=================================================
 //=================================================
-L2pedAlgo12::L2pedAlgo12(const char* name, const char *uid, L2EmcDb* db, char* outDir, int resOff) 
+L2pedAlgo12::L2pedAlgo12(const char* name, const char *uid, L2EmcDb2012* db, char* outDir, int resOff) 
   :  L2VirtualAlgo2012(name, uid,  db,  outDir, false, false, resOff) { 
   /* called one per days
      all memory allocation must be done here
@@ -126,7 +126,7 @@ L2pedAlgo12::initRunUser(int runNo, int *rc_ints, float *rc_floats) {
   int i;  
   int nBtowOk=0, nEtowOk=0;
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    const L2EmcDb2012::EmcCDbItem *x=mDb->getByIndex(i);
     if(mDb->isEmpty(x)) continue; // dropped not mapped channels
     if (mDb->isBTOW(x) ) {
 	  db_btowPed[x->rdo]=(int) (x->ped);
@@ -282,7 +282,7 @@ L2pedAlgo12::finishRunUser() {/* called once at the end of the run */
   int i;
   int nB=0;
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    const L2EmcDb2012::EmcCDbItem *x=mDb->getByIndex(i);
     if(mDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
     if (mDb->isBTOW(x) ||mDb->isETOW(x) ) { //
       // printf("sss i=%d",i); mDb->printItem(x);
@@ -381,18 +381,18 @@ L2pedAlgo12::finishRunUser() {/* called once at the end of the run */
 
     // .................. SAVE FULL SPECTRA BINARY ...........
     for(i=0; i<EmcDbIndexMax; i++) {
-      const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+      const L2EmcDb2012::EmcCDbItem *x=mDb->getByIndex(i);
       if(mDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
       L2Histo *h=0;
       char tit[400];
       if(mDb->isBTOW(x) ){
 	h= btowAdc[x->rdo];
-	//L2EmcDb::printItem(x);
+	//L2EmcDb2012::printItem(x);
 	sprintf(tit,"BTOW=%s cr/ch=%03d/%03d stat/0x=%04x+%04x soft=%s; %s",x->name, x->crate, x->chan, x->stat, x->fail,x->tube,xAxis);
 	//printf("tit=%s=\n",tit);	
       } else if(mDb->isETOW(x) ) {
 	h= etowAdc[x->rdo];
-	//L2EmcDb::printItem(x);
+	//L2EmcDb2012::printItem(x);
 	sprintf(tit,"ETOW=%s cr/ch=%03d/%03d stat/0x=%04x+%04x pname=%s; %s",x->name, x->crate, x->chan, x->stat, x->fail,x->tube,xAxis);
       }
       if(h==0) continue; //just in case
@@ -411,6 +411,9 @@ L2pedAlgo12::finishRunUser() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo12.cxx,v $
+  Revision 1.3  2011/10/19 16:12:12  jml
+  more 2012 stuff
+
   Revision 1.2  2011/10/19 15:39:44  jml
   2012
 

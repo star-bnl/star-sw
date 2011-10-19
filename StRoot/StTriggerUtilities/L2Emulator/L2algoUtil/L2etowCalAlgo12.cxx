@@ -5,7 +5,7 @@
 #include <math.h>
 
 /*********************************************************
-  $Id: L2etowCalAlgo12.cxx,v 1.3 2011/10/19 15:58:06 jml Exp $
+  $Id: L2etowCalAlgo12.cxx,v 1.4 2011/10/19 16:12:10 jml Exp $
   \author Jan Balewski, MIT, 2008 
  *****************************************************
   Descripion:
@@ -19,7 +19,7 @@
 #else
   #include "L2EmcDb2012.h"
   #include "L2Histo.h"
-  #include "L2EmcGeom.h"
+  #include "L2EmcGeom2012.h"
 #endif
 
 #include "L2etowCalAlgo12.h"
@@ -27,7 +27,7 @@
 
 //=================================================
 //=================================================
-L2etowCalAlgo12::L2etowCalAlgo12(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid, db,  outDir, false, true, resOff) { 
+L2etowCalAlgo12::L2etowCalAlgo12(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom2012 *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid, db,  outDir, false, true, resOff) { 
   /* called once per days
      all memory allocation must be done here
   */
@@ -348,6 +348,9 @@ L2etowCalAlgo12::print0(){ // full raw input  ADC array
 
 /**********************************************************************
   $Log: L2etowCalAlgo12.cxx,v $
+  Revision 1.4  2011/10/19 16:12:10  jml
+  more 2012 stuff
+
   Revision 1.3  2011/10/19 15:58:06  jml
   more compile offline
 

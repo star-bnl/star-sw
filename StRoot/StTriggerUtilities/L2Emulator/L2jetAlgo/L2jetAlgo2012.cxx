@@ -5,7 +5,7 @@
 #include <math.h>
 
 /***********************************************************
- * $Id: L2jetAlgo2012.cxx,v 1.2 2011/10/19 15:39:44 jml Exp $
+ * $Id: L2jetAlgo2012.cxx,v 1.3 2011/10/19 16:12:11 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  ***********************************************************
  * Descripion:
@@ -32,7 +32,7 @@
 
 //=================================================
 //=================================================
-L2jetAlgo2012::L2jetAlgo2012(const char* name, const char *uid, L2EmcDb* db, char* outDir, int resOff, bool writeHighResult) 
+L2jetAlgo2012::L2jetAlgo2012(const char* name, const char *uid, L2EmcDb2012* db, char* outDir, int resOff, bool writeHighResult) 
   :  L2VirtualAlgo2012( name, uid,  db,  outDir, true, true, resOff) { 
   /* called one per days
      all memory allocation must be done here
@@ -179,7 +179,7 @@ L2jetAlgo2012::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
   int nBg=0, nEg=0; /* counts # of reasonable calibrated towers */ 
 
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    const L2EmcDb2012::EmcCDbItem *x=mDb->getByIndex(i);
     if(mDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
     if(x->fail) continue; /* dropped masked channels */
     if(x->gain<=0) continue; /* dropped uncalibrated towers , tmp */
@@ -990,10 +990,10 @@ L2jetAlgo2012::finishRunHisto(){
   int bHotSum=1,bHotId=-1;
   int eHotSum=1;
 
-  const L2EmcDb::EmcCDbItem *xE=mDb->getByIndex(402), *xB=mDb->getByIndex(402);
+  const L2EmcDb2012::EmcCDbItem *xE=mDb->getByIndex(402), *xB=mDb->getByIndex(402);
   int i;
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    const L2EmcDb2012::EmcCDbItem *x=mDb->getByIndex(i);
     if(mDb->isEmpty(x)) continue; 
     if (mDb->isBTOW(x) ) {
       int softId=atoi(x->tube+2);
@@ -1032,6 +1032,9 @@ L2jetAlgo2012::finishRunHisto(){
 
 /**********************************************************************
   $Log: L2jetAlgo2012.cxx,v $
+  Revision 1.3  2011/10/19 16:12:11  jml
+  more 2012 stuff
+
   Revision 1.2  2011/10/19 15:39:44  jml
   2012
 

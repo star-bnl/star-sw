@@ -5,7 +5,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2wBemc2012.cxx,v 1.2 2011/10/19 15:39:45 jml Exp $
+ * $Id: L2wBemc2012.cxx,v 1.3 2011/10/19 16:12:12 jml Exp $
  * \author Jan Balewski,MIT , 2009 
  *********************************************************************
  * Descripion: see .h
@@ -27,14 +27,14 @@ const float stepETH=5;// for QA histo
 #else
   #include "../L2algoUtil/L2EmcDb2012.h"
   #include "../L2algoUtil/L2Histo.h"
-  #include "../L2algoUtil/L2EmcGeom.h"
+  #include "../L2algoUtil/L2EmcGeom2012.h"
 #endif
 
 #include "L2wBemc2012.h"
 
 //=================================================
 //=================================================
-L2wBemc2012::L2wBemc2012(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name,uid,  db, outDir, true, false, resOff) { 
+L2wBemc2012::L2wBemc2012(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom2012 *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name,uid,  db, outDir, true, false, resOff) { 
   /* called one per day
      all memory allocation must be done here
   */
@@ -100,7 +100,7 @@ L2wBemc2012::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 
   for ( int index=0; index<EmcDbIndexMax; index++ )
      {
-       const L2EmcDb::EmcCDbItem *x = mDb->getByIndex(index);
+       const L2EmcDb2012::EmcCDbItem *x = mDb->getByIndex(index);
        if ( x==0 ) continue;
        if ( !mDb->isBTOW(x) ) continue; 
        int sec = x->sec - 1;
@@ -295,11 +295,11 @@ L2wBemc2012::finishRunUser() {  /* called once at the end of the run */
 
   for(int jh=10;jh<19;jh++) 
   {
-    const L2EmcDb::EmcCDbItem *xB=mDb->getByIndex(402);
+    const L2EmcDb2012::EmcCDbItem *xB=mDb->getByIndex(402);
     const int *hiData = hA[jh]->getData();
     int hotY=0,totY=0;
     for(int i=0; i<EmcDbIndexMax; i++) {
-      const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+      const L2EmcDb2012::EmcCDbItem *x=mDb->getByIndex(i);
       if(mDb->isEmpty(x)) continue;
       if (!mDb->isBTOW(x) ) continue;
       int ieta= (x->eta-1);
@@ -421,6 +421,9 @@ L2wBemc2012::print4(int token, int hitSize){ // L2-algo input list
 #endif
 /**********************************************************************
   $Log: L2wBemc2012.cxx,v $
+  Revision 1.3  2011/10/19 16:12:12  jml
+  more 2012 stuff
+
   Revision 1.2  2011/10/19 15:39:45  jml
   2012
 

@@ -6,7 +6,7 @@
 #include <fakeRtsLog.h>
 
 /*********************************************************************
- * $Id: L2bemcGamma2012.cxx,v 1.3 2011/10/19 15:39:43 jml Exp $
+ * $Id: L2bemcGamma2012.cxx,v 1.4 2011/10/19 16:12:11 jml Exp $
  * \author Jan Balewski,MIT , 2008 
  *********************************************************************
  * Descripion: see .h
@@ -20,7 +20,7 @@
 #else    //full path needed for cvs'd code
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb2012.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcGeom.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcGeom2012.h"
 #endif
 
 #include "L2bemcGamma2012.h"
@@ -28,7 +28,7 @@
 
 //=================================================
 //=================================================
-L2bemcGamma2012::L2bemcGamma2012(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid,  db, outDir, true, false, resOff) { 
+L2bemcGamma2012::L2bemcGamma2012(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom2012 *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid,  db, outDir, true, false, resOff) { 
   /* called one per days
      all memory allocation must be done here
   */
@@ -95,7 +95,7 @@ L2bemcGamma2012::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 
   for ( int index=0; index<EmcDbIndexMax; index++ )
      {
-       const L2EmcDb::EmcCDbItem *x = mDb->getByIndex(index);
+       const L2EmcDb2012::EmcCDbItem *x = mDb->getByIndex(index);
        if ( x==0 ) continue;
        if ( !mDb->isBTOW(x) ) continue; 
        int sec = x->sec - 1;
@@ -394,6 +394,9 @@ L2bemcGamma2012::print4(int token, int hitSize){ // L2-algo input list
 #endif
 /**********************************************************************
   $Log: L2bemcGamma2012.cxx,v $
+  Revision 1.4  2011/10/19 16:12:11  jml
+  more 2012 stuff
+
   Revision 1.3  2011/10/19 15:39:43  jml
   2012
 

@@ -5,7 +5,7 @@
 #include <math.h>
 
 /***********************************************************
- * $Id: L2hienAlgo12.cxx,v 1.2 2011/10/19 15:39:43 jml Exp $
+ * $Id: L2hienAlgo12.cxx,v 1.3 2011/10/19 16:12:11 jml Exp $
  * \author Jan Balewski, MIT, 2008 
  ***********************************************************
  * Descripion: see .h
@@ -25,7 +25,7 @@
 
 //=================================================
 //=================================================
-L2hienAlgo12::L2hienAlgo12(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff, L2VirtualAlgo2012::EmcSwitch  beSwitch)  :  L2VirtualAlgo2012( name, uid,  db, outDir, (beSwitch==kIsBtow),(beSwitch==kIsEtow), resOff ) { 
+L2hienAlgo12::L2hienAlgo12(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom2012 *geoX, char* outDir, int resOff, L2VirtualAlgo2012::EmcSwitch  beSwitch)  :  L2VirtualAlgo2012( name, uid,  db, outDir, (beSwitch==kIsBtow),(beSwitch==kIsEtow), resOff ) { 
   /* called one per days
      all memory allocation must be done here
   */
@@ -114,7 +114,7 @@ L2hienAlgo12::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 
   if(mSwitch==kIsBtow) // prepare BTOW  lookup tables
     for ( int index=0; index<EmcDbIndexMax; index++ )     {
-      const L2EmcDb::EmcCDbItem *x = mDb->getByIndex(index);
+      const L2EmcDb2012::EmcCDbItem *x = mDb->getByIndex(index);
       if ( x==0 ) continue;
       if ( !mDb->isBTOW(x) ) continue; 
       int sec = x->sec - 1;
@@ -134,7 +134,7 @@ L2hienAlgo12::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 
   if(mSwitch==kIsEtow) // prepare ETOW  lookup tables
     for ( int index=0; index<EmcDbIndexMax; index++ )     {
-      const L2EmcDb::EmcCDbItem *x = mDb->getByIndex(index);
+      const L2EmcDb2012::EmcCDbItem *x = mDb->getByIndex(index);
       if ( x==0 ) continue;
       if ( !mDb->isETOW(x) ) continue; 
       int sec = x->sec - 1;
@@ -367,6 +367,9 @@ L2hienAlgo12::print2(int token){ // full , local ADC array
 
 /**********************************************************************
   $Log: L2hienAlgo12.cxx,v $
+  Revision 1.3  2011/10/19 16:12:11  jml
+  more 2012 stuff
+
   Revision 1.2  2011/10/19 15:39:43  jml
   2012
 
