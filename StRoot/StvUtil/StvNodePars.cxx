@@ -206,6 +206,7 @@ static const int mius[]= {1,2,5,8,9,10,13,14,0};
 //______________________________________________________________________________
 StvNodePars &StvNodePars::operator=(const StvNodePars& fr) 
 {
+  if (&fr==this)	return *this;
   memcpy(this,&fr,sizeof(*this));
   assert(_hz);
   return *this;
