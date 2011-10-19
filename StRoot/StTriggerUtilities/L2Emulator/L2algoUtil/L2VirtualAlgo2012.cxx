@@ -16,7 +16,7 @@
 
 #include "L2VirtualAlgo2012.h"
 //=============================================
-L2VirtualAlgo2012::L2VirtualAlgo2012(const char* name, const char *uid, L2EmcDb* db, char* outDir, bool needbarrel, bool needendcap, int resOff) :  mDb(db) {
+L2VirtualAlgo2012::L2VirtualAlgo2012(const char* name, const char *uid, L2EmcDb2012* db, char* outDir, bool needbarrel, bool needendcap, int resOff) :  mDb(db) {
   algoIsOkay=true; //whether the algorithm is in a functional state.  innocent until proven guilty.
   mxHA=0;// initially no user defined histos
   mName1=name;
@@ -532,6 +532,9 @@ unsigned short L2VirtualAlgo2012::swap_bytes(unsigned short in)
 
 /******************************************************
   $Log: L2VirtualAlgo2012.cxx,v $
+  Revision 1.4  2011/10/19 15:58:06  jml
+  more compile offline
+
   Revision 1.3  2011/10/19 15:39:42  jml
   2012
 

@@ -5,7 +5,7 @@
 #include <math.h>
 #include "fakeRtsLog.h"
 /*********************************************************
-  $Id: L2btowCalAlgo12.cxx,v 1.3 2011/10/19 15:39:42 jml Exp $
+  $Id: L2btowCalAlgo12.cxx,v 1.4 2011/10/19 15:58:06 jml Exp $
   \author Jan Balewski, MIT, 2009 
  *****************************************************
   Descripion: 
@@ -32,7 +32,7 @@ L2eventStream2012  globL2eventStream2012;
 
 //=================================================
 //=================================================
-L2btowCalAlgo12::L2btowCalAlgo12(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid,  db,  outDir, true, false, resOff) { 
+L2btowCalAlgo12::L2btowCalAlgo12(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid,  db,  outDir, true, false, resOff) { 
   /* called one per days
      all memory allocation must be done here
   */
@@ -123,7 +123,7 @@ L2btowCalAlgo12::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
   int nEneThr=0, nPedThr=0; //BTOW count # of towers above & below threshold
   if(par_gainType>=kGainIdeal)  // this disables the whole loop below
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    const L2EmcDb2012::EmcCDbItem *x=mDb->getByIndex(i);
     if(mDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
     /*....... B A R R E L  .................*/
     if (!mDb->isBTOW(x) ) continue; /* drop if not BTOW */
@@ -284,11 +284,11 @@ L2btowCalAlgo12::finishRunUser() {  /* called once at the end of the run */
   // search for hot tower, re-project histos vs. other representations
  int bHotSum=1,bHotId=-1;
  const int *data20=hA[10]->getData();
- const L2EmcDb::EmcCDbItem *xB=mDb->getByIndex(402); // some wired default?
+ const L2EmcDb2012::EmcCDbItem *xB=mDb->getByIndex(402); // some wired default?
   
   int i;
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    const L2EmcDb2012::EmcCDbItem *x=mDb->getByIndex(i);
     if(mDb->isEmpty(x)) continue;
     if (!mDb->isBTOW(x) ) continue;
     int softId=atoi(x->tube+2);
@@ -362,6 +362,9 @@ L2btowCalAlgo12::print0(){ // full raw input  ADC array
 
 /****************************************************
   $Log: L2btowCalAlgo12.cxx,v $
+  Revision 1.4  2011/10/19 15:58:06  jml
+  more compile offline
+
   Revision 1.3  2011/10/19 15:39:42  jml
   2012
 

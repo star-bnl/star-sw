@@ -5,7 +5,7 @@
 #include <math.h>
 
 /*********************************************************
-  $Id: L2etowCalAlgo12.cxx,v 1.2 2011/10/19 15:39:42 jml Exp $
+  $Id: L2etowCalAlgo12.cxx,v 1.3 2011/10/19 15:58:06 jml Exp $
   \author Jan Balewski, MIT, 2008 
  *****************************************************
   Descripion:
@@ -27,7 +27,7 @@
 
 //=================================================
 //=================================================
-L2etowCalAlgo12::L2etowCalAlgo12(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid, db,  outDir, false, true, resOff) { 
+L2etowCalAlgo12::L2etowCalAlgo12(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid, db,  outDir, false, true, resOff) { 
   /* called once per days
      all memory allocation must be done here
   */
@@ -114,7 +114,7 @@ L2etowCalAlgo12::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
   int nEneThr=0, nPedThr=0; //ETOW count # of towers above & below threshold
   if(par_gainType>=kGainIdeal)  // this disables the whole loop below
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    const L2EmcDb2012::EmcCDbItem *x=mDb->getByIndex(i);
     if(mDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
     /*....... E N D C A P  .................*/
     if (!mDb->isETOW(x) ) continue; /* drop if not ETOW */
@@ -269,11 +269,11 @@ L2etowCalAlgo12::finishRunUser() {
 
   int eHotSum=1,eHotId=-1;
   const int *data20=hA[10]->getData();
-  const L2EmcDb::EmcCDbItem *xE=0; //mDb->getByIndex(502); // some wired default?
+  const L2EmcDb2012::EmcCDbItem *xE=0; //mDb->getByIndex(502); // some wired default?
   
   int i;
   for(i=0; i<EmcDbIndexMax; i++) {
-    const L2EmcDb::EmcCDbItem *x=mDb->getByIndex(i);
+    const L2EmcDb2012::EmcCDbItem *x=mDb->getByIndex(i);
     if(mDb->isEmpty(x)) continue;
     if (!mDb->isETOW(x) ) continue;
     int ieta= (x->eta-1);
@@ -348,6 +348,9 @@ L2etowCalAlgo12::print0(){ // full raw input  ADC array
 
 /**********************************************************************
   $Log: L2etowCalAlgo12.cxx,v $
+  Revision 1.3  2011/10/19 15:58:06  jml
+  more compile offline
+
   Revision 1.2  2011/10/19 15:39:42  jml
   2012
 
