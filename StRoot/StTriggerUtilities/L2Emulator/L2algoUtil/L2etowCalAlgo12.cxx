@@ -5,7 +5,7 @@
 #include <math.h>
 
 /*********************************************************
-  $Id: L2etowCalAlgo12.cxx,v 1.1 2011/10/18 15:11:41 jml Exp $
+  $Id: L2etowCalAlgo12.cxx,v 1.2 2011/10/19 15:39:42 jml Exp $
   \author Jan Balewski, MIT, 2008 
  *****************************************************
   Descripion:
@@ -14,10 +14,10 @@
 
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
-  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2EmcDb2012.h"
   #include "../L2algoUtil/L2Histo.h"
 #else
-  #include "L2EmcDb.h"
+  #include "L2EmcDb2012.h"
   #include "L2Histo.h"
   #include "L2EmcGeom.h"
 #endif
@@ -27,7 +27,7 @@
 
 //=================================================
 //=================================================
-L2etowCalAlgo12::L2etowCalAlgo12(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name,  db,  outDir, false, true, resOff) { 
+L2etowCalAlgo12::L2etowCalAlgo12(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid, db,  outDir, false, true, resOff) { 
   /* called once per days
      all memory allocation must be done here
   */
@@ -348,6 +348,9 @@ L2etowCalAlgo12::print0(){ // full raw input  ADC array
 
 /**********************************************************************
   $Log: L2etowCalAlgo12.cxx,v $
+  Revision 1.2  2011/10/19 15:39:42  jml
+  2012
+
   Revision 1.1  2011/10/18 15:11:41  jml
   adding 2012 algorithms
 

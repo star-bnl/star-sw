@@ -1,7 +1,7 @@
 #ifndef L2bemcGamma2012_H
 #define L2bemcGamma2012_H
 /*********************************************************************
- * $Id: L2bemcGamma2012.h,v 1.1 2011/10/18 15:11:42 jml Exp $
+ * $Id: L2bemcGamma2012.h,v 1.2 2011/10/19 15:39:43 jml Exp $
  * \author Jan Balewski, MIT, 2008 
  *********************************************************************
  * Descripion:
@@ -76,7 +76,7 @@ class L2bemcGamma2012 : public  L2VirtualAlgo2012 {
   float sumET(int phi, int eta);
   
  public:
-  L2bemcGamma2012(const char* name, L2EmcDb* db, L2EmcGeom *geo, char* outDir, int resOff);
+  L2bemcGamma2012(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geo, char* outDir, int resOff);
   int   initRunUser( int runNo, int *rc_ints, float *rc_floats);
   void  finishRunUser();// at the end of each run
   void  computeUser(int token);
@@ -93,6 +93,9 @@ class L2bemcGamma2012 : public  L2VirtualAlgo2012 {
 
 /**********************************************************************
   $Log: L2bemcGamma2012.h,v $
+  Revision 1.2  2011/10/19 15:39:43  jml
+  2012
+
   Revision 1.1  2011/10/18 15:11:42  jml
   adding 2012 algorithms
 

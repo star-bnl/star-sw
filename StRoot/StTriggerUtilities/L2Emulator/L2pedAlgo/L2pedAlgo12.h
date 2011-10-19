@@ -2,7 +2,7 @@
 #define L2PEDALGO12_H
 
 /*************************************************************
- * $Id: L2pedAlgo12.h,v 1.1 2011/10/18 15:11:44 jml Exp $
+ * $Id: L2pedAlgo12.h,v 1.2 2011/10/19 15:39:44 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  *************************************************************
  * Descripion:
@@ -43,7 +43,7 @@ class L2pedAlgo12 : public  L2VirtualAlgo2012 {
   unsigned short db_etowPed[EtowGeom::mxRdo];
 
  public:
-  L2pedAlgo12(const char* name, L2EmcDb* db, char* outDir, int resOff);
+  L2pedAlgo12(const char* name, const char *uid, L2EmcDb* db, char* outDir, int resOff);
   int  initRunUser(int runNo,  int *rc_ints, float *rc_floats);
   void finishRunUser();// at the end of each run
   void computeUser(int token); // booby trap
@@ -59,6 +59,9 @@ class L2pedAlgo12 : public  L2VirtualAlgo2012 {
 
 /**********************************************************************
   $Log: L2pedAlgo12.h,v $
+  Revision 1.2  2011/10/19 15:39:44  jml
+  2012
+
   Revision 1.1  2011/10/18 15:11:44  jml
   adding 2012 algorithms
 

@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 /*******************************************************
- * $Id: L2EmcGeom.h,v 1.3 2010/04/17 16:42:09 pibero Exp $
+ * $Id: L2EmcGeom.h,v 1.4 2011/10/19 15:39:42 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  *******************************************************
  * Descripion:
@@ -12,7 +12,7 @@
  */
 #include <string.h> // for memset
 
-#include "L2EmcDb.h"
+#include "L2EmcDb2012.h"
 
 //-------------------------------------------
 class BtowGeom{

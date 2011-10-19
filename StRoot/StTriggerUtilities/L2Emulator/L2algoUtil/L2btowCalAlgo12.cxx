@@ -5,7 +5,7 @@
 #include <math.h>
 #include "fakeRtsLog.h"
 /*********************************************************
-  $Id: L2btowCalAlgo12.cxx,v 1.2 2011/10/19 14:34:23 jml Exp $
+  $Id: L2btowCalAlgo12.cxx,v 1.3 2011/10/19 15:39:42 jml Exp $
   \author Jan Balewski, MIT, 2009 
  *****************************************************
   Descripion: 
@@ -14,10 +14,10 @@
 
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
-  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2EmcDb2012.h"
   #include "../L2algoUtil/L2Histo.h"
 #else
-  #include "L2EmcDb.h"
+  #include "L2EmcDb2012.h"
   #include "L2Histo.h"
   #include "L2EmcGeom.h"
 #endif
@@ -32,7 +32,7 @@ L2eventStream2012  globL2eventStream2012;
 
 //=================================================
 //=================================================
-L2btowCalAlgo12::L2btowCalAlgo12(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name,  db,  outDir, true, false, resOff) { 
+L2btowCalAlgo12::L2btowCalAlgo12(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid,  db,  outDir, true, false, resOff) { 
   /* called one per days
      all memory allocation must be done here
   */
@@ -51,6 +51,9 @@ L2btowCalAlgo12::L2btowCalAlgo12(const char* name, L2EmcDb* db, L2EmcGeom *geoX,
     btowCalibData.nInputBlock=0;
     btowCalibData.hitSize=0;
   }
+
+  LOG("JEFF", "sizeof L2 event stream: %d", sizeof(L2eventStream2012));
+
  }
 
 /* ========================================
@@ -359,6 +362,9 @@ L2btowCalAlgo12::print0(){ // full raw input  ADC array
 
 /****************************************************
   $Log: L2btowCalAlgo12.cxx,v $
+  Revision 1.3  2011/10/19 15:39:42  jml
+  2012
+
   Revision 1.2  2011/10/19 14:34:23  jml
   added fakeRtsLog.h to turn log statements into printfs
 

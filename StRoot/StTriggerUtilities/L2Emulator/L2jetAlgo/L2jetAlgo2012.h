@@ -1,7 +1,7 @@
 #ifndef L2JETALGO2D_H
 #define L2JETALGO2D_H
 /***********************************************************
- * $Id: L2jetAlgo2012.h,v 1.1 2011/10/18 15:11:43 jml Exp $
+ * $Id: L2jetAlgo2012.h,v 1.2 2011/10/19 15:39:44 jml Exp $
  * \author Jan Balewski, IUCF, 2008 
  ***********************************************************
  * Descripion:
@@ -121,7 +121,7 @@ class L2jetAlgo2012 : public  L2VirtualAlgo2012 {
   //void computeUser(int token);//BP these may have to be public?
 
  public:
-  L2jetAlgo2012(const char* name, L2EmcDb* db, char* outDir, int resOff, bool writeHighResult=false);
+  L2jetAlgo2012(const char* name, const char *uid, L2EmcDb* db, char* outDir, int resOff, bool writeHighResult=false);
   // ~L2jetAlgo2008(){}; // memory leak NOT taken care of
   int   initRunUser( int runNo, int *rc_ints, float *rc_floats);
   bool decisionUser(int token, int *myL2Result);//BP
@@ -133,6 +133,9 @@ class L2jetAlgo2012 : public  L2VirtualAlgo2012 {
 
 /**********************************************************************
   $Log: L2jetAlgo2012.h,v $
+  Revision 1.2  2011/10/19 15:39:44  jml
+  2012
+
   Revision 1.1  2011/10/18 15:11:43  jml
   adding 2012 algorithms
 

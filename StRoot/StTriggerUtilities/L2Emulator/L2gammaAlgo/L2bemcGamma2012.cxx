@@ -6,7 +6,7 @@
 #include <fakeRtsLog.h>
 
 /*********************************************************************
- * $Id: L2bemcGamma2012.cxx,v 1.2 2011/10/19 14:34:23 jml Exp $
+ * $Id: L2bemcGamma2012.cxx,v 1.3 2011/10/19 15:39:43 jml Exp $
  * \author Jan Balewski,MIT , 2008 
  *********************************************************************
  * Descripion: see .h
@@ -15,10 +15,10 @@
 
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
-  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2EmcDb2012.h"
   #include "../L2algoUtil/L2Histo.h"
 #else    //full path needed for cvs'd code
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb2012.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcGeom.h"
 #endif
@@ -28,7 +28,7 @@
 
 //=================================================
 //=================================================
-L2bemcGamma2012::L2bemcGamma2012(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name,  db, outDir, true, false, resOff) { 
+L2bemcGamma2012::L2bemcGamma2012(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid,  db, outDir, true, false, resOff) { 
   /* called one per days
      all memory allocation must be done here
   */
@@ -394,6 +394,9 @@ L2bemcGamma2012::print4(int token, int hitSize){ // L2-algo input list
 #endif
 /**********************************************************************
   $Log: L2bemcGamma2012.cxx,v $
+  Revision 1.3  2011/10/19 15:39:43  jml
+  2012
+
   Revision 1.2  2011/10/19 14:34:23  jml
   added fakeRtsLog.h to turn log statements into printfs
 

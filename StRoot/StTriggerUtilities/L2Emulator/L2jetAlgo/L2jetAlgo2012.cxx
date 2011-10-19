@@ -5,7 +5,7 @@
 #include <math.h>
 
 /***********************************************************
- * $Id: L2jetAlgo2012.cxx,v 1.1 2011/10/18 15:11:43 jml Exp $
+ * $Id: L2jetAlgo2012.cxx,v 1.2 2011/10/19 15:39:44 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  ***********************************************************
  * Descripion:
@@ -19,10 +19,10 @@
 
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
-  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2EmcDb2012.h"
   #include "../L2algoUtil/L2Histo.h"
 #else
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb2012.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 #endif
 
@@ -32,8 +32,8 @@
 
 //=================================================
 //=================================================
-L2jetAlgo2012::L2jetAlgo2012(const char* name, L2EmcDb* db, char* outDir, int resOff, bool writeHighResult) 
-  :  L2VirtualAlgo2012( name,  db,  outDir, true, true, resOff) { 
+L2jetAlgo2012::L2jetAlgo2012(const char* name, const char *uid, L2EmcDb* db, char* outDir, int resOff, bool writeHighResult) 
+  :  L2VirtualAlgo2012( name, uid,  db,  outDir, true, true, resOff) { 
   /* called one per days
      all memory allocation must be done here
   */
@@ -1032,6 +1032,9 @@ L2jetAlgo2012::finishRunHisto(){
 
 /**********************************************************************
   $Log: L2jetAlgo2012.cxx,v $
+  Revision 1.2  2011/10/19 15:39:44  jml
+  2012
+
   Revision 1.1  2011/10/18 15:11:43  jml
   adding 2012 algorithms
 
