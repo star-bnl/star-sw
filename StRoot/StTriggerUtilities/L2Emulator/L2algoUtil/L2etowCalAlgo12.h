@@ -1,7 +1,7 @@
 #ifndef L2etowCalAlgo12_H
 #define L2etowCalAlgo12_H
 /********************************************************
- * $Id: L2etowCalAlgo12.h,v 1.2 2011/10/19 15:39:42 jml Exp $
+ * $Id: L2etowCalAlgo12.h,v 1.3 2011/10/19 15:58:06 jml Exp $
  * \author Jan Balewski,MIT, 2008 
  ********************************************************
  * Descripion:
@@ -41,7 +41,7 @@ class L2etowCalAlgo12 : public  L2VirtualAlgo2012 {
   void createHisto();
 
  public: 
-  L2etowCalAlgo12(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geo, char* outDir,int resOff);
+  L2etowCalAlgo12(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom *geo, char* outDir,int resOff);
   int   initRunUser( int runNo, int *rc_ints, float *rc_floats);
   void  finishRunUser();// at the end of each run
   void  calibrateEtow(int token, int eemcIn, ushort *eemcData);
@@ -55,6 +55,9 @@ class L2etowCalAlgo12 : public  L2VirtualAlgo2012 {
 
 /**********************************************************************
   $Log: L2etowCalAlgo12.h,v $
+  Revision 1.3  2011/10/19 15:58:06  jml
+  more compile offline
+
   Revision 1.2  2011/10/19 15:39:42  jml
   2012
 

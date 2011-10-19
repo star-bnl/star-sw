@@ -3,7 +3,7 @@
 
 
 /*************************************************************
- * $Id: L2VirtualAlgo2012.h,v 1.2 2011/10/19 15:39:42 jml Exp $
+ * $Id: L2VirtualAlgo2012.h,v 1.3 2011/10/19 15:58:06 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  *************************************************************
  * Descripion:
@@ -22,7 +22,7 @@
 #include <string>
 #include "L2eventStream2012.h"
  
-class L2EmcDb;
+class L2EmcDb2012;
 class L2Histo;
 class L2VirtualAlgo2012 { 
  public:
@@ -40,7 +40,7 @@ class L2VirtualAlgo2012 {
    EmcSwitch mSwitch; // use enum above
 
    std::string mOutDir1, mName1, muid;
-  L2EmcDb *mDb;
+  L2EmcDb2012 *mDb;
   FILE    *mLogFile, *mHistFile;
   L2Histo *mhN; /*  Neve(case),  
 		    bins: [0-4],[10-14], reserved for virtual09 algo
@@ -92,7 +92,7 @@ class L2VirtualAlgo2012 {
   unsigned short swap_bytes(unsigned short in);
 
  public:
-  L2VirtualAlgo2012(const char* name, const char *uid, L2EmcDb* db, char*outDir, bool needsbarrel, bool needsendcap, int resOff);
+  L2VirtualAlgo2012(const char* name, const char *uid, L2EmcDb2012* db, char*outDir, bool needsbarrel, bool needsendcap, int resOff);
   virtual ~L2VirtualAlgo2012(); //memory leak NOT taken care off
   void setOflTrigID(int x) {oflTrigId=x;} //only for Maker-analysis
   int  getOflTrigID() {return oflTrigId;} //only for Maker-analysis

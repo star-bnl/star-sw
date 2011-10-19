@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 /*******************************************************
- * $Id: L2EmcGeom.h,v 1.4 2011/10/19 15:39:42 jml Exp $
+ * $Id: L2EmcGeom.h,v 1.5 2011/10/19 15:58:06 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  *******************************************************
  * Descripion:
@@ -17,7 +17,7 @@
 //-------------------------------------------
 class BtowGeom{
  public:
-  enum { mxRdo=(L2EmcDb::BTOW_MAXFEE*L2EmcDb::BTOW_DATSIZE) ,mxEtaBin=40, mxPhiBin=120, mxSubs=10 };
+  enum { mxRdo=(L2EmcDb2012::BTOW_MAXFEE*L2EmcDb2012::BTOW_DATSIZE) ,mxEtaBin=40, mxPhiBin=120, mxSubs=10 };
   // tmp, should be better protected
   float idealGain2Ene[mxEtaBin]; // (chan/GeV)
   float cosh[mxEtaBin]; 
@@ -38,7 +38,7 @@ class BtowGeom{
 //-------------------------------------------
 class EtowGeom{
  public:
-  enum { mxRdo=(L2EmcDb::ETOW_MAXFEE*L2EmcDb::ETOW_DATUSED) ,mxEtaBin=12, mxPhiBin=60, mxSubs=5 };
+  enum { mxRdo=(L2EmcDb2012::ETOW_MAXFEE*L2EmcDb2012::ETOW_DATUSED) ,mxEtaBin=12, mxPhiBin=60, mxSubs=5 };
   // tmp, should be better protected
   float idealGain2Ene[mxEtaBin]; // (chan/GeV)
   float cosh[mxEtaBin]; 

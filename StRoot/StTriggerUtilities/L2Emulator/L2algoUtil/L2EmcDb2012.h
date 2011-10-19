@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 /*********************************************************
- * $Id: L2EmcDb2012.h,v 1.1 2011/10/19 15:42:14 jml Exp $
+ * $Id: L2EmcDb2012.h,v 1.2 2011/10/19 15:58:06 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************
  * Descripion:
@@ -11,13 +11,13 @@
  *********************************************************
  */
 
-class L2EmcDb {
+class L2EmcDb2012 {
  public:
   /* use it to decalare any ENDCAP local array 12+1 secors */
   enum { EindexMax=13000};
   /* use it to decalare any local BTOW array 12+1+extra */
   enum { BindexMax=5400};
-#define EmcDbIndexMax  (L2EmcDb::EindexMax+L2EmcDb::BindexMax) /* use it to decalare any local array */
+#define EmcDbIndexMax  (L2EmcDb2012::EindexMax+L2EmcDb2012::BindexMax) /* use it to decalare any local array */
   
   enum {ETOW_DATSIZE=160, ETOW_DATUSED=128, BTOW_DATSIZE=160, ETOW_MAXFEE=6, BTOW_MAXFEE=30,MxEmcNameLen=16};
 
@@ -42,8 +42,8 @@ class L2EmcDb {
     unsigned  fail; /* bits, see eemcConstDB.hh for definitions */
   } ;
 
-  L2EmcDb(char *inpP, char *logP, char *uid);
-  ~L2EmcDb(); // saves DB for last run
+  L2EmcDb2012(char *inpP, char *logP, char *uid);
+  ~L2EmcDb2012(); // saves DB for last run
   const  EmcCDbItem *getByIndex(int i);
   const  EmcCDbItem *getByName(char *name); // slow
   int    name2index(char *name);// slow
@@ -155,6 +155,9 @@ class L2EmcDb {
 /*
 *********************************************************************
   $Log: L2EmcDb2012.h,v $
+  Revision 1.2  2011/10/19 15:58:06  jml
+  more compile offline
+
   Revision 1.1  2011/10/19 15:42:14  jml
   added 2012
 
