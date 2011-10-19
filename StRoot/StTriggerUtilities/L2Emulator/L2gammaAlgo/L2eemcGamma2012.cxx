@@ -5,7 +5,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2eemcGamma2012.cxx,v 1.1 2011/10/18 15:11:42 jml Exp $
+ * $Id: L2eemcGamma2012.cxx,v 1.2 2011/10/19 15:39:43 jml Exp $
  * \author Jan Balewski,MIT , 2008 
  *********************************************************************
  * Descripion: see .h
@@ -14,10 +14,10 @@
 
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
-  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2EmcDb2012.h"
   #include "../L2algoUtil/L2Histo.h"
 #else    //full path needed for cvs'd code
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb2012.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcGeom.h"
 #endif
@@ -69,7 +69,7 @@ void L2eemcGamma2012::swap(int array[], int index1, int index2)
 
 //=================================================
 //=================================================
-L2eemcGamma2012::L2eemcGamma2012(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name,  db, outDir,  false,true, resOff) { 
+L2eemcGamma2012::L2eemcGamma2012(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid, db, outDir,  false,true, resOff) { 
   /* called one per days
      all memory allocation must be done here
   */
@@ -645,6 +645,9 @@ L2eemcGamma2012::print4(int token, int hitSize){ // L2-algo input list
 
 /**********************************************************************
   $Log: L2eemcGamma2012.cxx,v $
+  Revision 1.2  2011/10/19 15:39:43  jml
+  2012
+
   Revision 1.1  2011/10/18 15:11:42  jml
   adding 2012 algorithms
 

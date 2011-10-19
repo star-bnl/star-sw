@@ -3,7 +3,7 @@
 
 
 /*************************************************************
- * $Id: L2VirtualAlgo2012.h,v 1.1 2011/10/18 15:11:41 jml Exp $
+ * $Id: L2VirtualAlgo2012.h,v 1.2 2011/10/19 15:39:42 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  *************************************************************
  * Descripion:
@@ -39,7 +39,7 @@ class L2VirtualAlgo2012 {
   //..... main Barrel/Endcap/Both switch
    EmcSwitch mSwitch; // use enum above
 
-  std::string mOutDir1, mName1;
+   std::string mOutDir1, mName1, muid;
   L2EmcDb *mDb;
   FILE    *mLogFile, *mHistFile;
   L2Histo *mhN; /*  Neve(case),  
@@ -92,13 +92,15 @@ class L2VirtualAlgo2012 {
   unsigned short swap_bytes(unsigned short in);
 
  public:
-  L2VirtualAlgo2012(const char* name, L2EmcDb* db, char*outDir, bool needsbarrel, bool needsendcap, int resOff);
+  L2VirtualAlgo2012(const char* name, const char *uid, L2EmcDb* db, char*outDir, bool needsbarrel, bool needsendcap, int resOff);
   virtual ~L2VirtualAlgo2012(); //memory leak NOT taken care off
   void setOflTrigID(int x) {oflTrigId=x;} //only for Maker-analysis
   int  getOflTrigID() {return oflTrigId;} //only for Maker-analysis
   bool   isAccepted(){ return mAccept; } // only for Maker-analysis
   static int  readParams(const char *fileN, int mxPar, int *iPar, float *fPar);
-  const char *getName() { return mName1.c_str();}
+  const char *getName() { 
+    return mName1.c_str();
+  }
 
   int   initRun(int runNo, int *rc_ints, float *rc_floats);
   void  compute (int token);

@@ -6,20 +6,21 @@
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
   #include "../L2algoUtil/L2Histo.h"
-  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2EmcDb2012.h"
 #else  //full path needed for cvs'd code
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb2012.h"
 #endif
 
 //#define ADD_HARDCODED_DELAY // take it off for real on-line
 
 #include "L2VirtualAlgo2012.h"
 //=============================================
-L2VirtualAlgo2012::L2VirtualAlgo2012(const char* name, L2EmcDb* db, char* outDir, bool needbarrel, bool needendcap, int resOff) :  mDb(db) {
+L2VirtualAlgo2012::L2VirtualAlgo2012(const char* name, const char *uid, L2EmcDb* db, char* outDir, bool needbarrel, bool needendcap, int resOff) :  mDb(db) {
   algoIsOkay=true; //whether the algorithm is in a functional state.  innocent until proven guilty.
   mxHA=0;// initially no user defined histos
   mName1=name;
+  mName1 = mName1 + "." + uid;
   mOutDir1=outDir;
   mNeeds_barrel=needbarrel;
   mNeeds_endcap=needendcap;
@@ -531,6 +532,9 @@ unsigned short L2VirtualAlgo2012::swap_bytes(unsigned short in)
 
 /******************************************************
   $Log: L2VirtualAlgo2012.cxx,v $
+  Revision 1.3  2011/10/19 15:39:42  jml
+  2012
+
   Revision 1.2  2011/10/19 14:34:23  jml
   added fakeRtsLog.h to turn log statements into printfs
 

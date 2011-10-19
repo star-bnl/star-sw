@@ -5,7 +5,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2wBemc2012.cxx,v 1.1 2011/10/18 15:11:44 jml Exp $
+ * $Id: L2wBemc2012.cxx,v 1.2 2011/10/19 15:39:45 jml Exp $
  * \author Jan Balewski,MIT , 2009 
  *********************************************************************
  * Descripion: see .h
@@ -22,10 +22,10 @@ const float stepETH=5;// for QA histo
 
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
-  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2EmcDb2012.h"
   #include "../L2algoUtil/L2Histo.h"
 #else
-  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2EmcDb2012.h"
   #include "../L2algoUtil/L2Histo.h"
   #include "../L2algoUtil/L2EmcGeom.h"
 #endif
@@ -34,7 +34,7 @@ const float stepETH=5;// for QA histo
 
 //=================================================
 //=================================================
-L2wBemc2012::L2wBemc2012(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name,  db, outDir, true, false, resOff) { 
+L2wBemc2012::L2wBemc2012(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name,uid,  db, outDir, true, false, resOff) { 
   /* called one per day
      all memory allocation must be done here
   */
@@ -421,6 +421,9 @@ L2wBemc2012::print4(int token, int hitSize){ // L2-algo input list
 #endif
 /**********************************************************************
   $Log: L2wBemc2012.cxx,v $
+  Revision 1.2  2011/10/19 15:39:45  jml
+  2012
+
   Revision 1.1  2011/10/18 15:11:44  jml
   adding 2012 algorithms
 

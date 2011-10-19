@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 /**********************************************************
- * $Id: L2pedAlgo12.cxx,v 1.1 2011/10/18 15:11:43 jml Exp $
+ * $Id: L2pedAlgo12.cxx,v 1.2 2011/10/19 15:39:44 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  **********************************************************
  * Descripion:
@@ -13,11 +13,11 @@
 
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
-  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2EmcDb2012.h"
   #include "../L2algoUtil/L2EmcGeom.h"
   #include "../L2algoUtil/L2Histo.h"
 #else
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb2012.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 #endif
 
@@ -26,8 +26,8 @@
 
 //=================================================
 //=================================================
-L2pedAlgo12::L2pedAlgo12(const char* name, L2EmcDb* db, char* outDir, int resOff) 
-  :  L2VirtualAlgo2012( name,  db,  outDir, false, false, resOff) { 
+L2pedAlgo12::L2pedAlgo12(const char* name, const char *uid, L2EmcDb* db, char* outDir, int resOff) 
+  :  L2VirtualAlgo2012(name, uid,  db,  outDir, false, false, resOff) { 
   /* called one per days
      all memory allocation must be done here
   */
@@ -411,6 +411,9 @@ L2pedAlgo12::finishRunUser() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo12.cxx,v $
+  Revision 1.2  2011/10/19 15:39:44  jml
+  2012
+
   Revision 1.1  2011/10/18 15:11:43  jml
   adding 2012 algorithms
 

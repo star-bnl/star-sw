@@ -5,7 +5,7 @@
 #include <math.h>
 
 /***********************************************************
- * $Id: L2hienAlgo12.cxx,v 1.1 2011/10/18 15:11:42 jml Exp $
+ * $Id: L2hienAlgo12.cxx,v 1.2 2011/10/19 15:39:43 jml Exp $
  * \author Jan Balewski, MIT, 2008 
  ***********************************************************
  * Descripion: see .h
@@ -13,10 +13,10 @@
  */
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
-  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2EmcDb2012.h"
   #include "../L2algoUtil/L2Histo.h"
 #else    //full path needed for cvs'd code
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb2012.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
 #endif
 
@@ -25,7 +25,7 @@
 
 //=================================================
 //=================================================
-L2hienAlgo12::L2hienAlgo12(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff, L2VirtualAlgo2012::EmcSwitch  beSwitch)  :  L2VirtualAlgo2012( name,  db, outDir, (beSwitch==kIsBtow),(beSwitch==kIsEtow), resOff ) { 
+L2hienAlgo12::L2hienAlgo12(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff, L2VirtualAlgo2012::EmcSwitch  beSwitch)  :  L2VirtualAlgo2012( name, uid,  db, outDir, (beSwitch==kIsBtow),(beSwitch==kIsEtow), resOff ) { 
   /* called one per days
      all memory allocation must be done here
   */
@@ -367,6 +367,9 @@ L2hienAlgo12::print2(int token){ // full , local ADC array
 
 /**********************************************************************
   $Log: L2hienAlgo12.cxx,v $
+  Revision 1.2  2011/10/19 15:39:43  jml
+  2012
+
   Revision 1.1  2011/10/18 15:11:42  jml
   adding 2012 algorithms
 

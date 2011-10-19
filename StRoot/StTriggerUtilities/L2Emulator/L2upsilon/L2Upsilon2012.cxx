@@ -6,10 +6,10 @@
 
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
-  #include "../L2algoUtil/L2EmcDb.h"
+  #include "../L2algoUtil/L2EmcDb2012.h"
   #include "../L2algoUtil/L2Histo.h"
 #else    //full path needed for cvs'd code
-  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb2012.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
   #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcGeom.h"
 #endif
@@ -21,7 +21,7 @@
 
 //=================================================
 //=================================================
-L2Upsilon2012::L2Upsilon2012(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name,  db, outDir, true, false, resOff) { 
+L2Upsilon2012::L2Upsilon2012(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid, db, outDir, true, false, resOff) { 
   /* called one per days
      all memory allocation must be done here
   */
