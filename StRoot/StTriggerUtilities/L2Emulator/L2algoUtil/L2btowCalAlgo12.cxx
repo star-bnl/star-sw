@@ -5,7 +5,7 @@
 #include <math.h>
 #include "fakeRtsLog.h"
 /*********************************************************
-  $Id: L2btowCalAlgo12.cxx,v 1.4 2011/10/19 15:58:06 jml Exp $
+  $Id: L2btowCalAlgo12.cxx,v 1.5 2011/10/19 16:12:10 jml Exp $
   \author Jan Balewski, MIT, 2009 
  *****************************************************
   Descripion: 
@@ -19,7 +19,7 @@
 #else
   #include "L2EmcDb2012.h"
   #include "L2Histo.h"
-  #include "L2EmcGeom.h"
+  #include "L2EmcGeom2012.h"
 #endif
 
 #include "L2btowCalAlgo12.h"
@@ -32,7 +32,7 @@ L2eventStream2012  globL2eventStream2012;
 
 //=================================================
 //=================================================
-L2btowCalAlgo12::L2btowCalAlgo12(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid,  db,  outDir, true, false, resOff) { 
+L2btowCalAlgo12::L2btowCalAlgo12(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom2012 *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2012( name, uid,  db,  outDir, true, false, resOff) { 
   /* called one per days
      all memory allocation must be done here
   */
@@ -362,6 +362,9 @@ L2btowCalAlgo12::print0(){ // full raw input  ADC array
 
 /****************************************************
   $Log: L2btowCalAlgo12.cxx,v $
+  Revision 1.5  2011/10/19 16:12:10  jml
+  more 2012 stuff
+
   Revision 1.4  2011/10/19 15:58:06  jml
   more compile offline
 

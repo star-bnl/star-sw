@@ -1,9 +1,9 @@
-#ifndef L2EMCGEOM_H
-#define L2EMCGEOM_H
+#ifndef L2EMCGEOM2012_H
+#define L2EMCGEOM2012_H
 #include <stdio.h>
 
 /*******************************************************
- * $Id: L2EmcGeom.h,v 1.6 2011/10/19 16:12:10 jml Exp $
+ * $Id: L2EmcGeom2012.h,v 1.1 2011/10/19 16:12:10 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  *******************************************************
  * Descripion:
@@ -12,12 +12,12 @@
  */
 #include <string.h> // for memset
 
-#include "L2EmcDb.h"
+#include "L2EmcDb2012.h"
 
 //-------------------------------------------
 class BtowGeom{
  public:
-  enum { mxRdo=(L2EmcDb::BTOW_MAXFEE*L2EmcDb::BTOW_DATSIZE) ,mxEtaBin=40, mxPhiBin=120, mxSubs=10 };
+  enum { mxRdo=(L2EmcDb2012::BTOW_MAXFEE*L2EmcDb2012::BTOW_DATSIZE) ,mxEtaBin=40, mxPhiBin=120, mxSubs=10 };
   // tmp, should be better protected
   float idealGain2Ene[mxEtaBin]; // (chan/GeV)
   float cosh[mxEtaBin]; 
@@ -38,7 +38,7 @@ class BtowGeom{
 //-------------------------------------------
 class EtowGeom{
  public:
-  enum { mxRdo=(L2EmcDb::ETOW_MAXFEE*L2EmcDb::ETOW_DATUSED) ,mxEtaBin=12, mxPhiBin=60, mxSubs=5 };
+  enum { mxRdo=(L2EmcDb2012::ETOW_MAXFEE*L2EmcDb2012::ETOW_DATUSED) ,mxEtaBin=12, mxPhiBin=60, mxSubs=5 };
   // tmp, should be better protected
   float idealGain2Ene[mxEtaBin]; // (chan/GeV)
   float cosh[mxEtaBin]; 
@@ -57,7 +57,7 @@ class EtowGeom{
 };
 
 //--------------------------------------
-class L2EmcGeom { // instanton class, created only once per week
+class L2EmcGeom2012 { // instanton class, created only once per week
   int par_maxADC;
   float par_maxET; // for maxADC scale, for ideal gains
   
@@ -66,8 +66,8 @@ class L2EmcGeom { // instanton class, created only once per week
   EtowGeom etow; // protect it better later
   float getMaxET(){ return par_maxET;}
   float getIdealAdc2ET(){ return par_maxADC/par_maxET;}
-  L2EmcGeom();
-  ~L2EmcGeom(){}; 
+  L2EmcGeom2012();
+  ~L2EmcGeom2012(){}; 
 
 
 };

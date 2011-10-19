@@ -1,7 +1,7 @@
 #ifndef L2bemcGamma2012_H
 #define L2bemcGamma2012_H
 /*********************************************************************
- * $Id: L2bemcGamma2012.h,v 1.2 2011/10/19 15:39:43 jml Exp $
+ * $Id: L2bemcGamma2012.h,v 1.3 2011/10/19 16:12:11 jml Exp $
  * \author Jan Balewski, MIT, 2008 
  *********************************************************************
  * Descripion:
@@ -24,7 +24,7 @@
 
 class L2bemcGamma2012 ;
 class L2Histo;
-class L2EmcGeom;
+class L2EmcGeom2012;
 // remember to clear in initRun() to avoid stale data
 class L2bemcGammaEvent2012 {// WARN : all is in RAM x 4096 tokens!
  public:
@@ -57,7 +57,7 @@ class L2bemcGamma2012 : public  L2VirtualAlgo2012 {
 
 
   //.............run-long, token independent variables
-  L2EmcGeom *mGeom;// avaliable but not used in this example
+  L2EmcGeom2012 *mGeom;// avaliable but not used in this example
   int mRdo2tower[mxBtow];
   int mTower2rdo[mxBtow];
 
@@ -76,7 +76,7 @@ class L2bemcGamma2012 : public  L2VirtualAlgo2012 {
   float sumET(int phi, int eta);
   
  public:
-  L2bemcGamma2012(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geo, char* outDir, int resOff);
+  L2bemcGamma2012(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom2012 *geo, char* outDir, int resOff);
   int   initRunUser( int runNo, int *rc_ints, float *rc_floats);
   void  finishRunUser();// at the end of each run
   void  computeUser(int token);
@@ -93,6 +93,9 @@ class L2bemcGamma2012 : public  L2VirtualAlgo2012 {
 
 /**********************************************************************
   $Log: L2bemcGamma2012.h,v $
+  Revision 1.3  2011/10/19 16:12:11  jml
+  more 2012 stuff
+
   Revision 1.2  2011/10/19 15:39:43  jml
   2012
 

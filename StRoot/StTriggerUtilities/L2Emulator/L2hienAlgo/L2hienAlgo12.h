@@ -1,7 +1,7 @@
 #ifndef L2hienAlgo12_H
 #define L2hienAlgo12_H
 /*****************************************************
- * $Id: L2hienAlgo12.h,v 1.2 2011/10/19 15:39:43 jml Exp $
+ * $Id: L2hienAlgo12.h,v 1.3 2011/10/19 16:12:11 jml Exp $
  * \author Jan Balewski, MIT, 2008 
  *****************************************************
 Descripion:
@@ -35,7 +35,7 @@ In case of an overflow a random (not realy) selection of towers  will be  added 
 
 class L2hienAlgo12 ;
 class L2Histo;
-class L2EmcGeom;
+class L2EmcGeom2012;
 
 // remember to clear in initRun() to avoid stale data
 class L2hienList12 {// WARN : all sits in RAM x 4096 tokens!
@@ -87,7 +87,7 @@ class L2hienAlgo12 : public  L2VirtualAlgo2012 {
   void  createHisto();
   
  public:
-  L2hienAlgo12(const char* name, const char *uid, L2EmcDb* db, L2EmcGeom *geo, char* outDir, int resOff, L2VirtualAlgo2012::EmcSwitch  beSwitch);
+  L2hienAlgo12(const char* name, const char *uid, L2EmcDb2012* db, L2EmcGeom2012 *geo, char* outDir, int resOff, L2VirtualAlgo2012::EmcSwitch  beSwitch);
   int   initRunUser( int runNo, int *rc_ints, float *rc_floats);
   void  finishRunUser();// at the end of each run
   void  computeUser(int token);
@@ -104,6 +104,9 @@ class L2hienAlgo12 : public  L2VirtualAlgo2012 {
 
 /****************************************************
   $Log: L2hienAlgo12.h,v $
+  Revision 1.3  2011/10/19 16:12:11  jml
+  more 2012 stuff
+
   Revision 1.2  2011/10/19 15:39:43  jml
   2012
 
