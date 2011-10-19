@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <rtsLog.h>
+#include "fakeRtsLog.h"
 /*********************************************************
-  $Id: L2btowCalAlgo12.cxx,v 1.1 2011/10/18 15:11:41 jml Exp $
+  $Id: L2btowCalAlgo12.cxx,v 1.2 2011/10/19 14:34:23 jml Exp $
   \author Jan Balewski, MIT, 2009 
  *****************************************************
   Descripion: 
@@ -359,6 +359,9 @@ L2btowCalAlgo12::print0(){ // full raw input  ADC array
 
 /****************************************************
   $Log: L2btowCalAlgo12.cxx,v $
+  Revision 1.2  2011/10/19 14:34:23  jml
+  added fakeRtsLog.h to turn log statements into printfs
+
   Revision 1.1  2011/10/18 15:11:41  jml
   adding 2012 algorithms
 
