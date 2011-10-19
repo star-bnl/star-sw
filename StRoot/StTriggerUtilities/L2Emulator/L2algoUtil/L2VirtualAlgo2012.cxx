@@ -1,10 +1,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <cstdlib>
-#include <rtsLog.h>
+
+#include "fakeRtsLog.h"
 
 #ifdef  IS_REAL_L2  //in l2-ana  environment
-  #include "rtsLog.h"
   #include "../L2algoUtil/L2Histo.h"
   #include "../L2algoUtil/L2EmcDb.h"
 #else  //full path needed for cvs'd code
@@ -531,6 +531,9 @@ unsigned short L2VirtualAlgo2012::swap_bytes(unsigned short in)
 
 /******************************************************
   $Log: L2VirtualAlgo2012.cxx,v $
+  Revision 1.2  2011/10/19 14:34:23  jml
+  added fakeRtsLog.h to turn log statements into printfs
+
   Revision 1.1  2011/10/18 15:11:41  jml
   adding 2012 algorithms
 
