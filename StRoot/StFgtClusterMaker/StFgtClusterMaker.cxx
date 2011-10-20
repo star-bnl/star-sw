@@ -2,13 +2,10 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.9 2011/10/18 03:16:00 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.10 2011/10/20 17:30:37 balewski Exp $
 //   $Log: StFgtClusterMaker.cxx,v $
-//   Revision 1.9  2011/10/18 03:16:00  avossen
-//   make compatible with chain like event saving, first step
-//
-//   Revision 1.8  2011/10/18 01:18:50  avossen
-//   changed data access method to GetInputDS called from Make()
+//   Revision 1.10  2011/10/20 17:30:37  balewski
+//   revert
 //
 //   Revision 1.7  2011/10/17 21:42:02  balewski
 //   added tmp interface to fgt-simu-maker
@@ -24,48 +21,23 @@
 #include "StRoot/StFgtRawMaker/StFgtCosmicMaker.h"
 #include "StRoot/StFgtRawMaker/StFgtRawMaker.h"
 #include "StFgtSimulator/StFgtSlowSimuMaker.h"
-#include "StRoot/StEvent/StEvent.h"
 
 void StFgtClusterMaker::Clear(Option_t *opts)
 {
 
 };
-
-Int_t StFgtClusterMaker::PrepareEnvironment()
-{
-
-  StEvent* mEvent=0;
-  mEvent=(StEvent*)GetInputDS("StEvent");
-
-  mFgtEventPtr=NULL;
-  if(mEvent)
-    {
-      mFgtEventPtr=mEvent->fgtEvent();
-
-    }
-  else
-    {
-      //in other makers we would construct a new event here, but this doesn't make sense for the cluster maker
-	LOG_ERROR << "could not find StEvent in  cluster maker" << endm;
-      return kStErr;
-    }
-  return kStOK;
-  };
-
-
 Int_t StFgtClusterMaker::Make()
 {
   Int_t ierr = kStOk;
   TStopwatch clock;
   clock.Start();
   LOG_DEBUG <<"StClusterMaker::Make()******************************************************************"<<endm;
-  if( !mIsInitialized || !pClusterAlgo|| (PrepareEnvironment()!=kStOK))
+
+  if( !mIsInitialized || !pClusterAlgo)
     {
       LOG_ERROR << "cluster maker not initialized" << endm;
       if(!pClusterAlgo) 
-	LOG_ERROR << "no cluster algo " << endm;
-      if(!mIsInitialized) 
-	LOG_ERROR << "really not initialzied... " << endm;
+	LOG_ERROR << "no cluster maker " << endm;
       return kStFatal;
     }
   else
@@ -87,7 +59,9 @@ Int_t StFgtClusterMaker::Make()
 	    }
 	}
     }
+
   return ierr;
+
 };
 
 
@@ -101,6 +75,35 @@ Int_t StFgtClusterMaker::Init()
 {
   //  cout <<"cluster init " <<endl;
   Int_t ierr = kStOk;
+  TObject *dataMaker = GetMaker( mFgtEventMakerName.data());
+  if( !dataMaker ){
+    LOG_FATAL << "::Init() could not get pointer to a maker with name '" << mFgtEventMakerName << "'" << endm;
+    ierr = kStFatal;
+  };
+  if( !ierr )
+    {
+      if( dataMaker->InheritsFrom( "StFgtCosmicMaker" ) ){
+	StFgtCosmicMaker* maker = static_cast< StFgtCosmicMaker* >( dataMaker );
+	mFgtEventPtr = maker->getFgtEventPtr();
+	//	cout <<" have cosmic  maker "<< endl;
+      } 
+      else if ( dataMaker->InheritsFrom( "StFgtRawMaker" ) ){
+      StFgtRawMaker* maker = static_cast< StFgtRawMaker* >( dataMaker );
+      mFgtEventPtr = maker->getFgtEventPtr();
+      //      cout <<" have raw  maker "<< endl;
+      }
+      else if (strstr(mFgtEventMakerName.data(),"FgtSlowSimu")) {
+	// try to fetch data from FgtSlow-simu in a different way
+	mFgtEventPtr = ((StFgtSlowSimuMaker*)dataMaker)->mFgtEvent; 
+      }    
+    }
+    
+
+  if( !mFgtEventPtr ){
+    LOG_FATAL << "::Init() could not get pointer to StFgtEvent" << endm;
+    ierr = kStFatal;
+
+  }
 
   mIsInitialized=true;
   return ierr;
@@ -116,6 +119,7 @@ StFgtClusterMaker::~StFgtClusterMaker()
 {
 	
 };
+
     
 ClassImp(StFgtClusterMaker);
     
