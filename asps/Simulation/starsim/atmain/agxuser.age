@@ -1,5 +1,8 @@
-* $Id: agxuser.age,v 1.4 2009/04/28 22:47:01 perev Exp $
+* $Id: agxuser.age,v 1.5 2011/10/20 23:07:19 jwebb Exp $
 * $Log: agxuser.age,v $
+* Revision 1.5  2011/10/20 23:07:19  jwebb
+* Added capability to provide a slope in the x,y vertex.
+*
 * Revision 1.4  2009/04/28 22:47:01  perev
 * More comments
 *
@@ -124,7 +127,7 @@
 *
      Logical Y
 	external gfkine,gfvert
-*
+
   call KUPATL( command, npar )
   Iprin=Idebug;  Ncommand+=1;
   if Lhome < 0
@@ -314,6 +317,11 @@
   {" set up the vertex position "
      AvFLAG=1;     Do I=1,Npar { CAll KUGETR(AVsigm(i)) }
      Prin1 AVsigm; (' AGXUSER: generating vertex spread ',3f9.4)
+  }
+  else If Command=='GSLOPE' 
+  { """setup the beamline slope"""
+    DO i=1,npar { call KuGetr( avSlope(i) ); }
+    Prin1  AVslope; (' AGXUSER: generating vertex slope ',2f9.4);
   }
   else If Command=='GDROP' | Command=='DROP'
   {" drop selected bank tree "
