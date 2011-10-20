@@ -299,8 +299,10 @@
       CALL KUPAR('GVERTEX','Z_vertex','z of the generated vertex','R',
      +'S')
       CALL KUPVAL('GVERTEX','Z_vertex',0,0.,' ','D')
-      GUID(1)='Defines the average position of the simulated vertex.'
-      CALL KUGUID('GVERTEX',GUID,1,'S')
+      GUID(1)='Defines the average position of the simulated vertex at z
+     +=0.  To provide a'
+      GUID(2)='z-dependent offset, use the gslope command.'
+      CALL KUGUID('GVERTEX',GUID,2,'S')
       CALL KUACT('GVERTEX',AGXUSER)
 
       CALL KUCMD(' ','GSPREAD','C')
@@ -316,6 +318,23 @@
       GUID(1)='Defines the spread of the simulated vertex position.'
       CALL KUGUID('GSPREAD',GUID,1,'S')
       CALL KUACT('GSPREAD',AGXUSER)
+
+      CALL KUCMD(' ','GSLOPE','C')
+      CALL KUPAR('GSLOPE','X','z-dependence of the beamline','R','S')
+      CALL KUPVAL('GSLOPE','X',0,0.,' ','D')
+      CALL KUPAR('GSLOPE','Y','z-dependence of the beamline','R','S')
+      CALL KUPVAL('GSLOPE','Y',0,0.,' ','D')
+      GUID(1)='Provides the slope of the beamline vs z in the x and y di
+     +rections.'
+      GUID(2)='Example:'
+      GUID(3)='   aguser/gspread 0.02 0.02 25.0'
+      GUID(4)='   aguser/gvertex 0.01 0.10  1.0'
+      GUID(5)='   aguser/gslope  2.5E-3 1.0E-6'
+      GUID(6)='   implements a beamline constraint'
+      GUID(7)='   x = 0.01 + (2.5E-3)*z'
+      GUID(8)='   y = 0.10 + (1.0E-6)*z'
+      CALL KUGUID('GSLOPE',GUID,8,'S')
+      CALL KUACT('GSLOPE',AGXUSER)
 
       CALL KUCMD(' ','GSFLAG','C')
       CALL KUPAR('GSFLAG','Flag','AGI control flag','O','S')

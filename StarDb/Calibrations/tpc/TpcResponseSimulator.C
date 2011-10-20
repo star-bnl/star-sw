@@ -1,5 +1,14 @@
-// $Id: TpcResponseSimulator.C,v 1.5 2010/05/24 16:07:20 fisyak Exp $
+// $Id: TpcResponseSimulator.C,v 1.8 2010/10/29 16:04:05 fisyak Exp $
 // $Log: TpcResponseSimulator.C,v $
+// Revision 1.8  2010/10/29 16:04:05  fisyak
+// Set proper t0 offset for Run IX
+//
+// Revision 1.7  2010/10/28 23:41:54  fisyak
+// extra t0 off set for Altro chip
+//
+// Revision 1.6  2010/06/14 23:36:08  fisyak
+// Freeze version V
+//
 // Revision 1.5  2010/05/24 16:07:20  fisyak
 // Add default dE/dx calibration tables, replace TpcAltroParameters and asic_thresholds_tpx by tpcAltroParams
 //
@@ -21,12 +30,6 @@ TDataSet *CreateTable() {
   if (!TClass::GetClass("St_TpcResponseSimulator")) return 0;
   TpcResponseSimulator_st row;
   St_TpcResponseSimulator *tableSet = new St_TpcResponseSimulator("TpcResponseSimulator",1);
-  const Double_t SecRowTpcRS[12] = {
-/* 	SecRow3CGFcucu22_i.root */
-/* WE*/ 0.00505588,	0.000182126,	-0.000515286,	-0.000123615,
-/* W*/ 	0.00195786,	0.000370508,	-0.00266726,	-2.11445e-05,
-/* E*/ 	0.00832393,	-3.00828e-05,	-0.00212012,	-0.000115558};
-  //
   memset(&row,0,tableSet->GetRowSize());
   row.I0                    = 13.1;// eV, CH4 		       
   row.Cluster    	    = 3.2; // average no. of electrons per primary  			       
@@ -58,12 +61,22 @@ TDataSet *CreateTable() {
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
   row.SecRowCorIW[0] = row.SecRowCorIE[0] = - TMath::Log(0.533*0.843485); 
   row.SecRowCorOW[0] = row.SecRowCorOE[0] = - TMath::Log(0.512*0.725267); 
-#if 0 /* j */
+  const Double_t SecRowTpcRS[12] = {
+/* 	SecRow3CGFy2005_Q.root */
+/* WE */	0.214102,	-0.00151132,	0.0946478,	0.000728438,
+/* W  */	0.215207,	-0.00157779,	0.0845241,	0.000992761,
+/* E  */	0.214664,	-0.000998026,	0.130842,      -8.91701e-05};
+  //
   Float_t *a = &row.SecRowCorIW[0];
   for (Int_t i = 0; i < 8; i++) {
-    a[i] += SecRowTpcRS[i+4];
-  }
-#endif
+    a[i] += SecRowTpcRS[i%4];
+  }                              //          SecRow3CGFHist032P05if_dedx  SecRow3CGFy2005_S
+  row.SecRowSigIW[0] = row.SecRowSigIE[0] = 0.182; //sqrt(3.45242e-01**2 - 2.93233e-01**2) = 1.82226359989437259e-01
+  row.SecRowSigOW[0] = row.SecRowSigOE[0] = 0.156; //sqrt(3.10911e-01**2 - 2.68642e-01**2) = 1.56515576723213090e-01
+  Float_t *b = &row.SecRowSigIW[0];
+  row.PolyaInner = 1.38;
+  row.PolyaOuter = 1.38;
+  row.T0offset   = 0.00;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

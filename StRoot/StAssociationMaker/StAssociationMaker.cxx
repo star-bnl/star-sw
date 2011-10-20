@@ -1,7 +1,13 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.51 2009/11/10 20:19:36 fisyak Exp $
+ * $Id: StAssociationMaker.cxx,v 1.54 2010/10/11 19:15:25 fisyak Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.54  2010/10/11 19:15:25  fisyak
+ * remove find_if due to bug in logic of its usage
+ *
+ * Revision 1.53  2010/06/22 22:06:33  fine
+ * roll back the previous version to restore the nightly builds
+ *
  * Revision 1.51  2009/11/10 20:19:36  fisyak
  * Change default to ITTF
  *
@@ -224,7 +230,6 @@
 #if !defined(ST_NO_NAMESPACES)
 using std::string;
 using std::vector;
-using std::find_if;
 using std::cout;
 using std::ostream;
 #endif
@@ -868,7 +873,6 @@ Int_t StAssociationMaker::Make()
 	    
 	  } // mc hits in debug2
 	}// end of debug2 mode
-	compFuncMcTpcHit tpcComp;
 	for (unsigned int iHit=0; iHit<tpcPadRowHitColl->hits().size(); iHit++){
 	  //PR(iHit); 
 	  
@@ -887,19 +891,11 @@ Int_t StAssociationMaker::Make()
 	  // The comparison will be used to find the first Mc Hit
 	  // with a z greater than this reference, so that we don't loop
 	  // over the hits that we don't need to.
-	  
-	  tpcComp.setReferenceZ(rcTpcHit->position().z() - parDB->zCutTpc(200.));
 	  StMcHit* closestTpcHit = 0;
 	  
-	  // Find the first Mc Tpc Hit that might have a meaningful association.
-	  StMcTpcHitIterator tpcHitSeed = find_if (mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin(),
-						   mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end(),
-						   tpcComp); // in case 2 we can start from begin
-	  
-	  bool isFirst = true;
 	  float xDiff, yDiff, zDiff;
 	  xDiff = yDiff = zDiff = -999;
-	  for (StMcTpcHitIterator jHit = tpcHitSeed;
+	  for (StMcTpcHitIterator jHit = mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin();
 	       jHit != mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end();
 	       jHit++){
 	    //PR(jHit); 
@@ -912,13 +908,9 @@ Int_t StAssociationMaker::Make()
 	      xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
 	      yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
 	      zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
-	      float mcZ = mcTpcHit->position().z(); // the z resolution now depends on z
-	      if ( zDiff > parDB->zCutTpc(mcZ) ) break; //mc hits are sorted, save time!
-	      
-	      if (isFirst) {
+	      if (!closestTpcHit) {
 		tpcHitDistance=xDiff*xDiff+zDiff*zDiff;
 		closestTpcHit = mcTpcHit;
-		isFirst = false;
 	      }
 	      if (xDiff*xDiff+zDiff*zDiff<tpcHitDistance) {
 		tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
@@ -927,7 +919,7 @@ Int_t StAssociationMaker::Make()
 	      
 	      if ( fabs(xDiff)>= parDB->xCutTpc() ||
 		   fabs(yDiff)>= parDB->yCutTpc() ||
-		   fabs(zDiff)>= parDB->zCutTpc(mcZ)) continue;
+		   fabs(zDiff)>= parDB->zCutTpc(mcTpcHit->position().z())) continue;
 	    } else 
 	      if (mcTpcHit->parentTrack()->key() != rcTpcHit->idTruth()) continue;
 	    // Make Associations  Use maps,
