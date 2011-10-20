@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.20 2007/12/25 17:39:31 fine Exp $
+ * $Id: StTpcDbMaker.h,v 1.21 2009/12/07 23:44:58 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.21  2009/12/07 23:44:58  fisyak
+ * Drop coordinate transformation for fortran, remove TpcHitErr
+ *
  * Revision 1.20  2007/12/25 17:39:31  fine
  * Add the TPC coordinate transformation global function to the Root/Cint dictionary
  *
@@ -79,111 +82,6 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#ifndef __CINT__
-#include "StarCallf77.h"
-#define numberOfPadsAtRow_ F77_NAME(numberofpadsatrow,NUMBEROFPADSATROW)
-#define tpc_row_to_y_ F77_NAME(tpc_row_to_y,TPC_ROW_TO_Y)
-#define tpc_pad_to_x_ F77_NAME(tpc_pad_to_x,TPC_PAD_TO_X)
-#define tpc_x_to_pad_ F77_NAME(tpc_x_to_pad,TPC_X_TO_PAD)
-#define tpc_local_to_global_ F77_NAME(tpc_local_to_global,TPC_LOCAL_TO_GLOBAL)
-#define tpc_localsector_to_local_ F77_NAME(tpc_localsector_to_local,TPC_LOCALSECTOR_TO_LOCAL)
-#define tpc_local_to_global_err_ F77_NAME(tpc_local_to_global_err,TPC_LOCAL_TO_GLOBAL_ERR)
-#define tpc_local_to_global_emx_ F77_NAME(tpc_local_to_global_emx,TPC_LOCAL_TO_GLOBAL_EMX)
-#define tpc_global_to_local_ F77_NAME(tpc_global_to_local,TPC_GLOBAL_TO_LOCAL)
-#define tpc_global_to_local_p_ F77_NAME(tpc_global_to_local_p,TPC_GLOBAL_TO_LOCAL_P)
-#define tpc_drift_velocity_ F77_NAME(tpc_drift_velocity,TPC_DRIFT_VELOCITY)
-#define tpc_time_to_z_ F77_NAME(tpc_time_to_z,TPC_TIME_TO_Z)
-#define tpc_z_to_time_ F77_NAME(tpc_z_to_time,TPC_Z_TO_TIME)
-#define tpc_drift_velocity_ F77_NAME(tpc_drift_velocity,TPC_DRIFT_VELOCITY)
-#define tpc_drift_volume_length_ F77_NAME(tpc_drift_volume_length,TPC_DRIFT_VOLUME_LENGTH)
-#define tpc_row_par_ F77_NAME(tpc_row_par,TPC_ROW_PAR)
-#define tpc_global_to_sector_ F77_NAME(tpc_global_to_sector,TPC_GLOBAL_TO_SECTOR)
-#define tpc_sec24_to_sec12_ F77_NAME(tpc_sec24_to_sec12,TPC_SEC24_TO_SEC12)
-#define tpc_pad_time_offset_ F77_NAME(tpc_pad_time_offset,TPC_PAD_TIME_OFFSET)
-#define tpc_rdo_mask_ F77_NAME(tpc_rdo_mask,TPC_RDO_MASK)
-#define tpc_hit_error_table_ F77_NAME(tpc_hit_error_table,TPC_HIT_ERROR_TABLE)
-extern "C" {
-R__EXTERN int type_of_call numberOfPadsAtRow_(int *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_row_to_y_(float *,float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_pad_to_x_(float *,float *,float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_x_to_pad_(float *,float *,float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_local_to_global_err_(int &,const float *,float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_local_to_global_emx_(int &,const float *,float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_local_to_global_(int *,const float *,float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_localsector_to_local_(int *,const float *,float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_global_to_local_(int *,float *,float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_global_to_local_p_(int *,float *,float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_time_to_z_(int *,int *,int *,int *,float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_z_to_time_(float *,int *,int *,int *,int *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_drift_velocity_(float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_drift_volume_length_(float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_row_par_(int *,float *,float *,float *);
-}
-extern "C" {
-R__EXTERN int type_of_call tpc_global_to_sector_(int*, float*);
-}
-extern "C" {
-  R__EXTERN int type_of_call tpc_sec24_to_sec12_(int*, int*);
-}
-extern "C" {
-  R__EXTERN int type_of_call tpc_pad_time_offset_(int*, int*, int*, float*);
-}
-extern "C" {
-  R__EXTERN int type_of_call tpc_rdo_mask_(int*, int*);
-}
-extern "C" {
-  R__EXTERN int type_of_call tpc_hit_error_table_(int*, int*, int*, float*);
-}
-#else
-   int numberOfPadsAtRow_(int *);
-   int tpc_row_to_y_(float *,float *);
-   int tpc_pad_to_x_(float *,float *,float *);
-   int tpc_x_to_pad_(float *,float *,float *);
-   int tpc_local_to_global_err_(int &,const float *,float *);
-   int tpc_local_to_global_emx_(int &,const float *,float *);
-   int tpc_local_to_global_(int *,const float *,float *);
-   int tpc_localsector_to_local_(int *,const float *,float *);
-   int tpc_global_to_local_(int *,float *,float *);
-   int tpc_global_to_local_p_(int *,float *,float *);
-   int tpc_time_to_z_(int *,int *,int *,int *,float *);
-   int tpc_z_to_time_(float *,int *,int *,int *,int *);
-   int tpc_drift_velocity_(float *);
-   int tpc_drift_volume_length_(float *);
-   int tpc_row_par_(int *,float *,float *,float *);
-   int tpc_global_to_sector_(int*, float*);
-   int tpc_sec24_to_sec12_(int*, int*);
-   int tpc_pad_time_offset_(int*, int*, int*, float*);
-   int tpc_rdo_mask_(int*, int*);
-   int tpc_hit_error_table_(int*, int*, int*, float*);
-#endif
 class StTpcDb;
 class St_tpg_pad_plane;
 class St_tpg_detector;
@@ -216,7 +114,7 @@ class StTpcDbMaker : public StMaker {
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
    virtual void SetTpc2Global();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.20 2007/12/25 17:39:31 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.21 2009/12/07 23:44:58 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker,0)   //StAF chain virtual base class for Makers
 };

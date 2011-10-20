@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.51 2009/11/02 17:31:41 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.52.2.1 2011/10/16 13:43:04 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,12 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.52.2.1  2011/10/16 13:43:04  jeromel
+ * Import changes from v1.54
+ *
+ * Revision 1.52  2009/12/07 23:44:58  fisyak
+ * Drop coordinate transformation for fortran, remove TpcHitErr
+ *
  * Revision 1.51  2009/11/02 17:31:41  fisyak
  * use directly field from StarMagField, replace St_tpcGainC and St_tpcT0C by St_tpcPadGainT0C, add remove defaults in coordinate transformations
  *
@@ -145,6 +151,7 @@
 #include "tables/St_dst_L0_Trigger_Table.h"
 #include "TUnixTime.h"
 #include "StMessMgr.h"
+#include "St_db_Maker/St_db_Maker.h"
 StTpcDb* gStTpcDb = 0;
 
 // C++ routines:
@@ -160,7 +167,6 @@ ClassImp(StTpcPadPlaneI)
 ClassImp(StTpcSlowControlSimI)
 ClassImp(StTpcT0I)
 ClassImp(StTpcFieldCageI)
-ClassImp(StTpcHitErrorsI)
 #endif
 //_____________________________________________________________________________
 StTpcDb::StTpcDb(TDataSet* input) : m_Debug(0) {
@@ -385,25 +391,6 @@ StTpcFieldCageI* StTpcDb::FieldCage(){
   }
   return FC;
 }
-
-//_____________________________________________________________________________
-StTpcHitErrorsI* StTpcDb::HitErrors(){
-  if (!hitErrors){            // get hit errors from data base
-   const int dbIndex = kCalibration;
-   if (tpctrg[dbIndex]){
-     //    TDataSet* tpd = tpctrg[dbIndex]->Find("tpcHitErrors");
-     St_tpcHitErrors *tpd = (St_tpcHitErrors* ) FindTable("tpcHitErrors",dbIndex);
-     if (!(tpd && tpd->HasData()) ){
-       gMessMgr->Message("StTpcDb::Error Finding Tpc Hit Error Info","E");
-       return 0;
-     }
-     if (Debug()) tpd->Print(0,1);
-     hitErrors = new StRTpcHitErrors(tpd);
-   }
-  }
- return hitErrors;
-}
-
 //_____________________________________________________________________________
 StTpcT0I* StTpcDb::T0(int sector){
   if(sector<1||sector>24){
@@ -464,7 +451,7 @@ void StTpcDb::SetDriftVelocity() {
 	mUc = 0;
 	return;
       }
-      if (mk->GetValidity(dvel0,t) < 0) {
+      if (St_db_Maker::GetValidity(dvel0,t) < 0) {
 	gMessMgr->Message("StTpcDb::Error Wrong Validity Tpc DriftVelocity","E");
 	mUc = 0;
 	return;
@@ -546,10 +533,11 @@ TTable *StTpcDb::FindTable(const Char_t *name, Int_t dbIndex) {
     if (! (table && table->HasData()) ) {
       gMessMgr->Error() << "StTpcDb::Error Finding " << name << endm;
     } else if (Debug() && table->GetRowSize()< 1024) {
-      StMaker *dbMk = StChain::GetChain()->Maker("db");
-      if (dbMk) {
+      //StMaker *dbMk = StChain::GetChain()->Maker("db");
+      //if (dbMk) {
+      {
 	TDatime t[2];
-	dbMk->GetValidity(table,t);
+	St_db_Maker::GetValidity(table,t);
 	gMessMgr->Warning()  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
 			     << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
       }

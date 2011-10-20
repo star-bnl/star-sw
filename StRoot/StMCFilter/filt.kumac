@@ -2,6 +2,8 @@
 * runs GSTAR Pythia + Filter
 *
 *
+*
+*
  MACRO filt nEve=1   file=filt seed=123
 * particle ID:  gamma=1  mu+=5 mu-=6 prot=14  elect=3 pi0=7 pi+=8  pi-=9 lambda=18 sig0=20 
 
@@ -10,14 +12,16 @@ trace on
   gfile o [file].fzd
 
 detp  geom y2008
+gexec $STAR_LIB/geometry.so
+gexec $STAR_LIB/libPythia6_4_23.so
+gexec $STAR_LIB/bpythia.so
+
+
 vsig  0.01  30.
 	
  gstat time size mult stak
 *
- gexec $STAR_LIB/geometry.so
- gexec $STAR_LIB/libpythia_6410t.so
- gexec $STAR_LIB/bpythia.so
- gexec $STAR_LIB/StMCFilter.so
+ exec StRoot/StMCFilter/loadlibs.kumac
 
 gfilt example
 * MUST NOT be tabs in the next line(VP???)

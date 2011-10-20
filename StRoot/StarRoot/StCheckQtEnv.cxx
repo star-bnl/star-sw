@@ -1,6 +1,6 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/10/2006
 //
-// $Id: StCheckQtEnv.cxx,v 1.9 2009/09/11 23:51:21 fine Exp $
+// $Id: StCheckQtEnv.cxx,v 1.10 2010/02/26 01:23:06 fine Exp $
 // This class sets the Qt/Root environment "on fly" and 
 // generates the correct ROOT resource ".rootrc" file 
 // also
@@ -138,6 +138,7 @@ Long_t  StCheckQtEnv::SetQtEnv(bool checkCoin) {
   Long_t c = 0;
   TString fileName = GetNewFileName("rootrc");
   FILE *f =  fopen((const char *)fileName, "w");
+  if (f) {
   // Check Qt-layer 
   if ((c+=SetRootResource(f,plugins[iPlugin],plugins[iPlugin+1],plugins[iPlugin+2]))) {
     iPlugin+=3;
@@ -187,6 +188,9 @@ Long_t  StCheckQtEnv::SetQtEnv(bool checkCoin) {
  } } }
  
  fclose(f);
+ } else {
+  c = 1;
+ }
  if (c == 0) {
     fprintf(stderr," No shared library to activate the Qt-layer has been detected.\n");
     fprintf(stderr," Please talk to your SysAdmin\n");

@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.79 2009/12/03 22:14:37 fine Exp $
+// $Id: StDraw3D.cxx,v 1.100 2010/05/04 21:33:31 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -11,7 +11,7 @@
 #include "TPolyMarker3D.h"
 #include "TPolyLine3D.h"
 #include "TSystem.h"
-#include "TROOT.h"
+// #include "TROOT.h"
 #include "TColor.h"
 #include "TEnv.h"
 #include "StCheckQtEnv.h"
@@ -33,7 +33,13 @@ Color_t StDraw3D::fgBkColor      = kBlack;
 Int_t   StDraw3D::fDrawCanvasCounter = -1; 
 
 namespace {
-    const double p2 = TMath::PiOver2();
+     const double p2 = TMath::PiOver2();
+     //__________________________________________________________________________________________
+     static inline void ForceAnimate(unsigned int times=0, int msecDelay=0)
+     {
+         unsigned int  counter = times;
+         while( (!times || counter) && !gSystem->ProcessEvents()) { --counter; if (msecDelay) gSystem->Sleep(msecDelay);} 
+     }
 }
 
 //___________________________________________________
@@ -113,7 +119,10 @@ namespace {
 //___________________________________________________
 class poly_line_3D : public TPolyLine3D, public view_3D {
    public:
-     poly_line_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyLine3D(n,p),view_3D(){;}
+     poly_line_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyLine3D(n,p),view_3D()
+     {  SetBit(kCanDelete);}
+     poly_line_3D(Int_t n, Double_t *p, Option_t *option="") : TPolyLine3D(n,p),view_3D()
+     {  SetBit(kCanDelete);}
      virtual ~poly_line_3D(){;}
      virtual char  *GetObjectInfo(Int_t x, Int_t y) const
      {
@@ -137,7 +146,10 @@ class poly_line_3D : public TPolyLine3D, public view_3D {
 //___________________________________________________
 class poly_marker_3D : public TPolyMarker3D, public view_3D {
    public:
-     poly_marker_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyMarker3D(n,p,1,option),view_3D(){;}
+     poly_marker_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyMarker3D(n,p,1,option),view_3D()
+     {  SetBit(kCanDelete);}
+     poly_marker_3D(Int_t n, Double_t *p, Option_t *option="") : TPolyMarker3D(n,p,1,option),view_3D()
+     {  SetBit(kCanDelete);}
      virtual ~poly_marker_3D(){;}
      virtual char  *GetObjectInfo(Int_t x, Int_t y) const
      {
@@ -162,9 +174,13 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
 class volume_view_3D : public TVolume, public view_3D {
    public:
      volume_view_3D(const Text_t *name, const Text_t *title, TShape *shape, Option_t *option="")
-   : TVolume(name,title, shape,option),view_3D(){;}
-     volume_view_3D() : TVolume(),view_3D(){;}
-     virtual ~volume_view_3D(){;}
+   : TVolume(name,title, shape,option),view_3D()
+     {         SetBit(kCanDelete);     }
+     volume_view_3D() : TVolume(),view_3D()
+     {        SetBit(kCanDelete);        }
+     virtual ~volume_view_3D(){
+        if (fListOfShapes) fListOfShapes->Delete();
+ ;   }
      virtual char  *GetObjectInfo(Int_t x, Int_t y) const
      {
         const TString &customInfo = info();
@@ -229,7 +245,7 @@ class volume_view_3D : public TVolume, public view_3D {
 */
 //___________________________________________________
 StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColor(fgBkColor),fViewer(0),fView(0)
-      , fDetectorName(detectorName),fMaster(0),fTopVolume(0)
+      , fDetectorName(detectorName),fMaster(0),fTopVolume(0),fWantPad(0),fOwnViewer(kTRUE),fOwnPad(pad?kFALSE:kTRUE)
 {
 
    // The detectorName is a comma separated list of the OpenInventor files with no extension
@@ -249,11 +265,32 @@ StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColo
    AddStyle(kUnusedHit,   NHitCol,NHitSty,NHitSiz);
 }
 
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Create a EventDisplay using the external TVirtualViewer3D \a viewer and TVirtualPad \a pad
+*/
+StDraw3D::StDraw3D(TVirtualViewer3D *viewer,TVirtualPad *pad): fPad(pad),fBkColor(fgBkColor),fViewer(viewer),fView(0)
+      , fDetectorName(),fMaster(),fTopVolume(),fWantPad(0),fOwnViewer(kFALSE),fOwnPad(kFALSE)
+{
+   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol=kBlue;
+   static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=kGreen;
+   static const Style_t TrakSty = 1; static const Size_t TrakSiz = 2.00; static const Color_t TrakCol=kRed;
+   static const Style_t VertSty = 5; static const Size_t VertSiz = 3.50; static const Color_t VertCol=kYellow;
+   AddStyle(kVtx,         VertCol,VertSty,VertSiz);
+   AddStyle(kPrimaryTrack,TrakCol,TrakSty,TrakSiz);
+   AddStyle(kGlobalTrack, TrakCol,TrakSty,TrakSiz);
+   AddStyle(kTrackBegin,  VertCol,VertSty,VertSiz);
+   AddStyle(kTrackEnd,    VertCol,VertSty,VertSiz);
+   AddStyle(kUsedHit,     UHitCol,UHitSty,UHitSiz);
+   AddStyle(kUnusedHit,   NHitCol,NHitSty,NHitSiz);
+}
+
 //__________________________________________________________________________________
 TVirtualPad *StDraw3D::InitPad() 
 {
    if (fMaster) fMaster->InitPad();
-   else if (!fPad ) {
+   else if (!fPad && !fWantPad ) {
       fDrawCanvasCounter++;
       TString canvasName = "STAR";
       TString canvasTitle;
@@ -268,6 +305,7 @@ TVirtualPad *StDraw3D::InitPad()
       fPad->SetFillColor(fBkColor);
       fPad->Modified();
       fPad->Update();
+      fPad->GetCanvas()->GetCanvasImp()->Iconify();
    }
    return Pad();
 }
@@ -285,10 +323,11 @@ StDraw3D::~StDraw3D()
 {
     if (fPad) {
        if (!fMaster) fPad->Clear();
-       delete fPad;
+       if (fOwnPad)  delete fPad; // TPad will destroy the viewer
        fPad       = 0;
        fMaster    = 0;
        fTopVolume = 0;
+       fViewer = 0;
     }
 }
 
@@ -361,7 +400,7 @@ void StDraw3D::AddDetectors(const char*nameDetectors)
    }
 }
 
-//! Remove all objects from the screen
+//! Remove all objects from the list and update the screen if \a opt is "update"
 //___________________________________________________
 void  StDraw3D::Clear(Option_t *opt)
 {
@@ -370,8 +409,15 @@ void  StDraw3D::Clear(Option_t *opt)
    if (pad) {
       pad->Clear(opt);
       fTopVolume = 0;
-      Update();
+      if ( !strcmp(opt,"update") ) Update();
+   } else if ( TVirtualViewer3D *viewer = Viewer() ) {
+      viewer->Clear();
    }
+   if (gGeometry) {
+       gGeometry->GetListOfMatrices()->Clear();
+       gGeometry->GetListOfShapes()->Delete();
+   }
+   TCollection::EmptyGarbageCollection();
 }
 
 //___________________________________________________
@@ -382,11 +428,19 @@ TObject *StDraw3D::Draw(TObject *o,const char *option)
    if (o) {
       TVirtualPad *sav = gPad;
       if (!Pad())        InitPad();
-      if (Pad() != sav)  Pad()->cd();
-      assert (fPad==gPad);
-      o->Draw(option);
-      if (sav && (Pad() != sav)) sav->cd();
+      TVirtualPad *thisPad = Pad(); 
+      if (thisPad) {
+        if (thisPad != sav)  thisPad->cd();
+        assert (fPad==gPad);
+        o->Draw(option);
+      }
+      if (thisPad && sav && (thisPad != sav))  sav->cd();
       if (!Viewer()) InitViewer();
+      if (!thisPad) {
+         // no TPad was provided by the user 
+         // Use TVirtualViewer3D directly
+         Viewer()->ObjectPaint(o,option);
+      }
    }
    return o;
 }
@@ -432,7 +486,13 @@ const StDraw3DStyle &StDraw3D::AddStyle(EDraw3DStyle type,Color_t col,Style_t st
     \param type - The pre-defined \a type we want to get the reference to
  */
 //__________________________________________________________________________________________
-const StDraw3DStyle &StDraw3D::Style(EDraw3DStyle type)
+const StDraw3DStyle &StDraw3D::Style(EDraw3DStyle type) const
+{
+    return fStyles.find(type)->second;
+}
+
+//__________________________________________________________________________________________
+StDraw3DStyle &StDraw3D::Style(EDraw3DStyle type)
 {
     return fStyles[type];
 }
@@ -466,6 +526,33 @@ TObject *StDraw3D::Points(int n, const float *xyz, Color_t col,Style_t sty,Size_
 
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
+/*! Add \a n 3D coordinates from the \a xyz array of \c double values to the display list with the \a col color, \a sty style, and \a siz size if provided
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Points(int n, const double *xyz, Color_t col,Style_t sty,Size_t siz)
+{ 
+   //
+   // Draw "n" points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyMarker3D class
+   // with the ROOT color, style, size attributes
+   //
+   
+   poly_marker_3D *plMk  = new poly_marker_3D(n,(Double_t*)xyz);
+   if (col != colorDefault) plMk->SetMarkerColor(col);
+   if (sty != styDefault)   plMk->SetMarkerStyle(sty);
+   if (siz != sizDefault)   plMk->SetMarkerSize(siz);
+   fView = plMk;
+   return Draw(plMk);
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
 /*! Add \a n 3D coordinates from the \a xyz array to the display list with the \a col color, \a sty style, and \a siz size if provided
    \param   xyz - the vector of the floating ount values ( the container should be 3*n long at least )
    \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
@@ -481,7 +568,27 @@ TObject *StDraw3D::Points(const std::vector<float> &xyz, Color_t col,Style_t sty
    // with ROOT TPolyMarker3D class
    // with the ROOT color, style, size attributes
    //
-   return Points(xyz.size(),&xyz[0],col,sty,siz);
+   return Points(xyz.size()/3,&xyz[0],col,sty,siz);
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n 3D coordinates from the \a xyz array to the display list with the \a col color, \a sty style, and \a siz size if provided
+   \param   xyz - the vector of the floating ount values ( the container should be 3*n long at least )
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Points(const std::vector<double> &xyz, Color_t col,Style_t sty,Size_t siz)
+{ 
+   //
+   // Draw the "xyz" vector of the float coordinates 
+   // with ROOT TPolyMarker3D class
+   // with the ROOT color, style, size attributes
+   //
+   return Points(xyz.size()/3,&xyz[0],col,sty,siz);
 }
 
 //__________________________________________________________________________________________
@@ -509,7 +616,30 @@ TObject *StDraw3D::Points(int n, const float *xyz, EDraw3DStyle sty)
 
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
-/*! Add \a 3D coordinates from the \a xyz  vector to the display list with the \a sty pre-defined style if provided 
+/*! Add \a n 3D coordinates from the \a xyz array to the display list with the \a sty pre-defined style if provided 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating point values ( the array should be 3*n long at least )
+   \param   sty  - EDraw3DStyle value selecting some predefined style 
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Points(int n, const double *xyz, EDraw3DStyle sty)
+{
+   //
+   // Draw "n" points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyMarker3D class and the predefined attrbutes
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   
+  const StDraw3DStyle &style =  Style(sty);
+  return Points(n, xyz, style.Col(),style.Sty(),style.Siz());
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add 3D coordinates from the \a xyz  vector to the display list with the \a sty pre-defined style if provided 
    \param   xyz - the vector of the floating point values ( the array should be 3*n long at least )
    \param   sty  - EDraw3DStyle value selecting some predefined style 
    \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
@@ -529,8 +659,59 @@ TObject *StDraw3D::Points(const std::vector<float> &xyz, EDraw3DStyle sty)
   return Points(xyz, style.Col(),style.Sty(),style.Siz());
 }
 
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add 3D coordinates from the \a xyz  vector to the display list with the \a sty pre-defined style if provided 
+   \param   xyz - the vector of the floating point values ( the array should be 3*n long at least )
+   \param   sty  - EDraw3DStyle value selecting some predefined style 
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Points(const std::vector<double> &xyz, EDraw3DStyle sty)
+{
+   //
+   // Draw "xyz" vector of the float coordinates 
+   // with ROOT TPolyMarker3D class and the predefined attrbutes
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   
+  const StDraw3DStyle &style =  Style(sty);
+  return Points(xyz, style.Col(),style.Sty(),style.Siz());
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n 3D coordinates from the \a xyz array to the display list with the pre-defined \c kVtx style
+   It is designed to be used from the interactive \c "gdb" session because it needs 2 parameters only it 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating point values ( the array should be 3*n long at least )
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
 //___________________________________________________
 TObject *StDraw3D::Draw3D(int n,  const float *xyz)
+{
+   //
+   // Draw "n" points of the "xyz" array of the float coordinates 
+   // and the kVtx attrbute
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   return Points(n,xyz,kVtx);
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n 3D coordinates from the \a xyz array to the display list with the pre-defined \c kVtx style
+   It is designed to be used from the interactive \c "gdb" session because it needs 2 parameters only it 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating point values ( the array should be 3*n long at least )
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
+//___________________________________________________
+TObject *StDraw3D::Draw3D(int n,  const double *xyz)
 {
    //
    // Draw "n" points of the "xyz" array of the float coordinates 
@@ -592,6 +773,58 @@ TObject *StDraw3D::Line(int n,  const float *xyz, Color_t col,Style_t sty,Size_t
    fView = plLine;
    return Draw(plLine);
 }
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*!  Add a line sigment connecting 2 points defined by the \a(\a"x0",\a"y0" \a"z0"\a) and \a(\a"x1",\a"y1" \a"z1"\a) to the display list with the \a col color, \a sty style, and \a siz size if provided
+   \param  x0,y0,z0 - the 3D coordinates of the first point
+   \param  x1,y1,z1 - the 3D coordinates of the second point
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the line segment defined by 2 input points
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Line(float x0, float y0, float z0,  float x1, float y1, float z1, Color_t col,Style_t sty,Size_t siz)
+{
+   //
+   // Draw "n" connected points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyline3D class
+   // with the ROOT color, style, size attributes
+   //
+   std::vector<float> line(6);
+   int i = 0;
+   line[i++]=x0;line[i++]=y0;line[i++]=z0;
+   line[i++]=x1;line[i++]=y1;line[i++]=z1;
+   return Line(line,col,sty,siz);   
+}
+
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n connected points defined by the \a "xyz" array of the 3D coordinates to the display list with the \a col color, \a sty style, and \a siz size if provided
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Line(int n,  const double *xyz, Color_t col,Style_t sty,Size_t siz)
+{
+   //
+   // Draw "n" connected points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyline3D class
+   // with the ROOT color, style, size attributes
+   //
+   poly_line_3D *plLine  = new poly_line_3D(n,(Float_t*)xyz);
+   if (col != colorDefault) plLine->SetLineColor(col);
+   if (sty != styDefault)   plLine->SetLineStyle(sty);
+   if (siz != sizDefault)   plLine->SetLineWidth(Width_t(siz));
+   fView = plLine;
+   return Draw(plLine);
+}
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! Add \a n connected points defined by the \a "xyz" array of the 3D coordinates to the display list with the \a col color, \a sty style, and \a siz size if provided
@@ -609,7 +842,27 @@ TObject *StDraw3D::Line(const std::vector<float> &xyz, Color_t col,Style_t sty,S
    // with ROOT TPolyline3D class
    // with the ROOT color, style, size attributes
    //
-   return Line(xyz.size(), &xyz[0], col,sty,siz);
+   return Line(xyz.size()/3, &xyz[0], col,sty,siz);
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n connected points defined by the \a "xyz" array of the 3D coordinates to the display list with the \a col color, \a sty style, and \a siz size if provided
+   \param   xyz - the vector of the floating ount values ( the array should be 3*n long at least )
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Line(const std::vector<double> &xyz, Color_t col,Style_t sty,Size_t siz)
+{
+   //
+   // Draw the "xyz" vector of the float coordinates 
+   // with ROOT TPolyline3D class
+   // with the ROOT color, style, size attributes
+   //
+   return Line(xyz.size()/3, &xyz[0], col,sty,siz);
 }
    
 //__________________________________________________________________________________________
@@ -635,6 +888,27 @@ TObject *StDraw3D::Line(const std::vector<float> &xyz, EDraw3DStyle sty)
 
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
+/*! Add the connected points defined by the \xyz vector  of 3D coordinates to the display list with the \a sty pre-defined style if provided 
+   \param   xyz - the vector of the floating ount values ( the array should be 3*n long at least )
+   \param   sty  - EDraw3DStyle value selecting some predefined style 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the input \a xyz array 
+*/
+//___________________________________________________
+TObject *StDraw3D::Line(const std::vector<double> &xyz, EDraw3DStyle sty)
+{
+   //
+   // Draw "n" connected points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyLine3D class and the predefined attrbutes
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   const StDraw3DStyle &style =  Style(sty);
+   return Line(xyz, style.Col(),style.Sty(),style.Siz() );
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
 /*! Add \a n  connected points defined by the \xyz array of 3D coordinates to the display list with the \a sty pre-defined style if provided 
    \param     n - the number of the 3D coordinates 
    \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
@@ -643,6 +917,28 @@ TObject *StDraw3D::Line(const std::vector<float> &xyz, EDraw3DStyle sty)
 */
 //___________________________________________________
 TObject *StDraw3D::Line(int n,  const float *xyz,EDraw3DStyle sty)
+{
+   //
+   // Draw "n" connected points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyLine3D class and the predefined attrbutes
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   const StDraw3DStyle &style =  Style(sty);
+   return Line(n,xyz,  style.Col(),style.Sty(),style.Siz() );
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n  connected points defined by the \xyz array of 3D coordinates to the display list with the \a sty pre-defined style if provided 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
+   \param   sty  - EDraw3DStyle value selecting some predefined style 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the input \a xyz array 
+*/
+//___________________________________________________
+TObject *StDraw3D::Line(int n, const double *xyz,EDraw3DStyle sty)
 {
    //
    // Draw "n" connected points of the "xyz" array of the float coordinates 
@@ -717,6 +1013,7 @@ void StDraw3D::AddComment(const char *cmnt)
    if (fView) fView->addComment(cmnt);
 }
 
+//___________________________________________________
 //! Save the current 3D scene using "wrl" file format
 /*! \param  filename - the file name to save the 3d scene
    \note : The "wrl" format can be converted to the standatd 3D PDF format 
@@ -757,6 +1054,7 @@ void StDraw3D::Print(const char *filename, const char*type) const
    Save(filename,type);
 }
 
+//___________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! Save the current 3D scene using the 3D "wrl" format if possible otherwise use the \a type file format 
    \param  filename - the file name to save the 3d scene
@@ -774,8 +1072,48 @@ void StDraw3D::Save(const char *filename, const char*type) const
     else if (Pad()) Pad()->Print(filename,type);
 }
 
+
 //___________________________________________________
-void StDraw3D::Update()
+//! Set the varous drawing option. The method passes the input \a options to TQtCoinWidget::SetDrawOption method 
+/*! \param  options - [ <shape1> [, shape2 [, . . .  shape-n] - a comma separated list of the OpenInventor files with no extension\n
+                    | <em> { parameter : value } </em> - enclosed into the curly brackets a pair "parameter : value"\n
+                     \param - <em> { file : file.iv } </em> - the iv file defining the top level OpenInventor node. 
+                          For example, it can be useful to customize the entire screen rotation / animation )\n
+                     \param - <em>{ footer: text }</em>  - define the image footer (caption)\n
+                     \param - <em>{ record : true | false }</em> - toogle the <em>"record scene"</em> option\n
+                     \param - <em>{ save : filename }</em> - save the current image into file\n
+                     \param - <em>{ screen : full }</em> - turn the <em>"fullscreen view"</em> option\n
+                     \param - <em>{ view : all  }</em> - zoom the image  in/out to make sure it fits the entire screen\n
+   <P>For example, the ROOT macro:
+   \code
+   void Draw3D()
+   {
+      gROOT->Macro("Load.C");  //< Load STAR framework shared libraries
+      gEventDisplay->Draw3DTest(); //< Invoke the built-in rendering test
+      gEventDisplay->SetDrawOption("{file:rotation.iv}");//< Add rotation to the scene
+      gEventDisplay->SetFooter("STAR Event Display Example");
+      gEventDisplay->Print("Draw3DTest.wrl"); //< Save the 3D scene into the file
+      gEventDisplay->SetDrawOption("{view:all}"); // zoom the scene in/out to fit the entire screen
+   }   
+   \endcode
+   is to produce the  animated image:
+   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.gif "Animated version of the test image"
+   \sa Draw3D.C 
+*/   
+//___________________________________________________
+void StDraw3D::SetDrawOption(Option_t *options)
+{ 
+   if ( TVirtualViewer3D *viewer = Viewer() ) 
+       viewer->SetDrawOption(options);
+}
+
+//___________________________________________________
+//! Render  all items from the current display list onto the screen  and refesh the screen immiately if \a asap is defined
+/*! \param  asap = (defaul:false) force the sysysten to refresh the screen woith the fresh image. 
+                   This option can significantly slow dowbn the rednereing if abused.  
+*/ 
+//___________________________________________________
+void StDraw3D::Update(bool asap)
 {
    TVirtualPad *pad = Pad();
    if (pad) {
@@ -784,7 +1122,10 @@ void StDraw3D::Update()
       assert (pad==gPad);
       pad->Update();
       if (sav && (pad != sav)) sav->cd();
+   } else {
+       UpdateViewer(0);
    }
+   if (asap) ForceAnimate(1);
 }
 
 //___________________________________________________
@@ -818,6 +1159,16 @@ void StDraw3D::UpdateModified()
    }
 }
 
+//_______________________________________________________________
+void StDraw3D::UpdateViewer(TVirtualPad *pad) 
+{
+   TVirtualViewer3D *viewer = Viewer();
+   if (viewer) {
+      if (fTopVolume) Draw(fTopVolume,"same");
+      viewer->PadPaint(pad);
+   }
+}
+
 //___________________________________________________
 //!  The built-in quick test to check the application environment and test the basic methods
 /*! 
@@ -828,6 +1179,7 @@ void StDraw3D::UpdateModified()
   \endcode
    to get the picture:
    \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.png "Test image is to show several tpc points , tpc track, barrel and endcap towers"
+   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.gif "Animated version of the test image"
 */
 //___________________________________________________
 void StDraw3D::Draw3DTest(){
@@ -899,6 +1251,7 @@ void StDraw3D::Draw3DTest(){
       eta4 +=stepEta;
       phi  += 4*TMath::Pi()/n;
    }
+   if (!Pad()) Update();
 }
 
 //______________________________________________________________________________
@@ -1077,7 +1430,10 @@ TObject *StDraw3D::Tower(float radius
 */
 //__________________________________________________________________________________________
 TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda2, float phi,float dphi, Color_t col,Style_t sty, Size_t siz)
-{ 
+{   
+   if (gGeometry) {
+      gGeometry->GetListOfMatrices()->Clear();
+   }
    if (lambda2-lambda1 < 0 ) {
        Warning("StDraw3D::Tower", "The illegal negative value for dlambda = %f", lambda2-lambda1);
        float swp = lambda1;
@@ -1120,8 +1476,12 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
    x2Far = TMath::Sqrt(y2Far*y2Far + zFar*zFar) * TMath::Tan(dphi/2); 
 
    float dy = TMath::Tan(lambda )*siz/2;
-      
-   TTRAP *trap = new TTRAP(  "CALO", Form("Angle%d",lambda)
+   
+   // to fight Rene Brun one has to assign an unique name fro each tower. Weird !
+   
+   // const char *towerName= gGeometry ? Form("CALO%d", gGeometry->GetListOfShapes()->GetSize()): "CALO";
+     
+   TTRAP *trap = new TTRAP( "CALO", Form("Angle%d",lambda)
          , "Barrel"                // Material
          , siz/2                   // dz
          , lambda*TMath::RadToDeg()// Float_t theta (ROOT needs degree)
@@ -1135,6 +1495,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
          , x2Far                   // Float_t tl2
          , 0                       // Float_t alpha2 (ROOT needs degree)
          );
+   if (gGeometry) gGeometry->GetListOfShapes()->Remove(trap);
    bool draw = false;
    if (!fTopVolume) {
        draw = true;
@@ -1177,10 +1538,8 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
    thisShape->SetFillColor(col);
    thisShape->SetLineColor(col);
    thisShape->SetFillStyle(barrel ? sty-kBarrelStyle : sty );
-   if (draw) {
+   if ( draw /* && Pad() */ ) {
       Draw(fTopVolume,"same");
-   } else {
-//      UpdateModified();
    }
    fView = thisShape;
    return thisShape;
@@ -1243,5 +1602,40 @@ TObject *StDraw3D::Tower( float radius, const StarRoot::StEta &eta
    }
    return Tower(radius,lambda,lambda1,lambda2, phi, dphi, col, sty, siz);
 }
+//! Set the footer (caption) defined by the input \a footer text string 
+/*!
+\param footer - the text string to be drawn onto the bottom of the 3D scene image. The string may contain sevral lines separated by \\n end-of-line symbol
+ */
+//__________________________________________________________________________________________
+void StDraw3D::SetFooter(const char *footer)
+{
+   TString viewerFooter = "{footer:";
+   viewerFooter += footer; viewerFooter += "}";
+   SetDrawOption(viewerFooter.Data());
+}
+
+//__________________________________________________________________________________________
+//! Animate the viewer from the gdb session 
+/*! For example, use
+  \code
+      gdb> p gEventDisplay->Point(0,0,0,1,1,1)
+  \endcode
+   to add one 3D point to the plot followed by 
+  \code
+      gdb> p gEventDisplay->Animate();
+  \endcode 
+  to be able to interract with the display.
+  To continue the debugger session select "option"->"Interrupt" menu
+*/
+//__________________________________________________________________________________________
+void StDraw3D::Animate()
+{
+   TVirtualPad *pad = Pad();
+   if (pad && pad->IsModified()) {
+      Update();
+   } 
+   ForceAnimate(0,200);
+}
+
 
 ClassImp(StDraw3D)

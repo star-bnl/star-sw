@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBTofPidTraits.h,v 2.1 2008/12/22 20:31:00 ullrich Exp $
+ * $Id: StBTofPidTraits.h,v 2.2 2009/12/08 23:24:46 fine Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StBTofPidTraits.h,v $
+ * Revision 2.2  2009/12/08 23:24:46  fine
+ * Fix issue  #1748 http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1748
+ *
  * Revision 2.1  2008/12/22 20:31:00  ullrich
  * Initial Revision.
  *
@@ -67,7 +70,7 @@ public:
     void    setYLocal(float);
     void    setZLocal(float);
     void    setThetaLocal(float);
-    void    setPosition(StThreeVectorF&);                            
+    void    setPosition( const StThreeVectorF&);                            
 
     void    setTimeOfFlight(float);
     void    setPathLength(float);

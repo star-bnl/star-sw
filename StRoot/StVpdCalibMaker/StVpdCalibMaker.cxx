@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.1 2009/11/09 20:55:54 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.2 2009/12/04 22:22:17 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,11 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.2  2009/12/04 22:22:17  geurts
+ * two updates (Xin):
+ * - use the new calibration table vpdTotCorr
+ * - update on the vzVpdFinder(), a cut on timing diff is used to remove outliers.
+ *
  * Revision 1.1  2009/11/09 20:55:54  geurts
  * first release
  *
@@ -30,8 +35,7 @@
 #include "StEventUtilities/StuRefMult.hh"
 #include "PhysicalConstants.h"
 #include "phys_constants.h"
-#include "tables/St_tofTotbCorr_Table.h"
-#include "tables/St_tofZbCorr_Table.h"
+#include "tables/St_vpdTotCorr_Table.h"
 
 #include "StBTofUtil/StBTofHitCollection.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
@@ -191,41 +195,36 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
     }
   
     LOG_INFO << "     loading calibration parameters ..." << endm;
-    // read tofTotbCorr table
-    St_tofTotbCorr* tofTotCorr = static_cast<St_tofTotbCorr*>(dbDataSet->Find("tofTotbCorr"));
-    if(!tofTotCorr) {
-      LOG_ERROR << "unable to get tof TotbCorr table parameters" << endm;
-      //    assert(tofTotCorr);
+    // read vpdTotCorr table
+    St_vpdTotCorr* vpdTotCorr = static_cast<St_vpdTotCorr*>(dbDataSet->Find("vpdTotCorr"));
+    if(!vpdTotCorr) {
+      LOG_ERROR << "unable to get vpdTotCorr table parameters" << endm;
+      //    assert(vpdTotCorr);
       return kStErr;
     }
-    tofTotbCorr_st* totCorr = static_cast<tofTotbCorr_st*>(tofTotCorr->GetArray());
-    Int_t numRows = tofTotCorr->GetNRows();
+    vpdTotCorr_st* totCorr = static_cast<vpdTotCorr_st*>(vpdTotCorr->GetArray());
+    Int_t numRows = vpdTotCorr->GetNRows();
 
-    if(numRows!=NTray*NTDIG+NVPD*2) {
-      LOG_WARN  << " Mis-matched number of rows in tofTotbCorr table: " << numRows 
-		<< " (exp:" << NTray*NTDIG+NVPD*2 << ")" << endm;
+    if(numRows!=NVPD*2) {
+      LOG_WARN  << " Mis-matched number of rows in vpdTotCorr table: " << numRows 
+		<< " (exp:" << NVPD*2 << ")" << endm;
     }
 
-    LOG_DEBUG << " Number of rows read in: " << numRows << " for ToT correction" << endm;
+    LOG_DEBUG << " Number of rows read in: " << numRows << " for Vpd ToT correction" << endm;
 
     for (Int_t i=0;i<numRows;i++) {
-      short trayId = totCorr[i].trayId;
-      short cellId = totCorr[i].cellId;      // used for vpds
-      int index = (trayId-NTray-1)*NVPD+(cellId-1);   // used for vpd index
+      short tubeId = totCorr[i].tubeId;
       // check index range
-      if (index>2*NVPD) {
-	LOG_ERROR << "tray index (" << index << ") out of range ("
-		  << 2*NVPD << ") for trayId-cellId " << trayId 
-		  << "-" << cellId << endm;
+      if (tubeId>2*NVPD) {
+	LOG_ERROR << "tubeId (" << tubeId << ") out of range ("
+		  << 2*NVPD << ")" << endm;
 	return kStErr;
       }
 
       for(Int_t j=0;j<NBinMax;j++) {
-	if(trayId==WestVpdTrayId||trayId==EastVpdTrayId) { // upVPD east west
-	  mVPDTotEdge[index][j] = totCorr[i].tot[j];
-	  mVPDTotCorr[index][j] = totCorr[i].corr[j];
-	  LOG_DEBUG << " east/west: " << trayId << " index: " << index << endm;
-	}
+	mVPDTotEdge[tubeId-1][j] = totCorr[i].tot[j];
+	mVPDTotCorr[tubeId-1][j] = totCorr[i].corr[j];
+	LOG_DEBUG << " east/west: " << (tubeId-1)/NVPD << " tubeId: " << tubeId << endm;
       } // end j 0->NBinMax
     } // end i 0->numRows
   }
@@ -307,6 +306,8 @@ Bool_t StVpdCalibMaker::writeVpdData() const
     LOG_INFO << " TofCollection: NWest = " << tofHeader->numberOfVpdHits(west) 
 	     << " NEast = " << tofHeader->numberOfVpdHits(east) << endm;
     LOG_INFO <<" vpd vz = " << mVPDVtxZ[0] <<endm;
+// added
+    LOG_INFO << " TSum West " << mTSumWest << " East " << mTSumEast << endm;
 
   return kTRUE;
 }
@@ -327,8 +328,8 @@ Bool_t StVpdCalibMaker::loadVpdData()
       return kFALSE;
     }
 
-//    Int_t nhits = mMuDst->numberOfBTofHit();
-    Int_t nhits = mMuDst->btofArray(muBTofHit)->GetEntries();
+    Int_t nhits = mMuDst->numberOfBTofHit();
+//    Int_t nhits = mMuDst->btofArray(muBTofHit)->GetEntries();
     for(int i=0;i<nhits;i++) {
       StMuBTofHit *aHit = (StMuBTofHit *)mMuDst->btofHit(i);
       if(!aHit) continue;
@@ -336,7 +337,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
        if(trayId==WestVpdTrayId || trayId==EastVpdTrayId) {   // VPD this time
         int tubeId = aHit->cell();
 	int indx = (trayId-NTray-1)*NVPD+(tubeId-1);
-	if (indx>2*NVPD){
+	if (indx>=2*NVPD){
 	  LOG_ERROR << "vpd index (" << indx << ") out of range ("
 		    << 2*NVPD << ") for trayId-tubeId " << trayId 
 		    << "-" << tubeId << endm;
@@ -370,7 +371,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
       if(trayId==WestVpdTrayId || trayId==EastVpdTrayId) {   // VPD this time
         int tubeId = aHit->cell();
 	int indx = (trayId-NTray-1)*NVPD+(tubeId-1);
-	if (indx>2*NVPD){
+	if (indx>=2*NVPD){
 	  LOG_ERROR << "vpd index (" << indx << ") out of range ("
 		    << 2*NVPD << ") for trayId-tubeId " << trayId 
 		    << "-" << tubeId << endm;
@@ -402,8 +403,6 @@ void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time)
     if (i>=NVPD) vpdEast=true;
 
     if( time[i]>0. && tot[i]>0. ) {
-      Double_t tmp = time[i];
-      if (vpdEast) {while (tmp>TMAX) tmp -= TMAX;}
 
       int ibin = -1;
       for(int j=0;j<NBinMax-1;j++) {
@@ -421,7 +420,7 @@ void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time)
 
 	if (vpdEast){
 	  mNEast++;
-	  mVPDLeTime[i] = tmp - dcorr;
+	  mVPDLeTime[i] = time[i] - dcorr;
 	  mTSumEast += mVPDLeTime[i];
 	  mVPDHitPatternEast |= 1<<(i-NVPD);
 	} else {
@@ -451,6 +450,29 @@ void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time)
 /// VzFinder from VPD, currently using a simple calculation. Can be improved in the future
 void StVpdCalibMaker::vzVpdFinder()
 {
+  for(int i=0;i<2*NVPD;i++){
+    // check
+    if(mVPDLeTime[i]<1.e-4) continue;
+    double vpdtime;
+    if(i<NVPD&&mNWest>1) {  // west VPD
+      vpdtime = (mVPDLeTime[i]*mNWest-mTSumWest)/(mNWest-1);
+      if(fabs(vpdtime)>TDIFFCUT) {
+        mTSumWest -= mVPDLeTime[i];
+        mVPDLeTime[i] = 0.;
+        mNWest--;
+      }
+    }
+    if(i>=NVPD&&mNEast>1) {  // east VPD
+      vpdtime = (mVPDLeTime[i]*mNEast-mTSumEast)/(mNEast-1);
+      if(fabs(vpdtime)>TDIFFCUT) {
+        mTSumEast -= mVPDLeTime[i];
+        mVPDLeTime[i] = 0.;
+        mNEast--; 
+      }
+    }
+  }
+
+  // calculate the vertex z from vpd
   if ( mNEast>=mVPDEastHitsCut && mNWest>=mVPDWestHitsCut ) {
     mVPDVtxZ[0] = (mTSumEast/mNEast - mTSumWest/mNWest)/2.*(C_C_LIGHT/1.e9);
     mNVzVpd++;

@@ -100,8 +100,11 @@ Bfc_st BFC[] = { // standard chains
            ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
   {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,ToF,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
+
   {"Idst"        ,""  ,"",              "dst,event,compend,EventQA"   ,"","","Turn on DST for ITTF",kFALSE},
-  {"IAna"    ,""  ,"","dEdxY2,Kink2,xi2,CMuDst,analysis","","","Turn on User Maker, dEdx and MuDst",kFALSE},
+  {"IAna"    ,""  ,"","dEdxY2,Kink2,xi2,CMuDst,analysis","",""  ,"Turn on Xi, Kink, dEdx and MuDst",kFALSE},
+  {"BAna"    ,""  ,"","dEdxY2,CMuDst,analysis"          ,"",""            ,"Turn on dEdx and MuDst",kFALSE},
+
   {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,l0,tags,Tree,evout"
    ,                                                               "","","Base chain for 2003 ITTF",kFALSE},
   {"dau2003i"    ,"","","B2003I,IAna,CtbMatchVtx,Corr2,ppOpt,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd"
@@ -224,11 +227,24 @@ Bfc_st BFC[] = { // standard chains
    "B2009.1,IAna,hitfilt,ppOpt,VFMinuit,l3onl,emcDY2,fpd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis",
         "","","Production chain for 2009 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no trigger)",kFALSE},
   {"pp2009c"      ,"" ,"",   
-   "B2009.2,IAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis","","",
+   "B2009.2,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis","","",
               "Production chain for 2009 data - no Corr, no VF (+l3, bcc/fpd, ftpc, e/b-emc, trig)",kFALSE},
 
 
+   
+  // chains for year 10
+  {"B2010","","","ry2010,in,tpcX,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","","",
+                                                                   "Base chain for 2010 ITTF (tpc)",kFALSE},
 
+  {"P2010a","" ,"",  // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt
+   "B2010,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
+                    "","","Production chain for 2010 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc)",kFALSE},
+  {"pp2010a","" ,"", // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt,VFPPVnoCTB
+   "B2010,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis",
+             "","","Production chain for 2010 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no VF)",kFALSE},   
+   
+  
+   
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},
@@ -271,6 +287,7 @@ Bfc_st BFC[] = { // standard chains
   {"Debug1"      ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
   {"Debug2"      ,""  ,"",""                                            ,"","","Set debug flag = 2",kFALSE},
   {"IdTruth"     ,""  ,"",""              ,"","","Enable IdTruth association in StAssociationMaker",kFALSE},
+  {"OldMiniMc"   ,""  ,"",""                           ,"","","Keep pre-2008 convention for MiniMc",kFALSE},
   {"useInTracker",""  ,"","","",""    ,"switch from EGR to Sti global tracks in StAssociationMaker",kFALSE},
   {"noRepeat"    ,""  ,"",""                                        ,"","","No repeat in Messenger",kFALSE},
   {"noHistos"    ,""  ,"",""                                    ,"","","Disables Attributes histos",kFALSE},
@@ -427,44 +444,61 @@ Bfc_st BFC[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"db"          ,"db"   ,"","StDbT"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb","detDb","","db","StDetectorDbMaker","StDetectorDbMaker","Load and run StDetectorDbMaker",kFALSE},
-  {"magF"        ,"MagField","","StDbT,db","StMagFMaker","StarMagField,StMagF"
-   ,                                                      "Mag.field map with scale factor from Db",kFALSE},
+  {"magF"        ,"MagField","","StDbT,db","StMagFMaker","StarMagField,StMagF",
+                                                          "Mag.field map with scale factor from Db",kFALSE},
   {"dbutil"      ,""     ,"","detDb,StDbT"                 ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db,StarMagField"            ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"svtDb"       ,"svtDb","","tpcDb,SvtCL", "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
-  {"ssdDb"    ,"ssdDb","","tpcDb,SsdUtil","StSsdDbMaker","StSsdDbMaker","Load and run StSsdDbMaker",kFALSE},
-  {"eemcDb"      ,"eeDb" ,"","db",                               "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
+  {"ssdDb"      ,"ssdDb","","tpcDb,SsdUtil","StSsdDbMaker","StSsdDbMaker","Load and run SsdDbMaker",kFALSE},
+  {"eemcDb"      ,"eeDb" ,"","db",               "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
+  {"fmsDb"       ,"fmsDb","","db",                  "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
+
+
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   // for simulation on fly Event time stamp is set outside of the simulation makers
-  {"ntin"        ,"geant"  ,"","paw,-fzin,-geant,-gstar,Simu,geantL,paw","St_geant_Maker"
-   ,                                                   "gstar","read event generated Hbook nt-file",kFALSE},
-  {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker"
-   ,                                                             "Prepare kinematics for embedding",kFALSE},
+  {"ntin"        ,"geant"  ,"","paw,-fzin,-geant,-gstar,Simu,geantL,paw","St_geant_Maker",
+                                                       "gstar","read event generated Hbook nt-file",kFALSE},
+  {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker",
+                                                                 "Prepare kinematics for embedding",kFALSE},
+
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
   {"VMCAppl" ,"","","geomT,gen_t,sim_T,tpcDB,svtDb,ssdDb,RootVMC,","","StarVMCApplication","VMC G3",kFALSE},
   {"VMC"         ,"geant","","Simu,VMCAppl,-geant","StVMCMaker",           "StVMCMaker","VMC Maker",kFALSE},
   {"VMCPassive"  ,"geant","","VMCAppl"    ,"StVMCMaker",   "StVMCMaker","VMC Maker in Passive Mode",kFALSE},
-  {"trg"         ,"trg","l0Chain","trg_T,globT,db","St_trg_Maker","St_trg,St_trg_Maker"
-   ,                                                     "trigger analysis for Year 2001-2005 data",kFALSE},
+
+
+  {"trg"         ,"trg","l0Chain","trg_T,globT,db","St_trg_Maker","St_trg,St_trg_Maker",
+                                                         "trigger analysis for Year 2001-2005 data",kFALSE},
   {"TRGDef"      ,""  ,"","",""                          ,"StTriggerDataMaker","Load StTriggerData",kFALSE},
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
-  {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker"
-   ,                                                                     "<Early StEvent creation>",kFALSE},
+
+
+  // fms
+  {"fmsdat"     ,"","", "StEvent,fmsdb", 
+                                     "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",kFALSE},
+
+
+  {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker",
+                                                                         "<Early StEvent creation>",kFALSE},
+
+
   {"l0"          ,"l0Chain","","globT,ctf,trg"                              ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db" ,"St_ctf_Maker","St_ctf,St_ctf_Maker","ToF simulation",kFALSE},
   {"mwc"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"ppMCTrig"    ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"pp2pp"       ,"","","",                              "St_pp2pp_Maker","St_pp2pp_Maker","pp->pp",kFALSE},
   {"tpc"         ,"","","fcf,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use tpcI,fcf instead",kFALSE},
   {"tpcI" ,"tpcChain","","tpc_T,globT,db,tpcDB,TpcHitMover",    "StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
-  {"Trs","Trs","tpcChain","scl,tpcDB,TrsToF,StEvent,EmbeddingShortCut","StTrsMaker","StTrsMaker","",kFALSE},
-  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut","StTpcRSMaker","libMathMore,StTpcRSMaker"
-   ,                                                                   "New Tpc Response Simulator",kFALSE},
-  {"EmbeddingShortCut","","","","","","" ,"Embedding Short Cut for StdEdxY2Maker and StTpcHitMover",kFALSE},
+  {"Trs","Trs","tpcChain",    "scl,tpcDB,TrsToF,StEvent,EmbedShortCut","StTrsMaker","StTrsMaker","",kFALSE},
+  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbedShortCut","StTpcRSMaker","libMathMore,StTpcRSMaker",
+                                                                       "New Tpc Response Simulator",kFALSE},
+
+  {"EmbedShortCut","","","",                  "","","Short Cut for StdEdxY2Maker and StTpcHitMover",kFALSE},
   {"StMcEvent"   ,"","","gen_t,sim_T"                                            ,"","StMcEvent","",kFALSE},
   {"McEvent" ,"","","StEvent,tpcDb,EEmcUtil,EmcUtil,StMcEvent","StMcEventMaker","StMcEventMaker","",kFALSE},
   {"Mixer"       ,"tpc_raw","","daq","StMixerMaker"                   ,"StTrsMaker,StMixerMaker","",kFALSE},
@@ -575,8 +609,8 @@ Bfc_st BFC[] = { // standard chains
                                      "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
 
   // BTOF related chains
-  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
-                                                                             "StChain","BTOF Chain",kFALSE}, 
+  //  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
+  //                                                                           "StChain","BTOF Chain",kFALSE}, 
 
   {"BtofDat"   ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker",
                                                                                    "BTOF hit maker",kFALSE},
@@ -603,6 +637,9 @@ Bfc_st BFC[] = { // standard chains
   {"tofCalib"   ,"","TofChain","db,TofUtil","StTofCalibMaker","StTofCalibMaker",  "TOF calibration",kFALSE},
 
 
+  // Filtering - all filters will have the pattern "FiltXXX"
+  {"FiltGamma" ,"","","StEvent,StMcEvent,EmcUtil",
+                                           "StGammaFilterMaker","StFilterMaker",  "Gamma filtering",kFALSE},
 
 
 
@@ -624,29 +661,27 @@ Bfc_st BFC[] = { // standard chains
   {"PixelIT"     ,""  ,"","",""                                  ,"","ITTF: track using Pixel geom",kFALSE},
   {"IstIT"       ,""  ,"","",""                                    ,"","ITTF: track using Ist geom",kFALSE},
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
+  {"genvtx"      ,""  ,"","ctf_T,EEmcUtil","StGenericVertexMaker",
+                    "St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker",      "Generic Vertex Finder",kFALSE},
+  {"StiUtil"  ,"","","",                              "","StiUtilities","Load StiUtilities library",kFALSE},
+  {"StiRnD"   ,"","","",                                  "","StiRnD", "Load StiRnD shared library",kFALSE},
+  {"Sti"      ,"Sti","","SCL,StEvent,StiLibs,StDbT,TpcIT,StiUtil,compend","StiMaker",
+                                                    "StEventUtilities,Sti,StiMaker" ,"ITTF tracker",kFALSE},
+  {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
+   ,                                      "StEventUtilities,StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
+  {"StiPulls" ,"","","Sti",                                      "","", "Request to make Sti Pulls",kFALSE},
+  {"BeamBack" ,"","","StEvent","StBeamBackMaker","StBeamBackMaker",
+                                                               "Beam background tracker in the TPC",kFALSE},
+  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker",
+                                                                     "Bichsel method used for dEdx",kFALSE},
 
+  // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti
-  {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker",
-                                                                                   "BTOF Simulator",kFALSE},
   {"btofMatch"  ,"","BTofChain","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker",
                                                                           "TPC-BTOF track matching",kFALSE},
   {"btofCalib"  ,"","BTofChain","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker",
                                                                                  "BTOF calibration",kFALSE},
 
-  {"genvtx"      ,""  ,"","ctf_T,EEmcUtil","StGenericVertexMaker"
-   ,"St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker",                      "Generic Vertex Finder",kFALSE},
-  {"StiUtil"  ,"","","",                              "","StiUtilities","Load StiUtilities library",kFALSE},
-  {"StiRnD"   ,"","","",                                  "","StiRnD", "Load StiRnD shared library",kFALSE},
-  {"Sti"      ,"Sti","","SCL,StEvent,StiLibs,StDbT,TpcIT,StiUtil,compend","StiMaker"
-   ,                                                "StEventUtilities,Sti,StiMaker" ,"ITTF tracker",kFALSE},
-  {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
-   ,                                      "StEventUtilities,StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
-  {"StiPulls" ,"","","Sti",                                      "","", "Request to make Sti Pulls",kFALSE},
-  {"BeamBack" ,"","","StEvent","StBeamBackMaker","StBeamBackMaker"
-   ,                                                           "Beam background tracker in the TPC",kFALSE},
-  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker"
-   ,                                                                 "Bichsel method used for dEdx",kFALSE},
-  // Options in need to be done after the tracker
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","globT,MuDSTDeps","StVertexSeedMaker"
    ,                                   "StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
   {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker"
@@ -662,14 +697,23 @@ Bfc_st BFC[] = { // standard chains
    ,                    "StFtpcClusterMaker and StFtpcTrackMaker will produce gain scan histograms",kFALSE},
   {"fdbg"     ,"","","fcl,fpt","","","StFtpcClusterMaker and StFtpcTrackMaker will write debugfile",kFALSE},
   {"flaser"   ,"","","fcl,fpt"   ,"","","StFtpcClusterMaker and StFtpcTrackMaker for LASERTRACKING",kFALSE},
+
   {"pmdReco"   ,"pmdReco","","PmdUtil,pmdRead,pmdClust"       ,"StMaker","StChain","PMD Reco chain",kFALSE},
   {"pmdRaw"    ,"pmdRaw","","pmdReco"                        "","","PMD Reco chain giving raw data",kFALSE},
   {"pmd"       ,"pmd","","pmdSim,pmdClust,pmdDis","StMaker"      ,"StChain", "PMD Simulation chain",kFALSE},
   {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
   {"pmdSim"    ,"","","PmdUtil","StPmdSimulatorMaker","StPmdSimulatorMaker","Hit Simulator for PMD",kFALSE},
   {"pmdClust"  ,"pmdClust","","","StPmdClusterMaker",    "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
-  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker"
-   ,                                              "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
+  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
+                                                  "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
+
+  // final TOF combo
+  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
+                                                                             "StChain","BTOF Chain",kFALSE}, 
+  {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker",
+                                                                                   "BTOF Simulator",kFALSE},
+
+
   {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker"
    ,                                                                      "Find Kinks from StEvent",kFALSE},
   {"V02"         ,"v02","","db,MuDST,-V0","StV0FinderMaker","StSecondaryVertexMaker"
@@ -772,12 +816,17 @@ Bfc_st BFC[] = { // standard chains
   {"EvOutOnly"   ,""  ,"","EvOut,Tree,noTags"                        ,"","","Only event.root files",kFALSE},
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE},
   {"Notpc_daq"   ,""  ,"","-tpc_daq"                                            ,"","","No tpc_daq",kFALSE},
+
+   
   {"Calibration chains","------------","-----------","-----------------------------------","","","",kFALSE},
   {"LanaDV","","","MakeEvent,trgd,in,tpc_daq,tpcI,fcf,LaserIT,VFMinuit,Lana,Analysis,Corr4,NosvtIT,NossdIT",
    "",""                                                                                 ,"get LDV",kFALSE},
   {"LanaDVtpx","","","MakeEvent,trgd,in,tpx,TpcHitMover,LaserIT,VFMinuit,Lana,Analysis,Corr4,NosvtIT,NossdIT",
    "",""                                                                        ,"get LDV with TPX",kFALSE},
   {"LaserDV.Chain","","","in,LaserCal,fcf,TpcHitMover,OGridLeak3D,OShortR,OSpaceZ2","","","get LDV",kFALSE},
+
+
+
   {"Production chain from Db","------------","-----------","-----------------------------","","","",kFALSE},
   {"ppITTFsvt.Chain" ,"" ,"","DbV20020802,pp2001,fpd,beamLine,svt_daq,SvtD,est,svtdedx,CMuDst"
    ,"","",""                                                                                       ,kFALSE},

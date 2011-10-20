@@ -22,7 +22,132 @@ MakeChairInstance(tpcOmegaTau,Calibrations/tpc/tpcOmegaTau);
 #include "St_tpcDriftVelocityC.h"
 MakeChairInstance(tpcDriftVelocity,Calibrations/tpc/tpcDriftVelocity);
 #include "St_TpcSecRowCorC.h"
-MakeChairInstance(TpcSecRowCor,Calibrations/tpc/TpcSecRowCor);
+ClassImp(St_TpcSecRowCorC);
+#include "St_TpcSecRowBC.h"
+MakeChairInstance2(TpcSecRowCor,St_TpcSecRowBC,Calibrations/tpc/TpcSecRowB);
+#include "St_TpcSecRowCC.h"
+MakeChairInstance2(TpcSecRowCor,St_TpcSecRowCC,Calibrations/tpc/TpcSecRowC);
+#include "St_TpcSecRowXC.h"
+MakeChairInstance2(TpcSecRowCor,St_TpcSecRowXC,Calibrations/tpc/TpcSecRowX);
+#include "St_tpcCorrectionC.h"
+ClassImp(St_tpcCorrectionC);
+//________________________________________________________________________________
+Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z) {
+  tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
+  return SumSeries(cor, x, z);
+}
+//________________________________________________________________________________
+Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double_t z) {
+  Double_t Sum = 0;
+  if (! cor) return Sum;
+  Int_t N = TMath::Abs(cor->npar)%100;
+  if (N == 0) return Sum;
+  static Double_t T0, T1, T2;
+  // parameterization variable
+  Double_t X = x;
+  if (cor->npar  < 0) X = TMath::Exp(x);
+  else {
+    switch  (cor->type) {
+    case 10:// ADC correction offset + poly for ADC
+    case 11:// ADC correction offset + poly for log(ADC) and |Z|  
+      X = TMath::Log(x);      break;
+    case 1: // Tchebyshev [-1,1] 
+      if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      break;
+    case 2: // Shifted TChebyshev [0,1]
+      if (cor->min < cor->max)   X = TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      break;
+    case 3: 
+      if (TMath::Abs(TMath::Abs(x) - 1) < 1.e-7) X = 0;
+      else                                       X = TMath::Log(1. - TMath::Abs(x));
+      break;
+    case 4:
+      if (TMath::Abs(TMath::Abs(x) - 1) < 1.e-7) X = 0;
+      else                                       X = TMath::Sign(TMath::Log(1. - TMath::Abs(x)),x);
+      break;
+    default:      X = x;    break;
+    }
+  }
+  if (cor->type != 1 && cor->type != 2 &&
+      cor->min < cor->max) {
+    if (X < cor->min) X = cor->min;
+    if (X > cor->max) X = cor->max;
+  }
+  switch (cor->type) {
+  case 1: // Tchebyshev [-1,1] 
+    T0 = 1;
+    Sum = cor->a[0]*T0;
+    if (N == 1) break;
+    T1 = X;
+    Sum += cor->a[1]*T1;
+    for (int n = 2; n <= N; n++) {
+      T2 = 2*X*T1 - T0;
+      Sum += cor->a[n]*T2;
+      T0 = T1;
+      T1 = T2;
+    }
+    break;
+  case 2: // Shifted TChebyshev [0,1]
+    T0 = 1;
+    Sum = cor->a[0]*T0;
+    if (N == 1) break;
+    T1 = 2*X - 1;
+    Sum += cor->a[1]*T1;
+    for (int n = 2; n <= N; n++) {
+      T2 = 2*(2*X - 1)*T1 - T0;
+      Sum += cor->a[n]*T2;
+      T0 = T1;
+      T1 = T2;
+    }
+    break;
+  case 10: // ADC correction offset + poly for ADC
+    Sum = cor->a[N-1];
+    for (int n = N-2; n>=0; n--) Sum = X*Sum + cor->a[n];
+    Sum += TMath::Log(1. + cor->OffSet/x);
+    Sum  = TMath::Exp(Sum);
+    Sum *= x;
+    break;
+  case 11: // ADC correction offset + poly for log(ADC) and |Z|
+    Sum = cor->a[1] + z*cor->a[2] + z*X*cor->a[3] + TMath::Exp(X*(cor->a[4] + X*(cor->a[5] + X*cor->a[6])));
+    Sum *= TMath::Exp(-cor->a[0]);
+    break;
+  default: // polynomials
+    Sum = cor->a[N-1];
+    for (int n = N-2; n>=0; n--) Sum = X*Sum + cor->a[n];
+    break;
+  }
+  return Sum;
+}
+#include "St_TpcRowQC.h"
+MakeChairInstance2(tpcCorrection,St_TpcRowQC,Calibrations/tpc/TpcRowQ);
+#include "St_TpcDriftDistOxygenC.h"
+MakeChairInstance2(tpcCorrection,St_TpcDriftDistOxygenC,Calibrations/tpc/TpcDriftDistOxygen);
+#include "St_TpcMultiplicityC.h"
+MakeChairInstance2(tpcCorrection,St_TpcMultiplicityC,Calibrations/tpc/TpcMultiplicity);
+#include "St_TpcZCorrectionBC.h"
+MakeChairInstance2(tpcCorrection,St_TpcZCorrectionBC,Calibrations/tpc/TpcZCorrectionB);
+#include "St_TpcdXCorrectionBC.h"
+MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorrectionB);
+#include "St_tpcPressureBC.h"
+MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB);
+#include "St_tpcMethaneInC.h"
+MakeChairInstance2(tpcCorrection,St_tpcMethaneInC,Calibrations/tpc/tpcMethaneIn);
+#include "St_tpcGasTemperatureC.h"
+MakeChairInstance2(tpcCorrection,St_tpcGasTemperatureC,Calibrations/tpc/tpcGasTemperature);
+#include "St_tpcWaterOutC.h"
+MakeChairInstance2(tpcCorrection,St_tpcWaterOutC,Calibrations/tpc/tpcWaterOut);
+#include "St_TpcdChargeC.h"
+MakeChairInstance2(tpcCorrection,St_TpcdChargeC,Calibrations/tpc/TpcdCharge);
+#include "St_TpcZDCC.h"
+MakeChairInstance2(tpcCorrection,St_TpcZDCC,Calibrations/tpc/TpcZDC);
+#include "St_TpcSpaceChargeC.h"
+MakeChairInstance2(tpcCorrection,St_TpcSpaceChargeC,Calibrations/tpc/TpcSpaceCharge);
+#include "St_TpcPhiDirectionC.h"
+MakeChairInstance2(tpcCorrection,St_TpcPhiDirectionC,Calibrations/tpc/TpcPhiDirection);
+#include "St_TpcdEdxCorC.h"
+MakeChairInstance2(tpcCorrection,St_TpcdEdxCorC,Calibrations/tpc/TpcdEdxCor);
+#include "St_TpcLengthCorrectionBC.h"
+MakeChairInstance2(tpcCorrection,St_TpcLengthCorrectionBC,Calibrations/tpc/TpcLengthCorrectionB);
 #include "St_tpcEffectiveGeomC.h"
 MakeChairInstance(tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeom);
 #include "St_tpcElectronicsC.h"
@@ -45,6 +170,8 @@ MakeChairInstance(tpcPadrowT0,Calibrations/tpc/tpcPadrowT0);
 MakeChairInstance(tpcSectorT0offset,Calibrations/tpc/tpcSectorT0offset);
 #include "St_TpcAltroParametersC.h"
 MakeChairInstance(TpcAltroParameters,Calibrations/tpc/TpcAltroParameters);
+#include "St_tpcAltroParamsC.h"
+MakeChairInstance(tpcAltroParams,Calibrations/tpc/tpcAltroParams);
 #include "St_asic_thresholdsC.h"
 MakeChairInstance(asic_thresholds,Calibrations/tpc/asic_thresholds);
 #include "St_asic_thresholds_tpxC.h"
@@ -115,9 +242,10 @@ Float_t St_tpcAnodeHVC::voltagePadrow(Int_t sector, Int_t padrow) const {
   St_tpcAnodeHVC::sockets(sector, padrow, e1, e2, f2);
   if (e1==0) return -99;
   Float_t v1=voltage(e1-1);
-  if (f2==0) return v1;
+  if (f2 < 0.1) return v1;
   Float_t v2=voltage(e2-1);
-  if (v2==v1) return v1;
+  if (TMath::Abs(v2 - v1) > 40) return -99;
+  if (TMath::Abs(v2 - v1) <  1) return v1;
   // different voltages on influencing HVs
   // effective voltage is a sum of exponential gains
   Float_t B = (padrow <= 13 ? 13.05e-3 : 10.26e-3);
@@ -147,6 +275,46 @@ Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
 MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
 #include "St_tpcSlewingC.h"
 MakeChairInstance(tpcSlewing,Calibrations/tpc/tpcSlewing);
+#include "St_tpcAcChargeC.h"
+MakeChairInstance(tpcAcCharge,Calibrations/tpc/tpcAcCharge);
+#include "St_tpcAvCurrentC.h"
+MakeChairInstance(tpcAvCurrent,Calibrations/tpc/tpcAvCurrent);
+#include "St_TpcResponseSimulatorC.h"
+MakeChairInstance(TpcResponseSimulator,Calibrations/tpc/TpcResponseSimulator);
+#include "St_TpcPadCorrectionC.h"
+#include "TPolynomial.h"
+MakeChairInstance(TpcPadCorrection,Calibrations/tpc/TpcPadCorrection);
+St_TpcPadCorrectionC::St_TpcPadCorrectionC(St_TpcPadCorrection *table) : TChair(table), fFunc(0) {
+  Int_t nrows = GetNRows();
+  if (nrows) {
+    fFunc = new TF1*[nrows]; memset(fFunc, 0, sizeof(fFunc));
+    for (Int_t i = 0; i < nrows; i++) {
+      Short_t io = Struct(i)->InOut;
+      Short_t np = Struct(i)->npads;
+      Short_t MuOrSigma  = -1;
+      if (Struct(i)->R == 8) MuOrSigma = 0;
+      if (Struct(i)->R == 7) MuOrSigma = 1;
+      if ((io < 1 || io > 2) ||
+	  (np < 1 || np > 7) ||
+	  (MuOrSigma < 0 || MuOrSigma > 1)) continue;
+      Int_t  indx = 2*(7*(io-1) + np-1)+MuOrSigma;
+      assert(indx < nrows);
+      fFunc[indx] = TPolynomial::MakePoly(Form("%s_%i_%i",Struct(i)->Type,np,io),Struct(i)->N-1,Struct(i)->R);
+      fFunc[indx]->SetParameters(&Struct(i)->a0);
+    }
+  }
+}
+St_TpcPadCorrectionC::~St_TpcPadCorrectionC() {
+  fgInstance = 0; 
+  if (fFunc) {
+    Int_t nrows = GetNRows();
+    for (Int_t i = 0; i < nrows; i++) 
+      SafeDelete(fFunc[i]); 
+    delete [] fFunc;
+  }
+}
+#include "St_tpcGainCorrectionC.h"
+MakeChairInstance2(tpcCorrection,St_tpcGainCorrectionC,Calibrations/tpc/tpcGainCorrection);
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
@@ -156,57 +324,24 @@ ClassImp(St_trigDetSumsC);
 //___________________tpc_____________________________________________________________
 #include "St_tss_tssparC.h"
 MakeChairInstance(tss_tsspar,tpc/tsspars/tsspar);
-Float_t St_tss_tssparC::gain_in(Int_t i) {
-  return Struct(i)->gain_in;
-}
-//________________________________________________________________________________
-Float_t St_tss_tssparC::gain_in(Int_t sec, Int_t row) {
-  Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
-  //  Float_t V = St_tpcAnodeHVC::instance()->voltagePadrow(sec,row);
-  /* VoltageGFRunIX24DEV.root
-     FitP->Draw("mu:y-1170>>I(20,-180,20)","(i&&j&&prob>0.01&&i<=13&&abs(mu)<0.4)/(dmu*dmu)","profg")
-     I->Fit("pol1","er","",-100,0)
- FCN=37.5062 FROM MINOS     STATUS=SUCCESSFUL     10 CALLS          64 TOTAL
-                     EDM=4.53972e-22    STRATEGY= 1      ERROR MATRIX ACCURATE 
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0          -5.60237e-02   4.91833e-03  -4.98627e-12  -5.46491e-10
-   2  p1          -1.13903e-03   8.15059e-05   8.15059e-05  -9.89312e-08
-
-   */
-  Float_t gain = gain_in();
-  Double_t v = V - 1170;
-  gain *= (V > 0) ? TMath::Exp(v*(13.087e-3 -1.13903e-03 )) : 0; //Run IX24
-  return gain;
-}
-//________________________________________________________________________________
-Float_t St_tss_tssparC::gain_out(Int_t i) 	{
-  return Struct(i)->gain_out;
-}
-//________________________________________________________________________________
-Float_t St_tss_tssparC::gain_out(Int_t sec, Int_t row) {
-  Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
-  //  Float_t V = St_tpcAnodeHVC::instance()->voltagePadrow(sec,row);
-  Float_t gain = gain_out();
-  /* VoltageGFRunIX24DEV.root
-     FitP->Draw("mu:y>>O(28,1260,1400)","(i&&j&&prob>0.01&&i>13&&y>1160&&abs(mu)<0.5)/(dmu*dmu)","profg");
-     TF1 *f = new TF1("f","[0]+(x-1390)*([1]+(x-1390)*[2])");
- FCN=62.5827 FROM MIGRAD    STATUS=CONVERGED      66 CALLS          67 TOTAL
-                     EDM=7.03069e-21    STRATEGY= 1      ERROR MATRIX ACCURATE 
-  EXT PARAMETER                                   STEP         FIRST   
-  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
-   1  p0           1.52940e-02   2.33532e-03   3.81142e-06   4.66062e-08
-   2  p1          -7.77617e-04   8.75985e-05   6.74118e-08   6.85122e-07
-   3  p2           9.01092e-06   8.28886e-07   1.42918e-09  -1.86438e-04
-   */
-  Double_t v = V - 1390;
-  gain *= (V > 0) ? TMath::Exp(v*(10.211e-3 + (-7.77617e-04 + v*9.01092e-06) )) : 0; //RunIX24: 
-  return gain;
-}
 //________________________________________________________________________________
 Float_t St_tss_tssparC::gain(Int_t sec, Int_t row) {
-  return row <= 13 ? gain_in(sec,row) : gain_out(sec,row);
+  Int_t l = 0;
+  Double_t V_nominal = 1390;
+  if (row <= 13) {l = 1; V_nominal = 1170;}
+  Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
+  Float_t gain = 0;
+  if (V > 0) {
+    St_tpcGainCorrectionC *gC = St_tpcGainCorrectionC::instance();
+    Double_t v = V - V_nominal;
+    if (gC->GetNRows() < l || v < gC->min(l) || v > gC->max(l)) return gain;
+    gain  = TMath::Exp(gC->CalcCorrection(l,v));
+  }
+  return gain;
 }
+//__________________Calibrations/tracker______________________________________________________________
+#include "St_tpcMaxHitsC.h"
+MakeChairInstance(tpcMaxHits,Calibrations/tracker/tpcMaxHits);
 //__________________Calibrations/rich______________________________________________________________
 #include "StDetectorDbRichScalers.h"
 StDetectorDbRichScalers *StDetectorDbRichScalers::fgInstance = 0;
@@ -361,17 +496,19 @@ St_tpcSectorPositionC *St_tpcSectorPositionC::fgInstance = 0;
 St_tpcSectorPosition  *St_tpcSectorPositionC::fgTables[24] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 St_tpcSectorPositionC *St_tpcSectorPositionC::instance() { 
   if (fgInstance) return fgInstance;					
-  St_db_Maker *dbMk = (St_db_Maker *) StMaker::GetChain()->Maker("db");	
+  TDataSet *tpc = StMaker::GetChain()->GetDataBase("Geometry/tpc");
+  assert(tpc);
   for (Int_t sec = 1; sec <= 24; sec++) {
-    TString path = Form("Geometry/tpc/Sector_%02i/tpcSectorPosition",sec);
-    fgTables[sec-1] = (St_tpcSectorPosition  *) StMaker::GetChain()->GetDataBase(path.Data()); 
+    TString path = Form("Sector_%02i/tpcSectorPosition",sec);
+    fgTables[sec-1] = (St_tpcSectorPosition  *) tpc->Find(path.Data()); 
     if (! fgTables[sec-1]) {							
-      LOG_WARN << "St_tpcSectorPositionC::instance " << path.Data() << "\twas not found" << endm; 
+      LOG_WARN << "St_tpcSectorPositionC::instance " << tpc->GetTitle() << "/" << path.Data() 
+	       << "\twas not found" << endm; 
       assert(fgTables[sec-1]);							
     }						
-    if (dbMk && dbMk->Debug() ) {						
+    {						
       TDatime t[2];							
-      dbMk->GetValidity(fgTables[sec-1],t);					        
+      St_db_Maker::GetValidity(fgTables[sec-1],t);					        
       Int_t Nrows = fgTables[sec-1]->GetNRows();					
       LOG_WARN << "St_tpcSectorPositionC::instance found table " << fgTables[sec-1]->GetName() 
 	       << " with NRows = " << Nrows << " in db" << endm;		
@@ -391,7 +528,8 @@ MakeChairInstance(tpcPadPlanes,Geometry/tpc/tpcPadPlanes);
 MakeChairInstance(tpcGlobalPosition,Geometry/tpc/tpcGlobalPosition);
 #include "St_tpcFieldCageShortC.h"
 MakeChairInstance(tpcFieldCageShort,Geometry/tpc/tpcFieldCageShort);
-#include "St_SurveyC.h"
+#include "St_tpcHVPlanesC.h"
+MakeChairInstance(tpcHVPlanes,Geometry/tpc/tpcHVPlanes);
 #include "St_SurveyC.h"
 ClassImp(St_SurveyC);
 #include "StSvtSurveyC.h"

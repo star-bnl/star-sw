@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.35 2009/12/01 21:56:35 tone421 Exp $
+ * $Id: StMuTrack.h,v 1.36 2009/12/08 23:24:46 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -104,7 +104,6 @@ class StMuTrack : public TObject {
     StPhysicalHelixD outerHelix() const; ///< Returns outer helix (last measured point)
     const StMuProbPidTraits &probPidTraits() const; ///< Returns Yuri Fisyak new pid probabilities. 
     const StMuBTofPidTraits &btofPidTraits() const; /// dongx
-    StMuBTofPidTraits &btofPidTraits(); /// dongx
     void setBTofPidTraits(const StMuBTofPidTraits& pid); /// dongx
     static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
     static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
@@ -218,6 +217,9 @@ inline const StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0)
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.36  2009/12/08 23:24:46  fine
+ * Fix issue  #1748 http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1748
+ *
  * Revision 1.35  2009/12/01 21:56:35  tone421
  * Implemented changes as per http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1734
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofPidTraits.cxx,v 2.1 2008/12/22 20:30:59 ullrich Exp $
+ * $Id: StBTofPidTraits.cxx,v 2.2 2009/12/08 23:24:46 fine Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofPidTraits.cxx,v $
+ * Revision 2.2  2009/12/08 23:24:46  fine
+ * Fix issue  #1748 http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1748
+ *
  * Revision 2.1  2008/12/22 20:30:59  ullrich
  * Initial Revision.
  *
@@ -17,7 +20,7 @@
  ***************************************************************************/
 #include "StBTofPidTraits.h"
 
-static const char rcsid[] = "$Id: StBTofPidTraits.cxx,v 2.1 2008/12/22 20:30:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StBTofPidTraits.cxx,v 2.2 2009/12/08 23:24:46 fine Exp $";
 
 ClassImp(StBTofPidTraits)
 
@@ -68,4 +71,4 @@ void
 StBTofPidTraits::setTofHit(StBTofHit* hit) { mBTofHit = hit; }
 
 void
-StBTofPidTraits::setPosition(StThreeVectorF& pos) { mPosition = pos; }
+StBTofPidTraits::setPosition(const StThreeVectorF& pos) { mPosition = pos; }

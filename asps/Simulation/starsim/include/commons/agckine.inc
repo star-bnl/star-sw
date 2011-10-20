@@ -1,8 +1,12 @@
 *
-* $Id: agckine.inc,v 1.1.1.1 2004/01/12 23:49:49 potekhin Exp $
+* $Id: agckine.inc,v 1.2 2011/10/20 23:07:20 jwebb Exp $
 * $Name:  $
 * $Log: agckine.inc,v $
+* Revision 1.2  2011/10/20 23:07:20  jwebb
+* Added capability to provide a slope in the x,y vertex.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:49  potekhin
+*
 *
 * Revision 1.3  2003/06/18 09:00:24  nevski
 * increase filename length for ghist command
@@ -17,12 +21,12 @@
       Integer          IKineOld,IdInp,Kevent,
      >                 Iback,IbackOld,IbMode,IbBefor,IbAfter,
      >                 IbCurrent,IvCurrent,Ioutp,IoutpOld
-      Real             AVflag,AVcoor,AVsigm,Ptype,PTmin,PTmax,
+      Real             AVflag,AVcoor,AVsigm,AVslope,Ptype,PTmin,PTmax,
      >                 Etamin,Etamax,PhiMin,PhiMax,Ptflag,
      >                 Zmin,Zmax,BgMult,BgTime,BgSkip,
      >                 Pxmin,Pxmax,Pymin,Pymax,Pzmin,Pzmax
       COMMON /AgCKINE/ IKineOld,IdInp,Kevent(3),
-     >                 AVflag,AVcoor(3),AVsigm(3),
+     >                 AVflag,AVcoor(3),AVsigm(3),AvSlope(3),
      >                 Ptype,PTmin,PTmax,Etamin,Etamax,
      >                 PhiMin,PhiMax,Ptflag,Zmin,Zmax,
      >                 Pxmin,Pxmax,Pymin,Pymax,Pzmin,Pzmax

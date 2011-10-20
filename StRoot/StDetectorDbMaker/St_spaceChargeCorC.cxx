@@ -1,4 +1,5 @@
 #include "St_spaceChargeCorC.h"
+#include "StDetectorDbRichScalers.h"
 #include "StMemStat.h"
 
  Double_t St_spaceChargeCorC::getSpaceChargeCoulombs(Double_t scaleFactor)
@@ -31,6 +32,10 @@
         case (10): mult = scalers->getBBCBlueBkg(); break;
         default  : mult = 0.;
       }
+      if (mult < 0) {
+        Mark();
+        return 0; // Unphysical scaler rates will be uncorrected
+      } else UnMark();
       Double_t saturation = getSpaceChargeSatRate(row);
       Double_t correction = getSpaceChargeCorrection(scaleFactor,row);
       Double_t factor     = getSpaceChargeFactor(row);

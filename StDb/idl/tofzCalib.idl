@@ -7,8 +7,6 @@
 */
 
 struct tofzCalib{
-	octet trayid;		/*TOF tray ID 1-120 */
-	octet boardid;		/*board ID 1-8*/
-	float z[10];		/*hit position z */
-	float zcorr[10]; 	/*z correction*/
+	float z[11];		/*hit position z */
+	float zcorr[11]; 	/*z correction*/
 };

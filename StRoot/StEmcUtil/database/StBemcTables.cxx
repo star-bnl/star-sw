@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.cxx,v 1.12 2009/01/02 02:56:18 kocolosk Exp $
+ * $Id: StBemcTables.cxx,v 1.13 2010/01/27 21:39:51 perev Exp $
  * Author: Alexandre A. P. Suaide
  * Maintainer: Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -11,6 +11,7 @@
 #include "StEmcUtil/others/emcDetectorName.h"
 #include "StDaqLib/EMC/StEmcDecoder.h"
 #include "StMaker.h"
+#include "St_db_Maker/St_db_Maker.h"
 #include "StEmcRawMaker/defines.h"
 
 ClassImp(StBemcTables)
@@ -233,7 +234,7 @@ void StBemcTables::loadTables(StMaker* maker) {
 
 void StBemcTables::updateValidity(StMaker* maker, TTable* table) {
     TDatime datime[2];
-    maker->GetValidity(table,datime);
+    St_db_Maker::GetValidity(table,datime);
     string tableName = table->GetName();
     string beginTime = datime[0].AsSQLString();
     string endTime   = datime[1].AsSQLString();
@@ -622,6 +623,9 @@ int* StBemcTables::triggerFormulaParametersByID(int softId) const {
 /***************************************************************************
  *
  * $Log: StBemcTables.cxx,v $
+ * Revision 1.13  2010/01/27 21:39:51  perev
+ * GetValidity now is static
+ *
  * Revision 1.12  2009/01/02 02:56:18  kocolosk
  * use StMaker::GetDBTime() instead of GetDateTime()
  *

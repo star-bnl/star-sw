@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.20 2009/11/19 14:05:44 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.23 2011/10/14 23:25:33 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -12,7 +12,7 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#include "StTpcDb/StTpcdEdxCorrection.h" 
+#include "StTpcdEdxCorrection.h" 
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh" 
 #include "StPhysicalHelixD.hh"
@@ -22,7 +22,7 @@ class StGlobalTrack;
 class TMinuit; 
 class StEvent;
 class StGlobalCoordinate;
-class TH2S;
+class TH2F;
 class StTpcPadrowHitCollection;
 
 class StdEdxY2Maker : public StMaker {
@@ -84,14 +84,12 @@ class StdEdxY2Maker : public StMaker {
   StThreeVectorD      *mRowPosition[24][45][3]; //!
   StThreeVectorD      *mPromptNormal[2][2]; // West/East, Inner/Outer
   StThreeVectorD      *mPromptPosition[2][2][3]; 
-  St_trigDetSums      *m_trigDetSums;//!
-  trigDetSums_st      *m_trig;//!
-  TH2S                *mHitsUsage;//!
+  TH2F                *mHitsUsage;//!
   Char_t              end[1];
  public:
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.20 2009/11/19 14:05:44 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.23 2011/10/14 23:25:33 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   ClassDef(StdEdxY2Maker,0)   //StAF chain virtual base class for Makers

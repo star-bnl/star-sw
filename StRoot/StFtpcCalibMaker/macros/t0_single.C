@@ -1,6 +1,9 @@
-// $Id: t0_single.C,v 1.4 2008/05/15 21:05:55 jcs Exp $
+// $Id: t0_single.C,v 1.5 2009/12/09 14:41:49 jcs Exp $
 //
 // $Log: t0_single.C,v $
+// Revision 1.5  2009/12/09 14:41:49  jcs
+// delta_t0 and delta_gas can now both = 0
+//
 // Revision 1.4  2008/05/15 21:05:55  jcs
 // load StDetectorDbMaker.so
 //
@@ -17,11 +20,6 @@ void t0_single(TString filename, char* t0, char* gas,float mbfield)
 
   cout<<"Starting t0_single.C:"<<endl;
   cout<<"               filename = "<<filename<<".root"<<endl;
-  // if both t0 and gas = "0", set t0=".000001" otherwise program will seg fault
-  if (atof(t0)==0 && atof(gas)==0) {
-     t0 = ".000001";
-     cout<<"  changed t0=0 to   t0  = "<<t0<<" to avoid seg fault"<<endl;
-  } else
   cout<<"               t0       = "<<t0<<endl;
   cout<<"               gas      = "<<gas<<endl;
   cout<<"               mbfield  = "<<mbfield<<endl;
