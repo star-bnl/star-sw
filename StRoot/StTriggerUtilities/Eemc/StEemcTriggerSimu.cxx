@@ -763,8 +763,8 @@ int StEemcTriggerSimu::endcapHighTowerTh(int i) const { return mE001->getRegiste
 
 int StEemcTriggerSimu::endcapJetPatchAdc(int jp) const { return (*mE101)[1-jp/3].info[jp%3]; }
 
-int StEemcTriggerSimu::getEndcapHighTower(int tp) const { return feeTPTreeADC->TP(tp)->getOutHT(); }
-int StEemcTriggerSimu::getEndcapPatchSum(int tp) const { return feeTPTreeADC->TP(tp)->getOutTPsum(); }
+int StEemcTriggerSimu::getOutHT(int tp) const { return feeTPTreeADC->TP(tp)->getOutHT(); }
+int StEemcTriggerSimu::getOutTPsum(int tp) const { return feeTPTreeADC->TP(tp)->getOutTPsum(); }
 
 //==================================================
 //==================================================
@@ -785,6 +785,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.47  2011/10/22 20:25:17  pibero
+// Add getters for output of EEMC FEEs for backward-compatibility
+//
 // Revision 1.46  2011/10/16 21:43:44  pibero
 // Implement EEMC FEE boards HT masks
 //

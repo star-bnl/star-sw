@@ -146,8 +146,10 @@ public:
   int endcapJetPatchAdc(int jp) const;
   int endcapHighTowerAdc(int towerId) const { return 0; }
 
-  int getEndcapHighTower(int tp) const;
-  int getEndcapPatchSum(int tp) const;
+  int getOutHT(int tp) const;
+  int getOutTPsum(int tp) const;
+  int getEndcapHighTower(int tp) const { return getOutHT(tp); }
+  int getEndcapPatchSum(int tp) const { return getOutTPsum(tp); }
 
   // Fill StEmcTriggerDetector in MuDst for MC
   void fillStEmcTriggerDetector();
@@ -160,6 +162,9 @@ public:
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.26  2011/10/22 20:25:17  pibero
+// Add getters for output of EEMC FEEs for backward-compatibility
+//
 // Revision 1.25  2011/10/16 17:41:59  pibero
 // Implement EEMC FEE HT & TP masks
 //
