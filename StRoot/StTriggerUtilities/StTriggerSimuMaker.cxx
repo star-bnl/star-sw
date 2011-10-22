@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.48 2011/10/17 06:19:11 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.49 2011/10/22 18:12:52 pibero Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -379,6 +379,7 @@ bool StTriggerSimuMaker::getTriggerThresholds(int runNumber)
   if (DB) {
     St_triggerThreshold* desc = dynamic_cast<St_triggerThreshold*>(DB->Find("triggerThreshold"));
     if (desc) {
+      LOG_INFO << "Using BEMC offline database" << endm;
       triggerThreshold_st* table = desc->GetTable();
       LOG_INFO << setw(20) << "object"
 	       << setw(20) << "index"
@@ -490,6 +491,8 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
     LOG_INFO << "DB Time = " << GetDBTime().AsSQLString() << endm;
     LOG_INFO << "Run Number = " << runNumber << endm;
   }
+
+  LOG_INFO << "Using BEMC online database" << endm;
 
   // object=DSM crate, idx=DSM board
   query = Form("select object,idx,reg,label,value,defaultvalue from dict where hash=(select dicthash from run where idx_rn = %d)",runNumber);
@@ -724,6 +727,9 @@ void StTriggerSimuMaker::changeJetPatchTh()
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.49  2011/10/22 18:12:52  pibero
+ * Print whether using offline/offline database
+ *
  * Revision 1.48  2011/10/17 06:19:11  pibero
  * Specify online database for each year
  *
