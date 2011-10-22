@@ -149,8 +149,11 @@ private:
   void getPed();
   void GetTriggerPatchFromCrate(int crate, int seq, int& triggerPatch) const;
   void FEEout();
-  void FEEini2009();
+  void FEEini2009(int runNumber);
   void FEEout2009();
+  void switchoff(int& x, int n) const { x &= ~(1 << n); }
+  void switchon (int& x, int n) const { x |=  (1 << n); }
+  void simulateFEEfailure();
   void get2006_DSMLayer0();
   void get2006_DSMLayer1();
   void get2006_DSMLayer2();

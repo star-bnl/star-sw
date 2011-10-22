@@ -296,7 +296,7 @@ void StBemcTriggerSimu::InitRun(int runnumber){
     HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(year);
   }
   else {
-    FEEini2009();
+    FEEini2009(runnumber);
     mAllTriggers.clear();
   }
 }
@@ -507,8 +507,10 @@ void StBemcTriggerSimu::Make(){
 
   if (year < 2009)
     FEEout();
-  else
+  else {
     FEEout2009();
+    simulateFEEfailure();
+  }
 
   //pp
   if (year==2006){
@@ -763,7 +765,7 @@ void StBemcTriggerSimu::GetTriggerPatchFromCrate(int crate, int seq, int& trigge
   if (crate <= 15) triggerPatch += 150;
 }
 
-void StBemcTriggerSimu::FEEini2009()
+void StBemcTriggerSimu::FEEini2009(int runNumber)
 {
   const bool debug = false;
 
@@ -810,7 +812,17 @@ void StBemcTriggerSimu::FEEini2009()
 
   // Tower 1907 (TP13) has huge pedestal (2068.39) starting with run 10154060
   // and time stamp 2009-06-03 20:38:58 GMT. Mask it off.
-  if (timestamp >= TDatime("2009-06-03 20:38:58").Get()) TowerStatus[1907-1] = 0;
+  //if (timestamp >= TDatime("2009-06-03 20:38:58").Get()) TowerStatus[1907-1] = 0;
+  if (runNumber >= 10154060 && runNumber <= 10180034) TowerStatus[1907-1] = 0;
+
+  // Tower 1233 has zero gain
+  if (runNumber >= 10141025 && runNumber <= 10155022) TowerStatus[1233-1] = 0;
+
+  // Tower 4355 has huge pedestal (42949672.00). Mask it out.
+  if (runNumber >= 10136035 && runNumber <= 10136070) TowerStatus[4355-1] = 0;
+
+  // Tower 1433 has zero gain in pp500
+  if (runNumber >= 10078075 && runNumber <= 10103042) TowerStatus[1433-1] = 0;
 
   LOG_INFO << "triggerPatch\tcrate\tseq\tHTsta\tTPsta\tbitConv\tformula\tLUTscale\tLUTped\tLUTsig\tLUTpow\tpar4\tpar5\tnumMaskTow" << endm;
   for (int crate = 1; crate <= kNCrates; ++crate) {
@@ -843,7 +855,8 @@ void StBemcTriggerSimu::FEEini2009()
   DSM_TPStatus[277] = 0;
 
   // TP50-59 have wrong config for run 10128030 (Start 2009-05-08 08:52:14 GMT) to 10129011 (Stop 2009-05-09 07:38:42 GMT)
-  if (TDatime("2009-05-08 08:52:14").Get() <= timestamp && timestamp <= TDatime("2009-05-09 07:38:42").Get()) {
+  //if (TDatime("2009-05-08 08:52:14").Get() <= timestamp && timestamp <= TDatime("2009-05-09 07:38:42").Get()) {
+  if (runNumber >= 10128030 && runNumber <= 10129011) {
     bitConvValue[50] = 2;
     bitConvValue[51] = 2;
     bitConvValue[52] = 3;
@@ -854,6 +867,44 @@ void StBemcTriggerSimu::FEEini2009()
     bitConvValue[57] = 2;
     bitConvValue[58] = 3;
     bitConvValue[59] = 3;
+  }
+
+  // Copycat channels: The last 3 towers of the first trigger patch and all 16 towers of the second trigger patch
+  // have duplicate ADCs. A solution is to mask out both the high tower and patch sum output of the affected tower
+  // front end electronics (FEEs) in both the simulation and data for consistency. In addition, all 32 towers from
+  // both trigger patches (1 FEE board) should be masked out in the offline BEMC status tables.
+  // It is not clear what causes this problem but it seems to be a failure mode of either the tower crate multiplexer
+  // or the tower data collector (TDC). See the BEMC Technical Design Report, pp. 133-134:
+  // http://drupal.star.bnl.gov/STAR/system/files/BEMC%20TDR.pdf
+  // This problem has been identified in the BEMC data as far back as 2006 and as recently as 2011.
+  // See analysis:
+  // http://cyclotron.tamu.edu/pibero/jets/2011.10.18/JetMeeting-2011.10.18.pdf
+  if (runNumber >= 10120032 && runNumber <= 10121053) {
+    DSM_HTStatus[228] = 0;
+    DSM_TPStatus[228] = 0;
+    DSM_HTStatus[229] = 0;
+    DSM_TPStatus[229] = 0;
+  }
+
+  if (runNumber >= 10150051 && runNumber <= 10156058) {
+    DSM_HTStatus[122] = 0;
+    DSM_TPStatus[122] = 0;
+    DSM_HTStatus[123] = 0;
+    DSM_TPStatus[123] = 0;
+  }
+
+  if (runNumber >= 10156086 && runNumber <= 10160017) {
+    DSM_HTStatus[22] = 0;
+    DSM_TPStatus[22] = 0;
+    DSM_HTStatus[23] = 0;
+    DSM_TPStatus[23] = 0;
+  }
+
+  if (runNumber >= 10163048 && runNumber <= 10180034) {
+    DSM_HTStatus[220] = 0;
+    DSM_TPStatus[220] = 0;
+    DSM_HTStatus[221] = 0;
+    DSM_TPStatus[221] = 0;
   }
 }
 
@@ -907,9 +958,6 @@ void StBemcTriggerSimu::FEEout2009()
   // emcSim->setDoZeroSuppression(kBarrelEmcTowerId,false);
   assert(nhits == kNTowers);
 
-  // TP277 HT output is always higher by one unit
-  ++L0_HT_ADC[277];
-
   // FEE LUT
   for (int crate = 1; crate <= kNCrates; ++crate) {
     for (int seq = 0; seq < kNSeq; ++seq) {
@@ -925,6 +973,24 @@ void StBemcTriggerSimu::FEEout2009()
   } // for crate
 }
 
+void StBemcTriggerSimu::simulateFEEfailure()
+{
+  switchon(L0_HT_ADC[166],1);
+  switchon(L0_HT_ADC[199],0);
+  switchoff(++L0_HT_ADC[277],0);
+  switchoff(L0_HT_ADC[292],1);
+
+  int runNumber = StMaker::GetChain()->GetRunNumber();
+
+  if (runNumber >= 10169005 && runNumber <= 10180034) switchon(L0_HT_ADC[196],2);
+  if (runNumber >= 10156086 && runNumber <= 10158021) switchoff(++L0_HT_ADC[288],0);
+
+  if (runNumber >= 10131039 && runNumber <= 10139018) switchoff(L0_TP_ADC[239],0);
+  if (runNumber >= 10160069 && runNumber <= 10162040) switchoff(L0_TP_ADC[161],1);
+  if (runNumber >= 10121092 && runNumber <= 10136031) switchon (L0_TP_ADC[137],0);
+  if (runNumber >= 10156031 && runNumber <= 10180034) switchon (L0_TP_ADC[137],0);
+  if (runNumber >= 10154060 && runNumber <= 10155022) switchon (L0_TP_ADC[13 ],0);
+}
 
 //==================================================
 //==================================================
