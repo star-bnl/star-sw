@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.24 2011/10/05 23:13:19 perev Exp $
+// $Id: StObject.cxx,v 1.25 2011/10/24 19:20:22 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.25  2011/10/24 19:20:22  perev
+// assert for dead object added
+//
 // Revision 1.24  2011/10/05 23:13:19  perev
 // Remove redundant now cleaning
 //
@@ -69,6 +72,7 @@
 // Revision 1.1  1999/04/30 13:15:55  fisyak
 // Ad StObject, modification StArray for StRootEvent
 //
+#include <assert.h>
 #include "StObject.h"
 #include "TDataSetIter.h"
 #include "TROOT.h"
@@ -117,6 +121,7 @@ void StObject::Streamer(TBuffer &R__b)
      }
 
   } else {
+    assert(TestBit(kNotDeleted));
     R__b.WriteVersion(StObject::Class());
     if (fgTally) {
       UInt_t udx = GetUniqueID();
