@@ -1496,6 +1496,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 
 	LOG(DBG,"rdo %d, rdo token %d, trg cou %d",rdo.rdo,rdo.token,rdo.trg_cou) ;
 
+	// grab only the prompt contribution...
 	for(u_int i=0;i<rdo.trg_cou;i++) {
 		u_int dta = rdo.trg[i].data ;
 		u_int marker = rdo.trg[i].csr >> 24 ;
@@ -1508,6 +1509,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			trgs[cou].trg = (dta >> 16) & 0xF ;
 			trgs[cou].rhic_delta = 0 ;
 			trgs[cou].rhic = rhic ;
+			trgs[cou].reserved[0] = 0xF0000000 | (0x0FFFFFFF & dta) ;	// 0xF for "fired"
 
 			switch(trgs[cou].trg) {
 			case 4 :	// physics
@@ -1518,7 +1520,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			default :
 				LOG(ERR,"RDO %d: T %d: prompt: bad trg: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
 				err = 1 ;
-				break ;
+				continue ;
 			}
 
 			if(trgs[cou].t==0) {
@@ -1531,11 +1533,18 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			if((dta & 0x3000000) != 0x2000000) {
 				LOG(ERR,"RDO %d: T %d: prompt: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
 				err = 1 ;
+				continue ;
+			}
+
+			if(cou) {
+				LOG(ERR,"RDO %d: duplicate prompt trigger",rdo.rdo) ;
+				err = 1  ;
+				continue ;
 			}
 
 			cou++ ;
 
-			collision = rhic ;
+			collision = rhic ;	// mark the collission time...
 		}
 
 	}
@@ -1553,7 +1562,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 		trgs[cou].trg = 4 ;	// dummy
 		trgs[cou].rhic_delta = 0 ;
 		trgs[cou].rhic = 0 ;
-		
+		trgs[cou].reserved[0] = 0 ;
 
 		cou++ ;
 
@@ -1580,11 +1589,13 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 		u_int rhic = rdo.trg[i].rhic_counter ;
 
 		if(marker==0xFF) {	// FIFO
+			int daq10k = 0 ;
+
 			trgs[cou].t = dta & 0xFFF ;
 			trgs[cou].daq = (dta >> 12) & 0xF ;
 			trgs[cou].trg = (dta >> 16) & 0xF ;
 			trgs[cou].rhic = rhic ;
-
+			trgs[cou].reserved[0] = 0x20000000 | (0x0FFFFFFF & dta) ;
 
 			switch(trgs[cou].trg) {
 			case 13 :	// L2 ABORT
@@ -1596,15 +1607,23 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 					continue ;	// skip it
 				}
 				// WARNING: no "break" here!!!
-			default :
+			default :	// readout command; BUT not necessarily for DAQ10k!
+
 				// check for overrun UNLESS the actual command
-				if((dta & 0x3000000) != 0x2000000) {
-					if(trgs[0].trg == 9) { // laser!	
-						LOG(NOTE,"RDO %d: T %d: FIFO: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
-					}
-					else {
-						LOG(ERR,"RDO %d: T %d: FIFO: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
-						err = 1 ;
+
+				if((dta & 0x3A00000) == 0x0800000) {
+					//LOG(WARN,"DAQ10k trigger; no data") ;
+					daq10k = 1 ;
+				}
+				else {
+					if((dta & 0x3000000) != 0x2000000) {
+						if(trgs[0].trg == 9) { // laser!	
+							LOG(NOTE,"RDO %d: T %d: FIFO: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+						}
+						else {
+							LOG(ERR,"RDO %d: T %d: FIFO: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+							err = 1 ;
+						}
 					}
 				}
 
@@ -1625,8 +1644,13 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 					break ;
 				}
 
-					
-				continue ;
+				trgs[cou].reserved[0] = 0xA0000000 | (0x0FFFFFFF & dta) ;	// maybe DAQ10k?
+
+				// new in FY12, DAQ10k -- we leave all of them for receiver.C!
+				
+				if(daq10k) break ;	// use it
+				else continue ;		// skip it...
+
 			}
 
 			// we took out all the FIFO l0 contribs here!
@@ -1657,14 +1681,16 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 	}
 
 	if(err) {	// dump out everyhign
+		LOG(ERR," RDO %d: words %d",rdo.rdo,words) ;
 		for(u_int i=0;i<rdo.trg_cou;i++) {
 			LOG(ERR,"  RDO %d: T %4d: %d/%d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg_cou, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
 		}
 	}
-	else if((rdo.rdo==1) && ((rdo.sector==1))) {
-		for(u_int i=0;i<rdo.trg_cou;i++) {
-			LOG(NOTE,"RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
-		}
+	else if((rdo.rdo>=5) && ((rdo.sector==10))) {
+//		LOG(TERR," RDO %d: words %d",rdo.rdo,words) ;
+//		for(u_int i=0;i<rdo.trg_cou;i++) {
+//			LOG(TERR," dbg: RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
+//		}
 	}
 	
 

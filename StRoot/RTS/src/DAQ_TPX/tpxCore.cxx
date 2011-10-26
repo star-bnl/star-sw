@@ -31,7 +31,9 @@ u_int expected_usercode[5] = {
 //	0x00acf6c3	//06Sep08
 //	0x00ad0581	//07Sep08
 //	0x00AD9A39	//15Apr09
-	0x00ACEB76	//05Oct09
+//	0x00ACEB76	//05Oct09
+//	0x00ABF590	//07Oct11, DAQ10k: some RDOs had ALTRO timeouts
+	0x00AD9D1D	//09Oct11, DAQ10k: maybe 1 clock delayed...
 } ;
 
 static inline u_int get10(u_int *l, u_int p) ;
@@ -264,8 +266,8 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 
 	rdo->trg_cou = *l ;		// get the trigger count
 
-	if(rdo->trg_cou > 120) {
-		if(do_log) LOG(ERR,"Bad trg count %d, token %d",rdo->trg_cou, rdo->token) ;
+	if(rdo->trg_cou > 124) {
+		if(do_log) LOG(ERR,"Bad trg count %d>124, token %d",rdo->trg_cou, rdo->token) ;
 //		rdo->trg_cou = 0 ;
 //		rdo->token = -ENOTSUP ;
 //		return rdo->token ;
