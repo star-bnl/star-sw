@@ -2,8 +2,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.12 2011/10/26 19:32:31 balewski Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.13 2011/10/26 20:56:50 avossen Exp $
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.13  2011/10/26 20:56:50  avossen
+//   use geoIds to determine if two strips are adjacent
+//
 //   Revision 1.12  2011/10/26 19:32:31  balewski
 //   now fgt-geom is owned by fgtDb-maker
 //
@@ -33,6 +36,39 @@ void StFgtClusterMaker::Clear(Option_t *opts)
 {
 
 };
+
+
+
+
+
+Int_t StFgtClusterMaker::PrepareEnvironment()
+{
+  StEvent* mEvent=0;
+  mEvent=(StEvent*)GetInputDS("StEvent");
+
+  mFgtEventPtr=NULL;
+  if(mEvent)
+    {
+      mFgtEventPtr=mEvent->fgtEvent();
+    }
+  else
+    {
+      //in other makers we would construct a new event here, but this doesn't make sense for the cluster maker
+	LOG_ERROR << "could not find StEvent in  cluster maker" << endm;
+      return kStErr;
+    }
+  if(mFgtEventPtr)
+    return kStOK;
+  else
+    {
+      LOG_ERROR << "could not find StFgtEvent in  cluster maker" << endm;
+      return kStErr;
+    }
+  };
+
+
+
+
 Int_t StFgtClusterMaker::Make()
 {
   Int_t ierr = kStOk;
@@ -41,18 +77,18 @@ Int_t StFgtClusterMaker::Make()
   LOG_DEBUG <<"StClusterMaker::Make()******************************************************************"<<endm;
 
   //  Access of FGT from  StEvent 
-  StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
-  assert(mEvent); // fix your chain
+  //  StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
+  //  assert(mEvent); // fix your chain
 
-  mFgtEventPtr=mEvent->fgtEvent(); 
-  assert(mFgtEventPtr);
-  //printf("StFgtClusterMaker::Make()-> mIsInitialized=%d,  pClusterAlgo=%p\n",mIsInitialized , pClusterAlgo);
 
-  if( !mIsInitialized || !pClusterAlgo)
+  if( !mIsInitialized || !pClusterAlgo || (PrepareEnvironment()!=kStOK))
     {
       LOG_ERROR << "cluster maker not initialized" << endm;
       if(!pClusterAlgo) 
 	LOG_ERROR << "no cluster maker " << endm;
+      return kStFatal;
+      if(!mIsInitialized) 
+	LOG_ERROR << "really not initialzied... " << endm;
       return kStFatal;
     }
   else
