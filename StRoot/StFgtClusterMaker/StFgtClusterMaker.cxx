@@ -2,8 +2,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.10 2011/10/20 17:30:37 balewski Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.11 2011/10/26 17:02:04 balewski Exp $
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.11  2011/10/26 17:02:04  balewski
+//   get fgt event the proper way
+//
 //   Revision 1.10  2011/10/20 17:30:37  balewski
 //   revert
 //
@@ -21,6 +24,7 @@
 #include "StRoot/StFgtRawMaker/StFgtCosmicMaker.h"
 #include "StRoot/StFgtRawMaker/StFgtRawMaker.h"
 #include "StFgtSimulator/StFgtSlowSimuMaker.h"
+#include "../StEvent/StEvent.h"
 
 void StFgtClusterMaker::Clear(Option_t *opts)
 {
@@ -32,6 +36,14 @@ Int_t StFgtClusterMaker::Make()
   TStopwatch clock;
   clock.Start();
   LOG_DEBUG <<"StClusterMaker::Make()******************************************************************"<<endm;
+
+  //  Access of FGT from  StEvent 
+  StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
+  assert(mEvent); // fix your chain
+
+  mFgtEventPtr=mEvent->fgtEvent(); 
+  assert(mFgtEventPtr);
+  printf("StFgtClusterMaker::Make()-> mIsInitialized=%d,  pClusterAlgo=%p\n",mIsInitialized , pClusterAlgo);
 
   if( !mIsInitialized || !pClusterAlgo)
     {
@@ -46,9 +58,10 @@ Int_t StFgtClusterMaker::Make()
       for(int discIdx=0;discIdx<mFgtEventPtr->getNumDiscs();discIdx++)
 	{
 	  StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
+	  printf("iD=%d %p\n",discIdx,pDisc);
 	  if(pDisc)
 	    {
-	      //	      cout <<"disc: " << discIdx << " has " << pDisc->getRawHitArray().getEntries() <<endl;
+	      cout <<"disc: " << discIdx << " has " << pDisc->getRawHitArray().getEntries() <<endl;
 	      Int_t loc_ierr=pClusterAlgo->doClustering(pDisc->getRawHitArray(),pDisc->getClusterArray());
 	      if(loc_ierr!=kStOk)
 		{
@@ -75,6 +88,8 @@ Int_t StFgtClusterMaker::Init()
 {
   //  cout <<"cluster init " <<endl;
   Int_t ierr = kStOk;
+
+#if 0 // this method of data access wil not work in BFC, disabled, Jan
   TObject *dataMaker = GetMaker( mFgtEventMakerName.data());
   if( !dataMaker ){
     LOG_FATAL << "::Init() could not get pointer to a maker with name '" << mFgtEventMakerName << "'" << endm;
@@ -92,10 +107,7 @@ Int_t StFgtClusterMaker::Init()
       mFgtEventPtr = maker->getFgtEventPtr();
       //      cout <<" have raw  maker "<< endl;
       }
-      else if (strstr(mFgtEventMakerName.data(),"FgtSlowSimu")) {
-	// try to fetch data from FgtSlow-simu in a different way
-	mFgtEventPtr = ((StFgtSlowSimuMaker*)dataMaker)->mFgtEvent; 
-      }    
+     
     }
     
 
@@ -104,6 +116,8 @@ Int_t StFgtClusterMaker::Init()
     ierr = kStFatal;
 
   }
+#endif
+
 
   mIsInitialized=true;
   return ierr;
