@@ -8,7 +8,7 @@ import os
 import re
 
 # Exception handling
-from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning
+from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError
 
 enable_warnings = os.getenv('AGML_WARNINGS',False)
 from warnings import warn
@@ -1236,7 +1236,7 @@ class Struct( Handler ):
                   'Int_t'   : 'Int_t',
                   'char'    : 'TString' }
 
-        # Nothing to do if passed a null string
+        # Nothing to do if passed a null string (WHY SILENT HERE?)
         if len(name.strip()) == 0:
             return
         
@@ -1511,7 +1511,13 @@ class Fill( Handler ):
             val = self.val_list[i].lower()
             com = self.com_list[i]
 
-            typ=_struct_table[ self.name ][ var ]
+            try:
+                typ=_struct_table[ self.name ][ var ]
+            except KeyError:
+                print ""
+                print "--> Error: Structure %s has no variable %s <--"%(self.name,var)
+                print ""
+                raise
                         
             if typ == 'char' or typ == 'TString':
                 val = val.strip('"') # strip out double quotes
