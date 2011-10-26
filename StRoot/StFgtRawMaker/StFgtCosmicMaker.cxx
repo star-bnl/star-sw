@@ -19,9 +19,11 @@ StFgtCosmicMaker::~StFgtCosmicMaker(){
       delete mRdr;
 };
 
-Int_t StFgtCosmicMaker::constructFgtEvent()
-{
 
+//in the cosmic maker the prepareEnvironment should only be called once (in init), so everything is constructed
+Int_t StFgtCosmicMaker::prepareEnvironment()
+{
+ 
   if( mFgtEventPtr )
       delete mFgtEventPtr;
 
@@ -53,7 +55,7 @@ Int_t StFgtCosmicMaker::constructFgtEvent()
 Int_t StFgtCosmicMaker::Init(){
    //LOG_INFO << "initializing" << endm;
 
-   Int_t ierr = constructFgtEvent();
+   Int_t ierr = prepareEnvironment();
 
    //LOG_INFO << "event constructed" << endm;
 
@@ -77,6 +79,10 @@ Int_t StFgtCosmicMaker::Init(){
 //read next event from daq file and fill the fgtevent
 Int_t StFgtCosmicMaker::Make()
 {
+
+  ///clear should be called separately, but in case it is not, empty the fgtevent by hand:
+  if(mFgtEventPtr)
+    mFgtEventPtr->Clear();
 
    //Short_t quadrant=0;      
    //Char_t layer=0;

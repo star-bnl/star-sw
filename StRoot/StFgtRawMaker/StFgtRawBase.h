@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRawBase.h,v 1.6 2011/10/18 03:16:08 avossen Exp $
+ * $Id: StFgtRawBase.h,v 1.7 2011/10/26 20:57:48 avossen Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRawBase.h,v $
+ * Revision 1.7  2011/10/26 20:57:48  avossen
+ * hopefully made cosmic and raw maker compatible with bfc (again), added clear in make. Unnecessary if member fkt clear() is called after every event
+ *
  * Revision 1.6  2011/10/18 03:16:08  avossen
  * make compatible with chain like event saving, first step
  *
@@ -58,8 +61,8 @@ class StFgtRawBase {
    // equals operator
    StFgtRawBase& operator=(const StFgtRawBase&);
 
-   // Construct the StFgtEvent
-   virtual Int_t constructFgtEvent();
+   // Construct the StFgtEvent, or grab the old one
+   virtual Int_t prepareEnvironment();
 
    // accessors
    StFgtEvent* getFgtEventPtr();
