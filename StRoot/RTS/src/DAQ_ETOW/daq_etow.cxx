@@ -18,6 +18,9 @@
 #include "daq_etow.h"
 
 
+const int etow_crate_map[] = {
+  0x01, 0x02, 0x03, 0x04, 0x05, 0x06
+};
 
 
 const char *daq_etow::help_string = "ETOW tst\n" ;
@@ -273,7 +276,7 @@ int daq_etow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	trg[1].daq = us[1] ;
 	trg[1].rhic = trg[0].rhic + 1 ;
 
-	if(us[2] != 0xF) {
+	if(us[0] != 0xF) {
 		err |= 1 ;
 		LOG(ERR,"trg cmd not 15 == 0x%04X",us[0]) ;
 	}
