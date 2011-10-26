@@ -619,11 +619,17 @@ double StSpaceChargeEbyEMaker::FindPeak(TH1* hist,float& pkwidth) {
   mn *= 1.1; rms *= 1.5;
   double lr = mn-rms;
   double ur = mn+rms;
-  double pmax = hist->GetMaximum();
+  double pmax = TMath::Max(hist->GetMaximum(),0.);
+  double lp = pmax*0.001;
+  double up = pmax*10.0;
   ga1.SetParameters(pmax,mn,rms*0.5);
   ga1.SetRange(lr,ur);
-  int fitResult = hist->Fit(&ga1,"LLR0Q");
+  ga1.SetParLimits(0,lp,up); // Loglikelihood only works with positive functions
+  int fitResult = hist->Fit(&ga1,
+    (gROOT->GetVersionInt() >= 53000 ? "WLR0Q" : "LLR0Q")); // Loglikelihood options changed!
   if (fitResult != 0) return -999.;
+  double rp = ga1.GetParameter(0);
+  if (rp == lp || rp == up) return -998;
   pkwidth = TMath::Abs(ga1.GetParError(1));
   return ga1.GetParameter(1);
 
@@ -1094,8 +1100,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.37 2011/04/18 17:36:52 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.38 2011/10/26 15:33:49 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.38  2011/10/26 15:33:49  genevb
+// Avoid floating point exception in Loglikelihood fits of gaussian peaks
+//
 // Revision 1.37  2011/04/18 17:36:52  genevb
 // Expanded range for sc hists
 //
