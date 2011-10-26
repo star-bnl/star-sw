@@ -329,6 +329,7 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
     track->SetPrimary(bestVertex+1);
     node->SetType(StvNode::kPrimNode);    
     node->SetHit(hit);    
+    node->SetXi2(bestXi2,0);
     goodCount++;
     if (track->GetCharge()>0) { plus++; } else { minus++; }
 
