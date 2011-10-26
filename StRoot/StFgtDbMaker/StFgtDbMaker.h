@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.4 2011/10/06 19:03:58 balewski Exp $
+// $Id: StFgtDbMaker.h,v 1.5 2011/10/26 19:32:34 balewski Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -11,12 +11,14 @@
 #include "StMaker.h"
 #endif
 
-class fgtElosCutoff_st;
+#include "StFgtUtil/geometry/StFgtGeom.h"
 
+class fgtElosCutoff_st;
 
 class StFgtDbMaker : public StMaker {
  private:
   fgtElosCutoff_st *mLossTab;
+  StFgtGeom *geom;
 
  public: 
   StFgtDbMaker(const char *name="FgtDb");
@@ -28,15 +30,19 @@ class StFgtDbMaker : public StMaker {
   virtual void   Clear(const char *opt);
 
   Float_t eLossTab(int bin); //  built from BichselELossProbHighBG.dat used to reject very high and unrealistic loss value
+  StFgtGeom *getFgtGeom(){ return geom;} 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.4 2011/10/06 19:03:58 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.5 2011/10/26 19:32:34 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.5  2011/10/26 19:32:34  balewski
+// now fgt-geom is owned by fgtDb-maker
+//
 // Revision 1.4  2011/10/06 19:03:58  balewski
 // access Elos table from STAR DB
 //

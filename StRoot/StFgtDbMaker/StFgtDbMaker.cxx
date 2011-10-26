@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.3 2011/10/06 19:03:58 balewski Exp $
+// $Id: StFgtDbMaker.cxx,v 1.4 2011/10/26 19:32:34 balewski Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -17,7 +17,10 @@ StFgtDbMaker* gStFgtDbMaker=NULL;
 ClassImp(StFgtDbMaker)
 //_____________________________________________________________________________
 StFgtDbMaker::StFgtDbMaker(const char *name) : 
-  StMaker(name){gStFgtDbMaker = this;}
+  StMaker(name){
+  gStFgtDbMaker = this;
+  geom=0;
+}
 
 //_____________________________________________________________________________
 StFgtDbMaker::~StFgtDbMaker() {}
@@ -64,7 +67,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber) {
     assert(12==1);
   }
   
- 
+  geom=new StFgtGeom();// for now it is static, but later may be time dependent
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -98,6 +101,9 @@ Float_t StFgtDbMaker::eLossTab(int bin){
 }
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.4  2011/10/26 19:32:34  balewski
+// now fgt-geom is owned by fgtDb-maker
+//
 // Revision 1.3  2011/10/06 19:03:58  balewski
 // access Elos table from STAR DB
 //
