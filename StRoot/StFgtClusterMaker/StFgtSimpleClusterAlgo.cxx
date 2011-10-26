@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.9 2011/10/14 18:45:27 avossen Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.10 2011/10/26 20:56:50 avossen Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.10  2011/10/26 20:56:50  avossen
+//  use geoIds to determine if two strips are adjacent
+//
 //  Revision 1.9  2011/10/14 18:45:27  avossen
 //  fixed some bugs in simple cluster algo
 //
@@ -71,8 +74,9 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
 	  continue;
 	}
 
+      //      bool adjacentStrips=(((abs(prvOrdinate-ordinate)<StFgtGeom::kFgtPhiAnglePitch) &&isPhi)|| ((abs(prvOrdinate-ordinate)<StFgtGeom::kFgtRadPitch) && isR));
+      bool adjacentStrips=(abs(prvGeoId-(*it)->getGeoId())<2);
 
-      bool adjacentStrips=(((abs(prvOrdinate-ordinate)<StFgtGeom::kFgtPhiAnglePitch) &&isPhi)|| ((abs(prvOrdinate-ordinate)<StFgtGeom::kFgtRadPitch) && isR));
       //if the strip is adjacent to the last one? Then we add it to the cluster
       if((layer==prvLayer && adjacentStrips)&& prvLayer!=noLayer) 
 	{
@@ -85,6 +89,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
 	  prvLayer=layer;
 	  prvGeoId=(*it)->getGeoId();
 	  prvOrdinate=ordinate;
+	  continue;
 	}
       else
 	{//we are looking at a new cluster because we are not at the beginning and the new strip is not adjacent to the old one

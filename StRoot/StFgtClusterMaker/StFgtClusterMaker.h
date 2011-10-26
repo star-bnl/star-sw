@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.9 2011/10/20 17:30:37 balewski Exp $
+//   $Id: StFgtClusterMaker.h,v 1.10 2011/10/26 20:56:50 avossen Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.10  2011/10/26 20:56:50  avossen
+//   use geoIds to determine if two strips are adjacent
+//
 //   Revision 1.9  2011/10/20 17:30:37  balewski
 //   revert
 //
@@ -47,6 +50,7 @@ class StFgtClusterMaker : public StMaker
 
  protected:
   StFgtIClusterAlgo* pClusterAlgo;
+  Int_t PrepareEnvironment();
   StFgtEvent *mFgtEventPtr;
   std::string mFgtEventMakerName;
 
