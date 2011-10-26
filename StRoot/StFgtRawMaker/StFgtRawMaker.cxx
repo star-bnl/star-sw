@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.16 2011/10/26 20:57:48 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.17 2011/10/26 21:32:01 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.17  2011/10/26 21:32:01  avossen
+//  fixed mFgtEvent pointer name
+//
 //  Revision 1.16  2011/10/26 20:57:48  avossen
 //  hopefully made cosmic and raw maker compatible with bfc (again), added clear in make. Unnecessary if member fkt clear() is called after every event
 //
@@ -64,27 +67,27 @@ Int_t StFgtRawMaker::PrepareEnvironment()
   Short_t numDiscs=6;
 
   mEvent= (StEvent*)StRTSBaseMaker::GetInputDS("StEvent");
-  mFgtEvent=NULL;
+  mFgtEventPtr=NULL;
   if(mEvent)
     {
-      mFgtEvent=mEvent->fgtEvent();
+      mFgtEventPtr=mEvent->fgtEvent();
     }
   else
     {
       mEvent=new StEvent();
       StRTSBaseMaker::AddData(mEvent);
-      mFgtEvent=mEvent->fgtEvent();
+      mFgtEventPtr=mEvent->fgtEvent();
     }
-  if(!mFgtEvent)
+  if(!mFgtEventPtr)
     {
-      mFgtEvent=new StFgtEvent(numDiscs);
-      mEvent->setFgtEvent(mFgtEvent);
+      mFgtEventPtr=new StFgtEvent(numDiscs);
+      mEvent->setFgtEvent(mFgtEventPtr);
       LOG_DEBUG <<"::prepareEnvironment() has added a non existing StFgtEvent()"<<endm;
     }
   else
     {
       //this should be unncessary if the member clear function is called
-      mFgtEvent->Clear();
+      mFgtEventPtr->Clear();
     }
   return kStOK;
 };
@@ -164,7 +167,6 @@ Int_t StFgtRawMaker::Init()
 
          mIsInitialized = 1;
       };
-   };
 
    return ierr;
 };
