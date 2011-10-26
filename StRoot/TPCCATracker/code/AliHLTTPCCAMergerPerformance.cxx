@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMergerPerformance.cxx,v 1.2 2010/08/23 19:37:02 mzyzak Exp $
+// $Id: AliHLTTPCCAMergerPerformance.cxx,v 1.3 2011/10/26 22:09:08 perev Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -51,6 +51,10 @@
 
 ClassImp(MergerPerfData)
 ClassImp(MergerPerfDataEvent)
+AliHLTTPCCAMergerPerformance::AliHLTTPCCAMergerPerformance()
+:iData(0),iData2Step(0),first_call(true),MPDTree(0)
+,MPDTree2Step(0),MergerData(0),fMPDE(0),fMPDE2Step(0)
+{}
 
 void AliHLTTPCCAMergerPerformance::SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
                             AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
