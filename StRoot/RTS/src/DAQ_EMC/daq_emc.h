@@ -26,6 +26,8 @@
 #define ESMD_DATSIZE   192
 
 
+
+
 struct emc_t {
 	u_char btow_in ;
 	u_short btow_max_ch ;
