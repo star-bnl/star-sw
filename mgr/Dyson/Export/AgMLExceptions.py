@@ -131,6 +131,7 @@ class AgmlAttributeWarning(Warning):
         --> AgML Warning line %i: %s has invalid attribute %s="%s" <--
         """%(self.locator.getLineNumber(),self.tag,self.key,self.value)
         return output
+
 # ===============================================================================
 class AgmlMissingAttributeWarning(Warning):
 
@@ -144,4 +145,16 @@ class AgmlMissingAttributeWarning(Warning):
         
         --> AgML Warning line %i: %s missinge required attribute %s <--
         """%(self.locator.getLineNumber(),self.tag,self.key)
+        return output
+# ===============================================================================
+class AgmlFillMissingVarError(Exception):
+    def __init__(self,struct,varname):
+        self.struct = struct
+        self.varname = varname
+        Exception.__init__(self)
+    def __str__(self):
+        output = """
+
+        --> AgML Error line %i: struct %s has no variable %s <--
+        """%(self.struct,self.varname)
         return output
