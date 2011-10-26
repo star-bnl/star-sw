@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.15 2011/10/06 15:19:43 sgliske Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.16 2011/10/26 20:57:48 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.16  2011/10/26 20:57:48  avossen
+//  hopefully made cosmic and raw maker compatible with bfc (again), added clear in make. Unnecessary if member fkt clear() is called after every event
+//
 //  Revision 1.15  2011/10/06 15:19:43  sgliske
 //  StFgtRawHitArray::PushBack -> pushBack
 //
@@ -55,13 +58,45 @@
 #include "StFgtRawMaker.h"
 
 
+Int_t StFgtRawMaker::PrepareEnvironment()
+{
+  StEvent* mEvent=0;
+  Short_t numDiscs=6;
+
+  mEvent= (StEvent*)StRTSBaseMaker::GetInputDS("StEvent");
+  mFgtEvent=NULL;
+  if(mEvent)
+    {
+      mFgtEvent=mEvent->fgtEvent();
+    }
+  else
+    {
+      mEvent=new StEvent();
+      StRTSBaseMaker::AddData(mEvent);
+      mFgtEvent=mEvent->fgtEvent();
+    }
+  if(!mFgtEvent)
+    {
+      mFgtEvent=new StFgtEvent(numDiscs);
+      mEvent->setFgtEvent(mFgtEvent);
+      LOG_DEBUG <<"::prepareEnvironment() has added a non existing StFgtEvent()"<<endm;
+    }
+  else
+    {
+      //this should be unncessary if the member clear function is called
+      mFgtEvent->Clear();
+    }
+  return kStOK;
+};
+
+
 Int_t StFgtRawMaker::Make()
 {
   TStopwatch clock;
   clock.Start();
   LOG_DEBUG <<"StEmcRawMaker::Make()******************************************************************"<<endm;
 
-  if( !mIsInitialized )
+  if( !mIsInitialized || (PrepareEnvironment()!=kStOK) )
      {
         LOG_ERROR << "Not initialized" << endm;
         return kStFatal;
@@ -124,25 +159,8 @@ Int_t StFgtRawMaker::Init()
 {
    Int_t ierr = kStOk;
 
-   if( !mIsInitialized ){
-      ierr = constructFgtEvent();
-
-      if( ierr || !mFgtEventPtr )
-         {
-            LOG_FATAL << "Error constructing FgtEvent" << endm;
-            ierr = kStFatal;
-         };
-
-      if( !ierr ){
-         StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
-         if(!mEvent)
-            {
-               mEvent=new StEvent();
-               //hmmm.... see stEmcrawmaker
-               AddData(mEvent);
-            }
-
-         mEvent->setFgtEvent( mFgtEventPtr );
+   if( !mIsInitialized )
+     {
 
          mIsInitialized = 1;
       };

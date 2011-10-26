@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtCosmicMaker.h,v 1.13 2011/10/18 03:16:08 avossen Exp $
+//  $Id: StFgtCosmicMaker.h,v 1.14 2011/10/26 20:57:48 avossen Exp $
 //  $Log: StFgtCosmicMaker.h,v $
+//  Revision 1.14  2011/10/26 20:57:48  avossen
+//  hopefully made cosmic and raw maker compatible with bfc (again), added clear in make. Unnecessary if member fkt clear() is called after every event
+//
 //  Revision 1.13  2011/10/18 03:16:08  avossen
 //  make compatible with chain like event saving, first step
 //
@@ -54,7 +57,7 @@ class StFgtCosmicMaker : public StFgtRawBase, public StMaker
   virtual Int_t Init();
   virtual Int_t Make();
   virtual void Clear( Option_t *opts = "" );
-  virtual Int_t constructFgtEvent();
+  virtual Int_t prepareEnvironment();
 
   void cutShortEvents( Bool_t doIt = 1 );
 

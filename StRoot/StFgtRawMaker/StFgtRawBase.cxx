@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRawBase.cxx,v 1.4 2011/10/18 03:16:08 avossen Exp $
+ * $Id: StFgtRawBase.cxx,v 1.5 2011/10/26 20:57:48 avossen Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRawBase.cxx,v $
+ * Revision 1.5  2011/10/26 20:57:48  avossen
+ * hopefully made cosmic and raw maker compatible with bfc (again), added clear in make. Unnecessary if member fkt clear() is called after every event
+ *
  * Revision 1.4  2011/10/18 03:16:08  avossen
  * make compatible with chain like event saving, first step
  *
@@ -55,7 +58,6 @@ StFgtRawBase::StFgtRawBase( const StFgtRawBase& rhs ) :
    if( rhs.mFgtEventPtr )
       mFgtEventPtr = new StFgtEvent( *(rhs.mFgtEventPtr) );
 
-
 };
 
 // equals operator
@@ -77,6 +79,6 @@ StFgtRawBase& StFgtRawBase::operator=( const StFgtRawBase& rhs ){
    return *this;
 };
 
-Int_t StFgtRawBase::constructFgtEvent(){return kStOK;};
+Int_t StFgtRawBase::prepareEnvironment(){return kStOK;};
 
 

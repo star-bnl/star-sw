@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtRawMaker.h,v 1.14 2011/09/21 17:49:34 sgliske Exp $
+//  $Id: StFgtRawMaker.h,v 1.15 2011/10/26 20:57:49 avossen Exp $
 //  $Log: StFgtRawMaker.h,v $
+//  Revision 1.15  2011/10/26 20:57:49  avossen
+//  hopefully made cosmic and raw maker compatible with bfc (again), added clear in make. Unnecessary if member fkt clear() is called after every event
+//
 //  Revision 1.14  2011/09/21 17:49:34  sgliske
 //  alternate base class with more
 //   functionality and not an StMaker
@@ -45,6 +48,7 @@ class StFgtRawMaker : public StRTSBaseMaker, public StFgtRawBase
   virtual Int_t Make();
   virtual void Clear( Option_t *opts = "" );
   virtual Int_t FillHits();
+  virtual Int_t PrepareEnvironment();
 
  protected:
 
