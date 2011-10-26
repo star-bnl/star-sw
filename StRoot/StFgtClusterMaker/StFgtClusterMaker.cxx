@@ -2,8 +2,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.11 2011/10/26 17:02:04 balewski Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.12 2011/10/26 19:32:31 balewski Exp $
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.12  2011/10/26 19:32:31  balewski
+//   now fgt-geom is owned by fgtDb-maker
+//
 //   Revision 1.11  2011/10/26 17:02:04  balewski
 //   get fgt event the proper way
 //
@@ -21,9 +24,9 @@
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
-#include "StRoot/StFgtRawMaker/StFgtCosmicMaker.h"
-#include "StRoot/StFgtRawMaker/StFgtRawMaker.h"
-#include "StFgtSimulator/StFgtSlowSimuMaker.h"
+//#include "StRoot/StFgtRawMaker/StFgtCosmicMaker.h"
+//#include "StRoot/StFgtRawMaker/StFgtRawMaker.h"
+//
 #include "../StEvent/StEvent.h"
 
 void StFgtClusterMaker::Clear(Option_t *opts)
@@ -43,7 +46,7 @@ Int_t StFgtClusterMaker::Make()
 
   mFgtEventPtr=mEvent->fgtEvent(); 
   assert(mFgtEventPtr);
-  printf("StFgtClusterMaker::Make()-> mIsInitialized=%d,  pClusterAlgo=%p\n",mIsInitialized , pClusterAlgo);
+  //printf("StFgtClusterMaker::Make()-> mIsInitialized=%d,  pClusterAlgo=%p\n",mIsInitialized , pClusterAlgo);
 
   if( !mIsInitialized || !pClusterAlgo)
     {
@@ -56,11 +59,11 @@ Int_t StFgtClusterMaker::Make()
     {
       //invoke algo for each disc
       for(int discIdx=0;discIdx<mFgtEventPtr->getNumDiscs();discIdx++)
-	{
+	{ 
 	  StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
-	  printf("iD=%d %p\n",discIdx,pDisc);
+	  //printf("iD=%d %p\n",discIdx,pDisc);
 	  if(pDisc)
-	    {
+	    { 
 	      cout <<"disc: " << discIdx << " has " << pDisc->getRawHitArray().getEntries() <<endl;
 	      Int_t loc_ierr=pClusterAlgo->doClustering(pDisc->getRawHitArray(),pDisc->getClusterArray());
 	      if(loc_ierr!=kStOk)
