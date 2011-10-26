@@ -11,6 +11,8 @@ struct etow_t {
 	short preamble[ETOW_MAXFEE][ETOW_PRESIZE] ;
 } ;
 
+extern const int etow_crate_map[] ;
+
 
 class daq_etow : public daq_det {
 private:
