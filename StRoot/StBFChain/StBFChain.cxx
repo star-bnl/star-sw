@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.588 2011/10/11 19:50:20 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.590 2011/10/25 23:10:55 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -371,8 +371,8 @@ Int_t StBFChain::Instantiate()
       if (GetOption("Embedding")) mk->SetAttr("Embedding",kTRUE);
     }
     //		Sti(ITTF) start
-    if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "Stv" || maker == "StvCA") {
-      if ( maker == "StvCA" ) {
+    if (maker == "StiMaker" || maker == "StiVMCMaker" || maker == "StvMaker") {
+      if ( maker == "StvMaker" &&  GetOption("StvCA")) {
 	//      mk->SetAttr("seedFinders","CA","Stv");              // for CA seed finder
 	mk->SetAttr("seedFinders","CA,Default","Stv");      // for CA + Default seed finders
       }
@@ -415,7 +415,7 @@ Int_t StBFChain::Instantiate()
     if (maker=="StGenericVertexMaker") {
       // VertexFinder methods
       if (GetOption("Sti") || GetOption("StiCA") ||
-	  GetOption("Stv") || GetOption("StvCA") ||
+	  GetOption("Stv") ||
 	  GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , kTRUE);
       if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, kTRUE);
       if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
@@ -747,7 +747,6 @@ Int_t StBFChain::Instantiate()
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Sti");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiCA");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Stv");
-  if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StvCA");
   if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"StiVMC");
 
   gMessMgr->QAInfo() << "+++ Setting attribute " << Gproperty.Data() << " = " << Gvalue.Data() << endm;
@@ -788,7 +787,7 @@ Int_t StBFChain::Init() {
     // force load of geometry for VMC and Sti
     
     if (GetOption("Sti") || GetOption("StiCA") || 
-	GetOption("Stv") || GetOption("StvCA") || 
+	GetOption("Stv") || 
 	GetOption("StiVMC") ||GetOption("VMC") || 
 	GetOption("VMCPassive")) {
       const DbAlias_t *DbAlias = GetDbAliases();
@@ -1183,7 +1182,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	gMessMgr->Error() << "Option ntin cannot be used in root.exe. Use root4star" << endm;
 	abort();
       }
-      if (! (GetOption("Stv") || GetOption("StvCA"))) {
+      if (! (GetOption("Stv"))) {
 	if (GetOption("gstar")) {
 	  SetOption("VMC","Default,-TGiant3,gstar");
 	  SetOption("-gstar","Default,-TGiant3");
@@ -1193,7 +1192,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-geantL","Default,-TGiant3");
       SetOption("-geometry","Default,-TGiant3");
       SetOption("-geomNoField","Default,-TGiant3");
-      if (! (GetOption("Stv") || GetOption("StvCA"))) {
+      if (! (GetOption("Stv"))) {
 	if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
 	  SetOption("VMCPassive","Default,-TGiant3");
 	}
@@ -1202,12 +1201,12 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	SetOption("minicern","Default,-TGiant3");
       }
     }
-    if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || GetOption("Stv")  || GetOption("StvCA") || GetOption("StiVMC"))) {
+    if (GetOption("ITTF") && ! (GetOption("Sti") || GetOption("StiCA")  || GetOption("Stv") || GetOption("StiVMC"))) {
       TString STAR_LEVEL(gSystem->Getenv("STAR_LEVEL"));
       if (STAR_LEVEL == ".DEV2")  SetOption("StiCA","Default,ITTF");
       else                        SetOption("Sti"  ,"Default,ITTF");
     }  
-    if (GetOption("Stv")  || GetOption("StvCA")) {
+    if (GetOption("Stv")) {
       SetOption("-TpcIT","Default,Stv");
       SetOption("-SvtIT","Default,Stv");
       SetOption("-SsdIT","Default,Stv");

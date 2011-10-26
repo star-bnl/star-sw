@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.12 2011/10/07 19:35:46 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.13 2011/10/26 20:35:39 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.13  2011/10/26 20:35:39  perev
+ * Temporary fix primary hit ignored
+ *
  * Revision 1.12  2011/10/07 19:35:46  perev
  * StTrack::mKey short==>int
  *
@@ -1403,7 +1406,8 @@ static int nCall=0; nCall++;
 
 //		global Hit
   const StHitPlane *hitPlane = stiHit->detector();
-  assert(hitPlane);
+//  assert(hitPlane);
+  if (!hitPlane) return; //Temporary???????
   const float *n = hitPlane->GetDir(stiHit->x())[0];
   aux.gPhiHP = atan2(n[1],n[0]);
   aux.gLamHP = asin(n[2]);

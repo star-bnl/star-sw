@@ -48,17 +48,14 @@ void StvKalmanTrackFinder::Reset()
 //_____________________________________________________________________________
 int StvKalmanTrackFinder::FindTracks()
 {
-static int trkShow=0;
-static int kitShow=0;
-//  DoShow(2);
-  int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSeed=0,nSeedTot=0;
 static StvToolkit *kit = StvToolkit::Inst();
 static StvConst  *kons = StvConst::Inst();
+  int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSeed=0,nSeedTot=0;
   StvSeedFinders *sfs = kit->SeedFinders();
   double aveRes=0,aveXi2=0;
   mCurrTrak = 0;
 
-  for (int isf=0;isf<sfs->size();isf++) { //Loop over seed finders
+  for (int isf=0;isf<(int)sfs->size();isf++) { //Loop over seed finders
     StvSeedFinder* sf = (*sfs)[isf];
     int myMinHits = kons->mMinHits;
     if(sf->Again()) myMinHits = kons->mGoodHits;
@@ -174,7 +171,11 @@ Mtx55D_t derivFit;
     idive = mDive->Dive();
 
 //+++++++++++++++++++++++++++++++++++++
-    assert(!(mySkip && !idive));
+//????    assert(!(mySkip && !idive));
+    if (mySkip && !idive) {
+      Warning("FindTrack","Strange case mySkip!=0 and iDive==0");
+      break;
+    }
     totLen+=mDive->GetLength();
     nNode++;		// assert(nNode<200);
     if (nNode>200) { //Something very wrong
@@ -328,6 +329,7 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
     track->SetPrimary(bestVertex+1);
     node->SetType(StvNode::kPrimNode);    
     node->SetHit(hit);    
+    node->SetXi2(bestXi2,0);
     goodCount++;
     if (track->GetCharge()>0) { plus++; } else { minus++; }
 
