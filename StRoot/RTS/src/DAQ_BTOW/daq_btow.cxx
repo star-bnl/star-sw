@@ -16,6 +16,19 @@
 
 #include "daq_btow.h"
 
+
+// maps received from Gerard on Mar 17,2006
+const int btow_crate_map[] = {
+  0x12, 0x11, 0x10, 0x1e,
+  0x1d, 0x1c, 0x1b, 0x1a,
+  0x19, 0x18, 0x17, 0x16,
+  0x15, 0x14, 0x13, 0x01,
+  0x0f, 0x0e, 0x0d, 0x0c,
+  0x0b, 0x0a, 0x09, 0x08,
+  0x07, 0x06, 0x05, 0x04,
+  0x03, 0x02
+} ;
+
 class daq_det_btow_factory : public daq_det_factory
 {
 public:
@@ -199,7 +212,13 @@ daq_dta *daq_btow::handle_adc()
 
 
 	// unpack 
+
+	// This is really a bad hack where DDL DAQ and DDL Trigger moved the
+	// whole event by 4 bytes to stay compatible with the VME BTOW Receiver
+
 	u_short *data = (u_short *)((char *)raw_dta + 4 + 128) ;	// 4 byte dummy, 128 byte header
+
+
 
 #if 0
 	u_short *ppp = (u_short *) raw_dta ;
@@ -269,7 +288,7 @@ int daq_btow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	trg[1].daq = us[1] ;
 	trg[1].rhic = trg[0].rhic + 1 ;
 
-	if(us[0] != 0xF) {
+	if(us[0] != 0xF) {	// in data!!!
 		err |= 1 ;
 		LOG(ERR,"trg cmd not 15 == 0x%04X",us[0]) ;
 	}

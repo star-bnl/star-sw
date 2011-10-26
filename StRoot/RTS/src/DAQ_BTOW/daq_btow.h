@@ -11,6 +11,7 @@ struct btow_t {
 	short preamble[BTOW_MAXFEE][BTOW_PRESIZE] ;
 } ;
 
+extern const int btow_crate_map[] ;
 
 class daq_btow : public daq_det {
 private:
