@@ -35,6 +35,8 @@ const int   SCN1 = 200;
 const int   SCN2 = 100;
 const float SCL = -0.015;
 const float SCH =  0.085;
+const float SCB = (SCH-SCL)/SCN1;
+const float SCX = SCB/TMath::Sqrt(TMath::TwoPi());
 
 const int   DCN = 125;
 const float DCL = -2.5;
@@ -338,11 +340,15 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           //Float_t DCA=hh.geometricSignedDistance(0,0); // for testing only
           Float_t DCA3=-999;
           Float_t DCA2=-999;
+          Double_t DCAerr = 0.;
           StDcaGeometry* triDcaGeom = ((StGlobalTrack*) tri)->dcaGeometry();
           if (triDcaGeom) {
             StPhysicalHelixD dcahh = triDcaGeom->helix();
             DCA3 = dcahh.distance(ooo,kFALSE);
             DCA2 = dcahh.geometricSignedDistance(ooo.x(),ooo.y());
+            // helix() gets the sign of DCA2, thelix() gets the error
+            THelixTrack thelix = triDcaGeom->thelix();
+            thelix.Dca(ooo.x(),ooo.y(),&DCAerr);
           } else {
             DCA3 = hh.distance(ooo,kFALSE);
             DCA2 = hh.geometricSignedDistance(ooo.x(),ooo.y());
@@ -388,8 +394,21 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 	     eta,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space))) continue;
           if (QAmode) cutshist->Fill(32);
 
+          Double_t spaceErr = TMath::Abs(space*DCAerr/DCA2);
 	  space += lastsc;  // Assumes additive linearity of space charge!
-	  schists[curhist]->Fill(space);
+          if (spaceErr > 0) {
+            // Fill SpaceCharge accounting for prediction error
+            ga1.SetParameters(SCX/spaceErr,space,spaceErr);
+            for (Int_t si=1;si<=SCN1;si++) {
+              Double_t sx = schists[curhist]->GetBinCenter(si);
+              if (TMath::Abs((sx-space)/spaceErr) < 4.5) {
+                // only within +/-4.5 sigma
+                schists[curhist]->Fill(sx,ga1.Eval(sx));
+              }
+            }
+          } else {
+            schists[curhist]->Fill(space);
+          }
           FillQAHists(DCA2,space,ch,hh,e_or_w);
 
 
@@ -990,12 +1009,13 @@ void StSpaceChargeEbyEMaker::DetermineGaps() {
   DetermineGapHelper(gapZhist,gapZfitslope,gapZfitintercept,gapZdivslope);
 }
 //_____________________________________________________________________________
-void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
+void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* gh,
       float& fitslope, float& fitintercept, float& divslope) {
 
-  ga1.SetParameters(hh->GetEntries()/(16.*2.*10.),0.,0.1);
-  hh->FitSlicesX(&ga1,1,0,20,"LL0Q");
-  const char* hn = hh->GetName();
+  ga1.SetParameters(gh->GetEntries()/(16.*2.*10.),0.,0.1);
+  ga1.SetParLimits(0,0.001,10.0*gh->GetEntries()); // Loglikelihood only works with positive functions
+  gh->FitSlicesX(&ga1,1,0,20,"L0Q"); // gapZhist bin contents are integers
+  const char* hn = gh->GetName();
   TH1D* GapsChi2 = (TH1D*) gDirectory->Get(Form("%s_chi2",hn));
   TH1D* GapsAmp  = (TH1D*) gDirectory->Get(Form("%s_0",hn));
   TH1D* GapsMean = (TH1D*) gDirectory->Get(Form("%s_1",hn));
@@ -1037,12 +1057,12 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
 
   // Initial fits to DCA distribution
   ga1.SetParameters(1.,0.,1.);
-  dcaproj->Fit("ga1","Q");
+  dcaproj->Fit(&ga1,"Q");
   float hm = ga1.GetParameter(1);
   float hw = TMath::Abs(ga1.GetParameter(2));
   float hd = 0.6*hw;
   ga1.SetRange(hm-hd,hm+hd);
-  dcaproj->Fit("ga1","RQ");
+  dcaproj->Fit(&ga1,"RQ");
   float gm = ga1.GetParameter(1);
   float gw = TMath::Abs(ga1.GetParameter(2));
   float gm1 = gm;
@@ -1050,15 +1070,15 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
 
   // Iterate fit to get best answer
   ga1.SetRange(gm-0.9*gw,gm+0.9*gw);
-  dcaproj->Fit("ga1","RQ");
+  dcaproj->Fit(&ga1,"RQ");
   gm = ga1.GetParameter(1);
   gw = TMath::Abs(ga1.GetParameter(2));
   ga1.SetRange(gm-0.8*gw,gm+0.8*gw);
-  dcaproj->Fit("ga1","RQ");
+  dcaproj->Fit(&ga1,"RQ");
   gm = ga1.GetParameter(1);
   gw = TMath::Abs(ga1.GetParameter(2));
   ga1.SetRange(gm-0.7*gw,gm+0.7*gw);
-  dcaproj->Fit("ga1","RQ");
+  dcaproj->Fit(&ga1,"RQ");
   gm = ga1.GetParameter(1);
   gw = TMath::Abs(ga1.GetParameter(2));
   float gme = TMath::Abs(ga1.GetParError(1));
@@ -1100,8 +1120,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.38 2011/10/26 15:33:49 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.39 2011/10/27 23:11:03 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.39  2011/10/27 23:11:03  genevb
+// Account for pointing error in sDCA and predicted SpaceCharge
+//
 // Revision 1.38  2011/10/26 15:33:49  genevb
 // Avoid floating point exception in Loglikelihood fits of gaussian peaks
 //
