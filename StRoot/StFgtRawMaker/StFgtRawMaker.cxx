@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.17 2011/10/26 21:32:01 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.18 2011/10/27 21:09:47 jeromel Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.18  2011/10/27 21:09:47  jeromel
+//  Small info added in Init() + ident
+//
 //  Revision 1.17  2011/10/26 21:32:01  avossen
 //  fixed mFgtEvent pointer name
 //
@@ -162,6 +165,8 @@ Int_t StFgtRawMaker::Init()
 {
    Int_t ierr = kStOk;
 
+   LOG_INFO << "StFgtRawMaker::Init we are named "  << GetName() << endm;
+
    if( !mIsInitialized )
      {
 
@@ -171,24 +176,24 @@ Int_t StFgtRawMaker::Init()
    return ierr;
 };
 
- StFgtRawMaker::StFgtRawMaker(const Char_t* name) :
-    StRTSBaseMaker( "adc", name ),
-    StFgtRawBase(),
-    mIsInitialized(0)
-       {
-          // nothing else to do
-       };
+StFgtRawMaker::StFgtRawMaker(const Char_t* name) :
+  StRTSBaseMaker( "adc", name ),
+  StFgtRawBase(),
+  mIsInitialized(0)
+{
+  // nothing else to do
+};
 
 
 StFgtRawMaker::~StFgtRawMaker()
-   {
-      // nothing to do
-   };
+{
+  // nothing to do
+};
 
 void StFgtRawMaker::Clear( Option_t *opts )
 {
    if( mFgtEventPtr )
-      mFgtEventPtr->Clear( opts );
+     mFgtEventPtr->Clear( opts );
 };
 
 ClassImp(StFgtRawMaker);
