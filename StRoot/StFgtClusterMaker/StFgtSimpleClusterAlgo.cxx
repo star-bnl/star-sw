@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.10 2011/10/26 20:56:50 avossen Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.11 2011/10/27 14:18:25 avossen Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.11  2011/10/27 14:18:25  avossen
+//  minor update
+//
 //  Revision 1.10  2011/10/26 20:56:50  avossen
 //  use geoIds to determine if two strips are adjacent
 //
@@ -98,7 +101,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
 	  newCluster->setLayer(prvLayer);
 	  newCluster->setKey(prvGeoId);
 	  newCluster->setCharge(accuCharge);
-	  newCluster->setPosition(meanOrdinate/numStrips);
+	  newCluster->setPosition(meanOrdinate/(float)numStrips);
 	  if(numStrips<=10)
 	    clusters.pushBack(*newCluster);
 	  //	      cout <<"cluster has size: " << numStrips <<endl;
@@ -126,7 +129,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
       //new cluster was started but not included yet..
       newCluster->setLayer(prvLayer);
       newCluster->setKey(prvGeoId);
-      newCluster->setPosition(meanOrdinate/numStrips);
+      newCluster->setPosition(meanOrdinate/(float)numStrips);
       newCluster->setCharge(accuCharge);
       if(numStrips<=10)
 	clusters.pushBack(*newCluster);
