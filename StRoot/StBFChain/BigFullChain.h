@@ -458,6 +458,7 @@ Bfc_st BFC[] = { // standard chains
   {"SsdUtil"     ,""  ,"","StarMagField,StEvent",""               ,"Geom,StSsdUtil","Load SSD Util",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T,geomT,StDbT",""                      ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
+  {"FgtUtil"     ,""  ,"","",""                                       ,"StFgtUtil","Load StFgtUtil",kFALSE},
 #if 0
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
 #else
@@ -651,13 +652,13 @@ Bfc_st BFC[] = { // standard chains
   {"eemcD"       ,"","","","","",                              "WARNING *** Option is OBSOLETE ***",kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"emcY2"    ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
-   "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"","emcY2","emc_T,EmcUtil,StMcEvent,MuDST","StEmcSimulatorMaker","StEmcSimulatorMaker",
-   "New simulator for BEMC",kFALSE},
+                                                                           "New simulator for BEMC",kFALSE},
   {"EEfs" ,"eefs","","db,EEmcUtil,MuDst",
-   "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+                                     "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
   {"EEss" ,"eess","","EEfs",
-   "StEEmcSlowMaker","StEEmcSimulatorMaker","EEMC slow simulator",kFALSE},
+                                     "StEEmcSlowMaker","StEEmcSimulatorMaker","EEMC slow simulator",kFALSE},
   // BTOF related chains
   //  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
   //                                                                           "StChain","BTOF Chain",kFALSE}, 
@@ -672,28 +673,32 @@ Bfc_st BFC[] = { // standard chains
   {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
   {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
   {"tofDat"    ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker",
-   "TOF Data base chain",kFALSE},
+                                                                              "TOF Data base chain",kFALSE},
   {"tofXDat"   ,"tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
-   "TOF hit maker",kFALSE},
+                                                                                    "TOF hit maker",kFALSE},
   
   {"tofsim"    ,"","TofChain","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker",
-   "TOF Simulator",kFALSE},
+                                                                                    "TOF Simulator",kFALSE},
   
   {"tofrMatch" ,"","TofChain","db,TofUtil","StTofrMatchMaker","StTofrMatchMaker",
-   "TPC to TOFr track matching",kFALSE},
+                                                                       "TPC to TOFr track matching",kFALSE},
   {"tofpMatch"   ,"","TofChain","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker",
-   "TPC to TOFp track matching",kFALSE},
+                                                                       "TPC to TOFp track matching",kFALSE},
   {"tofCalib"   ,"","TofChain","db,TofUtil","StTofCalibMaker","StTofCalibMaker",  "TOF calibration",kFALSE},
   // Filtering - all filters will have the pattern "FiltXXX"
   {"FiltGamma" ,"","","StEvent,StMcEvent,EmcUtil",
-   "StGammaFilterMaker","StFilterMaker",  "BEmc Gamma filtering",kFALSE},
+                                      "StGammaFilterMaker","StFilterMaker",  "BEmc Gamma filtering",kFALSE},
   {"FiltEemcGamma" ,"","","StEvent,StMcEvent,EmcUtil",
-   "StEemcGammaFilterMaker","StFilterMaker",  "EEmc Gamma filtering",kFALSE},
+                                  "StEemcGammaFilterMaker","StFilterMaker",  "EEmc Gamma filtering",kFALSE},
   
   
   // fms
   {"fmsdat"     ,"","", "StEvent,fmsdb", 
-   "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",kFALSE},
+                                     "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",kFALSE},
+
+  // FGT placeholder
+  {"fgtdat"     ,"","", "event,fgtutil","StFgtRawMaker","StFgtRawMaker",          "FGT Data reader",kFALSE},
+
   
   // Some global Sti stuff including vertexing
   {"genvtx"      ,""  ,"","ctf_T,EEmcUtil","StGenericVertexMaker"
