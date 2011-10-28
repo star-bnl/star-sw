@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.10 2011/10/26 20:56:50 avossen Exp $
+//   $Id: StFgtClusterMaker.h,v 1.11 2011/10/28 14:28:41 sgliske Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.11  2011/10/28 14:28:41  sgliske
+//   minor update
+//
 //   Revision 1.10  2011/10/26 20:56:50  avossen
 //   use geoIds to determine if two strips are adjacent
 //
@@ -37,7 +40,7 @@
 class StFgtClusterMaker : public StMaker
 {
  public:
-  StFgtClusterMaker(const Char_t* rawBaseMakerName,const Char_t* name="FgtCluster");
+  StFgtClusterMaker( const Char_t* name="FgtCluster");
   virtual ~StFgtClusterMaker();
   virtual Int_t Init();
   virtual Int_t Make();
@@ -45,14 +48,11 @@ class StFgtClusterMaker : public StMaker
 
   Int_t setClusterAlgo(StFgtIClusterAlgo*);
 
- private:
-  Bool_t mIsInitialized;
-
  protected:
-  StFgtIClusterAlgo* pClusterAlgo;
-  Int_t PrepareEnvironment();
   StFgtEvent *mFgtEventPtr;
-  std::string mFgtEventMakerName;
+  StFgtIClusterAlgo* mClusterAlgoPtr;
+
+  Int_t prepareEnvironment();
 
   ClassDef(StFgtClusterMaker,1);
 
