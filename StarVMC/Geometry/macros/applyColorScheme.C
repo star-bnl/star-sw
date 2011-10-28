@@ -6,11 +6,11 @@
 #include "TGeoNode.h"
 #include "TGeoVolume.h"
 
-std::map< TString, Int_t > colors;
-std::map< TString, Int_t > trans;   // transparency level
-
 void applyColorScheme( const Char_t *TOP="CAVE" )
 {
+
+  std::map< TString, Int_t > colors;
+  std::map< TString, Int_t > trans;   // transparency level
 
   //
   // Inner detector support module
