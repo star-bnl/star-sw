@@ -2,8 +2,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.13 2011/10/26 20:56:50 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.14 2011/10/28 14:28:26 sgliske Exp $
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.14  2011/10/28 14:28:26  sgliske
+//   Cleaned up prepareEnvironment (no functional change).Removed old methods of getting data pointer.Also pClusterAlgo changed to mClusterAlgoPtr to conform with STAR guidelines.
+//
 //   Revision 1.13  2011/10/26 20:56:50  avossen
 //   use geoIds to determine if two strips are adjacent
 //
@@ -41,31 +44,38 @@ void StFgtClusterMaker::Clear(Option_t *opts)
 
 
 
-Int_t StFgtClusterMaker::PrepareEnvironment()
+Int_t StFgtClusterMaker::prepareEnvironment()
 {
+  Int_t ierr = kStOk;
+
+  //StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
+  //assert(mEvent); // fix your chain
   StEvent* mEvent=0;
   mEvent=(StEvent*)GetInputDS("StEvent");
+
+  if( !mEvent ){
+     LOG_ERROR << "Pointer to StEvent is null" << endl;
+     ierr = kStErr;
+  };
 
   mFgtEventPtr=NULL;
   if(mEvent)
     {
       mFgtEventPtr=mEvent->fgtEvent();
-    }
-  else
-    {
-      //in other makers we would construct a new event here, but this doesn't make sense for the cluster maker
-	LOG_ERROR << "could not find StEvent in  cluster maker" << endm;
-      return kStErr;
-    }
-  if(mFgtEventPtr)
-    return kStOK;
-  else
-    {
-      LOG_ERROR << "could not find StFgtEvent in  cluster maker" << endm;
-      return kStErr;
-    }
-  };
+    };
 
+  // Note: only the makers StFgtRawMaker, StFgtCosmicMaker and
+  // StFgtSlowSimuMaker make the StFgtEvent.  If there is not an
+  // StFgtEvent in StEvent, then throw an error.
+
+  if( !mFgtEventPtr)
+    {
+       LOG_ERROR << "Pointer to StFgtEvent is null when sought in '" << ClassName() << "::prepareEnviroment'" << endm;
+      ierr = kStErr;
+    }
+
+  return ierr;
+};
 
 
 
@@ -81,14 +91,10 @@ Int_t StFgtClusterMaker::Make()
   //  assert(mEvent); // fix your chain
 
 
-  if( !mIsInitialized || !pClusterAlgo || (PrepareEnvironment()!=kStOK))
+  if( !mClusterAlgoPtr || (prepareEnvironment()!=kStOK))
     {
-      LOG_ERROR << "cluster maker not initialized" << endm;
-      if(!pClusterAlgo) 
+      if(!mClusterAlgoPtr) 
 	LOG_ERROR << "no cluster maker " << endm;
-      return kStFatal;
-      if(!mIsInitialized) 
-	LOG_ERROR << "really not initialzied... " << endm;
       return kStFatal;
     }
   else
@@ -101,7 +107,7 @@ Int_t StFgtClusterMaker::Make()
 	  if(pDisc)
 	    { 
 	      cout <<"disc: " << discIdx << " has " << pDisc->getRawHitArray().getEntries() <<endl;
-	      Int_t loc_ierr=pClusterAlgo->doClustering(pDisc->getRawHitArray(),pDisc->getClusterArray());
+	      Int_t loc_ierr=mClusterAlgoPtr->doClustering(pDisc->getRawHitArray(),pDisc->getClusterArray());
 	      if(loc_ierr!=kStOk)
 		{
 		  LOG_WARN <<"StClusterMaker::Make(): clustering for disc " << discIdx << " returned " << loc_ierr <<endm;
@@ -119,7 +125,7 @@ Int_t StFgtClusterMaker::Make()
 
 Int_t StFgtClusterMaker::setClusterAlgo(StFgtIClusterAlgo* algo)
 {
-  pClusterAlgo=algo;
+  mClusterAlgoPtr=algo;
   return kStOk;
 }
 
@@ -128,44 +134,18 @@ Int_t StFgtClusterMaker::Init()
   //  cout <<"cluster init " <<endl;
   Int_t ierr = kStOk;
 
-#if 0 // this method of data access wil not work in BFC, disabled, Jan
-  TObject *dataMaker = GetMaker( mFgtEventMakerName.data());
-  if( !dataMaker ){
-    LOG_FATAL << "::Init() could not get pointer to a maker with name '" << mFgtEventMakerName << "'" << endm;
-    ierr = kStFatal;
+  if( !mClusterAlgoPtr ){
+     LOG_ERROR << "No fgt cluster algorithm specified" << endm;
+     ierr = kStErr;
   };
-  if( !ierr )
-    {
-      if( dataMaker->InheritsFrom( "StFgtCosmicMaker" ) ){
-	StFgtCosmicMaker* maker = static_cast< StFgtCosmicMaker* >( dataMaker );
-	mFgtEventPtr = maker->getFgtEventPtr();
-	//	cout <<" have cosmic  maker "<< endl;
-      } 
-      else if ( dataMaker->InheritsFrom( "StFgtRawMaker" ) ){
-      StFgtRawMaker* maker = static_cast< StFgtRawMaker* >( dataMaker );
-      mFgtEventPtr = maker->getFgtEventPtr();
-      //      cout <<" have raw  maker "<< endl;
-      }
-     
-    }
-    
 
-  if( !mFgtEventPtr ){
-    LOG_FATAL << "::Init() could not get pointer to StFgtEvent" << endm;
-    ierr = kStFatal;
-
-  }
-#endif
-
-
-  mIsInitialized=true;
   return ierr;
 };
   
   
-StFgtClusterMaker::StFgtClusterMaker(const Char_t* rawBaseMakerName, const Char_t* name) : StMaker("fgt"),mFgtEventPtr(0),mFgtEventMakerName( rawBaseMakerName ),mIsInitialized(0),pClusterAlgo(0)
+StFgtClusterMaker::StFgtClusterMaker( const Char_t* name ) : StMaker(name),mFgtEventPtr(0),mClusterAlgoPtr(0)
 {
-  SetName(name);
+   /* */
 };
 
 StFgtClusterMaker::~StFgtClusterMaker()
