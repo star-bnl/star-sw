@@ -4,10 +4,15 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.11 2011/10/28 14:28:41 sgliske Exp $
+//   $Id: StFgtClusterMaker.h,v 1.12 2011/10/28 14:29:43 sgliske Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.12  2011/10/28 14:29:43  sgliske
+//   fixed CVS tags
+//
 //   Revision 1.11  2011/10/28 14:28:41  sgliske
-//   minor update
+//   Cleaned up prepareEnvironment (no functional change).
+//   Removed old methods of getting data pointer.
+//   Also pClusterAlgo changed to mClusterAlgoPtr to conform with STAR guidelines.
 //
 //   Revision 1.10  2011/10/26 20:56:50  avossen
 //   use geoIds to determine if two strips are adjacent
