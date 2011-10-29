@@ -39,6 +39,8 @@ void StarGeometryDb()
   y2011(); geom.Last(); setTitle("Year 2011 Production Geometry");  geom.select="y2011pro"; geom.fill();
   y2012(); geom.Last(); setTitle("Year 2012 Development Geometry"); geom.select="y2012dev"; geom.fill();
 
+  test();
+
   //
   // Upgrade studies tagged with a year (2000+)
   //
@@ -1029,6 +1031,38 @@ void estar()
 
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+void test()
+{
+  geom.select="test"; { /* just the cave */
+    geom.caveFlag = "CAVE04";
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    geom.magpFlag = "MAGPof";  geom.magpStat = 0;
+    geom.bbcmFlag = "BBCMof";  geom.bbcmStat = 0;
+    // ================================================ Tracking, calorimetry, etc..
+    geom.tpceFlag = "TPCEof";  geom.tpceStat = 0;
+    geom.btofFlag = "BTOFof";  geom.btofStat = 0;
+    geom.calbFlag = "CALBof";  geom.calbStat = 0; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALof";  geom.ecalStat = 0; geom.ecalCuts = 1;
+    geom.fpdmFlag = "FPDMof";  geom.fpdmStat = 0;
+    geom.vpddFlag = "VPDDof";  geom.vpddStat = 0;
+    geom.mutdFlag = "MUTDof";  geom.mutdStat = 0;
+    // ================================================
+    geom.idsmFlag = "IDSMof";  geom.idsmStat = 0;
+    geom.fgtdFlag = "FGTDof";  geom.fgtdStat = 0;
+    geom.pipeFlag = "PIPEof";  geom.pipeStat = 0;
+    geom.upstFlag = "UPSTof";  geom.upstStat = 0;
+    geom.zcalFlag = "ZCALof";  geom.zcalStat = 0;
+    geom.phmdFlag = "PHMDof";  geom.phmdStat = 0;
+    // ================================================
+    setTitle("== test geometry ==");
+    // ================================================
+    geom.fill();
+  }
+}
 
 
 

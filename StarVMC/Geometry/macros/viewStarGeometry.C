@@ -118,7 +118,7 @@ void addDetectorTab( const Char_t *name,
 void cacheGeometry( const Char_t *tag, const Char_t *addons )
 {  
   TFile *file = new TFile(Form("%s.root",tag));
-  if ( file->IsZombie() )
+  if ( file->IsZombie() || nocache )
     {
 
       delete file;
