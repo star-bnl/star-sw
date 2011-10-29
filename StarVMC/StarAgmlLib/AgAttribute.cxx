@@ -13,6 +13,7 @@ struct _AttributeDummy{
     AgAttribute::mParList.push_back("fill");
     AgAttribute::mParList.push_back("lsty");
     AgAttribute::mParList.push_back("lwid");
+    AgAttribute::mParList.push_back("trans");
   };
 } _attribute_dummy_init;
 // -----------------------------------------------------------------------------------------------------------

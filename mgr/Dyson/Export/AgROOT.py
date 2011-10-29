@@ -20,13 +20,23 @@ from pyparsing  import *
 namespace       = True  # Classes go into namespaces
 export_comments = True  # Comments will be exported
 
+# Skip exporting of G3 routines
 routine_skip_list = ['gsckov','gstpar']
 
-#from Geometry import geometry
+# This list might not be used anywhere
 iostack = []
 
-
-_agstar_attribute_list = ['seen','colo','ltyp','serial','fill','lsty','lwid'];
+# List of attributes allowed in the <Attribute ... /> operator
+_agstar_attribute_list = [
+    'seen',     # The family of volumes will be seen
+    'colo',     # Defines the color of the volumes
+    'ltyp',     # Defines line style
+    'serial',   # If serial changes, forces the creation of a new volume
+    'fill',     # G3 does something
+    'lsty',     # Also line style
+    'lwid',     # Line width
+    'trans'     # Transparency in OpenGL/ROOT
+    ];
 
 _structures = {}
 
