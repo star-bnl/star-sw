@@ -98,44 +98,39 @@
         <Use struct="MEND"  />
         TanTheta = (exp(+mend_etacut)-exp(-mend_etacut))/2 
 
-        <Create block="MAGP"  />
-        <Placement block="MAGP" in="Cave"  >
-        </Placement>
+        <Create    block="MAGP"  />
+        <Placement block="MAGP" in="Cave"  />
         
 
         <Block name="MAGP" comment="is the magnet mother"  >
-            <Material name="Air"  />
-            <Medium name="Standard"  />
-            <Attribute for="MAGP" seen="0" colo="1"  />
-            <If expr="magg_test==1"  >
-                <Shape type="TUBE" rmax="magg_Rmax" rmin="mend_PoleRmn" dz="magg_Length/2"  />
-                <Else  >
-                    <Shape type="PCON" zi="{-magg_Length/2,-mend_PoleZ,-mend_PoleZ,mend_PoleZ,mend_PoleZ,magg_Length/2}" rmn="{mend_PoleRmn,mend_PoleRmn,mbar_CoilRmn,mbar_CoilRmn,mend_PoleRmn,mend_PoleRmn}" rmx="{magg_Rmax,magg_Rmax,magg_Rmax,magg_Rmax,magg_Rmax,magg_Rmax}" nz="6" phi1="0" dphi="360"  />
-                </Else>
-                
+
+            <Material  name="Air"  />
+            <Medium    name="Standard"  />
+            <Attribute for="MAGP" seen="0" colo="1" />
+
+	    <If expr="magg_test==1">
+	    <Shape type="TUBE" rmax="magg_Rmax" rmin="mend_PoleRmn" dz="magg_Length/2"  />
+	    <Else  >
+	    <Shape type="PCON" zi="{-magg_Length/2,-mend_PoleZ,-mend_PoleZ,mend_PoleZ,mend_PoleZ,magg_Length/2}" rmn="{mend_PoleRmn,mend_PoleRmn,mbar_CoilRmn,mbar_CoilRmn,mend_PoleRmn,mend_PoleRmn}" rmx="{magg_Rmax,magg_Rmax,magg_Rmax,magg_Rmax,magg_Rmax,magg_Rmax}" nz="6" phi1="0" dphi="360"  />
+	    </Else>                
             </If>
             
-            <Create block="COIL"  />
-            <Placement block="COIL"  >
-            </Placement>
+	    <Create    block="COIL"  />
+            <Placement block="COIL"  />
             
-            <Create block="MRET"  />
-            <Placement block="MRET"  >
-            </Placement>
+            <Create    block="MRET"  />
+            <Placement block="MRET"  />
+
             
-            <Create block="MPTV"  />
-            <Placement z="+mend_PoleZ" block="MPTV"  >
-            </Placement>
-            
-            <Placement z="-mend_PoleZ" block="MPTV"  >
+            <Create    block="MPTV"  />
+            <Placement block="MPTV" z="+mend_PoleZ" />
+	    <Placement block="MPTV" z="-mend_PoleZ"  >
                 <Rotation thetaz="180"  />
             </Placement>
             
-            <Create block="MRGV"  />
-            <Placement z="+mbar_coilLen/2" block="MRGV"  >
-            </Placement>
-            
-            <Placement z="-mbar_coilLen/2" block="MRGV"  >
+            <Create    block="MRGV"  />
+            <Placement block="MRGV"  z="+mbar_coilLen/2" />
+            <Placement block="MRGV"  z="-mbar_coilLen/2"  >
                 <Rotation thetaz="180"  />
             </Placement>
             
