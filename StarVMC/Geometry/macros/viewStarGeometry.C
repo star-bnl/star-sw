@@ -1,5 +1,8 @@
 TGLViewer* viewer;
 
+Bool_t nocache = false;
+Bool_t viewall = false;
+
 void viewStarGeometry( const Char_t *tag="y2011", const Char_t *addons="",
 		       const Char_t *TOP="HALL",
 		       const Char_t *NODE="CAVE_1"
@@ -28,7 +31,7 @@ void viewStarGeometry( const Char_t *tag="y2011", const Char_t *addons="",
   // Draw the scene
   gEve->Redraw3D(kTRUE);
   
-
+  if ( viewall ) {
   addDetectorTab( "TPCE_1", "TPC"  );
 
   addDetectorTab( "CALB_1", "BEMC" );
@@ -61,7 +64,7 @@ void viewStarGeometry( const Char_t *tag="y2011", const Char_t *addons="",
 
   addDetectorTab( "PIPE_1", "pipe" );
   addDetectorTab( "MAGP_1", "magnet" );
-
+  }//viewall
 
   const Char_t *path  = ".:./StarVMC/Geometry/macros/:$STAR/StarVMC/Geometry/macros/";
   Char_t *file = gSystem->Which(path,"applyColorScheme.C",kReadPermission);  
