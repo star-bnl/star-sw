@@ -680,8 +680,12 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
   TString myattr = "Attributes for ";
   myattr += volume->GetName();
   myattr += ": ";
-  const Char_t *att[] = {"seen", "colo", "lsty", "lwid", "fill"};
 
+  //
+  // Set GEANT3 Attributes
+  // =====================
+  //
+  const Char_t *att[] = {"seen", "colo", "lsty", "lwid", "fill"};
   for ( Int_t i=0;i<5;i++ )
     {
       if ( !mAttribute.isSet( att[i] ) ) 
@@ -693,11 +697,25 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
       gGeoManager->SetVolumeAttribute( volume->GetName(), att[i], val );
     }
 
+  //
+  // Handle serial attribute by placing a <serial>number</serial> into the
+  // title of the volume.  The serial number will be checked at create/position
+  // time, and a new volume generated if the serial number changes
+  // ===========================================================================
+  //
   if ( mAttribute.isSet("serial") )
     {
       volume_title += "<serial>";
       volume_title += Form("%8.3f ",mAttribute.par("serial"));
       volume_title += "</serial>";
+    }
+
+  //
+  // Apply transparency
+  //
+  if ( mAttribute.isSet("trans") )
+    {
+      volume->SetTransparency( (UInt_t)mAttribute("trans") );
     }
 
   // Add the volume to the volume stack and map

@@ -15,8 +15,11 @@ class AgAttribute : public TNamed
   AgAttribute(const Char_t *name="none");
   AgAttribute( const AgAttribute &other );
   ~AgAttribute(){ /* nada */ };
+
   /// Returns a reference to the named parameter.
   Double_t &par( const Char_t *name );
+
+  Double_t &operator()(const Char_t *name) { return par(name); }
 
 
   /// Tests whether the named parameter is set for this shape
