@@ -12,11 +12,15 @@ namespace FPDMGEO3 // $NMSPC
       Float_t version; 
       Float_t chkvsim; 
       Float_t pbplate; 
+      Float_t fmsnorthx; 
+      Float_t fmssouthx; 
       Fmcg_t() : AgStructure("Fmcg_t","User-defined AgML structure") 
       { 
          version=0; 
          chkvsim=0; 
          pbplate=0; 
+         fmsnorthx=0; 
+         fmssouthx=0; 
          _index=0; 
       } 
       ~ Fmcg_t(){ /* nada */ }; 

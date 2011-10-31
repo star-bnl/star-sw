@@ -37,6 +37,8 @@
           ///Float_t version;     
           ///Float_t chkvsim;     
           ///Float_t pbplate;     
+          ///Float_t fmsnorthx;     
+          ///Float_t fmssouthx;     
           ///Int_t _index;     
           //     
           Fmcg_t fmcg;     
@@ -2149,10 +2151,16 @@
                    /// fmcg . chkvsim = 0; //  = 0 dE, = 1 Cherenkov simulation for PbG            
                    fmcg . pbplate = 0; //  =0 no plate, =1 with plate            
                    /// fmcg . pbplate = 0; //  =0 no plate, =1 with plate            
+                   fmcg . fmsnorthx = -0.3; // Default x-position           
+                   /// fmcg . fmsnorthx = -0.3; // Default x-position           
+                   fmcg . fmssouthx = +0.3; // Default x-position           
+                   /// fmcg . fmssouthx = +0.3; // Default x-position           
                    //           
                    fmcg.fill();           
              ///@}        
              //        
+             /// USE fmcg version=8.0;        
+             fmcg.Use("version",(Float_t)8.0);        
              // ---------------------------------------------------------------------------------------------------        
              ///@addtogroup fpos_doc        
              ///@{           
@@ -2205,8 +2213,8 @@
                    /// fpos . imod = 3; //  Module# (EN=1, ES=2, WN=3, WS=4, ...)            
                    fpos . itype = 2; //  Type (1=7*7+SMD+PreShower, 2=17*34+14*28)            
                    /// fpos . itype = 2; //  Type (1=7*7+SMD+PreShower, 2=17*34+14*28)            
-                   fpos . x = -0.3; //  X distance from beam to edge of detector            
-                   /// fpos . x = -0.3; //  X distance from beam to edge of detector            
+                   fpos . x = fmcg.fmsnorthx; //  X distance from beam to edge of detector            
+                   /// fpos . x = fmcg.fmsnorthx; //  X distance from beam to edge of detector            
                    fpos . y = 0.0; //  Y distance from beam to edge of detector            
                    /// fpos . y = 0.0; //  Y distance from beam to edge of detector            
                    fpos . z = 706.3; //  Z distance from IP to surface of detector            
@@ -2225,8 +2233,8 @@
                    /// fpos . imod = 4; //  Module# (EN=1, ES=2, WN=3, WS=4, ...)            
                    fpos . itype = 2; //  Type (1=7*7+SMD+PreShower, 2=17*34+14*28)            
                    /// fpos . itype = 2; //  Type (1=7*7+SMD+PreShower, 2=17*34+14*28)            
-                   fpos . x = 0.3; //  X distance from beam to edge of detector            
-                   /// fpos . x = 0.3; //  X distance from beam to edge of detector            
+                   fpos . x = fmcg.fmssouthx; //  X distance from beam to edge of detector            
+                   /// fpos . x = fmcg.fmssouthx; //  X distance from beam to edge of detector            
                    fpos . y = 0.0; //  Y distance from beam to edge of detector            
                    /// fpos . y = 0.0; //  Y distance from beam to edge of detector            
                    fpos . z = 706.3; //  Z distance from IP to surface of detector            
