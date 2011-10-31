@@ -20,17 +20,24 @@
             <var name="Version" type="float"  />
             <var name="ChkvSim" type="float"  />
             <var name="PbPlate" type="float"  />
+
+            <var name="FmsNorthX" />
+            <var name="FmsSouthX" />
+
         </Structure>
+
         
         <Structure name="FPOS"  >
-            <var name="iMod" type="float"  />
+            <var name="iMod"  type="float"  />
             <var name="iType" type="float"  />
-            <var name="X" type="float"  />
-            <var name="Y" type="float"  />
-            <var name="Z" type="float"  />
-            <var name="AY" type="float"  />
-            <var name="AZ" type="float"  />
+            <var name="X"     type="float"  />
+            <var name="Y"     type="float"  />
+            <var name="Z"     type="float"  />
+            <var name="AY"    type="float"  />
+            <var name="AZ"    type="float"  />
         </Structure>
+
+
         
         <Structure name="FBXD"  >
             <var name="Type" type="float"  />
@@ -212,7 +219,14 @@
             <var name="Version" value="8.0" comment=" Geometry version  "  />
             <var name="ChkvSim" value="0" comment=" = 0 dE, = 1 Cherenkov simulation for PbG "  />
             <var name="PbPlate" value="0" comment=" =0 no plate, =1 with plate "  />
+
+            <var name="FmsNorthX" value="-0.3" comment="Default x-position" />
+            <var name="FmsSouthX" value="+0.3" comment="Default x-position" />
+
         </Fill>
+
+	<Use struct="FMCG" select="version" value="8.0" />
+
         
         <Fill name="FPOS" comment="Fpd EN positioning"  >
             <var name="iMod" value="1" comment=" Module# (EN=1, ES=2, WN=3, WS=4, ...) "  />
@@ -224,7 +238,6 @@
             <var name="AZ" value="0" comment=" Angle around Z "  />
         </Fill>
         
-
         <Fill name="FPOS" comment="Fpd ES positioning"  >
             <var name="iMod" value="2" comment=" Module# (EN=1, ES=2, WS=3, WS=4, ...) "  />
             <var name="iType" value="1" comment=" Type (1=7*7+SMD+PreShower, 2=17*34+14*28) "  />
@@ -237,23 +250,23 @@
         
 
         <Fill name="FPOS" comment="FMS WN positioning"  >
-            <var name="iMod" value="3" comment=" Module# (EN=1, ES=2, WN=3, WS=4, ...) "  />
+            <var name="iMod"  value="3" comment=" Module# (EN=1, ES=2, WN=3, WS=4, ...) "  />
             <var name="iType" value="2" comment=" Type (1=7*7+SMD+PreShower, 2=17*34+14*28) "  />
-            <var name="X" value="-0.3" comment=" X distance from beam to edge of detector "  />
-            <var name="Y" value="0.0" comment=" Y distance from beam to edge of detector "  />
-            <var name="Z" value="706.3" comment=" Z distance from IP to surface of detector "  />
-            <var name="AY" value="0" comment=" Angle aroound Y (0 for west, 180 for east) "  />
+            <var name="X"     value="FMCG_FmsNorthX" comment=" X distance from beam to edge of detector "  />
+            <var name="Y"     value="0.0" comment=" Y distance from beam to edge of detector "  />
+            <var name="Z"     value="706.3" comment=" Z distance from IP to surface of detector "  />
+            <var name="AY"    value="0" comment=" Angle aroound Y (0 for west, 180 for east) "  />
         </Fill>
         
 
         <Fill name="FPOS" comment="FMS WS positioning"  >
-            <var name="iMod" value="4" comment=" Module# (EN=1, ES=2, WN=3, WS=4, ...) "  />
+            <var name="iMod"  value="4" comment=" Module# (EN=1, ES=2, WN=3, WS=4, ...) "  />
             <var name="iType" value="2" comment=" Type (1=7*7+SMD+PreShower, 2=17*34+14*28) "  />
-            <var name="X" value="0.3" comment=" X distance from beam to edge of detector "  />
-            <var name="Y" value="0.0" comment=" Y distance from beam to edge of detector "  />
-            <var name="Z" value="706.3" comment=" Z distance from IP to surface of detector "  />
-            <var name="AY" value="0" comment=" Angle aroound Y (0 for west, 180 for east) "  />
-            <var name="AZ" value="0" comment=" Angle around Z "  />
+            <var name="X"     value="FMCG_FmsSouthX" comment=" X distance from beam to edge of detector "  />
+            <var name="Y"     value="0.0" comment=" Y distance from beam to edge of detector "  />
+            <var name="Z"     value="706.3" comment=" Z distance from IP to surface of detector "  />
+            <var name="AY"    value="0" comment=" Angle aroound Y (0 for west, 180 for east) "  />
+            <var name="AZ"    value="0" comment=" Angle around Z "  />
         </Fill>
         
         <Fill name="FBXD" comment="FPD Box Geometry"  >
