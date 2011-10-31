@@ -44,6 +44,9 @@ ClassImp(Geometry);
 /* ClassImp(RichGeom_t); */ RichGeom_t richGeom;
 /* ClassImp(FgtdGeom_t); */ FgtdGeom_t fgtdGeom;
 /* ClassImp(IdsmGeom_t); */ IdsmGeom_t idsmGeom;
+/* ClassImp(FsceGeom_t); */ FsceGeom_t fsceGeom;
+
+/* ClassImp(EiddGeom_t); */ EiddGeom_t eiddGeom;
 
 // ----------------------------------------------------------------------
 Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
@@ -54,6 +57,7 @@ Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
   CalbInit(); CaveInit(); EcalInit(); FpdmInit(); FtpcInit(); MutdInit(); PipeInit();
   PixlInit(); SconInit(); SisdInit(); SvttInit(); BtofInit(); TpceInit(); VpddInit();
   UpstInit(); ZcalInit(); FtroInit(); RichInit(); PhmdInit(); FgtdInit(); IdsmInit();
+  FsceInit(); EiddInit();
 
   const Char_t *path = ".:StarVMC/Geometry/macros/:$STAR/StarVMC/Geometry/macros/";
   const Char_t *file = gSystem->Which( path, "StarGeometryDb.C", kReadPermission );
@@ -91,7 +95,9 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   Initialize(phmd);  Initialize(svtt);  Initialize(sisd);  Initialize(scon); std::cout << std::endl;
   Initialize(idsm);  Initialize(ftpc);  Initialize(ftro);  Initialize(fgtd); std::cout << std::endl;
   Initialize(calb);  Initialize(ecal);  Initialize(fpdm);  Initialize(upst); std::cout << std::endl;
+  Initialize(fsce);  Initialize(eidd);                                       std::cout << std::endl;
   std::cout << "==============================================================================================================" << std::endl;
+#undef Initialize
 
 
   // Cave goes first as it must be present to place things into
@@ -138,6 +144,10 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   geom.success_calb = ConstructCalb( geom.calbFlag, geom.calbStat );
   geom.success_ecal = ConstructEcal( geom.ecalFlag, geom.ecalStat );
   geom.success_fpdm = ConstructFpdm( geom.fpdmFlag, geom.fpdmStat );
+
+  // eSTAR upgrades
+  geom.success_eidd = ConstructEidd( geom.eiddFlag, geom.eiddStat );
+  geom.success_fsce = ConstructFsce( geom.fsceFlag, geom.fsceStat );
 
   // Place the upstream areas
   geom.success_upst = ConstructUpst( geom.upstFlag, geom.upstStat );
@@ -344,7 +354,15 @@ Bool_t Geometry::ConstructFpdm( const Char_t *flag, Bool_t go )
       return false;
     }
 
-  if ( go )
+  AgStructure::AgDetpNew( fpdmGeom.module, Form("FPD/FPD++/FMS with config %s",flag) );
+  if ( fpdmGeom.position )
+    {
+      std::cout << "Configure FMS N/S separation" << std::endl;
+      AgStructure::AgDetpAdd( "Fmcg_t", "fmsnorthx", (Float_t)-50.3 );  // need to extend agstructure
+      AgStructure::AgDetpAdd( "Fmcg_t", "fmssouthx", (Float_t)+50.3 );  // to permit this
+    }
+
+
   if ( !CreateModule( fpdmGeom.module ) )
     {
       Warning(GetName(),"Could not create module "+fpdmGeom.module);
@@ -537,6 +555,37 @@ Bool_t Geometry::ConstructMutd( const Char_t *flag, Bool_t go )
 }
 
 
+// ----------------------------------------------------------------------
+Bool_t Geometry::ConstructEidd( const Char_t *flag, Bool_t go )
+{ if (!go) return false;
+  //
+  if (! eiddGeom.Use("select",flag) )
+    {
+      Error(GetName(), Form("Cannot locate configuration %s",flag));
+      return false;
+    }
+  if (!CreateModule( eiddGeom.module ) )
+    {
+      Warning(GetName(),"Could not create module "+eiddGeom.module );
+      return false;
+    }
+  return true;
+}
+Bool_t Geometry::ConstructFsce( const Char_t *flag, Bool_t go )
+{ if (!go) return false;
+  //
+  if (! fsceGeom.Use("select",flag) )
+    {
+      Error(GetName(), Form("Cannot locate configuration %s",flag));
+      return false;
+    }
+  if (!CreateModule( fsceGeom.module ) )
+    {
+      Warning(GetName(),"Could not create module "+fsceGeom.module );
+      return false;
+    }
+  return true;
+}
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructFtro( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -982,15 +1031,27 @@ Bool_t Geometry::EcalInit()
 
 Bool_t Geometry::FpdmInit()
 {
-  //replace [exe FPDM00;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 0;]
+
+  fpdmGeom.position = 0; // closed
   fpdmGeom.select="FPDM00"; fpdmGeom.config=0; fpdmGeom.module="FpdmGeo"; fpdmGeom.fill();
-  //replace [exe FPDM01;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 1;]
   fpdmGeom.select="FPDM01"; fpdmGeom.config=1; fpdmGeom.module="FpdmGeo1"; fpdmGeom.fill();
-  //replace [exe FPDM02;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 2;]
   fpdmGeom.select="FPDM02"; fpdmGeom.config=2; fpdmGeom.module="FpdmGeo2"; fpdmGeom.fill();
-  //replace [exe FPDM03;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 3;]
   fpdmGeom.select="FPDM03"; fpdmGeom.config=3; fpdmGeom.module="FpdmGeo3"; fpdmGeom.fill();
+
+  fpdmGeom.position = 1; // open
+  fpdmGeom.select="FPDM13"; fpdmGeom.config=3; fpdmGeom.module="FpdmGeo3"; fpdmGeom.fill();  
+
   return true;
+}
+
+Bool_t Geometry::FsceInit()
+{
+  fsceGeom.select="FSCEv0"; fsceGeom.config=1; fsceGeom.module="FsceGeo"; fsceGeom.fill();
+}
+
+Bool_t Geometry::EiddInit()
+{
+  eiddGeom.select="EIDDv0"; eiddGeom.config=1; eiddGeom.module="EiddGeo"; eiddGeom.fill();
 }
 
 Bool_t Geometry::FtpcInit()

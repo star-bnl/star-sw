@@ -27,6 +27,9 @@ class Geom_t : public AgStructure
   SetDetector(istd); // placeholder for IST
   SetDetector(pxld); // placeholder for PXL
 
+  SetDetector(fsce); // Forward calorimeter upgrade
+  SetDetector(eidd); // East poletip detectors
+
       ecalCuts=1;
       calbCuts=1;
       
@@ -53,6 +56,9 @@ class Geom_t : public AgStructure
 
   AddDetector(istd);
   AddDetector(pxld);
+
+  AddDetector(fsce);
+  AddDetector(eidd);
 
   Int_t ecalCuts;
   Int_t calbCuts;
@@ -148,8 +154,33 @@ class FpdmGeom_t : public AgStructure
   ~FpdmGeom_t(){ };
   TString select;
   TString module;
-  Int_t     config;
+  Int_t   config;
+  Int_t   position;
 };
+
+class FsceGeom_t : public AgStructure
+{ public:
+  ClassDef(FsceGeom_t,1);
+  FsceGeom_t(): AgStructure("FsceGeom_t","STAR Forward ??? Calorimeter Master Geometry Table")
+    { select="default"; module="-none-"; config=0; }
+  ~FsceGeom_t(){ };
+
+  TString select;
+  TString module;
+  Int_t   config;
+};
+
+class EiddGeom_t : public AgStructure
+{ public:
+  ClassDef(EiddGeom_t,1);
+  EiddGeom_t(): AgStructure("EiddGeom_t","STAR EAST poletip TRD, TOF and ECAL")
+    { select="default"; module="-none-"; config=0; }
+  ~EiddGeom_t(){ };
+  TString select;
+  TString module;
+  Int_t   config;
+};
+  
 
 // ----------------------------------------------------------------------
 class FtpcGeom_t : public AgStructure
@@ -482,7 +513,8 @@ class Geometry : public AgModule
   Bool_t SvttInit();  Bool_t BtofInit();  Bool_t TpceInit();
   Bool_t VpddInit();  Bool_t MagpInit();  Bool_t UpstInit();
   Bool_t ZcalInit();  Bool_t FtroInit();  Bool_t RichInit();
-  Bool_t FgtdInit();  Bool_t IdsmInit();  
+  Bool_t FgtdInit();  Bool_t IdsmInit();  Bool_t FsceInit();
+  Bool_t EiddInit();
 
   Bool_t IstdInit(){ /* placeholder */ return false; }
   Bool_t PxldInit(){ /* placeholder */ return false; }
@@ -521,7 +553,10 @@ class Geometry : public AgModule
   // New Inner Detectors
   Bool_t ConstructIstd( const Char_t *flag, Bool_t go=false ) { /* placeholder */ return false; }
   Bool_t ConstructPxld( const Char_t *flag, Bool_t go=false ) { /* placeholder */ return false; }
-  
+
+  // eSTAR Upgrades
+  Bool_t ConstructFsce( const Char_t *flag, Bool_t go=true );
+  Bool_t ConstructEidd( const Char_t *flag, Bool_t go=true );
 
  public:
   AgModule *CreateModule( const Char_t *name, const Char_t *top = NULL );
