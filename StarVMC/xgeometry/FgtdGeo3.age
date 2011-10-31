@@ -402,7 +402,7 @@
       BLOCK FGQE   E-spacer frame, flat
       ATTRIBUTE FGQE seen=1 colo=4
       MATERIAL FR4
-      SHAPE box dx=diskOutR*sin(( flatAng2-flatAng1)*degrad/2.),
+      SHAPE box dx=diskOutR*sin((flatAng2-flatAng1)*degrad/2.),
             dy=frameWidth/2. dz=frameDZ/2.
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- FGQF

@@ -8,7 +8,7 @@
       PBPT,FSHM,FHMS,FXGT,FALU,FBAS,FENC,
       FEAC,FEBC,FECC,FEDC,FETC,FERC,FESC,
       FEEC
-      STRUCTURE FMCG { Version,ChkvSim,PbPlate}
+      STRUCTURE FMCG { Version,ChkvSim,PbPlate,FmsNorthX,FmsSouthX}
       STRUCTURE FPOS { iMod,iType,X,Y,Z,AY,AZ}
       STRUCTURE FBXD { Type,Height,Depth,Width,NX,NY,NXL,NYL,XOffset,ZOffset,PSOffset,
             SmdOff}
@@ -71,7 +71,10 @@
       Version = 8.0 !  Geometry version
       ChkvSim = 0 !  = 0 dE, = 1 Cherenkov simulation for PbG
       PbPlate = 0 !  =0 no plate, =1 with plate
+      FmsNorthX = -0.3 ! Default x-position
+      FmsSouthX = +0.3 ! Default x-position
       ENDFILL
+      use FMCG version=8.0
       FILL FPOS		! Fpd EN positioning
       iMod = 1 !  Module# (EN=1, ES=2, WN=3, WS=4, ...)
       iType = 1 !  Type (1=7*7+SMD+PreShower, 2=17*34+14*28)
@@ -93,7 +96,7 @@
       FILL FPOS		! FMS WN positioning
       iMod = 3 !  Module# (EN=1, ES=2, WN=3, WS=4, ...)
       iType = 2 !  Type (1=7*7+SMD+PreShower, 2=17*34+14*28)
-      X = -0.3 !  X distance from beam to edge of detector
+      X = FMCG_FmsNorthX !  X distance from beam to edge of detector
       Y = 0.0 !  Y distance from beam to edge of detector
       Z = 706.3 !  Z distance from IP to surface of detector
       AY = 0 !  Angle aroound Y (0 for west, 180 for east)
@@ -101,7 +104,7 @@
       FILL FPOS		! FMS WS positioning
       iMod = 4 !  Module# (EN=1, ES=2, WN=3, WS=4, ...)
       iType = 2 !  Type (1=7*7+SMD+PreShower, 2=17*34+14*28)
-      X = 0.3 !  X distance from beam to edge of detector
+      X = FMCG_FmsSouthX !  X distance from beam to edge of detector
       Y = 0.0 !  Y distance from beam to edge of detector
       Z = 706.3 !  Z distance from IP to surface of detector
       AY = 0 !  Angle aroound Y (0 for west, 180 for east)
