@@ -85,6 +85,10 @@ void applyColorScheme( const Char_t *TOP="CAVE" )
   colors["BPOL"]=kGray+2;
   colors["CLA1"]=kBlue;
   colors["BPO1"]=kGray+2;
+  //
+  // FSCE
+  //
+  colors["FSCT"]=kRed+2;
   
 
   //
