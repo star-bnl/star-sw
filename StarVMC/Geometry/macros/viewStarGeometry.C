@@ -61,9 +61,14 @@ void viewStarGeometry( const Char_t *tag="y2011", const Char_t *addons="",
   addDetectorTab( "SCON_1", "SCON" );
   addDetectorTab( "SCON_1", "SCON", "SVTT" );
 
+  addDetectorTab( "FSCE_1", "FSCE" );
+  addDetectorTab( "ETTV_1", "EIDD" );
 
   addDetectorTab( "PIPE_1", "pipe" );
   addDetectorTab( "MAGP_1", "magnet" );
+
+
+
   }//viewall
 
   const Char_t *path  = ".:./StarVMC/Geometry/macros/:$STAR/StarVMC/Geometry/macros/";
@@ -148,5 +153,6 @@ void cacheGeometry( const Char_t *tag, const Char_t *addons )
       gGeoManager->Export(Form("%s.root",tag));
     }
   delete file;
-  gROOT -> Reset();
+  // gROOT -> Reset();
+
 }
