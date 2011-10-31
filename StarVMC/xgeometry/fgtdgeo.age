@@ -1,7 +1,7 @@
-* $Id: fgtdgeo.age,v 1.2 2011/10/03 22:45:40 jwebb Exp $
+* $Id: fgtdgeo.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
 * $Log: fgtdgeo.age,v $
-* Revision 1.2  2011/10/03 22:45:40  jwebb
-* Integrating 9/23 version of FGT.  Definition of "complete" and "y2012".
+* Revision 1.3  2011/10/31 18:52:59  jwebb
+* devE for eSTAR.
 *
 * Revision 1.7  2007/11/13 21:30:03  perev
 * material ALKAP fixed
@@ -182,10 +182,10 @@ endblock
 
       END
 
-* $Id: fgtdgeo.age,v 1.2 2011/10/03 22:45:40 jwebb Exp $
+* $Id: fgtdgeo.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
 * $Log: fgtdgeo.age,v $
-* Revision 1.2  2011/10/03 22:45:40  jwebb
-* Integrating 9/23 version of FGT.  Definition of "complete" and "y2012".
+* Revision 1.3  2011/10/31 18:52:59  jwebb
+* devE for eSTAR.
 *
 * Revision 1.4  2007/11/13 21:29:45  perev
 * material ALKAP fixed
@@ -1142,8 +1142,8 @@ endblock
       END
 
 * $Log: fgtdgeo.age,v $
-* Revision 1.2  2011/10/03 22:45:40  jwebb
-* Integrating 9/23 version of FGT.  Definition of "complete" and "y2012".
+* Revision 1.3  2011/10/31 18:52:59  jwebb
+* devE for eSTAR.
 *
 * Revision 1.8  2008/12/01 23:44:03  perev
 * Jan changes the length
