@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtDaq2TxtMaker.h,v 1.1 2011/10/07 19:55:37 sgliske Exp $
+ * $Id: StFgtDaq2TxtMaker.h,v 1.2 2011/11/01 18:55:08 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -23,6 +23,9 @@
  ***************************************************************************
  *
  * $Log: StFgtDaq2TxtMaker.h,v $
+ * Revision 1.2  2011/11/01 18:55:08  sgliske
+ * Updated to correspond with StEvent containers, take 2.
+ *
  * Revision 1.1  2011/10/07 19:55:37  sgliske
  * creation
  *
@@ -36,14 +39,11 @@
 #include <fstream>
 
 #include "StMaker.h"
-#include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
-
 
 class StFgtDaq2TxtMaker : public StMaker {
  public:
    // constructors
    StFgtDaq2TxtMaker( const Char_t* name = "fgtDaq2Txt",
-                      const Char_t* fgtRawBaseName = "FgtCosmicMaker",
                       const Char_t* outputfile = "testout.txt",
                       Short_t quadId = 0 );
    // default OK
@@ -63,10 +63,6 @@ class StFgtDaq2TxtMaker : public StMaker {
    void setIsCosmic( Bool_t itIs );
 
  protected:
-   // for input
-   std::string mInputName;
-   StFgtEvent *mFgtEventPtr;
-
    // for output
    std::string mFileName;
    std::ofstream mFout;
