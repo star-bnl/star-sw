@@ -19,8 +19,8 @@
 *     will not be present in event files.
 ******************************************************************************/
 #include "daqFormats.h"
-#define FORMAT_VERSION        0x11110141      /* Format yymmddvv */
-#define MAX_TRG_BLK_SIZE          122896      /* Current total: 113.25k bytes for pre/post non-zero suppressed data.  Allow 120k */
+#define FORMAT_VERSION        0x09013040      /* 30 Jan 2009; Version 4.0 Format: yymmddvv */
+#define MAX_TRG_BLK_SIZE          122880      /* Current total: 113.25k bytes for pre/post non-zero suppressed data.  Allow 120k */
 #define MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
 
 #define ADD_BIT_FORCE          5              /* Force store of this event */
@@ -60,8 +60,6 @@ typedef struct {
   unsigned short     TOF[8];                  /* TOF and MTD data */
   unsigned short     VTX[8];                  /* Separate VPD, ZDC and BBC DSMs have been replaced with this one */
   unsigned short     EMC[8];                  /* Contents of 1 EMC IB - results of separate BEMC and EEMC DSMs */
-  unsigned short     TPCMask[8];              /* TPC mask for DAQ10K */
-  
   unsigned short     BCdata[16];              /* Contents of 2 Bunch Crossing DSMs IB's */       
   unsigned short     specialTriggers[8];      /* Contents of 1 Special Trigger DSM - all the special trigger requests */
   unsigned short     FPD[8];                  /* Contents of 1 FMS and FPD IB */
