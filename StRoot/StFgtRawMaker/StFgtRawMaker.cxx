@@ -2,9 +2,14 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.18 2011/10/27 21:09:47 jeromel Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.19 2011/11/01 18:45:32 sgliske Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.19  2011/11/01 18:45:32  sgliske
+//  Updated to correspond with StEvent containers, take 2.
+//  Note: new FGT containers (and StEvent access) no longer
+//  motivate the use of a common base class
+//
 //  Revision 1.18  2011/10/27 21:09:47  jeromel
 //  Small info added in Init() + ident
 //
@@ -60,37 +65,39 @@
 #include "DAQ_FGT/daq_fgt.h"
 #include "DAQ_READER/daq_dta.h"
 
+#include "StRoot/StEvent/StFgtCollection.h"
+#include "StRoot/StEvent/StFgtStripCollection.h"
+#include "StRoot/StEvent/StFgtStrip.h"
 
 #include "StFgtRawMaker.h"
 
 
 Int_t StFgtRawMaker::PrepareEnvironment()
 {
-  StEvent* mEvent=0;
-  Short_t numDiscs=6;
+  StEvent* eventPtr=0;
+  eventPtr= (StEvent*)StRTSBaseMaker::GetInputDS("StEvent");
 
-  mEvent= (StEvent*)StRTSBaseMaker::GetInputDS("StEvent");
-  mFgtEventPtr=NULL;
-  if(mEvent)
+  mFgtCollectionPtr=NULL;
+  if(eventPtr)
     {
-      mFgtEventPtr=mEvent->fgtEvent();
+      mFgtCollectionPtr=eventPtr->fgtCollection();
     }
   else
     {
-      mEvent=new StEvent();
-      StRTSBaseMaker::AddData(mEvent);
-      mFgtEventPtr=mEvent->fgtEvent();
+      eventPtr=new StEvent();
+      StRTSBaseMaker::AddData(eventPtr);
+      mFgtCollectionPtr=eventPtr->fgtCollection();
     }
-  if(!mFgtEventPtr)
+  if(!mFgtCollectionPtr)
     {
-      mFgtEventPtr=new StFgtEvent(numDiscs);
-      mEvent->setFgtEvent(mFgtEventPtr);
-      LOG_DEBUG <<"::prepareEnvironment() has added a non existing StFgtEvent()"<<endm;
+      mFgtCollectionPtr=new StFgtCollection();
+      eventPtr->setFgtCollection(mFgtCollectionPtr);
+      LOG_DEBUG <<"::prepareEnvironment() has added a non existing StFgtCollection()"<<endm;
     }
   else
     {
       //this should be unncessary if the member clear function is called
-      mFgtEventPtr->Clear();
+      mFgtCollectionPtr->Clear();
     }
   return kStOK;
 };
@@ -102,9 +109,9 @@ Int_t StFgtRawMaker::Make()
   clock.Start();
   LOG_DEBUG <<"StEmcRawMaker::Make()******************************************************************"<<endm;
 
-  if( !mIsInitialized || (PrepareEnvironment()!=kStOK) )
+  if( PrepareEnvironment()!=kStOK )
      {
-        LOG_ERROR << "Not initialized" << endm;
+        LOG_ERROR << "Error preparing enviroment" << endm;
         return kStFatal;
      }
   else
@@ -149,10 +156,13 @@ Int_t StFgtRawMaker::FillHits()
                StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
 
                Char_t type = 0;    // TODO: set this according to the database???
-               StFgtRawHit hit(geoId,adc,type,timebin);
-               StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
-               if(pDisc)
-                  pDisc->getRawHitArray().pushBack( hit );
+
+               StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
+               if( stripCollectionPtr )
+                  {
+                     StSPtrVecFgtStrip &stripVec = stripCollectionPtr->getStripVec();
+                     stripVec.push_back( new StFgtStrip( geoId,adc,type,timebin) );
+                  }
                else
                   { LOG_WARN <<"Could not access disc " << discIdx << endm; }
             }
@@ -167,19 +177,12 @@ Int_t StFgtRawMaker::Init()
 
    LOG_INFO << "StFgtRawMaker::Init we are named "  << GetName() << endm;
 
-   if( !mIsInitialized )
-     {
-
-         mIsInitialized = 1;
-      };
-
    return ierr;
 };
 
 StFgtRawMaker::StFgtRawMaker(const Char_t* name) :
-  StRTSBaseMaker( "adc", name ),
-  StFgtRawBase(),
-  mIsInitialized(0)
+   StRTSBaseMaker( "adc", name ),
+   mFgtCollectionPtr(0)
 {
   // nothing else to do
 };
@@ -192,8 +195,8 @@ StFgtRawMaker::~StFgtRawMaker()
 
 void StFgtRawMaker::Clear( Option_t *opts )
 {
-   if( mFgtEventPtr )
-     mFgtEventPtr->Clear( opts );
+   if( mFgtCollectionPtr )
+     mFgtCollectionPtr->Clear( opts );
 };
 
 ClassImp(StFgtRawMaker);

@@ -4,10 +4,12 @@
 #include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
 #include "RTS/src/DAQ_FGT/daq_fgt.h"
 #include "RTS/src/DAQ_READER/daq_dta.h"
-#include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
+#include "StRoot/StEvent/StFgtCollection.h"
+#include "StRoot/StEvent/StFgtStripCollection.h"
+#include "StRoot/StEvent/StFgtStrip.h"
 
 StFgtCosmicMaker::StFgtCosmicMaker( const Char_t* name, const Char_t *daqFileName ) :
-   StFgtRawBase(), StMaker( name ), mCutShortEvents(0), mDaqFileName( daqFileName ), mRdr(0)
+   StMaker( name ), mCutShortEvents(0), mFgtCollectionPtr(0), mDaqFileName( daqFileName ), mRdr(0)
 {
    //LOG_INFO << "OK?" << endm;
 
@@ -23,33 +25,32 @@ StFgtCosmicMaker::~StFgtCosmicMaker(){
 //in the cosmic maker the prepareEnvironment should only be called once (in init), so everything is constructed
 Int_t StFgtCosmicMaker::prepareEnvironment()
 {
- 
-  if( mFgtEventPtr )
-      delete mFgtEventPtr;
+  StEvent* eventPtr=0;
+  eventPtr= (StEvent*)GetInputDS("StEvent");
 
-   mFgtEventPtr = new StFgtEvent( mNumDiscs, mNumRawHits, mNumClusters, mNumPoints );
-   StEvent* mEvent=0;
-   //   mEvent=(StEvent*)GetInputDS("StEvent");
-   //we assume that for the cosmic stand this is where the event is created
-   if(!mEvent)
-     {
-       mEvent=new StEvent();
-       AddData(mEvent);
-       cout <<" attaching..." <<endl;
-     }
-
-
-   if(mEvent&& mFgtEventPtr)
-     {
-       mEvent->setFgtEvent(mFgtEventPtr);
-       LOG_DEBUG<<"cosmic maker added new event and fgtEvent" <<endm;
-     }
-   else
-     {
-       LOG_ERROR<<"cosmic maker could not create events" <<endl;
-     }
-
-   return ( mFgtEventPtr ? kStOk : kStErr );
+  mFgtCollectionPtr=NULL;
+  if(eventPtr)
+    {
+      mFgtCollectionPtr=eventPtr->fgtCollection();
+    }
+  else
+    {
+      eventPtr=new StEvent();
+      AddData(eventPtr);
+      mFgtCollectionPtr=eventPtr->fgtCollection();
+    }
+  if(!mFgtCollectionPtr)
+    {
+      mFgtCollectionPtr=new StFgtCollection();
+      eventPtr->setFgtCollection(mFgtCollectionPtr);
+      LOG_DEBUG <<"::prepareEnvironment() has added a non existing StFgtCollection()"<<endm;
+    }
+  else
+    {
+      //this should be unncessary if the member clear function is called
+      mFgtCollectionPtr->Clear();
+    }
+  return kStOK;
 };
 
 Int_t StFgtCosmicMaker::Init(){
@@ -59,9 +60,9 @@ Int_t StFgtCosmicMaker::Init(){
 
    //LOG_INFO << "event constructed" << endm;
 
-   if( ierr || !mFgtEventPtr )
+   if( ierr || !mFgtCollectionPtr )
       {
-         LOG_FATAL << "Error constructing FgtEvent" << endm;
+         LOG_FATAL << "Error constructing FgtCollection" << endm;
          ierr = kStFatal;
       };
 
@@ -81,8 +82,8 @@ Int_t StFgtCosmicMaker::Make()
 {
 
   ///clear should be called separately, but in case it is not, empty the fgtevent by hand:
-  if(mFgtEventPtr)
-    mFgtEventPtr->Clear();
+  if(mFgtCollectionPtr)
+    mFgtCollectionPtr->Clear();
 
    //Short_t quadrant=0;      
    //Char_t layer=0;
@@ -105,14 +106,9 @@ Int_t StFgtCosmicMaker::Make()
   daq_dta *dd = 0;
   dd = mRdr->det("fgt")->get("adc");
       
-  //LOG_INFO << "z starting event " << GetEventNumber() << ", dd at " << dd << endm;
-
   while(dd && dd->iterate()) 
     {
       fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
-
-//       LOG_INFO << "y Arm, Apv, Rdo = " << arm << ' ' << apv << ' ' << rdo
-//            << ", number of hits " << dd->ncontent << endm;
 
       for(u_int i=0;i<dd->ncontent;i++) 
 	{
@@ -159,12 +155,14 @@ Int_t StFgtCosmicMaker::Make()
           */
 
           Char_t type = 0;    // raw adc, no correction yet.
-	  StFgtRawHit hit(geoId,adc,type,timebin);
-	  hit.setCharge(adc);
-	  StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
 
-	  if(pDisc)
-	    pDisc->getRawHitArray().pushBack(hit);
+
+          StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
+          if( stripCollectionPtr )
+             {
+                StSPtrVecFgtStrip &stripVec = stripCollectionPtr->getStripVec();
+                stripVec.push_back( new StFgtStrip( geoId,adc,type,timebin) );
+             }
 	  else
 	    { LOG_WARN <<"Could not access disc "<<endm; }
 	}
@@ -174,34 +172,29 @@ Int_t StFgtCosmicMaker::Make()
   if( mCutShortEvents ){
      // clear events that do not have a complete set of channels
      Bool_t eventOK = 1;
-     for( UInt_t i = 0; i < mNumDiscs && eventOK; ++i ){
-        StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr( i );
-        if( pDisc )
-           eventOK = ( pDisc->getNumRawHits() == 7*1280 );
+     UInt_t numDiscs = mFgtCollectionPtr->getNumDiscs();
+
+     for( UInt_t discIdx = 0; discIdx < numDiscs && eventOK; ++discIdx ){
+        StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
+        if( stripCollectionPtr )
+           eventOK = ( stripCollectionPtr->getNumStrips() == 7*1280 );
      };
      if( !eventOK ){
-        for( UInt_t i = 0; i < mNumDiscs; ++i ){
-           StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr( i );
-           if( pDisc )
-              pDisc->ClearRawHitArray();
+        for( UInt_t discIdx = 0; discIdx < numDiscs && eventOK; ++discIdx ){
+          StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
+          if( stripCollectionPtr )
+             stripCollectionPtr->Clear();
         };
      };
   };
-
-  // debug
-//   for( UInt_t i = 0; i < mNumDiscs; ++i ){
-//      StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr( i );
-//      if( pDisc )
-//         LOG_INFO << "mkr: disc " << i << " nhits " << pDisc->getNumRawHits() << endm;
-//   };
 
   return kStOk;
 };
 
 void StFgtCosmicMaker::Clear( Option_t *opts )
 {
-   if( mFgtEventPtr )
-      mFgtEventPtr->Clear( opts );
+   if( mFgtCollectionPtr )
+      mFgtCollectionPtr->Clear( opts );
 };
 
 

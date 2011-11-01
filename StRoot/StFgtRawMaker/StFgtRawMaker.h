@@ -1,8 +1,13 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtRawMaker.h,v 1.15 2011/10/26 20:57:49 avossen Exp $
+//  $Id: StFgtRawMaker.h,v 1.16 2011/11/01 18:45:32 sgliske Exp $
 //  $Log: StFgtRawMaker.h,v $
+//  Revision 1.16  2011/11/01 18:45:32  sgliske
+//  Updated to correspond with StEvent containers, take 2.
+//  Note: new FGT containers (and StEvent access) no longer
+//  motivate the use of a common base class
+//
 //  Revision 1.15  2011/10/26 20:57:49  avossen
 //  hopefully made cosmic and raw maker compatible with bfc (again), added clear in make. Unnecessary if member fkt clear() is called after every event
 //
@@ -27,18 +32,16 @@
 
 #include "StRoot/St_base/StMessMgr.h"
 #include "StRoot/St_base/Stypes.h"
-
 #include "StRoot/StChain/StRTSBaseMaker.h"
-#include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
 
-#include "StFgtRawBase.h"
+class StFgtCollection;
 
 //#include "StRoot/StEvent/StEventTypes.h"
 //#include <StDaqLib/GENERIC/EventReader.hh>
 //#include <StDAQMaker/StDAQReader.h>
 //#include "StRoot/StFgtUtil/database/StFgtDb.h"
 
-class StFgtRawMaker : public StRTSBaseMaker, public StFgtRawBase
+class StFgtRawMaker : public StRTSBaseMaker
 {
  public: 
   StFgtRawMaker(const Char_t* name="FgtRaw");
@@ -51,10 +54,9 @@ class StFgtRawMaker : public StRTSBaseMaker, public StFgtRawBase
   virtual Int_t PrepareEnvironment();
 
  protected:
+  StFgtCollection *mFgtCollectionPtr;
 
  private:
-  Bool_t mIsInitialized;
-
   ClassDef(StFgtRawMaker,1);
 };
 
