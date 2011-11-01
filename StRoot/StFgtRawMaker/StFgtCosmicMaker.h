@@ -1,8 +1,13 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtCosmicMaker.h,v 1.14 2011/10/26 20:57:48 avossen Exp $
+//  $Id: StFgtCosmicMaker.h,v 1.15 2011/11/01 18:45:32 sgliske Exp $
 //  $Log: StFgtCosmicMaker.h,v $
+//  Revision 1.15  2011/11/01 18:45:32  sgliske
+//  Updated to correspond with StEvent containers, take 2.
+//  Note: new FGT containers (and StEvent access) no longer
+//  motivate the use of a common base class
+//
 //  Revision 1.14  2011/10/26 20:57:48  avossen
 //  hopefully made cosmic and raw maker compatible with bfc (again), added clear in make. Unnecessary if member fkt clear() is called after every event
 //
@@ -30,22 +35,18 @@
 //
 //
 //
-//subclass StFgtRawMaker
-//replace prepare environment etc
-//provide getStFgtEvent method with the data
 
 #ifndef STAR_StFgtCosmicMaker_HH
 #define STAR_StFgtCosmicMaker_HH
 
-#include <set>
-
-#include "StFgtRawMaker.h"
 #include "StRoot/St_base/StMessMgr.h"
 #include "StRoot/St_base/Stypes.h"
-
 #include "RTS/src/DAQ_READER/daqReader.h"
+#include "StMaker.h"
 
-class StFgtCosmicMaker : public StFgtRawBase, public StMaker
+class StFgtCollection;
+
+class StFgtCosmicMaker : public StMaker
 {
 
  public: 
@@ -63,6 +64,7 @@ class StFgtCosmicMaker : public StFgtRawBase, public StMaker
 
  protected:
   Bool_t mCutShortEvents;
+  StFgtCollection *mFgtCollectionPtr;
 
  private:
   std::string mDaqFileName;
