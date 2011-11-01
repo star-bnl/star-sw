@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtDaq2TxtMaker.cxx,v 1.1 2011/10/07 19:55:37 sgliske Exp $
+ * $Id: StFgtDaq2TxtMaker.cxx,v 1.2 2011/11/01 18:55:08 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtDaq2TxtMaker.cxx,v $
+ * Revision 1.2  2011/11/01 18:55:08  sgliske
+ * Updated to correspond with StEvent containers, take 2.
+ *
  * Revision 1.1  2011/10/07 19:55:37  sgliske
  * creation
  *
@@ -26,25 +29,19 @@
 #include <string>
 #include <fstream>
 
-#include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
-#include "StRoot/StEvent/StFgtEvent/StFgtDisc.h"
+#include "StRoot/StEvent/StEvent.h"
+#include "StRoot/StEvent/StFgtCollection.h"
+#include "StRoot/StEvent/StFgtStrip.h"
 
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeomDefs.h"
-#include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
-#include "StRoot/StFgtRawMaker/StFgtRawBase.h"
-#include "StRoot/StFgtRawMaker/StFgtRawMaker.h"
-#include "StRoot/StFgtRawMaker/StFgtCosmicMaker.h"
 
 // constructors
 StFgtDaq2TxtMaker::StFgtDaq2TxtMaker( const Char_t* name,
-                                      const Char_t* fgtRawBaseName,
                                       const Char_t* outputfile,
                                       Short_t quadId )
    : StMaker( name ),
-     mInputName( fgtRawBaseName ),
-     mFgtEventPtr( 0 ),
      mFileName( outputfile ),
      mQuad( quadId ),
      mDataSize2( 0 ),
@@ -59,29 +56,6 @@ const Int_t StFgtDaq2TxtMaker::mDataSize1 = 7*128;
 
 Int_t StFgtDaq2TxtMaker::Init(){
    Int_t ierr = kStOk;
-
-   // get the data
-   TObject *dataMaker = GetMaker( mInputName.data() );
-
-   if( !dataMaker ){
-      LOG_FATAL << "::Init() could not get pointer to a maker with name '" << mInputName << "'" << endm;
-      ierr = kStFatal;
-   };
-
-   if( !ierr ){
-      if( dataMaker->InheritsFrom( "StFgtCosmicMaker" ) ){
-         StFgtCosmicMaker* maker = static_cast< StFgtCosmicMaker* >( dataMaker );
-         mFgtEventPtr = maker->getFgtEventPtr();
-      } else if ( dataMaker->InheritsFrom( "StFgtRawMaker" ) ){
-         StFgtRawMaker* maker = static_cast< StFgtRawMaker* >( dataMaker );
-         mFgtEventPtr = maker->getFgtEventPtr();
-      };
-
-      if( !mFgtEventPtr ){
-         LOG_FATAL << "::Init() could not get pointer to StFgtEvent" << endm;
-         ierr = kStFatal;
-      };
-   };
 
    // set the output
    LOG_INFO << "Opening file '" << mFileName << "' for output" << endm;
@@ -111,23 +85,36 @@ void StFgtDaq2TxtMaker::Clear(const Option_t* opts ){
 Int_t StFgtDaq2TxtMaker::Make(){
    Int_t ierr = kStOk;
 
-   // fill the data array
-   ierr = kStErr;
-   for( Int_t discId=0; discId<6; ++discId ){
-      StFgtDisc *discPtr = mFgtEventPtr->getDiscPtr( discId );
+   StEvent* eventPtr = 0;
+   eventPtr = (StEvent*)GetInputDS("StEvent");
 
-      if( discPtr ){
-         ierr = kStOk;
-         StFgtRawHitArray &hitArray = discPtr->getRawHitArray();
+   if( !eventPtr ) {
+      LOG_ERROR << "Error getting pointer to StEvent from '" << ClassName() << "'" << endm;
+      ierr = kStErr;
+   };
 
-         Int_t n = hitArray.getEntries();
-         for( Int_t i = 0; i<n; ++i ){
+   StFgtCollection* fgtCollectionPtr = 0;
 
-            StFgtRawHit *hit = hitArray.getRawHitPtr( i );
-            if( hit ){
-               Int_t geoId = hit->getGeoId();
-               Short_t adc = hit->getAdc();
-               Int_t tb = hit->getTimeBin();
+   if( eventPtr ) {
+      fgtCollectionPtr=eventPtr->fgtCollection();
+   };
+
+   if( !fgtCollectionPtr) {
+      LOG_ERROR << "Error getting pointer to StFgtCollection from '" << ClassName() << "'" << endm;
+      ierr = kStErr;
+   };
+
+   if( !ierr ){
+      for( UInt_t discIdx=0; discIdx<fgtCollectionPtr->getNumDiscs(); ++discIdx ){
+         StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( discIdx );
+         if( stripCollectionPtr ){
+            StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
+            StSPtrVecFgtStripIterator stripIter;
+
+            for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
+               Int_t geoId = (*stripIter)->getGeoId();
+               Short_t adc = (*stripIter)->getAdc();
+               Int_t tb = (*stripIter)->getTimeBin();
 
                Short_t disc, quad, strip;
                Char_t layer;
