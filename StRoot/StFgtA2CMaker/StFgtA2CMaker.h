@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.1 2011/10/28 14:58:49 sgliske Exp $
+ * $Id: StFgtA2CMaker.h,v 1.2 2011/11/01 18:46:14 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -28,6 +28,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.2  2011/11/01 18:46:14  sgliske
+ * Updated to correspond with StEvent containers, take 2.
+ *
  * Revision 1.1  2011/10/28 14:58:49  sgliske
  * replacement to StFgtCorAdcMaker
  *
@@ -40,7 +43,6 @@
 #include <string>
 #include "StMaker.h"
 
-#include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
 #include "StRoot/StFgtPedMaker/StFgtPedReader.h"
 
 class StFgtA2CMaker : public StMaker {
@@ -69,9 +71,6 @@ class StFgtA2CMaker : public StMaker {
    void doRemoveOtherTimeBins(  Bool_t doIt );
 
  protected:
-   // for accessing the data
-   StFgtEvent* mFgtEventPtr;
-
    // for the ped reader
    StFgtPedReader *mPedReader;
    std::string mPedFile;

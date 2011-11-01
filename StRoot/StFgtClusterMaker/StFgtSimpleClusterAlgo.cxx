@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.11 2011/10/27 14:18:25 avossen Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.12 2011/11/01 18:46:30 sgliske Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.12  2011/11/01 18:46:30  sgliske
+//  Updated to correspond with StEvent containers, take 2.
+//
 //  Revision 1.11  2011/10/27 14:18:25  avossen
 //  minor update
 //
@@ -24,6 +27,11 @@
 #include "StFgtSimpleClusterAlgo.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 
+#include "StRoot/StEvent/StFgtStripCollection.h"
+#include "StRoot/StEvent/StFgtStrip.h"
+#include "StRoot/StEvent/StFgtHitCollection.h"
+#include "StRoot/StEvent/StFgtHit.h"
+
 StFgtSimpleClusterAlgo::StFgtSimpleClusterAlgo():mIsInitialized(0)
 {
   //nothing else to do....
@@ -35,29 +43,29 @@ Int_t StFgtSimpleClusterAlgo::Init()
   return 0; // ?,jan
 };
 
-Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArray& clusters)
+Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitCollection& clusters )
 {
-  const Char_t noLayer='N';
+
   //we make use of the fact, that the hits are already sorted by geoId
-  StFgtRawHitConstPtrVec mSortPtr;
-  hits.getSortedPtrVec(mSortPtr);
+  strips.sortByGeoId();
+
+  Float_t defaultError = 0.001;
+
   Short_t disc, quadrant,prvDisc,prvQuad;
-  Char_t layer,prvLayer;
+  Char_t layer,prvLayer,noLayer='z';
   Double_t ordinate, lowerSpan, upperSpan, prvOrdinate;
   Int_t prvGeoId;
   Double_t accuCharge=0; 
   Double_t meanOrdinate=0;
   Int_t numStrips=0;
-  bool lookForNewCluster=true;
+  //bool lookForNewCluster=true;
   prvLayer=noLayer;
   bool isPhi, isR;
 
-  StFgtCluster* newCluster=0;
+  StFgtHit* newCluster=0;
 
 
-
-
-  for(StFgtRawHitConstPtrVec::iterator it=mSortPtr.begin();it!=mSortPtr.end();it++)
+  for( StSPtrVecFgtStripIterator it=strips.getStripVec().begin();it!=strips.getStripVec().end();++it)
     {
       StFgtGeom::getPhysicalCoordinate((*it)->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
       isPhi=(layer=='P');
@@ -66,8 +74,10 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
       if(prvLayer==noLayer)//first hit
 	{
 	  accuCharge=(*it)->getAdc();  
-	  newCluster=new StFgtCluster((*it)->getGeoId(),layer,ordinate,accuCharge);
-	  newCluster->pushBack((*it)->getGeoId());
+	  newCluster=new StFgtHit( disc, quadrant, layer, ordinate, defaultError, accuCharge, (*it)->getGeoId() );
+          stripWeightMap_t &stripWeightMap = newCluster->getStripWeightMap();
+          stripWeightMap[ *it ] = 1;
+
 	  meanOrdinate=ordinate;
 	  prvLayer=layer;
 	  prvGeoId=(*it)->getGeoId();
@@ -88,7 +98,10 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
 	  accuCharge+=(*it)->getAdc();
 	  meanOrdinate+=ordinate;
 	  numStrips++;
-	  newCluster->pushBack((*it)->getGeoId());
+
+          stripWeightMap_t &stripWeightMap = newCluster->getStripWeightMap();
+          stripWeightMap[ *it ] = 1;
+
 	  prvLayer=layer;
 	  prvGeoId=(*it)->getGeoId();
 	  prvOrdinate=ordinate;
@@ -98,23 +111,23 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
 	{//we are looking at a new cluster because we are not at the beginning and the new strip is not adjacent to the old one
 	  //set charge, push back cluster, start new one
 	  //set layer etc of cluster
-	  newCluster->setLayer(prvLayer);
-	  newCluster->setKey(prvGeoId);
 	  newCluster->setCharge(accuCharge);
-	  newCluster->setPosition(meanOrdinate/(float)numStrips);
+	  newCluster->setPosition1D(meanOrdinate/(float)numStrips, defaultError );
 	  if(numStrips<=10)
-	    clusters.pushBack(*newCluster);
+             clusters.getHitVec().push_back(newCluster);
+          else
+             delete newCluster;
 	  //	      cout <<"cluster has size: " << numStrips <<endl;
 	  //
-	  delete newCluster;
-	  //	      	      accuCharge=(*it)->getCharge();
-	  accuCharge=(*it)->getAdc();
+	  accuCharge=(*it)->getCharge();
+
 	  meanOrdinate=ordinate;
 	  numStrips=1;
-	  newCluster=new StFgtCluster((*it)->getGeoId(),layer,ordinate,accuCharge);
+	  newCluster=new StFgtHit( disc, quadrant, layer, ordinate, defaultError, accuCharge, (*it)->getGeoId() );
 	  
 	  //add the current stuff
-	  newCluster->pushBack((*it)->getGeoId());
+          stripWeightMap_t &stripWeightMap = newCluster->getStripWeightMap();
+          stripWeightMap[ *it ] = 1;
 	  prvLayer=layer;
 	  prvGeoId=(*it)->getGeoId();
 	  prvDisc=disc;
@@ -127,25 +140,16 @@ Int_t StFgtSimpleClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterA
   if(newCluster)
     {
       //new cluster was started but not included yet..
-      newCluster->setLayer(prvLayer);
-      newCluster->setKey(prvGeoId);
-      newCluster->setPosition(meanOrdinate/(float)numStrips);
+      newCluster->setPosition1D(meanOrdinate/(float)numStrips, defaultError );
       newCluster->setCharge(accuCharge);
       if(numStrips<=10)
-	clusters.pushBack(*newCluster);
+         clusters.getHitVec().push_back(newCluster);
+      else
+         delete newCluster;
       //      cout <<"cluster has size: " << numStrips <<endl;
-      delete newCluster;
     }
 
   return kStOk;
 };
-
-
-//sort hits according to geoId. This function is probably not needed anymore since the hits are sorted by geoId to start with
-bool StFgtSimpleClusterAlgo::sortHits(StFgtRawHit first, StFgtRawHit second)
-{
-  return (first.getGeoId()< second.getGeoId());
-
-}
 
 ClassImp(StFgtSimpleClusterAlgo);

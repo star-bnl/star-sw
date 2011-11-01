@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.cxx,v 1.6 2011/10/14 18:45:27 avossen Exp $
+//  $Id: StFgtMaxClusterAlgo.cxx,v 1.7 2011/11/01 18:46:30 sgliske Exp $
 //  $Log: StFgtMaxClusterAlgo.cxx,v $
+//  Revision 1.7  2011/11/01 18:46:30  sgliske
+//  Updated to correspond with StEvent containers, take 2.
+//
 //  Revision 1.6  2011/10/14 18:45:27  avossen
 //  fixed some bugs in simple cluster algo
 //
@@ -12,9 +15,15 @@
 // \author Anselm Vossen (avossen@indiana.edu)
 //
 
+#include "Stypes.h"
 #include "StFgtMaxClusterAlgo.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include <iostream>
+
+#include "StRoot/StEvent/StFgtStripCollection.h"
+#include "StRoot/StEvent/StFgtStrip.h"
+#include "StRoot/StEvent/StFgtHitCollection.h"
+#include "StRoot/StEvent/StFgtHit.h"
 
 StFgtMaxClusterAlgo::StFgtMaxClusterAlgo():mIsInitialized(0)
 {
@@ -27,12 +36,15 @@ Int_t StFgtMaxClusterAlgo::Init()
   return kStOk;
 };
 
-Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArray& clusters)
+
+Int_t StFgtMaxClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitCollection& clusters )
 {
 
   //we make use of the fact, that the hits are already sorted by geoId
-  StFgtRawHitConstPtrVec mSortPtr;
-  hits.getSortedPtrVec(mSortPtr);
+  strips.sortByGeoId();
+
+  Float_t defaultError = 0.001;
+
   Short_t disc, quadrant;
   Char_t layer;
   Double_t ordinate, lowerSpan, upperSpan;
@@ -42,53 +54,47 @@ Int_t StFgtMaxClusterAlgo::doClustering(StFgtRawHitArray& hits, StFgtClusterArra
   Int_t phiGeoId, rGeoId;
   bool isPhi, isR;
   //  cout <<"we have " << mSortPtr.size() << " points " <<endl;
-  for(StFgtRawHitConstPtrVec::iterator it=mSortPtr.begin();it!=mSortPtr.end();it++)
+  StFgtStrip *stripPtr = 0;
+
+  for( StSPtrVecFgtStripIterator it=strips.getStripVec().begin();it!=strips.getStripVec().end();++it)
     {
       StFgtGeom::getPhysicalCoordinate((*it)->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
       isPhi=(layer=='P');
       isR=(!isPhi);
-      //      cout <<"charge is: " << (*it)->getAdc() <<  " maxRcharge: " <<maxRCharge <<" maxPhicharge: " << maxPhiCharge << " isPhi: "<< isPhi <<endl;
-      if(isR && ((*it)->getAdc() > maxRCharge))
+      //      cout <<"charge is: " << (*it)->getCharge() <<  " maxRcharge: " <<maxRCharge <<" maxPhicharge: " << maxPhiCharge << " isPhi: "<< isPhi <<endl;
+      if(isR && ((*it)->getCharge() > maxRCharge))
 	{
-	  maxRCharge=(*it)->getAdc();
+	  maxRCharge=(*it)->getCharge();
 	  rOrdinate=ordinate;
 	  rGeoId=(*it)->getGeoId();
+          stripPtr = *it;
 	}
-      if(isPhi && ((*it)->getAdc() > maxPhiCharge))
+      if(isPhi && ((*it)->getCharge() > maxPhiCharge))
 	{
-	  maxPhiCharge=(*it)->getAdc();
+	  maxPhiCharge=(*it)->getCharge();
 	  phiOrdinate=ordinate;
 	  phiGeoId=(*it)->getGeoId();
+          stripPtr = *it;
 	}
     }
 
+  StFgtHit *hit = 0;
   if(maxRCharge>0)
     {
       //      cout <<"have maxR" <<endl;
-      StFgtCluster newCluster(rGeoId,'R',rOrdinate,maxRCharge);
-      newCluster.pushBack(rGeoId);
-      //new cluster was started but not included yet..
-      //      cout <<"1" <<e ndl;
-      //      newCluster.setLayer('R');
-      //      newCluster.setKey(rGeoId);
-      //      newCluster.setPosition(rOrdinate);
-      //      newCluster.setCharge(maxRCharge);
-      //      cout <<" new r cluster " << endl;
-      clusters.pushBack(newCluster);
+      hit = new StFgtHit( disc, quadrant, 'R', rOrdinate, defaultError, maxRCharge, rGeoId );
     } 
   if(maxPhiCharge>0)
     {
-
-      StFgtCluster newCluster;
-      //new cluster was started but not included yet..
-      newCluster.setLayer('P');
-      newCluster.setKey(phiGeoId);
-      newCluster.setPosition(phiOrdinate);
-      newCluster.setCharge(maxPhiCharge);
-      newCluster.pushBack(phiGeoId);
-      clusters.pushBack(newCluster);
+      hit = new StFgtHit( disc, quadrant, 'P', rOrdinate, defaultError, maxRCharge, phiGeoId );
       //      cout <<" new phi cluster " << endl;
     } 
+
+  if( hit ){
+     clusters.getHitVec().push_back( hit );
+     stripWeightMap_t &stripWeightMap = hit->getStripWeightMap();
+     stripWeightMap[ stripPtr ] = 1;
+  };
 
   return kStOk;
 };

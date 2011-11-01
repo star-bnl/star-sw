@@ -1,5 +1,8 @@
-// $Id: StFgtIClusterAlgo.h,v 1.5 2011/10/03 19:39:46 avossen Exp $
+// $Id: StFgtIClusterAlgo.h,v 1.6 2011/11/01 18:46:30 sgliske Exp $
 // $Log: StFgtIClusterAlgo.h,v $
+// Revision 1.6  2011/11/01 18:46:30  sgliske
+// Updated to correspond with StEvent containers, take 2.
+//
 // Revision 1.5  2011/10/03 19:39:46  avossen
 // compiling version of simple cluster maker, changed PushBack->pushBack energy->charge in ClusterArray and Cluster
 //
@@ -24,17 +27,19 @@
 #ifndef STAR_StFgtIClusterAlgo_HH
 #define STAR_StFgtIClusterAlgo_HH
 
-#include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
-#include "StRoot/StEvent/StFgtEvent/StFgtClusterArray.h"
-#include "StRoot/StEvent/StFgtEvent/StFgtRawHitArray.h"
+#include "Stypes.h"
+class StFgtStripCollection;
+class StFgtHitCollection;
 
 class StFgtIClusterAlgo
 {
  public:
   //subclasses must implement this function that takes raw hits from StEvent and fills the Cluster collection
-  virtual Int_t doClustering(StFgtRawHitArray&, StFgtClusterArray&)=0;
+  virtual Int_t doClustering( StFgtStripCollection&, StFgtHitCollection& )=0;
   virtual Int_t Init()=0;
-  
+
+ private:
+  ClassDef( StFgtIClusterAlgo, 1 );  
 };
 
 #endif
