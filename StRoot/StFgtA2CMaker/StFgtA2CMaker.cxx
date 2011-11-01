@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.1 2011/10/28 14:58:49 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.2 2011/11/01 18:46:14 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.2  2011/11/01 18:46:14  sgliske
+ * Updated to correspond with StEvent containers, take 2.
+ *
  * Revision 1.1  2011/10/28 14:58:49  sgliske
  * replacement to StFgtCorAdcMaker
  *
@@ -18,14 +21,17 @@
 
 #include <string>
 
-#include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
+#include "StRoot/StEvent/StEvent.h"
+#include "StRoot/StEvent/StFgtCollection.h"
+#include "StRoot/StEvent/StFgtStripCollection.h"
+#include "StRoot/StEvent/StFgtStrip.h"
 #include "StRoot/StFgtPedMaker/StFgtPedReader.h"
 #include "StFgtA2CMaker.h"
-#include "StRoot/StEvent/StEvent.h"
+
 
 // constructors
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
-   : StMaker( name ),mFgtEventPtr(0), mPedReader(0),
+   : StMaker( name ), mPedReader(0),
      mTimeBinMask(0x10), mDoRemoveOtherTimeBins(0),
      mAbsThres(-10000), mRelThres(5) { /* */ };
 
@@ -50,33 +56,39 @@ Int_t StFgtA2CMaker::Init(){
 Int_t StFgtA2CMaker::Make(){
    Int_t ierr = kStOk;
 
-   StEvent* mEvent=0;
-   mEvent=(StEvent*)GetInputDS("StEvent");
+   StEvent* eventPtr = 0;
+   eventPtr = (StEvent*)GetInputDS("StEvent");
 
-   mFgtEventPtr=NULL;
-   if(mEvent) {
-      mFgtEventPtr=mEvent->fgtEvent();
+   if( !eventPtr ) {
+      LOG_ERROR << "Error getting pointer to StEvent from '" << ClassName() << "'" << endm;
+      ierr = kStErr;
    };
 
-   if( !mFgtEventPtr) {
-      LOG_ERROR << "could not find StFgtEvent in '" << ClassName() << "'" << endm;
+   StFgtCollection* fgtCollectionPtr = 0;
+
+   if( eventPtr ) {
+      fgtCollectionPtr=eventPtr->fgtCollection();
+   };
+
+   if( !fgtCollectionPtr) {
+      LOG_ERROR << "Error getting pointer to StFgtCollection from '" << ClassName() << "'" << endm;
       ierr = kStErr;
    };
 
    if( !ierr ){
-      for( Int_t discIdx=0; discIdx<mFgtEventPtr->getNumDiscs(); ++discIdx ){
-         StFgtDisc *discPtr = mFgtEventPtr->getDiscPtr( discIdx );
+      for( UInt_t discIdx=0; discIdx<fgtCollectionPtr->getNumDiscs(); ++discIdx ){
+         StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( discIdx );
+         if( stripCollectionPtr ){
+            StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
+            StSPtrVecFgtStripIterator stripIter;
 
-         if( discPtr ){
-            StFgtRawHitArray &hitArray = discPtr->getRawHitArray();
-
-            for( Int_t hitIdx = 0; hitIdx < hitArray.getEntries() && !ierr; ++hitIdx ){
-               StFgtRawHit *hit = hitArray.getRawHitPtr( hitIdx );
-               if( hit ){
-                  if( 1<<hit->getTimeBin() & mTimeBinMask ){
-                     Int_t geoId = hit->getGeoId();
-                     Int_t timebin = hit->getTimeBin();
-                     Int_t adc = hit->getAdc();
+            for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
+               StFgtStrip *strip = *stripIter;
+               if( strip ){
+                  if( 1<<strip->getTimeBin() & mTimeBinMask ){
+                     Int_t geoId = strip->getGeoId();
+                     Int_t timebin = strip->getTimeBin();
+                     Int_t adc = strip->getAdc();
 
                      Float_t ped, err;
                      mPedReader->getPed( geoId, timebin, ped, err );
@@ -85,24 +97,24 @@ Int_t StFgtA2CMaker::Make(){
                      adc -= ped;
 
                      // set the value
-                     hit->setAdc( adc );
+                     strip->setAdc( adc );
 
                      // no DB yet, so no gains.  Default to unitary gain
-                     hit->setCharge( adc );
+                     strip->setCharge( adc );
 
                      // flag whether to cut
                      if( (mRelThres && adc < mRelThres*err) || (mAbsThres>-4096 && adc < mAbsThres) )
-                        hit->setGeoId( -1 );
+                        strip->setGeoId( -1 );
 
                   } else if ( mDoRemoveOtherTimeBins ){
                      // flag to cut
-                     hit->setGeoId( -1 );
+                     strip->setGeoId( -1 );
                   };
                };
             };
 
             if( mDoRemoveOtherTimeBins || mRelThres || mAbsThres>-4096 )
-               hitArray.removeFlagged();
+               stripCollectionPtr->removeFlagged();
          };
       };
    };

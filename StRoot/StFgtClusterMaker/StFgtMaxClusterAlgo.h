@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.h,v 1.3 2011/10/10 20:35:08 avossen Exp $
+//  $Id: StFgtMaxClusterAlgo.h,v 1.4 2011/11/01 18:46:30 sgliske Exp $
 //  $Log: StFgtMaxClusterAlgo.h,v $
+//  Revision 1.4  2011/11/01 18:46:30  sgliske
+//  Updated to correspond with StEvent containers, take 2.
+//
 //  Revision 1.3  2011/10/10 20:35:08  avossen
 //  fixed strip-cluster association in MaxCluster algo, made other files cvs compliant
 //
@@ -15,16 +18,14 @@
 #define STAR_StFgtMaxClusterAlgo_HH
 
 #include "StFgtIClusterAlgo.h"
-#include "StRoot/StEvent/StFgtEvent/StFgtRawHit.h"
 
 class StFgtMaxClusterAlgo :public StFgtIClusterAlgo
 {
 
-
  public:
   StFgtMaxClusterAlgo();
 
-  virtual Int_t doClustering(StFgtRawHitArray&, StFgtClusterArray&);
+  virtual Int_t doClustering( StFgtStripCollection&, StFgtHitCollection& );
   virtual Int_t Init();
 
  protected:

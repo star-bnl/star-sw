@@ -1,6 +1,9 @@
 ///
-// $Id: StFgtSimpleClusterAlgo.h,v 1.5 2011/10/10 20:35:08 avossen Exp $
+// $Id: StFgtSimpleClusterAlgo.h,v 1.6 2011/11/01 18:46:30 sgliske Exp $
 // $Log: StFgtSimpleClusterAlgo.h,v $
+// Revision 1.6  2011/11/01 18:46:30  sgliske
+// Updated to correspond with StEvent containers, take 2.
+//
 // Revision 1.5  2011/10/10 20:35:08  avossen
 // fixed strip-cluster association in MaxCluster algo, made other files cvs compliant
 //
@@ -18,10 +21,6 @@
 #define STAR_StFgtSimpleClusterAlgo_HH
 
 #include "StFgtIClusterAlgo.h"
-#include "StRoot/StEvent/StFgtEvent/StFgtRawHit.h"
-#include "StRoot/St_base/StMessMgr.h"
-#include "StRoot/St_base/Stypes.h"
-
 
 class StFgtSimpleClusterAlgo :public StFgtIClusterAlgo
 {
@@ -29,11 +28,10 @@ class StFgtSimpleClusterAlgo :public StFgtIClusterAlgo
  public:
   StFgtSimpleClusterAlgo();
 
-  virtual Int_t doClustering(StFgtRawHitArray&, StFgtClusterArray&);
+  virtual Int_t doClustering(  StFgtStripCollection& strips, StFgtHitCollection& clusters );
   virtual Int_t Init();
 
  protected:
-  bool sortHits(StFgtRawHit first, StFgtRawHit second);
 
  private:
   Bool_t mIsInitialized;

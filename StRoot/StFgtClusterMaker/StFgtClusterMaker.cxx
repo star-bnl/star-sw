@@ -2,8 +2,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.15 2011/10/28 14:29:43 sgliske Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.16 2011/11/01 18:46:30 sgliske Exp $
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.16  2011/11/01 18:46:30  sgliske
+//   Updated to correspond with StEvent containers, take 2.
+//
 //   Revision 1.15  2011/10/28 14:29:43  sgliske
 //   fixed CVS tags
 //
@@ -34,11 +37,9 @@
 //
 
 #include "StFgtClusterMaker.h"
-#include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
-//#include "StRoot/StFgtRawMaker/StFgtCosmicMaker.h"
-//#include "StRoot/StFgtRawMaker/StFgtRawMaker.h"
-//
-#include "../StEvent/StEvent.h"
+#include "StRoot/StEvent/StEvent.h"
+#include "StRoot/StEvent/StFgtCollection.h"
+#include "StFgtIClusterAlgo.h"
 
 void StFgtClusterMaker::Clear(Option_t *opts)
 {
@@ -46,83 +47,47 @@ void StFgtClusterMaker::Clear(Option_t *opts)
 };
 
 
-
-
-
-Int_t StFgtClusterMaker::prepareEnvironment()
-{
-  Int_t ierr = kStOk;
-
-  //StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
-  //assert(mEvent); // fix your chain
-  StEvent* mEvent=0;
-  mEvent=(StEvent*)GetInputDS("StEvent");
-
-  if( !mEvent ){
-     LOG_ERROR << "Pointer to StEvent is null" << endl;
-     ierr = kStErr;
-  };
-
-  mFgtEventPtr=NULL;
-  if(mEvent)
-    {
-      mFgtEventPtr=mEvent->fgtEvent();
-    };
-
-  // Note: only the makers StFgtRawMaker, StFgtCosmicMaker and
-  // StFgtSlowSimuMaker make the StFgtEvent.  If there is not an
-  // StFgtEvent in StEvent, then throw an error.
-
-  if( !mFgtEventPtr)
-    {
-       LOG_ERROR << "Pointer to StFgtEvent is null when sought in '" << ClassName() << "::prepareEnviroment'" << endm;
-      ierr = kStErr;
-    }
-
-  return ierr;
-};
-
-
-
 Int_t StFgtClusterMaker::Make()
 {
-  Int_t ierr = kStOk;
-  TStopwatch clock;
-  clock.Start();
-  LOG_DEBUG <<"StClusterMaker::Make()******************************************************************"<<endm;
+   Int_t ierr = kStOk;
 
-  //  Access of FGT from  StEvent 
-  //  StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
-  //  assert(mEvent); // fix your chain
+   StEvent* eventPtr = 0;
+   eventPtr = (StEvent*)GetInputDS("StEvent");
 
+   if( !eventPtr ) {
+      LOG_ERROR << "Error getting pointer to StEvent from '" << ClassName() << "'" << endm;
+      ierr = kStErr;
+   };
 
-  if( !mClusterAlgoPtr || (prepareEnvironment()!=kStOK))
-    {
-      if(!mClusterAlgoPtr) 
-	LOG_ERROR << "no cluster maker " << endm;
-      return kStFatal;
-    }
-  else
-    {
-      //invoke algo for each disc
-      for(int discIdx=0;discIdx<mFgtEventPtr->getNumDiscs();discIdx++)
-	{ 
-	  StFgtDisc* pDisc=mFgtEventPtr->getDiscPtr(discIdx);
-	  //printf("iD=%d %p\n",discIdx,pDisc);
-	  if(pDisc)
-	    { 
-	      cout <<"disc: " << discIdx << " has " << pDisc->getRawHitArray().getEntries() <<endl;
-	      Int_t loc_ierr=mClusterAlgoPtr->doClustering(pDisc->getRawHitArray(),pDisc->getClusterArray());
-	      if(loc_ierr!=kStOk)
-		{
-		  LOG_WARN <<"StClusterMaker::Make(): clustering for disc " << discIdx << " returned " << loc_ierr <<endm;
-		  if(loc_ierr>ierr)
-		    ierr=loc_ierr;
-		}
-	    }
-	}
-    }
+   StFgtCollection* fgtCollectionPtr = 0;
 
+   if( eventPtr ) {
+      fgtCollectionPtr=eventPtr->fgtCollection();
+   };
+
+   if( !fgtCollectionPtr) {
+      LOG_ERROR << "Error getting pointer to StFgtCollection from '" << ClassName() << "'" << endm;
+      ierr = kStErr;
+   };
+
+   if( !ierr ){
+      for( UInt_t discIdx=0; discIdx<fgtCollectionPtr->getNumDiscs(); ++discIdx ){
+         LOG_INFO << "disc: " << discIdx << " has " << fgtCollectionPtr->getNumStrips() << endm;
+
+         StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( discIdx );
+         StFgtHitCollection *hitCollectionPtr = fgtCollectionPtr->getHitCollection( discIdx );
+
+         if( stripCollectionPtr && hitCollectionPtr ){
+            Int_t loc_ierr = mClusterAlgoPtr->doClustering( *stripCollectionPtr, *hitCollectionPtr );
+            if(loc_ierr!=kStOk) {
+               LOG_WARN <<"StClusterMaker::Make(): clustering for disc " << discIdx << " returned " << loc_ierr <<endm;
+               if(loc_ierr>ierr)
+                  ierr=loc_ierr;
+            }
+         }
+      }
+   }
+   
   return ierr;
 
 };
@@ -144,11 +109,14 @@ Int_t StFgtClusterMaker::Init()
      ierr = kStErr;
   };
 
+  if( !ierr )
+     ierr = mClusterAlgoPtr->Init();
+
   return ierr;
 };
   
   
-StFgtClusterMaker::StFgtClusterMaker( const Char_t* name ) : StMaker(name),mFgtEventPtr(0),mClusterAlgoPtr(0)
+StFgtClusterMaker::StFgtClusterMaker( const Char_t* name ) : StMaker(name),mClusterAlgoPtr(0)
 {
    /* */
 };

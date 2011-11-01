@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.12 2011/10/28 14:29:43 sgliske Exp $
+//   $Id: StFgtClusterMaker.h,v 1.13 2011/11/01 18:46:30 sgliske Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.13  2011/11/01 18:46:30  sgliske
+//   Updated to correspond with StEvent containers, take 2.
+//
 //   Revision 1.12  2011/10/28 14:29:43  sgliske
 //   fixed CVS tags
 //
@@ -31,16 +34,8 @@
 #ifndef STAR_StFgtClusterMaker_HH
 #define STAR_StFgtClusterMaker_HH
 
-#include <TStopwatch.h>
-#include <math.h>
-#include <TString.h>
-
 #include "StMaker.h"
-#include "StRoot/StEvent/StFgtEvent/StFgtEvent.h"
-#include "StFgtIClusterAlgo.h"
-#include "StRoot/St_base/StMessMgr.h"
-//#include "StRoot/St_base/Stypes.h"
-
+class StFgtIClusterAlgo;
 
 class StFgtClusterMaker : public StMaker
 {
@@ -54,10 +49,7 @@ class StFgtClusterMaker : public StMaker
   Int_t setClusterAlgo(StFgtIClusterAlgo*);
 
  protected:
-  StFgtEvent *mFgtEventPtr;
   StFgtIClusterAlgo* mClusterAlgoPtr;
-
-  Int_t prepareEnvironment();
 
   ClassDef(StFgtClusterMaker,1);
 
