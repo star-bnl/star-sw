@@ -38,16 +38,19 @@ std::map< Int_t, std::vector<TString> > AgShape::mRootMembers; // ROOT data memb
 //
 // =============================================================================================================
 //
+
+
+// MACRO Add: associates a given shape with a given parameter
 #define Add(shape,par) {					\
     AgShape::mParList[AgShape::k##shape].push_back(#par);	\
     AgShape::mShapeIds[#shape]=AgShape::k##shape;		\
     AgShape::mShapeNames[AgShape::k##shape]=#shape;		\
   }
-
+// MACRO Ctr: associates a given shape constructor with a given shape name
 #define Ctr(shape,name) {				\
     AgShape::mRootCtors[ AgShape::k##shape]=#name;	\
   }
-
+// MACRO Mbr: Provides the ordered list specifying the parameters of a ROOT shape
 #define Mbr(shape,name) {						\
     AgShape::mRootMembers[ AgShape::k##shape].push_back(#name);}
 
@@ -90,10 +93,12 @@ struct _Dummy {
     Add(Cons,dz); Add(Cons,rmn1); Add(Cons,rmx1); Add(Cons,rmn2); Add(Cons,rmx2); Add(Cons,phi1); Add(Cons,phi2);
     Mbr(Cons,fDz);Mbr(Cons,fRmin1);Mbr(Cons,fRmax1);Mbr(Cons,fRmin2);Mbr(Cons,fRmax2);Mbr(Cons,fPhi1);Mbr(Cons,fPhi2);
     Ctr(Cons,TGeoConeSeg);
+
     // TGeoSphere(Double_t rmin, Double_t rmax, Double_t theta1 = 0, Double_t theta2 = 180, Double_t phi1 = 0, Double_t phi2 = 360)
     Add(Sphe,rmin); Add(Sphe,rmax); Add(Sphe,the1); Add(Sphe,the2); Add(Sphe,phi1); Add(Sphe,phi2);
     Mbr(Sphe,fRmin);Mbr(Sphe,fRmax);Mbr(Sphe,fTheta1);Mbr(Sphe,fTheta2);Mbr(Sphe,fPhi1);Mbr(Sphe,fPhi2);
     Ctr(Sphe,TGeoSphere);
+
     // TGeoPara(Double_t dx, Double_t dy, Double_t dz, Double_t alpha, Double_t theta, Double_t phi)
     Add(Para,dx); Add(Para,dy); Add(Para,dz); Add(Para,alph); Add(Para,thet); Add(Para,phi);
     Mbr(Para,fX); Mbr(Para,fY); Mbr(Para,fZ); Mbr(Para,fAlpha); Mbr(Para,fTheta); Mbr(Para,fPhi);
@@ -111,13 +116,44 @@ struct _Dummy {
     Mbr(Eltu,fA); Mbr(Eltu,fB); Mbr(Eltu,fDz);
     Ctr(Eltu,TGeoEltu);
     // 	TGeoHype(Double_t rin, Double_t stin, Double_t rout, Double_t stout, Double_t dz)
+    Add(Hype,dz); Add(Hype,rin); Add(Hype,stin); Add(Hype,rout); Add(Hype,stout);
+    Mbr(Hype,fDz); Mbr(Hype,fRin); Mbr(Hype,fStin); Mbr(Hype,fRout); Mbr(Hype,fStout);   
+    /*
     Add(Hype,rin); Add(Hype,stin); Add(Hype,rout); Add(Hype,stout); Add(Hype,dz);
     Mbr(Hype,fRin);Mbr(Hype,fStin);Mbr(Hype,fRout);Mbr(Hype,fStout);Mbr(Hype,fDz);
+    */
     Ctr(Hype,TGeoHype);
+
     // 	TGeoGtra(Double_t dz, Double_t theta, Double_t phi, Double_t twist, Double_t h1, Double_t bl1, Double_t tl1, Double_t alpha1, Double_t h2, Double_t bl2, Double_t tl2, Double_t alpha2)
-    Add(Gtra,dz); Add(Gtra,thet); Add(Gtra,phi); Add(Gtra,twis); Add(Gtra,h1); Add(Gtra,bl1); Add(Gtra, tl1); Add(Gtra,alp1); Add(Gtra,h2); Add(Gtra,bl2); Add(Gtra,tl2); Add(Gtra,alp2);
-    Mbr(Gtra,fDz);Mbr(Gtra,fTheta);Mbr(Gtra,fPhi);Mbr(Gtra,fTwist);Mbr(Gtra,fH1);Mbr(Gtra,fBl1);Mbr(Gtra,fTl1);Mbr(Gtra,fAlpha1);Mbr(Gtra,fH2);Mbr(Gtra,fBl2);Mbr(Gtra,fTl2);Mbr(Gtra,fAlpha2);
+    Add(Gtra,dz); 
+    Add(Gtra,thet); 
+    Add(Gtra,phi); 
+    Add(Gtra,h1); 
+    Add(Gtra,bl1); 
+    Add(Gtra, tl1); 
+    Add(Gtra,alp1); 
+    Add(Gtra,h2); 
+    Add(Gtra,bl2); 
+    Add(Gtra,tl2); 
+    Add(Gtra,alp2);
+    Add(Gtra,twis); 
+
+    Mbr(Gtra,fDz);
+    Mbr(Gtra,fTheta);
+    Mbr(Gtra,fPhi);
+    Mbr(Gtra,fH1);
+    Mbr(Gtra,fBl1);
+    Mbr(Gtra,fTl1);
+    Mbr(Gtra,fAlpha1);
+    Mbr(Gtra,fH2);
+    Mbr(Gtra,fBl2);
+    Mbr(Gtra,fTl2);
+    Mbr(Gtra,fAlpha2);
+    Mbr(Gtra,fTwist);
+
     Ctr(Gtra,TGeoGtra);
+
+
     // 	TGeoCtub(Double_t rmin, Double_t rmax, Double_t dz, Double_t phi1, Double_t phi2, Double_t lx, Double_t ly, Double_t lz, Double_t tx, Double_t ty, Double_t tz)
     Add(Ctub,rmin); Add(Ctub,rmax); Add(Ctub,dz); Add(Ctub,phi1); Add(Ctub,phi2);
     Mbr(Ctub,fRmin);Mbr(Ctub,fRmax);Mbr(Ctub,fDz);Mbr(Ctub,fPhi1);Mbr(Ctub,fPhi2);
@@ -544,6 +580,10 @@ void AgShape::Inherit( AgBlock *block )
     case (AgShape::kCone):
       if ( !isSet("rmn1") ) par("rmn1")=0;
       if ( !isSet("rmn2") ) par("rmn2")=0;
+      break;
+    case (AgShape::kCtub):
+      if (!isSet("hx")&&!isSet("hy")&&!isSet("hz")) {par("hx")=0.; par("hy")=0.; par("hz")=1.; }
+      if (!isSet("lx")&&!isSet("ly")&&!isSet("lz")) {par("lx")=0.; par("ly")=0.; par("lz")=1.; }
       break;
     case (AgShape::kDivision):
       if ( !isSet("step") )   par("step")=0;
