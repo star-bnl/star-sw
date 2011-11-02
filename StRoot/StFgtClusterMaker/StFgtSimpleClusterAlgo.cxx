@@ -1,6 +1,10 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.12 2011/11/01 18:46:30 sgliske Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.13 2011/11/02 18:44:45 sgliske Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.13  2011/11/02 18:44:45  sgliske
+//  updated for changed StFgtHit constructor:
+//  changed saving central strip ptr to geoId in StFgtHit
+//
 //  Revision 1.12  2011/11/01 18:46:30  sgliske
 //  Updated to correspond with StEvent containers, take 2.
 //
@@ -74,7 +78,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
       if(prvLayer==noLayer)//first hit
 	{
 	  accuCharge=(*it)->getAdc();  
-	  newCluster=new StFgtHit( disc, quadrant, layer, ordinate, defaultError, accuCharge, (*it)->getGeoId() );
+	  newCluster=new StFgtHit( disc, quadrant, layer, ordinate, defaultError, accuCharge, (*it)->getGeoId(), (*it)->getGeoId() );
           stripWeightMap_t &stripWeightMap = newCluster->getStripWeightMap();
           stripWeightMap[ *it ] = 1;
 
@@ -123,7 +127,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 
 	  meanOrdinate=ordinate;
 	  numStrips=1;
-	  newCluster=new StFgtHit( disc, quadrant, layer, ordinate, defaultError, accuCharge, (*it)->getGeoId() );
+	  newCluster=new StFgtHit( disc, quadrant, layer, ordinate, defaultError, accuCharge, (*it)->getGeoId(), (*it)->getGeoId() );
 	  
 	  //add the current stuff
           stripWeightMap_t &stripWeightMap = newCluster->getStripWeightMap();
