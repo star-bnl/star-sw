@@ -48,8 +48,8 @@ _shape_arglist = {
     'coneseg'    : ['dz','rmn1','rmx1','rmn2','rmx2','phi1','phi2'],
     'cons'       : ['dz','rmn1','rmx1','rmn2','rmx2','phi1','phi2'],    
     'eltu'       : ['p1','p2','dz'],
-
-    'gtra'       : ['dz','thet','phi','twist','h1','bl1','tl1','alp1','h2','bl2','tl2','alp2' ],
+#    'gtra'       : ['dz','thet','phi','twist','h1','bl1','tl1','alp1','h2','bl2','tl2','alp2' ],
+    'gtra'       : ['dz','thet','phi','twis','h1','bl1','tl1','alp1','h2','bl2','tl2','alp2' ],
     'trap'       : ['dz','thet','phi','h1','bl1','tl1','alp1','h2','bl2','tl2','alp2'],
 
     'hype'       : ['rin','stin','rout','stout','dz'], 
@@ -64,6 +64,7 @@ _shape_arglist = {
     'trd2'       : ['dx1','dx2','dy1','dy2','dz'], 
     'tube'       : ['rmin','rmax','dz'],
     'tubs'       : ['rmin','rmax','phi1','phi2','dz'],
+    'ctub'       : ['rmin','rmax','phi1','phi2','dz','hx','hy','hz','lx','ly','lz'],
     'division'   : ['ndiv','iaxis','c0']
     }
 
