@@ -2,12 +2,13 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.17 2011/11/02 16:03:56 balewski Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.18 2011/11/02 20:53:30 balewski Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StFgtIClusterAlgo.h"
+#include "StEvent/StFgtHit.h"
 
 void StFgtClusterMaker::Clear(Option_t *opts)
 {
@@ -56,6 +57,33 @@ Int_t StFgtClusterMaker::Make()
      }
    }
    
+
+   printf("End of fgt-clust-maker, print all strips & clusters:\n");
+   
+   printf("  fgtCollnumDisc=%d, tot strip=%d  totClust=%d\n",fgtCollectionPtr->getNumDiscs(),fgtCollectionPtr->getNumStrips()  , fgtCollectionPtr->getNumHits());
+  for(int iDisc=0; iDisc <(int)fgtCollectionPtr->getNumDiscs(); iDisc++) {
+    printf("  content: iDisc=%d  # of : strips=%d  hits=%d\n" ,iDisc , fgtCollectionPtr->getNumStrips(iDisc)  , fgtCollectionPtr-> getNumHits( iDisc));
+
+    // ..... print all strips ....
+    StFgtStripCollection *stripPtr= fgtCollectionPtr->getStripCollection(iDisc);
+    StSPtrVecFgtStrip &stripVec = stripPtr->getStripVec();    
+    int ih=0;
+    for( StSPtrVecFgtStripIterator it=stripVec.begin();it!=stripVec.end();++it, ih++)    {
+      printf("iDisc=%d ih=%d  strip: geoId=%d ADC=%d\n",iDisc,ih,((*it))->getGeoId(),((*it))->getAdc());
+    }
+    
+    // ..... print all 1D clusters (aka FGT HITs) ....
+    StFgtHitCollection *clustPtr= fgtCollectionPtr->getHitCollection(iDisc);
+    StSPtrVecFgtHit &clustVec = clustPtr->getHitVec();    
+    ih=0;
+    for( StSPtrVecFgtHitIterator it=clustVec.begin();it!=clustVec.end();++it, ih++)    {
+
+      printf("iDisc=%d ih=%d  clust  quad=%d, layer=%c charge=%.2f  R/cm=%.3f +/- %.3f  Phi/rad=%f +/-%f   centStripId=%d totCharge=%.2f\n",iDisc,ih, ((*it))->getQuad(), ((*it))->getLayer(), ((*it))->charge(), ((*it))->getPositionR(), ((*it))->getErrorR(), ((*it))->getPositionPhi(), ((*it))->getErrorPhi(),((*it))->getCentralStripGeoId(),  ((*it))->charge());
+    }
+    
+    
+  }
+  
   return ierr;
 
 };
@@ -99,6 +127,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.18  2011/11/02 20:53:30  balewski
+//   lot of printouts
+//
 //   Revision 1.17  2011/11/02 16:03:56  balewski
 //   fix indexing of printout
 //
