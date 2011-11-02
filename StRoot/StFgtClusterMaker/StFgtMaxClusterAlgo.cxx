@@ -1,6 +1,10 @@
 //
-//  $Id: StFgtMaxClusterAlgo.cxx,v 1.7 2011/11/01 18:46:30 sgliske Exp $
+//  $Id: StFgtMaxClusterAlgo.cxx,v 1.8 2011/11/02 18:44:45 sgliske Exp $
 //  $Log: StFgtMaxClusterAlgo.cxx,v $
+//  Revision 1.8  2011/11/02 18:44:45  sgliske
+//  updated for changed StFgtHit constructor:
+//  changed saving central strip ptr to geoId in StFgtHit
+//
 //  Revision 1.7  2011/11/01 18:46:30  sgliske
 //  Updated to correspond with StEvent containers, take 2.
 //
@@ -82,11 +86,11 @@ Int_t StFgtMaxClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitC
   if(maxRCharge>0)
     {
       //      cout <<"have maxR" <<endl;
-      hit = new StFgtHit( disc, quadrant, 'R', rOrdinate, defaultError, maxRCharge, rGeoId );
+       hit = new StFgtHit( disc, quadrant, 'R', rOrdinate, defaultError, maxRCharge, rGeoId, rGeoId );
     } 
   if(maxPhiCharge>0)
     {
-      hit = new StFgtHit( disc, quadrant, 'P', rOrdinate, defaultError, maxRCharge, phiGeoId );
+       hit = new StFgtHit( disc, quadrant, 'P', rOrdinate, defaultError, maxRCharge, phiGeoId, phiGeoId );
       //      cout <<" new phi cluster " << endl;
     } 
 
