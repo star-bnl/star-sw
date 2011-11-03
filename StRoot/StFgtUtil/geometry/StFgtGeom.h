@@ -51,6 +51,9 @@ class StFgtGeom
 	//  For all functions where they appear: Disc can be >= 0 (in theory,
 	//  although only values 0-5 work at the moment, I believe). Quadrant
 	//  is 0-3.  Layer is 'P' or 'R'. Strip is 0-720
+  static Double_t getDiscZ(int iDisc){return iDisc*10+70;}
+
+
 	static Int_t encodeGeoId(
 	    Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
 	)
@@ -408,8 +411,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.21 2011/10/13 21:02:15 balewski Exp $
+ *  $Id: StFgtGeom.h,v 1.22 2011/11/03 20:04:41 avossen Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.22  2011/11/03 20:04:41  avossen
+ *  added simple function to get disc z
+ *
  *  Revision 1.21  2011/10/13 21:02:15  balewski
  *  cleanup of not needed intermediate methods
  *
