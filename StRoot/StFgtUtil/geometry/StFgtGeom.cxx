@@ -104,7 +104,7 @@ bool StFgtGeom::belowFlat( TVector3 r ) //	'r' in LOC ref
 
 int StFgtGeom::getQuad( double phiLab )
 {
-  printf("StFgtGeom::getQuad phiLab/rad=%f\n", phiLab );
+  //  printf("StFgtGeom::getQuad phiLab/rad=%f\n", phiLab );
   assert(phiLab <= pi );
   assert(phiLab >= -pi );
   if ( phiLab > phiQuadXaxis(1) && phiLab <= phiQuadXaxis(0) )
@@ -3034,8 +3034,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.17 2011/10/13 21:02:15 balewski Exp $
+ *  $Id: StFgtGeom.cxx,v 1.18 2011/11/03 16:18:51 balewski Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.18  2011/11/03 16:18:51  balewski
+ *  remove printout
+ *
  *  Revision 1.17  2011/10/13 21:02:15  balewski
  *  cleanup of not needed intermediate methods
  *
