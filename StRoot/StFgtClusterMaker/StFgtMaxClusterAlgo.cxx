@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.cxx,v 1.9 2011/11/03 14:59:49 sgliske Exp $
+//  $Id: StFgtMaxClusterAlgo.cxx,v 1.10 2011/11/03 20:04:17 avossen Exp $
 //  $Log: StFgtMaxClusterAlgo.cxx,v $
+//  Revision 1.10  2011/11/03 20:04:17  avossen
+//  updated clustering makers and algos to reflect new containers
+//
 //  Revision 1.9  2011/11/03 14:59:49  sgliske
 //  Error estimate set to twice the pitch
 //
@@ -59,7 +62,8 @@ Int_t StFgtMaxClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitC
   Int_t phiGeoId, rGeoId;
   bool isPhi, isR;
   //  cout <<"we have " << mSortPtr.size() << " points " <<endl;
-  StFgtStrip *stripPtr = 0;
+  StFgtStrip *rStripPtr = 0;
+  StFgtStrip *phiStripPtr = 0;
 
   for( StSPtrVecFgtStripIterator it=strips.getStripVec().begin();it!=strips.getStripVec().end();++it)
     {
@@ -72,34 +76,42 @@ Int_t StFgtMaxClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitC
 	  maxRCharge=(*it)->getCharge();
 	  rOrdinate=ordinate;
 	  rGeoId=(*it)->getGeoId();
-          stripPtr = *it;
+          rStripPtr = *it;
 	}
       if(isPhi && ((*it)->getCharge() > maxPhiCharge))
 	{
 	  maxPhiCharge=(*it)->getCharge();
 	  phiOrdinate=ordinate;
 	  phiGeoId=(*it)->getGeoId();
-          stripPtr = *it;
+          phiStripPtr = *it;
 	}
     }
 
-  StFgtHit *hit = 0;
+  StFgtHit *rHit = 0;
+  StFgtHit *phiHit = 0;
   if(maxRCharge>0)
     {
       //      cout <<"have maxR" <<endl;
-       hit = new StFgtHit( disc, quadrant, 'R', rOrdinate, 2*StFgtGeom::radStrip_pitch(), maxRCharge, rGeoId, rGeoId );
+      rHit = new StFgtHit( clusters.getHitVec().size(),rGeoId,maxRCharge, disc, quadrant, 'R', rOrdinate, 2*StFgtGeom::radStrip_pitch(), 0.0, 0.0, 0.0, 0.0);
     } 
+  if( rHit ){
+     clusters.getHitVec().push_back( rHit );
+     stripWeightMap_t &stripWeightMap = rHit->getStripWeightMap();
+     stripWeightMap[ rStripPtr ] = 1;
+
+  };
+
   if(maxPhiCharge>0)
     {
-       hit = new StFgtHit( disc, quadrant, 'P', rOrdinate, 2*StFgtGeom::phiStrip_pitch(), maxPhiCharge, phiGeoId, phiGeoId );
+      phiHit = new StFgtHit( clusters.getHitVec().size(), phiGeoId,maxRCharge, disc, quadrant, 'P', 0.0, 0.0,phiOrdinate, 2*StFgtGeom::phiStrip_pitch(),0.0,0.0);
       //      cout <<" new phi cluster " << endl;
     } 
-
-  if( hit ){
-     clusters.getHitVec().push_back( hit );
-     stripWeightMap_t &stripWeightMap = hit->getStripWeightMap();
-     stripWeightMap[ stripPtr ] = 1;
+  if(phiHit ){
+     clusters.getHitVec().push_back( phiHit );
+     stripWeightMap_t &stripWeightMap = phiHit->getStripWeightMap();
+     stripWeightMap[ phiStripPtr ] = 1;
   };
+
 
   return kStOk;
 };

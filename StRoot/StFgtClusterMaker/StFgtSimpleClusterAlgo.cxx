@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.15 2011/11/03 15:54:05 avossen Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.16 2011/11/03 20:04:17 avossen Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.16  2011/11/03 20:04:17  avossen
+//  updated clustering makers and algos to reflect new containers
+//
 //  Revision 1.15  2011/11/03 15:54:05  avossen
 //  fixed error for last cluster on disk
 //
@@ -41,6 +44,8 @@
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "StRoot/StEvent/StFgtHitCollection.h"
 #include "StRoot/StEvent/StFgtHit.h"
+//for floor
+#include <math.h>
 
 StFgtSimpleClusterAlgo::StFgtSimpleClusterAlgo():mIsInitialized(0)
 {
@@ -72,9 +77,9 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
   //bool lookForNewCluster=true;
   prvLayer=noLayer;
   bool isPhi, isR;
-
   StFgtHit* newCluster=0;
-
+  //to compute energy weighted strip id
+  Double_t meanGeoId=0;
 
   for( StSPtrVecFgtStripIterator it=strips.getStripVec().begin();it!=strips.getStripVec().end();++it)
     {
@@ -85,11 +90,13 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
       if(prvLayer==noLayer)//first hit
 	{
 	  accuCharge=(*it)->getAdc();  
-	  newCluster=new StFgtHit( disc, quadrant, layer, ordinate, defaultError, accuCharge, (*it)->getGeoId(), (*it)->getGeoId() );
+	  meanGeoId=(*it)->getAdc()*(*it)->getGeoId();
+
+	  newCluster=new StFgtHit(clusters.getHitVec().size(),meanGeoId,accuCharge, disc, quadrant, layer, ordinate, defaultError,ordinate, defaultError,0.0,0.0);
           stripWeightMap_t &stripWeightMap = newCluster->getStripWeightMap();
           stripWeightMap[ *it ] = 1;
-
 	  meanOrdinate=ordinate;
+
 	  meanSqOrdinate=ordinate*ordinate;
 	  prvLayer=layer;
 	  prvGeoId=(*it)->getGeoId();
@@ -109,6 +116,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	  //accuCharge+=(*it)->getCharge();  
 	  accuCharge+=(*it)->getAdc();
 	  meanOrdinate+=ordinate;
+	  meanGeoId+=(*it)->getAdc()*(*it)->getGeoId();
 	  meanSqOrdinate+=ordinate*ordinate;
 	  numStrips++;
 
@@ -128,6 +136,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 
           // compute mean and st. dev.
           meanOrdinate /= (float)numStrips;
+	  meanGeoId /= accuCharge;
           meanSqOrdinate /= (float)numStrips;
           meanSqOrdinate -= meanOrdinate*meanOrdinate;
           if( meanSqOrdinate > 0 )
@@ -140,7 +149,17 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
           if( meanSqOrdinate < 2*pitch )
              meanSqOrdinate = 2*pitch;
 
-	  newCluster->setPosition1D(meanOrdinate/(float)numStrips, meanSqOrdinate );
+	  if(layer=='R')
+	    {
+	      newCluster->setPositionR(meanOrdinate );
+	      newCluster->setErrorR(meanSqOrdinate);
+	    }
+	  else
+	    {
+	      newCluster->setPositionPhi(meanOrdinate );
+	      newCluster->setErrorPhi(meanSqOrdinate);
+	    }
+	  newCluster->setCentralStripGeoId(floor(meanGeoId+0.5));
 	  if(numStrips<=10)
              clusters.getHitVec().push_back(newCluster);
           else
@@ -150,10 +169,10 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	  accuCharge=(*it)->getCharge();
 
 	  meanOrdinate=ordinate;
+	  meanGeoId=(*it)->getAdc()*(*it)->getGeoId();
           meanSqOrdinate=ordinate*ordinate;
 	  numStrips=1;
-	  newCluster=new StFgtHit( disc, quadrant, layer, ordinate, defaultError, accuCharge, (*it)->getGeoId(), (*it)->getGeoId() );
-	  
+	  newCluster=new StFgtHit(clusters.getHitVec().size(),meanGeoId,accuCharge, disc, quadrant, layer, ordinate, defaultError,ordinate, defaultError,0.0,0.0);
 	  //add the current stuff
           stripWeightMap_t &stripWeightMap = newCluster->getStripWeightMap();
           stripWeightMap[ *it ] = 1;
@@ -170,6 +189,8 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
     {
       //new cluster was started but not included yet..
       //      newCluster->setPosition1D(meanOrdinate/(float)numStrips, defaultError );
+      meanOrdinate /= (float)numStrips;
+      meanGeoId/=accuCharge;
       newCluster->setCharge(accuCharge);
       meanSqOrdinate /= (float)numStrips;
       meanSqOrdinate -= meanOrdinate*meanOrdinate;
@@ -182,7 +203,18 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
       Double_t pitch = ( layer == 'R' ? StFgtGeom::radStrip_pitch() : StFgtGeom::phiStrip_pitch() );
       if( meanSqOrdinate < 2*pitch )
 	meanSqOrdinate = 2*pitch;
-      newCluster->setPosition1D(meanOrdinate/(float)numStrips, meanSqOrdinate );
+      if(layer=='R')
+	{
+	  newCluster->setPositionR(meanOrdinate );
+	  newCluster->setErrorR(meanSqOrdinate);
+	}
+      else
+	{
+	  newCluster->setPositionPhi(meanOrdinate );
+	  newCluster->setErrorPhi(meanSqOrdinate);
+	}
+      
+      newCluster->setCentralStripGeoId(floor(meanGeoId+0.5));
       if(numStrips<=10)
          clusters.getHitVec().push_back(newCluster);
       else

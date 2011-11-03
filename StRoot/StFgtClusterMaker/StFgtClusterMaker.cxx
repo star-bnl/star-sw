@@ -2,13 +2,14 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.18 2011/11/02 20:53:30 balewski Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.19 2011/11/03 20:04:17 avossen Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StFgtIClusterAlgo.h"
 #include "StEvent/StFgtHit.h"
+#include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 
 void StFgtClusterMaker::Clear(Option_t *opts)
 {
@@ -54,6 +55,40 @@ Int_t StFgtClusterMaker::Make()
 	     ierr=loc_ierr;
 	 }
        }
+       ///after building the clusters (StFgtHits)
+       for( StSPtrVecFgtHitIterator it=fgtCollectionPtr->getHitCollection(discIdx)->getHitVec().begin();it!=fgtCollectionPtr->getHitCollection(discIdx)->getHitVec().end();++it)
+	 {
+	   Int_t centralStripGeoId=(*it)->getCentralStripGeoId();
+	   Short_t disc, quad;
+	   Char_t layer;
+	   Double_t ordinate, lowerSpan, upperSpan;
+	   Float_t mR=0.0;
+	   Float_t mPhi=0.0;
+	   Float_t mErrR=0.0;
+	   Float_t mErrPhi=0.0;
+
+	   StFgtGeom::getPhysicalCoordinate( centralStripGeoId, disc, quad, layer, ordinate, lowerSpan, upperSpan );
+	   if( layer == 'R' ){
+	     mR = (*it)->getPositionR();
+	     mErrR = (*it)->getErrorR();
+	     mPhi = 0.5*(upperSpan + lowerSpan);   // mid point of the strip
+	     mErrPhi = upperSpan - lowerSpan;      // length of the strip
+	   } else {
+	     mPhi = (*it)->getPositionPhi();
+	     mErrPhi = (*it)->getErrorPhi();
+	     mR = 0.5*(upperSpan + lowerSpan);   // mid point of the strip
+	     mErrR = upperSpan - lowerSpan;      // length of the strip
+	   };
+	   (*it)->setPositionZ(StFgtGeom::getDiscZ(disc));
+	   (*it)->setErrorZ(0.0);
+	   (*it)->setPositionR(mR);
+	   (*it)->setErrorR(mErrR);
+	   (*it)->setPositionPhi(mPhi);
+	   (*it)->setErrorPhi(mErrPhi);
+
+	 }
+       ///////
+
      }
    }
    
@@ -127,6 +162,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.19  2011/11/03 20:04:17  avossen
+//   updated clustering makers and algos to reflect new containers
+//
 //   Revision 1.18  2011/11/02 20:53:30  balewski
 //   lot of printouts
 //
