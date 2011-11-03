@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.14 2011/11/03 15:00:10 sgliske Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.15 2011/11/03 15:54:05 avossen Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.15  2011/11/03 15:54:05  avossen
+//  fixed error for last cluster on disk
+//
 //  Revision 1.14  2011/11/03 15:00:10  sgliske
 //  Error estimate set to st. dev. of the ordinate
 //
@@ -166,13 +169,24 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
   if(newCluster)
     {
       //new cluster was started but not included yet..
-      newCluster->setPosition1D(meanOrdinate/(float)numStrips, defaultError );
+      //      newCluster->setPosition1D(meanOrdinate/(float)numStrips, defaultError );
       newCluster->setCharge(accuCharge);
+      meanSqOrdinate /= (float)numStrips;
+      meanSqOrdinate -= meanOrdinate*meanOrdinate;
+      if( meanSqOrdinate > 0 )
+	meanSqOrdinate = sqrt(meanSqOrdinate);
+
+      // meanSqOrdinate is now the st. dev. of the ordinate
+
+      // avoid unreasonable small uncertainty, due to small cluster sizes
+      Double_t pitch = ( layer == 'R' ? StFgtGeom::radStrip_pitch() : StFgtGeom::phiStrip_pitch() );
+      if( meanSqOrdinate < 2*pitch )
+	meanSqOrdinate = 2*pitch;
+      newCluster->setPosition1D(meanOrdinate/(float)numStrips, meanSqOrdinate );
       if(numStrips<=10)
          clusters.getHitVec().push_back(newCluster);
       else
          delete newCluster;
-      //      cout <<"cluster has size: " << numStrips <<endl;
     }
 
   return kStOk;
