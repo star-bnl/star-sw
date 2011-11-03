@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.cxx,v 1.8 2011/11/02 18:44:45 sgliske Exp $
+//  $Id: StFgtMaxClusterAlgo.cxx,v 1.9 2011/11/03 14:59:49 sgliske Exp $
 //  $Log: StFgtMaxClusterAlgo.cxx,v $
+//  Revision 1.9  2011/11/03 14:59:49  sgliske
+//  Error estimate set to twice the pitch
+//
 //  Revision 1.8  2011/11/02 18:44:45  sgliske
 //  updated for changed StFgtHit constructor:
 //  changed saving central strip ptr to geoId in StFgtHit
@@ -47,8 +50,6 @@ Int_t StFgtMaxClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitC
   //we make use of the fact, that the hits are already sorted by geoId
   strips.sortByGeoId();
 
-  Float_t defaultError = 0.001;
-
   Short_t disc, quadrant;
   Char_t layer;
   Double_t ordinate, lowerSpan, upperSpan;
@@ -86,11 +87,11 @@ Int_t StFgtMaxClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitC
   if(maxRCharge>0)
     {
       //      cout <<"have maxR" <<endl;
-       hit = new StFgtHit( disc, quadrant, 'R', rOrdinate, defaultError, maxRCharge, rGeoId, rGeoId );
+       hit = new StFgtHit( disc, quadrant, 'R', rOrdinate, 2*StFgtGeom::radStrip_pitch(), maxRCharge, rGeoId, rGeoId );
     } 
   if(maxPhiCharge>0)
     {
-       hit = new StFgtHit( disc, quadrant, 'P', rOrdinate, defaultError, maxRCharge, phiGeoId, phiGeoId );
+       hit = new StFgtHit( disc, quadrant, 'P', rOrdinate, 2*StFgtGeom::phiStrip_pitch(), maxPhiCharge, phiGeoId, phiGeoId );
       //      cout <<" new phi cluster " << endl;
     } 
 
