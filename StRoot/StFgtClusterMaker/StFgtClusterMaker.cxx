@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.19 2011/11/03 20:04:17 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.20 2011/11/03 21:18:28 balewski Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -113,7 +113,7 @@ Int_t StFgtClusterMaker::Make()
     ih=0;
     for( StSPtrVecFgtHitIterator it=clustVec.begin();it!=clustVec.end();++it, ih++)    {
 
-      printf("iDisc=%d ih=%d  clust  quad=%d, layer=%c charge=%.2f  R/cm=%.3f +/- %.3f  Phi/rad=%f +/-%f   centStripId=%d totCharge=%.2f\n",iDisc,ih, ((*it))->getQuad(), ((*it))->getLayer(), ((*it))->charge(), ((*it))->getPositionR(), ((*it))->getErrorR(), ((*it))->getPositionPhi(), ((*it))->getErrorPhi(),((*it))->getCentralStripGeoId(),  ((*it))->charge());
+      printf("iDisc=%d ih=%d  clust  quad=%d, layer=%c charge=%.2f  R/cm=%.3f +/- %.3f  Phi/rad=%f +/-%f  Z/cm=%.2f +/-%.2f   centStripId=%d totCharge=%.2f\n",iDisc,ih, ((*it))->getQuad(), ((*it))->getLayer(), ((*it))->charge(), ((*it))->getPositionR(), ((*it))->getErrorR(), ((*it))->getPositionPhi(), ((*it))->getErrorPhi(), ((*it))->getPositionZ(), ((*it))->getErrorZ(),((*it))->getCentralStripGeoId(),  ((*it))->charge());
     }
     
     
@@ -162,6 +162,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.20  2011/11/03 21:18:28  balewski
+//   more printout
+//
 //   Revision 1.19  2011/11/03 20:04:17  avossen
 //   updated clustering makers and algos to reflect new containers
 //
