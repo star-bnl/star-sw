@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.13 2011/11/02 18:44:45 sgliske Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.14 2011/11/03 15:00:10 sgliske Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.14  2011/11/03 15:00:10  sgliske
+//  Error estimate set to st. dev. of the ordinate
+//
 //  Revision 1.13  2011/11/02 18:44:45  sgliske
 //  updated for changed StFgtHit constructor:
 //  changed saving central strip ptr to geoId in StFgtHit
@@ -61,6 +64,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
   Int_t prvGeoId;
   Double_t accuCharge=0; 
   Double_t meanOrdinate=0;
+  Double_t meanSqOrdinate=0;
   Int_t numStrips=0;
   //bool lookForNewCluster=true;
   prvLayer=noLayer;
@@ -83,6 +87,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
           stripWeightMap[ *it ] = 1;
 
 	  meanOrdinate=ordinate;
+	  meanSqOrdinate=ordinate*ordinate;
 	  prvLayer=layer;
 	  prvGeoId=(*it)->getGeoId();
 	  numStrips=1;
@@ -101,6 +106,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	  //accuCharge+=(*it)->getCharge();  
 	  accuCharge+=(*it)->getAdc();
 	  meanOrdinate+=ordinate;
+	  meanSqOrdinate+=ordinate*ordinate;
 	  numStrips++;
 
           stripWeightMap_t &stripWeightMap = newCluster->getStripWeightMap();
@@ -116,7 +122,22 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	  //set charge, push back cluster, start new one
 	  //set layer etc of cluster
 	  newCluster->setCharge(accuCharge);
-	  newCluster->setPosition1D(meanOrdinate/(float)numStrips, defaultError );
+
+          // compute mean and st. dev.
+          meanOrdinate /= (float)numStrips;
+          meanSqOrdinate /= (float)numStrips;
+          meanSqOrdinate -= meanOrdinate*meanOrdinate;
+          if( meanSqOrdinate > 0 )
+             meanSqOrdinate = sqrt(meanSqOrdinate);
+
+          // meanSqOrdinate is now the st. dev. of the ordinate
+
+          // avoid unreasonable small uncertainty, due to small cluster sizes
+          Double_t pitch = ( layer == 'R' ? StFgtGeom::radStrip_pitch() : StFgtGeom::phiStrip_pitch() );
+          if( meanSqOrdinate < 2*pitch )
+             meanSqOrdinate = 2*pitch;
+
+	  newCluster->setPosition1D(meanOrdinate/(float)numStrips, meanSqOrdinate );
 	  if(numStrips<=10)
              clusters.getHitVec().push_back(newCluster);
           else
@@ -126,6 +147,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	  accuCharge=(*it)->getCharge();
 
 	  meanOrdinate=ordinate;
+          meanSqOrdinate=ordinate*ordinate;
 	  numStrips=1;
 	  newCluster=new StFgtHit( disc, quadrant, layer, ordinate, defaultError, accuCharge, (*it)->getGeoId(), (*it)->getGeoId() );
 	  
