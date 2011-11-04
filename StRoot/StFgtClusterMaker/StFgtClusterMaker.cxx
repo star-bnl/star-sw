@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.21 2011/11/04 17:01:19 balewski Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.22 2011/11/04 17:38:12 balewski Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -85,6 +85,7 @@ Int_t StFgtClusterMaker::Make()
 	   (*it)->setErrorR(mErrR);
 	   (*it)->setPositionPhi(mPhi);
 	   (*it)->setErrorPhi(mErrPhi);
+	   printf("CLM:  centStrgeoId=%d, disc=%d, Z1=%f Z2=%f, phi1=%f  phi2=%f\n",centralStripGeoId,disc,StFgtGeom::getDiscZ(disc),(*it)->getPositionZ(),mPhi,(*it)->getPositionPhi());
 
 	 }
        ///////
@@ -162,6 +163,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.22  2011/11/04 17:38:12  balewski
+//   more printouts
+//
 //   Revision 1.21  2011/11/04 17:01:19  balewski
 //   *** empty log message ***
 //
