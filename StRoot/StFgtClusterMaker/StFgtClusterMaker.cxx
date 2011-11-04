@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.23 2011/11/04 19:00:22 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.24 2011/11/04 19:31:53 balewski Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -80,24 +80,21 @@ Int_t StFgtClusterMaker::Make()
 	     mR = 0.5*(upperSpan + lowerSpan);   // mid point of the strip
 	     mErrR = upperSpan - lowerSpan;      // length of the strip
 	   };
-	   mPhi-=StFgtGeom::phiQuadXaxis(quad);
+	   mPhi+=StFgtGeom::phiQuadXaxis(quad);
 	   if(mPhi>TMath::Pi())
 	     mPhi-=(2*TMath::Pi());
 	   if(mPhi<((-1)*TMath::Pi()))
 	     mPhi+=(2*TMath::Pi());
 
-
-
-
-
-	   (*it)->setPositionZ(StFgtGeom::getDiscZ(disc));
-	   (*it)->setErrorZ(0.2); // the thickens of sensitive volume (2mm), Jan
-
 	   (*it)->setPositionR(mR);
 	   (*it)->setErrorR(mErrR);
 	   (*it)->setPositionPhi(mPhi);
 	   (*it)->setErrorPhi(mErrPhi);
-	   printf("CLM:  centStrgeoId=%d, disc=%d, Z1=%f Z2=%f, phi1=%f  phi2=%f\n",centralStripGeoId,disc,StFgtGeom::getDiscZ(disc),(*it)->getPositionZ(),mPhi,(*it)->getPositionPhi());
+
+	   (*it)->setPositionZ(StFgtGeom::getDiscZ(disc));
+	   (*it)->setErrorZ(0.2); // the thickens of sensitive volume (2mm), Jan
+
+	   printf("CLM:  centStrgeoId=%d, disc=%d at phi=%f and Z=%f Z2=%f, phi1=%f  phi2=%f\n",centralStripGeoId,disc,StFgtGeom::phiQuadXaxis(quad), StFgtGeom::getDiscZ(disc),(*it)->getPositionZ(),mPhi,(*it)->getPositionPhi());
 
 	 }
        ///////
@@ -174,6 +171,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.24  2011/11/04 19:31:53  balewski
+//   fixed Z problem, by circumventing the bug in the set methods
+//
 //   Revision 1.23  2011/11/04 19:00:22  avossen
 //   changed phi from local to global phi
 //
