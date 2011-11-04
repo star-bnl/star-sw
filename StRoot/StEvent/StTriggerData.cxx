@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.17 2011/02/15 18:56:08 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.18 2011/11/04 19:20:38 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.18  2011/11/04 19:20:38  ullrich
+ * Added tpcMaskDSM() - Akio.
+ *
  * Revision 2.17  2011/02/15 18:56:08  ullrich
  * New access fct for ZDCSMD, new ZDCSMD map, spinBit() modified.
  *
@@ -64,7 +67,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.17 2011/02/15 18:56:08 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.18 2011/11/04 19:20:38 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -172,6 +175,7 @@ unsigned short StTriggerData::ctbLayer2DSM(int channel) const {return 0;}
 unsigned short StTriggerData::bemcLayer1DSM(int channel, int prepost) const {return 0;}
 unsigned short StTriggerData::eemcLayer1DSM(int channel, int prepost) const {return 0;}
 unsigned short StTriggerData::emcLayer2DSM(int channel) const {return 0;}
+unsigned short StTriggerData::tpcMaskDSM(int channel) const {return 0;}
 unsigned short StTriggerData::fpdLayer1DSMRaw(StBeamDirection eastwest, int channel, int prepost) const {return 0;}
 unsigned short StTriggerData::fpdLayer1DSM(StBeamDirection eastwest, int module, int board, int prepost) const {return 0;}
 unsigned short StTriggerData::fpdLayer2DSMRaw(int channel) const {return 0;}
