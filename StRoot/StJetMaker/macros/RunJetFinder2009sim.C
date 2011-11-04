@@ -84,10 +84,15 @@ void RunJetFinder2009sim(int nevents = 1e6,
   // BEMC simulator
   StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker;
   emcSim->setCalibSpread(kBarrelEmcTowerId,0.15);
+  emcSim->setCheckStatus(kBarrelEmcTowerId,false);
+  emcSim->setMakeFullDetector(kBarrelEmcTowerId,true);
+  emcSim->setDoZeroSuppression(kBarrelEmcTowerId,false);
+
   StPreEclMaker* preEcl = new StPreEclMaker; // need this to fill new StEvent information
 
   // Barrel ADC to energy maker
   StEmcADCtoEMaker* adc = new StEmcADCtoEMaker;
+  adc->saveAllStEvent(true);
 
   // Trigger simulator
   // -- StL2_2009EmulatorMaker must run before StTriggerSimuMaker?
