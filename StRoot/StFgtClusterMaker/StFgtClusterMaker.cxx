@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.20 2011/11/03 21:18:28 balewski Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.21 2011/11/04 17:01:19 balewski Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -80,7 +80,7 @@ Int_t StFgtClusterMaker::Make()
 	     mErrR = upperSpan - lowerSpan;      // length of the strip
 	   };
 	   (*it)->setPositionZ(StFgtGeom::getDiscZ(disc));
-	   (*it)->setErrorZ(0.0);
+	   (*it)->setErrorZ(0.2); // the thickens of sensitive volume (2mm), Jan
 	   (*it)->setPositionR(mR);
 	   (*it)->setErrorR(mErrR);
 	   (*it)->setPositionPhi(mPhi);
@@ -104,7 +104,7 @@ Int_t StFgtClusterMaker::Make()
     StSPtrVecFgtStrip &stripVec = stripPtr->getStripVec();    
     int ih=0;
     for( StSPtrVecFgtStripIterator it=stripVec.begin();it!=stripVec.end();++it, ih++)    {
-      printf("iDisc=%d ih=%d  strip: geoId=%d ADC=%d\n",iDisc,ih,((*it))->getGeoId(),((*it))->getAdc());
+      printf("iDisc=%d ih=%d  strip: geoId=%d ADC=%d  charge=%f\n",iDisc,ih,((*it))->getGeoId(),((*it))->getAdc(),((*it))->getCharge());
     }
     
     // ..... print all 1D clusters (aka FGT HITs) ....
@@ -113,7 +113,7 @@ Int_t StFgtClusterMaker::Make()
     ih=0;
     for( StSPtrVecFgtHitIterator it=clustVec.begin();it!=clustVec.end();++it, ih++)    {
 
-      printf("iDisc=%d ih=%d  clust  quad=%d, layer=%c charge=%.2f  R/cm=%.3f +/- %.3f  Phi/rad=%f +/-%f  Z/cm=%.2f +/-%.2f   centStripId=%d totCharge=%.2f\n",iDisc,ih, ((*it))->getQuad(), ((*it))->getLayer(), ((*it))->charge(), ((*it))->getPositionR(), ((*it))->getErrorR(), ((*it))->getPositionPhi(), ((*it))->getErrorPhi(), ((*it))->getPositionZ(), ((*it))->getErrorZ(),((*it))->getCentralStripGeoId(),  ((*it))->charge());
+      printf("iDisc=%d ih=%d  clust  quad=%d, layer=%c totCharge=%.2f  R/cm=%.3f +/- %.3f  Phi/rad=%f +/-%f  Z/cm=%.2f +/-%.2f   centStripId=%d \n",iDisc,ih, ((*it))->getQuad(), ((*it))->getLayer(), ((*it))->charge(), ((*it))->getPositionR(), ((*it))->getErrorR(), ((*it))->getPositionPhi(), ((*it))->getErrorPhi(), ((*it))->getPositionZ(), ((*it))->getErrorZ(),((*it))->getCentralStripGeoId());
     }
     
     
@@ -162,6 +162,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.21  2011/11/04 17:01:19  balewski
+//   *** empty log message ***
+//
 //   Revision 1.20  2011/11/03 21:18:28  balewski
 //   more printout
 //
