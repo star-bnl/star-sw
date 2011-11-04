@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.38 2011/10/17 15:36:37 fisyak Exp $
+ * $Id: StTriggerData.h,v 2.39 2011/11/04 19:20:38 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.39  2011/11/04 19:20:38  ullrich
+ * Added tpcMaskDSM() - Akio.
+ *
  * Revision 2.38  2011/10/17 15:36:37  fisyak
  * increment version no.
  *
@@ -195,6 +198,7 @@ public:
     virtual unsigned short bemcLayer1DSM(int channel, int prepost=0) const;
     virtual unsigned short eemcLayer1DSM(int channel, int prepost=0) const;
     virtual unsigned short emcLayer2DSM(int channel) const;
+    virtual unsigned short tpcMaskDSM(int channel) const;
     virtual unsigned short fpdLayer1DSMRaw(StBeamDirection eastwest, int channel, int prepost=0) const;
     virtual unsigned short fpdLayer1DSM(StBeamDirection eastwest, int module, int board, int prepsot=0) const;
     virtual unsigned short fpdLayer2DSMRaw(int channel) const;
