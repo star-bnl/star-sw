@@ -950,7 +950,7 @@ void StBemcTriggerSimu::FEEout2009()
   // StEmcADCtoEMaker* bemcAdc = new StEmcADCtoEMaker;
   // bemcAdc->saveAllStEvent(true);
   //
-  // and in simulation macros:
+  // and IN ADDITION simulation macros need:
   //
   // StEmcSimulatorMaker* emcSim = (StEmcSimulatorMaker*)chain->GetMaker("EmcSimulator");
   // emcSim->setCheckStatus(kBarrelEmcTowerId,false);
