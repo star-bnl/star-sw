@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.22 2011/11/04 17:38:12 balewski Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.23 2011/11/04 19:00:22 avossen Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -71,7 +71,8 @@ Int_t StFgtClusterMaker::Make()
 	   if( layer == 'R' ){
 	     mR = (*it)->getPositionR();
 	     mErrR = (*it)->getErrorR();
-	     mPhi = 0.5*(upperSpan + lowerSpan);   // mid point of the strip
+	     // mid point of the strip
+	     mPhi = 0.5*(upperSpan + lowerSpan);  
 	     mErrPhi = upperSpan - lowerSpan;      // length of the strip
 	   } else {
 	     mPhi = (*it)->getPositionPhi();
@@ -79,8 +80,19 @@ Int_t StFgtClusterMaker::Make()
 	     mR = 0.5*(upperSpan + lowerSpan);   // mid point of the strip
 	     mErrR = upperSpan - lowerSpan;      // length of the strip
 	   };
+	   mPhi-=StFgtGeom::phiQuadXaxis(quad);
+	   if(mPhi>TMath::Pi())
+	     mPhi-=(2*TMath::Pi());
+	   if(mPhi<((-1)*TMath::Pi()))
+	     mPhi+=(2*TMath::Pi());
+
+
+
+
+
 	   (*it)->setPositionZ(StFgtGeom::getDiscZ(disc));
 	   (*it)->setErrorZ(0.2); // the thickens of sensitive volume (2mm), Jan
+
 	   (*it)->setPositionR(mR);
 	   (*it)->setErrorR(mErrR);
 	   (*it)->setPositionPhi(mPhi);
@@ -113,7 +125,6 @@ Int_t StFgtClusterMaker::Make()
     StSPtrVecFgtHit &clustVec = clustPtr->getHitVec();    
     ih=0;
     for( StSPtrVecFgtHitIterator it=clustVec.begin();it!=clustVec.end();++it, ih++)    {
-
       printf("iDisc=%d ih=%d  clust  quad=%d, layer=%c totCharge=%.2f  R/cm=%.3f +/- %.3f  Phi/rad=%f +/-%f  Z/cm=%.2f +/-%.2f   centStripId=%d \n",iDisc,ih, ((*it))->getQuad(), ((*it))->getLayer(), ((*it))->charge(), ((*it))->getPositionR(), ((*it))->getErrorR(), ((*it))->getPositionPhi(), ((*it))->getErrorPhi(), ((*it))->getPositionZ(), ((*it))->getErrorZ(),((*it))->getCentralStripGeoId());
     }
     
@@ -163,6 +174,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.23  2011/11/04 19:00:22  avossen
+//   changed phi from local to global phi
+//
 //   Revision 1.22  2011/11/04 17:38:12  balewski
 //   more printouts
 //
