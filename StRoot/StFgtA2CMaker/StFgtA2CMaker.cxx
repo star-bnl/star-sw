@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.2 2011/11/01 18:46:14 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.3 2011/11/04 17:01:06 balewski Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.3  2011/11/04 17:01:06  balewski
+ * added printouts
+ *
  * Revision 1.2  2011/11/01 18:46:14  sgliske
  * Updated to correspond with StEvent containers, take 2.
  *
@@ -82,6 +85,7 @@ Int_t StFgtA2CMaker::Make(){
             StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
             StSPtrVecFgtStripIterator stripIter;
 
+	    printf("A2C for iDsic=%d\n",discIdx);
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
                StFgtStrip *strip = *stripIter;
                if( strip ){
@@ -92,6 +96,7 @@ Int_t StFgtA2CMaker::Make(){
 
                      Float_t ped, err;
                      mPedReader->getPed( geoId, timebin, ped, err );
+		     printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,err);
 
                      // subtract the pedistal
                      adc -= ped;
@@ -101,7 +106,7 @@ Int_t StFgtA2CMaker::Make(){
 
                      // no DB yet, so no gains.  Default to unitary gain
                      strip->setCharge( adc );
-
+		     printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
                      // flag whether to cut
                      if( (mRelThres && adc < mRelThres*err) || (mAbsThres>-4096 && adc < mAbsThres) )
                         strip->setGeoId( -1 );
