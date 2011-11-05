@@ -117,13 +117,149 @@ int StFgtGeom::getQuad( double phiLab )
 }
 
 //This function takes in a radius and a LOCAL phi values (0-90 degrees)
+//It returns the closest phi strip to the input radius,phi pair
+//If there are not strips implemented on the detector at that r,phi 
+//then it returns -1
+int StFgtGeom::phi2LocalStripId( double rad, double phiLoc, double *binFrac )
+{
+
+  int pbins = ((Plast() - Pfirst())/phiStrip_pitch())+1;//720 strips total numbered from 0-719
+
+  double pstrip[pbins];//array that holds phi location of strips
+
+  //fill array of rstrip with difference between passed phi and strip phi location values
+  double min_p_diff = phiStrip_pitch();
+  int pindex = -1;//index in array is the strip value
+  for ( int i =0; i < pbins; i++)
+    {
+      pstrip[i] = fabs(i*phiStrip_pitch() + Pfirst() - phiLoc);
+      if (pstrip[i] < min_p_diff) 
+	{
+	  min_p_diff = pstrip[i];
+	  pindex = i;
+	}
+    }
+
+  //if r is < 19.125 and >= 11.5 then all even strips are not there
+  //if index is odd it doesn't exist at these radii
+  if ( (rad < Rmid()) && (rad >= Rin()) && (pindex%2) )  pindex = -1;
+  
+  //the first and last 35 strips have irregular r values
+  if ( (pindex < 35) || ( pindex > 684) )
+    {
+      if ( rad < Phistrip_R_Low(pindex)) pindex  = -1;
+    }
+  
+  //if radius is outside of geometric location of the foil then return -1
+  if ( (rad > Rout()) || (rad < Rin()) ) pindex = -1;
+
+  return pindex;
+  
+}
+
+
+
+double StFgtGeom::Phistrip_R_High(int pindex){
+  
+  double r;
+  r = Rout();
+  return r;
+
+}
+
+double StFgtGeom::Phistrip_R_Low(int pindex){
+  
+  double r;
+
+  double holdLow[35]={37.0706,//strip 0
+		      34.8235,
+		      32.8244,
+		      31.0505,
+		      29.4515,
+		      28.0157,
+		      26.7075,
+		      25.5216,
+		      24.4317,
+		      23.4357,
+		      22.5179,
+		      21.6654,
+		      20.8788,
+		      20.144,
+		      19.4624,
+		      19.125,
+		      18.2264,
+		      19.125,
+		      17.1382,
+		      19.125,
+		      16.1729,
+		      19.125,
+		      15.3108,
+		      19.125,
+		      14.5362,
+		      19.125,
+		      13.8365,
+		      19.125,
+		      13.2012,
+		      19.125,
+		      12.6219,
+		      19.125,
+		      12.0916,
+		      19.125,
+		      11.6042};//strip 34
+  
+  double holdHigh[35]={19.125,//strip 685
+		       11.8432,
+		       19.125,
+		       12.3514,
+		       19.125,
+		       12.9053,
+		       19.125,
+		       13.5115,
+		       19.125,
+		       14.1778,
+		       19.125,
+		       14.9134,
+		       19.125,
+		       15.7299,
+		       19.125,
+		       16.6412,
+		       19.125,
+		       17.6649,
+		       19.125,
+		       18.8232,
+		       19.4614,
+		       20.1444,
+		       20.8773,
+		       21.6656,
+		       22.5158,
+		       23.4356,
+		       24.4339,
+		       25.5211,
+		       26.7097,
+		       28.0145,
+		       29.4536,
+		       31.0486,
+		       32.8265,
+		       34.8204,
+		       37.0723};//strip 719
+
+
+ 
+  if (pindex < 35) {  r = holdLow[pindex]; }
+  if (pindex > 684){  r = holdHigh[pindex-685]; }
+
+  return r;
+}
+
+
+//This function takes in a radius and a LOCAL phi values (0-90 degrees)
 //It returns the closest r strip to the input radius,phi pair
 //If there are not strips implemented on the detector at that r,phi 
 //then it returns -1
 int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
 {
 
-  int rbins = ((Rlast() - Rfirst())/radStrip_pitch())+1;//280 strips on each side of the quadrant
+  int rbins = ((Rlast() - Rfirst())/phiStrip_pitch())+1;//280 strips on each side of the quadrant
 
   double rstrip[rbins];//array that holds r location of strips
 
@@ -279,20 +415,6 @@ double StFgtGeom::Rstrip_Phi_Low(int rindex){
   return phi;
 }
 
-//  Again, this will return -1 on error, and the second argument is optional,
-//  and if specified will return the fraction of the bin size [0,1.)
-//  phiLoc must be in the range of [0,pi/2)
-int StFgtGeom::phiLoc2LocalStripId( double phiLoc, double *binFrac )
-{
-    double ratio = phiLoc / phiStrip_pitch();
-    int iphi = (int) ratio;
-    if ( binFrac )
-	*binFrac = ratio-iphi;
-    if ( iphi >= 0 && iphi < kNumFgtStripsPerLayer )
-	return iphi;
-    else
-	return -1;
-}
 
 // Whether the reverse map is valid
 Bool_t StFgtGeom::mReverseNaiveMappingValid = 0;
@@ -3034,8 +3156,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.18 2011/11/03 16:18:51 balewski Exp $
+ *  $Id: StFgtGeom.cxx,v 1.19 2011/11/05 02:25:14 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.19  2011/11/05 02:25:14  rfatemi
+ *  add phi2LocalStripId
+ *
  *  Revision 1.18  2011/11/03 16:18:51  balewski
  *  remove printout
  *

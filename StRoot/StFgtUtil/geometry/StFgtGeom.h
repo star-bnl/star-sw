@@ -285,9 +285,11 @@ class StFgtGeom
 	static double Rout()	{ return kFgtRout; }
 	static double Rfirst()  { return kFgtRfirst; }
 	static double Rlast()   { return kFgtRlast;}
+	static double Pfirst()  { return kFgtPfirst; }
+	static double Plast()   { return kFgtPlast;}
 
 	static double radStrip_pitch() { return kFgtRadPitch; }		//  cm
-	static double phiStrip_pitch() { return kFgtPhiPitch/Rout(); }	//  rad
+	static double phiStrip_pitch() { return  kFgtPhiAnglePitch; }	//  rad
 
 	static double yLimit() { return kFgtRout; }
 
@@ -308,11 +310,13 @@ class StFgtGeom
 	static const double kFgtRmid		= 19.125;   //	cm, at Rout/2.
 	static const double kFgtRin		= 11.5;	    //	cm, 
 	static const double kFgtRfirst          = 11.5385;  // location of first R strip after Rin
+	static const double kFgtPfirst        = 0.0324;    // location of first Phi strip
+	static const double kFgtPlast         = 1.5384;    // location of last Phi strip
 	static const double kFgtRflat		= 35.85;    //	cm, 
 	static const double kFgtPhiflat		= 31.0/180.*3.1416;//  rad 
 	static const double kFgtRadPitch	=  0.09538; //	nominal '800 mu pitch'
 	static const double kFgtPhiPitch	=  0.08;    //	800 mu, at outer radi or at Rmid
-	static const double kFgtPhiAnglePitch	=  0.002094; 
+	static const double kFgtPhiAnglePitch	=  0.00209; 
 	static const double kFgtDeadQuadEdge	=  1.2;	    // (cm) effective dead area along quadrant edges
 
 	//  Standard definitions.
@@ -359,11 +363,16 @@ class StFgtGeom
 	//  slightly by me.
 
 	//  These next two return -1 on error.
-	static  int rad2LocalStripId( double rad, double phi, double *binFrac=0 );
-	static  int phiLoc2LocalStripId( double phiLoc, double *binFrac=0 );
-	
+	static  int rad2LocalStripId(double rad, double phi, double *binFrac=0 );
+	static  int phi2LocalStripId(double rad, double phi, double *binFrac=0 );
+
 	static double Rstrip_Phi_High(int rindex);//return upper phi range for an r strip
-	static double Rstrip_Phi_Low (int rindex);//return lower phi range for an r strip
+	static double Rstrip_Phi_Low(int rindex);//return lower phi range for an r strip
+	static double Phistrip_R_Low(int pindex);//return lower r range for a phi strip
+	static double Phistrip_R_High(int pindex);//return upper r range for a phi strip
+
+
+
 
 };
 
@@ -411,8 +420,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.22 2011/11/03 20:04:41 avossen Exp $
+ *  $Id: StFgtGeom.h,v 1.23 2011/11/05 02:24:56 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.23  2011/11/05 02:24:56  rfatemi
+ *  add phi2LocalStripId
+ *
  *  Revision 1.22  2011/11/03 20:04:41  avossen
  *  added simple function to get disc z
  *
