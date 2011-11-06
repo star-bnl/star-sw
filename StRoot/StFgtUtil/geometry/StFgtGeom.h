@@ -310,13 +310,13 @@ class StFgtGeom
 	static const double kFgtRmid		= 19.125;   //	cm, at Rout/2.
 	static const double kFgtRin		= 11.5;	    //	cm, 
 	static const double kFgtRfirst          = 11.5385;  // location of first R strip after Rin
-	static const double kFgtPfirst        = 0.0324;    // location of first Phi strip
+	static const double kFgtPfirst        = 0.0324;    // location of first Phi strip 
 	static const double kFgtPlast         = 1.5384;    // location of last Phi strip
 	static const double kFgtRflat		= 35.85;    //	cm, 
 	static const double kFgtPhiflat		= 31.0/180.*3.1416;//  rad 
 	static const double kFgtRadPitch	=  0.09538; //	nominal '800 mu pitch'
 	static const double kFgtPhiPitch	=  0.08;    //	800 mu, at outer radi or at Rmid
-	static const double kFgtPhiAnglePitch	=  0.00209; 
+	static const double kFgtPhiAnglePitch	=  0.002095; 
 	static const double kFgtDeadQuadEdge	=  1.2;	    // (cm) effective dead area along quadrant edges
 
 	//  Standard definitions.
@@ -420,8 +420,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.23 2011/11/05 02:24:56 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.24 2011/11/06 22:34:34 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.24  2011/11/06 22:34:34  rfatemi
+ *  implement phi2LocalStripId
+ *
  *  Revision 1.23  2011/11/05 02:24:56  rfatemi
  *  add phi2LocalStripId
  *
