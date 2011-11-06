@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <iostream>
 #include <algorithm>
+using namespace std;
 
 //ClassImp(StFgtGeom)
 
@@ -116,23 +117,23 @@ int StFgtGeom::getQuad( double phiLab )
   return 2;
 }
 
-//This function takes in a radius and a LOCAL phi values (0-90 degrees)
-//It returns the closest phi strip to the input radius,phi pair
+//This function takes in a radius and a LOCAL phi values (0-pi/2 radians)
+//It returns the closest phi strip to the input radius,phi pair (0-719)
 //If there are not strips implemented on the detector at that r,phi 
 //then it returns -1
 int StFgtGeom::phi2LocalStripId( double rad, double phiLoc, double *binFrac )
 {
 
-  int pbins = ((Plast() - Pfirst())/phiStrip_pitch())+1;//720 strips total numbered from 0-719
+  int pbins = ((Plast() - Pfirst())/phiStrip_pitch());//720 strips total numbered from 0-719
 
   double pstrip[pbins];//array that holds phi location of strips
 
-  //fill array of rstrip with difference between passed phi and strip phi location values
+  //fill array of pstrip with difference between passed phi and strip phi location values
   double min_p_diff = phiStrip_pitch();
   int pindex = -1;//index in array is the strip value
   for ( int i =0; i < pbins; i++)
     {
-      pstrip[i] = fabs(i*phiStrip_pitch() + Pfirst() - phiLoc);
+      pstrip[i] = fabs(-i*phiStrip_pitch() + Plast() - phiLoc);
       if (pstrip[i] < min_p_diff) 
 	{
 	  min_p_diff = pstrip[i];
@@ -252,7 +253,7 @@ double StFgtGeom::Phistrip_R_Low(int pindex){
 }
 
 
-//This function takes in a radius and a LOCAL phi values (0-90 degrees)
+//This function takes in a radius and a LOCAL phi values (0-pi/2 radians)
 //It returns the closest r strip to the input radius,phi pair
 //If there are not strips implemented on the detector at that r,phi 
 //then it returns -1
@@ -3156,8 +3157,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.19 2011/11/05 02:25:14 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.20 2011/11/06 22:34:21 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.20  2011/11/06 22:34:21  rfatemi
+ *  implement phi2LocalStripId
+ *
  *  Revision 1.19  2011/11/05 02:25:14  rfatemi
  *  add phi2LocalStripId
  *
