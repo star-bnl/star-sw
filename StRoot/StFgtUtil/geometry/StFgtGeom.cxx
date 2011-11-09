@@ -133,8 +133,8 @@ int StFgtGeom::phi2LocalStripId( double rad, double phiLoc, double *binFrac )
   int pindex = -1;//index in array is the strip value
   for ( int i =0; i < pbins; i++)
     {
-      pstrip[i] = fabs(-i*phiStrip_pitch() + Plast() - phiLoc);
-      if (pstrip[i] < min_p_diff) 
+      pstrip[i] = (-i*phiStrip_pitch() + Plast() - phiLoc);
+      if ( fabs(pstrip[i]) < fabs(min_p_diff) ) 
 	{
 	  min_p_diff = pstrip[i];
 	  pindex = i;
@@ -143,8 +143,14 @@ int StFgtGeom::phi2LocalStripId( double rad, double phiLoc, double *binFrac )
 
   //if r is < 19.125 and >= 11.5 then all even strips are not there
   //if index is odd the width is 2x phiStrip_pitch()
-  //Right now it just makes it -1
-  if ( (rad < Rmid()) && (rad >= Rin()) && (pindex%2) )  pindex = -1;
+  if ( (rad < Rmid()) && (rad >= Rin()) && (pindex%2) ){
+ 
+    //if min_p_diff < 0 then phiLoc > stripPhi and is closer to the lower numbered odd strip
+    if (min_p_diff <= 0) pindex-=1;
+    //if min_p_diff > 0 then phiLoc < stripPhi and is closer to higher numbered odd strip 
+    if (min_p_diff > 0) pindex+=1;
+
+  }
   
   //the first and last 35 strips have irregular rinner values
   if ( (pindex < 35) || ( pindex > 684) )
@@ -3516,8 +3522,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.21 2011/11/08 22:40:06 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.22 2011/11/09 00:50:04 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.22  2011/11/09 00:50:04  rfatemi
+ *  Fix width phi strips with r < Rmid()
+ *
  *  Revision 1.21  2011/11/08 22:40:06  rfatemi
  *  Fixed flat part in phi2LocalStripId
  *
