@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.24 2011/11/04 19:31:53 balewski Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.25 2011/11/09 17:50:10 balewski Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -94,7 +94,7 @@ Int_t StFgtClusterMaker::Make()
 	   (*it)->setPositionZ(StFgtGeom::getDiscZ(disc));
 	   (*it)->setErrorZ(0.2); // the thickens of sensitive volume (2mm), Jan
 
-	   printf("CLM:  centStrgeoId=%d, disc=%d at phi=%f and Z=%f Z2=%f, phi1=%f  phi2=%f\n",centralStripGeoId,disc,StFgtGeom::phiQuadXaxis(quad), StFgtGeom::getDiscZ(disc),(*it)->getPositionZ(),mPhi,(*it)->getPositionPhi());
+	   //printf("CLM:  centStrgeoId=%d, disc=%d at phi=%f and Z=%f Z2=%f, phi1=%f  phi2=%f\n",centralStripGeoId,disc,StFgtGeom::phiQuadXaxis(quad), StFgtGeom::getDiscZ(disc),(*it)->getPositionZ(),mPhi,(*it)->getPositionPhi());
 
 	 }
        ///////
@@ -114,7 +114,11 @@ Int_t StFgtClusterMaker::Make()
     StSPtrVecFgtStrip &stripVec = stripPtr->getStripVec();    
     int ih=0;
     for( StSPtrVecFgtStripIterator it=stripVec.begin();it!=stripVec.end();++it, ih++)    {
-      printf("iDisc=%d ih=%d  strip: geoId=%d ADC=%d  charge=%f\n",iDisc,ih,((*it))->getGeoId(),((*it))->getAdc(),((*it))->getCharge());
+     // details of strip localization, use output variables ending w/ X
+      Short_t discX,  quadrantX,  stripX; Char_t  layerX;
+      StFgtGeom::decodeGeoId(((*it))->getGeoId(),discX,quadrantX, layerX, stripX);
+      int octX=1; if (stripX<300) octX=0;
+      printf("iDisc=%d ih=%d  strip: geoId=%d ADC=%d  charge=%.1f decode0: strip=%d quad=%d oct=%d plane=%c disc=%d \n",iDisc,ih,((*it))->getGeoId(),((*it))->getAdc(),((*it))->getCharge(),stripX,quadrantX,octX,layerX,discX);
     }
     
     // ..... print all 1D clusters (aka FGT HITs) ....
@@ -122,7 +126,12 @@ Int_t StFgtClusterMaker::Make()
     StSPtrVecFgtHit &clustVec = clustPtr->getHitVec();    
     ih=0;
     for( StSPtrVecFgtHitIterator it=clustVec.begin();it!=clustVec.end();++it, ih++)    {
-      printf("iDisc=%d ih=%d  clust  quad=%d, layer=%c totCharge=%.2f  R/cm=%.3f +/- %.3f  Phi/rad=%f +/-%f  Z/cm=%.2f +/-%.2f   centStripId=%d \n",iDisc,ih, ((*it))->getQuad(), ((*it))->getLayer(), ((*it))->charge(), ((*it))->getPositionR(), ((*it))->getErrorR(), ((*it))->getPositionPhi(), ((*it))->getErrorPhi(), ((*it))->getPositionZ(), ((*it))->getErrorZ(),((*it))->getCentralStripGeoId());
+      // details of central strip localization, use output variables ending w/ X
+      Short_t discX,  quadrantX,  stripX; Char_t  layerX;
+      StFgtGeom::decodeGeoId(((*it))->getCentralStripGeoId(),discX,quadrantX, layerX, stripX);
+      int octX=1; if (stripX<300) octX=0;
+      
+      printf("iDisc=%d ih=%d  clust  quad=%d, layer=%c totCharge=%.1f  R/cm=%.2f +/- %.2f  Phi/rad=%.3f +/-%.3f  Z/cm=%.1f +/-%.1f   centStripId=%d decode0: strip=%d quad=%d oct=%d plane=%c disc=%d \n",iDisc,ih, ((*it))->getQuad(), ((*it))->getLayer(), ((*it))->charge(), ((*it))->getPositionR(), ((*it))->getErrorR(), ((*it))->getPositionPhi(), ((*it))->getErrorPhi(), ((*it))->getPositionZ(), ((*it))->getErrorZ(),((*it))->getCentralStripGeoId(),stripX,quadrantX,octX,layerX,discX);
     }
     
     
@@ -171,6 +180,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.25  2011/11/09 17:50:10  balewski
+//   more printout
+//
 //   Revision 1.24  2011/11/04 19:31:53  balewski
 //   fixed Z problem, by circumventing the bug in the set methods
 //
