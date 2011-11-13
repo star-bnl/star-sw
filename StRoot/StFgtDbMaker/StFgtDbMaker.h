@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.5 2011/10/26 19:32:34 balewski Exp $
+// $Id: StFgtDbMaker.h,v 1.6 2011/11/13 23:51:49 wwitzke Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -11,6 +11,13 @@
 #include "StMaker.h"
 #endif
 
+//#include "StFgtUtil/database/fgtGain.h"
+//#include "StFgtUtil/database/fgtMapping.h"
+//#include "StFgtUtil/database/fgtPedestal.h"
+//#include "StFgtUtil/database/fgtStatus.h"
+#include "StFgtUtil/database/StFgtDb.h"
+#include "StFgtUtil/database/StFgtDbImpl.h"
+#include "StFgtUtil/database/StFgtDbNaiveImpl.h"
 #include "StFgtUtil/geometry/StFgtGeom.h"
 
 class fgtElosCutoff_st;
@@ -19,6 +26,9 @@ class StFgtDbMaker : public StMaker {
  private:
   fgtElosCutoff_st *mLossTab;
   StFgtGeom *geom;
+  StFgtDb * m_tables;
+  fgtMapping_st * m_rmap;
+  bool	    m_isIdeal;
 
  public: 
   StFgtDbMaker(const char *name="FgtDb");
@@ -27,19 +37,25 @@ class StFgtDbMaker : public StMaker {
   virtual Int_t  InitRun(Int_t runNumber);
   virtual Int_t  Make();
   virtual Int_t  Finish();
+  virtual StFgtDb * getDbTables() { return m_tables; }
   virtual void   Clear(const char *opt);
+
+  virtual void SetFlavor( const char *flav, const char *tabname );
 
   Float_t eLossTab(int bin); //  built from BichselELossProbHighBG.dat used to reject very high and unrealistic loss value
   StFgtGeom *getFgtGeom(){ return geom;} 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.5 2011/10/26 19:32:34 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.6 2011/11/13 23:51:49 wwitzke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.6  2011/11/13 23:51:49  wwitzke
+// Modified StFgtDbMaker to pull calibration data from the database.
+//
 // Revision 1.5  2011/10/26 19:32:34  balewski
 // now fgt-geom is owned by fgtDb-maker
 //
