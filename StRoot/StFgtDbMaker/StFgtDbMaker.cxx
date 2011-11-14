@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.8 2011/11/14 02:17:26 wwitzke Exp $
+// $Id: StFgtDbMaker.cxx,v 1.9 2011/11/14 02:31:15 wwitzke Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -25,7 +25,7 @@ StFgtDbMaker::StFgtDbMaker(const char *name)
     : StMaker(name)
 {
     gStFgtDbMaker = this;
-    m_tables = 0;
+    m_tables = new StFgtDbImpl();
     m_rmap = 0;
     m_isIdeal = false;
     geom=0;
@@ -302,6 +302,9 @@ Float_t StFgtDbMaker::eLossTab(int bin)
 }
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.9  2011/11/14 02:31:15  wwitzke
+// Fixed bug with where getTables() can be called.
+//
 // Revision 1.8  2011/11/14 02:17:26  wwitzke
 // Update to fix seg fault. Again.
 //
