@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.7 2011/11/14 01:49:33 wwitzke Exp $
+// $Id: StFgtDbMaker.cxx,v 1.8 2011/11/14 02:17:26 wwitzke Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -26,6 +26,7 @@ StFgtDbMaker::StFgtDbMaker(const char *name)
 {
     gStFgtDbMaker = this;
     m_tables = 0;
+    m_rmap = 0;
     m_isIdeal = false;
     geom=0;
 }
@@ -225,7 +226,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    gainDataset->GetTable()
 	);
 
-	mLossTab = eLosDataset->GetTable(); assert(mLossTab);
 	LOG_INFO
 	    <<
 		Form(
@@ -302,6 +302,9 @@ Float_t StFgtDbMaker::eLossTab(int bin)
 }
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.8  2011/11/14 02:17:26  wwitzke
+// Update to fix seg fault. Again.
+//
 // Revision 1.7  2011/11/14 01:49:33  wwitzke
 // Fixed seg fault bug.
 //
