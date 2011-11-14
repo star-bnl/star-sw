@@ -7,7 +7,7 @@
 #include "EvpMessage.h"
 #include "Jevp/StJevpServer/EvpConstants.h"
 #include <PDFUtil/PdfIndex.hh>
-#include <RTS/include/SUNRT/clock.h>
+#include <RTS/include/SUNRT/clockClass.h>
 #include <signal.h>
 #include <RTS/include/rtsLog.h>
 #include <TSystem.h>
@@ -57,16 +57,11 @@ JevpPlotSet::JevpPlotSet()
 {
   CP;
   buildxml = NULL;
-  die_at_endofrun = 0;
   hello_cmds = (char *)"client";
   diska = NULL;
   daqfile = NULL;
-  server = (char *)"evp.starp.bnl.gov";
-  serverport = JEVP_PORT;
-  socketName = NULL;
   pdf = NULL;
   loglevel = NULL;
-  socket = NULL;
   current_run = 0;
   update_time = 5;
   confdatadir = (char *)"/RTScache/conf/jevp";
@@ -74,16 +69,11 @@ JevpPlotSet::JevpPlotSet()
   plotsetname = (char *)"def_plotset";
   builderStatus.setStatus("stopped");
   pause = 0;
-  CP;
-}
 
-void JevpPlotSet::addServerTags(char *tags)
-{
-  EvpMessage msg;
-  msg.setSource(plotsetname);
-  msg.setCmd("addServerTag");
-  msg.setArgs(tags);
-  send(&msg);
+  processingTimer = new RtsTimer_root();
+
+  servertags[0] = '\0';
+  CP;
 }
 
 int JevpPlotSet::addPlot(JevpPlot *hist)
@@ -207,6 +197,8 @@ void JevpPlotSet::_initialize(int argc, char *argv[])
   TH1 *h;
   PlotHisto *ph;
 
+  LOG("JEFF", "plotsetname = %s",plotsetname);
+
   LOG("JEFF", "Initializing %sBuilder: pid=%d file=%s",getPlotSetName(), (int)getpid(), daqfile ? daqfile : "live");
   CP;
   plotEvtsByTrigger = new JevpPlot();
@@ -259,6 +251,9 @@ void JevpPlotSet::_startrun(daqReader *rdr)
   CP;
   strcpy(myname, plotsetname);
 
+  processingTime = 0;
+  numberOfEventsRun = 0;
+
   CP;
   memset((char *)n_pertrg, 0, sizeof(n_pertrg));
   memset((char *)avg_time_pertrg, 0, sizeof(avg_time_pertrg));
@@ -267,26 +262,30 @@ void JevpPlotSet::_startrun(daqReader *rdr)
   run = rdr->run;
   builderStatus.setStatus("running");
   
+
   CP;
   builderStatus.run = rdr->run;
   builderStatus.lastEventTime = time(NULL);
   builderStatus.events = 0;
-  send((TObject *)&builderStatus);
-  
 
   CP;
-  LOG(NOTE, "Here");
+  LOG("JEFF", "evtsbytrigger 0x%x %s", plotEvtsByTrigger, myname);
+  LOG("JEFF", "Here 0x%x", plotEvtsByTrigger->getHisto(0));
+  LOG("JEFF", "Here 0x%x", plotEvtsByTrigger->getHisto(0)->histo);
   plotEvtsByTrigger->getHisto(0)->histo->Reset();
   CP;
-  LOG(NOTE, "Here");
+  LOG("JEFF", "Here");
   plotTimeByTrigger->getHisto(0)->histo->Reset();
   CP;
-  LOG(NOTE, "Here");
+  LOG("JEFF", "Here");
   plotTime->getHisto(0)->histo->Reset();
   CP;
-  LOG(NOTE, "Here");
+  LOG("JEFF", "Here");
   CPC;
+
+  LOG("JEFF", "startrun");
   startrun(rdr);
+  LOG("JEFF", "Stop startrun");
   CPC;
   CP;
 }
@@ -302,14 +301,10 @@ void JevpPlotSet::_stoprun(daqReader *rdr)
   CPC;
   stoprun(rdr);   // perform user actions first...
   CPC;
-  CP;
-  updatePlots();  // make sure plots are ready to go...
-  CP;
 
   builderStatus.setStatus("stopped");
 
   LOG("JEFF", "Stopping run #%d",run);
-  send((TObject *)&builderStatus);
     
   CP;
 }
@@ -320,18 +315,15 @@ void JevpPlotSet::stoprun(daqReader *rdr)
 
 void JevpPlotSet::_event(daqReader *rdr)
 {
+  processingTimer->record_time();
+
   CPC;
   builderStatus.events++;
   event(rdr);
   CPC;
 
-  LOG(DBG, "pause=%d",pause);
-  if(pause) {
-    printf("Enter enter to continue: ");
-    char nothing[20];
-    scanf("%s", nothing);
-    pause=0;
-  }
+  processingTime += processingTimer->record_time();
+  numberOfEventsRun++;
 }
 
 void JevpPlotSet::event(daqReader *rdr)
@@ -354,6 +346,7 @@ char *JevpPlotSet::getPlotSetName()
 }
   
 
+// Main is only called in the stand alone version!
 void JevpPlotSet::Main(int argc, char *argv[])
 {
   static unsigned int last_update = 0;
@@ -370,7 +363,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 
   if(loglevel) rtsLogLevel(loglevel);
     
-  LOG(NOTE, "Starting BUILDER:%s",getPlotSetName());
+  LOG("JEFF", "Starting BUILDER:%s",getPlotSetName());
 
   gSystem->ResetSignal(kSigChild);
   gSystem->ResetSignal(kSigBus);
@@ -389,7 +382,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
   LOG(DBG, "Initializing reader %s", daqfile ? daqfile : "null");
 
   // initialize reader
-  reader = new daqReader(daqfile);
+  daqReader *reader = new daqReader(daqfile);
 
   
   // Do this after the reader...
@@ -403,29 +396,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
   if(diska) reader->setEvpDisk(diska);
 
   CP;
-
-  if(server) {
-    LOG(DBG, "Pause for a while");
-
-    if(strcmp(hello_cmds, "steal") == 0) {
-      //sleep(5);
-    }
-    else {
-      //sleep(5);
-    }
-
-    while(connect(server, serverport) < 0) {
-      LOG(ERR, "Error connecting to server.  Try again in 10 seconds");
-      sleep(10);
-    }
-  }
-  else {
-    LOG(WARN, "No connect");
-  }
-  
-
-  CP;
-  RtsTimer clock;  // plot clock...
+  RtsTimer_root clock;  // plot clock...
 
   int _monitorTimerTime = time(NULL);
   char _ofilename[80];
@@ -439,12 +410,12 @@ void JevpPlotSet::Main(int argc, char *argv[])
   double _selectionClockTime=0;
   double _eventClockTime=0;
   double _fillsClockTime=0;
-  RtsTimer _getClock;
-  RtsTimer _updateClock;
-  RtsTimer _burpClock;
-  RtsTimer _selectionClock;
-  RtsTimer _eventClock;
-  RtsTimer _fillsClock;
+  RtsTimer_root _getClock;
+  RtsTimer_root _updateClock;
+  RtsTimer_root _burpClock;
+  RtsTimer_root _selectionClock;
+  RtsTimer_root _eventClock;
+  RtsTimer_root _fillsClock;
 
   clock.record_time();
 
@@ -452,11 +423,6 @@ void JevpPlotSet::Main(int argc, char *argv[])
   _initialize(argc, argv);
 
   CP;
-//   if(server == NULL) {
-//     builderStatus.setStatus("stopped");
-//   }
-
- 
 
   for(;;) {
     CP;
@@ -504,22 +470,6 @@ void JevpPlotSet::Main(int argc, char *argv[])
     CP;
     clock.record_time();
     
-    CP;
-    unsigned int tm = time(NULL);
-    if(tm > (last_update + update_time)) {
-      if(socket && (builderStatus.running())) {
-
-	_updateClock.record_time();
-	updatePlots();
-	_nupdate++;
-	_updateClockTime += _updateClock.record_time();
-
-	last_update = tm;
-      }
-    }
-
-    CP;
-
     _burpClock.record_time();
     if(ret == NULL) {  // all kinds of burps...
       switch(reader->status) {
@@ -535,18 +485,6 @@ void JevpPlotSet::Main(int argc, char *argv[])
 
 	CP;
 	LOG(DBG, "EVP_STAT_EOR stat=%s",builderStatus.status);
-
-	{
-	  EvpMessage m;
-	  m.setSource(plotsetname);
-	  m.setCmd((char *)"ping");
-	  m.setArgs("");
-	  int xxxret = send(&m);	// ping server...
-	  if(xxxret < 0) {
-	    LOG(NOTE, "Server down, exiting...");
-	    exit(0);
-	  }
-	}
 	
 	if(!builderStatus.running()) {
 	  LOG(NOTE, "Already end of run, don't stop it again... %d",builderStatus.running());
@@ -563,17 +501,11 @@ void JevpPlotSet::Main(int argc, char *argv[])
 
 	LOG(DBG, "End of Run... [previous run=%d, current run=%d]",
 	    current_run, reader->run);
+     
+	if(pdf) writePdfFile();  // Finish and exit...  
 	
-	CP;
-	if(pdf) writePdfFile();  // Finish and exit...
-	CP;
+	exit(0);
 	
-	if(die_at_endofrun) {
-	  LOG("JEFF", "It's end of run and set to die, goodbye");
-	  exit(0);
-	}
-	
-	_burpClockTime += _burpClock.record_time();
 	continue;    // don't have an event to parse... go back to start
 
       case EVP_STAT_EVT:
@@ -704,7 +636,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 int JevpPlotSet::parseArgs(int argc, char *argv[])
 {
   CP;
-  int explicit_server=0;
+
   for(int i=1;i<argc;i++) {
     if(memcmp(argv[i], "-diska", 6) == 0) {
       i++;
@@ -713,28 +645,6 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
     else if (memcmp(argv[i], "-file", 5) == 0) {
       i++;
       daqfile = argv[i];
-    }
-    else if (memcmp(argv[i], "-noserver", 9) == 0) {
-      server = NULL;
-    }
-    else if (memcmp(argv[i], "-server", 7) == 0) {
-      i++;
-      explicit_server=1;
-      if((i<argc) && (argv[i][0] != '-')) {
-	server = argv[i];
-      }
-      else
-	i--;
-    }
-    else if (memcmp(argv[i], "-die", 4) == 0) {
-      die_at_endofrun = 1;
-    }
-    else if (memcmp(argv[i], "-steal", 6) == 0) {
-      hello_cmds = (char *)"steal";
-    }
-    else if (memcmp(argv[i], "-port", 5) == 0) {
-      i++;
-      serverport = atoi(argv[i]);
     }
     else if (memcmp(argv[i], "-pdf", 4) == 0) {
       i++;
@@ -763,53 +673,19 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
     else if (strcmp(argv[i], "-pause") == 0) {
       pause = 1;
     }
-    else if (strcmp(argv[i], "-socket") == 0) {
-      i++;
-      socketName = argv[i];
-    }
     else if (strcmp(argv[i], "-buildxml") == 0) {
       i++;
       buildxml = argv[i];
     }
     else {
       printf("No arg #%d = %s\n",i,argv[i]);
-      printf("%s arguments\n\t-diska diskapath\n\t-file filename\n\t-noserver\n\t-server servername\n\t-port port\n\t-pdf pdffilename\n\t-loglevel level\n\t-datadir datadir (/RTScache/conf/jevp)\n\t-clientdatadir datadir (/a/jevp/client)",argv[0]);
-      printf("\n\t-steal   (be base plot builder)\n\t-die   (die at end of run)\n");
+      printf("%s arguments\n\t-diska diskapath\n\t-file filename\n\t-pdf pdffilename\n\t-loglevel level\n\t-datadir datadir (/RTScache/conf/jevp)\n\t-clientdatadir datadir (/a/jevp/client)",argv[0]);
       printf("\t-pause\n\t-buildxml <file>\n");
       CP;
       return -1;
     }    
   }
 
-  if((explicit_server == 0) && daqfile) {
-    server = NULL;
-  }
-
-  if(!server) {
-    die_at_endofrun = 1;
-  }
-  
-  CP;
-  return 0;
-}
-
-int JevpPlotSet::updatePlots()
-{
-  CP;
-  if(!server) return 0;
-
-  CP;
-  JevpPlot *curr = (JevpPlot *)plots.First();
-
-  while(curr) {
-    curr->run = current_run;
-    send(curr);
-    curr = (JevpPlot *)plots.After(curr);
-  }
-
-  // also update status
-  send((TObject *)&builderStatus);
- 
   CP;
   return 0;
 }
@@ -895,76 +771,25 @@ void JevpPlotSet::writePdfFile()
   return;
 }
 
-int JevpPlotSet::connect(char *host, int port) {
+void JevpPlotSet::addServerTags(char *tags)
+{
+  LOG("JEFF", "servertags = %d",strlen(servertags));
 
-  LOG(DBG, "Connecting...to %s:%d",host,port);
+  if(strlen(servertags) > 0) {
 
-  if(socketName) {
-    socket = new TSocket(socketName);
+    if(strstr(servertags, tags)) {
+      return;
+    }
+
+    strcat(servertags, ",");
+    strcat(servertags, tags);
   }
   else {
-    socket = new TSocket(host,port);
+    strcpy(servertags, tags);
   }
+}
 
-  if(!socket->IsValid()) {
-    LOG(ERR, "Error connecting to server: %d",socket->GetErrorCode());
-
-    delete socket;
-    socket = NULL;
-    return -1;
-  }
-
-  LOG(DBG, "Hello Message: (%s) %s",plotsetname,hello_cmds);
-  EvpMessage m;
-  LOG(DBG, "C.");
-  m.setSource(plotsetname);
-  LOG(DBG, "A.");
-  m.setCmd((char *)"hello");
-  LOG(DBG, "B.");
-  m.setArgs(hello_cmds);
- 
-
-  LOG(DBG, "Send...");
-  send(&m);
-
-  LOG(DBG, "Recieving hello message");
-  TMessage *mess;
-  int ret = socket->Recv(mess);
-  if( ret == 0) {
-    LOG(ERR, "Couldn't connect to server...");
-    return -1;
-  }
-
-  LOG(DBG, "Getting hello message out...");
-  if(strcmp(mess->GetClass()->GetName(), (char *)"EvpMessage") != 0) {
-    LOG(ERR, "Invalid message returned:  %s",mess->GetClass()->GetName());
-    return -1;
-  }
-
-  EvpMessage *msg = (EvpMessage *)mess->ReadObject(mess->GetClass());
-  
-  LOG(DBG, "Hello message is: %s",msg->args);
-
-  if(strcmp(msg->args, "base") == 0) {
-    LOG(DBG, "%s:  I am the new base client", plotsetname);
-    base_client = 1;
-  }
-  else {
-    LOG(DBG, "%s:  I am not the base client", plotsetname);
-    base_client = 0;
-  }
-
-  delete(mess);
-  return 0;
-}  
-
-int JevpPlotSet::send(TObject *msg) {
-  if(!server) return 0;
-
-  TMessage mess(kMESS_OBJECT);
-  
-  mess.WriteObject(msg);
-  int ret = socket->Send(mess);
-  LOG(DBG, "socket send ret=%d",ret);
-  return ret;
+char *JevpPlotSet::getServerTags()
+{
+  return servertags;
 }

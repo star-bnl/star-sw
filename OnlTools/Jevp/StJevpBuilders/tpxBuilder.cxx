@@ -330,225 +330,259 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
 
 #define safelog(x) ((x > 0) ? log10(x) : 0)
 
-  void tpxBuilder::event(daqReader *rdr)
-  {
-    int has_adc=0;
-    int has_cld=0;
+void tpxBuilder::event(daqReader *rdr)
+{
+  int has_adc=0;
+  int has_cld=0;
 
-    // printf("aa\n");
-    long q_idx = ((long)&contents.h15_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
-    long qs_idx = ((long)&contents.h120_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
-    long cl_qs_idx = ((long)&extras.cl120_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
+  LOG("JEFF", "a");
 
-    // printf("q qs cl:  %d %d %d 0x%x 0x%x\n",q_idx,qs_idx,cl_qs_idx,&extras.cl120_chargeStep_s1,extras.array);
-    // printf("bb\n"); 
+  // printf("aa\n");
+  long q_idx = ((long)&contents.h15_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
+  long qs_idx = ((long)&contents.h120_chargeStep_s1 - (long)contents.array) / (sizeof(TH1 *));
+  long cl_qs_idx = ((long)&extras.cl120_chargeStep_s1 - (long)extras.array) / (sizeof(TH1 *));
 
-    double pixel_count = 0;
-    double channel_count = 0;
-    double cluster_count = 0;
-    double charge_count = 0;
-    double charge_count_sector;
-    double tpc_max_channels = 0.0;
-    int tpc_max_channels_sector = 5692;
+  // printf("q qs cl:  %d %d %d 0x%x 0x%x\n",q_idx,qs_idx,cl_qs_idx,&extras.cl120_chargeStep_s1,extras.array);
+  // printf("bb\n"); 
 
-    double cl_max_channels = 0;
+  double pixel_count = 0;
+  double channel_count = 0;
+  double cluster_count = 0;
+  double charge_count = 0;
+  double charge_count_sector;
+  double tpc_max_channels = 0.0;
+  int tpc_max_channels_sector = 5692;
 
-    double pix_count_cl = 0;
+  double cl_max_channels = 0;
 
-  
-    // printf("cc\n");
-    for(int s=1;s<=24;s++) {
+  double pix_count_cl = 0;
 
-      charge_count_sector = 0;
-      int channel_counts[183][46];
-      double charge_counts[183][46];
-      double tb_charge_counts[512];
 
-      memset(channel_counts, 0, sizeof(channel_counts));
-      memset(charge_counts, 0, sizeof(charge_counts));
-      memset(tb_charge_counts, 0, sizeof(tb_charge_counts));
+  LOG("JEFF", "b");
+
+  // printf("cc\n");
+  for(int s=1;s<=24;s++) {
+
+    charge_count_sector = 0;
+    int channel_counts[183][46];
+    double charge_counts[183][46];
+    double tb_charge_counts[512];
+
+    memset(channel_counts, 0, sizeof(channel_counts));
+    memset(charge_counts, 0, sizeof(charge_counts));
+    memset(tb_charge_counts, 0, sizeof(tb_charge_counts));
     
-      //printf("a\n");
-      daq_dta *dd = rdr->det("tpx")->get("adc",s) ;
-      if(dd) {   // regular data...
-	has_adc = 1;
-	tpc_max_channels += tpc_max_channels_sector;
+    LOG("JEFF", "Sect %d",s);
 
-	while(dd->iterate()) {
+    daq_dta *dd = rdr->det("tpx")->get("adc",s) ;
+    if(dd) {   // regular data...
+
+      LOG("JEFF", "has adc");
+
+      has_adc = 1;
+      tpc_max_channels += tpc_max_channels_sector;
+
+      while(dd->iterate()) {
+  	channel_counts[dd->pad][dd->row] = 1;
+
+	pixel_count += dd->ncontent ;
+
+	if(dd->ncontent > 0) {
 	  channel_counts[dd->pad][dd->row] = 1;
+	}
 
-	  pixel_count += dd->ncontent ;
+	//	LOG("JEFF", "nocont");
+	for(u_int i=0;i<dd->ncontent;i++) {
+	  int tb = dd->adc[i].tb;
+	  int adc = dd->adc[i].adc;
 
-	  if(dd->ncontent > 0) {
-	    channel_counts[dd->pad][dd->row] = 1;
+	  if((dd->pad >= 183) ||
+	     (dd->row >= 46) ||
+	     (tb >= 512)) {
+	    LOG("JEFF", "Really?  %d %d %d", dd->pad, dd->row, tb);
 	  }
-
-	  for(u_int i=0;i<dd->ncontent;i++) {
-	    int tb = dd->adc[i].tb;
-	    int adc = dd->adc[i].adc;
-
+	  else {
 	    charge_counts[dd->pad][dd->row] += adc;
 	    tb_charge_counts[tb] += adc;
 	  }
 	}
+	//	LOG("JEFF", "and here");
+      }
+
+      LOG("JEFF", "ball");
+      for(int i=0;i<512;i++) {
+	contents.array[s + qs_idx - 1]->Fill(i,tb_charge_counts[i]);
+      }
       
-	for(int i=0;i<512;i++) {
-	  contents.array[s + qs_idx - 1]->Fill(i,tb_charge_counts[i]);
+      LOG("JEFF", "b2");
+      
+      for(int i=1;i<183;i++) {
+	for(int j=1;j<46;j++) {
+	  // printf("c\n");
+	  channel_count += channel_counts[i][j];
+	  charge_count += charge_counts[i][j];
+	  charge_count_sector += charge_counts[i][j];
+	  
+	  if(charge_counts[i][j]) {
+	    contents.h66_tpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts[i][j]);
+	    ((TH2D *)contents.array[s + q_idx - 1])->Fill(i, j, charge_counts[i][j]);
+	  }
 	}
-      
+      }
+
+      LOG("JEFF", "b3");
+      contents.h67_tpc_sector_charge->Fill(s,charge_count_sector);      
+    }
+
+    LOG("JEFF", "c");
+
+    double charge_cl=0;
+    double charge_counts_cl[183][46];
+    double tb_charge_counts_cl[512];
+    memset(charge_counts_cl, 0, sizeof(charge_counts_cl));
+    memset(tb_charge_counts_cl, 0, sizeof(tb_charge_counts_cl));
+
+    //printf("clusters\n");
+
+    LOG("JEFF", "d");
+
+    dd = rdr->det("tpx")->get("cld",s) ;
+    if(dd) {
+      has_cld = 1;
+      cl_max_channels += tpc_max_channels_sector;
+
+      while(dd->iterate()) {
+
+	for(u_int i=0;i<dd->ncontent;i++) {
+	  pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);
+	  charge_counts_cl[(int)dd->cld[i].pad][dd->row] += dd->cld[i].charge;
+	  tb_charge_counts_cl[(int)dd->cld[i].tb] += dd->cld[i].charge;
+	  charge_cl += dd->cld[i].charge;
+	}
+      }
+    
+      //printf("cl_qs_idx = %d\n",cl_qs_idx);
+
+      if(has_cld) {
+	for(int i=0;i<512;i++) {
+	  extras.array[s + cl_qs_idx - 1]->Fill(i,tb_charge_counts_cl[i]);
+	}
+       
 	for(int i=1;i<183;i++) {
 	  for(int j=1;j<46;j++) {
-	    // printf("c\n");
-	    channel_count += channel_counts[i][j];
-	    charge_count += charge_counts[i][j];
-	    charge_count_sector += charge_counts[i][j];
-	  
-	    if(charge_counts[i][j]) {
-	      contents.h66_tpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts[i][j]);
-	      ((TH2D *)contents.array[s + q_idx - 1])->Fill(i, j, charge_counts[i][j]);
+	    if(charge_counts_cl[i][j]) {
+	      extras.cl66_tpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts_cl[i][j]);
 	    }
 	  }
 	}
-
-	//  printf("d\n");
-	contents.h67_tpc_sector_charge->Fill(s,charge_count_sector);      
-      }
-
-      double charge_cl=0;
-      double charge_counts_cl[183][46];
-      double tb_charge_counts_cl[512];
-      memset(charge_counts_cl, 0, sizeof(charge_counts_cl));
-      memset(tb_charge_counts_cl, 0, sizeof(tb_charge_counts_cl));
-
-      //printf("clusters\n");
-
-      dd = rdr->det("tpx")->get("cld",s) ;
-      if(dd) {
-	has_cld = 1;
-	cl_max_channels += tpc_max_channels_sector;
-
-	while(dd->iterate()) {
-
-	  for(u_int i=0;i<dd->ncontent;i++) {
- 	    pix_count_cl += (dd->cld[i].t2 - dd->cld[i].t1)*(dd->cld[i].p2 - dd->cld[i].p1);
-	    charge_counts_cl[(int)dd->cld[i].pad][dd->row] += dd->cld[i].charge;
-	    tb_charge_counts_cl[(int)dd->cld[i].tb] += dd->cld[i].charge;
-	    charge_cl += dd->cld[i].charge;
-	  }
-	}
-    
-	//printf("cl_qs_idx = %d\n",cl_qs_idx);
-
-	if(has_cld) {
-	  for(int i=0;i<512;i++) {
-	    extras.array[s + cl_qs_idx - 1]->Fill(i,tb_charge_counts_cl[i]);
-	  }
-       
-	  for(int i=1;i<183;i++) {
-	    for(int j=1;j<46;j++) {
-	      if(charge_counts_cl[i][j]) {
-		extras.cl66_tpc_phi_charge->Fill(mPhiAngleMap[s-1][j-1][i-1],charge_counts_cl[i][j]);
-	      }
-	    }
-	  }
 	  
-	  extras.cl67_tpc_sector_charge->Fill(s,charge_cl);
-	}
+	extras.cl67_tpc_sector_charge->Fill(s,charge_cl);
       }
-
-   
-
-      /***** no pedestal handling currently!
-
-      // will only exist in token 0 of a pedestal run!
-      dd = rdr->det("tpx")->get("pedrms",s) ;
-      while(dd && dd->iterate()) {
-      //       found = 1 ;
-      //       if(do_print) {
-      // 	printf("TPX: sec %02d, row %2d, pad %3d (%d pix)\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
-      // 	daq_det_pedrms *ped = (daq_det_pedrms *)dd->Void ;
-      // 	for(u_int tb=0;tb<dd->ncontent;tb++) {
-      // 	  printf("  tb %3d: ped %3d, rms %.2f\n",tb,ped[tb].ped,ped[tb].rms) ;
-      // 	}
-      //       }
-      }
-
-      */
     }
 
-    //printf("summaries\n");
+    LOG("JEFF", "dddd");
+    LOG("JEFF", "e %d", rdr->token);
 
-    // Summaries are completed...
-    //printf("%d channel counts:   %lf (%lf)\n",rdr->seq, channel_count, pixel_count);  
+    /***** no pedestal handling currently!
+
+    // will only exist in token 0 of a pedestal run!
+    dd = rdr->det("tpx")->get("pedrms",s) ;
+    while(dd && dd->iterate()) {
+    //       found = 1 ;
+    //       if(do_print) {
+    // 	printf("TPX: sec %02d, row %2d, pad %3d (%d pix)\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+    // 	daq_det_pedrms *ped = (daq_det_pedrms *)dd->Void ;
+    // 	for(u_int tb=0;tb<dd->ncontent;tb++) {
+    // 	  printf("  tb %3d: ped %3d, rms %.2f\n",tb,ped[tb].ped,ped[tb].rms) ;
+    // 	}
+    //       }
+    }
+
+    */
+  }
+
+  //printf("summaries\n");
+
+  // Summaries are completed...
+  //printf("%d channel counts:   %lf (%lf)\n",rdr->seq, channel_count, pixel_count);  
   
     
-    if(has_adc) {
-      n_adc++;
-      double adc_scale = (double)(n_adc-1) / (double)n_adc;
-      if(n_adc == 1) adc_scale = 1;
+  LOG("JEFF", "e %d", rdr->token);
 
-      for(int i=1;i<=24;i++) {
-	contents.array[i + qs_idx - 1]->Scale(adc_scale);
-      }
-      contents.h66_tpc_phi_charge->Scale(adc_scale);
-      contents.h67_tpc_sector_charge->Scale(adc_scale);
+  if(has_adc) {
+
+    LOG("JEFF", "f");
+    n_adc++;
+    double adc_scale = (double)(n_adc-1) / (double)n_adc;
+    if(n_adc == 1) adc_scale = 1;
+
+    for(int i=1;i<=24;i++) {
+      contents.array[i + qs_idx - 1]->Scale(adc_scale);
     }
-
-    if(has_cld) {
-      n_cld++;   
-      double cld_scale = (double)(n_cld-1) / (double)n_cld;
-      if(n_cld == 1) cld_scale = 1;
-
-      for(int i=1;i<=24;i++) {
-	extras.array[i + cl_qs_idx - 1]->Scale(cld_scale);
-      }
-      extras.cl66_tpc_phi_charge->Scale(cld_scale);
-      extras.cl67_tpc_sector_charge->Scale(cld_scale);
-    }
-    
-
-    switch(rdr->trgcmd) {
-    case 4:
-      contents.tpc_occ_physics->Fill(100.0 * (double)channel_count / tpc_max_channels);
-      contents.tpc_pix_occ_physics->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
-
-      extras.tpc_clpix_occ_physics->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
-
-      //printf("chan=%lf pix=%lf max=%lf:  %lf %lf\n",channel_count,pixel_count,tpc_max_channels,channel_count/tpc_max_channels,pixel_count/(tpc_max_channels*400));
-      break;
-    case 8:  // Lasers...
-    case 9:
-      {
-	contents.h44_tpc_occ_laser->Fill(100.0 * (double)channel_count / tpc_max_channels);
-	contents.tpc_pix_occ_laser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
-	extras.tpc_clpix_occ_laser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
-
-	double vDrift = laserReader->Make(rdr);
-     
-	//printf("%d vDrift = %lf\n",rdr->event_number, vDrift);
-
-	if((vDrift > 5.4) && (vDrift < 5.8))
-	  contents.h102_tpc_drift_vel->Fill(vDrift);
-      
-      }
-      break;
-
-    case 10:   // Pulsers..
-      contents.h43_tpc_occ_pulser->Fill(100.0 * (double)channel_count / tpc_max_channels);
-      contents.tpc_pix_occ_pulser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
-      extras.tpc_clpix_occ_pulser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
-
-      break;
-    default:
-      LOG(WARN, "Trigger command other than 4,8,9,10");
-    }
-
-    // Normalize the charge histos
-    //
-    // adc vs sector
-    // phy disto
-    
+    contents.h66_tpc_phi_charge->Scale(adc_scale);
+    contents.h67_tpc_sector_charge->Scale(adc_scale);
   }
+
+  LOG("JEFF", "ee");
+
+  if(has_cld) {
+
+    LOG("JEFF", "ff");
+    n_cld++;   
+    double cld_scale = (double)(n_cld-1) / (double)n_cld;
+    if(n_cld == 1) cld_scale = 1;
+
+    for(int i=1;i<=24;i++) {
+      extras.array[i + cl_qs_idx - 1]->Scale(cld_scale);
+    }
+    extras.cl66_tpc_phi_charge->Scale(cld_scale);
+    extras.cl67_tpc_sector_charge->Scale(cld_scale);
+  }
+    
+  LOG("JEFF", "g");
+
+  switch(rdr->trgcmd) {
+  case 4:
+    contents.tpc_occ_physics->Fill(100.0 * (double)channel_count / tpc_max_channels);
+    contents.tpc_pix_occ_physics->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
+
+    extras.tpc_clpix_occ_physics->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
+
+    //printf("chan=%lf pix=%lf max=%lf:  %lf %lf\n",channel_count,pixel_count,tpc_max_channels,channel_count/tpc_max_channels,pixel_count/(tpc_max_channels*400));
+    break;
+  case 8:  // Lasers...
+  case 9:
+    {
+      contents.h44_tpc_occ_laser->Fill(100.0 * (double)channel_count / tpc_max_channels);
+      contents.tpc_pix_occ_laser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
+      extras.tpc_clpix_occ_laser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
+
+      double vDrift = laserReader->Make(rdr);
+     
+      //printf("%d vDrift = %lf\n",rdr->event_number, vDrift);
+
+      if((vDrift > 5.4) && (vDrift < 5.8))
+	contents.h102_tpc_drift_vel->Fill(vDrift);
+      
+    }
+    break;
+
+  case 10:   // Pulsers..
+    contents.h43_tpc_occ_pulser->Fill(100.0 * (double)channel_count / tpc_max_channels);
+    contents.tpc_pix_occ_pulser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
+    extras.tpc_clpix_occ_pulser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
+
+    break;
+  default:
+    LOG(WARN, "Trigger command other than 4,8,9,10");
+  }
+
+  // Normalize the charge histos
+  //
+  // adc vs sector
+  // phy disto
+    
+}
 
   void tpxBuilder::setPhiAngleMap()
   {

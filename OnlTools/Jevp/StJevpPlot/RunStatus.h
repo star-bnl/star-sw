@@ -24,6 +24,8 @@ class RunStatus : public TObject {
  
   static int getNumericStatus(char *str);
 
+  int running();
+
   ClassDef(RunStatus,1) ;
 };
 

@@ -13,7 +13,12 @@
 #include "Jevp/StJevpPlot/JLatex.h"
 #include "Jevp/StJevpPlot/JLine.h"
 
+#include <unistd.h>
+//#include <RTS/include/SUNRT/clockClass.h>
+
 #define DEFAULT_CLIENTDATADIR "/a/jevp/client"
+
+class RtsTimer_root;
 
 class JevpPlotSet : public TObject {
   
@@ -64,8 +69,6 @@ class JevpPlotSet : public TObject {
 
   void resetAllPlots();
 
-  int send(TObject *msg); // used only for special cases...such as base server run info
-
   char *clientdatadir;
   char *confdatadir;
   char *plotsetname;
@@ -73,26 +76,31 @@ class JevpPlotSet : public TObject {
   char *hello_cmds;   // do I want to be base_client?  "steal if so"
 
   void addServerTags(char *tags);
+  char *getServerTags();
 
- private:
-  TSocket *socket;
+  RtsTimer_root *processingTimer;
+  double processingTime;
+  int numberOfEventsRun;
 
-  int run;
-  int die_at_endofrun;
+  double getAverageProcessingTime() {
+    double n = (numberOfEventsRun>0) ? numberOfEventsRun : 1;
+    return (processingTime / n);
+  }
 
   TList plots;    // The plots built
+
+ private:
+
+  int run;
+
+  char servertags[512];
   
   unsigned int current_run;
 
- 
   int base_client;    // am I base client?
 
-  daqReader *reader;
   char *diska;      // event pool path
   char *daqfile;    // data file / null for live
-  char *server;     // server
-  int serverport;   // server port
-  char *socketName;
   char *pdf;        // direct pdf file output
   char *loglevel;
   char *buildxml;
@@ -102,8 +110,6 @@ class JevpPlotSet : public TObject {
 
   int pause;
   int parseArgs(int argc, char *argv[]);   
-  int connect(char *host, int port);
-  int updatePlots();
   void writePdfFile();
 
   JevpPlot *plotEvtsByTrigger;
@@ -112,6 +118,8 @@ class JevpPlotSet : public TObject {
 
   double n_pertrg[64];
   double avg_time_pertrg[64];
+
+
 
  public:
   ClassDef(JevpPlotSet, 1);
