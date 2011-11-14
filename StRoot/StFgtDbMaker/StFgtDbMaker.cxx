@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.5 2011/11/13 23:51:49 wwitzke Exp $
+// $Id: StFgtDbMaker.cxx,v 1.6 2011/11/14 01:18:00 wwitzke Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -86,6 +86,31 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	assert(11==1);
     }
 
+    if (eLosDataset)
+    {
+	mLossTab = eLosDataset->GetTable(); assert(mLossTab);
+	LOG_INFO
+	    <<
+		Form(
+		    "%s :: fgtElosCutoff table received, comment=%s",
+		    GetName(),mLossTab[0].comment
+		)
+	    << endm;
+ 
+	#if 0 // disable it later 
+	    for (int i = 0; i < 10000; i++) { 
+            std::cout << i <<"tmp eLoss val: " << mLossTab[0].cutoff[i] 
+		      << std::endl;
+	    if(i>15) break;    }
+	#endif   
+    }
+    else
+    {
+	LOG_FATAL << Form("%s :: fgtElosCutoff table  failed,",GetName())
+		  << endm;
+	assert(12==1);
+    }
+  
     St_fgtMapping * mapDataset = 0;
     St_fgtGain * gainDataset = 0;
     St_fgtPedestal * pedDataset = 0;
@@ -107,41 +132,75 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    m_tables = new StFgtDbImpl();
 	}
 
+	LOG_INFO <<  "::RequestDataBase() for calibration tables..."<< endl;  
+	TDataSet *MapDB = GetDataBase("Calibrations/fgt/fgtMapping");
+	if (!MapDB)
+	{
+	    LOG_FATAL
+		<< "ERROR: no table found in db for map, or malformed local db config" 
+		<< endm;
+	    assert(13==1);
+	}
+	TDataSet *PedDB = GetDataBase("Calibrations/fgt/fgtPedestal");
+	if (!PedDB)
+	{
+	    LOG_FATAL
+		<< "ERROR: no table found in db for pedestals, or malformed local db config" 
+		<< endm;
+	    assert(14==1);
+	}
+	TDataSet *StatusDB = GetDataBase("Calibrations/fgt/fgtStatus");
+	if (!StatusDB)
+	{
+	    LOG_FATAL
+		<< "ERROR: no table found in db for pedestals, or malformed local db config" 
+		<< endm;
+	    assert(15==1);
+	}
+	TDataSet *GainDB = GetDataBase("Calibrations/fgt/fgtGain");
+	if (!GainDB)
+	{
+	    LOG_FATAL
+		<< "ERROR: no table found in db for pedestals, or malformed local db config" 
+		<< endm;
+	    assert(16==1);
+	}
+
 	mapDataset = (St_fgtMapping *)
-	    DB->Find("fgtPedestal"); assert(mapDataset);
+	   MapDB->Find("fgtMapping"); assert(mapDataset);
 	rows = mapDataset->GetNRows();
 	if (rows > 1) 
 	{
 	    LOG_FATAL   << " found INDEXED table for mapping with " << rows
 			<< " rows, this is fatal, fix DB content" << endm;
-	    assert(11==1);
+	    assert(17==1);
 	}
 	gainDataset = (St_fgtGain*)
-	    DB->Find("fgtGain"); assert(gainDataset);
+	    GainDB->Find("fgtGain"); assert(gainDataset);
 	rows = gainDataset->GetNRows();
 	if (rows > 1) 
 	{
 	    LOG_FATAL   << " found INDEXED table for gains with " << rows
 			<< " rows, this is fatal, fix DB content" << endm;
-	    assert(11==1);
+	    assert(18==1);
 	}
 	pedDataset = (St_fgtPedestal*)
-	    DB->Find("fgtPedestal"); assert(pedDataset);
+	    PedDB->Find("fgtPedestal"); assert(pedDataset);
 	rows = pedDataset->GetNRows();
 	if (rows > 1) 
 	{
 	    LOG_FATAL   << " found INDEXED table for pedestals with " << rows
 			<< " rows, this is fatal, fix DB content" << endm;
-	    assert(11==1);
+	    assert(19==1);
 	}
 	statusDataset = (St_fgtStatus*)
-	    DB->Find("fgtStatus"); assert(statusDataset);
+	    StatusDB->Find("fgtStatus"); assert(statusDataset);
 	rows = statusDataset->GetNRows();
 	if (rows > 1) 
 	{
 	    LOG_FATAL   << " found INDEXED table for status with " << rows
 			<< " rows, this is fatal, fix DB content" << endm;
-	    assert(11==1);
+	    assert(20==1);
 	}
     }
   
@@ -204,34 +263,9 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 		      << endm;
 	}
 
-	assert(12==1);
+	assert(21==1);
     }
 
-    if (eLosDataset)
-    {
-	mLossTab = eLosDataset->GetTable(); assert(mLossTab);
-	LOG_INFO
-	    <<
-		Form(
-		    "%s :: fgtElosCutoff table received, comment=%s",
-		    GetName(),mLossTab[0].comment
-		)
-	    << endm;
- 
-	#if 0 // disable it later 
-	    for (int i = 0; i < 10000; i++) { 
-            std::cout << i <<"tmp eLoss val: " << mLossTab[0].cutoff[i] 
-		      << std::endl;
-	    if(i>15) break;    }
-	#endif   
-    }
-    else
-    {
-	LOG_FATAL << Form("%s :: fgtElosCutoff table  failed,",GetName())
-		  << endm;
-	assert(12==1);
-    }
-  
     geom=new StFgtGeom();   //	for now it is static, but later may be time
 			    //	dependent
     return kStOK;
@@ -267,6 +301,9 @@ Float_t StFgtDbMaker::eLossTab(int bin)
 }
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.6  2011/11/14 01:18:00  wwitzke
+// Fixes so that we have better errors in StFgtDbMaker.cxx.
+//
 // Revision 1.5  2011/11/13 23:51:49  wwitzke
 // Modified StFgtDbMaker to pull calibration data from the database.
 //
