@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.6 2011/11/14 01:18:00 wwitzke Exp $
+// $Id: StFgtDbMaker.cxx,v 1.7 2011/11/14 01:49:33 wwitzke Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -123,9 +123,10 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
     }
     else
     {
-	if ( dynamic_cast< StFgtDbNaiveImpl * >(m_tables) )
+	if ( m_tables && dynamic_cast< StFgtDbNaiveImpl * >(m_tables) )
 	{
 	    delete m_tables;
+	    m_tables = 0;
 	}
 	if ( !m_tables )
 	{
@@ -301,8 +302,8 @@ Float_t StFgtDbMaker::eLossTab(int bin)
 }
 
 // $Log: StFgtDbMaker.cxx,v $
-// Revision 1.6  2011/11/14 01:18:00  wwitzke
-// Fixes so that we have better errors in StFgtDbMaker.cxx.
+// Revision 1.7  2011/11/14 01:49:33  wwitzke
+// Fixed seg fault bug.
 //
 // Revision 1.5  2011/11/13 23:51:49  wwitzke
 // Modified StFgtDbMaker to pull calibration data from the database.
