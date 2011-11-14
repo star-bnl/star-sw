@@ -26,7 +26,7 @@ void JTMonitor::Remove(TSocket *s)
   sList->Remove(s);
 }
 
-TSocket *JTMonitor::Select()
+TSocket *JTMonitor::Select(int delay)
 {
   struct pollfd pollfds[_JT_NSOCK_];
   TSocket *s;
@@ -40,7 +40,7 @@ TSocket *JTMonitor::Select()
     n++;
   }
 
-  int result = poll(pollfds, n, 1000 * 10);
+  int result = poll(pollfds, n, delay);
   
   if(result < 0) {
     LOG(ERR, "An error calling poll: %s",strerror(errno));

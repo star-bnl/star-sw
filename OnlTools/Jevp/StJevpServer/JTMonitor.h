@@ -16,7 +16,7 @@ class JTMonitor {
 
   void Add(TSocket *s);
   void Remove(TSocket *s);
-  TSocket *Select();
+  TSocket *Select(int delay);
 };
 
 #endif

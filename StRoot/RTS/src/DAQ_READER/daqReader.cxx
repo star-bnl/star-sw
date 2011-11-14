@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.42 2011/04/21 19:10:50 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.43 2011/11/14 21:48:10 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -169,15 +169,15 @@ void daqReader::init()
 #ifndef RTS_ONLINE
   // this is only for Offline!
 
-  rtsLogLevel(WARN) ;
-  rtsLogAddDest("130.199.60.86",RTS_LOG_PORT_READER) ;	// reader.log to daqman
+  // rtsLogLevel(WARN) ;
+  // rtsLogAddDest("130.199.60.86",RTS_LOG_PORT_READER) ;	// reader.log to daqman
 
   // allow this one message to daqman's reader log...
-  rtsLogOutput(RTS_LOG_NET) ;
-  LOG(INFO,"%s",cvs_id_string) ;
+  //rtsLogOutput(RTS_LOG_NET) ;
+  //LOG(INFO,"%s",cvs_id_string) ;
   // back to STDERR
   rtsLogOutput(RTS_LOG_STDERR) ;	// STDERR only!
-
+  LOG(INFO,"%s",cvs_id_string) ;
 #endif
 
 

@@ -37,9 +37,15 @@ void RunStatus::dump()
   LOG("JEFF", "--------------------------");
 }
 
+int RunStatus::running()
+{
+  if(strcmp(status, "running") == 0) return 1;
+  return 0;
+}
+
 int RunStatus::getNumericStatus(char *str)
 {
-  static char *statname[5] = { "unknown", "starting", "running", "stopping", "stopped" };
+  static char *statname[5] = { (char *)"unknown", (char *)"starting", (char *)"running", (char *)"stopping", (char *)"stopped" };
 
   for(int i=0;i<5;i++) {
     if(strcmp(str, statname[i]) == 0) return i;

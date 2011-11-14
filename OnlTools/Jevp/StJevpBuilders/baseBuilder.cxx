@@ -36,7 +36,7 @@ void baseBuilder::initialize(int argc, char *argv[]) {
 }
   
 void baseBuilder::startrun(daqReader *rdr) {
-  LOG(DBG, "startrun #%d",rdr->run);
+  LOG("JEFF", "startrun #%d",rdr->run);
   
   first_event = 0;
 }
@@ -58,7 +58,7 @@ void baseBuilder::event(daqReader *rdr) {
     for(int i=0;i<32;i++) {
       if(mask & 1<<i) {
 	char *det = (char *)rts2name(i);
-	if(!det) det = "xxx";
+	if(!det) det = (char *)"xxx";
 
 	strcpy(tmp, det);
 	det = tmp;
