@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.cxx,v 1.10 2011/11/03 20:04:17 avossen Exp $
+//  $Id: StFgtMaxClusterAlgo.cxx,v 1.11 2011/11/17 19:23:54 ckriley Exp $
 //  $Log: StFgtMaxClusterAlgo.cxx,v $
+//  Revision 1.11  2011/11/17 19:23:54  ckriley
+//  fixed small bug
+//
 //  Revision 1.10  2011/11/03 20:04:17  avossen
 //  updated clustering makers and algos to reflect new containers
 //
@@ -87,6 +90,7 @@ Int_t StFgtMaxClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitC
 	}
     }
 
+
   StFgtHit *rHit = 0;
   StFgtHit *phiHit = 0;
   if(maxRCharge>0)
@@ -103,7 +107,7 @@ Int_t StFgtMaxClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitC
 
   if(maxPhiCharge>0)
     {
-      phiHit = new StFgtHit( clusters.getHitVec().size(), phiGeoId,maxRCharge, disc, quadrant, 'P', 0.0, 0.0,phiOrdinate, 2*StFgtGeom::phiStrip_pitch(),0.0,0.0);
+      phiHit = new StFgtHit( clusters.getHitVec().size(), phiGeoId,maxPhiCharge, disc, quadrant, 'P', 0.0, 0.0,phiOrdinate, 2*StFgtGeom::phiStrip_pitch(),0.0,0.0);
       //      cout <<" new phi cluster " << endl;
     } 
   if(phiHit ){

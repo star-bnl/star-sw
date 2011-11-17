@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.18 2011/11/10 23:59:22 avossen Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.19 2011/11/17 19:23:54 ckriley Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.19  2011/11/17 19:23:54  ckriley
+//  fixed small bug
+//
 //  Revision 1.18  2011/11/10 23:59:22  avossen
 //  modified simple cluster algo so that it should find phi clusters with R<19
 //
@@ -192,7 +195,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	      newCluster->setErrorPhi(meanSqOrdinate);
 	    }
 	  newCluster->setCentralStripGeoId(floor(meanGeoId+0.5));
-	  if(numStrips<=10)
+	  if(numStrips<=10 && newCluster->getCentralStripGeoId() > 0)
              clusters.getHitVec().push_back(newCluster);
           else
              delete newCluster;
@@ -254,7 +257,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
       //      cout <<"setting central strip to " << floor(meanGeoId+0.5)<<endl;
 
       newCluster->setCentralStripGeoId(floor(meanGeoId+0.5));
-      if(numStrips<=10)
+      if(numStrips<=10 && newCluster->getCentralStripGeoId() > 0)
          clusters.getHitVec().push_back(newCluster);
       else
          delete newCluster;
