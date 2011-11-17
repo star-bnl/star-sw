@@ -45,6 +45,12 @@ StEmcDecoder::StEmcDecoder(unsigned date, unsigned time, bool TowerMapBug) {
             PreshowerBugFixIndex[newId-1] = id;
         }
     }
+
+    // SMD eta swap fixes applied only at analysis level
+    for(int i=0;i<18000;i++) SmdBugFixIndex[i] = i+1;
+    if(date >= 20100101 && date < 20110101) {
+        #include "SmdBug2010.txt"
+    }
 }
 
 StEmcDecoder::~StEmcDecoder() { }
@@ -83,6 +89,19 @@ the preshower index (software) in the original map
 int StEmcDecoder::GetPreshowerBugCorrectionShift(int id_original,int& id_shift) const
 {
     int id_new = PreshowerBugFixIndex[id_original - 1];
+    id_shift = id_new-id_original;
+    return 1;
+}
+//--------------------------------------------------------
+/*!
+GetSmdBugCorrectionShift method - returns the id shift with respect to
+the SMD index (software) in the original map
+\param id_original is the soft_id in the original map
+\param id_shift is the shift that should be applied to the id. In this case, id_corrected = Id_original+id_shift
+*/
+int StEmcDecoder::GetSmdBugCorrectionShift(int id_original,int& id_shift) const
+{
+    int id_new = SmdBugFixIndex[id_original - 1];
     id_shift = id_new-id_original;
     return 1;
 }
@@ -576,9 +595,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const {
     return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 1.4 2010/01/28 13:45:06 mattheww Exp $
+// $Id: StEmcDecoder.cxx,v 1.5 2010/12/22 22:57:21 stevens4 Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 1.5  2010/12/22 22:57:21  stevens4
+// Patch for BSMDE mapping problem in P10ih and P10ij productions (RT #2043)
+//
 // Revision 1.4  2010/01/28 13:45:06  mattheww
 // update from Oleksandr to protect against NULL pointers
 //

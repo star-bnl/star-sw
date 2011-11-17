@@ -1,5 +1,5 @@
 //
-// $Id: StMiniMcEvent.cxx,v 1.7 2009/08/25 21:22:56 fine Exp $
+// $Id: StMiniMcEvent.cxx,v 1.8 2011/03/22 00:31:52 perev Exp $
 //
 
 #include "StMiniMcEvent.h"
@@ -219,8 +219,8 @@ StMiniMcEvent::Clear(Option_t *option)
   mContamPairs->Clear();
   mMatGlobPairs->Clear();
   
-  mNMcTrack = mNMatchedPair = mNMergedPair 
-    = mNSplitPair = mNGhostPair = mNContamPair = mNMatGlobPair = 0;
+  mNMcTrack = mNMatchedPair = mNMergedPair = mNSplitPair 
+            = mNGhostPair   = mNContamPair = mNMatGlobPair = 0;
   
 }
 #define PrMinMc(A) cout << #A":" << m ## A << "\t"

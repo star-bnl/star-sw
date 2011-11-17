@@ -1,7 +1,15 @@
-* $Id: btofgeo6.g,v 1.8 2010/06/23 19:09:49 jwebb Exp $
+* $Id: btofgeo6.g,v 1.11 2011/02/28 15:33:40 jwebb Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo6.g,v $
+* Revision 1.11  2011/02/28 15:33:40  jwebb
+* Cosmetic changes to comments needed for AgML translation.
+*
+* Revision 1.10  2010/12/17 20:00:21  jwebb
+*
+* Reverted to previous version of btofgeo6 code.  Fixes will be applied now
+* in btofgeo7.
+*
 * Revision 1.8  2010/06/23 19:09:49  jwebb
 * Resolved minor bug in the cooling tubes for the tof.  The inner radii of
 * the cooling tubes are passed to the block creating the water volume, but
@@ -612,28 +620,28 @@ Block BTOH is a half of trigger system (west-east)
       ! tof=5 means TOFr6 tray (not active), tof=6 means TOFr7 tray, tof=7 means TOFr8++ tray
       ! tof=-1 means no tray (Run 9)
       do is=1,60
-         tof=0		                                !-> all CTB for choice=1                     
-         if (choice==2)                       tof=1	!-> all TOFp
-         if (choice==3 & 46<=is&is<=60)       tof=1	!-> big TOFp patch, rest CTB
-         if (choice==4 & is==btog_posit1(1))  tof=1	!-> Run-2 (one TOFp tray)
-         if (choice==5 & is==btog_posit1(1))  tof=1	!-> Run-3 (one TOFp tray
+         tof=0		                                !// all CTB for choice=1                     
+         if (choice==2)                       tof=1	!// all TOFp
+         if (choice==3 & 46<=is&is<=60)       tof=1	!// big TOFp patch, rest CTB
+         if (choice==4 & is==btog_posit1(1))  tof=1	!// Run-2 (one TOFp tray)
+         if (choice==5 & is==btog_posit1(1))  tof=1	!// Run-3 (one TOFp tray
          if (choice==5 & is==btog_posit2)     tof=2	!      and one TOFr tray)
-         if (choice==6)                       tof=7	!-> all TOFr
-         if (choice==7 & is==btog_posit1(2))  tof=1	!-> Run-4 (one TOFp tray moved 1 slot
+         if (choice==6)                       tof=7	!// all TOFr
+         if (choice==7 & is==btog_posit1(2))  tof=1	!// Run-4 (one TOFp tray moved 1 slot
          if (choice==7 & is==btog_posit2)     tof=3	!      and one TOFrp tray)
-	 if (choice==8  & is==btog_posit3)    tof=4  	!-> Run-5 (one TOFr5 tray)
-	 if (choice==9  & is==btog_posit3)    tof=5  	!-> Run-6 (one TOFr6 tray)
-	 if (choice==10 & is==btog_posit3)    tof=6  	!-> Run-7 (one TOFr7 tray)
-         if (choice==11 & is==btog_posit4(1)) tof=7 	!-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(2)) tof=7 	!-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(3)) tof=7	!-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(4)) tof=7 	!-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(5)) tof=7 	!-> Run-8 (5 TOFr8 trays)
+	 if (choice==8  & is==btog_posit3)    tof=4  	!// Run-5 (one TOFr5 tray)
+	 if (choice==9  & is==btog_posit3)    tof=5  	!// Run-6 (one TOFr6 tray)
+	 if (choice==10 & is==btog_posit3)    tof=6  	!// Run-7 (one TOFr7 tray)
+         if (choice==11 & is==btog_posit4(1)) tof=7 	!// Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(2)) tof=7 	!// Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(3)) tof=7	!// Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(4)) tof=7 	!// Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(5)) tof=7 	!// Run-8 (5 TOFr8 trays)
 
-         if (choice==12  & btog_posit5(is)   ==1) tof= 7 !-> Run-9:TOFr8 tray (west)
-         if (choice==12  & btog_posit5(is)   ==0) tof=-1 !-> Run-9: no tray (west)
-         if (choice==-12 & btog_posit5(is+60)==1) tof= 7 !-> Run-9: TOFr8 tray (east)
-         if (choice==-12 & btog_posit5(is+60)==0) tof=-1 !-> Run-9: no tray (east)
+         if (choice==12  & btog_posit5(is)   ==1) tof= 7 !// Run-9:TOFr8 tray (west)
+         if (choice==12  & btog_posit5(is)   ==0) tof=-1 !// Run-9: no tray (west)
+         if (choice==-12 & btog_posit5(is+60)==1) tof= 7 !// Run-9: TOFr8 tray (east)
+         if (choice==-12 & btog_posit5(is+60)==0) tof=-1 !// Run-9: no tray (east)
 
 *         print *,' Positioning Tray, choice,is,tof=',choice,is,tof
 *         Create and Position BSEC  alphaz = 102+6*is
@@ -1268,7 +1276,7 @@ EndBlock
 *        Outer-Glass    BROG
 *        Separator      BRSG
 *     /--Inner-Glass    BRIG
-*  n {
+*  n +
 *     \--Separator
 *        Outer-Glass
 *        Graphite

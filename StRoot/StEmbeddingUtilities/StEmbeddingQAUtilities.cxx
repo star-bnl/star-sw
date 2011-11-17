@@ -1,6 +1,24 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.9 2010/08/13 21:54:51 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.15 2011/08/25 17:37:26 cpowell Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.15  2011/08/25 17:37:26  cpowell
+ * Remove use of function getGeantId(const UInt_t geantid)
+ *
+ * Revision 1.14  2011/08/05 00:26:50  cpowell
+ * Fix by Xianglei related to the update in StMiniMcMaker for calculating dcaGl of StTinyRcTrack
+ *
+ * Revision 1.13  2011/04/26 20:27:22  hmasui
+ * Add isGamma function
+ *
+ * Revision 1.12  2011/04/05 23:12:36  hmasui
+ * Added getGeantId() function
+ *
+ * Revision 1.11  2011/04/01 05:02:50  hmasui
+ * Implement track selections (moved from StEmbeddingQATrack)
+ *
+ * Revision 1.10  2011/02/11 23:20:56  hmasui
+ * Bug fix for e+ and e-
+ *
  * Revision 1.9  2010/08/13 21:54:51  hmasui
  * Separate charge for pi/K/p
  *
@@ -18,6 +36,8 @@
  *
  ****************************************************************************************************/
 
+#include <assert.h>
+
 #include "TError.h"
 #include "TH1.h"
 #include "TStyle.h"
@@ -26,8 +46,6 @@
 #include "StMessMgr.h"
 #include "StParticleDefinition.hh"
 #include "StParticleTable.hh"
-
-using namespace std ;
 
   StEmbeddingQAUtilities* StEmbeddingQAUtilities::mInstance = 0 ;
 
@@ -61,6 +79,18 @@ StEmbeddingQAUtilities::StEmbeddingQAUtilities()
   mCategoryId.insert( pair<const TString, const UInt_t>(mCategoryName[4], 4) );
   mCategoryId.insert( pair<const TString, const UInt_t>(mCategoryName[5], 5) );
   mCategoryId.insert( pair<const TString, const UInt_t>(mCategoryName[6], 6) );
+
+  // Default cut
+  mPtMinCut       = 0.1 ;   /// Minimum pt cut, pt > 0.1 GeV/c
+  mPtMaxCut       = 10.0 ;  /// Minimum pt cut, pt < 10 GeV/c
+  mEtaCut         = 1.5 ;   /// Eta cut, |eta| < 1.5
+  mNHitCut        = 10 ;    /// Minimum Nfit cut, Nfit >= 10
+  mNHitToNPossCut = 0.51 ;  /// Minimum Nfit cut, NHitFit/NHitPoss > 0.51
+  mDcaCut         = 3.0 ;   /// Global dca cut, |dca_{gl}| < 3 cm
+  mNSigmaCut      = 2.0 ;   /// Nsigma cut, |Nsigma| < 2
+  mRapidityCut    = 10.0 ;  /// Rapidity cut, |y| < 10
+  mZVertexCut     = 30.0 ;  /// z-vertex cut, |vz| < 30 cm
+  mTriggerIdCut.clear() ;   /// No trigger cut by default
 }
 
 //____________________________________________________________________________________________________
@@ -217,10 +247,10 @@ Bool_t StEmbeddingQAUtilities::isReal(const TString name) const
 }
 
 //____________________________________________________________________________________________________
-Bool_t StEmbeddingQAUtilities::isElectron(const Int_t geantid) const { return geantid==2 ; }
+Bool_t StEmbeddingQAUtilities::isPositron(const Int_t geantid) const { return geantid==2 ; }
 
 //____________________________________________________________________________________________________
-Bool_t StEmbeddingQAUtilities::isPositron(const Int_t geantid) const { return geantid==3 ; }
+Bool_t StEmbeddingQAUtilities::isElectron(const Int_t geantid) const { return geantid==3 ; }
 
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQAUtilities::isPiPlus(const Int_t geantid) const { return geantid==8 ; }
@@ -282,6 +312,14 @@ Bool_t StEmbeddingQAUtilities::isEPiKP(const Int_t geantid) const
   /// Check the input string geant id is e/pi/K/p
 
   return isElectrons(geantid) || isPions(geantid) || isKaons(geantid) || isProtons(geantid) ;
+}
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isGamma(const Int_t geantid) const
+{
+  /// Check geantid is gamma or not
+
+  return (geantid == 1) ;
 }
 
 //____________________________________________________________________________________________________
@@ -389,7 +427,13 @@ void StEmbeddingQAUtilities::setStyle(TH1* h) const
 StParticleDefinition* StEmbeddingQAUtilities::getParticleDefinition(const UInt_t geantid) const
 {
   /// Take into account the modulus of geant id by 10k
-  return StParticleTable::instance()->findParticleByGeantId(geantid%10000) ;
+  if(!isGeantIdOk(geantid)) {
+    LOG_ERROR << Form("StEmbeddingQAUtilities::getParticleDefinition  Cannot find geantid=%d in StParticleTable", geantid) << endm;
+    LOG_ERROR << "StEmbeddingQAUtilities::getParticleDefinition  You should check out the latest StRoot/StarClassLibrary from CVS" << endm;
+    assert(0);
+  }
+
+  return StParticleTable::instance()->findParticleByGeantId(geantid);
 }
 
 //__________________________________________________________________________________________
@@ -398,6 +442,216 @@ Bool_t StEmbeddingQAUtilities::isGeantIdOk(const UInt_t geantid) const
   /// Check geant id in StParticleTable
   ///  Take into account the modulus of geantid by 10k
 
-  return StParticleTable::instance()->containsGeantId(geantid%10000) ;
+  return StParticleTable::instance()->containsGeantId(geantid);
 }
+
+//__________________________________________________________________________________________
+Int_t StEmbeddingQAUtilities::getGeantId(const UInt_t geantid) const
+{
+  /// Return geantid itself
+  /// except for geantid > 50000
+  return ( geantid > 50000 ) ? geantid%50000 : geantid ;
+}
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::getPtMinCut() const { return mPtMinCut ; }
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::getPtMaxCut() const { return mPtMaxCut ; }
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::getEtaCut() const { return mEtaCut ; }
+
+//__________________________________________________________________________________________
+Short_t StEmbeddingQAUtilities::getNHitCut() const { return mNHitCut ; }
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::getNHitToNPossCut() const { return mNHitToNPossCut ; }
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::getDcaCut() const { return mDcaCut ; }
+
+//__________________________________________________________________________________________
+Double_t StEmbeddingQAUtilities::getNSigmaCut() const { return mNSigmaCut ; }
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::getRapidityCut() const { return mRapidityCut ; }
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::getZVertexCut() const { return mZVertexCut ; }
+
+//__________________________________________________________________________________________
+vector<UInt_t> StEmbeddingQAUtilities::getTriggerIdCut() const { return mTriggerIdCut ; }
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::setPtMinCut(const Float_t val)
+{
+  mPtMinCut = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setPtMinCut  Minimum pt cut off = " << mPtMinCut
+    << endm;
+  return getPtMinCut() ;
+}
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::setPtMaxCut(const Float_t val)
+{
+  mPtMaxCut = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setPtMaxCut  Maximum pt cut off = " << mPtMaxCut
+    << endm;
+  return getPtMaxCut() ;
+}
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::setEtaCut(const Float_t val)
+{
+  mEtaCut = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setEtaCut  eta cut = " << mEtaCut
+    << endm;
+  return getEtaCut() ;
+}
+
+//__________________________________________________________________________________________
+Short_t StEmbeddingQAUtilities::setNHitCut(const Short_t val)
+{
+  mNHitCut = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setNHitCut  nHitsFit cut = " << mNHitCut
+    << endm;
+  return getNHitCut() ;
+}
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::setNHitToNPossCut(const Float_t val)
+{
+  mNHitToNPossCut = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setNHitToNPossCut  Ratio of nHitsFit to nHitsPoss cut = " << mNHitToNPossCut
+    << endm;
+  return getNHitToNPossCut() ;
+}
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::setDcaCut(const Float_t val)
+{
+  mDcaCut = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setDcaCut  Dca cut = " << mDcaCut
+    << endm;
+  return getDcaCut() ;
+}
+
+//__________________________________________________________________________________________
+Double_t  StEmbeddingQAUtilities::setNSigmaCut(const Double_t val)
+{
+  mNSigmaCut = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setNSigmaCut  NSigma cut = " << mNSigmaCut
+    << endm;
+  return getNSigmaCut() ;
+}
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::setRapidityCut(const Float_t val)
+{
+  mRapidityCut = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setRapidityCut  Rapidity cut = " << mRapidityCut
+    << endm;
+  return getRapidityCut() ;
+}
+
+//__________________________________________________________________________________________
+Float_t StEmbeddingQAUtilities::setZVertexCut(const Float_t val)
+{
+  mZVertexCut = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setZVertexCut  z-vertex cut = " << mZVertexCut
+    << endm;
+  return getZVertexCut() ;
+}
+
+//__________________________________________________________________________________________
+void StEmbeddingQAUtilities::addTriggerIdCut(const UInt_t val)
+{
+  mTriggerIdCut.push_back(val);
+  LOG_INFO << "StEmbeddingQAUtilities::addTriggerIdCut  add new trigger id = " << val
+    << endm;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isPtOk(const Float_t pt) const
+{
+  return (pt > mPtMinCut && pt < mPtMaxCut ) ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isEtaOk(const Float_t eta) const
+{
+  return TMath::Abs(eta) < mEtaCut ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isNHitsFitOk(const Float_t nHitsFit) const
+{
+  return nHitsFit > mNHitCut ;
+}
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isNHitToNPossOk(const Float_t ratio) const
+{
+  return ratio > mNHitToNPossCut ;
+}
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isDcaOk(const Float_t dca) const
+{
+  return ( dca > -mDcaCut && dca < mDcaCut ) ;
+}
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isNSigmaOk(const Float_t nsigma) const
+{
+  return TMath::Abs(nsigma) < mNSigmaCut ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isRapidityOk(const Float_t y) const
+{
+  return TMath::Abs(y) < mRapidityCut ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isZVertexOk(const Float_t vz) const
+{
+  return TMath::Abs(vz) < mZVertexCut ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isTriggerOk(const UInt_t trigger) const
+{
+  // No trigger is required
+  if ( mTriggerIdCut.empty() ) return kTRUE ;
+
+  for(UInt_t i=0; i<mTriggerIdCut.size(); i++) {
+    if ( trigger == mTriggerIdCut[i] ) return kTRUE ;
+  }
+
+  // doesn't match any trigger id's
+  return kFALSE ;
+}
+
+//__________________________________________________________________________________________
+void StEmbeddingQAUtilities::PrintCuts() const
+{
+  LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
+  LOG_INFO << "  StEmbeddingQAUtilities::PrintCuts()" << endm;
+  LOG_INFO << "  Track-wise selections ==================================================" << endm;
+  LOG_INFO << Form("    pt cut             : %1.1f - %1.1f GeV/c", getPtMinCut(), getPtMaxCut()) << endm;
+  LOG_INFO << Form("    eta cut            : |eta| < %1.1f", getEtaCut()) << endm;
+  LOG_INFO << Form("    nHitsFit cut       : nHitsfit > %2d", getNHitCut()) << endm;
+  LOG_INFO << Form("    nHits/nHitsMax cut : ratio > %1.2f", getNHitToNPossCut()) << endm;
+  LOG_INFO << Form("    dca cut            : dca < %1.1f cm", getDcaCut()) << endm;
+  LOG_INFO << Form("    nsigma cut         : nsigma < %1.1f", getNSigmaCut()) << endm;
+  LOG_INFO << Form("    rapidity cut       : |y| < %1.1f", getRapidityCut()) << endm;
+  LOG_INFO << "  Event-wise selections ==================================================" << endm;
+  LOG_INFO << Form("    z-vertex cut       : |vz| < %1.1f cm", getZVertexCut()) << endm;
+  if ( !mTriggerIdCut.empty() ) {
+    for(UInt_t i=0; i<mTriggerIdCut.size(); i++) {
+      LOG_INFO << Form("    trigger id cut     : id = %10d", mTriggerIdCut[i]) << endm;
+    }
+  }
+  LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
+}
+
 

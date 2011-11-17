@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.4 2010/08/10 19:18:31 geurts Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.5 2011/02/03 19:01:01 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.cxx,v $
+ * Revision 1.5  2011/02/03 19:01:01  geurts
+ * Introduce option to switch writing simulated hits to StEvent. Default behavior is OFF.
+ *
  * Revision 1.4  2010/08/10 19:18:31  geurts
  * Look for geant data in bfc ("geant") or geant.root ("geantBranch"); Protect storing BTofMcHitCollection in case McEvent is NULL.  [Xin]
  *
@@ -75,6 +78,7 @@ StBTofSimMaker::StBTofSimMaker(const char *name):StMaker(name)
 	mBookHisto=kFALSE;// histograms 
 	mSlow=kTRUE;
 	mCellXtalk=kTRUE;
+	mWriteStEvent=kFALSE;
 	mDaqMap=0;
 	Reset();
 
@@ -107,7 +111,7 @@ void StBTofSimMaker::Reset()
 	mEvent  = 0;
 	mMcEvent = 0;
 	//mBTofCollection = 0;
-	delete mBTofCollection;
+	if (mWriteStEvent) delete mBTofCollection;
 	delete mMcBTofHitCollection;
 	mSimDb  = 0;
 
@@ -584,79 +588,80 @@ Int_t StBTofSimMaker::fillEvent()
 	}
 
 	/// send off to StEvent
-	mBTofCollection= new StBTofCollection();
-	mEvent = (StEvent*)GetInputDS("StEvent");
-	if (!mEvent) {
-		LOG_ERROR << "No StEvent! Bailing out ..." << endm;
+	if (mWriteStEvent){
+	  mBTofCollection= new StBTofCollection();
+	  mEvent = (StEvent*)GetInputDS("StEvent");
+	  if (!mEvent) {
+	    LOG_ERROR << "No StEvent! Bailing out ..." << endm;
+	  }
+
+	  /// creat StBTofHit / tofRawData / tofData collection
+	  for(Int_t jj = 0; jj < (Int_t)mMcBTofHitCollection->hits().size(); jj++) {
+	    StMcBTofHit *aMcBTofHit = mMcBTofHitCollection->hits()[jj];
+
+	    if(!aMcBTofHit) continue;
+	    Int_t trayid = aMcBTofHit->tray();
+	    Int_t moduleid = aMcBTofHit->module();
+	    Int_t cellid = aMcBTofHit->cell();
+
+	    Int_t chn = 255;  // default
+	    if(trayid>0&&trayid<=120) {
+	      chn = mDaqMap->Cell2TDIGChan(moduleid,cellid);
+	    } else if(trayid==121) {
+	      chn = mDaqMap->WestPMT2TDIGLeChan(cellid);
+	    } else if(trayid==122) {
+	      chn = mDaqMap->EastPMT2TDIGLeChan(cellid);
+	    }
+
+	    Int_t index;
+	    if(trayid>0&&trayid<=120) { 
+	      index = (trayid-1)*mNTOF + (moduleid-1)*mNCell + (cellid-1);
+	    } else if(trayid==121||trayid==122) {
+	      index = (trayid-1)*mNTOF + (cellid-1);
+	    }
+
+
+	    /// Efficiency
+	    Float_t eff = 1.;
+	    if(trayid>0&&trayid<=120) eff = mSimDb->eff_tof(trayid, moduleid, cellid);
+	    else if(trayid==121||trayid==122) eff = mSimDb->eff_vpd(trayid, cellid);
+	    if (gRandom->Uniform(1.0) > eff){cout<<"REMOVED"<<endl; continue; } //! inefficiency
+
+
+	    //Fill the StBTofHit
+	    StBTofHit aBTofHit;
+	    aBTofHit.Clear();
+
+	    Float_t mcTof=aMcBTofHit->tof()/1000.;//from picoseconds to nanoseconds
+
+	    aBTofHit.setTray((Int_t)aMcBTofHit->tray());
+	    aBTofHit.setModule((unsigned char)aMcBTofHit->module());
+	    aBTofHit.setCell((Int_t)aMcBTofHit->cell());
+	    aBTofHit.setLeadingEdgeTime((Double_t)mcTof);
+	    aBTofHit.setTrailingEdgeTime((Double_t)mcTof);
+	    aBTofHit.setAssociatedTrack(NULL);//done in StBTofMatchMaker
+	    aBTofHit.setIdTruth(aMcBTofHit->parentTrackId(), 0);
+	    mBTofCollection->addHit(new StBTofHit(aBTofHit));
+
+	    //Fill the StBTofRawHit
+	    StBTofRawHit aBTofRawHit;
+	    aBTofRawHit.Clear();
+	    aBTofRawHit.setTray((Int_t)aMcBTofHit->tray());
+	    aBTofRawHit.setChannel(6*(aMcBTofHit->module() - 1) + (Int_t)aMcBTofHit->cell());
+	    aBTofRawHit.setFlag(1);
+	    mBTofCollection->addRawHit(new StBTofRawHit(aBTofRawHit));
+
+	  }
+
+	  //Fill StBTofHeader -- 	
+	  StBTofHeader aHead;
+	  mBTofCollection->setHeader(new StBTofHeader(aHead));
+
+	  //Store Collections
+	  mEvent->setBTofCollection(mBTofCollection);
+
+	  LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
 	}
-
-	/// creat StBTofHit / tofRawData / tofData collection
-	for(Int_t jj = 0; jj < (Int_t)mMcBTofHitCollection->hits().size(); jj++) {
-		StMcBTofHit *aMcBTofHit = mMcBTofHitCollection->hits()[jj];
-
-		if(!aMcBTofHit) continue;
-		Int_t trayid = aMcBTofHit->tray();
-		Int_t moduleid = aMcBTofHit->module();
-		Int_t cellid = aMcBTofHit->cell();
-
-		Int_t chn = 255;  // default
-		if(trayid>0&&trayid<=120) {
-			chn = mDaqMap->Cell2TDIGChan(moduleid,cellid);
-		} else if(trayid==121) {
-			chn = mDaqMap->WestPMT2TDIGLeChan(cellid);
-		} else if(trayid==122) {
-			chn = mDaqMap->EastPMT2TDIGLeChan(cellid);
-		}
-
-		Int_t index;
-		if(trayid>0&&trayid<=120) { 
-			index = (trayid-1)*mNTOF + (moduleid-1)*mNCell + (cellid-1);
-		} else if(trayid==121||trayid==122) {
-			index = (trayid-1)*mNTOF + (cellid-1);
-		}
-
-
-		/// Efficiency
-		Float_t eff = 1.;
-		if(trayid>0&&trayid<=120) eff = mSimDb->eff_tof(trayid, moduleid, cellid);
-		else if(trayid==121||trayid==122) eff = mSimDb->eff_vpd(trayid, cellid);
-		if (gRandom->Uniform(1.0) > eff){cout<<"REMOVED"<<endl; continue; } //! inefficiency
-
-
-		//Fill the StBTofHit
-		StBTofHit aBTofHit;
-		aBTofHit.Clear();
-
-		Float_t mcTof=aMcBTofHit->tof()/1000.;//from picoseconds to nanoseconds
-
-		aBTofHit.setTray((Int_t)aMcBTofHit->tray());
-		aBTofHit.setModule((unsigned char)aMcBTofHit->module());
-		aBTofHit.setCell((Int_t)aMcBTofHit->cell());
-		aBTofHit.setLeadingEdgeTime((Double_t)mcTof);
-		aBTofHit.setTrailingEdgeTime((Double_t)mcTof);
-		aBTofHit.setAssociatedTrack(NULL);//done in StBTofMatchMaker
-		aBTofHit.setIdTruth(aMcBTofHit->parentTrackId(), 0);
-		mBTofCollection->addHit(new StBTofHit(aBTofHit));
-
-		//Fill the StBTofRawHit
-		StBTofRawHit aBTofRawHit;
-		aBTofRawHit.Clear();
-		aBTofRawHit.setTray((Int_t)aMcBTofHit->tray());
-		aBTofRawHit.setChannel(6*(aMcBTofHit->module() - 1) + (Int_t)aMcBTofHit->cell());
-		aBTofRawHit.setFlag(1);
-		mBTofCollection->addRawHit(new StBTofRawHit(aBTofRawHit));
-
-	}
-
-	//Fill StBTofHeader -- 	
-	StBTofHeader aHead;
-	mBTofCollection->setHeader(new StBTofHeader(aHead));
-
-	//Store Collections
-	mEvent->setBTofCollection(mBTofCollection);
-
-	LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
-
 
 	/// check StMcEvent and StEvent
 	if(Debug()) {
@@ -708,22 +713,23 @@ Int_t StBTofSimMaker::fillEvent()
 		nEast=0;
 		nWest=0;
 
+		if (mWriteStEvent){
+		  StSPtrVecBTofHit& bTofHits=mEvent->btofCollection()->tofHits();
+		  StBTofHit* bHit;
+		  for(Int_t aa=0;aa<(int)bTofHits.size();aa++){
+		    bHit=bTofHits[aa];
+		    Int_t itray=bHit->tray();
+		    Int_t imodule=bHit->module();
+		    Int_t icell=bHit->cell();
+		    if(mBookHisto) {mCellReco->Fill((imodule-1)*mNCell+(icell-1),itray-1);}
+		  }
 
-		StSPtrVecBTofHit& bTofHits=mEvent->btofCollection()->tofHits();
-		StBTofHit* bHit;
-		for(Int_t aa=0;aa<(int)bTofHits.size();aa++){
-			bHit=bTofHits[aa];
-			Int_t itray=bHit->tray();
-			Int_t imodule=bHit->module();
-			Int_t icell=bHit->cell();
-			if(mBookHisto) {mCellReco->Fill((imodule-1)*mNCell+(icell-1),itray-1);}
+		  if(mBookHisto) {
+		    for(Int_t i=0;i<mNTray;i++) mNCellReco->Fill(nCell[i],i);
+		    mNVpdReco->Fill(nWest,nEast);
+		  }
+
 		}
-
-		if(mBookHisto) {
-			for(Int_t i=0;i<mNTray;i++) mNCellReco->Fill(nCell[i],i);
-			mNVpdReco->Fill(nWest,nEast);
-		}
-
 	}
 
 	if(Debug()) cout<<"leaving fill event"<<endl;

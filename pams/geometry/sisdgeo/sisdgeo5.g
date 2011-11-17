@@ -1,5 +1,8 @@
-* $Id: sisdgeo5.g,v 1.3 2009/02/23 20:38:02 perev Exp $
+* $Id: sisdgeo5.g,v 1.4 2011/02/28 16:36:39 jwebb Exp $
 * $Log: sisdgeo5.g,v $
+* Revision 1.4  2011/02/28 16:36:39  jwebb
+* Cosmetic changes needed for AgML syntax matching.
+*
 * Revision 1.3  2009/02/23 20:38:02  perev
 * SSD hit max energy 10 times more.(Jonathan)
 *
@@ -66,8 +69,8 @@ Module  SISDGEO5  is the Silicon Strip Detector
                        SFSL_Dx, SFSL_Dy, SFSL_Dz, SFSD_Dx, SFSD_Dy, SFSD_Dz,
                        SFLA_Px,  SFLA_Py,
                        SFLC_Px,  SFLC_Py,  SFES_Px,  SFES_Py, SFES_Pz,
-                       SFEB_Px ,  SFEB_Py
-                     }
+                       SFEB_Px ,  SFEB_Py                     }
+
 
 
       structure SFPB { Hhight,   Khight,   Hbase,   Kbase, Fsize,
@@ -78,8 +81,8 @@ Module  SISDGEO5  is the Silicon Strip Detector
                        ssLen,    wpLen,    sdlen,    tilt,     
                        cprad,    cpral,    cfrad,    gpThk,
                        Int ladderMap(20),
-                       ladderAngle(20), ladderTilt(20),LadderRadius(20)
-                       }
+                       ladderAngle(20), ladderTilt(20),LadderRadius(20)   }
+
 
 *
       Integer   ilad,iwaf,jwaf,nc

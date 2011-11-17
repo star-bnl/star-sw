@@ -33,6 +33,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
     mBemcData = new StBemcData();
     mBemcData->towerMapBug(kTRUE); // corrects for tower map bug at analysis level by default
     mBemcData->psdMapBug2(kTRUE);
+    mBemcData->smdMapBug(kTRUE);
     mBemcData->setCrateVeto(1);
     //status checking for all tables at analysis level by default
     StDetectorId bemcid = static_cast<StDetectorId>(kBarrelEmcTowerId);
@@ -65,6 +66,13 @@ Int_t StEmcADCtoEMaker::InitRun(Int_t run)
 {
     // Load DB and create decoder for the BEMC
     LOG_INFO <<"Getting database tables for the BEMC detector "<<endm;
+    
+    StMuDst* muDst = (StMuDst*)GetInputDS("MuDst");
+    if(muDst)
+      mBemcData->setProdVer(muDst->event()->runInfo().productionVersion().Data());
+    else
+      mBemcData->setProdVer("");
+    
     mBemcData->createDecoder(GetDate(),GetTime());
     mBemcData->getTables()->loadTables((StMaker*)this);
 
@@ -178,7 +186,7 @@ Bool_t StEmcADCtoEMaker::makeBemc()
         if(muEmc)
         {
             LOG_DEBUG <<"Copying EMC information from StEmcCollection "<<endm;
-            Bool_t ok = mBemcData->make(muEmc,mEvent);
+	      Bool_t ok = mBemcData->make(muEmc,mEvent);
             if(ok)
             {
                 StEmcCollection *emc = mEvent->emcCollection();

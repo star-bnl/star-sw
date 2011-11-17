@@ -352,11 +352,108 @@ void THelixTrack::MakeMtx(double step,double F[5][5])
   F[kZ][kL] = S/(fCosL*fCosL);
   F[kL][kL] = 1;
 }
+//______________________________________________________________________________
+void THelixTrack::TestMtx() 
+{
+  enum {kH=0,kA,kC,kZ,kL};
+const static char* T="HACZL";
+  double Dir[4][3],X[4][3]={{0}},Rho[2],step,F[5][5],Del,Dif;
+  double maxEps = 0;  
+  step = 20;
+  int nErr=0;
+  int iR = 10+ gRandom->Rndm()*100;
+  int iAlf=30+ gRandom->Rndm()*100;
+  int iLam=10+ gRandom->Rndm()*60;
+//??iLam=0;
+    Rho[0] = 1./iR;
+    double alf = iAlf/180.*M_PI;
+    double lam = iLam/180.*M_PI;
+    Dir[0][0] = cos(lam)*cos(iAlf/180.*M_PI);
+    Dir[0][1] = cos(lam)*sin(iAlf/180.*M_PI);
+    Dir[0][2] = sin(lam);
+    THelixTrack tc(X[0],Dir[0],Rho[0]);
+    tc.Eval(step,X[1],Dir[1]);
+    tc.MakeMtx(step,F);
+    printf("TestMtx: Angle=%d Lam=%d \tRad=%d \n",iAlf,iLam,iR);
+
+    for (int iHAR=0;iHAR<5;iHAR++) {
+      memcpy(X[2]  ,X[0]  ,sizeof(X[0][0])  *3);
+      memcpy(Dir[2],Dir[0],sizeof(Dir[0][0])*3);
+      Del = 0;
+      Rho[1]=Rho[0];
+      switch (iHAR) {
+	case kH: { 
+	  Del = 0.001*iR;
+          X[2][0] += -Dir[0][1]*Del/cos(lam);
+          X[2][1] +=  Dir[0][0]*Del/cos(lam);
+          break;}
+	  
+	case kA: {
+	  Del = M_PI/180*0.01;
+          Dir[2][0] = cos(lam)*cos(alf+Del);
+          Dir[2][1] = cos(lam)*sin(alf+Del);
+          Dir[2][2] = sin(lam);
+          break;}
+
+	case kC: {
+          Del = Rho[0]*0.005;
+          Rho[1] = Rho[0]+Del;
+          break;}
+	case kZ: {
+          Del = 0.02;
+          X[2][2] += Del;
+          break;}
+	case kL: {
+          Del = M_PI/180*0.1;
+          Dir[2][0] = cos(lam+Del)*cos(alf);
+          Dir[2][1] = cos(lam+Del)*sin(alf);
+          Dir[2][2] = sin(lam+Del);
+          break;}
+        }//end switch
+      
+        THelixTrack tcc(X[2],Dir[2],Rho[1]);
+        double myStep = tcc.Path(X[1][0],X[1][1]);
+        tcc.Eval(myStep,X[3],Dir[3]);
+
+        for (int jHAR=0;jHAR<5; jHAR++) {
+          if (jHAR==kC) continue;
+          if (jHAR==kL) continue;
+	  switch(jHAR) {
+	  case kH: {
+	    Dif = (X[3][0]-X[1][0])*(-Dir[1][1])
+	        + (X[3][1]-X[1][1])*( Dir[1][0]);
+            Dif/=cos(lam);
+            break;}
+	  case kA: {
+	    Dif = atan2(Dir[3][1],Dir[3][0])
+	         -atan2(Dir[1][1],Dir[1][0]); 
+            if (Dif>  M_PI) Dif-=2*M_PI;
+            if (Dif< -M_PI) Dif+=2*M_PI;
+            break;}
+	  case kZ: {
+	    Dif = X[3][2]-X[1][2];
+            break;}
+          }
+          double est = Dif/Del;
+	  double eps = fabs(est-F[jHAR][iHAR])*2
+	             /(fabs(est)+fabs(F[jHAR][iHAR]+1e-6));
+          if (eps>maxEps) maxEps=eps;
+          if (eps < 1e-2) continue;
+          nErr++;
+          printf(" m%c%c \t%g \t%g \t%g\n",
+	         T[jHAR],T[iHAR],F[jHAR][iHAR],est,eps);
+	
+    } }  
+    printf("TestMtx: %d errors maxEps=%g\n",nErr,maxEps);
+
+}
+
 //_____________________________________________________________________________
 double THelixTrack::Move(double step) 
 {
-  double F[5][5];
-  Eval(step,fX,fP,fRho);
+  double xyz[3],dir[3],rho,F[5][5];
+  Eval(step,xyz,dir,rho);
+  Set(xyz,dir,rho,fDRho);
   if (fEmx && fEmx->mHH>0) {
     MakeMtx(step,F);
     fEmx->Move(F);
@@ -796,105 +893,6 @@ void THelixTrack::Print(Option_t *) const
   printf("THelixTrack *ht = new THelixTrack(xyz,dir,Rho);\n");
   
 }
-//______________________________________________________________________________
-void THelixTrack::TestMtx() 
-{
-  enum {kH=0,kA,kC,kZ,kL};
-const static char* T="HACZL";
-  double Dir[4][3],X[4][3]={{0}},Rho[2],step,F[5][5],Del,Dif;
-  double maxEps = 0;  
-  int nErr=0;
-  int iR = 10+ gRandom->Rndm()*100;
-  int iAlf=30+ gRandom->Rndm()*100;
-  int iLam=10+ gRandom->Rndm()*60;
-  step = gRandom->Rndm()*6*iR;
-//??iLam=0;
-    Rho[0] = 1./iR;
-    double alf = iAlf/180.*M_PI;
-    double lam = iLam/180.*M_PI;
-    Dir[0][0] = cos(lam)*cos(iAlf/180.*M_PI);
-    Dir[0][1] = cos(lam)*sin(iAlf/180.*M_PI);
-    Dir[0][2] = sin(lam);
-    THelixTrack tc(X[0],Dir[0],Rho[0]);
-    tc.Eval(step,X[1],Dir[1]);
-//    tc.MakeMtx(step,F);
-    tc.Move(step,F);
-
-    printf("TestMtx: Angle=%d Lam=%d \tRad=%d Step=%d \n",iAlf,iLam,iR,int(step));
-
-    for (int iHAR=0;iHAR<5;iHAR++) {
-      memcpy(X[2]  ,X[0]  ,sizeof(X[0][0])  *3);
-      memcpy(Dir[2],Dir[0],sizeof(Dir[0][0])*3);
-      Del = 0;
-      Rho[1]=Rho[0];
-      switch (iHAR) {
-	case kH: { 
-	  Del = 0.001*iR;
-          X[2][0] += -Dir[0][1]*Del/cos(lam);
-          X[2][1] +=  Dir[0][0]*Del/cos(lam);
-          break;}
-	  
-	case kA: {
-	  Del = M_PI/180*0.01;
-          Dir[2][0] = cos(lam)*cos(alf+Del);
-          Dir[2][1] = cos(lam)*sin(alf+Del);
-          Dir[2][2] = sin(lam);
-          break;}
-
-	case kC: {
-          Del = Rho[0]*0.005;
-          Rho[1] = Rho[0]+Del;
-          break;}
-	case kZ: {
-          Del = 0.02;
-          X[2][2] += Del;
-          break;}
-	case kL: {
-          Del = M_PI/180*0.1;
-          Dir[2][0] = cos(lam+Del)*cos(alf);
-          Dir[2][1] = cos(lam+Del)*sin(alf);
-          Dir[2][2] = sin(lam+Del);
-          break;}
-        }//end switch
-      
-        THelixTrack tcc(X[2],Dir[2],Rho[1]);
-        tcc.Move(step);
-	double myStep = tcc.Path(X[1][0],X[1][1]);
-        tcc.Eval(myStep,X[3],Dir[3]);
-
-        for (int jHAR=0;jHAR<5; jHAR++) {
-          if (jHAR==kC) continue;
-          if (jHAR==kL) continue;
-	  switch(jHAR) {
-	  case kH: {
-	    Dif = (X[3][0]-X[1][0])*(-Dir[1][1])
-	        + (X[3][1]-X[1][1])*( Dir[1][0]);
-            Dif/=cos(lam);
-            break;}
-	  case kA: {
-	    Dif = atan2(Dir[3][1],Dir[3][0])
-	         -atan2(Dir[1][1],Dir[1][0]); 
-            if (Dif>  M_PI) Dif-=2*M_PI;
-            if (Dif< -M_PI) Dif+=2*M_PI;
-            break;}
-	  case kZ: {
-	    Dif = X[3][2]-X[1][2];
-            break;}
-          }
-          double est = Dif/Del;
-	  double eps = fabs(est-F[jHAR][iHAR])*2
-	             /(fabs(est)+fabs(F[jHAR][iHAR]+1e-6));
-          if (eps>maxEps) maxEps=eps;
-          if (eps < 1e-2) continue;
-          nErr++;
-          printf(" m%c%c \t%g \t%g \t%g\n",
-	         T[jHAR],T[iHAR],F[jHAR][iHAR],est,eps);
-	
-    } }  
-    printf("TestMtx: %d errors maxEps=%g\n",nErr,maxEps);
-
-}
-
 //_____________________________________________________________________________
 int SqEqu(double *cba, double *sol)
 {
@@ -992,89 +990,6 @@ void THelixTrack::Fill(TCircle &circ) const
   circ.fD[1]=fP[1]/fCosL;
   circ.fRho=fRho;
   if (fEmx) circ.SetEmx(fEmx->Arr());
-}
-//_____________________________________________________________________________
-void THelixTrack::InvertMtx(double F[5][5])
-{
-static const int minus[][2] = {{0,1},{1,0},{1,2},{3,0},{3,2},{3,4},{-1,0}};
-  for (int i=0;minus[i][0]>=0;i++) {
-    F[minus[i][0]][minus[i][1]] = -F[minus[i][0]][minus[i][1]];
-  }
-}
-
-
-// //_____________________________________________________________________________
-// void THelixTrack::TestErr()
-// {
-//    double hpar[7];
-//    for (int i=0;i<7;i++) { hpar[i] = (gRandom->Rndm()-0.5)*100;
-//    hpar[6] = 1./hpar[6];
-//    
-// }   
-
-//______________________________________________________________________________
-void THelixTrack::Show(double len, const THelixTrack *other) const
-{
-static TCanvas *myCanvas = 0;
-  int kolor[2]={kRed,kBlue};
-
-  TGraph  *ciGraph[2][2] = {{0}};
-  TGraph  *ptGraph[2][2] = {{0}};
-  TGraph  *szGraph[2]    = {0};
-  
-  double  x[100],y[100],z[100],l[100],xyz[3];
-  double  X[4],Y[4],Z[4],L[4];
-  const THelixTrack *th[]={this,other};
-  int nH = (other)? 2:1;
-  for (int ih=0;ih<nH;ih++) {
-    double rho = fabs(th[ih]->GetRho());
-    double step = 0.01*(1./(rho+1e-10));
-   
-    if (step>fabs(len)*0.10) step=fabs(len)*0.1;
-    if (step<fabs(len)*0.01) step=fabs(len)*0.01;
-
-
-    int nPts = (int)(fabs(len)/step);
-    step = fabs(len)/nPts;
-    if (len<0) {len = -len; step = -step;}
-    for (int ipt=0; ipt<nPts; ipt++) {
-      double s = ipt*step;
-      th[ih]->Eval(s,xyz); 
-      l[ipt]=s; x[ipt]=xyz[0]; y[ipt]=xyz[1], z[ipt]=xyz[2];
-    }
-    ciGraph[ih][0]  = new TGraph(nPts  , x, y);
-    ciGraph[ih][1]  = new TGraph(nPts  , l, z);
-    ciGraph[ih][0]->SetLineColor(kolor[ih]);
-    ciGraph[ih][1]->SetLineColor(kolor[ih]);
-    ptGraph[ih][0]  = new TGraph(   1  , x, y);
-    ptGraph[ih][1]  = new TGraph(   1  , l, z);
-    ptGraph[ih][0]->SetMarkerColor(kolor[ih]);
-    ptGraph[ih][1]->SetMarkerColor(kolor[ih]);
-
-    X[ih*2+0]=x[0]; X[ih*2+1]=x[nPts-1];
-    Y[ih*2+0]=y[0]; Y[ih*2+1]=y[nPts-1];
-    Z[ih*2+0]=z[0]; Z[ih*2+1]=z[nPts-1];
-    L[ih*2+0]=l[0]; L[ih*2+1]=l[nPts-1];
-  }
-
-  szGraph[0]  = new TGraph(nH*2  , X, Y);
-  szGraph[1]  = new TGraph(nH*2  , L, Z);
-// 
-  myCanvas = new TCanvas("THelixTrack_Show","",600,800);
-  myCanvas->Divide(1,2);
-  for (int ipad=0;ipad<2;ipad++) {
-    myCanvas->cd(ipad+1); 
-    szGraph[ipad]->Draw("AP");
-    for (int ih = 0;ih<nH;ih++) {
-      ptGraph[ih][ipad]->Draw("same *");
-      ciGraph[ih][ipad]->Draw("same CP");
-  } }
-
-
-  myCanvas->Modified();
-  myCanvas->Update();
-  while(!gSystem->ProcessEvents()){}; 
-
 }
 //_____________________________________________________________________________
 void THelixTrack::Test1()
@@ -1177,93 +1092,77 @@ void THelixTrack::Test5()
 
   }  
 }
+// //_____________________________________________________________________________
+// void THelixTrack::TestErr()
+// {
+//    double hpar[7];
+//    for (int i=0;i<7;i++) { hpar[i] = (gRandom->Rndm()-0.5)*100;
+//    hpar[6] = 1./hpar[6];
+//    
+// }   
+
 //______________________________________________________________________________
-void THelixTrack::TestDer() 
+void THelixTrack::Show(double len, const THelixTrack *other) const
 {
-  enum {kH=0,kA,kC,kZ,kL};
-  double fak = 0.1;
-  double D[5][3],X[5][3]={{0}},Rho[5],step,F[5][5];
-  int iR = 10+ gRandom->Rndm()*100;
-  int iAlf=30+ gRandom->Rndm()*100;
-  int iLam=10+ gRandom->Rndm()*60;
-  step = gRandom->Rndm()*6*iR;
-//??iLam=0;
-  Rho[0] = 1./iR;
-  double alf = iAlf/180.*M_PI;
-  double lam = iLam/180.*M_PI;
-  D[0][0] = cos(lam)*cos(alf);
-  D[0][1] = cos(lam)*sin(alf);
-  D[0][2] = sin(lam);
-  THelixTrack hlx0(X[0],D[0],Rho[0]);
-  THelixTrack hlx1(hlx0);
-  hlx1.Move(step,F);
-  hlx1.Eval(0,X[2],D[2]);
-  Rho[2]=hlx1.GetRho();
+static TCanvas *myCanvas = 0;
+  int kolor[2]={kRed,kBlue};
+
+  TGraph  *ciGraph[2][2] = {{0}};
+  TGraph  *ptGraph[2][2] = {{0}};
+  TGraph  *szGraph[2]    = {0};
+  
+  double  x[100],y[100],z[100],l[100],xyz[3];
+  double  X[4],Y[4],Z[4],L[4];
+  const THelixTrack *th[]={this,other};
+  int nH = (other)? 2:1;
+  for (int ih=0;ih<nH;ih++) {
+    double rho = fabs(th[ih]->GetRho());
+    double step = 0.01*(1./(rho+1e-10));
+   
+    if (step>fabs(len)*0.10) step=fabs(len)*0.1;
+    if (step<fabs(len)*0.01) step=fabs(len)*0.01;
 
 
-  printf("TestDer: Angle=%d Lam=%d \tRad=%d Step=%d \n",iAlf,iLam,iR,int(step));
-  hlx0.Eval(0,X[1],D[1]); Rho[1]=hlx0.GetRho();
+    int nPts = (int)(fabs(len)/step);
+    step = fabs(len)/nPts;
+    if (len<0) {len = -len; step = -step;}
+    for (int ipt=0; ipt<nPts; ipt++) {
+      double s = ipt*step;
+      th[ih]->Eval(s,xyz); 
+      l[ipt]=s; x[ipt]=xyz[0]; y[ipt]=xyz[1], z[ipt]=xyz[2];
+    }
+    ciGraph[ih][0]  = new TGraph(nPts  , x, y);
+    ciGraph[ih][1]  = new TGraph(nPts  , l, z);
+    ciGraph[ih][0]->SetLineColor(kolor[ih]);
+    ciGraph[ih][1]->SetLineColor(kolor[ih]);
+    ptGraph[ih][0]  = new TGraph(   1  , x, y);
+    ptGraph[ih][1]  = new TGraph(   1  , l, z);
+    ptGraph[ih][0]->SetMarkerColor(kolor[ih]);
+    ptGraph[ih][1]->SetMarkerColor(kolor[ih]);
 
-  double dH   = iR	*0.01		*(gRandom->Rndm()-0.5)*fak;
-  double dAlf = M_PI/180*0.1		*(gRandom->Rndm()-0.5)*fak;
-  double dRho = Rho[0]	*0.1		*(gRandom->Rndm()-0.5)*fak;
-  double dZ   = 			 (gRandom->Rndm()-0.5)*fak;
-  double dLam = M_PI/180*0.1		*(gRandom->Rndm()-0.5)*fak;
-  double dA[5] = {dH,dAlf,dRho,dZ ,dLam}, dB[5];
-  D[1][0] = cos(lam+dLam)*cos(alf+dAlf);
-  D[1][1] = cos(lam+dLam)*sin(alf+dAlf);
-  D[1][2] = sin(lam+dLam);
-  X[1][0] += -D[0][1]*dH/cos(lam);
-  X[1][1] +=  D[0][0]*dH/cos(lam);
-  X[1][2] +=  dZ;
-  Rho[1]+=dRho;
-  THelixTrack hlxM(X[1],D[1],Rho[1]);
-  hlxM.Move(step);
-  double dL = hlxM.Path(X[2][0],X[2][1]);
-  hlxM.Move(dL);
-  hlxM.Eval(0,X[3],D[3]); Rho[3]=hlxM.GetRho();
+    X[ih*2+0]=x[0]; X[ih*2+1]=x[nPts-1];
+    Y[ih*2+0]=y[0]; Y[ih*2+1]=y[nPts-1];
+    Z[ih*2+0]=z[0]; Z[ih*2+1]=z[nPts-1];
+    L[ih*2+0]=l[0]; L[ih*2+1]=l[nPts-1];
+  }
 
-  TCL::vmatl(F[0],dA,dB,5,5);
-//TCL::vmatr(dA,F[0],dB,5,5);
+  szGraph[0]  = new TGraph(nH*2  , X, Y);
+  szGraph[1]  = new TGraph(nH*2  , L, Z);
+// 
+  myCanvas = new TCanvas("THelixTrack_Show","",600,800);
+  myCanvas->Divide(1,2);
+  for (int ipad=0;ipad<2;ipad++) {
+    myCanvas->cd(ipad+1); 
+    szGraph[ipad]->Draw("AP");
+    for (int ih = 0;ih<nH;ih++) {
+      ptGraph[ih][ipad]->Draw("same *");
+      ciGraph[ih][ipad]->Draw("same CP");
+  } }
 
-  memcpy(X[4],X[2],3*sizeof(double));
-  memcpy(D[4],D[2],3*sizeof(double));
-  Rho[4]=Rho[2];
-  double myAlf = atan2(D[2][1],D[2][0]);
-  double myLam = asin(D[2][2])	       ;
-  D[4][0] =   cos(myLam+dB[kL])*cos(myAlf+dB[kA]);
-  D[4][1] =   cos(myLam+dB[kL])*sin(myAlf+dB[kA]);
-  D[4][2] =   sin(myLam+dB[kL]);
-  X[4][0] += -D[2][1]*dB[kH]/cos(myLam);
-  X[4][1] +=  D[2][0]*dB[kH]/cos(myLam);
-  X[4][2] +=  dB[kZ];
-  Rho[4]  +=  dB[kC];
 
-  THelixTrack hlxD(X[4],D[4],Rho[4]);
-  dL = hlxD.Path(X[2][0],X[2][1]);
-  hlxD.Move(dL);
-  hlxD.Eval(0,X[4],D[4]);
-  Rho[4]=hlxD.GetRho();
-
-//  hlx1.Print();
-//  hlxM.Print();
-//  hlxD.Print();
-  double dC[5];
-  dC[kH] = (-(X[3][0]-X[2][0])*D[2][1]+(X[3][1]-X[2][1])*D[2][0])/cos(myLam);
-  dC[kA] = atan2(D[3][1],D[3][0])-atan2(D[2][1],D[2][0]);
-  dC[kC] = Rho[3]-Rho[2];
-  dC[kZ] = X[3][2]-X[2][2];
-  dC[kL] = asin(D[3][2])-asin(D[2][2]);
-  for (int i=0;i<5;i++) {printf(" %d - %g == %g\n",i,dB[i],dC[i]);}
-
-  double myDelta = 0;
-  for (int i=0;i<3;i++){myDelta+=pow(X[4][i]-X[3][i],2);}
-  myDelta = sqrt(myDelta);
-
-  double ihDelta = 0;
-  for (int i=0;i<3;i++){ihDelta+=pow(X[2][i]-X[3][i],2);}
-  ihDelta = sqrt(ihDelta);
-  printf( "\n***  DELTA = %g << %g   ***\n",myDelta,ihDelta);
+  myCanvas->Modified();
+  myCanvas->Update();
+  while(!gSystem->ProcessEvents()){}; 
 
 }
 
@@ -2937,7 +2836,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.50 2010/10/31 23:36:35 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.48 2010/07/16 20:31:38 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2953,12 +2852,6 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
- * Revision 1.50  2010/10/31 23:36:35  perev
- * TestDer() Test deiivates added
- *
- * Revision 1.49  2010/10/14 17:45:49  perev
- * Inversion of derivative matrix added
- *
  * Revision 1.48  2010/07/16 20:31:38  perev
  * Put back some ctr(this) to ctr(*this)
  *

@@ -1,6 +1,9 @@
-* $Id: fpdmgeo.g,v 1.11 2010/02/05 21:26:59 jwebb Exp $
+* $Id: fpdmgeo.g,v 1.12 2011/02/28 16:20:01 jwebb Exp $
 * $Name:  $
 * $Log: fpdmgeo.g,v $
+* Revision 1.12  2011/02/28 16:20:01  jwebb
+* Switched from fortran-style to mortran-style continuation lines.
+*
 * Revision 1.11  2010/02/05 21:26:59  jwebb
 * All materials are now defined locally, so that changes to medium properties
 * do not affect other detectors.
@@ -816,8 +819,7 @@ Block FLGT is one PbG Tower
       Create and Position FWAL z=-ztot+(FLGG_AlThick+FLGG_depth)/2.0
       Create and Position FUMT z=-ztot+FLGG_AlThick+FLGG_depth+FLGG_MuMetDz/2.0
       Create and Position FPRB z=-ztot+FLGG_AlThick+FLGG_depth+FLGG_SiRubDz/2.0
-      Create and Position FPCT z=-ztot+FLGG_AlThick+FLGG_depth+FLGG_SiRubDz
-     >                                +FLGG_PhCathDz/2.0
+      Create and Position FPCT z=-ztot+FLGG_AlThick+FLGG_depth+FLGG_SiRubDz+FLGG_PhCathDz/2.0
 
 Endblock
 * ----------------------------------------------------------------------------
