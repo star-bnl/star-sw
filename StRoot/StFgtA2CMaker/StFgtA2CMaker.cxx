@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.3 2011/11/04 17:01:06 balewski Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.4 2011/11/17 18:40:40 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.4  2011/11/17 18:40:40  sgliske
+ * Bug fixed: need to always call stripCollectionPtr->removeFlagged();
+ * Also implemented check to invalidate strip if weird ped. value
+ *
  * Revision 1.3  2011/11/04 17:01:06  balewski
  * added printouts
  *
@@ -98,19 +102,22 @@ Int_t StFgtA2CMaker::Make(){
                      mPedReader->getPed( geoId, timebin, ped, err );
 		     printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,err);
 
-                     // subtract the pedistal
-                     adc -= ped;
-
-                     // set the value
-                     strip->setAdc( adc );
-
-                     // no DB yet, so no gains.  Default to unitary gain
-                     strip->setCharge( adc );
-		     printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
-                     // flag whether to cut
-                     if( (mRelThres && adc < mRelThres*err) || (mAbsThres>-4096 && adc < mAbsThres) )
+                     if( ped > 4096 || ped < 0 ){
                         strip->setGeoId( -1 );
+                     } else {
+                        // subtract the pedistal
+                        adc -= ped;
 
+                        // set the value
+                        strip->setAdc( adc );
+
+                        // no DB yet, so no gains.  Default to unitary gain
+                        strip->setCharge( adc );
+                        printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
+                        // flag whether to cut
+                        if( (mRelThres && adc < mRelThres*err) || (mAbsThres>-4096 && adc < mAbsThres) )
+                           strip->setGeoId( -1 );
+                     };
                   } else if ( mDoRemoveOtherTimeBins ){
                      // flag to cut
                      strip->setGeoId( -1 );
@@ -118,8 +125,9 @@ Int_t StFgtA2CMaker::Make(){
                };
             };
 
-            if( mDoRemoveOtherTimeBins || mRelThres || mAbsThres>-4096 )
-               stripCollectionPtr->removeFlagged();
+            // always check if any need removed, as it is possible
+            // some ``bad'' strips may have abnormally large st. dev.
+            stripCollectionPtr->removeFlagged();
          };
       };
    };
