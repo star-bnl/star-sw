@@ -41,7 +41,8 @@ class JevpServer {
   DisplayFile *displays;
   char *serverTags;
 
-  int run;                // run number
+  int eventsThisRun;
+  // int run;                // run number
   int nodb;               // send to db?
   int die;                // die when the run is over? or wait for the next run...
   char *daqfilename;      // NULL if running real data

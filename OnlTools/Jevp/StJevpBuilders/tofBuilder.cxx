@@ -91,12 +91,14 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   contents.TOF_L1mult_vs_sumL0->SetYTitle("Sum L0 of hits");
 
 
-  contents.TOF_Error1 = new TH1F("TOF_Error1","TOF electronics error ",250,0.5,125.5);
+  contents.TOF_Error1 = new TH1F("TOF_Error1","TOF electronics error ",244,0.5,125.5);
   contents.TOF_Error1->SetXTitle("Tray #");
-  contents.TOF_Error2=new TH1F("TOF_Error2","TOF bunchid shift error",14,0,7.);
+  contents.TOF_Error2=new TH1F("TOF_Error2","TOF bunchid shift error",122,0.5,122.5);
   contents.TOF_Error2->SetXTitle("THUB upvpd MTD");
-  contents.TOF_Error3=new TH1F("TOF_Error3","TOF bunchid shift error",14,0,7.);
+  contents.TOF_Error3=new TH1F("TOF_Error3","TOF bunchid shift error",122,0.5,122.5);
   contents.TOF_EventCount=new TH1F("TOF_EventCount","TOF_EventCount",2,0,2);
+  contents.TOF_Tray_hits1=new TH1F("TOF_Tray_hits1","TOF Hits by TrayHalf",244,0.5,122.5);
+  contents.TOF_Tray_hits2=new TH1F("TOF_Tray_hits2","TOF Hits by TrayHalf",244,0.5,122.5);
 
   contents.upvpd_hitmap[0] = new TH1F("upvpd_LE_hitmap","upvpd Leading edge hitmap",54,-0.5,53.5);
   contents.upvpd_hitmap[0]->SetXTitle("PMT #");
@@ -303,7 +305,7 @@ void tofBuilder::startrun(daqReader *rdr) {
   //printf("labels\n");
 
   for(int i=0;i<NTRAYS;i++) {
-    LOG("JEFF", "tray %d   (idx=%d)",i, TOF_L0_trg_idx);
+    LOG(DBG, "tray %d   (idx=%d)",i, TOF_L0_trg_idx);
 
     if(TOF_L0_trg_labels[i]) {
       // remove element deletes it!
@@ -313,22 +315,22 @@ void tofBuilder::startrun(daqReader *rdr) {
     }
 
    
-    LOG("JEFF", "checking... tray %d",i);
+    LOG(DBG, "checking... tray %d",i);
 
     if(NotActiveTray[i+1]) {
-      LOG("JEFF", "Tray %d not active",i+1);
+      LOG(DBG, "Tray %d not active",i+1);
       TOF_L0_trg_labels[i] = new TLatex(.2,.8,"Not Active");
       TOF_L0_trg_labels[i]->SetNDC();
       plots[i+TOF_L0_trg_idx]->addElement(TOF_L0_trg_labels[i]);
     }
     else if (MaskoutTray[i+1]) {
-      LOG("JEFF","Tray %d masked out\n",i+1);
+      LOG(DBG,"Tray %d masked out\n",i+1);
       TOF_L0_trg_labels[i] = new TLatex(.2,.8,"Masked Out");
       TOF_L0_trg_labels[i]->SetNDC();
       plots[i+TOF_L0_trg_idx]->addElement(TOF_L0_trg_labels[i]);
     } 
     
-    LOG("JEFF", "checkinged tray %d",i);
+    LOG(DBG, "checkinged tray %d",i);
     
   }
 
@@ -378,7 +380,7 @@ int tofBuilder::parseData(daqReader *rdr)
   int trayid=-1;
   int bunchid=0;
   memset(tinohit, 0, sizeof(tinohit));
-  for(int i=0;i<2;i++) for(int j=0;j<124;j++) allbunchid[i][j] = -9999;
+  for(int i=0;i<2;i++) for(int j=0;j<122;j++) allbunchid[i][j] = -9999;
 
   // Get TOF data...
   daq_dta *dd = rdr->det("tof")->get("legacy");
@@ -388,9 +390,22 @@ int tofBuilder::parseData(daqReader *rdr)
       tof = (tof_t *)dd->Void;
 
       // TOF trigger window per THUB, subject to change anytime.
-      int trigwindowLow[4]={2830,2840,2910,2910};
-      int trigwindowHigh[4]={2910,2920,2990,2990};
-      
+      //int trigwindowLow[4]={2830,2840,2910,2910};
+      //int trigwindowHigh[4]={2910,2920,2990,2990};
+      int trigwindowLowpertray[120]={
+	2809,2809,2806,2808,2809, 2809,2809,2809,2809,2810, 2809,2809,2809,2809,2809,
+	2809,2808,2809,2809,2808, 2809,2809,2809,2809,2806, 2809,2818,2818,2818,2818,
+	2818,2824,2826,2822,2828, 2826,2827,2825,2827,2819, 2821,2821,2820,2818,2809,
+	2809,2809,2809,2809,2809, 2784,2784,2784,2795,2796, 2797,2797,2797,2809,2809,
+	2884,2884,2871,2873,2872, 2883,2877,2884,2878,2883, 2884,2884,2884,2884,2885,
+	2884,2892,2894,2895,2893, 2894,2893,2892,2894,2884, 2884,2883,2883,2884,2875,
+	2876,2877,2875,2876,2878, 2884,2884,2890,2884,2897, 2897,2897,2897,2896,2897,
+	2896,2896,2894,2896,2897, 2896,2884,2891,2884,2884, 2884,2885,2883,2884,2884
+      };
+      int trigwindowHighpertray[120];
+      for(int iii=0;iii<120;iii++)
+	trigwindowHighpertray[iii]=trigwindowLowpertray[iii]+80;
+
       for(int ifib=0;ifib<4;ifib++){
 	int ndataword = tof->ddl_words[ifib];    // 
 	if(ndataword<=0) continue;
@@ -400,8 +415,12 @@ int tofBuilder::parseData(daqReader *rdr)
 	  // error stuff...
 	  int packetid = (dataword&0xF0000000)>>28;
 	  if(!ValidDataword(packetid)) {
-	    contents.TOF_Error1->Fill(trayid+0.5*halftrayid); 
-	    nerr1++;
+	    
+	    // ignore tray95-0 error
+	    if(trayid != 95) {
+	      contents.TOF_Error1->Fill(trayid+0.5*halftrayid); 
+	      nerr1++;
+	    }
 	  }
 
 	  if(ndataword<=0) continue;
@@ -469,9 +488,11 @@ int tofBuilder::parseData(daqReader *rdr)
 	  float timeDiff = time- trgTime;
 	  while(timeDiff<0) timeDiff += 51200;
 
-	  int thub=Get_TOFTHUB(trayid);
+	  //int thub=Get_TOFTHUB(trayid);
+	  //if(timeDiff<trigwindowLow[thub] || timeDiff>trigwindowHigh[thub]) continue;   // trigger window cut
 
-	  if(timeDiff<trigwindowLow[thub] || timeDiff>trigwindowHigh[thub]) continue;   // trigger window cut
+	  if(timeDiff<trigwindowLowpertray[trayid-1] || timeDiff>trigwindowHighpertray[trayid-1]) continue;
+
 	  //
 	  int atdig = globaltdcchan/24;   // 0,1,....7
 	  int atdcid  = globaltdcchan/8;    // 0,1,....24    
@@ -481,6 +502,11 @@ int tofBuilder::parseData(daqReader *rdr)
 	  int tinoidx = atdig*3 + tinoid;
 	  //
 	  tinohit[trayid-1][tinoidx]++; 
+	  
+	  if((edgeid !=4) && (edgeid != 5)) continue;
+	  
+	  if(halftrayid==0) contents.TOF_Tray_hits1->Fill(trayid-0.5);
+	  if(halftrayid==1) contents.TOF_Tray_hits2->Fill(trayid);
 	}  // end loop nword
       }  // end loop fiber
     }
@@ -505,10 +531,67 @@ bool tofBuilder::ValidDataword(int packetid)
 
 }
 
+// int tofBuilder::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchid)
+// {
+//   if(trayid<1 || trayid>122) return -1;
+//   if(trayid == 123) return -1;
+//   // THUB NW
+//   int trayinTHUB1[30]={21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50};
+//   // THUB NE 
+//   int trayinTHUB2[30]={66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95};
+//   // THUB SW
+//   int trayinTHUB3[30]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,51,52,53,54,55,56,57,58,59,60};
+//   // THUB SE
+//   int trayinTHUB4[30]={61,62,63,64,65,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120};
+ 
+//   // the following numbers are moved into TOF_ValidBunchidPhase.txt 
+//   /*
+//   int trayvalidshift[2][4]={{4,-5,0,-7},{5,-4,0,-6}};
+//   //tray 121 half0: 4 5    half1: 5 6
+//   //tray 122 half0: -5 -4  half1: -4 -3
+//   int tray121shift[2][2]={{ 4, 5},{ 5, 6}};
+//   int tray122shift[2][2]={{-5,-4},{-4,-3}};
+//   int tray124shift[2]   = {-5,-6};
+//   */
+
+//   int nthub=-1;
+//   int ret=-1;
+//   for(int itray=0;itray<30;itray++){
+//     if(trayid == trayinTHUB1[itray]) nthub=0;
+//     if(trayid == trayinTHUB2[itray]) nthub=1;
+//     if(trayid == trayinTHUB3[itray]) nthub=2;
+//     if(trayid == trayinTHUB4[itray]) nthub=3;
+//   }
+//   if(trayid == 121) nthub = 4;
+//   if(trayid == 122) nthub = 5;
+ 
+//   int diff = bunchid - refbunchid;
+//   if(diff>2048)   {diff =diff-4096;} 
+//   else if(diff<-2048) {diff =diff+4096;}
+
+//   //  cout<<"tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<nthub<<endl;
+
+//   if(trayid>1 && trayid<121){
+//     if( (diff != mValidShiftTray[0][nthub])  && (diff != mValidShiftTray[1][nthub]) ) ret=nthub;
+//   } else if(trayid==121){
+//     if(diff !=mValidShift121[halftrayid][0] && diff != mValidShift121[halftrayid][1]) ret=nthub;
+//   } else if(trayid==122){
+//     if(diff !=mValidShift122[halftrayid][0] && diff != mValidShift122[halftrayid][1]) ret=nthub;
+//   }
+
+//   if(ret>=0) {
+//     cout<<"ERROR!! tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<ret<<endl;
+//   }
+
+//   return ret;
+// }
+
 int tofBuilder::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchid)
 {
-  if(trayid<1 || trayid>124) return -1;
+  if(trayid<1 || trayid>122) return -1;
+
   if(trayid == 123) return -1;
+
   // THUB NW
   int trayinTHUB1[30]={21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50};
   // THUB NE 
@@ -536,28 +619,22 @@ int tofBuilder::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchi
     if(trayid == trayinTHUB3[itray]) nthub=2;
     if(trayid == trayinTHUB4[itray]) nthub=3;
   }
-  if(trayid == 121) nthub = 4;
-  if(trayid == 122) nthub = 5;
-  if(trayid == 124) nthub = 6;
-  int diff = bunchid - refbunchid;
+  if(trayid == 121) nthub =4;
+  if(trayid == 122) nthub =5;
+  int diff=bunchid-refbunchid;
   if(diff>2048)   {diff =diff-4096;} 
   else if(diff<-2048) {diff =diff+4096;}
 
-  //  cout<<"tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<nthub<<endl;
-
+//  cout<<"tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<nthub<<endl;
   if(trayid>1 && trayid<121){
     if( (diff != mValidShiftTray[0][nthub])  && (diff != mValidShiftTray[1][nthub]) ) ret=nthub;
   } else if(trayid==121){
     if(diff !=mValidShift121[halftrayid][0] && diff != mValidShift121[halftrayid][1]) ret=nthub;
   } else if(trayid==122){
     if(diff !=mValidShift122[halftrayid][0] && diff != mValidShift122[halftrayid][1]) ret=nthub;
-  } else if(trayid==124) {
-    if(diff != mValidShift124[0] && diff != mValidShift124[1]) ret=nthub;
   }
 
-  if(ret>=0) {
-    cout<<"ERROR!! tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<ret<<endl;
-  }
+  //if(ret>=0)cout<<"ERROR!! tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<ret<<endl;
 
   return ret;
 }
@@ -641,7 +718,7 @@ void tofBuilder::event(daqReader *rdr)
     nerr2++;
   }
   
-  for(int itray=0;itray<124;itray++){
+  for(int itray=0;itray<122;itray++){
     int traynum=itray+1;
     if(NotActiveTray[traynum]) continue;
     for(int ihalf=0;ihalf<2;ihalf++){
@@ -651,7 +728,6 @@ void tofBuilder::event(daqReader *rdr)
       int ret=ValidBunchid(traynum,ihalf,bunchid,bunchidref1);
 
       if(ret>=0) {
-	printf("%d jjj %d %d %d %d\n",ret,traynum,ihalf,bunchid,bunchidref1);
 	contents.TOF_Error2->Fill(ret+0.5*ihalf);
 	nerr2++;
 
@@ -741,14 +817,11 @@ void tofBuilder::main(int argc, char *argv[])
 }
 
 
-
-
-
 void tofBuilder::ReadValidBunchidPhase(){
-  //cout<<"tofBuilder::Bunchid phase config file:"<<mBunchShiftList<<endl;
+  //cout<<"TOFcheckHistogramGroup::Bunchid phase config file:"<<mBunchShiftList<<endl;
   char mBunchShiftList[256];
   sprintf(mBunchShiftList, "%s/tof/%s",confdatadir,"TOF_ValidBunchidPhase.txt");
-  
+
   mReferenceTray=1;
   
   TString buffer;
@@ -770,11 +843,9 @@ void tofBuilder::ReadValidBunchidPhase(){
       if(count==13 || count==14) mValidShift122[0][(count-1)%2]=number;
       if(count==15 || count==16) mValidShift122[1][(count-1)%2]=number;
 
-      if(count==17 || count==18) mValidShift124[(count-1)%2]=number;
-
       count++;
     }
-  } else {cout<<"tofBuilder::Can not open file:"<<mBunchShiftList<<endl;}
+  } else {cout<<"TOFcheckHistogramGroup::Can not open file:"<<mBunchShiftList<<endl;}
 
 }
 

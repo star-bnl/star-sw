@@ -57,6 +57,8 @@ public:
       TH1 *TOF_Error2;
       TH1 *TOF_Error3;
       TH1 *TOF_EventCount;      
+      TH1 *TOF_Tray_hits1;
+      TH1 *TOF_Tray_hits2;
 
       // TOFtrayHistogramGroup
       TH1 *TOF_Tray_LEhitmap[NTRAYS];
@@ -77,7 +79,7 @@ public:
   } extra;
 
 
-  bool NotActiveTray[128];  // Highest TOF tray  number is MTD: 124, leave some rooms here. 
+  bool NotActiveTray[128];  // Highest TOF tray  number is MTD: 124, leave some room here. 
 
   TLatex *TOF_L0_trg_labels[NTRAYS];
   TLatex *TOF_Error1_label;
@@ -95,7 +97,6 @@ public:
   int mValidShiftTray[2][4];
   int mValidShift121[2][2];
   int mValidShift122[2][2];
-  int mValidShift124[2];
 
   int np;
   JevpPlot *plots[400];

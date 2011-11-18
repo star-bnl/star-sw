@@ -13,6 +13,11 @@
 #include "Jevp/StJevpPlot/JLatex.h"
 #include "Jevp/StJevpPlot/JLine.h"
 
+
+#include "StDaqLib/TRG/trgStructures2009.h"
+#include "StEvent/StTriggerData2009.h"
+#include "StEvent/StTriggerData.h"
+
 #include <unistd.h>
 //#include <RTS/include/SUNRT/clockClass.h>
 
@@ -88,6 +93,8 @@ class JevpPlotSet : public TObject {
   }
 
   TList plots;    // The plots built
+
+  StTriggerData *getStTriggerData(daqReader *rdr);
 
  private:
 

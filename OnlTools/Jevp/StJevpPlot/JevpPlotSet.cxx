@@ -12,6 +12,10 @@
 #include <RTS/include/rtsLog.h>
 #include <TSystem.h>
 
+#include <DAQ_READER/daqReader.h>
+#include <DAQ_READER/daq_dta.h>
+#include <DAQ_READER/daq_det.h>
+
 #define NUM_INTERNALPLOTS 3
 
 ClassImp(JevpPlotSet);
@@ -197,8 +201,6 @@ void JevpPlotSet::_initialize(int argc, char *argv[])
   TH1 *h;
   PlotHisto *ph;
 
-  LOG("JEFF", "plotsetname = %s",plotsetname);
-
   LOG("JEFF", "Initializing %sBuilder: pid=%d file=%s",getPlotSetName(), (int)getpid(), daqfile ? daqfile : "live");
   CP;
   plotEvtsByTrigger = new JevpPlot();
@@ -269,23 +271,15 @@ void JevpPlotSet::_startrun(daqReader *rdr)
   builderStatus.events = 0;
 
   CP;
-  LOG("JEFF", "evtsbytrigger 0x%x %s", plotEvtsByTrigger, myname);
-  LOG("JEFF", "Here 0x%x", plotEvtsByTrigger->getHisto(0));
-  LOG("JEFF", "Here 0x%x", plotEvtsByTrigger->getHisto(0)->histo);
   plotEvtsByTrigger->getHisto(0)->histo->Reset();
   CP;
-  LOG("JEFF", "Here");
   plotTimeByTrigger->getHisto(0)->histo->Reset();
   CP;
-  LOG("JEFF", "Here");
   plotTime->getHisto(0)->histo->Reset();
   CP;
-  LOG("JEFF", "Here");
   CPC;
 
-  LOG("JEFF", "startrun");
   startrun(rdr);
-  LOG("JEFF", "Stop startrun");
   CPC;
   CP;
 }
@@ -304,8 +298,6 @@ void JevpPlotSet::_stoprun(daqReader *rdr)
 
   builderStatus.setStatus("stopped");
 
-  LOG("JEFF", "Stopping run #%d",run);
-    
   CP;
 }
 
@@ -357,7 +349,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 
   builderStatus.setName(plotsetname);
 
-  rtsLogOutput(RTS_LOG_NET);
+  rtsLogOutput(RTS_LOG_STDERR);
   rtsLogAddDest((char *)"172.16.0.1",8004);
   rtsLogLevel((char *)WARN);
 
@@ -773,7 +765,7 @@ void JevpPlotSet::writePdfFile()
 
 void JevpPlotSet::addServerTags(char *tags)
 {
-  LOG("JEFF", "servertags = %d",strlen(servertags));
+  LOG(DBG, "servertags = %d",strlen(servertags));
 
   if(strlen(servertags) > 0) {
 
@@ -792,4 +784,33 @@ void JevpPlotSet::addServerTags(char *tags)
 char *JevpPlotSet::getServerTags()
 {
   return servertags;
+}
+
+
+// Helper for getting data
+StTriggerData *JevpPlotSet::getStTriggerData(daqReader *rdr)
+{
+  StTriggerData2009 *trgd2009;
+  int run = rdr->run;
+  
+  daq_dta *dd = rdr->det("trg")->get("raw");
+  if(dd && dd->iterate()) {
+    char *td = (char *)dd->Void;
+    
+    if(td[3] != 0x40) {
+      LOG("ERR", "TRG RAW: version mismatch 0x%2x-0x%2x-0x%2x-0x%2x", td[0], td[1], td[2], td[3]);
+      return NULL;
+    }
+
+    TriggerDataBlk2009 *trgdatablock2009 = (TriggerDataBlk2009 *)td;
+    trgd2009 = new StTriggerData2009(trgdatablock2009, run);
+  }
+  else {
+    LOG(ERR, "No trigger data exists...");
+    return NULL;
+  }
+  
+  StTriggerData *trgd = (StTriggerData *)trgd2009;
+
+  return trgd;
 }

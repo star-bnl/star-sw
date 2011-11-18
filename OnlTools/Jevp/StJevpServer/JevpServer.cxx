@@ -216,7 +216,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
 
 void JevpServer::archive_display_file()
 {
-  LOG("JEFF", "Archiving display file");
+  LOG(DBG, "Archiving display file");
   // First find existing display def files..
   char orig[256];
   char archive[256];
@@ -274,7 +274,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
   updateDisplayDefs();
 
   // Create daq reader...
-  LOG("JEFF", "Reader filename is %s",daqfilename ? daqfilename : "none");
+  LOG(DBG, "Reader filename is %s",daqfilename ? daqfilename : "none");
   rdr = new daqReader(daqfilename);
   if(diska) rdr->setEvpDisk(diska);
 
@@ -301,14 +301,9 @@ int JevpServer::init(int port, int argc, char *argv[]) {
   TListIter next(&builders);
   JevpPlotSet *curr;
   while((curr = (baseBuilder *)next())) {
-    //LOG("JEFF", "Adding Builders: builder=%s",curr->getPlotSetName()); 
-    LOG("JEFF", "curr = 0x%x",curr);
     curr->_initialize(argc, argv);
-    LOG("JEFF", "Adding Builders: builder=%s",curr->getPlotSetName());
   }
   CP;
-
-  LOG("JEFF", "Done");
 
   return 0;
 }  
@@ -317,7 +312,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 // returns delay in milliseconds
 int JevpServer::handleEvent()
 {
-  static int eventsThisRun=0;
+
 
   JevpPlotSet *curr;
   TListIter next(&builders);
@@ -334,7 +329,7 @@ int JevpServer::handleEvent()
       return 100;
       
     case EVP_STAT_EOR:
-      LOG("JEFF", "End of the run!");
+      LOG(DBG, "End of the run!");
       CP;
       if(runStatus.running()) {
 	performStopRun();
@@ -362,16 +357,12 @@ int JevpServer::handleEvent()
     return 1000;
   }
   
-  LOG("JEFF", "rdr->run=%d run=%d",rdr->run, run);
-  if(rdr->run != (unsigned int)run) {
+  if(rdr->run != (unsigned int)runStatus.run) {
     CP;
-    LOG("JEFF", "Starting new run #%d  (%d)",rdr->run, run);
+    LOG("JEFF", "Starting new run #%d  (%d)",rdr->run, runStatus.run);
     performStartRun();
     eventsThisRun = 0;
   }
-  
-
-  LOG("JEFF", "Got here...");
 
   eventsThisRun++;
   
@@ -381,17 +372,19 @@ int JevpServer::handleEvent()
   CP;
   while((curr = (JevpPlotSet *)next())) {
    
+    double throttle_time = .025;
+
     if(throttleAlgos) {
-      if((curr->processingTime / (double)eventsThisRun) > .1) {
-	LOG("JEFF", "Skipping builder for event %d: %s due to 100ms/event throttle (%lf secs/event : %d so far)",
-	    rdr->seq, curr->getPlotSetName(), curr->getAverageProcessingTime(), curr->numberOfEventsRun);
+      if((curr->processingTime / (double)eventsThisRun) > throttle_time) {
+	LOG("JEFF", "Skipping builder for event %d: %s due to %d ms/event throttle (%lf secs/event : %d of %d so far)",
+	    rdr->seq, curr->getPlotSetName(), (int)(throttle_time * 1000), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
 	
 	continue;
       }
     }
     
     CP;
-    LOG("JEFF", "Sending event #%d to builder: %s",rdr->seq, curr->getPlotSetName());
+    LOG(DBG, "Sending event #%d to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, curr->getPlotSetName(), curr->getAverageProcessingTime());
 
     curr->_event(rdr);
 
@@ -399,8 +392,6 @@ int JevpServer::handleEvent()
   }
   
   CP;
-
-  LOG("JEFF", "Got done with event...");
   return 0;
 }
 
@@ -420,7 +411,7 @@ void JevpServer::handleClient(int delay) {
   CP;
   if((long)s <= 0) {
     if(delay > 0) {
-      LOG(WARN, "Got a timeout or an error: %d (delay was %d)",s,delay);
+      LOG(DBG, "Got a timeout or an error: %d (delay was %d)",s,delay);
     }
     CP;
     return;
@@ -562,7 +553,7 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
   }
   else if(strcmp(msg->cmd, "addServerTag") == 0) {
     CP;
-    LOG("JEFF", "Adding serverTags: %s", msg->args);
+    //LOG("JEFF", "Adding serverTags: %s", msg->args);
     addServerTags(msg->args);
     CP;
   }
@@ -605,17 +596,32 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
 void JevpServer::performStartRun()
 {
   runStatus.run = rdr->run;
-  
+  eventsThisRun = 0;
+
   LOG("JEFF", "Start run #%d",runStatus.run);
   clearForNewRun();
 
   runStatus.setStatus("running");
-  LOG("JEFF", "Back...");
 }
 
 void JevpServer::performStopRun()
 {
-  LOG("JEFF", "Got end of run...%d",displays->nDisplays());
+  LOG("JEFF", "Got run stop for run #%d (%d displays to write out)",runStatus.run, displays->nDisplays());
+
+
+  JevpPlotSet *curr;
+  TListIter next(&builders);
+  
+  while((curr = (JevpPlotSet *)next())) {
+    LOG("JEFF", "End of run report for %s: (%lf secs/event : %d of %d analyzed)",
+	curr->getPlotSetName(), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
+    
+    continue;
+  }
+
+  
+  eventsThisRun = 0;
+
 
   // Write out the pdfs for all displays...
   for(int i=0;i<displays->nDisplays();i++) {
@@ -634,16 +640,15 @@ void JevpServer::performStopRun()
   // Add any new plots to the pallet...
 
 
-  TListIter next(&builders);
-  JevpPlotSet *curr;
+  next.Reset();
   while((curr = (JevpPlotSet *)next())) {
 
-    LOG("JEFF", "Adding plot to pallete: builder=%s",curr->getPlotSetName());
+    LOG(DBG, "Adding plot to pallete: builder=%s",curr->getPlotSetName());
 
     JevpPlot *currplot;
     TListIter nextplot(&curr->plots);
     while((currplot = (JevpPlot *)nextplot())) { 
-      LOG("JEFF", "                    : plot = %s",currplot->GetPlotName());
+      LOG(DBG, "                    : plot = %s",currplot->GetPlotName());
       addToPallete(currplot);
     }
   }
@@ -672,25 +677,17 @@ void JevpServer::clearForNewRun()
 
   TListIter next(&builders);
 
-  LOG("JEFF", "Here...");
-
   JevpPlotSet *curr;
   while((curr = (JevpPlotSet *)next())) {
 
-    LOG("JEFF", "There %s", curr->getPlotSetName());
+    LOG(DBG, "Send startrun for: %s", curr->getPlotSetName());
     curr->_startrun(rdr);
-
-    LOG("JEFF", "Blah");
   }
-
-  LOG("JEFF", "There");
 
   if(serverTags) {
     free(serverTags);
     serverTags = NULL;
   }
-
-  LOG("JEFF", "further");
 }
 
 
@@ -705,7 +702,7 @@ JevpPlot *JevpServer::getPlot(char *name) {
   
     while((currplot = (JevpPlot *)nextplot())) {
 
-      LOG("JEFF", "getPlot():  checking %s vs %s",name,currplot->GetPlotName());
+      LOG(DBG, "getPlot():  checking %s vs %s",name,currplot->GetPlotName());
 
       if(strcmp(currplot->GetPlotName(), name) == 0) {
 	return currplot;
@@ -777,15 +774,6 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
 
     if(strcmp(plotname, "serv_JevpSummary") == 0) {
       JevpPlot *p = getJevpSummaryPlot();
- //      CP;
-//       LOG("JEFF", "Got summary Plot 0x%x",p);
-//       TMessage mess(kMESS_OBJECT);
-//       CP;
-//       mess.WriteObject(p);
-//       CP;
-//       s->Send(mess);
-//       CP;
-//       LOG("JEFF", "Sent summary plot");
       
       handleEvpPlot(NULL, p);
     }
@@ -1152,4 +1140,155 @@ void JevpServer::addServerTags(char *tags)
   }
   
   free(tmp);
+}
+
+
+int JevpServer::execScript(const char *name, char *args[], int waitforreturn)
+{
+  CP;
+  pid_t pid = fork();
+
+  if(pid == -1) {
+    LOG(CRIT, "Error spawning script: %s (%s)",name, strerror(errno),0,0,0);
+    return 1;
+  }
+
+  if(pid == 0) {
+    for(int i=0;;i++) {
+      if(args[i] == NULL) break;
+      LOG(NOTE, "args[%d] = %s",i,args[i]);
+    }
+    
+    int ret = execvp(name,args);
+    if(ret < 0) {
+      LOG(CRIT, "Error spawning script: %s (%s)",name, strerror(errno),0,0,0);
+      return 1;
+    }
+  }
+
+  CP;
+  if(!waitforreturn) return 0;
+  CP;
+
+  // Wait for child to return....
+  int stat=0;
+  do {
+    waitpid(pid,&stat,0);
+  } while(WIFEXITED(stat) == 0);
+
+  return WEXITSTATUS(stat);
+}
+
+// This function actually checks if already in pallete
+// if not, adds....
+void JevpServer::addToPallete(JevpPlot *plot)
+{
+  char *builder = plot->getParent();
+  char *name = plot->GetPlotName();
+
+  CP;
+  DisplayNode *palleteNode = displays->root->child;
+
+  while(palleteNode) {
+    if(strcmp(palleteNode->name, "pallete") == 0) {
+      break;   // Found the node we are looking for!
+    }
+    else {
+      LOG(DBG,"Looking for pallete: checking dir %s",palleteNode->name);
+    }
+    palleteNode = palleteNode->next;
+  }
+
+  CP;
+  if(!palleteNode) {
+    LOG(ERR, "No pallete found!");
+    return;
+  }
+  LOG(DBG, "Found pallete node");
+
+  CP;
+
+  // Look for builder...
+  DisplayNode *builderNode = palleteNode->child;
+
+  CP;
+
+  while(builderNode) {
+    if(strcmp(builderNode->name, builder) == 0) {
+      break;
+    }
+    else {
+      LOG(DBG, "Looking for builder %s:  checking dir %s",builderNode->name);
+    }
+
+    builderNode = builderNode->next;
+  }
+  
+  CP;
+
+  // If not there, create builder...
+  if(!builderNode) {
+    CP;
+    LOG(DBG, "Creating builder node!");
+    builderNode = new DisplayNode();
+    builderNode->setName(builder);
+    // alphabetize...
+    palleteNode->insertChildAlpha(builderNode);
+  }
+  
+  CP;
+  LOG(DBG, "Have builder node...");
+  
+  CP;
+  // Look for plot...
+  DisplayNode *plotNode = builderNode->child;
+  while(plotNode) {
+    
+    if(strcmp(plotNode->name,name) == 0) {    // Its there, nothing to be done!
+      LOG(DBG, "plot was already there...do nothing");
+      return;
+    }
+  
+    plotNode = plotNode->next;
+  }
+  CP;
+
+  LOG("JEFF", "inserting plot %s/%s into pallete", builder, name);
+  // The plot was not found... insert it
+  plotNode = new DisplayNode();
+  plotNode->setName(name);
+  plotNode->leaf = 1;
+  builderNode->insertChildAlpha(plotNode);
+
+  CP;
+}
+
+
+// Parse a string of the form
+// "defaultparam param1=x param2=y"
+char *JevpServer::getParamFromString(char *dest, char *source, char *param)
+{
+  char *tmp = dest;
+  char *str = source;
+
+  // Find the "param=" and position directly after it...
+  if(param != NULL) {
+    str = strstr(source, param);
+    if(!str) return NULL;
+
+    str += strlen(param);
+    if(*str != '=') {
+      return NULL;
+    }
+    str++;
+  }
+  
+  // copy till whitespace or end...
+  while((*str != '\0') && !isspace(*str)) {
+    *tmp = *str;
+    tmp++;
+    str++;
+  }
+  *tmp = '\0';
+  return dest;  
 }
