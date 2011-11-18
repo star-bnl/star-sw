@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.11 2011/10/03 20:11:42 perev Exp $
+// $Id: StvMaker.cxx,v 1.12 2011/11/18 23:34:37 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -61,6 +61,7 @@ More detailed: 				<br>
 #include "TTree.h"
 #include "TTable.h"
 #include "TCernLib.h"
+#include "TGeoManager.h"
 #include "StDetectorId.h"
 #include "StEvent.h"
 #include "StChainOpt.h"
@@ -146,10 +147,8 @@ static int initialized = 0;
   TString geom;
 // 		Geometry via DBMaker
   TDataSet *myGeo = GetDataBase("VmcGeometry");
-  if (myGeo) {
-    geom = myGeo->GetName();
-    geom.ReplaceAll("Geometry.","");
-    geom.ReplaceAll(".C","");
+  if (gGeoManager) {
+    geom = gGeoManager->GetName();
   } else {
     geom = GetChainOpt()->GetGeometry();
     assert(geom.Length());

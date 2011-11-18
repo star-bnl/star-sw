@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.13 2011/10/26 20:35:39 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.14 2011/11/18 23:34:40 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.14  2011/11/18 23:34:40  perev
+ * Global impact fixed
+ *
  * Revision 1.13  2011/10/26 20:35:39  perev
  * Temporary fix primary hit ignored
  *
@@ -875,17 +878,13 @@ void StvStEventFiller::fillEventPrimaries()
     
     pTrack = 0;
     for (mVertN=0; (vertex = mEvent->primaryVertex(mVertN));mVertN++) {
-      if (kTrack->IsPrimary()!=mVertN+1)	continue;
       StThreeVectorD vertexPosition = vertex->position();
       double zPrim = vertexPosition.z();
       // loop over StvKalmanTracks
       float globalDca = impactParameter(gTrack,vertexPosition);
       if (fabs(minDca) > fabs(globalDca)) minDca = globalDca;
  
-      const StvNode *lastNode = kTrack->GetNode(StvTrack::kPrimPoint);
-      StvHit *pHit = lastNode->GetHit();
-      assert (pHit);
-      assert (fabs(pHit->x()[2]-zPrim)<0.001);//not this primary
+      if (kTrack->IsPrimary()!=mVertN+1)	continue;
 
       fillTrackCount1++;
       // detector info
@@ -1217,7 +1216,7 @@ bool StvStEventFiller::accept(const StvTrack* track)
 //  int nPossiblePoints = track->getMaxPointCount(0);
 //  int nMeasuredPoints = track->getPointCount   (0);
     int nFittedPoints   = track->GetNHits();
-    if (nFittedPoints  <  5 )					return 0;
+    if (nFittedPoints  <  5 )				return 0;
     if(track->GetLength()<=0) 				return 0; 
     // insert other filters for riff-raff we don't want in StEvent here.
     
@@ -1261,6 +1260,7 @@ static int nCall = 0; nCall++;
   dca->set(&myImp.mImp,&myImp.mImpImp);
   StvDebug::Count("DcaGeo",dca->params()[0]);
   assert(fabs(pars.getRxy()-fabs(dca->params()[0]))<1e-2*(1+pars.getRxy()));
+  stTrack->setImpactParameter(myImp.mImp);
 
 }
 //_____________________________________________________________________________
