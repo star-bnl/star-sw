@@ -99,6 +99,7 @@ void RunJetFinder2009pro(int nevents = 1e6,
 
   // Barrel ADC to energy maker
   StEmcADCtoEMaker* adc = new StEmcADCtoEMaker;
+  adc->saveAllStEvent(true);
 
   // Trigger simulator
   StTriggerSimuMaker* simuTrig = new StTriggerSimuMaker;
