@@ -315,7 +315,6 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
 
   // Add Plots to plot set...
   for(int i=0;i<=n;i++) {
-    // LOG("JEFF", "Adding plot %d",i);
     addPlot(plots[i]);
   }
 }
@@ -334,8 +333,6 @@ void tpxBuilder::event(daqReader *rdr)
 {
   int has_adc=0;
   int has_cld=0;
-
-  LOG("JEFF", "a");
 
   // printf("aa\n");
   long q_idx = ((long)&contents.h15_tpc_sec1 - (long)contents.array) / (sizeof(TH1 *));
@@ -357,9 +354,6 @@ void tpxBuilder::event(daqReader *rdr)
 
   double pix_count_cl = 0;
 
-
-  LOG("JEFF", "b");
-
   // printf("cc\n");
   for(int s=1;s<=24;s++) {
 
@@ -371,14 +365,9 @@ void tpxBuilder::event(daqReader *rdr)
     memset(channel_counts, 0, sizeof(channel_counts));
     memset(charge_counts, 0, sizeof(charge_counts));
     memset(tb_charge_counts, 0, sizeof(tb_charge_counts));
-    
-    LOG("JEFF", "Sect %d",s);
 
     daq_dta *dd = rdr->det("tpx")->get("adc",s) ;
     if(dd) {   // regular data...
-
-      LOG("JEFF", "has adc");
-
       has_adc = 1;
       tpc_max_channels += tpc_max_channels_sector;
 
@@ -391,7 +380,6 @@ void tpxBuilder::event(daqReader *rdr)
 	  channel_counts[dd->pad][dd->row] = 1;
 	}
 
-	//	LOG("JEFF", "nocont");
 	for(u_int i=0;i<dd->ncontent;i++) {
 	  int tb = dd->adc[i].tb;
 	  int adc = dd->adc[i].adc;
@@ -399,22 +387,18 @@ void tpxBuilder::event(daqReader *rdr)
 	  if((dd->pad >= 183) ||
 	     (dd->row >= 46) ||
 	     (tb >= 512)) {
-	    LOG("JEFF", "Really?  %d %d %d", dd->pad, dd->row, tb);
+	    LOG(ERR, "pad=%d row=%d tb=%d out of range.  Ignore.", dd->pad, dd->row, tb);
 	  }
 	  else {
 	    charge_counts[dd->pad][dd->row] += adc;
 	    tb_charge_counts[tb] += adc;
 	  }
 	}
-	//	LOG("JEFF", "and here");
       }
 
-      LOG("JEFF", "ball");
       for(int i=0;i<512;i++) {
 	contents.array[s + qs_idx - 1]->Fill(i,tb_charge_counts[i]);
       }
-      
-      LOG("JEFF", "b2");
       
       for(int i=1;i<183;i++) {
 	for(int j=1;j<46;j++) {
@@ -430,21 +414,14 @@ void tpxBuilder::event(daqReader *rdr)
 	}
       }
 
-      LOG("JEFF", "b3");
       contents.h67_tpc_sector_charge->Fill(s,charge_count_sector);      
     }
-
-    LOG("JEFF", "c");
 
     double charge_cl=0;
     double charge_counts_cl[183][46];
     double tb_charge_counts_cl[512];
     memset(charge_counts_cl, 0, sizeof(charge_counts_cl));
     memset(tb_charge_counts_cl, 0, sizeof(tb_charge_counts_cl));
-
-    //printf("clusters\n");
-
-    LOG("JEFF", "d");
 
     dd = rdr->det("tpx")->get("cld",s) ;
     if(dd) {
@@ -480,9 +457,6 @@ void tpxBuilder::event(daqReader *rdr)
       }
     }
 
-    LOG("JEFF", "dddd");
-    LOG("JEFF", "e %d", rdr->token);
-
     /***** no pedestal handling currently!
 
     // will only exist in token 0 of a pedestal run!
@@ -507,11 +481,8 @@ void tpxBuilder::event(daqReader *rdr)
   //printf("%d channel counts:   %lf (%lf)\n",rdr->seq, channel_count, pixel_count);  
   
     
-  LOG("JEFF", "e %d", rdr->token);
-
   if(has_adc) {
 
-    LOG("JEFF", "f");
     n_adc++;
     double adc_scale = (double)(n_adc-1) / (double)n_adc;
     if(n_adc == 1) adc_scale = 1;
@@ -523,11 +494,7 @@ void tpxBuilder::event(daqReader *rdr)
     contents.h67_tpc_sector_charge->Scale(adc_scale);
   }
 
-  LOG("JEFF", "ee");
-
   if(has_cld) {
-
-    LOG("JEFF", "ff");
     n_cld++;   
     double cld_scale = (double)(n_cld-1) / (double)n_cld;
     if(n_cld == 1) cld_scale = 1;
@@ -538,8 +505,6 @@ void tpxBuilder::event(daqReader *rdr)
     extras.cl66_tpc_phi_charge->Scale(cld_scale);
     extras.cl67_tpc_sector_charge->Scale(cld_scale);
   }
-    
-  LOG("JEFF", "g");
 
   switch(rdr->trgcmd) {
   case 4:
