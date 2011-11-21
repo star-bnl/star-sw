@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.73 2011/10/11 01:24:57 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.74 2011/11/21 22:00:13 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.74  2011/11/21 22:00:13  perev
+ * Ignore tracks with wrong ge_id
+ *
  * Revision 1.73  2011/10/11 01:24:57  perev
  * Mtd added
  *
@@ -314,7 +317,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.73 2011/10/11 01:24:57 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.74 2011/11/21 22:00:13 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -860,8 +863,8 @@ Int_t StMcEventMaker::Make()
             if (trackTable[itrk].e<trackTable[itrk].ptot) 
 	        trackTable[itrk].ptot=trackTable[itrk].e;
 //		Fix(hack) tracks with garbage geand id(VP)
-            if (trackTable[itrk].ge_pid<0) 	trackTable[itrk].ge_pid=0;
-            if (trackTable[itrk].ge_pid>0xffff) trackTable[itrk].ge_pid=0;
+            if (trackTable[itrk].ge_pid<=0) 	continue;
+            if (trackTable[itrk].ge_pid>0xffff) continue;
 
 	    t = new StMcTrack(&(trackTable[itrk]));
 	    usedTracksG2t++;
