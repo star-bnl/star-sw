@@ -1083,7 +1083,8 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
       TString   myname = realname(name);
       if ( myname.Contains( block->GetName() ) )
 	{
-	  copy++; // ok... this is simplified.  But we take care of not placing same block elsewhere...
+	  copy++; // ok... this is simplified. 
+        	  // But we take care of not placing same block elsewhere...
 	}
     }
 
