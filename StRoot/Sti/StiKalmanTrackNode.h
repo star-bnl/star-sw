@@ -90,6 +90,7 @@ public:
   void resetError(double fak=0);
   /// Initialize this node with the given hit information
   void initialize(StiHit*h);
+  void initialize(StiDetector *d);
 //void initialize(StiHit*h,double alpha, double eta, double curvature, double tanl);
   
   /// Sets the Kalman state of this node equal to that of the given node. 
@@ -249,6 +250,7 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   static Int_t  debug()           {return _debug;}
   static void   setDebug(Int_t m) {_debug = m;}
   static void   SetLaser(Int_t m) {_laser = m;}
+  static Int_t  IsLaser()         {return _laser;}
   void   PrintpT(const Char_t *opt="") const ;
   int    getFlipFlop() const 			{return mFlipFlop;}
   static void   ResetComment(const Char_t *m = "") 	{comment = m; commentdEdx = "";}

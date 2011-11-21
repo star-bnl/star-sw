@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.132 2010/09/07 18:37:31 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.133 2011/11/21 17:05:26 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.133  2011/11/21 17:05:26  fisyak
+ * Correct no. of possible point for CA case
+ *
  * Revision 2.132  2010/09/07 18:37:31  fisyak
  * Restore Sti logic before TPCCATracker
  *
@@ -1868,6 +1871,15 @@ void StiKalmanTrackNode::initialize(StiHit *h)
   setHitErrors();
   _state = kTNInit;
   setChi2(0.1);
+}
+//______________________________________________________________________________
+void StiKalmanTrackNode::initialize(StiDetector *d)
+{
+  reset();
+  _detector = d;
+  _alpha   = _detector->getPlacement()->getNormalRefAngle(); 
+  _state = kTNInit;
+  setChi2(1e10);
 }
 //______________________________________________________________________________
 StiKalmanTrackNode::StiKalmanTrackNode(const StiKalmanTrackNode &n)
