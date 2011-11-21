@@ -45,6 +45,9 @@
         <varlist type="INTEGER"  >
             kBlack,kRed,kGreen,kBlue,kYellow,kViolet,kLightBlue
         </varlist>
+        <varlist type="integer">
+	  kBbox,kPara,kTrd1,iShape,
+	</varlist>
         
         <Parameter name="kBlack" value="1"  />
         <Parameter name="kRed" value="2"  />
@@ -53,6 +56,12 @@
         <Parameter name="kYellow" value="5"  />
         <Parameter name="kViolet" value="6"  />
         <Parameter name="kLightBlue" value="7"  />
+
+	<Parameter name="kBbox" value="0" />
+	<Parameter name="kPara" value="1" />
+	<Parameter name="kTrd1" value="2" />
+	
+	<varlist type="int"> mycount/0/ </varlist>
 
 <Export language="Mortran">
         <varlist type="REAL"  >
@@ -1032,15 +1041,15 @@
             <Medium name="TSWH_STANDARD" deemax="0.248853" stmin="1.15055" />
             <Attribute for="TSWH" seen="1" colo="kViolet"  />
             <Shape type="PCON" zi="{TPCG_MembTHK/2,zWheel1,zWheel1,zTOFCend,zTOFCend,zTIFCFlangeBegin,zTIFCFlangeBegin,TPCG_DzEnvelop}" rmn="{tifcOR,tifcOR,tifcOR,tifcOR,tifcOR,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT}" rmx="{tofcIR,tofcIR,TPCG_WheelOR1,TPCG_WheelOR1,TPCG_WheelOR,TPCG_WheelOR,TPCG_WheelOR,TPCG_WheelOR}" nz="8" phi1="-15" dphi="30"  />
-			<!--
+            <!--
             <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
                 %ivolume,%volume
             </Print>
             -->
 
-            <Create block="TSAW"  />
-            <Placement konly="'MANY'" block="TSAW"  >
-            </Placement>
+            <Create    block="TSAW"  />
+            <Placement block="TSAW" konly="'MANY'" />
+
             
 
         </Block>
@@ -1066,10 +1075,13 @@
 
             <Do var="inOut" from="kInner" to="kOuter"  >
 
+mycount = 0;
+
                 <Use struct="COOL" select="inout" value="inOut "  />
                 <Use struct="RIBS" select="inout" value="inOut "  />
                 <Use struct="HOLZ" select="inout" value="InOut "  />
-                <Use struct="TECW" select="sec" value="(inOut+1) "  />
+                <Use struct="TECW" select="sec"   value="(inOut+1) "  />
+
                 z2 = zWheel1
                 z1 = z2 - TECW_Thick
                 z  = (z1 + TPCG_MembTHK/2)/2
@@ -1089,6 +1101,9 @@
 
                 dRSectorShift = TECW_rMin - r1
 
+
+<!-- Check that the code below doesn't have an indexing problem -->
+
                 <If expr="inOut==kInner"  >
                     xHoles(0) = r2 - 1.988*INCH
 
@@ -1096,32 +1111,33 @@
                         xHoles(i) = xHoles(i-1) - 1.575*INCH
                     </Do>
                     
-                    <Else  >
+                <Else  >
 
-                        <Do var="i" from="0" to="HOLZ_numberOfRows - 1"  >
-                            xHoles(i) = r2 - (1.988 + 1.575*i)*INCH 
-                        </Do>
+                    <Do var="i" from="0" to="HOLZ_numberOfRows - 1"  >
+                        xHoles(i) = r2 - (1.988 + 1.575*i)*INCH 
+                    </Do>
                         
-                    </Else>
-                    
+                </Else>                    
                 </If>
                 
 
-                <Create block="TSAS"  />
-                <Placement konly="'MANY'" block="TSAS"  >
-                </Placement>
-                
-                <Create block="TWAS"  />
-                <Placement konly="'MANY'" block="TWAS"  >
-                </Placement>
-                
-                <Create block="TBRW"  />
+                <Create    block="TSAS"  />
+                <Placement block="TSAS" konly="'MANY'" />
 
-<!--
-                <Placement x="TPCG_WheelR1" z="zWheel1+TPCG_WheelTHK/2" konly="'MANY'" block="TBRW"  >		  
--->
-                <Placement x="TPCG_WheelR1" z="zWheel1+TPCG_WheelTHK/2" block="TBRW"  />
-                
+                <Create    block="TWAS"  />
+                <Placement block="TWAS"  konly="'MANY'" />
+
+<If expr="inOut==0">                          <!-- Placed only once by AgSTAR rules -->
+                <Create    block="TBRW"  />
+                <Placement block="TBRW" x="TPCG_WheelR1" z="zWheel1+TPCG_WheelTHK/2" />
+
+                <Info format="TBRW  x={9.4f}">TPCG_WheelR1   </Info>
+                <Info format="      y={9.4f}"> 0.0  </Info>
+                <Info format="      z={9.4f}"> zWheel1+TPCG_WheelTHK/2 </Info>
+                <Info format="  inout={3i}"> inOut </Info>
+	        <Info format="  count={3i}">   mycount</Info>
+</If>
+       
 
                 x1 = TPCG_WheelR0*cos15
                 x2 = TPCG_WheelR2
@@ -1134,7 +1150,7 @@
 
                 myDx=dy; myDy=dx; myDz=dz; myAlph=-(1-2*inOut)*15
 
-                <Create block="TWRB"  />
+                <Create    block="TWRB"  />
                 <Placement block="TWRB"		    y="y" x="x" z="z" >
                     <Rotation ort="YX-Z"  />
                 </Placement>
@@ -1148,14 +1164,14 @@
 
                 myDx=dy; myDy=dx; myDz=dz; myAlph=-(1-2*inOut)*15
 
-                <Create block="TWRB"  />
-                <Placement y="y" x="x" z="z" block="TWRB"  >
+                <Create    block="TWRB"  />
+                <Placement block="TWRB" y="y" x="x" z="z" >
                     <Rotation ort="YX-Z"  />
                 </Placement>
-                
 
 
-            </Do>
+
+            </Do><!-- Loop on inOut -->
             
 
 
@@ -1184,9 +1200,19 @@
 <!--
                     <Placement y="y" x="x" z="zWheel1+TPCG_WheelTHK/2" konly="'MANY'" block="TBRW"  >
 -->
-                    <Placement y="y" x="x" z="zWheel1+TPCG_WheelTHK/2" block="TBRW"  >
-                        <Rotation alphaz="alpha"  />
-                    </Placement>
+<!-- AgSTAR does not place the first version of this at the same position -->
+
+
+                    <Info format="TBRW  x={9.4f}"> x </Info>
+                    <Info format="      y={9.4f}"> y </Info>
+                    <Info format="      z={9.4f}"> z </Info>
+		    <Info format="  inout={3i}"> inOut </Info>
+                    <Info format="  alpha={9.4f}"> alpha </Info>
+		    <Info format="  count={3i}">   mycount</Info>
+
+                    <Placement block="TBRW" y="y" x="x" z="zWheel1+TPCG_WheelTHK/2"><Rotation alphaz="alpha"/></Placement>
+
+		    mycount+=1;
                     
 
                 </Do>
@@ -1198,20 +1224,20 @@
             </Do>
             
 
-            <Create block="TWBT"  />
+            <Create    block="TWBT"  />
             <Placement block="TWBT" />
             
-            <Create block="TWRI"  />
-	    <Placement konly="'MANY'" block="TWRI"  /> <!-- MANY volume because it is an assembly -->
+            <Create    block="TWRI"  />
+	    <Placement block="TWRI" konly="'MANY'"  /> <!-- MANY volume because it is an assembly -->
             
-            <Create block="TWTR"  />
+            <Create    block="TWTR"  />
             <Placement block="TWTR"  />
             
-            <Create block="TWMR"  />
+            <Create    block="TWMR"  />
             <Placement block="TWMR"  />
             
-            <Create block="TRDO"  />
-            <Placement konly="'MANY'" block="TRDO"  />
+            <Create    block="TRDO"  />
+            <Placement block="TRDO" konly="'MANY'" />
 
             
 
@@ -1232,9 +1258,10 @@
                 <!--
                 mySha='TRD1'
                 myPar = {dx1,dx2,dy,dz}
-                -->
                 <Assign var="mySha" value="'TRD1'" />
-                <Assign var="myPar" value="{dx1,dx2,dy,dz}" />
+                -->
+
+		iShape = kTrd1; <Assign var="myPar" value="{dx1,dx2,dy,dz}" />
                 
                 <Create block="TCOO"  />
                 <Placement x="z" z="(TPCG_zRDO-2*dy)" block="TCOO"  >
@@ -1304,18 +1331,19 @@
             xW = 0
 
             <Do var="iRib" from="0" to="1"  >
-				<!--
+	      <!--
                 mySha = 'PARA'
-                myPar = {dx, dy, dz, -(1-2*iRib)*alpha}
-                -->
-                <Assign var="mySha" value="'PARA'" />
-                <Assign var="myPar" value="{dx, dy, dz, -(1-2*iRib)*alpha}" /> 
-                <Create block="TRIB"  />
+		myPar = {dx, dy, dz, -(1-2*iRib)*alpha}
+		<Assign var="mySha" value="'PARA'" />
+	      -->
 
-                x  = ((y1 + y2)/2 - dx)*(1-2*iRib)
-                <Placement y="-x" x="y" z="z" block="TRIB"  >
-                    <Rotation ort="YX-Z"  />
-                </Placement>
+	      iShape = kPara;  <Assign var="myPar" value="{dx, dy, dz, -(1-2*iRib)*alpha}" /> 
+	      <Create block="TRIB"  />
+
+	      x  = ((y1 + y2)/2 - dx)*(1-2*iRib)
+	      <Placement block="TRIB" y="-x" x="y" z="z">
+		<Rotation ort="YX-Z"  />
+	      </Placement>
                 
 
                 xW = ((y1 + y2)/2 -  dxW)*(1-2*iRib)
@@ -1349,8 +1377,10 @@
 					<!--
                     mySha='TRD1'
                     myPar = {dx1, dx2, dz, dr/2}
-					-->
+				
 		<Assign var="mySha" value="'TRD1'" />
+					-->
+		iShape = kTrd1;
 		<Assign var="myPar" value="{dx1, dx2, dz, dr/2}" />
 					
                     <Create block="TRIB"  />
@@ -1365,12 +1395,12 @@
                         mySha='BOX '
                         myPar = {dr/2, dy/2, dz}
                         -->
-                      <Assign var="mySha" value="'BBOX'" />
-                      <Assign var="myPar" value="{dr/2, dy/2, dz}" />
+<!--                      <Assign var="mySha" value="'BBOX'" /> -->
+		      iShape = kBbox; <Assign var="myPar" value="{dr/2, dy/2, dz}" />
 
-                        <Create block="TRIB"  />
-                        <Placement y="y" x="r" z="z2-dz" block="TRIB"  >
-                        </Placement>
+                        <Create    block="TRIB"  />
+                        <Placement block="TRIB" y="y" x="r" z="z2-dz" />
+
                         
 
                     </Else>
@@ -1420,7 +1450,8 @@
             <Do var="iCoo" from="0" to="1"  >
 
 	<Assign var="myPar" value="{dx, dy, dz,-(1-2*iCoo)*beta, 0, 0}" />
-	<Assign var="mySha" value="'PARA'" />
+<!--	<Assign var="mySha" value="'PARA'" /> -->
+iShape = kPara;
 				<!--
                 myPar={dx, dy, dz,-(1-2*iCoo)*beta, 0, 0}
                 mySha = 'PARA'
@@ -1456,7 +1487,8 @@
                 mySha='TRD1'
                 myPar= {dy1, dy2, dz, dx}
                 -->
-              <Assign var="mySha" value="'TRD1'" />
+<!--              <Assign var="mySha" value="'TRD1'" /> -->
+iShape = kTrd1;
               <Assign var="myPar" value="{dy1, dy2, dz, dx}" />               
                 myPar(11) = x-dx-TFEE_AssemblyThickness/2+dRSectorShift
                 myPar(13) = zWheel1+dz
@@ -1799,7 +1831,8 @@
             mySha = 'PARA'
             myPar = {TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, 15}
             -->
-            <Assign var="mySha" value="'PARA'" />
+<!--            <Assign var="mySha" value="'PARA'" /> -->
+iShape = kPara;
             <Assign var="myPar" value="{TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, 15}" />
             x = TPCG_WheelR2 - TPCG_RDOCoolingdX
             y = x*tan15 - TPCG_RDOCoolingdY 
@@ -1813,7 +1846,8 @@
             mySha = 'PARA'
             myPar = {TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, -15}
             -->
-            <Assign var="mySha" value="'PARA'" />
+<!--            <Assign var="mySha" value="'PARA'" /> -->
+iShape = kPara;
             <Assign var="myPar" value="{TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, -15}" />
             
             x = TPCG_WheelR2 - TPCG_RDOCoolingdX
@@ -1843,7 +1877,8 @@
                 mySha = 'TRD1'
                 myPar = {dx1, dx2, dy, dz}
                 -->
-                <Assign var="mySha" value="'TRD1'" />
+<!--                <Assign var="mySha" value="'TRD1'" /> -->
+iShape = kTrd1;
                 <Assign var="myPar" value="{dx1, dx2, dy, dz}" />
                 myPar(11) = z; myPar(13) = TPCG_zRDO - 2*dy
                 <Create block="TCOO"  />
@@ -1908,23 +1943,20 @@
 
         <Block name="TCOO" comment="CoolingTube"  >
 
-            <Attribute for="TCOO" seen="1" colo="kRed"  />
-            <Material name="Water_Pipe"  />
-            <Medium name="TCOO_h2o_pipe" deemax="0.184746" stmin="0.0348298" />
-            <If expr="mySha=='PARA'"  >
-                <Shape type="PARA" dz="myPar(3)" alph="myPar(4)" dx="myPar(1)" dy="myPar(2)" thet="0" phi="0"  />
-            </If>
-            
-            <If expr="mySha=='TRD1'"  >
-                <Shape type="TRD1" dz="myPar(4)" dx2="myPar(2)" dx1="myPar(1)" dy="myPar(3)"  />
-            </If>
-            
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
+	  <Attribute for="TCOO" seen="1" colo="kRed"  />
+	  <Material name="Water_Pipe"  />
+	  <Medium name="TCOO_h2o_pipe" deemax="0.184746" stmin="0.0348298" />
 
+
+	  <If expr="iShape==kPara">
+	    <Shape type="PARA" dz="myPar(3)" alph="myPar(4)" dx="myPar(1)" dy="myPar(2)" thet="0" phi="0"  />
+	  </If>
+            
+
+	  <If expr="iShape==kTrd1" >
+	    <Shape type="TRD1" dz="myPar(4)" dx2="myPar(2)" dx1="myPar(1)" dy="myPar(3)"  />
+	  </If>
+            
         </Block>
         
 
@@ -1966,13 +1998,15 @@
 
             <Attribute for="TRib" seen="1" colo="kRed"  />
             <Material name="ALUMINIUM"  />
-<Medium name="TRIB_aluminium" deemax="0.18296" stmin="0.0334422" />
-            <If expr="mySha=='PARA'"  >
+	    <Medium name="TRIB_aluminium" deemax="0.18296" stmin="0.0334422" />
+
+            <!-- <If expr="mySha=='PARA'"  > -->
             <!-- NOTE: Provided thet=phi=0 -->
+	    <If expr="iShape==kPara">
                 <Shape type="PARA" dz="myPar(3)" alph="myPar(4)" dx="myPar(1)" dy="myPar(2)" thet="0" phi="0" />
-            <Elif expr="mySha=='TRD1'"  >
+            <Elif expr="iShape==kTrd1">
                 <Shape type="TRD1" dz="myPar(4)" dx2="myPar(2)" dx1="myPar(1)" dy="myPar(3)"  />
-            <Elif expr="mySha=='BBOX'"  >
+            <Elif expr="iShape==kBbox">
             <!-- NOTE: Switched to bbox from PARA -->
                 <Shape type="BBOX" dz="myPar(3)" dx="myPar(1)" dy="myPar(2)"  />
             </Elif>
@@ -2084,9 +2118,16 @@
             </Print>
             -->
             <Do var="iSecAng" from="15" to="360-15" step="30"  >
-                <Create block="TPSS"  />
-                <Placement konly="'MANY'" block="TPSS"  >
-                    <Rotation alphaz="iSecAng"  />
+
+                <Create    block="TPSS"  />
+                <Placement block="TPSS"            konly="'MANY'"  >
+                <!-- 
+		     Place with copy number=1 for each instance of TPSS.
+		     What is the reason for the "MANY" flag?
+
+                     Well... ncopy=1 doesn't work here... Wonder what the problem is...
+		-->
+                           <Rotation alphaz="iSecAng"  />
                 </Placement>
                 
             </Do>
