@@ -47,7 +47,7 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
       // gROOT->Macro(Form("scripts/%s.h",mytag));
     }
 
-  gGeoManager->CloseGeometry();
+  //  gGeoManager->CloseGeometry();
   gGeoManager->SetVisLevel(99);        
 
   return;

@@ -20,6 +20,9 @@ void StarGeometryDb()
   geom.idsmFlag = "IDSMof"; geom.idsmStat=0; // IDSM defaults to off
   geom.fgtdFlag = "FGTDof"; geom.fgtdStat=0; // FGTD defaults to off
 
+  geom.fsceFlag = "FSCEof";  geom.fsceStat = 0;
+  geom.eiddFlag = "EIDDof";  geom.eiddStat = 0;
+
 
   //
   // Setup STAR Geometries y2000 to present
