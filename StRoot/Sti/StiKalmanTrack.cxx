@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.120 2010/09/07 18:37:31 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.120 2010/09/07 18:37:31 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.121 2011/11/21 17:05:26 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.121 2011/11/21 17:05:26 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.121  2011/11/21 17:05:26  fisyak
+ * Correct no. of possible point for CA case
+ *
  * Revision 2.120  2010/09/07 18:37:31  fisyak
  * Restore Sti logic before TPCCATracker
  *
@@ -385,12 +388,16 @@
 #include "StHit.h"
 
 //Sti
+#include "StiKalmanTrack.h"
+#include "StiKalmanTrackFinder.h"
 #include "StiToolkit.h"
-#include "StiTrackFinder.h"
+#include "StiDetectorContainer.h"
 #include "StiHit.h"
 #include "StiKalmanTrackNode.h"
 #include "StiKalmanTrack.h"
 #include "StiDetector.h"
+#include "StiDetectorGroups.h"
+#include "StiDetectorBuilder.h"
 #include "StiPlacement.h"
 #include "StiMaterial.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
@@ -518,6 +525,38 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
   const StiDetector* detector=0;
   UInt_t nhits = hits.size();
   setSeedHitCount(nhits);
+#if 1
+  StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();
+  StiDetector* detectorOld = 0; 
+  for (UInt_t ihit = 0; ihit < nhits; ihit++)  {
+    StiHit *hit = hits[ihit];
+    detector = hit->detector();
+    assert(detector);
+    // look for gaps in hit list
+    if (detectorOld && detector->getGroupId() == kTpcId) {
+      Double_t R_hit = detector->getPlacement()->getLayerRadius();
+      Double_t R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
+      while ((R_hit < R_hit_OLD)) {
+	detectorContainer->setToDetector( detectorOld );
+	if ( detectorContainer->moveIn()) {
+	  StiDetector* d = detectorContainer->getCurrentDetector(); //**detectorContainer;
+	  if (d == detector) break;
+	  detectorOld = d;
+	  R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
+	  if (detectorOld->isActive()) {
+	    StiKalmanTrackNode * nI = trackNodeFactory->getInstance();
+	    nI->initialize(d);
+	    add(nI,kOutsideIn);
+	  }
+	}
+      }
+    }
+    StiKalmanTrackNode * n = trackNodeFactory->getInstance();
+    n->initialize(hit);
+    add(n,kOutsideIn);
+    detectorOld = (StiDetector*) detector;
+  }  
+#else  
   for (UInt_t ihit=0;ihit<nhits;ihit++)
   {
     StiHit *hit = hits[ihit];
@@ -527,6 +566,7 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
     n->initialize(hit);
     add(n,kOutsideIn);
   }
+#endif
 #ifdef DO_TPCCATRACKER
   if (firstPars){
     firstNode->fitPars() = *firstPars;
