@@ -9,11 +9,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.32 2011/11/17 20:16:20 genevb Exp $
+ * $Id: StMcTrack.cc,v 2.32.2.1 2011/11/22 16:01:18 didenko Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.32.2.1  2011/11/22 16:01:18  didenko
+ * bug fixed
+ *
  * Revision 2.32  2011/11/17 20:16:20  genevb
  * For SL10k_embed, fixes from 2.28 and 2.29, minus FPD inclusion from 2.27
  *
@@ -74,8 +77,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.32 2011/11/17 20:16:20 genevb Exp $
+ * $Id: StMcTrack.cc,v 2.32.2.1 2011/11/22 16:01:18 didenko Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.32.2.1  2011/11/22 16:01:18  didenko
+ * bug fixed
+ *
  * Revision 2.32  2011/11/17 20:16:20  genevb
  * For SL10k_embed, fixes from 2.28 and 2.29, minus FPD inclusion from 2.27
  *
@@ -205,7 +211,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.32 2011/11/17 20:16:20 genevb Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.32.2.1 2011/11/22 16:01:18 didenko Exp $";
 
 ClassImp(StMcTrack);
 
@@ -224,7 +230,8 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mFourMomentum.setE(trk->e);
     mIsShower = trk->is_shower;
     mGeantId = trk->ge_pid;
-    assert(mGeantId>=0 && mGeantId<=0xFFFF);
+    assert(mGeantId>=0);
+    if ( mGeantId>0xFFFF)  mGeantId = 0;
     mPdgId   = trk->eg_pid;
     mKey     = trk->id;
     mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
