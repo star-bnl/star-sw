@@ -37,7 +37,7 @@ public:
   union {
     TH1 *array[];
     struct {
-      TH1 *h2_tst;
+      TH1 *h2_tmp;
     };
   } contents;
 
