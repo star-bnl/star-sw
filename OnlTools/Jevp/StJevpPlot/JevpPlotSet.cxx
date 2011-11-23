@@ -66,7 +66,7 @@ JevpPlotSet::JevpPlotSet()
   daqfile = NULL;
   pdf = NULL;
   loglevel = NULL;
-  current_run = 0;
+  current_run = -1;
   update_time = 5;
   confdatadir = (char *)"/RTScache/conf/jevp";
   clientdatadir = (char *)DEFAULT_CLIENTDATADIR;
@@ -378,7 +378,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 
   
   // Do this after the reader...
-  rtsLogOutput(RTS_LOG_NET);
+  rtsLogOutput(RTS_LOG_STDERR);
   rtsLogAddDest((char *)"172.16.0.1",8004);
   rtsLogLevel((char *)WARN);
   if(loglevel) rtsLogLevel(loglevel);
@@ -527,6 +527,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
     CP;
     LOG(DBG, "We've got some kind of event:  token=%d seq=%d",reader->token,reader->seq);
 
+    LOG(DBG, "reader run = %d,  curr run = %d",reader->run,current_run);
     if(reader->run != current_run) {
       LOG(DBG, "Got an event for a run change: prev run=%d new run=%d",
 	  current_run, reader->run);
