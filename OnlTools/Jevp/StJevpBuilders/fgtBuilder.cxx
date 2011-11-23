@@ -46,7 +46,7 @@ fgtBuilder::~fgtBuilder() {
 void fgtBuilder::initialize(int argc, char *argv[]) {
 
   // Initialization of histograms.
-  contents.h2_tst = new TH1F("h2_tst","tst",50,0,10);
+  contents.h2_tmp = new TH1F("h2_tmp","tst",50,0,10);
 
   // Add root histograms to Plots
   int np = sizeof(contents) / sizeof(TH1 *);
