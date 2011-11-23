@@ -71,7 +71,7 @@ the adminstrator of the system.   (The method for doing this is
 documented in the readme-server.txt file).   However to for debugging
 purposes the code is executed stand alone using a root script as folows
 
-> OnlTools/Jevp/launch xxxBuilder --file filename -pdf outputfilename.pdf
+> OnlTools/Jevp/launch xxxBuilder -file filename -pdf outputfilename.pdf
 
 Here, "filename" can be a daqfile or else a evp directory
       "outputfilename.pdf" is the output file for the generated histograms
