@@ -68,6 +68,9 @@ class DisplayNode {
     return atoi(ret);
   }
 
+  void freeChildren();
+  DisplayNode *findChild(char *name);
+  
   void writeXML(FILE *out, int depth);
   void spaces(FILE *out, int depth);
   void printProperties(FILE *out, int depth);
@@ -103,8 +106,6 @@ class DisplayFile {
   
   DisplayFile();
   ~DisplayFile();
-  void freeDisplayNodes(DisplayNode *node);
-
   void chomp(char *to, char *from, int max);
   
   int Read(char *fn);
@@ -129,9 +130,9 @@ class DisplayFile {
   int nDisplays() {
     if(!root) return 0;
     if(!root->child) return 0;
-    return root->child->nSiblings();   // Don't include pallette, but do include me...
+    return root->child->nSiblings();   // Don't include pallete, but do include me...
   }
-  
+
   // Interface for usage...
   static unsigned int getTabBase();
   static unsigned int getTabDepthMult(u_int idx);
