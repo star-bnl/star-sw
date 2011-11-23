@@ -50,6 +50,7 @@ class JevpServer {
   RunStatus runStatus;    // are we in a run or not?
   TList builders;         
   
+  JevpPlot *jevpSummaryPlot;
 
   JevpServer() {
     myport = JEVP_PORT;
@@ -68,6 +69,8 @@ class JevpServer {
     die = 0;
     daqfilename = NULL;
     serverTags = NULL;
+    
+    jevpSummaryPlot = NULL;
   };
   
   static void main(int argc, char *argv[]);
@@ -83,6 +86,9 @@ class JevpServer {
 
 
   void archive_display_file();                           // Archive utilities
+
+  DisplayNode *getPalleteNode();
+  void freePallete();
   void addToPallete(JevpPlot *plot);
 
   JevpPlot *getJevpSummaryPlot();                        // Build The Summary plot...
@@ -108,13 +114,11 @@ class JevpServer {
   int writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page);
   int writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page, int nosibs);
   void writeRunPdf(int display, int run);
-  void writePdf(char *fn, int display, int combo_index);
+  void writePdf(char *fn, int combo_index);
 
 
 
   JevpPlot *getPlot(char *name);
-
-
 
   void dump();
   int updateDisplayDefs();

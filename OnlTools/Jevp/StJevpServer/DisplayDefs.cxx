@@ -277,18 +277,36 @@ DisplayFile::DisplayFile() {
 
 DisplayFile::~DisplayFile() {
   if(textBuff) free(textBuff);
-  if(root) freeDisplayNodes(root);
+  if(root) delete root;
   if(serverTags) free(serverTags);
 }
 
-
 // Free's all nodes below..
-void DisplayFile::freeDisplayNodes(DisplayNode *node)
+void DisplayNode::freeChildren()
 {
-  if(node->child) freeDisplayNodes(node->child);
-  if(node->next) freeDisplayNodes(node->next);
-  delete node;
+  if(child) {
+    delete child;
+    child = NULL;
+  }
 }
+
+DisplayNode *DisplayNode::findChild(char *name)
+{
+  DisplayNode *curr = child;
+
+  while(curr) {
+    if(curr->name == NULL) {
+      LOG(ERR, "name is null");
+    }
+    if(strcmp(name, curr->name) == 0) {
+      return curr;
+    }
+
+    curr = curr->next;
+  }
+  return NULL;
+}
+
 
 void DisplayFile::chomp(char *to, char *str, int max)
 {

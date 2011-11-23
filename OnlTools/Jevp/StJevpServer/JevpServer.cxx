@@ -110,7 +110,6 @@ void JevpServer::main(int argc, char *argv[])
   LOG("JEFF", "Starting JevpServer: port=%d pid=%d", serv.myport, (int)getpid());
 
   // Each time we start, archive the existing display file...
-  serv.archive_display_file();
   serv.init(serv.myport, argc, argv);
 
   for(;;) {
@@ -214,46 +213,6 @@ void JevpServer::parseArgs(int argc, char *argv[])
   }    
 }
 
-void JevpServer::archive_display_file()
-{
-  LOG(DBG, "Archiving display file");
-  // First find existing display def files..
-  char orig[256];
-  char archive[256];
-  strcpy(archive, basedir);
-  strcat(archive, "/display_archive");
-  
-  
-  char tstr[64];
-  time_t t = time(NULL);
-  struct tm *tmp = localtime(&t);
-  strftime(tstr, 64, "%F-%T", tmp);
-
-  sprintf(archive, "%s/%s.%s", archive, displays_fn, tstr);
-  sprintf(orig, "%s/%s", basedir, displays_fn);
-  
-  int fdi = open(orig, O_RDONLY); 
-  if(fdi < 0) {
-    LOG(ERR, "Can't archive display file %s (%s)", orig, strerror(errno));
-  }
-  int fdo = open(archive, O_CREAT | O_WRONLY, 0666);
-  if(fdo < 0) {
-    LOG(ERR, "Can't archive display file %s (%s)", archive, strerror(errno));
-  }
-
-  char buff[256];
-  int ret = read(fdi, buff, 256);
-  while(ret > 0) {
-    write(fdo, buff, ret);
-
-    ret = read(fdi, buff, 256);
-  }
-
-  close(fdi);
-  close(fdo);
-}
-
-
 int JevpServer::updateDisplayDefs()
 {
   char tmp[100];
@@ -261,6 +220,8 @@ int JevpServer::updateDisplayDefs()
   if(displays) delete displays;
   displays = new DisplayFile();
   displays->Read(tmp);
+
+  displays->dump();
   return 0;
 }
 
@@ -525,13 +486,14 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
   }
   else if(strcmp(msg->cmd, "print") == 0) {
     char printer[100];
-    int tab;
-    int display;
+    //int tab;
+    //int display;
 
-    sscanf(msg->args, "%s %d %d", printer, &display, &tab);
-    LOG("JEFF", "Request to printing tab %d to printer %s", tab, printer);
+    //sscanf(msg->args, "%s %d %d", printer, &display, &tab);
+    //LOG("JEFF", "Request to printing tab %d to printer %s", tab, printer);
+
     
-    writePdf((char *)"/tmp/jevp.pdf", display, tab);
+    writePdf((char *)"/tmp/jevp.pdf", 1);
 
     gSystem->Exec("/usr/bin/convert /tmp/jevp.pdf /tmp/jevp.ps");
     
@@ -639,6 +601,7 @@ void JevpServer::performStopRun()
 
   // Add any new plots to the pallet...
 
+  freePallete();
 
   next.Reset();
   while((curr = (JevpPlotSet *)next())) {
@@ -648,7 +611,7 @@ void JevpServer::performStopRun()
     JevpPlot *currplot;
     TListIter nextplot(&curr->plots);
     while((currplot = (JevpPlot *)nextplot())) { 
-      LOG(DBG, "                    : plot = %s",currplot->GetPlotName());
+      LOG("JEFF", "                    : plot = %s",currplot->GetPlotName());
       addToPallete(currplot);
     }
   }
@@ -659,8 +622,14 @@ void JevpServer::performStopRun()
     LOG(ERR, "Error writing xml file %s",fn);
   }
 
-  CP;
+  char *args[4];
+  args[0] = "OnlTools/Jevp/archiveHistoDefs.pl";
+  args[1] = basedir;
+  args[2] = displays_fn;
+  args[3] = NULL;
 
+  execScript("OnlTools/Jevp/archiveHistoDefs.pl", args);
+ 
   if(die) {
     LOG("JEFF", "die is set, so now exit");
     exit(0);
@@ -773,11 +742,11 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
     LOG(DBG,"getplot..\n");
 
     if(strcmp(plotname, "serv_JevpSummary") == 0) {
-      JevpPlot *p = getJevpSummaryPlot();
-      
-      handleEvpPlot(NULL, p);
+      plot = getJevpSummaryPlot();
     }
-    plot = getPlot(plotname);
+    else {
+      plot = getPlot(plotname);
+    }
   }
 
     
@@ -801,6 +770,78 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
   }
 }
 
+JevpPlot *JevpServer::getJevpSummaryPlot()
+{
+  if(jevpSummaryPlot) {
+    delete jevpSummaryPlot;
+    jevpSummaryPlot = NULL;
+  }
+
+  CP;
+  jevpSummaryPlot = new JevpPlot();
+  jevpSummaryPlot->setParent((char *)"serv");
+  TH1I *h = new TH1I("JevpSummary", "JevpSummary", 64,0,63);
+  //h->GetXaxis()->SetAxisColor(kWhite);
+  h->GetXaxis()->SetTickLength(0);
+  h->GetXaxis()->SetLabelColor(kWhite);
+  //h->GetYaxis()->SetAxisColor(kWhite);
+  h->GetYaxis()->SetTickLength(0);
+  h->GetYaxis()->SetLabelColor(kWhite);
+  //h->SetLineColor(kWhite);
+  //h->SetAxisColor(kWhite);
+  //h->SetLabelColor(kWhite);
+
+  jevpSummaryPlot->addHisto(h);
+
+  jevpSummaryPlot->setOptStat(0);
+  jevpSummaryPlot->gridx = 0;
+  jevpSummaryPlot->gridy = 0;
+  
+  
+  CP;
+  JLatex *l;
+  
+  
+  int i = 0;
+  char tmp[256];
+
+  sprintf(tmp,"Run #%d: (%s for %ld seconds)",runStatus.run, runStatus.status, time(NULL) - runStatus.timeOfLastChange);
+  l = new JLatex(2, liney(i++), tmp);
+  i++;
+  l->SetTextSize(.05);
+  jevpSummaryPlot->addElement(l);
+
+  sprintf(tmp, "Tags:   %s", serverTags);
+  l = new JLatex(2, liney(i++), tmp);
+  i++;
+  l->SetTextSize(.035);
+  jevpSummaryPlot->addElement(l);
+
+
+  // Now show builders...
+  TListIter next(&builders);
+  BuilderStatus *curr;
+  int n=0;
+  while((curr = (BuilderStatus *)next())) {
+    n++;
+    sprintf(tmp, "builder %10s%c: \t(run #%d, status %s, events %d, evttime %ld, contacttime %ld)",
+	    curr->name, curr->official ? '*' : '-', curr->run, curr->status, curr->events, time(NULL) - curr->lastEventTime, time(NULL) - curr->lastTransaction);
+    l = new JLatex(2, liney(i++), tmp);
+    l->SetTextSize(.035);
+    jevpSummaryPlot->addElement(l); 
+  }
+  
+  CP;
+  if(n == 0) {
+    sprintf(tmp,"There are no builders");
+    l = new JLatex(2, liney(i++), tmp);
+    l->SetTextSize(.035);
+    jevpSummaryPlot->addElement(l);
+  }
+  CP;
+
+  return jevpSummaryPlot;
+}
 
 void JevpServer::handleSwapRefs(char *name)
 {
@@ -823,10 +864,17 @@ void JevpServer::handleSwapRefs(char *name)
 
 void JevpServer::writeRunPdf(int display, int run)
 {
+  int ret = displays->setDisplay(display);
+  if(ret < 0) {
+    LOG(ERR, "Can't set display to %d",display);
+    return;
+  }
+  LOG(DBG, "Set displays to %d",ret);
+  
   char filename[256];
   sprintf(filename, "%s/%s_%d.pdf",pdfdir, displays->displayRoot->name, run);
   
-  writePdf(filename, display, 1);
+  writePdf(filename, 1);
 
   // Save it in the database...
   if(nodb != 1) {
@@ -848,15 +896,9 @@ void JevpServer::writeRunPdf(int display, int run)
   }
 }
 
-void JevpServer::writePdf(char *filename, int display, int combo_index)
+void JevpServer::writePdf(char *filename, int combo_index)
 {
-  int ret = displays->setDisplay(display);
-  if(ret < 0) {
-    LOG(ERR, "Can't set display to %d",display);
-    return;
-  }
-  LOG(DBG, "Set displays to %d",ret);
-  
+  LOG("JEFF", "Writing pdf: %s index=%d",filename,combo_index);
   DisplayNode *root = displays->getTab(combo_index);
 
   if(combo_index == 0) {
@@ -1179,6 +1221,27 @@ int JevpServer::execScript(const char *name, char *args[], int waitforreturn)
   return WEXITSTATUS(stat);
 }
 
+DisplayNode *JevpServer::getPalleteNode()
+{
+  DisplayNode *palleteNode = displays->root->child;
+  
+  while(palleteNode) {
+    if(strcmp(palleteNode->name, "pallete") == 0) {
+      return palleteNode;
+    }
+    palleteNode = palleteNode->next;
+  }
+  return NULL;
+}
+
+void JevpServer::freePallete()
+{
+  DisplayNode *palleteNode = getPalleteNode();
+  if(palleteNode) {
+    palleteNode->freeChildren();
+  }
+}
+
 // This function actually checks if already in pallete
 // if not, adds....
 void JevpServer::addToPallete(JevpPlot *plot)
@@ -1186,80 +1249,43 @@ void JevpServer::addToPallete(JevpPlot *plot)
   char *builder = plot->getParent();
   char *name = plot->GetPlotName();
 
-  CP;
-  DisplayNode *palleteNode = displays->root->child;
-
-  while(palleteNode) {
-    if(strcmp(palleteNode->name, "pallete") == 0) {
-      break;   // Found the node we are looking for!
-    }
-    else {
-      LOG(DBG,"Looking for pallete: checking dir %s",palleteNode->name);
-    }
-    palleteNode = palleteNode->next;
-  }
+  DisplayNode *palleteNode = getPalleteNode();
 
   CP;
   if(!palleteNode) {
     LOG(ERR, "No pallete found!");
     return;
   }
-  LOG(DBG, "Found pallete node");
-
   CP;
 
   // Look for builder...
-  DisplayNode *builderNode = palleteNode->child;
+  DisplayNode *builderNode = palleteNode->findChild(builder);
 
   CP;
-
-  while(builderNode) {
-    if(strcmp(builderNode->name, builder) == 0) {
-      break;
-    }
-    else {
-      LOG(DBG, "Looking for builder %s:  checking dir %s",builderNode->name);
-    }
-
-    builderNode = builderNode->next;
-  }
-  
-  CP;
-
-  // If not there, create builder...
   if(!builderNode) {
     CP;
-    LOG(DBG, "Creating builder node!");
     builderNode = new DisplayNode();
     builderNode->setName(builder);
-    // alphabetize...
     palleteNode->insertChildAlpha(builderNode);
   }
-  
-  CP;
-  LOG(DBG, "Have builder node...");
-  
   CP;
   // Look for plot...
-  DisplayNode *plotNode = builderNode->child;
-  while(plotNode) {
-    
-    if(strcmp(plotNode->name,name) == 0) {    // Its there, nothing to be done!
-      LOG(DBG, "plot was already there...do nothing");
-      return;
-    }
-  
-    plotNode = plotNode->next;
-  }
+
+  DisplayNode *plotNode = builderNode->findChild(name);
+
   CP;
-
-  LOG("JEFF", "inserting plot %s/%s into pallete", builder, name);
-  // The plot was not found... insert it
-  plotNode = new DisplayNode();
-  plotNode->setName(name);
-  plotNode->leaf = 1;
-  builderNode->insertChildAlpha(plotNode);
-
+  if(plotNode) {
+    CP;
+    LOG(ERR, "We already have a pallete entry for %s:%s",builder,name);
+  }
+  else {
+    CP;
+    // The plot was not found... insert it
+    plotNode = new DisplayNode();
+    plotNode->setName(name);
+    plotNode->leaf = 1;
+    builderNode->insertChildAlpha(plotNode);
+  }
   CP;
 }
 
@@ -1291,4 +1317,44 @@ char *JevpServer::getParamFromString(char *dest, char *source, char *param)
   }
   *tmp = '\0';
   return dest;  
+}
+
+
+void JevpServer::DrawCrossOfDeath(char *str)
+{
+  TLine* a = new TLine(0.,0.,1.,1.);
+  TLine* b = new TLine(0.,1.,1.,0.);
+  TText* t = new TText(0.5,0.5,str);
+
+//   // This is how we free the memory...
+  a->SetBit(kCanDelete);
+  b->SetBit(kCanDelete);
+  t->SetBit(kCanDelete);
+//   screen->addPlot(a);
+//   screen->addPlot(b);
+//   screen->addPlot(t);
+
+  a->SetLineColor(2);
+  b->SetLineColor(2);
+  t->SetTextColor(3);
+  t->SetTextAlign(22);
+
+  // Already cd()'d to proper pad...
+  a->Draw();
+  b->Draw();
+  t->Draw();
+
+  //delete a;
+  //delete b;
+  //delete t;
+  // gCanvas->Update();
+  //cout << __PRETTY_FUNCTION__ << endl;
+  return;
+
+}
+
+
+double JevpServer::liney(double x)
+{
+  return 1.0 - (x+5.0)/25.0;
 }
