@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.2 2011/11/01 18:46:14 sgliske Exp $
+ * $Id: StFgtA2CMaker.h,v 1.3 2011/11/25 20:24:13 ckriley Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -28,6 +28,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.3  2011/11/25 20:24:13  ckriley
+ * added statusmaker functionality
+ *
  * Revision 1.2  2011/11/01 18:46:14  sgliske
  * Updated to correspond with StEvent containers, take 2.
  *
@@ -44,6 +47,9 @@
 #include "StMaker.h"
 
 #include "StRoot/StFgtPedMaker/StFgtPedReader.h"
+#include "StRoot/StFgtStatusMaker/StFgtStatusReader.h"
+#include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
+
 
 class StFgtA2CMaker : public StMaker {
  public:
@@ -64,16 +70,22 @@ class StFgtA2CMaker : public StMaker {
 
    // modifiers
    void setPedReaderFile( const Char_t* filename );
+   void setStatusReaderFile( const Char_t* filename );
    void setTimeBinMask( Short_t timeBinMask );
    void setAbsThres( Float_t thres );  // set to below -4096 to skip cut
    void setRelThres( Float_t thres );  // set to zero to skip cut
-
+   //void setFgtDb( StFgtDbMaker *fgtDb);
    void doRemoveOtherTimeBins(  Bool_t doIt );
 
  protected:
    // for the ped reader
    StFgtPedReader *mPedReader;
    std::string mPedFile;
+
+   // for the strip status reader
+   StFgtStatusReader *mStatusReader;
+   std::string mStatusFile;
+   Bool_t checkStatus;
 
    // other parameters
    Short_t mTimeBinMask;
@@ -83,7 +95,7 @@ class StFgtA2CMaker : public StMaker {
    // member functions
    Int_t subtrPeds();
    Int_t cutHits();
-
+ 
  private:   
    ClassDef(StFgtA2CMaker,1);
 
@@ -97,6 +109,7 @@ inline StFgtA2CMaker::~StFgtA2CMaker(){ /* */ };
 // modifiers
 inline void StFgtA2CMaker::setTimeBinMask( Short_t timeBinMask ){ mTimeBinMask = timeBinMask; };
 inline void StFgtA2CMaker::setPedReaderFile( const Char_t* filename ){ mPedFile = filename; };
+inline void StFgtA2CMaker::setStatusReaderFile( const Char_t* filename ){ mStatusFile = filename; checkStatus=true;};
 inline void StFgtA2CMaker::setAbsThres( Float_t thres ){ mAbsThres = thres; };
 inline void StFgtA2CMaker::setRelThres( Float_t thres ){ mRelThres = thres; };
 inline void StFgtA2CMaker::doRemoveOtherTimeBins(  Bool_t doIt ){ mDoRemoveOtherTimeBins = doIt; };
