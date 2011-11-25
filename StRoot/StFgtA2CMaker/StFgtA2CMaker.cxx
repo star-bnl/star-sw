@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.4 2011/11/17 18:40:40 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.5 2011/11/25 20:24:13 ckriley Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.5  2011/11/25 20:24:13  ckriley
+ * added statusmaker functionality
+ *
  * Revision 1.4  2011/11/17 18:40:40  sgliske
  * Bug fixed: need to always call stripCollectionPtr->removeFlagged();
  * Also implemented check to invalidate strip if weird ped. value
@@ -33,12 +36,13 @@
 #include "StRoot/StEvent/StFgtStripCollection.h"
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "StRoot/StFgtPedMaker/StFgtPedReader.h"
+#include "StRoot/StFgtStatusMaker/StFgtStatusReader.h"
 #include "StFgtA2CMaker.h"
 
 
 // constructors
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
-   : StMaker( name ), mPedReader(0),
+   : StMaker( name ), mPedReader(0), mStatusReader(0), checkStatus(false),
      mTimeBinMask(0x10), mDoRemoveOtherTimeBins(0),
      mAbsThres(-10000), mRelThres(5) { /* */ };
 
@@ -50,11 +54,15 @@ Int_t StFgtA2CMaker::Init(){
       ierr = kStFatal;
    };
 
-   // now the ped reader, if needed
+   // now the ped reader and status reader, if needed
    if( !ierr ){
       mPedReader = new StFgtPedReader( mPedFile.data() );
       mPedReader->setTimeBinMask( mTimeBinMask );
       ierr = mPedReader->Init();
+      if( !(mStatusFile.empty()) ){
+        mStatusReader = new StFgtStatusReader( mStatusFile.data() );
+        ierr = mStatusReader->Init();
+      }
    };
 
    return ierr;
@@ -114,7 +122,14 @@ Int_t StFgtA2CMaker::Make(){
                         // no DB yet, so no gains.  Default to unitary gain
                         strip->setCharge( adc );
                         printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
+
                         // flag whether to cut
+                        if(checkStatus) {
+                          Int_t status;
+                          mStatusReader->getStatus( geoId, status );
+                          if(!status)
+                            strip->setGeoId( -1 );}
+
                         if( (mRelThres && adc < mRelThres*err) || (mAbsThres>-4096 && adc < mAbsThres) )
                            strip->setGeoId( -1 );
                      };
