@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.124 2011/03/19 02:48:07 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.125 2011/11/28 17:03:09 dmitry Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.125  2011/11/28 17:03:09  dmitry
+// dbv override support in StDbLib,StDbBroker,St_db_Maker
+//
 // Revision 1.124  2011/03/19 02:48:07  perev
 // blacklist added
 //
@@ -484,7 +487,17 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
    fTimer[0].Stop(); fTimer[2].Start(0);
    fDBBroker  = new StDbBroker();
    if (Debug() > 1) fDBBroker->setVerbose(1);
-   if (fMaxEntryTime) fDBBroker->SetProdTime(fMaxEntryTime);
+   if (fMaxEntryTime) { 
+       fDBBroker->SetProdTime(fMaxEntryTime);
+        for (std::map<std::pair<char*,char*>,UInt_t>::iterator it = fMaxEntryTimeOverride.begin(); it != fMaxEntryTimeOverride.end(); it++ ) {
+            //if ( (*it).first.first ) {
+                //std::cout << "SPECIAL: St_db_Maker - Setting DBBroker to " << (*it).first.first << " _ " << (*it).first.second << " = " << (*it).second << "\n";
+            //} else {
+                //std::cout << "SPECIAL: St_db_Maker - Setting DBBroker to [all types] _ " << (*it).first.second << " = " << (*it).second << "\n";
+            //}
+            fDBBroker->AddProdTimeOverride((*it).second, (*it).first.first, (*it).first.second);                                                                        
+        }
+   }
    const TAttr *attl = GetAttr();
    if (attl) {
      TIter next(attl);
@@ -1297,6 +1310,19 @@ void St_db_Maker::SetMaxEntryTime(Int_t idate,Int_t itime)
   ut.SetGTime(idate,itime);
   fMaxEntryTime = ut.GetUTime();
 }
+
+//_____________________________________________________________________________
+void St_db_Maker::AddMaxEntryTimeOverride(Int_t idate,Int_t itime, char* dbType, char* dbDomain) {
+    TUnixTime ut;
+    ut.SetGTime(idate,itime);
+    fMaxEntryTimeOverride.insert( std::make_pair<std::pair<char*,char*>,UInt_t>( std::make_pair<char*,char*>(dbType,dbDomain), ut.GetUTime() ) );
+    //if (dbType) {
+        //std::cout << "SPECIAL: St_db_Maker - received override " << dbType << " _ " << dbDomain << " = " << idate << "," << itime << "\n";
+    //} else {
+        //std::cout << "SPECIAL: St_db_Maker - received override [all types] _ " << dbDomain << " = " << idate << "," << itime << "\n";
+    //}
+} 
+
 // Now very UGLY trick
 #define private public
 #include "TGeoManager.h"
