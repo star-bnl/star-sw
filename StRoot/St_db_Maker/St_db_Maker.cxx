@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.125 2011/11/28 17:03:09 dmitry Exp $
+// $Id: St_db_Maker.cxx,v 1.126 2011/11/28 23:23:35 dmitry Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.126  2011/11/28 23:23:35  dmitry
+// case conversion update for overrides
+//
 // Revision 1.125  2011/11/28 17:03:09  dmitry
 // dbv override support in StDbLib,StDbBroker,St_db_Maker
 //
@@ -1313,6 +1316,20 @@ void St_db_Maker::SetMaxEntryTime(Int_t idate,Int_t itime)
 
 //_____________________________________________________________________________
 void St_db_Maker::AddMaxEntryTimeOverride(Int_t idate,Int_t itime, char* dbType, char* dbDomain) {
+
+	if (dbType) {
+		for (char* p = dbType; *p != '\0'; p++) {
+			*p = (char)std::tolower(*p);
+		}
+		dbType[0] = std::toupper(dbType[0]);
+	}
+
+	if (dbDomain) {
+		for (char* p = dbDomain; *p != '\0'; p++) {
+			*p = (char)std::tolower(*p);
+		}
+	}
+
     TUnixTime ut;
     ut.SetGTime(idate,itime);
     fMaxEntryTimeOverride.insert( std::make_pair<std::pair<char*,char*>,UInt_t>( std::make_pair<char*,char*>(dbType,dbDomain), ut.GetUTime() ) );
