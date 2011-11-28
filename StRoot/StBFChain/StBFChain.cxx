@@ -1,7 +1,8 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.590 2011/10/25 23:10:55 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.591 2011/11/28 22:47:04 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
+#include "TPRegexp.h"
 #include "TString.h"
 #include "TObjString.h"
 #include "TSystem.h"
@@ -22,8 +23,9 @@
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
 #if 0
-// Keep to be compartible with old documentaion
+// Keep to be compatible with old documentaion
 #define STR_OBSOLETE "WARNING *** Option is OBSOLETE ***"
+
 //#include "BFC.h"
 // ITTF Chain will be put here. Option list starting from minimalistic requirements
 // and may not initially work.
@@ -32,6 +34,10 @@
 // ITTF Chains
 //#include "BFC2.h"
 #endif
+
+// JL - define this once, use two places
+#define BFC_DBREGEXP "(dbv|sdt)(\\d+)(_)(.*)(_)(.*)"
+
 
 // NoChainOptions -> Number of chain options auto-calculated
 #define __KEEP_TPCDAQ_FCF__ /* remove St_tpcdaq_Maker and StRTSClientFCFMaker. not yet ready */
@@ -929,11 +935,28 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     if       (Tag ==  opt) {return  i;}
     else {if (Tag == nopt) {return -i;}}
   }
+  //
+  // JL - sdt and dbv for timestamp
+  //
+  // Gopt for arbitrary property on 3 letter name (wildcard would be added) and length
+  // 6 for a value. Not advertized / not used and implementation is not complete (needed
+  // a case and di not have a clear one). TBD.
+  //
+  // 2011/11 added the possibility of detector sub-system specific timestamps.
+  // DBV only for now, logic is similar if we equally parse.
+  //
   // {sdt|dbv}YYYYMMDD -> {sdt|dbv} 3 / YYYYMMDD 8 => 11 || YYYYMMDD.HHMMSS = 15 => 18
   if (Tag.BeginsWith("dbv") || Tag.BeginsWith("sdt")) {
     Check = kTRUE;
+
     if (Tag.Length() == 11  || Tag.Length() == 18) return 0;
+
+    // Else we need to parse some more - assume a pattern {dbv|sdt}YYYYMMDD[.HHMMSS]_XXX_ZZZZZ
+    // First, detect it using quick counting 
+    Tag.ToLower();
+    if ( TPRegexp(BFC_DBREGEXP).Match(Tag)  == 7) return 0;
   }
+
   // GoptXXXvvvvvv -> Gopt 4 / XXX 3 / vvvvvv 6 = 13
   if ( Tag.BeginsWith("gopt") && Tag.Length() == 13 ) return 0;
 
@@ -976,25 +999,57 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  }
 	}
       } else {
-	// it is 0 i.e. was not recognized. Check if it is a (dbv|sdt)YYYYMMDD or (dbv|sdt)YYYYMMDD.HHMMSS
-	// We can do all of that in the
-	// SetDbOptions() only (removing the fBFC[i].Flag check) but the
-	// goal here is to avoid user's histeria by displaying extra
-	// messages NOW !!! Debug: dbv20040917
+	// it is 0 i.e. was not recognized. 
+	// Check if it is a (dbv|sdt)YYYYMMDD or (dbv|sdt)YYYYMMDD.HHMMSS and derivative
+	// We really set the options only once later in SetDbOptions() (removing the fBFC[i].Flag check) 
+	// but the goal here is to avoid user's histeria by displaying extra messages NOW.
+	//
+	// Note that kOpt() has already validated the pattern (so it has to be right here).
+	//
+	// !!! Debug: dbv20040917
 	if (Tag.BeginsWith("dbv")) {
 	  if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"dbv%8d",&FDate);
 	  if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"dbv%8d.%6d",&FDate,&FTime);
 	  if (Tag.Length() == 11 || Tag.Length() == 18) {
 	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Max DB EntryTime) "
 			       << FDate  << "." << FTime << endm;
+	  } else {
+	    // we passed kOpt() parsing was fine
+	    //if ( TPRegexp(BFC_DBREGEXP).Match(Tag)  == 7) return 0;
+	    TObjArray *subStrL = TPRegexp(BFC_DBREGEXP).MatchS(Tag);
+	    BFCTimeStamp TS;
+	    TString realm;
+
+	    TS.Type     = 1;
+	    TS.Date     = (((TObjString *) subStrL->At(2))->GetString()).Atoi();
+	    TS.Time     = 0; // for now, avoid parsing this as user use simple TS 99% of the time
+	    TS.Detector = ((TObjString *) subStrL->At(4))->GetString();
+	    TS.Realm    = ((TObjString *) subStrL->At(6))->GetString();
+
+	    if ( TS.Realm.IsNull() ){ realm = "*";}
+	    else {                    realm = TS.Realm;}
+
+	    GTSOptions.push_back(TS);
+
+	    LOG_WARN << "Override timestamp for detector requested\n\t" 
+	             << "Detector " << TS.Detector  << "\n\t"
+	             << "Realm    " << realm        << "\n\t"
+		     << "Date     " << TS.Date      << "\n\t"
+	             << "Time     " << TS.Time      << endm;
+
 	  }
+
 	} else if (Tag.BeginsWith("sdt")) {
 	  if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"sdt%8d",&FDateS);
 	  if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"sdt%8d.%6d",&FDateS,&FTimeS);
 	  if (Tag.Length() == 11 || Tag.Length() == 18) {
 	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Event Time) "
 			       << FDateS  << "." << FTimeS << endm;
+
+	    // <<< same logic for GTSOptions can be inserted here
+	    // <<< if so, use TS.Type     = 2
 	  }
+
 	} else if ( Tag.BeginsWith("gopt") && Tag.Length() == 13){
 	  char GOptName[3],GOptValue[6];
 	  //TString property(".gopt.");
@@ -1004,7 +1059,9 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 
 	  // see StBFChain::Setup() for default values
 	  Gproperty += GOptName;
-	  // JL
+
+	  // JL - this is not finished, see comment in kOpt()
+	  
 	  // pattern is case sensitive, need more checks on this before
 	  // setting to something else than "*"
 	  //Gpattern  += GOptName;
@@ -1436,21 +1493,29 @@ void StBFChain::SetDbOptions(StMaker *mk){
   else                          mk->SetAlias("VmcGeometry","db/.const/StarDb/AgiGeometry");
   Int_t i;
   Int_t Idate=0,Itime=0;
+
+  // First possibility
   for (i = 1; i < fNoChainOptions; i++) {
     if (fBFC[i].Flag && !strncmp(fBFC[i].Key ,"DbV",3)){
+      // JL - we use to set timestamp as a chain option (any) starting with dbv and followed
+      // by an arbitrary set of numbers. The real stamp was taken from the comment.
+      // This supports this old mode.
       gMessMgr->QAInfo() << "StBFChain::SetDbOptions  Found time-stamp " << fBFC[i].Key << " [" << fBFC[i].Comment << "]" << endm;
       (void) sscanf(fBFC[i].Comment,"%d/%d",&Idate,&Itime);
     }
   }
 
+  // If FDate is set and we do not have the old mode, then a dynamic timestamp was used
+  // Overwrite
   if( ! Idate && FDate){
-      gMessMgr->QAInfo() << "StBFChain::SetDbOptions  watching to user chosen dynamic time-stamp (MaxEntry) "
+    gMessMgr->QAInfo() << "StBFChain::SetDbOptions Switching to user chosen dynamic time-stamp (MaxEntry) "
 			 << FDate << " " << FTime << endm;
-      gMessMgr->QAInfo() << "Chain may crash if time-stamp is not validated by db interface" << endm;
+    gMessMgr->QAInfo() << "Chain may crash if time-stamp is not validated by db interface" << endm;
 
     Idate = FDate;
     Itime = FTime;
   }
+
   St_db_Maker *db = (St_db_Maker *) mk;
   // Startup date over-write
   if (FDateS){
@@ -1474,7 +1539,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
       // Show date settings
       gMessMgr->QAInfo() << db->GetName()
 			 << " Maker set time = "
-		       << db->GetDateTime().GetDate() << "."
+			 << db->GetDateTime().GetDate() << "."
 			 << db->GetDateTime().GetTime() << endm;
       if (GetOption("SIMU") && m_EvtHddr) {
 	gMessMgr->QAInfo() << GetName() << " Chain set time from  " << db->GetName() << endm;
@@ -1482,12 +1547,40 @@ void StBFChain::SetDbOptions(StMaker *mk){
       }
     }
   }
-  // MaxEntry over-write
+
+  // MaxEntry over-write - default and global for all realm and detectors
   if (Idate) {
     db->SetMaxEntryTime(Idate,Itime);
     gMessMgr->Info() << "\tSet DataBase max entry time " << Idate << "/" << Itime
 		     << " for St_db_Maker(\"" << db->GetName() <<"\")" << endm;
-  } // check if maker is St_db_Maker
+  } 
+
+  //
+  // Now treat the detector specific options
+  //
+  TString realm;
+  for (unsigned int i = 0; i < GTSOptions.size() ; i++){
+    if ( (GTSOptions[i].Realm).IsNull() ){ realm = "*";}
+    else {                                 realm = GTSOptions[i].Realm;}
+
+    if ( GTSOptions[i].Type == 1){
+      db->AddMaxEntryTimeOverride(GTSOptions[i].Date,0,
+				  (char *) GTSOptions[i].Realm.Data() ,
+				  (char *) GTSOptions[i].Detector.Data());
+
+      LOG_INFO << "Recovering override stamp " << i << " :: " 
+	       << GTSOptions[i].Detector << ", " << realm << ", "  
+	       << GTSOptions[i].Date     << ", " << GTSOptions[i].Time  << endm;
+    } else {
+      LOG_WARN << "Found override type " << GTSOptions[i].Type << " no treated yet" 
+	       << GTSOptions[i].Detector << ", " << realm << ", "  
+	       << GTSOptions[i].Date     << ", " << GTSOptions[i].Time  << endm;
+    }
+  }
+
+  //abort();
+
+
   if (!GetOption("fzin")) {
     struct Field_t {
       const Char_t *name;

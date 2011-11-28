@@ -6,8 +6,8 @@
 
  \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
- \date   1999/07/29 , 2001-2008
- @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.49 2011/08/22 16:52:53 fisyak Exp $
+ \date   1999/07/29 , 2001-2011
+ @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.50 2011/11/28 22:47:04 jeromel Exp $
 
  Class to control "BFC" chain
 
@@ -44,6 +44,7 @@ class StBFChain : public StChain {
   TString             Gproperty;  // a global property name
   TString             Gpattern;   // a global pattern
   TString             Gvalue;     // a global value
+  StVecBFCTS          GTSOptions; // global set of detector specific timestamps
 
   St_Bfc             *fchainOpt;
   Int_t               fkChain;    // Master chain option
@@ -103,7 +104,7 @@ class StBFChain : public StChain {
                TString GetGeometry() const;
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.49 2011/08/22 16:52:53 fisyak Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.50 2011/11/28 22:47:04 jeromel Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
