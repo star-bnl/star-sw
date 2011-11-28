@@ -4,9 +4,11 @@
 #include "StDbUtilities/StMagUtilities.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StEventTypes.h"
+#include "StDetectorDbMaker/St_tss_tssparC.h"
+#include "StDetectorDbMaker/St_tpcSlewingC.h"
 #include "TMath.h"
 ClassImp(StTpcHitMover)
-//#define __DEBUG__
+#define __DEBUG__
 #ifdef __DEBUG__
 #define PrPP(A,B) if (Debug()%10 > 1) {LOG_INFO << "StTpcHitMover::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
@@ -39,53 +41,74 @@ Int_t StTpcHitMover::Make() {
   static StGlobalCoordinate    coorG;
   Bool_t EmbeddingShortCut = IAttr("EmbeddingShortCut");
   StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
-  if ( pEvent) {
-    gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
-    if (! gStTpcDb) {
-      gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
-      return kStErr;
-    }
-    StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
-    if (TpcHitCollection) {
-      UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
-      for (UInt_t i = 0; i< numberOfSectors; i++) {
-	StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
-	if (sectorCollection) {
-	  Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
-	  for (int j = 0; j< numberOfPadrows; j++) {
-	    StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
-	    if (rowCollection) {
-	      StSPtrVecTpcHit &hits = rowCollection->hits();
-	      UInt_t NoHits = hits.size();
-	      if (NoHits) {
-		for (UInt_t k = 0; k < NoHits; k++) {
-		  StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
+  if (! pEvent) {
+    LOG_WARN << "StTpcHitMover::Make there is no StEvent " << endm;
+    return kStWarn;
+  }
+  gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
+  if (! gStTpcDb) {
+    gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
+    return kStErr;
+  }
+  if (! mTpcTransForm) mTpcTransForm = new StTpcCoordinateTransform(gStTpcDb);
+  StTpcCoordinateTransform &transform = *mTpcTransForm;
+  StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
+  St_tss_tssparC *tsspar = St_tss_tssparC::instance();
+  Double_t gains[2] = {
+    tsspar->gain_in() / tsspar->wire_coupling_in() *tsspar->ave_ion_pot() *tsspar->scale(),
+    tsspar->gain_out()/ tsspar->wire_coupling_out()*tsspar->ave_ion_pot() *tsspar->scale()
+  };
+  if (TpcHitCollection) {
+    UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
+    for (UInt_t i = 0; i< numberOfSectors; i++) {
+      StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
+      if (sectorCollection) {
+	Int_t sector = i + 1;
+	Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
+	for (int j = 0; j< numberOfPadrows; j++) {
+	  Int_t row = j + 1;
+	  Int_t io = 0;
+	  if (row > 13) io = 1;
+	  StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
+	  if (rowCollection) {
+	    StSPtrVecTpcHit &hits = rowCollection->hits();
+	    UInt_t NoHits = hits.size();
+	    if (NoHits) {
+	      for (UInt_t k = 0; k < NoHits; k++) {
+		StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
+		Double_t q = tpcHit->charge();
+		PrPP(Make,*tpcHit);
+		if (tpcHit->adc()) { // correct charge
+		  q = gains[io] * ((Double_t) tpcHit->adc());
+		}
+		if (! tpcHit->pad() && ! tpcHit->timeBucket()) {// old style, no pad and timeBucket set
 		  if (EmbeddingShortCut && tpcHit->idTruth() && tpcHit->idTruth() < 10000 && 
 		      tpcHit->qaTruth() > 95) continue; // don't move embedded hits
 		  StTpcLocalCoordinate  coorL(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z(),i+1,j+1);
 		  moveTpcHit(coorL,coorG);
-
-                  if (mExB && mExB->GetSpaceChargeMode() &&
-                    StDetectorDbSpaceChargeR2::instance()->IsMarked()) {
-                    gMessMgr->Error() << "StTpcHitMover::Make questionable hit corrections" << endm;
-                    return kStSkip;
-                  }
-
-		  StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
-		  tpcHit->setPosition(xyzF);
+		} else { //  transoform from original pad and time bucket measurements
+		  Float_t pad  = tpcHit->pad();
+		  Float_t time = tpcHit->timeBucket();
+		  StTpcPadCoordinate padcoord(sector, row, pad, time);
+		  StTpcLocalCoordinate  coorL;
+		  transform(padcoord,coorL,kFALSE);
+		  moveTpcHit(coorL,coorG);
 		}
+		if (mExB && mExB->GetSpaceChargeMode() &&
+                    StDetectorDbSpaceChargeR2::instance()->IsMarked()) {
+		  gMessMgr->Error() << "StTpcHitMover::Make questionable hit corrections" << endm;
+		  return kStSkip;
+		}
+		StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
+		tpcHit->setPosition(xyzF);
 	      }
 	    }
 	  }
 	}
       }
     }
-    return kStOK;
-  } 
-  else {
-    LOG_WARN << "StTpcHitMover::Make there is no StEvent " << endm;
-    return kStWarn;
   }
+  return kStOK;
 }
 //________________________________________________________________________________
 void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &coorG) {
@@ -94,7 +117,7 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   StTpcCoordinateTransform &transform = *mTpcTransForm;
   static StTpcLocalSectorCoordinate  coorLS;
   transform(coorL,coorLS);   PrPP(moveTpcHit,coorL); PrPP(moveTpcHit,coorLS); // to sector 12
-#if 1
+#if 0
   static StTpcPadCoordinate Pad;
   transform(coorLS,Pad,kFALSE,kFALSE); PrPP(moveTpcHit,Pad);
 #endif
