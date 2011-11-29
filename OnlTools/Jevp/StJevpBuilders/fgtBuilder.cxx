@@ -40,7 +40,7 @@ fgtBuilder::~fgtBuilder() {
 
   // Delete any existing histograms...
 
-  int n = sizeof(contents) / sizeof(TH2 *);
+    int n = sizeof(contents) / sizeof(TH2 *);
   cout <<" deleting " <<n<<" histos"  << endl;
   for(int i=0;i<n;i++) {
         if(contents.array[i]) delete contents.array[i];
@@ -52,46 +52,47 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
 
   // Initialization of histograms.
   //could run a loop...
-  contents.q1=new TH2F("q1","Disc 1, Quad 1",1280,0,1280,2000,0,2000);
-  contents.q2=new TH2F("q2","Disc 1, Quad 2",1280,0,1280,2000,0,2000);
-  contents.q3=new TH2F("q3","Disc 1, Quad 3",1280,0,1280,2000,0,2000);
-  contents.q4=new TH2F("q4","Disc 1, Quad 4",1280,0,1280,2000,0,2000);
-  contents.q5=new TH2F("q5","Disc 2, Quad 1",1280,0,1280,2000,0,2000);
-  contents.q6=new TH2F("q6","Disc 2, Quad 2",1280,0,1280,2000,0,2000);
-  contents.q7=new TH2F("q7","Disc 2, Quad 3",1280,0,1280,2000,0,2000);
-  contents.q8=new TH2F("q8","Disc 2, Quad 4",1280,0,1280,2000,0,2000);
-  contents.q9=new TH2F("q9","Disc 3, Quad 1",1280,0,1280,2000,0,2000);
-  contents.q10=new TH2F("q10","Disc 3, Quad 2",1280,0,1280,2000,0,2000);
-  contents.q11=new TH2F("q11","Disc 3, Quad 3",1280,0,1280,2000,0,2000);
-  contents.q12=new TH2F("q12","Disc 3, Quad 4",1280,0,1280,2000,0,2000);
-  contents.q13=new TH2F("q13","Disc 4, Quad 1",1280,0,1280,2000,0,2000);
-  contents.q14=new TH2F("q14","Disc 4, Quad 2",1280,0,1280,2000,0,2000);
-  contents.q15=new TH2F("q15","Disc 4, Quad 3",1280,0,1280,2000,0,2000);
-  contents.q16=new TH2F("q16","Disc 4, Quad 4",1280,0,1280,2000,0,2000);
-  contents.q17=new TH2F("q17","Disc 5, Quad 1",1280,0,1280,2000,0,2000);
-  contents.q18=new TH2F("q18","Disc 5, Quad 2",1280,0,1280,2000,0,2000);
-  contents.q19=new TH2F("q19","Disc 5, Quad 3",1280,0,1280,2000,0,2000);
-  contents.q20=new TH2F("q20","Disc 5, Quad 4",1280,0,1280,2000,0,2000);
-  contents.q21=new TH2F("q21","Disc 6, Quad 1",1280,0,1280,2000,0,2000);
-  contents.q22=new TH2F("q22","Disc 6, Quad 2",1280,0,1280,2000,0,2000);
-  contents.q23=new TH2F("q23","Disc 6, Quad 3",1280,0,1280,2000,0,2000);
-  contents.q24=new TH2F("q24","Disc 6, Quad 4",1280,0,1280,2000,0,2000);
+  contents.q1=new TH2F("q1","Disc 1, Assembly 1",1280,0,1280,100,0,2000);
+  contents.q2=new TH2F("q2","Disc 1, Assembly 2",1280,0,1280,100,0,2000);
+  contents.q3=new TH2F("q3","Disc 1, Assembly 3",1280,0,1280,100,0,2000);
+  contents.q4=new TH2F("q4","Disc 1, Assembly 4",1280,0,1280,100,0,2000);
+  contents.q5=new TH2F("q5","Disc 2, Assembly 1",1280,0,1280,100,0,2000);
+  contents.q6=new TH2F("q6","Disc 2, Assembly 2",1280,0,1280,100,0,2000);
+  contents.q7=new TH2F("q7","Disc 2, Assembly 3",1280,0,1280,100,0,2000);
+  contents.q8=new TH2F("q8","Disc 2, Assembly 4",1280,0,1280,100,0,2000);
+  contents.q9=new TH2F("q9","Disc 3, Assembly 1",1280,0,1280,100,0,2000);
+  contents.q10=new TH2F("q10","Disc 3, Assembly 2",1280,0,1280,100,0,2000);
+  contents.q11=new TH2F("q11","Disc 3, Assembly 3",1280,0,1280,100,0,2000);
+  contents.q12=new TH2F("q12","Disc 3, Assembly 4",1280,0,1280,100,0,2000);
+  contents.q13=new TH2F("q13","Disc 4, Assembly 1",1280,0,1280,100,0,2000);
+  contents.q14=new TH2F("q14","Disc 4, Assembly 2",1280,0,1280,100,0,2000);
+  contents.q15=new TH2F("q15","Disc 4, Assembly 3",1280,0,1280,100,0,2000);
+  contents.q16=new TH2F("q16","Disc 4, Assembly 4",1280,0,1280,100,0,2000);
+  contents.q17=new TH2F("q17","Disc 5, Assembly 1",1280,0,1280,100,0,2000);
+  contents.q18=new TH2F("q18","Disc 5, Assembly 2",1280,0,1280,100,0,2000);
+  contents.q19=new TH2F("q19","Disc 5, Assembly 3",1280,0,1280,100,0,2000);
+  contents.q20=new TH2F("q20","Disc 5, Assembly 4",1280,0,1280,100,0,2000);
+  contents.q21=new TH2F("q21","Disc 6, Assembly 1",1280,0,1280,100,0,2000);
+  contents.q22=new TH2F("q22","Disc 6, Assembly 2",1280,0,1280,100,0,2000);
+  contents.q23=new TH2F("q23","Disc 6, Assembly 3",1280,0,1280,100,0,2000);
+  contents.q24=new TH2F("q24","Disc 6, Assembly 4",1280,0,1280,100,0,2000);
   ////
 
   // Add root histograms to Plots
-  int np = sizeof(contents) / sizeof(TH2 *);
+    int np = sizeof(contents) / sizeof(TH2 *);
   JevpPlot *plots[np];
   cout <<" we have " << np <<endl;
-
+  
   for(int i=0;i<np;i++)
-    {
-      plots[i] = new JevpPlot(contents.array[i]);
-    }
-
+  {
+    contents.array[i]->SetOption("colz");
+    plots[i] = new JevpPlot(contents.array[i]);
+  }
+  
   // Add Plots to plot set...
-    for(int i=0;i<np;i++) {
+  for(int i=0;i<np;i++) {
     LOG(DBG, "Adding plot %d",i);
-    addPlot(plots[i]);
+  addPlot(plots[i]);
   }
 }
   
@@ -128,7 +129,7 @@ void fgtBuilder::event(daqReader *rdr)
 	if(dd->pad>10)
 	  quad+=1;
 	if(quad<24)
-	contents.array[quad]->Fill(dd->pad*128+f[i].ch,f[i].adc);
+	  contents.array[quad]->Fill(dd->pad*128+f[i].ch,f[i].adc);
 	else
 	  cout <<"quad too large: " << quad <<endl;
 	//	cout <<" filling with : " << dd->pad*128+f[i].ch <<" and " << f[i].adc <<endl;
@@ -139,8 +140,6 @@ void fgtBuilder::event(daqReader *rdr)
 	  //timbin
 	  f[i].tb;
 	  }*/
-
-
 	//quad should be 0-23
       }
   }
