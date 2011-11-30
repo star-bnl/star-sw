@@ -127,10 +127,6 @@ void JevpServer::main(int argc, char *argv[])
 
 void JevpServer::parseArgs(int argc, char *argv[])
 {
-  // Default builders...
-  char bstr[500];
-  strcpy(bstr, "base,bbc,bemc,daq,eemc,fpd,hlt,l3,tof,tpx,trg,upc");
-
   throttleAlgos = 1;
 
   log_output = RTS_LOG_STDERR;
@@ -160,10 +156,6 @@ void JevpServer::parseArgs(int argc, char *argv[])
       i++;
       myport = atoi(argv[i]);
     }
-    else if (strcmp(argv[i], "-builders")==0) {
-      i++;
-      strcpy(bstr, argv[i]);
-    }
     else if (strcmp(argv[i], "-file")==0) {
       i++;
       daqfilename = argv[i];
@@ -176,6 +168,10 @@ void JevpServer::parseArgs(int argc, char *argv[])
       myport = JEVP_PORT;
     }
     else if (strcmp(argv[i], "-test")==0) {
+      nodb = 1;
+      basedir = "/RTScache/conf/jevp_test";
+      pdfdir = "/a/jevp_test/pdf";
+      refplotdir = "/a/jevp_test/refplots";
       myport = JEVP_PORT + 10;
     }
     else if (strcmp(argv[i], "-diska")==0) {   // used only to pass to builders on launch...
@@ -189,7 +185,6 @@ void JevpServer::parseArgs(int argc, char *argv[])
       printf("\t[-nodb]\n");
       printf("\t[-db]    not usually needed, but db usually disabled in reanalysis\n");
       printf("\t[-port] port]\n");
-      printf("\t[-builders] builder,builder2...\n");
       printf("\t[-die]    (exit after end of run..)\n");
       printf("\t[-file daqfilename]\n");
       printf("\t[-test]   (set port to %d)\n",myport+10);
@@ -597,6 +592,7 @@ void JevpServer::performStopRun()
   char fn[256];
   sprintf(fn, "%s/%s", basedir, displays_fn);
 
+  LOG("JEFF", "fn=%s",fn);
   CP;
 
   // Add any new plots to the pallet...
