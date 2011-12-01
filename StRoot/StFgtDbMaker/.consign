@@ -1,9 +1,13 @@
 >>>>>>> 1.12:
 >>>>>>> 1.6:
+>>>>>>> 1.14:
 =======:
+StFgtDbImpl.h:1322778848 - 71b0523c43bef5409623ab2175784220
 StFgtNaiveDbMaker.h:1317697175 - 74be9357180142ff85129d91cb102080
+StFgtDbNaiveImpl.h:1322778848 - d3493bb603fdd9dab6406c3882344541
 >>>>>>> 1.10:
 >>>>>>> 1.9:
+StFgtDb.h:1322778848 - 52521aa022fd4d31b2e1322c68961550
 >>>>>>> 1.11:
-StFgtDbMaker.h:1321228309 - 7be5bcfabcba1fb73e56f8db8e371e02
+StFgtDbMaker.h:1322778887 - 9e2367f8736f926f52acf5c512a42177
 <<<<<<< .consign:
