@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.3 2011/11/25 20:24:13 ckriley Exp $
+ * $Id: StFgtA2CMaker.h,v 1.4 2011/12/01 00:13:23 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -28,6 +28,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.4  2011/12/01 00:13:23  avossen
+ * included use of db. Note: For DB use it hast to be set with setDb. Instantiate StFgtDBMaker, get the StFgtDb from the getTables method and give the pointer to the A2C maker
+ *
  * Revision 1.3  2011/11/25 20:24:13  ckriley
  * added statusmaker functionality
  *
@@ -77,21 +80,26 @@ class StFgtA2CMaker : public StMaker {
    //void setFgtDb( StFgtDbMaker *fgtDb);
    void doRemoveOtherTimeBins(  Bool_t doIt );
 
+   void setDb(StFgtDb* db);
+
  protected:
    // for the ped reader
    StFgtPedReader *mPedReader;
    std::string mPedFile;
 
+
    // for the strip status reader
    StFgtStatusReader *mStatusReader;
    std::string mStatusFile;
-   Bool_t checkStatus;
+   Bool_t useStatusFile;
 
    // other parameters
    Short_t mTimeBinMask;
    Bool_t mDoRemoveOtherTimeBins;
    Float_t mAbsThres, mRelThres;
-
+   //if the user gives a ped file, use that, otherwise get peds from db
+   Bool_t usePedFile;
+   StFgtDb* mDb;
    // member functions
    Int_t subtrPeds();
    Int_t cutHits();
@@ -108,10 +116,12 @@ inline StFgtA2CMaker::~StFgtA2CMaker(){ /* */ };
 
 // modifiers
 inline void StFgtA2CMaker::setTimeBinMask( Short_t timeBinMask ){ mTimeBinMask = timeBinMask; };
-inline void StFgtA2CMaker::setPedReaderFile( const Char_t* filename ){ mPedFile = filename; };
-inline void StFgtA2CMaker::setStatusReaderFile( const Char_t* filename ){ mStatusFile = filename; checkStatus=true;};
+inline void StFgtA2CMaker::setPedReaderFile( const Char_t* filename ){ mPedFile = filename; usePedFile=true; };
+inline void StFgtA2CMaker::setStatusReaderFile( const Char_t* filename ){ mStatusFile = filename; useStatusFile=true;};
 inline void StFgtA2CMaker::setAbsThres( Float_t thres ){ mAbsThres = thres; };
 inline void StFgtA2CMaker::setRelThres( Float_t thres ){ mRelThres = thres; };
+inline void StFgtA2CMaker::setDb(StFgtDb* db ){mDb=db; };
 inline void StFgtA2CMaker::doRemoveOtherTimeBins(  Bool_t doIt ){ mDoRemoveOtherTimeBins = doIt; };
+
 
 #endif

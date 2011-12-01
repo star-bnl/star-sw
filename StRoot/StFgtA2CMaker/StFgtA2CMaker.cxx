@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.5 2011/11/25 20:24:13 ckriley Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.6 2011/12/01 00:13:23 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.6  2011/12/01 00:13:23  avossen
+ * included use of db. Note: For DB use it hast to be set with setDb. Instantiate StFgtDBMaker, get the StFgtDb from the getTables method and give the pointer to the A2C maker
+ *
  * Revision 1.5  2011/11/25 20:24:13  ckriley
  * added statusmaker functionality
  *
@@ -42,37 +45,49 @@
 
 // constructors
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
-   : StMaker( name ), mPedReader(0), mStatusReader(0), checkStatus(false),
+   : StMaker( name ), mPedReader(0), mStatusReader(0), useStatusFile(false),
      mTimeBinMask(0x10), mDoRemoveOtherTimeBins(0),
-     mAbsThres(-10000), mRelThres(5) { /* */ };
+     mAbsThres(-10000), mRelThres(5), usePedFile(false), mDb(0) { /* */ };
+
 
 Int_t StFgtA2CMaker::Init(){
-   Int_t ierr = kStOk;
-
-   if( mPedFile.empty() ){
-      LOG_FATAL << "Cannot subtract peds--database not yet implemented" << endm;
-      ierr = kStFatal;
-   };
-
-   // now the ped reader and status reader, if needed
-   if( !ierr ){
-      mPedReader = new StFgtPedReader( mPedFile.data() );
-      mPedReader->setTimeBinMask( mTimeBinMask );
-      ierr = mPedReader->Init();
-      if( !(mStatusFile.empty()) ){
-        mStatusReader = new StFgtStatusReader( mStatusFile.data() );
-        ierr = mStatusReader->Init();
+  Int_t ierr = kStOk;
+  if(usePedFile)
+    {
+      if( mPedFile.empty()){
+	LOG_FATAL << "no ped file but told to use" << endm;
+	ierr = kStFatal;
+      };
+      if( !ierr ){
+	mPedReader = new StFgtPedReader( mPedFile.data() );
+	mPedReader->setTimeBinMask( mTimeBinMask );
+	ierr = mPedReader->Init();
       }
-   };
-
-   return ierr;
+    }
+  else{
+    if(!mDb)
+      {
+	LOG_FATAL << "cannot find db that I am supposed to use!" << endm;
+	ierr = kStFatal;
+      }
+  }
+  if( useStatusFile && !(mStatusFile.empty()) ){
+	mStatusReader = new StFgtStatusReader( mStatusFile.data() );
+	ierr = mStatusReader->Init();
+  }
+  
+  // now the ped reader and status reader, if needed
+  
+  return ierr;
 };
+
 
 Int_t StFgtA2CMaker::Make(){
    Int_t ierr = kStOk;
 
    StEvent* eventPtr = 0;
    eventPtr = (StEvent*)GetInputDS("StEvent");
+
 
    if( !eventPtr ) {
       LOG_ERROR << "Error getting pointer to StEvent from '" << ClassName() << "'" << endm;
@@ -105,9 +120,16 @@ Int_t StFgtA2CMaker::Make(){
                      Int_t geoId = strip->getGeoId();
                      Int_t timebin = strip->getTimeBin();
                      Int_t adc = strip->getAdc();
+		     Double_t gain= mDb ? mDb->getGainFromGeoId(geoId) : 1;
 
                      Float_t ped, err;
-                     mPedReader->getPed( geoId, timebin, ped, err );
+		     if(usePedFile)
+		       mPedReader->getPed( geoId, timebin, ped, err );
+		     else
+		       {
+			 ped=mDb->getPedestalFromGeoId(geoId);
+			 err=mDb->getPedestalSigmaFromGeoId(geoId);
+		       }
 		     printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,err);
 
                      if( ped > 4096 || ped < 0 ){
@@ -119,16 +141,17 @@ Int_t StFgtA2CMaker::Make(){
                         // set the value
                         strip->setAdc( adc );
 
-                        // no DB yet, so no gains.  Default to unitary gain
-                        strip->setCharge( adc );
-                        printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
 
-                        // flag whether to cut
-                        if(checkStatus) {
-                          Int_t status;
-                          mStatusReader->getStatus( geoId, status );
+                        strip->setCharge( gain*adc );
+                        printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
+                          UInt_t status=1;
+			  if(useStatusFile)
+			    mStatusReader->getStatus( geoId, status );
+			  if(!useStatusFile && mDb)
+			    status=mDb->getStatusFromGeoId(geoId);
                           if(!status)
-                            strip->setGeoId( -1 );}
+                            strip->setGeoId( -1 );
+		     
 
                         if( (mRelThres && adc < mRelThres*err) || (mAbsThres>-4096 && adc < mAbsThres) )
                            strip->setGeoId( -1 );
