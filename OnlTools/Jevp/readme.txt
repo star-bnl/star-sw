@@ -17,6 +17,7 @@ readme files:
 > cvs co OnlTools/Jevp
 > cvs co OnlTools/PDFUtil
 > cvs co StRoot/RTS
+> source OnlTools/Jevp/level.source
 > cons
 
 Should build everything.   The "executables" will be in the form
@@ -26,6 +27,11 @@ of shared object libraries stored in the directory tree
 
 In order to run the code you will need to execute the root scripts
 described in the following sections.
+
+One should source OnlTools/Jevp/level.source at the begining of each 
+session.   The programs will most likely work with the default
+offline source level, but are only guarenteed at the software level
+indicated...
 
 **********************************
 * II.  Code structure
