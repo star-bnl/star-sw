@@ -263,6 +263,8 @@ class StFgtDbImpl : public StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	);
 
+
+
     private:
 	fgtMapping_st * m_map;
 	fgtMapping_st * m_rmap; 

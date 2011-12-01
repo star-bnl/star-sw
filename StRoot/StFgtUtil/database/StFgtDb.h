@@ -134,8 +134,15 @@ class StFgtDb
 	virtual bool isR(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
+	virtual double gridAttenuation(float xLoc, float yLoc); // range [0,1]
+	virtual double PchargeFraction(float xLoc, float yLoc); // range [0,1]
+	virtual double PstripGain(int iStrip, int iQuad, int iDisc);
+	virtual double RstripGain(int iStrip, int iQuad, int iDisc);
 
     //ClassDef(StFgtDb, 1)
+
+
+
 };
 
 #endif
