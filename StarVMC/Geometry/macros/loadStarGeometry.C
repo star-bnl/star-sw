@@ -17,7 +17,15 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
   gErrorIgnoreLevel=9999;
 
   // ROOT TGeo stacker
-  AgBlock::SetStacker( new StarTGeoStacker() );
+  StarTGeoStacker *stacker = new StarTGeoStacker();
+  //  stacker -> Debug("TPAD", "position");
+  //  stacker -> Debug("TPCM", "position");
+  //  stacker -> Debug("TSWH", "position"); 
+  //  stacker -> Debug("TPGV", "position");
+  //  stacker -> Debug("TSAS", "position");
+  //  stacker -> Debug("TWAS", "position");
+  //  stacker -> Debug("TSGT", "position");
+  AgBlock::SetStacker( stacker );
 
   // Load the master geometry libraries
   //  gROOT->ProcessLine(".L libGeometry.so");
