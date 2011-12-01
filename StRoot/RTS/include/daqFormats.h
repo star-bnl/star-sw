@@ -28,12 +28,16 @@ typedef unsigned char UINT8 ;
 #include <TRG/trgStructures_30.h>
 #elif (TRG_VERSION == 0x32)
 #include <trgStructures_32.h>
-#else	// default
+#else	// after version 0x40, no TRGD
+#define NOTRGD
+#if (TRG_VERSION == 0x40)
+#include <trgDataDefs_40.h>
+#else
 #ifndef TRG_VERSION
-#define TRG_VERSION 0x40	// changed on Feb 22, 2007
+#define TRG_VERSION 0x41	// changed on Feb 22, 2007
 #endif
 #include <trgDataDefs.h>
-#define NOTRGD
+#endif
 #endif
 
 #define FMT_ADCD	(1 << 0)
