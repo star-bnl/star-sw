@@ -37,6 +37,8 @@ class StarAgmlStacker : public TNamed
     {
       return mNicknames[ TString(name) ];
     }
+
+  void Debug( const Char_t *name, const Char_t *flag="position" );
   
  private:
  protected:
@@ -59,12 +61,14 @@ class StarAgmlStacker : public TNamed
   std::map   < TString, std::vector< TString > > mNicknames;
   std::map   < TString, TString >                mRealnames;
 
+  std::map   < TString, TString >                mDebugOptions;
+  
+
  public:
   virtual const Char_t *GetCVS() const {
     static const Char_t cvs[]="Tag  $Name:  $ $Id $ built "__DATE__" "__TIME__;
     return cvs;
   }
-
 
 
   ClassDef(StarAgmlStacker,1);

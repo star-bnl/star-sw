@@ -149,13 +149,6 @@ TString StarAgmlStacker::nickname( TString agname, Bool_t add )
   nicks.push_back(mynickname);
   mRealnames[mynickname]=agname;
 
-  if ( agname == "TCOO" )
-    {
-      std::cout << "TCOO " << mynickname.Data() << " " << i << " " << i1 << " " << i2 << " " << i3 << std::endl;
-    }
-
-
-
   return mynickname;
   
 }
@@ -168,6 +161,13 @@ TString StarAgmlStacker::realname( TString nname )
   return mRealnames[nname];
 }
 
-
+// ---------------------------------------------------------------------------------------------------
+void StarAgmlStacker::Debug( const Char_t *name, const Char_t *flag )
+{
+  mDebugOptions[name]+="|";
+  mDebugOptions[name]+=flag;
+  mDebugOptions[name]+="|";
+  std::cout << GetName() << " -Debug- " << name << " " << mDebugOptions[name].Data() << std::endl;
+}
 
 
