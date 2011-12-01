@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.6 2011/11/13 23:51:49 wwitzke Exp $
+// $Id: StFgtDbMaker.h,v 1.7 2011/12/01 23:09:15 avossen Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -11,13 +11,13 @@
 #include "StMaker.h"
 #endif
 
-//#include "StFgtUtil/database/fgtGain.h"
+//#include "database/fgtGain.h"
 //#include "StFgtUtil/database/fgtMapping.h"
 //#include "StFgtUtil/database/fgtPedestal.h"
 //#include "StFgtUtil/database/fgtStatus.h"
-#include "StFgtUtil/database/StFgtDb.h"
-#include "StFgtUtil/database/StFgtDbImpl.h"
-#include "StFgtUtil/database/StFgtDbNaiveImpl.h"
+#include "StFgtDb.h"
+#include "StFgtDbImpl.h"
+#include "StFgtDbNaiveImpl.h"
 #include "StFgtUtil/geometry/StFgtGeom.h"
 
 class fgtElosCutoff_st;
@@ -46,13 +46,16 @@ class StFgtDbMaker : public StMaker {
   StFgtGeom *getFgtGeom(){ return geom;} 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.6 2011/11/13 23:51:49 wwitzke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.7 2011/12/01 23:09:15 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.7  2011/12/01 23:09:15  avossen
+// moved StFgtUtil/database to StFgtDbMaker
+//
 // Revision 1.6  2011/11/13 23:51:49  wwitzke
 // Modified StFgtDbMaker to pull calibration data from the database.
 //
