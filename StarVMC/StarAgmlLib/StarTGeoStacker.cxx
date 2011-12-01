@@ -2,6 +2,7 @@
 ClassImp(StarTGeoStacker);
 
 //#define __DEBUG_BUILD__
+//#define __DEBUG_PLACE__
 
 #include "AgModule.h"
 #include "AgBlock.h"
@@ -1112,6 +1113,20 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
   //
   //////////////////////////////////////////////////////////////////////////////
   //
+
+
+  if ( mDebugOptions[block_name].Contains("position")  ||
+       mDebugOptions[block_name].Contains("placement") ||
+       mDebugOptions[block_name].Contains("place") )
+    {
+      std::cout << "== Debug Placement: block="<<block_name.Data() << " ==================================" << std::endl;
+      std::cout << "   konly   = " << ((myonly==AgPlacement::kOnly)?"ONLY":"MANY") << std::endl;
+      std::cout << "   copy    = " << copy << std::endl;
+      std::cout << "   runtime = " << ((parameterized)?"TRUE":"FALSE") << std::endl;
+      std::cout << "   matrix  " << std::endl;
+      matrix->Print();
+    }
+
 
   if ( myonly == AgPlacement::kOnly )
     { 
