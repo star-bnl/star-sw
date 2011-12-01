@@ -2,6 +2,8 @@
 
 //  This is not a very efficient implementation of this. It feels like this
 //  could be more efficient.
+
+
 Double_t StFgtDbImpl::getMapping(
     Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 )
@@ -36,3 +38,7 @@ bool StFgtDbImpl::isR(
      
 	return (layer == 'R');
 }
+
+
+
+
