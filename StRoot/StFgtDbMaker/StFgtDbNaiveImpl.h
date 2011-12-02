@@ -202,6 +202,12 @@ class StFgtDbNaiveImpl : public StFgtDb
 	    return StFgtGeom::isNaiveR( rdo, arm, apv, channel );
 	}
 
+	virtual Float_t eLossTab(int bin)
+	{
+	  //no naive implementationo
+	  return 0;
+	}
+
     //	ClassDef(StFgtDbNaiveImpl, 1)
 };
 

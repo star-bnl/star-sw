@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.9 2011/11/14 02:31:15 wwitzke Exp $
+// $Id: StFgtDbMaker.cxx,v 1.10 2011/12/02 03:53:18 avossen Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -67,51 +67,9 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
     // clear old pointers to DB tables, just in case. Do not delete the data which are owned by StDbMaker
     mLossTab =0;
 
-    LOG_INFO <<  "::RequestDataBase() for Elos cut off ..."<< endl;  
-    TDataSet *DB = GetDataBase("Calibrations/fgt/fgtElosCutoff");
-    if (!DB)
-    {
-	LOG_FATAL
-	    << "ERROR: no table found in db, or malformed local db config" 
-	    << endm;
-	assert(10==1);
-    }
 
-    St_fgtElosCutoff *eLosDataset= (St_fgtElosCutoff*)
-	DB->Find("fgtElosCutoff"); assert(eLosDataset);
-    Int_t rows = eLosDataset->GetNRows();
-    if (rows > 1) 
-    {
-	LOG_FATAL   << " found INDEXED table with " << rows
-		    << " rows, this is fatal, fix DB content" << endm;
-	assert(11==1);
-    }
-
-    if (eLosDataset)
-    {
-	mLossTab = eLosDataset->GetTable(); assert(mLossTab);
-	LOG_INFO
-	    <<
-		Form(
-		    "%s :: fgtElosCutoff table received, comment=%s",
-		    GetName(),mLossTab[0].comment
-		)
-	    << endm;
- 
-	#if 0 // disable it later 
-	    for (int i = 0; i < 10000; i++) { 
-            std::cout << i <<"tmp eLoss val: " << mLossTab[0].cutoff[i] 
-		      << std::endl;
-	    if(i>15) break;    }
-	#endif   
-    }
-    else
-    {
-	LOG_FATAL << Form("%s :: fgtElosCutoff table  failed,",GetName())
-		  << endm;
-	assert(12==1);
-    }
-  
+    ////start here
+    St_fgtElosCutoff *eLossDataset=0;
     St_fgtMapping * mapDataset = 0;
     St_fgtGain * gainDataset = 0;
     St_fgtPedestal * pedDataset = 0;
@@ -133,6 +91,17 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	{
 	    m_tables = new StFgtDbImpl();
 	}
+
+	LOG_INFO <<  "::RequestDataBase() for Elos cut off ..."<< endl;    
+	TDataSet *ELossDB = GetDataBase("Calibrations/fgt/fgtElosCutoff");
+	if (!ELossDB)
+	{
+	  LOG_FATAL
+	    << "ERROR: no table found in db for eloss, or malformed local db config" 
+	    << endm;
+	  assert(10==1);
+	}
+
 
 	LOG_INFO <<  "::RequestDataBase() for calibration tables..."<< endl;  
 	TDataSet *MapDB = GetDataBase("Calibrations/fgt/fgtMapping");
@@ -168,8 +137,19 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    assert(16==1);
 	}
 
+
+	eLossDataset=(St_fgtElosCutoff*)ELossDB->Find("fgtElosCutoff"); assert(eLossDataset);
+	Int_t rows = eLossDataset->GetNRows();
+	if (rows > 1) 
+	  {
+	    LOG_FATAL   << " found INDEXED table with " << rows
+		    << " rows, this is fatal, fix DB content" << endm;
+	    assert(11==1);
+	  }
+
+
 	mapDataset = (St_fgtMapping *)
-	   MapDB->Find("fgtMapping"); assert(mapDataset);
+	  MapDB->Find("fgtMapping"); assert(mapDataset);
 	rows = mapDataset->GetNRows();
 	if (rows > 1) 
 	{
@@ -206,7 +186,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	}
     }
   
-    if (pedDataset && statusDataset && mapDataset && gainDataset )
+    if (pedDataset && statusDataset && mapDataset && gainDataset && eLossDataset)
     {
 	if ( m_rmap )
 	    delete m_rmap;
@@ -223,7 +203,8 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    map, m_rmap,
 	    statusDataset->GetTable(),
 	    pedDataset->GetTable(),
-	    gainDataset->GetTable()
+	    gainDataset->GetTable(),
+	    eLossDataset->GetTable()
 	);
 
 	LOG_INFO
@@ -263,11 +244,16 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    LOG_FATAL << Form("%s :: status table failed,",GetName())
 		      << endm;
 	}
+	if ( !eLossDataset )
+	{
+	    LOG_FATAL << Form("%s :: eLoss table failed,",GetName())
+		      << endm;
+	}
 
 	assert(21==1);
     }
 
-    geom=new StFgtGeom();   //	for now it is static, but later may be time
+    //    geom=new StFgtGeom();   //	for now it is static, but later may be time
 			    //	dependent
     return kStOK;
 }
@@ -294,14 +280,12 @@ Int_t StFgtDbMaker::Finish()
 }
 
 //_____________________________________________________________________________
-Float_t StFgtDbMaker::eLossTab(int bin)
-{
-    assert(bin>=0);
-    assert(bin<10000);
-    return mLossTab[0].cutoff[bin];
-}
+
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.10  2011/12/02 03:53:18  avossen
+// fixed eLoss db tables
+//
 // Revision 1.9  2011/11/14 02:31:15  wwitzke
 // Fixed bug with where getTables() can be called.
 //

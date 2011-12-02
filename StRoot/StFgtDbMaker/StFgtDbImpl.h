@@ -10,10 +10,12 @@
 #define _ST_FGT_DB_IMPL_H_
 
 #include "StFgtDb.h"
+#include "tables/St_fgtElosCutoff_Table.h"
 #include "tables/St_fgtPedestal_Table.h"
 #include "tables/St_fgtMapping_Table.h"
 #include "tables/St_fgtGain_Table.h"
 #include "tables/St_fgtStatus_Table.h"
+
 //#include "fgtGain.h"
 //#include "fgtMapping.h"
 //#include "fgtPedestal.h"
@@ -44,7 +46,8 @@ class StFgtDbImpl : public StFgtDb
 	    fgtMapping_st * rmap, 
 	    fgtStatus_st * status,
 	    fgtPedestal_st * pedestal,
-	    fgtGain_st * gain
+	    fgtGain_st * gain,
+	    fgtElosCutoff_st* mLossTab
 	)
 	{
 	    m_map = map;
@@ -52,6 +55,7 @@ class StFgtDbImpl : public StFgtDb
 	    m_status = status;
 	    m_pedestal = pedestal;
 	    m_gain = gain;
+	    m_eLoss=mLossTab;
 	}
 
 	//----------------------------------------------------------
@@ -271,6 +275,7 @@ class StFgtDbImpl : public StFgtDb
 	fgtStatus_st * m_status;
 	fgtPedestal_st * m_pedestal;
 	fgtGain_st * m_gain;
+	fgtElosCutoff_st* m_eLoss;
 
 	virtual Int_t encodeElectronicId(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
@@ -302,7 +307,13 @@ class StFgtDbImpl : public StFgtDb
 	    }
 	    return;
 	}
+	virtual Float_t eLossTab(int bin)
+	{
+	  assert(bin>=0);
+	  assert(bin<10000);
+	  return m_eLoss[0].cutoff[bin];
 
+	};
     //	ClassDef(StFgtDbImpl, 1)
 };
 
