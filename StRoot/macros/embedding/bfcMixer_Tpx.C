@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.27 2011/09/23 02:47:40 cpowell Exp $
+// $Id: bfcMixer_Tpx.C,v 1.28 2011/12/05 16:06:34 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.28  2011/12/05 16:06:34  zhux
+// latest geometry (y2010c) used in simulation chain (chain2) for P10ik
+//
 // Revision 1.27  2011/09/23 02:47:40  cpowell
 // Chain for p+p 200 P10ic production added. Setup for W embedding included.
 //
@@ -72,6 +75,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   TString geomP08ic("ry2008");
   TString geomP10ic("ry2009a");
   TString geomP10ih("ry2010");
+  TString geomP10ikSim("ry2010c"); // latest y2010 geometry
   TString geomP10ik(geomP10ih); // Same chain as P10ih
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
@@ -98,7 +102,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih;}
   else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih;}
   else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih;}
-  else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ik;}
+  else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ikSim;}
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
@@ -119,7 +123,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   else if (prodName == "P10ihAuAu39")  { chain3Opt += geomP10ih; }
   else if (prodName == "P10ihAuAu11")  { chain3Opt += geomP10ih; }
   else if (prodName == "P10ihAuAu7")   { chain3Opt += geomP10ih; }
-  else if (prodName == "P10ikAuAu200") { chain3Opt += geomP10ik; }
+  else if (prodName == "P10ikAuAu200") { /*chain3Opt += geomP10ik;*/ }
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
