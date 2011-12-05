@@ -8,11 +8,8 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.31 2011/10/11 01:12:14 perev Exp $
+ * $Id: StMcEvent.cc,v 2.30 2011/03/22 22:30:33 perev Exp $
  * $Log: StMcEvent.cc,v $
- * Revision 2.31  2011/10/11 01:12:14  perev
- * Mtd added
- *
  * Revision 2.30  2011/03/22 22:30:33  perev
  * Bug#2111 Remove redundant zeroing
  *
@@ -135,7 +132,6 @@
 #include "StMcEmcHitCollection.hh"
 #include "StMcTofHitCollection.hh"
 #include "StMcBTofHitCollection.hh"
-#include "StMcMtdHitCollection.hh"
 #include "StMcPixelHitCollection.hh"
 #include "StMcIstHitCollection.hh"
 #include "StMcFgtHitCollection.hh"
@@ -150,7 +146,6 @@
 #include "StMcCalorimeterHit.hh"
 #include "StMcTofHit.hh"
 #include "StMcBTofHit.hh"
-#include "StMcMtdHit.hh"
 #include "StMcPixelHit.hh"
 #include "StMcIstHit.hh"
 #include "StMcFgtHit.hh"
@@ -158,8 +153,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.31 2011/10/11 01:12:14 perev Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.31 2011/10/11 01:12:14 perev Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.30 2011/03/22 22:30:33 perev Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.30 2011/03/22 22:30:33 perev Exp $";
 ClassImp(StMcEvent);
 //______________________________________________________________________________
 void StMcEvent::initToZero()
@@ -179,10 +174,9 @@ void StMcEvent::makeColls()
     mCtbHits  = new StMcCtbHitCollection();
     mTofHits  = new StMcTofHitCollection();
     mBTofHits = new StMcBTofHitCollection();
-    mMtdHits  = new StMcMtdHitCollection();
     mPixelHits = new StMcPixelHitCollection();
-    mIstHits  = new StMcIstHitCollection();
-    mFgtHits  = new StMcFgtHitCollection();
+    mIstHits   = new StMcIstHitCollection();
+    mFgtHits   = new StMcFgtHitCollection();
 }
 
 //______________________________________________________________________________
@@ -402,12 +396,6 @@ void StMcEvent::setBTofHitCollection(StMcBTofHitCollection* val)
 {
     if (mBTofHits && mBTofHits!= val) delete mBTofHits;
     mBTofHits = val;
-}
-//______________________________________________________________________________
-void StMcEvent::setMtdHitCollection(StMcMtdHitCollection* val)
-{
-    if (mMtdHits && mMtdHits!= val) delete mMtdHits;
-    mMtdHits = val;
 }
 #if 0
 //______________________________________________________________________________
@@ -675,7 +663,6 @@ void StMcEvent::Print(Option_t *option) const {
   PrintHitCollectionW(Ssd,ssd,ladder,Ladders,wafer,Wafers);
   PrintHitCollection(Tof,tof);
   PrintHitCollection(BTof,btof);
-  PrintHitCollection(Mtd,mtd);
   PrintHitCollectionL(Pixel,pixel,layer,Layers);
   PrintHitCollectionL(Ist,ist,layer,Layers);
   PrintHitCollectionL(Fgt,fgt,layer,Layers);

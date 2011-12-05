@@ -1,8 +1,5 @@
-* $Id: geometry.g,v 1.240 2011/11/22 15:09:19 jwebb Exp $
+* $Id: geometry.g,v 1.239 2011/10/13 18:23:58 jwebb Exp $
 * $Log: geometry.g,v $
-* Revision 1.240  2011/11/22 15:09:19  jwebb
-* Added "devE" tag for eStar development.
-*
 * Revision 1.239  2011/10/13 18:23:58  jwebb
 * Added production geometry tag y2011a.  Tag y2011a is consistent with the y2011
 * geometry tag, as it exists in the SL11c and SL11d libraries.  y2011a should be
@@ -1281,9 +1278,6 @@ replace [exe ITSPof;] with  [;ITSP=off;] "prototype of the Inner Tracker SuPport
 replace [exe FHCM01;] with  [;FhcmConfig=1;] 
 
 
-replace [exe EIDDv01;] with [;EiddConfig=1; EIDD=on; ]
-
-
 ********* Geometry definitions *******************************************************
 *********   y2000   ***
 replace [exe y2000;] with [;"corrected: MWC readout, RICH reconstructed position, no TOF ";
@@ -1875,7 +1869,6 @@ REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe FGTDv31;     "FGT v3 5 half + 1 full disks";
 ]
 
-
 REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
     exe BTOF67;      "time of flight";
@@ -1925,50 +1918,6 @@ REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2013.  Currently j
 
     exe PIXL02;      "Development version of the pixl detector";
 ]
-
-
-
-REPLACE [exe devE;] with ["DEVE eSTAR upgrade geometry";
-    """Deprecated detectors"""
-    exe FTPCof;      "FTPC";
-    exe SVTTof;      "No SVT";
-    exe PHMDof;      "Photon mult detector on";
-    exe SISDof;      "No sisd";
-
-    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
-    exe BTOF67;      "time of flight";
-    exe CALB02;      "updated bemc model";
-    exe ECALv6;      "several bugfixes in eemc geometry";
-    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
-    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
-    exe BBCMon;      "beam beam counters";
-    exe FPDM03;      "Latest version of FPD";
-    exe VPDD07;      "Latest version of VPD";
-
-    exe MUTD05;      "Muon telescope detector";
-    exe CAVE04;      "Cave and tunnel";
-    exe PIPE12;      "The beam pipe";
-
-    exe IDSM02;      "Inner detector support";
-    exe FGTDv32;     "FGT v3 6 disks";
-
-    exe PIXL02;      "Development version of the pixl detector";
-
-    """Move the FMS N and S modules to an open position"""
-       FpdmPosition=1;
-       
-    """Switch on and configure the FSC geometry"""
-       FSCE=on;
-       FsceConfig=1;
-
-    """Activate the EIDD geometry"""
-       EIDD=on;
-       EiddConfig=1;
-
-]
-
-
-
 
 
 !//______________________________________________________________________________
@@ -2083,7 +2032,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               RICH,ZCAL,MFLD,BBCM,FPDM,PHMD,
               PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
               SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,
-              DUMM,SCON,IDSM,FSCE,EIDD
+              DUMM,SCON,IDSM,FSCE
 
 * Qualifiers:  TPC        TOF         etc
    Logical    emsEdit,svtWater,
@@ -2118,7 +2067,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
-              FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig
+              FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig
 
    Integer    FpdmPosition / 0 /
 
@@ -2237,7 +2186,6 @@ replace[;Case#{#;] with [
    VpddConfig  = 1 ! vpd...
    FhcmConfig  = 0 ! Forward Hadron Detector off by default
    FsceConfig  = 0 ! Forward Sphagettoni Calorimeter off by default
-   EiddConfig  = 0 ! EAst side, Trd, Tof and Calo for eSTAR studies
 
    pipeFlag = 3 ! pipe wrap + svt shield
 
@@ -2255,8 +2203,7 @@ replace[;Case#{#;] with [
     ISTB,GEMB,FSTD,SISD,
     FTRO,FGTD,SHLD,QUAD,
     MUTD,IGTD,HPDT,ITSP,
-    DUMM,SCON,IDSM,FSCE,
-    EIDD} = off;
+    DUMM,SCON,IDSM,FSCE} = off;
 
    {emsEdit,RICH}=off        " TimeOfFlight, EM calorimeter Sector            "
    nSvtLayer=7; nSvtVafer=0;  svtWaferDim=0; " SVT+SSD, wafer number and width as in code     "
@@ -2704,10 +2651,6 @@ If LL>0
   Case dev13 { dev13 : y2013 stufies;
                  Geom = 'dev13   ';
                  exe dev13; }
-
-  Case devE  { devE : eSTAR development geometry;
-                 Geom = 'devE    ';
-                 exe devE; }
 
 
 ****************************************************************************************
@@ -4447,10 +4390,6 @@ c     write(*,*) 'FSTD'
 
    """The Foward Spaghetti Calorimeter"""    
    IF FSCE {  call fscegeo;  }
-
-
-   """The EIDD Geometry (TOF, TRD, East calo)"""
-   IF EIDD {  call eiddgeo;  }
 
    if (IGTD) then
 c    write(*,*) 'IGTD'

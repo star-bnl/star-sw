@@ -9,22 +9,16 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.33 2011/11/17 20:20:13 genevb Exp $
+ * $Id: StMcTrack.cc,v 2.32.2.1 2011/11/22 16:01:18 didenko Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
- * Revision 2.33  2011/11/17 20:20:13  genevb
- * Restore latest version
+ * Revision 2.32.2.1  2011/11/22 16:01:18  didenko
+ * bug fixed
  *
  * Revision 2.32  2011/11/17 20:16:20  genevb
  * For SL10k_embed, fixes from 2.28 and 2.29, minus FPD inclusion from 2.27
- *
- * Revision 2.31  2011/10/11 01:22:24  perev
- * Not used anymore or ever
- *
- * Revision 2.30  2011/07/20 17:35:53  perev
- * Fsc added
  *
  * Revision 2.29  2011/03/22 22:30:33  perev
  * Bug#2111 Remove redundant zeroing
@@ -83,16 +77,13 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.33 2011/11/17 20:20:13 genevb Exp $
+ * $Id: StMcTrack.cc,v 2.32.2.1 2011/11/22 16:01:18 didenko Exp $
  * $Log: StMcTrack.cc,v $
- * Revision 2.33  2011/11/17 20:20:13  genevb
- * Restore latest version
+ * Revision 2.32.2.1  2011/11/22 16:01:18  didenko
+ * bug fixed
  *
- * Revision 2.31  2011/10/11 01:22:24  perev
- * Not used anymore or ever
- *
- * Revision 2.30  2011/07/20 17:35:53  perev
- * Fsc added
+ * Revision 2.32  2011/11/17 20:16:20  genevb
+ * For SL10k_embed, fixes from 2.28 and 2.29, minus FPD inclusion from 2.27
  *
  * Revision 2.29  2011/03/22 22:30:33  perev
  * Bug#2111 Remove redundant zeroing
@@ -220,7 +211,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.33 2011/11/17 20:20:13 genevb Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.32.2.1 2011/11/22 16:01:18 didenko Exp $";
 
 ClassImp(StMcTrack);
 
@@ -239,7 +230,8 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mFourMomentum.setE(trk->e);
     mIsShower = trk->is_shower;
     mGeantId = trk->ge_pid;
-    assert(mGeantId>=0 && mGeantId<=0xFFFF);
+    assert(mGeantId>=0);
+    if ( mGeantId>0xFFFF)  mGeantId = 0;
     mPdgId   = trk->eg_pid;
     mKey     = trk->id;
     mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
@@ -281,7 +273,6 @@ StMcTrack::~StMcTrack() {
     mBsmdeHits.clear();
     mBsmdpHits.clear();
     mTofHits.clear();
-    mMtdHits.clear();
     mEemcHits.clear();
     mEprsHits.clear();
     mEsmduHits.clear();
@@ -337,7 +328,6 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Bsmde Hits: " << t.bsmdeHits().size() << endl;
     os << "No. Bsmdp Hits: " << t.bsmdpHits().size() << endl;
     os << "No. Tof   Hits: " << t.tofHits().size()   << endl;
-    os << "No. Mtd   Hits: " << t.mtdHits().size()   << endl;
     os << "No. Eemc  Hits: " << t.eemcHits().size()  << endl;
     os << "No. Eprs  Hits: " << t.eprsHits().size()  << endl;
     os << "No. Esmdu Hits: " << t.esmduHits().size() << endl;
@@ -345,7 +335,6 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Pixel Hits: " << t.pixelHits().size() << endl;
     os << "No. Ist Hits  : " << t.istHits().size()   << endl;
     os << "No. Fgt Hits  : " << t.fgtHits().size()   << endl;
-    os << "No. Fsc Hits  : " << t.fscHits().size()   << endl;
     os << "Is Shower     : " << t.isShower() << endl;
     os << "Geant Id      : " << t.geantId()  << endl;
     os << "Pdg Code      : " << t.pdgId()  << endl;
@@ -381,7 +370,6 @@ void StMcTrack::Print(Option_t *option) const {
 	 << "Bse" 
 	 << "Bsp" 
 	 << "Tof" 
-	 << "Mtd" 
 	 << "Emc" 
 	 << "Eps" 
 	 << "Esu" 
@@ -399,7 +387,7 @@ void StMcTrack::Print(Option_t *option) const {
   Double_t y = rapidity();
   if (TMath::Abs(y) > 999.999) y = TMath::Sign(999.999, y);
     cout << 
-      Form("%8s%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%3i%6i%3i%3i%6i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i",
+      Form("%8s%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%3i%6i%3i%3i%6i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i",
 	   Name.Data(),
 	   fourMomentum().x(), fourMomentum().y(), fourMomentum().z(), fourMomentum().t(), 
 	   pt(),
@@ -420,7 +408,6 @@ void StMcTrack::Print(Option_t *option) const {
 	   bsmdeHits().size(),
 	   bsmdpHits().size(),
 	   tofHits().size(),
-	   mtdHits().size(),
 	   eemcHits().size(),
 	   eprsHits().size(),
 	   esmduHits().size(),
@@ -461,8 +448,6 @@ void StMcTrack::setBsmdpHits(StPtrVecMcCalorimeterHit& val) { mBsmdpHits = val; 
 
 void StMcTrack::setTofHits(StPtrVecMcTofHit& val) { mTofHits = val; }
 
-void StMcTrack::setMtdHits(StPtrVecMcMtdHit& val) { mMtdHits = val; }
-
 void StMcTrack::setEemcHits(StPtrVecMcCalorimeterHit& val) { mEemcHits = val; }
 
 void StMcTrack::setEprsHits(StPtrVecMcCalorimeterHit& val) { mEprsHits = val; }
@@ -470,8 +455,6 @@ void StMcTrack::setEprsHits(StPtrVecMcCalorimeterHit& val) { mEprsHits = val; }
 void StMcTrack::setEsmduHits(StPtrVecMcCalorimeterHit& val) { mEsmduHits = val; }
 
 void StMcTrack::setEsmdvHits(StPtrVecMcCalorimeterHit& val) { mEsmdvHits = val; }
-
-void StMcTrack::setFscHits(StPtrVecMcCalorimeterHit& val) { mFscHits = val; }
 
 void StMcTrack::setPixelHits(StPtrVecMcPixelHit& val) { mPixelHits = val; }
 
@@ -546,11 +529,6 @@ void StMcTrack::addTofHit(StMcTofHit* hit)
   mTofHits.push_back(hit);
 }
 
-void StMcTrack::addMtdHit(StMcMtdHit* hit)
-{
-  mMtdHits.push_back(hit);
-}
-
 void StMcTrack::addEemcHit(StMcCalorimeterHit* hit)
 {
   mEemcHits.push_back(hit);
@@ -569,16 +547,6 @@ void StMcTrack::addEsmduHit(StMcCalorimeterHit* hit)
 void StMcTrack::addEsmdvHit(StMcCalorimeterHit* hit)
 {
   mEsmdvHits.push_back(hit);
-}
-
-void StMcTrack::addFpdHit(StMcCalorimeterHit* hit)
-{
-  mFpdHits.push_back(hit);
-}
-
-void StMcTrack::addFscHit(StMcCalorimeterHit* hit)
-{
-  mFscHits.push_back(hit);
 }
 
 void StMcTrack::addPixelHit(StMcPixelHit* hit)
@@ -680,14 +648,6 @@ void StMcTrack::removeTofHit(StMcTofHit* hit)
     }
 }
 
-void StMcTrack::removeMtdHit(StMcMtdHit* hit)
-{
-    StMcMtdHitIterator iter = find(mMtdHits.begin(), mMtdHits.end(), hit);
-    if (iter != mMtdHits.end()){
-        mMtdHits.erase(iter);
-    }
-}
-
 void StMcTrack::removeEemcHit(StMcCalorimeterHit* hit)
 {
     removeCalorimeterHit(mEemcHits, hit);
@@ -751,7 +711,6 @@ const StPtrVecMcHit *StMcTrack::Hits(StDetectorId Id) const {
   case kFtpcWestId:  	  	
   case kFtpcEastId:  	  	coll = (StPtrVecMcHit *) &mFtpcHits; break;             
   case kTofId:       	  	coll = (StPtrVecMcHit *) &mTofHits; break; 	           	 
-  case kMtdId:       	  	coll = (StPtrVecMcHit *) &mMtdHits; break; 	           	 
   case kCtbId:       	  	coll = (StPtrVecMcHit *) &mCtbHits; break; 	           	 
   case kSsdId:       	  	coll = (StPtrVecMcHit *) &mSsdHits; break; 	         
   case kBarrelEmcTowerId:    	break; 
@@ -785,7 +744,6 @@ const StPtrVecMcCalorimeterHit *StMcTrack::CalorimeterHits(StDetectorId Id) cons
   case kFtpcWestId:  	  	
   case kFtpcEastId:  	  	break;             
   case kTofId:       	  	break; 	           	 
-  case kMtdId:       	  	break; 	           	 
   case kCtbId:       	  	break; 	           	 
   case kSsdId:       	  	break; 	         
   case kBarrelEmcTowerId:    	coll = (StPtrVecMcCalorimeterHit *) &mBemcHits;  break; 

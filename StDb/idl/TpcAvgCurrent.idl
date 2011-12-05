@@ -1,7 +1,0 @@
-struct TpcAvgCurrent { 
-  long  run;               /* run no. used for averaging  */
-  long  start_time;        /* begin unix time of averaging interval */
-  long  stop_time;         /* end   unix time of averaging interval */
-  float AvCurrent[192];    /* average current per sector(24) and channel(8) [muA]*/
-  float AcCharge[192];     /* accumulated charge per sector(24) and channel(8) [C]*/
- };  
