@@ -4,10 +4,10 @@
 /// \date 7 July 2007
 ///
 
-void RunGammaFitterDemo(const char* filelist = "StRoot/StGammaMaker/macros/photon_9_11.list")
+void RunGammaFitterDemo(const char* filelist = "/star/u/sdhamija/StGammaMaker/StRoot/StGammaMaker/macros/photon_9_11.list")
 {
   // Load shared libraries
-  gROOT->Macro("StRoot/StGammaMaker/macros/loadGammaLibs.C");
+  gROOT->Macro("$STAR/StRoot/StGammaMaker/macros/loadGammaLibs.C");
 
   // Create TChain from filelist
   TChain* chain = new TChain("gammas");
@@ -47,13 +47,14 @@ void RunGammaFitterDemo(const char* filelist = "StRoot/StGammaMaker/macros/photo
   fResidualCut->SetParameters(100, 0, 0.05);
 
   // Get number of entries in gamma tree
-  int nentries = chain->GetEntries();
-  cout << "nentries = " << nentries << endl;
+  int nevents = chain->GetEntries();
+  cout << "nevents = " << nevents << endl;
 
   // Event loop
   int ncandidates = 0;
-  for (int n = 0; n < nentries; ++n) {
-    chain->GetEntry(n);
+  for (int iEvent = 0; iEvent < nevents; ++iEvent) {
+    chain->GetEvent(iEvent);
+    if (iEvent % 1000 == 0) cout << "iEvent = " << iEvent << endl;
     // Skip events without vertex
     if (event->vertex() == TVector3(0,0,0)) continue;
     // Candidate loop
@@ -62,44 +63,46 @@ void RunGammaFitterDemo(const char* filelist = "StRoot/StGammaMaker/macros/photo
       assert(candidate);
       // EEMC candidates only
       if (candidate->detectorId() == StGammaCandidate::kEEmc) {
-	StGammaFitterResult u, v;
 	// Fit SMD u & v plane
-	if (StGammaFitter::instance()->fitSector(candidate, &u, &v)) {
-	  int sector, subsector, etabin;
-	  EEmcGeomSimple::Instance().getTower(candidate->position(), sector, subsector, etabin);
-	  TVector3& position = EEmcSmdGeom::instance()->getIntersection(sector, u.mean(), v.mean());
-	  if (position.z() != -999) {
-	    float residual = u.residual()+v.residual();
-	    float yield = u.yield()+v.yield();
-	    if (residual > 0 && yield > 0) {
-	      ++ncandidates;
-	      // Fill histograms
-	      hResidualYield->Fill(residual, yield);
-	      hVertexZ->Fill(event->vertex().z());
-	      hVertexXY->Fill(event->vertex().x(), event->vertex().y());
-	      hClusterEnergy->Fill(candidate->energy());
-	      hClusterPt->Fill(candidate->momentum().Pt());
-	      hClusterXY->Fill(candidate->position().x(), candidate->position().y());
-	      hClusterEtaPhi->Fill(candidate->position().Eta(), candidate->position().Phi());
-	      hSmdPointXY->Fill(position.x(), position.y());
-	      hYieldU->Fill(u.yield());
-	      hYieldV->Fill(v.yield());
-	      hResidualU->Fill(u.residual());
-	      hResidualV->Fill(v.residual());
-	      if (u.ndf() > 0) hChi2PerNdfU->Fill(u.chi2() / u.ndf());
-	      if (v.ndf() > 0) hChi2PerNdfV->Fill(v.chi2() / v.ndf());
-	      hMeanU->Fill(u.mean());
-	      hMeanV->Fill(v.mean());
-	      hSigmaU->Fill(u.sigma());
-	      hSigmaV->Fill(v.sigma());
-	      hNhitsU->Fill(candidate->numberOfSmdu());
-	      hNhitsV->Fill(candidate->numberOfSmdv());
-	    }
+	StGammaFitterResult fits[2];
+	StGammaFitterResult& u = fits[0];
+	StGammaFitterResult& v = fits[1];
+	StGammaFitter::instance()->fit(candidate, fits, 0);
+	StGammaFitter::instance()->fit(candidate, fits, 1);
+	int sector, subsector, etabin;
+	EEmcGeomSimple::Instance().getTower(candidate->position(), sector, subsector, etabin);
+	TVector3& position = EEmcSmdGeom::instance()->getIntersection(sector, u.mean, v.mean);
+	if (position.z() != -999) {
+	  float residual = u.residual+v.residual;
+	  float yield = u.yield+v.yield;
+	  if (residual > 0 && yield > 0) {
+	    ++ncandidates;
+	    // Fill histograms
+	    hResidualYield->Fill(residual, yield);
+	    hVertexZ->Fill(event->vertex().z());
+	    hVertexXY->Fill(event->vertex().x(), event->vertex().y());
+	    hClusterEnergy->Fill(candidate->energy());
+	    hClusterPt->Fill(candidate->momentum().Pt());
+	    hClusterXY->Fill(candidate->position().x(), candidate->position().y());
+	    hClusterEtaPhi->Fill(candidate->position().Eta(), candidate->position().Phi());
+	    hSmdPointXY->Fill(position.x(), position.y());
+	    hYieldU->Fill(u.yield);
+	    hYieldV->Fill(v.yield);
+	    hResidualU->Fill(u.residual);
+	    hResidualV->Fill(v.residual);
+	    if (u.ndf > 0) hChi2PerNdfU->Fill(u.chiSquare / u.ndf);
+	    if (v.ndf > 0) hChi2PerNdfV->Fill(v.chiSquare / v.ndf);
+	    hMeanU->Fill(u.mean);
+	    hMeanV->Fill(v.mean);
+	    hSigmaU->Fill(u.rms);
+	    hSigmaV->Fill(v.rms);
+	    hNhitsU->Fill(candidate->numberOfSmdu());
+	    hNhitsV->Fill(candidate->numberOfSmdv());
 	  }
 	}
       }
-    }
-  }
+    } // End candidate loop
+  } // End event loop
 
   cout << "ncandidates = " << ncandidates << endl;
 

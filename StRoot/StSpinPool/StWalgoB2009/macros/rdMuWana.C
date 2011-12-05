@@ -26,7 +26,7 @@ int rdMuWana(
 	     char* inDir   = "",// make it empty for scheduler 
 	     char* file    = "/star/u/balewski/2009-Wana-pp500/fillListD/F10535/R10102105_230531_230601.lis",
 	     int nFiles  = 5000, // max # of muDst files
-	     int isMC=0, // 0=run9-data 200=new MC w/ EEss in BFC
+	     int isMC=0, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
 	     int useJetFinder = 2 // 0 - no jets=badWalgo; 1 generate jet trees; 2 read jet trees 
  ) { 
 char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
@@ -36,11 +36,10 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
   if(isJanWjj){ // Jan: use isMC=100 for interactive M-C,
     if(isMC==0) jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.16.2010phys/"; 
   }
-  if(isMC &&  useJetFinder==2) geant=true;
+  if(isJanWjj && isMC &&  useJetFinder==2) geant=true;
 
 
-  if(isMC==100 )  jetTreeDir="./";
-  if(isMC==200 )  jetTreeDir="/star/institutions/mit/balewski/2009-Wsim-setD/data/";// new M-C w/ EEss in BFC
+  if(isMC==100||isMC==200 )  jetTreeDir="./";
   if(isMC==104)   jetTreeDir ="/star/data05/scratch/balewski/2010-Wsimu-a3/jetR04/";
   if(isMC==105)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR04split05/";
   if(isMC==107)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR07/";
@@ -475,9 +474,6 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
 
 
 // $Log: rdMuWana.C,v $
-// Revision 1.42  2010/10/25 01:58:19  balewski
-// isMC=200 point jet reader to mit-balewski disk
-//
 // Revision 1.41  2010/08/13 16:29:07  balewski
 // *** empty log message ***
 //

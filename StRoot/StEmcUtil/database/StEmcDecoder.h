@@ -46,6 +46,7 @@ public:
 
     int       GetTowerBugCorrectionShift(int id_original, int &shift) const;///<Returns the index shift for the tower in original map
     int       GetPreshowerBugCorrectionShift(int id_original, int &shift) const;///<Returns the index shift for the preshower in original map
+    int       GetSmdBugCorrectionShift(int id_original, int &shift) const;///<Returns the index shift for the SMD in original map
 
 	//methods to get another basis from softId
     int       GetTowerBin(int softId,int &m,int &e,int &s) const;///<Convert from softId to m,e,s for towers only
@@ -97,15 +98,19 @@ private:
     bool mTowerMapBug;
     int TowerBugFixIndex[4800];
     int PreshowerBugFixIndex[4800];
+    int SmdBugFixIndex[18000];
     StEmcMappingDb* mapping;
-    
+        
     ClassDef(StEmcDecoder,1)
 };
 #endif
 
-// $Id: StEmcDecoder.h,v 1.2 2009/02/01 17:34:52 kocolosk Exp $
+// $Id: StEmcDecoder.h,v 1.3 2010/12/22 22:57:21 stevens4 Exp $
 //
 // $Log: StEmcDecoder.h,v $
+// Revision 1.3  2010/12/22 22:57:21  stevens4
+// Patch for BSMDE mapping problem in P10ih and P10ij productions (RT #2043)
+//
 // Revision 1.2  2009/02/01 17:34:52  kocolosk
 // more caching and optimization.
 //

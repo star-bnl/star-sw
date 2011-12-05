@@ -35,7 +35,8 @@ StBemcData::StBemcData():StBemcRaw()
     
     mPsdMapBug2 = kTRUE;
     mTowerMapBug = kTRUE;
-    
+    mSmdMapBug = kTRUE;   
+ 
     // correct DB tables for swapping
     delete mTables;
     mTables = new StBemcTables(kTRUE, kTRUE);

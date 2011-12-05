@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.23 2010/08/27 22:31:34 ogrebeny Exp $
+// $Id: StEmcRawMaker.cxx,v 1.24 2010/12/22 22:58:57 stevens4 Exp $
 
 #include <math.h>
 
@@ -40,6 +40,7 @@ StEmcRawMaker::StEmcRawMaker(const char *name):StRTSBaseMaker(name)
     // this assures consistency between the muDst/StEvent files and database
     mBemcRaw->towerMapBug(kFALSE);
     mBemcRaw->psdMapBug2(kFALSE);
+    mBemcRaw->smdMapBug(kFALSE);
 
     mEemcRaw = new StEemcRaw();
     eeStDb=0;
@@ -327,6 +328,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.24  2010/12/22 22:58:57  stevens4
+// Patch for BSMDE mapping problem in P10ih and P10ij productions (RT #2043)
+//
 // Revision 1.23  2010/08/27 22:31:34  ogrebeny
 // *** empty log message ***
 //
