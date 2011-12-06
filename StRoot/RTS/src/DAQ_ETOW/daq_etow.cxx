@@ -235,11 +235,10 @@ daq_dta *daq_etow::handle_adc()
 	return adc ;
 }
 
-int daq_etow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
+int daq_etow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo1)
 {
 	const int ETOW_DDL_BYTES = 2100 ;
 	int buff_bytes = words * 4 ;
-	int rdo1 = rdo + 1 ;
 
 	u_short *us = (u_short *)addr ;
 
