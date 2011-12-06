@@ -91,7 +91,7 @@
 
 // 2012 Group definitions...
 #define FTP_GRP		0
-#define SS2_GRP		0	// same as old FTPC
+#define SST_GRP		0	// same as old FTPC
 
 #define PP_GRP	        1
 #define ETOW_GRP	2   
@@ -254,8 +254,8 @@ so we keep it here for source compatibility
 #define IST_SYSTEM      23
 #define IST_ID          IST_SYSTEM     /* HFT's Inner Silicon Tracker */
 
-#define SS2_SYSTEM      24
-#define SS2_ID          SS2_SYSTEM     /* HFT's SSD */
+#define SST_SYSTEM      24
+#define SST_ID          SST_SYSTEM     /* HFT's SSD */
 
 #define RPII_SYSTEM      25
 #define RPII_ID          RPII_SYSTEM     /* Roman Pots, Phase II */
@@ -530,7 +530,7 @@ so we keep it here for source compatibility
 
 #define PXL_NODES(x)     ((EXT2_SYSTEM<<12) | (PXL_SYSTEM<<7) | (x))
 #define IST_NODES(x)     ((EXT2_SYSTEM<<12) | (IST_SYSTEM<<7) | (x))
-#define SS2_NODES(x)     ((EXT2_SYSTEM<<12) | (SS2_SYSTEM<<7) | (x))
+#define SST_NODES(x)     ((EXT2_SYSTEM<<12) | (SST_SYSTEM<<7) | (x))
 #define RPII_NODES(x)     ((EXT2_SYSTEM<<12) | (RPII_SYSTEM<<7) | (x))
 
 #define GMT_NODES(x)     ((EXT2_SYSTEM<<12) | (GMT_SYSTEM<<7) | (x))
@@ -582,8 +582,8 @@ extern inline const char *rts2name(int rts_id)
 		return "MTD" ;
 	case IST_SYSTEM :
 		return "IST" ;
-	case SS2_SYSTEM :
-		return "SS2" ;
+	case SST_SYSTEM :
+		return "SST" ;
 	case RPII_SYSTEM :
 		return "RPII" ;
 	case GMT_SYSTEM :
@@ -629,7 +629,7 @@ extern inline int rts2det(int ix)
 	case FGT_ID :
 	case MTD_ID :
 	case IST_ID :
-	case SS2_ID :
+	case SST_ID :
 	case RPII_ID :
 	case GMT_ID :
 		return ix ;
@@ -666,7 +666,7 @@ extern inline int rts2tcd(int rts)
 		-1,		//21 PXL
 		TCD_MTD,	//22 MTD
 		-1,		//23 IST
-		-1,		//24 SS2
+		-1,		//24 SST
 		-1,		//25 RPII
 		TCD_GMT		//26 GMT
 		-1,		//27
@@ -726,7 +726,7 @@ extern inline int tcd2rts(int tcd)
 // BTOW, ETOW now part of trigger:   jan 2008
 #define LEGACY_DETS (1<<FTP_ID)
 #define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<PXL_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
-		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<IST_ID) | (1<<SS2_ID) | (1<<RPII_ID) | (1<<GMT_ID) | (1<<BTOW_ID) | (1<<ETOW_ID))
+		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<IST_ID) | (1<<SST_ID) | (1<<RPII_ID) | (1<<GMT_ID) | (1<<BTOW_ID) | (1<<ETOW_ID))
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 extern inline u_int grp2rts_mask(int grp)
@@ -806,8 +806,8 @@ extern inline int rts2grp(int rts)
 	case GMT_ID :
 		return GMT_GRP;
 	// Tonko, Aug 11: filled them all
-	case SS2_ID :
-		return SS2_GRP;
+	case SST_ID :
+		return SST_GRP;
 	case PXL_ID :
 		return PXL_GRP;
 	case IST_ID :
