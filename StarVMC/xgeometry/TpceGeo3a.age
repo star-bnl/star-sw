@@ -8,6 +8,8 @@
       +CDE,gconst.
       CHARACTER*4 voluName
 
+      real tsas_zoffset/0.0/, tsgt_zoffset/0.0/
+
       CONTENT TPCE,TPCM,TIFC,TIKA,TINX,TIAD,TOFC,TOFS,
       TOKA,TONX,TOAD,TOIG,TOHA,TSWH,TSAW,TSAS,
       TWAS,FEEA,FEEP,FEER,FEEI,TALS,TSGT,TWBT,
@@ -24,6 +26,8 @@
       PARAMETER (CM = 1.)
       INTEGER kBlack,kRed,kGreen,kBlue,kYellow,kViolet,kLightBlue
 
+      integer kBbox,kPara,kTrd1,iShape
+
       PARAMETER (kBlack = 1)
       PARAMETER (kRed = 2)
       PARAMETER (kGreen = 3)
@@ -31,6 +35,11 @@
       PARAMETER (kYellow = 5)
       PARAMETER (kViolet = 6)
       PARAMETER (kLightBlue = 7)
+      PARAMETER (kBbox = 0)
+      PARAMETER (kPara = 1)
+      PARAMETER (kTrd1 = 2)
+      Integer *4 mycount/0/
+
       REAL sind,cosd,tand
 
       REAL cos15,sin15,tan15
@@ -550,10 +559,10 @@
       Prin1 %ivolume,%volume;
       ('Creating volume ',I4,2X,A4)
       tpgvz  =(tpcg_MembTHK + tpgvLeng)/2
-      zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK;        !//write(*,*)'zWheel1 ', zWheel1
-      zTOFCend = TPCG_LengthW/2 - TPCG_WheelTHK1;       !//write(*,*)'zTOFCend', zTOFCend; !//end of TOFC
-      zTIFCend = TPCG_LengthW/2 + 0.97;                 !//write(*,*)'zTIFCend', zTIFCend; !//end of TIFC + flange
-      zTIFCFlangeBegin = zTIFCend - 1*INCH;             !//write(*,*)'zTIFCFlangeBegin' , zTIFCFlangeBegin
+      zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK;
+      zTOFCend = TPCG_LengthW/2 - TPCG_WheelTHK1;
+      zTIFCend = TPCG_LengthW/2 + 0.97;
+      zTIFCFlangeBegin = zTIFCend - 1*INCH;
       CREATE TPGV
       POSITION TPGV z=+tpgvz thetax=90 phix=75 thetay=90 phiy=-15 thetaz=0 phiz=0  _
 	konly='MANY' 
@@ -727,6 +736,7 @@
       dX  = 0
       use TECW sec=1
       DO inOut = kInner, kOuter
+      mycount = 0;
       use COOL inout=inOut
       use RIBS inout=inOut
       use HOLZ inout=InOut
@@ -756,11 +766,13 @@
       END DO
       ENDIF
       CREATE TSAS
-      POSITION TSAS konly='MANY' 
+      POSITION TSAS z=tsas_zoffset konly='MANY' 
       CREATE TWAS
       POSITION TWAS konly='MANY' 
+      IF ( inOut==0 ) THEN
       CREATE TBRW
       POSITION TBRW x=TPCG_WheelR1 z=zWheel1+TPCG_WheelTHK/2 
+      ENDIF
       x1 = TPCG_WheelR0*cos15
       x2 = TPCG_WheelR2
       dz = TPCG_WheelRibHeight/2
@@ -798,6 +810,7 @@
       x = r
       y = r *tand(alpha)
       POSITION TBRW x=x y=y z=zWheel1+TPCG_WheelTHK/2 alphaz=alpha 
+      mycount+=1;
       END DO
       qwe(1) = -qwe(1)
       qwe(2) = -qwe(2)
@@ -819,7 +832,7 @@
       z  = RCoolingTube
       dx1 = (z-dz)*tan15 - 2*TPCG_RDOCoolingdY
       dx2 = (z+dz)*tan15 - 2*TPCG_RDOCoolingdY
-      mySha = 'TRD1'
+      iShape = kTrd1;
       myPar = {dx1,dx2,dy,dz}
       CREATE TCOO
       POSITION TCOO x=z z=(TPCG_zRDO-2*dy) ort=YZX 
@@ -849,7 +862,7 @@
       CREATE TALS
       POSITION TALS 
       CREATE TSGT
-      POSITION TSGT 
+      POSITION TSGT z=tsgt_zoffset 
       dy =(r2 - r1)/2
       y  =(r2 + r1)/2
       dx = TECW_widthRib/2
@@ -859,7 +872,7 @@
       dzW = TPCG_WireMountHeight/2
       xW = 0
       DO iRib = 0, 1
-      mySha = 'PARA'
+      iShape = kPara;
       myPar = {dx, dy, dz, -(1-2*iRib)*alpha}
       CREATE TRIB
       x  = ((y1 + y2)/2 - dx)*(1-2*iRib)
@@ -879,12 +892,12 @@
       dx2 =  r      *dYdX - TECW_widthRib - 2*dxW; ! TECW_widthLip
       dx1 = (r - dr)*dYdX - TECW_widthRib - 2*dxW; ! TECW_widthLip
       xc = r - TECW_zStepRib/2
-      mySha = 'TRD1'
+      iShape = kTrd1;
       myPar = {dx1, dx2, dz, dr/2}
       CREATE TRIB
       POSITION TRIB x=r-dr/2 y=0 z=z2-dz ort=YZX 
       ELSE
-      mySha = 'BBOX'
+      iShape = kBbox;
       myPar = {dr/2, dy/2, dz}
       CREATE TRIB
       POSITION TRIB x=r y=y z=z2-dz 
@@ -915,7 +928,7 @@
       x =(x1 + x2)/2
       DO iCoo = 0, 1
       myPar = {dx, dy, dz,-(1-2*iCoo)*beta, 0, 0}
-      mySha = 'PARA'
+      iShape = kPara;
       CREATE TCOO
       POSITION TCOO x=y y=x*(2*iCoo-1) z=zWheel1+dz ort=YX-Z 
       END DO
@@ -931,7 +944,7 @@
       dy2 = dy
       dy1 = dy - 2*dYdX*dx
       ENDIF
-      mySha = 'TRD1'
+      iShape = kTrd1;
       myPar = {dy1, dy2, dz, dx}
       myPar(11) = x-dx-TFEE_AssemblyThickness/2+dRSectorShift
       myPar(13) = zWheel1+dz
@@ -1026,6 +1039,7 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TWRI
       BLOCK TWRI   WheelOuterRing
+      MEDIUM TWRI_standard stmin=1.15055
       SHAPE pcon phi1=-15 dphi=30 nz=4 zi={zWheel1,
             zTOFCend,zTOFCend,TPCG_LengthW/2} rmn={TPCG_WheelR2*cos15,
             TPCG_WheelR2*cos15,TPCG_WheelR2*cos15,
@@ -1107,14 +1121,14 @@
       SHAPE pgon phi1=-15 dphi=30 npdiv=1 nz=2,
             zi={zzzRDO(1),zzzRDO(2)} rmn={rmnRDO(1),rmnRDO(2)},
             rmx={rmxRDO(1),rmxRDO(2)}
-      mySha = 'PARA'
+      iShape = kPara;
       myPar = {TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, 15}
       x = TPCG_WheelR2 - TPCG_RDOCoolingdX
       y = x*tan15 - TPCG_RDOCoolingdY
       z = TPCG_zRDO - 2*dy
       CREATE TCOO
       POSITION TCOO x=x y=y z=z ort=YX-Z 
-      mySha = 'PARA'
+      iShape = kPara;
       myPar = {TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, -15}
       x = TPCG_WheelR2 - TPCG_RDOCoolingdX
       y = x*tan15 - TPCG_RDOCoolingdY
@@ -1128,7 +1142,7 @@
       z  = RCoolingTube
       dx1 = (z-dz)*tan15 - 2*TPCG_RDOCoolingdY
       dx2 = (z+dz)*tan15 - 2*TPCG_RDOCoolingdY
-      mySha = 'TRD1'
+      iShape = kTrd1;
       myPar = {dx1, dx2, dy, dz}
       myPar(11) = z; myPar(13) = TPCG_zRDO - 2*dy
       CREATE TCOO
@@ -1163,11 +1177,11 @@
       ATTRIBUTE TCOO seen=1 colo=kRed
       MATERIAL Water_Pipe
       MEDIUM TCOO_h2o_pipe deemax=0.184746 stmin=0.0348298
-      IF ( mySha=='PARA' ) THEN
+      IF ( iShape==kPara ) THEN
       SHAPE para dx=myPar(1) dy=myPar(2) dz=myPar(3),
             alph=myPar(4) thet=0 phi=0
       ENDIF
-      IF ( mySha=='TRD1' ) THEN
+      IF ( iShape==kTrd1 ) THEN
       SHAPE trd1 dx1=myPar(1) dx2=myPar(2) dy=myPar(3),
             dz=myPar(4)
       ENDIF
@@ -1192,13 +1206,13 @@
       ATTRIBUTE TRib seen=1 colo=kRed
       MATERIAL ALUMINIUM
       MEDIUM TRIB_aluminium deemax=0.18296 stmin=0.0334422
-      IF ( mySha=='PARA' ) THEN
+      IF ( iShape==kPara ) THEN
       SHAPE para dx=myPar(1) dy=myPar(2) dz=myPar(3),
             alph=myPar(4) thet=0 phi=0
-      ELSEIF ( mySha=='TRD1' ) THEN
+      ELSEIF ( iShape==kTrd1 ) THEN
       SHAPE trd1 dx1=myPar(1) dx2=myPar(2) dy=myPar(3),
             dz=myPar(4)
-      ELSEIF ( mySha=='BBOX' ) THEN
+      ELSEIF ( iShape==kBbox ) THEN
       SHAPE box dx=myPar(1) dy=myPar(2) dz=myPar(3)
       ENDIF
       ENDBLOCK
@@ -1248,16 +1262,18 @@
       use TPRS sec=i_sec
       use TECW sec=i_sec
       zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK
-      zBeg = TPCG_MembTHK/2
-      zEnd = TPCG_zGroundGrid + TPRS_dAnode*2
-      zDed = TPCG_zGatingGrid - TPCG_DeadZone
-      zPmt = TPCG_zGatingGrid
-      dx=tprs_width/2
+      zBeg     = TPCG_MembTHK/2
+      zEnd     = TPCG_zGroundGrid + TPRS_dAnode*2
+      zDed     = TPCG_zGatingGrid - TPCG_DeadZone
+      zPmt     = TPCG_zGatingGrid
+      dx       = tprs_width/2
       IF ( kase==1 ) THEN
-      dz = (zDed - zBeg)/2; z= (zDed + zBeg)/2 -tpgvz
+      dz = (zDed - zBeg)/2;
+      z  = (zDed + zBeg)/2 - tpgvz
       ENDIF
       IF ( kase==2 ) THEN
-      dz = (zEnd - zPmt)/2; z= (zEnd + zPmt)/2 -tpgvz
+      dz = (zEnd - zPmt)/2;
+      z  = (zEnd + zPmt)/2 - tpgvz
       ENDIF
       DO i_row = 1, NINT(tprs_nRow)
       IF ( (NINT(tprs_super)==3|i_row==1) ) THEN
@@ -1290,14 +1306,14 @@
       }
       MATERIAL p10
       MATERIAL sensitive_gas isvol=1 stemax=2.5*tprs_width
-      MEDIUM TPAD_p10 stemax=2.5*tprs_width deemax=0.00175367 stmin=0.0294056 isvol=1
+      MEDIUM TPAD_p10 stemax=2.5*tprs_width deemax=0.00175367 stmin=0.0249056 isvol=1
       SHAPE box dx=0 dy=0 dz=0
       Call GStPar(ag_imed, 'CUTGAM', 1e-4)
       Call GStPar(ag_imed, 'CUTELE', 1e-4)
       Call GStPar(ag_imed, 'DCUTE', 1e-4)
       Call GStPar(ag_imed, 'DCUTM', 1e-4)
       Call GStPar(ag_imed, 'STRA', 1.)
-      HITS TPAD z:0.0005:s y:0.0005: z:0.0005: cx:10: cy:10: cz:10: lptot:18:(-3,2),
+      HITS TPAD z:0.0005:s y:0.0005: x:0.0005: cx:10: cy:10: cz:10: lptot:18:(-3,2),
             sleng:0.1:(0,800) tof:16:(0,1.0E-6) lgam:16:(-2,+2) step:11:(0,10) user:21:(-0.01,0.01)
       ENDBLOCK
       <W> '===>> 	[End AgML Module tpceGeo3a]	 <<==='; (A32,/,/);
