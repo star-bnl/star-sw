@@ -8,74 +8,99 @@ root4star -b -q 'rdMuWana.C(1e6,"","fillListE/Wplus0.lis",1e5,350,2)'
 #include <iostream>
 
 class StChain;
-StChain *chain=0;
-int useEtow=3;// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
 
-int  spinSort=false;
-int  isJustin=false;
-bool isZ=true; 
-int  geant=false;
- 
+StChain *chain = 0;
+int useEtow    = 3;// 0 = don't use; 1 = only in event-display, 2 = in away sum,3 = in away&near sum
+int  spinSort  = false;
+int  isJustin  = false;
+bool isZ       = true;
+int  geant     = false;
+
 int rdMuWana(
-	     int nEve=1e6,
-	     char* inDir   = "",// make it empty for scheduler 
-	     char* file    = "fillListE/sl11b/Wplus0.lis",
-	     int nFiles = 1e5, // max # of muDst files
-	     int isMC=350, // 0=run9-data 350=embedding
-	     int useJetFinder = 0 // 0 - no jets=badWalgo; 1 generate jet trees; 2 read jet trees 
- ) { 
-  char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
-  
-  TString jetTreeDir="/star/u/stevens4/wAnalysis/efficXsec/outEmb/jets/";
-  if(isMC==0) jetTreeDir="/star/data01/pwg/stevens4/wAnalysis/xSecPaper/sl11b/jets/";  
+  int   nEve         = 1e6,
+  char* inDir        = "",                           // make it empty for scheduler
+  char* file         = "fillListE/sl11b/Wplus0.lis",
+  int   nFiles       = 1e5,                          // max # of muDst files
+  int   isMC         = 350,                          // 0           = run9-data 350 = embedding
+  int   useJetFinder = 0                             // 0 - no jets = badWalgo; 1 generate jet trees; 2 read jet trees
+)
+{
+  char    *eemcSetupPath = "/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
+  TString  jetTreeDir    = "/star/u/stevens4/wAnalysis/efficXsec/outEmb/jets/";
 
-  if(isMC >= 350 &&  useJetFinder==2) geant=true;
+  if (isMC == 0) jetTreeDir = "/star/data01/pwg/stevens4/wAnalysis/xSecPaper/sl11b/jets/";
 
-  if(isMC) spinSort=false;
-  TString outF=file;
-  int runNo=0,bht3ID=0,l2wID=0,fillNo=0;
-  if(isMC==0) {//real data: runNum, trigID, L2ID from list name
-    printf("Unpack file=%s=\n",file); 
-    char *file1=strstr(file,"/R")+1;
-    printf("file1=%s=%s=\n",file1);
-    fillNo=atoi(file1-6);
-    outF=file1; file1=outF.Data();
-    char *p1=strstr(file1,"_");
-    char *p2=strstr(p1+1,"_");
-    runNo=atoi(file1+1);
-    bht3ID=atoi(p1+1);
-    l2wID=atoi(p2+1);
-    p1[0]=0;
-    outF=file1;
-    outF=outF;
-    printf("OutF=%s=\n",outF.Data());
-  } 
-  else if(isMC < 400) { //embedding run with geant files
-    char *file1; char *file2;
-    if(isMC==350) { file2=strstr(file,"/W");    file1=strstr(file2,"W"); }
-    if(isMC==351) { file2=strstr(file,"/Wtau"); file1=strstr(file2,"Wtau"); }
-    if(isMC==352) { file2=strstr(file,"/Z");    file1=strstr(file2,"Z"); } 
-    assert(file1);  printf("file1=%s=\n",file1);
-    outF=file1; outF.ReplaceAll(".lis","");
-    TString nameReweight=file1; nameReweight.ReplaceAll(".lis","");
-    for(int j=0; j<10; j++) nameReweight.ReplaceAll(Form("%d",j),"");
-    cout<<"nameReweight="<<nameReweight<<endl;
+  if (isMC >= 350 && useJetFinder == 2) geant = true;
+
+  if (isMC) spinSort = false;
+
+  TString outF = file;
+
+  int runNo  = 0;
+  int bht3ID = 230531;
+  int l2wID  = 230610;
+  int fillNo = 0;
+
+  if (isMC == 0) { //real data: runNum, trigID, L2ID from list name
+
+    printf("Unpack file=%s=\n", file);
+    char *file1 = strstr(file, "/R") + 1;
+    printf("file1=%s=%s=\n", file1);
+    //fillNo   = atoi(file1-6);
+    outF     = file1;
+    file1    = outF.Data();
+    //char *p1 = strstr(file1, "_");
+    //char *p2 = strstr(p1+1, "_");
+    runNo    = atoi(file1 + 1);
+    //bht3ID   = atoi(p1+1);
+    //l2wID    = atoi(p2+1);
+    //p1[0]    = 0;
+    //outF     = file1;
+    //outF     = outF;
+
+    printf("OutF=%s=\n", outF.Data());
+  }
+  else if (isMC < 400) { //embedding run with geant files
+    char *file1;
+    char *file2;
+    if (isMC == 350) {
+      file2 = strstr(file, "/W");
+      file1 = strstr(file2, "W");
+    }
+    if (isMC == 351) {
+      file2 = strstr(file, "/Wtau");
+      file1 = strstr(file2, "Wtau");
+    }
+    if (isMC == 352) {
+      file2 = strstr(file, "/Z");
+      file1 = strstr(file2, "Z");
+    }
+    assert(file1);
+    printf("file1=%s=\n", file1);
+    outF = file1;
+    outF.ReplaceAll(".lis", "");
+    TString nameReweight = file1;
+    nameReweight.ReplaceAll(".lis", "");
+    for (int j = 0; j < 10; j++) nameReweight.ReplaceAll(Form("%d", j), "");
+    cout << "nameReweight=" << nameReweight << endl;
   }
   else { //bad isMC flag
-    cout<<"bad isMC flag"<<endl; return; 
+    cout << "bad isMC flag" << endl;
+    return;
   }
-  printf("TRIG ID: bht3=%d l2w=%d isMC=%d\n",bht3ID,l2wID,isMC);
-    
+
+  printf("TRIG ID: bht3=%d l2w=%d isMC=%d\n", bht3ID, l2wID, isMC);
+
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
   gROOT->LoadMacro("LoadLogger.C");
   gMessMgr -> SwitchOff("D");
   gMessMgr -> SwitchOn("I");
-  
+
   assert( !gSystem->Load("StDaqLib"));
 
   // libraries below are needed for DB interface
-  assert( !gSystem->Load("StDetectorDbMaker")); 
+  assert( !gSystem->Load("StDetectorDbMaker"));
   assert( !gSystem->Load("StTpcDb"));
   assert( !gSystem->Load("StDbUtilities")); //for trigger simu
   assert( !gSystem->Load("StDbBroker"));
@@ -89,9 +114,9 @@ int rdMuWana(
   gSystem->Load("StEmcADCtoEMaker");
   assert( !gSystem->Load("StTriggerUtilities"));
 
-  if(spinSort)  assert( !gSystem->Load("StSpinDbMaker"));
-  
-  if (useJetFinder ==1 || useJetFinder == 2){ // jetfinder/jetreader libraries
+  if (spinSort)  assert( !gSystem->Load("StSpinDbMaker"));
+
+  if (useJetFinder == 1 || useJetFinder == 2) { // jetfinder/jetreader libraries
     cout << "BEGIN: loading jetfinder libs" << endl;
     gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
@@ -111,87 +136,92 @@ int rdMuWana(
     cout << "\nWARN: Jet are NOT read in, W-algo will not wrk properly\n " << endl;
   }
 
-  if(geant){                                  
-    // libraries for access to MC record  
-    assert( !gSystem->Load("StMcEvent"));      
-    assert( !gSystem->Load("StMcEventMaker")); 
-  
+  if (geant) {
+    // libraries for access to MC record
+    assert( !gSystem->Load("StMcEvent"));
+    assert( !gSystem->Load("StMcEventMaker"));
+
     // libraries for trigger simulator
     assert( !gSystem->Load("StEmcSimulatorMaker"));
     assert( !gSystem->Load("StEEmcSimulatorMaker"));
     assert( !gSystem->Load("StEpcMaker"));
   }
-  
+
   cout << " loading done " << endl;
 
-  // create chain    
-  chain = new StChain("StChain"); 
+  // create chain
+  chain = new StChain("StChain");
   // create histogram storage array  (everybody needs it):
-  TObjArray* HList=new TObjArray;
+  TObjArray* HList = new TObjArray;
 
-  if(geant){ 
+  if (geant) {
     //split MuDst file list to geant files
-    ifstream infile(file); string line; 
-    StFile *setFiles= new StFile(); int j=0;
-    while(infile.good()){
-      getline (infile,line);
-      TString name = line; 
-      name.ReplaceAll(".MuDst.root",".geant.root");
-      if(line=="") break;
+    ifstream infile(file);
+    string line;
+    StFile *setFiles = new StFile();
+    int j = 0;
+
+    while (infile.good()) {
+      getline (infile, line);
+      TString name = line;
+      name.ReplaceAll(".MuDst.root", ".geant.root");
+      if (line == "") break;
       setFiles->AddFile(name.Data());
       j++;
-      if(j%10==0) cout<<"Added "<<j<<" files:"<<name.Data()<<endl; 
-      if(j==nFiles) break;
+      if (j % 10 == 0) cout << "Added " << j << " files:" << name.Data() << endl;
+      if (j == nFiles) break;
     }
-             
-    // get list of geant files                    
-    StIOMaker* ioMaker = new StIOMaker("IO","r",setFiles,"bfcTree");
+
+    // get list of geant files
+    StIOMaker* ioMaker = new StIOMaker("IO", "r", setFiles, "bfcTree");
     //ioMaker->SetDebug();
-    ioMaker->SetIOMode("r");             
-    ioMaker->SetBranch("*",0,"0");   //deactivate all branches 
-    ioMaker->SetBranch("geantBranch",0,"r");//activate geant Branch
+    ioMaker->SetIOMode("r");
+    ioMaker->SetBranch("*", 0, "0");   //deactivate all branches
+    ioMaker->SetBranch("geantBranch", 0, "r");//activate geant Branch
   }
 
-  // Now we add Makers to the chain...   
-  muMk = new StMuDstMaker(0,0,inDir,file,"MuDst.root",nFiles);
-  muMk->SetStatus("*",0);
-  muMk->SetStatus("MuEvent",1);
-  muMk->SetStatus("EmcTow",1);
-  muMk->SetStatus("EmcSmde",1);
-  muMk->SetStatus("EmcSmdp",1);
-  muMk->SetStatus("PrimaryVertices",1);
-  muMk->SetStatus("GlobalTracks",1);
-  muMk->SetStatus("PrimaryTracks",1);
+  // Now we add Makers to the chain...
+  //int nFiles=1;
+  muMk = new StMuDstMaker(0, 0, inDir, file, "MuDst.root", nFiles);
+  muMk->SetStatus("*", 0);
+  muMk->SetStatus("MuEvent", 1);
+  muMk->SetStatus("EmcTow", 1);
+  muMk->SetStatus("EmcSmde", 1);
+  muMk->SetStatus("EmcSmdp", 1);
+  muMk->SetStatus("PrimaryVertices", 1);
+  muMk->SetStatus("GlobalTracks", 1);
+  muMk->SetStatus("PrimaryTracks", 1);
   //need to add StMuMcTrack to get idtruth, etc.
- 
-  //for EEMC, need full db access:
-  St_db_Maker   *dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
 
-  if (isMC==0) { // run 9 data
-    dbMk->SetFlavor("Wbose","bsmdeCalib"); // Willie's relative gains E-plane
-    dbMk->SetFlavor("Wbose","bsmdpCalib"); // P-plane
+  //for EEMC, need full db access:
+  St_db_Maker   *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb", "MySQL:StarDb", "$STAR/StarDb");
+
+  if (isMC == 0) { // run 9 data
+    dbMk->SetFlavor("Wbose", "bsmdeCalib"); // Willie's relative gains E-plane
+    dbMk->SetFlavor("Wbose", "bsmdpCalib"); // P-plane
     //dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
     //dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
-  }   
-  else if(isMC>=350) {  // embedding samples
-    dbMk->SetMaxEntryTime(20101215,0); // keep the same DB snap-shot as used in BFC for embedding
-    dbMk->SetFlavor("Wbose2","bsmdpCalib");
-    dbMk->SetFlavor("Wbose2","bsmdeCalib");
+  }
+  else if (isMC >= 350) { // embedding samples
+    dbMk->SetMaxEntryTime(20101215, 0); // keep the same DB snap-shot as used in BFC for embedding
+    dbMk->SetFlavor("Wbose2", "bsmdpCalib");
+    dbMk->SetFlavor("Wbose2", "bsmdeCalib");
   }
   else {
-    printf("???? unforeseen MC flag, ABORT\n"); assert(1==2);
+    printf("???? unforeseen MC flag, ABORT\n");
+    assert(1 == 2);
   }
 
   //.... load EEMC database
   StEEmcDbMaker*  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
-  
-  if(geant){                                            
-    StMcEventMaker *mcEventMaker = new StMcEventMaker();  
-    mcEventMaker->doPrintEventInfo = false;               
-    mcEventMaker->doPrintMemoryInfo = false;              
+
+  if (geant) {
+    StMcEventMaker *mcEventMaker = new StMcEventMaker();
+    mcEventMaker->doPrintEventInfo = false;
+    mcEventMaker->doPrintMemoryInfo = false;
   }
-  
-  if(useJetFinder!=1 && isMC){ //only use trigger simulator in W algo
+
+  if (useJetFinder != 1 && isMC) { //only use trigger simulator in W algo
     //don't need geant for trigger simu
     StEmcADCtoEMaker *bemcAdc = new StEmcADCtoEMaker();//for real data this sets calibration and status
 
@@ -205,29 +235,29 @@ int rdMuWana(
     simuTrig->useBemc();
     simuTrig->bemc->setConfig(2);
   }
-  
+
   //.... Jet finder code ....
   if (useJetFinder > 0)  {
-    TString outFile = "jets_"+outF+".root";
-    cout << "BEGIN: running jet finder/reader =" <<outFile<<"="<< endl;
+    TString outFile = "jets_" + outF + ".root";
+    cout << "BEGIN: running jet finder/reader =" << outFile << "=" << endl;
   }
 
-  if (useJetFinder == 1){// run jet finder
-    double pi = atan(1.0)*4.0;    
+  if (useJetFinder == 1) { // run jet finder
+    double pi = atan(1.0) * 4.0;
     // Makers for clusterfinding
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
 
     //here we also tag whether or not to do the swap:
-    bool doTowerSwapFix = true;
+    bool doTowerSwapFix   = true;
     bool use2003TowerCuts = false;
     bool use2006TowerCuts = true;
     //4p maker using 100% tower energy correction
-    StBET4pMaker* bet4pMakerFrac100 = new StBET4pMaker("BET4pMakerFrac100",muMk,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(1.0));
+    StBET4pMaker* bet4pMakerFrac100 = new StBET4pMaker("BET4pMakerFrac100", muMk, doTowerSwapFix, new StjTowerEnergyCorrectionForTracksFraction(1.0));
     bet4pMakerFrac100->setUse2003Cuts(use2003TowerCuts);
     bet4pMakerFrac100->setUseEndcap(true);
     bet4pMakerFrac100->setUse2006Cuts(use2006TowerCuts);
     //4p maker using 100% tower energy correction (no endcap)
-    StBET4pMaker* bet4pMakerFrac100_noEEMC = new StBET4pMaker("BET4pMakerFrac100_noEEMC",muMk,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(1.0));
+    StBET4pMaker* bet4pMakerFrac100_noEEMC = new StBET4pMaker("BET4pMakerFrac100_noEEMC", muMk, doTowerSwapFix, new StjTowerEnergyCorrectionForTracksFraction(1.0));
     bet4pMakerFrac100_noEEMC->setUse2003Cuts(use2003TowerCuts);
     bet4pMakerFrac100_noEEMC->setUseEndcap(false);
     bet4pMakerFrac100_noEEMC->setUse2006Cuts(use2006TowerCuts);
@@ -252,7 +282,7 @@ int rdMuWana(
     cpars->setConeRadius(0.7); // default=0.7
     cpars->setSeedEtMin(0.5);
     cpars->setAssocEtMin(0.1);
-    cpars->setSplitFraction(0.5); //default=0.5. if 0.3 less split? 
+    cpars->setSplitFraction(0.5); //default=0.5. if 0.3 less split?
     cpars->setPerformMinimization(true);
     cpars->setAddMidpoints(true);
     cpars->setRequireStableMidpoints(true);
@@ -260,184 +290,201 @@ int rdMuWana(
 
     cpars->setDebug(false);
 
-    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction     
+    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction
     emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets12_100_noEEMC"); //100% subtraction (no Endcap)
 
 
-    TChain* tree=muMk->chain(); assert(tree);
-    int nEntries=(int) tree->GetEntries();
-    printf("total eve in muDst chain =%d for run=%d\n",nEntries,runNo);  // return ;
-    if(nEntries<0) return;
+    TChain* tree = muMk->chain();
+    assert(tree);
+
+    int nEntries = (int) tree->GetEntries();
+
+    printf("total eve in muDst chain =%d for run=%d\n", nEntries, runNo); // return ;
+
+    if (nEntries < 0) return;
 
     chain->Init();
     chain->ls(3);
 
     char txt[1000];
     //---------------------------------------------------
-    int eventCounter=0;
-    int t1=time(0);
+    int eventCounter = 0;
+    int t1 = time(0);
     TStopwatch tt;
-    for (Int_t iev=0;iev<nEntries; iev++) {
-      if(eventCounter>=nEve) break;
+
+    for (Int_t iev = 0; iev < nEntries; iev++) {
+      if (eventCounter >= nEve) break;
       chain->Clear();
       int stat = chain->Make();
       //cout<<iev<<endl;
-       if(stat != kStOk && stat != kStSkip) break; // EOF or input error
-       eventCounter++;
+      if (stat != kStOk && stat != kStSkip) break; // EOF or input error
+      eventCounter++;
     }
-    cout<<"run R"<<runNo<<" nEve="<<eventCounter<<" total "; tt.Print();
+
+    cout << "run R" << runNo << " nEve=" << eventCounter << " total ";
+    tt.Print();
     printf("****************************************** \n");
 
-    int t2=time(0);
-    if(t2==t1) t2=t1+1;
-    float tMnt=(t2-t1)/60.;
-    float rate=1.*eventCounter/(t2-t1);
-    printf("#sorting R%d done %d of   nEve= %d, CPU rate= %.1f Hz, total time %.1f minute(s) \n\n",runNo,eventCounter,nEntries,rate,tMnt);
+    int t2 = time(0);
+    if (t2 == t1) t2 = t1 + 1;
+    float tMnt = (t2 - t1) / 60.;
+    float rate = 1.*eventCounter / (t2 - t1);
+    printf("#sorting R%d done %d of   nEve= %d, CPU rate= %.1f Hz, total time %.1f minute(s) \n\n", runNo, eventCounter, nEntries, rate, tMnt);
 
     cout << "END: jet finder " << endl;
     return;
   }
-  if (useJetFinder == 2)
-  {
+
+  if (useJetFinder == 2) {
     cout << "Configure to read jet trees " << endl;
     StJetReader *jetReader = new StJetReader;
-    jetReader->InitFile(jetTreeDir+outFile);
+    jetReader->InitFile(jetTreeDir + outFile);
   }
 
 
   //.... W reconstruction code ....
-  St2009WMaker *WmuMk=new St2009WMaker();
-  if(isMC) { // MC specific
+  St2009WMaker *WmuMk = new St2009WMaker();
+  if (isMC) { // MC specific
     WmuMk->setMC(isMC); //pass "version" of MC to maker
     WmuMk->setNameReweight(nameReweight.Data());
 
     //vary energy scales for syst. uncert. calc., remove it next time , also from .h,.cxx
-    //WmuMk->setJetNeutScaleMC(1.0); 
-    //WmuMk->setJetChrgScaleMC(1.0); 
-    
-  }else {// real data specific
-    WmuMk->setTrigID(bht3ID,l2wID,runNo);
+    //WmuMk->setJetNeutScaleMC(1.0);
+    //WmuMk->setJetChrgScaleMC(1.0);
+
   }
-  
-  if (useJetFinder == 2) WmuMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
-  
-  WmuMk->setMaxDisplayEve(10); // only first N events will get displayed 
+  else { // real data specific
+    WmuMk->setTrigID(bht3ID, l2wID, runNo);
+  }
+
+  if (useJetFinder == 2) WmuMk->setJetTreeBranch("ConeJets12_100", "ConeJets12_100_noEEMC"); //select jet tree braches used
+
+  WmuMk->setMaxDisplayEve(10); // only first N events will get displayed
   WmuMk->useEtow(useEtow);// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
 
   //set energy scale (works for data and MC - be careful!)
-  if(isMC==0) WmuMk->setBtowScale(0.976);
-  else WmuMk->setBtowScale(1.02);     
+  if (isMC == 0) WmuMk->setBtowScale(0.976);
+  else WmuMk->setBtowScale(1.02);
   //WmuMk->setEtowScale(1.0);
 
   /* evaluation of result, has full acess to W-algo internal data
      including overwrite - be careful */
-  
-  WpubMk=new St2009pubWanaMaker("pubJan"); // remove it next time??
-  WpubMk->attachWalgoMaker(WmuMk); // 
 
-  //Collect all output histograms   
+  WpubMk = new St2009pubWanaMaker("pubJan"); // remove it next time??
+  WpubMk->attachWalgoMaker(WmuMk); //
+
+  //Collect all output histograms
   WmuMk->setHList(HList);
   WpubMk->setHList(HList);
 
   //calculate lumi from runs
-  if(isMC==0) {
-    WlumiMk=new St2009WlumiMaker("lumi"); 
-    WlumiMk->attachWalgoMaker(WmuMk); 
+  if (isMC == 0) {
+    WlumiMk = new St2009WlumiMaker("lumi");
+    WlumiMk->attachWalgoMaker(WmuMk);
     WlumiMk->attachMuMaker(muMk);
     WlumiMk->setHList(HList);
   }
-  
-  StSpinDbMaker *spDb=0;
-  if(spinSort){
-    spDb=new StSpinDbMaker("spinDb");
-    enum {mxSM=5}; // to study eta-cuts, drop Q/PT cut
+
+  StSpinDbMaker *spDb = 0;
+
+  if (spinSort) {
+    spDb = new StSpinDbMaker("spinDb");
+    enum {mxSM = 5}; // to study eta-cuts, drop Q/PT cut
     St2009pubSpinMaker *spinMkA[mxSM];
-    for(int kk=0;kk<mxSM;kk++) {
-      char ttx[100]; sprintf(ttx,"%cspin",'A'+kk);
-      printf("add spinMaker %s %d \n",ttx,kk);
-      spinMkA[kk]=new St2009pubSpinMaker(ttx); 
+    for (int kk = 0; kk < mxSM; kk++) {
+      char ttx[100];
+      sprintf(ttx, "%cspin", 'A' + kk);
+      printf("add spinMaker %s %d \n", ttx, kk);
+      spinMkA[kk] = new St2009pubSpinMaker(ttx);
       spinMkA[kk]->attachWalgoMaker(WmuMk);
       spinMkA[kk]->attachSpinDb(spDb);
-      spinMkA[kk]->setHList(HList); 
-      if(kk==1) spinMkA[kk]->setEta(-1.,0.);
-      if(kk==2) spinMkA[kk]->setEta(0,1.);
-      if(kk==3) spinMkA[kk]->setQPT(-1);// disable Q/PT cut
-      if(kk==4) spinMkA[kk]->setNoEEMC(); 
-    }  
+      spinMkA[kk]->setHList(HList);
+      if (kk == 1) spinMkA[kk]->setEta(-1., 0.);
+      if (kk == 2) spinMkA[kk]->setEta(0, 1.);
+      if (kk == 3) spinMkA[kk]->setQPT(-1); // disable Q/PT cut
+      if (kk == 4) spinMkA[kk]->setNoEEMC();
+    }
   }
-  
-  if(isZ){
-    ZMk=new St2009ZMaker("Z"); 
+
+  if (isZ) {
+    ZMk = new St2009ZMaker("Z");
     ZMk->attachWalgoMaker(WmuMk);
-    ZMk->setHList(HList); 
+    ZMk->setHList(HList);
     ZMk->setClusterFrac24(0.95);
     ZMk->setDeltaR(7.0);
     ZMk->setNearEtFrac(0.88);
     ZMk->setClusterMinEt(15);
-    ZMk->setPhi12Min(3.1416/2.);
+    ZMk->setPhi12Min(3.1416 / 2.);
     ZMk->setMinZMass(73.); // Zmass -20%
     ZMk->setMaxZMass(114.);// Zmass +20%
   }
 
-  if(geant){
-    pubMcMk=new St2009pubMcMaker("pubMc");
+  if (geant) {
+    pubMcMk = new St2009pubMcMaker("pubMc");
     pubMcMk->attachWalgoMaker(WmuMk);
     pubMcMk->attachZalgoMaker(ZMk);
     pubMcMk->setHList(HList);
   }
 
-  TChain* tree=muMk->chain(); assert(tree);
-  int nEntries=(int) tree->GetEntries();
-  printf("total eve in muDst chain =%d\n",nEntries);  // return ;
-  if(nEntries<0) return;
+  TChain* tree = muMk->chain();
+  assert(tree);
+  int nEntries = (int) tree->GetEntries();
+  printf("total eve in muDst chain =%d\n", nEntries); // return ;
+  if (nEntries < 0) return;
 
   chain->Init();
   //chain->ls(3);
 
   char txt[1000];
   //---------------------------------------------------
-  int eventCounter=0;
-  int t1=time(0);  
+  int eventCounter = 0;
+  int t1 = time(0);
   TStopwatch tt;
-  for (Int_t iev=0;iev<nEntries; iev++) {
-    if(eventCounter>=nEve) break;
+
+  for (Int_t iev = 0; iev < nEntries; iev++) {
+    if (eventCounter >= nEve) break;
     chain->Clear();
     int stat = chain->Make();
     //cout<<iev<<endl;
-    if(stat != kStOk && stat != kStSkip) break; // EOF or input error
-    eventCounter++;    
+    if (stat != kStOk && stat != kStSkip) break; // EOF or input error
+    eventCounter++;
   }
-  
-  if(isMC==0) 
+
+  if (isMC == 0)
     WlumiMk->FinishRun(runNo);
 
-  cout<<"run R"<<runNo<<" nEve="<<eventCounter<<" total "; tt.Print();
+  cout << "run R" << runNo << " nEve=" << eventCounter << " total ";
+  tt.Print();
   printf("****************************************** \n");
 
-  int t2=time(0);
-  if(t2==t1) t2=t1+1;
-  float tMnt=(t2-t1)/60.;
-  float rate=1.*eventCounter/(t2-t1);
-  printf("#sorting R%d done %d of   nEve= %d, CPU rate= %.1f Hz, total time %.1f minute(s) \n\n",runNo,eventCounter,nEntries,rate,tMnt);
+  int t2 = time(0);
+  if (t2 == t1) t2 = t1 + 1;
+  float tMnt = (t2 - t1) / 60.;
+  float rate = 1.*eventCounter / (t2 - t1);
+  printf("#sorting R%d done %d of   nEve= %d, CPU rate= %.1f Hz, total time %.1f minute(s) \n\n", runNo, eventCounter, nEntries, rate, tMnt);
 
-  TString outFh=outF+".wana.hist.root";
+  TString outFh = outF + ".wana.hist.root";
 
-  cout<<"Output histo file "<<outFh<<endl;
-  hf=new TFile(outFh,"recreate");
-  if(hf->IsOpen()) {
+  cout << "Output histo file " << outFh << endl;
+  hf = new TFile(outFh, "recreate");
+
+  if (hf->IsOpen()) {
     //HList->ls();
     HList->Write();
-    printf("\n Histo saved -->%s<\n",outFh.Data());
-  } 
-  else {
-    printf("\n Failed to open Histo-file -->%s<, continue\n",outFh.Data());
+    printf("\n Histo saved -->%s<\n", outFh.Data());
   }
-  
-  return;  
+  else {
+    printf("\n Failed to open Histo-file -->%s<, continue\n", outFh.Data());
+  }
+
+  return 0;
 }
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.45.2.1  2011/12/06 21:19:02  smirnovd
+// minor changes
+//
 // Revision 1.45  2011/10/12 20:38:35  stevens4
 // update from GPC code review
 //
