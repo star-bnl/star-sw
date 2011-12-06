@@ -2211,7 +2211,7 @@ iShape = kTrd1;
                  <!-- x,y,z coordinate.  S option always reats the hit as a single step -->
                  <Hit meas="z" bins="0.0005" opts="s" />
                  <Hit meas="y" bins="0.0005"          />
-                 <Hit meas="z" bins="0.0005"          />
+                 <Hit meas="x" bins="0.0005"          />
 
                  <!-- cosines of the angle in x, y, z with 10bit precision -->
                  <Hit meas="cx" nbits="10" />
