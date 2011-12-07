@@ -187,6 +187,10 @@ class ComponentFieldMap : public ComponentBase {
     int Coordinates13(double x, double y, double z,
             double& t1, double& t2, double& t3, double& t4,
             double jac[4][4], double& det, int imap);
+    // Calculate coordinates for a cube
+    int CoordinatesCube(double x, double y, double z,
+            double& t1, double& t2, double& t3,
+            double jac[3][3], double& det, int imap);
 
     // Calculate Jacobian for curved quadratic triangles            
     void Jacobian3(int i, double u, double v, double w,
@@ -197,6 +201,9 @@ class ComponentFieldMap : public ComponentBase {
     // Calculate Jacobian for curved quadratic tetrahedra                   
     void Jacobian13(int i, double t, double u, double v, double w,
                     double& det, double jac[4][4]);
+    // Calculate Jacobian for a cube
+    void JacobianCube(int i, double t, double u, double v,
+                    double& det, double jac[3][3]);
 
     // Find the element for a point in curved quadratic quadrilaterals
     int FindElement5(const double x, const double y, const double z,
@@ -206,6 +213,11 @@ class ComponentFieldMap : public ComponentBase {
     int FindElement13(const double x, const double y, const double z,
                       double& t1, double& t2, double& t3, double& t4,
                       double jac[4][4], double& det);
+    // Find the element for a point in a cube
+    int FindElementCube(const double x, const double y, const double z,
+                      double& t1, double& t2, double& t3,
+                      double jac[3][3], double& det,
+                      const std::vector<int>* ElementsToStart = 0);
                       
     // Move (xpos, ypos, zpos) to field map coordinates
     void MapCoordinates(double& xpos, double& ypos, double& zpos,

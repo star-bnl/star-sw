@@ -44,6 +44,16 @@ all:	$(TARGETS)
 
 .PHONY:	heed
 
+installdirs : 
+	@if [ ! -d $(GARFIELD_HOME)/Library/$(BFARCH) ] ; then mkdir -p $(GARFIELD_HOME)/Library/$(BFARCH); \
+	    echo "   >>>> Create $(GARFIELD_HOME)/Library/$(BFARCH)"; fi
+	@if [ ! -d $(OBJDIR) ]; then mkdir -p $(OBJDIR); \
+	    echo "   >>>> Create $(OBJDIR)"; \
+        else echo " $(OBJDIR) already existent"; fi
+	@if [ ! -d $(OBJDIR)/Heed/ ]; then mkdir -p $(OBJDIR)/Heed; \
+	    echo "   >>>> Create $(OBJDIR)/Heed"; \
+        else echo " $(OBJDIR)/Heed already existent"; fi
+        
 heed:	
 	@echo Compiling Heed...
 	@cd $(HEEDDIR); make; cd $(GARFIELD_HOME)
@@ -150,6 +160,11 @@ $(OBJDIR)/ComponentAnsys121.o: \
 	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/ComponentAnsys123.o: \
 	$(SRCDIR)/ComponentAnsys123.cc $(INCDIR)/ComponentAnsys123.hh \
+	$(SRCDIR)/ComponentFieldMap.cc $(INCDIR)/ComponentFieldMap.hh 
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
+$(OBJDIR)/ComponentCST.o: \
+	$(SRCDIR)/ComponentCST.cc $(INCDIR)/ComponentCST.hh \
 	$(SRCDIR)/ComponentFieldMap.cc $(INCDIR)/ComponentFieldMap.hh 
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@

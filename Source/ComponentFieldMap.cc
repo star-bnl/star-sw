@@ -465,6 +465,84 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
 
 }
 
+int
+ComponentFieldMap::FindElementCube(const double x, const double y, const double z,
+                      double& t1, double& t2, double& t3,
+                      double jac[3][3], double& det, const std::vector<int>* ElementsToStart){
+  int imap = -1;
+//advanced element search around the last called element
+  if (ElementsToStart->size() != 0) {
+	  int n_elements = ElementsToStart->size();
+	  for (int i = 0; i < n_elements; ++i) {
+		if (x >= nodes[elements[ElementsToStart->at(i)].emap[3]].x &&
+			y >= nodes[elements[ElementsToStart->at(i)].emap[3]].y &&
+			z >= nodes[elements[ElementsToStart->at(i)].emap[3]].z &&
+			x < nodes[elements[ElementsToStart->at(i)].emap[0]].x &&
+			y < nodes[elements[ElementsToStart->at(i)].emap[2]].y &&
+			z < nodes[elements[ElementsToStart->at(i)].emap[7]].z) {
+		  imap = ElementsToStart->at(i);
+		  break;
+		}
+	  }
+
+  }
+//default element loop
+  if (imap == -1) {
+	  for (int i = 0; i < nElements; ++i) {
+		if (x >= nodes[elements[i].emap[3]].x &&
+			y >= nodes[elements[i].emap[3]].y &&
+			z >= nodes[elements[i].emap[3]].z &&
+			x < nodes[elements[i].emap[0]].x &&
+			y < nodes[elements[i].emap[2]].y &&
+			z < nodes[elements[i].emap[7]].z) {
+			imap = i;
+			break;
+		}
+	  }
+  }
+
+
+  if (imap < 0) {
+    if (debug) {
+      std::cout << className << "::FindElementCube:\n";
+      std::cout << "    Point (" << x << "," << y << "," << z << ") not in the mesh, it is background or PEC..\n";
+      std::cout << "    First node ("
+    		    << nodes[elements[0].emap[3]].x << ","
+    		    << nodes[elements[0].emap[3]].y << ","
+    		    << nodes[elements[0].emap[3]].z
+    		    << ") in the mesh.\n";
+      std::cout << "        dx= " << (nodes[elements[0].emap[0]].x-nodes[elements[0].emap[3]].x)
+    		    << ", dy= " << (nodes[elements[0].emap[2]].y-nodes[elements[0].emap[3]].y)
+    		    << ", dz= " << (nodes[elements[0].emap[7]].z-nodes[elements[0].emap[3]].z)
+    		    << "\n";
+      std::cout << "    Last node (" << nodes[elements[nElements-1].emap[5]].x
+    		    << "," << nodes[elements[nElements-1].emap[5]].y
+    		    << "," << nodes[elements[nElements-1].emap[5]].z
+    		    << ") in the mesh.\n";
+      std::cout << "        dx= " << (nodes[elements[nElements-1].emap[0]].x-nodes[elements[nElements-1].emap[3]].x)
+    		    << ", dy= " << (nodes[elements[nElements-1].emap[2]].y-nodes[elements[nElements-1].emap[3]].y)
+    		    << ", dz= " << (nodes[elements[nElements-1].emap[7]].z-nodes[elements[nElements-1].emap[3]].z)
+    		    << "\n";
+    }
+    return -1;
+  }
+  CoordinatesCube(x,y,z,t1,t2,t3,jac,det,imap);
+  if (debug) {
+	std::cout << className << "::FindElementCube:\n";
+	std::cout << "Global: (" << x << "," << y << "," << z << ") in element " << imap << " (degenerate: " << elements[imap].degenerate << ")\n";
+    std::cout << "  Node xyzV\n";
+    for (int i = 0; i < 8; i++) {
+    	std::cout << "  " << elements[imap].emap[i]
+    			  << " " << nodes[elements[imap].emap[i]].x
+    			  << " " << nodes[elements[imap].emap[i]].y
+    			  << " " << nodes[elements[imap].emap[i]].z
+    			  << " " << nodes[elements[imap].emap[i]].v
+    			  << "\n";
+    }
+  }
+  return imap;
+}
+
 void 
 ComponentFieldMap::Jacobian3(int i, double u, double v, double w, double& det, double jac[4][4]) {
 
@@ -1117,6 +1195,102 @@ v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
 ((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[7]].y+
 			      w*nodes[elements[i].emap[8]].y));
 
+}
+
+void
+ComponentFieldMap::JacobianCube(int i, double t, double u, double v,
+                    double& det, double jac[3][3]){
+  // Initial values
+  det = 0;
+  for (int j = 0; j < 3; ++j) {
+    for (int k = 0; k < 3; ++k) jac[j][k] = 0;
+  }
+
+  // Be sure that the element is within range
+  if (i < 0 || i >= nElements) {
+	std::cerr << className << "::JacobianCube:\n";
+	std::cerr << "    Element " << i << " out of range.\n";
+    return;
+  }
+  jac[0][0] = 1./8 * (nodes[elements[i].emap[0]].x * -1 * (1 - u) * (1 - v) +
+                      nodes[elements[i].emap[1]].x * +1 * (1 - u) * (1 - v) +
+                      nodes[elements[i].emap[2]].x * +1 * (1 + u) * (1 - v) +
+                      nodes[elements[i].emap[3]].x * -1 * (1 + u) * (1 - v) +
+                      nodes[elements[i].emap[4]].x * -1 * (1 - u) * (1 + v) +
+                      nodes[elements[i].emap[5]].x * +1 * (1 - u) * (1 + v) +
+                      nodes[elements[i].emap[6]].x * +1 * (1 + u) * (1 + v) +
+                      nodes[elements[i].emap[7]].x * -1 * (1 + u) * (1 + v));
+  jac[0][1] = 1./8 * (nodes[elements[i].emap[0]].y * -1 * (1 - u) * (1 - v) +
+                      nodes[elements[i].emap[1]].y * +1 * (1 - u) * (1 - v) +
+                      nodes[elements[i].emap[2]].y * +1 * (1 + u) * (1 - v) +
+                      nodes[elements[i].emap[3]].y * -1 * (1 + u) * (1 - v) +
+                      nodes[elements[i].emap[4]].y * -1 * (1 - u) * (1 + v) +
+                      nodes[elements[i].emap[5]].y * +1 * (1 - u) * (1 + v) +
+                      nodes[elements[i].emap[6]].y * +1 * (1 + u) * (1 + v) +
+                      nodes[elements[i].emap[7]].y * -1 * (1 + u) * (1 + v));
+  jac[0][2] = 1./8 * (nodes[elements[i].emap[0]].z * -1 * (1 - u) * (1 - v) +
+                      nodes[elements[i].emap[1]].z * +1 * (1 - u) * (1 - v) +
+                      nodes[elements[i].emap[2]].z * +1 * (1 + u) * (1 - v) +
+                      nodes[elements[i].emap[3]].z * -1 * (1 + u) * (1 - v) +
+                      nodes[elements[i].emap[4]].z * -1 * (1 - u) * (1 + v) +
+                      nodes[elements[i].emap[5]].z * +1 * (1 - u) * (1 + v) +
+                      nodes[elements[i].emap[6]].z * +1 * (1 + u) * (1 + v) +
+                      nodes[elements[i].emap[7]].z * -1 * (1 + u) * (1 + v));
+  jac[1][0] = 1./8 * (nodes[elements[i].emap[0]].x * (1 - t) * -1 * (1 - v) +
+                      nodes[elements[i].emap[1]].x * (1 + t) * -1 * (1 - v) +
+                      nodes[elements[i].emap[2]].x * (1 + t) * +1 * (1 - v) +
+                      nodes[elements[i].emap[3]].x * (1 - t) * +1 * (1 - v) +
+                      nodes[elements[i].emap[4]].x * (1 - t) * -1 * (1 + v) +
+                      nodes[elements[i].emap[5]].x * (1 + t) * -1 * (1 + v) +
+                      nodes[elements[i].emap[6]].x * (1 + t) * +1 * (1 + v) +
+                      nodes[elements[i].emap[7]].x * (1 - t) * +1 * (1 + v));
+  jac[1][1] = 1./8 * (nodes[elements[i].emap[0]].y * (1 - t) * -1 * (1 - v) +
+                      nodes[elements[i].emap[1]].y * (1 + t) * -1 * (1 - v) +
+                      nodes[elements[i].emap[2]].y * (1 + t) * +1 * (1 - v) +
+                      nodes[elements[i].emap[3]].y * (1 - t) * +1 * (1 - v) +
+                      nodes[elements[i].emap[4]].y * (1 - t) * -1 * (1 + v) +
+                      nodes[elements[i].emap[5]].y * (1 + t) * -1 * (1 + v) +
+                      nodes[elements[i].emap[6]].y * (1 + t) * +1 * (1 + v) +
+                      nodes[elements[i].emap[7]].y * (1 - t) * +1 * (1 + v));
+  jac[1][2] = 1./8 * (nodes[elements[i].emap[0]].z * (1 - t) * -1 * (1 - v) +
+                      nodes[elements[i].emap[1]].z * (1 + t) * -1 * (1 - v) +
+                      nodes[elements[i].emap[2]].z * (1 + t) * +1 * (1 - v) +
+                      nodes[elements[i].emap[3]].z * (1 - t) * +1 * (1 - v) +
+                      nodes[elements[i].emap[4]].z * (1 - t) * -1 * (1 + v) +
+                      nodes[elements[i].emap[5]].z * (1 + t) * -1 * (1 + v) +
+                      nodes[elements[i].emap[6]].z * (1 + t) * +1 * (1 + v) +
+                      nodes[elements[i].emap[7]].z * (1 - t) * +1 * (1 + v));
+  jac[2][0] = 1./8 * (nodes[elements[i].emap[0]].x * (1 - t) * (1 - u) * -1 +
+                      nodes[elements[i].emap[1]].x * (1 + t) * (1 - u) * -1 +
+                      nodes[elements[i].emap[2]].x * (1 + t) * (1 + u) * -1 +
+                      nodes[elements[i].emap[3]].x * (1 - t) * (1 + u) * -1 +
+                      nodes[elements[i].emap[4]].x * (1 - t) * (1 - u) * +1 +
+                      nodes[elements[i].emap[5]].x * (1 + t) * (1 - u) * +1 +
+                      nodes[elements[i].emap[6]].x * (1 + t) * (1 + u) * +1 +
+                      nodes[elements[i].emap[7]].x * (1 - t) * (1 + u) * +1);
+  jac[2][1] = 1./8 * (nodes[elements[i].emap[0]].y * (1 - t) * (1 - u) * -1 +
+                      nodes[elements[i].emap[1]].y * (1 + t) * (1 - u) * -1 +
+                      nodes[elements[i].emap[2]].y * (1 + t) * (1 + u) * -1 +
+                      nodes[elements[i].emap[3]].y * (1 - t) * (1 + u) * -1 +
+                      nodes[elements[i].emap[4]].y * (1 - t) * (1 - u) * +1 +
+                      nodes[elements[i].emap[5]].y * (1 + t) * (1 - u) * +1 +
+                      nodes[elements[i].emap[6]].y * (1 + t) * (1 + u) * +1 +
+                      nodes[elements[i].emap[7]].y * (1 - t) * (1 + u) * +1);
+  jac[2][2] = 1./8 * (nodes[elements[i].emap[0]].z * (1 - t) * (1 - u) * -1 +
+                      nodes[elements[i].emap[1]].z * (1 + t) * (1 - u) * -1 +
+                      nodes[elements[i].emap[2]].z * (1 + t) * (1 + u) * -1 +
+                      nodes[elements[i].emap[3]].z * (1 - t) * (1 + u) * -1 +
+                      nodes[elements[i].emap[4]].z * (1 - t) * (1 - u) * +1 +
+                      nodes[elements[i].emap[5]].z * (1 + t) * (1 - u) * +1 +
+                      nodes[elements[i].emap[6]].z * (1 + t) * (1 + u) * +1 +
+                      nodes[elements[i].emap[7]].z * (1 - t) * (1 + u) * +1);
+  // compute determinant
+  det = jac[0][0] * jac[1][1] * jac[2][2] +
+        jac[0][1] * jac[1][2] * jac[2][0] +
+        jac[0][2] * jac[1][0] * jac[2][1] -
+        jac[0][2] * jac[1][1] * jac[2][0] -
+        jac[0][0] * jac[1][2] * jac[2][1] -
+        jac[0][1] * jac[1][0] * jac[2][2];
 }
 
 int 
@@ -2000,6 +2174,86 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
   }
 
   // Success
+  ifail = 0;
+  return ifail;
+
+}
+
+int
+ComponentFieldMap::CoordinatesCube(double x, double y, double z,
+            double& t1, double& t2, double& t3,
+            double jac[3][3], double& det, int imap){
+   /*
+   global coordinates   8 _ _ _ _7    t3    t2
+                       /       /|     ^   /|
+     ^ z              /       / |     |   /
+     |             5 /_______/6 |     |  /
+     |              |        |  |     | /
+     |              |  4     |  /3    |/     t1
+      ------->      |        | /       ------->
+     /      y       |        |/       local coordinates
+    /               1--------2
+   /
+  v x
+  */
+  // Failure flag
+  int ifail = 1;
+
+  // Compute hexahedral coordinates (t1->[-1,1],t2->[-1,1],t3->[-1,1]) and
+  // t1 (zeta) is in y-direction
+  // t2 (eta)  is in opposit x-direction
+  // t3 (mu)   is in z-direction
+  // Nodes are set in that way, that node [0] has always lowest x,y,z!
+  t2 = -1.* (2. * (x - nodes[elements[imap].emap[3]].x) / (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x) -1);
+  t1 = 2. * (y - nodes[elements[imap].emap[3]].y) / (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y) -1;
+  t3 = 2. * (z - nodes[elements[imap].emap[3]].z) / (nodes[elements[imap].emap[7]].z - nodes[elements[imap].emap[3]].z) -1;
+  // Re-compute the (x,y,z) position for this coordinate.
+  if (debug) {
+    double n1 = 1./8 * (1 - t1) * (1 - t2) * (1 - t3);
+    double n2 = 1./8 * (1 + t1) * (1 - t2) * (1 - t3);
+    double n3 = 1./8 * (1 + t1) * (1 + t2) * (1 - t3);
+    double n4 = 1./8 * (1 - t1) * (1 + t2) * (1 - t3);
+    double n5 = 1./8 * (1 - t1) * (1 - t2) * (1 + t3);
+    double n6 = 1./8 * (1 + t1) * (1 - t2) * (1 + t3);
+    double n7 = 1./8 * (1 + t1) * (1 + t2) * (1 + t3);
+    double n8 = 1./8 * (1 - t1) * (1 + t2) * (1 + t3);
+    double xr =
+      nodes[elements[imap].emap[0]].x * n1 +
+      nodes[elements[imap].emap[1]].x * n2 +
+      nodes[elements[imap].emap[2]].x * n3 +
+      nodes[elements[imap].emap[3]].x * n4 +
+      nodes[elements[imap].emap[4]].x * n5 +
+      nodes[elements[imap].emap[5]].x * n6 +
+      nodes[elements[imap].emap[6]].x * n7 +
+      nodes[elements[imap].emap[7]].x * n8;
+    double yr =
+      nodes[elements[imap].emap[0]].y * n1 +
+      nodes[elements[imap].emap[1]].y * n2 +
+      nodes[elements[imap].emap[2]].y * n3 +
+      nodes[elements[imap].emap[3]].y * n4 +
+      nodes[elements[imap].emap[4]].y * n5 +
+      nodes[elements[imap].emap[5]].y * n6 +
+      nodes[elements[imap].emap[6]].y * n7 +
+      nodes[elements[imap].emap[7]].y * n8;
+    double zr =
+      nodes[elements[imap].emap[0]].z * n1 +
+      nodes[elements[imap].emap[1]].z * n2 +
+      nodes[elements[imap].emap[2]].z * n3 +
+      nodes[elements[imap].emap[3]].z * n4 +
+      nodes[elements[imap].emap[4]].z * n5 +
+      nodes[elements[imap].emap[5]].z * n6 +
+      nodes[elements[imap].emap[6]].z * n7 +
+      nodes[elements[imap].emap[7]].z * n8;
+    double sr = n1 + n2 + n3 + n4 + n5 + n6 + n7 + n8;
+    std::cout << className << "::CoordinatesCube:\n";
+    std::cout << "    Position requested:     (" << x << "," << y << "," << z << ")\n";
+    std::cout << "    Position reconstructed: (" << xr << "," << yr << "," << zr << ")\n";
+    std::cout << "    Difference:             (" << (x - xr) << "," << (y - yr) << "," << (z - zr) << ")\n";
+    std::cout << "    Hexahedral coordinates (t, u, v) = (" << t1 << "," << t2 << "," << t3 << ")\n";
+    std::cout << "    Checksum - 1:           " << (sr - 1) << "\n";
+  }
+  JacobianCube(imap,t1,t2,t3,det,jac);
+  // This should always work.
   ifail = 0;
   return ifail;
 
