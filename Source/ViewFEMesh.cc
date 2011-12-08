@@ -18,7 +18,8 @@ ViewFEMesh::ViewFEMesh() :
   xMin(-1.), yMin(-1.), zMin(-1.), 
   xMax( 1.), yMax( 1.), zMax( 1.),
   component(0),
-  viewDrift(0) {
+  viewDrift(0),
+  xaxis(0), yaxis(0), drawAxes(false) {
 
   plottingEngine.SetDefaultStyle();
   SetDefaultProjection();
@@ -54,6 +55,13 @@ ViewFEMesh::SetCanvas(TCanvas* c) {
   }
   canvas = c;
   hasExternalCanvas = true;
+
+}
+
+TCanvas *
+ViewFEMesh::GetCanvas() {
+
+  return canvas;
 
 }
 
@@ -119,6 +127,9 @@ ViewFEMesh::Plot() {
     if (hasExternalCanvas) hasExternalCanvas = false;
   }
   canvas->Range(xMin, yMin, xMax, yMax);
+
+  // Set up axes if they do not already exist
+  if(xaxis == 0 && yaxis == 0) CreateDefaultAxes();
 
   // Plot the elements
   DrawElements();  
@@ -188,6 +199,42 @@ ViewFEMesh::SetDefaultProjection() {
 
 }
 
+// Set the x-axis
+void 
+ViewFEMesh::SetXaxis(TGaxis * ax) { xaxis = ax; }
+
+// Set the y-axis
+void 
+ViewFEMesh::SetYaxis(TGaxis * ay) { yaxis = ay; }
+
+// Create default axes
+void 
+ViewFEMesh::CreateDefaultAxes() {
+
+  // Create a new x and y axis
+  xaxis = new TGaxis(xMin + std::abs(xMax - xMin) * 0.1, 
+                     yMin + std::abs(yMax - yMin) * 0.1, 
+                     xMax - std::abs(xMax - xMin) * 0.1, 
+                     yMin + std::abs(yMax - yMin) * 0.1, 
+                     xMin + std::abs(xMax - xMin) * 0.1, 
+                     xMax - std::abs(xMax - xMin) * 0.1, 2405, "x");
+  yaxis = new TGaxis(xMin + std::abs(xMax - xMin) * 0.1, 
+                     yMin + std::abs(yMax - yMin) * 0.1, 
+                     xMin + std::abs(xMax - xMin) * 0.1, 
+                     yMax - std::abs(yMax - yMin) * 0.1, 
+                     yMin + std::abs(yMax - yMin) * 0.1,
+                     yMax - std::abs(yMax - yMin) * 0.1, 2405, "y");
+
+  // Label sizes
+  xaxis->SetLabelSize(0.025);
+  yaxis->SetLabelSize(0.025);
+
+  // Titles
+  xaxis->SetTitleSize(0.03); xaxis->SetTitle("x [cm]");
+  yaxis->SetTitleSize(0.03); yaxis->SetTitle("y [cm]");
+
+}
+
 // Use ROOT plotting functions to draw the mesh elements on the canvas
 // General methodology ported from Garfield
 void
@@ -228,8 +275,9 @@ ViewFEMesh::DrawElements() {
 
   // Calculate the inverse of the projection matrix for
   //  calculating coordinates in the viewing plane            
-  if(projDet != 0) { projMat.Invert(); }
-  else {
+  if(projDet != 0) { 
+    projMat.Invert(); 
+  } else {
     std::cerr << className << "::DrawElements:\n";
     std::cerr << "    Projection matrix is not invertible.\n";
     std::cerr << "    Finite element mesh will not be drawn.\n";
@@ -402,12 +450,15 @@ ViewFEMesh::DrawElements() {
             if(planeCut) { vX.push_back(xMat(0,0)); vY.push_back(xMat(1,0)); }
           }
 
-          // Create a TPolyLine object connecting the points
+          // Create a convex TPolyLine object connecting the points
           if(vX.size() >= 3) {
 
-            // Wrap around to the starting point
-            vX.push_back(vX[0]);
-            vY.push_back(vY[0]);
+            // Keep track of whether the polygon is partially and completely in the area
+            bool partInArea = false;
+            bool allInArea = true;
+ 
+            // Eliminate crossings of the polygon lines (known as "butterflies" in Garfield)
+            RemoveCrossings(vX,vY);
 
             // Create the TPolyLine
             int polyPts = 0;
@@ -415,19 +466,36 @@ ViewFEMesh::DrawElements() {
             poly->SetLineColor(colorID);
             poly->SetFillColor(colorID);
             poly->SetLineWidth(1);
+
+            // Add all of the points
             for(int pt = 0; pt < (int) vX.size(); pt++)   {
 
-              // Add this point if it is within the view to within 10%
-              if(vX[pt] >= xMin - std::abs(xMin) * 0.1 
-                  && vX[pt] <= xMax + std::abs(xMax) * 0.1 
-                  && vY[pt] >= yMin - std::abs(yMin) * 0.1
-                  && vY[pt] <= yMax + std::abs(yMax) * 0.1) {
-                poly->SetPoint(polyPts, vX[pt], vY[pt]);
-                polyPts++;
+              // Update the visibility of the element.
+              if(InView(vX[pt],vY[pt])) {
+                partInArea = true;
               }
+              else { allInArea = false; }
+
+              // Add this point
+              poly->SetPoint(polyPts, vX[pt], vY[pt]);
+              polyPts++;
             }
-            mesh.push_back(poly);
-          }
+ 
+            // Only add polygons that are at least partially visible
+            if(partInArea) {
+
+              // Clip the polygon to the view region (not yet completed).
+
+              // Wrap around to the starting point
+              vX.push_back(vX[0]);
+              vY.push_back(vY[0]);
+              polyPts++;
+
+              // Add the polygon to the mesh
+              mesh.push_back(poly);
+            }
+            
+          } // end TPolyLine construction if statement
         } // end z-periodicity loop
       } // end y-periodicity loop
     } // end x-periodicity loop
@@ -456,11 +524,9 @@ ViewFEMesh::DrawElements() {
         // Project this point onto the plane
         PlaneCoords(ptx, pty, ptz, projMat, xMat);
 
-        // Add this point if it is within the view to within 10%
-        if(xMat(0,0) >= xMin - std::abs(xMin) * 0.1 
-            && xMat(0,0) <= xMax + std::abs(xMax) * 0.1 
-            && xMat(1,0) >= yMin - std::abs(yMin) * 0.1
-            && xMat(1,0) <= yMax + std::abs(yMax) * 0.1) {
+        // Add this point if it is within the view
+        if(xMat(0,0) >= xMin && xMat(0,0) <= xMax 
+            && xMat(1,0) >= yMin && xMat(1,0) <= yMax) {
           poly->SetPoint(polyPts, xMat(0,0), xMat(1,0));
           polyPts++;
         }
@@ -486,8 +552,237 @@ ViewFEMesh::DrawElements() {
     driftLines[m]->Draw("same");
   }
 
+  // Draw the axes
+  if(xaxis != 0 && drawAxes) xaxis->Draw();
+  if(yaxis != 0 && drawAxes) yaxis->Draw();
+
 }
 
+// Returns true if the specified point is in the view region
+bool
+ViewFEMesh::InView(double x, double y) {
+  return (x >= xMin && x <= xMax && y >= yMin && y <= yMax);
+}
+
+// Removes duplicate points and line crossings by correctly ordering
+//  the points in the provided vectors.
+//
+//  NOTE: This is a 2D version of the BUTFLD method in Garfield.  It
+//   follows the same general algorithm.
+//
+void 
+ViewFEMesh::RemoveCrossings(std::vector<double> & x, std::vector<double> & y) {
+
+  // Determine element dimensions
+  double xmin = x[0], xmax = x[0];
+  double ymin = y[0], ymax = y[0];
+  for(int i = 1; i < (int) x.size(); i++) {
+    if(x[i] < xmin) xmin = x[i];
+    if(x[i] > xmax) xmax = x[i];
+    if(y[i] < ymin) ymin = y[i];
+    if(y[i] > ymax) ymax = y[i];
+  }
+
+  // First remove duplicate points
+  double xtol = 1e-10*std::abs(xmax - xmin);
+  double ytol = 1e-10*std::abs(ymax - ymin);
+  for(int i = 0; i < (int) x.size(); i++) {
+    for(int j = i + 1; j < (int) x.size(); j++) {
+      if(std::abs(x[i] - x[j]) < xtol 
+       && std::abs(y[i] - y[j]) < ytol) {
+        x.erase(x.begin() + j);
+        y.erase(y.begin() + j);
+        j--;
+      }
+    }
+  }
+
+  // No crossings with 3 points or less
+  if(x.size() <= 3) return;
+
+  // Save the polygon size so it is easily accessible
+  int NN = x.size();
+
+  // Keep track of the number of attempts
+  int attempts = 0;
+
+  // Exchange points until crossings are eliminated or we have attempted NN times
+  bool crossings = true;
+  while(crossings && (attempts < NN)) {
+
+    // Assume we are done after this attempt.
+    crossings = false;
+
+    for(int i = 1; i <= NN; i++) {
+      for(int j = i+2; j <= NN; j++) {
+      
+        // End the j-loop if we have surpassed N and wrapped around to i
+        if((j + 1) > NN && 1 + (j % NN) >= i) break;
+
+        // Otherwise, detect crossings and attempt to eliminate them.
+        else {
+
+          // Determine if we have a crossing.
+          if(LinesCrossed(x[(i - 1) % NN], y[(i - 1) % NN],
+                          x[ i      % NN], y[ i      % NN],
+                          x[(j - 1) % NN], y[(j - 1) % NN],
+                          x[ j      % NN], y[ j      % NN])) {
+
+            // Swap each point from i towards j with each corresponding point
+            //  from j towards i.
+            for(int k = 1; k <= (j - i) / 2; k++) {
+
+              double xs = x[(i + k - 1) % NN];
+              double ys = y[(i + k - 1) % NN];
+              x[(i + k - 1) % NN] = x[(j - k) % NN];
+              y[(i + k - 1) % NN] = y[(j - k) % NN];
+              x[(j - k) % NN] = xs;
+              y[(j - k) % NN] = ys;
+
+              // Force another attempt
+              crossings = true;
+            }
+          }
+        }
+      } // end loop over j
+    } // end loop over i
+
+    // Increment the number of attempts
+    attempts++;
+
+  } // end while(crossings)
+
+  if(attempts > NN) {
+    std::cerr << className << "::RemoveCrossings:\n";
+    std::cerr << "    WARNING: Maximum attempts reached - crossings not removed.\n";
+  }
+  
+}
+
+//
+// Determines whether the line connecting points (x1,y1) and (x2,y2)
+//  and the line connecting points (u1,v1) and (u2,v2) cross somewhere
+//  between the 4 points.
+//
+// Ported from Garfield function CROSSD
+//
+bool 
+ViewFEMesh::LinesCrossed(double x1, double y1, double x2, double y2,
+             double u1, double v1, double u2, double v2) {
+
+  // Set the tolerances
+  double xtol = 1.0e-10*std::max(std::abs(x1), std::max(std::abs(x2),
+                        std::max(std::abs(u1), std::abs(u2))));
+  double ytol = 1.0e-10*std::max(std::abs(y1), std::max(std::abs(y2),
+                        std::max(std::abs(v1), std::abs(v2))));
+  if(xtol < 0) xtol = 1.0e-10;
+  if(ytol < 0) ytol = 1.0e-10;
+
+  // To store the crossing point
+  double xc = 0;
+  double yc = 0;
+
+  // Compute the distances and determinant (dx,dy) x (du,dv)
+  double dy = y2 - y1;
+  double dv = v2 - v1;
+  double dx = x1 - x2;
+  double du = u1 - u2;
+  double det = dy * du - dx * dv;
+
+  // Check for crossing because one of the points is on both lines
+  if(OnLine(x1,y1,x2,y2,u1,v1) || OnLine(x1,y1,x2,y2,u2,v2) ||
+     OnLine(u1,v1,u2,v2,x1,y1) || OnLine(u1,v1,u2,v2,x2,y2))
+    return true;
+  // Check if the lines are parallel (zero determinant)
+  else if(std::abs(det) < xtol*ytol)
+    return false;
+  // No special case: compute point of intersection
+  else {
+
+    // Solve crossing equations
+    xc = (du * (x1 * y2 - x2 * y1) - dx * (u1 * v2 - u2 * v1)) / det;
+    yc = ((-1 * dv) * (x1 * y2 - x2 * y1) + dy * (u1 * v2 - u2 * v1)) / det;
+
+    // Determine if this point is on both lines
+    if(OnLine(x1,y1,x2,y2,xc,yc) && OnLine(u1,v1,u2,v2,xc,yc))
+      return true;
+  }
+
+  // The lines do not cross if we have reached this point
+  return false;
+
+}
+
+//
+// Determines whether the point (u,v) lies on the line connecting
+//  points (x1,y1) and (x2,y2).
+//
+// Ported from Garfield function ONLIND
+//
+bool 
+ViewFEMesh::OnLine(double x1, double y1, double x2, double y2, double u, double v) {
+
+  // Set the tolerances
+  double xtol = 1.0e-10*std::max(std::abs(x1),
+                 std::max(std::abs(x2),std::abs(u)));
+  double ytol = 1.0e-10*std::max(std::abs(y1),
+                 std::max(std::abs(y2),std::abs(v)));
+  if(xtol < 0) xtol = 1.0e-10;
+  if(ytol < 0) ytol = 1.0e-10;
+
+  // To store the coordinates of the comparison point
+  double xc = 0, yc = 0;
+
+  // Check if (u,v) is the point (x1,y1) or (x2,y2)
+  if((std::abs(x1 - u) <= xtol && std::abs(y1 - v) <= ytol) ||
+     (std::abs(x2 - u) <= xtol && std::abs(y2 - v) <= ytol)) {
+    return true;
+  }
+  // Check if the line is actually a point
+  else if(std::abs(x1 - x2) <= xtol && std::abs(y1 - y2) <= ytol) {
+    return false;
+  }
+  // Choose (x1,y1) as starting point if closer to (u,v)
+  else if(std::abs(u - x1) + std::abs(v - y1) < 
+          std::abs(u - x2) + std::abs(v - y2)) {
+
+    // Compute the component of the line from (x1,y1) to (u,v)
+    //  along the line from (x1,y1) to (x2,y2)
+    double dpar = ((u - x1) * (x2 - x1) + (v - y1) * (y2 - y1)) /
+                  ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+
+    // Determine the point on the line to which to compare (u,v)
+    if(dpar < 0.0) { xc = x1; yc = y1; }
+    else if(dpar > 1.0) { xc = x2; yc = y2; }
+    else {
+      xc = x1 + dpar * (x2 - x1);
+      yc = y1 + dpar * (y2 - y1);
+    }
+  }
+  // Choose (x2,y2) as starting point if closer to (u,v)
+  else {
+
+    // Compute the component of the line from (x2,y2) to (u,v)
+    //  along the line from (x2,y2) to (x1,y1)
+    double dpar = ((u - x2) * (x1 - x2) + (v - y2) * (y1 - y2)) /
+                  ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+
+    // Determine the point on the line to which to compare (u,v)
+    if(dpar < 0.0) { xc = x2; yc = y2; }
+    else if(dpar > 1.0) { xc = x1; yc = y1; }
+    else {
+      xc = x2 + dpar * (x1 - x2);
+      yc = y2 + dpar * (y1 - y2);
+    }
+  }
+
+  // Compare the calculated point to (u,v)
+  if(std::abs(u - xc) < xtol && std::abs(v - yc) < ytol)
+    return true;
+
+  return false;
+  
+}
 
 // Ported from Garfield: determines the point of intersection, in planar 
 //  coordinates, of a plane with the line connecting multiple points
@@ -536,6 +831,7 @@ ViewFEMesh::PlaneCut(double x1, double y1, double z1, double x2, double y2,
   // Return success if the plane point is between the two vertices
   if(xMat(2,0) < 0 || xMat(2,0) > 1) return false;
   return true;
+  
 }
 
 // Ported from Garfield: calculates the planar coordinates
@@ -554,6 +850,7 @@ ViewFEMesh::PlaneCoords(double x, double y, double z,
   xMat = projMat*coordMat;
 
   return true;
+  
 }
 
 }
