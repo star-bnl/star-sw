@@ -215,13 +215,19 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 
 			LOG(NOTE,"RDO %d, ARM %d, format_code %d",r,arm,format_code) ;
 
-			int arm_id = *dta & 0x7 ;	
+			int arm_id = *dta & 0x7 ;
+			int arm_seq = (*dta >> 20) & 0xfff;
+			int arm_err = (*dta >>16) & 0xf;
 			dta++ ;
-
 
 			if(arm_id != arm) {
 				LOG(ERR,"RDO %d: Bad ARM ID: expect %d, have %d",r,arm,arm_id) ;
 				LOG(ERR,"0x%08x 0x%08x 0x%08x",*(dta-2),*(dta-1),*dta);
+				continue ;
+			}
+
+			if(arm_err != 0) {
+				LOG(ERR,"RDO %d ARM %d: Error code 0x%x",r,arm,arm_err) ;
 				continue ;
 			}
 
@@ -243,8 +249,7 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 				int apv_id = *dta & 0x1F ;
 				int length = (*dta >> 5) & 0x3FF ;
 				int fmt = (*dta >> 16) & 0x7 ;
-
-
+				int seq = (*dta >> 20) & 0xfff;
 
 				dta++ ;
 
@@ -269,6 +274,12 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 					continue ;
 				}
 
+				if(seq != arm_seq) {
+				  // should be ERR, not yet
+				  LOG(WARN,"RDO %d ARM %d APV %d: Sequence number mismatch, expect %d have %d",r,arm,apv,arm_seq,seq);
+				  //continue;
+				}
+
 				if((ntim <= 0) || (ntim > 7)) {
 					LOG(ERR,"Ntim %d ?!",ntim) ;
 					continue ;
@@ -277,6 +288,7 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 					LOG(ERR,"FMT %d != 1",fmt) ;
 					continue ;
 				}
+
 
 				// set of Gerard's hadrcoded hacks...
 				// [Gerard]: Modified "my" hardcoded hacks so it would work regardless of which APV's (except #23) are used, despite that the length code is not properly filled in.
@@ -325,6 +337,13 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 					wfm[4*j+3]	= 0x0fff & (d16[i++]>>4) ;
 				}
 
+				// hack dump for raw "waveform" for timing in the APV's
+				if ((arm==1) && (apv==13)) {  // fill in the one we're interested in at the moment
+				  for(int j=0;j<1000;j++)
+				    printf("%d\n",wfm[j]);
+				  printf("\n\n"); // event "index" separator for gnuplot
+				}
+				// end of that hack dump
 
 				dta += (length - 2) ;	// skip "length" words - 2 for the header
 
