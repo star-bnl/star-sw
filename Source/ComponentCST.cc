@@ -1,4 +1,4 @@
-//Copied and modified ComponentAnsys123.cc
+// Copied and modified ComponentAnsys123.cc
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
@@ -27,25 +27,24 @@ ComponentCST::ComponentCST() : ComponentFieldMap() {
 
 bool
 ComponentCST::Initialise(std::string elist, std::string nlist,
-std::string mplist, std::string prnsol,
-std::string unit) {
-//zenker:done
-    ready = false;
+                         std::string mplist, std::string prnsol,
+                         std::string unit) {
+  //zenker:done
+  ready = false;
 
   // Keep track of the success
-    bool ok = true;
+  bool ok = true;
 
   // Buffer for reading
-    const int size = 200;
-    char line[size];
-   // Open the material list
-    std::ifstream fmplist;
-    fmplist.open(mplist.c_str(), std::ios::in);
-    if (fmplist.fail()) {
-        std::cerr << className << "::Initialise:\n";
-        std::cerr << "    Could not open material file "
-                  << mplist.c_str() << " for reading.\n",
-        std::cerr << "    The file perhaps does not exist.\n";
+  const int size = 200;
+  char line[size];
+  // Open the material list
+  std::ifstream fmplist;
+  fmplist.open(mplist.c_str(), std::ios::in);
+  if (fmplist.fail()) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Could not open material file " << mplist << " for reading.\n",
+    std::cerr << "    The file perhaps does not exist.\n";
     return false;
   }
 
@@ -63,13 +62,13 @@ std::string unit) {
          int(token[0]) == 10 || int(token[0]) == 13) continue;
     // Read number of materials,
     // ensure it does not exceed the maximum and initialise the list
-    if (strcmp(token,"Materials") == 0) {
+    if (strcmp(token, "Materials") == 0) {
       token = strtok(NULL, " ");
       nMaterials = ReadInteger(token, -1, readerror);
       if (readerror) {
-    	std::cerr << className << "::Initialise:\n";
-    	std::cerr << "    Error reading file " <<  mplist.c_str()
-    			  << " (line " << il << ").\n";
+        std::cerr << className << "::Initialise:\n";
+        std::cerr << "    Error reading file " <<  mplist 
+                  << " (line " << il << ").\n";
         fmplist.close();
         ok = false;
         return false;
@@ -84,20 +83,20 @@ std::string unit) {
     	std::cout << className << "::Initialise:\n";
         std::cout << "    Number of materials: " << nMaterials << "\n";
       }
-    } else if (strcmp(token,"Material") == 0) {
+    } else if (strcmp(token, "Material") == 0) {
       token = strtok(NULL, " ");
       int imat = ReadInteger(token, -1, readerror);
       if (readerror) {
     	std::cerr << className << "::Initialise:\n";
-    	std::cerr << "     Error reading file " << mplist.c_str()
-    			  << " (line " << il << ".\n";
+    	std::cerr << "     Error reading file " << mplist
+                  << " (line " << il << ".\n";
         fmplist.close();
         ok = false;
         return false;
       } else if (imat < 1 || imat > nMaterials) {
     	std::cerr << className << "::Initialise:\n";
     	std::cerr << "    Found out-of-range material index " << imat << "in\n";
-        std::cerr << "     material properties file " << mplist.c_str() << ".\n";
+        std::cerr << "    material properties file " << mplist << ".\n";
         ok = false;
       } else {
         token = strtok(NULL, " ");
@@ -109,8 +108,8 @@ std::string unit) {
         } else {
           std::cerr << className << "::Initialise:\n";
           std::cerr << "    Found unknown material property flag " << token << "\n";
-          std::cerr << "     on material properties file " << mplist.c_str()
-        		    << "(line " << il << ").\n";
+          std::cerr << "    on material properties file " << mplist
+                    << "(line " << il << ").\n";
           ok = false;
         }
         token = strtok(NULL, " ");
@@ -120,10 +119,10 @@ std::string unit) {
           materials[imat - 1].ohm = ReadDouble(token, -1, readerror);
           token = strtok(NULL, " ");
           if (strcmp(token,"PERX") != 0){
-        	std::cerr << className << "::Initialise:\n";
-        	std::cerr << "   Found unknown material property falg "<< token << "\n";
-            std::cerr << "   on material file " << mplist.c_str()
-            		  << "(material " << imat << ").\n)";
+            std::cerr << className << "::Initialise:\n";
+            std::cerr << "   Found unknown material property falg "<< token << "\n";
+            std::cerr << "   on material file " << mplist
+                      << " (material " << imat << ").\n)";
             ok = false;
           } else {
             token = strtok(NULL, " ");
@@ -132,30 +131,34 @@ std::string unit) {
         }
         if (readerror) {
           std::cerr << className << "::Initialise:\n";
-          std::cerr <<"     Error reading file " << mplist.c_str() << "(line " << il << ").\n";
+          std::cerr << "     Error reading file " << mplist << "(line " << il << ").\n";
           fmplist.close();
           ok = false;
           return false;
         }
-        if(debug){
-          std::cerr << className << "::Initialise:\n";
-          std::cerr << "   Read material properties for material " << (imat-1) << "\n";
-          if (itype == 2) std::cerr << "   eps = " << materials[imat - 1].eps << " ohm = " << materials[imat - 1].ohm << "\n";
-          else std::cerr << "   eps = " << materials[imat - 1].eps << "\n";
+        if (debug){
+          std::cout << className << "::Initialise:\n";
+          std::cout << "    Read material properties for material " << (imat-1) << "\n";
+          if (itype == 2) {
+            std::cout << "    eps = " << materials[imat - 1].eps 
+                      << " ohm = " << materials[imat - 1].ohm << "\n";
+          } else {
+            std::cout << "    eps = " << materials[imat - 1].eps << "\n";
+          }
         }
       }
     }
   }
   // Close the file
   fmplist.close();
-   // Find the lowest epsilon, check for eps = 0, set default drift media
+  // Find the lowest epsilon, check for eps = 0, set default drift media
   double epsmin = -1; int iepsmin = -1;
   for (int imat = 0; imat < nMaterials; ++imat) {
     if (materials[imat].eps < 0) continue;
     if (materials[imat].eps == 0) {
       std::cout << className << "::Initialise:\n";
       std::cout << "    Material " << imat << " has been assigned a permittivity\n";
-      std::cout << "    equal to zero in " << mplist.c_str() << ".\n";
+      std::cout << "    equal to zero in " << mplist << ".\n";
       ok = false;
     } else if (iepsmin < 0 || epsmin > materials[imat].eps) {
       epsmin = materials[imat].eps;
@@ -163,9 +166,9 @@ std::string unit) {
     }
   }
   if (iepsmin < 0) {
-	std::cerr << className << "::Initialise:\n";
-	std::cerr << "     No material with positive permittivity found in\n";
-	std::cerr << "     material list " << mplist.c_str() << ".\n";
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "     No material with positive permittivity found in\n";
+    std::cerr << "     material list " << mplist.c_str() << ".\n";
     ok = false;
   } else {
     for (int imat = 0; imat < nMaterials; ++imat) {
@@ -179,16 +182,16 @@ std::string unit) {
   // Tell how many lines read
   std::cout << className << "::Initialise:\n";
   std::cout << "    Read properties of " << nMaterials << " materials\n";
-  std::cout << "    from file " << mplist.c_str() << ".\n";
+  std::cout << "    from file " << mplist << ".\n";
   if (debug) PrintMaterials();
 
   // Open the element list
   std::ifstream felist;
   felist.open(elist.c_str(), std::ios::in);
   if (felist.fail()) {
-	std::cerr << className << "::Initialise:\n";
-	std::cerr << "    Could not open element file " << elist.c_str() << " for reading.\n";
-	std::cerr << "    The file perhaps does not exist.\n";
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Could not open element file " << elist << " for reading.\n";
+    std::cerr << "    The file perhaps does not exist.\n";
     return false;
   }
   // Read the element list
@@ -224,63 +227,66 @@ std::string unit) {
     // Check synchronisation
     if (readerror) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Error reading file " << elist.c_str() << " (line " << il << ").\n";
+      std::cerr << "    Error reading file " << elist << " (line " << il << ").\n";
       felist.close();
       ok = false;
       return false;
     } else if (ielem != nElements + nbackground) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Synchronisation lost on file " << elist.c_str() << " (line " << il << ").\n";
+      std::cerr << "    Synchronisation lost on file " << elist << " (line " << il << ").\n";
       std::cerr << "    Element: " << ielem << " (expected " << nElements << "), material: " << imat
-    		    << ", nodes: ("
-    		    << in0 << " "
-    		    << in1 << " "
-    		    << in2 << " "
-    		    << in3 << " "
-    		    << in4 << " "
-    		    << in5 << " "
-    		    << in6 << " "
-    		    << in7 <<")\n";
+                << ", nodes: ("
+                << in0 << " "
+                << in1 << " "
+                << in2 << " "
+                << in3 << " "
+                << in4 << " "
+                << in5 << " "
+                << in6 << " "
+                << in7 << ")\n";
       ok = false;
     }
     // Check the material number and ensure that epsilon is non-negative
     if (imat < 1 || imat > nMaterials) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "   Out-of-range material number on file " << elist.c_str() << " (line " << il << ").\n";
+      std::cerr << "   Out-of-range material number on file " << elist 
+                << " (line " << il << ").\n";
       std::cerr << "    Element: " << ielem << ", material: " << imat
-    		    << ", nodes: ("
-    		    << in0 << " "
-    		    << in1 << " "
-    		    << in2 << " "
-    		    << in3 << " "
-    		    << in4 << " "
-    		    << in5 << " "
-    		    << in6 << " "
-    		    << in7 <<")\n";
+                << ", nodes: ("
+                << in0 << " "
+                << in1 << " "
+                << in2 << " "
+                << in3 << " "
+                << in4 << " "
+                << in5 << " "
+                << in6 << " "
+                << in7 << ")\n";
       ok = false;
     }
     if (materials[imat - 1].eps < 0) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Element " << ielem << " in element list " << elist.c_str() << " uses material " << imat << " which\n";
+      std::cerr << "    Element " << ielem << " in element list " << elist 
+                << " uses material " << imat << " which\n";
       std::cerr << "    has not been assigned a positive permittivity\n";
-      std::cerr << "    in material list " << mplist.c_str() << ".\n";
+      std::cerr << "    in material list " << mplist << ".\n";
       ok = false;
     }
      // Check the node numbers
     if (in0 < 0 || in1 < 0 || in2 < 0 || in3 < 0 ||
         in4 < 0 || in5 < 0 || in6 < 0 || in7 < 0) {
       std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Found a node number < 0 on file " << elist.c_str() << " (line " << il << ").\n";
+      std::cerr << "    Found a node number < 0 on file " << elist 
+                << " (line " << il << ").\n";
       std::cerr << "    Element: " << ielem << ", material: " << imat << ",\n";
-      std::cerr << "nodes: ("
-  		    << in0 << " "
-  		    << in1 << " "
-  		    << in2 << " "
-  		    << in3 << " "
-  		    << in4 << " "
-  		    << in5 << " "
-  		    << in6 << " "
-  		    << in7 <<")\n";
+      std::cerr << "    nodes: ("
+                << in0 << " "
+                << in1 << " "
+                << in2 << " "
+                << in3 << " "
+                << in4 << " "
+                << in5 << " "
+                << in6 << " "
+                << in7 <<")\n";
       ok = false;
     }
     if (in0 > highestnode) highestnode = in0;
@@ -310,18 +316,20 @@ std::string unit) {
     newElement.emap[6] = in6;
     newElement.emap[7] = in7;
     elements.push_back(newElement);
-//    if (nElements > 934100) {
-//      printf("ComponentCST::Initialise\n");
-//      printf("   Eelement: %d\n",nElements);
-//      printf("   Nodes   : %d,%d,%d,%d,%d,%d,%d,%d\n",in0,in1,in2,in3,in4,in5,in6,in7);
-//    }
+    // if (nElements > 934100) {
+    //   std::cout << className << "::Initialise\n";
+    //   std::cout << "    Element: " << nElements << "\n";
+    //   std::cout << "    Nodes  : " 
+    //             << in0 << ", " << in1 << ", " << in2 << ", " << in3 << ", "
+    //             << in4 << ", " << in5 << ", " << in6 << ", " << in7 << "\n";
+     // }
     ++nElements;
   }
   // Close the file
   felist.close();
   // Tell how many lines read
   std::cout << className << "::Initialise:\n";
-  std::cout << "    Read " << nElements << " elements from file " << elist.c_str() << ",\n";
+  std::cout << "    Read " << nElements << " elements from file " << elist << ",\n";
   std::cout << "    highest node number: " << highestnode << ",\n";
   std::cout << "    degenerate elements: " << ndegenerate << ",\n";
   std::cout << "    background elements skipped: " << nbackground << ".\n";
@@ -330,215 +338,220 @@ std::string unit) {
   if (strcmp(unit.c_str(),"mum") == 0 || strcmp(unit.c_str(),"micron") == 0 ||
       strcmp(unit.c_str(),"micrometer") == 0) {
     funit = 0.0001;
-      } else if (strcmp(unit.c_str(),"mm") == 0 ||
-                 strcmp(unit.c_str(),"millimeter") == 0) {
-                   funit = 0.1;
-                 } else if (strcmp(unit.c_str(),"cm") == 0 ||
-                            strcmp(unit.c_str(),"centimeter") == 0) {
-                              funit = 1.0;
-                            } else if (strcmp(unit.c_str(),"m") == 0 ||
-     strcmp(unit.c_str(),"meter") == 0) {
-       funit = 100.0;
-     } else {
-       std::cerr << className << "::Initialise:\n";
-       std::cerr << "    Unknown length unit " << unit.c_str() << ".\n";
-       ok = false;
-       funit = 1.0;
-     }
-     if (debug) {
-       std::cout << className << "::Initialise:\n";
-       std::cout << "    Unit scaling factor = " << funit << ".\n";
-     }
+  } else if (strcmp(unit.c_str(),"mm") == 0 ||
+             strcmp(unit.c_str(),"millimeter") == 0) {
+    funit = 0.1;
+  } else if (strcmp(unit.c_str(),"cm") == 0 ||
+             strcmp(unit.c_str(),"centimeter") == 0) {
+    funit = 1.0;
+  } else if (strcmp(unit.c_str(),"m") == 0 ||
+             strcmp(unit.c_str(),"meter") == 0) {
+    funit = 100.0;
+  } else {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Unknown length unit " << unit << ".\n";
+    ok = false;
+    funit = 1.0;
+  }
+  if (debug) {
+    std::cout << className << "::Initialise:\n";
+    std::cout << "    Unit scaling factor = " << funit << ".\n";
+  }
 
   // Open the node list
-     std::ifstream fnlist;
-     fnlist.open(nlist.c_str(), std::ios::in);
-     if (fnlist.fail()) {
-       std::cerr << className << "::Initialise:\n";
-       std::cerr << "    Could not open nodes file " << nlist.c_str() << " for reading.\n";
-       std::cerr << "    The file perhaps does not exist.\n";
-       return false;
-     }
+  std::ifstream fnlist;
+  fnlist.open(nlist.c_str(), std::ios::in);
+  if (fnlist.fail()) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Could not open nodes file " << nlist << " for reading.\n";
+    std::cerr << "    The file perhaps does not exist.\n";
+    return false;
+  }
   // Read the node list
-     nodes.clear();
-     nNodes = 0;
-     il = 0;
-     std::vector<double> x_lines,y_lines,z_lines;
-     int lines_type = -1;
-     double line_tmp;
-     while (fnlist.getline(line, size, '\n')) {
-       il++;
+  nodes.clear();
+  nNodes = 0;
+  il = 0;
+  std::vector<double> x_lines,y_lines,z_lines;
+  int lines_type = -1;
+  double line_tmp;
+  while (fnlist.getline(line, size, '\n')) {
+    il++;
     // Split the line in tokens
-       char* token = NULL;
+    char* token = NULL;
     // Split into tokens
-       token = strtok(line, " ");
+    token = strtok(line, " ");
     // Skip blank lines and headers
-       if (!token || strcmp(token," ") == 0 || strcmp(token,"\n") == 0 ||
-            int(token[0]) == 10 || int(token[0]) == 13 ) continue;
-    // read max sizes
-       if (strcmp(token,"xmax") == 0){
-         token = strtok(NULL, " "); m_xlines = ReadInteger(token, -1,readerror);token = strtok(NULL, " ");
-         token = strtok(NULL, " "); m_ylines = ReadInteger(token, -1,readerror);token = strtok(NULL, " ");
-         token = strtok(NULL, " "); m_zlines = ReadInteger(token, -1,readerror);
-         std::cout << className << "::Initialise:\n";
-         std::cout << "    Found " << m_xlines << " x-lines, "
-        		   << m_ylines << " y-lines and "
-        		   << m_zlines << " z-lines in file "
-        		   << nlist.c_str() << ".\n";
-         if (readerror) break;
-         else continue;
-       }
-       if (strcmp(token,"x-lines\n") == 0 || strcmp(token,"x-lines") == 0) {
-         lines_type = 1;
-         if (debug){
-          std::cout << className << "::Initialise:\n";
-          std::cout << "    Reading x-lines from file  " << nlist.c_str() << ".\n";
-         }
-         continue;
-       }
-       if (strcmp(token,"y-lines\n") == 0 || strcmp(token,"y-lines") == 0) {
-         lines_type = 2;
-         if (debug){
-             std::cout << className << "::Initialise:\n";
-             std::cout << "    Reading y-lines from file  " << nlist.c_str() << ".\n";
-         }
-         continue;
-       }
-       if (strcmp(token,"z-lines\n") == 0 || strcmp(token,"z-lines") == 0) {
-         lines_type = 3;
-         if (debug){
-             std::cout << className << "::Initialise:\n";
-             std::cout << "    Reading z-lines from file  " << nlist.c_str() << ".\n";
-         }
-         continue;
-       }
-       line_tmp = ReadDouble(token, -1, readerror);
-       if( lines_type == 1) x_lines.push_back(line_tmp);
-       else if ( lines_type == 2) y_lines.push_back(line_tmp);
-       else if ( lines_type == 3) z_lines.push_back(line_tmp);
-       else {
-    	 std::cerr << className << "::Initialise:\n";
-    	 std::cerr << "    Line type was not set in  " << nlist.c_str() << " (line " << il << ", token = " << token << ").\n";
-    	 std::cerr << "    Maybe it is in the wrong format\n";
-    	 std::cerr << "    e.g. missing tailing space after x-lines.\n";
-         ok = false;
-         break;
-       }
-       if (readerror) break;
-     }
-     // Check syntax
-     if (readerror) {
-       std::cerr << className << "::Initialise:\n";
-       std::cerr << "    Error reading file " << nlist.c_str() << " (line " << il << ").\n";
-       fnlist.close();
-       ok = false;
-       return false;
-     }
-     // Close the file
-     fnlist.close();
-     // Calculate the node positions
-     for(int z = 0; z < m_zlines; z++){
-       for(int y = 0; y < m_ylines; y++){
-         for(int x = 0; x < m_xlines; x++){
-           node newNode;
-           // Store the point coordinates
-           newNode.x = x_lines.at(x) * funit;
-           newNode.y = y_lines.at(y) * funit;
-           newNode.z = z_lines.at(z) * funit;
-           nodes.push_back(newNode);
-           ++nNodes;
-         }
-       }
-     }
-    // Check synchronisation
-     if ((m_xlines*m_ylines*m_zlines) != nNodes) {
-    	 std::cerr << className << "::Initialise:\n";
-    	 std::cerr << "    Synchronisation lost on file " << nlist.c_str() << ".\n";
-         std::cerr << "    Nodes: " << nNodes << " (expected " << (m_xlines*m_ylines*m_zlines) << ")\n";
-         ok = false;
-       }
+    if (!token || strcmp(token, " ") == 0 || strcmp(token, "\n") == 0 ||
+        int(token[0]) == 10 || int(token[0]) == 13) continue;
+    // Read max sizes
+    if (strcmp(token, "xmax") == 0) {
+      token = strtok(NULL, " "); m_xlines = ReadInteger(token, -1, readerror);
+      token = strtok(NULL, " ");
+      token = strtok(NULL, " "); m_ylines = ReadInteger(token, -1, readerror);
+      token = strtok(NULL, " ");
+      token = strtok(NULL, " "); m_zlines = ReadInteger(token, -1, readerror);
+      std::cout << className << "::Initialise:\n";
+      std::cout << "    Found " << m_xlines << " x-lines, "
+                                << m_ylines << " y-lines and "
+                                << m_zlines << " z-lines in file "
+                                << nlist << ".\n";
+      if (readerror) break;
+      continue;
+    }
+    if (strcmp(token, "x-lines\n") == 0 || strcmp(token, "x-lines") == 0) {
+      lines_type = 1;
+      if (debug) {
+        std::cout << className << "::Initialise:\n";
+        std::cout << "    Reading x-lines from file  " << nlist << ".\n";
+      }
+      continue;
+    }
+    if (strcmp(token, "y-lines\n") == 0 || strcmp(token, "y-lines") == 0) {
+      lines_type = 2;
+      if (debug) {
+        std::cout << className << "::Initialise:\n";
+        std::cout << "    Reading y-lines from file  " << nlist << ".\n";
+      }
+      continue;
+    }
+    if (strcmp(token, "z-lines\n") == 0 || strcmp(token, "z-lines") == 0) {
+      lines_type = 3;
+      if (debug) {
+        std::cout << className << "::Initialise:\n";
+        std::cout << "    Reading z-lines from file  " << nlist << ".\n";
+      }
+      continue;
+    }
+    line_tmp = ReadDouble(token, -1, readerror);
+    if (lines_type == 1) x_lines.push_back(line_tmp);
+    else if (lines_type == 2) y_lines.push_back(line_tmp);
+    else if (lines_type == 3) z_lines.push_back(line_tmp);
+    else {
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Line type was not set in  " << nlist 
+                << " (line " << il << ", token = " << token << ").\n";
+      std::cerr << "    Maybe it is in the wrong format\n";
+      std::cerr << "    e.g. missing tailing space after x-lines.\n";
+      ok = false;
+      break;
+    }
+    if (readerror) break;
+  }
+  // Check syntax
+  if (readerror) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Error reading file " << nlist << " (line " << il << ").\n";
+    fnlist.close();
+    ok = false;
+    return false;
+  }
+  // Close the file
+  fnlist.close();
+  // Calculate the node positions
+  for (int z = 0; z < m_zlines; z++) {
+    for (int y = 0; y < m_ylines; y++){
+      for (int x = 0; x < m_xlines; x++){
+        node newNode;
+        // Store the point coordinates
+        newNode.x = x_lines.at(x) * funit;
+        newNode.y = y_lines.at(y) * funit;
+        newNode.z = z_lines.at(z) * funit;
+        nodes.push_back(newNode);
+        ++nNodes;
+      }
+    }
+  }
+  // Check synchronisation
+  if ((m_xlines * m_ylines * m_zlines) != nNodes) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Synchronisation lost on file " << nlist << ".\n";
+    std::cerr << "    Nodes: " << nNodes << " (expected " 
+              << (m_xlines * m_ylines * m_zlines) << ")\n";
+    ok = false;
+  }
 
   // Tell how many lines read
-     std::cout << className << "::Initialise:\n";
-     std::cout << "    Read " << nNodes << " nodes from file " << nlist.c_str() << ".\n";
+  std::cout << className << "::Initialise:\n";
+  std::cout << "    Read " << nNodes << " nodes from file " << nlist << ".\n";
   // Check number of nodes
-     if (nNodes != (highestnode+1)) {
-       std::cerr << className << "::Initialise:\n";
-       std::cerr << "    Number of nodes read (" << nNodes << ") on " << nlist.c_str() << " \n";
-       std::cerr << "    does not match element list (" << highestnode << ").\n";
-       std::cerr << "    Maybe the line size exceeded 200 characters.\n";
-       ok = false;
-     }
+  if (nNodes != (highestnode+1)) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Number of nodes read (" << nNodes << ") on " << nlist << " \n";
+    std::cerr << "    does not match element list (" << highestnode << ").\n";
+    std::cerr << "    Maybe the line size exceeded 200 characters.\n";
+    ok = false;
+  }
 
   // Open the voltage list
-     std::ifstream fprnsol;
-     fprnsol.open(prnsol.c_str(), std::ios::in);
-     if (fprnsol.fail()) {
-       std::cerr << className << "::Initialise:\n";
-       std::cerr << "    Could not open potential file " << prnsol.c_str() << " for reading.\n";
-       std::cerr << "    The file perhaps does not exist.\n";
-       return false;
-     }
+  std::ifstream fprnsol;
+  fprnsol.open(prnsol.c_str(), std::ios::in);
+  if (fprnsol.fail()) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Could not open potential file " << prnsol << " for reading.\n";
+    std::cerr << "    The file perhaps does not exist.\n";
+    return false;
+  }
   // Read the voltage list
-     il = 0;
-     int nread = 0;
-     readerror = false;
-     while (fprnsol.getline(line, size, '\n')) {
-       il++;
+  il = 0;
+  int nread = 0;
+  readerror = false;
+  while (fprnsol.getline(line, size, '\n')) {
+    il++;
     // Split the line in tokens
-       char* token = NULL;
-       token = strtok(line, " ");
+    char* token = NULL;
+    token = strtok(line, " ");
     // Skip blank lines and headers
-       if (!token || strcmp(token," ") == 0 || strcmp(token,"\n") == 0 ||
-            int(token[0]) == 10 || int(token[0]) == 13 ||
-            strcmp(token,"Max")   == 0 ) continue;
+    if (!token || strcmp(token," ") == 0 || strcmp(token,"\n") == 0 ||
+        int(token[0]) == 10 || int(token[0]) == 13 ||
+        strcmp(token,"Max") == 0) continue;
     // Read the element
-       int inode = ReadInteger(token, -1, readerror);
-       token = strtok(NULL, " "); double volt = ReadDouble(token, -1, readerror);
+    int inode = ReadInteger(token, -1, readerror);
+    token = strtok(NULL, " "); double volt = ReadDouble(token, -1, readerror);
     // Check syntax
-       if (readerror) {
-    	 std::cerr << className << "::Initialise:\n";
-    	 std::cerr << "    Error reading file " << prnsol.c_str() << " (line " << il << ").\n";
-         fprnsol.close();
-         ok = false;
-         return false;
-       }
+    if (readerror) {
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Error reading file " << prnsol << " (line " << il << ").\n";
+      fprnsol.close();
+      ok = false;
+      return false;
+    }
     // Check node number and store if OK
-       if (inode < 1 || inode > nNodes) {
-    	 std::cerr << className << "::Initialise:\n";
-    	 std::cerr << "    Node number " << inode << " out of range\n";
-    	 std::cerr << "    on potential file " << prnsol.c_str() << " (line " << il << ").\n";
-         ok = false;
-       } else {
-         nodes[inode - 1].v = volt;
-         nread++;
-       }
-     }
+    if (inode < 1 || inode > nNodes) {
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Node number " << inode << " out of range\n";
+      std::cerr << "    on potential file " << prnsol << " (line " << il << ").\n";
+      ok = false;
+    } else {
+      nodes[inode - 1].v = volt;
+      nread++;
+    }
+  }
   // Close the file
-     fprnsol.close();
+  fprnsol.close();
   // Tell how many lines read
-     std::cout << className << "::Initialise:\n";
-     std::cout << "    Read " << nread << " potentials from file " << prnsol.c_str() << ".\n";
+  std::cout << className << "::Initialise:\n";
+  std::cout << "    Read " << nread << " potentials from file " << prnsol << ".\n";
   // Check number of nodes
-     if (nread != nNodes) {
-       std::cerr << className << "::Initialise:\n";
-       std::cerr << "    Number of nodes read (" << nread << ") on potential file " << prnsol.c_str() << " does not\n";
-       std::cerr << "    match the node list (" << nNodes << ").\n";
-       ok = false;
-     }
-   // Set the ready flag
-     if (ok) {
-       ready = true;
-     } else {
-       std::cerr << className << "::Initialise:\n";
-       std::cerr << "    Field map could not be read and cannot be interpolated.\n";
-       return false;
-     }
+  if (nread != nNodes) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Number of nodes read (" << nread 
+              << ") on potential file " << prnsol << " does not\n";
+    std::cerr << "    match the node list (" << nNodes << ").\n";
+    ok = false;
+  }
+  // Set the ready flag
+  if (ok) {
+    ready = true;
+  } else {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Field map could not be read and cannot be interpolated.\n";
+    return false;
+  }
 
   // Establish the ranges
-     SetRange();
-     UpdatePeriodicity();
-     return true;
+  SetRange();
+  UpdatePeriodicity();
+  return true;
 
 }
 
@@ -546,9 +559,9 @@ bool
 ComponentCST::SetWeightingField(std::string prnsol, std::string label) {
 
   if (!ready) {
-	std::cerr << className << "::SetWeightingField:\n";
-	std::cerr << "    No valid field map is present.\n";
-	std::cerr << "    Weighting field cannot be added.\n";
+    std::cerr << className << "::SetWeightingField:\n";
+    std::cerr << "    No valid field map is present.\n";
+    std::cerr << "    Weighting field cannot be added.\n";
     return false;
   }
 
@@ -556,8 +569,8 @@ ComponentCST::SetWeightingField(std::string prnsol, std::string label) {
   std::ifstream fprnsol;
   fprnsol.open(prnsol.c_str(), std::ios::in);
   if (fprnsol.fail()) {
-	std::cerr << className << "::SetWeightingField:\n";
-    std::cerr << "    Could not open potential file " << prnsol.c_str() << " for reading.\n";
+    std::cerr << className << "::SetWeightingField:\n";
+    std::cerr << "    Could not open potential file " << prnsol << " for reading.\n";
     std::cerr << "    The file perhaps does not exist.\n";
     return false;
   }
@@ -611,8 +624,8 @@ ComponentCST::SetWeightingField(std::string prnsol, std::string label) {
     // Check syntax
     if (readerror) {
       std::cerr << className << "::SetWeightingField:\n";
-      std::cerr << "    Error reading file " << prnsol.c_str()
-    			<< " (line " << il << ").\n";
+      std::cerr << "    Error reading file " << prnsol
+                << " (line " << il << ").\n";
       fprnsol.close();
       return false;
     }
@@ -620,8 +633,8 @@ ComponentCST::SetWeightingField(std::string prnsol, std::string label) {
     if (inode < 1 || inode > nNodes) {
       std::cerr << className << "::SetWeightingField:\n";
       std::cerr << "    Node number " << inode << " out of range.\n";
-      std::cerr << "    on potential file " << prnsol.c_str()
-    		    << " (line " << il << ").\n";
+      std::cerr << "    on potential file " << prnsol
+                << " (line " << il << ").\n";
       ok = false;
     } else {
       nodes[inode - 1].w[iw] = volt;
@@ -632,13 +645,12 @@ ComponentCST::SetWeightingField(std::string prnsol, std::string label) {
   fprnsol.close();
   // Tell how many lines read
   std::cout << className << "::SetWeightingField:\n";
-  std::cout << "    Read " << nread << " potentials from file "
-		    << prnsol.c_str() << ".\n";
+  std::cout << "    Read " << nread << " potentials from file " << prnsol << ".\n";
   // Check number of nodes
   if (nread != nNodes) {
-	std::cerr << className << "::SetWeightingField:\n";
-	std::cerr << "    Number of nodes read (" << nread << ")"
-			  << " on potential file "  << prnsol.c_str() << "\n";
+    std::cerr << className << "::SetWeightingField:\n";
+    std::cerr << "    Number of nodes read (" << nread << ")"
+              << " on potential file "  << prnsol << "\n";
     std::cerr << "     does not match the node list (" << nNodes << ".\n";
     ok = false;
   }
@@ -667,21 +679,19 @@ double& ex, double& ey, double& ez,Medium*& m, int& status) {
 
 void
 ComponentCST::ElectricField(
-const double xin, const double yin, const double zin,
-double& ex, double& ey, double& ez, double& volt,
-Medium*& m, int& status) {
-//	  for (int i = 0; i < nElements; ++i) {
-//		printf("Node-Positions of element %d:\n",i);
-//		for (int j = 0; j < 8;++j) {
-//			printf("        (%g,%g,%g)\n",
-//				nodes[elements[i].emap[j]].x,
-//				nodes[elements[i].emap[j]].y,
-//				nodes[elements[i].emap[j]].z);
-//		}
-//	  }
+        const double xin, const double yin, const double zin,
+        double& ex, double& ey, double& ez, double& volt,
+        Medium*& m, int& status) {
 
-
-
+  // for (int i = 0; i < nElements; ++i) {
+  //   printf("Node-Positions of element %d:\n",i);
+  //   for (int j = 0; j < 8;++j) {
+  //     printf("        (%g,%g,%g)\n",
+  //     nodes[elements[i].emap[j]].x,
+  //     nodes[elements[i].emap[j]].y,
+  //     nodes[elements[i].emap[j]].z);
+  //    }
+  // }
 
   // Copy the coordinates
   double x = xin, y = yin, z = zin;
@@ -693,7 +703,6 @@ Medium*& m, int& status) {
   xmirrored, ymirrored, zmirrored,
   rcoordinate, rotation);
 
-
   // Initial values
   ex = ey = ez = volt = 0;
   status = 0;
@@ -702,59 +711,60 @@ Medium*& m, int& status) {
   if (!ready) {
     status = -10;
     std::cerr << className << "::ElectricField:\n";
-    std::cerr << " Field map not available for interpolation.\n";
+    std::cerr << "    Field map not available for interpolation.\n";
     return;
   }
 
   if (warning) {
-	std::cout << className << "::ElectricField:\n";
-	std::cout << "Warnings have been issued for this field map.\n";
+    std::cout << className << "::ElectricField:\n";
+    std::cout << "    Warnings have been issued for this field map.\n";
   }
 
   // Find the element that contains this point
   double t1, t2, t3, jac[3][3], det;
-//  int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
-//   int imap = Coordinates4(x, y, z, t1, t2, t3, t4, jac, det,imap);
   std::vector<int>* vec_surrounding = 0;
-  //to reserve the memory here (vector is copied from ComponentCST::GetSurroundingElements
-  //were memory is no longer reserved!
+  // To reserve the memory here 
+  // (vector is copied from ComponentCST::GetSurroundingElements
+  // where memory is no longer reserved!
   std::vector<int> tmp_vec = ComponentCST::GetSurroundingElements(m_LastElementCalled);
   vec_surrounding = &(tmp_vec);
-  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det,vec_surrounding);
+  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det, vec_surrounding);
 
   if (imap < 0) {
     if (debug) {
       std::cout << className << "::ElectricField:\n";
-      std::cout << "    Point (" << x << "," << y << "," << z << ") not in the mesh, it is background or PEC.\n";
+      std::cout << "    Point (" << x << "," << y << "," << z 
+                << ") not in the mesh,\n"; 
+      std::cout << "    it is background or PEC.\n";
     }
     status = -6;
     return;
   }
-  //Save element number of last element
+  // Save element number of last element
   m_LastElementCalled = imap;
 
   double inv_jac[3][3];
   det = fabs(det);
-  inv_jac[0][0] = 1./det * (jac[1][1] * jac[2][2] - jac[1][2] * jac[2][1]);
-  inv_jac[0][1] = 1./det * (jac[0][2] * jac[2][1] - jac[0][1] * jac[2][2]);
-  inv_jac[0][2] = 1./det * (jac[0][1] * jac[1][2] - jac[0][2] * jac[1][1]);
-  inv_jac[1][0] = 1./det * (jac[1][2] * jac[2][0] - jac[1][0] * jac[2][2]);
-  inv_jac[1][1] = 1./det * (jac[0][0] * jac[2][2] - jac[0][2] * jac[2][0]);
-  inv_jac[1][2] = 1./det * (jac[0][2] * jac[1][0] - jac[0][0] * jac[1][2]);
-  inv_jac[2][0] = 1./det * (jac[1][0] * jac[2][1] - jac[1][1] * jac[2][0]);
-  inv_jac[2][1] = 1./det * (jac[0][1] * jac[2][0] - jac[0][0] * jac[2][1]);
-  inv_jac[2][2] = 1./det * (jac[0][0] * jac[1][1] - jac[0][1] * jac[1][0]);
+  inv_jac[0][0] = (1./det) * (jac[1][1] * jac[2][2] - jac[1][2] * jac[2][1]);
+  inv_jac[0][1] = (1./det) * (jac[0][2] * jac[2][1] - jac[0][1] * jac[2][2]);
+  inv_jac[0][2] = (1./det) * (jac[0][1] * jac[1][2] - jac[0][2] * jac[1][1]);
+  inv_jac[1][0] = (1./det) * (jac[1][2] * jac[2][0] - jac[1][0] * jac[2][2]);
+  inv_jac[1][1] = (1./det) * (jac[0][0] * jac[2][2] - jac[0][2] * jac[2][0]);
+  inv_jac[1][2] = (1./det) * (jac[0][2] * jac[1][0] - jac[0][0] * jac[1][2]);
+  inv_jac[2][0] = (1./det) * (jac[1][0] * jac[2][1] - jac[1][1] * jac[2][0]);
+  inv_jac[2][1] = (1./det) * (jac[0][1] * jac[2][0] - jac[0][0] * jac[2][1]);
+  inv_jac[2][2] = (1./det) * (jac[0][0] * jac[1][1] - jac[0][1] * jac[1][0]);
   // Field calculation
-  volt = 1./8* (  nodes[elements[imap].emap[0]].v * (1 - t1) * (1 - t2) * (1 - t3) +
-                  nodes[elements[imap].emap[1]].v * (1 + t1) * (1 - t2) * (1 - t3) +
-                  nodes[elements[imap].emap[2]].v * (1 + t1) * (1 + t2) * (1 - t3) +
-                  nodes[elements[imap].emap[3]].v * (1 - t1) * (1 + t2) * (1 - t3) +
-                  nodes[elements[imap].emap[4]].v * (1 - t1) * (1 - t2) * (1 + t3) +
-                  nodes[elements[imap].emap[5]].v * (1 + t1) * (1 - t2) * (1 + t3) +
-                  nodes[elements[imap].emap[6]].v * (1 + t1) * (1 + t2) * (1 + t3) +
-                  nodes[elements[imap].emap[7]].v * (1 - t1) * (1 + t2) * (1 + t3));
-  ex = 1./8. * (
-		  nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
+  volt = (nodes[elements[imap].emap[0]].v * (1 - t1) * (1 - t2) * (1 - t3) +
+          nodes[elements[imap].emap[1]].v * (1 + t1) * (1 - t2) * (1 - t3) +
+          nodes[elements[imap].emap[2]].v * (1 + t1) * (1 + t2) * (1 - t3) +
+          nodes[elements[imap].emap[3]].v * (1 - t1) * (1 + t2) * (1 - t3) +
+          nodes[elements[imap].emap[4]].v * (1 - t1) * (1 - t2) * (1 + t3) +
+          nodes[elements[imap].emap[5]].v * (1 + t1) * (1 - t2) * (1 + t3) +
+          nodes[elements[imap].emap[6]].v * (1 + t1) * (1 + t2) * (1 + t3) +
+          nodes[elements[imap].emap[7]].v * (1 - t1) * (1 + t2) * (1 + t3)) / 8.;
+  ex = (1. / 8.) * (
+          nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
                                              (1 - t1) * -1 * (1 - t3) * inv_jac[1][0] +
                                              (1 - t1) * (1 - t2) * -1 * inv_jac[2][0]) +
           nodes[elements[imap].emap[1]].v * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
@@ -778,8 +788,8 @@ Medium*& m, int& status) {
           nodes[elements[imap].emap[7]].v * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][0] +
                                              (1 - t1) * +1 * (1 + t3) * inv_jac[1][0] +
                                              (1 - t1) * (1 + t2) * +1 * inv_jac[2][0]));
-  ey = 1./8. * (
-		  nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][1] +
+  ey = (1. / 8.) * (
+          nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][1] +
                                              (1 - t1) * -1 * (1 - t3) * inv_jac[1][1] +
                                              (1 - t1) * (1 - t2) * -1 * inv_jac[2][1]) +
           nodes[elements[imap].emap[1]].v * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][1] +
@@ -803,8 +813,8 @@ Medium*& m, int& status) {
           nodes[elements[imap].emap[7]].v * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][1] +
                                              (1 - t1) * +1 * (1 + t3) * inv_jac[1][1] +
                                              (1 - t1) * (1 + t2) * +1 * inv_jac[2][1]));
-  ez = -1./8. * (
-		  nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][2] +
+  ez = (-1. / 8.) * (
+          nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][2] +
                                              (1 - t1) * -1 * (1 - t3) * inv_jac[1][2] +
                                              (1 - t1) * (1 - t2) * -1 * inv_jac[2][2]) +
           nodes[elements[imap].emap[1]].v * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][2] +
@@ -830,17 +840,18 @@ Medium*& m, int& status) {
                                              (1 - t1) * (1 + t2) * +1 * inv_jac[2][2]));
 
   // Transform field to global coordinates
-  UnmapFields(ex, ey, ez,
-  x, y, z,
-  xmirrored, ymirrored, zmirrored,
-  rcoordinate, rotation);
+  UnmapFields(ex, ey, ez, x, y, z,
+              xmirrored, ymirrored, zmirrored,
+              rcoordinate, rotation);
 
-  // Drift medium ?
+  // Drift medium?
   if (debug) {
-	std::cout << className << "::ElectricField:\n";
-	std::cout << "Material " << elements[imap].matmap << ", drift flag " << materials[elements[imap].matmap].driftmedium << ".\n";
-    std::cout << "Local Coordinates (" << t1 << "," << t2 << "," << t3 << ",) Voltage: " << volt << "\n";
-    std::cout << "E-Field (" << ex << "," << ey << "," << ez << ")\n";
+    std::cout << className << "::ElectricField:\n";
+    std::cout << "    Material " << elements[imap].matmap << ", drift flag " 
+              << materials[elements[imap].matmap].driftmedium << ".\n";
+    std::cout << "    Local Coordinates (" << t1 << "," << t2 << "," << t3 
+              << ",) Voltage: " << volt << "\n";
+    std::cout << "    E-Field (" << ex << "," << ey << "," << ez << ")\n";
     std::cout << "*******End of ComponentCST::ElectricField********\n\n";
   }
   m = materials[elements[imap].matmap].medium;
@@ -854,9 +865,9 @@ Medium*& m, int& status) {
 
 void
 ComponentCST::WeightingField(
-const double xin, const double yin, const double zin,
-double& wx, double& wy, double& wz,
-const std::string label) {
+        const double xin, const double yin, const double zin,
+        double& wx, double& wy, double& wz,
+        const std::string label) {
 
   // Initial values
   wx = wy = wz = 0;
@@ -887,12 +898,12 @@ const std::string label) {
   bool xmirrored, ymirrored, zmirrored;
   double rcoordinate, rotation;
   MapCoordinates(x, y, z,
-  xmirrored, ymirrored, zmirrored,
-  rcoordinate, rotation);
+                 xmirrored, ymirrored, zmirrored,
+                 rcoordinate, rotation);
 
   if (warning) {
-	std::cout << className << "::WeightingField:\n";
-	std::cout << "Warnings have been issued for this field map.\n";
+    std::cout << className << "::WeightingField:\n";
+    std::cout << "    Warnings have been issued for this field map.\n";
   }
 
   // Find the element that contains this point
@@ -907,113 +918,112 @@ const std::string label) {
   if (imap < 0) return;
 
   if (debug) {
-	std::cout << className << "::WeightingField:\n";
-	std::cout << "Global: (" << x << "," << y << "," << z << "),\n";
-	std::cout << "Local: (" << t1 << "," << t2 << "," << t3 << ") in element " << imap << " \n";
-	std::cout << "  Node xyzV\n";
-	for (int i = 0; i < 8; i++) {
-	  std::cout << "  " << elements[imap].emap[i]
-	            << " " << nodes[elements[imap].emap[i]].x
-			    << " " << nodes[elements[imap].emap[i]].y
-			    << " " << nodes[elements[imap].emap[i]].z
-			    << " " << nodes[elements[imap].emap[i]].w[iw] << "\n";
-	}
+    std::cout << className << "::WeightingField:\n";
+    std::cout << "    Global: (" << x << "," << y << "," << z << "),\n";
+    std::cout << "    Local: (" << t1 << "," << t2 << "," << t3 
+              << ") in element " << imap << " \n";
+    std::cout << "    Node xyzV\n";
+    for (int i = 0; i < 8; i++) {
+      std::cout << "  " << elements[imap].emap[i]
+                << " " << nodes[elements[imap].emap[i]].x
+                << " " << nodes[elements[imap].emap[i]].y
+                << " " << nodes[elements[imap].emap[i]].z
+                << " " << nodes[elements[imap].emap[i]].w[iw] << "\n";
+    }
   }
   double inv_jac[3][3];
   det = fabs(det);
-  inv_jac[0][0] = 1./det * (jac[1][1] * jac[2][2] - jac[1][2] * jac[2][1]);
-  inv_jac[0][1] = 1./det * (jac[0][2] * jac[2][1] - jac[0][1] * jac[2][2]);
-  inv_jac[0][2] = 1./det * (jac[0][1] * jac[1][2] - jac[0][2] * jac[1][1]);
-  inv_jac[1][0] = 1./det * (jac[1][2] * jac[2][0] - jac[1][0] * jac[2][2]);
-  inv_jac[1][1] = 1./det * (jac[0][0] * jac[2][2] - jac[0][2] * jac[2][0]);
-  inv_jac[1][2] = 1./det * (jac[0][2] * jac[1][0] - jac[0][0] * jac[1][2]);
-  inv_jac[2][0] = 1./det * (jac[1][0] * jac[2][1] - jac[1][1] * jac[2][0]);
-  inv_jac[2][1] = 1./det * (jac[0][1] * jac[2][0] - jac[0][0] * jac[2][1]);
-  inv_jac[2][2] = 1./det * (jac[0][0] * jac[1][1] - jac[0][1] * jac[1][0]);
+  inv_jac[0][0] = (1. / det) * (jac[1][1] * jac[2][2] - jac[1][2] * jac[2][1]);
+  inv_jac[0][1] = (1. / det) * (jac[0][2] * jac[2][1] - jac[0][1] * jac[2][2]);
+  inv_jac[0][2] = (1. / det) * (jac[0][1] * jac[1][2] - jac[0][2] * jac[1][1]);
+  inv_jac[1][0] = (1. / det) * (jac[1][2] * jac[2][0] - jac[1][0] * jac[2][2]);
+  inv_jac[1][1] = (1. / det) * (jac[0][0] * jac[2][2] - jac[0][2] * jac[2][0]);
+  inv_jac[1][2] = (1. / det) * (jac[0][2] * jac[1][0] - jac[0][0] * jac[1][2]);
+  inv_jac[2][0] = (1. / det) * (jac[1][0] * jac[2][1] - jac[1][1] * jac[2][0]);
+  inv_jac[2][1] = (1. / det) * (jac[0][1] * jac[2][0] - jac[0][0] * jac[2][1]);
+  inv_jac[2][2] = (1. / det) * (jac[0][0] * jac[1][1] - jac[0][1] * jac[1][0]);
 
-  wx = 1./8. * (
-  		  nodes[elements[imap].emap[0]].w[iw] * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
-                                               (1 - t1) * -1 * (1 - t3) * inv_jac[1][0] +
-                                               (1 - t1) * (1 - t2) * -1 * inv_jac[2][0]) +
-            nodes[elements[imap].emap[1]].w[iw] * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
-                                               (1 + t1) * -1 * (1 - t3) * inv_jac[1][0] +
-                                               (1 + t1) * (1 - t2) * -1 * inv_jac[2][0]) +
-            nodes[elements[imap].emap[2]].w[iw] * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][0] +
-                                               (1 + t1) * +1 * (1 - t3) * inv_jac[1][0] +
-                                               (1 + t1) * (1 + t2) * -1 * inv_jac[2][0]) +
-            nodes[elements[imap].emap[3]].w[iw] * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][0] +
-                                               (1 - t1) * +1 * (1 - t3) * inv_jac[1][0] +
-                                               (1 - t1) * (1 + t2) * -1 * inv_jac[2][0]) +
-            nodes[elements[imap].emap[4]].w[iw] * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][0] +
-                                               (1 - t1) * -1 * (1 + t3) * inv_jac[1][0] +
-                                               (1 - t1) * (1 - t2) * +1 * inv_jac[2][0]) +
-            nodes[elements[imap].emap[5]].w[iw] * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][0] +
-                                               (1 + t1) * -1 * (1 + t3) * inv_jac[1][0] +
-                                               (1 + t1) * (1 - t2) * +1 * inv_jac[2][0]) +
-            nodes[elements[imap].emap[6]].w[iw] * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][0] +
-                                               (1 + t1) * +1 * (1 + t3) * inv_jac[1][0] +
-                                               (1 + t1) * (1 + t2) * +1 * inv_jac[2][0]) +
-            nodes[elements[imap].emap[7]].w[iw] * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][0] +
-                                               (1 - t1) * +1 * (1 + t3) * inv_jac[1][0] +
-                                               (1 - t1) * (1 + t2) * +1 * inv_jac[2][0]));
-    wy = 1./8. * (
-  		  nodes[elements[imap].emap[0]].w[iw] * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][1] +
-                                               (1 - t1) * -1 * (1 - t3) * inv_jac[1][1] +
-                                               (1 - t1) * (1 - t2) * -1 * inv_jac[2][1]) +
-            nodes[elements[imap].emap[1]].w[iw] * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][1] +
-                                               (1 + t1) * -1 * (1 - t3) * inv_jac[1][1] +
-                                               (1 + t1) * (1 - t2) * -1 * inv_jac[2][1]) +
-            nodes[elements[imap].emap[2]].w[iw] * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][1] +
-                                               (1 + t1) * +1 * (1 - t3) * inv_jac[1][1] +
-                                               (1 + t1) * (1 + t2) * -1 * inv_jac[2][1]) +
-            nodes[elements[imap].emap[3]].w[iw] * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][1] +
-                                               (1 - t1) * +1 * (1 - t3) * inv_jac[1][1] +
-                                               (1 - t1) * (1 + t2) * -1 * inv_jac[2][1]) +
-            nodes[elements[imap].emap[4]].w[iw] * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][1] +
-                                               (1 - t1) * -1 * (1 + t3) * inv_jac[1][1] +
-                                               (1 - t1) * (1 - t2) * +1 * inv_jac[2][1]) +
-            nodes[elements[imap].emap[5]].w[iw] * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][1] +
-                                               (1 + t1) * -1 * (1 + t3) * inv_jac[1][1] +
-                                               (1 + t1) * (1 - t2) * +1 * inv_jac[2][1]) +
-            nodes[elements[imap].emap[6]].w[iw] * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][1] +
-                                               (1 + t1) * +1 * (1 + t3) * inv_jac[1][1] +
-                                               (1 + t1) * (1 + t2) * +1 * inv_jac[2][1]) +
-            nodes[elements[imap].emap[7]].w[iw] * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][1] +
-                                               (1 - t1) * +1 * (1 + t3) * inv_jac[1][1] +
-                                               (1 - t1) * (1 + t2) * +1 * inv_jac[2][1]));
-    wz = -1./8. * (
-  		  nodes[elements[imap].emap[0]].w[iw] * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][2] +
-                                               (1 - t1) * -1 * (1 - t3) * inv_jac[1][2] +
-                                               (1 - t1) * (1 - t2) * -1 * inv_jac[2][2]) +
-            nodes[elements[imap].emap[1]].w[iw] * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][2] +
-                                               (1 + t1) * -1 * (1 - t3) * inv_jac[1][2] +
-                                               (1 + t1) * (1 - t2) * -1 * inv_jac[2][2]) +
-            nodes[elements[imap].emap[2]].w[iw] * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][2] +
-                                               (1 + t1) * +1 * (1 - t3) * inv_jac[1][2] +
-                                               (1 + t1) * (1 + t2) * -1 * inv_jac[2][2]) +
-            nodes[elements[imap].emap[3]].w[iw] * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][2] +
-                                               (1 - t1) * +1 * (1 - t3) * inv_jac[1][2] +
-                                               (1 - t1) * (1 + t2) * -1 * inv_jac[2][2]) +
-            nodes[elements[imap].emap[4]].w[iw] * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][2] +
-                                               (1 - t1) * -1 * (1 + t3) * inv_jac[1][2] +
-                                               (1 - t1) * (1 - t2) * +1 * inv_jac[2][2]) +
-            nodes[elements[imap].emap[5]].w[iw] * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][2] +
-                                               (1 + t1) * -1 * (1 + t3) * inv_jac[1][2] +
-                                               (1 + t1) * (1 - t2) * +1 * inv_jac[2][2]) +
-            nodes[elements[imap].emap[6]].w[iw] * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][2] +
-                                               (1 + t1) * +1 * (1 + t3) * inv_jac[1][2] +
-                                               (1 + t1) * (1 + t2) * +1 * inv_jac[2][2]) +
-            nodes[elements[imap].emap[7]].w[iw] * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][2] +
-                                               (1 - t1) * +1 * (1 + t3) * inv_jac[1][2] +
-                                               (1 - t1) * (1 + t2) * +1 * inv_jac[2][2]));
-
-
+  wx = (1. / 8.) * (
+          nodes[elements[imap].emap[0]].w[iw] * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
+                                                 (1 - t1) * -1 * (1 - t3) * inv_jac[1][0] +
+                                                 (1 - t1) * (1 - t2) * -1 * inv_jac[2][0]) +
+          nodes[elements[imap].emap[1]].w[iw] * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
+                                                 (1 + t1) * -1 * (1 - t3) * inv_jac[1][0] +
+                                                 (1 + t1) * (1 - t2) * -1 * inv_jac[2][0]) +
+          nodes[elements[imap].emap[2]].w[iw] * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][0] +
+                                                 (1 + t1) * +1 * (1 - t3) * inv_jac[1][0] +
+                                                 (1 + t1) * (1 + t2) * -1 * inv_jac[2][0]) +
+          nodes[elements[imap].emap[3]].w[iw] * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][0] +
+                                                 (1 - t1) * +1 * (1 - t3) * inv_jac[1][0] +
+                                                 (1 - t1) * (1 + t2) * -1 * inv_jac[2][0]) +
+          nodes[elements[imap].emap[4]].w[iw] * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][0] +
+                                                 (1 - t1) * -1 * (1 + t3) * inv_jac[1][0] +
+                                                 (1 - t1) * (1 - t2) * +1 * inv_jac[2][0]) +
+          nodes[elements[imap].emap[5]].w[iw] * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][0] +
+                                                 (1 + t1) * -1 * (1 + t3) * inv_jac[1][0] +
+                                                 (1 + t1) * (1 - t2) * +1 * inv_jac[2][0]) +
+          nodes[elements[imap].emap[6]].w[iw] * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][0] +
+                                                 (1 + t1) * +1 * (1 + t3) * inv_jac[1][0] +
+                                                 (1 + t1) * (1 + t2) * +1 * inv_jac[2][0]) +
+          nodes[elements[imap].emap[7]].w[iw] * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][0] +
+                                                 (1 - t1) * +1 * (1 + t3) * inv_jac[1][0] +
+                                                 (1 - t1) * (1 + t2) * +1 * inv_jac[2][0]));
+  wy = (1. / 8.) * (
+          nodes[elements[imap].emap[0]].w[iw] * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][1] +
+                                                 (1 - t1) * -1 * (1 - t3) * inv_jac[1][1] +
+                                                 (1 - t1) * (1 - t2) * -1 * inv_jac[2][1]) +
+          nodes[elements[imap].emap[1]].w[iw] * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][1] +
+                                                 (1 + t1) * -1 * (1 - t3) * inv_jac[1][1] +
+                                                 (1 + t1) * (1 - t2) * -1 * inv_jac[2][1]) +
+          nodes[elements[imap].emap[2]].w[iw] * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][1] +
+                                                 (1 + t1) * +1 * (1 - t3) * inv_jac[1][1] +
+                                                 (1 + t1) * (1 + t2) * -1 * inv_jac[2][1]) +
+          nodes[elements[imap].emap[3]].w[iw] * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][1] +
+                                                 (1 - t1) * +1 * (1 - t3) * inv_jac[1][1] +
+                                                 (1 - t1) * (1 + t2) * -1 * inv_jac[2][1]) +
+          nodes[elements[imap].emap[4]].w[iw] * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][1] +
+                                                 (1 - t1) * -1 * (1 + t3) * inv_jac[1][1] +
+                                                 (1 - t1) * (1 - t2) * +1 * inv_jac[2][1]) +
+          nodes[elements[imap].emap[5]].w[iw] * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][1] +
+                                                 (1 + t1) * -1 * (1 + t3) * inv_jac[1][1] +
+                                                 (1 + t1) * (1 - t2) * +1 * inv_jac[2][1]) +
+          nodes[elements[imap].emap[6]].w[iw] * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][1] +
+                                                 (1 + t1) * +1 * (1 + t3) * inv_jac[1][1] +
+                                                 (1 + t1) * (1 + t2) * +1 * inv_jac[2][1]) +
+          nodes[elements[imap].emap[7]].w[iw] * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][1] +
+                                                 (1 - t1) * +1 * (1 + t3) * inv_jac[1][1] +
+                                                 (1 - t1) * (1 + t2) * +1 * inv_jac[2][1]));
+  wz = (-1. / 8.) * (
+          nodes[elements[imap].emap[0]].w[iw] * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][2] +
+                                                 (1 - t1) * -1 * (1 - t3) * inv_jac[1][2] +
+                                                 (1 - t1) * (1 - t2) * -1 * inv_jac[2][2]) +
+          nodes[elements[imap].emap[1]].w[iw] * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][2] +
+                                                 (1 + t1) * -1 * (1 - t3) * inv_jac[1][2] +
+                                                 (1 + t1) * (1 - t2) * -1 * inv_jac[2][2]) +
+          nodes[elements[imap].emap[2]].w[iw] * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][2] +
+                                                 (1 + t1) * +1 * (1 - t3) * inv_jac[1][2] +
+                                                 (1 + t1) * (1 + t2) * -1 * inv_jac[2][2]) +
+          nodes[elements[imap].emap[3]].w[iw] * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][2] +
+                                                 (1 - t1) * +1 * (1 - t3) * inv_jac[1][2] +
+                                                 (1 - t1) * (1 + t2) * -1 * inv_jac[2][2]) +
+          nodes[elements[imap].emap[4]].w[iw] * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][2] +
+                                                 (1 - t1) * -1 * (1 + t3) * inv_jac[1][2] +
+                                                 (1 - t1) * (1 - t2) * +1 * inv_jac[2][2]) +
+          nodes[elements[imap].emap[5]].w[iw] * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][2] +
+                                                 (1 + t1) * -1 * (1 + t3) * inv_jac[1][2] +
+                                                 (1 + t1) * (1 - t2) * +1 * inv_jac[2][2]) +
+          nodes[elements[imap].emap[6]].w[iw] * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][2] +
+                                                 (1 + t1) * +1 * (1 + t3) * inv_jac[1][2] +
+                                                 (1 + t1) * (1 + t2) * +1 * inv_jac[2][2]) +
+          nodes[elements[imap].emap[7]].w[iw] * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][2] +
+                                                 (1 - t1) * +1 * (1 + t3) * inv_jac[1][2] +
+                                                 (1 - t1) * (1 + t2) * +1 * inv_jac[2][2]));
 
   // Transform field to global coordinates
-  UnmapFields(wx, wy, wz,
-  x, y, z,
-  xmirrored, ymirrored, zmirrored,
-  rcoordinate, rotation);
+  UnmapFields(wx, wy, wz, x, y, z,
+              xmirrored, ymirrored, zmirrored,
+              rcoordinate, rotation);
+
 }
 
 
@@ -1048,19 +1058,20 @@ ComponentCST::WeightingPotential(
   bool xmirrored, ymirrored, zmirrored;
   double rcoordinate, rotation;
   MapCoordinates(x, y, z,
-  xmirrored, ymirrored, zmirrored,
-  rcoordinate, rotation);
+                 xmirrored, ymirrored, zmirrored,
+                 rcoordinate, rotation);
 
   if (warning) {
-	std::cout << className << "::WeightingPotential:\n";
-	std::cout << "Warnings have been issued for this field map.\n";
+    std::cout << className << "::WeightingPotential:\n";
+    std::cout << "Warnings have been issued for this field map.\n";
   }
 
   // Find the element that contains this point
   double t1, t2, t3, jac[3][3], det;
   std::vector<int>* vec_surrounding;
-  //to reserve the memory here (vector is copied from ComponentCST::GetSurroundingElements
-  //were memory is no longer reserved!
+  // To reserve the memory here 
+  // (vector is copied from ComponentCST::GetSurroundingElements
+  // where memory is no longer reserved!
   std::vector<int> tmp_vec = ComponentCST::GetSurroundingElements(m_LastElementCalled);
   vec_surrounding = &(tmp_vec);
   int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det,vec_surrounding);
@@ -1068,21 +1079,22 @@ ComponentCST::WeightingPotential(
   if (imap < 0) return 0.;
 
   if (debug) {
-	std::cout << className << "::WeightingPotential:\n";
-	std::cout << "Global: (" << x << "," << y << "," << z << "),\n";
-	std::cout << "Local: (" << t1 << "," << t2 << "," << t3 << ") in element " << imap << "\n";
-	std::cout << "  Node xyzV\n";
-	for (int i = 0; i < 8; ++i) {
+    std::cout << className << "::WeightingPotential:\n";
+    std::cout << "    Global: (" << x << "," << y << "," << z << "),\n";
+    std::cout << "    Local: (" << t1 << "," << t2 << "," << t3 
+              << ") in element " << imap << "\n";
+    std::cout << "  Node xyzV\n";
+    for (int i = 0; i < 8; ++i) {
       std::cout << "  " << elements[imap].emap[i]
-    		    << " " <<  nodes[elements[imap].emap[i]].x
-    		    << " " <<  nodes[elements[imap].emap[i]].y
-    		    << " " <<  nodes[elements[imap].emap[i]].z
-    		    << " " <<  nodes[elements[imap].emap[i]].v << "\n";
-	}
+                << " " <<  nodes[elements[imap].emap[i]].x
+                << " " <<  nodes[elements[imap].emap[i]].y
+                << " " <<  nodes[elements[imap].emap[i]].z
+                << " " <<  nodes[elements[imap].emap[i]].v << "\n";
+    }
   }
 
-
-  return  1./8* (  nodes[elements[imap].emap[0]].w[iw] * (1 - t1) * (1 - t2) * (1 - t3) +
+  return (1. / 8.) * ( 
+          nodes[elements[imap].emap[0]].w[iw] * (1 - t1) * (1 - t2) * (1 - t3) +
           nodes[elements[imap].emap[1]].w[iw] * (1 + t1) * (1 - t2) * (1 - t3) +
           nodes[elements[imap].emap[2]].w[iw] * (1 + t1) * (1 + t2) * (1 - t3) +
           nodes[elements[imap].emap[3]].w[iw] * (1 - t1) * (1 + t2) * (1 - t3) +
@@ -1094,9 +1106,9 @@ ComponentCST::WeightingPotential(
 }
 
 bool
-ComponentCST::GetMedium(
-const double xin, const double yin, const double zin, Medium*& m) {
-  //zenker:done
+ComponentCST::GetMedium(const double xin, const double yin, const double zin, 
+                        Medium*& m) {
+
   // Copy the coordinates
   double x = xin, y = yin, z = zin;
 
@@ -1104,28 +1116,29 @@ const double xin, const double yin, const double zin, Medium*& m) {
   bool xmirrored, ymirrored, zmirrored;
   double rcoordinate, rotation;
   MapCoordinates(x, y, z,
-  xmirrored, ymirrored, zmirrored,
-  rcoordinate, rotation);
+                 xmirrored, ymirrored, zmirrored,
+                 rcoordinate, rotation);
 
   // Initial value
   m = 0;
 
   // Do not proceed if not properly initialised.
   if (!ready) {
-	std::cerr << className << "::GetMedium:\n";
-	std::cerr << "Field map not available for interpolation.\n";
+    std::cerr << className << "::GetMedium:\n";
+    std::cerr << "Field map not available for interpolation.\n";
     return false;
   }
   if (warning) {
-	std::cout << className << "::GetMedium:\n";
-	std::cout << "Warnings have been issued for this field map.\n";
+    std::cout << className << "::GetMedium:\n";
+    std::cout << "Warnings have been issued for this field map.\n";
   }
 
   // Find the element that contains this point.
   double t1, t2, t3, jac[3][3], det;
   std::vector<int>* vec_surrounding;
-  //to reserve the memory here (vector is copied from ComponentCST::GetSurroundingElements
-  //were memory is no longer reserved!
+  // To reserve the memory here 
+  // (vector is copied from ComponentCST::GetSurroundingElements
+  // where memory is no longer reserved!
   std::vector<int> tmp_vec = ComponentCST::GetSurroundingElements(m_LastElementCalled);
   vec_surrounding = &(tmp_vec);
   int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det,vec_surrounding);
@@ -1139,22 +1152,25 @@ const double xin, const double yin, const double zin, Medium*& m) {
   if (elements[imap].matmap < 0 || elements[imap].matmap >= nMaterials ) {
     if (debug) {
       std::cerr << className << "::GetMedium:\n";
-      std::cerr << "Point (" << x << "," << y << "," << z << ") has out of range material number " << imap << ".\n";
+      std::cerr << "Point (" << x << "," << y << "," << z 
+                << ") has out of range material number " << imap << ".\n";
     }
     return false;
   }
 
   if (debug) {
-	std::cout << className << "::GetMedium:\n";
-	std::cout << "Global: (" << x << "," << y << "," << z << "),\n";
-	std::cout << "Local: (" << t1 << "," << t2 << "," << t3 << ") in element " << imap << " (degenerate: " << elements[imap].degenerate << ")\n";
-    std::cout << "  Node xyzV\n";
+    std::cout << className << "::GetMedium:\n";
+    std::cout << "    Global: (" << x << "," << y << "," << z << "),\n";
+    std::cout << "    Local: (" << t1 << "," << t2 << "," << t3 
+              << ") in element " << imap 
+              << " (degenerate: " << elements[imap].degenerate << ")\n";
+    std::cout << "    Node xyzV\n";
     for (int i = 0; i < 8; i++) {
-    	std::cout << " " <<  elements[imap].emap[i]
-    			  << " " <<  nodes[elements[imap].emap[i]].x
-    			  << " " <<  nodes[elements[imap].emap[i]].y
-    			  << " " <<  nodes[elements[imap].emap[i]].z
-    			  << " " <<  nodes[elements[imap].emap[i]].v << "\n";
+      std::cout << "     " <<  elements[imap].emap[i]
+                << " " <<  nodes[elements[imap].emap[i]].x
+                << " " <<  nodes[elements[imap].emap[i]].y
+                << " " <<  nodes[elements[imap].emap[i]].z
+                << " " <<  nodes[elements[imap].emap[i]].v << "\n";
     }
   }
 
@@ -1169,9 +1185,9 @@ void
 ComponentCST::SetRangeZ(const double zmin, const double zmax) {
 
   if (fabs(zmax - zmin) <= 0.) {
-	std::cerr << className << "::SetRangeZ:\n";
-	std::cerr << "Zero range is not permitted.\n";
-	return;
+    std::cerr << className << "::SetRangeZ:\n";
+    std::cerr << "    Zero range is not permitted.\n";
+    return;
   }
   zMinBoundingBox = std::min(zmin, zmax);
   zMaxBoundingBox = std::min(zmin, zmax);
@@ -1187,12 +1203,12 @@ ComponentCST::UpdatePeriodicity() {
 
 double
   ComponentCST::GetElementVolume(const int i) {
-  //zenker:done
+
   if (i < 0 || i >= nElements) return 0.;
   const double volume =
       fabs((nodes[elements[i].emap[1]].x - nodes[elements[i].emap[0]].x) *
-      (nodes[elements[i].emap[4]].y - nodes[elements[i].emap[0]].y) *
-      (nodes[elements[i].emap[3]].z - nodes[elements[i].emap[0]].z));
+           (nodes[elements[i].emap[4]].y - nodes[elements[i].emap[0]].y) *
+           (nodes[elements[i].emap[3]].z - nodes[elements[i].emap[0]].z));
   return volume;
 }
 
@@ -1205,10 +1221,10 @@ ComponentCST::GetAspectRatio(const int i, double& dmin, double& dmax) {
   }
 
   const int np = 8;
-    // Loop over all pairs of vertices.
+  // Loop over all pairs of vertices.
   for (int j = 0; j < np - 1; ++j) {
     for (int k = j + 1; k < np; ++k) {
-    // Compute distance.
+      // Compute distance.
       const double dist = sqrt(
       pow(nodes[elements[i].emap[j]].x - nodes[elements[i].emap[k]].x, 2) +
       pow(nodes[elements[i].emap[j]].y - nodes[elements[i].emap[k]].y, 2));
@@ -1225,73 +1241,82 @@ ComponentCST::GetAspectRatio(const int i, double& dmin, double& dmax) {
 
 
 void
-ComponentCST::Element2Index(int element,int &i,int &j, int &k) {
-	/* Here the index along x,y,z direction of the given element
-	 * is calculated (i,j,k).
-	 * i,j,k start at 0 and reach at maximum
-	 * m_xlines-1,m_ylines-1,m_zlines-1
-	 */
-	int tmp = element;
-	k = element / ((m_xlines-1) * (m_ylines-1));
-	tmp -= k * (m_xlines-1) * (m_ylines-1);
-  j = tmp / (m_xlines-1);
-	i = element - j * (m_xlines-1) - k * (m_xlines-1) * (m_ylines-1);
+ComponentCST::Element2Index(int element, int &i, int &j, int &k) {
+
+  /* Here the index along x,y,z direction of the given element
+   * is calculated (i,j,k).
+   * i,j,k start at 0 and reach at maximum
+   * m_xlines-1,m_ylines-1,m_zlines-1
+   */
+
+  int tmp = element;
+  k = element / ((m_xlines - 1) * (m_ylines - 1));
+  tmp -= k * (m_xlines - 1) * (m_ylines - 1);
+  j = tmp / (m_xlines - 1);
+  i = element - j * (m_xlines - 1) - k * (m_xlines - 1) * (m_ylines - 1);
+
 }
 
 std::vector<int>
 ComponentCST::GetSurroundingElements(int element) {
-	/* Here all elements around the central element are collected.
-	 * The boarders are treated so that the length of the returned vector
-	 * may vary.
-	 * x,y,z are the number nodes in x,y,z direction!
-	 * The first element has the number 0 and the last has the number
-	 *(m_xlines-1)*(m_ylines-1)*(m_zlines-1)-1 since there
-	 *are (m_xlines-1)*(y-1)*(z-1) elements.
-	 */
-	int i,j,k,tmp_element;
-//	Printf("Computing elements for central cell %d and boardes are (%d,%d,%d)",element,m_xlines,m_ylines,m_zlines);
-	ComponentCST::Element2Index(element,i,j,k);
-	std::vector<int> vec;
+
+  /* Here all elements around the central element are collected.
+   * The boarders are treated so that the length of the returned vector
+   * may vary.
+   * x,y,z are the number nodes in x,y,z direction!
+   * The first element has the number 0 and the last has the number
+   * (m_xlines-1)*(m_ylines-1)*(m_zlines-1)-1 since there
+   * are (m_xlines-1)*(y-1)*(z-1) elements.
+   */
+
+  int i, j, k, tmp_element;
+  // std::cout << className << "::GetSurroundingElements:\n";
+  // std::cout < "    Computing elements for central cell " << element << "\n";
+  // std::cout << "    and boarders are (" 
+  //           << m_xlines << ", " << m_ylines << ", " << m_zlines << ")\n";
+  ComponentCST::Element2Index(element, i, j, k);
+  std::vector<int> vec;
   for (int l1 = -1; l1 < 2; l1++) {
     for (int l2 = -1; l2 < 2; l2++) {
       for (int l3 = -1; l3 < 2; l3++) {
-//         if ( (i+l1) >=0 && (i+l1) < (x-1) &&
-//               (j+l2)>=0 && (j+l2) < (y-1) &&
-//               (k+l3)>=0 && (k+l3) < (z-1)) {
-//           tmp_element = (i+l1)+(j+l2)*(x-1) + (k+l3)*(x-1)*(y-1);
-// //           cout << "Considering element: " << tmp_element << endl;
-//           if (tmp_element >= 0 && tmp_element <= (x-1)*(y-1)*(z-1) ) vec.push_back(tmp_element);
-//         }
+        // if ((i+l1) >=0 && (i+l1) < (x-1) &&
+        //     (j+l2) >=0 && (j+l2) < (y-1) &&
+        //     (k+l3) >=0 && (k+l3) < (z-1)) {
+        //   tmp_element = (i+l1)+(j+l2)*(x-1) + (k+l3)*(x-1)*(y-1);
+        //   std::cout << "Considering element: " << tmp_element << std::endl;
+        //   if (tmp_element >= 0 && tmp_element <= (x-1)*(y-1)*(z-1)) {
+        //     vec.push_back(tmp_element);
+        //   }
+        // }
         int tmp_i, tmp_j, tmp_k;
-        if ((i+l1) < 0) {
-          tmp_i = (m_xlines-2);
-        } else if ((i+l1) >= (m_xlines-1)){
+        if (i + l1 < 0) {
+          tmp_i = m_xlines - 2;
+        } else if (i  + l1 >= m_xlines - 1) {
           tmp_i = 0;
         } else {
           tmp_i = i + l1;
         }
-        if ((j+l2) < 0) {
-          tmp_j = (m_ylines-2);
-        } else if ((j+l2) >= (m_ylines-1)) {
+        if (j + l2 < 0) {
+          tmp_j = m_ylines - 2;
+        } else if (j + l2 >= m_ylines - 1) {
           tmp_j = 0;
         } else {
           tmp_j = j + l2;
         }
-        if ((k+l3) < 0) {
-          tmp_k = (m_zlines-2);
-        } else if ((k+l3) >= (m_zlines-1)) {
+        if (k + l3 < 0) {
+          tmp_k = m_zlines - 2;
+        } else if (k + l3 >= m_zlines - 1) {
           tmp_k = 0;
         } else {
           tmp_k = k + l3;
         }
-        tmp_element = tmp_i+tmp_j*(m_xlines-1) + tmp_k*(m_xlines-1)*(m_ylines-1);
+        tmp_element = tmp_i + tmp_j * (m_xlines - 1) + tmp_k * (m_xlines-1) * (m_ylines - 1);
         vec.push_back(tmp_element);
       }
     }
   }
-	return vec;
+  return vec;
+
 }
-
-
 
 }

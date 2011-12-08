@@ -1,7 +1,5 @@
 #include <iostream>
-#include <math.h>
-#include <stdio.h>
-
+#include <cmath>
 
 #include "DriftLineRKF.hh"
 #include "FundamentalConstants.hh"

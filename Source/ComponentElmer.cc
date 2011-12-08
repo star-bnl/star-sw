@@ -42,14 +42,13 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   const int size = 100;
   char line[size];
 
-  printf("ComponentElmer::Initialise:\n");
   // Open the header
   std::ifstream fheader;
   fheader.open(header.c_str(), std::ios::in);
   if (fheader.fail()) {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Could not open header file %s for reading.\n",
-           header.c_str());
+   std::cerr << className << "::Initialise:\n";    
+   std::cerr << "    Could not open header file " 
+             << header << " for reading.\n";
   }
 
   // Temporary variables for use in file reading
@@ -64,11 +63,13 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   nNodes = ReadInteger(token, 0, readerror);
   token = strtok(NULL, " ");
   nElements = ReadInteger(token, 0, readerror);
-  printf("    Read %i nodes and %i elements from file %s.\n",
-         nNodes, nElements, header.c_str());
+  std::cout << "ComponentElmer::Initialise:\n";
+  std::cout << "    Read " << nNodes << " nodes and "
+            << nElements << " elements from file " << header << ".\n";
   if (readerror) {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Error reading file %s (line %d).\n", header.c_str(), il);
+    std::cerr << className << "::Initialise:\n";    
+    std::cerr << "    Error reading file " << header 
+              << " (line " << il << ").\n";
     fheader.close();
     ok = false;
     return false;
@@ -81,9 +82,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   std::ifstream fnodes;
   fnodes.open(nlist.c_str(), std::ios::in);
   if (fnodes.fail()) {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Could not open nodes file %s for reading.\n",
-           nlist.c_str());
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Could not open nodes file " 
+              << nlist << " for reading.\n";
   }
 
   // Check the value of the unit
@@ -101,14 +102,14 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
              strcmp(unit.c_str(),"meter") == 0) {
     funit = 100.0;
   } else {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Unknown length unit %s.\n", unit.c_str());
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Unknown length unit " << unit << ".\n";
     ok = false;
     funit = 1.0;    
   }
   if (debug) {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Unit scaling factor = %g.\n", funit);
+    std::cout << "ComponentElmer::Initialise:\n";
+    std::cout << "    Unit scaling factor = " << funit << ".\n";
   }
 
   // Read the nodes from the file
@@ -128,14 +129,15 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     token = strtok(NULL, " "); double ynode = ReadDouble(token, -1, readerror);
     token = strtok(NULL, " "); double znode = ReadDouble(token, -1, readerror);
     if (readerror) {
-      printf("ComponentElmer::Initialise:\n");
-      printf("    Error reading file %s (line %d).\n", nlist.c_str(), il);
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Error reading file " << nlist 
+                << " (line " << il << ").\n";
       fnodes.close();
       ok = false;
       return false;
     }
     
-    //if(il < 60) printf("Got node %i with x=%f, y=%f, z=%f and funit=%f.\n",il,xnode,ynode,znode,funit);
+    // if(il < 60) std::cout << "Got node " << il << " with x=" << xnode << ", y=" << ynode << ", z=" << znode << " and funit=" << funit << "\n";
 
     // Set up and create a new node
     newNode.x = xnode * funit;
@@ -151,9 +153,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   std::ifstream fvolt;
   fvolt.open(volt.c_str(), std::ios::in);
   if (fvolt.fail()) {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Could not open result file %s for reading.\n",
-           volt.c_str());
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Could not open result file "
+              << volt  << " for reading.\n";
   }
 
   // Reset the line counter
@@ -168,9 +170,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
 
   // Should have stopped: if not, print error message
   if (!readstop) {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Error reading past header of potentials file %s.\n", 
-           volt.c_str());  
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Error reading past header of potentials file "
+              << volt << ".\n"; 
     fnodes.close();
     ok = false;
     return false;  
@@ -189,8 +191,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     token = strtok(line, " ");
     v = ReadDouble(token, -1, readerror);
     if(readerror) {
-      printf("ComponentElmer::Initialise:\n");
-      printf("    Error reading file %s (line %d).\n", volt.c_str(), il);
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Error reading file " << volt 
+                << " (line " << il << ").\n";
       fnodes.close();
       ok = false;
       return false;  
@@ -206,18 +209,18 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   std::ifstream fmplist;
   fmplist.open(mplist.c_str(), std::ios::in);
   if (fmplist.fail()) {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Could not open result file %s for reading.\n",
-           mplist.c_str());
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Could not open result file "
+              << mplist << " for reading.\n";              
   }
 
   // Read the dielectric constants from the materials file
   fmplist.getline(line, size, '\n');
   token = strtok(line, " ");
   if (readerror) {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Error reading number of materials from %s.\n", 
-           mplist.c_str());
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Error reading number of materials from "
+              << mplist << ".\n"; 
     fmplist.close();
     ok = false;
     return false;
@@ -234,15 +237,17 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     token = strtok(line, " "); ReadInteger(token, -1, readerror);
     token = strtok(NULL, " "); double dc = ReadDouble(token, -1.0, readerror);
     if (readerror) {
-      printf("ComponentElmer::Initialise:\n");
-      printf("    Error reading file %s (line %d).\n", mplist.c_str(), il);
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Error reading file " << mplist 
+                << " (line " << il << ").\n";
       fmplist.close();
       ok = false;
       return false;
     } 
     materials[il - 2].eps = dc;
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Set material %i of %i to eps %f.\n", il - 2, nMaterials, dc);
+    std::cout << className << "::Initialise:\n";
+    std::cout << "    Set material " << il - 2 << " of " << nMaterials 
+              << " to eps " << dc << ".\n";
   }
 
   // Close the materials file
@@ -253,9 +258,10 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   for (int imat = 0; imat < nMaterials; ++imat) {
     if (materials[imat].eps < 0) continue;
     if (materials[imat].eps == 0) {
-      printf("ComponentElmer::Initialise:\n");
-      printf("    Material %d has been assigned a permittivity\n", imat);
-      printf("    equal to zero in %s.\n", mplist.c_str());
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Material " << imat 
+                << " has been assigned a permittivity\n";
+      std::cerr << "    equal to zero in " << mplist << ".\n";
       ok = false;
     } else if (iepsmin < 0 || epsmin > materials[imat].eps) {
       epsmin = materials[imat].eps;
@@ -264,9 +270,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   }
   
   if (iepsmin < 0) {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    No material with positive permittivity found \n");
-    printf("    in material list %s.\n", mplist.c_str());
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    No material with positive permittivity found \n";
+    std::cerr << "    in material list " << mplist << ".\n";
     ok = false;
   } else {
     for (int imat = 0; imat < nMaterials; ++imat) {
@@ -282,9 +288,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   std::ifstream felems;
   felems.open(elist.c_str(), std::ios::in);
   if (felems.fail()) {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Could not open result file %s for reading.\n",
-           elist.c_str());
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Could not open result file "
+              << elist << " for reading.\n";
   }
 
   // Read the elements and their material indices
@@ -320,14 +326,17 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     token = strtok(NULL, " "); int in9 = ReadInteger(token, -1, readerror);
    
     if (debug && il < 10) {
-      printf("Read nodes %i, %i, %i, %i... from element %i of %i with mat %i.\n",
-             in0,in1,in2,in3,il+1,nElements,imat);
+      std::cout << "    Read nodes " 
+                << in0 << ", " << in1 << ", " << in2 << ", " << in3 
+                << ", ... from element " << il + 1 
+                << " of " << nElements << " with mat " << imat << ".\n";
     }
 
     // Check synchronisation
     if (readerror) {
-      printf("ComponentElmer::Initialise:\n");
-      printf("    Error reading file %s (line %d).\n", elist.c_str(), il);
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Error reading file " << elist 
+                << " (line " << il << ").\n";
       felems.close();
       ok = false;
       return false;
@@ -335,32 +344,38 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     
     // Check the material number and ensure that epsilon is non-negative
     if (imat < 0 || imat > nMaterials) {
-       printf("ComponentElmer::Initialise:\n");
-       printf("    Out-of-range material number on file %s (line %d).\n", 
-              elist.c_str(), il);
-      printf("    Element: %d, material: %d,\n", il, imat);
-      printf("    nodes: (%d %d %d %d %d %d %d %d %d %d)\n",
-             in0, in1, in2, in3, in4, in5, in6, in7, in8, in9);
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Out-of-range material number on file "
+                << elist << " (line " << il << ").\n"; 
+      std::cerr << "    Element: " << il << ", material: " << imat << "\n";
+      std::cerr << "    nodes: (" 
+                << in0 << ", " << in1 << ", " << in2 << ", " << in3 << ", "
+                << in4 << ", " << in5 << ", " << in6 << ", "
+                << in7 << ", " << in8 << ", " << in9 << ")\n";
       ok = false;
     }
     if (materials[imat].eps < 0) {
-      printf("ComponentElmer::Initialise:\n");
-      printf("    Element %d in element list %s \n", il, elist.c_str());
-      printf("    uses material %d which has not been assigned\n", imat);
-      printf("    a positive permittivity in material list %s.\n", 
-             mplist.c_str());
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Element " << il << " in element list "
+                << elist << "\n";
+      std::cerr << "    uses material " << imat 
+                << " which has not been assigned\n";
+      std::cerr << "    a positive permittivity in material list " 
+                << mplist << ".\n"; 
       ok = false;
     }
 
     // Check the node numbers
     if (in0 < 1 || in1 < 1 || in2 < 1 || in3 < 1 || in4 < 1 || 
         in5 < 1 || in6 < 1 || in7 < 1 || in8 < 1 || in9 < 1) {
-      printf("ComponentElmer::Initialise:\n");
-      printf("    Found a node number < 1 on file %s (line %d).\n",
-             elist.c_str(), il);
-      printf("    Element: %d, material: %d,\n", il, imat);
-      printf("    nodes: (%d %d %d %d %d %d %d %d %d %d).\n",
-             in0, in1, in2, in3, in4, in5, in6, in7, in8, in9);
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Found a node number < 1 on file "
+                << elist << " (line " << il << ").\n";
+      std::cerr << "    Element: " << il << ", material: " << imat << "\n";
+      std::cerr << "    nodes: (" 
+                << in0 << ", " << in1 << ", " << in2 << ", " << in3 << ", "
+                << in4 << ", " << in5 << ", " << in6 << ", "
+                << in7 << ", " << in8 << ", " << in9 << ")\n";
       ok = false;
     }
     if (in0 > highestnode) highestnode = in0;
@@ -394,10 +409,10 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
         in6 == in7 || in6 == in8 || in6 == in9 || 
         in7 == in8 || in7 == in9 || 
         in8 == in9) {
-      printf("ComponentElmer::Initialise:\n");
-      printf("    Element %d of file %s is degenerate,\n", 
-             il, elist.c_str());
-      printf("    no such elements allowed in this type of map.\n");
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Element " << il << " of file "
+                << elist << " is degenerate,\n";
+      std::cerr << "    no such elements allowed in this type of map.\n";
       ok = false;
     }
     
@@ -427,12 +442,13 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   if (ok) {
     ready = true;
   } else {
-    printf("ComponentElmer::Initialise:\n");
-    printf("    Field map could not be read and can not be interpolated.\n");
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Field map could not be read and can not be interpolated.\n";
     return false;
   }
 
-  printf("END ComponentElmer::Initialise:\n");
+  std::cout << "ComponentElmer::Initialise:\n";
+  std::cout << "    Finished.\n";
 
   // Remove weighting fields (if any).
   wfields.clear();
@@ -462,7 +478,7 @@ ComponentElmer::SetWeightingField(std::string prnsol, std::string label) {
   if (fprnsol.fail()) {
     std::cerr << className << "::SetWeightingField:\n";
     std::cerr << "    Could not open potential file "
-              << prnsol.c_str() << " for reading.\n"; 
+              << prnsol << " for reading.\n"; 
     std::cerr << "    The file perhaps does not exist.\n";
     return false;
   }
@@ -505,19 +521,19 @@ ComponentElmer::SetWeightingField(std::string prnsol, std::string label) {
     char* token = NULL;
     token = strtok(line, " ");
     // Skip blank lines and headers.
-    if (!token || strcmp(token," ") == 0 || strcmp(token,"\n") == 0 || 
+    if (!token || strcmp(token, " ") == 0 || strcmp(token, "\n") == 0 || 
         int(token[0]) == 10 || int(token[0]) == 13 ||
-        strcmp(token,"PRINT")   == 0 || strcmp(token,"*****")   == 0 ||
-        strcmp(token,"LOAD")    == 0 || strcmp(token,"TIME=")   == 0 ||
-        strcmp(token,"MAXIMUM") == 0 || strcmp(token,"VALUE")   == 0 ||
-        strcmp(token,"NODE")    == 0) continue;
+        strcmp(token, "PRINT")   == 0 || strcmp(token, "*****")   == 0 ||
+        strcmp(token, "LOAD")    == 0 || strcmp(token, "TIME=")   == 0 ||
+        strcmp(token, "MAXIMUM") == 0 || strcmp(token, "VALUE")   == 0 ||
+        strcmp(token, "NODE")    == 0) continue;
     // Read the element.
     int inode = ReadInteger(token, -1, readerror);
     token = strtok(NULL, " "); double volt = ReadDouble(token, -1, readerror);
     // Check the syntax.
     if (readerror) {
       std::cerr << className << "::SetWeightingField:\n";
-      std::cerr << "    Error reading file " << prnsol.c_str() 
+      std::cerr << "    Error reading file " << prnsol 
                 << " (line " << il << ").\n";
       fprnsol.close();
       return false;
@@ -526,7 +542,7 @@ ComponentElmer::SetWeightingField(std::string prnsol, std::string label) {
     if (inode < 1 || inode > nNodes) {
       std::cerr << className << "::SetWeightingField:\n";
       std::cerr << "    Node number " << inode << " out of range\n";
-      std::cerr << "    on potential file " << prnsol.c_str() 
+      std::cerr << "    on potential file " << prnsol
                 << " (line " << il << ").\n";
       ok = false;
     } else {
@@ -544,7 +560,7 @@ ComponentElmer::SetWeightingField(std::string prnsol, std::string label) {
   if (nread != nNodes) {
     std::cerr << className << "::SetWeightingField:\n";
     std::cerr << "    Number of nodes read (" << nread << ") "
-              << "    on potential file " << prnsol.c_str() << "\n";
+              << "    on potential file " << prnsol << "\n";
     std::cerr << "    does not match the node list (" << nNodes << ").\n";
     ok = false;
   }
@@ -595,14 +611,14 @@ ComponentElmer::ElectricField(
   // Do not proceed if not properly initialised.
   if (!ready) {
     status = -10;
-    printf("ComponentElmer::ElectricField:\n");
-    printf("    Field map not available for interpolation.\n");
+    std::cerr << className << "::ElectricField:\n";
+    std::cerr << "    Field map not available for interpolation.\n";
     return;
   }
   
   if (warning) {
-    printf("ComponentElmer::ElectricField:\n");
-    printf("    Warnings have been issued for this field map.\n");
+    std::cerr << className << "::ElectricField:\n";
+    std::cerr << "    Warnings have been issued for this field map.\n";
   }
 
   // Find the element that contains this point
@@ -610,18 +626,21 @@ ComponentElmer::ElectricField(
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
     if (debug) {
-      printf("ComponentElmer::ElectricField:\n");
-      printf("    Point (%g,%g,%g) not in the mesh.\n", x, y, z);
+      std::cout << className << "::ElectricField:\n";
+      std::cout << "    Point (" << x << ", " << y << ", " << z 
+                << " not in the mesh.\n";
     }
     status = -6;
     return;
   }
   
   if (debug) {
-    printf("ComponentElmer::ElectricField:\n");
-    printf("    Global: (%g,%g,%g), Local: (%g,%g,%g,%g) in element %d\n",
-           x, y, z, t1, t2, t3, t4, imap);
-    printf("      Node             x            y            z            V\n");
+    std::cout << className << "::ElectricField:\n";
+    std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
+    std::cout << "    Local: (" << t1 << ", " << t2 << ", "
+                                << t3 << ", " << t4 
+              << " in element " << imap << "\n";
+    std::cout << "      Node             x            y            z            V\n";
     for (int i = 0; i < 10; i++) {
       printf("      %-5d %12g %12g %12g %12g\n",
              elements[imap].emap[i],
@@ -699,11 +718,11 @@ ComponentElmer::ElectricField(
               xmirrored, ymirrored, zmirrored,
               rcoordinate, rotation);
 
-  // Drift medium ?
+  // Drift medium?
   if (debug) {
-    printf("ComponentElmer::ElectricField:\n");
-    printf("    Material %d, drift flag %d.\n",
-           elements[imap].matmap, materials[elements[imap].matmap].driftmedium);
+    std::cout << className << "::ElectricField:\n";
+    std::cout << "    Material " << elements[imap].matmap 
+              << ", drift flag " << materials[elements[imap].matmap].driftmedium << "\n";
   }
   m = materials[elements[imap].matmap].medium;
   status = -5;
@@ -766,10 +785,11 @@ ComponentElmer::WeightingField(
   
   if (debug) {
     std::cout << className << "::WeightingField:\n";
-    printf("    Global: (%g,%g,%g),\n", x, y, z);
-    printf("    Local: (%g,%g,%g,%g) in element %d\n",
-           t1, t2, t3, t4, imap);
-    printf("      Node             x            y            z            V\n");
+    std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
+    std::cout << "    Local: (" << t1 << ", " << t2 << ", "
+                                << t3 << ", " << t4 
+              << " in element " << imap << "\n";
+    std::cout << "      Node             x            y            z            V\n";
     for (int i = 0; i < 10; i++) {
       printf("      %-5d %12g %12g %12g %12g\n",
              elements[imap].emap[i],
@@ -885,11 +905,12 @@ ComponentElmer::WeightingPotential(
   if (imap < 0) return 0.;
   
   if (debug) {
-    std::cerr << className << "::WeightingPotential:\n";
-    printf("    Global: (%g,%g,%g),\n", x, y, z);
-    printf("    Local: (%g,%g,%g,%g) in element %d\n",
-           t1, t2, t3, t4, imap);
-    printf("      Node             x            y            z            V\n");
+    std::cout << className << "::WeightingPotential:\n";
+    std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
+    std::cout << "    Local: (" << t1 << ", " << t2 << ", "
+                                << t3 << ", " << t4 
+              << " in element " << imap << "\n";
+    std::cout << "      Node             x            y            z            V\n";
     for (int i = 0; i < 10; i++) {
       printf("      %-5d %12g %12g %12g %12g\n",
              elements[imap].emap[i],
@@ -934,13 +955,13 @@ ComponentElmer::GetMedium(
 
   // Do not proceed if not properly initialised.
   if (!ready) {
-    printf("ComponentElmer::GetMedium:\n");
-    printf("    Field map not available for interpolation.\n");
+    std::cerr << className << "::GetMedium:\n";
+    std::cerr << "    Field map not available for interpolation.\n";
     return false;
   }
   if (warning) {
-    printf("ComponentElmer::GetMedium:\n");
-    printf("    Warnings have been issued for this field map.\n");
+    std::cerr << className << "::GetMedium:\n";
+    std::cerr << "    Warnings have been issued for this field map.\n";
   }
 
   // Find the element that contains this point
@@ -948,26 +969,28 @@ ComponentElmer::GetMedium(
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
     if (debug) {
-      printf("ComponentElmer::GetMedium:\n");
-      printf("    Point (%g,%g,%g) not in the mesh.\n", x, y, z);      
+      std::cout << className << "::GetMedium:\n";
+      std::cout << "    Point (" << x << ", " << y << ", " << z 
+                << ") not in the mesh.\n";
     }
     return false;
   }
   if (elements[imap].matmap < 0 || elements[imap].matmap >= nMaterials ) {
     if (debug) {
-      printf("ComponentElmer::GetMedium:\n");
-      printf("    Point (%g,%g) has out of range material number %d.\n", 
-             x, y, imap);
+      std::cerr << className << "::GetMedium:\n";
+      std::cerr << "    Point (" << x << ", " << y 
+                << ") has out of range material number " << imap << ".\n";
     }
     return false;
   }
   
   if (debug) {
-    printf("ComponentElmer::ElectricField:\n");
-    printf("    Global: (%g,%g,%g),\n", x, y, z);
-    printf("    Local: (%g,%g,%g,%g) in element %d\n",
-           t1, t2, t3, t4, imap);
-    printf("      Node             x            y            z            V\n");
+    std::cout << className << "::GetMedium:\n";
+    std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";
+    std::cout << "    Local: (" << t1 << ", " << t2 << ", "
+                                << t3 << ", " << t4 
+              << " in element " << imap << "\n";
+    std::cout << "      Node             x            y            z            V\n";
     for (int ii = 0; ii < 10; ++ii) {
       printf("      %-5d %12g %12g %12g %12g\n",
              elements[imap].emap[ii],
