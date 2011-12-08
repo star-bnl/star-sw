@@ -16,14 +16,14 @@
 #include "daq_ss2.h"
 
 
-const char *daq_ss2::help_string = "SS2\n\
+const char *daq_ss2::help_string = "SST\n\
 raw	returns raw data\n" ;
 
 class daq_det_ss2_factory : public daq_det_factory
 {
 public:
 	daq_det_ss2_factory() {
-		daq_det_factory::det_factories[SS2_ID] = this ;
+		daq_det_factory::det_factories[SST_ID] = this ;
 	}
 
 	daq_det *create() {
@@ -36,9 +36,9 @@ static daq_det_ss2_factory ss2_factory ;
 
 daq_ss2::daq_ss2(daqReader *rts_caller) 
 {
-	rts_id = SS2_ID ;
+	rts_id = SST_ID ;
 	name = rts2name(rts_id) ;
-	sfs_name = "ss2" ;
+	sfs_name = "sst" ;
 	caller = rts_caller ;
 	
 	if(caller) caller->insert(this, rts_id) ;
