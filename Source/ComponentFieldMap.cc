@@ -2343,9 +2343,9 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
   }
 
   // Not more than 1 rotational symmetry
-  if (xRotationSymmetry && yRotationSymmetry ||
-      xRotationSymmetry && zRotationSymmetry ||
-      yRotationSymmetry && zRotationSymmetry) {
+  if ((xRotationSymmetry && yRotationSymmetry) ||
+      (xRotationSymmetry && zRotationSymmetry) ||
+      (yRotationSymmetry && zRotationSymmetry)) {
     std::cerr << className << "::UpdatePeriodicityCommon:\n";
     std::cerr << "    Only 1 rotational symmetry allowed; reset.\n";
     xRotationSymmetry = false;

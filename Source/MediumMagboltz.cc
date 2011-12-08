@@ -33,6 +33,10 @@ MediumMagboltz::MediumMagboltz() :
   nIonisationProducts(0), nDeexcitationProducts(0), 
   useOpalBeaty(true), useGreenSawada(false),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma) {
+
+  fit4p4s = fit4pQ = fit4pEta = 1.;
+  fit3d4p = fit3dQ = fit3dEta = 1.;
+  fitHigh4p = 1.;
  
   className = "MediumMagboltz";
  
@@ -2351,7 +2355,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       newDxc.type.resize(nc, DxcTypeRad);
       newDxc.p[0] = 3.8e-3;  newDxc.final[0] = mapDxc["Ar_1S5"];
       newDxc.p[1] = 8.47e-3; newDxc.final[1] = mapDxc["Ar_1S4"];
-      newDxc.p[2] = 0.0223;  newDxc.final[2] = mapDxc["Ar_1S3"];
+      newDxc.p[2] = 0.0223;  newDxc.final[2] = mapDxc["Ar_1S2"];
     } else if (level == "Ar_2P2") {
       int nc = 4; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); 
@@ -2927,6 +2931,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].nChannels += 1;
         // Transfer to 4s states
+        // Inoue, Setser, and Sadeghi, J. Chem. Phys. 75 (1982), 977-983
+        // const double k4s = 3.8e-20;
         // Chang and Setser, J. Chem. Phys. 69 (1978), 3885-3897
         const double k4s = 5.3e-20;
         deexcitations[j].p.push_back(0.25 * k4s * nAr);
@@ -3169,7 +3175,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       if (level == "Ar_2P10") {
         // Transfer to 4s states
         // Chang and Setser, J. Chem. Phys. 69 (1978), 3885-3897
-        const double k4s = 5.3e-20;
+        const double k4s = 2.0e-20;
         deexcitations[j].p.push_back(0.25 * k4s * nAr);
         deexcitations[j].p.push_back(0.25 * k4s * nAr);
         deexcitations[j].p.push_back(0.25 * k4s * nAr);
@@ -3194,7 +3200,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
           level == "Ar_2S3"     || level == "Ar_2S2") {
         // 3d and 5s levels
         // Transfer to 4p levels
-        const double k4p = 2.e-19;
+        const double k4p = fit3d4p * 1.e-20;
         deexcitations[j].final.push_back(mapDxc["Ar_2P10"]);
         deexcitations[j].final.push_back(mapDxc["Ar_2P9"]);
         deexcitations[j].final.push_back(mapDxc["Ar_2P8"]);
@@ -3217,7 +3223,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
           level == "Ar_5S1!" || level == "Ar_4S2" || level == "Ar_5S4" ||
           level == "Ar_6D2") {
         // Transfer to 4p levels
-        const double k4p = 2.e-19;
+        const double k4p = fitHigh4p * 1.e-20;
         deexcitations[j].final.push_back(mapDxc["Ar_2P10"]);
         deexcitations[j].final.push_back(mapDxc["Ar_2P9"]);
         deexcitations[j].final.push_back(mapDxc["Ar_2P8"]);
@@ -3296,7 +3302,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                                                   pacs, eta)) {
         pacs = eta = 0.;
       }
-      const double pPenning = pow(eta, 2. / 5.);
+      double pPenning = pow(eta, 2. / 5.);
       if (level == "Ar_1S5") {
         // Rate constant from Velazco et al., J. Chem. Phys. 69 (1978)
         const double kQ = 5.3e-19;
@@ -3408,7 +3414,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double vel = SpeedOfLight * 
                            sqrt(8. * BoltzmannConstant * temperature / 
                                 (Pi * mR));
-        const double kQ = sigma * vel;
+        const double kQ = fit3dQ * sigma * vel;
+        pPenning = fit3dEta;
         if (debug) {
           std::cout << className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
@@ -3437,7 +3444,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double vel = SpeedOfLight * 
                            sqrt(8. * BoltzmannConstant * temperature / 
                                 (Pi * mR));
-        const double kQ = sigma * vel;
+        const double kQ = fit3dQ * sigma * vel;
+        pPenning = fit3dEta;
         if (debug) {
           std::cout << className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
@@ -3466,7 +3474,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                                                   pacs, eta)) {
         pacs = eta = 0.;
       }
-      const double pPenning = pow(eta, 2. / 5.);
+      double pPenning = pow(eta, 2. / 5.);
       if (level == "Ar_1S5") {
         // Rate constant from Chen and Setser, J. Phys. Chem. 95 (1991)
         const double kQ = 4.55e-19;
@@ -3498,6 +3506,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P8") {
         // Rate constant from Sadeghi et al., J. Chem. Phys. 115 (2001)
         const double kQ = 7.4e-19;
+        std::cout << level << ": " << pPenning << "\n";
+        if (pPenning > 0.) pPenning = fit4pEta;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3508,6 +3518,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P6") {
         // Rate constant from Sadeghi et al.
         const double kQ = 3.4e-19;
+        std::cout << level << ": " << pPenning << "\n";
+        if (pPenning > 0.) pPenning = fit4pEta;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3518,6 +3530,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P5") {
         // Rate constant from Sadeghi et al.
         const double kQ = 6.0e-19;
+        std::cout << level << ": " << pPenning << "\n";
+        if (pPenning > 0.) pPenning = fit4pEta;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3528,6 +3542,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P1") {
         // Rate constant from Sadeghi et al.
         const double kQ = 9.3e-19;
+        std::cout << level << ": " << pPenning << "\n";
+        if (pPenning > 0.) pPenning = fit4pEta;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3540,6 +3556,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                  level == "Ar_2P3"  || level == "Ar_2P2") {
         // Average of rate constants given by Sadeghi et al.
         const double kQ = 6.53e-19;
+        std::cout << level << ": " << pPenning << "\n";
+        if (pPenning > 0.) pPenning = fit4pEta;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3562,7 +3580,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                                   BohrRadius * BohrRadius);
         const double kQ = 2.591e-19 * 
                           pow(uA * uQ, 2. / 5.) * 
-                          pow(temperature / mR, 3. / 10.);  
+                          pow(temperature / mR, 3. / 10.);
         if (debug) {
           std::cout << className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
@@ -3595,7 +3613,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double vel = SpeedOfLight * 
                            sqrt(8. * BoltzmannConstant * temperature / 
                                 (Pi * mR));
-        const double kQ = sigma * vel;
+        const double kQ = fit3dQ * sigma * vel;
+        std::cout << level << ": " << pPenning << "\n";
+        pPenning = fit3dEta;
         if (debug) {
           std::cout << className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
@@ -3624,7 +3644,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double vel = SpeedOfLight * 
                            sqrt(8. * BoltzmannConstant * temperature / 
                                 (Pi * mR));
-        const double kQ = sigma * vel;
+        const double kQ = fit3dQ * sigma * vel;
+        std::cout << level << ": " << pPenning << "\n";
+        pPenning = fit3dEta;
         if (debug) {
           std::cout << className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"

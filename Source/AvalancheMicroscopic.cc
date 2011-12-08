@@ -582,6 +582,7 @@ AvalancheMicroscopic::DriftElectron(
   endpointsElectrons.clear(); 
   endpointsHoles.clear();
   photons.clear();
+
   // Reset the particle counters.
   nPhotons = nElectrons = nHoles = nIons = 0; 
   nElectronEndpoints = nHoleEndpoints = 0;

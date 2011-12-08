@@ -130,7 +130,20 @@ class MediumMagboltz : public MediumGas {
     void GenerateGasTable(const int numCollisions = 10,
                           const bool verbose = true);
 
+    void SetDxcFitParameters4p(const double f4p4s, const double fQ, const double fEta) {
+      fit4p4s = f4p4s; fit4pQ = fQ; fit4pEta = fEta;
+    } 
+    void SetDxcFitParameters3d(const double f3d4p, const double fQ, const double fEta) {
+      fit3d4p = f3d4p; fit3dQ = fQ; fit3dEta = fEta;
+    }
+    void SetDxcFitParametersHigh(const double fHigh4p) {
+      fitHigh4p = fHigh4p;
+    } 
   private:
+
+    double fit4p4s, fit4pQ, fit4pEta;
+    double fit3d4p, fit3dQ, fit3dEta;
+    double fitHigh4p;
 
     static const int nEnergySteps = 20000;
     static const int nEnergyStepsLog = 100;
