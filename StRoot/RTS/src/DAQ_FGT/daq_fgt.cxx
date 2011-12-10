@@ -337,6 +337,7 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 					wfm[4*j+3]	= 0x0fff & (d16[i++]>>4) ;
 				}
 
+				/*
 				// hack dump for raw "waveform" for timing in the APV's
 				if ((arm==1) && (apv==13)) {  // fill in the one we're interested in at the moment
 				  for(int j=0;j<1000;j++)
@@ -344,6 +345,7 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 				  printf("\n\n"); // event "index" separator for gnuplot
 				}
 				// end of that hack dump
+				*/
 
 				dta += (length - 2) ;	// skip "length" words - 2 for the header
 
