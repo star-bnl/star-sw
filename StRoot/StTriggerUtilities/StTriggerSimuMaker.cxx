@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.49 2011/10/22 18:12:52 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.50 2011/12/11 17:16:43 pibero Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -725,8 +725,16 @@ void StTriggerSimuMaker::changeJetPatchTh()
   }
 }
 
+void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
+{
+  emc->get2009_DSMLayer3_Result()->setRegister(reg,value);
+}
+
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.50  2011/12/11 17:16:43  pibero
+ * Add function to set LD301 registers
+ *
  * Revision 1.49  2011/10/22 18:12:52  pibero
  * Print whether using offline/offline database
  *

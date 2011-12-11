@@ -118,14 +118,19 @@ public:
 
   void changeJPThresh(int value) { mChangeJPThresh = value; }
 
+  void setLastDsmRegister(int reg, int value);
+
   ClassDef(StTriggerSimuMaker,0)
 };
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.29 2011/10/04 18:29:16 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.30 2011/12/11 17:16:43 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.30  2011/12/11 17:16:43  pibero
+// Add function to set LD301 registers
+//
 // Revision 1.29  2011/10/04 18:29:16  pibero
 // *** empty log message ***
 //
