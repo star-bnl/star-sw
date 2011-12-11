@@ -97,6 +97,23 @@ void StEmcTriggerSimu::defineTrigger(const TriggerDefinition& trigdef)
   mTcu->defineTrigger(trigdef);
 }
 
+void StEmcTriggerSimu::defineTrigger(int triggerIndex, const char* name, int triggerId, int onbits, int offbits, int onbits1, int onbits2, int onbits3, int offbits1, int offbits2, int offbits3)
+{
+  TriggerDefinition triggerDefinition;
+  triggerDefinition.triggerIndex = triggerIndex;
+  strcpy(triggerDefinition.name,name);
+  triggerDefinition.triggerId = triggerId;
+  triggerDefinition.onbits = onbits;
+  triggerDefinition.offbits = offbits;
+  triggerDefinition.onbits1 = onbits1;
+  triggerDefinition.onbits2 = onbits2;
+  triggerDefinition.onbits3 = onbits3;
+  triggerDefinition.offbits1 = offbits1;
+  triggerDefinition.offbits2 = offbits2;
+  triggerDefinition.offbits3 = offbits3;
+  defineTrigger(triggerDefinition);
+}
+
 int StEmcTriggerSimu::EM201output() const { return (*mEM201)[0].output; }
 
 int StEmcTriggerSimu::overlapJetPatchTh(int i) const { return mEM201->getRegister(i); }

@@ -69,6 +69,7 @@ public:
   DSMLayer_LD301_2009* get2009_DSMLayer3_Result();
 
   void defineTrigger(const TriggerDefinition& trigdef);
+  void defineTrigger(int triggerIndex, const char* name, int triggerId, int onbits, int offbits, int onbits1, int onbits2, int onbits3, int offbits1, int offbits2, int offbits3);
 
   int  overlapJetPatchTh(int i) const;
   void getOverlapJetPatchAdc(int i, int& jp, int& adc) const;
