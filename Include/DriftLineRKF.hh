@@ -26,11 +26,14 @@ namespace Garfield {
     void EnablePlotting(ViewDrift* view);
     void DisablePlotting();
 
-    void DriftLine(double x0, double y0, double z0, double t0,  
-		   double& meanTime, double& rmsTime,                   
-		   std::string particleType = "e-");
-    
-    void SetMaxSteps(int max){maxSteps = max;};
+    void SetMaxSteps(int max) {maxSteps = max;};
+
+    void DriftElectron(const double x0, const double y0, const double z0,
+                       const double t0);
+    void DriftHole(const double x0, const double y0, const double z0,
+                   const double t0);
+    void DriftIon(const double x0, const double y0, const double z0,
+                  const double t0);
 
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
@@ -39,6 +42,8 @@ namespace Garfield {
     void DisableVerbose() {verbose = false;}
 
   private:
+
+    std::string className;
 
     Sensor* sensor;
     Medium* medium;
@@ -53,29 +58,31 @@ namespace Garfield {
     ViewDrift* viewer;
 
     bool debug;
-    
     bool verbose;
 
+    void DriftLine(double x0, double y0, double z0, double t0,  
+                   double& meanTime, double& rmsTime,                   
+                   std::string particleType);
     // Used to drift a particle to the edge of a boundary.
-    void EndDriftLine();
+    void EndDriftLine(const std::string particleType);
     // Used to drift a particle to a wire
-    void DriftToWire(double x0, double y0, double z0, int iWire);
-    // Used by DriftToWire to find the distance to the wires edge
-    double DistanceToWire(double x, double y, double z);
-    // Used to determine the diffussion over the drift length
+    void DriftToWire(double x0, double y0, double z0, 
+                     const std::string particleType);
+    // Used to determine the diffusion over the drift length
     double IntegrateDiffusion(const double x,  const double y,  const double z,
-			      const double xe, const double ye, const double ze);
+			      const double xe, const double ye, const double ze,
+                              const std::string particleType);
     
     // These variables store the position and radius ofa trapping wire
     double xWire, yWire, rWire;
 
-    struct step{
-      //position (initial and final)
-      double xi,xf;
-      double yi,yf;
-      double zi,zf;
-      //time (initial and final)
-      double ti,tf;
+    struct step {
+      // Position (initial and final)
+      double xi, xf;
+      double yi, yf;
+      double zi, zf;
+      // Time (initial and final)
+      double ti, tf;
       std::string status;
     };
     std::vector<step> path;

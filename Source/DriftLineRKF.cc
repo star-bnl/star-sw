@@ -14,6 +14,7 @@ DriftLineRKF::DriftLineRKF() :
   usePlotting(false), viewer(0), 
   debug(false), verbose(false) {
   
+  className = "DriftLineRKF";
   path.clear();
 
 }
@@ -23,8 +24,8 @@ void
 DriftLineRKF::SetSensor(Sensor* s) {
     
   if (s == 0) {
-    std::cerr << "DriftLineRKF::SetSensor:\n";
-    std::cerr << "    Sensor is not defined.\n";
+    std::cerr << className << "::SetSensor:\n";
+    std::cerr << "    Sensor pointer is null.\n";
     return;
   }
 
@@ -36,8 +37,8 @@ void
 DriftLineRKF::EnablePlotting(ViewDrift* view) {
 
   if (view == 0) {
-    std::cerr << "DriftLineRKF::EnablePlotting:\n";
-    std::cerr << "    Viewer is not defined.\n";
+    std::cerr << className << "::EnablePlotting:\n";
+    std::cerr << "    Viewer pointer is null.\n";
     return;
   }
   
@@ -54,6 +55,33 @@ DriftLineRKF::DisablePlotting() {
 
 }
 
+void
+DriftLineRKF::DriftElectron(const double x0, const double y0, const double z0,
+                            const double t0) {
+                            
+  double meanTime = 0.; double rmsTime = 0.; 
+  DriftLine(x0, y0, z0, t0, meanTime, rmsTime, "electron");
+
+}
+
+void
+DriftLineRKF::DriftHole(const double x0, const double y0, const double z0,
+                        const double t0) {
+                            
+  double meanTime = 0.; double rmsTime = 0.; 
+  DriftLine(x0, y0, z0, t0, meanTime, rmsTime, "hole");
+
+}
+
+void
+DriftLineRKF::DriftIon(const double x0, const double y0, const double z0,
+                       const double t0) {
+                            
+  double meanTime = 0.; double rmsTime = 0.; 
+  DriftLine(x0, y0, z0, t0, meanTime, rmsTime, "ion");
+
+}
+
 void 
 DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
                         double& meanTime, double& rmsTime, std::string particleType) {
@@ -64,7 +92,7 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
 
   // Check if the sensor is defined
   if (sensor == 0) {
-    std::cerr << "DriftLineRKF::DriftLine:\n";
+    std::cerr << className << "::DriftLine:\n";
     std::cerr << "    Sensor is not defined.\n";
     return;
   }
@@ -74,35 +102,31 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
   // in a drift medium.
   
   // Get field values
-  double ex, ey, ez, eTot; 
-  double bx, by, bz, bTot;
+  double ex, ey, ez; 
+  double bx, by, bz;
   int status;
-
   sensor->MagneticField(x0, y0, z0, bx, by, bz, status);
   sensor->ElectricField(x0, y0, z0, ex, ey, ez, medium, status);
   if (status != 0) {
-    std::cerr << "DriftLineRKF::DriftLine:\n";
+    std::cerr << className << "::DriftLine:\n";
     std::cerr << "    No valid field at initial position.\n";
     return;
   }
 
-  eTot = sqrt(ex * ex + ey * ey + ez * ez);
-  bTot = sqrt(bx * bx + by * by + bz * bz);
-
-  // Approximation parameters
-  const double c10 = 214. / 891.; 
-  const double c11 =   1. / 33.;
-  const double c12 = 650. / 891.;
+  // Numerical constants for RKF integration
+  const double c10 = 214. /  891.; 
+  const double c11 =   1. /   33.;
+  const double c12 = 650. /  891.;
   const double c20 = 533. / 2106.; 
   const double c22 = 800. / 1053.; 
-  const double c23 =  -1. / 78.;
+  const double c23 =  -1. /   78.;
 
-  const double b10 = 1. / 4.; 
+  const double b10 =    1. /   4.; 
   const double b20 = -189. / 800.; 
-  const double b21 = 729. / 800.;
-  const double b30 = 214. / 891.; 
-  const double b31 = 1. / 33.; 
-  const double b32 = 650./891.;
+  const double b21 =  729. / 800.;
+  const double b30 =  214. / 891.; 
+  const double b31 =    1. /  33.; 
+  const double b32 =  650. / 891.;
 
   // Current position
   double r[3] = {x0, y0, z0};
@@ -117,15 +141,28 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
   // Position where particle has crossed the trap radius of a wire
   double rc[3] = {0., 0., 0.}; 
 
-  //final velocity estimates
+  // Final velocity estimates
   double phi1[3], phi2[3];
 
   // Initialize particle velocity
-  // Add if clause for electron/hole/ion.
-  if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v0[0], v0[1], v0[2])) {
-    std::cerr << "DriftLineRKF::DriftLine:\n";
-    std::cerr << "    Failed to retrieve drift velocity.\n";
-    return;
+  if (particleType == "electron") {
+    if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v0[0], v0[1], v0[2])) {
+      std::cerr << className << "::DriftLine:\n";
+      std::cerr << "    Failed to retrieve drift velocity.\n";
+      return;
+    }
+  } else if (particleType == "hole") {
+    if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, v0[0], v0[1], v0[2])) {
+      std::cerr << className << "::DriftLine:\n";
+      std::cerr << "    Failed to retrieve drift velocity.\n";
+      return;
+    }
+  } else if (particleType == "ion") {
+    if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, v0[0], v0[1], v0[2])) {
+      std::cerr << className << "::DriftLine:\n";
+      std::cerr << "    Failed to retrieve drift velocity.\n";
+      return;
+    }
   }
   double vTot = sqrt(v0[0] * v0[0] + v0[1] * v0[1] + v0[2] * v0[2]);
 
@@ -141,14 +178,13 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
 
   path.clear();
   while (counter <= maxSteps && keepGoing) {
-    int iWire; //keep a reference to the wire which traps the drift line
     step tempStep;
     path.push_back(tempStep);
     path[counter].xi = r[0];
     path[counter].yi = r[1];
     path[counter].zi = r[2];
     if (counter == 0) path[counter].ti = t0;
-    else path[counter].ti = path[counter -1].tf;
+    else path[counter].ti = path[counter - 1].tf;
 
     // First estimate of new drift velocity
     r1[0] = r[0] + dt * b10 * v0[0];
@@ -159,23 +195,39 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     if (status == 0) {
       if (sensor->IsWireCrossed(path.back().xi, path.back().yi, path.back().zi, 
                                 r1[0], r1[1], r1[2], rc[0], rc[1], rc[2])) {
-         std::cerr<<"DriftLineRKF::DriftLine:\n\tdrift line crossed wire. Abandoning.";
-         path[counter].status = "Crossed Wire.";
-         break;
-      } else if (sensor->IsInTrapRadius(r1[0], r1[1], r1[2], xWire, yWire, rWire)){
-         DriftToWire(r1[0], r1[1], r1[2], iWire);
-         break;
+        std::cerr << className << "::DriftLine:\n";
+        std::cerr << "    Drift line crossed wire. Abandoning.\n";
+        path[counter].status = "Crossed Wire.";
+        break;
+      } else if (sensor->IsInTrapRadius(r1[0], r1[1], r1[2], xWire, yWire, rWire)) {
+        DriftToWire(r1[0], r1[1], r1[2], particleType);
+        break;
       } else {
-         if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v1[0], v1[1], v1[2])) {
-           std::cerr << "DriftLineRKF::DriftLine:\n";
-           std::cerr << "    Failed to retrieve drift velocity.\n";
-           return;
-         }      
+        if (particleType == "electron") {
+          if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v1[0], v1[1], v1[2])) {
+            std::cerr << className << "::DriftLine:\n";
+            std::cerr << "    Failed to retrieve drift velocity.\n";
+            return;
+          }
+        } else if (particleType == "hole") {
+          if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, v1[0], v1[1], v1[2])) {
+            std::cerr << className << "::DriftLine:\n";
+            std::cerr << "    Failed to retrieve drift velocity.\n";
+            return;
+          }
+        } else if (particleType == "ion") {
+          if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, v1[0], v1[1], v1[2])) {
+            std::cerr << className << "::DriftLine:\n";
+            std::cerr << "    Failed to retrieve drift velocity.\n";
+            return;
+          }
+        }
       }
     } else {
-      EndDriftLine();
+      EndDriftLine(particleType);
       break;
     }
+    
     // Second estimate of new drift velocity
     r1[0] = r[0] + dt * (b20 * v0[0] + b21 * v1[0]);
     r1[1] = r[1] + dt * (b20 * v0[1] + b21 * v1[1]);
@@ -185,48 +237,78 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     if (status == 0) {
       if (sensor->IsWireCrossed(path.back().xi, path.back().yi, path.back().zi, 
                                 r1[0], r1[1], r1[2], rc[0], rc[1], rc[2])) {
-        std::cerr << "DriftLineRKF::DriftLine:\n\t";
-        std::cerr << "Drift line crossed wire. Abandoning.";
+        std::cerr << className << "::DriftLine:\n";
+        std::cerr << "    Drift line crossed wire. Abandoning.\n";
         path[counter].status = "Crossed Wire.";
         break;
       } else if (sensor->IsInTrapRadius(r1[0], r1[1], r1[2], xWire, yWire, rWire)) {
-        DriftToWire(r1[0], r1[1], r1[2], iWire);
+        DriftToWire(r1[0], r1[1], r1[2], particleType);
         break;
       } else {
-        if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v2[0], v2[1], v2[2])) {
-          std::cerr << "DriftLineRKF::DriftLine:\n";
-          std::cerr << "    Failed to retrieve drift velocity.\n";
-          return;
+        if (particleType == "electron") {
+          if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v2[0], v2[1], v2[2])) {
+            std::cerr << className << "::DriftLine:\n";
+            std::cerr << "    Failed to retrieve drift velocity.\n";
+            return;
+          }
+        } else if (particleType == "hole") {
+          if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, v2[0], v2[1], v2[2])) {
+            std::cerr << className << "::DriftLine:\n";
+            std::cerr << "    Failed to retrieve drift velocity.\n";
+            return;
+          }
+        } else if (particleType == "ion") {
+          if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, v2[0], v2[1], v2[2])) {
+            std::cerr << className << "::DriftLine:\n";
+            std::cerr << "    Failed to retrieve drift velocity.\n";
+            return;
+          }
         }
       }     
     } else {
-      EndDriftLine();
+      EndDriftLine(particleType);
       break;
     }
+    
     // Third estimate of new drift velocity
     r1[0] = r[0] + dt * (b30 * v0[0] + b31 * v1[0] + b32 * v2[0]);
     r1[1] = r[1] + dt * (b30 * v0[1] + b31 * v1[1] + b32 * v2[1]);
     r1[2] = r[2] + dt * (b30 * v0[2] + b31 * v1[2] + b32 * v2[2]);   
-    sensor->MagneticField(r1[0],r1[1],r1[2],bx, by, bz, status);
-    sensor->ElectricField(r1[0],r1[1],r1[2],ex, ey, ez, medium, status);
+    sensor->MagneticField(r1[0], r1[1], r1[2], bx, by, bz, status);
+    sensor->ElectricField(r1[0], r1[1], r1[2], ex, ey, ez, medium, status);
     if (status == 0) {
       if (sensor->IsWireCrossed(path.back().xi, path.back().yi, path.back().zi, 
                                 r1[0], r1[1], r1[2], rc[0], rc[1], rc[2])) {
-         std::cerr<<"DriftLineRKF::DriftLine:\n\tdrift line crossed wire. Abandoning.";
-         path[counter].status = "Crossed Wire.";
-         break;
+        std::cerr << className << "::DriftLine:\n";
+        std::cerr << "    Drift line crossed wire. Abandoning.\n";
+        path[counter].status = "Crossed Wire.";
+        break;
       } else if(sensor->IsInTrapRadius(r1[0], r1[1], r1[2], xWire, yWire, rWire)){
-        DriftToWire(r1[0], r1[1], r1[2], iWire);
+        DriftToWire(r1[0], r1[1], r1[2], particleType);
         break;
       } else {
-        if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v3[0], v3[1], v3[2])) {
-          std::cerr << "DriftLineRKF::DriftLine:\n";
-          std::cerr << "    Failed to retrieve drift velocity.\n";
-          return;
-        }       
+        if (particleType == "electron") {
+          if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v3[0], v3[1], v3[2])) {
+            std::cerr << className << "::DriftLine:\n";
+            std::cerr << "    Failed to retrieve drift velocity.\n";
+            return;
+          }
+        } else if (particleType == "hole") {
+          if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, v3[0], v3[1], v3[2])) {
+            std::cerr << className << "::DriftLine:\n";
+            std::cerr << "    Failed to retrieve drift velocity.\n";
+            return;
+          }
+        } else if (particleType == "ion") {
+          if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, v3[0], v3[1], v3[2])) {
+            std::cerr << className << "::DriftLine:\n";
+            std::cerr << "    Failed to retrieve drift velocity.\n";
+            return;
+          }
+        }
       }
     } else {
-      EndDriftLine();
+      EndDriftLine(particleType);
       break;
     }
     // Calculate estimates of velocity over step
@@ -239,20 +321,20 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     phi2[2] = c20 * v0[2] + c22 * v2[2] + c23 * v3[2];
     // Check step length is valid
     double stepLength = sqrt(phi1[0] * phi1[0] + phi1[1] * phi1[1] + phi1[2] * phi1[2]);
-    if (stepLength <= 0.0){
-      std::cerr << "DriftLineRKF::DriftLine::\n\t" 
-                << "Step length zero. Abandoning drift.\n";
+    if (stepLength <= 0.0) {
+      std::cerr << className << "::DriftLine:\n" 
+                << "    Step length zero. Abandoning drift.\n";
       keepGoing = false;
     } else if (dt * stepLength > maxStepSize) {
       if (debug) {
-        std::cerr << "DriftLineRKF::DriftLine::\n\t" 
-                  << "Step length too long. Reducing time step.\n";
+        std::cout << className << "::DriftLine:\n" 
+                  << "    Step length too long. Reducing time step.\n";
       }
       dt = 0.5 * maxStepSize / stepLength;
     } else {
       if (debug) {
-        std::cout << "DriftLineRKF::DriftLine::\n\t" 
-                  << "Step good.\n";
+        std::cout << className << "::DriftLine:\n" 
+                  << "    Step good.\n";
       }
     }
     pdt = dt;
@@ -268,30 +350,30 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
  
     sensor->ElectricField(r[0], r[1], r[2], ex, ey, ez, medium, status);
     if (status != 0) {
-      if (debug) std::cout << "Outside bounds!\n";
-      EndDriftLine();
+      if (debug) std::cout << "    Outside bounds!\n";
+      EndDriftLine(particleType);
       break;
     }
    
     // Adjust step size depending on accuracy
     if (phi1[0] != phi2[0] || phi1[1] != phi2[1] || phi1[2] != phi2[2]) {
       if (debug) {
-        std::cout << "DriftLineRKF::DriftLine:\n\t" 
-                   << "Adapting step size.\n";
+        std::cout << className << "::DriftLine:\n" 
+                  << "    Adapting step size.\n";
       }
       dt = sqrt(dt * intAccuracy / 
                 (fabs(phi1[0] - phi2[0]) + fabs(phi1[1] - phi2[1]) + fabs(phi1[2] - phi2[2])));
     } else {
       if (debug) {
-        std::cout << "DriftLineRKF::DriftLine:\n\t" 
-                  << "Increasing step size.\n";
+        std::cout << className << "::DriftLine:\n" 
+                  << "    Increasing step size.\n";
       }
       dt *= 2.;
     }
     // Make sure that dt is different from zero; 
     // this should always be ok.
     if (dt <= 0.) {
-      std::cerr << "DriftLineRKF::DriftLine:\n";
+      std::cerr << className << "::DriftLine:\n";
       std::cerr << "    Step size is zero (program bug).\n";
       std::cerr << "    The calculation is abandoned.\n";
       return;
@@ -305,7 +387,7 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     // Stop in case dt tends to become too small.
     if (dt * (fabs(phi1[0]) + fabs(phi1[1]) + fabs(phi1[2])) < intAccuracy) {
       if (debug) {
-        std::cerr << "DriftLineRKF::DriftLine:\n";
+        std::cerr << className << "::DriftLine:\n";
         std::cerr << "    Step size has become smaller than int. accuracy.\n";
         std::cerr << "    The calculation is abandoned.\n";
         return;
@@ -327,40 +409,46 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     // Increase counter (default counter max = 1000)
     counter++;
   }
+  const int nSteps = path.size();
   // If the user specifies output step history
-  if(verbose){
-    std::cout << "Step #\t\ttime\t\tXi\t\tYi\t\tZi\t\tdt\t\tStatus\n";
-    for(int i = 0; i < path.size() ; i++){
+  if (verbose) {
+    std::cout << "    Step #    time    Xi    Yi    Zi    dt    Status\n";
+    for (int i = 0; i < nSteps; ++i) {
       std::cout.precision(8);
-      std::cout<<i<<"\t\t"<<path[i].ti<<"\t\t"
-	       <<path[i].xi<<"\t\t"
-	       <<path[i].yi<<"\t\t"
-	       <<path[i].zi<<"\t\t"
-	       <<fabs(path[i].tf - path[i].ti)<<"\t\t"
-	       <<path[i].status <<"\n";
+      std::cout << i << "    " << path[i].ti << "    "
+                << path[i].xi << "    "
+                << path[i].yi << "    "
+                << path[i].zi << "    "
+                << fabs(path[i].tf - path[i].ti) << "    "
+                << path[i].status << "\n";
     }
-    std::cout<<path.size()-1<<"\t\t"<<path.back().tf 
-	     <<"\t\t" <<path.back().xf 
-	     <<"\t\t"<<path.back().yf
-	     <<"\t\t"<<path.back().zf
-	     <<"\t\t---\t\tEND\n"; 
+    std::cout << path.size() - 1 << "    " << path.back().tf << "    "
+              << path.back().xf << "    "
+              << path.back().yf << "    "
+              << path.back().zf << "    "
+              << " ---     END"; 
   }
-  for (int i = 0; i < path.size(); i++){
+  for (int i = 0; i < nSteps; ++i) {
     if (usePlotting) {
-      viewer->AddDriftLinePoint(iLine, path[i].xi, path[i].yi, path[i].zi);
+      viewer->AddDriftLinePoint(iLine, 
+                                path[i].xi, 
+                                path[i].yi, 
+                                path[i].zi);
     }
   }
   if (usePlotting) {
-    viewer->AddDriftLinePoint(iLine,path.back().xf,
-			      path.back().yf,
-			      path.back().zf);
+    viewer->AddDriftLinePoint(iLine, 
+                              path.back().xf,
+                              path.back().yf, 
+                              path.back().zf);
   }
   
   // This should be done with in the while loop
   // calculating the rmsTime and setting meanTime
-  
-  for(int i = 0; i < path.size(); i++){
-    rmsTime += IntegrateDiffusion(path[i].xi, path[i].yi, path[i].zi, path[i].xf, path[i].yf, path[i].zf);
+  for (int i = 0; i < nSteps; ++i) {
+    rmsTime += IntegrateDiffusion(path[i].xi, path[i].yi, path[i].zi, 
+                                  path[i].xf, path[i].yf, path[i].zf,
+                                  particleType);
   }
   
   rmsTime = sqrt(rmsTime);
@@ -369,13 +457,15 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
 }
 
 void
-DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
+DriftLineRKF::DriftToWire(double x0, double y0, double z0, 
+                          const std::string particleType) {
 
-  if (debug) { 
-    std::cout << "Particle trapped by wire at: ";
-    std::cout << x0 << ", " << y0 << ", " << z0
+  if (debug) {
+    std::cout << className << "::DriftToWire:\n";
+    std::cout << "    Particle trapped by wire at: "
+              << x0 << ", " << y0 << ", " << z0
               << " (r = " << sqrt(x0 * x0 + y0 * y0 + z0 * z0) << ")\n";
-    std::cout << "by wire located at (" << xWire << ", " 
+    std::cout << "    by wire located at (" << xWire << ", " 
               << yWire << ") with physical radius " 
               << rWire << " cm.\n";
   }
@@ -390,8 +480,9 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
   sensor->MagneticField(x0, y0, z0, bx, by, bz, status);
   sensor->ElectricField(x0, y0, z0, ex, ey, ez, medium, status);
   if (status != 0) {
-    std::cerr << "DriftLineRKF::DriftToWire:\n\t";
-    std::cerr << "Zero field at initial position. Abandoning drift to wire.\n";
+    std::cerr << className << "::DriftToWire:\n";
+    std::cerr << "    Zero field at initial position.\n";
+    std::cerr << "    Abandoning drift to wire.\n";
     path.back().status = "Zero field. Abandoned.";
     return;
   }
@@ -400,17 +491,31 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
   double vx0 = 0.;
   double vz0 = 0.;
   double vy0 = 0.;
-  if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)) {
-    std::cerr << "DriftLineRKF::DriftToWire:\n\t";
-    std::cerr << "Unable to retrieve drift velocity.\n";
-    return;
-  }
+  if (particleType == "electron") {
+    if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)) {
+      std::cerr << className << "::DriftToWire:\n";
+      std::cerr << "    Unable to retrieve drift velocity.\n";
+      return;
+    }
+  } else if (particleType == "hole") {
+    if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)) {
+      std::cerr << className << "::DriftToWire:\n";
+      std::cerr << "    Unable to retrieve drift velocity.\n";
+      return;
+    }
+  } else if (particleType == "ion") {
+    if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)) {
+      std::cerr << className << "::DriftToWire:\n";
+      std::cerr << "    Unable to retrieve drift velocity.\n";
+      return;
+    }
+  }    
 
   double speed0 = sqrt(vx0 * vx0 + vy0 * vy0 + vz0 * vz0);
-  double dist2wire = DistanceToWire(x0, y0, z0);
+  double dist2wire = sqrt(pow(xWire - x0, 2) + pow(yWire - y0, 2)) - rWire;
   double tCrude = dist2wire / speed0;
 
-  // Check if tCrude is to small
+  // Check if tCrude is too small
   if (tCrude < 1.e-6) {
     path.back().xf = x0;
     path.back().yf = y0;
@@ -427,16 +532,16 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
     double y1 = y0 + tCrude * vy0;
     double z1 = z0 + tCrude * vz0;
     if (debug) {
-      std::cout << "Step to wire: " << x1 << ", " << y1 << ", " << z1 << "\n";
+      std::cout << "    Step to wire: " << x1 << ", " << y1 << ", " << z1 << "\n";
     }
    
     // Check to make sure step is in a good location
-    dist2wire = DistanceToWire(x1, y1, z1);
+    dist2wire = sqrt(pow(xWire - x1, 2) + pow(yWire - y1, 2)) - rWire;
     if (dist2wire < 0.) {
      
       if (debug) {
-        std::cout << "DriftLineRKF::DriftToWire:\n\t";
-        std::cout << "Drift line inside wire. This may be the last step.\n";
+        std::cout << className << "::DriftToWire:\n";
+        std::cout << "    Drift line inside wire. This may be the last step.\n";
       }
      
       lastStep = true;
@@ -447,31 +552,43 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
         x1 = x0 + tCrude * vx0;
         y1 = y0 + tCrude * vy0;
         z1 = z0 + tCrude * vz0;
-        dist2wire = DistanceToWire(x1,y1,z1);
+        dist2wire = sqrt(pow(xWire - x1, 2) + pow(yWire - y1, 2)) - rWire;
       }
     }
    
     sensor->MagneticField(x1, y1, z1, bx, by, bz, status);
     sensor->ElectricField(x1, y1, z1, ex, ey, ez, medium, status);
     if (status != 0) {
-      std::cerr << "DriftLineRKF::DriftToWire:\n\t";
-      std::cerr << "Zero field at step location (" << x1 << ", " << y1 << ", " << z1 << "). Abandoning.\n";
-      std::cerr << "Status returned: " << status << ".\n";
+      std::cerr << className << "::DriftToWire:\n";
+      std::cerr << "    Zero field at step location (" 
+                << x1 << ", " << y1 << ", " << z1 << "). Abandoning.\n";
+      std::cerr << "    Status returned: " << status << ".\n";
       path.back().status = "Zero field. Abandoned.";
       return;
     }
 
     // Now calculate the drift velocity at this end point
-    double vx1 = 0.;
-    double vy1 = 0.;
-    double vz1 = 0.;
-    if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
-      std::cerr << "DriftLineRKF::DriftToWire:\n\t";
-      std::cerr << "Unable to retrieve drift velocity. Abandoning.\n";
-      path.back().status = "Abandoned";
-      return;
+    double vx1 = 0., vy1 = 0., vz1 = 0.;
+    if (particleType == "electron") {
+      if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
+        std::cerr << className << "::DriftToWire:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        return;
+      }
+    } else if (particleType == "hole") {
+      if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
+        std::cerr << className << "::DriftToWire:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        return;
+      }
+    } else if (particleType == "ion") {
+      if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
+        std::cerr << className << "::DriftToWire:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        return;
+      }
     }
-   
+
     double speed1 = sqrt(vx1 * vx1 + vy1 * vy1 + vz1 * vz1);
    
     // Calculate a mid point between (x0, y0) and (x1, y1)
@@ -483,22 +600,38 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
     sensor->MagneticField(xm, ym, zm, bx, by, bz, status);
     sensor->ElectricField(xm, ym, zm, ex, ey, ez, medium, status);
     if (status != 0) {
-      std::cerr << "DriftLineRKF::DriftToWire:\n\t";
-      std::cerr << "Zero field at step location (" << xm << ", " << ym << ", " << zm << "). Abandoning.\n";
+      std::cerr << className << "::DriftToWire:\n";
+      std::cerr << "    Zero field at step location (" 
+                << xm << ", " << ym << ", " << zm << "). Abandoning.\n";
       path.back().status = "Zero field. Abandoned.";
       return;
     }
    
     // Now calculate the drift velocity at this mid point
-    double vxm = 0.;
-    double vym = 0.;
-    double vzm = 0.;
-    if(!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)){
-      std::cerr << "DriftLineRKF::DriftToWire:\n\t";
-      std::cerr << "Unable to retrieve drift velocity. Abandoning.\n";
-      path.back().status = "Abandoned";
-      return;
+    double vxm = 0., vym = 0., vzm = 0.;
+    if (particleType == "electron") {
+      if(!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)){
+        std::cerr << className << "::DriftToWire:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        path.back().status = "Abandoned";
+        return;
+      }
+    } else if (particleType == "hole") {
+      if(!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)){
+        std::cerr << className << "::DriftToWire:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        path.back().status = "Abandoned";
+        return;
+      }
+    } else if (particleType == "ion") {
+      if(!medium->IonVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)){
+        std::cerr << className << "::DriftToWire:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        path.back().status = "Abandoned";
+        return;
+      }
     }
+    
     double speedm = sqrt(vxm * vxm + vym * vym + vzm * vzm);
    
     // Compare the first and second order estimates
@@ -527,17 +660,11 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
   path.back().tf = path.back().ti + timeToDrift;
 
 }
-
-double
-DriftLineRKF::DistanceToWire(double x, double y, double z){
-
-  return sqrt(pow(xWire - x, 2) + pow(yWire - y, 2)) - rWire;
-
-}
   
 double 
 DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
-                                 const double xe, const double ye, const double ze) {
+                                 const double xe, const double ye, const double ze,
+                                 const std::string particleType) {
 
   if (debug) { 
     std::cout << "-----------------------------------------\n";
@@ -549,9 +676,8 @@ DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
   // Used to determine when the last integration step has been taken
   bool lastStep = false;
 
-  // Store the total diffusion components
+  // Store the total diffusion
   double dLrms = 0.;
-  double dTrms = 0.;
 
   // Check to make sure initial position has non-zero field
   double ex, ey, ez;
@@ -560,40 +686,66 @@ DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
   sensor->MagneticField(x, y, z, bx, by, bz, status);
   sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
   if(status != 0) {
-    std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
-    std::cerr << "Zero field at initial position. Abandoning.\n";
+    std::cerr << className << "::IntegrateDiffusion:\n";
+    std::cerr << "    Zero field at initial position. Abandoning.\n";
     return 0.;
   }
   
   // Determine drift velocity at init point 
-  double vx0 = 0.;
-  double vy0 = 0.;
-  double vz0 = 0.;
-  if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)) {
-    std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
-    std::cerr << "Unable to retrieve drift velocity. Abandoning.\n";
-    path.back().status = "Abandoned";
+  double vx0 = 0., vy0 = 0., vz0 = 0.;
+  if (particleType == "electron") {
+    if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)) {
+      std::cerr << className << "::IntegrateDiffusion:\n";
+      std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+      path.back().status = "Abandoned";
+    }
+  } else if (particleType == "hole") {
+    if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)) {
+      std::cerr << className << "::IntegrateDiffusion:\n";
+      std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+      path.back().status = "Abandoned";
+    }
+  } else if (particleType == "ion") {
+    if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)) {
+      std::cerr << className << "::IntegrateDiffusion:\n";
+      std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+      path.back().status = "Abandoned";
+    }  
   }
   double speed0 = sqrt(vx0 * vx0 + vy0 * vy0 + vz0 * vz0);
   
   // Determine diffusion at init point
   double dL0 = 0.;
   double dT0 = 0.;
-  if (!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dL0, dT0)) {
-    std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
-    std::cerr << "Unable to retrieve diffusion.\n";
-    return 0.;
+  if (particleType == "electron") {
+    if (!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dL0, dT0)) {
+      std::cerr << className << "::IntegrateDiffusion:\n";
+      std::cerr << "    Unable to retrieve diffusion.\n";
+      return 0.;
+    }
+  } else if (particleType == "hole") {
+    if (!medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dL0, dT0)) {
+      std::cerr << className << "::IntegrateDiffusion:\n";
+      std::cerr << "    Unable to retrieve diffusion.\n";
+      return 0.;
+    }
+  } else if (particleType == "ion") {
+    if (!medium->IonDiffusion(ex, ey, ez, bx, by, bz, dL0, dT0)) {
+      std::cerr << className << "::IntegrateDiffusion:\n";
+      std::cerr << "    Unable to retrieve diffusion.\n";
+      return 0.;  
+    }
   }
 
   // Determine the initial step length
   double stepLength = sqrt(pow(x - xe, 2) + pow(y - ye, 2) + pow(z - ze, 2));
-  if(debug) std::cout << "Step Length = " << stepLength <<"\n";
+  if (debug) std::cout << "Step Length = " << stepLength <<"\n";
   // Check to see if initial step size is too small
   if (stepLength <= 1.e-6) {
     if (debug) {
-      std::cout << "DriftLineRKF::IntegrateDiffusion:\n\t"
-                << "Initial stepSize to small.\t\n "
-                << "Using constant diffusion over step.\n";
+      std::cout << className << "::IntegrateDiffusion:\n";
+      std::cout << "    Initial step size too small.\n";
+      std::cout << "    Using constant diffusion over step.\n";
     }
     return pow(dL0 / speed0, 2) * stepLength; 
   }
@@ -615,9 +767,10 @@ DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
     sensor->MagneticField(x1, y1, z1, bx, by, bz, status);
     sensor->ElectricField(x1, y1, z1, ex, ey, ez, medium, status);
     if (status != 0) {
-      std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
-      std::cerr << "Zero field at step location (" << x1 << ", " << y1 << ", " << z1 << "). Abandoning.\n";
-      std::cerr << "Status returned: " << status << ".\n";
+      std::cerr << className << "::IntegrateDiffusion:\n";
+      std::cerr << "    Zero field at step location (" 
+                << x1 << ", " << y1 << ", " << z1 << "). Abandoning.\n";
+      std::cerr << "    Status returned: " << status << ".\n";
       return 0.;
     }
  
@@ -625,19 +778,48 @@ DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
     double vx1 = 0.;
     double vy1 = 0.;
     double vz1 = 0.;
-    if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
-      std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
-      std::cerr << "Unable to retrieve drift velocity. Abandoning.\n";
-      path.back().status = "Abandoned";
+    if (particleType == "electron") {
+      if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        path.back().status = "Abandoned";
+      }
+    } else if (particleType == "hole") {
+      if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        path.back().status = "Abandoned";
+      }
+    } else if (particleType == "ion") {
+      if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        path.back().status = "Abandoned";
+      }  
     }
     double speed1 = sqrt(vx1 * vx1 + vy1 * vy1 + vz1 * vz1);
    
     // Now calculate the diffusion at this end point
     double dL1 = 0.;
     double dT1 = 0.;
-    if (!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dL1, dT1)) {
-      std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
-      std::cerr << "Unable to retrieve diffusion. Abandoning.\n";
+    if (particleType == "electron") {
+      if (!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dL1, dT1)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve diffusion.\n";
+        return 0.;
+      }
+    } else if (particleType == "hole") {
+      if (!medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dL1, dT1)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve diffusion.\n";
+        return 0.;
+      }
+    } else if (particleType == "ion") {
+      if (!medium->IonDiffusion(ex, ey, ez, bx, by, bz, dL1, dT1)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve diffusion.\n";
+        return 0.;  
+      }
     }
    
     // Calculate a mid point between (x0, y0) and (x1, y1)
@@ -648,8 +830,9 @@ DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
     sensor->MagneticField(xm, ym, zm, bx, by, bz, status);
     sensor->ElectricField(xm, ym, zm, ex, ey, ez, medium, status);
     if (status != 0) {
-      std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
-      std::cerr << "Zero field at step location (" << xm << ", " << ym << ", " << zm << "). Abandoning.\n";
+      std::cerr << className << "::IntegrateDiffusion:\n";
+      std::cerr << "    Zero field at step location (" 
+                << xm << ", " << ym << ", " << zm << "). Abandoning.\n";
       return 0.;
     }
   
@@ -657,22 +840,51 @@ DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
     double vxm = 0.;
     double vym = 0.;
     double vzm = 0.;
-    if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)){
-      std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
-      std::cerr << "Unable to retrieve drift velocity. Abandoning.\n";
-      path.back().status = "Abandoned";
+    if (particleType == "electron") {
+      if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        path.back().status = "Abandoned";
+      }
+    } else if (particleType == "hole") {
+      if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        path.back().status = "Abandoned";
+      }
+    } else if (particleType == "ion") {
+      if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve drift velocity. Abandoning.\n";
+        path.back().status = "Abandoned";
+      }  
     }
     double speedm = sqrt(vxm * vxm + vym * vym + vzm * vzm); 
     
     // Now calculate the diffusion at this mid point
     double dLm = 0.;
     double dTm = 0.;
-    if (!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dLm, dTm)) {
-     std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
-     std::cerr << "Unable to retrieve diffusion. Abandoning.\n";
+    if (particleType == "electron") {
+      if (!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dLm, dTm)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve diffusion.\n";
+        return 0.;
+      }
+    } else if (particleType == "hole") {
+      if (!medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dLm, dTm)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve diffusion.\n";
+        return 0.;
+      }
+    } else if (particleType == "ion") {
+      if (!medium->IonDiffusion(ex, ey, ez, bx, by, bz, dLm, dTm)) {
+        std::cerr << className << "::IntegrateDiffusion:\n";
+        std::cerr << "    Unable to retrieve diffusion.\n";
+        return 0.;  
+      }
     }
 
-    // Compare the trapoziodal estimate with the simpsons
+    // Compare the trapezoidal estimate with the Simpsons
     double diffIntAcc = 1.e-3;
     const double sigma0 = pow(dL0 / speed0, 2);
     const double sigma1 = pow(dL1 / speed1, 2);
@@ -702,8 +914,8 @@ DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
       double norm = sqrt(xn * xn + yn * yn + zn * zn);
       if (norm < 1.e-6) {
         if (debug) {
-          std::cout << "DriftLineRKF::IntegrateDiffusion:\n\t"
-                    << "Step too small. Using constant diffusion over step.\n";
+          std::cout << className << "::IntegrateDiffusion:\n"
+                    << "    Step too small. Using constant diffusion over step.\n";
         }
         dLrms += pow(dL0 / speed0, 2) * stepLength;
         break;
@@ -716,7 +928,8 @@ DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
       y1 += stepLength * yn;
       z1 += stepLength * zn;
 
-      if (DistanceToWire(x1, y1, z1) < rWire) {
+      const double dist2wire = sqrt(pow(xWire - x1, 2) + pow(yWire - y1, 2)) - rWire;
+      if (dist2wire < rWire) {
         std::cout << "Inside Wire.\n";
         break;
       }
@@ -738,50 +951,62 @@ DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
 }  
 
 void 
-DriftLineRKF::EndDriftLine() {
+DriftLineRKF::EndDriftLine(const std::string particleType) {
 
-
-  double x,y,z;
-  double vx,vy,vz;
-  double bx,by,bz;
-  double ex,ey,ez;
-  double lastStepLength;
-  int status;
-
-  //these will store the original position for use later in time calculation
+  // These will store the original position for use later in time calculation
   double xp = path.back().xi;
   double yp = path.back().yi;
   double zp = path.back().zi;
   double x0 = xp, y0 = yp, z0 = zp;
-  double x1 = xp, y1 = yp, z1 = zp;
   
+  double bx, by, bz;
+  double ex, ey, ez;  
+  int status;
   sensor->MagneticField(x0, y0, z0, bx, by, bz, status);
   sensor->ElectricField(x0, y0, z0, ex, ey, ez, medium, status);
   if (status != 0) {
-    std::cerr << "DriftLineRKF::EndDriftLine:\n";
+    std::cerr << className << "::EndDriftLine:\n";
     std::cerr << "    No valid field at initial point.\n";
     std::cerr << "    Program bug!\n";
     return;
   }
-  if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz)) {
-    std::cerr << "DriftLineRKF::EndDriftLine:\n";
-    std::cerr << "    Failed to retrieve drift velocity.\n";
-    return;
+  double vx, vy, vz;
+  if (particleType == "electron") {
+    if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz)) {
+      std::cerr << className << "::EndDriftLine:\n";
+      std::cerr << "    Failed to retrieve drift velocity.\n";
+      return;
+    
+    }
+  } else if (particleType == "hole") {
+    if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz)) {
+      std::cerr << className << "::EndDriftLine:\n";
+      std::cerr << "    Failed to retrieve drift velocity.\n";
+      return;
+    
+    }
+  } else if (particleType == "ion") {
+    if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz)) {
+      std::cerr << className << "::EndDriftLine:\n";
+      std::cerr << "    Failed to retrieve drift velocity.\n";
+      return;
+    
+    }
   }
-
   double speed = sqrt(vx * vx + vy * vy + vz * vz);
 
   // x1, y1, z1 to store beginning of previous step for now.
+  double x1 = xp, y1 = yp, z1 = zp;
   if (path.size() > 1) {
     x1 = path[path.size() - 2].xi;
     y1 = path[path.size() - 2].yi;
     z1 = path[path.size() - 2].zi;
   }
-  // TODO: Do something for single point case.
- 
-  lastStepLength = sqrt(pow(fabs(x1-x0),2) +
-			pow(fabs(y1-y0),2) +
-			pow(fabs(z1-z0),2));
+
+  // TODO: Do something for single point case. 
+  double lastStepLength = sqrt(pow(fabs(x1 - x0), 2) +
+                               pow(fabs(y1 - y0), 2) +
+                               pow(fabs(z1 - z0), 2));
  
   x1 = x0;
   y1 = y0;
@@ -802,7 +1027,8 @@ DriftLineRKF::EndDriftLine() {
     z1 += lastStepLength * vz / speed;
   }
 
-  for (int i = 0; i < 100; i++) {
+  double x, y, z;
+  for (int i = 0; i < 100; ++i) {
     x = x0 + 0.5 * (x1 - x0);
     y = y0 + 0.5 * (y1 - y0);
     z = z0 + 0.5 * (z1 - z0);
@@ -811,7 +1037,7 @@ DriftLineRKF::EndDriftLine() {
       x0 = x;
       y0 = y;
       z0 = z;
-    }  else {
+    } else {
       x1 = x;
       y1 = y;
       z1 = z;
@@ -822,7 +1048,9 @@ DriftLineRKF::EndDriftLine() {
   path.back().xf = x;
   path.back().yf = y;
   path.back().zf = z;
-  path.back().tf = path.back().ti + fabs(sqrt(pow((x - xp), 2) + pow((y - yp), 2) + pow((z - zp),2))) / speed; 
+  path.back().tf = path.back().ti + fabs(sqrt(pow((x - xp), 2) + 
+                                              pow((y - yp), 2) + 
+                                              pow((z - zp), 2))) / speed; 
   path.back().status = "left volume";
 
 }
