@@ -1611,7 +1611,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 
 				// check for overrun UNLESS the actual command
 
-				if((dta & 0x3A00000) == 0x0800000) {
+				if((dta & 0x03A00000) == 0x00800000) {
 					//LOG(WARN,"DAQ10k trigger; no data") ;
 					daq10k = 1 ;
 				}
@@ -1686,13 +1686,14 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			LOG(ERR,"  RDO %d: T %4d: %d/%d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg_cou, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
 		}
 	}
-	else if((rdo.rdo>=5) && ((rdo.sector==10))) {
-//		LOG(TERR," RDO %d: words %d",rdo.rdo,words) ;
-//		for(u_int i=0;i<rdo.trg_cou;i++) {
-//			LOG(TERR," dbg: RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
-//		}
+/*
+	else if((rdo.rdo>=6) && ((rdo.sector==24))) {
+		LOG(TERR," RDO %d: words %d",rdo.rdo,words) ;
+		for(u_int i=0;i<rdo.trg_cou;i++) {
+			LOG(TERR," dbg: RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, res 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, trgs[i].reserved[0],rdo.trg[i].rhic_counter) ;
+		}
 	}
-	
+*/	
 
 
 

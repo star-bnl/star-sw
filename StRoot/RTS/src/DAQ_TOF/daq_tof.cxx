@@ -337,7 +337,8 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		trg[0].t = 4097 ;
 	}
 
-	
+
+#if 0	
 	// move backwards to the start of the trigger block and just count at first
 	while(words) {
 		if((w[words] >> 28)==0xA) {	// trigger stuff
@@ -397,6 +398,19 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		}
 	}
 
+#endif
+	if((t_cou==1) && (trg[0].t > 0) && (trg[0].t<=4095)) {
+		trg[t_cou].t = trg[0].t ;
+		trg[t_cou].daq = 0 ;
+		trg[t_cou].trg = 15 ;
+		trg[t_cou].rhic = trg[0].rhic + 1  ;
+		trg[t_cou].rhic_delta = 1 ;
+		t_cou++ ;
+
+	}
+	else {
+		LOG(WARN,"%d %d %d???",t_cou,trg[0].t,trg[0].trg) ;
+	}
 
 	if(err) {
 		LOG(ERR,"[%d] Bad Event: T %4d: words %d, trg_words %d (start at %d) : 0x%08X 0x%08X 0x%08X",
