@@ -39,21 +39,45 @@
 #include "StDetectorDbMaker/St_TpcResponseSimulatorC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
-#include "TDatabasePDG.h"
+#include "StParticleTable.hh"
+#include "StParticleDefinition.hh"
 #include "Altro.h"
 #include "TRVector.h"
 #include "StBichsel/Bichsel.h"
 #define __DEBUG__
-#ifdef __DEBUG__
-#define PrPP(A,B) if (Debug()%10 > 1) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
+#if defined(__DEBUG__)
+#define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.53 2011/10/14 23:27:51 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.54 2011/12/13 17:23:22 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
-//#define __YXTProduct__
+//#define WIREHISTOGRAM
+//#define WIREMAP
+#if defined(WIREHISTOGRAM)
+#include "THnSparse.h"
+#include "TArrayL64.h"
+#include "TArrayI.h"
+#include "TArrayD.h"
+#else /* ! WIREHISTOGRAM */
+#if defined(WIREMAP)
+#include <map>
+#include <utility>
+class WireEntry {
+public:
+  WireEntry(Int_t trackId = 0, Int_t row = 0, Int_t wire = 0, Float_t pad = 0, Float_t timebucket = 0, Float_t q = 0) :
+    fTrackId(trackId), fRow(row), fWire(wire), fPad(pad), fTimebucket(timebucket), fQ(q) {}
+  virtual ~WireEntry() {}
+  Int_t fTrackId, fRow, fWire;
+  Float_t fPad, fTimebucket, fQ;
+};
+typedef multimap<Int_t,WireEntry> WireMap;
+typedef WireMap::iterator WireMapIter;
+typedef pair<WireMapIter,WireMapIter> WireMapPairIter;
+#endif /* WIREMAP */
+#endif /* WIREHISTOGRAM */
 //                                    Inner        Outer
 static       Double_t t0IO[2]   = {1.20868e-9, 1.43615e-9}; // recalculated in InducedCharge
 static const Double_t tauC[2]   = {999.655e-9, 919.183e-9}; 
@@ -99,7 +123,6 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   memset (mShaperResponses, 0, sizeof(mShaperResponses));
   memset (mChargeFraction, 0, sizeof(mChargeFraction));
   memset (mPadResponseFunction, 0, sizeof(mPadResponseFunction));
-  memset (mYXTProducts, 0, sizeof(mYXTProducts));
   mPolya[0] = mPolya[1] = 0;
   m_Mode = 0;
   //  SETBIT(m_Mode,kPAI); 
@@ -121,7 +144,6 @@ Int_t StTpcRSMaker::Finish() {
   for (Int_t io = 0; io < 2; io++) {// Inner/Outer
     for (Int_t sec = 0; sec < NoOfSectors; sec++) {
       if (mShaperResponses[io][sec] && !mShaperResponses[io][sec]->TestBit(kNotDeleted)) {SafeDelete(mShaperResponses[io][sec]);}
-      if (mYXTProducts[io][sec]     && !mYXTProducts[io][sec]->TestBit(kNotDeleted)) {SafeDelete(mYXTProducts[io][sec]);}
     }
     SafeDelete(mChargeFraction[io]);
     SafeDelete(mPadResponseFunction[io]);
@@ -227,7 +249,7 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
     LOG_INFO << "Illegal date/time. Tpc Anode Voltage is not set to run condition: AliveInner: " << nAliveInner 
 	     << "\tAliveOuter: " << nAliveOuter 
 	     << "\tStop the run" << endm;
-    return kStFatal;
+    assert(nAliveInner || nAliveOuter);
   }
   if (nAliveInner > 1) innerSectorAnodeVoltage /= nAliveInner;
   if (nAliveOuter > 1) outerSectorAnodeVoltage /= nAliveOuter;
@@ -300,10 +322,8 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
 	    if (r > 1e-2) break;
 	  }
 	  mShaperResponses[io][sector-1]->SetRange(timeBinMin,t);
-#ifndef __YXTProduct__
 	  mShaperResponses[io][sector-1]->SetNpx((Int_t) (10*(t-timeBinMin)));
 	  mShaperResponses[io][sector-1]->Save(timeBinMin,t,0,0,0,0);
-#endif /* ! __YXTProduct__ */
 	}
 	continue;
       } 
@@ -330,10 +350,8 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
 	  if (r > 1e-2) break;
 	}
 	mShaperResponses[io][sector-1]->SetRange(timeBinMin,t);
-#ifndef __YXTProduct__
 	mShaperResponses[io][sector-1]->SetNpx((Int_t) (10*(t-timeBinMin)));
 	mShaperResponses[io][sector-1]->Save(timeBinMin,t,0,0,0,0);
-#endif /* ! __YXTProduct__ */
       }
     }
     //                             w       h         s      a       l   i
@@ -372,9 +390,7 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
 	if (r > 1e-2) break;
       }
       mPadResponseFunction[io]->SetRange(-x,x);
-#ifndef  __YXTProduct__
       mPadResponseFunction[io]->Save(xminP,xmaxP,0,0,0,0);
-#endif /* ! __YXTProduct__ */
     }
     if (! mChargeFraction[io]) {
       Double_t xmaxP = 2.5;//5*gStTpcDb->PadPlaneGeometry()->innerSectorPadLength(); // 1.42
@@ -407,9 +423,7 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
       }
       mChargeFraction[io]->SetRange(-x,x);
       
-#ifndef  __YXTProduct__
       mChargeFraction[io]->Save(xminP,xmaxP,0,0,0,0);
-#endif /* ! __YXTProduct__ */
     }
     //  TF1F *func = new TF1F("funcP","x*sqrt(x)/exp(2.5*x)",0,10);
     // see http://www4.rcf.bnl.gov/~lebedev/tec/polya.html
@@ -432,51 +446,6 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
   }
   // tss
   mGG = new TF1F("GaitingGridTransperency","1-6.27594134307865925e+00*TMath::Exp(-2.87987e-01*(x-1.46222e+01))",21,56);
-#ifdef __YXTProduct__
-  for (Int_t io = 0; io < 2; io++) {// In/Out
-    for (Int_t sector = 1; sector <= NoOfSectors; sector++) {
-      for (Int_t sec = 1; sec < sector; sec++) {
-	if (mShaperResponses[io][sector-1] &&  mShaperResponses[io][sector-1] == mShaperResponses[io][sec-1]) {
-	  mYXTProducts[io][sector-1] = mYXTProducts[io][sec-1];
-	  break;
-	}
-      }
-      if (mYXTProducts[io][sector-1]) continue;
-      Int_t ny = 10*(mChargeFraction[io]->GetXmax() - mChargeFraction[io]->GetXmin());
-      Int_t nx = 10*(mPadResponseFunction[io]->GetXmax() - mPadResponseFunction[io]->GetXmin());
-      Int_t nt = 10*(mShaperResponses[io][sector-1]->GetXmax() - mShaperResponses[io][sector-1]->GetXmin());
-      mYXTProducts[io][sector-1] = new TH3F(Form("YXT_%s_s%02i", io == 0 ? "I" : "O", sector),
-					    Form("Product of ChargeFraction(y) * PadResponseFunction(x) * ShaperResponses(t) for %s sector %02i", 
-						 io == 0 ? "Inner" : "Outer",sector),
-					    ny, mChargeFraction[io]->GetXmin(), mChargeFraction[io]->GetXmax(),
-					    nx, mPadResponseFunction[io]->GetXmin(), mPadResponseFunction[io]->GetXmax(),
-					    nt, mShaperResponses[io][sector-1]->GetXmin(), mShaperResponses[io][sector-1]->GetXmax());
-      TAxis *Y = mYXTProducts[io][sector-1]->GetXaxis();
-      TAxis *X = mYXTProducts[io][sector-1]->GetYaxis();
-      TAxis *T = mYXTProducts[io][sector-1]->GetZaxis();
-      TArrayD vY(ny), vX(nx), vT(nt);
-      for (Int_t iy = 1; iy <= ny; iy++) {
-	Double_t y = Y->GetBinCenter(iy);
-	vY[iy-1] = mChargeFraction[io]->Eval(y);
-      }
-      for (Int_t ix = 1; ix <= nx; ix++) {
-	Double_t x = X->GetBinCenter(ix);
-	vX[ix-1] = mPadResponseFunction[io]->Eval(x);
-      }
-      for (Int_t it = 1; it < nt; it++) {
-	Double_t t = T->GetBinCenter(it);
-	vT[it-1] = mShaperResponses[io][sector-1]->Eval(t);
-      }
-      for (Int_t iy = 1; iy <= ny; iy++) {
-	for (Int_t ix = 1; ix <= nx; ix++) {
-	  for (Int_t it = 1; it < nt; it++) {
-	    mYXTProducts[io][sector-1]->SetBinContent(iy,ix,it,vY[iy-1]*vX[ix-1]*vT[it-1]);
-	  }
-	}
-      }
-    }
-  }  
-#endif /* __YXTProduct__ */  
   if (Debug()) Print();
 #ifdef __ClusterProfile__
   memset (hist, 0, sizeof(hist));
@@ -577,6 +546,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     Idebug = 0;
     Int_t NoHitsInTheSector = 0;
     SignalSum_t *SignalSum = ResetSignalSum();
+#if defined(WIREMAP)
+    WireMap wires;
+    WireEntry wireE;
+#endif /* WIREMAP */
     // it is assumed that hit are ordered by sector, trackId, pad rows, and track length
     while (sortedIndex < no_tpc_hits) {
       Int_t indx = sorter.GetIndex(sortedIndex);
@@ -594,16 +567,23 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       if (tpc_hit->volume_id <= 0 || tpc_hit->volume_id > 1000000) {sortedIndex++; continue;}
       Int_t Id         = tpc_hit->track_p;
       Int_t id3 = 0, ipart = 8, charge = 1;
+      Double_t mass = 0;
       if (tpc_track) {
 	id3        = tpc_track[Id-1].start_vertex_p;
 	ipart      = tpc_track[Id-1].ge_pid;
 	charge     = (Int_t) tpc_track[Id-1].charge;
+	StParticleDefinition *particle = StParticleTable::instance()->findParticleByGeantId(ipart);
+	if (particle) {
+	  mass = particle->mass();
+	  charge = particle->charge();
+	}
 #if 0
 	if (tpc_track[Id-1].next_parent_p && ipart == 3) { // delta electrons ?
 	  Id = tpc_track[Id-1].next_parent_p;
 	  ipart      = tpc_track[Id-1].ge_pid;
 	}
 #endif
+	
       }
       if (ipart == Laserino || ipart == Chasrino) {
 	charge = 0;
@@ -730,11 +710,31 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       Double_t padlength = gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();
       Double_t PadPitch        = gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch();
       Double_t sigmaJitterT     = St_TpcResponseSimulatorC::instance()->SigmaJitterTI();
+      Double_t sigmaJitterX     = St_TpcResponseSimulatorC::instance()->SigmaJitterXI();
       if(io) { // Outer
 	padlength              = gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();
 	PadPitch               = gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
 	sigmaJitterT           = St_TpcResponseSimulatorC::instance()->SigmaJitterTO();
+	sigmaJitterX     = St_TpcResponseSimulatorC::instance()->SigmaJitterXO();
       }
+#if defined(WIREHISTOGRAM)
+      //      const Int_t pack = 8; // G
+      const Int_t pack = 16; // H
+      //                          row     w             pad          time bucket
+      const Int_t    binWs[4] = {  45,  173,  pack*NoOfPads, pack/2*NoOfTimeBins};
+      const Double_t xWmin[4] = { 0.5,  -0.5,           0.5,                   0};
+      const Double_t xWmax[4] = {45.5, 172.5,  NoOfPads+0.5,        NoOfTimeBins};
+      THnSparseF wireHistogram("Wires","Wire Histogram to keep charge versus wire, pad and time bucket for a given particle",
+			       4, binWs, xWmin, xWmax); 
+      struct Wire_t {
+	Double_t row, wireIndex, pad, timebucket, Q;
+      };
+      Wire_t wireT;
+      Int_t bins[4];
+#if 0
+      Long64_t binSold = -1;
+#endif
+#endif /* WIREHISTOGRAM */
       Double_t s = sMin;
       for (Int_t iSegHits = 0; iSegHits < nSegHits && s < sMax; iSegHits++) {
 	g2t_tpc_hit_st *tpc_hitC = TrackSegmentHits[iSegHits].tpc_hitC;
@@ -743,14 +743,16 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	if (Debug() && iRow && iRow != row) continue;
 	Int_t io = (row <= NoOfInnerRows) ? 0 : 1;
 	// Generate signal 
-	TF1F *mShaperResponse = mShaperResponses[io][sector-1];
 	Double_t Gain = St_tss_tssparC::instance()->gain(sector,row); 
+#if ! defined(WIREHISTOGRAM) && ! defined(WIREMAP)
+	TF1F *mShaperResponse = mShaperResponses[io][sector-1];
 	Int_t rowMin = row;
 	Int_t rowMax = row;
 	if(row > NoOfInnerRows) { // Outer
 	  rowMin                 = TMath::Max(row - 1, NoOfInnerRows+1);
 	  rowMax                 = TMath::Min(row + 1, NoOfRows);
 	}
+#endif /* ! WIREHISTOGRAM */
 #ifdef __ClusterProfile__
 	checkList[io][2]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),Gain);
 #endif	/* __ClusterProfile__ */
@@ -792,7 +794,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	checkList[io][4]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),dEdxCor);
 #endif	/* __ClusterProfile__ */
 	// Apply Gating Grid
-	if (TrackSegmentHits[iSegHits].Pad.timeBucket() > mGG->GetXmin() && TrackSegmentHits[iSegHits].Pad.timeBucket() < mGG->GetXmax()) {
+	if (TrackSegmentHits[iSegHits].Pad.timeBucket() > mGG->GetXmin() && 
+	    TrackSegmentHits[iSegHits].Pad.timeBucket() < mGG->GetXmax()) {
 	  dEdxCor *= mGG->Eval(TrackSegmentHits[iSegHits].Pad.timeBucket());
 	}
 	if (dEdxCor < minSignal) continue;
@@ -829,13 +832,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #endif	/* __ClusterProfile__ */
 	Double_t gamma = TMath::Power(10.,lgam) + 1;
 	Double_t betaGamma = TMath::Sqrt(gamma*gamma - 1.);
-	Int_t iPDG = TDatabasePDG::Instance()->ConvertGeant3ToPdg(ipart);
-	if (iPDG > 0) {
-	  Double_t mass = TDatabasePDG::Instance()->GetParticle(iPDG)->Mass();
-	  StThreeVectorD       pxyzG(tpc_hitC->p[0],tpc_hitC->p[1],tpc_hitC->p[2]);
-	  Double_t bg = pxyzG.mag()/mass;
-	  if (bg > betaGamma) betaGamma = bg;
-	}
+	StThreeVectorD       pxyzG(tpc_hitC->p[0],tpc_hitC->p[1],tpc_hitC->p[2]);
+	Double_t bg = pxyzG.mag()/mass;
+	if (bg > betaGamma) betaGamma = bg;
 	Double_t padH = TrackSegmentHits[iSegHits].Pad.pad();        
 	Double_t tbkH = TrackSegmentHits[iSegHits].Pad.timeBucket(); 
 	tpc_hitC->pad = padH;
@@ -855,6 +854,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t D = 1. + OmegaTau*OmegaTau;
 	Double_t SigmaT = St_TpcResponseSimulatorC::instance()->transverseDiffusion()*  TMath::Sqrt(   driftLength/D);
 	//	Double_t SigmaL = St_TpcResponseSimulatorC::instance()->longitudinalDiffusion()*TMath::Sqrt(2*driftLength  );
+#if ! defined(WIREHISTOGRAM)
+	if (sigmaJitterX > 0) {SigmaT = TMath::Sqrt(SigmaT*SigmaT + sigmaJitterX*sigmaJitterX);}
+#endif /* ! WIREHISTOGRAM */
 	Double_t SigmaL = St_TpcResponseSimulatorC::instance()->longitudinalDiffusion()*TMath::Sqrt(   driftLength  );
 	if (Debug()%10 > 1) { 	
 	  LOG_INFO << "s_low/s_upper/dSD\t" << s_low << "/\t" << s_upper << endm;
@@ -935,6 +937,13 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #endif	/* __ClusterProfile__ */
 	  Double_t sigmaT = SigmaT;
 	  Double_t sigmaL = SigmaL;
+#if defined(WIREMAP)
+	  wireE.fTrackId = TrackSegmentHits[iSegHits].TrackId;
+	  wireE.fRow  = row;
+#endif /* WIREMAP */
+#if defined(WIREHISTOGRAM)
+	  wireT.row = row;
+#endif /* WIREHISTOGRAM */
 	  for (Int_t ie = 0; ie < Nt; ie++) {
 	    nTotal++;
 	    Double_t QAv = mPolya[io]->GetRandom();
@@ -952,11 +961,23 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    if (y < lastInnerSectorAnodeWire) {
 	      Int_t WireIndex = TMath::Nint((y - firstInnerSectorAnodeWire)/anodeWirePitch);
 	      yOnWire = firstInnerSectorAnodeWire + WireIndex*anodeWirePitch;
+#if defined(WIREHISTOGRAM)
+	      wireT.wireIndex = WireIndex;
+#endif /* WIREHISTOGRAM */
+#if defined(WIREMAP)
+	      wireE.fWire = WireIndex;
+#endif /* WIREMAP */
 	    }
 	    else {
 	      Int_t WireIndex = TMath::Nint((y - firstOuterSectorAnodeWire)/anodeWirePitch);
 	      yOnWire = firstOuterSectorAnodeWire + WireIndex*anodeWirePitch;
 	      alphaVariation = OuterAlphaVariation;
+#if defined(WIREHISTOGRAM)
+	      wireT.wireIndex = WireIndex;
+#endif /* WIREHISTOGRAM */
+#if defined(WIREMAP)
+	      wireE.fWire = WireIndex;
+#endif /* WIREMAP */
 	    }
 	    Double_t distanceToWire = y - yOnWire; // Calculated effective distance to wire affected by Lorentz shift 
 	    xOnWire = xyzE.position().x();
@@ -977,6 +998,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #ifdef __ClusterProfile__
 	    checkList[io][9]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),QAv);
 #endif	/* __ClusterProfile__ */
+#if ! defined(WIREHISTOGRAM) && ! defined(WIREMAP)
 	    for(Int_t row = rowMin; row <= rowMax; row++) {              
 	      Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row);
 	      if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
@@ -987,18 +1009,14 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      Float_t bin = Pad.timeBucket();//L  - 1; // K
 	      Int_t binT = TMath::Nint(bin); //L bin;//K TMath::Nint(bin);// J bin; // I TMath::Nint(bin);
 	      if (binT < 0 || binT >= NoOfTimeBins) continue;
-	      Double_t dT = bin -  binT + St_TpcResponseSimulatorC::instance()->T0offset();
-	      if (sigmaJitterT) dT += gRandom->Gaus(0,sigmaJitterT);
+	      Double_t dT = bin -  binT + St_TpcResponseSimulatorC::instance()->T0offset(); 
+	      if (sigmaJitterT) dT += gRandom->Gaus(0,sigmaJitterT);  // #1
 	      Double_t dely[1]      = {transform.yFromRow(row)-yOnWire};            
-#ifndef __YXTProduct__
 	      Double_t localYDirectionCoupling = mChargeFraction[io]->GetSaveL(dely);
 #ifdef __ClusterProfile__
 	      checkList[io][10]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),localYDirectionCoupling);
 #endif	/* __ClusterProfile__ */
 	      if(localYDirectionCoupling < minSignal) continue;
-#else /*  __YXTProduct__ */
-	      Int_t binY = mYXTProducts[io][sector-1]->GetXaxis()->FindBin(dely[0]);
-#endif /* ! __YXTProduct__ */
 	      Float_t padX = Pad.pad();
 	      Int_t CentralPad = TMath::Nint(padX);
 	      if (CentralPad < 1) continue;
@@ -1020,7 +1038,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		checkList[io][12]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),gain);
 #endif	/* __ClusterProfile__ */
 		Double_t xPad = pad - padX;
-#ifndef __YXTProduct__
 		Double_t xpad[1] = {xPad};
 		Double_t localXDirectionCoupling = gain*mPadResponseFunction[io]->GetSaveL(xpad);
 		if (localXDirectionCoupling < minSignal) continue;
@@ -1032,22 +1049,13 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		checkList[io][14]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),XYcoupling);
 #endif	/* __ClusterProfile__ */
 		if(XYcoupling < minSignal)  continue;
-#else /* __YXTProduct__ */
-		Int_t binX = mYXTProducts[io][sector-1]->GetYaxis()->FindBin(xPad);
-#endif /* ! __YXTProduct__ */
 		Int_t bin_low  = TMath::Max(0             ,binT + TMath::Nint(dt+mShaperResponse->GetXmin()-0.5));
 		Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+mShaperResponse->GetXmax()+0.5));
 		Int_t index = NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin_low;
 		for(Int_t itbin=bin_low;itbin<=bin_high;itbin++, index++){
 		  Double_t t = -dt + (Double_t)(itbin - binT);
 	      
-#ifndef __YXTProduct__
 		  Double_t signal = XYcoupling*mShaperResponse->GetSaveL(&t);
-#else /* __YXTProduct__ */
-		  //		  Double_t signal = gain*mYXTProducts[io][sector-1]->Interpolate(dely[0],xPad,t);
-		  Int_t bT = mYXTProducts[io][sector-1]->GetZaxis()->FindBin(t);
-		  Double_t signal = gain*mYXTProducts[io][sector-1]->GetBinContent(binY,binX,bT);
-#endif /* ! __YXTProduct__ */
 		  TotalSignal += signal;
 		  SignalSum[index].Sum += signal;
 #ifdef __ClusterProfile__
@@ -1074,6 +1082,26 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		} // time 
 	      } // pad limits
 	    } // row limits
+#else /* WIREHISTOGRAM || WIREMAP */
+	    StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, row);
+	    static StTpcPadCoordinate Pad;
+	    transform(xyzW,Pad,kFALSE,kFALSE); // don't use T0, don't use Tau
+	    Float_t bin = Pad.timeBucket();
+	    Double_t dT = bin + St_TpcResponseSimulatorC::instance()->T0offset();
+#if defined(WIREHISTOGRAM) && ! defined(WIREMAP)
+	    wireT.pad = Pad.pad();
+	    wireT.timebucket = dT;
+	    wireT.Q  = QAv*GainLocal;
+	    wireHistogram.Fill(&wireT.row, wireT.Q);
+#else /* WIREMAP && ! WIREHISTOGRAM */
+	    if (sigmaJitterT) dT += gRandom->Gaus(0,sigmaJitterT);  // #1
+	    wireE.fPad = Pad.pad();
+	    wireE.fTimebucket  = dT;
+	    wireE.fQ = QAv*GainLocal;
+	    Int_t index = 16*(100*wireE.fRow + wireE.fWire) + 16*(wireE.fPad-TMath::Nint(wireE.fPad));
+	    wires.insert(pair<Int_t,WireEntry>(index,wireE));
+#endif /*   WIREHISTOGRAM && ! WIREMAP */
+#endif /* ! WIREHISTOGRAM && ! WIREMAP */
 	  }  // electrons in Cluster
 	} while (kTRUE); // Clusters
 	tpc_hitC->adc = -99;
@@ -1103,8 +1131,267 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #endif  /* __ClusterProfile__ */
 	}
 	NoHitsInTheSector++;
-      } // end do loop
-    } // hit in the sector
+      } // end do loop over segments for a given particle
+#if defined(WIREHISTOGRAM)
+      Double_t *x = &wireT.row;
+      Int_t dim = wireHistogram.GetNdimensions();
+      Long64_t N = wireHistogram.GetNbins();
+      if (Debug() > 1) {
+	cout << "Filled bins\t " << N << " from " << wireHistogram.GetEntries() << " entries." << endl;
+      }
+      TArrayL64 idxT(N); Long64_t *idx = idxT.GetArray();
+      TArrayD dT(N);   Double_t *dx = dT.GetArray();
+      
+      for (Long64_t i = 0; i < N; i++) {
+	wireT.Q = wireHistogram.GetBinContent(i, bins);
+	dx[i] = 0;
+	for (Int_t d = 0; d < dim; ++d) {
+	  if (d > 0) dx[i] *= (binWs[d-1]+2);
+	  dx[i] += bins[d];
+	}
+      }
+      TMath::Sort(N,dx,idx,0);
+      Int_t wireOld = -1;
+      Double_t padOld  = 1e9;
+      Int_t rowMin  = -1;
+      Int_t rowMax  = -1;
+      TArrayI padMin;
+      TArrayI padMax;
+      TArrayD localYDirectionCoupling(3);
+      TArrayD localXDirectionCoupling[3];
+      for (Long64_t i = 0; i < N; ++i) {
+	wireT.Q = wireHistogram.GetBinContent(idx[i], bins);
+	for (Int_t d = 0; d < dim; ++d) {
+	  x[d] = wireHistogram.GetAxis(d)->GetBinCenter(bins[d]);
+	}
+	if (Debug() > 1) {
+	  cout << "entry #/#" << i << " / " << idx[i];
+	  for (Int_t d = 0; d < dim; ++d) {
+	    cout << "\t" << x[d];
+	  }
+	  cout << "\tQ = " << wireT.Q << endl;
+	}
+	Int_t r = wireT.row;
+	if (wireT.wireIndex != wireOld) {
+	  wireOld = wireT.wireIndex;
+	  padOld  = 1e9;
+	  // Induce charge
+	  Double_t yOnWire =  (r <= 13) ? firstInnerSectorAnodeWire + wireT.wireIndex*anodeWirePitch
+	    :      	                firstOuterSectorAnodeWire + wireT.wireIndex*anodeWirePitch;
+	  rowMin = rowMax = r;
+	  Int_t io = 0;
+	  if(r > NoOfInnerRows) { // Outer
+	    rowMin                 = TMath::Max(r - 1, NoOfInnerRows+1);
+	    rowMax                 = TMath::Min(r + 1, NoOfRows);
+	    io = 1;
+	  }
+	  for(Int_t row = rowMin; row <= rowMax; row++) {              
+	    localYDirectionCoupling[row-rowMin] = 0;
+	    Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row);
+	    if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+	    if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
+	    Double_t dely[1]      = {transform.yFromRow(row)-yOnWire};            
+	    Double_t localY = mChargeFraction[io]->GetSaveL(dely);
+	    if (localY < minSignal) continue;
+	    localYDirectionCoupling[row-rowMin] = localY;
+	  }
+	}
+	if (wireT.pad != padOld) {
+	  padOld = wireT.pad;
+	  StTpcPadCoordinate Pad(sector,r,wireT.pad,wireT.timebucket);
+	  static StTpcLocalSectorCoordinate xyzS;
+	  transform(Pad,xyzS,kFALSE,kFALSE); // don't use T0, don't use Tau
+	  padMin.Set(rowMax-rowMin+1);
+	  padMax.Set(rowMax-rowMin+1);
+	  for(Int_t row = rowMin; row <= rowMax; row++) {  
+	    localXDirectionCoupling[row-rowMin].Set(0);
+	    StTpcPadCoordinate PadR(sector,row,wireT.pad,wireT.timebucket);
+	    transform(xyzS,PadR,kFALSE,kFALSE); // don't use T0, don't use Tau
+	    Float_t padX = PadR.pad();
+	    Int_t CentralPad = TMath::Nint(padX);
+	    if (CentralPad < 1) continue;
+	    Int_t PadsAtRow = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
+	    if(CentralPad > PadsAtRow) continue;
+	    Int_t DeltaPad = TMath::Nint(mPadResponseFunction[io]->GetXmax());
+	    padMin[row-rowMin] = TMath::Max(CentralPad - DeltaPad ,1);
+	    padMax[row-rowMin] = TMath::Min(CentralPad + DeltaPad ,PadsAtRow);
+	    localXDirectionCoupling[row-rowMin].Set(padMax[row-rowMin]-padMin[row-rowMin]+1);
+	    for(Int_t pad = padMin[row-rowMin]; pad <= padMax[row-rowMin]; pad++) {
+	      Double_t xPad = pad - padX;
+	      Double_t xpad[1] = {xPad};
+	      Double_t localX = mPadResponseFunction[io]->GetSaveL(xpad);
+	      if (localX < minSignal) continue;
+	      localXDirectionCoupling[row-rowMin][pad-padMin[row-rowMin]] = localX;
+	    }
+	  }
+	}
+	TF1F *mShaperResponse = mShaperResponses[io][sector-1];
+	for(Int_t row = rowMin; row < rowMin+padMin.GetSize(); row++) {  
+	  if(localYDirectionCoupling[row-rowMin] < minSignal) continue;
+	  Double_t bin = wireT.timebucket;
+	  Int_t binT = TMath::Nint(bin); 
+	  if (binT < 0 || binT >= NoOfTimeBins) continue;
+	  Double_t dT = bin -  binT;
+	  if (sigmaJitterT) dT += gRandom->Gaus(0,sigmaJitterT); // #1
+	  //	      Double_t xPad = padMin - padX;
+	  for(Int_t pad = padMin[row-rowMin]; pad < padMin[row-rowMin] + localXDirectionCoupling[row-rowMin].GetSize(); pad++) {
+	    Double_t XYcoupling = localYDirectionCoupling[row-rowMin]*localXDirectionCoupling[row-rowMin][pad-padMin[row-rowMin]];
+	    if(XYcoupling < minSignal)  continue;
+	    Double_t gain = wireT.Q;
+	    Double_t dt = dT;
+	    if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
+	      gain   *= St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
+	      if (gain <= 0.0) continue;
+	      dt -= St_tpcPadGainT0C::instance()->T0(sector,row,pad);
+	    }
+	    Int_t bin_low  = TMath::Max(0             ,binT + TMath::Nint(dt+mShaperResponse->GetXmin()-0.5));
+	    Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+mShaperResponse->GetXmax()+0.5));
+	    Int_t index = NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin_low;
+	    for(Int_t itbin=bin_low;itbin<=bin_high;itbin++, index++){
+	      Double_t t = -dt + (Double_t)(itbin - binT);
+	      Double_t signal = XYcoupling*mShaperResponse->GetSaveL(&t);
+	      SignalSum[index].Sum += signal;
+	      if ( Id ) {
+		if (! SignalSum[index].TrackId ) SignalSum[index].TrackId = Id;
+		else  // switch TrackId, works only for 2 tracks, more tracks ?
+		  if ( SignalSum[index].TrackId != Id && SignalSum[index].Sum < 2*signal) 
+		    SignalSum[index].TrackId = Id;
+	      }
+	    } // time 
+	  } // pad limits
+	} // loop over rows
+      } // loop over wireHistogram entries
+#endif /* WIREHISTOGRAM */
+    }  // hits in the sector
+#if defined(WIREMAP)
+    if (! wires.empty()) {
+      WireMapIter it, jt;
+      WireMapPairIter ret;
+      Int_t indexOld = -1;
+      Int_t wireOld = -1;
+      Double_t padOld  = 1e9;
+      Int_t rowMin  = -1;
+      Int_t rowMax  = -1;
+      TArrayI padMin;
+      TArrayI padMax;
+      TArrayD localYDirectionCoupling(3);
+      TArrayD localXDirectionCoupling[3];
+      Int_t   CentralPad;
+      Int_t i = 0;
+      Int_t io = -1;
+      for (it = wires.begin(); it != wires.end();) {
+	ret = wires.equal_range((*it).first);
+	if (ret.first == ret.second) {
+	  it = ret.first;
+	  continue; 
+	}
+	for (jt = ret.first; jt != ret.second; ++jt) {
+	  wireE = (*jt).second;
+	  if (Debug() > 1) {
+	    i++;
+	    cout << "entry #\t" << i << "\t" << (*jt).first 
+		 << "\t" << wireE.fTrackId << "\t" << wireE.fRow << "\t" << wireE.fWire
+		 << "\t" << wireE.fPad << "\t" << wireE.fTimebucket << "\t" << wireE.fQ << endl;
+	  }
+	  if (indexOld != (*jt).first) {
+	    indexOld = (*jt).first;
+	    Int_t r = wireE.fRow;
+	    if (wireE.fWire != wireOld) {
+	      wireOld = wireE.fWire;
+	      padOld  = 1e9;
+	      // Induce charge
+	      Double_t yOnWire =  (r <= 13) ? firstInnerSectorAnodeWire + wireE.fWire*anodeWirePitch
+		:      	                      firstOuterSectorAnodeWire + wireE.fWire*anodeWirePitch;
+	      rowMin = rowMax = r;
+	      io = 0;
+	      if(r > NoOfInnerRows) { // Outer
+		rowMin                 = TMath::Max(r - 1, NoOfInnerRows+1);
+		rowMax                 = TMath::Min(r + 1, NoOfRows);
+		io = 1;
+	      }
+	      Int_t DeltaPad = TMath::Nint(mPadResponseFunction[io]->GetXmax());
+	      padMin.Set(rowMax-rowMin+1);
+	      padMax.Set(rowMax-rowMin+1);
+	      for(Int_t row = rowMin; row <= rowMax; row++) {              
+		padMin[row-rowMin] = - DeltaPad;
+		padMax[row-rowMin] = + DeltaPad;
+		localYDirectionCoupling[row-rowMin] = 0;
+		localXDirectionCoupling[row-rowMin].Set(0);
+		Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row);
+		if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+		if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))  continue;
+		localXDirectionCoupling[row-rowMin].Set(padMax[row-rowMin]-padMin[row-rowMin]+1);
+		Double_t dely[1]      = {transform.yFromRow(row)-yOnWire};            
+		Double_t localY = mChargeFraction[io]->GetSaveL(dely);
+		if (localY < minSignal) continue;
+		localYDirectionCoupling[row-rowMin] = localY;
+	      }
+	    }
+	    if (wireE.fPad != padOld) {
+	      padOld = wireE.fPad;
+	      StTpcPadCoordinate Pad(sector,r,wireE.fPad,wireE.fTimebucket);
+	      static StTpcLocalSectorCoordinate xyzS;
+	      transform(Pad,xyzS,kFALSE,kFALSE); // don't use T0, don't use Tau
+	      CentralPad = TMath::Nint(wireE.fPad);
+	      if (CentralPad >= 1 && CentralPad <= gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(r)) {
+		for(Int_t row = rowMin; row <= rowMax; row++) {  
+		  StTpcPadCoordinate PadR(sector,row,wireE.fPad,wireE.fTimebucket);
+		  transform(xyzS,PadR,kFALSE,kFALSE); // don't use T0, don't use Tau
+		  Float_t padX = PadR.pad() - CentralPad;
+		  if (localXDirectionCoupling[row-rowMin].GetSize()) {
+		    for(Int_t pad = padMin[row-rowMin]; pad <= padMax[row-rowMin]; pad++) {
+		      Double_t xPad = pad - padX;
+		      Double_t xpad[1] = {xPad};
+		      Double_t localX = mPadResponseFunction[io]->GetSaveL(xpad);
+		      if (localX < minSignal) continue;
+		      localXDirectionCoupling[row-rowMin][pad-padMin[row-rowMin]] = localX;
+		    }
+		  }
+		}
+	      }
+	    }
+	  } // indexOld != (*jt).first
+	  TF1F *mShaperResponse = mShaperResponses[io][sector-1];
+	  CentralPad = TMath::Nint(wireE.fPad);
+	  for(Int_t row = rowMin; row < rowMin+padMin.GetSize(); row++) {  
+	    if(localYDirectionCoupling[row-rowMin] < minSignal) continue;
+	    Double_t bin = wireE.fTimebucket;
+	    Int_t binT = TMath::Nint(bin); 
+	    if (binT < 0 || binT >= NoOfTimeBins) continue;
+	    Double_t dT = bin -  binT;
+	    for(Int_t p = padMin[row-rowMin]; p < padMin[row-rowMin] + localXDirectionCoupling[row-rowMin].GetSize(); p++) {
+	      Double_t XYcoupling = localYDirectionCoupling[row-rowMin]*localXDirectionCoupling[row-rowMin][p-padMin[row-rowMin]];
+	      if(XYcoupling < minSignal)  continue;
+	      Int_t pad = CentralPad + p;
+	      Double_t gain = wireE.fQ;
+	      Double_t dt = dT;
+	      if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
+		gain   *= St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
+		if (gain <= 0.0) continue;
+		dt -= St_tpcPadGainT0C::instance()->T0(sector,row,pad);
+	      }
+	      Int_t bin_low  = TMath::Max(0             ,binT + TMath::Nint(dt+mShaperResponse->GetXmin()-0.5));
+	      Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+mShaperResponse->GetXmax()+0.5));
+	      Int_t index = NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin_low;
+	      for(Int_t itbin=bin_low;itbin<=bin_high;itbin++, index++){
+		Double_t t = -dt + (Double_t)(itbin - binT);
+		Double_t signal = XYcoupling*mShaperResponse->GetSaveL(&t);
+		SignalSum[index].Sum += signal;
+		if ( wireE.fTrackId ) {
+		  if (! SignalSum[index].TrackId ) SignalSum[index].TrackId = wireE.fTrackId;
+		  else  // switch TrackId, works only for 2 tracks, more tracks ?
+		    if ( SignalSum[index].TrackId != wireE.fTrackId && SignalSum[index].Sum < 2*signal) 
+		      SignalSum[index].TrackId = wireE.fTrackId;
+		}
+	      } // time 
+	    } // pad limits
+	  } // loop over rows
+	} // loop over wireHistogram entries with the same index
+	if (jt == wires.end()) break;
+	it = jt;
+      } // loop over wireHistogram entries
+    }
+#endif /* WIREMAP */
     if (NoHitsInTheSector) {
       DigitizeSector(sector);   
       if (Debug()) LOG_INFO << "StTpcRSMaker: Done with sector\t" << sector << " total no. of hit = " << NoHitsInTheSector << endm;
@@ -1567,8 +1854,11 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.53 2011/10/14 23:27:51 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.54 2011/12/13 17:23:22 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.54  2011/12/13 17:23:22  fisyak
+// remove YXTProd, add WIREHISTOGRAM and WIREMAP, use particle definition from StarClassLibrary
+//
 // Revision 1.53  2011/10/14 23:27:51  fisyak
 // Back to standard version
 //
