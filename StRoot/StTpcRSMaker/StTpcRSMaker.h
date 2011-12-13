@@ -18,7 +18,6 @@ using namespace units;
 #include "StTpcRawData.h"
 #include "TF1F.h"
 #include "TH1.h"
-#include "TH3.h"
 #include "TTree.h"
 #include "PAI.h"
 // g2t tables
@@ -54,7 +53,6 @@ class StTpcRSMaker : public StMaker {
   TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
   TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
   TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
-  TH3F *GetYXTProd(Int_t io = 0, Int_t sector = 1) {return mYXTProducts[io][sector-1];}
   Double_t GetNoPrimaryClusters(Double_t betaGamma, Int_t charge);
   virtual void Print(Option_t *option="") const;
   void DigitizeSector(Int_t sector);
@@ -89,7 +87,6 @@ class StTpcRSMaker : public StMaker {
   TF1F  *mPadResponseFunction[2];     //!
   TF1F  *mPolya[2];                   //!
   TF1F  *mGG;                         //! Gating Grid Transperency
-  TH3F  *mYXTProducts[2][24];//! precalculated product of mChargeFractionInner/mChargeFractionOuter by mPadResponseFunctionInner/mPadResponseFunctionOuter by mShaperResponses
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   PAI  *mPAI;                         //!
   Double_t             mLaserScale;   //!
@@ -128,14 +125,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.22 2011/10/14 23:27:51 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.23 2011/12/13 17:23:22 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.22 2011/10/14 23:27:51 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.23 2011/12/13 17:23:22 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.23  2011/12/13 17:23:22  fisyak
+// remove YXTProd, add WIREHISTOGRAM and WIREMAP, use particle definition from StarClassLibrary
+//
 // Revision 1.22  2011/10/14 23:27:51  fisyak
 // Back to standard version
 //

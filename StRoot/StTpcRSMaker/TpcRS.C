@@ -54,6 +54,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
   TString FileIn(fileIn);
   if (FileIn == "") {
     ChainOpt += "gstar,"; RootFile += "gstar";
+    if (RunOpt.Contains("hadr_of",TString::kIgnoreCase) ||
+	   Opt.Contains("hadr_of",TString::kIgnoreCase)) ChainOpt += "hadr_off,";
+    if (RunOpt.Contains("phys_of",TString::kIgnoreCase) ||
+	   Opt.Contains("phys_of",TString::kIgnoreCase)) ChainOpt += "phys_off,";
+    if (RunOpt.Contains("PhysicsOff",TString::kIgnoreCase) ||
+	   Opt.Contains("PhysicsOff",TString::kIgnoreCase)) ChainOpt += "phys_off,";
     if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2011,";
     if      (Opt.Contains("FieldOff" ,TString::kIgnoreCase)) ChainOpt += "FieldOff,";
     else if (Opt.Contains("HalfField",TString::kIgnoreCase)) ChainOpt += "HalfField,";
@@ -171,39 +177,18 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
   }
   if (FileIn == "" && gClassTable->GetID("TGiant3") >= 0) {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
-    geant->Do("debug on");
-#if 0
-    geant->Do("swit 1 2");
-    geant->Do("swit 2 2");
-#endif
-    //    geant->SetDebug(0);
+    if (Opt.Contains("debug",TString::kIgnoreCase)) {
+      geant->Do("debug on");
+      geant->SetDebug(1);
+      geant->Do("swit 1 2");
+      geant->Do("swit 2 2");
+    }
     //            NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
     //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
     cout << Opt << endl;
     if (First > 0) {
       Int_t i = (gSystem->GetPid()+ First)%256;
       geant->Do(Form("rndm %i; rndm;",i));
-    }
-    if (Opt.Contains("PhysicsOff",TString::kIgnoreCase)) {
-      geant->Do("DCAY 0");
-      geant->Do("ANNI 0");
-      geant->Do("BREM 0");
-      geant->Do("COMP 0");
-      geant->Do("HADR 0");
-      geant->Do("MUNU 0");
-      geant->Do("PAIR 0");
-      geant->Do("PFIS 0");
-      geant->Do("PHOT 0");
-      geant->Do("RAYL 0");
-      //      geant->Do("LOSS 4"); // no fluctuations 
-      //    geant->Do("LOSS 1"); // with delta electron above dcute
-      //      geant->Do("DRAY 0");
-      //      geant->Do("MULS 1");
-      geant->Do("STRA 0");
-      //         CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-      geant->Do("CUTS     1e-4   1e+4   .001   .001   .001  .001  .001  1e+4  .001   .001 50.e-6");
-      //    geant->Do("gclose all");
-      geant->Do("physi");
     }
     if ( Opt.Contains("laser",TString::kIgnoreCase)) {
       gSystem->Load("gstar.so");
