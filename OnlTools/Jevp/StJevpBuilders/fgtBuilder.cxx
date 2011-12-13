@@ -49,7 +49,7 @@ fgtBuilder::~fgtBuilder() {
 }
 
 void fgtBuilder::initialize(int argc, char *argv[]) {
-
+  
   // Initialization of histograms.
   //could run a loop...
   contents.q1=new TH2F("assembly1","Disc 1, Assembly 1",3000,0,3000,100,0,5000);
@@ -120,7 +120,7 @@ void fgtBuilder::event(daqReader *rdr)
     for(u_int i=0;i<dd->ncontent;i++)
       {
 
-	//	  printf("FGT ADC: RDO %d, ARM %d, APV %d: %d values\n",dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
+	//		  printf("FGT ADC: RDO %d, ARM %d, APV %d: %d values\n",dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 	//	dd->rdo;
 	//the arm
 	//	dd->sec;// two arms per disc
@@ -131,9 +131,10 @@ void fgtBuilder::event(daqReader *rdr)
 	int channel;
 	if(quad<24)
 	  {
-	    channel=dd->pad*128+f[i].ch;
-	    if(channel>1280)
-	      channel-=(2*128);
+	    //	    channel=dd->pad*128+f[i].ch;
+	    //	    if(channel>1280)
+	    //	      channel-=(2*128);
+	    channel=(dd->pad%12)+f[i].ch;
 	    contents.array[quad]->Fill(channel,f[i].adc);
 	  }
 	else
