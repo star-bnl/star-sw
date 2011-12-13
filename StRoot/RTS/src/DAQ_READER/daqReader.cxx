@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.43 2011/11/14 21:48:10 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.44 2011/12/13 20:41:22 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1067,12 +1067,15 @@ int daqReader::fillSummaryInfo(SummaryInfo *info, gbPayload *pay)
   LOG(NOTE, "version = 0x%x", version);
 
   if(((version & 0xff000000) != 0xda000000) && ((b2h32(version) & 0x000000ff ) != 0x40)) {   // Version 0x01
+    LOG(NOTE, "gbPayload version 0x10");
+
     gbPayload_0x01 *pv = (gbPayload_0x01 *)pay;
     LOG(NOTE, "gbPayload 0x01:  v#=0x%x",b2h32(version));    // picked up from big endian evtdes
     return fillSummaryInfo_v01(info, pv);
   }
 
   if(((version & 0xff000000) != 0xda000000) && ((b2h32(version) & 0x000000ff ) == 0x40)) {   // Version 0x01a
+    LOG(NOTE, "gbPayload version 0x01a");
     gbPayload_0x01a *pv = (gbPayload_0x01a *)pay;
     LOG(NOTE, "gbPayload 0x01a:  v#=0x%x", b2h32(version));  // picked up from big endian evtdesc
     return fillSummaryInfo_v01a(info, pv);
