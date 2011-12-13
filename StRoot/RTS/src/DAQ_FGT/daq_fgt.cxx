@@ -454,8 +454,8 @@ daq_dta *daq_fgt::handle_phys(int disk, int quadrant, int strip_type)
 int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
 	const int FGT_BYTES_MIN = ((6)*4) ;	// this is the minimum
-	const int FGT_BYTES_MAX = ((8192)*4) ;
-	const u_int FGT_VERSION = 0x5555 ;		 
+	const int FGT_BYTES_MAX = (32768*4) ;
+	const u_int FGT_VERSION = 0x0034 ;		 
 	const u_int FGT_SIGNATURE = 0x46475420 ;	// "FGT"
 
 	int t_cou = 0 ;
@@ -473,14 +473,14 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 
 	// grab crc from the last word
-	int last_ix = words - 1 ;
+
 	// misc signatures and errors from the header
 	if(d32[1] != FGT_SIGNATURE) {	// "FGT"
 		LOG(ERR,"RDO %d: bad header sig 0x%08X, expect 0x%08X",rdo,d32[1], FGT_SIGNATURE) ;
 		bad |= 1 ;
 	}
 
-	if(d32[5] != 0xBEEFFEED) {	// deadface
+	if(d32[5] != 0xFEEDBEEF) {	// deadface
 		LOG(ERR,"RDO %d: bad deadface 0x%08X",rdo,d32[9]) ;
 		bad |= 1 ;
 	}
@@ -517,20 +517,20 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 	int format_code = (d32[2] >> 8) & 0xFF ;
 	if(format_code == 0x02) {	// null event
-		LOG(NOTE,"WARN %d: null event",rdo) ;
+		LOG(WARN,"RDO %d: format code 0x%X? (null event)",rdo,format_code) ;
 
-		trg[0].t = 4097 ;
-		trg[0].daq = 0 ;
-		trg[0].trg = 0 ;
-		trg[0].rhic = d32[4] ;
+//		trg[0].t = 4097 ;
+//		trg[0].daq = 0 ;
+//		trg[0].trg = 0 ;
+//		trg[0].rhic = d32[4] ;
 
-		return 1 ;
+//		return 1 ;
 
 	}
 
-#if 1
+#if 0
 #define	 G_CONST  0x04C11DB7 
-
+	int last_ix = words - 1 ;
 	u_int crc_in_data = d32[last_ix] ;
 	register u_int crc = 0xFFFFFFFF ;
 	if(crc_in_data) {	
@@ -566,16 +566,16 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 	// L0 part
 	t_cou = 0 ;
-	trg[0].t = d32[0] & 0xFFF ;
-	trg[0].daq = d32[2] & 0xF ;
-	trg[0].trg = (d32[2] >> 4) & 0xF ;
-	trg[0].rhic = d32[4] ;
-	
+	trg[t_cou].t = d32[0] & 0xFFF ;
+	trg[t_cou].daq = d32[2] & 0xF ;
+	trg[t_cou].trg = (d32[2] >> 4) & 0xF ;
+	trg[t_cou].rhic = d32[4] ;
 	t_cou++ ;
 
 
-	LOG(NOTE,"RDO %d: token %d, trg %d, daq %d: rhic %u",rdo, 
-		trg[0].t, trg[0].trg, trg[0].daq, trg[0].rhic) ;
+	LOG(NOTE,"RDO %d: words %d: token %d, trg %d, daq %d: rhic %u: rdo_in_data %d, format_code 0x%X",rdo,words,
+		trg[0].t, trg[0].trg, trg[0].daq, trg[0].rhic,
+		rdo_in_dta,format_code) ;
 
 
 	// check token and trg_cmd sanity...
@@ -587,10 +587,6 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 	switch(trg[0].trg) {
 	case 4 :
-	case 8 :
-	case 11 :
-	case 12 :
-	case 15 :
 		break ;
 	default :
 		LOG(ERR,"RDO %d: bad trg_cmd %d",rdo, trg[0].trg) ;
@@ -600,7 +596,7 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		break ;
 	}
 
-#if 1	// skip for the temporary 0x8129 V
+#if 0	// skip for the temporary 0x8129 V
 
 	// get mesg_length
 	int mesg_length = d32[last_ix-1] & 0xFFF ;	// 12 bits only
@@ -648,13 +644,6 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 //		bad |= 2 ;
 //	}
 #endif
-
-	// HACK!!!! since there is no L2 command implemented!
-	trg[t_cou].t = trg[0].t ;
-	trg[t_cou].trg = 15 ;
-	trg[t_cou].daq = 0 ;
-	trg[t_cou].rhic = trg[0].rhic + 1 ;
-	t_cou++ ;
 
 
 	
