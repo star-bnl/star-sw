@@ -31,9 +31,17 @@
 //#define TPX_TCD_STOP			182
 //#define TPX_TCD_TIME_0		182.175466		// measured around Dec 2010
 
-#define TPX_TCD_PED_STOP		175
-#define TPX_TCD_START			176
-#define TPX_TCD_STOP			179
+
+// was in FY11
+//#define TPX_TCD_PED_STOP		173
+//#define TPX_TCD_START			174
+//#define TPX_TCD_STOP			177
+//#define TPX_TCD_TIME_0		176.6
+
+//FY12
+#define TPX_TCD_PED_STOP		173
+#define TPX_TCD_START			174
+#define TPX_TCD_STOP			177
 #define TPX_TCD_TIME_0			176.6
 
 /* FY10 and previous value.
@@ -48,8 +56,14 @@
 
 
 // accepted region: start must be the lowest, stop must be the highest
-#define TPX_PULSER_PED_START	170
-#define TPX_PULSER_PED_STOP	186
+
+//FY11
+//#define TPX_PULSER_PED_START	170
+//#define TPX_PULSER_PED_STOP	186
+
+//FY12
+#define TPX_PULSER_PED_START	166
+#define TPX_PULSER_PED_STOP	182
 
 class tpxGain
 {
