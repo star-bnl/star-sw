@@ -5,8 +5,6 @@
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
-#include "StDaqLib/TRG/trgStructures2009.h"
-#include "StEvent/StTriggerData2009.h"
 
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "StEvent/StTriggerData.h"
@@ -110,9 +108,7 @@ void daqBuilder::startrun(daqReader *rdr) {
 
 void daqBuilder::event(daqReader *rdr)
 {
-  // StTriggerData2009 *trgd2009;
-  // int run = rdr->run;
-
+ 
   // Fill Histograms...
   int tpc_size = rdr->getDetectorSize("tpx");
   int bemc_size = rdr->getDetectorSize("btow");

@@ -5,8 +5,6 @@
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
-#include "StDaqLib/TRG/trgStructures2009.h"
-#include "StEvent/StTriggerData2009.h"
 
 #include "StRoot/StEEmcPool/muEztPanitkin/EEMCPlots.h"
 
@@ -417,31 +415,9 @@ void eemcBuilder::event(daqReader *rdr)
   // Find trigger data...
   static int eventn;
   eventn++;
-  //LOG("JEFF","Starting event %d",eventn);
-  StTriggerData2009 *trgd2009;
-  int run = rdr->run;
-
-  daq_dta *dd = rdr->det("trg")->get("raw");
-  if(dd && dd->iterate()) {
-    char *td = (char *)dd->Void;
-    
-    if(td[3] != 0x40) {
-      LOG("ERR", "TRG RAW: version mismatch 0x%2x-0x%2x-0x%2x-0x%2x", td[0], td[1], td[2], td[3]);
-      return;
-    }
-
-    //LOG("JEFF", "I'm here...");
-    TriggerDataBlk2009 *trgdatablock2009 = (TriggerDataBlk2009 *)td;
-    //LOG("JEFF", "I'm there...");
-    trgd2009 = new StTriggerData2009(trgdatablock2009, run);
-    //LOG("JEFF", "I'm still here...");
-  }
-  else {
-    LOG(ERR, "No trigger data exists...");
-    return;
-  }
   
-  StTriggerData *trgd = (StTriggerData *)trgd2009;
+  StTriggerData *trgd = getStTriggerData(rdr);
+  if(!trgd) return;
 
   //LOG("JEFF", "FillHisto");
   EEMCPlots::fillHisto( (char *)rdr,
