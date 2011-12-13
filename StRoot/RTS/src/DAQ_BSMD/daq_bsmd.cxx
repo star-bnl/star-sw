@@ -821,7 +821,6 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	case 8 :
 	case 11 :
 	case 12 :
-	case 15 :
 		break ;
 	default :
 		LOG(ERR,"RDO %d: bad trg_cmd %d",rdo, trg[0].trg) ;
@@ -879,13 +878,6 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 //		bad |= 2 ;
 //	}
 #endif
-
-	// HACK!!!!
-	trg[t_cou].t = trg[0].t ;
-	trg[t_cou].trg = 15 ;
-	trg[t_cou].daq = 0 ;
-	trg[t_cou].rhic = trg[0].rhic + 1 ;
-	t_cou++ ;
 
 
 	
