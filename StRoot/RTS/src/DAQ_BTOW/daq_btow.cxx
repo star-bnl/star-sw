@@ -252,6 +252,7 @@ int daq_btow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	const int BTOW_DDL_BYTES = 9972 ;
 	int buff_bytes = words * 4 ;
 	int rdo1 = rdo  ;
+	int tcou = 0 ;
 
 	u_short *us = (u_short *)addr ;
 
@@ -277,16 +278,20 @@ int daq_btow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 
 	// L0 part
-	trg[0].t = t_hi*256 + t_lo ;
-	trg[0].daq = 0 ;
-	trg[0].trg = 4 ;	// BTOW does not give the correct L0, only L2 so we invent 4
-	trg[0].rhic = l2h16(us[4]) ;
-	
+	trg[tcou].t = t_hi*256 + t_lo ;
+	trg[tcou].daq = 0 ;
+	trg[tcou].trg = 4 ;	// BTOW does not give the correct L0, only L2 so we invent 4
+	trg[tcou].rhic = l2h16(us[4]) ;
+	tcou++ ;
+
+	/* gone
 	// L2 part
-	trg[1].t = trg[0].t ;	// copy over token
-	trg[1].trg = 15 ;	// for now! us[0] ;	// this is where the trg cmd ought to be
-	trg[1].daq = us[1] ;
-	trg[1].rhic = trg[0].rhic + 1 ;
+	trg[tcou].t = trg[0].t ;	// copy over token
+	trg[tcou].trg = 15 ;	// for now! us[0] ;	// this is where the trg cmd ought to be
+	trg[tcou].daq = us[1] ;
+	trg[tcou].rhic = trg[0].rhic + 1 ;
+	tcou++ ;
+	*/
 
 	if(us[0] != 0xF) {	// in data!!!
 		err |= 1 ;
@@ -294,8 +299,22 @@ int daq_btow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	if(trg[0].t == 0) {
+		/*
+		static int t_hack = 0 ;
+
+		t_hack++ ;
+		if(t_hack > 4095) t_hack = 1 ;
+
+		trg[0].t = t_hack ;
+		trg[1].t = t_hack ;
+
+
+		LOG(WARN,"Was token 0 -- changing to %d",t_hack) ;
+		*/
+
 		err |= 1 ;
 		LOG(ERR,"token 0!") ;
+
 	}
 
 	if(err) {
@@ -307,7 +326,7 @@ int daq_btow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		return -1 ;
 	}
 
-	return 2 ;
+	return tcou ;
 
 
 

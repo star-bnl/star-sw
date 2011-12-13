@@ -256,11 +256,6 @@ int daq_esmd::get_l2(char *buff, int buff_words, struct daq_trg_word *trg, int r
 	trg[0].trg = 4 ;	// ESMD does not give the correct L0, only L2 so we invent 4
 	trg[0].rhic = l2h16(us[4]) ;
 	
-	// L2 part
-	trg[1].t = trg[0].t ;	// copy over token
-	trg[1].trg = 15 ;	// for now! us[0] ;	// this is where the trg cmd ought to be
-	trg[1].daq = us[1] ;
-	trg[1].rhic = trg[0].rhic + 1 ;
 
 	if(us[0] != 0xF) {
 		err |= 1 ;
@@ -281,5 +276,5 @@ int daq_esmd::get_l2(char *buff, int buff_words, struct daq_trg_word *trg, int r
 		return -1 ;
 	}
 
-	return 2 ;
+	return 1 ;
 }
