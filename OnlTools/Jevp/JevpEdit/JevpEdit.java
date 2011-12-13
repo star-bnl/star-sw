@@ -609,6 +609,9 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 	m = new JMenuItem("group in subdir");
 	m.addActionListener(this);
 	popup.add(m);
+	m = new JMenuItem("check children");
+	m.addActionListener(this);
+	popup.add(m);
 
 	root = new DefaultMutableTreeNode(treedata);
 	treeModel = new DefaultTreeModel(root);
@@ -758,6 +761,29 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 	return ntnode;
     }
 
+    String checkChildren(DefaultMutableTreeNode o)
+    {
+	String me;
+	String children;
+	String siblings;
+
+	JNode n = (JNode)o.getUserObject();
+	
+	if(n.child) {
+	    children = checkChildren(n.child);
+	}
+
+	if(n.next) {
+	    siblings = checkSiblings(n.child);
+	}
+
+	if(!inPallete(n)) {
+	    me = n.name;
+	}
+
+	
+    }
+
     DefaultMutableTreeNode createNewSiblingTab(JTree t, DefaultMutableTreeNode o)
     {
 	JNode n = (JNode)o.getUserObject();
@@ -856,8 +882,12 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 
 		deleteNode(node);
 	    }
-	    
 	}
+
+	if(e.getActionCommand().equals("check children")) {
+	    checkChildren(menuTree, o);
+	}
+
 
 	if(e.getActionCommand().equals("delete")) {  // delete all children as well...
 	    System.out.printf("got delete command: %s\n",n.name);

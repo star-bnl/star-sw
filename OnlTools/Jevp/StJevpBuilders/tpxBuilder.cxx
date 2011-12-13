@@ -5,8 +5,6 @@
 #include "DAQ_READER/daqReader.h"
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
-#include "StDaqLib/TRG/trgStructures2009.h"
-#include "StEvent/StTriggerData2009.h"
 
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "StEvent/StTriggerData.h"

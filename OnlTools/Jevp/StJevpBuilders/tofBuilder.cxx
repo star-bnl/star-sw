@@ -7,8 +7,6 @@
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
 #include "DAQ_TOF/daq_tof.h"
-#include "StDaqLib/TRG/trgStructures2009.h"
-#include "StEvent/StTriggerData2009.h"
 #include <TLatex.h>
 #include <TPad.h>
 #include <TH1I.h>
@@ -646,27 +644,8 @@ void tofBuilder::event(daqReader *rdr)
   //printf("event\n");
 
   // Get Trigger Data...
-  StTriggerData2009 *trgd2009;
-  int run = rdr->run;
-  
-  daq_dta *dd = rdr->det("trg")->get("raw");
-  if(dd && dd->iterate()) {
-    char *td = (char *)dd->Void;
-    
-    if(td[3] != 0x40) {
-      LOG("ERR", "TRG RAW: version mismatch 0x%2x-0x%2x-0x%2x-0x%2x", td[0], td[1], td[2], td[3]);
-      return;
-    }
-
-    TriggerDataBlk2009 *trgdatablock2009 = (TriggerDataBlk2009 *)td;
-    trgd2009 = new StTriggerData2009(trgdatablock2009, run);
-  }
-  else {
-    LOG(ERR, "No trigger data exists...");
-    return;
-  }
-  
-  StTriggerData *trgd = (StTriggerData *)trgd2009;
+  StTriggerData *trgd = getStTriggerData(rdr);
+  if(!trgd) return;
 
   //printf("trgd\n");
 

@@ -6,8 +6,6 @@
 #include "DAQ_READER/daq_dta.h"
 #include <DAQ_READER/daq_dta.h>
 #include "DAQ_READER/daq_det.h"
-#include "StDaqLib/TRG/trgStructures2009.h"
-#include "StEvent/StTriggerData2009.h"
 #include <DAQ_FGT/daq_fgt.h>
 
 #include "Jevp/StJevpPlot/RunStatus.h"
@@ -150,10 +148,8 @@ void fgtBuilder::event(daqReader *rdr)
 	//quad should be 0-23
       }
   }
-    evtCt++;
+  evtCt++;
 
-  // StTriggerData2009 *trgd2009;
-  // int run = rdr->run;
 
   // Fill Histograms...
   //  int tpc_size = rdr->getDetectorSize("tpx");

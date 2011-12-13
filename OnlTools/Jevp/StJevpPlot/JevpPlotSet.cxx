@@ -11,6 +11,8 @@
 #include <signal.h>
 #include <RTS/include/rtsLog.h>
 #include <TSystem.h>
+#include "StEvent/StTriggerData2009.h"
+#include "StEvent/StTriggerData2012.h"
 
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
@@ -791,27 +793,32 @@ char *JevpPlotSet::getServerTags()
 // Helper for getting data
 StTriggerData *JevpPlotSet::getStTriggerData(daqReader *rdr)
 {
-  StTriggerData2009 *trgd2009;
+  StTriggerData *trgd = NULL;
   int run = rdr->run;
   
   daq_dta *dd = rdr->det("trg")->get("raw");
   if(dd && dd->iterate()) {
     char *td = (char *)dd->Void;
     
-    if(td[3] != 0x40) {
+    if(td[3] == 0x40) {
+      TriggerDataBlk2009 *trgdatablock2009 = (TriggerDataBlk2009 *)td;
+      StTriggerData2009 *trgd2009 = new StTriggerData2009(trgdatablock2009, run);
+      trgd = (StTriggerData *)trgd2009;
+    }
+    else if(td[3] == 0x41) {
+      TriggerDataBlk2012 *trgdatablock2012 = (TriggerDataBlk2012 *)td;
+      StTriggerData2012 *trgd2012 = new StTriggerData2012(trgdatablock2012, run);
+      trgd = (StTriggerData *)trgd2012;
+    }
+    else {
       LOG("ERR", "TRG RAW: version mismatch 0x%2x-0x%2x-0x%2x-0x%2x", td[0], td[1], td[2], td[3]);
       return NULL;
     }
 
-    TriggerDataBlk2009 *trgdatablock2009 = (TriggerDataBlk2009 *)td;
-    trgd2009 = new StTriggerData2009(trgdatablock2009, run);
+    return trgd;
   }
-  else {
-    LOG(ERR, "No trigger data exists...");
-    return NULL;
-  }
-  
-  StTriggerData *trgd = (StTriggerData *)trgd2009;
 
-  return trgd;
+
+  LOG(ERR, "No trigger data exists...");
+  return NULL;
 }
