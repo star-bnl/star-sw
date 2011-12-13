@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.44 2011/12/13 20:41:22 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.45 2011/12/13 21:34:02 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -109,11 +109,11 @@ daqReader::daqReader(char *name)
     input_type = dir;
 
     // change to that directory...
-    if(chdir(fname) < 0) {
-      LOG(ERR,"Can't chdir %s [%s]",fname,strerror(errno),0,0,0) ;
-      sleep(1) ;
-      return ;
-    }
+ //    if(chdir(fname) < 0) {
+//       LOG(ERR,"Can't chdir %s [%s]",fname,strerror(errno),0,0,0) ;
+//       sleep(1) ;
+//       return ;
+//     }
 
     status = EVP_STAT_OK ;
     return ;
