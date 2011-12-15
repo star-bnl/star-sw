@@ -1199,7 +1199,8 @@ int JevpServer::execScript(const char *name, char *args[], int waitforreturn)
     
     int ret = execvp(name,args);
     if(ret < 0) {
-      LOG(CRIT, "Error spawning script: %s (%s)",name, strerror(errno),0,0,0);
+      char buff[100];
+      LOG(CRIT, "Error spawning script: %s (%s)  (%s)",name, strerror(errno),getcwd(buff,100));
       return 1;
     }
   }

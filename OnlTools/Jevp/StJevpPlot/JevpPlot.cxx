@@ -415,13 +415,25 @@ void JevpPlot::draw()
 {
   // Check for legends...
   //printf("in draw()\n");
-  
+  int ex1=0;
+
+  if(strcmp(myname, "eemc_cr1")) ex1 = 1;  
+  if(strcmp(myname, "eemc_cr84")) ex1 = 1;
+
   PlotHisto *curr = (PlotHisto *)histos.First();
 
+  if(ex1) {
+    LOG("JEFF", "%s curr = 0x%x histo = 0x%x", myname, curr, curr ? curr->histo : NULL);
+  }
+  
   int dimension = 0;
   if(curr) {
     if(curr->histo) {
       dimension = curr->histo->GetDimension();
+
+      if(ex1) {
+	LOG("JEFF", "%s dimension = %d", myname, dimension);
+      }
     }
   }
 
@@ -451,8 +463,6 @@ void JevpPlot::draw()
   }
   gPad->SetGridx(gridx);
   gPad->SetGridy(gridy);
-  
-
 
   gStyle->SetPalette(palette);  
 
@@ -464,6 +474,10 @@ void JevpPlot::draw()
     while(curr) {
       double m;
       m = curr->histo->GetBinContent(curr->histo->GetMaximumBin());
+      
+      if(ex1) {
+	LOG("JEFF", "%s max bin = %d",myname, m);
+      }
       
       LOG(NOTE, "Histo %s: (%s) m=%f %d",GetPlotName(), curr->histo->GetName(), m, dimension);
       
@@ -517,7 +531,7 @@ void JevpPlot::draw()
     LOG(DBG, "opts---%s\n",opts);
     curr->histo->Draw(opts);
     same = (char *)"SAME";
-
+    
     curr = (PlotHisto *)histos.After(curr);
   }
 
@@ -530,14 +544,14 @@ void JevpPlot::draw()
     element->Draw();
     element = (TObject *)elements.After(element);
   }
-
-
+  
+  
   //JLatex *el = new JLatex(.3,.5,GetPlotName());
   //el->Draw();
   //gPad->Update();
   // delete el;
 
-
+  
   if(legend)
     legend->Draw();
 }

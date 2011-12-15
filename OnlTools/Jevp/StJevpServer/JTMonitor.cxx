@@ -37,6 +37,11 @@ TSocket *JTMonitor::Select(int delay)
     pollfds[n].fd = s->GetDescriptor();
     pollfds[n].events = POLLIN | POLLPRI;
     pollfds[n].revents = 0;
+    
+    if(n >= _JT_NSOCK_) {
+      LOG(CRIT, "N(%d) > _JT_NSOCK_(%d)",n,_JT_NSOCK_);
+    }
+    
     n++;
   }
 

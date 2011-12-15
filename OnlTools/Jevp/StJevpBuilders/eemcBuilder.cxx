@@ -417,7 +417,7 @@ void eemcBuilder::event(daqReader *rdr)
   eventn++;
   
   StTriggerData *trgd = getStTriggerData(rdr);
-  if(!trgd) return;
+  // if(!trgd) return;
 
   //LOG("JEFF", "FillHisto");
   EEMCPlots::fillHisto( (char *)rdr,
