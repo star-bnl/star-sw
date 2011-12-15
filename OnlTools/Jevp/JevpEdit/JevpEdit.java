@@ -781,7 +781,18 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 	    me = n.name;
 	}
 
-	
+	String answer = "";
+	if(me != null) {
+	    answer = me;
+	}
+	if(siblings != null) {
+	    answer = me + "," + siblings;
+	}
+	if(children != null) {
+	    answer = me + "," + children;
+	}
+
+	return answer;
     }
 
     DefaultMutableTreeNode createNewSiblingTab(JTree t, DefaultMutableTreeNode o)
@@ -885,7 +896,8 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 	}
 
 	if(e.getActionCommand().equals("check children")) {
-	    checkChildren(menuTree, o);
+	    String ans = checkChildren(o);
+	    System.out.printf("The following are not in the pallete: %s\n",ans);
 	}
 
 

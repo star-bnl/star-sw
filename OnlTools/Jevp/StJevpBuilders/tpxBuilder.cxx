@@ -537,7 +537,7 @@ void tpxBuilder::event(daqReader *rdr)
 
     break;
   default:
-    LOG(WARN, "Trigger command other than 4,8,9,10");
+    LOG(WARN, "Trigger command other than 4,8,9,10: evt %d, token=%d, cmd=%d",rdr->seq, rdr->token, rdr->trgcmd);
   }
 
   // Normalize the charge histos
