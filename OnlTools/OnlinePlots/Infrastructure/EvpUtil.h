@@ -65,8 +65,8 @@ class EvpUtil {
   static int GetLogY(const int i,const int j);
   static int GetLogZ(const int i,const int j);
   static bool DisplayOneCanvas(TMapFile* mfile , TPad* gcc, const int i, const int j, bool doClear=false);    // return true if canvas should be printed
-  static bool DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, const int j, bool doClear=false, GroupCollection* hGroups=NULL); // return true if canvas should be printed
-  static bool HasEntries(GenericFile* gFile , int i, int j);
+  static bool DisplayOneCanvas(GenericFile* genFile , TPad* gcc, const int i, const int j, bool doClear=false, GroupCollection* hGroups=NULL); // return true if canvas should be printed
+  static bool HasEntries(GenericFile* genFile , int i, int j);
   static int ParseString (const TString &tChain, TObjArray &Opt);
   
   static int ReadCanvasDefinitions(char* file = mCanvasDescriptionFile);
@@ -106,7 +106,7 @@ class EvpUtil {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.h,v 1.9 2009/09/29 19:20:11 genevb Exp $
+ * $Id: EvpUtil.h,v 1.10 2011/12/19 22:20:27 genevb Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -116,6 +116,9 @@ class EvpUtil {
  ***************************************************************************
  *
  * $Log: EvpUtil.h,v $
+ * Revision 1.10  2011/12/19 22:20:27  genevb
+ * Better variable name (no conflicts) for generic files
+ *
  * Revision 1.9  2009/09/29 19:20:11  genevb
  * A couple char to const char fixes
  *
