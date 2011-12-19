@@ -588,10 +588,10 @@ void EvpUtil::Draw(TH1*h, const char* options) {
 }
 
 //-------------------------------------------------------------
-bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, const int j, bool doClear, GroupCollection* hGroups) {
+bool  EvpUtil::DisplayOneCanvas(GenericFile* genFile , TPad* gcc, const int i, const int j, bool doClear, GroupCollection* hGroups) {
   if(hGroupName[i][j] != "") {	// histogram groups
     if(hGroups != NULL && hGroups->contains(hGroupName[i][j])) {
-      HistogramGroup* hg = hGroups->read(gFile,hGroupName[i][j]);
+      HistogramGroup* hg = hGroups->read(genFile,hGroupName[i][j]);
       hg->draw(((TCanvas*) gcc));
       hg->setPrinted(true);
       return true;
@@ -628,13 +628,13 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
   // EEMC
   if(i>=11 && i<=14 ) {
     //    printf("\n\n EEMC display i=%d j=%d\n\n",i,j);
-        eePlot(i,j,gFile, gcc, gEnv->GetValue("Online.eemcMask","eemcTwMask.dat"));
+        eePlot(i,j,genFile, gcc, gEnv->GetValue("Online.eemcMask","eemcTwMask.dat"));
 	goto ret;
   }
   
   // BEMC
   if (i == 5 || i ==6) {
-    BEMCPlotsPresenter::displayTab(i - 5, j - 1, gFile, gcc, 0);
+    BEMCPlotsPresenter::displayTab(i - 5, j - 1, genFile, gcc, 0);
     goto ret;
     
   }
@@ -675,11 +675,11 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
     
     
     
-    hHist[1][2][2] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[1][2][2].Data(), hHist[1][2][2]);
+    hHist[1][2][2] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[1][2][2].Data(), hHist[1][2][2]);
     //h338_ftp_west it's 2d
-    hHist[7][3][0] = (TH2 *)GetHistoFromGenericFile(gFile,hNames[7][3][0].Data(), hHist[7][3][0]);
+    hHist[7][3][0] = (TH2 *)GetHistoFromGenericFile(genFile,hNames[7][3][0].Data(), hHist[7][3][0]);
     //h339_ftp_east
-    hHist[7][3][1] = (TH2 *)GetHistoFromGenericFile(gFile,hNames[7][3][1].Data(), hHist[7][3][1]);
+    hHist[7][3][1] = (TH2 *)GetHistoFromGenericFile(genFile,hNames[7][3][1].Data(), hHist[7][3][1]);
     
     int nEntries = (int) hHist[1][2][2]->GetEntries();
     //cout<<"h11 Entries "<<nEntries<<endl;
@@ -702,9 +702,9 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
   //         //82
   //         cc->cd(1);
   //         //
-  //         hh[0] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][0].Data(), hh[0]);
+  //         hh[0] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][0].Data(), hh[0]);
   //         //69
-  //         hh[1] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][1].Data(), hh[1]);
+  //         hh[1] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][1].Data(), hh[1]);
   
   //         hh[0]->SetFillColor(0);
   //         hh[0]->Draw();
@@ -714,9 +714,9 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
   
   //         cc->cd(2);
   //         //83
-  //         hh[2] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][2].Data(), hh[2]);
+  //         hh[2] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][2].Data(), hh[2]);
   //         //70
-  //         hh[3] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][3].Data(), hh[3]);
+  //         hh[3] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][3].Data(), hh[3]);
   
   //         hh[2]->SetFillColor(0);
   //         hh[2]->Draw();
@@ -735,9 +735,9 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
   //         // gStyle->SetStatW(0);
   //         // gStyle->SetStatH(0);
   //         cc->cd(1);
-  //         hh[0] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][0].Data(), hh[0]);
+  //         hh[0] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][0].Data(), hh[0]);
   //         //hh[0]->SetDirectory(0);
-  //         hh[11] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][11].Data(), hh[11]);
+  //         hh[11] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][11].Data(), hh[11]);
   //         //hh[11]->SetDirectory(0);
   //         Draw(hh[0]->Draw();
   //         TH1 *htemp[10];
@@ -777,7 +777,7 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
   //             int color=k+1;
   //             if (color>9)
   //             {color+=2;}
-  //             hh[k+1] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][k+1].Data(), hh[k+1]);
+  //             hh[k+1] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][k+1].Data(), hh[k+1]);
   //             hh[k+1]->SetFillColor(0);
   //             hh[k+1]->SetLineColor(color);
   //             hmax = hh[k+1]->GetMaximum();
@@ -801,38 +801,38 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
       
       gcc->cd(1);
   
-      hh[0] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][0].Data(),hh[0]);
+      hh[0] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][0].Data(),hh[0]);
       hh[0]->SetFillColor(1); hh[0]->SetLineColor(1);
       Draw(hh[0]); bunchCounterLegend->AddEntry(hh[0],"Events","F");
-      hh[1] = (TH1 *)GetHistoFromGenericFile(gFile,"h442_bunch_yellow_fill",hh[1]);
+      hh[1] = (TH1 *)GetHistoFromGenericFile(genFile,"h442_bunch_yellow_fill",hh[1]);
       hh[1]->SetFillColor(3); hh[1]->SetLineColor(3);
       Draw(hh[1],"SAME"); bunchCounterLegend->AddEntry(hh[1],"Y Filled","F");
-      hh[2] = (TH1 *)GetHistoFromGenericFile(gFile,"h443_bunch_yellow_up",hh[2]);
+      hh[2] = (TH1 *)GetHistoFromGenericFile(genFile,"h443_bunch_yellow_up",hh[2]);
       hh[2]->SetFillColor(2); hh[2]->SetLineColor(2);
       Draw(hh[2],"SAME"); bunchCounterLegend->AddEntry(hh[2],"Y Up","F");
-      hh[3] = (TH1 *)GetHistoFromGenericFile(gFile,"h444_bunch_yellow_down",hh[3]);
+      hh[3] = (TH1 *)GetHistoFromGenericFile(genFile,"h444_bunch_yellow_down",hh[3]);
       hh[3]->SetFillColor(4); hh[3]->SetLineColor(4);
       Draw(hh[3],"SAME"); bunchCounterLegend->AddEntry(hh[3],"Y Down","F");
-      hh[4] = (TH1 *)GetHistoFromGenericFile(gFile,"h445_bunch_yellow_unpol",hh[4]);
+      hh[4] = (TH1 *)GetHistoFromGenericFile(genFile,"h445_bunch_yellow_unpol",hh[4]);
       hh[4]->SetFillColor(5); hh[4]->SetLineColor(5);
       Draw(hh[4],"SAME"); bunchCounterLegend->AddEntry(hh[4],"Y Unpol","F"); 
       bunchCounterLegend->Draw();
 
       gcc->cd(2); 
 
-      hh[5] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][0].Data(),hh[5]);
+      hh[5] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][0].Data(),hh[5]);
       hh[5]->SetFillColor(1); hh[5]->SetLineColor(1);
       Draw(hh[5]); bunchCounterLegend2->AddEntry(hh[5],"Events","F");
-      hh[6] = (TH1 *)GetHistoFromGenericFile(gFile,"h446_bunch_blue_fill",hh[6]);
+      hh[6] = (TH1 *)GetHistoFromGenericFile(genFile,"h446_bunch_blue_fill",hh[6]);
       hh[6]->SetFillColor(3); hh[6]->SetLineColor(3);
       Draw(hh[6],"SAME"); bunchCounterLegend2->AddEntry(hh[6],"B Filled","F");
-      hh[7] = (TH1 *)GetHistoFromGenericFile(gFile,"h447_bunch_blue_up",hh[7]);
+      hh[7] = (TH1 *)GetHistoFromGenericFile(genFile,"h447_bunch_blue_up",hh[7]);
       hh[7]->SetFillColor(2); hh[7]->SetLineColor(2);
       Draw(hh[7],"SAME"); bunchCounterLegend2->AddEntry(hh[7],"B Up","F");
-      hh[8] = (TH1 *)GetHistoFromGenericFile(gFile,"h448_bunch_blue_down",hh[8]);
+      hh[8] = (TH1 *)GetHistoFromGenericFile(genFile,"h448_bunch_blue_down",hh[8]);
       hh[8]->SetFillColor(4); hh[8]->SetLineColor(4);
       Draw(hh[8],"SAME"); bunchCounterLegend2->AddEntry(hh[8],"B Down","F");
-      hh[9] = (TH1 *)GetHistoFromGenericFile(gFile,"h449_bunch_blue_unpol",hh[9]);
+      hh[9] = (TH1 *)GetHistoFromGenericFile(genFile,"h449_bunch_blue_unpol",hh[9]);
       hh[9]->SetFillColor(5); hh[9]->SetLineColor(5);
       Draw(hh[9],"SAME"); bunchCounterLegend2->AddEntry(hh[9],"B Unpol","F");
       bunchCounterLegend2->Draw();
@@ -849,9 +849,9 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
 	cout<<"Get histo:"<<hNames[i][j][k]<<endl;
       }
       // Actual get of the histogram
-      //    hh[k] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][k].Data(), hh[k]);
+      //    hh[k] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][k].Data(), hh[k]);
       gPad->GetListOfPrimitives()->Remove( hh[k]);
-      hHist[i][j][k] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][k].Data(),hHist[i][j][k]);
+      hHist[i][j][k] = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][k].Data(),hHist[i][j][k]);
       //hHist[i][j][k] = mHist[i][j][k];
 
       // Check if what we asked for exists
@@ -947,10 +947,10 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
 }
 
 
-bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
+bool EvpUtil::HasEntries(GenericFile* genFile , int i, int j) {
   for(int k=0; k<nHist[i][j]; k++) {
       TH1* h  = 0;
-      h = (TH1 *)GetHistoFromGenericFile(gFile,hNames[i][j][k].Data(),h);
+      h = (TH1 *)GetHistoFromGenericFile(genFile,hNames[i][j][k].Data(),h);
       if ( h ) {
 	if ( h->GetEntries() ) {
 	  if ( h->GetMean()>0 || h->GetRMS()>0 ) return true;
@@ -964,7 +964,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.16 2010/04/08 23:50:58 genevb Exp $
+ * $Id: EvpUtil.cxx,v 1.17 2011/12/19 22:20:27 genevb Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -974,6 +974,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.17  2011/12/19 22:20:27  genevb
+ * Better variable name (no conflicts) for generic files
+ *
  * Revision 1.16  2010/04/08 23:50:58  genevb
  * Use linear for plots with no entries
  *
