@@ -30,6 +30,7 @@
 #include "Jevp/StJevpBuilders/bbcBuilder.h"
 #include "Jevp/StJevpBuilders/daqBuilder.h"
 #include "Jevp/StJevpBuilders/eemcBuilder.h"
+#include "Jevp/StJevpBuilders/bemcBuilder.h"
 #include "Jevp/StJevpBuilders/fpdBuilder.h"
 #include "Jevp/StJevpBuilders/hltBuilder.h"
 #include "Jevp/StJevpBuilders/l3Builder.h"
@@ -244,6 +245,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
   builders.Add(new baseBuilder);
   builders.Add(new bbcBuilder());
   builders.Add(new daqBuilder());
+  builders.Add(new bemcBuilder());
   builders.Add(new eemcBuilder());
   builders.Add(new fpdBuilder());
   builders.Add(new hltBuilder());

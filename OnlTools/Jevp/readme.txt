@@ -17,6 +17,8 @@ readme files:
 > cvs co OnlTools/Jevp
 > cvs co OnlTools/PDFUtil
 > cvs co StRoot/RTS
+> cvs co StRoot/StDaqLib
+> cvs co StRoot/StEvent
 > source OnlTools/Jevp/level.source
 > cons
 
