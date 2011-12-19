@@ -761,36 +761,82 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 	return ntnode;
     }
 
-    String checkChildren(DefaultMutableTreeNode o)
+
+    JNode findChildOrSiblingByName(JNode node, String name) {
+	if(node.name.equals(name)) {
+	    return node;
+	}
+
+	JNode ret = null;
+	if(node.next != null) {
+	    ret = findChildOrSiblingByName(node.next, name);
+	    if(ret != null) return ret;
+	}
+
+	if(node.child != null) {
+	    ret = findChildOrSiblingByName(node.child, name);
+	    if(ret != null) return ret;
+	}
+
+	return ret;
+    }
+
+    Boolean inPallete(String name)
     {
-	String me;
-	String children;
-	String siblings;
+	JNode ret = findChildOrSiblingByName(palleteData, name);
+	if(ret != null) return true;
+	return false;
+    }
 
-	JNode n = (JNode)o.getUserObject();
+
+    String checkChildren(JNode n, Boolean checkSiblings)
+    {
+
+	System.out.printf("Checking node %s\n",n.name);
+
+	String me = null;
+	String children = null;
+	String siblings = null;
 	
-	if(n.child) {
-	    children = checkChildren(n.child);
+	if(n.child != null) {
+	    children = checkChildren(n.child,true);
 	}
 
-	if(n.next) {
-	    siblings = checkSiblings(n.child);
+	if(checkSiblings) {
+	    if(n.next != null) {
+		siblings = checkChildren(n.next,true);
+	    }
 	}
 
-	if(!inPallete(n)) {
-	    me = n.name;
+	if(n.leaf) {
+	    if(!inPallete(n.name)) {
+		me = n.name;
+	    }
 	}
 
-	String answer = "";
+	String answer = null;
+
 	if(me != null) {
 	    answer = me;
 	}
 	if(siblings != null) {
-	    answer = me + "," + siblings;
+	    if(answer == null) {
+		answer = siblings;
+	    }
+	    else {
+		answer = answer + "," + siblings;
+	    }
 	}
 	if(children != null) {
-	    answer = me + "," + children;
+	    if(answer == null) {
+		answer = children; 
+	    }
+	    else {
+		answer = answer + "," + children;
+	    }
 	}
+
+	System.out.printf("returning:  me=%s answer=%s\n",n.name,answer);
 
 	return answer;
     }
@@ -896,7 +942,9 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 	}
 
 	if(e.getActionCommand().equals("check children")) {
-	    String ans = checkChildren(o);
+	    
+	    JNode nn = (JNode)o.getUserObject();
+	    String ans = checkChildren(nn, false);
 	    System.out.printf("The following are not in the pallete: %s\n",ans);
 	}
 
