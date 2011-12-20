@@ -947,7 +947,7 @@ void dev13()
     geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1;
     geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
     geom.mutdFlag = "MUTD04";  geom.mutdStat = 1;
-    geom.pipeFlag = "PIPE12";  geom.pipeStat = 1;
+    geom.pipeFlag = "PIPEv1";  geom.pipeStat = 1;
     // ================================================ 
     geom.pixlFlag = "PIXL02";  geom.pixlStat = 1; 
     // ================================================ 
