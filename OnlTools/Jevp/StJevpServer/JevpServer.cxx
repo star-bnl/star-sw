@@ -615,9 +615,10 @@ void JevpServer::performStopRun()
   }
   CP;
 
-  LOG(DBG, "Writing display file...%s",fn);
+  LOG("JEFF", "Writing display file...%s",fn);
+  unlink(fn);
   if(displays->Write(fn) < 0) {
-    LOG(ERR, "Error writing xml file %s",fn);
+    LOG(ERR, "Error writing display file %s",fn);
   }
 
   char *args[4];
