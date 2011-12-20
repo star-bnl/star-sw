@@ -1227,7 +1227,7 @@ Bool_t Geometry::PipeInit() // Does this break the config=-1 scheme?
   }
 
   // New beam pipe
-  pipeGeom.select="PIPE20"; {
+  pipeGeom.select="PIPEv1"; {
     pipeGeom.config=0;
     pipeGeom.flag=0;
     pipeGeom.module="PipeGeo1";
