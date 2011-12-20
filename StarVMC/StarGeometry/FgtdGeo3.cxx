@@ -29,6 +29,18 @@
        // ---------------------------------------------------------------------------------------------------     
           ///@addtogroup FgtdGeo3_vars     
           ///@{        
+                float cooltubeinr=10.25;        
+                //        
+                /// float cooltubeinr=10.25        
+          ///@}     
+          ///@addtogroup FgtdGeo3_vars     
+          ///@{        
+                float cooltubedz=150;        
+                //        
+                /// float cooltubedz=150        
+          ///@}     
+          ///@addtogroup FgtdGeo3_vars     
+          ///@{        
                 float diskinr=10.35;        
                 //        
                 /// float diskinr=10.35        
@@ -191,10 +203,9 @@
           /// AgML structure members:     
           ///                             
           ///Float_t config;     
-          ///Float_t startz;     
-          ///Float_t diskstepz;     
           ///Int_t ndisk;     
           ///Int_t nquad;     
+          ///Array_t<Float_t> zdisca;     
           ///Int_t _index;     
           //     
           Fgst_t fgst;     
@@ -213,7 +224,7 @@
                         Bool_t _same_shape = true;           
                       { AgAttribute attr = AgAttribute("FGTM");              
                             attr.par("seen")=0;              
-                            attr.par("colo")=6;              
+                            attr.par("colo")=1;              
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
@@ -224,19 +235,41 @@
                       {  AgShape shape = AgShape("Tube");              
                             shape     .Inherit( AgBlock::previous() );              
                             create     .SetParameters(shape);              
-                            shape.par("rmin")=diskinr;              
+                            shape.par("rmin")=cooltubeinr;              
                             shape.par("rmax")=diskoutr;              
                             shape.par("dz")=fgtlenz/2.0;              
-                            /// Shape Tube rmin=diskinr rmax=diskoutr dz=fgtlenz/2.0               
+                            /// Shape Tube rmin=cooltubeinr rmax=diskoutr dz=fgtlenz/2.0               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
                             if (_same_shape) goto END_OF_FGTM;              
                             _stacker -> Build(this);              
                       }           
+                      _create = AgCreate("FGCT");           
+                      {              
+                            AgShape myshape; // undefined shape              
+                            ///Create FGCT              
+                            Create("FGCT");               
+                      }           
+                      { AgPlacement place = AgPlacement("FGCT","FGTM");              
+                            /// Add daughter volume FGCT to mother FGTM              
+                            _stacker -> Position( AgBlock::Find("FGCT"), place );              
+                      } // end placement of FGCT           
+                      _create = AgCreate("FGCN");           
+                      {              
+                            AgShape myshape; // undefined shape              
+                            ///Create FGCN              
+                            Create("FGCN");               
+                      }           
+                      { AgPlacement place = AgPlacement("FGCN","FGTM");              
+                            /// Add daughter volume FGCN to mother FGTM              
+                            place.TranslateZ(-fgtlenz/2.0+0.64/2.);              
+                            /// Translate z = -fgtlenz/2.0+0.64/2.              
+                            _stacker -> Position( AgBlock::Find("FGCN"), place );              
+                      } // end placement of FGCN           
                       /// Loop on disk from 1 to fgst.ndisk step=1           
                       for ( disk=1; (1>0)? (disk<=fgst.ndisk):(disk>=fgst.ndisk); disk+=1 )           
                       {              
-                            diskz=-fgtlenz/2. +disklenz/2. + (disk-1.0)*fgst.diskstepz;              
+                            diskz=-fgtlenz/2.+1.0 +disklenz/2. + fgst.zdisca(disk)- fgst.zdisca(1);              
                             if ( (fgst.config==2.0)||(disk<=1) )              
                             {                 
                                   _create = AgCreate("FGTD");                 
@@ -249,6 +282,8 @@
                                         /// Add daughter volume FGTD to mother FGTM                    
                                         place.TranslateZ(diskz);                    
                                         /// Translate z = diskz                    
+                                        place.par("ncopy")=disk;                    
+                                        /// Ncopy: disk                    
                                         place.AlphaZ(quadtiltang);                    
                                         /// Rotate: AlphaZ = quadtiltang                    
                                         /// G3 Reference: thetax = 90                    
@@ -272,6 +307,8 @@
                                         /// Add daughter volume FGTH to mother FGTM                    
                                         place.TranslateZ(diskz);                    
                                         /// Translate z = diskz                    
+                                        place.par("ncopy")=disk;                    
+                                        /// Ncopy: disk                    
                                         place.AlphaZ(quadtiltang);                    
                                         /// Rotate: AlphaZ = quadtiltang                    
                                         /// G3 Reference: thetax = 90                    
@@ -284,10 +321,129 @@
                                   } // end placement of FGTH                 
                             }              
                       }           
+                      /// Loop on disk from 2 to fgst.ndisk step=1           
+                      for ( disk=2; (1>0)? (disk<=fgst.ndisk):(disk>=fgst.ndisk); disk+=1 )           
+                      {              
+                            diskz=-fgtlenz/2. + 1.0 + fgst.zdisca(disk)- fgst.zdisca(1) -1.28/2.;              
+                            _create = AgCreate("FGCM");              
+                            {                 
+                                  AgShape myshape; // undefined shape                 
+                                  ///Create FGCM                 
+                                  Create("FGCM");                  
+                            }              
+                            { AgPlacement place = AgPlacement("FGCM","FGTM");                 
+                                  /// Add daughter volume FGCM to mother FGTM                 
+                                  place.TranslateZ(diskz);                 
+                                  /// Translate z = diskz                 
+                                  _stacker -> Position( AgBlock::Find("FGCM"), place );                 
+                            } // end placement of FGCM              
+                      }           
                       END_OF_FGTM:           
                       mCurrent = _save;           
                 ///@}        
           } // End Block FGTM     
+          // ---------------------------------------------------------------------------------------------------     
+          void FGCT::Block( AgCreate create )     
+          {         
+                ///@addtogroup FGCT_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("FGCT");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=6;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material CFRPMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Cfrpmix");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Tube");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("rmin")=cooltubeinr;              
+                            shape.par("rmax")=cooltubeinr+0.05;              
+                            shape.par("dz")=cooltubedz/2.;              
+                            /// Shape Tube rmin=cooltubeinr rmax=cooltubeinr+0.05 dz=cooltubedz/2.               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_FGCT;              
+                            _stacker -> Build(this);              
+                      }           
+                      END_OF_FGCT:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block FGCT     
+          // ---------------------------------------------------------------------------------------------------     
+          void FGCN::Block( AgCreate create )     
+          {         
+                ///@addtogroup FGCN_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("FGCN");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=6;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material Nylon            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Nylon");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Tube");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("rmin")=10.35;              
+                            shape.par("rmax")=11.5;              
+                            shape.par("dz")=0.64/2.;              
+                            /// Shape Tube rmin=10.35 rmax=11.5 dz=0.64/2.               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_FGCN;              
+                            _stacker -> Build(this);              
+                      }           
+                      END_OF_FGCN:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block FGCN     
+          // ---------------------------------------------------------------------------------------------------     
+          void FGCM::Block( AgCreate create )     
+          {         
+                ///@addtogroup FGCM_doc        
+                ///@{           
+                        AgBlock *_save = mCurrent;           
+                        mCurrent = this;           
+                        Bool_t _same_shape = true;           
+                      { AgAttribute attr = AgAttribute("FGCM");              
+                            attr.par("seen")=1;              
+                            attr.par("colo")=6;              
+                            attr.Inherit( AgBlock::previous() );               
+                            _attribute = attr;              
+                      }           
+                      /// Material CoolMix            
+                      {  AgMaterial mat = AgMaterial::CopyMaterial("Coolmix");              
+                            _material = mat;              
+                      }           
+                      {  AgShape shape = AgShape("Tube");              
+                            shape     .Inherit( AgBlock::previous() );              
+                            create     .SetParameters(shape);              
+                            shape.par("rmin")=10.35;              
+                            shape.par("rmax")=11.54;              
+                            shape.par("dz")=1.28/2.;              
+                            /// Shape Tube rmin=10.35 rmax=11.54 dz=1.28/2.               
+                            _same_shape &= _stacker->SearchVolume( shape, _attribute );              
+                            _shape = shape;              
+                            if (_same_shape) goto END_OF_FGCM;              
+                            _stacker -> Build(this);              
+                      }           
+                      END_OF_FGCM:           
+                      mCurrent = _save;           
+                ///@}        
+          } // End Block FGCM     
           // ---------------------------------------------------------------------------------------------------     
           void FGTD::Block( AgCreate create )     
           {         
@@ -1937,7 +2093,7 @@
        {        
              ///@addtogroup FgtdGeo3_revision        
              ///@{           
-                   /// Created:   10/04/2011            
+                   /// Created:   12/20/2011            
              ///@}        
              ///@addtogroup FgtdGeo3_revision        
              ///@{           
@@ -1967,6 +2123,9 @@
              AddBlock("FGWC");        
              AddBlock("FGWD");        
              AddBlock("FGWE");        
+             AddBlock("FGCT");        
+             AddBlock("FGCN");        
+             AddBlock("FGCM");        
              // ---------------------------------------------------------------------------------------------------        
              ///@addtogroup fggg_doc        
              ///@{           
@@ -1983,14 +2142,22 @@
                    ++fgst._index;           
                    fgst . config = 1.0; // versioning of the FGST geometry data           
                    /// fgst . config = 1.0; // versioning of the FGST geometry data           
-                   fgst . startz = 70.; //  position of sensitive volume of the 1st disk           
-                   /// fgst . startz = 70.; //  position of sensitive volume of the 1st disk           
-                   fgst . diskstepz = 10.; //  disk separation along Z           
-                   /// fgst . diskstepz = 10.; //  disk separation along Z           
                    fgst . ndisk = 6; // number of disks           
                    /// fgst . ndisk = 6; // number of disks           
                    fgst . nquad = 4; // number quadrants in a disks           
                    /// fgst . nquad = 4; // number quadrants in a disks           
+                   fgst . zdisca.at(0) = 67.3990; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
+                   ///fgst . zdisca.at(0) = 67.3990; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
+                   fgst . zdisca.at(1) = 77.8765; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
+                   ///fgst . zdisca.at(1) = 77.8765; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
+                   fgst . zdisca.at(2) = 87.0840; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
+                   ///fgst . zdisca.at(2) = 87.0840; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
+                   fgst . zdisca.at(3) = 97.4821; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
+                   ///fgst . zdisca.at(3) = 97.4821; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
+                   fgst . zdisca.at(4) = 108.9121; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
+                   ///fgst . zdisca.at(4) = 108.9121; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
+                   fgst . zdisca.at(5) = 118.9927; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
+                   ///fgst . zdisca.at(5) = 118.9927; //  z-center of disk senstive volume from center in STAR , as measured in 2011-10             
                    //           
                    fgst.fill();           
              ///@}        
@@ -2001,14 +2168,22 @@
                    ++fgst._index;           
                    fgst . config = 2.0; // versioning of the FGST geometry data           
                    /// fgst . config = 2.0; // versioning of the FGST geometry data           
-                   fgst . startz = 70.; //  position of sensitive volume of the 1st disk           
-                   /// fgst . startz = 70.; //  position of sensitive volume of the 1st disk           
-                   fgst . diskstepz = 10.; //  disk separation along Z           
-                   /// fgst . diskstepz = 10.; //  disk separation along Z           
                    fgst . ndisk = 6; // number of disks           
                    /// fgst . ndisk = 6; // number of disks           
                    fgst . nquad = 4; // number quadrants in a disks           
                    /// fgst . nquad = 4; // number quadrants in a disks           
+                   fgst . zdisca.at(0) = 70.; //  z-center of disk senstive volume from center in STAR , ideal location            
+                   ///fgst . zdisca.at(0) = 70.; //  z-center of disk senstive volume from center in STAR , ideal location            
+                   fgst . zdisca.at(1) = 80.; //  z-center of disk senstive volume from center in STAR , ideal location            
+                   ///fgst . zdisca.at(1) = 80.; //  z-center of disk senstive volume from center in STAR , ideal location            
+                   fgst . zdisca.at(2) = 90.; //  z-center of disk senstive volume from center in STAR , ideal location            
+                   ///fgst . zdisca.at(2) = 90.; //  z-center of disk senstive volume from center in STAR , ideal location            
+                   fgst . zdisca.at(3) = 100.; //  z-center of disk senstive volume from center in STAR , ideal location            
+                   ///fgst . zdisca.at(3) = 100.; //  z-center of disk senstive volume from center in STAR , ideal location            
+                   fgst . zdisca.at(4) = 110.; //  z-center of disk senstive volume from center in STAR , ideal location            
+                   ///fgst . zdisca.at(4) = 110.; //  z-center of disk senstive volume from center in STAR , ideal location            
+                   fgst . zdisca.at(5) = 120.; //  z-center of disk senstive volume from center in STAR , ideal location            
+                   ///fgst . zdisca.at(5) = 120.; //  z-center of disk senstive volume from center in STAR , ideal location            
                    //           
                    fgst.fill();           
              ///@}        
@@ -2024,6 +2199,53 @@
                    mix.Component("C",12,6,0.220);           
                    mix.Component("H",1,1,0.032);           
                    mix.par("dens")=1.80;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component O	a=16	z=8	w=0.062        
+             /// Component C	a=12	z=6	w=0.892        
+             /// Component H	a=1	z=1	w=0.019        
+             /// Component Cl	a=35.5	z=17	w=0.027        
+             /// Mixture CFRPMix dens=1.78        
+             {  AgMaterial &mix = AgMaterial::Get("Cfrpmix");           
+                   mix.Component("O",16,8,0.062);           
+                   mix.Component("C",12,6,0.892);           
+                   mix.Component("H",1,1,0.019);           
+                   mix.Component("Cl",35.5,17,0.027);           
+                   mix.par("dens")=1.78;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component O	a=16	z=8	w=0.142        
+             /// Component C	a=12	z=6	w=0.637        
+             /// Component H	a=1	z=1	w=0.097        
+             /// Component N	a=14	z=7	w=0.124        
+             /// Mixture Nylon dens=1.15        
+             {  AgMaterial &mix = AgMaterial::Get("Nylon");           
+                   mix.Component("O",16,8,0.142);           
+                   mix.Component("C",12,6,0.637);           
+                   mix.Component("H",1,1,0.097);           
+                   mix.Component("N",14,7,0.124);           
+                   mix.par("dens")=1.15;           
+                   mix.lock();           
+                   _material = mix;           
+                   _material.lock();           
+             }        
+             /// Component O	a=16	z=8	w=0.129        
+             /// Component C	a=12	z=6	w=0.579        
+             /// Component H	a=1	z=1	w=0.088        
+             /// Component N	a=14	z=7	w=0.112        
+             /// Component Al	a=27	z=13	w=0.092        
+             /// Mixture CoolMix dens=1.214        
+             {  AgMaterial &mix = AgMaterial::Get("Coolmix");           
+                   mix.Component("O",16,8,0.129);           
+                   mix.Component("C",12,6,0.579);           
+                   mix.Component("H",1,1,0.088);           
+                   mix.Component("N",14,7,0.112);           
+                   mix.Component("Al",27,13,0.092);           
+                   mix.par("dens")=1.214;           
                    mix.lock();           
                    _material = mix;           
                    _material.lock();           
@@ -2217,8 +2439,8 @@
              /// USE fgst config=fggg.fgstconfig;        
              fgst.Use("config",(Float_t)fggg.fgstconfig);        
              disklenz=volnomexdz+volsensdz+volgemdz+volreaddz+volelecdz;        
-             fgtlenz = (fgst.ndisk-1)* fgst.diskstepz +disklenz;        
-             centerz = fgst.startz+fgtlenz/2.0 -( volnomexdz+volsensdz/2.);        
+             fgtlenz = cooltubedz;        
+             centerz = fgst.zdisca(1) +fgtlenz/2.0 -( volnomexdz+volsensdz/2.);        
              xx=acos(flatoutr/diskoutr);        
              flatang1=flatperpang-xx/degrad;        
              flatang2=flatperpang+xx/degrad;        

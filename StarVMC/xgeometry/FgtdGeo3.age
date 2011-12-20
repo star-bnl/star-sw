@@ -1,12 +1,17 @@
       MODULE FGTDGEO3    forward GEM tracking detector for 2012 , 2013
-      Created   10/04/2011
+      Created   12/20/2011
       Author Jan Balewski MIT, Wei-Ming Zhang KSU, Willie Leight MIT (material mixes)
       +CDE,agecom,gcunit,gconst.
       CONTENT FGTM, FGTD, FGTQ,  FGTH,
       FGVN, FGZC, FGVG, FGVR, FGVE,
       FGQA, FGQB, FGQC, FGQD, FGQE, FGQF,
       FGXA, FGXB, FGXC, FGXD,
-      FGWA, FGWB, FGWC, FGWD, FGWE
+      FGWA, FGWB, FGWC, FGWD, FGWE,
+      FGCT, FGCN, FGCM
+      real *4 coolTubeInR/10.25/
+
+      real *4 coolTubeDZ/150/
+
       real *4 diskInR/10.35/
 
       real *4 diskOutR/39.4/
@@ -57,29 +62,44 @@
             k,zzFGZ, xxFGX,xxFGQ, xxFGZ
 
       STRUCTURE FGGG { FgstConfig}
-      STRUCTURE FGST { config,startZ,diskStepZ,int ndisk,int nQuad}
+      STRUCTURE FGST { config,int ndisk,int nQuad,zDiscA(6)}
       FILL FGGG		! FGT Geometry Control Structure
       FgstConfig = 1.0 ! selection of no. of disks and quadrants
       ENDFILL
       FILL FGST		! FGT Geometry  for year 2012
       config = 1.0 ! versioning of the FGST geometry data
-      startZ = 70. !  position of sensitive volume of the 1st disk
-      diskStepZ = 10. !  disk separation along Z
       ndisk = 6 ! number of disks
       nQuad = 4 ! number quadrants in a disks
+      zdiscA  = {   67.3990,   77.8765,   87.0840,   97.4821, 
+                   108.9121,  118.9927} !   z-center of disk senstive volume from center in STAR , as measured in 2011-10  
       ENDFILL
       FILL FGST		! FGT Geometry with one quadrant in one disk
       config = 2.0 ! versioning of the FGST geometry data
-      startZ = 70. !  position of sensitive volume of the 1st disk
-      diskStepZ = 10. !  disk separation along Z
       ndisk = 6 ! number of disks
       nQuad = 4 ! number quadrants in a disks
+      zdiscA  = {   70.,   80.,   90.,  100.,  110.,  120.} !   z-center of disk senstive volume from center in STAR , ideal location 
       ENDFILL
       COMPONENT Si A=28.08 Z=14 W=0.281
       COMPONENT O A=16 Z=8 W=0.467
       COMPONENT C A=12 Z=6 W=0.220
       COMPONENT H A=1 Z=1 W=0.032
       MIXTURE FR4 dens=1.80
+      COMPONENT O A=16 Z=8 W=0.062
+      COMPONENT C A=12 Z=6 W=0.892
+      COMPONENT H A=1 Z=1 W=0.019
+      COMPONENT Cl A=35.5 Z=17 W=0.027
+      MIXTURE CFRPMix dens=1.78
+      COMPONENT O A=16 Z=8 W=0.142
+      COMPONENT C A=12 Z=6 W=0.637
+      COMPONENT H A=1 Z=1 W=0.097
+      COMPONENT N A=14 Z=7 W=0.124
+      MIXTURE Nylon dens=1.15
+      COMPONENT O A=16 Z=8 W=0.129
+      COMPONENT C A=12 Z=6 W=0.579
+      COMPONENT H A=1 Z=1 W=0.088
+      COMPONENT N A=14 Z=7 W=0.112
+      COMPONENT Al A=27 Z=13 W=0.092
+      MIXTURE CoolMix dens=1.214
       COMPONENT O A=16 Z=8 W=0.090
       COMPONENT C A=12 Z=6 W=0.796
       COMPONENT H A=1 Z=1 W=0.023
@@ -152,8 +172,8 @@
       use FGGG
       use FGST config=FGGG_FgstConfig
       diskLenZ=volNomexDZ+volSensDZ+volGemDZ+volReadDZ+volElecDZ
-      fgtLenZ = (FGST_ndisk-1)* FGST_diskStepZ +diskLenZ
-      centerZ = FGST_startZ+fgtLenZ/2.0 -( volNomexDZ+volSensDZ/2.)
+      fgtLenZ = coolTubeDZ
+      centerZ = FGST_zdiscA(1) +fgtLenZ/2.0 -( volNomexDZ+volSensDZ/2.)
       xx=acos(flatOutR/diskOutR)
       flatAng1=flatPerpAng-xx/degrad
       flatAng2=flatPerpAng+xx/degrad
@@ -161,19 +181,48 @@
       POSITION FGTM in IDSM z=centerZ 
       ! ---------------------------------------------------------------------------------- FGTM
       BLOCK FGTM   mother volume for FGT assembly
-      ATTRIBUTE FGTM seen=0 colo=6
+      ATTRIBUTE FGTM seen=0 colo=1
       MATERIAL Air
-      SHAPE tube rmin=diskInR rmax=diskOutR dz=fgtLenZ/2.0
+      SHAPE tube rmin=coolTubeInR rmax=diskOutR,
+            dz=fgtLenZ/2.0
+      CREATE FGCT
+      POSITION FGCT 
+      CREATE FGCN
+      POSITION FGCN z=-fgtLenZ/2.0+0.64/2. 
       DO disk = 1, FGST_ndisk
-      diskZ=-fgtLenZ/2. +diskLenZ/2. + (disk-1.0)*FGST_diskStepZ
+      diskZ=-fgtLenZ/2.+1.0 +diskLenZ/2. + FGST_zdiscA(disk)- FGST_zdiscA(1)
       IF ( (FGST_config.eq.2.0).or.(disk.le.1) ) THEN
       CREATE FGTD
-      POSITION FGTD z=diskZ alphaz=quadTiltAng 
+      POSITION FGTD z=diskZ alphaz=quadTiltAng ncopy=disk 
       ELSE
       CREATE FGTH
-      POSITION FGTH z=diskZ alphaz=quadTiltAng 
+      POSITION FGTH z=diskZ alphaz=quadTiltAng ncopy=disk 
       ENDIF
       END DO
+      DO disk = 2, FGST_ndisk
+      diskZ=-fgtLenZ/2. + 1.0 + FGST_zdiscA(disk)- FGST_zdiscA(1) -1.28/2.
+      CREATE FGCM
+      POSITION FGCM z=diskZ 
+      END DO
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- FGCT
+      BLOCK FGCT   inner cooling tube
+      ATTRIBUTE FGCT seen=1 colo=6
+      MATERIAL CFRPMix
+      SHAPE tube rmin=coolTubeInR rmax=coolTubeInR+0.05,
+            dz=coolTubeDZ/2.
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- FGCN
+      BLOCK FGCN   nylon 1st ring
+      ATTRIBUTE FGCN seen=1 colo=6
+      MATERIAL Nylon
+      SHAPE tube rmin=10.35 rmax=11.5 dz=0.64/2.
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- FGCM
+      BLOCK FGCM   nylon and Al ring
+      ATTRIBUTE FGCM seen=1 colo=6
+      MATERIAL CoolMix
+      SHAPE tube rmin=10.35 rmax=11.54 dz=1.28/2.
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- FGTD
       BLOCK FGTD   mother volume for FGT disk
