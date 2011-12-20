@@ -760,8 +760,8 @@
                    ++idsg._index;           
                    idsg . version = 1.0; // 2012 Versionin of the IDS geometry            
                    /// idsg . version = 1.0; // 2012 Versionin of the IDS geometry            
-                   idsg . rf = 8.0; //  radii of inner volume boundary           
-                   /// idsg . rf = 8.0; //  radii of inner volume boundary           
+                   idsg . rf = 2.25; //  radii of inner volume boundary           
+                   /// idsg . rf = 2.25; //  radii of inner volume boundary           
                    idsg . angflat = 106.; //  angle (deg) for center of flat           
                    /// idsg . angflat = 106.; //  angle (deg) for center of flat           
                    idsg . rrres = 43.; //  radial distance of  for TPC resistor tubes           
@@ -792,8 +792,8 @@
                    ++idsg._index;           
                    idsg . version = 2.0; // 2013 versionin of the IDS geometry            
                    /// idsg . version = 2.0; // 2013 versionin of the IDS geometry            
-                   idsg . rf = 8.0; //  radii of inner volume boundary           
-                   /// idsg . rf = 8.0; //  radii of inner volume boundary           
+                   idsg . rf = 2.25; //  radii of inner volume boundary           
+                   /// idsg . rf = 2.25; //  radii of inner volume boundary           
                    idsg . angflat = 106.; //  angle (deg) for center of flat           
                    /// idsg . angflat = 106.; //  angle (deg) for center of flat           
                    idsg . rrres = 43.; //  radial distance of  for TPC resistor tubes           

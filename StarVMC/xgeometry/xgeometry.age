@@ -1,7 +1,12 @@
-* $Id: xgeometry.age,v 1.10 2011/10/31 18:52:59 jwebb Exp $
+* $Id: xgeometry.age,v 1.11 2011/12/20 22:33:41 jwebb Exp $
 * $Log: xgeometry.age,v $
-* Revision 1.10  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.11  2011/12/20 22:33:41  jwebb
+* Latest versions of HFT and FGT.  New inner section for the beam pipe (still
+* needs to be extended and matched up with old beam pipe).  Reduced inner
+* radius of IDSM in order to accomodate the HFT.
+*
+* Revision 1.240  2011/11/22 15:09:19  jwebb
+* Added "devE" tag for eStar development.
 *
 * Revision 1.239  2011/10/13 18:23:58  jwebb
 * Added production geometry tag y2011a.  Tag y2011a is consistent with the y2011
@@ -1136,6 +1141,8 @@ replace [exe PIPE04;] with [ "The new pipe according to Kai"; PipeConfig = 4;
 replace [exe PIPE14;] with [ "The new pipe according to Kai"; PipeConfig = 4;
                              "pipe wrap only" ;               PipeFlag   = 1;]
 
+replace [exe PIPEv1;] with [ "The 2013 beam pipe"; PipeFlag=-1; PipeConfig=10; ]
+
 *                                                                                       Pixel Detector
 
 replace [exe PIXL00;] with [ "Simplest.Gerrit" PIXL=on; PixlConfig=-1;]
@@ -1892,7 +1899,7 @@ REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
     exe SISDof;      "No sisd";
     exe MUTD05;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
-    exe PIPE12;      "The beam pipe";
+    exe PIPEv1;      "The beam pipe 2013";
 
     exe IDSM02;      "Inner detector support";
     exe FGTDv32;     "FGT v3 6 disks";
@@ -2704,6 +2711,10 @@ If LL>0
   Case dev13 { dev13 : y2013 stufies;
                  Geom = 'dev13   ';
                  exe dev13; }
+
+  Case devE  { devE : eSTAR development geometry;
+                 Geom = 'devE    ';
+                 exe devE; }
 
 
 ****************************************************************************************
@@ -4103,8 +4114,15 @@ c    write(*,*) 'PIPE'
      call AgDETP new ('PIPE')
      call AgDETP add ('pipv.PipeConfig=',PipeConfig,1);
      call AgDETP add ('pipv.PipeFlag=',PipeFlag,1);
-     if (PipeConfig == -1) {Call pipegeo00;}
-     else                  {Call pipegeo;  }
+     IF      PipeConfig == -1  {
+             Call pipegeo00;
+     }
+     ELSE IF PipeConfig < 10   {
+             Call PipeGeo
+     }
+     ELSE If PipeConfig == 10  {
+             Call PipeGeo1
+     }
    }
 
 * Upstream (DX), shield, and D0+Q1+Q2+Q3
@@ -4443,6 +4461,10 @@ c     write(*,*) 'FSTD'
 
    """The Foward Spaghetti Calorimeter"""
    IF FSCE {  call fscegeo;  }
+
+
+   """The EIDD Geometry (TOF, TRD, East calo)"""
+   IF EIDD {  call eiddgeo;  }
 
    if (IGTD) then
 c    write(*,*) 'IGTD'

@@ -22,17 +22,15 @@ namespace FGTDGEO3 // $NMSPC
       ClassDef(Fgst_t,1); 
       public: 
       Float_t config; 
-      Float_t startz; 
-      Float_t diskstepz; 
       Int_t ndisk; 
       Int_t nquad; 
+      Array_t<Float_t> zdisca; 
       Fgst_t() : AgStructure("Fgst_t","User-defined AgML structure") 
       { 
          config=0; 
-         startz=0; 
-         diskstepz=0; 
          ndisk=0; 
          nquad=0; 
+         zdisca = Array_t<Float_t>(6); 
          _index=0; 
       } 
       ~ Fgst_t(){ /* nada */ }; 
@@ -48,6 +46,42 @@ namespace FGTDGEO3 // $NMSPC
       virtual void Block( AgCreate c ); 
       virtual void End(){ }; 
       ClassDef(FGTM,1); 
+   }; 
+   // ---------------------------------------------------------------------- FGCT -- 
+   ///@defgroup FGCT_doc 
+   ///@class FGCT 
+   ///@brief inner cooling tube 
+   class FGCT : public AgBlock 
+   {  public: 
+      FGCT() : AgBlock("FGCT","inner cooling tube"){ }; 
+      ~FGCT(){ }; 
+      virtual void Block( AgCreate c ); 
+      virtual void End(){ }; 
+      ClassDef(FGCT,1); 
+   }; 
+   // ---------------------------------------------------------------------- FGCN -- 
+   ///@defgroup FGCN_doc 
+   ///@class FGCN 
+   ///@brief nylon 1st ring 
+   class FGCN : public AgBlock 
+   {  public: 
+      FGCN() : AgBlock("FGCN","nylon 1st ring"){ }; 
+      ~FGCN(){ }; 
+      virtual void Block( AgCreate c ); 
+      virtual void End(){ }; 
+      ClassDef(FGCN,1); 
+   }; 
+   // ---------------------------------------------------------------------- FGCM -- 
+   ///@defgroup FGCM_doc 
+   ///@class FGCM 
+   ///@brief nylon and Al ring 
+   class FGCM : public AgBlock 
+   {  public: 
+      FGCM() : AgBlock("FGCM","nylon and Al ring"){ }; 
+      ~FGCM(){ }; 
+      virtual void Block( AgCreate c ); 
+      virtual void End(){ }; 
+      ClassDef(FGCM,1); 
    }; 
    // ---------------------------------------------------------------------- FGTD -- 
    ///@defgroup FGTD_doc 

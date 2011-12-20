@@ -17,7 +17,7 @@
       ENDFILL
       FILL IDSG		! IDS Geometry data,46.1cm=inner radii of IFC
       version = 1.0 ! 2012 Versionin of the IDS geometry
-      rF = 8.0 !  radii of inner volume boundary
+      rF = 2.25 !  radii of inner volume boundary
       angFlat = 106. !  angle (deg) for center of flat
       rrRes = 43. !  radial distance of  for TPC resistor tubes
       r1Res = 1.17 !  inner radii for TPC resistor tubes
@@ -31,7 +31,7 @@
       ENDFILL
       FILL IDSG		! IDS Geometry data,46.1cm=inner radii of IFC
       version = 2.0 ! 2013 versionin of the IDS geometry
-      rF = 8.0 !  radii of inner volume boundary
+      rF = 2.25 !  radii of inner volume boundary
       angFlat = 106. !  angle (deg) for center of flat
       rrRes = 43. !  radial distance of  for TPC resistor tubes
       r1Res = 1.17 !  inner radii for TPC resistor tubes
