@@ -143,9 +143,9 @@
           ///@}     
           ///@addtogroup PixlGeo4_vars     
           ///@{        
-                float minradsec=2.2;        
+                float minradsec=2.35;        
                 //        
-                /// float minradsec=2.2        
+                /// float minradsec=2.35        
           ///@}     
           ///@addtogroup PixlGeo4_vars     
           ///@{        
@@ -161,9 +161,9 @@
           ///@}     
           ///@addtogroup PixlGeo4_vars     
           ///@{        
-                float minrvol=1.9;        
+                float minrvol=2.3;        
                 //        
-                /// float minrvol=1.9        
+                /// float minrvol=2.3        
           ///@}     
           ///@addtogroup PixlGeo4_vars     
           ///@{        
@@ -185,15 +185,15 @@
           ///@}     
           ///@addtogroup PixlGeo4_vars     
           ///@{        
-                float minphisec=90.0;        
+                float minphisec=88.0;        
                 //        
-                /// float minphisec=90.0        
+                /// float minphisec=88.0        
           ///@}     
           ///@addtogroup PixlGeo4_vars     
           ///@{        
-                float maxphisec=126.0;        
+                float maxphisec=128.0;        
                 //        
-                /// float maxphisec=126.0        
+                /// float maxphisec=128.0        
           ///@}     
           ///@addtogroup PixlGeo4_vars     
           ///@{        
@@ -300,10 +300,10 @@
                             create     .SetParameters(shape);              
                             shape.par("rmin")=minradsec;              
                             shape.par("rmax")=maxradsec;              
-                            shape.par("phi1")=minphisec-5.0;              
-                            shape.par("phi2")=maxphisec+5.0;              
+                            shape.par("phi1")=minphisec;              
+                            shape.par("phi2")=maxphisec;              
                             shape.par("dz")=halfmaxz;              
-                            /// Shape Tubs rmin=minradsec rmax=maxradsec phi1=minphisec-5.0 phi2=maxphisec+5.0 dz=halfmaxz               
+                            /// Shape Tubs rmin=minradsec rmax=maxradsec phi1=minphisec phi2=maxphisec dz=halfmaxz               
                             _same_shape &= _stacker->SearchVolume( shape, _attribute );              
                             _shape = shape;              
                             if (_same_shape) goto END_OF_PXLA;              
@@ -667,6 +667,8 @@
                             /// Translate y = 8.16292              
                             place.TranslateZ(0);              
                             /// Translate z = 0              
+                            place.par("only")=AgPlacement::kMany;              
+                            /// Overlap: agplacement::kmany              
                             place.AlphaZ(79.963-90);              
                             /// Rotate: AlphaZ = 79.963-90              
                             /// G3 Reference: thetax = 90              
@@ -691,6 +693,8 @@
                             /// Translate y = 7.75133              
                             place.TranslateZ(0);              
                             /// Translate z = 0              
+                            place.par("only")=AgPlacement::kMany;              
+                            /// Overlap: agplacement::kmany              
                             place.AlphaZ(91.963-90);              
                             /// Rotate: AlphaZ = 91.963-90              
                             /// G3 Reference: thetax = 90              
@@ -715,6 +719,8 @@
                             /// Translate y = 7.00098              
                             place.TranslateZ(0);              
                             /// Translate z = 0              
+                            place.par("only")=AgPlacement::kMany;              
+                            /// Overlap: agplacement::kmany              
                             place.AlphaZ(103.693-90);              
                             /// Rotate: AlphaZ = 103.693-90              
                             /// G3 Reference: thetax = 90              
@@ -739,6 +745,8 @@
                             /// Translate y = 2.53854              
                             place.TranslateZ(0);              
                             /// Translate z = 0              
+                            place.par("only")=AgPlacement::kMany;              
+                            /// Overlap: agplacement::kmany              
                             place.AlphaZ(87.396-90);              
                             /// Rotate: AlphaZ = 87.396-90              
                             /// G3 Reference: thetax = 90              
@@ -1294,7 +1302,7 @@
                       }           
                       { AgAttribute attr = AgAttribute("PLAC");              
                             attr.par("seen")=1;              
-                            attr.par("colo")=5;              
+                            attr.par("colo")=6;              
                             attr.Inherit( AgBlock::previous() );               
                             _attribute = attr;              
                       }           
@@ -1327,7 +1335,7 @@
              ///@}        
              ///@addtogroup PixlGeo4_revision        
              ///@{           
-                   /// Created: Dec.14 2011           
+                   /// Created: Dec.20 2011           
              ///@}        
              AddBlock("PXMO");        
              AddBlock("PXLA");        
