@@ -243,9 +243,6 @@
                             xpos=.00001*sin(anglepos);              
                             ypos=.00001*cos(anglepos);              
                             zpos =0.0;              
-                            std::cout << Form("angle = %5.2f ",angle) << std::endl;              
-                            std::cout << Form("xpos  = %5.2f ",xpos) << std::endl;              
-                            std::cout << Form("ypos  = %5.2f ",ypos) << std::endl;              
                             _create = AgCreate("PXLA");              
                             {                 
                                   AgShape myshape; // undefined shape                 
