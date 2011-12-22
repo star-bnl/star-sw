@@ -1,9 +1,9 @@
 <Document file="StarVMC/Geometry/PipeGeo/PipeGeo1.xml">
 <Module name="PipeGeo1" comment="Beam pipe in y2013 and beyond">
 
-   <Author name="Amilkar Quintero" />
+   <Author name="Amilkar Quintero" />    <!-- With modifications by J. Webb, 12/20/2011 -->
    <Created date="29/Jun/2011" />
-   <!-- With modifications by J. Webb, 12/20/2011 -->
+
 
    <CDE>AgeCom,GcUnit,GConst</CDE>
 
@@ -43,13 +43,16 @@
       <var name="yoffset" value="0.0"     comment="Default y position " />
       <var name="zoffset" value="0.0"     comment="Default z position " />
 
-      <var name="zoffber" value="-15.75"  comment="Offset of beryllium" />
+      <var name="zoffber" value="-15.75*inch"  comment="Offset of beryllium as per drawing" />
 
   </Fill>
 
   <!--                                                                        Create the Pipe -->
   <Create    block="PIPE" />
-  <Placement block="PIPE" in="CAVE" x="PIPG_xoffset" y="PIPG_yoffset" z="PIPG_zoffset" />
+  <Placement block="PIPE" in="CAVE" x="PIPG_xoffset" y="PIPG_yoffset" z="PIPG_zoffset">
+             <!-- Rotate 180 degrees such that Be section is offset to the west of IP -->
+             <Rotation alphax="180" />
+  </Placement>
 
 
   <!--                                                                     Beam Pipe Envelope -->

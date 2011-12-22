@@ -403,8 +403,8 @@
                    /// pipg . yoffset = 0.0; // Default y position            
                    pipg . zoffset = 0.0; // Default z position            
                    /// pipg . zoffset = 0.0; // Default z position            
-                   pipg . zoffber = -15.75; // Offset of beryllium           
-                   /// pipg . zoffber = -15.75; // Offset of beryllium           
+                   pipg . zoffber = -15.75*inch; // Offset of beryllium as per drawing           
+                   /// pipg . zoffber = -15.75*inch; // Offset of beryllium as per drawing           
                    //           
                    pipg.fill();           
              ///@}        
@@ -423,6 +423,14 @@
                    /// Translate y = pipg.yoffset           
                    place.TranslateZ(pipg.zoffset);           
                    /// Translate z = pipg.zoffset           
+                   place.AlphaX(180);           
+                   /// Rotate: AlphaX = 180           
+                   /// G3 Reference: thetax = 90           
+                   /// G3 Reference: phix = 0           
+                   /// G3 Reference: thetay = 90           
+                   /// G3 Reference: phiy = 90           
+                   /// G3 Reference: thetaz = 0           
+                   /// G3 Reference: phiz = 0           
                    _stacker -> Position( AgBlock::Find("PIPE"), place );           
              } // end placement of PIPE        
        }; // PipeGeo1     
