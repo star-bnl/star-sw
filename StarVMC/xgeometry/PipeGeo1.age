@@ -16,10 +16,10 @@
       xoffset = 0.0 ! Default x position
       yoffset = 0.0 ! Default y position
       zoffset = 0.0 ! Default z position
-      zoffber = -15.75 ! Offset of beryllium
+      zoffber = -15.75*inch ! Offset of beryllium as per drawing
       ENDFILL
       CREATE PIPE
-      POSITION PIPE in CAVE x=PIPG_xoffset y=PIPG_yoffset z=PIPG_zoffset 
+      POSITION PIPE in CAVE x=PIPG_xoffset y=PIPG_yoffset z=PIPG_zoffset alphax=180 
       ! ---------------------------------------------------------------------------------- PIPE
       BLOCK PIPE   Pipe mother volume
       MATERIAL Air
