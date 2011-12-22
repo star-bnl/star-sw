@@ -91,9 +91,6 @@
       xpos=.00001*sin(anglepos)
       ypos=.00001*cos(anglepos)
       zpos =0.0
-      <W> angle;  ('angle = ', F5.2);
-      <W> xpos;  ('xpos  = ', F5.2);
-      <W> ypos;  ('ypos  = ', F5.2);
       CREATE PXLA
       POSITION PXLA in PXMO x=xpos y=ypos z=zpos alphaz=-1*angle konly='MANY' 
       END DO
