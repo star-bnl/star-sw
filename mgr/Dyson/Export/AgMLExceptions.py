@@ -3,6 +3,12 @@ from exceptions import Exception
 from Dyson.Utils.Shapes  import listOfShapes
 
 
+def RED(x): return "\033[5m\033[31m"+x+"\033[0m"
+def YELLOW(x): return "\033[5m\033[33m"+x+"\033[0m"
+def BLUE(x): return "\033[5m\033[34m"+x+"\033[0m"
+def MAGENTA(x): return "\033[5m\035[34m"+x+"\033[0m"
+
+
 # ===============================================================================
 class ContentError(Exception):
     """
@@ -26,7 +32,7 @@ AgML Error: Volume %s not found in <Content> of Module %s
         
 =============-================================================
         """ % (self.volume, self.module )
-        return output
+        return RED(output)
 
 # ===============================================================================
 class MissingError(Exception):
@@ -47,7 +53,7 @@ class MissingError(Exception):
  
  =============-================================================
         """ % (self.volume, self.module )
-        return output
+        return RED(output)
 
 # ===============================================================================
 class AgmlArrayError(Exception):
@@ -74,7 +80,7 @@ class AgmlArrayError(Exception):
  ============-=================================================
  """
             
-        return output
+        return RED(output)
 
 # ===============================================================================
 class AgmlNameError(Exception):
@@ -87,7 +93,7 @@ class AgmlNameError(Exception):
         --> AgML Error line %i: %s must be 4 characters for backwards compatibility <--
         """%(self.locator.getLineNumber(),self.tag)
 
-        return output
+        return RED(output)
     
 # ===============================================================================
 class AgmlCommentError(Exception):
@@ -100,7 +106,7 @@ class AgmlCommentError(Exception):
         --> AgML Error line %i: %s requires a comment field <--
         """%(self.locator.getLineNumber(),self.tag)
         
-        return output
+        return RED(output)
     
 
 # ===============================================================================
@@ -115,7 +121,7 @@ class AgmlShapeError(Exception):
         --> AgML Error line %i: shape %s is unknown"%s" <--
         """%(self.locator.getLineNumber(),self.shape)
 
-        return output        
+        return RED(output)
 
 # ===============================================================================
 class AgmlAttributeWarning(Warning):
@@ -130,7 +136,7 @@ class AgmlAttributeWarning(Warning):
         
         --> AgML Warning line %i: %s has invalid attribute %s="%s" <--
         """%(self.locator.getLineNumber(),self.tag,self.key,self.value)
-        return output
+        return YELLOW(output)
 
 # ===============================================================================
 class AgmlMissingAttributeWarning(Warning):
@@ -145,7 +151,7 @@ class AgmlMissingAttributeWarning(Warning):
         
         --> AgML Warning line %i: %s missinge required attribute %s <--
         """%(self.locator.getLineNumber(),self.tag,self.key)
-        return output
+        return YELLOW(output)
 # ===============================================================================
 class AgmlFillMissingVarError(Exception):
     def __init__(self,struct,varname):
@@ -157,4 +163,4 @@ class AgmlFillMissingVarError(Exception):
 
         --> AgML Error line %i: struct %s has no variable %s <--
         """%(self.struct,self.varname)
-        return output
+        return RED(output)
