@@ -50,8 +50,8 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.55 2011/12/20 21:09:56 fisyak Exp $";
-//#define __ClusterProfile__
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.56 2011/12/23 00:27:12 fisyak Exp $";
+#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
 #define __PAD_BLOCK__
@@ -299,7 +299,6 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumberOf */) {
 	    if (r > 1e-2) break;
 	  }
 	  mShaperResponses[io][sector-1]->SetRange(timeBinMin,t);
-	  mShaperResponses[io][sector-1]->SetNpx((Int_t) (20*(t-timeBinMin)));
 	  mShaperResponses[io][sector-1]->Save(timeBinMin,t,0,0,0,0);
 	}
 	continue;
@@ -327,7 +326,6 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumberOf */) {
 	  if (r > 1e-2) break;
 	}
 	mShaperResponses[io][sector-1]->SetRange(timeBinMin,t);
-	mShaperResponses[io][sector-1]->SetNpx((Int_t) (20*(t-timeBinMin)));
 	mShaperResponses[io][sector-1]->Save(timeBinMin,t,0,0,0,0);
       }
     }
@@ -701,7 +699,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Int_t row = volId%100;
 	if (Debug() && iRow && iRow != row) continue;
 	io = (row <= NoOfInnerRows) ? 0 : 1;
-	
 	// Generate signal 
 	Double_t Gain = St_tss_tssparC::instance()->gain(sector,row); 
 	TF1F *mShaperResponse = mShaperResponses[io][sector-1];
@@ -979,7 +976,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #endif	/* __ClusterProfile__ */
 #ifdef __PAD_BLOCK__
 		//		Double_t localXDirectionCoupling = localXDirectionCouplings[pad-padMin];
-		Double_t localXDirectionCoupling = XDirectionCouplings[pad-padMin];
+		Double_t localXDirectionCoupling = gain*XDirectionCouplings[pad-padMin];
 #else
 		Double_t xPad = pad - padX;
 		Double_t xpad[1] = {xPad};
@@ -998,9 +995,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+mShaperResponse->GetXmax()+0.5));
 		Int_t index = NoOfTimeBins*((r-1)*NoOfPads+pad-1)+bin_low;
 #ifdef __PAD_BLOCK__
-	      Int_t Ntbks = bin_high-bin_low+1;
-	      Double_t tt = -dt + (bin_low - binT);
-	      mShaperResponse->GetSaveL(Ntbks,tt,TimeCouplings);
+		Int_t Ntbks = bin_high-bin_low+1;
+		Double_t tt = -dt + (bin_low - binT);
+		mShaperResponse->GetSaveL(Ntbks,tt,TimeCouplings);
 #endif /* __PAD_BLOCK__ */		
 		for(Int_t itbin=bin_low;itbin<=bin_high;itbin++, index++){
 #ifdef __PAD_BLOCK__
@@ -1009,6 +1006,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		  Double_t t = -dt + (Double_t)(itbin - binT);
 		  Double_t signal = XYcoupling*mShaperResponse->GetSaveL(&t);
 #endif /* __PAD_BLOCK__ */
+		  if (signal < minSignal)  continue;
 		  TotalSignal += signal;
 		  SignalSum[index].Sum += signal;
 #ifdef __ClusterProfile__
@@ -1025,11 +1023,16 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 			SignalSum[index].TrackId = TrackSegmentHits[iSegHits].TrackId;
 		  }
 #ifdef __ClusterProfile__
-		  if (Debug()%10 > 2 && SignalSum[index].Sum > 0) {
+		  if (Debug()%10 > 2 && (SignalSum[index].Sum > 0 || ! TMath::Finite(SignalSum[index].Sum)) ) {
 		    LOG_INFO << "simu R/P/T/I = " << r << " /\t" << pad << " /\t" << itbin << " /\t" << index 
 			     << "\tSum/Adc/TrackId = " << SignalSum[index].Sum << " /\t" 
 			     << SignalSum[index].Adc << " /\t" << SignalSum[index].TrackId 
 			     << "\tsignal = " << signal << endm;
+#ifdef __DEBUG__
+		    if (! TMath::Finite(SignalSum[index].Sum)) {
+		      LOG_INFO << "Not Finite" << endm;
+		    }
+#endif /* __DEBUG__ */
 		  }
 #endif  /* __ClusterProfile__ */
 		} // time 
@@ -1262,7 +1265,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
 #endif
 	if (pRMS > 0) {
 	  adc = (Int_t) (SignalSum[index].Sum/gain + gRandom->Gaus(ped,pRMS));
-	  adc = adc - (int) ped;
+	  adc = adc - (Int_t) ped;
 	}
 	else            adc = (Int_t) (SignalSum[index].Sum/gain);
 	if (adc > 1023) adc = 1023;
@@ -1528,8 +1531,11 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.55 2011/12/20 21:09:56 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.56 2011/12/23 00:27:12 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.56  2011/12/23 00:27:12  fisyak
+// Add protection for underflow bins
+//
 // Revision 1.55  2011/12/20 21:09:56  fisyak
 // change defaults: shark measurements: old default => 46.6%, wire histograms => 38.9%, wire map => 12.5 + 10.2, pad block => 15%
 //
