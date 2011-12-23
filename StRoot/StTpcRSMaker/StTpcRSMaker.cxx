@@ -44,14 +44,14 @@
 #include "Altro.h"
 #include "TRVector.h"
 #include "StBichsel/Bichsel.h"
-#define __DEBUG__
+//#define __DEBUG__
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.56 2011/12/23 00:27:12 fisyak Exp $";
-#define __ClusterProfile__
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.57 2011/12/23 16:38:25 fisyak Exp $";
+//#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
 #define __PAD_BLOCK__
@@ -495,8 +495,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   static Int_t iSec  = 0, iRow = 0;
   static StTpcCoordinateTransform transform(gStTpcDb);
 #ifdef __PAD_BLOCK__
-  static Double_t XDirectionCouplings[50];
-  static Double_t TimeCouplings[512];
+  enum {kPadMax = 20, kTimeBacketMax = 50};
+  static Double_t XDirectionCouplings[kPadMax];
+  static Double_t TimeCouplings[kTimeBacketMax];
 #endif /* __PAD_BLOCK__ */
   Int_t Ndebug = 0, Idebug; // debug printout depth
   if (Debug()%10) {
@@ -958,7 +959,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      Int_t padMin = TMath::Max(CentralPad - DeltaPad ,1);
 	      Int_t padMax = TMath::Min(CentralPad + DeltaPad ,PadsAtRow);
 #ifdef __PAD_BLOCK__
-	      Int_t Npads = padMax-padMin+1;
+	      Int_t Npads = TMath::Min(padMax-padMin+1, kPadMax);
 	      Double_t xPadMin = padMin - padX;
 	      mPadResponseFunction[io]->GetSaveL(Npads,xPadMin,XDirectionCouplings);
 #endif /* __PAD_BLOCK__ */
@@ -995,7 +996,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+mShaperResponse->GetXmax()+0.5));
 		Int_t index = NoOfTimeBins*((r-1)*NoOfPads+pad-1)+bin_low;
 #ifdef __PAD_BLOCK__
-		Int_t Ntbks = bin_high-bin_low+1;
+		Int_t Ntbks = TMath::Min(bin_high-bin_low+1, kTimeBacketMax);
 		Double_t tt = -dt + (bin_low - binT);
 		mShaperResponse->GetSaveL(Ntbks,tt,TimeCouplings);
 #endif /* __PAD_BLOCK__ */		
@@ -1531,10 +1532,10 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.56 2011/12/23 00:27:12 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.57 2011/12/23 16:38:25 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
-// Revision 1.56  2011/12/23 00:27:12  fisyak
-// Add protection for underflow bins
+// Revision 1.57  2011/12/23 16:38:25  fisyak
+// Remove __DEBUG__ and __ClusterProfile__ from default, reduce arrays and add check for bounds
 //
 // Revision 1.55  2011/12/20 21:09:56  fisyak
 // change defaults: shark measurements: old default => 46.6%, wire histograms => 38.9%, wire map => 12.5 + 10.2, pad block => 15%
