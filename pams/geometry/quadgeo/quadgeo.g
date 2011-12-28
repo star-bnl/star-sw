@@ -1,6 +1,9 @@
-* $Id: quadgeo.g,v 1.2 2006/01/18 23:08:52 potekhin Exp $
+* $Id: quadgeo.g,v 1.3 2011/02/28 16:27:40 jwebb Exp $
 *
 * $Log: quadgeo.g,v $
+* Revision 1.3  2011/02/28 16:27:40  jwebb
+* Cosmetic change needed for AgML syntax matching.
+*
 * Revision 1.2  2006/01/18 23:08:52  potekhin
 * Checking in additional work on the quad model, now temporarily
 * frozen, which we need for our beam background studies
@@ -24,8 +27,7 @@ Module QUADGEO is the description of all the magnets upstream inclusive of D0
                        DzeroL,DzeroRi,DzeroRo,
                        Q1,        ri1,    ro1, dz1,
                        Q2,        ri2,    ro2, dz2,
-                       Q3,        ri3,    ro3, dz3
-                     }
+                       Q3,        ri3,    ro3, dz3 }
 
 *
 *    local variable for section positioning

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNodeImpl.cc,v 1.8 2007/03/08 22:07:22 deph Exp $
+ * $Id: StDbConfigNodeImpl.cc,v 1.9 2011/11/28 17:03:08 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNodeImpl.cc,v $
+ * Revision 1.9  2011/11/28 17:03:08  dmitry
+ * dbv override support in StDbLib,StDbBroker,St_db_Maker
+ *
  * Revision 1.8  2007/03/08 22:07:22  deph
  * Fixed small memory leak in removeTable
  *
@@ -306,6 +309,15 @@ StDbConfigNodeImpl::setTablesProdTime(unsigned int ptime){
   for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
       if((*itr))(*itr)->setProdTime(ptime);
    }
+}
+
+////////////////////////////////////////////////////////////////
+void
+StDbConfigNodeImpl::setTablesProdTimeOverride(unsigned int ptime, char* dbType, char* dbDomain) {
+  TableList::iterator itr;
+  for(itr = mTables.begin(); itr!=mTables.end(); ++itr) {
+    if((*itr))(*itr)->setProdTime(ptime);
+  }
 }
 
 ////////////////////////////////////////////////////////////////
