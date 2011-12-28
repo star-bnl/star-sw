@@ -67,7 +67,7 @@ class ViewField {
 
     std::string className;
  
-    static const int nMaxContours = 30;
+    static const int nMaxContours = 100;
 
     // Options
     bool debug;

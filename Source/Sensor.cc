@@ -170,7 +170,7 @@ Sensor::SetArea(const double xmin, const double ymin, const double zmin,
   if (fabs(xmax - xmin) < Small || 
       fabs(ymax - ymin) < Small || 
       fabs(zmax - zmin) < Small) {
-    std::cerr << "AvalancheMicroscopic::SetArea:\n";
+    std::cerr << className << "::SetArea:\n";
     std::cerr << "    Invalid range.\n";
     return false;
   }
