@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.1 2009/12/09 21:56:41 dthein Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.5 2011/02/03 19:01:01 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,18 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.cxx,v $
+ * Revision 1.5  2011/02/03 19:01:01  geurts
+ * Introduce option to switch writing simulated hits to StEvent. Default behavior is OFF.
+ *
+ * Revision 1.4  2010/08/10 19:18:31  geurts
+ * Look for geant data in bfc ("geant") or geant.root ("geantBranch"); Protect storing BTofMcHitCollection in case McEvent is NULL.  [Xin]
+ *
+ * Revision 1.3  2010/07/14 20:44:10  geurts
+ * Correct application of vpd resolution smearing: The original values in the db (or ParSim) are in ps [Xin]
+ *
+ * Revision 1.2  2010/07/14 20:32:57  geurts
+ * remove geometry initialization (not used)
+ *
  * Revision 1.1  2009/12/09 21:56:41  dthein
  * First version of StBTofSimMaker
  * 
@@ -66,7 +78,7 @@ StBTofSimMaker::StBTofSimMaker(const char *name):StMaker(name)
 	mBookHisto=kFALSE;// histograms 
 	mSlow=kTRUE;
 	mCellXtalk=kTRUE;
-	mGeomDb=0;
+	mWriteStEvent=kFALSE;
 	mDaqMap=0;
 	Reset();
 
@@ -95,14 +107,14 @@ Int_t StBTofSimMaker::Init()
 //_____________________________________________________________________________
 void StBTofSimMaker::Reset()
 {
+	mGeantData = 0;
 	mEvent  = 0;
 	mMcEvent = 0;
 	//mBTofCollection = 0;
-	delete mBTofCollection;
+	if (mWriteStEvent) delete mBTofCollection;
 	delete mMcBTofHitCollection;
 	mSimDb  = 0;
 
-	if(mGeomDb){delete mGeomDb; mGeomDb = 0;}
 	if(mDaqMap){delete mDaqMap; mDaqMap = 0;}
 
 	ResetFlags();
@@ -120,15 +132,7 @@ Int_t StBTofSimMaker::ResetFlags()
 //_____________________________________________________________________________
 Int_t StBTofSimMaker::InitRun(Int_t runnumber)
 {
-	LOG_INFO << "StBTofSimMaker::InitRun  -- initializing TofGeometry --" << endm;
-
-	/// BTOF geometry
-	mGeomDb = new StBTofGeometry("tofrGeom","tofrGeom in MatchMaker");
-	if(!mGeomDb->IsInitDone()) {
-		LOG_DEBUG << "BTofGeometry initialization..." << endm;
-		TVolume *starHall = (TVolume *)GetDataSet("HALL");
-		mGeomDb->Init(this,starHall);
-	}
+	LOG_INFO << "StBTofSimMaker::InitRun  -- initializing BTOF DAQ map --" << endm;
 
 	/// MRPC-TOF DAQ map
 	mDaqMap = new StBTofDaqMap();
@@ -140,8 +144,7 @@ Int_t StBTofSimMaker::InitRun(Int_t runnumber)
 //_____________________________________________________________________________
 Int_t StBTofSimMaker::FinishRun(Int_t runnumber)
 {
-	LOG_INFO << "StBTofSimMaker::FinishRun -- cleaning up BTofGeometry --" << endm;
-	if (mGeomDb){delete mGeomDb; mGeomDb = 0;}
+	LOG_INFO << "StBTofSimMaker::FinishRun -- cleaning up BTOF DAQ map --" << endm;
 	if (mDaqMap){delete mDaqMap; mDaqMap = 0;}
 	return kStOk;
 }
@@ -172,8 +175,11 @@ Int_t StBTofSimMaker::Make()
 	mMcBTofHitCollection = new StMcBTofHitCollection();
 
 	// Check to see that there are GEANT hits
-	St_DataSet* geantData = GetInputDS("geantBranch");
-	if(!geantData) {
+	mGeantData = GetInputDS("geant"); // in bfc chain
+	if(!mGeantData) { // when reading the geant.root file
+		mGeantData = GetInputDS("geantBranch");
+	}
+	if(!mGeantData) {
 		LOG_WARN << " No GEANT data loaded. Exit! " << endm;
 		return kStWarn;
 	}
@@ -181,7 +187,7 @@ Int_t StBTofSimMaker::Make()
 
 	// Look for VPD hits
 	St_g2t_vpd_hit* g2t_vpd_hits = 0;
-	g2t_vpd_hits = dynamic_cast<St_g2t_vpd_hit*>(geantData->Find("g2t_vpd_hit"));
+	g2t_vpd_hits = dynamic_cast<St_g2t_vpd_hit*>(mGeantData->Find("g2t_vpd_hit"));
 	if(!g2t_vpd_hits){
 		LOG_WARN << " No VPD hits in GEANT" << endm; }
 	else {
@@ -197,7 +203,7 @@ Int_t StBTofSimMaker::Make()
 
 	// Look for TOF hits
 	St_g2t_ctf_hit* g2t_tfr_hits = 0;
-	g2t_tfr_hits = dynamic_cast<St_g2t_ctf_hit*> (geantData->Find("g2t_tfr_hit"));
+	g2t_tfr_hits = dynamic_cast<St_g2t_ctf_hit*> (mGeantData->Find("g2t_tfr_hit"));
 	if(!g2t_tfr_hits) {
 		LOG_WARN << " No TOF hits in GEANT" << endm; }
 	else {
@@ -246,8 +252,8 @@ Int_t StBTofSimMaker::VpdResponse(g2t_vpd_hit_st* vpd_hit)
 	Int_t itray = vId/1000 + 120;    //! 121: west, 122: east
 	Int_t itube = vId%100;           //! 1-19
 
-	Double_t tof = vpd_hit->tof + ranGauss.shoot()*mSimDb->timeres_vpd();   //! 140 ps per channel
-	Double_t t0 = vpd_hit->tof;
+	Double_t tof = (vpd_hit->tof + ranGauss.shoot()*mSimDb->timeres_vpd())*1000./nanosecond; //! 140 ps per channel
+	Double_t t0 = vpd_hit->tof*1000./nanosecond;
 	Double_t de = vpd_hit->de;
 	Double_t pathL = -9999.; //! NA for vpd
 	Double_t q = 0.;
@@ -295,8 +301,7 @@ Int_t StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
 	}
 
 
-	St_DataSetIter geant(GetDataSet("geantBranch"));
-	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(geant("g2t_track"));
+	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(mGeantData->Find("g2t_track"));
 	if (!g2t_track) {
 		LOG_WARN << " No G2T track table!" << endm;
 		return kStWarn;
@@ -487,8 +492,7 @@ Int_t StBTofSimMaker::CellTimePassTh(TrackVec& tofResponseVec)
 
 
 	/// store to McBTofHitCollection
-	St_DataSetIter geant(GetDataSet("geantBranch"));
-	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(geant("g2t_track"));
+	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(mGeantData->Find("g2t_track"));
 	if (!g2t_track) {
 		LOG_WARN << " No g2t track table !!! " << endm;
 		return kStWarn;
@@ -578,84 +582,86 @@ Int_t StBTofSimMaker::fillEvent()
 	mMcEvent = (StMcEvent*)GetInputDS("StMcEvent");
 	if (!mMcEvent) {
 		LOG_ERROR << "No StMcEvent! Bailing out ..." << endm;
+	} else {
+		mMcEvent->setBTofHitCollection(mMcBTofHitCollection);
+		LOG_INFO << " ... StMcTofCollection stored in StMcEvent" << endm;
 	}
-	mMcEvent->setBTofHitCollection(mMcBTofHitCollection);
-	LOG_INFO << " ... StMcTofCollection stored in StMcEvent" << endm;
 
 	/// send off to StEvent
-	mBTofCollection= new StBTofCollection();
-	mEvent = (StEvent*)GetInputDS("StEvent");
-	if (!mEvent) {
-		LOG_ERROR << "No StEvent! Bailing out ..." << endm;
+	if (mWriteStEvent){
+	  mBTofCollection= new StBTofCollection();
+	  mEvent = (StEvent*)GetInputDS("StEvent");
+	  if (!mEvent) {
+	    LOG_ERROR << "No StEvent! Bailing out ..." << endm;
+	  }
+
+	  /// creat StBTofHit / tofRawData / tofData collection
+	  for(Int_t jj = 0; jj < (Int_t)mMcBTofHitCollection->hits().size(); jj++) {
+	    StMcBTofHit *aMcBTofHit = mMcBTofHitCollection->hits()[jj];
+
+	    if(!aMcBTofHit) continue;
+	    Int_t trayid = aMcBTofHit->tray();
+	    Int_t moduleid = aMcBTofHit->module();
+	    Int_t cellid = aMcBTofHit->cell();
+
+	    Int_t chn = 255;  // default
+	    if(trayid>0&&trayid<=120) {
+	      chn = mDaqMap->Cell2TDIGChan(moduleid,cellid);
+	    } else if(trayid==121) {
+	      chn = mDaqMap->WestPMT2TDIGLeChan(cellid);
+	    } else if(trayid==122) {
+	      chn = mDaqMap->EastPMT2TDIGLeChan(cellid);
+	    }
+
+	    Int_t index;
+	    if(trayid>0&&trayid<=120) { 
+	      index = (trayid-1)*mNTOF + (moduleid-1)*mNCell + (cellid-1);
+	    } else if(trayid==121||trayid==122) {
+	      index = (trayid-1)*mNTOF + (cellid-1);
+	    }
+
+
+	    /// Efficiency
+	    Float_t eff = 1.;
+	    if(trayid>0&&trayid<=120) eff = mSimDb->eff_tof(trayid, moduleid, cellid);
+	    else if(trayid==121||trayid==122) eff = mSimDb->eff_vpd(trayid, cellid);
+	    if (gRandom->Uniform(1.0) > eff){cout<<"REMOVED"<<endl; continue; } //! inefficiency
+
+
+	    //Fill the StBTofHit
+	    StBTofHit aBTofHit;
+	    aBTofHit.Clear();
+
+	    Float_t mcTof=aMcBTofHit->tof()/1000.;//from picoseconds to nanoseconds
+
+	    aBTofHit.setTray((Int_t)aMcBTofHit->tray());
+	    aBTofHit.setModule((unsigned char)aMcBTofHit->module());
+	    aBTofHit.setCell((Int_t)aMcBTofHit->cell());
+	    aBTofHit.setLeadingEdgeTime((Double_t)mcTof);
+	    aBTofHit.setTrailingEdgeTime((Double_t)mcTof);
+	    aBTofHit.setAssociatedTrack(NULL);//done in StBTofMatchMaker
+	    aBTofHit.setIdTruth(aMcBTofHit->parentTrackId(), 0);
+	    mBTofCollection->addHit(new StBTofHit(aBTofHit));
+
+	    //Fill the StBTofRawHit
+	    StBTofRawHit aBTofRawHit;
+	    aBTofRawHit.Clear();
+	    aBTofRawHit.setTray((Int_t)aMcBTofHit->tray());
+	    aBTofRawHit.setChannel(6*(aMcBTofHit->module() - 1) + (Int_t)aMcBTofHit->cell());
+	    aBTofRawHit.setFlag(1);
+	    mBTofCollection->addRawHit(new StBTofRawHit(aBTofRawHit));
+
+	  }
+
+	  //Fill StBTofHeader -- 	
+	  StBTofHeader aHead;
+	  mBTofCollection->setHeader(new StBTofHeader(aHead));
+
+	  //Store Collections
+	  mEvent->setBTofCollection(mBTofCollection);
+
+	  LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
 	}
-
-	/// creat StBTofHit / tofRawData / tofData collection
-	for(Int_t jj = 0; jj < (Int_t)mMcBTofHitCollection->hits().size(); jj++) {
-		StMcBTofHit *aMcBTofHit = mMcBTofHitCollection->hits()[jj];
-
-		if(!aMcBTofHit) continue;
-		Int_t trayid = aMcBTofHit->tray();
-		Int_t moduleid = aMcBTofHit->module();
-		Int_t cellid = aMcBTofHit->cell();
-
-		Int_t chn = 255;  // default
-		if(trayid>0&&trayid<=120) {
-			chn = mDaqMap->Cell2TDIGChan(moduleid,cellid);
-		} else if(trayid==121) {
-			chn = mDaqMap->WestPMT2TDIGLeChan(cellid);
-		} else if(trayid==122) {
-			chn = mDaqMap->EastPMT2TDIGLeChan(cellid);
-		}
-
-		Int_t index;
-		if(trayid>0&&trayid<=120) { 
-			index = (trayid-1)*mNTOF + (moduleid-1)*mNCell + (cellid-1);
-		} else if(trayid==121||trayid==122) {
-			index = (trayid-1)*mNTOF + (cellid-1);
-		}
-
-
-		/// Efficiency
-		Float_t eff = 1.;
-		if(trayid>0&&trayid<=120) eff = mSimDb->eff_tof(trayid, moduleid, cellid);
-		else if(trayid==121||trayid==122) eff = mSimDb->eff_vpd(trayid, cellid);
-		if (gRandom->Uniform(1.0) > eff){cout<<"REMOVED"<<endl; continue; } //! inefficiency
-
-
-		//Fill the StBTofHit
-		StBTofHit aBTofHit;
-		aBTofHit.Clear();
-
-		Float_t mcTof=aMcBTofHit->tof()/1000.;//from picoseconds to nanoseconds
-
-		aBTofHit.setTray((Int_t)aMcBTofHit->tray());
-		aBTofHit.setModule((unsigned char)aMcBTofHit->module());
-		aBTofHit.setCell((Int_t)aMcBTofHit->cell());
-		aBTofHit.setLeadingEdgeTime((Double_t)mcTof);
-		aBTofHit.setTrailingEdgeTime((Double_t)mcTof);
-		aBTofHit.setAssociatedTrack(NULL);//done in StBTofMatchMaker
-		aBTofHit.setIdTruth(aMcBTofHit->parentTrackId(), 0);
-		mBTofCollection->addHit(new StBTofHit(aBTofHit));
-
-		//Fill the StBTofRawHit
-		StBTofRawHit aBTofRawHit;
-		aBTofRawHit.Clear();
-		aBTofRawHit.setTray((Int_t)aMcBTofHit->tray());
-		aBTofRawHit.setChannel(6*(aMcBTofHit->module() - 1) + (Int_t)aMcBTofHit->cell());
-		aBTofRawHit.setFlag(1);
-		mBTofCollection->addRawHit(new StBTofRawHit(aBTofRawHit));
-
-	}
-
-	//Fill StBTofHeader -- 	
-	StBTofHeader aHead;
-	mBTofCollection->setHeader(new StBTofHeader(aHead));
-
-	//Store Collections
-	mEvent->setBTofCollection(mBTofCollection);
-
-	LOG_INFO << "... StBTofCollection Stored in StEvent! " << endm;
-
 
 	/// check StMcEvent and StEvent
 	if(Debug()) {
@@ -707,22 +713,23 @@ Int_t StBTofSimMaker::fillEvent()
 		nEast=0;
 		nWest=0;
 
+		if (mWriteStEvent){
+		  StSPtrVecBTofHit& bTofHits=mEvent->btofCollection()->tofHits();
+		  StBTofHit* bHit;
+		  for(Int_t aa=0;aa<(int)bTofHits.size();aa++){
+		    bHit=bTofHits[aa];
+		    Int_t itray=bHit->tray();
+		    Int_t imodule=bHit->module();
+		    Int_t icell=bHit->cell();
+		    if(mBookHisto) {mCellReco->Fill((imodule-1)*mNCell+(icell-1),itray-1);}
+		  }
 
-		StSPtrVecBTofHit& bTofHits=mEvent->btofCollection()->tofHits();
-		StBTofHit* bHit;
-		for(Int_t aa=0;aa<(int)bTofHits.size();aa++){
-			bHit=bTofHits[aa];
-			Int_t itray=bHit->tray();
-			Int_t imodule=bHit->module();
-			Int_t icell=bHit->cell();
-			if(mBookHisto) {mCellReco->Fill((imodule-1)*mNCell+(icell-1),itray-1);}
+		  if(mBookHisto) {
+		    for(Int_t i=0;i<mNTray;i++) mNCellReco->Fill(nCell[i],i);
+		    mNVpdReco->Fill(nWest,nEast);
+		  }
+
 		}
-
-		if(mBookHisto) {
-			for(Int_t i=0;i<mNTray;i++) mNCellReco->Fill(nCell[i],i);
-			mNVpdReco->Fill(nWest,nEast);
-		}
-
 	}
 
 	if(Debug()) cout<<"leaving fill event"<<endl;
@@ -824,8 +831,7 @@ Int_t StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant)
 
 	StThreeVectorF local(tofHitsFromGeant->x[0], tofHitsFromGeant->x[1], tofHitsFromGeant->x[2]);
 
-	St_DataSetIter geant(GetDataSet("geantBranch"));
-	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(geant("g2t_track"));
+	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(mGeantData->Find("g2t_track"));
 	if (!g2t_track) {
 		LOG_WARN << " No g2t track table !!! " << endm;
 		return kStWarn;

@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.14 2009/02/02 19:30:50 fisyak Exp $
+ * $Id: StMiniMcMaker.h,v 1.16 2010/08/31 20:16:15 fisyak Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,6 +12,12 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.16  2010/08/31 20:16:15  fisyak
+ * Add track seedQuality
+ *
+ * Revision 1.15  2010/04/15 19:17:27  fisyak
+ * Add corrections for AppendMCDaughterTrack from Masayuki Wada
+ *
  * Revision 1.14  2009/02/02 19:30:50  fisyak
  * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
  *
@@ -80,6 +86,12 @@
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.16  2010/08/31 20:16:15  fisyak
+ * Add track seedQuality
+ *
+ * Revision 1.15  2010/04/15 19:17:27  fisyak
+ * Add corrections for AppendMCDaughterTrack from Masayuki Wada
+ *
  * Revision 1.14  2009/02/02 19:30:50  fisyak
  * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
  *
@@ -144,7 +156,7 @@
  * but in order not to break Jenn's scripts if she was already using this macro,
  * this parameter was added at the end and defaults to "rcf", which is appropriate
  * for hijing files reconstructed in rcf.
- * and $Id: StMiniMcMaker.h,v 1.14 2009/02/02 19:30:50 fisyak Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.h,v 1.16 2010/08/31 20:16:15 fisyak Exp $ plus header comments for the macros
  *
  */
 
@@ -217,7 +229,7 @@ class StMiniMcMaker : public StMaker{
   Int_t Make();
   Int_t Finish();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.14 2009/02/02 19:30:50 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.16 2010/08/31 20:16:15 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   //---- SETS -------
 
@@ -273,7 +285,7 @@ class StMiniMcMaker : public StMaker{
 				 Int_t nMcFtpcENch, Int_t nMcFtpcWNch,
 				 Int_t nFtpcEUncorrected, Int_t nFtpcWUncorrected);
   void             fillTrackPairInfo(StMiniMcPair*,
-				     const StMcTrack*,
+				     StMcTrack*,
 				     const StTrack* prTrack, 
 				     const StTrack* glTrack,
 				     Int_t commonHits, Int_t nAssMc,
@@ -286,7 +298,7 @@ class StMiniMcMaker : public StMaker{
 				   Int_t nAssMc);
   
   void             fillMcTrackInfo(StTinyMcTrack*,
-				   const StMcTrack*,
+				   StMcTrack*,
 				   Int_t nAssGl, Int_t nAssPr);
 
   void             checkMerged(StMcTrack* merged, Int_t mergedCommonHits,
@@ -295,6 +307,9 @@ class StMiniMcMaker : public StMaker{
   void             checkContam(StMcTrack*,StGlobalTrack*,Int_t);
 
   size_t           getIndex(size_t mult);
+
+ void             AppendMCDaughterTrack();
+
   // members
   StMiniMcEvent*   mMiniMcEvent; //! 
   StIOInterFace*   mIOMaker;      //!

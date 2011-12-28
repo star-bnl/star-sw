@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.48 2010/01/25 03:57:39 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.49 2010/02/01 23:15:27 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -604,7 +604,7 @@ void StMuDst::Print(Option_t *option) const {
   cout << endl;
 }
 
-void StMuDst::printVertices() const {
+void StMuDst::printVertices()  {
   if (numberOfPrimaryVertices() == 0) {
     cout << "No vertices stored (for older data, check StMuEvent)" << endl;
     return;
@@ -618,7 +618,7 @@ void StMuDst::printVertices() const {
   }
 }
 
-void StMuDst::printPrimaryTracks() const {
+void StMuDst::printPrimaryTracks() {
   if (numberOfPrimaryTracks() == 0) {
     cout << "No primary tracks found!" << endl;
     return;
@@ -632,7 +632,7 @@ void StMuDst::printPrimaryTracks() const {
   }
 }
 
-void StMuDst::printGlobalTracks() const {
+void StMuDst::printGlobalTracks()  {
   if (numberOfGlobalTracks() == 0) {
     cout << "No global tracks found!" << endl;
     return;
@@ -651,6 +651,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.49  2010/02/01 23:15:27  fine
+ * replace non-static method
+ *
  * Revision 1.48  2010/01/25 03:57:39  tone421
  * Added FMS and Roman pot arrays
  *

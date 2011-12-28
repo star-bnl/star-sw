@@ -48,10 +48,9 @@ TBrowser *brow=0;
 // The acual file to be used is passed as an argument to the macro, or a default can be set
 
 void simM2Maker (
-		const char *MainFile="/star/institutions/lbl/dongx/tof/fulltof/event/StEvent/pythia_7.geant.root",
-		Int_t nevents=5000000
-		//                const char *MainFile="/star/u/debasish/hijing/hijingnew/hijtest/Au200GeVhijing10events.geant.root",
-		//	const char *outFileName="test0_6.root"
+		const char *MainFile="/star/institutions/rice/geurts/sim/tof/pythia_0.geant.root",
+		Int_t nevents=10,
+		const char *outFileName="test.root"
 		)
 {
 	// Load all the System libraries
@@ -117,17 +116,25 @@ void simM2Maker (
 	mcEventReader->doUseSvt = false;
 	mcEventReader->doUseRich = false;
 	mcEventReader->doUseEemc = false;
-	mcEventReader->doUseBtof  = true;
-	//mcEventReader->SetDebug(1);
+	mcEventReader->doUseTof  = true;
+	mcEventReader->SetDebug(1);
 
 
 	St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb", "MySQL:StarDb", "$STAR/StarDb");
-	dbMk->SetDateTime(20080301,214129); // for simulation
+	dbMk->SetDateTime(20090401,214129); // for simulation
 	cout << " DbMaker loading done " << endl;
 
 
 	//geant to StEvent convertion code
-	StBTofSimMaker *simMaker = new StBTofSimMaker; 
+	string filename=outFileName;
+	StBTofSimMaker *simMaker = new StBTofSimMaker;
+	simMaker->setBookHist(kTRUE);
+	simMaker->setHistFileName(filename);
+	simMaker->writeStEvent(kTRUE);
+
+	StBTofMatchMaker *matchMaker = new StBTofMatchMaker;
+        matchMaker->setIdealGeometry();
+	matchMaker->SetDebug(1);
 
 	//StEvent to MuDst conversion
 	StMuDstMaker* makeMu=new StMuDstMaker("makeMu");

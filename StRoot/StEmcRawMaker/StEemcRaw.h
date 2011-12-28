@@ -28,8 +28,8 @@ private:
     TH1F *hs[8];
     Bool_t   copyRawData(StEEMCReader *eeReader, StEmcRawData *raw);
     Bool_t copyRawData(StEmcRawMaker* maker, StEmcRawData *raw);
-    Bool_t headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int token, int runId);
-    Bool_t   headersAreSick(StEEMCReader *eeReader, StEmcRawData *raw, int token, int runId);
+    Bool_t headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int token, int runId, int time);
+    Bool_t   headersAreSick(StEEMCReader *eeReader, StEmcRawData *raw, int token, int runId, int time);
     Bool_t   towerDataAreSick(StEmcRawData* raw);
     void     raw2pixels(StEvent* mEvent);
 
@@ -51,10 +51,13 @@ public:
 
 #endif
 
-// $Id: StEemcRaw.h,v 1.7 2009/02/04 21:05:42 kocolosk Exp $
+// $Id: StEemcRaw.h,v 1.8 2011/01/04 19:04:08 stevens4 Exp $
 
 /*
  * $Log: StEemcRaw.h,v $
+ * Revision 1.8  2011/01/04 19:04:08  stevens4
+ * added event time to EEMC header check
+ *
  * Revision 1.7  2009/02/04 21:05:42  kocolosk
  * Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
  *

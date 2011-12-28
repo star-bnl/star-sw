@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.65 2010/01/26 21:06:09 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.67 2010/04/08 15:53:27 fisyak Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -53,10 +53,11 @@ using namespace units;
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcAcChargeC.h"
+#include "StDetectorDbMaker/St_trigDetSumsC.h"
 const static StPidParticle NHYPS = kPidHe3;//kPidTriton;
 const static Int_t tZero= 19950101;
 const static Int_t tMin = 20090301;
-const static Int_t tMax = 20090705;
+const static Int_t tMax = 20100705;
 const static TDatime t0(tZero,0);
 const static Int_t timeOffSet = t0.Convert();
 const static Int_t NdEdxMax  = 60;
@@ -90,7 +91,6 @@ ClassImp(StdEdxY2Maker);
 StdEdxY2Maker::StdEdxY2Maker(const char *name):
   StMaker(name), 
   m_Minuit(0), m_TpcdEdxCorrection(0),  m_Mask(-1), 
-  m_trigDetSums(0), m_trig(0),
   mHitsUsage(0)
 {
   memset (beg, 0, end-beg);
@@ -150,18 +150,15 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
   innerSectorPadPitch = gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch();
   outerSectorPadPitch = gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
 
-  m_trigDetSums = (St_trigDetSums *)GetDataBase("Calibrations/rich/trigDetSums");
-  if ( ! m_trigDetSums ) gMessMgr->Error() << "StdEdxY2Maker:: Cannot find trigDetSums in Calibrations/rich" << endm;
+  if ( ! St_trigDetSumsC::instance() ) gMessMgr->Error() << "StdEdxY2Maker:: Cannot find trigDetSums" << endm;
   else {
-    if (!m_trigDetSums->GetNRows()) gMessMgr->Error() << "StdEdxY2Maker:: trigDetSums has not data" << endm;
+    if (!St_trigDetSumsC::instance()->GetNRows()) gMessMgr->Error() << "StdEdxY2Maker:: trigDetSums has not data" << endm;
     else {
-      m_trig = m_trigDetSums->GetTable();
       UInt_t date = GetDateTime().Convert();
-      if (date < m_trig->timeOffset) {
+      if (date < St_trigDetSumsC::instance()->timeOffset()) {
 	gMessMgr->Error() << "StdEdxY2Maker:: Illegal time for scalers = " 
-			  << m_trig->timeOffset << "/" << date
-			  << " Run " << m_trig->runNumber << "/" << GetRunNumber() << endm;
-	m_trigDetSums = 0; m_trig = 0;
+			  << St_trigDetSumsC::instance()->timeOffset() << "/" << date
+			  << " Run " << St_trigDetSumsC::instance()->runNumber() << "/" << GetRunNumber() << endm;
       }
     }
   }
@@ -614,7 +611,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].ZdriftDistance = localSect[3].position().z();
 	CdEdx[NdEdx].zG      = tpcHit->position().z();
 	CdEdx[NdEdx].Qcm     = 1e6*QL[kTpcOutIn]/tpcHit->position().perp2(); // uC/cm
-	if (m_trig)	CdEdx[NdEdx].Zdc     = m_trig->zdcX;
+	if (St_trigDetSumsC::instance())	CdEdx[NdEdx].Zdc     = St_trigDetSumsC::instance()->zdcX();
 	Bool_t doIT = kTRUE;
 	if (TESTBIT(m_Mode,kEmbedding)) doIT = kFALSE;
 	Int_t iok = m_TpcdEdxCorrection->dEdxCorrection(CdEdx[NdEdx],doIT);
@@ -1208,7 +1205,6 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   
   StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
   Double_t pMomentum = g3.mag();
-  Double_t Eta = g3.pseudoRapidity();
   Int_t sCharge = 0;
   if (gTrack->geometry()->charge() < 0) sCharge = 1;
   //  StTpcDedxPidAlgorithm tpcDedxAlgo;
@@ -1324,7 +1320,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   if (pidF && TrackLength > 40.) {
     // Bad dE/dx
     Double_t L10Mult = -1;
-    if (m_trig) L10Mult = m_trig->mult;
+    if (St_trigDetSumsC::instance()) L10Mult = St_trigDetSumsC::instance()->mult();
     //    StThreeVectorD pxyz = gTrack->geometry()->momentum();
     StThreeVectorD  xyz = gTrack->geometry()->helix().at(0);
     Double_t ZG  = xyz.z();
@@ -1606,17 +1602,17 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  if (ppmOxygenOutP) ppmOxygenOutP->Fill(tpcGas->ppmOxygenOut,FdEdx[k].dEdxN);
 	  if (flowRateRecirculationP) flowRateRecirculationP->Fill(tpcGas->flowRateRecirculation,FdEdx[k].dEdxN);
 	}
-	if (m_trig) {
-	  if (m_trig->zdcX > 0 && ZdcCP) ZdcCP->Fill(TMath::Log10(m_trig->zdcX), FdEdx[k].dEdxN);
-	  if (m_trig->bbcYellowBkg > 0 && bbcYellowBkg) 
-	    bbcYellowBkg->Fill(TMath::Log10(m_trig->bbcYellowBkg), FdEdx[k].dEdxN);
-	  if (m_trig->bbcBlueBkg > 0 && bbcBlueBkg) 
-	    bbcBlueBkg->Fill(TMath::Log10(m_trig->bbcBlueBkg), FdEdx[k].dEdxN);
-	  if (m_trig->bbcX > 0 && BBCP) BBCP->Fill(TMath::Log10(m_trig->bbcX), FdEdx[k].dEdxN);
-	  if (m_trig->L0   > 0 && L0P) L0P->Fill(TMath::Log10(m_trig->L0), FdEdx[k].dEdxN);
-	  if (m_trig->mult > 0) {
-	    if (MultiplicityPI && FdEdx[k].row < 14) MultiplicityPI->Fill(TMath::Log10(m_trig->mult), FdEdx[k].dEdxN);
-	    if (MultiplicityPO && FdEdx[k].row > 13) MultiplicityPO->Fill(TMath::Log10(m_trig->mult), FdEdx[k].dEdxN);
+	if (St_trigDetSumsC::instance()) {
+	  if (St_trigDetSumsC::instance()->zdcX() > 0 && ZdcCP) ZdcCP->Fill(TMath::Log10(St_trigDetSumsC::instance()->zdcX()), FdEdx[k].dEdxN);
+	  if (St_trigDetSumsC::instance()->bbcYellowBkg() > 0 && bbcYellowBkg) 
+	    bbcYellowBkg->Fill(TMath::Log10(St_trigDetSumsC::instance()->bbcYellowBkg()), FdEdx[k].dEdxN);
+	  if (St_trigDetSumsC::instance()->bbcBlueBkg() > 0 && bbcBlueBkg) 
+	    bbcBlueBkg->Fill(TMath::Log10(St_trigDetSumsC::instance()->bbcBlueBkg()), FdEdx[k].dEdxN);
+	  if (St_trigDetSumsC::instance()->bbcX() > 0 && BBCP) BBCP->Fill(TMath::Log10(St_trigDetSumsC::instance()->bbcX()), FdEdx[k].dEdxN);
+	  if (St_trigDetSumsC::instance()->L0()   > 0 && L0P) L0P->Fill(TMath::Log10(St_trigDetSumsC::instance()->L0()), FdEdx[k].dEdxN);
+	  if (St_trigDetSumsC::instance()->mult() > 0) {
+	    if (MultiplicityPI && FdEdx[k].row < 14) MultiplicityPI->Fill(TMath::Log10(St_trigDetSumsC::instance()->mult()), FdEdx[k].dEdxN);
+	    if (MultiplicityPO && FdEdx[k].row > 13) MultiplicityPO->Fill(TMath::Log10(St_trigDetSumsC::instance()->mult()), FdEdx[k].dEdxN);
 	  }
 	}
 	//       if ((TESTBIT(m_Mode, kGASHISTOGRAMS))) {
@@ -1626,7 +1622,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	//       } // GASHISTOGRAMS 
 	// Correction 
 #if 0
-	Double_t eta =  Eta;
+	Double_t eta = g3.pseudoRapidity(); 
 #endif
 	Double_t Pad2Edge = FdEdx[k].edge;
 	if (TMath::Abs(Pad2Edge) > 5) {
@@ -1699,9 +1695,9 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (ETA3)ETA3->Fill(FdEdx[k].row,eta,FdEdx[k].dEdxN);
 #endif
 	if (Edge3) Edge3->Fill(FdEdx[k].row,FdEdx[k].edge,  FdEdx[k].dEdxN);
-	if (m_trig && m_trig->mult > 0) {
-	  if (MulRow)   MulRow->Fill(TMath::Log10(m_trig->mult),FdEdx[k].row,FdEdx[k].C[StTpcdEdxCorrection::kMultiplicity-1].dEdxN);
-	  if (MulRowC) MulRowC->Fill(TMath::Log10(m_trig->mult),FdEdx[k].row,FdEdx[k].dEdxN);
+	if (St_trigDetSumsC::instance() && St_trigDetSumsC::instance()->mult() > 0) {
+	  if (MulRow)   MulRow->Fill(TMath::Log10(St_trigDetSumsC::instance()->mult()),FdEdx[k].row,FdEdx[k].C[StTpcdEdxCorrection::kMultiplicity-1].dEdxN);
+	  if (MulRowC) MulRowC->Fill(TMath::Log10(St_trigDetSumsC::instance()->mult()),FdEdx[k].row,FdEdx[k].dEdxN);
 	}
 	if (dXdE )  dXdE->Fill(FdEdx[k].dx,FdEdx[k].row,FdEdx[k].C[StTpcdEdxCorrection::kdXCorrection-1].dEdxN);
 	if (dXdEA) dXdEA->Fill(FdEdx[k].dx,FdEdx[k].row,FdEdx[k].C[StTpcdEdxCorrection::kdXCorrection].dEdxN);
@@ -1991,16 +1987,16 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
       if (ppmOxygenOut)          ppmOxygenOut->Fill(date,tpcgas->ppmOxygenOut);                
       if (flowRateRecirculation) flowRateRecirculation->Fill(date,tpcgas->flowRateRecirculation);
     }
-    if (m_trig) {
+    if (St_trigDetSumsC::instance()) {
 #if 0
-      if (m_trig->zdcWest > 0 &&
-	  m_trig->zdcEast > 0 && Zdc) Zdc->Fill(TMath::Log10(m_trig->zdcWest),
-						TMath::Log10(m_trig->zdcEast));
+      if (St_trigDetSumsC::instance()->zdcWest() > 0 &&
+	  St_trigDetSumsC::instance()->zdcEast() > 0 && Zdc) Zdc->Fill(TMath::Log10(St_trigDetSumsC::instance()->zdcWest()),
+								       TMath::Log10(St_trigDetSumsC::instance()->zdcEast()));
 #endif
-      if (m_trig->zdcX > 0 && ZdcC) ZdcC->Fill(TMath::Log10(m_trig->zdcX));
-      if (m_trig->bbcX > 0 && BBC) BBC->Fill(TMath::Log10(m_trig->bbcX));
-      if (m_trig->L0   > 0 && L0) L0->Fill(TMath::Log10(m_trig->L0));
-      if (m_trig->mult > 0 && Multiplicity) Multiplicity->Fill(TMath::Log10(m_trig->mult));
+      if (St_trigDetSumsC::instance()->zdcX() > 0 && ZdcC) ZdcC->Fill(TMath::Log10(St_trigDetSumsC::instance()->zdcX()));
+      if (St_trigDetSumsC::instance()->bbcX() > 0 && BBC) BBC->Fill(TMath::Log10(St_trigDetSumsC::instance()->bbcX()));
+      if (St_trigDetSumsC::instance()->L0()   > 0 && L0) L0->Fill(TMath::Log10(St_trigDetSumsC::instance()->L0()));
+      if (St_trigDetSumsC::instance()->mult() > 0 && Multiplicity) Multiplicity->Fill(TMath::Log10(St_trigDetSumsC::instance()->mult()));
     }
   } // (TESTBIT(m_Mode, kGASHISTOGRAMS))n
 }

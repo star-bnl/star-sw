@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManagerImpl.hh,v 1.7 2007/08/20 18:21:29 deph Exp $
+ * $Id: StDbManagerImpl.hh,v 1.8 2011/02/10 17:30:42 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.hh,v $
+ * Revision 1.8  2011/02/10 17:30:42  dmitry
+ * added an option to blacklist domains
+ *
  * Revision 1.7  2007/08/20 18:21:29  deph
  * New Version of Load Balancer
  *
@@ -95,10 +98,12 @@ public:
 /*************** end helper class definitions ****************/
 
 #include <list>
+#include <set>
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef list<dbType*,allocator<dbType*> > dbTypes;
 typedef list<dbDomain*,allocator<dbDomain*> > dbDomains;
 typedef list<StDbServer*,allocator<StDbServer*> > ServerList;
+typedef set<std::string,allocator<std::string> > dbDomainBlacklist;
 #else
 #if !defined(ST_NO_NAMESPACES)
 using std::list;
@@ -106,6 +111,7 @@ using std::list;
 typedef list<dbType*> dbTypes;
 typedef list<dbDomain*> dbDomains;
 typedef list<StDbServer*> ServerList;
+typedef set<std::string> dbDomainBlacklist;
 #endif
 
 
@@ -121,6 +127,7 @@ private:
   StDbType       dbTypeFree;      //! enum of last unspecified type 
   StDbDomain     dbDomainFree;    //! enum of last unspecified domain
   ServerList     mservers;        //! servers to handle the Query 
+  dbDomainBlacklist mBlacklist;   //! set of blacklisted domains
   parseXmlString mparser;         //! parses strings in XML
 
   bool mhasServerList;
@@ -179,6 +186,8 @@ public:
   virtual char*           getDbName(const char* typeName, 
                                     const char* domainName);
   virtual char*           printDbName(StDbType type, StDbDomain domain);
+
+  virtual void            blacklistDbDomain(const char* domainName); 
 
   // time stamp methods
   virtual void            setRequestTime(unsigned int time);

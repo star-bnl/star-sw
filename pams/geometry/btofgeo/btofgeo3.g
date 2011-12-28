@@ -1,7 +1,17 @@
-* $Id: btofgeo3.g,v 1.6 2005/05/23 14:56:15 llope Exp $
+* $Id: btofgeo3.g,v 1.8 2011/02/28 15:33:40 jwebb Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo3.g,v $
+* Revision 1.8  2011/02/28 15:33:40  jwebb
+* Cosmetic changes to comments needed for AgML translation.
+*
+* Revision 1.7  2010/06/23 19:09:49  jwebb
+* Resolved minor bug in the cooling tubes for the tof.  The inner radii of
+* the cooling tubes are passed to the block creating the water volume, but
+* the shape operator indicated that it should inherit its parameters from
+* the mother volume.  This resulted in the outer radius of the water volume
+* being set equal to the outer radius of the cooling tube.
+*
 * Revision 1.6  2005/05/23 14:56:15  llope
 * removed unneeded Dens=0.282 statements from honeycomb Material definitions
 *
@@ -401,14 +411,14 @@ Block BTOH is a half of trigger system (west-east)
 
       ! tof=0 means ctb, tof=1 means TOFp, tof=2 means TOFr, tof=3 means TOFr'
       do is=1,60
-         tof=0		                                !-> all CTB for choice=1                     
-         if (choice==2)                      tof=1	!-> all TOFp
-         if (choice==3 & 46<=is&is<=60)      tof=1	!-> big TOFp patch, rest CTB
-         if (choice==4 & is==btog_posit1(1)) tof=1	!-> Run-2 (one TOFp tray)
-         if (choice==5 & is==btog_posit1(1)) tof=1	!-> Run-3 (one TOFp tray
+         tof=0		                                !// all CTB for choice=1                     
+         if (choice==2)                      tof=1	!// all TOFp
+         if (choice==3 & 46<=is&is<=60)      tof=1	!// big TOFp patch, rest CTB
+         if (choice==4 & is==btog_posit1(1)) tof=1	!// Run-2 (one TOFp tray)
+         if (choice==5 & is==btog_posit1(1)) tof=1	!// Run-3 (one TOFp tray
          if (choice==5 & is==btog_posit2)    tof=2	!      and one TOFr tray)
-         if (choice==6)                      tof=2	!-> all TOFr
-         if (choice==7 & is==btog_posit1(2)) tof=1	!-> Run-4 (one TOFp tray moved 1 slot
+         if (choice==6)                      tof=2	!// all TOFr
+         if (choice==7 & is==btog_posit1(2)) tof=1	!// Run-4 (one TOFp tray moved 1 slot
          if (choice==7 & is==btog_posit2)    tof=3	!      and one TOFrp tray)
 !         print *,' Positioning Tray, choice,is,tof=',choice,is,tof
          Create and Position BSEC  alphaz = 102+6*is
@@ -961,8 +971,7 @@ Block BWAT  is  TPC cooling water
       Component H2     A=1   Z=1   W=2
       Component O      A=16  Z=8   W=1
       Mixture   Water  Dens=1.0
-      Shape     TUBE
-**   Rmin=0  Rmax=0
+      Shape     TUBE   Rmin=0  Rmax=0
 EndBlock
 
 *------------------------------------------------------------------------------
@@ -977,7 +986,7 @@ EndBlock
 *        Outer-Glass    BROG
 *        Separator      BRSG
 *     /--Inner-Glass    BRIG
-*  n {
+*  n +
 *     \--Separator
 *        Outer-Glass
 *        Graphite

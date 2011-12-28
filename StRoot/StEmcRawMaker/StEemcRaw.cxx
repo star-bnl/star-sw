@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.18 2009/05/06 14:25:54 mattheww Exp $
+// $Id: StEemcRaw.cxx,v 1.19 2011/01/04 19:04:08 stevens4 Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -75,8 +75,9 @@ Bool_t StEemcRaw::make(StEmcRawMaker* maker, StEvent* mEvent){
     int token=trg->triggerToken();
     // printf("\nStL0Trigger::token=%d\n",token);
     int runId=mEvent->runId();
+    int time=mEvent->time();
 
-    if( headersAreSick(maker, eemcRaw, token,  runId) )
+    if( headersAreSick(maker, eemcRaw, token,  runId, time) )
         return false;
     if (hs[0])
         hs[0]->Fill(3);
@@ -140,7 +141,7 @@ Bool_t StEemcRaw::copyRawData(StEmcRawMaker* maker, StEmcRawData *raw)
     return true;
 }
 
-Bool_t StEemcRaw::headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int token, int runId)
+Bool_t StEemcRaw::headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int token, int runId, int time)
 {
     if (! raw)
     {
@@ -192,7 +193,7 @@ Bool_t StEemcRaw::headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int to
         if(fiber->type=='T')
             lenCount+=32; // one more board exist in harware
 
-        if(fiber->type=='S' && runId<6000000)
+	if(fiber->type=='S' && time<1104537600 && runId<6000000)
             errFlag=0x28;  // bug in box firmawer prior to 2005
 
 	//HACK^2 - disable token check, March 22, 2007
@@ -267,8 +268,9 @@ Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent){
     int token=trg->triggerToken();
     // printf("\nStL0Trigger::token=%d\n",token);
     int runId=mEvent->runId();
+    int time=mEvent->time();
 
-    if( headersAreSick(eeReader, eemcRaw, token,  runId) )
+    if( headersAreSick(eeReader, eemcRaw, token,  runId, time) )
         return false;
     if (hs[0])
         hs[0]->Fill(3);
@@ -308,7 +310,7 @@ Bool_t   StEemcRaw::copyRawData(StEEMCReader *eeReader, StEmcRawData *raw)
 //____________________________________________________
 //____________________________________________________
 //____________________________________________________
-Bool_t   StEemcRaw::headersAreSick(StEEMCReader *eeReader, StEmcRawData *raw, int token, int runId)
+Bool_t   StEemcRaw::headersAreSick(StEEMCReader *eeReader, StEmcRawData *raw, int token, int runId, int time)
 {
 
     if (! raw)
@@ -361,7 +363,7 @@ Bool_t   StEemcRaw::headersAreSick(StEEMCReader *eeReader, StEmcRawData *raw, in
         if(fiber->type=='T')
             lenCount+=32; // one more board exist in harware
 
-        if(fiber->type=='S' && runId<6000000)
+        if(fiber->type=='S' && time<1104537600 && runId<6000000)
             errFlag=0x28;  // bug in box firmawer prior to 2005
 
 	//HACK^2 - disable token check, March 22, 2007
@@ -590,6 +592,9 @@ void StEemcRaw::initHisto()
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.19  2011/01/04 19:04:08  stevens4
+// added event time to EEMC header check
+//
 // Revision 1.18  2009/05/06 14:25:54  mattheww
 // changed a threshold in EEMC
 //

@@ -1,6 +1,9 @@
-* $Id: shldgeo.g,v 1.4 2006/01/18 23:17:59 potekhin Exp $
+* $Id: shldgeo.g,v 1.5 2011/02/28 16:28:59 jwebb Exp $
 *
 * $Log: shldgeo.g,v $
+* Revision 1.5  2011/02/28 16:28:59  jwebb
+* Cosmetic changed required for AgML syntax matching.
+*
 * Revision 1.4  2006/01/18 23:17:59  potekhin
 * Flush out small changes in the beam shield geometry
 * (very simple at the moment) as we aren't doing further development right now.
@@ -30,8 +33,8 @@ Module SHLDGEO is the shielding
                      baseLevel,   baseZ,   baseDx,  baseDy,
                          slabX,   slabZ,   slabDy,  slabDz,
                           fiDz,    fiDy,     holeX,  holeY,
-                      floorThk,floorLen,floorWidth, floorPos
-                     }
+                      floorThk,floorLen,floorWidth, floorPos }
+
 
 *
 *    local variable for section positioning

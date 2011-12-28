@@ -1,5 +1,29 @@
-// $Id: St_geant_Maker.cxx,v 1.125 2010/01/07 19:16:24 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.135 2010/08/10 16:35:33 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.135  2010/08/10 16:35:33  fisyak
+// Add initialization of starsim parameter tables after opening zebra-file
+//
+// Revision 1.134  2010/05/27 13:36:14  fisyak
+// 3rd attemp to synchronize mag.field. Now take care that the maker can be not Active and do InitRun in Work
+//
+// Revision 1.132  2010/05/24 15:38:40  fisyak
+// Move geometry and mag.field initialization from Init into InitRun in order to allow mag. field settings from StMagFMaker::InitRun
+//
+// Revision 1.130  2010/05/10 14:19:52  fisyak
+// move geometry load from Init to InitRun in order to allow MagF maker to set mag.field
+//
+// Revision 1.129  2010/04/23 23:19:26  perev
+// Remove not needed and expencive call AgstHits
+//
+// Revision 1.128  2010/03/31 19:15:45  fine
+// RT #1890 Fix the side effect introduced  yesterdays
+//
+// Revision 1.127  2010/03/29 20:37:54  fine
+// RT #1890 Fix the geometry leak that entails the warning message
+//
+// Revision 1.126  2010/02/22 15:02:18  fisyak
+// Clean up, fix bug #1860 by replacing skip => trig
+//
 // Revision 1.125  2010/01/07 19:16:24  perev
 // mArgs for agvolume is 9 now
 //
@@ -499,7 +523,7 @@
 #include "StMagF.h"
 #include "StMessMgr.h"
 #ifdef DetectorIndex
-#include "StarG2T2VMCMap.h"
+#include "StarDetectorMap.h"
 #endif
 #ifdef F77_NAME
 #define    geometry	 F77_NAME(geometry,GEOMETRY)
@@ -623,21 +647,23 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
      ds = StMaker::FindDataSet(logInput,uppMk,dowMk); 
   } else {
      if (lookupHall) {
-        if (!fVolume) ((St_geant_Maker *)this)->Work();
-  
-        if (fVolume) {
+        ds = fVolume;
+        if (!fVolume) {
+           ((St_geant_Maker *)this)->Work();
            ds = fVolume;
-           if (gGeometry) {
-              TList *listOfVolume = gGeometry->GetListOfNodes();
+           if (fVolume) {
+              if (gGeometry) {
+                 TList *listOfVolume = gGeometry->GetListOfNodes();
 
-              // Remove hall from the list of ROOT nodes to make it free of ROOT control
-              listOfVolume->Remove(fVolume);
-              listOfVolume->Remove(fVolume);
+                 // Remove hall from the list of ROOT nodes to make it free of ROOT control
+                 listOfVolume->Remove(fVolume);
+                 listOfVolume->Remove(fVolume);
+              }
+              // Add "hall" into ".const" area of this maker
+              ((St_geant_Maker *)this)->AddConst(fVolume);
+              if (Debug()) fVolume->ls(3);
            }
-            // Add "hall" into ".const" area of this maker
-            ((St_geant_Maker *)this)->AddConst(fVolume);
-            if (Debug()) fVolume->ls(3);
-        } 
+        }
     } else if (lookupGeoDir) {
         if (!fGeoDirectory) {
            TString file("pams/geometry");
@@ -678,20 +704,20 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
   // Initialize GEANT
-  if (! geant3) {
-    PrintInfo();
-    geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
-    assert(geant3);
-    cquest = (Quest_t  *) geant3->Quest();
-    clink  = (Gclink_t *) geant3->Gclink();
-    cflag  = (Gcflag_t *) geant3->Gcflag();
-    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
-    cnum   = (Gcnum_t  *) geant3->Gcnum();
-    z_iq   = (Int_t    *) geant3->Iq();
-    z_lq   = (Int_t    *) geant3->Lq();
-    z_q    = (Float_t  *) geant3->Q();
-    csets  = (Gcsets_t *) geant3->Gcsets();
-  }
+  if (  geant3) return kStOK;
+  PrintInfo();
+  geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
+  assert(geant3);
+  cquest = (Quest_t  *) geant3->Quest();
+  clink  = (Gclink_t *) geant3->Gclink();
+  cflag  = (Gcflag_t *) geant3->Gcflag();
+  cvolu  = (Gcvolu_t *) geant3->Gcvolu();
+  cnum   = (Gcnum_t  *) geant3->Gcnum();
+  z_iq   = (Int_t    *) geant3->Iq();
+  z_lq   = (Int_t    *) geant3->Lq();
+  z_q    = (Float_t  *) geant3->Q();
+  csets  = (Gcsets_t *) geant3->Gcsets();
+
   TString InputFile(fInputFile);
   if (fInputFile != "") {//check that first word contains .fz then add "gfile p" 
     //                                       -"-          .nt then add "user/input user" 
@@ -715,19 +741,60 @@ Int_t St_geant_Maker::Init(){
       if (InputFile != "") Do(InputFile.Data());
       InputFile = "";
     }
+  } else {  
+    if (IsActive()) {// default
+      Do("subevent 0;");
+      // gkine #particles partid ptrange yrange phirange vertexrange
+      Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
+      Do("mode g2tm prin 1;");
+      //  Do("next;");
+      //  Do("dcut cave z 1 10 10 0.03 0.03;");
+      if ((m_Mode/1000)%10 == 1) {// phys_off
+	gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
+	Do("DCAY 0");
+	Do("ANNI 0");
+	Do("BREM 0");
+	Do("COMP 0");
+	Do("HADR 0");
+	Do("MUNU 0");
+	Do("PAIR 0");
+	Do("PFIS 0");
+	Do("PHOT 0");
+	Do("RAYL 0");
+	Do("LOSS 4"); // no fluctuations 
+	//  Do("LOSS 1"); // with delta electron above dcute
+	Do("DRAY 0");
+	Do("MULS 0");
+	Do("STRA 0");
+	//                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
+	Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
+	Do("gclose all");
+	Do("physi");
+      }	
+      if (Debug() > 1) {
+	Do("debug on;");
+	Do("swit 2 2;");
+      }
+    }
   }
+  return kStOK;
+}
+//________________________________________________________________________________
+Int_t St_geant_Maker::InitRun(Int_t run){
   if (mInitialization != "") {
+    gMessMgr->Info() << "St_geant_Maker::InitRun -- Do geometry initialization" << endm;
     Do(mInitialization.Data()); 
     Geometry();
+    mInitialization = "";
+    Do("gclose all");
   }
-  Do("gclose all");
   Agstroot();
+  gMessMgr->Info() << "St_geant_Maker::InitRun -- Do mag.field initialization" << endm;
   m_geom_gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
   if (m_geom_gdat)  {
     AddRunco(new St_geom_gdat(*m_geom_gdat));
   }
-  BookHist();   // Create Histograms    
-  if (m_Mode%100 != 1 &&  IsActive() ) { // Mixer mode == 1 or reco - do not modify EvtHddr and MagF
+  if (m_Mode%10 != 1 && IsActive() ) { // Mixer mode == 1 or reco - do not modify EvtHddr and MagF
     fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
     if (!fEvtHddr) {                            // Standalone run
       fEvtHddr = new StEvtHddr(m_ConstSet);
@@ -761,7 +828,7 @@ Int_t St_geant_Maker::Init(){
       }
       gMessMgr->Info()  << "St_geant_Maker::Init mfscale = " << mfscale		       << endm;
       struct Field_t {
-	const char *name;
+	const Char_t *name;
 	Float_t scale;
       };
       const Field_t FieldOptions[5] = {
@@ -796,42 +863,7 @@ Int_t St_geant_Maker::Init(){
       }
     }
   }
-  // Kinematics
-  if (fInputFile == "" && IsActive()) {// default
-      Do("subevent 0;");
-      // gkine #particles partid ptrange yrange phirange vertexrange
-      Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
-      Do("mode g2tm prin 1;");
-      //  Do("next;");
-      //  Do("dcut cave z 1 10 10 0.03 0.03;");
-      if ((m_Mode/1000)%10 == 1) {// phys_off
-	gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
-	Do("DCAY 0");
-	Do("ANNI 0");
-	Do("BREM 0");
-	Do("COMP 0");
-	Do("HADR 0");
-	Do("MUNU 0");
-	Do("PAIR 0");
-	Do("PFIS 0");
-	Do("PHOT 0");
-	Do("RAYL 0");
-	Do("LOSS 4"); // no fluctuations 
-	//  Do("LOSS 1"); // with delta electron above dcute
-	Do("DRAY 0");
-	Do("MULS 0");
-	Do("STRA 0");
-	//                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-	Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
-	Do("gclose all");
-	Do("physi");
-      }	
-      if (Debug() > 1) {
-	Do("debug on;");
-	Do("swit 2 2;");
-      }
-  }
-  return StMaker::Init();
+  return kStOK;
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Make()
@@ -1206,9 +1238,6 @@ Int_t St_geant_Maker::Make()
   if (address) csjcal(&address,&narg);
 #endif
   
-  // Fill Histograms    
-  FillHist();
-  
   if (cflag->ieorun) return kStEOF; 
   if (cflag->ieotri) return kStErr; 
   return kStOK;
@@ -1422,6 +1451,9 @@ void St_geant_Maker::ClearRootGeoms()
 //_____________________________________________________________________________
 TDataSet *St_geant_Maker::Work()
 {  
+  if (mInitialization != "") {
+    InitRun(-1);
+  }
   struct  Medium 
   { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
   struct  Volume
@@ -1687,7 +1719,7 @@ Int_t St_geant_Maker::Skip(Int_t Nskip)
 {
   if (Nskip >= 0) {
     Char_t kuip[20];
-    sprintf (kuip,"skip %i",Nskip);
+    sprintf (kuip,"trig %i",Nskip);
     if (GetDebug()) printf("St_geant_Maker skip %i\n record(s)",Nskip); 
     Do((const char*)kuip);
     
@@ -1776,7 +1808,7 @@ void St_geant_Maker::Geometry() {
 }
 //______________________________________________________________________________
 Int_t St_geant_Maker::Agstroot() {
-  AgstHits();
+//VP not used  AgstHits();
   return agstroot();
 }
 //_____________________________________________________________________________
@@ -1799,7 +1831,7 @@ void St_geant_Maker::Dzddiv(Int_t& idiv ,Int_t &Ldummy,const Char_t* path,const 
 }
 
 //_____________________________________________________________________________
-
+#if 0
 void St_geant_Maker::BookHist(){
   
   gMessMgr->Info() << "St_geant_Maker::***********  St_geant_Maker - bookhist!!!! *********" << endm;
@@ -1842,10 +1874,11 @@ void St_geant_Maker::FillHist(){
   
   gMessMgr->Info() << "St_geant_Maker:: geant event vertex: " << 
     gvt->ge_x[0] << "\t" << gvt->ge_x[1] << "\t" << gvt->ge_x[2] << endm;
-  
+#if 0  
   m_histvx->Fill(gvt->ge_x[0]);
   m_histvy->Fill(gvt->ge_x[1]);
   m_histvz->Fill(gvt->ge_x[2]);
+#endif
 }
 //________________________________________________________________________________
 TGeoVolume* St_geant_Maker::Ag2Geom() { 
@@ -2151,6 +2184,7 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
   fTopGeoVolume = volume;
   return GetTopGeoVolume();
 }
+#endif
 #if 1
 //________________________________________________________________________________
 void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
@@ -2247,7 +2281,8 @@ Char_t *acfromr(Float_t r) {// 'TYPE'
 }
 #endif
 //________________________________________________________________________________
-Int_t St_geant_Maker::AgstHits() {
+Int_t St_geant_Maker::AgstHits() 
+{
   if (! geant3) return kStErr;
   Int_t JSET = clink->jset;
   if (JSET <= 0) return kStErr;

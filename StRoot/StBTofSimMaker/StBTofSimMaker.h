@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.h,v 1.1 2009/12/09 21:56:41 dthein Exp $
+ * $Id: StBTofSimMaker.h,v 1.4 2011/02/03 19:01:01 geurts Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.h,v $
+ * Revision 1.4  2011/02/03 19:01:01  geurts
+ * Introduce option to switch writing simulated hits to StEvent. Default behavior is OFF.
+ *
+ * Revision 1.3  2010/08/10 19:18:32  geurts
+ * Look for geant data in bfc ("geant") or geant.root ("geantBranch"); Protect storing BTofMcHitCollection in case McEvent is NULL.  [Xin]
+ *
+ * Revision 1.2  2010/07/14 20:32:58  geurts
+ * remove geometry initialization (not used)
+ *
  * Revision 1.1  2009/12/09 21:56:41  dthein
  * First version of StBTofSimMaker
  * 
@@ -29,7 +38,6 @@ class TProfile;
 class StEvent;
 class StBTofCollection;
 class StTofSimParam;
-class StBTofGeometry;
 class StBTofDaqMap;
 struct g2t_ctf_hit_st;
 
@@ -52,11 +60,11 @@ class StBTofSimMaker : public StMaker{
 	protected:
 
 
-		StBTofGeometry*      mGeomDb;         //! 
 		StTofSimParam*      mSimDb;          //!
 		StBTofDaqMap*       mDaqMap;         //! Tof Daq map
 		StMcBTofHitCollection *mMcBTofHitCollection; //! barrel tof hit
 
+		St_DataSet        *mGeantData;        //! geant table
 		StEvent           *mEvent;            //!
 		StMcEvent         *mMcEvent;
 		StBTofCollection   *mBTofCollection;   
@@ -80,6 +88,7 @@ class StBTofSimMaker : public StMaker{
 		Bool_t mCellXtalk;     //! switch for cell xtalk
 		Bool_t mSlow;
 		Bool_t mBookHisto;
+		Bool_t mWriteStEvent;  //! switch to enable Maker to write out simulated hits to StEvent
 
 		Int_t     mTofHitFlag[mNTray][mNTOF];   //! hit flag for tof geant hits
 		Int_t   mVpdHitFlag[2*mNVPD];         //! hit flag for vpd geant hits
@@ -187,17 +196,18 @@ class StBTofSimMaker : public StMaker{
 		virtual Int_t  Make();
 		virtual Int_t  Finish();
 
-		StBTofGeometry*    GetGeometry()       const { return mGeomDb; }
 		StTofSimParam*    GetSimParam()       const { return mSimDb; }
 		StBTofCollection*  GetBTofCollection()  const { return mBTofCollection; }
 		StMcBTofHitCollection* GetMcBTofHitCollection() const { return mMcBTofHitCollection; }
 
 		void   setCellXtalk(Bool_t val) { mCellXtalk = val; }
 		void   setHistFileName(string s);
+		void   setBookHist(Bool_t val) { mBookHisto = val; }
+		void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
 
 		virtual const char *GetCVS() const
-		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.1 2009/12/09 21:56:41 dthein Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.4 2011/02/03 19:01:01 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-		ClassDef(StBTofSimMaker,0)
+		ClassDef(StBTofSimMaker,1)
 };
 #endif

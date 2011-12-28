@@ -1,5 +1,17 @@
-// $Id: St_geant_Maker.h,v 1.44 2009/12/31 00:02:59 perev Exp $
+// $Id: St_geant_Maker.h,v 1.50 2010/08/10 16:35:33 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.50  2010/08/10 16:35:33  fisyak
+// Add initialization of starsim parameter tables after opening zebra-file
+//
+// Revision 1.49  2010/05/27 13:36:14  fisyak
+// 3rd attemp to synchronize mag.field. Now take care that the maker can be not Active and do InitRun in Work
+//
+// Revision 1.47  2010/05/24 15:38:40  fisyak
+// Move geometry and mag.field initialization from Init into InitRun in order to allow mag. field settings from StMagFMaker::InitRun
+//
+// Revision 1.45  2010/05/10 14:19:52  fisyak
+// move geometry load from Init to InitRun in order to allow MagF maker to set mag.field
+//
 // Revision 1.44  2009/12/31 00:02:59  perev
 // Add the material name to the volume name
 //
@@ -112,16 +124,17 @@ protected:
  private:
 
   St_geom_gdat *m_geom_gdat;
-
+#if 0
   virtual void   BookHist();
   virtual void   FillHist();
-
+#endif
 public: 
                   St_geant_Maker(const char *name="geant",
 				 Int_t nwgeant=20,Int_t nwpaw=0, Int_t iwtype=0);
    virtual       ~St_geant_Maker(){};
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
+   virtual Int_t  InitRun(Int_t run);
 #if 1
    virtual void   SetDateTime(int idat=0,int itim=0);//
 #endif
@@ -179,8 +192,9 @@ public:
    virtual void     Dzddiv(Int_t& idiv ,Int_t &Ldummy,
 			   const Char_t* path,const Char_t* opt,
 			   Int_t& one,Int_t &two,Int_t &three,Int_t& iw);
-   
+#if 0   
   TGeoVolume* Ag2Geom();
+#endif
 #ifdef DetectorIndex
   void        DetSetIndex();
   void        DumpIndex(const Char_t *name, const Char_t *vers, const Char_t *fmt, TArrayI &NVmax, TArrayI &Ids);
@@ -204,7 +218,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.44 2009/12/31 00:02:59 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.50 2010/08/10 16:35:33 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 

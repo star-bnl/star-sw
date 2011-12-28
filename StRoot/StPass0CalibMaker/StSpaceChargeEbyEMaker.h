@@ -44,7 +44,7 @@ public:
           float  EvalCalib(TDirectory* hdir=0);
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.10 2009/11/20 18:51:19 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.11 2010/01/28 18:53:30 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -76,8 +76,6 @@ protected:
   float SCALER_ERROR;
 
   StMagUtilities* m_ExB;     //!
-  StMaker* tpcDbMaker;       //!
-  StMaker* tpcHitMoverMaker; //!
   void BuildHist(int i);
   void FindSpaceCharge();
   double FindPeak(TH1*,float&);
@@ -158,8 +156,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.10 2009/11/20 18:51:19 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.11 2010/01/28 18:53:30 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.11  2010/01/28 18:53:30  genevb
+// Remove unneeded members
+//
 // Revision 1.10  2009/11/20 18:51:19  genevb
 // Avoid compiler warning about unsigned comparison
 //

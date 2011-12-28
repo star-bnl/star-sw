@@ -389,6 +389,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     # directory structure using auto-globbing for include purposes
   } elsif ( $pkg =~ m/^StAssociationMaker$/ ||
 	    $pkg =~ m/EmcUtil$/             ||
+	    $pkg =~ m/St_geant_Maker$/      ||
 	    $pkg =~ m/^StMuDSTMaker$/       ||
 	    $pkg =~ m/^StJetMaker$/         ||
 	    $pkg =~ m/^StEmcPool$/          ||
