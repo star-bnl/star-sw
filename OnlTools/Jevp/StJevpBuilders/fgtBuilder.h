@@ -14,7 +14,7 @@ class fgtBuilder : public JevpPlotSet {
 public:
   int run;
 
-  fgtBuilder(); 
+  fgtBuilder(JevpServer *parent=NULL); 
   ~fgtBuilder();
   
 

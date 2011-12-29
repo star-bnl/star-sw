@@ -14,7 +14,7 @@ class tpxBuilder : public JevpPlotSet {
  public:
   int run;
 
-  tpxBuilder(); 
+  tpxBuilder(JevpServer *parent=NULL); 
   ~tpxBuilder();
   
 

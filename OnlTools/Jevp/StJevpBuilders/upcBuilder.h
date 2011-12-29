@@ -12,7 +12,7 @@ class upcBuilder : public JevpPlotSet {
 public:
   int run;
 
-  upcBuilder(); 
+  upcBuilder(JevpServer *parent=NULL); 
   ~upcBuilder();
   
   void initialize(int argc, char *argv[]);

@@ -24,7 +24,7 @@
 ClassImp(upcBuilder);
   
 
-upcBuilder::upcBuilder() {
+upcBuilder::upcBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"upc";
 
   // start with histograms undefined...

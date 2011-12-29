@@ -13,13 +13,14 @@
 #include "Jevp/StJevpPlot/JLatex.h"
 #include "Jevp/StJevpPlot/JLine.h"
 
-
 #include "StDaqLib/TRG/trgStructures2009.h"
 #include "StEvent/StTriggerData2009.h"
 #include "StEvent/StTriggerData.h"
 
 #include <unistd.h>
 //#include <RTS/include/SUNRT/clockClass.h>
+
+class JevpServer;
 
 #define DEFAULT_CLIENTDATADIR "/a/jevp/client"
 
@@ -29,9 +30,10 @@ class JevpPlotSet : public TObject {
   
  public:
   BuilderStatus builderStatus;
-  JevpPlotSet();
+  JevpPlotSet(JevpServer *server = NULL);
 
   char *getPlotSetName();
+
 
   // Plot management
   //
@@ -97,6 +99,8 @@ class JevpPlotSet : public TObject {
   StTriggerData *getStTriggerData(daqReader *rdr);
 
  private:
+
+  JevpServer *parent;
 
   int run;
 

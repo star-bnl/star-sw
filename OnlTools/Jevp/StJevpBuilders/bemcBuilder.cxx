@@ -47,7 +47,7 @@ if (!NAME) { \
   LOG(ERR, "Histogram " NAME " not found: " TITLE);	\
 }
 
-bemcBuilder::bemcBuilder() {
+bemcBuilder::bemcBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"bemc";
 
   numPmtBoxes = sizeof(pmtbxMinSoftId)/sizeof(Int_t);

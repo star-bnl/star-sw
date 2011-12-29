@@ -33,6 +33,10 @@ void baseBuilder::initialize(int argc, char *argv[]) {
 //       status.setNumPlotSets(atoi(argv[i+1]));
 //     }
   }
+
+  printf("base:  Confdatadir = %s",confdatadir);
+
+  
 }
   
 void baseBuilder::startrun(daqReader *rdr) {

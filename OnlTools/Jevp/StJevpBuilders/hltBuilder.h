@@ -224,7 +224,8 @@ class hltBuilder : public JevpPlotSet {
   //const char* plotsetname; //*********************************Chris Added this to get it to compile.
   ////////////////////// Function //////////////////// 
 
-  hltBuilder() { plotsetname = (char *)"hlt"; }
+  hltBuilder(JevpServer *parent=NULL) : JevpPlotSet(parent)
+    { plotsetname = (char *)"hlt"; }
  
   void initialize(int argc, char *argv[]);
    

@@ -32,7 +32,7 @@ static const int NTPCpads[45] = {
     98,100,102,104,106,106,108,110,112,112,114,116,118,120,122,122, //Outer 
     124,126,128,128,130,132,134,136,138,138,140,142,144,144,144,144};
 
-tpxBuilder::tpxBuilder() {
+tpxBuilder::tpxBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"tpx";
 
   // start with histograms undefined...

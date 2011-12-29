@@ -14,7 +14,7 @@ class bemcBuilder : public JevpPlotSet {
 public:
   int run;
 
-  bemcBuilder(); 
+  bemcBuilder(JevpServer *parent=NULL); 
   ~bemcBuilder();
   
 

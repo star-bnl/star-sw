@@ -59,7 +59,7 @@ public:
   JevpPlot *day[10];
   JevpPlot *all[31];
 
-  HltphiBuilder() {
+  HltphiBuilder(JevpServer *parent=NULL) : JevpPlotSet(parent) {
     plotsetname = (char *)"hltp";
   }
 

@@ -27,7 +27,7 @@ ClassImp(bbcBuilder);
   
 typedef JevpPlot * ptrJevpPlot;
 
-bbcBuilder::bbcBuilder() {
+bbcBuilder::bbcBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"bbc";
   
   int np = sizeof(contents) / sizeof(TH1 *);

@@ -24,7 +24,7 @@
 ClassImp(ppBuilder);
   
 
-ppBuilder::ppBuilder() {
+ppBuilder::ppBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"pp";
 
   // start with histograms undefined...

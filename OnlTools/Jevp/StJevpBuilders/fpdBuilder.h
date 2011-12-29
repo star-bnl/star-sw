@@ -13,7 +13,7 @@ class fpdBuilder : public JevpPlotSet {
   //RunStatus status;
   int run;
 
-  fpdBuilder(); 
+  fpdBuilder(JevpServer *parent=NULL); 
   ~fpdBuilder();
   
 

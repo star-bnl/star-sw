@@ -13,7 +13,7 @@ class bbcBuilder : public JevpPlotSet {
   //RunStatus status;
   int run;
 
-  bbcBuilder(); 
+  bbcBuilder(JevpServer *parent=NULL); 
   ~bbcBuilder();
   
 

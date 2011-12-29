@@ -1712,22 +1712,27 @@ void JevpGui::jl_JevpLogic(const char* file) {
 
 
 void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
+  static int x;
+
   char tmp[256];
   tmp[0] = '\0';
 
-  screen->setUpdatesEnabled(false);   // keep double buffer in place...
+  screen->setUpdatesEnabled(false);   // keep doublebuffer in place...
+
+
+  double maxY = -9999;
+  DisplayNode *hd = NULL;
+  screen->Clear();
+  TCanvas *gcc = screen->GetCanvas();
+
+
+  int wide=0;
+  int deep=0;
+  int scaley=0;
+  int nplots=0;
 
   int combo_index = screen->combo_index;
-
-
-  //printf("sleeping 5\n");
-  //sleep(5);
-
-  //int isCanvas=0;
-  
-  LOG(DBG,"drawplot....combo_index = %d\n",combo_index);
-
-
+  LOG("JEFF","drawplot....combo_index = %d x=%d\n",combo_index, x++);
 
   // I need to use the display def version to get a 
   // real object rather than a string...
@@ -1739,49 +1744,41 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
     LOG(DBG, "Cross of death: %s",tmp);
     jl_CrossOfDeath(screen, tmp);
     CP;
-    return;
+    goto redraw;
   }
 
-  //   void *thetab = jl_displayFile->getTab(combo_index, &isCanvas);
-  //   if(!isCanvas) {
-  //     sprintf(tmp, "No canvas for index=%d",combo_index);
-  //     jl_CrossOfDeath(screen, tmp);
-  //     return;
-  //   }
+  hd = thetab;
 
   CP;
-  // CanvasDescriptor *cd = (CanvasDescriptor *)thetab;
-  int nplots = thetab->nSiblings() + 1;
+  nplots = thetab->nSiblings() + 1;
 
   // gcc->Clear();
   
-  int wide = thetab->getIntParentProperty("wide");
+  wide = thetab->getIntParentProperty("wide");
   if(wide <= 0) wide = 1;
-  int deep = thetab->getIntParentProperty("deep");
+  deep = thetab->getIntParentProperty("deep");
   if(deep <= 0) deep = 1;
-  int scaley = thetab->getIntParentProperty("scaley");
+  scaley = thetab->getIntParentProperty("scaley");
   if(scaley <= 0) scaley = 0;
 
   LOG(DBG, "wide = %d deep = %d scaley = %d nplots=%d", wide, deep, scaley, nplots);
 
   CP;
 
-  //sleep(3);
-
-  double maxY = -9999;
-
-  DisplayNode *hd = thetab;
 
 
-  screen->Clear();
-  TCanvas *gcc = screen->GetCanvas();
+  if(x % 2 == 0) {
+    jl_CrossOfDeath(screen, "Every other update!");
+    goto redraw;
+  }
+
   gcc->Divide(wide, deep);
-
+    
   for(int i=0;i<nplots;i++) {   // First get plots!
     char tmp[256];
-
+      
     JevpPlot *plot = jl_getPlotFromServer(hd->name,  tmp);
-
+      
     if(plot) {
       LOG(DBG, "Got plot %s : %s",hd->name,plot->GetPlotName());
       screen->addPlot(plot);
@@ -1792,18 +1789,18 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
     else {
       LOG(DBG, "No plot for %s",hd->name);
     }
-
+      
     hd = hd->next;   
   }
   CP;
-
+    
   // Now plot them
   hd = thetab;
   CP;
   for(int i=0;i<wide*deep;i++) {
-
+      
     gcc->cd(i+1);
-
+      
     if(i<nplots) {
       JevpPlot *plot = screen->getJevpPlot(hd->name);
       if(plot == NULL) {
@@ -1818,7 +1815,7 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
 	if(scaley) {
 	  plot->setMaxY(maxY * 1.2);
 	}
-      
+	  
 	CP;
 	gcc->cd(i+1);
 	plot->draw();
@@ -1826,7 +1823,7 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
       }
       CP;
       //printf("drew %s\n",hd->name);
-
+	
       hd = hd->next;    
       // sleep(3);
     }
@@ -1836,9 +1833,9 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
       //jl_CrossOfDeath(screen, "blah...");
     }
   }
-
   CP;
 
+ redraw:
   screen->setUpdatesEnabled(true);   // reenable the update
   gcc->Update();
   //screen->update();                  // and trigger!

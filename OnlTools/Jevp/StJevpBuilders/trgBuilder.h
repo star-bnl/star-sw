@@ -15,7 +15,7 @@ public:
   //RunStatus status;
   int run;
 
-  trgBuilder(); 
+  trgBuilder(JevpServer *parent=NULL); 
   ~trgBuilder();
   
 

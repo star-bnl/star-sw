@@ -26,7 +26,7 @@
 
 ClassImp(tofBuilder);
   
-tofBuilder::tofBuilder() {
+tofBuilder::tofBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"tof";
 
   np = sizeof(contents) / sizeof(TH1 *);
