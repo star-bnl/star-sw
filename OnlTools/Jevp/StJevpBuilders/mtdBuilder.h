@@ -16,7 +16,7 @@ class mtdBuilder : public JevpPlotSet {
   //RunStatus status;
   int run;
 
-  mtdBuilder(); 
+  mtdBuilder(JevpServer *parent=NULL); 
   ~mtdBuilder();
   
 
