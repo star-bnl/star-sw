@@ -29,6 +29,8 @@ FFLAGS = -fpic -Os -c
 # Debug flags
 # CFLAGS += -g
 # FFLAGS += -g
+# Profiling flag
+# CFLAGS += -pg
 
 # Linking flags
 LDFLAGS = `root-config --glibs` `root-config --ldflags`-lGeom \

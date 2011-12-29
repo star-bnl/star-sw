@@ -21,7 +21,7 @@ AvalancheMC::AvalancheMC() :
   nEndpointsElectrons(0), nEndpointsHoles(0), nEndpointsIons(0),
   usePlotting(false), viewer(0), 
   useSignal(false), useInducedCharge(false), useEquilibration(true), 
-  useDiffusion(true), useAttachment(true), useBfield(false), useIons(true), 
+  useDiffusion(true), useAttachment(false), useBfield(false), useIons(true), 
   withElectrons(true), withHoles(true),
   debug(false) {
   
@@ -359,7 +359,8 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   // Make sure the starting point is inside a drift medium.
   if (status != 0) {
     std::cerr << className << "::DriftLine:\n";
-    std::cerr << "    No drift medium at initial position.\n";
+    std::cerr << "    No drift medium at initial position ("
+              << x << ", " << y << ", " << z << ").\n";
     ok = false;
     abortReason = StatusLeftDriftMedium;
   }
@@ -386,6 +387,10 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     if (q < 0) {
       if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) || 
           !medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
+        std::cerr << className << "::DriftLine:\n";
+        std::cerr << "    Error calculating electron"
+                  << " velocity or diffusion\n";
+        std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n"; 
         ok = false;
         abortReason = StatusCalculationAbandoned;
         break;
@@ -393,6 +398,10 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     } else if (q == 1) {
       if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) || 
           !medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
+        std::cerr << className << "::DriftLine:\n";
+        std::cerr << "    Error calculating hole"
+                  << " velocity or diffusion\n";
+        std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n"; 
         ok = false;
         abortReason = StatusCalculationAbandoned;
         break;
@@ -400,6 +409,10 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     } else if (q == 2) {
       if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) ||
           !medium->IonDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
+        std::cerr << className << "::DriftLine:\n";
+        std::cerr << "    Error calculating ion"
+                  << " velocity or diffusion\n";
+        std::cerr << "    at (" << x << ", " << y << ", " << z << ")\n"; 
         ok = false;
         abortReason = StatusCalculationAbandoned;
         break;
@@ -768,11 +781,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     }
   }
 
-  if (!ok) {
-    std::cerr << className << "::DriftLine:\n";
-    std::cerr << "    Error calculating the transport parameters.\n";
-    return false;
-  }
+  if (!ok) return false;
 
   return true;
 
