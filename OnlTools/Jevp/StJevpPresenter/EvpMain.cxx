@@ -74,7 +74,7 @@ int EvpMain::main(char *args)
 
   CP;
   
-  rtsLogOutput(RTS_LOG_NET);
+  rtsLogOutput(RTS_LOG_STDERR);
   rtsLogAddDest((char *)"130.199.60.86", 8004);
 
   CP;

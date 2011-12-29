@@ -27,7 +27,7 @@
 ClassImp(l3Builder);
   
 
-l3Builder::l3Builder() {
+l3Builder::l3Builder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"l3";
 
   // start with histograms undefined...

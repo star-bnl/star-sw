@@ -24,7 +24,7 @@ public:
   int run;
   int first_event;
 
-  baseBuilder() {
+  baseBuilder(JevpServer *parent=NULL) : JevpPlotSet(parent) {
     plotsetname = (char *)"base";
     hello_cmds = (char *)"steal";
   }

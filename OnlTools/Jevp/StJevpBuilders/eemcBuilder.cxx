@@ -26,7 +26,7 @@ ClassImp(eemcBuilder);
 #define min(A, B) (((A) < (B)) ? (A) : (B))
 #define max(A, B) (((A) > (B)) ? (A) : (B))
 
-eemcBuilder::eemcBuilder() {
+eemcBuilder::eemcBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"eemc";
 }
 

@@ -29,7 +29,7 @@ ClassImp(mtdBuilder);
   
 typedef JevpPlot * ptrJevpPlot;
 
-mtdBuilder::mtdBuilder() {
+mtdBuilder::mtdBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"mtd";
   
   int np = sizeof(contents) / sizeof(TH1 *);

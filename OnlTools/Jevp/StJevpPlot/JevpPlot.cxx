@@ -76,6 +76,8 @@ void PlotHisto::setLegArgs(const char *text)
 
 PlotHisto::~PlotHisto()
 {
+  LOG("JEFF", "Delete histo: %s can %d must %d",histo->GetName(), histo->TestBit(kCanDelete), histo->TestBit(kMustCleanup));
+
   if(histo) delete histo;
   if(legendText) delete legendText;
   if(legendArgs) delete legendArgs;
@@ -417,72 +419,60 @@ void JevpPlot::draw()
   //printf("in draw()\n");
   int ex1=0;
 
-  if(strcmp(myname, "eemc_cr1")) ex1 = 1;  
-  if(strcmp(myname, "eemc_cr84")) ex1 = 1;
+  if(strcmp(myname, "eemc_cr1")==0) ex1 = 1;  
+  if(strcmp(myname, "eemc_cr84")==0) ex1 = 1;
 
-  PlotHisto *curr = (PlotHisto *)histos.First();
+  TListIter next(&histos);
+  PlotHisto *curr;
 
-  if(ex1) {
-    LOG("JEFF", "%s curr = 0x%x histo = 0x%x", myname, curr, curr ? curr->histo : NULL);
-  }
-  
   int dimension = 0;
-  if(curr) {
-    if(curr->histo) {
-      dimension = curr->histo->GetDimension();
+  curr = (PlotHisto *)histos.First();
+  if(curr && curr->histo) dimension = curr->histo->GetDimension();
 
-      if(ex1) {
-	LOG("JEFF", "%s dimension = %d", myname, dimension);
+#ifdef JUNK  
+  // Reset Empty histos
+  while((curr = (PlotHisto *)next())) {
+    if(curr->histo) {
+      if(curr->histo->GetEntries() == 0) {
+	curr->histo->Reset();
       }
     }
   }
+#endif
 
+  //#ifdef JUNK
+  // Handle legends...
   if(legend != NULL) {
-    //printf("In legend\n");
-    LOG(DBG, "draw delete legend\n");
     delete legend;
-    LOG(DBG, "draw delete legend done\n");
     legend = NULL;
   }
 
   if(legendx1 >= 0) {
-    //printf("legend >\n");
     legend = new TLegend(legendx1,legendy1,legendx2,legendy2);
   }
-  
-  //printf("gStyle\n");
+  //#endif
+
   gStyle->SetOptStat(optstat);
-  //printf("logx %d\n",logx);
   gPad->SetLogx(logx);
-  //printf("logy7 %d\n",logy);
   gPad->SetLogy(logy);
-  // printf("optlogz %d\n",optlogz);
   if(optlogz != -1) {
     gStyle->SetOptLogz(optlogz);
-    //LOG(DBG, "Set optlogz %d",optlogz);
   }
   gPad->SetGridx(gridx);
   gPad->SetGridy(gridy);
-
   gStyle->SetPalette(palette);  
 
+  //#ifdef JUNK
   // Get histo bounds...
-
   if(dimension == 1) {
-    curr = (PlotHisto *)histos.First();
-    double max=0;
-    while(curr) {
+    double max = 0;
+    next.Reset();
+    while((curr = (PlotHisto *)next())) {
       double m;
       m = curr->histo->GetBinContent(curr->histo->GetMaximumBin());
       
-      if(ex1) {
-	LOG("JEFF", "%s max bin = %d",myname, m);
-      }
-      
-      LOG(NOTE, "Histo %s: (%s) m=%f %d",GetPlotName(), curr->histo->GetName(), m, dimension);
-      
+      LOG(NOTE, "Histo %s: (%s) m=%f",GetPlotName(), curr->histo->GetName(), m);
       if(m > max) max = m;
-      curr = (PlotHisto *)histos.After(curr);
     }
     curr = (PlotHisto *)histos.First();
     
@@ -495,15 +485,20 @@ void JevpPlot::draw()
       curr->histo->SetMaximum(max * 1.1);
     }
   }
+  //#endif
 
   int plotnum= 1;
   char *same = NULL;
 
   // printf("While loop start\n");
-  while(curr) {
+  next.Reset();
+
+
+  while((curr = (PlotHisto *)next())) {
     //printf("plot %d\n", plotnum);
     plotnum++;
 
+    //#ifdef JUNK
     if(dimension == 1) {
       if(logy) {
 	if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(10.0);
@@ -513,13 +508,16 @@ void JevpPlot::draw()
 	if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(1.0);
       }
     }
+    //#endif
 
+      //#ifdef JUNK
     if(legend) {
       char *text = (char *)((curr->legendText) ? curr->legendText : "no text");
       char *args = (char *)((curr->legendArgs) ? curr->legendArgs : "");
       
       legend->AddEntry(curr->histo, text, args); 
     }
+    //#endif
 
     char opts[256];
     if(drawopts)
@@ -528,15 +526,12 @@ void JevpPlot::draw()
 
     if(same) strcat(opts,same);
 
-    LOG(DBG, "opts---%s\n",opts);
-    curr->histo->Draw(opts);
+    LOG(NOTE, "opts---%s\n",opts);
+    curr->histo->DrawCopy(opts);
     same = (char *)"SAME";
-    
-    curr = (PlotHisto *)histos.After(curr);
   }
 
- 
-
+  //#ifdef JUNK
   // Draw additional elements...
   TObject *element = (TObject *)elements.First();
   while(element) {
@@ -544,14 +539,9 @@ void JevpPlot::draw()
     element->Draw();
     element = (TObject *)elements.After(element);
   }
+  //#endif
   
-  
-  //JLatex *el = new JLatex(.3,.5,GetPlotName());
-  //el->Draw();
-  //gPad->Update();
-  // delete el;
-
-  
-  if(legend)
-    legend->Draw();
+    //#ifdef JUNK 
+  if(legend) legend->Draw();
+  //#endif
 }

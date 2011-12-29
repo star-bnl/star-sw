@@ -59,9 +59,10 @@ static void catchSignals(void)
 
 
 
-JevpPlotSet::JevpPlotSet()
+JevpPlotSet::JevpPlotSet(JevpServer *server)
 {
   CP;
+  parent = server;
   buildxml = NULL;
   hello_cmds = (char *)"client";
   diska = NULL;

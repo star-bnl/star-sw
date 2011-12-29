@@ -12,7 +12,7 @@ class l3Builder : public JevpPlotSet {
 public:
   int run;
 
-  l3Builder(); 
+  l3Builder(JevpServer *parent=NULL); 
   ~l3Builder();
   
   void initialize(int argc, char *argv[]);

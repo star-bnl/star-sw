@@ -27,7 +27,7 @@ ClassImp(fpdBuilder);
   
 typedef JevpPlot * ptrJevpPlot;
 
-fpdBuilder::fpdBuilder() {
+fpdBuilder::fpdBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"fpd";
   
   int np = sizeof(contents) / sizeof(TH1 *);

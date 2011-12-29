@@ -12,7 +12,7 @@ class ppBuilder : public JevpPlotSet {
 public:
   int run;
 
-  ppBuilder(); 
+  ppBuilder(JevpServer *parent=NULL); 
   ~ppBuilder();
   
   void initialize(int argc, char *argv[]);

@@ -26,7 +26,7 @@
 ClassImp(daqBuilder);
   
 
-daqBuilder::daqBuilder() {
+daqBuilder::daqBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"daq";
 
   // start with histograms undefined...

@@ -28,7 +28,7 @@
 ClassImp(fgtBuilder);
   
 
-fgtBuilder::fgtBuilder():evtCt(0) {
+fgtBuilder::fgtBuilder(JevpServer *parent):JevpPlotSet(parent),evtCt(0) {
   plotsetname = (char *)"fgt";
   // start with histograms undefined...
   memset(&contents, 0, sizeof(contents));

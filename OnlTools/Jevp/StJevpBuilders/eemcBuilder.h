@@ -23,7 +23,7 @@ class eemcBuilder : public JevpPlotSet {
 public:
   int run;
 
-  eemcBuilder(); 
+  eemcBuilder(JevpServer *parent=NULL); 
   ~eemcBuilder();
   
   void initialize(int argc, char *argv[]);

@@ -12,7 +12,7 @@ class daqBuilder : public JevpPlotSet {
 public:
   int run;
 
-  daqBuilder(); 
+  daqBuilder(JevpServer *parent=NULL); 
   ~daqBuilder();
   
 

@@ -27,7 +27,7 @@
 ClassImp(trgBuilder);
   
 
-trgBuilder::trgBuilder() {
+trgBuilder::trgBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   plotsetname = (char *)"trg";
 
   h76_zdc_time_east = NULL;

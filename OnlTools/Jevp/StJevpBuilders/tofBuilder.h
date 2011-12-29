@@ -17,7 +17,7 @@ class tofBuilder : public JevpPlotSet {
 public:
   int run;
 
-  tofBuilder(); 
+  tofBuilder(JevpServer *parent=NULL); 
   ~tofBuilder();
   
   void initialize(int argc, char *argv[]);

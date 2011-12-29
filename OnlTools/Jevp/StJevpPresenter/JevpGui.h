@@ -94,7 +94,7 @@ public:
     TObject *o;
 
     while((o = (TObject *)next())) {
-      LOG(DBG, "Deleting an object... %s",o->GetName());
+      LOG("JEFF", "Deleting an object... %s can %d must %d",o->GetName(),o->TestBit(kCanDelete),o->TestBit(kMustCleanup));
       delete o;
     }
 
@@ -102,7 +102,7 @@ public:
     jevpPlots->Clear();
     //printf("more clear\n");
     GetCanvas()->Clear(); 
-    //printf("clearest\n");
+    LOG("JEFF", "Cleared canvas");
 
     LOG(DBG, "Done Clearing Screen Widget");
   };
