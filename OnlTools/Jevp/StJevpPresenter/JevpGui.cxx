@@ -310,6 +310,7 @@ void JevpGui::switchTabs(const char *newdisplay, const char *newbuilderlist) {
   strcpy(evpMainDisplay, newdisplay);
   evpMain->display = evpMainDisplay;
 
+  LOG("JEFF", "Setting servertags to %s",newbuilderlist);
   jl_displayFile->setServerTags(newbuilderlist);
 
 
@@ -1277,6 +1278,7 @@ void JevpGui::UpdatePlots()
   if (fActions[kAutoUpdate]->isOn()) {
     QTimer::singleShot(fGuiRefreshRate,this,SLOT(UpdatePlots()));
   }
+  CP;
 }
 
   //______________________________________________________________________________
@@ -1767,10 +1769,10 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
 
 
 
-  if(x % 2 == 0) {
-    jl_CrossOfDeath(screen, "Every other update!");
-    goto redraw;
-  }
+//   if(x % 2 == 0) {
+//     jl_CrossOfDeath(screen, "Every other update!");
+//     goto redraw;
+//   }
 
   gcc->Divide(wide, deep);
     
@@ -1818,7 +1820,16 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
 	  
 	CP;
 	gcc->cd(i+1);
-	plot->draw();
+
+	if(!plot->needsdata || plot->isDataPresent()) {
+	  plot->draw();
+	}
+	else {
+	  char tmp[255];
+	  sprintf(tmp,"No data for plot: %s",hd->name);
+	  jl_NoDataPresent(screen, tmp);
+	}
+	
 	//delete plot;
       }
       CP;
@@ -1928,6 +1939,34 @@ JevpPlot *JevpGui::jl_getPlotFromServer(char *name, char *error)
   return NULL;
 }
 
+
+void JevpGui::jl_NoDataPresent(JevpScreenWidget *screen, char *str) {
+  //  TLine* a = new TLine(0.,0.,1.,1.);
+  //  TLine* b = new TLine(0.,1.,1.,0.);
+  TText* t = new TText(0.5,0.5,str);
+
+  // This is how we free the memory...
+  //a->SetBit(kCanDelete);
+  //b->SetBit(kCanDelete);
+  //t->SetBit(kCanDelete);
+  // screen->addPlot(a);
+  // screen->addPlot(b);
+  screen->addPlot(t);
+
+  // a->SetLineColor(2);
+  // b->SetLineColor(2);
+  t->SetTextColor(3);
+  t->SetTextAlign(22);
+
+  // Already cd()'d to proper pad...
+  // a->Draw();
+  // b->Draw();
+  t->Draw();
+
+  //gcc->Update();
+  //cout << __PRETTY_FUNCTION__ << endl;
+  return;
+}
 
 void JevpGui::jl_CrossOfDeath(JevpScreenWidget *screen, char *str) {
 

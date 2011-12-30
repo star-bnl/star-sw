@@ -43,6 +43,8 @@ class JevpPlot : public TObject {
   // int run;
   TLegend *legend;
  
+  int needsdata;
+
   int run;       
   int refid;         // reference name, if any
   char *refcomment;    // reference comment, if any
@@ -73,6 +75,7 @@ class JevpPlot : public TObject {
   void addHisto(TH1 *roothist);
   void removeHisto(int i);
   PlotHisto *getHisto(int i);
+  int isDataPresent();
   int nHistos();
   char *GetPlotName();
   void setPalette(int x) { palette = x; };

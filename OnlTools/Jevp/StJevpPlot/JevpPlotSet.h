@@ -12,6 +12,7 @@
 #include "Jevp/StJevpPlot/BuilderStatus.h"
 #include "Jevp/StJevpPlot/JLatex.h"
 #include "Jevp/StJevpPlot/JLine.h"
+#include "Jevp/StJevpServer/JevpServer.h"
 
 #include "StDaqLib/TRG/trgStructures2009.h"
 #include "StEvent/StTriggerData2009.h"
@@ -83,7 +84,7 @@ class JevpPlotSet : public TObject {
   char *hello_cmds;   // do I want to be base_client?  "steal if so"
 
   void addServerTags(char *tags);
-  char *getServerTags();
+  //char *getServerTags();
 
   RtsTimer_root *processingTimer;
   double processingTime;

@@ -18,12 +18,12 @@ class BuilderStatus : public TObject {
   int lastEventTime;
   int events;
   
-  int detectorsNeeded;
+  //int detectorsNeeded;
 
   // These are used only by the server...
-  unsigned long long int sockid;  
-  int lastTransaction;
-  int official;
+  //unsigned long long int sockid;  
+  //int lastTransaction;
+  //int official;
 
  public:
 

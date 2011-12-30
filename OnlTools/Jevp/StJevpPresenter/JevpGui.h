@@ -484,6 +484,7 @@ DisplayNode *jl_getCanvasDescriptor(u_int combo_idx) {
  void jl_WriteCurrent(int i, int j);
  void jl_WriteCurrentCanvasToPSFile(const char* file, int tab, int subTag);
  void jl_SaveAll();
+ void jl_NoDataPresent(JevpScreenWidget *screen, char *label="No plot");
  void jl_CrossOfDeath(JevpScreenWidget *screen, char *label="No plot");
  void jl_DrawEmptySpace(JevpScreenWidget *screen, char *label=" ");
  void jl_ReconfigureTabs();

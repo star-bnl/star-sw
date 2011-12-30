@@ -74,7 +74,8 @@ void baseBuilder::event(daqReader *rdr) {
 	char tmp2[20];
 	sprintf(tmp2, "|%s|",tmp);
 	addServerTags(tmp2);
-	//LOG("JEFF", "det[%d] = %s",i, tmp2);
+    
+	LOG("JEFF", "adding server tag: det[%d] = %s",i, tmp2);
       }
     }
   }

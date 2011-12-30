@@ -1,3 +1,6 @@
+#ifndef _JEVPSERVER_H_
+#define _JEVPSERVER_H_
+
 #include <TROOT.h>
 #include <TServerSocket.h>
 #include <TSocket.h>
@@ -7,7 +10,7 @@
 #include <TClass.h>
 
 #include "DAQ_READER/daqReader.h"
-
+#include <PDFUtil/PdfIndex.hh>
 #include "Jevp/StJevpPlot/EvpMessage.h"
 #include "Jevp/StJevpPlot/JevpPlot.h"
 #include "DisplayDefs.h"
@@ -132,3 +135,6 @@ class JevpServer {
 
   int execScript(const char *name,  char *args[], int waitforreturn=1);
 };
+
+
+#endif

@@ -206,6 +206,9 @@ void JevpPlotSet::_initialize(int argc, char *argv[])
 
   LOG("JEFF", "Initializing %sBuilder: pid=%d file=%s",getPlotSetName(), (int)getpid(), daqfile ? daqfile : "live");
   CP;
+
+  builderStatus.setName(getPlotSetName());
+
   plotEvtsByTrigger = new JevpPlot();
   sprintf(tmp, "%s_EvtsByTrigger", getPlotSetName());
   h = new TH1I(tmp,tmp,64,0,63);
@@ -314,6 +317,7 @@ void JevpPlotSet::_event(daqReader *rdr)
 
   CPC;
   builderStatus.events++;
+  builderStatus.lastEventTime = time(NULL);
   event(rdr);
   CPC;
 
@@ -769,25 +773,14 @@ void JevpPlotSet::writePdfFile()
 
 void JevpPlotSet::addServerTags(char *tags)
 {
-  LOG(DBG, "servertags = %d",strlen(servertags));
-
-  if(strlen(servertags) > 0) {
-
-    if(strstr(servertags, tags)) {
-      return;
-    }
-
-    strcat(servertags, ",");
-    strcat(servertags, tags);
+  
+  if(parent) {
+    LOG("JEFF", "Adding: %s",tags);
+    parent->addServerTags(tags);
   }
   else {
-    strcpy(servertags, tags);
+    LOG("JEFF", "NO parent");
   }
-}
-
-char *JevpPlotSet::getServerTags()
-{
-  return servertags;
 }
 
 
