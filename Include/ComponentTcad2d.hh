@@ -108,7 +108,9 @@ class ComponentTcad2d : public ComponentBase {
       // Types 1 - 3 are supported by this class.
       int type;
       // Associated region
-      int region; 
+      int region;
+      int nNeighbours;
+      std::vector<int> neighbours;
     };
     std::vector<element> elements;
 
@@ -144,6 +146,7 @@ class ComponentTcad2d : public ComponentBase {
 
     bool LoadGrid(const std::string gridfilename);
     bool LoadData(const std::string datafilename);
+    void FindNeighbours();
     void Cleanup();
 
 };

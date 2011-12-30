@@ -21,16 +21,22 @@ FC = gfortran
 # Compilation flags
 CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long -Woverloaded-virtual \
 	 `root-config --cflags` \
-        -fpic -fno-common -Os -c \
+        -fpic -fno-common -c \
 	-I$(INCDIR) -I$(HEEDDIR) -DINS_CRETURN 
 
-FFLAGS = -fpic -Os -c
+FFLAGS = -fpic -c
+
+# Optimization flags
+# CFLAGS += -Os
+# FFLAGS += -Os
+CFLAGS += -O2
+FFLAGS += -O2
 
 # Debug flags
 # CFLAGS += -g
 # FFLAGS += -g
 # Profiling flag
-# CFLAGS += -pg
+ CFLAGS += -pg
 
 # Linking flags
 LDFLAGS = `root-config --glibs` `root-config --ldflags`-lGeom \

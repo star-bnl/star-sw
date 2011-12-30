@@ -20,8 +20,11 @@ ComponentTcad2d::ComponentTcad2d() :
 
   className = "ComponentTcad2d";
     
+  regions.reserve(10);
   regions.clear();
+  vertices.reserve(1000);
   vertices.clear();
+  elements.reserve(1000);
   elements.clear();
   for (int i = nMaxVertices; i--;) w[i] = 0.;
 
@@ -159,6 +162,79 @@ ComponentTcad2d::ElectricField(
   }
   
   // The point is not in the previous element.
+  // Check the adjacent elements.
+  for (int j = elements[lastElement].nNeighbours; j--;) {
+    i = elements[lastElement].neighbours[j];
+    if (x < vertices[elements[i].vertex[0]].x) continue;
+    switch (elements[i].type) {
+      case 1:
+        if (CheckLine(x, y, i)) {
+          ex = w[0] * vertices[elements[i].vertex[0]].ex + 
+               w[1] * vertices[elements[i].vertex[1]].ex;
+          ey = w[0] * vertices[elements[i].vertex[0]].ey + 
+               w[1] * vertices[elements[i].vertex[1]].ey;
+          p  = w[0] * vertices[elements[i].vertex[0]].p + 
+               w[1] * vertices[elements[i].vertex[1]].p;
+          if (xMirrored) ex = -ex;
+          if (yMirrored) ey = -ey;
+          lastElement = i;
+          m = regions[elements[i].region].medium;
+          if (!regions[elements[i].region].drift || m == 0) status = -5; 
+          return;
+        }
+        break;
+      case 2:
+        if (CheckTriangle(x, y, i)) {
+          ex = w[0] * vertices[elements[i].vertex[0]].ex + 
+               w[1] * vertices[elements[i].vertex[1]].ex + 
+               w[2] * vertices[elements[i].vertex[2]].ex;
+          ey = w[0] * vertices[elements[i].vertex[0]].ey + 
+               w[1] * vertices[elements[i].vertex[1]].ey + 
+               w[2] * vertices[elements[i].vertex[2]].ey;
+          p  = w[0] * vertices[elements[i].vertex[0]].p + 
+               w[1] * vertices[elements[i].vertex[1]].p + 
+               w[2] * vertices[elements[i].vertex[2]].p;               
+          if (xMirrored) ex = -ex;
+          if (yMirrored) ey = -ey;
+          lastElement = i;
+          m = regions[elements[i].region].medium;
+          if (!regions[elements[i].region].drift || m == 0) status = -5; 
+          return;
+        }
+        break;    
+      case 3:
+        if (CheckRectangle(x, y, i)) {
+          ex = w[0] * vertices[elements[i].vertex[0]].ex + 
+               w[1] * vertices[elements[i].vertex[1]].ex + 
+               w[2] * vertices[elements[i].vertex[2]].ex + 
+               w[3] * vertices[elements[i].vertex[3]].ex;
+          ey = w[0] * vertices[elements[i].vertex[0]].ey + 
+               w[1] * vertices[elements[i].vertex[1]].ey + 
+               w[2] * vertices[elements[i].vertex[2]].ey + 
+               w[3] * vertices[elements[i].vertex[3]].ey;
+          p  = w[0] * vertices[elements[i].vertex[0]].p + 
+               w[1] * vertices[elements[i].vertex[1]].p + 
+               w[2] * vertices[elements[i].vertex[2]].p + 
+               w[3] * vertices[elements[i].vertex[3]].p;               
+          if (xMirrored) ex = -ex;
+          if (yMirrored) ey = -ey;
+          lastElement = i;
+          m = regions[elements[i].region].medium;
+          if (!regions[elements[i].region].drift || m == 0) status = -5;
+          return;
+        }
+        break;
+      default:
+        std::cerr << className << "::ElectricField:\n";
+        std::cerr << "    Invalid element type (" 
+                  << elements[i].type << ").\n";
+        status = -11;
+        return;
+        break;
+    }
+  }
+  
+  // The point is not in the previous element nor in the adjacent ones.
   // We have to loop over all elements.
   for (i = nElements; i--;) {
     if (x < vertices[elements[i].vertex[0]].x) continue;
@@ -336,6 +412,45 @@ ComponentTcad2d::GetMedium(
   }
   
   // The point is not in the previous element.
+  // Check the adjacent elements.
+  for (int j = elements[lastElement].nNeighbours; j--;) {
+    i = elements[lastElement].neighbours[j];
+    if (x < vertices[elements[i].vertex[0]].x) continue;
+    switch (elements[i].type) {
+      case 1:
+        if (CheckLine(x, y, i)) {
+          lastElement = i;
+          m = regions[elements[i].region].medium;
+          if (m == 0) return false;
+          return true;
+        }
+        break;
+      case 2:
+        if (CheckTriangle(x, y, i)) {
+          lastElement = i;
+          m = regions[elements[i].region].medium;
+          if (m == 0) return false;
+          return true;
+        }
+        break;    
+      case 3:
+        if (CheckRectangle(x, y, i)) {
+          lastElement = i;
+          m = regions[elements[i].region].medium;
+          if (m == 0) return false;
+          return true;
+        }
+        break;
+      default:
+        std::cerr << className << "::GetMedium:\n";
+        std::cerr << "    Invalid element type (" 
+                  << elements[i].type << ").\n";
+        return false;
+        break;
+    }
+  }
+  
+  // The point is not in the previous element nor in the adjacent ones.
   // We have to loop over all elements.
   for (i = nElements; i--;) {
     if (x < vertices[elements[i].vertex[0]].x) continue;
@@ -475,6 +590,57 @@ ComponentTcad2d::GetMobility(
   }
   
   // The point is not in the previous element.
+  // Check the adjacent elements.
+  for (int j = elements[lastElement].nNeighbours; j--;) {
+    i = elements[lastElement].neighbours[j];
+    if (x < vertices[elements[i].vertex[0]].x) continue;
+    switch (elements[i].type) {
+      case 1:
+        if (CheckLine(x, y, i)) {
+          emob = w[0] * vertices[elements[i].vertex[0]].emob + 
+                 w[1] * vertices[elements[i].vertex[1]].emob;
+          hmob = w[0] * vertices[elements[i].vertex[0]].hmob + 
+                 w[1] * vertices[elements[i].vertex[1]].hmob;
+          lastElement = i;
+          return true;
+        }
+        break;
+      case 2:
+        if (CheckTriangle(x, y, i)) {
+          emob = w[0] * vertices[elements[i].vertex[0]].emob + 
+                 w[1] * vertices[elements[i].vertex[1]].emob + 
+                 w[2] * vertices[elements[i].vertex[2]].emob;
+          hmob = w[0] * vertices[elements[i].vertex[0]].hmob + 
+                 w[1] * vertices[elements[i].vertex[1]].hmob + 
+                 w[2] * vertices[elements[i].vertex[2]].hmob;
+          lastElement = i;
+          return true;
+        }
+        break;    
+      case 3:
+        if (CheckRectangle(x, y, i)) {
+          emob = w[0] * vertices[elements[i].vertex[0]].emob + 
+                 w[1] * vertices[elements[i].vertex[1]].emob + 
+                 w[2] * vertices[elements[i].vertex[2]].emob + 
+                 w[3] * vertices[elements[i].vertex[3]].emob;
+          hmob = w[0] * vertices[elements[i].vertex[0]].hmob + 
+                 w[1] * vertices[elements[i].vertex[1]].hmob + 
+                 w[2] * vertices[elements[i].vertex[2]].hmob + 
+                 w[3] * vertices[elements[i].vertex[3]].hmob;
+          lastElement = i;
+          return true;
+        }
+        break;
+      default:
+        std::cerr << className << "::GetMobility:\n";
+        std::cerr << "    Invalid element type (" 
+                  << elements[i].type << ").\n";
+        return false;
+        break;
+    }
+  }
+  
+  // The point is not in the previous element nor in the adjacent ones.
   // We have to loop over all elements.
   for (i = nElements; i--;) {
     if (x < vertices[elements[i].vertex[0]].x) continue;
@@ -706,6 +872,9 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
   }
   
   std::cout << "    Number of vertices: " << nVertices << "\n";
+  
+  // Find adjacent elements.
+  FindNeighbours();
   
   if (!ok) {
     ready = false;
@@ -1641,6 +1810,9 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
       elements.resize(nElements);
       // Get type and constituting edges of each element.
       for (int j = 0; j < nElements; ++j) {
+        for (int k = nMaxVertices; k--;) elements[j].vertex[k] = -1; 
+        elements[j].nNeighbours = 0;
+        elements[j].neighbours.clear();
         ++iLine;
         gridfile >> type;
         switch (type) {
@@ -1847,6 +2019,47 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
   }
       
   return true;
+  
+}
+
+void
+ComponentTcad2d::FindNeighbours() {
+
+
+  std::vector<std::vector<bool> > adjacent;
+  adjacent.resize(nElements);
+  for (int i = nElements; i--;) {
+    adjacent[i].resize(nElements);
+    for (int j = nElements; j--;) {
+      adjacent[i][j] = false;
+    }
+  }
+  
+  for (int i = nElements; i--;) {
+    for (int m = nMaxVertices; m--;) {
+      if (elements[i].vertex[m] < 0) continue;
+      for (int j = nElements; j--;) {
+        if (i == j || adjacent[i][j]) continue;
+        for (int n = nMaxVertices; n--;) {
+          if (elements[i].vertex[m] == elements[j].vertex[n]) {
+            adjacent[i][j] = true;
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  for (int i = nElements; i--;) {
+    elements[i].nNeighbours = 0;
+    elements[i].neighbours.clear();
+    for (int j = nElements; j--;) {
+      if (adjacent[i][j]) {
+        elements[i].neighbours.push_back(j);
+        elements[i].nNeighbours += 1;
+      }
+    }
+  }
   
 }
 
