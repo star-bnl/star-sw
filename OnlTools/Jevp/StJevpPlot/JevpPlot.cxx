@@ -98,6 +98,7 @@ JevpPlot::JevpPlot(TH1 *firsthisto) {
   palette = 1;
   gridx = -1;
   gridy = -1;
+  needsdata = 1;
 
   nhistos=0;
   legendx1 = -1;
@@ -413,6 +414,30 @@ char *JevpPlot::GetPlotName()
   return myname;
 }
 
+int JevpPlot::isDataPresent()
+{
+  PlotHisto *curr;
+  TListIter next(&histos);
+
+  int data_present = 0;
+  int nhist=0;
+  while((curr = (PlotHisto *)next())) {
+    nhist++;
+    if(curr->histo) {
+      if(curr->histo->GetEntries() > 0) {
+	data_present = 1;
+      }
+    }
+  }
+  
+  if(nhist==0) data_present = 1;
+
+  LOG("JEFF", "data_present=%d for histo: %s",data_present,myname);
+  return data_present;
+}
+
+// Return 0 if no data
+// Return > 0 if data
 void JevpPlot::draw()
 {
   // Check for legends...
@@ -429,16 +454,7 @@ void JevpPlot::draw()
   curr = (PlotHisto *)histos.First();
   if(curr && curr->histo) dimension = curr->histo->GetDimension();
 
-#ifdef JUNK  
-  // Reset Empty histos
-  while((curr = (PlotHisto *)next())) {
-    if(curr->histo) {
-      if(curr->histo->GetEntries() == 0) {
-	curr->histo->Reset();
-      }
-    }
-  }
-#endif
+  int data_present = isDataPresent();
 
   //#ifdef JUNK
   // Handle legends...

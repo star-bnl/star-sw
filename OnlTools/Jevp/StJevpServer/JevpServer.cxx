@@ -242,18 +242,18 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 
 
   // Create builders...
-  builders.Add(new baseBuilder);
-  builders.Add(new bbcBuilder());
-  builders.Add(new daqBuilder());
-  builders.Add(new bemcBuilder());
-  builders.Add(new eemcBuilder());
-  builders.Add(new fpdBuilder());
-  builders.Add(new hltBuilder());
-  builders.Add(new l3Builder());
-  builders.Add(new tofBuilder());
-  builders.Add(new tpxBuilder());
-  builders.Add(new trgBuilder());
-  builders.Add(new upcBuilder());
+  builders.Add(new baseBuilder(this));
+  builders.Add(new bbcBuilder(this));
+  builders.Add(new daqBuilder(this));
+  builders.Add(new bemcBuilder(this));
+  builders.Add(new eemcBuilder(this));
+  builders.Add(new fpdBuilder(this));
+  builders.Add(new hltBuilder(this));
+  builders.Add(new l3Builder(this));
+  builders.Add(new tofBuilder(this));
+  builders.Add(new tpxBuilder(this));
+  builders.Add(new trgBuilder(this));
+  builders.Add(new upcBuilder(this));
   
 
   TListIter next(&builders);
@@ -510,21 +510,17 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     sscanf(msg->args, "%s %d", str, &idx);
     deleteReferencePlot(str,idx);
   }
-  else if(strcmp(msg->cmd, "addServerTag") == 0) {
-    CP;
-    //LOG("JEFF", "Adding serverTags: %s", msg->args);
-    addServerTags(msg->args);
-    CP;
-  }
   else if(strcmp(msg->cmd, "getServerTags") == 0) {
     CP;
     EvpMessage m;
     m.setSource((char *)"serv");
     m.setCmd((char *)"getServerTags");
     if(serverTags) {
+      LOG("JEFF", "server tags are: %s",serverTags);
       m.setArgs(serverTags);
     }
     else {
+      LOG("JEFF", "No server tags?");
       m.setArgs("");
     }
 
@@ -778,6 +774,7 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
 
   CP;
   jevpSummaryPlot = new JevpPlot();
+  jevpSummaryPlot->needsdata = 0;
   jevpSummaryPlot->setParent((char *)"serv");
   TH1I *h = new TH1I("JevpSummary", "JevpSummary", 64,0,63);
   //h->GetXaxis()->SetAxisColor(kWhite);
@@ -819,12 +816,14 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
 
   // Now show builders...
   TListIter next(&builders);
-  BuilderStatus *curr;
+  JevpPlotSet *obj;
   int n=0;
-  while((curr = (BuilderStatus *)next())) {
+  while((obj = (JevpPlotSet *)next())) {
+    BuilderStatus *curr = &obj->builderStatus;
+
     n++;
-    sprintf(tmp, "builder %10s%c: \t(run #%d, status %s, events %d, evttime %ld, contacttime %ld)",
-	    curr->name, curr->official ? '*' : '-', curr->run, curr->status, curr->events, time(NULL) - curr->lastEventTime, time(NULL) - curr->lastTransaction);
+    sprintf(tmp, "builder %10s: \t(events %d, evttime %d)",
+	    curr->name, curr->events, (int)(time(NULL) - curr->lastEventTime));
     l = new JLatex(2, liney(i++), tmp);
     l->SetTextSize(.035);
     jevpSummaryPlot->addElement(l); 
@@ -1161,10 +1160,36 @@ void JevpServer::saveReferencePlot(JevpPlot *plot) {
   f.Close();
 }
 
+void JevpServer::addServerTag(char *tag)
+{
+  char tg[100];
+  sprintf(tg, "|%s|",tag);
+
+  if(serverTags == NULL) {
+    serverTags = (char *)malloc(strlen(tag)+2);
+    strcpy(serverTags, "|");
+    strcat(serverTags, tag);
+    strcat(serverTags, "|");
+    return;
+  }
+
+  if(strstr(serverTags, tg)) return;
+  
+  char *ntag = (char *)malloc(strlen(serverTags) + strlen(tag) + 2);
+  strcpy(ntag, serverTags);
+  strcat(ntag, tag);
+  strcat(ntag, "|");
+
+  free(serverTags);
+  serverTags = ntag;
+}
+
 
 // tags delimeted by "|"
 void JevpServer::addServerTags(char *tags)
 {
+  LOG("JEFF", "Adding tag: %s",tags);
+
   char *tmp = (char *)malloc(sizeof(tags)+1);
   strcpy(tmp, tags);
   
@@ -1180,6 +1205,7 @@ void JevpServer::addServerTags(char *tags)
     t = strtok(NULL, "|");
   }
   
+  LOG("JEFF", "server tags are: %s",serverTags);
   free(tmp);
 }
 

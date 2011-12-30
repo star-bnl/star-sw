@@ -822,7 +822,7 @@ int DisplayNode::matchTags(char *tags)
   if(!val) return 1;
   if(!tags) return 0;
 
-  LOG(DBG,"require %s in string of available dets: %s",val, tags);
+  LOG("JEFF","require %s in string of available dets: %s",val, tags);
 
   static char requiredTags[256];
   static char req[32];
@@ -833,14 +833,14 @@ int DisplayNode::matchTags(char *tags)
   while(x) {
     sprintf(req, "|%s|", x);
     if(!strstr(tags, req)) {
-      LOG(DBG, "Match builders return false: didn't find %s in %s",req,tags);
+      LOG("JEFF", "Match builders return false: didn't find %s in %s",req,tags);
       return 0;
     }
 
     x = strtok(NULL, ",");
   }
   
-  LOG(DBG, "Match builders return true: found %s in %s",val, tags);
+  LOG("JEFF", "Match builders return true: found %s in %s",val, tags);
   return 1;
 }
 

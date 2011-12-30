@@ -12,9 +12,9 @@ BuilderStatus::BuilderStatus()
   run = 0;
   lastEventTime = 0;
   events = 0;
-  detectorsNeeded = 0;
-  official = 0;
-  sockid = 0;
+  //detectorsNeeded = 0;
+  //official = 0;
+  //sockid = 0;
 }
 
 BuilderStatus::~BuilderStatus()
