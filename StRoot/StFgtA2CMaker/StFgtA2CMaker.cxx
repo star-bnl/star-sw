@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.6 2011/12/01 00:13:23 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.7 2012/01/04 20:23:02 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.7  2012/01/04 20:23:02  sgliske
+ * fixed spelling of iDsic to iDisc
+ *
  * Revision 1.6  2011/12/01 00:13:23  avossen
  * included use of db. Note: For DB use it hast to be set with setDb. Instantiate StFgtDBMaker, get the StFgtDb from the getTables method and give the pointer to the A2C maker
  *
@@ -112,7 +115,7 @@ Int_t StFgtA2CMaker::Make(){
             StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
             StSPtrVecFgtStripIterator stripIter;
 
-	    printf("A2C for iDsic=%d\n",discIdx);
+	    printf("A2C for iDisc=%d\n",discIdx);
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
                StFgtStrip *strip = *stripIter;
                if( strip ){
