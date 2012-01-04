@@ -12,9 +12,11 @@
 #include <map>
 #include <TPolyLine.h>
 #include <TPolyLine3D.h>
+#include <TString.h>
 
 #include "ViewDrift.hh"
 #include "ComponentFieldMap.hh"
+#include "ComponentCST.hh"
 
 namespace Garfield {
 
@@ -35,8 +37,8 @@ class ViewFEMesh {
     
     // Set area to be plotted
     void SetArea();
-    void SetArea(double xmin, double ymin,
-                 double xmax, double ymax);
+    void SetArea(double xmin, double ymin, double zmin,
+                 double xmax, double ymax, double zmax);
 
     // Projection plane
     void SetDefaultProjection();
@@ -58,10 +60,13 @@ class ViewFEMesh {
     // Associate a color with each element material map ID;
     //  Uses ROOT color numberings
     void SetColor(int matID, int colorID) { colorMap[matID] = colorID; }
+    void SetFillColor(int matID, int colorID) { colorMap_fill[matID] = colorID; }
 
     // Set the optional associated ViewDrift
     void SetViewDrift(ViewDrift * vd) { viewDrift = vd; }
 
+    // Show filled mesh elements
+    void SetFillMeshWithBorders() {plotMeshBorders = true; fillMesh = true;}
     // Debugging switch
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
@@ -70,7 +75,7 @@ class ViewFEMesh {
 
     std::string className;
     std::string label;
- 
+
     // Options
     bool debug;
     bool fillMesh;
@@ -92,6 +97,7 @@ class ViewFEMesh {
 
     // Optional associated ViewDrift object
     ViewDrift * viewDrift;
+    bool plotMeshBorders;
 
     // Axes
     TGaxis * xaxis;
@@ -104,10 +110,12 @@ class ViewFEMesh {
 
     // The color map
     std::map<int,int> colorMap;
+    std::map<int,int> colorMap_fill;
 
     // Element plotting methods
     void CreateDefaultAxes();
     void DrawElements();
+    void DrawCST(ComponentCST* componentCST);
     bool InView(double x, double y);
     bool LinesCrossed(double x1, double y1, double x2, double y2,
              double u1, double v1, double u2, double v2);
@@ -117,6 +125,8 @@ class ViewFEMesh {
                   double z2, TMatrixD & xMat);
     bool PlaneCoords(double x, double y, double z, const TMatrixD& projMat, 
                      TMatrixD& xMat);
+    // Plot method to be called by Plot() for CST cubic elements
+    // available are "xy", "yz" and "xz"
 
 };
 

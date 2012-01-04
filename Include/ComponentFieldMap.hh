@@ -216,8 +216,7 @@ class ComponentFieldMap : public ComponentBase {
     // Find the element for a point in a cube
     int FindElementCube(const double x, const double y, const double z,
                       double& t1, double& t2, double& t3,
-                      double jac[3][3], double& det,
-                      const std::vector<int>* ElementsToStart = 0);
+                      double jac[3][3], double& det);
                       
     // Move (xpos, ypos, zpos) to field map coordinates
     void MapCoordinates(double& xpos, double& ypos, double& zpos,

@@ -481,23 +481,18 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
 int
 ComponentFieldMap::FindElementCube(const double x, const double y, const double z,
                       double& t1, double& t2, double& t3,
-                      double jac[3][3], double& det, const std::vector<int>* ElementsToStart){
+                      double jac[3][3], double& det){
   
   int imap = -1;
-  // Advanced element search around the last called element
-  if (ElementsToStart->size() != 0) {
-    int n_elements = ElementsToStart->size();
-    for (int i = 0; i < n_elements; ++i) {
-      if (x >= nodes[elements[ElementsToStart->at(i)].emap[3]].x &&
-          y >= nodes[elements[ElementsToStart->at(i)].emap[3]].y &&
-          z >= nodes[elements[ElementsToStart->at(i)].emap[3]].z &&
-          x < nodes[elements[ElementsToStart->at(i)].emap[0]].x &&
-          y < nodes[elements[ElementsToStart->at(i)].emap[2]].y &&
-          z < nodes[elements[ElementsToStart->at(i)].emap[7]].z) {
-        imap = ElementsToStart->at(i);
-        break;
-      }
-    }
+
+  if (x >= nodes[elements[lastElement].emap[3]].x &&
+      y >= nodes[elements[lastElement].emap[3]].y &&
+      z >= nodes[elements[lastElement].emap[3]].z &&
+      x < nodes[elements[lastElement].emap[0]].x &&
+      y < nodes[elements[lastElement].emap[2]].y &&
+      z < nodes[elements[lastElement].emap[7]].z) {
+    imap = lastElement;
+    CoordinatesCube(x,y,z,t1,t2,t3,jac,det,imap);
   }
   
   // Default element loop

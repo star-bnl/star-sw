@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "ComponentFieldMap.hh"
+#include "ComponentCST.hh"
 #include "Plotting.hh"
 #include "ViewFEMesh.hh"
 
@@ -19,6 +20,7 @@ ViewFEMesh::ViewFEMesh() :
   xMax( 1.), yMax( 1.), zMax( 1.),
   component(0),
   viewDrift(0),
+  plotMeshBorders(false),
   xaxis(0), yaxis(0), drawAxes(false) {
 
   plottingEngine.SetDefaultStyle();
@@ -66,8 +68,8 @@ ViewFEMesh::GetCanvas() {
 }
 
 void 
-ViewFEMesh::SetArea(double xmin, double ymin,
-                   double xmax, double ymax) {
+ViewFEMesh::SetArea(double xmin, double ymin, double zmin,
+                   double xmax, double ymax, double zmax) {
 
   // Check range, assign if non-null
   if (xmin == xmax || ymin == ymax) {
@@ -77,11 +79,10 @@ ViewFEMesh::SetArea(double xmin, double ymin,
   }
   xMin = std::min(xmin, xmax);
   yMin = std::min(ymin, ymax);
+  zMin = std::min(zmin, zmax);
   xMax = std::max(xmin, xmax);
   yMax = std::max(ymin, ymax);
-
-  zMin = 0.;
-  zMax = 1.;
+  zMax = std::max(zmin, zmax);
 
   hasUserArea = true;
  
@@ -132,7 +133,15 @@ ViewFEMesh::Plot() {
   if(xaxis == 0 && yaxis == 0) CreateDefaultAxes();
 
   // Plot the elements
-  DrawElements();  
+  ComponentCST* componentCST = dynamic_cast<ComponentCST*>(component);
+  if(componentCST != 0) {
+    std::cout << className << "::Plot:\n";
+    std::cout << "    The given component is a CST component!.\n";
+    std::cout << "    Method PlotCST is called now!.\n";
+    DrawCST(componentCST);
+  } else {
+    DrawElements();
+  }
   canvas->Update();
 
   return true;
@@ -313,7 +322,7 @@ ViewFEMesh::DrawElements() {
   for(int elem = 0; elem < component->nElements; elem++)  {
 
     // Do not plot the drift medium
-    if(component->materials[component->elements[elem].matmap].driftmedium) 
+    if(component->materials[component->elements[elem].matmap].driftmedium && !(plotMeshBorders))
       continue;
     
     // -- Tetrahedral elements
@@ -328,6 +337,12 @@ ViewFEMesh::DrawElements() {
     int colorID = colorMap.count(component->elements[elem].matmap);
     if(colorID != 0) colorID = colorMap[component->elements[elem].matmap];
     else colorID = 1;
+
+    // Get the fill color for this element (default colorID)
+    int colorID_fill = colorMap_fill.count(component->elements[elem].matmap);
+    if(colorID_fill != 0) colorID_fill = colorMap_fill[component->elements[elem].matmap];
+    else colorID_fill = colorID;
+
 
     // Loop over the periodicities in x
     for(int nx = nMinX; nx <= nMaxX; nx++) {
@@ -464,8 +479,8 @@ ViewFEMesh::DrawElements() {
             int polyPts = 0;
             TPolyLine* poly = new TPolyLine();
             poly->SetLineColor(colorID);
-            poly->SetFillColor(colorID);
-            poly->SetLineWidth(1);
+            poly->SetFillColor(colorID_fill);
+            poly->SetLineWidth(3);
 
             // Add all of the points
             for(int pt = 0; pt < (int) vX.size(); pt++)   {
@@ -543,8 +558,301 @@ ViewFEMesh::DrawElements() {
   
   // Draw the mesh on the canvas
   for(int m = mesh.size(); m--;) {
+    if(plotMeshBorders || !fillMesh) mesh[m]->Draw("same");
     if(fillMesh) mesh[m]->Draw("f:same");
-    else mesh[m]->Draw("same");
+  }
+
+  // Draw the drift lines on the view
+  for(int m = driftLines.size(); m--;) {
+    driftLines[m]->Draw("same");
+  }
+
+  // Draw the axes
+  if(xaxis != 0 && drawAxes) xaxis->Draw();
+  if(yaxis != 0 && drawAxes) yaxis->Draw();
+
+}
+
+void
+ViewFEMesh::DrawCST(ComponentCST* componentCST) {
+  /*The method is based on ViewFEMesh::Draw, thus the first part is copied from there.
+   * At the moment only x-y, x-z, and y-z are available due to the simple implementation.
+   * The advantage of this method is that there is no element loop and thus it is much
+   * faster.
+   */
+  // Get the map boundaries from the component
+  double mapxmax = component->mapxmax;
+  double mapxmin = component->mapxmin;
+  double mapymax = component->mapymax;
+  double mapymin = component->mapymin;
+  double mapzmax = component->mapzmax;
+  double mapzmin = component->mapzmin;
+
+  // Get the periodicities.
+  double sx = mapxmax-mapxmin;
+  double sy = mapymax-mapymin;
+  double sz = mapzmax-mapzmin;
+  const bool perX = component->xPeriodic || component->xMirrorPeriodic;
+  const bool perY = component->yPeriodic || component->yMirrorPeriodic;
+  const bool perZ = component->zPeriodic || component->zMirrorPeriodic;
+
+  // Clear the meshes and drift line lists
+  mesh.clear();
+  driftLines.clear();
+
+  // Prepare the final projection matrix (the transpose of the 2D array "project")
+  double fnorm = sqrt(plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]);
+  TArrayD dataProj(9);
+  dataProj[0] = project[0][0]; dataProj[1] = project[1][0]; dataProj[2] = plane[0]/fnorm;
+  dataProj[3] = project[0][1]; dataProj[4] = project[1][1]; dataProj[5] = plane[1]/fnorm;
+  dataProj[6] = project[0][2]; dataProj[7] = project[1][2]; dataProj[8] = plane[2]/fnorm;
+  TMatrixD projMat(3,3,dataProj.GetArray());
+
+  // Calculate the determinant of the projection matrix
+  double projDet = projMat(0,0)*(projMat(1,1)*projMat(2,2) - projMat(1,2)*projMat(2,1)) -
+                 projMat(0,1)*(projMat(1,0)*projMat(2,2) - projMat(1,2)*projMat(2,0)) +
+                 projMat(0,2)*(projMat(1,0)*projMat(2,1) - projMat(1,1)*projMat(2,0));
+
+  // Calculate the inverse of the projection matrix for
+  //  calculating coordinates in the viewing plane
+  if(projDet != 0) {
+    projMat.Invert();
+  } else {
+    std::cerr << className << "::DrawCST:\n";
+    std::cerr << "    Projection matrix is not invertible.\n";
+    std::cerr << "    Finite element mesh will not be drawn.\n";
+  }
+
+  // Construct two empty single-column matrices for use as coordinate vectors
+  TMatrixD xMat(3,1);
+
+  // Determine the number of periods present in the cell.
+  int nMaxX = 0, nMinX = 0;
+  int nMaxY = 0, nMinY = 0;
+  int nMaxZ = 0, nMinZ = 0;
+  if (perX) {
+    nMinX = int(xMin / sx) - 1;
+    nMaxX = int(xMax / sx) + 1;
+  }
+  if (perY) {
+    nMinY = int(yMin / sy) - 1;
+    nMaxY = int(yMax / sy) + 1;
+  }
+  if (perZ) {
+    nMinZ = int(zMin / sz) - 1;
+    nMaxZ = int(zMax / sz) + 1;
+  }
+
+  int elem = 0;
+  std::vector<PolygonInfo> elements;
+  int nMinU = 0, nMaxU = 0, nMinV = 0, nMaxV = 0;
+  double mapumin = 0., mapumax = 0., mapvmin = 0., mapvmax = 0.;
+  double su = 0., sv = 0.;
+  bool mirroru = false, mirrorv = false;
+
+  // xy view
+  if(plane[0] == 0 && plane[1] == 0 && plane[2] == 1) {
+    std::cout << className << "::DrawCST:\n";
+    std::cout << "    Creating x-y mesh view.\n";
+    xaxis->SetTitle("x [cm]");
+    yaxis->SetTitle("y [cm]");
+    nMinU = nMinX;  nMaxU = nMaxX;
+    nMinV = nMinY;  nMaxV = nMaxY;
+    mapumin = mapxmin;  mapumax = mapxmax;
+    mapvmin = mapymin;  mapvmax = mapymax;
+    su = sx;  sv = sy;
+    mirroru = component->xMirrorPeriodic;
+    mirrorv = component->yMirrorPeriodic;
+    for(unsigned int y = 0; y < (componentCST->m_ylines.size() - 1); y++) {
+      for(unsigned int x = 0; x < (componentCST->m_xlines.size() - 1); x++) {
+        elem = x + (componentCST->m_xlines.size() - 1) * y +
+            (componentCST->m_xlines.size() - 1) * (componentCST->m_ylines.size() - 1) * (componentCST->m_zlines.size() - 1)/2;
+        PolygonInfo tmp_info;
+        tmp_info.element = elem;
+        tmp_info.p1[0] = component->nodes[component->elements[elem].emap[3]].x;
+        tmp_info.p2[0] = component->nodes[component->elements[elem].emap[0]].x;
+        tmp_info.p3[0] = component->nodes[component->elements[elem].emap[1]].x;
+        tmp_info.p4[0] = component->nodes[component->elements[elem].emap[2]].x;
+        tmp_info.p1[1] = component->nodes[component->elements[elem].emap[3]].y;
+        tmp_info.p2[1] = component->nodes[component->elements[elem].emap[0]].y;
+        tmp_info.p3[1] = component->nodes[component->elements[elem].emap[1]].y;
+        tmp_info.p4[1] = component->nodes[component->elements[elem].emap[2]].y;
+        tmp_info.material = component->elements[elem].matmap;
+        elements.push_back(tmp_info);
+      }
+    }
+  //xz-view
+  } else if(plane[0] == 0 && plane[1] == -1 && plane[2] == 0) {
+    std::cout << className << "::DrawCST:\n";
+    std::cout << "    Creating x-z mesh view.\n";
+    xaxis->SetTitle("x [cm]");
+    yaxis->SetTitle("z [cm]");
+    nMinU = nMinX;  nMaxU = nMaxX;
+    nMinV = nMinZ;  nMaxV = nMaxZ;
+    mapumin = mapxmin;  mapumax = mapxmax;
+    mapvmin = mapzmin;  mapvmax = mapzmax;
+    su = sx;  sv = sz;
+    mirroru = component->xMirrorPeriodic;
+    mirrorv = component->zMirrorPeriodic;
+    for(unsigned int z = 0; z < componentCST->m_zlines.size(); z++) {
+      for(unsigned int x = 0; x < (componentCST->m_xlines.size() - 1); x++) {
+        elem = x +  (componentCST->m_xlines.size() - 1) * (componentCST->m_ylines.size() - 1) * z;
+        PolygonInfo tmp_info;
+        tmp_info.element = elem;
+        tmp_info.p1[0] = component->nodes[component->elements[elem].emap[3]].x;
+        tmp_info.p2[0] = component->nodes[component->elements[elem].emap[0]].x;
+        tmp_info.p3[0] = component->nodes[component->elements[elem].emap[4]].x;
+        tmp_info.p4[0] = component->nodes[component->elements[elem].emap[7]].x;
+        tmp_info.p1[1] = component->nodes[component->elements[elem].emap[3]].z;
+        tmp_info.p2[1] = component->nodes[component->elements[elem].emap[0]].z;
+        tmp_info.p3[1] = component->nodes[component->elements[elem].emap[4]].z;
+        tmp_info.p4[1] = component->nodes[component->elements[elem].emap[7]].z;
+        tmp_info.material = component->elements[elem].matmap;
+        elements.push_back(tmp_info);
+      }
+    }
+
+  // yz-view
+  } else if(plane[0] == -1 && plane[1] == 0 && plane[2] == 0) {
+    std::cout << className << "::DrawCST:\n";
+    std::cout << "    Creating z-y mesh view.\n";
+    xaxis->SetTitle("z [cm]");
+    yaxis->SetTitle("y [cm]");
+    nMinU = nMinZ;  nMaxU = nMaxZ;
+    nMinV = nMinY;  nMaxV = nMaxY;
+    mapumin = mapzmin;  mapumax = mapzmax;
+    mapvmin = mapymin;  mapvmax = mapymax;
+    su = sz;  sv = sy;
+    mirroru = component->zMirrorPeriodic;
+    mirrorv = component->yMirrorPeriodic;
+    for(unsigned int z = 0; z < componentCST->m_zlines.size(); z++) {
+      for(unsigned int y = 0; y < componentCST->m_ylines.size(); y++) {
+        elem = (componentCST->m_xlines.size() - 1) * y + (componentCST->m_xlines.size() - 1) * (componentCST->m_ylines.size() - 1) * z;
+        PolygonInfo tmp_info;
+        tmp_info.element = elem;
+        tmp_info.p1[0] = component->nodes[component->elements[elem].emap[3]].z;
+        tmp_info.p2[0] = component->nodes[component->elements[elem].emap[7]].z;
+        tmp_info.p3[0] = component->nodes[component->elements[elem].emap[6]].z;
+        tmp_info.p4[0] = component->nodes[component->elements[elem].emap[2]].z;
+        tmp_info.p1[1] = component->nodes[component->elements[elem].emap[3]].y;
+        tmp_info.p2[1] = component->nodes[component->elements[elem].emap[7]].y;
+        tmp_info.p3[1] = component->nodes[component->elements[elem].emap[6]].y;
+        tmp_info.p4[1] = component->nodes[component->elements[elem].emap[2]].y;
+        tmp_info.material = component->elements[elem].matmap;
+        // Add the polygon to the mesh
+        elements.push_back(tmp_info);
+      }
+    }
+  } else {
+    std::cerr << className << "::DrawCST:\n";
+    std::cerr << "    The given plane name is not known.\n";
+    std::cerr << "    Please choose one of the following: xy, xz, yz.\n";
+  }
+  std::cout << className << "::PlotCST:\n";
+  std::cout << "    Number of the considered elements in this projection:" << elements.size() << std::endl;
+  std::vector<PolygonInfo>::iterator it;
+  std::vector<PolygonInfo>::iterator itend = elements.end();
+
+  for(int nu = nMinU; nu <= nMaxU; nu++) {
+    for(int nv = nMinV; nv <= nMaxV; nv++){
+      it = elements.begin();
+      while(it != itend){
+        int colorID = colorMap.count((*it).material);
+        if(colorID != 0) colorID = colorMap[(*it).material];
+        else colorID = 1;
+
+        // Get the fill color for this element (default colorID)
+        int colorID_fill = colorMap_fill.count((*it).material);
+        if(colorID_fill != 0) colorID_fill = colorMap_fill[(*it).material];
+        else colorID_fill = colorID;
+
+        TPolyLine* poly = new TPolyLine();
+        poly->SetLineColor(colorID);
+        poly->SetFillColor(colorID_fill);
+        if(plotMeshBorders)
+          poly->SetLineWidth(3);
+        else
+          poly->SetLineWidth(1);
+        // Add 4 points of the square
+        Double_t tmp_u[4], tmp_v[4];
+        if(mirroru && nu != 2*(nu/2)){
+          tmp_u[0] = mapumin + (mapumax - (*it).p1[0]) + su*nu;
+          tmp_u[1] = mapumin + (mapumax - (*it).p2[0]) + su*nu;
+          tmp_u[2] = mapumin + (mapumax - (*it).p3[0]) + su*nu;
+          tmp_u[3] = mapumin + (mapumax - (*it).p4[0]) + su*nu;
+        } else {
+          tmp_u[0] = (*it).p1[0] + su*nu;
+          tmp_u[1] = (*it).p2[0] + su*nu;
+          tmp_u[2] = (*it).p3[0] + su*nu;
+          tmp_u[3] = (*it).p4[0] + su*nu;
+        }
+        if(mirrorv && nv != 2*(nv/2)){
+          tmp_v[0] = mapvmin + (mapvmax - (*it).p1[1]) + sv*nv;
+          tmp_v[1] = mapvmin + (mapvmax - (*it).p2[1]) + sv*nv;
+          tmp_v[2] = mapvmin + (mapvmax - (*it).p3[1]) + sv*nv;
+          tmp_v[3] = mapvmin + (mapvmax - (*it).p4[1]) + sv*nv;
+        } else {
+          tmp_v[0] = (*it).p1[1] + sv*nv;
+          tmp_v[1] = (*it).p2[1] + sv*nv;
+          tmp_v[2] = (*it).p3[1] + sv*nv;
+          tmp_v[3] = (*it).p4[1] + sv*nv;
+        }
+        poly->SetPoint(0,tmp_u[0],tmp_v[0]);
+        poly->SetPoint(1,tmp_u[1],tmp_v[1]);
+        poly->SetPoint(2,tmp_u[2],tmp_v[2]);
+        poly->SetPoint(3,tmp_u[3],tmp_v[3]);
+        // Add the polygon to the mesh
+        mesh.push_back(poly);
+        it++;
+      }//end element loop
+    }//end v-periodicity loop
+  }//end u-periodicity loop
+
+
+  // If we have an associated ViewDrift, plot projections of the drift lines
+  if(viewDrift != 0) {
+
+    for(int dline = 0; dline < (int)viewDrift->driftLines.size(); dline++) {
+
+      // Get the number of points and their coordinates
+      float npts = viewDrift->driftLines[dline].GetN();
+      float * pts = viewDrift->driftLines[dline].GetP();
+
+      // Create a TPolyLine that is a 2D projection of the original
+      TPolyLine* poly = new TPolyLine();
+      poly->SetLineColor(viewDrift->driftLines[dline].GetLineColor());
+      int polyPts = 0;
+      for(int pt = 0; pt < npts; pt++) {
+
+        // Get the coordinates of this point in the TPolyLine3D
+        double ptx = pts[3*pt];
+        double pty = pts[3*pt+1];
+        double ptz = pts[3*pt+2];
+
+        // Project this point onto the plane
+        PlaneCoords(ptx, pty, ptz, projMat, xMat);
+
+        // Add this point if it is within the view
+        if(xMat(0,0) >= xMin && xMat(0,0) <= xMax
+            && xMat(1,0) >= yMin && xMat(1,0) <= yMax) {
+          poly->SetPoint(polyPts, xMat(0,0), xMat(1,0));
+          polyPts++;
+        }
+      } // end loop over points
+
+      // Add the drift line to the list
+      driftLines.push_back(poly);
+
+    } // end loop over drift lines
+  } // end if(viewDrift != 0)
+
+  // Call the ROOT draw methods to plot the elements
+  canvas->cd();
+
+  // Draw the mesh on the canvas
+  for(int m = mesh.size(); m--;) {
+    if(plotMeshBorders || !fillMesh) mesh[m]->Draw("same");
+    if(fillMesh) mesh[m]->Draw("f:same");
   }
 
   // Draw the drift lines on the view

@@ -15,13 +15,12 @@ ComponentCST::ComponentCST() : ComponentFieldMap() {
 
   className = "ComponentCST";
   ready = false;
-  m_LastElementCalled = 0;
-  m_xlines = 0;
-  m_ylines = 0;
-  m_zlines = 0;
   // Default bounding box
   zMinBoundingBox = -50.;
   zMaxBoundingBox =  50.;
+  m_xlines.clear();
+  m_ylines.clear();
+  m_zlines.clear();
 
 }
 
@@ -29,7 +28,6 @@ bool
 ComponentCST::Initialise(std::string elist, std::string nlist,
                          std::string mplist, std::string prnsol,
                          std::string unit) {
-  //zenker:done
   ready = false;
 
   // Keep track of the success
@@ -371,7 +369,7 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
   nodes.clear();
   nNodes = 0;
   il = 0;
-  std::vector<double> x_lines,y_lines,z_lines;
+  int xlines = 0, ylines = 0, zlines = 0;
   int lines_type = -1;
   double line_tmp;
   while (fnlist.getline(line, size, '\n')) {
@@ -385,16 +383,11 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
         int(token[0]) == 10 || int(token[0]) == 13) continue;
     // Read max sizes
     if (strcmp(token, "xmax") == 0) {
-      token = strtok(NULL, " "); m_xlines = ReadInteger(token, -1, readerror);
+      token = strtok(NULL, " "); xlines = ReadInteger(token, -1, readerror);
       token = strtok(NULL, " ");
-      token = strtok(NULL, " "); m_ylines = ReadInteger(token, -1, readerror);
+      token = strtok(NULL, " "); ylines = ReadInteger(token, -1, readerror);
       token = strtok(NULL, " ");
-      token = strtok(NULL, " "); m_zlines = ReadInteger(token, -1, readerror);
-      std::cout << className << "::Initialise:\n";
-      std::cout << "    Found " << m_xlines << " x-lines, "
-                                << m_ylines << " y-lines and "
-                                << m_zlines << " z-lines in file "
-                                << nlist << ".\n";
+      token = strtok(NULL, " "); zlines = ReadInteger(token, -1, readerror);
       if (readerror) break;
       continue;
     }
@@ -423,9 +416,9 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
       continue;
     }
     line_tmp = ReadDouble(token, -1, readerror);
-    if (lines_type == 1) x_lines.push_back(line_tmp);
-    else if (lines_type == 2) y_lines.push_back(line_tmp);
-    else if (lines_type == 3) z_lines.push_back(line_tmp);
+    if (lines_type == 1) m_xlines.push_back(line_tmp * funit);
+    else if (lines_type == 2) m_ylines.push_back(line_tmp * funit);
+    else if (lines_type == 3) m_zlines.push_back(line_tmp * funit);
     else {
       std::cerr << className << "::Initialise:\n";
       std::cerr << "    Line type was not set in  " << nlist 
@@ -448,25 +441,43 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
   // Close the file
   fnlist.close();
   // Calculate the node positions
-  for (int z = 0; z < m_zlines; z++) {
-    for (int y = 0; y < m_ylines; y++){
-      for (int x = 0; x < m_xlines; x++){
+  for (unsigned int z = 0; z < m_zlines.size(); z++) {
+    for (unsigned int y = 0; y < m_ylines.size(); y++){
+      for (unsigned int x = 0; x < m_xlines.size(); x++){
         node newNode;
         // Store the point coordinates
-        newNode.x = x_lines.at(x) * funit;
-        newNode.y = y_lines.at(y) * funit;
-        newNode.z = z_lines.at(z) * funit;
+        newNode.x = m_xlines.at(x);
+        newNode.y = m_ylines.at(y);
+        newNode.z = m_zlines.at(z);
         nodes.push_back(newNode);
         ++nNodes;
       }
     }
   }
+  if ((unsigned)xlines == m_xlines.size() &&
+      (unsigned)ylines == m_ylines.size() &&
+      (unsigned)zlines == m_zlines.size()) {
+    std::cout << className << "::Initialise:\n";
+    std::cout << "    Found in file " << nlist << "\n    "
+                              << xlines << " x-lines\n    "
+                              << ylines << " y-lines\n    "
+                              << zlines << " z-lines\n";
+  } else {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    There should be " << xlines << " x-lines, "
+                                        << ylines << " y-lines and "
+                                        << zlines << " z-lines in file "
+                                        << nlist << " but I found :\n    "
+                                        << m_xlines.size() << " x-lines, "
+                                        << m_ylines.size() << " x-lines, "
+                                        << m_zlines.size() << " z-lines.\n";
+  }
   // Check synchronisation
-  if ((m_xlines * m_ylines * m_zlines) != nNodes) {
+  if ((xlines * ylines * zlines) != nNodes) {
     std::cerr << className << "::Initialise:\n";
     std::cerr << "    Synchronisation lost on file " << nlist << ".\n";
     std::cerr << "    Nodes: " << nNodes << " (expected " 
-              << (m_xlines * m_ylines * m_zlines) << ")\n";
+              << (xlines * ylines * zlines) << ")\n";
     ok = false;
   }
 
@@ -683,16 +694,6 @@ ComponentCST::ElectricField(
         double& ex, double& ey, double& ez, double& volt,
         Medium*& m, int& status) {
 
-  // for (int i = 0; i < nElements; ++i) {
-  //   printf("Node-Positions of element %d:\n",i);
-  //   for (int j = 0; j < 8;++j) {
-  //     printf("        (%g,%g,%g)\n",
-  //     nodes[elements[i].emap[j]].x,
-  //     nodes[elements[i].emap[j]].y,
-  //     nodes[elements[i].emap[j]].z);
-  //    }
-  // }
-
   // Copy the coordinates
   double x = xin, y = yin, z = zin;
 
@@ -719,16 +720,9 @@ ComponentCST::ElectricField(
     std::cout << className << "::ElectricField:\n";
     std::cout << "    Warnings have been issued for this field map.\n";
   }
-
-  // Find the element that contains this point
   double t1, t2, t3, jac[3][3], det;
-  std::vector<int>* vec_surrounding = 0;
-  // To reserve the memory here 
-  // (vector is copied from ComponentCST::GetSurroundingElements
-  // where memory is no longer reserved!
-  std::vector<int> tmp_vec = ComponentCST::GetSurroundingElements(m_LastElementCalled);
-  vec_surrounding = &(tmp_vec);
-  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det, vec_surrounding);
+
+  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det);
 
   if (imap < 0) {
     if (debug) {
@@ -741,7 +735,7 @@ ComponentCST::ElectricField(
     return;
   }
   // Save element number of last element
-  m_LastElementCalled = imap;
+  lastElement = imap;
 
   double inv_jac[3][3];
   det = fabs(det);
@@ -908,12 +902,9 @@ ComponentCST::WeightingField(
 
   // Find the element that contains this point
   double t1, t2, t3, jac[3][3], det;
-  std::vector<int>* vec_surrounding;
-  //to reserve the memory here (vector is copied from ComponentCST::GetSurroundingElements
-  //were memory is no longer reserved!
-  std::vector<int> tmp_vec = ComponentCST::GetSurroundingElements(m_LastElementCalled);
-  vec_surrounding = &(tmp_vec);
-  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det,vec_surrounding);
+
+  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det);
+
   // Check if the point is in the mesh
   if (imap < 0) return;
 
@@ -1068,13 +1059,9 @@ ComponentCST::WeightingPotential(
 
   // Find the element that contains this point
   double t1, t2, t3, jac[3][3], det;
-  std::vector<int>* vec_surrounding;
-  // To reserve the memory here 
-  // (vector is copied from ComponentCST::GetSurroundingElements
-  // where memory is no longer reserved!
-  std::vector<int> tmp_vec = ComponentCST::GetSurroundingElements(m_LastElementCalled);
-  vec_surrounding = &(tmp_vec);
-  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det,vec_surrounding);
+
+  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det);
+
   // Check if the point is in the mesh
   if (imap < 0) return 0.;
 
@@ -1135,13 +1122,9 @@ ComponentCST::GetMedium(const double xin, const double yin, const double zin,
 
   // Find the element that contains this point.
   double t1, t2, t3, jac[3][3], det;
-  std::vector<int>* vec_surrounding;
-  // To reserve the memory here 
-  // (vector is copied from ComponentCST::GetSurroundingElements
-  // where memory is no longer reserved!
-  std::vector<int> tmp_vec = ComponentCST::GetSurroundingElements(m_LastElementCalled);
-  vec_surrounding = &(tmp_vec);
-  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det,vec_surrounding);
+
+  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det);
+
   if (imap < 0) {
     if (debug) {
       std::cerr << className << "::GetMedium:\n";
@@ -1250,73 +1233,118 @@ ComponentCST::Element2Index(int element, int &i, int &j, int &k) {
    */
 
   int tmp = element;
-  k = element / ((m_xlines - 1) * (m_ylines - 1));
-  tmp -= k * (m_xlines - 1) * (m_ylines - 1);
-  j = tmp / (m_xlines - 1);
-  i = element - j * (m_xlines - 1) - k * (m_xlines - 1) * (m_ylines - 1);
+  k = element / ((m_xlines.size() - 1) * (m_ylines.size() - 1));
+  tmp -= k * (m_xlines.size() - 1) * (m_ylines.size() - 1);
+  j = tmp / (m_xlines.size() - 1);
+  i = element - j * (m_xlines.size() - 1) - k * (m_xlines.size() - 1) * (m_ylines.size() - 1);
 
 }
 
-std::vector<int>
-ComponentCST::GetSurroundingElements(int element) {
+int
+ComponentCST::FindElementCube(const double x, const double y, const double z,
+                      double& t1, double& t2, double& t3,
+                      double jac[3][3], double& det){
 
-  /* Here all elements around the central element are collected.
-   * The boarders are treated so that the length of the returned vector
-   * may vary.
-   * x,y,z are the number nodes in x,y,z direction!
-   * The first element has the number 0 and the last has the number
-   * (m_xlines-1)*(m_ylines-1)*(m_zlines-1)-1 since there
-   * are (m_xlines-1)*(y-1)*(z-1) elements.
-   */
+  int imap = -1;
+  // check if the last element matches
+  // if yes than leave directly
+  if (x >= nodes[elements[lastElement].emap[3]].x &&
+      y >= nodes[elements[lastElement].emap[3]].y &&
+      z >= nodes[elements[lastElement].emap[3]].z &&
+      x < nodes[elements[lastElement].emap[0]].x &&
+      y < nodes[elements[lastElement].emap[2]].y &&
+      z < nodes[elements[lastElement].emap[7]].z) {
+    imap = lastElement;
+    CoordinatesCube(x,y,z,t1,t2,t3,jac,det,imap);
+    return imap;
+  }
 
-  int i, j, k, tmp_element;
-  // std::cout << className << "::GetSurroundingElements:\n";
-  // std::cout < "    Computing elements for central cell " << element << "\n";
-  // std::cout << "    and boarders are (" 
-  //           << m_xlines << ", " << m_ylines << ", " << m_zlines << ")\n";
-  ComponentCST::Element2Index(element, i, j, k);
-  std::vector<int> vec;
-  for (int l1 = -1; l1 < 2; l1++) {
-    for (int l2 = -1; l2 < 2; l2++) {
-      for (int l3 = -1; l3 < 2; l3++) {
-        // if ((i+l1) >=0 && (i+l1) < (x-1) &&
-        //     (j+l2) >=0 && (j+l2) < (y-1) &&
-        //     (k+l3) >=0 && (k+l3) < (z-1)) {
-        //   tmp_element = (i+l1)+(j+l2)*(x-1) + (k+l3)*(x-1)*(y-1);
-        //   std::cout << "Considering element: " << tmp_element << std::endl;
-        //   if (tmp_element >= 0 && tmp_element <= (x-1)*(y-1)*(z-1)) {
-        //     vec.push_back(tmp_element);
-        //   }
-        // }
-        int tmp_i, tmp_j, tmp_k;
-        if (i + l1 < 0) {
-          tmp_i = m_xlines - 2;
-        } else if (i  + l1 >= m_xlines - 1) {
-          tmp_i = 0;
-        } else {
-          tmp_i = i + l1;
-        }
-        if (j + l2 < 0) {
-          tmp_j = m_ylines - 2;
-        } else if (j + l2 >= m_ylines - 1) {
-          tmp_j = 0;
-        } else {
-          tmp_j = j + l2;
-        }
-        if (k + l3 < 0) {
-          tmp_k = m_zlines - 2;
-        } else if (k + l3 >= m_zlines - 1) {
-          tmp_k = 0;
-        } else {
-          tmp_k = k + l3;
-        }
-        tmp_element = tmp_i + tmp_j * (m_xlines - 1) + tmp_k * (m_xlines-1) * (m_ylines - 1);
-        vec.push_back(tmp_element);
+  // CST specific element search without an element loop
+  int index_x = 0, index_y = 0, index_z = 0;
+  if (imap == -1) {
+    std::vector<double>::iterator it;
+    double my_x[] = {x};
+    it = std::search(m_xlines.begin(),m_xlines.end(),my_x,my_x+1,Greater);
+    index_x = std::distance(m_xlines.begin(),(it-1));
+    double my_y[] = {y};
+    it = std::search(m_ylines.begin(),m_ylines.end(),my_y,my_y+1,Greater);
+    index_y = std::distance(m_ylines.begin(),(it-1));
+    double my_z[] = {z};
+    it = std::search(m_zlines.begin(),m_zlines.end(),my_z,my_z+1,Greater);
+    index_z = std::distance(m_zlines.begin(),(it-1));
+    /* Behavior at borders:
+     * x < x_min -> index_x = -1
+     * x = x_min -> index_x = 0
+     * x = x_max -> index_x = m_xlines.size() - 1
+     * x > x_max -> index_x = m_xlines.size() - 1
+    */
+
+    // check if the point is out of the mesh
+    if(index_x < 0 || index_y < 0 || index_z < 0 ||
+       index_x == (m_xlines.size()-1) || index_y == (m_ylines.size()-1) || index_z == (m_zlines.size()-1))
+      return -1;
+    else
+      imap = index_x + (m_xlines.size() - 1) * index_y + (m_xlines.size() - 1) * (m_ylines.size() - 1) * index_z;
+
+    if(debug && imap != -1) {
+      if( x < nodes[elements[imap].emap[3]].x || x > nodes[elements[imap].emap[0]].x ||
+          y < nodes[elements[imap].emap[3]].y || y > nodes[elements[imap].emap[2]].y ||
+          z < nodes[elements[imap].emap[3]].z || z > nodes[elements[imap].emap[7]].z) {
+        std::cout << "Element: " << imap << "\tPoint: (" << x << "," << y << "," << z << ")\n"
+                << "x: " << nodes[elements[imap].emap[3]].x << " - " << nodes[elements[imap].emap[0]].x << "\n"
+                << "y: " << nodes[elements[imap].emap[3]].y << " - " << nodes[elements[imap].emap[2]].y << "\n"
+                << "z: " << nodes[elements[imap].emap[3]].z << " - " << nodes[elements[imap].emap[7]].z << "\n\n";
       }
     }
   }
-  return vec;
-
+  // final test - should never fail
+  if (imap < 0 || imap > nElements) {
+    std::cerr << className << "::FindElementCube:\n";
+    std::cerr << "    Index of the element (imap is " << imap << ") is to large!"
+              << "    Number of Elements: " << nElements
+              << "\n    index_x: "   << index_x
+              << "\n    index_y: " << index_y
+              << "\n    index_z: " << index_z << std::endl;
+    if (debug) {
+      std::cout << className << "::FindElementCube:\n";
+      std::cout << "    Point (" << x << "," << y << "," << z
+                << ") not in the mesh, it is background or PEC.\n";
+      std::cout << "    First node ("
+                << nodes[elements[0].emap[3]].x << ","
+                << nodes[elements[0].emap[3]].y << ","
+                << nodes[elements[0].emap[3]].z
+                << ") in the mesh.\n";
+      std::cout << "    dx= " << (nodes[elements[0].emap[0]].x-nodes[elements[0].emap[3]].x)
+                << ", dy= " << (nodes[elements[0].emap[2]].y-nodes[elements[0].emap[3]].y)
+                << ", dz= " << (nodes[elements[0].emap[7]].z-nodes[elements[0].emap[3]].z)
+                << "\n";
+      std::cout << "    Last node (" << nodes[elements[nElements-1].emap[5]].x
+                << "," << nodes[elements[nElements-1].emap[5]].y
+                << "," << nodes[elements[nElements-1].emap[5]].z
+                << ") in the mesh.\n";
+      std::cout << "  dx= " << (nodes[elements[nElements-1].emap[0]].x-nodes[elements[nElements-1].emap[3]].x)
+                << ", dy= " << (nodes[elements[nElements-1].emap[2]].y-nodes[elements[nElements-1].emap[3]].y)
+                << ", dz= " << (nodes[elements[nElements-1].emap[7]].z-nodes[elements[nElements-1].emap[3]].z)
+                << "\n";
+    }
+    return -1;
+  }
+  CoordinatesCube(x,y,z,t1,t2,t3,jac,det,imap);
+  if (debug) {
+    std::cout << className << "::FindElementCube:\n";
+    std::cout << "Global: (" << x << "," << y << "," << z << ") in element "
+              << imap << " (degenerate: "
+              << elements[imap].degenerate << ")\n";
+    std::cout << "      Node xyzV\n";
+    for (int i = 0; i < 8; i++) {
+      std::cout << "  " << elements[imap].emap[i]
+                << " " << nodes[elements[imap].emap[i]].x
+                << " " << nodes[elements[imap].emap[i]].y
+                << " " << nodes[elements[imap].emap[i]].z
+                << " " << nodes[elements[imap].emap[i]].v
+                << "\n";
+    }
+  }
+  return imap;
 }
-
 }
