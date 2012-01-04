@@ -35,7 +35,7 @@ TDataSet *CreateGeometry(const Char_t *name="y2011") {
   // Wrap TGeoManager in a TDataSet and return it
   if ( gGeoManager ) 
     {
-      geom = new TObjectSet("Geometry",gGeoManager);
+      geom = new TObjectSet("Geometry",gGeoManager, false );
       geom -> SetTitle( Form("AgML Geometry: %s",name) );
     }
 
