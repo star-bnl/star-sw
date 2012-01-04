@@ -35,9 +35,11 @@
 #include "Jevp/StJevpBuilders/hltBuilder.h"
 #include "Jevp/StJevpBuilders/l3Builder.h"
 #include "Jevp/StJevpBuilders/tofBuilder.h"
+#include "Jevp/StJevpBuilders/mtdBuilder.h"
 #include "Jevp/StJevpBuilders/tpxBuilder.h"
 #include "Jevp/StJevpBuilders/trgBuilder.h"
 #include "Jevp/StJevpBuilders/upcBuilder.h"
+#include "Jevp/StJevpBuilders/fgtBuilder.h"
 
 static int line_number=0;
 #define CP line_number=__LINE__
@@ -251,9 +253,11 @@ int JevpServer::init(int port, int argc, char *argv[]) {
   builders.Add(new hltBuilder(this));
   builders.Add(new l3Builder(this));
   builders.Add(new tofBuilder(this));
+  builders.Add(new mtdBuilder(this));
   builders.Add(new tpxBuilder(this));
   builders.Add(new trgBuilder(this));
   builders.Add(new upcBuilder(this));
+  builders.Add(new fgtBuilder(this));
   
 
   TListIter next(&builders);

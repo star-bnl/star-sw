@@ -540,6 +540,10 @@ void JevpPlot::draw()
       strcpy(opts, drawopts);
     else opts[0] = '\0';
 
+    if((dimension > 1) && (strlen(opts) == 0)) {
+      sprintf(opts, "colz");
+    }
+
     if(same) strcat(opts,same);
 
     LOG(NOTE, "opts---%s\n",opts);
