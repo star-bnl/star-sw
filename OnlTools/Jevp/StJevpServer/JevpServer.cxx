@@ -41,6 +41,9 @@
 #include "Jevp/StJevpBuilders/upcBuilder.h"
 #include "Jevp/StJevpBuilders/fgtBuilder.h"
 
+
+#include <RTS/include/SUNRT/clockClass.h>
+
 static int line_number=0;
 #define CP line_number=__LINE__
 
@@ -660,25 +663,41 @@ void JevpServer::clearForNewRun()
 
 
 JevpPlot *JevpServer::getPlot(char *name) {
+  RtsTimer_root clock;
+  clock.record_time();
+  int nexamined=0;
+
   JevpPlotSet *curr;
   TListIter next(&builders);
   
-  while((curr = (JevpPlotSet *)next())) {
+  JevpPlot *currplot = NULL;
 
-    JevpPlot *currplot;
+  while((curr = (JevpPlotSet *)next())) {
+    
+    // char *ps_name = curr->getPlotSetName();
+    // int len = strlen(ps_name);
+    // if(strncmp(name,ps_name,len) != 0) continue;
+
+
     TListIter nextplot(&curr->plots);
   
     while((currplot = (JevpPlot *)nextplot())) {
 
       LOG(DBG, "getPlot():  checking %s vs %s",name,currplot->GetPlotName());
+      nexamined++;
 
       if(strcmp(currplot->GetPlotName(), name) == 0) {
-	return currplot;
+	goto done;
       }
     }
   }
 
-  return NULL;
+ done:
+
+  double t1 = clock.record_time();
+  LOG("JEFF", "Ethernet: getPlot(%s) %lf nsearched=%d",name,t1,nexamined);
+
+  return currplot;
 }
 
 
