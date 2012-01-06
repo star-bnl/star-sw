@@ -1,7 +1,0 @@
-<Document file="StarVMC/Geometry/Compat/fgtdgeo.xml">
-<Export language="Mortran">
-<Import file="pams/geometry/fgtdgeo/fgtdgeo.g"  verbatim="true" />
-<Import file="pams/geometry/fgtdgeo/fgtdgeo1.g" verbatim="true" />
-<Import file="pams/geometry/fgtdgeo/fgtdgeo2.g" verbatim="true" />
-</Export>
-</Document>
