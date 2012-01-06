@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.4 2011/12/01 00:13:23 avossen Exp $
+ * $Id: StFgtA2CMaker.h,v 1.5 2012/01/06 17:48:00 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -28,6 +28,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.5  2012/01/06 17:48:00  sgliske
+ * Added requested GetCVS tag
+ *
  * Revision 1.4  2011/12/01 00:13:23  avossen
  * included use of db. Note: For DB use it hast to be set with setDb. Instantiate StFgtDBMaker, get the StFgtDb from the getTables method and give the pointer to the A2C maker
  *
@@ -81,6 +84,9 @@ class StFgtA2CMaker : public StMaker {
    void doRemoveOtherTimeBins(  Bool_t doIt );
 
    void setDb(StFgtDb* db);
+
+   virtual const char *GetCVS() const
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.5 2012/01/06 17:48:00 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    // for the ped reader
