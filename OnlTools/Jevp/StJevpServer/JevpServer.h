@@ -99,6 +99,7 @@ class JevpServer {
   int handleEvent();
   void handleClient(int delay);
 
+  void handleNewEvent(EvpMessage *msg);
   void handleEvpMessage(TSocket *s, EvpMessage *msg);
   void handleEvpPlot(TSocket *s, JevpPlot *plot);
   void handleGetPlot(TSocket *s, char *argstring);
@@ -132,9 +133,15 @@ class JevpServer {
 
 
 
+  void readSocket();
+  
+  /*   void *readerThread(void *); */
+  /*   void readerThreadSend(TSocket *socket, char *cmd); */
+  /*   void readerThreadWait(TSocket *socket); */
 
   int execScript(const char *name,  char *args[], int waitforreturn=1);
 };
 
+void *JEVPSERVERreaderThread(void *);
 
 #endif
