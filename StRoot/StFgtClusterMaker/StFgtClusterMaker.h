@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.13 2011/11/01 18:46:30 sgliske Exp $
+//   $Id: StFgtClusterMaker.h,v 1.14 2012/01/06 17:58:39 sgliske Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.14  2012/01/06 17:58:39  sgliske
+//   Added requested GetCVS tag
+//
 //   Revision 1.13  2011/11/01 18:46:30  sgliske
 //   Updated to correspond with StEvent containers, take 2.
 //
@@ -47,6 +50,9 @@ class StFgtClusterMaker : public StMaker
   virtual void Clear( Option_t *opts = "" );
 
   Int_t setClusterAlgo(StFgtIClusterAlgo*);
+
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.14 2012/01/06 17:58:39 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   StFgtIClusterAlgo* mClusterAlgoPtr;
