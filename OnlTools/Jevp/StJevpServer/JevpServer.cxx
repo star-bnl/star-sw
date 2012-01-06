@@ -15,6 +15,7 @@
 #include <TText.h>
 #include <TSystem.h>
 #include <signal.h>
+#include <TThread.h>
 
 #include "EvpConstants.h"
 #include "JevpServer.h"
@@ -46,6 +47,7 @@
 
 static int line_number=0;
 #define CP line_number=__LINE__
+int JEVPSERVERport;
 
 static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
@@ -118,18 +120,114 @@ void JevpServer::main(int argc, char *argv[])
   // Each time we start, archive the existing display file...
   serv.init(serv.myport, argc, argv);
 
+  // Start reader thread
+  TThread *rThread = new TThread("readerThread", (void(*)(void *))(&JEVPSERVERreaderThread),(void *)&serv);
+  rThread->Run();
+
+  
   for(;;) {
-
-    CP;
-    int delay = serv.handleEvent();   // get an event and call the builders...
-
-    // delay depends on the event status
-    // 0 if successfully read an event
-    // longer if no events available...
-    CP;
-    serv.handleClient(delay);         
+    
+    serv.readSocket();
+    
+    LOG(DBG, "Read socket!");
   }
+  
+  
+//     int delay = serv.handleEvent();   // get an event and call the builders...
+
+//     // delay depends on the event status
+//     // 0 if successfully read an event
+//     // longer if no events available...
+//     CP;
+//     serv.handleClient(delay);   
 }
+
+void JevpServer::readSocket()
+{
+  TSocket *s;
+  TMessage *mess;
+  
+  CP;
+  s = mon->Select(100);
+  if((long) s <= 0) {
+    CP;
+    LOG(DBG, "Got a timeout or an error reading socket");
+    return;
+  }
+  CP;
+
+  // Check if it is a new connection!
+  if(s == ssocket) {
+    CP;
+    TSocket *nsocket = ssocket->Accept();
+    //TInetAddress adr = nsocket->GetInetAddress();
+    mon->Add(nsocket);
+    return;
+  }
+  CP;
+
+  // No it is data...
+  int ret = s->Recv(mess);
+  CP;
+
+  if(ret == 0) {
+    CP;
+    LOG(DBG, "Disconnecting a client...");
+    mon->Remove(s);
+    delete s;
+    delete mess;
+    return;
+  }
+  CP;
+
+  // If it is an EvpMessage
+  if(strcmp(mess->GetClass()->GetName(),"EvpMessage") == 0) {
+    CP;
+    EvpMessage *msg = (EvpMessage *)mess->ReadObject(mess->GetClass());
+    CP;
+
+    if(strcmp(msg->getSource(), "readerThread") == 0) {   // From the daqReader!
+      CP;
+      handleNewEvent(msg);
+      CP;
+    }
+    else {                                // from a client!
+      CP;
+      handleEvpMessage(s, msg);
+      CP;
+    }
+    
+    delete mess;
+    delete msg;
+    return;
+  }
+  CP;
+  // Well it must be a JevpPlot from the client!
+  if (strcmp(mess->GetClass()->GetName(), "JevpPlot")==0) {
+    CP;
+    JevpPlot *plot = (JevpPlot *)mess->ReadObject(mess->GetClass());
+    
+    if(plot->refid != 0) {
+      saveReferencePlot(plot);
+    }
+    else {
+      LOG(ERR, "Got a JevpPlot from client, but doesn't seem to be a reference plot...");
+    }
+    
+    delete plot;
+    delete mess;
+    return;
+  }
+
+  CP;
+  LOG(ERR, "Got invalid message type: %s\n",mess->GetClass()->GetName());
+  delete mess;
+}  
+
+
+
+
+
 
 void JevpServer::parseArgs(int argc, char *argv[])
 {
@@ -208,7 +306,8 @@ void JevpServer::parseArgs(int argc, char *argv[])
     }
   }
 
-
+  JEVPSERVERport = myport;
+     
   if(!displays_fn) {
     displays_fn = (char *)"HistoDefs.txt";
   }    
@@ -226,6 +325,7 @@ int JevpServer::updateDisplayDefs()
   return 0;
 }
 
+daqReader *JEVPSERVERrdr;
 
 int JevpServer::init(int port, int argc, char *argv[]) {
 
@@ -238,6 +338,8 @@ int JevpServer::init(int port, int argc, char *argv[]) {
   // Create daq reader...
   LOG(DBG, "Reader filename is %s",daqfilename ? daqfilename : "none");
   rdr = new daqReader(daqfilename);
+  JEVPSERVERrdr = rdr;
+
   if(diska) rdr->setEvpDisk(diska);
 
   // daqreader resets it?
@@ -275,90 +377,61 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 
 
 // returns delay in milliseconds
-int JevpServer::handleEvent()
+void JevpServer::handleNewEvent(EvpMessage *m)
 {
-
-
-  JevpPlotSet *curr;
-  TListIter next(&builders);
-
-  CP;
-
-  // Get an event...
-  char *ret = rdr->get(0, EVP_TYPE_ANY);
-  if(ret == NULL) {
-    switch(rdr->status) {
-    case EVP_STAT_OK:
-      LOG(DBG, "EVP reader burped a bit...");
-      CP;
-      return 100;
-      
-    case EVP_STAT_EOR:
-      LOG(DBG, "End of the run!");
-      CP;
-      if(runStatus.running()) {
-	performStopRun();
-      }
-      CP;
-      return 1000;
-
-    case EVP_STAT_EVT:
-      LOG(ERR, "Problem reading event... skipping");
-      return 1000;
-
-    case EVP_STAT_CRIT:
-      LOG(CRIT, "Criticle problem reading event... exiting");
-      exit(0);
-
-    default:
-      LOG(ERR, "Not ok, eor,evt or crit???");
-      return 1000;      
-    }
-  }
-
-  CP;
-  if(rdr->status) {
-    LOG(ERR, "Bad status on read?  rdr->status=%d",rdr->status);
-    return 1000;
-  }
-  
-  if(rdr->run != (unsigned int)runStatus.run) {
+  if(strcmp(m->cmd,"stoprun") == 0) {
     CP;
-    LOG("JEFF", "Starting new run #%d  (%d)",rdr->run, runStatus.run);
-    performStartRun();
-    eventsThisRun = 0;
-  }
-
-  eventsThisRun++;
-  
-  // Now we have an event!
-  //
-  // fill histograms!
-  CP;
-  while((curr = (JevpPlotSet *)next())) {
-   
-    double throttle_time = .025;
-
-    if(throttleAlgos) {
-      if((curr->processingTime / (double)eventsThisRun) > throttle_time) {
-	LOG("JEFF", "Skipping builder for event %d: %s due to %d ms/event throttle (%lf secs/event : %d of %d so far)",
-	    rdr->seq, curr->getPlotSetName(), (int)(throttle_time * 1000), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
-	
-	continue;
-      }
+    if(runStatus.running()) {
+      performStopRun();
     }
+  }
+  else if(strcmp(m->cmd,"newevent") == 0) {
+    CP;
+    JevpPlotSet *curr;
+    TListIter next(&builders);
     
+    if(rdr->run != (unsigned int)runStatus.run) {
+      CP;
+      LOG("JEFF", "Starting new run #%d  (%d)",rdr->run, runStatus.run);
+      performStartRun();
+      eventsThisRun = 0;
+    }
+
+    eventsThisRun++;
+    
+    // Now we have an event!
+    //
+    // fill histograms!
     CP;
-    LOG(DBG, "Sending event #%d to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, curr->getPlotSetName(), curr->getAverageProcessingTime());
-
-    curr->_event(rdr);
-
+    while((curr = (JevpPlotSet *)next())) {
+      
+      double throttle_time = .025;
+      
+      if(throttleAlgos) {
+	if((curr->processingTime / (double)eventsThisRun) > throttle_time) {
+	  LOG("JEFF", "Skipping builder for event %d: %s due to %d ms/event throttle (%lf secs/event : %d of %d so far)",
+	      rdr->seq, curr->getPlotSetName(), (int)(throttle_time * 1000), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
+	  
+	  continue;
+	}
+      }
+      
+      CP;
+      LOG(DBG, "Sending event #%d to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, curr->getPlotSetName(), curr->getAverageProcessingTime());
+      
+      curr->_event(rdr);
+      
+      CP;
+    }
     CP;
   }
-  
-  CP;
-  return 0;
+  else {
+    LOG(ERR, "handleNewEvent got invalid command: %s",m->cmd);
+  }
 }
+
+
+
 
 void JevpServer::handleClient(int delay) {
   TMessage *mess;
@@ -449,11 +522,11 @@ void JevpServer::handleClient(int delay) {
 void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
 {
   CP;
-  if(strcmp(msg->cmd, "dump") == 0) {
+  if(strcmp(msg->getCmd(), "dump") == 0) {
     CP;
     dump();
   }
-  else if(strcmp(msg->cmd, "display_desc") == 0) {  // Display Descriptor
+  else if(strcmp(msg->getCmd(), "display_desc") == 0) {  // Display Descriptor
 
     LOG(DBG, "Got request for display %s", msg->args);
     int ret = displays->setDisplay(msg->args);
@@ -474,12 +547,12 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     mess.WriteObject(&m);
     s->Send(mess);
   }
-  else if(strcmp(msg->cmd, "GetStatus") == 0) {
+  else if(strcmp(msg->getCmd(), "GetStatus") == 0) {
     TMessage mess(kMESS_OBJECT);
     mess.WriteObject(&runStatus);
     s->Send(mess);
   }
-  else if(strcmp(msg->cmd, "ping") == 0) {    
+  else if(strcmp(msg->getCmd(), "ping") == 0) {    
     EvpMessage m;
     m.setSource((char *)"serv");
     m.setCmd((char *)"ping");
@@ -488,7 +561,7 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     CP;
     s->Send(mess);
   }
-  else if(strcmp(msg->cmd, "print") == 0) {
+  else if(strcmp(msg->getCmd(), "print") == 0) {
     char printer[100];
     //int tab;
     //int display;
@@ -502,22 +575,26 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     gSystem->Exec("/usr/bin/convert /tmp/jevp.pdf /tmp/jevp.ps");
     
   }
-  else if(strcmp(msg->cmd, "getplot") == 0) {
+  else if(strcmp(msg->getCmd(), "getplot") == 0) {
     CP;
+    RtsTimer_root clock;
+    clock.record_time();
     handleGetPlot(s,msg->args);
+    double t1 = clock.record_time();
+    LOG("JEFF", "Ethernet: handleGetPlot(%s) %lf",msg->args,t1);
   }
-  else if(strcmp(msg->cmd, "swaprefs") == 0) {
+  else if(strcmp(msg->getCmd(), "swaprefs") == 0) {
     CP;
     handleSwapRefs(msg->args);
   }
-  else if(strcmp(msg->cmd, "deleteplot") == 0) {
+  else if(strcmp(msg->getCmd(), "deleteplot") == 0) {
     CP;
     char str[256];
     int idx;
     sscanf(msg->args, "%s %d", str, &idx);
     deleteReferencePlot(str,idx);
   }
-  else if(strcmp(msg->cmd, "getServerTags") == 0) {
+  else if(strcmp(msg->getCmd(), "getServerTags") == 0) {
     CP;
     EvpMessage m;
     m.setSource((char *)"serv");
@@ -535,7 +612,7 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     mess.WriteObject(&m);
     s->Send(mess);
   }
-  else if(strcmp(msg->cmd, "monitor") == 0) {
+  else if(strcmp(msg->getCmd(), "monitor") == 0) {
     CP;
     EvpMessage m;
     m.setSource((char *)"serv");
@@ -550,7 +627,7 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
   }
   else {
     CP;
-    LOG(WARN,"Unknown command: %s\n",msg->cmd);
+    LOG(WARN,"Unknown command: %s\n",msg->getCmd());
   }
   CP;
 }
@@ -674,9 +751,9 @@ JevpPlot *JevpServer::getPlot(char *name) {
 
   while((curr = (JevpPlotSet *)next())) {
     
-    // char *ps_name = curr->getPlotSetName();
-    // int len = strlen(ps_name);
-    // if(strncmp(name,ps_name,len) != 0) continue;
+    char *ps_name = curr->getPlotSetName();
+    int len = strlen(ps_name);
+    if(strncmp(name,ps_name,len) != 0) continue;
 
 
     TListIter nextplot(&curr->plots);
@@ -1406,4 +1483,89 @@ void JevpServer::DrawCrossOfDeath(char *str)
 double JevpServer::liney(double x)
 {
   return 1.0 - (x+5.0)/25.0;
+}
+
+
+
+
+// Handle the reader get() in a separate thread in order to 
+// get true asychronous data.
+//
+// The problem is that rdr->get() takes a full .1 sec if there is no event
+// and this leads to significant delays when many plots are read...
+// each control command has a rdr->get() between it...
+
+void readerThreadSend(TSocket *socket, char *cmd)
+{
+  EvpMessage m;
+  m.setSource((char *)"readerThread");
+  m.setCmd(cmd);
+  
+  TMessage mess(kMESS_OBJECT);
+  mess.WriteObject(&m);
+  socket->Send(mess);
+}
+
+void readerThreadWait(TSocket *socket)
+{
+  TMessage *mess;
+  socket->Recv(mess);
+  delete mess;
+}
+
+void *JEVPSERVERreaderThread(void *)
+{
+  // First connect a socket to myself!
+
+  TSocket *socket = new TSocket("localhost.localdomain", JEVPSERVERport);
+  if(!socket) {
+    LOG(CRIT, "Can not connect to my own socket!");
+    exit(0);
+  }
+
+  // Now, the rule is that I attempt to get an event.   
+  // Once I have an event, then I send a message to the server
+  // via the socket.   I then wait for a response from the server before I 
+  // next ask the reader for an event!
+
+  for(;;) {
+    char *ret = JEVPSERVERrdr->get(0, EVP_TYPE_ANY);
+
+    // Obviously some problem, what is it!
+    if(ret == NULL) {
+      switch(JEVPSERVERrdr->status) {
+      case EVP_STAT_OK:
+	LOG(DBG, "EVP reader burped a bit...");
+	continue;
+      
+      case EVP_STAT_EOR:
+	LOG(DBG, "End of the run!");
+	readerThreadSend(socket, "stoprun");
+	readerThreadWait(socket);
+	continue;
+	
+      case EVP_STAT_EVT:
+	LOG(ERR, "Problem reading event... skipping");
+	continue;
+	
+      case EVP_STAT_CRIT:
+	LOG(CRIT, "Criticle problem reading event... exiting");
+	exit(0);
+	
+      default:
+	LOG(ERR, "Not ok, eor,evt or crit???");
+	continue;
+      }
+    }
+    
+    if(JEVPSERVERrdr->status) {
+      LOG(ERR, "Bad status on read?  rdr->status=%d",JEVPSERVERrdr->status);
+      continue;
+    }
+
+    readerThreadSend(socket, "newevent");
+    readerThreadWait(socket);
+  }
+  
+  return NULL;
 }

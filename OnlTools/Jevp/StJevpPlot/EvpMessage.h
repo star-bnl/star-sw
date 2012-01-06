@@ -13,6 +13,10 @@ class EvpMessage : public TObject {
   void setCmd(const char *cmd);
   void setArgs(const char *args);
 
+  const char *getSource() { return source ? source : ""; }
+  const char *getCmd() { return cmd ? cmd : ""; }
+  const char *getArgs() { return args ? args : ""; }
+
   EvpMessage();
   ~EvpMessage();
   
