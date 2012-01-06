@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.26 2012/01/06 17:48:18 sgliske Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.27 2012/01/06 17:56:07 sgliske Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -102,11 +102,11 @@ Int_t StFgtClusterMaker::Make()
      }
    }
    
-#ifdef EXTRA_LOGGING
+
    printf("End of fgt-clust-maker, print all strips & clusters:\n");
    
    printf("  fgtCollnumDisc=%d, tot strip=%d  totClust=%d\n",fgtCollectionPtr->getNumDiscs(),fgtCollectionPtr->getNumStrips()  , fgtCollectionPtr->getNumHits());
-  for(int iDisc=0; iDisc <(int)fgtCollectionPtr->getNumDiscs(); iDisc++) 
+  for(int iDisc=0; iDisc <(int)fgtCollectionPtr->getNumDiscs(); iDisc++) {
     printf("  content: iDisc=%d  # of : strips=%d  hits=%d\n" ,iDisc , fgtCollectionPtr->getNumStrips(iDisc)  , fgtCollectionPtr-> getNumHits( iDisc));
 
     // ..... print all strips ....
@@ -136,8 +136,7 @@ Int_t StFgtClusterMaker::Make()
     
     
   }
-#endif
-
+  
   return ierr;
 
 };
@@ -181,8 +180,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
-//   Revision 1.26  2012/01/06 17:48:18  sgliske
-//   StFgtClusterMaker/StFgtClusterMaker.cxx
+//   Revision 1.27  2012/01/06 17:56:07  sgliske
+//   oops--didn't intend to commit the last one.
+//   this commit undoes that.
 //
 //   Revision 1.25  2011/11/09 17:50:10  balewski
 //   more printout
