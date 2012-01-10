@@ -13,6 +13,8 @@
 #include <TH1I.h>
 #include <TH2F.h>
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "fgtBuilder.h"
 #include <RTS/include/rtsLog.h>
@@ -52,9 +54,11 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   //could run a loop...
   // Add root histograms to Plots
     int np = sizeof(contents) / sizeof(TH2 *);
+    char buffer[50];
     for(int gid=0;gid<np;gid++)
       {
-	contents.array[gid]=new TH2F((string("assembly")+itoa(gid)).c_str(),Gid2Label[gid].c_str(),1400,0,1400,0,4000);
+	sprintf(buffer,"array%d",gid);
+	contents.array[gid]=new TH2F(buffer,Gid2Label[gid].c_str(),1400,0,1400,0,4000);
       }
 
     /*  contents.q1=new TH2F("assembly1","Disc 1, Assembly 1",1400,0,1400,100,0,4000);
@@ -194,3 +198,6 @@ void fgtBuilder::main(int argc, char *argv[])
   cout <<"ending main" << endl;
 }
 
+
+const string fgtBuilder::Gid2Label[19]={"1AB","1BC","1CD","1DA","2AB","2BC","2DA","3AB","3BC","3DA","4AB","4BC","4DA","5AB","5BC","5DA","6AB","6BC","6DA"};
+const int fgtBuilder::Indx2Gid[19]={1,10,11,0,3,12,2,4,5,13,15,6,14,16,17,7,9,18,8};

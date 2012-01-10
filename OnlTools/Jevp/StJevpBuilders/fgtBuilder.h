@@ -7,7 +7,7 @@
 #include <TH2F.h>
 #include <TRandom.h>
 #include "DAQ_READER/daq_dta.h"
-
+#include <string>
 #include <math.h>
 
 class fgtBuilder : public JevpPlotSet {
@@ -34,9 +34,9 @@ public:
 
 
 
-  string Gid2Label[]={"1AB","1BC","1CD","1DA","2AB","2BC","2DA","3AB","3BC","3DA","4AB","4BC","4DA","5AB","5BC","5DA","6AB","6BC","6DA"};
+  static const string Gid2Label[19];
   //the gid encodes rdo etc. but since this is consecutive, we have to have another mapping
-  int Indx2Gid[]={1,10,11,0,3,12,2,4,5,13,15,6,14,16,17,7,9,18,8};
+  static const int Indx2Gid[19];
 
 
   //*** Histogram Declarations...
