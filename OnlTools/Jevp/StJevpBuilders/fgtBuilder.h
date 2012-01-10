@@ -32,6 +32,13 @@ public:
   int t_10min;
   int t_120min;
 
+
+
+  string Gid2Label[]={"1AB","1BC","1CD","1DA","2AB","2BC","2DA","3AB","3BC","3DA","4AB","4BC","4DA","5AB","5BC","5DA","6AB","6BC","6DA"};
+  //the gid encodes rdo etc. but since this is consecutive, we have to have another mapping
+  int Indx2Gid[]={1,10,11,0,3,12,2,4,5,13,15,6,14,16,17,7,9,18,8};
+
+
   //*** Histogram Declarations...
   //*** Use the union to be able to treat in bulk
   //*** As well as by name...
@@ -57,11 +64,6 @@ public:
       TH2* q17;
       TH2* q18;
       TH2* q19;
-      TH2* q20;
-      TH2* q21;
-      TH2* q22;
-      TH2* q23;
-      TH2* q24;
     };
   } contents;
   daq_dta *dd;

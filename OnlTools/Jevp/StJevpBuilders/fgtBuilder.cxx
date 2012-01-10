@@ -50,7 +50,14 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   
   // Initialization of histograms.
   //could run a loop...
-  contents.q1=new TH2F("assembly1","Disc 1, Assembly 1",1400,0,1400,100,0,4000);
+  // Add root histograms to Plots
+    int np = sizeof(contents) / sizeof(TH2 *);
+    for(int gid=0;gid<np;gid++)
+      {
+	contents.array[gid]=new TH2F((string("assembly")+itoa(gid)).c_str(),Gid2Label[gid].c_str(),1400,0,1400,0,4000);
+      }
+
+    /*  contents.q1=new TH2F("assembly1","Disc 1, Assembly 1",1400,0,1400,100,0,4000);
   contents.q2=new TH2F("assembly2","Disc 1, Assembly 2",1400,0,1400,100,0,4000);
   contents.q3=new TH2F("assembly3","Disc 1, Assembly 3",1400,0,1400,100,0,4000);
   contents.q4=new TH2F("assembly4","Disc 1, Assembly 4",1400,0,1400,100,0,4000);
@@ -73,24 +80,23 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   contents.q21=new TH2F("assembly21","Disc 6, Assembly 1",1400,0,1400,100,0,4000);
   contents.q22=new TH2F("assembly22","Disc 6, Assembly 2",1400,0,1400,100,0,4000);
   contents.q23=new TH2F("assembly23","Disc 6, Assembly 3",1400,0,1400,100,0,4000);
-  contents.q24=new TH2F("assembly24","Disc 6, Assembly 4",1400,0,1400,100,0,4000);
+  contents.q24=new TH2F("assembly24","Disc 6, Assembly 4",1400,0,1400,100,0,4000);*/
   ////
 
-  // Add root histograms to Plots
-    int np = sizeof(contents) / sizeof(TH2 *);
+
   JevpPlot *plots[np];
   cout <<" we have " << np <<endl;
   
   for(int i=0;i<np;i++)
   {
     contents.array[i]->SetOption("colz");
-    plots[i] = new JevpPlot(contents.array[i]);
+    plots[i] = new JevpPlot(contents.array[Indx2Gid[i]]);
   }
   
   // Add Plots to plot set...
   for(int i=0;i<np;i++) {
     LOG(DBG, "Adding plot %d",i);
-  addPlot(plots[i]);
+    addPlot(plots[i]);
   }
 }
   
@@ -123,6 +129,15 @@ void fgtBuilder::event(daqReader *rdr)
 	//the arm
 	//	dd->sec;// two arms per disc
 	//	int disc=dd->rdo*3+dd->sec/2;
+
+	//see ben's spreadsheet, first rdo has 10, second 9 assemblies attached
+	int gid=(dd->rdo-1)*10+dd->sec*2;
+	if(dd->pad>10)
+	  gid+=1;
+
+	if(gid>18)
+	  cout <<"gid: " << gid <<" to high "<<endl;
+
 	int quad=(dd->rdo-1)*12+dd->sec*2;
 	if(dd->pad>10)
 	  quad+=1;
