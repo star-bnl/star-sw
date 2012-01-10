@@ -759,8 +759,20 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   }
 
   // Compute the induced signals if requested.
-  if (useSignal) ComputeSignal(q);
-  if (useInducedCharge) ComputeInducedCharge(q);
+  if (useSignal) {
+    if (q == 2) {
+      ComputeSignal(1);
+    } else {
+      ComputeSignal(q);
+    }
+  }
+  if (useInducedCharge) {
+    if (q == 2) {
+      ComputeInducedCharge(1);
+    } else {
+      ComputeInducedCharge(1);
+    }
+  }
 
   // Plot the drift line if requested.
   if (usePlotting && nDrift > 0) {

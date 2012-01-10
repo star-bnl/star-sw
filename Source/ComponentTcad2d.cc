@@ -2083,9 +2083,11 @@ ComponentTcad2d::Cleanup() {
 bool 
 ComponentTcad2d::CheckRectangle(const double x, const double y, const int i) {
  
-  if (y < vertices[elements[i].vertex[0]].y) return false;
-  if (x > vertices[elements[i].vertex[3]].x) return false;
-  if (y > vertices[elements[i].vertex[1]].y) return false;
+  if (y < vertices[elements[i].vertex[0]].y ||
+      x > vertices[elements[i].vertex[3]].x || 
+      y > vertices[elements[i].vertex[1]].y) {
+    return false;
+  }
   
   // Map (x, y) to local variables (u, v) in [-1, 1].
   const double u = (x - 0.5 * (vertices[elements[i].vertex[0]].x + 

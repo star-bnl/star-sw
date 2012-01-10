@@ -62,7 +62,8 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetPadGridX(kTRUE);
   garfieldStyle->SetPadGridY(kTRUE);
 
-  const int font = 132;
+  // const int font = 132;
+  const int font = 42;
   garfieldStyle->SetTextFont(font);
   garfieldStyle->SetTitleStyle(0);
   garfieldStyle->SetTitleBorderSize(0);
