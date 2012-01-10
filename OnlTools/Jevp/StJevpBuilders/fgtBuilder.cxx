@@ -58,7 +58,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
     for(int gid=0;gid<np;gid++)
       {
 	sprintf(buffer,"array%d",gid);
-	contents.array[gid]=new TH2F(buffer,Gid2Label[gid].c_str(),1400,0,1400,0,4000);
+	contents.array[gid]=new TH2F(buffer,Gid2Label[gid].c_str(),1400,0,1400,100,0,4000);
       }
 
     /*  contents.q1=new TH2F("assembly1","Disc 1, Assembly 1",1400,0,1400,100,0,4000);
@@ -89,19 +89,21 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
 
 
   JevpPlot *plots[np];
-  cout <<" we have " << np <<endl;
+  //  cout <<" we have " << np <<endl;
   
   for(int i=0;i<np;i++)
   {
     contents.array[i]->SetOption("colz");
     plots[i] = new JevpPlot(contents.array[Indx2Gid[i]]);
+    //    plots[i] = new JevpPlot(contents.array[i]);
   }
-  
+  //  cout <<"adding plots... " <<endl;  
   // Add Plots to plot set...
   for(int i=0;i<np;i++) {
     LOG(DBG, "Adding plot %d",i);
     addPlot(plots[i]);
   }
+  //  cout <<" done " <<endl;
 }
   
 void fgtBuilder::startrun(daqReader *rdr) {
@@ -120,7 +122,7 @@ void fgtBuilder::startrun(daqReader *rdr) {
 void fgtBuilder::event(daqReader *rdr)
 {
   //  contents.h2_tmp->Fill(tRnd.Rndm(0));
-  if(!(evtCt %1000))
+    if(!(evtCt %1000))
     LOG(DBG, "Looking at evt %d",evtCt);
   daq_dta *dd=rdr->det("fgt")->get("adc");
   while(dd && dd->iterate()) {
@@ -153,7 +155,7 @@ void fgtBuilder::event(daqReader *rdr)
 	    //	      channel-=(2*128);
 	    channel=(dd->pad%12)*128+f[i].ch;
 	    //apvs go 0-9 then 12-...
-	    contents.array[quad]->Fill(channel,f[i].adc);
+	    contents.array[gid]->Fill(channel,f[i].adc);
 	  }
 	else
 	  cout <<"quad too large: " << quad <<endl;
@@ -199,5 +201,6 @@ void fgtBuilder::main(int argc, char *argv[])
 }
 
 
-const string fgtBuilder::Gid2Label[19]={"1AB","1BC","1CD","1DA","2AB","2BC","2DA","3AB","3BC","3DA","4AB","4BC","4DA","5AB","5BC","5DA","6AB","6BC","6DA"};
+//const string fgtBuilder::Gid2Label[19]={"1AB","1BC","1CD","1DA","2AB","2BC","2DA","3AB","3BC","3DA","4AB","4BC","4DA","5AB","5BC","5DA","6AB","6BC","6DA"};
+const string fgtBuilder::Gid2Label[19]={"1DA","1AB","2DA","2AB","3AB","3BC","4BC","5DA","6DA","6AB","1BC","1CD","2BC","3DA","4DA","4AB","5AB","5BC","6BC"};
 const int fgtBuilder::Indx2Gid[19]={1,10,11,0,3,12,2,4,5,13,15,6,14,16,17,7,9,18,8};
