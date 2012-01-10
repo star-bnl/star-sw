@@ -57,7 +57,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
     char buffer[50];
     for(int gid=0;gid<np;gid++)
       {
-	sprintf(buffer,"array%d",gid);
+	sprintf(buffer,"FGTassembly%d",gid);
 	contents.array[gid]=new TH2F(buffer,Gid2Label[gid].c_str(),1400,0,1400,100,0,4000);
       }
 
