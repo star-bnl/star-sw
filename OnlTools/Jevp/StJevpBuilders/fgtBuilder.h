@@ -66,8 +66,35 @@ public:
       TH2* q19;
     };
   } contents;
+
+  union {
+    TH1 *hArray[];
+    struct {
+      TH1* h1;
+      TH1* h2;
+      //other possible plots:
+      //hits over pedestal for each timebin, shows in time, collision condition etc.
+
+    };
+  } hContents;
+
+  static const int maxC;
+  static const int maxA;
+  static const int maxPedVal;
+  static const int maxRMSVal;
+  static const int minPedVal;
+  static const int minRMSVal;
+
+  int np;
+  int hNp;
+  JevpPlot** plots;
   daq_dta *dd;
   //*** End Histogram Declarations...
+  float meanVals[19*1400];
+  int aVals[19*1400];
+  int numVals[19*1400];
+  int rmsVals[19*1400];
+  bool isChannelBad[19*1400];
 
   ClassDef(fgtBuilder, 1);
 };
