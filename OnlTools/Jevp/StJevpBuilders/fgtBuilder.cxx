@@ -53,76 +53,74 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   // Initialization of histograms.
   //could run a loop...
   // Add root histograms to Plots
-    int np = sizeof(contents) / sizeof(TH2 *);
-    char buffer[50];
-    for(int gid=0;gid<np;gid++)
-      {
-	sprintf(buffer,"FGTassembly%d",gid);
-	contents.array[gid]=new TH2F(buffer,Gid2Label[gid].c_str(),1400,0,1400,100,0,4000);
-      }
-
-    /*  contents.q1=new TH2F("assembly1","Disc 1, Assembly 1",1400,0,1400,100,0,4000);
-  contents.q2=new TH2F("assembly2","Disc 1, Assembly 2",1400,0,1400,100,0,4000);
-  contents.q3=new TH2F("assembly3","Disc 1, Assembly 3",1400,0,1400,100,0,4000);
-  contents.q4=new TH2F("assembly4","Disc 1, Assembly 4",1400,0,1400,100,0,4000);
-  contents.q5=new TH2F("assembly5","Disc 2, Assembly 1",1400,0,1400,100,0,4000);
-  contents.q6=new TH2F("assembly6","Disc 2, Assembly 2",1400,0,1400,100,0,4000);
-  contents.q7=new TH2F("assembly7","Disc 2, Assembly 3",1400,0,1400,100,0,4000);
-  contents.q8=new TH2F("assembly8","Disc 2, Assembly 4",1400,0,1400,100,0,4000);
-  contents.q9=new TH2F("assembly9","Disc 3, Assembly 1",1400,0,1400,100,0,4000);
-  contents.q10=new TH2F("assembly10","Disc 3, Assembly 2",1400,0,1400,100,0,4000);
-  contents.q11=new TH2F("assembly11","Disc 3, Assembly 3",1400,0,1400,100,0,4000);
-  contents.q12=new TH2F("assembly12","Disc 3, Assembly 4",1400,0,1400,100,0,4000);
-  contents.q13=new TH2F("assembly13","Disc 4, Assembly 1",1400,0,1400,100,0,4000);
-  contents.q14=new TH2F("assembly14","Disc 4, Assembly 2",1400,0,1400,100,0,4000);
-  contents.q15=new TH2F("assembly15","Disc 4, Assembly 3",1400,0,1400,100,0,4000);
-  contents.q16=new TH2F("assembly16","Disc 4, Assembly 4",1400,0,1400,100,0,4000);
-  contents.q17=new TH2F("assembly17","Disc 5, Assembly 1",1400,0,1400,100,0,4000);
-  contents.q18=new TH2F("assembly18","Disc 5, Assembly 2",1400,0,1400,100,0,4000);
-  contents.q19=new TH2F("assembly19","Disc 5, Assembly 3",1400,0,1400,100,0,4000);
-  contents.q20=new TH2F("assembly20","Disc 5, Assembly 4",1400,0,1400,100,0,4000);
-  contents.q21=new TH2F("assembly21","Disc 6, Assembly 1",1400,0,1400,100,0,4000);
-  contents.q22=new TH2F("assembly22","Disc 6, Assembly 2",1400,0,1400,100,0,4000);
-  contents.q23=new TH2F("assembly23","Disc 6, Assembly 3",1400,0,1400,100,0,4000);
-  contents.q24=new TH2F("assembly24","Disc 6, Assembly 4",1400,0,1400,100,0,4000);*/
-  ////
-
-
-  JevpPlot *plots[np];
-  //  cout <<" we have " << np <<endl;
-  
-  for(int i=0;i<np;i++)
-  {
-    contents.array[i]->SetOption("colz");
-    plots[i] = new JevpPlot(contents.array[Indx2Gid[i]]);
-    //    plots[i] = new JevpPlot(contents.array[i]);
+  for(int i=0;i<maxC*maxA;i++)
+    {
+      meanVals[i]=0;
+      aVals[i]=0;
+      rmsVals[i]=0;
+      numVals[i]=0;
+      isChannelBad[i]=false;
   }
+
+  //////////////////////////////////add bad channels here///////////////////////
+  ///////////////////isChannelBad[numAssembly*maxC+channel]=true;
+
+
+
+
+
+
+  ////////////////////////////////////
+  np = sizeof(contents) / sizeof(TH2 *);
+  hNp=sizeof(hContents)/sizeof(TH1 *);
+  char buffer[50];
+  for(int gid=0;gid<np;gid++)
+    {
+      sprintf(buffer,"FGTassembly%d",gid);
+      contents.array[gid]=new TH2F(buffer,Gid2Label[gid].c_str(),maxC,0,maxC,100,0,4000);
+    }
+
+  hContents.h1=new TH1F("MeanPeds","Mean Pedestal Values",500,minPedVal,maxPedVal);
+  hContents.h2=new TH1F("MeanStdDev","Mean StdDev",500,0,maxRMSVal);
+
+  
+  //  JevpPlot *plots[np+hNp];
+  plots=new JevpPlot*[np+hNp];
+  for(int i=0;i<np;i++)
+    {
+      contents.array[i]->SetOption("colz");
+      plots[i] = new JevpPlot(contents.array[Indx2Gid[i]]);
+      //    plots[i] = new JevpPlot(contents.array[i]);
+    }
+  plots[np]=new JevpPlot(hContents.h1);
+  plots[np+1]=new JevpPlot(hContents.h2);
+
   //  cout <<"adding plots... " <<endl;  
   // Add Plots to plot set...
-  for(int i=0;i<np;i++) {
+  for(int i=0;i<np+hNp;i++) {
     LOG(DBG, "Adding plot %d",i);
     addPlot(plots[i]);
   }
+
   //  cout <<" done " <<endl;
 }
-  
+
 void fgtBuilder::startrun(daqReader *rdr) {
   LOG(NOTE, "fgtBuilder starting run #%d",rdr->run);
   resetAllPlots();
-
+  
   t_2min = time(NULL);
   t_10min = time(NULL);
   t_120min = time(NULL);
-
-
 }
 
 #define safelog(x) ((x > 0) ? log10(x) : 0)
 
 void fgtBuilder::event(daqReader *rdr)
 {
+  char buffer[200];
   //  contents.h2_tmp->Fill(tRnd.Rndm(0));
-    if(!(evtCt %1000))
+  if(!(evtCt %1000))
     LOG(DBG, "Looking at evt %d",evtCt);
   daq_dta *dd=rdr->det("fgt")->get("adc");
   while(dd && dd->iterate()) {
@@ -135,30 +133,31 @@ void fgtBuilder::event(daqReader *rdr)
 	//the arm
 	//	dd->sec;// two arms per disc
 	//	int disc=dd->rdo*3+dd->sec/2;
-
+	
 	//see ben's spreadsheet, first rdo has 10, second 9 assemblies attached
 	int gid=(dd->rdo-1)*10+dd->sec*2;
 	if(dd->pad>10)
 	  gid+=1;
-
 	if(gid>18)
 	  cout <<"gid: " << gid <<" to high "<<endl;
-
 	int quad=(dd->rdo-1)*12+dd->sec*2;
 	if(dd->pad>10)
 	  quad+=1;
 	int channel;
-	if(quad<24)
+	if(gid<20)
 	  {
-	    //	    channel=dd->pad*128+f[i].ch;
-	    //	    if(channel>1280)
-	    //	      channel-=(2*128);
 	    channel=(dd->pad%12)*128+f[i].ch;
+	    if(isChannelBad[gid*maxC+channel])
+	      continue;
 	    //apvs go 0-9 then 12-...
 	    contents.array[gid]->Fill(channel,f[i].adc);
+	    rmsVals[gid*maxC+channel]+=(meanVals[gid*maxC+channel]-f[i].adc)*(meanVals[gid*maxC+channel]-f[i].adc);
+	    aVals[gid*maxC+channel]+=f[i].adc;
+	    numVals[gid*maxC+channel]++;
 	  }
 	else
 	  cout <<"quad too large: " << quad <<endl;
+
 	//	cout <<" filling with : " << dd->pad*128+f[i].ch <<" and " << f[i].adc <<endl;
 	/*if(dd->pad <= APVEnd)
 	  {
@@ -171,18 +170,46 @@ void fgtBuilder::event(daqReader *rdr)
       }
   }
   evtCt++;
-
-
+  
+  
   // Fill Histograms...
   //  int tpc_size = rdr->getDetectorSize("tpx");
   //  contents.h2_tpc->Fill(safelog(tpc_size));
   
   // Reset rolling histos if necessary..
-  //  int tm = time(NULL);
-  //  if(tm > t_2min + 120) {
-  //    t_2min = tm;
-  //    contents.h155_time_size_2min->Reset();
-  //  }
+    int tm = time(NULL);
+    if((tm > t_10min + 600) || (!(evtCt%5000))) {
+      t_10min = tm;
+      hContents.h1->Reset();
+      hContents.h2->Reset();
+      int numBad=0;
+      for(int i=0;i<maxC*maxA;i++)
+	{
+	  bool isBad=false;
+	  if(aVals[i]>0 && numVals[i] > 0)
+	    {
+	      hContents.h1->Fill(aVals[i]/numVals[i]);
+	      meanVals[i]=aVals[i]/numVals[i];
+	      if(meanVals[i]<250 || meanVals[i]>maxPedVal)
+		isBad=true;
+	    }
+	  if(numVals[i]>1)
+	    {
+	      //cout <<"numVals: " << numVals[i] <<" rms val: " << rmsVals[i] << " filling with : " << sqrt(rmsVals[i]/(numVals[i]-1)) <<endl;
+	      double rms=sqrt(rmsVals[i]/(numVals[i]-1));
+	      hContents.h2->Fill(rms);
+	      if(rms<5 || maxRMSVal)
+		isBad=true;
+	    }
+	  aVals[i]=0;
+	  numVals[i]=0;
+	  rmsVals[i]=0;
+	  if(isBad)
+	    numBad++;
+	}
+      sprintf(buffer,"You seem to have %d bad channels that are not masked", numBad);
+      plots[np]->setRefComment(buffer);
+    }
 
   //  contents.h155_time_size_2min->Fill(tm-t_2min, safelog(sz));
   // End Fill Histograms...
@@ -204,3 +231,9 @@ void fgtBuilder::main(int argc, char *argv[])
 //const string fgtBuilder::Gid2Label[19]={"1AB","1BC","1CD","1DA","2AB","2BC","2DA","3AB","3BC","3DA","4AB","4BC","4DA","5AB","5BC","5DA","6AB","6BC","6DA"};
 const string fgtBuilder::Gid2Label[19]={"1DA","1AB","2DA","2AB","3AB","3BC","4BC","5DA","6DA","6AB","1BC","1CD","2BC","3DA","4DA","4AB","5AB","5BC","6BC"};
 const int fgtBuilder::Indx2Gid[19]={1,10,11,0,3,12,2,4,5,13,15,6,14,16,17,7,9,18,8};
+const int fgtBuilder::maxA=19;
+const int fgtBuilder::maxC=1400;
+const int fgtBuilder::maxPedVal=1500;
+const int fgtBuilder::maxRMSVal=100;
+const int fgtBuilder::minPedVal=100;
+const int fgtBuilder::minRMSVal=0;
