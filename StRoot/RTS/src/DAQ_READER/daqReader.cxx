@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.45 2011/12/13 21:34:02 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.46 2012/01/12 16:48:10 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -366,7 +366,8 @@ char *daqReader::get(int num, int type)
       if(input_type == dir) {
 	LOG(NOTE,"No File, but didn't see token 0 - stopping...",event_number) ;
 	status = EVP_STAT_EOR ;
-	event_number = 1;
+	event_number--;
+	//event_number = 1;
       }
       return NULL;
     }
@@ -952,7 +953,7 @@ int daqReader::openEventFile()
 
   desc = open64(file_name,O_RDONLY,0666) ;
   if(desc < 0) {	
-    LOG(ERR,"Error opening file %s [%s] - skipping...",file_name,strerror(errno),0,0,0) ;
+    LOG(NOTE,"Error opening file %s [%s] - skipping...",file_name,strerror(errno),0,0,0) ;
     status = EVP_STAT_EVT ;
     return -1; 
   }
@@ -978,7 +979,9 @@ int daqReader::getNextEventFilename(int num, int type)
   if((event_number != 1) && (token == 0)) {	// we read at least one event and it was token==0 thus this is it...
     LOG(DBG,"Previous event (%d) was Token 0 in directory - stopping...",event_number,0,0,0,0) ;
     status = EVP_STAT_EOR ;
-    event_number = 1;
+    if(input_type == live) {
+      event_number = 1;
+    }
     return -1;
   }
 
@@ -1209,7 +1212,7 @@ int daqReader::getNextEventFilenameFromDir(int eventNum)
   if(eventNum==0) eventNum = event_number;
   sprintf(file_name,"%s/%d",fname,eventNum) ;
   
- LOG(DBG, "Getting next event from dir: event_number=%s",file_name);
+  LOG(DBG, "Getting next event from dir: event_number=%s",file_name);
 
   event_number = eventNum ;
   return STAT_OK;
