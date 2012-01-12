@@ -103,6 +103,13 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
     addPlot(plots[i]);
   }
 
+
+  errorMsg=new JLatex(.25,.12,"No Error Message");
+  errorMsg->SetTextSize(0.035);
+  errorMsg->SetTextAlign(13);
+  errorMsg->SetTextAngle(90);
+  plots[np]->addElement(errorMsg);
+
   //  cout <<" done " <<endl;
 }
 
@@ -178,48 +185,37 @@ void fgtBuilder::event(daqReader *rdr)
   //  contents.h2_tpc->Fill(safelog(tpc_size));
   
   // Reset rolling histos if necessary..
-    int tm = time(NULL);
-    if((tm > t_10min + 600) || (!(evtCt%5000))) {
-      t_10min = tm;
-      hContents.h1->Reset();
-      hContents.h2->Reset();
-      int numBad=0;
-      for(int i=0;i<maxC*maxA;i++)
-	{
-	  bool isBad=false;
-	  if(aVals[i]>0 && numVals[i] > 0)
-	    {
-	      hContents.h1->Fill(aVals[i]/numVals[i]);
-	      meanVals[i]=aVals[i]/numVals[i];
-	      if(meanVals[i]<250 || meanVals[i]>maxPedVal)
-		isBad=true;
-	    }
-	  if(numVals[i]>1)
-	    {
-	      //cout <<"numVals: " << numVals[i] <<" rms val: " << rmsVals[i] << " filling with : " << sqrt(rmsVals[i]/(numVals[i]-1)) <<endl;
-	      double rms=sqrt(rmsVals[i]/(numVals[i]-1));
-	      hContents.h2->Fill(rms);
-	      if(rms<5 || maxRMSVal)
-		isBad=true;
-	    }
-	  aVals[i]=0;
-	  numVals[i]=0;
-	  rmsVals[i]=0;
-	  if(isBad)
-	    numBad++;
-	}
-      sprintf(buffer,"You seem to have %d bad channels that are not masked", numBad);
-      if(errorMsg!=0)
-	{
-	  plots[np]->removeElement(errorMsg);
-	  delete errorMsg;
-	}
-      errorMsg=new JLatex(.25,.12,buffer);
-      errorMsg.SetText Size(0.035);
-      errorMsg.SetTextAlign(13);
-      errorMsg.SetTextAngle(90);
-      plots[np]->addElement(errorMsg);
+  int tm = time(NULL);
+  if((tm > t_10min + 600) || (!(evtCt%5000))) {
+    t_10min = tm;
+    hContents.h1->Reset();
+    hContents.h2->Reset();
+    int numBad=0;
+    for(int i=0;i<maxC*maxA;i++) {
+      bool isBad=false;
+      if(aVals[i]>0 && numVals[i] > 0) {
+	hContents.h1->Fill(aVals[i]/numVals[i]);
+	meanVals[i]=aVals[i]/numVals[i];
+	if(meanVals[i]<250 || meanVals[i]>maxPedVal)
+	  isBad=true;
+      }
+      if(numVals[i]>1) {
+	//cout <<"numVals: " << numVals[i] <<" rms val: " << rmsVals[i] << " filling with : " << sqrt(rmsVals[i]/(numVals[i]-1)) <<endl;
+	double rms=sqrt(rmsVals[i]/(numVals[i]-1));
+	hContents.h2->Fill(rms);
+	if(rms<5 || maxRMSVal)
+	  isBad=true;
+      }
+      aVals[i]=0;
+      numVals[i]=0;
+      rmsVals[i]=0;
+      if(isBad)
+	numBad++;
     }
+
+    sprintf(buffer,"You seem to have %d bad channels that are not masked", numBad);  
+    errorMsg->SetText(buffer);    
+  }
 
   //  contents.h155_time_size_2min->Fill(tm-t_2min, safelog(sz));
   // End Fill Histograms...

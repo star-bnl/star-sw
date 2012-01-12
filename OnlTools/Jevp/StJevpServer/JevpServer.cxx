@@ -258,6 +258,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
     else if (strcmp(argv[i], "-nothrottle") == 0) {
       throttleAlgos = 0;
     }
+    else if (strcmp(argv[i], "-nopdf")==0) {
+      pdfdir = NULL;
+    }
     else if (strcmp(argv[i], "-nodb")==0) {
       nodb = 1;
     }
@@ -678,6 +681,9 @@ void JevpServer::performStopRun()
 
 
   // Write out the pdfs for all displays...
+  displays->setServerTags(serverTags ? serverTags : "");
+  displays->ignoreServerTags = 0;
+
   for(int i=0;i<displays->nDisplays();i++) {
     LOG("JEFF","Writing pdf for display %d, run %d",i,runStatus.run);
     CP;
@@ -993,6 +999,8 @@ void JevpServer::handleSwapRefs(char *name)
 
 void JevpServer::writeRunPdf(int display, int run)
 {
+  if(pdfdir == NULL) return;
+
   int ret = displays->setDisplay(display);
   if(ret < 0) {
     LOG(ERR, "Can't set display to %d",display);
@@ -1002,9 +1010,9 @@ void JevpServer::writeRunPdf(int display, int run)
   
   char filename[256];
   sprintf(filename, "%s/%s_%d.pdf",pdfdir, displays->displayRoot->name, run);
-  
+  CP;
   writePdf(filename, 1);
-
+  CP;
   // Save it in the database...
   if(nodb != 1) {
     LOG(DBG, "Writing PDF file: %s",filename);
@@ -1027,6 +1035,8 @@ void JevpServer::writeRunPdf(int display, int run)
 
 void JevpServer::writePdf(char *filename, int combo_index)
 {
+  if(pdfdir == NULL) return;
+
   LOG("JEFF", "Writing pdf: %s index=%d",filename,combo_index);
   DisplayNode *root = displays->getTab(combo_index);
 
@@ -1039,29 +1049,49 @@ void JevpServer::writePdf(char *filename, int combo_index)
   //   char filename[256];
   //   sprintf(filename, "%s/%s_%d.pdf", pdfdir, displays->displayRoot->name, run);
 
+  LOG("JEFF", "writeNodePdf root: %s",filename);
+
   PdfIndex index;
   writeNodePdf(root, &index, NULL, filename, 1, 0);
   
+  LOG("JEFF", "write endfilename");
+
   // Now a summary....
   char endfilename[256];
   strcpy(endfilename, filename);
   strcat(endfilename, ")");
   TCanvas summary("c2");
   summary.Print(endfilename, "pdf,Portrait");
-  
+
+  CP;
   // Index the file...
   char indexedfilename[256];
   strcpy(indexedfilename, filename);
   // strcat(indexedfilename, ".idx");
   index.CreateIndexedFile(filename, indexedfilename);
+
+  CP;
 }
 
 int JevpServer::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page, int nosibs)
 {
-  
-  LOG(DBG, "writeNodePdf:  %s page=%d",node->name,page);
+  LOG("JEFF", "node = 0x%x", node);
+  LOG("JEFF", "writeNodePdf:  %s page=%d",node->name,page);
+
+  LOG("JEFF", "Checking node %s against server tags %s", node->name, serverTags);
 
   int npages = 0;
+
+  if(!node->matchTags(serverTags)) {
+    LOG("JEFF", "node %s does not match tags %s", node->name, serverTags);
+
+    // But, handle siblings!   
+    if(node->next && !nosibs) {
+      npages += writeNodePdf(node->next, index, prevIndexEntry, filename, page, 0);
+    }
+    return npages;
+  }
+
   if(node->leaf) {   // We are writing histograms...
     writeHistogramLeavesPdf(node, index, prevIndexEntry, filename, page);
     return 1;
