@@ -53,6 +53,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   // Initialization of histograms.
   //could run a loop...
   // Add root histograms to Plots
+  errorMsg=0;
   for(int i=0;i<maxC*maxA;i++)
     {
       meanVals[i]=0;
@@ -208,7 +209,16 @@ void fgtBuilder::event(daqReader *rdr)
 	    numBad++;
 	}
       sprintf(buffer,"You seem to have %d bad channels that are not masked", numBad);
-      plots[np]->setRefComment(buffer);
+      if(errorMsg!=0)
+	{
+	  plots[np]->removeElement(errorMsg);
+	  delete errorMsg;
+	}
+      errorMsg=new JLatex(.25,.12,buffer);
+      errorMsg.SetText Size(0.035);
+      errorMsg.SetTextAlign(13);
+      errorMsg.SetTextAngle(90);
+      plots[np]->addElement(errorMsg);
     }
 
   //  contents.h155_time_size_2min->Fill(tm-t_2min, safelog(sz));

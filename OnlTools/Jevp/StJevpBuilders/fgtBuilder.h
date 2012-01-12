@@ -95,6 +95,7 @@ public:
   int numVals[19*1400];
   int rmsVals[19*1400];
   bool isChannelBad[19*1400];
+  JLatex* errorMsg;
 
   ClassDef(fgtBuilder, 1);
 };
