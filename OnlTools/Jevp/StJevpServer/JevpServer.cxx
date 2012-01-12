@@ -189,6 +189,14 @@ void JevpServer::readSocket()
     if(strcmp(msg->getSource(), "readerThread") == 0) {   // From the daqReader!
       CP;
       handleNewEvent(msg);
+      
+      EvpMessage m;
+      m.setSource((char *)"serverThread");
+      m.setCmd((char *)"release");
+  
+      TMessage mess(kMESS_OBJECT);
+      mess.WriteObject(&m);
+      s->Send(mess);
       CP;
     }
     else {                                // from a client!
@@ -380,12 +388,14 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 void JevpServer::handleNewEvent(EvpMessage *m)
 {
   if(strcmp(m->cmd,"stoprun") == 0) {
+    LOG("JEFF", "SERVThread: Got stoprun from reader");
     CP;
     if(runStatus.running()) {
       performStopRun();
     }
   }
   else if(strcmp(m->cmd,"newevent") == 0) {
+    LOG("JEFF", "SERVThread: Got newevent");
     CP;
     JevpPlotSet *curr;
     TListIter next(&builders);
@@ -417,7 +427,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
       }
       
       CP;
-      LOG(DBG, "Sending event #%d to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, curr->getPlotSetName(), curr->getAverageProcessingTime());
+      LOG("JEFF", "Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
       
       curr->_event(rdr);
       
@@ -428,6 +438,9 @@ void JevpServer::handleNewEvent(EvpMessage *m)
   else {
     LOG(ERR, "handleNewEvent got invalid command: %s",m->cmd);
   }
+
+
+  
 }
 
 
@@ -581,7 +594,9 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     clock.record_time();
     handleGetPlot(s,msg->args);
     double t1 = clock.record_time();
-    LOG("JEFF", "Ethernet: handleGetPlot(%s) %lf",msg->args,t1);
+    if(t1 > .05) {
+      LOG("JEFF", "Timing: handleGetPlot(%s) time=%lf",msg->args,t1);
+    }
   }
   else if(strcmp(msg->getCmd(), "swaprefs") == 0) {
     CP;
@@ -600,11 +615,11 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     m.setSource((char *)"serv");
     m.setCmd((char *)"getServerTags");
     if(serverTags) {
-      LOG("JEFF", "server tags are: %s",serverTags);
+      LOG(DBG, "server tags are: %s",serverTags);
       m.setArgs(serverTags);
     }
     else {
-      LOG("JEFF", "No server tags?");
+      LOG(DBG, "No server tags?");
       m.setArgs("");
     }
 
@@ -674,7 +689,7 @@ void JevpServer::performStopRun()
   char fn[256];
   sprintf(fn, "%s/%s", basedir, displays_fn);
 
-  LOG("JEFF", "fn=%s",fn);
+  LOG(DBG, "fn=%s",fn);
   CP;
 
   // Add any new plots to the pallet...
@@ -689,7 +704,7 @@ void JevpServer::performStopRun()
     JevpPlot *currplot;
     TListIter nextplot(&curr->plots);
     while((currplot = (JevpPlot *)nextplot())) { 
-      LOG("JEFF", "                    : plot = %s",currplot->GetPlotName());
+      LOG(DBG, "                    : plot = %s",currplot->GetPlotName());
       addToPallete(currplot);
     }
   }
@@ -711,6 +726,7 @@ void JevpServer::performStopRun()
  
   if(die) {
     LOG("JEFF", "die is set, so now exit");
+    CP;
     exit(0);
   }
 
@@ -772,7 +788,7 @@ JevpPlot *JevpServer::getPlot(char *name) {
  done:
 
   double t1 = clock.record_time();
-  LOG("JEFF", "Ethernet: getPlot(%s) %lf nsearched=%d",name,t1,nexamined);
+  LOG(DBG, "Ethernet: getPlot(%s) %lf nsearched=%d",name,t1,nexamined);
 
   return currplot;
 }
@@ -780,6 +796,10 @@ JevpPlot *JevpServer::getPlot(char *name) {
 
 void JevpServer::handleGetPlot(TSocket *s, char *argstring) 
 {
+  RtsTimer_root clock;
+  double t1=0,t2=0,t3=0,t4=0;
+  clock.record_time();
+
   JevpPlot *plot=NULL;
   char refidstr[20];
   char runidstr[20];
@@ -792,6 +812,8 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
   }
  
   LOG(DBG,"Plotname is %s\n",plotname);
+
+  t1 = clock.record_time();
 
   if(getParamFromString(refidstr, argstring, (char *)"refid")) {
     char fn[256];
@@ -844,6 +866,7 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
     }
   }
 
+  t2 = clock.record_time();
     
   if(!plot) {
     char tmp[100];
@@ -856,13 +879,21 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
     mess.WriteObject(&m);
     
     int ret = s->Send(mess);
+    t3=clock.record_time();
     LOG(DBG, "sent (errmess) %d bytes",ret);
   } else {
+    clock.record_time();
     TMessage mess(kMESS_OBJECT);
+    t1=clock.record_time();
     mess.WriteObject(plot);
+    t2=clock.record_time();
     int ret = s->Send(mess);
+    t4=clock.record_time();
     LOG(DBG, "Sent (plot) %d bytes",ret);
   }
+
+  LOG(DBG, "getplot %lf %lf %lf %lf",t1,t2,t3,t4);
+
 }
 
 JevpPlot *JevpServer::getJevpSummaryPlot()
@@ -1238,7 +1269,7 @@ void JevpServer::deleteReferencePlot(char *name, int refid) {
 
 void JevpServer::saveReferencePlot(JevpPlot *plot) {
 
-  LOG("JEFF","save refplot");
+  LOG(DBG,"save refplot");
 
   char plotname[256];
 
@@ -1247,12 +1278,12 @@ void JevpServer::saveReferencePlot(JevpPlot *plot) {
   }
 
 
-  LOG("JEFF", "refplot %s %d",plot->GetPlotName(), plot->refid);
+  LOG(DBG, "refplot %s %d",plot->GetPlotName(), plot->refid);
   
   
   sprintf(plotname, "%s/REF.%s.%d.root",refplotdir,plot->GetPlotName(), plot->refid);
 
-  LOG("JEFF", "plotname = %s", plotname);
+  LOG(DBG, "plotname = %s", plotname);
 
   // Now actually save plot to the file plotname...
   TFile f(plotname, "new");
@@ -1288,7 +1319,7 @@ void JevpServer::addServerTag(char *tag)
 // tags delimeted by "|"
 void JevpServer::addServerTags(char *tags)
 {
-  LOG("JEFF", "Adding tag: %s",tags);
+  LOG(DBG, "Adding tag: %s",tags);
 
   char *tmp = (char *)malloc(sizeof(tags)+1);
   strcpy(tmp, tags);
@@ -1305,7 +1336,7 @@ void JevpServer::addServerTags(char *tags)
     t = strtok(NULL, "|");
   }
   
-  LOG("JEFF", "server tags are: %s",serverTags);
+  LOG(DBG, "server tags are: %s",serverTags);
   free(tmp);
 }
 
@@ -1539,7 +1570,7 @@ void *JEVPSERVERreaderThread(void *)
 	continue;
       
       case EVP_STAT_EOR:
-	LOG(DBG, "End of the run!");
+	LOG("JEFF", "RDRThread: End of the run!");
 	readerThreadSend(socket, "stoprun");
 	readerThreadWait(socket);
 	continue;
@@ -1549,7 +1580,7 @@ void *JEVPSERVERreaderThread(void *)
 	continue;
 	
       case EVP_STAT_CRIT:
-	LOG(CRIT, "Criticle problem reading event... exiting");
+	LOG(CRIT, "Critical problem reading event... exiting");
 	exit(0);
 	
       default:
@@ -1563,8 +1594,11 @@ void *JEVPSERVERreaderThread(void *)
       continue;
     }
 
+    LOG("JEFF", "RDRThread: Sending newevent to JevpServer: #%d run %d",JEVPSERVERrdr->event_number,JEVPSERVERrdr->run);
     readerThreadSend(socket, "newevent");
+    LOG("JEFF", "RDRThread: Waiting for JevpServer");
     readerThreadWait(socket);
+    LOG("JEFF", "RDRThread: Trying to read a new event...");
   }
   
   return NULL;
