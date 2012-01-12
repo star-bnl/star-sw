@@ -775,6 +775,8 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
 
     LOG(DBG,"idx(%d @ %d)=%d   next=%d  (%s)\n",combo_index,depth,idx,next_idx,node ? node->name : "null");
     
+    LOG(DBG, "ignore=%d match=%d %s",ignoreServerTags, node->matchTags(serverTags), serverTags);
+
     while(node && !(ignoreServerTags || node->matchTags(serverTags))) {
       node = node->next;
     }
@@ -814,33 +816,28 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
 
 int DisplayNode::matchTags(char *tags)
 {
-  
-  const char *val = _getProperty("requireTag");
-
-  LOG(DBG,"In match builders: node %s val = %s", name, val);
-
-  if(!val) return 1;
   if(!tags) return 0;
 
-  LOG("JEFF","require %s in string of available dets: %s",val, tags);
+  const char *val = _getProperty("requireTag");
+  if(!val) return 1;
 
   static char requiredTags[256];
   static char req[32];
-
+  
   strcpy(requiredTags, val);
   char *x = strtok(requiredTags, ",");
 
   while(x) {
     sprintf(req, "|%s|", x);
     if(!strstr(tags, req)) {
-      LOG("JEFF", "Match builders return false: didn't find %s in %s",req,tags);
+      LOG(DBG, "Match builders return false: didn't find %s in %s",req,tags);
       return 0;
     }
 
     x = strtok(NULL, ",");
   }
   
-  LOG("JEFF", "Match builders return true: found %s in %s",val, tags);
+  LOG(DBG, "Match builders return true: found %s in %s",val, tags);
   return 1;
 }
 

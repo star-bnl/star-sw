@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <TROOT.h>
+//#include <TROOT.h>
 #include <TStyle.h>
 #include <TH1.h>
 #include <TH2.h>
