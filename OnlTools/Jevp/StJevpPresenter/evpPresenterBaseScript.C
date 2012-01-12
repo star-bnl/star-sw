@@ -1,3 +1,4 @@
+#include <string.h>
 
 void evpPresenterBaseScript(char *args)
 {
@@ -24,4 +25,7 @@ void evpPresenterBaseScript(char *args)
     gSystem->Load("Jevp");    
   }
   EvpMain::main(args);
+
+  printf("Run application...\n");
+  // gApplication->Run();
 }

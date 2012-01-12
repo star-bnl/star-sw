@@ -104,18 +104,14 @@ int EvpMain::_main(int argc, char **argv )
   CP;
   JevpGui *gui = new JevpGui();
   CP;
-  JevpGui *logic = gui;
-  CP;
-  gui->jl_JevpLogic();
-  CP;
-  gui->gui_JevpGui(logic);
-  CP;
-  gui->show();
-  CP;
-  //PresenterConnect *con = new PresenterConnect(gui, logic);
-  //new 
-  gui->pc_PresenterConnect(gui, logic);
-  CP;
+  gui->init();
+
+
+  //gui->jl_JevpLogic();
+  //gui->gui_JevpGui(logic);
+  //gui->show();
+  //gui->pc_PresenterConnect(gui, logic);
+  
   // This issues an update...to start the update loop...
   QTimer::singleShot (100,gui,SLOT(UpdatePlots()));
 
@@ -151,6 +147,8 @@ int EvpMain::parseArgs(int argc, char *argv[])
       i++;
       displayFile = 1;
       display = argv[i];
+    }
+    else if (memcmp(argv[i], "-loop", 5) == 0) {
     }
     else {
       printf("%s arguments\n\t-noserver\n\t-server servername\n\t-port port\n\tdisplay <display>\n\t-localdisplay <display>",argv[0]);

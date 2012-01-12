@@ -30,6 +30,7 @@
 #include "Jevp/StJevpPlot/EvpMessage.h"
 #include "Jevp/StJevpServer/DisplayDefs.h"
 
+
 #  include <q3intdict.h> 
 #  include <q3mainwindow.h>
 #  include <Q3Frame>
@@ -94,7 +95,7 @@ public:
     TObject *o;
 
     while((o = (TObject *)next())) {
-      LOG("JEFF", "Deleting an object... %s can %d must %d",o->GetName(),o->TestBit(kCanDelete),o->TestBit(kMustCleanup));
+      LOG(DBG, "Deleting an object... %s can %d must %d",o->GetName(),o->TestBit(kCanDelete),o->TestBit(kMustCleanup));
       delete o;
     }
 
@@ -135,8 +136,6 @@ private:
     int mWidth;
     int mHight;
     char mPsName[1024];
-
-    JevpGui *logic;
 
     char *serverTags;
 
@@ -212,9 +211,9 @@ private:
     
     Int_t   fGuiRefreshRate; // msec.
 
-    void deleteTabs(QTabWidget *tab);
+    void deleteTabs(QTabWidget *tab,int leaveSummary = 0);
     void switchTabs(const char *newdisplay, const char *newbuilderlist);
-    void buildTabs();
+    void buildTabs(int addSummary);
 
     void fillTab(QTabWidget *tab, u_int idx);
 
@@ -311,16 +310,15 @@ public slots:
       //////////////////////////////  PresenterConnect
 
  private:
-      JevpGui *pc_mGui;
-      JevpGui *pc_mPresenter;
+
 
   int pc_mTab;
   int pc_mSubTab;
   TCanvas* pc_mCanvas;
  public:
 
-  void pc_PresenterConnect(JevpGui *gui, JevpGui *pre);
-  
+ protected:
+  void closeEvent(QCloseEvent *e);
 
  public slots:
  void pc_save();
@@ -392,8 +390,8 @@ public slots:
  public:
 
   TSocket *jl_socket;
-  void jl_JevpLogic();
-  void jl_JevpLogic(const char*);
+  void init();
+  void readDisplayFromServer();
 
  int jl_file_uploaded; // flag if pdf file was uploaded into database; yes=1, no=0, error=-1
 
@@ -416,7 +414,7 @@ public slots:
  public slots:
    //void jl_Connect();
  void jl_printAll(const char* filename);
-
+ void jl_ClosePresenter();
  u_int jl_getTabBase();
  u_int jl_getTabDepthMult(u_int idx);
  u_int jl_getTabNextIdx(u_int idx);

@@ -76,7 +76,7 @@ void PlotHisto::setLegArgs(const char *text)
 
 PlotHisto::~PlotHisto()
 {
-  LOG("JEFF", "Delete histo: %s can %d must %d",histo->GetName(), histo->TestBit(kCanDelete), histo->TestBit(kMustCleanup));
+  LOG(DBG, "Delete histo: %s can %d must %d",histo->GetName(), histo->TestBit(kCanDelete), histo->TestBit(kMustCleanup));
 
   if(histo) delete histo;
   if(legendText) delete legendText;
@@ -432,7 +432,7 @@ int JevpPlot::isDataPresent()
   
   if(nhist==0) data_present = 1;
 
-  LOG("JEFF", "data_present=%d for histo: %s",data_present,myname);
+  LOG(DBG, "data_present=%d for histo: %s",data_present,myname);
   return data_present;
 }
 
