@@ -51,9 +51,9 @@ void daqBuilder::initialize(int argc, char *argv[]) {
   contents.h11_ftp_evsize = new TH1F("h11_ftp_evsize","log of FTPC Buffer Size",50,0,10);
   contents.h12_l3_evsize = new TH1F("h12_l3_evsize","log of L3 Buffer Size",30,0,6);
   contents.h14_tof_evsize = new TH1F("h14_tof_evsize","log of TOF Buffer Size",30,0.,6);
-  contents.h155_time_size_2min = new TH2F("h155_time_size_2min","Log10(event size) vs time", 120,0,120,400,0,8);
-  contents.h156_time_size_10min = new TH2F("h156_time_size_10min","Log10(event size) vs time", 600,0,600,400,0,8);
-  contents.h157_time_size_2hour = new TH2F("h157_time_size_2hour","Log10(event size) vs time",3600,0,7200,400,0,8);
+  contents.h155_time_size_2min = new TH2F("h155_time_size_2min","Log10(event size) vs time", 120,0,120,200,0,8);
+  contents.h156_time_size_10min = new TH2F("h156_time_size_10min","Log10(event size) vs time", 400,0,600,200,0,8);
+  contents.h157_time_size_2hour = new TH2F("h157_time_size_2hour","Log10(event size) vs time", 400,0,7200,200,0,8);
   contents.h337_ftp_time_size_2hour = new TH2F("h337_ftp_time_size_2hour","FTPC Event Size vs time(sec)",600,0,600,80,0,8);
   contents.h103_tpc_frac = new TH1F("h103_tpc_frac","TPC Event Size Fraction (%)",50,0,100);
   contents.h106_bemc_frac = new TH1F("h106_bemc_frac","BEMC Event Size Fraction (%)",50,0,100);
