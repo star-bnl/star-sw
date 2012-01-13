@@ -52,7 +52,7 @@ class StFgtGeom
 	//  although only values 0-5 work at the moment, I believe). Quadrant
 	//  is 0-3.  Layer is 'P' or 'R'. Strip is 0-720
   static Double_t getDiscZ(int iDisc){return iDisc*10+70;}
-
+  
 
 	static Int_t encodeGeoId(
 	    Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
@@ -181,6 +181,33 @@ class StFgtGeom
 	//  For those functions that have them, currently rdo can be 1-2, arm
 	//  can be 0-5, apv can be 0-23 (although 10, 11, 22, and 23 are not
 	//  technically valid) and channel is 0-127.
+
+	static Int_t getElectIdFromElecCoord(
+	   Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+	)
+	{
+	  Int_t eID = -1;
+
+
+	  //apv 10,11,22,23 are unused 
+	  //to make electID continuous we need to shift down 
+	  Int_t apvMod = apv;
+	  if (apv > 11) apvMod = apv-2;
+
+	  if ((rdo > 0)&&( rdo < 3)){
+	    if ((arm >= 0)&&(arm < 6)){
+	      if ((apvMod >= 0)&&(apvMod < 20)){
+		if ((channel >= 0)&&(channel < 128)){
+	         
+		  eID =  channel + (128 * (apvMod + (20 * (arm + (6 * (rdo - 1))))));
+		}
+	      }
+	    }
+	  }
+	  
+	  return eID; 
+	}
+
 	static Int_t getNaiveGeoIdFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
@@ -420,8 +447,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.24 2011/11/06 22:34:34 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.25 2012/01/13 19:10:41 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.25  2012/01/13 19:10:41  rfatemi
+ *  included getElectIdfromElecCoord to calculate electronic id from RDO,ARM,APVmod,CH
+ *
  *  Revision 1.24  2011/11/06 22:34:34  rfatemi
  *  implement phi2LocalStripId
  *
