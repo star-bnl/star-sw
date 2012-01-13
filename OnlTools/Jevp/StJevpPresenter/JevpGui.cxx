@@ -702,6 +702,7 @@ void JevpGui::DoAutoUpdateButton()
     cout<<"AutoUpdate Button Pressed"<<endl;
   }
   UpdatePlots();
+  tabChanged(rootTab);
 }
 //---------------------------------------------------------------
 void JevpGui::DoBitsButton() {
@@ -717,6 +718,7 @@ void JevpGui::DoUpdateButton()
   }
   
   UpdatePlots();
+  tabChanged(rootTab);
 }
 //---------------------------------------------------------------
 void JevpGui::DoPrintButton()
@@ -838,6 +840,9 @@ void JevpGui::ChangeToRun()
   if(ret) {
     newname = mydialog->getResult();
   }
+  
+  char *name = new char[40];
+  strcpy(name, newname);
 
   delete mydialog;
 
@@ -847,22 +852,15 @@ void JevpGui::ChangeToRun()
   fActions[kFileLive]->setEnabled(1);
 
 
-  char *name = new char[40];
-  strcpy(name, newname);
+
   static char windowname[100];
   sprintf(windowname, "Reanalysing Existing Run: %s",name);
   SetWindowName(windowname);
   
   LOG(DBG,"run name=%s\n",name);
 
-  int newport = jl_LaunchRun(name);
-  LOG(DBG,"newport = %d\n",newport);
-  if(newport <= 0) return;   // no new connection...
+  jl_LaunchRun(name);
 
-  if(evpMain->serverport != JEVP_PORT) {
-    jl_killServer();
-  }
-  jl_ConnectToServerPort(newport, 60);
 
   delete name;
 }
@@ -1181,7 +1179,9 @@ void JevpGui::UpdatePlots()
     else {  // if not, update visible plots and redraw...
       CP;
       clock.record_time();
+ 
       jl_DrawPlot(currentScreen);
+  
       double t1 = clock.record_time();
       LOG("JEFF", "Ethernet: Drawplots (%lf)",t1);
     }
@@ -1362,34 +1362,6 @@ int JevpGui::jl_LaunchRun(char *runNumber) {
   msg.setSource((char *)"presenter");
   msg.setArgs(runNumber);
   jl_send(&msg);
-
-
-  // Get response...
-  TMessage *mess;
-  int ret = jl_socket->Recv(mess);
-  if(ret == 0) {  // disconnect
-    LOG(ERR,"Server disconnected?\n");
-    exit(0);
-  }
-  
-  //int x = (int)mess->GetClass();
-  if(strcmp(mess->GetClass()->GetName(), "EvpMessage") != 0) {
-    LOG(ERR,"Didn't get a EvpMessage class\n");
-    exit(0);
-  }
-
-  EvpMessage *response = (EvpMessage *)mess->ReadObject(mess->GetClass());
-
-  LOG(DBG,"Got a response: %s %s\n",response->cmd,response->args);
-
-  if(strcmp(response->cmd, "launch") != 0) {
-    LOG(ERR,"Didn't get a launch command...");
-    return 0;
-  }
-
-  int port = atoi(response->args);
-  
-  return port;
 }
 
 void JevpGui::jl_killServer() {
@@ -1571,10 +1543,17 @@ void JevpGui::init()
 
   show();
   
+
+
+  
   connect(this,SIGNAL(update()), this, SLOT(update()) ); 
 
   connect(this, SIGNAL( pc_signalEventInfo(int,int,int,int, unsigned int, unsigned int,unsigned int, unsigned int) ), this, SLOT( setEventInfo(int,int,int,int, unsigned int, unsigned int,unsigned int, unsigned int) ) ); 
   connect(this, SIGNAL( pc_signalServerInfo(ServerStatus*) ), this, SLOT( setServerInfo(ServerStatus*) ) ); 
+
+  //  rootTab->setCurrentIndex(0);
+  //  update();
+  tabChanged(rootTab);
 
   pc_mCanvas = 0;
 }
