@@ -16,6 +16,7 @@
 #include <TSystem.h>
 #include <signal.h>
 #include <TThread.h>
+#include <TApplication.h>
 
 #include "EvpConstants.h"
 #include "JevpServer.h"
@@ -48,6 +49,8 @@
 static int line_number=0;
 #define CP line_number=__LINE__
 int JEVPSERVERport;
+JevpServer serv;
+
 
 static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
@@ -64,6 +67,17 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
   LOG(ERR, "%s", str);
 
   exit(-1);
+}
+
+static void ignoreSignals()
+{
+  int i ;
+  
+  for(i=0;i<37;i++) {	// hook'em all!
+    signal(i,SIG_IGN) ;
+  }
+  
+  return;
 }
 
 static void catchSignals(void)
@@ -107,8 +121,6 @@ void _JevpServerMain(int argc, char *argv[])
 void JevpServer::main(int argc, char *argv[])
 {
   // gErrorIgnoreLevel = kBreak;   // suppress root messages...
-  JevpServer serv;
-   
   serv.parseArgs(argc, argv);
   
   rtsLogOutput(serv.log_output);
@@ -336,8 +348,6 @@ int JevpServer::updateDisplayDefs()
   return 0;
 }
 
-daqReader *JEVPSERVERrdr;
-
 int JevpServer::init(int port, int argc, char *argv[]) {
 
   ssocket = new TServerSocket(port,kTRUE,100);
@@ -349,7 +359,6 @@ int JevpServer::init(int port, int argc, char *argv[]) {
   // Create daq reader...
   LOG(DBG, "Reader filename is %s",daqfilename ? daqfilename : "none");
   rdr = new daqReader(daqfilename);
-  JEVPSERVERrdr = rdr;
 
   if(diska) rdr->setEvpDisk(diska);
 
@@ -390,12 +399,16 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 // returns delay in milliseconds
 void JevpServer::handleNewEvent(EvpMessage *m)
 {
+  
   if(strcmp(m->cmd,"stoprun") == 0) {
     LOG(DBG, "SERVThread: Got stoprun from reader");
     CP;
     if(runStatus.running()) {
       performStopRun();
     }
+  }
+  else if(strcmp(m->cmd, "readerr") == 0) {
+    LOG("JEFF", "A read err...");
   }
   else if(strcmp(m->cmd,"newevent") == 0) {
     LOG(DBG, "SERVThread: Got newevent");
@@ -643,6 +656,14 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     CP;
     s->Send(mess);
   }
+  else if (strcmp(msg->getCmd(), "launch") == 0) {
+    LOG("JEFF", "Got launch:  (%s) (%s)", msg->getArgs(), msg->getSource());	
+
+
+    char *x = (char *)malloc(strlen(msg->getArgs()) + 1);
+    strcpy(x, msg->getArgs());
+    launchArgs = x;
+  }
   else {
     CP;
     LOG(WARN,"Unknown command: %s\n",msg->getCmd());
@@ -733,7 +754,10 @@ void JevpServer::performStopRun()
   if(die) {
     LOG("JEFF", "die is set, so now exit");
     CP;
-    exit(0);
+
+    ignoreSignals();
+    gApplication->Terminate();
+    //exit(0);
   }
 
   runStatus.setStatus("stopped");
@@ -862,7 +886,7 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
     }
   }
   else {
-    LOG(DBG,"getplot..\n");
+    LOG(DBG,"getplot..%s\n", plotname);
 
     if(strcmp(plotname, "serv_JevpSummary") == 0) {
       plot = getJevpSummaryPlot();
@@ -950,17 +974,19 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
   l->SetTextSize(.035);
   jevpSummaryPlot->addElement(l);
 
-
+  CP;
   // Now show builders...
   TListIter next(&builders);
   JevpPlotSet *obj;
   int n=0;
+
+  CP;
   while((obj = (JevpPlotSet *)next())) {
     BuilderStatus *curr = &obj->builderStatus;
 
     n++;
-    sprintf(tmp, "builder %10s: \t(events %d, evttime %d)",
-	    curr->name, curr->events, (int)(time(NULL) - curr->lastEventTime));
+    sprintf(tmp, "builder %15s: (events %d, avgtime %06.4lf)",
+	    curr->name, curr->events, obj->getAverageProcessingTime());
     l = new JLatex(2, liney(i++), tmp);
     l->SetTextSize(.035);
     jevpSummaryPlot->addElement(l); 
@@ -1200,7 +1226,7 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
     LOG(DBG, "Plotting %s on page %d / pad %d",cnode->name, page, pad);
 
     JevpPlot *plot = NULL;
-    if(cnode->name = "serv_JevpSummary") {
+    if(strcmp(cnode->name, "serv_JevpSummary")) {
       plot = getJevpSummaryPlot();
     }
     else {
@@ -1576,6 +1602,17 @@ void readerThreadWait(TSocket *socket)
   TMessage *mess;
   socket->Recv(mess);
   delete mess;
+
+  if(serv.launchArgs) {
+
+    LOG("JEFF", "Got launchArgs!");
+    // We need to change the rdr...
+    delete serv.rdr;
+    serv.rdr = new daqReader(serv.launchArgs);
+
+    free(serv.launchArgs);
+    serv.launchArgs = NULL;
+  }
 }
 
 void *JEVPSERVERreaderThread(void *)
@@ -1597,11 +1634,11 @@ void *JEVPSERVERreaderThread(void *)
     
     usleep(100);  // otherwise we can starve out clients...
 
-    char *ret = JEVPSERVERrdr->get(0, EVP_TYPE_ANY);
-
+    char *ret = serv.rdr->get(0, EVP_TYPE_ANY);
+    
     // Obviously some problem, what is it!
     if(ret == NULL) {
-      switch(JEVPSERVERrdr->status) {
+      switch(serv.rdr->status) {
       case EVP_STAT_OK:
 	LOG(DBG, "EVP reader burped a bit...");
 	continue;
@@ -1613,29 +1650,28 @@ void *JEVPSERVERreaderThread(void *)
 	continue;
 	
       case EVP_STAT_EVT:
-	LOG(ERR, "Problem reading event... skipping");
-	continue;
-	
       case EVP_STAT_CRIT:
-	LOG(CRIT, "Critical problem reading event... exiting");
-	exit(0);
-	
       default:
-	LOG(ERR, "Not ok, eor,evt or crit???");
+
+	LOG(ERR, "Problem reading event:  perhaps the file is bad?");
+	sleep(1);
+	readerThreadSend(socket, "readerr");
+	readerThreadWait(socket);
 	continue;
+	
       }
     }
     
-    if(JEVPSERVERrdr->status) {
-      LOG(ERR, "Bad status on read?  rdr->status=%d",JEVPSERVERrdr->status);
+    if(serv.rdr->status) {
+      LOG(ERR, "Bad status on read?  rdr->status=%d",serv.rdr->status);
       continue;
     }
 
-    LOG(DBG, "RDRThread: Sending newevent to JevpServer: #%d run %d",JEVPSERVERrdr->event_number,JEVPSERVERrdr->run);
+    LOG("JEFF", "RDRThread: Sending newevent to JevpServer: #%d run %d",serv.rdr->event_number,serv.rdr->run);
     readerThreadSend(socket, "newevent");
-    LOG(DBG, "RDRThread: Waiting for JevpServer");
+    LOG("JEFF", "RDRThread: Waiting for JevpServer");
     readerThreadWait(socket);
-    LOG(DBG, "RDRThread: Trying to read a new event...");
+    LOG("JEFF", "RDRThread: Trying to read a new event...");
   }
   
   return NULL;
