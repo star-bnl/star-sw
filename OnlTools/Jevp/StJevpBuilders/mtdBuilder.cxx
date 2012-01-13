@@ -313,6 +313,7 @@ void mtdBuilder::event(daqReader *rdr) {
 	
   //if (west_adc[1]>0) cout<<"west_adc[1]="<<west_adc[1]<<"!!!!!!!!!!!<"endl;
 	
+  if(trgd) delete trgd;
   return;
 }
 
