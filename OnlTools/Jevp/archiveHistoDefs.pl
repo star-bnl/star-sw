@@ -5,8 +5,9 @@ $myfile = $ARGV[1];
 
 #printf $mypath."\n";
 
-$tm = `date +-%Y-%m-%d-%k:%M:%S`;
+$tm = `date +-%Y-%m-%d-%H:%M:%S`;
 chomp $tm;
+chomp $myfile;
 
 $newfile = $mypath."/".$myfile;
 $oldfile = $mypath."/".$myfile.".tmp";
@@ -20,12 +21,12 @@ system("diff $oldfile $newfile > /dev/null");
 $x = $?;
 
 if($x == 0) {
-    #printf "files the same...no archive\n";
+    printf "files (old=$oldfile new=$newfile)the same...no archive\n";
     exit;
 } 
 
 #printf("archivefile: $archivefile\n");
-#printf "files different... archive\n";
+printf "files different... archiving to $archivefile\n";
 system("cp $newfile $archivefile");
 
 system("cp $newfile $oldfile");

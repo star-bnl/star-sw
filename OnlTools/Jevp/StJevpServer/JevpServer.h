@@ -37,7 +37,7 @@ class JevpServer {
   char *basedir;       // base for config files...
   char *diska;
   int myport;
-
+  char *launchArgs;    // used to pass the lanuch arguments back to reader thread...
   daqReader *rdr;
 
   char *displays_fn;      // Display Information...
@@ -72,7 +72,8 @@ class JevpServer {
     die = 0;
     daqfilename = NULL;
     serverTags = NULL;
-    
+    launchArgs = NULL;
+
     jevpSummaryPlot = NULL;
   };
   
