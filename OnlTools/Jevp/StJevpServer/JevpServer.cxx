@@ -391,21 +391,21 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 void JevpServer::handleNewEvent(EvpMessage *m)
 {
   if(strcmp(m->cmd,"stoprun") == 0) {
-    LOG("JEFF", "SERVThread: Got stoprun from reader");
+    LOG(DBG, "SERVThread: Got stoprun from reader");
     CP;
     if(runStatus.running()) {
       performStopRun();
     }
   }
   else if(strcmp(m->cmd,"newevent") == 0) {
-    LOG("JEFF", "SERVThread: Got newevent");
+    LOG(DBG, "SERVThread: Got newevent");
     CP;
     JevpPlotSet *curr;
     TListIter next(&builders);
     
     if(rdr->run != (unsigned int)runStatus.run) {
       CP;
-      LOG("JEFF", "Starting new run #%d  (%d)",rdr->run, runStatus.run);
+      LOG(DBG, "Starting new run #%d  (%d)",rdr->run, runStatus.run);
       performStartRun();
       eventsThisRun = 0;
     }
@@ -430,7 +430,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
       }
       
       CP;
-      LOG("JEFF", "Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
+      LOG(DBG, "Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
       
       curr->_event(rdr);
       
@@ -552,7 +552,7 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     m.setSource("serv");
     m.setCmd("xml");
     if(!displays) {
-      LOG("JEFF", "No displays available\n");
+      LOG(ERR, "No displays available\n");
       return;
     }
     
@@ -716,7 +716,7 @@ void JevpServer::performStopRun()
   }
   CP;
 
-  LOG("JEFF", "Writing display file...%s",fn);
+  LOG(DBG, "Writing display file...%s",fn);
   unlink(fn);
   if(displays->Write(fn) < 0) {
     LOG(ERR, "Error writing display file %s",fn);
@@ -1029,7 +1029,7 @@ void JevpServer::writeRunPdf(int display, int run)
 
     //int ret = char((execScript *)"WritePDFToDB",args);
     int ret = execScript("WritePDFToDB", args);
-    LOG("JEFF", "Wrote PDF file: %s (ret=%d)", filename, ret);
+    LOG(DBG, "Wrote PDF file: %s (ret=%d)", filename, ret);
   }
 }
 
@@ -1037,11 +1037,11 @@ void JevpServer::writePdf(char *filename, int combo_index)
 {
   if(pdfdir == NULL) return;
 
-  LOG("JEFF", "Writing pdf: %s index=%d",filename,combo_index);
+  LOG(DBG, "Writing pdf: %s index=%d",filename,combo_index);
   DisplayNode *root = displays->getTab(combo_index);
 
   if(combo_index == 0) {
-    LOG("JEFF", "disproot = 0x%x root = 0x%x", displays->displayRoot, root);
+    LOG(DBG, "disproot = 0x%x root = 0x%x", displays->displayRoot, root);
     root = displays->displayRoot;
   }
 
@@ -1049,12 +1049,12 @@ void JevpServer::writePdf(char *filename, int combo_index)
   //   char filename[256];
   //   sprintf(filename, "%s/%s_%d.pdf", pdfdir, displays->displayRoot->name, run);
 
-  LOG("JEFF", "writeNodePdf root: %s",filename);
+  LOG(DBG, "writeNodePdf root: %s",filename);
 
   PdfIndex index;
   writeNodePdf(root, &index, NULL, filename, 1, 0);
   
-  LOG("JEFF", "write endfilename");
+  LOG(DBG, "write endfilename");
 
   // Now a summary....
   char endfilename[256];
@@ -1075,15 +1075,12 @@ void JevpServer::writePdf(char *filename, int combo_index)
 
 int JevpServer::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page, int nosibs)
 {
-  LOG("JEFF", "node = 0x%x", node);
-  LOG("JEFF", "writeNodePdf:  %s page=%d",node->name,page);
-
-  LOG("JEFF", "Checking node %s against server tags %s", node->name, serverTags);
+  LOG(DBG, "Checking node %s against server tags %s", node->name, serverTags);
 
   int npages = 0;
 
   if(!node->matchTags(serverTags)) {
-    LOG("JEFF", "node %s does not match tags %s", node->name, serverTags);
+    LOG(DBG, "node %s does not match tags %s", node->name, serverTags);
 
     // But, handle siblings!   
     if(node->next && !nosibs) {
@@ -1202,7 +1199,14 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
 
     LOG(DBG, "Plotting %s on page %d / pad %d",cnode->name, page, pad);
 
-    JevpPlot *plot = getPlot(cnode->name);
+    JevpPlot *plot = NULL;
+    if(cnode->name = "serv_JevpSummary") {
+      plot = getJevpSummaryPlot();
+    }
+    else {
+      plot = getPlot(cnode->name);
+    }
+
     if(plot) {
       LOG(DBG, "Found plot %s",cnode->name);
       plot->draw();
@@ -1590,6 +1594,9 @@ void *JEVPSERVERreaderThread(void *)
   // next ask the reader for an event!
 
   for(;;) {
+    
+    usleep(100);  // otherwise we can starve out clients...
+
     char *ret = JEVPSERVERrdr->get(0, EVP_TYPE_ANY);
 
     // Obviously some problem, what is it!
@@ -1600,7 +1607,7 @@ void *JEVPSERVERreaderThread(void *)
 	continue;
       
       case EVP_STAT_EOR:
-	LOG("JEFF", "RDRThread: End of the run!");
+	LOG(DBG, "RDRThread: End of the run!");
 	readerThreadSend(socket, "stoprun");
 	readerThreadWait(socket);
 	continue;
@@ -1624,11 +1631,11 @@ void *JEVPSERVERreaderThread(void *)
       continue;
     }
 
-    LOG("JEFF", "RDRThread: Sending newevent to JevpServer: #%d run %d",JEVPSERVERrdr->event_number,JEVPSERVERrdr->run);
+    LOG(DBG, "RDRThread: Sending newevent to JevpServer: #%d run %d",JEVPSERVERrdr->event_number,JEVPSERVERrdr->run);
     readerThreadSend(socket, "newevent");
-    LOG("JEFF", "RDRThread: Waiting for JevpServer");
+    LOG(DBG, "RDRThread: Waiting for JevpServer");
     readerThreadWait(socket);
-    LOG("JEFF", "RDRThread: Trying to read a new event...");
+    LOG(DBG, "RDRThread: Trying to read a new event...");
   }
   
   return NULL;
