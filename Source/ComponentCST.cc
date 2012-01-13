@@ -5,6 +5,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <math.h>
+#include <algorithm>
 #include <vector>
 
 #include "ComponentCST.hh"
