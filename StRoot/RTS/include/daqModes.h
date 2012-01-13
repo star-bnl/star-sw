@@ -45,16 +45,17 @@
 #define RUN_TYPE_HLT_DEBUG	203	// special pedestal setup to simulate clusters
 
 /* special DAQ commands sent out via Trigger */
-#define DAQCMD_DEFAULT		0	/* Run cluster finder _and_ wait for FORMAT_DATA */
-#define DAQCMD_FMT_WAIT		1	/* Will keep the buffer and wait for a FORMAT_DATA */
+/* Note that the daq_cmd is mostly a bit mask! */
 
-/* Removed: was never really used #define DAQCMD_CL_RUN		2 */	/* Run cluster finder */
-#define DAQCMD_HLT_RUN		2	/* Run HLT -- new from FY09 */
+#define DAQCMD_DAQ10K_DISABLE			2	/* if the 2nd bit is _not_ set, run daq10k TPC sector */
+#define DAQCMD_FMT_ONLY				4	/* force raw (non ZS or non CLD) data */
 
-#define DAQCMD_FMT_ONLY		4	/* _Just_ format data - no clusters! */
-
-#define DAQCMD_SPEC_PED		8	/* used in pedestals runs for special hardware handling i.e. PMD*/
-#define DAQCMD_IGNORE		15	/* completelly ignores the event - acts as an ABORT - not used but could for cleanup events*/
+// Tonko: marked unused but left for documentation, Jan 2012
+//unused #define DAQCMD_DEFAULT			0	/* Run cluster finder _and_ wait for FORMAT_DATA */
+//unused #define DAQCMD_FMT_WAIT		1	/* Will keep the buffer and wait for a FORMAT_DATA */
+//unused #define DAQCMD_HLT_RUN			2	/* Run HLT -- new from FY09 */
+//unused #define DAQCMD_SPEC_PED		8	/* used in pedestals runs for special hardware handling i.e. PMD*/
+//unused #define DAQCMD_IGNORE			15	/* completelly ignores the event - acts as an ABORT - not used but could for cleanup events*/
 
 
 
