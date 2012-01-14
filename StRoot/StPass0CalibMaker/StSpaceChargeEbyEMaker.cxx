@@ -21,6 +21,8 @@
 #include "StBTofPidTraits.h"
 #include "StTrackPidTraits.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/projection/StEmcPosition.h"
 
 #include "TUnixTime.h"
 #include "TFile.h"
@@ -73,7 +75,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     doNtuple(kFALSE), doReset(kTRUE), doGaps(kFALSE),
     inGapRow(0),
     vtxEmcMatch(1), vtxTofMatch(0), vtxMinTrks(5),
-    minTpcHits(25), reqEmcMatch(kFALSE), reqTofMatch(kTRUE),
+    minTpcHits(25), reqEmcMatch(kTRUE), reqTofMatch(kTRUE),
     m_ExB(0),
     scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
     myhistE(0), myhistW(0), dczhist(0), dcehist(0), dcphist(0),
@@ -274,6 +276,18 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   unsigned int i,j,k;
   StThreeVectorD ooo = pvtx->position();
 
+  // Prepare for EMC match
+  StEmcDetector* bemcDet = 0;
+  Double_t emcRadius = 0;
+  static StEmcPosition* emcPosition = 0;
+  static StEmcGeom* emcGeom = 0;
+  if (reqEmcMatch) {
+    bemcDet = event->emcCollection()->detector(kBarrelEmcTowerId);
+    if (!emcPosition) emcPosition = new StEmcPosition();
+    if (!emcGeom) emcGeom = StEmcGeom::instance("bemc");
+    emcRadius = emcGeom->Radius() + 30; // use exit radius, 30cm beyond face
+  }
+
   for (i=0; i<nnodes; i++) {
       for (j=0; j<theNodes[i]->entries(global); j++) {
         if (QAmode) cutshist->Fill(16);
@@ -311,25 +325,62 @@ Int_t StSpaceChargeEbyEMaker::Make() {
             //  2: 1-2 matching, pick up the one with higher ToT vaule (<25ns) 
             //  3: 1-2 matching, pick up the one with closest projection position along local y
             if (Mflag <= 0) continue;
-            if (QAmode) cutshist->Fill(24);
 
           }
-          if (QAmode) cutshist->Fill(25);
-          if (reqEmcMatch) {} // to be defined
-          if (QAmode) cutshist->Fill(26);
+          if (QAmode) cutshist->Fill(24);
+
+          if (reqEmcMatch) {
+
+            Double_t mEmcThresh = 0.15;
+            Double_t energyBEMC = -100.0;
+            UInt_t tower_eta,tower_mod = 0;
+            Int_t tower_sub = 0;
+            StThreeVectorD emcTrkMomentum,emcTrkPosition;
+            if (!(emcPosition->trackOnEmc(&emcTrkPosition,&emcTrkMomentum,
+                                 tri,runinfo->magneticField()/10.,emcRadius))) continue;
+            if (QAmode) cutshist->Fill(25);
+         
+            Float_t emcEta = emcTrkPosition.pseudoRapidity();
+            Float_t emcPhi = emcTrkPosition.phi();
+            Int_t m,e,s,id = 0;
+            emcGeom->getBin(emcPhi,emcEta,m,e,s);
+            if (emcGeom->getId(m,e,s,id) == 0) {
+              tower_mod = m;
+              tower_eta = e;
+              tower_sub = s;
+            }
+            if (tower_mod < 1 || tower_mod > 120) continue;
+            if (QAmode) cutshist->Fill(26);
+ 
+            if (event->emcCollection()) {
+              StEmcModule* emcMod = bemcDet->module(tower_mod);
+              StSPtrVecEmcRawHit& emcHits = emcMod->hits();
+              for (UInt_t emcHit=0; emcHit<emcHits.size(); emcHit++) {
+                if ((emcHits[emcHit]) && (emcHits[emcHit]->eta() == tower_eta)
+                                      && (emcHits[emcHit]->sub() == tower_sub)) {
+                    energyBEMC = emcHits[emcHit]->energy();
+                    break; // only one hit
+                }
+              }
+            }
+         
+            if (energyBEMC < mEmcThresh) continue; 
+
+          }
+          if (QAmode) cutshist->Fill(27);
 
           StTrackGeometry* triGeom = tri->geometry();
 
           StThreeVectorF xvec = triGeom->origin();
           if (!(xvec.x() || xvec.y() || xvec.z())) continue;
-          if (QAmode) cutshist->Fill(27);
+          if (QAmode) cutshist->Fill(28);
           StThreeVectorF pvec = triGeom->momentum();
           if (!(pvec.x() || pvec.y())) continue;
-          if (QAmode) cutshist->Fill(28);
+          if (QAmode) cutshist->Fill(29);
 
           float oldPt = pvec.perp();
           if (oldPt < 0.0001) continue;
-          if (QAmode) cutshist->Fill(29);
+          if (QAmode) cutshist->Fill(30);
 
 	  int e_or_w = 0; // east is -1, west is +1
 	  if (pvec.z() * xvec.z() > 0) e_or_w = ( (xvec.z() > 0) ? 1 : -1 );
@@ -354,7 +405,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
             DCA2 = hh.geometricSignedDistance(ooo.x(),ooo.y());
           }
           if (DCA3 > 4) continue; // cut out pileup tracks!
-          if (QAmode) cutshist->Fill(30);
+          if (QAmode) cutshist->Fill(31);
           Int_t ch = (int) triGeom->charge();
 
           Int_t PCT = 0;
@@ -386,13 +437,13 @@ Int_t StSpaceChargeEbyEMaker::Make() {
             }
           }
           if (PCT) continue; // Track has post-crossing hits
-          if (QAmode) cutshist->Fill(31);
+          if (QAmode) cutshist->Fill(32);
           
           Float_t space = 10000.;
           if (!(m_ExB->PredictSpaceChargeDistortion(ch,oldPt,ooo.z(),
 	  //   eta,DCA2,map.data(0),map.data(1),space))) continue;
 	     eta,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space))) continue;
-          if (QAmode) cutshist->Fill(32);
+          if (QAmode) cutshist->Fill(33);
 
           Double_t spaceErr = TMath::Abs(space*DCAerr/DCA2);
 	  space += lastsc;  // Assumes additive linearity of space charge!
@@ -1120,8 +1171,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.39 2011/10/27 23:11:03 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.40 2012/01/14 00:21:04 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.40  2012/01/14 00:21:04  genevb
+// Add code for EMC match, set default to required
+//
 // Revision 1.39  2011/10/27 23:11:03  genevb
 // Account for pointing error in sDCA and predicted SpaceCharge
 //
