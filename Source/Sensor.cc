@@ -46,7 +46,7 @@ Sensor::ElectricField(const double x, const double y, const double z,
   double fx, fy, fz, p;
   Medium* med = 0;
   int stat;
-  // Add up electric field contributions from all components
+  // Add up electric field contributions from all components.
   for (int i = nComponents; i--;) {
     components[i].comp->ElectricField(x, y, z, fx, fy, fz, p, med, stat);
     if (status != 0) {
@@ -70,7 +70,7 @@ Sensor::ElectricField(const double x, const double y, const double z,
   double fx, fy, fz;
   Medium* med = 0;
   int stat;
-  // Add up electric field contributions from all components
+  // Add up electric field contributions from all components.
   for (int i = nComponents; i--;) {
     components[i].comp->ElectricField(x, y, z, fx, fy, fz, med, stat);
     if (status != 0) {
@@ -88,7 +88,7 @@ Sensor::MagneticField(const double x, const double y, const double z,
 
   bx = by = bz = 0.;
   double fx, fy, fz;
-  // Add up contributions
+  // Add up contributions.
   for (int i = nComponents; i--;) {
     components[i].comp->MagneticField(x, y, z, fx, fy, fz, status);
     if (status != 0) continue;
@@ -104,7 +104,7 @@ Sensor::WeightingField(const double x, const double y, const double z,
   
   wx = wy = wz = 0.;
   double fx = 0., fy = 0., fz = 0.;
-  // Add up field contributions from all components
+  // Add up field contributions from all components.
   for (int i = nElectrodes; i--;) {
     if (electrodes[i].label == label) {
       fx = fy = fz = 0.;
@@ -124,7 +124,7 @@ Sensor::GetMedium(const double x, const double y, const double z,
   // Make sure there is at least one component.
   if (lastComponent < 0) return false;
 
-  // Check if we are still in the same component as in the previous call
+  // Check if we are still in the same component as in the previous call.
   if (components[lastComponent].comp->GetMedium(x, y, z, m)) {
     // Cross-check that the medium is defined.
     if (m != 0) return true;
@@ -266,10 +266,11 @@ Sensor::IsWireCrossed(const double x0, const double y0, const double z0,
 }
 
 bool
-Sensor::IsInTrapRadius(double x0, double y0, double z0, double& xw, double& yw, double& rw){
+Sensor::IsInTrapRadius(double x0, double y0, double z0, 
+                       double& xw, double& yw, double& rw){
 
   for (int i = nComponents; i--;) {
-    if (components[i].comp->IsInTrapRadius(x0, y0, z0, xw, yw, rw)){ 
+    if (components[i].comp->IsInTrapRadius(x0, y0, z0, xw, yw, rw)) { 
       return true;
     }
   }
@@ -698,6 +699,28 @@ Sensor::ConvoluteSignal() {
   return true;
   
 }
+
+bool
+Sensor::IntegrateSignal() {
+
+  if (nEvents <= 0) {
+    std::cerr << className << "::IntegrateSignal:\n";
+    std::cerr << "    No signals present.\n";
+    return false;
+  }
+  
+  for (int i = 0; i < nElectrodes; ++i) {
+    for (int j = 0; j < nTimeBins; ++j) {
+      electrodes[i].signal[j] *= tStep;
+      if (j > 0) {
+        electrodes[i].signal[j] += electrodes[i].signal[j - 1];
+      }
+    }
+  }
+  return true;
+  
+}
+
 
 void
 Sensor::SetNoiseFunction(double (*f)(double t)) {

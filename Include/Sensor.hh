@@ -89,6 +89,7 @@ class Sensor {
     double GetInducedCharge(const std::string label);
     void SetTransferFunction(double (*f)(double t));
     bool ConvoluteSignal();
+    bool IntegrateSignal();
     void SetNoiseFunction(double (*f)(double t));
     void AddNoise();
     bool ComputeThresholdCrossings(const double thr, 
