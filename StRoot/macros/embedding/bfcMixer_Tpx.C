@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.28 2011/12/05 16:06:34 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.29 2012/01/14 02:15:28 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.29  2012/01/14 02:15:28  zhux
+// Geometry tag addition in Chain3 removed, Chain2 geometry tags are all updated to the latest version (on 2011.1.14).
+//
 // Revision 1.28  2011/12/05 16:06:34  zhux
 // latest geometry (y2010c) used in simulation chain (chain2) for P10ik
 //
@@ -72,10 +75,9 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   // Run10 Au+Au 200 GeV chain
   TString prodP10ikAuAu200("DbV20101213 P2010a pmdReco btof BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D, VFMCE TpxClu -VFMinuit -hitfilt");
 
-  TString geomP08ic("ry2008");
-  TString geomP10ic("ry2009a");
-  TString geomP10ih("ry2010");
-  TString geomP10ikSim("ry2010c"); // latest y2010 geometry
+  TString geomP08ic("ry2008e");
+  TString geomP10ic("ry2009d");
+  TString geomP10ih("ry2010c");
   TString geomP10ik(geomP10ih); // Same chain as P10ih
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
@@ -102,32 +104,12 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih;}
   else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih;}
   else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih;}
-  else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ikSim;}
+  else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ik;}
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
   chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
-  chain3Opt += ",";
-
-  if (prodName == "P08icpp")           { chain3Opt += geomP08ic; }
-  else if (prodName == "P08iepp")      { chain3Opt += geomP08ic; }
-  else if (prodName == "P08icAuAu9")   { chain3Opt += geomP08ic; }
-  else if (prodName == "P08icdAu")     { chain3Opt += geomP08ic; }
-  else if (prodName == "P08iedAu")     { chain3Opt += geomP08ic; }
-  else if (prodName == "P08icAuAu200") { chain3Opt += geomP08ic; }
-  else if (prodName == "P09igpp500")   { chain3Opt += geomP10ic; }
-  else if (prodName == "P11ibpp500")   { chain3Opt += geomP10ic; }
-  else if (prodName == "P10iapp")      { chain3Opt += geomP10ih; }
-  else if (prodName == "P10icpp200")   { chain3Opt += geomP10ic; }
-  else if (prodName == "P10ihAuAu39")  { chain3Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu11")  { chain3Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu7")   { chain3Opt += geomP10ih; }
-  else if (prodName == "P10ikAuAu200") { /*chain3Opt += geomP10ik;*/ }
-  else {
-    cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
-    return;
-  }
 
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
