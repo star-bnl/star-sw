@@ -172,12 +172,14 @@ Int_t StFgtRawDaqReader::Make() {
 
             Short_t quad, strip;
             Char_t layer;
-            Short_t geoId = ( mIsCosmic
+            Int_t geoId = ( mIsCosmic
                               ? StFgtCosmicTestStandGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel)
                               : fgtTables->getGeoIdFromElecCoord(rdo, arm, apv, channel) 
                               );
             StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
-
+            assert( discIdx > -1 );
+            assert( quad > -1 );
+            assert( strip > -1 );
 
             /* DEBUGGING
                if( timebin == 1 ){
@@ -198,7 +200,7 @@ Int_t StFgtRawDaqReader::Make() {
                StSPtrVecFgtStrip &stripVec = stripCollectionPtr->getStripVec();
                stripVec.push_back( new StFgtStrip( geoId,adc,type,timebin) );
             } else {
-               LOG_WARN <<"Could not access disc "<<endm;
+               LOG_WARN << "StFgtRawDaqReader::Make() -- Could not access stripCollection for disc " << discIdx << endm;
             };
          };
       };
