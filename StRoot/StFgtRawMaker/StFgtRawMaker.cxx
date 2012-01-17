@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.19 2011/11/01 18:45:32 sgliske Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.20 2012/01/17 21:56:26 sgliske Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.20  2012/01/17 21:56:26  sgliske
+//  Short_t geoId -> Int_t geoId
+//
 //  Revision 1.19  2011/11/01 18:45:32  sgliske
 //  Updated to correspond with StEvent containers, take 2.
 //  Note: new FGT containers (and StEvent access) no longer
@@ -152,7 +155,7 @@ Int_t StFgtRawMaker::FillHits()
                adc=mFgtRawData->adc;
                arm=rts_tbl->Sector();
                apv=rts_tbl->Pad();
-               Short_t geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
+               Int_t geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
                StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
 
                Char_t type = 0;    // TODO: set this according to the database???
@@ -164,7 +167,7 @@ Int_t StFgtRawMaker::FillHits()
                      stripVec.push_back( new StFgtStrip( geoId,adc,type,timebin) );
                   }
                else
-                  { LOG_WARN <<"Could not access disc " << discIdx << endm; }
+                  { LOG_WARN << "StFgtRawMaker::Make() -- Could not access disc " << discIdx << endm; }
             }
       }
 

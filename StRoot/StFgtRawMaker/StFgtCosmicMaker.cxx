@@ -120,7 +120,7 @@ Int_t StFgtCosmicMaker::Make()
 	  timebin=f[i].tb;
           Short_t discIdx=0;  // will be set with getNaivePhysCoordFromElecCoord
 
-	  Short_t geoId = StFgtCosmicTestStandGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
+	  Int_t geoId = StFgtCosmicTestStandGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
 
           Short_t quad, strip;
           Char_t layer;
@@ -164,7 +164,7 @@ Int_t StFgtCosmicMaker::Make()
                 stripVec.push_back( new StFgtStrip( geoId,adc,type,timebin) );
              }
 	  else
-	    { LOG_WARN <<"Could not access disc "<<endm; }
+             { LOG_WARN << "StFgtCosmicMaker::Make() -- Could not access disc " << discIdx << endm; }
 	}
     }
 
