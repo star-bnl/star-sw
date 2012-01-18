@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.21 2012/01/18 03:10:51 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.22 2012/01/18 03:28:25 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.22  2012/01/18 03:28:25  avossen
+//  removed naive calls
+//
 //  Revision 1.21  2012/01/18 03:10:51  avossen
 //  added db access to the raw maker
 //
@@ -161,9 +164,15 @@ Int_t StFgtRawMaker::FillHits()
                apv=rts_tbl->Pad();
 	       Int_t geoId=-1;
 	       if(!fgtDb)
-		 geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
+		 //		 geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
+		 {
+		   LOG_FATAL<<Form("StFgtRawMaker: No DB available")<<endm;
+		   return kStFatal;
+		 }    
 	       else
-		 geoId=fgtDb->getGeoIdFromElecCoord(rdo, arm, apv, channel);
+		 {
+		   geoId=fgtDb->getGeoIdFromElecCoord(rdo, arm, apv, channel);
+		 }
 
                StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
                Char_t type = 0;    // TODO: set this according to the database???
