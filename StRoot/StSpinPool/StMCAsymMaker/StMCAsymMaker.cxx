@@ -559,6 +559,9 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
     pythia->setCosTheta(pythiaTable->cos_th);
     pythia->setX1(pythiaTable->bjor_1);
     pythia->setX2(pythiaTable->bjor_2);
+    pythia->setMstu72(pythiaTable->mstu72);
+    pythia->setMstu73(pythiaTable->mstu73);
+    pythia->setMstp111(pythiaTable->mstp111);
     pythia->setPartonALL(partonic_all);
     
     pythia->setDF1(StPythiaEvent::LO, df1_LO);
