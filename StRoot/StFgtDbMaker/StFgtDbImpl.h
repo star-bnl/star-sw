@@ -283,7 +283,7 @@ class StFgtDbImpl : public StFgtDb
 	{
 	    if ( apv >= 12 )
 	    {
-		apv -= 12;
+		apv -= 2;
 	    }
 	    return channel+128*(apv+20*(arm+6*(rdo-1)));
 	}
