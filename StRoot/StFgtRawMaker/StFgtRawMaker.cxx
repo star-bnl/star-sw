@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.22 2012/01/18 03:28:25 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.23 2012/01/18 17:48:31 sgliske Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.23  2012/01/18 17:48:31  sgliske
+//  StEvent/StFgtStrip now contains rdo/arm/apv/channel
+//
 //  Revision 1.22  2012/01/18 03:28:25  avossen
 //  removed naive calls
 //
@@ -181,7 +184,7 @@ Int_t StFgtRawMaker::FillHits()
                if( stripCollectionPtr )
                   {
                      StSPtrVecFgtStrip &stripVec = stripCollectionPtr->getStripVec();
-                     stripVec.push_back( new StFgtStrip( geoId,adc,type,timebin) );
+                     stripVec.push_back( new StFgtStrip( geoId,rdo,arm,apv,channel,adc,type,timebin) );
                   }
                else
                   { LOG_WARN << "StFgtRawMaker::Make() -- Could not access disc " << discIdx << endm; }

@@ -198,7 +198,7 @@ Int_t StFgtRawDaqReader::Make() {
             StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
             if( stripCollectionPtr ) {
                StSPtrVecFgtStrip &stripVec = stripCollectionPtr->getStripVec();
-               stripVec.push_back( new StFgtStrip( geoId,adc,type,timebin) );
+               stripVec.push_back( new StFgtStrip( geoId,rdo,arm,apv,channel,adc,type,timebin) );
             } else {
                LOG_WARN << "StFgtRawDaqReader::Make() -- Could not access stripCollection for disc " << discIdx << endm;
             };
