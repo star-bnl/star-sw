@@ -4,6 +4,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.cxx,v $
+// Revision 1.5  2012/01/18 18:11:36  pibero
+// Added PYTHIA variables: MSTU(72), MSTU(73), and MSTP(111)
+//
 // Revision 1.4  2011/09/13 16:24:21  pibero
 // Added DSSV2009 grid
 //
@@ -64,6 +67,9 @@ StPythiaEvent::StPythiaEvent(const StPythiaEvent& t)
     mCosTheta   = t.mCosTheta;
     mX1         = t.mX1;
     mX2         = t.mX2;
+    mMstu72     = t.mMstu72;
+    mMstu73     = t.mMstu73;
+    mMstp111    = t.mMstp111;
     mPartonALL  = t.mPartonALL;
     
     for(int i=0; i<NPDF; i++) {
@@ -100,6 +106,9 @@ StPythiaEvent& StPythiaEvent::operator=(const StPythiaEvent& rhs)
     mCosTheta   = rhs.mCosTheta;
     mX1         = rhs.mX1;
     mX2         = rhs.mX2;
+    mMstu72     = rhs.mMstu72;
+    mMstu73     = rhs.mMstu73;
+    mMstp111    = rhs.mMstp111;
     mPartonALL  = rhs.mPartonALL;
     
     for(int i=0; i<NPDF; i++) {

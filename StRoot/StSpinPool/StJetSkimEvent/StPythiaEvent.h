@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.6 2011/09/13 20:03:51 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.7 2012/01/18 18:11:36 pibero Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.7  2012/01/18 18:11:36  pibero
+// Added PYTHIA variables: MSTU(72), MSTU(73), and MSTP(111)
+//
 // Revision 1.6  2011/09/13 20:03:51  pibero
 // DSSV2009 -> DSSV2009a
 //
@@ -78,6 +81,9 @@ public:
   float cosTheta() const;
   float x1() const;
   float x2() const;
+  int mstu72() const;
+  int mstu73() const;
+  int mstp111() const;
   float Q2() const;
   float partonALL() const;
   float dF1(PDF scenario = STD) const;
@@ -103,6 +109,9 @@ public:
   void setCosTheta(float cosTheta);
   void setX1(float x1);
   void setX2(float x2);
+  void setMstu72(int mstu72);
+  void setMstu73(int mstu73);
+  void setMstp111(int mstp111);
   void setPartonALL(float a);
   void setDF1(PDF scenario, float val);
   void setDF2(PDF scenario, float val);
@@ -121,9 +130,12 @@ private:
   float mT;
   float mU;
   float mPt;
-    float mCosTheta;
+  float mCosTheta;
   float mX1;
   float mX2;
+  int mMstu72;
+  int mMstu73;
+  int mMstp111;
   float mPartonALL;
   float mDF1[NPDF];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2][DSSV2009a]
   float mDF2[NPDF];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2][DSSV2009a]
@@ -132,7 +144,7 @@ private:
   
   TClonesArray* mParticles;
   
-  ClassDef(StPythiaEvent,5);
+  ClassDef(StPythiaEvent,6);
 };
 
 inline int StPythiaEvent::runId() const { return mRunId; }
@@ -147,6 +159,9 @@ inline float StPythiaEvent::pt() const { return mPt; }
 inline float StPythiaEvent::cosTheta() const { return mCosTheta; }
 inline float StPythiaEvent::x1() const { return mX1; }
 inline float StPythiaEvent::x2() const { return mX2; }
+inline int StPythiaEvent::mstu72() const { return mMstu72; }
+inline int StPythiaEvent::mstu73() const { return mMstu73; }
+inline int StPythiaEvent::mstp111() const { return mMstp111; }
 inline float StPythiaEvent::Q2() const { return mPt * mPt; }
 inline float StPythiaEvent::partonALL() const { return mPartonALL; }
 inline float StPythiaEvent::dF1(PDF scenario) const { return mDF1[scenario]; }
@@ -226,6 +241,9 @@ inline void StPythiaEvent::Clear(Option_t* option)
     mCosTheta = 0;
     mX1 = 0;
     mX2 = 0;
+    mMstu72 = 0;
+    mMstu73 = 0;
+    mMstp111 = 0;
     mPartonALL = 0;
     for (int ii=0; ii<30; ii++) {
       mDF1[ii] = 0;
@@ -249,6 +267,9 @@ inline void StPythiaEvent::setPt(float pt) { mPt = pt; }
 inline void StPythiaEvent::setCosTheta(float cosTheta) { mCosTheta = cosTheta; }
 inline void StPythiaEvent::setX1(float x1) { mX1 = x1; }
 inline void StPythiaEvent::setX2(float x2) { mX2 = x2; }
+inline void StPythiaEvent::setMstu72(int mstu72) { mMstu72 = mstu72; }
+inline void StPythiaEvent::setMstu73(int mstu73) { mMstu73 = mstu73; }
+inline void StPythiaEvent::setMstp111(int mstp111) { mMstp111 = mstp111; }
 inline void StPythiaEvent::setPartonALL(float a) { mPartonALL = a; }
 inline void StPythiaEvent::setDF1(PDF scenario, float val) { mDF1[scenario] = val; }
 inline void StPythiaEvent::setDF2(PDF scenario, float val) { mDF2[scenario] = val; }
