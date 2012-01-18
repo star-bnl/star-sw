@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.10 2011/12/02 03:53:18 avossen Exp $
+// $Id: StFgtDbMaker.cxx,v 1.11 2012/01/18 17:24:55 sgliske Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -222,7 +222,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    if(i>15) break;    }
 	#endif   
     }
-    else
+    else if (!m_isIdeal)
     {
 	if ( !pedDataset )
 	{
@@ -283,6 +283,9 @@ Int_t StFgtDbMaker::Finish()
 
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.11  2012/01/18 17:24:55  sgliske
+// fixed bug on line 225 that made ideal flavor always fail
+//
 // Revision 1.10  2011/12/02 03:53:18  avossen
 // fixed eLoss db tables
 //
