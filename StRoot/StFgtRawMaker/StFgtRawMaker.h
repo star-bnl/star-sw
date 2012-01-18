@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtRawMaker.h,v 1.16 2011/11/01 18:45:32 sgliske Exp $
+//  $Id: StFgtRawMaker.h,v 1.17 2012/01/18 03:10:51 avossen Exp $
 //  $Log: StFgtRawMaker.h,v $
+//  Revision 1.17  2012/01/18 03:10:51  avossen
+//  added db access to the raw maker
+//
 //  Revision 1.16  2011/11/01 18:45:32  sgliske
 //  Updated to correspond with StEvent containers, take 2.
 //  Note: new FGT containers (and StEvent access) no longer
@@ -35,11 +38,12 @@
 #include "StRoot/StChain/StRTSBaseMaker.h"
 
 class StFgtCollection;
-
+class StFgtDb;
 //#include "StRoot/StEvent/StEventTypes.h"
 //#include <StDaqLib/GENERIC/EventReader.hh>
 //#include <StDAQMaker/StDAQReader.h>
 //#include "StRoot/StFgtUtil/database/StFgtDb.h"
+
 
 class StFgtRawMaker : public StRTSBaseMaker
 {
@@ -53,10 +57,13 @@ class StFgtRawMaker : public StRTSBaseMaker
   virtual Int_t FillHits();
   virtual Int_t PrepareEnvironment();
 
+  void setFgtDb(StFgtDb *x) {fgtDb=x;}
+
  protected:
   StFgtCollection *mFgtCollectionPtr;
 
  private:
+  StFgtDb *fgtDb;
   ClassDef(StFgtRawMaker,1);
 };
 

@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.20 2012/01/17 21:56:26 sgliske Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.21 2012/01/18 03:10:51 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.21  2012/01/18 03:10:51  avossen
+//  added db access to the raw maker
+//
 //  Revision 1.20  2012/01/17 21:56:26  sgliske
 //  Short_t geoId -> Int_t geoId
 //
@@ -71,6 +74,7 @@
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtStripCollection.h"
 #include "StRoot/StEvent/StFgtStrip.h"
+#include "StFgtDbMaker/StFgtDb.h"
 
 #include "StFgtRawMaker.h"
 
@@ -155,9 +159,13 @@ Int_t StFgtRawMaker::FillHits()
                adc=mFgtRawData->adc;
                arm=rts_tbl->Sector();
                apv=rts_tbl->Pad();
-               Int_t geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
-               StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
+	       Int_t geoId=-1;
+	       if(!fgtDb)
+		 geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
+	       else
+		 geoId=fgtDb->getGeoIdFromElecCoord(rdo, arm, apv, channel);
 
+               StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
                Char_t type = 0;    // TODO: set this according to the database???
 
                StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
@@ -187,7 +195,7 @@ StFgtRawMaker::StFgtRawMaker(const Char_t* name) :
    StRTSBaseMaker( "adc", name ),
    mFgtCollectionPtr(0)
 {
-  // nothing else to do
+  fgtDb=0;
 };
 
 
