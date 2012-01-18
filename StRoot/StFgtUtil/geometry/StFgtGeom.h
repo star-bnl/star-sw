@@ -208,6 +208,24 @@ class StFgtGeom
 	  return eID; 
 	}
 
+	static void getElecCoordFromElectId(
+           Int_t eID, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
+	)
+	{
+          channel = eID % 128;
+          eID /= 128;
+          apv = eID % 20;
+          eID /= 20;
+          arm = eID % 6;
+          eID /= 6;
+          rdo = eID + 1;
+
+	  //apv 10,11,22,23 are unused 
+          //undo shift down to get apv back to the value coming from DAQ
+          if( apv > 9 )
+             apv += 2;
+	}
+
 	static Int_t getNaiveGeoIdFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
@@ -447,8 +465,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.25 2012/01/13 19:10:41 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.26 2012/01/18 18:22:31 sgliske Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.26  2012/01/18 18:22:31  sgliske
+ *  added function getElecCoordFromElectId
+ *
  *  Revision 1.25  2012/01/13 19:10:41  rfatemi
  *  included getElectIdfromElecCoord to calculate electronic id from RDO,ARM,APVmod,CH
  *
