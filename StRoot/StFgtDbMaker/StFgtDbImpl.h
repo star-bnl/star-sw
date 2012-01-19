@@ -15,6 +15,7 @@
 #include "tables/St_fgtMapping_Table.h"
 #include "tables/St_fgtGain_Table.h"
 #include "tables/St_fgtStatus_Table.h"
+#include "StFgtUtil/geometry/StFgtGeom.h"
 
 //#include "fgtGain.h"
 //#include "fgtMapping.h"
@@ -66,7 +67,7 @@ class StFgtDbImpl : public StFgtDb
 	)
 	{
 	    return m_map->Mapping[ 
-		encodeElectronicId( rdo, arm, apv, channel )
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
 	    ];
 	}
 
@@ -76,7 +77,7 @@ class StFgtDbImpl : public StFgtDb
 	{
 	    Int_t elecId = m_rmap->Mapping[ geoId ];
 
-	    decodeElectronicId( elecId, rdo, arm, apv, channel );
+	    StFgtGeom::decodeElectronicId( elecId, rdo, arm, apv, channel );
 
 	    return;
 	}
@@ -136,7 +137,7 @@ class StFgtDbImpl : public StFgtDb
 	)
 	{
 	    return m_pedestal->AdcPedestal[
-		encodeElectronicId( rdo, arm, apv, channel )
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
 	    ];
 	}
 
@@ -161,7 +162,7 @@ class StFgtDbImpl : public StFgtDb
 	)
 	{
 	    return m_pedestal->AdcPedestalRMS[
-		encodeElectronicId( rdo, arm, apv, channel )
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
 	    ];
 	}
 
@@ -186,7 +187,7 @@ class StFgtDbImpl : public StFgtDb
 	)
 	{
 	    return m_pedestal->Status[
-		encodeElectronicId( rdo, arm, apv, channel )
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
 	    ];
 	}
 
@@ -209,7 +210,7 @@ class StFgtDbImpl : public StFgtDb
 	)
 	{
 	    return m_status->Status[
-		encodeElectronicId( rdo, arm, apv, channel )
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
 	    ];
 	}
 
@@ -232,7 +233,7 @@ class StFgtDbImpl : public StFgtDb
 	)
 	{
 	    return m_gain->Gain[
-		encodeElectronicId( rdo, arm, apv, channel )
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
 	    ];
 	}
 
@@ -255,7 +256,7 @@ class StFgtDbImpl : public StFgtDb
 	)
 	{
 	    return m_gain->Status[
-		encodeElectronicId( rdo, arm, apv, channel )
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
 	    ];
 	}
 
@@ -277,36 +278,6 @@ class StFgtDbImpl : public StFgtDb
 	fgtGain_st * m_gain;
 	fgtElosCutoff_st* m_eLoss;
 
-	virtual Int_t encodeElectronicId(
-	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
-	)
-	{
-	    if ( apv >= 12 )
-	    {
-		apv -= 2;
-	    }
-	    return channel+128*(apv+20*(arm+6*(rdo-1)));
-	}
-
-	virtual void decodeElectronicId(
-	    Int_t elecId, Int_t &rdo, Int_t &arm, Int_t &apv, Int_t &channel
-	)
-	{
-	    channel = elecId % 128;
-	    elecId /= 128;
-
-	    apv = elecId % 20;
-	    elecId /= 20;
-
-	    arm = elecId % 6;
-	    rdo = 1 + elecId / 6;
-
-	    if ( apv > 9 )
-	    {
-		apv += 2;
-	    }
-	    return;
-	}
 	virtual Float_t eLossTab(int bin)
 	{
 	  assert(bin>=0);
