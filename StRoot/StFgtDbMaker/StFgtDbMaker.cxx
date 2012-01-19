@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.11 2012/01/18 17:24:55 sgliske Exp $
+// $Id: StFgtDbMaker.cxx,v 1.12 2012/01/19 22:59:31 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -196,7 +196,9 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 
 	for ( int ii = 0; ii < 51200; ++ii )
 	{
+	  if (map->Mapping[ii]>=0)
 	    m_rmap->Mapping[ map->Mapping[ii] ] = ii;
+	  
 	}
 
 	dynamic_cast< StFgtDbImpl * >(m_tables)->updateTables(
@@ -283,6 +285,9 @@ Int_t StFgtDbMaker::Finish()
 
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.12  2012/01/19 22:59:31  rfatemi
+// Don't read negative DB numbers into reverse maps
+//
 // Revision 1.11  2012/01/18 17:24:55  sgliske
 // fixed bug on line 225 that made ideal flavor always fail
 //
