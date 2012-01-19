@@ -181,25 +181,51 @@ class StFgtGeom
 	//  For those functions that have them, currently rdo can be 1-2, arm
 	//  can be 0-5, apv can be 0-23 (although 10, 11, 22, and 23 are not
 	//  technically valid) and channel is 0-127.
+	static Int_t encodeElectronicId(
+	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+	)
+	{
+	    if ( apv >= 12 )
+	    {
+		apv -= 2;
+	    }
+	    return channel+128*(apv+20*(arm+6*(rdo-1)));
+	}
+
+	static void decodeElectronicId(
+	    Int_t elecId, Int_t &rdo, Int_t &arm, Int_t &apv, Int_t &channel
+	)
+	{
+	    channel = elecId % 128;
+	    elecId /= 128;
+
+	    apv = elecId % 20;
+	    elecId /= 20;
+
+	    arm = elecId % 6;
+	    rdo = 1 + elecId / 6;
+
+	    if ( apv > 9 )
+	    {
+		apv += 2;
+	    }
+	    return;
+	}
+
 
 	static Int_t getElectIdFromElecCoord(
-	   Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+	   Int_t rdo, Int_t arm, Int_t apv, Int_t ch
 	)
 	{
 	  Int_t eID = -1;
-
-
-	  //apv 10,11,22,23 are unused 
-	  //to make electID continuous we need to shift down 
-	  Int_t apvMod = apv;
-	  if (apv > 11) apvMod = apv-2;
+	  
 
 	  if ((rdo > 0)&&( rdo < 3)){
 	    if ((arm >= 0)&&(arm < 6)){
-	      if ((apvMod >= 0)&&(apvMod < 20)){
-		if ((channel >= 0)&&(channel < 128)){
+	      if ((apv >= 0)&&(apv< 24)){
+		if ((ch >= 0)&&(ch < 128)){
 	         
-		  eID =  channel + (128 * (apvMod + (20 * (arm + (6 * (rdo - 1))))));
+		  eID = encodeElectronicId(rdo,arm,apv,ch); 
 		}
 	      }
 	    }
@@ -208,22 +234,16 @@ class StFgtGeom
 	  return eID; 
 	}
 
+
+
+
 	static void getElecCoordFromElectId(
-           Int_t eID, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
+           Int_t eID, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& ch
 	)
 	{
-          channel = eID % 128;
-          eID /= 128;
-          apv = eID % 20;
-          eID /= 20;
-          arm = eID % 6;
-          eID /= 6;
-          rdo = eID + 1;
+         
+	  decodeElectronicId(eID,rdo,arm,apv,ch);
 
-	  //apv 10,11,22,23 are unused 
-          //undo shift down to get apv back to the value coming from DAQ
-          if( apv > 9 )
-             apv += 2;
 	}
 
 	static Int_t getNaiveGeoIdFromElecCoord(
@@ -465,8 +485,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.26 2012/01/18 18:22:31 sgliske Exp $
+ *  $Id: StFgtGeom.h,v 1.27 2012/01/19 16:27:27 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.27  2012/01/19 16:27:27  rfatemi
+ *  Move encode(decode) ElectronicId from StFgtDbImp.h
+ *
  *  Revision 1.26  2012/01/18 18:22:31  sgliske
  *  added function getElecCoordFromElectId
  *
