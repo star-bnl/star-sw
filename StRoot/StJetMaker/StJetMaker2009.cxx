@@ -221,7 +221,7 @@ int StJetMaker2009::Make()
     if (jetbranch->anapars->useMonteCarlo) {
       StjMCMuDst mc(this);
       StjPrimaryVertex mcvertex = mc.getMCVertex();
-      StjMCParticleList mcparticles = mc.getMCParticleList();
+      StjMCParticleList mcparticles = jetbranch->anapars->mcCuts()(mc.getMCParticleList());
       StProtoJet::FourVecList particles; // vector<const AbstractFourVec*>
       transform(mcparticles.begin(),mcparticles.end(),back_inserter(particles),StjMCParticleToStMuTrackFourVec());
 
