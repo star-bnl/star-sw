@@ -290,17 +290,29 @@ void RunJetFinder2009sim(int nevents = 1e6,
 
   //------------------------------------------------------------------------------------
 
-  // Set analysis cuts for Pythia branch
-  StAnaPars* anaparsPythia = new StAnaPars;
-  anaparsPythia->useMonteCarlo = true;
+  // Set analysis cuts for particle jets branch
+  StAnaPars* anaparsParticle = new StAnaPars;
+  anaparsParticle->useMonteCarlo = true;
 
   // MC cuts
-  //anaparsPythia->addMcCut(new StjMCParticleCutStatus(1)); // final state particles
-  anaparsPythia->addMcCut(new StjMCParticleCutParton);
+  anaparsParticle->addMcCut(new StjMCParticleCutStatus(1)); // final state particles
 
   // Jet cuts
-  anaparsPythia->addJetCut(new StProtoJetCutPt(3,200));
-  anaparsPythia->addJetCut(new StProtoJetCutEta(-100,100));
+  anaparsParticle->addJetCut(new StProtoJetCutPt(3,200));
+  anaparsParticle->addJetCut(new StProtoJetCutEta(-100,100));
+    
+  //------------------------------------------------------------------------------------
+
+  // Set analysis cuts for parton jets branch
+  StAnaPars* anaparsParton = new StAnaPars;
+  anaparsParton->useMonteCarlo = true;
+
+  // MC cuts
+  anaparsParton->addMcCut(new StjMCParticleCutParton);
+
+  // Jet cuts
+  anaparsParton->addJetCut(new StProtoJetCutPt(3,200));
+  anaparsParton->addJetCut(new StProtoJetCutEta(-100,100));
     
   // Set cone jet finder parameters
   StConePars* conepars = new StConePars;
@@ -321,7 +333,8 @@ void RunJetFinder2009sim(int nevents = 1e6,
   jetmaker->addBranch("ConeJets12_093",anapars12_093,conepars);
   jetmaker->addBranch("ConeJets5",anapars5,conepars);
   jetmaker->addBranch("ConeJetsEMC",anaparsEMC,conepars);
-  jetmaker->addBranch("PythiaConeJets",anaparsPythia,conepars);
+  jetmaker->addBranch("ParticleConeJets",anaparsParticle,conepars);
+  jetmaker->addBranch("PartonConeJets",anaparsParton,conepars);
 
   //------------------------------------------------------------------------------------
 
