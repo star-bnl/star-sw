@@ -12,6 +12,7 @@
 #include "StjTowerEnergyCorrectionForTracksNull.h"
 #include "StjTrackListCut.h"
 #include "StjTowerEnergyListCut.h"
+#include "StjMCParticleListCut.h"
 #include "StJetFinder/StProtoJetListCut.h"
 
 class StAnaPars : public TObject {
@@ -38,12 +39,14 @@ public:
   void addTpcCut(StjTrackCut* c) { mTpcCuts.addCut(c); }
   void addBemcCut(StjTowerEnergyCut* c) { mBemcCuts.addCut(c); }
   void addEemcCut(StjTowerEnergyCut* c) { mEemcCuts.addCut(c); }
+  void addMcCut(StjMCParticleCut* c) { mMcCuts.addCut(c); }
   void addJetCut(StProtoJetCut* c) { mJetCuts.addCut(c); }
 
   StjAbstractTowerEnergyCorrectionForTracks& correctTowerEnergyForTracks() { return *mCorrectTowerEnergyForTracks; }
   StjTrackListCut& tpcCuts() { return mTpcCuts; }
   StjTowerEnergyListCut& bemcCuts() { return mBemcCuts; }
   StjTowerEnergyListCut& eemcCuts() { return mEemcCuts; }
+  StjMCParticleListCut& mcCuts() { return mMcCuts; }
   StProtoJetListCut& jetCuts() { return mJetCuts; }
 
 private:
@@ -51,6 +54,7 @@ private:
   StjTrackListCut mTpcCuts;
   StjTowerEnergyListCut mBemcCuts;
   StjTowerEnergyListCut mEemcCuts;
+  StjMCParticleListCut mMcCuts;
   StProtoJetListCut mJetCuts;
 
 public:

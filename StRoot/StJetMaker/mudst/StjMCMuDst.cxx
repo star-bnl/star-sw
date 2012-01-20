@@ -1,4 +1,4 @@
-// $Id: StjMCMuDst.cxx,v 1.10 2011/01/27 16:42:44 pibero Exp $
+// $Id: StjMCMuDst.cxx,v 1.11 2012/01/20 21:53:08 pibero Exp $
 
 #include <StjMCMuDst.h>
 
@@ -50,29 +50,26 @@ StjMCParticleList StjMCMuDst::getMCParticleList()
     if (const St_particle* particle_descriptor = (const St_particle*)geantDstI("particle")) {
       if (const particle_st* particle_table = particle_descriptor->GetTable()) {
 	for (int i = 0; i < particle_descriptor->GetNRows(); ++i) {
-	  // Final state particles only
-	  if (particle_table[i].isthep == 1) {
-	    StjMCParticle particle;
-	    particle.runNumber       = runNumber;
-	    particle.eventId         = eventNumber;	
-	    particle.status          = particle_table[i].isthep;
-	    particle.mcparticleId    = i+1;
-	    particle.pdg             = particle_table[i].idhep;
-	    particle.firstMotherId   = particle_table[i].jmohep[0];
-	    particle.lastMotherId    = particle_table[i].jmohep[1];
-	    particle.firstDaughterId = particle_table[i].jdahep[0];
-	    particle.lastDaughterId  = particle_table[i].jdahep[1];
-	    particle.vertexZ         = particle_table[i].vhep[2];
+	  StjMCParticle particle;
+	  particle.runNumber       = runNumber;
+	  particle.eventId         = eventNumber;	
+	  particle.status          = particle_table[i].isthep;
+	  particle.mcparticleId    = i+1;
+	  particle.pdg             = particle_table[i].idhep;
+	  particle.firstMotherId   = particle_table[i].jmohep[0];
+	  particle.lastMotherId    = particle_table[i].jmohep[1];
+	  particle.firstDaughterId = particle_table[i].jdahep[0];
+	  particle.lastDaughterId  = particle_table[i].jdahep[1];
+	  particle.vertexZ         = particle_table[i].vhep[2];
 
-	    TLorentzVector p4(particle_table[i].phep);
-	    particle.pt  = p4.Pt();
-	    particle.eta = p4.Eta();
-	    particle.phi = p4.Phi();
-	    particle.m   = p4.M();
-	    particle.e   = p4.E();
+	  TLorentzVector p4(particle_table[i].phep);
+	  particle.pt  = p4.Pt();
+	  particle.eta = p4.Eta();
+	  particle.phi = p4.Phi();
+	  particle.m   = p4.M();
+	  particle.e   = p4.E();
 
-	    theList.push_back(particle);
-	  }
+	  theList.push_back(particle);
 	}
       }
     }

@@ -294,6 +294,10 @@ void RunJetFinder2009sim(int nevents = 1e6,
   StAnaPars* anaparsPythia = new StAnaPars;
   anaparsPythia->useMonteCarlo = true;
 
+  // MC cuts
+  //anaparsPythia->addMcCut(new StjMCParticleCutStatus(1)); // final state particles
+  anaparsPythia->addMcCut(new StjMCParticleCutParton);
+
   // Jet cuts
   anaparsPythia->addJetCut(new StProtoJetCutPt(3,200));
   anaparsPythia->addJetCut(new StProtoJetCutEta(-100,100));
