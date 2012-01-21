@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMaker.h,v 1.7 2003/09/10 19:47:19 perev Exp $
+ * $Id: StHbtMaker.h,v 1.8 2012/01/21 16:50:55 yyang Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.h,v $
+ * Revision 1.8  2012/01/21 16:50:55  yyang
+ * this is a test commit
+ *
  * Revision 1.7  2003/09/10 19:47:19  perev
  * ansi corrs
  *
@@ -87,7 +90,7 @@ class StHbtMaker
 
   
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.7 2003/09/10 19:47:19 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.8 2012/01/21 16:50:55 yyang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 #ifdef __ROOT__
   ClassDef(StHbtMaker,0)
 #endif
@@ -97,6 +100,6 @@ inline StHbtManager* StHbtMaker::HbtManager(){return mHbtManager;}
 inline  int StHbtMaker::Debug() const {return mDebug;}
 inline  void StHbtMaker::SetDebug(int d){mDebug=d;}
 
-
+//this is test comment for testing cvs commit
 
 #endif
