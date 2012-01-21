@@ -62,6 +62,21 @@ int St_pythia_Maker::Make()
   St_particle* particle = new St_particle("particle",mEvent->numberOfParticles());
   geant->Add(particle);
 
+  St_g2t_pythia* g2t_pythia = new St_g2t_pythia("g2t_pythia",1);
+  geant->Add(g2t_pythia);
+  g2t_pythia_st* pythiaTable = g2t_pythia->GetTable();
+  pythiaTable->subprocess_id = mEvent->processId();
+  pythiaTable->mand_s = mEvent->s();
+  pythiaTable->mand_t = mEvent->t();
+  pythiaTable->mand_u = mEvent->u();
+  pythiaTable->hard_p = mEvent->pt();
+  pythiaTable->cos_th = mEvent->cosTheta();
+  pythiaTable->bjor_1 = mEvent->x1();
+  pythiaTable->bjor_2 = mEvent->x2();
+  pythiaTable->mstu72 = mEvent->mstu72();
+  pythiaTable->mstu73 = mEvent->mstu73();
+  pythiaTable->mstp111 = mEvent->mstp111();
+
   // Track loop
   for (int i = 0; i < mEvent->numberOfParticles(); ++i) {
     particle_st part;
