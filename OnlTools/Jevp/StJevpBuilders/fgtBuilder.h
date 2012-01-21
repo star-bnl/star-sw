@@ -26,6 +26,9 @@ public:
   static void main(int argc, char *argv[]);
 
  private:
+
+  void fillSumHistos();
+
   TRandom tRnd;
   int evtCt;
   int t_2min;
@@ -37,6 +40,7 @@ public:
   static const string Gid2Label[19];
   //the gid encodes rdo etc. but since this is consecutive, we have to have another mapping
   static const int Indx2Gid[19];
+  static const int Gid2Indx[19];
 
 
   //*** Histogram Declarations...
@@ -72,11 +76,21 @@ public:
     struct {
       TH1* h1;
       TH1* h2;
+      TH1* hSumBad;
       //other possible plots:
       //hits over pedestal for each timebin, shows in time, collision condition etc.
-
     };
   } hContents;
+
+  union {
+    TH2 *sumHArray[];
+    struct{
+      TH2* hSumPed;
+      TH2* hSumSig;
+      TH2* hSumFrac;
+
+    };
+  }hSumContents;
 
   static const int maxC;
   static const int maxA;
@@ -87,14 +101,24 @@ public:
 
   int np;
   int hNp;
+  int hSNp;
+
   JevpPlot** plots;
   daq_dta *dd;
   //*** End Histogram Declarations...
   float meanVals[19*1400];
+  float oldStdDevs[19*1400];
+
   int aVals[19*1400];
   int numVals[19*1400];
   int rmsVals[19*1400];
+
+  int numOverOneSig[19*1400];
   bool isChannelBad[19*1400];
+
+  int sumHistogramsFilled;
+
+
   JLatex* errorMsg;
 
   ClassDef(fgtBuilder, 1);
