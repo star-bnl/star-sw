@@ -14,7 +14,13 @@
 
 class StjMCParticleCutParton : public StjMCParticleCut {
 public:
-  bool operator()(const StjMCParticle&);
+  static int mstu72;		// set by StjMCMuDst
+  static int mstu73;		// set by StjMCMuDst
+
+  bool operator()(const StjMCParticle& particle)
+  {
+    return particle.mcparticleId <= mstu72 || particle.mcparticleId > mstu73;
+  }
 
   ClassDef(StjMCParticleCutParton,1)
 };
