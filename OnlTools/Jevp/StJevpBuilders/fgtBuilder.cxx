@@ -117,9 +117,11 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
 
   hContents.h1=new TH1F("MeanPeds","Mean Pedestal Values",300,minPedVal,maxPedVal);
   hContents.h1->GetXaxis()->SetTitle("Mean Pedestal Value");
+  hContents.h1->SetFillColor(kYellow-9);
   hContents.h1->SetStats(false);
   hContents.h2=new TH1F("MeanStdDev","Mean StdDev",100,0,maxRMSVal);
   hContents.h2->GetXaxis()->SetTitle("#sigma");
+  hContents.h2->SetFillColor(kYellow-9);
   hContents.h2->SetStats(false);
   hContents.hSumBad=new TH1F("Number of good channels per APV","Number of good channels per APV",190,0,190);
   //  hContents.hSumBad->GetXaxis()->SetNdivisions(19,false);
