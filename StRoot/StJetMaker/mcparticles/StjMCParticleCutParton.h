@@ -10,6 +10,7 @@
 #ifndef STJ_MCPARTICLE_CUT_PARTON_H
 #define STJ_MCPARTICLE_CUT_PARTON_H
 
+#include <cmath>
 #include "StjMCParticleCut.h"
 
 class StjMCParticleCutParton : public StjMCParticleCut {
@@ -19,7 +20,7 @@ public:
 
   bool operator()(const StjMCParticle& particle)
   {
-    return particle.mcparticleId <= mstu72 || particle.mcparticleId > mstu73;
+    return !(particle.mcparticleId > mstu72 && particle.mcparticleId <= mstu73 && particle.firstMotherId <= mstu72 && particle.status != 51 && particle.pt > 0.0001 && fabs(particle.eta) < 5);
   }
 
   ClassDef(StjMCParticleCutParton,1)
