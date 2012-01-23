@@ -17,7 +17,7 @@ TDataSet *CreateGeometry(const Char_t *name="y2011") {
   }
 
   const Char_t *path  = ".:./StarDb/AgMLGeometry/:$STAR/StarDb/AgMLGeometry/";
-  Char_t *file = gSystem->Which(path,"loadStarGeometry.C",kReadPermission);
+  Char_t *file = gSystem->Which(path,"loadStarGeometry.Cxx",kReadPermission);
 
   // Load the geometry macro
   gROOT -> ProcessLine( Form(".L %s",file ) );
