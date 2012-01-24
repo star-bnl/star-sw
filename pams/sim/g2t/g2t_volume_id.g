@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.68 2011/09/23 21:54:32 perev Exp $
+* $Id: g2t_volume_id.g,v 1.69 2012/01/24 03:32:32 perev Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.69  2012/01/24 03:32:32  perev
+* Add Etr
+*
 * Revision 1.68  2011/09/23 21:54:32  perev
 * FGT two numbers id now
 *
@@ -144,6 +147,7 @@
 ********************************************************************
       implicit none
       integer  g2t_volume_id
++CDE,gcunit.
 * 
       Character*3      Csys
       Integer          NUMBV(15)
@@ -797,12 +801,32 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         module = numbv(2)
         layer  = numbv(3)
         volume_id = 1000*sector + 100*module + layer
+
+*******************************************************************************************
+       elseif (Csys=='etr') then
+
+          sector = MOD( (numbv(1)-1), 12 );   "Sectors count from 0 - 11"
+          layer  =      (numbv(1)-1)/ 12;     "Layers  count from 0 - 2"
+          section= numbv(2) - 1
+
+          """ sector  from 0 - 11  (phi division)      """
+          """ layer   from 0 - 2   (z-division)        """
+          """ section from 0 - 29  (division of layer) """
+
+          volume_id = section + 100*layer + 10000*sector
+
+          <W> numbv(1), numbv(2), sector, layer, section, volume_id; 
+    ('numbv =',I4,2X,I4,' sector=',I4,' layer=',I4,' section=',I4,' vid=', I7);
+
+
+*******************************************************************************************
       
 
       else
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
     g2t_volume_id = volume_id
+
 
     end
       
