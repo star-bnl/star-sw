@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.24 2011/10/17 00:13:49 fisyak Exp $
+ * $Id: StHit.cxx,v 2.25 2012/01/24 03:05:08 perev Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.25  2012/01/24 03:05:08  perev
+ * Cleanup
+ *
  * Revision 2.24  2011/10/17 00:13:49  fisyak
  * Add handles for IdTruth info
  *
@@ -94,10 +97,11 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.24 2011/10/17 00:13:49 fisyak Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.25 2012/01/24 03:05:08 perev Exp $";
 
 ClassImp(StHit)
 
+//______________________________________________________________________________
 StHit::StHit()
 {
     mHardwarePosition	= 0;
@@ -109,6 +113,7 @@ StHit::StHit()
     mNextHit 		= 0;
 }
 
+//______________________________________________________________________________
 StHit::StHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
              unsigned int hp, float q, unsigned char c, UShort_t idTruth, UShort_t quality, UShort_t id)
@@ -117,10 +122,11 @@ StHit::StHit(const StThreeVectorF& p,
 {
 }
 
+//______________________________________________________________________________
 StHit::~StHit() { /* noop */ }
 
-int
-StHit::operator==(const StHit& h) const
+//______________________________________________________________________________
+int StHit::operator==(const StHit& h) const
 {
     return h.mPosition         == mPosition &&
            h.mPositionError    == h.mPositionError &&
@@ -133,50 +139,50 @@ StHit::operator==(const StHit& h) const
            h.mNextHit          == mNextHit;
 }
 
-int
-StHit::operator!=(const StHit& h) const
+//______________________________________________________________________________
+int StHit::operator!=(const StHit& h) const
 {
     return !(*this == h);  // use operator==()
 }
 
-void
-StHit::setCharge(float val) { mCharge = val; }
+//______________________________________________________________________________
+void StHit::setCharge(float val) { mCharge = val; }
 
-void
-StHit::setTrackReferenceCount(unsigned char val) { mTrackRefCount = val; }
+//______________________________________________________________________________
+void StHit::setTrackReferenceCount(unsigned char val) { mTrackRefCount = val; }
     
-void
-StHit::setFitFlag(unsigned char val) { mFitFlag = val; }
+//______________________________________________________________________________
+void StHit::setFitFlag(unsigned char val) { mFitFlag = val; }
     
-void
-StHit::setHardwarePosition(unsigned int val) { mHardwarePosition = val; }
+//______________________________________________________________________________
+void StHit::setHardwarePosition(unsigned int val) { mHardwarePosition = val; }
 
-void
-StHit::setPositionError(const StThreeVectorF& e) { mPositionError = e; }
+//______________________________________________________________________________
+void StHit::setPositionError(const StThreeVectorF& e) { mPositionError = e; }
     
-float
-StHit::charge() const { return mCharge; }
+//______________________________________________________________________________
+float StHit::charge() const { return mCharge; }
 
-unsigned int
-StHit::flag() const { return static_cast<unsigned int>(mFlag); }
+//______________________________________________________________________________
+unsigned int StHit::flag() const { return static_cast<unsigned int>(mFlag); }
 
-int
-StHit::usedInFit() const { return static_cast<int>(mFitFlag); }
+//______________________________________________________________________________
+int StHit::usedInFit() const { return static_cast<int>(mFitFlag); }
 
-unsigned int
-StHit::trackReferenceCount() const { return static_cast<unsigned int>(mTrackRefCount); }
+//______________________________________________________________________________
+unsigned int StHit::trackReferenceCount() const { return static_cast<unsigned int>(mTrackRefCount); }
 
-StDetectorId
-StHit::detector() const
+//______________________________________________________________________________
+StDetectorId StHit::detector() const
 {
     return static_cast<StDetectorId>(bits(0, 4));
 }
 
-StThreeVectorF
-StHit::positionError() const { return mPositionError; }
+//______________________________________________________________________________
+StThreeVectorF StHit::positionError() const { return mPositionError; }
    
-StMatrixF
-StHit::covariantMatrix() const
+//______________________________________________________________________________
+StMatrixF StHit::covariantMatrix() const
 {
     // for now the diagonal elements is all we have
     StMatrixF m(3,3);
@@ -186,26 +192,8 @@ StHit::covariantMatrix() const
     return m;
 }
 
-StPtrVecTrack
-StHit::relatedTracks(const StSPtrVecTrackNode& nodes, StTrackType type)
-{
-    StPtrVecTrack vec;
-    StPtrVecHit hvec;
-    StDetectorId id = this->detector();
-    
-    for (unsigned int i=0; i<nodes.size(); i++) {
-        const StTrackNode *node = nodes[i];
-        unsigned int ntracks = node->entries(type);
-        for (unsigned int k=0; k<ntracks; k++) {
-            const StTrack *track = node->track(type, k);
-            hvec = track->detectorInfo()->hits(id);
-            for (unsigned int j=0; j<hvec.size(); j++)
-                if (hvec[j] == this) vec.push_back(const_cast<StTrack*>(track));
-        }
-    }
-    return vec;
-}
 
+//______________________________________________________________________________
 void StHit::setIdTruth(int idtru,int qatru) 
 {
     if (qatru==0) qatru = (idtru>>16);
@@ -214,11 +202,13 @@ void StHit::setIdTruth(int idtru,int qatru)
     mQuality = (UShort_t) qatru;
 }
 
+//______________________________________________________________________________
 int StHit::idTruth() const
 {
   return mIdTruth;
 }
 
+//______________________________________________________________________________
 ostream&  operator<<(ostream& os, const StHit& v)
 {
   os << Form("id %5i ",v.id()) << *((const StMeasuredPoint *)&v );
@@ -228,4 +218,5 @@ ostream&  operator<<(ostream& os, const StHit& v)
   return os;
 }
 
+//______________________________________________________________________________
 void StHit::Print(Option_t *option) const {cout << *this << endl;}
