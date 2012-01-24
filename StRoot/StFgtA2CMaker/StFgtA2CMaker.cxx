@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.8 2012/01/24 05:52:13 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.9 2012/01/24 06:52:45 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.9  2012/01/24 06:52:45  sgliske
+ * made status cuts optional
+ * and updated status to a fail condition--
+ * i.e. status == 0x0 is good, otherwise is bad.
+ * WARNING--this may be different than that used at first
+ * in for the cosmic test stand.
+ *
  * Revision 1.8  2012/01/24 05:52:13  sgliske
  * Surrounded printf's with #ifdef,
  * cleaned up a little whitespace,
@@ -157,13 +164,15 @@ Int_t StFgtA2CMaker::Make(){
 #ifdef DEBUG
                         printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
 #endif
-                        UInt_t status=1;
-                        if(useStatusFile)
-                           mStatusReader->getStatus( geoId, status );
-                        if(!useStatusFile && mDb)
-                           status=mDb->getStatusFromGeoId(geoId);
-                        if(!status)
-                           strip->setGeoId( -1 );
+                        if( mCutBadStatus ){
+                           UInt_t status=0;
+                           if(useStatusFile)
+                              mStatusReader->getStatus( geoId, status );
+                           if(!useStatusFile && mDb)
+                              status=mDb->getStatusFromGeoId(geoId);
+                           if(status)
+                              strip->setGeoId( -1 );
+                        };
 		     
                         if( (mRelThres && adc < mRelThres*err) || (mAbsThres>-4096 && adc < mAbsThres) )
                            strip->setGeoId( -1 );
