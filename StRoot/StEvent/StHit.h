@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.27 2011/10/17 00:13:49 fisyak Exp $
+ * $Id: StHit.h,v 2.28 2012/01/24 03:04:22 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.28  2012/01/24 03:04:22  perev
+ * Cleanup
+ *
  * Revision 2.27  2011/10/17 00:13:49  fisyak
  * Add handles for IdTruth info
  *
@@ -116,10 +119,12 @@ class StTrack;
 class StHit : public StMeasuredPoint {
 public:
     StHit();
-    StHit(const StThreeVectorF&,
-          const StThreeVectorF&,
-          unsigned int, float, unsigned char = 0,
-	UShort_t idTruth=0, UShort_t quality=0, UShort_t id =0);
+    StHit(const StThreeVectorF& position,
+          const StThreeVectorF& errors,
+          unsigned int hardware,
+	  float    charge, 
+	  unsigned char trakRefCount = 0,
+	  UShort_t idTruth=0, UShort_t quality=0, UShort_t id =0);
     // StHit(const StHit&);            use default
     // StHit& operator=(const StHit&); use default
     ~StHit();
@@ -151,7 +156,6 @@ public:
     void SetNextHit(StHit *next = 0) 	{mNextHit = next;}
 
     virtual StDetectorId   detector() const;
-    virtual StPtrVecTrack  relatedTracks(const StSPtrVecTrackNode&, StTrackType);
     virtual void           Print(Option_t *option="") const;
     
 protected:
