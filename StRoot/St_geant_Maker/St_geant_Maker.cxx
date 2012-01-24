@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.140 2011/09/11 20:57:12 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.141 2012/01/24 03:13:29 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.141  2012/01/24 03:13:29  perev
+// Etr added
+//
 // Revision 1.140  2011/09/11 20:57:12  fisyak
 // Add kinematics definition via MuDst, Clean up
 //
@@ -537,6 +540,8 @@
 #include "g2t/St_g2t_fpd_Module.h"
 #include "g2t/St_g2t_fsc_Module.h"
 #include "g2t/St_g2t_mtd_Module.h"
+#include "g2t/St_g2t_etr_Module.h"
+
 #include "St_db_Maker/St_db_Maker.h"
 #include "TUnixTime.h"
 #include "StarCallf77.h" 
@@ -1303,6 +1308,16 @@ Int_t St_geant_Maker::Make()
     iRes = g2t_mtd(g2t_track,g2t_mtd_hit); if (Debug() > 1) g2t_mtd_hit->Print(0,10);
     //           ==============================
   }
+ 
+  nhits = 0;
+  geant3 -> Gfnhit("EIDH","TABD", nhits);
+  if ( nhits > 0 ) 
+    {
+      St_g2t_etr_hit *g2t_etr_hit = new St_g2t_etr_hit("g2t_etr_hit",nhits);
+      m_DataSet->Add(g2t_etr_hit);
+      iRes = g2t_etr( g2t_track, g2t_etr_hit); 
+      if ( Debug() > 1 ) g2t_etr_hit->Print(0,10);
+    }
   
 
 
