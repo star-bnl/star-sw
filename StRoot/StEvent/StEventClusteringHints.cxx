@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.29 2011/11/04 19:19:33 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.30 2012/01/24 03:03:13 perev Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.30  2012/01/24 03:03:13  perev
+ * Open for new detectors
+ *
  * Revision 2.29  2011/11/04 19:19:33  ullrich
  * Added StTriggerData2012.
  *
@@ -101,7 +104,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.29 2011/11/04 19:19:33 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.30 2012/01/24 03:03:13 perev Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -217,8 +220,9 @@ StEventClusteringHints::setMiniDstMode()
 const char*
 StEventClusteringHints::branchName(const char* classname) const
 {
+    if (strstr(classname,"Hit")) return "evt_hits";
     map<string,string>::const_iterator i = mNameMap->find(string(classname));
-    return i != mNameMap->end() ? i->second.c_str() : 0;
+    return i != mNameMap->end() ? i->second.c_str() : "event";
 }
 
 void
@@ -234,7 +238,7 @@ int
 StEventClusteringHints::branchId(const char* branchname) const
 {
     map<string,int>::const_iterator i = mBranchIds.find(string(branchname));
-    return i != mBranchIds.end() ? i->second : -1;  
+    return i != mBranchIds.end() ? i->second : 1;  
 }
 
 vector<string>
