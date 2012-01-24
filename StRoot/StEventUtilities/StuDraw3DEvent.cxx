@@ -1,6 +1,7 @@
-// $Id: StuDraw3DEvent.cxx,v 1.32 2010/04/26 22:03:44 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.33 2012/01/24 03:11:32 perev Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
+#include "TSystem.h"
 #include "TVirtualPad.h"
 #include "TColor.h"
 #include "StEventHelper.h"
@@ -23,6 +24,7 @@
 #include "TMath.h"
 #include "StTrackDetectorInfo.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEventHitIter.h"
 #include "StMessMgr.h"
 
 
@@ -55,6 +57,7 @@
          current "display" is to be set too \sa Display()
          \sa Plot3Dtracks.C
 */
+ClassImp(StuDraw3DEvent)
 //___________________________________________________
 StuDraw3DEvent::StuDraw3DEvent( const char *detectorName,TVirtualPad *pad):StDraw3D(detectorName,pad)
 {
@@ -579,6 +582,25 @@ void StuDraw3DEvent::FtpcHits(const StEvent *event,EStuDraw3DEvent trackHitsOnly
 StuDraw3DEvent *StuDraw3DEvent::Display(){ return gEventDisplay;}
 
 StuDraw3DEvent *gEventDisplay = new StuDraw3DEvent();
-
-ClassImp(StuDraw3DEvent)
+//____________________________________________________________________________________
+void StuDraw3DEvent::Hits(StEventHitIter &iter)
+{
+  std::vector<float> hitPoints;
+  for (StHit *sth=0;(sth = *(iter));++iter) {
+    const float *f = sth->position().xyz();
+    hitPoints.push_back(f[0]);
+    hitPoints.push_back(f[1]);
+    hitPoints.push_back(f[2]);
+  }
+  std::vector<float>::iterator xyz = hitPoints.begin();
+  Points(hitPoints.size()/3,&*xyz,kUsedHit);
+}
+//____________________________________________________________________________________
+//_____________________________________________________________________________
+void StuDraw3DEvent::Wait()
+{
+    if (gEventDisplay) gEventDisplay->UpdateModified();
+    fprintf(stderr,"StvDraw::Waiting...\n");
+    while(!gSystem->ProcessEvents()){gSystem->Sleep(200);}; 
+}
 

@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.20 2010/04/26 22:03:44 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.21 2012/01/24 03:11:25 perev Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"
@@ -12,6 +12,7 @@
 class StTrack;
 class StMeasuredPoint;
 class StEvent;
+class StEventHitIter;
 class StTpcHitCollection;
 class StSPtrVecTrackNode;
 class StEmcRawHit;
@@ -74,6 +75,7 @@ class StuDraw3DEvent : public virtual StDraw3D
                   ,  Style_t sty= Style_t(-1)
                   ,  Size_t siz = Size_t (-1));
      virtual void    Hits(const StEvent* event, EStuDraw3DEvent trackHitsOnly=kUsedHits, StTrackType type=global);
+     virtual void    Hits(StEventHitIter &iter);
      virtual void    FtpcHits(const StEvent* event, EStuDraw3DEvent trackHitsOnly=kUsedHits, StTrackType type=global);
      virtual void    Hits(const StTrack &track,  EDraw3DStyle sty);
      virtual void    Hits(const StTrack &track);
@@ -99,6 +101,7 @@ class StuDraw3DEvent : public virtual StDraw3D
      virtual void EmcHits(const StEvent* event, const char *det="bemc");
      virtual TObject *EmcHit(Int_t emcHitsSoftId, Color_t col,Style_t sty,Size_t siz, const char *det="bemc" );
      virtual TObject *EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t sty,Size_t siz,const char *det="bemc");
+     static void Wait();
      template <class T> TObject *Vector(const StThreeVector<T> &vector, EDraw3DStyle sty=kVtx);
      ClassDef(StuDraw3DEvent,0);
 };
