@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.49 2011/10/17 00:13:49 fisyak Exp $
+ * $Id: StEvent.cxx,v 2.50 2012/01/24 03:01:38 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.50  2012/01/24 03:01:38  perev
+ * Etr detector added
+ *
  * Revision 2.49  2011/10/17 00:13:49  fisyak
  * Add handles for IdTruth info
  *
@@ -180,6 +183,7 @@
 #include "StEventSummary.h"
 #include "StTpcHitCollection.h"
 #include "StRnDHitCollection.h"
+#include "StEtrHitCollection.h"
 #include "StSvtHitCollection.h"
 #include "StSsdHitCollection.h"
 #include "StFtpcHitCollection.h"
@@ -212,13 +216,13 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.49 2011/10/17 00:13:49 fisyak Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.49 2011/10/17 00:13:49 fisyak Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.50 2012/01/24 03:01:38 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.50 2012/01/24 03:01:38 perev Exp $";
 
 ClassImp(StEvent)
 
-template<class T> void
-_lookup(T*& val, StSPtrVecObject &vec)
+//______________________________________________________________________________
+template<class T> void _lookup(T*& val, StSPtrVecObject &vec)
 {
     val = 0;
     for (unsigned int i=0; i<vec.size(); i++)
@@ -228,8 +232,8 @@ _lookup(T*& val, StSPtrVecObject &vec)
         }
 }
 
-template<class T> void
-_lookupOrCreate(T*& val, StSPtrVecObject &vec)
+//______________________________________________________________________________
+template<class T> void _lookupOrCreate(T*& val, StSPtrVecObject &vec)
 {
     T* t = 0;
     _lookup(t, vec);
@@ -240,8 +244,8 @@ _lookupOrCreate(T*& val, StSPtrVecObject &vec)
     val = t;
 }
 
-template<class T> void
-_lookupAndSet(T* val, StSPtrVecObject &vec)
+//______________________________________________________________________________
+template<class T> void _lookupAndSet(T* val, StSPtrVecObject &vec)
 {
     for (unsigned int i=0; i<vec.size(); i++)
         if (vec[i] && typeid(*vec[i]) == typeid(T)) {
@@ -253,8 +257,8 @@ _lookupAndSet(T* val, StSPtrVecObject &vec)
     vec.push_back(val);
 }
 
-template<class T> void
-_lookupDynamic(T*& val, StSPtrVecObject &vec)
+//______________________________________________________________________________
+template<class T> void _lookupDynamic(T*& val, StSPtrVecObject &vec)
 {
     val = 0;
     for (unsigned int i=0; i<vec.size(); i++)
@@ -264,8 +268,8 @@ _lookupDynamic(T*& val, StSPtrVecObject &vec)
 	}
 }
 
-template<class T> void
-_lookupDynamicAndSet(T* val, StSPtrVecObject &vec)
+//______________________________________________________________________________
+template<class T> void _lookupDynamicAndSet(T* val, StSPtrVecObject &vec)
 {
     T *test;
     for (unsigned int i=0; i<vec.size(); i++) {
@@ -282,15 +286,17 @@ _lookupDynamicAndSet(T* val, StSPtrVecObject &vec)
     vec.push_back(val);
 }
 
-void
-StEvent::initToZero() { /* noop */ }
+//______________________________________________________________________________
+void StEvent::initToZero() { /* noop */ }
 
+//______________________________________________________________________________
 StEvent::StEvent() : StXRefMain("StEvent")
 {
     GenUUId();		//Generate Universally Unique IDentifier
     initToZero();
 }
   
+//______________________________________________________________________________
 StEvent::~StEvent()
 { /* noop */ }
 
@@ -393,14 +399,15 @@ StEvent::summary() const
 const TString&
 StEvent::cvsTag() { return mCvsTag; }
 
-StTpcHitCollection*
-StEvent::tpcHitCollection()
+//______________________________________________________________________________
+StTpcHitCollection* StEvent::tpcHitCollection()
 {
     StTpcHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
 
+//______________________________________________________________________________
 const StTpcHitCollection*
 StEvent::tpcHitCollection() const
 {
@@ -409,24 +416,39 @@ StEvent::tpcHitCollection() const
     return hits;
 }
 
-StRnDHitCollection*
-StEvent::rndHitCollection()
+//______________________________________________________________________________
+StRnDHitCollection* StEvent::rndHitCollection()
 {
     StRnDHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
 
-const StRnDHitCollection*
-StEvent::rndHitCollection() const
+//______________________________________________________________________________
+const StRnDHitCollection* StEvent::rndHitCollection() const
 {
     StRnDHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
 
-StFtpcHitCollection*
-StEvent::ftpcHitCollection()
+//______________________________________________________________________________
+const StEtrHitCollection* StEvent::etrHitCollection() const
+{
+    StEtrHitCollection *hits = 0;
+    _lookup(hits, mContent);
+    return hits;
+}
+
+//______________________________________________________________________________
+     StEtrHitCollection* StEvent::etrHitCollection() 
+{
+    StEtrHitCollection *hits = 0;
+    _lookup(hits, mContent);
+    return hits;
+}
+//______________________________________________________________________________
+StFtpcHitCollection* StEvent::ftpcHitCollection()
 {
     StFtpcHitCollection *hits = 0;
     _lookup(hits, mContent);
@@ -1137,20 +1159,25 @@ StEvent::setL1Trigger(StL1Trigger* val)
     _lookupAndSet(val, mContent);
 }
 
-void
-StEvent::setL3Trigger(StL3Trigger* val)
+//______________________________________________________________________________
+void StEvent::setL3Trigger(StL3Trigger* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-void
-StEvent::setHltEvent(StHltEvent* val)
+//______________________________________________________________________________
+void StEvent::setEtrHitCollection(StEtrHitCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+//______________________________________________________________________________
+void StEvent::setHltEvent(StHltEvent* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-void
-StEvent::addPrimaryVertex(StPrimaryVertex* vertex, StPrimaryVertexOrder order)
+//______________________________________________________________________________
+void StEvent::addPrimaryVertex(StPrimaryVertex* vertex, StPrimaryVertexOrder order)
 {
     if (!vertex) return;  // not a valid vertex, do nothing
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.23 2011/04/25 21:24:33 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.24 2012/01/24 02:57:09 perev Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.24  2012/01/24 02:57:09  perev
+ * Etr detector added
+ *
  * Revision 2.23  2011/04/25 21:24:33  ullrich
  * Added containers for MTD.
  *
@@ -89,6 +92,7 @@
 #include "StSsdHit.h"
 #include "StTpcHit.h"
 #include "StFtpcHit.h"
+#include "StEtrHit.h"
 #include "StRichHit.h"
 #include "StRichPixel.h"
 #include "StRichPid.h"
@@ -141,6 +145,7 @@ StCollectionImp(SvtHit)
 StCollectionImp(SsdHit)
 StCollectionImp(TpcHit)
 StCollectionImp(FtpcHit)
+StCollectionImp(EtrHit)
 StCollectionImp(RichHit)
 StCollectionImp(RichCluster)
 StCollectionImp(RichPixel)

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.42 2011/10/17 00:13:49 fisyak Exp $
+ * $Id: StEvent.h,v 2.43 2012/01/24 03:01:24 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.43  2012/01/24 03:01:24  perev
+ * Etr detector added
+ *
  * Revision 2.42  2011/10/17 00:13:49  fisyak
  * Add handles for IdTruth info
  *
@@ -164,6 +167,7 @@ class StTpcHitCollection;
 class StFtpcHitCollection;
 class StSvtHitCollection;
 class StSsdHitCollection;
+class StEtrHitCollection;
 class StEmcCollection;
 class StFmsCollection;
 class StRichCollection;
@@ -238,6 +242,8 @@ public:
     const StPhmdCollection*             phmdCollection() const;
     StRnDHitCollection*                 rndHitCollection();
     const StRnDHitCollection*           rndHitCollection() const;
+    StEtrHitCollection*                 etrHitCollection();
+    const StEtrHitCollection*           etrHitCollection() const;
     StHltEvent*                         hltEvent();
     const StHltEvent*                   hltEvent() const;
     
@@ -303,6 +309,7 @@ public:
     void setSummary(StEventSummary*);
     void setTpcHitCollection(StTpcHitCollection*);
     void setRnDHitCollection(StRnDHitCollection*);
+    void setEtrHitCollection(StEtrHitCollection*);
     void setFtpcHitCollection(StFtpcHitCollection*);
     void setSvtHitCollection(StSvtHitCollection*);
     void setSsdHitCollection(StSsdHitCollection*);

@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.38 2011/04/25 21:25:09 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.39 2012/01/24 03:00:42 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.39  2012/01/24 03:00:42  perev
+ * Etr detector added
+ *
  * Revision 2.38  2011/04/25 21:25:09  ullrich
  * Modifications to hold MTD data.
  *
@@ -192,6 +195,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kPxlId       = kPxlIdentifier,
                    kIstId       = kIstIdentifier,
                    kFgtId       = kFgtIdentifier,
+                   kEtrId       = kEtrIdentifier,
                    kFpdWestId   = kFpdWestIdentifier,
                    kFpdEastId   = kFpdEastIdentifier, 
                    kFmsId       = kFmsIdentifier,  
@@ -343,7 +347,7 @@ enum StVertexFinderId { undefinedVertexFinder = 0,
                         minuitVertexFinder,
                         ppvVertexFinder,
                         ppvNoCtbVertexFinder,
-		    mcEventVertexFFinder};
+		    	mcEventVertexFFinder};
 
 
 /*!
@@ -370,12 +374,15 @@ enum StPrimaryVertexOrder {
 /*!
  * \enum StL2TriggerResultType
  */
-enum StL2TriggerResultType { l2Trg2006BEMCGammaPi = 0,
-		         l2Trg2006BEMCGammaPiRandom,
-		         l2Trg2006EEMCGammaPi,
-		         l2Trg2006EEMCGammaPiRandom,
-		         l2Trg2006MonoJet,
-		         l2Trg2006DiJet,
-		         l2Trg2006RandomJet};
+enum StL2TriggerResultType {	l2Trg2006BEMCGammaPi = 0,
+		         	l2Trg2006BEMCGammaPiRandom,
+		         	l2Trg2006EEMCGammaPi,
+		         	l2Trg2006EEMCGammaPiRandom,
+		         	l2Trg2006MonoJet,
+		         	l2Trg2006DiJet,
+		         	l2Trg2006RandomJet};
 
+
+const char *detectorNameById(StDetectorId id);
+StDetectorId detectorIdByName(const char *name);
 #endif
