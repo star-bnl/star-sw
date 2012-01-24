@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.6 2012/01/24 05:54:51 sgliske Exp $
+ * $Id: StFgtA2CMaker.h,v 1.7 2012/01/24 06:52:46 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -28,6 +28,13 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.7  2012/01/24 06:52:46  sgliske
+ * made status cuts optional
+ * and updated status to a fail condition--
+ * i.e. status == 0x0 is good, otherwise is bad.
+ * WARNING--this may be different than that used at first
+ * in for the cosmic test stand.
+ *
  * Revision 1.6  2012/01/24 05:54:51  sgliske
  * changed default name to reflect A2C,
  * as opposed to old CorMaker
@@ -85,18 +92,18 @@ class StFgtA2CMaker : public StMaker {
    void setAbsThres( Float_t thres );  // set to below -4096 to skip cut
    void setRelThres( Float_t thres );  // set to zero to skip cut
    //void setFgtDb( StFgtDbMaker *fgtDb);
-   void doRemoveOtherTimeBins(  Bool_t doIt );
+   void doRemoveOtherTimeBins( Bool_t doIt );
+   void doCutBadStatus( Bool_t doIt );
 
    void setDb(StFgtDb* db);
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.6 2012/01/24 05:54:51 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.7 2012/01/24 06:52:46 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    // for the ped reader
    StFgtPedReader *mPedReader;
    std::string mPedFile;
-
 
    // for the strip status reader
    StFgtStatusReader *mStatusReader;
@@ -105,7 +112,7 @@ class StFgtA2CMaker : public StMaker {
 
    // other parameters
    Short_t mTimeBinMask;
-   Bool_t mDoRemoveOtherTimeBins;
+   Bool_t mDoRemoveOtherTimeBins, mCutBadStatus;
    Float_t mAbsThres, mRelThres;
    //if the user gives a ped file, use that, otherwise get peds from db
    Bool_t usePedFile;
@@ -132,6 +139,7 @@ inline void StFgtA2CMaker::setAbsThres( Float_t thres ){ mAbsThres = thres; };
 inline void StFgtA2CMaker::setRelThres( Float_t thres ){ mRelThres = thres; };
 inline void StFgtA2CMaker::setDb(StFgtDb* db ){mDb=db; };
 inline void StFgtA2CMaker::doRemoveOtherTimeBins(  Bool_t doIt ){ mDoRemoveOtherTimeBins = doIt; };
+inline void StFgtA2CMaker::doCutBadStatus(  Bool_t doIt ){ mCutBadStatus = doIt; };
 
 
 #endif
