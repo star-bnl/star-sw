@@ -35,6 +35,7 @@
 ** FPD East        = 31
 ** FMS             = 32
 ** MTD             = 34
+** ETR             = 35
 */
 
 
@@ -97,6 +98,11 @@
 #define kMtdIdentifier                34
 
 /*
+ **  The following are for the Endcap TRD in ETTIE detector
+ */
+#define kEtrIdentifier                35
+
+/*
 **  The following are more or less virtual detectors.
 **  Depending on funding or policy this stuff might
 **  happen or not. (OBSOLETE)
@@ -112,9 +118,12 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.9 2011/04/25 21:25:09 ullrich Exp $
+/* $Id: StDetectorDefinitions.h,v 2.10 2012/01/24 02:58:21 perev Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.10  2012/01/24 02:58:21  perev
+** Etr detector added
+**
 ** Revision 2.9  2011/04/25 21:25:09  ullrich
 ** Modifications to hold MTD data.
 **
