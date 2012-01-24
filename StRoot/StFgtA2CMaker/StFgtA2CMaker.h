@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.5 2012/01/06 17:48:00 sgliske Exp $
+ * $Id: StFgtA2CMaker.h,v 1.6 2012/01/24 05:54:51 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -28,6 +28,10 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.6  2012/01/24 05:54:51  sgliske
+ * changed default name to reflect A2C,
+ * as opposed to old CorMaker
+ *
  * Revision 1.5  2012/01/06 17:48:00  sgliske
  * Added requested GetCVS tag
  *
@@ -60,7 +64,7 @@
 class StFgtA2CMaker : public StMaker {
  public:
    // constructors
-   StFgtA2CMaker( const Char_t* name = "fgtCorAdcMaker" );
+   StFgtA2CMaker( const Char_t* name = "fgtA2CMaker" );
 
    // default OK
    // StFgtA2CMaker(const StFgtA2CMaker&);
@@ -86,7 +90,7 @@ class StFgtA2CMaker : public StMaker {
    void setDb(StFgtDb* db);
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.5 2012/01/06 17:48:00 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.6 2012/01/24 05:54:51 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    // for the ped reader
