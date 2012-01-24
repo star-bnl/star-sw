@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.7 2012/01/04 20:23:02 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.8 2012/01/24 05:52:13 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.8  2012/01/24 05:52:13  sgliske
+ * Surrounded printf's with #ifdef,
+ * cleaned up a little whitespace,
+ * added strip->SetType( 1 );
+ *
  * Revision 1.7  2012/01/04 20:23:02  sgliske
  * fixed spelling of iDsic to iDisc
  *
@@ -115,7 +120,9 @@ Int_t StFgtA2CMaker::Make(){
             StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
             StSPtrVecFgtStripIterator stripIter;
 
+#ifdef DEBUG
 	    printf("A2C for iDisc=%d\n",discIdx);
+#endif
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
                StFgtStrip *strip = *stripIter;
                if( strip ){
@@ -133,7 +140,9 @@ Int_t StFgtA2CMaker::Make(){
 			 ped=mDb->getPedestalFromGeoId(geoId);
 			 err=mDb->getPedestalSigmaFromGeoId(geoId);
 		       }
+#ifdef DEBUG
 		     printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,err);
+#endif
 
                      if( ped > 4096 || ped < 0 ){
                         strip->setGeoId( -1 );
@@ -141,21 +150,21 @@ Int_t StFgtA2CMaker::Make(){
                         // subtract the pedistal
                         adc -= ped;
 
-                        // set the value
+                        // set the values
                         strip->setAdc( adc );
-
-
+                        strip->setType( 1 );
                         strip->setCharge( gain*adc );
+#ifdef DEBUG
                         printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
-                          UInt_t status=1;
-			  if(useStatusFile)
-			    mStatusReader->getStatus( geoId, status );
-			  if(!useStatusFile && mDb)
-			    status=mDb->getStatusFromGeoId(geoId);
-                          if(!status)
-                            strip->setGeoId( -1 );
+#endif
+                        UInt_t status=1;
+                        if(useStatusFile)
+                           mStatusReader->getStatus( geoId, status );
+                        if(!useStatusFile && mDb)
+                           status=mDb->getStatusFromGeoId(geoId);
+                        if(!status)
+                           strip->setGeoId( -1 );
 		     
-
                         if( (mRelThres && adc < mRelThres*err) || (mAbsThres>-4096 && adc < mAbsThres) )
                            strip->setGeoId( -1 );
                      };
