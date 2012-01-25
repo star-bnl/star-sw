@@ -112,7 +112,7 @@ StFgtDb::printFgtDumpCSV1(TString fname, int myDate, int myTime) {
 	  std::string  geoName=fgtDb->getGeoNameFromElecCoord(rdo,arm,apv,channel);
 	 
 
-	fprintf(fd,"%d,%d,  %d,%d,%d,%d,  %d,%c,%c,%3d,   %.4f,%.3f,%.3f,  bad%s,   %d,%.1f,%.1f,%d\n",electId,geoId,rdo,arm,apv,channel,disk+1,quad+'A',layer,strip+1,  ordinate,  lowerSpan,  upperSpan, geoName.data(), pedStat,ped,pedSig, stripStat);
+	fprintf(fd,"%d,%d,  %d,%d,%d,%d,  %d,%c,%c,%3d,   %.4f,%.3f,%.3f,  bad%s,   %d,%.1f,%.1f,%d\n",electId,geoId,rdo,arm,apv,channel,disk+1,quad+'A',layer,strip,  ordinate,  lowerSpan,  upperSpan, geoName.data(), pedStat,ped,pedSig, stripStat);
 
 
 	}
