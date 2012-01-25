@@ -143,9 +143,7 @@ class StFgtDb
 	virtual double PstripGain(int iStrip, int iQuad, int iDisc);
 	virtual double RstripGain(int iStrip, int iQuad, int iDisc);
 
-    //ClassDef(StFgtDb, 1)
-
-
+	void printFgtDumpCSV1(TString fname, int myDate, int myTime);
 
 };
 

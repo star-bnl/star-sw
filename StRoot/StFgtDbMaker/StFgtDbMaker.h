@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.7 2011/12/01 23:09:15 avossen Exp $
+// $Id: StFgtDbMaker.h,v 1.8 2012/01/25 03:56:56 balewski Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -39,6 +39,7 @@ class StFgtDbMaker : public StMaker {
   virtual Int_t  Finish();
   virtual StFgtDb * getDbTables() { return m_tables; }
   virtual void   Clear(const char *opt);
+  void  printFgtDumpCSV(TString fname) { m_tables->printFgtDumpCSV1(fname,GetDate(), GetTime());  }
 
   virtual void SetFlavor( const char *flav, const char *tabname );
 
@@ -46,13 +47,16 @@ class StFgtDbMaker : public StMaker {
   StFgtGeom *getFgtGeom(){ return geom;} 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.7 2011/12/01 23:09:15 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.8 2012/01/25 03:56:56 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.8  2012/01/25 03:56:56  balewski
+// printing out DB dump
+//
 // Revision 1.7  2011/12/01 23:09:15  avossen
 // moved StFgtUtil/database to StFgtDbMaker
 //
