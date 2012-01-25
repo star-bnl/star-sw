@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.14 2011/06/20 15:13:51 fisyak Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.15 2012/01/25 23:10:06 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.15  2012/01/25 23:10:06  genevb
+ * Move StMaker name logic before StMaker instantiation
+ *
  * Revision 1.14  2011/06/20 15:13:51  fisyak
  * Force to call Finish with SIGTERM signal obtained from condor_vacate_job after time limit reached
  *
@@ -84,9 +87,9 @@ ClassImp(StRTSBaseMaker);
  */
 //_____________________________________________________________
 StRTSBaseMaker::StRTSBaseMaker(const char *detectorName,const char *makerName)
-      :StMaker(detectorName), fDaq_Dta(0), fDetectorName(detectorName)
+      :StMaker((makerName && makerName[0] ? makerName : detectorName))
+      ,fDaq_Dta(0), fDetectorName(detectorName)
 {
-  if (makerName && makerName[0]) SetName(makerName);
   LOG_DEBUG << "StRTSBaseMaker::ctor"  << endm;
 }
 
