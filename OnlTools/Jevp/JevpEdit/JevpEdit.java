@@ -555,6 +555,7 @@ class PropertyFrame extends JFrame
 
 public class JevpEdit extends JFrame implements ActionListener, TreeSelectionListener
 {  
+    String basedir;
     JNode treedata;
     JTree tree;
     DefaultMutableTreeNode root;
@@ -879,7 +880,7 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 
 	    //myPropertyFrame.saveNode();
 
-	    JFileChooser d = new JFileChooser("/RTScache/conf/jevp");
+	    JFileChooser d = new JFileChooser(basedir);
 	    int x = d.showSaveDialog(this);
 	    if(x == d.APPROVE_OPTION) {
 		String fn = d.getName(d.getSelectedFile());
@@ -1318,17 +1319,28 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
     {
 	JevpEdit me = new JevpEdit();
 
+	if(args.length == 0) {
+	    System.out.printf("need a filename!");
+	    return;
+	}
+	
 	try {
 
 	    // Load the xml document...
 	    String s;
-	    if(args.length == 0) {
+	    if(args[0].equals("-live")) {
 		s = "/RTScache/conf/jevp/HistoDefs.txt";
 	    }
-	    else
+	    else {
 		s = args[0];
-
+	    }
+	    
+	    
+	    
 	    File file = new File(s);
+
+	    me.basedir = file.getAbsolutePath();
+
 	    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	    DocumentBuilder db = dbf.newDocumentBuilder();
 	    Document doc = db.parse(file);

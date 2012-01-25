@@ -790,6 +790,10 @@ JevpPlot *JevpServer::getPlot(char *name) {
   clock.record_time();
   int nexamined=0;
 
+  if(strcmp(name, "serv_JevpSummary") == 0) {
+    return getJevpSummaryPlot();
+  }
+
   JevpPlotSet *curr;
   TListIter next(&builders);
   
@@ -888,12 +892,12 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
   else {
     LOG(DBG,"getplot..%s\n", plotname);
 
-    if(strcmp(plotname, "serv_JevpSummary") == 0) {
-      plot = getJevpSummaryPlot();
-    }
-    else {
-      plot = getPlot(plotname);
-    }
+//     if(strcmp(plotname, "serv_JevpSummary") == 0) {
+//       plot = getJevpSummaryPlot();
+//     }
+//     else {
+    plot = getPlot(plotname);
+    //    }
   }
 
   t2 = clock.record_time();
@@ -1226,12 +1230,12 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
     LOG(DBG, "Plotting %s on page %d / pad %d",cnode->name, page, pad);
 
     JevpPlot *plot = NULL;
-    if(strcmp(cnode->name, "serv_JevpSummary") == 0) {
-      plot = getJevpSummaryPlot();
-    }
-    else {
-      plot = getPlot(cnode->name);
-    }
+    //if(strcmp(cnode->name, "serv_JevpSummary") == 0) {
+    // plot = getJevpSummaryPlot();
+    //}
+    //else {
+    plot = getPlot(cnode->name);
+    //}
 
     if(plot) {
       LOG(DBG, "Found plot %s",cnode->name);

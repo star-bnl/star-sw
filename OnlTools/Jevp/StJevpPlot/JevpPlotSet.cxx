@@ -13,6 +13,7 @@
 #include <TSystem.h>
 #include "StEvent/StTriggerData2009.h"
 #include "StEvent/StTriggerData2012.h"
+#include "PdfFileBuilder.h"
 
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
@@ -76,6 +77,7 @@ JevpPlotSet::JevpPlotSet(JevpServer *server)
   plotsetname = (char *)"def_plotset";
   builderStatus.setStatus("stopped");
   pause = 0;
+  xml = NULL;
 
   processingTimer = new RtsTimer_root();
 
@@ -501,7 +503,21 @@ void JevpPlotSet::Main(int argc, char *argv[])
 	LOG(DBG, "End of Run... [previous run=%d, current run=%d]",
 	    current_run, reader->run);
      
-	if(pdf) writePdfFile();  // Finish and exit...  
+	if(pdf) {
+	  if(xml) {
+	    // Here we have some defined format...
+	    DisplayFile *displays = new DisplayFile();
+	    displays->Read(xml);
+	    LOG("JEFF", "pdf writer!");
+	    PdfFileBuilder *pdfwriter = new PdfFileBuilder(displays, NULL, this);
+	    LOG("JEFF", "Write");
+	    pdfwriter->write(pdf,0);
+	    LOG("JEFF", "Done");
+	  }
+	  else {
+	    writePdfFile();  // Finish and exit...  
+	  }
+	}
 	
 	exit(0);
 	
@@ -670,17 +686,17 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
       i++;
       clientdatadir = argv[i];
     }
-    else if (strcmp(argv[i], "-pause") == 0) {
-      pause = 1;
-    }
     else if (strcmp(argv[i], "-buildxml") == 0) {
       i++;
       buildxml = argv[i];
     }
+    else if (strcmp(argv[i], "-xml") == 0) {
+      i++;
+      xml = argv[i];
+    }
     else {
       printf("No arg #%d = %s\n",i,argv[i]);
-      printf("%s arguments\n\t-diska diskapath\n\t-file filename\n\t-pdf pdffilename\n\t-loglevel level\n\t-datadir datadir (/RTScache/conf/jevp)\n\t-clientdatadir datadir (/a/jevp/client)",argv[0]);
-      printf("\t-pause\n\t-buildxml <file>\n");
+      printf("%s arguments\n\t-diska diskapath\n\t-file filename\n\t-pdf pdffilename\n\t-loglevel level\n\t-confdatadir datadir (/RTScache/conf/jevp)\n\t-clientdatadir datadir (/a/jevp/client)\n\t-buildxml <file>\n\t-xml <file>\n",argv[0]);
       CP;
       return -1;
     }    
@@ -692,21 +708,32 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
 
 void JevpPlotSet::buildTheXml()
 {
+  CP;
+
+  FILE *f = fopen(buildxml, "w");
+  if(!f) {
+    printf("Error.   Can't open file %s\n",buildxml);
+    exit(0);
+  }
+
+  fprintf(f, "<doc>\n\t<display_def>%sDisplay\n", getPlotSetName());
+
   JevpPlot *curr = (JevpPlot *)plots.First();
-
-  int i=0;
   while(curr) {
-    //printf("curr->GetPlotName():  %s\n",curr->GetPlotName());
+    fprintf(f,"\t\t<histogram>%s</histogram>\n",curr->GetPlotName());
+    curr = (JevpPlot *)plots.After(curr);
+  }
+  fprintf(f, "\t</display_def>\n");
 
-    i++;
-
-    printf("<tab>%s<canvas><wide>1</wide><deep>1</deep>\n",curr->GetPlotName());
-    printf("        <histogram>%s</histogram>\n",curr->GetPlotName());
-    printf("</canvas></tab>\n");
-
+  fprintf(f, "\t<pallete>\n\t\t<tab>%s\n",getPlotSetName());
+  curr = (JevpPlot *)plots.First();
+  while(curr) {
+    fprintf(f,"\t\t\t<histogram>%s</histogram>\n",curr->GetPlotName());
 
     curr = (JevpPlot *)plots.After(curr);
   }
+  fprintf(f, "\t\t</tab>\n\t</pallete>\n</doc>");
+  fclose(f);
 
   exit(0);
 }
