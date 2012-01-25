@@ -11,6 +11,8 @@
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 
+#include <trgDataDefs.h>
+
 // only the detectors we will use need to be included
 // for their structure definitions...
 #include <DAQ_BSMD/daq_bsmd.h>
@@ -53,6 +55,7 @@ static int pp2pp_doer(daqReader *rdr, const char *do_print) ;
 static int l3_doer(daqReader *rdr, const char *do_print) ;
 static int fgt_doer(daqReader *rdr, const char *do_print) ;
 static int mtd_doer(daqReader *rdr, const char *do_print) ;
+static int tinfo_doer(daqReader *rdr, const char *do_print);
 //static int gmt_doer(daqReader *rdr, const char *do_print) ;
 
 int main(int argc, char *argv[])
@@ -154,6 +157,8 @@ int main(int argc, char *argv[])
 			   evp->daqbits64_l2,
 			   evp->daqbits64,
 			   evp->evpgroups);
+
+		    tinfo_doer(evp, "tinfo");
 		  }
 		}
 
@@ -1065,3 +1070,37 @@ static int gmt_doer(daqReader *rdr, const char *do_print)
 }
 
 #endif
+
+
+
+// This is called by tinfo flag:
+
+static int tinfo_doer(daqReader *rdr, const char *do_print)
+{
+  int found = 0;
+
+  daq_dta *dd = rdr->det("trg")->get("raw") ;
+  if(dd) {
+    if(dd->iterate()) {
+      found = 1;
+
+      int sz = dd->get_size_t();
+      TriggerDataBlk *trg = (TriggerDataBlk *)dd->Byte;
+
+      EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
+      TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
+      L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
+
+      printf("L1 trg = 0x%x-%x\n",swap32(trgSum->L1Sum[1]),swap32(trgSum->L1Sum[0]));
+      printf("L2 trg = 0x%x-%x\n",swap32(trgSum->L2Sum[1]),swap32(trgSum->L2Sum[0]));
+      for(int i=0;i<64;i++) {
+	printf("L2Result[%d]=0x%x\n",i,swap32(trgSum->L2Result[i]));
+      }
+      for(int i=0;i<8;i++) {
+	printf("lastDsm[%d] = 0x%x\n",i,swap16(l1Dsm->lastDSM[i]));
+      }
+    }
+  }
+  
+  return found;
+}
