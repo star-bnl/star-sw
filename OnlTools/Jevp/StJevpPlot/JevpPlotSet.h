@@ -80,7 +80,7 @@ class JevpPlotSet : public TObject {
   char *clientdatadir;
   char *confdatadir;
   char *plotsetname;
-
+  char *xml;
   char *hello_cmds;   // do I want to be base_client?  "steal if so"
 
   void addServerTags(char *tags);
