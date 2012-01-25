@@ -1226,7 +1226,7 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
     LOG(DBG, "Plotting %s on page %d / pad %d",cnode->name, page, pad);
 
     JevpPlot *plot = NULL;
-    if(strcmp(cnode->name, "serv_JevpSummary")) {
+    if(strcmp(cnode->name, "serv_JevpSummary") == 0) {
       plot = getJevpSummaryPlot();
     }
     else {

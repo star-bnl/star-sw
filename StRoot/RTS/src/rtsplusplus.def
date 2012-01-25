@@ -80,6 +80,7 @@ clean:
 
 install:
 	$(INSTALL)  $(BINS) $(BINDIR)
+	$(INSTALL)  $(SHELLS) $(BINDIR)
 
 depend:
 	$(MAKEDEPEND)

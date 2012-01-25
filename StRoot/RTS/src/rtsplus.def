@@ -31,6 +31,7 @@ clean:
 install:
 	@$(INSTALL)  $(BINS) $(BINDIR)
 	@$(INSTALL)  $(LIBS) $(LIBDIR)
+	@$(INSTALL)  $(SHELLS) $(BINDIR)
 	@for dir in $(EXTERNAL_BINS); do \
 		$(MAKE) -C $$dir $@; \
 	done

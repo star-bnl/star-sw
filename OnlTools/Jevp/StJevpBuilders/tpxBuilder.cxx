@@ -516,13 +516,16 @@ void tpxBuilder::event(daqReader *rdr)
   case 8:  // Lasers...
   case 9:
     {
+      
+      LOG("JEFF", "Got a laser...");
+
       contents.h44_tpc_occ_laser->Fill(100.0 * (double)channel_count / tpc_max_channels);
       contents.tpc_pix_occ_laser->Fill(100.0 * (double)pixel_count / (tpc_max_channels * 400.0));
       extras.tpc_clpix_occ_laser->Fill(100.0 * (double)pix_count_cl / (cl_max_channels * 400.0));
 
       double vDrift = laserReader->Make(rdr);
      
-      //printf("%d vDrift = %lf\n",rdr->event_number, vDrift);
+      LOG("JEFF","%d vDrift = %lf",rdr->event_number, vDrift);
 
       if((vDrift > 5.4) && (vDrift < 5.8))
 	contents.h102_tpc_drift_vel->Fill(vDrift);
