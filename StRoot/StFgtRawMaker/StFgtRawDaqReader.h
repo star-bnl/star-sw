@@ -35,6 +35,9 @@ class StFgtRawDaqReader : public StMaker {
    void cutShortEvents( Bool_t doIt = 1 );
    void setIsCosmic( Bool_t itIs = 1 );
 
+   // Get CVS
+   virtual const char *GetCVS() const;
+
  protected:
    Bool_t mCutShortEvents, mIsCosmic;
    Int_t mDate, mTime;
@@ -53,12 +56,19 @@ class StFgtRawDaqReader : public StMaker {
 inline void StFgtRawDaqReader::setFilename( std::string filename ){ mDaqFileName = filename; };
 inline void StFgtRawDaqReader::cutShortEvents( Bool_t doIt ){ mCutShortEvents = doIt; };
 inline void StFgtRawDaqReader::setIsCosmic( Bool_t itIs ){ mIsCosmic = itIs; };
+inline const char *StFgtRawDaqReader::GetCVS() const {
+   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.2 2012/01/26 11:38:33 sgliske Exp $ built "__DATE__" "__TIME__ ;
+   return cvs;
+};
 
 #endif
 
 /*
- * $Id: StFgtRawDaqReader.h,v 1.1 2012/01/17 20:10:54 sgliske Exp $
+ * $Id: StFgtRawDaqReader.h,v 1.2 2012/01/26 11:38:33 sgliske Exp $
  * $Log: StFgtRawDaqReader.h,v $
+ * Revision 1.2  2012/01/26 11:38:33  sgliske
+ * added GetCVS()
+ *
  * Revision 1.1  2012/01/17 20:10:54  sgliske
  * creation
  *
