@@ -24,7 +24,7 @@ ClassImp(StTriggerDataMaker)
 
 //_____________________________________________________________________________
 
-StTriggerDataMaker::StTriggerDataMaker(const char *name):StRTSBaseMaker(name,name)
+StTriggerDataMaker::StTriggerDataMaker(const char *name):StRTSBaseMaker("trg",name)
 {
   LOG_INFO << "Constructing StTriggerDataMaker with name=" << name << endm;
   mDebug=0;
