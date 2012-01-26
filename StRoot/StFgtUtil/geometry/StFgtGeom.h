@@ -405,7 +405,7 @@ class StFgtGeom
 	StFgtGeom( const StFgtGeom& );
 	StFgtGeom& operator=( const StFgtGeom& );
 	*/
-
+ public:
 	//  Standard definitions.
 	static const Int_t kNumStrips = 1440; 
 	static const Int_t kNumChannels = 1280;
@@ -424,6 +424,7 @@ class StFgtGeom
 	static int mRadStripGBLId_number;
 	static int mPhiStripGBLId_number;
 
+ protected:
 	//  ---Private member variables---
 	static StFgtGeomData mStrips[ kNumStrips ];
 
@@ -498,8 +499,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.28 2012/01/26 13:13:12 sgliske Exp $
+ *  $Id: StFgtGeom.h,v 1.29 2012/01/26 18:41:49 balewski Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.29  2012/01/26 18:41:49  balewski
+ *  fixing , new constants
+ *
  *  Revision 1.28  2012/01/26 13:13:12  sgliske
  *  Updated to use StFgtConsts, which
  *  replaces StFgtEnums and StFgtGeomDefs
