@@ -10,7 +10,7 @@
 
 #include "StFgtRawDaqReader.h"
 #include "StRoot/StEvent/StEvent.h"
-#include "StRoot/StFgtUtil/geometry/StFgtGeomDefs.h"
+
 #include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
 #include "StRoot/St_base/StMessMgr.h"
 #include "RTS/src/DAQ_FGT/daq_fgt.h"
@@ -21,6 +21,7 @@
 #include "RTS/src/DAQ_READER/daqReader.h"
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 //#include "StRoot/St_db_Maker/St_db_Maker.h"
+#include "StRoot/StFgtUtil/StFgtConsts.h"
 
 #include <string.h>
 
@@ -214,9 +215,9 @@ Int_t StFgtRawDaqReader::Make() {
      for( UInt_t discIdx = 0; discIdx < numDiscs && eventOK; ++discIdx ){
         StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
         if( stripCollectionPtr ){
-           Int_t remainder = stripCollectionPtr->getNumStrips() % 1280;
-           Int_t estTimeBins = stripCollectionPtr->getNumStrips() / 1280;
-           eventOK = ( remainder == 0 && ( estTimeBins == 5 || estTimeBins == 7 || estTimeBins == 1 ) );
+           Int_t chanPerQuad = kFgtApvsPerQuad*kFgtNumChannels; // 1280
+           Int_t remainder = stripCollectionPtr->getNumStrips() % chanPerQuad;
+           eventOK = (remainder == 0);
         };
      };
      if( !eventOK ){
