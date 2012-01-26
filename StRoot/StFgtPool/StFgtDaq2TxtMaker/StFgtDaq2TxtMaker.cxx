@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtDaq2TxtMaker.cxx,v 1.2 2011/11/01 18:55:08 sgliske Exp $
+ * $Id: StFgtDaq2TxtMaker.cxx,v 1.3 2012/01/26 13:13:11 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,10 @@
  ***************************************************************************
  *
  * $Log: StFgtDaq2TxtMaker.cxx,v $
+ * Revision 1.3  2012/01/26 13:13:11  sgliske
+ * Updated to use StFgtConsts, which
+ * replaces StFgtEnums and StFgtGeomDefs
+ *
  * Revision 1.2  2011/11/01 18:55:08  sgliske
  * Updated to correspond with StEvent containers, take 2.
  *
@@ -35,7 +39,7 @@
 
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
-#include "StRoot/StFgtUtil/geometry/StFgtGeomDefs.h"
+
 
 // constructors
 StFgtDaq2TxtMaker::StFgtDaq2TxtMaker( const Char_t* name,

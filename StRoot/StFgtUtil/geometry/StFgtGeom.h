@@ -17,8 +17,7 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
-
-#include "StFgtGeomDefs.h"
+#include "StRoot/StFgtUtil/StFgtConsts.h"
 
 //  StFgtGeomData stores data on each ordinate associated with each global ID
 //  used to index individual geometry elements.
@@ -60,9 +59,9 @@ class StFgtGeom
 	{
 	    return
 	    (
-		( disc*kNumFgtQuadrants + quadrant )
-		* kNumFgtLayers + ( layer == 'P' )
-	    ) * kNumFgtStripsPerLayer + strip;
+		( disc*kFgtNumQuads + quadrant )
+		* kFgtNumLayers + ( layer == 'P' )
+	    ) * kFgtNumStrips + strip;
 	}
 
 	static void decodeGeoId(
@@ -70,14 +69,14 @@ class StFgtGeom
 	    Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
 	)
 	{
-	    strip = geoId % kNumFgtStripsPerLayer;
-	    geoId /= kNumFgtStripsPerLayer;
+	    strip = geoId % kFgtNumStrips;
+	    geoId /= kFgtNumStrips;
 
-	    layer = ( geoId % kNumFgtLayers ) ? 'P' : 'R';
-	    geoId /= kNumFgtLayers;
+	    layer = ( geoId % kFgtNumLayers ) ? 'P' : 'R';
+	    geoId /= kFgtNumLayers;
 
-	    quadrant = geoId % kNumFgtQuadrants;
-	    disc = geoId / kNumFgtQuadrants;
+	    quadrant = geoId % kFgtNumQuads;
+	    disc = geoId / kFgtNumQuads;
 	}
 
 	static std::string encodeGeoName(
@@ -138,15 +137,15 @@ class StFgtGeom
 	    decodeGeoId( geoId, disc, quadrant, layer, strip );
 	    ordinate =
 		mStrips[
-		    (layer == 'P') * kNumFgtStripsPerLayer + strip
+		    (layer == 'P') * kFgtNumStrips + strip
 		].ordinate;
 	    lowerSpan =
 		mStrips[
-		    (layer == 'P') * kNumFgtStripsPerLayer + strip
+		    (layer == 'P') * kFgtNumStrips + strip
 		].lowerSpan;
 	    upperSpan =
 		mStrips[
-		    (layer == 'P') * kNumFgtStripsPerLayer + strip
+		    (layer == 'P') * kFgtNumStrips + strip
 		].upperSpan;
 	}
 
@@ -163,15 +162,15 @@ class StFgtGeom
 	    decodeGeoName( geoName, disc, quadrant, layer, strip );
 	    ordinate =
 		mStrips[
-		    (layer == 'P') * kNumFgtStripsPerLayer + strip
+		    (layer == 'P') * kFgtNumStrips + strip
 		].ordinate;
 	    lowerSpan =
 		mStrips[
-		    (layer == 'P') * kNumFgtStripsPerLayer + strip
+		    (layer == 'P') * kFgtNumStrips + strip
 		].lowerSpan;
 	    upperSpan =
 		mStrips[
-		    (layer == 'P') * kNumFgtStripsPerLayer + strip
+		    (layer == 'P') * kFgtNumStrips + strip
 		].upperSpan;
 	}
 
@@ -246,6 +245,20 @@ class StFgtGeom
 
 	}
 
+        // get the octant for a given layer and strip
+        static Char_t getOctant( Char_t layer, Int_t strip ){
+           return ( strip < ( layer == 'R' ? kFgtNumRstripsPerOctant : kFgtNumPstripsPerOctant )
+                    ? kFgtLowerStripOctant 
+                    : kFgtHigherStripOctant );
+        };
+
+        // get the octant given the APV number
+        static Char_t getOctant( Int_t apv ){
+           return ( (apv%kFgtApvsPerAssembly) < kFgtApvsPerOct
+                    ? kFgtLowerStripOctant 
+                    : kFgtHigherStripOctant );
+        };
+
 	static Int_t getNaiveGeoIdFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
@@ -256,14 +269,14 @@ class StFgtGeom
 	    if ( apv >= 12 )
 		return
 		(
-		    disc*kNumFgtQuadrants + quadrant
-		) * kNumFgtLayers * kNumFgtStripsPerLayer
+		    disc*kFgtNumQuads + quadrant
+		) * kFgtNumLayers * kFgtNumStrips
 		    + mNaiveMapping[ (apv-12)*128+channel ];
 	    else
 		return
 		(
-		    disc*kNumFgtQuadrants + quadrant
-		) * kNumFgtLayers * kNumFgtStripsPerLayer
+		    disc*kFgtNumQuads + quadrant
+		) * kFgtNumLayers * kFgtNumStrips
 		    + mNaiveMapping[ apv*128+channel ];
 
 	}
@@ -280,7 +293,7 @@ class StFgtGeom
            if( !mReverseNaiveMappingValid )
               makeReverseNaiveMappingValid();
 
-           Int_t key = ( (layer=='P')*kNumFgtStripsPerLayer + strip );
+           Int_t key = ( (layer=='P')*kFgtNumStrips + strip );
            channel = mReverseNaiveMapping[ key ];
            apv = channel / 128;
            channel %= 128;
@@ -384,13 +397,6 @@ class StFgtGeom
 	static const double kFgtPhiAnglePitch	=  0.002095; 
 	static const double kFgtDeadQuadEdge	=  1.2;	    // (cm) effective dead area along quadrant edges
 
-	//  Standard definitions.
-	static const Int_t kNumStrips = 1440; 
-	static const Int_t kNumChannels = 1280;
-	static const Int_t kFgtMxDisk=6;    /* max # of  FGT disks @ STAR */
-	static const Int_t kFgtMxQuad=4;    /* max # of quadrants in single FGT disk */
-        static const Int_t kNumFgtStripsPerLayer = 720;
-
     protected:
 	/*  Not sure that these have a point anymore.
 	StFgtGeom() {};
@@ -399,6 +405,13 @@ class StFgtGeom
 	StFgtGeom( const StFgtGeom& );
 	StFgtGeom& operator=( const StFgtGeom& );
 	*/
+
+	//  Standard definitions.
+	static const Int_t kNumStrips = 1440; 
+	static const Int_t kNumChannels = 1280;
+	static const Int_t kFgtMxDisk=6;    /* max # of  FGT disks @ STAR */
+	static const Int_t kFgtMxQuad=4;    /* max # of quadrants in single FGT disk */
+        static const Int_t kFgtNumStrips = 720;
 
 	//  Various constants used in Jan's conversion functions.
 	static double pi;
@@ -414,12 +427,12 @@ class StFgtGeom
 	//  ---Private member variables---
 	static StFgtGeomData mStrips[ kNumStrips ];
 
-        // maps from (apv*128 + channel) to ((layer=='P')*kNumFgtStripsPerLayer + stripID)
+        // maps from (apv*128 + channel) to ((layer=='P')*kFgtNumStrips + stripID)
 	static Int_t mNaiveMapping[ kNumChannels ];
 
-        // reverse mapping: ((layer=='P')*kNumFgtStripsPerLayer + stripID) to (apv*128 + channel)
+        // reverse mapping: ((layer=='P')*kFgtNumStrips + stripID) to (apv*128 + channel)
         static Bool_t mReverseNaiveMappingValid;
-	static Int_t mReverseNaiveMapping[ 2*kNumFgtStripsPerLayer ];
+	static Int_t mReverseNaiveMapping[ 2*kFgtNumStrips ];
         static void makeReverseNaiveMappingValid();
 
  public:
@@ -485,8 +498,12 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.27 2012/01/19 16:27:27 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.28 2012/01/26 13:13:12 sgliske Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.28  2012/01/26 13:13:12  sgliske
+ *  Updated to use StFgtConsts, which
+ *  replaces StFgtEnums and StFgtGeomDefs
+ *
  *  Revision 1.27  2012/01/19 16:27:27  rfatemi
  *  Move encode(decode) ElectronicId from StFgtDbImp.h
  *

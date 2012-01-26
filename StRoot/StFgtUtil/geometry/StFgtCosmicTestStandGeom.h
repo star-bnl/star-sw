@@ -18,7 +18,6 @@
 #include <cmath>
 
 #include "StFgtGeom.h"
-#include "StFgtGeomDefs.h"
 
 class StFgtCosmicTestStandGeom:public StFgtGeom
 {
@@ -58,7 +57,7 @@ class StFgtCosmicTestStandGeom:public StFgtGeom
                 apv -= 12;
 
              return
-                ( disc*kNumFgtQuadrants + quadrant ) * kNumFgtLayers * kNumFgtStripsPerLayer
+                ( disc*kFgtNumQuads + quadrant ) * kFgtNumLayers * kFgtNumStrips
                 + mNaiveMapping[ apv*128+channel ];
 	   }
 	   
@@ -75,7 +74,7 @@ class StFgtCosmicTestStandGeom:public StFgtGeom
            if( !mReverseNaiveMappingValid )
               makeReverseNaiveMappingValid();
 
-           Int_t key = ( (layer=='P')*kNumFgtStripsPerLayer + strip );
+           Int_t key = ( (layer=='P')*kFgtNumStrips + strip );
            channel = mReverseNaiveMapping[ key ];
            apv = channel / 128;
            channel %= 128;
@@ -108,8 +107,12 @@ class StFgtCosmicTestStandGeom:public StFgtGeom
 #endif
 
 /*
- *  $Id: StFgtCosmicTestStandGeom.h,v 1.4 2011/10/06 15:17:27 sgliske Exp $
+ *  $Id: StFgtCosmicTestStandGeom.h,v 1.5 2012/01/26 13:13:12 sgliske Exp $
  *  $Log: StFgtCosmicTestStandGeom.h,v $
+ *  Revision 1.5  2012/01/26 13:13:12  sgliske
+ *  Updated to use StFgtConsts, which
+ *  replaces StFgtEnums and StFgtGeomDefs
+ *
  *  Revision 1.4  2011/10/06 15:17:27  sgliske
  *  CVS says it updated the file, but I don't see a change
  *
