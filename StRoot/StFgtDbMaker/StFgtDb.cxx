@@ -84,7 +84,7 @@ StFgtDb::printFgtDumpCSV1(TString fname, int myDate, int myTime) {
   FILE *fd=fopen(fname.Data(),"w"); assert(fd);
   printf("saving =%s=\n",fname.Data());
   fprintf(fd,"#  FGT mapping, timeStamp date=%d  time=%d\n",myDate,myTime);
-  fprintf(fd,"# electId,geoID,   RDO(1;2),ARM(0-4),APV(0-9;12-21),chan(0-127),    disk(1-6),quad(A-D),layer(P;R),strip(1-720;540),   ordinate(rad;cm),lowSpan(cm;rad),upSpan(cm;rad), geoName,  pedStat,ped(ADC),sigPed(ADC),stripStat\n");
+  fprintf(fd,"# electId,geoID,   RDO(1;2),ARM(0-4),APV(0-9;12-21),chan(0-127),    disk(1-6),quad(A-D),layer(P;R),strip(P:0-719;R0-279+400-679),   ordinate(rad;cm),lowSpan(cm;rad),upSpan(cm;rad), geoName,  ped(ADC),sigPed(ADC),stripStat\n");
 
   StFgtDb * fgtDb=this;
   int nTry=0, nMap=0;
@@ -103,7 +103,7 @@ StFgtDb::printFgtDumpCSV1(TString fname, int myDate, int myTime) {
 	  StFgtGeom::decodeGeoId(geoId,disk,quad,layer,strip);
 	  StFgtGeom::getPhysicalCoordinate(geoId,disk,quad,layer,ordinate,  lowerSpan,  upperSpan);
 	  
-	  int    pedStat=fgtDb->getPedestalStatusFromElecCoord(rdo,arm,apv,channel);
+	 //obsolete, not used:  int    pedStat=fgtDb->getPedestalStatusFromElecCoord(rdo,arm,apv,channel);
 	  double     ped=fgtDb->getPedestalFromElecCoord(rdo,arm,apv,channel);
 	  double  pedSig=fgtDb->getPedestalSigmaFromElecCoord(rdo,arm,apv,channel);
 	  int  stripStat=fgtDb->getStatusFromElecCoord(rdo,arm,apv,channel);
@@ -112,7 +112,7 @@ StFgtDb::printFgtDumpCSV1(TString fname, int myDate, int myTime) {
 	  std::string  geoName=fgtDb->getGeoNameFromElecCoord(rdo,arm,apv,channel);
 	 
 
-	fprintf(fd,"%d,%d,  %d,%d,%d,%d,  %d,%c,%c,%3d,   %.4f,%.3f,%.3f,  bad%s,   %d,%.1f,%.1f,%d\n",electId,geoId,rdo,arm,apv,channel,disk+1,quad+'A',layer,strip,  ordinate,  lowerSpan,  upperSpan, geoName.data(), pedStat,ped,pedSig, stripStat);
+	fprintf(fd,"%d,%d,  %d,%d,%d,%d,  %d,%c,%c,%d,   %.4f,%.3f,%.3f,  bad%s,   %.1f,%.1f,%d\n",electId,geoId,rdo,arm,apv,channel,disk+1,quad+'A',layer,strip,  ordinate,  lowerSpan,  upperSpan, geoName.data(), ped,pedSig, stripStat);
 
 
 	}
