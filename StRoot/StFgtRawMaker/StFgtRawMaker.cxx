@@ -2,9 +2,13 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.23 2012/01/18 17:48:31 sgliske Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.24 2012/01/26 13:13:12 sgliske Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.24  2012/01/26 13:13:12  sgliske
+//  Updated to use StFgtConsts, which
+//  replaces StFgtEnums and StFgtGeomDefs
+//
 //  Revision 1.23  2012/01/18 17:48:31  sgliske
 //  StEvent/StFgtStrip now contains rdo/arm/apv/channel
 //
@@ -70,7 +74,7 @@
 
 #include "StRoot/St_base/StMessMgr.h"
 #include "StRoot/St_base/Stypes.h"
-#include "StRoot/StFgtUtil/geometry/StFgtGeomDefs.h"
+
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include "StRoot/StChain/StRtsTable.h"
 #include "StRoot/StEvent/StEvent.h"

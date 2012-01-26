@@ -56,7 +56,7 @@ int	StFgtGeom::mPhiStripGBLId_number =
 #endif
 // function to setup the reverse mapping based on the forward mapping
 void StFgtGeom::makeReverseNaiveMappingValid(){
-   for( Int_t *p = mReverseNaiveMapping; p != &mNaiveMapping[2*kNumFgtStripsPerLayer]; ++p )
+   for( Int_t *p = mReverseNaiveMapping; p != &mNaiveMapping[2*kFgtNumStrips]; ++p )
       (*p) = 0;
 
    Int_t i = 0;
@@ -713,7 +713,7 @@ double StFgtGeom::Rstrip_Phi_High(int rindex){
 		   0.46165336,
 		   0.50945919};
   
-  double high[kNumFgtStripsPerLayer];
+  double high[kFgtNumStrips];
 
   for (int i = 0; i < 25; i++)
     {
@@ -740,7 +740,7 @@ double StFgtGeom::Rstrip_Phi_Low(int rindex){
   
   double phi;
 
-  double low[kNumFgtStripsPerLayer]={0.8905733,
+  double low[kFgtNumStrips]={0.8905733,
 				     0.88363036,
 				     0.87651359,
 				     0.86921173,
@@ -786,7 +786,7 @@ double StFgtGeom::Rstrip_Phi_Low(int rindex){
 Bool_t StFgtGeom::mReverseNaiveMappingValid = 0;
 
 // The reverse map data member
-Int_t StFgtGeom::mReverseNaiveMapping[ 2*kNumFgtStripsPerLayer ];
+Int_t StFgtGeom::mReverseNaiveMapping[ 2*kFgtNumStrips ];
 
 //  Initialize our physical coordinate database here. These are:
 //  isPhi?, ordinate, lowerSpan, upperSpan
@@ -3522,8 +3522,12 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.22 2011/11/09 00:50:04 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.23 2012/01/26 13:13:12 sgliske Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.23  2012/01/26 13:13:12  sgliske
+ *  Updated to use StFgtConsts, which
+ *  replaces StFgtEnums and StFgtGeomDefs
+ *
  *  Revision 1.22  2011/11/09 00:50:04  rfatemi
  *  Fix width phi strips with r < Rmid()
  *

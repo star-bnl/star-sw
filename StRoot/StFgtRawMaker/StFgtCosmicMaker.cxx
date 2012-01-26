@@ -1,6 +1,6 @@
 #include "StFgtCosmicMaker.h"
 #include "StRoot/StEvent/StEvent.h"
-#include "StRoot/StFgtUtil/geometry/StFgtGeomDefs.h"
+
 #include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
 #include "RTS/src/DAQ_FGT/daq_fgt.h"
 #include "RTS/src/DAQ_READER/daq_dta.h"
