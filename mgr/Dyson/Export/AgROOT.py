@@ -1779,11 +1779,18 @@ class Mixture(Handler):
                 # May depend on variables, so pass through and catch at run time
                 return
             sumw += w
-            if w<1.0: isMixt=True
-            if w>1.0: isComp=True            
+            if w<1.0:                     isMixt=True
+            if w>1.0:                     isComp=True            
+            if float(int(w)) != float(w): isMixt=True
 
         if isMixt and isComp:
             RaiseException( MixtureComponentError( self ) )
+
+        if sumw==100.0:
+            RaiseWarning( MixtureComponentError( self ) )
+
+        
+            
 
     
 class Component(Handler):
