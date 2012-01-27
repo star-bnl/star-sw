@@ -18,7 +18,7 @@ static double MAXTAN = 100;
 static double MAXNODPARS[]   ={555,555,555,6.66,111, MAXTAN+1, .1};
 //                              h  z   a    l  ptin
 static const double MAXFITPARS[]   ={22,22, .5 , .5 ,20};
-static const double BIGFITPARS[]   ={0.1 ,0.1, .2 , .2 ,0.1},BIGFITPART=0.05;
+static const double BIGFITPARS[]   ={0.1 ,0.1, .1 , .1 ,0.01},BIGFITPART=0.01;
 static const double MAXFITERR[5]   ={.3,.3 ,.03 ,.03 ,1};
 static const double MAXERRFACT     = 16;
 //______________________________________________________________________________ 
