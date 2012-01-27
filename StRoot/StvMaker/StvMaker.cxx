@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.13 2012/01/27 18:14:36 perev Exp $
+// $Id: StvMaker.cxx,v 1.14 2012/01/27 18:20:45 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -160,7 +160,8 @@ Int_t StvMaker::InitDetectors()
   } }
 
   if (IAttr("activeEtr")) {//Etr hit loader
-      StTGeoHelper::Inst()->SetActive(kEtrId,1,0);
+      StVoluInfo *info = StTGeoHelper::Inst()->SetActive(kEtrId,1,0);
+      assert(info);
       StvHitErrCalculator *hec = new StvHitErrCalculator("EtrHitErrs");
       double etrPars[StvHitErrCalculator::kMaxPars]={1e-4,1e-4};
       hec->SetPars(etrPars);
