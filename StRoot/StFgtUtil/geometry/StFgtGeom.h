@@ -36,144 +36,134 @@ struct StFgtGeomData
 class StFgtGeom
 {
     public:
-	/*  Not sure that these have a point anymore.
-	static StFgtGeom& getInstance()
-	{
-	    static StFgtGeom singleton;
-	    return singleton;
-	}
 
-	//  Shouldn't need to do much here.
-	~StFgtGeom() {}
-	*/
-
-	//  For all functions where they appear: Disc can be >= 0 (in theory,
-	//  although only values 0-5 work at the moment, I believe). Quadrant
-	//  is 0-3.  Layer is 'P' or 'R'. Strip is 0-720
+  //  For all functions where they appear: Disc can be >= 0 (in theory,
+  //  although only values 0-5 work at the moment, I believe). Quadrant
+  //  is 0-3.  Layer is 'P' or 'R'. Strip is 0-720
   static Double_t getDiscZ(int iDisc){return iDisc*10+70;}
   
 
-	static Int_t encodeGeoId(
-	    Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
-	)
-	{
-	    return
-	    (
-		( disc*kFgtNumQuads + quadrant )
-		* kFgtNumLayers + ( layer == 'P' )
-	    ) * kFgtNumStrips + strip;
-	}
-
-	static void decodeGeoId(
-	    Int_t geoId,
-	    Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
-	)
-	{
-	    strip = geoId % kFgtNumStrips;
-	    geoId /= kFgtNumStrips;
-
-	    layer = ( geoId % kFgtNumLayers ) ? 'P' : 'R';
-	    geoId /= kFgtNumLayers;
-
-	    quadrant = geoId % kFgtNumQuads;
-	    disc = geoId / kFgtNumQuads;
-	}
-
-	static std::string encodeGeoName(
-	    Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
-	)
-	{
-            std::stringstream buff;
-            buff << disc << quadrant << layer;
-	    strip += 1;
-            if ( strip < 10 )
-                buff << "00";
-            else if ( strip < 100 )
-                buff << "0";
-
-            buff << strip;
-            return buff.str();
-	}
-
-	static void decodeGeoName(
-	    const std::string & geoName,
-	    Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
-	)
-	{
-	    disc = geoName[0] - '0';
-	    quadrant = geoName[1] - '0';
-	    layer = geoName[2];
-	    strip = std::atoi( (geoName.substr(3)).c_str() ) - 1;
-	}
-
-	static std::string translateGeoIdToGeoName( Int_t geoId )
-	{
-	    Short_t disc, quadrant, strip;
-	    Char_t layer;
-
-	    decodeGeoId( geoId, disc, quadrant, layer, strip );
-	    return encodeGeoName( disc, quadrant, layer, strip );
-	}
-
-	static Int_t translateGeoNameToGeoId( const std::string & geoName )
-	{
-	    Short_t disc, quadrant, strip;
-	    Char_t layer;
-
-	    decodeGeoName( geoName, disc, quadrant, layer, strip );
-	    return encodeGeoId( disc, quadrant, layer, strip );
-	}
-
-	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
-	//  radians, depending on the layer.
-	static void getPhysicalCoordinate(
-	    Int_t geoId,
-	    Short_t & disc, Short_t & quadrant, Char_t & layer,
-	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
-	)
-	{
-	    Short_t strip;
-
-	    decodeGeoId( geoId, disc, quadrant, layer, strip );
-	    ordinate =
-		mStrips[
-		    (layer == 'P') * kFgtNumStrips + strip
+  static Int_t encodeGeoId(
+			   Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
+			   )
+    {
+      return
+	(
+	 ( disc*kFgtNumQuads + quadrant )
+	 * kFgtNumLayers + ( layer == 'P' )
+	 ) * kFgtNumStrips + strip;
+    }
+  
+  static void decodeGeoId(
+			  Int_t geoId,
+			  Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
+			  )
+    {
+      strip = geoId % kFgtNumStrips;
+      geoId /= kFgtNumStrips;
+      
+      layer = ( geoId % kFgtNumLayers ) ? 'P' : 'R';
+      geoId /= kFgtNumLayers;
+      
+      quadrant = geoId % kFgtNumQuads;
+      disc = geoId / kFgtNumQuads;
+    }
+  
+  static std::string encodeGeoName(
+				   Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
+				   )
+    {
+      std::stringstream buff;
+      buff << disc << quadrant << layer;
+      strip += 1;
+      if ( strip < 10 )
+	buff << "00";
+      else if ( strip < 100 )
+	buff << "0";
+      
+      buff << strip;
+      return buff.str();
+    }
+  
+  static void decodeGeoName(
+			    const std::string & geoName,
+			    Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
+			    )
+    {
+      disc = geoName[0] - '0';
+      quadrant = geoName[1] - '0';
+      layer = geoName[2];
+      strip = std::atoi( (geoName.substr(3)).c_str() ) - 1;
+    }
+  
+  static std::string translateGeoIdToGeoName( Int_t geoId )
+    {
+      Short_t disc, quadrant, strip;
+      Char_t layer;
+      
+      decodeGeoId( geoId, disc, quadrant, layer, strip );
+      return encodeGeoName( disc, quadrant, layer, strip );
+    }
+  
+  static Int_t translateGeoNameToGeoId( const std::string & geoName )
+    {
+      Short_t disc, quadrant, strip;
+      Char_t layer;
+      
+      decodeGeoName( geoName, disc, quadrant, layer, strip );
+      return encodeGeoId( disc, quadrant, layer, strip );
+    }
+  
+  //  The ordinate, lowerSpan and upperSpan are all in centimeters or
+  //  radians, depending on the layer.
+  static void getPhysicalCoordinate(
+				    Int_t geoId,
+				    Short_t & disc, Short_t & quadrant, Char_t & layer,
+				    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
+				    )
+    {
+      Short_t strip;
+      
+      decodeGeoId( geoId, disc, quadrant, layer, strip );
+      ordinate =
+	mStrips[
+		(layer == 'P') * kFgtNumStrips + strip
 		].ordinate;
-	    lowerSpan =
-		mStrips[
-		    (layer == 'P') * kFgtNumStrips + strip
+      lowerSpan =
+	mStrips[
+		(layer == 'P') * kFgtNumStrips + strip
 		].lowerSpan;
-	    upperSpan =
-		mStrips[
-		    (layer == 'P') * kFgtNumStrips + strip
+      upperSpan =
+	mStrips[
+		(layer == 'P') * kFgtNumStrips + strip
 		].upperSpan;
-	}
-
-	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
-	//  radians, depending on the layer.
-	static void getPhysicalCoordinate(
-	    const std::string & geoName,
-	    Short_t & disc, Short_t & quadrant, Char_t & layer,
-	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
-	)
-	{
-	    Short_t strip;
-
-	    decodeGeoName( geoName, disc, quadrant, layer, strip );
-	    ordinate =
-		mStrips[
-		    (layer == 'P') * kFgtNumStrips + strip
+    }
+  
+  //  The ordinate, lowerSpan and upperSpan are all in centimeters or
+  //  radians, depending on the layer.
+  static void getPhysicalCoordinate(
+				    const std::string & geoName,
+				    Short_t & disc, Short_t & quadrant, Char_t & layer,
+				    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
+				    )
+    {
+      Short_t strip;
+      
+      decodeGeoName( geoName, disc, quadrant, layer, strip );
+      ordinate =
+	mStrips[
+		(layer == 'P') * kFgtNumStrips + strip
 		].ordinate;
-	    lowerSpan =
-		mStrips[
-		    (layer == 'P') * kFgtNumStrips + strip
+      lowerSpan =
+	mStrips[
+		(layer == 'P') * kFgtNumStrips + strip
 		].lowerSpan;
-	    upperSpan =
-		mStrips[
-		    (layer == 'P') * kFgtNumStrips + strip
+      upperSpan =
+	mStrips[
+		(layer == 'P') * kFgtNumStrips + strip
 		].upperSpan;
-	}
-
+    }
+  
 	//  Please note that the following functions do NOT access the STAR
 	//  database to find mapping information. They assume the most
 	//  straight-forward mapping scheme and use that.
@@ -397,21 +387,11 @@ class StFgtGeom
 	static const double kFgtPhiAnglePitch	=  0.002095; 
 	static const double kFgtDeadQuadEdge	=  1.2;	    // (cm) effective dead area along quadrant edges
 
-    protected:
-	/*  Not sure that these have a point anymore.
-	StFgtGeom() {};
+ protected:
 
-	//  Copy constructors and assignment operators are *not* implemented.
-	StFgtGeom( const StFgtGeom& );
-	StFgtGeom& operator=( const StFgtGeom& );
-	*/
+	
  public:
-	//  Standard definitions.
-	static const Int_t kNumStrips = 1440; 
-	static const Int_t kNumChannels = 1280;
-	static const Int_t kFgtMxDisk=6;    /* max # of  FGT disks @ STAR */
-	static const Int_t kFgtMxQuad=4;    /* max # of quadrants in single FGT disk */
-        static const Int_t kFgtNumStrips = 720;
+	
 
 	//  Various constants used in Jan's conversion functions.
 	static double pi;
@@ -426,10 +406,10 @@ class StFgtGeom
 
  protected:
 	//  ---Private member variables---
-	static StFgtGeomData mStrips[ kNumStrips ];
+	static StFgtGeomData mStrips[ 2*kFgtNumStrips ];
 
         // maps from (apv*128 + channel) to ((layer=='P')*kFgtNumStrips + stripID)
-	static Int_t mNaiveMapping[ kNumChannels ];
+	static Int_t mNaiveMapping[  kFgtNumChannels*kFgtApvsPerQuad ];
 
         // reverse mapping: ((layer=='P')*kFgtNumStrips + stripID) to (apv*128 + channel)
         static Bool_t mReverseNaiveMappingValid;
@@ -499,8 +479,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.29 2012/01/26 18:41:49 balewski Exp $
+ *  $Id: StFgtGeom.h,v 1.30 2012/01/27 13:21:25 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.30  2012/01/27 13:21:25  rfatemi
+ *  used only constants declared in enums in StFgtConsts.h
+ *
  *  Revision 1.29  2012/01/26 18:41:49  balewski
  *  fixing , new constants
  *
