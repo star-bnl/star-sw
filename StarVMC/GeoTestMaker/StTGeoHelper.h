@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.15 2011/10/03 20:47:16 perev Exp $
+// $Id: StTGeoHelper.h,v 1.16 2012/01/27 18:11:28 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -208,7 +208,7 @@ public:
        void Init(int mode=0);
        void Finish();
 
-       void SetModule (const char *voluName,int akt=1);
+ StVoluInfo *SetModule (const char *voluName,int akt=1);
        void InitInfo();
        void InitModuLev();
 
@@ -228,8 +228,9 @@ public:
         void  Print(const char *tit=0) const;
         void  ls(const char* opt="Mmps")                const;
         void  SetInfo   (StVoluInfo *ext);
-        void  SetActive (const char *voluName,int act=1,StActiveFunctor *af=0);
-        void  SetActive (StDetectorId did,int act=1,StActiveFunctor *af=0);
+  StVoluInfo *SetActive (const char *voluName,int act=1,StActiveFunctor *af=0);
+  StVoluInfo *SetActive (StDetectorId did,int act=1,StActiveFunctor *af=0);
+const TGeoVolume *FindModule(const char *patt);
   StVoluInfo *SetFlag   (const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg,int act=1);
          int  IsFlag    (const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg) const;
          int  IsModule  (const TGeoVolume *volu)        const;
@@ -339,10 +340,14 @@ public:
      StTGeoHitShape(double zMin,double zMax);
 void Update(double z1, double z2, double rxy);
 int  Inside(double z,double rxy) const;
+void Get(double &zMin,double &zMax,double &rMax);
+
+
 private:
 enum {kNZ=100};
 double fZMin;
 double fZMax;
+double fRMax;
 double fRxy[kNZ];
 };
 #endif //ST_TGEOHELPER_H

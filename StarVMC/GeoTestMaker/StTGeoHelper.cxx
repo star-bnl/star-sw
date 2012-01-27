@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.16 2011/09/21 23:03:24 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.17 2012/01/27 18:11:28 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <set>
 #include "TROOT.h"
+#include "TString.h"
 #include "TMath.h"
 #include "TObjArray.h"
 #include "TGeoManager.h"
@@ -38,79 +39,42 @@ ClassImp(StHitTube )
 
 enum EMEDIUM {kISVOL =0,kIFIELD=1,kFIELDM=2,kTMAXFD=3
              ,kSTEMAX=4,kDEEMAX=5,kEPSIL =6,kSTMIN =7};
-static const char *gDetName[]={
-  "Unknown",
-  "Tpc",
-  "Svt",
-  "Rich",
-  "FtpcWest",
-  "FtpcEast",
-  "Tof",
-  "Ctb",
-  "Ssd",
-  "BarrelEmcTower",
-  "BarrelEmcPreShower",
-  "BarrelSmdEtaStrip",
-  "BarrelSmdPhiStrip",
-  "EndcapEmcTower",
-  "EndcapEmcPreShower",
-  "EndcapSmdUStrip",
-  "EndcapSmdVStrip",
-  "ZdcWest",
-  "ZdcEast",
-  "MwpcWest",
-  "MwpcEast",
-  "TpcSsd",
-  "TpcSvt",
-  "TpcSsdSvt",
-  "SsdSvt",
-  "PhmdCpv",
-  "Phmd",
-  "Pxl",
-  "Ist",
-  "Fgt",
-  "FpdWest",
-  "FpdEast",
-  "Fms",
-  "Rps",
-   0};
 
-static const char *gModName[]={
-  "UNKNOWN", 		//Unknown
-  "TPCE",		//Tpc
-  "SVTT",		//Svt
-  "RICH",		//Rich
-  "FTPC",		//FtpcWest
-  "FTPC",		//FtpcWest
-  "BTOF",		//Tof
-  "",			//Ctb
-  "SFMO",		//Ssd
-  "CALB",		//BarrelEmcTower
-  "CALB",		//"BarrelEmcPreShower
-  "CALB",		//BarrelSmdEtaStrip
-  "CALB",		//BarrelSmdPhiStrip
-  "ECAL",		//EndcapEmcTower
-  "ECAL", 		//EndcapEmcPreShowe
-  "ECAL",		//EndcapSmdUStrip
-  "ECAL",		//EndcapSmdVStrip
-  "",			//ZdcWest
-  "",			//ZdcEast
-  "",			//MwpcWest
-  "MWPCEAST",		//MwpcEast
-  "",			//TpcSsd
-  "",			//TpcSvt
-  "",			//TpcSsdSvt
-  "",			//SsdSvt
-  "PHMDCPV",		//PhmdCpv
-  "PHMD",		//Phmd
-  "PXMO",		//Pxl
-  "IBMO",		//Ist
-  "FGMO",		//Fgt
-  "FBOX",		//FpdWest
-  "FBOX",		//FpdEast
-  "FBOX",		//Fms
-  "",			//Rps
-  };		
+struct myMap {int id; const char *name;};
+static myMap gMyMod[] = {
+{kUnknownId             ,""	},
+{kTpcId       		,"TPCE"	},
+{kSvtId       		,"SVTT"	},
+{kRichId      		,"RICH"	},
+{kFtpcWestId  		,"FTPC"	},
+{kFtpcEastId  		,"FTPC"	},
+{kTofId       		,"BTOF"	},
+{kCtbId       		,"Ctb"	},
+{kSsdId       		,"SFMO"	},
+{kBarrelEmcTowerId     	,"CALB"	},
+{kBarrelEmcPreShowerId 	,"CALB"	},
+{kBarrelSmdEtaStripId  	,"CALB"	},
+{kBarrelSmdPhiStripId  	,"CALB"	},
+{kEndcapEmcTowerId     	,"ECAL"	},
+{kEndcapEmcPreShowerId 	,"ECAL"	},
+{kEndcapSmdUStripId    	,"ECAL"	},
+{kEndcapSmdVStripId    	,"ECAL"	},
+{kZdcWestId   		,""	},
+{kZdcEastId   		,""	},
+{kMwpcWestId  		,""	},
+{kMwpcEastId  		,""	},
+{kPhmdCpvId   		,"PHMD"	},
+{kPhmdId      		,"PHMD"	},
+{kPxlId       		,"PXMO"	},
+{kIstId       		,"IBMO"	},
+{kFgtId       		,"FGTM"	},
+{kEtrId       		,"ETRV"	},
+{kFpdWestId   		,"FBOX"	},
+{kFpdEastId   		,"FBOX"	},
+{kFmsId       		,""	},
+{kRpsId       		,""	},
+{kMtdId       		,"MMBL"	},
+{0,0				}};
   		  
 void myBreak(int i) 
 { 
@@ -210,31 +174,40 @@ void StTGeoHelper::InitInfo()
 
 }
 //_____________________________________________________________________________
-void StTGeoHelper::SetModule (const char *voluName, int akt)
+StVoluInfo *StTGeoHelper::SetModule (const char *voluName, int akt)
 {
-  TGeoVolume *vol = gGeoManager->FindVolumeFast(voluName);
-  if (!vol) { Warning("SetModule","Volume %s Not Found",voluName);return;}
+  const char *volName = voluName;
+  TGeoVolume *vol = gGeoManager->FindVolumeFast(volName);
+  if (!vol) { 
+    StDetectorId did = DetId(volName);
+    if (did) { 
+      volName = ModName(did); 
+      vol = gGeoManager->FindVolumeFast(volName);
+  } }
+  if (!vol) { Warning("SetModule","Volume %s Not Found",voluName);return 0;}
 
-  SetFlag(vol,StVoluInfo::kModule,akt);
+  return SetFlag(vol,StVoluInfo::kModule,akt);
 }
 //_____________________________________________________________________________
-void StTGeoHelper::SetActive (const char *voluName, int akt,StActiveFunctor *af)
+StVoluInfo *StTGeoHelper::SetActive (const char *voluName, int akt,StActiveFunctor *af)
 {
-  TGeoVolume *vol = gGeoManager->FindVolumeFast(voluName);
-  if (!vol) { Warning("SetActive","Volume %s Not Found",voluName);return;}
-  StVoluInfo *inf = SetFlag(vol,StVoluInfo::kActive,akt);
+  StVoluInfo *inf = SetModule(voluName,1);
+  if (!inf) return 0;
+  inf->SetBit(StVoluInfo::kActive,akt);
   inf->SetActiveFunctor(af);
+  return inf;
 }
 //_____________________________________________________________________________
-void StTGeoHelper::SetActive (StDetectorId did,int akt,StActiveFunctor *af)
+StVoluInfo * StTGeoHelper::SetActive (StDetectorId did,int akt,StActiveFunctor *af)
 {
   const char *modu = ModName(did);
-  if (!*modu)  { Warning("SetActive","DetId %d Unknown",did);return;}
-  SetActive(modu,akt,af); 
+  if (!*modu)  { Warning("SetActive","DetId %d Unknown",did);return 0;}
+  StVoluInfo *vi = SetActive(modu,akt,af); 
+  if (!vi) return 0;
   Long64_t mask = 1; mask = mask<<(int)did;
   if (akt) { fActiveModu |=  mask; }
   else     { fActiveModu &= ~mask; }
-
+  return vi;
 }
 //_____________________________________________________________________________
 int StTGeoHelper::IsActive (StDetectorId did) const
@@ -829,23 +802,26 @@ int StTGeoHelper::InitHits()
 //_____________________________________________________________________________
 StDetectorId StTGeoHelper::DetId(const char *detName) 
 {
-   for (int i = 0;gDetName[i]; i++) 
-   { if (strcmp(detName,gDetName[i])==0) return (StDetectorId)i;}
-   for (int i = 0;gModName[i]; i++) 
-   { if (strcmp(detName,gModName[i])==0) return (StDetectorId)i;}
+   StDetectorId id = detectorIdByName(detName); 
+   if (id) return id;
+   TString tDetName(detName);
+   for (int i = 0;gMyMod[i].name; i++) {
+    if (!tDetName.CompareTo(gMyMod[i].name,TString::kIgnoreCase)) 
+        return (StDetectorId)gMyMod[i].id;}
    return (StDetectorId)0;
 }
 //_____________________________________________________________________________
 const char *StTGeoHelper::DetName(StDetectorId detId)
 {
- if (detId >= StDetectorId(sizeof(gDetName)/sizeof(char*))) detId=(StDetectorId)0;
- return gDetName[detId];
+  const char *det =detectorNameById(detId);
+  return det;
 }
 //_____________________________________________________________________________
 const char *StTGeoHelper::ModName(StDetectorId detId)
 {
- if (detId >= StDetectorId(sizeof(gModName)/sizeof(char*))) detId=StDetectorId(0);
- return gModName[detId];
+   for (int i = 0;gMyMod[i].name; i++) 
+   { if (gMyMod[i].id==detId)  return gMyMod[i].name;}
+   return "";
 }
 
 //_____________________________________________________________________________
@@ -1182,13 +1158,32 @@ int StTGeoIter::IsOmule()  const //candidate to module
    }
    return (jk==6);
 }
-
+//_____________________________________________________________________________
+const TGeoVolume *StTGeoHelper::FindModule(const char *patt) 
+{
+   
+  const TGeoVolume *vol=0,*bestVolu=0;
+  int bestQua = -1000000;
+  for (StTGeoIter it;(vol=*it);++it) {
+    const char *name = vol->GetName();
+    if (patt[0]!=name[0]) continue;
+    if (patt[1]!=name[1]) continue;
+    int n = 0;
+    for (;patt[n];n++) { if (name[n]!=patt[n]) break;}
+    if (n<3) continue;
+    if (it.GetLev()>5) continue;
+    int qua = n*100 - it.GetLev();
+    if (qua <= bestQua) continue;
+    bestQua = qua; bestVolu = vol;
+  }
+  return bestVolu;
+}
 
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 StTGeoHitShape::StTGeoHitShape(double zMin,double zMax)
 {
-  fZMin = zMin; fZMax = zMax;
+  fZMin = zMin; fZMax = zMax; fRMax = 0;
   memset(fRxy,0,sizeof(fRxy));
 }
 //_____________________________________________________________________________
@@ -1196,7 +1191,7 @@ void StTGeoHitShape::Update(double z1, double z2, double rxy)
 {
    assert(z1>fZMin && z1<fZMax);
    assert(z2>fZMin && z2<fZMax);
-
+   if (fRMax<rxy) fRMax=rxy;
    rxy*=1.1;
    int jl = (int)((z1-fZMin)/(fZMax-fZMin)*kNZ);
    int jr = (int)((z2-fZMin)/(fZMax-fZMin)*kNZ);
