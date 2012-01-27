@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.12 2011/11/18 23:34:37 perev Exp $
+// $Id: StvMaker.cxx,v 1.13 2012/01/27 18:14:36 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -136,6 +136,40 @@ Int_t StvMaker::Init()
 //_____________________________________________________________________________
 Int_t StvMaker::InitDetectors()
 {
+  
+  StvToolkit *kit =StvToolkit::Inst();
+  kit->SetHitLoader(new StvHitLoader);
+  kit->HitLoader()->Init();
+  if (*SAttr("HitLoadOpt")) StTGeoHelper::Inst()->SetOpt(IAttr("HitLoadOpt"));
+
+  if (IAttr("activeTpc")) {
+  
+    const char*  innOutNames[2]  ={"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs"    };
+    StTGeoHelper::Inst()->SetActive(kTpcId,1,new StvTpcActive);
+    for (int io=0;io<2;io++) {
+      StvHitErrCalculator *hec = new StvTpcHitErrCalculator(innOutNames[io]);
+      TString ts("Calibrations/tracker/");
+      ts+=innOutNames[io];
+      TTable *tt = (TTable*)GetDataBase(ts);
+      assert(tt);
+
+      hec->SetPars((double*)tt->GetArray());
+      StvTpcSelector        *sel = new StvTpcSelector(innOutNames[io]);
+      int nHP = StTGeoHelper::Inst()->SetHitErrCalc(kTpcId,hec,sel);
+      Info("Init","%s: %d HitPlanes",innOutNames[io],nHP);
+  } }
+
+  if (IAttr("activeEtr")) {//Etr hit loader
+      StTGeoHelper::Inst()->SetActive(kEtrId,1,0);
+      StvHitErrCalculator *hec = new StvHitErrCalculator("EtrHitErrs");
+      double etrPars[StvHitErrCalculator::kMaxPars]={1e-4,1e-4};
+      hec->SetPars(etrPars);
+      int nHP = StTGeoHelper::Inst()->SetHitErrCalc(kEtrId,hec,0);
+      Info("Init","%s: %d HitPlanes","EtrHitErrs",nHP);
+  }
+  StTGeoHelper::Inst()->Init(1+2+4);
+
+
   return kStOk;
 }
 
@@ -146,7 +180,7 @@ static int initialized = 0;
   if (initialized) return 0;
   TString geom;
 // 		Geometry via DBMaker
-  TDataSet *myGeo = GetDataBase("VmcGeometry");
+  TDataSet *myGeo = GetDataBase("VmcGeometry"); if (myGeo){};
   if (gGeoManager) {
     geom = gGeoManager->GetName();
   } else {
@@ -160,48 +194,23 @@ static int initialized = 0;
   app->SetInit(ini);
   app->Init();
 
-  StTGeoHelper::Inst()->SetActive(kTpcId,1,new StvTpcActive);
-  StTGeoHelper::Inst()->Init(1+2+4);
-
-  const char*  innOutNames[2]  ={"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs"    };
-  for (int io=0;io<2;io++) {
-    StvHitErrCalculator *hec = new StvTpcHitErrCalculator(innOutNames[io]);
-    TString ts("Calibrations/tracker/");
-    ts+=innOutNames[io];
-    TTable *tt = (TTable*)GetDataBase(ts);
-//    TTable *tt = (TTable*)GetDataBase(innOutNames[io]);
-    assert(tt);
-
-    hec->SetPars((double*)tt->GetArray());
-    StvTpcSelector        *sel = new StvTpcSelector(innOutNames[io]);
-    int nHP = StTGeoHelper::Inst()->SetHitErrCalc(kTpcId,hec,sel);
-    Info("Init","%s: %d HitPlanes",innOutNames[io],nHP);
-  }
 
   StvToolkit *kit =StvToolkit::Inst();
-  kit->SetHitLoader(new StvHitLoader);
-  kit->HitLoader()->Init();
-  if (*SAttr("HitLoadOpt")) StTGeoHelper::Inst()->SetOpt(IAttr("HitLoadOpt"));
 
 //		Choose seed finders
-  const char *seeds = SAttr("seedFinders");
-  if (!*seeds) seeds = "Default";
-  int jl=0,jr=-1;
-  while(1) 
-  {
-    jr = strcspn(seeds+jl," ,")+jl; if (jl>=jr) break;
-    TString chunk(seeds+jl,jr-jl);
-    if      (chunk.CompareTo("CA"      ,TString::kIgnoreCase)==0) {
+  TString seeds = SAttr("seedFinders");
+  if (!seeds.Length()) seeds = "Default";
+  TObjArray *tokens = seeds.Tokenize(" ,");
+  for (int idx=0;idx<=tokens->GetLast();idx++) {
+  TString &chunk = ((TObjString*)tokens->At(idx))->String();
+    if (chunk.CompareTo("CA"      ,TString::kIgnoreCase)==0) {
       assert(gSystem->Load("Vc.so")		<=0);
       assert(gSystem->Load("TPCCATracker.so")	<=0);
-      kit->SetSeedFinder (new StvCASeedFinder);}
-    else if (chunk.CompareTo("Default",TString::kIgnoreCase)==0 ) {
-      kit->SetSeedFinder (new StvDefaultSeedFinder); }
-    if (!seeds[jr]) break;
-    jl = jr + 1;
+      kit->SetSeedFinder (new StvCASeedFinder);		continue;}
+    if (chunk.CompareTo("Default",TString::kIgnoreCase)==0 ) {
+      kit->SetSeedFinder (new StvDefaultSeedFinder);	continue;}
   };
-
-
+  delete tokens;
 
   kit->SetTrackFinder(new StvKalmanTrackFinder);
 
@@ -211,7 +220,7 @@ static int initialized = 0;
   mEventFiller= new StvStEventFiller;
   InitPulls();
   mVertexFinder = new StvStarVertexFinder("GenericVertex");
-//  InitDetectors();
+  InitDetectors();
   
   return StMaker::InitRun(run);
 }

@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.6 2011/10/03 20:11:42 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.7 2012/01/27 18:14:35 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -23,6 +23,7 @@ Main tasks:
 #include "StEvent.h"
 #include "StHit.h"
 #include "StEventUtilities/StEventHelper.h"
+#include "StEventUtilities/StEventHitIter.h"
 #include "Stv/StvDraw.h"
 #include "Stv/StvStl.h"
 
@@ -56,8 +57,8 @@ Int_t StvHitLoader::Finish()
 Int_t StvHitLoader::Init()
 {
    for (int id=1; id<kMaxDetectorId; id++){
-     if (StTGeoHelper::Inst()->IsActive((StDetectorId)id))
-         mHitIter->AddDetector((StDetectorId)id);
+     if (!StTGeoHelper::Inst()->IsActive((StDetectorId)id)) continue;
+     mHitIter->AddDetector((StDetectorId)id);
    }
    return 0;
 }
