@@ -44,7 +44,7 @@ float mZStep;
 float mRxy2;
 float mZ2;
 float mDir[3]; 		// track direction
-float mLen;		// cone length 
+float mLen;		// cone length (height)
 //		Calculated data
 
 float mTan; 		// (tan(cone angle/2)
