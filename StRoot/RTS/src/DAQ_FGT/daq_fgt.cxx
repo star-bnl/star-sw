@@ -247,8 +247,8 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 				LOG(NOTE,"  APV %d",apv) ;
 
 				int apv_id = *dta & 0x1F ;
-				int length = (*dta >> 5) & 0x3FF ;
-				int fmt = (*dta >> 16) & 0x7 ;
+				int length = (*dta >> 5) & 0x3FF ;   // it's probable that we never use >0x1ff, so there is a hidden 'reserved' bit here
+				int fmt = (*dta >> 16) & 0xf ;       // promoted to 4 bits on 1/26/2012 (take over reserved=0 bit)
 				int seq = (*dta >> 20) & 0xfff;
 
 				dta++ ;
@@ -264,6 +264,8 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 
 				dta++ ;
 
+				nhits = ( ntim>0 ? nhits+1 : 0 );    // nhits (range 0-128) is encoded like this in 7-bit nhits field and ntim field
+
 				LOG(NOTE,"  capid %d, nhits %d, is_error 0x%X, refadc %d, ntim %d, is_0 0x%X",
 				    capid, nhits, is_error, refadc, ntim, is_0) ;
 
@@ -275,7 +277,8 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 				}
 
 				if(seq != arm_seq) {
-				  // should be ERR, not yet
+				  // should be ERR, not yet; when promoting to err we need to change fmt code from 1 to something new, since there
+				  // is old data (before ARM firmware r67), with fmt code 1, that needs to be supported and which has wrong sequence numbers
 				  LOG(WARN,"RDO %d ARM %d APV %d: Sequence number mismatch, expect %d have %d",r,arm,apv,arm_seq,seq);
 				  //continue;
 				}
@@ -296,6 +299,8 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 				// This here remains still quite a hack, I must fix the length code but that is slightly nontrivial for today
 				// This will fail perhaps very occasionally if the data word is just exactly right to make it fail... pretty unlikely I hope!
 				// It also fails if ever APV #23 is recognized / non-truncated. That shouldn't happen, of course (in FGT! not IST!)
+				if (length==2)      // i.e. nothing but 2 header words in this record
+				  continue;         //here paving the way for the length hack to be removed, this should remain working, for non-ZS data at least
 				if (apv==23) {
 				  dta += 3;
 				  continue;
@@ -319,10 +324,11 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 
 
 				u_short *d16 = (u_short *) dta ;
-				u_short wfm[1024] ;
+				u_short wfm[2720] ;       // actually use 1000 for 7 timebins, less for less, but better cover worst case length from header
 				int i = 0 ;
 				
-				for(int j=0;j<250;j++) {
+				// it is important to note, this is specifically for format 1, and the length will always be of form 2+3*n
+				for(int j=0;j<((length-2)/3)*2;j++) {
 					u_short wtmp ;
 
 					wfm[4*j]	= 0x0fff & d16[i] ;
@@ -337,16 +343,6 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 					wfm[4*j+3]	= 0x0fff & (d16[i++]>>4) ;
 				}
 
-				/*
-				// hack dump for raw "waveform" for timing in the APV's
-				if ((arm==1) && (apv==13)) {  // fill in the one we're interested in at the moment
-				  for(int j=0;j<1000;j++)
-				    printf("%d\n",wfm[j]);
-				  printf("\n\n"); // event "index" separator for gnuplot
-				}
-				// end of that hack dump
-				*/
-
 				dta += (length - 2) ;	// skip "length" words - 2 for the header
 
 				/*
@@ -356,8 +352,12 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 				LOG(TERR,"Diff %d",dta-o_dta) ;
 				*/
 
+				if ( 27+127+(ntim-1)*140 >= ((length-2)/3)*8 ) {
+				  LOG(ERR,"trouble in APV block content, it's shorter than required to unpack %d timebins",ntim);
+				  continue;
+				}
 				for(int ch=0;ch<128;ch++) {
-					int rch = 32*(ch%4) + 8*(ch/4) - 31*(ch/16) ;
+					int rch = 32*(ch%4) + 8*(ch/4) - 31*(ch/16) ;     // see APV user guide (channel mux sequence)
 					for(int tb=0;tb<ntim;tb++) {
 
 						int adc = wfm[27+ch+tb*140] ;
