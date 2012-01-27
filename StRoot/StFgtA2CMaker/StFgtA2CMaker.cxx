@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.9 2012/01/24 06:52:45 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.10 2012/01/27 13:38:29 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.10  2012/01/27 13:38:29  sgliske
+ * updated to correspond with new Status/Ped readers,
+ * Now keyed by elecId
+ *
  * Revision 1.9  2012/01/24 06:52:45  sgliske
  * made status cuts optional
  * and updated status to a fail condition--
@@ -138,10 +142,13 @@ Int_t StFgtA2CMaker::Make(){
                      Int_t timebin = strip->getTimeBin();
                      Int_t adc = strip->getAdc();
 		     Double_t gain= mDb ? mDb->getGainFromGeoId(geoId) : 1;
+                     Int_t rdo, arm, apv, channel;
+                     strip->getElecCoords( rdo, arm, apv, channel );
+                     Int_t elecId = StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
 
                      Float_t ped, err;
 		     if(usePedFile)
-		       mPedReader->getPed( geoId, timebin, ped, err );
+		       mPedReader->getPed( elecId, timebin, ped, err );
 		     else
 		       {
 			 ped=mDb->getPedestalFromGeoId(geoId);
@@ -167,7 +174,7 @@ Int_t StFgtA2CMaker::Make(){
                         if( mCutBadStatus ){
                            UInt_t status=0;
                            if(useStatusFile)
-                              mStatusReader->getStatus( geoId, status );
+                              status = mStatusReader->getStatus( elecId );
                            if(!useStatusFile && mDb)
                               status=mDb->getStatusFromGeoId(geoId);
                            if(status)
