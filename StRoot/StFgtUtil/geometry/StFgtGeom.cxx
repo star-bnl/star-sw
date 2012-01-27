@@ -60,7 +60,7 @@ void StFgtGeom::makeReverseNaiveMappingValid(){
       (*p) = 0;
 
    Int_t i = 0;
-   for( const Int_t *p = mNaiveMapping; p != &mNaiveMapping[kNumChannels]; ++p, ++i )
+   for( const Int_t *p = mNaiveMapping; p != &mNaiveMapping[ kFgtNumChannels*kFgtApvsPerQuad]; ++p, ++i )
       mReverseNaiveMapping[ (*p) ] = i;
 
    mReverseNaiveMappingValid = 1;
@@ -3522,8 +3522,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.23 2012/01/26 13:13:12 sgliske Exp $
+ *  $Id: StFgtGeom.cxx,v 1.24 2012/01/27 13:21:55 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.24  2012/01/27 13:21:55  rfatemi
+ *  Use only constants in StFgtConsts.h
+ *
  *  Revision 1.23  2012/01/26 13:13:12  sgliske
  *  Updated to use StFgtConsts, which
  *  replaces StFgtEnums and StFgtGeomDefs
