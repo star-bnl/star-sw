@@ -306,7 +306,8 @@ void fgtBuilder::fillSumHistos()
 	      int index=Gid2Indx[gid]*maxC+iApv*128+iCh;
 	      int gIndex=gid*maxC+iApv*128+iCh;
 	      //should not be a memory leak, since histogram exists and should just be refilled...
-	      projX=contents.array[gid]->ProjectionY("_px",iApv*128+iCh,iApv*128+iCh,"o");
+	      //+1 due to underflow bin
+	      projX=contents.array[gid]->ProjectionY("_px",iApv*128+iCh+1,iApv*128+iCh+1,"o");
 	      //	      cout <<"getting proj from gid: " << gid <<" channel: " << iApv*128+iCh << endl;
 	      float mean=projX->GetMean();
 	      float sig=projX->GetRMS();
@@ -381,10 +382,11 @@ void fgtBuilder::stoprun(daqReader *rdr) {
 	numVals[i]=0;
 	numOverOneSig[i]=0;
       }
-  if(sumHistogramsFilled<2)
-    {
-      fillSumHistos();
-    }
+    //no effect anyways, since stoprun is only called after the histos are drawn
+    //  if(sumHistogramsFilled<2)
+    //    {
+    //      fillSumHistos();
+    //    }
 }
 
 void fgtBuilder::main(int argc, char *argv[])
