@@ -20,6 +20,7 @@ StvHitErrCalculator(const char *name="");
 virtual void CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual void CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual void CalcDcaDers(double dRR[kMaxPars][3]);
+virtual double Trace(const float hiPos[3]);
 virtual  int GetNPars() const 			{return 4;}
 const double *GetPars() const 			{return mPar ;}
 static StvHitErrCalculator *Inst(const char *name);
@@ -41,6 +42,7 @@ public:
 virtual void CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual void CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3]);
 virtual void CalcDcaDers(double dRR[kMaxPars][3]);
+virtual double Trace(const float hiPos[3]);
 virtual  int GetNPars() const 			{return 6;}
 static void Dest(double phiG=33,double lamG=33);
 

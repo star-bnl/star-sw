@@ -138,6 +138,10 @@ void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][
   hRr[0]=G[0]; hRr[1]=G[1]; hRr[2]=G[2];
 } 
 //______________________________________________________________________________
+double StvHitErrCalculator::Trace(const float*) {
+  return mPar[kWidTrk]+mPar[kYErr]+mPar[kWidTrk]+mPar[kZErr];
+}
+//______________________________________________________________________________
 void StvHitErrCalculator::CalcDcaDers(double dRR[kMaxPars][3])
 {
 // Calculate deriavatives of err matrix.
@@ -179,6 +183,17 @@ void StvTpcHitErrCalculator::CalcDcaDers(double dRR[kMaxPars][3])
      dRR[kYDiff][j]=dRR[kYErr][j]*mZSpan;
      dRR[kZDiff][j]=dRR[kZErr][j]*mZSpan;
    }
+}
+//______________________________________________________________________________
+double StvTpcHitErrCalculator::Trace(const float hiPos[3]) 
+{
+    mZSpan = fabs(hiPos[2]-210)/100;
+    double save1 = mPar[kYErr],save2 = mPar[kZErr];
+    mPar[kYErr]+=mPar[kYDiff]*mZSpan;
+    mPar[kZErr]+=mPar[kZDiff]*mZSpan;
+    double err2 = StvHitErrCalculator::Trace(hiPos);
+    mPar[kYErr]=save1;mPar[kZErr]=save2;
+    return err2;
 }
 
 
