@@ -194,7 +194,7 @@ public:
   double mTheta2;	//multiple scattering angle error
   double mOrt2;		//multiple scattering position error
   double mELoss;	//Energy loss
-  double mdPtidL;	//d(1/p)/len
+  double mdPPdL;	//dP/P/len
   double mELossErr2;	//Square or Energy loss error
 public:
   void Clear() { mTheta2=0; mOrt2=0;mELoss=0;mELossErr2=0; }

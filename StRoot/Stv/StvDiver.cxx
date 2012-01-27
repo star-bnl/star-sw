@@ -359,7 +359,7 @@ static int nCall=0; nCall++;
   fELossData.mOrt2   = fELossTrak->GetOrt2();
   fELossData.mELoss  = fELossTrak->ELoss();
   fELossData.mELossErr2 = fELossTrak->ELossErr2();
-  fELossData.mdPtidL = fELossTrak->dPtidL();
+  fELossData.mdPPdL = fELossTrak->dPPdL();
 
   double cosL = fHelix->GetCos();
   double tanL = fHelix->GetTan();

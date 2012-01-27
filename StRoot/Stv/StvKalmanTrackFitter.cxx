@@ -209,7 +209,7 @@ int StvKalmanTrackFitter::Propagate(StvNode  *node,const StvNode *preNode,int di
   double dS = myHlx.Path(P);
   myHlx.Move(dS);
   double rho = myHlx.GetRho();
-  rho += rho*losNode->GetELoss().mdPtidL*dS;
+  rho += -rho*losNode->GetELoss().mdPPdL*dS;
   myHlx.Set(rho);
   node->mPP[dir].set(&myHlx,preNode->mFP[dir]._hz);
   node->mPE[dir].Set(&myHlx,preNode->mFP[dir]._hz);
@@ -267,6 +267,7 @@ THelixTrack* StvKalmanTrackFitter::GetHelix() const {return mHelx;}
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
 {
+static int nCall=0;nCall++;
 // mode.bit0 = use err
 // mode.bit1 = update track
 // mode.bit2 = print
@@ -288,6 +289,11 @@ int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
     if(mode&1) {	//Account errors
       double cos2li = node->GetFP()._tanl; cos2li = (1+cos2li*cos2li);
       const double *rr = node->GetHE();    
+      assert(rr[0]>0);
+      assert(rr[2]>0);
+      assert(rr[0]*rr[2]>rr[1]*rr[1]);
+
+
       StvDebug::Count("HHhlx",sqrt(rr[0]));
       StvDebug::Count("ZZhlx",sqrt(rr[2]));
 
@@ -295,7 +301,9 @@ int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
     }
   }  
   mXi2 =hlx.Fit();
-  if(mode&1) hlx.MakeErrs();
+  if(mode&1) {
+    hlx.MakeErrs(); 
+    assert(hlx.Emx()->Sign()>=0);}
   double dL = hlx.Path(trak->front()->GetFP().P);
   hlx.Move(dL);
 
@@ -316,14 +324,15 @@ int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
     if (hit) {for (int i=0;i<3;i++) {dHit[i]=hit->x()[i];};X = dHit;}
     double dS = myHlx.Path(X); myHlx.Move(dS);
     totLen+=dS; node->mLen = totLen;
-    if (on) totLoss += node->GetELoss().mdPtidL*dS;
+    if (on) totLoss += node->GetELoss().mdPPdL*dS;
     if (node == fstNode) on=1;
     if (node == lstNode) on=0;
     if (!hit) continue;
     const THEmx_t *emx = myHlx.Emx();
-    const double  *rr  = node->GetHE();    
+    assert(emx->Sign()>=0);
+//??    const double  *rr  = node->GetHE();    
 //??    assert(emx->mHH < rr[0]);
-    double cos2li = 1.+pow(node->GetFP()._tanl,2); 
+//??    double cos2li = 1.+pow(node->GetFP()._tanl,2); 
 //??    assert(emx->mZZ < rr[2]*cos2li);
   }
 
@@ -335,7 +344,7 @@ int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
       preNode = node; node = *midIt; iNode++;
       if (preNode) {
 	double dS = node->mLen-preNode->mLen; midLen+=dS;
-	if (on) totLoss += fabs(node->GetELoss().mdPtidL*dS);
+	if (on) totLoss += fabs(node->GetELoss().mdPPdL*dS);
       }
       if (node == fstNode) on=1;
       if (node == lstNode) on=0;
@@ -363,7 +372,7 @@ int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
 	myHlx.Move(dS,Fhlx);
 	if (preNode) { //Update helix
           double rho = myHlx.GetRho();
-          rho += rho*node->GetELoss().mdPtidL*dS;
+          rho += -rho*node->GetELoss().mdPPdL*dS;
           myHlx.Set(rho);
 	}
 	FP.set(&myHlx,FP._hz); 
