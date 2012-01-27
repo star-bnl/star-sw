@@ -8,7 +8,7 @@ import os
 import re
 
 # Exception handling
-from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError
+from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError, MixtureComponentError
 
 enable_warnings = os.getenv('AGML_WARNINGS',False)
 from warnings import warn
@@ -1644,8 +1644,8 @@ class Material(Handler):
 
         # List of attributes known to Material tag
         mylist = ['a', 'z', 'dens', 'absl', 'radl',
-            'ifield','isvol','fieldm','tmaxfd',
-            'epsil','stemax','deemax','stmin' ] # and additional medium parameters
+                  'ifield','isvol','fieldm','tmaxfd',
+                  'epsil','stemax','deemax','stmin' ] # and additional medium parameters
 
         # Check validity of attributes and issue warning if we are provided
         # an unknown attribute
@@ -1726,10 +1726,12 @@ class Mixture(Handler):
     def __init__(self):
         self.name = ""        
         self.opts = []
-        self.comps = []        
+        self.comps = []
+        self.elements = []
         Handler.__init__(self)                    
-    def addComponent(self, comp):
+    def addComponent(self, comp, element ):
         self.comps.append(comp)
+        self.elements.append(element)
     def startElement(self,tag,attr):
         self.name = attr.get('name')
         mylist = [ 'a', 'z', 'isvol', 'dens', 'nc', 'radl', 'absl' ] # ADDED radl, absl 02/16/11
@@ -1761,6 +1763,28 @@ class Mixture(Handler):
         document.impl( '_material = mix;', unit=current )
         document.impl( '_material.lock();', unit=current )
         document.impl( '}', unit=current )
+
+        self.checkComponents()
+
+    def checkComponents(self):
+        sumw = 0.0
+        isMixt = False # Is a mixture IF one w < 1
+        isComp = False # Is a compound IF one w > 1
+
+        for ele in self.elements:
+            w = 0.0
+            try:                          w = float(ele['w'])                
+            except ValueError:            w = eval(ele['w'])
+            except:
+                # May depend on variables, so pass through and catch at run time
+                return
+            sumw += w
+            if w<1.0: isMixt=True
+            if w>1.0: isComp=True            
+
+        if isMixt and isComp:
+            RaiseException( MixtureComponentError( self ) )
+
     
 class Component(Handler):
     def __init__(self): Handler.__init__(self)
@@ -1785,7 +1809,7 @@ class Component(Handler):
         z=z.lower()
         w=w.lower()
         
-        self.parent.addComponent( 'mix.Component("%s",%s,%s,%s);'%( name, a, z, w ) )
+        self.parent.addComponent( 'mix.Component("%s",%s,%s,%s);'%( name, a, z, w ), {'name':name, 'a':a, 'z':z, 'w':w} )
         document.impl( '/// Component %s\ta=%s\tz=%s\tw=%s'%(name,a,z,w), unit=current )
 
 class Attribute(Handler):

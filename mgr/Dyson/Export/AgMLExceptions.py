@@ -162,5 +162,30 @@ class AgmlFillMissingVarError(Exception):
         output = """
 
         --> AgML Error line %i: struct %s has no variable %s <--
-        """%(self.struct,self.varname)
+        """%(self.locator.getLineNumber(),self.struct,self.varname)
         return RED(output)
+
+
+# ===============================================================================
+class MixtureComponentError(Exception):
+    def __init__(self,mixture):
+        self.mixture = mixture
+        Exception.__init__(self)
+    def __str__(self):
+        output = """
+
+        --> AgML Error line %i : Mixture %s has invalid weights for components. <--
+
+            All weights must be < 1 for a mixture by weight
+            All weights must be integer for a mixture by chemical formula            
+            """%(self.locator.getLineNumber(), self.mixture.name)
+
+        for ele in self.mixture.elements:
+            output+= """
+            Component %s a=%s z=%s w=%s"""%(ele['name'],ele['a'],ele['z'],ele['w'])
+        output += "\n"
+
+        return RED(output)
+
+
+
