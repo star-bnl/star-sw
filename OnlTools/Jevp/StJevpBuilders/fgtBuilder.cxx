@@ -69,7 +69,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
     {
       meanVals[i]=0;
       aVals[i]=0;
-      rmsVals[i]=0;
+      //      rmsVals[i]=0;
       numVals[i]=0;
       numOverOneSig[i]=0;
       oldStdDevs[i]=0;
@@ -237,16 +237,13 @@ void fgtBuilder::event(daqReader *rdr)
 	      continue;
 	    //apvs go 0-9 then 12-...
 	    contents.array[gid]->Fill(channel,f[i].adc);
-	    rmsVals[gid*maxC+channel]+=(meanVals[gid*maxC+channel]-f[i].adc)*(meanVals[gid*maxC+channel]-f[i].adc);
+	    //	    rmsVals[gid*maxC+channel]+=(meanVals[gid*maxC+channel]-f[i].adc)*(meanVals[gid*maxC+channel]-f[i].adc);
 	    aVals[gid*maxC+channel]+=f[i].adc;
 	    //	    cout <<"tb: " << (int)f[i].tb <<endl;
 	    numVals[gid*maxC+channel]++;
-
-	    if(f[i].adc-meanVals[gid*maxC+channel]>oldStdDevs[gid*maxC+channel])
+	    if(f[i].adc-meanVals[gid*maxC+channel]>oldStdDevs[gid*maxC+channel] && oldStdDevs[gid*maxC+channel]>0)
 	      {
-
 		numOverOneSig[gid*maxC+channel]++;
-
 	      }
 	    //else
 	    //	          cout <<"no" <<endl;
@@ -274,7 +271,7 @@ void fgtBuilder::event(daqReader *rdr)
   
   // Reset rolling histos if necessary..
   int tm = time(NULL);
-  if((tm > t_10min + 600) || (!(evtCt%5000)))
+  if((tm > t_10min + 10) || (!(evtCt%100)))
     {
       t_10min = tm;
       fillSumHistos();
@@ -288,13 +285,42 @@ void fgtBuilder::event(daqReader *rdr)
 //right now all time bins are summed, so what is shown in mean and std dev is the mean over all tb for a channel
 void fgtBuilder::fillSumHistos()
 {
+
+  //  cout <<"fill..: "<<endl;
   char buffer[200];
     hContents.h1->Reset();
     hContents.h2->Reset();
     hContents.hSumBad->Reset();
+    hSumContents.hSumSig->Reset();
+    hSumContents.hSumPed->Reset();
+    hSumContents.hSumFrac->Reset();
+
     int numBad=0;
     //    int numTB=5;
     sumHistogramsFilled++;
+
+    //rms actually returns sigma
+    for(int gid=0;gid<maxA;gid++){
+	for(int iApv=0;iApv<10;iApv++){
+	    for(int iCh=0;iCh<128;iCh++){
+	      int index=Gid2Indx[gid]*maxC+iApv*128+iCh;
+	      int gIndex=gid*maxC+iApv*128+iCh;
+	      //should not be a memory leak, since histogram exists and should just be refilled...
+	      projX=contents.array[gid]->ProjectionY("_px",iApv*128+iCh,iApv*128+iCh,"o");
+	      //	      cout <<"getting proj from gid: " << gid <<" channel: " << iApv*128+iCh << endl;
+	      float mean=projX->GetMean();
+	      float sig=projX->GetRMS();
+	      //	      cout <<"mean: " << mean <<" sig: " << sig <<endl;
+	      hContents.h1->Fill(mean);
+	      if(sig>0)
+		{
+		 hContents.h2->Fill(sig);
+		 hSumContents.hSumSig->Fill(Gid2Indx[gid]*10+iApv,sig);
+		 }
+	      hSumContents.hSumPed->Fill(Gid2Indx[gid]*10+iApv,mean);
+	      meanVals[gIndex]=mean;
+	      oldStdDevs[gIndex]=sig;
+	    }}}
 
     for(int i=0;i<maxC*maxA;i++) 
       {
@@ -302,39 +328,39 @@ void fgtBuilder::fillSumHistos()
 	int index=Gid2Indx[gid];
 	//maxC is 1280
 	int apvNr=10*index+floor((i%maxC)/128);
-
 //	cout <<"apv nr is : " << apvNr << " gid: " << gid <<" i : " << i <<endl;
 //       	cout <<" 10 gid: " << 10*gid <<" i%maxC: " << (i%maxC) <<" add: " << floor((i%maxC)/128) <<" aVals: " << aVals[i] << " num: " << numVals[i] <<endl;
 	bool isBad=false;
-	if(aVals[i]>0 && numVals[i] > 0) 
+	if(numVals[i] > 0) 
 	  {
-	    hContents.h1->Fill(aVals[i]/numVals[i]);
-	    meanVals[i]=aVals[i]/numVals[i];
-	    hSumContents.hSumPed->Fill(apvNr,meanVals[i]);
+	    //	    hContents.h1->Fill(aVals[i]/numVals[i]);
+	    //	    meanVals[i]=aVals[i]/numVals[i];
+	    //	    hSumContents.hSumPed->Fill(apvNr,meanVals[i]);
 	    //	    cout <<"filling with " << numOverOneSig[i] <<" / "<< numVals[i]<< "=" <<numOverOneSig[i]/(float)numVals[i]<<endl;
+	    //numOverOneSig is filled according to gid
 	    hSumContents.hSumFrac->Fill(apvNr,numOverOneSig[i]/(float)numVals[i]);
-
 	    if(meanVals[i]<250 || meanVals[i]>maxPedVal)
 	      isBad=true;
 	  }
 	if(numVals[i]>1) 
 	  {
 	    //cout <<"numVals: " << numVals[i] <<" rms val: " << rmsVals[i] << " filling with : " << sqrt(rmsVals[i]/(numVals[i]-1)) <<endl;
-	    double rms=sqrt(rmsVals[i]/(numVals[i]-1));
-	    hContents.h2->Fill(rms);
-	    oldStdDevs[i]=rms;
+	    //	    double rms=sqrt(rmsVals[i]/(numVals[i]-1));
+	    //	    hContents.h2->Fill(rms);
+	    //	    oldStdDevs[i]=rms;
 	    //	    cout <<" rms: " << rms <<endl;
-	    hSumContents.hSumSig->Fill(apvNr,rms);
+	    //	    hSumContents.hSumSig->Fill(apvNr,rms);
+
+	    //filled before from the histos
+	    double rms=oldStdDevs[i];
 	    if(rms<5 || rms> maxRMSVal)
 	      isBad=true;
 	    else
 	      hContents.hSumBad->Fill(apvNr);
 	  }
 
-      aVals[i]=0;
-      numVals[i]=0;
-      rmsVals[i]=0;
-      numOverOneSig[i]=0;
+	///      aVals[i]=0;
+      //      rmsVals[i]=0;
       if(isBad)
 	numBad++;
     }
@@ -350,7 +376,11 @@ void fgtBuilder::stoprun(daqReader *rdr) {
   //here I should refill the histograms with the overall statistics (the summary histos)
 
   //if this is 0 we only have the means, 1 means we have not yet computed the stdDev, greater, equal 2 means that they should be filled
-
+    for(int i=0;i<maxC*maxA;i++) 
+      {
+	numVals[i]=0;
+	numOverOneSig[i]=0;
+      }
   if(sumHistogramsFilled<2)
     {
       fillSumHistos();

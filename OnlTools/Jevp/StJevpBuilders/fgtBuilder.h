@@ -28,7 +28,7 @@ public:
  private:
 
   void fillSumHistos();
-
+  TH1D* projX;
   TRandom tRnd;
   int evtCt;
   int t_2min;
@@ -111,7 +111,7 @@ public:
 
   int aVals[19*1400];
   int numVals[19*1400];
-  int rmsVals[19*1400];
+  //  int rmsVals[19*1400];
 
   int numOverOneSig[19*1400];
   bool isChannelBad[19*1400];
