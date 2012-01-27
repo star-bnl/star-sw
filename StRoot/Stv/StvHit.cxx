@@ -8,6 +8,7 @@
 #include "TCernLib.h"
 #include "Stiostream.h"
 #include "StvHit.h"
+#include "StvUtil/StvHitErrCalculator.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 
 
@@ -50,6 +51,12 @@ void StvHit::set(const StHitPlane *detector,
   msthit = stHit;
   return;
 }
+//_____________________________________________________________________________
+double StvHit::err2() const
+{
+  return ((StvHitErrCalculator*)(mDetector->GetHitErrCalc()))->Trace(mGlo);
+}
+
 //_____________________________________________________________________________
 void StvVertex::set(const float *x,const float matrix[6])
 {
