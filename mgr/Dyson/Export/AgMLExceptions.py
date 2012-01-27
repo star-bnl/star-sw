@@ -177,7 +177,10 @@ class MixtureComponentError(Exception):
         --> AgML Error line %i : Mixture %s has invalid weights for components. <--
 
             All weights must be < 1 for a mixture by weight
-            All weights must be integer for a mixture by chemical formula            
+                (and sum of all weights = 1)
+                
+            All weights must be integer for a mixture by chemical formula                
+
             """%(self.locator.getLineNumber(), self.mixture.name)
 
         for ele in self.mixture.elements:
@@ -186,6 +189,5 @@ class MixtureComponentError(Exception):
         output += "\n"
 
         return RED(output)
-
 
 
