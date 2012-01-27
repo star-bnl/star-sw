@@ -72,7 +72,7 @@
         
   <Block name="FSCT" comment="is a sensitive Tungsten+Sci+Epoxy tower"  >
 
-    <!--radl="0.8719" -- >
+    <!--radl="0.8719" -->
     <Mixture name="WSE" dens="8.297">
       <Component name="W" a="183.84" z="74" w="0.923"  />
       <Component name="C" a="12.01"  z="6"  w="0.071"  />
