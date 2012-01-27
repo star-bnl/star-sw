@@ -123,7 +123,6 @@ std::vector<TObject*> mySeedObjs;
 
   StvHit *fstHit,*selHit=0; 
   mSel.SetXYStep(TpcOuterDeltaR);
-  mSel.SetErr(kTpcHitErr*kErrFakt);
 
   for (;(*f1stHitMapIter)!=f1stHitMap->end();++(*f1stHitMapIter)) {//1st hit loop
     fstHit = (*(*f1stHitMapIter)).second;
@@ -137,6 +136,7 @@ std::vector<TObject*> mySeedObjs;
     mSel.Reset();
 if (myDeb>0) {fDraw->Clear();mySeedObjs.clear();}
     selHit = fstHit;
+    mSel.SetErr(sqrt(fstHit->err2())*kErrFakt);
 
     int selJkk = -11;
 
@@ -295,7 +295,8 @@ StvDebug::Break(nCall);
   if (mZStep>0) {
     float sinLa = fabs(mDir[2]);
     if (sinLa<1./kLenFakt) sinLa= 1./kLenFakt;
-    mLen = mZStep/sinLa;
+    double myLen = mZStep/sinLa;
+    if (mLen <myLen) mLen = myLen;
   }
   assert(mLen>0);
 
