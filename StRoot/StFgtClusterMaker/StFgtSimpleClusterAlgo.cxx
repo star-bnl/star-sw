@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.19 2011/11/17 19:23:54 ckriley Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.20 2012/01/28 20:10:12 avossen Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.20  2012/01/28 20:10:12  avossen
+//  addec cluster uncertainty
+//
 //  Revision 1.19  2011/11/17 19:23:54  ckriley
 //  fixed small bug
 //
@@ -80,6 +83,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
   Double_t ordinate, lowerSpan, upperSpan, prvOrdinate;
   Int_t prvGeoId;
   Double_t accuCharge=0; 
+  Double_t accuChargeError=0;
   Double_t meanOrdinate=0;
   Double_t meanSqOrdinate=0;
   Int_t numStrips=0;
@@ -120,6 +124,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 
 	  //	  cout <<" adc: " << accuCharge <<" geoId: " << (*it)->getGeoId() <<" meangeo: ";
 	  accuCharge=(*it)->getCharge();  
+	  accuChargeError=(*it)->getChargeUncert();
 	  meanGeoId=(*it)->getCharge()*(*it)->getGeoId();
 	  //	  cout << meanGeoId<<endl;
 
@@ -143,6 +148,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	  //should really be charge...
 	  //accuCharge+=(*it)->getCharge();  
 	  accuCharge+=(*it)->getCharge();
+	  accuChargeError+=(*it)->getChargeUncert();
 	  meanOrdinate+=ordinate;
 
 	  meanGeoId+=(*it)->getCharge()*(*it)->getGeoId();
@@ -167,6 +173,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	  //	  cout <<"setting charge of new cluster to " << accuCharge <<endl;
 
 	  newCluster->setCharge(accuCharge);
+	  numStrips > 1 ? newCluster->setChargeUncert(sqrt(accuChargeError/((float)numStrips-1))) : newCluster->setChargeUncert(sqrt(accuChargeError/((float)numStrips)));
           // compute mean and st. dev.
           meanOrdinate /= (float)numStrips;
 	  //	  cout <<" geo id is : " <<  meanGeoId <<" / " << accuCharge;
@@ -202,6 +209,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	  //	      cout <<"cluster has size: " << numStrips <<endl;
 	  //
 	  accuCharge=(*it)->getCharge();
+	  accuChargeError=(*it)->getChargeUncert();
 	  meanOrdinate=ordinate;
 	  meanGeoId=(*it)->getCharge()*(*it)->getGeoId();
 	  //	  cout<<" geo ID: " << (*it)->getGeoId() <<" charge: " << (*it)->getCharge() <<endl;
@@ -232,6 +240,8 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
       meanGeoId/=accuCharge;
       //      cout <<" and corrected: " << meanGeoId<<endl;
       newCluster->setCharge(accuCharge);
+      numStrips > 1 ? newCluster->setChargeUncert(sqrt(accuChargeError/((float)numStrips-1))) : newCluster->setChargeUncert(sqrt(accuChargeError/((float)numStrips)));
+
       meanSqOrdinate /= (float)numStrips;
       meanSqOrdinate -= meanOrdinate*meanOrdinate;
       if( meanSqOrdinate > 0 )
