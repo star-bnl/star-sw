@@ -69,32 +69,33 @@ class StFgtGeom
       disc = geoId / kFgtNumQuads;
     }
   
-  static std::string encodeGeoName(
-				   Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
-				   )
-    {
-      std::stringstream buff;
-      buff << disc << quadrant << layer;
-      strip += 1;
-      if ( strip < 10 )
-	buff << "00";
-      else if ( strip < 100 )
-	buff << "0";
-      
-      buff << strip;
-      return buff.str();
-    }
-  
-  static void decodeGeoName(
-			    const std::string & geoName,
-			    Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
-			    )
-    {
-      disc = geoName[0] - '0';
-      quadrant = geoName[1] - '0';
-      layer = geoName[2];
-      strip = std::atoi( (geoName.substr(3)).c_str() ) - 1;
-    }
+	static std::string encodeGeoName(
+	    Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
+	)
+	{
+            std::stringstream buff;
+            buff << disc+1 << (Char_t)(quadrant+'A') << layer;
+
+            if ( strip < 10 )
+                buff << "00";
+            else if ( strip < 100 )
+                buff << "0";
+
+            buff << strip;
+            return buff.str();
+	}
+
+	static void decodeGeoName(
+	    const std::string & geoName,
+	    Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
+	)
+	{
+            assert( geoName.size() == 6 );
+	    disc = geoName[0] - '1';
+	    quadrant = geoName[1] - 'A';
+	    layer = geoName[2];
+	    strip = std::atoi( (geoName.substr(3)).c_str() );
+	}
   
   static std::string translateGeoIdToGeoName( Int_t geoId )
     {
@@ -372,24 +373,6 @@ class StFgtGeom
 	static  bool belowFlat( TVector3 rLoc );
 	static  int  getQuad( double phiLab );
 	
-	//  Jan's definitions for the final 400-800 micron pitch design
-	static const double kFgtRout		= 38.25;    //	cm ,
-	static const double kFgtRlast           = 38.1571;  // location of last R strip before Rout
-	static const double kFgtRmid		= 19.125;   //	cm, at Rout/2.
-	static const double kFgtRin		= 11.5;	    //	cm, 
-	static const double kFgtRfirst          = 11.5385;  // location of first R strip after Rin
-	static const double kFgtPfirst        = 0.0324;    // location of first Phi strip 
-	static const double kFgtPlast         = 1.5384;    // location of last Phi strip
-	static const double kFgtRflat		= 35.85;    //	cm, 
-	static const double kFgtPhiflat		= 31.0/180.*3.1416;//  rad 
-	static const double kFgtRadPitch	=  0.09538; //	nominal '800 mu pitch'
-	static const double kFgtPhiPitch	=  0.08;    //	800 mu, at outer radi or at Rmid
-	static const double kFgtPhiAnglePitch	=  0.002095; 
-	static const double kFgtDeadQuadEdge	=  1.2;	    // (cm) effective dead area along quadrant edges
-
- protected:
-
-	
  public:
 	
 
@@ -479,8 +462,13 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.30 2012/01/27 13:21:25 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.31 2012/01/28 10:29:47 sgliske Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.31  2012/01/28 10:29:47  sgliske
+ *  static const doubles moved from StFgtGeom to StFgtConsts
+ *  Also, geoName updated to more recent convention
+ *  disc in 1-6, quad in A-D, strip in 0-719
+ *
  *  Revision 1.30  2012/01/27 13:21:25  rfatemi
  *  used only constants declared in enums in StFgtConsts.h
  *
