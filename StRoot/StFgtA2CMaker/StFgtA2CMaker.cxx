@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.11 2012/01/28 11:22:53 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.12 2012/01/28 20:10:12 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.12  2012/01/28 20:10:12  avossen
+ * addec cluster uncertainty
+ *
  * Revision 1.11  2012/01/28 11:22:53  sgliske
  * changed status check to status map
  * changed setDb to setFgtDb
@@ -190,6 +193,7 @@ Int_t StFgtA2CMaker::Make(){
                         strip->setAdc( adc );
                         strip->setType( 1 );
                         strip->setCharge( gain*adc );
+			strip->setChargeUncert(gain*err);
 #ifdef DEBUG
                         printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
 #endif
