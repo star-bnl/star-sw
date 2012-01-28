@@ -21,8 +21,7 @@ enum {
    kFgtApvsPerOct = 5,
    kFgtApvsPerQuad = 10,
    kFgtApvsPerArm = 20,
-   kFgtNumElecIds = 30720,    // elec id in 0-30719,
-                              // note kFgtNumElecId = kFgtNumChan * kFgtApvsPerArm * kFgtNumArm * kFgtNumRdo
+   kFgtNumElecIds = kFgtNumChannels * kFgtApvsPerArm * kFgtNumArms * kFgtNumRdos  // elec id in 0 to kFgtNumElecIds-1
 };
 
 // constants related to physical coordinates
@@ -32,8 +31,7 @@ enum {
    kFgtNumOctantsPerDisc = 8,
    kFgtNumLayers = 2,
    kFgtNumStrips = 720,
-   kFgtNumGeoIds = 34560,         // geoId in 0-34559
-                                  // kFgtNumGeoId = kFgtNumStrip
+   kFgtNumGeoIds = kFgtNumQuads * kFgtNumDiscs * kFgtNumLayers * kFgtNumStrips,   // geoId in 0 to kFgtNumGeoIds-1
    kFgtNumPstripsPerOctant = 360,
    kFgtNumRstripsPerOctant = 280,
    kFgtLowerStripOctant = 'L',    // i.e. a strip is in octant "kFgtLowerStripOctant" if
@@ -69,8 +67,11 @@ enum {
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.2 2012/01/28 10:29:47 sgliske Exp $
+ * $Id: StFgtConsts.h,v 1.3 2012/01/28 10:44:50 sgliske Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.3  2012/01/28 10:44:50  sgliske
+ * updated number of geoIds and elecIds to use products
+ *
  * Revision 1.2  2012/01/28 10:29:47  sgliske
  * static const doubles moved from StFgtGeom to StFgtConsts
  * Also, geoName updated to more recent convention
