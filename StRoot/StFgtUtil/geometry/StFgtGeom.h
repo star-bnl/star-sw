@@ -9,7 +9,7 @@
 #ifndef _ST_FGT_GEOM_H_
 #define _ST_FGT_GEOM_H_
 
-#include <TObject.h>
+#include <assert.h>
 #include <TVector3.h>
 #include <string>
 #include <sstream>
@@ -462,8 +462,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.31 2012/01/28 10:29:47 sgliske Exp $
+ *  $Id: StFgtGeom.h,v 1.32 2012/01/28 10:46:37 sgliske Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.32  2012/01/28 10:46:37  sgliske
+ *  Forgot to include assert, and removing unneeded TObject include
+ *
  *  Revision 1.31  2012/01/28 10:29:47  sgliske
  *  static const doubles moved from StFgtGeom to StFgtConsts
  *  Also, geoName updated to more recent convention
