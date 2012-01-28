@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.10 2012/01/27 13:38:29 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.11 2012/01/28 11:22:53 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.11  2012/01/28 11:22:53  sgliske
+ * changed status check to status map
+ * changed setDb to setFgtDb
+ * cleaned up few other minor things
+ *
  * Revision 1.10  2012/01/27 13:38:29  sgliske
  * updated to correspond with new Status/Ped readers,
  * Now keyed by elecId
@@ -29,8 +34,10 @@
  * Revision 1.7  2012/01/04 20:23:02  sgliske
  * fixed spelling of iDsic to iDisc
  *
- * Revision 1.6  2011/12/01 00:13:23  avossen
- * included use of db. Note: For DB use it hast to be set with setDb. Instantiate StFgtDBMaker, get the StFgtDb from the getTables method and give the pointer to the A2C maker
+ * Revision 1.6 2011/12/01 00:13:23 avossen
+ * included use of db. Note: For DB use it hast to be set with setDb.
+ * Instantiate StFgtDBMaker, get the StFgtDb from the getTables method
+ * and give the pointer to the A2C maker
  *
  * Revision 1.5  2011/11/25 20:24:13  ckriley
  * added statusmaker functionality
@@ -59,6 +66,7 @@
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "StRoot/StFgtPedMaker/StFgtPedReader.h"
 #include "StRoot/StFgtStatusMaker/StFgtStatusReader.h"
+#include "StRoot/StFgtDbMaker/StFgtDb.h"
 #include "StFgtA2CMaker.h"
 
 
@@ -71,8 +79,7 @@ StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
 
 Int_t StFgtA2CMaker::Init(){
   Int_t ierr = kStOk;
-  if(usePedFile)
-    {
+  if( usePedFile ) {
       if( mPedFile.empty()){
 	LOG_FATAL << "no ped file but told to use" << endm;
 	ierr = kStFatal;
@@ -82,21 +89,28 @@ Int_t StFgtA2CMaker::Init(){
 	mPedReader->setTimeBinMask( mTimeBinMask );
 	ierr = mPedReader->Init();
       }
-    }
-  else{
-    if(!mDb)
-      {
-	LOG_FATAL << "cannot find db that I am supposed to use!" << endm;
+    } else {
+     if(!mDb) {
+	LOG_FATAL << "No DB nor pedestal file specified--cannot proceed" << endm;
 	ierr = kStFatal;
       }
   }
-  if( useStatusFile && !(mStatusFile.empty()) ){
+  if( useStatusFile ) {
+      if( mStatusFile.empty()){
+	LOG_FATAL << "no status file but told to use" << endm;
+	ierr = kStFatal;
+      };
+      if( !ierr ){
 	mStatusReader = new StFgtStatusReader( mStatusFile.data() );
 	ierr = mStatusReader->Init();
-  }
-  
-  // now the ped reader and status reader, if needed
-  
+      }
+    } else {
+     if(!mDb) {
+	LOG_FATAL << "No DB nor status file specified--cannot proceed" << endm;
+	ierr = kStFatal;
+      }
+  };
+
   return ierr;
 };
 
@@ -106,7 +120,6 @@ Int_t StFgtA2CMaker::Make(){
 
    StEvent* eventPtr = 0;
    eventPtr = (StEvent*)GetInputDS("StEvent");
-
 
    if( !eventPtr ) {
       LOG_ERROR << "Error getting pointer to StEvent from '" << ClassName() << "'" << endm;
@@ -122,6 +135,16 @@ Int_t StFgtA2CMaker::Make(){
    if( !fgtCollectionPtr) {
       LOG_ERROR << "Error getting pointer to StFgtCollection from '" << ClassName() << "'" << endm;
       ierr = kStErr;
+   };
+
+   if( !mDb && mStatusFile.empty() && mStatusMask != 0x0 ){
+	LOG_FATAL << "No DB nor status file specified--cannot proceed" << endm;
+	ierr = kStFatal;
+   };
+
+   if( !mDb && mPedFile.empty() ){
+	LOG_FATAL << "No DB nor pedestal file specified--cannot proceed" << endm;
+	ierr = kStFatal;
    };
 
    if( !ierr ){
@@ -146,14 +169,13 @@ Int_t StFgtA2CMaker::Make(){
                      strip->getElecCoords( rdo, arm, apv, channel );
                      Int_t elecId = StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
 
-                     Float_t ped, err;
+                     Float_t ped = 0, err = 0;
 		     if(usePedFile)
-		       mPedReader->getPed( elecId, timebin, ped, err );
-		     else
-		       {
-			 ped=mDb->getPedestalFromGeoId(geoId);
-			 err=mDb->getPedestalSigmaFromGeoId(geoId);
-		       }
+                        mPedReader->getPed( elecId, timebin, ped, err );
+		     else if( mDb ){
+                        ped = mDb->getPedestalFromElecCoord( rdo, arm, apv, channel );
+                        err = mDb->getPedestalSigmaFromElecCoord( rdo, arm, apv, channel );
+                     }
 #ifdef DEBUG
 		     printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,err);
 #endif
@@ -171,13 +193,13 @@ Int_t StFgtA2CMaker::Make(){
 #ifdef DEBUG
                         printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
 #endif
-                        if( mCutBadStatus ){
-                           UInt_t status=0;
-                           if(useStatusFile)
+                        if( mStatusMask != 0x0 ){
+                           UInt_t status = 0x0;  // assume strip is good
+                           if( useStatusFile )
                               status = mStatusReader->getStatus( elecId );
-                           if(!useStatusFile && mDb)
+                           else if( mDb )
                               status=mDb->getStatusFromGeoId(geoId);
-                           if(status)
+                           if( status & mStatusMask )
                               strip->setGeoId( -1 );
                         };
 		     
