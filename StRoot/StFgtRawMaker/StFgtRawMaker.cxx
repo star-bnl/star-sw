@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.24 2012/01/26 13:13:12 sgliske Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.25 2012/01/28 18:54:47 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.25  2012/01/28 18:54:47  avossen
+//  removed last naive call and reference to StFgtGeom.h
+//
 //  Revision 1.24  2012/01/26 13:13:12  sgliske
 //  Updated to use StFgtConsts, which
 //  replaces StFgtEnums and StFgtGeomDefs
@@ -75,7 +78,7 @@
 #include "StRoot/St_base/StMessMgr.h"
 #include "StRoot/St_base/Stypes.h"
 
-#include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
+//#include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include "StRoot/StChain/StRtsTable.h"
 #include "StRoot/StEvent/StEvent.h"
 #include "DAQ_FGT/daq_fgt.h"
@@ -179,9 +182,11 @@ Int_t StFgtRawMaker::FillHits()
 	       else
 		 {
 		   geoId=fgtDb->getGeoIdFromElecCoord(rdo, arm, apv, channel);
+		   fgtDb->getPhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
 		 }
 
-               StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
+	       //               StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
+
                Char_t type = 0;    // TODO: set this according to the database???
 
                StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
