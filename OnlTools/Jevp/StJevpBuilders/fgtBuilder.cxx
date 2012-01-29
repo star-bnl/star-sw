@@ -74,6 +74,10 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
       numOverOneSig[i]=0;
       oldStdDevs[i]=0;
       isChannelBad[i]=false;
+      runningAvg[i]=0;
+      runningStdDevSq[i]=0;
+
+
   }
 
 
@@ -239,9 +243,14 @@ void fgtBuilder::event(daqReader *rdr)
 	    contents.array[gid]->Fill(channel,f[i].adc);
 	    //	    rmsVals[gid*maxC+channel]+=(meanVals[gid*maxC+channel]-f[i].adc)*(meanVals[gid*maxC+channel]-f[i].adc);
 	    aVals[gid*maxC+channel]+=f[i].adc;
-	    //	    cout <<"tb: " << (int)f[i].tb <<endl;
 	    numVals[gid*maxC+channel]++;
-	    if(f[i].adc-meanVals[gid*maxC+channel]>oldStdDevs[gid*maxC+channel] && oldStdDevs[gid*maxC+channel]>0)
+	    runningAvg[gid*maxC+channel]+=(f[i].adc-runningAvg[gid*maxC+channel])/numVals[gid*maxC+channel];
+	    runningStdDevSq[gid*maxC+channel]+=((float)numVals[gid*maxC+channel]-1)/(numVals[gid*maxC+channel])*(f[i].adc-runningAvg[gid*maxC+channel])*(f[i].adc-runningAvg[gid*maxC+channel]);
+
+	      oldStdDevs[gid*maxC+channel]=sqrt(runningStdDevSq[gid*maxC+channel]/numVals[gid*maxC+channel]);
+	      //	      cout <<"channel:  " <<gid*maxC+channel <<" stddevsq: " << runningStdDevSq[gid*maxC+channel] <<" oldStddev: " << oldStdDevs[gid*maxC+channel] <<" avg: " << runningAvg[gid*maxC+channel] <<endl;
+
+	      if(f[i].adc-runningAvg[gid*maxC+channel]>oldStdDevs[gid*maxC+channel] && oldStdDevs[gid*maxC+channel]>0)
 	      {
 		numOverOneSig[gid*maxC+channel]++;
 	      }
@@ -271,10 +280,10 @@ void fgtBuilder::event(daqReader *rdr)
   
   // Reset rolling histos if necessary..
   int tm = time(NULL);
-  if((tm > t_10min + 10) || (!(evtCt%100)))
+  if((tm > t_10min + 10) || (!(evtCt%50)))
     {
       t_10min = tm;
-      fillSumHistos();
+            fillSumHistos();
     }
 
   //  contents.h155_time_size_2min->Fill(tm-t_2min, safelog(sz));
@@ -307,10 +316,12 @@ void fgtBuilder::fillSumHistos()
 	      int gIndex=gid*maxC+iApv*128+iCh;
 	      //should not be a memory leak, since histogram exists and should just be refilled...
 	      //+1 due to underflow bin
-	      projX=contents.array[gid]->ProjectionY("_px",iApv*128+iCh+1,iApv*128+iCh+1,"o");
+	      //	      projX=contents.array[gid]->ProjectionY("_px",iApv*128+iCh+1,iApv*128+iCh+1,"o");
 	      //	      cout <<"getting proj from gid: " << gid <<" channel: " << iApv*128+iCh << endl;
-	      float mean=projX->GetMean();
-	      float sig=projX->GetRMS();
+	      //	      float mean=projX->GetMean();
+	      //	      float sig=projX->GetRMS();
+	      float mean=runningAvg[gIndex];
+	      float sig=oldStdDevs[gIndex];
 	      //	      cout <<"mean: " << mean <<" sig: " << sig <<endl;
 	      hContents.h1->Fill(mean);
 	      if(sig>0)
@@ -319,8 +330,8 @@ void fgtBuilder::fillSumHistos()
 		 hSumContents.hSumSig->Fill(Gid2Indx[gid]*10+iApv,sig);
 		 }
 	      hSumContents.hSumPed->Fill(Gid2Indx[gid]*10+iApv,mean);
-	      meanVals[gIndex]=mean;
-	      oldStdDevs[gIndex]=sig;
+	      //	      meanVals[gIndex]=mean;
+	      //	      oldStdDevs[gIndex]=sig;
 	    }}}
 
     for(int i=0;i<maxC*maxA;i++) 
@@ -340,7 +351,7 @@ void fgtBuilder::fillSumHistos()
 	    //	    cout <<"filling with " << numOverOneSig[i] <<" / "<< numVals[i]<< "=" <<numOverOneSig[i]/(float)numVals[i]<<endl;
 	    //numOverOneSig is filled according to gid
 	    hSumContents.hSumFrac->Fill(apvNr,numOverOneSig[i]/(float)numVals[i]);
-	    if(meanVals[i]<250 || meanVals[i]>maxPedVal)
+	    if(runningAvg[i]<250 || runningAvg[i]>maxPedVal)
 	      isBad=true;
 	  }
 	if(numVals[i]>1) 
@@ -381,6 +392,14 @@ void fgtBuilder::stoprun(daqReader *rdr) {
       {
 	numVals[i]=0;
 	numOverOneSig[i]=0;
+	runningAvg[i]=0;
+	runningStdDevSq[i]=0;
+	oldStdDevs[i]=0;
+      meanVals[i]=0;
+      aVals[i]=0;
+      //      rmsVals[i]=0;
+      isChannelBad[i]=false;
+
       }
     //no effect anyways, since stoprun is only called after the histos are drawn
     //  if(sumHistogramsFilled<2)
