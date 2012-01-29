@@ -113,8 +113,13 @@ public:
   int numVals[19*1400];
   //  int rmsVals[19*1400];
 
+
   int numOverOneSig[19*1400];
   bool isChannelBad[19*1400];
+
+
+  double runningAvg[19*1400];
+  double runningStdDevSq[19*1400];
 
   int sumHistogramsFilled;
 
