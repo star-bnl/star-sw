@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.16 2012/01/30 13:38:38 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.17 2012/01/30 21:49:33 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.17  2012/01/30 21:49:33  avossen
+ * removed references to files
+ *
  * Revision 1.16  2012/01/30 13:38:38  sgliske
  * made mistake in last update.  Now it is fixed
  *
@@ -85,16 +88,16 @@
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtStripCollection.h"
 #include "StRoot/StEvent/StFgtStrip.h"
-#include "StRoot/StFgtPedMaker/StFgtPedReader.h"
-#include "StRoot/StFgtStatusMaker/StFgtStatusReader.h"
+//#include "StRoot/StFgtPedMaker/StFgtPedReader.h"
+//#include "StRoot/StFgtStatusMaker/StFgtStatusReader.h"
 #include "StRoot/StFgtDbMaker/StFgtDb.h"
 #include "StFgtA2CMaker.h"
 
 
 // constructors
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
-   : StMaker( name ), mPedReader(0), mStatusReader(0), useStatusFile(false),
-     mAbsThres(-10000), mRelThres(5), usePedFile(false), mDb(0) {
+   : StMaker( name ), 
+     mAbsThres(-10000), mRelThres(5), mDb(0) {
 
    mPulseShapePtr = new TF1( "pulseShape", "[0]*(x>[4])*(x-[4])**[1]*exp(-[2]*(x-[4]))+[3]", 0, kFgtNumTimeBins );
    mPulseShapePtr->SetParName( 0, "C" );
@@ -109,37 +112,11 @@ StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
 
 Int_t StFgtA2CMaker::Init(){
   Int_t ierr = kStOk;
-  if( usePedFile ) {
-      if( mPedFile.empty()){
-	LOG_FATAL << "no ped file but told to use" << endm;
-	ierr = kStFatal;
-      };
-      if( !ierr ){
-	mPedReader = new StFgtPedReader( mPedFile.data() );
-	mPedReader->setTimeBinMask( 0xFF );
-	ierr = mPedReader->Init();
-      }
-    } else {
+
      if(!mDb) {
-	LOG_FATAL << "No DB nor pedestal file specified--cannot proceed" << endm;
+	LOG_FATAL << "A2CMaker: No DB for pedestals and status specified--cannot proceed" << endm;
 	ierr = kStFatal;
       }
-  }
-  if( useStatusFile ) {
-      if( mStatusFile.empty()){
-	LOG_FATAL << "no status file but told to use" << endm;
-	ierr = kStFatal;
-      };
-      if( !ierr ){
-	mStatusReader = new StFgtStatusReader( mStatusFile.data() );
-	ierr = mStatusReader->Init();
-      }
-    } else {
-     if(!mDb) {
-	LOG_FATAL << "No DB nor status file specified--cannot proceed" << endm;
-	ierr = kStFatal;
-      }
-  };
 
   return ierr;
 };
@@ -167,15 +144,11 @@ Int_t StFgtA2CMaker::Make(){
       ierr = kStErr;
    };
 
-   if( !mDb && mStatusFile.empty() && mStatusMask != 0x0 ){
-	LOG_FATAL << "No DB nor status file specified--cannot proceed" << endm;
+   if( !mDb&& mStatusMask != 0x0 ){
+	LOG_FATAL << "A2CNajerL No  specified--cannot proceed" << endm;
 	ierr = kStFatal;
    };
 
-   if( !mDb && mPedFile.empty() ){
-	LOG_FATAL << "No DB nor pedestal file specified--cannot proceed" << endm;
-	ierr = kStFatal;
-   };
 
    if( !ierr ){
       for( UInt_t discIdx=0; discIdx<fgtCollectionPtr->getNumDiscs(); ++discIdx ){
@@ -204,12 +177,7 @@ Int_t StFgtA2CMaker::Make(){
 
                      // get the pedestal
                      Float_t ped = 0, pedErr = 0;
-		     if(usePedFile){
-                        Int_t rdo, arm, apv, channel;
-                        strip->getElecCoords( rdo, arm, apv, channel );
-                        Int_t elecId = StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
-                        mPedReader->getPed( elecId, timebin, ped, pedErr );
-		     } else if( mDb ){
+		     if( mDb ){
                         ped = mDb->getPedestalFromGeoId( geoId );
                         pedErr = mDb->getPedestalSigmaFromGeoId( geoId );
                      };
@@ -259,12 +227,7 @@ Int_t StFgtA2CMaker::Make(){
 #endif
                      if( mStatusMask != 0x0 ){
                         UInt_t status = 0x0;  // assume strip is good
-                        if( useStatusFile ){
-                           Int_t rdo, arm, apv, channel;
-                           Int_t elecId = StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
-                        
-                           status = mStatusReader->getStatus( elecId );
-                        } else if( mDb ){
+			if( mDb ){
                            status=mDb->getStatusFromGeoId(geoId);
                         };
 
