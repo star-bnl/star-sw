@@ -14,6 +14,7 @@ void Clear()  			{ memset(this,0,sizeof(*this));}
      TCEmx_t()			{ Clear();}
 void Set(const double *err);  	
 void Move(double const F[3][3]);
+double Sign() const;
 void Backward();
 public:
 
@@ -37,6 +38,7 @@ void Set(const double *errxy,const double *errz);
 void Move(double const F[5][5]);
 void Backward();
 void Print(const char *tit=0) const;
+double Sign() const;
 public:
 //  dA: delta azimuth angle; dH: error along ort to dir and Z axis
 //  dC: error of curvature;  dZ == dZ; dL = dLambda
@@ -52,6 +54,7 @@ mHL, mAL, mCL, mZL, mLL;
 class TCircle: public TObject
 {
 friend class THelixTrack;
+friend class TCircleFitter;
 public:
  TCircle();
  TCircle(const double *x,const double *dir,double rho);
@@ -70,6 +73,7 @@ const double* Dir() const 	{return fD;  }
       void    SetEmx(const double *err=0);
 const TCEmx_t *Emx() const 	{return fEmx;} 
       TCEmx_t *Emx()     	{return fEmx;} 
+  void GetCenter(double center[2]) const;
 double Path(const double pnt[2]) const;
 double Path(const double pnt[2], const double exy[3]) const;
 double Path(const TCircle &tc,double *s2=0) const;
@@ -145,11 +149,18 @@ const double *GetX(int i=0) const;
       double *GetX(int i=0);
 TCircleFitterAux* GetAux(int i) const;
 
-static void Test(int iTest);
-static void Test();
+static void Test(int iTest=0);
 static void TestCorr(int kode=0);
 private:
-//double Weight(int idx);
+double f();
+double df(int i);
+double d2f(int i,int j);
+double Rho2();
+double dRho2(int i);
+double d2Rho2(int i,int j);
+double F();
+double dF(int i);
+double d2F(int i,int j);
 
 private:
 TArrayD fArr;
@@ -160,7 +171,7 @@ int    fCase;	//default case 0=automatic,1=small angle,2=Chernov/Ososkov
 int    fKase;	//used case
 int    fBack;
 TCircleFitterAux* fAux;
-double fCos,fSin;
+double fCos,fSin;	//Direction of local coordinate
 double fNor[2];
 double fPol[6];
 double fXgravity;
@@ -174,9 +185,12 @@ double fRrrr;
 double fRr;
 double fWtot;
 double fRadius2;
-double fXd, fYd, fG1;
-double fXCenter,fYCenter;
+double fXd, fYd, fG1;		//fXd,fYd coordianate of circle center in local sys 
+double fNx, fNy;		//Direction from circle center to point on circle in local sys 
+double fXCenter,fYCenter;	//coordianate of circle center in globa
 double fCov[6],fA,fB,fC,fH;
+double fR;			//radius of curvatur
+double fRd;			//distance to center in local system
 double fCorrR,fCorrB;
 double fChi2;
 int    fNdf;
@@ -201,7 +215,7 @@ THelixTrack &operator=(const THelixTrack &from);
 	void Set   (double rho,double drho=0);
 	void SetEmx(const double*  err2xy,const double*  err2z);
 	void SetEmx(const double*  err=0);
-    THEmx_t *Emx() const{return fEmx;}
+    THEmx_t *Emx() const			{return fEmx;}
 	void StiEmx(double emx[21]) const;
         void GetSpot(const double axis[3][3],double emx[3]) const;
 	void Fill  (TCircle &circ) const;
