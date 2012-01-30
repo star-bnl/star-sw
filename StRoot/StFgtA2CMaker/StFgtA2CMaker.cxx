@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.12 2012/01/28 20:10:12 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.13 2012/01/30 10:42:22 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.13  2012/01/30 10:42:22  sgliske
+ * strip containers now contain adc values for
+ * all time bins.  Also fixed bug where setType modified the timebin
+ * rather than the type.
+ *
  * Revision 1.12  2012/01/28 20:10:12  avossen
  * addec cluster uncertainty
  *
@@ -76,7 +81,6 @@
 // constructors
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
    : StMaker( name ), mPedReader(0), mStatusReader(0), useStatusFile(false),
-     mTimeBinMask(0x10), mDoRemoveOtherTimeBins(0),
      mAbsThres(-10000), mRelThres(5), usePedFile(false), mDb(0) { /* */ };
 
 
@@ -89,7 +93,7 @@ Int_t StFgtA2CMaker::Init(){
       };
       if( !ierr ){
 	mPedReader = new StFgtPedReader( mPedFile.data() );
-	mPedReader->setTimeBinMask( mTimeBinMask );
+	mPedReader->setTimeBinMask( 0xFF );
 	ierr = mPedReader->Init();
       }
     } else {
@@ -163,56 +167,80 @@ Int_t StFgtA2CMaker::Make(){
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
                StFgtStrip *strip = *stripIter;
                if( strip ){
-                  if( 1<<strip->getTimeBin() & mTimeBinMask ){
-                     Int_t geoId = strip->getGeoId();
-                     Int_t timebin = strip->getTimeBin();
-                     Int_t adc = strip->getAdc();
-		     Double_t gain= mDb ? mDb->getGainFromGeoId(geoId) : 1;
-                     Int_t rdo, arm, apv, channel;
-                     strip->getElecCoords( rdo, arm, apv, channel );
-                     Int_t elecId = StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
+                  Int_t totalADC = 0;
+                  Int_t pedErrSumSq = 0, nPed = 0;
+                  Int_t nTbAboveThres = 0;
 
+                  Int_t geoId = strip->getGeoId();
+                  // switch geoId to elec id lookups, as soon as available
+                  // also clean up later computations of elecId at the same time
+
+                  // subtract the pedestal from each time bin
+                  for( Int_t timebin = 0; timebin < kFgtNumTimeBins && strip->getGeoId() > -1; ++timebin ){
+
+                     // get the pedestal
                      Float_t ped = 0, err = 0;
-		     if(usePedFile)
+		     if(usePedFile){
+                        Int_t rdo, arm, apv, channel;
+                        strip->getElecCoords( rdo, arm, apv, channel );
+                        Int_t elecId = StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
                         mPedReader->getPed( elecId, timebin, ped, err );
-		     else if( mDb ){
-                        ped = mDb->getPedestalFromElecCoord( rdo, arm, apv, channel );
-                        err = mDb->getPedestalSigmaFromElecCoord( rdo, arm, apv, channel );
-                     }
+		     } else if( mDb ){
+                        ped = mDb->getPedestalFromGeoId( geoId );
+                        err = mDb->getPedestalSigmaFromGeoId( geoId );
+                     };
+
 #ifdef DEBUG
 		     printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,err);
 #endif
-
+                     // subract the ped or invalidate the strip
                      if( ped > 4096 || ped < 0 ){
                         strip->setGeoId( -1 );
                      } else {
-                        // subtract the pedistal
-                        adc -= ped;
+                        Int_t adcMinusPed = strip->getAdc() - ped;
 
-                        // set the values
-                        strip->setAdc( adc );
+                        strip->setAdc( adcMinusPed );
                         strip->setType( 1 );
-                        strip->setCharge( gain*adc );
-			strip->setChargeUncert(gain*err);
+
+                        totalADC += adcMinusPed;
+                        pedErrSumSq += err*err;
+                        ++nPed;
+
+                        if( (mRelThres && adcMinusPed > mRelThres*err) || (mAbsThres>-4096 && adcMinusPed > mAbsThres) )
+                           ++nTbAboveThres;
+                     };
+                  };
+
+                  // check if any signal here
+                  if( !nTbAboveThres && (mRelThres || mAbsThres>-4096) ){
+                     strip->setGeoId( -1 );
+                  } else {
+                     // there's a signal here, or we aren't cutting on signals.
+
+		     Double_t gain = mDb ? mDb->getGainFromGeoId(geoId) : 1;
+
+                     strip->setCharge( gain*totalADC );  // later change totalADC to a fit parameter
+                     strip->setChargeUncert( nPed ?
+                                             gain*sqrt( pedErrSumSq )/nPed :
+                                             10000 );
+
 #ifdef DEBUG
-                        printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
+                     printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
 #endif
-                        if( mStatusMask != 0x0 ){
-                           UInt_t status = 0x0;  // assume strip is good
-                           if( useStatusFile )
-                              status = mStatusReader->getStatus( elecId );
-                           else if( mDb )
-                              status=mDb->getStatusFromGeoId(geoId);
-                           if( status & mStatusMask )
-                              strip->setGeoId( -1 );
+                     if( mStatusMask != 0x0 ){
+                        UInt_t status = 0x0;  // assume strip is good
+                        if( useStatusFile ){
+                           Int_t rdo, arm, apv, channel;
+                           Int_t elecId = StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
+                        
+                           status = mStatusReader->getStatus( elecId );
+                        } else if( mDb ){
+                           status=mDb->getStatusFromGeoId(geoId);
                         };
-		     
-                        if( (mRelThres && adc < mRelThres*err) || (mAbsThres>-4096 && adc < mAbsThres) )
+
+                        if( status & mStatusMask )
                            strip->setGeoId( -1 );
                      };
-                  } else if ( mDoRemoveOtherTimeBins ){
-                     // flag to cut
-                     strip->setGeoId( -1 );
                   };
                };
             };

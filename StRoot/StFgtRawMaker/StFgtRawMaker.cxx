@@ -2,9 +2,14 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.25 2012/01/28 18:54:47 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.26 2012/01/30 10:42:23 sgliske Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.26  2012/01/30 10:42:23  sgliske
+//  strip containers now contain adc values for
+//  all time bins.  Also fixed bug where setType modified the timebin
+//  rather than the type.
+//
 //  Revision 1.25  2012/01/28 18:54:47  avossen
 //  removed last naive call and reference to StFgtGeom.h
 //
@@ -192,8 +197,12 @@ Int_t StFgtRawMaker::FillHits()
                StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
                if( stripCollectionPtr )
                   {
-                     StSPtrVecFgtStrip &stripVec = stripCollectionPtr->getStripVec();
-                     stripVec.push_back( new StFgtStrip( geoId,rdo,arm,apv,channel,adc,type,timebin) );
+                     Int_t elecId =  StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
+                     StFgtStrip* stripPtr = stripCollectionPtr->getStrip( elecId );
+                     stripPtr->setAdc( adc, timebin );
+                     stripPtr->setType( type );
+                     stripPtr->setGeoId( geoId );
+                     stripPtr->setElecCoords( rdo, arm, apv, channel );
                   }
                else
                   { LOG_WARN << "StFgtRawMaker::Make() -- Could not access disc " << discIdx << endm; }

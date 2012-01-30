@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.8 2012/01/28 11:22:53 sgliske Exp $
+ * $Id: StFgtA2CMaker.h,v 1.9 2012/01/30 10:42:22 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -37,6 +37,11 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.9  2012/01/30 10:42:22  sgliske
+ * strip containers now contain adc values for
+ * all time bins.  Also fixed bug where setType modified the timebin
+ * rather than the type.
+ *
  * Revision 1.8  2012/01/28 11:22:53  sgliske
  * changed status check to status map
  * changed setDb to setFgtDb
@@ -103,16 +108,14 @@ class StFgtA2CMaker : public StMaker {
    // modifiers
    void setPedReaderFile( const Char_t* filename );
    void setStatusReaderFile( const Char_t* filename );
-   void setTimeBinMask( Short_t timeBinMask );
    void setAbsThres( Float_t thres );  // set to below -4096 to skip cut
    void setRelThres( Float_t thres );  // set to zero to skip cut
    void setFgtDb( StFgtDb *fgtDb);
-   void doRemoveOtherTimeBins( Bool_t doIt );
    void doCutBadStatus( Bool_t doIt );
    void setStatusMask( UChar_t mask );
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.8 2012/01/28 11:22:53 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.9 2012/01/30 10:42:22 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    // for the ped reader
@@ -125,8 +128,7 @@ class StFgtA2CMaker : public StMaker {
    Bool_t useStatusFile;
 
    // other parameters
-   Short_t mTimeBinMask;
-   Bool_t mDoRemoveOtherTimeBins, mStatusMask;
+   Int_t mStatusMask;
    Float_t mAbsThres, mRelThres;
    //if the user gives a ped file, use that, otherwise get peds from db
    Bool_t usePedFile;
@@ -146,13 +148,11 @@ class StFgtA2CMaker : public StMaker {
 inline StFgtA2CMaker::~StFgtA2CMaker(){ /* */ };
 
 // modifiers
-inline void StFgtA2CMaker::setTimeBinMask( Short_t timeBinMask ){ mTimeBinMask = timeBinMask; };
 inline void StFgtA2CMaker::setPedReaderFile( const Char_t* filename ){ mPedFile = filename; usePedFile=true; };
 inline void StFgtA2CMaker::setStatusReaderFile( const Char_t* filename ){ mStatusFile = filename; useStatusFile=true;};
 inline void StFgtA2CMaker::setAbsThres( Float_t thres ){ mAbsThres = thres; };
 inline void StFgtA2CMaker::setRelThres( Float_t thres ){ mRelThres = thres; };
 inline void StFgtA2CMaker::setFgtDb(StFgtDb* db ){mDb=db; };
-inline void StFgtA2CMaker::doRemoveOtherTimeBins(  Bool_t doIt ){ mDoRemoveOtherTimeBins = doIt; };
 inline void StFgtA2CMaker::doCutBadStatus(  Bool_t doIt ){ mStatusMask = 0xFF; };
 inline void StFgtA2CMaker::setStatusMask( UChar_t mask ){ mStatusMask = mask; };
 

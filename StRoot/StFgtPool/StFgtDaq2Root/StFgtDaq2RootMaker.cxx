@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtDaq2RootMaker.cxx,v 1.1 2012/01/28 09:29:26 sgliske Exp $
+ * $Id: StFgtDaq2RootMaker.cxx,v 1.2 2012/01/30 10:42:23 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StFgtDaq2RootMaker.cxx,v $
+ * Revision 1.2  2012/01/30 10:42:23  sgliske
+ * strip containers now contain adc values for
+ * all time bins.  Also fixed bug where setType modified the timebin
+ * rather than the type.
+ *
  * Revision 1.1  2012/01/28 09:29:26  sgliske
  * creation
  *
@@ -98,20 +103,22 @@ Int_t StFgtDaq2RootMaker::Make(){
             StSPtrVecFgtStripIterator stripIter;
 
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
-               Short_t adc = (*stripIter)->getAdc();
-               Int_t tb = (*stripIter)->getTimeBin();
-               Int_t rdo, arm, apv, chan, quad;
-               (*stripIter)->getElecCoords( rdo, arm, apv, chan );
+               for( Int_t tb = 0; tb < kFgtNumTimeBins; ++tb ){
+                  Short_t adc = (*stripIter)->getAdc(tb);
 
-               if( arm == 0 )
-                  quad = 0;
-               else if( apv < 10 )
-                  quad = 1;
-               else
-                  quad = 2;
-               apv %= 12;
+                  Int_t rdo, arm, apv, chan, quad;
+                  (*stripIter)->getElecCoords( rdo, arm, apv, chan );
 
-               mData.quad[quad].apv[apv].chan[chan].tb[tb] = adc;
+                  if( arm == 0 )
+                     quad = 0;
+                  else if( apv < 10 )
+                     quad = 1;
+                  else
+                     quad = 2;
+                  apv %= 12;
+
+                  mData.quad[quad].apv[apv].chan[chan].tb[tb] = adc;
+               };
             };
          };
       };
