@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.14 2012/01/30 11:40:04 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.15 2012/01/30 13:08:37 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.15  2012/01/30 13:08:37  sgliske
+ * updated charge uncertainty to include portion from
+ * adc Poisson uncertainty.
+ *
  * Revision 1.14  2012/01/30 11:40:04  sgliske
  * a2cMaker now fits the pulse shape,
  * strip containers updated
@@ -243,7 +247,7 @@ Int_t StFgtA2CMaker::Make(){
 		     Double_t gain = mDb ? mDb->getGainFromGeoId(geoId) : 1;
 
                      strip->setCharge( gain ? fitC/gain : 0 );
-                     strip->setChargeUncert( gain ? errC/gain : 10000 );
+                     strip->setChargeUncert( gain ? sqrt(errC*errC + adc)/gain : 10000 );
 
 #ifdef DEBUG
                      printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
