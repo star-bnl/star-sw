@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.10 2012/01/30 11:40:04 sgliske Exp $
+ * $Id: StFgtA2CMaker.h,v 1.11 2012/01/30 21:49:33 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -37,6 +37,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.11  2012/01/30 21:49:33  avossen
+ * removed references to files
+ *
  * Revision 1.10  2012/01/30 11:40:04  sgliske
  * a2cMaker now fits the pulse shape,
  * strip containers updated
@@ -88,8 +91,7 @@
 #include <string>
 #include "StMaker.h"
 
-class StFgtPedReader;
-class StFgtStatusReader;
+
 class StFgtDb;
 
 class StFgtA2CMaker : public StMaker {
@@ -110,8 +112,7 @@ class StFgtA2CMaker : public StMaker {
    virtual Int_t Make();
 
    // modifiers
-   void setPedReaderFile( const Char_t* filename );
-   void setStatusReaderFile( const Char_t* filename );
+
    void setAbsThres( Float_t thres );  // set to below -4096 to skip cut
    void setRelThres( Float_t thres );  // set to zero to skip cut
    void setFgtDb( StFgtDb *fgtDb);
@@ -119,17 +120,9 @@ class StFgtA2CMaker : public StMaker {
    void setStatusMask( UChar_t mask );
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.10 2012/01/30 11:40:04 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.11 2012/01/30 21:49:33 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
-   // for the ped reader
-   StFgtPedReader *mPedReader;
-   std::string mPedFile;
-
-   // for the strip status reader
-   StFgtStatusReader *mStatusReader;
-   std::string mStatusFile;
-   Bool_t useStatusFile;
 
    // other parameters
    Int_t mStatusMask;
@@ -154,8 +147,6 @@ class StFgtA2CMaker : public StMaker {
 inline StFgtA2CMaker::~StFgtA2CMaker(){ /* */ };
 
 // modifiers
-inline void StFgtA2CMaker::setPedReaderFile( const Char_t* filename ){ mPedFile = filename; usePedFile=true; };
-inline void StFgtA2CMaker::setStatusReaderFile( const Char_t* filename ){ mStatusFile = filename; useStatusFile=true;};
 inline void StFgtA2CMaker::setAbsThres( Float_t thres ){ mAbsThres = thres; };
 inline void StFgtA2CMaker::setRelThres( Float_t thres ){ mRelThres = thres; };
 inline void StFgtA2CMaker::setFgtDb(StFgtDb* db ){mDb=db; };
