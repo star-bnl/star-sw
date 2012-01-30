@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.13 2012/01/30 10:42:22 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.14 2012/01/30 11:40:04 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.14  2012/01/30 11:40:04  sgliske
+ * a2cMaker now fits the pulse shape,
+ * strip containers updated
+ *
  * Revision 1.13  2012/01/30 10:42:22  sgliske
  * strip containers now contain adc values for
  * all time bins.  Also fixed bug where setType modified the timebin
@@ -67,6 +71,8 @@
  **************************************************************************/
 
 #include <string>
+#include <TH1.h>
+#include <TF1.h>
 
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StFgtCollection.h"
@@ -81,7 +87,17 @@
 // constructors
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
    : StMaker( name ), mPedReader(0), mStatusReader(0), useStatusFile(false),
-     mAbsThres(-10000), mRelThres(5), usePedFile(false), mDb(0) { /* */ };
+     mAbsThres(-10000), mRelThres(5), usePedFile(false), mDb(0) {
+
+   mPulseShapePtr = new TF1( "pulseShape", "[0]*(x>[4])*(x-[4])**[1]*exp(-[2]*(x-[4]))+[3]", 0, kFgtNumTimeBins );
+   mPulseShapePtr->SetParName( 0, "C" );
+   mPulseShapePtr->SetParName( 1, "a" );
+   mPulseShapePtr->SetParName( 2, "b" );
+   mPulseShapePtr->SetParName( 3, "ped" );
+   mPulseShapePtr->SetParName( 4, "t0" );
+
+   mHistPtr = new TH1F( (std::string( name ) + "_hist").data(), "temp hist", kFgtNumTimeBins, 0, kFgtNumTimeBins );
+};
 
 
 Int_t StFgtA2CMaker::Init(){
@@ -167,8 +183,6 @@ Int_t StFgtA2CMaker::Make(){
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
                StFgtStrip *strip = *stripIter;
                if( strip ){
-                  Int_t totalADC = 0;
-                  Int_t pedErrSumSq = 0, nPed = 0;
                   Int_t nTbAboveThres = 0;
 
                   Int_t geoId = strip->getGeoId();
@@ -177,21 +191,23 @@ Int_t StFgtA2CMaker::Make(){
 
                   // subtract the pedestal from each time bin
                   for( Int_t timebin = 0; timebin < kFgtNumTimeBins && strip->getGeoId() > -1; ++timebin ){
+                     mHistPtr->SetBinContent( timebin+1, 0 );
+                     mHistPtr->SetBinError( timebin+1, 10000 );
 
                      // get the pedestal
-                     Float_t ped = 0, err = 0;
+                     Float_t ped = 0, pedErr = 0;
 		     if(usePedFile){
                         Int_t rdo, arm, apv, channel;
                         strip->getElecCoords( rdo, arm, apv, channel );
                         Int_t elecId = StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
-                        mPedReader->getPed( elecId, timebin, ped, err );
+                        mPedReader->getPed( elecId, timebin, ped, pedErr );
 		     } else if( mDb ){
                         ped = mDb->getPedestalFromGeoId( geoId );
-                        err = mDb->getPedestalSigmaFromGeoId( geoId );
+                        pedErr = mDb->getPedestalSigmaFromGeoId( geoId );
                      };
 
 #ifdef DEBUG
-		     printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,err);
+		     printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,pedErr);
 #endif
                      // subract the ped or invalidate the strip
                      if( ped > 4096 || ped < 0 ){
@@ -202,11 +218,10 @@ Int_t StFgtA2CMaker::Make(){
                         strip->setAdc( adcMinusPed );
                         strip->setType( 1 );
 
-                        totalADC += adcMinusPed;
-                        pedErrSumSq += err*err;
-                        ++nPed;
+                        mHistPtr->SetBinContent( timebin+1, adcMinusPed );
+                        mHistPtr->SetBinError( timebin+1, pedErr );
 
-                        if( (mRelThres && adcMinusPed > mRelThres*err) || (mAbsThres>-4096 && adcMinusPed > mAbsThres) )
+                        if( (mRelThres && adcMinusPed > mRelThres*pedErr) || (mAbsThres>-4096 && adcMinusPed > mAbsThres) )
                            ++nTbAboveThres;
                      };
                   };
@@ -215,14 +230,20 @@ Int_t StFgtA2CMaker::Make(){
                   if( !nTbAboveThres && (mRelThres || mAbsThres>-4096) ){
                      strip->setGeoId( -1 );
                   } else {
-                     // there's a signal here, or we aren't cutting on signals.
+                     mHistPtr->Fit( mPulseShapePtr );
+                     strip->setFitParam( 
+                                        mPulseShapePtr->GetParameter( 0 ),
+                                        mPulseShapePtr->GetParameter( 1 ),
+                                        mPulseShapePtr->GetParameter( 2 ),
+                                        mPulseShapePtr->GetParameter( 3 ),
+                                        mPulseShapePtr->GetParameter( 4 )   );
 
+                     Double_t fitC = mPulseShapePtr->GetParameter( 0 );
+                     Double_t errC = mPulseShapePtr->GetParError( 0 );
 		     Double_t gain = mDb ? mDb->getGainFromGeoId(geoId) : 1;
 
-                     strip->setCharge( gain*totalADC );  // later change totalADC to a fit parameter
-                     strip->setChargeUncert( nPed ?
-                                             gain*sqrt( pedErrSumSq )/nPed :
-                                             10000 );
+                     strip->setCharge( gain ? fitC/gain : 0 );
+                     strip->setChargeUncert( gain ? errC/gain : 10000 );
 
 #ifdef DEBUG
                      printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());

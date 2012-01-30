@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.9 2012/01/30 10:42:22 sgliske Exp $
+ * $Id: StFgtA2CMaker.h,v 1.10 2012/01/30 11:40:04 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -37,6 +37,10 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.10  2012/01/30 11:40:04  sgliske
+ * a2cMaker now fits the pulse shape,
+ * strip containers updated
+ *
  * Revision 1.9  2012/01/30 10:42:22  sgliske
  * strip containers now contain adc values for
  * all time bins.  Also fixed bug where setType modified the timebin
@@ -115,7 +119,7 @@ class StFgtA2CMaker : public StMaker {
    void setStatusMask( UChar_t mask );
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.9 2012/01/30 10:42:22 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.10 2012/01/30 11:40:04 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    // for the ped reader
@@ -130,12 +134,14 @@ class StFgtA2CMaker : public StMaker {
    // other parameters
    Int_t mStatusMask;
    Float_t mAbsThres, mRelThres;
-   //if the user gives a ped file, use that, otherwise get peds from db
+
+   // if the user gives a ped file, use that, otherwise get peds from db
    Bool_t usePedFile;
    StFgtDb* mDb;
-   // member functions
-   Int_t subtrPeds();
-   Int_t cutHits();
+
+   // for fitting
+   TF1 *mPulseShapePtr;
+   TH1F *mHistPtr;
  
  private:   
    ClassDef(StFgtA2CMaker,1);
