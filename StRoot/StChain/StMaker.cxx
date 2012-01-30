@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.247 2011/12/22 19:41:19 perev Exp $
+// $Id: StMaker.cxx,v 1.248 2012/01/30 17:19:59 perev Exp $
 //
 //
 /*!
@@ -297,6 +297,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr20",      20200102,    17, "upgr20",   "y2007 +  one TOF"}, // advertized simu 20061101
   {"upgr21",      20200102,    18, "upgr21",   "y2007 + full TOF"}, // advertized simu 20061101
   {"dev13",       20200102,    19, "dev13",    "dev geo for 2013"}, // 
+  {"devE",        20200102,    20, "devE",      "dev geo for Erick"}, // 
   {0,                    0,     0,        0,    0}
 };
 
@@ -1973,6 +1974,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.248  2012/01/30 17:19:59  perev
+// devE geometry added
+//
 // Revision 1.247  2011/12/22 19:41:19  perev
 // dev13 geo added
 //
