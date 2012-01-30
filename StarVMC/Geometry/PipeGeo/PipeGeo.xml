@@ -374,10 +374,16 @@
         
         <Block name="PWRP" comment="is the beampipe wrap of Kapton and aluminum"  >
             <Mixture name="MLI" dens="1.82667"  >
-                <Component name="C5" a="12" z="6" w="5"  />
-                <Component name="H4" a="1" z="1" w="4"  />
-                <Component name="O2" a="16" z="8" w="2"  />
-                <Component name="Al" a="27" z="13" w="3.45327"  />
+<!-- User intended C5H4O2 + some amount of Al, equivalent to 3.45 atoms per molecule... So
+     to create the corresponding ROOT material we need to modify this
+                <Component name="C5" a="12" z="6"  w="5"  />
+                <Component name="H4" a="1"  z="1"  w="4"  />
+                <Component name="O2" a="16" z="8"  w="2"  /> 
+                <Component name="Al" a="27" z="13" w="3.45327"  /> -->
+                <Component name="C5" a="12" z="6"  w="500000"  />
+                <Component name="H4" a="1"  z="1"  w="400000"  />
+                <Component name="O2" a="16" z="8"  w="200000"  /> 
+                <Component name="Al" a="27" z="13" w="345327"  />
             </Mixture>
             
             <Attribute for="Pwrp" seen="1" colo="3"  />
@@ -386,10 +392,15 @@
         
         <Block name="PSLD" comment="is the svt beampipe shield"  >
             <Mixture name="ALKAP" dens="1.432"  >
+<!-- Same issue as above 
                 <Component name="C5" a="12" z="6" w="5"  />
                 <Component name="H4" a="1" z="1" w="4"  />
                 <Component name="O2" a="16" z="8" w="2"  />
-                <Component name="Al" a="27" z="13" w="0.2302"  />
+                <Component name="Al" a="27" z="13" w="0.2302"  /> -->
+                <Component name="C5" a="12" z="6" w="50000"  />
+                <Component name="H4" a="1" z="1"  w="40000"  />
+                <Component name="O2" a="16" z="8" w="20000"  />
+                <Component name="Al" a="27" z="13" w="2302"  /> 
             </Mixture>
             
             <Attribute for="PSLD" seen="1" colo="3"  />
