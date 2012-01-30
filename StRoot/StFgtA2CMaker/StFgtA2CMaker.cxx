@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.15 2012/01/30 13:08:37 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.16 2012/01/30 13:38:38 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.16  2012/01/30 13:38:38  sgliske
+ * made mistake in last update.  Now it is fixed
+ *
  * Revision 1.15  2012/01/30 13:08:37  sgliske
  * updated charge uncertainty to include portion from
  * adc Poisson uncertainty.
@@ -189,6 +192,7 @@ Int_t StFgtA2CMaker::Make(){
                if( strip ){
                   Int_t nTbAboveThres = 0;
 
+                  Int_t adc = strip->getAdc();
                   Int_t geoId = strip->getGeoId();
                   // switch geoId to elec id lookups, as soon as available
                   // also clean up later computations of elecId at the same time
@@ -213,11 +217,12 @@ Int_t StFgtA2CMaker::Make(){
 #ifdef DEBUG
 		     printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,pedErr);
 #endif
+
                      // subract the ped or invalidate the strip
                      if( ped > 4096 || ped < 0 ){
                         strip->setGeoId( -1 );
                      } else {
-                        Int_t adcMinusPed = strip->getAdc() - ped;
+                        Int_t adcMinusPed = adc - ped;
 
                         strip->setAdc( adcMinusPed );
                         strip->setType( 1 );
