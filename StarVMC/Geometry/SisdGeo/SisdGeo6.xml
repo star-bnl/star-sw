@@ -1652,11 +1652,14 @@
 
         <Block name="SOSK" comment="is the separation shield cylinder"  >
             <Mixture name="SSDALMY" dens="1.40845"  >
-                <Component name="C5" a="12" z="6" w="10000*5"  />
-                <Component name="H4" a="1" z="1" w="10000*4"  />
-                <Component name="O2" a="16" z="8" w="10000*2"  />
-                <Component name="Al" a="27" z="13" w="10000*0.0986"  />
-            </Mixture>
+<!-- Material weights have been corrected to account for the Natoms=(int) vs Natoms=(float)
+     difference between AgSTAR and ROOT.
+  -->
+                <Component name="C5" a="12" z="6"  w="10000*5"  />
+                <Component name="H4" a="1"  z="1"  w="10000*4"  />
+                <Component name="O2" a="16" z="8"  w="10000*2"  />
+                <Component name="Al" a="27" z="13" w="986"  />
+	    </Mixture>
             
 
             <Material name="SSDALMY"  />
