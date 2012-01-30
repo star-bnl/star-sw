@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtDaq2TxtMaker.cxx,v 1.3 2012/01/26 13:13:11 sgliske Exp $
+ * $Id: StFgtDaq2TxtMaker.cxx,v 1.4 2012/01/30 10:42:23 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,11 @@
  ***************************************************************************
  *
  * $Log: StFgtDaq2TxtMaker.cxx,v $
+ * Revision 1.4  2012/01/30 10:42:23  sgliske
+ * strip containers now contain adc values for
+ * all time bins.  Also fixed bug where setType modified the timebin
+ * rather than the type.
+ *
  * Revision 1.3  2012/01/26 13:13:11  sgliske
  * Updated to use StFgtConsts, which
  * replaces StFgtEnums and StFgtGeomDefs
@@ -117,22 +122,23 @@ Int_t StFgtDaq2TxtMaker::Make(){
 
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
                Int_t geoId = (*stripIter)->getGeoId();
-               Short_t adc = (*stripIter)->getAdc();
-               Int_t tb = (*stripIter)->getTimeBin();
+               for( Int_t tb = 0; tb < kFgtNumTimeBins; ++tb ){
+                  Short_t adc = (*stripIter)->getAdc(tb);
 
-               Short_t disc, quad, strip;
-               Char_t layer;
-               StFgtGeom::decodeGeoId( geoId, disc, quad, layer, strip );
+                  Short_t disc, quad, strip;
+                  Char_t layer;
+                  StFgtGeom::decodeGeoId( geoId, disc, quad, layer, strip );
 
-               if( quad == mQuad ){
-                  Int_t rdo, arm, apv, channel;
-                  if( mIsCosmic )
-                     StFgtCosmicTestStandGeom::getNaiveElecCoordFromGeoId(geoId,rdo,arm,apv,channel);
-                  else
-                     StFgtGeom::getNaiveElecCoordFromGeoId(geoId,rdo,arm,apv,channel);
+                  if( quad == mQuad ){
+                     Int_t rdo, arm, apv, channel;
+                     if( mIsCosmic )
+                        StFgtCosmicTestStandGeom::getNaiveElecCoordFromGeoId(geoId,rdo,arm,apv,channel);
+                     else
+                        StFgtGeom::getNaiveElecCoordFromGeoId(geoId,rdo,arm,apv,channel);
 
-                  apv %= 12;
-                  mData[ 7*channel + tb ][ disc*10 + apv] = adc;
+                     apv %= 12;
+                     mData[ 7*channel + tb ][ disc*10 + apv] = adc;
+                  };
                };
             };
          };
