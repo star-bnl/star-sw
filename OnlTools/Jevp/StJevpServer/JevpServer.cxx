@@ -42,6 +42,7 @@
 #include "Jevp/StJevpBuilders/trgBuilder.h"
 #include "Jevp/StJevpBuilders/upcBuilder.h"
 #include "Jevp/StJevpBuilders/fgtBuilder.h"
+#include "Jevp/StJevpBuilders/vpdBuilder.h"
 
 
 #include <RTS/include/SUNRT/clockClass.h>
@@ -394,6 +395,7 @@ int JevpServer::init(int port, int argc, char *argv[]) {
   builders.Add(new trgBuilder(this));
   builders.Add(new upcBuilder(this));
   builders.Add(new fgtBuilder(this));
+  builders.Add(new vpdBuilder(this));
   
 
   TListIter next(&builders);
