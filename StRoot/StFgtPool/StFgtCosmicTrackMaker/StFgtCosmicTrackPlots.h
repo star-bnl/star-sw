@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtCosmicTrackPlots.h,v 1.1 2012/01/31 23:25:35 avossen Exp $ 
+ * $Id: StFgtCosmicTrackPlots.h,v 1.2 2012/01/31 23:37:17 avossen Exp $ 
  * Author: C. K. Riley (ckriley@bnl.gov), Oct. 18 2011 
  *
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFgtCosmicTrackPlots.h,v $
+ * Revision 1.2  2012/01/31 23:37:17  avossen
+ * fixed StFgtCosmicTrackMaker paths
+ *
  * Revision 1.1  2012/01/31 23:25:35  avossen
  * moved StFgtCosmicTrackMaker to StFgtPool
  *
@@ -50,7 +53,7 @@
 #include <TProfile.h>
 #include <TProfile2D.h>
 #include "StMaker.h"
-#include "StRoot/StFgtCosmicTrackMaker/StFgtCosmicTrack.h"
+#include "StRoot/StFgtPool/StFgtCosmicTrackMaker/StFgtCosmicTrack.h"
 
 class StFgtCosmicTrackPlots : public StMaker {
  public:
