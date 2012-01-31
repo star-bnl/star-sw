@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.13 2012/01/31 17:02:46 wwitzke Exp $
+// $Id: StFgtDbMaker.cxx,v 1.14 2012/01/31 21:07:43 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -80,11 +80,11 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
     {
 	if ( m_tables )
 	    delete m_tables;
-	m_tables = new StFgtDbNaiveImpl();
+	m_tables = new StFgtDbIdealImpl();
     }
     else
     {
-	if ( m_tables && dynamic_cast< StFgtDbNaiveImpl * >(m_tables) )
+	if ( m_tables && dynamic_cast< StFgtDbIdealImpl * >(m_tables) )
 	{
 	    delete m_tables;
 	    m_tables = 0;
@@ -287,6 +287,9 @@ Int_t StFgtDbMaker::Finish()
 
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.14  2012/01/31 21:07:43  rfatemi
+// changes for StFgtDbIdealImpl.h
+//
 // Revision 1.13  2012/01/31 17:02:46  wwitzke
 // Added date/time printout to StFgtDbMaker.cxx InitRun().
 //
