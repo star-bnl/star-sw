@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.18 2012/01/31 08:26:53 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.19 2012/01/31 11:23:02 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.19  2012/01/31 11:23:02  sgliske
+ * If no cut on ped, than skip fit.
+ * Still cut based on status mask in either case
+ *
  * Revision 1.18  2012/01/31 08:26:53  sgliske
  * cleaned up, and removed need to use setFgtDb.
  * Now, if not set, will try to find it using
@@ -222,7 +226,9 @@ Int_t StFgtA2CMaker::Make(){
                   // check if any signal here
                   if( !nTbAboveThres && (mRelThres || mAbsThres>-4096) ){
                      strip->setGeoId( -1 );
-                  } else {
+                  } else if( mRelThres || mAbsThres>-4096 ){
+                     // only fit if there was a cut on the pedestals
+
                      mHistPtr->Fit( mPulseShapePtr );
                      strip->setFitParam( 
                                         mPulseShapePtr->GetParameter( 0 ),
@@ -241,12 +247,15 @@ Int_t StFgtA2CMaker::Make(){
 #ifdef DEBUG
                      printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
 #endif
-                     if( mStatusMask != 0x0 ){
-                        UInt_t status=mDb->getStatusFromGeoId(geoId);
+                  } else {
+                     strip->invalidateCharge();
+                  };
 
-                        if( status & mStatusMask )
-                           strip->setGeoId( -1 );
-                     };
+                  if( mStatusMask != 0x0 ){
+                     UInt_t status=mDb->getStatusFromGeoId(geoId);
+
+                     if( status & mStatusMask )
+                        strip->setGeoId( -1 );
                   };
                };
             };
