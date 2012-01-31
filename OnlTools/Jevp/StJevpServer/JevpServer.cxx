@@ -118,6 +118,17 @@ void _JevpServerMain(int argc, char *argv[])
   JevpServer::main(argc, argv);
 }
 
+void JevpServer::debugBuilders(int line)
+{
+#ifdef DEBUG
+  TListIter next(&builders);
+  JevpPlotSet *curr;
+  while((curr = (JevpPlotSet *)next())) {
+    LOG("JEFF", "print name (%d): %s",line,curr->getPlotSetName());
+  }
+#endif
+}
+
 void JevpServer::main(int argc, char *argv[])
 {
   // gErrorIgnoreLevel = kBreak;   // suppress root messages...
@@ -127,7 +138,7 @@ void JevpServer::main(int argc, char *argv[])
   rtsLogAddDest(serv.log_dest, serv.log_port);
   rtsLogLevel(serv.log_level);
 
-  LOG("JEFF", "Starting JevpServer: port=%d pid=%d", serv.myport, (int)getpid());
+  LOG(DBG, "Starting JevpServer: port=%d pid=%d", serv.myport, (int)getpid());
 
   // Each time we start, archive the existing display file...
   serv.init(serv.myport, argc, argv);
@@ -387,10 +398,12 @@ int JevpServer::init(int port, int argc, char *argv[]) {
 
   TListIter next(&builders);
   JevpPlotSet *curr;
-  while((curr = (baseBuilder *)next())) {
+  while((curr = (JevpPlotSet *)next())) {
     curr->_initialize(argc, argv);
   }
   CP;
+
+  debugBuilders(__LINE__);
 
   return 0;
 }  
@@ -443,7 +456,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
       }
       
       CP;
-      LOG(DBG, "Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
+      LOG("JEFF", "Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
       
       curr->_event(rdr);
       
@@ -937,6 +950,8 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
     jevpSummaryPlot = NULL;
   }
 
+  debugBuilders(__LINE__);
+
   CP;
   jevpSummaryPlot = new JevpPlot();
   jevpSummaryPlot->needsdata = 0;
@@ -964,7 +979,7 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
   
   
   int i = 0;
-  char tmp[256];
+  char tmp[512];
 
   sprintf(tmp,"Run #%d: (%s for %ld seconds)",runStatus.run, runStatus.status, time(NULL) - runStatus.timeOfLastChange);
   l = new JLatex(2, liney(i++), tmp);
@@ -984,17 +999,28 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
   JevpPlotSet *obj;
   int n=0;
 
+  debugBuilders(__LINE__);
+
   CP;
   while((obj = (JevpPlotSet *)next())) {
+    LOG(DBG, "object");
+    LOG(DBG, "name=%s",obj->getPlotSetName());
     BuilderStatus *curr = &obj->builderStatus;
 
     n++;
     sprintf(tmp, "builder %15s: (events %d, avgtime %06.4lf)",
 	    curr->name, curr->events, obj->getAverageProcessingTime());
+    
+    LOG(DBG, "here %s",tmp);
     l = new JLatex(2, liney(i++), tmp);
     l->SetTextSize(.035);
+
+    LOG(DBG, "Here");
     jevpSummaryPlot->addElement(l); 
+
+    LOG(DBG, "HEre");
   }
+  LOG("JEFE","here");
   
   CP;
   if(n == 0) {
@@ -1671,11 +1697,11 @@ void *JEVPSERVERreaderThread(void *)
       continue;
     }
 
-    LOG("JEFF", "RDRThread: Sending newevent to JevpServer: #%d run %d",serv.rdr->event_number,serv.rdr->run);
+    LOG(DBG, "RDRThread: Sending newevent to JevpServer: #%d run %d",serv.rdr->event_number,serv.rdr->run);
     readerThreadSend(socket, "newevent");
-    LOG("JEFF", "RDRThread: Waiting for JevpServer");
+    LOG(DBG, "RDRThread: Waiting for JevpServer");
     readerThreadWait(socket);
-    LOG("JEFF", "RDRThread: Trying to read a new event...");
+    LOG(DBG, "RDRThread: Trying to read a new event...");
   }
   
   return NULL;

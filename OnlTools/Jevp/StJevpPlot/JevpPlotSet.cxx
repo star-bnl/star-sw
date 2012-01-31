@@ -80,6 +80,8 @@ JevpPlotSet::JevpPlotSet(JevpServer *server)
   xml = NULL;
 
   processingTimer = new RtsTimer_root();
+  processingTime = 0;
+  numberOfEventsRun = 0;
 
   servertags[0] = '\0';
   CP;

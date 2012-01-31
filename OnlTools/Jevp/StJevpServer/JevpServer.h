@@ -55,6 +55,8 @@ class JevpServer {
   
   JevpPlot *jevpSummaryPlot;
 
+  void debugBuilders(int line);
+
   JevpServer() {
     myport = JEVP_PORT;
     ssocket = NULL;
