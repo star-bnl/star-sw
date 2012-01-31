@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.17 2012/01/27 18:11:28 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.18 2012/01/31 02:23:56 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string>
+#include <map>
 #include <assert.h>
 #include <set>
 #include "TROOT.h"
@@ -30,6 +31,7 @@
 #include "StMultiKeyMap.h"
 
 static StTGeoHelper *gStTGeoHelper=0;
+typedef std::map<const TGeoVolume*,int> myVoluMap ;
 
 ClassImp(StTGeoHelper)
 ClassImp(StVoluInfo)
@@ -124,6 +126,7 @@ void StTGeoHelper::Finish()
 //_____________________________________________________________________________
 void StTGeoHelper::InitInfo()
 {
+  myVoluMap myMap;
   gGeoManager->CdTop();
   
   StTGeoIter it;
@@ -140,13 +143,14 @@ void StTGeoHelper::InitInfo()
     if (it.IsFirst()) {		//First visit
 //			Recognize module
 //			Check for MODULE    
+    int &itWas = myMap[vol];
+    if (itWas)  {it.Skip();continue;}
+    itWas = 1;
       do {
-	if (IsModule(vol)) 	break;
-	if (!it.IsOmule())	break;
+	if (!IsModule(vol) && !it.IsOmule())	break;
 	StVoluInfo *ext = SetFlag(vol,StVoluInfo::kModule);
         myModu = ext; tgModu = vol; nHits=0;
- 	if (!IsActive(vol)) {
-	  printf("Module = %s(%d) ",vol->GetName(),volId); it.Print(0);}
+	printf("Module = %s(%d) ",vol->GetName(),volId); it.Print(0);
       } while(0);
 
       if (IsModule(vol) && !IsActive(vol)) {
@@ -164,7 +168,7 @@ void StTGeoHelper::InitInfo()
         if (!nHits) 	{// Module without hits or not active now
  	  printf("Module = %s(%d) ",vol->GetName(),volId); it.Print(0);
         } else 		{// Module with hits. It is MODULE
-	  myModu->SetMODULE();
+	  SetFlag(vol,StVoluInfo::kHitted);
  	  printf("MODULE = %s(%d) hits=%d",vol->GetName(),volId,nHits);
 	  it.Print(0);
         }  
