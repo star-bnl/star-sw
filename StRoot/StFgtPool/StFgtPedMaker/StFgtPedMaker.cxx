@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedMaker.cxx,v 1.1 2012/01/31 08:52:51 sgliske Exp $
+ * $Id: StFgtPedMaker.cxx,v 1.2 2012/01/31 16:47:47 wwitzke Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedMaker.cxx,v $
+ * Revision 1.2  2012/01/31 16:47:47  wwitzke
+ * Changed for cosmic test stand change.
+ *
  * Revision 1.1  2012/01/31 08:52:51  sgliske
  * StFgtPedMaker moved to StFgtPool
  *
@@ -66,7 +69,7 @@
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
-#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
+#include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
 #include "StRoot/StFgtUtil/StFgtConsts.h"
 
 // constructor

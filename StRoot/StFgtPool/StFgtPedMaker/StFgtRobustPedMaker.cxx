@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRobustPedMaker.cxx,v 1.1 2012/01/31 08:52:51 sgliske Exp $
+ * $Id: StFgtRobustPedMaker.cxx,v 1.2 2012/01/31 16:47:47 wwitzke Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRobustPedMaker.cxx,v $
+ * Revision 1.2  2012/01/31 16:47:47  wwitzke
+ * Changed for cosmic test stand change.
+ *
  * Revision 1.1  2012/01/31 08:52:51  sgliske
  * StFgtPedMaker moved to StFgtPool
  *
@@ -52,7 +55,7 @@
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
-#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
+#include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
 #include "StRoot/StFgtUtil/StFgtConsts.h"
 
 #define ONE_OVER_TWICE_SQRT_LOG_TWO 0.6005612
