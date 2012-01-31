@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtStatusMaker.cxx,v 1.2 2012/01/31 09:15:34 sgliske Exp $
+ * $Id: StFgtStatusMaker.cxx,v 1.3 2012/01/31 16:49:14 wwitzke Exp $
  * Author: C. K. Riley, Nov 2011 & S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtStatusMaker.cxx,v $
+ * Revision 1.3  2012/01/31 16:49:14  wwitzke
+ * Changed for cosmic test stand.
+ *
  * Revision 1.2  2012/01/31 09:15:34  sgliske
  * includes updated since status and Ped makers moved to Pool
  *
@@ -51,7 +54,7 @@
 #include "StRoot/StFgtDbMaker/StFgtDb.h"
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
-#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
+#include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
 #include "StRoot/StFgtUtil/StFgtConsts.h"
 #include "StRoot/StFgtPool/StFgtPedMaker/StFgtPedMaker.h"
 

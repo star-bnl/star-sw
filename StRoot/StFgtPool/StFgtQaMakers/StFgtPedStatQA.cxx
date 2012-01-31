@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtPedStatQA.cxx,v 1.2 2012/01/31 09:31:37 sgliske Exp $
+ * $Id: StFgtPedStatQA.cxx,v 1.3 2012/01/31 16:48:34 wwitzke Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedStatQA.cxx,v $
+ * Revision 1.3  2012/01/31 16:48:34  wwitzke
+ * Changed for cosmic test stand.
+ *
  * Revision 1.2  2012/01/31 09:31:37  sgliske
  * includes updated for things moved to StFgtPooll
  *
@@ -64,7 +67,7 @@
 #include <string>
 #include "StFgtPedStatQA.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
-#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
+#include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
 #include "StRoot/StFgtPool/StFgtPedMaker/StFgtPedMaker.h"
 #include "StRoot/StFgtPool/StFgtPedMaker/StFgtPedMaker.h"
 #include "StRoot/StFgtPool/StFgtStatusMaker/StFgtStatusMaker.h"

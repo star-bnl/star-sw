@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtPedPlotter.cxx,v 1.6 2011/09/30 19:09:07 sgliske Exp $
+ * $Id: StFgtPedPlotter.cxx,v 1.7 2012/01/31 16:48:04 wwitzke Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedPlotter.cxx,v $
+ * Revision 1.7  2012/01/31 16:48:04  wwitzke
+ * Changed for cosmic test stand.
+ *
  * Revision 1.6  2011/09/30 19:09:07  sgliske
  * general update
  *
@@ -46,7 +49,7 @@ using std::endl;
 
 #include <TGraphErrors.h>
 
-#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
+#include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
 
 // since this isn't defined elsewhere (yet)
 // set to 8 so that it doesn't matter if bins are 0-6 or 1-7

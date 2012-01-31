@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtCosmicTrackQA.cxx,v 1.1 2012/01/31 09:26:16 sgliske Exp $ 
+ * $Id: StFgtCosmicTrackQA.cxx,v 1.2 2012/01/31 16:48:34 wwitzke Exp $ 
  * Author: C. K. Riley (ckriley@bnl.gov), Oct. 18 2011 
  *
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFgtCosmicTrackQA.cxx,v $
+ * Revision 1.2  2012/01/31 16:48:34  wwitzke
+ * Changed for cosmic test stand.
+ *
  * Revision 1.1  2012/01/31 09:26:16  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -61,7 +64,7 @@
 #include "StMaker.h"
 
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
-#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
+#include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
 
 
 #include "StRoot/StEvent/StFgtCollection.h"
