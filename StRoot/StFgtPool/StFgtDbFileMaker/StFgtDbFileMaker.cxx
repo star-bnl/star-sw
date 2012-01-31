@@ -566,7 +566,8 @@ void StFgtDbFileMaker::printRealDbMappingFile(){
 		}
 	      
 
-	      strip = stripId % StFgtGeom::kNumFgtStripsPerLayer;
+	      //strip = stripId % StFgtGeom::kNumFgtStripsPerLayer;
+	      strip = stripId % kFgtNumStrips;
 	      geoId= StFgtGeom::encodeGeoId(disk, quad,layer,strip);
 
 	      Int_t real_apv = group*12 + apv;		
@@ -613,7 +614,8 @@ Int_t StFgtDbFileMaker::searchRStripId_LowPhi(Double_t r)
   
   assert(r!=0);
   
-  for (ii = 400; ii <  StFgtGeom::kNumStrips; ++ii)
+  //kFgtNumStrips*2 used to be kNumStrips
+  for (ii = 400; ii <  (kFgtNumStrips*2); ++ii)
     {
       if (r == StFgtGeom::mStrips[ii].ordinate) {
 	//cout<<" r="<<r<<" =?  "<<StFgtGeom::mStrips[ii].ordinate<<endl;
@@ -632,8 +634,9 @@ Int_t StFgtDbFileMaker::searchPhiStripId(Double_t p)
   Int_t ii;
   
   assert(p!=-1);
-  
-  for (ii = 0; ii < StFgtGeom::kNumStrips; ++ii)
+
+  //kFgtNumStrips*2 used to be kNumStrips before change of consts and put into StFgtConsts.  
+  for (ii = 0; ii < (2*kFgtNumStrips); ++ii)
     {
       if (p == StFgtGeom::mStrips[ii].ordinate){
 	//cout<<" p="<<p<<" =?  "<<StFgtGeom::mStrips[ii].ordinate<<endl;
