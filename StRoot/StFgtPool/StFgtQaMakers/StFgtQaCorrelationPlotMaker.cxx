@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtQaCorrelationPlotMaker.cxx,v 1.1 2012/01/31 09:26:17 sgliske Exp $
+ * $Id: StFgtQaCorrelationPlotMaker.cxx,v 1.2 2012/01/31 16:48:34 wwitzke Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtQaCorrelationPlotMaker.cxx,v $
+ * Revision 1.2  2012/01/31 16:48:34  wwitzke
+ * Changed for cosmic test stand.
+ *
  * Revision 1.1  2012/01/31 09:26:17  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -60,7 +63,7 @@
 #include <TROOT.h>
 #include <TStyle.h>
 
-#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
+#include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
 
 
 #include "StRoot/StEvent/StFgtCollection.h"

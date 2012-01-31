@@ -20,7 +20,7 @@
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "StRoot/StEvent/StEvent.h"
-#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
+#include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 
 // Copied from StFgtPedMaker.cxx

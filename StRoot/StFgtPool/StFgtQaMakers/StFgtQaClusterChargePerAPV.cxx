@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtQaClusterChargePerAPV.cxx,v 1.1 2012/01/31 09:26:17 sgliske Exp $
+ * $Id: StFgtQaClusterChargePerAPV.cxx,v 1.2 2012/01/31 16:48:34 wwitzke Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StFgtQaClusterChargePerAPV.cxx,v $
+ * Revision 1.2  2012/01/31 16:48:34  wwitzke
+ * Changed for cosmic test stand.
+ *
  * Revision 1.1  2012/01/31 09:26:17  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -34,7 +37,7 @@
 #include <TH2F.h>
 
 #include "StFgtQaMaker.h"
-#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
+#include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
 
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtHitCollection.h"

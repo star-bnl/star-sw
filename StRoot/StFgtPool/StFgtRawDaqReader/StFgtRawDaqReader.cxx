@@ -11,7 +11,7 @@
 #include "StFgtRawDaqReader.h"
 #include "StRoot/StEvent/StEvent.h"
 
-#include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
+#include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
 #include "StRoot/St_base/StMessMgr.h"
 #include "RTS/src/DAQ_FGT/daq_fgt.h"
 #include "RTS/src/DAQ_READER/daq_dta.h"
@@ -257,8 +257,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.3 2012/01/31 11:23:34 sgliske Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.4 2012/01/31 16:48:56 wwitzke Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.4  2012/01/31 16:48:56  wwitzke
+ * Changed for cosmic test stand.
+ *
  * Revision 1.3  2012/01/31 11:23:34  sgliske
  * No longer requires passing name of StFgtDbMaker
  *
