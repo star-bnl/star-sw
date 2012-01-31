@@ -57,17 +57,20 @@ inline void StFgtRawDaqReader::setFilename( std::string filename ){ mDaqFileName
 inline void StFgtRawDaqReader::cutShortEvents( Bool_t doIt ){ mCutShortEvents = doIt; };
 inline void StFgtRawDaqReader::setIsCosmic( Bool_t itIs ){ mIsCosmic = itIs; };
 inline const char *StFgtRawDaqReader::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.1 2012/01/31 09:15:34 sgliske Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.2 2012/01/31 09:16:55 sgliske Exp $ built "__DATE__" "__TIME__ ;
    return cvs;
 };
 
 #endif
 
 /*
- * $Id: StFgtRawDaqReader.h,v 1.1 2012/01/31 09:15:34 sgliske Exp $
+ * $Id: StFgtRawDaqReader.h,v 1.2 2012/01/31 09:16:55 sgliske Exp $
  * $Log: StFgtRawDaqReader.h,v $
+ * Revision 1.2  2012/01/31 09:16:55  sgliske
+ * fixed cvs caption
+ *
  * Revision 1.1  2012/01/31 09:15:34  sgliske
- * includes updated since status and Ped makers moved to Pool
+ * Moved to StFgtPool
  *
  * Revision 1.2  2012/01/26 11:38:33  sgliske
  * added GetCVS()

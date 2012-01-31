@@ -244,3 +244,14 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 
 
 ClassImp(StFgtRawDaqReader);
+
+/*
+ * $Id: StFgtRawDaqReader.cxx,v 1.2 2012/01/31 09:16:55 sgliske Exp $
+ * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.2  2012/01/31 09:16:55  sgliske
+ * fixed cvs caption
+ *
+ * Revision 1.1  2012/01/31 09:15:34  sgliske
+ * Moved to StFgtPool
+ *
+ */
