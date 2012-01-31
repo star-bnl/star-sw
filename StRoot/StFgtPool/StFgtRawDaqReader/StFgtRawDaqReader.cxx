@@ -82,21 +82,32 @@ Int_t StFgtRawDaqReader::Init(){
    };
 
    if( !ierr && !mIsCosmic ){
-      // get the maker pointer
-      mFgtDbMkr = static_cast< StFgtDbMaker* >( GetMaker( mDbMkrName.data() ) );
+      if( !mDbMkrName.empty() ){
+         // get the maker pointer
+         mFgtDbMkr = static_cast< StFgtDbMaker* >( GetMaker( mDbMkrName.data() ) );
 
-       if( !ierr && !mFgtDbMkr ){
-          LOG_FATAL << "Error finding FgtDbMkr" << endm;
-          ierr = kStFatal;
-       };
+         if( !ierr && !mFgtDbMkr ){
+            LOG_FATAL << "Error finding FgtDbMkr named '" << mDbMkrName << "'" << endm;
+            ierr = kStFatal;
+         };
 
-      if( !mFgtDbMkr->InheritsFrom("StFgtDbMaker") ){
-         LOG_FATAL << "StFgtDbMkr does not inherit from StFgtDbMaker" << endm;
-         LOG_FATAL << "Name is '" << mFgtDbMkr->GetName() << "', class is '" << mFgtDbMkr->ClassName() << endm;
-         ierr = kStFatal;
+         if( !mFgtDbMkr->InheritsFrom("StFgtDbMaker") ){
+            LOG_FATAL << "StFgtDbMkr does not inherit from StFgtDbMaker" << endm;
+            LOG_FATAL << "Name is '" << mFgtDbMkr->GetName() << "', class is '" << mFgtDbMkr->ClassName() << endm;
+            ierr = kStFatal;
+         };
       };
 
-      LOG_INFO << "Using date and time " << mFgtDbMkr->GetDateTime().GetDate() << ", " << mFgtDbMkr->GetDateTime().GetTime() << endm;
+      if( !mFgtDbMkr ){
+         mFgtDbMkr = static_cast< StFgtDbMaker* >( GetMakerInheritsFrom( "StFgtDbMaker" ) );
+         if( !mFgtDbMkr ){
+            LOG_FATAL << "StFgtDbMaker name not provided and error finding StFgtDbMaker" << endm;
+            ierr = kStFatal;
+         };
+      };
+
+      LOG_INFO << "Using date and time " << mFgtDbMkr->GetDateTime().GetDate() << ", "
+               << mFgtDbMkr->GetDateTime().GetTime() << endm;
    };
 
    if( !ierr ){
@@ -246,8 +257,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.2 2012/01/31 09:16:55 sgliske Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.3 2012/01/31 11:23:34 sgliske Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.3  2012/01/31 11:23:34  sgliske
+ * No longer requires passing name of StFgtDbMaker
+ *
  * Revision 1.2  2012/01/31 09:16:55  sgliske
  * fixed cvs caption
  *
