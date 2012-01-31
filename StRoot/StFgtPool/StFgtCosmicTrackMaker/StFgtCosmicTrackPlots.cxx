@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtCosmicTrackPlots.cxx,v 1.1 2012/01/31 23:25:35 avossen Exp $ 
+ * $Id: StFgtCosmicTrackPlots.cxx,v 1.2 2012/01/31 23:37:17 avossen Exp $ 
  * Author: C. K. Riley (ckriley@bnl.gov), Oct. 18 2011 
  *
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFgtCosmicTrackPlots.cxx,v $
+ * Revision 1.2  2012/01/31 23:37:17  avossen
+ * fixed StFgtCosmicTrackMaker paths
+ *
  * Revision 1.1  2012/01/31 23:25:35  avossen
  * moved StFgtCosmicTrackMaker to StFgtPool
  *
@@ -62,10 +65,8 @@
 #include "StMaker.h"
 
 #include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
-
-
-#include "StRoot/StFgtCosmicTrackMaker/StFgtCosmicTrackMaker.h"
-#include "StRoot/StFgtCosmicTrackMaker/StFgtCosmicTrack.h"
+#include "StRoot/StFgtPool/StFgtCosmicTrackMaker/StFgtCosmicTrackMaker.h"
+#include "StRoot/StFgtPool/StFgtCosmicTrackMaker/StFgtCosmicTrack.h"
 
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StFgtCollection.h"
