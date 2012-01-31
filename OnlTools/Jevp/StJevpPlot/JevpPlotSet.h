@@ -92,6 +92,7 @@ class JevpPlotSet : public TObject {
 
   double getAverageProcessingTime() {
     double n = (numberOfEventsRun>0) ? numberOfEventsRun : 1;
+
     return (processingTime / n);
   }
 
