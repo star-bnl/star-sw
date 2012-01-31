@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtQaRawOctAdc.h,v 1.1 2012/01/31 09:26:17 sgliske Exp $
+ * $Id: StFgtQaRawOctAdc.h,v 1.2 2012/01/31 12:53:28 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtQaRawOctAdc.h,v $
+ * Revision 1.2  2012/01/31 12:53:28  sgliske
+ * updates
+ *
  * Revision 1.1  2012/01/31 09:26:17  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -19,8 +22,8 @@
  *
  **************************************************************************/
 
-#ifndef _ST_FGT_QA_RAQ_OCT_ADC_H_
-#define _ST_FGT_QA_RAQ_OCT_ADC_H_
+#ifndef _ST_FGT_QA_RAW_OCT_ADC_H_
+#define _ST_FGT_QA_RAW_OCT_ADC_H_
 
 #include <string>
 #include <sstream>
@@ -32,8 +35,7 @@ class TH2F;
 class StFgtQaRawOctAdc : public StMaker {
  public:
    // constructors
-   StFgtQaRawOctAdc( const Char_t* name = "fgtQaRawOctAdc", Int_t rdo = 1, Int_t arm = 0, Int_t apvStart = 0,
-                     Int_t timeBin = 2 );
+   StFgtQaRawOctAdc( const Char_t* name = "fgtQaRawOctAdc", Int_t timeBin = 2 );
 
    // default OK
    // StFgtQaRawOctAdc(const StFgtQaRawOctAdc&);
@@ -48,14 +50,21 @@ class StFgtQaRawOctAdc : public StMaker {
    Int_t Make();
 
    // accessor
-   TH2F* getHist();
+   std::vector< TH2F* > getHistVec();
+
+   // modifier
+   void setTimeBin( Int_t tb );
 
  protected:
-   // the histogram
-   TH2F *mHist;
+   // typedef
+   typedef std::vector< TH2F* > HistVec_t;
 
-   // For selecting the octant
-   Int_t mRdo, mArm, mApvStart, mTimeBin;
+   // the histogram
+   HistVec_t mHistVec;
+
+   // For selecting the timebin
+   Int_t mTimeBin, mAdcBins;
+   Float_t mAdcMin, mAdcMax;
 
  private:   
    ClassDef(StFgtQaRawOctAdc,1);
@@ -64,7 +73,7 @@ class StFgtQaRawOctAdc : public StMaker {
 
 // inline functions
 
-// modifiers
-inline TH2F* StFgtQaRawOctAdc::getHist(){ return mHist; };
+inline std::vector< TH2F* > StFgtQaRawOctAdc::getHistVec(){ return mHistVec; };
+inline void StFgtQaRawOctAdc::setTimeBin( Int_t tb ){ mTimeBin = tb; };
 
 #endif

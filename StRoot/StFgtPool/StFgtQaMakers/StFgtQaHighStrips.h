@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtQaHighStrips.h,v 1.1 2012/01/31 09:26:17 sgliske Exp $
+ * $Id: StFgtQaHighStrips.h,v 1.2 2012/01/31 12:53:28 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StFgtQaHighStrips.h,v $
+ * Revision 1.2  2012/01/31 12:53:28  sgliske
+ * updates
+ *
  * Revision 1.1  2012/01/31 09:26:17  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -65,7 +68,7 @@ class StFgtQaHighStrips : public StMaker {
 /*    StFgtDbMaker *mFgtDbMkr; */
 
    // ranges
-   Int_t mNumOct, mMaxNum;
+   Int_t mMaxNum;
 
  private:   
    ClassDef(StFgtQaHighStrips,1);
