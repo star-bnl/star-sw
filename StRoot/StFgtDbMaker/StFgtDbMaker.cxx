@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.12 2012/01/19 22:59:31 rfatemi Exp $
+// $Id: StFgtDbMaker.cxx,v 1.13 2012/01/31 17:02:46 wwitzke Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -63,6 +63,8 @@ Int_t StFgtDbMaker::Init()
 Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 {
     LOG_INFO << Form("StFgtDbMaker::InitRun(), run=%d",runNumber)<<endm;
+    LOG_INFO << Form("StFgtDbMaker::InitRun(), Event DateTime=%s",GetDateTime().AsString())<<endm;
+    LOG_INFO << Form("StFgtDbMaker::InitRun(), Database Time=%s",GetDBTime().AsString())<<endm;
 
     // clear old pointers to DB tables, just in case. Do not delete the data which are owned by StDbMaker
     mLossTab =0;
@@ -285,6 +287,9 @@ Int_t StFgtDbMaker::Finish()
 
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.13  2012/01/31 17:02:46  wwitzke
+// Added date/time printout to StFgtDbMaker.cxx InitRun().
+//
 // Revision 1.12  2012/01/19 22:59:31  rfatemi
 // Don't read negative DB numbers into reverse maps
 //
