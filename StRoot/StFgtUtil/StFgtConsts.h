@@ -27,6 +27,7 @@ enum {
 // constants related to physical coordinates
 enum {
    kFgtNumDiscs = 6,
+   kFgtNumQuads = 4,
    kFgtNumOctantsPerDisc = 8,
    kFgtNumOctants = kFgtNumOctantsPerDisc*kFgtNumDiscs,
    kFgtNumLayers = 2,
@@ -67,8 +68,11 @@ enum {
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.4 2012/01/31 10:51:12 sgliske Exp $
+ * $Id: StFgtConsts.h,v 1.5 2012/01/31 12:53:11 sgliske Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.5  2012/01/31 12:53:11  sgliske
+ * Somehow kFgtNumQuads was lost--now restored
+ *
  * Revision 1.4  2012/01/31 10:51:12  sgliske
  * Added number of octants (48)
  *
