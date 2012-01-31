@@ -25,14 +25,15 @@ fi
 
 cd $SUBMIT_DIR
 
-LIST=`ls -l  | grep '^d' | grep "PtHard_[0-9]" | rev | cut -f1 -d" " | rev`
+#LIST=`ls -l  | grep '^d' | grep "PtHard_[0-9]" | rev | cut -f1 -d" " | rev`
+LIST=`ls`
 for LINE in $LIST; do
 	echo ""
 	echo "In directory $LINE..."
 	cd $LINE
 	PTMIN=`echo $LINE | cut -f2 -d"_"`
 	PTMAX=`echo $LINE | cut -f3 -d"_"`
-	XML=`ls *PtHard_${PTMIN}_${PTMAX}.xml`
+	XML=`ls *.xml`
 	if [ ! -e $XML ]; then
 		echo "     Error, XML file $XML does not exist in folder $LINE, Skip!"
 		continue
