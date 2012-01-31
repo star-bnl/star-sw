@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.15 2011/05/24 20:50:43 genevb Exp $
+// $Id: StHistUtil.h,v 2.16 2012/01/31 22:14:54 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.16  2012/01/31 22:14:54  genevb
+// QA Shift Mode, optimized for AutoQA Browser
+//
 // Revision 2.15  2011/05/24 20:50:43  genevb
 // Allow limited graphics file printing
 //
@@ -95,6 +98,7 @@ class StHistUtil {
   TString m_OutType;    // Output file type
   Bool_t  m_OutMultiPage; // Output file is multipage
   TString m_OutIndividuals; // Additional output of each pad
+  Bool_t  m_QAShiftMode; // For the Offline QA Browser
   Int_t   m_CurPrefix;
   Int_t   m_CurPage;
   TString m_GlobalTitle; // Title at top of each page of output
@@ -197,7 +201,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.15 2011/05/24 20:50:43 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.16 2012/01/31 22:14:54 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };

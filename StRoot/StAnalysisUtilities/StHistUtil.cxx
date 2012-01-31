@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.84 2011/05/24 20:50:43 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.85 2012/01/31 22:14:53 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.85  2012/01/31 22:14:53  genevb
+// QA Shift Mode, optimized for AutoQA Browser
+//
 // Revision 2.84  2011/05/24 20:50:43  genevb
 // Allow limited graphics file printing
 //
@@ -340,7 +343,11 @@ StHistUtil::StHistUtil(){
   m_PrintMode = 0;
   m_OutMultiPage = kTRUE;
   m_OutIndividuals = "";
+  m_QAShiftMode = kFALSE;
   m_RunYear = 0;
+
+  Ltitle = 0;
+  Ldesc = 0;
 
   maxHistCopy = 4096;
   newHist = new TH1ptr[maxHistCopy];
@@ -410,15 +417,23 @@ void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
     else if (m_OutFileName.EndsWith(".C")) m_OutType="C"; // Save histograms as code
     else if (m_OutFileName.EndsWith(".root")) m_OutType="root";
     else if (m_OutFileName.EndsWith("none")) m_OutType="none"; // No output set
+    else if (m_OutFileName.EndsWith(".qas")) m_OutType="qas"; // QA Shift mode
     else {
       LOG_INFO << "SetHistUtil::SetOutFile(): unknown type, assuming ps" << endm;
       m_OutType = "ps";
       m_OutFileName.Append(".ps");
     }
-    if (m_OutType.CompareTo("none")) {
-      m_PrintMode |= QAU1<<QAprintSet;
-      m_PrintMode |= QAU1<<QAprintSetRef;
-    }
+  }
+  if (!m_OutType.CompareTo("qas")) { // QA Shift mode options
+    m_QAShiftMode = kTRUE;
+    m_OutIndividuals = ".svg";
+    m_PrintMode |= QAU1<<QAprintIndiv;
+    m_PrintMode |= QAU1<<QAprintIndivRef;
+    m_OutType = "none";
+  }
+  if (m_OutType.CompareTo("none")) {
+    m_PrintMode |= QAU1<<QAprintSet;
+    m_PrintMode |= QAU1<<QAprintSetRef;
   }
 
   // Multipage output for ps,pdf
@@ -505,9 +520,11 @@ Bool_t StHistUtil::CheckOutFile(const Char_t *histName) {
   }
   (m_CurFileNameR = "Ref_") += m_CurFileName;
 
-  Ldesc->Clear();
-  Ldesc->AddText(possibleSuffixes[m_CurPrefix]);
-  Ldesc->AddText("Hists");
+  if (Ldesc) {
+    Ldesc->Clear();
+    Ldesc->AddText(possibleSuffixes[m_CurPrefix]);
+    Ldesc->AddText("Hists");
+  }
   return kTRUE;
 }
 //_____________________________________________________________________________
@@ -517,11 +534,26 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
   
   LOG_INFO << " **** Now in StHistUtil::DrawHists  **** " << endm;
 
+  Int_t canvasWidth,canvasHeight;
+
+  if (m_QAShiftMode) {
+    LOG_INFO << "In QA Shift Mode - overriding other inputs" << endm;
+    m_PadColumns=1;
+    m_PadRows=1;
+    canvasWidth = 250;
+    canvasHeight = 250;
+  } else {
+    // SetPaperSize wants width & height in cm: A4 is 20,26 & US is 20,24
+    gStyle->SetPaperSize(m_PaperWidth,m_PaperHeight); 
+    // TCanvas wants width & height in pixels (712 x 950 corresponds to A4 paper)
+    //                                        (600 x 780                US      )
+    //  TCanvas *m_HistCanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
+    canvasWidth = 600;
+    canvasHeight = 780;
+  }
 
   //set Style of Plots
   const Int_t numPads = m_PadColumns*m_PadRows;  
-  // SetPaperSize wants width & height in cm: A4 is 20,26 & US is 20,24
-  gStyle->SetPaperSize(m_PaperWidth,m_PaperHeight); 
   gStyle->SetOptStat(111111);
   gStyle->SetStatStyle(0);
   gStyle->SetOptDate(0);
@@ -532,81 +564,89 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
   SafeDelete(m_HistCanvas);
   SafeDelete(m_HistCanvasR);
 
-  // TCanvas wants width & height in pixels (712 x 950 corresponds to A4 paper)
-  //                                        (600 x 780                US      )
-  //  TCanvas *m_HistCanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
   if (m_refInFile) {
-    m_HistCanvasR = new TCanvas("CanvasNameR"," STAR Reference Histogram Canvas",20,20,600,780);
+    m_HistCanvasR = new TCanvas("CanvasNameR"," STAR Reference Histogram Canvas",20,20,canvasWidth,canvasHeight);
   }
-  m_HistCanvas = new TCanvas("CanvasName"," STAR Maker Histogram Canvas",0,0,600,780);
-
-  // write title at top of canvas - first page
-  Ltitle = new TPaveLabel(0.08,0.96,0.88,1.0,m_GlobalTitle.Data(),"br");
-  Ltitle->SetFillColor(18);
-  Ltitle->SetTextFont(32);
-  Ltitle->SetTextSize(0.5);
-  Ltitle->Draw();
-  if (m_refInFile) {
-    m_HistCanvasR->cd();
-    TPaveLabel* LtitleR = new TPaveLabel(0.08,0.96,0.88,1.0,m_refInFile->GetName(),"br");
-    LtitleR->SetFillColor(18);
-    LtitleR->SetTextFont(32);
-    LtitleR->SetTextSize(0.5);
-    LtitleR->Draw();
-    m_HistCanvas->cd();
-  }
-
-  // write descriptor at top of canvas - first page
-  Ldesc = new TPaveText(0.90,0.96,0.99,1.0,"br");
-  Ldesc->SetFillColor(18);
-  Ldesc->SetTextFont(32);
-  Ldesc->Draw();
-  if (m_refInFile) {
-    m_HistCanvasR->cd();
-    Ldesc->Draw();
-    m_HistCanvas->cd();
-  }
-
-  // now put in date & time at bottom right of canvas - first page
-  TDatime HistTime;
-  const Char_t *myTime = HistTime.AsString();
-  TPaveLabel *Ldatetime = new TPaveLabel(0.7,0.01,0.95,0.03,myTime,"br");
-  Ldatetime->SetTextSize(0.6);
-  Ldatetime->Draw();
-  if (m_refInFile) {
-    m_HistCanvasR->cd();
-    Ldatetime->Draw();
-    m_HistCanvas->cd();
-  }
+  m_HistCanvas = new TCanvas("CanvasName"," STAR Maker Histogram Canvas",0,0,canvasWidth,canvasHeight);
 
 
-  // now put in page # at bottom left of canvas - first page
+  TPad *graphPad = m_HistCanvas;
+  TPad *graphPadR = m_HistCanvasR;
+  TPaveLabel* LtitleR = 0;
+  TPaveLabel *Ldatetime = 0;
+  TPaveLabel *Lpage = 0;
   m_CurPage=1;
-  TPaveLabel *Lpage = new TPaveLabel(0.1,0.01,0.16,0.03,Form("%d",m_CurPage),"br");
-  Lpage->SetTextSize(0.6);
-  Lpage->Draw();
-  if (m_refInFile) {
-    m_HistCanvasR->cd();
-    Lpage->Draw();
-    m_HistCanvas->cd();
-  }
 
-  // Make 1 big pad on the canvas - make it a little bit inside the  canvas 
-  //    - must cd to get to this pad! 
-  // order is x1 y1 x2 y2 
-  TPad *graphPad = new TPad("PadName","Pad Title",0.0,0.05,1.00,0.95);
-  graphPad->Draw();
-  graphPad->cd();
-  graphPad->Divide(m_PadColumns,m_PadRows);
-  TPad *graphPadR = 0;
-  if (m_refInFile) {
-    m_HistCanvasR->cd();
-    graphPadR = new TPad("PadNameR","Pad TitleR",0.0,0.05,1.00,0.95);
-    graphPadR->Draw();
-    graphPadR->cd();
-    graphPadR->Divide(m_PadColumns,m_PadRows);
+  if (!m_QAShiftMode) {
+  // Do not draw page numbers, titles, etc. in QA Shift mode
+
+    // write title at top of canvas - first page
+    Ltitle = new TPaveLabel(0.08,0.96,0.88,1.0,m_GlobalTitle.Data(),"br");
+    Ltitle->SetFillColor(18);
+    Ltitle->SetTextFont(32);
+    Ltitle->SetTextSize(0.5);
+    Ltitle->Draw();
+    if (m_refInFile) {
+      m_HistCanvasR->cd();
+      LtitleR = new TPaveLabel(0.08,0.96,0.88,1.0,m_refInFile->GetName(),"br");
+      LtitleR->SetFillColor(18);
+      LtitleR->SetTextFont(32);
+      LtitleR->SetTextSize(0.5);
+      LtitleR->Draw();
+      m_HistCanvas->cd();
+    }
+
+    // write descriptor at top of canvas - first page
+    Ldesc = new TPaveText(0.90,0.96,0.99,1.0,"br");
+    Ldesc->SetFillColor(18);
+    Ldesc->SetTextFont(32);
+    Ldesc->Draw();
+    if (m_refInFile) {
+      m_HistCanvasR->cd();
+      Ldesc->Draw();
+      m_HistCanvas->cd();
+    }
+
+    // now put in date & time at bottom right of canvas - first page
+    TDatime HistTime;
+    const Char_t *myTime = HistTime.AsString();
+    Ldatetime = new TPaveLabel(0.7,0.01,0.95,0.03,myTime,"br");
+    Ldatetime->SetTextSize(0.6);
+    Ldatetime->Draw();
+    if (m_refInFile) {
+      m_HistCanvasR->cd();
+      Ldatetime->Draw();
+      m_HistCanvas->cd();
+    }
+
+
+    // now put in page # at bottom left of canvas - first page
+    Lpage = new TPaveLabel(0.1,0.01,0.16,0.03,Form("%d",m_CurPage),"br");
+    Lpage->SetTextSize(0.6);
+    Lpage->Draw();
+    if (m_refInFile) {
+      m_HistCanvasR->cd();
+      Lpage->Draw();
+      m_HistCanvas->cd();
+    }
+
+    // Make 1 big pad on the canvas - make it a little bit inside the  canvas 
+    //    - must cd to get to this pad! 
+    // order is x1 y1 x2 y2 
+    graphPad = new TPad("PadName","Pad Title",0.0,0.05,1.00,0.95);
+    graphPad->Draw();
     graphPad->cd();
-  }
+    graphPad->Divide(m_PadColumns,m_PadRows);
+    if (m_refInFile) {
+      m_HistCanvasR->cd();
+      graphPadR = new TPad("PadNameR","Pad TitleR",0.0,0.05,1.00,0.95);
+      graphPadR->Draw();
+      graphPadR->cd();
+      graphPadR->Divide(m_PadColumns,m_PadRows);
+    graphPad->cd();
+    }
+
+  } // !m_QAShiftMode
 
   Int_t padCount = 0;
   Bool_t padAdvance = kTRUE;
@@ -697,7 +737,12 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 	    padCount = numPads;
 	    m_CurPage = 0;
 	  }
-          if (padCount == numPads) {
+          if (m_QAShiftMode) {
+            graphPad->Clear();
+            if (m_refInFile) graphPadR->Clear();
+            padCount = 0;
+            m_CurPage++;
+          } else if (padCount == numPads) {
             // must redraw the histcanvas for each new page!
             m_HistCanvas->Modified();
             m_HistCanvas->Update();
@@ -728,7 +773,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 
             // update the page number
             m_CurPage++;
-            Lpage->SetLabel(Form("%d",m_CurPage));
+            if (Lpage) Lpage->SetLabel(Form("%d",m_CurPage));
 
 	    if (!m_OutMultiPage && !m_CurFileName.IsNull()) {
               Ssiz_t last_us = m_CurFileName.Last('_') + 1;
@@ -775,8 +820,11 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           for (int analRepeat = 0;analRepeat < (hobjR ? 2 : 1); analRepeat++) {
 
 	  padAdvance = kTRUE;
-          if (analRepeat) {objPad=gPad; graphPadR->cd(curPad); hobj=hobjR;}
-	  else graphPad->cd(curPad);
+          if (analRepeat) {
+            objPad=gPad;
+            graphPadR->cd(m_QAShiftMode ? 0 : curPad);
+            hobj=hobjR;
+          } else graphPad->cd(m_QAShiftMode ? 0 : curPad);
 
           // set x & y grid off by default
 	  gPad->SetGridy(0);
@@ -1094,6 +1142,8 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 
             if (m_PrintMode & QAU1<<QAprintIndivRef)
               gPad->Print(Form("Ref_%s%s",oName.Data(),m_OutIndividuals.Data()));
+            if (m_QAShiftMode)
+              gPad->Print(Form("Ref_%s.png",oName.Data()));
 
             if (objPad) {
               objPad->cd();
@@ -1108,6 +1158,8 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
               latex.SetTextSize(sz);
               if (m_PrintMode & QAU1<<QAprintIndiv)
                 gPad->Print(Form("%s%s",oName.Data(),m_OutIndividuals.Data()));
+              if (m_QAShiftMode)
+                gPad->Print(Form("%s.png",oName.Data()));
             }
 
 
@@ -1120,6 +1172,8 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           } else {
             if (m_PrintMode & QAU1<<QAprintIndiv)
               gPad->Print(Form("%s%s",oName.Data(),m_OutIndividuals.Data()));
+            if (m_QAShiftMode)
+              gPad->Print(Form("%s.png",oName.Data()));
             if (strlen(m_refResultsFile)) {
               if (!R_ostr) R_ostr = new ofstream(m_refResultsFile);
               (*R_ostr) << m_CurPage << " " << curPad << " " << oName << " 1.0" << endl;
