@@ -265,9 +265,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
 {
   throttleAlgos = 1;
 
-  log_output = RTS_LOG_STDERR;
+  log_output = RTS_LOG_NET;
   log_dest = (char *)"172.16.0.1";
-  log_port = 8404;
+  log_port = 8004;
   log_level = (char *)WARN;
 
   for(int i=1;i<argc;i++) {
@@ -308,6 +308,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
     }
     else if (strcmp(argv[i], "-test")==0) {
       nodb = 1;
+      log_output = RTS_LOG_STDERR;
       basedir = "/RTScache/conf/jevp_test";
       pdfdir = "/a/jevp_test/pdf";
       refplotdir = "/a/jevp_test/refplots";
