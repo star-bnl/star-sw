@@ -388,6 +388,9 @@ class StFgtGeom
 	static int mPhiStripGBLId_number;
 
  protected:
+
+	friend class StFgtDbFileMaker;
+
 	//  ---Private member variables---
 	static StFgtGeomData mStrips[ 2*kFgtNumStrips ];
 
@@ -462,8 +465,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.32 2012/01/28 10:46:37 sgliske Exp $
+ *  $Id: StFgtGeom.h,v 1.33 2012/01/31 15:34:23 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.33  2012/01/31 15:34:23  rfatemi
+ *  make it a friend of StFgtDbMaker which lives in StFgtPool
+ *
  *  Revision 1.32  2012/01/28 10:46:37  sgliske
  *  Forgot to include assert, and removing unneeded TObject include
  *
