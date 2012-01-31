@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtStatusMaker.cxx,v 1.1 2012/01/31 08:59:43 sgliske Exp $
+ * $Id: StFgtStatusMaker.cxx,v 1.2 2012/01/31 09:15:34 sgliske Exp $
  * Author: C. K. Riley, Nov 2011 & S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtStatusMaker.cxx,v $
+ * Revision 1.2  2012/01/31 09:15:34  sgliske
+ * includes updated since status and Ped makers moved to Pool
+ *
  * Revision 1.1  2012/01/31 08:59:43  sgliske
  * moved StFgtStatus maker to StFgtPool
  *
@@ -49,8 +52,8 @@
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
-#include "StRoot/StFgtPedMaker/StFgtPedMaker.h"
 #include "StRoot/StFgtUtil/StFgtConsts.h"
+#include "StRoot/StFgtPool/StFgtPedMaker/StFgtPedMaker.h"
 
 // constructor
 StFgtStatusMaker::StFgtStatusMaker( const Char_t* name, const Char_t* pedMakerName ) :
