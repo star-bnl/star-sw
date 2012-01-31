@@ -27,7 +27,7 @@ void StGeomBrowser::SetFile(const char *fileName)
    fFileName = fileName;
    gSystem->ExpandPathName(fFileName);    
    if (!fBrowser) fBrowser = new GeomBrowser();
-   if ( fFileName.EndsWith(".C") ) {
+   if ( fFileName.EndsWith(".C") || fFileName.EndsWith(".h")) {
       if (!gSystem->AccessPathName(fFileName.Data()))
            fBrowser->fileOpenMacro(fFileName.Data()); 
    } else if ( fFileName.EndsWith(".root") ) {         

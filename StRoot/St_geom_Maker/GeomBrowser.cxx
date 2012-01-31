@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.23 2010/05/12 23:12:21 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.24 2012/01/31 01:11:03 perev Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #ifndef  NO_GEANT_MAKER
@@ -400,15 +400,25 @@ void GeomBrowser::fileOpenMacro( const QString &fileName )
 {
   // Read ROOT macro with the ROOT TGeo geometry model
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
-    if (!gROOT->LoadMacro(fileName.toStdString().c_str()))  {
+    std::string str = fileName.toStdString();
+    int n = str.size();
+    if ( gGeoManager) {		//Ready
+    }
+    else if (str.substr(n-2,n-1)==".h") {
+      int err = gROOT->Macro(str.c_str()); 
+      if (err) gGeoManager = 0;
+    }
+    else if (!gROOT->LoadMacro(str.c_str()))  {
       TDataSet *topSet = (TDataSet *)gROOT->ProcessLineFast("CreateTable()");
-      if (topSet) {
-         // Look for the "Geometry" set
-		   QString name = QFileInfo(fileName).completeBaseName();
-         fTreeWidget->AddModel2ListView(gGeoManager,name);
-      }
+    } 
+    if ( gGeoManager) {
       fOpenFileName = fileName;
-    } else {
+      QString name = gGeoManager->GetName();
+      fTreeWidget->AddModel2ListView(gGeoManager,name);
+    }
+
+
+    if (!gGeoManager) {
        QMessageBox::warning(this,"Open ROOT macro geometry file","Can not open the macro file");
     }
     CleanGeoManager();
