@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtQaHighStrips.cxx,v 1.1 2012/01/31 09:26:17 sgliske Exp $
+ * $Id: StFgtQaHighStrips.cxx,v 1.2 2012/01/31 12:53:28 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtQaHighStrips.cxx,v $
+ * Revision 1.2  2012/01/31 12:53:28  sgliske
+ * updates
+ *
  * Revision 1.1  2012/01/31 09:26:17  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -35,7 +38,7 @@
 
 // constructors
 StFgtQaHighStrips::StFgtQaHighStrips( const Char_t* name ) :
-   StMaker( name ), mHist2D( 0 ), mHistVec( mNumOct, (TH1F*)0 ), mNumOct( kFgtNumDiscs * kFgtNumQuads * 2 ), mMaxNum( 10 ) {
+   StMaker( name ), mHist2D( 0 ), mHistVec( kFgtNumOctants, (TH1F*)0 ), mMaxNum( 10 ) {
    // that's all
 };
 
@@ -58,7 +61,7 @@ Int_t StFgtQaHighStrips::Init(){
    std::string name = ss.str();
 
    mHist2D = new TH2F( ss.str().data(), "Number of High Strips per Event per Octant; Octant; Number of Strips",
-                       mNumOct, 0, mNumOct, mMaxNum, 0, mMaxNum );
+                       kFgtNumOctants, 0, kFgtNumOctants, mMaxNum, 0, mMaxNum );
 
    Char_t octName[2] = { 'L', 'S' };
    Int_t histIdx = 0;
@@ -121,7 +124,7 @@ Int_t StFgtQaHighStrips::Make(){
       };
    };
 
-   vector< Int_t > numPerOct( mNumOct, 0 );
+   vector< Int_t > numPerOct( kFgtNumOctants, 0 );
 
    for( Int_t disc = 0; disc < kFgtNumDiscs && !ierr; ++disc ){
       StFgtStripCollection *stripCollectionPtr = 0;

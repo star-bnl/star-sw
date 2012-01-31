@@ -1,15 +1,18 @@
 /***************************************************************************
  *
- * $Id: fgtRawSpectraQA.C,v 1.1 2012/01/31 09:26:18 sgliske Exp $
+ * $Id: fgtRawSpectraQA.C,v 1.2 2012/01/31 12:53:28 sgliske Exp $
  * Author: S. Gliske, Jan 2011
  *
  ***************************************************************************
  *
- * Description: Make plot of raw spectra per quadrant.
+ * Description: Make plot of raw spectra per quadrant.  Requires the DB.
  *
  ***************************************************************************
  *
  * $Log: fgtRawSpectraQA.C,v $
+ * Revision 1.2  2012/01/31 12:53:28  sgliske
+ * updates
+ *
  * Revision 1.1  2012/01/31 09:26:18  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -39,40 +42,22 @@ StChain           *analysisChain = 0;
 St_db_Maker       *dbMkr         = 0;
 StFgtDbMaker      *fgtDbMkr      = 0; 
 StFgtRawDaqReader *daqRdr        = 0;
-StFgtQaRawOctAdc  *qaMkr[48] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+StFgtQaRawOctAdc  *qaMkr         = 0;
 
 TCanvas *can = 0;
 
 int fgtRawSpectraQA( const Char_t *filenameIn = "testfile.daq",
                      const Char_t *filebaseOut = "testfile.rawQA",
-                     Int_t nevents = -1,
+                     Int_t date = 20120115,
+                     Int_t time = 0,
+                     Float_t pedRelThres = 0,    // 0 = no cut, otherwise: # of sigma above pedestal for cut
+                     Int_t nevents = 2000,
                      Int_t timebin = 2,
-                     Int_t isCosmic = -1,
+                     UInt_t statusMask,
                      Bool_t cutShortEvents = 1 ){
 
    LoadLibs();
    Int_t ierr = 0;
-
-   // 
-   // DECIDE IF COSMIC OR NOT
-   // 
-
-   if( isCosmic == -1 ){
-      isCosmic = 0;
-      std::string daqFileName( filenameIn );
-      std::string::size_type pos = daqFileName.find_last_of(".");
-      
-      if( pos != std::string::npos && daqFileName.substr( pos ) == ".sfs" )
-         isCosmic = 1;
-   };
-
-   if( isCosmic )
-      cout << "Is Cosmic" << endl;
-   else
-      cout << "Is not cosmic" << endl;
 
    //
    // START CONSTRUCTING THE CHAIN
@@ -81,63 +66,41 @@ int fgtRawSpectraQA( const Char_t *filenameIn = "testfile.daq",
    cout << "Constructing the chain" << endl;
    analysisChain = new StChain("eemcAnalysisChain");
 
-   std::string fgtDbMkrName = "";
+   //
+   // THE DATABASE
+   //
 
-   if( !isCosmic ){
-      // always cut short events if it is cosmic data
-      cutShortEvents = 1;
+   // note: DB is used to convert elec coords into geoIds in
+   // StEvent/StFgtStrip, and do determine the disc and quad given
+   // an rdo/arm/apv combination.
 
-      // note: DB is used to convert elec coords into geoIds in
-      // StEvent/StFgtStrip, but geoIds are never used in the makers
-      // in this macro.
+   cout << "Constructing St_db_Maker" << endl;
 
-      cout << "Loading St_db_Maker" << endl;
-      gSystem->Load("libStDb_Tables.so");
-      gSystem->Load("StDbLib.so");
-      gSystem->Load("St_db_Maker");
-      gSystem->Load("StDbBroker");
+   TString dir0 = "MySQL:StarDb";
+   TString dir1 = "$STAR/StarDb";
+   St_db_Maker *dbMkr = new St_db_Maker( "dbMkr", dir0, dir1 );
+   dbMkr->SetDateTime(time,date);
 
-      TString dir0 = "MySQL:StarDb";
-      TString dir1 = "$STAR/StarDb";
-      St_db_Maker *dbMkr = new St_db_Maker( "dbMkr", dir0, dir1 );
-      dbMkr->SetDateTime(20120115,1);
-
-      cout << "Loading StFgtDbMaker" << endl;
-      gSystem->Load("StFgtDbMaker");
-
-      cout << "Constructing StFgtDbMaker" << endl;
-      fgtDbMkr = new StFgtDbMaker( "fgtDbMkr" );
-      //fgtDbMkr->SetFlavor("ideal",""); // mapping is wrong, but at least the code runs...
-
-      fgtDbMkrName = fgtDbMkr->GetName();
-   };
+   cout << "Constructing StFgtDbMaker" << endl;
+   fgtDbMkr = new StFgtDbMaker( "fgtDbMkr" );
 
    //
    // NOW THE OTHER READERS AND MAKERS
    //
 
    cout << "Constructing the daq reader" << endl;
-   daqRdr = new StFgtRawDaqReader( "daqReader", filenameIn, fgtDbMkrName.data() );
-   daqRdr->setIsCosmic( isCosmic );
+   daqRdr = new StFgtRawDaqReader( "daqReader", filenameIn, "" );
+   daqRdr->setIsCosmic( 0 );
    daqRdr->cutShortEvents( cutShortEvents );
 
-   cout << "Constructing the QA Makers" << endl;
-   Int_t idx = 0;
-   std::stringstream ss;
-   Int_t startArray[] = {0,5,12,17};
-   for( Int_t rdo = 1; rdo < 3; ++rdo ){
-      for( Int_t arm = 0; arm < 6; ++arm ){
-         for( Int_t startIdx = 0; startIdx < 4; ++startIdx, ++idx ){
-            for( Int_t oct = 0; oct < 1; ++oct ){
-               ss.str("");
-               ss.clear();
-               ss << "fgtRawQaMkr_" << idx;
+   a2cMkr = new StFgtA2CMaker( "a2cMkr" );
+   a2cMkr->setStatusMask( statusMask );
+   a2cMkr->setAbsThres( -10000 );  // set to below -4096 to skip cut
+   a2cMkr->setRelThres( pedRelThres );  // set to zero to skip cut
 
-               qaMkr[idx] = new StFgtQaRawOctAdc( ss.str().data(), rdo, arm, startArray[startIdx], 2 );
-            };
-         };
-      };
-   };
+   cout << "Constructing the QA Makers" << endl;
+   qaMkr = new StFgtQaRawOctAdc( "qaMkr", 2 );
+   qaMkr->setTimeBin( 2 );
 
    // debug
    // analysisChain->ls(4);
@@ -185,22 +148,23 @@ int fgtRawSpectraQA( const Char_t *filenameIn = "testfile.daq",
    // open output file
    can->Print( (std::string(filebaseOut) + ".ps[").data() );
 
+   std::vector< TH2F* >& hist = qaMkr->getHistVec();
+
    // get max
    Float_t max = 0;
    for( Int_t idx = 0; idx < 48; ++idx ){
-      TH2F *hist = qaMkr[idx]->getHist();
-      if( hist->GetMaximum() > max )
-         max = hist->GetMaximum();
+      if( histp[idx]->GetMaximum() > max )
+         max = hist[idx]->GetMaximum();
    };
    max = 0.9*max;
 
    TH2F *dummy[4];
    const Char_t dummyNames[4][20] = { "dummy1", "dummy2", "dummy3", "dummy4" };
 
-   Float_t xMin = qaMkr[0]->getHist()->GetXaxis()->GetXmin();
-   Float_t xMax = qaMkr[0]->getHist()->GetXaxis()->GetXmax();
-   Float_t yMin = qaMkr[0]->getHist()->GetYaxis()->GetXmin();
-   Float_t yMax = qaMkr[0]->getHist()->GetYaxis()->GetXmax();
+   Float_t xMin = hist[0]->GetXaxis()->GetXmin();
+   Float_t xMax = hist[0]->GetXaxis()->GetXmax();
+   Float_t yMin = hist[0]->GetYaxis()->GetXmin();
+   Float_t yMax = hist[0]->GetYaxis()->GetXmax();
 
    for( Int_t i=0; i<4; ++i )
       dummy[i] = new TH2F( dummyNames[i], "", 5, xMin, xMax, 1, yMin, yMax );
@@ -212,14 +176,13 @@ int fgtRawSpectraQA( const Char_t *filenameIn = "testfile.daq",
          for( Int_t startIdx = 0; startIdx < 4; ++startIdx, ++idx ){
             for( Int_t oct = 0; oct < 1; ++oct ){
 
-               TH2F *hist = qaMkr[idx]->getHist();
-               if( hist->GetEntries() > 0 ){
+               if( hist[idx]->GetEntries() > 0 ){
                   can->cd(subpad);
                   gPad->SetLeftMargin( 0.06 );
                   gPad->SetRightMargin( 0.05 );
                   gPad->SetBottomMargin( 0.11 );
 
-                  hist->SetMaximum( max );
+                  hist[idx]->SetMaximum( max );
                   dummy[subpad-1]->GetXaxis()->SetTitleOffset(0.9);
                   dummy[subpad-1]->GetXaxis()->SetTitleSize(0.06);
                   dummy[subpad-1]->GetXaxis()->SetLabelSize(0.06);
@@ -239,14 +202,14 @@ int fgtRawSpectraQA( const Char_t *filenameIn = "testfile.daq",
                   dummy[subpad-1]->GetXaxis()->SetNdivisions(222,0);
                   dummy[subpad-1]->SetMinimum( 0 );
                   dummy[subpad-1]->SetMaximum( max );
-                  dummy[subpad-1]->SetTitle( hist->GetTitle() );
-                  hist->SetTitle("");
+                  dummy[subpad-1]->SetTitle( hist[idx]->GetTitle() );
+                  hist[idx]->SetTitle("");
 
-                  dummy[subpad-1]->GetYaxis()->SetTitle( hist->GetYaxis()->GetTitle() );
-                  hist->GetYaxis()->SetTitle("");
+                  dummy[subpad-1]->GetYaxis()->SetTitle( hist[idx]->GetYaxis()->GetTitle() );
+                  hist[idx]->GetYaxis()->SetTitle("");
                   dummy[subpad-1]->Draw("COLZ");
 
-                  hist->Draw("COLZ SAME");
+                  hist[idx]->Draw("COLZ SAME");
 
                   gPad->Update();
                   gPad->Modified();
@@ -305,11 +268,18 @@ void LoadLibs() {
   gSystem->Load("StEvent");
   cout << "loaded StEvent library" << endl;
 
+  gSystem->Load("libStDb_Tables.so");
+  gSystem->Load("StDbLib.so");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StDbBroker");
+  cout << "loaded DB libraries" << endl;
+
   gSystem->Load("RTS");
   gSystem->Load("StFgtUtil");
-  gSystem->Load("StFgtRawMaker");
+  gSystem->Load("StFgtDbMaker");
+  gSystem->Load("StFgtA2CMaker");
+  gSystem->Load("StFgtRawDaqReader");
   gSystem->Load("StFgtPedMaker");
   gSystem->Load("StFgtStatusMaker");
-  gSystem->Load("StFgtA2CMaker");
-  gSystem->Load("StFgtQaMakers");
+  cout << "loaded FGT libraries" << endl;
 };

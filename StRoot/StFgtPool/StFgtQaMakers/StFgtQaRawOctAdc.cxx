@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtQaRawOctAdc.cxx,v 1.1 2012/01/31 09:26:17 sgliske Exp $
+ * $Id: StFgtQaRawOctAdc.cxx,v 1.2 2012/01/31 12:53:28 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtQaRawOctAdc.cxx,v $
+ * Revision 1.2  2012/01/31 12:53:28  sgliske
+ * updates
+ *
  * Revision 1.1  2012/01/31 09:26:17  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -29,6 +32,8 @@
  **************************************************************************/
 
 #include "StFgtQaRawOctAdc.h"
+#include "StFgtDbMaker/StFgtDbMaker.h"
+#include "StFgtDbMaker/StFgtDb.h"
 
 #include <string>
 #include <TH2F.h>
@@ -42,36 +47,67 @@
 #include "StRoot/StFgtUtil/StFgtConsts.h"
 
 // constructors
-StFgtQaRawOctAdc::StFgtQaRawOctAdc( const Char_t* name, Int_t rdo, Int_t arm, Int_t apvStart, Int_t tb ) :
-   StMaker( name ), mHist( 0 ), mRdo( rdo ), mArm( arm ), mApvStart( apvStart ), mTimeBin( tb ){
+StFgtQaRawOctAdc::StFgtQaRawOctAdc( const Char_t* name, Int_t tb ) :
+   StMaker( name ), mHistVec( kFgtNumOctants, (TH2F*)0 ), mTimeBin( tb ), mAdcBins(256), mAdcMin(0), mAdcMax(6*mAdcBins) {
    // nothing else
 };
 
 // deconstructor
 StFgtQaRawOctAdc::~StFgtQaRawOctAdc(){
-   if( mHist )
-      delete mHist;
+   HistVec_t::iterator iter;
+   for( iter = mHistVec.begin(); iter != mHistVec.end(); ++iter )
+      if( *iter ) 
+         delete *iter;
 };
 
 Int_t StFgtQaRawOctAdc::Init(){
    Int_t ierr = kStOk;
 
    std::stringstream ss;
-   ss << "h" << GetName();
-   std::string name = ss.str();
 
-   ss.str("");
-   ss.clear();
-   ss << "Rdo " << mRdo << " Arm " << mArm << " Apv " << mApvStart << "-" << mApvStart+5;
-   ss << "; " << kFgtNumChannels << "*(apv-" << mApvStart << ")+channel; ADC value";
+   Char_t octName[2] = { 'L', 'S' };
+   Int_t histIdx = 0;
+   for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc ){
+      for( Int_t quad = 0; quad < kFgtNumDiscs; ++quad ){
+         for( Int_t oct = 0; oct < 2; ++oct, ++histIdx ){
+            ss.str("");
+            ss.clear();
+            ss << disc+1 << (Char_t)(quad+'A') << octName[oct];
+            std::string label = ss.str();
 
-   mHist = new TH2F( name.data(), ss.str().data(), 640, 0, 640, 256, 0, 1536 );
+            ss.str("");
+            ss.clear();
+            ss << "h" << GetName() << "_" << histIdx;
+
+            Int_t chanPerOct = kFgtNumChannels*kFgtApvsPerOct;
+            mHistVec[ histIdx ] = new TH2F( ss.str().data(),
+                                            ( std::string("Number of High Strips per Event for Octant" ) + label +
+                                              "; Number of Strips; Number of Events").data(),
+                                            chanPerOct, 0, chanPerOct, mAdcBins, mAdcMin, mAdcMax );
+         };
+      };
+   };
 
    return ierr;
 };
 
 Int_t StFgtQaRawOctAdc::Make(){
    Int_t ierr = kStOk;
+
+   StFgtDbMaker *fgtDbMkr = static_cast< StFgtDbMaker* >( GetMakerInheritsFrom( "StFgtDbMaker" ) );
+   if( !fgtDbMkr ){
+      LOG_FATAL << "Error finding StFgtDbMaker" << endm;
+      ierr = kStFatal;
+   };
+
+   if( !ierr ){
+      StFgtDb *fgtTables = fgtDbMkr->getDbTables();
+
+      if( !fgtTables ){
+         LOG_FATAL << "Error finding StFgtDb" << endm;
+         ierr = kStFatal;
+      };
+   };
 
    StEvent* eventPtr = 0;
    StFgtCollection *fgtCollectionPtr = 0;
@@ -104,8 +140,13 @@ Int_t StFgtQaRawOctAdc::Make(){
             Int_t rdo, arm, apv, channel;
             (*stripIter)->getElecCoords( rdo, arm, apv, channel );
 
-            if( rdo == mRdo && arm == mArm && apv >= mApvStart && apv - mApvStart < 5 )
-               mHist->Fill( (apv-mApvStart)*kFgtNumChannels + channel, (*stripIter)->getAdc( mTimeBin ) );
+            Char_t layer, oct = StFgtGeom::getOctant( apv );
+            Short_t disc2, quad, strip;
+            StFgtGeom::decodeGeoId( (*stripIter)->getGeoId(), disc2, quad, layer, strip );
+
+            int histIdx = disc2*kFgtNumQuads*2 + quad*2 + (oct=='S');
+
+            mHistVec[ histIdx ]->Fill( ((apv%12)%5)*kFgtNumChannels + channel, (*stripIter)->getAdc( mTimeBin ) );
          }; 
       };
    };
