@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtPedStatQA.cxx,v 1.1 2012/01/31 09:26:16 sgliske Exp $
+ * $Id: StFgtPedStatQA.cxx,v 1.2 2012/01/31 09:31:37 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtPedStatQA.cxx,v $
+ * Revision 1.2  2012/01/31 09:31:37  sgliske
+ * includes updated for things moved to StFgtPooll
+ *
  * Revision 1.1  2012/01/31 09:26:16  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -62,8 +65,10 @@
 #include "StFgtPedStatQA.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include "StRoot/StFgtUtil/geometry/StFgtCosmicTestStandGeom.h"
-#include "StRoot/StFgtPedMaker/StFgtPedMaker.h"
-#include "StRoot/StFgtStatusMaker/StFgtStatusMaker.h"
+#include "StRoot/StFgtPool/StFgtPedMaker/StFgtPedMaker.h"
+#include "StRoot/StFgtPool/StFgtPedMaker/StFgtPedMaker.h"
+#include "StRoot/StFgtPool/StFgtStatusMaker/StFgtStatusMaker.h"
+#include "StRoot/StFgtPool/StFgtStatusMaker/StFgtStatusMaker.h"
 #include "StRoot/StFgtDbMaker/StFgtDb.h"
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 #include "StRoot/StFgtUtil/StFgtConsts.h"

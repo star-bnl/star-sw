@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtQaClusterChargePerAPV.h,v 1.1 2012/01/31 09:26:17 sgliske Exp $
+ * $Id: StFgtQaClusterChargePerAPV.h,v 1.2 2012/01/31 09:31:37 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StFgtQaClusterChargePerAPV.h,v $
+ * Revision 1.2  2012/01/31 09:31:37  sgliske
+ * includes updated for things moved to StFgtPooll
+ *
  * Revision 1.1  2012/01/31 09:26:17  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -35,7 +38,8 @@
 #include <TH2F.h>
 
 #include "StFgtQaMaker.h"
-#include "StRoot/StFgtPedMaker/StFgtPedReader.h"
+#include "StRoot/StFgtPool/StFgtPedMaker/StFgtPedReader.h"
+#include "StRoot/StFgtPool/StFgtPedMaker/StFgtPedReader.h"
 
 
 class StFgtQaClusterChargePerAPV : public StFgtQaMaker {
