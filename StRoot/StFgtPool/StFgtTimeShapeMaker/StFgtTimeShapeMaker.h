@@ -69,8 +69,6 @@ class StFgtTimeShapeMaker : public StMaker {
    friend class StFgtStatusMaker; 
 
    TH1F* hh;
-   Short_t oldGeoId;
-   Float_t stripAdc[7];
    
    TFile* fFgt;
    TTree* tFgt;

@@ -20,7 +20,6 @@
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "StRoot/StEvent/StEvent.h"
-#include "StRoot/StFgtPool/StFgtCosmicTestStandGeom/StFgtCosmicTestStandGeom.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 
 // Copied from StFgtPedMaker.cxx
@@ -121,96 +120,79 @@ Int_t StFgtTimeShapeMaker::Make(){
             StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
             StSPtrVecFgtStripIterator stripIter;
 	    Int_t itimebinCnt=0;
-	    Float_t stripMin=9999.;
-	    Float_t stripMax=0.;
 	    rdo=0;arm=-1;apv=-1;chn=-1;		 
 	    char hname[100];
-	    Bool_t firstStrip=true;
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){	      
-	      Short_t geoId = (*stripIter)->getGeoId();
-	      if(firstStrip){oldGeoId=geoId;firstStrip=false;};
-	      if(geoId != oldGeoId){//New strip, process the old strip ADC for all time bins	 
-		if(itimebinCnt!=Ntimebin){
-		  cout << "ERROR time bin match " << itimebinCnt << 
-		    " rdo=" << rdo << " arm="<< arm << " apv=" << apv << " chn="<< chn << endl;
-		};
-		ped=stripMin;
-		for(Int_t is=0;is<Ntimebin;is++){
-		  adc[is]-=ped;
-		};		
-		
-		Bool_t pass=true;
-		if(rdo==1 && arm==1 && (apv==0 || apv==1))pass=false;		 
-		if(pass){	
-		  chi2=-1.;tau=0.;t0=0.;offset=0.;errCode=0;
-		  Float_t pedsig=35.*ped/745.;		 	
-		  hh->Reset();
-		  for(Int_t is=0;is<Ntimebin;is++){
-		    hh->SetBinContent(is+1,adc[is]);
-		    hh->SetBinError(is+1,sqrt(2.)*pedsig);
-		  }
-		  sprintf(hname,"rdo%d_arm%d_apv%d_chn%d_%d",rdo,arm,apv,chn,iEvt);
-		  hh->SetTitle(hname);	 		            
-		  mmax=hh->GetMaximumBin()-1;
-		  mmin=hh->GetMinimumBin()-1;
-		  adcmax=hh->GetBinContent(mmax+1);
-		  
-		  Int_t highcnt=0;
-		  for(Int_t is=0;is<Ntimebin;is++){
-		    if(adc[is]>adcmax*0.9)highcnt++;
-		  };
-		  
-		  if(adcmax>fitThresh){
-		    Bool_t skipFit=false;
-		    if(abs(mmax-mmin)==2 && mmin>0 && mmax>0 && mmin<6 && mmax<6){
-		      Float_t middle1=(hh->GetBinContent(mmin)+hh->GetBinContent(mmin+2))/2.;
-		      Float_t middle2=(hh->GetBinContent(mmax)+hh->GetBinContent(mmax+2))/2.;
-		      if((middle1-hh->GetBinContent(mmin+1))/hh->GetBinError(mmin+1)>3. && (hh->GetBinContent(mmax+1)-middle2)/hh->GetBinError(mmax+1)>3.){skipFit=true;errCode=1;}
-		    }
-		    if(highcnt>3)errCode=2;
-		    if(!skipFit){
-		      InitFX();
-		      if(fixTau){
-			//Float_t tau0=htau->GetBinContent(iapv+1);
-			//if(tau0>0){InitFX(tau0);}
-			//else{InitFX();}
-		      };
-		      hh->Fit(FX,"Q","",0.,Ntimebin);		       
-		      chi2=FX->GetChisquare();
-		      fmax=FX->GetMaximumX();			     
-		      t0=FX->GetParameter(4);
-		      tau=FX->GetParameter(1);
-		      offset=FX->GetParameter(3);
-		      if(chi2<20. && igoodCnt<120 && adcmax>plotThresh){
-			hGood[igoodCnt]=new TH1F(*hh);	
-			fGood[igoodCnt]=new TF1(*FX);
-			sprintf(hname,"fgood%d",igoodCnt);
-			fGood[igoodCnt]->SetTitle(hname);
-			igoodCnt++;
-		      };
-		      if(chi2>100. && ibadCnt<120 && adcmax>plotThresh){
-			hBad[ibadCnt]=new TH1F(*hh);	
-			fBad[ibadCnt]=new TF1(*FX);
-			sprintf(hname,"fbad%d",ibadCnt);
-			fBad[ibadCnt]->SetTitle(hname);
-			ibadCnt++;
-		      };
-		    };
-		    tFgt->Fill();//save only fitted events		 
-		  };
-		  //tFgt->Fill();//save all events from "ok" APVs		 
-		};
-		itimebinCnt=0;		 
-		stripMin=9999.;stripMax=0.;oldGeoId=geoId;
-		rdo=0;arm=-1;apv=-1;chn=-1;		 
-	      };
-	      Short_t timeBin = (*stripIter)->getTimeBin();
-	      Short_t ad = (*stripIter)->getAdc();	      
+	      rdo=0;arm=-1;apv=-1;chn=-1;	
 	      (*stripIter)->getElecCoords( rdo, arm, apv, chn );
-	      adc[timeBin]=ad;
-	      if(ad<stripMin)stripMin=ad;
-	      if(ad>stripMax)stripMax=ad;
-	      itimebinCnt++;                
+	      printf("%d %d %d %d %d \n",iEvt,rdo,arm,apv,chn);
+	      ped=(*stripIter)->getAdc(0);
+	      for(Int_t is=0;is<Ntimebin;is++){
+		adc[is]=(*stripIter)->getAdc(is);
+		adc[is]-=ped;
+		printf("%d ",adc[is]);
+	      };		
+	      printf("%d \n",(*stripIter)->getAdc());
+	      Bool_t pass=true;
+	      if(rdo==1 && arm==1 && (apv==0 || apv==1))pass=false;		 
+	      if(pass){	
+		chi2=-1.;tau=0.;t0=0.;offset=0.;errCode=0;
+		Float_t pedsig=35.*ped/745.;		 	
+		hh->Reset();
+		for(Int_t is=0;is<Ntimebin;is++){
+		  hh->SetBinContent(is+1,adc[is]);
+		  hh->SetBinError(is+1,sqrt(2.)*pedsig);
+		}
+		sprintf(hname,"rdo%d_arm%d_apv%d_chn%d_%d",rdo,arm,apv,chn,iEvt);
+		hh->SetTitle(hname);	 		            
+		mmax=hh->GetMaximumBin()-1;
+		mmin=hh->GetMinimumBin()-1;
+		adcmax=hh->GetBinContent(mmax+1);
+		
+		Int_t highcnt=0;
+		for(Int_t is=0;is<Ntimebin;is++){
+		  if(adc[is]>adcmax*0.9)highcnt++;
+		};
+		
+		if(adcmax>fitThresh){
+		  Bool_t skipFit=false;
+		  if(abs(mmax-mmin)==2 && mmin>0 && mmax>0 && mmin<6 && mmax<6){
+		    Float_t middle1=(hh->GetBinContent(mmin)+hh->GetBinContent(mmin+2))/2.;
+		    Float_t middle2=(hh->GetBinContent(mmax)+hh->GetBinContent(mmax+2))/2.;
+		    if((middle1-hh->GetBinContent(mmin+1))/hh->GetBinError(mmin+1)>3. && (hh->GetBinContent(mmax+1)-middle2)/hh->GetBinError(mmax+1)>3.){skipFit=true;errCode=1;}
+		  }
+		  if(highcnt>3)errCode=2;
+		  if(!skipFit){
+		    InitFX();
+		    if(fixTau){
+		      //Float_t tau0=htau->GetBinContent(iapv+1);
+		      //if(tau0>0){InitFX(tau0);}
+		      //else{InitFX();}
+		    };
+		    hh->Fit(FX,"Q","",0.,Ntimebin);		       
+		    chi2=FX->GetChisquare();
+		    fmax=FX->GetMaximumX();			     
+		    t0=FX->GetParameter(4);
+		    tau=FX->GetParameter(1);
+		    offset=FX->GetParameter(3);
+		    if(chi2<20. && igoodCnt<120 && adcmax>plotThresh){
+		      hGood[igoodCnt]=new TH1F(*hh);	
+		      fGood[igoodCnt]=new TF1(*FX);
+		      sprintf(hname,"fgood%d",igoodCnt);
+		      fGood[igoodCnt]->SetTitle(hname);
+		      igoodCnt++;
+		    };
+		    if(chi2>100. && ibadCnt<120 && adcmax>plotThresh){
+		      hBad[ibadCnt]=new TH1F(*hh);	
+		      fBad[ibadCnt]=new TF1(*FX);
+		      sprintf(hname,"fbad%d",ibadCnt);
+		      fBad[ibadCnt]->SetTitle(hname);
+		      ibadCnt++;
+		    };
+		  };
+		  tFgt->Fill();//save only fitted events		 
+		};
+	      };
 	    };
          };
       };
