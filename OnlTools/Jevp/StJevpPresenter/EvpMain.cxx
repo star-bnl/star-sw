@@ -150,6 +150,9 @@ int EvpMain::parseArgs(int argc, char *argv[])
     }
     else if (memcmp(argv[i], "-loop", 5) == 0) {
     }
+    else if (memcmp(argv[i], "-live", 5) == 0) {
+      rtsLogOutput(RTS_LOG_NET);
+    }
     else {
       printf("%s arguments\n\t-noserver\n\t-server servername\n\t-port port\n\tdisplay <display>\n\t-localdisplay <display>",argv[0]);
       return -1;
