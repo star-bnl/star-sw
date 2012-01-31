@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: simpleTestStandTest.C,v 1.4 2011/09/21 17:49:35 sgliske Exp $
+ * $Id: simpleTestStandTest.C,v 1.1 2012/01/31 09:07:43 sgliske Exp $
  * Author: S. Gliske, Sept 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: simpleTestStandTest.C,v $
+ * Revision 1.1  2012/01/31 09:07:43  sgliske
+ * moved StFgtRawDaqReader to StFgtPool/StFgtRawDaqReader
+ *
  * Revision 1.4  2011/09/21 17:49:35  sgliske
  * alternate base class with more
  *  functionality and not an StMaker
