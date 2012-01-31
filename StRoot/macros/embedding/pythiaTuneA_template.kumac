@@ -1,13 +1,13 @@
-* Test kumac file for pythia
-* Arguments
-* [1]: Output fz filename
-* [2] and [3]: Random number seeds
-* [4]: Number of triggers
+MACRO pythia outfile rndm1 rndm2 trig ptmin ptmax
 
-gfile o [1]
+gfile o [outfile]
+
+** Create the geometry
 detp geom y2008 field=-5.0
 gexec $STAR_LIB/geometry.so
 gclose all
+
+** Load the PYTHIA generator
 gexec  $STAR_LIB/libpythia_6410t.so
 gexec  $STAR_LIB/bpythia.so
 
@@ -15,8 +15,8 @@ gexec  $STAR_LIB/bpythia.so
 ENER 200.0        ! Collision energy
 MSEL 1            ! Total cross section, i.e. elastic+inelastic D=1
 * caution -- Pt bin
-CKIN 3=PTMIN 
-CKIN 4=PTMAX
+CKIN 3=[ptmin] 
+CKIN 4=[ptmax]
 *
 MSTP (51)=7       ! - 
 MSTP (81)=1       ! - 
@@ -57,9 +57,9 @@ MDCY (176,1)=0  ! OMEGA- 3334
 vsig  0.03  20.0
 gkine -4 0 0 100 -6.3 +6.3 0 6.3 -30.0 +30.0
 * seed the random generator
-rndm [2] [3]
+rndm [rndm1] [rndm2]
 * trigger
-trig [4]
+trig [trig]
 *
 CALL PYSTAT(1)
 quit
