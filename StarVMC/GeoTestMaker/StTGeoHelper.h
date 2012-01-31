@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.16 2012/01/27 18:11:28 perev Exp $
+// $Id: StTGeoHelper.h,v 1.17 2012/01/31 02:23:56 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -61,8 +61,8 @@ class StVoluInfo : public TObject
 public:
 enum E_VoluInfo {
       kModule      = BIT(15),   // The volume is a module, like TPCE,SVTT
-      kMODULE      = BIT(16),   // The volume is a Module with Hits
       kActive      = BIT(17),   // The volume is active
+      kHitted      = BIT(21),   // The volume has hits under it
       kHitPlane    = BIT(21)};  // The volume is a Hit plane
 public:
 enum E_Kind { kVoluInfo=1,kHitPlaneInfo=2};
@@ -70,11 +70,11 @@ enum E_Kind { kVoluInfo=1,kHitPlaneInfo=2};
          StVoluInfo(int voluNumber)     {SetUniqueID(voluNumber);fActiveFunctor=0;}
 virtual ~StVoluInfo(){;}
         int IsModule  ()        const   {return TestBit(kModule);}
-        int IsMODULE()          const   {return TestBit(kMODULE);}
+        int IsMODULE()          const   {return TestBit(kModule)&&
+	                                        TestBit(kHitted);}
         int IsHitPlane()        const   {return TestBit(kHitPlane);}
         int IsActive()          const   {return TestBit(kActive);}
        void SetModule  (int s=1)        {SetBit(kModule,s)      ;}
-       void SetMODULE  (int s=1)        {SetBit(kMODULE,s)      ;}
        void SetHitPlane(int s=1)        {SetBit(kHitPlane,s)    ;}
        void SetActive  (int s=1)        {SetBit(kActive,s)      ;}
        void SetActiveFunctor(StActiveFunctor *af)	
