@@ -6,6 +6,7 @@
 #endif
 
 #include "StFgtUtil/geometry/StFgtGeom.h"
+#include "StRoot/StFgtUtil/StFgtConsts.h"
 
 class StFgtDbFileMaker : public StMaker {
  private:
@@ -39,7 +40,7 @@ class StFgtDbFileMaker : public StMaker {
   
  
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtDbFileMaker.h,v 1.1 2012/01/30 18:40:39 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtDbFileMaker.h,v 1.2 2012/01/31 15:21:15 rfatemi Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
