@@ -119,7 +119,6 @@ Int_t StFgtTimeShapeMaker::Make(){
          if( stripCollectionPtr ){
             StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
             StSPtrVecFgtStripIterator stripIter;
-	    Int_t itimebinCnt=0;
 	    rdo=0;arm=-1;apv=-1;chn=-1;		 
 	    char hname[100];
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){	      
