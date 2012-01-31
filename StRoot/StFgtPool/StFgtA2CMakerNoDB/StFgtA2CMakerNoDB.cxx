@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMakerNoDB.cxx,v 1.1 2012/01/31 08:41:45 sgliske Exp $
+ * $Id: StFgtA2CMakerNoDB.cxx,v 1.2 2012/01/31 09:15:34 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMakerNoDB.cxx,v $
+ * Revision 1.2  2012/01/31 09:15:34  sgliske
+ * includes updated since status and Ped makers moved to Pool
+ *
  * Revision 1.1  2012/01/31 08:41:45  sgliske
  * split from the StFgtA2CMaker
  *
@@ -24,9 +27,9 @@
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtStripCollection.h"
 #include "StRoot/StEvent/StFgtStrip.h"
-#include "StRoot/StFgtPedMaker/StFgtPedReader.h"
-#include "StRoot/StFgtStatusMaker/StFgtStatusReader.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
+#include "StRoot/StFgtPool/StFgtPedMaker/StFgtPedReader.h"
+#include "StRoot/StFgtPool/StFgtStatusMaker/StFgtStatusReader.h"
 
 #include "StFgtA2CMakerNoDB.h"
 
