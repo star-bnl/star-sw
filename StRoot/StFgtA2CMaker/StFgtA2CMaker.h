@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.11 2012/01/30 21:49:33 avossen Exp $
+ * $Id: StFgtA2CMaker.h,v 1.12 2012/01/31 08:26:53 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -14,29 +14,26 @@
  * removes strips with status not passing the mask.  Computing the
  * charge currently involves
  *
- * 1) pedistal subtraction
+ * 1) pedestal subtraction
  * 2) applying minimum threshold (both fixed and multiples of the pedistal st. err.)
- * 3) applies gains
+ * 3) fitting the pulse shape
+ * 3) applying gain
  *
  * The status map is applied as follows: status 0x00 is good, all else
  * is bad.  Strips are removed if the status bit anded with the mask
- * is non-zero. To remove all strips with bad status, set the mask to
- * 0xFF.  To ignore status, set the mask to 0x00.  To remove only
- * strips with bit 3 set, set the mast to 0x04, etc.  Status is
+ * is non-zero. To remove all strips with any status bit set
+ * set the mask to 0xFF.  To ignore status, set the mask to 0x00.  To remove only
+ * strips with bit 3 set, set the mask to 0x04, etc.  Status is
  * currently only a uchar.
- *
- * Currently, these steps are only applied for time bins matching the
- * given time bin mask.  The maker can also remove raw hits from the
- * StFgtEvent for time bins that will not be used.  Eventually, this
- * maker may also include common mode noise correction.
- *
- * The time bin mask is a bit field, with the lowest bit being the
- * lowest time bin, e.g. 0x01 is the 0th time bin, while 0x10 is the 4th
- * time bin.
  *
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.12  2012/01/31 08:26:53  sgliske
+ * cleaned up, and removed need to use setFgtDb.
+ * Now, if not set, will try to find it using
+ * GetMakerInheritsFrom
+ *
  * Revision 1.11  2012/01/30 21:49:33  avossen
  * removed references to files
  *
@@ -85,12 +82,11 @@
  *
  **************************************************************************/
 
-#ifndef _ST_FGT_A2C_MAKER_H
-#define _ST_FGT_A2C_MAKER_H
+#ifndef _ST_FGT_A2C_MAKER_H_
+#define _ST_FGT_A2C_MAKER_H_
 
 #include <string>
 #include "StMaker.h"
-
 
 class StFgtDb;
 
@@ -112,24 +108,22 @@ class StFgtA2CMaker : public StMaker {
    virtual Int_t Make();
 
    // modifiers
-
    void setAbsThres( Float_t thres );  // set to below -4096 to skip cut
    void setRelThres( Float_t thres );  // set to zero to skip cut
    void setFgtDb( StFgtDb *fgtDb);
    void doCutBadStatus( Bool_t doIt );
    void setStatusMask( UChar_t mask );
 
+   // cvs tag
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.11 2012/01/30 21:49:33 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.12 2012/01/31 08:26:53 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
-
-   // other parameters
+   // parameters
    Int_t mStatusMask;
    Float_t mAbsThres, mRelThres;
 
-   // if the user gives a ped file, use that, otherwise get peds from db
-   Bool_t usePedFile;
+   // pointer to the DB
    StFgtDb* mDb;
 
    // for fitting
@@ -138,7 +132,6 @@ class StFgtA2CMaker : public StMaker {
  
  private:   
    ClassDef(StFgtA2CMaker,1);
-
 }; 
 
 // inline functions

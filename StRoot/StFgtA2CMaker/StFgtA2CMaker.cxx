@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.17 2012/01/30 21:49:33 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.18 2012/01/31 08:26:53 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.18  2012/01/31 08:26:53  sgliske
+ * cleaned up, and removed need to use setFgtDb.
+ * Now, if not set, will try to find it using
+ * GetMakerInheritsFrom
+ *
  * Revision 1.17  2012/01/30 21:49:33  avossen
  * removed references to files
  *
@@ -88,8 +93,7 @@
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtStripCollection.h"
 #include "StRoot/StEvent/StFgtStrip.h"
-//#include "StRoot/StFgtPedMaker/StFgtPedReader.h"
-//#include "StRoot/StFgtStatusMaker/StFgtStatusReader.h"
+#include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 #include "StRoot/StFgtDbMaker/StFgtDb.h"
 #include "StFgtA2CMaker.h"
 
@@ -113,10 +117,23 @@ StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
 Int_t StFgtA2CMaker::Init(){
   Int_t ierr = kStOk;
 
-     if(!mDb) {
-	LOG_FATAL << "A2CMaker: No DB for pedestals and status specified--cannot proceed" << endm;
-	ierr = kStFatal;
-      }
+  if( !mDb ){
+     StFgtDbMaker *fgtDbMkr = static_cast< StFgtDbMaker* >( GetMakerInheritsFrom( "StFgtDbMaker" ) );
+     if( !fgtDbMkr ){
+        LOG_FATAL << "StFgtDb not provided and error finding StFgtDbMaker" << endm;
+        ierr = kStFatal;
+     };
+
+     if( !ierr ){
+        mDb = fgtDbMkr->getDbTables();
+
+        if( !mDb ){
+           LOG_FATAL << "StFgtDb not provided and error retrieving pointer from StFgtDbMaker '"
+                     << fgtDbMkr->GetName() << endm;
+           ierr = kStFatal;
+        };
+     };
+  };
 
   return ierr;
 };
@@ -124,6 +141,12 @@ Int_t StFgtA2CMaker::Init(){
 
 Int_t StFgtA2CMaker::Make(){
    Int_t ierr = kStOk;
+
+   if( !mDb ){
+      // warning message already given in init,
+      // so just silently skip the event
+      return kStFatal;
+   };
 
    StEvent* eventPtr = 0;
    eventPtr = (StEvent*)GetInputDS("StEvent");
@@ -144,12 +167,6 @@ Int_t StFgtA2CMaker::Make(){
       ierr = kStErr;
    };
 
-   if( !mDb&& mStatusMask != 0x0 ){
-	LOG_FATAL << "A2CNajerL No  specified--cannot proceed" << endm;
-	ierr = kStFatal;
-   };
-
-
    if( !ierr ){
       for( UInt_t discIdx=0; discIdx<fgtCollectionPtr->getNumDiscs(); ++discIdx ){
          StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( discIdx );
@@ -167,8 +184,10 @@ Int_t StFgtA2CMaker::Make(){
 
                   Int_t adc = strip->getAdc();
                   Int_t geoId = strip->getGeoId();
-                  // switch geoId to elec id lookups, as soon as available
-                  // also clean up later computations of elecId at the same time
+                  // Later, switch geoId to elecId lookups, since DB keyed by
+                  // elecId, as soon as function made available.  Also
+                  // clean up computations of elecId in this code at
+                  // the same time.
 
                   // subtract the pedestal from each time bin
                   for( Int_t timebin = 0; timebin < kFgtNumTimeBins && strip->getGeoId() > -1; ++timebin ){
@@ -177,11 +196,8 @@ Int_t StFgtA2CMaker::Make(){
 
                      // get the pedestal
                      Float_t ped = 0, pedErr = 0;
-		     if( mDb ){
-                        ped = mDb->getPedestalFromGeoId( geoId );
-                        pedErr = mDb->getPedestalSigmaFromGeoId( geoId );
-                     };
-
+                     ped = mDb->getPedestalFromGeoId( geoId );
+                     pedErr = mDb->getPedestalSigmaFromGeoId( geoId );
 #ifdef DEBUG
 		     printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,pedErr);
 #endif
@@ -217,7 +233,7 @@ Int_t StFgtA2CMaker::Make(){
 
                      Double_t fitC = mPulseShapePtr->GetParameter( 0 );
                      Double_t errC = mPulseShapePtr->GetParError( 0 );
-		     Double_t gain = mDb ? mDb->getGainFromGeoId(geoId) : 1;
+		     Double_t gain = mDb->getGainFromGeoId( geoId );
 
                      strip->setCharge( gain ? fitC/gain : 0 );
                      strip->setChargeUncert( gain ? sqrt(errC*errC + adc)/gain : 10000 );
@@ -226,10 +242,7 @@ Int_t StFgtA2CMaker::Make(){
                      printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
 #endif
                      if( mStatusMask != 0x0 ){
-                        UInt_t status = 0x0;  // assume strip is good
-			if( mDb ){
-                           status=mDb->getStatusFromGeoId(geoId);
-                        };
+                        UInt_t status=mDb->getStatusFromGeoId(geoId);
 
                         if( status & mStatusMask )
                            strip->setGeoId( -1 );
