@@ -27,8 +27,8 @@ enum {
 // constants related to physical coordinates
 enum {
    kFgtNumDiscs = 6,
-   kFgtNumQuads = 4,
    kFgtNumOctantsPerDisc = 8,
+   kFgtNumOctants = kFgtNumOctantsPerDisc*kFgtNumDiscs,
    kFgtNumLayers = 2,
    kFgtNumStrips = 720,
    kFgtNumGeoIds = kFgtNumQuads * kFgtNumDiscs * kFgtNumLayers * kFgtNumStrips,   // geoId in 0 to kFgtNumGeoIds-1
@@ -67,8 +67,11 @@ enum {
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.3 2012/01/28 10:44:50 sgliske Exp $
+ * $Id: StFgtConsts.h,v 1.4 2012/01/31 10:51:12 sgliske Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.4  2012/01/31 10:51:12  sgliske
+ * Added number of octants (48)
+ *
  * Revision 1.3  2012/01/28 10:44:50  sgliske
  * updated number of geoIds and elecIds to use products
  *
