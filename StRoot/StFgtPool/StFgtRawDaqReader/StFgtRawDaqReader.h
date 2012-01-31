@@ -22,7 +22,7 @@ class StFgtCollection;
 
 class StFgtRawDaqReader : public StMaker {
  public: 
-   StFgtRawDaqReader( const Char_t* name = "fgtRawDaqReader", const Char_t *daqFileName = "", const Char_t* dbMkrName = "fgtDbMaker" );
+   StFgtRawDaqReader( const Char_t* name = "fgtRawDaqReader", const Char_t *daqFileName = "", const Char_t* dbMkrName = "" );
    virtual ~StFgtRawDaqReader();
 
    void setFilename( std::string filename );
@@ -57,15 +57,18 @@ inline void StFgtRawDaqReader::setFilename( std::string filename ){ mDaqFileName
 inline void StFgtRawDaqReader::cutShortEvents( Bool_t doIt ){ mCutShortEvents = doIt; };
 inline void StFgtRawDaqReader::setIsCosmic( Bool_t itIs ){ mIsCosmic = itIs; };
 inline const char *StFgtRawDaqReader::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.2 2012/01/31 09:16:55 sgliske Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.3 2012/01/31 11:23:34 sgliske Exp $ built "__DATE__" "__TIME__ ;
    return cvs;
 };
 
 #endif
 
 /*
- * $Id: StFgtRawDaqReader.h,v 1.2 2012/01/31 09:16:55 sgliske Exp $
+ * $Id: StFgtRawDaqReader.h,v 1.3 2012/01/31 11:23:34 sgliske Exp $
  * $Log: StFgtRawDaqReader.h,v $
+ * Revision 1.3  2012/01/31 11:23:34  sgliske
+ * No longer requires passing name of StFgtDbMaker
+ *
  * Revision 1.2  2012/01/31 09:16:55  sgliske
  * fixed cvs caption
  *
