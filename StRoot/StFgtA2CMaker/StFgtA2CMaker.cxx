@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.20 2012/02/01 17:56:33 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.21 2012/02/01 18:21:51 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.21  2012/02/01 18:21:51  avossen
+ * changed error on the charge to pedRMS and replaced fit with sum over timebins
+ *
  * Revision 1.20  2012/02/01 17:56:33  avossen
  * changed error on the charge to pedRMS and replaced fit with sum over timebins
  *
@@ -254,7 +257,7 @@ Int_t StFgtA2CMaker::Make(){
 #endif 
 		     ////////////////////////////////////////////////////////////----
 		     strip->setCharge(gain ? sumC/gain : 0);
-		     strip->setChargeUncert(gain ? pedErr/gain : 10000);
+		     strip->setChargeUncert(gain ? sqrt(nTbAboveThres)*pedErr/gain : 10000);
 
 #ifdef DEBUG
                      printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
