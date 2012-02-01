@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.18 2012/01/31 02:23:56 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.19 2012/02/01 19:32:13 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -126,7 +126,6 @@ void StTGeoHelper::Finish()
 //_____________________________________________________________________________
 void StTGeoHelper::InitInfo()
 {
-  myVoluMap myMap;
   gGeoManager->CdTop();
   
   StTGeoIter it;
@@ -143,12 +142,10 @@ void StTGeoHelper::InitInfo()
     if (it.IsFirst()) {		//First visit
 //			Recognize module
 //			Check for MODULE    
-    int &itWas = myMap[vol];
-    if (itWas)  {it.Skip();continue;}
-    itWas = 1;
       do {
 	if (!IsModule(vol) && !it.IsOmule())	break;
 	StVoluInfo *ext = SetFlag(vol,StVoluInfo::kModule);
+        assert(IsModule(vol));
         myModu = ext; tgModu = vol; nHits=0;
 	printf("Module = %s(%d) ",vol->GetName(),volId); it.Print(0);
       } while(0);
@@ -858,6 +855,7 @@ StHitPlaneInfo::StHitPlaneInfo(int volId) : StVoluInfo(volId)
 StHitPlane *StHitPlaneInfo::MakeHitPlane(const StTGeoIter &it)
 
 {
+static int nCall=0; nCall++;
   const TGeoVolume *volu = *it;
   const TGeoShape  *sh = volu->GetShape();
   StHitPlane *hp=0;
