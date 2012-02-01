@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.7 2012/01/27 18:14:35 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.8 2012/02/01 19:17:34 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -56,11 +56,13 @@ Int_t StvHitLoader::Finish()
 //_____________________________________________________________________________
 Int_t StvHitLoader::Init()
 {
+   int nDet=0;
    for (int id=1; id<kMaxDetectorId; id++){
      if (!StTGeoHelper::Inst()->IsActive((StDetectorId)id)) continue;
      mHitIter->AddDetector((StDetectorId)id);
+     nDet++;
    }
-   return 0;
+   return nDet;
 }
 
 //_____________________________________________________________________________
@@ -93,7 +95,6 @@ if (myGraph) { //create canvas
       Info("LoadHits","Start %s hits",StTGeoHelper::DetName(did));
       nHits=0; nHitz=0;
     }
-if (fabs(stHit->position()[2])>200) continue;//????????????????????????
     StvHit *stiHit = MakeStvHit(stHit,mHitIter->UPath());
 
 if (myHits) (*myHits)+= stiHit;   
@@ -119,7 +120,7 @@ StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath)
    UInt_t hard = stHit->hardwarePosition();
    StThreeVectorF v3f = stHit->position();
    const float *xyz = v3f.xyz();
-   int seed = 0;
+   int seed = 1;
    if (did == kTpcId) {
 //   enum {zPrompt = 205,rMiddle=124};
      enum {zPrompt = 205,rMiddle=0};
