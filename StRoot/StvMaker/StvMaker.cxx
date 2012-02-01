@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.14 2012/01/27 18:20:45 perev Exp $
+// $Id: StvMaker.cxx,v 1.15 2012/02/01 19:18:32 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -137,38 +137,44 @@ Int_t StvMaker::Init()
 Int_t StvMaker::InitDetectors()
 {
   
-  StvToolkit *kit =StvToolkit::Inst();
-  kit->SetHitLoader(new StvHitLoader);
-  kit->HitLoader()->Init();
-  if (*SAttr("HitLoadOpt")) StTGeoHelper::Inst()->SetOpt(IAttr("HitLoadOpt"));
+  StvToolkit   *kit = StvToolkit::Inst();
+  StTGeoHelper *tgh = StTGeoHelper::Inst();
+  if (*SAttr("HitLoadOpt")) tgh->SetOpt(IAttr("HitLoadOpt"));
 
-  if (IAttr("activeTpc")) {
+//		Activate detectors
+  if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
+  if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
+//		Now Initialize TGeo helper
+  tgh->Init(1+2+4);
+
+//		TGeo herlper is ready, add error calculators
+  if (IAttr("activeTpc")) {	//TPC error calculators
   
     const char*  innOutNames[2]  ={"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs"    };
-    StTGeoHelper::Inst()->SetActive(kTpcId,1,new StvTpcActive);
     for (int io=0;io<2;io++) {
       StvHitErrCalculator *hec = new StvTpcHitErrCalculator(innOutNames[io]);
       TString ts("Calibrations/tracker/");
       ts+=innOutNames[io];
       TTable *tt = (TTable*)GetDataBase(ts);
       assert(tt);
-
       hec->SetPars((double*)tt->GetArray());
-      StvTpcSelector        *sel = new StvTpcSelector(innOutNames[io]);
-      int nHP = StTGeoHelper::Inst()->SetHitErrCalc(kTpcId,hec,sel);
+      StvTpcSelector*sel = new StvTpcSelector(innOutNames[io]);
+      int nHP = tgh->SetHitErrCalc(kTpcId,hec,sel);
       Info("Init","%s: %d HitPlanes",innOutNames[io],nHP);
+      assert(nHP);
   } }
 
-  if (IAttr("activeEtr")) {//Etr hit loader
-      StVoluInfo *info = StTGeoHelper::Inst()->SetActive(kEtrId,1,0);
-      assert(info);
+  if (IAttr("activeEtr")) {	//Etr error calculators
       StvHitErrCalculator *hec = new StvHitErrCalculator("EtrHitErrs");
       double etrPars[StvHitErrCalculator::kMaxPars]={1e-4,1e-4};
       hec->SetPars(etrPars);
-      int nHP = StTGeoHelper::Inst()->SetHitErrCalc(kEtrId,hec,0);
+      int nHP = tgh->SetHitErrCalc(kEtrId,hec,0);
       Info("Init","%s: %d HitPlanes","EtrHitErrs",nHP);
+      assert(nHP);
   }
-  StTGeoHelper::Inst()->Init(1+2+4);
+
+  kit->SetHitLoader(new StvHitLoader);
+  assert(kit->HitLoader()->Init());
 
 
   return kStOk;
