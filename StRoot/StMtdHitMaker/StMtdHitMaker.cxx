@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.1 2011/04/26 20:04:35 geurts Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.2 2012/02/01 05:47:59 geurts Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -59,7 +59,27 @@ Int_t StMtdHitMaker::Init() {
 
 //_____________________________________________________________
 Int_t StMtdHitMaker::InitRun(Int_t runnumber) {
-  // Placeholder for future INL database loads
+  /// Initialize Tray-to-Tdig map
+  memset(mTray2TdigMap,-1,sizeof(mTray2TdigMap));
+
+  /// Run-12 (this will move to database)
+  /// note: index runs from 0-29 for backlegs 1-30, same for tray#
+  mTray2TdigMap[25][1] = 0; /// backleg #26 (3 trays)
+  mTray2TdigMap[25][2] = 1;
+  mTray2TdigMap[25][3] = 4;
+
+  mTray2TdigMap[26][0] = 0; /// backleg #27 (5 trays)
+  mTray2TdigMap[26][1] = 1;
+  mTray2TdigMap[26][2] = 2;
+  mTray2TdigMap[26][3] = 5;
+  mTray2TdigMap[26][4] = 4;
+
+  mTray2TdigMap[27][0] = 0; /// backleg #28 (5 trays)
+  mTray2TdigMap[27][1] = 1;
+  mTray2TdigMap[27][2] = 2;
+  mTray2TdigMap[27][3] = 5;
+  mTray2TdigMap[27][4] = 4;
+
   return kStOK;
 }
 
@@ -132,7 +152,7 @@ StRtsTable *StMtdHitMaker::GetNextRaw() {
 //_____________________________________________________________
 Int_t StMtdHitMaker::Make() {
   mMtdCollection = GetMtdCollection();
-  LOG_INFO << " getting the mtd collection " << mMtdCollection << endm;
+  LOG_DEBUG << " getting the mtd collection " << mMtdCollection << endm;
   if (mMtdCollection) {
     if ( GetNextRaw() ) {
       /// Unpack MTD raw data from daq structure
@@ -164,7 +184,8 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
   MtdTrailingHits.clear();
 
   const int nTHUB=1;
-  for(int ifib=0;ifib<nTHUB;ifib++){     // 4 fibers
+  /// Loop over MTD THUBs (each connect by fiber to an RDO
+  for(int ifib=0;ifib<nTHUB;ifib++){
     int nword=fMtd->ddl_words[ifib];
     if(nword <= 0) continue;
     int halfbacklegid    = -99;
@@ -173,47 +194,75 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
 
     LOG_DEBUG << "RDO " << ifib+1 << ": words " << fMtd->ddl_words[ifib] << endm;
 
+    /// process data word seperately, get TDC information from data words.
     for (int iword=0;iword<nword;iword++) {
       unsigned int dataword=fMtd->ddl[ifib][iword];
       LOG_DEBUG << "DATAWORD: 0x" << hex << dataword << dec << endm;
 
-      ///  now process data word seperately, get TDC information from data words.
+      /// Trigger time
+      if( (dataword&0xF0000000)>>28 == 0x2) {
+	// Save the first trigger time in each fiber
+        if(mTriggerTimeStamp[ifib]==0) mTriggerTimeStamp[ifib] = dataword;
+        continue; 
+      }
+
       if( (dataword&0xF0000000)>>28 == 0xD) continue;  /// header tag word
       if( (dataword&0xF0000000)>>28 == 0xE) continue;  /// TDIG separator word
-      if( (dataword&0xF0000000)>>28 == 0xA) {  /// header trigger data flag
-        ///  do nothing at this moment.
-        continue;
-      }            
-      if( (dataword&0xF0000000)>>28 == 0x2) {   /// trigger time here.
-        if(mTriggerTimeStamp[ifib]==0) mTriggerTimeStamp[ifib] = dataword;  // Save the first trigger time in each fiber
-        continue; 
-      } 
-      if( (dataword&0xF0000000)>>28 == 0xC) {   /// geographical data
-        halfbacklegid = dataword&0x01;    
+      if( (dataword&0xF0000000)>>28 == 0xA) continue;   /// header trigger data flag
+              
+      /// geographical data
+      if( (dataword&0xF0000000)>>28 == 0xC) {
+        halfbacklegid =  dataword&0x01;    
         backlegid     = (dataword&0x0FE)>>1;
         continue;
       }
+      // range checks
       if(halfbacklegid<0) continue;
-      LOG_DEBUG << " Found backleg ID " << backlegid << endm;
       if(backlegid<1 || backlegid >124) {
         LOG_ERROR<<"StMtdHitMaker::DATA ERROR!! unexpected backlegID ! "<<endm;
         continue;
       }
-      int edgeid =int( (dataword & 0xf0000000)>>28 );
-      if((edgeid !=4) && (edgeid!=5)) continue;   /// not leading or trailing
 
-      int tdcid=(dataword & 0x0F000000)>>24;  /// 0-15
-      int tdigid=tdcid/4;   /// 0-3 for half backleg.
-      int tdcchan=(dataword&0x00E00000)>>21;         /// tdcchan is 0-7 here.
-      ///
+
+      if( (dataword&0xF0000000)>>28 == 0x6) continue; //error
+
+      /// Look for edge type (4=leading, 5=trailing)
+      int edgeid =int( (dataword & 0xF0000000)>>28 );
+      if((edgeid !=4) && (edgeid!=5)) continue;   /// not leading or trailing 
+
+      /// From here on assume TDC data, and decode accordingly
+
+      /// decode TDIG-Id ...
+      int tdcid=(dataword & 0x0F000000)>>24;  /// range: 0-15
+      //int tdigid=tdcid/4;             /// for halftray0, 0-2 for tdig0; 4-6 for tdig1
+      //if (halfbacklegid==1) tdigid=4; /// for halftray1, 0-2 for tdig 4
+
+      /// MTD backlegs 27/28
+      int tdigid=((tdcid & 0xC)>>2) + halfbacklegid*4;
+
+      /// decode TDC channel ...
+      int tdcchan=(dataword&0x00E00000)>>21; /// tdcchan range: 0-7
+
+      /// lookup corresponding tray# for TDIG-Id
+      int itray;
+      for (itray=1;itray<=5;itray++){
+	if (mTray2TdigMap[backlegid-1][itray-1] == tdigid) break;
+      }
+      LOG_DEBUG << " Found (backleg#,tray#,chan#)= (" << backlegid << ", " << itray << "," << tdcchan << ") " << endm;
+
+      /// decode TDC time bin ...
+      unsigned int timeinbin = ((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  /// time in tdc bin
+
+
+      /// Fill MTD raw hit structures
       MtdRawHit temphit={0};
       memset(&temphit,0,sizeof(temphit));
       temphit.fiberid = (UChar_t)ifib;
       temphit.backlegID  = (UChar_t)backlegid;
-      unsigned int timeinbin = ((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  /// time in tdc bin
       temphit.tdc     = timeinbin;
       /// global channel number here
-      temphit.globaltdcchan = (UChar_t)(tdcchan + (tdcid%4)*8+tdigid*24+halfbacklegid*96); /// 0-191 for backleg
+      //temphit.globaltdcchan = (UChar_t)(tdcchan + (tdcid%4)*8+tdigid*24+halfbacklegid*96); /// 0-191 for backleg
+
       temphit.dataword      = dataword;
 
       if(edgeid == 4) {     /// leading edge data
