@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.17 2012/01/31 02:23:56 perev Exp $
+// $Id: StTGeoHelper.h,v 1.18 2012/02/01 19:31:19 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -61,9 +61,9 @@ class StVoluInfo : public TObject
 public:
 enum E_VoluInfo {
       kModule      = BIT(15),   // The volume is a module, like TPCE,SVTT
-      kActive      = BIT(17),   // The volume is active
-      kHitted      = BIT(21),   // The volume has hits under it
-      kHitPlane    = BIT(21)};  // The volume is a Hit plane
+      kActive      = BIT(16),   // The volume is active
+      kHitted      = BIT(17),   // The volume has hits under it
+      kHitPlane    = BIT(18)};  // The volume is a Hit plane
 public:
 enum E_Kind { kVoluInfo=1,kHitPlaneInfo=2};
 
