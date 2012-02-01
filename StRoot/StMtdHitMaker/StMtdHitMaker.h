@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.2 2012/02/01 05:47:59 geurts Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.3 2012/02/01 06:40:01 geurts Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -65,6 +65,7 @@ class StMtdHitMaker:public StRTSBaseMaker {
   StRtsTable *GetNextRaw(int sec);
       
   StMtdCollection *GetMtdCollection();
+  Int_t tdcchan2globalstrip(int, int, int);
 
  public:
 

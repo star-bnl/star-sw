@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.2 2012/02/01 05:47:59 geurts Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.3 2012/02/01 06:40:01 geurts Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -243,12 +243,6 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
       /// decode TDC channel ...
       int tdcchan=(dataword&0x00E00000)>>21; /// tdcchan range: 0-7
 
-      /// lookup corresponding tray# for TDIG-Id
-      int itray;
-      for (itray=1;itray<=5;itray++){
-	if (mTray2TdigMap[backlegid-1][itray-1] == tdigid) break;
-      }
-      LOG_DEBUG << " Found (backleg#,tray#,chan#)= (" << backlegid << ", " << itray << "," << tdcchan << ") " << endm;
 
       /// decode TDC time bin ...
       unsigned int timeinbin = ((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  /// time in tdc bin
@@ -262,8 +256,17 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
       temphit.tdc     = timeinbin;
       /// global channel number here
       //temphit.globaltdcchan = (UChar_t)(tdcchan + (tdcid%4)*8+tdigid*24+halfbacklegid*96); /// 0-191 for backleg
+      temphit.globaltdcchan = (UChar_t)(tdcchan2globalstrip(tdigid,tdcid,tdcchan)); 
 
       temphit.dataword      = dataword;
+
+      /// lookup corresponding tray# for TDIG-Id
+      int itray;
+      for (itray=1;itray<=5;itray++){
+	if (mTray2TdigMap[backlegid-1][itray-1] == tdigid) break;
+      }
+      LOG_INFO << " Found (backleg#,globalchan#,tray#,chan#)= (" << backlegid << ", " << tdcchan2globalstrip(tdigid,tdcid,tdcchan) << ", " << itray << "," << tdcchan << ") " << endm;
+
 
       if(edgeid == 4) {     /// leading edge data
         MtdLeadingHits.push_back(temphit);
@@ -279,6 +282,26 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
   } /// end loop fibers
   ///
   return -1;
+}
+
+
+//____________________________________________
+/*!
+ * Map TDC channel to a global strip coordinate
+ */
+Int_t StMtdHitMaker::tdcchan2globalstrip(int tdigboardid, int tdcid, int tdcchan) {
+  Int_t globalstripid=-1;
+  int Hnum=tdcid%4+1;
+  int globaltdcchan=Hnum*10+tdcchan;
+  int mtdstrip[24]={21,12,32,20,14,35,25,13,30,24,11,31,
+		    34,22,10,37,27,17,33,23,16,36,26,15};
+  for(int i=0;i<24;i++){
+    if(mtdstrip[i]==globaltdcchan) {globalstripid=i+1;break;}
+  }
+  if(tdigboardid>3)
+    globalstripid = (globalstripid>12)? globalstripid-12:globalstripid+12;
+	
+  return globalstripid;
 }
 
 
