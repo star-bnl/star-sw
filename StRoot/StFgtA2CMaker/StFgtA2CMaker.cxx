@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.19 2012/01/31 11:23:02 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.20 2012/02/01 17:56:33 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.20  2012/02/01 17:56:33  avossen
+ * changed error on the charge to pedRMS and replaced fit with sum over timebins
+ *
  * Revision 1.19  2012/01/31 11:23:02  sgliske
  * If no cut on ped, than skip fit.
  * Still cut based on status mask in either case
@@ -183,6 +186,7 @@ Int_t StFgtA2CMaker::Make(){
 #endif
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
                StFgtStrip *strip = *stripIter;
+	       Float_t ped = 0, pedErr = 0;
                if( strip ){
                   Int_t nTbAboveThres = 0;
 
@@ -192,14 +196,15 @@ Int_t StFgtA2CMaker::Make(){
                   // elecId, as soon as function made available.  Also
                   // clean up computations of elecId in this code at
                   // the same time.
-
+		  Float_t sumC=0;
                   // subtract the pedestal from each time bin
                   for( Int_t timebin = 0; timebin < kFgtNumTimeBins && strip->getGeoId() > -1; ++timebin ){
                      mHistPtr->SetBinContent( timebin+1, 0 );
                      mHistPtr->SetBinError( timebin+1, 10000 );
 
                      // get the pedestal
-                     Float_t ped = 0, pedErr = 0;
+		     ped = 0;
+		     pedErr = 0;
                      ped = mDb->getPedestalFromGeoId( geoId );
                      pedErr = mDb->getPedestalSigmaFromGeoId( geoId );
 #ifdef DEBUG
@@ -211,7 +216,7 @@ Int_t StFgtA2CMaker::Make(){
                         strip->setGeoId( -1 );
                      } else {
                         Int_t adcMinusPed = adc - ped;
-
+			sumC+=adcMinusPed;
                         strip->setAdc( adcMinusPed );
                         strip->setType( 1 );
 
@@ -229,6 +234,9 @@ Int_t StFgtA2CMaker::Make(){
                   } else if( mRelThres || mAbsThres>-4096 ){
                      // only fit if there was a cut on the pedestals
 
+		     Double_t gain = mDb->getGainFromGeoId( geoId );
+		    //////////////////////////////////----------------Disable fitting for now
+#ifdef DO_FIT
                      mHistPtr->Fit( mPulseShapePtr );
                      strip->setFitParam( 
                                         mPulseShapePtr->GetParameter( 0 ),
@@ -239,17 +247,21 @@ Int_t StFgtA2CMaker::Make(){
 
                      Double_t fitC = mPulseShapePtr->GetParameter( 0 );
                      Double_t errC = mPulseShapePtr->GetParError( 0 );
-		     Double_t gain = mDb->getGainFromGeoId( geoId );
 
                      strip->setCharge( gain ? fitC/gain : 0 );
-                     strip->setChargeUncert( gain ? sqrt(errC*errC + adc)/gain : 10000 );
+		     //removed adc in error computation
+                     strip->setChargeUncert( gain ? errC/gain : 10000 );
+#endif 
+		     ////////////////////////////////////////////////////////////----
+		     strip->setCharge(gain ? sumC/gain : 0);
+		     strip->setChargeUncert(gain ? pedErr/gain : 10000);
 
 #ifdef DEBUG
                      printf("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge());
 #endif
                   } else {
                      strip->invalidateCharge();
-                  };
+		  };
 
                   if( mStatusMask != 0x0 ){
                      UInt_t status=mDb->getStatusFromGeoId(geoId);
@@ -258,7 +270,7 @@ Int_t StFgtA2CMaker::Make(){
                         strip->setGeoId( -1 );
                   };
                };
-            };
+	    };
 
             // always check if any need removed, as it is possible
             // some ``bad'' strips may have abnormally large st. dev.
