@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2012.h,v 2.1 2011/11/04 19:21:26 ullrich Exp $
+ * $Id: StTriggerData2012.h,v 2.2 2012/02/01 17:00:07 ullrich Exp $
  *
  * Author: Akio Ogawa, Nov 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2012.h,v $
+ * Revision 2.2  2012/02/01 17:00:07  ullrich
+ * Fixed bug concerning seg failt when MIX DSM not in run and added new arg to MtdVpdTacDiff()
+ *
  * Revision 2.1  2011/11/04 19:21:26  ullrich
  * Initial Revision.
  *
@@ -163,6 +166,7 @@ public:
     unsigned char  mtdDsmAtCh(int ch, int prepost=0) const;
     bool           mtdDsmHit(int pmt, int prepost=0) const;
     unsigned short mtdgemAtAddress(int address, int prepost=0) const;
+    unsigned short mtdVpdTacDiff() const;
     
     //TOF
     unsigned short tofAtAddress(int address, int prepost=0) const;

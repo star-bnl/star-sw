@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.18 2011/11/04 19:20:38 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.19 2012/02/01 17:00:07 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.19  2012/02/01 17:00:07  ullrich
+ * Fixed bug concerning seg failt when MIX DSM not in run and added new arg to MtdVpdTacDiff()
+ *
  * Revision 2.18  2011/11/04 19:20:38  ullrich
  * Added tpcMaskDSM() - Akio.
  *
@@ -67,7 +70,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.18 2011/11/04 19:20:38 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.19 2012/02/01 17:00:07 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -241,6 +244,7 @@ unsigned short StTriggerData::mtdAdc(StBeamDirection eastwest, int pmt, int prep
 unsigned short StTriggerData::mtdTdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 unsigned char  StTriggerData::mtdDsmAtCh(int ch, int prepost) const {return 0;}
 bool           StTriggerData::mtdDsmHit(int pmt, int prepost) const {return 0;}
+unsigned short StTriggerData::mtdVpdTacDiff() const {return 0;}
 unsigned short StTriggerData::tofAtAddress(int address, int prepost) const {return 0;}
 unsigned short StTriggerData::tofTrayMultiplicity(int tray, int prepost) const {return 0;}
 unsigned short StTriggerData::tofMultiplicity(int prepost) const {return 0;}

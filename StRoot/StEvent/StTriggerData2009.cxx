@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.30 2011/03/29 18:06:21 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.31 2012/02/01 17:00:07 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.31  2012/02/01 17:00:07  ullrich
+ * Fixed bug concerning seg failt when MIX DSM not in run and added new arg to MtdVpdTacDiff()
+ *
  * Revision 2.30  2011/03/29 18:06:21  ullrich
  * Fixed bug in bug in vpdEarliestTDCHighThr()
  *
@@ -1110,19 +1113,20 @@ unsigned short StTriggerData2009::vpdEarliestTDCHighThr(StBeamDirection eastwest
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0){
+      if (mRun<=10365999){
+        return 0;
+      }
+      else if(mRun<=12003001) {
         if (mBBC[buffer]){
-            if (mRun<=10365999){ 
-                return 0;
-            }
-            else if(mRun<=12003001) {
-                if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
-                else                {return mBBC[buffer]->VPD[4]%4096;}
-            }
-	    else {
-	      if (eastwest==east) {return mMIX[buffer]->MTD_P2PLayer1[13] + ((mMIX[buffer]->MTD_P2PLayer1[12]&0x0f)<<8);}
-	      else                {return mMIX[buffer]->MTD_P2PLayer1[9]  + ((mMIX[buffer]->MTD_P2PLayer1[8]&0x0f)<<8);}
-	    }
+          if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
+          else {return mBBC[buffer]->VPD[4]%4096;}
         }
+      }else {
+        if(mMIX[buffer]){
+          if (eastwest==east) {return mMIX[buffer]->MTD_P2PLayer1[13] + ((mMIX[buffer]->MTD_P2PLayer1[12]&0x0f)<<8);}
+          else {return mMIX[buffer]->MTD_P2PLayer1[9]  + ((mMIX[buffer]->MTD_P2PLayer1[8]&0x0f)<<8);}
+        }
+      }
     }
     return 0;
 }
