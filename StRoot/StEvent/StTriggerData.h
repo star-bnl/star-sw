@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.39 2011/11/04 19:20:38 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.40 2012/02/01 17:00:07 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.40  2012/02/01 17:00:07  ullrich
+ * Fixed bug concerning seg failt when MIX DSM not in run and added new arg to MtdVpdTacDiff()
+ *
  * Revision 2.39  2011/11/04 19:20:38  ullrich
  * Added tpcMaskDSM() - Akio.
  *
@@ -289,6 +292,7 @@ public:
     virtual unsigned short mtdTdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned char  mtdDsmAtCh(int ch, int prepost=0) const;
     virtual bool           mtdDsmHit(int pmt, int prepost=0) const;
+    virtual unsigned short mtdVpdTacDiff() const;
 
     //TOF
     virtual unsigned short tofAtAddress(int address, int prepost=0) const;

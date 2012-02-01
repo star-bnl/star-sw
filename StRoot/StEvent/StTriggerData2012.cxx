@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2012.cxx,v 2.1 2011/11/04 19:21:26 ullrich Exp $
+ * $Id: StTriggerData2012.cxx,v 2.2 2012/02/01 17:00:07 ullrich Exp $
  *
  * Author: Akio Ogawa,Nov 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2012.cxx,v $
+ * Revision 2.2  2012/02/01 17:00:07  ullrich
+ * Fixed bug concerning seg failt when MIX DSM not in run and added new arg to MtdVpdTacDiff()
+ *
  * Revision 2.1  2011/11/04 19:21:26  ullrich
  * Initial Revision.
  *
@@ -1031,19 +1034,20 @@ unsigned short StTriggerData2012::vpdEarliestTDCHighThr(StBeamDirection eastwest
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0){
+      if (mRun<=10365999){ 
+	return 0;
+      }
+      else if(mRun<=12003001) {
         if (mBBC[buffer]){
-            if (mRun<=10365999){ 
-                return 0;
-            }
-            else if(mRun<=12003001) {
-                if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
-                else                {return mBBC[buffer]->VPD[4]%4096;}
-            }
-            else {
-                if (eastwest==east) {return mMIX[buffer]->MTD_P2PLayer1[13] + ((mMIX[buffer]->MTD_P2PLayer1[12]&0x0f)<<8);}
-                else                {return mMIX[buffer]->MTD_P2PLayer1[9]  + ((mMIX[buffer]->MTD_P2PLayer1[8]&0x0f)<<8);}
-            }
-        }
+	  if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
+	  else                {return mBBC[buffer]->VPD[4]%4096;}
+	}
+      }else {
+	if(mMIX[buffer]){
+	  if (eastwest==east) {return mMIX[buffer]->MTD_P2PLayer1[13] + ((mMIX[buffer]->MTD_P2PLayer1[12]&0x0f)<<8);}
+	  else                {return mMIX[buffer]->MTD_P2PLayer1[9]  + ((mMIX[buffer]->MTD_P2PLayer1[8]&0x0f)<<8);}
+	}
+      }
     }
     return 0;
 }
@@ -1179,6 +1183,11 @@ bool StTriggerData2012::mtdDsmHit(int pmt, int prepost) const
         }
     }
     return false;
+}
+
+unsigned short StTriggerData2012::mtdVpdTacDiff() const
+{
+  return (L1_DSM->TOF[3] & 0x3fff);
 }
 
 unsigned short StTriggerData2012::tofAtAddress(int address, int prepost) const 
