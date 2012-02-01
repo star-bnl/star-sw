@@ -447,11 +447,11 @@ void JevpServer::handleNewEvent(EvpMessage *m)
     CP;
     while((curr = (JevpPlotSet *)next())) {
       
-      double throttle_time = .025;
+      double throttle_time = .05;
       
       if(throttleAlgos) {
 	if((curr->processingTime / (double)eventsThisRun) > throttle_time) {
-	  LOG("JEFF", "Skipping builder for event %d: %s due to %d ms/event throttle (%lf secs/event : %d of %d so far)",
+	  LOG(NOTE, "Skipping builder for event %d: %s due to %d ms/event throttle (%lf secs/event : %d of %d so far)",
 	      rdr->seq, curr->getPlotSetName(), (int)(throttle_time * 1000), curr->getAverageProcessingTime(), curr->numberOfEventsRun, eventsThisRun);
 	  
 	  continue;
@@ -459,7 +459,7 @@ void JevpServer::handleNewEvent(EvpMessage *m)
       }
       
       CP;
-      LOG("JEFF", "Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
+      LOG(DBG, "Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
       
       curr->_event(rdr);
       
@@ -1023,7 +1023,6 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
 
     LOG(DBG, "HEre");
   }
-  LOG("JEFE","here");
   
   CP;
   if(n == 0) {

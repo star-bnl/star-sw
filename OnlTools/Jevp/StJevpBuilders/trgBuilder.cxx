@@ -346,7 +346,7 @@ void trgBuilder::event(daqReader *rdr)
   double mZdcVertex   = -9999;
   int te = trgd->zdcPmtTDC(east,1);
   int tw = trgd->zdcPmtTDC(west,1);
-  LOG("JEFF","te = %d tw = %d",te,tw);
+  LOG(DBG,"te = %d tw = %d",te,tw);
   if(te>20 && te<4000) h76_zdc_time_east->Fill(float(te));    
   if(tw>20 && tw<4000) h77_zdc_time_west->Fill(float(tw));    
   if(te>20 && te<4000 && tw>20 && tw<4000){
