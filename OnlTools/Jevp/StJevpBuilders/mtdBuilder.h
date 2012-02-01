@@ -1,3 +1,6 @@
+#ifndef _MTDBUILDER_H
+#define _MTDBUILDER_H
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,18 +11,18 @@
 
 #include <math.h>
 
-
-#define nMTDtrays 3
+#define nMTDtrays 30
+#define nMTDtrig 20
 
 class mtdBuilder : public JevpPlotSet {
  public:
+
   //RunStatus status;
   int run;
 
   mtdBuilder(JevpServer *parent=NULL); 
   ~mtdBuilder();
   
-
   void initialize(int argc, char *argv[]);
   void startrun(daqReader *rdr);
   void stoprun(daqReader *rdr);
@@ -33,29 +36,24 @@ class mtdBuilder : public JevpPlotSet {
     TH1 *array[];
     struct {
       // MTDhits histogram group
-      TH1* MTD26E_hitmap[2][2];
-      TH1* MTD26C_hitmap[2][2];
-      TH1* MTD26W_hitmap[2][2];
-      TH1* MTD1_hitmap[2][2];
-      TH2* MTD_ToT;
-      TH2* MTD_eastT_vs_westT;
-      TH1* MTD_eastT_westT;
-      TH2* MTD_hits_vs_TOF_hits;
+      TH1*** hMTD_hitmap;
 
       // MTDtriggerinfo histogram group
-      TH1* MTD_adc[nMTDtrays][2];// 3 trays; 0 east, 1 west
-      TH1* MTD_tac[nMTDtrays][2];
+      TH1** hMTD_trig;
     };
   } contents;
 
   // MTDhits support
-  int tdcchan2globalstrip(int,int,int,int);
+  int tdcchan2globalstrip(int,int,int);
+  int tdig2slot(int, int);
+  int istray3bl(int);
  
   double numberforsort;
   vector<double> leadinghits;
   vector<double> trailinghits;
 
-
   JevpPlot **plots;
   ClassDef(mtdBuilder, 1);
 };
+
+#endif
