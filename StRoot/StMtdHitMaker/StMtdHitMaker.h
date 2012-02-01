@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.1 2011/04/26 20:04:35 geurts Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.2 2012/02/01 05:47:59 geurts Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -57,6 +57,8 @@ class StMtdHitMaker:public StRTSBaseMaker {
   Int_t                   mNValidTrays;          //! number of valid MTD trays
   unsigned int            mTriggerTimeStamp[4];  //! Trigger Time in 4 fibers
   StMtdCollection*        mMtdCollection;        //! pointer to StMtdCollection
+  Int_t                   mTray2TdigMap[30][5];  //! map TDIG-Id to MTD tray
+
 
  protected:
   StRtsTable *GetNextRaw();
