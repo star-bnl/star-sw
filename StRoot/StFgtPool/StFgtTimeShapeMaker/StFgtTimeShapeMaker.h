@@ -68,6 +68,8 @@ class StFgtTimeShapeMaker : public StMaker {
  private: 
    friend class StFgtStatusMaker; 
 
+   StFgtDbMaker* fgtDb;
+
    TH1F* hh;
    
    TFile* fFgt;

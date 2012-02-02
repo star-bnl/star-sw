@@ -21,6 +21,7 @@
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
+#include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 
 // Copied from StFgtPedMaker.cxx
 // since this isn't defined elsewhere (yet)
@@ -39,7 +40,9 @@ StFgtTimeShapeMaker::StFgtTimeShapeMaker( const Char_t* name ) : StMaker( name )
 // initialize
 Int_t StFgtTimeShapeMaker::Init(){
    Int_t ierr = kStOk;
-
+   
+   fgtDb = new StFgtDbMaker("fgtDb");
+   fgtDb->getDbTables();
    Int_t chstore[120];
    for(Int_t jch=0;jch<80;jch++)
      {
@@ -124,14 +127,15 @@ Int_t StFgtTimeShapeMaker::Make(){
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){	      
 	      rdo=0;arm=-1;apv=-1;chn=-1;	
 	      (*stripIter)->getElecCoords( rdo, arm, apv, chn );
-	      printf("%d %d %d %d %d \n",iEvt,rdo,arm,apv,chn);
+	      //int geoId=fgtDb->getDbTables()->getGeoIdFromElecCoord(rdo, arm, apv, chn);
+	      //printf("%d %d %d %d %d %d \n",iEvt,rdo,arm,apv,chn,geoId);
 	      ped=(*stripIter)->getAdc(0);
 	      for(Int_t is=0;is<Ntimebin;is++){
 		adc[is]=(*stripIter)->getAdc(is);
 		adc[is]-=ped;
-		printf("%d ",adc[is]);
+		//printf("%d ",adc[is]);
 	      };		
-	      printf("%d \n",(*stripIter)->getAdc());
+	      //printf("%d %d \n",ped,(*stripIter)->getAdc());
 	      Bool_t pass=true;
 	      if(rdo==1 && arm==1 && (apv==0 || apv==1))pass=false;		 
 	      if(pass){	
