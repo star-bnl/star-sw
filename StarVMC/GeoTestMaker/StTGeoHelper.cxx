@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.19 2012/02/01 19:32:13 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.20 2012/02/02 00:17:12 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -735,10 +735,12 @@ static const float dirs[26][3] = {
     myDir[2] = dirs[idir][2];
     gGeoManager->SetCurrentDirection(myDir);
     double myStep = 0;
-    while (1) {
+    for (int istep=0;istep<10;istep++) {
       node = gGeoManager->FindNextBoundaryAndStep();
       if (!node) 					break;
-      myStep +=gGeoManager->GetStep();
+      double stp = gGeoManager->GetStep();
+      if (stp<myStep*0.01) stp=myStep*0.01;
+      myStep +=stp;
       if (myStep>minDist) 				break;
       
       hp = GetCurrentHitPlane();     
