@@ -17,6 +17,7 @@
 #include <signal.h>
 #include <TThread.h>
 #include <TApplication.h>
+#include <setjmp.h>
 
 #include "EvpConstants.h"
 #include "JevpServer.h"
@@ -48,7 +49,12 @@
 #include <RTS/include/SUNRT/clockClass.h>
 
 static int line_number=0;
+static char *line_builder = NULL;
 #define CP line_number=__LINE__
+#define CP_ENTER_BUILDER(x) line_builder = x
+#define CP_LEAVE_BUILDER line_builder = NULL;
+static sigjmp_buf env;
+
 int JEVPSERVERport;
 JevpServer serv;
 
@@ -64,6 +70,12 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
     return;
   }
 
+  // If we are trying to cleam up after a builder!
+  if(line_builder) {
+    siglongjmp(env,1);
+  }
+
+  // Otherwise just get out!
   sprintf(str,"Signal %d: shutting down! (line=%d)", arg, line_number);
   LOG(ERR, "%s", str);
 
@@ -125,7 +137,7 @@ void JevpServer::debugBuilders(int line)
   TListIter next(&builders);
   JevpPlotSet *curr;
   while((curr = (JevpPlotSet *)next())) {
-    LOG("JEFF", "print name (%d): %s",line,curr->getPlotSetName());
+    LOG("JEFF", "print name (%d): %s",line, curr->getPlotSetName());
   }
 #endif
 }
@@ -461,7 +473,16 @@ void JevpServer::handleNewEvent(EvpMessage *m)
       CP;
       LOG(DBG, "Sending event #%d(%d) to builder: %s  (avg processing time=%lf secs/evt)",rdr->seq, rdr->event_number, curr->getPlotSetName(), curr->getAverageProcessingTime());
       
-      curr->_event(rdr);
+      if(sigsetjmp(env, 1)) {
+	LOG(CAUTION, "Sigsegv in builder: %s.  Disabling builder.",curr->getPlotSetName());
+	curr->setDisabled();
+	CP_LEAVE_BUILDER;
+      }
+      else {
+	CP_ENTER_BUILDER(curr->getPlotSetName());
+	curr->_event(rdr);
+	CP_LEAVE_BUILDER;
+      }
       
       CP;
     }
@@ -1073,7 +1094,7 @@ void JevpServer::writeRunPdf(int display, int run)
   CP;
   // Save it in the database...
   if(nodb != 1) {
-    LOG(DBG, "Writing PDF file: %s",filename);
+    LOG(DBG, "Writing PDF file: %s to DB",filename);
 
     char *args[5];
 
@@ -1087,7 +1108,7 @@ void JevpServer::writeRunPdf(int display, int run)
 
     //int ret = char((execScript *)"WritePDFToDB",args);
     int ret = execScript("WritePDFToDB", args);
-    LOG(DBG, "Wrote PDF file: %s (ret=%d)", filename, ret);
+    LOG(WARN, "Wrote PDF file to DB: %s (ret=%d)", filename, ret);
   }
 }
 

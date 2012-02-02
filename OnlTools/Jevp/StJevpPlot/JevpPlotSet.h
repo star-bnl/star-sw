@@ -50,6 +50,10 @@ class JevpPlotSet : public TObject {
   JevpPlot *getPlotByIndex(int i);
   void dump();
 
+  void setDisabled() {
+    disabled = 1;
+  }
+  
   // initialize() is called once at the begininning of the program
   // the arguments are the command line arguments of the program
   void _initialize(int argc, char *argv[]);
@@ -104,6 +108,7 @@ class JevpPlotSet : public TObject {
 
   JevpServer *parent;
 
+  int disabled;
   int run;
 
   char servertags[512];

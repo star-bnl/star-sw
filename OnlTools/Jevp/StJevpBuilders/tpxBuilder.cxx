@@ -317,13 +317,13 @@ void tpxBuilder::initialize(int argc, char *argv[]) {
   }
 }
   
-    void tpxBuilder::startrun(daqReader *rdr) {
-    LOG("JEFF", "tpxBuilder starting run #%d",rdr->run);
-    resetAllPlots();
-    laserReader->resetAll();
-    n_cld = 0;
-    n_adc = 0;
-  }
+void tpxBuilder::startrun(daqReader *rdr) {
+  LOG("JEFF", "tpxBuilder starting run #%d",rdr->run);
+  resetAllPlots();
+  laserReader->resetAll();
+  n_cld = 0;
+  n_adc = 0;
+}
 
 #define safelog(x) ((x > 0) ? log10(x) : 0)
 

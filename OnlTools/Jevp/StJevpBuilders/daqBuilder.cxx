@@ -108,7 +108,6 @@ void daqBuilder::startrun(daqReader *rdr) {
 
 void daqBuilder::event(daqReader *rdr)
 {
- 
   // Fill Histograms...
   int tpc_size = rdr->getDetectorSize("tpx");
   int bemc_size = rdr->getDetectorSize("btow");
