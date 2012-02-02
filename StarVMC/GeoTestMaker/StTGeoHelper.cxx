@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.20 2012/02/02 00:17:12 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.21 2012/02/02 00:36:19 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -739,7 +739,8 @@ static const float dirs[26][3] = {
       node = gGeoManager->FindNextBoundaryAndStep();
       if (!node) 					break;
       double stp = gGeoManager->GetStep();
-      if (stp<myStep*0.01) stp=myStep*0.01;
+      if (stp<1e-4) 		stp=1e-4; 	//One micron
+      if (stp<myStep*0.01) 	stp=myStep*0.01;
       myStep +=stp;
       if (myStep>minDist) 				break;
       
