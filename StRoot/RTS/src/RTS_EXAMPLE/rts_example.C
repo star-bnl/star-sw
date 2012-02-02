@@ -58,6 +58,8 @@ static int mtd_doer(daqReader *rdr, const char *do_print) ;
 static int tinfo_doer(daqReader *rdr, const char *do_print);
 //static int gmt_doer(daqReader *rdr, const char *do_print) ;
 
+static int good ;
+
 int main(int argc, char *argv[])
 {
 	extern char *optarg ;
@@ -95,7 +97,7 @@ int main(int argc, char *argv[])
 		evp->setEvpDisk(mountpoint);
 	}
 
-	int good=0;
+	good=0;
 	int bad=0;
 	
 	for(;;) {
@@ -140,7 +142,7 @@ int main(int argc, char *argv[])
 		daq_dta *dd ;	// generic data pointer; reused all the time
 
 
-		LOG(INFO,"sequence %d: token %4d, trgcmd %2d, daqcmd %2d, time %u, detectors 0x%08X (status 0x%X)",evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
+		LOG(INFO,"evt %d: sequence %d: token %4d, trgcmd %d, daqcmd %d, time %u, detectors 0x%08X (status 0x%X)",good,evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
 		    evp->evt_time, evp->detectors, evp->status) ;
 
 
@@ -245,17 +247,22 @@ int main(int argc, char *argv[])
 
 		if(btow_doer(evp, print_det)) LOG(INFO,"BTOW found") ;
 
-		if(bsmd_doer(evp,print_det)) LOG(INFO,"BSMD found (any bank)") ;
+		// logging done in the doer...
+		bsmd_doer(evp,print_det) ;
 
 		if(etow_doer(evp, print_det)) LOG(INFO,"ETOW found") ;
 
 		if(esmd_doer(evp, print_det)) LOG(INFO,"ESMD found") ;
 
-		/******************** TPC & TPX ***********************/
+		/******************** TPC (old electronics) ***********************/
 
 		if(tpc_doer(evp,print_det)) LOG(INFO,"TPC found (legacy)") ;
 
-		if(tpx_doer(evp,print_det)) LOG(INFO,"TPX found (any bank)") ;
+		/********************** TPX ***************************/
+		// logging is done in the tpx_doer...
+		tpx_doer(evp,print_det) ;
+
+
 
 		/*************************** PP2PP **********************/
 		if(pp2pp_doer(evp,print_det)) LOG(INFO,"PP2PP found") ;
@@ -402,6 +409,10 @@ static int hlt_doer(daqReader *rdr, const char  *do_print)
 static int tpx_doer(daqReader *rdr, const char  *do_print)
 {
 	int found = 0 ;
+	int adc_found = 0 ;
+	int cld_found = 0 ;
+	int ped_found = 0 ;
+
 	daq_dta *dd ;
 
 	if(strcasestr(do_print,"tpx")) ;	// leave as is...
@@ -434,13 +445,13 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 		memset(pixel_count,0,sizeof(pixel_count)) ;
 		int sec_found = 0 ;
 
-
 		dd = rdr->det("tpx")->get("adc",s) ;
 		if(dd) 	{
 
 			while(dd->iterate()) {
-				found = 1 ;
+				found = 1 ;	// any sector...
 				sec_found = 1 ;
+				adc_found = 1 ;	// any sector...
 				if(do_print) {
 					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				}
@@ -467,15 +478,37 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 		while(dd && dd->iterate()) {
 
 			found = 1 ;
-
+			cld_found = 1 ;
 
 			if(do_print) {
-				printf("TPX: sec %02d, row %2d: %3d clusters\n",dd->sec,dd->row,dd->ncontent) ;
+				printf("TPX: sec %02d, row %2d: %3d clusters (evt %d)\n",dd->sec,dd->row,dd->ncontent,good) ;
 			}
 			
 			for(u_int i=0;i<dd->ncontent;i++) {
 				if(do_print) {
-					printf("\tpad %7.3f, time %7.3f, charge %5d, flags 0x%02X\n",dd->cld[i].pad,dd->cld[i].tb,dd->cld[i].charge,dd->cld[i].flags) ;
+					int p1,p2,t1,t2 ;
+					int bad = 0 ;
+					p1 = dd->cld[i].p1 ;
+					p2 = dd->cld[i].p2 ;
+					t1 = dd->cld[i].t1 ;
+					t2 = dd->cld[i].t2 ;
+
+					if(p1 > 200) bad = 1 ;
+					if(p2 > 200) bad = 1 ;
+					if(p2<p1) bad = 1 ;
+					if((p2-p1)>14) bad = 1 ;
+
+					if(t1 > 1200) bad = 1 ;
+					if(t2 > 1200) bad = 1 ;
+					if(t2<t1) bad = 1 ;
+					if((t2-t1)>30) bad = 1 ;
+
+					if(bad) printf("BAD: ") ;
+					printf("\tpad %7.3f[%d,%d], time %7.3f[%d,%d], charge %5d, flags 0x%02X\n",
+					       dd->cld[i].pad,dd->cld[i].p1,dd->cld[i].p2,
+					       dd->cld[i].tb,dd->cld[i].t1,dd->cld[i].t2,
+					       dd->cld[i].charge,dd->cld[i].flags) ;
+					
 				}
 			}
 		}
@@ -485,6 +518,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 		dd = rdr->det("tpx")->get("pedrms",s) ;
 		while(dd && dd->iterate()) {
 			found = 1 ;
+			ped_found = 1 ;
 			if(do_print) {
 				printf("TPX: sec %02d, row %2d, pad %3d (%d pix)\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				daq_det_pedrms *ped = (daq_det_pedrms *)dd->Void ;
@@ -494,6 +528,23 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 			}
 		}
 
+	}
+
+	char fstr[64] ;
+	fstr[0] = 0 ;	// EOS marker...
+
+	if(cld_found) {
+		strcat(fstr,"CLD ") ;
+	}
+	if(adc_found) {
+		strcat(fstr,"ADC " ) ;
+	}
+	if(ped_found) {
+		strcat(fstr,"PEDRMS ") ;
+	}
+
+	if(found) {
+		LOG(INFO,"TPX found [%s]",fstr) ;
 	}
 
 	return found ;
@@ -627,6 +678,11 @@ static int bsmd_doer(daqReader *rdr, const char *do_print)
 	int found = 0 ;
 	daq_dta *dd ;
 
+	int raw_found = 0 ;
+	int adc_non_zs_found = 0 ;
+	int adc_found = 0 ;
+	int ped_found = 0 ;
+
 	if(strcasestr(do_print,"bsmd")) ;	// leave as is...
 	else do_print = 0 ;
 
@@ -637,7 +693,7 @@ static int bsmd_doer(daqReader *rdr, const char *do_print)
 		if(dd) {
 			while(dd->iterate()) {
 				found = 1 ;
-
+				raw_found = 1 ;
 
 				if(do_print) printf("BSMD RAW: fiber %2d [==%d], sector %d:\n",dd->rdo,f,dd->sec) ;
 
@@ -656,6 +712,7 @@ static int bsmd_doer(daqReader *rdr, const char *do_print)
 		if(dd) {
 			while(dd->iterate()) {
 				found = 1 ;
+				adc_non_zs_found = 1 ;
 
 				bsmd_t *d = (bsmd_t *) dd->Void ;
 
@@ -675,6 +732,7 @@ static int bsmd_doer(daqReader *rdr, const char *do_print)
 		if(dd) {
 			while(dd->iterate()) {
 				found = 1 ;
+				adc_found = 1 ;
 
 				bsmd_t *d = (bsmd_t *) dd->Void ;
 
@@ -694,6 +752,7 @@ static int bsmd_doer(daqReader *rdr, const char *do_print)
 		if(dd) {
 			while(dd->iterate()) {
 				found = 1 ;
+				ped_found = 1 ;
 
 				bsmd_t *d = (bsmd_t *) dd->Void ;
 
@@ -712,6 +771,7 @@ static int bsmd_doer(daqReader *rdr, const char *do_print)
 		if(dd) {
 			while(dd->iterate()) {
 				found = 1 ;
+				ped_found = 1 ;
 
 				bsmd_t *d = (bsmd_t *) dd->Void ;
 
@@ -722,6 +782,28 @@ static int bsmd_doer(daqReader *rdr, const char *do_print)
 				}
 			}
 		}
+	}
+
+
+	char fstr[64] ;
+	fstr[0] = 0 ;	// EOS marker...
+
+	if(raw_found) {
+		strcat(fstr,"RAW ") ;
+	}
+
+	if(adc_found) {
+		strcat(fstr,"ADC-ZS ") ;
+	}
+	if(adc_non_zs_found) {
+		strcat(fstr,"ADC-non-ZS " ) ;
+	}
+	if(ped_found) {
+		strcat(fstr,"PEDRMS ") ;
+	}
+
+	if(found) {
+		LOG(INFO,"BSMD found [%s]",fstr) ;
 	}
 
 
@@ -798,6 +880,25 @@ static int btow_doer(daqReader *rdr, const char *do_print)
 	if(strcasestr(do_print,"btow")) ;	// leave as is...
 	else do_print = 0 ;
 
+/* generally commented out... */
+#if 0
+	dd = rdr->det("btow")->get("raw") ;
+	if(dd) {
+		while(dd->iterate()) {
+			u_short *s16 = (u_short *) dd->Void ;
+
+			if(do_print) {
+				printf("BTOW: bytes %d\n",dd->ncontent) ;
+			}
+
+			for(u_int i=0;i<dd->ncontent/2;i++) {
+				if(do_print) {
+					printf("%d: 0x%04X [%d dec]\n",i,s16[i],s16[i]) ;	
+				}
+			}
+		}
+	}
+#endif
 
 	dd = rdr->det("btow")->get("adc") ;
 	if(dd) {
