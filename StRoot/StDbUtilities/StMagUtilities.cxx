@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.86 2011/09/16 21:52:30 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.87 2012/02/02 18:19:08 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.87  2012/02/02 18:19:08  genevb
+ * Catch small/zero primary E field
+ *
  * Revision 1.86  2011/09/16 21:52:30  genevb
  * Minor fixes for sector misalignment: output statement, and outermost radius
  *
@@ -457,6 +460,12 @@ void StMagUtilities::GetTPCVoltages ()
   CathodeV       =  fTpcVolts->getCathodeVoltage() * 1000 ; 
   GG             =  fTpcVolts->getGGVoltage() ; 
   StarMagE       =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;         // STAR Electric Field (V/cm) Magnitude
+  if (TMath::Abs(StarMagE) < 1e-6) {
+    cout << "StMagUtilities ERROR **** Calculations fail with extremely small or zero primary E field:" << endl;
+    cout << "StMagUtilities     StarMagE = (CathodeV - GG) / TPC_Z0 = (" << CathodeV
+      << " - " << GG << ") / " << TPC_Z0 << " = " << StarMagE << " V/cm" << endl;
+    exit(1);
+  } 
 }
 
 void StMagUtilities::GetSpaceCharge ()  
