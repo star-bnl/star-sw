@@ -30,11 +30,13 @@
 #include "StMaker.h"
 
 class StFgtDbMaker;
+class StFgtDb;
+class StFgtCollection;
 
 class StFgtTimeShapeMaker : public StMaker {
  public:
    // constructors
-   StFgtTimeShapeMaker( const Char_t* name = "FgtTimeShapeMaker" );
+  StFgtTimeShapeMaker( const Char_t* name = "FgtTimeShapeMaker" , const Char_t* dbMkrName = ""  );
 
    // default OK
    // StFgtTimeShapeMaker(const StFgtTimeShapeMaker&);
@@ -59,6 +61,7 @@ class StFgtTimeShapeMaker : public StMaker {
    Int_t plotThresh;
    Bool_t fixTau;
    Int_t Ntimebin;
+   Int_t pedSelect;
    
  protected:
    // since this isn't saved anywhere else
@@ -68,7 +71,9 @@ class StFgtTimeShapeMaker : public StMaker {
  private: 
    friend class StFgtStatusMaker; 
 
-   StFgtDbMaker* fgtDb;
+   std::string mDbMkrName;
+   StFgtDbMaker* mFgtDbMkr;;
+   StFgtCollection* mFgtCollectionPtr;
 
    TH1F* hh;
    
@@ -80,13 +85,23 @@ class StFgtTimeShapeMaker : public StMaker {
    Int_t arm;
    Int_t apv;
    Int_t chn;
+   Short_t disk;
+   Short_t quad;
+   Short_t strip;
+   Short_t stat;
+   Double_t ordinate;
+   Double_t lowerSpan;
+   Double_t upperSpan;
+   Char_t layer;
+   Double_t ped;
+   Double_t pedSig;
    Int_t adc[7];
-   Int_t ped;
    Int_t adcmax;
    Int_t mmax;
    Int_t mmin;
    Float_t chi2;
    Float_t fmax;
+   Float_t norm;
    Float_t tau;
    Float_t t0;
    Float_t offset;
