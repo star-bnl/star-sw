@@ -392,6 +392,24 @@ struct rts2011EvbxSuperMon {
   } trgs[TRIGGERS_MAX+1] ;
 };
 
+// new, FY13, slow controls monitoring (via scDeamon)
+struct rtsMonSC {
+	rtsMonHeader head ;
+
+	int rich_scalers[32] ;
+	float mag_field ;
+
+	short blu_ions ;
+	short blu_energy ;
+	char blu_status[32] ;
+
+	short yel_ions ;
+	short yel_energy ;
+	char yel_status[32] ;
+
+	char mcr_vote[32] ;
+
+};
 
 
 #endif
