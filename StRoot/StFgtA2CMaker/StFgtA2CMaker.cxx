@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.21 2012/02/01 18:21:51 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.22 2012/02/02 15:38:58 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.22  2012/02/02 15:38:58  sgliske
+ * bu fixed: getAdc not in timebin loop
+ *
  * Revision 1.21  2012/02/01 18:21:51  avossen
  * changed error on the charge to pedRMS and replaced fit with sum over timebins
  *
@@ -193,7 +196,6 @@ Int_t StFgtA2CMaker::Make(){
                if( strip ){
                   Int_t nTbAboveThres = 0;
 
-                  Int_t adc = strip->getAdc();
                   Int_t geoId = strip->getGeoId();
                   // Later, switch geoId to elecId lookups, since DB keyed by
                   // elecId, as soon as function made available.  Also
@@ -202,6 +204,8 @@ Int_t StFgtA2CMaker::Make(){
 		  Float_t sumC=0;
                   // subtract the pedestal from each time bin
                   for( Int_t timebin = 0; timebin < kFgtNumTimeBins && strip->getGeoId() > -1; ++timebin ){
+                     Int_t adc = strip->getAdc( timebin );
+
                      mHistPtr->SetBinContent( timebin+1, 0 );
                      mHistPtr->SetBinError( timebin+1, 10000 );
 
