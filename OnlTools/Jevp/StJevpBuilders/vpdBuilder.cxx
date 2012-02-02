@@ -161,6 +161,7 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 }
   
 void vpdBuilder::startrun(daqReader *rdr) {
+  resetAllPlots();
 }
 
 void vpdBuilder::stoprun(daqReader *rdr) {
@@ -247,7 +248,7 @@ void vpdBuilder::event(daqReader *rdr) {
   contents.hi_earliestTAC_vs_eastchan->Fill(earliestchan_east_hi,maxTacEastHigh);
   contents.hi_earliestTAC_vs_westchan->Fill(earliestchan_west_hi,maxTacWestHigh);
 
-
+  if(trgd) delete trgd;
 }
 
 void vpdBuilder::main(int argc, char *argv[])

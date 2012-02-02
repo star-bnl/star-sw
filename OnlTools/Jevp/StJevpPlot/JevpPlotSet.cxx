@@ -63,6 +63,7 @@ static void catchSignals(void)
 JevpPlotSet::JevpPlotSet(JevpServer *server)
 {
   CP;
+  disabled = 0;
   parent = server;
   buildxml = NULL;
   hello_cmds = (char *)"client";
@@ -261,6 +262,7 @@ void JevpPlotSet::initialize(int argc, char *argv[])
 void JevpPlotSet::_startrun(daqReader *rdr)
 {
   CP;
+  disabled = 0;
   strcpy(myname, plotsetname);
 
   processingTime = 0;
@@ -317,6 +319,8 @@ void JevpPlotSet::stoprun(daqReader *rdr)
 
 void JevpPlotSet::_event(daqReader *rdr)
 {
+  if(disabled) return;
+
   processingTimer->record_time();
 
   CPC;
