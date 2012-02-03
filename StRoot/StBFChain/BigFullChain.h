@@ -273,6 +273,9 @@ Bfc_st BFC[] = { // standard chains
   // chains for year 12
   {"B2012","","","ry2012,in,tpcX,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
    ,                                                               "Base chain for 2012 ITTF (tpc)",kFALSE},
+  {"pp2012a","" ,"", 
+   "B2012,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
+   "","",                "Production chain for 2012 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},   
 
 
 
