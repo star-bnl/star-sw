@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.3 2012/02/01 06:40:01 geurts Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.4 2012/02/03 17:52:41 geurts Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -45,22 +45,24 @@ StMtdHitMaker::~StMtdHitMaker()
 void StMtdHitMaker::Clear(Option_t* option)  { 
   MtdLeadingHits.clear();
   MtdTrailingHits.clear();
-  const int nTHUB=1;
-  for(int i=0;i<nTHUB;i++) mTriggerTimeStamp[i] = 0;
+  memset(mTriggerTimeStamp,0,2);
 }
 
 
 //_____________________________________________________________
 Int_t StMtdHitMaker::Init() {
   Clear("");
+  /// Initialize Tray-to-Tdig map (-1 means no TDIG board)
+  memset(mTray2TdigMap,-1,sizeof(mTray2TdigMap));
+
   return kStOK;
 }
 
 
 //_____________________________________________________________
 Int_t StMtdHitMaker::InitRun(Int_t runnumber) {
-  /// Initialize Tray-to-Tdig map
-  memset(mTray2TdigMap,-1,sizeof(mTray2TdigMap));
+  /// Find out what year we're in
+  mYear= (Int_t)runnumber/1e6 -1 ;
 
   /// Run-12 (this will move to database)
   /// note: index runs from 0-29 for backlegs 1-30, same for tray#
@@ -254,10 +256,11 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
       temphit.fiberid = (UChar_t)ifib;
       temphit.backlegID  = (UChar_t)backlegid;
       temphit.tdc     = timeinbin;
-      /// global channel number here
-      //temphit.globaltdcchan = (UChar_t)(tdcchan + (tdcid%4)*8+tdigid*24+halfbacklegid*96); /// 0-191 for backleg
-      temphit.globaltdcchan = (UChar_t)(tdcchan2globalstrip(tdigid,tdcid,tdcchan)); 
-
+      /// global channel number here, 
+      if (mYear<12)
+	temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip(tdigid,tdcid,tdcchan,backlegid)); 
+      else
+	temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip(tdigid,tdcid,tdcchan)); 
       temphit.dataword      = dataword;
 
       /// lookup corresponding tray# for TDIG-Id
@@ -265,8 +268,6 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
       for (itray=1;itray<=5;itray++){
 	if (mTray2TdigMap[backlegid-1][itray-1] == tdigid) break;
       }
-      LOG_INFO << " Found (backleg#,globalchan#,tray#,chan#)= (" << backlegid << ", " << tdcchan2globalstrip(tdigid,tdcid,tdcchan) << ", " << itray << "," << tdcchan << ") " << endm;
-
 
       if(edgeid == 4) {     /// leading edge data
         MtdLeadingHits.push_back(temphit);
@@ -287,24 +288,60 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
 
 //____________________________________________
 /*!
- * Map TDC channel to a global strip coordinate
+ * Map TDC channel to a global strip coordinate (Run 12 and later)
  */
-Int_t StMtdHitMaker::tdcchan2globalstrip(int tdigboardid, int tdcid, int tdcchan) {
-  Int_t globalstripid=-1;
-  int Hnum=tdcid%4+1;
-  int globaltdcchan=Hnum*10+tdcchan;
-  int mtdstrip[24]={21,12,32,20,14,35,25,13,30,24,11,31,
+Int_t StMtdHitMaker::tdcChan2globalStrip(int tdigBoardId, int tdcId, int tdcChan) {
+  if (mYear<12)
+    LOG_WARN << "tdcchan2globalstrip(int,int,int) called for pre Run-12 run: wrong globalStrip" << endm;
+
+  Int_t globalStripId=-1;
+  int Hnum=tdcId%4+1;
+  int globalTdcChan=Hnum*10+tdcChan;
+  int mtdStrip[24]={21,12,32,20,14,35,25,13,30,24,11,31,
 		    34,22,10,37,27,17,33,23,16,36,26,15};
   for(int i=0;i<24;i++){
-    if(mtdstrip[i]==globaltdcchan) {globalstripid=i+1;break;}
+    if(mtdStrip[i]==globalTdcChan) {globalStripId=i+1;break;}
   }
-  if(tdigboardid>3)
-    globalstripid = (globalstripid>12)? globalstripid-12:globalstripid+12;
+  if(tdigBoardId>3)
+    globalStripId = (globalStripId>12)? globalStripId-12:globalStripId+12;
 	
-  return globalstripid;
+  return globalStripId;
 }
 
 
+//____________________________________________
+/*!
+ * Map TDC channel to a global strip coordinate (prior to Run 12)
+ */
+Int_t StMtdHitMaker::tdcChan2globalStrip(int tdigBoardId,int tdcId,int tdcChan,int backLegId) {
+
+  /// This function is only useful before Run 12.
+  if (mYear>11) {
+    return tdcChan2globalStrip(tdigBoardId,tdcId,tdcChan);
+  }
+
+  /// 
+  Int_t globalStripId=-1;
+  if(backLegId==26){
+    if (tdcId>3) tdcId=tdcId-4; //scale to H#
+    int globalTdcChan=(tdcId+1)*10+tdcChan;
+    int mtdStrip[24]={34,22,10,37,27,17,33,23,16,36,26,15,
+		      21,12,32,20,14,35,25,13,30,24,11,31};
+    for(int i=0;i<24;i++){
+      if(mtdStrip[i]==globalTdcChan) {globalStripId=i+1; break;}
+    }
+  }
+  
+  if(backLegId==1){
+    int globalTdcChan=(tdcId+1)*10+tdcChan;
+    int mtdStrip[18]=  {34,22,10,37,27,17, 32,20,30,24,11,31, 33,23,16,36,26,15};
+    for(int i=0;i<18;i++){
+      if(mtdStrip[i]==globalTdcChan) {globalStripId=i+1;break;}
+    }
+  }
+  
+  return globalStripId;
+}
 //____________________________________________
 /*!
  * Fill the data from DAQ into MtdRawHit Collection in StEvent
