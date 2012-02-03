@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.3 2012/02/01 06:40:01 geurts Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.4 2012/02/03 17:52:41 geurts Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -54,8 +54,9 @@ class StMtdHitMaker:public StRTSBaseMaker {
   vector<MtdRawHit> MtdLeadingHits;
   vector<MtdRawHit> MtdTrailingHits;
 
+  Int_t                   mYear;                 //! RHIC run year
   Int_t                   mNValidTrays;          //! number of valid MTD trays
-  unsigned int            mTriggerTimeStamp[4];  //! Trigger Time in 4 fibers
+  unsigned int            mTriggerTimeStamp[2];  //! Trigger Time in 4 fibers
   StMtdCollection*        mMtdCollection;        //! pointer to StMtdCollection
   Int_t                   mTray2TdigMap[30][5];  //! map TDIG-Id to MTD tray
 
@@ -65,7 +66,8 @@ class StMtdHitMaker:public StRTSBaseMaker {
   StRtsTable *GetNextRaw(int sec);
       
   StMtdCollection *GetMtdCollection();
-  Int_t tdcchan2globalstrip(int, int, int);
+  Int_t tdcChan2globalStrip(int, int, int);
+  Int_t tdcChan2globalStrip(int, int, int, int);
 
  public:
 
