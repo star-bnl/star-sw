@@ -109,7 +109,21 @@ public:
       evpCtrs.runStartTime = time(NULL);
     }
 
-    float et = time(NULL) - evpCtrs.runStartTime;
+#ifdef __vxworks
+    struct timespec tm;
+    clock_gettime(CLOCK_REALTIME, &tm);
+    float sec = l2h32(tm.tv_sec);
+    float usec = l2h32(tm.tv_nsec * 1000);
+#else
+    struct timeval tm;
+    gettimeofday(&tm, NULL);
+    float sec = tm.tv_sec;
+    float usec = tm.tv_usec;
+#endif
+    
+    float currtime = sec + usec / 1000000.0;
+
+    float et = currtime - evpCtrs.runStartTime;
     if(et < 1) et = 1;
 
     // get event group mask
