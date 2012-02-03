@@ -1467,7 +1467,7 @@
         </varlist>
         
         <varlist type="REAL"  >
-            tan_theta_min,tan_theta_max
+            tan_theta_min/0.275720567/,tan_theta_max/0.761952162/
         </varlist>
 
 <Export language="Mortran">        
@@ -1476,9 +1476,10 @@
         	<Return value="tan(2*atan(exp(-etax)))" />
         </Inline>   
 </Export>
-        
+<!--        
         tan_theta_min = tanf( EtaMax ) 
         tan_theta_max = tanf( EtaMin ) 
+-->
 
 
         <If expr="cut .eq. 1"  >
