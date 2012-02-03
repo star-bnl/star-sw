@@ -275,8 +275,11 @@ Bfc_st BFC[] = { // standard chains
    ,                                                               "Base chain for 2012 ITTF (tpc)",kFALSE},
   {"pp2012a","" ,"", 
    "B2012,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
-   "","",                "Production chain for 2012 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},   
+   "","",                "Production chain for 2012 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
 
+  {"P2012a","" ,"",  
+   "B2012,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis"
+   ,                      "","","Production chain for 2011 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
   // Other chains/Calibration
