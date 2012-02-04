@@ -486,13 +486,13 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 
-	/* wait for it to stabilize */
+	/* wait for it to stabilize 
 	if((d32[2] >> 16) != FGT_VERSION) {
 		LOG(ERR,"RDO %d: bad version 0x%04X, expect 0x%04X",rdo,d32[2] >> 16, FGT_VERSION) ;
 		bad |= 2 ;	// soft error
 	
 	}
-
+	*/
 
 	if((d32[3] & 0xFFFF0000)) {	// error_flags
 		LOG(ERR,"RDO %d: error flags 0x%04X",rdo,d32[3]>>16) ;
