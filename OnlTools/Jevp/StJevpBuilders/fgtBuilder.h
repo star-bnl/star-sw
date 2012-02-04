@@ -77,6 +77,7 @@ public:
       TH1* h1;
       TH1* h2;
       TH1* hSumBad;
+      TH1* hApvCorpt;
       //other possible plots:
       //hits over pedestal for each timebin, shows in time, collision condition etc.
     };
@@ -98,6 +99,10 @@ public:
   static const int maxRMSVal;
   static const int minPedVal;
   static const int minRMSVal;
+  static const int numRDO;
+  static const int numAPV;
+  static const int numARM;
+  static const int goodChCut;
 
   int np;
   int hNp;
@@ -120,6 +125,8 @@ public:
 
   double runningAvg[19*1400];
   double runningStdDevSq[19*1400];
+  //num RDOs, ARM, APV, keep track of channel count per apv
+  int chCntDaq[2][6][24];
 
   int sumHistogramsFilled;
 

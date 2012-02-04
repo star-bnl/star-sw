@@ -131,6 +131,9 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   //  hContents.hSumBad->GetXaxis()->SetNdivisions(19,false);
   hContents.hSumBad->SetFillColor(kYellow-9);
   hContents.hSumBad->SetStats(false);
+  hContents.hApvCorpt=new TH1F("Frequency of good APVs per event","good APVs", 150,-0.5,149.5);
+  hContents.hApvCorpt->SetFillColor(kYellow-9);
+  hContents.hApvCorpt->SetStats(false);
 
   hSumContents.hSumPed=new TH2F("Pedestal per APV","Pedestal per APV",190,0,190,1497,0,1496);
   hSumContents.hSumPed->SetStats(false);
@@ -146,6 +149,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
       hSumContents.hSumSig->GetXaxis()->SetBinLabel(i*10+1,Gid2Label[Indx2Gid[i]].c_str());
       hSumContents.hSumFrac->GetXaxis()->SetBinLabel(i*10+1,Gid2Label[Indx2Gid[i]].c_str());
       hSumContents.hSumPed->GetXaxis()->SetBinLabel(i*10+1,Gid2Label[Indx2Gid[i]].c_str());
+
     }
 
 
@@ -161,6 +165,8 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   plots[np]=new JevpPlot(hContents.h1);
   plots[np+1]=new JevpPlot(hContents.h2);
   plots[np+2]=new JevpPlot(hContents.hSumBad);
+  plots[np+3]=new JevpPlot(hContents.hApvCorpt);
+  plots[np+3]->logy=true;
   JLine* line=new JLine(0,128,190,128);
   line->SetLineColor(kRed);
   plots[np+2]->addElement(line);
@@ -206,6 +212,11 @@ void fgtBuilder::startrun(daqReader *rdr) {
 
 void fgtBuilder::event(daqReader *rdr)
 {
+  //Jan's request
+  memset(chCntDaq,0,sizeof(chCntDaq));
+  //
+
+
 
   //  contents.h2_tmp->Fill(tRnd.Rndm(0));
   if(!(evtCt %1000))
@@ -221,6 +232,11 @@ void fgtBuilder::event(daqReader *rdr)
 	//the arm
 	//	dd->sec;// two arms per disc
 	//	int disc=dd->rdo*3+dd->sec/2;
+	///For Jan's request, only use timebin 0 so there is no double counting
+	if(f[i].tb==0)
+	  {
+	    chCntDaq[dd->rdo][dd->sec][dd->pad]++;
+	  }
 	
 	//see ben's spreadsheet, first rdo has 10, second 9 assemblies attached
 	int gid=(dd->rdo-1)*10+dd->sec*2;
@@ -271,8 +287,25 @@ void fgtBuilder::event(daqReader *rdr)
 	//quad should be 0-23
       }
   }
+  //Fill Jan's histo
+  int goodAPVs=0;
+  for(int iRdo=0;iRdo<numRDO;iRdo++)
+    {
+
+      for(int iArm=0;iArm<numARM;iArm++)
+	{
+	  for(int iApv=0;iApv<numAPV;iApv++)
+	    {
+	      if(chCntDaq[iRdo][iArm][iApv]>goodChCut)
+		goodAPVs++;
+	    }
+	}
+    }
+  hContents.hApvCorpt->Fill(goodAPVs);
   evtCt++;
   
+
+
   
   // Fill Histograms...
   //  int tpc_size = rdr->getDetectorSize("tpx");
@@ -312,7 +345,7 @@ void fgtBuilder::fillSumHistos()
     for(int gid=0;gid<maxA;gid++){
 	for(int iApv=0;iApv<10;iApv++){
 	    for(int iCh=0;iCh<128;iCh++){
-	      int index=Gid2Indx[gid]*maxC+iApv*128+iCh;
+	      //	      int index=Gid2Indx[gid]*maxC+iApv*128+iCh;
 	      int gIndex=gid*maxC+iApv*128+iCh;
 	      //should not be a memory leak, since histogram exists and should just be refilled...
 	      //+1 due to underflow bin
@@ -427,3 +460,7 @@ const int fgtBuilder::maxPedVal=1500;
 const int fgtBuilder::maxRMSVal=250;
 const int fgtBuilder::minPedVal=100;
 const int fgtBuilder::minRMSVal=0;
+ const int fgtBuilder::numRDO=2;
+ const int fgtBuilder::numARM=6;
+ const int fgtBuilder::numAPV=24;
+const int fgtBuilder::goodChCut=64;
