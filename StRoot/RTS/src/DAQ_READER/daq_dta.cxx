@@ -47,6 +47,7 @@ int daq_dta::iterate()
 void daq_dta::release()
 {
 	if(store && bytes_alloced) {
+		LOG(DBG,"freeing store") ;
 		free(store) ;
 		store = 0 ;
 		bytes_alloced = 0 ;

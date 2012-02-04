@@ -131,10 +131,22 @@ daq_det::~daq_det()
 	LOG(DBG,"~daq_det: %s [%d]",name,rts_id) ;
 
 #ifndef PP_MVME
-	if(caller) caller->de_insert(rts_id) ;
+	if(caller) {
+		LOG(DBG,"Before de_insert(%d)",rts_id) ;
+		caller->de_insert(rts_id) ;
+		LOG(DBG,"After de_insert(%d)",rts_id) ;
+	}
 #endif
 	return ;
 }
+
+
+unsigned int daq_det::get_global_event_num()
+{
+	if(caller) return caller->seq ;
+	
+	return 0 ;	// unknown...
+};
 
 void daq_det::managed_by(class daqReader *c)
 {
