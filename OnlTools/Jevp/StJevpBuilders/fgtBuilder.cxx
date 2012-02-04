@@ -214,9 +214,6 @@ void fgtBuilder::event(daqReader *rdr)
 {
   //Jan's request
   memset(chCntDaq,0,sizeof(chCntDaq));
-  //
-
-
 
   //  contents.h2_tmp->Fill(tRnd.Rndm(0));
   if(!(evtCt %1000))
@@ -233,11 +230,12 @@ void fgtBuilder::event(daqReader *rdr)
 	//	dd->sec;// two arms per disc
 	//	int disc=dd->rdo*3+dd->sec/2;
 	///For Jan's request, only use timebin 0 so there is no double counting
+	//	cout <<"naj fill : " << dd->rdo<<" sec: " << dd->sec << " pad " << dd->pad <<endl;
 	if(f[i].tb==0)
 	  {
-	    chCntDaq[dd->rdo][dd->sec][dd->pad]++;
+	    chCntDaq[dd->rdo-1][dd->sec][dd->pad]++;
 	  }
-	
+	//	cout <<"down  " <<endl;
 	//see ben's spreadsheet, first rdo has 10, second 9 assemblies attached
 	int gid=(dd->rdo-1)*10+dd->sec*2;
 	if(dd->pad>10)
@@ -288,6 +286,7 @@ void fgtBuilder::event(daqReader *rdr)
       }
   }
   //Fill Jan's histo
+  //	cout <<" fill histo" <<endl;
   int goodAPVs=0;
   for(int iRdo=0;iRdo<numRDO;iRdo++)
     {
@@ -302,6 +301,7 @@ void fgtBuilder::event(daqReader *rdr)
 	}
     }
   hContents.hApvCorpt->Fill(goodAPVs);
+  //  cout <<"done" <<endl;
   evtCt++;
   
 
