@@ -12,7 +12,7 @@
 #include "StEvent/StTriggerData.h"
 #include <TH1I.h>
 #include <TH2F.h>
-
+#include <TPaveStats.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -131,9 +131,15 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   //  hContents.hSumBad->GetXaxis()->SetNdivisions(19,false);
   hContents.hSumBad->SetFillColor(kYellow-9);
   hContents.hSumBad->SetStats(false);
-  hContents.hApvCorpt=new TH1F("Frequency of good APVs per event","good APVs", 150,-0.5,149.5);
+  hContents.hApvCorpt=new TH1F("APV Corruption","Frequency of visible APVs per event", 150,-0.5,149.5);
+  hContents.hApvCorpt->GetXaxis()->SetTitle("number of visible APVs");
   hContents.hApvCorpt->SetFillColor(kYellow-9);
-  hContents.hApvCorpt->SetStats(false);
+  //  cout <<"seting statis"<<endl;
+  hContents.hApvCorpt->SetStats(true);
+  //
+  //  cout <<"done"  <<endl;
+
+
 
   hSumContents.hSumPed=new TH2F("Pedestal per APV","Pedestal per APV",190,0,190,1497,0,1496);
   hSumContents.hSumPed->SetStats(false);
@@ -167,6 +173,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   plots[np+2]=new JevpPlot(hContents.hSumBad);
   plots[np+3]=new JevpPlot(hContents.hApvCorpt);
   plots[np+3]->logy=true;
+  plots[np+3]->setOptStat(10);
   JLine* line=new JLine(0,128,190,128);
   line->SetLineColor(kRed);
   plots[np+2]->addElement(line);
@@ -214,7 +221,6 @@ void fgtBuilder::event(daqReader *rdr)
 {
   //Jan's request
   memset(chCntDaq,0,sizeof(chCntDaq));
-
   //  contents.h2_tmp->Fill(tRnd.Rndm(0));
   if(!(evtCt %1000))
     LOG(DBG, "Looking at evt %d",evtCt);
