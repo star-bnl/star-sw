@@ -2,11 +2,14 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.26 2012/01/30 10:42:23 sgliske Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.27 2012/02/05 21:19:22 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.27  2012/02/05 21:19:22  avossen
+//  added check for invalid elec coordinates
+//
 //  Revision 1.26  2012/01/30 10:42:23  sgliske
-//  strip containers now contain adc values for
+
 //  all time bins.  Also fixed bug where setType modified the timebin
 //  rather than the type.
 //
@@ -177,6 +180,21 @@ Int_t StFgtRawMaker::FillHits()
                adc=mFgtRawData->adc;
                arm=rts_tbl->Sector();
                apv=rts_tbl->Pad();
+	       if(apv>=22 || apv <  0 || apv ==10|| apv==11)
+		 continue;
+	       if(arm<0 || arm> 4)
+		 continue;
+	       if(timebin>7)
+		 continue;
+	       if(channel>=128)
+		 continue;
+	       if(rdo<1 || rdo > 2)
+		 continue;
+
+
+
+
+
 	       Int_t geoId=-1;
 	       if(!fgtDb)
 		 //		 geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);

@@ -179,6 +179,18 @@ Int_t StFgtRawDaqReader::Make() {
             apv=dd->pad;
             rdo=dd->rdo;
             timebin=f[i].tb;
+	//corrupted data
+
+	       if(apv>=22 || apv <  0 || apv ==10|| apv==11)
+		 continue;
+	       if(arm<0 || arm> 4)
+		 continue;
+	       if(timebin>7)
+		 continue;
+	       if(channel>=128)
+		 continue;
+	       if(rdo<1 || rdo > 2)
+		 continue;
             Short_t discIdx=0;  // will be set with getNaivePhysCoordFromElecCoord
 
 
@@ -189,6 +201,13 @@ Int_t StFgtRawDaqReader::Make() {
                               : fgtTables->getGeoIdFromElecCoord(rdo, arm, apv, channel) 
                               );
             StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
+	    if(apv>21)
+	      cout <<"is cosmic: " << mIsCosmic << " rdo: " << rdo <<" arm: " << arm <<" apv: " << apv <<" channel: " << channel <<endl;
+	    if(strip <=0)
+	      {
+	      cout <<"geoId: " << geoId <<" discIdx: " << discIdx << " quad: " << quad << " layer: " << layer <<" strip: " << strip <<endl;
+	      cout <<"is cosmic: " << mIsCosmic << " rdo: " << rdo <<" arm: " << arm <<" apv: " << apv <<" channel: " << channel <<endl;
+	      }
             assert( discIdx > -1 );
             assert( quad > -1 );
             assert( strip > -1 );
@@ -257,8 +276,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.4 2012/01/31 16:48:56 wwitzke Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.5 2012/02/05 21:19:22 avossen Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.5  2012/02/05 21:19:22  avossen
+ * added check for invalid elec coordinates
+ *
  * Revision 1.4  2012/01/31 16:48:56  wwitzke
  * Changed for cosmic test stand.
  *
