@@ -229,6 +229,15 @@ void fgtBuilder::event(daqReader *rdr)
     fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
     for(u_int i=0;i<dd->ncontent;i++)
       {
+	//corrupted data
+	if(dd->pad>21 || dd->pad<0 || dd->pad==10 || dd->pad==11)
+	  continue;
+	if(dd->rdo<1 || dd->dd->rdo > 2 || dd->dd->sec <0 || dd->sec> 4)
+	  continue;
+	if(f[i].ch>127 || f[i].ch<0|| f[i].tb>7)
+	  continue;
+
+
 	//	if(evtCt <1000)
 	//	  printf("FGT ADC: RDO %d, ARM %d, APV %d: %d values\n",dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 	//	dd->rdo;
@@ -252,6 +261,7 @@ void fgtBuilder::event(daqReader *rdr)
 	if(dd->pad>10)
 	  quad+=1;
 	int channel;
+
 	if(gid<20)
 	  {
 	    channel=(dd->pad%12)*128+f[i].ch;
