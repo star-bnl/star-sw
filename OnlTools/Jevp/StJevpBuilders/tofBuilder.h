@@ -83,12 +83,8 @@ public:
 
   TLatex *TOF_L0_trg_labels[NTRAYS];
   TLatex *TOF_Error1_label;
-  TLatex *TOF_Error2_labela;
-  TLatex *TOF_Error2_labelb;
-  int nevts;
-  int nerr1;
-  int nerr2;
-  int nerr3;
+  TLatex *TOF_Error2_label;
+  TLatex *TOF_Error3_label;
   
   void ReadTrayList();
   void ReadValidBunchidPhase();

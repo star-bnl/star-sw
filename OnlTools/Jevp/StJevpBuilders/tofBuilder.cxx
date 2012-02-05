@@ -16,13 +16,6 @@
 #include "tofBuilder.h"
 #include <RTS/include/rtsLog.h>
 #include <assert.h>
-// This is the one PlotSet that is guarenteed to always exist
-// It's main purpose is to provide the run information 
-// To the server...
-//
-// It has no plots (currently)
-//
-
 
 ClassImp(tofBuilder);
   
@@ -40,8 +33,8 @@ tofBuilder::tofBuilder(JevpServer *parent) : JevpPlotSet(parent) {
 
   memset(TOF_L0_trg_labels, 0, sizeof(contents));
   TOF_Error1_label = NULL;
-  TOF_Error2_labela = NULL;
-  TOF_Error2_labelb = NULL;
+  TOF_Error2_label = NULL;
+  TOF_Error3_label = NULL;
 }
 
 tofBuilder::~tofBuilder() {
@@ -89,11 +82,10 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   contents.TOF_L1mult_vs_sumL0->SetYTitle("Sum L0 of hits");
 
 
-  contents.TOF_Error1 = new TH1F("TOF_Error1","TOF electronics error ",244,0.5,125.5);
+  contents.TOF_Error1 = new TH1F("TOF_Error1","TOF electronics errors",244,0.5,122.5);
   contents.TOF_Error1->SetXTitle("Tray #");
-  contents.TOF_Error2=new TH1F("TOF_Error2","TOF bunchid shift error",122,0.5,122.5);
-  contents.TOF_Error2->SetXTitle("THUB upvpd MTD");
-  contents.TOF_Error3=new TH1F("TOF_Error3","TOF bunchid shift error",122,0.5,122.5);
+  contents.TOF_Error2=new TH1F("TOF_Error2","TOF incorrect bunchid errors",122,0.5,122.5);
+  contents.TOF_Error3=new TH1F("TOF_Error3","TOF trays not read out (bunchid not found)",122,0.5,122.5);
   contents.TOF_EventCount=new TH1F("TOF_EventCount","TOF_EventCount",2,0,2);
   contents.TOF_Tray_hits1=new TH1F("TOF_Tray_hits1","TOF Hits by TrayHalf",244,0.5,122.5);
   contents.TOF_Tray_hits2=new TH1F("TOF_Tray_hits2","TOF Hits by TrayHalf",244,0.5,122.5);
@@ -118,107 +110,56 @@ void tofBuilder::initialize(int argc, char *argv[]) {
     plots[n]->logy = 1;
   }
   n--;
-
+  
+  //L1mult
   plots[++n] = new JevpPlot(contents.TOF_L1mult_vs_ZDCadcsum);
   plots[n]->setDrawOpts("colz");
-  // plots[n]->optstat = 0;
   plots[++n] = new JevpPlot(contents.TOF_L1mult_vs_sumL0);
   plots[n]->setDrawOpts("colz");
-  // plots[n]->optstat = 0;
-
+  
+  //error check
   plots[++n] = new JevpPlot(contents.TOF_Error1);
+  plots[n]->logy=1;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
   TOF_Error1_label = new TLatex();
   TOF_Error1_label->SetNDC();
   plots[n]->addElement(TOF_Error1_label);
 
   plots[++n] = new JevpPlot(contents.TOF_Error2);
-  TOF_Error2_labela = new TLatex();
-  TOF_Error2_labela->SetNDC();
-  TOF_Error2_labelb = new TLatex();
-  TOF_Error2_labelb->SetNDC(); 
-  plots[n]->gridy = 0;
-  plots[n]->addElement(TOF_Error2_labela);
-  plots[n]->addElement(TOF_Error2_labelb);
-  
-  JLatex *l;
-  l = new JLatex(.25, .12, "THUB1-NW0");
-  l->SetTextSize(.035);
-  l->SetTextAlign(13);
-  l->SetTextAngle(90);
-  plots[n]->addElement(l);
-
-  l = new JLatex(*l);
-  l->SetText("THB1-NE0");
-  l->SetX(1.25);
-  plots[n]->addElement(l);
-  l = new JLatex(*l);
-  l->SetText("THB1-SW0");
-  l->SetX(2.25);
-  plots[n]->addElement(l);
-  l = new JLatex(*l);
-  l->SetText("THB1-SE0");
-  l->SetX(3.25);
-  plots[n]->addElement(l);
-  l = new JLatex(*l);
-  l->SetText("upvpd-west0");
-  l->SetX(4.25);
-  plots[n]->addElement(l);
-  l = new JLatex(*l);
-  l->SetText("upvpd-east0");
-  l->SetX(5.25);
-  plots[n]->addElement(l);
-  l = new JLatex(*l);
-  l->SetText("MTD0");
-  l->SetX(6.25);
-  plots[n]->addElement(l);
-
-  l = new JLatex(*l);
-  l->SetY(.2);
-  l->SetText("THUB1-NW1");
-  l->SetX(.75);
-  plots[n]->addElement(l);
-  l = new JLatex(*l);
-  l->SetText("THB1-NE1");
-  l->SetX(1.75);
-  plots[n]->addElement(l);
-  l = new JLatex(*l);
-  l->SetText("THB1-SW1");
-  l->SetX(2.75);
-  plots[n]->addElement(l);
-  l = new JLatex(*l);
-  l->SetText("THB1-SE1");
-  l->SetX(3.75);
-  plots[n]->addElement(l);
-  l = new JLatex(*l);
-  l->SetText("upvpd-west1");
-  l->SetX(4.75);
-  plots[n]->addElement(l);
-  l = new JLatex(*l);
-  l->SetText("upvpd-east1");
-  l->SetX(5.75);
-  plots[n]->addElement(l);
-  l = new JLatex(*l);
-  l->SetText("MTD1");
-  l->SetX(6.75);
-  plots[n]->addElement(l);
-
-  
+  plots[n]->logy=1;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
+  TOF_Error2_label = new TLatex();
+  TOF_Error2_label->SetNDC(); 
+  plots[n]->addElement(TOF_Error2_label); 
   
   plots[++n] = new JevpPlot(contents.TOF_Error3);
+  plots[n]->logy=1;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
+  TOF_Error3_label = new TLatex();
+  TOF_Error3_label->SetNDC();  
+  plots[n]->addElement(TOF_Error3_label);
+  
+  //hits vs tray
+  plots[++n] = new JevpPlot(contents.TOF_Tray_hits1);
+  plots[n]->addHisto(contents.TOF_Tray_hits2);
+  plots[n]->logy=1;
+  plots[n]->getHisto(0)->histo->SetFillColor(5);plots[n]->optstat = 0;
+  plots[n]->getHisto(1)->histo->SetFillColor(7);plots[n]->optstat = 0;  
+  
   plots[++n] = new JevpPlot(contents.TOF_EventCount);
-
+  
   for(int i=0;i<NTRAYS;i++) {
     n++;
     plots[n] = new JevpPlot(contents.TOF_Tray_LEhitmap[i]);
     plots[n]->addHisto(extra.TOF_Tray_TEhitmap[i]);
     plots[n]->optstat = 0;
-    //plots[n]->logy = 1;
   }
   
   plots[++n] = new JevpPlot(contents.upvpd_hitmap[0]);
 
   JLine *ln;
-  //  JLatex *l;
+  JLatex *l; 
+  l = new JLatex(.25, .12, "THUB1-NW0");
+  l->SetTextSize(.035);
+  l->SetTextAlign(13);
+  l->SetTextAngle(90); 
 
   contents.upvpd_hitmap[0]->SetFillColor(19);
   ln = new JLine(18.5,.1,18.5,.9);
@@ -278,29 +219,19 @@ void tofBuilder::initialize(int argc, char *argv[]) {
     LOG(DBG, "Adding plot %d",i);
     addPlot(plots[i]);
   }
+  
+  LOG("TOF", "Initialization done.");
 }
   
 void tofBuilder::startrun(daqReader *rdr) {
-  //printf("start\n");
   LOG("JEFF", "tofBuilder starting run #%d",rdr->run);
   resetAllPlots();
-
-  //printf("reset\n");
-
-  nevts=0;
-  nerr1=0;
-  nerr2=0;
-  nerr3=0;
-
-  //printf("tray list\n");
 
   ReadTrayList();
   ReadValidBunchidPhase();
   ReadTraymaskoutList();
 
   long TOF_L0_trg_idx = ((long)&contents.TOF_L0_trg[0] - (long)&contents) / 4;
-
-  //printf("labels\n");
 
   for(int i=0;i<NTRAYS;i++) {
     LOG(DBG, "tray %d   (idx=%d)",i, TOF_L0_trg_idx);
@@ -312,7 +243,6 @@ void tofBuilder::startrun(daqReader *rdr) {
       TOF_L0_trg_labels[i] = NULL;
     }
 
-   
     LOG(DBG, "checking... tray %d",i);
 
     if(NotActiveTray[i+1]) {
@@ -332,7 +262,7 @@ void tofBuilder::startrun(daqReader *rdr) {
     
   }
 
-  // printf("done\n");
+  // LOG("TOF", "::starrun() done");
 }
 
 int tofBuilder::Get_TOFTHUB(int trayid){
@@ -405,7 +335,7 @@ int tofBuilder::parseData(daqReader *rdr)
 	trigwindowHighpertray[iii]=trigwindowLowpertray[iii]+80;
 
       for(int ifib=0;ifib<4;ifib++){
-	int ndataword = tof->ddl_words[ifib];    // 
+	int ndataword = tof->ddl_words[ifib];
 	if(ndataword<=0) continue;
 	for(int iword=0;iword<ndataword;iword++){
 	  int dataword=tof->ddl[ifib][iword];
@@ -413,11 +343,10 @@ int tofBuilder::parseData(daqReader *rdr)
 	  // error stuff...
 	  int packetid = (dataword&0xF0000000)>>28;
 	  if(!ValidDataword(packetid)) {
-	    
-	    // ignore tray95-0 error
+	    // ignore tray95-0 error until bad HPTDC replaced!!!!! 
+      // Contact kefeng.xin@rice.edu
 	    if(trayid != 95) {
 	      contents.TOF_Error1->Fill(trayid+0.5*halftrayid); 
-	      nerr1++;
 	    }
 	  }
 
@@ -435,14 +364,13 @@ int tofBuilder::parseData(daqReader *rdr)
 	    continue;
 	  }
 
-	  if(trayid < 1 || trayid > 124) continue;  
+	  if(trayid < 1 || trayid > 122) continue;
 	  if( (dataword&0xF0000000)>>28 == 0x6) {continue;}
 	  if( (dataword&0xF0000000)>>28 == 0x2) {
 	    bunchid=dataword&0xFFF;
 	    allbunchid[halftrayid][trayid-1] = bunchid;
 	    continue;  
 	  }
-	  //
 	  int edgeid =int( (dataword & 0xf0000000)>>28 );
 
 	  int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
@@ -491,14 +419,13 @@ int tofBuilder::parseData(daqReader *rdr)
 
 	  if(timeDiff<trigwindowLowpertray[trayid-1] || timeDiff>trigwindowHighpertray[trayid-1]) continue;
 
-	  //
 	  int atdig = globaltdcchan/24;   // 0,1,....7
 	  int atdcid  = globaltdcchan/8;    // 0,1,....24    
 	  int ahptdcid = atdcid%3;
 	  int atdcchan = globaltdcchan%8;
 	  int tinoid=TDIGChan2TINOChan(ahptdcid,atdcchan);
 	  int tinoidx = atdig*3 + tinoid;
-	  //
+    
 	  tinohit[trayid-1][tinoidx]++; 
 	  
 	  if((edgeid !=4) && (edgeid != 5)) continue;
@@ -529,66 +456,9 @@ bool tofBuilder::ValidDataword(int packetid)
 
 }
 
-// int tofBuilder::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchid)
-// {
-//   if(trayid<1 || trayid>122) return -1;
-//   if(trayid == 123) return -1;
-//   // THUB NW
-//   int trayinTHUB1[30]={21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50};
-//   // THUB NE 
-//   int trayinTHUB2[30]={66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95};
-//   // THUB SW
-//   int trayinTHUB3[30]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,51,52,53,54,55,56,57,58,59,60};
-//   // THUB SE
-//   int trayinTHUB4[30]={61,62,63,64,65,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120};
- 
-//   // the following numbers are moved into TOF_ValidBunchidPhase.txt 
-//   /*
-//   int trayvalidshift[2][4]={{4,-5,0,-7},{5,-4,0,-6}};
-//   //tray 121 half0: 4 5    half1: 5 6
-//   //tray 122 half0: -5 -4  half1: -4 -3
-//   int tray121shift[2][2]={{ 4, 5},{ 5, 6}};
-//   int tray122shift[2][2]={{-5,-4},{-4,-3}};
-//   int tray124shift[2]   = {-5,-6};
-//   */
-
-//   int nthub=-1;
-//   int ret=-1;
-//   for(int itray=0;itray<30;itray++){
-//     if(trayid == trayinTHUB1[itray]) nthub=0;
-//     if(trayid == trayinTHUB2[itray]) nthub=1;
-//     if(trayid == trayinTHUB3[itray]) nthub=2;
-//     if(trayid == trayinTHUB4[itray]) nthub=3;
-//   }
-//   if(trayid == 121) nthub = 4;
-//   if(trayid == 122) nthub = 5;
- 
-//   int diff = bunchid - refbunchid;
-//   if(diff>2048)   {diff =diff-4096;} 
-//   else if(diff<-2048) {diff =diff+4096;}
-
-//   //  cout<<"tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<nthub<<endl;
-
-//   if(trayid>1 && trayid<121){
-//     if( (diff != mValidShiftTray[0][nthub])  && (diff != mValidShiftTray[1][nthub]) ) ret=nthub;
-//   } else if(trayid==121){
-//     if(diff !=mValidShift121[halftrayid][0] && diff != mValidShift121[halftrayid][1]) ret=nthub;
-//   } else if(trayid==122){
-//     if(diff !=mValidShift122[halftrayid][0] && diff != mValidShift122[halftrayid][1]) ret=nthub;
-//   }
-
-//   if(ret>=0) {
-//     cout<<"ERROR!! tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<ret<<endl;
-//   }
-
-//   return ret;
-// }
-
 int tofBuilder::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchid)
 {
   if(trayid<1 || trayid>122) return -1;
-
-  if(trayid == 123) return -1;
 
   // THUB NW
   int trayinTHUB1[30]={21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50};
@@ -598,16 +468,6 @@ int tofBuilder::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchi
   int trayinTHUB3[30]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,51,52,53,54,55,56,57,58,59,60};
   // THUB SE
   int trayinTHUB4[30]={61,62,63,64,65,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120};
- 
-  // the following numbers are moved into TOF_ValidBunchidPhase.txt 
-  /*
-  int trayvalidshift[2][4]={{4,-5,0,-7},{5,-4,0,-6}};
-  //tray 121 half0: 4 5    half1: 5 6
-  //tray 122 half0: -5 -4  half1: -4 -3
-  int tray121shift[2][2]={{ 4, 5},{ 5, 6}};
-  int tray122shift[2][2]={{-5,-4},{-4,-3}};
-  int tray124shift[2]   = {-5,-6};
-  */
 
   int nthub=-1;
   int ret=-1;
@@ -617,13 +477,12 @@ int tofBuilder::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchi
     if(trayid == trayinTHUB3[itray]) nthub=2;
     if(trayid == trayinTHUB4[itray]) nthub=3;
   }
-  if(trayid == 121) nthub =4;
-  if(trayid == 122) nthub =5;
-  int diff=bunchid-refbunchid;
+  if(trayid == 121) nthub = 4;
+  if(trayid == 122) nthub = 5;
+  int diff = bunchid - refbunchid;
   if(diff>2048)   {diff =diff-4096;} 
   else if(diff<-2048) {diff =diff+4096;}
 
-//  cout<<"tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<nthub<<endl;
   if(trayid>1 && trayid<121){
     if( (diff != mValidShiftTray[0][nthub])  && (diff != mValidShiftTray[1][nthub]) ) ret=nthub;
   } else if(trayid==121){
@@ -631,8 +490,6 @@ int tofBuilder::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchi
   } else if(trayid==122){
     if(diff !=mValidShift122[halftrayid][0] && diff != mValidShift122[halftrayid][1]) ret=nthub;
   }
-
-  //if(ret>=0)cout<<"ERROR!! tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<ret<<endl;
 
   return ret;
 }
@@ -658,8 +515,6 @@ void tofBuilder::event(daqReader *rdr)
     if(prepost != 0) continue;    // only look at prepost =0 data.
 
     for(int tray=1;tray<=120;tray++){
-
-      //cout<<" TOF TRAY :::: "<<atrayid<<endl;
       int trigger_mult=trgd->tofTrayMultiplicity(tray,prepost);
       if(trigger_mult > 31) trigger_mult=31;
       contents.TOF_L0_trg[tray-1]->Fill(trigger_mult);
@@ -685,16 +540,14 @@ void tofBuilder::event(daqReader *rdr)
   contents.TOF_L1mult_vs_ZDCadcsum->Fill(TOF_L1mult, trgd->zdcHardwareSum());
   contents.TOF_L1mult_vs_sumL0->Fill(TOF_L1mult, sum_L0_hit);
 
-  // Check errors...
   contents.TOF_EventCount->Fill(1);
 
-  // check bunch id shift
+  // check bunch
   int bunchidref1 =   allbunchid[0][mReferenceTray-1];   // bunchid from tray 1 as reference.
   int bunchidref2 =   allbunchid[1][mReferenceTray-1];   // bunchid from tray 1 as reference.
   if(bunchidref1 != bunchidref2) {
     printf("ids %d %d\n",bunchidref1,bunchidref2);
-    contents.TOF_Error2->Fill(3);
-    nerr2++;
+    contents.TOF_Error2->Fill(1);
   }
   
   for(int itray=0;itray<122;itray++){
@@ -702,47 +555,49 @@ void tofBuilder::event(daqReader *rdr)
     if(NotActiveTray[traynum]) continue;
     for(int ihalf=0;ihalf<2;ihalf++){
       int bunchid=allbunchid[ihalf][itray];
-      //if(bunchid == -9999) continue;
-      
       int ret=ValidBunchid(traynum,ihalf,bunchid,bunchidref1);
-
-      if(ret>=0) {
-	contents.TOF_Error2->Fill(ret+0.5*ihalf);
-	nerr2++;
-
-	if(bunchid == -9999) { 
-	  contents.TOF_Error3->Fill(ret+0.5*ihalf);
-	  nerr3++;
-	}
-      }
+      
+      if(ret>=0 && bunchid!=-9999) contents.TOF_Error2->Fill(traynum); //real bunchid errors
+      if(bunchid==-9999) contents.TOF_Error3->Fill(traynum); //missing bunchid
     }
   }
 
-  nevts++;
   char t[256];
-  if(nerr1 == 0) {
-    sprintf(t, "No electronics errors in %d events",nevts);
+  int nev = (int)(contents.TOF_EventCount->GetEntries());
+  int err1 = (int)(contents.TOF_Error1->GetEntries());
+  int err2 = (int)(contents.TOF_Error2->GetEntries());
+  int err3 = (int)(contents.TOF_Error3->GetEntries());
+  
+  if(err1== 0) {
+    sprintf(t, "No electronics errors in %d events",nev);
+    TOF_Error1_label->SetTextColor(3);
   }
   else {
-    sprintf(t, "%d electronics errors in %d events",nerr1, nevts);
+    sprintf(t, "%d electronics errors in %d events",err1, nev);
+    TOF_Error1_label->SetTextColor(2);
   }
   TOF_Error1_label->SetText(.2,.8,t);
 
-  if(nerr2 == 0) {
-    sprintf(t, "No bunchid errors in %d events",nevts);
+  
+  if( err2== 0) {
+    sprintf(t, "No incorrrect bunchids in %d events",nev);
+    TOF_Error2_label->SetTextColor(3);
   }
   else {
-    sprintf(t, "%d bunchid errors in %d events",nerr2, nevts);
+    sprintf(t, "%d incorrect bunchids in %d events!",err2, nev);
+    TOF_Error2_label->SetTextColor(2);
   }
-  TOF_Error2_labela->SetText(.2,.8,t);
+  TOF_Error2_label->SetText(.2,.8,t);
 
-  if((nevts > 9) && (nerr3 > nevts/2)) {
-    sprintf(t, "Possible Tray Lost.  CALL EXPERT");
+  if( err3== 0) {
+    sprintf(t, "No read out errors in %d events",nev);
+    TOF_Error3_label->SetTextColor(3);
   }
   else {
-    t[0] = '\0';
+    sprintf(t, "%d read out errors in %d events!",err2, nev);
+    TOF_Error3_label->SetTextColor(2);
   }
-  TOF_Error2_labelb->SetText(.2,.7,t);
+  TOF_Error3_label->SetText(.2,.8,t);
  
   std::sort(leadinghits.begin(), leadinghits.end());
   std::sort(trailinghits.begin(), trailinghits.end());
@@ -797,15 +652,23 @@ void tofBuilder::main(int argc, char *argv[])
 
 
 void tofBuilder::ReadValidBunchidPhase(){
-  //cout<<"TOFcheckHistogramGroup::Bunchid phase config file:"<<mBunchShiftList<<endl;
-  char mBunchShiftList[256];
-  sprintf(mBunchShiftList, "%s/tof/%s",confdatadir,"TOF_ValidBunchidPhase.txt");
-
-  mReferenceTray=1;
   
   TString buffer;
+  char mBunchShiftList[256];
+  char mBunchShiftListLocal[256];
+  
+  sprintf(mBunchShiftList, "%s/tof/%s",confdatadir,"TOF_ValidBunchidPhase.txt");
   ifstream filein(mBunchShiftList);
+  
+  mReferenceTray=1;
   int count=0;
+  
+  //try local if not in conf dir
+  if(!filein) {
+    filein.close(); 
+    sprintf(mBunchShiftListLocal, "tofconfig/%s","TOF_ValidBunchidPhase.txt");
+    filein.open(mBunchShiftListLocal);
+  }
 
   if(filein){
     while(!filein.eof()){
@@ -824,7 +687,8 @@ void tofBuilder::ReadValidBunchidPhase(){
 
       count++;
     }
-  } else {cout<<"TOFcheckHistogramGroup::Can not open file:"<<mBunchShiftList<<endl;}
+  } else
+      LOG("====TOF====", "Can not open file: %s or %s", mBunchShiftList, mBunchShiftListLocal);
 
 }
 
@@ -833,44 +697,62 @@ void tofBuilder::ReadTraymaskoutList(){
   
   TString buffer;
   char mTraymaskoutList[256];
+  char mTraymaskoutListLocal[256];
+  
   sprintf(mTraymaskoutList, "%s/tof/%s",confdatadir,"TOF_TrayMaskout.txt");
-
   ifstream filein(mTraymaskoutList);
-  for(int i=0;i<128;i++){MaskoutTray[i]=false;}
+  for(int i=0;i<122;i++){MaskoutTray[i]=false;}
+  
+  //try local if not in conf dir
+  if(!filein) {
+    filein.close(); 
+    sprintf(mTraymaskoutListLocal, "tofconfig/%s","TOF_TrayMaskout.txt");
+    filein.open(mTraymaskoutListLocal);
+  }
+  
   if(filein){ 
     while(!filein.eof()) {
       buffer.ReadLine(filein);
       if(buffer.BeginsWith("/")) continue;
       if(buffer.BeginsWith("#")) continue;
       int trayid = atoi(buffer.Data());
-      if(trayid<1 || trayid>127) continue;
+      if(trayid<1 || trayid>122) continue;
       MaskoutTray[trayid]=true;
     }   
-  } else {cout<<"tofBuilder::Can not open file:"<<mTraymaskoutList<<endl;}
+  } else
+    LOG("====TOF====", "Can not open file: %s or %s", mTraymaskoutList, mTraymaskoutListLocal);
   filein.close();
 
 }
 
 void tofBuilder::ReadTrayList(){
   
-  //cout<<"tofBuilder::TrayList config file:"<<mTrayList<<endl;
-  char mTrayList[256];
-  sprintf(mTrayList, "%s/tof/%s",confdatadir,"TOF_TrayNotInRun.txt");
-  
   TString buffer;
+  char mTrayList[256];
+  char mTrayListLocal[256];
+  sprintf(mTrayList, "%s/tof/%s",confdatadir,"TOF_TrayNotInRun.txt");
 
   ifstream filein(mTrayList);
-  for(int i=0;i<128;i++){NotActiveTray[i]=false;}
+  for(int i=0;i<122;i++){NotActiveTray[i]=false;}
+  
+  //try local if not in conf dir
+  if(!filein) {
+    filein.close(); 
+    sprintf(mTrayListLocal, "tofconfig/%s","TOF_TrayNotInRun.txt");
+    filein.open(mTrayListLocal);
+  }
+  
   if(filein){ 
     while(!filein.eof()) {
       buffer.ReadLine(filein);
       if(buffer.BeginsWith("/")) continue;
       if(buffer.BeginsWith("#")) continue;
       int trayid = atoi(buffer.Data());
-      if(trayid<1 || trayid>127) continue;
+      if(trayid<1 || trayid>122) continue;
       NotActiveTray[trayid]=true;
     }   
-  } else {cout<<"tofBuilder::Can not open file:"<<mTrayList<<endl;}
+  } else
+    LOG("====TOF====", "Can not open file: %s or %s", mTrayList, mTrayListLocal);
   filein.close();
 
 }
@@ -913,7 +795,7 @@ int tofBuilder::tdcchan2upvpdPMTchan(int globaltdcchan, int edgeid,int trayid)
   for(int i=38;i<46;i++){
     if(upvpdLEchan[i]==inputglobalchan) {pmtLEchan=i;if(trayid==122)pmtLEchan=pmtLEchan+8;break;}
   }
-  //
+  
   int pmtTEchan=-1;
   for(int i=startpoint;i<startpoint+19;i++){
     if(upvpdTEchan[i]==inputglobalchan) {pmtTEchan=i;break;}
@@ -924,8 +806,6 @@ int tofBuilder::tdcchan2upvpdPMTchan(int globaltdcchan, int edgeid,int trayid)
 
   if(edgeid==4) pmtchan = pmtLEchan;
   if(edgeid==5) pmtchan = pmtTEchan;
-
-  //cout<<" inside map:: trayid="<<trayid<<" globaltdcchan="<<globaltdcchan<<" edgeid="<<edgeid<<" return="<<pmtchan<<endl;
 
   return pmtchan;
 }
