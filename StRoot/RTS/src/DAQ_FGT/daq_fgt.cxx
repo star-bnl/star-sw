@@ -205,7 +205,7 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 		// 2: null
 
 		int arm_mask = (d[3] >> 8) & 0x3F ;
-		LOG(NOTE,"ARC Header: format %d, ARM mask 0x%02x",format_code,arm_mask);
+		LOG(NOTE,"[evt %d]: RDO %d: ARC Header: format %d, ARM mask 0x%02x",get_global_event_num(),r,format_code,arm_mask);
 
 		u_int *dta = d + 6 ;	// start at the 6th word
 
@@ -213,38 +213,38 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 			if(arm_mask & (1<<arm)) ;
 			else continue ;
 
-			LOG(NOTE,"RDO %d, ARM %d, format_code %d",r,arm,format_code) ;
+			LOG(NOTE,"[evt %d]: RDO %d: Handling ARM %d",get_global_event_num(),r) ;
 
+			// digest the ARM header, word 0
 			int arm_id = *dta & 0x7 ;
 			int arm_seq = (*dta >> 20) & 0xfff;
 			int arm_err = (*dta >>16) & 0xf;
 			dta++ ;
+			// word 1
+			u_int apv_mask = *dta & 0x00FFFFFF ;
+			dta++ ;
+			// word 2, would get monitor register values from this word (not implemented yet, still need to skip over of course)
+			dta++ ;
+
+			LOG(NOTE,"[evt %d]: ARM_ID %d SEQ %d ERR %1x APV_MASK %06x",get_global_event_num(),
+			    arm_id,arm_seq,arm_err,apv_mask);
 
 			if(arm_id != arm) {
-				LOG(ERR,"RDO %d: Bad ARM ID: expect %d, have %d",r,arm,arm_id) ;
-				LOG(ERR,"0x%08x 0x%08x 0x%08x",*(dta-2),*(dta-1),*dta);
-				continue ;
+				LOG(ERR,"[evt %d]: RDO %d ARM %d: Bad ARM ID is %d",get_global_event_num(),r,arm,arm_id) ;
+				goto unrecoverable_error ;
 			}
 
 			if(arm_err != 0) {
-				LOG(ERR,"RDO %d ARM %d: Error code 0x%x",r,arm,arm_err) ;
-				continue ;
+				LOG(ERR,"[evt %d]: RDO %d ARM %d: Error code 0x%x",get_global_event_num(),r,arm,arm_err) ;
+				continue ;  // I think we can leave this as a 'recoverable' error for now ??
 			}
-
-			u_int apv_mask = *dta & 0x00FFFFFF ;
-			dta++ ;
-
-			// would get monitor register values from this word (not implemented yet, but need to skip over of course)
-			dta++ ;
 
 
 			for(int apv=0;apv<24;apv++) {
 				if(apv_mask & (1<<apv)) ;
 				else continue ;
 
-
-
-				LOG(NOTE,"  APV %d",apv) ;
+				LOG(NOTE,"[evt %d]: Handling APV %d",get_global_event_num(),apv) ;
 
 				int apv_id = *dta & 0x1F ;
 				int length = (*dta >> 5) & 0x3FF ;   // it's probable that we never use >0x1ff, so there is a hidden 'reserved' bit here
@@ -272,15 +272,18 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 
 				// sanity checks
 				if(apv != apv_id) {
-					LOG(ERR,"Bad APV ID: expect %d, read %d",apv,apv_id) ;
-					continue ;
+				  LOG(ERR,"[evt %d]: RDO %d ARM %d APV %d: Bad APV ID, got %d",get_global_event_num(),r,arm,apv,apv_id) ;
+					goto unrecoverable_error ;
 				}
 
 				if(seq != arm_seq) {
-				  // should be ERR, not yet; when promoting to err we need to change fmt code from 1 to something new, since there
-				  // is old data (before ARM firmware r67), with fmt code 1, that needs to be supported and which has wrong sequence numbers
-				  LOG(WARN,"RDO %d ARM %d APV %d: Sequence number mismatch, expect %d have %d",r,arm,apv,arm_seq,seq);
-				  //continue;
+					// In old test stand data (before ARM firmware r67) we have wrong sequence numbers
+#if 0
+					LOG(WARN,"[evt %d]: RDO %d ARM %d APV %d: Sequence number mismatch, expect %d have %d",get_global_event_num(),r,arm,apv,arm_seq,seq);
+#else
+					LOG(ERR,"[evt %d]: RDO %d ARM %d APV %d: Sequence number mismatch, expect %d have %d",get_global_event_num(),r,arm,apv,arm_seq,seq);
+					goto unrecoverable_error ;
+#endif
 				}
 
 				if((ntim <= 0) || (ntim > 7)) {
@@ -288,7 +291,7 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 					continue ;
 				}
 				if(fmt != 1) {
-					LOG(ERR,"FMT %d != 1",fmt) ;
+					LOG(ERR,"FMT %d != 1 (evt %d)",fmt,get_global_event_num()) ;
 					continue ;
 				}
 
@@ -353,8 +356,9 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 				*/
 
 				if ( 27+127+(ntim-1)*140 >= ((length-2)/3)*8 ) {
-				  LOG(ERR,"trouble in APV block content, it's shorter than required to unpack %d timebins",ntim);
-				  continue;
+				  LOG(ERR,"[evt %d]: RDO %d ARM %d APV %d: Trouble in APV block content, it's shorter than required to unpack %d timebins",
+				      get_global_event_num(),r,arm,apv,ntim);
+				  continue;  // this is a recoverable error
 				}
 				for(int ch=0;ch<128;ch++) {
 					int rch = 32*(ch%4) + 8*(ch/4) - 31*(ch/16) ;     // see APV user guide (channel mux sequence)
@@ -374,6 +378,9 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 			}
 
 		}
+		continue;
+unrecoverable_error:
+		LOG(WARN,"[evt %d]: RDO %d: Cannot reliably recover pointer to next item, dropping the rest of this event on this rdo");
 	}
 
 	adc->rewind() ;
