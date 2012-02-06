@@ -42,7 +42,7 @@ enum {
 
 // unsorted constants
 enum {
-   kFgtNumTimeBins = 5,           // if using cosmic data, recompile with this value set to 7
+  kFgtNumTimeBins = 9,           // if using cosmic data, recompile with this value set to 7
    kFgtMaxAdc = 4096
 };
 
@@ -68,8 +68,11 @@ enum {
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.5 2012/01/31 12:53:11 sgliske Exp $
+ * $Id: StFgtConsts.h,v 1.6 2012/02/06 18:24:32 avossen Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.6  2012/02/06 18:24:32  avossen
+ * changed max tb and default value for strip adcs
+ *
  * Revision 1.5  2012/01/31 12:53:11  sgliske
  * Somehow kFgtNumQuads was lost--now restored
  *
