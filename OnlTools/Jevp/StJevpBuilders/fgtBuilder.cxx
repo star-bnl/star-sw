@@ -232,7 +232,7 @@ void fgtBuilder::event(daqReader *rdr)
 	//corrupted data
 	if(dd->pad>21 || dd->pad<0 || dd->pad==10 || dd->pad==11)
 	  continue;
-	if(dd->rdo<1 || dd->dd->rdo > 2 || dd->dd->sec <0 || dd->sec> 4)
+	if(dd->rdo<1 || dd->rdo > 2 || dd->sec <0 || dd->sec> 4)
 	  continue;
 	if(f[i].ch>127 || f[i].ch<0|| f[i].tb>7)
 	  continue;
