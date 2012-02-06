@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.20 2012/01/28 20:10:12 avossen Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.21 2012/02/06 17:18:15 avossen Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.21  2012/02/06 17:18:15  avossen
+//  fixed negative charge clusters
+//
 //  Revision 1.20  2012/01/28 20:10:12  avossen
 //  addec cluster uncertainty
 //
@@ -122,7 +125,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
           stripWeightMap_t &stripWeightMap = newCluster->getStripWeightMap();
           stripWeightMap[ *it ] = 1;
 
-	  //	  cout <<" adc: " << accuCharge <<" geoId: " << (*it)->getGeoId() <<" meangeo: ";
+	  //	  cout <<"strip adc: " << (*it)->getAdc() <<" charge: " << (*it)->getCharge() <<endl;
 	  accuCharge=(*it)->getCharge();  
 	  accuChargeError=(*it)->getChargeUncert();
 	  meanGeoId=(*it)->getCharge()*(*it)->getGeoId();
@@ -147,6 +150,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	{
 	  //should really be charge...
 	  //accuCharge+=(*it)->getCharge();  
+	  //	  cout <<"adjacent strip with charge: " << (*it)->getCharge() <<endl;
 	  accuCharge+=(*it)->getCharge();
 	  accuChargeError+=(*it)->getChargeUncert();
 	  meanOrdinate+=ordinate;
@@ -170,7 +174,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	  //set charge, push back cluster, start new one
 	  //set layer etc of cluster
 
-	  //	  cout <<"setting charge of new cluster to " << accuCharge <<endl;
+	  //	  cout <<"setting charge of new cluster to (1)" << accuCharge <<endl;
 
 	  newCluster->setCharge(accuCharge);
 	  numStrips > 1 ? newCluster->setChargeUncert(sqrt(accuChargeError/((float)numStrips-1))) : newCluster->setChargeUncert(sqrt(accuChargeError/((float)numStrips)));
@@ -239,6 +243,7 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
       //      cout <<" finishing stuff up, mean geo: " << meanGeoId << " accucharge: " << accuCharge;
       meanGeoId/=accuCharge;
       //      cout <<" and corrected: " << meanGeoId<<endl;
+      //      cout <<"set charge: " << accuCharge <<endl;
       newCluster->setCharge(accuCharge);
       numStrips > 1 ? newCluster->setChargeUncert(sqrt(accuChargeError/((float)numStrips-1))) : newCluster->setChargeUncert(sqrt(accuChargeError/((float)numStrips)));
 

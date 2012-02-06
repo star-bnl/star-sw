@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.22 2012/02/02 15:38:58 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.23 2012/02/06 17:18:05 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.23  2012/02/06 17:18:05  avossen
+ * fixed negative charge clusters
+ *
  * Revision 1.22  2012/02/02 15:38:58  sgliske
  * bu fixed: getAdc not in timebin loop
  *
@@ -223,25 +226,35 @@ Int_t StFgtA2CMaker::Make(){
                         strip->setGeoId( -1 );
                      } else {
                         Int_t adcMinusPed = adc - ped;
-			sumC+=adcMinusPed;
-                        strip->setAdc( adcMinusPed );
+
+			//does this make sense? we run over several timebins... so this will pick up the last one, but this function assumes the default timebin of 2, let's add the timebin
+			//                        strip->setAdc(adcMinusPed );
+                        strip->setAdc( strip->getAdc(), timebin );
                         strip->setType( 1 );
 
                         mHistPtr->SetBinContent( timebin+1, adcMinusPed );
                         mHistPtr->SetBinError( timebin+1, pedErr );
 
-                        if( (mRelThres && adcMinusPed > mRelThres*pedErr) || (mAbsThres>-4096 && adcMinusPed > mAbsThres) )
-                           ++nTbAboveThres;
+			
+			//                        if( (mRelThres && adcMinusPed > mRelThres*pedErr) && ((mAbsThres<(-4096)) ||  adcMinusPed > mAbsThres) )
+                        if( (mRelThres && adcMinusPed > mRelThres*pedErr) || (mAbsThres>-4096 && adcMinusPed > mAbsThres)) 
+			  {
+			//only add if it is above pedestal, otherwise negative values can be added...
+			    sumC+=adcMinusPed;
+			    //    cout <<"this is above threshold:  timebin: " << timebin<<" chargeSum: " << sumC <<" adc: " << adcMinusPed <<endl;
+			    ++nTbAboveThres;
+			  }
                      };
+
                   };
 
                   // check if any signal here
-                  if( !nTbAboveThres && (mRelThres || mAbsThres>-4096) ){
+		  if( !nTbAboveThres && (mRelThres || mAbsThres>-4096) ){
                      strip->setGeoId( -1 );
                   } else if( mRelThres || mAbsThres>-4096 ){
                      // only fit if there was a cut on the pedestals
-
-		     Double_t gain = mDb->getGainFromGeoId( geoId );
+		    Double_t gain = mDb->getGainFromGeoId( geoId );
+		    //		    cout <<"found strip above threshold, charge: " << sumC <<" gain: " << gain<<endl;
 		    //////////////////////////////////----------------Disable fitting for now
 #ifdef DO_FIT
                      mHistPtr->Fit( mPulseShapePtr );
@@ -255,12 +268,15 @@ Int_t StFgtA2CMaker::Make(){
                      Double_t fitC = mPulseShapePtr->GetParameter( 0 );
                      Double_t errC = mPulseShapePtr->GetParError( 0 );
 
-                     strip->setCharge( gain ? fitC/gain : 0 );
+		     strip->setCharge( gain ? fitC/gain : 0 );
+
 		     //removed adc in error computation
                      strip->setChargeUncert( gain ? errC/gain : 10000 );
 #endif 
 		     ////////////////////////////////////////////////////////////----
-		     strip->setCharge(gain ? sumC/gain : 0);
+		     //		     cout <<"strip adc sum (=charge sum): " << sumC << " gain: " << gain << " geoId: " << geoId <<endl;
+		     // strip->setCharge(gain ? sumC/gain : 0);
+		     strip->setCharge(sumC);
 		     strip->setChargeUncert(gain ? sqrt(nTbAboveThres)*pedErr/gain : 10000);
 
 #ifdef DEBUG
