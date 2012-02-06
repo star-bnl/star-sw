@@ -840,6 +840,10 @@ JevpPlot *JevpServer::getPlot(char *name) {
     
     char *ps_name = curr->getPlotSetName();
     int len = strlen(ps_name);
+
+    LOG("JEFF", "compare: (%s) (%s) len=%d cmp=%d",
+	name,ps_name,len,strncmp(name,ps_name,len));
+
     if(strncmp(name,ps_name,len) != 0) continue;
 
 
@@ -876,7 +880,7 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
   char runidstr[20];
   char plotname[80];
 
-  LOG(DBG,"argstring is %s\n",argstring);
+  LOG(DBG,"argstring is (%s)\n",argstring);
   if(!getParamFromString(plotname, argstring)) {
     LOG(ERR,"No plot indicated in getplot?\n");
     return;
@@ -1579,8 +1583,8 @@ char *JevpServer::getParamFromString(char *dest, char *source, char *param)
     str++;
   }
   
-  // copy till whitespace or end...
-  while((*str != '\0') && !isspace(*str)) {
+  // copy till semicolon or end...
+  while((*str != '\0') && (*str != ';')) {
     *tmp = *str;
     tmp++;
     str++;
