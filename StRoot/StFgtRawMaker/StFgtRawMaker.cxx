@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.27 2012/02/05 21:19:22 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.28 2012/02/06 04:17:45 balewski Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.28  2012/02/06 04:17:45  balewski
+//  added 2012 APV exclusions
+//
 //  Revision 1.27  2012/02/05 21:19:22  avossen
 //  added check for invalid elec coordinates
 //
@@ -180,19 +183,19 @@ Int_t StFgtRawMaker::FillHits()
                adc=mFgtRawData->adc;
                arm=rts_tbl->Sector();
                apv=rts_tbl->Pad();
-	       if(apv>=22 || apv <  0 || apv ==10|| apv==11)
-		 continue;
-	       if(arm<0 || arm> 4)
-		 continue;
-	       if(timebin>7)
-		 continue;
-	       if(channel>=128)
-		 continue;
-	       if(rdo<1 || rdo > 2)
-		 continue;
+	       if(apv>=22 || apv <  0 || apv ==10|| apv==11)	 continue;
+	       if(arm<0 || arm> 4)		 continue;
+	       if(timebin>7)		 continue;
+	       if(channel>=128)		 continue;
+	       if(rdo<1 || rdo > 2)		 continue;
 
-
-
+	    // year 2012 exclusions
+	    if( ( (rdo==1 && arm==1) || (rdo==2 && arm==2) || (rdo==1 && arm==4)) && apv>4 && apv<10 ) continue;
+	    if( ((rdo==2 && arm==1) ||(rdo==1 && arm==3) ||(rdo==2 && arm==4) ) && apv<5 ) continue;
+	    if( rdo==2 && arm==4)  continue;
+	    if( ( (rdo==2 && arm==1) ||(rdo==1 && arm==3)  ) && apv>16 ) continue;
+	    if( ((rdo==1 && arm==2) ||(rdo==2 && arm==3)  ) && apv>10 && apv<17) continue;
+	    // end of 2012 exclusions
 
 
 	       Int_t geoId=-1;
