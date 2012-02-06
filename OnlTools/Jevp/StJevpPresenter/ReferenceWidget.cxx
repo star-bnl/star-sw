@@ -436,7 +436,7 @@ ReferenceWidget::ReferenceWidget(JevpGui *logic, char *name) : QDialog()
 
   // Get default reference plot...
   char refargs[100];
-  sprintf(refargs, "%s refid=1",name);
+  sprintf(refargs, "%s;refid=1",name);
   plot = logic->jl_getPlotFromServer(refargs, error);
 
   pd = new PlotDisplay(this, plot, 1, PD_LARGE_REF);
@@ -450,7 +450,7 @@ ReferenceWidget::ReferenceWidget(JevpGui *logic, char *name) : QDialog()
   allRefBox->setLayout(allRefLayout);
   PlotDisplay *prev = NULL;
   for(int i=1;;i++) {
-    sprintf(refargs, "%s refid=%d",name, i);
+    sprintf(refargs, "%s;refid=%d",name, i);
     
     if(i != 1) {   // if i==1, use plot from largeref...
       plot = logic->jl_getPlotFromServer(refargs,error);
