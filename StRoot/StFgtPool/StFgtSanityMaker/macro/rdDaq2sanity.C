@@ -23,10 +23,8 @@ StFgtDbMaker      *fgtDbMkr      = 0;
 StFgtRawDaqReader *daqRdr        = 0;
 StFgtSanityMaker     *tshapeMkr        = 0;
 
-int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.daq", 
-		  const Char_t *filenameOut = "whatever",
-               Int_t nevents = 1000,
-		  Bool_t cutShortEvents = 0 ){
+int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.daq",
+               Int_t nevents = 1000 ){
   Int_t isCosmic = -1;
   LoadLibs();
   Int_t ierr = 0;
@@ -53,7 +51,6 @@ int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.da
   
   if( !isCosmic ){
     // always cut short events if it is cosmic data
-    cutShortEvents = 1;
     
     cout << "Loading St_db_Maker" << endl;
     gSystem->Load("libStDb_Tables.so");
@@ -64,8 +61,8 @@ int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.da
     TString dir0 = "MySQL:StarDb";
     TString dir1 = "$STAR/StarDb";
     St_db_Maker *dbMkr = new St_db_Maker( "dbMkr", dir0, dir1 );
-    dbMkr->SetDateTime(20120128,204320);      // run 13025001 2012-01-25 08:03:34 GMT
-    
+    dbMkr->SetDateTime(20120128,204320);      // run ???
+    dbMkr->SetDateTime(20120125,80350);      // run 13025001 2012-01-25 08:03:34 GMT
     cout << "Loading StFgtDbMaker" << endl;
      gSystem->Load("StFgtDbMaker");
      
@@ -79,11 +76,11 @@ int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.da
   cout << "Constructing the daq reader" << endl;
   daqRdr = new StFgtRawDaqReader( "daqReader", filenameIn, fgtDbMkrName.data() );
   daqRdr->setIsCosmic( isCosmic );
-  daqRdr->cutShortEvents( cutShortEvents );
+  daqRdr->cutShortEvents( true );
   cout << "Fgt DB Maker Name " << fgtDbMkrName.data() << endl;
   cout << "Constructing the Time Shape Maker" << endl;
   tshapeMkr = new StFgtSanityMaker( "FgtTimeShapeMaker", fgtDbMkrName.data() );
-  std::string outFileName( filenameOut );
+
    
 
    // debug
@@ -101,8 +98,8 @@ int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.da
 
    cout << "max nevents = " << nevents << endl;
    for( int i=0; i<nevents && !ierr; ++i ){
-
-      //cout << "event number " << i << endl;
+     //    if( i % 100 == 0 )
+         cout << "\ton event number **************" << i << endl;
 
       //cout << "clear" << endl;
       analysisChain->Clear();
@@ -146,6 +143,9 @@ void LoadLibs() {
 /**************************************************************************
  *
  * $Log: rdDaq2sanity.C,v $
+ * Revision 1.2  2012/02/06 04:17:43  balewski
+ * added 2012 APV exclusions
+ *
  * Revision 1.1  2012/02/04 22:03:43  balewski
  * start
  *

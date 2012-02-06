@@ -20,7 +20,6 @@
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "RTS/src/DAQ_READER/daqReader.h"
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
-//#include "StRoot/St_db_Maker/St_db_Maker.h"
 #include "StRoot/StFgtUtil/StFgtConsts.h"
 
 #include <string.h>
@@ -179,20 +178,21 @@ Int_t StFgtRawDaqReader::Make() {
             apv=dd->pad;
             rdo=dd->rdo;
             timebin=f[i].tb;
-	//corrupted data
-
-	       if(apv>=22 || apv <  0 || apv ==10|| apv==11)
-		 continue;
-	       if(arm<0 || arm> 4)
-		 continue;
-	       if(timebin>7)
-		 continue;
-	       if(channel>=128)
-		 continue;
-	       if(rdo<1 || rdo > 2)
-		 continue;
+	    //corrupted data in non existing channels
+	    if(apv>=22 || apv <  0 || apv ==10|| apv==11)   	continue;
+	    if(arm<0 || arm> 4)		                        continue;
+	    if(timebin>7)		                        continue;
+	    if(channel>=128)		                        continue;
+	    if(rdo<1 || rdo > 2)		                continue;
             Short_t discIdx=0;  // will be set with getNaivePhysCoordFromElecCoord
 
+	    // year 2012 exclusions
+	    if( ( (rdo==1 && arm==1) || (rdo==2 && arm==2) || (rdo==1 && arm==4)) && apv>4 && apv<10 ) continue;
+	    if( ((rdo==2 && arm==1) ||(rdo==1 && arm==3) ||(rdo==2 && arm==4) ) && apv<5 ) continue;
+	    if( rdo==2 && arm==4)  continue;
+	    if( ( (rdo==2 && arm==1) ||(rdo==1 && arm==3)  ) && apv>16 ) continue;
+	    if( ((rdo==1 && arm==2) ||(rdo==2 && arm==3)  ) && apv>10 && apv<17) continue;
+	    // end of 2012 exclusions
 
             Short_t quad, strip;
             Char_t layer;
@@ -203,7 +203,7 @@ Int_t StFgtRawDaqReader::Make() {
             StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
 	    if(apv>21)
 	      cout <<"is cosmic: " << mIsCosmic << " rdo: " << rdo <<" arm: " << arm <<" apv: " << apv <<" channel: " << channel <<endl;
-	    if(strip <=0)
+	    if(strip <0)
 	      {
 	      cout <<"geoId: " << geoId <<" discIdx: " << discIdx << " quad: " << quad << " layer: " << layer <<" strip: " << strip <<endl;
 	      cout <<"is cosmic: " << mIsCosmic << " rdo: " << rdo <<" arm: " << arm <<" apv: " << apv <<" channel: " << channel <<endl;
@@ -276,8 +276,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.5 2012/02/05 21:19:22 avossen Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.6 2012/02/06 04:17:32 balewski Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.6  2012/02/06 04:17:32  balewski
+ * added 2012 APV exclusions
+ *
  * Revision 1.5  2012/02/05 21:19:22  avossen
  * added check for invalid elec coordinates
  *

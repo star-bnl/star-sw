@@ -139,7 +139,11 @@ Int_t StFgtSanityMaker::Make(){
 	 pedSig=fgtTables->getPedestalSigmaFromElecCoord(rdo,arm,apv,chn);
 	 memset(adcA,0,sizeof(adcA));
 	 int up=0;
-	 if(rdo==2 && chn!=127)//tmp
+	 if( chn==127) continue;
+	 if( rdo!=1) continue;
+	 if( arm!=1) continue;
+	 if( apv!=15) continue;
+
 	 for(Int_t is=0;is<Ntimebin;is++){
 	   adcA[is]=(*stripIter)->getAdc(is);
 	   adcA[is]-=ped;
@@ -148,7 +152,7 @@ Int_t StFgtSanityMaker::Make(){
 	   up++;
 	 }
 	 if(up) {
-	   printf("\nieve=%d rdo=%d arm=%d apv=%d ch=%d geoId=%d \n    adc-spd[0...6]=",iEvt,rdo,arm,apv,chn,geoId);
+	   printf("\nieve=%d rdo=%d arm=%d apv=%d ch=%d geoId=%d \n    adc-ped[0...6]=",iEvt,rdo,arm,apv,chn,geoId);
 	   for(Int_t is=0;is<Ntimebin;is++) printf(" %d ",adcA[is]);
 	   printf("\n");
 	 }
@@ -207,6 +211,9 @@ ClassImp( StFgtSanityMaker );
 /**************************************************************************
  *
  * $Log: StFgtSanityMaker.cxx,v $
+ * Revision 1.2  2012/02/06 04:17:36  balewski
+ * added 2012 APV exclusions
+ *
  * Revision 1.1  2012/02/04 22:03:40  balewski
  * start
  *
