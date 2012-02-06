@@ -841,9 +841,6 @@ JevpPlot *JevpServer::getPlot(char *name) {
     char *ps_name = curr->getPlotSetName();
     int len = strlen(ps_name);
 
-    LOG("JEFF", "compare: (%s) (%s) len=%d cmp=%d",
-	name,ps_name,len,strncmp(name,ps_name,len));
-
     if(strncmp(name,ps_name,len) != 0) continue;
 
 

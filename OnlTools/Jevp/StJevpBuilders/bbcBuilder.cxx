@@ -177,9 +177,13 @@ void bbcBuilder::event(daqReader *rdr)
   contents.h199_bbc_AdcSum_west->Fill(trgd->bbcADCSum(west));
   contents.h200_bbcl_AdcSum_east->Fill(trgd->bbcADCSumLargeTile(east));
   contents.h201_bbcl_AdcSum_west->Fill(trgd->bbcADCSumLargeTile(west));
-  contents.h202_bbc_earliest_tac_east->Fill(trgd->bbcEarliestTDC(east));
-  contents.h203_bbc_earliest_tac_west->Fill(trgd->bbcEarliestTDC(west));
-  
+  if(trgd->bbcEarliestTDC(east) > 0) {
+    contents.h202_bbc_earliest_tac_east->Fill(trgd->bbcEarliestTDC(east));
+  }
+  if(trgd->bbcEarliestTDC(west) > 0) {
+    contents.h203_bbc_earliest_tac_west->Fill(trgd->bbcEarliestTDC(west));
+  }
+
   if( trgd->bbcEarliestTDC(east)>10 && trgd->bbcEarliestTDC(east)<3000 &&
       trgd->bbcEarliestTDC(west)>10 && trgd->bbcEarliestTDC(west)<3000 ) {
     bbcTimeDiff = trgd->bbcTimeDifference()-4096;
