@@ -681,7 +681,7 @@ Bfc_st BFC[] = { // standard chains
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker","StVpdCalibMaker",   "VPD calibration",kFALSE}, 
   
   // MTD related chains
-  {"MtdDat"   ,"mtd_raw","MtdChain","db,MtdUtil","StMtdHitMaker","StEvent,StMtdHitMaker"
+  {"mtdDat"   ,"mtd_raw","MtdChain","db,MtdUtil","StMtdHitMaker","StEvent,StMtdHitMaker"
    ,                                                                                "MTD hit maker",kFALSE},
   // Time Of Flight related options
   {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
@@ -707,11 +707,11 @@ Bfc_st BFC[] = { // standard chains
   
   
   // fms
-  {"fmsdat"     ,"","", "StEvent,fmsdb", 
+  {"fmsDat"     ,"","", "StEvent,fmsdb", 
                                      "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",kFALSE},
 
   // FGT placeholder
-  {"fgtdat"     ,"","", "event,fgtutil","StFgtRawMaker","StFgtRawMaker",          "FGT Data reader",kFALSE},
+  {"fgtDat"     ,"","", "event,fgtutil","StFgtRawMaker","StFgtRawMaker",          "FGT Data reader",kFALSE},
 
   
   // Some global Sti stuff including vertexing
