@@ -15,7 +15,10 @@ int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.da
   Int_t ierr = 0;
   
   std::string daqFileName( filenameIn );
-  
+
+  // create histogram storage array  (everybody needs it):
+  TObjArray* HList=new TObjArray;
+
   cout << "Constructing the chain" << endl;
   analysisChain = new StChain("eemcAnalysisChain");
   
@@ -48,8 +51,9 @@ int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.da
   daqRdr->cutShortEvents( true );
   cout << "Fgt DB Maker Name " << fgtDbMkrName.data() << endl;
   cout << "Constructing the Time Shape Maker" << endl;
-  tshapeMkr = new StFgtSanityMaker( "FgtTimeShapeMaker", fgtDbMkrName.data() );
-   
+  // new StFgtSanityMaker( "FgtTimeShapeMaker", fgtDbMkrName.data() );
+  gainMk=new StFgtJanGainMaker(  fgtDbMkrName.data() );
+  gainMk->setHList(HList);
 
    // debug
    analysisChain->ls(3);
@@ -72,6 +76,19 @@ int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.da
    analysisChain->Finish();
 
    cerr << "\tall done" << endl;
+
+   TString outFh=filenameIn; outFh="pulse.hist.root";
+   //outFh.ReplaceAll(".daq",".wana.hist.root");
+   cout<<"Output histo file "<<outFh<<endl;
+   hf=new TFile(outFh,"recreate");
+   if(hf->IsOpen()) {
+     HList->ls();
+     HList->Write();
+     printf("\n Histo saved -->%s<\n",outFh.Data());
+   } else {
+     printf("\n Failed to open Histo-file -->%s<, continue\n",outFh.Data());
+   }
+
 
    fgtDbMkr->printFgtDumpCSV("fgtMapDump.csv"); // to dump whole FGT DB mapping
 
@@ -102,6 +119,9 @@ void LoadLibs() {
 /**************************************************************************
  *
  * $Log: rdDaq2sanity.C,v $
+ * Revision 1.4  2012/02/07 08:25:32  balewski
+ * *** empty log message ***
+ *
  * Revision 1.3  2012/02/07 05:33:33  balewski
  * *** empty log message ***
  *

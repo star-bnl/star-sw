@@ -1,5 +1,5 @@
 /*!
- * \class StFgtSanityMaker 
+ * \class StFgtJanGainMaker 
  * \author Jan Balewski , February 2012
  *
  ***************************************************************************
@@ -9,7 +9,7 @@
  ***************************************************************************/
 
 #include <string>
-#include "StFgtSanityMaker.h"
+#include "StFgtJanGainMaker.h"
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -20,15 +20,16 @@
 //========================================================
 //========================================================
 
-StFgtSanityMaker::StFgtSanityMaker( const Char_t* name , const Char_t* dbMkrName  ) : StMaker( name ), mDbMkrName( dbMkrName ), mFgtDbMkr(0) {
+StFgtJanGainMaker::StFgtJanGainMaker(  const Char_t* dbMkrName ,const Char_t* name  ) : StMaker( name ), mDbMkrName( dbMkrName ), mFgtDbMkr(0) {
+  HList=0;
 };
 
 
 //========================================================
 //========================================================
 //========================================================
-Int_t StFgtSanityMaker::Init(){
-
+Int_t StFgtJanGainMaker::Init(){
+  assert(HList);
 
    GetEvtHddr()->SetEventNumber(1);
 
@@ -36,54 +37,48 @@ Int_t StFgtSanityMaker::Init(){
    eventPtr= (StEvent*)GetInputDS("StEvent");
    assert(eventPtr);
    
-   mFgtCollectionPtr=NULL;
-   if(eventPtr) {
-     mFgtCollectionPtr=eventPtr->fgtCollection();
-   } else {
-     eventPtr=new StEvent();
-     AddData(eventPtr);
-     mFgtCollectionPtr=eventPtr->fgtCollection();
-   };
-   if(!mFgtCollectionPtr) {
-     mFgtCollectionPtr=new StFgtCollection();
-     eventPtr->setFgtCollection(mFgtCollectionPtr);
-     LOG_DEBUG <<"::prepareEnvironment() has added a non existing StFgtCollection()"<<endm;
-   } else {
-     //this should be unncessary if the member clear function is called
-     mFgtCollectionPtr->Clear();
-   };
-   
-   mFgtDbMkr = static_cast< StFgtDbMaker* >( GetMaker( mDbMkrName.data() ) );
-   
-   if( !mFgtDbMkr ){
-     LOG_FATAL << "Error finding mFgtDbMkr named '" << mDbMkrName << "'" << endm;
-     assert(1==2);
-   };
-
+   mFgtCollectionPtr=eventPtr->fgtCollection();
+   assert(mFgtCollectionPtr);
+   mFgtDbMkr = static_cast< StFgtDbMaker* >( GetMaker( mDbMkrName.data() ));   
+   assert(mFgtDbMkr );
    
    LOG_INFO << "Using date and time " << mFgtDbMkr->GetDateTime().GetDate() << ", "
 	    << mFgtDbMkr->GetDateTime().GetTime() << endm;
    
    iEvt=-1;
-   hh=new TH1F("fgt1","Seen APVs per event; # APVs/event",150,-0.5,149.5);
-
-   
+   initHistos();
    return kStOk;
 };
 
-//========================================================
-//========================================================
-//========================================================
 
-Int_t StFgtSanityMaker::Make(){
+//________________________________________________
+//________________________________________________
+void
+StFgtJanGainMaker::initHistos(){
+  //  const float PI=TMath::Pi();
+
+  //...... data histograms
+  memset(hA,0,sizeof(hA));
+   hA[5]=new TH1F("fgt1","Seen APVs per event; # APVs/event",150,-0.5,149.5);
+
+   
+   // add histos to the list (if provided)
+   for(int i=0;i<mxHA;i++) {
+     if(  hA[i]==0) continue;
+     HList->Add( hA[i]);
+   }
+   //  HList->ls();
+
+}
+
+//========================================================
+//========================================================
+//========================================================
+Int_t StFgtJanGainMaker::Make(){
 
    enum {Ntimebin=7};
    Int_t adcA[Ntimebin];
-   int chCntDet[kFgtNumDiscs][kFgtNumQuads][kFgtApvsPerAssembly*2]; 
-   int chCntDaq[  kFgtNumRdos ][kFgtNumArms ][kFgtApvsPerAssembly*2];
-   memset(chCntDet,0,sizeof(chCntDet));
-   memset(chCntDaq,0,sizeof(chCntDaq));
- 
+   int nPulse=0;
    iEvt++; 
    // cout << "iEvt = " << iEvt << endl;
    assert( mFgtDbMkr );
@@ -95,7 +90,7 @@ Int_t StFgtSanityMaker::Make(){
  
    mFgtCollectionPtr = mFgtCollectionPtr=eventPtr->fgtCollection();
    assert( mFgtCollectionPtr);
- 
+
    int lastGeo=-999;
    for( UInt_t discIdx=0; discIdx<mFgtCollectionPtr->getNumDiscs(); ++discIdx ){
      StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
@@ -116,9 +111,6 @@ Int_t StFgtSanityMaker::Make(){
        StFgtGeom::decodeGeoId(geoId,disk,quad,layer,strip);
        StFgtGeom::getPhysicalCoordinate(geoId,disk,quad,layer,ordinate,lowerSpan,upperSpan);
 
-       chCntDet[disk][quad][apv]++;
-       chCntDaq[rdo-1][arm][apv]++;
-
        // drop unstable or dead APVs - Jan's private list
        if(rdo==2 && arm==1 && apv==5) continue; 
        if(rdo==2 && arm==1 ) continue;
@@ -136,18 +128,27 @@ Int_t StFgtSanityMaker::Make(){
        float minAdc=9999, maxAdc=-9999, sum=0;
        int iMin=-1;
        for(Int_t is=0;is<Ntimebin;is++){
-	 adcA[is]=(*stripIter)->getAdc(is);
+	 adcA[is]=(*stripIter)->getAdc(is)-ped;
 	 if(adcA[is]<minAdc) { minAdc=adcA[is]; iMin=is;}
 	 if(adcA[is]>maxAdc) maxAdc=adcA[is];
 	 sum+=adcA[is];
        }
 
        //printf("mm %f %f\n",ped,maxAdc);
-       maxAdc-=minAdc;
-       sum-=minAdc*Ntimebin;
        if(maxAdc<600) continue;
        if(maxAdc>3000) continue;
-       if(iMin>0) continue; // require ped is in time bin 0
+       if(iMin>1) continue; // require ped is in time bin 0 or 1
+       
+       // save histo with pulse-shape
+       nPulse++;
+       TH1F * hsp=new TH1F(Form("ps%d_%d",iEvt,nPulse), Form("ieve=%d rdo=%d arm=%d apv=%d ch=%d geoId=%d     strip=%d%c%c%03d; time bin",iEvt,rdo,arm,apv,chn,geoId,disk+1,quad+'A',layer,strip),Ntimebin+2,0,Ntimebin+2);
+       for(Int_t is=0;is<Ntimebin;is++){
+	 hsp->SetBinContent(is+1,adcA[is]-ped);
+	 hsp->SetBinError(is+1,pedSig);
+       }
+       HList->Add(hsp);
+       // end of histo-save
+
        char star=' ';
        if(abs(lastGeo-geoId)==1) star='*';
        lastGeo=geoId;
@@ -158,58 +159,26 @@ Int_t StFgtSanityMaker::Make(){
      }
    }
    
-   if(iEvt==0) {
-     printf("JJ eventID=%d FGT sanity (detector view)\n",eventPtr->id());
-     for(int idisc=0;idisc<kFgtNumDiscs;idisc++)
-       for(int iquad=0;iquad<kFgtNumQuads;iquad++){
-	 printf("disc=%d quad=%c   ",idisc+1,iquad+'A');
-	 for(int iapv=0;iapv<kFgtApvsPerAssembly*2;iapv++){
-	   if(chCntDet[idisc][iquad][iapv]<=0) continue;
-	   printf(" apv%02d:%3d, ",iapv,chCntDet[idisc][iquad][iapv]);
-	 }
-	 printf("\n");
-       }
-     
-     printf("\nJJ eventID=%d FGT sanity (Daq view)\n",eventPtr->id());
-     for(int irdo=0;irdo<kFgtNumRdos; irdo++)
-       for(int iarm=0;iarm<kFgtNumArms;iarm++) {
-	 printf("RDO=%d arm=%d  apv:nCh  ",irdo+1,iarm);
-	 for(int iapv=0;iapv<kFgtApvsPerAssembly*2;iapv++){
-	   if(chCntDaq[irdo][iarm][iapv]<=0) continue;
-	   printf(" %2d:%3d, ",iapv,chCntDaq[irdo][iarm][iapv]);
-	 }
-	 printf("\n");
-       }
-   }// end of printout
-   
-   int nSeenApv=0;
-   for(int irdo=0;irdo<kFgtNumRdos; irdo++)
-     for(int iarm=0;iarm<kFgtNumArms;iarm++) 
-       for(int iapv=0;iapv<kFgtApvsPerAssembly*2;iapv++)
-	 if(chCntDaq[irdo][iarm][iapv]>64) nSeenApv++;
-   hh->Fill(nSeenApv);    
    
    return kStOK;
 };
 
 
-Int_t StFgtSanityMaker::Finish(){
+Int_t StFgtJanGainMaker::Finish(){
   
-  cout << "StFgtSanityMaker::Finish()" << endl;
-  hh->Draw();
-  gPad->SetLogy();
+  cout << "StFgtJanGainMaker::Finish()" << endl;
   return StMaker::Finish();
 };
 
 
 
 
-ClassImp( StFgtSanityMaker );
+ClassImp( StFgtJanGainMaker );
 
 /**************************************************************************
  *
- * $Log: StFgtSanityMaker.cxx,v $
- * Revision 1.5  2012/02/07 08:25:29  balewski
+ * $Log: StFgtJanGainMaker.cxx,v $
+ * Revision 1.1  2012/02/07 08:25:29  balewski
  * *** empty log message ***
  *
  * Revision 1.4  2012/02/07 06:14:42  balewski
