@@ -1,6 +1,11 @@
-* $Id: scongeo.g,v 1.4 2009/02/12 00:07:32 perev Exp $
+* $Id: scongeo.g,v 1.5 2011/03/11 00:05:51 jwebb Exp $
 *
 * $Log: scongeo.g,v $
+* Revision 1.5  2011/03/11 00:05:51  jwebb
+* An improved model of the SVT support cone... specifically the support rods.
+* Previous geometry assumed solid carbon.  Now we implement a carbon-fiber nomex
+* sandwich.
+*
 * Revision 1.4  2009/02/12 00:07:32  perev
 * BugFix wrong array size for PCON
 *
@@ -34,7 +39,7 @@ Module  SCONGEO is Support structures from SVTT moved into CAVE:
 +cde,AGECOM,GCONST,GCUNIT.
 *
       Content          SCON,SCMY,SGRA,SBSP,SAKM,SCKM,SBMM,SBMI,SBMO,SMRD,
-                       SBRL,SBRX,SBSR,SBCR,SROD,SROH
+                       SBRL,SBRX,SBSR,SBCR,SROD,SROH,SRON,SROI
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
                        ZsizeMax,  Angoff, SupportVer,   ConeVer,
@@ -44,6 +49,7 @@ Module  SCONGEO is Support structures from SVTT moved into CAVE:
                        HosRmx,    Nhoses,    WrpMyThk,  WrpAlThk,
                        GrphThk,   Cone1Zmn,  RodLen,    RodDist,
                        RodID,     RodOD,     RodIDx,    RodODx,
+                       carbonShell, carbonDens, nomexDens,
 		       Con1IdMn, Con3IdMn,
                        Con4IdMn, Con4IdMx,   Cone3zmx,  Cone4zmx,
                        BraThk,    ERJThk,    ERJWid,
@@ -173,6 +179,12 @@ Module  SCONGEO is Support structures from SVTT moved into CAVE:
       RodOD     = 4.50       ! OD of Carbon support rods 
       RodIDx    = 8.72       ! ID of Carbon support rods 
       RodODx    = 9.58       ! OD of Carbon support rods 
+*------------------------------------------------------------
+   Fill SSUP ! Support structures
+      Version   = 4          ! geometry version
+      carbonShell = 0.04     ! 0.4mm carbon fiber shell
+      carbonDens  = 1.78     ! 1.78 g/cm^3 is a typical carbon composite density
+      nomexDens   = 0.048    ! Ballpark figure
 *------------------------------------------------------------
    Fill SSUB ! beampipe support
       Version   = 1          ! geometry version
@@ -514,23 +526,71 @@ EndBlock
 * ****************************************************************************
 *
 Block SROD is the SVT Carbon composite support rod
+
       Material  Carbon
-      Attribute SROD  Seen=1  Colo=2
+      IF (ssup_version>=4.00) THEN
+         Material CarbonFiber dens=ssup_carbonDens
+      ENDIF
+      Attribute SROD  Seen=1  Colo=1
       Shape     ELTU   p1=ssup_RodODx/2,
                        p2=ssup_RodOD/2,
                        dz=ssup_RodLen/2
-      Create and Position SROH;
+
+      IF (ssup_version>=4.00) THEN
+      
+         Create   SRON "The support rod nomex core"
+         Position SRON
+
+      Else
+
+         Create   SROH "The support rod hole"
+         Position SROH
+
+      EndIF
+
 endblock
 
 *
 * ****************************************************************************
 *
+
+
+BLOCK SRON Is the creamy nomex filling
+
+      Component C      A=12  Z=6  W=5
+      Component H      A=1   Z=1  W=8
+      Component O      A=16  Z=8  W=2
+      Mixture   Nomex  Dens=ssup_nomexDens
+      Attribute SRON seen=1 colo=5
+
+      Shape     ELTU p1=ssup_rododx/2-ssup_carbonShell,
+                     p2=ssup_rodod /2-ssup_carbonShell
+
+      Create   SROI "The support rod inner shell"
+      Position SROI
+
+ENDBLOCK
+
+BLOCK SROI Is the inner carbon fiber shell
+
+      Material CarbonFiber
+      Attribute SROI seen=1 colo=1
+      Shape ELTU p1=ssup_rodidx/2+ssup_carbonShell,
+                 p2=ssup_rodid /2+ssup_carbonShell
+
+      Create   SROH "The support rod hole"
+      Position SROH
+
+ENDBLOCK
+
 Block SROH is the hole in SROD
+
       Material  Air
       Attribute SROH  Seen=1  Colo=3
       Shape     ELTU   p1=ssup_RodIDx/2,
                        p2=ssup_RodID/2,
                        dz=ssup_RodLen/2
+
 endblock
       End
 

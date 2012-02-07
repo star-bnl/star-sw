@@ -1,5 +1,8 @@
-* $Id: agxinit.cdf,v 1.2 2009/04/09 22:33:21 perev Exp $
+* $Id: agxinit.cdf,v 1.3 2011/10/20 23:07:19 jwebb Exp $
 * $Log: agxinit.cdf,v $
+* Revision 1.3  2011/10/20 23:07:19  jwebb
+* Added capability to provide a slope in the x,y vertex.
+*
 * Revision 1.2  2009/04/09 22:33:21  perev
 * gfilter added
 *
@@ -256,7 +259,8 @@ X_vertex  'x of the generated vertex' R D=0
 Y_vertex  'y of the generated vertex' R D=0
 Z_vertex  'z of the generated vertex' R D=0
 >Guidance
-Defines the average position of the simulated vertex.
+Defines the average position of the simulated vertex at z=0.  To provide a
+z-dependent offset, use the gslope command.
 >Action AGXUSER
 *-----------------------------------------------------------------------------
 >Command GSPREAD
@@ -266,6 +270,25 @@ Y_sigma  'y-spread of the generated vertex' R D=0
 Z_sigma  'z-spread of the generated vertex' R D=0
 >Guidance
 Defines the spread of the simulated vertex position.
+>Action AGXUSER
+*-----------------------------------------------------------------------------
+>Command GSLOPE
+>Parameters
+X 'z-dependence of the beamline' R D=0
+Y 'z-dependence of the beamline' R D=0
+>Guidance
+Provides the slope of the beamline vs z in the x and y directions. 
+
+Example:
+
+   aguser/gspread 0.02 0.02 25.0
+   aguser/gvertex 0.01 0.10  1.0
+   aguser/gslope  2.5E-3 1.0E-6 
+
+   implements a beamline constraint
+
+   x = 0.01 + (2.5E-3)*z
+   y = 0.10 + (1.0E-6)*z
 >Action AGXUSER
 *-----------------------------------------------------------------------------
 >Command GSFLAG

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.14 2009/11/10 21:18:53 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.15 2009/12/07 23:38:15 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.15  2009/12/07 23:38:15  fisyak
+ * Move size definition from #define  to enumerations
+ *
  * Revision 1.14  2009/11/10 21:18:53  fisyak
  * use local fMap variable
  *
@@ -1059,7 +1062,7 @@ Float_t StarMagField::Interpolate( const Float_t Xarray[], const Float_t Yarray[
 
 /// Search an ordered table by starting at the most recently used point
 
-void StarMagField::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
+void StarMagField::Search( Int_t N, const Float_t Xarray[], Float_t x, Int_t &low )
 
 {
   assert(! TMath::IsNaN(x));

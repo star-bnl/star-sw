@@ -1,7 +1,10 @@
 ****************************************************************************
-* $Id: tpcegeo.g,v 1.30 2009/11/10 02:14:31 perev Exp $
+* $Id: tpcegeo.g,v 1.31 2011/02/28 16:47:18 jwebb Exp $
 *
 * $Log: tpcegeo.g,v $
+* Revision 1.31  2011/02/28 16:47:18  jwebb
+* Added "EndFILL" statements where required.
+*
 * Revision 1.30  2009/11/10 02:14:31  perev
 * Where GSTPAR, set local material avoid bug in gphysi
 *
@@ -91,6 +94,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       tialDR     = 0.004    ! inner aluminum layer thickness
       MWCread    = 2        ! MWC readout flag
       gasCorr    = 1        ! gas density correction version
+   EndFILL
 *
    Fill TPRS              ! sector of padrows
       sec    = 1            ! sector number: 1 for inner, 2 for outer
@@ -102,6 +106,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
                 158, 166, 174, 182 }        ! number of pads in row
       Rpads  = {60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.6, 98.8, 
                104.0,109.2,114.4,119.6 }    ! tpc padrow radii
+   EndFILL
 *
    Fill TPRS              ! sector of padrows
       sec    = 2            ! sector number: 1 for inner, 2 for outer
@@ -120,6 +125,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
                 167.195, 169.195, 171.195, 173.195, 175.195, 
                 177.195, 179.195, 181.195, 183.195, 185.195, 
                 187.195, 189.195 }        ! tpc padrow radii
+   EndFILL
 *
    Fill TECW              ! EC trapezoid and support Wheel
       sec      = 1          ! sector number: 1 for inner, 2 for outer
@@ -149,6 +155,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       zex  = { 0, 0, 0, 0, 0 }  ! z positions of extra aluminum
       dxex = { 0, 0, 0, 0, 0 }  ! x-thickness of extra aluminum
       dzex = { 0, 0, 0, 0, 0 }  ! z-thickness of extra aluminum
+   EndFILL
 *
    Fill TECW              ! endcap trapezoid and support Wheel
       sec      = 2          ! sector number: 1 for inner, 2 for outer
@@ -180,6 +187,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       zex  = { 6.69, 32.22, 40.22, 56.22, 56.22 }     ! z positions
       dxex = { 2.54, 0.476, 0.476, 3.175, 3.175 }     ! x-thickness
       dzex = { 4.00, 7.05,  7.05,  7.05,  7.05  }     ! z-thickness
+   EndFILL
 *     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *
       Use  TPCG  

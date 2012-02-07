@@ -10,8 +10,29 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.115 2009/11/16 20:16:23 fine Exp $
+// $Id: St_db_Maker.cxx,v 1.122 2010/05/05 20:44:15 dmitry Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.122  2010/05/05 20:44:15  dmitry
+// Fixed check for db broker in file mode
+//
+// Revision 1.121  2010/05/05 18:35:03  dmitry
+// addon: single datasets also saved
+//
+// Revision 1.120  2010/05/05 15:25:51  dmitry
+// refactored snapshot code, to include Valeri's patch (save .root files)
+//
+// Revision 1.119  2010/04/28 07:23:40  dmitry
+// =new method to save snapshot+one subsequent dataset for each table in db
+//
+// Revision 1.118  2010/04/21 19:04:31  perev
+// Save changed to account changed internal structure
+//
+// Revision 1.117  2010/04/17 02:08:33  perev
+// ::SetDateTime set time also StMaker::SetDateTime
+//
+// Revision 1.116  2010/01/27 21:34:20  perev
+// GetValidity now is static
+//
 // Revision 1.115  2009/11/16 20:16:23  fine
 // Make the TDatime const interfaces
 //
@@ -217,52 +238,6 @@ enum eDBMAKER {kUNIXOBJ = 0x2000};
 
 TableClassImpl(St_dbConfig,dbConfig_st)
 //__________________________ class St_db_Maker  ____________________________
-ClassImp(St_db_Maker)
-//_____________________________________________________________________________
-int St_db_Maker::Snapshot (int flag)
-{
-   int ians=0;
-   TFile *tfSnap = 0;
-   TObjectSet set("dbSnapshot",0);
-   const char *fname = SAttr("dbSnapshot");
-   if (!fname || !*fname)                                       return 0;
-   switch (flag) {
-     case 0://Read
-     if (gSystem->AccessPathName(fname, kFileExists))           return 0;
-     if (gSystem->AccessPathName(fname, kReadPermission))       return 0;
-     tfSnap = TFile::Open(fname,"READ");
-     if (!tfSnap)                                               return 0;
-     if (tfSnap->IsZombie()) {delete tfSnap;                    return 0;}
-
-     Info("Snapshot","Use DB from file %s\n",fname);
-     ians = set.Read("dbSnapshot");
-     fDataBase = (TDataSet*)set.GetObject();
-     set.DoOwner(0);
-     assert(fDataBase);
-     break;
-
-     case 1://Write
-     if (!gSystem->AccessPathName(fname, kFileExists))          return 0;
-//// if (gSystem->AccessPathName(fname, kWritePermission))      return 0;
-     tfSnap = TFile::Open(fname,"NEW");
-     if (!tfSnap || tfSnap->IsZombie()) {
-       Error("Snapshot","Can not open file for write");
-       return 0;
-     }
-     TDataSet *parent = fDataBase->GetParent();
-     fDataBase->Shunt(0);
-     set.SetObject(fDataBase);
-     Info("Snapshot","Save DB to file %s\n",fname);
-     ians = set.Write("dbSnapshot",TObject::kOverwrite);
-     fDataBase->Shunt(parent);
-     tfSnap->Close();
-     break;
-   }
-   delete tfSnap;
-   return ians;
-}
-
-
 //__________________________ class St_db_Maker  ____________________________
 ClassImp(St_db_Maker)
 //_____________________________________________________________________________
@@ -631,11 +606,17 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
     if (val->fTimeMin.Get() <= uevent
      && val->fTimeMax.Get() >  uevent)          return kPrune;
 
+   TObjectSet set("dbSnapshot",0);                                                                                                                   
+   const char *fname = mk->SAttr("dbSnapshot");                                                                                                      
+   if (!fname || !*fname) {                                                                                                                          
+     // not in a snapshot mode                                                                                                                       
+   } else { 
     if (!mk->fDBBroker) {
       mk->Error("UpdateDB","DbSnapshot mode: wrong validity for %s ignored( ???? )"
                ,val->GetName());
       return kPrune;
     }
+  }
   TDataSet *par = val->GetParent();
   par->Remove(val->fDat);
   mk->UpdateValiSet(val,currenTime);
@@ -681,7 +662,9 @@ SWITCH:  switch (kase) {
     case 2:   // Only CINT object
               newGuy = LoadTable(left);
               if (!val->fDat) { val->fDat = newGuy; val->AddFirst(newGuy);}
-              else            { val->fDat->Update(newGuy); delete newGuy;}
+              else if(val->fDat->InheritsFrom(TTable::Class()))
+	                      { val->fDat->Update(newGuy); delete newGuy ;}
+              else            { delete val->fDat; val->fDat = newGuy     ;}
               val->fTimeMin = valsCINT[0];  val->fTimeMax = valsCINT[1];
               val->fGood=1; kase=4; goto SWITCH;
 
@@ -941,6 +924,7 @@ void St_db_Maker::SetDateTime(Int_t idat,Int_t itim)
   fIsDBTime=0; if (idat==0) return;
   fIsDBTime=1; fDBTime.Set(idat,itim);
   Info("SetDateTime","Setting Startup Date=%d Time=%d",idat,itim);
+  StMaker::SetDateTime(idat,itim);
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetDateTime(const char *alias)
@@ -951,6 +935,7 @@ void   St_db_Maker::SetDateTime(const char *alias)
   assert(idat);
   Info("SetDateTime","(\"%s\") == Startup Date=%d Time=%d",alias,idat,itim);
   fDBTime.Set(idat,itim);
+  StMaker::SetDateTime(idat,itim);
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetOn(const char *path)
@@ -968,11 +953,18 @@ Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime)
   top = GetDataBase(path);
   if (!top) return 1;
   TDataSetIter nextDS(top,999);
-  while((ds = nextDS())) {
+  TDataSet::EDataSetPass  mode = TDataSet::kContinue;
+  while((ds = nextDS(mode))) {
+    mode = TDataSet::kContinue;
+    if (ds->GetName()[0]=='.') { mode = TDataSet::kPrune; continue; }
     if (!ds->InheritsFrom(TTable::Class()))continue;
     ts = ds->Path();
     i = ts.Index(".const/"); assert(i>0); ts.Replace(0  ,i+7,"");
-    if (ts.Index(".")>=0)               continue;
+    int jdot = ts.Index(".",(Ssiz_t)1,(Ssiz_t)0   ,TString::kExact);
+    assert(jdot>0);
+    int jsla = ts.Index("/",(Ssiz_t)1,(Ssiz_t)jdot,TString::kExact);
+    assert(jsla>0);
+    ts.Remove(jdot,jsla-jdot+1);
     l = ts.Length();
     for (i=0;i<l;i++) {
       if (ts[i]!='/') continue;
@@ -981,7 +973,7 @@ Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime)
     }
     tb = (TTable*)ds;
     if (newtime) { val[0] = *newtime;}
-    else         {i = GetValidity(tb,val); assert(!i);}
+    else         {i = GetValidity(tb,val); assert(i>=0);}
     sprintf(cbuf,".%08d.%06d.C",val[0].GetDate(),val[0].GetTime());
     ts += cbuf;
     out.open((const char*)ts);
@@ -991,6 +983,124 @@ Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime)
   }
   return (!nakt);
 }
+//_____________________________________________________________________________
+Int_t St_db_Maker::SaveDataSet(TDataSet* ds, int type, bool savenext) {
+    if (!ds || !ds->InheritsFrom(TTable::Class())) {                                                                                                        
+        // dataset is not inherited from TTable                                                                                                      
+        return 0;                                                                                                                                    
+    }                                                                                                                                                
+    int i = 0;                                                                                                                                         
+    int jdot = 0, jsla = 0; // used for recursive directory creation                                                                                   
+	TString ts; 
+	TString dir; // DataSet directory on disk                                                                                                          
+    ts = ds->Path();                                                                                                                                 
+    i = 0; i = ts.Index(".const/"); assert(i>0); ts.Replace(0,i+7,"");                                                                                                                                                                                                                                   
+    jdot = 0; jdot = ts.Index(".",(Ssiz_t)1,(Ssiz_t)0   ,TString::kExact); assert(jdot>0);                                                           
+    jsla = 0; jsla = ts.Index("/",(Ssiz_t)1,(Ssiz_t)jdot,TString::kExact); assert(jsla>0);                                                           
+    ts.Remove(jdot, jsla-jdot + 1);                                                                                                                  
+    int l = ts.Length();                                                                                                                             
+
+    for (i = 0; i < l; i++) {                                                                                                                        
+      if (ts[i]!='/') continue;                                                                                                                      
+      dir.Replace(0,999,ts,i);                                                                                                                       
+      gSystem->MakeDirectory(dir);                                                                                                                   
+    } 
+	switch(type) {
+		case 0:
+			return SaveDataSetAsRootFile((TTable*)ds, ts, savenext);
+			break;
+		case 1:
+			return SaveDataSetAsCMacro((TTable*)ds, ts, savenext);
+			break;
+        default:
+		// requested format is not known to St_db_Maker, sorry!
+		break;
+	}                                                                                                                                      	
+	return 1;
+}
+
+//_____________________________________________________________________________
+Int_t St_db_Maker::SaveDataSetAsCMacro(TTable* tb, TString ts, bool savenext) {
+    TDatime val[2]; // validity of original sets                                                                                                       
+    std::ofstream out; // output file handle                                                                                                           
+    int i = 0; i = GetValidity(tb,val); assert(i>=0);                                                                                                    
+    std::stringstream ostr;                                                                                                                          
+    ostr << ts << "." << std::setw(6) << std::setfill('0') <<val[0].GetDate() << "." << std::setw(6) << std::setfill('0')                            
+         << val[0].GetTime() << ".C"; 
+    out.open( ostr.str().c_str() );                                                                                                                  
+    tb->SavePrimitive(out,"");                                                                                                                       
+    out.close();                                                                                                                                     
+
+	if (savenext == true) {
+    	std::string tbname( std::string(ts.Data()).substr(7) ); // name of data set to search for
+    	if (val[1].GetDate() < 20330101 ) { // table has more values, let's store +1 dataset 
+        	TDataSet* ds_r = 0;                                                                                                                          
+        	ds_r = GetDataBase(tbname.c_str(), &val[1]);                                                                                                 
+			if (ds_r) {
+				SaveDataSetAsCMacro((TTable*)ds_r, ts, false);
+        		delete ds_r;
+			}                                                                                                                                 
+    	}                                                                                                                                                
+	}
+	return 0;
+}
+
+Int_t St_db_Maker::SaveDataSetAsRootFile(TTable* tb, TString ts, bool savenext) {
+    TDatime val[2]; // validity of original sets                                                                                                       
+    int i = 0; i = GetValidity(tb,val); assert(i>=0);                                                                                                    
+    std::stringstream ostr;                                                                                                                          
+    ostr << ts << "." << std::setw(6) << std::setfill('0') <<val[0].GetDate() << "." << std::setw(6) << std::setfill('0')                            
+         << val[0].GetTime() << ".root";                                                                                                             
+    TFile ofile(ostr.str().c_str(),"RECREATE" );                                                                                                   
+    tb->Write();                                                                                                                                 
+    ofile.Close(); 
+
+	if (savenext == true) {
+    	std::string tbname( std::string(ts.Data()).substr(7) ); // name of data set to search for
+    	if (val[1].GetDate() < 20330101 ) { // table has more values, let's store +1 dataset 
+        	TDataSet* ds_r = 0;                                                                                                                          
+        	ds_r = GetDataBase(tbname.c_str(), &val[1]);                                                                                                 
+			if (ds_r) {
+				SaveDataSetAsRootFile((TTable*)ds_r, ts, false);
+        		delete ds_r;
+			}                                                                                                                                 
+    	}
+	}                                                                                                                                                
+
+	return 0;
+}
+
+//_____________________________________________________________________________
+Int_t  St_db_Maker::SaveSnapshotPlus(char* path, int type)                                                                            
+{                                                                                                                                                    
+  TDataSet *top = 0, *ds = 0;                                                                                                                        
+  TString ts; // DataSet path                                                                                                                        
+  TDataSet::EDataSetPass  mode = TDataSet::kContinue;                                                                                                
+  TDatime maxDbTime; 
+  maxDbTime.Set(kMaxTime,0);                                                                                                                                 
+
+  // request DataSets from database                                                                                                                  
+  top = GetDataBase(path);                                                                                                                           
+  if (!top) {                                                                                                                                        
+    // can't find requested database name                                                                                                            
+    return 1;                                                                                                                                        
+  }                 
+  TDataSetIter nextDS(top,999); 
+  ds = nextDS(mode);
+  if (!ds) {
+	 // no subtrees found, let's save this lonely dataset 
+	 SaveDataSet(top, type, true);
+	 return 0;
+  }
+  // cycle through available datasets                                                                                                                
+  while ((ds = nextDS(mode))) {                                                                                                                      
+    mode = TDataSet::kContinue;                                                                                                                      
+    if (ds->GetName()[0]=='.') { mode = TDataSet::kPrune; continue; }                                                                                
+	SaveDataSet(ds, type, true);
+  }                                                                                                                                                  
+  return 0;                                                                                                                                          
+}   
+
 //_____________________________________________________________________________
 void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
 {
@@ -1064,7 +1174,7 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
 
 }
 //_____________________________________________________________________________
-Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *const val) const
+Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *const val)
 {
    if (!tb)                             return -1;
    TString ts("."); ts+=tb->GetName();
@@ -1078,6 +1188,23 @@ Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *const val) const
      val[1] = vs->fTimeMax;
    }
    return vs->fVers;
+}
+//_____________________________________________________________________________
+Int_t  St_db_Maker::Drop(TDataSet *ds)
+{
+   if (!ds)                             return -1;
+   TString ts("."); ts+=ds->GetName();
+   TDataSet *pa = ds->GetParent();
+   assert(pa);				
+   assert(ts == pa->GetName());
+   StValiSet *vs = (StValiSet*)pa;
+   assert(ds == vs->fDat);
+   TDataSet *ppa = pa->GetParent();
+   ppa->Remove(ds); 
+   pa->Remove(ds); 
+   vs->fDat=0; 
+   delete ds;
+   return 0;
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetOff(const char *path)
@@ -1126,6 +1253,67 @@ void St_db_Maker::SetMaxEntryTime(Int_t idate,Int_t itime)
   ut.SetGTime(idate,itime);
   fMaxEntryTime = ut.GetUTime();
 }
+// Now very UGLY trick
+#define private public
+#include "TGeoManager.h"
+//_____________________________________________________________________________
+int St_db_Maker::Snapshot (int flag)
+{
+   int ians=0;
+   TFile *tfSnap = 0;
+   TObjectSet set("dbSnapshot",0);
+   const char *fname = SAttr("dbSnapshot");
+   if (!fname || !*fname)                                       return 0;
+   switch (flag) {
+     case 0://Read
+     if (gSystem->AccessPathName(fname, kFileExists))           return 0;
+     if (gSystem->AccessPathName(fname, kReadPermission))       return 0;
+     tfSnap = TFile::Open(fname,"READ");
+     if (!tfSnap)                                               return 0;
+     if (tfSnap->IsZombie()) {delete tfSnap;                    return 0;}
+
+     Info("Snapshot","Use DB from file %s\n",fname);
+     ians = set.Read("dbSnapshot");
+     fDataBase = (TDataSet*)set.GetObject();
+     set.DoOwner(0);
+     assert(fDataBase);
+//      {
+// //	Special case TGeo geometry must  be touched
+//      TDataSet *geo = (TDataSet*)fDataBase->FindObject(".Geometry");
+//      if (geo) {
+//        geo = ((StValiSet*)geo)->fDat;
+//        TGeoManager *gm = (TGeoManager*)geo->GetObject();
+//        if (gm) { gm->fClosed=0; gm->CloseGeometry(); }
+//      } }
+     break;
+
+     case 1://Write
+     if (!gSystem->AccessPathName(fname, kFileExists))          return 0;
+//// if (gSystem->AccessPathName(fname, kWritePermission))      return 0;
+     tfSnap = TFile::Open(fname,"NEW");
+     if (!tfSnap || tfSnap->IsZombie()) {
+       Error("Snapshot","Can not open file for write");
+       return 0;
+     }
+// //	TGeo geometry must not be saved
+//      TDataSet *geo = (TDataSet*)fDataBase->FindObject(".Geometry");
+//      if (geo) {
+//        geo = ((StValiSet*)geo)->fDat;
+//        Drop(geo);
+//      }
+     TDataSet *parent = fDataBase->GetParent();
+     fDataBase->Shunt(0);
+     set.SetObject(fDataBase);
+     Info("Snapshot","Save DB to file %s\n",fname);
+     ians = set.Write("dbSnapshot",TObject::kOverwrite);
+     fDataBase->Shunt(parent);
+     tfSnap->Close();
+     break;
+   }
+   delete tfSnap;
+   return ians;
+}
+
 
 
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98

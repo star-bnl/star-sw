@@ -164,7 +164,10 @@ void StDbServiceBroker::DoLoadBalancing()
 #ifdef DEBUG
   PrintHostList();
 #endif
-  RecommendHost();
+  while (RecommendHost()) {                                                                                                                                  
+    LOG_WARN << "Scanned all hosts in a Load Balancer list, no usable hosts found. Will try again in 60 seconds." << endm;                                    
+    sleep(60);                                                                                                                                               
+  }; 
 #ifdef DEBUG
   cout << " go to "<<GiveHostName()<<" port "<<GiveHostPort()<<"\n";
 #endif
@@ -255,14 +258,17 @@ void StDbServiceBroker::PrintHostList()
     }
 }
 //////////////////////////////////////////////////////
-void StDbServiceBroker::RecommendHost()
+int StDbServiceBroker::RecommendHost()
 {
   double dproc_min = HUGE_VAL;
+
+  // default initialization for vector iterator
+  MyBestHost = MyHostList.end();
 
   if (MyHostList.size()==1)
     {
       MyBestHost = MyHostList.begin();
-      return;
+      return 0;
     }
 
   srand ( unsigned ( time (NULL) ) );                                                                                                                        
@@ -274,7 +280,7 @@ void StDbServiceBroker::RecommendHost()
 
       if (conn==0)
         {
-          LOG_ERROR << "StDbServiceBroker::RecommendHost() mysql_init(0) failed "<<endm;
+          LOG_WARN << "StDbServiceBroker::RecommendHost() mysql_init(0) failed "<<endm;
           continue;
         }
 
@@ -283,7 +289,7 @@ void StDbServiceBroker::RecommendHost()
       if (mysql_real_connect
 	  (conn,((*I).HostName).c_str(), "loadbalancer","lbdb","test",(*I).Port,Socket,0)==NULL)
         {
-          LOG_ERROR << "StDbServiceBroker::RecommendHost() mysql_real_connect "<< 
+          LOG_WARN << "StDbServiceBroker::RecommendHost() mysql_real_connect "<< 
 	    conn << " "<<((*I).HostName).c_str()<<" "<<(*I).Port <<" failed"<<endm;
           mysql_close(conn);
           continue;
@@ -291,7 +297,7 @@ void StDbServiceBroker::RecommendHost()
 
       if (mysql_query(conn, "show status like \"%Threads_running\"") != 0 )
         {
-          LOG_ERROR <<"StDbServiceBroker::RecommendHost() show processlist failed"<<endm;
+          LOG_WARN <<"StDbServiceBroker::RecommendHost() show processlist failed"<<endm;
           continue;
         }
 
@@ -301,20 +307,20 @@ void StDbServiceBroker::RecommendHost()
       MYSQL_RES* res_set = mysql_store_result(conn);
      if (res_set==0)
         {
-          LOG_ERROR << "StDbServiceBroker::RecommendHost(): mysql_store_result failed"<<endm; 
+          LOG_WARN << "StDbServiceBroker::RecommendHost(): mysql_store_result failed"<<endm; 
         }
      else
        {
 	 MYSQL_ROW row = mysql_fetch_row(res_set);
 	 if (row==0)
 	   {
-	     LOG_ERROR << "StDbServiceBroker::RecommendHost(): mysql_fetch_row failed"<<endm;
+	     LOG_WARN << "StDbServiceBroker::RecommendHost(): mysql_fetch_row failed"<<endm;
 	   }
 	 else
 	   {
 	     if(!from_string<unsigned int>(nproc,row[1],std::dec))
 	     {
-	       LOG_ERROR << "StDbServiceBroker::RecommendHost():  mysql_fetch_row returns non-numeric"<<endm;
+	       LOG_WARN << "StDbServiceBroker::RecommendHost():  mysql_fetch_row returns non-numeric"<<endm;
 	     }
 	   }
 	 mysql_free_result(res_set);
@@ -333,10 +339,18 @@ void StDbServiceBroker::RecommendHost()
 
       if (dproc<dproc_min && nproc<(*I).Cap)
         {
-          dproc_min = dproc;
-	  MyBestHost = I;
+          	dproc_min = dproc;
+	  		MyBestHost = I;
         }
+
     }
+
+    if ( MyBestHost != MyHostList.end() ) {                                                                                                                  
+		// found good host
+        return 0;                                                                                                                                            
+    } 
+	// no hosts found..
+	return 1;
 }
 ////////////////////////////////////////////////////////////////
 string StDbServiceBroker::GiveHostName()

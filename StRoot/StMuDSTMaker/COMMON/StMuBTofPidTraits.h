@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMuBTofPidTraits.h,v 1.1 2009/02/20 17:05:59 tone421 Exp $
+ * $Id: StMuBTofPidTraits.h,v 1.2 2009/12/08 23:24:46 fine Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StMuBTofPidTraits.h,v $
+ * Revision 1.2  2009/12/08 23:24:46  fine
+ * Fix issue  #1748 http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1748
+ *
  * Revision 1.1  2009/02/20 17:05:59  tone421
  * *** empty log message ***
  *
@@ -30,7 +33,7 @@ public:
     StMuBTofPidTraits();
     ~StMuBTofPidTraits();
 
-    StBTofPidTraits* createBTofPidTraits();
+   StBTofPidTraits* createBTofPidTraits() const;
 
     /// Matching information
     unsigned char    matchFlag() const;
@@ -63,7 +66,7 @@ public:
     void    setYLocal(float);
     void    setZLocal(float);
     void    setThetaLocal(float);
-    void    setPosition(StThreeVectorF&);                            
+    void    setPosition(const StThreeVectorF&);                            
 
     void    setTimeOfFlight(float);
     void    setPathLength(float);

@@ -1,5 +1,20 @@
-// $Id: St_db_Maker.h,v 1.33 2009/11/16 20:16:23 fine Exp $
+// $Id: St_db_Maker.h,v 1.38 2010/05/05 18:35:04 dmitry Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.38  2010/05/05 18:35:04  dmitry
+// addon: single datasets also saved
+//
+// Revision 1.37  2010/05/05 15:25:51  dmitry
+// refactored snapshot code, to include Valeri's patch (save .root files)
+//
+// Revision 1.36  2010/04/28 07:23:40  dmitry
+// =new method to save snapshot+one subsequent dataset for each table in db
+//
+// Revision 1.35  2010/04/17 02:07:19  perev
+// Method Drop added
+//
+// Revision 1.34  2010/01/27 21:34:20  perev
+// GetValidity now is static
+//
 // Revision 1.33  2009/11/16 20:16:23  fine
 // Make the TDatime const interfaces
 //
@@ -113,7 +128,7 @@ private:
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.33 2009/11/16 20:16:23 fine Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.38 2010/05/05 18:35:04 dmitry Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -125,13 +140,14 @@ private:
    virtual        ~St_db_Maker();
    virtual TDataSet *GetDataBase(const char* logInput, const TDatime *td=0);
    virtual const TDatime &GetDateTime() const;
-   virtual Int_t   GetValidity(const TTable *tb, TDatime * const val) const;
+   static  Int_t   GetValidity(const TTable *tb, TDatime *const val);
    virtual void    SetDateTime(int idat,int itim);
    virtual void    SetDateTime(const char *datalias);
    virtual Int_t   InitRun(int runumber);
    virtual Int_t   Init();
    virtual Int_t   Make();
    virtual Int_t   Save(const char *path,const TDatime *newtime=0);
+   virtual Int_t   SaveSnapshotPlus(char* path, int type = 0);      // snapshot mode, type: 0 = .root, 1 = .C 
    virtual void    SetOff(const Char_t *path);
    virtual void    SetOn (const Char_t *path);
    virtual void    SetFlavor(const char *flav,const char *tabname=".all");
@@ -145,6 +161,10 @@ private:
    virtual TDataSet *LoadTable(TDataSet* left);
    virtual TDataSet *FindLeft(StValiSet *val, TDatime vals[2], const TDatime &currenTime);
    virtual TDataSet *OpenMySQL(const char* dbname);
+   virtual Int_t   SaveDataSet(TDataSet* ds, int type, bool savenext); // prepares directory and calls appropriate save method
+   virtual Int_t   SaveDataSetAsCMacro(TTable* tb, TString ds_name, bool savenext);   // creates [dataset_name].[beginTime].[endTime].C file 
+   virtual Int_t   SaveDataSetAsRootFile(TTable* tb, TString ds_name, bool savenext); // creates [dataset_name].[beginTime].[endTime].root file 
+   static  Int_t     Drop(TDataSet *ds);
            int       Snapshot (int flag);
 
    static EDataSetPass UpdateDB (TDataSet* ds,void *user );
@@ -155,7 +175,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.33 2009/11/16 20:16:23 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.38 2010/05/05 18:35:04 dmitry Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };

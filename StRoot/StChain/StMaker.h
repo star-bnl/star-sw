@@ -181,7 +181,6 @@ public:
    virtual TDataSet  *GetDataBase(const char *logInput,const TDatime *td=0);
    virtual TDataSet  *GetInputDB (const char *logInput)
                           {return GetDataBase(logInput);};
-   virtual Int_t   GetValidity(const TTable *tb, TDatime *const val) const;
 
 
    virtual Int_t        GetDebug() const {return m_DebugLevel;}
@@ -247,7 +246,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.96 2009/11/16 20:16:22 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.97 2010/01/27 20:37:04 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char *logInput,
                                     const StMaker *uppMk=0,
@@ -311,8 +310,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.96 2009/11/16 20:16:22 fine Exp $
+// $Id: StMaker.h,v 1.97 2010/01/27 20:37:04 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.97  2010/01/27 20:37:04  perev
+// GetValidity removed. It is St_db_Maker::GetValidity() now
+//
 // Revision 1.96  2009/11/16 20:16:22  fine
 // Make the TDatime const interfaces
 //

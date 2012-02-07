@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.33 2009/11/03 00:04:54 dmitry Exp $
+ * $Id: StDbSql.cc,v 1.34 2009/12/10 03:47:07 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.34  2009/12/10 03:47:07  dmitry
+ * BETWEEN operator was not constructed properly from elementID array => potential origin of several mysterious problems
+ *
  * Revision 1.33  2009/11/03 00:04:54  dmitry
  * restored missing endTime check
  *
@@ -1453,23 +1456,27 @@ StDbSql::getElementList(int* e, int num){
 // using the between operator
 
  StString es;
- if(!e){ 
-   es<<0;
- } else {
-   // for(int i=0;i<num-1;i++)//es<<e[i]<<",";
-     {
-//MPD
-       // if (e[0] == 0){
-       if (num == 1){
-	 es<<"= "<<e[0];
-       } else if(e[0]< num) {
-	 es<<"between "<<e[0]<<" and "<<num;
-       } else {
-	 es<<"between "<<num <<" and "<<e[0];
-       }
-     }
-     // es<<e[num-1];
- }
+
+ if (!e || num == 0) {                                                                                                                                       
+   es<<0;                                                                                                                                                    
+ } else if (num == 1) {                                                                                                                                      
+    es << " = " << e[0];                                                                                                                                      
+ } else {                                                                                                                                                    
+    // check for ordered list first, if not ordered - use "IN", not "BETWEEN"                                                                                
+    bool ordered = true;                                                                                                                                     
+    for (int i = 0; i < num; i++) {                                                                                                                          
+        if (e[i] != (e[0]+i)) {                                                                                                                              
+            ordered = false;                                                                                                                                 
+            break;                                                                                                                                           
+        }                                                                                                                                                    
+    }                                                                                                                                                        
+    if (ordered == true) {                                                                                                                                   
+        es<<" BETWEEN "<<e[0]<<" AND "<< (e[0] + num - 1);                                                                                                    
+    } else {                                                                                                                                                 
+        // list is not ordered, probably, our input is some mixed element IDs, use "IN"                                                                      
+        return getElementListIN(e,num);                                                                                                                      
+    }                                                                                                                                                        
+ } 
 
  return mRetString(es);
 }
