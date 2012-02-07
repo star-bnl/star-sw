@@ -96,13 +96,14 @@ class JevpPlot : public TObject {
   void addElement(TObject *element);
   void removeElement(TObject *element);
   
+  TList histos;
  private:
   char *xaxis_label;
   char *yaxis_label;
 
   char *parent;
 
-  TList histos;
+
   int nhistos;
   char *drawopts;
 

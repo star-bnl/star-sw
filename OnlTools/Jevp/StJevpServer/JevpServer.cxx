@@ -732,6 +732,7 @@ void JevpServer::writeRootFiles()
   // Got through all histos...
   JevpPlotSet *curr;
   JevpPlot *currplot = NULL;
+  PlotHisto *currhisto = NULL;
 
   TListIter next(&builders);
   
@@ -740,7 +741,13 @@ void JevpServer::writeRootFiles()
     TListIter nextplot(&curr->plots);
   
     while((currplot = (JevpPlot *)nextplot())) {
-      currplot->Write();
+
+
+      TListIter nexthisto(&currplot->histos);
+
+      while((currhisto = (PlotHisto *)nexthisto())) {
+	currhisto->histo->Write();
+      }
     }
   }
   
