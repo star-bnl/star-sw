@@ -64,8 +64,6 @@ class StFgtTimeShapeMaker : public StMaker {
    Int_t pedSelect;
    
  protected:
-   // since this isn't saved anywhere else
-   static const Int_t mMaxNumTimeBins;
    struct MyFunc;
 
  private: 
@@ -116,6 +114,8 @@ class StFgtTimeShapeMaker : public StMaker {
    TF1* fBad[120];
    Int_t igoodCnt;
    Int_t ibadCnt;
+
+   TH1F* htau;
 
    ClassDef(StFgtTimeShapeMaker,1);
 

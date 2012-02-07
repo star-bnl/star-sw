@@ -24,9 +24,6 @@
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 
 // Copied from StFgtPedMaker.cxx
-// since this isn't defined elsewhere (yet)
-// set to 8 so that it doesn't matter if bins are 0-6 or 1-7
-const Int_t StFgtTimeShapeMaker::mMaxNumTimeBins = 8;
 
 // constructor
 StFgtTimeShapeMaker::StFgtTimeShapeMaker( const Char_t* name , const Char_t* dbMkrName  ) : StMaker( name ), mDbMkrName( dbMkrName ), mFgtDbMkr(0) {
@@ -41,28 +38,8 @@ StFgtTimeShapeMaker::StFgtTimeShapeMaker( const Char_t* name , const Char_t* dbM
 Int_t StFgtTimeShapeMaker::Init(){
    Int_t ierr = kStOk;
 
-   GetEvtHddr()->SetEventNumber(1);
+   ierr=InitTree();
 
-   StEvent* eventPtr=0;
-   eventPtr= (StEvent*)GetInputDS("StEvent");
-   
-   mFgtCollectionPtr=NULL;
-   if(eventPtr) {
-     mFgtCollectionPtr=eventPtr->fgtCollection();
-   } else {
-     eventPtr=new StEvent();
-     AddData(eventPtr);
-     mFgtCollectionPtr=eventPtr->fgtCollection();
-   };
-   if(!mFgtCollectionPtr) {
-     mFgtCollectionPtr=new StFgtCollection();
-     eventPtr->setFgtCollection(mFgtCollectionPtr);
-     LOG_DEBUG <<"::prepareEnvironment() has added a non existing StFgtCollection()"<<endm;
-   } else {
-     //this should be unncessary if the member clear function is called
-     mFgtCollectionPtr->Clear();
-   };
-   
    mFgtDbMkr = static_cast< StFgtDbMaker* >( GetMaker( mDbMkrName.data() ) );
    
    if( !ierr && !mFgtDbMkr ){
@@ -83,6 +60,18 @@ Int_t StFgtTimeShapeMaker::Init(){
        ierr = kStFatal;
      };
    };
+
+   if(fixTau)
+     {
+       TFile ftau("htau.root","read");
+       if(ftau.IsOpen()){
+	 htau=(TH1F*)ftau.Get("htau");     
+       }
+       else{
+	 LOG_FATAL << "Tau parameter fix requested, but htau.root not found" << endm;
+	 ierr = kStFatal;
+       };
+     };
    
    LOG_INFO << "Using date and time " << mFgtDbMkr->GetDateTime().GetDate() << ", "
 	    << mFgtDbMkr->GetDateTime().GetTime() << endm;
@@ -91,7 +80,6 @@ Int_t StFgtTimeShapeMaker::Init(){
    ibadCnt=0;
    iEvt=-1;
    hh=new TH1F("hh","hh",Ntimebin,0,Ntimebin);
-   ierr=InitTree();
    
    return ierr;
 };
@@ -144,11 +132,12 @@ Int_t StFgtTimeShapeMaker::InitTree(){
 Int_t StFgtTimeShapeMaker::Make(){
    iEvt++;
    Int_t ierr = kStOk;
-   cout << "iEvt = " << iEvt << endl;
+   if(iEvt%10==0)cout << "iEvt = " << iEvt << endl;
    StFgtDb *fgtTables = 0;
    if( !mFgtDbMkr ){
      LOG_FATAL << "Pointer to Fgt DB Maker is null" << endm;
      ierr = kStFatal;
+     return ierr;
    };
    if( !ierr ){
      fgtTables = mFgtDbMkr->getDbTables();
@@ -156,6 +145,7 @@ Int_t StFgtTimeShapeMaker::Make(){
      if( !fgtTables ){
        LOG_FATAL << "Pointer to Fgt DB Tables is null" << endm;
        ierr = kStFatal;
+       return ierr;
      };
    };
    
@@ -196,14 +186,18 @@ Int_t StFgtTimeShapeMaker::Make(){
 	      rdo=0;arm=apv=chn=stat=-1;	
 	      disk=quad=strip=-1.;layer=' ';
 	      ordinate=lowerSpan=upperSpan=-1.;
+	      Int_t dof=Ntimebin-4;
 
 	      (*stripIter)->getElecCoords( rdo, arm, apv, chn );      
 	      stat=fgtTables->getStatusFromElecCoord(rdo,arm,apv,chn);
+	      if(stat>0)continue;//stat=0 is good. Otherwise, skip.
+
 	      int geoId=fgtTables->getGeoIdFromElecCoord(rdo, arm, apv, chn);
-	      if (geoId>=0){
+	      if (geoId>0){
 		StFgtGeom::decodeGeoId(geoId,disk,quad,layer,strip);
 		StFgtGeom::getPhysicalCoordinate(geoId,disk,quad,layer,ordinate,lowerSpan,upperSpan);
-	      };
+	      }
+	      else{continue;};//strip was not mapped , we readout in the daq file some '0' form non-existing APVs.
 	      //printf("%d %d %d %d %d %d \n",iEvt,rdo,arm,apv,chn,geoId);
 
 	      ped=99999.;pedSig=0.;
@@ -217,6 +211,7 @@ Int_t StFgtTimeShapeMaker::Make(){
 		  if(ped>(*stripIter)->getAdc(is)){ped=(*stripIter)->getAdc(is);};
 		};
 		pedSig=35.*ped/745.;
+		//dof++;//when using adcmin as pedestal, we fix the offset parameter.
 	      } break;
 	      case 2:{
 		ped=fgtTables->getPedestalFromElecCoord(rdo,arm,apv,chn);
@@ -224,15 +219,15 @@ Int_t StFgtTimeShapeMaker::Make(){
 	      }	break;
 	      default:cout << "O_o This should never print" << endl;       
 	      }
+	      if(ped<=0.)continue;
 	      for(Int_t is=0;is<7;is++){adc[is]=0.;};
 	      for(Int_t is=0;is<Ntimebin;is++){
 		adc[is]=(*stripIter)->getAdc(is);
 		adc[is]-=ped;
-		//printf("%d ",adc[is]);
-	      };		
-	      //printf("ped=%f \n",ped);
+	      };			     
 	      Bool_t pass=true;
-	      if(rdo==1 && arm==1 && (apv==0 || apv==1))pass=false;		 
+	      if(rdo==1 && arm==3 && apv==9)pass=false;		 
+	      if(rdo==1 && arm==4 && apv==21)pass=false;		 
 
 	      if(pass){	
 		chi2=-1.;tau=0.;t0=0.;offset=0.;errCode=0;
@@ -246,7 +241,12 @@ Int_t StFgtTimeShapeMaker::Make(){
 		mmax=hh->GetMaximumBin()-1;
 		mmin=hh->GetMinimumBin()-1;
 		adcmax=hh->GetBinContent(mmax+1);
-		
+		if(0){
+		  for(Int_t is=0;is<Ntimebin;is++){
+		    printf("%d ",(*stripIter)->getAdc(is));
+		  };		
+		  printf("ped=%f \n",ped);
+		};
 		if(adcmax>fitThresh){
 		  if(abs(mmax-mmin)==2 && mmin>0 && mmax>0 && mmin<Ntimebin-1 && mmax<Ntimebin-1){
 		    Float_t middle1=(hh->GetBinContent(mmin)+hh->GetBinContent(mmin+2))/2.;
@@ -255,32 +255,35 @@ Int_t StFgtTimeShapeMaker::Make(){
 		  }
 		  Int_t highcnt=0;
 		  for(Int_t is=0;is<Ntimebin;is++){
-		    if(adc[is]>adcmax*0.9 && adcmax>20.*pedSig)highcnt++;
+		    if(adc[is]>adcmax*0.95 && adcmax>20.*pedSig)highcnt++;
 		  };		  
-		  if(highcnt>3){errCode=2;}
+		  if(highcnt>2){errCode=2;}
 
 		  if(!errCode){
 		    InitFX();
 		    if(fixTau){
-		      //Float_t tau0=htau->GetBinContent(iapv+1);
-		      //if(tau0>0){InitFX(tau0);}
-		      //else{InitFX();}
+		      Int_t binAPV = disk*40 + quad*10 + (apv%12);
+		      Float_t tau0=htau->GetBinContent(binAPV+1);
+		      if(tau0>0){InitFX(tau0);}
+		      else{InitFX();}
+		      dof++;//for fixing the tau parameter
 		    };
+
 		    hh->Fit(FX,"Q","",0.,Ntimebin);		       
-		    chi2=FX->GetChisquare();
+		    chi2=FX->GetChisquare()/(Float_t)dof;
 		    fmax=FX->GetMaximumX();			     
 		    t0=FX->GetParameter(4);
 		    tau=FX->GetParameter(1);
 		    offset=FX->GetParameter(3);
 		    norm=FX->GetParameter(0);
-		    if(chi2<20. && igoodCnt<120 && adcmax>plotThresh){
+		    if(chi2<1. && igoodCnt<120 && adcmax>plotThresh){
 		      hGood[igoodCnt]=new TH1F(*hh);	
 		      fGood[igoodCnt]=new TF1(*FX);
 		      sprintf(hname,"fgood%d",igoodCnt);
 		      fGood[igoodCnt]->SetTitle(hname);
 		      igoodCnt++;
 		    };
-		    if(chi2>100. && ibadCnt<120 && adcmax>plotThresh){
+		    if(chi2>20. && ibadCnt<120 && adcmax>plotThresh){
 		      hBad[ibadCnt]=new TH1F(*hh);	
 		      fBad[ibadCnt]=new TF1(*FX);
 		      sprintf(hname,"fbad%d",ibadCnt);
@@ -301,40 +304,41 @@ Int_t StFgtTimeShapeMaker::Make(){
 
 Int_t StFgtTimeShapeMaker::Finish(){
   
-  TCanvas* tcv1=new TCanvas("tcv1","tcv1",1600,800);
-  tcv1->Divide(8,5);
-  TCanvas* tcv2=new TCanvas("tcv2","tcv2",1600,800);
-  tcv2->Divide(8,5);
+  TCanvas* tcv1=new TCanvas("tcv1","tcv1",850,1100);
+  tcv1->Divide(5,8);
+  TCanvas* tcv2=new TCanvas("tcv2","tcv2",850,1100);
+  tcv2->Divide(5,8);
+
+  tcv1->Print("fits_good.pdf(","pdf");
+  tcv2->Print("fits_bad.pdf(","pdf");
 
   for(Int_t i=0;i<igoodCnt;i++){
-    if(i==40 || i==80){
-      if(i==40){tcv1->Print("fits_good(","pdf");}
-      else{tcv1->Print("fits_good","pdf");};
-      tcv1->Clear();
-      tcv1->Divide(8,5);
-    };
     tcv1->GetPad(i%40+1)->SetGridx(0);
     tcv1->GetPad(i%40+1)->SetGridy(0);
     tcv1->cd(i%40+1);
     hGood[i]->Draw();
     fGood[i]->Draw("same");
+    if(i%40==39){
+      tcv1->Print("fits_good.pdf","pdf");
+      tcv1->Clear();
+      tcv1->Divide(5,8);
+    };
   }
   for(Int_t i=0;i<ibadCnt;i++){
-    if(i==40 || i==80){
-      if(i==40){tcv2->Print("fits_bad(","pdf");}
-      else{tcv2->Print("fits_bad","pdf");};
-      tcv2->Clear();
-      tcv2->Divide(8,5);
-    };
     tcv2->GetPad(i%40+1)->SetGridx(0);
     tcv2->GetPad(i%40+1)->SetGridy(0);
     tcv2->cd(i%40+1);
     hBad[i]->Draw();
     fBad[i]->Draw("same");
+    if(i%40==39){
+      tcv2->Print("fits_bad.pdf","pdf");
+      tcv2->Clear();
+      tcv2->Divide(5,8);
+    };
   }
   
-  tcv1->Print("fits_good)","pdf");
-  tcv2->Print("fits_bad)","pdf");
+  tcv1->Print("fits_good.pdf)","pdf");
+  tcv2->Print("fits_bad.pdf)","pdf");
 
   tFgt->Print();
   fFgt->cd();
@@ -384,19 +388,19 @@ void StFgtTimeShapeMaker::InitFX()
   FX->SetParameter(1,1.);
   FX->SetParLimits(1,0.1,10.);
   FX->FixParameter(2,2.);
-  if(pedSelect==1)FX->FixParameter(3,0.);
+  //if(pedSelect==1)FX->FixParameter(3,0.);
   FX->SetParameter(4,0.);
   FX->SetParLimits(4,-10.,17.);
 };
 
-void StFgtTimeShapeMaker::InitFX(Float_t tau)
+void StFgtTimeShapeMaker::InitFX(Float_t ftau)
 {
   FX->SetParameter(0,200.);
   FX->SetParLimits(0,0.,100000.);
-  FX->SetParameter(1,tau);
-  FX->SetParLimits(1,tau,tau);
+  FX->SetParameter(1,ftau);
+  FX->SetParLimits(1,ftau,ftau);
   FX->FixParameter(2,2.);
-  if(pedSelect==1)FX->FixParameter(3,0.);
+  //if(pedSelect==1)FX->FixParameter(3,0.);
   FX->SetParameter(4,0.);
   FX->SetParLimits(4,-10.,17.);
 };
