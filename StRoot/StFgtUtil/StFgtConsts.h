@@ -17,6 +17,7 @@ enum {
    kFgtNumArms = 6,           // arm in 0-5, though 5 not used in run12.
    kFgtNumChannels = 128,     // channel in 0-127
    kFgtApvsPerAssembly = 12,  //
+   kFgtMaxApvId=kFgtApvsPerAssembly*2, // covers 0-23 
    kFgtApvGap = 2,            // i.e. apvs 10 & 11
    kFgtApvsPerOct = 5,
    kFgtApvsPerQuad = 10,
@@ -68,10 +69,13 @@ enum {
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.6 2012/02/06 18:24:32 avossen Exp $
+ * $Id: StFgtConsts.h,v 1.7 2012/02/07 06:14:45 balewski Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.7  2012/02/07 06:14:45  balewski
+ * *** empty log message ***
+ *
  * Revision 1.6  2012/02/06 18:24:32  avossen
- * changed max tb and default value for strip adcs
+ *  changed max tb and default value for strip adcs
  *
  * Revision 1.5  2012/01/31 12:53:11  sgliske
  * Somehow kFgtNumQuads was lost--now restored

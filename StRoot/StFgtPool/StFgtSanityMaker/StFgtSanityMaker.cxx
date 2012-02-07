@@ -77,22 +77,12 @@ Int_t StFgtSanityMaker::Init(){
 
 Int_t StFgtSanityMaker::Make(){
 
-   Int_t rdo;
-   Int_t arm;
-   Int_t apv;
-   Int_t chn;
-   Short_t disk;
-   Short_t quad;
-   Short_t strip;
-   Short_t stat;
-   Double_t ordinate;
-   Double_t lowerSpan;
-   Double_t upperSpan;
-   Char_t layer;
-   Double_t ped;
-   Double_t pedSig;
    enum {Ntimebin=7};
    Int_t adcA[Ntimebin];
+   int chCntDet[kFgtNumDiscs][kFgtNumQuads][kFgtApvsPerAssembly*2]; 
+   int chCntDaq[  kFgtNumRdos ][kFgtNumArms ][kFgtApvsPerAssembly*2];
+   memset(chCntDet,0,sizeof(chCntDet));
+   memset(chCntDaq,0,sizeof(chCntDaq));
  
    iEvt++; 
    // cout << "iEvt = " << iEvt << endl;
@@ -102,114 +92,96 @@ Int_t StFgtSanityMaker::Make(){
 
    StEvent* eventPtr =  (StEvent*)GetInputDS("StEvent");
    assert(eventPtr);
-   enum {kFgtMaxApvId=kFgtApvsPerAssembly*2, kFgtOctPerDisc=kFgtNumQuads*2};
-
-   int chCntDet[kFgtNumDiscs][kFgtNumQuads][kFgtApvsPerAssembly*2]; 
-   memset(chCntDet,0,sizeof(chCntDet));
-   int chCntDaq[  kFgtNumRdos ][kFgtNumArms ][kFgtApvsPerAssembly*2];
-   memset(chCntDaq,0,sizeof(chCntDaq));
  
-
    mFgtCollectionPtr = mFgtCollectionPtr=eventPtr->fgtCollection();
+   assert( mFgtCollectionPtr);
  
    int lastGeo=-999;
-   assert( mFgtCollectionPtr);
    for( UInt_t discIdx=0; discIdx<mFgtCollectionPtr->getNumDiscs(); ++discIdx ){
      StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
      if( stripCollectionPtr ){
        StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
        StSPtrVecFgtStripIterator stripIter;
-       rdo=0;arm=-1;apv=-1;chn=-1;		 
+
        for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){	      
-	 rdo=0;arm=apv=chn=stat=-1;	
-	 disk=quad=strip=-1.;layer=' ';
-	 ordinate=lowerSpan=upperSpan=-1.;
-	 
-	 (*stripIter)->getElecCoords( rdo, arm, apv, chn );      
-	 stat=fgtTables->getStatusFromElecCoord(rdo,arm,apv,chn);
-	 if(stat) continue; // drop bad strips
-	 int geoId=fgtTables->getGeoIdFromElecCoord(rdo, arm, apv, chn);
-	 //
-	 assert (geoId>=0);
-	 StFgtGeom::decodeGeoId(geoId,disk,quad,layer,strip);
-	 StFgtGeom::getPhysicalCoordinate(geoId,disk,quad,layer,ordinate,lowerSpan,upperSpan);
+       int rdo=0, arm=-1, apv=-1, chn=-1;		 
+       Short_t disk=-1, quad=-1, strip=-1; char layer='x';
+       double	 ordinate=-1,lowerSpan=-1,upperSpan=-1.;       
+       (*stripIter)->getElecCoords( rdo, arm, apv, chn );      
+       int stat=fgtTables->getStatusFromElecCoord(rdo,arm,apv,chn);
+       if(stat) continue; // drop bad strips
+       int geoId=fgtTables->getGeoIdFromElecCoord(rdo, arm, apv, chn);
+	
+       assert (geoId>=0);
+       StFgtGeom::decodeGeoId(geoId,disk,quad,layer,strip);
+       StFgtGeom::getPhysicalCoordinate(geoId,disk,quad,layer,ordinate,lowerSpan,upperSpan);
 
-	 chCntDet[disk][quad][apv]++;
-	 chCntDaq[rdo-1][arm][apv]++;
+       chCntDet[disk][quad][apv]++;
+       chCntDaq[rdo-1][arm][apv]++;
 
-	 // drop unstable or dead APVs - Jan's private list
-	 if(rdo==2 && arm==1 && apv==5) continue; 
-	 if(rdo==2 && arm==1 ) continue;
-	 if(rdo==2 && arm==2 && apv==18) continue;
-	 if(rdo==1 && arm==3 && apv==9) continue;
-	 if(rdo==2 && arm==3 ) continue;
-	 if(rdo==1 && arm==4 && apv==19) continue;
-	 if(rdo==1 && arm==4 && apv==21) continue;
-	 if(rdo==2 && arm==4 ) continue;
+       // drop unstable or dead APVs - Jan's private list
+       if(rdo==2 && arm==1 && apv==5) continue; 
+       if(rdo==2 && arm==1 ) continue;
+       if(rdo==2 && arm==2 && apv==18) continue;
+       if(rdo==1 && arm==3 && apv==9) continue;
+       if(rdo==2 && arm==3 ) continue;
+       if(rdo==1 && arm==4 && apv==19) continue;
+       if(rdo==1 && arm==4 && apv==21) continue;
+       if(rdo==2 && arm==4 ) continue;
+       
+       double  ped=fgtTables->getPedestalFromElecCoord(rdo,arm,apv,chn);
+       double  pedSig=fgtTables->getPedestalSigmaFromElecCoord(rdo,arm,apv,chn);
 
-	 ped=99999.;pedSig=0.;
-	 ped=fgtTables->getPedestalFromElecCoord(rdo,arm,apv,chn);
-	 pedSig=fgtTables->getPedestalSigmaFromElecCoord(rdo,arm,apv,chn);
+       memset(adcA,0,sizeof(adcA));
+       float minAdc=9999, maxAdc=-9999, sum=0;
+       int iMin=-1;
+       for(Int_t is=0;is<Ntimebin;is++){
+	 adcA[is]=(*stripIter)->getAdc(is);
+	 if(adcA[is]<minAdc) { minAdc=adcA[is]; iMin=is;}
+	 if(adcA[is]>maxAdc) maxAdc=adcA[is];
+	 sum+=adcA[is];
+       }
 
-	 memset(adcA,0,sizeof(adcA));
-
-#if 0
-	 if( chn==127) continue;
-	 if( rdo!=1) continue;
-	 if( arm!=1) continue;
-	 if( apv!=15) continue;
-#endif
-
-	 float minAdc=9999, maxAdc=-9999, sum=0;
-	 int iMin=-1;
-	 for(Int_t is=0;is<Ntimebin;is++){
-	   adcA[is]=(*stripIter)->getAdc(is);
-	   if(adcA[is]<minAdc) { minAdc=adcA[is]; iMin=is;}
-	   if(adcA[is]>maxAdc) maxAdc=adcA[is];
-	   sum+=adcA[is];
-	 }
-	 //printf("mm %f %f\n",ped,maxAdc);
-	 maxAdc-=minAdc;
-	 sum-=minAdc*Ntimebin;
-	 if(maxAdc<600) continue;
-	 if(maxAdc>3000) continue;
-	 if(iMin>0) continue; // require ped is in time bin 0
-	 char star=' ';
-	 if(abs(lastGeo-geoId)==1) star='*';
-	 lastGeo=geoId;
-	 printf("\nieve=%d rdo=%d arm=%d apv=%d ch=%d geoId=%d     strip=%d%c%c%03d  %csumADC-ped=%.1f\n    adc-ped[0...6]=",iEvt,rdo,arm,apv,chn,geoId,disk+1,quad+'A',layer,strip,star,sum);
-	 for(Int_t is=0;is<Ntimebin;is++) printf(" %.0f ",adcA[is]-minAdc);
-	 printf("\n    dbPd=%.1f minAdc=%.1f  del=%.1f\n",ped,minAdc,ped-minAdc);
-	 
-	 
+       //printf("mm %f %f\n",ped,maxAdc);
+       maxAdc-=minAdc;
+       sum-=minAdc*Ntimebin;
+       if(maxAdc<600) continue;
+       if(maxAdc>3000) continue;
+       if(iMin>0) continue; // require ped is in time bin 0
+       char star=' ';
+       if(abs(lastGeo-geoId)==1) star='*';
+       lastGeo=geoId;
+       printf("\nieve=%d rdo=%d arm=%d apv=%d ch=%d geoId=%d     strip=%d%c%c%03d  %csumADC-ped=%.1f\n    adc-ped[0...6]=",iEvt,rdo,arm,apv,chn,geoId,disk+1,quad+'A',layer,strip,star,sum);
+       for(Int_t is=0;is<Ntimebin;is++) printf(" %.0f ",adcA[is]-minAdc);
+       printf("\n    dbPd=%.1f minAdc=%.1f  del=%.1f\n",ped,minAdc,ped-minAdc);       
        }
      }
    }
-
+   
    if(iEvt==0) {
-   printf("JJ eventID=%d FGT sanity (detector view)\n",eventPtr->id());
-   for(int idisc=0;idisc<kFgtNumDiscs;idisc++)
-     for(int iquad=0;iquad<kFgtNumQuads;iquad++){
-       printf("disc=%d quad=%c   ",idisc+1,iquad+'A');
-       for(int iapv=0;iapv<kFgtApvsPerAssembly*2;iapv++){
-	 if(chCntDet[idisc][iquad][iapv]<=0) continue;
-	 printf(" apv%02d:%3d, ",iapv,chCntDet[idisc][iquad][iapv]);
+     printf("JJ eventID=%d FGT sanity (detector view)\n",eventPtr->id());
+     for(int idisc=0;idisc<kFgtNumDiscs;idisc++)
+       for(int iquad=0;iquad<kFgtNumQuads;iquad++){
+	 printf("disc=%d quad=%c   ",idisc+1,iquad+'A');
+	 for(int iapv=0;iapv<kFgtApvsPerAssembly*2;iapv++){
+	   if(chCntDet[idisc][iquad][iapv]<=0) continue;
+	   printf(" apv%02d:%3d, ",iapv,chCntDet[idisc][iquad][iapv]);
+	 }
+	 printf("\n");
        }
-       printf("\n");
-     }
-
-   printf("\nJJ eventID=%d FGT sanity (Daq view)\n",eventPtr->id());
-   for(int irdo=0;irdo<kFgtNumRdos; irdo++)
-     for(int iarm=0;iarm<kFgtNumArms;iarm++) {
-       printf("RDO=%d arm=%d  apv:nCh  ",irdo+1,iarm);
-       for(int iapv=0;iapv<kFgtApvsPerAssembly*2;iapv++){
-	 if(chCntDaq[irdo][iarm][iapv]<=0) continue;
-	 printf(" %2d:%3d, ",iapv,chCntDaq[irdo][iarm][iapv]);
+     
+     printf("\nJJ eventID=%d FGT sanity (Daq view)\n",eventPtr->id());
+     for(int irdo=0;irdo<kFgtNumRdos; irdo++)
+       for(int iarm=0;iarm<kFgtNumArms;iarm++) {
+	 printf("RDO=%d arm=%d  apv:nCh  ",irdo+1,iarm);
+	 for(int iapv=0;iapv<kFgtApvsPerAssembly*2;iapv++){
+	   if(chCntDaq[irdo][iarm][iapv]<=0) continue;
+	   printf(" %2d:%3d, ",iapv,chCntDaq[irdo][iarm][iapv]);
+	 }
+	 printf("\n");
        }
-       printf("\n");
-     }
    }// end of printout
-
+   
    int nSeenApv=0;
    for(int irdo=0;irdo<kFgtNumRdos; irdo++)
      for(int iarm=0;iarm<kFgtNumArms;iarm++) 
@@ -237,6 +209,9 @@ ClassImp( StFgtSanityMaker );
 /**************************************************************************
  *
  * $Log: StFgtSanityMaker.cxx,v $
+ * Revision 1.4  2012/02/07 06:14:42  balewski
+ * *** empty log message ***
+ *
  * Revision 1.3  2012/02/07 05:33:30  balewski
  * *** empty log message ***
  *
