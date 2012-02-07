@@ -186,6 +186,7 @@ Int_t StFgtRawDaqReader::Make() {
 	    if(rdo<1 || rdo > 2)		                continue;
             Short_t discIdx=0;  // will be set with getNaivePhysCoordFromElecCoord
 
+#if 1
 	    // year 2012 exclusions
 	    if( ( (rdo==1 && arm==1) || (rdo==2 && arm==2) || (rdo==1 && arm==4)) && apv>4 && apv<10 ) continue;
 	    if( ((rdo==2 && arm==1) ||(rdo==1 && arm==3) ||(rdo==2 && arm==4) ) && apv<5 ) continue;
@@ -193,7 +194,7 @@ Int_t StFgtRawDaqReader::Make() {
 	    if( ( (rdo==2 && arm==1) ||(rdo==1 && arm==3)  ) && apv>16 ) continue;
 	    if( ((rdo==1 && arm==2) ||(rdo==2 && arm==3)  ) && apv>10 && apv<17) continue;
 	    // end of 2012 exclusions
-
+#endif 
             Short_t quad, strip;
             Char_t layer;
             Int_t geoId = ( mIsCosmic
@@ -212,10 +213,10 @@ Int_t StFgtRawDaqReader::Make() {
             assert( quad > -1 );
             assert( strip > -1 );
 
+	    // cout << "AAA " << GetEventNumber() << " | " << rdo << ' ' << arm << ' ' << apv << ' ' << channel << " | " << geoId << ' ' << discIdx << ' ' << quad << ' ' << layer << ' ' << strip << ' '<<timebin<<endl;
             /* DEBUGGING
                if( timebin == 1 ){
-               cout << "AAA " << GetEventNumber() << " | " << rdo << ' ' << arm << ' ' << apv << ' ' << channel << " | " << geoId << ' ' << discIdx << ' ' << quad << ' ' << layer << ' ' << strip << endl;
-
+               
                //                ( mIsCosmic
                //                  ? StFgtCosmicTestStandGeom::getNaiveElecCoordFromGeoId(geoId, rdo,arm,apv,channel)
                //                  : fgtTables->getElecCoordFromGeoId(geoId, rdo, arm, apv, channel) 
@@ -276,8 +277,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.6 2012/02/06 04:17:32 balewski Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.7 2012/02/07 05:33:25 balewski Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.7  2012/02/07 05:33:25  balewski
+ * *** empty log message ***
+ *
  * Revision 1.6  2012/02/06 04:17:32  balewski
  * added 2012 APV exclusions
  *
