@@ -22,16 +22,19 @@ StCloseFileOnTerminate &StCloseFileOnTerminate::Instantiate()
 //_________________________________________________________
 Bool_t StCloseFileOnTerminate::Notify() {
    // close all TFile  & Terminate
-#if ROOT_VERSION_CODE < ROOT_VERSION(5,31,1)
+#if 1 /* ROOT_VERSION_CODE < ROOT_VERSION(5,31,1) */
    Error(__FUNCTION__," Closing all TFiles   . . . . ");
    TSeqCollection   *files = gROOT->GetListOfFiles();
    int count = 0;
    if (files && files->GetSize() >0 ) {
        TIter next(files);
-       while( TFile *f = (TFile *)next() ) { 
-	 Error(__FUNCTION__, "file %s will be closed", f->GetName());
-	 f->Close(); ++count; 
-	 Error(__FUNCTION__, "file %s has been closed", f->GetName());
+       while( TFile *f = (TFile *) next() ) { 
+	 if ( f-> IsWritable() ) {
+	   Error(__FUNCTION__, "file %s will be closed", f->GetName());
+	   f->Write();
+	   f->Close(); ++count; 
+	   Error(__FUNCTION__, "file %s has been closed", f->GetName());
+	 }
        }
        files->Delete();
    }
