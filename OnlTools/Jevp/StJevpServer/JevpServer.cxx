@@ -321,9 +321,10 @@ void JevpServer::parseArgs(int argc, char *argv[])
     else if (strcmp(argv[i], "-test")==0) {
       nodb = 1;
       log_output = RTS_LOG_STDERR;
-      basedir = "/RTScache/conf/jevp_test";
-      pdfdir = "/a/jevp_test/pdf";
-      refplotdir = "/a/jevp_test/refplots";
+      basedir = (char *)"/RTScache/conf/jevp_test";
+      pdfdir = (char *)"/a/jevp_test/pdf";
+      refplotdir = (char *)"/a/jevp_test/refplots";
+      rootfiledir = (char *)"/a/jevp_test/rootfiles";
       myport = JEVP_PORT + 10;
     }
     else if (strcmp(argv[i], "-diska")==0) {   // used only to pass to builders on launch...
@@ -628,7 +629,7 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     s->Send(mess);
   }
   else if(strcmp(msg->getCmd(), "print") == 0) {
-    char printer[100];
+    //char printer[100];
     //int tab;
     //int display;
 
@@ -711,12 +712,40 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
 void JevpServer::performStartRun()
 {
   runStatus.run = rdr->run;
+
   eventsThisRun = 0;
 
   LOG("JEFF", "Start run #%d",runStatus.run);
   clearForNewRun();
 
   runStatus.setStatus("running");
+}
+
+void JevpServer::writeRootFiles()
+{
+  char filename[256];
+  sprintf(filename, "%s/run_%d.root",rootfiledir, runStatus.run);
+  
+  LOG("JEFF", "Writing to rootfile: %s",filename);
+  TFile *rootfile = new TFile(filename, "recreate");
+  
+  // Got through all histos...
+  JevpPlotSet *curr;
+  JevpPlot *currplot = NULL;
+
+  TListIter next(&builders);
+  
+  while((curr = (JevpPlotSet *)next())) {
+    
+    TListIter nextplot(&curr->plots);
+  
+    while((currplot = (JevpPlot *)nextplot())) {
+      currplot->Write();
+    }
+  }
+  
+  rootfile->Close();
+  delete rootfile;
 }
 
 void JevpServer::performStopRun()
@@ -748,6 +777,8 @@ void JevpServer::performStopRun()
     writeRunPdf(i, runStatus.run);
     CP;
   }
+
+  writeRootFiles();
 
   // Update the palletes and write out xml again
   char fn[256];
@@ -1093,6 +1124,7 @@ void JevpServer::writeRunPdf(int display, int run)
   CP;
   writePdf(filename, 1);
   CP;
+
   // Save it in the database...
   if(nodb != 1) {
     LOG(DBG, "Writing PDF file: %s to DB",filename);

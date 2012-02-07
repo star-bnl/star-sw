@@ -33,6 +33,7 @@ class JevpServer {
   int throttleAlgos;
 
   char *pdfdir;        // pdf dir
+  char *rootfiledir;
   char *refplotdir;    // ref plot dir
   char *basedir;       // base for config files...
   char *diska;
@@ -70,6 +71,7 @@ class JevpServer {
     basedir = (char *)DEFAULT_BASEDIR;
     refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
     pdfdir = (char *)DEFAULT_PDFDIR;
+    rootfiledir = (char *)DEFAULT_ROOTFILEDIR;
     nodb = 0;
     die = 0;
     daqfilename = NULL;
@@ -79,6 +81,7 @@ class JevpServer {
     jevpSummaryPlot = NULL;
   };
   
+  void writeRootFiles();
   static void main(int argc, char *argv[]);
   void parseArgs(int argc, char *argv[]);
   int init(int port, int argc, char *argv[]);
