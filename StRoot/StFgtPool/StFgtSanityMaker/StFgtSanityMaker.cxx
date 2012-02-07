@@ -34,6 +34,7 @@ Int_t StFgtSanityMaker::Init(){
 
    StEvent* eventPtr=0;
    eventPtr= (StEvent*)GetInputDS("StEvent");
+   assert(eventPtr);
    
    mFgtCollectionPtr=NULL;
    if(eventPtr) {
@@ -111,6 +112,7 @@ Int_t StFgtSanityMaker::Make(){
 
    mFgtCollectionPtr = mFgtCollectionPtr=eventPtr->fgtCollection();
  
+   int lastGeo=-999;
    assert( mFgtCollectionPtr);
    for( UInt_t discIdx=0; discIdx<mFgtCollectionPtr->getNumDiscs(); ++discIdx ){
      StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
@@ -125,6 +127,7 @@ Int_t StFgtSanityMaker::Make(){
 	 
 	 (*stripIter)->getElecCoords( rdo, arm, apv, chn );      
 	 stat=fgtTables->getStatusFromElecCoord(rdo,arm,apv,chn);
+	 if(stat) continue; // drop bad strips
 	 int geoId=fgtTables->getGeoIdFromElecCoord(rdo, arm, apv, chn);
 	 //
 	 assert (geoId>=0);
@@ -133,29 +136,52 @@ Int_t StFgtSanityMaker::Make(){
 
 	 chCntDet[disk][quad][apv]++;
 	 chCntDaq[rdo-1][arm][apv]++;
-	 
+
+	 // drop unstable or dead APVs - Jan's private list
+	 if(rdo==2 && arm==1 && apv==5) continue; 
+	 if(rdo==2 && arm==1 ) continue;
+	 if(rdo==2 && arm==2 && apv==18) continue;
+	 if(rdo==1 && arm==3 && apv==9) continue;
+	 if(rdo==2 && arm==3 ) continue;
+	 if(rdo==1 && arm==4 && apv==19) continue;
+	 if(rdo==1 && arm==4 && apv==21) continue;
+	 if(rdo==2 && arm==4 ) continue;
+
 	 ped=99999.;pedSig=0.;
 	 ped=fgtTables->getPedestalFromElecCoord(rdo,arm,apv,chn);
 	 pedSig=fgtTables->getPedestalSigmaFromElecCoord(rdo,arm,apv,chn);
+
 	 memset(adcA,0,sizeof(adcA));
-	 int up=0;
+
+#if 0
 	 if( chn==127) continue;
 	 if( rdo!=1) continue;
 	 if( arm!=1) continue;
 	 if( apv!=15) continue;
+#endif
 
+	 float minAdc=9999, maxAdc=-9999, sum=0;
+	 int iMin=-1;
 	 for(Int_t is=0;is<Ntimebin;is++){
 	   adcA[is]=(*stripIter)->getAdc(is);
-	   adcA[is]-=ped;
-	   if(adcA[is]<1000) continue;
-	   if(adcA[is]>2500) continue;
-	   up++;
+	   if(adcA[is]<minAdc) { minAdc=adcA[is]; iMin=is;}
+	   if(adcA[is]>maxAdc) maxAdc=adcA[is];
+	   sum+=adcA[is];
 	 }
-	 if(up) {
-	   printf("\nieve=%d rdo=%d arm=%d apv=%d ch=%d geoId=%d \n    adc-ped[0...6]=",iEvt,rdo,arm,apv,chn,geoId);
-	   for(Int_t is=0;is<Ntimebin;is++) printf(" %d ",adcA[is]);
-	   printf("\n");
-	 }
+	 //printf("mm %f %f\n",ped,maxAdc);
+	 maxAdc-=minAdc;
+	 sum-=minAdc*Ntimebin;
+	 if(maxAdc<600) continue;
+	 if(maxAdc>3000) continue;
+	 if(iMin>0) continue; // require ped is in time bin 0
+	 char star=' ';
+	 if(abs(lastGeo-geoId)==1) star='*';
+	 lastGeo=geoId;
+	 printf("\nieve=%d rdo=%d arm=%d apv=%d ch=%d geoId=%d     strip=%d%c%c%03d  %csumADC-ped=%.1f\n    adc-ped[0...6]=",iEvt,rdo,arm,apv,chn,geoId,disk+1,quad+'A',layer,strip,star,sum);
+	 for(Int_t is=0;is<Ntimebin;is++) printf(" %.0f ",adcA[is]-minAdc);
+	 printf("\n    dbPd=%.1f minAdc=%.1f  del=%.1f\n",ped,minAdc,ped-minAdc);
+	 
+	 
        }
      }
    }
@@ -211,6 +237,9 @@ ClassImp( StFgtSanityMaker );
 /**************************************************************************
  *
  * $Log: StFgtSanityMaker.cxx,v $
+ * Revision 1.3  2012/02/07 05:33:30  balewski
+ * *** empty log message ***
+ *
  * Revision 1.2  2012/02/06 04:17:36  balewski
  * added 2012 APV exclusions
  *

@@ -8,79 +8,47 @@
  *
  ***************************************************************************/
 
-// forward declarations
-class StChain;
-class StFgtDbMaker;
-class StFgtRawDaqReader;
-class StFgtSanityMaker;
-class St_db_Maker;
-class StDbConfigNode;
-class StDbManager;
-
-StChain           *analysisChain = 0;
-St_db_Maker       *dbMkr         = 0;
-StFgtDbMaker      *fgtDbMkr      = 0; 
-StFgtRawDaqReader *daqRdr        = 0;
-StFgtSanityMaker     *tshapeMkr        = 0;
 
 int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.daq",
                Int_t nevents = 1000 ){
-  Int_t isCosmic = -1;
   LoadLibs();
   Int_t ierr = 0;
   
-  if( isCosmic == -1 ){
-    isCosmic = 0;
-      std::string daqFileName( filenameIn );
-      std::string::size_type pos = daqFileName.find_last_of(".");
-      
-      if( pos != std::string::npos && daqFileName.substr( pos ) == ".sfs" )
-	isCosmic = 1;
-  };
-  
-  if( isCosmic )
-    cout << "Is Cosmic" << endl;
-  else
-    cout << "Is not cosmic" << endl;
-  
+  std::string daqFileName( filenameIn );
   
   cout << "Constructing the chain" << endl;
   analysisChain = new StChain("eemcAnalysisChain");
   
   std::string fgtDbMkrName = "";
   
-  if( !isCosmic ){
-    // always cut short events if it is cosmic data
-    
-    cout << "Loading St_db_Maker" << endl;
-    gSystem->Load("libStDb_Tables.so");
-    gSystem->Load("StDbLib.so");
-    gSystem->Load("St_db_Maker");
-    gSystem->Load("StDbBroker");
-    
-    TString dir0 = "MySQL:StarDb";
-    TString dir1 = "$STAR/StarDb";
-    St_db_Maker *dbMkr = new St_db_Maker( "dbMkr", dir0, dir1 );
-    dbMkr->SetDateTime(20120128,204320);      // run ???
-    dbMkr->SetDateTime(20120125,80350);      // run 13025001 2012-01-25 08:03:34 GMT
-    cout << "Loading StFgtDbMaker" << endl;
-     gSystem->Load("StFgtDbMaker");
-     
-     cout << "Constructing StFgtDbMaker" << endl;
-     fgtDbMkr = new StFgtDbMaker( "fgtDbMkr" );
-     
-     fgtDbMkrName = fgtDbMkr->GetName();
-     
-     cout << "Fgt DB Maker Name " << fgtDbMkrName << endl;
-  };
+  cout << "Loading St_db_Maker" << endl;
+  gSystem->Load("libStDb_Tables.so");
+  gSystem->Load("StDbLib.so");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StDbBroker");
+  
+  TString dir0 = "MySQL:StarDb";
+  TString dir1 = "$STAR/StarDb";
+  St_db_Maker *dbMkr = new St_db_Maker( "dbMkr", dir0, dir1 );
+  dbMkr->SetDateTime(20120207,0);      // Feb 7
+  //dbMkr->SetDateTime(20120125,80350);      // run 13025001 2012-01-25 08:03:34 GMT
+  cout << "Loading StFgtDbMaker" << endl;
+  gSystem->Load("StFgtDbMaker");
+  
+  cout << "Constructing StFgtDbMaker" << endl;
+  fgtDbMkr = new StFgtDbMaker( "fgtDbMkr" );
+  
+  fgtDbMkrName = fgtDbMkr->GetName();
+  
+  cout << "Fgt DB Maker Name " << fgtDbMkrName << endl;
+ 
   cout << "Constructing the daq reader" << endl;
   daqRdr = new StFgtRawDaqReader( "daqReader", filenameIn, fgtDbMkrName.data() );
-  daqRdr->setIsCosmic( isCosmic );
+  daqRdr->setIsCosmic( 0 );
   daqRdr->cutShortEvents( true );
   cout << "Fgt DB Maker Name " << fgtDbMkrName.data() << endl;
   cout << "Constructing the Time Shape Maker" << endl;
   tshapeMkr = new StFgtSanityMaker( "FgtTimeShapeMaker", fgtDbMkrName.data() );
-
    
 
    // debug
@@ -89,11 +57,6 @@ int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.da
    cout << "Initializing" << endl;
    ierr = analysisChain->Init();
 
-   if( ierr ){
-      cout << "Error initializing" << endl;
-      return;
-   };
-
    if( nevents < 0 )nevents = 1<<30; // a big number
 
    cout << "max nevents = " << nevents << endl;
@@ -101,22 +64,18 @@ int rdDaq2sanity( const Char_t *filenameIn = "st_physics_13027045_raw_0010001.da
      //    if( i % 100 == 0 )
          cout << "\ton event number **************" << i << endl;
 
-      //cout << "clear" << endl;
       analysisChain->Clear();
-
-      //cout << "make" << endl;
       ierr = analysisChain->Make();
-
    };
 
-   //
-   // Calls the ::Finish() method on all makers
-   //
-   cout << "finish" << endl;
+   cout << "M: finish" << endl;
    analysisChain->Finish();
 
    cerr << "\tall done" << endl;
-   return;
+
+   fgtDbMkr->printFgtDumpCSV("fgtMapDump.csv"); // to dump whole FGT DB mapping
+
+ 
 };
 
 
@@ -143,6 +102,9 @@ void LoadLibs() {
 /**************************************************************************
  *
  * $Log: rdDaq2sanity.C,v $
+ * Revision 1.3  2012/02/07 05:33:33  balewski
+ * *** empty log message ***
+ *
  * Revision 1.2  2012/02/06 04:17:43  balewski
  * added 2012 APV exclusions
  *
