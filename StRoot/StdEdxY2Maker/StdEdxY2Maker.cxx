@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.72 2011/10/14 23:25:33 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.72.2.1 2012/02/07 19:41:01 didenko Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -104,10 +104,12 @@ StdEdxY2Maker::StdEdxY2Maker(const char *name):
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Init(){
-  if (IAttr("EmbeddingShortCut")) {
+  Int_t mode = m_Mode;
+  if (m_Mode == -10 || m_Mode == -11 || m_Mode == 0) { // default
+    //    SETBIT(m_Mode,kOldClusterFinder); 
     m_Mode = 0;
-    SETBIT(m_Mode,kEmbedding);
-    SETBIT(m_Mode,kPadSelection); 
+    if (mode == -11) {SETBIT(m_Mode,kEmbedding);}
+    SETBIT(m_Mode,kPadSelection);
     SETBIT(m_Mask,StTpcdEdxCorrection::kTpcLast);
   }
   if (Debug()) {
