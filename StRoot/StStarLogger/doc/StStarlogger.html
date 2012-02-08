@@ -54,17 +54,17 @@ Table of Contents:
   To merge the STAR existing framework with the log4j package, 
   it was only a matter of creating another implementation of 
   the STAR messenger interface - 
-     <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger">
+     <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/StStarLogger">
      <b><code>StLoggerManager</code></b></a>. 
   Additionally, to meet 
   the STAR production needs, a standard set of the logger 
   appender and filter features were either developed or enhanced. 
   We added one extra appender to communicate with the STAR 
   production MySQL database, namely
-  <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger">
+  <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/StStarLogger">
      <b><code>StMySQLAppender</code></b></a>, 
    and created a custom logger filter, 
-  <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger">
+  <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/StStarLogger">
      <b><code>StarOptionFilter</code></b></a>.     
   to be able to select/suspend the messages according to the 
   STAR production manager's criteria. Once again, and due to 
@@ -73,8 +73,8 @@ Table of Contents:
   require modifying any existing piece of the STAR code. 
   It is sufficient to dynamically load the new implementation 
   (see 
-  <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/LoadLogger.C?rev=HEAD">
-  <b><code>LoadLogger.C</code></b></a> macro 
+  <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/macros/LoadLogger.C">
+  <b><code>LoadLogger.C</code></b></a> macro) 
   and provide an external XML <a href="#conf">configuration file</a> 
   for the logger as needed. 
 
@@ -278,7 +278,7 @@ or something like this.
 <h2> How to use the manager </h2>
 
 To use the STAR message manager your code has to contain the STAR message manager 
-<a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/St_base/StMessMgr.h">interface header file</a>:
+<a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/St_base/StMessMgr.h">interface header file</a>:
 
   <b><code>
    <pre>
@@ -293,8 +293,8 @@ To use the STAR message manager your code has to contain the STAR message manage
 
 <p>
   To turn the new one one should load the extra shared library.
-  The ROOT macros <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/LoadLogger.C?rev=HEAD"><b><code>LoadLogger.C</code></b></a> does just that.
-  This means to instantiate the new logger it is enough to call <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/LoadLogger.C"><b><code>"LoadLogger.C"</code></b></a>
+  The ROOT macros <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/macros/LoadLogger.C"><b><code>LoadLogger.C</code></b></a> does just that.
+  This means to instantiate the new logger it is enough to call <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/macros/LoadLogger.C"><b><code>"LoadLogger.C"</code></b></a>
   followed by you your ROOT macro invocation. 
   <p>
    However for <b><code>bfc.C</code></b> the new interface is set as "default". To tune it off and use the old version one should 
@@ -311,13 +311,13 @@ To use the STAR message manager your code has to contain the STAR message manage
    the verbosity may be defined by the external Logger configuration file.
    It recommended to avoid using any method of the STAR message manager describing with 
    <a href="/public/comp/sofi/StMessMgr"> document</a> and use <a href"#macros">the macros</a>
-   mentioned above only. This is to make the ocde free of the run-time and compilation 
-   time parameters this can be defined via the <a href="#conf">logger configuration</a> file.
+   mentioned above only. This is to make the code free of the run-time and compilation-time
+   parameters; this can be defined via the <a href="#conf">logger configuration</a> file.
  <p>
    
    In the other words the author of the code should not apply the "Advanced methods" described by   
    <a href="/public/comp/sofi/StMessMgr"> "Section II"</a> 
-   from the use code as soon as this can be done outside of the code at run-time.
+   from the user code as soon as this can be done outside of the code at run-time.
  <p>
    It is enough to define the desirable messages and its level. 
    All other features can be ordered with the configuration 
@@ -357,7 +357,7 @@ environment variable as well.
 <!-- ------------------------------------------------------------------------------ -->
 <a name="fileExample"></a>
 <!-- ------------------------------------------------------------------------------ -->
-For example, <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/log4j.xml?rev=HEAD">the file <b><code>"log4j.xml"</code></b></a> 
+For example, <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/StRoot/StStarLogger/log4j.xml?rev=HEAD">the file <b><code>"log4j.xml"</code></b></a> 
 defines the "Console output" for entire STAR production chain and the <b><code>"Debug"</code></b> level of the messages.
 
 <p>
@@ -379,7 +379,7 @@ defines the "Console output" for entire STAR production chain and the <b><code>"
 </ul>
 
 These four types are necessary to empower the developers with the capabilities 
-to log messages according to message type and level, to control at runtime 
+to log messages according to message type and level, to control at run-time 
 how these messages are formatted, and lastly to decide where they are reported. 
 <p>
 For each logger one can define the "priority value" (message level) and the arbitrary number 
@@ -638,7 +638,7 @@ alike within his/her <a href="#conf">custom <b><code>".rootrc"</code></b> file</
 
 The example of the configuration files below are available 
 to copy from <b><code>$STAR/StRoot/StStarLogger/doc</b></code> directory 
-or from <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/doc">STAR CVS repository</a>
+or from <a href="http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/~checkout~/StRoot/StStarLogger/doc">STAR CVS repository</a>
 <ul>
 <li><a href="Bfc.xml"> <b><code>Bfc.xml</code></b></a> - describes the STAR custom <b><code>StarOptionFilter</code></b> parameters
 <li><a href="HardQuotaRange.xml"> <b><code>HardQuotaRange.xml</code></b></a> - allows at most  400 messsage of the level "Debug" and "Info" 
