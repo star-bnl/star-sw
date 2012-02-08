@@ -67,6 +67,8 @@ public:
       TH1 *upvpd_hitmap[2];
       TH1 *upvpd_ToT;
       TH1 *upvpd_eastT_vs_westT;
+      
+      TH2 *hBunchidShiftVSthub;
     };
   } contents;
   //*** End Histogram Declarations...
