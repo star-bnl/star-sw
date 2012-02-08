@@ -78,7 +78,7 @@ public:
   u_int combo_index;
   TList *plots;
   TList *jevpPlots;
-
+ 
   void addJevpPlot(JevpPlot *mplot) {  
     jevpPlots->Add(mplot); 
     LOG(DBG, "jevpPlots has %d entries",jevpPlots->GetSize());

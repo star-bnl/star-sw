@@ -10,6 +10,7 @@
 #include <TLine.h>
 #include "TEnv.h"
 #include "ReferenceWidget.h"
+#include "ZoomWidget.h"
 #include "TQtWidget.h"
 #include "TQtZoomPadWidget.h"
 #include <qinputdialog.h>
@@ -122,7 +123,7 @@ JevpScreenWidget::JevpScreenWidget(char *tabname, char *plotname, u_int combo_in
   LOG(DBG,"Creating JevpScreenWidget for %s %s\n",plotname,tabname);
   plot = new std::string(plotname);
 
-  
+
 }
 
 JevpPlot *JevpScreenWidget::getJevpPlot(char *name) {
@@ -177,7 +178,46 @@ void JevpScreenWidget::mousePressEvent(QMouseEvent *e)
     for(int i=0;i<nn;i++) {
       hnode = hnode->next;
     }
+
+
+#ifdef USE_QTIP
     QToolTip::showText(e->globalPos(), hnode->name);
+#else
+
+    // Add a popup menu...
+    Q3PopupMenu *pop = new Q3PopupMenu(this);
+    pop->insertItem(hnode->name,NULL,1,1);
+    pop->insertItem("Reference Plot...",NULL,2,2);
+    pop->insertItem("Zoom Plot...",3,3);
+    
+    int ret = pop->exec(QCursor::pos());
+    {
+      if(ret == 1) {
+	LOG("JEFF", "Do nothing...");
+      }
+      else if (ret == 2) {
+	LOG("JEFF", "Do reference plots");
+	if(hnode->name) {
+	  ReferenceWidget *ref = new ReferenceWidget(gJevpGui, hnode->name);
+	  ref->exec();
+	  LOG(DBG,"Returned....\n");
+	  delete ref;
+	}
+      }
+      else if (ret == 3) {
+	LOG("JEFF", "Do zoom plot");
+	if(hnode->name) {
+	  ZoomWidget *ref = new ZoomWidget(gJevpGui, hnode->name);
+	  ref->exec();
+	  LOG(DBG,"Returned....\n");
+	  delete ref;
+	}
+      }
+    }
+
+    delete pop;
+#endif
+
     //LOG("JEFF","Got a mouse press event...%d %d  %s:\n",x,y,hnode->name);
   }
 }
