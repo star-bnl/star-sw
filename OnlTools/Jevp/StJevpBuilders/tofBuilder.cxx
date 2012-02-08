@@ -60,7 +60,7 @@ void tofBuilder::initialize(int argc, char *argv[]) {
 
     sprintf(tmpchr,"TOF_Tray%03d_trg_L0",i+1);
     sprintf(tmpchr1,"Tray %03d L0 (trg)",i+1);
-    contents.TOF_L0_trg[i]=new TH1F(tmpchr,tmpchr1,32,-0.5,31.5);
+    contents.TOF_L0_trg[i]= new TH1F(tmpchr,tmpchr1,32,-0.5,31.5);
 
     sprintf(tmpchr,"TOF_Tray%03d_LE_hitmap",i+1);
     sprintf(tmpchr1,"Tray %03d Leading hitmap",i+1);
@@ -72,12 +72,15 @@ void tofBuilder::initialize(int argc, char *argv[]) {
     extra.TOF_Tray_TEhitmap[i] = new TH1F(tmpchr,tmpchr1,192,-0.5,191.5);
     extra.TOF_Tray_TEhitmap[i]->SetLineColor(4);
   }
+  contents.hBunchidShiftVSthub = new TH2F("hBunchidShiftVSthub","hBunchidShiftVSthub",8,0.5,8.5,50,-24.5,25.5);
   
-  contents.TOF_L1mult_vs_ZDCadcsum=new TH2F("TOF_L1_vs_ZDCadcsum","TOF_L1_vs_ZDCadcsum",144,0.5,2880.5,150,0,3000);
+  //contents.TOF_L1mult_vs_ZDCadcsum=new TH2F("TOF_L1_vs_ZDCadcsum","TOF_L1_vs_ZDCadcsum",144,0.5,2880.5,150,0,3000);//auau
+  contents.TOF_L1mult_vs_ZDCadcsum=new TH2F("TOF_L1_vs_ZDCadcsum","TOF_L1_vs_ZDCadcsum",200,0.5,200.5,200,0.5,200.5);//pp200
   contents.TOF_L1mult_vs_ZDCadcsum->SetXTitle("TOF L1 Mult");
   contents.TOF_L1mult_vs_ZDCadcsum->SetYTitle("ZDC hardware adc Sum");
 
-  contents.TOF_L1mult_vs_sumL0=new TH2F("TOF_L1_vs_sumL0","TOF_L1_vs_sumL0",144,0.5,2880.5,144,0.5,2880.5);
+  //contents.TOF_L1mult_vs_sumL0=new TH2F("TOF_L1_vs_sumL0","TOF_L1_vs_sumL0",144,0.5,2880.5,144,0.5,2880.5);//auau
+  contents.TOF_L1mult_vs_sumL0=new TH2F("TOF_L1_vs_sumL0","TOF_L1_vs_sumL0",200,0.5,200.5,200,0.5,200.5);//pp
   contents.TOF_L1mult_vs_sumL0->SetXTitle("TOF L1 Mult");
   contents.TOF_L1mult_vs_sumL0->SetYTitle("Sum L0 of hits");
 
@@ -108,6 +111,8 @@ void tofBuilder::initialize(int argc, char *argv[]) {
     plots[n] = new JevpPlot(contents.TOF_L0_trg[n]);
     plots[n]->optstat = 0;
     plots[n]->logy = 1;
+    plots[n]->gridx = 0;
+    plots[n]->gridy = 0;
   }
   n--;
   
@@ -119,19 +124,22 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   
   //error check
   plots[++n] = new JevpPlot(contents.TOF_Error1);
-  plots[n]->logy=1;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
+  plots[n]->logy=0;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
+  plots[n]->getHisto(0)->histo->SetMinimum(0);
   TOF_Error1_label = new TLatex();
   TOF_Error1_label->SetNDC();
   plots[n]->addElement(TOF_Error1_label);
 
   plots[++n] = new JevpPlot(contents.TOF_Error2);
-  plots[n]->logy=1;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
+  plots[n]->logy=0;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
+  plots[n]->getHisto(0)->histo->SetMinimum(0);
   TOF_Error2_label = new TLatex();
   TOF_Error2_label->SetNDC(); 
   plots[n]->addElement(TOF_Error2_label); 
   
   plots[++n] = new JevpPlot(contents.TOF_Error3);
-  plots[n]->logy=1;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
+  plots[n]->logy=0;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
+  plots[n]->getHisto(0)->histo->SetMinimum(0);
   TOF_Error3_label = new TLatex();
   TOF_Error3_label->SetNDC();  
   plots[n]->addElement(TOF_Error3_label);
@@ -144,12 +152,16 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   plots[n]->getHisto(1)->histo->SetFillColor(7);plots[n]->optstat = 0;  
   
   plots[++n] = new JevpPlot(contents.TOF_EventCount);
+  plots[++n] = new JevpPlot(contents.hBunchidShiftVSthub);
+  plots[n]->optstat = 1111111;
   
   for(int i=0;i<NTRAYS;i++) {
     n++;
     plots[n] = new JevpPlot(contents.TOF_Tray_LEhitmap[i]);
     plots[n]->addHisto(extra.TOF_Tray_TEhitmap[i]);
     plots[n]->optstat = 0;
+    plots[n]->gridx = 0;
+    plots[n]->gridy = 0;
   }
   
   plots[++n] = new JevpPlot(contents.upvpd_hitmap[0]);
@@ -320,20 +332,42 @@ int tofBuilder::parseData(daqReader *rdr)
       // TOF trigger window per THUB, subject to change anytime.
       //int trigwindowLow[4]={2830,2840,2910,2910};
       //int trigwindowHigh[4]={2910,2920,2990,2990};
-      int trigwindowLowpertray[120]={
-	2809,2809,2806,2808,2809, 2809,2809,2809,2809,2810, 2809,2809,2809,2809,2809,
-	2809,2808,2809,2809,2808, 2809,2809,2809,2809,2806, 2809,2818,2818,2818,2818,
-	2818,2824,2826,2822,2828, 2826,2827,2825,2827,2819, 2821,2821,2820,2818,2809,
-	2809,2809,2809,2809,2809, 2784,2784,2784,2795,2796, 2797,2797,2797,2809,2809,
-	2884,2884,2871,2873,2872, 2883,2877,2884,2878,2883, 2884,2884,2884,2884,2885,
-	2884,2892,2894,2895,2893, 2894,2893,2892,2894,2884, 2884,2883,2883,2884,2875,
-	2876,2877,2875,2876,2878, 2884,2884,2890,2884,2897, 2897,2897,2897,2896,2897,
-	2896,2896,2894,2896,2897, 2896,2884,2891,2884,2884, 2884,2885,2883,2884,2884
-      };
-      int trigwindowHighpertray[120];
-      for(int iii=0;iii<120;iii++)
-	trigwindowHighpertray[iii]=trigwindowLowpertray[iii]+80;
+//      int trigwindowLowpertray[120]={ //run11
+//	2809,2809,2806,2808,2809, 2809,2809,2809,2809,2810, 2809,2809,2809,2809,2809,
+//	2809,2808,2809,2809,2808, 2809,2809,2809,2809,2806, 2809,2818,2818,2818,2818,
+//	2818,2824,2826,2822,2828, 2826,2827,2825,2827,2819, 2821,2821,2820,2818,2809,
+//	2809,2809,2809,2809,2809, 2784,2784,2784,2795,2796, 2797,2797,2797,2809,2809,
+//	2884,2884,2871,2873,2872, 2883,2877,2884,2878,2883, 2884,2884,2884,2884,2885,
+//	2884,2892,2894,2895,2893, 2894,2893,2892,2894,2884, 2884,2883,2883,2884,2875,
+//	2876,2877,2875,2876,2878, 2884,2884,2890,2884,2897, 2897,2897,2897,2896,2897,
+//	2896,2896,2894,2896,2897, 2896,2884,2891,2884,2884, 2884,2885,2883,2884,2884
+//      };
+//      int trigwindowHighpertray[120];
+//      for(int iii=0;iii<120;iii++)
+//	trigwindowHighpertray[iii]=trigwindowLowpertray[iii]+80;
 
+      float trigwindowCenterpertray[120]={ //run12 13037090.
+        2910.1,2909.8,2909.4,2910.8,2917.0,2917.3,2917.9,2918.3,2917.3,2918.6,
+        2917.9,2917.7,2916.2,2914.9,2918.4,2917.9,2910.1,2911.2,2911.3,2911.5,
+        2837.2,2837.4,2837.4,2836.0,2835.2,2835.5,2841.8,2844.4,2841.7,2840.9,
+        2842.2,2850.3,2851.0,2849.9,2851.2,2850.4,2851.5,2849.8,2851.3,2843.9,
+        2843.2,2844.2,2843.4,2841.9,2833.3,2834.6,2835.8,2837.2,2836.6,2833.6,
+        2892.3,2895.1,2892.9,2901.6,2901.4,2903.6,2902.7,2902.3,2909.7,2910.3,
+        2904.6,2905.6,2897.0,2897.0,2897.6,2901.6,2899.1,2901.3,2899.5,2902.6,
+        2901.8,2906.5,2909.8,2907.6,2909.5,2906.4,2914.7,2917.3,2917.7,2915.0,
+        2914.2,2914.1,2915.7,2914.9,2905.9,2907.1,2906.5,2907.2,2905.4,2899.4,
+        2899.4,2902.2,2899.2,2899.1,  0.0,2913.2,2913.6,2913.4,2912.6,2921.5,
+        2921.6,  0.0,2920.9,2921.2,2921.0,2920.6,2920.8,2920.6,2920.7,2919.7,
+        2919.2,2912.0,2915.5,2912.2,2911.9,2913.1,2912.3,2902.4,2904.0,2905.5
+      };
+      
+      int trigwindowHighpertray[120];   
+      int trigwindowLowpertray[120];    
+      for(int iii=0;iii<120;iii++){     
+        trigwindowLowpertray[iii]=trigwindowCenterpertray[iii]-40;
+        trigwindowHighpertray[iii]=trigwindowCenterpertray[iii]+40;
+      }
+      
       for(int ifib=0;ifib<4;ifib++){
 	int ndataword = tof->ddl_words[ifib];
 	if(ndataword<=0) continue;
@@ -485,10 +519,19 @@ int tofBuilder::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchi
 
   if(trayid>1 && trayid<121){
     if( (diff != mValidShiftTray[0][nthub])  && (diff != mValidShiftTray[1][nthub]) ) ret=nthub;
-  } else if(trayid==121){
-    if(diff !=mValidShift121[halftrayid][0] && diff != mValidShift121[halftrayid][1]) ret=nthub;
-  } else if(trayid==122){
-    if(diff !=mValidShift122[halftrayid][0] && diff != mValidShift122[halftrayid][1]) ret=nthub;
+    contents.hBunchidShiftVSthub->Fill(nthub+1,diff);
+  } 
+  else if(trayid==121){
+    if(diff !=mValidShift121[halftrayid][0] && diff != mValidShift121[halftrayid][1])
+      ret=nthub;
+    if(halftrayid==0)contents.hBunchidShiftVSthub->Fill(nthub+1,diff);
+    if(halftrayid==1)contents.hBunchidShiftVSthub->Fill(nthub+3,diff);
+  } 
+  else if(trayid==122){
+    if(diff !=mValidShift122[halftrayid][0] && diff != mValidShift122[halftrayid][1]) 
+      ret=nthub;
+    if(halftrayid==0)contents.hBunchidShiftVSthub->Fill(nthub+1,diff);
+    if(halftrayid==1)contents.hBunchidShiftVSthub->Fill(nthub+3,diff);
   }
 
   return ret;
@@ -556,7 +599,6 @@ void tofBuilder::event(daqReader *rdr)
     for(int ihalf=0;ihalf<2;ihalf++){
       int bunchid=allbunchid[ihalf][itray];
       int ret=ValidBunchid(traynum,ihalf,bunchid,bunchidref1);
-      
       if(ret>=0 && bunchid!=-9999) contents.TOF_Error2->Fill(traynum); //real bunchid errors
       if(bunchid==-9999) contents.TOF_Error3->Fill(traynum); //missing bunchid
     }
@@ -594,7 +636,7 @@ void tofBuilder::event(daqReader *rdr)
     TOF_Error3_label->SetTextColor(3);
   }
   else {
-    sprintf(t, "%d read out errors in %d events!",err2, nev);
+    sprintf(t, "%d read out errors in %d events!",err3, nev);
     TOF_Error3_label->SetTextColor(2);
   }
   TOF_Error3_label->SetText(.2,.8,t);
