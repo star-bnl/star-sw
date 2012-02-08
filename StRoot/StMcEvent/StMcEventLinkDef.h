@@ -98,7 +98,7 @@
 #pragma link C++ class vector<StMcFgtHit*>+;
 #pragma link C++ class vector<StMcTofHit*>+;
 #pragma link C++ class vector<StMcBTofHit*>+;
-//#pragma link C++ class vector<StMcMtdHit*>;
+#pragma link C++ class vector<StMcMtdHit*>+;
 #pragma link C++ class vector<StMcTrack*>+;
 // Not owners
 #pragma link C++ class vector<StMcVertex*>+;
