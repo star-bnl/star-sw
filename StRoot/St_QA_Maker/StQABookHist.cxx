@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.65 2011/05/31 21:35:49 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.66 2012/02/08 22:10:35 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.66  2012/02/08 22:10:35  genevb
+// Updates for Run 12
+//
 // Revision 2.65  2011/05/31 21:35:49  genevb
 // TPC request: add time bucket distribution of hits
 //
@@ -758,7 +761,9 @@ void StQABookHist::BookHist(Int_t histsSet){
     mNullPrimVtxClass->SetXTitle("has primary vertex? (yes = 1, no = -1)");
     mNullPrimVtxClass->SetYTitle("# of events");
   }
-  if (histsSet!=StQA_run8) silHists = kTRUE;
+  if (!(histsSet==StQA_run8     ||
+        histsSet==StQA_run12all ||
+        histsSet==StQA_run12      )) silHists = kTRUE;
   BookHistPoint();
   BookHistEMC();
   if (histsSet == StQA_AuAuOld) {
@@ -770,9 +775,12 @@ void StQABookHist::BookHist(Int_t histsSet){
   BookHistDE();
   BookHistPID();
   BookHistVertex();
-  BookHistPMD();
+  if (!(histsSet==StQA_run12all ||
+        histsSet==StQA_run12      )) BookHistPMD();
   if (histsSet==StQA_MC) BookHistEval();
-  if (histsSet==StQA_run8) BookHistTOF();
+  if (histsSet==StQA_run8     ||
+      histsSet==StQA_run12all ||
+      histsSet==StQA_run12      ) BookHistTOF();
   
 }
 //_____________________________________________________________________________

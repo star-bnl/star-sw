@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.36 2011/05/26 19:59:38 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.37 2012/02/08 22:10:35 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.37  2012/02/08 22:10:35  genevb
+// Updates for Run 12
+//
 // Revision 2.36  2011/05/26 19:59:38  genevb
 // Cleanup in destructors
 //
@@ -232,9 +235,12 @@ Int_t StQAMakerBase::Make() {
   // histograms from FPD in StEvent
   if (histsSet==StQA_AuAuOld) MakeHistFPD();
   // histograms from PMD in StEvent
-  MakeHistPMD();
+  if (!(histsSet==StQA_run12all ||
+        histsSet==StQA_run12      )) MakeHistPMD();
   // histograms from TOF in StEvent
-  if (histsSet==StQA_run8) MakeHistTOF();
+  if (histsSet==StQA_run8     ||
+      histsSet==StQA_run12all ||
+      histsSet==StQA_run12      ) MakeHistTOF();
 
   eventCount++;
   return kStOk;
@@ -285,6 +291,7 @@ void StQAMakerBase::BookHist() {
 
   // Real data with event classes for different triggers
 
+    case (StQA_run12) :
     case (StQA_run8) :
     case (StQA_AuAu) : {
       (prefix[0] = QAMakerType) += "MB";  // Minbias
@@ -309,6 +316,7 @@ void StQAMakerBase::BookHist() {
 
    // pp data with just one event class
     case (StQA_pp) :
+    case (StQA_run12all) :
 
     default  : {
       prefix[0] = QAMakerType;

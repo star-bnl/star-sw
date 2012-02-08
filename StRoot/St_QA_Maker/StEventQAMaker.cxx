@@ -160,7 +160,8 @@ Int_t StEventQAMaker::Make() {
     gMessMgr->Error("StEventQAMaker::Make(): no event found!");
     return kStErr;
   }
-  Bool_t realData = event->info() && (event->info()->type() == "NONE");
+  Bool_t realData = event->info() && (event->info()->type() == "NONE" ||
+                                      event->info()->type() == "Collision");
   if (eventCount==0) {
     if (histsSet == StQA_Undef) {
       if (realData) {
@@ -310,9 +311,12 @@ Int_t StEventQAMaker::Make() {
       gMessMgr->Warning("StEventQAMaker::Make(): No trigger info");
     }
   }  // allTrigs
-  if (run_year >=9) {
+  if (run_year >=13) {
+    if (realData) histsSet = StQA_run12; // for now, everything from run12 on uses this set
+  } else if (run_year >=9) {
     if (realData) histsSet = StQA_run8; // for now, everything from run8 on uses this set
   } else silHists = kTRUE;
+
   
   for (int bitn=0; bitn<32; bitn++) {
     if (tword>>(bitn) & 1U)
@@ -2392,8 +2396,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.104 2011/07/29 21:52:41 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.105 2012/02/08 22:10:35 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.105  2012/02/08 22:10:35  genevb
+// Updates for Run 12
+//
 // Revision 2.104  2011/07/29 21:52:41  genevb
 // Fixed improper initialization of event classes affecting future simulations
 //
