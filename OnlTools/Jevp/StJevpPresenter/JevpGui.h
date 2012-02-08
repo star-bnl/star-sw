@@ -49,6 +49,7 @@
   class Q3ProgressBar;
 #endif /* QT4 */
 
+class QTimer;
 class QTabWidget ;
 class QPushButton;
 class QButton;
@@ -103,7 +104,7 @@ public:
     jevpPlots->Clear();
     //printf("more clear\n");
     GetCanvas()->Clear(); 
-    LOG("JEFF", "Cleared canvas");
+    //LOG("JEFF", "Cleared canvas");
 
     LOG(DBG, "Done Clearing Screen Widget");
   };
@@ -130,6 +131,7 @@ class JevpGui : public Q3MainWindow {
     QPushButton* fStarLogo;
 
 private:
+    QTimer *refreshTimer;
 
     QTabWidget *rootTab;
 
@@ -288,6 +290,7 @@ public slots:
     //void addGroupTab(const char*); // adds a new QTabWidget to the dynamic tabs;
     //void addGroup(const char*);    // adds a new QWidget to that last QTabWidget in the dynamic tabs
     void UpdatePlots();
+    void refreshTimerFired();
 
     signals:
       void save();
