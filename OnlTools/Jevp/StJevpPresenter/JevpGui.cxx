@@ -438,6 +438,10 @@ JevpGui::JevpGui() : Q3MainWindow(), mWidth(900), mHight(500), mStrLive(" Live  
   gJevpGui = this;
   serverTags = (char *)malloc(10);
   strcpy(serverTags, "");
+
+  refreshTimer = new QTimer(this);
+  connect(refreshTimer, SIGNAL(timeout()), this, SLOT(refreshTimerFired()));
+  refreshTimer->start(2500);
 }
 
 
@@ -1069,7 +1073,7 @@ int JevpGui::updateRunStatus()
   delete mess;
   double t2=clock.record_time();
 
-  LOG("JEFF", "Ethernet: RunStatus (response=%lf decode=%lf)",t1,t2);
+  //LOG("JEFF", "Ethernet: RunStatus (response=%lf decode=%lf)",t1,t2);
   
   int isLive = fActions[kFileLive]->isOn();
   int secs = time(NULL) - rs->timeOfLastChange;
@@ -1183,17 +1187,28 @@ void JevpGui::UpdatePlots()
       jl_DrawPlot(currentScreen);
   
       double t1 = clock.record_time();
-      LOG("JEFF", "Ethernet: Drawplots (%lf)",t1);
+      if(t1 > .25)
+	LOG("JEFF", "Ethernet: Drawplots (%lf)",t1);
     }
     
   }
 
-  CP;
-  if (fActions[kAutoUpdate]->isOn()) {
-    QTimer::singleShot(fGuiRefreshRate,this,SLOT(UpdatePlots()));
-  }
+//   if (fActions[kAutoUpdate]->isOn()) {
+//     QTimer::singleShot(fGuiRefreshRate,this,SLOT(UpdatePlots()));
+//   }
   CP;
 }
+
+void JevpGui::refreshTimerFired()
+{ 
+  //  LOG("JEFF", "Timer fired...");
+  if(fActions[kAutoUpdate]->isOn()) {
+    //LOG("JEFF", "calling update...");
+    UpdatePlots();
+    tabChanged(rootTab);
+  }
+}
+
 
   //______________________________________________________________________________
 void JevpGui::setServerInfo(ServerStatus* ss) {
@@ -1533,7 +1548,9 @@ void JevpGui::init()
   CP;
   LOG(DBG,"Done building tabs\n");
 
-  fActions[kAutoUpdate]->setOn(false);
+  // this is enough!
+  //fActions[kAutoUpdate]->setOn(false);
+  fActions[kAutoUpdate]->setOn(true);
  
   connect(qApp,SIGNAL(lastWindowClosed()),TQtRootSlot::CintSlot(),SLOT(TerminateAndQuit()));
   connect(qApp,SIGNAL(lastWindowClosed()),this, SLOT(jl_ClosePresenter()));
@@ -1784,7 +1801,8 @@ JevpPlot *JevpGui::jl_getPlotFromServer(char *name, char *error)
     JevpPlot *plot = (JevpPlot *)mess->ReadObject(mess->GetClass());
 
     double t2 = clock.record_time();
-    LOG("JEFF", "Ethernet: JevpPlot (%lf %lf)",t1,t2);
+    if(t2 > .25)
+      LOG("JEFF", "Ethernet: JevpPlot (%lf %lf)",t1,t2);
 
     delete mess;
     return plot;
@@ -2168,7 +2186,7 @@ int JevpGui::jl_send(TObject *msg) {
   jl_socket->Send(mess);
 
   double t1=clock.record_time();
-  LOG("JEFF", "Ethernet: send()   (%lf)",t1);
+  //  LOG("JEFF", "Ethernet: send()   (%lf)",t1);
 
   return 0;
 }
