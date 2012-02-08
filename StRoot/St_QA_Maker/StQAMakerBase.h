@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.17 2009/11/19 20:34:38 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.18 2012/02/08 22:10:35 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.18  2012/02/08 22:10:35  genevb
+// Updates for Run 12
+//
 // Revision 2.17  2009/11/19 20:34:38  genevb
 // Remove Event Summary (using defunct old software monitors)
 //
@@ -68,7 +71,9 @@ enum StQAHistSetType {
   StQA_pp = 2,
   StQA_dAu = 3,
   StQA_AuAu = 4,
-  StQA_run8 = 5
+  StQA_run8 = 5,
+  StQA_run12all = 6,
+  StQA_run12 = 7
 };
 
 #include "StMaker.h"
@@ -90,7 +95,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.17 2009/11/19 20:34:38 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.18 2012/02/08 22:10:35 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
