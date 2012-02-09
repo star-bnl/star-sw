@@ -7,15 +7,16 @@
  */
 
 #include "StFgtGeom.h"
-#include <assert.h>
+#include <TMath.h>
+//#include <assert.h>
 #include <iostream>
 #include <algorithm>
 using namespace std;
 
 //ClassImp(StFgtGeom)
 
-double	StFgtGeom::mPi = 2.*std::acos(0.);
-double	StFgtGeom::mHalfPi = 0.5*mPi;
+double	StFgtGeom::mPi = TMath::Pi();
+double	StFgtGeom::mHalfPi = TMath::PiOver2();
 
 void StFgtGeom::getNaiveElecCoordFromGeoId(
     Int_t geoId,
@@ -70,13 +71,6 @@ int	StFgtGeom::mPhiStripLOCId_number =
     int (
 	(mHalfPi-phiStripOff()) / phiStrip_pitch()
     ) + 5;
-#if 0
-int	StFgtGeom::mRadStripGBLId_number =
-    kNumFgtQuadrants * radStripLOCId_number();
-
-int	StFgtGeom::mPhiStripGBLId_number =
-    kNumFgtQuadrants * phiStripLOCId_number();
-#endif
 // function to setup the reverse mapping based on the forward mapping
 void StFgtGeom::makeReverseNaiveMappingValid(){
    for( Int_t *p = mReverseNaiveMapping; p != &mNaiveMapping[2*kFgtNumStrips]; ++p )
@@ -101,8 +95,7 @@ double StFgtGeom::phiQuadXaxis( int iquad )
 	    return 165.0*mPi/180.0;
 	case 3:
 	    return 75.0*mPi/180.0;
-	default:
-	    assert(2==3);   //	Safe without costing us any clock cycles.
+	    //assert(2==3);   //	Safe without costing us any clock cycles.
     }
 }
 
@@ -129,8 +122,8 @@ bool StFgtGeom::belowFlat( TVector3 r ) //	'r' in LOC ref
 int StFgtGeom::getQuad( double phiLab )
 {
   //  printf("StFgtGeom::getQuad phiLab/rad=%f\n", phiLab );
-  assert(phiLab <= mPi );
-  assert(phiLab >= -mPi );
+  //assert(phiLab <= mPi );
+  //assert(phiLab >= -mPi );
   if ( phiLab > phiQuadXaxis(1) && phiLab <= phiQuadXaxis(0) )
     return 1;
   if ( phiLab > phiQuadXaxis(0) && phiLab <= phiQuadXaxis(3) )
@@ -815,7 +808,7 @@ Int_t StFgtGeom::mReverseNaiveMapping[ 2*kFgtNumStrips ];
 //  isPhi?, ordinate, lowerSpan, upperSpan
 //  The index corresponds to (apv*128)+channel (assuming that the apv is in
 //  [0,12).  If apv is in [12,24), then the index is (apv-12)*128+channel.
-StFgtGeomData StFgtGeom::mStrips[] =
+StFgtGeom::StFgtGeomData StFgtGeom::mStrips[] =
 {
     { false, 38.1571, 0.8905733, 1.53935776 },
     { false, 38.0617, 0.88363036, 1.53927901 },
@@ -3545,11 +3538,12 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.28 2012/02/09 17:52:03 wwitzke Exp $
+ *  $Id: StFgtGeom.cxx,v 1.29 2012/02/09 18:23:24 wwitzke Exp $
  *  $Log: StFgtGeom.cxx,v $
- *  Revision 1.28  2012/02/09 17:52:03  wwitzke
- *  Changed organization of StFgtGeom to put inline functions after class body.
- *  Also moved getNaiveElecCoordFromGeoId to .cxx as a non-inline function.
+ *  Revision 1.29  2012/02/09 18:23:24  wwitzke
+ *  Fixed various minor issues, including nesting the StFgtGeomData, making the
+ *  various "pi" variables use the TMath definions of pi, and removing the various
+ *  asserts from the code.
  *
  *  Revision 1.26  2012/02/09 16:49:02  wwitzke
  *  Fixed naming convention problems (camel casing).
