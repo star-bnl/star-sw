@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.66 2012/02/08 22:10:35 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.67 2012/02/09 03:01:05 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.67  2012/02/09 03:01:05  genevb
+// No FTPC histograms for Run 12+
+//
 // Revision 2.66  2012/02/08 22:10:35  genevb
 // Updates for Run 12
 //
@@ -224,6 +227,7 @@ ClassImp(StQABookHist)
 StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
 
   silHists = kFALSE;
+  ftpHists = kFALSE;
 
   int i = 0;
 
@@ -764,6 +768,8 @@ void StQABookHist::BookHist(Int_t histsSet){
   if (!(histsSet==StQA_run8     ||
         histsSet==StQA_run12all ||
         histsSet==StQA_run12      )) silHists = kTRUE;
+  if (!(histsSet==StQA_run12all ||
+        histsSet==StQA_run12      )) ftpHists = kTRUE;
   BookHistPoint();
   BookHistEMC();
   if (histsSet == StQA_AuAuOld) {
@@ -1106,6 +1112,8 @@ void StQABookHist::BookHistGlob(){
 
   }
 
+  if (ftpHists) { // FTPC hists
+
 // 1D ftpc
 
   // both east (solid) and west(dashed) on same plot
@@ -1247,6 +1255,8 @@ void StQABookHist::BookHistGlob(){
   m_npoint_lengthFW = QAH::H2F("QaGtrkNPntLengthFW","globtrk: N pnts vs length, ftpcW",30,0.,120.,15,0.,15.);
     m_npoint_lengthFW->SetXTitle("trk length");
     m_npoint_lengthFW->SetYTitle("Npoints on trk");
+
+  } // ftpHists
 }
 //____________________________________________________
 void StQABookHist::BookHistPrim(){
@@ -1466,7 +1476,9 @@ void StQABookHist::BookHistPrim(){
   m_ppsi_phiTS = QAH::H2F("QaPtrkPsiPhiTS","primtrk: psi vs phi, tpc+svt",36, 0.,360.,36,0.,360.);
     m_ppsi_phiTS->SetXTitle("phi");
     m_ppsi_phiTS->SetYTitle("psi");
-  }
+  } // silHists
+
+  if (ftpHists) { // FTPC hists
 
 // 1D ftpc
   // east (solid) and west(dashed) on same plot
@@ -1583,6 +1595,8 @@ void StQABookHist::BookHistPrim(){
   m_pnpoint_lengthFW = QAH::H2F("QaPtrkNPntLengthFW","primtrk: N pnts vs length, ftpcW",50,0.,300.,15,0.,15.);
     m_pnpoint_lengthFW->SetXTitle("trk length");
     m_pnpoint_lengthFW->SetYTitle("Npoints on trk");
+
+  } // ftpHists
 
 // 2D - SVT drift length
   if (silHists)

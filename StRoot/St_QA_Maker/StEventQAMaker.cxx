@@ -85,6 +85,7 @@ StEventQAMaker::StEventQAMaker(const char *name, const char *title) :
 StQAMakerBase(name,title,"StE"), event(0), mHitHist(0), mPmdGeom(0), maputil(0) {
   mRunNumber = -1;
   silHists = kFALSE;
+  ftpHists = kFALSE;
   hitsAvail = kTRUE;
   vertExists = -1.;
 }
@@ -316,6 +317,7 @@ Int_t StEventQAMaker::Make() {
   } else if (run_year >=9) {
     if (realData) histsSet = StQA_run8; // for now, everything from run8 on uses this set
   } else silHists = kTRUE;
+  if (run_year < 13) ftpHists = kTRUE; // Removed for run12 on
 
   
   for (int bitn=0; bitn<32; bitn++) {
@@ -783,7 +785,7 @@ void StEventQAMaker::MakeHistGlob() {
       } // SVT || SSD requirement
       
       // now fill all FTPC East histograms ------------------------------------------
-      else if (map.trackFtpcEast()) {
+      else if (ftpHists && map.trackFtpcEast()) {
 	
 	cnttrkgFE++;
 	
@@ -852,7 +854,7 @@ void StEventQAMaker::MakeHistGlob() {
 				       Float_t(detInfo->numberOfPoints()));
       }
       // now fill all FTPC West histograms ------------------------------------------
-      else if (map.trackFtpcWest()) {
+      else if (ftpHists && map.trackFtpcWest()) {
 	
 	cnttrkgFW++;
 	
@@ -2396,8 +2398,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.105 2012/02/08 22:10:35 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.106 2012/02/09 03:01:05 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.106  2012/02/09 03:01:05  genevb
+// No FTPC histograms for Run 12+
+//
 // Revision 2.105  2012/02/08 22:10:35  genevb
 // Updates for Run 12
 //

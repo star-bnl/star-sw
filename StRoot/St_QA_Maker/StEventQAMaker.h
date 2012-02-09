@@ -33,6 +33,7 @@ class StEventQAMaker : public StQAMakerBase {
   StPmdMapUtil* maputil;   //!
   Int_t mRunNumber;
   Bool_t silHists;      // whether we're doing SVT,SSD hists
+  Bool_t ftpHists;      // whether we're doing FTPC hists
   Bool_t hitsAvail;     // whether TPC hits are available
   Float_t vertExists;   // prim vertex : none/questionable/good
   
@@ -74,15 +75,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.15 2011/05/26 19:59:38 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.16 2012/02/09 03:01:05 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.15 2011/05/26 19:59:38 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.16 2012/02/09 03:01:05 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.16  2012/02/09 03:01:05  genevb
+// No FTPC histograms for Run 12+
+//
 // Revision 2.15  2011/05/26 19:59:38  genevb
 // Cleanup in destructors
 //
