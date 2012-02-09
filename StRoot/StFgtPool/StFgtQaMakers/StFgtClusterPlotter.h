@@ -10,12 +10,11 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
-
-class StFgtClusterPlotMaker : public StFgtQaMaker {
+class StFgtClusterPlotter : public StFgtQaMaker {
  public:
-  StFgtClusterPlotMaker(const Char_t* name="FgtClusterPlotMaker");
+  StFgtClusterPlotter(const Char_t* name="FgtClusterPlotter");
 
-  virtual ~StFgtClusterPlotMaker();
+  virtual ~StFgtClusterPlotter();
 
    Int_t Init();
    Int_t Make();
@@ -29,6 +28,8 @@ class StFgtClusterPlotMaker : public StFgtQaMaker {
    TH2D** hClusSizeR;
    TH2D** hCChargeElecSpace;
    TH2D** hClusSizeElecSpace;
+ private:   
+   ClassDef(StFgtClusterPlotter,1);
 
 
 };
