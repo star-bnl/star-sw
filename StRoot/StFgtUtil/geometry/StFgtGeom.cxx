@@ -17,6 +17,30 @@ using namespace std;
 double	StFgtGeom::mPi = 2.*std::acos(0.);
 double	StFgtGeom::mHalfPi = 0.5*mPi;
 
+void StFgtGeom::getNaiveElecCoordFromGeoId(
+    Int_t geoId,
+    Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
+)
+{
+   Short_t disc, quadrant, strip;
+   Char_t layer;
+
+   decodeGeoId( geoId, disc, quadrant, layer, strip );
+
+   if( !mReverseNaiveMappingValid )
+      makeReverseNaiveMappingValid();
+
+   Int_t key = ( (layer=='P')*kFgtNumStrips + strip );
+   channel = mReverseNaiveMapping[ key ];
+   apv = channel / 128;
+   channel %= 128;
+
+   if( quadrant % 2 )
+      apv += 12;
+
+   rdo = disc/3+1;
+   arm = (disc % 3)*2 + (quadrant>1);
+}
 
 double	StFgtGeom::mRadStripOff =
     (
@@ -3521,10 +3545,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.27 2012/02/09 17:00:10 wwitzke Exp $
+ *  $Id: StFgtGeom.cxx,v 1.28 2012/02/09 17:52:03 wwitzke Exp $
  *  $Log: StFgtGeom.cxx,v $
- *  Revision 1.27  2012/02/09 17:00:10  wwitzke
- *  Modified some variable names to conform to standard naming conventions.
+ *  Revision 1.28  2012/02/09 17:52:03  wwitzke
+ *  Changed organization of StFgtGeom to put inline functions after class body.
+ *  Also moved getNaiveElecCoordFromGeoId to .cxx as a non-inline function.
  *
  *  Revision 1.26  2012/02/09 16:49:02  wwitzke
  *  Fixed naming convention problems (camel casing).
