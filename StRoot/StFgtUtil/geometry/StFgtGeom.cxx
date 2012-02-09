@@ -21,10 +21,10 @@ double	StFgtGeom::halfpi = 0.5*pi;
 
 double	StFgtGeom::mRadStripOff =
     (
-	(Rout()-Rin()/radStrip_pitch())
+	(rOut()-rIn()/radStrip_pitch())
 	-
 	int (
-	    (Rout() - Rin())/radStrip_pitch()
+	    (rOut() - rIn())/radStrip_pitch()
 	)
     ) * radStrip_pitch();
 
@@ -40,7 +40,7 @@ double	StFgtGeom::mPhiStripOff =
 
 int	StFgtGeom::mRadStripLOCId_number =
   int (
-	(Rout()-Rin()-radStripOff()) / radStrip_pitch()
+	(rOut()-rIn()-radStripOff()) / radStrip_pitch()
     ) + 5;
 
 int	StFgtGeom::mPhiStripLOCId_number =
@@ -86,7 +86,7 @@ double StFgtGeom::phiQuadXaxis( int iquad )
 bool StFgtGeom::inDisc( TVector3 r ) //	'r' in LAB ref
 {
     double Rxy = r.Perp();
-    //printf("StFgtGeom::inDisc Rxy=%f Rin=%f Rout=%f\n",Rxy,kFgtRin,kFgtRout);
+    //printf("StFgtGeom::inDisc Rxy=%f rIn=%f rOut=%f\n",Rxy,kFgtRin,kFgtRout);
     if ( Rxy < kFgtRin )
 	return false;
     if ( Rxy > kFgtRout )
@@ -124,7 +124,7 @@ int StFgtGeom::getQuad( double phiLab )
 int StFgtGeom::phi2LocalStripId( double rad, double phiLoc, double *binFrac )
 {
 
-  const int pbins = ((Plast() - Pfirst())/phiStrip_pitch());//720 strips total numbered from 0-719
+  const int pbins = ((pLast() - pFirst())/phiStrip_pitch());//720 strips total numbered from 0-719
 
   double pstrip[pbins];//array that holds phi location of strips
 
@@ -133,7 +133,7 @@ int StFgtGeom::phi2LocalStripId( double rad, double phiLoc, double *binFrac )
   int pindex = -1;//index in array is the strip value
   for ( int i =0; i < pbins; i++)
     {
-      pstrip[i] = (-i*phiStrip_pitch() + Plast() - phiLoc);
+      pstrip[i] = (-i*phiStrip_pitch() + pLast() - phiLoc);
       if ( fabs(pstrip[i]) < fabs(min_p_diff) ) 
 	{
 	  min_p_diff = pstrip[i];
@@ -143,7 +143,7 @@ int StFgtGeom::phi2LocalStripId( double rad, double phiLoc, double *binFrac )
 
   //if r is < 19.125 and >= 11.5 then all even strips are not there
   //if index is odd the width is 2x phiStrip_pitch()
-  if ( (rad < Rmid()) && (rad >= Rin()) && (pindex%2) ){
+  if ( (rad < rMid()) && (rad >= rIn()) && (pindex%2) ){
  
     //if min_p_diff < 0 then phiLoc > stripPhi and is closer to the lower numbered odd strip
     if (min_p_diff <= 0) pindex-=1;
@@ -155,20 +155,20 @@ int StFgtGeom::phi2LocalStripId( double rad, double phiLoc, double *binFrac )
   //the first and last 35 strips have irregular rinner values
   if ( (pindex < 35) || ( pindex > 684) )
     {
-      if ( rad < Phistrip_R_Low(pindex)) pindex  = -1;
+      if ( rad < pHistrip_R_Low(pindex)) pindex  = -1;
     }
   
   //these strips have irregular router values
   if ( (pindex < 347) || ( pindex > 306) )
     {
-      if ( rad > Phistrip_R_High(pindex)) pindex  = -1;
+      if ( rad > pHistrip_R_High(pindex)) pindex  = -1;
     }
 
   //if radius is outside of geometric location of the foil then return -1
-  if ( (rad > Rout()) || (rad < Rin()) ) pindex = -1;
+  if ( (rad > rOut()) || (rad < rIn()) ) pindex = -1;
 
   //if phi is outside of first strip - width or last strip + width then return -1
-  if ( (phiLoc > (Plast()+phiStrip_pitch())) || (phiLoc < (Pfirst()-phiStrip_pitch())) ) pindex = -1;
+  if ( (phiLoc > (pLast()+phiStrip_pitch())) || (phiLoc < (pFirst()-phiStrip_pitch())) ) pindex = -1;
 
   return pindex;
   
@@ -176,7 +176,7 @@ int StFgtGeom::phi2LocalStripId( double rad, double phiLoc, double *binFrac )
 
 
 
-double StFgtGeom::Phistrip_R_High(int pindex){
+double StFgtGeom::pHistrip_R_High(int pindex){
   
   double r;
 
@@ -533,7 +533,7 @@ double StFgtGeom::Phistrip_R_High(int pindex){
 
 }
 
-double StFgtGeom::Phistrip_R_Low(int pindex){
+double StFgtGeom::pHistrip_R_Low(int pindex){
   
   double r;
 
@@ -625,7 +625,7 @@ double StFgtGeom::Phistrip_R_Low(int pindex){
 int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
 {
 
-  const int rbins = ((Rlast() - Rfirst())/phiStrip_pitch())+1;//280 strips on each side of the quadrant
+  const int rbins = ((rLast() - rFirst())/phiStrip_pitch())+1;//280 strips on each side of the quadrant
 
   double rstrip[rbins];//array that holds r location of strips
 
@@ -634,7 +634,7 @@ int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
   int rindex = -1;//index in array is the strip value
   for ( int i =0; i < rbins; i++)
     {
-      rstrip[i] = fabs(-i*radStrip_pitch() + Rlast() - rad);
+      rstrip[i] = fabs(-i*radStrip_pitch() + rLast() - rad);
       if (rstrip[i] < min_r_diff) 
 	{
 	  min_r_diff = rstrip[i];
@@ -663,8 +663,8 @@ int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
   //Last make a series of checks to be sure that there are strips in the phi region for strips  0 - 24 and 400-424
   if (((rindex < 25)&&(rindex >=0)) || (( rindex < 425 )&&( rindex >= 400)))
     {
-      if (phiLoc > (Rstrip_Phi_High(rindex))) rindex = -1;
-      if (phiLoc < (Rstrip_Phi_Low(rindex))) rindex = -1;								   
+      if (phiLoc > (rStrip_Phi_High(rindex))) rindex = -1;
+      if (phiLoc < (rStrip_Phi_Low(rindex))) rindex = -1;								   
     }
 
 
@@ -676,13 +676,13 @@ int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
       checkLowRad +=400;
     }
 
-  if (( rindex < checkLowRad ) || (rindex >= checkHighRad) || ( rad < (Rfirst() - (radStrip_pitch()/2))) || ( rad > ( Rlast() + (radStrip_pitch()/2) ) ) )  rindex = -1;
+  if (( rindex < checkLowRad ) || (rindex >= checkHighRad) || ( rad < (rFirst() - (radStrip_pitch()/2))) || ( rad > ( rLast() + (radStrip_pitch()/2) ) ) )  rindex = -1;
     
   return rindex;
   
 }
 
-double StFgtGeom::Rstrip_Phi_High(int rindex){
+double StFgtGeom::rStrip_Phi_High(int rindex){
   
   double phi;
 
@@ -736,7 +736,7 @@ double StFgtGeom::Rstrip_Phi_High(int rindex){
   return phi;
 }
 
-double StFgtGeom::Rstrip_Phi_Low(int rindex){
+double StFgtGeom::rStrip_Phi_Low(int rindex){
   
   double phi;
 
@@ -3522,8 +3522,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.25 2012/02/09 16:16:39 wwitzke Exp $
+ *  $Id: StFgtGeom.cxx,v 1.26 2012/02/09 16:49:02 wwitzke Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.26  2012/02/09 16:49:02  wwitzke
+ *  Fixed naming convention problems (camel casing).
+ *
  *  Revision 1.25  2012/02/09 16:16:39  wwitzke
  *  Made minor fix to StFgtGeom.h to eliminate warnings.
  *
@@ -3535,7 +3538,7 @@ Int_t StFgtGeom::mNaiveMapping[] =
  *  replaces StFgtEnums and StFgtGeomDefs
  *
  *  Revision 1.22  2011/11/09 00:50:04  rfatemi
- *  Fix width phi strips with r < Rmid()
+ *  Fix width phi strips with r < rMid()
  *
  *  Revision 1.21  2011/11/08 22:40:06  rfatemi
  *  Fixed flat part in phi2LocalStripId

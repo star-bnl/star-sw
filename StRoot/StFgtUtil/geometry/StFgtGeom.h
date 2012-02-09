@@ -31,8 +31,7 @@ struct StFgtGeomData
 
 //  StFgtGeom is a "singleton" class. Only one of it needs to exist in any
 //  program. However, because the data contained in this class is entirely
-//  static, the class itself is also entirely static. No instances of this
-//  class can be created.
+//  static, the class itself is also entirely static.
 class StFgtGeom
 {
     public:
@@ -349,13 +348,13 @@ class StFgtGeom
 	//  Jan's necessary functions start here.  These were written by Jan,
 	//  modified slightly by me.
 	//  Jan: I have adjusted the dimensions to match FGT as build, September, 2011
-	static double Rin()	{ return kFgtRin; }
-	static double Rmid()	{ return kFgtRmid; }
-	static double Rout()	{ return kFgtRout; }
-	static double Rfirst()  { return kFgtRfirst; }
-	static double Rlast()   { return kFgtRlast;}
-	static double Pfirst()  { return kFgtPfirst; }
-	static double Plast()   { return kFgtPlast;}
+	static double rIn()	{ return kFgtRin; }
+	static double rMid()	{ return kFgtRmid; }
+	static double rOut()	{ return kFgtRout; }
+	static double rFirst()  { return kFgtRfirst; }
+	static double rLast()   { return kFgtRlast;}
+	static double pFirst()  { return kFgtPfirst; }
+	static double pLast()   { return kFgtPlast;}
 
 	static double radStrip_pitch() { return kFgtRadPitch; }		//  cm
 	static double phiStrip_pitch() { return  kFgtPhiAnglePitch; }	//  rad
@@ -411,10 +410,10 @@ class StFgtGeom
 	static  int rad2LocalStripId(double rad, double phi, double *binFrac=0 );
 	static  int phi2LocalStripId(double rad, double phi, double *binFrac=0 );
 
-	static double Rstrip_Phi_High(int rindex);//return upper phi range for an r strip
-	static double Rstrip_Phi_Low(int rindex);//return lower phi range for an r strip
-	static double Phistrip_R_Low(int pindex);//return lower r range for a phi strip
-	static double Phistrip_R_High(int pindex);//return upper r range for a phi strip
+	static double rStrip_Phi_High(int rindex);//return upper phi range for an r strip
+	static double rStrip_Phi_Low(int rindex);//return lower phi range for an r strip
+	static double pHistrip_R_Low(int pindex);//return lower r range for a phi strip
+	static double pHistrip_R_High(int pindex);//return upper r range for a phi strip
 
 
 
@@ -465,8 +464,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.33 2012/01/31 15:34:23 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.34 2012/02/09 16:49:02 wwitzke Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.34  2012/02/09 16:49:02  wwitzke
+ *  Fixed naming convention problems (camel casing).
+ *
  *  Revision 1.33  2012/01/31 15:34:23  rfatemi
  *  make it a friend of StFgtDbMaker which lives in StFgtPool
  *
