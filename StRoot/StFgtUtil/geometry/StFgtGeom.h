@@ -376,9 +376,8 @@ class StFgtGeom
 	
 
 	//  Various constants used in Jan's conversion functions.
-	static double pi;
-	static double doublepi;
-	static double halfpi;
+	static double mPi;
+	static double mHalfPi;
 	static double mRadStripOff;
 	static double mPhiStripOff;
 	static int mRadStripLOCId_number;
@@ -464,10 +463,10 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.34 2012/02/09 16:49:02 wwitzke Exp $
+ *  $Id: StFgtGeom.h,v 1.35 2012/02/09 17:00:10 wwitzke Exp $
  *  $Log: StFgtGeom.h,v $
- *  Revision 1.34  2012/02/09 16:49:02  wwitzke
- *  Fixed naming convention problems (camel casing).
+ *  Revision 1.35  2012/02/09 17:00:10  wwitzke
+ *  Modified some variable names to conform to standard naming conventions.
  *
  *  Revision 1.33  2012/01/31 15:34:23  rfatemi
  *  make it a friend of StFgtDbMaker which lives in StFgtPool
