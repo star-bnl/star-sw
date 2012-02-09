@@ -14,9 +14,8 @@ using namespace std;
 
 //ClassImp(StFgtGeom)
 
-double	StFgtGeom::pi = 2.*std::acos(0.);
-double	StFgtGeom::doublepi = 2.*pi;
-double	StFgtGeom::halfpi = 0.5*pi;
+double	StFgtGeom::mPi = 2.*std::acos(0.);
+double	StFgtGeom::mHalfPi = 0.5*mPi;
 
 
 double	StFgtGeom::mRadStripOff =
@@ -30,10 +29,10 @@ double	StFgtGeom::mRadStripOff =
 
 double	StFgtGeom::mPhiStripOff =
     (
-	halfpi/phiStrip_pitch()
+	mHalfPi/phiStrip_pitch()
 	-
 	int (
-	    halfpi/phiStrip_pitch()
+	    mHalfPi/phiStrip_pitch()
 	)
     ) * phiStrip_pitch();
 
@@ -45,7 +44,7 @@ int	StFgtGeom::mRadStripLOCId_number =
 
 int	StFgtGeom::mPhiStripLOCId_number =
     int (
-	(halfpi-phiStripOff()) / phiStrip_pitch()
+	(mHalfPi-phiStripOff()) / phiStrip_pitch()
     ) + 5;
 #if 0
 int	StFgtGeom::mRadStripGBLId_number =
@@ -71,13 +70,13 @@ double StFgtGeom::phiQuadXaxis( int iquad )
     switch( iquad )
     {
 	case 0:
-	    return -15.0*pi/180.0;
+	    return -15.0*mPi/180.0;
 	case 1:
-	    return -105.0*pi/180.0;
+	    return -105.0*mPi/180.0;
 	case 2:
-	    return 165.0*pi/180.0;
+	    return 165.0*mPi/180.0;
 	case 3:
-	    return 75.0*pi/180.0;
+	    return 75.0*mPi/180.0;
 	default:
 	    assert(2==3);   //	Safe without costing us any clock cycles.
     }
@@ -106,8 +105,8 @@ bool StFgtGeom::belowFlat( TVector3 r ) //	'r' in LOC ref
 int StFgtGeom::getQuad( double phiLab )
 {
   //  printf("StFgtGeom::getQuad phiLab/rad=%f\n", phiLab );
-  assert(phiLab <= pi );
-  assert(phiLab >= -pi );
+  assert(phiLab <= mPi );
+  assert(phiLab >= -mPi );
   if ( phiLab > phiQuadXaxis(1) && phiLab <= phiQuadXaxis(0) )
     return 1;
   if ( phiLab > phiQuadXaxis(0) && phiLab <= phiQuadXaxis(3) )
@@ -646,7 +645,7 @@ int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
   Int_t Phi_flag = 0;
   
   //if phi = 0-45 (90-135,-45--90, -135--180)  then strips are 400-678  and flag =1  
-  if ((phiLoc >= 0)&&(phiLoc < pi/4)) Phi_flag = 1;
+  if ((phiLoc >= 0)&&(phiLoc < mPi/4)) Phi_flag = 1;
  
 
   //only exception are for strips 13-24 that extend over the midway point 
@@ -654,7 +653,7 @@ int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
   if ((rindex<25)&&(rindex>12)) 
     {
     
-      if ((phiLoc > 0.57)&&(phiLoc <= halfpi)) Phi_flag = 0;  
+      if ((phiLoc > 0.57)&&(phiLoc <= mHalfPi)) Phi_flag = 0;  
       
     }
     
@@ -727,7 +726,7 @@ double StFgtGeom::rStrip_Phi_High(int rindex){
 
   for (int i = 0;i<280; i++)
     {
-      high[i] = halfpi;
+      high[i] = mHalfPi;
     }
 
   if (((rindex >=0)&&(rindex < 280))||((rindex < 680)&&(rindex >=400)))
@@ -3522,8 +3521,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.26 2012/02/09 16:49:02 wwitzke Exp $
+ *  $Id: StFgtGeom.cxx,v 1.27 2012/02/09 17:00:10 wwitzke Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.27  2012/02/09 17:00:10  wwitzke
+ *  Modified some variable names to conform to standard naming conventions.
+ *
  *  Revision 1.26  2012/02/09 16:49:02  wwitzke
  *  Fixed naming convention problems (camel casing).
  *
