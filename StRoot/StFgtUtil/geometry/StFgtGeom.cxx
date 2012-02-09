@@ -64,7 +64,7 @@ void StFgtGeom::makeReverseNaiveMappingValid(){
       mReverseNaiveMapping[ (*p) ] = i;
 
    mReverseNaiveMappingValid = 1;
-};
+}
 
 double StFgtGeom::phiQuadXaxis( int iquad )
 {
@@ -124,7 +124,7 @@ int StFgtGeom::getQuad( double phiLab )
 int StFgtGeom::phi2LocalStripId( double rad, double phiLoc, double *binFrac )
 {
 
-  int pbins = ((Plast() - Pfirst())/phiStrip_pitch());//720 strips total numbered from 0-719
+  const int pbins = ((Plast() - Pfirst())/phiStrip_pitch());//720 strips total numbered from 0-719
 
   double pstrip[pbins];//array that holds phi location of strips
 
@@ -625,7 +625,7 @@ double StFgtGeom::Phistrip_R_Low(int pindex){
 int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
 {
 
-  int rbins = ((Rlast() - Rfirst())/phiStrip_pitch())+1;//280 strips on each side of the quadrant
+  const int rbins = ((Rlast() - Rfirst())/phiStrip_pitch())+1;//280 strips on each side of the quadrant
 
   double rstrip[rbins];//array that holds r location of strips
 
@@ -3522,8 +3522,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.24 2012/01/27 13:21:55 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.25 2012/02/09 16:16:39 wwitzke Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.25  2012/02/09 16:16:39  wwitzke
+ *  Made minor fix to StFgtGeom.h to eliminate warnings.
+ *
  *  Revision 1.24  2012/01/27 13:21:55  rfatemi
  *  Use only constants in StFgtConsts.h
  *
