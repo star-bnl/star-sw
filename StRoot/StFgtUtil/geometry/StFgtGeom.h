@@ -372,35 +372,6 @@ class StFgtGeom
 	static  bool belowFlat( TVector3 rLoc );
 	static  int  getQuad( double phiLab );
 	
- public:
-	
-
-	//  Various constants used in Jan's conversion functions.
-	static double mPi;
-	static double mHalfPi;
-	static double mRadStripOff;
-	static double mPhiStripOff;
-	static int mRadStripLOCId_number;
-	static int mPhiStripLOCId_number;
-	static int mRadStripGBLId_number;
-	static int mPhiStripGBLId_number;
-
- protected:
-
-	friend class StFgtDbFileMaker;
-
-	//  ---Private member variables---
-	static StFgtGeomData mStrips[ 2*kFgtNumStrips ];
-
-        // maps from (apv*128 + channel) to ((layer=='P')*kFgtNumStrips + stripID)
-	static Int_t mNaiveMapping[  kFgtNumChannels*kFgtApvsPerQuad ];
-
-        // reverse mapping: ((layer=='P')*kFgtNumStrips + stripID) to (apv*128 + channel)
-        static Bool_t mReverseNaiveMappingValid;
-	static Int_t mReverseNaiveMapping[ 2*kFgtNumStrips ];
-        static void makeReverseNaiveMappingValid();
-
- public:
 	//  What follows are some functions to help with the
 	//  localXYtoStripID function.  These are also written by Jan, modified
 	//  slightly by me.
@@ -414,9 +385,31 @@ class StFgtGeom
 	static double pHistrip_R_Low(int pindex);//return lower r range for a phi strip
 	static double pHistrip_R_High(int pindex);//return upper r range for a phi strip
 
+ protected:
+	friend class StFgtDbFileMaker;
 
 
+	//  Various constants used in Jan's conversion functions.
+	static double mPi;
+	static double mHalfPi;
+	static double mRadStripOff;
+	static double mPhiStripOff;
+	static int mRadStripLOCId_number;
+	static int mPhiStripLOCId_number;
+	static int mRadStripGBLId_number;
+	static int mPhiStripGBLId_number;
 
+
+	//  ---Private member variables---
+	static StFgtGeomData mStrips[ 2*kFgtNumStrips ];
+
+        // maps from (apv*128 + channel) to ((layer=='P')*kFgtNumStrips + stripID)
+	static Int_t mNaiveMapping[  kFgtNumChannels*kFgtApvsPerQuad ];
+
+        // reverse mapping: ((layer=='P')*kFgtNumStrips + stripID) to (apv*128 + channel)
+        static Bool_t mReverseNaiveMappingValid;
+	static Int_t mReverseNaiveMapping[ 2*kFgtNumStrips ];
+        static void makeReverseNaiveMappingValid();
 };
 
 #endif
@@ -463,8 +456,12 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.35 2012/02/09 17:00:10 wwitzke Exp $
+ *  $Id: StFgtGeom.h,v 1.36 2012/02/09 17:05:58 wwitzke Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.36  2012/02/09 17:05:58  wwitzke
+ *  Fixed public/protected/private problems (moved some members from public to
+ *  protected, consolidated public methods).
+ *
  *  Revision 1.35  2012/02/09 17:00:10  wwitzke
  *  Modified some variable names to conform to standard naming conventions.
  *
