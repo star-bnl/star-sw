@@ -37,7 +37,7 @@ enum {
    kFgtNumPstripsPerOctant = 360,
    kFgtNumRstripsPerOctant = 280,
    kFgtLowerStripOctant = 'L',    // i.e. a strip is in octant "kFgtLowerStripOctant" if
-   kFgtHigherStripOctant = 'S',   // the strip index is below the number of strips per octant
+   kFgtHigherStripOctant = 'S'   // the strip index is below the number of strips per octant
                                   // for that layer
 };
 
@@ -69,8 +69,11 @@ enum {
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.7 2012/02/07 06:14:45 balewski Exp $
+ * $Id: StFgtConsts.h,v 1.8 2012/02/09 16:16:17 wwitzke Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.8  2012/02/09 16:16:17  wwitzke
+ * Made minor fix to StFgtConsts.h to eliminate warnings.
+ *
  * Revision 1.7  2012/02/07 06:14:45  balewski
  * *** empty log message ***
  *
