@@ -14,15 +14,18 @@
 /** grab the cluster container, fill histograms
 
 */
-Int_t StFgtClusterPlotMaker::Make()
+Int_t StFgtClusterPlotter::Make()
 {
    Int_t ierr = StFgtQaMaker::Make();
+   cout <<"in plotter make " << endl;
  for(int iDx=0;iDx<kFgtNumDiscs;iDx++)
    {
+     cout <<"trying to get disc " << iDx << endl;
      StFgtHitCollection* clusterCol=mFgtCollectionPtr->getHitCollection(iDx);
 
      if(clusterCol)
        {
+	 cout <<"got collection, looking at hits ..  " <<endl;
 	 const StSPtrVecFgtHit &hitVec=clusterCol->getHitVec();
 	 StSPtrVecFgtHitConstIterator hitIter;
 	 for(hitIter=hitVec.begin();hitIter != hitVec.end();hitIter++)
@@ -37,6 +40,8 @@ Int_t StFgtClusterPlotMaker::Make()
 	     Char_t tLayer;
 	     //get strip id from the geo id
 	     StFgtGeom::decodeGeoId(geoId,tDisc,tQuad,tLayer,tStrip);     
+	     //	     cout <<"filling charge with phi: " << phi << " r : " << r << " charge: " << charge <<" numStrips: " << numStrips<< " strip nr: " << tStrip<<endl;
+	     //	     cout<<"disc nr: " << iDx <<" quad: " << iq << " numquads: " << kFgtNumQuads <<endl;
 	     hCChargePosSpacePhi[iDx*kFgtNumQuads+iq]->Fill(phi,charge);
 	     hCChargePosSpaceR[iDx*kFgtNumQuads+iq]->Fill(r,charge);
 	     hClusSizePhi[iDx*kFgtNumQuads+iq]->Fill(phi,numStrips);
@@ -52,9 +57,21 @@ Int_t StFgtClusterPlotMaker::Make()
  return ierr;
 };
 
+StFgtClusterPlotter::StFgtClusterPlotter( const Char_t* name)
+{
+  StFgtQaMaker( name, 0,0, "qName" );
 
-Int_t StFgtClusterPlotMaker::Finish(){
+};
 
+StFgtClusterPlotter::~StFgtClusterPlotter()
+{
+  //delete histogram arrays
+};
+
+
+Int_t StFgtClusterPlotter::Finish(){
+      gStyle->SetPalette(1);
+  cout <<"cluster plotter finish funciton " <<endl;
    Int_t ierr = kStOk;
   TCanvas* cChargePhi=new TCanvas("chargePhi","chargePhi",850,1100);
   cChargePhi->Divide(kFgtNumDiscs,kFgtNumQuads);
@@ -75,6 +92,7 @@ Int_t StFgtClusterPlotMaker::Finish(){
     {
       for(Int_t iQ=0;iQ<kFgtNumQuads;iQ++)
 	{
+	  cout <<"drawing disc " << iD <<" quad " << iQ <<endl;
 	  cChargePhi->cd(iD*kFgtNumQuads+iQ+1);
 	  hCChargePosSpacePhi[iD*kFgtNumQuads+iQ]->Draw("colz");
 	  cChargeR->cd(iD*kFgtNumQuads+iQ+1);
@@ -90,6 +108,8 @@ Int_t StFgtClusterPlotMaker::Finish(){
 	}
     }
 
+
+  cout <<"saving .." <<endl;
   cChargePhi->SaveAs("cChargePhi.pdf");
   cChargePhi->SaveAs("cChargePhi.png");
 
@@ -119,7 +139,7 @@ Int_t StFgtClusterPlotMaker::Finish(){
 construct histograms
 
 */
-Int_t StFgtClusterPlotMaker::Init(){
+Int_t StFgtClusterPlotter::Init(){
    Int_t ierr = kStOk;
    hClusterCharge=new TH1D("clusterCharge","clusterCharge",100, 0, 1000);
    char buffer[100];
@@ -135,19 +155,20 @@ Int_t StFgtClusterPlotMaker::Init(){
      {
        for(int iQ=0;iQ<kFgtNumQuads;iQ++)
 	 {
-	   sprintf(buffer,"clusterChargeDisk%d_cluster%d_phi",iD,iQ);
-	   hCChargePosSpacePhi[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,4, 100, 0, 2000);
-	   sprintf(buffer,"clusterChargeDisk%d_cluster%d_R",iD,iQ);
-	   hCChargePosSpaceR[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,4, 100, 0, 2000);
-	   sprintf(buffer,"clusterSizeDisk%d_cluster%d_phi",iD,iQ);
-	   hClusSizePhi[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,4, 100, 0, 2000);
-	   sprintf(buffer,"clusterSizeDisk%d_cluster%d_R",iD,iQ);
-	   hClusSizeR[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,4, 100, 0, 2000);
-	   sprintf(buffer,"clusterSizeDisk%d_cluster%d_ElecSpace",iD,iQ);
-	   hClusSizeElecSpace[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,4, 100, 0, 2000);
-	   sprintf(buffer,"clusterChargeDisk%d_cluster%d_ElecSpace",iD,iQ);
-	   hCChargeElecSpace[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,4, 100, 0, 2000);
+	   sprintf(buffer,"clusterChargeDisk%d_Quad%d_phi",iD,iQ);
+	   hCChargePosSpacePhi[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,-4,4, 100, 0, 2000);
+	   sprintf(buffer,"clusterChargeDisk%d_Quad%d_R",iD,iQ);
+	   hCChargePosSpaceR[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,10,35, 100, 0, 2000);
+	   sprintf(buffer,"clusterSizeDisk%d_Quad%d_phi",iD,iQ);
+	   hClusSizePhi[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,-4,4, 20, 0, 20);
+	   sprintf(buffer,"clusterSizeDisk%d_Quad%d_R",iD,iQ);
+	   hClusSizeR[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,10,35, 20, 0, 20);
+	   sprintf(buffer,"clusterSizeDisk%d_Quad%d_ElecSpace",iD,iQ);
+	   hClusSizeElecSpace[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,1000, 20, 0, 20);
+	   sprintf(buffer,"clusterChargeDisk%d_Quad%d_ElecSpace",iD,iQ);
+	   hCChargeElecSpace[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,1000, 100, 0, 2000);
 	 }
      }
    return ierr;
 };
+ClassImp(StFgtClusterPlotter);
