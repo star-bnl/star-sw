@@ -9,7 +9,7 @@
 #ifndef _ST_FGT_GEOM_H_
 #define _ST_FGT_GEOM_H_
 
-#include <assert.h>
+//#include <assert.h>
 #include <TVector3.h>
 #include <string>
 #include <sstream>
@@ -19,15 +19,6 @@
 #include <algorithm>
 #include "StRoot/StFgtUtil/StFgtConsts.h"
 
-//  StFgtGeomData stores data on each ordinate associated with each global ID
-//  used to index individual geometry elements.
-struct StFgtGeomData
-{
-    Bool_t isPhi;
-    Double_t ordinate;
-    Double_t lowerSpan;
-    Double_t upperSpan;
-};
 
 //  StFgtGeom is a "singleton" class. Only one of it needs to exist in any
 //  program. However, because the data contained in this class is entirely
@@ -157,7 +148,17 @@ class StFgtGeom
 	static double pHistrip_R_Low(int pindex);//return lower r range for a phi strip
 	static double pHistrip_R_High(int pindex);//return upper r range for a phi strip
 
- protected:
+    protected:
+	//  StFgtGeomData stores data on each ordinate associated with each
+	//  global ID used to index individual geometry elements.
+	struct StFgtGeomData
+	{
+	    Bool_t isPhi;
+	    Double_t ordinate;
+	    Double_t lowerSpan;
+	    Double_t upperSpan;
+	};
+
 	friend class StFgtDbFileMaker;
 
 
@@ -168,8 +169,6 @@ class StFgtGeom
 	static double mPhiStripOff;
 	static int mRadStripLOCId_number;
 	static int mPhiStripLOCId_number;
-	static int mRadStripGBLId_number;
-	static int mPhiStripGBLId_number;
 
 
 	//  ---Private member variables---
@@ -510,8 +509,13 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.37 2012/02/09 17:52:03 wwitzke Exp $
+ *  $Id: StFgtGeom.h,v 1.38 2012/02/09 18:23:24 wwitzke Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.38  2012/02/09 18:23:24  wwitzke
+ *  Fixed various minor issues, including nesting the StFgtGeomData, making the
+ *  various "pi" variables use the TMath definions of pi, and removing the various
+ *  asserts from the code.
+ *
  *  Revision 1.37  2012/02/09 17:52:03  wwitzke
  *  Changed organization of StFgtGeom to put inline functions after class body.
  *  Also moved getNaiveElecCoordFromGeoId to .cxx as a non-inline function.
