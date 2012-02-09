@@ -38,6 +38,9 @@ MACRO starlight outfile rndm1 rndm2 trig ptmin ptmax
    gkine -9 0
    gfile o [outfile]
 
+   gvertex 0.32  0.09 -1.0
+   gspread 0.055 0.02 28.8
+
    DO i=1,[trig]
       MESSAGE Processing event [i] / [trig]
       TRIG 1
