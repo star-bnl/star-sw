@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.8 2012/02/01 19:17:34 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.9 2012/02/10 20:56:57 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -68,8 +68,12 @@ Int_t StvHitLoader::Init()
 //_____________________________________________________________________________
 int StvHitLoader::LoadHits(const StEvent *stev)
 {
+enum {kFCF_CHOPPED=256		// 0x100 cluster is chopped from its neighbour: OFFLINE use only
+     ,kFCF_SANITY =512};	// 0x200 cluster extents not sane
 static int nCall=0; nCall++;
 static int myGraph=0;
+
+
 StvDraw *myDraw=0;
 StvHits *myHits=0;
 if (myGraph) { //create canvas
@@ -91,10 +95,10 @@ if (myGraph) { //create canvas
 	    ,nHits,nHitz,StTGeoHelper::DetName(didOld));
       }
       if (!stHit) break;
-
       Info("LoadHits","Start %s hits",StTGeoHelper::DetName(did));
       nHits=0; nHitz=0;
     }
+    if (stHit->flag() & kFCF_CHOPPED || stHit->flag() & kFCF_SANITY) continue; // ignore hits marked by AfterBurner as chopped o
     StvHit *stiHit = MakeStvHit(stHit,mHitIter->UPath());
 
 if (myHits) (*myHits)+= stiHit;   
