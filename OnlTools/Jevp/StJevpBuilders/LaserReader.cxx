@@ -13,6 +13,7 @@
 #include "DAQ_READER/daq_dta.h"
 #include "DAQ_READER/daq_det.h"
 #include "LaserReader.h"
+#include <RTS/include/rtsLog.h>
 
 float LaserReader::Make(daqReader *rdr)
 {
@@ -35,11 +36,13 @@ float LaserReader::Make(daqReader *rdr)
       
       for(unsigned int i=0;i<dd->ncontent;i++) {
 	double q = dd->cld[i].charge;
-	double tb = dd->cld[i].tb;
+	double tb = dd->cld[i].tb - 15.0;
 	double pad = dd->cld[i].pad;
 	
 	if((pad >= 68) && (pad <= 76)) {  // good pad
+
 	  for(int j=0;j<7;j++) {
+
 	    if((tb >= loLim[j]) && (tb <= hiLim[j])) {  // log the hit...
 	      
 	      int bin = 7*((s/2)-1) + j + 1;
