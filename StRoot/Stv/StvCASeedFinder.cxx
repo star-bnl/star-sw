@@ -1,4 +1,3 @@
-#if 1
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -33,8 +32,8 @@
 
 // 
 // static double innerR[13] = {60.000,  64.800,  69.600,  74.400,  79.200, //  5
-// 			    84.000,  88.800,  93.600,  98.800, 104.000, // 10
-// 			   109.200, 114.400, 119.600};
+// 			       84.000,  88.800,  93.600,  98.800, 104.000, // 10
+// 			      109.200, 114.400, 119.600};
 // static double outerR[32] = {127.195, 129.195, // 15
 // 			    131.195, 133.195, 135.195, 137.195, 139.195, // 20
 // 			    141.195, 143.195, 145.195, 147.195, 149.195, // 25
@@ -42,6 +41,7 @@
 // 			    161.195, 163.195, 165.195, 167.195, 169.195, // 35
 // 			    171.195, 173.195, 175.195, 177.195, 179.195, // 40
 // 			    181.195, 183.195, 185.195, 187.195, 189.195};// 45
+
 static const int NumberOfPadsAtRow[45] = {
     88, 96,104,112,118,126,134,142,150,158, // Inner
    166,174,182,
@@ -50,21 +50,35 @@ static const int NumberOfPadsAtRow[45] = {
    126,128,128,130,132,134,136,138,138,140,
    142,144,144,144,144
 };
+static  const int kNSlices = 24; //TODO initialize from StRoot
+static  const int kNRows = 45;
+
+static  float rRows[kNRows] = 
+                         {60.000,  64.800,  69.600,  74.400,  79.200, //  5  //TODO initialize from StRoot
+			  84.000,  88.800,  93.600,  98.800, 104.000, // 10
+			  109.200, 114.400, 119.600, 
+			  127.195, 129.195, // 15
+			  131.195, 133.195, 135.195, 137.195, 139.195, // 20
+			  141.195, 143.195, 145.195, 147.195, 149.195, // 25
+			  151.195, 153.195, 155.195, 157.195, 159.195, // 30
+			  161.195, 163.195, 165.195, 167.195, 169.195, // 35
+			  171.195, 173.195, 175.195, 177.195, 179.195, // 40
+			  181.195, 183.195, 185.195, 187.195, 189.195};// 45
 
 typedef std::complex<double> myComplex;
 static const double kToRad = M_PI/180;
 static const myComplex kIm = myComplex(0,1);
 
 static const myComplex sectAng[24] = {
-exp( kIm*kToRad* 60.),exp( kIm*kToRad* 30.),exp( kIm*kToRad*  0.),
-exp(-kIm*kToRad* 30.),exp(-kIm*kToRad* 60.),exp(-kIm*kToRad* 90.),
-exp(-kIm*kToRad*120.),exp(-kIm*kToRad*150.),exp( kIm*kToRad*180.),
-exp( kIm*kToRad*120.),exp( kIm*kToRad* 90.),exp( kIm*kToRad* 30.),
-
-exp( kIm*kToRad*120.),exp( kIm*kToRad*150.),exp( kIm*kToRad*180.),
-exp(-kIm*kToRad*150.),exp(-kIm*kToRad*120.),exp(-kIm*kToRad* 90.),
 exp(-kIm*kToRad* 60.),exp(-kIm*kToRad* 30.),exp(-kIm*kToRad*  0.),
-exp( kIm*kToRad* 30.),exp( kIm*kToRad* 60.),exp(-kIm*kToRad* 90.)};
+exp( kIm*kToRad* 30.),exp( kIm*kToRad* 60.),exp( kIm*kToRad* 90.),
+exp( kIm*kToRad*120.),exp( kIm*kToRad*150.),exp(-kIm*kToRad*180.),
+exp(-kIm*kToRad*150.),exp(-kIm*kToRad*120.),exp(-kIm*kToRad* 90.),
+
+exp(-kIm*kToRad*120.),exp(-kIm*kToRad*150.),exp(-kIm*kToRad*180.),
+exp( kIm*kToRad*150.),exp( kIm*kToRad*120.),exp( kIm*kToRad* 90.),
+exp( kIm*kToRad* 60.),exp( kIm*kToRad* 30.),exp( kIm*kToRad*  0.),
+exp(-kIm*kToRad* 30.),exp(-kIm*kToRad* 60.),exp(-kIm*kToRad* 90.)};
 
 
 
@@ -101,29 +115,14 @@ void StvCASeedFinder::Reset()
 //_____________________________________________________________________________
 void StvCASeedFinder::MakeSettings()
 {
-
-static  const int NSlices = 24; //TODO initialize from StRoot
-static  const int NRows = 45;
-
-static  float R[NRows] = {60.000,  64.800,  69.600,  74.400,  79.200, //  5  //TODO initialize from StRoot
-			  84.000,  88.800,  93.600,  98.800, 104.000, // 10
-			  109.200, 114.400, 119.600, 
-			  127.195, 129.195, // 15
-			  131.195, 133.195, 135.195, 137.195, 139.195, // 20
-			  141.195, 143.195, 145.195, 147.195, 149.195, // 25
-			  151.195, 153.195, 155.195, 157.195, 159.195, // 30
-			  161.195, 163.195, 165.195, 167.195, 169.195, // 35
-			  171.195, 173.195, 175.195, 177.195, 179.195, // 40
-			  181.195, 183.195, 185.195, 187.195, 189.195};// 45
-
-  for ( int iSlice = 0; iSlice < NSlices; iSlice++ ) {
+  for ( int iSlice = 0; iSlice < kNSlices; iSlice++ ) {
     AliHLTTPCCAParam SlicePar;
     memset(&SlicePar, 0, sizeof(AliHLTTPCCAParam));
 
     int sector = iSlice+1;
       // int sector = iSlice;
     SlicePar.SetISlice( iSlice );
-    SlicePar.SetNRows ( NRows ); 
+    SlicePar.SetNRows ( kNRows ); 
     double beta = 0;
     if (sector > 12) beta = (24-sector)*2.*TMath::Pi()/12.;
     else             beta =     sector *2.*TMath::Pi()/12.;
@@ -149,24 +148,38 @@ static  float R[NRows] = {60.000,  64.800,  69.600,  74.400,  79.200, //  5  //T
       SlicePar.SetZMin     (-210. );					//TODO initialize from StRoot
       SlicePar.SetZMax     (   0. );					//TODO initialize from StRoot
     }
-    for( int iR = 0; iR < NRows; iR++){
-      SlicePar.SetRowX(iR, R[iR]);
+    for( int iR = 0; iR < kNRows; iR++){
+      SlicePar.SetRowX(iR, rRows[iR]);
     }
+#if 1
     SlicePar.SetRecoType(1); //Stv hiterr parametrisation
     const double *coeffInner = StvHitErrCalculator::Inst("StvTpcInnerHitErrs")->GetPars();
     for(int iCoef=0; iCoef<6; iCoef++)
     {
       SlicePar.SetParamS0Par(0, 0, iCoef, (float)coeffInner[iCoef] );
     }  
-  
     SlicePar.SetParamS0Par(0, 0, 6, 0.0f );
-    
     const double *coeffOuter = StvHitErrCalculator::Inst("StvTpcOuterHitErrs")->GetPars();
     for(int iCoef=0; iCoef<6; iCoef++)
     {
       SlicePar.SetParamS0Par(0, 1, iCoef, (float)coeffOuter[iCoef] );
     }
+#endif  
+#if 0	//Hack
+    SlicePar.SetRecoType(0); //Stv hiterr parametrisation
+    float inn[6]= {0.000944592291, 0.00096804701, 0.0307030007
+                  ,0.005380766   , 0.00276213209, 0.0185125507};
+
+    float out[6]= {0.00119955395, 0.000499619695, 0.0558479801
+                  ,0.0100383796 , 0.000534858496, 0.0479304604};
   
+    for(int iCoef=0; iCoef<6; iCoef++)
+    {
+      SlicePar.SetParamS0Par(0, 0, iCoef, inn[iCoef] );
+      SlicePar.SetParamS0Par(0, 1, iCoef, out[iCoef] );
+    }  
+#endif  
+
     SlicePar.SetParamS0Par(0, 1, 6, 0.0f );
     SlicePar.SetParamS0Par(0, 2, 0, 0.0f );
     SlicePar.SetParamS0Par(0, 2, 1, 0.0f );
@@ -200,11 +213,11 @@ static  float R[NRows] = {60.000,  64.800,  69.600,  74.400,  79.200, //  5  //T
     fCaParam->push_back(SlicePar);
   } // for iSlice
 } // void StiTPCCATrackerInterface::MakeSettings()
-#endif //0
 
 //_____________________________________________________________________________
 void StvCASeedFinder::MakeHits()
 {
+const static double TAN15 = tan(M_PI*16/180); //16 != mistype
 
   fStvHits = StTGeoHelper::Inst()->GetAllHits(); 
   if (!fStvHits) return;
@@ -226,7 +239,9 @@ void StvCASeedFinder::MakeHits()
 // 		Make  CA Hit
     AliHLTTPCCAGBHit caHit;
     myComplex myXY(hit->x()[0],hit->x()[1]);
-    myXY/=sectAng[sector-1];
+    myXY*=sectAng[sector-1];
+    assert(fabs(myXY.imag()/myXY.real())<=TAN15);
+    assert(myXY.real()>0);
     caHit.SetX(   myXY.real()); // take position of the row
     caHit.SetY( - myXY.imag());
     caHit.SetZ( - hit->x()[2]);
