@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.4 2011/10/01 00:23:44 perev Exp $
+// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.5 2012/02/10 19:56:47 perev Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -237,10 +237,9 @@ enum {kYErr=0,kZErr=1,kWidTrk=2,kThkDet=3,kYDiff=4,kZDiff=5};
     Err2Z = c[3] + c[4]*z*(1.f+tg2Lambda) + c[5]*tg2Lambda;
     break;}
 
-  case 1: {/*Sti*/ 
+  case 1: {/*Stv*/ 
     float cos2lambda = 1/(tg2Lambda+1);
     float sin2lambda = tg2Lambda*cos2lambda;
-    z = (210. - CAMath::Abs(z)) * 0.01;
 
     Err2Y = (c[kThkDet]*sin2Phi   + c[kWidTrk])
              / (cos2Phi)             + c[kYErr] + c[kYDiff]*z;
