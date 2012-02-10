@@ -249,9 +249,9 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
     double beta = gRandom->Gaus()*W;
     double gama = gRandom->Gaus()*W;
     V = Nt*alfa + Np*beta + Nl*gama;
+    if (fabs((V*NtH))>0.5*D) continue;
     V[1]+=  gRandom->Gaus()*par[kYErr];
     V[2]+=  gRandom->Gaus()*par[kZErr];
-    if (fabs((V*NtH))>0.5*D) continue;
 
     if(++iEl>=nEl) break;
 
