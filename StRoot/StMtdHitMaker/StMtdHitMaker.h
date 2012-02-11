@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.4 2012/02/03 17:52:41 geurts Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.5 2012/02/11 02:15:11 geurts Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -16,6 +16,7 @@ class StEvent;
 class StMtdCollection;
 class StMtdRawHit;
 class StMtdHit;
+class StBTofINLCorr;
 
 struct MtdRawHit {
   unsigned int   tdc;               /// tdc time (in bin) per hit.
@@ -59,14 +60,16 @@ class StMtdHitMaker:public StRTSBaseMaker {
   unsigned int            mTriggerTimeStamp[2];  //! Trigger Time in 4 fibers
   StMtdCollection*        mMtdCollection;        //! pointer to StMtdCollection
   Int_t                   mTray2TdigMap[30][5];  //! map TDIG-Id to MTD tray
-
+  Int_t                   mTrayId[30][5];        //! map MTD trayIDs
+  Int_t                   mTdigId[118];          //! map TDIG Ids on MTD TrayIds
+  StBTofINLCorr*          mINLCorr;              //! pointer to INL correction class
 
  protected:
   StRtsTable *GetNextRaw();
   StRtsTable *GetNextRaw(int sec);
       
   StMtdCollection *GetMtdCollection();
-  Int_t tdcChan2globalStrip(int, int, int);
+  Int_t tdcChan2globalStrip11(int, int, int, int);
   Int_t tdcChan2globalStrip(int, int, int, int);
 
  public:
