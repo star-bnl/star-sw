@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.h,v 1.4 2009/12/14 19:38:30 dongx Exp $
+ * $Id: StBTofINLCorr.h,v 1.5 2012/02/11 02:13:23 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.h,v $
+ * Revision 1.5  2012/02/11 02:13:23  geurts
+ * allow direct access to INL corrections given TDIG-Id
+ *
  * Revision 1.4  2009/12/14 19:38:30  dongx
  * - mNValidBoards set by the read-in database entrie instead of a hard-coded number
  * - clean up mNValidTrays and related functions (not needed since previous versions)
@@ -80,6 +83,9 @@ class StBTofINLCorr{
   float getTrayINLCorr(int trayId, int globalTdcChan, int bin);
   /// To get the INL correction tables for vpds
   float getVpdINLCorr(StBeamDirection eastwest, int globalTdcChan, int bin);
+  /// direct access to INL correction table for any TDIG-Id
+  float getTdigINLCorr(int tdigId, int tdcChannel, int bin);
+
   
 };
 
