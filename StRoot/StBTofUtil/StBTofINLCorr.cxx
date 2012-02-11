@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.cxx,v 1.8 2010/05/25 22:09:44 geurts Exp $
+ * $Id: StBTofINLCorr.cxx,v 1.9 2012/02/11 02:13:23 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.cxx,v $
+ * Revision 1.9  2012/02/11 02:13:23  geurts
+ * allow direct access to INL corrections given TDIG-Id
+ *
  * Revision 1.8  2010/05/25 22:09:44  geurts
  * improved database handling and reduced log output
  *
@@ -182,6 +185,22 @@ void StBTofINLCorr::Reset() {
   }
 
   mNValidBoards = 0;
+}
+
+float StBTofINLCorr::getTdigINLCorr(int tdigId, int tdcChannel, int bin) {
+  int index = mBoardId2Index[tdigId];          // index in the inl array
+  if (tdcChannel<0||tdcChannel>23) {
+    LOG_WARN << "TDC Channel (" << tdcChannel << ") out of range. Forcing default values" << endm;
+    index = -999;
+  }
+  if(index<0||index>=mNValidBoards) {
+    LOG_WARN << " Missing INL table for TDIG-Id = " << tdigId << endm;
+    LOG_WARN << " Using the table from boardId # " << mBoardId[0] << " tdcchan # 0 " << endm;
+//    return 0.0;
+    return mINLCorr[0][0][bin]/100.;
+  } else {
+    return mINLCorr[index][tdcChannel][bin]/100.;
+  }
 }
 
 float StBTofINLCorr::getTrayINLCorr(int trayId, int globalTdcChan, int bin) {
