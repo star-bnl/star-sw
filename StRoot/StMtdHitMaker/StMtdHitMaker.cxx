@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.4 2012/02/03 17:52:41 geurts Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.5 2012/02/11 02:15:11 geurts Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -22,7 +22,7 @@
 #include "StDAQMaker/StDAQReader.h"
 #include "StRtsTable.h"
 #include "DAQ_MTD/daq_mtd.h"
-
+#include "StBTofUtil/StBTofINLCorr.h"
 
 ClassImp(StMtdHitMaker);
 
@@ -54,6 +54,8 @@ Int_t StMtdHitMaker::Init() {
   Clear("");
   /// Initialize Tray-to-Tdig map (-1 means no TDIG board)
   memset(mTray2TdigMap,-1,sizeof(mTray2TdigMap));
+  memset(mTrayId,0,sizeof(mTrayId));
+  memset(mTdigId,0,sizeof(mTdigId));
 
   return kStOK;
 }
@@ -64,23 +66,55 @@ Int_t StMtdHitMaker::InitRun(Int_t runnumber) {
   /// Find out what year we're in
   mYear= (Int_t)runnumber/1e6 -1 ;
 
-  /// Run-12 (this will move to database)
-  /// note: index runs from 0-29 for backlegs 1-30, same for tray#
-  mTray2TdigMap[25][1] = 0; /// backleg #26 (3 trays)
-  mTray2TdigMap[25][2] = 1;
-  mTray2TdigMap[25][3] = 4;
+  /// The Run-12 entries will all move to the database
+  if (mYear == 12){
+    /// TDIG/tray/backleg mapping
+    /// note: index runs from 0-29 for backlegs 1-30, same for tray#
+    mTray2TdigMap[25][1] = 0; /// backleg #26 (3 trays)
+    mTray2TdigMap[25][2] = 1;
+    mTray2TdigMap[25][3] = 4;
 
-  mTray2TdigMap[26][0] = 0; /// backleg #27 (5 trays)
-  mTray2TdigMap[26][1] = 1;
-  mTray2TdigMap[26][2] = 2;
-  mTray2TdigMap[26][3] = 5;
-  mTray2TdigMap[26][4] = 4;
+    mTray2TdigMap[26][0] = 0; /// backleg #27 (5 trays)
+    mTray2TdigMap[26][1] = 1;
+    mTray2TdigMap[26][2] = 2;
+    mTray2TdigMap[26][3] = 5;
+    mTray2TdigMap[26][4] = 4;
 
-  mTray2TdigMap[27][0] = 0; /// backleg #28 (5 trays)
-  mTray2TdigMap[27][1] = 1;
-  mTray2TdigMap[27][2] = 2;
-  mTray2TdigMap[27][3] = 5;
-  mTray2TdigMap[27][4] = 4;
+    mTray2TdigMap[27][0] = 0; /// backleg #28 (5 trays)
+    mTray2TdigMap[27][1] = 1;
+    mTray2TdigMap[27][2] = 2;
+    mTray2TdigMap[27][3] = 5;
+    mTray2TdigMap[27][4] = 4;
+
+    /// Run-12 TrayId map (this follows the UT-Austin 200-scheme)
+    mTrayId[25][1] = 200; /// backleg #26 (3 trays)
+    mTrayId[25][2] = 211;
+    mTrayId[25][3] = 210;
+
+    mTrayId[26][0] = 212; /// backleg #27 (5 trays)
+    mTrayId[26][1] = 207;
+    mTrayId[26][2] = 206;
+    mTrayId[26][3] = 204;
+    mTrayId[26][4] = 209;
+
+    mTrayId[27][0] = 208; /// backleg #28 (5 trays)
+    mTrayId[27][1] = 205;
+    mTrayId[27][2] = 202;
+    mTrayId[27][3] = 201;
+    mTrayId[27][4] = 203;
+
+    /// TrayID/TDIGId mapping
+    /// one[0] TDIG per MTD tray (data distilled from UT Austin database, cf. run12/INL/tdigs_120106.txt) 
+    Int_t mTdigIdRun12[13] = { 494, 1150, 1151, 1152, 1153, 1141, 1143, 1149, 1155, 1134, 1136, 1140, 1145};
+    for (int i=0;i<13;i++) mTdigId[i]=mTdigIdRun12[i];
+  }
+  else
+    LOG_INFO << "No InitRun for Run " << mYear << endm;
+
+  /// INL Table provided by TOF
+  LOG_DEBUG << "Initializing INL table:" << endm;
+  mINLCorr = new StBTofINLCorr();
+  mINLCorr->initFromDbase(this);
 
   return kStOK;
 }
@@ -88,7 +122,14 @@ Int_t StMtdHitMaker::InitRun(Int_t runnumber) {
 
 //_____________________________________________________________
 Int_t StMtdHitMaker::FinishRun(Int_t runnumber) {
-  // Placeholder for deleting database objects
+  /// clean up several maps
+  memset(mTray2TdigMap,-1,sizeof(mTray2TdigMap));
+  memset(mTrayId,0,sizeof(mTrayId));
+  memset(mTdigId,0,sizeof(mTdigId));
+
+  if(mINLCorr) delete mINLCorr;
+  mINLCorr = 0;
+
   return kStOK;
 }
 
@@ -236,8 +277,6 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
 
       /// decode TDIG-Id ...
       int tdcid=(dataword & 0x0F000000)>>24;  /// range: 0-15
-      //int tdigid=tdcid/4;             /// for halftray0, 0-2 for tdig0; 4-6 for tdig1
-      //if (halfbacklegid==1) tdigid=4; /// for halftray1, 0-2 for tdig 4
 
       /// MTD backlegs 27/28
       int tdigid=((tdcid & 0xC)>>2) + halfbacklegid*4;
@@ -245,10 +284,15 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
       /// decode TDC channel ...
       int tdcchan=(dataword&0x00E00000)>>21; /// tdcchan range: 0-7
 
-
       /// decode TDC time bin ...
       unsigned int timeinbin = ((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  /// time in tdc bin
 
+
+      /// lookup corresponding tray# for TDIG-Id
+      int itray;
+      for (itray=1;itray<=5;itray++){
+	if (mTray2TdigMap[backlegid-1][itray-1] == tdigid) break;
+      }
 
       /// Fill MTD raw hit structures
       MtdRawHit temphit={0};
@@ -258,16 +302,10 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
       temphit.tdc     = timeinbin;
       /// global channel number here, 
       if (mYear<12)
-	temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip(tdigid,tdcid,tdcchan,backlegid)); 
+	temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip11(tdigid,tdcid,tdcchan,backlegid)); 
       else
-	temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip(tdigid,tdcid,tdcchan)); 
+	temphit.globaltdcchan = (UChar_t)(tdcChan2globalStrip(itray, tdigid,tdcid,tdcchan)); 
       temphit.dataword      = dataword;
-
-      /// lookup corresponding tray# for TDIG-Id
-      int itray;
-      for (itray=1;itray<=5;itray++){
-	if (mTray2TdigMap[backlegid-1][itray-1] == tdigid) break;
-      }
 
       if(edgeid == 4) {     /// leading edge data
         MtdLeadingHits.push_back(temphit);
@@ -290,9 +328,12 @@ Int_t StMtdHitMaker::UnpackMtdRawData() {
 /*!
  * Map TDC channel to a global strip coordinate (Run 12 and later)
  */
-Int_t StMtdHitMaker::tdcChan2globalStrip(int tdigBoardId, int tdcId, int tdcChan) {
-  if (mYear<12)
-    LOG_WARN << "tdcchan2globalstrip(int,int,int) called for pre Run-12 run: wrong globalStrip" << endm;
+Int_t StMtdHitMaker::tdcChan2globalStrip(int itray, int tdigBoardId, int tdcId, int tdcChan) {
+
+  /// Make sure this mapping is not called for older Runs
+  if (mYear<12){
+    LOG_WARN << "calling Run12++ tdc mapping for Run" << mYear << ". Not good." << endm;
+  }
 
   Int_t globalStripId=-1;
   int Hnum=tdcId%4+1;
@@ -305,6 +346,9 @@ Int_t StMtdHitMaker::tdcChan2globalStrip(int tdigBoardId, int tdcId, int tdcChan
   if(tdigBoardId>3)
     globalStripId = (globalStripId>12)? globalStripId-12:globalStripId+12;
 	
+  /// offset stripId by trayId
+  globalStripId += (itray-1)*24;
+
   return globalStripId;
 }
 
@@ -313,11 +357,11 @@ Int_t StMtdHitMaker::tdcChan2globalStrip(int tdigBoardId, int tdcId, int tdcChan
 /*!
  * Map TDC channel to a global strip coordinate (prior to Run 12)
  */
-Int_t StMtdHitMaker::tdcChan2globalStrip(int tdigBoardId,int tdcId,int tdcChan,int backLegId) {
+Int_t StMtdHitMaker::tdcChan2globalStrip11(int tdigBoardId,int tdcId,int tdcChan,int backLegId) {
 
   /// This function is only useful before Run 12.
   if (mYear>11) {
-    return tdcChan2globalStrip(tdigBoardId,tdcId,tdcChan);
+    LOG_WARN << "calling pre-Run12 tdc mapping for Run" << mYear << ". Not good." << endm; 
   }
 
   /// 
@@ -390,7 +434,10 @@ void StMtdHitMaker::fillMtdHeader() {
  * Fill the data from MtdRawHit into MtdHit Collection in StEvent
  */
 void StMtdHitMaker::fillMtdHitCollection() {
-  // Place holder for MTD Hit object creation and storage
+
+
+//     double tmptdc_f = tmptdc + mINLCorr->getTrayINLCorr(trayId, chan, bin);
+//     double letime = tmptdc_f*VHRBIN2PS / 1000.;
 }
 
   
