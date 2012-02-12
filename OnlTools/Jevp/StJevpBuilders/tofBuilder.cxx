@@ -459,8 +459,10 @@ int tofBuilder::parseData(daqReader *rdr)
 	  int atdcchan = globaltdcchan%8;
 	  int tinoid=TDIGChan2TINOChan(ahptdcid,atdcchan);
 	  int tinoidx = atdig*3 + tinoid;
-    
-	  tinohit[trayid-1][tinoidx]++; 
+      
+      if (trayid>=1 && trayid<=120 && tinoidx>=0 && tinoidx<=23){   //WJL
+	       tinohit[trayid-1][tinoidx]++; 
+	  }                                                             //WJL
 	  
 	  if((edgeid !=4) && (edgeid != 5)) continue;
 	  
@@ -567,7 +569,12 @@ void tofBuilder::event(daqReader *rdr)
 
   leadinghits.clear();
   trailinghits.clear();
-  parseData(rdr);
+  int isuccess = parseData(rdr);     //WJL 
+  if (isuccess==0){                  //WJL
+    //LOG(WARN, "No pointer to TOF data - skipping event");
+    if(trgd) delete trgd;            //WJL
+    return;                          //WJL
+  }                                  //WJL
 
   int sum_L0_hit=0;
   for(int itray=0;itray<120;itray++){
