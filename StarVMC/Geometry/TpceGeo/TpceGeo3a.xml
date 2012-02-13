@@ -742,14 +742,12 @@
         <Create    block="TPCE"  />
         <Placement block="TPCE" in="CAVE"  />
 
+	<!--                                                                                        TPCE -->
         <Block name="TPCE" comment="is the TPC envelope"  >
 
             <Material name="Air"  />
-            <Medium name="Standard"
-            isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.248853" epsil="0.01" stmin="1.15055"
-             />
-            
-            
+	    <Medium   name="Standard" />
+
             <Attribute for="TPCE" seen="0" colo="kRed"  />
             <Shape type="TUBE" rmax="tpcg_rmax" rmin="tpcg_rmin" dz="tpcg_DzEnvelop"  />
 
@@ -803,231 +801,108 @@
         </Block>
         
 
-
+	<!--                                                                                        TPCM -->
         <Block name="TPCM" comment="is the Central Membrane placed in TPC"  >
+
             <Material name="Mylar"  />
-            <Medium name="TPCM_Mylar" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.212557" epsil="0.01" stmin="0.0311385" />
             <Attribute for="TPCM" seen="1" colo="kBlue"  />
             <Shape type="TUBE" rmax="tpcg_SenGasOR" rmin="tpgvIR" dz="tpcg_MembTHK/2"  />
-            <!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
+
         </Block>
         
 
-
+	<!--                                                                                        TIFC -->
         <Block name="TIFC" comment="defines the Inner Field Cage placed in TPC"  >
 
             <Material name="ALUMINIUM"  />
-            <Medium name="TIFC_aluminium" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.18296" epsil="0.01" stmin="0.0334422" />
             <Attribute for="TIFC" seen="1" colo="kBlue"  />
             <Shape type="PCON" zi="{-zTIFCend,-zTIFCFlangeBegin,-zTIFCFlangeBegin,zTIFCFlangeBegin,zTIFCFlangeBegin,zTIFCend}" rmn="{tifcIR,tifcIR,tifcIR,tifcIR,tifcIR,tifcIR}" rmx="{TPCG_tifcRF,TPCG_tifcRF,tifcOR,tifcOR,TPCG_tifcRF,TPCG_tifcRF}" nz="6" phi1="0" dphi="360"  />
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
 
-            <Create block="TIKA"  />
-            <Placement block="TIKA"  >
-            </Placement>
+            <Create block="TIKA"  />           <Placement block="TIKA"  />            
+            <Create block="TINX"  />           <Placement block="TINX"  />            
+            <Create block="TIAD"  />           <Placement block="TIAD"  />
             
-            <Create block="TINX"  />
-            <Placement block="TINX"  >
-            </Placement>
-            
-            <Create block="TIAD"  />
-            <Placement block="TIAD"  >
-            </Placement>
-            
-
         </Block>
         
 
-
+	<!-- Kapton layer in IFC                                                                    TIKA -->
         <Block name="TIKA" comment="is the kapton film of the inner field cage"  >
-            <Material name="Mylar"  />
-            <Medium name="TIKA_mylar" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.212557" epsil="0.01" stmin="0.0311385" />
+            <Material  name="Mylar"  />
             <Attribute for="TIKA" seen="1" colo="kViolet"  />
-            <Shape type="TUBE" rmax="tikaOR" rmin="tikaIR" dz="TPCG_dzYF1"  />
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-
+            <Shape     type="TUBE" rmax="tikaOR" rmin="tikaIR" dz="TPCG_dzYF1"  />
         </Block>
         
-
-
+	<!-- Nomex layer in IFC                                                                     TIKA -->
         <Block name="TINX" comment="is the inner nomex structureure"  >
             <Material name="Nomex"  />
-            <Medium name="TINX_nomex" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.242015" epsil="0.01" stmin="135061" />
             <Attribute for="TINX" seen="1" colo="kYellow"  />
             <Shape type="TUBE" rmax="tinxOR" rmin="tinxIR" dz="TPCG_dzYF1"  />
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-
         </Block>
         
-
-
+	<!-- Adhesive layer in IFC                                                                  TIKA -->
         <Block name="TIAD" comment="the inner adhesive structureure"  >
             <Material name="ADHESIVE"  />
-            <Medium name="TIAD_adhesive" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.21521" epsil="0.01" stmin="0.033412" />
             <Attribute for="TIKA" seen="1" colo="kViolet"  />
             <Shape type="TUBE" rmax="tiadOR" rmin="tiadIR" dz="TPCG_dzYF1"  />
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-
         </Block>
         
 
-
+	<!-- Outer field cage                                                                       TOFC -->
         <Block name="TOFC" comment="defines outer field cage - fill it WITH insulating gas already"  >
 
-            <Material name="ALUMINIUM"  />
-            <Medium name="TOFC_aluminium" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.18296" epsil="0.01" stmin="0.0334422" />
+            <Material  name="ALUMINIUM"  />
             <Attribute for="TOFC" seen="1" colo="kGreen"  />
-            <Shape type="PCON" zi="{-zTOFCend,-zWheel1,-zWheel1,zWheel1,zWheel1,zTOFCend}" rmn="{TPCG_WheelOR1,TPCG_WheelOR1,tofcIR,tofcIR,TPCG_WheelOR1,TPCG_WheelOR1}" rmx="{TPCG_WheelOR,TPCG_WheelOR,tofcOR,tofcOR,TPCG_WheelOR,TPCG_WheelOR}" nz="6" phi1="0" dphi="360"  />
-<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
--->
+            <Shape     type="PCON" zi="{-zTOFCend,-zWheel1,-zWheel1,zWheel1,zWheel1,zTOFCend}" rmn="{TPCG_WheelOR1,TPCG_WheelOR1,tofcIR,tofcIR,TPCG_WheelOR1,TPCG_WheelOR1}" rmx="{TPCG_WheelOR,TPCG_WheelOR,tofcOR,tofcOR,TPCG_WheelOR,TPCG_WheelOR}" nz="6" phi1="0" dphi="360"  />
 
-            <Create block="TOAD"  />
-            <Placement block="TOAD"  >
-            </Placement>
+            <Create block="TOAD"  />            <Placement block="TOAD"  />
+            <Create block="TOFS"  />            <Placement block="TOFS"  />
+            <Create block="TOKA"  />            <Placement block="TOKA"  />
+            <Create block="TONX"  />            <Placement block="TONX"  />
             
-
-            <Create block="TOFS"  />
-            <Placement block="TOFS"  >
-            </Placement>
-            
-            <Create block="TOKA"  />
-            <Placement block="TOKA"  >
-            </Placement>
-            
-            <Create block="TONX"  />
-            <Placement block="TONX"  >
-            </Placement>
-            
-            <Create block="TOIG"  />
-            <Placement block="TOIG"  >
-            </Placement>
-            
-            <Create block="TOHA"  />
-            <Placement block="TOHA"  >
-            </Placement>
-            
+            <Create block="TOIG"  />            <Placement block="TOIG"  />
+            <Create block="TOHA"  />            <Placement block="TOHA"  />
 
         </Block>
         
 
-
-        <Block name="TOFS" comment="is the Outer Field Cage structureure"  >
+            <Block name="TOFS" comment="is the Outer Field Cage structureure"  >
             <Material name="COPPER"  />
             <Medium name="TOFS_copper" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.25" epsil="0.01" stmin="0.0281386" />
             <Attribute for="TOFS" seen="1" colo="kBlue"  />
             <Shape type="TUBE" rmax="tocsOR" rmin="tocsIR" dz="TPCG_dzYF2"  />
+            </Block>
 
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-
-        </Block>
-        
-
-
-        <Block name="TOKA" comment="is MYLAR layer"  >
+            <Block name="TOKA" comment="is MYLAR layer"  >
             <Material name="mylar"  />
-            <Medium   name="TOKA_mylar" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.212557" epsil="0.01" stmin="0.0311385" />
             <Attribute for="TOKA" seen="1" colo="kGreen"  />
             <Shape type="TUBE" rmax="tokaOR" rmin="tokaIR" dz="TPCG_dzYF2"  />
-
-<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-  -->
-
-        </Block>
+            </Block>
         
-
-
-        <Block name="TONX" comment="is Nomex support"  >
+            <Block name="TONX" comment="is Nomex support"  >
             <Material name="Nomex"  />
-            <Medium name="TONX_nomex" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.242015" epsil="0.01" stmin="0.135061" />
             <Attribute for="TONX" seen="1" colo="kRed"  />
             <Shape type="PCON" zi="{-TPCG_dzYF2,-TPCG_dzYF3,-TPCG_dzYF3,TPCG_dzYF3,TPCG_dzYF3,TPCG_dzYF2}" rmn="{tonxOR-0.2,tonxOR-0.2,tonxIR,tonxIR,tonxOR-0.2,tonxOR-0.2}" rmx="{tonxOR,tonxOR,tonxOR,tonxOR,tonxOR,tonxOR}" nz="6" phi1="0" dphi="360"  />
+            </Block>
 
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-
-        </Block>
-        
-
-
-        <Block name="TOAD" comment="is Adhesive layer"  >
+            <Block name="TOAD" comment="is Adhesive layer"  >
             <Material name="mylar"  />
-            <Medium name="TOAD_mylar" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.212557" epsil="0.01" stmin="0.0311385" />
             <Attribute for="TOAD" seen="1" colo="kLightBlue"  />
             <Shape type="TUBE" rmax="toadOR" rmin="toadIR" dz="TPCG_dzYF2"  />
-
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-
-        </Block>
+            </Block>
         
-
-
-        <Block name="TOIG" comment="is Insulating Gas (Nitrogen)"  >
-
+            <Block name="TOIG" comment="is Insulating Gas (Nitrogen)"  >
             <Material name="NITROGEN_GAS"  />
-            <Medium name="TOIG_nitrogen_gas" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.248893" epsil="0.01" stmin="1.14554" />
             <Attribute for="TOAD" seen="1" colo="kLightBlue"  />
             <Shape type="TUBE" rmax="toigOR" rmin="toigIR" dz="TPCG_dzYF2"  />
-
-        <!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-         -->
-
-        </Block>
+            </Block>
         
-
-
-        <Block name="TOHA" comment="Gas Containment Vessel (Al) + HA"  >
+            <Block name="TOHA" comment="Gas Containment Vessel (Al) + HA"  >
             <Material name="AL_HONEYCOMB"  />
-            <Medium name="TOHA_al_honeycomb" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.23328" epsil="0.01" stmin="0.0707689" />
             <Attribute for="TOHA" seen="1" colo="kViolet"  />
             <Shape type="TUBE" rmax="tohaOR" rmin="tohaIR" dz="TPCG_dzYF3"  />
+            </Block>
 
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-
-        </Block>
+        <!--                                                                             end outer field cage -->
         
 
 
@@ -1035,36 +910,23 @@
 
         <Block name="TSWH" comment="TpcSectorWhole is Sector as Whole"  >
 
-            <Medium name="TSWH_STANDARD" deemax="0.248853" stmin="1.15055" />
+<!--        <Medium name="TSWH_STANDARD" deemax="0.248853" stmin="1.15055" /> -->
+            <Medium name="STANDARD" /> 
             <Attribute for="TSWH" seen="1" colo="kViolet"  />
             <Shape type="PCON" zi="{TPCG_MembTHK/2,zWheel1,zWheel1,zTOFCend,zTOFCend,zTIFCFlangeBegin,zTIFCFlangeBegin,TPCG_DzEnvelop}" rmn="{tifcOR,tifcOR,tifcOR,tifcOR,tifcOR,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT}" rmx="{tofcIR,tofcIR,TPCG_WheelOR1,TPCG_WheelOR1,TPCG_WheelOR,TPCG_WheelOR,TPCG_WheelOR,TPCG_WheelOR}" nz="8" phi1="-15" dphi="30"  />
-            <!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
 
-            <Create    block="TSAW"  />
-            <Placement block="TSAW" konly="'MANY'" />
-
-            
-
+            <Create block="TSAW" /><Placement block="TSAW" konly="'MANY'" />
+           
         </Block>
         
 
 
         <Block name="TSAW" comment="TpcSectorAndWheel"  >
-
-            <Medium name="STANDARD" deemax="0.248853" stmin="1.15055" />
+<!--            <Medium name="STANDARD" deemax="0.248853" stmin="1.15055" /> -->
+            <Medium name="STANDARD" />
             <Attribute for="TSAW" seen="1" colo="kYellow"  />
             <Shape type="PCON" zi="{204,TPCG_DzEnvelop-TPCG_MembTHK/2}" rmn="{48,48}" rmx="{208,208}" nz="2" phi1="-15" dphi="30"  />
 
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-            
             dX2 = 1.470
             dX  = 0
 
@@ -1283,19 +1145,13 @@ mycount = 0;
 
         <Block name="TSAS" comment="TpcInnerSectorAssembly &amp; TpcOuterSectorAssembly TSAS and TSA1"  >
 
-      	<Medium name="TSAS_STANDARD" deemax="0.248853" stmin="1.15055" />
+<!--      	<Medium name="TSAS_STANDARD" deemax="0.248853" stmin="1.15055" /> -->
         
             <Shape type="PGON" zi="{zzzSA(1),zzzSA(2)}" 
 	            	rmn="{rmnSA(inOut),rmnSA(inOut)}" 
 	            	rmx="{rmxSA(inOut),rmxSA(inOut)}" 
 	            	nz="2" npdiv="1" 
-		            phi1="-15" dphi="30"  />
-
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
+		        phi1="-15" dphi="30"  />
 
 
             <Attribute for="TSAS" seen="0"  />
@@ -1400,16 +1256,10 @@ mycount = 0;
 
         <Block name="TWAS" comment="TpcWheelInnerAssembly &amp; TpcWheelOuterAssembly TWAS and TWA1"  >
 
-	  <Medium name="TWAS_STANDARD" deemax="0.248853" stmin="1.15055" />
+<!--	  <Medium name="TWAS_STANDARD" deemax="0.248853" stmin="1.15055" /> -->
+
+          <Attribute for="TWAS" seen="0"  />
 	  <Shape type="PGON" zi="{zzzWA(1),zzzWA(2)}" rmn="{rmnWA(inOut),rmnWA(inOut)}" rmx="{rmxWA(inOut),rmxWA(inOut)}" nz="2" npdiv="1" phi1="-15" dphi="30"  />
-
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-
-            <Attribute for="TWAS" seen="0"  />
 
             dx =   TPCG_widTube*cm/2
             dz =   depthIOF(inOut+1)/2
@@ -1503,10 +1353,12 @@ iShape = kTrd1;
 
         <Block name="FEEA" comment="TGeoVolumeAssembly(FEE)"  >
 
+<!--
 	  <Medium name  = "FEEA_STD" 
 		  deemax= "0.248853" 
 		  stmin = "1.15055" 
 		  />
+  -->
 
 	  <Attribute for="FEEA" 
 		     seen="1" 
@@ -1530,18 +1382,9 @@ iShape = kTrd1;
 	      </Print>
 	  -->
 	  
-	  <Create block="FEEP"  />
-	  <Placement block="FEEP"  >
-	  </Placement>
-	  
-	  <Create block="FEER"  />
-	  <Placement x="-TFEE_RibDX-TFEE_CardDX" block="FEER"  >
-	  </Placement>
-	  
-	  <Create block="FEEI"  />
-	  <Placement x="2*TFEE_CardDX" z="0.5" block="FEEI"  >
-	  </Placement>
-	  
+	  <Create block="FEEP"  />  <Placement block="FEEP"  />	 
+	  <Create block="FEER"  />  <Placement block="FEER" x="-TFEE_RibDX-TFEE_CardDX" />	  
+	  <Create block="FEEI"  />  <Placement block="FEEI" x="2*TFEE_CardDX" z="0.5" />
 	  
 	</Block>
         
@@ -1550,15 +1393,8 @@ iShape = kTrd1;
         <Block name="FEEP" comment="FEEplate"  >
             <Attribute for="FEEP" seen="1" colo="kRed"  />
             <Material name="ALUMINIUM"  />
-            <Medium name="FEEP_aluminium" deemax="0.18296" stmin="0.0334422" />
+<!--            <Medium name="FEEP_aluminium" deemax="0.18296" stmin="0.0334422" /> -->
             <Shape type="bbox"       dz="TFEE_PlateDZ" dx="TFEE_PlateDX" dy="TFEE_PlateDY"  />
-
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-
         </Block>
         
 
@@ -1566,15 +1402,8 @@ iShape = kTrd1;
         <Block name="FEER" comment="FEERib"  >
             <Attribute for="FEER" seen="1" colo="1"  />
             <Material name="ALUMINIUM"  />
-            <Medium name="FEER_aluminium" deemax="0.18296" stmin="0.0334422" />
+<!--        <Medium name="FEER_aluminium" deemax="0.18296" stmin="0.0334422" /> -->
             <Shape type="bbox" dz="TFEE_RibDZ" dx="TFEE_RibDX" dy="TFEE_RibDY"  />
-
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-
         </Block>
         
 
@@ -1582,16 +1411,8 @@ iShape = kTrd1;
         <Block name="FEEI" comment="FEEitself"  >
             <Attribute for="FEEI" seen="1" colo="kViolet"  />
             <Material name="G10"  />
-            <Medium name="FEEI_g10" deemax="0.20313" stmin="0.0333806" />
+<!--        <Medium name="FEEI_g10" deemax="0.20313" stmin="0.0333806" /> -->
             <Shape type="bbox" dz="TFEE_CardDZ" dx="TFEE_CardDX" dy="TFEE_CardDY"  />
-
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-            
-
         </Block>
         
 
@@ -1600,16 +1421,8 @@ iShape = kTrd1;
 
             <Attribute for="TALS" seen="1" colo="kYellow"  />
             <Material name="ALUMINIUM"  />
-            <Medium name="TALS_aluminium"  deemax="0.18296" stmin="0.0334422" />
-            
+<!--        <Medium name="TALS_aluminium"  deemax="0.18296" stmin="0.0334422" /> -->            
             <Shape type="PGON" zi="{z1+TPCG_PadPlaneThickness,z1+TPCG_PadPlaneThickness+TECW_ThickAl}" rmn="{r1,r1}" rmx="{r2,r2}" nz="2" npdiv="1" phi1="-alpha" dphi="2*alpha"  />
-
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-            
 
             myPar(1)  = TECW_holeDx
             myPar(2)  = TECW_holeDy
@@ -1619,21 +1432,13 @@ iShape = kTrd1;
 
 
             <Do var="iTALS" from="0" to="HOLZ_numberOfRows - 1"  >
+            myPar(11) = xHoles(iTALS); !// cm 
+            <Do var="jtals" from="0" to="HOLZ_numberPerRow( itals+1 ) - 1"  >
+            myPar(12) = HOLZ_yholes( 9*itals+jtals+1) *INCH 
 
-                myPar(11) = xHoles(iTALS); !// cm 
-
-                <Do var="jtals" from="0" to="HOLZ_numberPerRow( itals+1 ) - 1"  >
-
-                    myPar(12) = HOLZ_yholes( 9*itals+jtals+1) *INCH 
-
-                    <Create block="THOL"  />
-                    <Placement y="myPar(12)" x="myPar(11)" z="myPar(13)" block="THOL"  >
-                    </Placement>
-                    
-
-                </Do>
-                
-
+            <Create block="THOL"  />
+            <Placement block="THOL" y="myPar(12)" x="myPar(11)" z="myPar(13)" />
+            </Do>                
             </Do>
             
 
@@ -1645,7 +1450,7 @@ iShape = kTrd1;
 
             <Attribute for="TSGT" seen="1" colo="kBlue"  />
             <Material name="G10"  />
-            <Medium name="TSGT_G10" deemax="0.20313" stmin="0.0333806" />
+<!--            <Medium name="TSGT_G10" deemax="0.20313" stmin="0.0333806" /> -->
             <Shape type="PGON" zi="{z1,z1+TPCG_PadPlaneThickness}" 
                    rmn="{r1,r1}" rmx="{r2,r2}" 
                    nz="2" npdiv="1" 
@@ -1663,7 +1468,7 @@ iShape = kTrd1;
 
             <Attribute for="TWBT" seen="1" colo="kGreen"  />
             <Material name="ALUMINIUM"  />
-            <Medium name="TWBT_aluminium" deemax="0.18296" stmin="0.0334422" />
+<!--            <Medium name="TWBT_aluminium" deemax="0.18296" stmin="0.0334422" /> -->
             <Shape type="PCON" zi="{zWheel1,zWheel1+3.500*INCH,zWheel1+3.500*INCH,TPCG_LengthW/2}" rmn="{TPCG_WheelIR,TPCG_WheelIR,TPCG_WheelIR+3.6,TPCG_WheelIR+3.6}" rmx="{TPCG_WheelR0,TPCG_WheelR0,TPCG_WheelR0,TPCG_WheelR0}" nz="4" phi1="-15" dphi="30"  />
 
 			<!--
@@ -1679,7 +1484,7 @@ iShape = kTrd1;
         <Block name="TWRI" comment="WheelOuterRing"  >
 
 
-            <Medium name="TWRI_standard" stmin="1.15055" />
+<!--            <Medium name="TWRI_standard" stmin="1.15055" /> -->
             <Shape type="PCON" zi="{zWheel1,zTOFCend,zTOFCend,TPCG_LengthW/2}" rmn="{TPCG_WheelR2*cos15,TPCG_WheelR2*cos15,TPCG_WheelR2*cos15,TPCG_WheelR2*cos15}" rmx="{TPCG_WheelOR1,TPCG_WheelOR1,TPCG_WheelOR,TPCG_WheelOR}" nz="4" phi1="-15" dphi="30"  />
 			<Medium name="TWRI_something" deemax="0.248853" stmin="1.15055" />
             <Attribute for="TWRI" seen="0" colo="kGreen"  />
@@ -1707,7 +1512,10 @@ iShape = kTrd1;
                     myG2 = myRMax*myCos 
                 </If>
                 
+ <!--
                 alpha = ACOS(myCos)/Pi*180 
+   -->
+                alpha = ACos(myCos)*raddeg;
 
                 <Create block="TWRG"  />
                 <Placement block="TWRG"  />
@@ -1729,7 +1537,7 @@ iShape = kTrd1;
         <Block name="TWRG" comment="WheelOuterRing PGON part"  >
             <Attribute for="TWRG" seen="1" colo="kGreen"  />
             <Material name="ALUMINIUM"  />
-            <Medium name="TWRG_aluminium" deemax="0.18296" stmin="0.0334422" />
+<!--            <Medium name="TWRG_aluminium" deemax="0.18296" stmin="0.0334422" /> -->
             <Shape type="PGON" zi="{zWheel1,TPCG_LengthW/2}" rmn="{myG1,myG1}" rmx="{myG2,myG2}" nz="2" npdiv="1" phi1="-alpha" dphi="alpha*2"  />
 
 			<!--
@@ -1745,7 +1553,7 @@ iShape = kTrd1;
         <Block name="TWRC" comment="WheelOuterRing PCON part"  >
             <Attribute for="TWRC" seen="1" colo="kGreen"  />
             <Material name="ALUMINIUM"  />
-            <Medium name="TWRC_aluminium" deemax="0.18296" stmin="0.0334422" />
+<!--            <Medium name="TWRC_aluminium" deemax="0.18296" stmin="0.0334422" /> -->
             <Shape type="PCON" zi="{zWheel1,zTOFCend,zTOFCend,TPCG_LengthW/2}" rmn="{TPCG_WheelR2/cos15,TPCG_WheelR2/cos15,TPCG_WheelR2/cos15,TPCG_WheelR2/cos15}" rmx="{TPCG_WheelOR1,TPCG_WheelOR1,TPCG_WheelOR,TPCG_WheelOR}" nz="4" phi1="-15" dphi="30"  />
 
 			<!--
@@ -1762,7 +1570,7 @@ iShape = kTrd1;
 
             <Attribute for="TWTR" seen="1" colo="kBlue"  />
             <Material name="ALUMINIUM"  />
-            <Medium name="TWTR_aluminium" deemax="0.18296" stmin="0.0334422" />
+<!--            <Medium name="TWTR_aluminium" deemax="0.18296" stmin="0.0334422" /> -->
             myG1=TPCG_WheelR2 - (TPCG_WheelTotalRibWidth-TPCG_WheelRibWidth)/2
             <Shape type="PGON" zi="{zWheel1,zWheel1+TPCG_WheelRibHeight}" rmn="{myG1,myG1}" rmx="{TPCG_WheelR2,TPCG_WheelR2}" nz="2" npdiv="1" phi1="-15" dphi="30"  />
 
@@ -1780,7 +1588,7 @@ iShape = kTrd1;
 
             <Attribute for="TWMR" seen="1" colo="kYellow"  />
             <Material name="ALUMINIUM"  />
-            <Medium name="TWMR_aluminium" deemax="0.18296" stmin="0.0334422" />
+<!--            <Medium name="TWMR_aluminium" deemax="0.18296" stmin="0.0334422" /> -->
             myG1=TPCG_WheelR2 - (TPCG_WheelTotalRibWidth-TPCG_WheelRibWidth)/2
             <Shape type="PGON" nz="4" npdiv="1" phi1="-15" dphi="30" 
                    zi="{zWheel1,zWheel1+TPCG_WheelRibHeight,zWheel1+TPCG_WheelRibHeight,TPCG_LengthW/2}"  
@@ -1803,7 +1611,7 @@ iShape = kTrd1;
 
             <Attribute for="TRDO" seen="0"  />
             <Attribute for="TRDO" seen="1" colo="kYellow"  />
-            <Medium name="TRDO_whatever" deemax="0.248853" stmin="1.15055" />
+<!--            <Medium name="TRDO_whatever" deemax="0.248853" stmin="1.15055" /> -->
             <Shape type="PGON" zi="{zzzRDO(1),zzzRDO(2)}" rmn="{rmnRDO(1),rmnRDO(2)}" rmx="{rmxRDO(1),rmxRDO(2)}"  nz="2" npdiv="1" phi1="-15" dphi="30"  />
             
 			<!--
@@ -1896,7 +1704,7 @@ iShape = kTrd1;
         <Block name="TBRW" comment="WheelRibBox"  >
             <Attribute for="TBRW" seen="1" colo="kViolet"  />
             <Material name="ALUMINIUM"  />
-            <Medium name="TBRW_aluminium" deemax="0.18296" stmin="0.0334422" />
+<!--            <Medium name="TBRW_aluminium" deemax="0.18296" stmin="0.0334422" /> -->
             <Shape type="bbox" dz="TPCG_WheelTHK/2" dx="TPCG_WheelBoxDy/2" dy="TPCG_WheelBoxDx/2"  />
 
 			<!--
@@ -1913,7 +1721,7 @@ iShape = kTrd1;
         <Block name="TWRB" comment="TpcWheelRib"  >
             <Attribute for="TWRB" seen="1" colo="kYellow"  />
             <Material name="ALUMINIUM"  />
-            <Medium name="TWRB_aluminium" deemax="0.18296" stmin="0.0334422" />
+<!--            <Medium name="TWRB_aluminium" deemax="0.18296" stmin="0.0334422" /> -->
             <Shape type="PARA" dz="myDz" alph="myAlph" dx="myDx" dy="myDy" thet="0" phi="0" />
 			<!--
             <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
@@ -1929,14 +1737,13 @@ iShape = kTrd1;
 
 	  <Attribute for="TCOO" seen="1" colo="kRed"  />
 	  <Material name="Water_Pipe"  />
-	  <Medium name="TCOO_h2o_pipe" deemax="0.184746" stmin="0.0348298" />
+<!--	  <Medium name="TCOO_h2o_pipe" deemax="0.184746" stmin="0.0348298" /> -->
 
 
 	  <If expr="iShape==kPara">
 	    <Shape type="PARA" dz="myPar(3)" alph="myPar(4)" dx="myPar(1)" dy="myPar(2)" thet="0" phi="0"  />
 	  </If>
             
-
 	  <If expr="iShape==kTrd1" >
 	    <Shape type="TRD1" dz="myPar(4)" dx2="myPar(2)" dx1="myPar(1)" dy="myPar(3)"  />
 	  </If>
@@ -1948,7 +1755,7 @@ iShape = kTrd1;
         <Block name="TCAB" comment="Cables"  >
             <Attribute for="TCAB" seen="1" colo="kGreen"  />
             <Material name="Cables"  />
-            <Medium name="TCAB_Cables" deemax="0.172513" stmin="0.0388322" />
+<!--            <Medium name="TCAB_Cables" deemax="0.172513" stmin="0.0388322" /> -->
             <Shape type="PARA" dz="myPar(3)" alph="myPar(4)" dx="myPar(1)" dy="myPar(2)" thet="0" phi="0" />
 
 			<!--
@@ -1965,7 +1772,7 @@ iShape = kTrd1;
         <Block name="TRDC" comment="RDOCard"  >
             <Attribute for="TRDC" seen="1" colo="kBlue"  />
             <Material name="G10"  />
-            <Medium name="TRDC_g10" deemax="0.20313" stmin="0.0333806" />
+<!--            <Medium name="TRDC_g10" deemax="0.20313" stmin="0.0333806" /> -->
             <Shape type="bbox" dz="TPCG_dzRDO" dx="TPCG_dxRDO" dy="TPCG_dyRDO" />
 
 			<!--
@@ -1982,7 +1789,7 @@ iShape = kTrd1;
 
             <Attribute for="TRib" seen="1" colo="kRed"  />
             <Material name="ALUMINIUM"  />
-	    <Medium name="TRIB_aluminium" deemax="0.18296" stmin="0.0334422" />
+<!--	    <Medium name="TRIB_aluminium" deemax="0.18296" stmin="0.0334422" /> -->
 
             <!-- <If expr="mySha=='PARA'"  > -->
             <!-- NOTE: Provided thet=phi=0 -->
@@ -2045,7 +1852,7 @@ iShape = kTrd1;
 
             <Attribute for="TWIR" seen="1" colo="kYellow"  />
             <Material name="G10"  />
-                  <Medium name="TWIR_g10" deemax="0.20313" stmin="0.0333806" />
+<!--                  <Medium name="TWIR_g10" deemax="0.20313" stmin="0.0333806" /> -->
             <Shape type="PARA" dz="myPar(3)" alph="myPar(4)" dx="myPar(1)" dy="myPar(2)" thet="0" phi="0" />
             <!--
             <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
@@ -2060,16 +1867,12 @@ iShape = kTrd1;
 
             <Attribute for="THOL" seen="1" colo="kGreen"  />
             <Material name="Air"  />
-            <Medium name="THOL_Air" deemax="0.248853" stmin="1.15055" />
+<!--        <Medium name="THOL_Air" deemax="0.248853" stmin="1.15055" /> -->
             <Shape type="bbox" dz="myPar(3)" dx="myPar(1)" dy="myPar(2)"  />
-            <!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-	        -->
-            <Create block="FEES"  />
-            <Placement block="FEES"  >
-            </Placement>
+
+
+            <Create block="FEES"/> <Placement block="FEES"  />
+
             
 
         </Block>
@@ -2078,14 +1881,9 @@ iShape = kTrd1;
 
         <Block name="FEES" comment="TFEESocket"  >
             <Material name="G10"  />
-            <Medium name="FEES_g10" deemax="0.20313" stmin="0.0333806" />
+<!--        <Medium name="FEES_g10" deemax="0.20313" stmin="0.0333806" /> -->
             <Attribute for="FEES" seen="1" colo="kBlue"  />
             <Shape type="bbox" dz="5.8/20" dx="6.2/20" dy="57./20"  />
-            <!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
         </Block>
         
 
@@ -2094,14 +1892,8 @@ iShape = kTrd1;
 
             <Attribute for="TPGV" seen="1" colo="kRed"  />
             <Material name="P10"  />
-            <Medium name="TPGV_p10" deemax="0.248246" stmin="1.60594" />
+<!--        <Medium name="TPGV_p10" deemax="0.248246" stmin="1.60594" /> -->
             <Shape type="TUBE" rmax="tpcg_SenGasOR" rmin="tpgvIR" dz="tpgvLeng/2" />
-            <!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
-
 
             <Do var="iSecAng" from="15" to="360-15" step="30"  >
 
@@ -2125,7 +1917,9 @@ iShape = kTrd1;
         <Block name="TPSS" comment="is a division of gas volume corresponding to a supersectors"  >
 
             <Attribute for="TPSS" seen="1" colo="kBlue"  />
+<!--
             <Medium name="TPSS_whatever" deemax="0.248246" stmin="1.60594" />
+  -->
             <Shape type="TUBS" phi2="15" phi1="-15"  />
             
 <!--
