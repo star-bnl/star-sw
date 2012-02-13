@@ -150,7 +150,7 @@ AgMedium &AgMedium::Get( const Char_t *name )
 {
 
 	  AgModule   *module = AgBlock::module();
-	  AgBlock    *block  = AgBlock::active();
+	  AgBlock    *block  = 0; //  AgBlock::active(); // uncomment to ensure independent media per volume when declared by user
 	  AgMedium   *medium = 0;
 
 	  TString modname="None";
@@ -193,7 +193,6 @@ AgMedium &AgMedium::Get( const Char_t *name )
 	  medium = Find(medname);
 	  if ( medium )
 	    {
-
 	      return (*medium);
 	    }
 
