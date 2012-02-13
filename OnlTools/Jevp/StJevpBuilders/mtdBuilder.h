@@ -47,6 +47,7 @@ class mtdBuilder : public JevpPlotSet {
   int tdcchan2globalstrip(int,int,int);
   int tdig2slot(int, int);
   int istray3bl(int);
+  int istray5bl(int);
  
   double numberforsort;
   vector<double> leadinghits;

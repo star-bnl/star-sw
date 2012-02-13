@@ -127,7 +127,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
     plots[i]->getHisto(0)->histo->SetFillColor(19);
     plots[i]->getHisto(0)->histo->SetMinimum(0);
     plots[i]->getHisto(0)->histo->SetFillStyle(1001);
-    plots[i]->optstat=0;
+    plots[i]->optstat=1111111;
     plots[i]->addElement(latexW);
     plots[i]->addElement(latexE);
     plots[i]->addElement(ln);
@@ -139,7 +139,7 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
     plots[i]->getHisto(0)->histo->SetFillColor(19);
     plots[i]->getHisto(0)->histo->SetMinimum(0);
     plots[i]->getHisto(0)->histo->SetFillStyle(1001);
-    plots[i]->optstat=0;
+    plots[i]->optstat=1111111;
   }
   LOG("====MTD====", "%d trig plots added", nhtrig);
   
@@ -184,15 +184,17 @@ void mtdBuilder::event(daqReader *rdr) {
 	  trayid     = (dataword&0x0FE)>>1;
 	  continue;
 	}
+
+	if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
 				
 	if( (dataword&0xF0000000)>>28 == 0x6) {continue;} //error
 	//
 	int edgeid =int( (dataword & 0xf0000000)>>28 );
 	//if((edgeid !=4) && (edgeid!=5)) continue; //leading edge or trailing edge
-  if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
+	if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
 				
 	int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
-  int tdigboardid= ( (tdcid & 0xC) >> 2) + halftrayid*4;
+	int tdigboardid= ( (tdcid & 0xC) >> 2) + halftrayid*4;
 	int tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
 	//int globaltdcchan=tdcchan + (tdcid%4)*8+tdigboardid*24+96*halftrayid; // 0-191 for tray
 	timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
@@ -202,19 +204,19 @@ void mtdBuilder::event(daqReader *rdr) {
 	int globalstripid=-1;
 	int stripid=-1;
 	int zendid=-1;
-  int slot=-1;
+	int slot=-1;
 	//				
 	if(trayid){
 	  globalstripid=tdcchan2globalstrip(tdigboardid,tdcid,tdcchan);
 	  stripid=(globalstripid-1)%12+1;
 	  zendid=(globalstripid-1)/12; //0 for Lo Z end; 1 for Hi Z end
-    slot=tdig2slot(tdigboardid, trayid);
+	  slot=tdig2slot(tdigboardid, trayid);
 	}				
 
-  for(int i=0;i<nMTDtrays;i++){
-      for(int j=0; j<5; j++)
+	if( istray3bl(trayid) && (slot<2||slot>4) ) continue;
+	if( istray5bl(trayid) && (slot<1||slot>5) ) continue;
+	if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
         contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);
-  }
       }  // end loop nword
     }
   }
@@ -307,4 +309,12 @@ int mtdBuilder::istray3bl(int trayid){
     if (trayid==tray3bl[itray3bl]) is3 = 1;
    }
   return is3;
+}
+
+int mtdBuilder::istray5bl(int trayid){
+  int is5 = 0;
+   for (unsigned int itray5bl=0; itray5bl<sizeof(tray5bl)/sizeof(int); itray5bl++) {
+    if (trayid==tray5bl[itray5bl]) is5 = 1;
+   }
+  return is5;
 }
