@@ -232,47 +232,6 @@ Bool_t Compare( TGeoVolume *volume, AgShape *agshape )
 #undef check
 #undef angle
 
-/************************************************************************* unused
-Bool_t IsSameMaterial( TGeoMaterial *t, AgMaterial *a )
-{
-  if ( t == NULL )  
-    {
-      return false;
-    }
-  if ( t->GetA() != a->par("a") ) return false;
-  if ( t->GetZ() != a->par("z") ) return false;
-  if ( t->GetDensity() != a->par("dens") ) return false;
-  if ( a->isSet("radl") )
-    {
-      if ( t->GetRadLen() != a->par("radl") ) return false;      
-    }
-  if ( a->isSet("absl") )
-    {
-      if ( t->GetIntLen() != a->par("absl") ) return false;
-    }
-
-  return true;
-}
-
-
-Bool_t isShapeValid( TGeoShape *shape )
-{
-  TString _class = shape->ClassName();
-  
-  // Require both parameters set for eliptical tubes
-  if ( _class == "TGeoEltu" )
-    {
-      TGeoEltu *eltu = (TGeoEltu*)shape;
-      if ( eltu->GetA() <= 0. or
-	   eltu->GetB() <= 0. )
-	{
-	  return false;
-	}
-    }
-
-  return true;
-}
-*************************************************************************/
 
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -298,6 +257,8 @@ TGeoMaterial *BuildMaterial( AgMaterial &ag_material )
 
   TString mat_name = ag_material.GetName();
   TString name;
+
+  std::cout << "BuildMaterial: " << mat_name.Data() << std::endl;
 
   Double_t aa   = ag_material.par("a");      
   Double_t zz   = ag_material.par("z");
@@ -397,29 +358,6 @@ TGeoMedium *GetMedium( TString name, AgMedium *medium )
 }
 
 
-/******************************************************************** Unused 
-// Is there a daughter volume already placed at the given position
-//
-Bool_t IsItThere( TGeoVolume *volume, TGeoVolume *mother, TGeoMatrix *matrix )
-{
-  
-  TString name = volume -> GetName();
-  TIter next( mother->GetNodes() );
-
-  TGeoNode *node = 0;
-  while ( (node=(TGeoNode*)next()) )
-    {
-      if ( name != node->GetVolume()->GetName() ) { // for now, just check by name
-	continue;
-      }
-
-      if ( (*matrix) == (*node->GetMatrix()) ) return true;
-    }
-
-  return false;
-}
-*************************************************************************/
-
 // ------------------------------------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------------------------- BEGIN --
 // ------------------------------------------------------------------------------------------------------------
@@ -509,11 +447,25 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
   __DEBUG_BUILD__ material -> Print();
 #endif
 
-  //
   // Medium name
-  //
   TString       med_name     = mMedium.GetName();  
-  TString       fqmed_name   = mod_name + "_" + blk_name + " " + med_name;
+
+  //This naming convention results in a unique medium per volume
+  //TString       fqmed_name   = mod_name + "_" + blk_name + " " + med_name;
+
+  // This naming convention results in a unique medium per material
+  TString fqmed_name = mat_name; 
+  if ( med_name != "None" ) 
+    {
+      fqmed_name += "::"; 
+      fqmed_name+=med_name;
+    }
+  else
+    {
+      TString parent = AgBlock::previous()->medium()->GetName();
+      fqmed_name += "::";
+      fqmed_name+=parent;
+    }
 
   //
   // It is possible that medium parameters were set in the material.
