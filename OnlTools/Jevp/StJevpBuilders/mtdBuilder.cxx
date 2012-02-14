@@ -18,8 +18,12 @@
 #include <RTS/include/rtsLog.h>
 
 // Backleg lists
-int tray3bl[] = {26};
-int tray5bl[] = {27, 28};
+int tray3bl[1] = {26};
+int tray5bl[2] = {27, 28};
+int tray[3]={26, 27, 28};
+
+int nGlobalSlot=sizeof(tray3bl)/sizeof(int)*3+sizeof(tray5bl)/sizeof(int)*5;
+int ntray=sizeof(tray)/sizeof(int);
 
 ClassImp(mtdBuilder);
   
@@ -91,10 +95,48 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   sprintf(tmpchr,"MTD_Trigger27_5_inadc"); contents.hMTD_trig[18] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
   sprintf(tmpchr,"MTD_Trigger27_5_intdc"); contents.hMTD_trig[19] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
 
+  //mtd bunchid
+  contents.MTD_bunchid = new TH2F("MTD_bunchid", "MTD_bunchid", 3, 25.5, 28.5, 30, -14.5, 15.5);
+
+  //mtd error check
+  sprintf(tmpchr,"MTD_Error1");contents.MTD_Error1 = new TH1F(tmpchr, "MTD electronics errors", 2, -0.5, 1.5);
+  contents.MTD_Error1->GetXaxis()->SetBinLabel(1, "THUB1");  contents.MTD_Error1->GetXaxis()->SetBinLabel(2, "THUB2");
+  sprintf(tmpchr,"MTD_Error2");contents.MTD_Error2 = new TH1F(tmpchr, "MTD incorrect bunchid errors", 3, 25.5, 28.5);
+  for(int i=0;i<ntray;i++){
+    sprintf(tmpchr,"Tray%d", tray[i]); 
+    contents.MTD_Error2->GetXaxis()->SetBinLabel(i+1, tmpchr); 
+  }
+  sprintf(tmpchr,"MTD_Error3");contents.MTD_Error3 = new TH1F(tmpchr, "MTD trays not read out (bunchid not found)", 3, 25.5, 28.5);
+  for(int i=0;i<ntray;i++){
+    sprintf(tmpchr,"Tray%d", tray[i]); 
+    contents.MTD_Error3->GetXaxis()->SetBinLabel(i+1, tmpchr); 
+  }
+  
+  contents.MTD_Tray_hits=new TH1F("MTD_Tray_hits","MTD Hits by Tray",nGlobalSlot, 1, nGlobalSlot+1);
+  int i=0;
+  for (unsigned int itray3bl=0; itray3bl<sizeof(tray3bl)/sizeof(int); itray3bl++) {
+    int val3tray=tray3bl[itray3bl];
+    for(int islot=2;islot<=4;islot++){
+      sprintf(tmpchr, "Tray%d-%d", val3tray, islot);
+      contents.MTD_Tray_hits->GetXaxis()->SetBinLabel(++i, tmpchr);
+    }
+  }
+  for (unsigned int itray5bl=0; itray5bl<sizeof(tray5bl)/sizeof(int); itray5bl++) {
+    int val5tray=tray5bl[itray5bl];
+    for(int islot=1;islot<=5;islot++){
+      sprintf(tmpchr, "Tray%d-%d", val5tray, islot);
+      contents.MTD_Tray_hits->GetXaxis()->SetBinLabel(++i, tmpchr);
+    }
+  }
+  
+  //Counter
+  contents.MTD_EventCount=new TH1F("MTD_EventCount","MTD_EventCount",2,0,2);
+
   // Add root histograms to Plots
   JevpPlot *plots[100];
   int nhhit=0;
   int nhtrig=0;
+  int n=0;
 
   JLatex *latexW, *latexE;
   latexW = new JLatex(4., 0.8, "West");
@@ -128,6 +170,8 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
     plots[i]->getHisto(0)->histo->SetMinimum(0);
     plots[i]->getHisto(0)->histo->SetFillStyle(1001);
     plots[i]->optstat=1111111;
+    plots[i]->gridx = 0;
+    plots[i]->gridy = 0;
     plots[i]->addElement(latexW);
     plots[i]->addElement(latexE);
     plots[i]->addElement(ln);
@@ -140,9 +184,58 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
     plots[i]->getHisto(0)->histo->SetMinimum(0);
     plots[i]->getHisto(0)->histo->SetFillStyle(1001);
     plots[i]->optstat=1111111;
+    plots[i]->gridx = 0;
+    plots[i]->gridy = 0;
   }
   LOG("====MTD====", "%d trig plots added", nhtrig);
+
+  n = nhhit+nhtrig-1;
+  plots[++n] = new JevpPlot(contents.MTD_bunchid);
+  addPlot(plots[n]);
+  plots[n]->setDrawOpts("colz");
+  plots[n]->optstat=1111111;
+  LOG("====MTD====", "mtd bunchid plots added");
   
+  plots[++n] = new JevpPlot(contents.MTD_Error1);
+  addPlot(plots[n]);
+  plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
+  plots[n]->getHisto(0)->histo->SetMinimum(0);
+  MTD_Error1_label = new TLatex();
+  MTD_Error1_label->SetNDC(); 
+  plots[n]->addElement(MTD_Error1_label);
+  LOG("====MTD====", "MTD_Error1 added");
+  
+  plots[++n] = new JevpPlot(contents.MTD_Error2);
+  addPlot(plots[n]);
+  plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
+  plots[n]->getHisto(0)->histo->SetMinimum(0);
+  MTD_Error2_label = new TLatex();
+  MTD_Error2_label->SetNDC(); 
+  plots[n]->addElement(MTD_Error2_label);
+  LOG("====MTD====", "MTD_Error2 added");
+  
+  plots[++n] = new JevpPlot(contents.MTD_Error3);
+  addPlot(plots[n]);
+  plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 1111111;
+  plots[n]->getHisto(0)->histo->SetMinimum(0);
+  MTD_Error3_label = new TLatex();
+  MTD_Error3_label->SetNDC(); 
+  plots[n]->addElement(MTD_Error3_label);
+  LOG("====MTD====", "MTD_Error3 added");
+  
+  plots[++n] = new JevpPlot(contents.MTD_EventCount);
+  addPlot(plots[n]);
+  plots[n]->optstat=1111111;
+  plots[n]->getHisto(0)->histo->SetMinimum(0);
+  LOG("====MTD====", "MTD_EventCount added");
+  
+  plots[++n] = new JevpPlot(contents.MTD_Tray_hits);
+  addPlot(plots[n]);
+  plots[n]->logy=1;
+  plots[n]->getHisto(0)->histo->SetFillColor(18);plots[n]->optstat = 0;
+  LOG("====MTD====", "MTD_Tray_hits added");
+  
+  LOG("====MTD====", "MTD initialization done");
 }
   
 void mtdBuilder::startrun(daqReader *rdr) {
@@ -155,8 +248,11 @@ void mtdBuilder::event(daqReader *rdr) {
   float time=0.;
   int halftrayid=-1;
   int trayid=-1;
+  int bunchid=0;
   leadinghits.clear();
   trailinghits.clear();
+  int allbunchid[2][30];
+  for(int i=0;i<2;i++) for(int j=0;j<30;j++) allbunchid[i][j] = -9999;
 	
   daq_dta *dd = rdr->det("mtd")->get("legacy");
   mtd_t *mtd;
@@ -170,7 +266,11 @@ void mtdBuilder::event(daqReader *rdr) {
       for(int iword=0;iword<ndataword;iword++){
 	int dataword=mtd->ddl[ifib][iword];
 				
-	if( (dataword&0xF0000000)>>28 == 0x2) continue;  //TDC header
+	int packetid = (dataword&0xF0000000)>>28;
+	if(!ValidDataword(packetid))
+	  contents.MTD_Error1->Fill(ifib); 
+
+//	if( (dataword&0xF0000000)>>28 == 0x2) continue;  //TDC header, moved to later
 	if( (dataword&0xF0000000)>>28 == 0xD) continue;  //Header tag
 	if( (dataword&0xF0000000)>>28 == 0xE) continue;  //TDIG Separator
 	if( (dataword&0xF0000000)>>28 == 0xA) {  // header trigger data flag
@@ -188,7 +288,13 @@ void mtdBuilder::event(daqReader *rdr) {
 	if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
 				
 	if( (dataword&0xF0000000)>>28 == 0x6) {continue;} //error
-	//
+
+	if( (dataword&0xF0000000)>>28 == 0x2) {
+	  bunchid=dataword&0xFFF;
+	  allbunchid[halftrayid][trayid-1] = bunchid;
+	  continue;  
+	}
+
 	int edgeid =int( (dataword & 0xf0000000)>>28 );
 	//if((edgeid !=4) && (edgeid!=5)) continue; //leading edge or trailing edge
 	if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
@@ -217,10 +323,77 @@ void mtdBuilder::event(daqReader *rdr) {
 	if( istray5bl(trayid) && (slot<1||slot>5) ) continue;
 	if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
         contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);
+        
+  contents.MTD_Tray_hits->Fill(iGlobalSlot(trayid,slot));
       }  // end loop nword
+    } //end dd iterate
+  } //end if dd
+	
+  contents.MTD_EventCount->Fill(1);
+  
+  //check bunchid
+  int mReferenceTray=26;
+  int bunchidref1 =   allbunchid[0][mReferenceTray-1];
+  int bunchidref2 =   allbunchid[1][mReferenceTray-1];
+  int diff = bunchidref2-bunchidref1;
+  if(diff>2048)   {diff =diff-4096;} 
+  else if(diff<-2048) {diff =diff+4096;}
+  
+  contents.MTD_bunchid->Fill(mReferenceTray, diff);
+  if(bunchidref2!=-9999 && diff) contents.MTD_Error2->Fill(mReferenceTray);
+  if(bunchidref1==-9999 || bunchidref2==-9999) contents.MTD_Error3->Fill(mReferenceTray);
+
+  for(int ihalf=0; ihalf<2; ihalf++){
+    for(int i=1; i<ntray; i++){ // skip mReferenceTray
+      int traynum=tray[i]; 
+      int itray=traynum-1;
+      diff = allbunchid[ihalf][itray]-allbunchid[0][mReferenceTray-1];
+      if(allbunchid[ihalf][itray]!=-9999) contents.MTD_bunchid->Fill(traynum, diff);
+      if(allbunchid[ihalf][itray]!=-9999 && diff) contents.MTD_Error2->Fill(traynum); // real bunchid errors
+      if(allbunchid[ihalf][itray]==-9999) contents.MTD_Error3->Fill(traynum); //missing bunchids
     }
   }
-	
+  
+  //painting label.. //can move to end of run
+  char t[256];
+  int nev = (int)(contents.MTD_EventCount->GetEntries());
+  int err1 = (int)(contents.MTD_Error1->GetEntries());
+  int err2 = (int)(contents.MTD_Error2->GetEntries());
+  int err3 = (int)(contents.MTD_Error3->GetEntries());
+  
+  //error1 label
+  if(err1== 0) {
+    sprintf(t, "No electronics errors in %d events",nev);
+    MTD_Error1_label->SetTextColor(3);
+  }
+  else {
+    sprintf(t, "%d electronics errors in %d events",err1, nev);
+    MTD_Error1_label->SetTextColor(2);
+  }
+  MTD_Error1_label->SetText(.2,.8,t);
+  
+  //error2 label
+  if( err2== 0) {
+    sprintf(t, "No incorrrect bunchids in %d events",nev);
+    MTD_Error2_label->SetTextColor(3);
+  }
+  else {
+    sprintf(t, "%d incorrect bunchids in %d events!",err2, nev);
+    MTD_Error2_label->SetTextColor(2);
+  }
+  MTD_Error2_label->SetText(.2,.8,t);
+  
+  //error3 label
+  if( err3== 0) {
+    sprintf(t, "No read out errors in %d events",nev);
+    MTD_Error3_label->SetTextColor(3);
+  }
+  else {
+    sprintf(t, "%d read out errors in %d events!",err3, nev);
+    MTD_Error3_label->SetTextColor(2);
+  }
+  MTD_Error3_label->SetText(.2,.8,t);
+  
   // now do the trigger plots...
   StTriggerData *trgd = getStTriggerData(rdr);
   if(!trgd) {
@@ -318,3 +491,26 @@ int mtdBuilder::istray5bl(int trayid){
    }
   return is5;
 }
+
+bool mtdBuilder::ValidDataword(int packetid)
+{
+
+  if(packetid == 0x2) return true;
+  if(packetid == 0xD) return true;
+  if(packetid == 0xE) return true;
+  if(packetid == 0xA) return true;
+  if(packetid == 0xC) return true;
+  if(packetid == 0x4) return true;
+  if(packetid == 0x5) return true;
+
+  return false;
+
+}
+      
+int mtdBuilder::iGlobalSlot(int trayid, int slot){ // 1-13, subject to change with detector update
+  if(trayid==26) return slot-1;
+  if(trayid==27) return 3+slot;
+  if(trayid==28) return 8+slot;
+  return -1;
+}
+
