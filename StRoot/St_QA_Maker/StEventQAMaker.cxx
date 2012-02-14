@@ -345,9 +345,10 @@ Int_t StEventQAMaker::Make() {
         else evClasses[0] = 3;
         break;
       }
-      case (StQA_run8):
-      case (StQA_AuAu):
-      case (StQA_dAu) : break;
+      case (StQA_run8) :
+      case (StQA_run12):
+      case (StQA_AuAu) :
+      case (StQA_dAu)  : break;
       default: evClasses[0] = 1;
     }
   }
@@ -2398,8 +2399,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.106 2012/02/09 03:01:05 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.107 2012/02/14 04:02:34 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.107  2012/02/14 04:02:34  genevb
+// fix for run12
+//
 // Revision 2.106  2012/02/09 03:01:05  genevb
 // No FTPC histograms for Run 12+
 //
