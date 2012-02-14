@@ -40,6 +40,12 @@ class mtdBuilder : public JevpPlotSet {
 
       // MTDtriggerinfo histogram group
       TH1** hMTD_trig;
+      TH2* MTD_bunchid;
+      TH1* MTD_EventCount;
+      TH1* MTD_Error1;
+      TH1* MTD_Error2;
+      TH1* MTD_Error3;
+      TH1* MTD_Tray_hits;
     };
   } contents;
 
@@ -48,6 +54,8 @@ class mtdBuilder : public JevpPlotSet {
   int tdig2slot(int, int);
   int istray3bl(int);
   int istray5bl(int);
+  bool ValidDataword(int);
+  int iGlobalSlot(int, int);
  
   double numberforsort;
   vector<double> leadinghits;
@@ -55,6 +63,10 @@ class mtdBuilder : public JevpPlotSet {
 
   JevpPlot **plots;
   ClassDef(mtdBuilder, 1);
+  
+  TLatex *MTD_Error1_label;
+  TLatex *MTD_Error2_label;
+  TLatex *MTD_Error3_label;
 };
 
 #endif
