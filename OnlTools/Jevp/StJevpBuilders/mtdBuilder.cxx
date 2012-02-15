@@ -403,34 +403,34 @@ void mtdBuilder::event(daqReader *rdr) {
 
   //MTD trigger Run12
   // for backleg 27-2
-  float outadc0= trgd->mtdAtAddress(8, 0); contents.hMTD_trig[0]->Fill(outadc0);
-  float outtdc0= trgd->mtdAtAddress(12, 0);contents.hMTD_trig[1]->Fill(outtdc0);
-  float inadc0= trgd->mtdAtAddress(9, 0);  contents.hMTD_trig[2]->Fill(inadc0);
-  float intdc0= trgd->mtdAtAddress(13, 0); contents.hMTD_trig[3]->Fill(intdc0);
+  float outadc0= trgd->mtdAtAddress(8, 0); if(outadc0) contents.hMTD_trig[0]->Fill(outadc0);
+  float outtdc0= trgd->mtdAtAddress(12, 0); if(outtdc0) contents.hMTD_trig[1]->Fill(outtdc0);
+  float inadc0= trgd->mtdAtAddress(9, 0); if(inadc0) contents.hMTD_trig[2]->Fill(inadc0);
+  float intdc0= trgd->mtdAtAddress(13, 0); if(intdc0) contents.hMTD_trig[3]->Fill(intdc0);
   
   //for backleg 27-3
-  float outadc1= trgd->mtdAtAddress(16, 0);contents.hMTD_trig[4]->Fill(outadc1);
-  float outtdc1= trgd->mtdAtAddress(20, 0);contents.hMTD_trig[5]->Fill(outtdc1);
-  float inadc1= trgd->mtdAtAddress(17, 0); contents.hMTD_trig[6]->Fill(inadc1);
-  float intdc1= trgd->mtdAtAddress(21, 0); contents.hMTD_trig[7]->Fill(intdc1);
+  float outadc1= trgd->mtdAtAddress(16, 0); if(outadc1) contents.hMTD_trig[4]->Fill(outadc1);
+  float outtdc1= trgd->mtdAtAddress(20, 0); if(outtdc1) contents.hMTD_trig[5]->Fill(outtdc1);
+  float inadc1= trgd->mtdAtAddress(17, 0); if(inadc1) contents.hMTD_trig[6]->Fill(inadc1);
+  float intdc1= trgd->mtdAtAddress(21, 0); if(intdc1) contents.hMTD_trig[7]->Fill(intdc1);
   
   //for backleg 27-4
-  float outadc2= trgd->mtdAtAddress(24, 0);contents.hMTD_trig[8]->Fill(outadc2);
-  float outtdc2= trgd->mtdAtAddress(28, 0);contents.hMTD_trig[9]->Fill(outtdc2);
-  float inadc2= trgd->mtdAtAddress(25, 0); contents.hMTD_trig[10]->Fill(inadc2);
-  float intdc2= trgd->mtdAtAddress(29, 0); contents.hMTD_trig[11]->Fill(intdc2);
+  float outadc2= trgd->mtdAtAddress(24, 0); if(outadc2) contents.hMTD_trig[8]->Fill(outadc2);
+  float outtdc2= trgd->mtdAtAddress(28, 0); if(outtdc2) contents.hMTD_trig[9]->Fill(outtdc2);
+  float inadc2= trgd->mtdAtAddress(25, 0); if(inadc2) contents.hMTD_trig[10]->Fill(inadc2);
+  float intdc2= trgd->mtdAtAddress(29, 0);  if(intdc2) contents.hMTD_trig[11]->Fill(intdc2);
   
   // for backleg 27-1
-  float outadc3= trgd->mtdgemAtAddress(8, 0); contents.hMTD_trig[12]->Fill(outadc3);
-  float outtdc3= trgd->mtdgemAtAddress(12, 0);contents.hMTD_trig[13]->Fill(outtdc3);
-  float inadc3= trgd->mtdgemAtAddress(9, 0);  contents.hMTD_trig[14]->Fill(inadc3);
-  float intdc3= trgd->mtdgemAtAddress(13, 0); contents.hMTD_trig[15]->Fill(intdc3);
+  float outadc3= trgd->mtdgemAtAddress(8, 0); if(outadc3) contents.hMTD_trig[12]->Fill(outadc3);
+  float outtdc3= trgd->mtdgemAtAddress(12, 0); if(outtdc3) contents.hMTD_trig[13]->Fill(outtdc3);
+  float inadc3= trgd->mtdgemAtAddress(9, 0); if(inadc3) contents.hMTD_trig[14]->Fill(inadc3);
+  float intdc3= trgd->mtdgemAtAddress(13, 0); if(intdc3) contents.hMTD_trig[15]->Fill(intdc3);
   
   //for backleg 27-5
-  float outadc4= trgd->mtdgemAtAddress(16, 0);contents.hMTD_trig[16]->Fill(outadc4);
-  float outtdc4= trgd->mtdgemAtAddress(20, 0);contents.hMTD_trig[17]->Fill(outtdc4);
-  float inadc4= trgd->mtdgemAtAddress(17, 0); contents.hMTD_trig[18]->Fill(inadc4);
-  float intdc4= trgd->mtdgemAtAddress(21, 0); contents.hMTD_trig[19]->Fill(intdc4);
+  float outadc4= trgd->mtdgemAtAddress(16, 0); if(outadc4) contents.hMTD_trig[16]->Fill(outadc4);
+  float outtdc4= trgd->mtdgemAtAddress(20, 0); if(outtdc4) contents.hMTD_trig[17]->Fill(outtdc4);
+  float inadc4= trgd->mtdgemAtAddress(17, 0); if(inadc4) contents.hMTD_trig[18]->Fill(inadc4);
+  float intdc4= trgd->mtdgemAtAddress(21, 0); if(intdc4) contents.hMTD_trig[19]->Fill(intdc4);
 	
   if(trgd) delete trgd;
   return;
