@@ -123,6 +123,7 @@ Int_t StFgtTimeShapeMaker::InitTree(){
     tFgt->Branch("norm",&norm,"norm/F");
     tFgt->Branch("tau",&tau,"tau/F");
     tFgt->Branch("t0",&t0,"t0/F");
+    tFgt->Branch("beta",&beta,"beta/F");
     tFgt->Branch("offset",&offset,"offset/F");
     tFgt->Branch("errCode",&errCode,"errCode/I");
   };
@@ -226,11 +227,14 @@ Int_t StFgtTimeShapeMaker::Make(){
 		adc[is]-=ped;
 	      };			     
 	      Bool_t pass=true;
-	      if(rdo==1 && arm==3 && apv==9)pass=false;		 
-	      if(rdo==1 && arm==4 && apv==21)pass=false;		 
+	      //if(rdo==1 && arm==3 && apv==9)pass=false;		 
+	      //if(rdo==1 && arm==4 && apv==21)pass=false;		 
+	      if(rdo==1 && arm==0 && apv>-1 && apv<10){}
+	      else if(rdo==2 && arm==0 && apv>-1 && apv<10){} 
+	      else{pass=false;};
 
 	      if(pass){	
-		chi2=-1.;tau=0.;t0=0.;offset=0.;errCode=0;
+		chi2=-1.;tau=0.;t0=0.;beta=0.;offset=0.;errCode=0;
 		hh->Reset();
 		for(Int_t is=0;is<Ntimebin;is++){
 		  hh->SetBinContent(is+1,adc[is]);
@@ -272,10 +276,11 @@ Int_t StFgtTimeShapeMaker::Make(){
 		    hh->Fit(FX,"Q","",0.,Ntimebin);		       
 		    chi2=FX->GetChisquare()/(Float_t)dof;
 		    fmax=FX->GetMaximumX();			     
-		    t0=FX->GetParameter(4);
-		    tau=FX->GetParameter(1);
-		    offset=FX->GetParameter(3);
 		    norm=FX->GetParameter(0);
+		    tau=FX->GetParameter(1);
+		    beta=FX->GetParameter(2);
+		    offset=FX->GetParameter(3);
+		    t0=FX->GetParameter(4);
 		    if(chi2<1. && igoodCnt<120 && adcmax>plotThresh){
 		      hGood[igoodCnt]=new TH1F(*hh);	
 		      fGood[igoodCnt]=new TF1(*FX);
@@ -388,6 +393,8 @@ void StFgtTimeShapeMaker::InitFX()
   FX->SetParameter(1,1.);
   FX->SetParLimits(1,0.1,10.);
   FX->FixParameter(2,2.);
+  //FX->SetParameter(2,2.);
+  //FX->SetParLimits(2,1.,3.);
   //if(pedSelect==1)FX->FixParameter(3,0.);
   FX->SetParameter(4,0.);
   FX->SetParLimits(4,-10.,17.);

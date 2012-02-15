@@ -101,7 +101,8 @@ class StFgtTimeShapeMaker : public StMaker {
    Float_t fmax;
    Float_t norm;
    Float_t tau;
-   Float_t t0;
+   Float_t t0;   
+   Float_t beta;
    Float_t offset;
    Int_t errCode;
 
