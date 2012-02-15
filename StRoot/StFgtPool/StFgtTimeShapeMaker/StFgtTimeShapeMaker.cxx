@@ -5,10 +5,11 @@
  *
  ***************************************************************************
  *
- * Description: 
+ * Description: Time shape fitter for the raw daq files. Output is a TTree that 
+ * contain the original spectrum, mapping information, and the fit results.
  *
  ***************************************************************************
- *
+ * No version history yet
  * 
  * 
  *
