@@ -37,8 +37,9 @@ enum {
    kFgtNumPstripsPerOctant = 360,
    kFgtNumRstripsPerOctant = 280,
    kFgtLowerStripOctant = 'L',    // i.e. a strip is in octant "kFgtLowerStripOctant" if
-   kFgtHigherStripOctant = 'S'   // the strip index is below the number of strips per octant
+   kFgtHigherStripOctant = 'S',   // the strip index is below the number of strips per octant
                                   // for that layer
+   kFgtNumStripsPerDisc = kFgtNumQuads  * kFgtNumLayers * kFgtNumStrips // includes both planes, geoId for given disc will not exceed this range after common disc-offset is subtracted 
 };
 
 // unsorted constants
@@ -69,8 +70,11 @@ enum {
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.8 2012/02/09 16:16:17 wwitzke Exp $
+ * $Id: StFgtConsts.h,v 1.9 2012/02/15 19:18:38 balewski Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.9  2012/02/15 19:18:38  balewski
+ * more usefull constants added
+ *
  * Revision 1.8  2012/02/09 16:16:17  wwitzke
  * Made minor fix to StFgtConsts.h to eliminate warnings.
  *
