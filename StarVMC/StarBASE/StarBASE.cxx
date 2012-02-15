@@ -31,6 +31,7 @@ StarBASE::StarBASE(const char *name,const char *gy, int trig)
   :StMaker(name),fNTrig(trig),fGeo(gy)
 {
   gSystem->AddIncludePath("${STAR}2/StarDb/VmcGeometry");
+  mZ=0; mS=0;
 }
 
 //_____________________________________________________________________________
@@ -104,16 +105,17 @@ int StarBASE::Make()
       for ( eta=min_eta+deta/2; eta<max_eta; eta+=deta )
 	{
 
-	  Double_t vertex=random->Gaus(0.,1.0); // smear by 1 cm in z	  
-	  mGenerator -> SetVertex( vertex, vertex );
+	  Double_t vertex=random->Gaus(mZ,mS); // smear by 1 cm in z 
+	  Double_t zmin = (1.0-0.00001)*vertex;
+	  Double_t zmax = (1.0+0.00001)*vertex;
 
 	  if ( *SAttr("sample") ) 
 	    {
-	      mGenerator->SetGenerator( nsample, 48, 10, 10, eta-deta/2, eta+deta/2, phi-dphi/2, phi+dphi/2, 0., 0., "G" );
+	      mGenerator->SetGenerator( nsample, 48, 10, 10, eta-deta/2, eta+deta/2, phi-dphi/2, phi+dphi/2, zmin, zmax, "G" );
 	    }
 	  else 
 	    {
-	      mGenerator->SetGenerator( 1, 48, 10, 10, eta, eta, phi, phi, 0., 0., "G" );
+	      mGenerator->SetGenerator( 1, 48, 10, 10, eta, eta, phi, phi, zmin, zmax, "G" );
 	    }
 	  TVirtualMC::GetMC()->ProcessEvent();
 

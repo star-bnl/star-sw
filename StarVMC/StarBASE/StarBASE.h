@@ -1,4 +1,4 @@
-// $Id: StarBASE.h,v 1.1 2010/02/11 19:51:02 jwebb Exp $
+// $Id: StarBASE.h,v 1.2 2012/02/15 15:09:44 jwebb Exp $
 
 #ifndef STAR_StarBASE
 #define STAR_StarBASE
@@ -34,6 +34,8 @@ class StarBASE : public StMaker {
   void SetDebug(int l);
   StMCStepping *steps(){ return mSteps; }
 
+  void SetVertex( Double_t z, Double_t sigma=0.0 ){ mZ=z; mS=sigma; }
+
  private:
   // Private method declaration if any
 
@@ -45,11 +47,14 @@ class StarBASE : public StMaker {
 
  public:
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StarBASE.h,v 1.1 2010/02/11 19:51:02 jwebb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StarBASE.h,v 1.2 2012/02/15 15:09:44 jwebb Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
   StMCStepping *mSteps;
+
+  Double_t mZ;
+  Double_t mS;
 
   ClassDef(StarBASE,0)   // Makers
 };
