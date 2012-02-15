@@ -10,6 +10,8 @@ copy macros/timeShape.C to a directory with .sl libraries
 
 starver eval
 
+cons
+
 root4star -b -q 'timeShape.C("input daq file name","output tree name, without .root surfix",Nevent,-1,0)'
 
 When running this script, one can choose the minimum ADC over pedestal for the fitting and plotting, type of pedestal to be used, and number of time bins in the data.
