@@ -4,12 +4,12 @@
  *
  ***************************************************************************
  *
- * Description: 
+ * Description: script to run StFgtTimeShapeMaker, which reads daq files to analyze the time structure
  *
  ***************************************************************************
  *
  * $Log: timeShape.C,v $
- * Revision 1.1  2012/02/07 03:51:42  leun
+ * Revision 1.2  2012/02/15 05:45:20  leun
  * *** empty log message ***
  *
  *
@@ -72,7 +72,7 @@ int timeShape( const Char_t *filenameIn = "st_physics_13036040_raw_5010001.daq",
      TString dir0 = "MySQL:StarDb";
      TString dir1 = "$STAR/StarDb";
      St_db_Maker *dbMkr = new St_db_Maker( "dbMkr", dir0, dir1 );
-     dbMkr->SetDateTime(20120204,202100);      // run 13025001 2012-01-25 08:03:34 GMT
+     dbMkr->SetDateTime(20120213,150645);//2012-02-13 15:06:45 GMT, database time needs to be set manually for now.
      
      cout << "Loading StFgtDbMaker" << endl;
      gSystem->Load("StFgtDbMaker");
@@ -93,10 +93,10 @@ int timeShape( const Char_t *filenameIn = "st_physics_13036040_raw_5010001.daq",
    tshapeMkr = new StFgtTimeShapeMaker( "FgtTimeShapeMaker", fgtDbMkrName.data() );
    std::string outFileName( filenameOut );
    tshapeMkr->fname=outFileName;
-   tshapeMkr->fitThresh=500;
-   tshapeMkr->plotThresh=700;
-   tshapeMkr->fixTau=false;
-   tshapeMkr->Ntimebin=7;
+   tshapeMkr->fitThresh=600;//ADC count above pedestal for fitting, typical width of the pedestal is ~35 counts.
+   tshapeMkr->plotThresh=700;//ADC count above pedestal for generating fit plots. If (plotThresh<fitThresh), plotThresh=fitThresh
+   tshapeMkr->fixTau=false;//Funtion to fix the width parameter in the fit. Not activated yet
+   tshapeMkr->Ntimebin=7;//Number of time bins in the data
    tshapeMkr->pedSelect=1;//pedSelect = 0: time bin 0 for each event, 1: the lowest adc count for each event, 2: from database, event independent.
    
 
