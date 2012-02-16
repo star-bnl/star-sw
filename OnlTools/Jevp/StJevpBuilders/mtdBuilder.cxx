@@ -256,7 +256,9 @@ void mtdBuilder::event(daqReader *rdr) {
 	
   daq_dta *dd = rdr->det("mtd")->get("legacy");
   mtd_t *mtd;
-  if(dd) {
+  if (!dd){		//WJL ...pointer to mtd data not found
+  	return;
+  } else {
     while(dd->iterate()) {
       mtd = (mtd_t *)dd->Void;
 			
@@ -264,67 +266,68 @@ void mtdBuilder::event(daqReader *rdr) {
       int ndataword = mtd->ddl_words[ifib];    
       if(ndataword<=0) continue;
       for(int iword=0;iword<ndataword;iword++){
-	int dataword=mtd->ddl[ifib][iword];
-				
-	int packetid = (dataword&0xF0000000)>>28;
-	if(!ValidDataword(packetid))
-	  contents.MTD_Error1->Fill(ifib); 
+		int dataword=mtd->ddl[ifib][iword];
+					
+		int packetid = (dataword&0xF0000000)>>28;
+		if(!ValidDataword(packetid))
+		  contents.MTD_Error1->Fill(ifib); 
+	
+	//	if( (dataword&0xF0000000)>>28 == 0x2) continue;  //TDC header, moved to later
+		if( (dataword&0xF0000000)>>28 == 0xD) continue;  //Header tag
+		if( (dataword&0xF0000000)>>28 == 0xE) continue;  //TDIG Separator
+		if( (dataword&0xF0000000)>>28 == 0xA) {  // header trigger data flag
+		  // do nothing at this moment.
+		  continue;
+		}
+					
+		// geographical data words for tray number.
+		if( (dataword&0xF0000000)>>28 == 0xC) { //Geographical Data
+		  halftrayid = dataword&0x01;    
+		  trayid     = (dataword&0x0FE)>>1;
+		  continue;
+		}
+	
+		if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
+					
+		if( (dataword&0xF0000000)>>28 == 0x6) {continue;} //error
+	
+		if( (dataword&0xF0000000)>>28 == 0x2) {
+		  bunchid=dataword&0xFFF;
+		  allbunchid[halftrayid][trayid-1] = bunchid;
+		  continue;  
+		}
+	
+		int edgeid =int( (dataword & 0xf0000000)>>28 );
+		//if((edgeid !=4) && (edgeid!=5)) continue; //leading edge or trailing edge
+		if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
+					
+		int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
+		int tdigboardid= ( (tdcid & 0xC) >> 2) + halftrayid*4;
+		int tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
+		//int globaltdcchan=tdcchan + (tdcid%4)*8+tdigboardid*24+96*halftrayid; // 0-191 for tray
+		timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
+		time = timeinbin * 25./1024;   // time in ns 
+					
+		//int moduleid=-1;
+		int globalstripid=-1;
+		int stripid=-1;
+		int zendid=-1;
+		int slot=-1;
+		//				
+		if(trayid){
+		  globalstripid=tdcchan2globalstrip(tdigboardid,tdcid,tdcchan);
+		  stripid=(globalstripid-1)%12+1;
+		  zendid=(globalstripid-1)/12; //0 for Lo Z end; 1 for Hi Z end
+		  slot=tdig2slot(tdigboardid, trayid);
+		}				
+	
+		if( istray3bl(trayid) && (slot<2||slot>4) ) continue;
+		if( istray5bl(trayid) && (slot<1||slot>5) ) continue;
+		if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
+		
+        contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);        
+  		contents.MTD_Tray_hits->Fill(iGlobalSlot(trayid,slot));
 
-//	if( (dataword&0xF0000000)>>28 == 0x2) continue;  //TDC header, moved to later
-	if( (dataword&0xF0000000)>>28 == 0xD) continue;  //Header tag
-	if( (dataword&0xF0000000)>>28 == 0xE) continue;  //TDIG Separator
-	if( (dataword&0xF0000000)>>28 == 0xA) {  // header trigger data flag
-	  // do nothing at this moment.
-	  continue;
-	}
-				
-	// geographical data words for tray number.
-	if( (dataword&0xF0000000)>>28 == 0xC) { //Geographical Data
-	  halftrayid = dataword&0x01;    
-	  trayid     = (dataword&0x0FE)>>1;
-	  continue;
-	}
-
-	if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
-				
-	if( (dataword&0xF0000000)>>28 == 0x6) {continue;} //error
-
-	if( (dataword&0xF0000000)>>28 == 0x2) {
-	  bunchid=dataword&0xFFF;
-	  allbunchid[halftrayid][trayid-1] = bunchid;
-	  continue;  
-	}
-
-	int edgeid =int( (dataword & 0xf0000000)>>28 );
-	//if((edgeid !=4) && (edgeid!=5)) continue; //leading edge or trailing edge
-	if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
-				
-	int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
-	int tdigboardid= ( (tdcid & 0xC) >> 2) + halftrayid*4;
-	int tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
-	//int globaltdcchan=tdcchan + (tdcid%4)*8+tdigboardid*24+96*halftrayid; // 0-191 for tray
-	timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
-	time = timeinbin * 25./1024;   // time in ns 
-				
-	//int moduleid=-1;
-	int globalstripid=-1;
-	int stripid=-1;
-	int zendid=-1;
-	int slot=-1;
-	//				
-	if(trayid){
-	  globalstripid=tdcchan2globalstrip(tdigboardid,tdcid,tdcchan);
-	  stripid=(globalstripid-1)%12+1;
-	  zendid=(globalstripid-1)/12; //0 for Lo Z end; 1 for Hi Z end
-	  slot=tdig2slot(tdigboardid, trayid);
-	}				
-
-	if( istray3bl(trayid) && (slot<2||slot>4) ) continue;
-	if( istray5bl(trayid) && (slot<1||slot>5) ) continue;
-	if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
-        contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);
-        
-  contents.MTD_Tray_hits->Fill(iGlobalSlot(trayid,slot));
       }  // end loop nword
     } //end dd iterate
   } //end if dd
@@ -397,7 +400,7 @@ void mtdBuilder::event(daqReader *rdr) {
   // now do the trigger plots...
   StTriggerData *trgd = getStTriggerData(rdr);
   if(!trgd) {
-    LOG(WARN, "No trigger data");
+    //LOG(WARN, "No trigger data");	//WJL should not be a warning. perfectly normal for some configs
     return;
   }
 
