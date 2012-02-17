@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.30 2012/02/17 15:01:24 didenko Exp $
+// $Id: bfcMixer_Tpx.C,v 1.31 2012/02/17 20:47:36 fisyak Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.31  2012/02/17 20:47:36  fisyak
+// Remove nodefault option from chain3
+//
 // Revision 1.30  2012/02/17 15:01:24  didenko
 // add run 2011 chains
 //
@@ -35,19 +38,19 @@ StChain  *Chain=0;
 class StBFChain;
 StBFChain *chain1, *chain2, *chain3;
 //_____________________________________________________________________
-void bfcMixer_Tpx(const Int_t Nevents=100,
+void bfcMixer_Tpx(Int_t Nevents=100,
 		  const Char_t *daqfile="/star/rcf/test/daq/2009/embed/st_physics_adc_10128048_raw_1320001.daq",
 		  const Char_t *tagfile="/star/rcf/test/daq/2009/embed/st_physics_adc_10128048_raw_1320001.tags.root",
-		  const Double_t pt_low=0.1,
-		  const Double_t pt_high=5.0,
-                  const Double_t eta_low=-1.5,
-                  const Double_t eta_high=1.5,
-                  const Double_t vzlow = -150.0,
-                  const Double_t vzhigh = 150.0,
-                  const Double_t vr = 100.0,
-		  const Int_t pid=9,
-		  const Double_t mult=100,
-                  const std::vector<Int_t> triggers = 0,
+		  Double_t pt_low=0.1,
+		  Double_t pt_high=5.0,
+                  Double_t eta_low=-1.5,
+                  Double_t eta_high=1.5,
+                  Double_t vzlow = -150.0,
+                  Double_t vzhigh = 150.0,
+                  Double_t vr = 100.0,
+		  Int_t pid=9,
+		  Double_t mult=100,
+                  std::vector<Int_t> triggers = 0,
                   const Char_t *prodName = "P08iepp",
                   const Char_t* type = "FlatPt",
 									const bool bPythia = false,
@@ -131,7 +134,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
-  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
+  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker"; 
 
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
@@ -295,4 +298,19 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   gMessMgr->QAInfo() << "Run completed " << endm;
   gSystem->Exec("date");
 }
-
+//________________________________________________________________________________
+void bfcMixer_Tpx(Int_t Nevents, const Char_t *daqfile, Char_t *tagfile,
+		  Double_t pt_low, Double_t pt_high, Double_t eta_low, Double_t eta_high, 
+		  Double_t vzlow, Double_t vzhigh, Double_t vr, Int_t pid, Double_t mult,
+		  const Char_t *triggersC, const Char_t *prodName, const Char_t* type) {
+  std::vector<Int_t> triggers;
+  if (triggersC) {
+    TPMERegexp pm(":");
+    Int_t N = pm.Split(triggersC);
+    for (Int_t i = 0; i < N; i++) {
+      TString num(pm[i]);
+      triggers.push_back(num.Atoi());
+    }
+  }
+  bfcMixer_Tpx(Nevents, daqfile, tagfile, pt_low, pt_high, eta_low, eta_high, vzlow, vzhigh, vr, pid, mult, triggers, prodName, type);
+}
