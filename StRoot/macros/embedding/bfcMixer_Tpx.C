@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.29 2012/01/14 02:15:28 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.30 2012/02/17 15:01:24 didenko Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.30  2012/02/17 15:01:24  didenko
+// add run 2011 chains
+//
 // Revision 1.29  2012/01/14 02:15:28  zhux
 // Geometry tag addition in Chain3 removed, Chain2 geometry tags are all updated to the latest version (on 2011.1.14).
 //
@@ -73,12 +76,26 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   TString prodP10ihAuAu7("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
 
   // Run10 Au+Au 200 GeV chain
-  TString prodP10ikAuAu200("DbV20101213 P2010a pmdReco btof BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D, VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP10ikAuAu200("DbV20101213 P2010a pmdReco btof BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
+
+   // Run11 Au+Au 200 GeV chain
+  TString prodP11idAuAu200("DbV20111124 P2011a pmdReco btof mtdDat BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
+  
+   // Run11 Au+Au 27 GeV chain  
+  TString prodP11idAuAu27("DbV20110911 P2011a btof mtddat pmdReco BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
+
+  // Run11 Au+Au 19.6 GeV chain  
+  TString prodP11idAuAu27("DbV20110820 P2011a btof mtddat pmdReco BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
+
+   // Run11 pp 500 GeV chain  
+  TString prodP11idpp500("DbV20110923 pp2011a btof mtddat fmsdat BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
 
   TString geomP08ic("ry2008e");
   TString geomP10ic("ry2009d");
   TString geomP10ih("ry2010c");
   TString geomP10ik(geomP10ih); // Same chain as P10ih
+  TString geomP11id("ry2011");
+
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
 //  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
@@ -105,6 +122,11 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih;}
   else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih;}
   else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ik;}
+  else if (prodName == "P11idAuAu200") { chain3Opt = prodP11idAuAu200;  chain2Opt += geomP11id;}
+  else if (prodName == "P11idAuAu27")  { chain3Opt = prodP11idAuAu27;   chain2Opt += geomP11id;}
+  else if (prodName == "P11idAuAu19")  { chain3Opt = prodP11idAuAu19;   chain2Opt += geomP11id;}
+  else if (prodName == "P11idpp500")   { chain3Opt = prodP11idpp500;    chain2Opt += geomP11id;}
+
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
