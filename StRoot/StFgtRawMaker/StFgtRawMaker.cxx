@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.28 2012/02/06 04:17:45 balewski Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.29 2012/02/20 23:56:39 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.29  2012/02/20 23:56:39  avossen
+//  addressing reviewers comments take 1
+//
 //  Revision 1.28  2012/02/06 04:17:45  balewski
 //  added 2012 APV exclusions
 //
@@ -103,7 +106,7 @@
 #include "StFgtRawMaker.h"
 
 
-Int_t StFgtRawMaker::PrepareEnvironment()
+Int_t StFgtRawMaker::prepareEnvironment()
 {
   StEvent* eventPtr=0;
   eventPtr= (StEvent*)StRTSBaseMaker::GetInputDS("StEvent");
@@ -140,18 +143,18 @@ Int_t StFgtRawMaker::Make()
   clock.Start();
   LOG_DEBUG <<"StEmcRawMaker::Make()******************************************************************"<<endm;
 
-  if( PrepareEnvironment()!=kStOK )
+  if( prepareEnvironment()!=kStOK )
      {
         LOG_ERROR << "Error preparing enviroment" << endm;
         return kStFatal;
      }
   else
      {
-        return FillHits();
+        return fillHits();
      };
 };
 
-Int_t StFgtRawMaker::FillHits()
+Int_t StFgtRawMaker::fillHits()
 {
 
    Short_t quadrant=0;      
@@ -199,7 +202,7 @@ Int_t StFgtRawMaker::FillHits()
 
 
 	       Int_t geoId=-1;
-	       if(!fgtDb)
+	       if(!mFgtDb)
 		 //		 geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
 		 {
 		   LOG_FATAL<<Form("StFgtRawMaker: No DB available")<<endm;
@@ -207,8 +210,8 @@ Int_t StFgtRawMaker::FillHits()
 		 }    
 	       else
 		 {
-		   geoId=fgtDb->getGeoIdFromElecCoord(rdo, arm, apv, channel);
-		   fgtDb->getPhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
+		   geoId=mFgtDb->getGeoIdFromElecCoord(rdo, arm, apv, channel);
+		   mFgtDb->getPhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
 		 }
 
 	       //               StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
@@ -244,9 +247,8 @@ Int_t StFgtRawMaker::Init()
 
 StFgtRawMaker::StFgtRawMaker(const Char_t* name) :
    StRTSBaseMaker( "adc", name ),
-   mFgtCollectionPtr(0)
+   mFgtCollectionPtr(0), mFgtDb(0)
 {
-  fgtDb=0;
 };
 
 
@@ -260,5 +262,9 @@ void StFgtRawMaker::Clear( Option_t *opts )
    if( mFgtCollectionPtr )
      mFgtCollectionPtr->Clear( opts );
 };
+
+
+StFgtRawMaker& operator=(const StFgtRawMaker &source)
+{}
 
 ClassImp(StFgtRawMaker);

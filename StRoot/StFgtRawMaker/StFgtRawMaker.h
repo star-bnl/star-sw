@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtRawMaker.h,v 1.17 2012/01/18 03:10:51 avossen Exp $
+//  $Id: StFgtRawMaker.h,v 1.18 2012/02/20 23:56:39 avossen Exp $
 //  $Log: StFgtRawMaker.h,v $
+//  Revision 1.18  2012/02/20 23:56:39  avossen
+//  addressing reviewers comments take 1
+//
 //  Revision 1.17  2012/01/18 03:10:51  avossen
 //  added db access to the raw maker
 //
@@ -44,7 +47,11 @@ class StFgtDb;
 //#include <StDAQMaker/StDAQReader.h>
 //#include "StRoot/StFgtUtil/database/StFgtDb.h"
 
+/**
+This is the raw maker for the FGT data. It makes use of its base class functions to read daq files into the StFgtEvent Data structure.
 
+
+*/
 class StFgtRawMaker : public StRTSBaseMaker
 {
  public: 
@@ -54,8 +61,8 @@ class StFgtRawMaker : public StRTSBaseMaker
   virtual Int_t Init();
   virtual Int_t Make();
   virtual void Clear( Option_t *opts = "" );
-  virtual Int_t FillHits();
-  virtual Int_t PrepareEnvironment();
+  virtual Int_t fillHits();
+  virtual Int_t prepareEnvironment();
 
   void setFgtDb(StFgtDb *x) {fgtDb=x;}
 
@@ -63,7 +70,19 @@ class StFgtRawMaker : public StRTSBaseMaker
   StFgtCollection *mFgtCollectionPtr;
 
  private:
-  StFgtDb *fgtDb;
+  /** copy contructor. It is private since there is no use case for this
+   */
+  StFgtRawMaker(const StFgtRawMaker &source)
+    {
+    }
+
+  /**
+     private asignment operator
+  */
+  StFgtRawMaker& operator=(const StFgtRawMaker &source);
+
+
+  StFgtDb *mFgtDb;
   ClassDef(StFgtRawMaker,1);
 };
 
