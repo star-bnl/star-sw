@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.29 2012/02/20 23:56:39 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.30 2012/02/21 04:41:57 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.30  2012/02/21 04:41:57  avossen
+//  *** empty log message ***
+//
 //  Revision 1.29  2012/02/20 23:56:39  avossen
 //  addressing reviewers comments take 1
 //
@@ -264,7 +267,14 @@ void StFgtRawMaker::Clear( Option_t *opts )
 };
 
 
-StFgtRawMaker& operator=(const StFgtRawMaker &source)
-{}
+StFgtRawMaker& StFgtRawMaker::operator=(const StFgtRawMaker &source)
+{
+  //  StRTSBaseMaker::operator=(source);
+  return *this;
+}
+
+StFgtRawMaker::StFgtRawMaker(const StFgtRawMaker &source):StRTSBaseMaker(source)
+{
+}
 
 ClassImp(StFgtRawMaker);
