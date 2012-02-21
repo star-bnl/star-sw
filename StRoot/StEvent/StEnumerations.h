@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.39 2012/01/24 03:00:42 perev Exp $
+ * $Id: StEnumerations.h,v 2.40 2012/02/21 16:25:47 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.40  2012/02/21 16:25:47  fisyak
+ * add KFVertexFinder
+ *
  * Revision 2.39  2012/01/24 03:00:42  perev
  * Etr detector added
  *
@@ -347,7 +350,8 @@ enum StVertexFinderId { undefinedVertexFinder = 0,
                         minuitVertexFinder,
                         ppvVertexFinder,
                         ppvNoCtbVertexFinder,
-		    	mcEventVertexFFinder};
+		    	mcEventVertexFFinder,
+			KFVertexFinder};
 
 
 /*!
