@@ -441,6 +441,13 @@ void JevpPlotSet::Main(int argc, char *argv[])
     _getClockTime += _getClock.record_time();
 
 
+    if(maxEvts > 0) {
+      if(reader->event_number > maxEvts) {
+	reader->status = EVP_STAT_EOR;
+	ret = NULL;
+      }
+    }
+
     if(builderStatus.running()) {
       if(_monitorTimerTime + 20 < time(NULL)) {
       
@@ -658,11 +665,16 @@ void JevpPlotSet::Main(int argc, char *argv[])
 int JevpPlotSet::parseArgs(int argc, char *argv[])
 {
   CP;
+  maxEvts = -1;
 
   for(int i=1;i<argc;i++) {
     if(memcmp(argv[i], "-diska", 6) == 0) {
       i++;
       diska = argv[i];
+    }
+    if(memcmp(argv[i], "-maxevts", 8) == 0) {
+      i++;
+      maxEvts = atoi(argv[i]);
     }
     else if (memcmp(argv[i], "-file", 5) == 0) {
       i++;
