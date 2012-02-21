@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtRawMaker.h,v 1.18 2012/02/20 23:56:39 avossen Exp $
+//  $Id: StFgtRawMaker.h,v 1.19 2012/02/21 04:41:57 avossen Exp $
 //  $Log: StFgtRawMaker.h,v $
+//  Revision 1.19  2012/02/21 04:41:57  avossen
+//  *** empty log message ***
+//
 //  Revision 1.18  2012/02/20 23:56:39  avossen
 //  addressing reviewers comments take 1
 //
@@ -64,7 +67,7 @@ class StFgtRawMaker : public StRTSBaseMaker
   virtual Int_t fillHits();
   virtual Int_t prepareEnvironment();
 
-  void setFgtDb(StFgtDb *x) {fgtDb=x;}
+  void setFgtDb(StFgtDb *x) {mFgtDb=x;}
 
  protected:
   StFgtCollection *mFgtCollectionPtr;
@@ -72,9 +75,7 @@ class StFgtRawMaker : public StRTSBaseMaker
  private:
   /** copy contructor. It is private since there is no use case for this
    */
-  StFgtRawMaker(const StFgtRawMaker &source)
-    {
-    }
+  StFgtRawMaker(const StFgtRawMaker &source);
 
   /**
      private asignment operator
