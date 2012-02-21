@@ -288,7 +288,6 @@ void StStrArray::Streamer(TBuffer &R__b)
    } else {
       R__b.WriteVersion(Class());
       StObjArray::Streamer(R__b);
-      StXRefManager::fgManager->AddColl(this);//temporaryVP
    }
 
 }
