@@ -1,13 +1,7 @@
-// $Id: StObject.cxx,v 1.25 2011/10/24 19:20:22 perev Exp $
+// $Id: StObject.cxx,v 1.26 2012/02/21 18:50:46 perev Exp $
 // $Log: StObject.cxx,v $
-// Revision 1.25  2011/10/24 19:20:22  perev
-// assert for dead object added
-//
-// Revision 1.24  2011/10/05 23:13:19  perev
-// Remove redundant now cleaning
-//
-// Revision 1.23  2011/07/19 19:20:21  perev
-// More accurate counter handling
+// Revision 1.26  2012/02/21 18:50:46  perev
+// bug #2281 fix
 //
 // Revision 1.22  2009/08/26 20:44:08  fine
 // fix the compilation issues under SL5_64_bits  gcc 4.3.2
@@ -72,7 +66,6 @@
 // Revision 1.1  1999/04/30 13:15:55  fisyak
 // Ad StObject, modification StArray for StRootEvent
 //
-#include <assert.h>
 #include "StObject.h"
 #include "TDataSetIter.h"
 #include "TROOT.h"
@@ -87,6 +80,7 @@
 StXRefManager 	 *StXRefManager::fgManager=0;
 UInt_t 	          StObject::fgTally=0;
 StXRefManagerList StXRefManager::fgManagerList;
+int StXRefManager::fgRWmode=-1;
 
 
 
@@ -121,7 +115,6 @@ void StObject::Streamer(TBuffer &R__b)
      }
 
   } else {
-    assert(TestBit(kNotDeleted));
     R__b.WriteVersion(StObject::Class());
     if (fgTally) {
       UInt_t udx = GetUniqueID();
@@ -210,6 +203,7 @@ void StXRef::Streamer(TBuffer &R__b)
    UInt_t R__s,R__c;
    
    if (R__b.IsReading() ) { //READ
+      StXRefManager::fgRWmode = 0;
       Version_t R__v = R__b.ReadVersion(&R__s,&R__c); if (R__v){};
       fUUId.Streamer(R__b);
       StXRefManager::Open(this);
@@ -220,7 +214,7 @@ void StXRef::Streamer(TBuffer &R__b)
       R__b.CheckByteCount(R__s,R__c,Class());
 
    } else {
-
+      StXRefManager::fgRWmode = 1;
       assert(!fUUId.IsNull());
       Synchro(0);
       R__c = R__b.WriteVersion(Class(),kTRUE);
@@ -268,22 +262,17 @@ ClassImp(StXRefMain)
 
 StXRefMain::~StXRefMain()
 {
-  assert(!GetUUId().IsNull());
-  StXRefManager::Cd(this);
-  delete StXRefManager::fgManager;
 }
 //______________________________________________________________________________
 void StXRefMain::Streamer(TBuffer &R__b)
 {
    StXRef::Streamer(R__b);  
-   StXRefManager::fgManager->Clear("");
 }
 //_____________________________________________________________________________
 StXRefManager::StXRefManager(const StUUId &id)
 {
    fTally = 0;
    fUpd = 0;
-   fLev = 0;
    fUUId = id;
    fMain=0;
    fgManagerList.push_front(this);
@@ -292,6 +281,16 @@ StXRefManager::StXRefManager(const StUUId &id)
 //_____________________________________________________________________________
 StXRefManager::~StXRefManager()
 {
+   
+   UInt_t umin,umax,u;
+   fObjTab.GetMiMax(umin,umax);
+   for (u=umin;u<=umax;u++) {
+     TObject **to = (TObject**)fObjTab.Get(u);
+     if (!to ) continue;
+     if (!*to) continue;
+     (*to)->SetUniqueID(0);
+   }
+
    fgManagerList.remove(this);
    if (fgManager==this) { fgManager=0; StObject::fgTally=0;}
    fMain=0; fTally=0;
@@ -303,6 +302,10 @@ StXRefManager::~StXRefManager()
 void StXRefManager::Cd(StXRef *xref)
 {
   StXRefManager *man = fgManager;
+  if (man) {
+     if (man->fTally!=StObject::fgTally) {//Was modified
+        man->fTally = StObject::fgTally;
+  }  } 
 
   if (!man || man->fUUId.Compare(xref->GetUUId())!=0) {
      StXRefManagerListIter it;
@@ -317,15 +320,20 @@ void StXRefManager::Cd(StXRef *xref)
 //_____________________________________________________________________________
 void StXRefManager::Open(StXRef *xref)
 {
+  if (fgRWmode==1) {		//Writing
+    if (xref->IsMain()) StObject::fgTally=1;
+    return;
+  }
+
   Cd(xref);
   StXRefManager *man = fgManager;
   if (!man) {
+     assert(xref->IsMain());
      man = new StXRefManager(xref->GetUUId());
      fgManagerList.push_front(man);
      fgManager   = man;
+     StObject::fgTally=1;  
   }
-  if (man->fTally > StObject::fgTally) StObject::fgTally=man->fTally;
-  man->fLev++;
   if (man->fMain==0) {
      man->fMain  = xref->GetMain();
   } else {
@@ -335,14 +343,18 @@ void StXRefManager::Open(StXRef *xref)
 //_____________________________________________________________________________
 void StXRefManager::Close(StXRef *xref)
 {
+  if (fgRWmode==1) {		//Writing
+    if (!xref->IsMain()) return;
+    StObject::fgTally=0;fgRWmode=-1;
+    return;
+  }
   Cd(xref);
   StXRefManager *man = fgManager;
   assert(man);
-  man->Update();
-  if (man->fMain) man->fMain->Add(xref);
-  man->Update(StObject::fgTally);
-  man->fLev--;
-  if (!man->fLev) StObject::fgTally = 0;
+  if (xref->IsMain()) man->Update();
+  if (man->fMain && man->fMain!= xref) man->fMain->Add(xref);
+  if (!xref->IsMain()) return;
+  delete man; fgRWmode=-1; StObject::fgTally=0;
 }  
 
 
@@ -357,13 +369,12 @@ void StXRefManager::AddColl (const StStrArray *sarr)
    int size = sarr->size();
    if (!size) 	return;
    fUpd=1;
-   UInt_t u,uMax=0;
+   UInt_t u;
    const TObject *to, **p;
    const_VecTObjIter it= sarr->begin(); 
    for(int i=0;i<size;i++) {
      if (!(to = it[i]))			continue;
      if (!(u = to->GetUniqueID()))	continue;
-     if (uMax<u)uMax=u;
      p = (const TObject**)fObjTab.GET(u);
      if (*p) 	{// Used already		
        if (*p == to)			continue;
@@ -371,7 +382,6 @@ void StXRefManager::AddColl (const StStrArray *sarr)
      }
      *p = to;
    }
-   Update(uMax);
 }
 //_____________________________________________________________________________
 void StXRefManager::Update ()
@@ -381,7 +391,7 @@ void StXRefManager::Update ()
   StObjArray *arr;
   StProxyUrr *urr;
   StCollListIter it;
-  UInt_t idx,udx,udxMax=0,sizeUrr,lst=999999;
+  UInt_t idx,udx,sizeUrr,lst=999999;
   TObject **p; 
   for (it = fColList.begin(); (urr = *it);) {//List
     sizeUrr = urr->size(); 
@@ -405,31 +415,15 @@ void StXRefManager::Update ()
          if (!p || !(*p))	{(*urr)[lst++] = udx; continue;}
          arr->push_back(*p); 
       }//end RefArray loop
-      if (udxMax<udx) udxMax=udx;
     }
     if (lst) { urr->resize(lst-1);     it++;      }
     else     {it = fColList.erase(it); delete urr;}
   }//end List
-  Update(udxMax);
-  StObject::fgTally = fTally;
+
 }
 //_____________________________________________________________________________
 void StXRefManager::Clear (Option_t*)
-{
-//   ULong_t **page = (ULong_t**)fObjTab.GetList();
-//   if (!page) return;
-//   for (;page; page = (ULong_t**)page[0]) {
-//     if (!page) 		break;
-//     if (!page[1]) 	continue;
-//     for (int i=0;i<(int)TPageMap::kPAGE;i++) {
-//       if (!page[i+2]) 	break;
-//       ((TObject*)page[i+2])->SetUniqueID(0);
-//     }
-//   }
-//   fTally = 0;
-//   fObjTab.Clear();
-//   StObject::fgTally=0;
-}
+{}
 
 //_____________________________________________________________________________
 TDataSet *StXRefManager::GetMain()
@@ -445,31 +439,25 @@ TPageMap::TPageMap()
   fTopPage = NewPage();
   fLstPage = 0;
   fLstUdx  = 0;
+  fMinUdx = 1000000000;
+  fMaxUdx = 0;
 }
 //_____________________________________________________________________________
 
 
 TPageMap::~TPageMap()
 {
-  Clear();
-}
-//_____________________________________________________________________________
-void TPageMap::Clear() {
    ULong_t *p,*n=0;
    for (p = fList; p ; p = n) 
    { n = (ULong_t*)p[0]; free(p);}
-   fList = 0;
-   fTopPage = NewPage();
-   fLstPage = 0;
-   fLstUdx  = 0;
 }     
 //_____________________________________________________________________________
 ULong_t *TPageMap::NewPage()  
 {
-   int n = sizeof(ULong_t)*(kPAGE+2);
+   int n = sizeof(ULong_t)*(kPAGE+1);
    ULong_t *p = (ULong_t*)malloc(n); memset(p,0,n);
    p[0] = (ULong_t)fList; fList = p;
-   return p+2;
+   return p+1;
 }
 
 //_____________________________________________________________________________
@@ -497,6 +485,9 @@ ULong_t *TPageMap::Get(UInt_t udx)
 //_____________________________________________________________________________
 ULong_t *TPageMap::GET(UInt_t udx) 
 {
+   if (fMinUdx>udx) fMinUdx=udx;
+   if (fMaxUdx<udx) fMaxUdx=udx;
+
    if ((udx&kLAST) != fLstUdx || fLstPage==0) {
       fLstUdx = (udx&kLAST);
       ULong_t *b = fTopPage,*a;
@@ -507,7 +498,7 @@ ULong_t *TPageMap::GET(UInt_t udx)
         b = a;
         if (!(s -=kBITS))  		break;;
       }
-      fLstPage = b; fLstPage[-1]=1;
+      fLstPage = b;
    }
    return fLstPage + (udx&kMASK);
 }
