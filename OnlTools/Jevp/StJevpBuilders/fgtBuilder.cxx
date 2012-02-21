@@ -76,8 +76,6 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
       isChannelBad[i]=false;
       runningAvg[i]=0;
       runningStdDevSq[i]=0;
-
-
   }
 
 
@@ -209,6 +207,20 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
 void fgtBuilder::startrun(daqReader *rdr) {
   LOG(NOTE, "fgtBuilder starting run #%d",rdr->run);
   resetAllPlots();
+
+  for(int i=0;i<maxC*maxA;i++)
+    {
+      meanVals[i]=0;
+      aVals[i]=0;
+      //      rmsVals[i]=0;
+      numVals[i]=0;
+      numOverOneSig[i]=0;
+      oldStdDevs[i]=0;
+      isChannelBad[i]=false;
+      runningAvg[i]=0;
+      runningStdDevSq[i]=0;
+  }
+  errorMsg->SetText("No Error Message");    
   sumHistogramsFilled=0;  
   t_2min = time(NULL);
   t_10min = time(NULL);
@@ -444,11 +456,10 @@ void fgtBuilder::stoprun(daqReader *rdr) {
 	runningAvg[i]=0;
 	runningStdDevSq[i]=0;
 	oldStdDevs[i]=0;
-      meanVals[i]=0;
-      aVals[i]=0;
-      //      rmsVals[i]=0;
-      isChannelBad[i]=false;
-
+	meanVals[i]=0;
+	aVals[i]=0;
+	//      rmsVals[i]=0;
+	isChannelBad[i]=false;
       }
     //no effect anyways, since stoprun is only called after the histos are drawn
     //  if(sumHistogramsFilled<2)
