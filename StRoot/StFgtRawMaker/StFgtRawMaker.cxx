@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.30 2012/02/21 04:41:57 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.31 2012/02/21 19:44:45 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.31  2012/02/21 19:44:45  avossen
+//  implementing reviewers comments take 2
+//
 //  Revision 1.30  2012/02/21 04:41:57  avossen
 //  *** empty log message ***
 //
@@ -95,7 +98,6 @@
 #include "StRoot/St_base/StMessMgr.h"
 #include "StRoot/St_base/Stypes.h"
 
-//#include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include "StRoot/StChain/StRtsTable.h"
 #include "StRoot/StEvent/StEvent.h"
 #include "DAQ_FGT/daq_fgt.h"
@@ -105,10 +107,15 @@
 #include "StRoot/StEvent/StFgtStripCollection.h"
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "StFgtDbMaker/StFgtDb.h"
+#include "StRoot/St_base/StMessMgr.h"
+#include "StRoot/St_base/Stypes.h"
 
 #include "StFgtRawMaker.h"
 
 
+/**
+Function to get pointer to StEvent datastructures. Creates them if they do not exist already.
+*/
 Int_t StFgtRawMaker::prepareEnvironment()
 {
   StEvent* eventPtr=0;
@@ -122,12 +129,22 @@ Int_t StFgtRawMaker::prepareEnvironment()
   else
     {
       eventPtr=new StEvent();
+      if(!eventPtr)
+	{
+	  LOG_DEBUG <<"::prepareEnvironment could not create StFgtEvent" <<endm;
+	  return kStFatal;
+	}
       StRTSBaseMaker::AddData(eventPtr);
       mFgtCollectionPtr=eventPtr->fgtCollection();
     }
   if(!mFgtCollectionPtr)
     {
       mFgtCollectionPtr=new StFgtCollection();
+      if(!mFgtCollectionPtr)
+	{
+	  LOG_DEBUG <<"::prepareEnvironment could not create StFgtCollection" <<endm;
+	  return kStFatal;
+	}
       eventPtr->setFgtCollection(mFgtCollectionPtr);
       LOG_DEBUG <<"::prepareEnvironment() has added a non existing StFgtCollection()"<<endm;
     }
@@ -137,134 +154,147 @@ Int_t StFgtRawMaker::prepareEnvironment()
       mFgtCollectionPtr->Clear();
     }
   return kStOK;
-};
+}
 
-
+/**
+Maker main function. Getting pointer to StEvent and fills the event structure
+*/
 Int_t StFgtRawMaker::Make()
 {
-  TStopwatch clock;
-  clock.Start();
+
   LOG_DEBUG <<"StEmcRawMaker::Make()******************************************************************"<<endm;
 
   if( prepareEnvironment()!=kStOK )
-     {
-        LOG_ERROR << "Error preparing enviroment" << endm;
-        return kStFatal;
-     }
+    {
+      LOG_ERROR << "Error preparing enviroment" << endm;
+      return kStFatal;
+    }
   else
-     {
-        return fillHits();
-     };
-};
+    {
+      return fillHits();
+    }
+}
 
+
+/**
+utility function to get the data from the daq file and fill the StEvent structure
+*/
 Int_t StFgtRawMaker::fillHits()
 {
 
-   Short_t quadrant=0;      
-   Char_t layer=0;
-   Double_t ordinate=0;
-   Double_t lowerSpan=0;
-   Double_t upperSpan=0;
-   Int_t rdo=0;
-   Int_t arm=0;
-   Int_t apv=0;
-   Int_t channel=0;
-   Short_t adc=0;
-   Short_t timebin=0;
-   Short_t discIdx=0;
+  Short_t quadrant=0;      
+  Char_t layer=0;
+  Double_t ordinate=0;
+  Double_t lowerSpan=0;
+  Double_t upperSpan=0;
+  Int_t rdo=0;
+  Int_t arm=0;
+  Int_t apv=0;
+  Int_t channel=0;
+  Short_t adc=0;
+  Short_t timebin=0;
+  Short_t discIdx=0;
 
-   //now grab the constants from the header file, loop over the raw data and fill the hits...
-   while(this->GetNextDaqElement("fgt/adc"))
-      {
-         StRtsTable* rts_tbl=DaqDta();
-         //works because '*' operator is giving your the row
-         for(StRtsTable::iterator it=rts_tbl->begin();it!=rts_tbl->end();it++)
-            {
-               fgt_adc_t *mFgtRawData=(fgt_adc_t*)*it;
-               rdo=rts_tbl->Rdo();
-               //this is different from rts_example
-               channel=mFgtRawData->ch;
-               timebin=mFgtRawData->tb;
-               //look at rts_example for the mapping 
-               adc=mFgtRawData->adc;
-               arm=rts_tbl->Sector();
-               apv=rts_tbl->Pad();
-	       if(apv>=22 || apv <  0 || apv ==10|| apv==11)	 continue;
-	       if(arm<0 || arm> 4)		 continue;
-	       if(timebin>7)		 continue;
-	       if(channel>=128)		 continue;
-	       if(rdo<1 || rdo > 2)		 continue;
-
-	    // year 2012 exclusions
-	    if( ( (rdo==1 && arm==1) || (rdo==2 && arm==2) || (rdo==1 && arm==4)) && apv>4 && apv<10 ) continue;
-	    if( ((rdo==2 && arm==1) ||(rdo==1 && arm==3) ||(rdo==2 && arm==4) ) && apv<5 ) continue;
-	    if( rdo==2 && arm==4)  continue;
-	    if( ( (rdo==2 && arm==1) ||(rdo==1 && arm==3)  ) && apv>16 ) continue;
-	    if( ((rdo==1 && arm==2) ||(rdo==2 && arm==3)  ) && apv>10 && apv<17) continue;
-	    // end of 2012 exclusions
+  //now grab the constants from the header file, loop over the raw data and fill the hits...
+  while(GetNextDaqElement("fgt/adc"))
+    {
+      StRtsTable* rts_tbl=DaqDta();
+      //works because '*' operator is giving your the row
+      for(StRtsTable::iterator it=rts_tbl->begin();it!=rts_tbl->end();it++)
+	{
+	  fgt_adc_t *mFgtRawData=(fgt_adc_t*)*it;
+	  rdo=rts_tbl->Rdo();
+	  //this is different from rts_example
+	  channel=mFgtRawData->ch;
+	  timebin=mFgtRawData->tb;
+	  //look at rts_example for the mapping 
+	  adc=mFgtRawData->adc;
+	  arm=rts_tbl->Sector();
+	  apv=rts_tbl->Pad();
 
 
-	       Int_t geoId=-1;
-	       if(!mFgtDb)
-		 //		 geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
-		 {
-		   LOG_FATAL<<Form("StFgtRawMaker: No DB available")<<endm;
-		   return kStFatal;
-		 }    
-	       else
-		 {
-		   geoId=mFgtDb->getGeoIdFromElecCoord(rdo, arm, apv, channel);
-		   mFgtDb->getPhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
-		 }
+	  if(apv>=22 || apv <  0 || apv ==10|| apv==11)	 continue;
+	  if(arm<0 || arm> 4)		 continue;
+	  if(timebin>7)		 continue;
+	  if(channel>=128)		 continue;
+	  if(rdo<1 || rdo > 2)		 continue;
 
-	       //               StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
+	  // year 2012 exclusions
+	  //	  if( ( (rdo==1 && arm==1) || (rdo==2 && arm==2) || (rdo==1 && arm==4)) && apv>4 && apv<10 ) continue;
+	  //	  if( ((rdo==2 && arm==1) ||(rdo==1 && arm==3) ||(rdo==2 && arm==4) ) && apv<5 ) continue;
+	  //	  if( rdo==2 && arm==4)  continue;
+	  //	  if( ( (rdo==2 && arm==1) ||(rdo==1 && arm==3)  ) && apv>16 ) continue;
+	  //	  if( ((rdo==1 && arm==2) ||(rdo==2 && arm==3)  ) && apv>10 && apv<17) continue;
+	  // end of 2012 exclusions
 
-               Char_t type = 0;    // TODO: set this according to the database???
 
-               StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
-               if( stripCollectionPtr )
-                  {
-                     Int_t elecId =  StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
-                     StFgtStrip* stripPtr = stripCollectionPtr->getStrip( elecId );
-                     stripPtr->setAdc( adc, timebin );
-                     stripPtr->setType( type );
-                     stripPtr->setGeoId( geoId );
-                     stripPtr->setElecCoords( rdo, arm, apv, channel );
-                  }
-               else
-                  { LOG_WARN << "StFgtRawMaker::Make() -- Could not access disc " << discIdx << endm; }
-            }
-      }
+	  Int_t geoId=-1;
+	  if(!mFgtDb)
+	    //		 geoId=StFgtGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel);
+	    {
+	      LOG_FATAL<<Form("StFgtRawMaker: No DB available")<<endm;
+	      return kStFatal;
+	    }    
+	  else
+	    {
+	      geoId=mFgtDb->getGeoIdFromElecCoord(rdo, arm, apv, channel);
+	      mFgtDb->getPhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
+	    }
 
-   return kStOK;
-};
+	  //               StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
 
+	  Char_t type = 0;    // TODO: set this according to the database???
+
+	  StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
+	  if( stripCollectionPtr )
+	    {
+	      Int_t elecId =  StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
+	      StFgtStrip* stripPtr = stripCollectionPtr->getStrip( elecId );
+	      stripPtr->setAdc( adc, timebin );
+	      stripPtr->setType( type );
+	      stripPtr->setGeoId( geoId );
+	      stripPtr->setElecCoords( rdo, arm, apv, channel );
+	    }
+	  else
+	    { LOG_WARN << "StFgtRawMaker::Make() -- Could not access disc " << discIdx << endm; }
+	}
+    }
+
+  return kStOK;
+}
+
+/**
+Init function. Not doing anything at the moment.
+*/
 Int_t StFgtRawMaker::Init()
 {
-   Int_t ierr = kStOk;
+  Int_t ierr = kStOk;
 
-   LOG_INFO << "StFgtRawMaker::Init we are named "  << GetName() << endm;
+  LOG_INFO << "StFgtRawMaker::Init we are named "  << GetName() << endm;
 
-   return ierr;
-};
+  return ierr;
+}
 
+/**
+constructor. 
+*/
 StFgtRawMaker::StFgtRawMaker(const Char_t* name) :
-   StRTSBaseMaker( "adc", name ),
-   mFgtCollectionPtr(0), mFgtDb(0)
+  StRTSBaseMaker( "adc", name ),
+  mFgtCollectionPtr(0), mFgtDb(0)
 {
-};
+}
 
 
 StFgtRawMaker::~StFgtRawMaker()
 {
   // nothing to do
-};
+}
 
 void StFgtRawMaker::Clear( Option_t *opts )
 {
-   if( mFgtCollectionPtr )
-     mFgtCollectionPtr->Clear( opts );
-};
+  if( mFgtCollectionPtr )
+    mFgtCollectionPtr->Clear( opts );
+}
 
 
 StFgtRawMaker& StFgtRawMaker::operator=(const StFgtRawMaker &source)
@@ -277,4 +307,4 @@ StFgtRawMaker::StFgtRawMaker(const StFgtRawMaker &source):StRTSBaseMaker(source)
 {
 }
 
-ClassImp(StFgtRawMaker);
+ClassImp(StFgtRawMaker)
