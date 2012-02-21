@@ -1,10 +1,7 @@
-// $Id: StObject.h,v 1.17 2011/10/05 23:09:34 perev Exp $
+// $Id: StObject.h,v 1.18 2012/02/21 18:48:37 perev Exp $
 // $Log: StObject.h,v $
-// Revision 1.17  2011/10/05 23:09:34  perev
-// Warnoff
-//
-// Revision 1.16  2011/07/19 19:20:17  perev
-// More accurate counter handling
+// Revision 1.18  2012/02/21 18:48:37  perev
+// I/O mode flag added
 //
 // Revision 1.15  2007/04/26 04:16:41  perev
 // Remove senseless comment
@@ -100,13 +97,14 @@ virtual 		       ~StXRef();
 virtual		StXRefMain     *MakeMain() = 0 ;
 virtual		      void      Synchro(int toMain) = 0 ;
 virtual		StXRefMain     *GetMain();
-virtual		      void      SetMain(StXRefMain *m) {fMain  = m;}
+virtual		       int      IsMain() const		{return 0;}
+virtual		      void      SetMain(StXRefMain *m) 	{fMain  = m;}
 virtual		      void      Add(TDataSet *ds);
-	const 	StUUId 	       &GetUUId() const          {return   fUUId;}
+	const 	StUUId 	       &GetUUId() const       	{return   fUUId;}
 		void         	SetUUId(const StUUId &id){fUUId    = id;}
-		void         	GenUUId(){fUUId.Generate();}
-		void         	SetTally(UInt_t tally) {fTally = tally;}
-		UInt_t         	GetTally()             {return   fTally;}
+		void         	GenUUId()		{fUUId.Generate();}
+		void         	SetTally(UInt_t tally) 	{fTally = tally;}
+		UInt_t         	GetTally()             	{return   fTally;}
 private:
 
 StUUId         fUUId;		//!
@@ -124,22 +122,22 @@ public:
 virtual ~StXRefMain();
 virtual  	void  		Split()=0;
 virtual	       	StXRefMain     *MakeMain() {return this;}
-virtual		      void      Synchro(int){};
+virtual		      void      Synchro(int toMain){};
 ClassDef(StXRefMain,1)
 };
 
 //_____________________________________________________________________________
 class TPageMap  {
 
-public:
 enum EPageMap {kPAGE=2048,kBITS=11,kBITZ=22,kMASK=0x7ff,kLAST=0xfffff800};
+public:
  TPageMap();
 ~TPageMap();
 
 ULong_t *GET(UInt_t udx) ;
 ULong_t *Get(UInt_t udx) ;
-ULong_t *GetList() 	{return fList;}
-    void Clear();
+void     GetMiMax(UInt_t &udxMin,UInt_t &udxMax) {udxMin=fMinUdx;udxMax=fMaxUdx;}
+
 static  void     Test();
 private:
 ULong_t *NewPage();
@@ -148,6 +146,9 @@ ULong_t *fTopPage;
 ULong_t *fLstPage;
 UInt_t   fLstUdx;
 ULong_t *fList;
+UInt_t   fMinUdx;
+UInt_t   fMaxUdx;
+
 
 };
 #ifndef __CINT__
@@ -162,8 +163,6 @@ typedef list<StProxyUrr*>  	        StCollList;
 typedef StCollList::iterator 		StCollListIter;
 typedef list<StXRefManager*> 		StXRefManagerList;
 typedef StXRefManagerList::iterator 	StXRefManagerListIter;
-typedef list<StXRef*>        		StXRefList;
-typedef StXRefList::iterator 		StXRefListIter;
 typedef vector<UInt_t> 			UIntVector;
 typedef UIntVector::iterator 		UIntVectorIter;
 //_____________________________________________________________________________
@@ -197,10 +196,7 @@ public:
         void    Cd();
         void    AddColl (      StProxyUrr *rarr);
         void    AddColl (const StStrArray *sarr);
-private:
         void    Update ();
-        void    Update (UInt_t tally){ if (fTally<tally)fTally=tally;}
-public:
         void    Clear (Option_t*);
 static  void    Cd        (StXRef     *xref);
 static  void    Open      (StXRef     *xref);
@@ -209,7 +205,6 @@ static  TDataSet *GetMain();
 
 private:
         Int_t  fUpd;
-        Int_t  fLev;
         UInt_t fTally;
         StUUId fUUId;		//!
         StCollList  fColList;
@@ -218,6 +213,7 @@ private:
 public:
 static StXRefManagerList fgManagerList;
 static StXRefManager 	*fgManager;
+static int 	         fgRWmode; //0=read,1=write,-1=undefined
 
 };
 
