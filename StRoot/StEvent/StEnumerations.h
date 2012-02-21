@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.40 2012/02/21 16:25:47 fisyak Exp $
+ * $Id: StEnumerations.h,v 2.41 2012/02/21 18:46:21 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.41  2012/02/21 18:46:21  perev
+ * max numeber of detid ==40
+ *
  * Revision 2.40  2012/02/21 16:25:47  fisyak
  * add KFVertexFinder
  *
@@ -204,7 +207,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kFmsId       = kFmsIdentifier,  
                    kRpsId       = kRpsIdentifier,
                    kMtdId       = kMtdIdentifier,
-                   kMaxDetectorId};
+                   kMaxDetectorId = 40};
 
 /*!
  * \enum StTrackType
