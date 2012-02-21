@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.43 2012/01/24 03:01:24 perev Exp $
+ * $Id: StEvent.h,v 2.44 2012/02/21 18:47:13 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.44  2012/02/21 18:47:13  perev
+ * Add IsMain() related to I/O
+ *
  * Revision 2.43  2012/01/24 03:01:24  perev
  * Etr detector added
  *
@@ -344,7 +347,7 @@ protected:
     mutable StSPtrVecObject  mContent;
     static  TString          mCvsTag;
     void    Split();
-
+     int    IsMain() const 	{return 1;}
 private:
     StEvent& operator=(const StEvent&);
     StEvent(const StEvent&);
