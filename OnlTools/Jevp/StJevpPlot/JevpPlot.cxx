@@ -440,24 +440,18 @@ int JevpPlot::isDataPresent()
 // Return > 0 if data
 void JevpPlot::draw()
 {
-  // Check for legends...
-  //printf("in draw()\n");
-  int ex1=0;
-
-  if(strcmp(myname, "eemc_cr1")==0) ex1 = 1;  
-  if(strcmp(myname, "eemc_cr84")==0) ex1 = 1;
-
   TListIter next(&histos);
   PlotHisto *curr;
 
+  // Get the plot dimension!
   int dimension = 0;
   curr = (PlotHisto *)histos.First();
   if(curr && curr->histo) dimension = curr->histo->GetDimension();
 
+  // Find out if data is present!
   int data_present = isDataPresent();
 
-  //#ifdef JUNK
-  // Handle legends...
+  // Set the legend!
   if(legend != NULL) {
     delete legend;
     legend = NULL;
@@ -466,8 +460,8 @@ void JevpPlot::draw()
   if(legendx1 >= 0) {
     legend = new TLegend(legendx1,legendy1,legendx2,legendy2);
   }
-  //#endif
 
+  // Set various parameters of the pad & style...
   gStyle->SetOptStat(optstat);
   gPad->SetLogx(logx);
   gPad->SetLogy(logy);
@@ -478,10 +472,12 @@ void JevpPlot::draw()
   gPad->SetGridy(gridy);
   gStyle->SetPalette(palette);  
 
-  //#ifdef JUNK
-  // Get histo bounds...
+  // Worry about histogram bounds only for 1-dimensional histograms
+  // 2-d and above come from the histo itself...
   if(dimension == 1) {
     double max = 0;
+
+    // Find the maximum!
     next.Reset();
     while((curr = (PlotHisto *)next())) {
       double m;
@@ -490,31 +486,30 @@ void JevpPlot::draw()
       LOG(NOTE, "Histo %s: (%s) m=%f",GetPlotName(), curr->histo->GetName(), m);
       if(m > max) max = m;
     }
-    curr = (PlotHisto *)histos.First();
-    
-    if(external_maxy > -9999) {
-      LOG(NOTE, "set max to %f", (float)(external_maxy));
-      curr->histo->SetMaximum(external_maxy);
-    }
-    else {
-      LOG(NOTE, "set max to %f",(float)(max*1.1));
-      curr->histo->SetMaximum(max * 1.1);
+
+    // Set all plots within to the maximum!
+    next.Reset();
+    while((curr = (PlotHisto *)next())) {
+      if(external_maxy > -9999) {
+	LOG(NOTE, "set max to %f", (float)(external_maxy));
+	curr->histo->SetMaximum(external_maxy);
+      }
+      else {
+	LOG(NOTE, "set max to %f",(float)(max*1.1));
+	curr->histo->SetMaximum(max * 1.1);
+      }
     }
   }
-  //#endif
-
+  
   int plotnum= 1;
   char *same = NULL;
-
+  
   // printf("While loop start\n");
   next.Reset();
-
-
   while((curr = (PlotHisto *)next())) {
     //printf("plot %d\n", plotnum);
     plotnum++;
-
-    //#ifdef JUNK
+   
     if(dimension == 1) {
       if(logy) {
 	if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(10.0);
@@ -524,17 +519,14 @@ void JevpPlot::draw()
 	if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(1.0);
       }
     }
-    //#endif
-
-      //#ifdef JUNK
+ 
     if(legend) {
       char *text = (char *)((curr->legendText) ? curr->legendText : "no text");
       char *args = (char *)((curr->legendArgs) ? curr->legendArgs : "");
       
       legend->AddEntry(curr->histo, text, args); 
     }
-    //#endif
-
+    
     char opts[256];
     if(drawopts)
       strcpy(opts, drawopts);
