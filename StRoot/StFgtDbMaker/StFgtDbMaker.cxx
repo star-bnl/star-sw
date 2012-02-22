@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.14 2012/01/31 21:07:43 rfatemi Exp $
+// $Id: StFgtDbMaker.cxx,v 1.15 2012/02/22 04:04:18 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -101,9 +101,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	  LOG_FATAL
 	    << "ERROR: no table found in db for eloss, or malformed local db config" 
 	    << endm;
-	  assert(10==1);
 	}
-
 
 	LOG_INFO <<  "::RequestDataBase() for calibration tables..."<< endl;  
 	TDataSet *MapDB = GetDataBase("Calibrations/fgt/fgtMapping");
@@ -112,7 +110,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    LOG_FATAL
 		<< "ERROR: no table found in db for map, or malformed local db config" 
 		<< endm;
-	    assert(13==1);
 	}
 	TDataSet *PedDB = GetDataBase("Calibrations/fgt/fgtPedestal");
 	if (!PedDB)
@@ -120,7 +117,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    LOG_FATAL
 		<< "ERROR: no table found in db for pedestals, or malformed local db config" 
 		<< endm;
-	    assert(14==1);
 	}
 	TDataSet *StatusDB = GetDataBase("Calibrations/fgt/fgtStatus");
 	if (!StatusDB)
@@ -128,7 +124,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    LOG_FATAL
 		<< "ERROR: no table found in db for pedestals, or malformed local db config" 
 		<< endm;
-	    assert(15==1);
 	}
 	TDataSet *GainDB = GetDataBase("Calibrations/fgt/fgtGain");
 	if (!GainDB)
@@ -136,7 +131,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    LOG_FATAL
 		<< "ERROR: no table found in db for pedestals, or malformed local db config" 
 		<< endm;
-	    assert(16==1);
 	}
 
 
@@ -146,7 +140,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	  {
 	    LOG_FATAL   << " found INDEXED table with " << rows
 		    << " rows, this is fatal, fix DB content" << endm;
-	    assert(11==1);
 	  }
 
 
@@ -157,7 +150,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	{
 	    LOG_FATAL   << " found INDEXED table for mapping with " << rows
 			<< " rows, this is fatal, fix DB content" << endm;
-	    assert(17==1);
 	}
 	gainDataset = (St_fgtGain*)
 	    GainDB->Find("fgtGain"); assert(gainDataset);
@@ -166,7 +158,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	{
 	    LOG_FATAL   << " found INDEXED table for gains with " << rows
 			<< " rows, this is fatal, fix DB content" << endm;
-	    assert(18==1);
 	}
 	pedDataset = (St_fgtPedestal*)
 	    PedDB->Find("fgtPedestal"); assert(pedDataset);
@@ -175,7 +166,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	{
 	    LOG_FATAL   << " found INDEXED table for pedestals with " << rows
 			<< " rows, this is fatal, fix DB content" << endm;
-	    assert(19==1);
 	}
 	statusDataset = (St_fgtStatus*)
 	    StatusDB->Find("fgtStatus"); assert(statusDataset);
@@ -184,7 +174,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	{
 	    LOG_FATAL   << " found INDEXED table for status with " << rows
 			<< " rows, this is fatal, fix DB content" << endm;
-	    assert(20==1);
 	}
     }
   
@@ -218,7 +207,13 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 		    GetName()
 		)
 	    << endm;
- 
+	
+	updateValidity(mapDataset);
+	updateValidity(statusDataset);
+	updateValidity(pedDataset);
+	updateValidity(gainDataset);
+	updateValidity(eLossDataset);
+
 	#if 0 // disable it later 
 	    for (int i = 0; i < 10000; i++) { 
             std::cout << i <<"tmp eLoss val: " << mLossTab[0].cutoff[i] 
@@ -253,14 +248,35 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    LOG_FATAL << Form("%s :: eLoss table failed,",GetName())
 		      << endm;
 	}
-
-	assert(21==1);
     }
 
     //    geom=new StFgtGeom();   //	for now it is static, but later may be time
 			    //	dependent
     return kStOK;
 }
+
+//_____________________________________________________________________________
+void StFgtDbMaker::updateValidity(TTable* table) {
+    TDatime datime[2];
+    St_db_Maker::GetValidity(table,datime);
+    string tableName = table->GetName();
+    string beginTime = datime[0].AsSQLString();
+    string endTime   = datime[1].AsSQLString();
+    
+    map<string, pair<string, string> >::iterator iter = mValidRanges.find(tableName);
+    if(iter == mValidRanges.end()) {
+        mValidRanges[tableName] = make_pair(beginTime, endTime);
+        LOG_INFO << Form("loaded a new %20s table with beginTime %s and endTime %s", tableName.c_str(), beginTime.c_str(), endTime.c_str()) << endm; 
+	cout << Form("loaded a new %20s table with beginTime %s and endTime %s", tableName.c_str(), beginTime.c_str(), endTime.c_str()) << endl; 
+    }
+    else if( beginTime != (iter->second).first ) {
+        (iter->second).first    = beginTime;
+        (iter->second).second   = endTime;
+        LOG_INFO << Form("loaded a new %20s table with beginTime %s and endTime %s", tableName.c_str(), beginTime.c_str(), endTime.c_str()) << endm; 
+        cout << Form("loaded a new %20s table with beginTime %s and endTime %s", tableName.c_str(), beginTime.c_str(), endTime.c_str()) << endl;
+    }
+}
+
 //_____________________________________________________________________________
 Int_t StFgtDbMaker::Make()
 {
@@ -286,7 +302,13 @@ Int_t StFgtDbMaker::Finish()
 //_____________________________________________________________________________
 
 
+
+
+
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.15  2012/02/22 04:04:18  rfatemi
+// Added beginTime's for each table
+//
 // Revision 1.14  2012/01/31 21:07:43  rfatemi
 // changes for StFgtDbIdealImpl.h
 //
