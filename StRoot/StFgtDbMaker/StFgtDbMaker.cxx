@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.15 2012/02/22 04:04:18 rfatemi Exp $
+// $Id: StFgtDbMaker.cxx,v 1.16 2012/02/22 20:07:44 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -208,11 +208,11 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 		)
 	    << endm;
 	
-	updateValidity(mapDataset);
-	updateValidity(statusDataset);
-	updateValidity(pedDataset);
-	updateValidity(gainDataset);
-	updateValidity(eLossDataset);
+	displayBeginEndTime(mapDataset);
+	displayBeginEndTime(statusDataset);
+	displayBeginEndTime(pedDataset);
+	displayBeginEndTime(gainDataset);
+	displayBeginEndTime(eLossDataset);
 
 	#if 0 // disable it later 
 	    for (int i = 0; i < 10000; i++) { 
@@ -256,7 +256,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 }
 
 //_____________________________________________________________________________
-void StFgtDbMaker::updateValidity(TTable* table) {
+void StFgtDbMaker::displayBeginEndTime(TTable* table) {
     TDatime datime[2];
     St_db_Maker::GetValidity(table,datime);
     string tableName = table->GetName();
@@ -306,6 +306,9 @@ Int_t StFgtDbMaker::Finish()
 
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.16  2012/02/22 20:07:44  rfatemi
+// Changed name from updateValidity to displayBeginEndTime
+//
 // Revision 1.15  2012/02/22 04:04:18  rfatemi
 // Added beginTime's for each table
 //
