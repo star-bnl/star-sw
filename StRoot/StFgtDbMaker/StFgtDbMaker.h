@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.9 2012/01/31 21:07:53 rfatemi Exp $
+// $Id: StFgtDbMaker.h,v 1.10 2012/02/22 04:04:29 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -41,19 +41,25 @@ class StFgtDbMaker : public StMaker {
   virtual void   Clear(const char *opt);
   void  printFgtDumpCSV(TString fname) { m_tables->printFgtDumpCSV1(fname,GetDate(), GetTime());  }
 
+ map<string, pair<string, string> > mValidRanges;
+  void updateValidity(TTable* table);
+
   virtual void SetFlavor( const char *flav, const char *tabname );
 
   Float_t eLossTab(int bin); //  built from BichselELossProbHighBG.dat used to reject very high and unrealistic loss value
   StFgtGeom *getFgtGeom(){ return geom;} 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.9 2012/01/31 21:07:53 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.10 2012/02/22 04:04:29 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.10  2012/02/22 04:04:29  rfatemi
+// Added beginTimes for each table
+//
 // Revision 1.9  2012/01/31 21:07:53  rfatemi
 // changes for StFgtDbIdealImpl.h
 //
