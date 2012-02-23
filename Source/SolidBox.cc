@@ -15,7 +15,7 @@ SolidBox::SolidBox(const double cx, const double cy, const double cz,
   dX(0.), dY(0.), dZ(1.),
   cPhi(1.),   sPhi(0.),
   cTheta(1.), sTheta(0.) {
-  
+ 
   std::cout << "SolidBox:\n";
   std::cout << "    " << cx - lx << " < x [cm] < " << cx + lx << "\n";
   std::cout << "    " << cy - ly << " < y [cm] < " << cy + ly << "\n";
@@ -133,6 +133,42 @@ SolidBox::GetOrientation(double& ctheta, double& stheta,
   cphi = cPhi; sphi = sPhi;
   return true;
 
+}
+
+void
+SolidBox::SetHalfLengthX(const double lx) {
+
+  if (lx > 0.) {
+    lX = lx;
+  } else {
+    std::cerr << "SolidBox::SetHalfLengthX:\n";
+    std::cerr << "    Half-length must be > 0.\n";
+  }
+   
+}
+
+void
+SolidBox::SetHalfLengthY(const double ly) {
+
+  if (ly > 0.) {
+    lY = ly;
+  } else {
+    std::cerr << "SolidBox::SetHalfLengthY:\n";
+    std::cerr << "    Half-length must be > 0.\n";
+  }
+   
+}
+
+void
+SolidBox::SetHalfLengthZ(const double lz) {
+
+  if (lz > 0.) {
+    lZ = lz;
+  } else {
+    std::cerr << "SolidBox::SetHalfLengthZ:\n";
+    std::cerr << "    Half-length must be > 0.\n";
+  }
+   
 }
 
 }

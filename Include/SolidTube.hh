@@ -27,7 +27,11 @@ class SolidTube : public Solid {
     bool GetCenter(double& x, double& y, double& z);
     bool GetDimensions(double& l1, double& l2, double& l3);
     bool GetOrientation(double& ctheta, double& stheta, 
-                        double& cphi, double& sphi);  
+                        double& cphi, double& sphi);
+
+    void SetInnerRadius(const double rmin);
+    void SetOuterRadius(const double rmax);
+    void SetHalfLengthZ(const double lz); 
     
   private:
 

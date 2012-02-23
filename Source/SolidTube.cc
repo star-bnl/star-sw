@@ -138,5 +138,50 @@ SolidTube::GetOrientation(double& ctheta, double& stheta,
 
 }
 
+void
+SolidTube::SetInnerRadius(const double rmin) {
+
+  if (rmin <= 0.) {
+    std::cerr << "SolidTube::SetInnerRadius:\n";
+    std::cerr << "    Radius must be > 0.\n";
+    return;
+  }
+  if (rmin >= rMax) {
+    std::cerr << "SolidTube::SetInnerRadius:\n";
+    std::cerr << "    Inner radius must be smaller than outer radius.\n";
+    return;
+  }
+  rMin = rmin;
+
 }
 
+void
+SolidTube::SetOuterRadius(const double rmax) {
+
+  if (rmax <= 0.) {
+    std::cerr << "SolidTube::SetOuterRadius:\n";
+    std::cerr << "    Radius must be > 0.\n";
+    return;
+  }
+  if (rmax <= rMin) {
+    std::cerr << "SolidTube::SetOuterRadius:\n";
+    std::cerr << "    Outer radius must be greater than inner radius.\n";
+    return;
+  }
+  rMax = rmax;
+
+}
+
+void
+SolidTube::SetHalfLengthZ(const double lz) {
+
+  if (lz <= 0.) {
+    std::cerr << "SolidTube::SetHalfLengthZ:\n";
+    std::cerr << "    Half-length must be > 0.\n";
+    return;
+  }
+  lZ = lz;
+
+}
+
+}

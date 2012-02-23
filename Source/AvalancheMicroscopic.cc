@@ -42,6 +42,10 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   className = "AvalancheMicroscopic";
   distanceHistogramType.clear();
   
+  stack.reserve(1000);
+  endpointsElectrons.reserve(1000);
+  endpointsHoles.reserve(1000);
+  photons.reserve(100);
   stack.clear();
   endpointsElectrons.clear();
   endpointsHoles.clear();
@@ -54,9 +58,9 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
 void 
 AvalancheMicroscopic::SetSensor(Sensor* s) {
 
-  if (s == 0) {
+  if (!s) {
     std::cerr << className << "::SetSensor:\n";
-    std::cerr << "    Sensor pointer is null.\n";
+    std::cerr << "    Sensor pointer is a null pointer.\n";
     return;
   }
   sensor = s;
@@ -66,9 +70,9 @@ AvalancheMicroscopic::SetSensor(Sensor* s) {
 void
 AvalancheMicroscopic::EnablePlotting(ViewDrift* view) {
 
-  if (view == 0) {
+  if (!view) {
     std::cerr << className << "::EnablePlotting:\n";
-    std::cerr << "    Viewer pointer is null.\n";
+    std::cerr << "    Viewer pointer is a null pointer.\n";
     return;
   }
   
@@ -93,9 +97,9 @@ AvalancheMicroscopic::DisablePlotting() {
 void 
 AvalancheMicroscopic::EnableElectronEnergyHistogramming(TH1* histo) {
 
-  if (histo == 0) {
+  if (!histo) {
     std::cerr << className << "::EnableElectronEnergyHistogramming:\n"; 
-    std::cerr << "    Histogram pointer is null.\n";
+    std::cerr << "    Histogram pointer is a null pointer.\n";
     return;
   }
   
@@ -114,9 +118,9 @@ AvalancheMicroscopic::DisableElectronEnergyHistogramming() {
 void 
 AvalancheMicroscopic::EnableHoleEnergyHistogramming(TH1* histo) {
 
-  if (histo == 0) {
+  if (!histo) {
     std::cerr << className << "::EnableHoleEnergyHistogramming:\n"; 
-    std::cerr << "    Histogram pointer is null.\n";
+    std::cerr << "    Histogram pointer is a null pointer.\n";
     return;
   }
   
@@ -135,9 +139,9 @@ AvalancheMicroscopic::DisableHoleEnergyHistogramming() {
 void 
 AvalancheMicroscopic::SetDistanceHistogram(TH1* histo, const char opt) {
 
-  if (histo == 0) {
+  if (!histo) {
     std::cerr << className << "::SetDistanceHistogram:\n"; 
-    std::cerr << "    Histogram pointer is null.\n";
+    std::cerr << "    Histogram pointer is a null pointer.\n";
     return;
   }
   
@@ -226,9 +230,9 @@ AvalancheMicroscopic::DisableDistanceHistogramming() {
 void 
 AvalancheMicroscopic::EnableSecondaryEnergyHistogramming(TH1* histo) {
 
-  if (histo == 0) {
+  if (!histo) {
     std::cerr << className << "::EnableSecondaryEnergyHistogramming:\n"; 
-    std::cerr << "    Histogram pointer is null.\n";
+    std::cerr << "    Histogram pointer is a null pointer.\n";
     return;
   }
   
@@ -501,9 +505,9 @@ AvalancheMicroscopic::SetUserHandleStep(
               double e, double dx, double dy, double dz,
               bool hole)) {
 
-  if (f == 0) {
+  if (!f) {
     std::cerr << className << "::SetUserHandleStep:\n";
-    std::cerr << "    Function pointer is null.\n";
+    std::cerr << "    Function pointer is a null pointer.\n";
     return;
   }
   userHandleStep = f;
@@ -616,7 +620,7 @@ AvalancheMicroscopic::TransportElectron(
     const bool aval, bool hole) {
   
   // Make sure that the sensor is defined.
-  if (sensor == 0) {
+  if (!sensor) {
     std::cerr << className << "::TransportElectron:\n";
     std::cerr << "    Sensor is not defined.\n";
     return false;

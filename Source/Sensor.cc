@@ -127,19 +127,18 @@ Sensor::GetMedium(const double x, const double y, const double z,
   // Check if we are still in the same component as in the previous call.
   if (components[lastComponent].comp->GetMedium(x, y, z, m)) {
     // Cross-check that the medium is defined.
-    if (m != 0) return true;
+    if (m) return true;
   }
 
   for (int i = nComponents; i--;) {
     if (components[i].comp->GetMedium(x, y, z, m)) {
       // Cross-check that the medium is defined.
-      if (m != 0) {
+      if (m) {
         lastComponent = i;
         return true;
       }
     }
   }
-
   return false;
 
 }
@@ -158,6 +157,18 @@ Sensor::SetArea() {
   std::cout << "    " << xMinUser << " < x [cm] < " << xMaxUser << "\n";
   std::cout << "    " << yMinUser << " < y [cm] < " << yMaxUser << "\n";
   std::cout << "    " << zMinUser << " < z [cm] < " << zMaxUser << "\n";
+  if (std::isinf(xMinUser) || std::isinf(xMaxUser)) {
+    std::cerr << className << "::SetArea:\n";
+    std::cerr << "    Warning: infinite x-range\n";
+  }
+  if (std::isinf(yMinUser) || std::isinf(yMaxUser)) {
+    std::cerr << className << "::SetArea:\n";
+    std::cerr << "    Warning: infinite x-range\n";
+  }
+  if (std::isinf(zMinUser) || std::isinf(zMaxUser)) {
+    std::cerr << className << "::SetArea:\n";
+    std::cerr << "    Warning: infinite x-range\n";
+  }
   hasUserArea = true;
   return true;
 
@@ -222,7 +233,7 @@ Sensor::IsInArea(const double x, const double y, const double z) {
   if (!hasUserArea) {
     if (!SetArea()) {
       std::cerr << className << "::IsInArea:\n";
-      std::cerr << "    User area is not known.\n";
+      std::cerr << "    User area cannot be established.\n";
       return false;
     }
     hasUserArea = true;
@@ -231,11 +242,6 @@ Sensor::IsInArea(const double x, const double y, const double z) {
   if (x >= xMinUser && x <= xMaxUser &&
       y >= yMinUser && y <= yMaxUser &&
       z >= zMinUser && z <= zMaxUser) {
-    if (debug) {
-      std::cout << className << "::IsInArea:\n";
-      std::cout << "    (" << x << ", " << y << ", " << z << ") "
-                << " is inside.\n";
-    }
     return true;
   } 
     
@@ -244,7 +250,6 @@ Sensor::IsInArea(const double x, const double y, const double z) {
     std::cout << "    (" << x << ", " << y << ", " << z << ") "
               << " is outside.\n";
   }
-
   return false;
 
 }
@@ -281,7 +286,7 @@ Sensor::IsInTrapRadius(double x0, double y0, double z0,
 void
 Sensor::AddComponent(ComponentBase* comp) {
 
-  if (comp == 0) {
+  if (!comp) {
     std::cerr << className << "::AddComponent:\n";
     std::cerr << "    Component pointer is null.\n";
     return;
@@ -298,7 +303,7 @@ Sensor::AddComponent(ComponentBase* comp) {
 void
 Sensor::AddElectrode(ComponentBase* comp, std::string label) {
 
-  if (comp == 0) {
+  if (!comp) {
     std::cerr << className << "::AddElectrode:\n";
     std::cerr << "    Component pointer is null.\n";
     return;
@@ -307,8 +312,8 @@ Sensor::AddElectrode(ComponentBase* comp, std::string label) {
   for (int i = nElectrodes; i--;) {
     if (electrodes[i].label == label) {
       std::cout << className << "::AddElectrode:\n";
-      std::cout << "    Warning: An electrode with label " 
-                << label << " exists already.\n";
+      std::cout << "    Warning: An electrode with label \"" 
+                << label << "\" exists already.\n";
       std::cout << "    Weighting fields will be summed up.\n";
       break;
     }
@@ -323,7 +328,7 @@ Sensor::AddElectrode(ComponentBase* comp, std::string label) {
   electrodes[nElectrodes - 1].electronsignal.resize(nTimeBins);
   electrodes[nElectrodes - 1].ionsignal.resize(nTimeBins);
   std::cout << className << "::AddElectrode:\n";
-  std::cout << "    Added readout electrode " << label << ".\n";
+  std::cout << "    Added readout electrode \"" << label << "\".\n";
   std::cout << "    All signals are reset.\n";
   ClearSignal();
 
@@ -348,9 +353,9 @@ Sensor::Clear() {
 bool 
 Sensor::GetVoltageRange(double& vmin, double& vmax) {
 
-  // We don't know the range yet
+  // We don't know the range yet.
   bool set = false;
-  // Loop over the fields
+  // Loop over the components.
   double umin, umax;
   for (int i = 0; i < nComponents; ++i) {
     if (!components[i].comp->GetVoltageRange(umin, umax)) continue;
@@ -364,7 +369,7 @@ Sensor::GetVoltageRange(double& vmin, double& vmax) {
     }
   }
   
-  // Warn if we still don't know the range
+  // Warn if we still don't know the range.
   if (!set) {
     std::cerr << className << "::GetVoltageRange:\n";
     std::cerr << "    Sensor voltage range not known.\n";
@@ -372,13 +377,11 @@ Sensor::GetVoltageRange(double& vmin, double& vmax) {
     return false;
   }  
 
-  // Debugging
   if (debug) {
     std::cout << className << "::GetVoltageRange:\n";
     std::cout << "    Voltage range " << vmin 
               << " < V < " << vmax << ".\n";
   }
-  
   return true;
 
 }
@@ -403,7 +406,7 @@ Sensor::AddSignal(const int q, const double t, const double dt,
                   const double x,  const double y,  const double z,
                   const double vx, const double vy, const double vz) {
  
-  // Get the time bin
+  // Get the time bin.
   if (t < tStart || dt <= 0.) {
     if (debug) {
       std::cerr << className << "::AddSignal:\n";

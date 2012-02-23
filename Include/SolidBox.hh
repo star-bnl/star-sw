@@ -28,7 +28,10 @@ class SolidBox : public Solid {
     bool GetDimensions(double& l1, double& l2, double& l3);
     bool GetOrientation(double& ctheta, double& stheta, 
                         double& cphi, double& sphi);
-    
+
+    void SetHalfLengthX(const double lx);
+    void SetHalfLengthY(const double ly);
+    void SetHalfLengthZ(const double lz);
     
   private:
 

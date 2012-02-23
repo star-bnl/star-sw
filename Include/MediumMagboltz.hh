@@ -75,6 +75,8 @@ class MediumMagboltz : public MediumGas {
     double GetElectronNullCollisionRate(const int band);
     // Get the (real) collision rate [ns-1] at a given electron energy e [eV]
     double GetElectronCollisionRate(const double e, const int band);
+    // Get the collision rate [ns-1] for a specific level
+    double GetElectronCollisionRate(const double e, const int level, const int band);
     // Sample the collision type
     bool   GetElectronCollision(const double e, int& type, int& level, 
                                 double& e1,
@@ -130,23 +132,17 @@ class MediumMagboltz : public MediumGas {
     void GenerateGasTable(const int numCollisions = 10,
                           const bool verbose = true);
 
-    void SetDxcFitParameters4p(const double f4p4s, const double fQ, const double fEta) {
-      fit4p4s = f4p4s; fit4pQ = fQ; fit4pEta = fEta;
-    } 
-    void SetDxcFitParameters3d(const double f3d4p, const double fQ, const double fEta) {
-      fit3d4p = f3d4p; fit3dQ = fQ; fit3dEta = fEta;
-    }
-    void SetDxcFitParametersHigh(const double fHigh4p) {
-      fitHigh4p = fHigh4p;
-    } 
+    double fit3d4p, fitHigh4p;
+    double fit3dQCO2,  fit3dEtaCO2;
+    double fit3dQCH4,  fit3dEtaCH4;
+    double fit3dQC2H6, fit3dEtaC2H6;
+    double fit4pEtaCH4;
+    double fit4pEtaC2H6;
+
   private:
 
-    double fit4p4s, fit4pQ, fit4pEta;
-    double fit3d4p, fit3dQ, fit3dEta;
-    double fitHigh4p;
-
     static const int nEnergySteps = 20000;
-    static const int nEnergyStepsLog = 100;
+    static const int nEnergyStepsLog = 200;
     static const int nEnergyStepsGamma = 5000;
     static const int nMaxInelasticTerms = 220;
     static const int nMaxLevels = 512;
@@ -159,7 +155,7 @@ class MediumMagboltz : public MediumGas {
  
     // Energy spacing of collision rate tables
     double eFinal, eStep;
-    double eMinLog;
+    double eHigh, eHighLog;
     double lnStep;
     bool useAutoAdjust;
   

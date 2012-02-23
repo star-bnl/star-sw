@@ -23,7 +23,7 @@ const int MediumMagboltz::DxcTypeCollNonIon = -1;
 MediumMagboltz::MediumMagboltz() :
   MediumGas(),
   eFinal(40.), eStep(eFinal / nEnergySteps), 
-  eMinLog(1000.), lnStep(1.),
+  eHigh(1.e4), eHighLog(log(eHigh)), lnStep(1.),
   useAutoAdjust(true), 
   useCsOutput(false), 
   nTerms(0), useAnisotropic(true), 
@@ -34,9 +34,10 @@ MediumMagboltz::MediumMagboltz() :
   useOpalBeaty(true), useGreenSawada(false),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma) {
 
-  fit4p4s = fit4pQ = fit4pEta = 1.;
-  fit3d4p = fit3dQ = fit3dEta = 1.;
-  fitHigh4p = 1.;
+  fit3d4p = fitHigh4p = 1.;
+  fit3dQCO2 = fit3dQCH4 = fit3dQC2H6 = 1.;
+  fit3dEtaCO2 = fit3dEtaCH4 = fit3dEtaC2H6 = 0.5;
+  fit4pEtaCH4 = fit4pEtaC2H6 = 0.5;
  
   className = "MediumMagboltz";
  
@@ -99,10 +100,10 @@ MediumMagboltz::SetMaxElectronEnergy(const double e) {
   eFinal = e;
   
   // Determine the energy interval size.
-  if (eFinal <= eMinLog) {
+  if (eFinal <= eHigh) {
     eStep = eFinal / nEnergySteps;
   } else {
-    eStep = eMinLog / nEnergySteps;
+    eStep = eHigh / nEnergySteps;
   }
   
   // Set max. energy and step size also in Magboltz common block.
@@ -607,7 +608,7 @@ MediumMagboltz::GetElectronCollisionRate(const double e, const int band) {
 
   // Get the energy interval.
   int iE = 0;
-  if (e <= eMinLog) {
+  if (e <= eHigh) {
     // Linear binning
     iE = int(e / eStep);
     if (iE >= nEnergySteps) return cfTot[nEnergySteps - 1];
@@ -616,8 +617,64 @@ MediumMagboltz::GetElectronCollisionRate(const double e, const int band) {
   }
   
   // Logarithmic binning
-  iE = int(log(e / eMinLog) / lnStep);
-  return cfTotLog[iE];
+  const double eLog = log(e);
+  iE = int((eLog - eHighLog) / lnStep);
+  // Calculate the collision rate by log-log interpolation.
+  const double fmax = cfTotLog[iE];
+  const double fmin = iE == 0 ? log(cfTot[nEnergySteps - 1]) : cfTotLog[iE - 1];
+  const double emin = eHighLog + iE * lnStep;
+  const double f = fmin + (eLog - emin) * (fmax - fmin) / lnStep;
+  return exp(f);
+
+}
+
+double 
+MediumMagboltz::GetElectronCollisionRate(const double e, const int level, 
+                                         const int band) {
+
+  // Check if the electron energy is within the currently set range.
+  if (e <= 0.) {
+    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << "    Electron energy must be greater than zero.\n";
+    return 0.;
+  }
+
+  // Check if the level exists.
+  if (level < 0) {
+    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << "    Level must be greater than zero.\n";
+    return 0.;
+  } else if (level >= nTerms) {
+    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << "    Level " << level << " does not exist.\n";
+    std::cerr << "    The present gas mixture has " << nTerms 
+              << " cross-section terms.\n";
+    return 0.;
+  }
+
+  // Get the total scattering rate.
+  double rate = GetElectronCollisionRate(e, band);
+  // Get the energy interval.
+  int iE = 0;
+  if (e <= eHigh) {
+    // Linear binning
+    iE = int(e / eStep);
+    if (iE >= nEnergySteps) return cfTot[nEnergySteps - 1];
+    if (level == 0) {
+      rate *= cf[iE][0];
+    } else {
+      rate *= cf[iE][level] - cf[iE][level - 1];
+    }
+  } else {
+    // Logarithmic binning
+    iE = int((log(e) - eHighLog) / lnStep);
+    if (level == 0) {
+      rate *= cfLog[iE][0];
+    } else {
+      rate *= cfLog[iE][level] - cfLog[iE][level - 1];
+    }
+  }
+  return rate;
 
 }
 
@@ -660,7 +717,7 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
   double angCut = 1.;
   double angPar = 0.5;
   
-  if (e <= eMinLog) {
+  if (e <= eHigh) {
     // Linear binning
     // Get the energy interval.
     int iE = int(e / eStep);
@@ -693,7 +750,7 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
   } else {
     // Logarithmic binning
     // Get the energy interval.
-    int iE = int(log(e / eMinLog) / lnStep);
+    int iE = int(log(e / eHigh) / lnStep);
     if (iE < 0) iE = 0;
     if (iE >= nEnergyStepsLog) iE = nEnergyStepsLog - 1;
     // Sample the scattering process.
@@ -1568,13 +1625,13 @@ MediumMagboltz::Mixer(const bool verbose) {
   if (debug || verbose) {
     std::cout << className << "::Mixer:\n";
     std::cout << "    Creating table of collision rates with\n";
-    std::cout << "      " << nEnergySteps 
-                          << " linear energy steps between 0 and " 
-                          << std::min(eFinal, eMinLog) << " eV\n";
-    if (eFinal > eMinLog) {
-      std::cout << "      " << nEnergyStepsLog 
-                            << " logarithmic energy steps between "
-                            << eMinLog << " and " << eFinal << " eV\n";
+    std::cout << "    " << nEnergySteps 
+                        << " linear energy steps between 0 and " 
+                        << std::min(eFinal, eHigh) << " eV\n";
+    if (eFinal > eHigh) {
+      std::cout << "    " << nEnergyStepsLog 
+                          << " logarithmic energy steps between "
+                          << eHigh << " and " << eFinal << " eV\n";
     }
   }
   nTerms = 0;
@@ -1587,10 +1644,10 @@ MediumMagboltz::Mixer(const bool verbose) {
 
   // Loop over the gases in the mixture.  
   for (int iGas = 0; iGas < nComponents; ++iGas) {
-    if (eFinal <= eMinLog) {
+    if (eFinal <= eHigh) {
       Magboltz::inpt_.efinal = eFinal;
     } else {
-      Magboltz::inpt_.efinal = eMinLog;
+      Magboltz::inpt_.efinal = eHigh;
     }
     Magboltz::inpt_.estep = eStep;
   
@@ -1783,75 +1840,80 @@ MediumMagboltz::Mixer(const bool verbose) {
       if (useCsOutput) outfile << "\n";
     }
     
-    if (eFinal <= eMinLog) continue;
+    if (eFinal <= eHigh) continue;
     // Fill the high-energy part (logarithmic binning).
-    const double rLog = pow(eFinal / eMinLog, 1. / nEnergyStepsLog);
+    // Calculate the growth factor.
+    const double rLog = pow(eFinal / eHigh, 1. / nEnergyStepsLog);
     lnStep = log(rLog);
-    double emid = 0.5 * eMinLog * (1. + rLog);
-    int imid = nEnergySteps - 1;
+    // Set the upper limit of the first bin.
+    double emax = eHigh * rLog;
+    int imax = nEnergySteps - 1;
     for (int iE = 0; iE < nEnergyStepsLog; ++iE) {
-      Magboltz::inpt_.estep = emid / (nEnergySteps - 0.5);
-      Magboltz::inpt_.efinal = emid + 0.5 * Magboltz::inpt_.estep;
+      Magboltz::inpt_.estep = emax / (nEnergySteps - 0.5);
+      Magboltz::inpt_.efinal = emax + 0.5 * Magboltz::inpt_.estep;
       Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
                         pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, scrpt);
       np = np0;
       if (useCsOutput) {
-        outfile << emid << "  " << q[imid][1] 
-                        << "  " << q[imid][2] 
-                        << "  " << q[imid][3] 
-                        << "  " << q[imid][4] << "  ";
+        outfile << emax << "  " << q[imax][1] 
+                        << "  " << q[imax][2] 
+                        << "  " << q[imax][3] 
+                        << "  " << q[imax][4] << "  ";
       }
       // Elastic scattering
-      cfLog[iE][np] = q[imid][1] * van;
+      cfLog[iE][np] = q[imax][1] * van;
       if (scatModel[np] == 1) {
-        ComputeAngularCut(pEqEl[imid][1], 
+        ComputeAngularCut(pEqEl[imax][1], 
                           scatCutLog[iE][np], 
                           scatParameterLog[iE][np]);
       } else if (scatModel[np] == 2) {
-        scatParameterLog[iE][np] = pEqEl[imid][1];
+        scatParameterLog[iE][np] = pEqEl[imax][1];
       }
       // Ionisation
       if (withIon) {
         ++np;
-        cfLog[iE][np] = q[imid][2] * van;
+        // Gross cross-section
+        cfLog[iE][np] = q[imax][2] * van;
+        // Counting cross-section
+        // cfLog[iE][np] = q[imax][4] * van;
         if (scatModel[np] == 1) {
-          ComputeAngularCut(pEqEl[imid][2], 
+          ComputeAngularCut(pEqEl[imax][2], 
                             scatCutLog[iE][np], 
                             scatParameterLog[iE][np]);
         } else if (scatModel[np] == 2) {
-          scatParameterLog[iE][np] = pEqEl[imid][2];
+          scatParameterLog[iE][np] = pEqEl[imax][2];
         }
       }
       // Attachment
       if (withAtt) {
         ++np;
-        cfLog[iE][np] = q[imid][3] * van;
+        cfLog[iE][np] = q[imax][3] * van;
       }
       // Inelastic terms
       for (int j = 0; j < nIn; ++j) {
         ++np;
-        if (useCsOutput) outfile << qIn[imid][j] << "  ";
-        cfLog[iE][np] = qIn[imid][j] * van;
+        if (useCsOutput) outfile << qIn[imax][j] << "  ";
+        cfLog[iE][np] = qIn[imax][j] * van;
         // Scale the excitation cross-sections (for error estimates).
         cfLog[iE][np] *= scaleExc[iGas];
         if (cfLog[iE][np] < 0.) {
           std::cerr << className << "::Mixer:\n";
           std::cerr << "    Negative inelastic cross-section at " 
-                    << emid << " eV.\n"; 
+                    << emax << " eV.\n"; 
           std::cerr << "    Set to zero.\n";
           cfLog[iE][np] = 0.;
         }
         if (scatModel[np] == 1) {
-          ComputeAngularCut(pEqIn[imid][j], 
+          ComputeAngularCut(pEqIn[imax][j], 
                             scatCutLog[iE][np], 
                             scatParameterLog[iE][np]);
         } else if (scatModel[np] == 2) {
-          scatParameterLog[iE][np] = pEqIn[imid][j];
+          scatParameterLog[iE][np] = pEqIn[imax][j];
         }
       }
       if (useCsOutput) outfile << "\n";
       // Increase the energy.
-      emid *= rLog;
+      emax *= rLog;
     }
   }
   if (useCsOutput) outfile.close();
@@ -1887,7 +1949,7 @@ MediumMagboltz::Mixer(const bool verbose) {
       }
       cfTot[iE] += cf[iE][k];
     }
-    // Normalise the collision frequencies.
+    // Normalise the collision probabilities.
     if (cfTot[iE] > 0.) {
       for (int k = nTerms; k--;) cf[iE][k] /= cfTot[iE];
     }
@@ -1903,8 +1965,8 @@ MediumMagboltz::Mixer(const bool verbose) {
     }
   }
   
-  if (eFinal > eMinLog) {
-    const double rLog = pow(eFinal / eMinLog, 1. / nEnergyStepsLog);
+  if (eFinal > eHigh) {
+    const double rLog = pow(eFinal / eHigh, 1. / nEnergyStepsLog);
     for (int iE = nEnergyStepsLog; iE--;) {
       // Calculate the total collision frequency.
       for (int k = nTerms; k--;) {
@@ -1913,26 +1975,31 @@ MediumMagboltz::Mixer(const bool verbose) {
         }
         cfTotLog[iE] += cfLog[iE][k];
       }
-      // Normalise the collision frequencies.
+      // Normalise the collision probabilities.
       if (cfTotLog[iE] > 0.) {
         for (int k = nTerms; k--;) cfLog[iE][k] /= cfTotLog[iE];
       }
       for (int k = 1; k < nTerms; ++k) {
         cfLog[iE][k] += cfLog[iE][k - 1];
       }
-      const double ekin = eMinLog * pow(rLog, iE) * (1. + rLog) / 2.;
+      const double ekin = eHigh * pow(rLog, iE + 1);
       cfTotLog[iE] *= sqrt(ekin) * sqrt(1. + 0.5 * ekin / ElectronMass) /
                       (1. + ekin / ElectronMass);
+      // Store the logarithm (for log-log interpolation)
+      cfTotLog[iE] = log(cfTotLog[iE]);
     }
   }
   
   // Determine the null collision frequency.
   cfNull = 0.;
   for (int j = 0; j < nEnergySteps; ++j) {
-    if (cfTot[j] >= cfNull) cfNull = cfTot[j];
+    if (cfTot[j] > cfNull) cfNull = cfTot[j];
   }
-  for (int j = 0; j < nEnergyStepsLog; ++j) {
-    if (cfTotLog[j] >= cfNull) cfNull = cfTotLog[j];
+  if (eFinal > eHigh) {
+    for (int j = 0; j < nEnergyStepsLog; ++j) {
+      const double r = exp(cfTotLog[j]);
+      if (r > cfNull) cfNull = r;
+    }
   } 
 
   // Reset the collision counters.
@@ -1944,7 +2011,7 @@ MediumMagboltz::Mixer(const bool verbose) {
     std::cout << className << "::Mixer:\n";
     std::cout << "    Energy [eV]    Collision Rate [ns-1]\n";
     for (int i = 0; i < 8; ++i) {
-      const double emax = std::min(eMinLog, eFinal); 
+      const double emax = std::min(eHigh, eFinal); 
       std::cout << "    " << std::fixed << std::setw(10) << std::setprecision(2)  
                 << (2 * i + 1) * emax / 16
                 << "    " << std::setw(18) << std::setprecision(2)
@@ -3302,7 +3369,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                                                   pacs, eta)) {
         pacs = eta = 0.;
       }
-      double pPenning = pow(eta, 2. / 5.);
+      const double pPenningWK = pow(eta, 2. / 5.);
       if (level == "Ar_1S5") {
         // Rate constant from Velazco et al., J. Chem. Phys. 69 (1978)
         const double kQ = 5.3e-19;
@@ -3388,6 +3455,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                     << "    " << level << " by CO2 (W-K formula):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
+        double pPenning = pPenningWK;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3414,14 +3482,14 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double vel = SpeedOfLight * 
                            sqrt(8. * BoltzmannConstant * temperature / 
                                 (Pi * mR));
-        const double kQ = fit3dQ * sigma * vel;
-        pPenning = fit3dEta;
+        const double kQ = fit3dQCO2 * sigma * vel;
         if (debug) {
           std::cout << className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CO2 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
+        double pPenning = fit3dEtaCO2;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3444,14 +3512,14 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double vel = SpeedOfLight * 
                            sqrt(8. * BoltzmannConstant * temperature / 
                                 (Pi * mR));
-        const double kQ = fit3dQ * sigma * vel;
-        pPenning = fit3dEta;
+        const double kQ = fit3dQCO2 * sigma * vel;
         if (debug) {
           std::cout << className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CO2 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
+        double pPenning = fit3dEtaCO2;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3474,7 +3542,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                                                   pacs, eta)) {
         pacs = eta = 0.;
       }
-      double pPenning = pow(eta, 2. / 5.);
+      const double pPenningWK = pow(eta, 2. / 5.);
       if (level == "Ar_1S5") {
         // Rate constant from Chen and Setser, J. Phys. Chem. 95 (1991)
         const double kQ = 4.55e-19;
@@ -3506,8 +3574,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P8") {
         // Rate constant from Sadeghi et al., J. Chem. Phys. 115 (2001)
         const double kQ = 7.4e-19;
-        std::cout << level << ": " << pPenning << "\n";
-        if (pPenning > 0.) pPenning = fit4pEta;
+        double pPenning = pPenningWK;
+        if (pPenning > 0.) pPenning = fit4pEtaCH4;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3518,8 +3586,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P6") {
         // Rate constant from Sadeghi et al.
         const double kQ = 3.4e-19;
-        std::cout << level << ": " << pPenning << "\n";
-        if (pPenning > 0.) pPenning = fit4pEta;
+        double pPenning = pPenningWK;
+        if (pPenning > 0.) pPenning = fit4pEtaCH4;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3530,8 +3598,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P5") {
         // Rate constant from Sadeghi et al.
         const double kQ = 6.0e-19;
-        std::cout << level << ": " << pPenning << "\n";
-        if (pPenning > 0.) pPenning = fit4pEta;
+        double pPenning = pPenningWK;
+        if (pPenning > 0.) pPenning = fit4pEtaCH4;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3542,8 +3610,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P1") {
         // Rate constant from Sadeghi et al.
         const double kQ = 9.3e-19;
-        std::cout << level << ": " << pPenning << "\n";
-        if (pPenning > 0.) pPenning = fit4pEta;
+        double pPenning = pPenningWK;
+        if (pPenning > 0.) pPenning = fit4pEtaCH4;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3556,8 +3624,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                  level == "Ar_2P3"  || level == "Ar_2P2") {
         // Average of rate constants given by Sadeghi et al.
         const double kQ = 6.53e-19;
-        std::cout << level << ": " << pPenning << "\n";
-        if (pPenning > 0.) pPenning = fit4pEta;
+        double pPenning = pPenningWK;
+        if (pPenning > 0.) pPenning = fit4pEtaCH4;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3587,6 +3655,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                     << "    " << level << " by CH4 (W-K formula):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
+        double pPenning = pPenningWK;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3613,15 +3682,14 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double vel = SpeedOfLight * 
                            sqrt(8. * BoltzmannConstant * temperature / 
                                 (Pi * mR));
-        const double kQ = fit3dQ * sigma * vel;
-        std::cout << level << ": " << pPenning << "\n";
-        pPenning = fit3dEta;
+        const double kQ = fit3dQCH4 * sigma * vel;
         if (debug) {
           std::cout << className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CH4 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
+        double pPenning = fit3dEtaCH4;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3644,15 +3712,14 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double vel = SpeedOfLight * 
                            sqrt(8. * BoltzmannConstant * temperature / 
                                 (Pi * mR));
-        const double kQ = fit3dQ * sigma * vel;
-        std::cout << level << ": " << pPenning << "\n";
-        pPenning = fit3dEta;
+        const double kQ = fit3dQCH4 * sigma * vel;
         if (debug) {
           std::cout << className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by CH4 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
+        double pPenning = fit3dEtaCH4;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3719,8 +3786,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P8") {
         // Rate constant from Sadeghi et al., J. Chem. Phys. 115 (2001)
         const double kQ = 9.2e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        double pPenning = fit4pEtaC2H6;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3729,8 +3797,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P6") {
         // Rate constant from Sadeghi et al.
         const double kQ = 4.8e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        double pPenning = fit4pEtaC2H6;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3739,8 +3808,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P5") {
         // Rate constant from Sadeghi et al.
         const double kQ = 9.9e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        double pPenning = fit4pEtaC2H6;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3749,8 +3819,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P1") {
         // Rate constant from Sadeghi et al.
         const double kQ = 11.0e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        double pPenning = fit4pEtaC2H6;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3761,8 +3832,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                  level == "Ar_2P3"  || level == "Ar_2P2") {
         // Average of rate constants given by Sadeghi et al.
         const double kQ = 8.7e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        double pPenning = fit4pEtaC2H6;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3816,15 +3888,16 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double vel = SpeedOfLight * 
                            sqrt(8. * BoltzmannConstant * temperature / 
                                 (Pi * mR));
-        const double kQ = sigma * vel;
+        const double kQ = fit3dQC2H6 * sigma * vel;
         if (debug) {
           std::cout << className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by C2H6 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        double pPenning = fit3dEtaC2H6;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3845,15 +3918,16 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         const double vel = SpeedOfLight * 
                            sqrt(8. * BoltzmannConstant * temperature / 
                                 (Pi * mR));
-        const double kQ = sigma * vel;
+        const double kQ = fit3dQC2H6 * sigma * vel;
         if (debug) {
           std::cout << className << "::ComputeDeexcitationTable:\n";
           std::cout << "    Rate constant for coll. deexcitation of\n"
                     << "    " << level << " by C2H6 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        double pPenning = fit3dEtaC2H6;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -4576,7 +4650,7 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
           std::cout << "---------- \n";
         }
       }
-      // Normalize the decay rates.
+      // Normalise the decay branching ratios.
       for (int j = 0; j < deexcitations[i].nChannels; ++j) {
         deexcitations[i].p[j] /= deexcitations[i].rate;
         if (j > 0) deexcitations[i].p[j] += deexcitations[i].p[j - 1];
