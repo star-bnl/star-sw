@@ -32,7 +32,10 @@ StvKalmanTrackFinder::StvKalmanTrackFinder(const char *name):StvTrackFinder(name
   memset(mBeg,0,mEnd-mBeg+1);
   mDive = new StvDiver("KalmanTrackFinder");
   mDive->Init();
-  mDive->SetRZmax(210,210);
+  double rMax,zMin,zMax;
+  StTGeoHelper::Inst()->GetHitShape()->Get(zMin,zMax,rMax);
+  if (zMax < -zMin) zMax = -zMin;
+  mDive->SetRZmax(rMax,zMax);
   mHitter = new StvHitter();
 }  
 //_____________________________________________________________________________
