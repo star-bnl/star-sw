@@ -44,9 +44,13 @@ class bbcBuilder : public JevpPlotSet {
       TH1 *h200_bbcl_AdcSum_east;
       TH1 *h201_bbcl_AdcSum_west;
       // h158-173
-      TH1 *bbce_tdc[16];        // 1-16
+      TH1 *bbce_tdc[24];        // 1-24
       // h174-189
-      TH1 *bbcw_tdc[16];        // 1-16
+      TH1 *bbcw_tdc[24];        // 1-24
+      TH1 *bbce_adcmip[24];     // 1-24
+      TH1 *bbcw_adcmip[24];     // 1-24
+      TH1 *bbce_adcfull[24];    // 1-24
+      TH1 *bbcw_adcfull[24];    // 1-24
       TH1 *h202_bbc_earliest_tac_east;
       TH1 *h203_bbc_earliest_tac_west;
       TH1 *h204_bbc_tac_difference_ew;
