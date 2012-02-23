@@ -22,7 +22,6 @@
 // It has no plots (currently)
 //
 
-
 ClassImp(bbcBuilder);
   
 typedef JevpPlot * ptrJevpPlot;
@@ -66,22 +65,34 @@ void bbcBuilder::initialize(int argc, char *argv[]) {
   contents.h200_bbcl_AdcSum_east = new TH1F("h200_bbcl_AdcSum_east","BBC Large-tile AdcSum East",128,0,4096);
   contents.h201_bbcl_AdcSum_west = new TH1F("h201_bbcl_AdcSum_west","BBC Large-tile AdcSum West",128,0,4096);
 
-  for(int i=0;i<16;i++) {
+  for(int i=0;i<24;i++) {
     char tmp[256];
     char tmp1[256];
     sprintf(tmp, "bbce_tdc_%d",i);
     sprintf(tmp1, "BBCE TDC %d",i);
-
     contents.bbce_tdc[i] = new TH1F(tmp,tmp1,128,0,4096);
-
     sprintf(tmp, "bbcw_tdc_%d",i);
     sprintf(tmp1, "BBCW TDC %d",i);
     contents.bbcw_tdc[i] = new TH1F(tmp,tmp1,128,0,4096);
+
+    sprintf(tmp, "bbce_adcmip_%d",i);
+    sprintf(tmp1, "BBCE ADC MIP%d",i);
+    contents.bbce_adcmip[i] = new TH1F(tmp,tmp1,64,0,512);
+    sprintf(tmp, "bbcw_adcmip_%d",i);
+    sprintf(tmp1, "BBCW ADC MIP%d",i);
+    contents.bbcw_adcmip[i] = new TH1F(tmp,tmp1,64,0,512);
+
+    sprintf(tmp, "bbce_adcfull_%d",i);
+    sprintf(tmp1, "BBCE ADC FULL%d",i);
+    contents.bbce_adcfull[i] = new TH1F(tmp,tmp1,128,0,4096);
+    sprintf(tmp, "bbcw_adcfull_%d",i);
+    sprintf(tmp1, "BBCW ADC FULL%d",i);
+    contents.bbcw_adcfull[i] = new TH1F(tmp,tmp1,128,0,4096);
   }
 
   contents.h202_bbc_earliest_tac_east = new TH1F("h202_bbc_earliest_tac_east","BBC East Earliest TAC",256,0,4096);
   contents.h203_bbc_earliest_tac_west = new TH1F("h203_bbc_earliest_tac_west","BBC West Earliest TAC",256,0,4096);
-  contents.h204_bbc_tac_difference_ew = new TH1F("h204_bbc_tac_difference_e-w","BBC TAC Difference",256,-4096,4096);
+  contents.h204_bbc_tac_difference_ew = new TH1F("h204_bbc_tac_difference_e-w","BBC TAC Difference",256,-1024,1024);
   contents.h452_bbc_tac_difference_ew = new TH1F("h452_bbc_tac_difference_e-w","BBC Vertex (cm)",256,-300,300);
   contents.h205_bbc_tac_e_w = new TH2F("h205_bbc_tac_e_w","BBC TAC East vs West",64,0,4096,64, 0,4096);
 
@@ -103,8 +114,12 @@ void bbcBuilder::initialize(int argc, char *argv[]) {
   plots[++n] = new JevpPlot(contents.h200_bbcl_AdcSum_east);
   plots[++n] = new JevpPlot(contents.h201_bbcl_AdcSum_west);
 
-  for(int i=0;i<16;i++) plots[++n] = new JevpPlot(contents.bbce_tdc[i]);       
-  for(int i=0;i<16;i++) plots[++n] = new JevpPlot(contents.bbcw_tdc[i]);
+  for(int i=0;i<24;i++) plots[++n] = new JevpPlot(contents.bbce_tdc[i]);       
+  for(int i=0;i<24;i++) plots[++n] = new JevpPlot(contents.bbcw_tdc[i]);
+  for(int i=0;i<24;i++) plots[++n] = new JevpPlot(contents.bbce_adcmip[i]);
+  for(int i=0;i<24;i++) plots[++n] = new JevpPlot(contents.bbcw_adcmip[i]);
+  for(int i=0;i<24;i++) plots[++n] = new JevpPlot(contents.bbce_adcfull[i]);
+  for(int i=0;i<24;i++) plots[++n] = new JevpPlot(contents.bbcw_adcfull[i]);
 
   plots[++n] = new JevpPlot(contents.h202_bbc_earliest_tac_east);
   plots[++n] = new JevpPlot(contents.h203_bbc_earliest_tac_west);
@@ -146,25 +161,26 @@ void bbcBuilder::event(daqReader *rdr)
       if(adc>5) {
 	if(j<=16) nhit[i]++;
 	else      nhitl[i]++;
-
 	if(i==0) {
 	  contents.h190_bbc_hitmap_EAST->Fill(j);
 	  contents.h192_bbc_weight_hitmap_EAST->Fill(j,adc);
+	  contents.bbce_adcmip[j-1]->Fill(adc);
+	  contents.bbce_adcfull[j-1]->Fill(adc);
 	}
 	if(i==1) {
 	  contents.h191_bbc_hitmap_WEST->Fill(j); 	 
 	  contents.h193_bbc_weight_hitmap_WEST->Fill(j,adc);
+	  contents.bbcw_adcmip[j-1]->Fill(adc);
+	  contents.bbcw_adcfull[j-1]->Fill(adc);
 	}
-      }
-    }
-    for(int j=1; j<=16; j++){
-      float tac=(float)trgd->bbcTDC((StBeamDirection)i,j);
 
-      if(i==0) {
-	contents.bbce_tdc[j-1]->Fill(tac);
-      }
-      if(i==1) {
-	contents.bbcw_tdc[j-1]->Fill(tac);
+	float tac=(float)trgd->bbcTDC((StBeamDirection)i,j);
+	if(i==0) {
+	  contents.bbce_tdc[j-1]->Fill(tac);
+	}
+	if(i==1) {
+	  contents.bbcw_tdc[j-1]->Fill(tac);
+	}
       }
     }
   }
