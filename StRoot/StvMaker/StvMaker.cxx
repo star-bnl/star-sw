@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.15 2012/02/01 19:18:32 perev Exp $
+// $Id: StvMaker.cxx,v 1.16 2012/02/23 17:56:40 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -201,6 +201,8 @@ static int initialized = 0;
   app->SetInit(ini);
   app->Init();
 
+  InitDetectors();
+
 
   StvToolkit *kit =StvToolkit::Inst();
 
@@ -227,7 +229,6 @@ static int initialized = 0;
   mEventFiller= new StvStEventFiller;
   InitPulls();
   mVertexFinder = new StvStarVertexFinder("GenericVertex");
-  InitDetectors();
   
   return StMaker::InitRun(run);
 }
