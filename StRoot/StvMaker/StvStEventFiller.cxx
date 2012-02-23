@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.14 2011/11/18 23:34:40 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.15 2012/02/23 18:13:15 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.15  2012/02/23 18:13:15  perev
+ * Cleanup
+ *
  * Revision 1.14  2011/11/18 23:34:40  perev
  * Global impact fixed
  *
@@ -1344,12 +1347,14 @@ static int nCall=0; nCall++;
   for (StvNodeConstIter tNode=track->begin();tNode!=track->end();++tNode) 
   {
       const StvNode *node = (*tNode);
+      if (node->GetType() != StvNode::kRegNode) continue;
       StvHit *stiHit = node->GetHit();
       if (!stiHit)		continue;
+      if (!stiHit->detector())  continue;
 
       if (node->GetXi2()>1000)  continue;
-
       StHit *hh = (StHit*)stiHit->stHit();
+      if (!hh) 			continue;
       const StvNodePars &fp = node->GetFP();
       double dL = (stiHit->x()[0]-fp._x)*fp._cosCA 
 	        + (stiHit->x()[1]-fp._y)*fp._sinCA;
@@ -1358,7 +1363,8 @@ static int nCall=0; nCall++;
       if (myNode) {
         dL = sqrt(pow(preXy[0]-myX,2)+pow(preXy[1]-myY,2));
         double rho = 0.5*(preRho+fabs(fp._curv));
-        if (rho*dL>0.01) dL = 2*asin(0.5*dL*rho)/rho;
+        double mySin = 0.5*dL*rho; if (mySin>0.99) break;
+        if (mySin>0.01) dL = 2*asin(mySin)/rho;
 	len+=dL; 
       }
       myNode++;preXy[0]=myX; preXy[1]=myY; preRho = fabs(fp._curv);
@@ -1471,6 +1477,7 @@ enum {kPP=0,kMP=1,kFP=2};
     count[0][kPP]++; count[detId][kPP]++;
     
     if (!h ) 			continue;
+    if (!h->detector())		continue;
 //fill measured points
     count[0][kMP]++; count[detId][kMP]++;
     if (node->GetXi2()>1000) 	continue;

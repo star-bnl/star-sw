@@ -145,20 +145,22 @@ static int nCall=0; nCall++;
   StvPullHit* hiG=0,*hiP =0;
   int nHiG = mHitsG.GetLast()+1;
   int nHiP = mHitsP.GetLast()+1;
-  for (iTkG=0;iTkG<mNTrks[0];iTkG++) {// Loop over globs
+  for (iTkG=0;iTkG<mNTrks[0];iTkG++) {		// Loop over globs
     trkG=(StvPullTrk*)mTrksG[iTkG]; idG = trkG->mTrackNumber;
     idP=-1; trkP=0;
-    if (iTkP<mNTrks[1]) {
+    if (iTkP<mNTrks[1]) {			// Check is it primary?
       trkP=(StvPullTrk*)mTrksP[iTkP]; idP = trkP->mTrackNumber;
     }
     int vertex = 0;
-    if (idG==idP) { //It is a primary
+    if (idG==idP) { 				//It is a primary
       vertex = trkP->mVertex;
       int nHits=0;
-      for(;iHiP<nHiP; iHiP ++) { // Loop over prim hits
-        hiP = (StvPullHit*)mHitsP[iHiP]; if (idP!=hiP->mTrackNumber) break;
+      for(;iHiP<nHiP; iHiP ++) { 		// Loop over prim hits
+        hiP = (StvPullHit*)mHitsP[iHiP]; 
+	if (idP!=hiP->mTrackNumber) break;
         nHits++;
-        hiP->mTrackNumber=iTkG+1; hiP->mVertex=vertex;
+        hiP->mTrackNumber=iTkG+1; 
+	hiP->mVertex=vertex;
       }
       assert(nHits==trkP->nAllHits);
       trkP->mTrackNumber= iTkG+1; iTkP++;
