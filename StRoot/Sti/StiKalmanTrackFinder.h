@@ -120,7 +120,8 @@ class QAFind;
 private:
         
     double    chi2;
-    TStopwatch *mTimg[3]; //seeds,traks,prims
+    TStopwatch *mTimg[3]; 	//seeds,traks,prims
+    int         mTryPerm;	//Count number of permutations
     static int   _debug;
 };
 
