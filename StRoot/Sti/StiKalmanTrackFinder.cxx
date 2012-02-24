@@ -65,6 +65,7 @@ static StiHit *vpHit = 0;
 #include "StiTPCCATrackerInterface.h"
 #endif /* DO_TPCCATRACKER */
 enum {kSeedTimg,kTrakTimg,kPrimTimg};
+enum {kMaxPerm = 100000};
 
 static const double kRMinTpc =55;
 int StiKalmanTrackFinder::_debug = 0;
@@ -546,6 +547,7 @@ StiKalmanTrackNode::Break(nCall);
   leadNode->cutTail(direction);
   assert(leadNode->isValid());
   QAFind qa; qa.rmin = rmin;
+  mTryPerm = kMaxPerm;
   find(track,direction,leadNode,qa);
   track->setFirstLastNode(leadNode);
   nnAft = track->getNNodes(3);
@@ -566,6 +568,7 @@ static const double ref1  = 50.*degToRad;
 static  const double ref1a  = 110.*degToRad;
   //  const double ref2a  = 2.*3.1415927-ref1a;
   gLevelOfFind++;
+  assert(--mTryPerm>0 && "TOO MANY permutations");
   StiDetector *tDet=0;
   int status;
   StiKalmanTrackNode testNode;
