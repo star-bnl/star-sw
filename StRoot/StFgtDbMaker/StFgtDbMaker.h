@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.11 2012/02/22 20:07:44 rfatemi Exp $
+// $Id: StFgtDbMaker.h,v 1.12 2012/02/24 16:20:31 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -39,10 +39,10 @@ class StFgtDbMaker : public StMaker {
   virtual Int_t  Finish();
   virtual StFgtDb * getDbTables() { return m_tables; }
   virtual void   Clear(const char *opt);
-  void  displayBeginEndTime(TString fname) { m_tables->printFgtDumpCSV1(fname,GetDate(), GetTime());  }
+  void  printFgtDumpCSV1(TString fname) { m_tables->printFgtDumpCSV1(fname,GetDate(), GetTime());  }
 
  map<string, pair<string, string> > mValidRanges;
-  void updateValidity(TTable* table);
+  void displayBeginEndTime(TTable* table);
 
   virtual void SetFlavor( const char *flav, const char *tabname );
 
@@ -50,13 +50,16 @@ class StFgtDbMaker : public StMaker {
   StFgtGeom *getFgtGeom(){ return geom;} 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.11 2012/02/22 20:07:44 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.12 2012/02/24 16:20:31 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.12  2012/02/24 16:20:31  rfatemi
+// Correct mistype in printFgtDumpCSV1
+//
 // Revision 1.11  2012/02/22 20:07:44  rfatemi
 // Changed name from updateValidity to displayBeginEndTime
 //
