@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.200 2011/10/17 12:16:10 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.201 2012/02/25 01:48:55 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.201  2012/02/25 01:48:55  perev
+// Limit on permutation installed
+//
 // Revision 1.200  2011/10/17 12:16:10  fisyak
 // Comment out request  DoAlignment for Track Finder
 //
@@ -669,105 +672,94 @@ Int_t StiMaker::InitRun(int run)
 Int_t StiMaker::Make()
 {
   cout <<"StiMaker::Make() -I- Starting on new event"<<endl;
+  int iAns=kStOK,iAnz=0;
+
 
   eventIsFinished = false;
-  StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
-#if 0
-  St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track");   
-  St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");   
-  StG2TrackVertexMap::instance(g2t_track,g2t_vertex);
-#endif
-  if (!event) return kStWarn;
+  try {		// try new event
+    StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
 
-  if (_tracker) {
-  _tracker->clear();
-  }
-  try {
-     if (mTimg[kHitTimg]) mTimg[kHitTimg]->Start(0);
-    _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
-     if (mTimg[kHitTimg]) mTimg[kHitTimg]->Stop();
-  }
-  catch (runtime_error &rte)
-  {
-    cout << "StiMaker::Make() - loadEvent(..) failed :" << rte.what() << endl;
-    MyClear();
-    return kStWarn;
-  }
+    if (!event) return kStWarn;
 
-  _seedFinder->reset();
-  if (_tracker) {
-      if (mTimg[kGloTimg]) mTimg[kGloTimg]->Start(0);
-
-      _tracker->findTracks();    // get the rest
-
-      if (mTimg[kGloTimg]) mTimg[kGloTimg]->Stop();
-      const std::vector<StiHit*> *vertexes=0;
-      try
-	{
-          if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
-
-	  if (_eventFiller)
-	    _eventFiller->fillEvent(event, _trackContainer);
-
-          if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
-	}
-      catch (runtime_error & rte)
-	{
-	  cout << "StiMaker::Make() - Run Time Error :" << rte.what() << endl;
-	}
-      if (_vertexFinder)
-	{
-	  //cout << "StiMaker::Maker() -I- Will Find Vertex"<<endl;
-          if (mTimg[kVtxTimg]) mTimg[kVtxTimg]->Start(0);
-
-	  _vertexFinder->fit(event);
-	  vertexes = _vertexFinder->result();
-
-          if (mTimg[kVtxTimg]) mTimg[kVtxTimg]->Stop();
-
-
-	  if (vertexes && vertexes->size())
-	    {
-
-              //Set minimal errors
-	      for (size_t i=0;i<vertexes->size();i++) {
-	        StiHit *vtx=(*vertexes)[i];
-                float vtxErr[6];
-		memcpy(vtxErr,vtx->errMtx(),sizeof(vtxErr));
-                if (vtxErr[0]>MIN_VTX_ERR2
-                &&  vtxErr[2]>MIN_VTX_ERR2
-                &&  vtxErr[5]>MIN_VTX_ERR2) continue;
-                memset(vtxErr,0,sizeof(vtxErr));
-                vtxErr[0]=MIN_VTX_ERR2;
-                vtxErr[2]=MIN_VTX_ERR2;
-                vtxErr[5]=MIN_VTX_ERR2;
-                vtx->setError(vtxErr);
-              }
-	      //cout << "StiMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
-              if (mTimg[kPriTimg]) mTimg[kPriTimg]->Start(0);
-
-	      _tracker->extendTracksToVertices(*vertexes);
-              mTotPrimTks[0]+=_tracker->getNPrims();
-              if (mTimg[kPriTimg]) mTimg[kPriTimg]->Stop();
-
-	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
-              if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
-	      if (_eventFiller) {_eventFiller->fillEventPrimaries(); /* fillVxFlags(); */}
-              if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
-	    }
-	}
+    if (_tracker) {
+    _tracker->clear();
     }
-  int iAns=kStOK,iAnz;
-  if (mPullTTree) {iAns = FillPulls();}
-  cout<< "StiMaker::Make() -I- Done"<<endl;
-  iAnz = StMaker::Make();
+       if (mTimg[kHitTimg]) mTimg[kHitTimg]->Start(0);
+      _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
+       if (mTimg[kHitTimg]) mTimg[kHitTimg]->Stop();
 
-  MyClear();
-  if (iAns) return iAns;
-  if (iAnz) return iAnz;
-  if (mTotPrimTks[1] && mTotPrimTks[0]>mTotPrimTks[1]) return kStStop;
-  if (IAttr("Alignment") &&  ! _tracker->getNTracks()) return kStErr;
-  return kStOK;
+    _seedFinder->reset();
+    if (_tracker) {
+	if (mTimg[kGloTimg]) mTimg[kGloTimg]->Start(0);
+
+	_tracker->findTracks();    // get the rest
+
+	if (mTimg[kGloTimg]) mTimg[kGloTimg]->Stop();
+	const std::vector<StiHit*> *vertexes=0;
+        if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
+
+	if (_eventFiller)
+	  _eventFiller->fillEvent(event, _trackContainer);
+
+        if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
+	if (_vertexFinder)
+	  {
+	    //cout << "StiMaker::Maker() -I- Will Find Vertex"<<endl;
+            if (mTimg[kVtxTimg]) mTimg[kVtxTimg]->Start(0);
+
+	    _vertexFinder->fit(event);
+	    vertexes = _vertexFinder->result();
+
+            if (mTimg[kVtxTimg]) mTimg[kVtxTimg]->Stop();
+
+
+	    if (vertexes && vertexes->size())
+	      {
+
+        	//Set minimal errors
+		for (size_t i=0;i<vertexes->size();i++) {
+	          StiHit *vtx=(*vertexes)[i];
+                  float vtxErr[6];
+		  memcpy(vtxErr,vtx->errMtx(),sizeof(vtxErr));
+                  if (vtxErr[0]>MIN_VTX_ERR2
+                  &&  vtxErr[2]>MIN_VTX_ERR2
+                  &&  vtxErr[5]>MIN_VTX_ERR2) continue;
+                  memset(vtxErr,0,sizeof(vtxErr));
+                  vtxErr[0]=MIN_VTX_ERR2;
+                  vtxErr[2]=MIN_VTX_ERR2;
+                  vtxErr[5]=MIN_VTX_ERR2;
+                  vtx->setError(vtxErr);
+        	}
+		//cout << "StiMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
+        	if (mTimg[kPriTimg]) mTimg[kPriTimg]->Start(0);
+
+		_tracker->extendTracksToVertices(*vertexes);
+        	mTotPrimTks[0]+=_tracker->getNPrims();
+        	if (mTimg[kPriTimg]) mTimg[kPriTimg]->Stop();
+
+		//cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
+        	if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
+		if (_eventFiller) {_eventFiller->fillEventPrimaries(); /* fillVxFlags(); */}
+        	if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
+	      }
+	  }
+      }
+    if (mPullTTree) {iAns = FillPulls();}
+    cout<< "StiMaker::Make() -I- Done"<<endl;
+    iAnz = StMaker::Make();
+    MyClear();
+    if (iAns) return iAns;
+    if (iAnz) return iAnz;
+    if (mTotPrimTks[1] && mTotPrimTks[0]>mTotPrimTks[1]) return kStStop;
+    if (IAttr("Alignment") &&  ! _tracker->getNTracks()) return kStErr;
+    return kStOK;
+  }
+  catch (runtime_error &rte) {
+    Error("Make","Catch exception %s",rte.what());
+    if (!strncmp(rte.what(),"FATAL::",6)) return kStFATAL;
+    MyClear();
+    return kStErr;
+  }
 }
 //_____________________________________________________________________________
 void StiMaker::MyClear()

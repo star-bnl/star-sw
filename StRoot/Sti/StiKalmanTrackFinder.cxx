@@ -47,17 +47,6 @@ using namespace std;
 #ifdef TIME_StiKalmanTrackFinder
 #include "Sti/StiTimer.h"
 #endif
-//#define ASSIGNVP
-#ifdef ASSIGNVP
-#include "TAssign.h"
-static int vpAssign = 0;
-static TAssign *gTAssign = 0;
-static TAssMtx *gTAssMtx = 0;
-static double vpLayer=0;
-static const StiDetector *vpDetector=0;
-static StiHit *vpHit = 0;
-
-#endif //ASSIGNVP
 
 #include "StiKalmanTrackFitter.h" // just for err check
 #include "StiTrackFinderFilter.h" // just for err check
@@ -65,7 +54,7 @@ static StiHit *vpHit = 0;
 #include "StiTPCCATrackerInterface.h"
 #endif /* DO_TPCCATRACKER */
 enum {kSeedTimg,kTrakTimg,kPrimTimg};
-enum {kMaxPerm = 100000};
+enum {kMaxTrackPerm = 10000,kMaxEventPerm=100000};
 
 static const double kRMinTpc =55;
 int StiKalmanTrackFinder::_debug = 0;
@@ -166,6 +155,8 @@ filter is set or if they satisfy the track filter requirements.
 //______________________________________________________________________________
 void StiKalmanTrackFinder::findTracks()
 {
+  mEventPerm = kMaxEventPerm;
+
   assert(_trackContainer );
   assert(_trackSeedFinder);
   _trackSeedFinder->reset();
@@ -190,28 +181,6 @@ void StiKalmanTrackFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt)
 #endif /* DO_TPCCATRACKER */
 //________________________________________________________________________________
 void StiKalmanTrackFinder::findAllTracks() {
-#ifdef ASSIGNVP
-  vpAssign = 1;
-  if (!gTAssign) { gTAssign = new TAssign(); gTAssMtx = new TAssMtxObj();}
-  gTAssMtx->Clear();
-  extendSeeds (0.); 
-  gTAssign->SetMatrix(gTAssMtx);
-  double s = gTAssign->Assign();
-  int nKeys = gTAssMtx->GetNKeys();
-
-  LOG_DEBUG << Form("findTracks:: nTracks=%d aver Chi2=%g",nKeys,s/nKeys)
-        << endm;
-  vpAssign = 2;
-  long token = 0,lKey=0,lVal=0;
-  while ( gTAssign->Iter(token,lKey,lVal)) {
-     if(!lVal) continue;
-     StiHit *stiHit = (StiHit*)lVal;
-     stiHit->setTimesUsed(1);
-  }
-
-  extendTracks( 0.);
-  return;
-#endif// ASSIGNVP
   
   
 //  extendSeeds (0.);
@@ -310,15 +279,6 @@ static int nCall=0;nCall++;
   for ( int itr=0;itr < ntr;itr++) {	//Track loop
     StiKalmanTrack *track = (StiKalmanTrack*)(*_trackContainer)[itr];
     if (track->getFlag()<=0) 	continue;
-#ifdef ASSIGNVP
-    if (vpAssign==2) {
-      vpHit = (StiHit*)gTAssign->GetVal((long)track);
-      vpDetector=0;vpLayer=0;
-      if (vpHit) {
-        vpDetector = vpHit->detector();
-        vpLayer = vpDetector->getPlacement()->getLayerRadius();
-    }}
-#endif// ASSIGNVP
 
     extended = extendTrack(track,rMin);
     track->reduce();
@@ -357,11 +317,6 @@ int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
     trackExtended = find(track,kOutsideIn,rMin);
     if (trackExtended) {
       status = 0;
-#ifdef ASSIGNVP
-      if (vpAssign!=1) status = track->refit();
-#else 
-        //        if (!rMin) status = track->refit();
-#endif// ASSIGNVP
       if(status) return abs(status)*100 + kRefitInFail;
     }	
 
@@ -547,8 +502,10 @@ StiKalmanTrackNode::Break(nCall);
   leadNode->cutTail(direction);
   assert(leadNode->isValid());
   QAFind qa; qa.rmin = rmin;
-  mTryPerm = kMaxPerm;
+  mTrackPerm = kMaxTrackPerm;
+  mUseComb = useComb();
   find(track,direction,leadNode,qa);
+
   track->setFirstLastNode(leadNode);
   nnAft = track->getNNodes(3);
   lnAft = track->getTrackLength();
@@ -568,7 +525,9 @@ static const double ref1  = 50.*degToRad;
 static  const double ref1a  = 110.*degToRad;
   //  const double ref2a  = 2.*3.1415927-ref1a;
   gLevelOfFind++;
-  assert(--mTryPerm>0 && "TOO MANY permutations");
+  if (--mEventPerm <0) throw runtime_error("FATAL::TOO MANY permutations");
+  if (--mTrackPerm==0) { mUseComb = 0; }
+
   StiDetector *tDet=0;
   int status;
   StiKalmanTrackNode testNode;
@@ -578,7 +537,6 @@ static  const double ref1a  = 110.*degToRad;
 
   assert(leadNode->isValid());
   const StiDetector *leadDet = leadNode->getDetector();
-  if (!leadDet)  throw runtime_error("SKTF::find() -E- leadDet==0");
   leadRadius = leadDet->getPlacement()->getNormalRadius();
   assert(leadRadius>0 && leadRadius<1000);
   if (leadRadius < qa.rmin) {gLevelOfFind--;return;}
@@ -608,9 +566,6 @@ static  const double ref1a  = 110.*degToRad;
 
   if (debug() > 2) cout <<endl<< "lead node:" << *leadNode<<endl<<"lead det:"<<*leadDet<<endl;
 
-#ifdef ASSIGNVP
-  int vpSelected=0;
-#endif// ASSIGNVP
   
   while (((!direction)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial()))
   {do{//technical do
@@ -628,16 +583,6 @@ static  const double ref1a  = 110.*degToRad;
        double angle  = detector->getPlacement()->getNormalRefAngle();
        double radius = detector->getPlacement()->getNormalRadius();
        assert(radius>0 && radius<1000);
-#ifdef ASSIGNVP
-       double ladius = detector->getPlacement()->getLayerRadius();
-       if (!direction && vpAssign==2 && vpHit && fabs(ladius-vpLayer)<1e-5) {
-         if (detector!=vpDetector) continue;
-         detectors.clear();
-         detectors.push_back(detector);
-         vpSelected = 2005;
-         break;
-       }
-#endif// ASSIGNVP
        if (radius < qa.rmin) {gLevelOfFind--;return;}
        double diff = radius-leadRadius;if (!direction) diff = -diff;
        if (diff<-1e-6 && debug()>3) {
@@ -724,44 +669,12 @@ static  const double ref1a  = 110.*degToRad;
       if (direction) {
         nHits=1;
       } else {
-        int flg = (testNode.getX()< kRMinTpc)? useComb()&3:useComb()>>2;
+        int flg = (testNode.getX()< kRMinTpc)? mUseComb &3:mUseComb>>2;
         if ((flg&2) || !nHits) 	nHits++;
         if ((flg&1)==0) 	nHits=1;
         
       }
 
-#ifdef ASSIGNVP
-      do {
-        if (!active) 		break;
-        if (direction) 		break;
-	if (testNode.getX()>16) break;
-	if (testNode.getX()<14) break;
-	
-        switch (vpAssign) {
-      
-          case 1:
-          for (int jHit=0;jHit<nHits; jHit++){
-            stiHit = hitCont.getHit(jHit);
-            if (!stiHit) continue;
-            chi2 = hitCont.getChi2(jHit);
-            double detr = hitCont.getDetr(jHit);
-	    gTAssMtx->SetChi2((long)track,(long)stiHit,chi2+log(detr));
-	  } 
-	  return;  
-
-          case 2:
-          if (!vpSelected) break;
-	  hitCont.reset();
-	  stiHit= vpHit;
-          nHits=1;
-          if (stiHit) { 
-            chi2 = testNode.evaluateChi2(stiHit);
-            hitCont.add(stiHit,chi2);
-            assert(tDet==stiHit->detector());
-	  }
-	}
-      }while(0);
-#endif //ASSIGNVP
       QAFind qaBest,qaTry;
       for (int jHit=0;jHit<nHits; jHit++)
       {//Loop over Hits
