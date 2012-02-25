@@ -121,7 +121,9 @@ private:
         
     double    chi2;
     TStopwatch *mTimg[3]; 	//seeds,traks,prims
-    int         mTryPerm;	//Count number of permutations
+    int         mTrackPerm;	//Count number of permutations
+    int         mEventPerm;	//Count number of permutations
+    int         mUseComb;	//useComb() saved 
     static int   _debug;
 };
 
