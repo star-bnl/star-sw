@@ -668,6 +668,15 @@ ComponentAnsys123::SetWeightingField(std::string prnsol, std::string label) {
 
   while (fprnsol.getline(line, size, '\n')) {
     il++;
+    // Skip page feed
+    if (strcmp(line,"1") == 0) {
+      fprnsol.getline(line, size, '\n'); il++;
+      fprnsol.getline(line, size, '\n'); il++;
+      fprnsol.getline(line, size, '\n'); il++;
+      fprnsol.getline(line, size, '\n'); il++;
+      fprnsol.getline(line, size, '\n'); il++;
+      continue;
+    }    
     // Split the line in tokens.
     char* token = NULL;
     token = strtok(line, " ");

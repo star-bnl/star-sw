@@ -1633,27 +1633,39 @@ MediumGas::LoadIonMobility(const std::string filename) {
   mobilities.clear();
   
   // Read the file line by line.
-  std::string line;
-  std::istringstream dataStream; 
-  dataStream.str("");
-  dataStream.clear();
+  char line[100];
    
   int i = 0;
   while (!infile.eof()) {
     ++i;
     // Read the next line.
-    std::getline(infile, line);
-    // Strip white space from the beginning of the line.
-    line.erase(line.begin(), std::find_if(line.begin(), line.end(), 
-               not1(std::ptr_fun<int, int>(isspace))));
-    // Skip comments.
-    if (line[0] == '#' || line[0] == '*' ||
-        (line[0] == '/' && line[1] == '/')) continue;
-    if (line == "") break;
-    // Extract the values.
-    dataStream.str(line);
-    dataStream >> field >> mu;
-    if (dataStream.eof()) break;
+    infile.getline(line, 100);
+
+    char* token = NULL;
+    token = strtok(line, " ,\t");
+    if (!token) {
+      break;
+    } else if (strcmp(token, "#") == 0 || strcmp(token, "*") == 0 || strcmp(token, "//") == 0) {
+      continue;
+    } else {
+      field = atof(token);
+      token = strtok(NULL, " ,\t");
+      if (!token) {
+	std::cerr << className << "::LoadIonMobility:\n";
+	std::cerr << "    Found E/N but no mobility before the end-of-line\n";
+	std::cerr << "    " << filename << " (line " << i << ").\n";
+	continue;
+      }
+      mu = atof(token);
+    }
+    token = strtok(NULL, " ,\t");
+    if(token && strcmp(token, "//") != 0) {
+	std::cerr << className << "::LoadIonMobility:\n";
+	std::cerr << "    Unexpected non-comment characters after the mobility; line skipped.\n";
+	std::cerr << "    " << filename << " (line " << i << ").\n";
+	continue;
+    }
+    // printf("E/N = %g Td: mu = %g cm2/(V.s)\n", field, mu);
     // Check if the data has been read correctly.
     if (infile.fail() && !infile.eof()) {
       std::cerr << className << "::LoadIonMobility:\n";
@@ -1661,9 +1673,6 @@ MediumGas::LoadIonMobility(const std::string filename) {
       std::cerr << "    " << filename << " (line " << i << ").\n";
       return false;
     }
-    // Reset the stringstream.
-    dataStream.str("");
-    dataStream.clear();
     // Make sure the values make sense.
     // Negative field values are not allowed.
     if (field < 0.) {
@@ -1694,7 +1703,7 @@ MediumGas::LoadIonMobility(const std::string filename) {
    
   // The E/N values in the file are supposed to be in Td (10^-17 V cm2).
   const double scaleField = 1.e-17 * GetNumberDensity();
-  // The reduced mobilities in the file are supposed to be in V / (cm2 s).
+  // The reduced mobilities in the file are supposed to be in cm2/(V s).
   const double scaleMobility = 1.e-9 * (pressure / AtmosphericPressure) * 
                                        (ZeroCelsius / temperature);
   for (int j = ne; j--;) {
