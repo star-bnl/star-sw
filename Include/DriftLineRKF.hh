@@ -9,7 +9,6 @@
 #include "Medium.hh"
 #include "GeometryBase.hh"
 
-
 namespace Garfield {
   
   class DriftLineRKF {

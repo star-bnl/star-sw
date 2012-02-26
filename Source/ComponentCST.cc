@@ -1280,21 +1280,26 @@ ComponentCST::FindElementCube(const double x, const double y, const double z,
      * x > x_max -> index_x = m_xlines.size() - 1
     */
 
-    // check if the point is out of the mesh
-    if(index_x < 0 || index_y < 0 || index_z < 0 ||
-       index_x == (m_xlines.size()-1) || index_y == (m_ylines.size()-1) || index_z == (m_zlines.size()-1))
+    // Check if the point is out of the mesh
+    const int index_x_max = m_xlines.size() - 1;
+    const int index_y_max = m_ylines.size() - 1;
+    const int index_z_max = m_zlines.size() - 1;
+    if (index_x < 0 || index_y < 0 || index_z < 0 ||
+        index_x == index_x_max || 
+        index_y == index_y_max || 
+        index_z == index_z_max) {
       return -1;
-    else
-      imap = index_x + (m_xlines.size() - 1) * index_y + (m_xlines.size() - 1) * (m_ylines.size() - 1) * index_z;
-
-    if(debug && imap != -1) {
-      if( x < nodes[elements[imap].emap[3]].x || x > nodes[elements[imap].emap[0]].x ||
+    } else {
+      imap = index_x + index_x_max * index_y + index_x_max * index_y_max * index_z;
+    }
+    if (debug && imap != -1) {
+      if (x < nodes[elements[imap].emap[3]].x || x > nodes[elements[imap].emap[0]].x ||
           y < nodes[elements[imap].emap[3]].y || y > nodes[elements[imap].emap[2]].y ||
           z < nodes[elements[imap].emap[3]].z || z > nodes[elements[imap].emap[7]].z) {
         std::cout << "Element: " << imap << "\tPoint: (" << x << "," << y << "," << z << ")\n"
-                << "x: " << nodes[elements[imap].emap[3]].x << " - " << nodes[elements[imap].emap[0]].x << "\n"
-                << "y: " << nodes[elements[imap].emap[3]].y << " - " << nodes[elements[imap].emap[2]].y << "\n"
-                << "z: " << nodes[elements[imap].emap[3]].z << " - " << nodes[elements[imap].emap[7]].z << "\n\n";
+                  << "x: " << nodes[elements[imap].emap[3]].x << " - " << nodes[elements[imap].emap[0]].x << "\n"
+                  << "y: " << nodes[elements[imap].emap[3]].y << " - " << nodes[elements[imap].emap[2]].y << "\n"
+                  << "z: " << nodes[elements[imap].emap[3]].z << " - " << nodes[elements[imap].emap[7]].z << "\n\n";
       }
     }
   }
@@ -1303,7 +1308,7 @@ ComponentCST::FindElementCube(const double x, const double y, const double z,
     std::cerr << className << "::FindElementCube:\n";
     std::cerr << "    Index of the element (imap is " << imap << ") is to large!"
               << "    Number of Elements: " << nElements
-              << "\n    index_x: "   << index_x
+              << "\n    index_x: " << index_x
               << "\n    index_y: " << index_y
               << "\n    index_z: " << index_z << std::endl;
     if (debug) {

@@ -117,7 +117,7 @@ public:
     { polyline_del();  }
   friend int plane::cross(const polyline &pll, point *crpt, int& qcrpt, 
 			  polyline *crpll, int& qcrpll, vfloat prec) const  ;
-  friend ostream& operator<<(ostream& file, const polyline& p);
+  friend std::ostream& operator<<(std::ostream& file, const polyline& p);
   
 };
 
@@ -126,7 +126,7 @@ int cross4pllines(const polyline pl[4], vfloat precision,
 // Draws straight line via 4 intervals.
 // returns 1 if line is drawn and 0 otherwise
 
-ostream& operator<<(ostream& file, const polyline& p);
+std::ostream& operator<<(std::ostream& file, const polyline& p);
 
 //             **** polyline in plane  ****
 
@@ -160,10 +160,10 @@ public:
   polyline_pl(const polyline& pl);
 
   polyline_pl& operator=(const polyline_pl& fpl);
-  friend ostream& operator<<(ostream& file, const polyline_pl& p);
+  friend std::ostream& operator<<(std::ostream& file, const polyline_pl& p);
 };
 
-ostream& operator<<(ostream& file, const  polyline_pl& p);
+std::ostream& operator<<(std::ostream& file, const  polyline_pl& p);
 
 //             **** polygon (in plane) ****
 
@@ -199,7 +199,7 @@ class polygon: public polyline_pl
   // Prec is used to find crossing points of straight lines
     
 };   
-ostream& operator<<(ostream& file, const polygon& p);
+std::ostream& operator<<(std::ostream& file, const polygon& p);
 
 //             ***  rectangle ***
 
@@ -223,7 +223,7 @@ protected:
   //    fqaref=4; faref=&aref_rct[0];
   //  }
 };
-ostream& operator<<(ostream& file, const rectangle& f);
+std::ostream& operator<<(std::ostream& file, const rectangle& f);
 
 //             **** special quadrangle ****  for cathode strip shamber 
 // 2 lines are going from a point of origin
@@ -284,7 +284,7 @@ public:
 	  const straight& sl1, const straight& sl2, 
 	  const vec& fdir1, const vec& fdir2, vfloat prec);
 
-  friend ostream& operator<<(ostream& file, const spquadr& p);
+  friend std::ostream& operator<<(std::ostream& file, const spquadr& p);
 private:
   spquadr(const point& fpiv, 
 	  const straight& sl1, const straight& sl2, // They are not need, Why?
@@ -295,7 +295,7 @@ private:
     }    
 };
   
-ostream& operator<<(ostream& file, const spquadr& p);
+std::ostream& operator<<(std::ostream& file, const spquadr& p);
 
 
 

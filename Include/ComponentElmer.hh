@@ -3,21 +3,17 @@
 #ifndef G_COMPONENT_ELMER_H
 #define G_COMPONENT_ELMER_H
 
-#include <RQ_OBJECT.h>
-
 #include "ComponentFieldMap.hh"
 
 namespace Garfield {
 
 class ComponentElmer: public ComponentFieldMap { 
 
-  RQ_OBJECT("ComponentElmer")
-    
   public:
     // Constructors
     ComponentElmer();
     ComponentElmer(std::string header, std::string elist,  std::string nlist,
-                      std::string mplist, std::string volt, std::string unit);
+                   std::string mplist, std::string volt, std::string unit);
     // Destructor
     ~ComponentElmer() {}
     
@@ -45,7 +41,7 @@ class ComponentElmer: public ComponentFieldMap {
     }
         
     bool Initialise(std::string header = "mesh.header",
-				std::string elist = "mesh.elements", 
+                    std::string elist = "mesh.elements", 
                     std::string nlist = "mesh.nodes",
                     std::string mplist = "dielectrics.dat", 
                     std::string volt = "out.result",

@@ -25,13 +25,13 @@ HeedPhoton::HeedPhoton
   gparticle(primvol, pt, vel, time),
   //parent_part(fparent_part),
   parent_particle_number(fparent_particle_number),
+  s_print_listing(fs_print_listing),
   energy(fenergy),
   s_photon_absorbed(0),
-  s_delta_generated(0),
 #ifdef SFER_PHOTOEL
   s_sfer_photoel(0),
 #endif
-  s_print_listing(fs_print_listing)
+  s_delta_generated(0)
 {
   mfunname("HeedPhoton::HeedPhoton(...)");
   particle_number = last_particle_number;

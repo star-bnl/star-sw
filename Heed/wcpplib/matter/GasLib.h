@@ -5,10 +5,9 @@
 There are not only gases but also atoms and molecules.
 The gas is the highest class in this hierarchy.
 
-
 The reason to gather all initializations in one file is the undefinite
 order of initialization of the global objects in C++.
-This order in definite only for objects presented in single object file.
+This order is definite only for objects presented in single object file.
 Since each atom, molecula, and matter should be registered in the system,
 the logbooks should be initialized and ready for work prior to
 initialization of the first registered object. 

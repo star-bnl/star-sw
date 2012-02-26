@@ -156,13 +156,12 @@ RegPassivePtr& RegPassivePtr::operator=(const RegPassivePtr& f)
 
 int RegPassivePtr::s_print_adr_cpp = 0;
 
-void RegPassivePtr::print(ostream& file, int l) const
+void RegPassivePtr::print(std::ostream& file, int l) const
 {
-  if(l > 0)
-    file<<(*this);
+  if (l > 0) file<<(*this);
 }
 
-ostream& operator<<(ostream& file, const RegPassivePtr& f)
+std::ostream& operator<<(std::ostream& file, const RegPassivePtr& f)
 {
 #ifdef USE_BIT_OPERA
 #ifdef USE_CHAR_GETSETTERS_PARAMETERS
@@ -279,7 +278,7 @@ RegPassivePtr::~RegPassivePtr()
   //mcout<<"~RegPassivePtr(): *this="<<(*this)<<'\n';
 }
 
-ostream& operator<<(ostream& file, const DoubleReg& f)
+std::ostream& operator<<(std::ostream& file, const DoubleReg& f)
 {  // make output similar to ordinary double
   file<<f.val;
   return file;

@@ -1,7 +1,9 @@
+#include <fstream>
 #include <iomanip>
-#include "heed++/code/HeedMatterDef.h"
 #include "wcpplib/clhep_units/WSystemOfUnits.h"
 #include "wcpplib/math/tline.h"
+#include "heed++/code/HeedMatterDef.h"
+
 /*
 2003, I. Smirnov
 */
@@ -727,19 +729,16 @@ void HeedMatterDef::replace_epsi12(const String& file_name)
   mfunnamep("void HeedMatterDef::replace_epsi12(const String& file_name)");
 
 #ifdef USE_STLSTRING
-  ifstream file(file_name.c_str());
+  std::ifstream file(file_name.c_str());
 #else
-  ifstream file(hist_file_name);
+  std::ifstream file(hist_file_name);
 #endif
-  if( !file )
-  {
+  if (!file) {
     funnw.ehdr(mcerr);
-    mcerr<<"cannot open file "<<file_name<<endl;
+    mcerr << "cannot open file " << file_name << std::endl;
     spexit(mcerr);
-  }
-  else
-  {
-    mcout<<"file "<<file_name<<" is opened"<<endl;
+  } else {
+    mcout << "file " << file_name << " is opened" << std::endl;
   }
   long qe=0;  // number of points in input mesh
   file >> qe;
@@ -792,23 +791,21 @@ void HeedMatterDef::replace_epsi12(const String& file_name)
 
   
 
-void HeedMatterDef::print(ostream& file, int l) const 
+void HeedMatterDef::print(std::ostream& file, int l) const 
 {
-  if(l <= 0)return;
-  Ifile<<"HeedMatterDef:\n";
-  indn.n+=2;
-  matter->print(file);
-  if(l >=2 )
-  {
+  if (l <= 0) return;
+  Ifile << "HeedMatterDef:\n";
+  indn.n += 2;
+  matter->print(file, 1);
+  if (l >=2) {
     long q = matter->qatom();
     long n;
-    Ifile<<"Printing "<<q<<" photoabsorption cross sections:\n";
-    indn.n+=2;
-    for( n=0; n<q; n++)
-    {
-      apacs[n]->print(file, l-1);
+    Ifile << "Printing " << q << " photoabsorption cross sections:\n";
+    indn.n += 2;
+    for (n = 0; n < q; n++) {
+      apacs[n]->print(file, l - 1);
     }
-    indn.n-=2;
+    indn.n -= 2;
   }
   Iprintan(file, eldens_cm_3, "1/cm^3");
   Iprintan(file, eldens, "MeV^3");
@@ -820,31 +817,30 @@ void HeedMatterDef::print(ostream& file, int l) const
   Iprintn(file, F);
   Iprintn(file, min_ioniz_pot);
   Iprintn(file, energy_mesh->get_q());
-  if(l >=2 )
-  {
+  if (l >= 2) {
     long qe = energy_mesh->get_q();
     long ne;
-    indn.n+=2;
-    Ifile<<" ne       energy      ACS(Mb)      ICS(Mb) ACS(1/MeV^2) ICS(1/MeV^2)       epsip       epsi1       epsi2   (1+epsi1)^2+epsi2^2\n";
-    for(ne=0; ne<qe; ne++)
-    {
+    indn.n += 2;
+    Ifile << " ne       energy      ACS(Mb)      ICS(Mb) ACS(1/MeV^2) ICS(1/MeV^2)       epsip       epsi1       epsi2   (1+epsi1)^2+epsi2^2\n";
+    for (ne = 0; ne < qe; ne++) {
       //double et = pow( energy_mesh->get_ec(ne), 2.0);
-      Ifile<<setw(3)<<ne<<' '<<setw(12)<<energy_mesh->get_e(ne)<<' '
-	   <<setw(12)<<ACS[ne]<<' '
-	   <<setw(12)<<ICS[ne]<<' '
-	   <<setw(12)<<ACS[ne]*C1_MEV2_MBN<<' '
-	   <<setw(12)<<ICS[ne]*C1_MEV2_MBN<<' '
-	   <<setw(12)<<epsip[ne]<<' '
-	   <<setw(12)<<epsi1[ne]<<' '
-	//<<setw(12)<<epsip[ne] * et<<' '
-	// <<setw(12)<<epsi1[ne] * et<<' '
-	   <<setw(12)<<epsi2[ne]<<' '
-	   <<setw(12)<<pow( (1+epsi1[ne]), 2.0) + pow(epsi2[ne], 2.0) <<' '
-	   <<'\n'; 
+      Ifile << std::setw(3) << ne << ' ' 
+            << std::setw(12) << energy_mesh->get_e(ne) << ' '
+	    << std::setw(12) << ACS[ne] << ' '
+	    << std::setw(12) << ICS[ne] << ' '
+	    << std::setw(12) << ACS[ne]*C1_MEV2_MBN << ' '
+	    << std::setw(12) << ICS[ne]*C1_MEV2_MBN << ' '
+	    << std::setw(12) << epsip[ne] << ' '
+	    << std::setw(12) << epsi1[ne] << ' '
+	    // << std::setw(12) << epsip[ne] * et << ' '
+	    // << std::setw(12) << epsi1[ne] * et << ' '
+	    << std::setw(12) << epsi2[ne] << ' '
+	    << std::setw(12) << pow( (1+epsi1[ne]), 2.0) + pow(epsi2[ne], 2.0) 
+	    << " \n";
     }
-    indn.n-=2;
+    indn.n -= 2;
   }
-  indn.n-=2;
+  indn.n -= 2;
 }
 
 

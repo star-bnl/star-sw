@@ -62,7 +62,6 @@ and notices about any modifications of the original text
 appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
-//#include <iostream.h>
 //#include <CLHEP/Alist/AList.h>
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/FunNameStack.h"
@@ -205,7 +204,7 @@ template<class T>class BlkArr
   //void check(void) const;
 
   /*
-  void print(ostream& file, long qpr) const
+  void print(std::ostream& file, long qpr) const
     { 
       Ifile<<"DynLinArr<T>: qel="<<get_qel()<<" qpr="<<qpr<<'\n';
       long n;
@@ -219,7 +218,7 @@ template<class T>class BlkArr
   */
   
   //~BlkArr() { if(el != NULL) delete[] el; }
-  void print_struct(ostream& file) const;
+  void print_struct(std::ostream& file) const;
   void allocate_block(long fqel) // allocates first blocks but qel = 0
     {
       la.clear();
@@ -522,7 +521,7 @@ void BlkArr<T>::put_qel(long fqel)
 }
  
 template<class T>
-void BlkArr<T>::print_struct(ostream& file) const
+void BlkArr<T>::print_struct(std::ostream& file) const
 {
   Ifile<<"structure: qel="<<qel<<" size_of_element="<<size_of_element<<"\n";
   indn.n+=2;
@@ -546,9 +545,9 @@ void BlkArr<T>::print_struct(ostream& file) const
 }
 
 template<class T>
-ostream& operator<<(ostream& file, const BlkArr<T>& f)
+std::ostream& operator<<(std::ostream& file, const BlkArr<T>& f)
 {
-  //mfunnamep("template<class T> ostream& operator<<(ostream& file, const BlkArr<T>& f)");
+  //mfunnamep("template<class T> std::ostream& operator<<(std::ostream& file, const BlkArr<T>& f)");
   Ifile<<"BlkArr<T>: qel="<<f.get_qel()<<'\n';
   f.print_struct(file);
   long n;
@@ -564,9 +563,9 @@ ostream& operator<<(ostream& file, const BlkArr<T>& f)
 
 
 template<class T>
-void print_BlkArr(ostream& file, const DynLinArr<T>& f, int l)
+void print_BlkArr(std::ostream& file, const DynLinArr<T>& f, int l)
 {
-  //mfunnamep("template<class T> void print_BlkArr(ostream& file, const BlkArr<T>& f, int l)");
+  //mfunnamep("template<class T> void print_BlkArr(std::ostream& file, const BlkArr<T>& f, int l)");
   Ifile<<"BlkArr<T>: qel="<<f.get_qel()<<'\n';
   f.print_struct(file);
   long n;

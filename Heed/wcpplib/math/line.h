@@ -36,7 +36,7 @@ template< class T >class T2DPoint
 };
 
 template<class T>
-ostream& operator<<(ostream& file, const T2DPoint<T>& f)
+std::ostream& operator<<(std::ostream& file, const T2DPoint<T>& f)
 {
   Ifile<<"T2DPoint: x="<<f.x<<" y="<<f.y<<'\n';
   return file;

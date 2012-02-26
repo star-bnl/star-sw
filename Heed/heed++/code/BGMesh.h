@@ -14,12 +14,11 @@ class BGMesh: public RegPassivePtr
   double xmax;
   long q;
   DynLinArr< double > x;
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(BGMesh);
 
 };
-
-ostream& operator<<(ostream& file, const BGMesh& bgm);
+std::ostream& operator<<(std::ostream& file, const BGMesh& bgm);
 
 DynLinArr< double > make_log_mesh(double fxmin, double fxmax, long fq);
 

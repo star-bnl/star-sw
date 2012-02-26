@@ -298,59 +298,52 @@ void  FunNameStack::remove_thread_stack(void)
 #endif
 
 #ifdef USE_BOOST_MULTITHREADING
-ostream& FunNameStack::printname(ostream& file, NameStack* ns, int n) // 
+std::ostream& FunNameStack::printname(std::ostream& file, NameStack* ns, int n) // 
 #else
-ostream& FunNameStack::printname(ostream& file, int n) // 
+std::ostream& FunNameStack::printname(std::ostream& file, int n) // 
 #endif
 { 
 #ifdef USE_BOOST_MULTITHREADING
-  file<<ns->name[n]; return file; 
+  file << ns->name[n]; return file; 
 #else
-  file<<name[n]; return file; 
+  file << name[n]; return file; 
 #endif
 }
 
-void spexit_action(ostream& file)
+void spexit_action(std::ostream& file)
 {
-  file<<"spexit_action: the streams will be now flushed\n"; 
+  file << "spexit_action: the streams will be now flushed\n"; 
   file.flush(); mcout.flush(); mcerr.flush(); 
-  if(s_throw_exception_in_spexit != 1)
-  {
-    if(s_exit_without_core == 1)
-    {
-      file<<"spexit_action: the exit(1) function is called\n";
+  if (s_throw_exception_in_spexit != 1) {
+    if (s_exit_without_core == 1) {
+      file << "spexit_action: the exit(1) function is called\n";
       exit(1);
-    }
-    else
-    {
-      file<<"spexit_action: the abort function is called\n";
+    } else {
+      file << "spexit_action: the abort function is called\n";
       abort();
     }
-  }
-  else
-  {
-    file<<"spexit_action: an exception is now called\n";
+  } else {
+    file << "spexit_action: an exception is now called\n";
     throw ExcFromSpexit(); 
   }
 }
 
-FunNameStack::FunNameStack( const FunNameStack& f)
+FunNameStack::FunNameStack(const FunNameStack& f)
 { 
   *this = f;
 }
 
 FunNameStack& FunNameStack::operator=(const FunNameStack& f)
 {
-  if(this == &(FunNameStack::instance()) )
-  {
-    mcerr<<"ERROR in FunNameStack& FunNameStack::operator=(const FunNameStack& f)\n";
-    mcerr<<"Attempt to copy to operative FunNameStack\n";
-    mcerr<<"You don't need and should not initialize main FunNameStack directly\n"; 
-    mcerr<<"If you want to change its parameters, use FunNameStack::instance()\n"; 
+  if (this == &(FunNameStack::instance())) {
+    mcerr << "ERROR in FunNameStack& FunNameStack::operator=(const FunNameStack& f)\n";
+    mcerr << "Attempt to copy to operative FunNameStack\n";
+    mcerr << "You don't need and should not initialize main FunNameStack directly\n"; 
+    mcerr << "If you want to change its parameters, use FunNameStack::instance()\n"; 
     Iprintn(mcout, this);
-    Iprintn(mcout, &(FunNameStack::instance()) );
+    Iprintn(mcout, &(FunNameStack::instance()));
     Iprintn(mcout, (*this));
-    Iprintn(mcout, (FunNameStack::instance()) );
+    Iprintn(mcout, (FunNameStack::instance()));
     
     spexit(mcerr);
   }
@@ -363,7 +356,7 @@ FunNameStack& FunNameStack::operator=(const FunNameStack& f)
   s_ignore_keynumberlist = 1; 
 #endif
 #endif
-  if(namestack != NULL) delete namestack;
+  if (namestack != NULL) delete namestack;
   namestack = new AbsList< NameStack > (*(f.namestack));
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
 #if defined( MAINTAIN_KEYNUMBER_LIST ) && defined( USE_BOOST_MULTITHREADING ) 
@@ -383,15 +376,11 @@ FunNameStack& FunNameStack::operator=(const FunNameStack& f)
 #ifdef USE_BOOST_MULTITHREADING
 #else
   int n;
-  for( n=0; n<f.qname; n++)
-  {
-    if(nmode == 0)
-    {
+  for (n = 0; n < f.qname; n++) {
+    if (nmode == 0) {
       name[n] = f.name[n];
-    }
-    else
-    {
-      int l = strlen(f.name[n])+1;
+    } else {
+      int l = strlen(f.name[n]) + 1;
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
       s_ignore_keynumberlist = 1; 
 #endif
@@ -399,7 +388,7 @@ FunNameStack& FunNameStack::operator=(const FunNameStack& f)
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
       s_ignore_keynumberlist = 0; 
 #endif
-   }
+    }
   }
 #endif
   return *this;
@@ -412,7 +401,6 @@ void FunNameStack::set_parameters(int fs_act, int fs_print)
 
 FunNameStack::~FunNameStack()
 { 
-  //cerr<<"~FunNameStack(): nmode="<<nmode<<'\n';
 #ifdef USE_BOOST_MULTITHREADING
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
 #if defined( MAINTAIN_KEYNUMBER_LIST ) && defined( USE_BOOST_MULTITHREADING ) 
@@ -434,7 +422,7 @@ FunNameStack::~FunNameStack()
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
   s_ignore_keynumberlist = 1; 
 #endif
-  if(nmode==1) for( n=0; n<qname; n++) delete name[n]; 
+  if (nmode==1) for (n=0; n < qname; n++) delete name[n]; 
 #ifdef USE_TOGETHER_WITH_CLEAN_NEW
   s_ignore_keynumberlist = 0; 
 #endif
@@ -446,104 +434,90 @@ FunNameStack::~FunNameStack()
 #include "util/FunNameStack.ic"
 #endif
   
-
-void FunNameStack::printput(ostream& file)
+void FunNameStack::printput(std::ostream& file)
 {
-  if(s_print==1 || s_print==2)
-  {
+  if (s_print == 1 || s_print == 2) {
 #ifdef USE_BOOST_MULTITHREADING
     NameStack* ns =  get_thread_stack();
-    file<<"FunNameStack::put: id="<<ns->id<<" qname="<<ns->qname
-	<<" last name= \"";
-    printname(file, ns, ns->qname-1);
-    file<<" \"\n";
+    file << "FunNameStack::put: id=" << ns->id << " qname=" << ns->qname
+	 << " last name= \"";
+    printname(file, ns, ns->qname - 1);
+    file << " \"\n";
 #else
-    file<<"FunNameStack::put: qname ="<<qname
-	<<" last name=";
-    printname(file,qname-1)<<'\n';
+    file << "FunNameStack::put: qname =" << qname
+	 << " last name=";
+    printname(file, qname - 1) << '\n';
 #endif
-  }
-  else if(s_print>=3)
-  {
+  } else if (s_print>=3) {
 #ifdef USE_BOOST_MULTITHREADING
-    NameStack* ns =  get_thread_stack();
-    file<<"FunNameStack::put: id="<<ns->id<<"\n"<<(*this);
+    NameStack* ns = get_thread_stack();
+    file << "FunNameStack::put: id=" << ns->id << "\n" << (*this);
 #else
-    file<<"FunNameStack::put:\n"<<(*this);
+    file << "FunNameStack::put:\n" << (*this);
 #endif
   }
 }
-void FunNameStack::printdel(ostream& file)
+void FunNameStack::printdel(std::ostream& file)
 {
-  if(s_print==2)
-  {
+  if (s_print==2) {
 #ifdef USE_BOOST_MULTITHREADING
     NameStack* ns =  get_thread_stack();
-    file<<"FunNameStack::del: id="<<ns->id<<" qname ="<<ns->qname
-	<<" last name= \"";
-    printname(file,ns, ns->qname-1);
-    file<<" \"\n";
+    file << "FunNameStack::del: id=" << ns->id << " qname =" << ns->qname
+	 << " last name= \"";
+    printname(file, ns, ns->qname - 1);
+    file << " \"\n";
 #else
-    file<<"FunNameStack::del: qname ="<<qname
-	<<" last name="; 
-    printname(file,qname-1)<<'\n';
+    file << "FunNameStack::del: qname =" << qname
+	 << " last name="; 
+    printname(file, qname - 1) << '\n';
 #endif
-  }
-  else if(s_print==4)
-  {
-    file<<"FunNameStack::del:\n"<<(*this);
+  } else if(s_print==4) {
+    file << "FunNameStack::del:\n" << (*this);
   }
 }
 
-ostream& operator<<(ostream& file, const FunNameStack& f)
+std::ostream& operator<<(std::ostream& file, const FunNameStack& f)
 {
-  if(f.s_act == 1)
-  {
+  if (f.s_act == 1) {
 #ifdef USE_BOOST_MULTITHREADING
-    file<<"FunNameStack: s_init="<<f.s_init<<'\n';
+    file << "FunNameStack: s_init=" << f.s_init << '\n';
     long nret, qret;
-    NameStack* ns =  f.get_thread_stack_q(nret, qret);
-    file<<" id="<<ns->id<<" qname="<<ns->qname<<'\n';
-    file<<"At the time of scanning there were "<<qret<<" threads \n"
-	<<"registered in FunNameStack system.\n";
-    file<<"The current one appeared nth: "<<nret<<'\n';
+    NameStack* ns = f.get_thread_stack_q(nret, qret);
+    file << " id=" << ns->id << " qname=" << ns->qname << '\n';
+    file << "At the time of scanning there were " << qret << " threads \n"
+	 << "registered in FunNameStack system.\n";
+    file << "The current one appeared nth: " << nret << '\n';
     int n;
-    for( n=0; n<ns->qname; n++)
-    {
-      //file<<"  n ="<<setw(3)<<n<<"  "<<f.name[n]<<'\n';
-      file<<setw(3)<<n<<"  "<<ns->name[n]<<' '<<'\n';
+    for (n = 0; n < ns->qname; n++) {
+      //file << "  n =" << std::setw(3) << n << "  " << f.name[n] << '\n';
+      file << std::setw(3) << n << "  " << ns->name[n] << " \n";
     }
-
-
-
-
 #else
-    file<<"FunNameStack: s_init="<<f.s_init<<" qname="<<f.qname<<'\n';
+    file << "FunNameStack: s_init=" << f.s_init << " qname=" << f.qname << '\n';
     int n;
-    for( n=0; n<f.qname; n++)
-    {
-      //file<<"  n ="<<setw(3)<<n<<"  "<<f.name[n]<<'\n';
-      file<<setw(3)<<n<<"  "<<f.name[n]<<' '<<'\n';
+    for (n = 0; n < f.qname; n++) {
+      //file << "  n =" << std::setw(3) << n << "  " << f.name[n] << '\n';
+      file << std::setw(3) << n << "  " << f.name[n] << " \n";
     }
 #endif
   }
   return file;
 }
 
-ostream& operator<<(ostream& file, const FunNameWatch& f)
+std::ostream& operator<<(std::ostream& file, const FunNameWatch& f)
 {
   f.hdr(file);
   return file;
 }
 
 //ostream& operator<<(ostream& file, const GenError& f)
-void GenError::print(ostream& file)
+void GenError::print(std::ostream& file)
 {
-  file<<"GenError::print: ERROR detected in:\n"
-      <<statcast( FunNameStack* , this)<<'\n';
+  file << "GenError::print: ERROR detected in:\n"
+       << statcast(FunNameStack* , this) << '\n';
   //<<static_cast<FunNameStack*>(this)<<'\n';
 }
-void GenError::finish(ostream& file)
+void GenError::finish(std::ostream& file)
 {
   print(file); exit(1);
 }

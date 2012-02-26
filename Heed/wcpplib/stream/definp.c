@@ -2,15 +2,16 @@
 #include "wcpplib/stream/definp.h"
 #include "wcpplib/stream/findmark.h"
 
+using namespace std;
+
 int definp_int(const String& str)
 {
   mfunnamep("int definp_int(const String& str)");
-  int i=0;
+  int i = 0;
   mcout<<"definp_int: starting, read int "<<str<<"\n";
-  if(str != String())
-  {
+  if(str != String()) {
     // search for mark
-    int i_ret = findmark(cin, str.c_str());
+    int i_ret = findmark(std::cin, str.c_str());
     check_econd11(i_ret , != 1 , mcerr);
   }
   cin>>i;

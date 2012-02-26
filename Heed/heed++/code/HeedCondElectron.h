@@ -39,10 +39,7 @@ class HeedCondElectron
   //HeedCondElectron(point fpt, point fptloc, manip_absvol_treeid ftid,
   //		   PassivePtr< HeedDeltaElectron > fparent_de):
   // pt(fpt), ptloc(fptloc), tid(ftid), parent_de(fparent_de) {;}
-  virtual void print(ostream& file, int l) const ;
-
-
-
+  virtual void print(std::ostream& file, int l) const ;
 };
 
 

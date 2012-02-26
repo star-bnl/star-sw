@@ -25,12 +25,12 @@ class HeedPhoton: public gparticle
   int s_photon_absorbed;  // used in physics_after_new_speed
   long na_absorbing;  // number of absorbing atom
   long ns_absorbing;  // number of absorbing shell
-  int s_delta_generated;  // sign that delta-electrons are already generated 
-                          // from this
 #ifdef SFER_PHOTOEL
   int s_sfer_photoel;
 #endif
-  // ( or cannot be generated )
+  // sign that delta-electrons are already generated (or cannot be created) 
+  int s_delta_generated;  
+
   HeedPhoton(manip_absvol* primvol, const point& pt, 
 	     const vec& vel, vfloat time, 
 	     long fparent_particle_number,
@@ -41,7 +41,7 @@ class HeedPhoton: public gparticle
   void physics_after_new_speed(void);
   virtual void physics(void);
   HeedPhoton(void): gparticle() {;}
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const;
   macro_copy_total(HeedPhoton);
   virtual ~HeedPhoton() {;}
   

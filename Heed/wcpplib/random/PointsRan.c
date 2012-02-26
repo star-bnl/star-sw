@@ -14,7 +14,7 @@ It is provided "as is" without express or implied warranty.
 */
 
 PointsRan::PointsRan(DynLinArr< double > fx, DynLinArr< double > fy, 
-		     double fxmin, double fxmax): 
+                     double fxmin, double fxmax): 
   xmin(fxmin), xmax(fxmax), x(fx), y(fy)
 {
   mfunnamep("PointsRan::PointsRan(...)");
@@ -86,7 +86,7 @@ PointsRan::PointsRan(DynLinArr< double > fx, DynLinArr< double > fy,
     else if(xmin > x[n-1])
     {
       integ_start += (xmin - x[n-1]) * 
-	(y[n-1] + 0.5 * a[n-1]*(xmin - x[n-1]) );
+        (y[n-1] + 0.5 * a[n-1]*(xmin - x[n-1]) );
       n_start = n-1;
     }
     if(xmax >= x[n])
@@ -97,7 +97,7 @@ PointsRan::PointsRan(DynLinArr< double > fx, DynLinArr< double > fy,
     else if(xmax > x[n-1])
     {
       integ_finish += (xmax - x[n-1]) * 
-	(y[n-1] + 0.5 * a[n-1]*(xmax - x[n-1]) );
+        (y[n-1] + 0.5 * a[n-1]*(xmax - x[n-1]) );
       n_finish = n;
     }
   }
@@ -105,12 +105,12 @@ PointsRan::PointsRan(DynLinArr< double > fx, DynLinArr< double > fy,
   /*
   for( n=0; n<q; n++)
   {
-    mcout<<setw(3)<<n
-	<<' '<<setw(12)<<x[n]
-	<<' '<<setw(12)<<y[n]
-	<<' '<<setw(12)<<iy[n];
+    mcout<<std::setw(3)<<n
+        <<' '<<std::setw(12)<<x[n]
+        <<' '<<std::setw(12)<<y[n]
+        <<' '<<std::setw(12)<<iy[n];
     if(n < q-1)
-      mcout<<' '<<setw(12)<<a[n];
+      mcout<<' '<<std::setw(12)<<a[n];
     mcout<<'\n';
   }
   */
@@ -160,27 +160,27 @@ double PointsRan::ran(double flat_ran) const
   return r;
 }
 
-void PointsRan::print(ostream& file) const
+void PointsRan::print(std::ostream& file) const
 {
-  Ifile<<"PointsRan:\n";
-  indn.n+=2;
-  Ifile<<"xmin="<<xmin<<" xmax="<<xmax<<'\n';
-  Ifile<<"n_start="<<n_start<<" n_finish="<<n_finish<<'\n';
-  Ifile<<"integ_start="<<integ_start<<" integ_finish="<<integ_finish<<'\n';
-  Ifile<<"integ_total="<<integ_total<<" integ_active="<<integ_active<<'\n';
+  Ifile << "PointsRan:\n";
+  indn.n += 2;
+  Ifile << "xmin=" << xmin << " xmax=" << xmax << '\n';
+  Ifile << "n_start=" << n_start << " n_finish=" << n_finish << '\n';
+  Ifile << "integ_start=" << integ_start 
+        << " integ_finish=" << integ_finish << '\n';
+  Ifile << "integ_total=" << integ_total 
+        << " integ_active=" << integ_active << '\n';
   //Iprintn(file, integ);
   long q = x.get_qel();
   Iprintn(file, q);
   long n;
-  for( n=0; n<q; n++)
-  {
-    file<<setw(3)<<n
-	<<' '<<setw(12)<<x[n]
-	<<' '<<setw(12)<<y[n]
-	<<' '<<setw(12)<<iy[n];
-    if(n < q-1)
-      file<<' '<<setw(12)<<a[n];
-    file<<'\n';
+  for(n = 0; n < q; n++) {
+    file << std::setw(3) << n
+         << ' ' << std::setw(12) << x[n]
+         << ' ' << std::setw(12) << y[n]
+         << ' ' << std::setw(12) << iy[n];
+    if (n < q - 1) file << ' ' << std::setw(12) << a[n];
+    file << '\n';
   }
-  indn.n-=2;
+  indn.n -= 2;
 }

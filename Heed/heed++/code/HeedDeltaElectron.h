@@ -63,7 +63,7 @@ class HeedDeltaElectron: public eparticle
   //EnTransfCS* encs);
   virtual void physics_mrange(double& fmrange);
   virtual void physics_after_new_speed(void);
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const;
   macro_copy_total(HeedDeltaElectron);
   virtual ~HeedDeltaElectron() {;}
   //virtual ~HeedDeltaElectron(void);

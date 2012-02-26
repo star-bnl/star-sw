@@ -45,7 +45,7 @@ class HeedParticle_BGM: public eparticle
 	    //EnTransfCS* encs);
   virtual void physics(void);
   HeedParticle_BGM(void): eparticle() { ; }
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(HeedParticle_BGM);
   virtual ~HeedParticle_BGM() {;}
   double transferred_energy_in_step;  // internal units

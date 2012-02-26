@@ -379,13 +379,13 @@ void vec::random_sfer_vec()
 }
 
 
-ostream& operator<<(ostream& file, const vec& v)
+std::ostream& operator<<(std::ostream& file, const vec& v)
 {
-  Ifile<<"vector="
-       <<setw(13)<<v.x
-       <<setw(13)<<v.y
-       <<setw(13)<<v.z;
-  file<<'\n';
+  Ifile << "vector="
+        << std::setw(13) << v.x
+        << std::setw(13) << v.y
+        << std::setw(13) << v.z;
+  file << '\n';
   file.flush();
   return file;
 }
@@ -395,9 +395,9 @@ vec dey(0,1,0);
 vec dez(0,0,1);
 vec dv0(0,0,0);
 
-ostream& operator<<(ostream& file, const vecReg& v)
+std::ostream& operator<<(std::ostream& file, const vecReg& v)
 {
-  Ifile<<"vecReg="<<((vec&)v);
+  Ifile << "vecReg=" << ((vec&)v);
   return file;
 }
 
@@ -562,22 +562,22 @@ basis::basis(const vec &pex, const vec &pey, const vec &pez,
 }
 
 void 
-basis::print(ostream& file, int l) const {
+basis::print(std::ostream& file, int l) const {
  
-  file<<(*this);
+  file << (*this);
 
 }
 
-ostream& operator<<(ostream& file, const basis& b)
+std::ostream& operator<<(std::ostream& file, const basis& b)
 {
-  Ifile<<"basis: name="<<b.name<<'\n';
-  indn.n+=2;
-  int indnsave=indn.n;
-  Ifile<<"ex: "; indn.n=0; file<<b.ex; indn.n=indnsave;
-  Ifile<<"ey: "; indn.n=0; file<<b.ey; indn.n=indnsave;
-  Ifile<<"ez: "; indn.n=0; file<<b.ez; indn.n=indnsave;
-  indn.n-=2;
-  //file<<'\n';
+  Ifile << "basis: name=" << b.name << '\n';
+  indn.n += 2;
+  int indnsave = indn.n;
+  Ifile << "ex: "; indn.n=0; file << b.ex; indn.n = indnsave;
+  Ifile << "ey: "; indn.n=0; file << b.ey; indn.n = indnsave;
+  Ifile << "ez: "; indn.n=0; file << b.ez; indn.n = indnsave;
+  indn.n -= 2;
+  //file << '\n';
   return file;
 }
 ostream& operator<<(ostream& file, const basisReg& b)

@@ -6,17 +6,12 @@
 #ifndef G_COMPONENT_CST_H
 #define G_COMPONENT_CST_H
 
-#include <RQ_OBJECT.h>
-
 #include <vector>
 #include "ComponentFieldMap.hh"
-
 
 namespace Garfield {
 
 class ComponentCST: public ComponentFieldMap {
-
-  RQ_OBJECT("ComponentCST")
 
   public:
     // Constructor
@@ -53,8 +48,8 @@ class ComponentCST: public ComponentFieldMap {
     // Range
     bool IsInBoundingBox(const double x, const double y, const double z) {
       return x >= xMinBoundingBox && x <= xMaxBoundingBox &&
-          y >= yMinBoundingBox && y <= yMaxBoundingBox &&
-          z >= zMinBoundingBox && z <= zMaxBoundingBox;
+             y >= yMinBoundingBox && y <= yMaxBoundingBox &&
+             z >= zMinBoundingBox && z <= zMaxBoundingBox;
     }
 
     void SetRangeZ(const double zmin, const double zmax);
@@ -64,8 +59,8 @@ class ComponentCST: public ComponentFieldMap {
     // Verify periodicities
     void UpdatePeriodicity();
     int FindElementCube(const double x, const double y, const double z,
-                          double& t1, double& t2, double& t3,
-                          double jac[3][3], double& det);
+                        double& t1, double& t2, double& t3,
+                        double jac[3][3], double& det);
     double GetElementVolume(const int i);
     void GetAspectRatio(const int i, double& dmin, double& dmax);
     static bool Greater(const double &a, const double &b) {return (a > b);};
@@ -73,14 +68,13 @@ class ComponentCST: public ComponentFieldMap {
 };
 
 struct PolygonInfo {
-  //this struct is used for drawing the mesh with ViewFEMesh.h
+  // This struct is used for drawing the mesh with ViewFEMesh.h
   double p1[2];
   double p2[2];
   double p3[2];
   double p4[2];
   int element;
   int material;
-
 };
 
 }

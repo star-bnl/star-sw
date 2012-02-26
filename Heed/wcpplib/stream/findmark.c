@@ -15,80 +15,73 @@ text appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 
-int findmark(istream &file, const char * s)
+int findmark(std::istream &file, const char* s)
 {
-  //char c;
   int ic;
-  int l=strlen(s);  // length does not include end symbol 
+  int l = strlen(s);  // length does not include end symbol 
   int n;
-  //cout<<"l="<<l<<'\n';
-  char *fs=new char[l+1];
-  for( n=0; n<l; n++)
-    if((ic=file.get())==EOF) { delete[] fs; return 0; }
-    else fs[n]=ic;
-  fs[l]='\0';
-  //cout<<fs<<'\n';
-  while(strcmp(fs,s)!=0)
-  {
-    for( n=1; n<l; n++) fs[n-1]=fs[n];
-    if((ic=file.get())==EOF) { delete[] fs; return 0; }
-    fs[l-1]=ic;
-    fs[l]='\0';
-    //cout<<fs<<'\n';
+  char *fs = new char[l + 1];
+  for (n = 0; n < l; n++) {
+    if ((ic = file.get()) == EOF) {
+      delete[] fs; return 0;
+    } else {
+      fs[n] = ic;
+    }
   }
-  delete[] fs;
+  fs[l] = '\0';
+  while (strcmp(fs,s) != 0) {
+    for (n = 1; n < l; n++) fs[n - 1] = fs[n];
+    if ((ic = file.get()) == EOF) {
+      delete[] fs; return 0;
+    }
+    fs[l - 1] = ic;
+    fs[l] = '\0';
+  }
+  delete [] fs;
   return 1;
 }
 
-int findmark_other_repeat(istream &file, ostream &outfile, const char * s)
+int findmark_other_repeat(std::istream& file, std::ostream& outfile, 
+                          const char* s)
 {
-  //char c;
   int ic;
-  int l=strlen(s);  // length does not include end symbol 
+  int l = strlen(s);  // length does not include end symbol 
   int n;
-  //cout<<"l="<<l<<'\n';
-  char *fs=new char[l+1];
-  for( n=0; n<l; n++)
-    if((ic=file.get())==EOF) 
-    { 
-      fs[n]=ic;
-      outfile.write(fs, n+1);
-      delete[] fs; return 0; 
+  char *fs = new char[l + 1];
+  for (n = 0; n < l; n++) {
+    if ((ic = file.get()) == EOF) { 
+      fs[n] = ic;
+      outfile.write(fs, n + 1);
+      delete [] fs; return 0; 
+    } else {
+      fs[n] = ic;
     }
-    else fs[n]=ic;
-  fs[l]='\0';
-  //cout<<fs<<'\n';
-  int s_not_new_line=0;
-  while(strcmp(fs,s)!=0)
-  {
-    if(fs[0] != '\n')
-    {
-      if((fs[0] == '\t' || fs[0] ==' ')  && s_not_new_line == 0)
-	;
-      else
-      {
-	s_not_new_line=1;
-	outfile.put(fs[0]);
+  }
+  fs[l] = '\0';
+  int s_not_new_line = 0;
+  while (strcmp(fs,s) != 0) {
+    if (fs[0] != '\n') {
+      if ((fs[0] == '\t' || fs[0] == ' ') && s_not_new_line == 0) {  
+        ;
+      } else {
+        s_not_new_line = 1;
+        outfile.put(fs[0]);
       }
+    } else {
+      if (s_not_new_line == 1) outfile.put(fs[0]); // to finish valid line
+      s_not_new_line = 0;  // to avoid switching to new line with empty old one
     }
-    else
-    {
-      if(s_not_new_line==1)
-	outfile.put(fs[0]);  // to finish valid line
-      s_not_new_line=0;  // to avoid switching to new line with empty old one
-    }
-    for( n=1; n<l; n++) fs[n-1]=fs[n];
-    if((ic=file.get())==EOF) { delete[] fs; return 0; }
-    fs[l-1]=ic;
-    fs[l]='\0';
-    //cout<<fs<<'\n';
+    for (n = 1; n < l; n++) fs[n - 1] = fs[n];
+    if ((ic = file.get()) == EOF) {delete [] fs; return 0;}
+    fs[l - 1] = ic;
+    fs[l] = '\0';
   }
   delete[] fs; 
   return 1;
 }
 
 
-int find1ofnmark(istream &file, int q, char * s[])
+int find1ofnmark(std::istream &file, int q, char * s[])
 {
   //mcout<<"find1ofnmark is started\n";
   //char c;
@@ -131,13 +124,13 @@ int find1ofnmark(istream &file, int q, char * s[])
       int ss=1;
       for( i=0; i<q; i++)
       {
-	if(l_max - pos_fs[i] < l[i])
-	{
-	  pos_fs[i]--; ss=0;
-	  //mcout<<"s[i]="<<s[i]<<'\n';
-	  //mcout<<"i="<<i<<" l_max="<<l_max<<" pos_fs[i]="<<pos_fs[i]
-	  //     <<" l[i]="<<l[i]<<" "<< &(fs[ pos_fs[i] ])<<'\n';
-	}
+        if(l_max - pos_fs[i] < l[i])
+        {
+          pos_fs[i]--; ss=0;
+          //mcout<<"s[i]="<<s[i]<<'\n';
+          //mcout<<"i="<<i<<" l_max="<<l_max<<" pos_fs[i]="<<pos_fs[i]
+          //     <<" l[i]="<<l[i]<<" "<< &(fs[ pos_fs[i] ])<<'\n';
+        }
       }
       if( ss == 1) s_init_pos_fs=1;
     }
@@ -145,8 +138,8 @@ int find1ofnmark(istream &file, int q, char * s[])
     {
       if( strcmp(&( fs[ pos_fs[i] ] ), s[i] ) == 0 )
       {
-	delete[] l; delete[] fs; delete[] pos_fs;
-	return i;
+        delete[] l; delete[] fs; delete[] pos_fs;
+        return i;
       }
     }
   }
@@ -155,8 +148,8 @@ int find1ofnmark(istream &file, int q, char * s[])
   return -1;
 }
 
-int find1ofnmark(istream &file, int q,  // number of strings 
-		 const String str[])      // addresses
+int find1ofnmark(std::istream &file, int q,  // number of strings 
+                 const String str[])      // addresses
 {
   char **s =  new char*[q];
   int i;

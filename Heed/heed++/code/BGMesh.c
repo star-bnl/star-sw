@@ -6,7 +6,7 @@ BGMesh::BGMesh(double fxmin, double fxmax, long fq):
   x = make_log_mesh(fxmin, fxmax, fq);
 }
 
-void BGMesh::print(ostream& file, int l) const
+void BGMesh::print(std::ostream& file, int l) const
 {
   if(l <= 0 ) return;
   Ifile<<"BGMesh (l="<<l<<"): \n";
@@ -20,9 +20,9 @@ void BGMesh::print(ostream& file, int l) const
   indn.n-=2;
 }
 
-ostream& operator<<(ostream& file, const BGMesh& bgm)
+std::ostream& operator<<(std::ostream& file, const BGMesh& bgm)
 {
-  Ifile<<"operator<<(ostream& file, const BGMesh& bgm):\n";
+  Ifile<<"operator<<(std::ostream& file, const BGMesh& bgm):\n";
   bgm.print(file, 2);
   return file;
 }

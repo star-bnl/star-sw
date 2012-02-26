@@ -107,7 +107,7 @@ template<class T> class EqualStepCoorMesh
   
   EqualStepCoorMesh<T>(void): q(0), xmin(0), xmax(0), step(0) {;}
   EqualStepCoorMesh<T>(long fq, T fxmin, T fxmax);
-  void print(ostream& file) const ;
+  void print(std::ostream& file) const ;
 
 private:
   long q;  // the number of steps or intervals;
@@ -267,7 +267,7 @@ int EqualStepCoorMesh<T>::get_interval_extrap(T x,
 }
 
 template<class T>
-void EqualStepCoorMesh<T>::print(ostream& file) const 
+void EqualStepCoorMesh<T>::print(std::ostream& file) const 
 {
   Ifile<<"EqualStepCoorMesh<T>:\n";
   indn.n+=2;
@@ -277,14 +277,14 @@ void EqualStepCoorMesh<T>::print(ostream& file) const
 }
 
 template<class T>
-ostream& operator<<(ostream& file, const EqualStepCoorMesh<T>& f)
+std::ostream& operator<<(std::ostream& file, const EqualStepCoorMesh<T>& f)
 {
   f.print(file);
   return file;
 }
 
 template<class T>
-istream& operator>>(istream& file, EqualStepCoorMesh<T>& f)
+std::istream& operator>>(std::istream& file, EqualStepCoorMesh<T>& f)
 {
   mfunname("istream& operator>>(istream& file, EqualStepCoorMesh<T>& f)");
   definp_endpar dep(&file, 0, 1, 0);
@@ -506,7 +506,7 @@ template<class T, class D> class PointCoorMesh
   // macro CHECK_POINT_MESH is initialized.
 
 
-  virtual void print(ostream& file) const ;
+  virtual void print(std::ostream& file) const ;
 
 private:
   long q;  // the number of points
@@ -783,7 +783,7 @@ int PointCoorMesh<T,D>::get_interval_extrap(T x,
 }
 
 template<class T, class D>
-void PointCoorMesh<T,D>::print(ostream& file) const 
+void PointCoorMesh<T,D>::print(std::ostream& file) const 
 {
   Ifile<<"PointCoorMesh<T,D>:\n";
   indn.n+=2;
@@ -808,7 +808,7 @@ void PointCoorMesh<T,D>::print(ostream& file) const
 }
 
 template<class T, class D>
-ostream& operator<<(ostream& file, const PointCoorMesh<T,D>& f)
+std::ostream& operator<<(std::ostream& file, const PointCoorMesh<T,D>& f)
 {
   f.print(file);
   return file;
@@ -907,7 +907,7 @@ template<class T> class CopiedPointCoorMesh
     }
     return *this;
   }
-  void print(ostream& file) const ;
+  void print(std::ostream& file) const ;
 
   
 private:
@@ -1204,7 +1204,7 @@ int CopiedPointCoorMesh<T>::get_interval_extrap(T x,
 }
 
 template<class T>
-void CopiedPointCoorMesh<T>::print(ostream& file) const 
+void CopiedPointCoorMesh<T>::print(std::ostream& file) const 
 {
   Ifile<<"CopiedPointCoorMesh<T>:\n";
   indn.n+=2;
@@ -1230,7 +1230,7 @@ void CopiedPointCoorMesh<T>::print(ostream& file) const
 }
 
 template<class T>
-ostream& operator<<(ostream& file, CopiedPointCoorMesh<T>& f)
+std::ostream& operator<<(std::ostream& file, CopiedPointCoorMesh<T>& f)
 {
   f.print(file);
   return file;
@@ -1238,7 +1238,7 @@ ostream& operator<<(ostream& file, CopiedPointCoorMesh<T>& f)
 
 
 template<class T>
-istream& operator>>(istream& file, CopiedPointCoorMesh<T>& f)
+std::istream& operator>>(std::istream& file, CopiedPointCoorMesh<T>& f)
 {
   mfunname("istream& operator>>(istream& file, CopiedPointCoorMesh<T>& f)");
   definp_endpar dep(&file, 0, 1, 0);
@@ -1343,7 +1343,7 @@ template<class T> class AbsCoorMesh: public RegPassivePtr
 
   virtual int get_step(long n, T& fstep) const = 0;
   
-  virtual void print(ostream& file) const 
+  virtual void print(std::ostream& file) const 
   { Ifile<<"AbsCoorMesh: no content.\n"; }  // 24 characters
    
 
@@ -1384,7 +1384,7 @@ template<class T> class AbsCoorMesh: public RegPassivePtr
 
 
 template<class T>
-ostream& operator<<(ostream& file, AbsCoorMesh<T>& f)
+std::ostream& operator<<(std::ostream& file, AbsCoorMesh<T>& f)
 {
   f.print(file);
   return file;
@@ -1434,7 +1434,7 @@ template<class T> class VirtEqualStepCoorMesh:
   VirtEqualStepCoorMesh<T>(long fq, T fxmin, T fxmax): 
     EqualStepCoorMesh<T>(fq, fxmin, fxmax) {}
 
-  virtual void print(ostream& file) const 
+  virtual void print(std::ostream& file) const 
     { Ifile<<"VirtEqualStepCoorMesh<T>:  \n"; indn.n+=2;
     // two blanks there above are necessary for correct reading 
     EqualStepCoorMesh< T >::print(file); indn.n-=2; }
@@ -1473,14 +1473,14 @@ template<class T> class VirtEqualStepCoorMesh:
 };
 
 template<class T>
-ostream& operator<<(ostream& file, VirtEqualStepCoorMesh<T>& f)
+std::ostream& operator<<(std::ostream& file, VirtEqualStepCoorMesh<T>& f)
 {
   f.print(file);
   return file;
 }
 
 template<class T>
-istream& operator>>(istream& file, VirtEqualStepCoorMesh<T>& f)
+std::istream& operator>>(std::istream& file, VirtEqualStepCoorMesh<T>& f)
 {  
   mfunname("istream& operator>>(istream& file, VirtEqualStepCoorMesh<T>& f)");
   definp_endpar dep(&file, 0, 1, 0);
@@ -1569,7 +1569,7 @@ template<class T> class VirtCopiedPointCoorMesh:
     CopiedPointCoorMesh< T >(famesh) 
   { }
 
-  virtual void print(ostream& file) const 
+  virtual void print(std::ostream& file) const 
     { Ifile<<"VirtCopiedPointCoorMesh<T>:\n"; indn.n+=2; 
     CopiedPointCoorMesh< T >::print(file); indn.n-=2; }
 
@@ -1608,14 +1608,14 @@ template<class T> class VirtCopiedPointCoorMesh:
 
 
 template<class T>
-ostream& operator<<(ostream& file, VirtCopiedPointCoorMesh<T>& f)
+std::ostream& operator<<(std::ostream& file, VirtCopiedPointCoorMesh<T>& f)
 {
   f.print(file);
   return file;
 }
 
 template<class T>
-istream& operator>>(istream& file, VirtCopiedPointCoorMesh<T>& f)
+std::istream& operator>>(std::istream& file, VirtCopiedPointCoorMesh<T>& f)
 {
   mfunname("istream& operator>>(istream& file, VirtCopiedPointCoorMesh<T>& f)");
   definp_endpar dep(&file, 0, 1, 0);
@@ -1711,7 +1711,7 @@ int operator!=(const AbsCoorMesh<T>& f1,
 }
 */
 template<class T>
-ActivePtr< AbsCoorMesh<T> > read_AbsCoorMesh(istream& file)
+ActivePtr< AbsCoorMesh<T> > read_AbsCoorMesh(std::istream& file)
 {
   mfunnamep("ActivePtr< AbsCoorMesh<T> > read_AbsCoorMesh(istream& file)");
   const long q = 28;
@@ -2477,10 +2477,6 @@ T t_hispre_step_ar(const M& mesh,
   long qi = mesh.get_qi();
   check_econd12(qi , < , 1 , mcerr);
   
-  //if(x1 > x2) return 0.0;
-  double xmin = mesh.get_xmin();
-  double xmax = mesh.get_xmax();
-  long istart, iafterend; // indexes to sum total intervals
   T s(0.0);
   long n=0;
   T xp1(0.0);
@@ -3098,7 +3094,6 @@ T t_integ_generic_point_ar(const M& mesh,
   if(x2 <= left_bond ) return 0.0;
   if(x1 >= right_bond ) return 0.0;
   // long istart, iafterend; // indexes to sum total intervals
-  T s(0.0);
   if(x1 < left_bond) x1 = left_bond;
   if(x2 > right_bond) x2 = right_bond;
   if(x1 <= xmin && s_extrap_left == 0)

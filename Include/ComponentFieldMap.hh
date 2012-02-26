@@ -1,16 +1,12 @@
 #ifndef G_COMPONENT_FIELD_MAP_H
 #define G_COMPONENT_FIELD_MAP_H
 
-#include <RQ_OBJECT.h>
-
 #include "ComponentBase.hh"
 
 namespace Garfield {
 
 class ComponentFieldMap : public ComponentBase {
 
-  RQ_OBJECT("ComponentFieldMap")
-    
   public:
     // Constructor
     ComponentFieldMap();

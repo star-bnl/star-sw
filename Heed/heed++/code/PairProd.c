@@ -2,8 +2,8 @@
 #include <cmath>
 #include <cfloat>
 #include <climits>
-#include "heed++/code/PairProd.h"
 #include "wcpplib/random/ranluxint.h"
+#include "heed++/code/PairProd.h"
 /*
 2003, I. Smirnov
 */
@@ -20,30 +20,27 @@ PairProd::PairProd(const String& file_name, double fwa, double ffactorFano):
   mfunnamep("PairProd::PairProd(const String& file_name, double fwa, double ffactorFano)");
   
 #ifdef USE_STLSTRING
-  ifstream file(file_name.c_str());
+  std::ifstream file(file_name.c_str());
 #else
-  ifstream file(file_name);
+  std::ifstream file(file_name);
 #endif
-  if( !file )
-  {
+  if (!file) {
     funnw.ehdr(mcerr);
-    mcerr<<"cannot open file "<<file_name<<endl;
+    mcerr << "cannot open file " << file_name << std::endl;
     spexit(mcerr);
   }
   long q;
-  file>>wa_table>>I_table>>J_table>>factorFano_table>>q;
-  if( !file.good() )
-  {
+  file >> wa_table >> I_table >> J_table >> factorFano_table >> q;
+  if (!file.good()) {
     funnw.ehdr(mcerr);
-    mcerr<<"error at reading file"<<endl;
+    mcerr << "error at reading file" << std::endl;
     spexit(mcerr);
   }
   DynLinArr< double > xx(q);
   DynLinArr< double > yy(q);
   long n;
-  for( n=0; n<q; n++)
-  {
-    file>>xx[n]>>yy[n];
+  for(n = 0; n < q; n++) {
+    file >> xx[n] >> yy[n];
   }
   pran = PointsRan(xx, yy, I_table, J_table);
   k = sqrt( factorFano * wa * wa / (factorFano_table * wa_table * wa_table) );
@@ -101,15 +98,16 @@ double PairProd::get_eloss(double e_cur) const
 
 #endif
 
-void PairProd::print(ostream& file) const 
-{
-  Ifile<<"PairProd:\n";
-  indn.n+=2;
-  Ifile<<"wa="<<wa<<" factorFano="<<factorFano<<'\n';
-  Ifile<<"wa_table="<<wa_table<<" factorFano_table="<<factorFano_table<<'\n';
-  Ifile<<" I_table="<<I_table<<" J_table="<<J_table<<" k="<<k<<" s="<<s<<'\n';
-  pran.print(file);
-  indn.n-=2;
+void PairProd::print(std::ostream& file, int l) const {
+  if (l > 0) {
+    Ifile<<"PairProd:\n";
+    indn.n += 2;
+    Ifile<<"wa="<<wa<<" factorFano="<<factorFano<<'\n';
+    Ifile<<"wa_table="<<wa_table<<" factorFano_table="<<factorFano_table<<'\n';
+    Ifile<<" I_table="<<I_table<<" J_table="<<J_table<<" k="<<k<<" s="<<s<<'\n';
+    pran.print(file);
+    indn.n-=2;
+  }
 }
   
  

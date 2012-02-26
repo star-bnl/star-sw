@@ -16,8 +16,6 @@ the energies could be in any units.
 2003, I. Smirnov
 */
 
-
-
 class PairProd: public RegPassivePtr
 {public:
   PairProd(void){;}
@@ -27,7 +25,7 @@ class PairProd: public RegPassivePtr
   // ecur is also in eV
   // No it can be different, see PairProd.c
 
-  virtual void print(ostream& file) const ;
+  virtual void print(std::ostream& file, int l) const;
 private:
   double wa;
   double factorFano;
@@ -55,7 +53,6 @@ private:
   //DynLinArr< double > xx;
   //DynLinArr< double > yy;
   PointsRan pran;
-
 
 };
 

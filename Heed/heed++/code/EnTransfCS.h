@@ -81,11 +81,11 @@ class EnTransfCS: public RegPassivePtr  // Energy Transfer Cross Section
                    // The difference shows the uncertainty of the value above
                    // arising from the finite number of intyervals
   double  meanC1;  //first moment with whole additional tail
-		   // to emax - kinematically allowed transition.
-		   // Now it is calculated only for heavy particles
-		   // because the integral for electrons is not
-		   // trivial,
-		   // or mean energy loss, Mev.
+                   // to emax - kinematically allowed transition.
+                   // Now it is calculated only for heavy particles
+                   // because the integral for electrons is not
+                   // trivial,
+                   // or mean energy loss, Mev.
 #ifndef EXCLUDE_A_VALUES
   double  meanC1_a; 
 #endif
@@ -146,21 +146,16 @@ class EnTransfCS: public RegPassivePtr  // Energy Transfer Cross Section
      The bode of constructor as well as the data volume are very large.
  
   EnTransfCS(double fparticle_mass, double fgamma_1, 
-	    int fs_primary_electron, 
-	    HeedMatterDef* fhmd);
+            int fs_primary_electron, 
+            HeedMatterDef* fhmd);
   */
   EnTransfCS(void) {};
   EnTransfCS(double fparticle_mass, double fgamma_1, 
-	    int fs_primary_electron, 
-	    HeedMatterDef* fhmd, long fparticle_charge=1);
+            int fs_primary_electron, 
+            HeedMatterDef* fhmd, long fparticle_charge=1);
  
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(EnTransfCS);
-
-
-
-
-
 };
 
 class EnTransfCSType
@@ -169,7 +164,7 @@ class EnTransfCSType
   EnTransfCSType(void): etcs() {;}
   EnTransfCSType(EnTransfCS* md): etcs(md) {;}
 };
-ostream & operator << (ostream & file, const EnTransfCSType & f);
+std::ostream& operator << (std::ostream& file, const EnTransfCSType& f);
 
 
 #endif

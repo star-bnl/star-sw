@@ -56,10 +56,7 @@ public:
   double get_integ_total(void) const  {return integ_total;}
   double get_integ_active(void) const  {return integ_active;}
   // actual integral of active distribution
-  void print(ostream& file) const;
+  void print(std::ostream& file) const;
 };
-
-
-
 
 #endif

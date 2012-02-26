@@ -9,7 +9,7 @@
 
 /* Four functions below looks for string in cin input stream,
 read a value of a corresponding type and  return it.
-They may be dangerous because they do not require s separator in front of string.
+They may be dangerous because they do not require a separator in front of string.
 Therefore the longer name which has the same ending can be erroneously taken
 instead of the looked one.
 The rewind is not made. Therefore the names should appear in order.

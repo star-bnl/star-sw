@@ -108,9 +108,8 @@ It is provided "as is" without express or implied warranty.
 */
 
 #include <iostream>   // to define cout and cerr
-using std::ostream;
-
-using std::cout;
+// using std::ostream;
+// using std::cout;
 
 #define USE_DEFAULT_STREAMS   // otherwise everything will be flushed to a file.
 // If the macro OPEN_LOGFILE_EXPLICITLY (see below) is NOT defined,
@@ -130,9 +129,9 @@ using std::cout;
 #ifdef USE_DEFAULT_STREAMS
 
 //#ifndef mcout
-#define mcout cout  /* change to ordinary default C++ stream */
+#define mcout std::cout  /* change to ordinary default C++ stream */
 //#endif            
-#define mcerr cout
+#define mcerr std::cerr
 //#define mcerr cerr
 
 #else
@@ -194,7 +193,7 @@ class indentation
 
 extern indentation indn;
 
-inline ostream& operator<<(ostream& file, indentation& ind)
+inline std::ostream& operator<<(std::ostream& file, indentation& ind)
 {
   int n;
   if(ind.s_not==1)
@@ -204,10 +203,8 @@ inline ostream& operator<<(ostream& file, indentation& ind)
   return file;
 }
 
-ostream& noindent(ostream& f);
-ostream& yesindent(ostream& f);
-
-
+std::ostream& noindent(std::ostream& f);
+std::ostream& yesindent(std::ostream& f);
 
 #define Ifile file<<indn 
 #define Imcout mcout<<indn 

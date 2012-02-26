@@ -1,4 +1,3 @@
-//#include <strstream.h>
 #include "wcpplib/stream/prstream.h"
 /*
 Copyright (c) 2001 I. B. Smirnov
@@ -13,12 +12,12 @@ It is provided "as is" without express or implied warranty.
 
 indentation indn;
 
-ostream& noindent(ostream& f)
+std::ostream& noindent(std::ostream& f)
 {
   indn.s_not=1;
   return f;
 }
-ostream& yesindent(ostream& f)
+std::ostream& yesindent(std::ostream& f)
 {
   indn.s_not=0;
   return f;

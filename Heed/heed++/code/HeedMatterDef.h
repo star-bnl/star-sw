@@ -1,10 +1,10 @@
 #ifndef HEEDMATTERDEF_H
 #define HEEDMATTERDEF_H
 
-#include "heed++/code/PhotoAbsCS.h"
 #include "wcpplib/matter/MatterDef.h"
 #include "wcpplib/matter/GasDef.h"
 #include "heed++/code/EnergyMesh.h"
+#include "heed++/code/PhotoAbsCS.h"
 
 /*
 Definition of matter parameters necessary for HEED.
@@ -124,7 +124,7 @@ public:
 		MolecPhotoAbsCS* fampacs2, 
 		double fW=0.0, double fF = standard_factor_Fano);
   */
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(HeedMatterDef);
 	
 private:

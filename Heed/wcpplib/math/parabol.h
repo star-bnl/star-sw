@@ -78,11 +78,11 @@ private:
   mutable double dxzero[2];
 };
 
-//ostream& operator<<(ostream& file, const Parabol& f);
+//std::ostream& operator<<(std::ostream& file, const Parabol& f);
 // made inline because otherwise it can not find indn at linking.
 // Why I don't know.
 
-ostream& operator<<(ostream& file, const Parabol& f);
+std::ostream& operator<<(std::ostream& file, const Parabol& f);
 
 
 #endif

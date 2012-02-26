@@ -11,10 +11,6 @@ appear in all copies and in supporting documentation.
 It is provided "as is" without express or implied warranty.
 */
 
-using namespace std;  // that is necessary for new version of compiler 
-                      // (gcc 3.2)
-
-
 //#define S_ENWSD    // switch to emulation of cast operators:
 // instead of static_cast as well as dynamic_cast it will be direct type
 // transformations: ((type)(name))

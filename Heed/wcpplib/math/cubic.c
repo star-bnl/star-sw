@@ -1,5 +1,4 @@
 #include <iomanip>
-using std::setw;
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/math/cubic.h"
 #include "wcpplib/math/parabol.h"
@@ -24,8 +23,8 @@ The file is provided "as is" without express or implied warranty.
 const double_complex iu(0,1);  
 
 void  Cubic::find_zero(double_complex &z1, 
-		       double_complex &z2, 
-		       double_complex &z3) const 
+                       double_complex &z2, 
+                       double_complex &z3) const 
 //int Cubic::find_zero(complex xzero[3]) const 
 {
   mfunname("void  Cubic::find_zero(double_complex &z1, double_complex &z2, double_complex &z3) const");
@@ -51,28 +50,28 @@ void  Cubic::find_zero(double_complex &z1,
       double t = R + sD;
       if(t > 0.0)
       {
-	S = pow( t  , 1/3.0 );
+        S = pow( t  , 1/3.0 );
       }
       else if(t < 0.0)
       {
-	S = -pow( -t  , 1/3.0 );
+        S = -pow( -t  , 1/3.0 );
       }
       else
       {
-	S = 0.0;
+        S = 0.0;
       }
       t = R - sD;
       if(t > 0.0)
       {
-	T = pow( t  , 1/3.0 );
+        T = pow( t  , 1/3.0 );
       }
       else if(t < 0.0)
       {
-	T = - pow( -t  , 1/3.0 );
+        T = - pow( -t  , 1/3.0 );
       }
       else
       {
-	T = 0.0;
+        T = 0.0;
       }
     }
     else
@@ -129,45 +128,37 @@ int Cubic::find_real_zero(double z[3]) const
     z[q] = zc3.real();
     q++;
   }
-  int n1, n2;
-  for(n1=0; n1<q-1; n1++)
-  {
-    for(n2=n1; n2<q; n2++)
-    {
-      if(z[n1] > z[n2])
-      {
-	double t;
-	t = z[n1];
-	z[n1] = z[n2];
-	z[n2] = t;
+  int n1 = 0, n2 = 0;
+  for (n1 = 0; n1 < q - 1; n1++) {
+    for (n2 = n1; n2 < q; n2++) {
+      if(z[n1] > z[n2]) {
+        double t = z[n1];
+        z[n1] = z[n2];
+        z[n2] = t;
       }
     }
   }
-  for(n1=0; n1<q-1; n1++)
-  {
+  for(n1 = 0; n1 < q - 1; n1++) {
     //Iprint2n(mcout, n1, q);
     //Iprintn(mcout, fabs(z[n1]));
     //Iprintn(mcout, fabs(z[n2]));
     //Iprintn(mcout, fabs((z[n1] - z[n1+1])/(z[n1] + z[n1+1])) );
 
     if((fabs(z[n1]) < thresh && fabs(z[n2]) < thresh) ||
-       fabs((z[n1] - z[n1+1])/(z[n1] + z[n1+1])) < thresh)
-    {
+       fabs((z[n1] - z[n1+1])/(z[n1] + z[n1+1])) < thresh) {
       //mcout<<"used\n";
-      for(n2=n1+1; n2<q-1; n2++)
-      {
-	z[n2] = z[n2+1];
+      for(n2 = n1 + 1; n2 < q - 1; n2++) {
+        z[n2] = z[n2+1];
       }
       q--;
       n1--;
     }
   }
-      
   return q;
 }  
 
 int Cubic::find_maxmin(double xmm[2], double ymm[2], 
-		       int s_mm[2]) const
+                       int s_mm[2]) const
 {
   mfunname("int Cubic::find_maxmin(double xmm[2], double ymm[2], int s_mm[2]) const");
   double ap = 3 * da;
@@ -205,45 +196,42 @@ int Cubic::find_maxmin(double xmm[2], double ymm[2],
 
 
 
-ostream& operator<<(ostream& file, const Cubic& f)
+std::ostream& operator<<(std::ostream& file, const Cubic& f)
 {
   double_complex z1;
   double_complex z2; 
   double_complex z3;
-  Ifile<<"Cubic: s_xzero="<< f.s_xzero()<<'\n'; 
-  indn.n+=2;
+  Ifile << "Cubic: s_xzero=" << f.s_xzero() << '\n'; 
+  indn.n += 2;
     //<<" s_dxmm="<<f.s_dxmm<<'\n'; 
   f.find_zero(z1, z2, z3);
-  Ifile<<"Cubic: a="<<f.a()<<" b="<<f.b()<<" c="<<f.c()<<" d="<<f.d()<<'\n';
-  file<<" z1,2,3="<<z1;
-  file<<' '<<z2;
-  file<<' '<<z3;
-  file<<'\n';
+  Ifile << "Cubic: a=" << f.a() 
+        << " b=" << f.b() 
+        << " c=" << f.c()
+        << " d=" << f.d() << '\n';
+  file << " z1,2,3=" << z1 << ' ' << z2 << ' ' << z3 << '\n';
   double r[3];
   int q;
   q = f.find_real_zero(r);
-  Ifile<<"The number of real zeros ="<<q<<'\n';
+  Ifile << "The number of real zeros =" << q << '\n';
   int n;
-  Ifile<<"Solutions=";
-  for(n=0; n<q; n++)
-    file<<' '<<r[n];
-  file<<'\n';
+  Ifile << "Solutions=";
+  for (n = 0; n < q; n++) file << ' ' << r[n];
+  file << '\n';
   double xmm[2]; 
   double ymm[2]; 
   int s_mm[2];
   q = f.find_maxmin(xmm, ymm, s_mm);
-  Ifile<<"Max/Min, q="<<q<<'\n';
-  indn.n+=2;
-  for(n=0; n<q; n++)
-  {
-    Ifile<<"n="<<n
-	 <<" xmm[n]="<<setw(13)<<xmm[n]
-	 <<" ymm[n]="<<setw(13)<<ymm[n]
-	 <<" s_mm[n]="<<setw(13)<<s_mm[n]<<'\n';
+  Ifile << "Max/Min, q=" << q << '\n';
+  indn.n += 2;
+  for (n = 0; n < q; n++) {
+    Ifile << "n=" << n
+          << " xmm[n]=" << std::setw(13) << xmm[n]
+          << " ymm[n]=" << std::setw(13) << ymm[n]
+          << " s_mm[n]=" << std::setw(13) << s_mm[n] << '\n';
   }
-  indn.n-=2;
-  indn.n-=2;
-
+  indn.n -= 2;
+  indn.n -= 2;
 
   return file;
 }

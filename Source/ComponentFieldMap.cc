@@ -149,7 +149,7 @@ ComponentFieldMap::SetMedium(const int imat, Medium* m) {
     return;
   }
   
-  if (m == 0) {
+  if (!m) {
     std::cerr << className << "::SetMedium:\n";
     std::cerr << "    Medium pointer is null.\n";
     return;
@@ -177,7 +177,7 @@ ComponentFieldMap::GetMedium(const int imat, Medium*& m) const {
   }
   
   m = materials[imat].medium;
-  if (m == 0) return false;  
+  if (!m) return false;  
   return true;
 
 }
@@ -373,10 +373,10 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
   if (lastElement > -1 && !checkMultipleElement) {
     rc = Coordinates13(x, y, z, t1, t2, t3, t4, jac, det, lastElement);
     if (rc == 0 &&
-	      t1 >= 0 && t1 <= +1 &&
-	      t2 >= 0 && t2 <= +1 &&
-	      t3 >= 0 && t3 <= +1 &&
-	      t4 >= 0 && t4 <= +1) return lastElement;
+        t1 >= 0 && t1 <= +1 &&
+        t2 >= 0 && t2 <= +1 &&
+        t3 >= 0 && t3 <= +1 &&
+        t4 >= 0 && t4 <= +1) return lastElement;
   }
 
   // Verify the count of volumes that contain the point.
@@ -407,10 +407,10 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
     rc = Coordinates13(x, y, z, t1, t2, t3, t4, jac, det, i);
     
     if (rc == 0 &&
-	    t1 >= 0 && t1 <= +1 &&
-	    t2 >= 0 && t2 <= +1 &&
-	    t3 >= 0 && t3 <= +1 &&
-	    t4 >= 0 && t4 <= +1) {
+      t1 >= 0 && t1 <= +1 &&
+      t2 >= 0 && t2 <= +1 &&
+      t3 >= 0 && t3 <= +1 &&
+      t4 >= 0 && t4 <= +1) {
       ++nfound;
       imap = i;
       lastElement = i;
@@ -516,39 +516,39 @@ ComponentFieldMap::FindElementCube(const double x, const double y, const double 
       std::cout << "    Point (" << x << "," << y << "," << z 
                 << ") not in the mesh, it is background or PEC.\n";
       std::cout << "    First node ("
-    		        << nodes[elements[0].emap[3]].x << ","
-    		        << nodes[elements[0].emap[3]].y << ","
-    		        << nodes[elements[0].emap[3]].z
-    		        << ") in the mesh.\n";
+                << nodes[elements[0].emap[3]].x << ","
+                << nodes[elements[0].emap[3]].y << ","
+                << nodes[elements[0].emap[3]].z
+                << ") in the mesh.\n";
       std::cout << "    dx= " << (nodes[elements[0].emap[0]].x-nodes[elements[0].emap[3]].x)
-    		        << ", dy= " << (nodes[elements[0].emap[2]].y-nodes[elements[0].emap[3]].y)
-    		        << ", dz= " << (nodes[elements[0].emap[7]].z-nodes[elements[0].emap[3]].z)
-    		        << "\n";
+                << ", dy= " << (nodes[elements[0].emap[2]].y-nodes[elements[0].emap[3]].y)
+                << ", dz= " << (nodes[elements[0].emap[7]].z-nodes[elements[0].emap[3]].z)
+                << "\n";
       std::cout << "    Last node (" << nodes[elements[nElements-1].emap[5]].x
-    		        << "," << nodes[elements[nElements-1].emap[5]].y
-    		        << "," << nodes[elements[nElements-1].emap[5]].z
-    		        << ") in the mesh.\n";
+                << "," << nodes[elements[nElements-1].emap[5]].y
+                << "," << nodes[elements[nElements-1].emap[5]].z
+                << ") in the mesh.\n";
       std::cout << "  dx= " << (nodes[elements[nElements-1].emap[0]].x-nodes[elements[nElements-1].emap[3]].x)
-    		        << ", dy= " << (nodes[elements[nElements-1].emap[2]].y-nodes[elements[nElements-1].emap[3]].y)
-    		        << ", dz= " << (nodes[elements[nElements-1].emap[7]].z-nodes[elements[nElements-1].emap[3]].z)
-    		        << "\n";
+                << ", dy= " << (nodes[elements[nElements-1].emap[2]].y-nodes[elements[nElements-1].emap[3]].y)
+                << ", dz= " << (nodes[elements[nElements-1].emap[7]].z-nodes[elements[nElements-1].emap[3]].z)
+                << "\n";
     }
     return -1;
   }
   CoordinatesCube(x,y,z,t1,t2,t3,jac,det,imap);
   if (debug) {
-	  std::cout << className << "::FindElementCube:\n";
-	  std::cout << "Global: (" << x << "," << y << "," << z << ") in element " 
+    std::cout << className << "::FindElementCube:\n";
+    std::cout << "Global: (" << x << "," << y << "," << z << ") in element " 
               << imap << " (degenerate: " 
               << elements[imap].degenerate << ")\n";
     std::cout << "      Node xyzV\n";
     for (int i = 0; i < 8; i++) {
-    	std::cout << "  " << elements[imap].emap[i]
-    			      << " " << nodes[elements[imap].emap[i]].x
-    			      << " " << nodes[elements[imap].emap[i]].y
-    			      << " " << nodes[elements[imap].emap[i]].z
-    			      << " " << nodes[elements[imap].emap[i]].v
-    			      << "\n";
+      std::cout << "  " << elements[imap].emap[i]
+                << " " << nodes[elements[imap].emap[i]].x
+                << " " << nodes[elements[imap].emap[i]].y
+                << " " << nodes[elements[imap].emap[i]].z
+                << " " << nodes[elements[imap].emap[i]].v
+                << "\n";
     }
   }
   return imap;
@@ -783,32 +783,32 @@ void ComponentFieldMap::Jacobian5(int i, double u, double v, double& det, double
      2*nodes[elements[i].emap[6]].y-nodes[elements[i].emap[7]].y+v*(-3*nodes[elements[i].emap[3]].y+5*nodes[elements[i].emap[4]].y-
      4*nodes[elements[i].emap[5]].y+3*nodes[elements[i].emap[6]].y+4*nodes[elements[i].emap[7]].y-
      3*v*(nodes[elements[i].emap[2]].y+nodes[elements[i].emap[4]].y-nodes[elements[i].emap[5]].y-nodes[elements[i].emap[6]].y+
-	  nodes[elements[i].emap[7]].y)))))/8;
+    nodes[elements[i].emap[7]].y)))))/8;
   // Jacobian terms
   jac[0][0] = (u*u*(-nodes[elements[i].emap[0]].y-nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y+
      nodes[elements[i].emap[3]].y+2*nodes[elements[i].emap[4]].y-2*nodes[elements[i].emap[6]].y)+2*(-nodes[elements[i].emap[4]].y+
      nodes[elements[i].emap[6]].y+v*(nodes[elements[i].emap[0]].y+nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y+nodes[elements[i].emap[3]].y-
      2*nodes[elements[i].emap[5]].y-2*nodes[elements[i].emap[7]].y))+u*(nodes[elements[i].emap[0]].y-2*v*nodes[elements[i].emap[0]].y-
      nodes[elements[i].emap[1]].y+2*v*nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y+2*v*nodes[elements[i].emap[2]].y-
-				      nodes[elements[i].emap[3]].y-2*v*nodes[elements[i].emap[3]].y-4*v*nodes[elements[i].emap[5]].y+4*v*nodes[elements[i].emap[7]].y))/4;
+              nodes[elements[i].emap[3]].y-2*v*nodes[elements[i].emap[3]].y-4*v*nodes[elements[i].emap[5]].y+4*v*nodes[elements[i].emap[7]].y))/4;
   jac[0][1] = (u*u*(nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-nodes[elements[i].emap[2]].x-
      nodes[elements[i].emap[3]].x-2*nodes[elements[i].emap[4]].x+2*nodes[elements[i].emap[6]].x)-2*(-nodes[elements[i].emap[4]].x+
      nodes[elements[i].emap[6]].x+v*(nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x+nodes[elements[i].emap[2]].x+nodes[elements[i].emap[3]].x-
      2*nodes[elements[i].emap[5]].x-2*nodes[elements[i].emap[7]].x))+u*((-1+2*v)*nodes[elements[i].emap[0]].x+
      nodes[elements[i].emap[1]].x-2*v*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[2]].x-2*v*nodes[elements[i].emap[2]].x+
-				      nodes[elements[i].emap[3]].x+2*v*nodes[elements[i].emap[3]].x+4*v*nodes[elements[i].emap[5]].x-4*v*nodes[elements[i].emap[7]].x))/4;
+              nodes[elements[i].emap[3]].x+2*v*nodes[elements[i].emap[3]].x+4*v*nodes[elements[i].emap[5]].x-4*v*nodes[elements[i].emap[7]].x))/4;
   jac[1][0] = (v*(-nodes[elements[i].emap[0]].y+nodes[elements[i].emap[1]].y-nodes[elements[i].emap[2]].y+nodes[elements[i].emap[3]].y)-
      2*nodes[elements[i].emap[5]].y+2*u*((-1+v)*nodes[elements[i].emap[0]].y+(-1+v)*nodes[elements[i].emap[1]].y-
      nodes[elements[i].emap[2]].y-v*nodes[elements[i].emap[2]].y-nodes[elements[i].emap[3]].y-v*nodes[elements[i].emap[3]].y+
      2*nodes[elements[i].emap[4]].y-2*v*nodes[elements[i].emap[4]].y+2*nodes[elements[i].emap[6]].y+2*v*nodes[elements[i].emap[6]].y)+
      v*v*(nodes[elements[i].emap[0]].y-nodes[elements[i].emap[1]].y-nodes[elements[i].emap[2]].y+nodes[elements[i].emap[3]].y+
-	  2*nodes[elements[i].emap[5]].y-2*nodes[elements[i].emap[7]].y)+2*nodes[elements[i].emap[7]].y)/4;
+    2*nodes[elements[i].emap[5]].y-2*nodes[elements[i].emap[7]].y)+2*nodes[elements[i].emap[7]].y)/4;
   jac[1][1] =(v*(nodes[elements[i].emap[0]].x-nodes[elements[i].emap[1]].x+nodes[elements[i].emap[2]].x-nodes[elements[i].emap[3]].x)+
      2*u*(nodes[elements[i].emap[0]].x-v*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-v*nodes[elements[i].emap[1]].x+
      nodes[elements[i].emap[2]].x+v*nodes[elements[i].emap[2]].x+nodes[elements[i].emap[3]].x+v*nodes[elements[i].emap[3]].x-
      2*nodes[elements[i].emap[4]].x+2*v*nodes[elements[i].emap[4]].x-2*nodes[elements[i].emap[6]].x-2*v*nodes[elements[i].emap[6]].x)+
      2*(nodes[elements[i].emap[5]].x-nodes[elements[i].emap[7]].x)+v*v*(-nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x+
-				      nodes[elements[i].emap[2]].x-nodes[elements[i].emap[3]].x-2*nodes[elements[i].emap[5]].x+2*nodes[elements[i].emap[7]].x))/4;
+              nodes[elements[i].emap[2]].x-nodes[elements[i].emap[3]].x-2*nodes[elements[i].emap[5]].x+2*nodes[elements[i].emap[7]].x))/4;
 
 }
 
@@ -920,7 +920,7 @@ v*nodes[elements[i].emap[7]].y+w*nodes[elements[i].emap[8]].y)))*
 4*u*nodes[elements[i].emap[7]].x)*(4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+
 4*t*nodes[elements[i].emap[6]].y+4*u*nodes[elements[i].emap[8]].y))*
 ((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
-			      w*nodes[elements[i].emap[8]].z));
+            w*nodes[elements[i].emap[8]].z));
 
 jac[0][1] =
 (nodes[elements[i].emap[1]].y-4*u*nodes[elements[i].emap[1]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y-
@@ -937,7 +937,7 @@ jac[0][1] =
 nodes[elements[i].emap[3]].y-4*w*nodes[elements[i].emap[3]].y+4*t*nodes[elements[i].emap[5]].y-4*t*nodes[elements[i].emap[6]].y+
 4*u*nodes[elements[i].emap[7]].y-4*u*nodes[elements[i].emap[8]].y)*
 ((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
-			      w*nodes[elements[i].emap[8]].z));
+            w*nodes[elements[i].emap[8]].z));
 
 jac[0][2] =
 (-4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[1]].x+4*u*nodes[elements[i].emap[1]].x+nodes[elements[i].emap[3]].x-
@@ -954,7 +954,7 @@ jac[0][2] =
 nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x-4*t*nodes[elements[i].emap[5]].x+4*t*nodes[elements[i].emap[6]].x-
 4*u*nodes[elements[i].emap[7]].x+4*u*nodes[elements[i].emap[8]].x)*
 ((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
-			      w*nodes[elements[i].emap[8]].z));
+            w*nodes[elements[i].emap[8]].z));
 
 jac[0][3] =
 (nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x-
@@ -971,7 +971,7 @@ jac[0][3] =
 nodes[elements[i].emap[3]].x-4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[5]].x-4*t*nodes[elements[i].emap[6]].x+
 4*u*nodes[elements[i].emap[7]].x-4*u*nodes[elements[i].emap[8]].x)*
 ((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[7]].y+
-			      w*nodes[elements[i].emap[8]].y));
+            w*nodes[elements[i].emap[8]].y));
 
 jac[1][0] =
 -((-((4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[3]].x+
@@ -1075,7 +1075,7 @@ v*nodes[elements[i].emap[5]].y+w*nodes[elements[i].emap[6]].y)))+
 w*nodes[elements[i].emap[6]].x))*(4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+
 4*t*nodes[elements[i].emap[6]].y+4*u*nodes[elements[i].emap[8]].y))*
 ((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
-			      w*nodes[elements[i].emap[8]].z));
+            w*nodes[elements[i].emap[8]].z));
 
 jac[2][1] =
 (-4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[1]].y+4*u*nodes[elements[i].emap[1]].y+nodes[elements[i].emap[3]].y-
@@ -1092,7 +1092,7 @@ v*nodes[elements[i].emap[7]].y-w*nodes[elements[i].emap[8]].y))*
 4*u*nodes[elements[i].emap[4]].y+4*v*nodes[elements[i].emap[5]].y-4*t*nodes[elements[i].emap[6]].y+4*w*nodes[elements[i].emap[6]].y-
 4*u*nodes[elements[i].emap[8]].y)*
 ((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
-			      w*nodes[elements[i].emap[8]].z));
+            w*nodes[elements[i].emap[8]].z));
 
 jac[2][2] =
 (nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x-
@@ -1109,7 +1109,7 @@ v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
 4*u*nodes[elements[i].emap[4]].x+4*v*nodes[elements[i].emap[5]].x-4*t*nodes[elements[i].emap[6]].x+4*w*nodes[elements[i].emap[6]].x-
 4*u*nodes[elements[i].emap[8]].x)*
 ((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
-			      w*nodes[elements[i].emap[8]].z));
+            w*nodes[elements[i].emap[8]].z));
 
 jac[2][3] =
 (-4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[1]].x+4*u*nodes[elements[i].emap[1]].x+nodes[elements[i].emap[3]].x-
@@ -1126,7 +1126,7 @@ v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
 4*u*nodes[elements[i].emap[4]].x+4*v*nodes[elements[i].emap[5]].x-4*t*nodes[elements[i].emap[6]].x+4*w*nodes[elements[i].emap[6]].x-
 4*u*nodes[elements[i].emap[8]].x)*
 ((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[7]].y+
-			      w*nodes[elements[i].emap[8]].y));
+            w*nodes[elements[i].emap[8]].y));
 
 jac[3][0] =
 -((((-1+4*u)*nodes[elements[i].emap[1]].x+4*(t*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[7]].x+
@@ -1153,7 +1153,7 @@ v*nodes[elements[i].emap[5]].y+w*nodes[elements[i].emap[6]].y)))+
 w*nodes[elements[i].emap[6]].x))*(4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+
 4*t*nodes[elements[i].emap[5]].y+4*u*nodes[elements[i].emap[7]].y))*
 ((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
-			      w*nodes[elements[i].emap[8]].z));
+            w*nodes[elements[i].emap[8]].z));
 
 jac[3][1] = 
 (nodes[elements[i].emap[1]].y-4*u*nodes[elements[i].emap[1]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y-
@@ -1170,7 +1170,7 @@ v*nodes[elements[i].emap[7]].y-w*nodes[elements[i].emap[8]].y))*
 4*u*nodes[elements[i].emap[4]].y-4*t*nodes[elements[i].emap[5]].y+4*v*nodes[elements[i].emap[5]].y+4*w*nodes[elements[i].emap[6]].y-
 4*u*nodes[elements[i].emap[7]].y)*
 ((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
-			      w*nodes[elements[i].emap[8]].z));
+            w*nodes[elements[i].emap[8]].z));
 
 jac[3][2] =
 (-4*w*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[1]].x+4*u*nodes[elements[i].emap[1]].x+nodes[elements[i].emap[2]].x-
@@ -1187,7 +1187,7 @@ v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
 4*u*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[5]].x+4*v*nodes[elements[i].emap[5]].x+
 4*w*nodes[elements[i].emap[6]].x-4*u*nodes[elements[i].emap[7]].x)*
 ((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
-			      w*nodes[elements[i].emap[8]].z));
+            w*nodes[elements[i].emap[8]].z));
 
 jac[3][3] = 
 (nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x-
@@ -1204,7 +1204,7 @@ v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
 4*u*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[5]].x+4*v*nodes[elements[i].emap[5]].x+4*w*nodes[elements[i].emap[6]].x-
 4*u*nodes[elements[i].emap[7]].x)*
 ((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[7]].y+
-			      w*nodes[elements[i].emap[8]].y));
+            w*nodes[elements[i].emap[8]].y));
 
 }
 
@@ -1219,8 +1219,8 @@ ComponentFieldMap::JacobianCube(int i, double t, double u, double v,
 
   // Be sure that the element is within range
   if (i < 0 || i >= nElements) {
-	  std::cerr << className << "::JacobianCube:\n";
-	  std::cerr << "    Element " << i << " out of range.\n";
+    std::cerr << className << "::JacobianCube:\n";
+    std::cerr << "    Element " << i << " out of range.\n";
     return;
   }
   jac[0][0] = 1./8 * (nodes[elements[i].emap[0]].x * -1 * (1 - u) * (1 - v) +
@@ -1489,8 +1489,8 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
 
 int 
 ComponentFieldMap::Coordinates4(double x, double y, double z,
-			   double& t1, double& t2, double& t3, double& t4,
-			   double jac[4][4], double& det, int imap) {
+         double& t1, double& t2, double& t3, double& t4,
+         double jac[4][4], double& det, int imap) {
 
   // Debugging
   if (debug) {
@@ -1508,17 +1508,18 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
   // Compute determinant.
   det =
     -(-((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y)) + 
-      (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y))*
-    (2*x*(-nodes[elements[imap].emap[0]].y+nodes[elements[imap].emap[1]].y+nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y) - 
+        (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y)) *
+     (2*x*(-nodes[elements[imap].emap[0]].y+nodes[elements[imap].emap[1]].y+nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y) - 
      (nodes[elements[imap].emap[0]].x+nodes[elements[imap].emap[3]].x) * (nodes[elements[imap].emap[1]].y+nodes[elements[imap].emap[2]].y-2*y) + 
      nodes[elements[imap].emap[1]].x*(nodes[elements[imap].emap[0]].y+nodes[elements[imap].emap[3]].y-2*y) + nodes[elements[imap].emap[2]].x*
      (nodes[elements[imap].emap[0]].y+nodes[elements[imap].emap[3]].y-2*y)) + 
     pow(-(nodes[elements[imap].emap[0]].x*nodes[elements[imap].emap[1]].y) + 
-	nodes[elements[imap].emap[3]].x*nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[2]].x*nodes[elements[imap].emap[3]].y+
-	x*(-nodes[elements[imap].emap[0]].y+
-           nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y+nodes[elements[imap].emap[3]].y) + 
-	nodes[elements[imap].emap[1]].x*(nodes[elements[imap].emap[0]].y-y) + 
-	(nodes[elements[imap].emap[0]].x+nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[3]].x)*y,2);
+          nodes[elements[imap].emap[3]].x*nodes[elements[imap].emap[2]].y - 
+          nodes[elements[imap].emap[2]].x*nodes[elements[imap].emap[3]].y +
+        x*(-nodes[elements[imap].emap[0]].y+nodes[elements[imap].emap[1]].y - 
+            nodes[elements[imap].emap[2]].y+nodes[elements[imap].emap[3]].y) + 
+        nodes[elements[imap].emap[1]].x*(nodes[elements[imap].emap[0]].y-y) +
+        (nodes[elements[imap].emap[0]].x+nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[3]].x)*y,2);
 
   // Check that the determinant is non-negative 
   // (this can happen if the point is out of range).
@@ -1535,7 +1536,7 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
   // Vector products for evaluation of T1.
   double prod = ((nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[3]].x) * 
                  (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[1]].y) - 
-	               (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[1]].x) * 
+                 (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[1]].x) * 
                  (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y));
   if (prod * prod > 1.0e-12 *
       ((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[1]].x) * 
@@ -1547,16 +1548,16 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
        (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y) * 
        (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y))) {
     t1 = (-(nodes[elements[imap].emap[3]].x*nodes[elements[imap].emap[0]].y) + x*nodes[elements[imap].emap[0]].y+
-	nodes[elements[imap].emap[2]].x*nodes[elements[imap].emap[1]].y-x*nodes[elements[imap].emap[1]].y-
-	nodes[elements[imap].emap[1]].x*nodes[elements[imap].emap[2]].y+
-	x*nodes[elements[imap].emap[2]].y+nodes[elements[imap].emap[0]].x*nodes[elements[imap].emap[3]].y-
-	x*nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[0]].x*y+nodes[elements[imap].emap[1]].x*y-
-	nodes[elements[imap].emap[2]].x*y+nodes[elements[imap].emap[3]].x*y+sqrt(det)) / prod;
+  nodes[elements[imap].emap[2]].x*nodes[elements[imap].emap[1]].y-x*nodes[elements[imap].emap[1]].y-
+  nodes[elements[imap].emap[1]].x*nodes[elements[imap].emap[2]].y+
+  x*nodes[elements[imap].emap[2]].y+nodes[elements[imap].emap[0]].x*nodes[elements[imap].emap[3]].y-
+  x*nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[0]].x*y+nodes[elements[imap].emap[1]].x*y-
+  nodes[elements[imap].emap[2]].x*y+nodes[elements[imap].emap[3]].x*y+sqrt(det)) / prod;
   } else {
     double xp = nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[1]].y;
     double yp = nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[0]].x;
     double dn = sqrt(xp * xp + yp * yp);
-    if(dn <= 0) {
+    if (dn <= 0) {
       std::cerr << className << "::Coordinates4:\n";
       std::cerr << "    Element " << imap 
                 << " appears to be degenerate in the 1 - 2 axis.\n";
@@ -1580,7 +1581,7 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
     double xt2 = nodes[elements[imap].emap[1]].x + 0.5 * (t + 1) * (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[1]].x);
     double yt2 = nodes[elements[imap].emap[1]].y + 0.5 * (t + 1) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[1]].y);
     dn = (xt1 - xt2) * (xt1 - xt2) + (yt1 - yt2) * (yt1 - yt2);
-    if(dn <= 0) {
+    if (dn <= 0) {
       std::cout << className << "::Coordinates4:\n";
       std::cout << "    Coordinate requested at convergence point of element " << imap << ".\n";
       return ifail;
@@ -1603,16 +1604,16 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
        (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y) * 
        (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y))) {
     t2 = (-(nodes[elements[imap].emap[1]].x*nodes[elements[imap].emap[0]].y) + x*nodes[elements[imap].emap[0]].y+
-	  nodes[elements[imap].emap[0]].x*nodes[elements[imap].emap[1]].y-x*nodes[elements[imap].emap[1]].y-
-	  nodes[elements[imap].emap[3]].x*nodes[elements[imap].emap[2]].y+
-	  x*nodes[elements[imap].emap[2]].y+nodes[elements[imap].emap[2]].x*nodes[elements[imap].emap[3]].y-
-	  x*nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[0]].x*y+nodes[elements[imap].emap[1]].x*y-
-	  nodes[elements[imap].emap[2]].x*y+nodes[elements[imap].emap[3]].x*y-sqrt(det)) / prod;
+    nodes[elements[imap].emap[0]].x*nodes[elements[imap].emap[1]].y-x*nodes[elements[imap].emap[1]].y-
+    nodes[elements[imap].emap[3]].x*nodes[elements[imap].emap[2]].y+
+    x*nodes[elements[imap].emap[2]].y+nodes[elements[imap].emap[2]].x*nodes[elements[imap].emap[3]].y-
+    x*nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[0]].x*y+nodes[elements[imap].emap[1]].x*y-
+    nodes[elements[imap].emap[2]].x*y+nodes[elements[imap].emap[3]].x*y-sqrt(det)) / prod;
   } else {
     double xp = nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y;
     double yp = nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[0]].x;
     double dn = sqrt(xp * xp + yp * yp);
-    if(dn <= 0) {
+    if (dn <= 0) {
       std::cerr << className << "Coordinates4:\n";
       std::cerr << "    Element " << imap 
                 << " appears to be degenerate in the 1 - 4 axis.\n";
@@ -1891,8 +1892,6 @@ ComponentFieldMap::Coordinates12(double x, double y, double z,
                         double& t1, double& t2, double& t3, double& t4,
                         double jac[4][4], double& det, int imap) {
 
-  // Debugging
-  //  bool debug; if (imap==1024) {debug=true;} else {debug = false;}
   if (debug) {
     std::cout << className << "::Coordinates12:\n";
     std::cout << "   Point ("
@@ -1999,8 +1998,6 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
                         double& t1, double& t2, double& t3, double& t4,
                         double jac[4][4], double& det, int imap) {
 
-  // Debugging
-  // if (imap == 1024) {debug=true;} else {debug = false;}
   if (debug) {
     std::cout << className << "::Coordinates13:\n";
     std::cout << "   Point ("

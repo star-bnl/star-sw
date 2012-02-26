@@ -12,6 +12,7 @@ The file is provided "as is" without express or implied warranty.
 #include <iomanip>
 #include "wcpplib/safetl/AbsArr.h"
 
+using namespace std;
 
 long max_qel_DynLinArr=100000000;  
 

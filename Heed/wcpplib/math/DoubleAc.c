@@ -10,7 +10,6 @@ appear in all copies and in supporting documentation.
 The file is provided "as is" without express or implied warranty.
 */
 #include <iomanip>
-using std::setw;
 #include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/math/minmax.h"
 #include "wcpplib/math/DoubleAc.h"
@@ -850,7 +849,7 @@ DoubleAc acos(const DoubleAc& f)
 } 
 
 
-void DoubleAc::print(ostream& file, int l) const
+void DoubleAc::print(std::ostream& file, int l) const
 {
   if(l<=0) return;
   if(l==1)
@@ -865,7 +864,7 @@ void DoubleAc::print(ostream& file, int l) const
   {
     file<<d;
     int t=file.precision(2);
-    file<<" ["<<setw(8)<<d-di<<","<<setw(8)<<da-d<<"] ";
+    file<<" ["<<std::setw(8)<<d-di<<","<<std::setw(8)<<da-d<<"] ";
     file.precision(t);
   }
   else if(l==4) 
@@ -876,20 +875,41 @@ void DoubleAc::print(ostream& file, int l) const
   {
     file<<d;
     int t=file.precision(2);
-    file<<" ["<<setw(8)<<d-di<<","<<setw(8)<<da-d<<"] \n";
+    file<<" ["<<std::setw(8)<<d-di<<","<<std::setw(8)<<da-d<<"] \n";
     file.precision(t);
   }
   else
   {
     int t=file.precision(16);
-    file<<"DoubleAc: d="<<setw(20)<<d
-	<<" di="<<setw(20)<<di<<" da="<<setw(20)<<da<<'\n';
+    file<<"DoubleAc: d="<<std::setw(20)<<d
+	<<" di="<<std::setw(20)<<di<<" da="<<std::setw(20)<<da<<'\n';
     file.precision(t);
   }
 }
 
-ostream& operator<<(ostream& file, const DoubleAc& f)
-{
+DoubleAc pow(const DoubleAc& f, const DoubleAc& p) {
+  mcerr<<"ERROR in inline DoubleAc pow(const DoubleAc& f, const DoubleAc& p):\n";
+  mcerr<<"not implemented yet\n";
+  spexit(mcerr);
+  /*
+  double d =  pow( f.get(), p);
+  double di = pow( f.left_limit(), p);
+  double da = pow( f.right_limit(), p);
+  if(p.get() >= 0.0) 
+    return DoubleAc(pow( f.get() , p.get() ),
+                    pow( f.get_left_limit() , p.get_left_limit() ),
+                    pow( f.get_right_limit() , p.get_right_limit() )
+                    );
+   else
+    return DoubleAc(pow( f.get() , p.get() ),
+                    pow( f.get_right_limit() , p.get_right_limit() ),
+                    pow( f.get_left_limit() , p.get_left_limit() )
+                    );
+  */
+  return 0.0;  // to calm Solaris
+}
+
+std::ostream& operator<<(std::ostream& file, const DoubleAc& f) {
   f.print(file,1);
   return file;
 }

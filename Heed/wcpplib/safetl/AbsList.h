@@ -78,14 +78,19 @@ private:
   AbsList<T>* head_node;
   AbsListNode<T>* prev_node;
   AbsListNode<T>* next_node;
-  AbsListNode(const AbsListNode<T>& f);  
-  // ^ preservation from copying
+  // preservation from copying
+  AbsListNode(const AbsListNode<T>& f)
+  #ifndef DONT_USE_ABSPTR
+    : RegPassivePtr()
+  #endif
+  {
+    head_node = f.head_node;
+    prev_node = f.prev_node;
+    next_node = f.next_node;
+  }  
   AbsListNode<T>& operator=(const AbsListNode<T>& f) {return *this;} 
-  // ^ preservation from copying
 public:
   T el;
-  // ac(void) {return &el;}
-  //AbsListNode& ac(void) {return el;}
   inline AbsList<T>* get_head_node(void) const {return head_node;}
   inline AbsListNode<T>* get_prev_node(void) const {return prev_node;}
   inline AbsListNode<T>* get_next_node(void) const {return next_node;}
@@ -235,12 +240,6 @@ public:
   macro_alloc
 #endif
 };
-
-template<class T> AbsListNode<T>::AbsListNode(const AbsListNode<T>& f) 
-#ifndef DONT_USE_ABSPTR
-   : RegPassivePtr()
-#endif
-{;} // preservation from copying
 
 template<class T> AbsListNode<T>::AbsListNode
 (AbsList<T>* fhead_node, 
@@ -714,9 +713,9 @@ void AbsList<T>::pilfer(PILF_CONST AbsList<T>& al)
 */
 
 template<class T>
-void print_AbsList(ostream& file, const AbsList<T>& f, int l)
+void print_AbsList(std::ostream& file, const AbsList<T>& f, int l)
 {
-  mfunnamep("template<class T> void print_AbsList(ostream& file, const AbsList<T>& f, int l)");
+  mfunnamep("template<class T> void print_AbsList(std::ostream& file, const AbsList<T>& f, int l)");
   Ifile<<"AbsList<T>: qel="<<f.get_qel()<<'\n';
   //f.check();
   long n=0;
@@ -739,9 +738,9 @@ void print_AbsList(ostream& file, const AbsList<T>& f, int l)
 }
 
 template<class T>
-void print_AbsList(ostream& file, const AbsList<T>& f)
+void print_AbsList(std::ostream& file, const AbsList<T>& f)
 {
-  mfunnamep("template<class T> void print_AbsList(ostream& file, const AbsList<T>& f)");
+  mfunnamep("template<class T> void print_AbsList(std::ostream& file, const AbsList<T>& f)");
   Ifile<<"AbsList<T>: qel="<<f.get_qel()<<'\n';
   //f.check();
   long n=0;
@@ -763,9 +762,9 @@ void print_AbsList(ostream& file, const AbsList<T>& f)
 }
 
 template<class T>
-ostream& operator<<(ostream& file, const AbsListNode<T>& f)
+std::ostream& operator<<(std::ostream& file, const AbsListNode<T>& f)
 {
-  mfunnamep("template<class T> ostream& operator<<(ostream& file, const AbsListNode<T>& f)");
+  mfunnamep("template<class T> std::ostream& operator<<(std::ostream& file, const AbsListNode<T>& f)");
   Ifile<<"AbsListNode<T>:\n";  
   indn.n+=2;
 #ifdef DONT_USE_ABSPTR
@@ -779,9 +778,9 @@ ostream& operator<<(ostream& file, const AbsListNode<T>& f)
 }
 
 template<class T>
-ostream& operator<<(ostream& file, const AbsList<T>& f)
+std::ostream& operator<<(std::ostream& file, const AbsList<T>& f)
 {
-  mfunnamep("template<class T> ostream& operator<<(ostream& file, const AbsList<T>& f)");
+  mfunnamep("template<class T> std::ostream& operator<<(std::ostream& file, const AbsList<T>& f)");
   Ifile<<"AbsList<T>: qel="<<f.get_qel()<<'\n';
   //f.check();
   long n=0;

@@ -98,7 +98,7 @@ public:
   virtual void scale(double fact) = 0; // just scale (multiply by some factor)
   // it is sometimes useful for debug and other purposes.
   
-  virtual void print(ostream& file, int l) const;
+  virtual void print(std::ostream& file, int l) const;
   macro_copy_total_zero(PhotoAbsCS);
   //virtual PhotoAbsCS* copy(void) const = 0;
   PhotoAbsCS(void);
@@ -133,7 +133,7 @@ public:
   // namely the height, y-axis)
   // it is sometimes useful for debug and other purposes.
   
-  virtual void print(ostream& file, int l) const;
+  virtual void print(std::ostream& file, int l) const;
   macro_copy_total(OveragePhotoAbsCS);
 };
 
@@ -146,12 +146,13 @@ class HydrogenPhotoAbsCS: public PhotoAbsCS
 {
 public:
   HydrogenPhotoAbsCS(void);
-  virtual double get_CS(double energy) const ;
-  virtual double get_integral_CS(double energy1, double energy2) const ;  
+  virtual double get_CS(double energy) const;
+  virtual double get_integral_CS(double energy1, double energy2) const;  
   virtual void scale(double fact);
   macro_copy_total(HydrogenPhotoAbsCS);
-  virtual void print(ostream& file, int l) const;
-  //AnyType_copy(HydrogenPhotoAbsCS, PhotoAbsCS)
+  virtual void print(std::ostream& file, int l) const;
+private:
+  double prefactor;
 };
 
 // Typically this is for reading Experimental CS, for example of argon,
@@ -214,7 +215,7 @@ public:
   inline const DynLinArr< double >&  get_arr_ener() const {return ener;}
   inline const DynLinArr< double >&  get_arr_CS() const {return cs;}
   virtual void scale(double fact);   // just miltiply the table 
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(SimpleTablePhotoAbsCS);
   //AnyType_copy( SimpleTablePhotoAbsCS, PhotoAbsCS)
 private:
@@ -237,7 +238,7 @@ public:
   virtual double get_CS(double energy) const ;
   virtual double get_integral_CS(double energy1, double energy2) const ;  
   virtual void scale(double fact);
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(PhenoPhotoAbsCS);
   //AnyType_copy(PhenoPhotoAbsCS, PhotoAbsCS)
 private:
@@ -261,7 +262,7 @@ public:
   virtual double get_CS(double energy) const ;
   virtual double get_integral_CS(double energy1, double energy2) const ;  
   virtual void scale(double fact);
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(FitBTPhotoAbsCS);
   //AnyType_copy(PhenoPhotoAbsCS, PhotoAbsCS)
 private:
@@ -311,7 +312,7 @@ class AtomicSecondaryProducts: public RegPassivePtr
   //AtomicSecondaryProducts(DynLinArr< double > fchannel_prob_dens;
   //			  DynLinArr< DynLinArr< double > > felectron_energy;
   //			  DynLinArr< DynLinArr< double > > fphoton_energy;
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
 
 protected:
   //long q_channel;
@@ -378,7 +379,7 @@ public:
 
   virtual void remove_shell(int nshell); 
   virtual void restore_shell(int nshell); 
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   macro_copy_total_zero(AtomPhotoAbsCS);
   //virtual AtomPhotoAbsCS* copy(void) const = 0;
   AtomPhotoAbsCS(void);
@@ -399,7 +400,7 @@ protected:
   DynLinArr< AtomicSecondaryProducts > asp; 
 };
 
-ostream& operator<<(ostream& file, const AtomPhotoAbsCS& f);
+std::ostream& operator<<(std::ostream& file, const AtomPhotoAbsCS& f);
 
 /*Simple means that there is no difference between absorption and ionization.
 So there is one single internal array for both.
@@ -421,7 +422,7 @@ public:
 				  double energy1, double energy2) const ;  
   // photo-ionization cross section, energy in MeV, CS in Mbarns.
   virtual int get_main_shell_number(int nshell) const;
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(SimpleAtomPhotoAbsCS);
   //AnyType_copy(SimpleAtomPhotoAbsCS, AtomPhotoAbsCS)
   SimpleAtomPhotoAbsCS(void);
@@ -472,7 +473,7 @@ public:
   void replace_shells_by_overage(double fwidth, // MeV
 				 double fstep,
 				 long fmax_q_step);
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(ExAtomPhotoAbsCS);
   //AnyType_copy(ExAtomPhotoAbsCS, AtomPhotoAbsCS)
   ExAtomPhotoAbsCS(void);
@@ -612,7 +613,7 @@ public:
 		  const AtomPhotoAbsCS& fatom3, int fqatom_ps3,
 		  double fW=0.0, double fF = standard_factor_Fano);  
     // 3 sorts of atoms
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const ;
 
 private:
   int qatom;  // total quantity of atoms, NOT number of sorts, NOT qel in atom
@@ -621,8 +622,7 @@ private:
   double W;	     // The mean work per pair production,  MeV.
   double F;	     // Fano parameter.
 };
-
-ostream& operator<<(ostream& file, const MolecPhotoAbsCS& f);
+std::ostream& operator<<(std::ostream& file, const MolecPhotoAbsCS& f);
 
 /*
 

@@ -179,7 +179,7 @@ Parabol::Parabol(double x1, double x2, double x3,
     s_var[1] = 1;
     s_var[2] = 1;
     DynArr<DoubleAc> mat_inv1(3,3);
-    int ierr1;
+    //int ierr1;
     //inverse_DynArr(mat, s_var, mat_inv, ierr, mat_inv1, ierr1);
     inverse_DynArr_prot(mat, s_var, mat_inv, szero, ierr);
     if( ierr != 0 )
@@ -368,7 +368,7 @@ double Parabol::find_maxmin(void)
   return -db / (2.0 * da); 
 }
 
-ostream& operator<<(ostream& file, const Parabol& f)
+std::ostream& operator<<(std::ostream& file, const Parabol& f)
 {
   double xz[2];
   int q=f.find_zero(xz);

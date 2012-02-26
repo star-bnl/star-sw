@@ -1,16 +1,12 @@
 #ifndef G_COMPONENT_ANSYS123_H
 #define G_COMPONENT_ANSYS123_H
 
-#include <RQ_OBJECT.h>
-
 #include "ComponentFieldMap.hh"
 
 namespace Garfield {
 
 class ComponentAnsys123: public ComponentFieldMap { 
 
-  RQ_OBJECT("ComponentAnsys123")
-    
   public:
     // Constructor
     ComponentAnsys123();

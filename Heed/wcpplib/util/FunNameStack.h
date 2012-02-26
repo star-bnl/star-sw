@@ -13,7 +13,7 @@ It is provided "as is" without express or implied warranty.
 
 #include <stdlib.h>
 #include <string.h>
-//#include <iostream.h>
+#include <iostream>
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/inlinec.h"
 
@@ -28,14 +28,6 @@ It is provided "as is" without express or implied warranty.
 #include "boost/thread/mutex.hpp"
 #endif
 
-//#ifndef mcout
-//#define mcout cout
-//#endif
-//#ifndef mcerr
-//#define mcerr cerr
-//#endif
-
-#include <iostream>
 /*
 // Here there is a good place to switch off the
 // initialization of the function names in all the programs 
@@ -90,7 +82,7 @@ FunNameWatch funnw4(FunNameIIII4)
 FunNameWatch funnw5(FunNameIIII5)
 
 // Checks
-  //#define DO_CHECKS 
+#define DO_CHECKS 
 #ifdef DO_CHECKS
 
 #ifdef FUNNAMESTACK
@@ -365,7 +357,7 @@ class ExcFromSpexit
   ExcFromSpexit(void){;}
 };
 
-void spexit_action(ostream& file); 
+void spexit_action(std::ostream& file); 
 extern int s_throw_exception_in_spexit;  // if == 1, does exit(1) of abort()
 // depending on the key below
 extern int s_exit_without_core;  // the key above have larger priority
@@ -377,7 +369,7 @@ spexit_action(stream); }
 
 
 const int pqname=1000; // this depth of stack is completely OK
-// for all correect programs.
+// for all correct programs.
 // If you have overflow, it is likely the infinite loop with recursion
 // in your program!
 
@@ -483,16 +475,16 @@ private:
              //     to time expense
 
 #ifdef USE_BOOST_MULTITHREADING
-  ostream& printname(ostream& file, NameStack* ns, int n); // 
+  std::ostream& printname(std::ostream& file, NameStack* ns, int n); // 
 #else
-  ostream& printname(ostream& file, int n); // 
+  std::ostream& printname(std::ostream& file, int n); // 
 #endif
 public:
   void set_parameters(int fs_act=1, int fs_print=0);
   ~FunNameStack();
 private:
-  void printput(ostream& file); // called at insertion of new name in stack
-  void printdel(ostream& file); // called at deletion of name from stack
+  void printput(std::ostream& file); // called at insertion of new name in stack
+  void printdel(std::ostream& file); // called at deletion of name from stack
 public:
   //#ifdef USE_BOOST_MULTITHREADING
   //wl_inline void put(char* fname);
@@ -501,9 +493,9 @@ public:
   //#endif
   wl_inline void del(int nname);
   wl_inline void replace(const char* fname);
-  friend ostream& operator<<(ostream& file, const FunNameStack& f);
+  friend std::ostream& operator<<(std::ostream& file, const FunNameStack& f);
 };
-ostream& operator<<(ostream& file, const FunNameStack& f);
+std::ostream& operator<<(std::ostream& file, const FunNameStack& f);
 
 // The following class is used solerly 
 // to change parameters of main FunNameStack, where it needs to do
@@ -556,14 +548,18 @@ public:
 #endif
     }
   */
-  ostream& hdr(ostream& file) const  // print header
-    { file<<name<<": "; return file; }
-  ostream& whdr(ostream& file) const // print header with word WARNING
-    { file<<name<<": WARNING:\n"; return file;}
-  ostream& ehdr(ostream& file) const // print header with word ERROR
-    { file<<name<<": ERROR:\n"; return file;}
+
+  // print header
+  std::ostream& hdr(std::ostream& file) const  
+    {file << name << ": "; return file;}
+  // print header with word WARNING
+  std::ostream& whdr(std::ostream& file) const 
+    {file << name << ": WARNING:\n"; return file;}
+  // print header with word ERROR
+  std::ostream& ehdr(std::ostream& file) const 
+    {file << name << ": ERROR:\n"; return file;}
 };
-ostream& operator<<(ostream& file, const FunNameWatch& f);
+std::ostream& operator<<(std::ostream& file, const FunNameWatch& f);
 
 /* It is assumed to be general basical class for catching of errors.
 Any error thrown with FunNameStack can be catched with pointer to this class.
@@ -572,11 +568,11 @@ class GenError: public FunNameStack
 {public:
   GenError(const FunNameStack& f): FunNameStack(f) {;}
   GenError(const GenError& f): FunNameStack(f) {;}
-  virtual void print(ostream& file);
-  virtual void finish(ostream& file);
+  virtual void print(std::ostream& file);
+  virtual void finish(std::ostream& file);
   virtual ~GenError() {}
 };
-//ostream& operator<<(ostream& file, const GenError& f);
+//std::ostream& operator<<(std::ostream& file, const GenError& f);
 #ifdef WCPPLIB_INLINE
 #include "wcpplib/util/FunNameStack.ic"
 #endif

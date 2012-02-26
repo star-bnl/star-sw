@@ -3,8 +3,7 @@
 #include "wcpplib/util/String.h"
 #include "wcpplib/safetl/AbsArr.h"
 #include "wcpplib/safetl/AbsPtr.h"
-//#include <fstream.h>
-//#include "heed++/code/PhysicalConstants.h"
+
 /*
 Definition of elastic scattering for low-energy delta-electron.
 
@@ -65,7 +64,7 @@ class ElElasticScat: public RegPassivePtr
 
   ElElasticScat(void): atom(0) {;}
   ElElasticScat(const String& file_name);
-  void print(ostream& file, int l) const ;
+  void print(std::ostream& file, int l) const ;
 #ifndef EXCLUDE_FUNCTIONS_WITH_HISTDEF
   void fill_hist(void);
   // Makes a package of histograms for all atoms for which the

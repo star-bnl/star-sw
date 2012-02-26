@@ -1,12 +1,11 @@
 #include "wcpplib/clhep_units/WSystemOfUnits.h"
-#include "heed++/code/HeedDeltaElectron.h"
-#include "heed++/code/HeedDeltaElectronCS.h"
-#include "heed++/code/HeedCondElectron.h"
 #include "wcpplib/random/ranluxint.h"
 #include "wcpplib/random/chisran.h"
 #include "wcpplib/random/pois.h"
 #include "wcpplib/random/rnorm.h"
-
+#include "heed++/code/HeedDeltaElectron.h"
+#include "heed++/code/HeedDeltaElectronCS.h"
+#include "heed++/code/HeedCondElectron.h"
 // to see  last_particle_number
 //#include "heed++/code/HeedParticle.h"
 
@@ -18,7 +17,6 @@
 #define RANDOM_POIS
 #define DIRECT_LOW_IF_LITTLE
 const long max_q_low_path_length_for_direct = 5;
-
 
 int HeedDeltaElectron::s_low_mult_scattering = 1;
 int HeedDeltaElectron::s_high_mult_scattering = 1;
@@ -54,28 +52,22 @@ void HeedDeltaElectron::physics_mrange(double& fmrange)
 {
   mfunname("void HeedDeltaElectron::physics_mrange(double& fmrange)");
   if(s_print_listing == 1)
-    mcout<<"void HeedDeltaElectron::physics_mrange(double& fmrange)"<<endl;
+    mcout<<"void HeedDeltaElectron::physics_mrange(double& fmrange)"<< std::endl;
   s_mult_low_path_length = 0;
   q_low_path_length = 0.0;
   s_path_length = 0;
-  if(fmrange <= 0.0)
-    return;
-  if(curr_kin_energy == 0.0)
-  {
+  if (fmrange <= 0.0) return;
+  if (curr_kin_energy == 0.0) {
     fmrange = 0.0;
     return;
   }
   const absvol* av = currpos.G_lavol(); // get least address of volume
   const HeedDeltaElectronCSType* hmecst = 
     dynamic_cast< const HeedDeltaElectronCSType*  >(av);
-  if(hmecst == NULL) 
-  {
+  if (hmecst == NULL) {
     return ;
-  }
-  else
-  {
-    if(s_print_listing == 1)
-    {
+  } else {
+    if (s_print_listing == 1) {
       Iprintnf(mcout, fmrange);
     }
     // calculate eloss and mrange as follows from eloss
@@ -258,7 +250,7 @@ void HeedDeltaElectron::physics_after_new_speed(void)
     dynamic_cast< const HeedDeltaElectronCSType*  >(av);
   if(s_print_listing == 1)
   {
-    mcout<<"physics_after_new_speed: started"<<endl;
+    mcout<<"physics_after_new_speed: started"<< std::endl;
   }
   if(hmecst == NULL) 
   {
@@ -357,7 +349,7 @@ void HeedDeltaElectron::physics_after_new_speed(void)
           // since necessary_energy is not an addition
           if(s_print_listing == 1)
           {
-            mcout<<"\nstart to leave conduction electrons"<<endl;
+            mcout<<"\nstart to leave conduction electrons"<< std::endl;
             //Iprintnf(mcout, Eloss/eV); 
             //Iprintnf(mcout, necessary_energy/eV); 
             Iprintnf(mcout, dedx); 
@@ -451,7 +443,7 @@ void HeedDeltaElectron::physics_after_new_speed(void)
     { 
       if(s_print_listing == 1)
       {
-        mcout<<"\nstart to rotate by low angle"<<endl;
+        mcout<<"\nstart to rotate by low angle"<< std::endl;
       }
       double ek_restricted = ek;
       if(ek_restricted < 0.0005) ek_restricted = 0.0005;
@@ -642,7 +634,7 @@ void HeedDeltaElectron::physics_after_new_speed(void)
       {
         if(s_print_listing == 1)
         {
-          mcout<<"\nstarting to rotate by large angle"<<endl; 
+          mcout<<"\nstarting to rotate by large angle"<< std::endl; 
           Iprintnf(mcout, s_path_length);
         }
         long n1r = emesh->get_interval_number_between_centers(ek_restricted);
@@ -693,7 +685,7 @@ void HeedDeltaElectron::physics_after_new_speed(void)
   }
 }
 
-void HeedDeltaElectron::print(ostream& file, int l) const 
+void HeedDeltaElectron::print(std::ostream& file, int l) const 
 {
   if(l >=0 )
   {  

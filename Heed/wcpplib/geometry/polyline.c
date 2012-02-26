@@ -1,7 +1,3 @@
-//#include <stdlib.h>
-//#include <iostream.h>
-//#include <iomanip.h>
-//#include <math.h>
 #include "wcpplib/geometry/polyline.h"
 
 /*
@@ -336,7 +332,7 @@ int cross4pllines(const polyline pl[4], vfloat precision,
 }
 
 
-ostream& operator<<(ostream& file, const polyline& p)
+std::ostream& operator<<(std::ostream& file, const polyline& p)
 {
   int n;
   Ifile<<"polyline:\n";
@@ -394,7 +390,7 @@ polyline_pl& polyline_pl::operator=(const polyline_pl& fpl)
   return *this;
 }
 
-ostream& operator<<(ostream& file, const polyline_pl& p)
+std::ostream& operator<<(std::ostream& file, const polyline_pl& p)
 {
   Ifile<<"polyline_pl:\n";
   indn.n+=2;
@@ -500,13 +496,11 @@ int polygon::check_point_in(const point& fpt, vfloat prec) const
   //mcout<<(*this);
   //mcout<<"fpt="<<fpt;
   int i;
-  if((i=polyline::check_point_in(fpt, prec)) > 0 )
-  {
+  if((i = polyline::check_point_in(fpt, prec)) > 0) {
     //mcout<<"polygon::check_point_in: inside poliline\n";
     return i;
   }
-  if((i=pn.check_point_in(fpt, prec)) == 0 )
-  {
+  if ((i = pn.check_point_in(fpt, prec)) == 0) {
     //mcout<<"polygon::check_point_in: outside plane\n";
     return i;
   }
@@ -517,41 +511,35 @@ int polygon::check_point_in(const point& fpt, vfloat prec) const
      circulation.
   */
   point endpt[2];
-  endpt[0]=pt[0]; // which is really first or last, depends on pn.Gdir()
-  endpt[1]=pt[0];
-  double totang=0;
-  double ang, ang1, ang2;
+  endpt[0] = pt[0]; // which is really first or last, depends on pn.Gdir()
+  endpt[1] = pt[0];
+  double totang = 0;
+  double ang, ang2;
   //int s_start[2];
   //s_start[0]=0;
   //s_start[1]=0;
-  int n,m;
-  for(n=0; n<qpt-1; n++)
-  {
+  int n;
+  for (n = 0; n < qpt - 1; n++) {
     ang2 = 0.0;
-    ang = ang2projvec( (pt[n]-fpt), (pt[n+1]-fpt), pn.Gdir());
-    if(ang <= M_PI)  // go to opposite direction of clock
-    {
+    ang = ang2projvec((pt[n] - fpt), (pt[n + 1] - fpt), pn.Gdir());
+    if (ang <= M_PI) {
+      // go to opposite direction of clock
       totang += ang;
-    }
-    else
-    {
-      ang2 = 2*M_PI - ang; totang -= ang2;
+    } else {
+      ang2 = 2 * M_PI - ang; 
+      totang -= ang2;
     }
     //mcout<<"polygon::check_point_in: n="<<n<<'\n';
-    //mcout<<"ang="<<ang<<" ang1="<<ang1<<" ang2="<<ang2
     //mcout<<" totang="<<totang<<'\n';
     //mcout<<"polygon::check_point_in:   endpt="
-    //	 <<endpt[0]<<endpt[1]<<'\n';
+    //     <<endpt[0]<<endpt[1]<<'\n';
   }
-
   
   //if(s_start[0]==1 && endpt[0]==pt[0] || 
   //   s_start[1]==1 && endpt[1]==pt[0] )
   //if( endpt[0] == endpt[1])
-  if(fabs(totang) > 6.0)
-    return 3;
-  else
-    return 0;
+  if (fabs(totang) > 6.0) return 3;
+  return 0;
 }
 
 point polygon::cross(const straight& fsl, vfloat prec) const 
@@ -600,7 +588,7 @@ int polygon::range(const point& fpt, const vec& dir,
     return 0;
 }
 
-ostream& operator<<(ostream& file, const polygon& p)
+std::ostream& operator<<(std::ostream& file, const polygon& p)
 {
   Ifile<<"polygon:\n";
   indn.n+=2;
@@ -670,7 +658,7 @@ rectangle::rectangle(const point& fpiv, vec fdir[2], vfloat fdim[2],
   //static_cast<polygon&>(*this) = polygon(slh,4,prec);
 }
   
-ostream& operator<<(ostream& file, const rectangle& f)
+std::ostream& operator<<(std::ostream& file, const rectangle& f)
 {
   Ifile<<"rectangle:\n";
   indn.n+=2;
@@ -729,7 +717,7 @@ spquadr::spquadr(const point& fpiv,
   *this = spquadr(fpiv, sl1, sl2, fdir1, fdir2, plgn); 
 }
 
-ostream& operator<<(ostream& file, const spquadr& p)
+std::ostream& operator<<(std::ostream& file, const spquadr& p)
 {
   Ifile<<"spquadr:\n";
   indn.n+=2;

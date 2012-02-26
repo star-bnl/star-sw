@@ -3,7 +3,6 @@
 
 #include <complex>
 
-
 /*
 Copyright (c) 2005 Igor B. Smirnov
 
@@ -102,7 +101,7 @@ private:
   mutable double dxmm[2]; // the same
 };
 
-ostream& operator<<(ostream& file, const Cubic& f);
+std::ostream& operator<<(std::ostream& file, const Cubic& f);
 
 
 

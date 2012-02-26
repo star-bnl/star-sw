@@ -2,7 +2,6 @@
 #define ENERGYMESH_H
 
 #include "wcpplib/safetl/AbsArr.h"
-//#include "wcpplib/math/tline.h"
 
 /*
 Internal calculations in HEED is convenient to perform
@@ -36,13 +35,10 @@ The violation of boundaries triggers error and termination.
 
 // Energies in MeV, as everywhere in HEED (unless otherwise specified)
 
-//const int pqener = 201;  
 const int pqener = 1001;  
 // qener-1 is maximal possible quantity of bins
 // In principle it is not clear whether it is better to use DynLinArr instead
 // of simple arrays and maximal value
-
-
 
 class EnergyMesh: public RegPassivePtr
 {public:
@@ -61,8 +57,8 @@ class EnergyMesh: public RegPassivePtr
   // array of left sides of intervals
   long get_interval_number(double ener);
   long get_interval_number_between_centers(double ener);  // left
-  friend ostream& operator<<(ostream& file, EnergyMesh& f );
-  virtual void print(ostream& file, int l) const ;
+  friend std::ostream& operator<<(std::ostream& file, EnergyMesh& f);
+  virtual void print(std::ostream& file, int l) const;
 
   // For two folowing things we need to define copying
   //PointCoorMesh< double, double[pqener] > pcm_e;
@@ -71,11 +67,16 @@ class EnergyMesh: public RegPassivePtr
   macro_copy_total(EnergyMesh);
   virtual ~EnergyMesh(){};
 private:
-  long q;     // number of intervals
-  double emin;  // left side of the first interval
-  double emax;  // right side of the last interval
-  double e[pqener];  // left side of interval, q+1 numbers
-  double ec[pqener-1]; // center of interval, q numners
+  // number of intervals
+  long q;     
+  // left side of the first interval
+  double emin;  
+  // right side of the last interval
+  double emax;  
+  // left side of interval, q + 1 numbers
+  double e[pqener];  
+   // center of interval, q numners
+  double ec[pqener-1];
 
 };
 

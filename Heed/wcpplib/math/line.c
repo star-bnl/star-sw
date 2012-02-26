@@ -20,7 +20,7 @@ It is provided "as is" without express or implied warranty.
 
 
 long find_interval(double x, 
-		   DynLinArr< double > coor)
+                   DynLinArr< double > coor)
 {
   mfunname("long find_interval(double x, DynLinArr< double > coor)");
   long n1,n2,n3;
@@ -42,7 +42,7 @@ long find_interval(double x,
 }
 
 long find_interval(double x, 
-		   double coor[], long q)
+                   double coor[], long q)
 {
   mfunname("long find_interval(double x, double coor[], long q)");
   long n1,n2,n3;
@@ -63,20 +63,19 @@ long find_interval(double x,
 }
 
 double lin_interpolation(double x, 
-			 DynLinArr< double > coor, DynLinArr< double > arr)
+                         DynLinArr< double > coor, DynLinArr< double > arr)
 {
   mfunname("double lin_interpolation(T x, DynLinArr< double > coor, DynLinArr< double > arr)");
 
   check_econd12(coor.get_qel() , != , arr.get_qel() , mcerr);
-  long q=coor.get_qel();
-  long nstart=find_interval(x , coor);
-  if(nstart < 0) return 0.0;
+  long nstart = find_interval(x, coor);
+  if (nstart < 0) return 0.0;
   return arr[nstart] + 
-    (arr[nstart+1] - arr[nstart]) / (coor[nstart+1] - coor[nstart])*
+    (arr[nstart+1] - arr[nstart]) / (coor[nstart+1] - coor[nstart]) *
     (x - coor[nstart]);
 }
 double lin_interpolation(double x, 
-			 double coor[], double arr[], long q)
+                         double coor[], double arr[], long q)
 {
   mfunname("double lin_interpolation(T x, double coor[], double arr[], long q)");
 
@@ -112,22 +111,22 @@ double double_parab_interpolation
   else if(nstart == 0) // one parabola through three first points
   {
     Parabol pr(coor[nstart], coor[nstart+1], coor[nstart+2],
-	       arr[nstart], arr[nstart+1], arr[nstart+2]);
+               arr[nstart], arr[nstart+1], arr[nstart+2]);
     return pr.y(x);
   }
   else if(nstart == q-2) // one parabola through three last points
   {
     Parabol pr(coor[nstart-1], coor[nstart], coor[nstart+1],
-	       arr[nstart-1], arr[nstart], arr[nstart+1]);
+               arr[nstart-1], arr[nstart], arr[nstart+1]);
     return pr.y(x);
   }
   else
   {
     Parabol pr1(coor[nstart], coor[nstart+1], coor[nstart+2],
-	       arr[nstart], arr[nstart+1], arr[nstart+2]);
+               arr[nstart], arr[nstart+1], arr[nstart+2]);
     double y1 = pr1.y(x);
     Parabol pr2(coor[nstart-1], coor[nstart], coor[nstart+1],
-	       arr[nstart-1], arr[nstart], arr[nstart+1]);
+               arr[nstart-1], arr[nstart], arr[nstart+1]);
     double y2 = pr2.y(x);
     double r1 = (x - coor[nstart])/(coor[nstart+1] - coor[nstart]);
     double r2 = (coor[nstart+1] - x)/(coor[nstart+1] - coor[nstart]);
@@ -141,7 +140,7 @@ double double_parab_interpolation
 
 
 void hist_lin_integ_ar(float *x, float *y, long q, 
-	float xhist_start, float xhist_step, float *yhist, long qhist)
+        float xhist_start, float xhist_step, float *yhist, long qhist)
 {
   long nh;
   float x1,x2;
@@ -169,17 +168,17 @@ float lin_integ_ar(float *x, float *y, long q, float x1, float x2)
   if( x2 < x1 || x2 <= x[0] || x1 >= x[q-1] ) return 0;
   for(i=0; i<q; i++ )
     if(x[i] > x1 )
-    {	n1=i; break; }
+    {        n1=i; break; }
   n2=q-1;
   for(i=n1; i<q; i++ )
     if( x[i] >= x2 )
-    {	n2=i; break; }
+    {        n2=i; break; }
   if( x1 < x[0] )
-  {	xt1=x[0]; nr=0; }
+  {        xt1=x[0]; nr=0; }
   else
-  {	xt1=x1; nr=n1-1; }
+  {        xt1=x1; nr=n1-1; }
   if( x2 > x[q-1] )
-  {	xt2=x[q-1];  }
+  {        xt2=x[q-1];  }
   else
     xt2=x2;
   xr2=xt1;
@@ -208,7 +207,7 @@ float lin_integ_ar(float *x, float *y, long q, float x1, float x2)
 }
 
 double lin_integ_ar(DynLinArr< double > x, DynLinArr< double > y, 
-		    long q, double x1, double x2)
+                    long q, double x1, double x2)
 // fit table by a straight line and integrate the area below it.
 {
   mfunname("double lin_integ_ar(...)");
@@ -221,17 +220,17 @@ double lin_integ_ar(DynLinArr< double > x, DynLinArr< double > y,
   if( x2 < x1 || x2 <= x[0] || x1 >= x[q-1] ) return 0;
   for(i=0; i<q; i++ )
     if(x[i] > x1 )
-    {	n1=i; break; }
+    {        n1=i; break; }
   n2=q-1;
   for(i=n1; i<q; i++ )
     if( x[i] >= x2 )
-    {	n2=i; break; }
+    {        n2=i; break; }
   if( x1 < x[0] )
-  {	xt1=x[0]; nr=0; }
+  {        xt1=x[0]; nr=0; }
   else
-  {	xt1=x1; nr=n1-1; }
+  {        xt1=x1; nr=n1-1; }
   if( x2 > x[q-1] )
-  {	xt2=x[q-1];  }
+  {        xt2=x[q-1];  }
   else
     xt2=x2;
   xr2=xt1;
@@ -273,23 +272,23 @@ float step_integ_ar(float *x, float *y, long q, float x1, float x2)
   long nr,n1,n2,i;
   float xt1,xt2;
   float xr1,xr2;
-  //	float a,b;
+  //        float a,b;
   float s=0;
   if(q<=0)return 0;
   if( x2 < x1 || x2 <= x[0] || x1 >= x[q-1] ) return 0;
   for(i=0; i<q; i++ )
     if(x[i] > x1 )
-    {	n1=i; break; }
+    {        n1=i; break; }
   n2=q-1;
   for(i=n1; i<q; i++ )
     if( x[i] >= x2 )
-    {	n2=i; break; }
+    {        n2=i; break; }
   if( x1 < x[0] )
-  {	xt1=x[0]; nr=0; }
+  {        xt1=x[0]; nr=0; }
   else
-  {	xt1=x1; nr=n1-1; }
+  {        xt1=x1; nr=n1-1; }
   if( x2 > x[q-1] )
-  {	xt2=x[q-1];  }
+  {        xt2=x[q-1];  }
   else
     xt2=x2;
   xr2=xt1;
@@ -311,15 +310,15 @@ float step_integ_ar(float *x, float *y, long q, float x1, float x2)
       xr2=xt2;
     s+=y[nr]*(xr2-xr1);
     //Imcout<<"nr="<<nr<<" y[nr]="<<y[nr]
-    //	  <<" xr..="<<xr1<<' '<<xr2
-    //	  <<" s="<<s<<'\n';
+    //          <<" xr..="<<xr1<<' '<<xr2
+    //          <<" s="<<s<<'\n';
   }
   return s;
 }
 
 
 double step_integ_ar(const double *x, const double *y, 
-		     long q, double x1, double x2)
+                     long q, double x1, double x2)
 // here x is a left side of interval on which
 // fuction f is a constant.
 // x and y is a arrays with dimen. q and q-1 respectively;
@@ -333,27 +332,27 @@ double step_integ_ar(const double *x, const double *y,
   long nr,n1,n2,i;
   double xt1,xt2;
   double xr1,xr2;
-  //	float a,b;
+  //        float a,b;
   double s=0;
   if(q<=0)return 0;
   if( x2 < x1 || x2 <= x[0] || x1 >= x[q-1] ) return 0;
   for(i=0; i<q; i++ )
     if(x[i] > x1 )
-    {	n1=i; break; }
+    {        n1=i; break; }
   n2=q-1;
   //Iprint2n(mcout, n1, n2);
   for(i=n1; i<q; i++ )
   {
     //Iprint3n(mcout, i, q, x[i]);
     if( x[i] >= x2 )
-    {	n2=i; break; }
+    {        n2=i; break; }
   }
   if( x1 < x[0] )
-  {	xt1=x[0]; nr=0; }
+  {        xt1=x[0]; nr=0; }
   else
-  {	xt1=x1; nr=n1-1; }
+  {        xt1=x1; nr=n1-1; }
   if( x2 > x[q-1] )
-  {	xt2=x[q-1];  }
+  {        xt2=x[q-1];  }
   else
     xt2=x2;
   xr2=xt1;
@@ -375,8 +374,8 @@ double step_integ_ar(const double *x, const double *y,
       xr2=xt2;
     s+=y[nr]*(xr2-xr1);
     //Imcout<<"nr="<<nr<<" y[nr]="<<y[nr]
-    //	  <<" xr..="<<xr1<<' '<<xr2
-    //	  <<" s="<<s<<'\n';
+    //          <<" xr..="<<xr1<<' '<<xr2
+    //          <<" s="<<s<<'\n';
   }
   return s;
 }
@@ -384,8 +383,8 @@ double step_integ_ar(const double *x, const double *y,
 #endif
 
 double find_x_for_known_int_hist(long q, double xmin, double xmax, 
-				 const double *y, 
-				 double integ, int* s_err)
+                                 const double *y, 
+                                 double integ, int* s_err)
 {
   mfunname("double find_x_for_known_int_hist(...)");
   check_econd11(q , < 0 , mcerr);
@@ -425,8 +424,8 @@ double find_x_for_known_int_hist(long q, double xmin, double xmax,
     
 
 double find_x_for_known_int_hist(long q, double xmin, double xmax, 
-				 DynLinArr< double > y, 
-				 double integ, int* s_err)
+                                 DynLinArr< double > y, 
+                                 double integ, int* s_err)
 {
   mfunname("double find_x_for_known_int_hist(...)");
   check_econd11(q , < 0 , mcerr);

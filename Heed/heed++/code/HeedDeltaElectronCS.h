@@ -103,9 +103,7 @@ class HeedDeltaElectronCS: public RegPassivePtr
 		      double fmlambda = 0.001*4.0e-3,
 		      double fmthetac = 0.1);
 
-  virtual void print(ostream& file, int l) const ;
-
-
+  virtual void print(std::ostream& file, int l) const ;
 };
 
 class HeedDeltaElectronCSType
@@ -114,7 +112,7 @@ class HeedDeltaElectronCSType
   HeedDeltaElectronCSType(void): hdecs() {;}
   HeedDeltaElectronCSType(HeedDeltaElectronCS* md): hdecs(md) {;}
 };
-ostream & operator << (ostream & file, const HeedDeltaElectronCSType & f);
+std::ostream& operator << (std::ostream& file, const HeedDeltaElectronCSType& f);
 
 
 #endif

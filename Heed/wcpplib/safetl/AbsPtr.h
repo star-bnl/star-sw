@@ -278,9 +278,11 @@ virtual CommonBase* copy(void) const \
 class AbsCont          // Abstract Container
 {public:
   virtual AbsCont* copy(void) const = 0;
-  virtual void print(ostream& file, int l) const 
-  { Ifile<<"AbsCont::print is called, l="<<l<<"\n"; }  // printing function
+  // printing function
   // parameter l is useful so as to control length of listing.
+  virtual void print(std::ostream& file, int l) const {
+    Ifile << "AbsCont::print is called, l=" << l << "\n";
+  }  
   virtual ~AbsCont() {}
 };
 
@@ -307,7 +309,7 @@ class AbsCont          // Abstract Container
 class AbsCont virt_common_base_col          // Abstract Container
 {public:
   virtual CommonBase* copy(void) const = 0;
-  virtual void print(ostream& file, int l) const 
+  virtual void print(std::ostream& file, int l) const 
   { Ifile<<"AbsCont::print is called, l="<<l<<"\n"; }  // printing function
   // parameter l is useful so as to control length of listing.
   virtual ~AbsCont() {}
@@ -325,10 +327,10 @@ class AbsCont virt_common_base_col          // Abstract Container
 // return NULL to calm compiler of Solaris which wants to see return value
 #endif
 
-inline ostream& operator<<(ostream& file, const AbsCont& f)
+inline std::ostream& operator<<(std::ostream& file, const AbsCont& f)
 {
-  Ifile<<"operator<<AbsCont& is called.\n";
-  f.print(file,0);  // this line is needed only to avoid warnings
+  Ifile << "operator<<AbsCont& is called.\n";
+  f.print(file, 0);  // this line is needed only to avoid warnings
   // at some severe compiler options that f is unused.
   return file;
 }
@@ -620,7 +622,7 @@ template<class X, class C = StandardCopyDefinition<X> >class ActivePtr  virt_com
     }
 
   
-  void print(ostream& file, int l=1) const;
+  void print(std::ostream& file, int l = 1) const;
   inline ActivePtr(void): ptr(NULL) {}
 
   // The constructors and the assignment are interpreted as put(), 
@@ -703,7 +705,7 @@ private:
 // does not work
 
 template<class X, class C >
-void ActivePtr<X,C>::print(ostream& file, int l) const 
+void ActivePtr<X,C>::print(std::ostream& file, int l) const 
 { 
   //if(ptr!=NULL) ptr->print(file, l); 
   Ifile<<"ActivePtr<X,C>: ";
@@ -730,7 +732,7 @@ void ActivePtr<X,C>::print(ostream& file, int l) const
 }
 
 template<class X, class C >
-ostream& operator<<(ostream& file, const ActivePtr<X,C>& f)
+std::ostream& operator<<(std::ostream& file, const ActivePtr<X,C>& f)
 {
   Ifile<<"ActivePtr<X,C>: ";
   if(f.get() == NULL)
@@ -759,7 +761,7 @@ ostream& operator<<(ostream& file, const ActivePtr<X,C>& f)
 }
 
 template<class X, class C >
-istream& operator>>(istream& file, ActivePtr<X,C>& f)
+std::istream& operator>>(std::istream& file, ActivePtr<X,C>& f)
 {
   long q = 13;
   long n;
@@ -783,7 +785,7 @@ istream& operator>>(istream& file, ActivePtr<X,C>& f)
 }
 /*
 template<class X>
-ostream& operator<<(ostream& file, const ActivePtr<X>& f)
+std::ostream& operator<<(std::ostream& file, const ActivePtr<X>& f)
 {
   Ifile<<"ActivePtr<X>:";
   if(f.get() == NULL)
@@ -898,7 +900,7 @@ template<class X>class ActivePtrWI
       if(ptr!=NULL) delete ptr;  
       ptr = fptr;
     }
-  void print(ostream& file, int l=1) const;
+  void print(std::ostream& file, int l = 1) const;
   inline ActivePtrWI(void): ptr(NULL) {}
   inline ActivePtrWI(const X* fptr):ptr(fptr != NULL ? new X(*fptr) : ((X*)NULL)) 
     {}  
@@ -968,7 +970,7 @@ ActivePtrWI<X>::operator X*(void) const
 #endif
 
 template<class X>
-void ActivePtrWI<X>::print(ostream& file, int l) const 
+void ActivePtrWI<X>::print(std::ostream& file, int l) const 
 { 
   //if(ptr!=NULL) ptr->print(file, l); 
   Ifile<<"ActivePtrWI<X>:";
@@ -982,7 +984,7 @@ void ActivePtrWI<X>::print(ostream& file, int l) const
   }
 }
 template<class X>
-ostream& operator<<(ostream& file, const ActivePtrWI<X>& f)
+std::ostream& operator<<(std::ostream& file, const ActivePtrWI<X>& f)
 {
   Ifile<<"ActivePtrWI<X>:";
   if(f.get() == NULL)
@@ -1236,8 +1238,8 @@ public:
     // the program is terminated with output message to mcerr.
     // Otherwise (normal behaviour) the references are cleared.
 
-  virtual void print(ostream& file, int l=1) const; 
-  friend ostream& operator<<(ostream& file, const RegPassivePtr& f);
+  virtual void print(std::ostream& file, int l=1) const; 
+  friend std::ostream& operator<<(std::ostream& file, const RegPassivePtr& f);
 
 
   // Three parameters controlling behaviour of pointee object at
@@ -1736,7 +1738,7 @@ template<class X>class PassivePtr virt_common_base_col
   inline void put(X* fptr);  // unregirster old registered object and 
     // pass fptr to  this.
 
-  //void print(ostream& file, int l) const 
+  //void print(std::ostream& file, int l) const 
   // { if(ptr!=NULL) ptr->print(file, l); }
   inline PassivePtr(void): cpp(NULL)
 #ifdef USE_DOUBLE_PTR_IN_PASSIVEPTR
@@ -1792,7 +1794,7 @@ template<class X>class PassivePtr virt_common_base_col
   long get_total_number_of_references(void) const
     {  if(cpp == NULL) return 0;
     else return cpp->get_number_of_booked(); }
-  void print(ostream& file, int l=1) const;
+  void print(std::ostream& file, int l=1) const;
   macro_copy_total(PassivePtr);
   virtual ~PassivePtr();
 private:
@@ -1819,7 +1821,7 @@ PassivePtr<X>::PassivePtr(const PassivePtr < Y >& f): cpp(NULL)
 }
 
 template<class X>
-void PassivePtr<X>::print(ostream& file, int l) const
+void PassivePtr<X>::print(std::ostream& file, int l) const
 {
   Ifile<<"PassivePtr<X>:";
   if(get() == NULL)
@@ -1838,7 +1840,7 @@ void PassivePtr<X>::print(ostream& file, int l) const
   }
 }
 template<class X>
-ostream& operator<<(ostream& file, const PassivePtr<X>& f)
+std::ostream& operator<<(std::ostream& file, const PassivePtr<X>& f)
 {
   Ifile<<"PassivePtr<X>:";
   if(f.get() == NULL)
@@ -2361,7 +2363,7 @@ template<class X, class C = StandardCopyDefinition<X> >class ActivePtrReg:
     RegPassivePtr(), ActivePtr<X,C>(f) {} 
   inline ActivePtrReg& operator=(const ActivePtrReg<X,C>& f) 
     { if(this != &f) put(f.get()) ; return *this; }
-  virtual void print(ostream& file, int l=1) const; 
+  virtual void print(std::ostream& file, int l=1) const; 
   macro_copy_total(ActivePtrReg);
   virtual ~ActivePtrReg() {}
 #ifdef USE_REPLACE_ALLOC
@@ -2370,7 +2372,7 @@ template<class X, class C = StandardCopyDefinition<X> >class ActivePtrReg:
 };
 
 template<class X, class C >
-void ActivePtrReg<X,C>::print(ostream& file, int l) const 
+void ActivePtrReg<X,C>::print(std::ostream& file, int l) const 
 { 
   //if(ptr!=NULL) ptr->print(file, l); 
   Ifile<<"ActivePtrReg<X,C>:\n";
@@ -2382,7 +2384,7 @@ void ActivePtrReg<X,C>::print(ostream& file, int l) const
 
  
 template<class X>
-ostream& operator<<(ostream& file, const ActivePtrReg<X>& f)
+std::ostream& operator<<(std::ostream& file, const ActivePtrReg<X>& f)
 {
   Ifile<<"ActivePtrReg<X>:";
   file<<noindent;
@@ -2429,5 +2431,5 @@ class DoubleReg: public RegPassivePtr
 #endif
 }; 
 
-ostream& operator<<(ostream& file, const DoubleReg& f);
+std::ostream& operator<<(std::ostream& file, const DoubleReg& f);
 #endif

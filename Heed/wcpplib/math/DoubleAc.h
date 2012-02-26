@@ -148,7 +148,7 @@ public:
   inline DoubleAc& operator/=(long f);
   inline DoubleAc& operator/=(int f);
 
-  void print(ostream& file, int l=1) const;
+  void print(std::ostream& file, int l=1) const;
   // if(l <= 0) return without print
   // if i == 1, 2, or 3, print without passing to the next line at the end
   // if i == 4, 5, or 6, the same print but with passing to the next line 
@@ -677,34 +677,7 @@ DoubleAc asin(const DoubleAc& f);
 
 DoubleAc acos(const DoubleAc& f);
 
-inline DoubleAc pow(const DoubleAc& f, const DoubleAc& p)
-{
-  mcerr<<"ERROR in inline DoubleAc pow(const DoubleAc& f, const DoubleAc& p):\n";
-  mcerr<<"not implemented yet\n";
-  spexit(mcerr);
-  /*
-  double d =  pow( f.get(), p);
-  double di = pow( f.left_limit(), p);
-  double da = pow( f.right_limit(), p);
-  if(
-
-
-  if(p.get() >= 0.0) 
-    return DoubleAc(pow( f.get() , p.get() ),
-		    pow( f.get_left_limit() , p.get_left_limit() ),
-		    pow( f.get_right_limit() , p.get_right_limit() )
-		    );
-  else
-    return DoubleAc(pow( f.get() , p.get() ),
-		    pow( f.get_right_limit() , p.get_right_limit() ),
-		    pow( f.get_left_limit() , p.get_left_limit() )
-		    );
-  */
-  return 0.0;  // to calm Solaris
-}
-
-
-ostream& operator<<(ostream& file, const DoubleAc& f);
+std::ostream& operator<<(std::ostream& file, const DoubleAc& f);
 // Calls f.print(file, 1) (prints only the central value)
 
 #define Iprintda( file , name ) file<<indn<<#name<<"="<<noindent; \

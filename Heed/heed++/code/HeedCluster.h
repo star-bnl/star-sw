@@ -23,7 +23,7 @@ class HeedCluster: public RegPassivePtr
     transferred_energy(ftransferred_energy), estimated_qel(festimated_qel),
     pt(fpt), ptloc(fptloc), 
     tid(ftid), natom(fnatom), nshell(fnshell) {;}
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const;
 };
 
 //extern AbsList< HeedCluster > cluster_bank;  // only for histograms

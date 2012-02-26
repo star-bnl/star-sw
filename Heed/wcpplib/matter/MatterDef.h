@@ -22,76 +22,61 @@ class MatterDef: public AtomMixDef
   double temperatureh;
   double densityh;
   double I_effh;
+  // I_eff is still not very reliable.
+  // There are too many approximations for this.
+  // Here is a simplest and probably not good.
   void calc_I_eff(void);
 public:
-
   inline const String& name(void) const  {return nameh;}
   inline const String& notation(void) const  {return notationh;}
   inline double density(void) const {return densityh; }
   inline double temperature(void) const {return temperatureh;}
   inline double I_eff(void) const {return I_effh;}
-  // I_eff is still not very reliable.
-  // There is too many approximations for this.
-  // Here is a simplest and probably not good.
 
   MatterDef(void);
   //MatterDef(const MatterDef& f);            // call is forbidden, terminates
   //MatterDef& operator=(const MatterDef& f); // call is forbidden, terminates 
   MatterDef(const String& fname, const String& fnotation,
-	    long fqatom, const DynLinArr< String >& fatom_not,
-	    const DynLinArr< double >& fweight_quan, 
-	    double fdensity, double ftemperature);
+            long fqatom, const DynLinArr< String >& fatom_not,
+            const DynLinArr< double >& fweight_quan, 
+            double fdensity, double ftemperature);
   MatterDef(const String& fname, const String& fnotation,
-	    const String& fatom_not, double fdensity, double ftemperature);
+            const String& fatom_not, double fdensity, double ftemperature);
   MatterDef(const String& fname, const String& fnotation,
-	    const String& fatom_not1, double fweight_quan1,
-	    const String& fatom_not2, double fweight_quan2, 
-	    double fdensity, double ftemperature);
+            const String& fatom_not1, double fweight_quan1,
+            const String& fatom_not2, double fweight_quan2, 
+            double fdensity, double ftemperature);
   MatterDef(const String& fname, const String& fnotation,
-	    const String& fatom_not1, double fweight_quan1,
-	    const String& fatom_not2, double fweight_quan2, 
-	    const String& fatom_not3, double fweight_quan3, 
-	    double fdensity, double ftemperature);
+            const String& fatom_not1, double fweight_quan1,
+            const String& fatom_not2, double fweight_quan2, 
+            const String& fatom_not3, double fweight_quan3, 
+            double fdensity, double ftemperature);
   ~MatterDef();
 
-  virtual void print(ostream & file, int l=0) const;
-  static void printall(ostream & file);
+  virtual void print(std::ostream& file, int l) const;
+  static void printall(std::ostream& file);
+  // Check that there is no matter with the same name in the container
   void verify(void); 
-  // checks that there is no molecule with the same name in
-  // the container
   static void verify(const String& fname, const String& fnotation); 
-  //protected:
-  //static AbsList< MatterDef* > logbook;
-public:  // declared public, but not modify externnally.
-  // Actually it is private, but the static function can not be
-  // declared public somewhy
+  // Initialize the logbook at the first request
+  // and keep it as internal static variable.
   static AbsList< MatterDef* >& get_logbook(void);
-  // This function initializes the logbook atits first request
-  // and keeps it as internal static variable.
-
-public:
   static const AbsList< MatterDef* >& get_const_logbook(void);
-  // const for external use
-  //static const AbsList< MatterDef* >& get_MatterDefLogbook(void);
+  // Return the adress of the matter with this notation if it is registered.
+  // Otherwise return NULL.
   static MatterDef* get_MatterDef(const String& fnotation);
-  // If no matter with this notation, returns NULL.
 
   macro_copy_total(MatterDef);
-  //AnyType_copy(MatterDef, MatterDef);
-  //virtual void print(ostream& file, int l) const { print(file); }  
-
 };
-
-ostream & operator << (ostream & file, const MatterDef & f);
+std::ostream& operator << (std::ostream& file, const MatterDef& f);
 
 class MatterType
-{public:
+{
+public:
   PassivePtr<MatterDef> matdef;
   MatterType(void): matdef() {;}
   MatterType(MatterDef* md): matdef(md) {;}
-  //virtual void empty_func(void){ ; }
 };
-ostream & operator << (ostream & file, const MatterType & f);
-
+std::ostream & operator << (std::ostream& file, const MatterType& f);
 
 #endif
