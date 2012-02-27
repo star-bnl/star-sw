@@ -53,11 +53,11 @@ const double Thomas_sum_rule_const_Mb =
 // Energies and threshold are given in MeV. This is important!
 // e1 should be < e2.
 int sign_nonlinear_interpolation(double e1, double cs1, 
-				 double e2, double cs2, double threshold);
+                                 double e2, double cs2, double threshold);
 
 double glin_integ_ar(DynLinArr< double > e, DynLinArr< double > cs, 
-		     long q, double e1, double e2,
-		     double threshold );
+                     long q, double e1, double e2,
+                     double threshold );
 // fit table by a straight line or by inverse power function 
 // (see comment above)
 // and integrate the area below it.
@@ -69,41 +69,41 @@ double glin_integ_ar(DynLinArr< double > e, DynLinArr< double > cs,
 // by the straight line till threshold.
 // If this line crosses zero, it is extrapolated only till this point.
 
-double my_integr_fun( double xp1, double yp1, double xp2, double yp2, 
-		      double xmin, double xmax, double x1, double x2);
-double my_val_fun( double xp1, double yp1, double xp2, double yp2, 
-		   double xmin, double xmax, double x);
+double my_integr_fun(double xp1, double yp1, double xp2, double yp2, 
+                     double xmin, double xmax, double x1, double x2);
+double my_val_fun(double xp1, double yp1, double xp2, double yp2, 
+                  double xmin, double xmax, double x);
 
 //double old_glin_integ_ar(DynLinArr< double > e, DynLinArr< double > cs, 
-//		     long q, double e1, double e2,
-//		     double threshold );
+//                     long q, double e1, double e2,
+//                     double threshold );
 
 //double glin_val_ar(DynLinArr< double > e, DynLinArr< double > cs, 
-//		   long q, double x
-//		   double threshold );
+//                   long q, double x
+//                   double threshold );
 
 
 class PhotoAbsCS virt_common_base_col
 {
 public:
   inline const String& get_name() const {return name;} 
+  // charge or number of electrons at this shell or in this atom
+  // (in principle the integral of CS should
+  // satisfy the Thomas-Reiche-Kuhn sum rule)
   inline int get_Z() const {return Z;} 
-         // charge or number of electrons at this shell or in this atom
-         // (in principle the integral of CS should
-         // satisfy the Thomas-Reiche-Kuhn sum rule)
   inline double get_threshold() const {return threshold;}
   virtual double get_CS(double energy) const = 0;// energy in MeV, CS in Mbarns
   virtual double get_integral_CS(double energy1, double energy2) const = 0;  
                                  // energy in MeV, CS in Mbarns * MeV
-  virtual void scale(double fact) = 0; // just scale (multiply by some factor)
+  // multiply by some factor
   // it is sometimes useful for debug and other purposes.
+  virtual void scale(double fact) = 0; 
   
   virtual void print(std::ostream& file, int l) const;
   macro_copy_total_zero(PhotoAbsCS);
-  //virtual PhotoAbsCS* copy(void) const = 0;
   PhotoAbsCS(void);
   PhotoAbsCS(const String& fname, int fZ, double fthreshold);
-
+  virtual ~PhotoAbsCS() {}
 protected:
   String name;
   int Z;
@@ -121,17 +121,20 @@ class OveragePhotoAbsCS: public PhotoAbsCS
   // so it will be without smoothing.
   double step; // the step of integration, for example, 1/20 from width
 public:
-
-  OveragePhotoAbsCS(void) {;}
+  // constructors
+  OveragePhotoAbsCS() {;}
   OveragePhotoAbsCS(PhotoAbsCS* apacs, double fwidth, // MeV
-		    double fstep,
-		    long fmax_q_step);
+                    double fstep,
+                    long fmax_q_step);
+  // destructor
+  virtual ~OveragePhotoAbsCS() {}
   virtual double get_CS(double energy) const;// energy in MeV, CS in Mbarns
   virtual double get_integral_CS(double energy1, double energy2) const;  
                                  // energy in MeV, CS in Mbarns * MeV
-  virtual void scale(double fact); // just scale (multiply by some factor,
-  // namely the height, y-axis)
+  
+  // scale (multiply the height, y-axis, by some factor)
   // it is sometimes useful for debug and other purposes.
+  virtual void scale(double fact); 
   
   virtual void print(std::ostream& file, int l) const;
   macro_copy_total(OveragePhotoAbsCS);
@@ -141,11 +144,11 @@ public:
 // Hydrogen: empirical fit of Kosarev & Podoliak 
 // Original formula for molecular hydrogen
 // Since this class for separated shell, we divide molecular CS by 2
-
 class HydrogenPhotoAbsCS: public PhotoAbsCS
 {
 public:
-  HydrogenPhotoAbsCS(void);
+  HydrogenPhotoAbsCS();
+  virtual ~HydrogenPhotoAbsCS() {}
   virtual double get_CS(double energy) const;
   virtual double get_integral_CS(double energy1, double energy2) const;  
   virtual void scale(double fact);
@@ -176,26 +179,24 @@ private:
 class SimpleTablePhotoAbsCS: public PhotoAbsCS
 {
 public:
-  SimpleTablePhotoAbsCS(void);
+  SimpleTablePhotoAbsCS();
   SimpleTablePhotoAbsCS(const String& fname, int fZ, 
-			double fthreshold, const String& ffile_name);
+                        double fthreshold, const String& ffile_name);
   SimpleTablePhotoAbsCS(const String& fname, int fZ, 
-			double fthreshold, 
-			const DynLinArr< double >& fener,
-			const DynLinArr< double >& fcs);
-
+                        double fthreshold, 
+                        const DynLinArr< double >& fener,
+                        const DynLinArr< double >& fcs);
   // Fit from one of the papers of Band-Trzaskovskaya et al, CS for any shell
   // It is difficult to integrate that formulas analytically.
   // So I create numerical array and treat it as input data.
   SimpleTablePhotoAbsCS(const String& fname, int fZ, double fthreshold, 
-			int  l, double E0, double yw, double ya,
-			double P, double sigma);
-
+                        int  l, double E0, double yw, double ya,
+                        double P, double sigma);
   // Replace part:
   SimpleTablePhotoAbsCS(const SimpleTablePhotoAbsCS& total, 
-		       const SimpleTablePhotoAbsCS& part, 
-		       double emax_repl);
-
+                       const SimpleTablePhotoAbsCS& part, 
+                       double emax_repl);
+  virtual ~SimpleTablePhotoAbsCS() {}
   void remove_leading_zeros(void);  // very useful operation
   // for preparation of some tables
   void remove_leading_tiny(double level);  // very useful operation
@@ -209,7 +210,6 @@ public:
   // removes all points which are less or equal to minimal_theshold
   // the case of equal needs for argon
 
-
   virtual double get_CS(double energy) const ;  // energy in MeV
   virtual double get_integral_CS(double energy1, double energy2) const ; 
   inline const DynLinArr< double >&  get_arr_ener() const {return ener;}
@@ -217,7 +217,6 @@ public:
   virtual void scale(double fact);   // just miltiply the table 
   virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(SimpleTablePhotoAbsCS);
-  //AnyType_copy( SimpleTablePhotoAbsCS, PhotoAbsCS)
 private:
   String file_name;  // saved for printing
   // The following arrays are interpreted as
@@ -232,7 +231,8 @@ class PhenoPhotoAbsCS: public PhotoAbsCS
 public:
   PhenoPhotoAbsCS(void);
   PhenoPhotoAbsCS(const String& fname, int fZ, 
-		  double fthreshold, double fpower=2.75);
+                  double fthreshold, double fpower=2.75);
+  virtual ~PhenoPhotoAbsCS() {}
   // power is here positive, but it is meay that there is division,
   // the the actual power is negative.
   virtual double get_CS(double energy) const ;
@@ -240,7 +240,6 @@ public:
   virtual void scale(double fact);
   virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(PhenoPhotoAbsCS);
-  //AnyType_copy(PhenoPhotoAbsCS, PhotoAbsCS)
 private:
   double power;  // positive power 1/E^power
   double factor;
@@ -254,8 +253,8 @@ class FitBTPhotoAbsCS: public PhotoAbsCS
 public:
   FitBTPhotoAbsCS(void);
   FitBTPhotoAbsCS(const String& fname, int fZ, double fthreshold, 
-		  int  lPas, double E0, double yw, double ya,
-		  double P, double sigma);
+                  int  lPas, double E0, double yw, double ya,
+                  double P, double sigma);
 
   // power is here positive, but it is meay that there is division,
   // the the actual power is negative.
@@ -295,23 +294,23 @@ the use of standard channel.
 class AtomicSecondaryProducts: public RegPassivePtr
 {public:
   int get_channel(DynLinArr< double >& felectron_energy, // MeV
-		  DynLinArr< double >& fphoton_energy) const ; // MeV
+                  DynLinArr< double >& fphoton_energy) const ; // MeV
     // return value - sign that channel is generated (1) or not (0).
 
-  AtomicSecondaryProducts(void): channel_prob_dens(),
+  AtomicSecondaryProducts(): channel_prob_dens(),
     electron_energy(), photon_energy() {;}
-
+  virtual ~AtomicSecondaryProducts() {}
   void add_channel(double fchannel_prob_dens,
-		   const DynLinArr< double >& felectron_energy,  // MeV
-		   const DynLinArr< double >& fphoton_energy,   // MeV
-		   int s_all_rest = 0);  // if 1 , the probability of this 
+                   const DynLinArr< double >& felectron_energy,  // MeV
+                   const DynLinArr< double >& fphoton_energy,   // MeV
+                   int s_all_rest = 0);  // if 1 , the probability of this 
     // channel is assigned to that what is left to 1. 
     // fchannel_prob_dens is then ignored, it can be just 0.  
     // This function adds new decay channel. Should be used at initialization. 
 
   //AtomicSecondaryProducts(DynLinArr< double > fchannel_prob_dens;
-  //			  DynLinArr< DynLinArr< double > > felectron_energy;
-  //			  DynLinArr< DynLinArr< double > > fphoton_energy;
+  //                          DynLinArr< DynLinArr< double > > felectron_energy;
+  //                          DynLinArr< DynLinArr< double > > fphoton_energy;
   virtual void print(std::ostream& file, int l) const ;
 
 protected:
@@ -333,24 +332,24 @@ public:
   virtual double get_integral_ACS(double energy1, double energy2) const = 0;  
   virtual double get_ACS(int nshell, double energy) const = 0;  
   virtual double get_integral_ACS(int nshell, 
-				  double energy1, double energy2) const = 0;  
+                                  double energy1, double energy2) const = 0;  
   // photo-absorption cross section, energy in MeV, CS in Mbarns.
   // It can include excitation.
 
   virtual double get_ICS(double energy) const = 0;  
   virtual double get_TICS(double energy,
-			 double factual_minimal_threshold) const;  
+                         double factual_minimal_threshold) const;  
   virtual double get_integral_ICS(double energy1, double energy2) const = 0;  
   virtual double get_integral_TICS(double energy1, double energy2,
-				  double factual_minimal_threshold) const;  
+                                  double factual_minimal_threshold) const;  
   virtual double get_ICS(int nshell, double energy) const = 0;  
   virtual double get_TICS(int nshell, double energy,
-			 double factual_minimal_threshold) const;  
+                         double factual_minimal_threshold) const;  
   virtual double get_integral_ICS(int nshell, 
-				  double energy1, double energy2) const = 0;  
+                                  double energy1, double energy2) const = 0;  
   virtual double get_integral_TICS(int nshell, 
-				  double energy1, double energy2,
-				  double factual_minimal_threshold) const; 
+                                  double energy1, double energy2,
+                                  double factual_minimal_threshold) const; 
   // The last function is convenient to redefine ionization threshold in 
   // atomic mixtures, where one atom can pass excitation to another,
   // which is easier to ionize.
@@ -365,9 +364,9 @@ public:
   // Later (in class HeedPhoton) the photo-electron is emitted ahead.
   // The other ones fly  in any direction.
   virtual void get_escape_particles(int nshell,     // input
-				    double energy,  // input 
-				    DynLinArr< double >& el_energy,
-				    DynLinArr< double >& ph_energy) const;
+                                    double energy,  // input 
+                                    DynLinArr< double >& el_energy,
+                                    DynLinArr< double >& ph_energy) const;
 
   virtual int get_main_shell_number(int nshell) const = 0;
   // returns the shell number (1,2,...)  
@@ -379,7 +378,7 @@ public:
 
   virtual void remove_shell(int nshell); 
   virtual void restore_shell(int nshell); 
-  virtual void print(std::ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const;
   macro_copy_total_zero(AtomPhotoAbsCS);
   //virtual AtomPhotoAbsCS* copy(void) const = 0;
   AtomPhotoAbsCS(void);
@@ -399,7 +398,6 @@ protected:
   // By default all is 0
   DynLinArr< AtomicSecondaryProducts > asp; 
 };
-
 std::ostream& operator<<(std::ostream& file, const AtomPhotoAbsCS& f);
 
 /*Simple means that there is no difference between absorption and ionization.
@@ -413,18 +411,17 @@ public:
   virtual double get_integral_ACS(double energy1, double energy2) const ;  
   virtual double get_ACS(int nshell, double energy) const ;  
   virtual double get_integral_ACS(int nshell, 
-				  double energy1, double energy2y) const ;  
+                                  double energy1, double energy2y) const ;  
   // photo-absorption cross section, energy in MeV, CS in Mbarns.
   virtual double get_ICS(double energy) const ;  
   virtual double get_integral_ICS(double energy1, double energy2) const ;  
   virtual double get_ICS(int nshell, double energy) const ;  
   virtual double get_integral_ICS(int nshell, 
-				  double energy1, double energy2) const ;  
+                                  double energy1, double energy2) const ;  
   // photo-ionization cross section, energy in MeV, CS in Mbarns.
   virtual int get_main_shell_number(int nshell) const;
   virtual void print(std::ostream& file, int l) const ;
   macro_copy_total(SimpleAtomPhotoAbsCS);
-  //AnyType_copy(SimpleAtomPhotoAbsCS, AtomPhotoAbsCS)
   SimpleAtomPhotoAbsCS(void);
   SimpleAtomPhotoAbsCS(int fZ, const String& ffile_name);
   // Takes the  name and shell energies from file,
@@ -432,7 +429,7 @@ public:
   SimpleAtomPhotoAbsCS(int fZ, const PhotoAbsCS& fasc);
   // The simplest thing: one prepared preliminary shell with Z electrons
   // Convenient for Hydrogen
-
+  virtual ~SimpleAtomPhotoAbsCS() {}
 
 protected:
   String file_name;  // saved for printing
@@ -448,7 +445,6 @@ const int s_add_excitations_to_normalize = 1;
 
 const int s_scale_to_normalize_if_more = 1;
 
-
 const double low_boundary_of_excitations = 0.7; // from ionization threshold
 
 // With exitation:
@@ -461,75 +457,71 @@ public:
   virtual double get_integral_ACS(double energy1, double energy2) const ;  
   virtual double get_ACS(int nshell, double energy) const ;  
   virtual double get_integral_ACS(int nshell, 
-				  double energy1, double energy2) const ;  
+                                  double energy1, double energy2) const ;  
 
   // photo-ionization cross section, energy in MeV, CS in Mbarns.
   virtual double get_ICS(double energy) const ;  
   virtual double get_integral_ICS(double energy1, double energy2) const ;  
   virtual double get_ICS(int nshell, double energy) const ;  
   virtual double get_integral_ICS(int nshell, 
-				  double energy1, double energy2) const ;  
+                                  double energy1, double energy2) const ;  
   virtual int get_main_shell_number(int nshell) const;
   void replace_shells_by_overage(double fwidth, // MeV
-				 double fstep,
-				 long fmax_q_step);
-  virtual void print(std::ostream& file, int l) const ;
+                                 double fstep,
+                                 long fmax_q_step);
+  virtual void print(std::ostream& file, int l) const;
   macro_copy_total(ExAtomPhotoAbsCS);
-  //AnyType_copy(ExAtomPhotoAbsCS, AtomPhotoAbsCS)
   ExAtomPhotoAbsCS(void);
   ExAtomPhotoAbsCS(int fZ, 
-		   const String& fthreshold_file_name,
-		   const String& fsimple_table_file_name,
-		   const String& fname="none",  // The name of atom
-		   // ^ if "none", it is taken from fthreshold_file_name
-		   // Normally it is used only with other threshold
-		   double fminimal_threshold=0.0);
+                   const String& fthreshold_file_name,
+                   const String& fsimple_table_file_name,
+                   const String& fname="none",  // The name of atom
+                   // ^ if "none", it is taken from fthreshold_file_name
+                   // Normally it is used only with other threshold
+                   double fminimal_threshold=0.0);
   // Takes the  name (see remark above) 
   // and shell energies from file fthreshold_file_name ,
   // takes cross section from file fsimple_table_file_name
-
   ExAtomPhotoAbsCS(int fZ, 
-		   const String& fname,   // just name of this atom
-		   const String& fBT_file_name,
-		   int id, // to distinguish it from constructor above
-		   // No, now it will be this way
-		   // 1 - old files without fluorescence rate
-		   // 2 - new files with fluorescence rate
-		   // other values - error
-		   double fminimal_threshold=0.0);
+                   const String& fname,   // just name of this atom
+                   const String& fBT_file_name,
+                   int id, // to distinguish it from constructor above
+                   // No, now it will be this way
+                   // 1 - old files without fluorescence rate
+                   // 2 - new files with fluorescence rate
+                   // other values - error
+                   double fminimal_threshold=0.0);
   // Takes the  shell names and shell energies from file generated by 
   // Band and Thragzkovskaya.
   // Old comm: Currently no fluorescence.
   // Today (22.04.2005) flyorescence is included in this constructor.
-
   ExAtomPhotoAbsCS(int fZ, 
-		   const String& fname,   // just name of this atom
-		   const String& fFitBT_file_name,
-		   int id, // to distinguish it from constructor above
-		   // 1 - old files without fluorescence rate
-		   // 2 - new files with fluorescence rate
-		   // other values - error
-		   int s_no_scale, // scaling is not done, needs for next
-		   double fminimal_threshold=0.0);
+                   const String& fname,   // just name of this atom
+                   const String& fFitBT_file_name,
+                   int id, // to distinguish it from constructor above
+                   // 1 - old files without fluorescence rate
+                   // 2 - new files with fluorescence rate
+                   // other values - error
+                   int s_no_scale, // scaling is not done, needs for next
+                   double fminimal_threshold=0.0);
   // Takes the shell energies and fit parameters made by 
   // Band and Thragzkovskaya
   // from a file.
-
   ExAtomPhotoAbsCS(int fZ, 
-		   const String& fname,   // just name of this atom
-		   const String& fFitBT_file_name,
-		   //const String& fthreshold_file_name,  this can be avoided 
-		   const String& fsimple_table_file_name,
-		   double emax_repl,
-		   int id, // to distinguish it from constructor above
-		   // and fluorescense (2) or not(1)
-		   double fminimal_threshold=0.0);
+                   const String& fname,   // just name of this atom
+                   const String& fFitBT_file_name,
+                   //const String& fthreshold_file_name,  this can be avoided 
+                   const String& fsimple_table_file_name,
+                   double emax_repl,
+                   int id, // to distinguish it from constructor above
+                   // and fluorescense (2) or not(1)
+                   double fminimal_threshold=0.0);
   // The combination of BT- fit and simple-table(Henke) tables, 
   // made by the same way as in the old fortran HEED.
   // It initializes BT- fit and replaces the part of the first shell
   // from threshold taken from BT- fit to emax_repl 
   // by values from  the simple table.
-
+  virtual ~ExAtomPhotoAbsCS() {}
 protected:
   String threshold_file_name;  // saved for printing
   String simple_table_file_name;
@@ -599,28 +591,29 @@ public:
 
   MolecPhotoAbsCS(void):qatom(0) {;} 
 
-  // In te following, if fW == 0.0, the program assigns it as 2 * mean(I_min),
+  // In the following, if fW == 0.0, the program assigns it as 2 * mean(I_min),
   // This is in general correct
+  // one sort of atoms
   MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom, int fqatom,
-		  double fW=0.0, double fF = standard_factor_Fano);  
-    // one sort of atoms
+                  double fW=0.0, double fF = standard_factor_Fano);  
+  // two sorts of atoms
   MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
-		  const AtomPhotoAbsCS& fatom2, int fqatom_ps2,
-		  double fW=0.0, double fF = standard_factor_Fano);  
-    // two sorts of atoms
+                  const AtomPhotoAbsCS& fatom2, int fqatom_ps2,
+                  double fW=0.0, double fF = standard_factor_Fano);  
+  // 3 sorts of atoms
   MolecPhotoAbsCS(const AtomPhotoAbsCS& fatom1, int fqatom_ps1,
-		  const AtomPhotoAbsCS& fatom2, int fqatom_ps2, 
-		  const AtomPhotoAbsCS& fatom3, int fqatom_ps3,
-		  double fW=0.0, double fF = standard_factor_Fano);  
-    // 3 sorts of atoms
-  virtual void print(std::ostream& file, int l) const ;
+                  const AtomPhotoAbsCS& fatom2, int fqatom_ps2, 
+                  const AtomPhotoAbsCS& fatom3, int fqatom_ps3,
+                  double fW=0.0, double fF = standard_factor_Fano);  
+  virtual ~MolecPhotoAbsCS() {}
+  virtual void print(std::ostream& file, int l) const;
 
 private:
   int qatom;  // total quantity of atoms, NOT number of sorts, NOT qel in atom
   DynLinArr< int > qatom_ps;
   DynLinArr< PassivePtr< const AtomPhotoAbsCS > > atom;
-  double W;	     // The mean work per pair production,  MeV.
-  double F;	     // Fano parameter.
+  double W;             // The mean work per pair production,  MeV.
+  double F;             // Fano parameter.
 };
 std::ostream& operator<<(std::ostream& file, const MolecPhotoAbsCS& f);
 
@@ -642,11 +635,11 @@ class PhotoAbsorptionCS
   PhotoAbsorptionCS(void);
 
   PhotoAbsorptionCS(const String& ffile_name, 
-		    PassivePtr< EnergyMesh > fenergy_mesh);  
+                    PassivePtr< EnergyMesh > fenergy_mesh);  
                                           // mesh will be created
 
   PhotoAbsorptionCS(const PhotoAbsorptionCS& pacs , 
-		    PassivePtr< EnergyMesh > fenergy_mesh);
+                    PassivePtr< EnergyMesh > fenergy_mesh);
   // convert to another existing mesh
 };
 */

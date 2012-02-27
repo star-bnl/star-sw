@@ -26,6 +26,7 @@ class VanDerVaals virt_common_base_col
   double Tkh;
 public:
   VanDerVaals( double fPk, double fTk);
+  virtual ~VanDerVaals() {}
   double a(void) const {return ah;}
   double b(void) const {return bh;}
   double Vk(void) const {return Vkh;}

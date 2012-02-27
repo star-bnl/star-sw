@@ -4,7 +4,7 @@
 
 /*
 "geometrical particle"
-It is particle which does not interact with matherials.
+It is particle which does not interact with materials.
 It flyes by polyline line or by circumferences from one volume to another.
 The flying is represented by changing of class members representing
 particle position.
@@ -26,13 +26,19 @@ The file is provided "as is" without express or implied warranty.
 //#define PRECISION_OF_SWITCH 1.0e-5
 //#define PRECISION_OF_SWITCH 1.0e-8
 
-class stvpoint    // point in space, time and velocity
+// point in space, time and velocity
+class stvpoint    
 {public:
-  point pt;    // in the first system from tid system
-  vec dir;     // Unit vector, in the first system from tid system
-  point ptloc;    // in the local system, the last system from tid
-  vec dirloc;     // Unit vector, in the local system, the last system from tid
-  vfloat speed;     // longitudinal velocity
+  // coordinates in the first system from tid system
+  point pt;    
+  // unit vector, in the first system from tid system
+  vec dir;     
+  // coordinates in the local system, the last system from tid
+  point ptloc; 
+  // unit vector, in the local system, the last system from tid
+  vec dirloc;  
+  // longitudinal velocity
+  vfloat speed;     
   //vfloat accel;     // longitudinal acceleration
   manip_absvol_treeid tid;
   //int namvol;  // number of currect volumes
@@ -44,25 +50,29 @@ class stvpoint    // point in space, time and velocity
               // embraced volume is also considered new.
 
   manip_absvol_eid next_eid;  // if nextpos.sb==2
-  vfloat prange;    // range from previous point
+  // range from previous point
+  vfloat prange;    
   vfloat time;
   //  vfloat vvel; // value of velocity
 
-  const manip_absvol_eid* G_laeid()  const // get least address of manipulator
-    { return tid.G_laeid(); }
-  manip_absvol* G_lamvol() const  // get least address of manipulator
-    { return tid.G_lamvol(); }
-  absvol* G_lavol() const // get least address of volume
-    { return tid.G_lavol(); }
-      
+  // get least address of manipulator
+  const manip_absvol_eid* G_laeid()  const 
+    {return tid.G_laeid();}
+  // get least address of manipulator
+  manip_absvol* G_lamvol() const  
+    {return tid.G_lamvol();}
+  // get least address of volume
+  absvol* G_lavol() const 
+    {return tid.G_lavol();}
+
+  // constructors      
   stvpoint(void): 
     pt(), dir(), ptloc(), dirloc(), 
     speed(0.0), tid(), sb(0), s_ent(0), next_eid(), prange(0.0), 
-    time(0){;}
-
+    time(0) {;}
   stvpoint(const point& fpt, const vec& fdir, vfloat fspeed,
-	   manip_absvol_treeid& ftid, vfloat fprange, vfloat ftime, 
-	    int fsb, int fs_ent, manip_absvol_eid& faeid): 
+           manip_absvol_treeid& ftid, vfloat fprange, vfloat ftime, 
+            int fsb, int fs_ent, manip_absvol_eid& faeid): 
     pt(fpt), dir(unit_vec(fdir)), speed(fspeed), tid(ftid), 
     sb(fsb), s_ent(fs_ent), 
     next_eid(faeid), 
@@ -71,48 +81,47 @@ class stvpoint    // point in space, time and velocity
       ptloc=pt; tid.up_absref(&ptloc);
       dirloc=dir; tid.up_absref(&dirloc);
     }
-
   stvpoint(const stvpoint& pstv, 
-	   const trajestep& ts,  // in the local system  
-	   vfloat mrange, // may be less than one in ts
-	   //manip_absvol_treeid& ftid, 
-	    int fsb, int fs_ent, manip_absvol_eid& faeid): 
+           const trajestep& ts,  // in the local system  
+           vfloat mrange,        // may be less than one in ts
+           //manip_absvol_treeid& ftid, 
+            int fsb, int fs_ent, manip_absvol_eid& faeid): 
     pt(), dir(), ptloc(), dirloc(), speed(pstv.speed), tid(pstv.tid), 
     sb(fsb), s_ent(fs_ent), 
     next_eid(faeid), 
     prange(mrange), time(pstv.time + mrange / pstv.speed) 
     { 
-      if(pstv.speed==0)
-	time=pstv.time;  // just to put anything
-      else
-	time = pstv.time + mrange / pstv.speed;
-      // If speed is changed, this time is to be corrected in derivative class
-
+      if (pstv.speed == 0) {
+        time=pstv.time;  // just to put anything
+      } else {
+        // If speed is changed, this time is to be corrected in derivative class
+        time = pstv.time + mrange / pstv.speed;
+      }
       ts.Gnextpoint(mrange, ptloc, dirloc);
-      pt=ptloc; tid.down_absref(&pt);
-      dir=dirloc; tid.down_absref(&dir);
+      pt  = ptloc;  tid.down_absref(&pt);
+      dir = dirloc; tid.down_absref(&dir);
     }
 
   stvpoint(const stvpoint& pstv, 
-	   const trajestep& ts,  // in the local system  
-	    int fsb, int fs_ent, manip_absvol_eid& faeid): 
+           const trajestep& ts,  // in the local system  
+            int fsb, int fs_ent, manip_absvol_eid& faeid): 
     pt(), dir(), ptloc(), dirloc(), speed(pstv.speed), tid(pstv.tid), 
     sb(fsb), s_ent(fs_ent), 
     next_eid(faeid), 
     prange(ts.mrange), time(pstv.time + ts.mrange / pstv.speed) 
     { 
-      if(pstv.speed==0)
-	time=pstv.time;  // just to put anything
-      else
-	time = pstv.time + ts.mrange / pstv.speed;
-      // If speed is changed, this time is to be corrected in derivative class
-      ptloc=ts.mpoint;
+      if (pstv.speed == 0) {
+        time=pstv.time;  // just to put anything
+      } else {
+        // If speed is changed, this time is to be corrected in derivative class
+        time = pstv.time + ts.mrange / pstv.speed;
+      }
+      ptloc = ts.mpoint;
       point temp;
       ts.Gnextpoint(ts.mrange, temp, dirloc);
-      pt=ptloc;   tid.down_absref(&pt);
-      dir=dirloc; tid.down_absref(&dir);
+      pt  = ptloc;  tid.down_absref(&pt);
+      dir = dirloc; tid.down_absref(&dir);
     }
-
   stvpoint(const stvpoint& fp):
     pt(fp.pt), dir(fp.dir), 
     ptloc(fp.ptloc), dirloc(fp.dirloc), 
@@ -121,7 +130,9 @@ class stvpoint    // point in space, time and velocity
     sb(fp.sb), s_ent(fp.s_ent), next_eid(fp.next_eid), 
     prange(fp.prange), time(fp.time)
     {;}
-  virtual void print(ostream& file, int l) const ;
+  // destructor
+  virtual ~stvpoint() {}
+  virtual void print(std::ostream& file, int l) const ;
 };
 
 class gparticle;
@@ -153,7 +164,7 @@ class gparticle: public RegPassivePtr
     { nextpos=calc_step_to_bord(); physics(); }
       
   gparticle(manip_absvol* primvol, const point& pt, 
-	    const vec& vel, vfloat time);
+            const vec& vel, vfloat time);
   // As far as I can now understand, PassivePtr< primvol > will be at 
   // origin.tid.eid[0]
 
@@ -173,7 +184,7 @@ class gparticle: public RegPassivePtr
   virtual void change_vol(void) 
     { currpos.tid.G_lavol()->income(this); }
   virtual void curvature(int& fs_cf, vec& frelcen, vfloat& fmrange, 
-			 vfloat prec);
+                         vfloat prec);
   // Allows to set curvature.
   // For flying particle it is expected to call another function
   // so as to obtain value and direction of force.
@@ -201,23 +212,22 @@ class gparticle: public RegPassivePtr
 
   //stvpoint switch_new_vol(manip_absvol* famvol[pqamvol], int fnamvol);
   stvpoint switch_new_vol(void);
-	    
+            
   virtual void fly(void)
     {
       mfunname("virtual void gparticle::fly(void)");
       while(s_life==1)
       {
-	step();
-	physics();
-	check_point(this);
+        step();
+        physics();
+        check_point(this);
       }
     }
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(std::ostream& file, int l) const;
   macro_copy_total(gparticle);
-  //AnyType_copy(gparticle, gparticle);
   virtual ~gparticle() {;}
 };
-	
+        
 #endif
 
 

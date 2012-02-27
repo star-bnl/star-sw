@@ -32,7 +32,7 @@ The file is provided "as is" without express or implied warranty.
 class trajestep_limit: public RegPassivePtr
 {public:
   vfloat max_range;  // useful if curvature is varyable.
-       // Then it shows how often it is changed.
+                     // Then it shows how often it is changed.
   //vfloat max_prange;
   // When charged particle is curved by electric field,
   // the field are changed faster, the stronger is field.
@@ -41,15 +41,14 @@ class trajestep_limit: public RegPassivePtr
 
   // 3 following parameters affect if s_cf==1.
   // They regulate precision.
-  vfloat rad_for_straight; // at this and more radius it
-             // preferes straight lines to reduce calculation time
-  vfloat max_straight_arange; 
+  // radius beyond which straight lines are preferred to reduce calculation time
+  vfloat rad_for_straight; 
   // angle of range if it goes along straight line, but s_cf==1. 
   // But the angle is calculated taking way as circle anyway.
+  vfloat max_straight_arange; 
+  // angle of range if it goes along circle
+  vfloat max_circumf_arange;  
 
-  vfloat max_circumf_arange;  // angle of range if it goes along circle
-  void range(int fs_cf0, vfloat rad, 
-	     int& fs_cf1, vfloat& mrange);
   // Chooses straight or circle line and calculates maximal range.
   // vfloat& mrange gives first maximal range and filled by finishing
   // maximal range which should be less by value.
@@ -58,8 +57,10 @@ class trajestep_limit: public RegPassivePtr
   //              approximated by straight line.
   // fs_cf1 : 0 - the track is simulated by straight line.
   //          1 - the track is simulated by curved line.
+  void range(int fs_cf0, vfloat rad, 
+             int& fs_cf1, vfloat& mrange);
   trajestep_limit(vfloat fmax_range, vfloat frad_for_straight,
-		  vfloat fmax_straight_arange, vfloat fmax_circumf_arange):
+                  vfloat fmax_straight_arange, vfloat fmax_circumf_arange):
     max_range(fmax_range), rad_for_straight(frad_for_straight),
     max_straight_arange(fmax_straight_arange), 
     max_circumf_arange(fmax_circumf_arange) {;}
@@ -72,13 +73,11 @@ class trajestep: public absref
   vec dir;    // unit_vec
   int s_cf;   // 0 - the track is straight, 
               // 1 - there is curvature, circumference
-              // ( but the range may anyway be calculated as straight line,
+              // (but the range may anyway be calculated as straight line,
               // depending on s_range_cf, see below)
-  vec relcen;  // position of the center of circumf. relatively currpos
-  // Used only if s_cf=1; otherwise ignored.
-  // If used, should be perpendicular to dir.
-
-
+  vec relcen; // position of the center of circumf. relatively currpos
+              // Used only if s_cf=1; otherwise ignored.
+              // If used, should be perpendicular to dir.
   // internal data
   //straight sl;  // inited always
   //circumf cf;  // should be inited only if s_cf==1
@@ -86,39 +85,39 @@ class trajestep: public absref
   // output data:  
   int s_range_cf; // 0 - range have been calculated via straight line
                   // 1 - via circle
-  //int s_range;    // 0 - range is infinite, 1 - finite
   int s_prec;     // 1 - range is limited by precision
-  vfloat mrange; // maximal possible range
-  point mpoint;  // finishing point
-  // It looks like that at s_prec=1 mpoint is not inited
-  // At s_prec=0 the point is inited
+  vfloat mrange;  // maximal possible range
+  point mpoint;   // finishing point
+  // It looks like that at s_prec=1 mpoint is not initiated
+  // At s_prec=0 the point is initiated
 
-  void Gnextpoint(vfloat frange, point& fpos, vec& fdir) const ;
-  void Gnextpoint1(vfloat frange, point& fpos, vec& fdir, vec& frelcen) const ;
+  void Gnextpoint(vfloat frange, point& fpos, vec& fdir) const;
+  void Gnextpoint1(vfloat frange, point& fpos, vec& fdir, vec& frelcen) const;
 
+  // constructors
   trajestep(trajestep_limit* ftl, const point& fcurrpos, const vec& fdir, 
-	    int fs_cf, const vec& frelcen, vfloat fmrange, vfloat prec);
+            int fs_cf, const vec& frelcen, vfloat fmrange, vfloat prec);
   // Here prec is used to check if frelcen is perp. to dir.
   // If it is not perpendicular with this precision, 
   // the function terminates the program.
   // To reduce range fmrange may be used. 
-
-  trajestep(const trajestep& fts,  // the new object will continue
-	    // propagation from the end point of the old one 
-	    vfloat mrange); // new range to travel
-
+  
+  // the new object will continue propagation from the end point of the old one
+  trajestep(const trajestep& fts,  
+            vfloat mrange); // new range to travel
   trajestep(void): // temporary
     tl(), currpos(), dir(), s_cf(0), relcen(), s_range_cf(0), s_prec(0),
     mrange(0), mpoint() {;}
+  // destructor
+  virtual ~trajestep() {}
 protected:  
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
   //virtual void Garef(int& fqaref , absref absref::**&faref, //fixed memory
-  //	            int& fqareff, absref **&fareff) // free memory
-  // { //mcout<<"straight::Garef is called\n";
-  //   fqaref=4; fqareff=0; faref=&aref[0]; fareff=NULL; }
+  //                   int& fqareff, absref **&fareff)        // free memory
+  // {fqaref=4; fqareff=0; faref=&aref[0]; fareff=NULL;}
   static absref(absref::*aref[4]);
 
 }; 
-ostream& operator<<(ostream& file, const trajestep& f);
+std::ostream& operator<<(std::ostream& file, const trajestep& f);
   
 #endif

@@ -197,22 +197,20 @@ double ElElasticScat::get_CS_for_presented_atom(long na, double energy,
       //cs[1] = cs[1] * coe[1] * coe[1];
       //Iprintn(mcout, cs[0]);
       //Iprintn(mcout, cs[1]);
-      double r;      
-      if (cs[0] >= 0.0 && cs[0] >= 0.0) {
+      double r = cs[0];   
+      if (cs[0] >= 0.0 && cs[1] >= 0.0) {
         r = cs[0] + (cs[1] - cs[0]) /
             (energy_mesh[ne] - energy_mesh[ne - 1]) * 
             (enKeV - energy_mesh[ne - 1]);
       } else {
         if (cs[0] >= 0.0) {
           r = cs[0];
+        } else if (cs[1] >= 0.0) {
+          r = cs[1];
         } else {
-          if (cs[1] >= 0.0) {
-            r = cs[1];
-          } else {
-            funnw.ehdr(mcerr);
-            mcerr << "not implemented case\n";
-            spexit(mcerr);
-          }
+          funnw.ehdr(mcerr);
+          mcerr << "not implemented case\n";
+          spexit(mcerr);
         }
       }
       r = r * coe * coe;
@@ -234,9 +232,9 @@ double ElElasticScat::get_CS(long Z, double energy, double angle, int s_interp)
   long Z_right = 10000;
   for (na = 0; na < qa; na++) {
     if (atom[na].Z == Z && s_interp == 0) {
-      //mcout<<"ElElasticScat::get_CS: atom[na].Z="<<atom[na].Z
-      //           <<" energy="<<energy
-      //           <<" angle="<<angle<<'\n';
+      //mcout << "ElElasticScat::get_CS: atom[na].Z=" << atom[na].Z
+      //      << " energy=" << energy
+      //      << " angle=" << angle << '\n';
       return get_CS_for_presented_atom(na, energy, angle);
     } else {
       if (atom[na].Z > Z_left && atom[na].Z < Z) {
@@ -293,8 +291,7 @@ void ElElasticScat::fill_hist(void)
   DynArr< histdef > rut_hist(qa, qe);
   DynArr< histdef > rutpol_hist(qa, qe);
   DynLinArr< histdef > path_length_rut_hist(qa);
-  for(na=0; na<qa; na++)
-  {
+  for (na = 0; na < qa; na++) {
     String name;
     name = "path_length_cor_" + long_to_String(atom[na].Z);
     path_length_cor_hist[na] = histdef(name, qe, 0.0, qe);
@@ -302,8 +299,7 @@ void ElElasticScat::fill_hist(void)
     name = "path_length_rut_" + long_to_String(atom[na].Z);
     path_length_rut_hist[na] = histdef(name, qe, 0.0, qe);
     path_length_rut_hist[na].init();
-    for(ne=0; ne<qe; ne++)
-    {
+    for (ne = 0; ne < qe; ne++) {
       double energyKeV = energy_mesh[ne];
       double energyMeV = 0.001 * energyKeV;
       name = "raw_"+ long_to_String(atom[na].Z) + "_" + 
@@ -343,8 +339,7 @@ void ElElasticScat::fill_hist(void)
       // real values are not known in this program
       double angle_step = M_PI / qh;  // in rad
       long nan;
-      for(nan=0; nan<qh; nan++)
-      {
+      for (nan = 0; nan < qh; nan++) {
         double angle = raw_hist.ac(na,ne).get_bin_center(0, nan);
         double anglerad = angle/180.0 * M_PI;
         double gamma = 1.0 + energyMeV / ELMAS;  
@@ -448,9 +443,9 @@ void ElElasticScat::fill_hist_low_scat(const String& file_name,
 
 
 #ifdef USE_STLSTRING
-  ofstream ofile(file_name.c_str());
+  std::ofstream ofile(file_name.c_str());
 #else
-  ofstream ofile(file_name);
+  std::ofstream ofile(file_name);
 #endif
   if( !ofile )
   {
@@ -628,9 +623,9 @@ void ElElasticScat::fill_hist_low_scat(const String& file_name,
   if(s_write_dist == 1)
   {
 #ifdef USE_STLSTRING
-    ofstream ofile(file_name_dist.c_str());
+    std::ofstream ofile(file_name_dist.c_str());
 #else
-    ofstream ofile(file_name_dist);
+    std::ofstream ofile(file_name_dist);
 #endif
     if( !ofile )
     {

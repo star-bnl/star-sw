@@ -500,13 +500,12 @@ template<class T, class D> class PointCoorMesh
 		     // is fq - 1.
 		     D* famesh); // dimension is fq and the last index is fq-1
   // This is the end point of the last interval
-
+  virtual ~PointCoorMesh<T,D>() {}
   void check(void); // check that the points are sequencial.
   // This is also done in constructor above provided that 
   // macro CHECK_POINT_MESH is initialized.
 
-
-  virtual void print(std::ostream& file) const ;
+  virtual void print(std::ostream& file) const;
 
 private:
   long q;  // the number of points
@@ -523,8 +522,6 @@ private:
   // auxiliary thing to accelerate finding intervals
   mutable T x_old; // previous x for finding interval
   mutable long n_old; // -1 if there is nothing
-  
-
 };
 
 

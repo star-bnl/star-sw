@@ -21,25 +21,27 @@ must be derived from class SensitiveVolume.
 
 */
 
-
-
-
-
 class HeedCondElectron
 {public:
-  //point pt;    // in the first system from tid system
-  point ptloc;    // in the local system, the last system from tid
-  // Time
+  // position (in the first system from tid system)
+  // point pt;
+  // position (in the local system, the last system from tid)
+  point ptloc;
+  // time
   double time;
-  //manip_absvol_treeid tid;
-  //PassivePtr< HeedDeltaElectron > parent_de;  // reference to parent  
+  // manip_absvol_treeid tid;
+  // reference to parent  
+  // PassivePtr< HeedDeltaElectron > parent_de;  
+  // constructors
   HeedCondElectron(void) {;}
   HeedCondElectron(point fptloc, double ftime):
     ptloc(fptloc), time(ftime) {;}
   //HeedCondElectron(point fpt, point fptloc, manip_absvol_treeid ftid,
-  //		   PassivePtr< HeedDeltaElectron > fparent_de):
+  //                 PassivePtr< HeedDeltaElectron > fparent_de):
   // pt(fpt), ptloc(fptloc), tid(ftid), parent_de(fparent_de) {;}
-  virtual void print(std::ostream& file, int l) const ;
+  // destructor
+  virtual ~HeedCondElectron() {}
+  virtual void print(std::ostream& file, int l) const;
 };
 
 
@@ -50,7 +52,6 @@ class SensitiveVolume
 {public:
   BlkArr< HeedCondElectron > conduction_electron_bank;
   SensitiveVolume(void) {;}
-
 };
 
 
