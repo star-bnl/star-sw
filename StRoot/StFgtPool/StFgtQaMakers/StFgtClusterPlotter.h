@@ -9,6 +9,7 @@
 #include <TROOT.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+#include <TFile.h>
 
 class StFgtClusterPlotter : public StFgtQaMaker {
  public:
@@ -19,8 +20,11 @@ class StFgtClusterPlotter : public StFgtQaMaker {
    Int_t Init();
    Int_t Make();
    Int_t Finish();
+   //   Bool_t checkPulse(StFgtHit* pClus);
 
  protected:
+   ofstream* outTxtFile;
+   TFile* myRootFile;
    TH1* hClusterCharge;
    TH2D** hCChargePosSpacePhi;
    TH2D** hCChargePosSpaceR;
@@ -28,6 +32,9 @@ class StFgtClusterPlotter : public StFgtQaMaker {
    TH2D** hClusSizeR;
    TH2D** hCChargeElecSpace;
    TH2D** hClusSizeElecSpace;
+   TH2D** radioPlots;
+   TH2D** corrPlots;
+   int runningEvtNr;
  private:   
    ClassDef(StFgtClusterPlotter,1);
 

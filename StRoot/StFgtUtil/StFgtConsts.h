@@ -4,7 +4,6 @@
  * which cannot be expressed as an int.  These remaining constants are
  * in the file StFgtGeom.h.
  *
- * \author S. Gliske (sgliske@anl.gov) Jan 2012
  *
  */
 
@@ -48,6 +47,20 @@ enum {
    kFgtMaxAdc = 4096
 };
 
+///cluster seed types
+enum {
+  kFgtSeedTypeNo,
+  kFgtDeadStrip,
+  kFgtSeedType1,
+  kFgtSeedType2,
+  kFgtSeedType3,
+  kFgtClusterPart,
+  kFgtNextToDeadGuy,
+  kFgtClusterEndUp,
+  kFgtClusterEndDown,
+  kFgtStripShared
+};
+
 // Jan's definitions for the final 400-800 micron pitch design 
 // Note:
 // using #define instead of const double to avoid requiring a .cpp
@@ -66,12 +79,16 @@ enum {
 #define kFgtPhiPitch      0.08        //     800 mu, at outer radi or at Rmid
 #define kFgtPhiAnglePitch 0.002095 
 #define kFgtDeadQuadEdge  1.2         // (cm) effective dead area along quadrant edges
+#define kFgtMaxClusterSize 11        //maximum cluster size in strips that a cluster algo should return
 
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.9 2012/02/15 19:18:38 balewski Exp $
+ * $Id: StFgtConsts.h,v 1.10 2012/02/28 19:32:25 avossen Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.10  2012/02/28 19:32:25  avossen
+ * many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
+ *
  * Revision 1.9  2012/02/15 19:18:38  balewski
  * more usefull constants added
  *

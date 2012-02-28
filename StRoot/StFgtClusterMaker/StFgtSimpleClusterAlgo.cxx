@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.21 2012/02/06 17:18:15 avossen Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.22 2012/02/28 19:32:25 avossen Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.22  2012/02/28 19:32:25  avossen
+//  many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
+//
 //  Revision 1.21  2012/02/06 17:18:15  avossen
 //  fixed negative charge clusters
 //
@@ -39,7 +42,7 @@
 //  use geoIds to determine if two strips are adjacent
 //
 //  Revision 1.9  2011/10/14 18:45:27  avossen
-//  fixed some bugs in simple cluster algo
+//  fixed some bugs in sibmple cluster algo
 //
 //  Revision 1.8  2011/10/13 20:35:22  balewski
 //  cleanup, added missing return value
@@ -70,9 +73,19 @@ StFgtSimpleClusterAlgo::StFgtSimpleClusterAlgo():mIsInitialized(0)
 Int_t StFgtSimpleClusterAlgo::Init()
 {
   mIsInitialized=true;
-  return 0; // ?,jan
+  return kStOk;
 };
 
+/** 
+    The simple cluster algorithm. It used the fact that neighbouring strips have neighbouring geoIds. 
+    The hits are sorted according to the geoId and the list of hits is then checked for geoIds that are next to each other.
+    If there is a hit in the R layer that is in the inner half of the detector, it is allowed in the phi to skip a geoId.
+    The error on the cluster charge is computed from the errors on the strip charges and the error on the position is the stdDev of the ordinates.
+    So no weighting by charge yet. 
+    The code gets called for each disk separately, so global coordinates have to be set later by the calling cluster maker.
+
+
+*/
 Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitCollection& clusters )
 {
   //  cout.precision(10);
@@ -80,7 +93,6 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
   strips.sortByGeoId();
 
   Float_t defaultError = 0.001;
-
   Short_t disc, quadrant,prvDisc,prvQuad;
   Char_t layer,prvLayer,noLayer='z';
   Double_t ordinate, lowerSpan, upperSpan, prvOrdinate;
@@ -96,14 +108,14 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
   StFgtHit* newCluster=0;
   //to compute energy weighted strip id
   Double_t meanGeoId=0;
-  //for R < 19 cm the difference in geo id of the phi strips is 2 and only even numbers are used...
+  //for R < R/2 cm the difference in geo id of the phi strips is 2 and only even numbers are used...
   bool stepTwo=false;
   //const 
   for( StSPtrVecFgtStripIterator it=strips.getStripVec().begin();it!=strips.getStripVec().end();++it)
     {
       StFgtGeom::getPhysicalCoordinate((*it)->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
 
-        if((layer=='R')&& ordinate < 19)
+      if((layer=='R')&& ordinate < kFgtRmid)
 	{
 	  stepTwo=true;
 	  break;
@@ -116,11 +128,8 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
       StFgtGeom::getPhysicalCoordinate((*it)->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
       isPhi=(layer=='P');
       isR=(!isPhi);
-
-
       if(prvLayer==noLayer)//first hit
 	{
-
 	  newCluster=new StFgtHit(clusters.getHitVec().size(),meanGeoId,accuCharge, disc, quadrant, layer, ordinate, defaultError,ordinate, defaultError,0.0,0.0);
           stripWeightMap_t &stripWeightMap = newCluster->getStripWeightMap();
           stripWeightMap[ *it ] = 1;
@@ -154,7 +163,6 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	  accuCharge+=(*it)->getCharge();
 	  accuChargeError+=(*it)->getChargeUncert();
 	  meanOrdinate+=ordinate;
-
 	  meanGeoId+=(*it)->getCharge()*(*it)->getGeoId();
 	  //	  cout<<"accuCharge is: " << accuCharge <<endl;
 	  //	  cout <<"meango: " << (*it)->getCharge() <<" * " << (*it)->getGeoId() <<" meanGeoId now " << meanGeoId <<endl;
@@ -188,12 +196,12 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
           meanSqOrdinate /= (float)numStrips;
           meanSqOrdinate -= meanOrdinate*meanOrdinate;
           if( meanSqOrdinate > 0 )
-             meanSqOrdinate = sqrt(meanSqOrdinate);
+	    meanSqOrdinate = sqrt(meanSqOrdinate);
           // meanSqOrdinate is now the st. dev. of the ordinate
           // avoid unreasonable small uncertainty, due to small cluster sizes
           Double_t pitch = ( layer == 'R' ? StFgtGeom::radStrip_pitch() : StFgtGeom::phiStrip_pitch() );
           if( meanSqOrdinate < 2*pitch )
-             meanSqOrdinate = 2*pitch;
+	    meanSqOrdinate = 2*pitch;
 
 	  if(layer=='R')
 	    {
@@ -206,10 +214,10 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	      newCluster->setErrorPhi(meanSqOrdinate);
 	    }
 	  newCluster->setCentralStripGeoId(floor(meanGeoId+0.5));
-	  if(numStrips<=10 && newCluster->getCentralStripGeoId() > 0)
-             clusters.getHitVec().push_back(newCluster);
+	  if(numStrips<=kFgtMaxClusterSize && newCluster->getCentralStripGeoId() > 0)
+	    clusters.getHitVec().push_back(newCluster);
           else
-             delete newCluster;
+	    delete newCluster;
 	  //	      cout <<"cluster has size: " << numStrips <<endl;
 	  //
 	  accuCharge=(*it)->getCharge();
@@ -272,13 +280,15 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
       //      cout <<"setting central strip to " << floor(meanGeoId+0.5)<<endl;
 
       newCluster->setCentralStripGeoId(floor(meanGeoId+0.5));
-      if(numStrips<=10 && newCluster->getCentralStripGeoId() > 0)
-         clusters.getHitVec().push_back(newCluster);
+      if(numStrips<=kFgtMaxClusterSize && newCluster->getCentralStripGeoId() > 0)
+	clusters.getHitVec().push_back(newCluster);
       else
-         delete newCluster;
+	delete newCluster;
     }
 
   return kStOk;
-};
+}
+
+
 
 ClassImp(StFgtSimpleClusterAlgo);

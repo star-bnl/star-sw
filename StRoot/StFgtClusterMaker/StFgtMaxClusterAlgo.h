@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.h,v 1.4 2011/11/01 18:46:30 sgliske Exp $
+//  $Id: StFgtMaxClusterAlgo.h,v 1.5 2012/02/28 19:32:25 avossen Exp $
 //  $Log: StFgtMaxClusterAlgo.h,v $
+//  Revision 1.5  2012/02/28 19:32:25  avossen
+//  many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
+//
 //  Revision 1.4  2011/11/01 18:46:30  sgliske
 //  Updated to correspond with StEvent containers, take 2.
 //
@@ -19,12 +22,18 @@
 
 #include "StFgtIClusterAlgo.h"
 
+/**
+Implements the StFgtIClusterAlgo interface. The doClustering method looks for the strip with the highest charge in each layer.
+This is meant as a fallback/test solution as it is fast and does not get confused by large clusters and the like.
+It will only find one cluster per layer.
+Also, no errors are assigned to charge or location.
+*/
 class StFgtMaxClusterAlgo :public StFgtIClusterAlgo
 {
 
  public:
   StFgtMaxClusterAlgo();
-
+  ///main work functions getting strips above pedestal for each disk
   virtual Int_t doClustering( StFgtStripCollection&, StFgtHitCollection& );
   virtual Int_t Init();
 
