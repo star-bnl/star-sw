@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHit.cxx,v 2.1 2011/04/25 21:24:02 ullrich Exp $
+ * $Id: StMtdHit.cxx,v 2.2 2012/02/28 01:24:51 perev Exp $
  *
  * Author: Frank Geurts, April 25, 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMtdHit.cxx,v $
+ * Revision 2.2  2012/02/28 01:24:51  perev
+ * tof() implementation added
+ *
  * Revision 2.1  2011/04/25 21:24:02  ullrich
  * Initial Revision.
  *
@@ -53,6 +56,8 @@ StMtdHit::trailingEdgeTime() const { return mTrailingEdgeTime; }
 
 pair<double,double>
 StMtdHit::tot() const { return pair<double,double>(mTrailingEdgeTime.first - mLeadingEdgeTime.first, mTrailingEdgeTime.second - mLeadingEdgeTime.second); }
+
+double StMtdHit::tof() const { return 0.5*(mLeadingEdgeTime.first+mLeadingEdgeTime.second); }
 
 StTrack*
 StMtdHit::associatedTrack() { return mAssociatedTrack; }
