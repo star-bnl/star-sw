@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdCollection.cxx,v 2.1 2011/04/25 21:24:02 ullrich Exp $ 
+ * $Id: StMtdCollection.cxx,v 2.2 2012/02/28 01:25:32 perev Exp $ 
  *
  * Author: Frank Geurts, April 25, 2011
  ***************************************************************************
@@ -13,14 +13,18 @@
  ***************************************************************************
  *
  * $Log: StMtdCollection.cxx,v $
+ * Revision 2.2  2012/02/28 01:25:32  perev
+ * Browse(...) added
+ *
  * Revision 2.1  2011/04/25 21:24:02  ullrich
  * Initial Revision.
  *
  *
  **************************************************************************/
+#include "TBrowser.h"
 #include "StMtdCollection.h"
 
-static const char rcsid[] = "$Id: StMtdCollection.cxx,v 2.1 2011/04/25 21:24:02 ullrich Exp $";
+static const char rcsid[] = "$Id: StMtdCollection.cxx,v 2.2 2012/02/28 01:25:32 perev Exp $";
 
 ClassImp(StMtdCollection)
     
@@ -72,3 +76,20 @@ StMtdCollection::hitsPresent() const { return mMtdHits.size(); }
 
 bool
 StMtdCollection::rawHitsPresent() const { return mMtdRawHits.size(); }
+//_____________________________________________________________________________
+void StMtdCollection::Browse(TBrowser *b)
+{
+  mMtdHits.Browse(b);
+  mMtdRawHits.Browse(b);
+//   // Browse this event (called by TBrowser).
+//    for (int i=0; i<(int)mMtdHits.size(); i++) {
+//      TObject *obj = mMtdHits[i]; if (!obj) continue;
+//      TString ts(obj->GetName()); ts+="#"; ts+=i;
+//      b->Add(obj,ts.Data());
+//    }
+//    for (int i=0; i<(int)mMtdRawHits.size(); i++) {
+//      TObject *obj = mMtdRawHits[i]; if (!obj) continue;
+//      TString ts(obj->GetName()); ts+="#"; ts+=i;
+//      b->Add(obj,ts.Data());
+//    }
+}
