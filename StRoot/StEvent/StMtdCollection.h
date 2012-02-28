@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMtdCollection.h,v 2.1 2011/04/25 21:24:02 ullrich Exp $
+ * $Id: StMtdCollection.h,v 2.2 2012/02/28 01:25:32 perev Exp $
  *
  * Author: Frank Geurts, April 25, 2011
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StMtdCollection.h,v $
+ * Revision 2.2  2012/02/28 01:25:32  perev
+ * Browse(...) added
+ *
  * Revision 2.1  2011/04/25 21:24:02  ullrich
  * Initial Revision.
  *
@@ -30,11 +33,15 @@
 #include "StMtdHeader.h"
 #include "StMtdHit.h"
 #include "StMtdRawHit.h"
+class TBrowser;
 
 class StMtdCollection : public StObject {
 public: 
     StMtdCollection();
     ~StMtdCollection();
+
+    bool IsFolder() const { return true;};
+    void Browse(TBrowser *b); 
 
     const StMtdHeader*         mtdHeader() const;
     StMtdHeader*               mtdHeader();
