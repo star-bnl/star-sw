@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.cxx,v 1.11 2011/11/17 19:23:54 ckriley Exp $
+//  $Id: StFgtMaxClusterAlgo.cxx,v 1.12 2012/02/28 19:32:25 avossen Exp $
 //  $Log: StFgtMaxClusterAlgo.cxx,v $
+//  Revision 1.12  2012/02/28 19:32:25  avossen
+//  many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
+//
 //  Revision 1.11  2011/11/17 19:23:54  ckriley
 //  fixed small bug
 //
@@ -49,7 +52,7 @@ Int_t StFgtMaxClusterAlgo::Init()
   return kStOk;
 };
 
-
+///algo just loops over the strips and selects the one with the highest charge in each layer
 Int_t StFgtMaxClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitCollection& clusters )
 {
 

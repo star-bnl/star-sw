@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.12 2012/01/31 08:26:53 sgliske Exp $
+ * $Id: StFgtA2CMaker.h,v 1.13 2012/02/28 19:32:25 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -29,6 +29,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.13  2012/02/28 19:32:25  avossen
+ * many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
+ *
  * Revision 1.12  2012/01/31 08:26:53  sgliske
  * cleaned up, and removed need to use setFgtDb.
  * Now, if not set, will try to find it using
@@ -87,6 +90,7 @@
 
 #include <string>
 #include "StMaker.h"
+#include "StRoot/StEvent/StFgtStrip.h"
 
 class StFgtDb;
 
@@ -116,9 +120,10 @@ class StFgtA2CMaker : public StMaker {
 
    // cvs tag
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.12 2012/01/31 08:26:53 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.13 2012/02/28 19:32:25 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
+   Short_t checkValidPulse(StFgtStrip* pStrip, Float_t ped);
    // parameters
    Int_t mStatusMask;
    Float_t mAbsThres, mRelThres;

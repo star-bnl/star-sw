@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.14 2012/01/06 17:58:39 sgliske Exp $
+//   $Id: StFgtClusterMaker.h,v 1.15 2012/02/28 19:32:25 avossen Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.15  2012/02/28 19:32:25  avossen
+//   many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
+//
 //   Revision 1.14  2012/01/06 17:58:39  sgliske
 //   Added requested GetCVS tag
 //
@@ -40,19 +43,34 @@
 #include "StMaker.h"
 class StFgtIClusterAlgo;
 
+
+/**
+The cluster maker. It uses an external algorithm which has to implement StFgtIClusterAlgo to do the actual clustering by calling doClustering with the fgt hits in StEvent.
+
+*/
 class StFgtClusterMaker : public StMaker
 {
  public:
   StFgtClusterMaker( const Char_t* name="FgtCluster");
   virtual ~StFgtClusterMaker();
+  /// Init function. Checks if there is a cluster algo and initializes the same.
   virtual Int_t Init();
+  /**
+The make function. Uses the cluster algo member to do the actual clustering. Then it does some post processing using the info on the absolute position of the disk that the algo does not have.
+In addition the cluster error is computed for the orthogonal direction (e.g. for r clusters in phi) from the strip length.
+  */
   virtual Int_t Make();
+
+  ///clear function is empty at the moment
   virtual void Clear( Option_t *opts = "" );
 
+  /**sets the clustering algorithm. Currently there is the simple Clustering algorithm and the max cluster algorithm. 
+The simple cluster algorithm is the default one. The max cluster only selects one hit stip per plane, the one with the highest charge
+   */
   Int_t setClusterAlgo(StFgtIClusterAlgo*);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.14 2012/01/06 17:58:39 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.15 2012/02/28 19:32:25 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   StFgtIClusterAlgo* mClusterAlgoPtr;

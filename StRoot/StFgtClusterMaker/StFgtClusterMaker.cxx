@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.27 2012/01/06 17:56:07 sgliske Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.28 2012/02/28 19:32:25 avossen Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -48,7 +48,9 @@ Int_t StFgtClusterMaker::Make()
        StFgtHitCollection *hitCollectionPtr = fgtCollectionPtr->getHitCollection( discIdx );
        
        if( stripCollectionPtr && hitCollectionPtr ){
+	 cout <<"doing clustering ..." <<endl;
 	 Int_t loc_ierr = mClusterAlgoPtr->doClustering( *stripCollectionPtr, *hitCollectionPtr );
+	 cout <<"done ..." <<endl;
 	 if(loc_ierr!=kStOk) {
 	   LOG_WARN <<"StClusterMaker::Make(): clustering for disc " << discIdx << " returned " << loc_ierr <<endm;
 	   if(loc_ierr>ierr)
@@ -102,13 +104,12 @@ Int_t StFgtClusterMaker::Make()
      }
    }
    
+   LOG_DEBUG << "End of fgt-clust-maker, print all strips & clusters: " << endm;
+   LOG_DEBUG <<"  fgtCollnumDisc=" << fgtCollectionPtr->getNumDiscs()<<", tot strip=" <<fgtCollectionPtr->getNumStrips()<<"  totClust=" <<  fgtCollectionPtr->getNumHits() <<endm;
+   for(int iDisc=0; iDisc <(int)fgtCollectionPtr->getNumDiscs(); iDisc++) {
 
-   printf("End of fgt-clust-maker, print all strips & clusters:\n");
-   
-   printf("  fgtCollnumDisc=%d, tot strip=%d  totClust=%d\n",fgtCollectionPtr->getNumDiscs(),fgtCollectionPtr->getNumStrips()  , fgtCollectionPtr->getNumHits());
-  for(int iDisc=0; iDisc <(int)fgtCollectionPtr->getNumDiscs(); iDisc++) {
-    printf("  content: iDisc=%d  # of : strips=%d  hits=%d\n" ,iDisc , fgtCollectionPtr->getNumStrips(iDisc)  , fgtCollectionPtr-> getNumHits( iDisc));
-
+    LOG_DEBUG <<"  content: iDisc="<<iDisc<< " # of : strips="<<fgtCollectionPtr->getNumStrips(iDisc) <<"  hits=" <<fgtCollectionPtr-> getNumHits( iDisc)<<endm;
+  
     // ..... print all strips ....
     StFgtStripCollection *stripPtr= fgtCollectionPtr->getStripCollection(iDisc);
     StSPtrVecFgtStrip &stripVec = stripPtr->getStripVec();    
@@ -118,7 +119,7 @@ Int_t StFgtClusterMaker::Make()
       Short_t discX,  quadrantX,  stripX; Char_t  layerX;
       StFgtGeom::decodeGeoId(((*it))->getGeoId(),discX,quadrantX, layerX, stripX);
       int octX=1; if (stripX<300) octX=0;
-      printf("iDisc=%d ih=%d  strip: geoId=%d ADC=%d  charge=%.1f decode0: strip=%d quad=%d oct=%d plane=%c disc=%d \n",iDisc,ih,((*it))->getGeoId(),((*it))->getAdc(),((*it))->getCharge(),stripX,quadrantX,octX,layerX,discX);
+      LOG_DEBUG << "iDisc="<<iDisc<<" ih=" <<ih <<"   strip: geoId=" <<((*it))->getGeoId()<< " ADC=" <<((*it))->getAdc()<<"  charge=" << ((*it))->getCharge()<< " 1f decode0: strip=" <<stripX << " quad="<<quadrantX << " oct=" <<octX << " plane="<<layerX<<" disc="<<discX<<endm;
     }
     
     // ..... print all 1D clusters (aka FGT HITs) ....
@@ -131,7 +132,7 @@ Int_t StFgtClusterMaker::Make()
       StFgtGeom::decodeGeoId(((*it))->getCentralStripGeoId(),discX,quadrantX, layerX, stripX);
       int octX=1; if (stripX<300) octX=0;
       
-      printf("iDisc=%d ih=%d  clust  quad=%d, layer=%c totCharge=%.1f  R/cm=%.2f +/- %.2f  Phi/rad=%.3f +/-%.3f  Z/cm=%.1f +/-%.1f   centStripId=%d decode0: strip=%d quad=%d oct=%d plane=%c disc=%d \n",iDisc,ih, ((*it))->getQuad(), ((*it))->getLayer(), ((*it))->charge(), ((*it))->getPositionR(), ((*it))->getErrorR(), ((*it))->getPositionPhi(), ((*it))->getErrorPhi(), ((*it))->getPositionZ(), ((*it))->getErrorZ(),((*it))->getCentralStripGeoId(),stripX,quadrantX,octX,layerX,discX);
+      LOG_DEBUG <<"iDisc="<<iDisc<<" ih="<<ih<<"  clust  quad="<<((*it))->getQuad()<<", layer="<<((*it))->getLayer()<<" totCharge="<<(*it)->charge()<< " R/cm="<<(*it)->getPositionR() <<" +/-"<<(*it)->getErrorR() <<" Phi/rad="<<(*it)->getPositionPhi()<<" +/- " << (*it)->getErrorPhi()<< "  Z/cm= " << (*it)->getPositionZ() <<" +/-  "<<(*it)->getErrorZ()<<" centStripId=" << (*it)->getCentralStripGeoId() <<"decode0: strip= " << stripX <<" quad="<<quadrantX <<" oct="<<octX <<"plane="<< layerX<<"  disc=" <<discX <<endm;
     }
     
     
@@ -180,6 +181,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.28  2012/02/28 19:32:25  avossen
+//   many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
+//
 //   Revision 1.27  2012/01/06 17:56:07  sgliske
 //   oops--didn't intend to commit the last one.
 //   this commit undoes that.
