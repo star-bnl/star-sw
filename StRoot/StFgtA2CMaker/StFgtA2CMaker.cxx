@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.24 2012/02/28 19:32:25 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.25 2012/02/29 20:29:08 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.25  2012/02/29 20:29:08  avossen
+ * changes to seed and cluster algo
+ *
  * Revision 1.24  2012/02/28 19:32:25  avossen
  * many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
  *
@@ -211,53 +214,65 @@ Int_t StFgtA2CMaker::Make(){
                   // subtract the pedestal from each time bin
 		  bool validPulse=true;
 		  Int_t maxADCVal=-4096;
-                  for( Int_t timebin = 0; timebin < kFgtNumTimeBins && strip->getGeoId() > -1; ++timebin ){
-                     Int_t adc = strip->getAdc( timebin );
-                     mHistPtr->SetBinContent( timebin+1, 0 );
-                     mHistPtr->SetBinError( timebin+1, 10000 );
-                     // get the pedestal
-		     ped = 0;
-		     pedErr = 0;
-                     ped = mDb->getPedestalFromGeoId( geoId );
-                     pedErr = mDb->getPedestalSigmaFromGeoId( geoId );
+		  ped = 0;
+		  pedErr = 0;
+		  ped = mDb->getPedestalFromGeoId( geoId );
+		  pedErr = mDb->getPedestalSigmaFromGeoId( geoId );
+		  strip->setPed(ped);
+		  strip->setPedErr(pedErr);
+
+		  if( ped > 4096 || ped < 0 ){
+		    strip->setGeoId( -1 );
+		  } else {
+
+		    for( Int_t timebin = 0; timebin < kFgtNumTimeBins && strip->getGeoId() > -1; ++timebin ){
+		      Int_t adc = strip->getAdc( timebin );
+		      mHistPtr->SetBinContent( timebin+1, 0 );
+		      mHistPtr->SetBinError( timebin+1, 10000 );
+		      // get the pedestal
+
+
+		      //		     if(30640<=geoId && geoId<30919)
+		      //		       cout <<"found strip in questinable area: " << geoId << " ped: " << ped <<" ped err: " << pedErr <<   " status: " <<  mDb->getStatusFromGeoId(geoId) <<" adc: " << adc<<endl;
+
+
+
 #ifdef DEBUG
-		     printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,pedErr);
+		      printf(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,pedErr);
 #endif
-                     // subract the ped or invalidate the strip
-                     if( ped > 4096 || ped < 0 ){
-                        strip->setGeoId( -1 );
-                     } else {
-		       Int_t adcMinusPed = adc - ped;
-		       if((adcMinusPed>maxADCVal) && (timebin==3 || timebin==4))
-			  maxADCVal=adcMinusPed;
+		      // subract the ped or invalidate the strip
 
-			//does this make sense? we run over several timebins... so this will pick up the last one, but this function assumes the default timebin of 2, let's add the timebin
-		       strip->setAdc(adcMinusPed, timebin );
-		       strip->setPed(ped);
-		       strip->setPedErr(pedErr);
-		       //                        strip->setAdc( strip->getAdc(), timebin );
-                        strip->setType( 1 );
-			if(adcMinusPed> -4000)//otherwise empty time bin
-			  {
-			    mHistPtr->SetBinContent( timebin+1, adcMinusPed );
-			    mHistPtr->SetBinError( timebin+1, pedErr );
-			  }
+		      Int_t adcMinusPed = adc - ped;
+		      if((adcMinusPed>maxADCVal) && (timebin==3 || timebin==4))
+			maxADCVal=adcMinusPed;
+
+		      //does this make sense? we run over several timebins... so this will pick up the last one, but this function assumes the default timebin of 2, let's add the timebin
+		      strip->setAdc(adcMinusPed, timebin );
+
+		      //                        strip->setAdc( strip->getAdc(), timebin );
+		      strip->setType( 1 );
+		      if(adcMinusPed> -4000)//otherwise empty time bin
+			{
+			  mHistPtr->SetBinContent( timebin+1, adcMinusPed );
+			  mHistPtr->SetBinError( timebin+1, pedErr );
+			}
 			
-			//                        if( (mRelThres && adcMinusPed > mRelThres*pedErr) && ((mAbsThres<(-4096)) ||  adcMinusPed > mAbsThres) )
-//sum over all (averages out fluctuations), but since the last two tb are -10000 or something like that, leave for
-			if(adcMinusPed>-1000) 			
-			  sumC+=adcMinusPed;
-                        if( (mRelThres && adcMinusPed > mRelThres*pedErr) || (mAbsThres>-4096 && adcMinusPed > mAbsThres)) 
-			  {
-			//only add if it is above pedestal, otherwise negative values can be added...
-			    //			    cout <<"sumC : " << sumC <<endl;
+		      //                        if( (mRelThres && adcMinusPed > mRelThres*pedErr) && ((mAbsThres<(-4096)) ||  adcMinusPed > mAbsThres) )
+		      //sum over all (averages out fluctuations), but since the last two tb are -10000 or something like that, leave for
+		      if(adcMinusPed>-1000) 			
+			sumC+=adcMinusPed;
+		      if( (mRelThres && adcMinusPed > mRelThres*pedErr) || (mAbsThres>-4096 && adcMinusPed > mAbsThres)) 
+			{
+			  //only add if it is above pedestal, otherwise negative values can be added...
+			  //			    cout <<"sumC : " << sumC <<endl;
 
-			    //			    cout <<"added: " << adcMinusPed <<" is now: " << sumC <<endl;
-			    //    cout <<"this is above threshold:  timebin: " << timebin<<" chargeSum: " << sumC <<" adc: " << adcMinusPed <<endl;
-			    ++nTbAboveThres;
-			  }
-                     };
-                  }
+			  //			    cout <<"added: " << adcMinusPed <<" is now: " << sumC <<endl;
+			  //    cout <<"this is above threshold:  timebin: " << timebin<<" chargeSum: " << sumC <<" adc: " << adcMinusPed <<endl;
+			  ++nTbAboveThres;
+			}
+			
+		    }
+		  }
 		  //set charge also for all strips
 
 		  Double_t gain = mDb->getGainFromGeoId( geoId );
@@ -341,24 +356,59 @@ Short_t StFgtA2CMaker::checkValidPulse(StFgtStrip* pStrip, Float_t ped)
   Int_t leadEdgeBin=-9999;
   Float_t sumAdc=0;
   Int_t numHighBins=0;
+  Int_t numAlmostHighBins=0; //3 sigma
+  Int_t numTailHighBins=0; //2 sigma in the tails
+  Int_t numHighBinsAfterLeadingEdge=0; //3 sigma
+
+
+  Int_t numPlateau=0;
+  Int_t numMaxPlateau=0;
+
+  Float_t prvAdc=-1;
+
   for( Int_t timebin = 0; timebin < kFgtNumTimeBins && pStrip->getGeoId() > -1; ++timebin )
     {
-      cout << pStrip->getAdc(timebin) <<" ";
       Float_t adc=pStrip->getAdc(timebin);
+      //to remove seeds where all strips are high and close together
+      if(prvAdc>0 && fabs(prvAdc-adc)<ped)
+	numPlateau++;
+      else
+	{
+	  if(numPlateau>numMaxPlateau)
+	    numMaxPlateau=numPlateau;
+	  //end of plateau
+	  numPlateau=0;
+	}
+
+
+      //this excludes the leading edge
+      if(leadEdgeBin>=0 && adc>3*ped)
+	numHighBinsAfterLeadingEdge++;
+      cout << pStrip->getAdc(timebin) <<" ";
+
       sumAdc+=adc;
       if(leadEdgeBin<0 && adc>5*ped) leadEdgeBin=timebin;
       if(2<=timebin && timebin <=4 && peakAdc<adc) peakAdc=adc;
       if(2<=timebin && timebin <=4 && adc>5*ped)
 	numHighBins++;
+      if(2<=timebin && timebin <=4 && adc>3*ped)
+	numAlmostHighBins++;
+
+      if(5<=timebin && timebin <=6)
+	numTailHighBins++;
     }
 
+  if(numPlateau>3)
+    return kFgtSeedTypeNo;
 
   //most restrictive condition
-  if(pStrip->getAdc(0) <2*ped && numHighBins==3 && peakAdc > pStrip->getAdc(6))
-    return kFgtSeedType1;
-  if(pStrip->getAdc(0) <2*ped && numHighBins==2 && peakAdc > pStrip->getAdc(6))
+  if(pStrip->getAdc(0) <2*ped && numHighBins==3 && peakAdc > pStrip->getAdc(6) && numAlmostHighBins>=3 && numHighBinsAfterLeadingEdge>=3)
+    {
+      return kFgtSeedType1;
+    }
+  if(pStrip->getAdc(0) <2*ped && numHighBins==2 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=3)
     return kFgtSeedType2;
-  if(pStrip->getAdc(0) <2*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6))
+  if(pStrip->getAdc(0) <2*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=3&& numAlmostHighBins>=3)
     return kFgtSeedType3;
 
 

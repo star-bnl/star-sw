@@ -80,12 +80,16 @@ enum {
 #define kFgtPhiAnglePitch 0.002095 
 #define kFgtDeadQuadEdge  1.2         // (cm) effective dead area along quadrant edges
 #define kFgtMaxClusterSize 11        //maximum cluster size in strips that a cluster algo should return
+#define kFgtNumAdditionalStrips 5        //strips in addition to the cluster size that are passed up. Mainly for debugging.
 
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.10 2012/02/28 19:32:25 avossen Exp $
+ * $Id: StFgtConsts.h,v 1.11 2012/02/29 20:29:08 avossen Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.11  2012/02/29 20:29:08  avossen
+ * changes to seed and cluster algo
+ *
  * Revision 1.10  2012/02/28 19:32:25  avossen
  * many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
  *

@@ -49,7 +49,7 @@ Int_t StFgtClusterPlotter::Make()
    cout <<"in plotter make " << endl;
    Float_t x;
    Float_t y;
-
+   Int_t prvGeoId=-1;
  for(int iDx=0;iDx<kFgtNumDiscs;iDx++)
    {
 	 vector<float> vPhi[4];
@@ -63,9 +63,15 @@ Int_t StFgtClusterPlotter::Make()
 	   {
 	     Short_t quad, disc, strip;
 	     Char_t layer; 
+	     if(((*it)->getGeoId()-prvGeoId)>1 && prvGeoId>=0)
+	       {
+		 (*outTxtFile) <<endl;
+	       }
+	     Bool_t stripDead=false;
+	     prvGeoId=(*it)->getGeoId();
 	     StFgtGeom::decodeGeoId((*it)->getGeoId(),disc, quad, layer, strip);
-	     //	     if(layer!='R')
-	     //	       continue;
+	     if(layer!='R')
+	       continue;
 	     switch((*it)->getClusterSeed())
 	       {
 	       case kFgtSeedType1:
@@ -101,14 +107,25 @@ Int_t StFgtClusterPlotter::Make()
 	       default:
 		 (*outTxtFile) <<"x";
 	       }
+	     if((*it)->getClusterSeed()==kFgtDeadStrip) 
+	       stripDead=true;
+	     else
+	       stripDead=false;
+
 
 	     for( Int_t timebin = 0; timebin < kFgtNumTimeBins-2; ++timebin )
 	       {
-		 float numSig=(*it)->getAdc(timebin)/(*it)->getPedErr();
-		 		 if(numSig >1)
-		   		   (*outTxtFile) << setw(4) << (*it)->getAdc(timebin)<< "    ";
-		   	 else
-		   	   (*outTxtFile) << setw(4) << " .  "<< "    ";
+
+		 if(stripDead)
+		   (*outTxtFile) << setw(4) << " ?  "<< "    ";
+		 else
+		   {
+		     float numSig=(*it)->getAdc(timebin)/(*it)->getPedErr();
+		     if(numSig >1)
+		       (*outTxtFile) << setw(4) << (*it)->getAdc(timebin)<< "    ";
+		     else
+		       (*outTxtFile) << setw(4) << " .  "<< "    ";
+		   }
 	       }
 
 	     (*outTxtFile) << " : charge: " << (*it)->getCharge()<<" +- " << (*it)->getChargeUncert() <<" location: "<<StFgtGeom::encodeGeoName(disc,quad,layer,strip);
@@ -116,9 +133,9 @@ Int_t StFgtClusterPlotter::Make()
 	     (*outTxtFile) << " ped: " << (*it)->getPed() <<" +- " << (*it)->getPedErr();
 	     (*outTxtFile) << " run evtNr " << runningEvtNr;
 	     //		     (*outTxtFile)  <<" t0: " << (*it)->getFitParamT0() <<" fit chi2/ndf: " << (*it)->getFitChi2();
-	     if((*it)->getClusterSeed()==kFgtSeedType1 || (*it)->getClusterSeed()==kFgtSeedType2)
+	     if((*it)->getClusterSeed()==kFgtSeedType1)
 	       {
-		 		 (*outTxtFile) << " ---> seed w/ 3 high strips";
+		 (*outTxtFile) << " ---> seed w/ 3 high strips";
 	       }
 	     if((*it)->getClusterSeed()==kFgtSeedType2)
 	       (*outTxtFile) << " ---> seed w/ 2 high strips";
@@ -164,9 +181,11 @@ Int_t StFgtClusterPlotter::Make()
 	       {
 		 //		 if(it->first->getClusterSeed()==kFgtSeedType1 || it->first->getClusterSeed()==kFgtSeedType2  || it->first->getClusterSeed()==kFgtSeedType3) //require 2 or 3 strips
 		 //		 if(it->first->getClusterSeed()==kFgtSeedType1 || it->first->getClusterSeed()==kFgtSeedType2) //require  3 strips
-		 if(it->first->getClusterSeed()==kFgtSeedType1) //require  3 strips
+		 if(it->first->getClusterSeed()==kFgtSeedType1 || it->first->getClusterSeed()==kFgtSeedType2 ||it->first->getClusterSeed()==kFgtSeedType3) //require  1,2,3 strips
 		   {
 		     containsSeed=true;
+		     ///use as charge the seed strip, seems to lead to better correlation:
+		     charge=it->first->getCharge();
 		   }
 	       }
 	     if(containsSeed)
