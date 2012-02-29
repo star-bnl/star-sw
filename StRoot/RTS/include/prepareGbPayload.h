@@ -36,7 +36,7 @@ public:
   } evpCfg;
 
   struct evpCtrs {
-    int runStartTime;
+    UINT32 runStartTime;
     int cnt[TRIGGERS_MAX];
   } evpCtrs;
 
@@ -46,22 +46,28 @@ public:
   int configEvp(STAR_CFG *cfg, int divisor=1)
   {
     // zero out counters...
-    evpCtrs.runStartTime = -1;   // untill the first event!
+    evpCtrs.runStartTime = (UINT32)-1;   // untill the first event!
     memset(evpCtrs.cnt, 0, sizeof(evpCtrs.cnt));
 
     // do configuration
     EvpGroup *groups = cfg->trg_setup.evpGroup;
     evpCfg.policy = cfg->trg_run.EvpPolicy;
-    for(int i=0;i<TRIGGERS_MAX;i++) {
+    for(int i=0;i<32;i++) {
+      
+
       evpCfg.groupdef[i][0] = groups[i].definition[0];
       evpCfg.groupdef[i][1] = groups[i].definition[1];
       
       evpCfg.rate[i] = groups[i].rate;
-      if((evpCfg.rate[i] > 0) && (divisor > 1)) {
-	evpCfg.rate[i] /= divisor;
+      if((evpCfg.rate[i] > 0.0) && (divisor > 1)) {
+	evpCfg.rate[i] /= (float)divisor;
       }
-	
+      
+      if((int)(evpCfg.rate[i]*1000) > 0) {
+	LOG(DBG, "configEvp: rate[%d]*1000 = %d",i,(int)(evpCfg.rate[i]*1000),0,0,0);
+      }
     } 
+
     return 0;
   }
 
@@ -105,32 +111,36 @@ public:
 
   UINT32 evpAssign(UINT32 trg_lo, UINT32 trg_hi)
   {
-    if(evpCtrs.runStartTime == -1) {
+    if(evpCtrs.runStartTime == (UINT32)-1) {
       evpCtrs.runStartTime = time(NULL);
     }
 
 #ifdef __vxworks
-    struct timespec tm;
-    clock_gettime(CLOCK_REALTIME, &tm);
-    float sec = l2h32(tm.tv_sec);
-    float usec = l2h32(tm.tv_nsec * 1000);
+    UINT32 sec = time(NULL);
+    UINT32 iet = sec - evpCtrs.runStartTime;
+    float et = (float)iet;
+    if(et < 1.0) et = 1;
+
+    LOG(DBG, "et=%d",(int)et,0,0,0,0);
 #else
     struct timeval tm;
     gettimeofday(&tm, NULL);
     float sec = tm.tv_sec;
     float usec = tm.tv_usec;
-#endif
-    
+
     float currtime = sec + usec / 1000000.0;
 
     float et = currtime - evpCtrs.runStartTime;
-    if(et < 1) et = 1;
-
+    if(et < 1.0) et = 1;
+#endif
+   
     // get event group mask
     UINT32 grpmask = 0;
     for(int i=0;i<32;i++) {
       if((trg_lo & evpCfg.groupdef[i][0]) ||
-	 (trg_hi & evpCfg.groupdef[i][1])) grpmask |= (1<<i);
+	 (trg_hi & evpCfg.groupdef[i][1])) {
+	grpmask |= (1<<i);
+      }
     }
 
     // get firemask (after rates)
@@ -140,21 +150,29 @@ public:
 
       float r = ((float)evpCtrs.cnt[i]/et);
       
-      if(r < evpCfg.rate[i]) 
+      if(r < evpCfg.rate[i]) {
 	firemask |= (1<<i);
 
-      if(evpCfg.rate[i] < 0) 
-	firemask |= (1<<i);
+	LOG(DBG, "Set fire mask because of rate[%d]: r*1000=%d rate*1000=%d, cnt=%d et=%d",i,(int)r*1000,(int)evpCfg.rate[i]*1000,evpCtrs.cnt[i],(int)et);
+      }
 
+      if(evpCfg.rate[i] < 0) {
+	LOG(DBG, "Set fire mask because of neg rate[%d]*1000 %d?",i,evpCfg.rate[i]*1000,0,0,0);
+	firemask |= (1<<i);
+      }
     }
 
-    if(evpCfg.policy == 1)  // all events
+    if(evpCfg.policy == 1) { // all events
+      LOG(DBG, "Set fire mask because of take all",0,0,0,0,0);
       firemask |= 1;
+    }
     
     if(evpCfg.policy == 2) { // 10 hz
       float r = ((float)evpCtrs.cnt[0]/et);
-      if(r < 10.0) 
+      if(r < 10.0) {
+	LOG(DBG, "Set fire mask because of 10hz",0,0,0,0,0);
 	firemask |= 1;
+      }
       else 
 	firemask = 0;
     }
@@ -191,7 +209,7 @@ public:
     pay->L2summary[1] = l2h32(l2trg_hi);
     pay->L3summary[1] = l2h32(l2trg_hi);
 
-    pay->evp = l2h32(evpAssign(l2trg_lo, 0));
+    pay->evp = l2h32(evpAssign(l2trg_lo, l2trg_hi));
     pay->L3summary[3] = pay->evp;
     
 #ifdef __vxworks
