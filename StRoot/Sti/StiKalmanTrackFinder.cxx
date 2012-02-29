@@ -54,7 +54,7 @@ using namespace std;
 #include "StiTPCCATrackerInterface.h"
 #endif /* DO_TPCCATRACKER */
 enum {kSeedTimg,kTrakTimg,kPrimTimg};
-enum {kMaxTrackPerm = 10000,kMaxEventPerm=100000};
+enum {kMaxTrackPerm = 10000,kMaxEventPerm=10000000};
 
 static const double kRMinTpc =55;
 int StiKalmanTrackFinder::_debug = 0;
