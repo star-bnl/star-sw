@@ -27,6 +27,7 @@
 #define DAQ_TIMEOUT			0x0E	// general timeout occured
 #define RTS_WRITE_COUNTERS             0x0f
 #define RUN_DONE                       0x10
+#define EVENT_DONE_BLOCKED             0x11
 
 // Run control reserves 0x20 -- 0x4f
 // Handler sends these to DAQ systems
