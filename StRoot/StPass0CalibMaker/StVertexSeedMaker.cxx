@@ -291,7 +291,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.46 2012/02/28 21:54:37 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.47 2012/02/29 02:00:04 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -489,7 +489,8 @@ void StVertexSeedMaker::GetFillDateTime() {
 void StVertexSeedMaker::FitData() {
    LOG_INFO << "Now fitting the data..." <<
      "\n  *****************************************************" << endm;
-   TVirtualFitter *minuit = TVirtualFitter::Fitter(0,4);
+   TVirtualFitter *minuit = TVirtualFitter::Fitter(0,26);
+   // above '26' must be >25, or ROOT dictates a max of 3 params?!?
    minuit->SetFCN(fnch);
 
 // Set starting values and step sizes for parameters
@@ -623,8 +624,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.46 2012/02/28 21:54:37 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.47 2012/02/29 02:00:04 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.47  2012/02/29 02:00:04  genevb
+// Hack to get TVirtualFitter to allow more than 3 parameters
+//
 // Revision 1.46  2012/02/28 21:54:37  genevb
 // Restore .root to .ROOT to avoid St_db_Maker read-in
 //
