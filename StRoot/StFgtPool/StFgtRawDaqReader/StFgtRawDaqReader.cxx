@@ -187,13 +187,12 @@ Int_t StFgtRawDaqReader::Make() {
             Short_t discIdx=0;  // will be set with getNaivePhysCoordFromElecCoord
 
 #if 1
-	    // year 2012 exclusions
-	    if( ( (rdo==1 && arm==1) || (rdo==2 && arm==2) || (rdo==1 && arm==4)) && apv>4 && apv<10 ) continue;
-	    if( ((rdo==2 && arm==1) ||(rdo==1 && arm==3) ||(rdo==2 && arm==4) ) && apv<5 ) continue;
-	    if( rdo==2 && arm==4)  continue;
-	    if( ( (rdo==2 && arm==1) ||(rdo==1 && arm==3)  ) && apv>16 ) continue;
-	    if( ((rdo==1 && arm==2) ||(rdo==2 && arm==3)  ) && apv>10 && apv<17) continue;
-	    // end of 2012 exclusions
+	    // year 2012 exclusions -- adjusted (bug fixed) 02/29/12 by sgliske
+            if( ( (rdo==1 && arm==1) || (rdo==2 && arm==2) || (rdo==1 && arm==4) ) && apv>4 && apv<10 ) continue;
+            if( ( (rdo==2 && arm==1) || (rdo==1 && arm==3) || (rdo==2 && arm==4) ) && apv<5 ) continue;
+            if( ( (rdo==2 && arm==1) || (rdo==1 && arm==3) || (rdo==2 && arm==4) ) && apv>16 ) continue;
+            if( ( (rdo==1 && arm==2) || (rdo==2 && arm==3) || (rdo==2 && arm==4) ) && apv>9 && apv<17) continue;
+            // end of 2012 exclusions
 #endif 
             Short_t quad, strip;
             Char_t layer;
@@ -277,8 +276,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.7 2012/02/07 05:33:25 balewski Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.8 2012/02/29 18:23:46 sgliske Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.8  2012/02/29 18:23:46  sgliske
+ * fixed bug in 2012 exclusions
+ *
  * Revision 1.7  2012/02/07 05:33:25  balewski
  * *** empty log message ***
  *
