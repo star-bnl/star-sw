@@ -708,9 +708,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$extraCXXFLAGS .= " -DNODEBUG";
 	$CXXFLAGS .= $extraCXXFLAGS;
 	# c++ `root-config --ldflags` -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
+	$LIBS = "-lVc";
+	if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
 	# stand - alone in .DEV2 only
 	if ($env->{STAR_VERSION} eq '.DEV2') {
-	  my $libs = "-lTPCCATracker -lVc -lTBB ". $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
+	  my $libs = "-lTPCCATracker " . $LIBS . $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
 	  $envTPCCA = $env->clone('Package' => $pkg,
 				  'EXTRA_CXXFLAGS' => $extraCXXFLAGS,# . " -DDRAW", # -DHLTCA_STANDALONE
 				  'CPPPATH'  => $CPPPATH,
@@ -1211,7 +1213,7 @@ if ( $#src > -1 ) {
 #	print "$#PlainObj => @PlainObj \n";
 	
 	$envPlain = $env2->clone('LIBPATH'  => $LIB, # . $main::PATH_SEPARATOR . $env->{Packages}->{ROOT}->{LIBDIR},
-				 'LIBS'     => "-lTPCCATracker -lVc -lTBB ");# . $env->{Packages}->{ROOT}->{LIBS} . " -lEG");
+				 'LIBS'     => "-lTPCCATracker ");# . $env->{Packages}->{ROOT}->{LIBS} . " -lEG");
       }
     }
     if ($pkg =~ m/^StGenericVertexMaker$/) { # For Stv no Sti 
