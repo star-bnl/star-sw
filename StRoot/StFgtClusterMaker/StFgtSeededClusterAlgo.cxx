@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.2 2012/02/29 20:29:08 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.3 2012/03/01 16:38:13 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.3  2012/03/01 16:38:13  avossen
+//  implemented tweaks to clustering
+//
 //  Revision 1.2  2012/02/29 20:29:08  avossen
 //  changes to seed and cluster algo
 //
@@ -116,7 +119,7 @@ Bool_t StFgtSeededClusterAlgo::isSameCluster(StSPtrVecFgtStripIterator itSeed,St
 
 
 //	  addStrips2Cluster(newCluster, it, strips.getStripsVec().begin();strip.getStripVec().end(), up);
-void StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStripIterator itSeed, StSPtrVecFgtStripIterator itVecBegin, StSPtrVecFgtStripIterator itVecEnd,Bool_t direction, Int_t sidedSize, Char_t seedLayer)
+Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStripIterator itSeed, StSPtrVecFgtStripIterator itVecBegin, StSPtrVecFgtStripIterator itVecEnd,Bool_t direction, Int_t sidedSize, Char_t seedLayer)
 {
   bool isPhi, isR;
   Short_t disc, quadrant,prvDisc,prvQuad;
@@ -137,7 +140,7 @@ void StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStrip
   Int_t deadStripsSkipped=0;
 
    while(nextStrip>=itVecBegin && nextStrip <itVecEnd &&(*nextStrip)->getClusterSeed()==kFgtDeadStrip)    {
-          cout <<"looking now next strip, which is dead: " << (*nextStrip)->getGeoId();
+     //          cout <<"looking now next strip, which is dead: " << (*nextStrip)->getGeoId();
       nextStrip+=inc;
       deadStripsSkipped++;
 
@@ -147,7 +150,7 @@ void StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStrip
 
   if(nextStrip >=itVecBegin && nextStrip <itVecEnd)
     {
-            cout <<"still looking at "<< (*nextStrip)->getGeoId()<<endl;
+      //      cout <<"still looking at "<< (*nextStrip)->getGeoId()<<endl;
       StFgtGeom::getPhysicalCoordinate((*nextStrip)->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
       bool adjacentStrip=((abs((*nextStrip)->getGeoId()-(*itSeed)->getGeoId())<(2+deadStripsSkipped))|| (( abs((*nextStrip)->getGeoId()-(*itSeed)->getGeoId()==(2+deadStripsSkipped)) && stepTwo && isPhi && ((*nextStrip)->getGeoId()%2==0))) &&   seedLayer==layer);
       //if the new strip is adjacent and it seems to belong to the same cluster, add it
@@ -158,10 +161,12 @@ void StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStrip
 	  stripWeightMap[ *nextStrip ] = 1;
 	  ///if the last add was successful and the cluster is not too big, go to next one...
 	  if(sidedSize+1<=kFgtMaxClusterSize/2)
-	    addStrips2Cluster(clus,nextStrip,itVecBegin,itVecEnd,direction,sidedSize+1,seedLayer);
+	    return addStrips2Cluster(clus,nextStrip,itVecBegin,itVecEnd,direction,sidedSize+1,seedLayer);//to return a kFgtClusterTooBig which is discovered downthe line
+	  else
+	    return kFgtClusterTooBig;
 	}
     }
-
+  return true;
 }
 
 
@@ -206,18 +211,74 @@ Int_t StFgtSeededClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
       //found seed for a cluster
       if((*it)->getClusterSeed() >=kFgtSeedType1 && ((*it)->getClusterSeed() <= kFgtSeedType3))
 	{
+
+
+	  ////
+	  ///check for ringing around cluster
+	  //	  if(ringing( it, strips.getStripVec().begin(),strips.getStripVec().end(), down,0,layer))
+	  //	    continue;  //was it
+	  StSPtrVecFgtStripIterator firstStrip=it-(int)(floor(kFgtMaxClusterSize/2)+kFgtNumAdditionalStrips);
+	  StSPtrVecFgtStripIterator lastStrip=it+(int)(floor(kFgtMaxClusterSize/2)+kFgtNumAdditionalStrips);
+	  if(firstStrip<strips.getStripVec().begin())
+	    firstStrip=strips.getStripVec().begin();
+
+	  Int_t stripsW_Charge=0;
+	  Int_t stripsWO_Charge=0;
+	  //compare with energy in cluster
+	  //	  cout << " looking around " << (*it)->getGeoId() << ": " << (*firstStrip)->getGeoId() <<" to something... " <<endl;
+	  for(StSPtrVecFgtStripIterator it2=firstStrip;(it2!=strips.getStripVec().end())&&(it2<=lastStrip);it2++)
+	    {
+	      if((*it2)->getClusterSeed()!=kFgtDeadStrip)
+		{
+		  if((*it2)->getCharge()>2*(*it2)->getChargeUncert())
+		    {
+		      //		      cout <<"   strip: " << (*it2)->getGeoId() << " has high charge " <<endl;
+		      stripsW_Charge++;
+		    }
+		  else
+		    {
+		      stripsWO_Charge++;
+		      //      cout <<"   strip: " << (*it2)->getGeoId() << " does not " <<endl;
+		    }
+		}
+	    }
+	  //	  cout<<" high charge strips: " << stripsW_Charge <<" low: " << stripsWO_Charge<<endl;
+	  if(stripsW_Charge>stripsWO_Charge)
+	      continue;
+
+	  /////
+
+
 	  StFgtGeom::getPhysicalCoordinate((*it)->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
 	  isPhi=(layer=='P');
 	  isR=(!isPhi);
 	  newCluster=new StFgtHit(clusters.getHitVec().size(),meanGeoId,accuCharge, disc, quadrant, layer, ordinate, defaultError,ordinate, defaultError,0.0,0.0);
 	  stripWeightMap_t &stripWeightMap = newCluster->getStripWeightMap();
 	  stripWeightMap[ *it ] = 1;
-
-
 	  //add strips to cluster going down
-	  addStrips2Cluster(newCluster, it, strips.getStripVec().begin(),strips.getStripVec().end(), down,0,layer);
+	  if(addStrips2Cluster(newCluster, it, strips.getStripVec().begin(),strips.getStripVec().end(), down,0,layer)==kFgtClusterTooBig)
+	    {
+	      //	      cout <<"cluster too big!, begin at: " << newCluster->getStripWeightMap().begin()->first->getGeoId()<<endl;
+	      //reset strips
+	     for(stripWeightMap_t::iterator it=newCluster->getStripWeightMap().begin();it!=newCluster->getStripWeightMap().end();it++)
+	       {
+		 it->first->setClusterSeed(kFgtSeedTypeNo);
+	       }
+	      delete newCluster;
+	      continue;
+	    }
 	  //add strips to cluster going up
-	  addStrips2Cluster(newCluster, it, strips.getStripVec().begin(),strips.getStripVec().end(), up,0,layer);
+	  if(addStrips2Cluster(newCluster, it, strips.getStripVec().begin(),strips.getStripVec().end(), up,0,layer)==kFgtClusterTooBig)
+	    {
+	     for(stripWeightMap_t::iterator it=newCluster->getStripWeightMap().begin();it!=newCluster->getStripWeightMap().end();it++)
+	       {
+		 it->first->setClusterSeed(kFgtSeedTypeNo);
+	       }
+	      delete newCluster;
+	      continue;
+	    }
+
+
 	  FillClusterInfo(newCluster);
 	  clusters.getHitVec().push_back(newCluster);
 	  //now of course we have to check where the cluster ends so that we don't start another cluster if there is another seed

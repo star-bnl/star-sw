@@ -1,8 +1,11 @@
 ///
-// $Id: StFgtSeededClusterAlgo.h,v 1.1 2012/02/28 19:34:29 avossen Exp $
+// $Id: StFgtSeededClusterAlgo.h,v 1.2 2012/03/01 16:38:13 avossen Exp $
 // $Log: StFgtSeededClusterAlgo.h,v $
+// Revision 1.2  2012/03/01 16:38:13  avossen
+// implemented tweaks to clustering
+//
 // Revision 1.1  2012/02/28 19:34:29  avossen
-// added new cluster maker
+//  added new cluster maker
 //
 // Revision 1.6  2011/11/01 18:46:30  sgliske
 // Updated to correspond with StEvent containers, take 2.
@@ -50,7 +53,7 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
  protected:
   ///migrated to A2C maker
   //  Bool_t checkPulse(StFgtHit* pClus);
-  void addStrips2Cluster(StFgtHit* clus, StFgtStrip** itSeed, StFgtStrip** itVecBegin, StFgtStrip** itVecEnd,Bool_t direction, Int_t sidedSize, Char_t seedLayer);
+  Int_t addStrips2Cluster(StFgtHit* clus, StFgtStrip** itSeed, StFgtStrip** itVecBegin, StFgtStrip** itVecEnd,Bool_t direction, Int_t sidedSize, Char_t seedLayer);
   Bool_t isSameCluster(StFgtStrip** itSeed,StFgtStrip** nextStrip);
   void FillClusterInfo(StFgtHit* cluster);
  private:
