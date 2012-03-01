@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHitCollection.cc,v 2.2 2005/01/27 23:40:46 calderon Exp $
+ * $Id: StMcCtbHitCollection.cc,v 2.3 2012/03/01 16:48:29 perev Exp $
  * $Log: StMcCtbHitCollection.cc,v $
+ * Revision 2.3  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.2  2005/01/27 23:40:46  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -12,44 +15,61 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
  */
+#include "TBrowser.h"
 #include "StMcCtbHitCollection.hh"
 #include "StMcCtbHit.hh"
 
-static const char rcsid[] = "$Id: StMcCtbHitCollection.cc,v 2.2 2005/01/27 23:40:46 calderon Exp $";
+static const char rcsid[] = "$Id: StMcCtbHitCollection.cc,v 2.3 2012/03/01 16:48:29 perev Exp $";
 ClassImp(StMcCtbHitCollection)
+//_____________________________________________________________________________
 StMcCtbHitCollection::StMcCtbHitCollection() : StObject()
 {
 }
 
+//_____________________________________________________________________________
 StMcCtbHitCollection::~StMcCtbHitCollection()
 {
   // StMcCtbHit provides its own new/delete operator, and
   // mHits is a polymorphic container, so we need to do this.
-  for (unsigned int i=0; i<mHits.size(); i++) {
-    delete mHits[i];
-    mHits[i] = 0;
-  }
+  Clear();
 }
     
-bool
-StMcCtbHitCollection::addHit(StMcCtbHit* hit)
-{
-    if (hit) {
-	mHits.push_back(hit);
-        return true;
-    }
-    else
-        return false;
-}
-
+//_____________________________________________________________________________
 unsigned long
 StMcCtbHitCollection::numberOfHits() const
 {
     return mHits.size();
 }
 
+//_____________________________________________________________________________
 const StSPtrVecMcCtbHit&
 StMcCtbHitCollection::hits() const { return mHits; }
 
-StSPtrVecMcCtbHit&
-StMcCtbHitCollection::hits() { return mHits; }
+//_____________________________________________________________________________
+StSPtrVecMcCtbHit& StMcCtbHitCollection::hits() { return mHits; }
+//_____________________________________________________________________________
+bool StMcCtbHitCollection::addHit(StMcCtbHit* hit)
+{
+  assert(hit && "Zero hit pointer added");
+  mHits.push_back(hit);
+  return true;
+}
+//_____________________________________________________________________________
+void StMcCtbHitCollection::Clear(const char*)
+{
+  for (int i=0; i<(int)mHits.size(); i++) 
+  {
+    delete mHits[i]; mHits[i] = 0;
+  }
+  mHits.clear();
+}
+//_____________________________________________________________________________
+void StMcCtbHitCollection::Browse(TBrowser *b)
+{
+  // Browse this event (called by TBrowser).
+   for (int i=0; i<(int)mHits.size(); i++) {
+     TObject *obj = mHits[i]; if (!obj) continue;
+     TString ts(obj->GetName()); ts+="#"; ts+=i;
+     b->Add(obj,ts.Data());
+   }
+}

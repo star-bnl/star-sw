@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcPadrowHitCollection.cc,v 2.2 2005/01/27 23:40:49 calderon Exp $
+ * $Id: StMcTpcPadrowHitCollection.cc,v 2.3 2012/03/01 16:48:30 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcPadrowHitCollection.cc,v $
+ * Revision 2.3  2012/03/01 16:48:30  perev
+ * method Browse() added
+ *
  * Revision 2.2  2005/01/27 23:40:49  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -21,30 +24,46 @@
  *
  *
  **************************************************************************/
+#include "TBrowser.h"
 #include "StMcTpcPadrowHitCollection.hh"
 #include "StMcTpcHit.hh"
 
-static const char rcsid[] = "$Id: StMcTpcPadrowHitCollection.cc,v 2.2 2005/01/27 23:40:49 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcPadrowHitCollection.cc,v 2.3 2012/03/01 16:48:30 perev Exp $";
 
 ClassImp(StMcTpcPadrowHitCollection)
 
+//_____________________________________________________________________________
 StMcTpcPadrowHitCollection::StMcTpcPadrowHitCollection() { /* noop */ }
 
+//_____________________________________________________________________________
 StMcTpcPadrowHitCollection::~StMcTpcPadrowHitCollection()
 {
-    // mHits
-    // is a polymorphic container and StMcTpcHit  
-    // provides its own new/delete operator.
-    //
-    for (unsigned int i=0; i<mHits.size(); i++) {
-        delete mHits[i];
-        mHits[i] = 0;
-    }
-    mHits.clear();
+  Clear();
 }
 
+//_____________________________________________________________________________
 const StSPtrVecMcTpcHit&
 StMcTpcPadrowHitCollection::hits() const { return mHits; }
 
+//_____________________________________________________________________________
 StSPtrVecMcTpcHit&
 StMcTpcPadrowHitCollection::hits() { return mHits; }
+//_____________________________________________________________________________
+void StMcTpcPadrowHitCollection::Clear(const char*)
+{
+  for (int i=0; i<(int)mHits.size(); i++) 
+  {
+    delete mHits[i]; mHits[i] = 0;
+  }
+  mHits.clear();
+}
+//_____________________________________________________________________________
+void StMcTpcPadrowHitCollection::Browse(TBrowser *b)
+{
+  // Browse this event (called by TBrowser).
+   for (int i=0; i<(int)mHits.size(); i++) {
+     TObject *obj = mHits[i]; if (!obj) continue;
+     TString ts(obj->GetName()); ts+="#"; ts+=i;
+     b->Add(obj,ts.Data());
+   }
+}

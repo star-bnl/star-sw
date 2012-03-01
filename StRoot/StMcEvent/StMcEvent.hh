@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.31 2011/10/11 01:12:18 perev Exp $
+ * $Id: StMcEvent.hh,v 2.32 2012/03/01 16:48:29 perev Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.32  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.31  2011/10/11 01:12:18  perev
  * Mtd added
  *
@@ -159,7 +162,8 @@ public:
   StMcEvent();  
   StMcEvent(g2t_event_st*);
   virtual ~StMcEvent();
-  
+  virtual void Browse(TBrowser *b); 
+  virtual bool IsFolder() const {return true;}; 
   int operator==(const StMcEvent&) const;
   int operator!=(const StMcEvent&) const;
 private:  
@@ -288,7 +292,6 @@ public:
   void setIstHitCollection(StMcIstHitCollection*); 
   void setFgtHitCollection(StMcFgtHitCollection*);       
   virtual void Print(Option_t *option="") const; // *MENU* 
-//vp  virtual void Browse(TBrowser *b) {TDataSet::Browse(b); Print("");}
  protected:
   char mBeg[1];				//!
   unsigned long                  mEventGeneratorEventLabel;

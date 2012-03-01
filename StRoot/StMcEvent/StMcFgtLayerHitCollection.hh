@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcFgtLayerHitCollection.hh,v 2.2 2009/07/24 19:08:07 perev Exp $
+ * $Id: StMcFgtLayerHitCollection.hh,v 2.3 2012/03/01 16:48:29 perev Exp $
  *
  * Author: Fabrice Retiere/Kai Schweda, Aug 2003
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMcFgtLayerHitCollection.hh,v $
+ * Revision 2.3  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.2  2009/07/24 19:08:07  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -34,6 +37,9 @@ class StMcFgtLayerHitCollection : public StObject
 public:
     StMcFgtLayerHitCollection();
     virtual ~StMcFgtLayerHitCollection();
+    void Clear(const char* opt="");
+    bool IsFolder() const { return true;};
+virtual void Browse(TBrowser *b); 
     
     unsigned long numberOfHits() const;
 

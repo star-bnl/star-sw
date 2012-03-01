@@ -8,8 +8,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.31 2011/10/11 01:12:14 perev Exp $
+ * $Id: StMcEvent.cc,v 2.32 2012/03/01 16:48:29 perev Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.32  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.31  2011/10/11 01:12:14  perev
  * Mtd added
  *
@@ -158,8 +161,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.31 2011/10/11 01:12:14 perev Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.31 2011/10/11 01:12:14 perev Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.32 2012/03/01 16:48:29 perev Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.32 2012/03/01 16:48:29 perev Exp $";
 ClassImp(StMcEvent);
 //______________________________________________________________________________
 void StMcEvent::initToZero()
@@ -459,6 +462,7 @@ void StMcEvent::setFgtHitCollection(StMcFgtHitCollection* val)
     if (mFgtHits && mFgtHits!= val) delete mFgtHits;
     mFgtHits = val;
 }   
+//______________________________________________________________________________
 #define PrintHeader(Name,name) \
   const StMc ## Name ## HitCollection *name ## Coll = name ## HitCollection();\
   cout << "---------------------------------------------------------" << endl;\
@@ -688,6 +692,17 @@ void StMcEvent::Print(Option_t *option) const {
     if (emcColl) emcColl->Print(option);
   }
 }  
+//______________________________________________________________________________
+void StMcEvent::Browse(TBrowser *b)
+{
+  // Browse this event (called by TBrowser).
+   for (int jk=1; mBegColl+jk<mEndColl;jk++) { 
+     TObject *obj = mBegColl[jk]; if (!obj) continue;
+     b->Add(obj,obj->GetName());
+   }
+   TDataSet::Browse(b);
+}
+//______________________________________________________________________________
 #undef  PrintHitCollection
 #undef  PrintHitCollectionL
 #undef  PrintHeader

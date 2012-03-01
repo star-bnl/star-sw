@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcRichHitCollection.cc,v 2.2 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcRichHitCollection.cc,v 2.3 2012/03/01 16:48:29 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, March 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcRichHitCollection.cc,v $
+ * Revision 2.3  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.2  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -21,44 +24,59 @@
  *
  *
  **************************************************************************/
+#include "TBrowser.h"
 #include "StMcRichHitCollection.hh"
 #include "StMcRichHit.hh"
 
-static const char rcsid[] = "$Id: StMcRichHitCollection.cc,v 2.2 2005/01/27 23:40:47 calderon Exp $";
+static const char rcsid[] = "$Id: StMcRichHitCollection.cc,v 2.3 2012/03/01 16:48:29 perev Exp $";
 ClassImp(StMcRichHitCollection);
+//_____________________________________________________________________________
 StMcRichHitCollection::StMcRichHitCollection()
 {
 }
 
+//_____________________________________________________________________________
 StMcRichHitCollection::~StMcRichHitCollection()
 {
   // StMcRichHit provides its own new/delete operator, and
   // mHits is a polymorphic container, so we need to do this.
-  for (unsigned int i=0; i<mHits.size(); i++) {
-    delete mHits[i];
-    mHits[i] = 0;
-  }
+  Clear();
 }
     
-bool
-StMcRichHitCollection::addHit(StMcRichHit* hit)
+//_____________________________________________________________________________
+bool StMcRichHitCollection::addHit(StMcRichHit* hit)
 {
-    if (hit) {
-	mHits.push_back(hit);
-        return true;
-    }
-    else
-        return false;
+    if (!hit) return false;
+    mHits.push_back(hit);
+    return true;
 }
 
-unsigned long
-StMcRichHitCollection::numberOfHits() const
+//_____________________________________________________________________________
+unsigned long StMcRichHitCollection::numberOfHits() const
 {
     return mHits.size();
 }
 
-const StSPtrVecMcRichHit&
-StMcRichHitCollection::hits() const { return mHits; }
+//_____________________________________________________________________________
+const StSPtrVecMcRichHit& StMcRichHitCollection::hits() const { return mHits; }
 
-StSPtrVecMcRichHit&
-StMcRichHitCollection::hits() { return mHits; }
+StSPtrVecMcRichHit& StMcRichHitCollection::hits() { return mHits; }
+//_____________________________________________________________________________
+void StMcRichHitCollection::Clear(const char*)
+{
+  for (int i=0; i<(int)mHits.size(); i++) 
+  {
+    delete mHits[i]; mHits[i] = 0;
+  }
+  mHits.clear();
+}
+//_____________________________________________________________________________
+void StMcRichHitCollection::Browse(TBrowser *b)
+{
+  // Browse this event (called by TBrowser).
+   for (int i=0; i<(int)mHits.size(); i++) {
+     TObject *obj = mHits[i]; if (!obj) continue;
+     TString ts(obj->GetName()); ts+="#"; ts+=i;
+     b->Add(obj,ts.Data());
+   }
+}

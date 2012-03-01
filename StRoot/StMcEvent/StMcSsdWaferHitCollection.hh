@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSsdWaferHitCollection.hh,v 2.2 2009/07/24 19:08:08 perev Exp $
+ * $Id: StMcSsdWaferHitCollection.hh,v 2.3 2012/03/01 16:48:29 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSsdWaferHitCollection.hh,v $
+ * Revision 2.3  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.2  2009/07/24 19:08:08  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -47,6 +50,9 @@ public:
     // StMcSsdWaferHitCollection(const StMcSsdWaferHitCollection&); use default
     // const StMcSsdWaferHitCollection& operator=(const StMcSsdWaferHitCollection&); use default
     virtual ~StMcSsdWaferHitCollection();
+    void Clear(const char* opt="");
+    bool IsFolder() const { return true;};
+virtual void Browse(TBrowser *b); 
     
     StSPtrVecMcSsdHit&       hits();
     const StSPtrVecMcSsdHit& hits() const;

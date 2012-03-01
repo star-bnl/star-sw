@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEmcModuleHitCollection.hh,v 2.5 2007/10/05 00:01:21 calderon Exp $
+ * $Id: StMcEmcModuleHitCollection.hh,v 2.6 2012/03/01 16:48:29 perev Exp $
  *
  * Author: Aleksei Pavlinov, May 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcModuleHitCollection.hh,v $
+ * Revision 2.6  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.5  2007/10/05 00:01:21  calderon
  * Changes to include a EMC hit collection that does not care about
  * parent tracks, so that now there are two collections.  This
@@ -43,8 +46,11 @@ public:
     StMcEmcModuleHitCollection();
     StMcEmcModuleHitCollection(const unsigned int m);
     virtual ~StMcEmcModuleHitCollection();
+    void Clear(const char* opt="");
+virtual bool IsFolder() const { return true;};
+virtual void Browse(TBrowser *b); 
+
     void init(const unsigned int m);
-    
     unsigned long numberOfHits() const;
     unsigned long numberOfDetectorHits() const;
     float sum() const;
@@ -60,8 +66,6 @@ public:
     StSPtrVecMcCalorimeterHit&       detectorHits();
     const StSPtrVecMcCalorimeterHit& detectorHits() const;
 
-//VP    virtual Bool_t IsFolder() const {return kFALSE;}
-    virtual void   Browse(TBrowser *b);
 
     void operator()(const unsigned int m) { init(m); } 
 

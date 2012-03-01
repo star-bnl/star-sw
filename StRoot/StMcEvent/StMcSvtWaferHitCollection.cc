@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtWaferHitCollection.cc,v 2.4 2005/01/27 23:40:48 calderon Exp $
+ * $Id: StMcSvtWaferHitCollection.cc,v 2.5 2012/03/01 16:48:29 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtWaferHitCollection.cc,v $
+ * Revision 2.5  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.4  2005/01/27 23:40:48  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -31,26 +34,43 @@
  *
  *
  **************************************************************************/
+#include "TBrowser.h"
 #include "StMcSvtWaferHitCollection.hh"
 #include "StMcSvtHit.hh"
 
-static const char rcsid[] = "$Id: StMcSvtWaferHitCollection.cc,v 2.4 2005/01/27 23:40:48 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtWaferHitCollection.cc,v 2.5 2012/03/01 16:48:29 perev Exp $";
 ClassImp(StMcSvtWaferHitCollection);
+//_____________________________________________________________________________
 StMcSvtWaferHitCollection::StMcSvtWaferHitCollection() { /* noop */ }
 
+//_____________________________________________________________________________
 StMcSvtWaferHitCollection::~StMcSvtWaferHitCollection()
 {
   // StMcSvtHit provides its own new/delete operator, and
   // mHits is a polymorphic container, so we need to do this.
-  for (unsigned int i=0; i<mHits.size(); i++) {
-    delete mHits[i];
-    mHits[i] = 0;
+  Clear();
+}
+//_____________________________________________________________________________
+const StSPtrVecMcSvtHit& StMcSvtWaferHitCollection::hits() const { return mHits; }
+
+//_____________________________________________________________________________
+StSPtrVecMcSvtHit& StMcSvtWaferHitCollection::hits() { return mHits; }
+//_____________________________________________________________________________
+void StMcSvtWaferHitCollection::Clear(const char*)
+{
+  for (int i=0; i<(int)mHits.size(); i++) 
+  {
+    delete mHits[i]; mHits[i] = 0;
   }
   mHits.clear();
 }
-
-const StSPtrVecMcSvtHit&
-StMcSvtWaferHitCollection::hits() const { return mHits; }
-
-StSPtrVecMcSvtHit&
-StMcSvtWaferHitCollection::hits() { return mHits; }
+//_____________________________________________________________________________
+void StMcSvtWaferHitCollection::Browse(TBrowser *b)
+{
+  // Browse this event (called by TBrowser).
+   for (int i=0; i<(int)mHits.size(); i++) {
+     TObject *obj = mHits[i]; if (!obj) continue;
+     TString ts(obj->GetName()); ts+="#"; ts+=i;
+     b->Add(obj,ts.Data());
+   }
+}

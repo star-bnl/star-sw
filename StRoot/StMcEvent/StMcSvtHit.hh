@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.13 2011/10/17 00:24:01 fisyak Exp $
+ * $Id: StMcSvtHit.hh,v 2.14 2012/03/01 16:48:29 perev Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.14  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.13  2011/10/17 00:24:01  fisyak
  * Add time of flight for hits
  *
@@ -77,7 +80,7 @@ public:
   ~StMcSvtHit() {}
   ULong_t layer()  const {return  (mVolumeId%10000)/1000;}      // layer=[1,6] with SSD [1-8]
   ULong_t ladder() const {return   (mVolumeId)%100;}   // ladder=[1-8] with SSD [1-20]
-  ULong_t wafer() const  {return   mVolumeId%10000 < 7101 ?  ((mVolumeId)%1000)/100 :  (((mVolumeId%10000)/100)-70);}  // wafer=[1-7] with SSD [1-16]
+  ULong_t wafer()  const {return   mVolumeId%10000 < 7101 ?  ((mVolumeId)%1000)/100 :  (((mVolumeId%10000)/100)-70);}  // wafer=[1-7] with SSD [1-16]
   ULong_t barrel() const {return  (layer()+1)/2; }    // barrel=[1-3] with SSD [1-4]
   ULong_t hybrid() const {return  0; } 
   virtual void Print(Option_t *option="") const; // *MENU* 

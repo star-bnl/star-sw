@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHitCollection.hh,v 2.2 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcCtbHitCollection.hh,v 2.3 2012/03/01 16:48:29 perev Exp $
  * $Log: StMcCtbHitCollection.hh,v $
+ * Revision 2.3  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.2  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -25,6 +28,9 @@ public:
     virtual ~StMcCtbHitCollection();
     // StMcCtbHitCollection(const StMcCtbHitCollection&);            use default
     // StMcCtbHitCollection& operator=(const StMcCtbHitCollection&); use default
+    void Clear(const char* opt="");
+    bool IsFolder() const { return true;};
+virtual void Browse(TBrowser *b); 
     
     bool          addHit(StMcCtbHit*);
     unsigned long numberOfHits() const;
