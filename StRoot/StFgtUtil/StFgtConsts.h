@@ -58,7 +58,8 @@ enum {
   kFgtNextToDeadGuy,
   kFgtClusterEndUp,
   kFgtClusterEndDown,
-  kFgtStripShared
+  kFgtStripShared,
+  kFgtClusterTooBig
 };
 
 // Jan's definitions for the final 400-800 micron pitch design 
@@ -85,8 +86,11 @@ enum {
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.11 2012/02/29 20:29:08 avossen Exp $
+ * $Id: StFgtConsts.h,v 1.12 2012/03/01 16:38:13 avossen Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.12  2012/03/01 16:38:13  avossen
+ * implemented tweaks to clustering
+ *
  * Revision 1.11  2012/02/29 20:29:08  avossen
  * changes to seed and cluster algo
  *

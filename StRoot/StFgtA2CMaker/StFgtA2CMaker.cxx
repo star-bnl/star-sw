@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.25 2012/02/29 20:29:08 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.26 2012/03/01 16:38:13 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.26  2012/03/01 16:38:13  avossen
+ * implemented tweaks to clustering
+ *
  * Revision 1.25  2012/02/29 20:29:08  avossen
  * changes to seed and cluster algo
  *
@@ -359,46 +362,53 @@ Short_t StFgtA2CMaker::checkValidPulse(StFgtStrip* pStrip, Float_t ped)
   Int_t numAlmostHighBins=0; //3 sigma
   Int_t numTailHighBins=0; //2 sigma in the tails
   Int_t numHighBinsAfterLeadingEdge=0; //3 sigma
-
-
   Int_t numPlateau=0;
   Int_t numMaxPlateau=0;
-
   Float_t prvAdc=-1;
 
   for( Int_t timebin = 0; timebin < kFgtNumTimeBins && pStrip->getGeoId() > -1; ++timebin )
     {
       Float_t adc=pStrip->getAdc(timebin);
       //to remove seeds where all strips are high and close together
-      if(prvAdc>0 && fabs(prvAdc-adc)<ped)
-	numPlateau++;
+      if(prvAdc>0 && fabs(prvAdc-adc)<ped && adc>3*ped)
+	{
+	  numPlateau++;
+	  //	  cout <<"adc: " << adc <<" plateau: " << numPlateau <<endl;
+	}
+
+      if(numPlateau>numMaxPlateau)
+	{
+	  numMaxPlateau=numPlateau;
+	  //	  cout <<"setting numMaxPlateau to " << numMaxPlateau<< endl;
+	}
       else
 	{
-	  if(numPlateau>numMaxPlateau)
-	    numMaxPlateau=numPlateau;
 	  //end of plateau
 	  numPlateau=0;
 	}
+      prvAdc=adc;
 
-
-      //this excludes the leading edge
-      if(leadEdgeBin>=0 && adc>3*ped)
+      //this excludes the leading edge, don't count if there is a hole after the leading edge
+      if(leadEdgeBin>=0 && adc>3*ped && (timebin-numHighBinsAfterLeadingEdge)>(leadEdgeBin+1))
 	numHighBinsAfterLeadingEdge++;
-      cout << pStrip->getAdc(timebin) <<" ";
+
+
+      //      cout << pStrip->getAdc(timebin) <<" ";
 
       sumAdc+=adc;
+
       if(leadEdgeBin<0 && adc>5*ped) leadEdgeBin=timebin;
+
       if(2<=timebin && timebin <=4 && peakAdc<adc) peakAdc=adc;
       if(2<=timebin && timebin <=4 && adc>5*ped)
 	numHighBins++;
       if(2<=timebin && timebin <=4 && adc>3*ped)
 	numAlmostHighBins++;
-
       if(5<=timebin && timebin <=6)
 	numTailHighBins++;
     }
-
-  if(numPlateau>3)
+  //  cout <<"deciding on max plat: " << numMaxPlateau <<endl;
+  if(numMaxPlateau>=3) //means basically 4 because we start counting after the first one
     return kFgtSeedTypeNo;
 
   //most restrictive condition
