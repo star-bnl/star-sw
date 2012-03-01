@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcPadrowHitCollection.hh,v 2.4 2009/07/24 19:08:09 perev Exp $
+ * $Id: StMcTpcPadrowHitCollection.hh,v 2.5 2012/03/01 16:48:30 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcPadrowHitCollection.hh,v $
+ * Revision 2.5  2012/03/01 16:48:30  perev
+ * method Browse() added
+ *
  * Revision 2.4  2009/07/24 19:08:09  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -41,6 +44,10 @@ class StMcTpcPadrowHitCollection : public StObject
 public:
     StMcTpcPadrowHitCollection();
     virtual ~StMcTpcPadrowHitCollection();
+    void Clear(const char* opt="");
+    bool IsFolder() const { return true;};
+virtual void Browse(TBrowser *b); 
+
     // StMcTpcPadrowHitCollection(const StMcTpcPadrowHitCollection&); use default
     // const StMcTpcPadrowHitCollection&
     // operator=(const StMcTpcPadrowHitCollection&);                use default

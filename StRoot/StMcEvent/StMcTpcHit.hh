@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.hh,v 2.12 2011/10/17 00:24:01 fisyak Exp $
+ * $Id: StMcTpcHit.hh,v 2.13 2012/03/01 16:48:30 perev Exp $
  * $Log: StMcTpcHit.hh,v $
+ * Revision 2.13  2012/03/01 16:48:30  perev
+ * method Browse() added
+ *
  * Revision 2.12  2011/10/17 00:24:01  fisyak
  * Add time of flight for hits
  *
@@ -65,11 +68,11 @@
 
 class StMcTpcHit : public StMcHit {
 public:
-  StMcTpcHit() {}
-  StMcTpcHit(const StThreeVectorF& x,const StThreeVectorF& p,
-	     Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0, 
-	     Float_t adc = 0, Float_t cl_x = 0, Float_t cl_t = 0): 
-    StMcHit(x,p,de,ds,tof,k,volId,parent), mAdc(adc), mMcl_x(cl_x), mMcl_t(cl_t) {}
+     StMcTpcHit() {}
+//   StMcTpcHit(const StThreeVectorF& x,const StThreeVectorF& p,
+// 	     Float_t de = 0, Float_t ds = 0, Float_t tof = 0, Long_t k = 0, Long_t volId = 0, StMcTrack* parent=0, 
+// 	     Float_t adc = 0, Float_t cl_x = 0, Float_t cl_t = 0): 
+//     StMcHit(x,p,de,ds,tof,k,volId,parent), mAdc(adc), mMcl_x(cl_x), mMcl_t(cl_t) {}
   StMcTpcHit(g2t_tpc_hit_st* pt): 
     StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
 	    StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]), 

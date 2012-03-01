@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcModuleHitCollection.cc,v $
+ * Revision 2.8  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.7  2007/12/14 20:23:50  calderon
  * From Adam Kocoloski: fix a memory leak, hits were not deleted in destructor.
  *
@@ -38,19 +41,22 @@
  *
  *
  **************************************************************************/
+#include "TBrowser.h"
 #include "StMcEmcModuleHitCollection.hh"
 #include "StMcCalorimeterHit.hh"
 
-static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.7 2007/12/14 20:23:50 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.8 2012/03/01 16:48:29 perev Exp $";
 
 ClassImp(StMcEmcModuleHitCollection)
 
+//_____________________________________________________________________________
 StMcEmcModuleHitCollection::StMcEmcModuleHitCollection(const unsigned int m)  
 {init(m);}
 
 StMcEmcModuleHitCollection::StMcEmcModuleHitCollection()  
 {init(0);}
 
+//_____________________________________________________________________________
 void StMcEmcModuleHitCollection::init(const unsigned int m)  
 {
   //
@@ -61,6 +67,7 @@ void StMcEmcModuleHitCollection::init(const unsigned int m)
   SetName(name);
 }
 
+//_____________________________________________________________________________
 StMcEmcModuleHitCollection::~StMcEmcModuleHitCollection()
 {
     int n = mHits.size();
@@ -72,20 +79,21 @@ StMcEmcModuleHitCollection::~StMcEmcModuleHitCollection()
     mDetectorHits.clear();
 }
 
+//_____________________________________________________________________________
 unsigned long 
 StMcEmcModuleHitCollection::numberOfHits() const
 {
     return mHits.size();
 }
 
-unsigned long
-StMcEmcModuleHitCollection::numberOfDetectorHits() const
+//_____________________________________________________________________________
+unsigned long StMcEmcModuleHitCollection::numberOfDetectorHits() const
 {
     return mDetectorHits.size();
 }
 
-float 
-StMcEmcModuleHitCollection::sum() const
+//_____________________________________________________________________________
+float StMcEmcModuleHitCollection::sum() const
 {
     float s = 0.0;
     for(unsigned int i=0; i<mHits.size(); i++){
@@ -94,26 +102,45 @@ StMcEmcModuleHitCollection::sum() const
     return s;
 } 
 
+//_____________________________________________________________________________
 const StSPtrVecMcCalorimeterHit&
 StMcEmcModuleHitCollection::hits() const { return mHits; }
 
+//_____________________________________________________________________________
 StSPtrVecMcCalorimeterHit&
 StMcEmcModuleHitCollection::hits() { return mHits; }
 
+//_____________________________________________________________________________
 const StSPtrVecMcCalorimeterHit&
 StMcEmcModuleHitCollection::detectorHits() const { return mDetectorHits; }
 
+//_____________________________________________________________________________
 StSPtrVecMcCalorimeterHit&
 StMcEmcModuleHitCollection::detectorHits() { return mDetectorHits; }
 
+//_____________________________________________________________________________
+void StMcEmcModuleHitCollection::Clear(const char*)
+{
+  for (int i=0; i<(int)mHits.size(); i++) 
+  {
+    delete mHits[i]; mHits[i] = 0;
+  }
+  for (int i=0; i<(int)mDetectorHits.size(); i++) 
+  {
+    delete mDetectorHits[i]; mDetectorHits[i] = 0;
+  }
+  mHits.clear();
+  mDetectorHits.clear();
+
+
+}
+//_____________________________________________________________________________
 void StMcEmcModuleHitCollection::Browse(TBrowser *b)
 {
-  int nh = mHits.size();
-  if (nh > 0) {
-    cout<<" == " << GetName()<<" == hits "<<nh<<" == sum Energy " << sum()<<"\n";
-    for (int ih=0; ih<nh; ih++){
-      StMcCalorimeterHit *hitEmc = mHits[ih];
-      cout<<"   "<<ih+1<<" "<<(*hitEmc);
-    }
-  }
+  // Browse this event (called by TBrowser).
+   for (int i=0; i<(int)mHits.size(); i++) {
+     TObject *obj = mHits[i]; if (!obj) continue;
+     TString ts(obj->GetName()); ts+="#"; ts+=i;
+     b->Add(obj,ts.Data());
+   }
 }

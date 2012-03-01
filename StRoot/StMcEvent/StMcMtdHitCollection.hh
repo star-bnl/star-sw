@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcMtdHitCollection.hh,v 2.1 2011/10/11 16:22:39 perev Exp $
+ * $Id: StMcMtdHitCollection.hh,v 2.2 2012/03/01 16:48:29 perev Exp $
  * $Log: StMcMtdHitCollection.hh,v $
+ * Revision 2.2  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.1  2011/10/11 16:22:39  perev
  * Add Mtd
  *
@@ -12,6 +15,7 @@
 #include "StMcContainers.hh"
 #include "StObject.h"
 
+class TBrowser;
 class StMcMtdHit;
 
 class StMcMtdHitCollection : public StObject {
@@ -19,7 +23,9 @@ public:
     StMcMtdHitCollection();
     virtual ~StMcMtdHitCollection();
     void Clear(const char* opt="");
-    bool          addHit(StMcMtdHit*);
+    bool IsFolder() const { return true;};
+virtual void Browse(TBrowser *b); 
+    bool addHit(StMcMtdHit*);
     unsigned long numberOfHits() const;
 
     StSPtrVecMcMtdHit&       hits();

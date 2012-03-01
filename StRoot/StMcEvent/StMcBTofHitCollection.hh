@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcBTofHitCollection.hh,v 2.1 2009/07/24 19:08:06 perev Exp $
+ * $Id: StMcBTofHitCollection.hh,v 2.2 2012/03/01 16:48:29 perev Exp $
  * $Log: StMcBTofHitCollection.hh,v $
+ * Revision 2.2  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.1  2009/07/24 19:08:06  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -18,6 +21,9 @@ class StMcBTofHitCollection : public StObject {
 public:
     StMcBTofHitCollection();
     virtual ~StMcBTofHitCollection();
+    void Clear(const char* opt="");
+    bool IsFolder() const { return true;};
+virtual void Browse(TBrowser *b); 
     
     bool          addHit(StMcBTofHit*);
     unsigned long numberOfHits() const;

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.12 2011/10/17 00:24:00 fisyak Exp $
+ * $Id: StMcHit.hh,v 2.13 2012/03/01 16:48:29 perev Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.13  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.12  2011/10/17 00:24:00  fisyak
  * Add time of flight for hits
  *
@@ -86,7 +89,7 @@ public:
   virtual const StThreeVectorF& localMomentum() const { return mLocalMomentum;}
   virtual Float_t                            dE() const { return mdE; }
   virtual Float_t                            dS() const { return mdS; }
-  virtual Float_t                         tof() const { return mTof; }
+  virtual Float_t                           tof() const { return mTof; }
   virtual Long_t                            key() const { return mKey; }
   virtual Long_t                       volumeId() const { return mVolumeId; }
   virtual StMcTrack*              parentTrack() const { return mParentTrack; }	
@@ -94,11 +97,11 @@ public:
 
   virtual void setPosition(const StThreeVectorF& val) { mPosition = val; }
   virtual void setLocalMomentum(const StThreeVectorF& val) { mLocalMomentum = val; }
-  virtual void setdE(Float_t val) { mdE = val; }
-  virtual void setdS(Float_t  val) { mdS = val; }
-  virtual void setTof(Float_t tof) {mTof = tof;}
-  virtual void setKey(Long_t val) { mKey = val; }
-  virtual void setVolumeId(Long_t val) { mVolumeId = val; }
+  virtual void setdE(Float_t val) 	{ mdE  = val;}
+  virtual void setdS(Float_t  val) 	{ mdS  = val;}
+  virtual void setTof(Float_t tof) 	{ mTof = tof;}
+  virtual void setKey(Long_t val) 	{ mKey = val;}
+  virtual void setVolumeId(Long_t val) 	{ mVolumeId = val; }
   virtual void setParentTrack(StMcTrack* val) { mParentTrack = val; }
   virtual void Print(Option_t *option="") const; // *MENU* 
     

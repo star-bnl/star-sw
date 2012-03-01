@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcRichHitCollection.hh,v 2.3 2009/07/24 19:08:08 perev Exp $
+ * $Id: StMcRichHitCollection.hh,v 2.4 2012/03/01 16:48:29 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, March 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcRichHitCollection.hh,v $
+ * Revision 2.4  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.3  2009/07/24 19:08:08  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -37,6 +40,9 @@ public:
     virtual ~StMcRichHitCollection();
     // StMcRichHitCollection(const StMcRichHitCollection&);            use default
     // StMcRichHitCollection& operator=(const StMcRichHitCollection&); use default
+    void Clear(const char* opt="");
+    bool IsFolder() const { return true;};
+virtual void Browse(TBrowser *b); 
     
     bool          addHit(StMcRichHit*);
     unsigned long numberOfHits() const;

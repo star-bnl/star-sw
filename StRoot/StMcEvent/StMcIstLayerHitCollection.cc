@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcIstLayerHitCollection.cc,v 2.2 2005/05/11 20:54:29 calderon Exp $
+ * $Id: StMcIstLayerHitCollection.cc,v 2.3 2012/03/01 16:48:29 perev Exp $
  *
  * Author: Fabrice Retiere/Kai Schweda, Aug 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcIstLayerHitCollection.cc,v $
+ * Revision 2.3  2012/03/01 16:48:29  perev
+ * method Browse() added
+ *
  * Revision 2.2  2005/05/11 20:54:29  calderon
  * Added persistency: ClassImp, ClassDef and inheritance from StObject.
  *
@@ -24,29 +27,45 @@
  *
  *
  **************************************************************************/
+#include "TBrowser.h"
 #include "StMcIstLayerHitCollection.hh"
 #include "StMcIstHit.hh"
-static const char rcsid[] = "$Id: StMcIstLayerHitCollection.cc,v 2.2 2005/05/11 20:54:29 calderon Exp $";
+static const char rcsid[] = "$Id: StMcIstLayerHitCollection.cc,v 2.3 2012/03/01 16:48:29 perev Exp $";
 
 ClassImp(StMcIstLayerHitCollection)
 
+//_____________________________________________________________________________
 StMcIstLayerHitCollection::StMcIstLayerHitCollection() { /* noop */ }
-
-StMcIstLayerHitCollection::~StMcIstLayerHitCollection()
+//_____________________________________________________________________________
+StMcIstLayerHitCollection::~StMcIstLayerHitCollection(){ Clear();   }
+//_____________________________________________________________________________
+void StMcIstLayerHitCollection::Clear(const char*)
 {
-    // If the hit provides its own new/delete operator.
-    for (unsigned int i=0; i<mHits.size(); i++) {
-	delete mHits[i];
-	mHits[i]=0;
+  for (int i=0; i<(int)mHits.size(); i++) 
+  {
+    delete mHits[i]; mHits[i] = 0;
   }
+  mHits.clear();
+}
+//_____________________________________________________________________________
+void StMcIstLayerHitCollection::Browse(TBrowser *b)
+{
+  // Browse this event (called by TBrowser).
+   for (int i=0; i<(int)mHits.size(); i++) {
+     TObject *obj = mHits[i]; if (!obj) continue;
+     TString ts(obj->GetName()); ts+="#"; ts+=i;
+     b->Add(obj,ts.Data());
+   }
 }
 
-const StSPtrVecMcIstHit&
-StMcIstLayerHitCollection::hits() const { return mHits; }
 
-StSPtrVecMcIstHit&
-StMcIstLayerHitCollection::hits() { return mHits; }
+//_____________________________________________________________________________
+const StSPtrVecMcIstHit& StMcIstLayerHitCollection::hits() const { return mHits; }
 
+//_____________________________________________________________________________
+StSPtrVecMcIstHit& StMcIstLayerHitCollection::hits() { return mHits; }
+
+//_____________________________________________________________________________
 unsigned long StMcIstLayerHitCollection::numberOfHits() const
 {
   return mHits.size();
