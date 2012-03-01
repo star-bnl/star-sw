@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.17 2012/01/31 00:25:11 cpowell Exp $
+# $Id: get_embedding_xml.pl,v 1.18 2012/03/01 05:46:38 cpowell Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.18  2012/03/01 05:46:38  cpowell
+# Corrected parameters for bfcMixer_TpcSvtSsd.C
+#
 # Revision 1.17  2012/01/31 00:25:11  cpowell
 # Allow pt bin subfolder with option -ptbin. Generalize usage with event simulator.
 #
@@ -644,7 +647,7 @@ sub get_bfcMixer {
     # bfcMixer_TpcSvtSsd.C needs two additional switches
     printDebug("SVT/SSD flags are added in the 2nd/3rd arguments");
 
-    $execute_bfcMixer = "$bfcMixerFunction($nevents, 1, 1, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\", $simulator);";
+    $execute_bfcMixer = "$bfcMixerFunction($nevents, 1, 1, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\");";
   }
   elsif ( $bfcMixer =~ /.*Tpx.C/  ){
     # bfcMixers with PYTHIA flag option (Tpx only) (CBPowell)
