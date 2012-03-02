@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.40 2011/06/10 21:17:17 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.41 2012/03/02 23:56:48 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.41  2012/03/02 23:56:48  genevb
+// Place TPC sector plots in QA Shift
+//
 // Revision 2.40  2011/06/10 21:17:17  genevb
 // Point Flag is EMC
 //
@@ -134,8 +137,32 @@
   ":svt:QaPointSvt",
   ":svt:QaPointXYSvt",
   ":svt:QaPointSvtLaser",
-  ":tpx;tpc:QaPointRPTpcE",
   ":tpx;tpc:QaPointRPTpcW",
+  ":tpx;tpc:QaPointRPTpcE",
+  ":tpx;tpc:QaTpcSector1",
+  ":tpx;tpc:QaTpcSector2",
+  ":tpx;tpc:QaTpcSector3",
+  ":tpx;tpc:QaTpcSector4",
+  ":tpx;tpc:QaTpcSector5",
+  ":tpx;tpc:QaTpcSector6",
+  ":tpx;tpc:QaTpcSector7",
+  ":tpx;tpc:QaTpcSector8",
+  ":tpx;tpc:QaTpcSector9",
+  ":tpx;tpc:QaTpcSector10",
+  ":tpx;tpc:QaTpcSector11",
+  ":tpx;tpc:QaTpcSector12",
+  ":tpx;tpc:QaTpcSector13",
+  ":tpx;tpc:QaTpcSector14",
+  ":tpx;tpc:QaTpcSector15",
+  ":tpx;tpc:QaTpcSector16",
+  ":tpx;tpc:QaTpcSector17",
+  ":tpx;tpc:QaTpcSector18",
+  ":tpx;tpc:QaTpcSector19",
+  ":tpx;tpc:QaTpcSector20",
+  ":tpx;tpc:QaTpcSector21",
+  ":tpx;tpc:QaTpcSector22",
+  ":tpx;tpc:QaTpcSector23",
+  ":tpx;tpc:QaTpcSector24",
   ":tpx;tpc:QaPointZhits",
   ":tpx;tpc:QaPointPhiT",
   ":svt:QaPointZhitsS",
