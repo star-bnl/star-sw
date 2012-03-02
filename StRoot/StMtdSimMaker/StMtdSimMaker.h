@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdSimMaker.h,v 1.1 2011/10/11 16:28:11 perev Exp $
+ * $Id: StMtdSimMaker.h,v 1.2 2012/03/02 02:18:34 perev Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMtdSimMaker.h,v $
- * Revision 1.1  2011/10/11 16:28:11  perev
- * *** empty log message ***
+ * Revision 1.2  2012/03/02 02:18:34  perev
+ * New provisional version rewritten by VP
  *
  *
  **************************************************************************/
@@ -19,57 +19,40 @@
 #define STBMTDSIMMAKER_HH
 #include "StMaker.h"
 
-#include "St_DataSet.h"
-class TH1F;
-class TH2F;
-class TNtuple;
-class TNtuple;
-class TProfile;
-
 class StEvent;
-class StMtdCollection;
 struct g2t_mtd_hit_st;
+class StMtdCollection;
+class TH2F;
 
 // g2t tables
 #include "tables/St_g2t_mtd_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
 
-#include "StMcEvent/StMcEvent.hh"
-#include "StMcEvent/StMcMtdHitCollection.hh"
-#include "StMcEvent/StMcMtdHit.hh"
-#include "StThreeVectorF.hh"
 #include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-#endif
 
-class StMtdSimMaker : public StMaker{
+class StMtdSimMaker : public StMaker
+{
  protected:
-
-
-  StMcMtdHitCollection *mMcMtdHitCollection; //! barrel tof hit
-
   St_DataSet        *mGeantData;        //! geant table
   StEvent           *mEvent;            //!
-  StMcEvent         *mMcEvent;
   StMtdCollection   *mMtdCollection;   
+  int                mNMtdHits;
+  g2t_mtd_hit_st    *mMtdHitsFromGeant;
 
   //define some constants
   enum {
-    //    mNBackleg = 32,
-    // mNModule   = 5,
-    mNBackleg = 99,
-    mNModule   = 99,
-    mNCell = 12,     //! 12 cells per box
-//    mAMP = 50000,     
-//    mADCBINWIDTH = 25,
-//    mTDCBINWIDTH = 50
-  };
+   kNBackleg = 99,
+   kNModule  = 99,
+   kNCell    = 12,     //! 12 cells per box
+   kAMP      = 50000,     
+   kADCBINWIDTH = 25,
+   kTDCBINWIDTH = 50
+ };
 
-//  const static float mVHRBIN2PS = 24.4;  //! Very High resolution mode, ps/bin
-//  const static float mHRBIN2PS = 97.7;     //! High resolution mode, ps/bin
-  const static float mMtdPadWidth = 3.8 + 0.6; //! Pad Width: 38mm padwidth + 6mm innerspacing
+//const static float kVHRBIN2PS = 24.4;  	//! Very High resolution mode, ps/bin
+//const static float kHRBIN2PS = 97.7;     	//! High resolution mode, ps/bin
+  const static float kMtdPadWidth = 3.8 + 0.6; 	//! Pad Width: 38mm padwidth + 6mm innerspacing
 
 
 //  Bool_t mCellXtalk;     //! switch for cell xtalk
@@ -77,24 +60,7 @@ class StMtdSimMaker : public StMaker{
   Bool_t mBookHisto;
   Bool_t mWriteStEvent;  //! switch to enable Maker to write out simulated hits to StEvent
 
-  Int_t     mMtdHitFlag[mNBackleg][mNModule*mNCell];   //! hit flag for tof geant hits
 
-  struct TrackHit{
-    Int_t          backleg;
-    Int_t          module;
-    Int_t          cell;
-    Int_t          trkId;
-    Double_t       dE;
-    Double_t       dQ;
-    Double_t       dQdt[600];//this 600 (nTimebins) comes from the /TofUtil/StTofParam file
-    Double_t       tof;
-    Double_t       s_track;
-    Double_t          t0;              //! t0 (in ps) as the start of this tof hit -- was ns - changed for consistency
-    StThreeVectorF position;
-  };
-
-
-  typedef vector<TrackHit, allocator<TrackHit> > TrackVec;
 
   string mHistFile;//for QA histograms
   TH1F* mBetaHist;    //! speed of particles hitting tof
@@ -144,26 +110,8 @@ class StMtdSimMaker : public StMaker{
 
     TVolume *starHall;
 
-//fg    Int_t CellResponse(g2t_mtd_hit_st* mtd_hit,
-//fg				TrackVec& trackVec);   //! Slow simulation step one
-//fg    Int_t CellTimePassTh(TrackVec& trackVec);        //! Slow simulation step two
-//fg
-    Int_t FastCellResponse(g2t_mtd_hit_st* mtd_hit);
-//fg
-    vector<Int_t>    CalcCellId(Int_t volume_id, Float_t ylocal);
-//fg    Int_t CellXtalk(Int_t icell, Float_t ylocal, Float_t& wt, Int_t& icellx);
-    Int_t      storeMcMtdHit(StMcMtdHit *mcCellHit);
-//fg
-//fg    Int_t        fillRaw(void);
-//fg    Int_t        electronicNoise(void);
-//fg    Float_t       slatResponseExp(Float_t&);
-//fg    Double_t GammaRandom();
-//fg
-//fg
-    Int_t        fillEvent();
     Int_t        bookHistograms();
     Int_t        writeHistograms();
-    Int_t        ResetFlags();
 
 
  public:
@@ -176,16 +124,18 @@ class StMtdSimMaker : public StMaker{
     Int_t          FinishRun(Int_t);
     virtual Int_t  Make();
     virtual Int_t  Finish();
-
+            Int_t  FastCellResponse();
+              int  CalcCellId(Int_t volume_id, Float_t ylocal,
+                              int &ibackleg,int &imodule,int &icell);
+			       
 //fg    StMtdCollection*  GetMtdCollection()  const { return mMtdCollection; }
-//fg    StMcMtdHitCollection* GetMcMtdHitCollection() const { return mMcMtdHitCollection; }
 //fg
 //fg    void   setHistFileName(string s);
 //fg    void   setBookHist(Bool_t val) { mBookHisto = val; }
 //fg    void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.1 2011/10/11 16:28:11 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StMtdSimMaker.h,v 1.2 2012/03/02 02:18:34 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StMtdSimMaker,1)
 };
