@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.74 2011/11/21 22:00:13 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.75 2012/03/02 02:16:57 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.75  2012/03/02 02:16:57  perev
+ * MTD Creation added
+ *
  * Revision 1.74  2011/11/21 22:00:13  perev
  * Ignore tracks with wrong ge_id
  *
@@ -317,7 +320,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.74 2011/11/21 22:00:13 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.75 2012/03/02 02:16:57 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -1243,7 +1246,7 @@ Int_t StMcEventMaker::Make()
 	AddHits(ctb,ctb,Ctb);
 	AddHits(tof,tof,Tof);
 	AddHits(tfr,tof,Tof);
-//VP	AddHits(mtd,mtd,Mtd);
+	AddHits(mtd,mtd,Mtd);
 	AddHits(pix,pixel,Pixel);
 	AddHits(ist,ist,Ist);
 	AddHits(fgt,fgt,Fgt);
