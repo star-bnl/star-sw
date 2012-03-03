@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.85 2012/01/31 22:14:53 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.86 2012/03/03 01:29:06 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.86  2012/03/03 01:29:06  genevb
+// Output found/total vertices
+//
 // Revision 2.85  2012/01/31 22:14:53  genevb
 // QA Shift Mode, optimized for AutoQA Browser
 //
@@ -985,6 +988,9 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             // restore
             latex.SetTextColor(1);
             latex.SetTextSize(txtSiz);
+            LOG_INFO << (m_CurPrefix ? possiblePrefixes[m_CurPrefix] : "GE")
+                     << " QA Events (found vtx/total) "
+                     << fndVtx << " / " << totVtx << endm;
           }
 
           if (oName.Contains("TpcSector")) {
