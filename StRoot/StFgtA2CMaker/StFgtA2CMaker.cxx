@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.27 2012/03/05 03:42:00 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.28 2012/03/05 16:13:13 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.28  2012/03/05 16:13:13  avossen
+ * changed maxAdc default to -9999
+ *
  * Revision 1.27  2012/03/05 03:42:00  avossen
  * added reset of max adc, so that the max adc contains the max adc after ped substraction
  *
@@ -211,7 +214,7 @@ Int_t StFgtA2CMaker::Make(){
                if( strip ){
                   Int_t nTbAboveThres = 0;
 		  //set max adc back so that the new max adc is set by the adc -ped
-		  strip->setMaxAdc(-1);
+		  strip->setMaxAdc(-9999);
                   Int_t geoId = strip->getGeoId();
                   // Later, switch geoId to elecId lookups, since DB keyed by
                   // elecId, as soon as function made available.  Also
