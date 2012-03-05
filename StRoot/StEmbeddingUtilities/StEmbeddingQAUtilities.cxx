@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.15 2011/08/25 17:37:26 cpowell Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.16 2012/03/05 10:32:43 cpowell Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.16  2012/03/05 10:32:43  cpowell
+ * Functions added to cut on refMult
+ *
  * Revision 1.15  2011/08/25 17:37:26  cpowell
  * Remove use of function getGeantId(const UInt_t geantid)
  *
@@ -90,6 +93,8 @@ StEmbeddingQAUtilities::StEmbeddingQAUtilities()
   mNSigmaCut      = 2.0 ;   /// Nsigma cut, |Nsigma| < 2
   mRapidityCut    = 10.0 ;  /// Rapidity cut, |y| < 10
   mZVertexCut     = 30.0 ;  /// z-vertex cut, |vz| < 30 cm
+  mRefMultMinCut  = 0 ;  		/// refMult cut, refMult >= 0
+  mRefMultMaxCut  = 1000 ;	/// refMult cut, refMult < 1000
   mTriggerIdCut.clear() ;   /// No trigger cut by default
 }
 
@@ -478,6 +483,12 @@ Double_t StEmbeddingQAUtilities::getNSigmaCut() const { return mNSigmaCut ; }
 Float_t StEmbeddingQAUtilities::getRapidityCut() const { return mRapidityCut ; }
 
 //__________________________________________________________________________________________
+Int_t StEmbeddingQAUtilities::getRefMultMinCut() const { return mRefMultMinCut ; }
+
+//__________________________________________________________________________________________
+Int_t StEmbeddingQAUtilities::getRefMultMaxCut() const { return mRefMultMaxCut ; }
+
+//__________________________________________________________________________________________
 Float_t StEmbeddingQAUtilities::getZVertexCut() const { return mZVertexCut ; }
 
 //__________________________________________________________________________________________
@@ -556,6 +567,24 @@ Float_t StEmbeddingQAUtilities::setRapidityCut(const Float_t val)
 }
 
 //__________________________________________________________________________________________
+Int_t StEmbeddingQAUtilities::setRefMultMinCut(const Int_t val)
+{
+  mRefMultMinCut = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setRefMultCut  refMult cut >= " << mRefMultMinCut 
+    << endm;
+  return getRefMultMinCut() ;
+}
+
+//__________________________________________________________________________________________
+Int_t StEmbeddingQAUtilities::setRefMultMaxCut(const Int_t val)
+{
+  mRefMultMaxCut = val ;
+  LOG_INFO << "StEmbeddingQAUtilities::setRefMultCut  refMult cut < " << mRefMultMaxCut  
+    << endm;
+  return getRefMultMaxCut() ;
+}
+
+//__________________________________________________________________________________________
 Float_t StEmbeddingQAUtilities::setZVertexCut(const Float_t val)
 {
   mZVertexCut = val ;
@@ -612,6 +641,12 @@ Bool_t StEmbeddingQAUtilities::isRapidityOk(const Float_t y) const
 }
 
 //__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isRefMultOk(const Int_t refMult) const
+{
+  return ((refMult >= mRefMultMinCut) && (refMult < mRefMultMaxCut)) ;
+}
+
+//__________________________________________________________________________________________
 Bool_t StEmbeddingQAUtilities::isZVertexOk(const Float_t vz) const
 {
   return TMath::Abs(vz) < mZVertexCut ;
@@ -646,6 +681,7 @@ void StEmbeddingQAUtilities::PrintCuts() const
   LOG_INFO << Form("    rapidity cut       : |y| < %1.1f", getRapidityCut()) << endm;
   LOG_INFO << "  Event-wise selections ==================================================" << endm;
   LOG_INFO << Form("    z-vertex cut       : |vz| < %1.1f cm", getZVertexCut()) << endm;
+  LOG_INFO << Form("    refMult cut        : %i <= refMult < %i", getRefMultMinCut(), getRefMultMaxCut()) << endm;
   if ( !mTriggerIdCut.empty() ) {
     for(UInt_t i=0; i<mTriggerIdCut.size(); i++) {
       LOG_INFO << Form("    trigger id cut     : id = %10d", mTriggerIdCut[i]) << endm;
