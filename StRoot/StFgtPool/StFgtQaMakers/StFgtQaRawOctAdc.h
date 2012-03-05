@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtQaRawOctAdc.h,v 1.2 2012/01/31 12:53:28 sgliske Exp $
+ * $Id: StFgtQaRawOctAdc.h,v 1.3 2012/03/05 20:35:15 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtQaRawOctAdc.h,v $
+ * Revision 1.3  2012/03/05 20:35:15  sgliske
+ * update--still not really working
+ *
  * Revision 1.2  2012/01/31 12:53:28  sgliske
  * updates
  *
@@ -51,6 +54,7 @@ class StFgtQaRawOctAdc : public StMaker {
 
    // accessor
    std::vector< TH2F* > getHistVec();
+   TH2F* getHist( Int_t idx );
 
    // modifier
    void setTimeBin( Int_t tb );
@@ -74,6 +78,7 @@ class StFgtQaRawOctAdc : public StMaker {
 // inline functions
 
 inline std::vector< TH2F* > StFgtQaRawOctAdc::getHistVec(){ return mHistVec; };
+inline TH2F* StFgtQaRawOctAdc::getHist( Int_t idx ){ return mHistVec.at(idx); };
 inline void StFgtQaRawOctAdc::setTimeBin( Int_t tb ){ mTimeBin = tb; };
 
 #endif

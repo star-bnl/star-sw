@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtQaRawOctAdc.cxx,v 1.2 2012/01/31 12:53:28 sgliske Exp $
+ * $Id: StFgtQaRawOctAdc.cxx,v 1.3 2012/03/05 20:35:15 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtQaRawOctAdc.cxx,v $
+ * Revision 1.3  2012/03/05 20:35:15  sgliske
+ * update--still not really working
+ *
  * Revision 1.2  2012/01/31 12:53:28  sgliske
  * updates
  *
@@ -81,7 +84,7 @@ Int_t StFgtQaRawOctAdc::Init(){
 
             Int_t chanPerOct = kFgtNumChannels*kFgtApvsPerOct;
             mHistVec[ histIdx ] = new TH2F( ss.str().data(),
-                                            ( std::string("Number of High Strips per Event for Octant" ) + label +
+                                            ( std::string("Octant " ) + label +
                                               "; Number of Strips; Number of Events").data(),
                                             chanPerOct, 0, chanPerOct, mAdcBins, mAdcMin, mAdcMax );
          };
