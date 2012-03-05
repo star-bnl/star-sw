@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtDaq2RootMaker.cxx,v 1.2 2012/01/30 10:42:23 sgliske Exp $
+ * $Id: StFgtDaq2RootMaker.cxx,v 1.3 2012/03/05 20:35:46 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtDaq2RootMaker.cxx,v $
+ * Revision 1.3  2012/03/05 20:35:46  sgliske
+ * update to export DAQ data as well
+ *
  * Revision 1.2  2012/01/30 10:42:23  sgliske
  * strip containers now contain adc values for
  * all time bins.  Also fixed bug where setType modified the timebin
@@ -109,13 +112,21 @@ Int_t StFgtDaq2RootMaker::Make(){
                   Int_t rdo, arm, apv, chan, quad;
                   (*stripIter)->getElecCoords( rdo, arm, apv, chan );
 
-                  if( arm == 0 )
+                  // Note: for cosmic data, discs are in the order
+                  // expected (top to bottom on the rack)) for DAQ
+                  // data, the discs correspond to
+                  // 0: 1A.L, 1D.S
+                  // 1: 2A.L, 2B.S
+                  // 2: 2B.L, 2A.S
+
+                  if( rdo == 1 && arm == 0 && apv < 10 )
                      quad = 0;
-                  else if( apv < 10 )
+                  else if( arm == 1 && apv < 10 )
                      quad = 1;
-                  else
+                  else if( rdo == 1 && arm == 1 && apv > 10 )
                      quad = 2;
                   apv %= 12;
+
 
                   mData.quad[quad].apv[apv].chan[chan].tb[tb] = adc;
                };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtDaq2RootMaker.h,v 1.1 2012/01/28 09:29:26 sgliske Exp $
+ * $Id: StFgtDaq2RootMaker.h,v 1.2 2012/03/05 20:35:46 sgliske Exp $
  * Author: S. Gliske, Jan 2011
  *
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StFgtDaq2RootMaker.h,v $
+ * Revision 1.2  2012/03/05 20:35:46  sgliske
+ * update to export DAQ data as well
+ *
  * Revision 1.1  2012/01/28 09:29:26  sgliske
  * creation
  *
@@ -45,7 +48,7 @@ class StFgtDaq2RootMaker : public StMaker {
    Int_t Make();
    Int_t Finish();
 
-   enum { kNumTimeBins = 7, kNumChans = 128, kNumApv = 10, kNumQuad = 3, kNumData = 26880 };
+   enum { kNumTimeBins = 7, kNumChans = 128, kNumApv = 10, kNumQuad = 3, kNumData = kNumTimeBins*kNumChans*kNumApv*kNumQuad };
 
    struct chan_t {
       Int_t tb[kNumTimeBins];
