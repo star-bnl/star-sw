@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.26 2012/03/01 16:38:13 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.27 2012/03/05 03:42:00 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.27  2012/03/05 03:42:00  avossen
+ * added reset of max adc, so that the max adc contains the max adc after ped substraction
+ *
  * Revision 1.26  2012/03/01 16:38:13  avossen
  * implemented tweaks to clustering
  *
@@ -207,7 +210,8 @@ Int_t StFgtA2CMaker::Make(){
 	       Float_t ped = 0, pedErr = 0;
                if( strip ){
                   Int_t nTbAboveThres = 0;
-
+		  //set max adc back so that the new max adc is set by the adc -ped
+		  strip->setMaxAdc(-1);
                   Int_t geoId = strip->getGeoId();
                   // Later, switch geoId to elecId lookups, since DB keyed by
                   // elecId, as soon as function made available.  Also
@@ -251,6 +255,7 @@ Int_t StFgtA2CMaker::Make(){
 
 		      //does this make sense? we run over several timebins... so this will pick up the last one, but this function assumes the default timebin of 2, let's add the timebin
 		      strip->setAdc(adcMinusPed, timebin );
+
 
 		      //                        strip->setAdc( strip->getAdc(), timebin );
 		      strip->setType( 1 );
@@ -412,14 +417,23 @@ Short_t StFgtA2CMaker::checkValidPulse(StFgtStrip* pStrip, Float_t ped)
     return kFgtSeedTypeNo;
 
   //most restrictive condition
-  if(pStrip->getAdc(0) <2*ped && numHighBins==3 && peakAdc > pStrip->getAdc(6) && numAlmostHighBins>=3 && numHighBinsAfterLeadingEdge>=3)
+  if(pStrip->getAdc(0) <3*ped && numHighBins==3 && peakAdc > pStrip->getAdc(6) && numAlmostHighBins>=3 && numHighBinsAfterLeadingEdge>=2)
+    {
+      return kFgtSeedType1;
+    }
+  if(pStrip->getAdc(0) <3*ped && numHighBins==2 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=2)
+    return kFgtSeedType2;
+  if(pStrip->getAdc(0) <3*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=3&& numAlmostHighBins>=2)
+    return kFgtSeedType3;
+
+  /*  if(pStrip->getAdc(0) <2*ped && numHighBins==3 && peakAdc > pStrip->getAdc(6) && numAlmostHighBins>=3 && numHighBinsAfterLeadingEdge>=3)
     {
       return kFgtSeedType1;
     }
   if(pStrip->getAdc(0) <2*ped && numHighBins==2 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=3)
     return kFgtSeedType2;
   if(pStrip->getAdc(0) <2*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=3&& numAlmostHighBins>=3)
-    return kFgtSeedType3;
+  return kFgtSeedType3;*/
 
 
   return kFgtSeedTypeNo;
