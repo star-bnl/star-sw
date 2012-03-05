@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.37 2012/02/08 22:10:35 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.38 2012/03/05 03:42:32 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.38  2012/03/05 03:42:32  genevb
+// Remove TPC XY dist, add TPC RPhi charge
+//
 // Revision 2.37  2012/02/08 22:10:35  genevb
 // Updates for Run 12
 //
@@ -154,6 +157,8 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   mTrigWord = 0;    // histogram for event trigger words
   mTrigBits = 0;    // histogram for event trigger bits
   for (i=0; i<24; i++) mTpcSectorPlot[i] = 0;
+  m_pnt_rpTQW = 0;
+  m_pnt_rpTQE = 0;
 
 // FTPC histograms
   m_ftpc_chargestepW=0; //! Chargestep from ftpc west
@@ -169,6 +174,8 @@ StQAMakerBase::~StQAMakerBase() {
   if (mTrigWord) delete mTrigWord;
   if (mTrigBits) delete mTrigBits;
   for (Int_t i=0; i<24; i++) { if (mTpcSectorPlot[i]) delete mTpcSectorPlot[i]; };
+  if (m_pnt_rpTQW) delete m_pnt_rpTQW;
+  if (m_pnt_rpTQE) delete m_pnt_rpTQE;
 }
 //_____________________________________________________________________________
 Int_t StQAMakerBase::Init() {
@@ -367,6 +374,8 @@ void StQAMakerBase::BookHistGeneral(){
     //mTpcSectorPlot[i]->SetYTitle("across padrows [cm]");
     mTpcSectorPlot[i]->SetYTitle("padrow");
   }
+  m_pnt_rpTQW    = QAH::H2F("QaPointRPTpcQW","point: r-phi distribution of charge, tpcW",20,58.75,196.75,72,0,TMath::TwoPi());
+  m_pnt_rpTQE    = QAH::H2F("QaPointRPTpcQE","point: r-phi distribution of charge, tpcE",20,58.75,196.75,72,0,TMath::TwoPi());
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistTrigger(){  

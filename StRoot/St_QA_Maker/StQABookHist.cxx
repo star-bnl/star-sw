@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.67 2012/02/09 03:01:05 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.68 2012/03/05 03:42:32 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.68  2012/03/05 03:42:32  genevb
+// Remove TPC XY dist, add TPC RPhi charge
+//
 // Revision 2.67  2012/02/09 03:01:05  genevb
 // No FTPC histograms for Run 12+
 //
@@ -685,10 +688,8 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pnt_tot_sm=0;  //! number of hits, small range
   m_pnt_id=0;      //! detector id of the hit
   m_pnt_xyS=0;     //! xy dist. of hits, svt
-  m_pnt_xyTE=0;    //! xy dist. of hits, tpcE
-  m_pnt_xyTW=0;    //! xy dist. of hits, tpcW
-  m_pnt_rpTE=0;    //! rphi dist. of hits, tpcE
   m_pnt_rpTW=0;    //! rphi dist. of hits, tpcW
+  m_pnt_rpTE=0;    //! rphi dist. of hits, tpcE
   m_pnt_phiT=0;    //! phi dist. of hits, tpc
   m_pnt_padrowT=0; //! padrow dist. of hits, tpc
   m_pnt_timeT=0;   //! time bucket dist. of hits, tpc
@@ -1729,12 +1730,10 @@ void StQABookHist::BookHistPoint(){
   m_pnt_svtLaserDiff->Rebin(1,"Laser 2");
   m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt,ssd",125,-25,25,125,-25,25);
   }
-  m_pnt_xyTE    = QAH::H2F("QaPointXYTpcE","point: x-y distribution of hits, tpcE",40,-200,200,40,-200,200);
-  m_pnt_xyTW    = QAH::H2F("QaPointXYTpcW","point: x-y distribution of hits, tpcW",40,-200,200,40,-200,200);
   // Now using polar coords (lego didn't work well because of inner radius and colored zero)
   // Drawing a lego plot requires r-phi,r. Drawing a plain polar plot reguirs r,r-phi
-  m_pnt_rpTE    = QAH::H2F("QaPointRPTpcE","point: r-phi distribution of hits, tpcE",23,58.75,196.75,72,0,TMath::TwoPi());
   m_pnt_rpTW    = QAH::H2F("QaPointRPTpcW","point: r-phi distribution of hits, tpcW",20,58.75,196.75,72,0,TMath::TwoPi());
+  m_pnt_rpTE    = QAH::H2F("QaPointRPTpcE","point: r-phi distribution of hits, tpcE",23,58.75,196.75,72,0,TMath::TwoPi());
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
   m_pnt_timeT   = QAH::MH1F("QaPointTimeT","point: time bucket distribution of hits, tpc",45,0,450,2);
   m_pnt_timeT->Rebin(0,"East");

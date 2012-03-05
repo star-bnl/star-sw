@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.18 2012/02/08 22:10:35 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.19 2012/03/05 03:42:32 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.19  2012/03/05 03:42:32  genevb
+// Remove TPC XY dist, add TPC RPhi charge
+//
 // Revision 2.18  2012/02/08 22:10:35  genevb
 // Updates for Run 12
 //
@@ -95,7 +98,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.18 2012/02/08 22:10:35 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.19 2012/03/05 03:42:32 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -117,6 +120,8 @@ class StQAMakerBase : public StMaker {
   TH1F     *mTrigBits;            //!
   // histograms for TPC hits sector by sector
   TH2F     *mTpcSectorPlot[24];   //!
+  TH2F     *m_pnt_rpTQW;
+  TH2F     *m_pnt_rpTQE;
 
   // FTPC histograms
   TH1F     *m_ftpc_chargestepW; //! Chargestep from ftpc west
