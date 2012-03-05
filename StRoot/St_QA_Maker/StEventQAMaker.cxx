@@ -1715,8 +1715,10 @@ void StEventQAMaker::MakeHistPoint() {
           if (phi<0) phi+=360.;
 	  hists->m_z_hits->Fill(hitPos.z());
           Float_t tb = tpcHitsVec[k]->timeBucket();
-          // scale by padrow density (1/4.8cm and 1/2.0cm) for polar xy plots
-          float hit_weight = (j>12 ? 1 : 2.4);
+          // correct for padrow density (1/4.8cm and 1/2.0cm) for polar xy plots
+          float density_correction = (j>12 ? 1 : 2.4);
+          // scale charge by length of pads (1/1.15cm and 1/1.95cm)
+          float hit_charge = tpcHitsVec[k]->charge() * density_correction * (j>12 ? 1 : 1.95/1.15);
           // TPC East is sectors 13-24, and (generally) z<0
           // TPC West is sectors  1-12, and (generally) z>0
           // In StEvent, sectors are mapped starting at 0 instead of 1
@@ -1725,15 +1727,15 @@ void StEventQAMaker::MakeHistPoint() {
             hists->m_pnt_timeT->Fill(tb,0);
 	    hists->m_pnt_phiT->Fill(phi,0.);
 	    hists->m_pnt_padrowT->Fill(j+1,0.); // physical padrow numbering starts at 1
-	    hists->m_pnt_rpTE->Fill(hitPos.perp(),phi*degree,hit_weight);
-	    hists->m_pnt_xyTE->Fill(hitPos.x(),hitPos.y());
+	    hists->m_pnt_rpTE->Fill(hitPos.perp(),phi*degree,density_correction);
+	    m_pnt_rpTQE->Fill(hitPos.perp(),phi*degree,hit_charge);
 	  } else {
             rotator = i-11;
             hists->m_pnt_timeT->Fill(tb,1);
 	    hists->m_pnt_phiT->Fill(phi,1.);
 	    hists->m_pnt_padrowT->Fill(j+1,1.); // physical padrow numbering starts at 1
-	    hists->m_pnt_rpTW->Fill(hitPos.perp(),phi*degree,hit_weight);
-	    hists->m_pnt_xyTW->Fill(hitPos.x(),hitPos.y());
+	    hists->m_pnt_rpTW->Fill(hitPos.perp(),phi*degree,density_correction);
+	    m_pnt_rpTQW->Fill(hitPos.perp(),phi*degree,hit_charge);
 	  }
           hitPos.rotateZ(((float) rotator)*TMath::Pi()/6.0);
           mTpcSectorPlot[i]->Fill(hitPos.x(),(float) (j+1));
@@ -2399,8 +2401,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.107 2012/02/14 04:02:34 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.108 2012/03/05 03:42:32 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.108  2012/03/05 03:42:32  genevb
+// Remove TPC XY dist, add TPC RPhi charge
+//
 // Revision 2.107  2012/02/14 04:02:34  genevb
 // fix for run12
 //
