@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.13 2012/02/28 19:32:25 avossen Exp $
+ * $Id: StFgtA2CMaker.h,v 1.14 2012/03/06 21:21:32 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -29,6 +29,12 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.14  2012/03/06 21:21:32  sgliske
+ * Responces to reviewers incoorperated.
+ * White space and comments cleaned up.
+ * Few remaining items offset with #ifdef,
+ * which may get removed before final move to DEV
+ *
  * Revision 1.13  2012/02/28 19:32:25  avossen
  * many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
  *
@@ -92,6 +98,10 @@
 #include "StMaker.h"
 #include "StRoot/StEvent/StFgtStrip.h"
 
+#ifdef MAKE_HISTOGRAM
+class TH1F;
+#endif
+
 class StFgtDb;
 
 class StFgtA2CMaker : public StMaker {
@@ -115,12 +125,12 @@ class StFgtA2CMaker : public StMaker {
    void setAbsThres( Float_t thres );  // set to below -4096 to skip cut
    void setRelThres( Float_t thres );  // set to zero to skip cut
    void setFgtDb( StFgtDb *fgtDb);
-   void doCutBadStatus( Bool_t doIt );
+   void doCutBadStatus();
    void setStatusMask( UChar_t mask );
 
    // cvs tag
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.13 2012/02/28 19:32:25 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.14 2012/03/06 21:21:32 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    Short_t checkValidPulse(StFgtStrip* pStrip, Float_t ped);
@@ -131,9 +141,9 @@ class StFgtA2CMaker : public StMaker {
    // pointer to the DB
    StFgtDb* mDb;
 
-   // for fitting
-   TF1 *mPulseShapePtr;
+#ifdef MAKE_HISTOGRAM
    TH1F *mHistPtr;
+#endif
  
  private:   
    ClassDef(StFgtA2CMaker,1);
@@ -142,13 +152,17 @@ class StFgtA2CMaker : public StMaker {
 // inline functions
 
 // deconstructor
-inline StFgtA2CMaker::~StFgtA2CMaker(){ /* */ };
+inline StFgtA2CMaker::~StFgtA2CMaker(){
+#ifdef MAKE_HISTOGRAM
+   delete mHistPtr;
+#endif
+};
 
 // modifiers
 inline void StFgtA2CMaker::setAbsThres( Float_t thres ){ mAbsThres = thres; };
 inline void StFgtA2CMaker::setRelThres( Float_t thres ){ mRelThres = thres; };
 inline void StFgtA2CMaker::setFgtDb(StFgtDb* db ){mDb=db; };
-inline void StFgtA2CMaker::doCutBadStatus(  Bool_t doIt ){ mStatusMask = 0xFF; };
+inline void StFgtA2CMaker::doCutBadStatus(){ mStatusMask = 0xFF; };
 inline void StFgtA2CMaker::setStatusMask( UChar_t mask ){ mStatusMask = mask; };
 
 #endif
