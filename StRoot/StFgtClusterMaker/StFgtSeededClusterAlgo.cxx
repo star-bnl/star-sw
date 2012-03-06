@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.3 2012/03/01 16:38:13 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.4 2012/03/06 18:54:28 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.4  2012/03/06 18:54:28  avossen
+//  added weighted mean and error to seeded clustering
+//
 //  Revision 1.3  2012/03/01 16:38:13  avossen
 //  implemented tweaks to clustering
 //
@@ -43,6 +46,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
   Short_t disc, quadrant;
   Char_t layer;
   Double_t accuCharge=0;
+  Double_t accuChargeSq=0;
   Double_t accuChargeError=0;
   Int_t numStrips=0;
   Double_t meanOrdinate=0;
@@ -55,13 +59,17 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
 
   for(stripWeightMap_t::iterator it=strips.begin();it!=strips.end();it++)
     {
-      accuCharge+=it->first->getCharge();
+      Double_t charge=it->first->getCharge();
+      accuCharge+=charge;
+      accuChargeSq+=(charge*charge);
+
       accuChargeError+=it->first->getChargeUncert();
       numStrips++;
       StFgtGeom::getPhysicalCoordinate(it->first->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
-      meanOrdinate+=ordinate;
-      meanSqOrdinate+=ordinate*ordinate;
-      meanGeoId+=((it->first->getGeoId())*(it->first->getCharge()));
+      meanOrdinate+=ordinate*charge;
+      meanSqOrdinate+=ordinate*ordinate*charge*charge;
+      //      cout <<"charge: " << charge << " ordinate: " << ordinate << " meanSqOrd: " << meanSqOrdinate << endl;
+      meanGeoId+=((it->first->getGeoId())*(charge));
     }
 
   
@@ -77,19 +85,24 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
       //    }
 
   cluster->setCharge(accuCharge);
-  numStrips > 1 ? cluster->setChargeUncert(sqrt(accuChargeError/((float)numStrips-1))) : cluster->setChargeUncert(sqrt(accuChargeError/((float)numStrips)));
-  meanOrdinate /= (float)numStrips;
+  numStrips > 1 ? cluster->setChargeUncert(sqrt(accuChargeError/((Double_t)numStrips-1))) : cluster->setChargeUncert(sqrt(accuChargeError/((Double_t)numStrips)));
+  meanOrdinate /= (Double_t)accuCharge;
   meanGeoId /= accuCharge;
-  meanSqOrdinate /= (float)numStrips;
+  meanSqOrdinate /= (Double_t)accuChargeSq;
+  //  cout <<" accuCharge: " << accuCharge << " meanOrd now: " << meanOrdinate << " meanSqOrdinate: " << meanSqOrdinate <<endl;
   meanSqOrdinate -= meanOrdinate*meanOrdinate;
+  //  cout <<" manOrdinate: " << meanOrdinate <<" error: " << meanSqOrdinate <<endl;
+
   if( meanSqOrdinate > 0 )
     meanSqOrdinate = sqrt(meanSqOrdinate);
   // meanSqOrdinate is now the st. dev. of the ordinate
   // avoid unreasonable small uncertainty, due to small cluster sizes
 
   Double_t pitch = ( layer == 'R' ? StFgtGeom::radStrip_pitch() : StFgtGeom::phiStrip_pitch() );
-  if( meanSqOrdinate < 2*pitch )
-    meanSqOrdinate = 2*pitch;
+  //  cout <<" pitch is : " <<pitch <<endl;
+  //  if( meanSqOrdinate < 2*pitch )
+  if( meanSqOrdinate < 0.001 )
+    meanSqOrdinate = pitch;
   if(layer=='R')
     {
       cluster->setPositionR(meanOrdinate );
@@ -221,9 +234,10 @@ Int_t StFgtSeededClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	  StSPtrVecFgtStripIterator lastStrip=it+(int)(floor(kFgtMaxClusterSize/2)+kFgtNumAdditionalStrips);
 	  if(firstStrip<strips.getStripVec().begin())
 	    firstStrip=strips.getStripVec().begin();
-
 	  Int_t stripsW_Charge=0;
 	  Int_t stripsWO_Charge=0;
+
+
 	  //compare with energy in cluster
 	  //	  cout << " looking around " << (*it)->getGeoId() << ": " << (*firstStrip)->getGeoId() <<" to something... " <<endl;
 	  for(StSPtrVecFgtStripIterator it2=firstStrip;(it2!=strips.getStripVec().end())&&(it2<=lastStrip);it2++)
@@ -244,7 +258,10 @@ Int_t StFgtSeededClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
 	    }
 	  //	  cout<<" high charge strips: " << stripsW_Charge <<" low: " << stripsWO_Charge<<endl;
 	  if(stripsW_Charge>stripsWO_Charge)
+	    {
+	      (*it)->setClusterSeed(kFgtClusterSeedInSeaOfNoise);
 	      continue;
+	    }
 
 	  /////
 
