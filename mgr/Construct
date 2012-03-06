@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.173 2011/08/31 23:20:39 fisyak Exp $
+# $Id: Construct,v 1.174 2012/03/06 19:34:51 jeromel Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -239,32 +239,37 @@ my @excludeDirList = qw(\. \.\. macros CVS html doc inc idl local run wrk exampl
 #my  $excludeDirList = "^(\.|\.\.|macros|CVS|html|doc|inc|idl|local|run|wrk|example|include|kumac.*)\$";
 my  $excludeDirList = "^(" . join ("|", @excludeDirList) . ")\$";
 
-#print "$excludeDirList\n";
+
+# open exclusion list
 my  $items = "(";
 if ( defined($SKIP_DIRS) ){ $items .= join("|",split(" ",$SKIP_DIRS));}
 if ($USE_64BITS and $USE_64BITS != "0"){
-  if ($items ne "(") { $item .= "|";}
-  $item .= "geometry|gstar|control"; 
+  if ($items ne "(") { $items .= "|";}
+  $items .= "geometry|gstar|control"; 
 }
 #print "CXX MAJOR = $env->{CXX_MAJOR} CXX MINOR =  $env->{CXX_MINOR}\n";
-if ($env->{CXX_MAJOR} < 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 4)) {$items .= "Vc|TBB|TPCCATracker";}
+if ($env->{CXX_MAJOR} < 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 4)) {
+    if ($items ne "(") { $items .= "|";}
+    $items .= "Vc|TBB|TPCCATracker";
+}
 if ($FC eq 'ifort') { 
- if ($items ne '(') {$items .= "|";}
- $items .= "StMCAsymMaker";
+    if ($items ne '(') {$items .= "|";}
+    $items .= "StMCAsymMaker";
 }
 if ($STAR_SYS =~ /x86_darwin/) {
-  if ($items ne '(') {$items .= "|";}
-  $items .= "StStarLogger|StEventDisplayMaker|St_geom_Maker"; # if no QT
+    if ($items ne '(') {$items .= "|";}
+    $items .= "StStarLogger|StEventDisplayMaker|St_geom_Maker"; # if no QT
 }
-#if ($items ne '(') {$items .= "|";}
-#$items .= "StBTofPool";
+# closing exclusion list
 if ($items ne '(') {$items .= ')';}
 else               {$items  = "";}
-#print "skip $items\n";
+
+print "SKIP_DIRS is now: $items\n" if ($items ne "");
+
+
 # Search for directories (one level down) and make
 # list of targets
 #
-
 foreach my $dir( "pams", "StRoot", "StDb" ,"StPiD", "StarVMC" ) {
   next if !-d $dir and !-l $dir;
   opendir( DIR, $dir ) or die "Can't open $dir\n";
