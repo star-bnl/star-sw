@@ -83,6 +83,11 @@ class StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
 
+
+	virtual Double_t getPedestalFromElecId(
+	    Int_t electId
+	) = 0;
+
 	virtual Double_t getPedestalSigmaFromGeoId( Int_t geoId ) = 0;
 
 	virtual Double_t getPedestalSigmaFromGeoName(
@@ -91,6 +96,10 @@ class StFgtDb
 
 	virtual Double_t getPedestalSigmaFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+	) = 0;
+
+	virtual Double_t getPedestalSigmaFromElecId(
+	    Int_t electId
 	) = 0;
 
 	virtual UChar_t getPedestalStatusFromGeoId( Int_t geoId ) = 0;
@@ -103,12 +112,20 @@ class StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
 
+	virtual UChar_t getPedestalStatusFromElecId(
+	    Int_t electId
+	) = 0;
+
 	virtual UChar_t getStatusFromGeoId( Int_t geoId ) = 0;
 
 	virtual UChar_t getStatusFromGeoName( const std::string & geoName ) = 0;
 
 	virtual UChar_t getStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+	) = 0;
+
+	virtual UChar_t getStatusFromElecId(
+	    Int_t electId
 	) = 0;
 
 	virtual Double_t getGainFromGeoId( Int_t geoId ) = 0;
@@ -119,12 +136,20 @@ class StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
 
+	virtual Double_t getGainFromElecId(
+	    Int_t electId
+	) = 0;
+
 	virtual UChar_t getGainStatusFromGeoId( Int_t geoId ) = 0;
 
 	virtual UChar_t getGainStatusFromGeoName( const std::string & geoName ) = 0;
 
 	virtual UChar_t getGainStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+	) = 0;
+
+	virtual UChar_t getGainStatusFromElecId(
+	    Int_t electId
 	) = 0;
 
 	virtual Double_t getMapping(

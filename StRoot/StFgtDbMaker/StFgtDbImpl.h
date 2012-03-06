@@ -122,6 +122,13 @@ class StFgtDbImpl : public StFgtDb
 	    return m_pedestal->AdcPedestal[ elecId ];
 	}
 
+
+	virtual Double_t getPedestalFromElecId( Int_t elecId)
+	{
+	  return m_pedestal->AdcPedestal[ elecId ];
+	}
+
+
 	virtual Double_t getPedestalFromGeoName(
 	    const std::string & geoName
 	)
@@ -172,6 +179,12 @@ class StFgtDbImpl : public StFgtDb
 	    return m_pedestal->Status[ elecId ];
 	}
 
+	virtual UChar_t getPedestalStatusFromElecId( Int_t elecId )
+	{
+	    return m_pedestal->Status[ elecId ];
+	}
+
+
 	virtual UChar_t getPedestalStatusFromGeoName(
 	    const std::string & geoName
 	)
@@ -194,6 +207,11 @@ class StFgtDbImpl : public StFgtDb
 	virtual UChar_t getStatusFromGeoId( Int_t geoId )
 	{
 	    Int_t elecId = m_rmap->Mapping[ geoId ];
+	    return m_status->Status[ elecId ];
+	}
+
+	virtual UChar_t getStatusFromElecId( Int_t elecId )
+	{
 	    return m_status->Status[ elecId ];
 	}
 
@@ -220,6 +238,12 @@ class StFgtDbImpl : public StFgtDb
 	    return m_gain->Gain[ elecId ];
 	}
 
+	virtual Double_t getGainFromElecId( Int_t elecId )
+	{
+	    return m_gain->Gain[ elecId ];
+	}
+
+
 	virtual Double_t getGainFromGeoName( const std::string & geoName )
 	{
 	    Int_t geoId =
@@ -242,6 +266,12 @@ class StFgtDbImpl : public StFgtDb
 	    Int_t elecId = m_rmap->Mapping[ geoId ];
 	    return m_gain->Status[ elecId ];
 	}
+
+	virtual UChar_t getGainStatusFromElecId( Int_t elecId )
+	{
+	    return m_gain->Status[ elecId ];
+	}
+
 
 	virtual UChar_t getGainStatusFromGeoName( const std::string & geoName )
 	{
