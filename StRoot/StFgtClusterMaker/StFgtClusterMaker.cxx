@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.29 2012/03/07 03:57:22 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.30 2012/03/07 22:08:15 avossen Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -10,6 +10,7 @@
 #include "StFgtIClusterAlgo.h"
 #include "StEvent/StFgtHit.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
+#include "StFgtSeededClusterAlgo.h"
 
 void StFgtClusterMaker::Clear(Option_t *opts)
 {
@@ -155,8 +156,8 @@ Int_t StFgtClusterMaker::Init()
   Int_t ierr = kStOk;
 
   if( !mClusterAlgoPtr ){
-     LOG_ERROR << "No fgt cluster algorithm specified" << endm;
-     ierr = kStErr;
+     LOG_INFO << "No fgt cluster algorithm specified, using default seededAlgo" << endm;
+     mClusterAlgoPtr=new StFgtSeededClusterAlgo();
   };
 
   if( !ierr )
@@ -181,6 +182,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.30  2012/03/07 22:08:15  avossen
+//   added default cluster algo
+//
 //   Revision 1.29  2012/03/07 03:57:22  avossen
 //   various updates
 //
