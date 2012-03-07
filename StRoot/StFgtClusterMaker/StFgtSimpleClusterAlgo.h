@@ -1,6 +1,9 @@
 ///
-// $Id: StFgtSimpleClusterAlgo.h,v 1.7 2012/02/28 19:32:25 avossen Exp $
+// $Id: StFgtSimpleClusterAlgo.h,v 1.8 2012/03/07 03:57:23 avossen Exp $
 // $Log: StFgtSimpleClusterAlgo.h,v $
+// Revision 1.8  2012/03/07 03:57:23  avossen
+// various updates
+//
 // Revision 1.7  2012/02/28 19:32:25  avossen
 // many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
 //
@@ -45,7 +48,6 @@ class StFgtSimpleClusterAlgo :public StFgtIClusterAlgo
   
 
  private:
-  Bool_t mIsInitialized;
   ClassDef(StFgtSimpleClusterAlgo,1);
 };
 

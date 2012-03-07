@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.h,v 1.5 2012/02/28 19:32:25 avossen Exp $
+//  $Id: StFgtMaxClusterAlgo.h,v 1.6 2012/03/07 03:57:23 avossen Exp $
 //  $Log: StFgtMaxClusterAlgo.h,v $
+//  Revision 1.6  2012/03/07 03:57:23  avossen
+//  various updates
+//
 //  Revision 1.5  2012/02/28 19:32:25  avossen
 //  many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
 //
@@ -40,7 +43,6 @@ class StFgtMaxClusterAlgo :public StFgtIClusterAlgo
  protected:
 
  private:
-  Bool_t mIsInitialized;
   ClassDef(StFgtMaxClusterAlgo,1);
 };
 

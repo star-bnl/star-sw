@@ -59,8 +59,17 @@ enum {
   kFgtClusterEndUp,
   kFgtClusterEndDown,
   kFgtStripShared,
-  kFgtClusterTooBig
+  kFgtClusterTooBig,
+  kFgtClusterSeedInSeaOfNoise
 };
+//strip types
+//enum { 
+//  kFgtRawAdc,
+//  kFgtPedSubtractedAdc,
+///  kFgtCorrNoiseSubtracted,
+//  kFgtMC
+//}
+
 
 // Jan's definitions for the final 400-800 micron pitch design 
 // Note:
@@ -86,8 +95,11 @@ enum {
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.12 2012/03/01 16:38:13 avossen Exp $
+ * $Id: StFgtConsts.h,v 1.13 2012/03/07 03:57:23 avossen Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.13  2012/03/07 03:57:23  avossen
+ * various updates
+ *
  * Revision 1.12  2012/03/01 16:38:13  avossen
  * implemented tweaks to clustering
  *

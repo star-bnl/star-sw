@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 //  \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.31 2012/02/21 19:44:45 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.32 2012/03/07 03:57:23 avossen Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.32  2012/03/07 03:57:23  avossen
+//  various updates
+//
 //  Revision 1.31  2012/02/21 19:44:45  avossen
 //  implementing reviewers comments take 2
 //
@@ -243,7 +246,8 @@ Int_t StFgtRawMaker::fillHits()
 
 	  //               StFgtGeom::getNaivePhysCoordFromElecCoord(rdo,arm,apv,channel,discIdx,quadrant,layer,ordinate,lowerSpan,upperSpan);
 
-	  Char_t type = 0;    // TODO: set this according to the database???
+	  //	  Char_t type = kFgtRawAdc;
+	  //	  Char_t type = 0;
 
 	  StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
 	  if( stripCollectionPtr )
@@ -251,7 +255,7 @@ Int_t StFgtRawMaker::fillHits()
 	      Int_t elecId =  StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
 	      StFgtStrip* stripPtr = stripCollectionPtr->getStrip( elecId );
 	      stripPtr->setAdc( adc, timebin );
-	      stripPtr->setType( type );
+	      //	      stripPtr->setType( type );
 	      stripPtr->setGeoId( geoId );
 	      stripPtr->setElecCoords( rdo, arm, apv, channel );
 	    }
@@ -297,14 +301,14 @@ void StFgtRawMaker::Clear( Option_t *opts )
 }
 
 
-StFgtRawMaker& StFgtRawMaker::operator=(const StFgtRawMaker &source)
-{
+//StFgtRawMaker& StFgtRawMaker::operator=(const StFgtRawMaker &source)
+//{
   //  StRTSBaseMaker::operator=(source);
-  return *this;
-}
+//  return *this;
+//}
 
-StFgtRawMaker::StFgtRawMaker(const StFgtRawMaker &source):StRTSBaseMaker(source)
-{
-}
+//StFgtRawMaker::StFgtRawMaker(const StFgtRawMaker &source):StRTSBaseMaker(source)
+//{
+//}
 
 ClassImp(StFgtRawMaker)

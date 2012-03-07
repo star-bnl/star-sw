@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.29 2012/03/06 21:21:17 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.30 2012/03/07 03:57:22 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.30  2012/03/07 03:57:22  avossen
+ * various updates
+ *
  * Revision 1.29  2012/03/06 21:21:17  sgliske
  * Responces to reviewers incoorperated.
  * White space and comments cleaned up.
@@ -254,7 +257,7 @@ Int_t StFgtA2CMaker::Make(){
                         // subract the ped, and set
                         Int_t adcMinusPed = adc - ped;
                         strip->setAdc(adcMinusPed, timebin );
-                        strip->setType( 1 );
+			//                        strip->setType( 1 );
 
 #ifdef NOT_USED
                         if((adcMinusPed>maxADCVal) && (timebin==3 || timebin==4))
