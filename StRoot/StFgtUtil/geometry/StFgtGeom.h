@@ -30,7 +30,27 @@ class StFgtGeom
 	//  For all functions where they appear: Disc can be >= 0 (in theory,
 	//  although only values 0-5 work at the moment, I believe). Quadrant
 	//  is 0-3.  Layer is 'P' or 'R'. Strip is 0-720
-	static Double_t getDiscZ(int iDisc) { return iDisc*10+70; }
+  
+  ///these values for now are copied from FgtdGeo3.xml, should come from vmc eventually
+	static Double_t getDiscZ(int iDisc) { 
+	  switch(iDisc)
+	    {
+	    case 0:
+	      return 67.399;
+	    case 1:
+	      return 77.8765;
+	    case 2:
+	      return 87.084;
+	    case 3:
+	      return 97.4821;
+	    case 4:
+	      return 108.9121;
+	    case 5:
+	      return 118.9927;
+	    default:
+	      return -1;
+	    }
+	}
 
 
 	static Int_t encodeGeoId( Int_t disc, Int_t quadrant,
@@ -509,8 +529,11 @@ Arc 2 has radius = 394.0 mm
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.38 2012/02/09 18:23:24 wwitzke Exp $
+ *  $Id: StFgtGeom.h,v 1.39 2012/03/07 20:31:43 avossen Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.39  2012/03/07 20:31:43  avossen
+ *  corrected z disc z position
+ *
  *  Revision 1.38  2012/02/09 18:23:24  wwitzke
  *  Fixed various minor issues, including nesting the StFgtGeomData, making the
  *  various "pi" variables use the TMath definions of pi, and removing the various
