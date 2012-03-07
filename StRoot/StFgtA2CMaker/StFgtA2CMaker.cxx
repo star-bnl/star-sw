@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.34 2012/03/07 18:07:18 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.35 2012/03/07 18:34:29 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.35  2012/03/07 18:34:29  sgliske
+ * Missing a few default value in the constructor
+ *
  * Revision 1.34  2012/03/07 18:07:18  sgliske
  * StFgtStrip::getClusterSeed() -> StFgtStrip::getClusterSeedType
  * StFgtStrip::setClusterSeed() -> StFgtStrip::setClusterSeedType
@@ -151,7 +154,7 @@
 
 // constructors
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
-   : StMaker( name ), mAbsThres(-10000), mRelThres(5), mDb(0) { /* */ };
+   : StMaker( name ), mRemoveNonPulse(1), mRemoveNonSignal(1), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(5), mDb(0) { /* */ };
 
 
 Int_t StFgtA2CMaker::Init(){
