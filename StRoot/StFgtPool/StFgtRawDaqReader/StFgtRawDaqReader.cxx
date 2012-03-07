@@ -224,14 +224,11 @@ Int_t StFgtRawDaqReader::Make() {
                };
             */
 
-            Char_t type = 0;    // raw adc, no correction yet.
-
             StFgtStripCollection *stripCollectionPtr = mFgtCollectionPtr->getStripCollection( discIdx );
             if( stripCollectionPtr ) {
                Int_t elecId =  StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
                StFgtStrip* stripPtr = stripCollectionPtr->getStrip( elecId );
                stripPtr->setAdc( adc, timebin );
-               stripPtr->setType( type );
                stripPtr->setGeoId( geoId );
                stripPtr->setElecCoords( rdo, arm, apv, channel );
             } else {
@@ -276,8 +273,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.8 2012/02/29 18:23:46 sgliske Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.9 2012/03/07 15:23:52 sgliske Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.9  2012/03/07 15:23:52  sgliske
+ * StFgtStrip no longer has a type field
+ *
  * Revision 1.8  2012/02/29 18:23:46  sgliske
  * fixed bug in 2012 exclusions
  *
