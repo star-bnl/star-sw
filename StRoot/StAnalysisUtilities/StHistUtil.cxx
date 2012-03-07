@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.86 2012/03/03 01:29:06 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.87 2012/03/07 02:04:10 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.87  2012/03/07 02:04:10  genevb
+// Differentiate event counts for Reference
+//
 // Revision 2.86  2012/03/03 01:29:06  genevb
 // Output found/total vertices
 //
@@ -989,6 +992,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             latex.SetTextColor(1);
             latex.SetTextSize(txtSiz);
             LOG_INFO << (m_CurPrefix ? possiblePrefixes[m_CurPrefix] : "GE")
+                     << (analRepeat ? " Ref" : "")
                      << " QA Events (found vtx/total) "
                      << fndVtx << " / " << totVtx << endm;
           }
