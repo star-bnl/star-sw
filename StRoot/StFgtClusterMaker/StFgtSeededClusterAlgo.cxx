@@ -1,6 +1,10 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.5 2012/03/07 03:57:23 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.6 2012/03/07 18:07:45 sgliske Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.6  2012/03/07 18:07:45  sgliske
+//  StFgtStrip::getClusterSeed() -> StFgtStrip::getClusterSeedType
+//  StFgtStrip::setClusterSeed() -> StFgtStrip::setClusterSeedType
+//
 //  Revision 1.5  2012/03/07 03:57:23  avossen
 //  various updates
 //
@@ -76,11 +80,11 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
   stripWeightMap_t::reverse_iterator itBack=strips.rbegin();
   //  if(strips.size()>1)
   //    {
-      if(itBack->first->getClusterSeed()==kFgtClusterPart)
-	itBack->first->setClusterSeed(kFgtClusterEndUp);
-      //      if(strips.begin()->first->getClusterSeed()>=kFgtSeedType1 && strips.begin()->first->getClusterSeed()<=kFgtSeedType3)
-      if(strips.begin()->first->getClusterSeed()==kFgtClusterPart)
-	(strips.begin())->first->setClusterSeed(kFgtClusterEndDown);
+      if(itBack->first->getClusterSeedType()==kFgtClusterPart)
+	itBack->first->setClusterSeedType(kFgtClusterEndUp);
+      //      if(strips.begin()->first->getClusterSeedType()>=kFgtSeedType1 && strips.begin()->first->getClusterSeedType()<=kFgtSeedType3)
+      if(strips.begin()->first->getClusterSeedType()==kFgtClusterPart)
+	(strips.begin())->first->setClusterSeedType(kFgtClusterEndDown);
       //    }
 
   cluster->setCharge(accuCharge);
@@ -150,7 +154,7 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
   StSPtrVecFgtStripIterator nextStrip=itSeed+inc;
   Int_t deadStripsSkipped=0;
 
-   while(nextStrip>=itVecBegin && nextStrip <itVecEnd &&(*nextStrip)->getClusterSeed()==kFgtDeadStrip)    {
+   while(nextStrip>=itVecBegin && nextStrip <itVecEnd &&(*nextStrip)->getClusterSeedType()==kFgtDeadStrip)    {
      //          cout <<"looking now next strip, which is dead: " << (*nextStrip)->getGeoId();
       nextStrip+=inc;
       deadStripsSkipped++;
@@ -167,7 +171,7 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
       //if the new strip is adjacent and it seems to belong to the same cluster, add it
       if(adjacentStrip && isSameCluster(itSeed,nextStrip))
 	{
-	  (*nextStrip)->setClusterSeed(kFgtClusterPart);
+	  (*nextStrip)->setClusterSeedType(kFgtClusterPart);
 	  stripWeightMap_t &stripWeightMap = clus->getStripWeightMap();
 	  stripWeightMap[ *nextStrip ] = 1;
 	  ///if the last add was successful and the cluster is not too big, go to next one...
@@ -216,7 +220,7 @@ run over all strips, find seeds, use those to start clusters
       if((*it)->getGeoId()<lastGeoIdInCluster && lastGeoIdInCluster>0)
 	continue;
       //found seed for a cluster
-      if((*it)->getClusterSeed() >=kFgtSeedType1 && ((*it)->getClusterSeed() <= kFgtSeedType3))
+      if((*it)->getClusterSeedType() >=kFgtSeedType1 && ((*it)->getClusterSeedType() <= kFgtSeedType3))
 	{
 	  ////
 	  ///check for ringing around cluster
@@ -232,7 +236,7 @@ run over all strips, find seeds, use those to start clusters
 	  //	  cout << " looking around " << (*it)->getGeoId() << ": " << (*firstStrip)->getGeoId() <<" to something... " <<endl;
 	  for(StSPtrVecFgtStripIterator it2=firstStrip;(it2!=strips.getStripVec().end())&&(it2<=lastStrip);it2++)
 	    {
-	      if((*it2)->getClusterSeed()!=kFgtDeadStrip)
+	      if((*it2)->getClusterSeedType()!=kFgtDeadStrip)
 		{
 		  if((*it2)->getCharge()>2*(*it2)->getChargeUncert())
 		    {
@@ -249,7 +253,7 @@ run over all strips, find seeds, use those to start clusters
 	  //	  cout<<" high charge strips: " << stripsW_Charge <<" low: " << stripsWO_Charge<<endl;
 	  if(stripsW_Charge>stripsWO_Charge)
 	    {
-	      (*it)->setClusterSeed(kFgtClusterSeedInSeaOfNoise);
+	      (*it)->setClusterSeedType(kFgtClusterSeedInSeaOfNoise);
 	      continue;
 	    }
 
@@ -272,7 +276,7 @@ run over all strips, find seeds, use those to start clusters
 	      //reset strips
 	     for(stripWeightMap_t::iterator it=newCluster->getStripWeightMap().begin();it!=newCluster->getStripWeightMap().end();it++)
 	       {
-		 it->first->setClusterSeed(kFgtSeedTypeNo);
+		 it->first->setClusterSeedType(kFgtSeedTypeNo);
 	       }
 	      delete newCluster;
 	      continue;
@@ -282,7 +286,7 @@ run over all strips, find seeds, use those to start clusters
 	    {
 	     for(stripWeightMap_t::iterator it=newCluster->getStripWeightMap().begin();it!=newCluster->getStripWeightMap().end();it++)
 	       {
-		 it->first->setClusterSeed(kFgtSeedTypeNo);
+		 it->first->setClusterSeedType(kFgtSeedTypeNo);
 	       }
 	      delete newCluster;
 	      continue;
