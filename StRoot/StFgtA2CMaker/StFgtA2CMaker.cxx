@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.33 2012/03/07 17:46:55 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.34 2012/03/07 18:07:18 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.34  2012/03/07 18:07:18  sgliske
+ * StFgtStrip::getClusterSeed() -> StFgtStrip::getClusterSeedType
+ * StFgtStrip::setClusterSeed() -> StFgtStrip::setClusterSeedType
+ *
  * Revision 1.33  2012/03/07 17:46:55  sgliske
  * Added options for not removing strips
  *
@@ -269,7 +273,7 @@ Int_t StFgtA2CMaker::Make(){
                   if( !nTbAboveThres && (mRelThres || mAbsThres>-4096) ){
                      // no time bins above thresholds for this strip
                      // i.e. no signal
-                     strip->setClusterSeed(kFgtSeedTypeNo);
+                     strip->setClusterSeedType(kFgtSeedTypeNo);
 
                      // If not removing strips far from pulses, check
                      // if supposed to remove non-signal.  Flag geoId
@@ -279,7 +283,7 @@ Int_t StFgtA2CMaker::Make(){
 
                   } else if( mRelThres || mAbsThres>-4096 ){
                      // but if it is +/- n strips from valid pulse, keep it
-                     strip->setClusterSeed(checkValidPulse(strip, pedErr));
+                     strip->setClusterSeedType(checkValidPulse(strip, pedErr));
                   } else {
                      strip->invalidateCharge();
                   };
@@ -288,7 +292,7 @@ Int_t StFgtA2CMaker::Make(){
                      UInt_t status=mDb->getStatusFromElecId(geoId);
 
                      if( status & mStatusMask )
-                        strip->setClusterSeed(kFgtDeadStrip);
+                        strip->setClusterSeedType(kFgtDeadStrip);
                   };
                };
             };
