@@ -154,6 +154,11 @@ class StFgtDbImpl : public StFgtDb
 	    return m_pedestal->AdcPedestalRMS[ elecId ];
 	}
 
+	virtual Double_t getPedestalSigmaFromElecId( Int_t elecId )
+	{
+	    return m_pedestal->AdcPedestalRMS[ elecId ];
+	}
+
 	virtual Double_t getPedestalSigmaFromGeoName(
 	    const std::string & geoName
 	)
