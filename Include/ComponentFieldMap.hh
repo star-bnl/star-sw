@@ -198,7 +198,7 @@ class ComponentFieldMap : public ComponentBase {
     void Jacobian13(int i, double t, double u, double v, double w,
                     double& det, double jac[4][4]);
     // Calculate Jacobian for a cube
-    void JacobianCube(int i, double t, double u, double v,
+    void JacobianCube(int i, double t1, double t2, double t3,
                     double& det, double jac[3][3]);
 
     // Find the element for a point in curved quadratic quadrilaterals

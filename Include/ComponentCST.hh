@@ -65,6 +65,7 @@ class ComponentCST: public ComponentFieldMap {
     void GetAspectRatio(const int i, double& dmin, double& dmax);
     static bool Greater(const double &a, const double &b) {return (a > b);};
     void Element2Index(int element,int &i,int &j, int &k);
+    void GetNodesForElement(int element, std::vector<int> &nodes);
 };
 
 struct PolygonInfo {

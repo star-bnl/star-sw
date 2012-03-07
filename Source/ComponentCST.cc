@@ -184,7 +184,162 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
   std::cout << "    from file " << mplist << ".\n";
   if (debug) PrintMaterials();
 
-  // Open the element list
+  // Check the value of the unit
+  double funit;
+  if (strcmp(unit.c_str(),"mum") == 0 || strcmp(unit.c_str(),"micron") == 0 ||
+      strcmp(unit.c_str(),"micrometer") == 0) {
+    funit = 0.0001;
+  } else if (strcmp(unit.c_str(),"mm") == 0 ||
+             strcmp(unit.c_str(),"millimeter") == 0) {
+    funit = 0.1;
+  } else if (strcmp(unit.c_str(),"cm") == 0 ||
+             strcmp(unit.c_str(),"centimeter") == 0) {
+    funit = 1.0;
+  } else if (strcmp(unit.c_str(),"m") == 0 ||
+             strcmp(unit.c_str(),"meter") == 0) {
+    funit = 100.0;
+  } else {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Unknown length unit " << unit << ".\n";
+    ok = false;
+    funit = 1.0;
+  }
+  if (debug) {
+    std::cout << className << "::Initialise:\n";
+    std::cout << "    Unit scaling factor = " << funit << ".\n";
+  }
+
+  // Open the node list
+  std::ifstream fnlist;
+  fnlist.open(nlist.c_str(), std::ios::in);
+  if (fnlist.fail()) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Could not open nodes file " << nlist << " for reading.\n";
+    std::cerr << "    The file perhaps does not exist.\n";
+    return false;
+  }
+  // Read the node list
+  nodes.clear();
+  nNodes = 0;
+  il = 0;
+  int xlines = 0, ylines = 0, zlines = 0;
+  int lines_type = -1;
+  double line_tmp;
+  while (fnlist.getline(line, size, '\n')) {
+    il++;
+    // Split the line in tokens
+    char* token = NULL;
+    // Split into tokens
+    token = strtok(line, " ");
+    // Skip blank lines and headers
+    if (!token || strcmp(token, " ") == 0 || strcmp(token, "\n") == 0 ||
+        int(token[0]) == 10 || int(token[0]) == 13) continue;
+    // Read max sizes
+    if (strcmp(token, "xmax") == 0) {
+      token = strtok(NULL, " "); xlines = ReadInteger(token, -1, readerror);
+      token = strtok(NULL, " ");
+      token = strtok(NULL, " "); ylines = ReadInteger(token, -1, readerror);
+      token = strtok(NULL, " ");
+      token = strtok(NULL, " "); zlines = ReadInteger(token, -1, readerror);
+      if (readerror) break;
+      continue;
+    }
+    if (strcmp(token, "x-lines\n") == 0 || strcmp(token, "x-lines") == 0) {
+      lines_type = 1;
+      if (debug) {
+        std::cout << className << "::Initialise:\n";
+        std::cout << "    Reading x-lines from file  " << nlist << ".\n";
+      }
+      continue;
+    }
+    if (strcmp(token, "y-lines\n") == 0 || strcmp(token, "y-lines") == 0) {
+      lines_type = 2;
+      if (debug) {
+        std::cout << className << "::Initialise:\n";
+        std::cout << "    Reading y-lines from file  " << nlist << ".\n";
+      }
+      continue;
+    }
+    if (strcmp(token, "z-lines\n") == 0 || strcmp(token, "z-lines") == 0) {
+      lines_type = 3;
+      if (debug) {
+        std::cout << className << "::Initialise:\n";
+        std::cout << "    Reading z-lines from file  " << nlist << ".\n";
+      }
+      continue;
+    }
+    line_tmp = ReadDouble(token, -1, readerror);
+    if (lines_type == 1) m_xlines.push_back(line_tmp * funit);
+    else if (lines_type == 2) m_ylines.push_back(line_tmp * funit);
+    else if (lines_type == 3) m_zlines.push_back(line_tmp * funit);
+    else {
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Line type was not set in  " << nlist
+                << " (line " << il << ", token = " << token << ").\n";
+      std::cerr << "    Maybe it is in the wrong format\n";
+      std::cerr << "    e.g. missing tailing space after x-lines.\n";
+      ok = false;
+      break;
+    }
+    if (readerror) break;
+  }
+  // Check syntax
+  if (readerror) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Error reading file " << nlist << " (line " << il << ").\n";
+    fnlist.close();
+    ok = false;
+    return false;
+  }
+  // Close the file
+  fnlist.close();
+  // Calculate the node positions
+  for (unsigned int z = 0; z < m_zlines.size(); z++) {
+    for (unsigned int y = 0; y < m_ylines.size(); y++){
+      for (unsigned int x = 0; x < m_xlines.size(); x++){
+        node newNode;
+        // Store the point coordinates
+        newNode.x = m_xlines.at(x);
+        newNode.y = m_ylines.at(y);
+        newNode.z = m_zlines.at(z);
+        nodes.push_back(newNode);
+        ++nNodes;
+      }
+    }
+  }
+  if ((unsigned)xlines == m_xlines.size() &&
+      (unsigned)ylines == m_ylines.size() &&
+      (unsigned)zlines == m_zlines.size()) {
+    std::cout << className << "::Initialise:\n";
+    std::cout << "    Found in file " << nlist << "\n    "
+                              << xlines << " x-lines\n    "
+                              << ylines << " y-lines\n    "
+                              << zlines << " z-lines\n";
+  } else {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    There should be " << xlines << " x-lines, "
+                                        << ylines << " y-lines and "
+                                        << zlines << " z-lines in file "
+                                        << nlist << " but I found :\n    "
+                                        << m_xlines.size() << " x-lines, "
+                                        << m_ylines.size() << " x-lines, "
+                                        << m_zlines.size() << " z-lines.\n";
+  }
+  // Check synchronisation
+  if ((xlines * ylines * zlines) != nNodes) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Synchronisation lost on file " << nlist << ".\n";
+    std::cerr << "    Nodes: " << nNodes << " (expected "
+              << (xlines * ylines * zlines) << ")\n";
+    ok = false;
+  }
+
+  // Tell how many lines read
+  std::cout << className << "::Initialise:\n";
+  std::cout << "    Read " << nNodes << " nodes from file " << nlist << ".\n";
+  // Check number of nodes
+
+   // Open the element list
   std::ifstream felist;
   felist.open(elist.c_str(), std::ios::in);
   if (felist.fail()) {
@@ -214,14 +369,12 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
     // Read the element
     int ielem = ReadInteger(token, -1, readerror);
     token = strtok(NULL, " "); int imat = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in0 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in1 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in2 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in3 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in4 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in5 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in6 = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); int in7 = ReadInteger(token, -1, readerror);
+    // construct node numbers
+    std::vector<int> nodes;
+    GetNodesForElement(ielem,nodes);
+    int in0 = nodes.at(0); int in1 = nodes.at(1); int in2 = nodes.at(2);
+    int in3 = nodes.at(3); int in4 = nodes.at(4); int in5 = nodes.at(5);
+    int in6 = nodes.at(6); int in7 = nodes.at(7);
 
     // Check synchronisation
     if (readerror) {
@@ -332,160 +485,7 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
   std::cout << "    highest node number: " << highestnode << ",\n";
   std::cout << "    degenerate elements: " << ndegenerate << ",\n";
   std::cout << "    background elements skipped: " << nbackground << ".\n";
-  // Check the value of the unit
-  double funit;
-  if (strcmp(unit.c_str(),"mum") == 0 || strcmp(unit.c_str(),"micron") == 0 ||
-      strcmp(unit.c_str(),"micrometer") == 0) {
-    funit = 0.0001;
-  } else if (strcmp(unit.c_str(),"mm") == 0 ||
-             strcmp(unit.c_str(),"millimeter") == 0) {
-    funit = 0.1;
-  } else if (strcmp(unit.c_str(),"cm") == 0 ||
-             strcmp(unit.c_str(),"centimeter") == 0) {
-    funit = 1.0;
-  } else if (strcmp(unit.c_str(),"m") == 0 ||
-             strcmp(unit.c_str(),"meter") == 0) {
-    funit = 100.0;
-  } else {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Unknown length unit " << unit << ".\n";
-    ok = false;
-    funit = 1.0;
-  }
-  if (debug) {
-    std::cout << className << "::Initialise:\n";
-    std::cout << "    Unit scaling factor = " << funit << ".\n";
-  }
 
-  // Open the node list
-  std::ifstream fnlist;
-  fnlist.open(nlist.c_str(), std::ios::in);
-  if (fnlist.fail()) {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Could not open nodes file " << nlist << " for reading.\n";
-    std::cerr << "    The file perhaps does not exist.\n";
-    return false;
-  }
-  // Read the node list
-  nodes.clear();
-  nNodes = 0;
-  il = 0;
-  int xlines = 0, ylines = 0, zlines = 0;
-  int lines_type = -1;
-  double line_tmp;
-  while (fnlist.getline(line, size, '\n')) {
-    il++;
-    // Split the line in tokens
-    char* token = NULL;
-    // Split into tokens
-    token = strtok(line, " ");
-    // Skip blank lines and headers
-    if (!token || strcmp(token, " ") == 0 || strcmp(token, "\n") == 0 ||
-        int(token[0]) == 10 || int(token[0]) == 13) continue;
-    // Read max sizes
-    if (strcmp(token, "xmax") == 0) {
-      token = strtok(NULL, " "); xlines = ReadInteger(token, -1, readerror);
-      token = strtok(NULL, " ");
-      token = strtok(NULL, " "); ylines = ReadInteger(token, -1, readerror);
-      token = strtok(NULL, " ");
-      token = strtok(NULL, " "); zlines = ReadInteger(token, -1, readerror);
-      if (readerror) break;
-      continue;
-    }
-    if (strcmp(token, "x-lines\n") == 0 || strcmp(token, "x-lines") == 0) {
-      lines_type = 1;
-      if (debug) {
-        std::cout << className << "::Initialise:\n";
-        std::cout << "    Reading x-lines from file  " << nlist << ".\n";
-      }
-      continue;
-    }
-    if (strcmp(token, "y-lines\n") == 0 || strcmp(token, "y-lines") == 0) {
-      lines_type = 2;
-      if (debug) {
-        std::cout << className << "::Initialise:\n";
-        std::cout << "    Reading y-lines from file  " << nlist << ".\n";
-      }
-      continue;
-    }
-    if (strcmp(token, "z-lines\n") == 0 || strcmp(token, "z-lines") == 0) {
-      lines_type = 3;
-      if (debug) {
-        std::cout << className << "::Initialise:\n";
-        std::cout << "    Reading z-lines from file  " << nlist << ".\n";
-      }
-      continue;
-    }
-    line_tmp = ReadDouble(token, -1, readerror);
-    if (lines_type == 1) m_xlines.push_back(line_tmp * funit);
-    else if (lines_type == 2) m_ylines.push_back(line_tmp * funit);
-    else if (lines_type == 3) m_zlines.push_back(line_tmp * funit);
-    else {
-      std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Line type was not set in  " << nlist 
-                << " (line " << il << ", token = " << token << ").\n";
-      std::cerr << "    Maybe it is in the wrong format\n";
-      std::cerr << "    e.g. missing tailing space after x-lines.\n";
-      ok = false;
-      break;
-    }
-    if (readerror) break;
-  }
-  // Check syntax
-  if (readerror) {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Error reading file " << nlist << " (line " << il << ").\n";
-    fnlist.close();
-    ok = false;
-    return false;
-  }
-  // Close the file
-  fnlist.close();
-  // Calculate the node positions
-  for (unsigned int z = 0; z < m_zlines.size(); z++) {
-    for (unsigned int y = 0; y < m_ylines.size(); y++){
-      for (unsigned int x = 0; x < m_xlines.size(); x++){
-        node newNode;
-        // Store the point coordinates
-        newNode.x = m_xlines.at(x);
-        newNode.y = m_ylines.at(y);
-        newNode.z = m_zlines.at(z);
-        nodes.push_back(newNode);
-        ++nNodes;
-      }
-    }
-  }
-  if ((unsigned)xlines == m_xlines.size() &&
-      (unsigned)ylines == m_ylines.size() &&
-      (unsigned)zlines == m_zlines.size()) {
-    std::cout << className << "::Initialise:\n";
-    std::cout << "    Found in file " << nlist << "\n    "
-                              << xlines << " x-lines\n    "
-                              << ylines << " y-lines\n    "
-                              << zlines << " z-lines\n";
-  } else {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    There should be " << xlines << " x-lines, "
-                                        << ylines << " y-lines and "
-                                        << zlines << " z-lines in file "
-                                        << nlist << " but I found :\n    "
-                                        << m_xlines.size() << " x-lines, "
-                                        << m_ylines.size() << " x-lines, "
-                                        << m_zlines.size() << " z-lines.\n";
-  }
-  // Check synchronisation
-  if ((xlines * ylines * zlines) != nNodes) {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Synchronisation lost on file " << nlist << ".\n";
-    std::cerr << "    Nodes: " << nNodes << " (expected " 
-              << (xlines * ylines * zlines) << ")\n";
-    ok = false;
-  }
-
-  // Tell how many lines read
-  std::cout << className << "::Initialise:\n";
-  std::cout << "    Read " << nNodes << " nodes from file " << nlist << ".\n";
-  // Check number of nodes
   if (nNodes != (highestnode+1)) {
     std::cerr << className << "::Initialise:\n";
     std::cerr << "    Number of nodes read (" << nNodes << ") on " << nlist << " \n";
@@ -493,7 +493,6 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
     std::cerr << "    Maybe the line size exceeded 200 characters.\n";
     ok = false;
   }
-
   // Open the voltage list
   std::ifstream fprnsol;
   fprnsol.open(prnsol.c_str(), std::ios::in);
@@ -833,22 +832,22 @@ ComponentCST::ElectricField(
           nodes[elements[imap].emap[7]].v * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][2] +
                                              (1 - t1) * +1 * (1 + t3) * inv_jac[1][2] +
                                              (1 - t1) * (1 + t2) * +1 * inv_jac[2][2]));
-
   // Transform field to global coordinates
   UnmapFields(ex, ey, ez, x, y, z,
               xmirrored, ymirrored, zmirrored,
               rcoordinate, rotation);
 
-  // Drift medium?
   if (debug) {
     std::cout << className << "::ElectricField:\n";
+    std::cout << "    Element number: " << imap << ".\n";
     std::cout << "    Material " << elements[imap].matmap << ", drift flag " 
               << materials[elements[imap].matmap].driftmedium << ".\n";
     std::cout << "    Local Coordinates (" << t1 << "," << t2 << "," << t3 
-              << ",) Voltage: " << volt << "\n";
+              << ") Voltage: " << volt << "\n";
     std::cout << "    E-Field (" << ex << "," << ey << "," << ez << ")\n";
     std::cout << "*******End of ComponentCST::ElectricField********\n\n";
   }
+  // Drift medium?
   m = materials[elements[imap].matmap].medium;
   status = -5;
   if (materials[elements[imap].matmap].driftmedium) {
@@ -1238,7 +1237,35 @@ ComponentCST::Element2Index(int element, int &i, int &j, int &k) {
   tmp -= k * (m_xlines.size() - 1) * (m_ylines.size() - 1);
   j = tmp / (m_xlines.size() - 1);
   i = element - j * (m_xlines.size() - 1) - k * (m_xlines.size() - 1) * (m_ylines.size() - 1);
+}
 
+void
+ComponentCST::GetNodesForElement(int element, std::vector<int> &nodes){
+   /*
+   global coordinates   8 _ _ _ _7    t3    t2
+                       /       /|     ^   /|
+     ^ z              /       / |     |   /
+     |             5 /_______/6 |     |  /
+     |              |        |  |     | /
+     |              |  4     |  /3    |/     t1
+      ------->      |        | /       ------->
+     /      y       |        |/       local coordinates
+    /               1--------2
+   /
+  v x
+  */
+
+  int i,j,k;
+  Element2Index(element,i,j,k);
+  nodes.clear();
+  nodes.push_back((i+1)+    j*m_xlines.size()+    k*m_xlines.size()*m_ylines.size());
+  nodes.push_back((i+1)+(j+1)*m_xlines.size()+    k*m_xlines.size()*m_ylines.size());
+  nodes.push_back(    i+(j+1)*m_xlines.size()+    k*m_xlines.size()*m_ylines.size());
+  nodes.push_back(    i+    j*m_xlines.size()+    k*m_xlines.size()*m_ylines.size());
+  nodes.push_back((i+1)+    j*m_xlines.size()+(k+1)*m_xlines.size()*m_ylines.size());
+  nodes.push_back((i+1)+(j+1)*m_xlines.size()+(k+1)*m_xlines.size()*m_ylines.size());
+  nodes.push_back(    i+(j+1)*m_xlines.size()+(k+1)*m_xlines.size()*m_ylines.size());
+  nodes.push_back(    i+    j*m_xlines.size()+(k+1)*m_xlines.size()*m_ylines.size());
 }
 
 int
@@ -1249,7 +1276,8 @@ ComponentCST::FindElementCube(const double x, const double y, const double z,
   int imap = -1;
   // check if the last element matches
   // if yes than leave directly
-  if (x >= nodes[elements[lastElement].emap[3]].x &&
+  if (lastElement >= 0 &&
+      x >= nodes[elements[lastElement].emap[3]].x &&
       y >= nodes[elements[lastElement].emap[3]].y &&
       z >= nodes[elements[lastElement].emap[3]].z &&
       x < nodes[elements[lastElement].emap[0]].x &&
@@ -1274,32 +1302,27 @@ ComponentCST::FindElementCube(const double x, const double y, const double z,
     it = std::search(m_zlines.begin(),m_zlines.end(),my_z,my_z+1,Greater);
     index_z = std::distance(m_zlines.begin(),(it-1));
     /* Behavior at borders:
-     * x < x_min -> index_x = -1
+    * x < x_min -> index_x = -1
      * x = x_min -> index_x = 0
      * x = x_max -> index_x = m_xlines.size() - 1
      * x > x_max -> index_x = m_xlines.size() - 1
     */
 
-    // Check if the point is out of the mesh
-    const int index_x_max = m_xlines.size() - 1;
-    const int index_y_max = m_ylines.size() - 1;
-    const int index_z_max = m_zlines.size() - 1;
-    if (index_x < 0 || index_y < 0 || index_z < 0 ||
-        index_x == index_x_max || 
-        index_y == index_y_max || 
-        index_z == index_z_max) {
+    // check if the point is out of the mesh
+    if(index_x < 0 || index_y < 0 || index_z < 0 ||
+       index_x == (m_xlines.size()-1) || index_y == (m_ylines.size()-1) || index_z == (m_zlines.size()-1))
       return -1;
-    } else {
-      imap = index_x + index_x_max * index_y + index_x_max * index_y_max * index_z;
-    }
-    if (debug && imap != -1) {
-      if (x < nodes[elements[imap].emap[3]].x || x > nodes[elements[imap].emap[0]].x ||
+    else
+      imap = index_x + (m_xlines.size() - 1) * index_y + (m_xlines.size() - 1) * (m_ylines.size() - 1) * index_z;
+
+    if(debug && imap != -1) {
+      if( x < nodes[elements[imap].emap[3]].x || x > nodes[elements[imap].emap[0]].x ||
           y < nodes[elements[imap].emap[3]].y || y > nodes[elements[imap].emap[2]].y ||
           z < nodes[elements[imap].emap[3]].z || z > nodes[elements[imap].emap[7]].z) {
         std::cout << "Element: " << imap << "\tPoint: (" << x << "," << y << "," << z << ")\n"
-                  << "x: " << nodes[elements[imap].emap[3]].x << " - " << nodes[elements[imap].emap[0]].x << "\n"
-                  << "y: " << nodes[elements[imap].emap[3]].y << " - " << nodes[elements[imap].emap[2]].y << "\n"
-                  << "z: " << nodes[elements[imap].emap[3]].z << " - " << nodes[elements[imap].emap[7]].z << "\n\n";
+                << "x: " << nodes[elements[imap].emap[3]].x << " - " << nodes[elements[imap].emap[0]].x << "\n"
+                << "y: " << nodes[elements[imap].emap[3]].y << " - " << nodes[elements[imap].emap[2]].y << "\n"
+                << "z: " << nodes[elements[imap].emap[3]].z << " - " << nodes[elements[imap].emap[7]].z << "\n\n";
       }
     }
   }
@@ -1308,7 +1331,7 @@ ComponentCST::FindElementCube(const double x, const double y, const double z,
     std::cerr << className << "::FindElementCube:\n";
     std::cerr << "    Index of the element (imap is " << imap << ") is to large!"
               << "    Number of Elements: " << nElements
-              << "\n    index_x: " << index_x
+              << "\n    index_x: "   << index_x
               << "\n    index_y: " << index_y
               << "\n    index_z: " << index_z << std::endl;
     if (debug) {
@@ -1341,7 +1364,7 @@ ComponentCST::FindElementCube(const double x, const double y, const double z,
     std::cout << "Global: (" << x << "," << y << "," << z << ") in element "
               << imap << " (degenerate: "
               << elements[imap].degenerate << ")\n";
-    std::cout << "      Node xyzV\n";
+   std::cout << "      Node xyzV\n";
     for (int i = 0; i < 8; i++) {
       std::cout << "  " << elements[imap].emap[i]
                 << " " << nodes[elements[imap].emap[i]].x

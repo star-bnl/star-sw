@@ -492,7 +492,6 @@ ComponentFieldMap::FindElementCube(const double x, const double y, const double 
       y < nodes[elements[lastElement].emap[2]].y &&
       z < nodes[elements[lastElement].emap[7]].z) {
     imap = lastElement;
-    CoordinatesCube(x,y,z,t1,t2,t3,jac,det,imap);
   }
   
   // Default element loop
@@ -1209,7 +1208,7 @@ v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
 }
 
 void
-ComponentFieldMap::JacobianCube(int i, double t, double u, double v,
+ComponentFieldMap::JacobianCube(int i, double t1, double t2, double t3,
                     double& det, double jac[3][3]){
   // Initial values
   det = 0;
@@ -1223,78 +1222,78 @@ ComponentFieldMap::JacobianCube(int i, double t, double u, double v,
     std::cerr << "    Element " << i << " out of range.\n";
     return;
   }
-  jac[0][0] = 1./8 * (nodes[elements[i].emap[0]].x * -1 * (1 - u) * (1 - v) +
-                      nodes[elements[i].emap[1]].x * +1 * (1 - u) * (1 - v) +
-                      nodes[elements[i].emap[2]].x * +1 * (1 + u) * (1 - v) +
-                      nodes[elements[i].emap[3]].x * -1 * (1 + u) * (1 - v) +
-                      nodes[elements[i].emap[4]].x * -1 * (1 - u) * (1 + v) +
-                      nodes[elements[i].emap[5]].x * +1 * (1 - u) * (1 + v) +
-                      nodes[elements[i].emap[6]].x * +1 * (1 + u) * (1 + v) +
-                      nodes[elements[i].emap[7]].x * -1 * (1 + u) * (1 + v));
-  jac[0][1] = 1./8 * (nodes[elements[i].emap[0]].y * -1 * (1 - u) * (1 - v) +
-                      nodes[elements[i].emap[1]].y * +1 * (1 - u) * (1 - v) +
-                      nodes[elements[i].emap[2]].y * +1 * (1 + u) * (1 - v) +
-                      nodes[elements[i].emap[3]].y * -1 * (1 + u) * (1 - v) +
-                      nodes[elements[i].emap[4]].y * -1 * (1 - u) * (1 + v) +
-                      nodes[elements[i].emap[5]].y * +1 * (1 - u) * (1 + v) +
-                      nodes[elements[i].emap[6]].y * +1 * (1 + u) * (1 + v) +
-                      nodes[elements[i].emap[7]].y * -1 * (1 + u) * (1 + v));
-  jac[0][2] = 1./8 * (nodes[elements[i].emap[0]].z * -1 * (1 - u) * (1 - v) +
-                      nodes[elements[i].emap[1]].z * +1 * (1 - u) * (1 - v) +
-                      nodes[elements[i].emap[2]].z * +1 * (1 + u) * (1 - v) +
-                      nodes[elements[i].emap[3]].z * -1 * (1 + u) * (1 - v) +
-                      nodes[elements[i].emap[4]].z * -1 * (1 - u) * (1 + v) +
-                      nodes[elements[i].emap[5]].z * +1 * (1 - u) * (1 + v) +
-                      nodes[elements[i].emap[6]].z * +1 * (1 + u) * (1 + v) +
-                      nodes[elements[i].emap[7]].z * -1 * (1 + u) * (1 + v));
-  jac[1][0] = 1./8 * (nodes[elements[i].emap[0]].x * (1 - t) * -1 * (1 - v) +
-                      nodes[elements[i].emap[1]].x * (1 + t) * -1 * (1 - v) +
-                      nodes[elements[i].emap[2]].x * (1 + t) * +1 * (1 - v) +
-                      nodes[elements[i].emap[3]].x * (1 - t) * +1 * (1 - v) +
-                      nodes[elements[i].emap[4]].x * (1 - t) * -1 * (1 + v) +
-                      nodes[elements[i].emap[5]].x * (1 + t) * -1 * (1 + v) +
-                      nodes[elements[i].emap[6]].x * (1 + t) * +1 * (1 + v) +
-                      nodes[elements[i].emap[7]].x * (1 - t) * +1 * (1 + v));
-  jac[1][1] = 1./8 * (nodes[elements[i].emap[0]].y * (1 - t) * -1 * (1 - v) +
-                      nodes[elements[i].emap[1]].y * (1 + t) * -1 * (1 - v) +
-                      nodes[elements[i].emap[2]].y * (1 + t) * +1 * (1 - v) +
-                      nodes[elements[i].emap[3]].y * (1 - t) * +1 * (1 - v) +
-                      nodes[elements[i].emap[4]].y * (1 - t) * -1 * (1 + v) +
-                      nodes[elements[i].emap[5]].y * (1 + t) * -1 * (1 + v) +
-                      nodes[elements[i].emap[6]].y * (1 + t) * +1 * (1 + v) +
-                      nodes[elements[i].emap[7]].y * (1 - t) * +1 * (1 + v));
-  jac[1][2] = 1./8 * (nodes[elements[i].emap[0]].z * (1 - t) * -1 * (1 - v) +
-                      nodes[elements[i].emap[1]].z * (1 + t) * -1 * (1 - v) +
-                      nodes[elements[i].emap[2]].z * (1 + t) * +1 * (1 - v) +
-                      nodes[elements[i].emap[3]].z * (1 - t) * +1 * (1 - v) +
-                      nodes[elements[i].emap[4]].z * (1 - t) * -1 * (1 + v) +
-                      nodes[elements[i].emap[5]].z * (1 + t) * -1 * (1 + v) +
-                      nodes[elements[i].emap[6]].z * (1 + t) * +1 * (1 + v) +
-                      nodes[elements[i].emap[7]].z * (1 - t) * +1 * (1 + v));
-  jac[2][0] = 1./8 * (nodes[elements[i].emap[0]].x * (1 - t) * (1 - u) * -1 +
-                      nodes[elements[i].emap[1]].x * (1 + t) * (1 - u) * -1 +
-                      nodes[elements[i].emap[2]].x * (1 + t) * (1 + u) * -1 +
-                      nodes[elements[i].emap[3]].x * (1 - t) * (1 + u) * -1 +
-                      nodes[elements[i].emap[4]].x * (1 - t) * (1 - u) * +1 +
-                      nodes[elements[i].emap[5]].x * (1 + t) * (1 - u) * +1 +
-                      nodes[elements[i].emap[6]].x * (1 + t) * (1 + u) * +1 +
-                      nodes[elements[i].emap[7]].x * (1 - t) * (1 + u) * +1);
-  jac[2][1] = 1./8 * (nodes[elements[i].emap[0]].y * (1 - t) * (1 - u) * -1 +
-                      nodes[elements[i].emap[1]].y * (1 + t) * (1 - u) * -1 +
-                      nodes[elements[i].emap[2]].y * (1 + t) * (1 + u) * -1 +
-                      nodes[elements[i].emap[3]].y * (1 - t) * (1 + u) * -1 +
-                      nodes[elements[i].emap[4]].y * (1 - t) * (1 - u) * +1 +
-                      nodes[elements[i].emap[5]].y * (1 + t) * (1 - u) * +1 +
-                      nodes[elements[i].emap[6]].y * (1 + t) * (1 + u) * +1 +
-                      nodes[elements[i].emap[7]].y * (1 - t) * (1 + u) * +1);
-  jac[2][2] = 1./8 * (nodes[elements[i].emap[0]].z * (1 - t) * (1 - u) * -1 +
-                      nodes[elements[i].emap[1]].z * (1 + t) * (1 - u) * -1 +
-                      nodes[elements[i].emap[2]].z * (1 + t) * (1 + u) * -1 +
-                      nodes[elements[i].emap[3]].z * (1 - t) * (1 + u) * -1 +
-                      nodes[elements[i].emap[4]].z * (1 - t) * (1 - u) * +1 +
-                      nodes[elements[i].emap[5]].z * (1 + t) * (1 - u) * +1 +
-                      nodes[elements[i].emap[6]].z * (1 + t) * (1 + u) * +1 +
-                      nodes[elements[i].emap[7]].z * (1 - t) * (1 + u) * +1);
+  jac[0][0] = 1./8 * (nodes[elements[i].emap[0]].x * -1 * (1 - t2) * (1 - t3) +
+                      nodes[elements[i].emap[1]].x * +1 * (1 - t2) * (1 - t3) +
+                      nodes[elements[i].emap[2]].x * +1 * (1 + t2) * (1 - t3) +
+                      nodes[elements[i].emap[3]].x * -1 * (1 + t2) * (1 - t3) +
+                      nodes[elements[i].emap[4]].x * -1 * (1 - t2) * (1 + t3) +
+                      nodes[elements[i].emap[5]].x * +1 * (1 - t2) * (1 + t3) +
+                      nodes[elements[i].emap[6]].x * +1 * (1 + t2) * (1 + t3) +
+                      nodes[elements[i].emap[7]].x * -1 * (1 + t2) * (1 + t3));
+  jac[0][1] = 1./8 * (nodes[elements[i].emap[0]].y * -1 * (1 - t2) * (1 - t3) +
+                      nodes[elements[i].emap[1]].y * +1 * (1 - t2) * (1 - t3) +
+                      nodes[elements[i].emap[2]].y * +1 * (1 + t2) * (1 - t3) +
+                      nodes[elements[i].emap[3]].y * -1 * (1 + t2) * (1 - t3) +
+                      nodes[elements[i].emap[4]].y * -1 * (1 - t2) * (1 + t3) +
+                      nodes[elements[i].emap[5]].y * +1 * (1 - t2) * (1 + t3) +
+                      nodes[elements[i].emap[6]].y * +1 * (1 + t2) * (1 + t3) +
+                      nodes[elements[i].emap[7]].y * -1 * (1 + t2) * (1 + t3));
+  jac[0][2] = 1./8 * (nodes[elements[i].emap[0]].z * -1 * (1 - t2) * (1 - t3) +
+                      nodes[elements[i].emap[1]].z * +1 * (1 - t2) * (1 - t3) +
+                      nodes[elements[i].emap[2]].z * +1 * (1 + t2) * (1 - t3) +
+                      nodes[elements[i].emap[3]].z * -1 * (1 + t2) * (1 - t3) +
+                      nodes[elements[i].emap[4]].z * -1 * (1 - t2) * (1 + t3) +
+                      nodes[elements[i].emap[5]].z * +1 * (1 - t2) * (1 + t3) +
+                      nodes[elements[i].emap[6]].z * +1 * (1 + t2) * (1 + t3) +
+                      nodes[elements[i].emap[7]].z * -1 * (1 + t2) * (1 + t3));
+  jac[1][0] = 1./8 * (nodes[elements[i].emap[0]].x * (1 - t1) * -1 * (1 - t3) +
+                      nodes[elements[i].emap[1]].x * (1 + t1) * -1 * (1 - t3) +
+                      nodes[elements[i].emap[2]].x * (1 + t1) * +1 * (1 - t3) +
+                      nodes[elements[i].emap[3]].x * (1 - t1) * +1 * (1 - t3) +
+                      nodes[elements[i].emap[4]].x * (1 - t1) * -1 * (1 + t3) +
+                      nodes[elements[i].emap[5]].x * (1 + t1) * -1 * (1 + t3) +
+                      nodes[elements[i].emap[6]].x * (1 + t1) * +1 * (1 + t3) +
+                      nodes[elements[i].emap[7]].x * (1 - t1) * +1 * (1 + t3));
+  jac[1][1] = 1./8 * (nodes[elements[i].emap[0]].y * (1 - t1) * -1 * (1 - t3) +
+                      nodes[elements[i].emap[1]].y * (1 + t1) * -1 * (1 - t3) +
+                      nodes[elements[i].emap[2]].y * (1 + t1) * +1 * (1 - t3) +
+                      nodes[elements[i].emap[3]].y * (1 - t1) * +1 * (1 - t3) +
+                      nodes[elements[i].emap[4]].y * (1 - t1) * -1 * (1 + t3) +
+                      nodes[elements[i].emap[5]].y * (1 + t1) * -1 * (1 + t3) +
+                      nodes[elements[i].emap[6]].y * (1 + t1) * +1 * (1 + t3) +
+                      nodes[elements[i].emap[7]].y * (1 - t1) * +1 * (1 + t3));
+  jac[1][2] = 1./8 * (nodes[elements[i].emap[0]].z * (1 - t1) * -1 * (1 - t3) +
+                      nodes[elements[i].emap[1]].z * (1 + t1) * -1 * (1 - t3) +
+                      nodes[elements[i].emap[2]].z * (1 + t1) * +1 * (1 - t3) +
+                      nodes[elements[i].emap[3]].z * (1 - t1) * +1 * (1 - t3) +
+                      nodes[elements[i].emap[4]].z * (1 - t1) * -1 * (1 + t3) +
+                      nodes[elements[i].emap[5]].z * (1 + t1) * -1 * (1 + t3) +
+                      nodes[elements[i].emap[6]].z * (1 + t1) * +1 * (1 + t3) +
+                      nodes[elements[i].emap[7]].z * (1 - t1) * +1 * (1 + t3));
+  jac[2][0] = 1./8 * (nodes[elements[i].emap[0]].x * (1 - t1) * (1 - t2) * -1 +
+                      nodes[elements[i].emap[1]].x * (1 + t1) * (1 - t2) * -1 +
+                      nodes[elements[i].emap[2]].x * (1 + t1) * (1 + t2) * -1 +
+                      nodes[elements[i].emap[3]].x * (1 - t1) * (1 + t2) * -1 +
+                      nodes[elements[i].emap[4]].x * (1 - t1) * (1 - t2) * +1 +
+                      nodes[elements[i].emap[5]].x * (1 + t1) * (1 - t2) * +1 +
+                      nodes[elements[i].emap[6]].x * (1 + t1) * (1 + t2) * +1 +
+                      nodes[elements[i].emap[7]].x * (1 - t1) * (1 + t2) * +1);
+  jac[2][1] = 1./8 * (nodes[elements[i].emap[0]].y * (1 - t1) * (1 - t2) * -1 +
+                      nodes[elements[i].emap[1]].y * (1 + t1) * (1 - t2) * -1 +
+                      nodes[elements[i].emap[2]].y * (1 + t1) * (1 + t2) * -1 +
+                      nodes[elements[i].emap[3]].y * (1 - t1) * (1 + t2) * -1 +
+                      nodes[elements[i].emap[4]].y * (1 - t1) * (1 - t2) * +1 +
+                      nodes[elements[i].emap[5]].y * (1 + t1) * (1 - t2) * +1 +
+                      nodes[elements[i].emap[6]].y * (1 + t1) * (1 + t2) * +1 +
+                      nodes[elements[i].emap[7]].y * (1 - t1) * (1 + t2) * +1);
+  jac[2][2] = 1./8 * (nodes[elements[i].emap[0]].z * (1 - t1) * (1 - t2) * -1 +
+                      nodes[elements[i].emap[1]].z * (1 + t1) * (1 - t2) * -1 +
+                      nodes[elements[i].emap[2]].z * (1 + t1) * (1 + t2) * -1 +
+                      nodes[elements[i].emap[3]].z * (1 - t1) * (1 + t2) * -1 +
+                      nodes[elements[i].emap[4]].z * (1 - t1) * (1 - t2) * +1 +
+                      nodes[elements[i].emap[5]].z * (1 + t1) * (1 - t2) * +1 +
+                      nodes[elements[i].emap[6]].z * (1 + t1) * (1 + t2) * +1 +
+                      nodes[elements[i].emap[7]].z * (1 - t1) * (1 + t2) * +1);
   // compute determinant
   det = jac[0][0] * jac[1][1] * jac[2][2] +
         jac[0][1] * jac[1][2] * jac[2][0] +
@@ -1302,6 +1301,23 @@ ComponentFieldMap::JacobianCube(int i, double t, double u, double v,
         jac[0][2] * jac[1][1] * jac[2][0] -
         jac[0][0] * jac[1][2] * jac[2][1] -
         jac[0][1] * jac[1][0] * jac[2][2];
+  if(debug){
+    std::cout << className << "::JacobianCube:\n";
+    std::cout << "   Det.: " << det << "\n";
+    std::cout << "         " << jac[0][0] << " " << jac[0][1] << " " << jac[0][2] << "\n";
+    std::cout << "         " << jac[1][0] << " " << jac[1][1] << " " << jac[1][2] << "\n";
+    std::cout << "         " << jac[2][0] << " " << jac[2][1] << " " << jac[2][2] << "\n";
+    std::cout << "   Hexahedral coordinates (t, u, v) = (" << t1 << "," << t2 << "," << t3 << ")\n";
+    std::cout << "   Node xyzV\n";
+    for (int node = 0; node < 8; node++) {
+      std::cout << "         " << elements[i].emap[node]
+                << "          " << nodes[elements[i].emap[node]].x
+                << "         " << nodes[elements[i].emap[node]].y
+                << "         " << nodes[elements[i].emap[node]].z
+                << "         " << nodes[elements[i].emap[node]].v
+                << "\n";
+    }
+  }
 }
 
 int 
