@@ -12,7 +12,6 @@
 #include <TCanvas.h>
 
 
-
 /**
 check if at least one hit in the cluster fulfills a pulse shape criterion
 */
@@ -61,6 +60,12 @@ Int_t StFgtClusterPlotter::Make()
 	 StFgtStripCollection& strips=*(mFgtCollectionPtr->getStripCollection( iDx ));
 	 for( StSPtrVecFgtStripIterator it=strips.getStripVec().begin();it!=strips.getStripVec().end();++it)
 	   {
+	     /*	     	     	     cout <<"maxAdc: " << (*it)->getMaxAdc() <<endl;
+	     cout <<"hits : ";
+	     for(int i=0;i<7;i++)
+	       { cout <<" " << (*it)->getAdc(i);}
+	       cout <<endl;*/
+
 	     Short_t quad, disc, strip;
 	     Char_t layer; 
 	     if(((*it)->getGeoId()-prvGeoId)>1 && prvGeoId>=0)
@@ -141,6 +146,9 @@ Int_t StFgtClusterPlotter::Make()
 	       (*outTxtFile) << " ---> seed w/ 2 high strips";
 	     if((*it)->getClusterSeed()==kFgtSeedType3)
 	       (*outTxtFile) << " ---> seed w/ 1 high strip";
+
+	     if((*it)->getClusterSeed()==kFgtClusterSeedInSeaOfNoise)
+	       (*outTxtFile) <<" ---> seed in too much noise";
 	     
 	     if((*it)->getClusterSeed()==kFgtClusterPart)
 	       (*outTxtFile) << " ---> Part of cluster";

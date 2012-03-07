@@ -1,6 +1,9 @@
 ///
-// $Id: StFgtSeededClusterAlgo.h,v 1.2 2012/03/01 16:38:13 avossen Exp $
+// $Id: StFgtSeededClusterAlgo.h,v 1.3 2012/03/07 03:57:23 avossen Exp $
 // $Log: StFgtSeededClusterAlgo.h,v $
+// Revision 1.3  2012/03/07 03:57:23  avossen
+// various updates
+//
 // Revision 1.2  2012/03/01 16:38:13  avossen
 // implemented tweaks to clustering
 //
@@ -57,7 +60,6 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
   Bool_t isSameCluster(StFgtStrip** itSeed,StFgtStrip** nextStrip);
   void FillClusterInfo(StFgtHit* cluster);
  private:
-  Bool_t mIsInitialized;
   Bool_t up;
   Bool_t down;
   ClassDef(StFgtSeededClusterAlgo,1);

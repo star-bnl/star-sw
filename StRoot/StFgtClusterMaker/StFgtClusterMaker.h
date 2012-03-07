@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.15 2012/02/28 19:32:25 avossen Exp $
+//   $Id: StFgtClusterMaker.h,v 1.16 2012/03/07 03:57:22 avossen Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.16  2012/03/07 03:57:22  avossen
+//   various updates
+//
 //   Revision 1.15  2012/02/28 19:32:25  avossen
 //   many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
 //
@@ -50,6 +53,7 @@ The cluster maker. It uses an external algorithm which has to implement StFgtICl
 */
 class StFgtClusterMaker : public StMaker
 {
+  //omitted assignment operator and copy constructor on purpose
  public:
   StFgtClusterMaker( const Char_t* name="FgtCluster");
   virtual ~StFgtClusterMaker();
@@ -70,7 +74,7 @@ The simple cluster algorithm is the default one. The max cluster only selects on
   Int_t setClusterAlgo(StFgtIClusterAlgo*);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.15 2012/02/28 19:32:25 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.16 2012/03/07 03:57:22 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   StFgtIClusterAlgo* mClusterAlgoPtr;

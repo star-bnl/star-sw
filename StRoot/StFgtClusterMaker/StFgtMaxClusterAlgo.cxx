@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.cxx,v 1.12 2012/02/28 19:32:25 avossen Exp $
+//  $Id: StFgtMaxClusterAlgo.cxx,v 1.13 2012/03/07 03:57:23 avossen Exp $
 //  $Log: StFgtMaxClusterAlgo.cxx,v $
+//  Revision 1.13  2012/03/07 03:57:23  avossen
+//  various updates
+//
 //  Revision 1.12  2012/02/28 19:32:25  avossen
 //  many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
 //
@@ -41,14 +44,13 @@
 #include "StRoot/StEvent/StFgtHitCollection.h"
 #include "StRoot/StEvent/StFgtHit.h"
 
-StFgtMaxClusterAlgo::StFgtMaxClusterAlgo():mIsInitialized(0)
+StFgtMaxClusterAlgo::StFgtMaxClusterAlgo()
 {
   //nothing else to do....
 };
 
 Int_t StFgtMaxClusterAlgo::Init()
 {
-  mIsInitialized=true;
   return kStOk;
 };
 

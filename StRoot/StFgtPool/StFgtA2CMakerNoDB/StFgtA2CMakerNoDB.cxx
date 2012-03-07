@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMakerNoDB.cxx,v 1.2 2012/01/31 09:15:34 sgliske Exp $
+ * $Id: StFgtA2CMakerNoDB.cxx,v 1.3 2012/03/07 03:57:23 avossen Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMakerNoDB.cxx,v $
+ * Revision 1.3  2012/03/07 03:57:23  avossen
+ * various updates
+ *
  * Revision 1.2  2012/01/31 09:15:34  sgliske
  * includes updated since status and Ped makers moved to Pool
  *
@@ -154,7 +157,7 @@ Int_t StFgtA2CMakerNoDB::Make(){
                         Int_t adcMinusPed = adc - ped;
 
                         strip->setAdc( adcMinusPed );
-                        strip->setType( 1 );
+			//                        strip->setType( 1 );
 
                         mHistPtr->SetBinContent( timebin+1, adcMinusPed );
                         mHistPtr->SetBinError( timebin+1, pedErr );

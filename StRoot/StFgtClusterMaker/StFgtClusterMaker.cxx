@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.28 2012/02/28 19:32:25 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.29 2012/03/07 03:57:22 avossen Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -48,9 +48,9 @@ Int_t StFgtClusterMaker::Make()
        StFgtHitCollection *hitCollectionPtr = fgtCollectionPtr->getHitCollection( discIdx );
        
        if( stripCollectionPtr && hitCollectionPtr ){
-	 cout <<"doing clustering ..." <<endl;
+	 //	 cout <<"doing clustering ..." <<endl;
 	 Int_t loc_ierr = mClusterAlgoPtr->doClustering( *stripCollectionPtr, *hitCollectionPtr );
-	 cout <<"done ..." <<endl;
+	 //	 cout <<"done ..." <<endl;
 	 if(loc_ierr!=kStOk) {
 	   LOG_WARN <<"StClusterMaker::Make(): clustering for disc " << discIdx << " returned " << loc_ierr <<endm;
 	   if(loc_ierr>ierr)
@@ -181,6 +181,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.29  2012/03/07 03:57:22  avossen
+//   various updates
+//
 //   Revision 1.28  2012/02/28 19:32:25  avossen
 //   many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
 //

@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtRawMaker.h,v 1.20 2012/02/21 19:44:45 avossen Exp $
+//  $Id: StFgtRawMaker.h,v 1.21 2012/03/07 03:57:23 avossen Exp $
 //  $Log: StFgtRawMaker.h,v $
+//  Revision 1.21  2012/03/07 03:57:23  avossen
+//  various updates
+//
 //  Revision 1.20  2012/02/21 19:44:45  avossen
 //  implementing reviewers comments take 2
 //
@@ -80,14 +83,15 @@ Function to get pointer to StEvent datastructures. Creates them if they do not e
   StFgtCollection *mFgtCollectionPtr;
 
  private:
+  ////omitted copy constructor and assignment operator on purpose
   /** copy contructor. It is private since there is no use case for this
    */
-  StFgtRawMaker(const StFgtRawMaker &source);
+  //  StFgtRawMaker(const StFgtRawMaker &source);
 
   /**
      private asignment operator
   */
-  StFgtRawMaker& operator=(const StFgtRawMaker &source);
+  //  StFgtRawMaker& operator=(const StFgtRawMaker &source);
   StFgtDb *mFgtDb;
   ClassDef(StFgtRawMaker,1);
 };

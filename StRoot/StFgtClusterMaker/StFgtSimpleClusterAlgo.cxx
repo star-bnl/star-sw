@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.22 2012/02/28 19:32:25 avossen Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.23 2012/03/07 03:57:23 avossen Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.23  2012/03/07 03:57:23  avossen
+//  various updates
+//
 //  Revision 1.22  2012/02/28 19:32:25  avossen
 //  many changes to enable new clustering algo: New strip fields, identification of seed strips, passing neighboring strips, new order in strip collections
 //
@@ -65,14 +68,13 @@
 //for floor
 #include <math.h>
 
-StFgtSimpleClusterAlgo::StFgtSimpleClusterAlgo():mIsInitialized(0)
+StFgtSimpleClusterAlgo::StFgtSimpleClusterAlgo()
 {
   //nothing else to do....
 };
 
 Int_t StFgtSimpleClusterAlgo::Init()
 {
-  mIsInitialized=true;
   return kStOk;
 };
 
