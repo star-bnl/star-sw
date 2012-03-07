@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.14 2012/03/06 21:21:32 sgliske Exp $
+ * $Id: StFgtA2CMaker.h,v 1.15 2012/03/07 17:09:05 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -29,6 +29,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.15  2012/03/07 17:09:05  sgliske
+ * code removed from compiling by #ifdef completely removed
+ *
  * Revision 1.14  2012/03/06 21:21:32  sgliske
  * Responces to reviewers incoorperated.
  * White space and comments cleaned up.
@@ -98,10 +101,6 @@
 #include "StMaker.h"
 #include "StRoot/StEvent/StFgtStrip.h"
 
-#ifdef MAKE_HISTOGRAM
-class TH1F;
-#endif
-
 class StFgtDb;
 
 class StFgtA2CMaker : public StMaker {
@@ -130,7 +129,7 @@ class StFgtA2CMaker : public StMaker {
 
    // cvs tag
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.14 2012/03/06 21:21:32 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.15 2012/03/07 17:09:05 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    Short_t checkValidPulse(StFgtStrip* pStrip, Float_t ped);
@@ -141,10 +140,7 @@ class StFgtA2CMaker : public StMaker {
    // pointer to the DB
    StFgtDb* mDb;
 
-#ifdef MAKE_HISTOGRAM
-   TH1F *mHistPtr;
-#endif
- 
+
  private:   
    ClassDef(StFgtA2CMaker,1);
 }; 
@@ -152,11 +148,7 @@ class StFgtA2CMaker : public StMaker {
 // inline functions
 
 // deconstructor
-inline StFgtA2CMaker::~StFgtA2CMaker(){
-#ifdef MAKE_HISTOGRAM
-   delete mHistPtr;
-#endif
-};
+inline StFgtA2CMaker::~StFgtA2CMaker(){ /* */ };
 
 // modifiers
 inline void StFgtA2CMaker::setAbsThres( Float_t thres ){ mAbsThres = thres; };
