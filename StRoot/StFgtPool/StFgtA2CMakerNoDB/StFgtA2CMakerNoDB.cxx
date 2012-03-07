@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMakerNoDB.cxx,v 1.4 2012/03/07 17:53:53 sgliske Exp $
+ * $Id: StFgtA2CMakerNoDB.cxx,v 1.5 2012/03/07 18:20:31 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMakerNoDB.cxx,v $
+ * Revision 1.5  2012/03/07 18:20:31  sgliske
+ * no longer have fit parameters in StFgtStrip
+ *
  * Revision 1.4  2012/03/07 17:53:53  sgliske
  * Added options for not removing strips to StFgtStripCollection
  *
@@ -175,12 +178,13 @@ Int_t StFgtA2CMakerNoDB::Make(){
                      strip->setGeoId( -1 );
                   } else {
                      mHistPtr->Fit( mPulseShapePtr );
-                     strip->setFitParam( 
-                                        mPulseShapePtr->GetParameter( 0 ),
-                                        mPulseShapePtr->GetParameter( 1 ),
-                                        mPulseShapePtr->GetParameter( 2 ),
-                                        mPulseShapePtr->GetParameter( 3 ),
-                                        mPulseShapePtr->GetParameter( 4 )   );
+                     // no longer suppported in current StEvent, as of March 7th
+//                      strip->setFitParam( 
+//                                         mPulseShapePtr->GetParameter( 0 ),
+//                                         mPulseShapePtr->GetParameter( 1 ),
+//                                         mPulseShapePtr->GetParameter( 2 ),
+//                                         mPulseShapePtr->GetParameter( 3 ),
+//                                         mPulseShapePtr->GetParameter( 4 )   );
 
                      Double_t fitC = mPulseShapePtr->GetParameter( 0 );
                      Double_t errC = mPulseShapePtr->GetParError( 0 );
