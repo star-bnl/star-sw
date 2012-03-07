@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.32 2012/03/07 17:09:05 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.33 2012/03/07 17:46:55 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.33  2012/03/07 17:46:55  sgliske
+ * Added options for not removing strips
+ *
  * Revision 1.32  2012/03/07 17:09:05  sgliske
  * code removed from compiling by #ifdef completely removed
  *
@@ -226,8 +229,8 @@ Int_t StFgtA2CMaker::Make(){
                   Float_t sumC=0;
 
                   // get the pedestal
-                  ped = mDb->getPedestalFromGeoId( geoId );
-                  pedErr = mDb->getPedestalSigmaFromGeoId( geoId );
+                  ped = mDb->getPedestalFromElecId( geoId );
+                  pedErr = mDb->getPedestalSigmaFromElecId( geoId );
                   strip->setPed(ped);
                   strip->setPedErr(pedErr);
 
@@ -253,7 +256,7 @@ Int_t StFgtA2CMaker::Make(){
                   };
 
                   // get gain
-                  Double_t gain = mDb->getGainFromGeoId( geoId );
+                  Double_t gain = mDb->getGainFromElecId( geoId );
 
                   // set the charge
                   strip->setCharge( sumC/gain );
@@ -264,17 +267,25 @@ Int_t StFgtA2CMaker::Make(){
 
                   // check if any signal here
                   if( !nTbAboveThres && (mRelThres || mAbsThres>-4096) ){
+                     // no time bins above thresholds for this strip
+                     // i.e. no signal
                      strip->setClusterSeed(kFgtSeedTypeNo);
 
-                     // but if it is +/- n strips from valid pulse, keep it
+                     // If not removing strips far from pulses, check
+                     // if supposed to remove non-signal.  Flag geoId
+                     // if this is the case.
+                     if( !mRemoveNonPulse && mRemoveNonSignal )
+                        strip->setGeoId( -1 );
+
                   } else if( mRelThres || mAbsThres>-4096 ){
+                     // but if it is +/- n strips from valid pulse, keep it
                      strip->setClusterSeed(checkValidPulse(strip, pedErr));
                   } else {
                      strip->invalidateCharge();
                   };
 
                   if( mStatusMask != 0x0 ){
-                     UInt_t status=mDb->getStatusFromGeoId(geoId);
+                     UInt_t status=mDb->getStatusFromElecId(geoId);
 
                      if( status & mStatusMask )
                         strip->setClusterSeed(kFgtDeadStrip);
@@ -284,7 +295,7 @@ Int_t StFgtA2CMaker::Make(){
 
             // always check if any need removed, as it is possible
             // some ``bad'' strips may have abnormally large st. dev.
-            stripCollectionPtr->removeFlagged();
+            stripCollectionPtr->removeFlagged( mRemoveNonPulse );
          };
       };
    };
