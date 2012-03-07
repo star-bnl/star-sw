@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMakerNoDB.cxx,v 1.3 2012/03/07 03:57:23 avossen Exp $
+ * $Id: StFgtA2CMakerNoDB.cxx,v 1.4 2012/03/07 17:53:53 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMakerNoDB.cxx,v $
+ * Revision 1.4  2012/03/07 17:53:53  sgliske
+ * Added options for not removing strips to StFgtStripCollection
+ *
  * Revision 1.3  2012/03/07 03:57:23  avossen
  * various updates
  *
@@ -201,7 +204,7 @@ Int_t StFgtA2CMakerNoDB::Make(){
 
             // always check if any need removed, as it is possible
             // some ``bad'' strips may have abnormally large st. dev.
-            stripCollectionPtr->removeFlagged();
+            stripCollectionPtr->removeFlagged(0);
          };
       };
    };
