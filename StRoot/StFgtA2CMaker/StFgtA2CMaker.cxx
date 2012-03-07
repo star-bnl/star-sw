@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.30 2012/03/07 03:57:22 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.31 2012/03/07 15:32:41 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.31  2012/03/07 15:32:41  sgliske
+ * Last update was commenting out 'strip->setType( 1 );'
+ * But final version should not commented out code,
+ * either real used code or real explanatory comments.
+ * Commented 'strip->setType' has been removed.
+ *
  * Revision 1.30  2012/03/07 03:57:22  avossen
  * various updates
  *
@@ -257,7 +263,6 @@ Int_t StFgtA2CMaker::Make(){
                         // subract the ped, and set
                         Int_t adcMinusPed = adc - ped;
                         strip->setAdc(adcMinusPed, timebin );
-			//                        strip->setType( 1 );
 
 #ifdef NOT_USED
                         if((adcMinusPed>maxADCVal) && (timebin==3 || timebin==4))
