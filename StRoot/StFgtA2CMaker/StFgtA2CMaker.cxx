@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.31 2012/03/07 15:32:41 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.32 2012/03/07 17:09:05 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.32  2012/03/07 17:09:05  sgliske
+ * code removed from compiling by #ifdef completely removed
+ *
  * Revision 1.31  2012/03/07 15:32:41  sgliske
  * Last update was commenting out 'strip->setType( 1 );'
  * But final version should not commented out code,
@@ -131,11 +134,6 @@
  *
  **************************************************************************/
 
-#ifdef MAKE_HISTOGRAM
-#include <string>
-#include <TH1.h>
-#endif
-
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtStripCollection.h"
@@ -146,12 +144,7 @@
 
 // constructors
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
-   : StMaker( name ), mAbsThres(-10000), mRelThres(5), mDb(0) {
-
-#ifdef MAKE_HISTOGRAM
-   mHistPtr = new TH1F( (std::string( name ) + "_hist").data(), "temp hist", kFgtNumTimeBins, 0, kFgtNumTimeBins );
-#endif
-};
+   : StMaker( name ), mAbsThres(-10000), mRelThres(5), mDb(0) { /* */ };
 
 
 Int_t StFgtA2CMaker::Init(){
@@ -214,9 +207,6 @@ Int_t StFgtA2CMaker::Make(){
             StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
             StSPtrVecFgtStripIterator stripIter;
 
-#ifdef DEBUG
-            LOG_INFO << Form("A2C for iDisc=%d\n",discIdx) << endm;
-#endif
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
                StFgtStrip *strip = *stripIter;
                Float_t ped = 0, pedErr = 0;
@@ -235,11 +225,6 @@ Int_t StFgtA2CMaker::Make(){
                   // sum of adc-ped values
                   Float_t sumC=0;
 
-#ifdef NOT_USED
-                  // subtract the pedestal from each time bin
-                  Int_t maxADCVal=-4096;
-#endif
-
                   // get the pedestal
                   ped = mDb->getPedestalFromGeoId( geoId );
                   pedErr = mDb->getPedestalSigmaFromGeoId( geoId );
@@ -252,29 +237,9 @@ Int_t StFgtA2CMaker::Make(){
                      for( Int_t timebin = 0; timebin < kFgtNumTimeBins && strip->getGeoId() > -1; ++timebin ){
                         Int_t adc = strip->getAdc( timebin );
 
-#ifdef MAKE_HISTOGRAM
-                        mHistPtr->SetBinContent( timebin+1, 0 );
-                        mHistPtr->SetBinError( timebin+1, 10000 );
-#endif
-#ifdef DEBUG
-                        LOG_INFO << Form(" inp strip geoId=%d adc=%d ped=%f pedErr=%f\n",geoId,adc,ped,pedErr) << endm;
-#endif
-
                         // subract the ped, and set
                         Int_t adcMinusPed = adc - ped;
                         strip->setAdc(adcMinusPed, timebin );
-
-#ifdef NOT_USED
-                        if((adcMinusPed>maxADCVal) && (timebin==3 || timebin==4))
-                           maxADCVal=adcMinusPed;
-#endif
-
-#ifdef MAKE_HISTOGRAM
-                        if(adcMinusPed > -4000){ //otherwise empty time bin
-                           mHistPtr->SetBinContent( timebin+1, adcMinusPed );
-                           mHistPtr->SetBinError( timebin+1, pedErr );
-                        };
-#endif
 
                         // sum over all (averages out fluctuations), but avoid invalid tb with large negative adc values
                         if( adcMinusPed > -1000)
@@ -303,11 +268,7 @@ Int_t StFgtA2CMaker::Make(){
 
                      // but if it is +/- n strips from valid pulse, keep it
                   } else if( mRelThres || mAbsThres>-4096 ){
-
                      strip->setClusterSeed(checkValidPulse(strip, pedErr));
-#ifdef DEBUG
-                     LOG_INFO << Form("    out  adc=%d charge=%f\n",strip->getAdc(),strip->getCharge()) << endm;
-#endif
                   } else {
                      strip->invalidateCharge();
                   };
