@@ -93,6 +93,12 @@ class StFgtDbIdealImpl : public StFgtDb
 	    return 20.0;
 	}
 
+	virtual Double_t getPedestalFromElecId( Int_t elecId )
+	{
+	    return 20.0;
+	}
+
+
 	//  The value of 2.0 being returned here has no real basis in reality
 	//  at all.
 	virtual Double_t getPedestalSigmaFromGeoId( Int_t geoId )
@@ -110,6 +116,11 @@ class StFgtDbIdealImpl : public StFgtDb
 	virtual Double_t getPedestalSigmaFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
+	{
+	    return 2.0;
+	}
+
+	virtual Double_t getPedestalSigmaFromElecId( Int_t elecId )
 	{
 	    return 2.0;
 	}
@@ -134,6 +145,11 @@ class StFgtDbIdealImpl : public StFgtDb
 	    return 1;
 	}
 
+	virtual UChar_t getPedestalStatusFromElecId( Int_t elecId )
+	{
+	    return 1;
+	}
+
 	//  The status is always good, so return 0.
 	virtual UChar_t getStatusFromGeoId( Int_t geoId )
 	{
@@ -148,6 +164,11 @@ class StFgtDbIdealImpl : public StFgtDb
 	virtual UChar_t getStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
+	{
+	    return 0;
+	}
+
+	virtual UChar_t getStatusFromElecId( Int_t elecId )
 	{
 	    return 0;
 	}
@@ -170,6 +191,11 @@ class StFgtDbIdealImpl : public StFgtDb
 	    return 50.0;
 	}
 
+	virtual Double_t getGainFromElecId( Int_t elecId )
+	{
+	    return 50.0;
+	}
+
 	//  Gains are always good here, so return 1.
 	virtual UChar_t getGainStatusFromGeoId( Int_t geoId )
 	{
@@ -187,6 +213,11 @@ class StFgtDbIdealImpl : public StFgtDb
 	{
 	    return 1;
 	}
+	virtual UChar_t getGainStatusFromElecId( Int_t elecId )
+	{
+	    return 1.0;
+	}
+
 
 	virtual Double_t getMapping(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
