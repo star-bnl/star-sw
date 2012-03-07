@@ -43,32 +43,25 @@ enum {
 
 // unsorted constants
 enum {
-  kFgtNumTimeBins = 9,           // if using cosmic data, recompile with this value set to 7
+   kFgtNumTimeBins = 9,           // if using cosmic data, recompile with this value set to 7
    kFgtMaxAdc = 4096
 };
 
 ///cluster seed types
 enum {
-  kFgtSeedTypeNo,
-  kFgtDeadStrip,
-  kFgtSeedType1,
-  kFgtSeedType2,
-  kFgtSeedType3,
-  kFgtClusterPart,
-  kFgtNextToDeadGuy,
-  kFgtClusterEndUp,
-  kFgtClusterEndDown,
-  kFgtStripShared,
-  kFgtClusterTooBig,
-  kFgtClusterSeedInSeaOfNoise
+   kFgtSeedTypeNo,
+   kFgtDeadStrip,
+   kFgtSeedType1,
+   kFgtSeedType2,
+   kFgtSeedType3,
+   kFgtClusterPart,
+   kFgtNextToDeadGuy,
+   kFgtClusterEndUp,
+   kFgtClusterEndDown,
+   kFgtStripShared,
+   kFgtClusterTooBig,
+   kFgtClusterSeedInSeaOfNoise
 };
-//strip types
-//enum { 
-//  kFgtRawAdc,
-//  kFgtPedSubtractedAdc,
-///  kFgtCorrNoiseSubtracted,
-//  kFgtMC
-//}
 
 
 // Jan's definitions for the final 400-800 micron pitch design 
@@ -95,8 +88,11 @@ enum {
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.13 2012/03/07 03:57:23 avossen Exp $
+ * $Id: StFgtConsts.h,v 1.14 2012/03/07 17:05:58 sgliske Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.14  2012/03/07 17:05:58  sgliske
+ * updated whitespace and comments
+ *
  * Revision 1.13  2012/03/07 03:57:23  avossen
  * various updates
  *
