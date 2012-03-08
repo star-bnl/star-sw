@@ -64,7 +64,7 @@ Int_t StFgtLenTreeMaker::Make()
 	     StFgtGeom::decodeGeoId((*it)->getGeoId(),disc, quad, layer, strip);
 	     if(layer!='R')
 	       continue;
-	     switch((*it)->getClusterSeed())
+	     switch((*it)->getClusterSeedType())
 	       {
 	       case kFgtSeedType1:
 		 (*outTxtFile) <<"#";
@@ -87,7 +87,7 @@ Int_t StFgtLenTreeMaker::Make()
 	       case kFgtDeadStrip:
 		 if(((it-1))>=strips.getStripVec().begin() && (it+1)<strips.getStripVec().end())
 		   {
-		     if((*(it-1))->getClusterSeed()>kFgtDeadStrip&& (*(it+1))->getClusterSeed()>kFgtDeadStrip)
+		     if((*(it-1))->getClusterSeedType()>kFgtDeadStrip&& (*(it+1))->getClusterSeedType()>kFgtDeadStrip)
 		       (*outTxtFile) <<"*";
 		     else
 		       (*outTxtFile) <<"x";
@@ -99,7 +99,7 @@ Int_t StFgtLenTreeMaker::Make()
 	       default:
 		 (*outTxtFile) <<"x";
 	       }
-	     if((*it)->getClusterSeed()==kFgtDeadStrip) 
+	     if((*it)->getClusterSeedType()==kFgtDeadStrip) 
 	       stripDead=true;
 	     else
 	       stripDead=false;
@@ -125,22 +125,22 @@ Int_t StFgtLenTreeMaker::Make()
 	     (*outTxtFile) << " ped: " << (*it)->getPed() <<" +- " << (*it)->getPedErr();
 	     (*outTxtFile) << " run evtNr " << runningEvtNr;
 	     //		     (*outTxtFile)  <<" t0: " << (*it)->getFitParamT0() <<" fit chi2/ndf: " << (*it)->getFitChi2();
-	     if((*it)->getClusterSeed()==kFgtSeedType1)
+	     if((*it)->getClusterSeedType()==kFgtSeedType1)
 	       {
 		 (*outTxtFile) << " ---> seed w/ 3 high strips";
 	       }
-	     if((*it)->getClusterSeed()==kFgtSeedType2)
+	     if((*it)->getClusterSeedType()==kFgtSeedType2)
 	       (*outTxtFile) << " ---> seed w/ 2 high strips";
-	     if((*it)->getClusterSeed()==kFgtSeedType3)
+	     if((*it)->getClusterSeedType()==kFgtSeedType3)
 	       (*outTxtFile) << " ---> seed w/ 1 high strip";
 	     
-	     if((*it)->getClusterSeed()==kFgtClusterPart)
+	     if((*it)->getClusterSeedType()==kFgtClusterPart)
 	       (*outTxtFile) << " ---> Part of cluster";
-	     if((*it)->getClusterSeed()==kFgtDeadStrip) 
+	     if((*it)->getClusterSeedType()==kFgtDeadStrip) 
 	       (*outTxtFile) <<" ---> Strip is marked dead";
-	     if((*it)->getClusterSeed()==kFgtClusterEndUp) 
+	     if((*it)->getClusterSeedType()==kFgtClusterEndUp) 
 	       (*outTxtFile) <<" ---> End of a cluster";
-	     if((*it)->getClusterSeed()==kFgtClusterEndDown) 
+	     if((*it)->getClusterSeedType()==kFgtClusterEndDown) 
 	       (*outTxtFile) <<" ---> Beginning of a cluster";
 
 	     (*outTxtFile) <<endl;
@@ -178,7 +178,7 @@ Int_t StFgtLenTreeMaker::Make()
 	     Int_t seedA=0;
 	     for(stripWeightMap_t::iterator it=(*hitIter)->getStripWeightMap().begin();it!=(*hitIter)->getStripWeightMap().end();it++)
 	       {
-		 if(it->first->getClusterSeed()==kFgtSeedType1 || it->first->getClusterSeed()==kFgtSeedType2 ||it->first->getClusterSeed()==kFgtSeedType3) //require  1,2,3 strips
+		 if(it->first->getClusterSeedType()==kFgtSeedType1 || it->first->getClusterSeedType()==kFgtSeedType2 ||it->first->getClusterSeedType()==kFgtSeedType3) //require  1,2,3 strips
 		   {
 		     containsSeed=true;		     
 		     if(seedA < it->first->getMaxAdc())seedA=it->first->getMaxAdc();
@@ -197,7 +197,7 @@ Int_t StFgtLenTreeMaker::Make()
 		 //{
 		 //  StFgtGeom::decodeGeoId(it->first->getGeoId(),disc, quad, layer, strip);
 		 //  if(maxA < it->first->getMaxAdc())maxA=it->first->getMaxAdc();
-		     //if(it->first->getClusterSeed()==kFgtSeedType1)
+		     //if(it->first->getClusterSeedType()==kFgtSeedType1)
 		     //{
 			 //		     (*outTxtFile) << " ---> seed with 3 high strips";
 		     //}
