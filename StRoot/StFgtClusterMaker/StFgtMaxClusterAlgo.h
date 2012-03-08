@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.h,v 1.6 2012/03/07 03:57:23 avossen Exp $
+//  $Id: StFgtMaxClusterAlgo.h,v 1.7 2012/03/08 17:43:40 avossen Exp $
 //  $Log: StFgtMaxClusterAlgo.h,v $
+//  Revision 1.7  2012/03/08 17:43:40  avossen
+//  added default cluster algo, made StFgtIClusterAlgo destructor =0
+//
 //  Revision 1.6  2012/03/07 03:57:23  avossen
 //  various updates
 //
@@ -30,6 +33,8 @@ Implements the StFgtIClusterAlgo interface. The doClustering method looks for th
 This is meant as a fallback/test solution as it is fast and does not get confused by large clusters and the like.
 It will only find one cluster per layer.
 Also, no errors are assigned to charge or location.
+
+Copy constructor and assignment operator omitted deliberately 
 */
 class StFgtMaxClusterAlgo :public StFgtIClusterAlgo
 {
@@ -39,6 +44,7 @@ class StFgtMaxClusterAlgo :public StFgtIClusterAlgo
   ///main work functions getting strips above pedestal for each disk
   virtual Int_t doClustering( StFgtStripCollection&, StFgtHitCollection& );
   virtual Int_t Init();
+  virtual ~StFgtMaxClusterAlgo();
 
  protected:
 

@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.cxx,v 1.13 2012/03/07 03:57:23 avossen Exp $
+//  $Id: StFgtMaxClusterAlgo.cxx,v 1.14 2012/03/08 17:43:40 avossen Exp $
 //  $Log: StFgtMaxClusterAlgo.cxx,v $
+//  Revision 1.14  2012/03/08 17:43:40  avossen
+//  added default cluster algo, made StFgtIClusterAlgo destructor =0
+//
 //  Revision 1.13  2012/03/07 03:57:23  avossen
 //  various updates
 //
@@ -125,6 +128,9 @@ Int_t StFgtMaxClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitC
   return kStOk;
 };
 
+StFgtMaxClusterAlgo::~StFgtMaxClusterAlgo()
+{
+}
 
 ClassImp(StFgtMaxClusterAlgo);
 

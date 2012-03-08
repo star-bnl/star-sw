@@ -1,6 +1,9 @@
 ///
-// $Id: StFgtSeededClusterAlgo.h,v 1.3 2012/03/07 03:57:23 avossen Exp $
+// $Id: StFgtSeededClusterAlgo.h,v 1.4 2012/03/08 17:43:40 avossen Exp $
 // $Log: StFgtSeededClusterAlgo.h,v $
+// Revision 1.4  2012/03/08 17:43:40  avossen
+// added default cluster algo, made StFgtIClusterAlgo destructor =0
+//
 // Revision 1.3  2012/03/07 03:57:23  avossen
 // various updates
 //
@@ -41,6 +44,7 @@ This class implements the IClusterAlgo interface, in particular the doClustering
 The implemented algo (simple) agregates all strips that are above threshold to clusters. It respects the fact that at the inner radius only every second P-Strip exist.
 There is a cutoff on the maximum numbers of strips per cluster as a safety in case of noisy data.
 
+Copy constructor and assignment operator omitted deliberately 
 */
 
 
@@ -52,6 +56,7 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
   ///the main function, using a collection of strips tht fired to build clusters of neighbouring strips
   virtual Int_t doClustering(  StFgtStripCollection& strips, StFgtHitCollection& clusters );
   virtual Int_t Init();
+  virtual ~StFgtSeededClusterAlgo();
 
  protected:
   ///migrated to A2C maker
