@@ -1,5 +1,8 @@
-// $Id: StFgtIClusterAlgo.h,v 1.6 2011/11/01 18:46:30 sgliske Exp $
+// $Id: StFgtIClusterAlgo.h,v 1.7 2012/03/08 17:43:40 avossen Exp $
 // $Log: StFgtIClusterAlgo.h,v $
+// Revision 1.7  2012/03/08 17:43:40  avossen
+// added default cluster algo, made StFgtIClusterAlgo destructor =0
+//
 // Revision 1.6  2011/11/01 18:46:30  sgliske
 // Updated to correspond with StEvent containers, take 2.
 //
@@ -34,9 +37,12 @@ class StFgtHitCollection;
 class StFgtIClusterAlgo
 {
  public:
-  //subclasses must implement this function that takes raw hits from StEvent and fills the Cluster collection
+  /**subclasses must implement this function that takes raw hits from StEvent and fills the Cluster collection
+  //the input might be modified, since the clustering checks if the seeds are legitimate and adds the info to the strips if they 
+  //are at the beginning or end of a cluster*/
   virtual Int_t doClustering( StFgtStripCollection&, StFgtHitCollection& )=0;
   virtual Int_t Init()=0;
+  virtual ~StFgtIClusterAlgo()=0;
 
  private:
   ClassDef( StFgtIClusterAlgo, 1 );  

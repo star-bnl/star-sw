@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.6 2012/03/07 18:07:45 sgliske Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.7 2012/03/08 17:43:40 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.7  2012/03/08 17:43:40  avossen
+//  added default cluster algo, made StFgtIClusterAlgo destructor =0
+//
 //  Revision 1.6  2012/03/07 18:07:45  sgliske
 //  StFgtStrip::getClusterSeed() -> StFgtStrip::getClusterSeedType
 //  StFgtStrip::setClusterSeed() -> StFgtStrip::setClusterSeedType
@@ -304,5 +307,9 @@ run over all strips, find seeds, use those to start clusters
 
 //Bool_t StFgtSeededClusterAlgo::up;
 //Bool_t StFgtSeededClusterAlgo::down;
+
+StFgtSeededClusterAlgo::~StFgtSeededClusterAlgo()
+{
+}
 
 ClassImp(StFgtSeededClusterAlgo);

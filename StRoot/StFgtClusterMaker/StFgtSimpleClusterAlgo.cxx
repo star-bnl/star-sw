@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.23 2012/03/07 03:57:23 avossen Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.24 2012/03/08 17:43:40 avossen Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.24  2012/03/08 17:43:40  avossen
+//  added default cluster algo, made StFgtIClusterAlgo destructor =0
+//
 //  Revision 1.23  2012/03/07 03:57:23  avossen
 //  various updates
 //
@@ -291,6 +294,9 @@ Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
   return kStOk;
 }
 
+StFgtSimpleClusterAlgo::~StFgtSimpleClusterAlgo()
+{
 
+}
 
 ClassImp(StFgtSimpleClusterAlgo);

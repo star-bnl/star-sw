@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.16 2012/03/07 03:57:22 avossen Exp $
+//   $Id: StFgtClusterMaker.h,v 1.17 2012/03/08 17:43:40 avossen Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.17  2012/03/08 17:43:40  avossen
+//   added default cluster algo, made StFgtIClusterAlgo destructor =0
+//
 //   Revision 1.16  2012/03/07 03:57:22  avossen
 //   various updates
 //
@@ -64,9 +67,8 @@ The make function. Uses the cluster algo member to do the actual clustering. The
 In addition the cluster error is computed for the orthogonal direction (e.g. for r clusters in phi) from the strip length.
   */
   virtual Int_t Make();
-
   ///clear function is empty at the moment
-  virtual void Clear( Option_t *opts = "" );
+  //  virtual void Clear( Option_t *opts = "" );
 
   /**sets the clustering algorithm. Currently there is the simple Clustering algorithm and the max cluster algorithm. 
 The simple cluster algorithm is the default one. The max cluster only selects one hit stip per plane, the one with the highest charge
@@ -74,7 +76,7 @@ The simple cluster algorithm is the default one. The max cluster only selects on
   Int_t setClusterAlgo(StFgtIClusterAlgo*);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.16 2012/03/07 03:57:22 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.17 2012/03/08 17:43:40 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   StFgtIClusterAlgo* mClusterAlgoPtr;
