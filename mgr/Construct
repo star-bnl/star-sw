@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.174 2012/03/06 19:34:51 jeromel Exp $
+# $Id: Construct,v 1.175 2012/03/08 12:40:39 jeromel Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -240,31 +240,37 @@ my @excludeDirList = qw(\. \.\. macros CVS html doc inc idl local run wrk exampl
 my  $excludeDirList = "^(" . join ("|", @excludeDirList) . ")\$";
 
 
-# open exclusion list
-my  $items = "(";
-if ( defined($SKIP_DIRS) ){ $items .= join("|",split(" ",$SKIP_DIRS));}
+#
+# Open exclusion list 
+# Note: Please start new list with "|XX" to exclude XX
+#   We should avoid having this list expanded - package not compiling should
+#   simply not be checked out in dev or other areas. Only possible exception
+#   are R&D packages which may requires a default exlcusion (unless +XX is
+#   used) or a trigger on conditions (CXX version, compiler presence). In
+#   such a case, those packages shouldbe stricly optional.
+#
+my  $items=""; 
+if ( defined($SKIP_DIRS) ){ $items .= "|".join("|",split(" ",$SKIP_DIRS));}
 if ($USE_64BITS and $USE_64BITS != "0"){
-  if ($items ne "(") { $items .= "|";}
-  $items .= "geometry|gstar|control"; 
+  $items .= "|geometry|gstar|control"; 
 }
 #print "CXX MAJOR = $env->{CXX_MAJOR} CXX MINOR =  $env->{CXX_MINOR}\n";
 if ($env->{CXX_MAJOR} < 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 4)) {
-    if ($items ne "(") { $items .= "|";}
-    $items .= "Vc|TBB|TPCCATracker";
+    $items .= "|Vc|TBB|TPCCATracker";
 }
 if ($FC eq 'ifort') { 
-    if ($items ne '(') {$items .= "|";}
-    $items .= "StMCAsymMaker";
+    $items .= "|StMCAsymMaker";
 }
 if ($STAR_SYS =~ /x86_darwin/) {
-    if ($items ne '(') {$items .= "|";}
-    $items .= "StStarLogger|StEventDisplayMaker|St_geom_Maker"; # if no QT
+    $items .= "|StStarLogger|StEventDisplayMaker|St_geom_Maker"; # if no QT
 }
 # closing exclusion list
-if ($items ne '(') {$items .= ')';}
-else               {$items  = "";}
+if ( $items ne ""){  
+    $items = "(".substr($items,1,length($items)-1).")";
+    print "SKIP_DIRS is now: $items\n";
+}
 
-print "SKIP_DIRS is now: $items\n" if ($items ne "");
+
 
 
 # Search for directories (one level down) and make
