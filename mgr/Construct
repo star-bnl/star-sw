@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.175 2012/03/08 12:40:39 jeromel Exp $
+# $Id: Construct,v 1.176 2012/03/08 16:58:51 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -252,7 +252,7 @@ my  $excludeDirList = "^(" . join ("|", @excludeDirList) . ")\$";
 my  $items=""; 
 if ( defined($SKIP_DIRS) ){ $items .= "|".join("|",split(" ",$SKIP_DIRS));}
 if ($USE_64BITS and $USE_64BITS != "0"){
-  $items .= "|geometry|gstar|control"; 
+  $items .= "|gstar|control"; 
 }
 #print "CXX MAJOR = $env->{CXX_MAJOR} CXX MINOR =  $env->{CXX_MINOR}\n";
 if ($env->{CXX_MAJOR} < 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 4)) {
@@ -264,6 +264,8 @@ if ($FC eq 'ifort') {
 if ($STAR_SYS =~ /x86_darwin/) {
     $items .= "|StStarLogger|StEventDisplayMaker|St_geom_Maker"; # if no QT
 }
+#if ($items ne '(') {$items .= "|";}
+#$items .= "StBTofPool|StTriggerUtilities";
 # closing exclusion list
 if ( $items ne ""){  
     $items = "(".substr($items,1,length($items)-1).")";
