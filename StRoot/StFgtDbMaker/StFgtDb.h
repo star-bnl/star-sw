@@ -19,7 +19,6 @@ class StFgtDb
     public:
 
 
-
 	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
 	//  radians, depending on the layer.
 	virtual void getPhysicalCoordinateFromGeoId(
@@ -148,7 +147,7 @@ class StFgtDb
 
 	virtual Float_t eLossTab(int bin)=0;
 
-	void printFgtDumpCSV1(TString fname, int myDate, int myTime);
+	virtual void printFgtDumpCSV1(TString fname, int myDate, int myTime);
 
 	virtual ~StFgtDb(){}
 
