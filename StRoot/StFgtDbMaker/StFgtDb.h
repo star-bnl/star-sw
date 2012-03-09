@@ -9,13 +9,6 @@
 #ifndef _ST_FGT_DB_H_
 #define _ST_FGT_DB_H_
 
-#include <TObject.h>
-#include <TVector3.h>
-#include <string>
-#include <sstream>
-#include <cstdlib>
-#include <cmath>
-
 #include "StFgtUtil/geometry/StFgtGeom.h"
 
 //  This is an abstract base class for all the table collection observers of
@@ -24,18 +17,16 @@
 class StFgtDb
 {
     public:
+
+
+
 	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
 	//  radians, depending on the layer.
 	virtual void getPhysicalCoordinateFromGeoId(
 	    Int_t geoId,
 	    Short_t & disc, Short_t & quadrant, Char_t & layer,
 	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
-	)
-	{
-	    return StFgtGeom::getPhysicalCoordinate(
-		geoId, disc, quadrant, layer, ordinate, lowerSpan, upperSpan
 	    );
-	}
 
 	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
 	//  radians, depending on the layer.
@@ -43,12 +34,7 @@ class StFgtDb
 	    const std::string & geoName,
 	    Short_t & disc, Short_t & quadrant, Char_t & layer,
 	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
-	)
-	{
-	    StFgtGeom::getPhysicalCoordinate(
-		geoName, disc, quadrant, layer, ordinate, lowerSpan, upperSpan
 	    );
-	}
 
 	virtual Int_t getGeoIdFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
@@ -162,15 +148,41 @@ class StFgtDb
 
 	virtual Float_t eLossTab(int bin)=0;
 
-
-	virtual double gridAttenuation(float xLoc, float yLoc); // range [0,1]
-	virtual double PchargeFraction(float xLoc, float yLoc); // range [0,1]
-	virtual double PstripGain(int iStrip, int iQuad, int iDisc);
-	virtual double RstripGain(int iStrip, int iQuad, int iDisc);
-
 	void printFgtDumpCSV1(TString fname, int myDate, int myTime);
 
+	virtual ~StFgtDb(){}
+
 };
+
+
+	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
+	//  radians, depending on the layer.
+inline 	void StFgtDb::getPhysicalCoordinateFromGeoId(
+	    Int_t geoId,
+	    Short_t & disc, Short_t & quadrant, Char_t & layer,
+	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
+	)
+	{
+	    return StFgtGeom::getPhysicalCoordinate(
+		geoId, disc, quadrant, layer, ordinate, lowerSpan, upperSpan
+	    );
+	}
+
+	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
+	//  radians, depending on the layer.
+inline	void StFgtDb::getPhysicalCoordinateFromGeoName(
+	    const std::string & geoName,
+	    Short_t & disc, Short_t & quadrant, Char_t & layer,
+	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
+	)
+	{
+	    StFgtGeom::getPhysicalCoordinate(
+		geoName, disc, quadrant, layer, ordinate, lowerSpan, upperSpan
+	    );
+	}
+
+
+
 
 #endif
 
