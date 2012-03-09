@@ -10,88 +10,88 @@
 #ifndef _ST_FGT_ENUMS_H_
 #define _ST_FGT_ENUMS_H_
 
-#include <string>
-
 // constants related to electric coordinates
-
-const Int_t kFgtNumRdos = 2;           // rdo in {1,2}
-const Int_t kFgtNumArms = 6;           // arm in 0-5, though 5 not used in run12.
-const Int_t kFgtNumChannels = 128;     // channel in 0-127
-const Int_t kFgtApvsPerAssembly = 12;  //
-const Int_t kFgtMaxApvId=kFgtApvsPerAssembly*2; // covers 0-23 
-const Int_t kFgtApvGap = 2;            // i.e. apvs 10 & 11
-const Int_t kFgtApvsPerOct = 5;
-const Int_t kFgtApvsPerQuad = 10;
-const Int_t kFgtApvsPerArm = 20;
-const Int_t kFgtNumElecIds = kFgtNumChannels * kFgtApvsPerArm * kFgtNumArms * kFgtNumRdos;  // elec id in 0 to kFgtNumElecIds-1
+enum { 
+   kFgtNumRdos = 2,           // rdo in {1,2}
+   kFgtNumArms = 6,           // arm in 0-5, though 5 not used in run12.
+   kFgtNumChannels = 128,     // channel in 0-127
+   kFgtApvsPerAssembly = 12,  //
+   kFgtMaxApvId=kFgtApvsPerAssembly*2, // covers 0-23 
+   kFgtApvGap = 2,            // i.e. apvs 10 & 11
+   kFgtApvsPerOct = 5,
+   kFgtApvsPerQuad = 10,
+   kFgtApvsPerArm = 20,
+   kFgtNumElecIds = kFgtNumChannels * kFgtApvsPerArm * kFgtNumArms * kFgtNumRdos  // elec id in 0 to kFgtNumElecIds-1
+};
 
 // constants related to physical coordinates
-
-const Int_t kFgtNumDiscs = 6;
-const Int_t kFgtNumQuads = 4;
-const Int_t kFgtNumOctantsPerDisc = 8;
-const Int_t kFgtNumOctants = kFgtNumOctantsPerDisc*kFgtNumDiscs;
-const Int_t kFgtNumLayers = 2;
-const Int_t kFgtNumStrips = 720;
-const Int_t kFgtNumGeoIds = kFgtNumQuads * kFgtNumDiscs * kFgtNumLayers * kFgtNumStrips;   // geoId in 0 to kFgtNumGeoIds-1
-const Int_t kFgtNumPstripsPerOctant = 360;
-const Int_t kFgtNumRstripsPerOctant = 280;
-const Int_t kFgtLowerStripOctant = 'L';    // i.e. a strip is in octant "kFgtLowerStripOctant" if
-const Int_t kFgtHigherStripOctant = 'S';   // the strip index is below the number of strips per octant
+enum {
+   kFgtNumDiscs = 6,
+   kFgtNumQuads = 4,
+   kFgtNumOctantsPerDisc = 8,
+   kFgtNumOctants = kFgtNumOctantsPerDisc*kFgtNumDiscs,
+   kFgtNumLayers = 2,
+   kFgtNumStrips = 720,
+   kFgtNumGeoIds = kFgtNumQuads * kFgtNumDiscs * kFgtNumLayers * kFgtNumStrips,   // geoId in 0 to kFgtNumGeoIds-1
+   kFgtNumPstripsPerOctant = 360,
+   kFgtNumRstripsPerOctant = 280,
+   kFgtLowerStripOctant = 'L',    // i.e. a strip is in octant "kFgtLowerStripOctant" if
+   kFgtHigherStripOctant = 'S',   // the strip index is below the number of strips per octant
                                   // for that layer
-const Int_t kFgtNumStripsPerDisc = kFgtNumQuads  * kFgtNumLayers * kFgtNumStrips; // includes both planes, geoId for given disc will not exceed this range after common disc-offset is subtracted 
+   kFgtNumStripsPerDisc = kFgtNumQuads  * kFgtNumLayers * kFgtNumStrips // includes both planes, geoId for given disc will not exceed this range after common disc-offset is subtracted 
+};
 
 // unsorted constants
-const Int_t kFgtNumTimeBins = 9;           // if using cosmic data, recompile with this value set to 7
-const Int_t kFgtMaxAdc = 4096;
+enum {
+   kFgtNumTimeBins = 9,           // if using cosmic data, recompile with this value set to 7
+   kFgtMaxAdc = 4096
+};
 
 ///cluster seed types
-const Int_t   kFgtSeedTypeNo=0;
-const Int_t   kFgtDeadStrip=1;
-const Int_t   kFgtSeedType1=2;
-const Int_t   kFgtSeedType2=3;
-const Int_t   kFgtSeedType3=4;
-const Int_t   kFgtClusterPart=5;
-const Int_t   kFgtNextToDeadGuy=6;
-const Int_t   kFgtClusterEndUp=7;
-const Int_t   kFgtClusterEndDown=8;
-const Int_t   kFgtStripShared=9;
-const Int_t   kFgtClusterTooBig=10;
-const Int_t   kFgtClusterSeedInSeaOfNoise=11;
+enum {
+   kFgtSeedTypeNo,
+   kFgtDeadStrip,
+   kFgtSeedType1,
+   kFgtSeedType2,
+   kFgtSeedType3,
+   kFgtClusterPart,
+   kFgtNextToDeadGuy,
+   kFgtClusterEndUp,
+   kFgtClusterEndDown,
+   kFgtStripShared,
+   kFgtClusterTooBig,
+   kFgtClusterSeedInSeaOfNoise
+};
 
-//return errors on boundry checks
-const Int_t kFgtError = -999;
-const std::string kFgtErrorString = "XXXXXX";
 
 // Jan's definitions for the final 400-800 micron pitch design 
 // Note:
 // using #define instead of const double to avoid requiring a .cpp
 // file for the constants
 
-const Double_t kFgtRout=          38.25;        //     cm ,
-const Double_t kFgtRlast=         38.1571;      // location of last R strip before Rout
-const Double_t kFgtRmid=          19.125;       //     cm, at Rout/2.
-const Double_t kFgtRin=           11.5;         //     cm, 
-const Double_t kFgtRfirst=        11.5385;      // location of first R strip after Rin
-const Double_t kFgtPfirst=        0.0324;       // location of first Phi strip 
-const Double_t kFgtPlast=         1.5384;       // location of last Phi strip
-const Double_t kFgtRflat=         35.85;        //     cm, 
-const Double_t kFgtPhiflat=       (31.0/180.*3.1416); //  rad 
-const Double_t kFgtRadPitch=      0.09538;     //     nominal '800 mu pitch'
-const Double_t kFgtPhiPitch=      0.08;        //     800 mu, at outer radi or at Rmid
-const Double_t kFgtPhiAnglePitch= 0.002095; 
-const Double_t kFgtDeadQuadEdge=  1.2;         // (cm) effective dead area along quadrant edges
-const Int_t kFgtMaxClusterSize= 11;        //maximum cluster size in strips that a cluster algo should return
-const Int_t kFgtNumAdditionalStrips=5;        //strips in addition to the cluster size that are passed up. Mainly for debugging.
-
+#define kFgtRout          38.25        //     cm ,
+#define kFgtRlast         38.1571      // location of last R strip before Rout
+#define kFgtRmid          19.125       //     cm, at Rout/2.
+#define kFgtRin           11.5         //     cm, 
+#define kFgtRfirst        11.5385      // location of first R strip after Rin
+#define kFgtPfirst        0.0324       // location of first Phi strip 
+#define kFgtPlast         1.5384       // location of last Phi strip
+#define kFgtRflat         35.85        //     cm, 
+#define kFgtPhiflat       (31.0/180.*3.1416) //  rad 
+#define kFgtRadPitch      0.09538     //     nominal '800 mu pitch'
+#define kFgtPhiPitch      0.08        //     800 mu, at outer radi or at Rmid
+#define kFgtPhiAnglePitch 0.002095 
+#define kFgtDeadQuadEdge  1.2         // (cm) effective dead area along quadrant edges
+#define kFgtMaxClusterSize 11        //maximum cluster size in strips that a cluster algo should return
+#define kFgtNumAdditionalStrips 5        //strips in addition to the cluster size that are passed up. Mainly for debugging.
 
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.15 2012/03/09 12:31:53 rfatemi Exp $
+ * $Id: StFgtConsts.h,v 1.16 2012/03/09 17:48:32 rfatemi Exp $
  * $Log: StFgtConsts.h,v $
- * Revision 1.15  2012/03/09 12:31:53  rfatemi
- * Change entries from enums to consts
+ * Revision 1.16  2012/03/09 17:48:32  rfatemi
+ * revert back to old version
  *
  * Revision 1.14  2012/03/07 17:05:58  sgliske
  * updated whitespace and comments
