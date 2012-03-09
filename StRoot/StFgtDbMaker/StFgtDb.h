@@ -147,7 +147,7 @@ class StFgtDb
 
 	virtual Float_t eLossTab(int bin)=0;
 
-	void printFgtDumpCSV1(TString fname, int myDate, int myTime);
+	virtual void printFgtDumpCSV1(TString fname, int myDate, int myTime);
 
 	virtual ~StFgtDb(){}
 
