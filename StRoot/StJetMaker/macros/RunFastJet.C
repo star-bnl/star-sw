@@ -3,18 +3,21 @@
 // Texas A&M University
 // 31 Aug 2011
 //
-// $Id: RunFastJet.C,v 1.2 2011/08/31 18:03:29 pibero Exp $
+// $Id: RunFastJet.C,v 1.3 2012/03/10 23:10:36 pibero Exp $
 //
 // $Log: RunFastJet.C,v $
+// Revision 1.3  2012/03/10 23:10:36  pibero
+// Added support for fastjet plugins
+//
 // Revision 1.2  2011/08/31 18:03:29  pibero
 // Minor updates
 //
 //
 
 void RunFastJet(int nevents = 1e6,
-		 const char* mudstfile = "/star/data60/reco/production2009_200Gev_Single/FullField/P10ic/2009/151/10151044/st_physics_adc_10151044_raw_6320004.MuDst.root",
-		 const char* jetfile   = "st_physics_adc_10151044_raw_6320004.jets.root",
-		 const char* skimfile  = "st_physics_adc_10151044_raw_6320004.skim.root",
+		const char* mudstfile = "root://xrdstar.rcf.bnl.gov:1095//home/starlib/home/starreco/reco/production2009_200Gev_Single/ReversedFullField/P10ic/2009/143/10143008/st_physics_10143008_raw_6020001.MuDst.root",
+		 const char* jetfile = "jets.root",
+		 const char* skimfile = "skim.root",
 		 bool useL2 = false)
 {
   cout << "Read MuDst file:\t" << mudstfile << endl;
@@ -44,6 +47,11 @@ void RunFastJet(int nevents = 1e6,
   gSystem->Load("StMCAsymMaker");
   gSystem->Load("StRandomSelector");
   gSystem->Load("libfastjet.so");
+  gSystem->Load("libCDFConesPlugin.so");
+  gSystem->Load("libEECambridgePlugin.so");
+  gSystem->Load("libJadePlugin.so");
+  gSystem->Load("libNestedDefsPlugin.so");
+  gSystem->Load("libSISConePlugin.so");
   gSystem->Load("StJetFinder");
   gSystem->Load("StJetSkimEvent");
   gSystem->Load("StJets");
@@ -51,7 +59,7 @@ void RunFastJet(int nevents = 1e6,
   gSystem->Load("StJetMaker");
   gSystem->Load("StTriggerFilterMaker");
 
-
+  // The chain
   StChain* chain = new StChain; 
 
   // MuDst reader
@@ -107,6 +115,7 @@ void RunFastJet(int nevents = 1e6,
 
   // Barrel ADC to energy maker
   StEmcADCtoEMaker* adc = new StEmcADCtoEMaker;
+  adc->saveAllStEvent(true);
 
   // Trigger simulator
   StTriggerSimuMaker* simuTrig = new StTriggerSimuMaker;
