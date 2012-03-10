@@ -4,9 +4,12 @@
 // Texas A&M University
 // 31 Aug 2011
 //
-// $Id: StFastJetPars.h,v 1.1 2011/08/31 17:57:36 pibero Exp $
+// $Id: StFastJetPars.h,v 1.2 2012/03/10 23:09:53 pibero Exp $
 //
 // $Log: StFastJetPars.h,v $
+// Revision 1.2  2012/03/10 23:09:53  pibero
+// Addeed support for fastjet plugins
+//
 // Revision 1.1  2011/08/31 17:57:36  pibero
 // Support for FastJet
 //
@@ -19,6 +22,25 @@
 #define ST_FAST_JET_PARS_H
 
 #include "StJetPars.h"
+
+class StPlugin : public TObject {
+public:
+  StPlugin(void* i) : mImpl(i) {}
+  virtual ~StPlugin() {}
+  void* impl() const { return mImpl; }
+protected:
+  void* mImpl;
+  ClassDef(StPlugin,0)
+};
+
+class StCDFMidPointPlugin : public StPlugin {
+public:
+  StCDFMidPointPlugin(double coneRadius,
+		      double overlapTreshold,
+		      double seedThreshold,
+		      double coneAreaFraction);
+  ClassDef(StCDFMidPointPlugin,0)
+};
 
 class StFastJetPars : public StJetPars {
 public:
@@ -112,6 +134,7 @@ public:
     , mRecombScheme(E_scheme)
     , mStrategy(Best)
     , mPtMin(5.0)
+    , mPlugin(0)
   {
   }
 
@@ -122,12 +145,14 @@ public:
   int    recombinationScheme() const { return mRecombScheme; }
   int    strategy           () const { return mStrategy;     }
   double ptMin              () const { return mPtMin;        }
+  void* plugin() const { return mPlugin->impl(); }
 
   void setJetAlgorithm       (int    jetAlgorithm) { mJetAlgorithm = jetAlgorithm; }
   void setRparam             (double Rparam      ) { mRparam       = Rparam;       }
   void setRecombinationScheme(int    recombScheme) { mRecombScheme = recombScheme; }
   void setStrategy           (int    strategy    ) { mStrategy     = strategy;     }
   void setPtMin              (double ptmin       ) { mPtMin        = ptmin;        }
+  void setPlugin(StPlugin* plugin) { mPlugin = plugin; }
 
 private:
   int    mJetAlgorithm;
@@ -135,6 +160,7 @@ private:
   int    mRecombScheme;
   int    mStrategy;
   double mPtMin;
+  StPlugin* mPlugin;
 
   ClassDef(StFastJetPars,0)
 };

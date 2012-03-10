@@ -4,9 +4,12 @@
 // Texas A&M University
 // 31 Aug 2011
 //
-// $Id: StjFastJet.h,v 1.1 2011/08/31 17:57:54 pibero Exp $
+// $Id: StjFastJet.h,v 1.2 2012/03/10 23:09:53 pibero Exp $
 //
 // $Log: StjFastJet.h,v $
+// Revision 1.2  2012/03/10 23:09:53  pibero
+// Addeed support for fastjet plugins
+//
 // Revision 1.1  2011/08/31 17:57:54  pibero
 // Support for FastJet
 //
@@ -30,6 +33,7 @@ public:
   void findJets(JetList& protoJetList, const FourVecList& particleList);
 
 private:
+  fastjet::JetDefinition jetDefinition() const;
   StFastJetPars mPars;
 };
 
