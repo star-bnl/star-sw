@@ -145,8 +145,6 @@ class StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
 
-	virtual Float_t eLossTab(int bin)=0;
-
 	virtual void printFgtDumpCSV1(TString fname, int myDate, int myTime);
 
 	virtual ~StFgtDb(){}
