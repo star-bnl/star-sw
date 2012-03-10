@@ -1,4 +1,4 @@
-// $Id: StjEEMCMuDst.cxx,v 1.9 2012/03/10 03:52:46 pibero Exp $
+// $Id: StjEEMCMuDst.cxx,v 1.10 2012/03/10 10:49:16 pibero Exp $
 #include "StjEEMCMuDst.h"
 
 #include "StMaker.h"
@@ -32,8 +32,8 @@ StjTowerEnergyList StjEEMCMuDst::getEnergyList()
     int rawadc, sec, sub, etabin;
     muEmc->getEndcapTowerADC(id, rawadc, sec, sub, etabin);
 
-    // Drop towers at saturation
-    if (rawadc == 4095) continue;
+    // Sanity check
+    if (rawadc < 0 || rawadc >= 4095) continue;
 
     assert(1 <= sec && sec <= 12);
     assert(1 <= sub && sub <= 5);
