@@ -3,9 +3,12 @@
 // Texas A&M University
 // 31 Aug 2011
 //
-// $Id: StFastJetPars.cxx,v 1.2 2012/03/10 23:09:53 pibero Exp $
+// $Id: StFastJetPars.cxx,v 1.3 2012/03/10 23:18:28 pibero Exp $
 //
 // $Log: StFastJetPars.cxx,v $
+// Revision 1.3  2012/03/10 23:18:28  pibero
+// Added destructor for StCDFMidPointPlugin
+//
 // Revision 1.2  2012/03/10 23:09:53  pibero
 // Addeed support for fastjet plugins
 //
@@ -71,4 +74,9 @@ StCDFMidPointPlugin::StCDFMidPointPlugin(double coneRadius,
 					 double coneAreaFraction)
   : StPlugin(new fastjet::CDFMidPointPlugin(coneRadius,overlapThreshold,seedThreshold,coneAreaFraction))
 {
+}
+
+StCDFMidPointPlugin::~StCDFMidPointPlugin()
+{
+  delete mImpl;
 }
