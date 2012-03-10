@@ -19,6 +19,7 @@
 #include "L2pedAlgo/L2pedAlgo09.h"
 #include "L2gammaAlgo/L2bemcGamma2009.h"
 #include "L2gammaAlgo/L2eemcGamma2009.h"
+#include "L2upsilon/L2Upsilon2009.h"
 #include "L2algoUtil/l2Algorithm.h" // L2 results offsets
 #include "StL2_2009EmulatorMaker.h"
 
@@ -50,6 +51,7 @@ StL2_2009EmulatorMaker::InitRun(int runNo){
   mL2algo.push_back(new L2jetAlgo2009("jetHigh",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_DIJET_HIGH));
   mL2algo.push_back(new L2bemcGamma2009("bGamma",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_BGAMMA));
   mL2algo.push_back(new L2eemcGamma2009("eGamma",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_EGAMMA));
+  mL2algo.push_back(new L2Upsilon2009("upsilon",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_UPSILON));
 
   initRun2(runNo);
 
