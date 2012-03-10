@@ -9,6 +9,7 @@
 #ifndef _ST_FGT_DB_IMPL_H_
 #define _ST_FGT_DB_IMPL_H_
 
+#include <cstdlib>
 #include "StFgtDb.h"
 #include "tables/St_fgtElosCutoff_Table.h"
 #include "tables/St_fgtPedestal_Table.h"
@@ -29,10 +30,11 @@ class StFgtDbImpl : public StFgtDb
 	//  directly by users. They are for use by the factory methods defined
 	//  in the class being observed by this DB interface implementation.
 
-	StFgtDbImpl()
+          StFgtDbImpl(
+        ) : m_map(NULL), m_rmap(NULL), m_status(NULL), m_pedestal(NULL), m_gain(NULL)
 	{ }
-
-	StFgtDbImpl(
+	    
+	  StFgtDbImpl(
 	    fgtMapping_st * map, 
 	    fgtMapping_st * rmap, 
 	    fgtStatus_st * status,
@@ -304,6 +306,7 @@ class StFgtDbImpl : public StFgtDb
 	);
 
 
+	virtual ~StFgtDbImpl(){}
 
     private:
 	fgtMapping_st * m_map;
@@ -313,13 +316,6 @@ class StFgtDbImpl : public StFgtDb
 	fgtGain_st * m_gain;
 	fgtElosCutoff_st* m_eLoss;
 
-	virtual Float_t eLossTab(int bin)
-	{
-	  assert(bin>=0);
-	  assert(bin<10000);
-	  return m_eLoss[0].cutoff[bin];
-
-	};
     //	ClassDef(StFgtDbImpl, 1)
 };
 
