@@ -3,9 +3,12 @@
 // Texas A&M University
 // 31 Aug 2011
 //
-// $Id: StjFastJet.cxx,v 1.1 2011/08/31 17:58:01 pibero Exp $
+// $Id: StjFastJet.cxx,v 1.2 2012/03/10 23:09:53 pibero Exp $
 //
 // $Log: StjFastJet.cxx,v $
+// Revision 1.2  2012/03/10 23:09:53  pibero
+// Addeed support for fastjet plugins
+//
 // Revision 1.1  2011/08/31 17:58:01  pibero
 // Support for FastJet
 //
@@ -28,14 +31,8 @@ void StjFastJet::findJets(JetList& protoJetList, const FourVecList& particleList
     inputParticles.push_back(pseudojet);
   }
 
-  // Create an object that represents your choice of jet algorithm and the associated parameters
-  fastjet::JetDefinition jetDefinition(static_cast<fastjet::JetAlgorithm>(mPars.jetAlgorithm()),
-				       mPars.Rparam(),
-				       static_cast<fastjet::RecombinationScheme>(mPars.recombinationScheme()),
-				       static_cast<fastjet::Strategy>(mPars.strategy()));
-
   // Run the jet clustering with the above jet definition
-  fastjet::ClusterSequence clusterSequence(inputParticles,jetDefinition);
+  fastjet::ClusterSequence clusterSequence(inputParticles,jetDefinition());
 
   // Extract inclusive jets with pt > ptmin
   std::vector<fastjet::PseudoJet> inclusiveJets = clusterSequence.inclusive_jets(mPars.ptMin());
@@ -48,4 +45,14 @@ void StjFastJet::findJets(JetList& protoJetList, const FourVecList& particleList
     protojet.update();
     protoJetList.push_back(protojet);
   }
+}
+
+fastjet::JetDefinition StjFastJet::jetDefinition() const
+{
+  return (mPars.jetAlgorithm() == fastjet::plugin_algorithm)
+    ? fastjet::JetDefinition(static_cast<fastjet::JetDefinition::Plugin*>(mPars.plugin()))
+    : fastjet::JetDefinition(static_cast<fastjet::JetAlgorithm>(mPars.jetAlgorithm()),
+			     mPars.Rparam(),
+			     static_cast<fastjet::RecombinationScheme>(mPars.recombinationScheme()),
+			     static_cast<fastjet::Strategy>(mPars.strategy()));
 }

@@ -3,9 +3,12 @@
 // Texas A&M University
 // 31 Aug 2011
 //
-// $Id: StFastJetPars.cxx,v 1.1 2011/08/31 17:57:44 pibero Exp $
+// $Id: StFastJetPars.cxx,v 1.2 2012/03/10 23:09:53 pibero Exp $
 //
 // $Log: StFastJetPars.cxx,v $
+// Revision 1.2  2012/03/10 23:09:53  pibero
+// Addeed support for fastjet plugins
+//
 // Revision 1.1  2011/08/31 17:57:44  pibero
 // Support for FastJet
 //
@@ -57,3 +60,15 @@ const int StFastJetPars::plugin_strategy = fastjet::plugin_strategy;
 ClassImp(StFastJetPars)
 
 StJetFinder* StFastJetPars::constructJetFinder() { return new StjFastJet(*this); }
+
+#include "fastjet/CDFMidPointPlugin.hh"
+
+ClassImp(StCDFMidPointPlugin)
+
+StCDFMidPointPlugin::StCDFMidPointPlugin(double coneRadius,
+					 double overlapThreshold,
+					 double seedThreshold,
+					 double coneAreaFraction)
+  : StPlugin(new fastjet::CDFMidPointPlugin(coneRadius,overlapThreshold,seedThreshold,coneAreaFraction))
+{
+}
