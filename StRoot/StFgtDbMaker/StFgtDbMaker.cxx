@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.16 2012/02/22 20:07:44 rfatemi Exp $
+// $Id: StFgtDbMaker.cxx,v 1.17 2012/03/10 01:59:22 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -7,10 +7,6 @@
 #include "StFgtDbMaker.h"
 #include "TDataSetIter.h"
 #include "StMessMgr.h"
-StFgtDbMaker* gStFgtDbMaker=NULL; 
-
-// accessing Eloss cut off table for slow-simu
-
 #include "tables/St_fgtElosCutoff_Table.h"
 #include "tables/St_fgtPedestal_Table.h"
 #include "tables/St_fgtMapping_Table.h"
@@ -24,11 +20,11 @@ ClassImp(StFgtDbMaker)
 StFgtDbMaker::StFgtDbMaker(const char *name)
     : StMaker(name)
 {
-    gStFgtDbMaker = this;
+  
     m_tables = new StFgtDbImpl();
     m_rmap = 0;
     m_isIdeal = false;
-    geom=0;
+    m_geom=0;
 }
 
 //_____________________________________________________________________________
@@ -39,9 +35,7 @@ StFgtDbMaker::~StFgtDbMaker()
 }
 
 //-----------------------------------------------------------------------------
-//  You should call getDbTables after calling this with "ideal".  If you do
-//  not, then your StFgtDb object will be out of date.
-void StFgtDbMaker::SetFlavor( const char * flav, const char * tabname )
+void StFgtDbMaker::setFlavor( const char * flav, const char * tabname )
 {
     if ( flav && strcmp( "ideal", flav ) == 0 )
 	m_isIdeal = true;
@@ -67,7 +61,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
     LOG_INFO << Form("StFgtDbMaker::InitRun(), Database Time=%s",GetDBTime().AsString())<<endm;
 
     // clear old pointers to DB tables, just in case. Do not delete the data which are owned by StDbMaker
-    mLossTab =0;
+    m_LossTab =0;
 
 
     ////start here
@@ -134,7 +128,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	}
 
 
-	eLossDataset=(St_fgtElosCutoff*)ELossDB->Find("fgtElosCutoff"); assert(eLossDataset);
+	eLossDataset=(St_fgtElosCutoff*)ELossDB->Find("fgtElosCutoff"); 
 	Int_t rows = eLossDataset->GetNRows();
 	if (rows > 1) 
 	  {
@@ -144,7 +138,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 
 
 	mapDataset = (St_fgtMapping *)
-	  MapDB->Find("fgtMapping"); assert(mapDataset);
+	  MapDB->Find("fgtMapping");
 	rows = mapDataset->GetNRows();
 	if (rows > 1) 
 	{
@@ -152,7 +146,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 			<< " rows, this is fatal, fix DB content" << endm;
 	}
 	gainDataset = (St_fgtGain*)
-	    GainDB->Find("fgtGain"); assert(gainDataset);
+	    GainDB->Find("fgtGain");
 	rows = gainDataset->GetNRows();
 	if (rows > 1) 
 	{
@@ -160,7 +154,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 			<< " rows, this is fatal, fix DB content" << endm;
 	}
 	pedDataset = (St_fgtPedestal*)
-	    PedDB->Find("fgtPedestal"); assert(pedDataset);
+	    PedDB->Find("fgtPedestal");
 	rows = pedDataset->GetNRows();
 	if (rows > 1) 
 	{
@@ -168,7 +162,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 			<< " rows, this is fatal, fix DB content" << endm;
 	}
 	statusDataset = (St_fgtStatus*)
-	    StatusDB->Find("fgtStatus"); assert(statusDataset);
+	    StatusDB->Find("fgtStatus");
 	rows = statusDataset->GetNRows();
 	if (rows > 1) 
 	{
@@ -214,12 +208,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	displayBeginEndTime(gainDataset);
 	displayBeginEndTime(eLossDataset);
 
-	#if 0 // disable it later 
-	    for (int i = 0; i < 10000; i++) { 
-            std::cout << i <<"tmp eLoss val: " << mLossTab[0].cutoff[i] 
-		      << std::endl;
-	    if(i>15) break;    }
-	#endif   
     }
     else if (!m_isIdeal)
     {
@@ -306,6 +294,9 @@ Int_t StFgtDbMaker::Finish()
 
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.17  2012/03/10 01:59:22  rfatemi
+// Review comments
+//
 // Revision 1.16  2012/02/22 20:07:44  rfatemi
 // Changed name from updateValidity to displayBeginEndTime
 //

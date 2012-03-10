@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.12 2012/02/24 16:20:31 rfatemi Exp $
+// $Id: StFgtDbMaker.h,v 1.13 2012/03/10 01:59:29 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -7,14 +7,8 @@
 #ifndef STFGTDBMAKER_H
 #define STFGTDBMAKER_H
 
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
 
-//#include "database/fgtGain.h"
-//#include "StFgtUtil/database/fgtMapping.h"
-//#include "StFgtUtil/database/fgtPedestal.h"
-//#include "StFgtUtil/database/fgtStatus.h"
+#include "StMaker.h"
 #include "StFgtDb.h"
 #include "StFgtDbImpl.h"
 #include "StFgtDbIdealImpl.h"
@@ -23,13 +17,7 @@
 class fgtElosCutoff_st;
 
 class StFgtDbMaker : public StMaker {
- private:
-  fgtElosCutoff_st *mLossTab;
-  StFgtGeom *geom;
-  StFgtDb * m_tables;
-  fgtMapping_st * m_rmap;
-  bool	    m_isIdeal;
-
+ 
  public: 
   StFgtDbMaker(const char *name="FgtDb");
   virtual       ~StFgtDbMaker();
@@ -41,22 +29,36 @@ class StFgtDbMaker : public StMaker {
   virtual void   Clear(const char *opt);
   void  printFgtDumpCSV1(TString fname) { m_tables->printFgtDumpCSV1(fname,GetDate(), GetTime());  }
 
- map<string, pair<string, string> > mValidRanges;
+  map<string, pair<string, string> > mValidRanges;
   void displayBeginEndTime(TTable* table);
 
-  virtual void SetFlavor( const char *flav, const char *tabname );
+  //  You should call getDbTables after calling this with "ideal".  If you do
+  //  not, then your StFgtDb object will be out of date.
+  virtual void setFlavor( const char *flav, const char *tabname );
 
   Float_t eLossTab(int bin); //  built from BichselELossProbHighBG.dat used to reject very high and unrealistic loss value
-  StFgtGeom *getFgtGeom(){ return geom;} 
+  StFgtGeom *getFgtGeom(){ return m_geom;} 
+
+private:
+
+  fgtElosCutoff_st *m_LossTab;
+  StFgtGeom *m_geom;
+  StFgtDb * m_tables;
+  fgtMapping_st * m_rmap;
+  bool	    m_isIdeal;
+
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.12 2012/02/24 16:20:31 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.13 2012/03/10 01:59:29 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.13  2012/03/10 01:59:29  rfatemi
+// Review comments
+//
 // Revision 1.12  2012/02/24 16:20:31  rfatemi
 // Correct mistype in printFgtDumpCSV1
 //
