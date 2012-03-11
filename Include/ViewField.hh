@@ -24,13 +24,15 @@ class ViewField {
     void SetSensor(Sensor* s);
     void SetComponent(ComponentBase* c);
     void SetCanvas(TCanvas* c);
- 
-    // Establish area, normal vector, in-plane vector ...
-    void SetArea(double xmin, double ymin, 
-                 double xmax, double ymax);
+    
+    // Range of the plot 
     void SetVoltageRange(const double minval, const double maxval);
     void SetElectricFieldRange(const double minval, const double maxval);
     void SetWeightingFieldRange(const double minval, const double maxval);
+
+    // Establish area, normal vector, in-plane vector ...
+    void SetArea(double xmin, double ymin, 
+                 double xmax, double ymax);
     void SetNumberOfContours(const int n);
     void SetDefaultProjection();
     void SetPlane(double fx, double fy, double fz, 
@@ -67,7 +69,7 @@ class ViewField {
 
     std::string className;
  
-    static const int nMaxContours = 100;
+    static const int nMaxContours = 50;
 
     // Options
     bool debug;

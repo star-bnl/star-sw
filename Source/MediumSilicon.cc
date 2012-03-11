@@ -1400,7 +1400,6 @@ MediumSilicon::GetElectronBandPopulation(const int band) {
     std::cerr << "    Band index (" << band << ") out of range.\n";
     return 0;
   }
-
   return nCollElectronBand[band];
 
 }
@@ -2249,7 +2248,6 @@ MediumSilicon::ElectronScatteringRates() {
     outfileX.close();
     outfileL.close();
   }
-
   
   std::ofstream outfileG;
   if (useCfOutput) {

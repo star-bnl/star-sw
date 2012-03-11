@@ -105,10 +105,10 @@ ViewField::SetArea(double xmin, double ymin,
     std::cerr << "      " << ymin << " < y < " << ymax << "\n";
     return;
   } 
-  pxmin = std::min(xmin,xmax);
-  pymin = std::min(ymin,ymax);
-  pxmax = std::max(xmin,xmax);
-  pymax = std::max(ymin,ymax);
+  pxmin = std::min(xmin, xmax);
+  pymin = std::min(ymin, ymax);
+  pxmax = std::max(xmin, xmax);
+  pymax = std::max(ymin, ymax);
   
 }
 
@@ -435,8 +435,12 @@ ViewField::PlotSurfaceWeightingField(const std::string label,
  
   if (fWfield == 0) CreateFunctionWeightingField();
 
-  int plotType = 1;
-  if (option == "e" || option == "field") {
+  int plotType = 0;
+  if (option == "v" || option == "p" || option == "phi" || 
+      option == "volt" || option == "voltage" || 
+      option == "pot" || option == "potential") {
+    fWfield->SetParameter(0,  -1.);
+  } else if (option == "e" || option == "field") {
     fWfield->SetParameter(0,  1.);
     plotType = 1;
   } else if (option == "ex") {
@@ -458,7 +462,9 @@ ViewField::PlotSurfaceWeightingField(const std::string label,
   fWfield->SetNpy(nSamples2dY);
   fWfield->GetXaxis()->SetTitle(xLabel);
   fWfield->GetYaxis()->SetTitle(yLabel);
-  if (plotType == 1) {
+  if (plotType == 0) {
+    fWfield->SetTitle("Surface plot of the weighting potential");
+  } else if (plotType == 1) {
     fWfield->SetTitle("Surface plot of the weighting field");
   } else if (plotType == 2) {
     fWfield->SetTitle("Surface plot of the weighting field (x-component)");
@@ -489,8 +495,12 @@ ViewField::PlotContourWeightingField(const std::string label,
 
   if (fWfield == 0) CreateFunctionWeightingField();
 
-  int plotType = 1;
-  if (option == "e" || option == "field") {
+  int plotType = 0;
+  if (option == "v" || option == "p" || option == "phi" || 
+      option == "volt" || option == "voltage" || 
+      option == "pot" || option == "potential") {
+    fWfield->SetParameter(0,  -1.);
+  } else if (option == "e" || option == "field") {
     fWfield->SetParameter(0,  1.);
     plotType = 1;
   } else if (option == "ex") {
@@ -512,9 +522,15 @@ ViewField::PlotContourWeightingField(const std::string label,
   double level[nMaxContours];
   for (int i = 0; i < nContours; ++i) {
     if (nContours > 1) {
-      level[i] = wmin + i * (wmax - wmin) / (nContours - 1.);
+      level[i] = i / (nContours - 1.);
+      if (plotType > 0) {
+        level[i] = wmin + (wmax - wmin) * level[i];
+      }
     } else {
-      level[i] = (wmax + wmin) / 2.; 
+      level[i] = 1. / 2.;
+      if (plotType > 0) {
+        level[i] *= (wmax + wmin); 
+      }
     }
   }
   fWfield->SetContour(nContours, level);
@@ -530,7 +546,9 @@ ViewField::PlotContourWeightingField(const std::string label,
   fWfield->SetNpy(nSamples2dY);
   fWfield->GetXaxis()->SetTitle(xLabel);
   fWfield->GetYaxis()->SetTitle(yLabel);
-  if (plotType == 1) {
+  if (plotType == 0) {
+    fWfield->SetTitle("Contours of the weighting potential");
+  } else if (plotType == 1) {
     fWfield->SetTitle("Contours of the weighting field");
   } else if (plotType == 2) {
     fWfield->SetTitle("Contours of the weighting field (x-component)");
@@ -728,7 +746,7 @@ ViewField::EvaluateWeightingField(double* pos, double* par) {
   if (sensor == 0 && component == 0) return 0.;
 
   // Compute the field.
-  double ex = 0., ey = 0., ez = 0.;
+  double ex = 0., ey = 0., ez = 0., v = 0.;
   const double xpos = project[0][0] * pos[0] + project[1][0] * pos[1] + 
                       project[2][0];
   const double ypos = project[0][1] * pos[0] + project[1][1] * pos[1] + 
@@ -737,21 +755,35 @@ ViewField::EvaluateWeightingField(double* pos, double* par) {
                       project[2][2];
  
   if (sensor == 0) {
-    component->WeightingField(xpos, ypos, zpos, ex, ey, ez, electrode);
+    if (par[0] > 0.) {
+      component->WeightingField(xpos, ypos, zpos, ex, ey, ez, electrode);
+    } else {
+      v = component->WeightingPotential(xpos, ypos, zpos, electrode);
+    }
   } else {
-    sensor->WeightingField(xpos, ypos, zpos, ex, ey, ez, electrode);
+    if (par[0] > 0.) {
+      sensor->WeightingField(xpos, ypos, zpos, ex, ey, ez, electrode);
+    } else {
+      v = component->WeightingPotential(xpos, ypos, zpos, electrode);
+    }
   }
   if (debug) {
     std::cout << className << "::EvaluateWeightingField:\n";
     std::cout << "    At (u, v) = (" 
               << pos[0] << ", " << pos[1] << "), "
-              << " (x,y,z) = (" 
+              << " (x, y, z) = (" 
               << xpos << "," << ypos << "," << zpos << ")\n";
-    std::cout << "    E = " << ex << ", " << ey << ", " << ez << ")\n";
+    if (par[0] > 0.) {
+      std::cout << "    E = (" << ex << ", " << ey << ", " << ez << ")\n";
+    } else {
+      std::cout << "    V = " << v << "\n";
+    }
   }
  
   // Select the quantity to be plotted.
-  if (par[0] > 30.) {
+  if (par[0] < 0.) {
+    return v;
+  } else if (par[0] > 30.) {
     return ez;
   } else if (par[0] > 20.) {
     return ey;

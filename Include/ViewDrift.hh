@@ -34,15 +34,17 @@ class ViewDrift {
 
     // Functions to be used by transport classes.
     void NewElectronDriftLine(const int np, int& id,
-                        const double x0, const double y0, const double z0);
+                              const double x0, const double y0, 
+                              const double z0);
     void NewHoleDriftLine(const int np, int& id,
                           const double x0, const double y0, const double z0);
     void NewIonDriftLine(const int np, int& id,
-                        const double x0, const double y0, const double z0);
+                         const double x0, const double y0, const double z0);
     void NewPhotonTrack(const double x0, const double y0, const double z0,
                         const double x1, const double y1, const double z1);
     void NewChargedParticleTrack(const int np, int& id,
-                        const double x0, const double y0, const double z0);
+                                 const double x0, const double y0, 
+                                 const double z0);
 
     void SetDriftLinePoint(const int iL, const int iP, 
                   const double x, const double y, const double z);

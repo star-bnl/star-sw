@@ -115,6 +115,21 @@ Sensor::WeightingField(const double x, const double y, const double z,
 
 }
 
+double 
+Sensor::WeightingPotential(const double x, const double y, const double z,
+                           const std::string label) {
+
+  double v = 0.;
+  // Add up contributions from all components.
+  for (int i = nElectrodes; i--;) {
+    if (electrodes[i].label == label) {
+      v += electrodes[i].comp->WeightingPotential(x, y, z, label);
+    }
+  }
+  return v;
+
+}
+
 bool 
 Sensor::GetMedium(const double x, const double y, const double z,
                   Medium*& m) {

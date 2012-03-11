@@ -90,8 +90,8 @@ class AvalancheMicroscopic {
     void EnableMagneticField()  {useBfield = true;}
     void DisableMagneticField() {useBfield = false;}
     
-    // Set number of collisions to be skipped
-    void SetCollisionSteps(const int n = 100);
+    // Set number of collisions to be skipped for plotting
+    void SetCollisionSteps(const int n);
 
     void SetTimeWindow(const double t0, const double t1);
     void UnsetTimeWindow();

@@ -32,6 +32,8 @@ class ComponentAnalyticField : public ComponentBase {
     void WeightingField(const double x, const double y, const double z,
                         double& wx, double& wy, double& wz,
                         const std::string label);
+    double WeightingPotential(const double x, const double y, const double z,
+                              const std::string label);
     
     bool GetBoundingBox(double& x0, double& y0, double& z0,
                         double& x1, double& y1, double& z1);
@@ -349,53 +351,64 @@ class ComponentAnalyticField : public ComponentBase {
                     double& ex, double& ey, double& ez, double& volt);
     // Evaluation of the weighting field
     bool Wfield(const double xpos, const double ypos, const double zpos,
-                double& ex, double& ey, double& ez, const int isw);
+                double& ex, double& ey, double& ez, double& volt,
+                const int isw, const bool opt);
     void WfieldWireA00(const double xpos, const double ypos,
-                       double& ex, double& ey, 
+                       double& ex, double& ey, double& volt,
                        const int mx, const int my, 
-                       const int sw);
+                       const int sw, const bool opt);
     void WfieldWireB2X(const double xpos, const double ypos,
-                       double& ex, double& ey,
-                       const int my, const int sw);
+                       double& ex, double& ey, double& volt,
+                       const int my, const int sw, const bool opt);
     void WfieldWireB2Y(const double xpos, const double ypos,
-                       double& ex, double& ey,
-                       const int mx, const int sw);
+                       double& ex, double& ey, double& volt,
+                       const int mx, const int sw, const bool opt);
     void WfieldWireC2X(const double xpos, const double ypos,
-                       double& ex, double& ey, const int sw);
+                       double& ex, double& ey, double& volt,
+                       const int sw, const bool opt);
     void WfieldWireC2Y(const double xpos, const double ypos,
-                       double& ex, double& ey, const int sw);
+                       double& ex, double& ey, double& volt,
+                       const int sw, const bool opt);
     void WfieldWireC30(const double xpos, const double ypos,
-                       double& ex, double& ey, const int sw);
+                       double& ex, double& ey, double& volt,
+                       const int sw, const bool opt);
     void WfieldWireD10(const double xpos, const double ypos,
-                       double& ex, double& ey, const int sw);
+                       double& ex, double& ey, double& volt,
+                       const int sw, const bool opt);
     void WfieldWireD30(const double xpos, const double ypos,
-                       double& ex, double& ey, const int sw);
+                       double& ex, double& ey, double& volt,
+                       const int sw, const bool opt);
     void WfieldPlaneA00(const double xpos, const double ypos,
-                        double& ex, double& ey, 
+                        double& ex, double& ey, double& volt,
                         const int mx, const int my, 
-                        const int iplane);
+                        const int iplane, const bool opt);
     void WfieldPlaneB2X(const double xpos, const double ypos,
-                        double& ex, double& ey, 
-                        const int my, const int iplane);
+                        double& ex, double& ey, double& volt,
+                        const int my, const int iplane, const bool opt);
     void WfieldPlaneB2Y(const double xpos, const double ypos,
-                        double& ex, double& ey, 
-                        const int mx, const int iplane);
+                        double& ex, double& ey, double& volt,
+                        const int mx, const int iplane, const bool opt);
     void WfieldPlaneC2X(const double xpos, const double ypos,
-                        double& ex, double& ey, const int iplane);
+                        double& ex, double& ey, double& volt,
+                        const int iplane, const bool opt);
     void WfieldPlaneC2Y(const double xpos, const double ypos,
-                        double& ex, double& ey, const int iplane);
+                        double& ex, double& ey, double& volt,
+                        const int iplane, const bool opt);
     void WfieldPlaneC30(const double xpos, const double ypos,
-                        double& ex, double& ey, const int iplane);
+                        double& ex, double& ey, double& volt,
+                        const int iplane, const bool opt);
     void WfieldPlaneD10(const double xpos, const double ypos,
-                        double& ex, double& ey, const int iplane);
+                        double& ex, double& ey, double& volt,
+                        const int iplane, const bool opt);
     void WfieldPlaneD30(const double xpos, const double ypos,
-                        double& ex, double& ey, const int iplane);
+                        double& ex, double& ey, double& volt,
+                        const int iplane, const bool opt);
     void WfieldStripZ(const double xpos, const double ypos,
-                      double& ex, double& ey,
-                      const int ip, const int is);
+                      double& ex, double& ey, double& volt,
+                      const int ip, const int is, const bool opt);
     void WfieldStripXy(const double xpos, const double ypos, const double zpos,
-                       double& ex, double& ey, double& ez,
-                       const int ip, const int is);
+                       double& ex, double& ey, double& ez, double& volt,
+                       const int ip, const int is, const bool opt);
 
     // Auxiliary functions for C type cells
     double Ph2(const double xpos, const double ypos);
