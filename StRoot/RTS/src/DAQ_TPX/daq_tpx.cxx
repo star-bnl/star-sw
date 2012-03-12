@@ -93,6 +93,8 @@ daq_tpx::daq_tpx(daqReader *rts_caller)
 	// create now!
 	legacy = new daq_dta ;
 
+	LOG(DBG,"legacy %p",legacy) ;
+
 	raw = new daq_dta ;	// in file, compressed
 	cld_raw = new daq_dta ;	// in file, compressed
 	ped_raw = new daq_dta ;
@@ -136,9 +138,15 @@ daq_tpx::~daq_tpx()
 	delete cld_raw ;
 	delete ped_raw ;
 
+	LOG(DBG,"%s: DEstructor done",name) ;
+
 	delete adc ;
 
+	LOG(DBG,"%s: DEstructor done",name) ;
+
 	delete cld ;
+
+	LOG(DBG,"%s: DEstructor done",name) ;
 
 	delete adc_sim ;
 	delete gain ;
@@ -146,21 +154,34 @@ daq_tpx::~daq_tpx()
 
 	delete cld_sim ;
 
+	LOG(DBG,"%s: DEstructor done",name) ;
+
 	delete ped_c ;
+
+	LOG(DBG,"%s: DEstructor done",name) ;
+
 	delete gain_c ;
 
-	delete legacy ;
+	LOG(DBG,"%s: DEstructor done %p ",name,legacy) ;
+
+	delete legacy ;	// dies here!
+
+	LOG(DBG,"%s: DEstructor done",name) ;
 
 	// algorithms and associated storage...
 	if(gain_algo) delete gain_algo ;
 	if(ped_algo) delete ped_algo ;
 	if(stat_algo) delete stat_algo ;
 
+	LOG(DBG,"%s: DEstructor done",name) ;
+
 	for(int i=0;i<=24;i++) {
 		if(fcf_algo[i]) delete fcf_algo[i] ;
 	}
+	LOG(DBG,"%s: DEstructor done",name) ;
 	if(fcf_tmp_storage) free(fcf_tmp_storage) ;
 
+	LOG(DBG,"%s: DEstructor done",name) ;
 	return ;
 }
 
@@ -457,6 +478,8 @@ daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, 
 	Make() ;
 	if(!present) return 0 ;	// this det is not in this event...
 
+
+//	LOG(TERR,"TPX in global event \"seq\" %u",get_global_event_num()) ;
 
 	if(strcasecmp(bank,"raw")==0) {
 		return handle_raw(sec,row) ;		// actually sec, rdo; r
@@ -1602,11 +1625,19 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			case 14 :	// L1 ACCEPT
 			case 15 :	// L2 ACCEPT
 				break ;
+
 			case 2 :	// RESET
-				if((trgs[cou].t == 1) && (trgs[cou].daq == 0)) {
+
+				if((trgs[cou].t == 0x345) && (trgs[cou].daq == 2)) { // reset at run start from L0
 					continue ;	// skip it
 				}
+				if((trgs[cou].t == 1001) && (trgs[cou].daq == 3)) { // reset at run start from TCD in local
+					continue ;	// skip it
+				}
+
 				// WARNING: no "break" here!!!
+
+
 			default :	// readout command; BUT not necessarily for DAQ10k!
 
 				// check for overrun UNLESS the actual command
