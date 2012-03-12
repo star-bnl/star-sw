@@ -412,6 +412,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 	int adc_found = 0 ;
 	int cld_found = 0 ;
 	int ped_found = 0 ;
+	char s_mask[24] ;
 
 	daq_dta *dd ;
 
@@ -420,6 +421,8 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 	// TPX
 	// it is better, more memory efficient, to call stuff sector by sector (if possible)
+
+	memset(s_mask,0,sizeof(s_mask)) ;
 
 	for(int s=1;s<=24;s++) {
 
@@ -479,6 +482,9 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 			found = 1 ;
 			cld_found = 1 ;
+
+			s_mask[dd->sec-1]=1 ;
+
 
 			if(do_print) {
 				printf("TPX: sec %02d, row %2d: %3d clusters (evt %d)\n",dd->sec,dd->row,dd->ncontent,good) ;
@@ -543,8 +549,14 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 		strcat(fstr,"PEDRMS ") ;
 	}
 
+
+	int s_cou = 0 ;
+	for(int s=0;s<24;s++) {
+		if(s_mask[s]) s_cou++ ;
+	}
+
 	if(found) {
-		LOG(INFO,"TPX found [%s]",fstr) ;
+		LOG(INFO,"TPX found [%s;%d]",fstr,s_cou) ;
 	}
 
 	return found ;
