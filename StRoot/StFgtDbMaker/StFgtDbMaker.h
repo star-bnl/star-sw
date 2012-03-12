@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.13 2012/03/10 01:59:29 rfatemi Exp $
+// $Id: StFgtDbMaker.h,v 1.14 2012/03/12 16:21:16 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -47,15 +47,19 @@ private:
   fgtMapping_st * m_rmap;
   bool	    m_isIdeal;
 
+ public:
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.13 2012/03/10 01:59:29 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.14 2012/03/12 16:21:16 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.14  2012/03/12 16:21:16  rfatemi
+// make sure getCVS() is public
+//
 // Revision 1.13  2012/03/10 01:59:29  rfatemi
 // Review comments
 //
