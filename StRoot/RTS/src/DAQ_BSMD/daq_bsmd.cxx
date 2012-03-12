@@ -816,19 +816,6 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		bad |= 2 ;
 	}
 
-	switch(trg[0].trg) {
-	case 4 :
-	case 8 :
-	case 11 :
-	case 12 :
-		break ;
-	default :
-		LOG(ERR,"RDO %d: bad trg_cmd %d",rdo, trg[0].trg) ;
-		// sanitize
-		trg[0].t = 4097 ;
-		bad |= 2 ;
-		break ;
-	}
 
 #if 1	// skip for the temporary 0x8129 V
 
@@ -880,16 +867,37 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 #endif
 
 
+	// check trigger command sanity...
+	switch(trg[0].trg) {
+	case 2 :
+		LOG(WARN,"RDO %d: T %04d: odd trg_cmd %d (daq_cmd %d) -- will ignore this event even if it had errors...",
+			rdo, trg[0].t, trg[0].trg, trg[0].daq) ;
+		trg[0].t = 4097 ;	// sanitize...
+		bad = 0 ;		// and force-clear any error....
+		break ;
+	case 4 :
+	case 8 :
+	case 11 :
+	case 12 :
+		break ;
+	default :
+		LOG(ERR,"RDO %d: T %04d: bad trg_cmd %d (daq_cmd %d)",rdo, trg[0].t, trg[0].trg, trg[0].daq) ;
+		// sanitize
+		trg[0].t = 4097 ;
+		bad |= 2 ;
+		break ;
+	}
+
 	
 	if(bad) {	
 		LOG(WARN,"RDO %d: words %d: bad %d:",rdo,words,bad) ;
 		// dump the whole header
 		for(int i=0;i<10;i++) {
-			LOG(WARN,"\tRDO %d: %4d: 0x%08X",rdo,i,d32[i]) ;
+			LOG(WARN,"\tRDO %d: header %4d: 0x%08X",rdo,i,d32[i]) ;
 		}
 		// dump last 4 words of the trailer as well
 		for(int i=(words-4);i<words;i++) {
-			LOG(WARN,"\tRDO %d: %4d: 0x%08X",rdo,i,d32[i]) ;
+			LOG(WARN,"\tRDO %d: trailer %4d: 0x%08X",rdo,i,d32[i]) ;
 		}
 		
 	}
