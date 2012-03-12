@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.121 2011/11/21 17:05:26 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.121 2011/11/21 17:05:26 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.122 2012/03/12 20:51:42 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.122 2012/03/12 20:51:42 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.122  2012/03/12 20:51:42  fisyak
+ * Restrict new No. possible point calculation to StiCA only
+ *
  * Revision 2.121  2011/11/21 17:05:26  fisyak
  * Correct no. of possible point for CA case
  *
@@ -525,28 +528,34 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
   const StiDetector* detector=0;
   UInt_t nhits = hits.size();
   setSeedHitCount(nhits);
-#if 1
+#ifdef DO_TPCCATRACKER
   StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();
-  StiDetector* detectorOld = 0; 
+  StiDetector* detectorOld = 0;
+  StiHit *hit_Old = 0;
   for (UInt_t ihit = 0; ihit < nhits; ihit++)  {
     StiHit *hit = hits[ihit];
     detector = hit->detector();
     assert(detector);
     // look for gaps in hit list
-    if (detectorOld && detector->getGroupId() == kTpcId) {
+    if (hit_Old && detector->getGroupId() == kTpcId) {
       Double_t R_hit = detector->getPlacement()->getLayerRadius();
+      Double_t angle_hit = detector->getPlacement()->getNormalRefAngle();
+      detectorOld = hit_Old->detector();
       Double_t R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
-      while ((R_hit < R_hit_OLD)) {
-	detectorContainer->setToDetector( detectorOld );
-	if ( detectorContainer->moveIn()) {
-	  StiDetector* d = detectorContainer->getCurrentDetector(); //**detectorContainer;
-	  if (d == detector) break;
-	  detectorOld = d;
-	  R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
-	  if (detectorOld->isActive()) {
-	    StiKalmanTrackNode * nI = trackNodeFactory->getInstance();
-	    nI->initialize(d);
-	    add(nI,kOutsideIn);
+      Double_t angle_hit_OLD = detectorOld->getPlacement()->getNormalRefAngle();
+      if (TMath::Abs(angle_hit - angle_hit_OLD) < TMath::DegToRad()*5) { // the same sector
+	while ((R_hit < R_hit_OLD)) {
+	  detectorContainer->setToDetector( detectorOld );
+	  if ( detectorContainer->moveIn()) {
+	    StiDetector* d = detectorContainer->getCurrentDetector(); //**detectorContainer;
+	    if (d == detector) break;
+	    detectorOld = d;
+	    R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
+	    if (detectorOld->isActive()) {
+	      StiKalmanTrackNode * nI = trackNodeFactory->getInstance();
+	      nI->initialize(d);
+	      add(nI,kOutsideIn);
+	    }
 	  }
 	}
       }
@@ -555,6 +564,7 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
     n->initialize(hit);
     add(n,kOutsideIn);
     detectorOld = (StiDetector*) detector;
+    hit_Old = hit;
   }  
 #else  
   for (UInt_t ihit=0;ihit<nhits;ihit++)
