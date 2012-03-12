@@ -67,9 +67,10 @@ int main(int argc, char *argv[])
 		testing = 1 ;
 	}
 	else {
+		errno = 0 ;
 		fd = open(argv[1],O_CREAT | O_APPEND | O_WRONLY,0666) ;
 		if(fd < 0) {
-			syslog(LOG_ERR,"File %s open: %m\n",argv[1]) ;
+			syslog(LOG_ERR,"File %s open: %s\n",argv[1],strerror(errno)) ;
 			return -1 ;
 		}
 	}
@@ -82,7 +83,7 @@ int main(int argc, char *argv[])
 		
 
 		
-		sz = 8*1024*1024 ;
+		sz = 16*1024*1024 ;
 		for(;;) {
 
 			ret = setsockopt(s,SOL_SOCKET,SO_RCVBUF,(char *)&sz,sizeof(int)) ;
@@ -99,6 +100,8 @@ int main(int argc, char *argv[])
 		sprintf(tbuff,"[%-8s %02d:%02d:%02d %03d] ","STARTUP",tm->tm_hour,tm->tm_min,tm->tm_sec,tm->tm_yday+1) ;
 		int pre_len = strlen(tbuff) ;
 		buffer = tbuff + pre_len - 4;
+
+		int first = 1 ;
 
 		for(;;) {
 			int i, j ;
@@ -178,6 +181,10 @@ int main(int argc, char *argv[])
 				}
 			}
 			else {
+				if(first) {
+					syslog(LOG_INFO,"Doing write of %d bytes\n",len+1) ;
+				}
+				first = 0;
 				write(fd,tbuff,len+1) ;
 			}
 

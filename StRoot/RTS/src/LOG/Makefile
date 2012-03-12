@@ -19,9 +19,13 @@ librtslog.a : rtsLogUnix.o
 
 logTest: logTest.o librtslog.a
 
-rtsLog: rtsLog.o librtslog.a
+rtsLog.o : rtsLog.C
+	$(CXX) $(CXXFLAGS) -DRTS_LOG_COLORED  -c  rtsLog.C
 
-operDisplay.sh:	
+rtsLog: rtsLog.o rtsLogUnix.o
+	$(CXX) $(CXXFLAGS) rtsLogUnix.o rtsLog.o -o rtsLog
+	
+#operDisplay.sh:	
 
 
 # DO NOT DELETE
