@@ -44,7 +44,7 @@ endif
 # we'll assume the target is this system.
 # For vxWorks cross-compilers (MVME or I960) the TARGET_SYSTEM should be defined
 # in the Makefile before these rules!
-# The currently supported target systems are: SUN, LINUX, MVME, I960
+# The currently supported target systems are: SUN, LINUX, MVME, I960, mv167
 ifndef TARGET_SYSTEM
 ifeq (${HOST_SYSTEM},SunOS)
 	export TARGET_SYSTEM := SUN
@@ -271,10 +271,46 @@ ifeq (${TARGET_SYSTEM},I960)
 	
 	INSTALL_SUFFIX := VX
 
+else
+ifeq (${TARGET_SYSTEM},mv167)
+	export WIND_BASE:=/RTS/vxworks/wind_68k/vxworks
+
+	TOP_CROSS := ${WIND_BASE}/host/x86-linux
+
+	export CC := m68k-wrs-vxworks-gcc
+	export CXX := m68k-wrs-vxworks-g++
+	export LD := m68k-wrs-vxworks-ld
+	export NM := m68k-wrs-vxworks-nm
+
+	TPATH :=${TOP_CROSS}/bin:${TOP_CROSS}/m68k-wrs-vxworks/bin:
+	TPATH +=${PATH}
+
+	PATH :=${TPATH}
+
+	export GCC_EXEC_PREFIX:=${TOP_CROSS}/lib/gcc-lib/
+
+
+#	HOSTDEFINES = -D_GNU_TOOL -DCPU=MC68040 -DVX_IGNORE_GNU_LIBS -DRW_MULTI_THREAD
+	HOSTDEFINES := -DVxWorks -Dlint -g -DCPU=MC68040
+
+	TARGET_CPU := m68k
+	HOSTFLAGS :=  -m68040 -nostdinc -fno-builtin
+
+	HOSTINCLUDES	= \
+		-I${WIND_BASE}/target/config/all \
+		-I${WIND_BASE}/target/h \
+		-I${WIND_BASE}/target/src/config \
+		-I${WIND_BASE}/config/mv167 \
+		-I${WIND_BASE}/config/all \
+		-I${WIND_BASE}/target/src/drv 
+
+	HOSTLIBS :=
+	
+	INSTALL_SUFFIX := VX
 
 endif
 endif
-
+endif
 
 
 
@@ -297,6 +333,9 @@ else
 ifeq (${TARGET_CPU}, 604)
 	HOSTDEFINES += -DRTS_BIG_ENDIAN
 else
+ifeq (${TARGET_CPU}, m68k)
+	HOSTDEFINES += -DRTS_BIG_ENDIAN
+else
 ifeq (${TARGET_CPU}, ultrasparc)
 	HOSTDEFINES += -DRTS_BIG_ENDIAN
 else
@@ -307,7 +346,7 @@ endif
 endif
 endif
 endif
-#endif
+endif
 
 
 ifeq (${USE_64BITS}, 1)
@@ -327,7 +366,8 @@ endif
 DEFINES = -D_REENTRANT ${RTS_DAQMAN_FLAGS} -DTARGET_SYSTEM=\"${TARGET_SYSTEM}\" -DPROJDIR=\"${PROJDIR}\"  -DINSTALL_SUFFIX=\"${INSTALL_SUFFIX}\" -D${RTS_TYPE} ${HOW} ${HOSTDEFINES} -DRTS_ONLINE
 
 
-BASEFLAGS= -O3 -Wall -pipe -fverbose-asm ${HOSTFLAGS} 
+BASEFLAGS = -O3 -Wall -pipe -fverbose-asm ${HOSTFLAGS} 
+#BASEFLAGS= -Wall -pipe -fverbose-asm ${HOSTFLAGS} 
 CCFLAGS  = ${BASEFLAGS} ${USRCCFLAGS}  ${DEFINES} ${INCLUDES} 
 CXXFLAGS = ${BASEFLAGS} ${USRCXXFLAGS} ${DEFINES} ${INCLUDES} 
 CFLAGS   = ${BASEFLAGS} ${USRCFLAGS}   ${DEFINES} ${INCLUDES} 
