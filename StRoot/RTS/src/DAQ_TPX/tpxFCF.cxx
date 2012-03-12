@@ -567,7 +567,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 
 	// kill, by hand, the pad which has 0.0 gain just to avoid confusion
 	// when the gains i.e. in Offline are misapplied
-	if(unlikely(s->g == 0.0)) return 0 ;
+	if(unlikely(s->g <= 0.001)) return 0 ;
 
 	u_int t_ave, charge ;
 	u_int tb_start ;

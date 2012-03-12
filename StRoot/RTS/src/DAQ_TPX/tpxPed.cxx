@@ -531,6 +531,10 @@ int tpxPed::to_cache(char *fname, u_int run)
 	char f_sum_name[128] ;
 	char *pn ;
 
+	static float old_sum[46][183] ;
+
+
+
 	if(!valid || smoothed) {
 		LOG(ERR,"ped::to_cache peds are bad: valid %d, smoothed %d -- not caching",valid,smoothed) ;
 		return -1 ;
@@ -547,15 +551,42 @@ int tpxPed::to_cache(char *fname, u_int run)
 
 	for(int rdo=1;rdo<=6;rdo++) {
 
+
 		// check if the RDO was present!
 		if(valid_evts[rdo-1] < MIN_EVENTS) {
-			LOG(WARN,"Sector %2d, RDO %d has %d events -- not caching!",sector,rdo,valid_evts[rdo-1]) ;
+			LOG(ERR,"Sector %2d, RDO %d has %d events -- not caching!",sector,rdo,valid_evts[rdo-1]) ;
 			continue ;
 		}
 
 		sprintf(fn,"%s_r%d.txt",pn,rdo) ;
 
-		
+		// first read old peds...
+
+		memset(old_sum,0,sizeof(old_sum)) ;
+		f = fopen(fn,"r") ;
+		if(f==0) {
+			LOG(ERR,"ped::to_cache can't open input file \"%s\" [%s]",fn,strerror(errno)) ;
+		}
+		else {
+
+			while(!feof(f)) {
+				float fped, frms ;
+				fscanf(f,"%d %d %d %f %f",&r,&p,&t,&fped,&frms) ;
+
+				if(t < 22) {
+					old_sum[r][p] += fped ;
+				}
+			}
+
+			for(r=0;r<=45;r++) {
+			for(p=1;p<=tpc_rowlen[r];p++) {
+				old_sum[r][p] /= 22.0 ;
+			}
+			}
+
+			fclose(f) ;
+		}
+
 
 		f = fopen(fn,"w") ;
 		if(f==0) {
@@ -597,7 +628,15 @@ int tpxPed::to_cache(char *fname, u_int run)
 				cou++ ;
 			}
 
-			if(f_sum) fprintf(f_sum,"%d %d %.5f\n",r,p,sum/(double)cou) ;
+			sum /= (double)cou ;
+
+			double p_diff = sum - old_sum[r][p] ;
+			if(fabs(p_diff)>1.0) {
+				LOG(WARN,"RDO %d: ped_compare r:p %d:%d = %.1f",rdo,r,p,p_diff) ;
+			}
+
+
+			if(f_sum) fprintf(f_sum,"%d %d %.5f\n",r,p,sum) ;
 
 			for(t=0;t<512;t++) {	
 			

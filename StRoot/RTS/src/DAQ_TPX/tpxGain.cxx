@@ -523,7 +523,7 @@ void tpxGain::calc()
 				get_gains(s,r,p)->t0 = t0/charge ;
 			}
 			else {
-				get_gains(s,r,p)->t0 = 0.0 ;	// *shrug* what else...
+				get_gains(s,r,p)->t0 = 0.0 ;	// *shrug* what else... 
 			}
 
 		}
@@ -721,6 +721,7 @@ void tpxGain::calc()
 
 	// for sector 16 specially in case we are running online!!!
 	if((s_start==16) && (s_stop==16)) {
+		LOG(WARN,"Sector 16 -- special case") ;
 		t0_all_mean += t0_mean[16] ;
 		t0_all_mean_count = 1 ;
 	}
@@ -1000,17 +1001,36 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.26 2011/09/11 18:40:56 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.27 2012/03/12 11:39:31 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
-	for(r=1;r<=45;r++) {
-	for(p=1;p<=tpc_rowlen[r];p++) {
-		fprintf(f,"%d %d %d %.3f %6.3f\n",s,r,p,
-			get_gains(s,r,p)->g,
-			get_gains(s,r,p)->t0) ;
-	}
-	}
+		
+		if(bad_rdo_mask[s]) {
+			LOG(WARN,"Sector %02d: bad rdo mask 0x%02X",s,bad_rdo_mask[s]) ;
+		}
+
+
+		for(r=1;r<=45;r++) {
+			for(p=1;p<=tpc_rowlen[r];p++) {
+				float t0 = get_gains(s,r,p)->t0 ;
+				float gg = get_gains(s,r,p)->g ;
+
+				fprintf(f,"%d %d %d %.3f %6.3f",s,r,p,
+					gg,
+					t0) ;
+
+				if(t0 < -9.9) {
+					fprintf(f,"    # RDO missing\n") ;
+				}
+				else if(t0 < -9.0) {
+					fprintf(f,"    # FEE missing\n") ;
+				}
+				else {
+					fprintf(f,"\n") ;
+				}
+			}
+		}
 	}
 
 	// dump at the end!
@@ -1073,6 +1093,8 @@ void tpxGain::compare(char *fname, int mysec)
 
 		if(r==0) continue ;	// skip unphysical channels
 
+//		printf("got %d %d %d %f %f\n",s,r,p,g,t0) ;
+		
 		// skip edge pads, they are always a hassle
 		if((p==1) || (p==2)) continue ;
 		if((p==tpc_rowlen[r]) || (p==(tpc_rowlen[r]-1))) continue ;
@@ -1143,16 +1165,19 @@ void tpxGain::compare(char *fname, int mysec)
 		dt_rms = sqrt(dt_rms - dt_mean * dt_mean) ;
 	}
 	
-	int max_allowed = 4 ;
+	int max_allowed = 2 ;
 	if(mysec == 0) {	// whole TPC, I will allow more
 		max_allowed *= 24 ;
 	}
 	
 	if(new_only>max_allowed) {
-		LOG(ERR, "gain_compare: sector %d: seems to have new bad pads: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
+		LOG(ERR, "gain_compare to %s: sector %d: seems to have new bad pads: both %3d, new_only %3d, old_only %d",
+		    fname,
+		    mysec,both,new_only,old_only) ;
 	}
 	else {
-		LOG(INFO,"gain_compare: sector %d: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
+		LOG(INFO,"gain_compare to %s: sector %d: both %3d, new_only %3d, old_only %d",
+		    fname,mysec,both,new_only,old_only) ;
 	}
 
 //	LOG(INFO,"gain_compare: sector %d: gain %f +- %f, T0 %f +- %f",mysec,dg_mean, dg_rms, dt_mean, dt_rms) ;
