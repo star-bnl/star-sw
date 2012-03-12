@@ -409,6 +409,8 @@ struct rtsMonSC {
 
 	char mcr_vote[32] ;
 
+	u_int phys_on ;
+	u_int phys_off ;
 };
 
 
