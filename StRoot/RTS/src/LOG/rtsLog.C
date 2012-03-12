@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 		
 	rtsLogAddDest(logdest,logport) ;
 
-	sprintf(logstr,"%s: %s [line 0]:",loglevel,__FILE__) ;
+	sprintf(logstr,"COLOR%s: %s [line 0]:",loglevel,__FILE__) ;
 
 	while(optind < argc) {
 		strcat(logstr," ") ;
