@@ -75,7 +75,10 @@ extern "C" {
 #define CAUTION	"CAUTION"	/* unmasked - for the operator */
 
 #define TERR	"Tonko"		/* this will go away! */
-#define SHIFT	"SHIFTLOG"	/* this will go away! */
+
+#define SAVEme	"SAVEme"	/* gets saved in saved.log */
+
+//#define SHIFT	"SHIFTLOG"	/* this will go away! */
 
 
 /*Tonko: not used Special (mis)handling for STAR Offline Code
@@ -93,10 +96,10 @@ extern "C" {
         do { \
                 const char *const yada = SEV ; \
                 if((*yada == 'E')) { \
-                        fprintf(stderr,""ANSI_RED"RTS_"SEV": "__BASE_FILE__" [line %d]: "STRING""ANSI_RESET"\n" , __LINE__ , ##ARGS) ;\
+                        fprintf(stderr,""ANSI_RED"RTS_"SEV": "__FILE__" [line %d]: "STRING""ANSI_RESET"\n" , __LINE__ , ##ARGS) ;\
 		} \
                 else if((*yada == 'C')) { \
-                        fprintf(stderr,""ANSI_RED""ANSI_BOLD"RTS_"SEV": "__BASE_FILE__" [line %d]: "STRING""ANSI_RESET"\n" , __LINE__ , ##ARGS) ;\
+                        fprintf(stderr,""ANSI_RED""ANSI_BOLD"RTS_"SEV": "__FILE__" [line %d]: "STRING""ANSI_RESET"\n" , __LINE__ , ##ARGS) ;\
 		} \
 	} while(0) \
 
@@ -197,6 +200,8 @@ INLINE_HACK void rtsLogLevel(char *level)
 		} \
 	} while(0) \
 
+	
+	#define rtsLogOutput(x)
 
 #else /* unix */
 
@@ -221,7 +226,7 @@ INLINE_HACK void rtsLogLevel(char *level)
                 else if((tonkoLogLevel>3) && (*yada == 'E')) ; \
                 else if((tonkoLogLevel>4) && (*yada == 'O')) ; \
                 else { \
-                        rtsLogUnix_v("COLOR"SEV": "__BASE_FILE__" [line %d]: "STRING"\n" , __LINE__ , ##ARGS) ;\
+                        rtsLogUnix_v("COLOR"SEV": "__FILE__" [line %d]: "STRING"\n" , __LINE__ , ##ARGS) ;\
 		} \
 	} while(0) \
 
@@ -235,7 +240,7 @@ INLINE_HACK void rtsLogLevel(char *level)
                 else if((tonkoLogLevel>3) && (*yada == 'E')) ; \
                 else if((tonkoLogLevel>4) && (*yada == 'O')) ; \
                 else { \
-                        rtsLogUnix_v(""SEV": "__BASE_FILE__" [line %d]: "STRING"\n" , __LINE__ , ##ARGS) ;\
+                        rtsLogUnix_v(""SEV": "__FILE__" [line %d]: "STRING"\n" , __LINE__ , ##ARGS) ;\
 		} \
 	} while(0) \
 
