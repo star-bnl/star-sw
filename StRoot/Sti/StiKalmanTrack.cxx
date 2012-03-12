@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.122 2012/03/12 20:51:42 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.122 2012/03/12 20:51:42 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.123 2012/03/12 23:17:12 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.123 2012/03/12 23:17:12 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.123  2012/03/12 23:17:12  fisyak
+ * Correct detectorOld cast for StiCA
+ *
  * Revision 2.122  2012/03/12 20:51:42  fisyak
  * Restrict new No. possible point calculation to StiCA only
  *
@@ -530,7 +533,7 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
   setSeedHitCount(nhits);
 #ifdef DO_TPCCATRACKER
   StiDetectorContainer    *detectorContainer = StiToolkit::instance()->getDetectorContainer();
-  StiDetector* detectorOld = 0;
+  const StiDetector* detectorOld = 0;
   StiHit *hit_Old = 0;
   for (UInt_t ihit = 0; ihit < nhits; ihit++)  {
     StiHit *hit = hits[ihit];
@@ -542,6 +545,12 @@ int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *f
       Double_t angle_hit = detector->getPlacement()->getNormalRefAngle();
       detectorOld = hit_Old->detector();
       Double_t R_hit_OLD = detectorOld->getPlacement()->getLayerRadius();
+      if (_debug && detectorOld == detector) {
+	cout << "The same detector for hit " << ihit << endl;
+	cout << "hit     \t" << *hit << endl;
+	if (hit_Old) 
+	  cout << "hitOld\t" << *hit_Old << endl;
+      }
       Double_t angle_hit_OLD = detectorOld->getPlacement()->getNormalRefAngle();
       if (TMath::Abs(angle_hit - angle_hit_OLD) < TMath::DegToRad()*5) { // the same sector
 	while ((R_hit < R_hit_OLD)) {
