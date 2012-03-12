@@ -1,6 +1,6 @@
-//$Id: haddWana.C,v 1.1 2011/02/23 14:00:12 balewski Exp $
+//$Id: haddWana.C,v 1.2 2012/03/12 23:11:43 smirnovd Exp $
 // line added after tag=DNP2009 by Jan
-// run list chaned to match final run selection for SL09g 
+// run list chaned to match final run selection for SL09g
 
 #include <string.h>
 #include "TChain.h"
@@ -14,7 +14,7 @@ TList *FileList;
 TFile *Target;
 
 
-int isAPS2010pol=0; /* affects only setP1-P4, not setA-D,
+int isAPS2010pol = 0; /* affects only setP1-P4, not setA-D,
 		       set it to 0 to see all usable polarized fills */
 
 
@@ -22,141 +22,157 @@ int isAPS2010pol=0; /* affects only setP1-P4, not setA-D,
 void MergeRootfile( TDirectory *target, TList *sourcelist );
 
 
-void haddWana(char *set="sumFeb21_2011",TString iPath="./") {
-  TString out=iPath;
+void haddWana(char *set = "sumFeb21_2011", TString iPath = "./")
+{
+   TString out = iPath;
 
-  if(strstr("sumFeb21_2011",set)>0) {
-    char *runL=" cutsOnly_Feb21 raw_sumFeb21";  } else if(strstr("setXX",set)>0) {
-    char *runL="HHHHH "; //total:  NNN 
-   } else {
-    printf(" hadd: set=%s= NOT found, quit\n",set); return; }
-  printf(" hadd: set=%s= path=%s= ...\n",set,iPath.Data());  
-  out+=set;
-  Target = TFile::Open( out+".wana.hist.root", "RECREATE" );
-  FileList = new TList();
-  printf("sum Output '%s' \n",Target->GetName());
+   if (strstr("sumFeb21_2011", set) > 0) {
+      char *runL = " cutsOnly_Feb21 raw_sumFeb21";
+   }
+   else if (strstr("setXX", set) > 0) {
+      char *runL = "HHHHH "; //total:  NNN
+   }
+   else {
+      printf(" hadd: set=%s= NOT found, quit\n", set);
+      return;
+   }
+   printf(" hadd: set=%s= path=%s= ...\n", set, iPath.Data());
+   out += set;
+   Target = TFile::Open( out + ".wana.hist.root", "RECREATE" );
+   FileList = new TList();
+   printf("sum Output '%s' \n", Target->GetName());
 
-  char *run=strtok(runL," "); // init 'strtok'
-  int i=1;
-  do {
-    printf("add run %d '%s' \n",i++,run);
-    if(isAPS2010pol && strstr(set,"run9setP")>0 ) { // remove runs from fills w/o official pol for APS-2010
-      int irun=atoi(run+1);
-      if(irun>=10083013 && irun<=10083058) { printf("\tdrop %s from F10415\n",run); continue;}
-      if(irun>=10098015 && irun<=10098015) { printf("\tdrop %s from F10508\n",run); continue;}
-    }
-    TString fullName=iPath+run+".wana.hist.root";  
-    FileList->Add( TFile::Open(fullName));
-  } while(run=strtok(0," "));  // advance by one nam
-
-  MergeRootfile(  Target, FileList );
-  printf("finished Output '%s' \n",Target->GetName());
-
-}   
-
-void MergeRootfile(  TDirectory *target, TList *sourcelist ) {
-
-  cout << "Target path: " << target->GetPath() << endl;
-  TString path( (char*)strstr( target->GetPath(), ":" ) );
-  path.Remove( 0, 2 );
-
-  TFile *first_source = (TFile*)sourcelist->First();
-  first_source->cd( path );
-  TDirectory *current_sourcedir = gDirectory;
-
-  int nh=0;
-  // loop over all keys in this directory
-  TChain *globChain = 0;
-  TIter nextkey( current_sourcedir->GetListOfKeys() );
-  TKey *key;
-  while ( (key = (TKey*)nextkey())) {
-    const char *name=key->GetName();
-    nh++;
-    if(nh%100==0) printf("nh=%d addingX %s\n",nh,name);
-    
-    // read object from first source file
-    first_source->cd( path );
-    TObject *obj = key->ReadObj();
-    
-    if ( obj->IsA()->InheritsFrom( "TH1" ) ) {
-      // descendant of TH1 -> merge it
-      
-      //      cout << "Merging histogram " << obj->GetName() << endl;
-      TH1 *h1 = (TH1*)obj;
-
-      // loop over all source files and add the content of the
-      // correspondant histogram to the one pointed to by "h1"
-      TFile *nextsource = (TFile*)sourcelist->After( first_source );
-      while ( nextsource ) {
-        
-        // make sure we are at the correct directory level by cd'ing to path
-        nextsource->cd( path );
-        TH1 *h2 = (TH1*)gDirectory->Get( h1->GetName() );
-        if ( h2 ) {
-          h1->Add( h2 );
-          delete h2; // don't know if this is necessary, i.e. if 
-                     // h2 is created by the call to gDirectory above.
-        }
-
-        nextsource = (TFile*)sourcelist->After( nextsource );
+   char *run = strtok(runL, " "); // init 'strtok'
+   int i = 1;
+   do {
+      printf("add run %d '%s' \n", i++, run);
+      if (isAPS2010pol && strstr(set, "run9setP") > 0 ) { // remove runs from fills w/o official pol for APS-2010
+         int irun = atoi(run + 1);
+         if (irun >= 10083013 && irun <= 10083058) {
+            printf("\tdrop %s from F10415\n", run);
+            continue;
+         }
+         if (irun >= 10098015 && irun <= 10098015) {
+            printf("\tdrop %s from F10508\n", run);
+            continue;
+         }
       }
-    }
-    else if ( obj->IsA()->InheritsFrom( "TTree" ) ) {
-      
-      // loop over all source files create a chain of Trees "globChain"
-      const char* obj_name= obj->GetName();
+      TString fullName = iPath + run + ".wana.hist.root";
+      FileList->Add( TFile::Open(fullName));
+   }
+   while (run = strtok(0, " ")); // advance by one nam
 
-      globChain = new TChain(obj_name);
-      globChain->Add(first_source->GetName());
-      TFile *nextsource = (TFile*)sourcelist->After( first_source );
-      //      const char* file_name = nextsource->GetName();
-      // cout << "file name  " << file_name << endl;
-     while ( nextsource ) {
-     	  
-       globChain->Add(nextsource->GetName());
-       nextsource = (TFile*)sourcelist->After( nextsource );
-     }
-     
-    } else if ( obj->IsA()->InheritsFrom( "TDirectory" ) ) {
-      // it's a subdirectory
-      
-      cout << "Found subdirectory " << obj->GetName() << endl;
-      
-      // create a new subdir of same name and title in the target file
-      target->cd();
-      TDirectory *newdir = target->mkdir( obj->GetName(), obj->GetTitle() );
+   MergeRootfile(  Target, FileList );
+   printf("finished Output '%s' \n", Target->GetName());
 
-      // newdir is now the starting point of another round of merging
-      // newdir still knows its depth within the target file via
-      // GetPath(), so we can still figure out where we are in the recursion
-      MergeRootfile( core,newdir, sourcelist );
-      
-    } else {
-      
-      // object is of no type that we know or can handle
-      cout << "Unknown object type, name: " 
-           << obj->GetName() << " title: " << obj->GetTitle() << endl;
-    }
-    
-    // now write the merged histogram (which is "in" obj) to the target file
-    // note that this will just store obj in the current directory level,
-    // which is not persistent until the complete directory itself is stored
-    // by "target->Write()" below
-    if ( obj ) {
-      target->cd();
-      
-      //!!if the object is a tree, it is stored in globChain...
-      if(obj->IsA()->InheritsFrom( "TTree" ))
-	globChain->Write( key->GetName() );
-      else
-	obj->Write( key->GetName() );
-    }
-    
-  } // while ( ( TKey *key = (TKey*)nextkey() ) )
-  
-  // save modifications to target file
-  target->Write();
-  
+}
+
+void MergeRootfile(  TDirectory *target, TList *sourcelist )
+{
+
+   cout << "Target path: " << target->GetPath() << endl;
+   TString path( (char*)strstr( target->GetPath(), ":" ) );
+   path.Remove( 0, 2 );
+
+   TFile *first_source = (TFile*)sourcelist->First();
+   first_source->cd( path );
+   TDirectory *current_sourcedir = gDirectory;
+
+   int nh = 0;
+   // loop over all keys in this directory
+   TChain *globChain = 0;
+   TIter nextkey( current_sourcedir->GetListOfKeys() );
+   TKey *key;
+   while ( (key = (TKey*)nextkey())) {
+      const char *name = key->GetName();
+      nh++;
+      if (nh % 100 == 0) printf("nh=%d addingX %s\n", nh, name);
+
+      // read object from first source file
+      first_source->cd( path );
+      TObject *obj = key->ReadObj();
+
+      if ( obj->IsA()->InheritsFrom( "TH1" ) ) {
+         // descendant of TH1 -> merge it
+
+         //      cout << "Merging histogram " << obj->GetName() << endl;
+         TH1 *h1 = (TH1*)obj;
+
+         // loop over all source files and add the content of the
+         // correspondant histogram to the one pointed to by "h1"
+         TFile *nextsource = (TFile*)sourcelist->After( first_source );
+         while ( nextsource ) {
+
+            // make sure we are at the correct directory level by cd'ing to path
+            nextsource->cd( path );
+            TH1 *h2 = (TH1*)gDirectory->Get( h1->GetName() );
+            if ( h2 ) {
+               h1->Add( h2 );
+               delete h2; // don't know if this is necessary, i.e. if
+               // h2 is created by the call to gDirectory above.
+            }
+
+            nextsource = (TFile*)sourcelist->After( nextsource );
+         }
+      }
+      else if ( obj->IsA()->InheritsFrom( "TTree" ) ) {
+
+         // loop over all source files create a chain of Trees "globChain"
+         const char* obj_name = obj->GetName();
+
+         globChain = new TChain(obj_name);
+         globChain->Add(first_source->GetName());
+         TFile *nextsource = (TFile*)sourcelist->After( first_source );
+         //      const char* file_name = nextsource->GetName();
+         // cout << "file name  " << file_name << endl;
+         while ( nextsource ) {
+
+            globChain->Add(nextsource->GetName());
+            nextsource = (TFile*)sourcelist->After( nextsource );
+         }
+
+      }
+      else if ( obj->IsA()->InheritsFrom( "TDirectory" ) ) {
+         // it's a subdirectory
+
+         cout << "Found subdirectory " << obj->GetName() << endl;
+
+         // create a new subdir of same name and title in the target file
+         target->cd();
+         TDirectory *newdir = target->mkdir( obj->GetName(), obj->GetTitle() );
+
+         // newdir is now the starting point of another round of merging
+         // newdir still knows its depth within the target file via
+         // GetPath(), so we can still figure out where we are in the recursion
+         MergeRootfile( core, newdir, sourcelist );
+
+      }
+      else {
+
+         // object is of no type that we know or can handle
+         cout << "Unknown object type, name: "
+              << obj->GetName() << " title: " << obj->GetTitle() << endl;
+      }
+
+      // now write the merged histogram (which is "in" obj) to the target file
+      // note that this will just store obj in the current directory level,
+      // which is not persistent until the complete directory itself is stored
+      // by "target->Write()" below
+      if ( obj ) {
+         target->cd();
+
+         //!!if the object is a tree, it is stored in globChain...
+         if (obj->IsA()->InheritsFrom( "TTree" ))
+            globChain->Write( key->GetName() );
+         else
+            obj->Write( key->GetName() );
+      }
+
+   } // while ( ( TKey *key = (TKey*)nextkey() ) )
+
+   // save modifications to target file
+   target->Write();
+
 }
 
 
@@ -172,13 +188,13 @@ void MergeRootfile(  TDirectory *target, TList *sourcelist ) {
   This code is based on the hadd.C example by Rene Brun and Dirk Geppert,
   which had a problem with directories more than one level deep.
   (see macro hadd_old.C for this previous implementation).
-  
-  The macro from Sven has been enhanced by 
+
+  The macro from Sven has been enhanced by
      Anne-Sylvie Nicollerat <Anne-Sylvie.Nicollerat@cern.ch>
    to automatically add Trees (via a chain of trees).
-  
+
   To use this macro, modify the file names in function hadd.
-  
+
   NB: This macro is provided as a tutorial.
       Use $ROOTSYS/bin/hadd to merge many histogram files
 
@@ -187,6 +203,9 @@ void MergeRootfile(  TDirectory *target, TList *sourcelist ) {
 
 
 // $Log: haddWana.C,v $
+// Revision 1.2  2012/03/12 23:11:43  smirnovd
+// *** empty log message ***
+//
 // Revision 1.1  2011/02/23 14:00:12  balewski
 // *** empty log message ***
 //
