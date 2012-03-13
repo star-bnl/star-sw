@@ -1,12 +1,20 @@
+import os
 from exceptions import Exception
+
 
 from Dyson.Utils.Shapes  import listOfShapes
 
+if ( os.getenv('AGML_COLORED_EXCEPTIONS',False) ):
+    def RED(x): return "\033[5m\033[31m"+x+"\033[0m"
+    def YELLOW(x): return "\033[5m\033[33m"+x+"\033[0m"
+    def BLUE(x): return "\033[5m\033[34m"+x+"\033[0m"
+    def MAGENTA(x): return "\033[5m\035[34m"+x+"\033[0m"
+else:
+    def RED(x): return x
+    def YELLOW(x): return x
+    def BLUE(x): return x
+    def MAGENTA(x): return x
 
-def RED(x): return "\033[5m\033[31m"+x+"\033[0m"
-def YELLOW(x): return "\033[5m\033[33m"+x+"\033[0m"
-def BLUE(x): return "\033[5m\033[34m"+x+"\033[0m"
-def MAGENTA(x): return "\033[5m\035[34m"+x+"\033[0m"
 
 
 # ===============================================================================
