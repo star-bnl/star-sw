@@ -35,6 +35,13 @@ class StFgtDb
 	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
 	    );
 
+
+	//geoId is a unique number used to identify a specific strip 
+        //on a specific disk/quadrant/layer/strip.  Please NOTE:
+        //The set of geoIds IS NOT CONTINUOUS simply becuase strip 
+        //number is not continuous. On the R plane strips 280-399 
+        //are not implemented.
+
 	virtual Int_t getGeoIdFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
@@ -47,6 +54,7 @@ class StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
 
+	//Geoname is human readable form of geoId
 	virtual void getElecCoordFromGeoName(
 	    const std::string & geoName,
             Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
@@ -68,7 +76,8 @@ class StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
 
-
+	//  Electronic Id is determined from the electronic devices rdo/arm/apv/channel
+        //  and does form a continuous set of integers. 
 	virtual Double_t getPedestalFromElecId(
 	    Int_t electId
 	) = 0;
@@ -87,6 +96,8 @@ class StFgtDb
 	    Int_t electId
 	) = 0;
 
+	//Pedestal status is not currently used or filled.  If you want to know the 
+	//status of a strip use getStatus* functions NOT getPedestalStatus* functions
 	virtual UChar_t getPedestalStatusFromGeoId( Int_t geoId ) = 0;
 
 	virtual UChar_t getPedestalStatusFromGeoName(
@@ -101,6 +112,7 @@ class StFgtDb
 	    Int_t electId
 	) = 0;
 
+	//These are the functions that tell you the status of strips
 	virtual UChar_t getStatusFromGeoId( Int_t geoId ) = 0;
 
 	virtual UChar_t getStatusFromGeoName( const std::string & geoName ) = 0;
@@ -145,6 +157,8 @@ class StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
 
+
+	//dump of FGT status/peds/pedSigma for each strip
 	void printFgtDumpCSV1(TString fname, int myDate, int myTime);
 
 	virtual ~StFgtDb(){}
