@@ -9,11 +9,11 @@ StEEmcDb *myDb;
 StMuDstMaker* muMk;
 StChain *chain=0;
 
-int rdMu2histoExample( int nEve=100 ){
+int rdMu2histoExample( int nEve=5000 ){
 
-  Int_t nFiles  = 10; 
-  char* file="st_physics_5089002_raw_3010001.MuDst.root";
-  char* inDir   = "/star/data41/reco/eemcCalibration/ReversedFullField/P04id/2004/089/";
+  Int_t nFiles  = 1; 
+  char* file="st_physics_12108020_raw_1020001.MuDst.root";
+  char* inDir   = "/star/data05/scratch/balewski/mu2011/";
   TString fullName=file;
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -33,23 +33,36 @@ int rdMu2histoExample( int nEve=100 ){
 
   // Now we add Makers to the chain...   
   muMk = new StMuDstMaker(0,0,inDir,fullName,".MuDst.root",nFiles);
+  //switch on only ETOW branch I need
+  muMk->SetStatus("*",0);
+  muMk->SetStatus("MuEvent",1);
+  muMk->SetStatus("EmcTow",1);
+
   TChain* tree=muMk->chain(); assert(tree); 
   int nEntries=tree->GetEntries();
   printf("total eve in chain =%d\n",nEntries);
 
+
+
   St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
   new StEEmcDbMaker("eemcDb");
   gMessMgr->SwitchOff("D");
-  //gMessMgr->SwitchOff("I");
-
-  myMk3=new StEEtowerExampleMaker("eeExample","MuDst");
+  gMessMgr->SwitchOff("I");
 
   TObjArray  HList;
+
+  myMk3=new StEEtowerExampleMaker("eeExample","MuDst");
   myMk3->Set(&HList);
 
   chain->ls();
   chain->Init();
   //  return;
+
+  // read one event first to init DB, excluded from timing measurement
+
+  chain->Clear();
+  stat = chain->Make();
+
   int eventCounter=0;
   int stat=0;
   int t1=time(0);
@@ -59,8 +72,8 @@ int rdMu2histoExample( int nEve=100 ){
     eventCounter++;
     chain->Clear();
     stat = chain->Make();
-    if(eventCounter%100==0)
-      printf("\n\n ====================%d  processing  ============\n", eventCounter);
+    if(eventCounter%500==0)
+      printf("\n ====================%d  processing  ============\n", eventCounter);
     
   }
   printf("sorting done, nEve=%d of %d\n",nEve, nEntries);
