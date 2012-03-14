@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.17 2012/03/10 01:59:22 rfatemi Exp $
+// $Id: StFgtDbMaker.cxx,v 1.18 2012/03/14 01:07:11 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -70,6 +70,9 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
     St_fgtGain * gainDataset = 0;
     St_fgtPedestal * pedDataset = 0;
     St_fgtStatus * statusDataset = 0;
+
+
+    /// Go get database tables
     if ( m_isIdeal )
     {
 	if ( m_tables )
@@ -294,6 +297,9 @@ Int_t StFgtDbMaker::Finish()
 
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.18  2012/03/14 01:07:11  rfatemi
+// added comments
+//
 // Revision 1.17  2012/03/10 01:59:22  rfatemi
 // Review comments
 //
