@@ -364,7 +364,19 @@ TGeoMedium *GetMedium( TString name, AgMedium *medium )
 StarTGeoStacker::StarTGeoStacker( const Char_t *name, const Char_t *title )
   : StarAgmlStacker(name,title)
 {
-  // meh
+
+  // Export basic materials to ROOT
+  const Char_t *ag[]={"Hydrogen","Deuterium","Helium","Lithium","Berillium","Carbon","Nitrogen","Neon","Aluminium","Iron","Copper","Tungsten","Lead","Uranium","Air","Vacuum","Silicon"};
+  for ( UInt_t i=0;i<sizeof(ag)/sizeof(Char_t *);i++ )
+    {
+      AgMaterial &m = AgMaterial::Get(ag[i]);
+      TString name = ag[i];
+      name.ToUpper();
+      gGeoManager->AddMaterial(new TGeoMaterial(name, m.par("a"),m.par("z"),m.par("dens"),m.par("radl"),m.par("absl")));
+      gGeoManager->GetMaterial(name)->SetTitle("AgML Default Material");
+    }
+  
+
 }
 
 
