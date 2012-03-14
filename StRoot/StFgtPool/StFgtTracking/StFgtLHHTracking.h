@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtLHHTracking.h,v 1.1 2012/03/14 21:04:17 sgliske Exp $
+ * $Id: StFgtLHHTracking.h,v 1.2 2012/03/14 22:22:40 sgliske Exp $
  * Author: S. Gliske, March 2012
  *
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StFgtLHHTracking.h,v $
+ * Revision 1.2  2012/03/14 22:22:40  sgliske
+ * update
+ *
  * Revision 1.1  2012/03/14 21:04:17  sgliske
  * creation
  *
@@ -32,11 +35,15 @@ struct StFgtLHHLine {
    Float_t mx, my, bx, by;         // parameters of the line
    Float_t vertZ;                  // derived quantity--z of the vertex
 
+   StFgtLHHLine() : pointIdx1(0), pointIdx2(0), discIdx1(0), discIdx2(0),
+                    mx(0), my(0), bx(0), by(0), vertZ(-1e11) { /* */ };
+
+
    StFgtLHHLine( Int_t pointIdx1_, Int_t pointIdx2_, Int_t discIdx1_, Int_t discIdx2_,
                  Float_t mx_, Float_t my_, Float_t bx_, Float_t by_ ) :
       pointIdx1(pointIdx1_), pointIdx2(pointIdx2_), discIdx1(discIdx1_), discIdx2(discIdx2_),
       mx(mx_), my(my_), bx(bx_), by(by_) {
-      vertZ = ( mx || my ? -( mx*bx + my*by )/(mx*mx+my*my) : -10000 );
+      vertZ = ( mx || my ? -( mx*bx + my*by )/(mx*mx+my*my) : -1e11 );
    };
 };
 
@@ -57,10 +64,15 @@ class StFgtLHHTracking : public StFgtTracking {
 
  protected:
    // array of helixes
-   StFgtLHHLineVec mLineVec;
+   enum { kFgtNumDiscPairs = kFgtNumDiscs*(kFgtNumDiscs-1)/2 };
+   StFgtLHHLineVec mLineVec[ kFgtNumDiscPairs ];
 
    // find the tracks
    virtual Int_t findTracks();
+
+   Float_t distanceSqLineToPoint( const StFgtLHHLine& line, const TVector3& pointPos ) const;
+   Float_t distanceSqBetween( const StFgtLHHLine& line1, const StFgtLHHLine& line2 ) const;
+
 
  private:   
    ClassDef(StFgtLHHTracking,1);

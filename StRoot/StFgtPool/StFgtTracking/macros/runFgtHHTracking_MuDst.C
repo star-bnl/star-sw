@@ -48,7 +48,7 @@ void runFgtHHTracking_MuDst( const Char_t *filename,
    //
    // now the QA maker
    //
-   occTxtMkr = new StMuFgtOccTxtMkr( "fgtOccTxtMkr" );
+   // occTxtMkr = new StMuFgtOccTxtMkr( "fgtOccTxtMkr" );
 
    //
    // the track maker
@@ -110,13 +110,13 @@ void runFgtHHTracking_MuDst( const Char_t *filename,
 void LoadLibs() {
    // commong shared libraries
    gROOT->Macro("loadMuDst.C");
-   gROOT->Macro("LoadLogger.C");
+   //gROOT->Macro("LoadLogger.C");
 
    // and a few others
-   gSystem->Load("StDbLib");
-   gSystem->Load("StDbBroker");
-   gSystem->Load("St_db_Maker");
-   gSystem->Load("StStarLogger");
+//    gSystem->Load("StDbLib");
+//    gSystem->Load("StDbBroker");
+//    gSystem->Load("St_db_Maker");
+//    gSystem->Load("StStarLogger");
 
    gSystem->Load("StFgtUtil");
    gSystem->Load("StMuFgtQa");
@@ -124,8 +124,11 @@ void LoadLibs() {
 };
 
 /*
- * $Id: runFgtHHTracking_MuDst.C,v 1.1 2012/03/07 15:38:05 sgliske Exp $
+ * $Id: runFgtHHTracking_MuDst.C,v 1.2 2012/03/14 22:22:40 sgliske Exp $
  * $Log: runFgtHHTracking_MuDst.C,v $
+ * Revision 1.2  2012/03/14 22:22:40  sgliske
+ * update
+ *
  * Revision 1.1  2012/03/07 15:38:05  sgliske
  * creation
  *
