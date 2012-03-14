@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtTracking.cxx,v 1.1 2012/03/07 15:38:04 sgliske Exp $
+ * $Id: StFgtTracking.cxx,v 1.2 2012/03/14 22:22:40 sgliske Exp $
  * Author: S. Gliske, March 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtTracking.cxx,v $
+ * Revision 1.2  2012/03/14 22:22:40  sgliske
+ * update
+ *
  * Revision 1.1  2012/03/07 15:38:04  sgliske
  * creation
  *
@@ -30,7 +33,11 @@
 #include "StRoot/StMuDSTMaker/COMMON/StMuFgtStrip.h"
 #include "StRoot/StMuDSTMaker/COMMON/StMuFgtCluster.h"
 
-#define DEBUG
+//#define DEBUG
+//#define DEBUG2
+
+// initialize structure value
+Int_t StFgtTrPoint::lastIdx = -1;
 
 // constructor
 StFgtTracking::StFgtTracking( const Char_t* name ) : StMaker( name ) { /* */ };
@@ -39,48 +46,19 @@ StFgtTracking::StFgtTracking( const Char_t* name ) : StMaker( name ) { /* */ };
 StFgtTracking::~StFgtTracking(){ /* */ };
 
 Int_t StFgtTracking::Init(){ 
-   Clear();
+   StFgtTracking::Clear();
    return kStOk;
 };
 
 Int_t StFgtTracking::Make(){
-   Clear();
-
-#ifdef DEBUG
-   {
-      Int_t disc = 0;
-      StFgtTrClusVec &rClusVec = mRclusVecPerDisc[disc];
-      StFgtTrClusVec &pClusVec = mPclusVecPerDisc[disc];
-
-      LOG_INFO << "A disc " << disc+1 << " r/phi clusters? " << rClusVec.size() << ' ' << pClusVec.size() << endm;
-   };
-#endif
+   // for some reason simply calling Clear() does not work
+   // need to actually cally StFgtTracking::Clear();
+   StFgtTracking::Clear();
 
    Int_t ierr = computePointsFromStEvent();
 
-#ifdef DEBUG
-   {
-      Int_t disc = 0;
-      StFgtTrClusVec &rClusVec = mRclusVecPerDisc[disc];
-      StFgtTrClusVec &pClusVec = mPclusVecPerDisc[disc];
-
-      LOG_INFO << "B disc " << disc+1 << " r/phi clusters? " << rClusVec.size() << ' ' << pClusVec.size() << endm;
-   };
-#endif
-
-
    if( ierr )
       ierr = computePointsFromMuDst();
-
-#ifdef DEBUG
-   {
-      Int_t disc = 0;
-      StFgtTrClusVec &rClusVec = mRclusVecPerDisc[disc];
-      StFgtTrClusVec &pClusVec = mPclusVecPerDisc[disc];
-
-      LOG_INFO << "C disc " << disc+1 << " r/phi clusters? " << rClusVec.size() << ' ' << pClusVec.size() << endm;
-   };
-#endif
 
    if( ierr ){
       LOG_ERROR << "No valid input" << endm;
@@ -124,16 +102,8 @@ Int_t StFgtTracking::computePointsFromStEvent(){
                StSPtrVecFgtHitConstIterator hitIter;
 
                Int_t idx = 0;
-               for( hitIter = hitVec.begin(); hitIter != hitVec.end(); ++hitIter, ++idx ){
-#ifdef DEBUG
-                  //LOG_INFO << "Adding '" << (*hitIter)->getLayer() << "' cluster to disc " << disc+1 << endm;
-#endif
-
-                  if( (*hitIter)->getLayer() == 'R' )
-                     mRclusVecPerDisc[ disc ].push_back( StFgtTrClus( idx, (*hitIter)->getPositionR() ) );
-                  else
-                     mPclusVecPerDisc[ disc ].push_back( StFgtTrClus( idx, (*hitIter)->getPositionPhi() ) );
-               };
+               for( hitIter = hitVec.begin(); hitIter != hitVec.end(); ++hitIter, ++idx )
+                  addClus( idx, (*hitIter)->getCentralStripGeoId(), (*hitIter)->getPositionR(), (*hitIter)->getPositionPhi() );
             };
          };
       };
@@ -148,15 +118,6 @@ Int_t StFgtTracking::computePointsFromMuDst(){
    // get pointer to input
    const StMuDst* muDst = (const StMuDst*)GetInputDS("MuDst");
 
-#ifdef DEBUG
-   Int_t disc = 0;
-   StFgtTrClusVec &rClusVec = mRclusVecPerDisc[disc];
-   StFgtTrClusVec &pClusVec = mPclusVecPerDisc[disc];
-
-   LOG_INFO << "disc " << disc+1 << " r/phi clusters? " << rClusVec.size() << ' ' << pClusVec.size() << endm;
-#endif
-
-
    if( muDst ){
       TClonesArray *fgtClusters = muDst->fgtArray( muFgtClusters );
 
@@ -168,23 +129,8 @@ Int_t StFgtTracking::computePointsFromMuDst(){
 
          for( Int_t i = 0; i < nClusters; ++i ){
             StMuFgtCluster* clus = static_cast< StMuFgtCluster* >( (*fgtClusters)[i] );
-            if( clus ){
-               // determine which octant this is in
-               Int_t geoId = clus->getCentralStripGeoId();
-
-               Short_t disc,  quad,  strip;
-               Char_t  layer;
-               StFgtGeom::decodeGeoId( geoId, disc, quad, layer, strip );
-
-#ifdef DEBUG
-               //LOG_INFO << "Adding '" << layer << "' cluster to disc " << disc+1 << endm;
-#endif
-
-               if( layer == 'R' )
-                  mRclusVecPerDisc[ disc ].push_back( StFgtTrClus( i, clus->getR() ) );
-               else
-                  mPclusVecPerDisc[ disc ].push_back( StFgtTrClus( i, clus->getPhi() ) );
-            };
+            if( clus )
+               addClus( i, clus->getCentralStripGeoId(), clus->getR(), clus->getPhi() );
          };
       };
    };
@@ -192,28 +138,66 @@ Int_t StFgtTracking::computePointsFromMuDst(){
    return ierr;
 };
 
+void StFgtTracking::addClus( Int_t clusIdx, Int_t geoId, Float_t rPos, Float_t pPos ){
+   Short_t disc,  quad,  strip;
+   Char_t  layer;
+   StFgtGeom::decodeGeoId( geoId, disc, quad, layer, strip );
+
+#ifdef DEBUG2
+   LOG_INFO << "Clus " << clusIdx << " at " << StFgtGeom::encodeGeoName( disc, quad, layer, strip ) << endm;
+#endif
+
+   Int_t octIdx = (quad*2 + ( StFgtGeom::getOctant( layer, strip ) == 'S' ))*kFgtNumDiscs + disc;
+
+   if( layer == 'R' )
+      mRclusVecPerOctDisc[ octIdx ].push_back( StFgtTrClus( clusIdx, rPos ) );
+   else
+      mPclusVecPerOctDisc[ octIdx ].push_back( StFgtTrClus( clusIdx, pPos ) );
+};
+
 Int_t StFgtTracking::makePoints(){
    for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc ){
       Double_t discZ = StFgtGeom::getDiscZ( disc );
 
-      StFgtTrClusVec &rClusVec = mRclusVecPerDisc[disc];
-      StFgtTrClusVec &pClusVec = mPclusVecPerDisc[disc];
       StFgtTrPointVec &pointVec = mPointVecPerDisc[disc];
 
-      if( !rClusVec.empty() && !pClusVec.empty() ){
-         StFgtTrClusVec::iterator rClusIter = rClusVec.begin();
-         StFgtTrClusVec::iterator pClusIter = pClusVec.begin();
+      for( Int_t oct = 0; oct < kFgtNumOctantsPerDisc; ++oct ){
+         Int_t octIdx = oct*kFgtNumDiscs + disc;
 
-         for( ; rClusIter != rClusVec.end(); ++rClusIter )
-            for( ; pClusIter != pClusVec.end(); ++pClusIter )
-               pointVec.push_back( StFgtTrPoint( *rClusIter, *pClusIter, discZ ) );
-      };
+         StFgtTrClusVec &rClusVec = mRclusVecPerOctDisc[octIdx];
+         StFgtTrClusVec &pClusVec = mPclusVecPerOctDisc[octIdx];
+
+         if( !rClusVec.empty() && !pClusVec.empty() ){
+            StFgtTrClusVec::iterator rClusIter = rClusVec.begin();
+            StFgtTrClusVec::iterator pClusIter = pClusVec.begin();
+
+            for( rClusVec.begin(); rClusIter != rClusVec.end(); ++rClusIter )
+               for( pClusIter = pClusVec.begin(); pClusIter != pClusVec.end(); ++pClusIter )
+                  pointVec.push_back( StFgtTrPoint( *rClusIter, *pClusIter, discZ ) );
+         };
+
 #ifdef DEBUG
-      LOG_INFO << "disc " << disc+1 << " r/phi clusters? " << rClusVec.size() << ' ' << pClusVec.size() << endm;
+         LOG_INFO << "oct " << disc+1 << (Char_t)(oct/2+'A') << "." << ( oct%2 ? 'S' : 'L' )
+                  << " r/phi clusters? " << rClusVec.size() << ' ' << pClusVec.size() << " points per disc " << pointVec.size() << endm;
 #endif
+      };
 
       mPointsTot += pointVec.size();
+
+#ifdef DEBUG
+      LOG_INFO << "Disc " << disc+1 << " contributes " << pointVec.size() << " new points, for a total of " << mPointsTot << " clusters" << endm;
+#endif
    };
+
+#ifdef DEBUG2
+   for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc ){
+      StFgtTrPointVec &pointVec = mPointVecPerDisc[disc];
+      for( UInt_t i=0; i<pointVec.size(); ++i ){
+         LOG_INFO << "Disc " << disc+1 << " point " << pointVec[i].trIdx << " ( " << pointVec[i].rIdx << ", " << pointVec[i].pIdx << " )"
+                  << " ( " << pointVec[i].pos.X() << ", " << pointVec[i].pos.Y() << " )" << endm;
+      };
+   };
+#endif
 
    return kStOk;
 };
@@ -221,11 +205,14 @@ Int_t StFgtTracking::makePoints(){
 
 void StFgtTracking::Clear( const Option_t *opt ){
    mPointsTot = 0;
-   for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc ){
-      mRclusVecPerDisc[disc].clear();
-      mPclusVecPerDisc[disc].clear();
-      mPointVecPerDisc[disc].clear();
+   StFgtTrPoint::lastIdx = -1;
+
+   for( Int_t discQuad = 0; discQuad < kFgtNumDiscs*kFgtNumQuads; ++discQuad ){
+      mRclusVecPerOctDisc[discQuad].clear();
+      mPclusVecPerOctDisc[discQuad].clear();
    };
+   for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc )
+      mPointVecPerDisc[disc].clear();
 };
 
 ClassImp( StFgtTracking );

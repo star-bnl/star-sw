@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtTracking.h,v 1.1 2012/03/07 15:38:04 sgliske Exp $
+ * $Id: StFgtTracking.h,v 1.2 2012/03/14 22:22:40 sgliske Exp $
  * Author: S. Gliske, March 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtTracking.h,v $
+ * Revision 1.2  2012/03/14 22:22:40  sgliske
+ * update
+ *
  * Revision 1.1  2012/03/07 15:38:04  sgliske
  * creation
  *
@@ -38,11 +41,13 @@ struct StFgtTrClus {
 
 // basic space point info for tracking
 struct StFgtTrPoint {
-   Int_t rIdx, pIdx;
+   Int_t trIdx, rIdx, pIdx;
    TVector3 pos;
 
-   StFgtTrPoint( Int_t rI = -1, Int_t pI = -1 ) : rIdx(rI), pIdx(pI) { /* */ };
-   StFgtTrPoint( const StFgtTrClus& rClus, const StFgtTrClus& pClus, Float_t z ) : rIdx(rClus.idx), pIdx(pClus.idx), pos(rClus.pos,0,z) {
+   static Int_t lastIdx;
+
+   StFgtTrPoint( Int_t rI = -1, Int_t pI = -1 ) : trIdx(++lastIdx), rIdx(rI), pIdx(pI) { /* */ };
+   StFgtTrPoint( const StFgtTrClus& rClus, const StFgtTrClus& pClus, Float_t z ) : trIdx(++lastIdx), rIdx(rClus.idx), pIdx(pClus.idx), pos(rClus.pos,0,z) {
       pos.SetPhi(pClus.pos);
    };
 };
@@ -67,8 +72,8 @@ class StFgtTracking : public StMaker {
 
  protected:
    // array of clusters and points per disc
-   StFgtTrClusVec mRclusVecPerDisc[ kFgtNumDiscs ];
-   StFgtTrClusVec mPclusVecPerDisc[ kFgtNumDiscs ];
+   StFgtTrClusVec mRclusVecPerOctDisc[ kFgtNumDiscs*kFgtNumOctantsPerDisc ];
+   StFgtTrClusVec mPclusVecPerOctDisc[ kFgtNumDiscs*kFgtNumOctantsPerDisc ];
    StFgtTrPointVec mPointVecPerDisc[ kFgtNumDiscs ];
 
    // to keep track of total number of points per event
@@ -77,6 +82,7 @@ class StFgtTracking : public StMaker {
    // functions
    Int_t computePointsFromStEvent();
    Int_t computePointsFromMuDst();
+   void  addClus( Int_t clusIdx, Int_t geoId, Float_t rPos, Float_t pPos );
    Int_t makePoints();
 
    // virtual function to find the tracks, given that the
