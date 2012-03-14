@@ -116,6 +116,10 @@ class StFgtGeom
         // get the octant given the APV number
         static Char_t getOctant( Int_t apv );
 
+	// get the octant given a phi in radians
+	// maps to i8: 0=A.L, 1=A.S, 2=B.L, .... 7=D.S
+	static Int_t getOctant( Double_t phi);
+
 	static Int_t getNaiveGeoIdFromElecCoord( Int_t rdo, Int_t arm,
 						 Int_t apv, Int_t channel );
 	static void getNaiveElecCoordFromGeoId( Int_t geoId, Int_t& rdo,
@@ -426,6 +430,19 @@ inline Char_t StFgtGeom::getOctant( Int_t apv )
 	    : kFgtHigherStripOctant );
 }
 
+
+//get the octant given the phi in radians
+inline Int_t StFgtGeom::getOctant( Double_t phi )
+{
+
+  double phiDeg= 75 - ((phi*180)/mPi);
+  while ( phiDeg < 0 ) phiDeg+=360;
+  while ( phiDeg > 360 ) phiDeg-=360;
+  int i8=phiDeg/45;
+  return i8;
+
+}
+
 inline Int_t StFgtGeom::getNaiveGeoIdFromElecCoord
 (
     Int_t rdo, Int_t arm, Int_t apv, Int_t channel
@@ -504,8 +521,11 @@ inline bool StFgtGeom::isNaiveR(
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.40 2012/03/14 00:58:56 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.41 2012/03/14 02:05:48 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.41  2012/03/14 02:05:48  rfatemi
+ *  adding in getOctant from phi access function
+ *
  *  Revision 1.40  2012/03/14 00:58:56  rfatemi
  *  added documentation
  *
