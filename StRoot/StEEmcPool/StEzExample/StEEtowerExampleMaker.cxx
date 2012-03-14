@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEtowerExampleMaker.cxx,v 1.3 2009/02/04 20:33:22 ogrebeny Exp $
+// $Id: StEEtowerExampleMaker.cxx,v 1.4 2012/03/14 23:53:19 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -100,7 +100,7 @@ Int_t StEEtowerExampleMaker::unpackMuDst(){
     assert(ieta>=0 && ieta<MaxEtaBins);
     
     towerE[ieta][iphi]=value;
-    // if(value>0) printf(" %d %d %f\n",ieta,iphi,value);
+    //if(value>0) printf(" %d %d %f\n",ieta,iphi,value);
   }
 
   gMessMgr->Message("","I") <<GetName()<<"::::getAdc()  found "<<n1<<" ADC>thres "<<endm;
@@ -109,6 +109,9 @@ Int_t StEEtowerExampleMaker::unpackMuDst(){
 
 
 // $Log: StEEtowerExampleMaker.cxx,v $
+// Revision 1.4  2012/03/14 23:53:19  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2009/02/04 20:33:22  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //
