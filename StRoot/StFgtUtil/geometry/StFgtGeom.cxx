@@ -75,7 +75,7 @@ Double_t StFgtGeom::getDiscZ(int iDisc)
 	case 5:
 	    return 118.9927;
 	default:
-	    LOG_INFO << "Disc " << iDisc << " out of range in StFgtGeom::getDiscZ." << endm;
+	    LOG_DEBUG << "Disc " << iDisc << " out of range in StFgtGeom::getDiscZ." << endm;
 	    return kFgtError;
     }
 }
@@ -93,7 +93,7 @@ double StFgtGeom::phiQuadXaxis( int iquad )
 	case 3:
 	    return 75.0*mPi/180.0;
 	default:
-	    LOG_INFO << "Quadrant " << iquad << " out of range in StFgtGeom::phiQuadXaxis." << endm;
+	    LOG_DEBUG << "Quadrant " << iquad << " out of range in StFgtGeom::phiQuadXaxis." << endm;
 	    return kFgtError;
 	    //assert(2==3);   //	Safe without costing us any clock cycles.
     }
@@ -144,12 +144,12 @@ Int_t StFgtGeom::encodeGeoId
 
     if ( disc < 0 || disc >= kFgtNumDiscs )
     {
-	LOG_INFO << "Disc " << disc << " out of range in StFgtGeom::encodeGeoId." << endm;
+	LOG_DEBUG << "Disc " << disc << " out of range in StFgtGeom::encodeGeoId." << endm;
 	return kFgtError;
     }
     else if ( quadrant < 0 || quadrant >= kFgtNumQuads )
     {
-	LOG_INFO << "Quadrant " << quadrant << " out of range in StFgtGeom::encodeGeoId." << endm;
+	LOG_DEBUG << "Quadrant " << quadrant << " out of range in StFgtGeom::encodeGeoId." << endm;
 	return kFgtError;
     }
     else if (
@@ -157,12 +157,12 @@ Int_t StFgtGeom::encodeGeoId
 	     && layer != testP
     )
     {
-	LOG_INFO << "Layer " << layer << " out of range in StFgtGeom::encodeGeoId." << endm;
+	LOG_DEBUG << "Layer " << layer << " out of range in StFgtGeom::encodeGeoId." << endm;
 	return kFgtError;
     }
     else if ( strip < 0 || strip >= kFgtNumStrips )
     {
-	LOG_INFO << "Strip " << strip << " out of range in StFgtGeom::encodeGeoId." << endm;
+	LOG_DEBUG << "Strip " << strip << " out of range in StFgtGeom::encodeGeoId." << endm;
 	return kFgtError;
     }
 
@@ -180,7 +180,7 @@ Int_t StFgtGeom::decodeGeoId
 {
     if ( geoId < 0 || geoId >= kFgtNumGeoIds )
     {
-	LOG_INFO << "GeoId " << geoId << " out of range in StFgtGeom::decodeGeoId." << endm;
+	LOG_DEBUG << "GeoId " << geoId << " out of range in StFgtGeom::decodeGeoId." << endm;
 	disc = kFgtError;
 	quadrant = kFgtError;
 	layer = kFgtErrorChar;
@@ -4053,8 +4053,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.31 2012/03/15 15:42:46 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.32 2012/03/15 17:17:44 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.32  2012/03/15 17:17:44  rfatemi
+ *  more INFO->DEBUG
+ *
  *  Revision 1.31  2012/03/15 15:42:46  rfatemi
  *  changed layer tests to "R" and "P" instead of "S" and "L"
  *
