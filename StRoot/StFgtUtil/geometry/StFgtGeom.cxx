@@ -6,42 +6,17 @@
  *
  */
 
-#include "StFgtGeom.h"
 #include <TMath.h>
 //#include <assert.h>
 #include <iostream>
 #include <algorithm>
-using namespace std;
+#include "StFgtGeom.h"
+#include "StMessMgr.h"
 
 //ClassImp(StFgtGeom)
 
 double	StFgtGeom::mPi = TMath::Pi();
 double	StFgtGeom::mHalfPi = TMath::PiOver2();
-
-void StFgtGeom::getNaiveElecCoordFromGeoId(
-    Int_t geoId,
-    Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
-)
-{
-   Short_t disc, quadrant, strip;
-   Char_t layer;
-
-   decodeGeoId( geoId, disc, quadrant, layer, strip );
-
-   if( !mReverseNaiveMappingValid )
-      makeReverseNaiveMappingValid();
-
-   Int_t key = ( (layer=='P')*kFgtNumStrips + strip );
-   channel = mReverseNaiveMapping[ key ];
-   apv = channel / 128;
-   channel %= 128;
-
-   if( quadrant % 2 )
-      apv += 12;
-
-   rdo = disc/3+1;
-   arm = (disc % 3)*2 + (quadrant>1);
-}
 
 double	StFgtGeom::mRadStripOff =
     (
@@ -83,6 +58,28 @@ void StFgtGeom::makeReverseNaiveMappingValid(){
    mReverseNaiveMappingValid = 1;
 }
 
+Double_t StFgtGeom::getDiscZ(int iDisc)
+{
+    switch(iDisc)
+    {
+	case 0:
+	    return 67.399;
+	case 1:
+	    return 77.8765;
+	case 2:
+	    return 87.084;
+	case 3:
+	    return 97.4821;
+	case 4:
+	    return 108.9121;
+	case 5:
+	    return 118.9927;
+	default:
+	    LOG_INFO << "Disc " << iDisc << " out of range in StFgtGeom::getDiscZ." << endm;
+	    return kFgtError;
+    }
+}
+
 double StFgtGeom::phiQuadXaxis( int iquad )
 {
     switch( iquad )
@@ -95,6 +92,9 @@ double StFgtGeom::phiQuadXaxis( int iquad )
 	    return 165.0*mPi/180.0;
 	case 3:
 	    return 75.0*mPi/180.0;
+	default:
+	    LOG_INFO << "Quadrant " << iquad << " out of range in StFgtGeom::phiQuadXaxis." << endm;
+	    return kFgtError;
 	    //assert(2==3);   //	Safe without costing us any clock cycles.
     }
 }
@@ -131,6 +131,511 @@ int StFgtGeom::getQuad( double phiLab )
   if ( phiLab > phiQuadXaxis(3) && phiLab <= phiQuadXaxis(2) )
     return 3;
   return 2;
+}
+
+Int_t StFgtGeom::encodeGeoId
+(
+    Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
+)   
+{
+    if ( disc < 0 || disc >= kFgtNumDiscs )
+    {
+	LOG_INFO << "Disc " << disc << " out of range in StFgtGeom::encodeGeoId." << endm;
+	return kFgtError;
+    }
+    else if ( quadrant < 0 || quadrant >= kFgtNumQuads )
+    {
+	LOG_INFO << "Quadrant " << quadrant << " out of range in StFgtGeom::encodeGeoId." << endm;
+	return kFgtError;
+    }
+    else if (
+	   layer != kFgtLowerStripOctant
+	&& layer != kFgtHigherStripOctant
+    )
+    {
+	LOG_INFO << "Layer " << layer << " out of range in StFgtGeom::encodeGeoId." << endm;
+	return kFgtError;
+    }
+    else if ( strip < 0 || strip >= kFgtNumStrips )
+    {
+	LOG_INFO << "Strip " << strip << " out of range in StFgtGeom::encodeGeoId." << endm;
+	return kFgtError;
+    }
+
+    return
+        (
+            ( disc*kFgtNumQuads + quadrant ) * kFgtNumLayers + ( layer == 'P' )
+        ) * kFgtNumStrips + strip;
+}
+
+Int_t StFgtGeom::decodeGeoId
+(
+    Int_t geoId,
+    Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
+)
+{
+    if ( geoId < 0 || geoId >= kFgtNumGeoIds )
+    {
+	LOG_INFO << "GeoId " << geoId << " out of range in StFgtGeom::decodeGeoId." << endm;
+	disc = kFgtError;
+	quadrant = kFgtError;
+	layer = kFgtErrorChar;
+	strip = kFgtError;
+
+	return kFgtError;
+    }
+
+    strip = geoId % kFgtNumStrips;
+    geoId /= kFgtNumStrips;
+
+    layer = ( geoId % kFgtNumLayers ) ? 'P' : 'R';
+    geoId /= kFgtNumLayers;
+
+    quadrant = geoId % kFgtNumQuads;
+    disc = geoId / kFgtNumQuads;
+
+    return 0;
+}
+
+std::string StFgtGeom::encodeGeoName
+(
+    Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
+)
+{
+    if ( disc < 0 || disc >= kFgtNumDiscs )
+    {
+	LOG_INFO << "Disc " << disc << " out of range in StFgtGeom::encodeGeoName." << endm;
+	return kFgtErrorString;
+    }
+    else if ( quadrant < 0 || quadrant >= kFgtNumQuads )
+    {
+	LOG_INFO << "Quadrant " << quadrant << " out of range in StFgtGeom::encodeGeoName." << endm;
+	return kFgtErrorString;
+    }
+    else if (
+	   layer != kFgtLowerStripOctant
+	&& layer != kFgtHigherStripOctant
+    )
+    {
+	LOG_INFO << "Layer " << layer << " out of range in StFgtGeom::encodeGeoName." << endm;
+	return kFgtErrorString;
+    }
+    else if ( strip < 0 || strip >= kFgtNumStrips )
+    {
+	LOG_INFO << "Strip " << strip << " out of range in StFgtGeom::encodeGeoName." << endm;
+	return kFgtErrorString;
+    }
+
+    std::stringstream buff;
+    buff << disc+1 << (Char_t)(quadrant+'A') << layer;
+
+    if ( strip < 10 )
+        buff << "00";
+    else if ( strip < 100 )
+        buff << "0";
+
+    buff << strip;
+    return buff.str();
+}
+
+Int_t StFgtGeom::decodeGeoName 
+(
+    const std::string & geoName,
+    Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
+)
+{
+    //assert( geoName.size() == 6 );
+    disc = geoName[0] - '1';
+    quadrant = geoName[1] - 'A';
+    layer = geoName[2];
+    strip = std::atoi( (geoName.substr(3)).c_str() );
+
+    //	This is unlikely to catch all errors with the geoName, but it should
+    //	do fairly well.
+    if (
+	   disc < 0
+	|| disc >= kFgtNumDiscs 
+	|| quadrant < 0
+	|| quadrant >= kFgtNumQuads
+	|| (
+	       layer != kFgtLowerStripOctant
+	    && quadrant != kFgtHigherStripOctant
+	   )
+	|| strip < 0
+	|| strip > kFgtNumStrips
+    )
+    {
+	LOG_INFO << "Malformed geoName " << geoName << " in StFgtGeom::decodeGeoName." << endm;
+	disc = kFgtError;
+	quadrant = kFgtError;
+	layer = kFgtErrorChar;
+	strip = kFgtError;
+
+	return kFgtError;
+    }
+
+    return 0;
+}
+
+std::string StFgtGeom::translateGeoIdToGeoName( Int_t geoId )
+{
+    Short_t disc, quadrant, strip;
+    Char_t layer;
+    
+    if ( geoId < 0 || geoId >= kFgtNumGeoIds )
+    {
+	LOG_INFO << "GeoId " << geoId << " out of range in StFgtGeom::translateGeoIdToGeoName." << endm;
+	return kFgtErrorString;
+    }
+
+    decodeGeoId( geoId, disc, quadrant, layer, strip );
+    return encodeGeoName( disc, quadrant, layer, strip );
+}
+
+Int_t StFgtGeom::translateGeoNameToGeoId( const std::string & geoName )
+{
+    Short_t disc, quadrant, strip;
+    Char_t layer;
+
+    //	Error message already taken care of in decodeGeoName.
+    if ( decodeGeoName( geoName, disc, quadrant, layer, strip ) < 0 )
+	return kFgtError;
+
+    return encodeGeoId( disc, quadrant, layer, strip );
+}
+
+//  The ordinate, lowerSpan and upperSpan are all in centimeters or
+//  radians, depending on the layer.
+Int_t StFgtGeom::getPhysicalCoordinate
+(
+    Int_t geoId,
+    Short_t & disc, Short_t & quadrant, Char_t & layer,
+    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
+)
+{
+    if ( geoId < 0 || geoId >= kFgtNumGeoIds )
+    {
+	LOG_INFO << "GeoId " << geoId << " out of range in StFgtGeom::getPhysicalCoordinate." << endm;
+	disc = kFgtError;
+	quadrant = kFgtError;
+	layer = kFgtErrorChar;
+	ordinate = kFgtError;
+	lowerSpan = kFgtError;
+	upperSpan = kFgtError;
+
+	return kFgtError;
+    }
+
+    Short_t strip;
+
+    decodeGeoId( geoId, disc, quadrant, layer, strip );
+    ordinate =
+        mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].ordinate;
+    lowerSpan =
+    mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].lowerSpan;
+    upperSpan =
+        mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].upperSpan;
+
+    return 0;
+}
+
+//  The ordinate, lowerSpan and upperSpan are all in centimeters or
+//  radians, depending on the layer.
+Int_t StFgtGeom::getPhysicalCoordinate
+(
+    const std::string & geoName,
+    Short_t & disc, Short_t & quadrant, Char_t & layer,
+    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
+)
+{
+    Short_t strip;
+
+    if ( decodeGeoName( geoName, disc, quadrant, layer, strip ) < 0 )
+    {
+	//  Error is mostly handled by the decodeGeoName call.
+	disc = kFgtError;
+	quadrant = kFgtError;
+	layer = kFgtErrorChar;
+	ordinate = kFgtError;
+	lowerSpan = kFgtError;
+	upperSpan = kFgtError;
+
+	return kFgtError;
+    }
+
+    ordinate =
+        mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].ordinate;
+    lowerSpan =
+        mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].lowerSpan;
+    upperSpan =
+        mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].upperSpan;
+
+    return 0;
+}
+
+//  Please note that the following functions do NOT access the STAR
+//  database to find mapping information. They assume the most
+//  straight-forward mapping scheme and use that.
+//  For those functions that have them, currently rdo can be 1-2, arm
+//  can be 0-5, apv can be 0-23 (although 10, 11, 22, and 23 are not
+//  technically valid) and channel is 0-127.
+Int_t StFgtGeom::encodeElectronicId
+(
+    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+)
+{
+    if ( (rdo - 1) < 0 || (rdo - 1) >= kFgtNumRdos )
+    {
+	LOG_INFO << "RDO " << rdo << " out of range in StFgtGeom::encodeElectronicId." << endm;
+	return kFgtError;
+    }
+    else if ( arm < 0 || arm >= kFgtNumArms )
+    {
+	LOG_INFO << "ARM " << arm << " out of range in StFgtGeom::encodeElectronicId." << endm;
+	return kFgtError;
+    }
+    else if ( apv < 0 || apv > kFgtMaxApvId || apv == 10 || apv == 11 )
+    {
+	LOG_INFO << "APV " << apv << " out of range in StFgtGeom::encodeElectronicId." << endm;
+	return kFgtError;
+    }
+    else if ( channel < 0 || channel >= kFgtNumChannels )
+    {
+	LOG_INFO << "Channel " << channel << " out of range in StFgtGeom::encodeElectronicId." << endm;
+	return kFgtError;
+    }
+
+
+    if ( apv >= 12 )
+    {
+        apv -= 2;
+    }
+    return channel+128*(apv+20*(arm+6*(rdo-1)));
+}
+
+Int_t StFgtGeom::decodeElectronicId
+(
+    Int_t elecId,
+    Int_t &rdo, Int_t &arm, Int_t &apv, Int_t &channel
+)
+{
+    if ( elecId < 0 || elecId >= kFgtNumElecIds )
+    {
+	LOG_INFO << "Electronic ID " << elecId << " out of range in StFgtGeom::decodeElectronicId." << endm;
+
+	rdo = kFgtError;
+	arm = kFgtError;
+	apv = kFgtError;
+	channel = kFgtError;
+
+	return kFgtError;
+    }
+
+    channel = elecId % 128;
+    elecId /= 128;
+
+    apv = elecId % 20;
+    elecId /= 20;
+
+    arm = elecId % 6;
+    rdo = 1 + elecId / 6;
+
+    if ( apv > 9 )
+    {
+        apv += 2;
+    }
+    return 0;
+}
+
+Int_t StFgtGeom::getNaiveGeoIdFromElecCoord
+(
+    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+)
+{
+    if ( (rdo - 1) < 0 || (rdo - 1) >= kFgtNumRdos )
+    {
+	LOG_INFO << "RDO " << rdo << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
+	return kFgtError;
+    }
+    else if ( arm < 0 || arm >= kFgtNumArms )
+    {
+	LOG_INFO << "ARM " << arm << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
+	return kFgtError;
+    }
+    else if ( apv < 0 || apv > kFgtMaxApvId || apv == 10 || apv == 11 )
+    {
+	LOG_INFO << "APV " << apv << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
+	return kFgtError;
+    }
+    else if ( channel < 0 || channel >= kFgtNumChannels )
+    {
+	LOG_INFO << "Channel " << channel << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
+	return kFgtError;
+    }
+
+    Short_t disc = int(arm/2) + (rdo-1)*3;
+    Short_t quadrant = (arm & 1)*2 + int( apv/12 );
+
+    if ( apv >= 12 )
+        return
+        (
+            disc*kFgtNumQuads + quadrant
+        ) * kFgtNumLayers * kFgtNumStrips
+            + mNaiveMapping[ (apv-12)*128+channel ];
+    else
+        return
+        (
+            disc*kFgtNumQuads + quadrant
+        ) * kFgtNumLayers * kFgtNumStrips
+            + mNaiveMapping[ apv*128+channel ];
+
+}
+
+// get the octant for a given layer and strip
+Char_t StFgtGeom::getOctant( Char_t layer, Int_t strip )
+{
+    if (
+	   layer != kFgtLowerStripOctant
+	&& layer != kFgtHigherStripOctant
+    )
+    {
+	LOG_INFO << "Layer " << layer << " out of range in StFgtGeom::getOctant." << endm;
+	return kFgtErrorChar;
+    }
+    else if ( strip < 0 || strip >= kFgtNumStrips )
+    {
+	LOG_INFO << "Strip " << strip << " out of range in StFgtGeom::getOctant." << endm;
+	return kFgtErrorChar;
+    }
+
+    return
+        ( strip < ( layer == 'R' ? kFgtNumRstripsPerOctant : kFgtNumPstripsPerOctant )
+            ? kFgtLowerStripOctant
+            : kFgtHigherStripOctant );
+}
+
+// get the octant given the APV number
+Char_t StFgtGeom::getOctant( Int_t apv )
+{
+    if ( apv < 0 || apv > kFgtMaxApvId || apv == 10 || apv == 11 )
+    {
+	LOG_INFO << "APV " << apv << " out of range in StFgtGeom::getOctant." << endm;
+	return kFgtErrorChar;
+    }
+
+    return ( (apv%kFgtApvsPerAssembly) < kFgtApvsPerOct
+	     ? kFgtLowerStripOctant
+	     : kFgtHigherStripOctant );
+}
+
+//  This is similar to the above functions, but it takes electronic
+//  coordinates and only returns the final ordinate. This is here
+//  primarily so that it can be used as a drop in replacement for
+//  older code that has similar functionality.
+Double_t StFgtGeom::getNaiveMapping(
+    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+)
+{
+    if ( (rdo - 1) < 0 || (rdo - 1) >= kFgtNumRdos )
+    {
+	LOG_INFO << "RDO " << rdo << " out of range in StFgtGeom::getNaiveMapping." << endm;
+	return kFgtError;
+    }
+    else if ( arm < 0 || arm >= kFgtNumArms )
+    {
+	LOG_INFO << "ARM " << arm << " out of range in StFgtGeom::getNaiveMapping." << endm;
+	return kFgtError;
+    }
+    else if ( apv < 0 || apv > kFgtMaxApvId || apv == 10 || apv == 11 )
+    {
+	LOG_INFO << "APV " << apv << " out of range in StFgtGeom::getNaiveMapping." << endm;
+	return kFgtError;
+    }
+    else if ( channel < 0 || channel >= kFgtNumChannels )
+    {
+	LOG_INFO << "Channel " << channel << " out of range in StFgtGeom::getNaiveMapping." << endm;
+	return kFgtError;
+    }
+
+    if ( apv >= 12 )
+        return
+            mStrips[ mNaiveMapping[ (apv-12)*128+channel ] ].ordinate;
+    else
+        return
+            mStrips[ mNaiveMapping[ apv*128+channel ] ].ordinate;
+}
+
+bool StFgtGeom::isNaiveR(
+    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
+)
+{
+    //	There isn't much I can do here without causing potential problems with
+    //	calls to this function. So, warnings are all I can do.
+    if ( (rdo - 1) < 0 || (rdo - 1) >= kFgtNumRdos )
+    {
+	LOG_INFO << "RDO " << rdo << " out of range in StFgtGeom::isNaiveR." << endm;
+    }
+    else if ( arm < 0 || arm >= kFgtNumArms )
+    {
+	LOG_INFO << "ARM " << arm << " out of range in StFgtGeom::isNaiveR." << endm;
+    }
+    else if ( apv < 0 || apv > kFgtMaxApvId || apv == 10 || apv == 11 )
+    {
+	LOG_INFO << "APV " << apv << " out of range in StFgtGeom::isNaiveR." << endm;
+    }
+    else if ( channel < 0 || channel >= kFgtNumChannels )
+    {
+	LOG_INFO << "Channel " << channel << " out of range in StFgtGeom::isNaiveR." << endm;
+    }
+
+    if ( apv >= 12 )
+        return
+            mNaiveMapping[ (apv-12)*128+channel ] < 720;
+    else
+        return
+            mNaiveMapping[ apv*128+channel ] < 720;
+}
+
+Int_t StFgtGeom::getNaiveElecCoordFromGeoId
+(
+    Int_t geoId,
+    Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
+)
+{
+    Short_t disc, quadrant, strip;
+    Char_t layer;
+
+    //	Most of this error should be handled by the decodeGeoId call.
+    if ( decodeGeoId( geoId, disc, quadrant, layer, strip ) < 0 )
+	return kFgtError;
+
+    if( !mReverseNaiveMappingValid )
+	makeReverseNaiveMappingValid();
+
+    Int_t key = ( (layer=='P')*kFgtNumStrips + strip );
+    channel = mReverseNaiveMapping[ key ];
+    apv = channel / 128;
+    channel %= 128;
+
+    if( quadrant % 2 )
+    apv += 12;
+
+    rdo = disc/3+1;
+    arm = (disc % 3)*2 + (quadrant>1);
+
+    return 0;
 }
 
 //This function takes in a radius and a LOCAL phi values (0-pi/2 radians)
@@ -3538,8 +4043,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.29 2012/02/09 18:23:24 wwitzke Exp $
+ *  $Id: StFgtGeom.cxx,v 1.30 2012/03/15 00:18:12 wwitzke Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.30  2012/03/15 00:18:12  wwitzke
+ *  Added boundary conditions to StFgtGeom.
+ *
  *  Revision 1.29  2012/02/09 18:23:24  wwitzke
  *  Fixed various minor issues, including nesting the StFgtGeomData, making the
  *  various "pi" variables use the TMath definions of pi, and removing the various

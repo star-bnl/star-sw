@@ -31,28 +31,9 @@ class StFgtGeom
 	//  although only values 0-5 work at the moment, I believe). Quadrant
 	//  is 0-3.  Layer is 'P' or 'R'. Strip is 0-720
 
-        ///Location of disks in Z. these values for now are copied from FgtdGeo3.xml, 
-        //should come from vmc eventually
-	static Double_t getDiscZ(int iDisc) { 
-	  switch(iDisc)
-	    {
-	    case 0:
-	      return 67.399;
-	    case 1:
-	      return 77.8765;
-	    case 2:
-	      return 87.084;
-	    case 3:
-	      return 97.4821;
-	    case 4:
-	      return 108.9121;
-	    case 5:
-	      return 118.9927;
-	    default:
-	      return -1;
-	    }
-	}
-
+        //  Location of disks in Z. these values for now are copied from
+	//  FgtdGeo3.xml, should come from vmc eventually
+	static Double_t getDiscZ(int iDisc);
 	
 	//geoId is a unique number used to identify a specific strip 
 	//on a specific disk/quadrant/layer/strip.  Please NOTE:
@@ -61,7 +42,7 @@ class StFgtGeom
 	//are not implemented.
 	static Int_t encodeGeoId( Int_t disc, Int_t quadrant,
 				  Char_t layer, Int_t strip );
-	static void decodeGeoId( Int_t geoId, Short_t & disc,
+	static Int_t decodeGeoId( Int_t geoId, Short_t & disc,
 				 Short_t & quadrant, Char_t & layer,
 				 Short_t & strip );
 
@@ -69,12 +50,12 @@ class StFgtGeom
 	//Geoname is human readable form of geoId
 	static std::string encodeGeoName( Int_t disc, Int_t quadrant,
 					  Char_t layer, Int_t strip );
-	static void decodeGeoName( const std::string & geoName, Short_t & disc,
+	static Int_t decodeGeoName( const std::string & geoName, Short_t & disc,
 				   Short_t & quadrant, Char_t & layer,
 				   Short_t & strip );
 	static std::string translateGeoIdToGeoName( Int_t geoId );
 	static Int_t translateGeoNameToGeoId( const std::string & geoName );
-	static void getPhysicalCoordinate( Int_t geoId, Short_t & disc,
+	static Int_t getPhysicalCoordinate( Int_t geoId, Short_t & disc,
 					   Short_t & quadrant, Char_t & layer,
 					   Double_t & ordinate, 
 					   Double_t & lowerSpan, 
@@ -82,7 +63,7 @@ class StFgtGeom
       
 	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
 	//  radians, depending on the layer.
-	static void getPhysicalCoordinate( const std::string & geoName,
+	static Int_t getPhysicalCoordinate( const std::string & geoName,
 					   Short_t & disc, Short_t & quadrant,
 					   Char_t & layer, Double_t & ordinate,
 					   Double_t & lowerSpan,
@@ -93,21 +74,22 @@ class StFgtGeom
 	//  straight-forward mapping scheme and use that.
 	//  For those functions that have them, currently rdo can be 1-2, arm
 	//  can be 0-5, apv can be 0-23 (although 10, 11, 22, and 23 are not
-	//  technically valid) and channel is 0-127. To access database functions
-	//  please use functions in StFgtDb.h
+	//  technically valid) and channel is 0-127. To access database
+	//  functions please use functions in StFgtDb.h
 
-	//  Electronic Id is determined from the electronic devices rdo/arm/apv/channel
-	//  and does form a continuous set of integers.  The mapping from geoId to electronicId 
-	//  is accessible via the database or from "naive"  functions below
+	//  Electronic Id is determined from the electronic devices
+	//  rdo/arm/apv/channel and does form a continuous set of integers.
+	//  The mapping from geoId to electronicId is accessible via the
+	//  database or from "naive"  functions below
 
 	static Int_t encodeElectronicId( Int_t rdo, Int_t arm,
 					 Int_t apv, Int_t channel );
 
-	static void decodeElectronicId( Int_t elecId, Int_t &rdo, Int_t &arm,
+	static Int_t decodeElectronicId( Int_t elecId, Int_t &rdo, Int_t &arm,
 					Int_t &apv, Int_t &channel );
 	static Int_t getElectIdFromElecCoord( Int_t rdo, Int_t arm,
 					      Int_t apv, Int_t ch );
-	static void getElecCoordFromElectId( Int_t eID, Int_t& rdo, Int_t& arm, 
+	static Int_t getElecCoordFromElectId( Int_t eID, Int_t& rdo, Int_t& arm, 
 					     Int_t& apv, Int_t& ch );
 
         // get the octant for a given layer and strip
@@ -122,13 +104,13 @@ class StFgtGeom
 
 	static Int_t getNaiveGeoIdFromElecCoord( Int_t rdo, Int_t arm,
 						 Int_t apv, Int_t channel );
-	static void getNaiveElecCoordFromGeoId( Int_t geoId, Int_t& rdo,
+	static Int_t getNaiveElecCoordFromGeoId( Int_t geoId, Int_t& rdo,
 						Int_t& arm, Int_t& apv,
 						Int_t& channel );
 	static std::string getNaiveGeoNameFromElecCoord( Int_t rdo, Int_t arm,
 							 Int_t apv,
 							 Int_t channel );
-	static void getNaivePhysCoordFromElecCoord( Int_t rdo, Int_t arm,
+	static Int_t getNaivePhysCoordFromElecCoord( Int_t rdo, Int_t arm,
 						    Int_t apv, Int_t channel,
 						    Short_t & disc,
 						    Short_t & quadrant,
@@ -222,248 +204,31 @@ class StFgtGeom
         static void makeReverseNaiveMappingValid();
 };
 
-inline Int_t StFgtGeom::encodeGeoId
-(
-    Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
-)
-{
-    return
-	(
-	    ( disc*kFgtNumQuads + quadrant ) * kFgtNumLayers + ( layer == 'P' )
-	) * kFgtNumStrips + strip;
-}
-
-inline void StFgtGeom::decodeGeoId
-(
-    Int_t geoId,
-    Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
-)
-{
-    strip = geoId % kFgtNumStrips;
-    geoId /= kFgtNumStrips;
-  
-    layer = ( geoId % kFgtNumLayers ) ? 'P' : 'R';
-    geoId /= kFgtNumLayers;
-  
-    quadrant = geoId % kFgtNumQuads;
-    disc = geoId / kFgtNumQuads;
-}
-
-inline std::string StFgtGeom::encodeGeoName
-(
-    Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
-)
-{
-    std::stringstream buff;
-    buff << disc+1 << (Char_t)(quadrant+'A') << layer;
-
-    if ( strip < 10 )
-	buff << "00";
-    else if ( strip < 100 )
-	buff << "0";
-
-    buff << strip;
-    return buff.str();
-}
-
-inline void StFgtGeom::decodeGeoName
-(
-    const std::string & geoName,
-    Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
-)
-{
-    //assert( geoName.size() == 6 );
-    disc = geoName[0] - '1';
-    quadrant = geoName[1] - 'A';
-    layer = geoName[2];
-    strip = std::atoi( (geoName.substr(3)).c_str() );
-}
-
-inline std::string StFgtGeom::translateGeoIdToGeoName( Int_t geoId )
-{
-    Short_t disc, quadrant, strip;
-    Char_t layer;
-  
-    decodeGeoId( geoId, disc, quadrant, layer, strip );
-    return encodeGeoName( disc, quadrant, layer, strip );
-}
-
-inline Int_t StFgtGeom::translateGeoNameToGeoId( const std::string & geoName )
-{
-    Short_t disc, quadrant, strip;
-    Char_t layer;
-  
-    decodeGeoName( geoName, disc, quadrant, layer, strip );
-    return encodeGeoId( disc, quadrant, layer, strip );
-}
-
-//  The ordinate, lowerSpan and upperSpan are all in centimeters or
-//  radians, depending on the layer.
-inline void StFgtGeom::getPhysicalCoordinate
-(
-    Int_t geoId,
-    Short_t & disc, Short_t & quadrant, Char_t & layer,
-    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
-)
-{
-    Short_t strip;
-  
-    decodeGeoId( geoId, disc, quadrant, layer, strip );
-    ordinate =
-	mStrips[
-	    (layer == 'P') * kFgtNumStrips + strip
-	    ].ordinate;
-    lowerSpan =
-    mStrips[
-	    (layer == 'P') * kFgtNumStrips + strip
-	    ].lowerSpan;
-    upperSpan =
-	mStrips[
-	    (layer == 'P') * kFgtNumStrips + strip
-	    ].upperSpan;
-}
-
-//  The ordinate, lowerSpan and upperSpan are all in centimeters or
-//  radians, depending on the layer.
-inline void StFgtGeom::getPhysicalCoordinate
-(
-    const std::string & geoName,
-    Short_t & disc, Short_t & quadrant, Char_t & layer,
-    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
-)
-{
-    Short_t strip;
-  
-    decodeGeoName( geoName, disc, quadrant, layer, strip );
-    ordinate =
-	mStrips[
-	    (layer == 'P') * kFgtNumStrips + strip
-	    ].ordinate;
-    lowerSpan =
-	mStrips[
-	    (layer == 'P') * kFgtNumStrips + strip
-	    ].lowerSpan;
-    upperSpan =
-	mStrips[
-	    (layer == 'P') * kFgtNumStrips + strip
-	    ].upperSpan;
-}
-
-//  Please note that the following functions do NOT access the STAR
-//  database to find mapping information. They assume the most
-//  straight-forward mapping scheme and use that.
-//  For those functions that have them, currently rdo can be 1-2, arm
-//  can be 0-5, apv can be 0-23 (although 10, 11, 22, and 23 are not
-//  technically valid) and channel is 0-127.
-inline Int_t StFgtGeom::encodeElectronicId
-(
-    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
-)
-{
-    if ( apv >= 12 )
-    {
-	apv -= 2;
-    }
-    return channel+128*(apv+20*(arm+6*(rdo-1)));
-}
-
-inline void StFgtGeom::decodeElectronicId
-(
-    Int_t elecId,
-    Int_t &rdo, Int_t &arm, Int_t &apv, Int_t &channel
-)
-{
-    channel = elecId % 128;
-    elecId /= 128;
-
-    apv = elecId % 20;
-    elecId /= 20;
-
-    arm = elecId % 6;
-    rdo = 1 + elecId / 6;
-
-    if ( apv > 9 )
-    {
-	apv += 2;
-    }
-    return;
-}
-
 inline Int_t StFgtGeom::getElectIdFromElecCoord
 (
     Int_t rdo, Int_t arm, Int_t apv, Int_t ch
 )
 {
-    Int_t eID = -1;
-    if ((rdo > 0)&&( rdo < 3))
-	if ((arm >= 0)&&(arm < 6))
-	    if ((apv >= 0)&&(apv< 24))
-		if ((ch >= 0)&&(ch < 128))
-		    eID = encodeElectronicId(rdo,arm,apv,ch); 
-  
-    return eID; 
+    return encodeElectronicId(rdo,arm,apv,ch); 
 }
 
-inline void StFgtGeom::getElecCoordFromElectId
+inline Int_t StFgtGeom::getElecCoordFromElectId
 (
    Int_t eID,
    Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& ch
 )
 {
-  decodeElectronicId(eID,rdo,arm,apv,ch);
+  return decodeElectronicId(eID,rdo,arm,apv,ch);
 }
-
-// get the octant for a given layer and strip
-inline Char_t StFgtGeom::getOctant( Char_t layer, Int_t strip )
-{
-    return
-	( strip < ( layer == 'R' ? kFgtNumRstripsPerOctant : kFgtNumPstripsPerOctant )
-	    ? kFgtLowerStripOctant 
-	    : kFgtHigherStripOctant );
-}
-
-// get the octant given the APV number
-inline Char_t StFgtGeom::getOctant( Int_t apv )
-{
-   return ( (apv%kFgtApvsPerAssembly) < kFgtApvsPerOct
-	    ? kFgtLowerStripOctant 
-	    : kFgtHigherStripOctant );
-}
-
 
 //get the octant given the phi in radians
 inline Int_t StFgtGeom::getOctant( Double_t phi )
 {
-
   double phiDeg= 75 - ((phi*180)/mPi);
   while ( phiDeg < 0 ) phiDeg+=360;
   while ( phiDeg > 360 ) phiDeg-=360;
   int i8=phiDeg/45;
   return i8;
-
-}
-
-inline Int_t StFgtGeom::getNaiveGeoIdFromElecCoord
-(
-    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
-)
-{
-    Short_t disc = int(arm/2) + (rdo-1)*3;
-    Short_t quadrant = (arm & 1)*2 + int( apv/12 );
-
-    if ( apv >= 12 )
-	return
-	(
-	    disc*kFgtNumQuads + quadrant
-	) * kFgtNumLayers * kFgtNumStrips
-	    + mNaiveMapping[ (apv-12)*128+channel ];
-    else
-	return
-	(
-	    disc*kFgtNumQuads + quadrant
-	) * kFgtNumLayers * kFgtNumStrips
-	    + mNaiveMapping[ apv*128+channel ];
-
 }
 
 inline std::string StFgtGeom::getNaiveGeoNameFromElecCoord
@@ -477,52 +242,28 @@ inline std::string StFgtGeom::getNaiveGeoNameFromElecCoord
 	);
 }
 
-inline void StFgtGeom::getNaivePhysCoordFromElecCoord
+inline Int_t StFgtGeom::getNaivePhysCoordFromElecCoord
 (
     Int_t rdo, Int_t arm, Int_t apv, Int_t channel,
     Short_t & disc, Short_t & quadrant, Char_t & layer,
     Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
 )
 {
-    getPhysicalCoordinate(
+    return getPhysicalCoordinate(
 	getNaiveGeoIdFromElecCoord( rdo, arm, apv, channel ),
 	disc, quadrant, layer, ordinate, lowerSpan, upperSpan
     );
 }
 
-//  This is similar to the above functions, but it takes electronic
-//  coordinates and only returns the final ordinate. This is here
-//  primarily so that it can be used as a drop in replacement for
-//  older code that has similar functionality.
-inline Double_t StFgtGeom::getNaiveMapping(
-    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
-)
-{
-    if ( apv >= 12 )
-	return
-	    mStrips[ mNaiveMapping[ (apv-12)*128+channel ] ].ordinate;
-    else
-	return
-	    mStrips[ mNaiveMapping[ apv*128+channel ] ].ordinate;
-}
-
-inline bool StFgtGeom::isNaiveR(
-    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
-)
-{
-    if ( apv >= 12 )
-	return
-	    mNaiveMapping[ (apv-12)*128+channel ] < 720;
-    else
-	return
-	    mNaiveMapping[ apv*128+channel ] < 720;
-}
 #endif
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.41 2012/03/14 02:05:48 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.42 2012/03/15 00:18:12 wwitzke Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.42  2012/03/15 00:18:12  wwitzke
+ *  Added boundary conditions to StFgtGeom.
+ *
  *  Revision 1.41  2012/03/14 02:05:48  rfatemi
  *  adding in getOctant from phi access function
  *
