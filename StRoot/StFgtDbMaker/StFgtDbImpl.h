@@ -287,7 +287,16 @@ class StFgtDbImpl : public StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	);
 
+
+	virtual Double_t getEloss(Int_t bin)
+	{
+	  return m_eLoss[0].cutoff[bin];
+	};
+
+
+
 	virtual ~StFgtDbImpl() {}
+
 
     private:
 	fgtMapping_st * m_map;
