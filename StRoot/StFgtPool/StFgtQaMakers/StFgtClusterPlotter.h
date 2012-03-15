@@ -35,6 +35,11 @@ class StFgtClusterPlotter : public StFgtQaMaker {
    TH2D** radioPlots;
    TH2D** corrPlots;
    int runningEvtNr;
+
+
+   //THD2** 
+
+
  private:   
    ClassDef(StFgtClusterPlotter,1);
 

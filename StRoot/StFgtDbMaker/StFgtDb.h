@@ -156,7 +156,7 @@ class StFgtDb
 	virtual bool isR(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
-
+	virtual Double_t getEloss(Int_t bin)=0;
 
 	//dump of FGT status/peds/pedSigma for each strip
 	void printFgtDumpCSV1(TString fname, int myDate, int myTime);

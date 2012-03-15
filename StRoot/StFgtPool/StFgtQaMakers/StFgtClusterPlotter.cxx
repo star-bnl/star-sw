@@ -116,11 +116,8 @@ Int_t StFgtClusterPlotter::Make()
 	       stripDead=true;
 	     else
 	       stripDead=false;
-
-
 	     for( Int_t timebin = 0; timebin < kFgtNumTimeBins-2; ++timebin )
 	       {
-
 		 if(stripDead)
 		   (*outTxtFile) << setw(4) << " ?  "<< "    ";
 		 else
@@ -132,7 +129,6 @@ Int_t StFgtClusterPlotter::Make()
 		       (*outTxtFile) << setw(4) << " .  "<< "    ";
 		   }
 	       }
-
 	     (*outTxtFile) << " : charge: " << (*it)->getCharge()<<" +- " << (*it)->getChargeUncert() <<" location: "<<StFgtGeom::encodeGeoName(disc,quad,layer,strip);
 	     (*outTxtFile) <<"/"<<(*it)->getGeoId();
 	     (*outTxtFile) << " ped: " << (*it)->getPed() <<" +- " << (*it)->getPedErr();
@@ -158,7 +154,6 @@ Int_t StFgtClusterPlotter::Make()
 	       (*outTxtFile) <<" ---> End of a cluster";
 	     if((*it)->getClusterSeedType()==kFgtClusterEndDown) 
 	       (*outTxtFile) <<" ---> Beginning of a cluster";
-
 	     (*outTxtFile) <<endl;
 	   }
 
@@ -265,7 +260,6 @@ Int_t StFgtClusterPlotter::Make()
 	     hClusSizeElecSpace[iDx*kFgtNumQuads+iq]->Fill(tStrip,numStrips);
 	       }
 	   }
-
 
 	 for(int iQ=0;iQ<4;iQ++)
 	   {

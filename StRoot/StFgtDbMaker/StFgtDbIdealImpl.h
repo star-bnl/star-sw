@@ -240,6 +240,11 @@ class StFgtDbIdealImpl : public StFgtDb
 	  return 0;
 	}
 
+	virtual Double_t getEloss(Int_t bin)
+	{
+	  return 0;
+	}
+
     //	ClassDef(StFgtDbNaiveImpl, 1)
 };
 
