@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.39 2011/10/05 23:07:50 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.40 2012/03/15 23:37:36 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.40  2012/03/15 23:37:36  perev
+ * Uncorrected globals added(Chris)
+ *
  * Revision 1.39  2011/10/05 23:07:50  perev
  * Commrnt++
  *
@@ -171,6 +174,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.40  2012/03/15 23:37:36  perev
+ * Uncorrected globals added(Chris)
+ *
  * Revision 1.39  2011/10/05 23:07:50  perev
  * Commrnt++
  *
@@ -330,7 +336,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.39 2011/10/05 23:07:50 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.40 2012/03/15 23:37:36 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -1031,6 +1037,18 @@ void  StMiniMcMaker::trackLoop()
   // the event centrality values, etc.
   // also look for 'split tracks','ghost tracks'...
   //
+	
+  Int_t nUncorrectedGlobals(0);
+  StSPtrVecTrackNode& trackNode = mRcEvent->trackNodes();
+  int nTracks = trackNode.size();
+  for (int i=0; i < nTracks; i++) {
+    StTrackNode *node = trackNode[i]; 
+    if (!node) continue;
+    StTrack *glTrack = node->track(global);
+    if (! glTrack) continue;
+    if(acceptGlobals(glTrack)) nUncorrectedGlobals++;
+  }
+
   Int_t nGoodTrackEta(0), nFtpcWUncorrected(0), nFtpcEUncorrected(0);
 
   const StSPtrVecPrimaryTrack& prTracks = 
@@ -1195,7 +1213,8 @@ void  StMiniMcMaker::trackLoop()
   fillEventInfo(nGoodTrackEta,nRcGlobal,nRcGoodGlobal20,
 		nAcceptedRaw,
 		nMcGoodGlobal20,nMcNch,nMcHminus,
-		nMcFtpcENch, nMcFtpcWNch,nFtpcEUncorrected,nFtpcWUncorrected);
+		nMcFtpcENch, nMcFtpcWNch,nFtpcEUncorrected,nFtpcWUncorrected, 
+		nUncorrectedGlobals);
   
   // delete the most probable pid functor
   // 
@@ -1243,6 +1262,7 @@ void StMiniMcMaker::trackLoopIdT() // match with IdTruth
       nRcGoodGlobal20(0), nRcGlobal(0), nMcGoodGlobal20(0), 
       nMcNch(0), nMcHminus(0), nMcFtpcWNch(0), nMcFtpcENch(0);
   Int_t nGoodTrackEta(0), nFtpcWUncorrected(0), nFtpcEUncorrected(0);
+	Int_t nUncorrectedGlobals(0);
 
   const StVertex *myVertex = mRcEvent->primaryVertex(mMainVtx);
 
@@ -1259,6 +1279,7 @@ void StMiniMcMaker::trackLoopIdT() // match with IdTruth
     if (!node) 		continue;
     StTrack *glTrack = node->track(global);
     if (! glTrack) 	continue;
+    if(acceptGlobals(glTrack)) nUncorrectedGlobals++;
 
     nRcGlobal++;	
     if(acceptGood20(glTrack)) nRcGoodGlobal20++;
@@ -1320,7 +1341,8 @@ void StMiniMcMaker::trackLoopIdT() // match with IdTruth
 
     fillEventInfo(nGoodTrackEta,nRcGlobal,nRcGoodGlobal20,
 		  nAcceptedRaw,nMcGoodGlobal20,nMcNch           ,nMcHminus,
-		  nMcFtpcENch ,nMcFtpcWNch    ,nFtpcEUncorrected,nFtpcWUncorrected);
+		  nMcFtpcENch ,nMcFtpcWNch    ,nFtpcEUncorrected,nFtpcWUncorrected, 
+      nUncorrectedGlobals);
 }
 #if 0
 //________________________________________________________________________________
@@ -1590,7 +1612,7 @@ Int_t StMiniMcMaker::closeFile()
 void StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta, Int_t nRcGlobal, Int_t nRcGoodGlobal20,
 			          Int_t nMcGlobal, Int_t nMcGoodGlobal20,
 			          Int_t nMcNch, Int_t nMcHminus, Int_t nMcFtpcENch, Int_t nMcFtpcWNch, Int_t nFtpcEUncorrected, 
-			          Int_t nFtpcWUncorrected)
+			          Int_t nFtpcWUncorrected, Int_t nUncorrectedGlobals)
 {
   mMiniMcEvent->setEventId((Int_t) mRcEvent->id());
   mMiniMcEvent->setRunId((Int_t) mRcEvent->runId());
@@ -1614,6 +1636,8 @@ void StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta, Int_t nRcGlobal, Int_t nR
   
   mMiniMcEvent->setNUncorrectedNegativePrimaries(uncorrectedNumberOfNegativePrimaries(*mRcEvent));
   mMiniMcEvent->setNUncorrectedPrimaries(uncorrectedNumberOfPrimaries(*mRcEvent));
+
+	mMiniMcEvent->setNUncorrectedGlobals(nUncorrectedGlobals);
   
   mMiniMcEvent->setNFtpcWUncorrectedPrimaries(nFtpcWUncorrected);
   mMiniMcEvent->setNFtpcEUncorrectedPrimaries(nFtpcEUncorrected);
@@ -2424,6 +2448,16 @@ Bool_t StMiniMcMaker::acceptUncorrected(const StTrack* track)
 }
 
 //______________________________________________________________________________
+Bool_t StMiniMcMaker::acceptGlobals(const StTrack* track)
+{
+  return (
+	  track->fitTraits().numberOfFitPoints(kTpcId)>=10 &&
+	  fabs(track->geometry()->momentum().pseudoRapidity())<=0.5 &&
+	  track->geometry()->helix().distance(*mRcVertexPos)<3 
+	  );    
+}
+
+//______________________________________________________________________________
 Bool_t  StMiniMcMaker::acceptFTPC(const StTrack* prTrack)
 {
   if(!prTrack) return false;
@@ -2783,9 +2817,12 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 
 //______________________________________________________________________________
 //
-// $Id: StMiniMcMaker.cxx,v 1.39 2011/10/05 23:07:50 perev Exp $
+// $Id: StMiniMcMaker.cxx,v 1.40 2012/03/15 23:37:36 perev Exp $
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.40  2012/03/15 23:37:36  perev
+// Uncorrected globals added(Chris)
+//
 // Revision 1.39  2011/10/05 23:07:50  perev
 // Commrnt++
 //
@@ -2809,6 +2846,9 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 //
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.40  2012/03/15 23:37:36  perev
+// Uncorrected globals added(Chris)
+//
 // Revision 1.39  2011/10/05 23:07:50  perev
 // Commrnt++
 //

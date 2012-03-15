@@ -43,6 +43,7 @@ class StMiniMcEvent : public TObject {
   Int_t		centrality() 			const { return mCentrality; }
   Int_t		nUncorrectedNegativePrimaries()	const { return mNUncorrectedNegativePrimaries; }
   Int_t		nUncorrectedPrimaries() 	const { return mNUncorrectedPrimaries; }
+  Int_t		nUncorrectedGlobals()  		const { return mNUncorrectedGlobals; }
   Int_t		nFtpcWUncorrectedPrimaries()	const { return mNFtpcWUncorrectedPrimaries; }
   Int_t		nFtpcEUncorrectedPrimaries()	const { return mNFtpcEUncorrectedPrimaries; }
   Int_t		mcMult() 			const { return mMcMult; }
@@ -87,6 +88,7 @@ class StMiniMcEvent : public TObject {
   void setCentrality(Int_t val)         		{ mCentrality=val; }
   void setNUncorrectedNegativePrimaries(Int_t val)	{ mNUncorrectedNegativePrimaries=val; }
   void setNUncorrectedPrimaries(Int_t val)		{ mNUncorrectedPrimaries=val; }
+  void setNUncorrectedGlobals(Int_t val)   { mNUncorrectedGlobals=val; }
   void setNFtpcWUncorrectedPrimaries(Int_t val)		{ mNFtpcWUncorrectedPrimaries=val; }
   void setNFtpcEUncorrectedPrimaries(Int_t val)		{ mNFtpcEUncorrectedPrimaries=val; }
   void setMcMult(Int_t val)				{ mMcMult=val; }
@@ -137,6 +139,7 @@ private:
   Int_t         mCentrality;  // centrality bin, Nch cuts, P02gd, 2k2
   Int_t         mNUncorrectedNegativePrimaries; // from StuRefMult
   Int_t         mNUncorrectedPrimaries; // from StuRefMult
+  Int_t         mNUncorrectedGlobals; // reco, globals, glTrk->helix->dist(vtx)<3, gl.fitPts>=10, -0.5 < eta < 0.5  
   Int_t         mNFtpcWUncorrectedPrimaries; // reco, primaries, flag>0, glTrk->helix->dist(vtx)<3, prim.pt<3, gl.fitPts>=5, 2.8 < eta < 3.8
   Int_t         mNFtpcEUncorrectedPrimaries; // reco, primaries, flag>0, glTrk->helix->dist(vtx)<3, prim.pt<3, gl.fitPts>=5,-2.8 > eta >-3.8
   Int_t         mMcMult;      // embedding: n mc tracks; (StMcEvent::numberOfPrimaryTracks()
@@ -203,6 +206,9 @@ private:
   
 //
 // $Log: StMiniMcEvent.h,v $
+// Revision 1.9  2012/03/15 23:37:20  perev
+// Uncorrected globals added(Chris)
+//
 // Revision 1.8  2011/03/22 00:31:48  perev
 // Added impact,phi impact & trigger time
 //
