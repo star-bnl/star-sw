@@ -10,6 +10,8 @@
 #ifndef _ST_FGT_ENUMS_H_
 #define _ST_FGT_ENUMS_H_
 
+#include <string>
+
 // constants related to electric coordinates
 enum { 
    kFgtNumRdos = 2,           // rdo in {1,2}
@@ -63,6 +65,9 @@ enum {
    kFgtClusterSeedInSeaOfNoise
 };
 
+const Int_t kFgtError = -999;
+const Char_t kFgtErrorChar = -1;
+const std::string kFgtErrorString = "XXXXXX";
 
 // Jan's definitions for the final 400-800 micron pitch design 
 // Note:
@@ -88,8 +93,11 @@ enum {
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.16 2012/03/09 17:48:32 rfatemi Exp $
+ * $Id: StFgtConsts.h,v 1.17 2012/03/15 00:17:58 wwitzke Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.17  2012/03/15 00:17:58  wwitzke
+ * Added error constants to StFgtConsts.h
+ *
  * Revision 1.16  2012/03/09 17:48:32  rfatemi
  * revert back to old version
  *
