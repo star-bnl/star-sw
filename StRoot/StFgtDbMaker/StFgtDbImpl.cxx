@@ -10,7 +10,7 @@ Int_t StFgtDbImpl::getElecCoordFromGeoId(
 {
     if ( geoId < 0 || geoId >= kFgtNumGeoIds )
     {
-        LOG_INFO << "GeoId " << geoId << " out of range in StFgtDbImpl::getElecCoordFromGeoId." << endm;
+        LOG_DEBUG << "GeoId " << geoId << " out of range in StFgtDbImpl::getElecCoordFromGeoId." << endm;
         rdo = kFgtError;
         arm = kFgtError;
         apv = kFgtError;
@@ -53,7 +53,7 @@ Double_t StFgtDbImpl::getPedestalFromGeoId( Int_t geoId )
 {
     if ( geoId < 0 || geoId >= kFgtNumGeoIds )
     {
-        LOG_INFO << "GeoId " << geoId << " out of range in StFgtDbImpl::getPedestalFromGeoId." << endm;
+        LOG_DEBUG << "GeoId " << geoId << " out of range in StFgtDbImpl::getPedestalFromGeoId." << endm;
         return kFgtError;
     }
 
@@ -65,7 +65,7 @@ Double_t StFgtDbImpl::getPedestalFromElecId( Int_t elecId)
 {
     if ( elecId < 0 || elecId >= kFgtNumElecIds )
     {
-        LOG_INFO << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getPedestalFromElecId." << endm;
+        LOG_DEBUG << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getPedestalFromElecId." << endm;
         return kFgtError;
     }
 
@@ -76,7 +76,7 @@ Double_t StFgtDbImpl::getPedestalSigmaFromGeoId( Int_t geoId )
 {
     if ( geoId < 0 || geoId >= kFgtNumGeoIds )
     {
-        LOG_INFO << "GeoId " << geoId << " out of range in StFgtDbImpl::getPedestalSigmaFromGeoId." << endm;
+        LOG_DEBUG << "GeoId " << geoId << " out of range in StFgtDbImpl::getPedestalSigmaFromGeoId." << endm;
         return kFgtError;
     }
 
@@ -88,7 +88,7 @@ Double_t StFgtDbImpl::getPedestalSigmaFromElecId( Int_t elecId )
 {
     if ( elecId < 0 || elecId >= kFgtNumElecIds )
     {
-        LOG_INFO << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getPedestalSigmaFromElecId." << endm;
+        LOG_DEBUG << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getPedestalSigmaFromElecId." << endm;
         return kFgtError;
     }
 
@@ -99,7 +99,7 @@ Char_t StFgtDbImpl::getPedestalStatusFromGeoId( Int_t geoId )
 {
     if ( geoId < 0 || geoId >= kFgtNumGeoIds )
     {
-        LOG_INFO << "GeoId " << geoId << " out of range in StFgtDbImpl::getPedestalStatusFromGeoId." << endm;
+        LOG_DEBUG << "GeoId " << geoId << " out of range in StFgtDbImpl::getPedestalStatusFromGeoId." << endm;
         return kFgtErrorChar;
     }
 
@@ -111,7 +111,7 @@ Char_t StFgtDbImpl::getPedestalStatusFromElecId( Int_t elecId )
 {
     if ( elecId < 0 || elecId >= kFgtNumElecIds )
     {
-        LOG_INFO << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getPedestalStatusFromElecId." << endm;
+        LOG_DEBUG << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getPedestalStatusFromElecId." << endm;
         return kFgtErrorChar;
     }
 
@@ -122,7 +122,7 @@ Char_t StFgtDbImpl::getStatusFromGeoId( Int_t geoId )
 {
     if ( geoId < 0 || geoId >= kFgtNumGeoIds )
     {
-        LOG_INFO << "GeoId " << geoId << " out of range in StFgtDbImpl::getStatusFromGeoId." << endm;
+        LOG_DEBUG << "GeoId " << geoId << " out of range in StFgtDbImpl::getStatusFromGeoId." << endm;
         return kFgtErrorChar;
     }
 
@@ -134,7 +134,7 @@ Char_t StFgtDbImpl::getStatusFromElecId( Int_t elecId )
 {
     if ( elecId < 0 || elecId >= kFgtNumElecIds )
     {
-        LOG_INFO << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getStatusFromElecId." << endm;
+        LOG_DEBUG << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getStatusFromElecId." << endm;
         return kFgtErrorChar;
     }
 
@@ -145,7 +145,7 @@ Double_t StFgtDbImpl::getGainFromGeoId( Int_t geoId )
 {
     if ( geoId < 0 || geoId >= kFgtNumGeoIds )
     {
-        LOG_INFO << "GeoId " << geoId << " out of range in StFgtDbImpl::getGainFromGeoId." << endm;
+        LOG_DEBUG << "GeoId " << geoId << " out of range in StFgtDbImpl::getGainFromGeoId." << endm;
         return kFgtError;
     }
 
@@ -157,7 +157,7 @@ Double_t StFgtDbImpl::getGainFromElecId( Int_t elecId )
 {
     if ( elecId < 0 || elecId >= kFgtNumElecIds )
     {
-        LOG_INFO << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getGainFromElecId." << endm;
+        LOG_DEBUG << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getGainFromElecId." << endm;
         return kFgtError;
     }
 
@@ -168,7 +168,7 @@ Char_t StFgtDbImpl::getGainStatusFromGeoId( Int_t geoId )
 {
     if ( geoId < 0 || geoId >= kFgtNumGeoIds )
     {
-        LOG_INFO << "GeoId " << geoId << " out of range in StFgtDbImpl::getGainStatusFromGeoId." << endm;
+        LOG_DEBUG << "GeoId " << geoId << " out of range in StFgtDbImpl::getGainStatusFromGeoId." << endm;
         return kFgtErrorChar;
     }
 
@@ -180,7 +180,7 @@ Char_t StFgtDbImpl::getGainStatusFromElecId( Int_t elecId )
 {
     if ( elecId < 0 || elecId >= kFgtNumElecIds )
     {
-        LOG_INFO << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getGainStatusFromElecId." << endm;
+        LOG_DEBUG << "Electronic ID " << elecId << " out of range in StFgtDbImpl::getGainStatusFromElecId." << endm;
         return kFgtErrorChar;
     }
 
