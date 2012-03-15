@@ -138,6 +138,10 @@ Int_t StFgtGeom::encodeGeoId
     Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
 )   
 {
+
+    Char_t testR='R';
+    Char_t testP='P';
+
     if ( disc < 0 || disc >= kFgtNumDiscs )
     {
 	LOG_INFO << "Disc " << disc << " out of range in StFgtGeom::encodeGeoId." << endm;
@@ -149,8 +153,8 @@ Int_t StFgtGeom::encodeGeoId
 	return kFgtError;
     }
     else if (
-	   layer != kFgtLowerStripOctant
-	&& layer != kFgtHigherStripOctant
+	     layer != testR
+	     && layer != testP
     )
     {
 	LOG_INFO << "Layer " << layer << " out of range in StFgtGeom::encodeGeoId." << endm;
@@ -202,27 +206,30 @@ std::string StFgtGeom::encodeGeoName
     Int_t disc, Int_t quadrant, Char_t layer, Int_t strip
 )
 {
+   Char_t testR='R';
+   Char_t testP='P';
+
     if ( disc < 0 || disc >= kFgtNumDiscs )
     {
-	LOG_INFO << "Disc " << disc << " out of range in StFgtGeom::encodeGeoName." << endm;
+	LOG_DEBUG << "Disc " << disc << " out of range in StFgtGeom::encodeGeoName." << endm;
 	return kFgtErrorString;
     }
     else if ( quadrant < 0 || quadrant >= kFgtNumQuads )
     {
-	LOG_INFO << "Quadrant " << quadrant << " out of range in StFgtGeom::encodeGeoName." << endm;
+	LOG_DEBUG << "Quadrant " << quadrant << " out of range in StFgtGeom::encodeGeoName." << endm;
 	return kFgtErrorString;
     }
     else if (
-	   layer != kFgtLowerStripOctant
-	&& layer != kFgtHigherStripOctant
+	     layer != testR
+	     && layer != testP
     )
     {
-	LOG_INFO << "Layer " << layer << " out of range in StFgtGeom::encodeGeoName." << endm;
+	LOG_DEBUG << "Layer " << layer << " out of range in StFgtGeom::encodeGeoName." << endm;
 	return kFgtErrorString;
     }
     else if ( strip < 0 || strip >= kFgtNumStrips )
     {
-	LOG_INFO << "Strip " << strip << " out of range in StFgtGeom::encodeGeoName." << endm;
+	LOG_DEBUG << "Strip " << strip << " out of range in StFgtGeom::encodeGeoName." << endm;
 	return kFgtErrorString;
     }
 
@@ -244,6 +251,9 @@ Int_t StFgtGeom::decodeGeoName
     Short_t & disc, Short_t & quadrant, Char_t & layer, Short_t & strip
 )
 {
+    Char_t testR='R';
+    Char_t testP='P';
+
     //assert( geoName.size() == 6 );
     disc = geoName[0] - '1';
     quadrant = geoName[1] - 'A';
@@ -258,14 +268,14 @@ Int_t StFgtGeom::decodeGeoName
 	|| quadrant < 0
 	|| quadrant >= kFgtNumQuads
 	|| (
-	       layer != kFgtLowerStripOctant
-	    && quadrant != kFgtHigherStripOctant
+	     layer != testR
+	     && layer != testP
 	   )
 	|| strip < 0
 	|| strip > kFgtNumStrips
     )
     {
-	LOG_INFO << "Malformed geoName " << geoName << " in StFgtGeom::decodeGeoName." << endm;
+	LOG_DEBUG << "Malformed geoName " << geoName << " in StFgtGeom::decodeGeoName." << endm;
 	disc = kFgtError;
 	quadrant = kFgtError;
 	layer = kFgtErrorChar;
@@ -284,7 +294,7 @@ std::string StFgtGeom::translateGeoIdToGeoName( Int_t geoId )
     
     if ( geoId < 0 || geoId >= kFgtNumGeoIds )
     {
-	LOG_INFO << "GeoId " << geoId << " out of range in StFgtGeom::translateGeoIdToGeoName." << endm;
+	LOG_DEBUG << "GeoId " << geoId << " out of range in StFgtGeom::translateGeoIdToGeoName." << endm;
 	return kFgtErrorString;
     }
 
@@ -315,7 +325,7 @@ Int_t StFgtGeom::getPhysicalCoordinate
 {
     if ( geoId < 0 || geoId >= kFgtNumGeoIds )
     {
-	LOG_INFO << "GeoId " << geoId << " out of range in StFgtGeom::getPhysicalCoordinate." << endm;
+	LOG_DEBUG << "GeoId " << geoId << " out of range in StFgtGeom::getPhysicalCoordinate." << endm;
 	disc = kFgtError;
 	quadrant = kFgtError;
 	layer = kFgtErrorChar;
@@ -398,22 +408,22 @@ Int_t StFgtGeom::encodeElectronicId
 {
     if ( (rdo - 1) < 0 || (rdo - 1) >= kFgtNumRdos )
     {
-	LOG_INFO << "RDO " << rdo << " out of range in StFgtGeom::encodeElectronicId." << endm;
+	LOG_DEBUG << "RDO " << rdo << " out of range in StFgtGeom::encodeElectronicId." << endm;
 	return kFgtError;
     }
     else if ( arm < 0 || arm >= kFgtNumArms )
     {
-	LOG_INFO << "ARM " << arm << " out of range in StFgtGeom::encodeElectronicId." << endm;
+	LOG_DEBUG << "ARM " << arm << " out of range in StFgtGeom::encodeElectronicId." << endm;
 	return kFgtError;
     }
     else if ( apv < 0 || apv > kFgtMaxApvId || apv == 10 || apv == 11 )
     {
-	LOG_INFO << "APV " << apv << " out of range in StFgtGeom::encodeElectronicId." << endm;
+	LOG_DEBUG << "APV " << apv << " out of range in StFgtGeom::encodeElectronicId." << endm;
 	return kFgtError;
     }
     else if ( channel < 0 || channel >= kFgtNumChannels )
     {
-	LOG_INFO << "Channel " << channel << " out of range in StFgtGeom::encodeElectronicId." << endm;
+	LOG_DEBUG << "Channel " << channel << " out of range in StFgtGeom::encodeElectronicId." << endm;
 	return kFgtError;
     }
 
@@ -433,7 +443,7 @@ Int_t StFgtGeom::decodeElectronicId
 {
     if ( elecId < 0 || elecId >= kFgtNumElecIds )
     {
-	LOG_INFO << "Electronic ID " << elecId << " out of range in StFgtGeom::decodeElectronicId." << endm;
+	LOG_DEBUG << "Electronic ID " << elecId << " out of range in StFgtGeom::decodeElectronicId." << endm;
 
 	rdo = kFgtError;
 	arm = kFgtError;
@@ -466,22 +476,22 @@ Int_t StFgtGeom::getNaiveGeoIdFromElecCoord
 {
     if ( (rdo - 1) < 0 || (rdo - 1) >= kFgtNumRdos )
     {
-	LOG_INFO << "RDO " << rdo << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
+	LOG_DEBUG << "RDO " << rdo << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
 	return kFgtError;
     }
     else if ( arm < 0 || arm >= kFgtNumArms )
     {
-	LOG_INFO << "ARM " << arm << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
+	LOG_DEBUG << "ARM " << arm << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
 	return kFgtError;
     }
     else if ( apv < 0 || apv > kFgtMaxApvId || apv == 10 || apv == 11 )
     {
-	LOG_INFO << "APV " << apv << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
+	LOG_DEBUG << "APV " << apv << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
 	return kFgtError;
     }
     else if ( channel < 0 || channel >= kFgtNumChannels )
     {
-	LOG_INFO << "Channel " << channel << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
+	LOG_DEBUG << "Channel " << channel << " out of range in StFgtGeom::getNaiveGeoIdFromElecCoord." << endm;
 	return kFgtError;
     }
 
@@ -511,12 +521,12 @@ Char_t StFgtGeom::getOctant( Char_t layer, Int_t strip )
 	&& layer != kFgtHigherStripOctant
     )
     {
-	LOG_INFO << "Layer " << layer << " out of range in StFgtGeom::getOctant." << endm;
+	LOG_DEBUG << "Layer " << layer << " out of range in StFgtGeom::getOctant." << endm;
 	return kFgtErrorChar;
     }
     else if ( strip < 0 || strip >= kFgtNumStrips )
     {
-	LOG_INFO << "Strip " << strip << " out of range in StFgtGeom::getOctant." << endm;
+	LOG_DEBUG << "Strip " << strip << " out of range in StFgtGeom::getOctant." << endm;
 	return kFgtErrorChar;
     }
 
@@ -531,7 +541,7 @@ Char_t StFgtGeom::getOctant( Int_t apv )
 {
     if ( apv < 0 || apv > kFgtMaxApvId || apv == 10 || apv == 11 )
     {
-	LOG_INFO << "APV " << apv << " out of range in StFgtGeom::getOctant." << endm;
+	LOG_DEBUG << "APV " << apv << " out of range in StFgtGeom::getOctant." << endm;
 	return kFgtErrorChar;
     }
 
@@ -550,22 +560,22 @@ Double_t StFgtGeom::getNaiveMapping(
 {
     if ( (rdo - 1) < 0 || (rdo - 1) >= kFgtNumRdos )
     {
-	LOG_INFO << "RDO " << rdo << " out of range in StFgtGeom::getNaiveMapping." << endm;
+	LOG_DEBUG << "RDO " << rdo << " out of range in StFgtGeom::getNaiveMapping." << endm;
 	return kFgtError;
     }
     else if ( arm < 0 || arm >= kFgtNumArms )
     {
-	LOG_INFO << "ARM " << arm << " out of range in StFgtGeom::getNaiveMapping." << endm;
+	LOG_DEBUG << "ARM " << arm << " out of range in StFgtGeom::getNaiveMapping." << endm;
 	return kFgtError;
     }
     else if ( apv < 0 || apv > kFgtMaxApvId || apv == 10 || apv == 11 )
     {
-	LOG_INFO << "APV " << apv << " out of range in StFgtGeom::getNaiveMapping." << endm;
+	LOG_DEBUG << "APV " << apv << " out of range in StFgtGeom::getNaiveMapping." << endm;
 	return kFgtError;
     }
     else if ( channel < 0 || channel >= kFgtNumChannels )
     {
-	LOG_INFO << "Channel " << channel << " out of range in StFgtGeom::getNaiveMapping." << endm;
+	LOG_DEBUG << "Channel " << channel << " out of range in StFgtGeom::getNaiveMapping." << endm;
 	return kFgtError;
     }
 
@@ -585,19 +595,19 @@ bool StFgtGeom::isNaiveR(
     //	calls to this function. So, warnings are all I can do.
     if ( (rdo - 1) < 0 || (rdo - 1) >= kFgtNumRdos )
     {
-	LOG_INFO << "RDO " << rdo << " out of range in StFgtGeom::isNaiveR." << endm;
+	LOG_DEBUG << "RDO " << rdo << " out of range in StFgtGeom::isNaiveR." << endm;
     }
     else if ( arm < 0 || arm >= kFgtNumArms )
     {
-	LOG_INFO << "ARM " << arm << " out of range in StFgtGeom::isNaiveR." << endm;
+	LOG_DEBUG << "ARM " << arm << " out of range in StFgtGeom::isNaiveR." << endm;
     }
     else if ( apv < 0 || apv > kFgtMaxApvId || apv == 10 || apv == 11 )
     {
-	LOG_INFO << "APV " << apv << " out of range in StFgtGeom::isNaiveR." << endm;
+	LOG_DEBUG << "APV " << apv << " out of range in StFgtGeom::isNaiveR." << endm;
     }
     else if ( channel < 0 || channel >= kFgtNumChannels )
     {
-	LOG_INFO << "Channel " << channel << " out of range in StFgtGeom::isNaiveR." << endm;
+	LOG_DEBUG << "Channel " << channel << " out of range in StFgtGeom::isNaiveR." << endm;
     }
 
     if ( apv >= 12 )
@@ -4043,8 +4053,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.30 2012/03/15 00:18:12 wwitzke Exp $
+ *  $Id: StFgtGeom.cxx,v 1.31 2012/03/15 15:42:46 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.31  2012/03/15 15:42:46  rfatemi
+ *  changed layer tests to "R" and "P" instead of "S" and "L"
+ *
  *  Revision 1.30  2012/03/15 00:18:12  wwitzke
  *  Added boundary conditions to StFgtGeom.
  *
