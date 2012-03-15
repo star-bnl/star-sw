@@ -68,21 +68,18 @@ class StFgtDbImpl : public StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
 	{
-	    return m_map->Mapping[ 
-		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
-	    ];
+	    Int_t eId = StFgtGeom::encodeElectronicId( rdo, arm, apv, channel );
+
+	    if ( eId < 0 )
+		return kFgtError;
+
+	    return m_map->Mapping[ eId ];
 	}
 
-	virtual void getElecCoordFromGeoId(
+
+	virtual Int_t getElecCoordFromGeoId(
             Int_t geoId, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
-	)
-	{
-	    Int_t elecId = m_rmap->Mapping[ geoId ];
-
-	    StFgtGeom::decodeElectronicId( elecId, rdo, arm, apv, channel );
-
-	    return;
-	}
+	);
 
 	virtual std::string getGeoNameFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
@@ -90,83 +87,69 @@ class StFgtDbImpl : public StFgtDb
 	{
 	    Int_t geoId = getGeoIdFromElecCoord( rdo, arm, apv, channel );
 
+	    if ( geoId < 0 )
+		return kFgtErrorString;
+
 	    return StFgtGeom::translateGeoIdToGeoName( geoId );
 	}
 
-	virtual void getElecCoordFromGeoName(
+
+	virtual Int_t getElecCoordFromGeoName(
 	    const std::string & geoName,
             Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
-	)
-	{
-	    Int_t geoId =
-		StFgtGeom::translateGeoNameToGeoId( geoName );
+	);
 
-	    getElecCoordFromGeoId( geoId, rdo, arm, apv, channel );
-
-	    return;
-	}
-
-	virtual void getPhysCoordFromElecCoord(
+	virtual Int_t getPhysCoordFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel,
 	    Short_t & disc, Short_t & quadrant, Char_t & layer,
 	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
 	)
 	{
-	    StFgtGeom::getPhysicalCoordinate(
+	    return StFgtGeom::getPhysicalCoordinate(
 		getGeoIdFromElecCoord( rdo, arm, apv, channel ),
 		disc, quadrant, layer, ordinate, lowerSpan, upperSpan
 	    );
 	}
 
-	virtual Double_t getPedestalFromGeoId( Int_t geoId )
-	{
-	    Int_t elecId = m_rmap->Mapping[ geoId ];
-	    return m_pedestal->AdcPedestal[ elecId ];
-	}
+	virtual Double_t getPedestalFromGeoId( Int_t geoId );
 
+	virtual Double_t getPedestalFromElecId( Int_t elecId);
 
-	virtual Double_t getPedestalFromElecId( Int_t elecId)
-	{
-	  return m_pedestal->AdcPedestal[ elecId ];
-	}
+	virtual Double_t getPedestalFromGeoName( const std::string & geoName )
+	{   
+	    Int_t geoId = StFgtGeom::translateGeoNameToGeoId( geoName );
 
-
-	virtual Double_t getPedestalFromGeoName(
-	    const std::string & geoName
-	)
-	{
-	    Int_t geoId =
-		StFgtGeom::translateGeoNameToGeoId( geoName );
+	    if ( geoId < 0 )
+		return kFgtError;
 
 	    return getPedestalFromGeoId( geoId );
-	}
+	}   
 
 	virtual Double_t getPedestalFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
-	{
-	    return m_pedestal->AdcPedestal[
-		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
-	    ];
+	{   
+	    Int_t eId =
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel );
+
+	    if ( eId < 0 )
+		return kFgtError;
+
+	    return m_pedestal->AdcPedestal[ eId ];
 	}
 
-	virtual Double_t getPedestalSigmaFromGeoId( Int_t geoId )
-	{
-	    Int_t elecId = m_rmap->Mapping[ geoId ];
-	    return m_pedestal->AdcPedestalRMS[ elecId ];
-	}
+	virtual Double_t getPedestalSigmaFromGeoId( Int_t geoId );
 
-	virtual Double_t getPedestalSigmaFromElecId( Int_t elecId )
-	{
-	    return m_pedestal->AdcPedestalRMS[ elecId ];
-	}
+	virtual Double_t getPedestalSigmaFromElecId( Int_t elecId );
 
 	virtual Double_t getPedestalSigmaFromGeoName(
 	    const std::string & geoName
 	)
 	{
-	    Int_t geoId =
-		StFgtGeom::translateGeoNameToGeoId( geoName );
+	    Int_t geoId = StFgtGeom::translateGeoNameToGeoId( geoName );
+
+	    if ( geoId < 0 )
+		return kFgtError;
 
 	    return getPedestalSigmaFromGeoId( geoId );
 	}
@@ -175,86 +158,83 @@ class StFgtDbImpl : public StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
 	{
-	    return m_pedestal->AdcPedestalRMS[
-		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
-	    ];
+	    Int_t eId =
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel );
+
+	    if ( eId < 0 )
+		return kFgtError;
+
+	    return m_pedestal->AdcPedestalRMS[ eId ];
 	}
 
-	virtual UChar_t getPedestalStatusFromGeoId( Int_t geoId )
-	{
-	    Int_t elecId = m_rmap->Mapping[ geoId ];
-	    return m_pedestal->Status[ elecId ];
-	}
+	virtual Char_t getPedestalStatusFromGeoId( Int_t geoId );
 
-	virtual UChar_t getPedestalStatusFromElecId( Int_t elecId )
-	{
-	    return m_pedestal->Status[ elecId ];
-	}
+	virtual Char_t getPedestalStatusFromElecId( Int_t elecId );
 
 
-	virtual UChar_t getPedestalStatusFromGeoName(
+	virtual Char_t getPedestalStatusFromGeoName(
 	    const std::string & geoName
 	)
 	{
-	    Int_t geoId =
-		StFgtGeom::translateGeoNameToGeoId( geoName );
+	    Int_t geoId = StFgtGeom::translateGeoNameToGeoId( geoName );
+
+	    if ( geoId < 0 )
+		return kFgtErrorChar;
 
 	    return getPedestalStatusFromGeoId( geoId );
 	}
 
-	virtual UChar_t getPedestalStatusFromElecCoord( 
+	virtual Char_t getPedestalStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
 	{
-	    return m_pedestal->Status[
-		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
-	    ];
+	    Int_t eId =
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel );
+
+	    if ( eId < 0 )
+		return kFgtErrorChar;
+
+	    return m_pedestal->Status[ eId ];
 	}
 
-	virtual UChar_t getStatusFromGeoId( Int_t geoId )
-	{
-	    Int_t elecId = m_rmap->Mapping[ geoId ];
-	    return m_status->Status[ elecId ];
-	}
 
-	virtual UChar_t getStatusFromElecId( Int_t elecId )
-	{
-	    return m_status->Status[ elecId ];
-	}
+	virtual Char_t getStatusFromGeoId( Int_t geoId );
 
-	virtual UChar_t getStatusFromGeoName( const std::string & geoName )
+	virtual Char_t getStatusFromElecId( Int_t elecId );
+
+	virtual Char_t getStatusFromGeoName( const std::string & geoName )
 	{
-	    Int_t geoId =
-		StFgtGeom::translateGeoNameToGeoId( geoName );
+	    Int_t geoId = StFgtGeom::translateGeoNameToGeoId( geoName );
+
+	    if ( geoId < 0 )
+		return kFgtErrorChar;
 
 	    return getStatusFromGeoId( geoId );
 	}
 
-	virtual UChar_t getStatusFromElecCoord( 
+	virtual Char_t getStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
 	{
-	    return m_status->Status[
-		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
-	    ];
+	    Int_t eId =
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel );
+
+	    if ( eId < 0 )
+		return kFgtErrorChar;
+
+	    return m_status->Status[ eId ];
 	}
 
-	virtual Double_t getGainFromGeoId( Int_t geoId )
-	{
-	    Int_t elecId = m_rmap->Mapping[ geoId ];
-	    return m_gain->Gain[ elecId ];
-	}
+	virtual Double_t getGainFromGeoId( Int_t geoId );
 
-	virtual Double_t getGainFromElecId( Int_t elecId )
-	{
-	    return m_gain->Gain[ elecId ];
-	}
-
+	virtual Double_t getGainFromElecId( Int_t elecId );
 
 	virtual Double_t getGainFromGeoName( const std::string & geoName )
 	{
-	    Int_t geoId =
-		StFgtGeom::translateGeoNameToGeoId( geoName );
+	    Int_t geoId = StFgtGeom::translateGeoNameToGeoId( geoName );
+
+	    if ( geoId < 0 )
+		return kFgtError;
 
 	    return getGainFromGeoId( geoId );
 	}
@@ -263,38 +243,40 @@ class StFgtDbImpl : public StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
 	{
-	    return m_gain->Gain[
-		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
-	    ];
+	    Int_t eId =
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel );
+
+	    if ( eId < 0 )
+		return kFgtError;
+
+	    return m_gain->Gain[ eId ];
 	}
 
-	virtual UChar_t getGainStatusFromGeoId( Int_t geoId )
-	{
-	    Int_t elecId = m_rmap->Mapping[ geoId ];
-	    return m_gain->Status[ elecId ];
-	}
+	virtual Char_t getGainStatusFromGeoId( Int_t geoId );
 
-	virtual UChar_t getGainStatusFromElecId( Int_t elecId )
-	{
-	    return m_gain->Status[ elecId ];
-	}
+	virtual Char_t getGainStatusFromElecId( Int_t elecId );
 
-
-	virtual UChar_t getGainStatusFromGeoName( const std::string & geoName )
+	virtual Char_t getGainStatusFromGeoName( const std::string & geoName )
 	{
-	    Int_t geoId =
-		StFgtGeom::translateGeoNameToGeoId( geoName );
+	    Int_t geoId = StFgtGeom::translateGeoNameToGeoId( geoName );
+
+	    if ( geoId < 0 )
+		return kFgtErrorChar;
 
 	    return getGainStatusFromGeoId( geoId );
 	}
 
-	virtual UChar_t getGainStatusFromElecCoord( 
+	virtual Char_t getGainStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
 	{
-	    return m_gain->Status[
-		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel )
-	    ];
+	    Int_t eId =
+		StFgtGeom::encodeElectronicId( rdo, arm, apv, channel );
+
+	    if ( eId < 0 )
+		return kFgtErrorChar;
+
+	    return m_gain->Status[ eId ];
 	}
 
 	virtual Double_t getMapping(
@@ -305,8 +287,7 @@ class StFgtDbImpl : public StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	);
 
-
-	virtual ~StFgtDbImpl(){}
+	virtual ~StFgtDbImpl() {}
 
     private:
 	fgtMapping_st * m_map;

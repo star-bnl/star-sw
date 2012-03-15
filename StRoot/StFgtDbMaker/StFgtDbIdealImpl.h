@@ -26,15 +26,13 @@ class StFgtDbIdealImpl : public StFgtDb
 	    );
 	}
 
-	virtual void getElecCoordFromGeoId(
+	virtual Int_t getElecCoordFromGeoId(
             Int_t geoId, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
 	)
 	{
-	    StFgtGeom::getNaiveElecCoordFromGeoId(
+	    return StFgtGeom::getNaiveElecCoordFromGeoId(
 		geoId, rdo, arm, apv, channel
 	    );
-
-	    return;
 	}
 
 	virtual std::string getGeoNameFromElecCoord(
@@ -46,7 +44,7 @@ class StFgtDbIdealImpl : public StFgtDb
 	    );
 	}
 
-	virtual void getElecCoordFromGeoName(
+	virtual Int_t getElecCoordFromGeoName(
 	    const std::string & geoName,
             Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
 	)
@@ -54,20 +52,24 @@ class StFgtDbIdealImpl : public StFgtDb
 	    Int_t geoId =
 		StFgtGeom::translateGeoNameToGeoId( geoName );
 
+	    //	Error handled in "translateGeoNameToGeoId"
+	    if ( geoId < 0 )
+		return kFgtError;
+
 	    StFgtGeom::getNaiveElecCoordFromGeoId(
 		geoId, rdo, arm, apv, channel
 	    );
 
-	    return;
+	    return 0;
 	}
 
-	virtual void getPhysCoordFromElecCoord(
+	virtual Int_t getPhysCoordFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel,
 	    Short_t & disc, Short_t & quadrant, Char_t & layer,
 	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
 	)
 	{
-	    StFgtGeom::getNaivePhysCoordFromElecCoord(
+	    return StFgtGeom::getNaivePhysCoordFromElecCoord(
 		rdo, arm, apv, channel,
 		disc, quadrant, layer, ordinate, lowerSpan, upperSpan
 	    );
@@ -126,49 +128,49 @@ class StFgtDbIdealImpl : public StFgtDb
 	}
 
 	//  The pedestal here is always good, so always return 1.
-	virtual UChar_t getPedestalStatusFromGeoId( Int_t geoId )
+	virtual Char_t getPedestalStatusFromGeoId( Int_t geoId )
 	{
 	    return 1;
 	}
 
-	virtual UChar_t getPedestalStatusFromGeoName(
+	virtual Char_t getPedestalStatusFromGeoName(
 	    const std::string & geoName
 	)
 	{
 	    return 1;
 	}
 
-	virtual UChar_t getPedestalStatusFromElecCoord( 
+	virtual Char_t getPedestalStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
 	{
 	    return 1;
 	}
 
-	virtual UChar_t getPedestalStatusFromElecId( Int_t elecId )
+	virtual Char_t getPedestalStatusFromElecId( Int_t elecId )
 	{
 	    return 1;
 	}
 
 	//  The status is always good, so return 0.
-	virtual UChar_t getStatusFromGeoId( Int_t geoId )
+	virtual Char_t getStatusFromGeoId( Int_t geoId )
 	{
 	    return 0;
 	}
 
-	virtual UChar_t getStatusFromGeoName( const std::string & geoName )
+	virtual Char_t getStatusFromGeoName( const std::string & geoName )
 	{
 	    return 0;
 	}
 
-	virtual UChar_t getStatusFromElecCoord( 
+	virtual Char_t getStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
 	{
 	    return 0;
 	}
 
-	virtual UChar_t getStatusFromElecId( Int_t elecId )
+	virtual Char_t getStatusFromElecId( Int_t elecId )
 	{
 	    return 0;
 	}
@@ -197,27 +199,26 @@ class StFgtDbIdealImpl : public StFgtDb
 	}
 
 	//  Gains are always good here, so return 1.
-	virtual UChar_t getGainStatusFromGeoId( Int_t geoId )
+	virtual Char_t getGainStatusFromGeoId( Int_t geoId )
 	{
 	    return 1;
 	}
 
-	virtual UChar_t getGainStatusFromGeoName( const std::string & geoName )
+	virtual Char_t getGainStatusFromGeoName( const std::string & geoName )
 	{
 	    return 1;
 	}
 
-	virtual UChar_t getGainStatusFromElecCoord( 
+	virtual Char_t getGainStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	)
 	{
 	    return 1;
 	}
-	virtual UChar_t getGainStatusFromElecId( Int_t elecId )
+	virtual Char_t getGainStatusFromElecId( Int_t elecId )
 	{
 	    return 1.0;
 	}
-
 
 	virtual Double_t getMapping(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel

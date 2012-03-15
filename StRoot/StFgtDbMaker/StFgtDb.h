@@ -21,7 +21,7 @@ class StFgtDb
 
 	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
 	//  radians, depending on the layer.
-	virtual void getPhysicalCoordinateFromGeoId(
+	virtual Int_t getPhysicalCoordinateFromGeoId(
 	    Int_t geoId,
 	    Short_t & disc, Short_t & quadrant, Char_t & layer,
 	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
@@ -29,7 +29,7 @@ class StFgtDb
 
 	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
 	//  radians, depending on the layer.
-	virtual void getPhysicalCoordinateFromGeoName(
+	virtual Int_t getPhysicalCoordinateFromGeoName(
 	    const std::string & geoName,
 	    Short_t & disc, Short_t & quadrant, Char_t & layer,
 	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
@@ -46,7 +46,7 @@ class StFgtDb
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
 
-	virtual void getElecCoordFromGeoId(
+	virtual Int_t getElecCoordFromGeoId(
             Int_t geoId, Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
 	) = 0;
 
@@ -55,12 +55,12 @@ class StFgtDb
 	) = 0;
 
 	//Geoname is human readable form of geoId
-	virtual void getElecCoordFromGeoName(
+	virtual Int_t getElecCoordFromGeoName(
 	    const std::string & geoName,
             Int_t& rdo, Int_t& arm, Int_t& apv, Int_t& channel
 	) = 0;
 
-	virtual void getPhysCoordFromElecCoord(
+	virtual Int_t getPhysCoordFromElecCoord(
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel,
 	    Short_t & disc, Short_t & quadrant, Char_t & layer,
 	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
@@ -98,30 +98,30 @@ class StFgtDb
 
 	//Pedestal status is not currently used or filled.  If you want to know the 
 	//status of a strip use getStatus* functions NOT getPedestalStatus* functions
-	virtual UChar_t getPedestalStatusFromGeoId( Int_t geoId ) = 0;
+	virtual Char_t getPedestalStatusFromGeoId( Int_t geoId ) = 0;
 
-	virtual UChar_t getPedestalStatusFromGeoName(
+	virtual Char_t getPedestalStatusFromGeoName(
 	    const std::string & geoName
 	) = 0;
 
-	virtual UChar_t getPedestalStatusFromElecCoord( 
+	virtual Char_t getPedestalStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
 
-	virtual UChar_t getPedestalStatusFromElecId(
+	virtual Char_t getPedestalStatusFromElecId(
 	    Int_t electId
 	) = 0;
 
 	//These are the functions that tell you the status of strips
-	virtual UChar_t getStatusFromGeoId( Int_t geoId ) = 0;
+	virtual Char_t getStatusFromGeoId( Int_t geoId ) = 0;
 
-	virtual UChar_t getStatusFromGeoName( const std::string & geoName ) = 0;
+	virtual Char_t getStatusFromGeoName( const std::string & geoName ) = 0;
 
-	virtual UChar_t getStatusFromElecCoord( 
+	virtual Char_t getStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
 
-	virtual UChar_t getStatusFromElecId(
+	virtual Char_t getStatusFromElecId(
 	    Int_t electId
 	) = 0;
 
@@ -137,15 +137,15 @@ class StFgtDb
 	    Int_t electId
 	) = 0;
 
-	virtual UChar_t getGainStatusFromGeoId( Int_t geoId ) = 0;
+	virtual Char_t getGainStatusFromGeoId( Int_t geoId ) = 0;
 
-	virtual UChar_t getGainStatusFromGeoName( const std::string & geoName ) = 0;
+	virtual Char_t getGainStatusFromGeoName( const std::string & geoName ) = 0;
 
-	virtual UChar_t getGainStatusFromElecCoord( 
+	virtual Char_t getGainStatusFromElecCoord( 
 	    Int_t rdo, Int_t arm, Int_t apv, Int_t channel
 	) = 0;
 
-	virtual UChar_t getGainStatusFromElecId(
+	virtual Char_t getGainStatusFromElecId(
 	    Int_t electId
 	) = 0;
 
@@ -168,7 +168,7 @@ class StFgtDb
 
 	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
 	//  radians, depending on the layer.
-inline 	void StFgtDb::getPhysicalCoordinateFromGeoId(
+inline 	Int_t StFgtDb::getPhysicalCoordinateFromGeoId(
 	    Int_t geoId,
 	    Short_t & disc, Short_t & quadrant, Char_t & layer,
 	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
@@ -181,13 +181,13 @@ inline 	void StFgtDb::getPhysicalCoordinateFromGeoId(
 
 	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
 	//  radians, depending on the layer.
-inline	void StFgtDb::getPhysicalCoordinateFromGeoName(
+inline	Int_t StFgtDb::getPhysicalCoordinateFromGeoName(
 	    const std::string & geoName,
 	    Short_t & disc, Short_t & quadrant, Char_t & layer,
 	    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
 	)
 	{
-	    StFgtGeom::getPhysicalCoordinate(
+	    return StFgtGeom::getPhysicalCoordinate(
 		geoName, disc, quadrant, layer, ordinate, lowerSpan, upperSpan
 	    );
 	}
