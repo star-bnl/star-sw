@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.28 2012/03/16 17:36:46 dmitry Exp $
+ * $Id: StDbConfigNode.cc,v 1.29 2012/03/16 19:36:18 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.29  2012/03/16 19:36:18  dmitry
+ * converted dangled char pointers to std::string objects + fixed typo
+ *
  * Revision 1.28  2012/03/16 17:36:46  dmitry
  * added * symbol to global override indicators
  *
@@ -207,7 +210,7 @@ StDbConfigNode::setProdTimeOverride(unsigned int ptime, char* dbType, char* dbDo
         isAllTypesAccepted = true;
     }
     completeName.append("_");
-    if (dbDomain && dbDomain[0] != '\0' && dbDomain[0] != ' ' && dbType[0] != '*') {
+    if (dbDomain && dbDomain[0] != '\0' && dbDomain[0] != ' ' && dbDomain[0] != '*') {
         completeName.append(dbDomain);
     }
 
