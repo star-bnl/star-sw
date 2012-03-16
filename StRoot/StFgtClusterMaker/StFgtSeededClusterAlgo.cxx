@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.9 2012/03/16 19:43:19 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.10 2012/03/16 19:49:46 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.10  2012/03/16 19:49:46  avossen
+//  *** empty log message ***
+//
 //  Revision 1.9  2012/03/16 19:43:19  avossen
 //  added option to allow to jump strips
 //
@@ -44,7 +47,7 @@
 //for floor
 #include <math.h>
 
-StFgtSeededClusterAlgo::StFgtSeededClusterAlgo():up(true),down(false)
+StFgtSeededClusterAlgo::StFgtSeededClusterAlgo():up(true),down(false),stepTwo(false)
 {
   //nothing else to do....
 };
