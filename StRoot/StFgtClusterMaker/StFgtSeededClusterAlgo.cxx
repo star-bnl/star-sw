@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.10 2012/03/16 19:49:46 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.11 2012/03/16 19:50:18 balewski Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.11  2012/03/16 19:50:18  balewski
+//  *** empty log message ***
+//
 //  Revision 1.10  2012/03/16 19:49:46  avossen
 //  *** empty log message ***
 //
@@ -262,7 +265,7 @@ run over all strips, find seeds, use those to start clusters
 		}
 	    }
 	  //	  cout<<" high charge strips: " << stripsW_Charge <<" low: " << stripsWO_Charge<<endl;
-	  if(stripsW_Charge>stripsWO_Charge)
+	  if(stripsW_Charge>stripsWO_Charge && stripsW_Charge > kFgtMaxClusterSize)
 	    {
 	      (*it)->setClusterSeedType(kFgtClusterSeedInSeaOfNoise);
 	      continue;
