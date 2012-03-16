@@ -1,6 +1,9 @@
 ///
-// $Id: StFgtSeededClusterAlgo.h,v 1.4 2012/03/08 17:43:40 avossen Exp $
+// $Id: StFgtSeededClusterAlgo.h,v 1.5 2012/03/16 19:41:15 avossen Exp $
 // $Log: StFgtSeededClusterAlgo.h,v $
+// Revision 1.5  2012/03/16 19:41:15  avossen
+// added option to allow to jump strips
+//
 // Revision 1.4  2012/03/08 17:43:40  avossen
 // added default cluster algo, made StFgtIClusterAlgo destructor =0
 //
@@ -57,6 +60,7 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
   virtual Int_t doClustering(  StFgtStripCollection& strips, StFgtHitCollection& clusters );
   virtual Int_t Init();
   virtual ~StFgtSeededClusterAlgo();
+  virtual void setJumpSingleStrip(Bool_t jump);
 
  protected:
   ///migrated to A2C maker
@@ -67,6 +71,13 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
  private:
   Bool_t up;
   Bool_t down;
+  Bool_t stepTwo;
   ClassDef(StFgtSeededClusterAlgo,1);
+
 };
 #endif
+
+inline void StFgtSeededClusterAlgo::setJumpSingleStrip(Bool_t jump)
+{
+  stepTwo=jump;
+}

@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.7 2012/03/08 17:43:40 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.8 2012/03/16 19:41:15 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.8  2012/03/16 19:41:15  avossen
+//  added option to allow to jump strips
+//
 //  Revision 1.7  2012/03/08 17:43:40  avossen
 //  added default cluster algo, made StFgtIClusterAlgo destructor =0
 //
@@ -153,7 +156,7 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
     }
   isPhi=(layer=='P');
   isR=(!isPhi);
-  Bool_t stepTwo=false;
+  Bool_t stepTwo=true;
   StSPtrVecFgtStripIterator nextStrip=itSeed+inc;
   Int_t deadStripsSkipped=0;
 
