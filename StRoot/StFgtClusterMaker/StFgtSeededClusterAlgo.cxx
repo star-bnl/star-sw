@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.8 2012/03/16 19:41:15 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.9 2012/03/16 19:43:19 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.9  2012/03/16 19:43:19  avossen
+//  added option to allow to jump strips
+//
 //  Revision 1.8  2012/03/16 19:41:15  avossen
 //  added option to allow to jump strips
 //
@@ -156,7 +159,7 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
     }
   isPhi=(layer=='P');
   isR=(!isPhi);
-  Bool_t stepTwo=true;
+
   StSPtrVecFgtStripIterator nextStrip=itSeed+inc;
   Int_t deadStripsSkipped=0;
 
@@ -209,7 +212,6 @@ Int_t StFgtSeededClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtH
   //to compute energy weighted strip id
   Double_t meanGeoId=0;
   //for R < R/2 cm the difference in geo id of the phi strips is 2 and only even numbers are used...
-  //  bool stepTwo=false;
   //const 
 
   /**
