@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtTracking.h,v 1.2 2012/03/14 22:22:40 sgliske Exp $
+ * $Id: StFgtTracking.h,v 1.3 2012/03/16 21:51:26 sgliske Exp $
  * Author: S. Gliske, March 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtTracking.h,v $
+ * Revision 1.3  2012/03/16 21:51:26  sgliske
+ * update
+ *
  * Revision 1.2  2012/03/14 22:22:40  sgliske
  * update
  *
@@ -41,13 +44,13 @@ struct StFgtTrClus {
 
 // basic space point info for tracking
 struct StFgtTrPoint {
-   Int_t trIdx, rIdx, pIdx;
+   Int_t ptIdx, rIdx, pIdx;  // ptIdx is the index value of this point
    TVector3 pos;
 
    static Int_t lastIdx;
 
-   StFgtTrPoint( Int_t rI = -1, Int_t pI = -1 ) : trIdx(++lastIdx), rIdx(rI), pIdx(pI) { /* */ };
-   StFgtTrPoint( const StFgtTrClus& rClus, const StFgtTrClus& pClus, Float_t z ) : trIdx(++lastIdx), rIdx(rClus.idx), pIdx(pClus.idx), pos(rClus.pos,0,z) {
+   StFgtTrPoint( Int_t rI = -1, Int_t pI = -1 ) : ptIdx(++lastIdx), rIdx(rI), pIdx(pI) { /* */ };
+   StFgtTrPoint( const StFgtTrClus& rClus, const StFgtTrClus& pClus, Float_t z ) : ptIdx(++lastIdx), rIdx(rClus.idx), pIdx(pClus.idx), pos(rClus.pos,0,z) {
       pos.SetPhi(pClus.pos);
    };
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtHHTracking.cxx,v 1.2 2012/03/14 22:22:40 sgliske Exp $
+ * $Id: StFgtHHTracking.cxx,v 1.3 2012/03/16 21:51:26 sgliske Exp $
  * Author: S. Gliske, March 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtHHTracking.cxx,v $
+ * Revision 1.3  2012/03/16 21:51:26  sgliske
+ * update
+ *
  * Revision 1.2  2012/03/14 22:22:40  sgliske
  * update
  *
@@ -87,7 +90,7 @@ Int_t StFgtHHTracking::findTracks(){
                Float_t r = (mBeamPos - TVector2( x0, y0 )).Mod();
 
                // #ifdef DEBUG
-               //                LOG_INFO << "Hits " << iter1->trIdx << ", " << iter2->trIdx << ' '
+               //                LOG_INFO << "Hits " << iter1->ptIdx << ", " << iter2->ptIdx << ' '
                //                         << "Pts "
                //                         << "( " << mBeamPos.X()   << ", " << mBeamPos.Y()   << ") "
                //                         << "( " << iter1->pos.X() << ", " << iter1->pos.Y() << ") "
@@ -96,7 +99,7 @@ Int_t StFgtHHTracking::findTracks(){
                //                         << "( " << x0 << ", " << y0 << ") and r = " << r << endm;
                // #endif
                if( r > mMinRad && r < mMaxRad )
-                  mHelixVec.push_back( StFgtHHelix( iter1->trIdx, iter2->trIdx, x0, y0, r ) );
+                  mHelixVec.push_back( StFgtHHelix( iter1->ptIdx, iter2->ptIdx, x0, y0, r ) );
             };
          };
       };
