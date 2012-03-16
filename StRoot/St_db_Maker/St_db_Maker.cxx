@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.127 2012/01/24 02:55:43 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.128 2012/03/16 19:36:18 dmitry Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.128  2012/03/16 19:36:18  dmitry
+// converted dangled char pointers to std::string objects + fixed typo
+//
 // Revision 1.127  2012/01/24 02:55:43  perev
 // Errors check added
 //
@@ -514,13 +517,8 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
    if (Debug() > 1) fDBBroker->setVerbose(1);
    if (fMaxEntryTime) { 
        fDBBroker->SetProdTime(fMaxEntryTime);
-        for (std::map<std::pair<char*,char*>,UInt_t>::iterator it = fMaxEntryTimeOverride.begin(); it != fMaxEntryTimeOverride.end(); it++ ) {
-            //if ( (*it).first.first ) {
-                //std::cout << "SPECIAL: St_db_Maker - Setting DBBroker to " << (*it).first.first << " _ " << (*it).first.second << " = " << (*it).second << "\n";
-            //} else {
-                //std::cout << "SPECIAL: St_db_Maker - Setting DBBroker to [all types] _ " << (*it).first.second << " = " << (*it).second << "\n";
-            //}
-            fDBBroker->AddProdTimeOverride((*it).second, (*it).first.first, (*it).first.second);                                                                        
+        for (std::map<std::pair<std::string,std::string>,UInt_t>::iterator it = fMaxEntryTimeOverride.begin(); it != fMaxEntryTimeOverride.end(); it++ ) {
+            fDBBroker->AddProdTimeOverride((*it).second, (char*)((*it).first.first).c_str(), (char*)((*it).first.second).c_str());                                                                        
         }
    }
    const TAttr *attl = GetAttr();
@@ -1344,27 +1342,27 @@ void St_db_Maker::SetMaxEntryTime(Int_t idate,Int_t itime)
 //_____________________________________________________________________________
 void St_db_Maker::AddMaxEntryTimeOverride(Int_t idate,Int_t itime, char* dbType, char* dbDomain) {
 
+	std::string mDbType = "";
+	std::string mDbDomain = "";
+
 	if (dbType) {
 		for (char* p = dbType; *p != '\0'; p++) {
 			*p = (char)std::tolower(*p);
 		}
 		dbType[0] = std::toupper(dbType[0]);
+		mDbType = dbType;
 	}
 
 	if (dbDomain) {
 		for (char* p = dbDomain; *p != '\0'; p++) {
 			*p = (char)std::tolower(*p);
 		}
+		mDbDomain = dbDomain;
 	}
 
     TUnixTime ut;
     ut.SetGTime(idate,itime);
-    fMaxEntryTimeOverride.insert( std::make_pair<std::pair<char*,char*>,UInt_t>( std::make_pair<char*,char*>(dbType,dbDomain), ut.GetUTime() ) );
-    //if (dbType) {
-        //std::cout << "SPECIAL: St_db_Maker - received override " << dbType << " _ " << dbDomain << " = " << idate << "," << itime << "\n";
-    //} else {
-        //std::cout << "SPECIAL: St_db_Maker - received override [all types] _ " << dbDomain << " = " << idate << "," << itime << "\n";
-    //}
+    fMaxEntryTimeOverride.insert( std::make_pair<std::pair<std::string,std::string>,UInt_t>( std::make_pair<std::string,std::string>(mDbType,mDbDomain), ut.GetUTime() ) );
 } 
 
 // Now very UGLY trick
