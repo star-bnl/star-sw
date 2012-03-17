@@ -10,7 +10,7 @@
 
 ClassImp(StJetCandidate);
 
-inline StJetCandidate::StJetCandidate(const TVector3& vertex, const TLorentzVector& fourMomentum)
+StJetCandidate::StJetCandidate(const TVector3& vertex, const TLorentzVector& fourMomentum)
   : mPt(fourMomentum.Pt())
   , mEta(fourMomentum.Eta())
   , mPhi(fourMomentum.Phi())
@@ -19,7 +19,7 @@ inline StJetCandidate::StJetCandidate(const TVector3& vertex, const TLorentzVect
   mDetEta = detEta(vertex);
 }
 
-inline float StJetCandidate::detEta(const TVector3& vertex) const
+float StJetCandidate::detEta(const TVector3& vertex) const
 {
   // Front plate of BEMC towers or BPRS layer (See StEmcGeom/geometry/StEmcGeom.cxx)
   // This only works for BEMC jets.
@@ -30,7 +30,7 @@ inline float StJetCandidate::detEta(const TVector3& vertex) const
   return pos.Eta();
 }
 
-inline StJetTrack* StJetCandidate::leadingChargedParticle() const
+StJetTrack* StJetCandidate::leadingChargedParticle() const
 {
   StJetTrack* lcp = 0;
   for (int i = 0; i < numberOfTracks(); ++i) {
@@ -40,19 +40,19 @@ inline StJetTrack* StJetCandidate::leadingChargedParticle() const
   return lcp;
 }
 
-inline float StJetCandidate::deltaR(const StJetElement* element) const
+float StJetCandidate::deltaR(const StJetElement* element) const
 {
   return momentum().DeltaR(element->momentum());
 }
 
-inline float StJetCandidate::sumTrackPt() const
+float StJetCandidate::sumTrackPt() const
 {
   float s = 0;
   for (int i = 0; i < numberOfTracks(); ++i) s += track(i)->pt();
   return s;
 }
 
-inline float StJetCandidate::sumTrackPt(float radius) const
+float StJetCandidate::sumTrackPt(float radius) const
 {
   float s = 0;
   for (int i = 0; i < numberOfTracks(); ++i) {
@@ -62,14 +62,14 @@ inline float StJetCandidate::sumTrackPt(float radius) const
   return s;
 }
 
-inline float StJetCandidate::sumTowerPt() const
+float StJetCandidate::sumTowerPt() const
 {
   float s = 0;
   for (int i = 0; i < numberOfTowers(); ++i) s += tower(i)->pt();
   return s;
 }
 
-inline float StJetCandidate::sumTowerPt(float radius) const
+float StJetCandidate::sumTowerPt(float radius) const
 {
   float s = 0;
   for (int i = 0; i < numberOfTowers(); ++i) {
@@ -79,7 +79,7 @@ inline float StJetCandidate::sumTowerPt(float radius) const
   return s;
 }
 
-inline StJetTrack* StJetCandidate::getTrackById(int id) const
+StJetTrack* StJetCandidate::getTrackById(int id) const
 {
   for (int i = 0; i < numberOfTracks(); ++i) {
     StJetTrack* t = track(i);
@@ -88,7 +88,7 @@ inline StJetTrack* StJetCandidate::getTrackById(int id) const
   return 0;
 }
 
-inline StJetTower* StJetCandidate::getTowerById(int id) const
+StJetTower* StJetCandidate::getTowerById(int id) const
 {
   for (int i = 0; i < numberOfTowers(); ++i) {
     StJetTower* t = tower(i);
@@ -97,12 +97,12 @@ inline StJetTower* StJetCandidate::getTowerById(int id) const
   return 0;
 }
 
-inline float StJetCandidate::getJetPatchPhi(int jetPatch)
+float StJetCandidate::getJetPatchPhi(int jetPatch)
 {
   return TVector2::Phi_mpi_pi((150 - (jetPatch % 6) * 60) * TMath::DegToRad());
 }
 
-inline bool StJetCandidate::getBarrelJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
+bool StJetCandidate::getBarrelJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
 {
   //
   // Pibero Djawotho <pibero@tamu.edu>
@@ -152,7 +152,7 @@ inline bool StJetCandidate::getBarrelJetPatchEtaPhi(int jetPatch, float& eta, fl
   return true;
 }
 
-inline bool StJetCandidate::getEndcapJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
+bool StJetCandidate::getEndcapJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
 {
   if (jetPatch >= 0 && jetPatch < 6)
     eta = 1.5;
@@ -164,7 +164,7 @@ inline bool StJetCandidate::getEndcapJetPatchEtaPhi(int jetPatch, float& eta, fl
   return true;
 }
 
-inline bool StJetCandidate::getOverlapJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
+bool StJetCandidate::getOverlapJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
 {
   if (jetPatch >= 0 && jetPatch < 6)
     eta = 0.9;
@@ -176,7 +176,7 @@ inline bool StJetCandidate::getOverlapJetPatchEtaPhi(int jetPatch, float& eta, f
   return true;
 }
 
-inline bool StJetCandidate::getBarrelJetPatchId(float eta, float phi, int& id)
+bool StJetCandidate::getBarrelJetPatchId(float eta, float phi, int& id)
 {
   //
   // Pibero Djawotho <pibero@tamu.edu>
@@ -218,7 +218,7 @@ inline bool StJetCandidate::getBarrelJetPatchId(float eta, float phi, int& id)
   return (0 <= id && id < 12);
 }
 
-inline bool StJetCandidate::getEndcapJetPatchId(float eta, float phi, int& id)
+bool StJetCandidate::getEndcapJetPatchId(float eta, float phi, int& id)
 {
   // Jet patch id is left at -1 on failure
   id = -1;
@@ -244,7 +244,7 @@ inline bool StJetCandidate::getEndcapJetPatchId(float eta, float phi, int& id)
   return (0 <= id && id < 6);
 }
 
-inline bool StJetCandidate::getOverlapJetPatchId(float eta, float phi, int& id)
+bool StJetCandidate::getOverlapJetPatchId(float eta, float phi, int& id)
 {
   // Jet patch id is left at -1 on failure
   id = -1;
