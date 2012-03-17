@@ -41,7 +41,8 @@ Int_t StFgtClusterPlotter::Make()
 
    StEvent* eventPtr = 0;
    eventPtr = (StEvent*)GetInputDS("StEvent");
-   (*outTxtFile) <<endl<<endl<<" ------new event: " << eventPtr->info()->id() << "----------------------" << " running nr: " << runningEvtNr << "------" << endl;
+   (*outTxtFileP) <<endl<<endl<<" ------new event: " << eventPtr->info()->id() << "----------------------" << " running nr: " << runningEvtNr << "------" << endl;
+   (*outTxtFileR) <<endl<<endl<<" ------new event: " << eventPtr->info()->id() << "----------------------" << " running nr: " << runningEvtNr << "------" << endl;
 
 
    Int_t ierr = StFgtQaMaker::Make();
@@ -68,15 +69,20 @@ Int_t StFgtClusterPlotter::Make()
 
 	     Short_t quad, disc, strip;
 	     Char_t layer; 
+
+	     Bool_t stripDead=false;
+	     prvGeoId=(*it)->getGeoId();
+	     StFgtGeom::decodeGeoId((*it)->getGeoId(),disc, quad, layer, strip);
+	     if(layer=='R')
+	       outTxtFile=outTxtFileR;
+	     else
+	       outTxtFile=outTxtFileP;
+
 	     if(((*it)->getGeoId()-prvGeoId)>1 && prvGeoId>=0)
 	       {
 		 (*outTxtFile) <<endl;
 	       }
-	     Bool_t stripDead=false;
-	     prvGeoId=(*it)->getGeoId();
-	     StFgtGeom::decodeGeoId((*it)->getGeoId(),disc, quad, layer, strip);
-	     if(layer!='R')
-	       continue;
+
 	     switch((*it)->getClusterSeedType())
 	       {
 	       case kFgtSeedType1:
@@ -444,8 +450,13 @@ construct histograms
 Int_t StFgtClusterPlotter::Init(){
 
   myRootFile=new TFile("clusterPlotter.root","RECREATE");
-  outTxtFile=new ofstream;
-  outTxtFile->open("clusters.txt");
+  //  outTxtFile=new ofstream;
+  //  outTxtFile->open("clusters.txt");
+
+  outTxtFileP=new ofstream;
+  outTxtFileP->open("clustersP.txt");
+  outTxtFileR=new ofstream;
+  outTxtFileR->open("clustersR.txt");
 
 
    Int_t ierr = kStOk;

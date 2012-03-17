@@ -24,6 +24,9 @@ class StFgtClusterPlotter : public StFgtQaMaker {
 
  protected:
    ofstream* outTxtFile;
+   ofstream* outTxtFileR;
+   ofstream* outTxtFileP;
+
    TFile* myRootFile;
    TH1* hClusterCharge;
    TH2D** hCChargePosSpacePhi;
