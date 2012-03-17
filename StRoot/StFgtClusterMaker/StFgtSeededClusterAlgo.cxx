@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.11 2012/03/16 19:50:18 balewski Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.12 2012/03/17 23:30:16 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.12  2012/03/17 23:30:16  avossen
+//  fudged the cluster maker
+//
 //  Revision 1.11  2012/03/16 19:50:18  balewski
 //  *** empty log message ***
 //
@@ -153,7 +156,7 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
   bool isPhi, isR;
   Short_t disc, quadrant;
   //,noLayer='z';
-  Char_t layer;
+    Char_t layer;
   Double_t ordinate, lowerSpan, upperSpan;
   //  cout <<"addint strip to cluster from geo:  " << (*itSeed)->getGeoId();
 
@@ -163,7 +166,8 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
       //      cout <<"dir is down " <<endl;
     inc=(-1);
     }
-  isPhi=(layer=='P');
+  //  cout <<"layer: " << seedLayer<<endl;
+  isPhi=(seedLayer=='P');
   isR=(!isPhi);
 
   StSPtrVecFgtStripIterator nextStrip=itSeed+inc;
@@ -173,7 +177,6 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
      //          cout <<"looking now next strip, which is dead: " << (*nextStrip)->getGeoId();
       nextStrip+=inc;
       deadStripsSkipped++;
-
       //the next printout might lead to a crash...
       // cout <<"now looking at "<< (*nextStrip)->getGeoId()<<endl;
     }
@@ -182,9 +185,31 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
     {
       //      cout <<"still looking at "<< (*nextStrip)->getGeoId()<<endl;
       StFgtGeom::getPhysicalCoordinate((*nextStrip)->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
-      bool adjacentStrip=((abs((*nextStrip)->getGeoId()-(*itSeed)->getGeoId())<(2+deadStripsSkipped))|| (( abs((*nextStrip)->getGeoId()-(*itSeed)->getGeoId()==(2+deadStripsSkipped))) && stepTwo && isPhi && ((*nextStrip)->getGeoId()%2==0) &&   seedLayer==layer));
+      //      if(isPhi)
+	//	cout <<"stepTwo: " << stepTwo << " nextStripID: " << (*nextStrip)->getGeoId() << " seedLayer: " << seedLayer <<" layer: " << layer <<endl;
+      bool adjacentStrip=((abs((*nextStrip)->getGeoId()-(*itSeed)->getGeoId()))<(2+deadStripsSkipped));
+      //      cout <<"looking at "<< (*nextStrip)->getGeoId()<< " adjacent: " << adjacentStrip <<endl;
+      bool adjacentStrip2=false;
+
+      if(adjacentStrip && !isSameCluster(itSeed,nextStrip))
+	{
+	  //	  cout <<" not no adjacent Strip" <<endl;
+	  if((nextStrip+inc) >=itVecBegin && (nextStrip+inc <itVecEnd))
+	    {
+	      //	      cout <<"geoid of next next: " << (*(nextStrip+inc))->getGeoId() <<" of seed: " << (*itSeed)->getGeoId() <<" deadStrips skipped: " << deadStripsSkipped<<endl;
+	      //  cout <<"diff in geo: " <<(abs((*nextStrip+inc)->getGeoId()-(*itSeed)->getGeoId()==(2+deadStripsSkipped)))<< endl;
+	      adjacentStrip2=((abs((*(nextStrip+inc))->getGeoId()-(*itSeed)->getGeoId()==(2+deadStripsSkipped))) && stepTwo && isPhi && ((*(nextStrip+inc))->getGeoId()%2==0) &&   seedLayer==layer);
+	    }
+	}
+      if(adjacentStrip2)
+	{
+	  //	  cout <<"jump Strip" <<endl;
+	  nextStrip=nextStrip+inc;//jump strip
+	}
+
+
       //if the new strip is adjacent and it seems to belong to the same cluster, add it
-      if(adjacentStrip && isSameCluster(itSeed,nextStrip))
+      if((adjacentStrip2|| adjacentStrip) && isSameCluster(itSeed,nextStrip))
 	{
 	  (*nextStrip)->setClusterSeedType(kFgtClusterPart);
 	  stripWeightMap_t &stripWeightMap = clus->getStripWeightMap();
