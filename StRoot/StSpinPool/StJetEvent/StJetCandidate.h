@@ -14,6 +14,7 @@
 #include "TRefArray.h"
 
 class StJetVertex;
+class StJetElement;
 class StJetTrack;
 class StJetTower;
 class StJetParticle;
@@ -45,14 +46,20 @@ public:
   float detEta() const { return mDetEta; }
   float detEta(const TVector3& vertex) const;
   float sumTrackPt() const;
+  float sumTrackPt(float radius) const;
   float sumTowerPt() const;
+  float sumTowerPt(float radius) const;
   float sumPt() const { return sumTrackPt() + sumTowerPt(); }
+  float sumPt(float radius) const { return sumTrackPt(radius)+sumTowerPt(radius); }
+  float profile(float radius) const { return sumPt(radius)/sumPt(); }
+  float psi(float radius) const { return profile(radius); }
   float rt() const { return mRt; }
   float neutralFraction() const { return rt(); }
   float chargedFraction() const { return 1 - neutralFraction(); }
   StJetTrack* leadingChargedParticle() const;
   float deltaPhi(const StJetCandidate* jet) const { return momentum().DeltaPhi(jet->momentum()); }
   float deltaR(const StJetCandidate* jet) const { return momentum().DeltaR(jet->momentum()); }
+  float deltaR(const StJetElement* element) const;
 
   int numberOfTracks() const { return mTracks.GetEntriesFast(); }
   int numberOfTowers() const { return mTowers.GetEntriesFast(); }
