@@ -13,10 +13,12 @@
 #include <TPolyLine.h>
 #include <TPolyLine3D.h>
 #include <TString.h>
+#include <TH2D.h>
 
 #include "ViewDrift.hh"
 #include "ComponentFieldMap.hh"
 #include "ComponentCST.hh"
+#include "Random.hh"
 
 namespace Garfield {
 
@@ -48,6 +50,8 @@ class ViewFEMesh {
     // Axes
     void SetXaxis(TGaxis* ax);
     void SetYaxis(TGaxis* ay);
+    void SetXaxisTitle(const char * xtitle);
+    void SetYaxisTitle(const char * ytitle);
     void EnableAxes()  {drawAxes = true;}
     void DisableAxes() {drawAxes = false;}
 
@@ -67,9 +71,13 @@ class ViewFEMesh {
 
     // Show filled mesh elements
     void SetFillMeshWithBorders() {plotMeshBorders = true; fillMesh = true;}
+
     // Debugging switch
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
+
+    // Create a default set of custom-made axes.
+    void CreateDefaultAxes();
   
   private:
 
@@ -100,8 +108,8 @@ class ViewFEMesh {
     bool plotMeshBorders;
 
     // Axes
-    TGaxis * xaxis;
-    TGaxis * yaxis;
+    TGaxis * xaxis, * yaxis;
+    TH2D * axes;
     bool drawAxes;
 
     // The mesh, stored as a vector of TPolyLine(3D) objects
@@ -113,18 +121,23 @@ class ViewFEMesh {
     std::map<int,int> colorMap_fill;
 
     // Element plotting methods
-    void CreateDefaultAxes();
     void DrawElements();
     void DrawCST(ComponentCST* componentCST);
     bool InView(double x, double y);
     bool LinesCrossed(double x1, double y1, double x2, double y2,
-             double u1, double v1, double u2, double v2);
+             double u1, double v1, double u2, double v2, 
+             double & xc, double & yc);
     bool OnLine(double x1, double y1, double x2, double y2, double u, double v);
     void RemoveCrossings(std::vector<double> & x, std::vector<double> & y);
     bool PlaneCut(double x1, double y1, double z1, double x2, double y2, 
                   double z2, TMatrixD & xMat);
     bool PlaneCoords(double x, double y, double z, const TMatrixD& projMat, 
                      TMatrixD& xMat);
+    void ClipToView(std::vector<double> & px, std::vector<double> & py,
+                       std::vector<double> & cx, std::vector<double> & cy);
+    bool IsInPolygon(double x, double y,  std::vector<double> & px, 
+                       std::vector<double> & py, bool & edge);
+
     // Plot method to be called by Plot() for CST cubic elements
     // available are "xy", "yz" and "xz"
 
