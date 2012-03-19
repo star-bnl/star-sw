@@ -67,17 +67,17 @@ int rdMuDst2print(
     StMuTriggerIdCollection *tic=&(muEve->triggerIdCollection());
     int trigID=380305; // EHT1*L2EW in 2012
     bool isL2EW=tic->nominal().isTrigger(trigID);
-    printL0Trig(tic);
 
     Int_t nGlobTrAll=muMk->muDst()->GetNGlobalTrack();
   
     TArrayI&  l2Array = muEve->L2Result();
-    printL2Trig(l2Array); 
 
     if(eventCounter%1==0) {
       printf("ieve=%d  eventID %d nPrimV=%d  nGlobTrAll=%d =============\n", eventCounter,info.id(),nPrimV,nGlobTrAll);
       printf("TrigID=%d fired=%d\n",trigID,isL2EW);
     }
+    printL0Trig(tic);
+    printL2Trig(l2Array); 
     
     int iv;
     if(0)for(iv=0;iv<nPrimV;iv++) {
