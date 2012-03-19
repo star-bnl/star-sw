@@ -6,11 +6,17 @@
 #include "StMaker.h"
 #include "StRoot/StFgtPool/StFgtQaMakers/StFgtQaMaker.h"
 #include <TH2D.h>
+#include <TH1F.h>
+#include <TF1.h>
 #include <TROOT.h>
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TFile.h>
 #include <TTree.h>
+
+class StFgtCollection;
+class StFgtHitCollection;
+class StFgtHit;
 
 class StFgtLenTreeMaker : public StFgtQaMaker {
  public:
@@ -22,48 +28,101 @@ class StFgtLenTreeMaker : public StFgtQaMaker {
    Int_t Make();
    Int_t Finish();
    Int_t InitTree();
-   //   Bool_t checkPulse(StFgtHit* pClus);
+   void FitFunc();
+   void InitFX();
    TString fname;
+   Int_t fitThresh;
+   Int_t Ntimebin;
 
  protected:
-   ofstream* outTxtFile;
-   TFile* myRootFile;
-   TH1* hClusterCharge;
-   TH2D** hCChargePosSpacePhi;
-   TH2D** hCChargePosSpaceR;
-   TH2D** hClusSizePhi;
-   TH2D** hClusSizeR;
-   TH2D** hCChargeElecSpace;
-   TH2D** hClusSizeElecSpace;
-   TH2D** radioPlots;
-   TH2D** corrPlots;
    int runningEvtNr;
+
+   struct MyFunc;
+    
+   typedef struct {
+     Float_t phi;
+     Float_t slope;
+     Float_t vtx;
+     Float_t chi2;
+     Int_t ncluster;
+     StFgtHit* clArray[6];
+   } lenTrack;
+
+   lenTrack trkArray[4];
+   
  private:   
    
    TFile* fFgt;
+
    TTree* tCl;
    
    Int_t iEvt;
    Int_t Ncl[6];
-   Int_t cl_geoId[6][10];
-   Int_t cl_quad[6][10];
-   Float_t cl_z[6][10];
-   Float_t cl_ez[6][10];
-   Float_t cl_phi[6][10];
-   Float_t cl_ephi[6][10];
-   Float_t cl_r[6][10];
-   Float_t cl_er[6][10];
-   Float_t cl_charge[6][10];
-   Float_t cl_echarge[6][10];
-   Int_t cl_numStrips[6][10]; 
-   Int_t cl_tStrip[6][10];
-   Char_t cl_layer[6][10];
-   Int_t cl_key[6][10];
-   Int_t maxadc[6][10];
-   Int_t seedadc[6][10];
- 
+   Int_t cl_geoId[6][20];
+   Int_t cl_seedType[6][20];
+   Int_t cl_quad[6][20];
+   Float_t cl_z[6][20];
+   Float_t cl_ez[6][20];
+   Float_t cl_phi[6][20];
+   Float_t cl_ephi[6][20];
+   Float_t cl_r[6][20];
+   Float_t cl_er[6][20];
+   Float_t cl_charge[6][20];
+   Float_t cl_echarge[6][20];
+   Int_t cl_numStrips[6][20]; 
+   Int_t cl_tQuad[6][20];
+   Int_t cl_tStrip[6][20];
+   Char_t cl_layer[6][20];
+   Int_t cl_key[6][20];
+   Int_t maxadc[6][20];
+   Int_t seedadc[6][20];
+   Int_t Ntrk;
+   Float_t tr_phi[4];
+   Float_t tr_slope[4];
+   Float_t tr_vtx[4];
+   Float_t tr_chi2[4];
+   Int_t tr_ncluster[4];
+   Int_t tr_iCl[4][6];
+
+
+   TTree* tFgt;
+  	
+   Int_t rdo;
+   Int_t arm;
+   Int_t apv;
+   Int_t chn;
+   Short_t disk;
+   Short_t quad;
+   Short_t strip;
+   Short_t stat;
+   Double_t ordinate;
+   Double_t lowerSpan;
+   Double_t upperSpan;
+   Char_t layer;
+   Double_t ped;
+   Double_t pedSig;
+   Int_t adc[7];
+   Int_t adcmax;
+   Int_t mmax;
+   Int_t mmin;
+   Float_t chi2;
+   Float_t fmax;
+   Float_t norm;
+   Float_t tau;
+   Float_t t0;   
+   Float_t beta;
+   Float_t offset;
+   Int_t errCode;
    
+   TF1* FX;
+   TF1* fs;
    
+   StFgtHit* cl_pointers[6][20];
+
+   TH1F* htrk;
+   TF1* f0;
+   TH1F* hh;
+
    ClassDef(StFgtLenTreeMaker,1);
 
 
