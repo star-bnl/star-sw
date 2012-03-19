@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.14 2012/03/12 16:21:16 rfatemi Exp $
+// $Id: StFgtDbMaker.h,v 1.15 2012/03/19 01:19:20 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -10,8 +10,6 @@
 
 #include "StMaker.h"
 #include "StFgtDb.h"
-#include "StFgtDbImpl.h"
-#include "StFgtDbIdealImpl.h"
 #include "StFgtUtil/geometry/StFgtGeom.h"
 
 class fgtElosCutoff_st;
@@ -45,18 +43,20 @@ private:
   StFgtGeom *m_geom;
   StFgtDb * m_tables;
   fgtMapping_st * m_rmap;
-  bool	    m_isIdeal;
 
  public:
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.14 2012/03/12 16:21:16 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.15 2012/03/19 01:19:20 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.15  2012/03/19 01:19:20  rfatemi
+// modified for removal of StFgtDbImpl and StFgtIdealDbImpl
+//
 // Revision 1.14  2012/03/12 16:21:16  rfatemi
 // make sure getCVS() is public
 //
