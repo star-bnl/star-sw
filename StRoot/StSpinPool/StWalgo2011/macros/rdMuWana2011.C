@@ -14,7 +14,7 @@ class StChain;
 StChain *chain = 0;
 
 int  spinSort = false;
-bool isZ      = true;
+bool isZ      = false;
 int  geant    = false;
 
 int rdMuWana2011(
@@ -132,6 +132,7 @@ int rdMuWana2011(
 
    // create chain
    chain = new StChain("StChain");
+
    // create histogram storage array  (everybody needs it):
    TObjArray* HList = new TObjArray;
 
@@ -148,27 +149,34 @@ int rdMuWana2011(
    }
 
    // Now we add Makers to the chain...
-   int nFiles = 1;
-   muMk = new StMuDstMaker(0, 0, muDir, file, "MuDst.root", nFiles);
-   muMk->SetStatus("*", 0);
-   muMk->SetStatus("MuEvent", 1);
-   muMk->SetStatus("EmcTow", 1);
-   muMk->SetStatus("EmcSmde", 1);
-   muMk->SetStatus("EmcSmdp", 1);
-   muMk->SetStatus("PrimaryVertices", 1);
-   muMk->SetStatus("GlobalTracks", 1);
-   muMk->SetStatus("PrimaryTracks", 1);
+   int maxFiles = 1000;
 
-   TChain* tree = muMk->chain();
-   assert(tree);
-   int nEntries = (int) tree->GetEntries();
+   StMuDstMaker *stMuDstMaker = new StMuDstMaker(0, 0, muDir, file, "MuDst.root", maxFiles);
 
-   printf("total eve in muDst chain =%d\n", nEntries); // return ;
+   stMuDstMaker->SetStatus("*", 0);
+   stMuDstMaker->SetStatus("MuEvent", 1);
+   stMuDstMaker->SetStatus("EmcTow", 1);
+   stMuDstMaker->SetStatus("EmcSmde", 1);
+   stMuDstMaker->SetStatus("EmcSmdp", 1);
+   stMuDstMaker->SetStatus("PrimaryVertices", 1);
+   stMuDstMaker->SetStatus("GlobalTracks", 1);
+   stMuDstMaker->SetStatus("PrimaryTracks", 1);
 
-   if (nEntries < 0) return;
+   TChain* stMuDstMakerChain = stMuDstMaker->chain();
+
+   assert(stMuDstMakerChain);
+
+   int nEntries = (int) stMuDstMakerChain->GetEntries();
+
+   if (nEntries < 0) {
+      Error("rdMuWana2011", "Invalid number of events %d", nEntries)
+      return -1;
+   }
+
+   printf("Total number of events in muDst chain = %d\n", nEntries);
 
    //for EEMC, need full db access:
-   St_db_Maker   *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb", "MySQL:StarDb", "$STAR/StarDb");
+   St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb", "MySQL:StarDb", "$STAR/StarDb");
 
    if (isMC == 0) {
       // run 11  data
@@ -236,7 +244,9 @@ int rdMuWana2011(
       cout << "BEGIN: running jet finder/reader =" << jetFile << "=" << endl;
    }
 
-   if (useJetFinder == 1) { // run jet finder
+
+   if (useJetFinder == 1)
+   { //{{{ // run jet finder
       double pi = atan(1.0) * 4.0;
       // Makers for clusterfinding
       StSpinDbMaker    *uspDbMaker = new StSpinDbMaker("spinDb");
@@ -248,20 +258,20 @@ int rdMuWana2011(
       bool use2006TowerCuts = true;
 
       //4p maker using 100% tower energy correction
-      StBET4pMaker* bet4pMakerFrac100 = new StBET4pMaker("BET4pMakerFrac100", muMk, doTowerSwapFix, new StjTowerEnergyCorrectionForTracksFraction(1.0));
+      StBET4pMaker* bet4pMakerFrac100 = new StBET4pMaker("BET4pMakerFrac100", stMuDstMaker, doTowerSwapFix, new StjTowerEnergyCorrectionForTracksFraction(1.0));
       bet4pMakerFrac100->setUse2003Cuts(use2003TowerCuts);
       bet4pMakerFrac100->setUseEndcap(true);
       bet4pMakerFrac100->setUse2006Cuts(use2006TowerCuts);
 
       //4p maker using 100% tower energy correction (no endcap)
-      StBET4pMaker* bet4pMakerFrac100_noEEMC = new StBET4pMaker("BET4pMakerFrac100_noEEMC", muMk, doTowerSwapFix, new StjTowerEnergyCorrectionForTracksFraction(1.0));
+      StBET4pMaker* bet4pMakerFrac100_noEEMC = new StBET4pMaker("BET4pMakerFrac100_noEEMC", stMuDstMaker, doTowerSwapFix, new StjTowerEnergyCorrectionForTracksFraction(1.0));
       bet4pMakerFrac100_noEEMC->setUse2003Cuts(use2003TowerCuts);
       bet4pMakerFrac100_noEEMC->setUseEndcap(false);
       bet4pMakerFrac100_noEEMC->setUse2006Cuts(use2006TowerCuts);
 
       //Instantiate the JetMaker and SkimEventMaker
-      StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muMk, jetFile);
-      //StJetSkimEventMaker* skimEventMaker = new StJetSkimEventMaker("StJetSkimEventMaker", muMk,outSkimFile);
+      StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", stMuDstMaker, jetFile);
+      //StJetSkimEventMaker* skimEventMaker = new StJetSkimEventMaker("StJetSkimEventMaker", stMuDstMaker,outSkimFile);
 
       //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
       StppAnaPars* anapars = new StppAnaPars();
@@ -291,7 +301,6 @@ int rdMuWana2011(
       emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction
       emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets12_100_noEEMC"); //100% subtraction (no Endcap)
 
-
       chain->Init();
       chain->ls(3);
 
@@ -318,11 +327,12 @@ int rdMuWana2011(
       float tMnt = (t2 - t1) / 60.;
       float rate = 1.*eventCounter / (t2 - t1);
 
-      printf("#sorting  done %d of   nEve= %d, CPU rate= %.1f Hz, total time %.1f minute(s) \n\n", eventCounter, nEntries, rate, tMnt);
+      printf("jets sorting done %d of   nEve= %d, CPU rate= %.1f Hz, total time %.1f minute(s) \n\n", eventCounter, nEntries, rate, tMnt);
 
       cout << "END: jet finder " << endl;
-      return;
-   }
+
+      return 1;
+   } //}}}
 
    if (useJetFinder == 2) {
       cout << "Configure to read jet trees " << endl;
@@ -348,7 +358,8 @@ int rdMuWana2011(
 
    WmuMk->setTreeName(treeFileName);
 
-   if (useJetFinder == 2) WmuMk->setJetTreeBranch("ConeJets12_100", "ConeJets12_100_noEEMC"); //select jet tree braches used
+   if (useJetFinder == 2)
+      WmuMk->setJetTreeBranch("ConeJets12_100", "ConeJets12_100_noEEMC"); //select jet tree braches used
 
    WmuMk->setMaxDisplayEve(100); // only first N events will get displayed
    //set energy scale (works for data and MC - be careful!)
@@ -358,7 +369,7 @@ int rdMuWana2011(
    /* evaluation of result, has full acess to W-algo internal data
       including overwrite - be careful */
 
-   WpubMk = new St2011pubWanaMaker("pubJan");
+   St2011pubWanaMaker *WpubMk = new St2011pubWanaMaker("pubJan");
    WpubMk->attachWalgoMaker(WmuMk);
 
    //Collect all output histograms
@@ -371,6 +382,7 @@ int rdMuWana2011(
       spDb = new StSpinDbMaker("spinDb");
       enum {mxSM = 5}; // to study eta-cuts, drop Q/PT cut
       St2011pubSpinMaker *spinMkA[mxSM];
+
       for (int kk = 0; kk < mxSM; kk++) {
          char ttx[100];
          sprintf(ttx, "%cspin", 'A' + kk);
@@ -403,23 +415,24 @@ int rdMuWana2011(
       ZMk->setMaxZMass(114.);// Zmass +20%
    }
 
-
    chain->Init();
    chain->ls(3);
 
    char txt[1000];
-   int eventCounter = 0;
-   int t1 = time(0);
+   int  eventCounter = 0;
+   int  t1 = time(0);
 
    TStopwatch tt;
 
    for (Int_t iev = 0; iev < nEntries; iev++) {
+      Info("rdMuWana2011", "Analyzing event %d", iev);
       if (eventCounter >= nEve) break;
       chain->Clear();
       int stat = chain->Make();
       if (stat != kStOk && stat != kStSkip) break; // EOF or input error
       eventCounter++;
    }
+
    //chain->Finish();
 
    cout << "run " << file << " nEve=" << eventCounter << " total ";
@@ -451,13 +464,17 @@ int rdMuWana2011(
    else {
       printf("\n Failed to open Histo-file -->%s<, continue\n", outFh.Data());
    }
+
    //WmuMk->Finish();
 
-   return 1;
+   return 2;
 }
 
 
 // $Log: rdMuWana2011.C,v $
+// Revision 1.3  2012/03/19 23:45:23  smirnovd
+// Major clean up. Removed hardcoded references etc.
+//
 // Revision 1.2  2012/03/12 23:11:30  smirnovd
 // *** empty log message ***
 //
