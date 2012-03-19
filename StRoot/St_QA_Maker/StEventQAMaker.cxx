@@ -235,6 +235,15 @@ Int_t StEventQAMaker::Make() {
       nEvClasses=0;
       tword = trigId->mask();
       
+      // Defining a new standard convention as of Run 12 pp500 (day 77)
+      // 000-099 => MB-like triggers
+      // 100-199 => CL-like triggers
+      // 200-399 => HT-like triggers
+      // 400-599 => JP-like triggers
+      // 600-999 => Other physics triggers
+      // Documentation: http://drupal.star.bnl.gov/STAR/comp/qa/offline/currentqadocs/offline-qa-histogram-trigger-types
+      Bool_t CONVENTION2012 = (run_num > 13077000);
+
       // dAu
       
       if (isTriggerAmong(trigId,4,2001,2002,2003,2004)) {
@@ -271,14 +280,14 @@ Int_t StEventQAMaker::Make() {
       // AuAu or generic
       
       if (isTriggerInSubRange(trigId,0,99) ||
-         (run_year >= 12 && isTriggerInSubRange(trigId,100,199))) {
+         ((!CONVENTION2012) && run_year >= 12 && isTriggerInSubRange(trigId,100,199))) {
 	mTrigWord->Fill(1.); // "MinBias"
 	doEvent = kTRUE;
 	evClasses[nEvClasses] = 1;
 	nEvClasses++;
 	histsSet = StQA_AuAu;
       }
-      if (isTriggerInSubRange(trigId,100,199) && run_year < 12) {
+      if (isTriggerInSubRange(trigId,100,199) && (CONVENTION2012  || run_year < 12)) {
 	mTrigWord->Fill(2.); // "Central"
 	doEvent = kTRUE;
 	evClasses[nEvClasses] = 2;
@@ -286,7 +295,8 @@ Int_t StEventQAMaker::Make() {
 	histsSet = StQA_AuAu;
       }
       if (isTriggerInSubRange(trigId,200,299) ||
-         (run_year >= 9 && isTriggerInSubRange(trigId,500,599))) {
+          ((!CONVENTION2012) && run_year >= 9 && isTriggerInSubRange(trigId,500,599)) ||
+          (CONVENTION2012 && isTriggerInSubRange(trigId,300,399))) {
 	mTrigWord->Fill(5.); // "High Tower"
 	doEvent = kTRUE;
 	evClasses[nEvClasses] = 3;
@@ -300,7 +310,8 @@ Int_t StEventQAMaker::Make() {
 	nEvClasses++;
 	histsSet = StQA_AuAu;
       }
-      if (run_year >= 10 && isTriggerInSubRange(trigId,400,499)) {
+      if ((run_year >= 10 && isTriggerInSubRange(trigId,400,499)) ||
+          (CONVENTION2012 && isTriggerInSubRange(trigId,500,599))) {
 	mTrigWord->Fill(4.); // "Jet patch"
 	doEvent = kTRUE;
 	evClasses[nEvClasses] = 5;
@@ -2401,8 +2412,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.108 2012/03/05 03:42:32 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.109 2012/03/19 02:58:45 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.109  2012/03/19 02:58:45  genevb
+// Using updated trigger type convention
+//
 // Revision 2.108  2012/03/05 03:42:32  genevb
 // Remove TPC XY dist, add TPC RPhi charge
 //
