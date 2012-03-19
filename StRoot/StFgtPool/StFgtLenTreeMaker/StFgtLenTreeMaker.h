@@ -18,6 +18,16 @@ class StFgtCollection;
 class StFgtHitCollection;
 class StFgtHit;
 
+class StFgtLenTrack {
+ public:
+  Float_t phi;
+  Float_t slope;
+  Float_t vtx;
+  Float_t chi2;
+  Int_t ncluster;
+  StFgtHit* clArray[6];
+};
+
 class StFgtLenTreeMaker : public StFgtQaMaker {
  public:
   StFgtLenTreeMaker(const Char_t* name="FgtLenTreeMaker");
@@ -33,24 +43,27 @@ class StFgtLenTreeMaker : public StFgtQaMaker {
    TString fname;
    Int_t fitThresh;
    Int_t Ntimebin;
+   StFgtLenTrack getLenTrack( int iTrk );
 
  protected:
    int runningEvtNr;
+   Int_t Ntrk;
+   
+ private:   
 
    struct MyFunc;
-    
-   typedef struct {
+   /*
+   struct StFgtLenTrack {
      Float_t phi;
      Float_t slope;
      Float_t vtx;
      Float_t chi2;
      Int_t ncluster;
      StFgtHit* clArray[6];
-   } lenTrack;
+   };
+   */
+   StFgtLenTrack trkArray[4];
 
-   lenTrack trkArray[4];
-   
- private:   
    
    TFile* fFgt;
 
@@ -76,7 +89,6 @@ class StFgtLenTreeMaker : public StFgtQaMaker {
    Int_t cl_key[6][20];
    Int_t maxadc[6][20];
    Int_t seedadc[6][20];
-   Int_t Ntrk;
    Float_t tr_phi[4];
    Float_t tr_slope[4];
    Float_t tr_vtx[4];
@@ -124,8 +136,10 @@ class StFgtLenTreeMaker : public StFgtQaMaker {
    TH1F* hh;
 
    ClassDef(StFgtLenTreeMaker,1);
+};
 
-
+inline StFgtLenTrack StFgtLenTreeMaker::getLenTrack( int iTrk ) {
+  return trkArray[iTrk];
 };
 
 #endif
