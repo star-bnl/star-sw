@@ -1,7 +1,6 @@
-// $Id: StFgtDbMaker.cxx,v 1.18 2012/03/14 01:07:11 rfatemi Exp $
+// $Id: StFgtDbMaker.cxx,v 1.19 2012/03/19 01:18:52 rfatemi Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
-
 */
 
 #include "StFgtDbMaker.h"
@@ -21,9 +20,8 @@ StFgtDbMaker::StFgtDbMaker(const char *name)
     : StMaker(name)
 {
   
-    m_tables = new StFgtDbImpl();
+    m_tables = new StFgtDb();
     m_rmap = 0;
-    m_isIdeal = false;
     m_geom=0;
 }
 
@@ -37,11 +35,6 @@ StFgtDbMaker::~StFgtDbMaker()
 //-----------------------------------------------------------------------------
 void StFgtDbMaker::setFlavor( const char * flav, const char * tabname )
 {
-    if ( flav && strcmp( "ideal", flav ) == 0 )
-	m_isIdeal = true;
-    else
-	m_isIdeal = false;
-
     StMaker::SetFlavor( flav, tabname );
 }
 
@@ -73,123 +66,105 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 
 
     /// Go get database tables
-    if ( m_isIdeal )
-    {
-	if ( m_tables )
-	    delete m_tables;
-	m_tables = new StFgtDbIdealImpl();
-    }
-    else
-    {
-	if ( m_tables && dynamic_cast< StFgtDbIdealImpl * >(m_tables) )
-	{
-	    delete m_tables;
-	    m_tables = 0;
-	}
-	if ( !m_tables )
-	{
-	    m_tables = new StFgtDbImpl();
-	}
-
-	LOG_INFO <<  "::RequestDataBase() for Elos cut off ..."<< endl;    
-	TDataSet *ELossDB = GetDataBase("Calibrations/fgt/fgtElosCutoff");
-	if (!ELossDB)
-	{
-	  LOG_FATAL
-	    << "ERROR: no table found in db for eloss, or malformed local db config" 
-	    << endm;
-	}
-
-	LOG_INFO <<  "::RequestDataBase() for calibration tables..."<< endl;  
-	TDataSet *MapDB = GetDataBase("Calibrations/fgt/fgtMapping");
-	if (!MapDB)
-	{
-	    LOG_FATAL
-		<< "ERROR: no table found in db for map, or malformed local db config" 
-		<< endm;
-	}
-	TDataSet *PedDB = GetDataBase("Calibrations/fgt/fgtPedestal");
-	if (!PedDB)
-	{
-	    LOG_FATAL
+    LOG_INFO <<  "::RequestDataBase() for Elos cut off ..."<< endl;    
+    TDataSet *ELossDB = GetDataBase("Calibrations/fgt/fgtElosCutoff");
+    if (!ELossDB)
+      {
+	LOG_FATAL
+	  << "ERROR: no table found in db for eloss, or malformed local db config" 
+	  << endm;
+      }
+    
+    LOG_INFO <<  "::RequestDataBase() for calibration tables..."<< endl;  
+    TDataSet *MapDB = GetDataBase("Calibrations/fgt/fgtMapping");
+    if (!MapDB)
+      {
+	LOG_FATAL
+	  << "ERROR: no table found in db for map, or malformed local db config" 
+	  << endm;
+      }
+    TDataSet *PedDB = GetDataBase("Calibrations/fgt/fgtPedestal");
+    if (!PedDB)
+      {
+	LOG_FATAL
+	  << "ERROR: no table found in db for pedestals, or malformed local db config" 
+	  << endm;
+      }
+    TDataSet *StatusDB = GetDataBase("Calibrations/fgt/fgtStatus");
+    if (!StatusDB)
+      {
+	LOG_FATAL
 		<< "ERROR: no table found in db for pedestals, or malformed local db config" 
 		<< endm;
-	}
-	TDataSet *StatusDB = GetDataBase("Calibrations/fgt/fgtStatus");
-	if (!StatusDB)
-	{
-	    LOG_FATAL
-		<< "ERROR: no table found in db for pedestals, or malformed local db config" 
-		<< endm;
-	}
-	TDataSet *GainDB = GetDataBase("Calibrations/fgt/fgtGain");
-	if (!GainDB)
-	{
-	    LOG_FATAL
-		<< "ERROR: no table found in db for pedestals, or malformed local db config" 
-		<< endm;
-	}
-
-
-	eLossDataset=(St_fgtElosCutoff*)ELossDB->Find("fgtElosCutoff"); 
-	Int_t rows = eLossDataset->GetNRows();
-	if (rows > 1) 
-	  {
-	    LOG_FATAL   << " found INDEXED table with " << rows
+      }
+    TDataSet *GainDB = GetDataBase("Calibrations/fgt/fgtGain");
+    if (!GainDB)
+      {
+	LOG_FATAL
+	  << "ERROR: no table found in db for pedestals, or malformed local db config" 
+	  << endm;
+      }
+    
+    
+    eLossDataset=(St_fgtElosCutoff*)ELossDB->Find("fgtElosCutoff"); 
+    Int_t rows = eLossDataset->GetNRows();
+    if (rows > 1) 
+      {
+	LOG_FATAL   << " found INDEXED table with " << rows
 		    << " rows, this is fatal, fix DB content" << endm;
-	  }
-
-
-	mapDataset = (St_fgtMapping *)
-	  MapDB->Find("fgtMapping");
-	rows = mapDataset->GetNRows();
-	if (rows > 1) 
-	{
-	    LOG_FATAL   << " found INDEXED table for mapping with " << rows
-			<< " rows, this is fatal, fix DB content" << endm;
-	}
-	gainDataset = (St_fgtGain*)
-	    GainDB->Find("fgtGain");
-	rows = gainDataset->GetNRows();
-	if (rows > 1) 
-	{
-	    LOG_FATAL   << " found INDEXED table for gains with " << rows
-			<< " rows, this is fatal, fix DB content" << endm;
-	}
-	pedDataset = (St_fgtPedestal*)
-	    PedDB->Find("fgtPedestal");
-	rows = pedDataset->GetNRows();
-	if (rows > 1) 
-	{
-	    LOG_FATAL   << " found INDEXED table for pedestals with " << rows
-			<< " rows, this is fatal, fix DB content" << endm;
-	}
-	statusDataset = (St_fgtStatus*)
-	    StatusDB->Find("fgtStatus");
-	rows = statusDataset->GetNRows();
-	if (rows > 1) 
-	{
-	    LOG_FATAL   << " found INDEXED table for status with " << rows
-			<< " rows, this is fatal, fix DB content" << endm;
-	}
-    }
-  
+      }
+    
+    
+    mapDataset = (St_fgtMapping *)
+      MapDB->Find("fgtMapping");
+    rows = mapDataset->GetNRows();
+    if (rows > 1) 
+      {
+	LOG_FATAL   << " found INDEXED table for mapping with " << rows
+		    << " rows, this is fatal, fix DB content" << endm;
+      }
+    gainDataset = (St_fgtGain*)
+      GainDB->Find("fgtGain");
+    rows = gainDataset->GetNRows();
+    if (rows > 1) 
+      {
+	LOG_FATAL   << " found INDEXED table for gains with " << rows
+		    << " rows, this is fatal, fix DB content" << endm;
+      }
+    pedDataset = (St_fgtPedestal*)
+      PedDB->Find("fgtPedestal");
+    rows = pedDataset->GetNRows();
+    if (rows > 1) 
+      {
+	LOG_FATAL   << " found INDEXED table for pedestals with " << rows
+		    << " rows, this is fatal, fix DB content" << endm;
+      }
+    statusDataset = (St_fgtStatus*)
+      StatusDB->Find("fgtStatus");
+    rows = statusDataset->GetNRows();
+    if (rows > 1) 
+      {
+	LOG_FATAL   << " found INDEXED table for status with " << rows
+		    << " rows, this is fatal, fix DB content" << endm;
+      }
+    
+    
     if (pedDataset && statusDataset && mapDataset && gainDataset && eLossDataset)
-    {
+      {
 	if ( m_rmap )
-	    delete m_rmap;
+	  delete m_rmap;
 	m_rmap = new fgtMapping_st();
-
+	
 	fgtMapping_st * map = mapDataset->GetTable();
-
+	
 	for ( int ii = 0; ii < 51200; ++ii )
-	{
-	  if (map->Mapping[ii]>=0)
-	    m_rmap->Mapping[ map->Mapping[ii] ] = ii;
-	  
-	}
-
-	dynamic_cast< StFgtDbImpl * >(m_tables)->updateTables(
+	  {
+	    if (map->Mapping[ii]>=0)
+	      m_rmap->Mapping[ map->Mapping[ii] ] = ii;
+	    
+	  }
+	
+	dynamic_cast< StFgtDb* >(m_tables)->updateTables(
 	    map, m_rmap,
 	    statusDataset->GetTable(),
 	    pedDataset->GetTable(),
@@ -212,7 +187,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	displayBeginEndTime(eLossDataset);
 
     }
-    else if (!m_isIdeal)
+    else 
     {
 	if ( !pedDataset )
 	{
@@ -241,8 +216,6 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	}
     }
 
-    //    geom=new StFgtGeom();   //	for now it is static, but later may be time
-			    //	dependent
     return kStOK;
 }
 
@@ -297,6 +270,9 @@ Int_t StFgtDbMaker::Finish()
 
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.19  2012/03/19 01:18:52  rfatemi
+// Modified for removal of StFgtDbImpl and StFgtDbIdealImpl
+//
 // Revision 1.18  2012/03/14 01:07:11  rfatemi
 // added comments
 //
