@@ -13,7 +13,6 @@
 
 Int_t StFgtLenTreeMaker::Make()
 {
-
    StEvent* eventPtr = 0;
    eventPtr = (StEvent*)GetInputDS("StEvent");
    //(*outTxtFile) <<endl<<endl<<" ------new event: " << eventPtr->info()->id() << "----------------------" << " running nr: " << runningEvtNr << "------" << endl;
@@ -214,7 +213,7 @@ Int_t StFgtLenTreeMaker::Make()
    Ntrk=iTrk;
    iEvt=runningEvtNr;
    if(anycluster){
-     printf("*************** FILLING THE TREE **********************\n");
+     printf("*************** FILLING THE TREE %d **********************\n", iEvt);
      tCl->Fill();
    };
 
