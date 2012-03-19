@@ -7,15 +7,15 @@ StChain *chain=0;
 
 int rdMuDst2print(
 		  char* file    = "st_physics_12033050_raw_4010001.MuDst.root",
-	  int nEve=100,
+	  int nEve=10,
 	  char* inDir   = "./"
 	  )
 { 
   Int_t nFiles  = 1;
   
-  inDir="/star/institutions/anl/balewski/vmSink2/";
-  file="st_physics_12033048_raw_1010001.MuDst.root";
-  //file="st_physics_12033049_raw_2020001.MuDst.root";
+  inDir="/star/data05/scratch/balewski/stW-2012A/data/";
+  file="st_W_13078014_raw_4360001.MuDst.root";
+ 
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
@@ -56,34 +56,31 @@ int rdMuDst2print(
     chain->Clear();
     int stat = chain->Make();
     if(stat) break; // EOF or input error
-    //printf("stat=%d\n", stat);
     eventCounter++;
-    // if(eventCounter<17) continue;
 
     // Access to muDst .......................
     StMuEvent* muEve = muMk->muDst()->event();
 
     StEventInfo &info=muEve->eventInfo();
     int nPrimV=muMk->muDst()->numberOfPrimaryVertices();
-    StMuTriggerIdCollection *tic=&(muEve->triggerIdCollection());
 
-    int trigID=96211;
-    bool fired=tic->nominal().isTrigger(trigID);
-  
+    StMuTriggerIdCollection *tic=&(muEve->triggerIdCollection());
+    int trigID=380305; // EHT1*L2EW in 2012
+    bool isL2EW=tic->nominal().isTrigger(trigID);
+    printL0Trig(tic);
+
     Int_t nGlobTrAll=muMk->muDst()->GetNGlobalTrack();
   
-    //assert(tic.nominal().isTrigger(127271)==0);
-    printTrig(tic);
+    TArrayI&  l2Array = muEve->L2Result();
+    printL2Trig(l2Array); 
 
     if(eventCounter%1==0) {
       printf("ieve=%d  eventID %d nPrimV=%d  nGlobTrAll=%d =============\n", eventCounter,info.id(),nPrimV,nGlobTrAll);
-      // printf("TrigID=%d fired=%d\n",trigID,fired);
-      
-      // if(nPrimV>1) printf("######\n");
+      printf("TrigID=%d fired=%d\n",trigID,isL2EW);
     }
-
+    
     int iv;
-    if(1)for(iv=0;iv<nPrimV;iv++) {
+    if(0)for(iv=0;iv<nPrimV;iv++) {
       StMuPrimaryVertex* V= muMk->muDst()->primaryVertex(iv);
       assert(V);
       muMk->muDst()->setVertexIndex(iv);
@@ -112,11 +109,8 @@ int rdMuDst2print(
       if (rank>0) h7->Fill(V->nTracksUsed());
       if (rank<0) h6->Fill(r.z());
     } 
- 
-
-    // continue;   // do NOT print prim tracks for each vertex  
-  
-    if(1)
+   
+    if(0)   // do NOT print prim tracks 
       for(iv=0;iv<nPrimV;iv++) {
 	muMk->muDst()->setVertexIndex(iv);
 	Int_t nPrimTrAll=muMk->muDst()->GetNPrimaryTrack();
@@ -311,8 +305,20 @@ printBEsmd( StMuEmcCollection* emc ) {
   printf("   --> %d BSMD-E & %d BSMD-P  hits with ADC>thr\n",n1,n2);
 }
 
+//=======================================
+printL2Trig( TArrayI& l2Array) {
+  
+  printf("AccessL2Decision() from regular muDst: L2Ar-size=%d\n",l2Array.GetSize());
+  unsigned int *l2res=(unsigned int *)l2Array.GetArray();
+  for(int i=0;i<l2Array.GetSize();i++){
+    if(l2res[i]==0) continue;
+    printf("i=%d val=0x%08x\n",i,l2res[i]);
+  }
+}
+
+
 //--------------------------------------
-void printTrig(StMuTriggerIdCollection *tic){
+void printL0Trig(StMuTriggerIdCollection *tic){
  
   const StTriggerId &l1=tic->l1();
   vector<unsigned int> idL=l1.triggerIds();
@@ -320,6 +326,12 @@ void printTrig(StMuTriggerIdCollection *tic){
   for(unsigned int i=0;i<idL.size(); i++){
     printf("%d, ",idL[i]);
   }
-  printf("\n");
+  printf("\n dump L2Array:");
+
+  //const int EEMCW_off=35; // valid only for 2011 run
+
+
+
+
 }
 
