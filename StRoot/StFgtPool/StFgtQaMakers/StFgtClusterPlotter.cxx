@@ -59,6 +59,7 @@ Int_t StFgtClusterPlotter::Make()
 	 vector<float> vRCharge[4];
 
 	 StFgtStripCollection& strips=*(mFgtCollectionPtr->getStripCollection( iDx ));
+
 	 for( StSPtrVecFgtStripIterator it=strips.getStripVec().begin();it!=strips.getStripVec().end();++it)
 	   {
 	     /*	     	     	     cout <<"maxAdc: " << (*it)->getMaxAdc() <<endl;
@@ -71,18 +72,19 @@ Int_t StFgtClusterPlotter::Make()
 	     Char_t layer; 
 
 	     Bool_t stripDead=false;
-	     prvGeoId=(*it)->getGeoId();
+
 	     StFgtGeom::decodeGeoId((*it)->getGeoId(),disc, quad, layer, strip);
 	     if(layer=='R')
 	       outTxtFile=outTxtFileR;
 	     else
 	       outTxtFile=outTxtFileP;
 
-	     if(((*it)->getGeoId()-prvGeoId)>1 && prvGeoId>=0)
+	     if(((*it)->getGeoId()-prvGeoId)>2 && prvGeoId>=0)
 	       {
-		 (*outTxtFile) <<endl;
+		 (*outTxtFile) <<endl<<endl<<endl;;
 	       }
 
+	     prvGeoId=(*it)->getGeoId();
 	     switch((*it)->getClusterSeedType())
 	       {
 	       case kFgtSeedType1:
