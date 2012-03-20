@@ -1,5 +1,9 @@
-* $Id: g2t_volume_id.g,v 1.69 2012/01/24 03:32:32 perev Exp $
+* $Id: g2t_volume_id.g,v 1.70 2012/03/20 20:45:06 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.70  2012/03/20 20:45:06  jwebb
+* Changes to g2t_volume_id to support reconfiguration of the inner TPAD
+* volumes for inner TPC upgrade studies.
+*
 * Revision 1.69  2012/01/24 03:32:32  perev
 * Add Etr
 *
@@ -175,25 +179,28 @@
       Integer          Iprin,Nvb
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
-      integer nbpads 
-      parameter (nbpads=73)
-      integer tpads(nbpads)/ 1, 1, 1, 2, 2, 2, 3, 3, 3, 4,
-			     4, 4, 5, 5, 5, 6, 6, 6, 7, 7,
-			     7, 8, 8, 8, 9, 9, 9,10,10,10,
-			    11,11,11,12,12,12,13,13,13,14,
-			    14,15,16,17,18,19,20,21,22,23,
-			    24,25,26,27,28,29,30,31,32,33,
-			    34,35,36,37,38,39,40,41,42,43,
-			    44,45,45/;
+      integer nbpads , maxpads
+      parameter (maxpads=100) "Maximum number of TPADs"
+      integer tpads(maxpads) "/ 1, 1, 1, 2, 2, 2, 3, 3, 3, 4,"
+			    "  4, 4, 5, 5, 5, 6, 6, 6, 7, 7,"
+			    "  7, 8, 8, 8, 9, 9, 9,10,10,10,"
+			    " 11,11,11,12,12,12,13,13,13,14,"
+			    " 14,15,16,17,18,19,20,21,22,23,"
+			    " 24,25,26,27,28,29,30,31,32,33,"
+			    " 34,35,36,37,38,39,40,41,42,43,"
+			    " 44,45,45/;                    "
 
-      integer isdets(nbpads)/1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
-			     0, 2, 1, 0, 2, 1, 0, 2, 1, 0,
-			     2, 1, 0, 2, 1, 0, 2, 1, 0, 2,
-			     1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
-			     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			     0, 0, 2/;
+      integer isdets(maxpads)"/1, 0, 2, 1, 0, 2, 1, 0, 2, 1,"
+			    " 0, 2, 1, 0, 2, 1, 0, 2, 1, 0,"
+			    " 2, 1, 0, 2, 1, 0, 2, 1, 0, 2,"
+			    " 1, 0, 2, 1, 0, 2, 1, 0, 2, 1,"
+			    " 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,"
+			    " 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,"
+			    " 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,"
+			    " 0, 0, 2/;                    "
+
+
+
 
       Structure  SVTG  {version}
       Structure  TPCG  {version}
@@ -218,7 +225,8 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       if (First) then
           first=.false.
           call RBPUSHD
-*        in simulations done in MDC1 (1998) btog_posit1 was not saved
+
+*         in simulations done in MDC1 (1998) btog_posit1 was not saved
           btog_posit1 = {32,33}
           USE  /DETM/SVTT/SVTG  stat=isvt
           USE  /DETM/TPCE/TPCG  stat=itpc
@@ -245,6 +253,54 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *             print *,'              : ISTB version of code=', ismg_code
              istVersion=ismg_code
           endif
+
+
+          """ Intialize TPADs based on TPC version """
+          IF TPCG_version == 10 {
+
+             nbpads = 68
+
+             tpads = { 1, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+                      10,11,12,13,14,15,16,17,18,19,
+                      20,21,22,23,24,25,26,27,28,29,
+                      30,31,32,32,33,33,34,35,36,37,
+                      38,39,40,41,42,43,44,45,46,47,
+                      48,49,50,51,52,53,54,55,56,57,
+                      58,59,60,61,62,63,64,64 };
+              isdets = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 2, 1, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 2 };
+                            
+
+
+          } else {
+
+             nbpads = 73
+             tpads = { 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 
+                       4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 
+                       7, 8, 8, 8, 9, 9, 9,10,10,10, 
+                      11,11,11,12,12,12,13,13,13,14, 
+                      14,15,16,17,18,19,20,21,22,23, 
+                      24,25,26,27,28,29,30,31,32,33, 
+                      34,35,36,37,38,39,40,41,42,43, 
+                      44,45,45};
+
+             isdets = { 1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+	                0, 2, 1, 0, 2, 1, 0, 2, 1, 0,
+		        2, 1, 0, 2, 1, 0, 2, 1, 0, 2,
+		        1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 2 };
+
+          }
+
+
 
           !! IFPDMGEO indicates which major version of the FPD/FMS module is present
           !! IFPD    indicates which geometry version is in place (to allow changes
