@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.128 2012/03/16 19:36:18 dmitry Exp $
+// $Id: St_db_Maker.cxx,v 1.129 2012/03/20 23:44:00 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.129  2012/03/20 23:44:00  perev
+// FullFileName() bug #2303 fix
+//
 // Revision 1.128  2012/03/16 19:36:18  dmitry
 // converted dangled char pointers to std::string objects + fixed typo
 //
@@ -290,15 +293,17 @@ TString FullFileName(const TDataSet* ds)
   TString dbDir(gSystem->BaseName(dbfile.Data()));
   dbDir.Append("/");
   TString full(ds->Path());
-  int idx = full.Index(dbDir);  if (idx<0) return "";
-  full.Remove(0,idx+dbDir.Length()-1);
-  full.Insert(0,dbfile);
+//		
+  do { 		//Remove redundant like "*/StarDb/"
+    int idx = full.Index(dbDir);if (idx<0) break;
+    full.Remove(0,idx+dbDir.Length()-1);
+  } while(1);
+  
   TString name(ds->GetName());
-  idx = name.Index(".");  if (idx<0) return "";
-  name.Remove(idx,999);
+  int idx = name.Index("."); if (idx>=0) name.Remove(idx,999);
   name.Insert(0,"/.");
-  idx = full.Index(name);
-  if (idx>=0) full.Remove(idx,name.Length());
+  full.ReplaceAll(name,"");
+  full.Insert(0,dbfile);
   gSystem->ExpandPathName(full);
   return full;
 }  
