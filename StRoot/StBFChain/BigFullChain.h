@@ -604,7 +604,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                "TPC+TPX pixel dump to NTuple", kFALSE},
   {"TpxRaw","TpxRaw","tpcChain","rts,detDb,StEvent","StTpcHitMaker","StTpcHitMaker"
    ,              "TPC+TPX convert DAQ Tpc Raw Data to TpcRawEvent used by TpcMixer and/or TpxClu", kFALSE},
-  {"TpcMixer","","tpcChain","StEvent,rts,-Mixer,TpxRaw"       ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
+  {"TpcMixer","","tpcChain","StEvent,rts,-Mixer,-tpx,TpxClu"  ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
   {"TpxClu","tpc_hits","tpcChain","rts,tpcDb,detDb,-tpx,-tpc_daq,-fcf","StTpcRTSHitMaker"
    ,"StTpcHitMaker",                                                    "RTS(online) cluster maker",kFALSE},
   {"Velo"        ,"","tpcChain","tpc_T"                             ,"StVeloMaker","StVeloMaker","",kFALSE},

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.99 2012/02/17 19:59:26 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.100 2012/03/20 15:41:55 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -632,7 +632,7 @@ Bfc_st BFC[] = {
    , "TPC+TPX pixel dump to NTuple", kFALSE},
   {"TpxRaw","TpxRaw","tpcChain","rts,detDb,StEvent","StTpcHitMaker","StTpcHitMaker"
    , "TPC+TPX convert DAQ Tpc Raw Data to TpcRawEvent used by TpcMixer and/or TpxClu", kFALSE},
-  {"TpcMixer","","tpcChain","StEvent,rts,-Mixer,TpxRaw" ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
+  {"TpcMixer","","tpcChain","StEvent,rts,-Mixer" ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
   {"TpxClu","tpc_hits","tpcChain","rts,tpcDb,detDb,-tpx,-tpc_daq,-fcf","StTpcRTSHitMaker"
    ,"StTpcHitMaker", "RTS(online) cluster maker",kFALSE},
   {"Velo" ,"","tpcChain","tpc_T" ,"StVeloMaker","StVeloMaker","",kFALSE},
@@ -1814,7 +1814,7 @@ Bfc_st BFC[] = {
    , "TPC+TPX pixel dump to NTuple", kFALSE},
   {"TpxRaw","TpxRaw","tpcChain","rts,detDb,StEvent","StTpcHitMaker","StTpcHitMaker"
    , "TPC+TPX convert DAQ Tpc Raw Data to TpcRawEvent used by TpcMixer and/or TpxClu", kFALSE},
-  {"TpcMixer","","tpcChain","StEvent,rts,-Mixer,TpxRaw" ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
+  {"TpcMixer","","tpcChain","StEvent,rts,-Mixer" ,"StTpcMixerMaker","StTpcHitMaker","",kFALSE},
   {"TpxClu","tpc_hits","tpcChain","rts,tpcDb,detDb,-tpx,-tpc_daq,-fcf","StTpcRTSHitMaker"
    ,"StTpcHitMaker", "RTS(online) cluster maker",kFALSE},
   {"Velo" ,"","tpcChain","tpc_T" ,"StVeloMaker","StVeloMaker","",kFALSE},
@@ -3915,9 +3915,12 @@ void StBFChain::SetDbOptions(StMaker *mk){
     if ( (GTSOptions[i].Realm).IsNull() ){ realm = "*";}
     else {                                 realm = GTSOptions[i].Realm;}
 
+    //LOG_INFO << "DEBUG MORE [" << (GTSOptions[i].Realm).Data() << "]" << endm;
+    //LOG_INFO << "DEBUG MORE [" << realm.Data() << "]" << endm;
+
     if ( GTSOptions[i].Type == 1){
       db->AddMaxEntryTimeOverride(GTSOptions[i].Date,0,
-				  (char *) GTSOptions[i].Realm.Data() ,
+				  (char *) realm.Data(),
 				  (char *) GTSOptions[i].Detector.Data());
 
       LOG_INFO << "Recovering override stamp " << i << " :: " 
