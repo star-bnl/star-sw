@@ -551,8 +551,7 @@
       ! ---------------------------------------------------------------------------------- TPCE
       BLOCK TPCE   is the TPC envelope
       MATERIAL Air
-      MEDIUM Standard ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10 deemax=0.248853,
-            stmin=1.15055 isvol=0
+      MEDIUM Standard
       ATTRIBUTE TPCE seen=0 colo=kRed
       SHAPE tube rmin=tpcg_rmin rmax=tpcg_rmax,
             dz=tpcg_DzEnvelop
@@ -584,8 +583,6 @@
       ! ---------------------------------------------------------------------------------- TPCM
       BLOCK TPCM   is the Central Membrane placed in TPC
       MATERIAL Mylar
-      MEDIUM TPCM_Mylar ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10 deemax=0.212557,
-            stmin=0.0311385 isvol=0
       ATTRIBUTE TPCM seen=1 colo=kBlue
       SHAPE tube rmin=tpgvIR rmax=tpcg_SenGasOR,
             dz=tpcg_MembTHK/2
@@ -593,8 +590,6 @@
       ! ---------------------------------------------------------------------------------- TIFC
       BLOCK TIFC   defines the Inner Field Cage placed in TPC
       MATERIAL ALUMINIUM
-      MEDIUM TIFC_aluminium ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10 deemax=0.18296,
-            stmin=0.0334422 isvol=0
       ATTRIBUTE TIFC seen=1 colo=kBlue
       SHAPE pcon phi1=0 dphi=360 nz=6 zi={-zTIFCend,
             -zTIFCFlangeBegin,-zTIFCFlangeBegin,zTIFCFlangeBegin,
@@ -612,32 +607,24 @@
       ! ---------------------------------------------------------------------------------- TIKA
       BLOCK TIKA   is the kapton film of the inner field cage
       MATERIAL Mylar
-      MEDIUM TIKA_mylar ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10 deemax=0.212557,
-            stmin=0.0311385 isvol=0
       ATTRIBUTE TIKA seen=1 colo=kViolet
       SHAPE tube rmin=tikaIR rmax=tikaOR dz=TPCG_dzYF1
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TINX
       BLOCK TINX   is the inner nomex structureure
       MATERIAL Nomex
-      MEDIUM TINX_nomex ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10 deemax=0.242015,
-            stmin=135061 isvol=0
       ATTRIBUTE TINX seen=1 colo=kYellow
       SHAPE tube rmin=tinxIR rmax=tinxOR dz=TPCG_dzYF1
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TIAD
       BLOCK TIAD   the inner adhesive structureure
       MATERIAL ADHESIVE
-      MEDIUM TIAD_adhesive ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10 deemax=0.21521,
-            stmin=0.033412 isvol=0
       ATTRIBUTE TIKA seen=1 colo=kViolet
       SHAPE tube rmin=tiadIR rmax=tiadOR dz=TPCG_dzYF1
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TOFC
       BLOCK TOFC   defines outer field cage - fill it WITH insulating gas already
       MATERIAL ALUMINIUM
-      MEDIUM TOFC_aluminium ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10 deemax=0.18296,
-            stmin=0.0334422 isvol=0
       ATTRIBUTE TOFC seen=1 colo=kGreen
       SHAPE pcon phi1=0 dphi=360 nz=6 zi={-zTOFCend,
             -zWheel1,-zWheel1,zWheel1,zWheel1,zTOFCend},
@@ -669,16 +656,12 @@
       ! ---------------------------------------------------------------------------------- TOKA
       BLOCK TOKA   is MYLAR layer
       MATERIAL mylar
-      MEDIUM TOKA_mylar ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10 deemax=0.212557,
-            stmin=0.0311385 isvol=0
       ATTRIBUTE TOKA seen=1 colo=kGreen
       SHAPE tube rmin=tokaIR rmax=tokaOR dz=TPCG_dzYF2
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TONX
       BLOCK TONX   is Nomex support
       MATERIAL Nomex
-      MEDIUM TONX_nomex ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10 deemax=0.242015,
-            stmin=0.135061 isvol=0
       ATTRIBUTE TONX seen=1 colo=kRed
       SHAPE pcon phi1=0 dphi=360 nz=6 zi={-TPCG_dzYF2,
             -TPCG_dzYF3,-TPCG_dzYF3,TPCG_dzYF3,TPCG_dzYF3,
@@ -689,30 +672,24 @@
       ! ---------------------------------------------------------------------------------- TOAD
       BLOCK TOAD   is Adhesive layer
       MATERIAL mylar
-      MEDIUM TOAD_mylar ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10 deemax=0.212557,
-            stmin=0.0311385 isvol=0
       ATTRIBUTE TOAD seen=1 colo=kLightBlue
       SHAPE tube rmin=toadIR rmax=toadOR dz=TPCG_dzYF2
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TOIG
       BLOCK TOIG   is Insulating Gas (Nitrogen)
       MATERIAL NITROGEN_GAS
-      MEDIUM TOIG_nitrogen_gas ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10,
-            deemax=0.248893 stmin=1.14554 isvol=0
       ATTRIBUTE TOAD seen=1 colo=kLightBlue
       SHAPE tube rmin=toigIR rmax=toigOR dz=TPCG_dzYF2
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TOHA
       BLOCK TOHA   Gas Containment Vessel (Al) + HA
       MATERIAL AL_HONEYCOMB
-      MEDIUM TOHA_al_honeycomb ifield=1 fieldm=20 tmaxfd=20 epsil=0.01 stemax=10,
-            deemax=0.23328 stmin=0.0707689 isvol=0
       ATTRIBUTE TOHA seen=1 colo=kViolet
       SHAPE tube rmin=tohaIR rmax=tohaOR dz=TPCG_dzYF3
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TSWH
       BLOCK TSWH   TpcSectorWhole is Sector as Whole
-      MEDIUM TSWH_STANDARD deemax=0.248853 stmin=1.15055
+      MEDIUM STANDARD
       ATTRIBUTE TSWH seen=1 colo=kViolet
       SHAPE pcon phi1=-15 dphi=30 nz=8 zi={TPCG_MembTHK/2,
             zWheel1,zWheel1,zTOFCend,zTOFCend,
@@ -727,7 +704,7 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TSAW
       BLOCK TSAW   TpcSectorAndWheel
-      MEDIUM STANDARD deemax=0.248853 stmin=1.15055
+      MEDIUM STANDARD
       ATTRIBUTE TSAW seen=1 colo=kYellow
       SHAPE pcon phi1=-15 dphi=30 nz=2 zi={204,
             TPCG_DzEnvelop-TPCG_MembTHK/2} rmn={48,48} rmx={208,
@@ -854,7 +831,6 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TSAS
       BLOCK TSAS   TpcInnerSectorAssembly & TpcOuterSectorAssembly TSAS and TSA1
-      MEDIUM TSAS_STANDARD deemax=0.248853 stmin=1.15055
       SHAPE pgon phi1=-15 dphi=30 npdiv=1 nz=2,
             zi={zzzSA(1),zzzSA(2)} rmn={rmnSA(inOut),rmnSA(inOut)},
             rmx={rmxSA(inOut),rmxSA(inOut)}
@@ -906,11 +882,10 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TWAS
       BLOCK TWAS   TpcWheelInnerAssembly & TpcWheelOuterAssembly TWAS and TWA1
-      MEDIUM TWAS_STANDARD deemax=0.248853 stmin=1.15055
+      ATTRIBUTE TWAS seen=0
       SHAPE pgon phi1=-15 dphi=30 npdiv=1 nz=2,
             zi={zzzWA(1),zzzWA(2)} rmn={rmnWA(inOut),rmnWA(inOut)},
             rmx={rmxWA(inOut),rmxWA(inOut)}
-      ATTRIBUTE TWAS seen=0
       dx =   TPCG_widTube*cm/2
       dz =   depthIOF(inOut + 1)/2
       dy =   heightIOF(inOut + 1)/2
@@ -960,7 +935,6 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- FEEA
       BLOCK FEEA   TGeoVolumeAssembly(FEE)
-      MEDIUM FEEA_STD deemax=0.248853 stmin=1.15055
       ATTRIBUTE FEEA seen=1 colo=kGreen
       SHAPE box dx=TFEE_ass(1) dy=TFEE_ass(2),
             dz=TFEE_ass(3)
@@ -976,7 +950,6 @@
       BLOCK FEEP   FEEplate
       ATTRIBUTE FEEP seen=1 colo=kRed
       MATERIAL ALUMINIUM
-      MEDIUM FEEP_aluminium deemax=0.18296 stmin=0.0334422
       SHAPE box dx=TFEE_PlateDX dy=TFEE_PlateDY,
             dz=TFEE_PlateDZ
       ENDBLOCK
@@ -984,14 +957,12 @@
       BLOCK FEER   FEERib
       ATTRIBUTE FEER seen=1 colo=1
       MATERIAL ALUMINIUM
-      MEDIUM FEER_aluminium deemax=0.18296 stmin=0.0334422
       SHAPE box dx=TFEE_RibDX dy=TFEE_RibDY dz=TFEE_RibDZ
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- FEEI
       BLOCK FEEI   FEEitself
       ATTRIBUTE FEEI seen=1 colo=kViolet
       MATERIAL G10
-      MEDIUM FEEI_g10 deemax=0.20313 stmin=0.0333806
       SHAPE box dx=TFEE_CardDX dy=TFEE_CardDY,
             dz=TFEE_CardDZ
       ENDBLOCK
@@ -999,7 +970,6 @@
       BLOCK TALS   TpcSectorAlSupport the Sector G10 alliminium support
       ATTRIBUTE TALS seen=1 colo=kYellow
       MATERIAL ALUMINIUM
-      MEDIUM TALS_aluminium deemax=0.18296 stmin=0.0334422
       SHAPE pgon phi1=-alpha dphi=2*alpha npdiv=1,
             nz=2 zi={z1+TPCG_PadPlaneThickness,z1+TPCG_PadPlaneThickness+TECW_ThickAl},
             rmn={r1,r1},
@@ -1021,7 +991,6 @@
       BLOCK TSGT   TpcSectorG10 the Sector G10
       ATTRIBUTE TSGT seen=1 colo=kBlue
       MATERIAL G10
-      MEDIUM TSGT_G10 deemax=0.20313 stmin=0.0333806
       SHAPE pgon phi1=-alpha dphi=2*alpha npdiv=1,
             nz=2 zi={z1,z1+TPCG_PadPlaneThickness} rmn={r1,
             r1} rmx={r2,r2}
@@ -1030,7 +999,6 @@
       BLOCK TWBT   //WheelBottom
       ATTRIBUTE TWBT seen=1 colo=kGreen
       MATERIAL ALUMINIUM
-      MEDIUM TWBT_aluminium deemax=0.18296 stmin=0.0334422
       SHAPE pcon phi1=-15 dphi=30 nz=4 zi={zWheel1,
             zWheel1+3.500*INCH,zWheel1+3.500*INCH,TPCG_LengthW/2},
             rmn={TPCG_WheelIR,TPCG_WheelIR,
@@ -1039,7 +1007,6 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TWRI
       BLOCK TWRI   WheelOuterRing
-      MEDIUM TWRI_standard stmin=1.15055
       SHAPE pcon phi1=-15 dphi=30 nz=4 zi={zWheel1,
             zTOFCend,zTOFCend,TPCG_LengthW/2} rmn={TPCG_WheelR2*cos15,
             TPCG_WheelR2*cos15,TPCG_WheelR2*cos15,
@@ -1058,7 +1025,7 @@
       IF ( (myg2>myRMax*myCos) ) THEN
       myG2 = myRMax*myCos
       ENDIF
-      alpha = ACOS(myCos)/Pi*180
+      alpha = ACos(myCos)*raddeg;
       CREATE TWRG
       POSITION TWRG 
       myCos = myG2/myRmin; myG1=myG2
@@ -1071,7 +1038,6 @@
       BLOCK TWRG   WheelOuterRing PGON part
       ATTRIBUTE TWRG seen=1 colo=kGreen
       MATERIAL ALUMINIUM
-      MEDIUM TWRG_aluminium deemax=0.18296 stmin=0.0334422
       SHAPE pgon phi1=-alpha dphi=alpha*2 npdiv=1,
             nz=2 zi={zWheel1,TPCG_LengthW/2} rmn={myG1,
             myG1} rmx={myG2,myG2}
@@ -1080,7 +1046,6 @@
       BLOCK TWRC   WheelOuterRing PCON part
       ATTRIBUTE TWRC seen=1 colo=kGreen
       MATERIAL ALUMINIUM
-      MEDIUM TWRC_aluminium deemax=0.18296 stmin=0.0334422
       SHAPE pcon phi1=-15 dphi=30 nz=4 zi={zWheel1,
             zTOFCend,zTOFCend,TPCG_LengthW/2} rmn={TPCG_WheelR2/cos15,
             TPCG_WheelR2/cos15,TPCG_WheelR2/cos15,
@@ -1091,7 +1056,6 @@
       BLOCK TWTR   TpcWheelTopRib
       ATTRIBUTE TWTR seen=1 colo=kBlue
       MATERIAL ALUMINIUM
-      MEDIUM TWTR_aluminium deemax=0.18296 stmin=0.0334422
       myG1=TPCG_WheelR2 - (TPCG_WheelTotalRibWidth - TPCG_WheelRibWidth)/2
       SHAPE pgon phi1=-15 dphi=30 npdiv=1 nz=2,
             zi={zWheel1,zWheel1+TPCG_WheelRibHeight} rmn={myG1,
@@ -1101,7 +1065,6 @@
       BLOCK TWMR   TpcWheelMiddleRib
       ATTRIBUTE TWMR seen=1 colo=kYellow
       MATERIAL ALUMINIUM
-      MEDIUM TWMR_aluminium deemax=0.18296 stmin=0.0334422
       myG1=TPCG_WheelR2 - (TPCG_WheelTotalRibWidth - TPCG_WheelRibWidth)/2
       SHAPE pgon phi1=-15 dphi=30 npdiv=1 nz=4,
             zi={zWheel1,zWheel1+TPCG_WheelRibHeight,zWheel1+TPCG_WheelRibHeight,
@@ -1117,7 +1080,6 @@
       BLOCK TRDO   TpcRDOAssembly
       ATTRIBUTE TRDO seen=0
       ATTRIBUTE TRDO seen=1 colo=kYellow
-      MEDIUM TRDO_whatever deemax=0.248853 stmin=1.15055
       SHAPE pgon phi1=-15 dphi=30 npdiv=1 nz=2,
             zi={zzzRDO(1),zzzRDO(2)} rmn={rmnRDO(1),rmnRDO(2)},
             rmx={rmxRDO(1),rmxRDO(2)}
@@ -1160,7 +1122,6 @@
       BLOCK TBRW   WheelRibBox
       ATTRIBUTE TBRW seen=1 colo=kViolet
       MATERIAL ALUMINIUM
-      MEDIUM TBRW_aluminium deemax=0.18296 stmin=0.0334422
       SHAPE box dx=TPCG_WheelBoxDy/2 dy=TPCG_WheelBoxDx/2,
             dz=TPCG_WheelTHK/2
       ENDBLOCK
@@ -1168,7 +1129,6 @@
       BLOCK TWRB   TpcWheelRib
       ATTRIBUTE TWRB seen=1 colo=kYellow
       MATERIAL ALUMINIUM
-      MEDIUM TWRB_aluminium deemax=0.18296 stmin=0.0334422
       SHAPE para dx=myDx dy=myDy dz=myDz alph=myAlph,
             thet=0 phi=0
       ENDBLOCK
@@ -1176,7 +1136,6 @@
       BLOCK TCOO   CoolingTube
       ATTRIBUTE TCOO seen=1 colo=kRed
       MATERIAL Water_Pipe
-      MEDIUM TCOO_h2o_pipe deemax=0.184746 stmin=0.0348298
       IF ( iShape==kPara ) THEN
       SHAPE para dx=myPar(1) dy=myPar(2) dz=myPar(3),
             alph=myPar(4) thet=0 phi=0
@@ -1190,7 +1149,6 @@
       BLOCK TCAB   Cables
       ATTRIBUTE TCAB seen=1 colo=kGreen
       MATERIAL Cables
-      MEDIUM TCAB_Cables deemax=0.172513 stmin=0.0388322
       SHAPE para dx=myPar(1) dy=myPar(2) dz=myPar(3),
             alph=myPar(4) thet=0 phi=0
       ENDBLOCK
@@ -1198,14 +1156,12 @@
       BLOCK TRDC   RDOCard
       ATTRIBUTE TRDC seen=1 colo=kBlue
       MATERIAL G10
-      MEDIUM TRDC_g10 deemax=0.20313 stmin=0.0333806
       SHAPE box dx=TPCG_dxRDO dy=TPCG_dyRDO dz=TPCG_dzRDO
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- TRIB
       BLOCK TRIB   Tpc Ribs
       ATTRIBUTE TRib seen=1 colo=kRed
       MATERIAL ALUMINIUM
-      MEDIUM TRIB_aluminium deemax=0.18296 stmin=0.0334422
       IF ( iShape==kPara ) THEN
       SHAPE para dx=myPar(1) dy=myPar(2) dz=myPar(3),
             alph=myPar(4) thet=0 phi=0
@@ -1220,7 +1176,6 @@
       BLOCK TWIR   WireMount
       ATTRIBUTE TWIR seen=1 colo=kYellow
       MATERIAL G10
-      MEDIUM TWIR_g10 deemax=0.20313 stmin=0.0333806
       SHAPE para dx=myPar(1) dy=myPar(2) dz=myPar(3),
             alph=myPar(4) thet=0 phi=0
       ENDBLOCK
@@ -1228,7 +1183,6 @@
       BLOCK THOL   the Sector holes for FEE
       ATTRIBUTE THOL seen=1 colo=kGreen
       MATERIAL Air
-      MEDIUM THOL_Air deemax=0.248853 stmin=1.15055
       SHAPE box dx=myPar(1) dy=myPar(2) dz=myPar(3)
       CREATE FEES
       POSITION FEES 
@@ -1236,7 +1190,6 @@
       ! ---------------------------------------------------------------------------------- FEES
       BLOCK FEES   TFEESocket
       MATERIAL G10
-      MEDIUM FEES_g10 deemax=0.20313 stmin=0.0333806
       ATTRIBUTE FEES seen=1 colo=kBlue
       SHAPE box dx=6.2/20 dy=57./20 dz=5.8/20
       ENDBLOCK
@@ -1244,7 +1197,6 @@
       BLOCK TPGV   is the Gas Volume placed in TPC
       ATTRIBUTE TPGV seen=1 colo=kRed
       MATERIAL P10
-      MEDIUM TPGV_p10 deemax=0.248246 stmin=1.60594
       SHAPE tube rmin=tpgvIR rmax=tpcg_SenGasOR,
             dz=tpgvLeng/2
       DO iSecAng = 15, 360-15, 30
@@ -1255,7 +1207,6 @@
       ! ---------------------------------------------------------------------------------- TPSS
       BLOCK TPSS   is a division of gas volume corresponding to a supersectors
       ATTRIBUTE TPSS seen=1 colo=kBlue
-      MEDIUM TPSS_whatever deemax=0.248246 stmin=1.60594
       SHAPE tubs phi1=-15 phi2=15
       DO kase = 1, 2
       DO i_sec = 1, 2

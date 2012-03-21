@@ -250,10 +250,10 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- PWRP
       BLOCK PWRP   is the beampipe wrap of Kapton and aluminum
-      COMPONENT C5 A=12 Z=6 W=5
-      COMPONENT H4 A=1 Z=1 W=4
-      COMPONENT O2 A=16 Z=8 W=2
-      COMPONENT Al A=27 Z=13 W=3.45327
+      COMPONENT C5 A=12 Z=6 W=500000
+      COMPONENT H4 A=1 Z=1 W=400000
+      COMPONENT O2 A=16 Z=8 W=200000
+      COMPONENT Al A=27 Z=13 W=345327
       MIXTURE MLI dens=1.82667
       ATTRIBUTE Pwrp seen=1 colo=3
       SHAPE tube rmin=pipg_WrpInnR rmax=pipg_WrpOutR,
@@ -261,10 +261,10 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- PSLD
       BLOCK PSLD   is the svt beampipe shield
-      COMPONENT C5 A=12 Z=6 W=5
-      COMPONENT H4 A=1 Z=1 W=4
-      COMPONENT O2 A=16 Z=8 W=2
-      COMPONENT Al A=27 Z=13 W=0.2302
+      COMPONENT C5 A=12 Z=6 W=50000
+      COMPONENT H4 A=1 Z=1 W=40000
+      COMPONENT O2 A=16 Z=8 W=20000
+      COMPONENT Al A=27 Z=13 W=2302
       MIXTURE ALKAP dens=1.432
       ATTRIBUTE PSLD seen=1 colo=3
       SHAPE tube rmin=pipg_SldInnR rmax=pipg_SldOutR,

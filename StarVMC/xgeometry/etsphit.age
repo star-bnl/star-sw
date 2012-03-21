@@ -1,8 +1,8 @@
 ******************************************************************************
-* $Id: etsphit.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: etsphit.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: etsphit.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.1  2004/01/19 21:16:53  potekhin
 * Need to make this into a separate compilation unit
