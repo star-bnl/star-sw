@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.35 2012/03/07 18:34:29 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.36 2012/03/21 19:25:06 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.36  2012/03/21 19:25:06  sgliske
+ * fixed bug in changed from geoId to elecId for DB lookups
+ *
  * Revision 1.35  2012/03/07 18:34:29  sgliske
  * Missing a few default value in the constructor
  *
@@ -226,18 +229,16 @@ Int_t StFgtA2CMaker::Make(){
                   //set max adc back so that the new max adc is set by the adc -ped
                   strip->setMaxAdc(-9999);
 
-                  Int_t geoId = strip->getGeoId();
-                  // Later, switch geoId to elecId lookups, since DB keyed by
-                  // elecId, as soon as function made available.  Also
-                  // clean up computations of elecId in this code at
-                  // the same time.
+                  Int_t rdo, arm, apv, chan; 
+                  strip->getElecCoords( rdo, arm, apv, chan ); 
+                  Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
 
                   // sum of adc-ped values
                   Float_t sumC=0;
 
                   // get the pedestal
-                  ped = mDb->getPedestalFromElecId( geoId );
-                  pedErr = mDb->getPedestalSigmaFromElecId( geoId );
+                  ped = mDb->getPedestalFromElecId( elecId );
+                  pedErr = mDb->getPedestalSigmaFromElecId( elecId );
                   strip->setPed(ped);
                   strip->setPedErr(pedErr);
 
@@ -263,7 +264,7 @@ Int_t StFgtA2CMaker::Make(){
                   };
 
                   // get gain
-                  Double_t gain = mDb->getGainFromElecId( geoId );
+                  Double_t gain = mDb->getGainFromElecId( elecId );
 
                   // set the charge
                   strip->setCharge( sumC/gain );
@@ -292,7 +293,7 @@ Int_t StFgtA2CMaker::Make(){
                   };
 
                   if( mStatusMask != 0x0 ){
-                     UInt_t status=mDb->getStatusFromElecId(geoId);
+                     UInt_t status=mDb->getStatusFromElecId( elecId );
 
                      if( status & mStatusMask )
                         strip->setClusterSeedType(kFgtDeadStrip);
