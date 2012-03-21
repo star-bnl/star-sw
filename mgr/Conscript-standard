@@ -221,7 +221,6 @@ if ($FC eq 'g77' or $FC eq 'gfortran'){
 if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "\t--- Regular case treatment (not gen not sim) ---\n" if $param::debug;
   
-            
     # if user requested debug, print some info on what was found
     if ($param::debug) {
 	$i = 0;
@@ -231,26 +230,32 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$i = 0;
 	foreach my $s(@h_files) { print "i=", $i++, " h_files = ", $s, "\n"; }
     }
-  
-    
+ 
+
+    #if (0==1){
     # Generate geometries first - this will be hit on any $Dir
     # xgeometry and StarGeometry may not be created however
+    #if ( $Dir =~ m/Geometry/ ){
     if ( $Dir =~ m/Geometry/ ){
 	my @xmlGeo   = script::find_xml($Dir);
+	
+	#print "DEBUG Found ".($#xmlGeo+1)." XML files in $Dir\n";
+
 	if ($#xmlGeo > -1){
 	    # for the geometry package, generate the geom
 	    # print join(";",@xmlGeo);
-	    my($bflnm,$pref,$agM,$agF,$agX,$agH,$agO);
+	    my($agM,$agE,$agX,$agH);
+	    my($trgt);
 	    my($agml_cmd);
-	    my(@ODIR)= ("StarVMC/StarGeometry/","StarVMC/xgeometry/");
-	      
-	    # for now, generate in-situ
-	    my($in_situ)=1==1;
+	    my(@ODIR)= ("StarVMC/StarGeometry/",
+			"StarVMC/xgeometry/");
 	    
-	    if ( $in_situ  && (! $IsRepo || $IsDotDev)){
-		foreach (@ODIR){ if ( ! -d $ODIR[0] && $in_sittu ){  mkdir($ODIR[0],0755);}}
+	    # Below if() was added to prevent compilation in non-local but
+	    # allow development in .dev - commented for integration
+	    #if ( (! $IsRepo || $IsDotDev)){
+		foreach (@ODIR){ if ( ! -d $ODIR[0] ){  mkdir($ODIR[0],0755);}}
 
-		# local or global
+		# local or global install
 		if ( -e "mgr/agmlParser.py"){	$agml_cmd = "mgr/agmlParser.py";
 		} else {			$agml_cmd =     "agmlParser.py";}
 		
@@ -259,43 +264,55 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			print "xml = $xml\n" if $param::debug;
 			$agM   = $xml; $agM =~ s/\..*//; $agM =~ s/.*\///;
 			
-			$pref  = ($in_situ?"#":"");
 			$agX   = $ODIR[0].$agM.".cxx";
 			$agH   = $ODIR[0].$agM.".h";
-			$agF   = $ODIR[1].$agM.".age";
-			$agO   = $ODIR[1].$agM.".o";
+			$agE   = $ODIR[1].$agM.".age";
 			  
-		        # print "\tDEBUG $agX $xml $agO\n";
-			# my $GenCmd = "$agml_cmd --file=%< --export=AgROOT --module=$bflnm --path=$ODIR && echo %>";
-			$env->{ENV}->{AGML_WARNINGS} = !$param::debug;
-			# export AGML_WARNINGS=\$AGML_WARNINGS
+		        #print "\tDEBUG $agX $xml\n";
+			
+			# generally enable all warnings for now
+			$env->{ENV}->{AGML_WARNINGS} = 1==1; # $param::debug;
 			
 			if ( $xml =~ m/Compat/ ){
-			    Depends $env [$pref.$agF], "#$xml";
-			    Command $env [$pref.$agF], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+			    Depends $env ["#".$agE], "#$xml";
+			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
 			} else {
-			    Depends $env [$pref.$agX, $pref.$agH, $pref.$agF], "#$xml";
-			    Depends $env [$agO], $pref.$agX, $pref.$agH;
+			    Depends $env ["#".$agX, "#".$agH, "#".$agE], "#$xml";
 			  
-			    Command $env [$pref.$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
-			    Command $env [$pref.$agF], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
-		    
-			    # push(@src,"#$agX"); 
-			    # push(@Defs,$agH);
+			    Command $env ["#".$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
+			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+
+			    # Install local file (#) as global
+			    # The .h file can be installed as-is
+			    $trgt = $OBJ."/".$agH;
+			    InstallAs  $env $trgt, "#".$agH;
+			    
+			    # The recently generated .cxx will create an extra source dependency
+			    $trgt = $OBJ."/".$agX;
+			    InstallAs  $env $trgt, "#".$agX;
+
+			    # Add source dependency but only cxx
+			    #>>push(@srcL, $trgt); 
 			}
-		    
+
+			# Install the "#" i.e. local file as global file - ageF created in both cases
+			# BEWARE that the agE (.age) file is created in xgeometry
+			$trgt = $OBJ."/".$agE;
+			InstallAs  $env $trgt, "#".$agE;
+
+			# Create source dependencies based on installed age, not the original
+			#>>push(@srcL, $trgt ); 
+
+
 		    } else {
 			# just be sure we pick only from one tree
 			print "Warning: found $xml but in a non-expected tree\n";
 		    }
-		}
-	    }
+		#}
+	     }
 	}
     }
-	
-
-    
 
   
     foreach my $Rep(@Repo) {
@@ -313,9 +330,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    foreach my $i(@h_filesR) { push @h_filesL, $i; }
 	}
     }
-    @src     = script::sortu(@srcL);
+    @src     = script::sortu(@srcL); 
     @h_files = script::sortu(@h_filesL);
     @idlM    = script::sortu(@idlML);
+
     # ui     /opt/star/sl305_gcc323/qt/bin/uic GeomBrowser.ui -i GeomBrowser.h -o .ui/GeomBrowser.cpp
     # xpm    /opt/star/sl305_gcc323/qt/bin/uic  -embed -o .ui/qmake_image_collection.cpp
     my $uic = $env->{Packages}->{QT}->{BINDIR} . "/uic";
@@ -548,6 +566,13 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$FCPATH .= $main::PATH_SEPARATOR . $env1->{ENV}->{CERN_ROOT} . "/include";
         # $FCPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{CERNLIB}->{INCDIR};
 
+    #} elsif ( $pkg =~ /^Geometry/ ){
+    #	$CPPPATH = "#" . $Dir;
+    #	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+    #	#$FCPATH  = $INCLUDE;
+    #	#$FCPATH .= $main::PATH_SEPARATOR . "#".$Dir;
+    #    print "DEBUG $CPPPATH\n";
+
     } elsif ( $pkg =~ /^xgeometry/ ){
 	$LIBS .= " -lStarMagFieldNoDict ";
 	#my $libs = "-lStarMagFieldNoDict";	
@@ -685,14 +710,14 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	@src = @srcC;
 
 
-    } elsif ( $pkg =~ m/^TBB$/) {
-	$CPPPATH = $INCLUDE 
-	    . $main::PATH_SEPARATOR . "#" . $Dir . "/src";
-	#      "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include" . 
-	#    print "CPPPATH => $CPPPATH\n";
-	$CXXFLAGS .= " -MMD -DTBB_DO_ASSERT -DDO_ITT_NOTIFY -DUSE_PTHREAD -D__TBB_BUILD=1 -Wall -Wno-parentheses";
-
-
+#    } elsif ( $pkg =~ m/^TBB$/) {
+#	$CPPPATH = $INCLUDE 
+#	    . $main::PATH_SEPARATOR . "#" . $Dir . "/src";
+#	#      "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include" . 
+#	#    print "CPPPATH => $CPPPATH\n";
+#	$CXXFLAGS .= " -MMD -DTBB_DO_ASSERT -DDO_ITT_NOTIFY -DUSE_PTHREAD -D__TBB_BUILD=1 -Wall -Wno-parentheses";
+#
+#
     }  elsif ( $pkg =~ m/^TPCCATracker$/) {
         $CPPPATH .=
 	    $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/code";
