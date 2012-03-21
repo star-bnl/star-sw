@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.23 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: StDbManager.hh,v 1.24 2011/02/10 17:30:42 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.24  2011/02/10 17:30:42  dmitry
+ * added an option to blacklist domains
+ *
  * Revision 1.23  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -203,6 +206,8 @@ public:
   virtual StDbDomain getDbDomain(const char* domainName)                 =0;
   virtual char*      getDbName(const char* typeName, const char* domName)=0;
   virtual char*      printDbName(StDbType type, StDbDomain domain)       =0;
+
+  virtual void       blacklistDbDomain(const char* domainName)           =0;
 
   // time stamp methods
   virtual void         setRequestTime(unsigned int time)                 =0;
