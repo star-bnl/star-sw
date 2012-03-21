@@ -5,7 +5,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2wBemc2012.cxx,v 1.3 2011/10/19 16:12:12 jml Exp $
+ * $Id: L2wBemc2012.cxx,v 1.4 2012/03/21 18:18:04 jml Exp $
  * \author Jan Balewski,MIT , 2009 
  *********************************************************************
  * Descripion: see .h
@@ -136,9 +136,6 @@ L2wBemc2012::sumET(int phi, int eta) {
   towPlusOne%= maxTowers;
   sum+=wrkBtow_et[towPlusOne];
   
-  //if(tow==0 || towPlusOne==0) {
-    //printf("tow : %d, %d --> %f %f \n",tow, towPlusOne,wrkBtow_et[tow],wrkBtow_et[towPlusOne]);
-  //}
   tow+=BtowGeom::mxEtaBin;
   tow%=maxTowers;
   
@@ -148,10 +145,6 @@ L2wBemc2012::sumET(int phi, int eta) {
   towPlusOne%= maxTowers;
   sum+=wrkBtow_et[towPlusOne];
   
-  //if(tow==0 || towPlusOne==0) {
-    //printf("tow : %d, %d --> %f %f \n",tow, towPlusOne,wrkBtow_et[tow],wrkBtow_et[towPlusOne]);
-  //}
-  // printf("B sumET=%f\n",sum);
   return sum;
 }
   
@@ -165,7 +158,6 @@ L2wBemc2012::computeUser(int token){
 
   // ------ PROJECT INPUT LIST TO 2D ARRAY AND SCAN FOR SEED TOWERS ----
   int i;
-  //  printf("L2-%s-compute: ---BTOW ADC list--- size=%d\n",getName(),*globEve_btow_hitSize);
 
   // access inpute list
   const HitTower1 *hit=mEveStream_btow[token].get_hits();
@@ -178,14 +170,12 @@ L2wBemc2012::computeUser(int token){
     wrkBtow_et[tower]=hit->et;
     if(hit->et<par_seedEtThres)continue;
     wrkBtow_tower_seed[wrkBtow_tower_seed_size++]=tower;
-    //printf("A  seed TWID=%d \n",tower);
   }
   hA[2]->fill(hitSize);
   int seedTow=-1,seedEta=-1,seedPhi=-1;
   float clustET=0;
   btowEve->isFresh=L2wBemcEvent2012::kDataFresh;
 
-  // printf("B nseed=%d\n",wrkBtow_tower_seed_size);
   // ----------- FIND 2x2 CLUSTER AROUND EVERY SEED -----
   for(i=0; i<wrkBtow_tower_seed_size;i++) {
     seedTow=wrkBtow_tower_seed[i];
@@ -218,7 +208,6 @@ L2wBemc2012::computeUser(int token){
   return;
   
  ACCEPT:
-  // printf("B acc clustET=%f\n",clustET);
   btowEve->seedET=wrkBtow_et[seedTow];
   btowEve->clusterET=clustET;
   btowEve->resultBlob.seedEt   =(unsigned char)(wrkBtow_et[seedTow]*256.0/60.0);
@@ -227,7 +216,6 @@ L2wBemc2012::computeUser(int token){
   btowEve->resultBlob.seedPhiBin=seedPhi;
   btowEve->resultBlob.trigger=2;
   rdtscll( btowEve->tkCompute);
-  //  printf("TTT1 %dl\n",ticks);
 
   return;
 }
@@ -258,7 +246,6 @@ L2wBemc2012::decisionUser(int token, int *myL2Result){
     unsigned long long tkDecision;
     rdtscll(tkDecision);
     int tkDelta=tkDecision-btowEve->tkCompute;					
-    //printf("TTT2 %d\n",tkDelta);
     hA[1]->fill(tkDelta/1000);
 
     hA[3]->fill((int)btowEve->seedET);
@@ -355,7 +342,6 @@ L2wBemc2012::createHisto() {
 
   //20-32 free
 
-  // printf("L2-%s::createHisto() done\n",getName());
 }
 
 //=======================================
@@ -421,6 +407,9 @@ L2wBemc2012::print4(int token, int hitSize){ // L2-algo input list
 #endif
 /**********************************************************************
   $Log: L2wBemc2012.cxx,v $
+  Revision 1.4  2012/03/21 18:18:04  jml
+  got rid of printfs from 2012 files
+
   Revision 1.3  2011/10/19 16:12:12  jml
   more 2012 stuff
 

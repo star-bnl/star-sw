@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <fakeRtsLog.h>
 
 /**********************************************************
- * $Id: L2pedAlgo12.cxx,v 1.3 2011/10/19 16:12:12 jml Exp $
+ * $Id: L2pedAlgo12.cxx,v 1.4 2012/03/21 18:18:03 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  **********************************************************
  * Descripion:
@@ -73,11 +74,8 @@ L2pedAlgo12::L2pedAlgo12(const char* name, const char *uid, L2EmcDb2012* db, cha
  
 
   //------- self-consistency checks, should never fail
-  // printf("ZZ %d %d\n", sizeof(L2pedResults2012), L2pedResults2012::mySizeChar);
   if (sizeof(L2pedResults2012)!= L2pedResults2012::mySizeChar) 
     criticalError("L2pedAlgo12 has failed consistency check. sizeof(L2pedAlgo12)!= L2pedResults2012::mySizeChar");
-  //j1  printf("L2pedAlgo12 instantiated, logPath='%s'\n",mOutDir);
-  
 }
 
 /*========================================
@@ -86,7 +84,6 @@ int
 L2pedAlgo12::initRunUser(int runNo, int *rc_ints, float *rc_floats) {
   //myName is not used.
   // update DB if run # has changed
-  //printf("aaa L2pedAlgo12::initRun runNo=%d\n",runNo);
   //OLD APPROACH, abandoned on Feb 4, 2008, JanB if(mDb->initRun(runNo)) return -27; 
   // DB must be initialized prior to lookup tables
 
@@ -137,8 +134,6 @@ L2pedAlgo12::initRunUser(int runNo, int *rc_ints, float *rc_floats) {
     }
   }
   
-  //j1  printf("L2ped algorithm init()... params:\n  pedSubtr=%d saveBinHist=%d  speedFact=%d   dbg=%d  prescAccept=%d\n  mapped channels: nBtow=%d nEtow=%d\n",par_pedSubtr,par_saveBinary,par_dbg,par_speedFact,par_prescAccept,nBtowOk,nEtowOk);
-
   for(i=0;i<BtowGeom::mxRdo;i++)  btowAdc[i]->reset();
   for(i=0;i<EtowGeom::mxRdo;i++)  etowAdc[i]->reset();
   for(i=0;i<mxHA;i++) if(hA[i]) hA[i]->reset();
@@ -155,7 +150,6 @@ bool
 L2pedAlgo12::doPedestals(int inpEveId, int* L2Result, 
 		   int bemcIn, ushort *bemcData,
 		   int eemcIn, ushort *eemcData){
-  // printf("L2pedAlgo12::doEvent  bemcIn=%d eemcIn=%d\n",bemcIn,eemcIn);
   /* STRICT TIME BUDGET  START ...., well a bit relaxed for this algo */
   unsigned long mEveTimeStart;
   rdtscl_macro(mEveTimeStart);
@@ -181,13 +175,11 @@ L2pedAlgo12::doPedestals(int inpEveId, int* L2Result,
     short first=s_lastB%BtowGeom::mxRdo;
     s_lastB=first+s_stepB;
     if(first==0) hA[10]->fill(1);
-    // printf("B: f=%d l=%d\n",first,s_lastB);
     
     for(rdo=first; rdo<s_lastB; rdo++){
       int adc=bemcData[rdo];
       if(par_pedSubtr) adc-=db_btowPed[rdo];
       btowAdc[rdo]->fill(adc-minAdc);
-      // printf("B: rdo=%d raw=%d ped=%d val=%d\n",rdo,bemcData[rdo],db_etowPed[rdo],adc-minAdc);
     }
   }
   
@@ -196,13 +188,11 @@ L2pedAlgo12::doPedestals(int inpEveId, int* L2Result,
     short first=s_lastE%EtowGeom::mxRdo;
     s_lastE=first+s_stepE;
     if(first==0) hA[10]->fill(2);
-    //printf("E: f=%d l=%d\n",first,s_lastE);
     
     for(rdo=first; rdo<s_lastE; rdo++){
       int adc=eemcData[rdo];
       if(par_pedSubtr) adc-=db_etowPed[rdo];
       etowAdc[rdo]->fill(adc-minAdc);
-      //    printf("E: rdo=%d raw=%d ped=%d val=%d\n",rdo,eemcData[rdo],db_etowPed[rdo],adc-minAdc);
     }
   }
   
@@ -221,7 +211,6 @@ L2pedAlgo12::doPedestals(int inpEveId, int* L2Result,
   int  kTick=mEveTimeDiff/1000;
   hA[11]->fill(kTick/20);
   
-  //  printf("jkTick=%d\n",kTick);
   const ushort maxKT=30000;
   out.int0.kTick=  kTick>maxKT ? maxKT : (int)kTick;
   
@@ -241,7 +230,6 @@ L2pedAlgo12::doPedestals(int inpEveId, int* L2Result,
 void 
 L2pedAlgo12::computeUser(int token ){
 
-  printf("computeUser-%s FATAL CRASH\n If you see this message it means l2new is very badly misconfigured \n and L2-emc-ped algo was not executed properly\n before calling other individual L2-algos. \n\n l2new will aborted now - fix the code, Ross C  (In the words of Jan B).\n",getName());
   criticalError("L2pedAlgo12::computeUser has been called and should not have been.  Serious problem in L2");
 
 }
@@ -254,17 +242,13 @@ L2pedAlgo12::finishRunUser() {/* called once at the end of the run */
 
   int nBtowLow=0, nBtowHigh=0 ,nEtowLow=0, nEtowHigh=0 ;
 
-  printf("L2ped_finish() , finding pedestals...\n");
-  
-
-  if(mLogFile==0) {printf("no open output log file,skip ped_finish()\n"); return;}  
+  if(mLogFile==0) { LOG(ERR,"no open output log file,skip ped_finish()\n"); return;}  
   fprintf(mLogFile,"#L2-ped algorithm finishRun(%d), compiled: %s , %s\n",run_number,__DATE__,__TIME__);
   fprintf(mLogFile,"#params: pedSubtr=%d speedFact=%d saveBin=%d debug=%d prescAccept=%d\n",par_pedSubtr,par_speedFact,par_saveBinary,par_dbg,par_prescAccept);
   hA[10]->printCSV(mLogFile); // event accumulated
   int iMax=-3, iFWHM=-4;
   hA[11]->findMax( &iMax, &iFWHM);
   fprintf(mLogFile,"#L2ped  CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",iMax, iFWHM,nInp);
-  // printf("L2ped  CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",iMax, iFWHM,nInp);
   if(par_saveBinary)  fprintf(mLogFile,"#L2ped  will save full spectra for all towers\n");
 
   int par_topAdc=85;
@@ -285,7 +269,6 @@ L2pedAlgo12::finishRunUser() {/* called once at the end of the run */
     const L2EmcDb2012::EmcCDbItem *x=mDb->getByIndex(i);
     if(mDb->isEmpty(x)) continue;  /* dropped not mapped  channels */
     if (mDb->isBTOW(x) ||mDb->isETOW(x) ) { //
-      // printf("sss i=%d",i); mDb->printItem(x);
       nB++;
       /* if(nB>30) return; */
       int iMax=-3, iFWHM=-4; 
@@ -364,20 +347,17 @@ L2pedAlgo12::finishRunUser() {/* called once at the end of the run */
    
   fprintf(mLogFile,"#L2ped_finishRun() # of towers with |ped-pedDB| >10 chan\n#    BTOW: nLow=%d nHigh=%d ;   ETOW  nLow=%d, nHigh=%d\n",nBtowLow, nBtowHigh,nEtowLow, nEtowHigh);
   fprintf(mLogFile,"#    found peds for nB+E=%d , seen events=%d\n",nB,nInp);
-  //  printf("l2ped_finish() found peds for nB+E=%d , seen events=%d\n",nB,nInp);
-
-
 
   // sprintf(fname,"%s/run%d.l2ped.hist.bin",mOutDir1.c_str(),run_number); // full spectra in binary form
   
   if(mHistFile==0) {
-    printf("Can't open .hist.bin file,skip ped_finish()\n"); 
+    LOG(ERR,"Can't open .hist.bin file,skip ped_finish()\n"); 
     goto end;
   }  
 
   
   if(par_saveBinary) {
-    printf("l2ped_finish() , save FULL spectra binary...\n");
+    LOG(DBG,"l2ped_finish() , save FULL spectra binary...\n");
 
     // .................. SAVE FULL SPECTRA BINARY ...........
     for(i=0; i<EmcDbIndexMax; i++) {
@@ -389,7 +369,6 @@ L2pedAlgo12::finishRunUser() {/* called once at the end of the run */
 	h= btowAdc[x->rdo];
 	//L2EmcDb2012::printItem(x);
 	sprintf(tit,"BTOW=%s cr/ch=%03d/%03d stat/0x=%04x+%04x soft=%s; %s",x->name, x->crate, x->chan, x->stat, x->fail,x->tube,xAxis);
-	//printf("tit=%s=\n",tit);	
       } else if(mDb->isETOW(x) ) {
 	h= etowAdc[x->rdo];
 	//L2EmcDb2012::printItem(x);
@@ -400,7 +379,6 @@ L2pedAlgo12::finishRunUser() {/* called once at the end of the run */
       h->write(mHistFile); // change title, add cr/chan/name, pedSubtrFlag
       // break;
     }
-    printf("l2ped_finish() binary full spectra saved\n");
   }
 
  end:
@@ -411,6 +389,9 @@ L2pedAlgo12::finishRunUser() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo12.cxx,v $
+  Revision 1.4  2012/03/21 18:18:03  jml
+  got rid of printfs from 2012 files
+
   Revision 1.3  2011/10/19 16:12:12  jml
   more 2012 stuff
 

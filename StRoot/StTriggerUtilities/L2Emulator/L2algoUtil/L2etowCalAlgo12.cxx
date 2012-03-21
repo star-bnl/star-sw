@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <fakeRtsLog.h>
 
 /*********************************************************
-  $Id: L2etowCalAlgo12.cxx,v 1.4 2011/10/19 16:12:10 jml Exp $
+  $Id: L2etowCalAlgo12.cxx,v 1.5 2012/03/21 18:18:03 jml Exp $
   \author Jan Balewski, MIT, 2008 
  *****************************************************
   Descripion:
@@ -217,8 +218,8 @@ L2etowCalAlgo12::calibrateEtow(int token, int eemcIn, ushort *rawAdc){
 
   // debugging should be off for any time critical computation
   if(par_dbg>0){
-    printf("L2-%s-compute: set adcL size=%d\n",getName(),nTower); 
-    printf("dbg=%s: found  nTw=%d\n",getName(),nTower);
+    LOG(DBG,"L2-%s-compute: set adcL size=%d\n",getName(),nTower); 
+    LOG(DBG,"dbg=%s: found  nTw=%d\n",getName(),nTower);
     if(par_dbg>0)   print0();
     printCalibratedData(token);
   } 
@@ -244,7 +245,7 @@ L2etowCalAlgo12::clear(int token){
 void 
 L2etowCalAlgo12::computeUser(int token ){
 
-  printf("computeUser-%s FATAL CRASH\n If you see this message it means l2new is very badly misconfigured \n and L2-etow-calib algo was not executed properly\n before calling other individual L2-algos. \n\n l2new will aborted now - fix the code, Jan B.\n",getName());
+  LOG(CRIT,"computeUser-%s FATAL CRASH\n If you see this message it means l2new is very badly misconfigured \n and L2-etow-calib algo was not executed properly\n before calling other individual L2-algos. \n\n l2new will aborted now - fix the code, Jan B.\n",getName());
   criticalError("L2etowCalAlgo12::computeUser has been called and should not have been.  Serious problem in L2");
   
 }
@@ -348,6 +349,9 @@ L2etowCalAlgo12::print0(){ // full raw input  ADC array
 
 /**********************************************************************
   $Log: L2etowCalAlgo12.cxx,v $
+  Revision 1.5  2012/03/21 18:18:03  jml
+  got rid of printfs from 2012 files
+
   Revision 1.4  2011/10/19 16:12:10  jml
   more 2012 stuff
 

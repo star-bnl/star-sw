@@ -41,7 +41,6 @@ L2VirtualAlgo2012::L2VirtualAlgo2012(const char* name, const char *uid, L2EmcDb2
   mhRc= new   L2Histo(905,"rate of COMPUTE; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
   mhRd= new   L2Histo(906,"rate of DECISION; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
   mhRa= new   L2Histo(907,"rate of ACCEPT; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
-  //j1 printf("L2-%s instantiated, logPath='%s'\n",getName(),mOutDir1.c_str());
   
   // consistency checks, should never fail
 
@@ -94,10 +93,11 @@ L2VirtualAlgo2012::initRun( int runNo, int *rc_ints, float *rc_floats) {
 
   char Fname[1000];
   sprintf(Fname,"%s/run%d.l2%s.log",mOutDir1.c_str(),mRunNumber,getName());
-  //j1 printf("L2-%s::initRun('%s') ...\n",getName(),Fname);
   
   mLogFile = fopen(Fname,"w");
-  if( mLogFile==0) printf(" L2-%s() UNABLE to open run summary log file, continue anyhow\n",getName());
+  if( mLogFile==0) {
+    LOG(ERR," L2-%s() UNABLE to open run summary log file, continue anyhow\n",getName());
+  }
 
   //set default for par_RndAcceptPrescale, just in case initRunUser() doesn't define it:
   par_RndAcceptPrescale=0;//no random accepts.
@@ -141,8 +141,6 @@ L2VirtualAlgo2012::initRun( int runNo, int *rc_ints, float *rc_floats) {
 
   }
 
-  // printf("L2initRunVirtual2012-%s kBad=%d\n",getName(),kBad);
-
   return kBad;
 }
 
@@ -158,12 +156,11 @@ L2VirtualAlgo2012::finishRun() {  /* called once at the end of the run */
   // save run summary histos
   char Fname[1000];
   sprintf(Fname,"%s/run%d.l2%s.hist.bin",mOutDir1.c_str(),mRunNumber,getName());
-  // printf("\nL2:%s::finishRun('%s') , save histo ...\n",getName(),Fname);
   mHistFile = fopen(Fname,"w");
   
   
   if( mHistFile==0) {
-    printf(" L2-%s: finishRun() UNABLE to open run summary log file, continue anyhow\n",getName());
+    LOG(ERR," L2-%s: finishRun() UNABLE to open run summary log file, continue anyhow\n",getName());
     if (mLogFile)
       fprintf(mLogFile,"#L2-%s histos NOT saved, I/O error\n",getName());
   } else { // save histos  
@@ -215,7 +212,6 @@ L2VirtualAlgo2012::finishCommonHistos() {
   for(ih=0;ih<nHt;ih++) {
     int iMax=-3, iFWHM=-4;
     hT[ih]->findMax( &iMax, &iFWHM);
-    // printf("L2-%s  %s CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",getName(),text[ih],iMax, iFWHM,mEventsInRun);
     
     if (mLogFile){
       fprintf(mLogFile,"#L2:%s  %s CPU/eve MPV %d kTicks,  FWHM=%d, seen eve=%d\n",getName(),text[ih],iMax, iFWHM,mEventsInRun);
@@ -247,7 +243,7 @@ L2VirtualAlgo2012::readParams(const char *fileN, int mxPar, int *iPar, float *fP
   memset(iPar,0,mxPar*sizeof(int));
   memset(fPar,0,mxPar*sizeof(int));
   FILE *fd=fopen(fileN,"r");
-  if(fd==0) { printf("   L2VirtualAlgo2012::readParams failed to open =%s=\n",fileN); return -2222;}
+  if(fd==0) { LOG(ERR,"L2VirtualAlgo2012::readParams failed to open =%s=\n",fileN); return -2222;}
 
   int nVal=0; // sum of read in ints & floats
   int nInt=0, nFloat=0; // # of read in values
@@ -258,7 +254,6 @@ L2VirtualAlgo2012::readParams(const char *fileN, int mxPar, int *iPar, float *fP
   
   for(;;) { 
     char * ret=fgets(buf,mx,fd);
-    //printf("xx1=%p\n",ret);
     if(ret==0) break;
     if(buf[0]==0) continue;
     if(buf[0]=='#') continue;
@@ -266,7 +261,6 @@ L2VirtualAlgo2012::readParams(const char *fileN, int mxPar, int *iPar, float *fP
 
     if (mode==0 && strstr(buf,"INTS")) { mode=1; continue; }
     if (mode==1 && strstr(buf,"FLOATS")) { mode=2; continue; }
-    // printf("AA %d =%s= %p %p \n",mode,buf,strstr(buf,"INTS"),strstr("FLOATS",buf));
     if(mode==1) { // ints[]
       if(nInt>=mxPar) {nVal=-501; break;} // too many int-params
       int ret1=sscanf(buf,"%i",iPar+nInt); 
@@ -283,7 +277,7 @@ L2VirtualAlgo2012::readParams(const char *fileN, int mxPar, int *iPar, float *fP
   }
 
   fclose(fd);
-  printf("    L2VirtualAlgo2012::readParams %d from '%s'\n",nVal,fileN); 
+  LOG(DBG,"L2VirtualAlgo2012::readParams %d from '%s'\n",nVal,fileN); 
   return nVal;
 }
 
@@ -340,7 +334,6 @@ L2VirtualAlgo2012::computeStop(int token){
   unsigned long xxx=mComputeTimeStop-mComputeTimeStart;
   mComputeTimeDiff[token]=xxx;
   int  kTick=xxx/1000;
-  //printf("jj delT/kTick=%f t1=%d t2=%d \n",mComputeTimeDiff/1000.,mComputeTimeStart,mComputeTimeStop);
   mhTc->fill(kTick);
 }
 
@@ -391,8 +384,6 @@ L2VirtualAlgo2012::decision(int token, bool barrel_is_in, bool endcap_is_in, int
       mAccept=decisionUser(token, myL2Result+mResultOffset);
     }
 
-  //printf("compuDDDD tkn=%d  dec=%d myRes=%p\n",token,mAccept, *myL2Result);
-
   if(mAccept || mRandomAccept) { 
     mhN->fill(10); //Breakdown of how many events got to each stage.  10=any accept
     mhRa->fill(mSecondsInRun);
@@ -407,7 +398,6 @@ L2VirtualAlgo2012::decision(int token, bool barrel_is_in, bool endcap_is_in, int
   mDecisionTimeDiff=mDecisionTimeStop-mDecisionTimeStart;
   int  kTick=mDecisionTimeDiff/1000;
  
-  // printf("deci-%s compT=%d;  deciT=%d kTick=%d\n", getName(),mComputeTimeDiff,mDecisionTimeDiff,kTick);
   mhTd->fill(kTick);
   kTick=(mDecisionTimeDiff+mComputeTimeDiff[token])/1000;
   mhTcd->fill(kTick);
@@ -423,14 +413,14 @@ L2VirtualAlgo2012::printCalibratedData(int token){ //
   // now print always BARREL - fix it later
   int i;
   const int hitSize=mEveStream_btow[token].get_hitSize();
-  printf("printCalibratedData-%s: ---BTOW ADC list--- size=%d\n",getName(),hitSize);
+  LOG(NOTE,"printCalibratedData-%s: ---BTOW ADC list--- size=%d\n",getName(),hitSize);
    const HitTower1 *hit=mEveStream_btow[token].get_hits();
   for(i=0;i< hitSize;i++,hit++) {
     int adc=hit->adc;
     int rdo=hit->rdo;
     float et=hit->et;
     float ene=hit->ene;
-    printf("  btow: i=%2d rdo=%4d  adc=%d  et=%.3f  ene=%.3f\n",i,rdo,adc,et,ene);
+    LOG(NOTE,"  btow: i=%2d rdo=%4d  adc=%d  et=%.3f  ene=%.3f\n",i,rdo,adc,et,ene);
   }
 }
 
@@ -443,7 +433,7 @@ L2VirtualAlgo2012::criticalError(const char* message){
 #ifdef IS_REAL_L2
   LOG(CRIT,"%s",message,0,0,0,0);
 #else
-  printf("CRITICAL MESSAGE: %s\n",message);
+  LOG(CRIT,"CRITICAL MESSAGE: %s\n",message);
   //asert(1==2);
 #endif
   return;
@@ -453,26 +443,19 @@ L2VirtualAlgo2012::criticalError(const char* message){
 //three functions needed for the temporary hack for the old TCU:
 bool  L2VirtualAlgo2012::checkDsmMask(unsigned short *lastDSM)
 {
-
-  //if (!useDsmMask) printf("useDsmMask=false, short-circuiting.\n");
   if (!useDsmMask)  return 1;  //short circuit if we're not using a mask (ie new TCU is being used).
-  //if (nmasks==0) printf("nmasks=0, short-circuiting.\n");
   if (nmasks==0) return 1; //if we don't have any masks set up for some reason, return a 'yes'
 
-  //printf("%s checkingDSM:\n",getName());
   bool isGood;
   for (int i=0;i<nmasks;i++)
     {
       isGood=true;
       for (int j=0;j<8 && isGood;j++)
 	{
-	  //printf(" Mask[%d]: 0x%04x  lastDSM: 0x%04x ==>  0x%04x\n",i,
-	  //	 DsmMask[i][j],swap_bytes(lastDSM[j]),(swap_bytes(lastDSM[j]) & DsmMask[i][j]) );
 	  if((swap_bytes(lastDSM[j]) & DsmMask[i][j]) != DsmMask[i][j]) isGood=false;
 	}
       if (isGood) return 1;
     }
-//printf("%s has no matching DSM masks.\n",getName());
   return 0; //we had masks and none of them matched, hence return 'no'.
 }
 
@@ -484,7 +467,7 @@ int L2VirtualAlgo2012::readDsmMask(const char *fileN)
 
   FILE *fd=fopen(fileN,"r");
   if(fd==0) { 
-    printf("   L2VirtualAlgo2012::readDsmMask failed to open =%s=.  Assuming no mask.\n",fileN); 
+    LOG(ERR,"   L2VirtualAlgo2012::readDsmMask failed to open =%s=.  Assuming no mask.\n",fileN); 
     return 0; //0=no error occurred.
     useDsmMask=false;
   }
@@ -497,19 +480,18 @@ int L2VirtualAlgo2012::readDsmMask(const char *fileN)
   
   for(;;) { 
     char * ret=fgets(buf,mx,fd);
-    //printf("xx1=%p\n",ret);
     if(ret==0) break;
     if(buf[0]==0) continue;
     if(buf[0]=='#') continue;
     if(buf[0]=='\n') continue;
-    if(nmasks>=kMaximumNumberOfDsmMasks) {printf("   L2VirtualAlgo2012::readDsmMask:  Too many masks %s.\n",fileN); return -3333;}
+    if(nmasks>=kMaximumNumberOfDsmMasks) {LOG(ERR,"   L2VirtualAlgo2012::readDsmMask:  Too many masks %s.\n",fileN); return -3333;}
     int ret1=sscanf(buf,"%hu",&(DsmMask[nmasks][n%8])); 
-    if(ret1!=1)  {printf("   L2VirtualAlgo2012::readDsmMask: Problem reading %s.\n",fileN); return -4444;} // wrong input file for this int-par
+    if(ret1!=1)  {LOG(ERR,"   L2VirtualAlgo2012::readDsmMask: Problem reading %s.\n",fileN); return -4444;} // wrong input file for this int-par
     n++;
     if (n%8==0) nmasks++;
   }
   fclose(fd);
-  if (n%8!=0){printf("   L2VirtualAlgo2012::readDsmMask:  Wrong number of arguments in %s (n=%d).\n",fileN,n); return -3333;}
+  if (n%8!=0){LOG(ERR,"   L2VirtualAlgo2012::readDsmMask:  Wrong number of arguments in %s (n=%d).\n",fileN,n); return -3333;}
   useDsmMask=true;
   return 0;  //0=no error occurred
 }
@@ -532,6 +514,9 @@ unsigned short L2VirtualAlgo2012::swap_bytes(unsigned short in)
 
 /******************************************************
   $Log: L2VirtualAlgo2012.cxx,v $
+  Revision 1.5  2012/03/21 18:18:03  jml
+  got rid of printfs from 2012 files
+
   Revision 1.4  2011/10/19 15:58:06  jml
   more compile offline
 

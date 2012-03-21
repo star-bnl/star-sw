@@ -6,7 +6,7 @@
 #include <fakeRtsLog.h>
 
 /*********************************************************************
- * $Id: L2bemcGamma2012.cxx,v 1.4 2011/10/19 16:12:11 jml Exp $
+ * $Id: L2bemcGamma2012.cxx,v 1.5 2012/03/21 18:18:03 jml Exp $
  * \author Jan Balewski,MIT , 2008 
  *********************************************************************
  * Descripion: see .h
@@ -41,7 +41,6 @@ L2bemcGamma2012::L2bemcGamma2012(const char* name, const char *uid, L2EmcDb2012*
   createHisto();
 
   //------- self-consistency checks, should never fail
-  // printf("ZZ %d %d\n", sizeof(L2gammaResult2008), L2gammaResult2008::mySizeChar);
   if (sizeof(L2gammaResult2012)!= L2gammaResult2012::mySizeChar) 
     criticalError("L2bemcGamma has failed consistency check. sizeof(L2gammaResult2012)!= L2gammaResult2012::mySizeChar");
   
@@ -131,9 +130,6 @@ L2bemcGamma2012::sumET(int phi, int eta) {
   towPlusOne%= maxTowers;
   sum+=wrkBtow_et[towPlusOne];
   
-  //if(tow==0 || towPlusOne==0) {
-    //printf("tow : %d, %d --> %f %f \n",tow, towPlusOne,wrkBtow_et[tow],wrkBtow_et[towPlusOne]);
-  //}
   tow+=BtowGeom::mxEtaBin;
   tow%=maxTowers;
   
@@ -143,10 +139,6 @@ L2bemcGamma2012::sumET(int phi, int eta) {
   towPlusOne%= maxTowers;
   sum+=wrkBtow_et[towPlusOne];
   
-  //if(tow==0 || towPlusOne==0) {
-    //printf("tow : %d, %d --> %f %f \n",tow, towPlusOne,wrkBtow_et[tow],wrkBtow_et[towPlusOne]);
-  //}
-  // printf("B sumET=%f\n",sum);
   return sum;
 }
   
@@ -165,7 +157,6 @@ L2bemcGamma2012::computeUser(int token){
 
   // ------ PROJECT INPUT LIST TO 2D ARRAY AND SCAN FOR SEED TOWERS ----
   int i;
-  //  printf("L2-%s-compute: ---BTOW ADC list--- size=%d\n",getName(),*globEve_btow_hitSize);
 
   L2bemcGammaEvent2012 *btowEve=mBtow+token;
 
@@ -181,7 +172,6 @@ L2bemcGamma2012::computeUser(int token){
     wrkBtow_et[tower]=hit->et;
     if(hit->et<par_seedEtThres)continue;
     wrkBtow_tower_seed[wrkBtow_tower_seed_size++]=tower;
-    //printf("A  seed TWID=%d \n",tower);
   }
   hA[2]->fill(hitSize);
   int seedTow=-1,seedEta=-1,seedPhi=-1;
@@ -189,7 +179,6 @@ L2bemcGamma2012::computeUser(int token){
   btowEve->isFresh=L2bemcGammaEvent2012::kDataFresh;
 
   LOG(DBG, "seed size = %d",wrkBtow_tower_seed_size);
-  // printf("B nseed=%d\n",wrkBtow_tower_seed_size);
   // ----------- FIND 2x2 CLUSTER AROUND EVERY SEED -----
   for(i=0; i<wrkBtow_tower_seed_size;i++) {
     seedTow=wrkBtow_tower_seed[i];
@@ -232,7 +221,6 @@ L2bemcGamma2012::computeUser(int token){
   return;
   
  ACCEPT:
-  // printf("B acc clustET=%f\n",clustET);
   btowEve->clusterET=clustET;
   btowEve->seedET=wrkBtow_et[seedTow];
   btowEve->resultBlob.clusterEt=(unsigned char)(clustET*256.0/60.0);
@@ -304,7 +292,6 @@ L2bemcGamma2012::finishRunUser() {  /* called once at the end of the run */
   const int *hist15Data = hA[7]->getData();
   for (int i = 0; i < BtowGeom::mxEtaBin; i++) {
     for (int j = 0; j < BtowGeom::mxPhiBin; j++) {
-      //printf("i %d, j %d, iXj*n %d, data %d\n", i, j, i+j*BtowGeom::mxEtaBin, hist15Data[i+j*BtowGeom::mxEtaBin]);
       hA[14]->fillW(i,j, hist15Data[i+j*BtowGeom::mxEtaBin]);
     }
   }
@@ -328,7 +315,6 @@ L2bemcGamma2012::createHisto() {
 
   hA[14]=new L2Histo(14,"BTOW: hot tower projection", BtowGeom::mxEtaBin, BtowGeom::mxPhiBin); // title in initRun
 
-  // printf("L2-%s::createHisto() done\n",getName());
 }
 
 //=======================================
@@ -394,6 +380,9 @@ L2bemcGamma2012::print4(int token, int hitSize){ // L2-algo input list
 #endif
 /**********************************************************************
   $Log: L2bemcGamma2012.cxx,v $
+  Revision 1.5  2012/03/21 18:18:03  jml
+  got rid of printfs from 2012 files
+
   Revision 1.4  2011/10/19 16:12:11  jml
   more 2012 stuff
 

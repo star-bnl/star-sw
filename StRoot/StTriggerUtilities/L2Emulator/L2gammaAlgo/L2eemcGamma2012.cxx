@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <fakeRtsLog.h>
 
 /*********************************************************************
- * $Id: L2eemcGamma2012.cxx,v 1.3 2011/10/19 16:12:11 jml Exp $
+ * $Id: L2eemcGamma2012.cxx,v 1.4 2012/03/21 18:18:03 jml Exp $
  * \author Jan Balewski,MIT , 2008 
  *********************************************************************
  * Descripion: see .h
@@ -249,7 +250,6 @@ L2eemcGamma2012::averageEtaPhi(int phi, int eta, float *avePhi, float *aveEta) {
 
   *aveEta = etaSum/ETsum;
   *avePhi = phiSum/ETsum;
-  //printf("eta:%d phi:%d --> etaSum:%f phiSum%f ETsum:%f aveEta:%f avePhi:%f\n",eta, phi, etaSum, phiSum, ETsum, *aveEta, *avePhi);
 }
   
 
@@ -271,9 +271,7 @@ L2eemcGamma2012::sumET(int phi, int eta) {
   if (etow_used[towPlusOne]==0) {
     sum+=wrkEtow_et[towPlusOne];
   }
-  //if(tow==0 || towPlusOne==0) {
-    //printf("tow : %d, %d --> %f %f \n",tow, towPlusOne,wrkEtow_et[tow],wrkEtow_et[towPlusOne]);
-  //}
+
   tow+=EtowGeom::mxEtaBin;
   tow%=maxTowers;
   if (etow_used[tow]==0) {
@@ -284,9 +282,6 @@ L2eemcGamma2012::sumET(int phi, int eta) {
   if (etow_used[towPlusOne]==0) {
     sum+=wrkEtow_et[towPlusOne];
   }
-  //if(tow==0 || towPlusOne==0) {
-    //printf("tow : %d, %d --> %f %f \n",tow, towPlusOne,wrkEtow_et[tow],wrkEtow_et[towPlusOne]);
-  //}
   return sum;
 }
   
@@ -306,8 +301,7 @@ L2eemcGamma2012::computeUser(int token){
 
   // ------ PROJECT INPUT LIST TO 2D ARRAY AND SCAN FOR SEED TOWERS ----
   int i;
-  //  printf("L2-%s-compute: ---ETOW ADC list--- size=%d\n",getName(),*globEve_etow_hitSize);
-
+ 
   L2eemcGammaEvent2012 *etowEve=mEtow+token;
   const HitTower1 *hit=mEveStream_etow[token].get_hits();
   const int hitSize=mEveStream_etow[token].get_hitSize();
@@ -354,7 +348,6 @@ L2eemcGamma2012::computeUser(int token){
     if(seedEta < EtowGeom::mxEtaBin) {
       maxET = sumET(seedPhi,seedEta);
       sum=sumET(seedPhi-1,seedEta);
-      //printf("0. max=%f sum=%f q=%d\n",maxET,sum,high_quadrant);
       if(maxET<sum) {
         maxET=sum;
         high_quadrant = 1;
@@ -362,19 +355,16 @@ L2eemcGamma2012::computeUser(int token){
     }
     if (seedEta > 0) {
       sum=sumET(seedPhi-1,seedEta-1);
-      //printf("1. max=%f sum=%f q=%d\n",maxET,sum,high_quadrant);
       if(maxET<sum) {
         maxET=sum;
         high_quadrant = 2;
       }
       sum=sumET(seedPhi,seedEta-1);
-      //printf("2. max=%f sum=%f q=%d\n",maxET,sum,high_quadrant);
       if(maxET<sum) {
         maxET=sum;
         high_quadrant = 3;
       }
     }
-    //printf("3. max=%f sum=%f q=%d\n",maxET,sum,high_quadrant);
 
     if(maxET<par_clusterEtThres)continue; 
     //........record clusters....
@@ -417,7 +407,6 @@ L2eemcGamma2012::computeUser(int token){
       averageEtaPhi(seedPhi, seedEta-1,&clusterPhi, &clusterEta);
     }
     hA[13]->fill(numNonZeroTow);
-    //printf("clusterEta:%f clusterPhi:%f\n",clusterEta, clusterPhi);
     etowEve->clusterEta[etowEve->size]=clusterEta;
     etowEve->clusterPhi[etowEve->size]=clusterPhi;
 
@@ -426,17 +415,11 @@ L2eemcGamma2012::computeUser(int token){
   }// end of cluster search
 
   hA[3]->fill(wrkEtow_tower_seed_size);
-  //printf("SeedSize=%d \n",wrkEtow_tower_seed_size);
   hA[4]->fill(etowEve->size);
-
-  //---------- histo cluster energies-----
-  //for(i=0;i<etow_clusterET_size;i++) {
-    // printf("clust  ET=%.3f \n",etow_clusterET[i]);
-  //}
 
   // debugging should be off for any time critical computation
   if(par_dbg>0){
-    printf("dbg=%s, etow-adcL-size=%d\n",getName(),hitSize);
+    LOG(DBG,"dbg=%s, etow-adcL-size=%d\n",getName(),hitSize);
     // if(par_dbg>0) print1();
     print2();
     print3();// tmp, must have token
@@ -456,12 +439,10 @@ L2eemcGamma2012::decisionUser(int token, int *myL2Result){
   //  prescale++;
   //  prescale %= par_prescale;
   //};
-  //printf("prescale %d\n",prescale);
 
   // get pointers to internal private event storage
   L2eemcGammaEvent2012 *etowEve=mEtow+token;
 
-  //  printf("eee %p\n",*myL2Result);
   int ic;  
 
   //...... some histos just for fun
@@ -474,11 +455,9 @@ L2eemcGamma2012::decisionUser(int token, int *myL2Result){
   for(ic=0;ic<etowEve->size;ic++) {
     float clustET=etowEve->clusterET[ic];
     hA[5]->fill((int)clustET);
-    // printf("DDD clust ET=%.3f\n", clustET);
     if(clustET<par_eventEtThres) continue;
     hA[6]->fill((int)clustET);
   }
-  //printf("clustzzzzzzzzzzzzzzzzz s=%d  tkn=%d\n",etow_clusterET_size,token);
 
   //........ fill (some) L2Result
   //etowEve->resultBlob.kTicksCompute=mComputeTimeDiff[token]/1000;
@@ -508,15 +487,7 @@ L2eemcGamma2012::decisionUser(int token, int *myL2Result){
     if (mRandomAccept) {//accept at random - never gets there for events below threshold, JanB
       etowEve->resultBlob.trigger=(unsigned char)7;
     }
-    /*printf("clustixxxxxxxxxxxxxxx clustEt=%f trigger=%d tower=%d quad=%d eta%f phi%f\n",
-      etowEve->clusterET[maxClusterID],
-      etowEve->resultBlob.trigger,
-      etowEve->clusterSeedTow[maxClusterID],
-      etowEve->clusterQuad[maxClusterID],
-      etowEve->clusterEta[maxClusterID],
-      etowEve->clusterPhi[maxClusterID]);
-    printf("Max Eta=%d maxPhi=%d \n", EtowGeom::mxEtaBin, EtowGeom::mxPhiBin);
-    */
+
     hA[9]->fill(etowEve->clusterQuad[maxClusterID]);
     hA[10]->fill((int)etowEve->clusterET[maxClusterID]);
     if(etowEve->size>= L2eemcGammaEvent2012::mxClust) mhN->fill(15);
@@ -575,7 +546,6 @@ L2eemcGamma2012::createHisto() {
   hA[12]=new L2Histo(12,"ETOW: 10*Seed Et/Cluster Et GeV", 30); // title in initRun
   hA[13]=new L2Histo(13,"ETOW: # non-zero towers per cluster", 5); // title in initRun
 
-  // printf("L2-%s::createHisto() done\n",getName());
 }
 
 //=======================================
@@ -645,6 +615,9 @@ L2eemcGamma2012::print4(int token, int hitSize){ // L2-algo input list
 
 /**********************************************************************
   $Log: L2eemcGamma2012.cxx,v $
+  Revision 1.4  2012/03/21 18:18:03  jml
+  got rid of printfs from 2012 files
+
   Revision 1.3  2011/10/19 16:12:11  jml
   more 2012 stuff
 

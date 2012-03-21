@@ -5,7 +5,7 @@
 #include <math.h>
 
 /***********************************************************
- * $Id: L2hienAlgo12.cxx,v 1.3 2011/10/19 16:12:11 jml Exp $
+ * $Id: L2hienAlgo12.cxx,v 1.4 2012/03/21 18:18:03 jml Exp $
  * \author Jan Balewski, MIT, 2008 
  ***********************************************************
  * Descripion: see .h
@@ -181,7 +181,6 @@ L2hienAlgo12::computeUser(int token){
      mRdo2towerID=mRdo2towerID_E;
    }
 
-  // printf("L2-%s-compute: ---EMC ADC list---token=%d input size=%d\n",getName(),token,hitSize);
   // get pointers to internal, token indexed, output event storage
   // output is just one per instance, same format for B & ETOW
   L2hienList12 *hiTwEve=mHiEnTw+token;
@@ -213,9 +212,7 @@ L2hienAlgo12::computeUser(int token){
 	value++;
       }
 
-    // printf(" adc in=%d ",hit->adc);
     if(hiTwEve->size>=par_maxList && i>=L2hienResult2012::maxTowers) break; // overflow protection
-    // printf("A %p %x  adc=%d softID=%d \n", value, *value, hit->adc,softID); 
   }
 
   unsigned int nTow;
@@ -224,8 +221,6 @@ L2hienAlgo12::computeUser(int token){
 
   if (totalADC>16777215) totalADC=16777215; //16777215=256*256*256=24 bits.
   hienResult->header=(nTow<<24)+totalADC; 
-
-  //  printf("L2-%s-compute: saved: size%d val[0]=0x%x p=%p\n",getName(),hiTwEve->size,hiTwEve->value[0],hiTwEve->value); 
 
   hiTwEve->isFresh=L2hienList12::kDataFresh;
   hA[2]->fill(hiTwEve->size);
@@ -244,7 +239,6 @@ L2hienAlgo12::decisionUser(int token, int *myL2Result){
   // get pointers to internal private event storage
   L2hienList12 *hiTwEve=mHiEnTw+token;
   L2hienResult2012 *hienResult=mHienResult+token;
-  //printf("L2-%s-decision: ---EMC ADC list---token=%d size=%d val[0]=0x%x p=%p\n",getName(),token,hiTwEve->size,hiTwEve->value[0],hiTwEve->value);
 
   //...... some histos for QA 
 
@@ -271,7 +265,6 @@ L2hienAlgo12::decisionUser(int token, int *myL2Result){
     int adc4=(*value)>>(16+4); // reduced resolution
     int softID=(*value)&0xffff;
     adcSum4+=adc4;
-    //printf(" got adc=%d softID=%d, ",adc,softID);
     hA[4]->fill(adc4);
     if(adc4<adc4QaThres) continue;
     hA[5]->fill(mTowerID2etaBin[softID]);
@@ -279,9 +272,6 @@ L2hienAlgo12::decisionUser(int token, int *myL2Result){
   }
   if(adcSum4>0) hA[7]->fill(adcSum4);
 
-  // printf("\n");
-
-  
   // debugging should be off for any time critical computation
   if(par_dbg>0){
     print2(token);
@@ -339,7 +329,6 @@ L2hienAlgo12::createHisto() {
   hA[6]=new L2Histo(6,"accepted: #towers w/ .... vs. phi ring",nPhiBin); // title set in initRun
   hA[7]=new L2Histo(7,"accepted: ADC sum ...",150); // title set in initRun
 
-  // printf("L2-%s::createHisto() done\n",getName());
 }
 
   
@@ -367,6 +356,9 @@ L2hienAlgo12::print2(int token){ // full , local ADC array
 
 /**********************************************************************
   $Log: L2hienAlgo12.cxx,v $
+  Revision 1.4  2012/03/21 18:18:03  jml
+  got rid of printfs from 2012 files
+
   Revision 1.3  2011/10/19 16:12:11  jml
   more 2012 stuff
 

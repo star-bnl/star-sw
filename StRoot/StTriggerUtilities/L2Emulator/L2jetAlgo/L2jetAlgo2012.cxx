@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <fakeRtsLog.h>
 
 /***********************************************************
- * $Id: L2jetAlgo2012.cxx,v 1.3 2011/10/19 16:12:11 jml Exp $
+ * $Id: L2jetAlgo2012.cxx,v 1.4 2012/03/21 18:18:03 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  ***********************************************************
  * Descripion:
@@ -42,7 +43,7 @@ L2jetAlgo2012::L2jetAlgo2012(const char* name, const char *uid, L2EmcDb2012* db,
 
   createHisto();
   run_number=-1;
-  printf("L2jetAlgo2012 instantiated, logPath='%s'\n",mOutDir1.c_str());
+  LOG(DBG,"L2jetAlgo2012 instantiated, logPath='%s'\n",mOutDir1.c_str());
   eve_Jet[0]=new L2Jet;
   eve_Jet[1]=new L2Jet;
 }
@@ -89,7 +90,7 @@ L2jetAlgo2012::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 
   mEventsInRun=0;
 
-  if( mLogFile==0) printf(" L2jetAlgo2012() UNABLE to open run summary log file, continue anyhow\n");
+  if( mLogFile==0) LOG(ERR," L2jetAlgo2012() UNABLE to open run summary log file, continue anyhow\n");
 
   // unpack params from run control GUI
   par_useBtowEast= (rc_ints[0]&1 )>0;
@@ -116,7 +117,7 @@ L2jetAlgo2012::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
   float monTwEtThr=2.0; // (GeV) Et threshold,WARN,  edit histo title by hand
   par_hotTwEtThr = monTwEtThr;
 
-  if(par_dbg) printf("Brian version is running!\n");  
+  if(par_dbg) LOG(DBG,"Brian version is running!\n");  
 
   if (mLogFile) { 
     fprintf(mLogFile,"L2jet algorithm initRun(%d), compiled: %s , %s\n params:\n",run_number,__DATE__,__TIME__);
@@ -201,7 +202,6 @@ L2jetAlgo2012::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
       // now cr0x1e, mod1, subm2, is beginning of the first BTOW TP
       iphiP= iphiTw/4 ; /* correct */
       //      if(ietaP==0 && iphiP==5) 
-      //if( (iphiTw==21 || iphiTw==22) && x->eta<=4) printf("%s  %s ietaP=%d iPhiP=%d  cr0x%02x ch=%03d\n",x->name, x->tube,ietaP, iphiP,x->crate,x->chan);
       db_btowL2PhiBin[x->rdo]=iphiP;
       db_btowL2PatchBin[x->rdo]=ietaP+ iphiP*cl2jetMaxEtaBins;
       nBg++;
@@ -216,7 +216,6 @@ L2jetAlgo2012::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
       iphiP= iphiTw/2 ; /* correct */
       if(x->eta<0 || x->eta>mxEtaBinsE) goto crashIt_1;
       ietaP=etowEtaBin2Patch[x->eta-1];
-      //printf("%s  %s ietaP=%d iPhiP=%d\n",x->name, x->tube,ietaP, iphiP);
       db_etowL2PhiBin[x->rdo]=iphiP;
       db_etowL2PatchBin[x->rdo]=ietaP+ iphiP*cl2jetMaxEtaBins;
       nEg++;
@@ -276,7 +275,7 @@ rdtscl_macro(mEveTimeStart);
     hA[10]->fill(0);
     hA[12]->fill(runTimeSec);
     
-    if(par_dbg>1) printf("\n......... in  L2Jet_doEvent(ID=%d)... bIn=%d eIn=%d\n",eve_ID,bemcIn,eemcIn);//bemcIn and eemcIn were passed to the old doEvent
+    if(par_dbg>1) LOG(DBG,"\n......... in  L2Jet_doEvent(ID=%d)... bIn=%d eIn=%d\n",eve_ID,bemcIn,eemcIn);//bemcIn and eemcIn were passed to the old doEvent
   
 
     //Ross asks: will the jet code run on just barrel or just endcap?
@@ -326,7 +325,7 @@ rdtscl_macro(mEveTimeStart);
     eve_Jet[1]=Jx;
   }
 
-  if(par_dbg>2) printf("doEvent iphiBin1=%d iene1=%f , iphiBin2=%d iene2=%f  rms1PhiBin=%f \n",eve_Jet[0]->iphiBin,eve_Jet[0]->iene,eve_Jet[1]->iphiBin,eve_Jet[1]->iene,eve_Jet[0]->rmsPhiBin);
+  if(par_dbg>2) LOG(DBG,"doEvent iphiBin1=%d iene1=%f , iphiBin2=%d iene2=%f  rms1PhiBin=%f \n",eve_Jet[0]->iphiBin,eve_Jet[0]->iene,eve_Jet[1]->iphiBin,eve_Jet[1]->iene,eve_Jet[0]->rmsPhiBin);
   
   //====== step 4: make trigger decisions====
   
@@ -335,9 +334,6 @@ rdtscl_macro(mEveTimeStart);
 
   float rjetEta_0=eve_Jet[0]->fetaBin*0.2 -1.0; //  wwj 2/10 
   float rjetEta_1=eve_Jet[1]->fetaBin*0.2 -1.0; //  wwj 2/10 
-
-  // printf(" fetabin_0=%f  fetabin_1=%f \n",eve_Jet[0]->fetaBin,eve_Jet[1]->fetaBin); //  wwj 2/15 
-  // printf(" rjetEta_0=%f  rjetEta_1=%f \n",rjetEta_0, rjetEta_1);  // wwj  2/15
 
   bool acceptDiJet_EE=((rjetEta_0+rjetEta_1) > par_diJetEtaHigh && eve_Jet[0]->eneGeV > par_diJetThr_4 && eve_Jet[1]->eneGeV > par_diJetThrLow); // wwj 2/10
 
@@ -520,14 +516,14 @@ rdtscl_macro(mEveTimeStart);
   rdtscl_macro(mEveTimeStop);
   mEveTimeDiff=mEveTimeStop-mEveTimeStart;
   int  kTick=mEveTimeDiff/1000;
-  //   printf("jj=%f t1=%d t2=%d \n",mEveTimeDiff/1000.,mEveTimeStart,mEveTimeStop);
+
   //mhT->fill(kTick); taken out 12/11/08 BP
 
   out.int0.kTick=  kTick>255 ? 255 : kTick;
  
   //calculate and match the check sum
   out.int1.checkSum=-L2jetResults2012_doCheckSum(&out);
-  // unsigned char  cSum=L2jetResults2012_doCheckSum(&out); printf("cSum2=%d\n",cSum);
+
   
 
   //===== step 7: write L2Result
@@ -537,20 +533,19 @@ rdtscl_macro(mEveTimeStart);
   
   if(par_dbg){//WWWW
     L2jetResults2012_print(&out);
-    printf(" phiRad1=%f  phiRad2=%f \n",eve_Jet[0]->phiRad,eve_Jet[1]->phiRad);
-    printf("idelZeta=%d  delZeta/deg=%.1f \n\n",idelZeta,idelZeta/31.416*180);
+    LOG(DBG," phiRad1=%f  phiRad2=%f \n",eve_Jet[0]->phiRad,eve_Jet[1]->phiRad);
+    LOG(DBG,"idelZeta=%d  delZeta/deg=%.1f \n\n",idelZeta,idelZeta/31.416*180);
     
     //tmp printouts of errors:
     if( out.jet1.iEne+out.jet2.iEne > out.int1.iTotEne) {
-      //printf("L2jet-fatal error, eve=%d, iEtot=%d < iEJ1=%d + iEJ2=%d, continue\n",inpEveId, out.int1.iTotEne,out.jet1.iEne,out.jet2.iEne);//no inpEveId BP
     }
     if(iphi1==iphi2) {
-      printf("L2jet-fatal error,neveId=%d, phi1,2=%d,%d\n",mEventsInRun,iphi1,iphi2);
+      LOG(ERR,"L2jet-fatal error,neveId=%d, phi1,2=%d,%d\n",mEventsInRun,iphi1,iphi2);
       dumpPatchEneA();    
     }
     
     if( L2jetResults2012_doCheckSum(&out)) {
-      printf("L2jet-fatal error, wrong cSum=%d\n", L2jetResults2012_doCheckSum(&out));
+      LOG(ERR,"L2jet-fatal error, wrong cSum=%d\n", L2jetResults2012_doCheckSum(&out));
       L2jetResults2012_print(&out);
     }
     
@@ -576,13 +571,12 @@ L2jetAlgo2012::finishRunUser() {  /* called once at the end of the run */
     fprintf(mLogFile," - accepted: rnd=%d  oneJet=%d diJet=%d \n", run_nEventRnd,  run_nEventOneJet, run_nEventDiJet);
 
     // print few basic histos
-    //printf("Attempting to write to 10:\n");
     hA[10]->printCSV(mLogFile); // event accumulated
 
   }
   finishRunHisto(); // still needs current DB
   if( mHistFile==0) {
-    printf(" L2jetAlgo2012: finishRun() UNABLE to open run summary log file, continue anyhow\n");
+    LOG(ERR," L2jetAlgo2012: finishRun() UNABLE to open run summary log file, continue anyhow\n");
     if (mLogFile)
       fprintf(mLogFile,"L2 di-jet histos NOT saved, I/O error\n");
   } else { // save histos  
@@ -730,8 +724,6 @@ L2jetAlgo2012::createHisto() {
 //=======================================
 void 
 L2jetAlgo2012::clearEvent(){
-  /*  printf("clearEvent_L2jet() executed\n"); */
-
   mAccept=false;
   memset(eve_patchEne,0,sizeof(eve_patchEne));
   memset(eve_phiEne,0,sizeof(eve_phiEne));
@@ -801,10 +793,7 @@ float L2jetAlgo2012::true2Dscan(){
       float *eneAp=eneA;
       for(k=0;k<cl2jetMaxEtaBins-cl2jet_par_mxEtaBin+1;k++,eneAp++) 
 	{
-	  // printf(" J1 ieta=%d E=%.2f\n", ix,eneA[0]/l2jet_par_energyScale);
-	  // printf("            E=%.2f\n",etaEneA[ix]/l2jet_par_energyScale);
 	  float sum=eneAp[0]+eneAp[1]+eneAp[2]+eneAp[3]+eneAp[4];
-	  //  printf("ix=%d sum=%d sumMax=%d\n",ix,sum,sumMax);
 	  secondPatchArray[i][k]=sum;
 	  if(maxPatchEt>sum) continue;
 	  //float *eneSave=eneA;
@@ -999,7 +988,6 @@ L2jetAlgo2012::finishRunHisto(){
       int softId=atoi(x->tube+2);
       int ieta= (x->eta-1);
       int iphi= (x->sec-1)*10 + x->sub-'a' ;
-      //mDb->printItem(x); printf("softID=%d\n",softId);
       hA[21]->fillW(softId,data20[x->rdo]);
       hA[22]->fillW(ieta, iphi,data20[x->rdo]);
       if(bHotSum<data20[x->rdo]) {
@@ -1032,6 +1020,9 @@ L2jetAlgo2012::finishRunHisto(){
 
 /**********************************************************************
   $Log: L2jetAlgo2012.cxx,v $
+  Revision 1.4  2012/03/21 18:18:03  jml
+  got rid of printfs from 2012 files
+
   Revision 1.3  2011/10/19 16:12:11  jml
   more 2012 stuff
 
