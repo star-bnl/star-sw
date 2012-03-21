@@ -1,0 +1,164 @@
+      MODULE ShapGeo   Shapes Geometry : places AgML shapes into the cave
+      Author Jason C. Webb
+      Created 11/01/2011
+      +CDE,agecom,gcunit,gconst.
+      CONTENT BBOX,PARA,TRDA,TRDB,TRAP,SPHE,TUBE,TUBS,CONE,CONS,ELTU,PCON,PGON,CTUB,
+            GTRA
+      real *4 x/-150.0/, dx/75.0/, y/-30.0/
+
+      Integer *4 icolor/27/
+
+      x=-150.0
+      y=-30;
+      CREATE BBOX
+      POSITION BBOX x=x y=y 
+      x+=dx;
+      CREATE PARA
+      POSITION PARA x=x y=y 
+      x+=dx;
+      CREATE TRDA
+      POSITION TRDA x=x y=y 
+      x+=dx;
+      CREATE TRDB
+      POSITION TRDB x=x y=y 
+      x+=dx;
+      CREATE TRAP
+      POSITION TRAP x=x y=y 
+      x+=dx;
+      CREATE SPHE
+      POSITION SPHE x=x y=y 
+      x+=dx;
+      CREATE TUBE
+      POSITION TUBE x=x y=y 
+      x+=dx;
+      CREATE TUBS
+      POSITION TUBS x=x y=y 
+      x+=dx;
+      x=-150.0
+      y=+30.0
+      CREATE CTUB
+      POSITION CTUB x=x y=y 
+      x+=dx;
+      CREATE ELTU
+      POSITION ELTU x=x y=y 
+      x+=dx;
+      CREATE CONE
+      POSITION CONE x=x y=y 
+      x+=dx;
+      CREATE CONS
+      POSITION CONS x=x y=y 
+      x+=dx;
+      CREATE PCON
+      POSITION PCON x=x y=y 
+      x+=dx;
+      CREATE PGON
+      POSITION PGON x=x y=y 
+      x+=dx;
+      CREATE GTRA
+      POSITION GTRA x=x y=y 
+      x+=dx;
+      ! ---------------------------------------------------------------------------------- BBOX
+      BLOCK BBOX   A box / TGeoBBox
+      ATTRIBUTE BBOX colo=icolor
+      icolor + =1
+      SHAPE box dx=20 dy=20 dz=40
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- PARA
+      BLOCK PARA   A parallelpiped TGeoPara
+      ATTRIBUTE PARA colo=icolor
+      icolor + =1
+      SHAPE para dx=20 dy=20 dz=40 alph=20 thet=20,
+            phi=45
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- TRDA
+      BLOCK TRDA   A trapezoid TGeoTrd1
+      ATTRIBUTE TRDA colo=icolor
+      icolor + =1
+      SHAPE trd1 dx1=10 dx2=20 dy=30 dz=40
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- TRDB
+      BLOCK TRDB   A trapezoid TGeoTrd2
+      ATTRIBUTE TRDB colo=icolor
+      icolor + =1
+      SHAPE trd2 dx1=10 dx2=20 dy1=30 dy2=10 dz=40
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- TRAP
+      BLOCK TRAP   A trapezoid TGeoTrap
+      ATTRIBUTE TRAP colo=icolor
+      icolor + =1
+      SHAPE trap dz=40 thet=15 phi=30 h1=20 bl1=10,
+            tl1=15 alp1=0.0 h2=20 bl2=10 tl2=15 alp2=0.0
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- GTRA
+      BLOCK GTRA   A trapezoid TGeoGtra
+      ATTRIBUTE GTRA colo=icolor
+      icolor + =1
+      SHAPE gtra dz=40 thet=15 phi=30 twis=30,
+            h1=20 bl1=10 tl1=15 alp1=0.0 h2=20 bl2=10 tl2=15,
+            alp2=0.0
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- SPHE
+      BLOCK SPHE   A sphere
+      ATTRIBUTE SPHE colo=icolor
+      icolor + =1
+      SHAPE sphe rmin=18.0 rmax=20.0
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- TUBE
+      BLOCK TUBE   A box
+      ATTRIBUTE TUBE colo=icolor
+      icolor + =1
+      SHAPE tube rmin=5.0 rmax=10.0 dz=15
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- TUBS
+      BLOCK TUBS   A box
+      ATTRIBUTE TUBS colo=icolor
+      icolor + =1
+      SHAPE tubs rmin=5.0 rmax=10.0 phi1=-120.0,
+            phi2=+120.0 dz=15
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- CTUB
+      BLOCK CTUB   A box
+      ATTRIBUTE CTUB colo=icolor
+      icolor + =1
+      SHAPE ctub rmin=5.0 rmax=10.0 phi1=-120.0,
+            phi2=+120.0 dz=15 hx=1.0 hy=1.0 hz=1.0 lx=0.0,
+            ly=0.0 lz=1.0
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- ELTU
+      BLOCK ELTU   An elliptical tube TGeoEltu
+      ATTRIBUTE ELTU colo=icolor
+      icolor + =1
+      SHAPE eltu p1=15.0 p2=10.0 dz=30.0
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- CONE
+      BLOCK CONE   A box
+      ATTRIBUTE CONE colo=icolor
+      icolor + =1
+      SHAPE cone dz=40 rmn1=5.0 rmx1=20.0 rmn2=5.0,
+            rmx2=7.5
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- CONS
+      BLOCK CONS   A box
+      ATTRIBUTE CONS colo=icolor
+      icolor + =1
+      SHAPE cons dz=40.0 rmn1=5.0 rmx1=20.0 rmn2=5.0,
+            rmx2=7.5 phi1=-120 phi2=+120
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- PCON
+      BLOCK PCON   A polycone
+      ATTRIBUTE PCON colo=icolor
+      icolor + =1
+      SHAPE pcon phi1=0 dphi=360 nz=5 zi={-20.,
+            -5.0,10.0,15.0,20.0} rmn={0,0,0,0,0} rmx={15.0,
+            15.0,8.0,12.0,15.0}
+      ENDBLOCK
+      ! ---------------------------------------------------------------------------------- PGON
+      BLOCK PGON   A polygon
+      ATTRIBUTE PGON colo=icolor
+      icolor + =1
+      SHAPE pgon phi1=0 dphi=360 npdiv=6 nz=5,
+            zi={-20.,-5.0,10.0,15.0,20.0} rmn={12.0,12.0,
+            5.0,9.0,12.0} rmx={15.0,15.0,8.0,12.0,15.0}
+      ENDBLOCK
+      <W> '===>> 	[End AgML Module ShapGeo]	 <<==='; (A32,/,/);
+      END! Module ShapGeo
