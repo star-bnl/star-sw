@@ -921,16 +921,16 @@
                         AgBlock *_save = mCurrent;           
                         mCurrent = this;           
                         Bool_t _same_shape = true;           
-                      /// Component C5	a=12	z=6	w=5           
-                      /// Component H4	a=1	z=1	w=4           
-                      /// Component O2	a=16	z=8	w=2           
-                      /// Component Al	a=27	z=13	w=3.45327           
+                      /// Component C5	a=12	z=6	w=500000           
+                      /// Component H4	a=1	z=1	w=400000           
+                      /// Component O2	a=16	z=8	w=200000           
+                      /// Component Al	a=27	z=13	w=345327           
                       /// Mixture MLI dens=1.82667           
                       {  AgMaterial &mix = AgMaterial::Get("Mli");              
-                            mix.Component("C5",12,6,5);              
-                            mix.Component("H4",1,1,4);              
-                            mix.Component("O2",16,8,2);              
-                            mix.Component("Al",27,13,3.45327);              
+                            mix.Component("C5",12,6,500000);              
+                            mix.Component("H4",1,1,400000);              
+                            mix.Component("O2",16,8,200000);              
+                            mix.Component("Al",27,13,345327);              
                             mix.par("dens")=1.82667;              
                             mix.lock();              
                             _material = mix;              
@@ -966,16 +966,16 @@
                         AgBlock *_save = mCurrent;           
                         mCurrent = this;           
                         Bool_t _same_shape = true;           
-                      /// Component C5	a=12	z=6	w=5           
-                      /// Component H4	a=1	z=1	w=4           
-                      /// Component O2	a=16	z=8	w=2           
-                      /// Component Al	a=27	z=13	w=0.2302           
+                      /// Component C5	a=12	z=6	w=50000           
+                      /// Component H4	a=1	z=1	w=40000           
+                      /// Component O2	a=16	z=8	w=20000           
+                      /// Component Al	a=27	z=13	w=2302           
                       /// Mixture ALKAP dens=1.432           
                       {  AgMaterial &mix = AgMaterial::Get("Alkap");              
-                            mix.Component("C5",12,6,5);              
-                            mix.Component("H4",1,1,4);              
-                            mix.Component("O2",16,8,2);              
-                            mix.Component("Al",27,13,0.2302);              
+                            mix.Component("C5",12,6,50000);              
+                            mix.Component("H4",1,1,40000);              
+                            mix.Component("O2",16,8,20000);              
+                            mix.Component("Al",27,13,2302);              
                             mix.par("dens")=1.432;              
                             mix.lock();              
                             _material = mix;              
