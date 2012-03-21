@@ -135,16 +135,15 @@
                         AgBlock *_save = mCurrent;           
                         mCurrent = this;           
                         Bool_t _same_shape = true;           
-                      /// Component W	a=183.84	z=74	w=92.3           
-                      /// Component C	a=12.01	z=6	w=7.1           
-                      /// Component H	a=1	z=1	w=0.6           
-                      /// Mixture WSE dens=8.297 radl=0.8719           
+                      /// Component W	a=183.84	z=74	w=0.923           
+                      /// Component C	a=12.01	z=6	w=0.071           
+                      /// Component H	a=1	z=1	w=0.006           
+                      /// Mixture WSE dens=8.297           
                       {  AgMaterial &mix = AgMaterial::Get("Wse");              
-                            mix.Component("W",183.84,74,92.3);              
-                            mix.Component("C",12.01,6,7.1);              
-                            mix.Component("H",1,1,0.6);              
+                            mix.Component("W",183.84,74,0.923);              
+                            mix.Component("C",12.01,6,0.071);              
+                            mix.Component("H",1,1,0.006);              
                             mix.par("dens")=8.297;              
-                            mix.par("radl")=0.8719;              
                             mix.lock();              
                             _material = mix;              
                             _material.lock();              
