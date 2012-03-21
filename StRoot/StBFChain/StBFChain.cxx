@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.570.2.1 2011/12/28 20:18:34 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.570.2.2 2012/03/21 20:30:43 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1479,7 +1479,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
 
     if ( GTSOptions[i].Type == 1){
       db->AddMaxEntryTimeOverride(GTSOptions[i].Date,0,
-				  (char *) GTSOptions[i].Realm.Data() ,
+				  (char *) realm.Data(),
 				  (char *) GTSOptions[i].Detector.Data());
 
       LOG_INFO << "Recovering override stamp " << i << " :: " 
