@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.19 2012/02/23 17:33:18 perev Exp $
+// $Id: StTGeoHelper.h,v 1.20 2012/03/21 23:43:32 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -41,7 +41,6 @@ bool operator()(const TString& s1, const TString& s2) const
 };
 
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
-class StiHit;
 class StHitPlane;
 typedef std::map< unsigned int, StHitPlane*>    StHitPlaneHardMap;
 typedef std::pair<unsigned int, StHitPlane*>    StHitPlaneHardPair;
@@ -68,7 +67,7 @@ enum E_VoluInfo {
 public:
 enum E_Kind { kVoluInfo=1,kHitPlaneInfo=2};
 
-         StVoluInfo(int voluNumber)     {SetUniqueID(voluNumber);fActiveFunctor=0;}
+         StVoluInfo(int voluNumber);
 virtual ~StVoluInfo(){;}
         int IsModule  ()        const   {return TestBit(kModule);}
         int IsMODULE()          const   {return TestBit(kMODULE);}
@@ -84,9 +83,13 @@ virtual ~StVoluInfo(){;}
 const  TGeoVolume* GetVolu()    const;
 const char *GetName() const;
 StActiveFunctor *GetActiveFunctor() 	{return fActiveFunctor  ;}
-virtual int Kind()              const   {return kVoluInfo;}
+virtual int Kind()              const   {return kVoluInfo	;}
+       void AddSens() 			{fNSens++;		;}
+        int GetSens() 			{return fNSens;		;}
+
 protected:
 StActiveFunctor *fActiveFunctor;
+int fNSens;
 ClassDef(StVoluInfo,0) //
 };
 
@@ -233,11 +236,11 @@ public:
   StVoluInfo *SetActive (StDetectorId did,int act=1,StActiveFunctor *af=0);
 const TGeoVolume *FindModule(const char *patt);
   StVoluInfo *SetFlag   (const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg,int act=1);
-         int  IsFlag    (const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg) const;
-         int  IsModule  (const TGeoVolume *volu)        const;
-         int  IsModule  (const TGeoNode   *node)        const;
-         int  IsMODULE  (const TGeoVolume *volu)        const;
-         int  IsActive  (const TGeoVolume *volu=0)      const;                  
+         StVoluInfo *IsFlag    (const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg) const;
+         StVoluInfo *IsModule  (const TGeoVolume *volu)        const;
+         StVoluInfo *IsModule  (const TGeoNode   *node)        const;
+         StVoluInfo *IsMODULE  (const TGeoVolume *volu)        const;
+         StVoluInfo *IsActive  (const TGeoVolume *volu=0)      const;                  
          int  IsActive  (StDetectorId did)              const;
          int  IsHitted  (const double X[3])             const;
 static   int  IsSensitive(const TGeoVolume *volu=0);
