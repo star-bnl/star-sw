@@ -1,8 +1,8 @@
 ***************************************************************************
-* $Id: hpdtgeo.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: hpdtgeo.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: hpdtgeo.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.3  2006/10/21 18:38:03  potekhin
 * Added a small safety margin on Rin, used 'ONLY' option to keep hits

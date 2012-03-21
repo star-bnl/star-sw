@@ -1,7 +1,7 @@
-* $Id: istbego.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: istbego.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: istbego.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.10  2005/04/14 16:24:25  nieuwhzs
 * Solved problems with the modules/ladders not ending up on the proper radius
@@ -352,10 +352,10 @@ endblock
 
 
       END
-* $Id: istbego.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: istbego.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: istbego.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.1  2006/10/02 21:50:18  potekhin
 * A dignificantly updated version by Gerrit
@@ -1021,10 +1021,10 @@ endblock
 * -------------------------------------------------------
 
       END
-* $Id: istbego.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: istbego.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: istbego.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.3  2006/10/21 18:08:13  potekhin
 * Updated simensions form Gerrit
@@ -1657,10 +1657,10 @@ endblock
 * -------------------------------------------------------
 
       END
-* $Id: istbego.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: istbego.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: istbego.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.3  2006/12/18 02:36:49  potekhin
 * Added a code field to the main stata structure,
@@ -2222,10 +2222,10 @@ endblock
 * -------------------------------------------------------
 
       END
-* $Id: istbego.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: istbego.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: istbego.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.1  2006/12/18 02:35:41  potekhin
 * Mid layer only, at 9.5cm
@@ -2780,10 +2780,10 @@ endblock
 * -------------------------------------------------------
 
       END
-* $Id: istbego.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: istbego.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: istbego.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.1  2006/12/18 02:36:00  potekhin
 * Two layer, mid layer at 9.5 cm
@@ -3404,10 +3404,10 @@ endblock
 * -------------------------------------------------------
 
       END
-* $Id: istbego.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: istbego.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: istbego.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.1  2007/03/09 21:39:17  potekhin
 * Inner layer with sensors only on the inside

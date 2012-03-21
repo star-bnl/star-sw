@@ -176,10 +176,10 @@ endblock
 
       END
 
-* $Id: pixlgeo.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: pixlgeo.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: pixlgeo.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.10  2004/04/21 22:45:57  potekhin
 * Killed the extraneous line with angular offset of 90
@@ -379,10 +379,10 @@ endblock
 *
       END
 
-* $Id: pixlgeo.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: pixlgeo.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: pixlgeo.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.4  2005/01/06 01:59:40  potekhin
 * Added an important comment, corrected a typo in another
@@ -550,10 +550,10 @@ endblock
 
       END
 
-* $Id: pixlgeo.age,v 1.3 2011/10/31 18:52:59 jwebb Exp $
+* $Id: pixlgeo.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
 * $Log: pixlgeo.age,v $
-* Revision 1.3  2011/10/31 18:52:59  jwebb
-* devE for eSTAR.
+* Revision 1.4  2012/03/21 21:50:38  jeromel
+* Generated AgML to age versions (may remove later since re-generated)
 *
 * Revision 1.2  2005/07/14 23:03:54  potekhin
 * Removed obsolete CVS rlog comments, changed the color

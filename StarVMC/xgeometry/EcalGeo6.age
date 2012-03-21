@@ -986,14 +986,12 @@
 
       REAL EtaMin/1.086/,EtaMax/2.000/
 
-      REAL tan_theta_min,tan_theta_max
+      REAL tan_theta_min/0.275720567/,tan_theta_max/0.761952162/
 
       !* Lambda function tanf
       real etax ! arguement for etax
       real tanf
       tanf(etax) = tan(2*atan(exp(-etax)))
-      tan_theta_min = tanf( EtaMax )
-      tan_theta_max = tanf( EtaMin )
       IF ( cut .eq. 1 ) THEN
       rdel    = 3.938
       nstrips = 288

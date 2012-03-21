@@ -43,9 +43,9 @@
       ENDBLOCK
       ! ---------------------------------------------------------------------------------- FSCT
       BLOCK FSCT   is a sensitive Tungsten+Sci+Epoxy tower
-      COMPONENT W A=183.84 Z=74 W=92.3
-      COMPONENT C A=12.01 Z=6 W=7.1
-      COMPONENT H A=1 Z=1 W=0.6
+      COMPONENT W A=183.84 Z=74 W=0.923
+      COMPONENT C A=12.01 Z=6 W=0.071
+      COMPONENT H A=1 Z=1 W=0.006
       MIXTURE WSE dens=8.297
       MEDIUM sensitive isvol=1
       ATTRIBUTE FSCT seen=1 colo=7
