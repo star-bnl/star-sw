@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpxAuAu39.C,v 1.2 2010/09/29 19:21:34 didenko Exp $
+// $Id: bfcMixer_TpxAuAu39.C,v 1.3 2012/02/17 20:47:36 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -63,7 +63,7 @@ void bfcMixer_TpxAuAu39(const Int_t Nevents=100,
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
-  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
+  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker"; 
   chain3Opt += ",";
 
   if (prodName == "P08icpp")           { chain3Opt += geomP08ic; }

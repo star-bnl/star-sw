@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.244 2011/07/19 20:49:16 perev Exp $
+// $Id: StMaker.cxx,v 1.245 2011/10/05 20:57:16 perev Exp $
 //
 //
 /*!
@@ -266,6 +266,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2010b",      20091215,     2, "y2010b",   "TOF fix & TPCE redused"},
   {"y2010c",      20091215,     3, "y2010c",   "Honey sandwich fix"},
   {"y2011",       20101215,     0, "y2011",    "y2011 TOF fix & TPCE redused & honey"},
+  {"y2012",       20111215,     0, "y2012",    "y2012 Very preliminary"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -1970,6 +1971,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.245  2011/10/05 20:57:16  perev
+// Register y2012
+//
 // Revision 1.244  2011/07/19 20:49:16  perev
 // Cleanup
 //

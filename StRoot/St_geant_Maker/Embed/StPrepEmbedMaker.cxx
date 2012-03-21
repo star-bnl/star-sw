@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.4 2010/11/30 23:32:22 hmasui Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.5 2011/12/05 15:50:49 zhux Exp $
  *
  */
 
@@ -96,6 +96,8 @@ StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name)
   mSkipMode = kFALSE; /// Do not skip the false vertex
   mSpreadMode = kFALSE; /// Do not smear z-vertex
   mOpenFzFile = kFALSE; /// Do not write .fz file
+  mPrimeMode = kFALSE; /// Do not prime the first event
+  mPrimed = kFALSE;
 }
 //____________________________________________________________________________________________________
 StPrepEmbedMaker::~StPrepEmbedMaker() { 
@@ -366,12 +368,16 @@ Int_t StPrepEmbedMaker::Make()
      vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
   }
 
+  if( mPrimeMode && !mPrimed ) {
+     mSavePid = mSettings->pid;
+     mSettings->pid = 45;
+  }
+
   // gkine is needed to set the z-vertex
   gkine(npart, xyz[2], xyz[2]);
 
   // Flat (pt, y)
   phasespace(npart);
-  
   
   Do(Form("gvertex %f %f %f",xyz[0],xyz[1],xyz[2]));
   if( mSettings->mode.CompareTo("strange", TString::kIgnoreCase) == 0 )
@@ -411,6 +417,11 @@ Int_t StPrepEmbedMaker::Make()
   }
 
   Do("trig 1");
+
+  if( mPrimeMode && !mPrimed ){
+     mSettings->pid = mSavePid;
+     mPrimed = kTRUE;
+  }   
 
   return kStOK;
 }
@@ -495,6 +506,21 @@ void StPrepEmbedMaker::SetSpreadMode(const Bool_t flag)
   LOG_INFO << "StPrepEmbedMaker::SetSpreadMode  set spread mode= ";
 
   if( mSpreadMode ){
+    LOG_INFO << " ON" << endm ;
+  }
+  else{
+    LOG_INFO << " OFF" << endm ;
+  }
+}
+
+//____________________________________________________________________________________________________
+void StPrepEmbedMaker::SetPrimeMode(const Bool_t flag)
+{
+  mPrimeMode=flag;
+
+  LOG_INFO << "StPrepEmbedMaker::SetPrimeMode  set prime mode= ";
+
+  if( mPrimeMode ){
     LOG_INFO << " ON" << endm ;
   }
   else{
@@ -630,6 +656,10 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.5  2011/12/05 15:50:49  zhux
+ * Add switch to prime the first event with deuterons (for dbar, tbar and hypertritons embedding).
+ * see ticket# 2097 for details.
+ *
  * Revision 1.4  2010/11/30 23:32:22  hmasui
  * Add fz file and a switch to enable writing fz file
  *
