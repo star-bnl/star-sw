@@ -1,0 +1,14 @@
+/*    tpcMaxHits.idl
+*
+*  Table: tpcMaxHits
+*
+*       description: limit reconstruction of events with excessive TPC hits
+*/ 
+
+
+struct tpcMaxHits { 
+
+   unsigned long  maxSectorHits;   /* maximum hits in a sector */
+   char           comment[255];    /* considerations in determining max */
+
+ };

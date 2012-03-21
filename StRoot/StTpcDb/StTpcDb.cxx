@@ -1,6 +1,7 @@
+
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.53 2010/01/26 21:04:42 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.55 2010/05/27 19:14:26 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +15,12 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.55  2010/05/27 19:14:26  fisyak
+ * Take out flavoring by 'sim' for tpcGlobalPosition,tpcSectorPosition and starClockOnl tables. remove usage tpcISTimeOffsets and tpcOSTimeOffsets tables
+ *
+ * Revision 1.54  2010/01/27 21:30:39  perev
+ * GetValidity now is static
+ *
  * Revision 1.53  2010/01/26 21:04:42  fisyak
  * Add new dE/dx calibration tables: TpcRowQ, tpcMethaneIn, tpcWaterOut, TpcZDC
  *
@@ -151,6 +158,7 @@
 #include "tables/St_dst_L0_Trigger_Table.h"
 #include "TUnixTime.h"
 #include "StMessMgr.h"
+#include "St_db_Maker/St_db_Maker.h"
 StTpcDb* gStTpcDb = 0;
 
 // C++ routines:
@@ -164,7 +172,6 @@ ClassImp(StTpcDimensionsI)
 ClassImp(StTpcElectronicsI)
 ClassImp(StTpcPadPlaneI)
 ClassImp(StTpcSlowControlSimI)
-ClassImp(StTpcT0I)
 ClassImp(StTpcFieldCageI)
 #endif
 //_____________________________________________________________________________
@@ -392,34 +399,6 @@ StTpcFieldCageI* StTpcDb::FieldCage(){
   return FC;
 }
 //_____________________________________________________________________________
-StTpcT0I* StTpcDb::T0(int sector){
-  if(sector<1||sector>24){
-    gMessMgr->Message("StTpcDb::T0s request for invalid sector","E");
-    return 0;
-  }
-  if(!t0[sector-1]){
-   const int dbIndex = kCalibration;
-   char dbname[40],dbname2[40];
-   sprintf(dbname,"Sector_%.2d/tpcISTimeOffsets",sector);
-   sprintf(dbname2,"Sector_%.2d/tpcOSTimeOffsets",sector);
-   //   printf("Getting %s , %s \n",dbname,dbname2);
-   if (tpctrg[dbIndex]){
-     //    TDataSet* tpd = (TDataSet*)tpctrg[dbIndex]->Find(dbname);
-     //    TDataSet* tpd2 = (TDataSet*)tpctrg[dbIndex]->Find(dbname2);
-     TDataSet *tpd = FindTable(dbname,dbIndex);
-     TDataSet *tpd2 = FindTable(dbname2,dbIndex);
-    if (!(tpd && tpd->HasData() && tpd2 && tpd2->HasData()) ){
-     gMessMgr->Message("StTpcDb::Error Finding Tpc Time Offsets","E");
-     return 0;
-    }
-    StRTpcT0* wptemp = new StRTpcT0((St_tpcISTimeOffsets*)tpd,(St_tpcOSTimeOffsets*)tpd2);
-    wptemp->SetPadPlanePointer(PadPlaneGeometry());
-    t0[sector-1] = (StTpcT0I*)wptemp;
-   }
-  }
- return t0[sector-1];
-}
-//_____________________________________________________________________________
 TTable *StTpcDb::getTpcTable(int i){
   return (TTable *)tpctrg[i];
 }
@@ -451,7 +430,7 @@ void StTpcDb::SetDriftVelocity() {
 	mUc = 0;
 	return;
       }
-      if (mk->GetValidity(dvel0,t) < 0) {
+      if (St_db_Maker::GetValidity(dvel0,t) < 0) {
 	gMessMgr->Message("StTpcDb::Error Wrong Validity Tpc DriftVelocity","E");
 	mUc = 0;
 	return;
@@ -533,10 +512,9 @@ TTable *StTpcDb::FindTable(const Char_t *name, Int_t dbIndex) {
     if (! (table && table->HasData()) ) {
       gMessMgr->Error() << "StTpcDb::Error Finding " << name << endm;
     } else if (Debug() && table->GetRowSize()< 1024) {
-      StMaker *dbMk = StChain::GetChain()->Maker("db");
-      if (dbMk) {
+      {
 	TDatime t[2];
-	dbMk->GetValidity(table,t);
+	St_db_Maker::GetValidity(table,t);
 	gMessMgr->Warning()  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
 			     << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
       }

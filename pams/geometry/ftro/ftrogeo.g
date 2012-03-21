@@ -1,5 +1,9 @@
-* $Id: ftrogeo.g,v 1.4 2004/10/28 22:19:50 potekhin Exp $
+* $Id: ftrogeo.g,v 1.5 2011/02/17 20:39:12 jwebb Exp $
 * $Log: ftrogeo.g,v $
+* Revision 1.5  2011/02/17 20:39:12  jwebb
+* Renamed "raddeg" => "myraddeg" to prevent name clash with standard starsim
+* constant (with exactly the opposite definition).
+*
 * Revision 1.4  2004/10/28 22:19:50  potekhin
 * There are two cages, one on each respective
 * FTPC module, so we have to position it twice
@@ -24,7 +28,7 @@ Module FTROGEO is the geometry of the readout structure of the FTPC
 ******************************************************************************
 +CDE,AGECOM,GCUNIT.
 *
-      real Zpos, raddeg, holeAngle, strutAngle, anglePos, angle
+      real Zpos, myraddeg, holeAngle, strutAngle, anglePos, angle
       real strutRad, plankRad,  strutHoleSpacing, centerStrut, inFlangeZ
       real ftpoAnglePos,ftpiAnglePos, a, rEff
 
@@ -98,7 +102,7 @@ Module FTROGEO is the geometry of the readout structure of the FTPC
       Mixture   G10   Dens=1.7
 
 
-      raddeg     = 3.14159265/180.0
+      myraddeg     = 3.14159265/180.0
       holeAngle  = 360.0/FTRG_ofNholes
       strutAngle = 360.0/FTRG_N
       strutRad   = FTRG_ofRin+FTRG_strutHgt/2.0
@@ -145,7 +149,7 @@ Block FTCM is the mother of the core struts and PCBs
 
 *      do nStrut=1,FTRG_N
 *         angle=(nStrut-1)*strutAngle
-*         anglePos = angle*raddeg
+*         anglePos = angle*myraddeg
 *         Position FSMO x=strutRad*cos(anglePos) y=strutRad*sin(anglePos) z=0.0 AlphaZ=90+angle
 *      enddo
 
@@ -164,14 +168,14 @@ Block FTCD is the division of the FTCM
       Position FTPL x=plankRad*cos(0.0) y=plankRad*sin(0.0) z=0.0 AlphaZ=90
 
 * PCB
-      a=raddeg*strutAngle/2.0-ftpoAnglePos
+      a=myraddeg*strutAngle/2.0-ftpoAnglePos
       rEff=(FTRG_ftpoR+FTRG_ftpoThk/2.0)/cos(ftpoAnglePos)
 
       Create FTPO
       Position FTPO x=rEff*cos(a)  y=rEff*sin(a)  z=0.0 AlphaZ=90+strutAngle/2.0
       Position FTPO x=rEff*cos(-a) y=rEff*sin(-a) z=0.0 AlphaZ=-90-strutAngle/2.0
 
-      a=raddeg*strutAngle/2.0-ftpiAnglePos
+      a=myraddeg*strutAngle/2.0-ftpiAnglePos
       rEff=(FTRG_ftpiR+FTRG_ftpiThk/2.0)/cos(ftpiAnglePos)
 
       Create FTPI
@@ -192,7 +196,7 @@ Block FTOF is the outer flange
       Create FTOH
       do nHole=1,FTRG_ofNholes
          angle=(nHole-1)*holeAngle
-         anglePos = angle*raddeg
+         anglePos = angle*myraddeg
          Position FTOH x=FTRG_ofHoleRad*cos(anglePos) y=FTRG_ofHoleRad*sin(anglePos)
       enddo
 endblock
@@ -299,7 +303,7 @@ endblock
 * Obsolete, but keep as reference:
 *      do nStrut=1,FTRG_N
 *         angle=(nStrut-1)*strutAngle
-*         anglePos = angle*raddeg
+*         anglePos = angle*myraddeg
 *         Position FSMO x=strutRad*cos(anglePos) y=strutRad*sin(anglePos) z=0.0 AlphaZ=90+angle
 *      enddo
 * -----------------------------------------------------------------------------

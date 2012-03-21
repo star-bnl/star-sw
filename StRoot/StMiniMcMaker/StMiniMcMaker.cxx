@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.29 2009/02/02 19:30:50 fisyak Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.35 2011/02/22 20:42:52 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,25 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.35  2011/02/22 20:42:52  perev
+ * now int parentParentGeantId
+ *
+ * Revision 1.34  2011/02/16 00:50:30  perev
+ * mPdgId added
+ *
+ * Revision 1.33  2010/08/31 20:16:15  fisyak
+ * Add track seedQuality
+ *
+ * Revision 1.32  2010/08/05 15:31:11  jwebb
+ * Changed the check on valid towers during clustering to suppress the non-
+ * error issued by StEmcGeom.
+ *
+ * Revision 1.31  2010/04/15 19:17:27  fisyak
+ * Add corrections for AppendMCDaughterTrack from Masayuki Wada
+ *
+ * Revision 1.30  2010/01/27 21:28:10  perev
+ * CleanUp
+ *
  * Revision 1.29  2009/02/02 19:30:50  fisyak
  * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
  *
@@ -140,6 +159,25 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.35  2011/02/22 20:42:52  perev
+ * now int parentParentGeantId
+ *
+ * Revision 1.34  2011/02/16 00:50:30  perev
+ * mPdgId added
+ *
+ * Revision 1.33  2010/08/31 20:16:15  fisyak
+ * Add track seedQuality
+ *
+ * Revision 1.32  2010/08/05 15:31:11  jwebb
+ * Changed the check on valid towers during clustering to suppress the non-
+ * error issued by StEmcGeom.
+ *
+ * Revision 1.31  2010/04/15 19:17:27  fisyak
+ * Add corrections for AppendMCDaughterTrack from Masayuki Wada
+ *
+ * Revision 1.30  2010/01/27 21:28:10  perev
+ * CleanUp
+ *
  * Revision 1.29  2009/02/02 19:30:50  fisyak
  * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
  *
@@ -268,7 +306,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.29 2009/02/02 19:30:50 fisyak Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.35 2011/02/22 20:42:52 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -536,6 +574,10 @@ StMiniMcMaker::Make()
   //
   if (m_Mode == 1) trackLoopIdT();
   else             trackLoop();
+
+  if (Debug()) mMiniMcEvent->Print();
+  // Append MC tracks that are not daughters of primary MC vertex. 
+  AppendMCDaughterTrack();
 
   //
   // fill the tree and clear all the tracks
@@ -920,10 +962,9 @@ StMiniMcMaker::trackLoop()
     // 02/25/02
     // accept all mc primary tracks within some eta window
     if(acceptRaw(mcTrack)){
-      StTinyMcTrack* tinyMcTrack    = new StTinyMcTrack;
-      fillMcTrackInfo(tinyMcTrack,mcTrack,nAssocGl,nAssocPr);
-      mMiniMcEvent->addMcTrack(tinyMcTrack);
-      delete tinyMcTrack;
+      StTinyMcTrack tinyMcTrack;
+      fillMcTrackInfo(&tinyMcTrack,mcTrack,nAssocGl,nAssocPr);
+      mMiniMcEvent->addMcTrack(&tinyMcTrack);
     }
   } // mc track iter
 
@@ -1470,7 +1511,7 @@ StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta, Int_t nRcGlobal, Int_t nRcGood
 
 void
 StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
-				 const StMcTrack* mcTrack, 
+				 StMcTrack* mcTrack, 
 				 const StTrack* prTrack, 
 				 const StTrack* glTrack,
 				 Int_t commonHits,
@@ -1497,7 +1538,7 @@ StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
   //
   StContamPair* contamPair = dynamic_cast<StContamPair*>(miniMcPair);
   if(contamPair){
-    const StMcTrack*    mcTParent = mcTrack->parent();
+    StMcTrack*    mcTParent = mcTrack->parent();
     
     if (mcTParent){
       contamPair->setParentGeantId(mcTrack->parent()->geantId());
@@ -1509,7 +1550,7 @@ StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
       contamPair->setStartY(mcTrack->startVertex()->position().y());
       contamPair->setStartZ(mcTrack->startVertex()->position().z());  
       
-      Short_t parentParentGeantId=0;
+      Int_t parentParentGeantId=0;
       Float_t parentParentPt=0;
       // check for parent of parent
       if(mcTrack->parent()->parent() && 
@@ -1584,7 +1625,7 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   tinyRcTrack->setCurvGl(glTrack->geometry()->curvature());
   tinyRcTrack->setTanLGl(tan(glTrack->geometry()->dipAngle()));
   tinyRcTrack->setErrGl(errorGl);
-  
+  tinyRcTrack->setSeedQuality(glTrack->seedQuality());
   //
   // reality check
   //
@@ -1738,6 +1779,10 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     for(int idEta=-1; idEta<2; ++idEta) {
       for (int idPhi=-1; idPhi<2; ++idPhi) {
 	int towerId = emcPos.getNextTowerId(softIdProj,idEta,idPhi);
+	if ( towerId == 0 )
+	  {
+	    continue; // off the end of the barrel
+	  }
 	if (!emcGeom->checkId(towerId)) {
 	  // Valid tower SoftId.  (Again, note that checkId returns "false" when the
 	  // softId is valid!)
@@ -1802,7 +1847,7 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
 
 void 
 StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
-			       const StMcTrack* mcTrack,
+			       StMcTrack* mcTrack,
 			       Int_t nAssocGl, Int_t nAssocPr)
 {
   if (mcTrack) {
@@ -1820,6 +1865,7 @@ StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
     tinyMcTrack->setNSsdHitMc(mcTrack->ssdHits().size());
     tinyMcTrack->setNFtpcHitMc(mcTrack->ftpcHits().size());
     tinyMcTrack->setGeantId(mcTrack->geantId());
+    tinyMcTrack->setPdgId(mcTrack->pdgId());
     short chargeMc = -9999;
     if (mcTrack->particleDefinition()) chargeMc = static_cast<short>(mcTrack->particleDefinition()->charge());
     tinyMcTrack->setChargeMc(chargeMc);
@@ -2145,7 +2191,7 @@ StMiniMcMaker::acceptPt(StTrack* track){
   possible pt cut on mc tracks
 */
 inline Bool_t
-StMiniMcMaker::acceptPt(StMcTrack *track){
+StMiniMcMaker::acceptPt(StMcTrack*track){
   return (track->momentum().perp()>=mMinPt &&
 	  track->momentum().perp()<=mMaxPt);
 }
@@ -2495,8 +2541,58 @@ size_t StMiniMcMaker::getIndex(size_t mult) {
   if (mult >= 14 ) return 8;
   return 9;
 }
+
+void StMiniMcMaker::AppendMCDaughterTrack() {
+    if (Debug())
+        cout << "##StMiniMcMaker::AppendMCDaughterTrack()"<< endl;
+
+//  vector<int> enteredGlobalTracks;
+    const StPtrVecMcTrack& allmcTracks = mMcEvent->tracks();
+    cout << "size of mcEvent->tracks() : "<< allmcTracks.size() << endl;
+
+    Int_t nAppendMC(0);
+    StMcTrackConstIterator allMcTrkIter = allmcTracks.begin();
+    for (; allMcTrkIter != allmcTracks.end(); ++allMcTrkIter) {
+        StMcTrack* mcGlobTrack = *allMcTrkIter;
+        if (isPrimaryTrack(mcGlobTrack)) continue;
+        if (!acceptRaw(mcGlobTrack)) continue; // loose eta cut (4 units, so should include ftpc).
+//      if (accept(mcGlobTrack) || mcGlobTrack->ftpcHits().size()>=5) { // 10 tpc hits or 5 ftpc hits
+            if (Debug()>1)
+                cout << "accepted mc global track, key "<< mcGlobTrack->key() << endl;
+            // Ok, track is accepted, query the map for its reco tracks.
+
+            StTinyMcTrack tinyMcTrack;
+            fillMcTrackInfo(&tinyMcTrack, mcGlobTrack, 0, 0);
+            mMiniMcEvent->addMcTrack(&tinyMcTrack);
+            nAppendMC++;
+
+//      }  // mc hits condition
+    }  // end of global track match loop
+
+    cout << "\tappended mc tracks: "<< nAppendMC << endl;
+}
+
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.35  2011/02/22 20:42:52  perev
+// now int parentParentGeantId
+//
+// Revision 1.34  2011/02/16 00:50:30  perev
+// mPdgId added
+//
+// Revision 1.33  2010/08/31 20:16:15  fisyak
+// Add track seedQuality
+//
+// Revision 1.32  2010/08/05 15:31:11  jwebb
+// Changed the check on valid towers during clustering to suppress the non-
+// error issued by StEmcGeom.
+//
+// Revision 1.31  2010/04/15 19:17:27  fisyak
+// Add corrections for AppendMCDaughterTrack from Masayuki Wada
+//
+// Revision 1.30  2010/01/27 21:28:10  perev
+// CleanUp
+//
 // Revision 1.29  2009/02/02 19:30:50  fisyak
 // Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
 //
