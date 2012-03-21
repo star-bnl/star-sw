@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.22 2012/02/23 17:33:59 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.23 2012/03/21 23:43:41 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -127,13 +127,11 @@ void StTGeoHelper::Finish()
 void StTGeoHelper::InitInfo()
 {
   gGeoManager->CdTop();
-  
+  std::map <int,int> moduMap;  
   StTGeoIter it;
   it.Print("StTGeoHelper_Init");
   const TGeoVolume *vol= *it;
 
-  int nHits=0;
-  const TGeoVolume *tgModu=0;
   StVoluInfo *myModu=0;
   for (;(vol=*it);++it) {
     vol->GetShape()->ComputeBBox();
@@ -143,34 +141,44 @@ void StTGeoHelper::InitInfo()
 //			Recognize module
 //			Check for MODULE    
       do {
+        myModu = 0;
 	if (!IsModule(vol) && !it.IsOmule())	break;
 	StVoluInfo *ext = SetFlag(vol,StVoluInfo::kModule);
         if (DetId(vol->GetName())) ext->SetMODULE();
         assert(IsModule(vol));
-        myModu = ext; tgModu = vol; nHits=0;
-	printf("Module = %s(%d) ",vol->GetName(),volId); it.Print(0);
+        myModu = ext; 
+//	printf("Module = %s(%d) ",vol->GetName(),volId); it.Print(0);
       } while(0);
 
-      if (IsModule(vol) && !IsActive(vol)) {
- 	  tgModu=0; it.Skip();continue;
+      if (myModu) 		continue;
+      if (!IsSensitive(vol)) 	continue;
+      for (int idx=1;1;idx++) {
+        const TGeoVolume *myVolu = it.GetVolu(idx);
+        if (!myVolu) 	break;
+        StVoluInfo *inf = IsModule(myVolu);
+        if (!inf)    	continue;
+        inf->AddSens(); break;
       }
+  }
 
-//			Update HitShape
-      if (IsSensitive(vol)) {SetFlag(vol,StVoluInfo::kActive,1);nHits++;}
-    }
+
     if (it.IsLast()) { 		//Last visit 
 
 //		Define for MODULE (capital letters, module with hits)   
-        if (vol != tgModu) 	continue;
-	if ( IsMODULE(vol)) 	continue;
-        if (!nHits) 	{// Module without hits or not active now
- 	  printf("Module = %s(%d) ",vol->GetName(),volId); it.Print(0);
+        myModu = IsModule(vol); 
+        if (!myModu) continue;
+        if (!myModu->GetSens()) 	{// Module without hits or not active now
+          if (!(moduMap[volId])) 	{//first time 
+ 	     printf("Module = %s(%d) ",vol->GetName(),volId); it.Print(0);
+	     moduMap[volId]++;
+	  }
         } else 		{// Module with hits. It is MODULE
 	  SetFlag(vol,StVoluInfo::kHitted);
- 	  printf("MODULE = %s(%d) hits=%d",vol->GetName(),volId,nHits);
+          TString ts = (IsActive(vol))? "*":" ";
+ 	  printf("MODULE%s= %s(%d) hits=%d",ts.Data(),vol->GetName(),volId,myModu->GetSens());
 	  it.Print(0);
         }  
-      myModu=0; nHits=0;
+      
     }
   }
 
@@ -229,7 +237,7 @@ int StTGeoHelper::IsActive (StDetectorId did) const
   return ((fActiveModu & ((Long64_t)1)<<did)!=0);
 }
 //_____________________________________________________________________________
-int StTGeoHelper::IsActive (const TGeoVolume *volu) const
+StVoluInfo *StTGeoHelper::IsActive (const TGeoVolume *volu) const
 {
  if (volu) {
    return (IsFlag(volu,StVoluInfo::kActive));
@@ -257,12 +265,14 @@ StVoluInfo *StTGeoHelper::SetFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo 
   return inf;
 }
 //_____________________________________________________________________________
-int  StTGeoHelper::IsFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg) const
+StVoluInfo *StTGeoHelper::IsFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg) const
 {
   int volId = volu->GetNumber();
   StVoluInfo *inf = GetInfo(volId);
   if (!inf ) return 0;
-  return (inf->TestBit(flg)!=0);
+
+  if(inf->TestBit(flg)==0) return 0;
+  return inf;
 }
 //_____________________________________________________________________________
 void StTGeoHelper::InitHitShape()
@@ -435,21 +445,23 @@ void StTGeoHelper::AddHitPlane(StHitPlane* pla)
   fHitPlaneArr->Add(pla);
 }    
 //_____________________________________________________________________________
-int StTGeoHelper::IsModule(const TGeoVolume *volu)  const
+StVoluInfo *StTGeoHelper::IsModule(const TGeoVolume *volu)  const
 {
   StVoluInfo *ext = GetInfo(volu->GetNumber());
   if (!ext) return 0;
-  return ext->IsModule();
+  if (!ext->IsModule()) return 0;
+  return ext;
 }    
 //_____________________________________________________________________________
-int StTGeoHelper::IsMODULE(const TGeoVolume *volu)  const
+StVoluInfo *StTGeoHelper::IsMODULE(const TGeoVolume *volu)  const
 {
   StVoluInfo *ext = GetInfo(volu->GetNumber());
   if (!ext) return 0;
-  return ext->IsMODULE();
+  if (!ext->IsMODULE()) return 0;
+  return ext;
 }    
 //_____________________________________________________________________________
-int StTGeoHelper::IsModule(const TGeoNode   *node)  const
+StVoluInfo *StTGeoHelper::IsModule(const TGeoNode   *node)  const
 { return IsModule(node->GetVolume()); }
 //_____________________________________________________________________________
 StHitPlaneInfo* StTGeoHelper::IsHitPlane(const TGeoVolume *volu) const
@@ -680,21 +692,38 @@ printf("Break(%d)\n",kase);
 const StHitPlane *StTGeoHelper::AddHit(void *hit,const float xyz[3],unsigned int hardw,int seed)
 {
 static int nCall = 0;  nCall++;  
+//		Test of hardware id assignment quality
+enum 		{kMaxTest=100,kMaxFail=10};
+static int 	nTest=0,nFail=0,detId=0;
+//
 //   Break(nCall);
   StHitPlaneHardMapIter it(fHitPlaneHardMap->find(hardw));
-  StHitPlane *hp=0;
+  StHitPlane *hp=0,*hpMap=0,*hpGeo=0;
   if (fOpt && it !=  fHitPlaneHardMap->end()) { //HitPlane found
-     hp = (*it).second;
-  } else {   
-     hp = FindHitPlane(xyz);
-     if (!hp) {
+     hpMap = (*it).second;
+  } 
+  hp = hpMap;
+  if (hpMap==0 || nTest < kMaxTest) { 
+     nTest++;
+     hpGeo = FindHitPlane(xyz);
+     if (!hpGeo) {
        double pnt[3]={xyz[0],xyz[1],xyz[2]};
        gGeoManager->SetCurrentPoint(pnt);
        Warning("AddHit","Hit(%g,%g,%g) in %s Not Found",pnt[0],pnt[1],pnt[2],GetPath());
        return 0;
      }
+     hp = hpGeo;
+     if (hpMap && hpMap != hpGeo) { //Different Hit planes found by map and geo
+       double pnt[3]={xyz[0],xyz[1],xyz[2]};
+       nFail++; 
+       Warning("AddHit","Hit(%g,%g,%g) Different Hit Planes found %s %s"
+              ,pnt[0],pnt[1],pnt[2],hpMap->GetName(),hpGeo->GetName());
+       assert(nFail<=kMaxFail);
+     }
      (*fHitPlaneHardMap)[hardw]=hp;
-
+  }
+  if (hp->GetDetId() != detId) { // New detector started
+    nTest=0; nFail=0; detId = hp->GetDetId();
   }
   assert(hp);
 
@@ -703,6 +732,8 @@ static int nCall = 0;  nCall++;
      fSeedHits->push_back(hit);
   } 
   hp->AddHit(hit,xyz);
+//printf("Hit(%g %g %g) added to %s\n",xyz[0],xyz[1],xyz[2],hp->GetName());
+
   if (hp->GetNHits()==1) AddHitPlane(hp);
 
 
@@ -1207,6 +1238,15 @@ const TGeoVolume *StTGeoHelper::FindModule(const char *patt)
   }
   return bestVolu;
 }
+
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+StVoluInfo::StVoluInfo(int voluNumber)     
+{ SetUniqueID(voluNumber);
+  fActiveFunctor=0;
+  fNSens = 0;
+}
+
 
 //_____________________________________________________________________________
 //_____________________________________________________________________________
