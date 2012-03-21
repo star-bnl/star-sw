@@ -2,9 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <fakeRtsLog.h>
 
 /*********************************************************************
- * $Id: L2EmcDb2012.cxx,v 1.2 2011/10/19 15:58:06 jml Exp $
+ * $Id: L2EmcDb2012.cxx,v 1.3 2012/03/21 18:18:02 jml Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -19,7 +20,7 @@
 //=====================================
 //=====================================
 L2EmcDb2012::L2EmcDb2012(char *inpP, char *logP, char *uid) {
-  printf("L2EmcDb2012::constr: ver20, inpPath='%s', logPath='%s'\n",inpP,logP);
+  LOG(DBG,"L2EmcDb2012::constr: ver20, inpPath='%s', logPath='%s'\n",inpP,logP);
   strncpy(inpPath,inpP,mxTxt);
   strncpy(logPath,logP,mxTxt);
   strcpy(muid, uid);
@@ -41,7 +42,7 @@ L2EmcDb2012::initRun(int runNo){
   run_number=runNo;
   char fname[1000];
   
-  printf("L2EmcDb2012::initRun, inpPath='%s', logPath='%s'\n",inpPath,logPath);
+  LOG(DBG,"L2EmcDb2012::initRun, inpPath='%s', logPath='%s'\n",inpPath,logPath);
   int err=0;
   sprintf(fname,"%s/btowDb.current",inpPath);           err+=readAsciiDb(fname,db_labels[0]);
   sprintf(fname,"%s/etowDb.current",inpPath);           err+=readAsciiDb(fname,db_labels[1]);
@@ -53,10 +54,10 @@ L2EmcDb2012::initRun(int runNo){
   sprintf(fname,"%s/%s",inpPath,pedFile);            err+=changePedsByName(fname,db_labels[5]);
 
   if(err) {
-    printf("\n\n total CRASH of L2EmcDb2012::initRun(%d), reason=some error in ASCII DB\n\n",runNo);
+    LOG(CRIT,"total CRASH of L2EmcDb2012::initRun(%d), reason=some error in ASCII DB\n\n",runNo);
     return err;
   }
-  printf("L2EmcDb2012::initRun(%d) done\n", runNo);
+  LOG(DBG,"L2EmcDb2012::initRun(%d) done\n", runNo);
   return 0;
 }
 
@@ -82,7 +83,7 @@ L2EmcDb2012::finishRun(){
     fprintf(dbFd,"#\n");
     writeAsciiDb(dbFd);
     fclose(dbFd);
-    printf("L2EmcDb2012:finishRun()  dbDump='%s' ...\n",dbFname);
+    LOG(DBG,"L2EmcDb2012:finishRun()  dbDump='%s' ...\n",dbFname);
   } else {
     if (dbFd)
       fprintf(dbFd,"L2EmcDb2012:FinishRun(%d)  dbDump  NOT saved, I/O error\n",run_number);
@@ -137,17 +138,17 @@ L2EmcDb2012::clearItem(struct EmcCDbItem *x) {
 void 
 L2EmcDb2012::printItem(const EmcCDbItem *x) {
   printf("gEmcCDb:");
-  if(x==0) { printf(" NULL pointer\n"); return; }
+  if(x==0) { LOG(NOTE,"NULL pointer\n"); return; }
 
   if(x->name[0]==0) {
     printf(" item not defined ???\n");
     return;
   }
-
+  
   if(strchr(x->name,'U') || strchr(x->name,'V') )
     printf(" %s crate=%d chan=%3d sec=%2d plane=%c strip=%3d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s rdo=%d  key=%d\n",x->name,x->crate,x->chan,x->sec,x->plane,x->strip,x->gain,x->ped,x->sigPed,x->thr,x->stat,x->fail,x->tube,x->rdo,x->key);
-  else
-    printf(" %s crate=%d chan=%3d sec=%2d sub=%c eta=%2d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s rdo=%d  key=%d\n",x->name,x->crate,x->chan,x->sec,x->sub,x->eta,x->gain,x->ped,x->sigPed,x->thr,x->stat,x->fail,x->tube,x->rdo,x->key);
+ else
+   printf(" %s crate=%d chan=%3d sec=%2d sub=%c eta=%2d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s rdo=%d  key=%d\n",x->name,x->crate,x->chan,x->sec,x->sub,x->eta,x->gain,x->ped,x->sigPed,x->thr,x->stat,x->fail,x->tube,x->rdo,x->key);
 }
 
 //=====================================
@@ -195,8 +196,6 @@ L2EmcDb2012::importItem(EmcCDbItem *x, FILE *fd){
   else 
     return -3;
 
-  /*  printf("aaa name='%s'  n=%d\n",name0,n);  */
-
 
   if(n!=13) return -1000-n;
 
@@ -239,11 +238,9 @@ L2EmcDb2012::name2index(char *name){
   case 't' : index= EindexMax+BtowName2Index(sec,name+3); break;
  
   default:
-    printf("EEname2Index('%s')  Logical Error3: invalid index=%d\n",name,index);
+    LOG(ERR,"EEname2Index('%s')  Logical Error3: invalid index=%d\n",name,index);
     exit(-1);
   }
-
-  /*  printf("EmcName2Index(%s)-->%d\n",name,index); */
   
   assert(index>=0);
   assert(index<EmcDbIndexMax);
@@ -289,23 +286,20 @@ L2EmcDb2012::BtowName2Index(int sect, char *xee){
   /* RETURN index range [0,4799] */
 
   int index=-1;
-  /*printf("in BtowName2Index, sect=%d, xee=%s=\n",sect,xee);*/
   char sub=xee[0];
   int etaB=atoi(xee+1);
 
 
   if(etaB<1 || etaB>40) {
-    printf("BtowName2Index()  Logical Error5: invalid sect=%d, xee=%s=\n",sect,xee);  
+    LOG(ERR,"BtowName2Index()  Logical Error5: invalid sect=%d, xee=%s=\n",sect,xee);  
     exit(-1);
   }
 
   if(sub<'a' || sub>'j') {
-    printf("BtowName2Index()  Logical Error6: invalid sect=%d, xee=%s=\n",sect,xee);  
+    LOG(ERR,"BtowName2Index()  Logical Error6: invalid sect=%d, xee=%s=\n",sect,xee);  
     exit(-1);
   }
   index=etaB +400*(sect-1) + (sub-'a')*40;
-  /* printf("sub=%c etaB=%d index=%d\n",sub,etaB,index); */
-
 
   return index;
 }
@@ -322,7 +316,6 @@ L2EmcDb2012::readAsciiDb(char *fname, char *lbl) {
 
   fd=fopen(fname,"r");  
   if(fd==0) { err=-1; goto crashIt;}
-  /* printf(" readAsciiDb(%s) ...\n",fname); */
   {
     const int mx=1000;
     char buf[mx];
@@ -341,7 +334,6 @@ L2EmcDb2012::readAsciiDb(char *fname, char *lbl) {
 
     /* -- recover Index for the specified (named) item */
     int key= name2index(x.name);
-    /*  printf(" name='%s' key=%d, inpKey=%d, inpKey \n",x.name,key,x.key); */
     
     x.key=key;
     
@@ -361,11 +353,11 @@ L2EmcDb2012::readAsciiDb(char *fname, char *lbl) {
     /*  EmcDbItemStruct_print(&x);  */
   }
   
-  printf("L2EmcDb2012::readAsciiDb(%s) ... nL=%d  nR=%d\n",fname,nL,nR);
+  LOG(DBG,"L2EmcDb2012::readAsciiDb(%s) ... nL=%d  nR=%d\n",fname,nL,nR);
   return 0;
   
  crashIt:
-  printf("\n\n total CRASH of L2EmcDb2012::readAsciiDb(%s) err=%d  nL=%d\n\n",fname,err,nL);
+  LOG(CRIT,"total CRASH of L2EmcDb2012::readAsciiDb(%s) err=%d  nL=%d\n\n",fname,err,nL);
   return err;
 }
 
@@ -398,7 +390,6 @@ L2EmcDb2012::writeAsciiDb(FILE *fd) {
     n1++;
     if(isEmpty(x)) continue;
     exportItem(x,fd);
-    // if(strstr(x->name,"01TA")) printf("c %s %f\n",x->name,x->ped);
     n2++;
   }
   fprintf(fd,"# total %d items out of %d possible\n",n2,n1);
@@ -416,7 +407,7 @@ L2EmcDb2012::changeMaskFullCrate(const char *fname, char BEflag, char *lbl) {
      lines starting with '#' are ignored
      empty lines are not permitted
   */
-  printf("L2EmcDb2012::changeMaskFullCrate(%s)\n",fname);
+  LOG(DBG,"L2EmcDb2012::changeMaskFullCrate(%s)\n",fname);
   FILE *fd=fopen(fname,"r");
   int nd=0,nl=0;
   const int mx=1000;
@@ -437,7 +428,7 @@ L2EmcDb2012::changeMaskFullCrate(const char *fname, char BEflag, char *lbl) {
     if(buf[0]=='#') continue;
     int n=sscanf(buf,"%x %x %x",&crate, &stat, &fail);
     if(n!=3) { err=-2;  goto crashIt; }
-    printf("# crate=0x%02x  set:  stat=0x%x  fail=0x%x\n",crate,stat,fail);
+    LOG(DBG,"# crate=0x%02x  set:  stat=0x%x  fail=0x%x\n",crate,stat,fail);
     int i;
     for(i=0; i<EmcDbIndexMax; i++) {
       struct EmcCDbItem  *x=dbByIndex+i;
@@ -454,10 +445,10 @@ L2EmcDb2012::changeMaskFullCrate(const char *fname, char BEflag, char *lbl) {
   }
   fclose(fd);
 
-  printf("    change stat & fail bits done inpLine=%d nChanged=%d\n",nl,nd);  return 0;
+  LOG(DBG,"change stat & fail bits done inpLine=%d nChanged=%d\n",nl,nd);  return 0;
 
  crashIt:
-  printf("\n\n total CRASH of L2EmcDb2012::changeMaskFullCrate(%s) err=%d  nL=%d\n\n",fname,err,nl);
+  LOG(CRIT,"total CRASH of L2EmcDb2012::changeMaskFullCrate(%s) err=%d  nL=%d\n\n",fname,err,nl);
   return err;
 }
 
@@ -471,7 +462,7 @@ L2EmcDb2012::changePedsByName(const char *fname, char *lbl) {
      lines starting with '#' are ignored
      empty lines are not permitted
   */
-  printf("L2EmcDb2012::changePedsByName(%s)\n",fname);
+  LOG(DBG,"L2EmcDb2012::changePedsByName(%s)\n",fname);
   FILE *fd=fopen(fname,"r");
   int nd=0,nl=0,ne=0;
   const int mx=1000;
@@ -496,10 +487,9 @@ L2EmcDb2012::changePedsByName(const char *fname, char *lbl) {
     struct EmcCDbItem  *x=dbByIndex+key;
 
     if(isEmpty(x)) { ne++; continue; } // skip unmapped channels
-     // printf("%s %p\n",cVal,x);
 
     // replace only initialized channels
-    if(pVal<0)  { printf("Ignore: %s",buf); continue; }
+    if(pVal<0)  { LOG(DBG,"Ignore: %s",buf); continue; }
     x->ped=pVal;
 
 
@@ -507,10 +497,10 @@ L2EmcDb2012::changePedsByName(const char *fname, char *lbl) {
   }
   fclose(fd);
 
-  printf("    changePedsByName() done inpLine=%d nChanged=%d nNotMappedAndIgnored=%d \n",nl,nd,ne);  return 0;
+  LOG(DBG,"changePedsByName() done inpLine=%d nChanged=%d nNotMappedAndIgnored=%d \n",nl,nd,ne);  return 0;
 
  crashIt:
-  printf("\n\n total CRASH of L2EmcDb2012::changePedsByName(%s) err=%d  nL=%d\n\n",fname,err,nl);
+  LOG(CRIT,"total CRASH of L2EmcDb2012::changePedsByName(%s) err=%d  nL=%d\n\n",fname,err,nl);
   return err;
 }
 
@@ -524,7 +514,7 @@ L2EmcDb2012::changeMaskByName(const char *fname, char *lbl) {
      lines starting with '#' are ignored
      empty lines are not permitted
 */
-  printf("L2EmcDb2012::changeMaskByName(%s)\n",fname);
+  LOG(DBG,"L2EmcDb2012::changeMaskByName(%s)\n",fname);
   FILE *fd=fopen(fname,"r");
   int nd=0,nl=0,ne=0;
   const int mx=1000;
@@ -548,7 +538,6 @@ L2EmcDb2012::changeMaskByName(const char *fname, char *lbl) {
     struct EmcCDbItem  *x=dbByIndex+key;
     
     if(isEmpty(x)) { ne++; continue; } // skip unmapped channels
-    // printf("%s %p\n",cVal,x);
     
     // replace only initialized channels
     x->stat=stat;
@@ -557,10 +546,10 @@ L2EmcDb2012::changeMaskByName(const char *fname, char *lbl) {
   }
   fclose(fd);
   
-  printf("    changeMaskByName() done inpLine=%d nChanged=%d nNotMappedAndIgnored=%d \n",nl,nd,ne);  return 0;
+  LOG(DBG,"changeMaskByName() done inpLine=%d nChanged=%d nNotMappedAndIgnored=%d \n",nl,nd,ne);  return 0;
 
  crashIt:
-  printf("\n\n total CRASH of L2EmcDb2012::changeMaskByName(%s) err=%d  nL=%d\n\n",fname,err,nl);
+  LOG(CRIT,"total CRASH of L2EmcDb2012::changeMaskByName(%s) err=%d  nL=%d\n\n",fname,err,nl);
   return err;
 }
 
@@ -568,6 +557,9 @@ L2EmcDb2012::changeMaskByName(const char *fname, char *lbl) {
 /*
 *********************************************************************
   $Log: L2EmcDb2012.cxx,v $
+  Revision 1.3  2012/03/21 18:18:02  jml
+  got rid of printfs from 2012 files
+
   Revision 1.2  2011/10/19 15:58:06  jml
   more compile offline
 

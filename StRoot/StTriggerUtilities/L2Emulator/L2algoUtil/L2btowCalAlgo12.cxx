@@ -5,7 +5,7 @@
 #include <math.h>
 #include "fakeRtsLog.h"
 /*********************************************************
-  $Id: L2btowCalAlgo12.cxx,v 1.5 2011/10/19 16:12:10 jml Exp $
+  $Id: L2btowCalAlgo12.cxx,v 1.6 2012/03/21 18:18:03 jml Exp $
   \author Jan Balewski, MIT, 2009 
  *****************************************************
   Descripion: 
@@ -133,8 +133,7 @@ L2btowCalAlgo12::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
 
     float adcThres=x->ped+par_nSigPed* fabs(x->sigPed);
     float otherThr=x->ped+par_twEneThres*x->gain;
-    //    if(strstr("01tg34",x->name))  printf("%s g=%f  adcThrEne=%.1f  adcThrAbovePed=%.1f  rdo=%d\n",x->name,x->gain,adcThres,otherThr,x->rdo);
-
+ 
     if(adcThres<otherThr) { //use energy threshold if higher
       adcThres=otherThr;
       nEneThr++;
@@ -217,7 +216,7 @@ L2btowCalAlgo12::calibrateBtow(int token, int bemcIn, ushort *rawAdc){
       hit->low_noise_et=low_noise_et;
       hit->ene=adc/gain2Ene[rdo]; 
       hit++;
-      nTower++; //printf("nBt=%d\n",nTower);
+      nTower++; 
       // only monitoring
       if(et >par_hotEtThres) {
 	hA[10]->fill(rdo);
@@ -237,8 +236,8 @@ L2btowCalAlgo12::calibrateBtow(int token, int bemcIn, ushort *rawAdc){
 
   // debugging should be off for any time critical computation
   if(par_dbg>0){
-    printf("L2-%s-compute: set adcL size=%d, get=%d\n",getName(),nTower,999); //tmp
-   printf("dbg=%s: found  nTw=%d\n",getName(),nTower);
+    LOG(DBG,"L2-%s-compute: set adcL size=%d, get=%d\n",getName(),nTower,999); //tmp
+    LOG(DBG,"dbg=%s: found  nTw=%d\n",getName(),nTower);
     if(par_dbg>0)   print0();
     printCalibratedData(token);
   } 
@@ -264,8 +263,7 @@ L2btowCalAlgo12::clear(int token){
 void 
 L2btowCalAlgo12::computeUser(int token ){
 
-  printf("computeUser-%s FATAL CRASH\n If you see this message it means l2new is very badly misconfigured \n and L2-btow-calib algo was not executed properly\n before calling other individual L2-algos. \n\n l2new will aborted now - fix the code, Jan B.\n",getName());
-  criticalError("L2btowCalAlgo12::computeUser has been called and should not have been.  Serious problem in L2");
+  LOG(CRIT,"L2btowCalAlgo12::computeUser has been called and should not have been.  Serious problem in L2");
 }
 
 
@@ -362,6 +360,9 @@ L2btowCalAlgo12::print0(){ // full raw input  ADC array
 
 /****************************************************
   $Log: L2btowCalAlgo12.cxx,v $
+  Revision 1.6  2012/03/21 18:18:03  jml
+  got rid of printfs from 2012 files
+
   Revision 1.5  2011/10/19 16:12:10  jml
   more 2012 stuff
 
