@@ -135,6 +135,7 @@ double  operator[](int i) const	{ return Arr()[i];}
 const StvFitErrs &operator*(const Mtx55D_t &mtx) const; 
 double Sign() const;
    int Check(const char *tit=0) const;
+   int Recov();
   void Print(const char *tit=0) const;
 public:	
 double
