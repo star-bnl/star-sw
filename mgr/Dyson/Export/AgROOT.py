@@ -10,7 +10,8 @@ import re
 # Exception handling
 from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError, MixtureComponentError
 
-enable_warnings = os.getenv('AGML_WARNINGS',False)
+#enable_warnings = os.getenv('AGML_WARNINGS',False)
+enable_warnings = ( os.getenv('STAR','...adev').find('adev') < 0 )
 from warnings import warn
 
 from pyparsing  import *
@@ -68,7 +69,7 @@ locator = None
 # locator to the exception
 def RaiseWarning( exception, warning=True ):
 
-    enable_warnings = os.getenv('AGML_WARNINGS',False)
+    enable_warnings = ( os.getenv('STAR','...adev').find('adev') < 0 )    
     if not enable_warnings:
         return
     
@@ -111,10 +112,6 @@ def checkAttributes( tag, attr, mylist, skip=[], warning=True ):
             pass
         else:
             RaiseWarning( AgmlAttributeWarning(current_block, tag, key, value), warning )
-##            if warning:
-##                warn(  AgmlAttributeWarning( current_block, tag, key, value ) )
-##            else:
-##                raise AgmlAttributeWarning( current_block, tag, key, value )
 
 def requireAttributes( tag, attr, mylist, warning=True ):
     """
@@ -122,14 +119,8 @@ def requireAttributes( tag, attr, mylist, warning=True ):
     """
     for key in mylist:
         value = attr.get(key, None)
-
         if value==None:            
             RaiseWarning( AgmlAttributeWarning(current_block, tag, key, warning ) )
-
-#            if warning==True:
-#                warn( AgmlMissingAttributeWarning( current_block, tag, key ) )
-#            else:
-#                raise AgmlMissingAttributeWarning( current_block, tag, key ) 
 
 
 # ----------------------------------------------------------------------------------------------------
@@ -420,7 +411,7 @@ class Module ( Handler ):
         document.impl('{',                                                     unit='modctr' )
         document.impl('}',                                                     unit='modctr' )
 
-        document.impl('void %s::ConstructGeometry()' % document.agmodule,      unit=current  )
+        document.impl('void %s::ConstructGeometry( const Char_t *dummy )' % document.agmodule,      unit=current  )
         document.impl('{',                                                     unit=current  )
 
     def characters( self, content ):
@@ -444,7 +435,7 @@ class Module ( Handler ):
         document.head('{')
         document.head('public:')
         document.head('%s();' % document.agmodule )
-        document.head('virtual void ConstructGeometry();')
+        document.head('virtual void ConstructGeometry( const Char_t *dummy="" );')
         document.head('~%s(){ };' % document.agmodule )
 ##        if namespace:
 ##            document.head('ClassDef(%s::%s,1);'% (document.agmodule,document.agmodule) )
@@ -1907,7 +1898,6 @@ class Shape(Handler):
         try:
             args   = Dyson.Utils.Shapes.arglist( mytype )
         except:
-            ##raise AgmlShapeError( current_block, mytype )
             RaiseWarning( AgmlShapeError( current_block, mytype ) )
 
         # Check validity of attributes and issue warning if we are provided
@@ -2063,7 +2053,8 @@ class Position(Handler):
             if key in mylist:
                 pass
             else:
-                warn(  AgmlAttributeWarning( current_block, tag, key, value ) )
+                #warn(  AgmlAttributeWarning( current_block, tag, key, value ) )
+                RaiseWarning( AgmlAttributeWarning( current_block, tag, key, value ) )
         
         for key in mylist:
             att = attr.get(key,None)        
