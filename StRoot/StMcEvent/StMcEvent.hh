@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.32 2012/03/01 16:48:29 perev Exp $
+ * $Id: StMcEvent.hh,v 2.33 2012/03/22 00:37:28 perev Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.33  2012/03/22 00:37:28  perev
+ * Etr added
+ *
  * Revision 2.32  2012/03/01 16:48:29  perev
  * method Browse() added
  *
@@ -147,6 +150,7 @@ class StMcCtbHitCollection;
 class StMcSvtHitCollection;
 class StMcSsdHitCollection;
 #include "StMcEmcHitCollection.hh"
+class StMcEtrHitCollection;
 class StMcTofHitCollection;
 class StMcBTofHitCollection;
 class StMcMtdHitCollection;
@@ -166,7 +170,7 @@ public:
   virtual bool IsFolder() const {return true;}; 
   int operator==(const StMcEvent&) const;
   int operator!=(const StMcEvent&) const;
-private:  
+protected:  
   void initToZero();
   void makeColls();
 public:
@@ -246,6 +250,9 @@ public:
   StMcEmcHitCollection*        esmdvHitCollection()       {return emcHitCollection("EsmdvHits");}
   const StMcEmcHitCollection*  esmdvHitCollection() const {return emcHitCollection("EsmdvHits");}
 
+  StMcEtrHitCollection*          etrHitCollection()       { return mEtrHits; }
+  const StMcEtrHitCollection*    etrHitCollection() const { return mEtrHits; }
+
   StMcEmcHitCollection*          fpdHitCollection()       { return emcHitCollection("FpdHits"); }
   const StMcEmcHitCollection*    fpdHitCollection() const { return emcHitCollection("FpdHits"); }
 
@@ -291,6 +298,7 @@ public:
   void setPixelHitCollection(StMcPixelHitCollection*);       
   void setIstHitCollection(StMcIstHitCollection*); 
   void setFgtHitCollection(StMcFgtHitCollection*);       
+  void setEtrHitCollection(StMcEtrHitCollection*);       
   virtual void Print(Option_t *option="") const; // *MENU* 
  protected:
   char mBeg[1];				//!
@@ -326,12 +334,13 @@ public:
   StMcPixelHitCollection*        mPixelHits;
   StMcIstHitCollection*          mIstHits;
   StMcFgtHitCollection*          mFgtHits;
+  StMcEtrHitCollection*          mEtrHits;
   StObject*                      mEndColl[1];	//!
   char                           mEnd[1];	//!
   StSPtrVecMcVertex              mVertices;
   StSPtrVecMcTrack               mTracks;
   static TString                 mCvsTag;
- private:
+ protected:
   const StMcEvent& operator=(const StMcEvent&);
   StMcEvent(const StMcEvent&);
   ClassDef(StMcEvent,3)
