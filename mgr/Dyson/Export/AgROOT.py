@@ -11,10 +11,98 @@ import re
 from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning, AgmlFillMissingVarError, MixtureComponentError
 
 #enable_warnings = os.getenv('AGML_WARNINGS',False)
-enable_warnings = ( os.getenv('STAR','...adev').find('adev') < 0 )
+#enable_warnings = ( os.getenv('STAR','...adev').find('adev') < 0 )
+enable_warnings = True
 from warnings import warn
 
 from pyparsing  import *
+
+# Legacy modules have errors in their definitions which must be preserved
+# as a reference for past data sets.  We do not want to issue compile-time
+# warnings for these modules.
+legacy = [    "StarVMC/Geometry/BbcmGeo/BbcmGeo.xml",
+              "StarVMC/Geometry/BtofGeo/BtofGeo1.xml",
+              "StarVMC/Geometry/BtofGeo/BtofGeo2.xml",
+              "StarVMC/Geometry/BtofGeo/BtofGeo3.xml",
+              "StarVMC/Geometry/BtofGeo/BtofGeo4.xml",
+              "StarVMC/Geometry/BtofGeo/BtofGeo5.xml",
+              "StarVMC/Geometry/BtofGeo/BtofGeo6.xml",
+              "StarVMC/Geometry/BtofGeo/BtofGeo7.xml",
+              "StarVMC/Geometry/CalbGeo/CalbGeo1.xml",
+              "StarVMC/Geometry/CalbGeo/CalbGeo2.xml",
+              "StarVMC/Geometry/CalbGeo/CalbGeo.xml",
+              "StarVMC/Geometry/CaveGeo/CaveGeo.xml",
+              "StarVMC/Geometry/Compat/calbpar.xml",
+              "StarVMC/Geometry/Compat/dummgeo.xml",
+              "StarVMC/Geometry/Compat/etsphit.xml",
+              "StarVMC/Geometry/Compat/ffpdstep.xml",
+              "StarVMC/Geometry/Compat/fgtdgeo.xml",
+              "StarVMC/Geometry/Compat/fhcmgeo.xml",
+              "StarVMC/Geometry/Compat/fpdmgeo.xml",
+              "StarVMC/Geometry/Compat/fstdgeo.xml",
+              "StarVMC/Geometry/Compat/gembgeo.xml",
+              "StarVMC/Geometry/Compat/hpdtgeo.xml",
+              "StarVMC/Geometry/Compat/igtdgeo.xml",
+              "StarVMC/Geometry/Compat/istbego.xml",
+              "StarVMC/Geometry/Compat/itspgeo.xml",
+              "StarVMC/Geometry/Compat/pixlgeo.xml",
+              "StarVMC/Geometry/Compat/richgeo.xml",
+              "StarVMC/Geometry/Compat/tpcegeo3.xml",
+              "StarVMC/Geometry/Compat/tpcegeo.xml",
+              "StarVMC/Geometry/Compat/wallgeo.xml",
+              "StarVMC/Geometry/Compat/xgeometry.xml",
+              "StarVMC/Geometry/EcalGeo/EcalGeo6.xml",
+              "StarVMC/Geometry/EcalGeo/EcalGeo.xml",
+              "StarVMC/Geometry/FpdmGeo/FpdmGeo1.xml",
+              "StarVMC/Geometry/FpdmGeo/FpdmGeo2.xml",
+              "StarVMC/Geometry/FpdmGeo/FpdmGeo3.xml",
+              "StarVMC/Geometry/FsceGeo/FsceGeo.xml",
+              "StarVMC/Geometry/FtpcGeo/FtpcGeo1.xml",
+              "StarVMC/Geometry/FtpcGeo/FtpcGeo.xml",
+              "StarVMC/Geometry/FtroGeo/FtroGeo.xml",
+              "StarVMC/Geometry/MagpGeo/MagpGeo.xml",
+              "StarVMC/Geometry/MutdGeo/MutdGeo2.xml",
+              "StarVMC/Geometry/MutdGeo/MutdGeo3.xml",
+              "StarVMC/Geometry/MutdGeo/MutdGeo4.xml",
+              "StarVMC/Geometry/MutdGeo/MutdGeo.xml",
+              "StarVMC/Geometry/PhmdGeo/PhmdGeo.xml",
+              "StarVMC/Geometry/PipeGeo/PipeGeo00.xml",
+              "StarVMC/Geometry/PipeGeo/PipeGeo.xml",
+              "StarVMC/Geometry/PixlGeo/PixlGeo3.xml",
+              "StarVMC/Geometry/QuadGeo/QuadGeo.xml",
+              "StarVMC/Geometry/SconGeo/SconGeo.xml",
+              "StarVMC/Geometry/ShldGeo/ShldGeo.xml",
+              "StarVMC/Geometry/SisdGeo/SisdGeo1.xml",
+              "StarVMC/Geometry/SisdGeo/SisdGeo2.xml",
+              "StarVMC/Geometry/SisdGeo/SisdGeo3.xml",
+              "StarVMC/Geometry/SisdGeo/SisdGeo4.xml",
+              "StarVMC/Geometry/SisdGeo/SisdGeo5.xml",
+              "StarVMC/Geometry/SisdGeo/SisdGeo6.xml",
+              "StarVMC/Geometry/SisdGeo/SisdGeo.xml",
+              "StarVMC/Geometry/SupoGeo/SupoGeo1.xml",
+              "StarVMC/Geometry/SupoGeo/SupoGeo.xml",
+              "StarVMC/Geometry/SvttGeo/SvttGeo10.xml",
+              "StarVMC/Geometry/SvttGeo/SvttGeo11.xml",
+              "StarVMC/Geometry/SvttGeo/SvttGeo1.xml",
+              "StarVMC/Geometry/SvttGeo/SvttGeo2.xml",
+              "StarVMC/Geometry/SvttGeo/SvttGeo3.xml",
+              "StarVMC/Geometry/SvttGeo/SvttGeo4.xml",
+              "StarVMC/Geometry/SvttGeo/SvttGeo5.xml",
+              "StarVMC/Geometry/SvttGeo/SvttGeo6.xml",
+              "StarVMC/Geometry/SvttGeo/SvttGeo7.xml",
+              "StarVMC/Geometry/SvttGeo/SvttGeo9.xml",
+              "StarVMC/Geometry/SvttGeo/SvttGeo.xml",
+              "StarVMC/Geometry/TestGeo/TestGeo1.xml",
+              "StarVMC/Geometry/TpceGeo/TpceGeo1.xml",
+              "StarVMC/Geometry/TpceGeo/TpceGeo2.xml",
+              "StarVMC/Geometry/UpstGeo/UpstGeo.xml",
+              "StarVMC/Geometry/VpddGeo/VpddGeo1.xml",
+              "StarVMC/Geometry/VpddGeo/VpddGeo2.xml",
+              "StarVMC/Geometry/VpddGeo/VpddGeo.xml",
+              "StarVMC/Geometry/ZcalGeo/ZcalGeo.xml"
+              ]
+
+
 
 # Control Flags
 # ==========================================================
@@ -69,7 +157,7 @@ locator = None
 # locator to the exception
 def RaiseWarning( exception, warning=True ):
 
-    enable_warnings = ( os.getenv('STAR','...adev').find('adev') < 0 )    
+    #enable_warnings = ( os.getenv('STAR','...adev').find('adev') < 0 )    
     if not enable_warnings:
         return
     
@@ -247,11 +335,15 @@ class Document( Handler ):
         self.parent = p
 
     def startElement(self, tag, attr):
-
+        global enable_warnings
+        
         self.options  = attr.get('cmdline',None)   # The command line options
         self.input    = attr.get('file')           # The complete path to the input file
         self.agmodule = self.GetModule()           # The name of the AgModule
         self.agpath   = self.options.path_name     # The path to store the exported files
+
+        enable_warnings = not (self.input in legacy)
+        
         try:
             os.mkdir( self.agpath )
         except OSError:            
