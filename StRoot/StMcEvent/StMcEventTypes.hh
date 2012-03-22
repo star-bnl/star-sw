@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.14 2011/10/11 01:15:35 perev Exp $
+ * $Id: StMcEventTypes.hh,v 2.15 2012/03/22 00:38:52 perev Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.15  2012/03/22 00:38:52  perev
+ * Etr added
+ *
  * Revision 2.14  2011/10/11 01:15:35  perev
  * Mtd added
  *
@@ -105,6 +108,8 @@
 #include "StMcFgtHit.hh"
 #include "StMcFgtHitCollection.hh"
 #include "StMcFgtLayerHitCollection.hh"
+#include "StMcEtrHit.hh"
+#include "StMcEtrHitCollection.hh"
 #include "StMcTrack.hh"
 #include "StMcVertex.hh"
 #endif

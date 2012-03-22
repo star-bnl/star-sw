@@ -8,8 +8,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.32 2012/03/01 16:48:29 perev Exp $
+ * $Id: StMcEvent.cc,v 2.33 2012/03/22 00:36:41 perev Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.33  2012/03/22 00:36:41  perev
+ * Etr added
+ *
  * Revision 2.32  2012/03/01 16:48:29  perev
  * method Browse() added
  *
@@ -142,6 +145,7 @@
 #include "StMcPixelHitCollection.hh"
 #include "StMcIstHitCollection.hh"
 #include "StMcFgtHitCollection.hh"
+#include "StMcEtrHitCollection.hh"
 #include "StMcContainers.hh" 
 #include "StMcVertex.hh"
 #include "StMcTrack.hh"
@@ -157,12 +161,13 @@
 #include "StMcPixelHit.hh"
 #include "StMcIstHit.hh"
 #include "StMcFgtHit.hh"
+#include "StMcEtrHit.hh"
 #include "tables/St_g2t_event_Table.h"
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.32 2012/03/01 16:48:29 perev Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.32 2012/03/01 16:48:29 perev Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.33 2012/03/22 00:36:41 perev Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.33 2012/03/22 00:36:41 perev Exp $";
 ClassImp(StMcEvent);
 //______________________________________________________________________________
 void StMcEvent::initToZero()
@@ -186,6 +191,7 @@ void StMcEvent::makeColls()
     mPixelHits = new StMcPixelHitCollection();
     mIstHits  = new StMcIstHitCollection();
     mFgtHits  = new StMcFgtHitCollection();
+    mEtrHits  = new StMcEtrHitCollection();
 }
 
 //______________________________________________________________________________
@@ -461,8 +467,6 @@ void StMcEvent::setFgtHitCollection(StMcFgtHitCollection* val)
 {
     if (mFgtHits && mFgtHits!= val) delete mFgtHits;
     mFgtHits = val;
-}   
-//______________________________________________________________________________
 #define PrintHeader(Name,name) \
   const StMc ## Name ## HitCollection *name ## Coll = name ## HitCollection();\
   cout << "---------------------------------------------------------" << endl;\
@@ -683,6 +687,7 @@ void StMcEvent::Print(Option_t *option) const {
   PrintHitCollectionL(Pixel,pixel,layer,Layers);
   PrintHitCollectionL(Ist,ist,layer,Layers);
   PrintHitCollectionL(Fgt,fgt,layer,Layers);
+  PrintHitCollection(Etr,etr);
   
   TDataSet *mcEvent = (TDataSet *) this;
   TDataSetIter next(mcEvent);
