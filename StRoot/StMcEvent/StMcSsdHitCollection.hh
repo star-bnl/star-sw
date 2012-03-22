@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSsdHitCollection.hh,v 2.3 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcSsdHitCollection.hh,v 2.4 2012/03/22 01:08:54 perev Exp $
  * $Log: StMcSsdHitCollection.hh,v $
+ * Revision 2.4  2012/03/22 01:08:54  perev
+ * private => protected
+ *
  * Revision 2.3  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -37,7 +40,7 @@ public:
     
     StMcSsdLadderHitCollection*       ladder(unsigned int);
     const StMcSsdLadderHitCollection* ladder(unsigned int) const;
-private:
+protected:
     enum { mNumberOfLadders = 20 };
     StMcSsdLadderHitCollection mLadders[mNumberOfLadders];
     ClassDef(StMcSsdHitCollection,1)
