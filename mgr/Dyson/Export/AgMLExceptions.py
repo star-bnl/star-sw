@@ -141,7 +141,7 @@ class AgmlAttributeWarning(Warning):
         self.value  = value
     def __str__(self):
         output = """
-        
+
         --> AgML Warning line %i: %s has invalid attribute %s="%s" <--
         """%(self.locator.getLineNumber(),self.tag,self.key,self.value)
         return YELLOW(output)
