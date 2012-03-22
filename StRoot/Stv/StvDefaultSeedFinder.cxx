@@ -51,7 +51,7 @@ void StvDefaultSeedFinder::Reset()
     StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
     const float *x = stiHit->x();
 //    float r2 = x[0]*x[0] + x[1]*x[1]+ x[2]*x[2];
-    float r2 = x[0]*x[0] + x[1]*x[1];
+    float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
     f1stHitMap->insert(std::pair<float,StvHit*>(-r2, stiHit));
     fMultiHits->Add(stiHit,x);
   } 
@@ -156,43 +156,11 @@ if (selJkk>=0) printf("***Selected*** selJkk = %d\n",selJkk);
       { 
 	StvHit *nexHit = (StvHit*)node->GetObj();
         if (nexHit->timesUsed()) continue;
-
-
-static const float myHits[][3]=
-// {{2.00477,-98.8,-196.035}
-// ,{2.70094,-93.6,-186.455}
-// ,{3.24008,-88.8,-176.757}
-// ,{3.85773,-84  ,-166.854}
-// ,{4.37594,-79.2,-157.731}
-// ,{4.8732 ,-74.4,-147.316}
-// ,{5.14539,-69.6,-137.009}
-// ,{5.49086,-64.8,-127.662}
-// ,{5.53797,-60  ,-118.081}
-
-{{43.2743,107.113,115.202}
-,{31.803,107.732,120.926}
-,{14.4888,104,129.818}
-,{3.80539,98.8,135.668}
-,{-2.97312,93.6,139.992}
-,{-8.53727,88.8,143.778}
-,{-12.2537,84,146.685}
-,{0}};
-const float *myX = nexHit->x();
-double myMin=0.5,myDif=0;
-int jkk=-1;
-for (int jk=0;myHits[jk][0];jk++) {
-  myDif = 0; for (int j=0;j<3;j++) {  myDif +=fabs(myX[j]-myHits[jk][j]);}
-  if (myDif>myMin) continue;
-  jkk=jk;}
- if (jkk>=0) { printf("jkk=%d %g %g %g\n",jkk,myX[0],myX[1],myX[2]);}
-
 	int ans = mSel.Reject(nexHit->x());
 	if (ans>0) continue;
+        if (ans<0) fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
 	if (minLen>mSel.mHitLen) { //Selecting the best
           delete selObj; minLen=mSel.mHitLen; selHit=nexHit;
-          selJkk = jkk;
-          mSel.Update();fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
-//          if (jkk>=0) printf("jkk=%d accepted\n",jkk);
 
         } //endSelecting the best
       } //endMultiIter loop
@@ -245,7 +213,7 @@ StvDebug::Break(nCall);
   
     case 0: {
       for (int i=0;i<3;i++) {mDir[i]=-mHit[i];}
-      mDir[2]/=2;stp=0;
+      stp=0;
       for (int i=0;i<3;i++) {stp+=mDir[i]*mDir[i];}
       stp = sqrt(stp);
       for (int i=0;i<3;i++) {mDir[i]/=stp;}
