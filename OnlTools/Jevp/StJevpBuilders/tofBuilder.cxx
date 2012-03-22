@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h>   
 #include <algorithm>
 
 #include "Jevp/StJevpPlot/JevpPlotSet.h"
@@ -65,6 +65,7 @@ void tofBuilder::initialize(int argc, char *argv[]) {
     sprintf(tmpchr,"TOF_Tray%03d_LE_hitmap",i+1);
     sprintf(tmpchr1,"Tray %03d Leading hitmap",i+1);
     contents.TOF_Tray_LEhitmap[i] = new TH1F(tmpchr,tmpchr1,192,-0.5,191.5);
+    //cout<<"booking "<<i<<"\t"<<contents.TOF_Tray_LEhitmap[i]<<endl;
     contents.TOF_Tray_LEhitmap[i]->SetLineColor(2);
 
     sprintf(tmpchr,"TOF_Tray%03d_TE_hitmap",i+1);
@@ -72,7 +73,7 @@ void tofBuilder::initialize(int argc, char *argv[]) {
     extra.TOF_Tray_TEhitmap[i] = new TH1F(tmpchr,tmpchr1,192,-0.5,191.5);
     extra.TOF_Tray_TEhitmap[i]->SetLineColor(4);
   }
-  contents.hBunchidShiftVSthub = new TH2F("hBunchidShiftVSthub","hBunchidShiftVSthub",8,0.5,8.5,50,-24.5,25.5);
+  contents.hBunchidShiftVSthub = new TH2F("hBunchidShiftVSthub","hBunchidShiftVSthub",8,0.5,8.5,250,-124.5,125.5);
   
   //contents.TOF_L1mult_vs_ZDCadcsum=new TH2F("TOF_L1_vs_ZDCadcsum","TOF_L1_vs_ZDCadcsum",144,0.5,2880.5,150,0,3000);//auau
   contents.TOF_L1mult_vs_ZDCadcsum=new TH2F("TOF_L1_vs_ZDCadcsum","TOF_L1_vs_ZDCadcsum",200,0.5,200.5,200,0.5,200.5);//pp200
@@ -103,8 +104,6 @@ void tofBuilder::initialize(int argc, char *argv[]) {
 
   contents.upvpd_eastT_vs_westT=new TH2F("upvpd_eastT_vs_westT","upvpd eastT vs westT",400,0,51200,400,0,51200);
   contents.upvpd_eastT_vs_westT->SetXTitle("east time (ns)");
-
-
 
   int n=0;
   for(n=0;n<NTRAYS;n++) {
@@ -277,28 +276,6 @@ void tofBuilder::startrun(daqReader *rdr) {
   // LOG("TOF", "::starrun() done");
 }
 
-int tofBuilder::Get_TOFTHUB(int trayid){
-
-  int trayinTHUB1[30]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,51,52,53,54,55,56,57,58,59,60};
-  int trayinTHUB2[30]={21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50};
-  int trayinTHUB3[30]={61,62,63,64,65,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120};
-  int trayinTHUB4[30]={66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95};
-
-  if(trayid<1 || trayid>120) return -1;
-
-  int nthub=-1;
-
-  for(int itray=0;itray<30;itray++){
-    if(trayid == trayinTHUB1[itray]) nthub=0;
-    if(trayid == trayinTHUB2[itray]) nthub=1;
-    if(trayid == trayinTHUB3[itray]) nthub=2;
-    if(trayid == trayinTHUB4[itray]) nthub=3;
-  }
-
-  return nthub;  
-
-}
-
 int tofBuilder::TDIGChan2TINOChan(int tdc,int chan)
 {
   int tdcid[24]  ={0,1,0,1,0,1,2,0,2,0,1,0,1,2,0,2,0,2,2,1,2,1,2,1};
@@ -346,33 +323,54 @@ int tofBuilder::parseData(daqReader *rdr)
 //      for(int iii=0;iii<120;iii++)
 //	trigwindowHighpertray[iii]=trigwindowLowpertray[iii]+80;
 
-      float trigwindowCenterpertray[120]={ //run12 13037090.
-        2910.1,2909.8,2909.4,2910.8,2917.0,2917.3,2917.9,2918.3,2917.3,2918.6,
-        2917.9,2917.7,2916.2,2914.9,2918.4,2917.9,2910.1,2911.2,2911.3,2911.5,
-        2837.2,2837.4,2837.4,2836.0,2835.2,2835.5,2841.8,2844.4,2841.7,2840.9,
-        2842.2,2850.3,2851.0,2849.9,2851.2,2850.4,2851.5,2849.8,2851.3,2843.9,
-        2843.2,2844.2,2843.4,2841.9,2833.3,2834.6,2835.8,2837.2,2836.6,2833.6,
-        2892.3,2895.1,2892.9,2901.6,2901.4,2903.6,2902.7,2902.3,2909.7,2910.3,
-        2904.6,2905.6,2897.0,2897.0,2897.6,2901.6,2899.1,2901.3,2899.5,2902.6,
-        2901.8,2906.5,2909.8,2907.6,2909.5,2906.4,2914.7,2917.3,2917.7,2915.0,
-        2914.2,2914.1,2915.7,2914.9,2905.9,2907.1,2906.5,2907.2,2905.4,2899.4,
-        2899.4,2902.2,2899.2,2899.1,  0.0,2913.2,2913.6,2913.4,2912.6,2921.5,
-        2921.6,  0.0,2920.9,2921.2,2921.0,2920.6,2920.8,2920.6,2920.7,2919.7,
-        2919.2,2912.0,2915.5,2912.2,2911.9,2913.1,2912.3,2902.4,2904.0,2905.5
+//       float trigwindowCenterpertray[120]={ //run12 13037090.
+//         2910.1,2909.8,2909.4,2910.8,2917.0,2917.3,2917.9,2918.3,2917.3,2918.6,
+//         2917.9,2917.7,2916.2,2914.9,2918.4,2917.9,2910.1,2911.2,2911.3,2911.5,
+//         2837.2,2837.4,2837.4,2836.0,2835.2,2835.5,2841.8,2844.4,2841.7,2840.9,
+//         2842.2,2850.3,2851.0,2849.9,2851.2,2850.4,2851.5,2849.8,2851.3,2843.9,
+//         2843.2,2844.2,2843.4,2841.9,2833.3,2834.6,2835.8,2837.2,2836.6,2833.6,
+//         2892.3,2895.1,2892.9,2901.6,2901.4,2903.6,2902.7,2902.3,2909.7,2910.3,
+//         2904.6,2905.6,2897.0,2897.0,2897.6,2901.6,2899.1,2901.3,2899.5,2902.6,
+//         2901.8,2906.5,2909.8,2907.6,2909.5,2906.4,2914.7,2917.3,2917.7,2915.0,
+//         2914.2,2914.1,2915.7,2914.9,2905.9,2907.1,2906.5,2907.2,2905.4,2899.4,
+//         2899.4,2902.2,2899.2,2899.1,  0.0,2913.2,2913.6,2913.4,2912.6,2921.5,
+//         2921.6,  0.0,2920.9,2921.2,2921.0,2920.6,2920.8,2920.6,2920.7,2919.7,
+//         2919.2,2912.0,2915.5,2912.2,2911.9,2913.1,2912.3,2902.4,2904.0,2905.5
+//       };
+//
+// now 122 trays... expanded to fix bug in hit pattern plot 3/22/2012 WJL 
+//                  (as well as several bugs in the VPD plots)
+      float trigwindowCenterpertray[122]={	 //run12 13082005
+		2907.9,2908.3,2908.0,2908.4,2915.6,2915.9,2915.2,2915.5,2915.2,2915.7,
+		2916.0,2915.9,2914.0,2914.2,2916.4,2916.6,2908.8,2908.7,2909.3,2909.2,
+		2835.9,2835.5,2835.4,2835.0,2833.2,2833.3,2840.7,2843.5,2840.0,2840.0,
+		2840.3,2848.6,2849.8,2848.4,2849.6,2848.1,2849.6,2848.0,2849.4,2841.9,
+		2843.0,2842.7,2842.5,2839.5,2832.8,2832.4,2834.7,2835.0,2835.3,2832.7,
+		2890.6,2893.0,2890.8,2898.6,2899.0,2900.8,2901.0,2900.7,2907.9,2908.2,
+		2902.7,2902.3,2894.8,2895.3,2895.3,2899.7,2897.8,2899.8,2897.7,2899.8,
+		2900.0,2905.5,2908.3,2903.9,2906.9,2904.0,2912.6,2914.0,2914.6,2913.3,
+		2913.0,2913.3,2913.2,2913.2,2904.3,2905.4,2904.8,2904.1,2903.9,2897.7,
+		2897.9,2898.1,2898.1,2898.4,  0.0,2911.0,2911.1,2911.3,2911.3,2919.8,
+		2919.9,  0.0,2919.7,2918.4,2918.7,2918.5,2919.8,2918.4,2918.0,2918.4,
+		2917.8,2910.1,2913.0,2909.8,2910.1,2910.8,2910.2,2901.7,2901.5,2902.4,
+		259.5,271.7
       };
       
-      int trigwindowHighpertray[120];   
-      int trigwindowLowpertray[120];    
-      for(int iii=0;iii<120;iii++){     
-        trigwindowLowpertray[iii]=trigwindowCenterpertray[iii]-40;
-        trigwindowHighpertray[iii]=trigwindowCenterpertray[iii]+40;
+      int trigwindowHighpertray[122];
+      int trigwindowLowpertray[122];
+      int triggeredcrossinghalfwindow = 40;
+      for(int iii=0;iii<122;iii++){
+      	int center	= trigwindowCenterpertray[iii] + 0.5; 	// convert float to nearest integer "NINT"
+		if (iii>=120){ triggeredcrossinghalfwindow = 30; }	// not strictly necessary but better than 40
+        trigwindowLowpertray[iii]	= center - triggeredcrossinghalfwindow;
+        trigwindowHighpertray[iii]	= center + triggeredcrossinghalfwindow;
       }
       
       for(int ifib=0;ifib<4;ifib++){
 	int ndataword = tof->ddl_words[ifib];
 	if(ndataword<=0) continue;
 	for(int iword=0;iword<ndataword;iword++){
-	  int dataword=tof->ddl[ifib][iword];
+	  unsigned int dataword = tof->ddl[ifib][iword];
 
 	  // error stuff...
 	  int packetid = (dataword&0xF0000000)>>28;
@@ -415,20 +413,23 @@ int tofBuilder::parseData(daqReader *rdr)
 	  int timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
 	  int time = timeinbin * 25./1024;   // time in ns 
 
+	  float trgTime = 25.*bunchid;
+	  float timeDiff = time - trgTime;
+	  while(timeDiff<0) timeDiff += 51200;
 
 	  if((trayid == 121) || (trayid == 122)) {    // handle upvpd...
 	    int moduleid=-1;
 	    int modulechan=-1;
 	    int globalmodulechan=-1;
-	    
 	    moduleid=trayid;
 	    modulechan=tdcchan2upvpdPMTchan(globaltdcchan,edgeid,trayid);
 	    globalmodulechan=modulechan;
-	  
-	    contents.upvpd_hitmap[edgeid-4]->Fill(modulechan);  
-	    numberforsort= time+globalmodulechan*1.e5+trayid*1.e8;
-	    if(edgeid==4) leadinghits.push_back(numberforsort);
-	    if(edgeid==5) trailinghits.push_back(numberforsort);
+		if (timeDiff<trigwindowLowpertray[trayid-1] || timeDiff>trigwindowHighpertray[trayid-1]){ 
+			contents.upvpd_hitmap[edgeid-4]->Fill(modulechan);  
+			numberforsort= time+globalmodulechan*1.e5+trayid*1.e8;
+			if(edgeid==4) leadinghits.push_back(numberforsort);
+			if(edgeid==5) trailinghits.push_back(numberforsort);
+		}
 	  }
 
 	  if(edgeid==4) {
@@ -443,18 +444,11 @@ int tofBuilder::parseData(daqReader *rdr)
 
 	  if(edgeid !=4) continue;    // leading edge data is enough
 
+	  if ( timeDiff<trigwindowLowpertray[trayid-1] 
+	    || timeDiff>trigwindowHighpertray[trayid-1] ) continue;
 
-	  float trgTime = 25.*bunchid;
-	  float timeDiff = time- trgTime;
-	  while(timeDiff<0) timeDiff += 51200;
-
-	  //int thub=Get_TOFTHUB(trayid);
-	  //if(timeDiff<trigwindowLow[thub] || timeDiff>trigwindowHigh[thub]) continue;   // trigger window cut
-
-	  if(timeDiff<trigwindowLowpertray[trayid-1] || timeDiff>trigwindowHighpertray[trayid-1]) continue;
-
-	  int atdig = globaltdcchan/24;   // 0,1,....7
-	  int atdcid  = globaltdcchan/8;    // 0,1,....24    
+	  int atdig = globaltdcchan/24;     // [0,7]
+	  int atdcid  = globaltdcchan/8;    // [0,23]    
 	  int ahptdcid = atdcid%3;
 	  int atdcchan = globaltdcchan%8;
 	  int tinoid=TDIGChan2TINOChan(ahptdcid,atdcchan);
