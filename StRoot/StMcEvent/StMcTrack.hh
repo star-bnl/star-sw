@@ -6,11 +6,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.27 2011/10/11 01:22:24 perev Exp $
+ * $Id: StMcTrack.hh,v 2.28 2012/03/22 01:03:21 perev Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.hh,v $
+ * Revision 2.28  2012/03/22 01:03:21  perev
+ * Etr add
+ *
  * Revision 2.27  2011/10/11 01:22:24  perev
  * Not used anymore or ever
  *
@@ -203,6 +206,8 @@ public:
   const StPtrVecMcIstHit& istHits() const { return mIstHits; }
   StPtrVecMcFgtHit& fgtHits() { return mFgtHits; }
   const StPtrVecMcFgtHit& fgtHits() const { return mFgtHits; }
+  StPtrVecMcEtrHit& etrHits() { return mEtrHits; }
+  const StPtrVecMcEtrHit& etrHits() const { return mEtrHits; }
   StParticleDefinition* particleDefinition();
   const StParticleDefinition* particleDefinition() const { return mParticleDefinition; }
   const StPtrVecMcHit *Hits(StDetectorId Id) const;
@@ -238,6 +243,7 @@ public:
     void setPixelHits(StPtrVecMcPixelHit&); 
     void setIstHits(StPtrVecMcIstHit&); 
     void setFgtHits(StPtrVecMcFgtHit&); 
+    void setEtrHits(StPtrVecMcEtrHit&); 
 
     void setShower(char); 
     void setGeantId(long); 
@@ -268,6 +274,7 @@ public:
     void addPixelHit(StMcPixelHit*); 
     void addIstHit(StMcIstHit*);
     void addFgtHit(StMcFgtHit*); 
+    void addEtrHit(StMcEtrHit*); 
     void removeTpcHit(StMcTpcHit*); 
     void removeSvtHit(StMcSvtHit*); 
     void removeSsdHit(StMcSsdHit*); 
@@ -289,6 +296,7 @@ public:
     void removePixelHit(StMcPixelHit*); 
     void removeIstHit(StMcIstHit*); 
     void removeFgtHit(StMcFgtHit*); 
+    void removeEtrHit(StMcEtrHit*); 
   void Print(Option_t *option="") const;
   Bool_t IsPrimary() const {return mIsPrimary;}
     //    void setTopologyMap(StTrackTopologyMap&); 
@@ -319,6 +327,7 @@ protected:
     StPtrVecMcPixelHit       mPixelHits; 
     StPtrVecMcIstHit         mIstHits;
     StPtrVecMcFgtHit         mFgtHits; 
+    StPtrVecMcEtrHit         mEtrHits; 
   StParticleDefinition*    mParticleDefinition; //!
     StMcTrack*               mParent;
     char                     mIsShower; 
