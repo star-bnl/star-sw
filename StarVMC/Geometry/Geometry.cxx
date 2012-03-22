@@ -1047,11 +1047,13 @@ Bool_t Geometry::FpdmInit()
 Bool_t Geometry::FsceInit()
 {
   fsceGeom.select="FSCEv0"; fsceGeom.config=1; fsceGeom.module="FsceGeo"; fsceGeom.fill();
+  return true;
 }
 
 Bool_t Geometry::EiddInit()
 {
   eiddGeom.select="EIDDv0"; eiddGeom.config=1; eiddGeom.module="EiddGeo"; eiddGeom.fill();
+  return true;
 }
 
 Bool_t Geometry::FtpcInit()
