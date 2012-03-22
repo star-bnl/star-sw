@@ -16,11 +16,11 @@ static const double chekCORRMAX  = 0.9999;
 static double MAXTAN = 100;
 //                              x   y   z  psi   pt  tan      cur
 static double MAXNODPARS[]   ={555,555,555,6.66,111, MAXTAN+1, .1};
-//                              h  z   a    l  ptin
-static const double MAXFITPARS[]   ={22,22, .5 , .5 ,20};
-static const double BIGFITPARS[]   ={0.1 ,0.1, .1 , .1 ,0.01},BIGFITPART=0.01;
-static const double MAXFITERR[5]   ={.3,.3 ,.03 ,.03 ,1};
-static const double MAXERRFACT     = 16;
+//                                   h    z   a     l   ptin
+static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,20  };
+static const double BIGFITPARS[]   ={0.1 ,0.1,0.1 ,0.1 ,0.01},BIGFITPART=0.01;
+static const double MAXFITERR[5]   ={0.5,0.5 ,0.3 ,.3 ,10};
+static const double MAXERRFACT     = 1;
 //______________________________________________________________________________ 
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B)
 {
@@ -344,7 +344,7 @@ const StvFitErrs &StvFitErrs::operator*(const Mtx55D_t &how) const
 static StvFitErrs myFitErrs;
   TCL::trasat(how[0],Arr(),myFitErrs.Arr(),5,5);
   myFitErrs.mHz = mHz;
-  assert(!myFitErrs.Check("StvFitErrs::operator*") || 1);
+  myFitErrs.Recov();
   return myFitErrs;
 }  
 //______________________________________________________________________________
@@ -382,6 +382,8 @@ mZP = (1/mHz)*emx->mCZ*cosL;
 mAP = (1/mHz)*emx->mAC + (1/mHz)*emx->mCZ*(-sinL*rho);
 mLP = (1/mHz)*emx->mCL;
 mPP = (1/mHz)*emx->mCC*(1/mHz);
+Recov();
+
 }  
 //______________________________________________________________________________
 void StvFitErrs::Get(THelixTrack *he) const
@@ -431,7 +433,7 @@ void StvFitErrs::Backward()
 //_____________________________________________________________________________
 int StvFitErrs::Check(const char *tit) const
 {
-
+  ((StvFitErrs*)((void*)this))->Recov();
   int ierr=0;
   double dia[5];const double *e=&mHH;
   for (int i=0,li=0;i< 5;li+=++i) {
@@ -447,6 +449,36 @@ ERR: if (!tit) return ierr;
   printf("StvFitErrs::Check(%s)=%d\n",tit,ierr);
   Print();
   return ierr;
+}     
+//_____________________________________________________________________________
+int StvFitErrs::Recov()
+{
+
+  double dia[5],fak[5];double *e=&mHH;
+
+  int nerr=0;
+//		Check diag errs
+  for (int i=0,li=0;i< 5;li+=++i) {
+    fak[i]=1;
+    if (e[li+i] < MAXFITERR[i]*MAXFITERR[i]) continue;
+    fak[i] = 0.99*MAXFITERR[i]/sqrt(e[li+i]); nerr++;
+  };
+  if (nerr) {  		//Recovery
+    for (int i=0,li=0;i< 5;li+=++i) {
+      for (int j=0;j<=i;j++) {
+        e[li+j]*=fak[i]*fak[j];
+  } } }
+
+//		Check correlations & Recovery
+  for (int i=0,li=0;i< 5;li+=++i) {
+    dia[i]=e[li+i];
+    for (int j=0;j<i;j++) {
+       if (e[li+j]*e[li+j]<dia[i]*dia[j]) continue;
+       double qwe = 0.98*sqrt(dia[i]*dia[j]);
+       e[li+j] = (e[li+j]<0)? -qwe:qwe;
+       nerr++;
+  } }
+  return nerr;
 }     
 
 //_____________________________________________________________________________
