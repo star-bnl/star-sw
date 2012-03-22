@@ -1643,6 +1643,8 @@ Bool_t AgStructure::AgDetpSet()
 
     }
 
+  return true;
+
 }
 
 

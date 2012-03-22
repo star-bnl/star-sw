@@ -20,7 +20,7 @@ AgCreate::~AgCreate()
 }
 // ---------------------------------------------------------------------------------------
 Double_t & AgCreate::par( const Char_t *name )
-{ static Double_t _dummy = 0;
+{ 
   TString key = name;
   return mParameters[ key ]; // allow the creation of a parameter at any time
 }
