@@ -2130,7 +2130,7 @@
                 ///@}        
           } // End Block EXGT     
     // ----------------------------------------------------------------------- geoctr
-       void EcalGeo::ConstructGeometry()     
+       void EcalGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup EcalGeo_revision        
              ///@{           

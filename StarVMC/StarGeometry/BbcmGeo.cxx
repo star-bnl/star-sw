@@ -466,7 +466,7 @@
                 ///@}        
           } // End Block BPOL     
     // ----------------------------------------------------------------------- geoctr
-       void BbcmGeo::ConstructGeometry()     
+       void BbcmGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup BbcmGeo_revision        
              ///@{           

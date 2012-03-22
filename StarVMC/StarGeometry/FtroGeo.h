@@ -271,7 +271,7 @@ namespace FTROGEO // $NMSPC
    { 
       public: 
       FtroGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~FtroGeo(){ }; 
       ClassDef(FtroGeo,1); 
       public: 

@@ -180,7 +180,7 @@
                 ///@}        
           } // End Block FSCT     
     // ----------------------------------------------------------------------- geoctr
-       void FsceGeo::ConstructGeometry()     
+       void FsceGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup FsceGeo_revision        
              ///@{           

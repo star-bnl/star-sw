@@ -1803,7 +1803,7 @@
                 ///@}        
           } // End Block SCMY     
     // ----------------------------------------------------------------------- geoctr
-       void SvttGeo5::ConstructGeometry()     
+       void SvttGeo5::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup SvttGeo5_revision        
              ///@{           

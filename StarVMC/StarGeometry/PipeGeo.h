@@ -339,7 +339,7 @@ namespace PIPEGEO // $NMSPC
    { 
       public: 
       PipeGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~PipeGeo(){ }; 
       ClassDef(PipeGeo,1); 
       public: 

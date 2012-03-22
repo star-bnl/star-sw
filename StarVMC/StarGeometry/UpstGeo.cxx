@@ -533,7 +533,7 @@
                 ///@}        
           } // End Block PVAG     
     // ----------------------------------------------------------------------- geoctr
-       void UpstGeo::ConstructGeometry()     
+       void UpstGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup UpstGeo_revision        
              ///@{           

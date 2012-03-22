@@ -1005,7 +1005,7 @@
                 ///@}        
           } // End Block SHST     
     // ----------------------------------------------------------------------- geoctr
-       void SupoGeo::ConstructGeometry()     
+       void SupoGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup SupoGeo_revision        
              ///@{           

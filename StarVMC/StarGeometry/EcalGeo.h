@@ -475,7 +475,7 @@ namespace ECALGEO // $NMSPC
    { 
       public: 
       EcalGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~EcalGeo(){ }; 
       ClassDef(EcalGeo,1); 
       public: 

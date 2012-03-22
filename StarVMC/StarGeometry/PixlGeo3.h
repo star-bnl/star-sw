@@ -163,7 +163,7 @@ namespace PIXLGEO3 // $NMSPC
    { 
       public: 
       PixlGeo3(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~PixlGeo3(){ }; 
       ClassDef(PixlGeo3,1); 
       public: 

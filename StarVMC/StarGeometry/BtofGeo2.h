@@ -943,7 +943,7 @@ namespace BTOFGEO2 // $NMSPC
    { 
       public: 
       BtofGeo2(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~BtofGeo2(){ }; 
       ClassDef(BtofGeo2,1); 
       public: 

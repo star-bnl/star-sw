@@ -1037,7 +1037,7 @@ namespace BTOFGEO4 // $NMSPC
    { 
       public: 
       BtofGeo4(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~BtofGeo4(){ }; 
       ClassDef(BtofGeo4,1); 
       public: 

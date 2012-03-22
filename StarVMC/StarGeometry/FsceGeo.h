@@ -59,7 +59,7 @@ namespace FSCEGEO // $NMSPC
    { 
       public: 
       FsceGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~FsceGeo(){ }; 
       ClassDef(FsceGeo,1); 
       public: 

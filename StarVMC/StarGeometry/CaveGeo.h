@@ -69,7 +69,7 @@ namespace CAVEGEO // $NMSPC
    { 
       public: 
       CaveGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~CaveGeo(){ }; 
       ClassDef(CaveGeo,1); 
       public: 

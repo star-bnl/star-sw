@@ -65,7 +65,7 @@ namespace TUTRGEO3 // $NMSPC
    { 
       public: 
       TutrGeo3(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~TutrGeo3(){ }; 
       ClassDef(TutrGeo3,1); 
       public: 

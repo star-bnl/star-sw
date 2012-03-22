@@ -1901,7 +1901,7 @@
                 ///@}        
           } // End Block BWAT     
     // ----------------------------------------------------------------------- geoctr
-       void BtofGeo1::ConstructGeometry()     
+       void BtofGeo1::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup BtofGeo1_revision        
              ///@{           

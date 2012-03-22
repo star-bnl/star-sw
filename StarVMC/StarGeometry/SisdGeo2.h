@@ -989,7 +989,7 @@ namespace SISDGEO2 // $NMSPC
    { 
       public: 
       SisdGeo2(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~SisdGeo2(){ }; 
       ClassDef(SisdGeo2,1); 
       public: 

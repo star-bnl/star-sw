@@ -1091,7 +1091,7 @@ namespace SISDGEO6 // $NMSPC
    { 
       public: 
       SisdGeo6(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~SisdGeo6(){ }; 
       ClassDef(SisdGeo6,1); 
       public: 

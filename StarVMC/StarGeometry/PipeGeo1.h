@@ -95,7 +95,7 @@ namespace PIPEGEO1 // $NMSPC
    { 
       public: 
       PipeGeo1(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~PipeGeo1(){ }; 
       ClassDef(PipeGeo1,1); 
       public: 

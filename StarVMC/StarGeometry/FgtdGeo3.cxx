@@ -2089,7 +2089,7 @@
                 ///@}        
           } // End Block FGWE     
     // ----------------------------------------------------------------------- geoctr
-       void FgtdGeo3::ConstructGeometry()     
+       void FgtdGeo3::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup FgtdGeo3_revision        
              ///@{           

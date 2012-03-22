@@ -1601,7 +1601,7 @@ namespace SVTTGEO2 // $NMSPC
    { 
       public: 
       SvttGeo2(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~SvttGeo2(){ }; 
       ClassDef(SvttGeo2,1); 
       public: 

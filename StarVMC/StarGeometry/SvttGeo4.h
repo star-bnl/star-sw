@@ -1413,7 +1413,7 @@ namespace SVTTGEO4 // $NMSPC
    { 
       public: 
       SvttGeo4(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~SvttGeo4(){ }; 
       ClassDef(SvttGeo4,1); 
       public: 

@@ -967,7 +967,7 @@
                 ///@}        
           } // End Block FHMS     
     // ----------------------------------------------------------------------- geoctr
-       void FpdmGeo1::ConstructGeometry()     
+       void FpdmGeo1::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup FpdmGeo1_revision        
              ///@{           

@@ -59,7 +59,7 @@ namespace TESTGEO1 // $NMSPC
    { 
       public: 
       TestGeo1(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~TestGeo1(){ }; 
       ClassDef(TestGeo1,1); 
       public: 

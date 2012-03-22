@@ -199,7 +199,7 @@
                 ///@}        
           } // End Block PVAC     
     // ----------------------------------------------------------------------- geoctr
-       void PipeGeo00::ConstructGeometry()     
+       void PipeGeo00::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup PipeGeo00_revision        
              ///@{           

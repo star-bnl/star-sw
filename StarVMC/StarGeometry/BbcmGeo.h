@@ -123,7 +123,7 @@ namespace BBCMGEO // $NMSPC
    { 
       public: 
       BbcmGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~BbcmGeo(){ }; 
       ClassDef(BbcmGeo,1); 
       public: 

@@ -1590,7 +1590,7 @@
                 ///@}        
           } // End Block SCMY     
     // ----------------------------------------------------------------------- geoctr
-       void SvttGeo9::ConstructGeometry()     
+       void SvttGeo9::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup SvttGeo9_revision        
              ///@{           

@@ -323,7 +323,7 @@ namespace MUTDGEO // $NMSPC
    { 
       public: 
       MutdGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~MutdGeo(){ }; 
       ClassDef(MutdGeo,1); 
       public: 

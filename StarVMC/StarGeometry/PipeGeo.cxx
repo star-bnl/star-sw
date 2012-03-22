@@ -1004,7 +1004,7 @@
                 ///@}        
           } // End Block PSLD     
     // ----------------------------------------------------------------------- geoctr
-       void PipeGeo::ConstructGeometry()     
+       void PipeGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup PipeGeo_revision        
              ///@{           

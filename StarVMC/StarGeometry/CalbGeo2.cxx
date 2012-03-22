@@ -1733,7 +1733,7 @@
                 ///@}        
           } // End Block CSHI     
     // ----------------------------------------------------------------------- geoctr
-       void CalbGeo2::ConstructGeometry()     
+       void CalbGeo2::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup CalbGeo2_revision        
              ///@{           

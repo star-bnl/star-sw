@@ -229,7 +229,7 @@ namespace SISDGEO // $NMSPC
    { 
       public: 
       SisdGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~SisdGeo(){ }; 
       ClassDef(SisdGeo,1); 
       public: 

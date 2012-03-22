@@ -231,7 +231,7 @@ namespace IDSMGEO1 // $NMSPC
    { 
       public: 
       IdsmGeo1(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~IdsmGeo1(){ }; 
       ClassDef(IdsmGeo1,1); 
       public: 

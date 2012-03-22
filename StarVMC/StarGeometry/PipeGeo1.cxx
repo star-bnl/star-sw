@@ -363,7 +363,7 @@
                 ///@}        
           } // End Block PBES     
     // ----------------------------------------------------------------------- geoctr
-       void PipeGeo1::ConstructGeometry()     
+       void PipeGeo1::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup PipeGeo1_revision        
              ///@{           

@@ -257,7 +257,7 @@ namespace PHMDGEO // $NMSPC
    { 
       public: 
       PhmdGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~PhmdGeo(){ }; 
       ClassDef(PhmdGeo,1); 
       public: 

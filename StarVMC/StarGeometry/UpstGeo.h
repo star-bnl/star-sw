@@ -199,7 +199,7 @@ namespace UPSTGEO // $NMSPC
    { 
       public: 
       UpstGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~UpstGeo(){ }; 
       ClassDef(UpstGeo,1); 
       public: 

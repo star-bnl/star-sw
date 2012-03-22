@@ -329,7 +329,7 @@ namespace SUPOGEO // $NMSPC
    { 
       public: 
       SupoGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~SupoGeo(){ }; 
       ClassDef(SupoGeo,1); 
       public: 

@@ -1133,7 +1133,7 @@ namespace BTOFGEO5 // $NMSPC
    { 
       public: 
       BtofGeo5(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~BtofGeo5(){ }; 
       ClassDef(BtofGeo5,1); 
       public: 
