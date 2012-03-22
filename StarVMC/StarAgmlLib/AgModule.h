@@ -14,7 +14,7 @@ class AgModule : public AgBlock
 
   /// ConstructGeometry is the method which is responsible for realizing
   /// the geometry defined by this module.
-  virtual void ConstructGeometry() { }
+  virtual void ConstructGeometry( const Char_t *dummy="" ) { }
 
   /// AddBlock creates an instance of the named block and adds it to the
   /// list of blocks defined in this module.  Such blocks serve as factories
