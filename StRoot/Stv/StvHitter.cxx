@@ -1,5 +1,6 @@
 #include "StvHitter.h"
 #include "Stv/StvHit.h"
+#include "TGeoManager.h"
 #include "TGeoVolume.h"
 #include "StvHitter.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
@@ -27,7 +28,11 @@ const StvHits *StvHitter::GetHits(const StvNodePars *pars, const float gate[2])
   mHits.clear();
   const StHitPlane *myHitPlane = StTGeoHelper::Inst()->GetCurrentHitPlane();
   if (!myHitPlane) 		return 0;	//no sensitive volume there
-//  assert(mHitPlane != myHitPlane);
+
+  gGeoManager->FindNode(pars->_x,pars->_y,pars->_z);
+  assert(strcmp(gGeoManager->GetPath(),myHitPlane->GetName())==0);
+
+
   if (mHitPlane == myHitPlane)  return 0;	//hit plane was already used
   if (!myHitPlane->GetNHits())	return &mHits;	//it is sensitive but no hits
   mHitPlane = myHitPlane;
