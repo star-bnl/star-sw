@@ -86,14 +86,19 @@ template <typename T> Array_t<T>::Array_t( const Array_t &other )
 
 template <typename T> ostream &Array_t<T>::Out( ostream &out )
 {
-  out << "["; for ( int i=0;i<_m;i++ ) 
-		{
-		  out << (_m>1)?"[ ":" "; for ( int j=0;j<_n;j++ )
-					    {
-					      out << at(j+1,i+1) << ", ";
-					    }
-		  out << (_m>1)?"] ":" ";
-		}
+  out << "["; 
+  for ( int i=0;i<_m;i++ ) 
+    {
+      //out << (_m>1)?"[ ":" "; 
+      if ( _m>1 ) out << "["; else out << " ";
+
+      for ( int j=0;j<_n;j++ )
+	{
+	  out << at(j+1,i+1) << ", ";
+	}
+      //out << (_m>1)?"] ":" ";
+      if ( _m>1 ) out << "]"; else out << " ";
+    }
   out << "]" <<std::endl;
   return out;
 }

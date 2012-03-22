@@ -148,7 +148,7 @@ void AgBlock::List(Option_t *opts)
   while ( iter != mBlockTable.end() )
     {
       TString name = (*iter).first;
-      if ( opts!="ALL" ) if ( name!=opts ) 
+      if ( Opts!="ALL" ) if ( name!=opts ) 
 	{
 	  iter++;
 	  continue;

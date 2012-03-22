@@ -755,9 +755,6 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
   TString block_name = block->GetName();
   assert(block);
 
-  Bool_t TPAD = block_name=="TPAD"; // temp for debugging
-
-
   //
   //////////////////////////////////////////////////////////////////////////////
   //
