@@ -5,7 +5,7 @@
 // Modifications by J. Lauret, V, Prevotchikov, G.V. Buren, L. Didenko  //
 //                  and V. Fine                                         //
 //                                                                      //
-// $Id: bfc.C,v 1.183 2011/10/11 14:11:55 jeromel Exp $
+// $Id: bfc.C,v 1.184 2012/03/22 14:14:30 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -153,6 +153,7 @@ void bfc(Int_t First, Int_t Last,
     gMessMgr->Error() << "Problems with instantiation of Maker(s)" << endm;
     gSystem->Exit(1);
   }
+  StMaker::lsMakers(chain);
   if (Last < 0) return;
   StMaker *dbMk = chain->GetMaker("db");
   if (dbMk) dbMk->SetDebug(1);
