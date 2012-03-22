@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEtrHitCollection.cxx,v 2.1 2012/01/24 03:06:12 perev Exp $
+ * $Id: StEtrHitCollection.cxx,v 2.2 2012/03/22 00:08:57 perev Exp $
  *
  * Author: Ming Shao, Jan 5, 2012
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEtrHitCollection.cxx,v $
+ * Revision 2.2  2012/03/22 00:08:57  perev
+ * assert() instead of memory leak added
+ *
  * Revision 2.1  2012/01/24 03:06:12  perev
  * Add Etr
  *
@@ -21,7 +24,7 @@
 #include "StEtrHitCollection.h"
 #include "StEtrHit.h"
 
-static const char rcsid[] = "$Id: StEtrHitCollection.cxx,v 2.1 2012/01/24 03:06:12 perev Exp $";
+static const char rcsid[] = "$Id: StEtrHitCollection.cxx,v 2.2 2012/03/22 00:08:57 perev Exp $";
 
 ClassImp(StEtrHitCollection)
 
@@ -32,15 +35,10 @@ StEtrHitCollection::~StEtrHitCollection() { /* noop */ }
 bool
 StEtrHitCollection::addHit(StEtrHit* hit)
 {
-    unsigned int p, s;
-    if (hit &&
-        (p = hit->layer()) < mNumberOfLayers &&
-        (s = hit->sector()) < mNumberOfSectors) {
-        mHits.push_back(hit);
-        return kTRUE;
-    }
-    else
-        return kFALSE;
+    assert(hit->layer()  < mNumberOfLayers);
+    assert(hit->sector() < mNumberOfSectors);
+    mHits.push_back(hit);
+    return kTRUE;
 }
 
 unsigned int
