@@ -1462,12 +1462,13 @@
             Rbot/77.41/,Rtop/213.922/
         </varlist>
         
-        <varlist type="REAL"  >
-            EtaMin/1.086/,EtaMax/2.000/
-        </varlist>
+        <!-- varlist type="REAL"  >
+            EtaMin/1.086/,EtaMax/2.000/  ! not used
+        </varlist -->
         
         <varlist type="REAL"  >
-            tan_theta_min/0.275720567/,tan_theta_max/0.761952162/
+        <!-- tan_theta_min/0.275720567/ ! not needed -->
+             tan_theta_max/0.761952162/
         </varlist>
 
 <Export language="Mortran">        
