@@ -1,9 +1,10 @@
 ****************************************************************************
-* $Id: tpcegeo.age,v 1.4 2012/03/21 21:50:39 jeromel Exp $
+* $Id: tpcegeo.age,v 1.5 2012/03/22 18:12:40 jwebb Exp $
 *
 * $Log: tpcegeo.age,v $
-* Revision 1.4  2012/03/21 21:50:39  jeromel
-* Generated AgML to age versions (may remove later since re-generated)
+* Revision 1.5  2012/03/22 18:12:40  jwebb
+* Generated AgML to age versions (may remove later since re-generated).
+* EcalGeo6 updated to remove unused variables.
 *
 * Revision 1.31  2011/02/28 16:47:18  jwebb
 * Added "EndFILL" statements where required.

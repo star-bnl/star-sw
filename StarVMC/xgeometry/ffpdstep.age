@@ -1,7 +1,8 @@
-* $Id: ffpdstep.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
+* $Id: ffpdstep.age,v 1.5 2012/03/22 18:12:39 jwebb Exp $
 * $Log: ffpdstep.age,v $
-* Revision 1.4  2012/03/21 21:50:38  jeromel
-* Generated AgML to age versions (may remove later since re-generated)
+* Revision 1.5  2012/03/22 18:12:39  jwebb
+* Generated AgML to age versions (may remove later since re-generated).
+* EcalGeo6 updated to remove unused variables.
 *
 * Revision 1.2  2004/03/31 16:34:10  potekhin
 * Factored out two methods due to code

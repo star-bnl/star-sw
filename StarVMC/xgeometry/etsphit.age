@@ -1,8 +1,9 @@
 ******************************************************************************
-* $Id: etsphit.age,v 1.4 2012/03/21 21:50:38 jeromel Exp $
+* $Id: etsphit.age,v 1.5 2012/03/22 18:12:39 jwebb Exp $
 * $Log: etsphit.age,v $
-* Revision 1.4  2012/03/21 21:50:38  jeromel
-* Generated AgML to age versions (may remove later since re-generated)
+* Revision 1.5  2012/03/22 18:12:39  jwebb
+* Generated AgML to age versions (may remove later since re-generated).
+* EcalGeo6 updated to remove unused variables.
 *
 * Revision 1.1  2004/01/19 21:16:53  potekhin
 * Need to make this into a separate compilation unit

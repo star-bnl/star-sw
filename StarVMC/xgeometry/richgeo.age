@@ -1,8 +1,9 @@
-* $Id: richgeo.age,v 1.4 2012/03/21 21:50:39 jeromel Exp $
+* $Id: richgeo.age,v 1.5 2012/03/22 18:12:40 jwebb Exp $
 *
 * $Log: richgeo.age,v $
-* Revision 1.4  2012/03/21 21:50:39  jeromel
-* Generated AgML to age versions (may remove later since re-generated)
+* Revision 1.5  2012/03/22 18:12:40  jwebb
+* Generated AgML to age versions (may remove later since re-generated).
+* EcalGeo6 updated to remove unused variables.
 *
 * Revision 1.12  2001/04/09 15:31:37  nevski
 * second version of cerenkov light properties introduced
