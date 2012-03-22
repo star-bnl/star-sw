@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcSectorHitCollection.hh,v 2.3 2009/07/24 19:08:09 perev Exp $
+ * $Id: StMcTpcSectorHitCollection.hh,v 2.4 2012/03/22 01:02:31 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcSectorHitCollection.hh,v $
+ * Revision 2.4  2012/03/22 01:02:31  perev
+ * private => protected
+ *
  * Revision 2.3  2009/07/24 19:08:09  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -46,7 +49,7 @@ public:
     StMcTpcPadrowHitCollection*       padrow(unsigned int);
     const StMcTpcPadrowHitCollection* padrow(unsigned int) const;
 
-private:
+protected:
     enum { mNumberOfPadrows = 45 };
     StMcTpcPadrowHitCollection mPadrows[mNumberOfPadrows];
     ClassDef(StMcTpcSectorHitCollection,1)
