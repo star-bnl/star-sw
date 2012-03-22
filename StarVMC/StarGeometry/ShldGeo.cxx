@@ -422,7 +422,7 @@
                 ///@}        
           } // End Block SHOL     
     // ----------------------------------------------------------------------- geoctr
-       void ShldGeo::ConstructGeometry()     
+       void ShldGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup ShldGeo_revision        
              ///@{           

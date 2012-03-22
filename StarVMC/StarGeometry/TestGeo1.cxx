@@ -253,7 +253,7 @@
                 ///@}        
           } // End Block TUBE     
     // ----------------------------------------------------------------------- geoctr
-       void TestGeo1::ConstructGeometry()     
+       void TestGeo1::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup TestGeo1_revision        
              ///@{           

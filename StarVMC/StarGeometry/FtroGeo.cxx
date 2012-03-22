@@ -901,7 +901,7 @@
                 ///@}        
           } // End Block FTSH     
     // ----------------------------------------------------------------------- geoctr
-       void FtroGeo::ConstructGeometry()     
+       void FtroGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup FtroGeo_revision        
              ///@{           

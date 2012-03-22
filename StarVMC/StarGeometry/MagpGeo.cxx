@@ -630,7 +630,7 @@
                 ///@}        
           } // End Block MTCL     
     // ----------------------------------------------------------------------- geoctr
-       void MagpGeo::ConstructGeometry()     
+       void MagpGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup MagpGeo_revision        
              ///@{           

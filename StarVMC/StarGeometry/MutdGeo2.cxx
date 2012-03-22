@@ -268,7 +268,7 @@
                 ///@}        
           } // End Block MMRP     
     // ----------------------------------------------------------------------- geoctr
-       void MutdGeo2::ConstructGeometry()     
+       void MutdGeo2::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup MutdGeo2_revision        
              ///@{           

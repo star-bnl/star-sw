@@ -639,7 +639,7 @@ namespace FTPCGEO // $NMSPC
    { 
       public: 
       FtpcGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~FtpcGeo(){ }; 
       ClassDef(FtpcGeo,1); 
       public: 

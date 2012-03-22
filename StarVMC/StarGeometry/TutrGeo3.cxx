@@ -280,7 +280,7 @@
                 ///@}        
           } // End Block ATUB     
     // ----------------------------------------------------------------------- geoctr
-       void TutrGeo3::ConstructGeometry()     
+       void TutrGeo3::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup TutrGeo3_revision        
              ///@{           

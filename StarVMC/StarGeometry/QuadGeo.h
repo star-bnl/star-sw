@@ -123,7 +123,7 @@ namespace QUADGEO // $NMSPC
    { 
       public: 
       QuadGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~QuadGeo(){ }; 
       ClassDef(QuadGeo,1); 
       public: 

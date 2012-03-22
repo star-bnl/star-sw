@@ -1109,7 +1109,7 @@
                 ///@}        
           } // End Block TBOD     
     // ----------------------------------------------------------------------- geoctr
-       void EiddGeo::ConstructGeometry()     
+       void EiddGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup EiddGeo_revision        
              ///@{           

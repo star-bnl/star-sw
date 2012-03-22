@@ -402,7 +402,7 @@
                 ///@}        
           } // End Block PLPS     
     // ----------------------------------------------------------------------- geoctr
-       void PixlGeo3::ConstructGeometry()     
+       void PixlGeo3::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup PixlGeo3_revision        
              ///@{           

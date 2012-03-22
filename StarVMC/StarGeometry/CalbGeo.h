@@ -287,7 +287,7 @@ namespace CALBGEO // $NMSPC
    { 
       public: 
       CalbGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~CalbGeo(){ }; 
       ClassDef(CalbGeo,1); 
       public: 

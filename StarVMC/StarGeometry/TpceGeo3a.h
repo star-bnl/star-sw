@@ -821,7 +821,7 @@ namespace TPCEGEO3A // $NMSPC
    { 
       public: 
       TpceGeo3a(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~TpceGeo3a(){ }; 
       ClassDef(TpceGeo3a,1); 
       public: 

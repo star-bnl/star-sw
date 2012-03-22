@@ -609,7 +609,7 @@ namespace ECALGEO6 // $NMSPC
    { 
       public: 
       EcalGeo6(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~EcalGeo6(){ }; 
       ClassDef(EcalGeo6,1); 
       public: 

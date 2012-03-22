@@ -977,7 +977,7 @@ namespace VPDDGEO2 // $NMSPC
    { 
       public: 
       VpddGeo2(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~VpddGeo2(){ }; 
       ClassDef(VpddGeo2,1); 
       public: 

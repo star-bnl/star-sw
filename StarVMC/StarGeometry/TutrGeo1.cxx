@@ -109,7 +109,7 @@
                 ///@}        
           } // End Block ABOX     
     // ----------------------------------------------------------------------- geoctr
-       void TutrGeo1::ConstructGeometry()     
+       void TutrGeo1::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup TutrGeo1_revision        
              ///@{           

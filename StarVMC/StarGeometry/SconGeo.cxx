@@ -1191,7 +1191,7 @@
                 ///@}        
           } // End Block SROH     
     // ----------------------------------------------------------------------- geoctr
-       void SconGeo::ConstructGeometry()     
+       void SconGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup SconGeo_revision        
              ///@{           

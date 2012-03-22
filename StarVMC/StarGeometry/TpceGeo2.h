@@ -727,7 +727,7 @@ namespace TPCEGEO2 // $NMSPC
    { 
       public: 
       TpceGeo2(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~TpceGeo2(){ }; 
       ClassDef(TpceGeo2,1); 
       public: 

@@ -563,7 +563,7 @@
                 ///@}        
           } // End Block PGON     
     // ----------------------------------------------------------------------- geoctr
-       void ShapGeo::ConstructGeometry()     
+       void ShapGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup ShapGeo_revision        
              ///@{           

@@ -2256,7 +2256,7 @@
                 ///@}        
           } // End Block FFRA     
     // ----------------------------------------------------------------------- geoctr
-       void FtpcGeo1::ConstructGeometry()     
+       void FtpcGeo1::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup FtpcGeo1_revision        
              ///@{           

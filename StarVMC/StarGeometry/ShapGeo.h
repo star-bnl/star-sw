@@ -191,7 +191,7 @@ namespace SHAPGEO // $NMSPC
    { 
       public: 
       ShapGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~ShapGeo(){ }; 
       ClassDef(ShapGeo,1); 
       public: 

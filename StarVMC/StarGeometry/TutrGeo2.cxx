@@ -290,7 +290,7 @@
                 ///@}        
           } // End Block ACNS     
     // ----------------------------------------------------------------------- geoctr
-       void TutrGeo2::ConstructGeometry()     
+       void TutrGeo2::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup TutrGeo2_revision        
              ///@{           

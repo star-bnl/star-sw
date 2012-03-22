@@ -1324,7 +1324,7 @@
                 ///@}        
           } // End Block PLAC     
     // ----------------------------------------------------------------------- geoctr
-       void PixlGeo4::ConstructGeometry()     
+       void PixlGeo4::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup PixlGeo4_revision        
              ///@{           

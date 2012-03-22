@@ -303,7 +303,7 @@ namespace FPDMGEO2 // $NMSPC
    { 
       public: 
       FpdmGeo2(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~FpdmGeo2(){ }; 
       ClassDef(FpdmGeo2,1); 
       public: 

@@ -301,7 +301,7 @@ namespace EIDDGEO // $NMSPC
    { 
       public: 
       EiddGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~EiddGeo(){ }; 
       ClassDef(EiddGeo,1); 
       public: 

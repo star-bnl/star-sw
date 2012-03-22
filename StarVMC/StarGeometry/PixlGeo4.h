@@ -227,7 +227,7 @@ namespace PIXLGEO4 // $NMSPC
    { 
       public: 
       PixlGeo4(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~PixlGeo4(){ }; 
       ClassDef(PixlGeo4,1); 
       public: 

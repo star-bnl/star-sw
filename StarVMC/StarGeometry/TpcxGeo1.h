@@ -819,7 +819,7 @@ namespace TPCXGEO1 // $NMSPC
    { 
       public: 
       TpcxGeo1(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~TpcxGeo1(){ }; 
       ClassDef(TpcxGeo1,1); 
       public: 

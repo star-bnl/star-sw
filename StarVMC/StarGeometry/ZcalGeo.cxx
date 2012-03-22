@@ -517,7 +517,7 @@
                 ///@}        
           } // End Block QSCI     
     // ----------------------------------------------------------------------- geoctr
-       void ZcalGeo::ConstructGeometry()     
+       void ZcalGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup ZcalGeo_revision        
              ///@{           

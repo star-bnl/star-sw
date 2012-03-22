@@ -955,7 +955,7 @@ namespace BTOFGEO3 // $NMSPC
    { 
       public: 
       BtofGeo3(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~BtofGeo3(){ }; 
       ClassDef(BtofGeo3,1); 
       public: 

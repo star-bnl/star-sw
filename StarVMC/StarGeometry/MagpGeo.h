@@ -211,7 +211,7 @@ namespace MAGPGEO // $NMSPC
    { 
       public: 
       MagpGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~MagpGeo(){ }; 
       ClassDef(MagpGeo,1); 
       public: 

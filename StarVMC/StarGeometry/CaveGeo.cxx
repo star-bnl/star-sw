@@ -266,7 +266,7 @@
                 ///@}        
           } // End Block CAVE     
     // ----------------------------------------------------------------------- geoctr
-       void CaveGeo::ConstructGeometry()     
+       void CaveGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup CaveGeo_revision        
              ///@{           

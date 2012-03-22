@@ -399,7 +399,7 @@ namespace SCONGEO // $NMSPC
    { 
       public: 
       SconGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~SconGeo(){ }; 
       ClassDef(SconGeo,1); 
       public: 

@@ -1260,7 +1260,7 @@
                 ///@}        
           } // End Block PDGS     
     // ----------------------------------------------------------------------- geoctr
-       void PhmdGeo::ConstructGeometry()     
+       void PhmdGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup PhmdGeo_revision        
              ///@{           

@@ -147,7 +147,7 @@ namespace SHLDGEO // $NMSPC
    { 
       public: 
       ShldGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~ShldGeo(){ }; 
       ClassDef(ShldGeo,1); 
       public: 

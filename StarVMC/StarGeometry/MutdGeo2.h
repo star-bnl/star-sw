@@ -89,7 +89,7 @@ namespace MUTDGEO2 // $NMSPC
    { 
       public: 
       MutdGeo2(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~MutdGeo2(){ }; 
       ClassDef(MutdGeo2,1); 
       public: 

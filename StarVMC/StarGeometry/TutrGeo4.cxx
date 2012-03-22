@@ -504,7 +504,7 @@
                 ///@}        
           } // End Block AELT     
     // ----------------------------------------------------------------------- geoctr
-       void TutrGeo4::ConstructGeometry()     
+       void TutrGeo4::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup TutrGeo4_revision        
              ///@{           

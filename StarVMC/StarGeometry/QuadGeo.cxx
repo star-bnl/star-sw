@@ -288,7 +288,7 @@
                 ///@}        
           } // End Block QTHR     
     // ----------------------------------------------------------------------- geoctr
-       void QuadGeo::ConstructGeometry()     
+       void QuadGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup QuadGeo_revision        
              ///@{           

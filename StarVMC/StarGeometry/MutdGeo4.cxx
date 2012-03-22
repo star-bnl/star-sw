@@ -1324,7 +1324,7 @@
                 ///@}        
           } // End Block MNOM     
     // ----------------------------------------------------------------------- geoctr
-       void MutdGeo4::ConstructGeometry()     
+       void MutdGeo4::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup MutdGeo4_revision        
              ///@{           

@@ -722,7 +722,7 @@
                 ///@}        
           } // End Block FGHV     
     // ----------------------------------------------------------------------- geoctr
-       void IdsmGeo1::ConstructGeometry()     
+       void IdsmGeo1::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup IdsmGeo1_revision        
              ///@{           

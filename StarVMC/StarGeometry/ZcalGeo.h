@@ -175,7 +175,7 @@ namespace ZCALGEO // $NMSPC
    { 
       public: 
       ZcalGeo(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~ZcalGeo(){ }; 
       ClassDef(ZcalGeo,1); 
       public: 

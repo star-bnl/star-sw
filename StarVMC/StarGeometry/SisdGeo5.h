@@ -1073,7 +1073,7 @@ namespace SISDGEO5 // $NMSPC
    { 
       public: 
       SisdGeo5(); 
-      virtual void ConstructGeometry(); 
+      virtual void ConstructGeometry( const Char_t *dummy="" ); 
       ~SisdGeo5(){ }; 
       ClassDef(SisdGeo5,1); 
       public: 

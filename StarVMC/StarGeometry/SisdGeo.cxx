@@ -739,7 +739,7 @@
                 ///@}        
           } // End Block SFCX     
     // ----------------------------------------------------------------------- geoctr
-       void SisdGeo::ConstructGeometry()     
+       void SisdGeo::ConstructGeometry( const Char_t *dummy )     
        {        
              ///@addtogroup SisdGeo_revision        
              ///@{           
