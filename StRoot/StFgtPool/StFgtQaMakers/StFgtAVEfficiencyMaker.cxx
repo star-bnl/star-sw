@@ -45,7 +45,7 @@ Double_t getRPhiRatio(StSPtrVecFgtHitConstIterator hitIterBegin, StSPtrVecFgtHit
 */
 Int_t StFgtAVEfficiencyMaker::Make()
 {
-  cout <<" in eff make " <<endl;
+  //  cout <<" in eff make " <<endl;
   StEvent* eventPtr = 0;
   eventPtr = (StEvent*)GetInputDS("StEvent");
 
@@ -55,14 +55,15 @@ Int_t StFgtAVEfficiencyMaker::Make()
   Int_t prvGeoId=-1;
 
   StFgtHitCollection* clusterColD1=mFgtCollectionPtr->getHitCollection(0);
-  StFgtHitCollection* clusterColD6=mFgtCollectionPtr->getHitCollection(4);//should be 5,but that seems to be dead
+  StFgtHitCollection* clusterColD6=mFgtCollectionPtr->getHitCollection(5);
 
   //look at the r phi ratio for each disk
   for(int i=0;i<6;i++)
     {
       StFgtHitCollection* tmpClusterCol=mFgtCollectionPtr->getHitCollection(i);
-      Double_t ratio=rPhiRatioPlots[i]->Fill(getRPhiRatio(tmpClusterCol->getHitVec().begin(),tmpClusterCol->getHitVec().end()));
-      cout << "ratio for disk: " << i << " is " << ratio <<endl;
+      Double_t ratio=getRPhiRatio(tmpClusterCol->getHitVec().begin(),tmpClusterCol->getHitVec().end());
+      rPhiRatioPlots[i]->Fill(ratio);
+      //      cout << "ratio for disk: " << i << " is " << ratio <<" disk has: " << tmpClusterCol->getHitVec().size() << "hits" <<endl;
     }
 
 
@@ -71,7 +72,7 @@ Int_t StFgtAVEfficiencyMaker::Make()
 
   const StSPtrVecFgtHit &hitVecD6=clusterColD6->getHitVec();
   Double_t D1Pos=StFgtGeom::getDiscZ(0);
-  Double_t D6Pos=StFgtGeom::getDiscZ(4);
+  Double_t D6Pos=StFgtGeom::getDiscZ(5);
   Double_t zArm=D6Pos-D1Pos;
   StSPtrVecFgtHitConstIterator hitIterD1,hitIterD6, hitIterD1R, hitIterD6R, hitIter, hitIter2;
   for(hitIterD1=hitVecD1.begin();hitIterD1 != hitVecD1.end();hitIterD1++)
@@ -80,10 +81,10 @@ Int_t StFgtAVEfficiencyMaker::Make()
       Char_t layer; 
       Bool_t stripDead=false;
       StFgtGeom::decodeGeoId((*hitIterD1)->getCentralStripGeoId(),disc, quad, layer, strip);
-      if(layer=='P')
+      /*      if(layer=='P')
 	cout <<"found phi d1 " <<endl;
       else
-	cout <<"found r d1 " <<endl;
+      cout <<"found r d1 " <<endl;*/
     }
 
   for(hitIterD1=hitVecD6.begin();hitIterD1 != hitVecD6.end();hitIterD1++)
@@ -92,14 +93,14 @@ Int_t StFgtAVEfficiencyMaker::Make()
       Char_t layer; 
       Bool_t stripDead=false;
       StFgtGeom::decodeGeoId((*hitIterD1)->getCentralStripGeoId(),disc, quad, layer, strip);
-      if(layer=='P')
+      /*      if(layer=='P')
 	cout <<"found phi d6 " <<endl;
       else
-	cout <<"found r d6 " <<endl;
+      cout <<"found r d6 " <<endl;*/
     }
 
 
-  cout <<"looking at " << hitVecD1.size() << " hits in D1 and " << hitVecD6.size() << " in D6 " <<endl;
+  //  cout <<"looking at " << hitVecD1.size() << " hits in D1 and " << hitVecD6.size() << " in D6 " <<endl;
   for(hitIterD1=hitVecD1.begin();hitIterD1 != hitVecD1.end();hitIterD1++)
     {
       Short_t quad, disc, strip;
@@ -160,19 +161,17 @@ Int_t StFgtAVEfficiencyMaker::Make()
 
 		  for(int iD=1;iD<5;iD++)
 		    {
-		      if(iD==4)//now use 4 for seed, so we always find hit there
-			continue;
 		      Bool_t found=false;
 		      Bool_t foundR=false;
 		      //check for hit
 		      Double_t diskZ=StFgtGeom::getDiscZ(iD);
 		      //expected
 
-		      Double_t xPosExp=xD1+(xD1-xD6)*(D1Pos-diskZ)/zArm;
-		      Double_t yPosExp=yD1+(yD1-yD6)*(D1Pos-diskZ)/zArm;
-		      Double_t rPosExp=rD1+(rD6-rD1)*(D1Pos-diskZ)/zArm;
-		      cout <<"x1: " << xD1 << " y1: " << yD1 <<" x6: " << xD6 <<" y6: " << yD6 << " zpos: " << diskZ <<" arm: " << zArm<<endl;
-		      cout <<"expect hit at : " << xPosExp <<" / " << yPosExp <<" r: " << rPosExp <<endl;
+		      Double_t xPosExp=xD1+(xD6-xD1)*(diskZ-D1Pos)/zArm;
+		      Double_t yPosExp=yD1+(yD6-yD1)*(diskZ-D1Pos)/zArm;
+		      Double_t rPosExp=rD1+(rD6-rD1)*(diskZ-D1Pos)/zArm;
+		      //		      cout <<"x1: " << xD1 << " y1: " << yD1 <<" x6: " << xD6 <<" y6: " << yD6 << " zpos: " << diskZ <<" arm: " << zArm<<endl;
+		      //		      cout <<"expect hit at : " << xPosExp <<" / " << yPosExp <<" r: " << rPosExp <<endl;
 		      StFgtHitCollection* clusterCol=mFgtCollectionPtr->getHitCollection(iD);
 		      const StSPtrVecFgtHit &hitVec=clusterCol->getHitVec();
 	      
@@ -191,20 +190,21 @@ Int_t StFgtAVEfficiencyMaker::Make()
 			      if(layer!='R')
 				continue;
 			      Float_t r=(*hitIter2)->getPositionR();
+			      //			      cout <<"checking with r:" << r <<endl;
 			      if(fabs(r-rPosExp)<1)
 				{
 				  foundR=true;
-				  cout <<"found r: " << r  <<endl;
+				  //				  cout <<"found r: " << r  <<endl;
 				  v_r.push_back(pair<Int_t,Double_t> (iD,r));
 				}
 
 			      x=r*cos(phi);
 			      y=r*sin(phi);
-			      cout <<"checking with x: " << x << " y: " << y <<endl;
+			      //			      cout <<"checking with x: " << x << " y: " << y <<endl;
 			      if(fabs(x-xPosExp) < 1 && fabs(y-yPosExp)<1) //found hit
 				{
 				  found=true;
-				  cout <<"found! " <<endl;
+				  cout <<"found! " <<" pushing back: iD: " << iD << "x: " << x << " y "<< y  <<endl;
 				  v_x.push_back(pair<Int_t,Double_t>(iD,x));
 				  v_y.push_back(pair<Int_t,Double_t>(iD,y));
 				}
@@ -215,7 +215,7 @@ Int_t StFgtAVEfficiencyMaker::Make()
 			iFound++;
 		      else
 			{
-			  cout <<"failed to find, pushing back " << xPosExp << " y: " << yPosExp <<endl;
+			  //			  cout <<"failed to find, pushing back " << xPosExp << " y: " << yPosExp <<endl;
 			  v_xFail.push_back(pair<Int_t,Double_t>(iD,xPosExp));
 			  v_yFail.push_back(pair<Int_t,Double_t>(iD,yPosExp));
 			}
@@ -223,14 +223,14 @@ Int_t StFgtAVEfficiencyMaker::Make()
 			iFoundR++;
 		      else
 			{
-			  cout <<"failed to find r " << rPosExp<<endl;
+			  //			  cout <<"failed to find r " << rPosExp<<endl;
 			  v_rFail.push_back(pair<Int_t, Double_t>(iD,rPosExp));
 			}
 
 		    }
 
-		  cout << " Ifound: " << iFound <<endl;
-		  if(iFound>=1) //at least one hit plus seed
+		  //		  cout << " Ifound: " << iFound <<endl;
+		  if(iFound>=2) //at least one hit plus seed
 		    {
 		      if(v_x.size()>iFound)
 			{
@@ -251,7 +251,7 @@ Int_t StFgtAVEfficiencyMaker::Make()
 			      Int_t disk=v_xFail[i].first;
 			      Double_t x=v_xFail[i].second;
 			      Double_t y=v_yFail[i].second;
-			      cout <<"filling disk fail: " << disk <<" with: " << x <<" / " <<y <<endl;
+			      //			      cout <<"filling disk fail: " << disk <<" with: " << x <<" / " <<y <<endl;
 			      radioPlotsNonEff[disk]->Fill(x,y);
 			    }
 			  hitCounter++;
@@ -262,7 +262,7 @@ Int_t StFgtAVEfficiencyMaker::Make()
 		    {
 		      if(v_r.size()>iFound)
 			{
-			  cout<<"more r hits than disks hit!!!" <<endl;
+			  //			  cout<<"more r hits than disks hit!!!" <<endl;
 			}
 		      else
 			{
@@ -270,14 +270,14 @@ Int_t StFgtAVEfficiencyMaker::Make()
 			    {
 			      Int_t disk=v_r[i].first;
 			      Double_t r=v_r[i].second;
-			      cout <<"filling  r disk: " << disk <<" with: " << r <<endl;
+			      //			      cout <<"filling  r disk: " << disk <<" with: " << r <<endl;
 			      rEff[disk]->Fill(r);
 			    }
 			  for(int i=0;i<v_rFail.size();i++)
 			    {
 			      Int_t disk=v_rFail[i].first;
 			      Double_t r=v_rFail[i].second;
-			      cout <<"filling r disk fail: " << disk <<" with: " << r <<endl;
+			      //			      cout <<"filling r disk fail: " << disk <<" with: " << r <<endl;
 			      rNonEff[disk]->Fill(r);
 			    }
 			  hitCounterR++;
@@ -305,7 +305,7 @@ return ierr;
  
 StFgtAVEfficiencyMaker::StFgtAVEfficiencyMaker( const Char_t* name):runningEvtNr(0),hitCounter(0),hitCounterR(0)
 {
-  cout <<"AVE const!!" <<endl;
+  cout <<"AVE constructor!!" <<endl;
   StFgtQaMaker( name, 0,0, "qName" );
 
 };
@@ -323,36 +323,71 @@ Int_t StFgtAVEfficiencyMaker::Finish(){
   Int_t ierr = kStOk;
 
   TCanvas* cRadio=new TCanvas("radioPlots","radioPlot",1000,1500);
+  TCanvas* cRadioHits=new TCanvas("radioPlotsHits","radioPlotHits",1000,1500);
+  TCanvas* cRadioNonHits=new TCanvas("radioPlotsNonHits","radioPlotNonHits",1000,1500);
   cRadio->Divide(2,3); //6 discs
+  cRadioHits->Divide(2,3); //6 discs
+  cRadioNonHits->Divide(2,3); //6 discs
   TCanvas* cRPRatio=new TCanvas("rPhiRatio","rPhiRatios",1000,1500);
   cRPRatio->Divide(2,3); //6 discs
 
   TCanvas* cREff=new TCanvas("crEff","crEff",1000,1500);
+
   cREff->Divide(2,3); //6 discs
 
   for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
     {
-      cRadio->cd(iD+1)->SetLogz();
-      radioPlotsEff[iD]->Add(radioPlotsNonEff[iD]);//all counts
+      //      cRadio->cd(iD+1)->SetLogz();
+      cRadioHits->cd(iD+1);
+      radioPlotsEff[iD]->Draw("colz");
+      cRadioNonHits->cd(iD+1);
+      radioPlotsNonEff[iD]->Draw("colz");
+
+    }
+  cRadioHits->SaveAs("radioPlotsHits.png");
+  cRadioNonHits->SaveAs("radioPlotsNonHits.png");
+
+  cout <<"saving .." <<endl;
+
+  for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
+    {
+      cRadio->cd(iD+1);
+
       TH2D* tmpAllCounts=(TH2D*)radioPlotsEff[iD]->Clone("tmp");
-      radioPlotsEff[iD]->Add(radioPlotsNonEff[iD],-1); //subtract non eff
-      radioPlotsEff[iD]->Divide(tmpAllCounts);
+      radioPlotsEff[iD]->Add(radioPlotsNonEff[iD]);//all counts
+      //      radioPlotsEff[iD]->Add(radioPlotsNonEff[iD],-1); //subtract non eff
+      for(int nx=0;nx<radioPlotsEff[iD]->GetNbinsX();nx++)
+	{
+	  for(int ny=0;ny<radioPlotsEff[iD]->GetNbinsY();ny++)
+	     {
+	       Double_t denom=radioPlotsEff[iD]->GetBinContent(nx,ny);
+	       if(denom>0)
+		 radioPlotsEff[iD]->SetBinContent(nx,ny,tmpAllCounts->GetBinContent(nx,ny)/denom);
+	       else
+		 radioPlotsEff[iD]->SetBinContent(nx,ny,0.0);
+	     }
+	}
+      //      radioPlotsEff[iD]->Divide(tmpAllCounts);
       radioPlotsEff[iD]->Draw("colz");
       cRPRatio->cd(iD+1);
       rPhiRatioPlots[iD]->Draw();
       cREff->cd(iD+1);
+
+      TH1D* tmpR=(TH1D*)rEff[iD]->Clone("tmpR");
       rEff[iD]->Add(rNonEff[iD]);
-      TH1D* tmpAllRCounts=(TH1D*)rEff[iD]->Clone("tmpR");
-      rEff[iD]->Add(rNonEff[iD],-1);
-      rEff[iD]->Divide(tmpAllRCounts);
+      for(int nx=0;nx<rEff[iD]->GetNbinsX();nx++)
+	{
+	  Double_t denom=rEff[iD]->GetBinContent(nx);
+	  if(denom>0)
+	    rEff[iD]->SetBinContent(nx,tmpR->GetBinContent(nx)/denom);
+	  else
+	    rEff[iD]->SetBinContent(nx,0.0);
+	}
       rEff[iD]->Draw();
     }
-
-
-  cout <<"saving .." <<endl;
-
   cRadio->SaveAs("radioPlotsEff.png");
   cRadio->SaveAs("radioPlotsEff.pdf");
+
 
   cREff->SaveAs("rEff.png");
   cREff->SaveAs("rEff.pdf");
@@ -391,27 +426,27 @@ Int_t StFgtAVEfficiencyMaker::Init(){
        cout <<"id: " << iD <<endl;
 
        sprintf(buffer,"radioDiskEff_%d",iD);
-       radioPlotsEff[iD]=new TH2D(buffer,buffer,10,-50,50,10,-50,50);
+       radioPlotsEff[iD]=new TH2D(buffer,buffer,20,-50,50,20,-50,50);
 
        cout <<"1" <<endl;
        sprintf(buffer,"rEff_%d",iD);
-       rEff[iD]=new TH1D(buffer,buffer,20,0,50);
+       rEff[iD]=new TH1D(buffer,buffer,100,0,50);
        sprintf(buffer,"rNonEff_%d",iD);
-       rNonEff[iD]=new TH1D(buffer,buffer,20,0,50);
+       rNonEff[iD]=new TH1D(buffer,buffer,100,0,50);
        cout <<"2" <<endl;
        for(int nx=0;nx<radioPlotsEff[iD]->GetNbinsX();nx++)
 	 {
 	   for(int ny=0;ny<radioPlotsEff[iD]->GetNbinsY();ny++)
 	     {
-	       radioPlotsEff[iD]->SetBinContent(nx,ny,0.1);//so that there is no divide by zero
+	       //	       radioPlotsEff[iD]->SetBinContent(nx,ny,0.1);//so that there is no divide by zero
 	     }
 	 }
        cout <<"3" <<endl;
        sprintf(buffer,"radioDiskNonEff_%d",iD);
-       radioPlotsNonEff[iD]=new TH2D(buffer,buffer,10,-50,50,10,-50,50);
+       radioPlotsNonEff[iD]=new TH2D(buffer,buffer,20,-50,50,20,-50,50);
        for(int nx=0;nx<rEff[iD]->GetNbinsX();nx++)
 	 {
-	   rEff[iD]->SetBinContent(nx,0.1);
+	   //	   rEff[iD]->SetBinContent(nx,0.1);
 	 }
        cout <<"4" <<endl;
        sprintf(buffer,"rPhiRatio_%d",iD);
