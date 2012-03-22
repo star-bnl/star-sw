@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEmcHitCollection.hh,v 2.8 2005/11/22 21:44:51 fisyak Exp $
+ * $Id: StMcEmcHitCollection.hh,v 2.9 2012/03/22 00:33:58 perev Exp $
  * $Log: StMcEmcHitCollection.hh,v $
+ * Revision 2.9  2012/03/22 00:33:58  perev
+ * private => protected
+ *
  * Revision 2.8  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -69,7 +72,7 @@ class StMcEmcHitCollection : public TDataSet {
   
  protected:
   void MakeHitCollection();
- private:
+ protected:
   ClassDef(StMcEmcHitCollection,1)
 };
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcPadrowHitCollection.hh,v 2.5 2012/03/01 16:48:30 perev Exp $
+ * $Id: StMcTpcPadrowHitCollection.hh,v 2.6 2012/03/22 00:54:37 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcPadrowHitCollection.hh,v $
+ * Revision 2.6  2012/03/22 00:54:37  perev
+ * private => protected
+ *
  * Revision 2.5  2012/03/01 16:48:30  perev
  * method Browse() added
  *
@@ -55,7 +58,7 @@ virtual void Browse(TBrowser *b);
     StSPtrVecMcTpcHit&       hits();
     const StSPtrVecMcTpcHit& hits() const;
 
-private:
+protected:
     StSPtrVecMcTpcHit mHits;
     ClassDef(StMcTpcPadrowHitCollection,1)
 };

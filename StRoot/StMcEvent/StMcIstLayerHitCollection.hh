@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcIstLayerHitCollection.hh,v 2.4 2012/03/01 16:48:29 perev Exp $
+ * $Id: StMcIstLayerHitCollection.hh,v 2.5 2012/03/22 00:44:33 perev Exp $
  *
  * Author: Fabrice Retiere/Kai Schweda, Aug 2003
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMcIstLayerHitCollection.hh,v $
+ * Revision 2.5  2012/03/22 00:44:33  perev
+ * private => protected
+ *
  * Revision 2.4  2012/03/01 16:48:29  perev
  * method Browse() added
  *
@@ -53,7 +56,7 @@ virtual void Browse(TBrowser *b);
     StSPtrVecMcIstHit&       hits();
     const StSPtrVecMcIstHit& hits() const; 
 
-private:
+protected:
     StSPtrVecMcIstHit mHits;
     ClassDef(StMcIstLayerHitCollection,1)
 };

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHitCollection.hh,v 2.5 2009/07/24 19:08:08 perev Exp $
+ * $Id: StMcSvtHitCollection.hh,v 2.6 2012/03/22 00:48:45 perev Exp $
  * $Log: StMcSvtHitCollection.hh,v $
+ * Revision 2.6  2012/03/22 00:48:45  perev
+ * private => protected
+ *
  * Revision 2.5  2009/07/24 19:08:08  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -51,7 +54,7 @@ public:
     StMcSvtBarrelHitCollection*       barrel(unsigned int);
     const StMcSvtBarrelHitCollection* barrel(unsigned int) const;
 
-private:
+protected:
     enum { mNumberOfBarrels = 4 }; // Keeping the SSD along with SVT
     StMcSvtBarrelHitCollection mBarrels[mNumberOfBarrels];
     ClassDef(StMcSvtHitCollection,1)

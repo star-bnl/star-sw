@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSsdWaferHitCollection.hh,v 2.3 2012/03/01 16:48:29 perev Exp $
+ * $Id: StMcSsdWaferHitCollection.hh,v 2.4 2012/03/22 00:48:45 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSsdWaferHitCollection.hh,v $
+ * Revision 2.4  2012/03/22 00:48:45  perev
+ * private => protected
+ *
  * Revision 2.3  2012/03/01 16:48:29  perev
  * method Browse() added
  *
@@ -57,7 +60,7 @@ virtual void Browse(TBrowser *b);
     StSPtrVecMcSsdHit&       hits();
     const StSPtrVecMcSsdHit& hits() const;
 
-private:
+protected:
     StSPtrVecMcSsdHit mHits;
     ClassDef(StMcSsdWaferHitCollection,1)
 };

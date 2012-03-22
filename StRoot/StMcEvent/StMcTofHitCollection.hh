@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTofHitCollection.hh,v 2.4 2012/03/01 16:48:29 perev Exp $
+ * $Id: StMcTofHitCollection.hh,v 2.5 2012/03/22 00:50:46 perev Exp $
  * $Log: StMcTofHitCollection.hh,v $
+ * Revision 2.5  2012/03/22 00:50:46  perev
+ * private => protected
+ *
  * Revision 2.4  2012/03/01 16:48:29  perev
  * method Browse() added
  *
@@ -38,7 +41,7 @@ virtual void Browse(TBrowser *b);
     StSPtrVecMcTofHit&       hits();
     const StSPtrVecMcTofHit& hits() const;
 
-private:
+protected:
     StSPtrVecMcTofHit mHits;
     ClassDef(StMcTofHitCollection,1)
 };

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHitCollection.hh,v 2.3 2009/07/24 19:08:09 perev Exp $
+ * $Id: StMcTpcHitCollection.hh,v 2.4 2012/03/22 00:50:46 perev Exp $
  * $Log: StMcTpcHitCollection.hh,v $
+ * Revision 2.4  2012/03/22 00:50:46  perev
+ * private => protected
+ *
  * Revision 2.3  2009/07/24 19:08:09  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -41,7 +44,7 @@ public:
     StMcTpcSectorHitCollection*       sector(unsigned int);
     const StMcTpcSectorHitCollection* sector(unsigned int) const;
 
-private:
+protected:
     enum { mNumberOfSectors = 24 };
     StMcTpcSectorHitCollection mSectors[mNumberOfSectors];
     ClassDef(StMcTpcHitCollection,1)

@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFgtHitCollection.hh,v 2.3 2009/10/13 19:14:27 perev Exp $
+ * $Id: StMcFgtHitCollection.hh,v 2.4 2012/03/22 00:39:27 perev Exp $
  *
  * $Log: StMcFgtHitCollection.hh,v $
+ * Revision 2.4  2012/03/22 00:39:27  perev
+ * private => protected
+ *
  * Revision 2.3  2009/10/13 19:14:27  perev
  * Wei-Ming update
  *
@@ -30,7 +33,7 @@ public:
     
     StMcFgtLayerHitCollection*       layer(unsigned int);
     const StMcFgtLayerHitCollection* layer(unsigned int) const;
-private:
+protected:
     enum { mNumberOfLayers = 9 }; // layer = disk in StFgtGeom WMZ
     StMcFgtLayerHitCollection mLayers[mNumberOfLayers];
     ClassDef(StMcFgtHitCollection,1)
