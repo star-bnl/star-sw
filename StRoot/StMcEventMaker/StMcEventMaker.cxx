@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.75 2012/03/02 02:16:57 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.76 2012/03/22 01:20:55 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.76  2012/03/22 01:20:55  perev
+ * Etr add
+ *
  * Revision 1.75  2012/03/02 02:16:57  perev
  * MTD Creation added
  *
@@ -304,6 +307,7 @@ using std::find;
 #include "tables/St_g2t_pix_hit_Table.h"
 #include "tables/St_g2t_ist_hit_Table.h"
 #include "tables/St_g2t_fgt_hit_Table.h"
+#include "tables/St_g2t_etr_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_particle_Table.h"
@@ -320,7 +324,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.75 2012/03/02 02:16:57 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.76 2012/03/22 01:20:55 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -367,6 +371,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUsePixel       (kTRUE),
     doUseIst         (kTRUE),
     doUseFgt         (kTRUE),
+    doUseEtr         (kTRUE),
     ttemp(),
     ttempParticle(),
     mCurrentMcEvent(0)    
@@ -418,6 +423,7 @@ Int_t StMcEventMaker::Finish()
 //_____________________________________________________________________________
 Int_t StMcEventMaker::Init()
 {
+    if (Debug()>=1) cout << "This is StMcEventMaker::Init() - by Ming" << endl;
     return StMaker::Init();
 }
 
@@ -494,6 +500,7 @@ Int_t StMcEventMaker::Make()
     St_g2t_pix_hit *g2t_pix_hitTablePointer =  (St_g2t_pix_hit *) geantDstI("g2t_pix_hit");
     St_g2t_ist_hit *g2t_ist_hitTablePointer =  (St_g2t_ist_hit *) geantDstI("g2t_ist_hit");
     St_g2t_fgt_hit *g2t_fgt_hitTablePointer =  (St_g2t_fgt_hit *) geantDstI("g2t_fgt_hit");
+    St_g2t_etr_hit *g2t_etr_hitTablePointer =  (St_g2t_etr_hit *) geantDstI("g2t_etr_hit");
     St_particle    *particleTablePointer    =  (St_particle    *) geantDstI("particle");
 
     // For backwards compatibility, look for the rch and particle tables also in the dstBranch
@@ -686,6 +693,16 @@ Int_t StMcEventMaker::Make()
 	else 
 	    if (Debug()) cerr << "Table g2t_fgt_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
+	//	
+	// Etr Hit Table
+	//
+	g2t_etr_hit_st *etrHitTable=0;
+	if (g2t_etr_hitTablePointer)
+	    etrHitTable = g2t_etr_hitTablePointer->GetTable();
+	    if (Debug()) cerr << "Table g2t_etr_hit found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	else 
+	    if (Debug()) cerr << "Table g2t_etr_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
 	//
 	// particle Table
 	//
@@ -866,8 +883,8 @@ Int_t StMcEventMaker::Make()
             if (trackTable[itrk].e<trackTable[itrk].ptot) 
 	        trackTable[itrk].ptot=trackTable[itrk].e;
 //		Fix(hack) tracks with garbage geand id(VP)
-            if (trackTable[itrk].ge_pid<=0) 	continue;
-            if (trackTable[itrk].ge_pid>0xffff) continue;
+            if (trackTable[itrk].ge_pid<0) 	trackTable[itrk].ge_pid=0;
+            if (trackTable[itrk].ge_pid>0xffff) trackTable[itrk].ge_pid=0;
 
 	    t = new StMcTrack(&(trackTable[itrk]));
 	    usedTracksG2t++;
@@ -1250,6 +1267,7 @@ Int_t StMcEventMaker::Make()
 	AddHits(pix,pixel,Pixel);
 	AddHits(ist,ist,Ist);
 	AddHits(fgt,fgt,Fgt);
+	AddHits(etr,etr,Etr);
 
 	// BEMC and BPRS Hits
 	if (doUseBemc) fillBemc(g2t_emc_hitTablePointer);
