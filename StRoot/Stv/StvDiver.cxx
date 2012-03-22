@@ -1,4 +1,5 @@
 #include "StvDiver.h"
+#include "TGeoManager.h"
 #include "TGeoVolume.h"
 #include "TVirtualMCStack.h"
 #include "TGeant3TGeo.h"
@@ -257,6 +258,12 @@ mybreak(nCall);
 //   printf("fEnterLength=%g fCurrentLength=%g Rxy=%g Z=%g\n\n"
 //         , fEnterLength, fCurrentLength,fCurrentPosition.Perp(),fCurrentPosition.Z());
 SWITCH: int myKaze = fKaze;
+// printf("KASE=%d Pos(%g %g %g) In %s\n",fKaze
+//       ,fCurrentPosition.X(),fCurrentPosition.Y(),fCurrentPosition.Z()
+//       ,gGeoManager->GetPath());
+
+
+
 if (GetDebug()) {printf("%d - ",nCall); Print();}
   switch (fKaze) {
     case kNEWtrack:;
