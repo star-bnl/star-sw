@@ -17,11 +17,14 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.h,v 2.8 2010/09/01 14:33:57 fisyak Exp $
+ * $Id: StAnalysisMaker.h,v 2.9 2012/03/22 23:45:16 fisyak Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.h,v $
+ * Revision 2.9  2012/03/22 23:45:16  fisyak
+ * Compress output for Event summary
+ *
  * Revision 2.8  2010/09/01 14:33:57  fisyak
  * Clean ups
  *
@@ -85,8 +88,6 @@
 //
 class StEvent;
 class StTrack;
-class TFile;
-class TNtuple;
 
 //
 //  On some systems (e.g. Sun) the STL is contained in
@@ -108,19 +109,17 @@ class StAnalysisMaker : public StMaker {
 public:
 
     StAnalysisMaker(const Char_t *name="analysis");     // constructor
-    ~StAnalysisMaker();                                 // destructor
+    ~StAnalysisMaker() {}                               // destructor
     
-    void Clear(Option_t *option="");    // called after every event to cleanup 
-    Int_t  Init();                      // called once at the beginning of your job
     Int_t  Make();                      // invoked for every event
     Int_t  Finish();                    // called once at the end
     static void PrintStEvent(Int_t k = 0, Int_t minFitPts = 0);
-    static void PrintTpcHits(Int_t sector = 0, Int_t row = 0, Bool_t plot = kFALSE, Int_t IdTruth=0);
+    static void PrintTpcHits(Int_t sector = 0, Int_t row = 0, Bool_t plot = kFALSE, Int_t IdTruth=-1);
     static void PrintSvtHits();
     static void PrintSsdHits();
     static void PrintRnDHits();
     virtual const char *GetCVS() const {
-      static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.8 2010/09/01 14:33:57 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.9 2012/03/22 23:45:16 fisyak Exp $ built "__DATE__" "__TIME__ ; 
       return cvs;
     }
 
@@ -138,18 +137,15 @@ private:
     //  Methods (== member functions)
     //  Remember: these are just examples!
     //
-    bool accept(StEvent*);            // this method serves as an event filter
-    bool accept(StTrack*);            // and this is used to select tracks
+    Bool_t accept(StEvent*);            // this method serves as an event filter
+    Bool_t accept(StTrack*);            // and this is used to select tracks
 
     //
     //  Data members
     //  Note, that it is recommended to start all member names with
     //  an 'm'. This makes it easier to read the code later.
     //
-    int        mEventCounter;  //!
-    string     mFileName;      //!
-    TFile      *mFile;         //!
-    TNtuple    *mTuple;        //!
+    Int_t        mEventCounter;  //!
 
     //
     //  This is needed to make your maker known to root4star.

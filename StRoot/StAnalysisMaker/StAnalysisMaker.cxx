@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.15 2010/09/01 14:33:57 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.16 2012/03/22 23:45:16 fisyak Exp $
  *
  */
 
@@ -29,8 +29,6 @@
 //
 #include "StAnalysisMaker.h"
 #include "StEventTypes.h"
-#include "TNtuple.h"
-#include "TFile.h"
 #include "StMessMgr.h"
 #include "StDcaGeometry.h"
 #if ROOT_VERSION_CODE < 334081
@@ -39,6 +37,7 @@
 #include "TArrayL64.h"
 #endif
 #include "TClassTable.h"
+#include "TNtuple.h"
 //
 //  The following line defines a static string. Currently it contains
 //  the cvs Id. The compiler will put the string (literally) in the
@@ -72,91 +71,14 @@ ClassImp(StAnalysisMaker)
 StAnalysisMaker::StAnalysisMaker(const Char_t *name) : StMaker(name)
 {
     mEventCounter = 0;
-    mFile = 0;
-    mTuple = 0;
 }
-
-
-
-/*!
- *
- *  Usually ok to leave this as it is, the destructor should
- *  however free/delete private data allocated in other part
- *  of the code.
- *
- */
-StAnalysisMaker::~StAnalysisMaker() { /* noop */ }
-
-
-
-/*!
- *
- * Called once at the beginning.
- * This is a good place to book histos and tuples.
- *
- */
-Int_t
-StAnalysisMaker::Init()
-{
-    //
-    //  Output file.
-    //  mFileName should contain a valid filename. Here
-    //  we dump the file into the null device.
-    //
-    mFileName = "/dev/null";    
-    mFile =  new TFile(mFileName.c_str(), "RECREATE");
-    gMessMgr->Info() << "StAnalysisMaker::Init(): "
-		     << "Histograms will be stored in file '"
-		     <<  mFileName.c_str() << "'" << endm;
-    
-    //
-    //  Define Ntuple.
-    //  Keep the order TFile -> TNtuple
-    //  
-    string varList = "evt:xvt:yvtx:zvtx:ctbsum:zdcsum:nprimary:npions:goodfrac";
-    mTuple = new TNtuple("example","example",varList.c_str());
-    
-    //
-    //  Call Init() of the base class.
-    //  Always leave this in.
-    //
-    return StMaker::Init();
-}
-
-/*!
- *
- *  Called every event after Make(). Usually you do not
- *  need to do anything here. Leave it as it is.
- *
- */
-void
-StAnalysisMaker::Clear(Option_t *opt)
-{
-    StMaker::Clear();
-}
-
-/*!
- *
- * Called once at the end.
- *
- */
-Int_t
-StAnalysisMaker::Finish()
-{
+Int_t StAnalysisMaker::Finish() {
     //
     //  A good place for printout and to summarize
     //  the run.
     //
     gMessMgr->Info() << "StAnalysisMaker::Finish() "
 		     << "Processed " << mEventCounter << " events." << endm;
-    
-    //
-    //  Write Ntuple/histos to file and close it.
-    //  
-    if( mFile){
-      mFile->Write();  
-      mFile->Close();
-    }
     
     return kStOK;
 }
@@ -165,9 +87,7 @@ StAnalysisMaker::Finish()
  *  This method is called every event. That's the
  *  right place to plug in your analysis. 
  */
-Int_t
-StAnalysisMaker::Make()
-{
+Int_t StAnalysisMaker::Make() {
     mEventCounter++;  // increase counter
 	
     //
@@ -195,124 +115,6 @@ StAnalysisMaker::Make()
       gMessMgr->Warning() << "StAnalysisMaker::Make : Event was not accepted" << endm;
       return kStOK;
     }
-
-    //
-    //  Ok we survived the filter. Now it is time
-    //  to do something with the event.
-    //  In the following we simply fill the Ntuple.
-    //
-    int k = 0;
-    float tuple[10];
-    tuple[k++] = event->id();                               // the event number
-    
-    tuple[k++] = event->primaryVertex()->position().x();    // x-vertex
-    tuple[k++] = event->primaryVertex()->position().y();    // y-vertex
-    tuple[k++] = event->primaryVertex()->position().z();    // z-vertex
-
-
-    // Y3 trigger Id dump
-    StTriggerIdCollection *trgcol = event->triggerIdCollection();
-    if ( ! trgcol ){
-      gMessMgr->Warning() << "StAnalysisMaker::Make : No triggerIdCollection" << endm;
-    } else {
-      const StTriggerId *l1 = trgcol->l1();
-      const StTriggerId *l2 = trgcol->l2();
-      const StTriggerId *l3 = trgcol->l3();
-      const StTriggerId *nominal = trgcol->nominal();
-
-      if(l1) {
-	vector<UInt_t> l1Vec = l1->triggerIds();
-	cout << "L1: Mask " <<l1->mask() << " " ;
-	for (vector<UInt_t>::iterator viter = l1Vec.begin();
-	     viter != l1Vec.end(); ++viter) {
-	  cout << (*viter) << "," ;
-	}
-	cout << endl;
-      }
-      if(l2) {
-	vector<UInt_t> l2Vec = l2->triggerIds();
-	cout << "L2: Mask " <<l2->mask() << " " ;
-	for (vector<UInt_t>::iterator viter = l2Vec.begin();
-	     viter != l2Vec.end(); ++viter) {
-	  cout << (*viter) << "," ;
-	}
-	cout << endl;
-      }
-      if(l3) {
-	vector<UInt_t> l3Vec = l3->triggerIds();
-	cout << "L3: Mask " <<l3->mask() << " " ;
-	for (vector<UInt_t>::iterator viter = l3Vec.begin();
-	     viter != l3Vec.end(); ++viter) {
-	  cout << (*viter) << "," ;
-	}
-	cout << endl;
-      }
-      
-      if(nominal) {
-	vector<UInt_t> nominalVec = nominal->triggerIds();
-	cout << "NOMINAL: Mask " <<nominal->mask() << " " ;
-	for (vector<UInt_t>::iterator viter = nominalVec.begin();
-	     viter != nominalVec.end(); ++viter) {
-	  cout << (*viter) << "," ;
-	}
-	cout << endl;
-      }
-    }
-
-
-    //
-    //  Get the ZDC and CTB data.
-    //  
-    StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
-    if (!theTriggers){
-      // good idea to check if the data is available at all
-      gMessMgr->Warning() << "StAnalysisMaker::Make : no triggerDetectorCollection" << endm;
-      return kStOK;           
-    }
-    StCtbTriggerDetector &theCtb = theTriggers->ctb();
-    StZdcTriggerDetector &theZdc = theTriggers->zdc();
-
-    //
-    //  Sum all CTB counter
-    float ctbsum = 0;
-    for (UInt_t  islat=0; islat<theCtb.numberOfSlats(); islat++) 
-	for (UInt_t  itray=0; itray<theCtb.numberOfTrays(); itray++)
-	    ctbsum += theCtb.mips(itray, islat, 0);
-
-    tuple[k++] = ctbsum;            // CTB
-    tuple[k++] = theZdc.adcSum();   // ZDC
-    
-    //
-    //  Count tracks
-    //  This is just an example on how to use little
-    //  helper functions which makes the code more readable.
-    //
-    tuple[k++] = countPrimaryTracks(*event);
-    tuple[k++] = countPrimaryPions(*event);
-
-    //
-    //  Last but not least we count the number of good global
-    //  tracks. Good or bad is determined by the track filter.
-    //  The fraction of good globals gets stored in the tuple. 
-    //
-    int allGlobals = 0;
-    int goodGlobals = 0;
-
-    StTrack *track;
-    StSPtrVecTrackNode& nodes = event->trackNodes();
-    for (UInt_t  j=0; j<nodes.size(); j++) {
-	track = nodes[j]->track(global);
-	if (track) allGlobals++;
-	if (accept(track)) goodGlobals++;
-    }
-    if (allGlobals) tuple[k++] = static_cast<float>(goodGlobals)/allGlobals;
-    else            tuple[k++] = -1;
-    //
-    //  That's it.
-    //  Store the current tuple. See you next event.
-    //
-    mTuple->Fill(tuple);
-
     return kStOK;
 }
 
@@ -344,16 +146,16 @@ void StAnalysisMaker::PrintStEvent(Int_t k, Int_t minFitPts) {
   if (!pEvent) return;
   cout << "Event: Run "<< pEvent->runId() << " Event No: " << pEvent->id() << endl;
   cout << "Vertex Positions" << endl;
-  const StPrimaryVertex *pvertex = pEvent->primaryVertex();
-  if (pvertex ) {
-    const StThreeVectorF &position = pvertex->position();
-    cout << "Event: Vertex Position " 
-	 << "\t" << position.x()
-	 << "\t" << position.y()
-	 << "\t" << position.z()
-	 << endl;
-  }
-  else {
+  UInt_t NpVX = pEvent->numberOfPrimaryVertices();
+  if (NpVX ) {
+    for (UInt_t i = 0; i < NpVX; i++) {
+      const StPrimaryVertex *vx = pEvent->primaryVertex(i);
+      const StThreeVectorF &position = vx->position();
+      cout << Form("Vertex: %i Position: %8.3f %8.3f %8.3f type: %3i Fl: %3i IdT: %4i Q: %4i",
+		   i,position.x(),position.y(),position.z(),
+		   vx->type(),vx->flag(), vx->idTruth(), vx->qaTruth()) << endl;
+    }
+  } else {
     cout << "Event: Vertex Not Found" << endl;
   }
   
@@ -364,7 +166,8 @@ void StAnalysisMaker::PrintStEvent(Int_t k, Int_t minFitPts) {
   for (UInt_t  i=0; i < nTracks; i++) {
     node = trackNode[i]; if (!node) continue;
     StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
-    StDcaGeometry* dca    = gTrack->dcaGeometry();
+    if (! gTrack->detectorInfo()) {cout << "Missing detectorInfo for track " << i << " ==========" << endl;}
+    const StDcaGeometry* dca    = gTrack->dcaGeometry();
     StPrimaryTrack *pTrack = 	static_cast<StPrimaryTrack*>(node->track(primary));
     for (int l = 0; l < 2; l++) {
       StTrack        *track = 0;
@@ -382,8 +185,9 @@ void StAnalysisMaker::PrintStEvent(Int_t k, Int_t minFitPts) {
 	  Double_t length = track->length();
 	  if (length > 9999.) length = 9999.;
 	  cout << Form(" L %8.3f", length);
-	  cout << Form(" NF %4d chi2 %8.3f NP %4d",
-		       track->fitTraits().numberOfFitPoints(), track->fitTraits().chi2(), track->numberOfPossiblePoints());
+	  cout << Form(" NF %4d chi2 %8.3f NP %4d Id: %4i Q: %4i",
+		       track->fitTraits().numberOfFitPoints(), track->fitTraits().chi2(), track->numberOfPossiblePoints(),
+		       track->idTruth(), track->qaTruth());
 	} else 	{
 	  //                      1234567890123456781234567812345678 12345678 12345678 12345678   123 12345678 12345678 123 12345678 
 	  if (! line) {
@@ -420,9 +224,6 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Bool_t plot, Int_t I
   struct BPoint_t {
     Float_t sector, row, x, y, z, q;
   };
-  static const Char_t *vname = "sector:row:x:y:z:q";
-  static TNtuple *Nt = 0;
-  if (plot && Nt == 0) Nt = new TNtuple("TpcHit","TpcHit",vname);
     
   StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
   if (!pEvent) { cout << "Can't find StEvent" << endl; return;}
@@ -461,7 +262,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Bool_t plot, Int_t I
 		Int_t l = idx[k];
 		StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[l]);
 		if (! tpcHit) continue;
-		if (IdTruth > 0 && tpcHit->idTruth() != IdTruth) continue;
+		if (IdTruth >= 0 && tpcHit->idTruth() != IdTruth) continue;
 		tpcHit->Print();
 	      }
 	    }
@@ -590,6 +391,9 @@ void StAnalysisMaker::PrintRnDHits() {
 }
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.16  2012/03/22 23:45:16  fisyak
+ * Compress output for Event summary
+ *
  * Revision 2.15  2010/09/01 14:33:57  fisyak
  * Clean ups
  *
