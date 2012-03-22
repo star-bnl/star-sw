@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.15 2012/02/23 18:13:15 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.16 2012/03/22 00:19:14 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.16  2012/03/22 00:19:14  perev
+ * Cleanup
+ *
  * Revision 1.15  2012/02/23 18:13:15  perev
  * Cleanup
  *
@@ -882,7 +885,7 @@ void StvStEventFiller::fillEventPrimaries()
     pTrack = 0;
     for (mVertN=0; (vertex = mEvent->primaryVertex(mVertN));mVertN++) {
       StThreeVectorD vertexPosition = vertex->position();
-      double zPrim = vertexPosition.z();
+//VP      double zPrim = vertexPosition.z();
       // loop over StvKalmanTracks
       float globalDca = impactParameter(gTrack,vertexPosition);
       if (fabs(minDca) > fabs(globalDca)) minDca = globalDca;
@@ -912,10 +915,8 @@ void StvStEventFiller::fillEventPrimaries()
       }
       if (pTrack->numberOfPossiblePoints()<10) 		break;
       if (pTrack->geometry()->momentum().mag()<0.1) 	break;
-      double qwe = pTrack->geometry()->momentum().phi()
-                 - ((StGlobalTrack*)gTrack)->dcaGeometry()->psi();
-      StvDebug::Count("psiPr-PsiGl",qwe/M_PI*180);
-
+      StDcaGeometry *myDca = gTrack->dcaGeometry();
+      if (!myDca)					break;
 
       fillTrackCountG++;
       break;
@@ -949,6 +950,8 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
   for (StvNodeConstIter it = track->begin();it!=track->end();++it) 
   {
       node = (*it);
+
+
       if (node->GetType() != StvNode::kRegNode) continue;
       const StvHit *stiHit = node->GetHit();
       if (!stiHit)		continue;
@@ -1347,7 +1350,9 @@ static int nCall=0; nCall++;
   for (StvNodeConstIter tNode=track->begin();tNode!=track->end();++tNode) 
   {
       const StvNode *node = (*tNode);
+
       if (node->GetType() != StvNode::kRegNode) continue;
+      if (!node->GetDetId()) 	continue;
       StvHit *stiHit = node->GetHit();
       if (!stiHit)		continue;
       if (!stiHit->detector())  continue;
@@ -1481,6 +1486,9 @@ enum {kPP=0,kMP=1,kFP=2};
 //fill measured points
     count[0][kMP]++; count[detId][kMP]++;
     if (node->GetXi2()>1000) 	continue;
+    if (!h->stHit())		continue;
     count[0][kFP]++; count[detId][kFP]++;
   }
 }
+
+
