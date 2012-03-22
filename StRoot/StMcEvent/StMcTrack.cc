@@ -9,16 +9,13 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.33 2011/11/17 20:20:13 genevb Exp $
+ * $Id: StMcTrack.cc,v 2.34 2012/03/22 01:03:26 perev Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
- * Revision 2.33  2011/11/17 20:20:13  genevb
- * Restore latest version
- *
- * Revision 2.32  2011/11/17 20:16:20  genevb
- * For SL10k_embed, fixes from 2.28 and 2.29, minus FPD inclusion from 2.27
+ * Revision 2.34  2012/03/22 01:03:26  perev
+ * Etr add
  *
  * Revision 2.31  2011/10/11 01:22:24  perev
  * Not used anymore or ever
@@ -83,10 +80,10 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.33 2011/11/17 20:20:13 genevb Exp $
+ * $Id: StMcTrack.cc,v 2.34 2012/03/22 01:03:26 perev Exp $
  * $Log: StMcTrack.cc,v $
- * Revision 2.33  2011/11/17 20:20:13  genevb
- * Restore latest version
+ * Revision 2.34  2012/03/22 01:03:26  perev
+ * Etr add
  *
  * Revision 2.31  2011/10/11 01:22:24  perev
  * Not used anymore or ever
@@ -220,7 +217,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.33 2011/11/17 20:20:13 genevb Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.34 2012/03/22 01:03:26 perev Exp $";
 
 ClassImp(StMcTrack);
 
@@ -289,6 +286,7 @@ StMcTrack::~StMcTrack() {
     mPixelHits.clear();
     mIstHits.clear();
     mFgtHits.clear();
+    mEtrHits.clear();
 }
 
 void StMcTrack::initToZero()
@@ -346,6 +344,7 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Ist Hits  : " << t.istHits().size()   << endl;
     os << "No. Fgt Hits  : " << t.fgtHits().size()   << endl;
     os << "No. Fsc Hits  : " << t.fscHits().size()   << endl;
+    os << "No. Etr Hits  : " << t.etrHits().size()   << endl;
     os << "Is Shower     : " << t.isShower() << endl;
     os << "Geant Id      : " << t.geantId()  << endl;
     os << "Pdg Code      : " << t.pdgId()  << endl;
@@ -389,6 +388,7 @@ void StMcTrack::Print(Option_t *option) const {
 	 << "Pxl" 
 	 << "Ist"  
 	 << "Fgt"  
+	 << "Etr"  
 	 << "ISh" << endl;
     return;
   }
@@ -428,6 +428,7 @@ void StMcTrack::Print(Option_t *option) const {
 	   pixelHits().size(),
 	   istHits().size(),
 	   fgtHits().size(),
+	   etrHits().size(),
 	   isShower())
 	 << endl;
 }
@@ -478,6 +479,8 @@ void StMcTrack::setPixelHits(StPtrVecMcPixelHit& val) { mPixelHits = val; }
 void StMcTrack::setIstHits(StPtrVecMcIstHit& val) { mIstHits = val; }
 
 void StMcTrack::setFgtHits(StPtrVecMcFgtHit& val) { mFgtHits = val; }
+
+void StMcTrack::setEtrHits(StPtrVecMcEtrHit& val) { mEtrHits = val; }
 
 void StMcTrack::setShower(char val) { mIsShower = val; }
 
@@ -594,6 +597,11 @@ void StMcTrack::addIstHit(StMcIstHit* hit)
 void StMcTrack::addFgtHit(StMcFgtHit* hit)
 {
   mFgtHits.push_back(hit);
+}
+
+void StMcTrack::addEtrHit(StMcEtrHit* hit)
+{
+  mEtrHits.push_back(hit);
 }
 
 // Not very elegant.  Maybe should have kept all collections as
@@ -733,6 +741,14 @@ void StMcTrack::removeFgtHit(StMcFgtHit* hit)
     }    
 }
 
+void StMcTrack::removeEtrHit(StMcEtrHit* hit)
+{
+    StMcEtrHitIterator iter = find (mEtrHits.begin(), mEtrHits.end(),hit);
+    if (iter != mEtrHits.end()) {
+	mEtrHits.erase(iter);
+    }    
+}
+
 //void StMcTrack::setTopologyMap(StTrackTopologyMap& val) { mTopologyMap = val; }
 StParticleDefinition* StMcTrack::particleDefinition() { 
   if (mParticleDefinition) return mParticleDefinition; 
@@ -771,6 +787,7 @@ const StPtrVecMcHit *StMcTrack::Hits(StDetectorId Id) const {
   case kPxlId:     	  	coll = (StPtrVecMcHit *) &mPixelHits; break;       
   case kIstId:       	  	coll = (StPtrVecMcHit *) &mIstHits; break;                  
   case kFgtId:  	        coll = (StPtrVecMcHit *) &mFgtHits; break;   
+  case kEtrId:  	        coll = (StPtrVecMcHit *) &mEtrHits; break;   
   default:                      break;          
   };
   return coll;
@@ -805,6 +822,7 @@ const StPtrVecMcCalorimeterHit *StMcTrack::CalorimeterHits(StDetectorId Id) cons
   case kPxlId:     	  	break;       
   case kIstId:       	  	break;                  
   case kFgtId:   	        break;   
+  case kEtrId:   	        break;   
   default:                      break;          
   };
   return coll;
