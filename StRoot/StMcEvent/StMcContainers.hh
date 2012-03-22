@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcContainers.hh,v 2.15 2011/10/11 01:09:39 perev Exp $
+ * $Id: StMcContainers.hh,v 2.16 2012/03/22 00:32:17 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcContainers.hh,v $
+ * Revision 2.16  2012/03/22 00:32:17  perev
+ * Etr hit added
+ *
  * Revision 2.15  2011/10/11 01:09:39  perev
  * Mtd added
  *
@@ -48,6 +51,9 @@
  * accordingly.
  *
  * $Log: StMcContainers.hh,v $
+ * Revision 2.16  2012/03/22 00:32:17  perev
+ * Etr hit added
+ *
  * Revision 2.15  2011/10/11 01:09:39  perev
  * Mtd added
  *
@@ -126,6 +132,7 @@ class StMcCtbHit;
 class StMcPixelHit;
 class StMcIstHit;
 class StMcFgtHit;
+class StMcEtrHit;
 class StMcTofHit;
 class StMcBTofHit;
 class StMcMtdHit;
@@ -144,6 +151,7 @@ typedef vector<StMcCtbHit*>  StSPtrVecMcCtbHit;
 typedef vector<StMcPixelHit*> StSPtrVecMcPixelHit; 
 typedef vector<StMcIstHit*>  StSPtrVecMcIstHit; 
 typedef vector<StMcFgtHit*>  StSPtrVecMcFgtHit; 
+typedef vector<StMcEtrHit*>  StSPtrVecMcEtrHit; 
 typedef vector<StMcTofHit*>  StSPtrVecMcTofHit; 
 typedef vector<StMcBTofHit*>  StSPtrVecMcBTofHit; 
 typedef vector<StMcMtdHit*>  StSPtrVecMcMtdHit; 
@@ -161,6 +169,7 @@ typedef vector<StMcCtbHit*>  StPtrVecMcCtbHit;
 typedef vector<StMcPixelHit*> StPtrVecMcPixelHit; 
 typedef vector<StMcIstHit*>  StPtrVecMcIstHit; 
 typedef vector<StMcFgtHit*>  StPtrVecMcFgtHit; 
+typedef vector<StMcEtrHit*>  StPtrVecMcEtrHit; 
 typedef vector<StMcTofHit*>  StPtrVecMcTofHit; 
 typedef vector<StMcBTofHit*>  StPtrVecMcBTofHit; 
 typedef vector<StMcMtdHit*>  StPtrVecMcMtdHit; 
@@ -178,6 +187,7 @@ typedef StPtrVecMcCtbHit::iterator  StMcCtbHitIterator;
 typedef StPtrVecMcPixelHit::iterator StMcPixelHitIterator; 
 typedef StPtrVecMcIstHit::iterator  StMcIstHitIterator; 
 typedef StPtrVecMcFgtHit::iterator  StMcFgtHitIterator; 
+typedef StPtrVecMcEtrHit::iterator  StMcEtrHitIterator; 
 typedef StPtrVecMcTofHit::iterator  StMcTofHitIterator; 
 typedef StPtrVecMcBTofHit::iterator  StMcBTofHitIterator; 
 typedef StPtrVecMcMtdHit::iterator  StMcMtdHitIterator; 
@@ -195,6 +205,7 @@ typedef StPtrVecMcCtbHit::const_iterator  StMcCtbHitConstIterator;
 typedef StPtrVecMcPixelHit::const_iterator StMcPixelHitConstIterator; 
 typedef StPtrVecMcIstHit::const_iterator  StMcIstHitConstIterator;
 typedef StPtrVecMcFgtHit::const_iterator  StMcFgtHitConstIterator; 
+typedef StPtrVecMcEtrHit::const_iterator  StMcEtrHitConstIterator; 
 typedef StPtrVecMcTofHit::const_iterator  StMcTofHitConstIterator; 
 typedef StPtrVecMcBTofHit::const_iterator  StMcBTofHitConstIterator; 
 typedef StPtrVecMcMtdHit::const_iterator  StMcMtdHitConstIterator; 
