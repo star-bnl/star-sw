@@ -20,6 +20,17 @@ setenv DB_ACCESS_MODE write
 root4star -b -l -q macros/storetofTDIGOnTray.C
 
 
+**** TFO/VPD triggerwindow update ****
+* determine the window (typical size ~75ns) in which the VPD
+* and BTOF see hits. For uniform HTPDC configurations, these
+* should be uniform per THUB, but individual trays (read:
+*  VPD "trays") could have non-default values
+* Update typically once, ahead of the new run period
+root4star -b -l -q  'macros/readtofTrgWindow.C("2012-03-20 00:00:00")'
+root4star -b -l -q  'macros/storetofTrgWindow.C'
+
+
+
 **** TOF alignment workflow ****
 * determine timestamp (usually only once per run period)
 * increment seconds in case of a new version
