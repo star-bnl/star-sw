@@ -19,27 +19,23 @@
 using namespace std;
 
 
-void storetofTrgWindow()
-//int main(int argc, char *argv[])
-
-{
+void storetofTrgWindow() {
 
 // year8
 //  const Int_t NTRAY = 5;
 // year9
 //  const Int_t NTRAY = 94;
-// year10
+// year10+
   const Int_t NTRAY = 120;
   const Int_t NVPDTRAY = 2;
   const Int_t NMAX = 120;
-  const Int_t NMTD = 2; //there is only one MTD, but it has ID=124
+  const Int_t NMTD = 2; //there is only one MTD, but it has ID=124 (and is only used in Run 10)
 
   //-- load dBase and Table definition libraries
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
   gSystem->Load("St_Tables.so");
-
   gSystem->Load("StDbLib.so");
   gSystem->Load("libStDb_Tables.so");
 
@@ -49,7 +45,9 @@ void storetofTrgWindow()
   //-- connect to the db & get an empty container
   StDbConfigNode* configNode = dbManager->initConfig("Calibrations_tof");
 
-  //----------------------------------------
+//----------------------------------------
+// History of time stamps (in GMT)
+//----------------------------------------
 //  TString ZStoreTime = "2007-11-01 00:00:01";
 //  TString ZStoreTime = "2009-02-01 00:00:00";  // y9 1st version very loose
 //  TString ZStoreTime = "2009-02-01 00:00:01";  // y9 2st version  
@@ -59,13 +57,13 @@ void storetofTrgWindow()
 //  TString ZStoreTime = "2009-05-29 14:00:00";  // 10149077-10150023
 //  TString ZStoreTime = "2009-05-30 15:30:00";  // 10150024-10152010
 //  TString ZStoreTime = "2009-06-03 16:00:00";  // 10154045-...
-
-  // year10
+//
 //  TString ZStoreTime = "2009-11-01 00:00:00"; // run 10 preliminary
 //  TString ZStoreTime = "2009-11-01 00:01:00"; // updated version, includes MTD
-// TString ZStoreTime = "2009-11-01 00:01:01"; // updated version, (2nd attempt)includes MTD
-// TString ZStoreTime = "2010-12-10 00:00:00"; // run 11 new timing (TOCK)
-TString ZStoreTime = "2011-12-20 00:00:01"; // run 12 new timing
+//  TString ZStoreTime = "2009-11-01 00:01:01"; // updated version, (2nd attempt)includes MTD
+//  TString ZStoreTime = "2010-12-10 00:00:00"; // run 11 new timing (TOCK)
+//  TString ZStoreTime = "2011-12-20 00:00:01"; // run 12 new timing
+  TString ZStoreTime = "2012-03-21 19:50:00"; // run 12 new VPD timing (effective from run 13081013)
 
 
   //-- add table to the container with descriptor given by Database
@@ -140,23 +138,26 @@ unsigned short cuthi[124]={
 2965,2976,2977,2966,2972,2970,2959,2962,2963,2959,2962,2973,2961,2959,2950,
 2911,2974,0,0};
 
+// year 12 - updated VPD window to lower TOF deadtime (pp500 -- March 22, 2012)
+  cutlow[120]= 230 ; cuthi[120]= 290;  // VPD West
+  cutlow[121]= 245 ; cuthi[121]= 305;  // VPD East
 
 
-// year10/11
+// ---------------------------------------------
+//- Prepare table
   for(int i=0;i<NMAX+NVPDTRAY+NMTD;i++) {
     trg[i].trgWindow_Min = cutlow[i];
     trg[i].trgWindow_Max = cuthi[i];
     cout << " tray = " << i+1 << " min = " << trg[i].trgWindow_Min << " max = " << trg[i].trgWindow_Max << endl;
   }
 
-  //- store data in table
+// Store data in table
   tofTrgWindow->SetTable((char*)trg, NMAX+NVPDTRAY+NMTD);
-  //- set store time
+//- set store time
   dbManager->setStoreTime(ZStoreTime.Data());
-  //- store table in dBase
+// Store table in dBase
   cout<<" here "<<endl;
   dbManager->storeDbTable(tofTrgWindow);
   cout<<"uploaded"<<endl;
-      //    return 0;
 }
 
