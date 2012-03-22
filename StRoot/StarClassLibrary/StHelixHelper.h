@@ -26,8 +26,8 @@ class StHelixHelper: public TObject
 {
   protected: 
       StHelixHelper();
-      static THelixTrack *MyHelix(THelixTrack *myHlx,const StHelixD *evHlx);
   public:
+      static THelixTrack *MyHelix(THelixTrack *myHlx,const StHelixD *evHlx);
       enum {kInnerHelix, kOutterHelix};
       StHelixHelper(const StPhysicalHelix &helix
         ,const StPhysicalHelix &outerHelix, double length);
