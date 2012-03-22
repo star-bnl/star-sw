@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcRichHitCollection.hh,v 2.4 2012/03/01 16:48:29 perev Exp $
+ * $Id: StMcRichHitCollection.hh,v 2.5 2012/03/22 00:47:08 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, March 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcRichHitCollection.hh,v $
+ * Revision 2.5  2012/03/22 00:47:08  perev
+ * private => protected
+ *
  * Revision 2.4  2012/03/01 16:48:29  perev
  * method Browse() added
  *
@@ -50,7 +53,7 @@ virtual void Browse(TBrowser *b);
     StSPtrVecMcRichHit&       hits();
     const StSPtrVecMcRichHit& hits() const;
 
-private:
+protected:
     StSPtrVecMcRichHit mHits;
     ClassDef(StMcRichHitCollection,1)
 };

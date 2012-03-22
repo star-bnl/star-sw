@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtLadderHitCollection.hh,v 2.5 2009/07/24 19:08:08 perev Exp $
+ * $Id: StMcSvtLadderHitCollection.hh,v 2.6 2012/03/22 00:49:53 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtLadderHitCollection.hh,v $
+ * Revision 2.6  2012/03/22 00:49:53  perev
+ * private => protected
+ *
  * Revision 2.5  2009/07/24 19:08:08  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -56,7 +59,7 @@ public:
 
     void setBarrelNumber(int);
     
-private:
+protected:
     enum { mMaxNumberOfWafers = 16 };
     int                        mBarrelNumber;
     StMcSvtWaferHitCollection  mWafers[mMaxNumberOfWafers];

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHitCollection.hh,v 2.4 2009/07/24 19:08:07 perev Exp $
+ * $Id: StMcIstHitCollection.hh,v 2.5 2012/03/22 00:43:52 perev Exp $
  * $Log: StMcIstHitCollection.hh,v $
+ * Revision 2.5  2012/03/22 00:43:52  perev
+ * private => protected
+ *
  * Revision 2.4  2009/07/24 19:08:07  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -39,7 +42,7 @@ public:
     
     StMcIstLayerHitCollection*       layer(unsigned int);
     const StMcIstLayerHitCollection* layer(unsigned int) const;
-private:
+protected:
     enum { mNumberOfLayers = 1 };
     StMcIstLayerHitCollection mLayers[mNumberOfLayers];
     ClassDef(StMcIstHitCollection,1)

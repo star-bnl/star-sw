@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSsdLadderHitCollection.hh,v 2.2 2011/10/17 00:24:01 fisyak Exp $
+ * $Id: StMcSsdLadderHitCollection.hh,v 2.3 2012/03/22 00:47:25 perev Exp $
  *
  * Author: Fabrice Retiere/Kai Schweda, Aug 2003
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMcSsdLadderHitCollection.hh,v $
+ * Revision 2.3  2012/03/22 00:47:25  perev
+ * private => protected
+ *
  * Revision 2.2  2011/10/17 00:24:01  fisyak
  * Add time of flight for hits
  *
@@ -45,7 +48,7 @@ class StMcSsdLadderHitCollection : public StObject
 public:
   StMcSsdLadderHitCollection() {}
   virtual ~StMcSsdLadderHitCollection() {}
-private:
+protected:
     enum { mMaxNumberOfWafers = 16 };
     StMcSsdWaferHitCollection  mWafers[mMaxNumberOfWafers];
 public:

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtBarrelHitCollection.hh,v 2.4 2009/07/24 19:08:08 perev Exp $
+ * $Id: StMcSvtBarrelHitCollection.hh,v 2.5 2012/03/22 00:48:45 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, March 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtBarrelHitCollection.hh,v $
+ * Revision 2.5  2012/03/22 00:48:45  perev
+ * private => protected
+ *
  * Revision 2.4  2009/07/24 19:08:08  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -52,7 +55,7 @@ public:
 
     void setBarrelNumber(int);
     
-private:
+protected:
     enum { mMaxNumberOfLadders = 20 };
     int                    mBarrelNumber;
     StMcSvtLadderHitCollection mLadders[mMaxNumberOfLadders];

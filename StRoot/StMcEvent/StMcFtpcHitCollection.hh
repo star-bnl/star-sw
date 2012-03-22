@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHitCollection.hh,v 2.4 2009/07/24 19:08:07 perev Exp $
+ * $Id: StMcFtpcHitCollection.hh,v 2.5 2012/03/22 00:41:15 perev Exp $
  * $Log: StMcFtpcHitCollection.hh,v $
+ * Revision 2.5  2012/03/22 00:41:15  perev
+ * private => protected
+ *
  * Revision 2.4  2009/07/24 19:08:07  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -41,7 +44,7 @@ public:
     
     StMcFtpcPlaneHitCollection*       plane(unsigned int);
     const StMcFtpcPlaneHitCollection* plane(unsigned int) const;
-private:
+protected:
     enum { mNumberOfPlanes = 20 };
     StMcFtpcPlaneHitCollection mPlanes[mNumberOfPlanes];
     ClassDef(StMcFtpcHitCollection,1)

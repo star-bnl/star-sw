@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHitCollection.hh,v 2.3 2009/07/24 19:08:07 perev Exp $
+ * $Id: StMcPixelHitCollection.hh,v 2.4 2012/03/22 00:45:54 perev Exp $
  * $Log: StMcPixelHitCollection.hh,v $
+ * Revision 2.4  2012/03/22 00:45:54  perev
+ * private => protected
+ *
  * Revision 2.3  2009/07/24 19:08:07  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -33,7 +36,7 @@ public:
     
     StMcPixelLayerHitCollection*       layer(unsigned int);
     const StMcPixelLayerHitCollection* layer(unsigned int) const;
-private:
+protected:
     enum { mNumberOfLayers = 2 };
     StMcPixelLayerHitCollection mLayers[mNumberOfLayers];
     ClassDef(StMcPixelHitCollection,1)

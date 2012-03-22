@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEmcModuleHitCollection.hh,v 2.6 2012/03/01 16:48:29 perev Exp $
+ * $Id: StMcEmcModuleHitCollection.hh,v 2.7 2012/03/22 00:35:22 perev Exp $
  *
  * Author: Aleksei Pavlinov, May 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcModuleHitCollection.hh,v $
+ * Revision 2.7  2012/03/22 00:35:22  perev
+ * private => protected
+ *
  * Revision 2.6  2012/03/01 16:48:29  perev
  * method Browse() added
  *
@@ -69,7 +72,7 @@ virtual void Browse(TBrowser *b);
 
     void operator()(const unsigned int m) { init(m); } 
 
-private:
+protected:
     StSPtrVecMcCalorimeterHit mHits;
     StSPtrVecMcCalorimeterHit mDetectorHits;
     ClassDef(StMcEmcModuleHitCollection,1)
