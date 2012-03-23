@@ -74,6 +74,7 @@ void StjeJetEventTreeWriter::fillJetTreeHeader(int iAnalyzer)
   jetEvent->Clear();
   jetEvent->mRunId   = fourPMaker->GetRunNumber();
   jetEvent->mEventId = fourPMaker->GetEventNumber();
+  jetEvent->mDatime  = fourPMaker->GetDateTime();
 }
 
 void StjeJetEventTreeWriter::fillJetTree(int iAnalyzer, int iVertex)
@@ -111,6 +112,8 @@ StJetCandidate* StjeJetEventTreeWriter::fillJet(StJetEvent* jetEvent, StJetVerte
       track->mNHitsDedx      = t->nHitsDedx();
       track->mDedx           = t->dEdx();
       track->mBeta           = t->beta();
+      track->mFirstPoint     = t->firstPoint();
+      track->mLastPoint      = t->lastPoint();
       track->mExitTowerId    = t->exitTowerId();
       track->mExitDetectorId = t->exitDetectorId();
       track->mExitPoint.SetPtEtaPhi(t->bemcRadius(),t->etaext(),t->phiext());

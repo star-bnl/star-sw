@@ -76,6 +76,7 @@ int StJetMaker2009::Make()
     // Fill header
     jetbranch->event->mRunId = GetRunNumber();
     jetbranch->event->mEventId = GetEventNumber();
+    jetbranch->event->mDatime = GetDateTime();
 
     if (jetbranch->anapars->useTpc) {
       StjTPCRandomMuDst tpc((StMuDstMaker*)0,
@@ -355,6 +356,8 @@ void StJetMaker2009::copyTrack(const StMuTrackEmu* t, StJetTrack* track)
   track->mNHitsDedx      = t->nHitsDedx();
   track->mDedx           = t->dEdx();
   track->mBeta           = t->beta();
+  track->mFirstPoint     = t->firstPoint();
+  track->mLastPoint      = t->lastPoint();
   track->mExitTowerId    = t->exitTowerId();
   track->mExitDetectorId = t->exitDetectorId();
   track->mExitPoint.SetPtEtaPhi(t->bemcRadius(),t->etaext(),t->phiext());

@@ -1,10 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.12 2010/04/24 04:15:35 pibero Exp $
+// $Id: StMuTrackEmu.h,v 1.13 2012/03/23 05:44:20 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
 
-#include <Rtypes.h>
+#include "TVector3.h"
 
 class StMuTrackEmu {
 
@@ -74,6 +74,8 @@ public:
   short          exitDetectorId() const { return _exitDetectorId; }
   double         dEdx()        const { return _dEdx; }
   double         beta()        const { return _beta; }
+  const TVector3& firstPoint() const { return _firstPoint; }
+  const TVector3&  lastPoint() const { return _lastPoint;  }
   int            trackIndex()  const { return _trackIndex; }
   short          id()          const { return _id; }
   short          detectorId()  const { return _detectorId; }
@@ -110,6 +112,8 @@ private:
   short          _exitDetectorId;
   double         _dEdx;
   double         _beta;
+  TVector3       _firstPoint;
+  TVector3       _lastPoint;
 
   int            _trackIndex;
 
