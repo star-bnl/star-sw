@@ -274,11 +274,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			$env->{ENV}->{AGML_WARNINGS} = 1==1; # $param::debug;
 			
 			if ( $xml =~ m/Compat/ ){
-			    Depends $env ["#".$agE], "#$xml";
+			    Depends $env ["#".$agE], ("#$xml", "#$agml_cmd");
 			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
 			} else {
-			    Depends $env ["#".$agX, "#".$agH, "#".$agE], "#$xml";
+			    Depends $env ["#".$agX, "#".$agH, "#".$agE], ("#$xml", "#$agml_cmd");
 			  
 			    Command $env ["#".$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
 			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
