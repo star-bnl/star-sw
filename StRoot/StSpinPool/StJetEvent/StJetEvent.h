@@ -19,6 +19,7 @@ class StJetTower;
 class StJetParticle;
 
 #include "TObject.h"
+#include "TDatime.h"
 
 class StJetEvent : public TObject {
 public:
@@ -29,6 +30,13 @@ public:
 
   int runId  () const { return mRunId;   }
   int eventId() const { return mEventId; }
+  const TDatime& dateTime() const { return mDatime; }
+  int year  () const { return mDatime.GetYear  (); }
+  int month () const { return mDatime.GetMonth (); }
+  int day   () const { return mDatime.GetDay   (); }
+  int hour  () const { return mDatime.GetHour  (); }
+  int minute() const { return mDatime.GetMinute(); }
+  int second() const { return mDatime.GetSecond(); }
 
   int numberOfVertices () const;
   int numberOfJets     () const;
@@ -60,6 +68,7 @@ private:
 
   int mRunId;
   int mEventId;
+  TDatime mDatime;
 
   TClonesArray* mVertices;
   TClonesArray* mJets;
@@ -67,7 +76,7 @@ private:
   TClonesArray* mTowers;
   TClonesArray* mParticles;
 
-  ClassDef(StJetEvent,5);
+  ClassDef(StJetEvent,6);
 };
 
 #endif // ST_JET_EVENT_H

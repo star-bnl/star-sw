@@ -50,6 +50,8 @@ public:
   float chi2()                const { return mChi2; }
   float chi2prob()            const { return mChi2Prob; }
   float beta()                const { return mBeta; }
+  const TVector3& firstPoint() const { return mFirstPoint; }
+  const TVector3&  lastPoint() const { return mLastPoint;  }
 
 private:
   short    mFlag;
@@ -67,8 +69,10 @@ private:
   float    mChi2;
   float    mChi2Prob;
   float    mBeta;
+  TVector3 mFirstPoint;
+  TVector3 mLastPoint;
 
-  ClassDef(StJetTrack,3);
+  ClassDef(StJetTrack,4);
 };
 
 #endif // ST_JET_TRACK_H
