@@ -1,7 +1,7 @@
 #ifndef L2wEemc2012_H
 #define L2wEemc2012_H
 /*********************************************************************
- * $Id: L2wEemc2012.h,v 1.3 2011/10/19 16:12:12 jml Exp $
+ * $Id: L2wEemc2012.h,v 1.4 2012/03/23 20:12:11 balewski Exp $
  * \author Jan Balewski, MIT, 2008 
  *********************************************************************
  * Descripion:
@@ -22,6 +22,12 @@
 class L2Histo;
 class L2EmcGeom2012;
 
+struct  L2weResult2012 {
+  unsigned char  trigger;     // bit0=rnd, bit1=ET>thr
+  unsigned char  highestEt;   // cluster Et with 60Gev Max.  bits=Et*256/60 
+  unsigned short highestRDO;
+};
+
 class L2wEemc2012 : public  L2VirtualAlgo2012 {
  private:
 
@@ -29,8 +35,8 @@ class L2wEemc2012 : public  L2VirtualAlgo2012 {
   int   par_dbg;
   float par_EtThresh;
 
- //............... preserved for Decision(),
-  float highestEt[L2eventStream2012::mxToken]; 
+  //............... preserved for Decision(),
+  L2weResult2012 resultBlob[L2eventStream2012::mxToken];
   
   // utility methods
   void  createHisto();
@@ -47,6 +53,9 @@ class L2wEemc2012 : public  L2VirtualAlgo2012 {
 
 /**********************************************************************
   $Log: L2wEemc2012.h,v $
+  Revision 1.4  2012/03/23 20:12:11  balewski
+  changes are to write a L2weResult to the L2Result array so we can differentiate random and real accepts, and update the plots so we can have some monitoring,no intended changes to the actual algo
+
   Revision 1.3  2011/10/19 16:12:12  jml
   more 2012 stuff
 

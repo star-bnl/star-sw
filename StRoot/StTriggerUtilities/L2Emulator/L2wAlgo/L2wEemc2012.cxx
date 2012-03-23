@@ -5,7 +5,7 @@
 #include <math.h>
 
 /***********************************************************
- * $Id: L2wEemc2012.cxx,v 1.3 2011/10/19 16:12:12 jml Exp $
+ * $Id: L2wEemc2012.cxx,v 1.4 2012/03/23 20:12:09 balewski Exp $
  * \author Jan Balewski, MIT, 2008 
  ***********************************************************
  * Descripion: see .h
@@ -26,7 +26,7 @@ L2wEemc2012::L2wEemc2012(const char* name, const char *uid, L2EmcDb2012* db, L2E
   
   // geoX is not used, ignore
   
-  setMaxHist(2); // set upper range, I uses only 2^N -it is easier to remember
+  setMaxHist(4); // set upper range, I uses only 2^N -it is easier to remember
   createHisto(); 
   
 }
@@ -56,15 +56,11 @@ L2wEemc2012::initRunUser( int runNo, int *rc_ints, float *rc_floats) {
   // clear content of all histograms & token-dependent memory
   int i;
   for (i=0; i<mxHA;i++) if(hA[i])hA[i]->reset();
-  for (i=0;i<L2eventStream2012::mxToken;i++) highestEt[i]=0;
-
+  
   // update titles of histos, add values of params
   char txt[1000];
 
   sprintf(txt,"highest endcap tower ET; x: tower ET; y: counts");
-  hA[0]->setTitle(txt);
-
-  sprintf(txt,"accepted: highest endcap tower ET; x: tower ET; y: counts");
   hA[1]->setTitle(txt);
 
   return 0; //OK  
@@ -87,9 +83,24 @@ L2wEemc2012::computeUser(int token){
   hit    =mEveStream_etow[token].get_hits();
   hitSize=mEveStream_etow[token].get_hitSize();
 
-  highestEt[token]=0;
-  for(i=0;i< hitSize;i++,hit++)
-    if (hit->et>highestEt[token]) highestEt[token]=hit->et;
+  float highestEt=0.;
+  unsigned short highestRDO=8888;
+  for(i=0;i< hitSize;i++,hit++) {
+    if (hit->et>highestEt) {
+      highestEt=hit->et;
+      highestRDO=hit->rdo;
+    }
+  }
+   
+  resultBlob[token].trigger=0;
+  resultBlob[token].highestEt=(unsigned char)(highestEt*256.0/60.0);
+  resultBlob[token].highestRDO=highestRDO;
+  hA[1]->fill((int)highestEt);
+  if (highestEt>par_EtThresh) {
+    hA[2]->fill((int)highestRDO);
+    resultBlob[token].trigger+=2;
+  }
+  
 } 
 
 
@@ -99,16 +110,10 @@ bool
 L2wEemc2012::decisionUser(int token, int *myL2Result){
   // INPUT: token + comput() results stored internally
   // OUTPUT: YES if the highestEt>par_EtThresh.  Plot highestEt.
-  float h=highestEt[token];
-  highestEt[token]=0; //clear it, just in case of stale data.
-  hA[0]->fill((int)h);
+  if (mRandomAccept) resultBlob[token].trigger+=1;
 
-  if (h>par_EtThresh) 
-    {
-      hA[1]->fill((int)h);
-      return true;
-    }
-  return false;
+  memcpy(myL2Result,&(resultBlob[token]),sizeof( L2weResult2012));
+  return resultBlob[token].trigger&2;
 } 
 
 
@@ -129,16 +134,21 @@ L2wEemc2012::finishRunUser() {  /* called once at the end of the run */
 //=======================================
 void 
 L2wEemc2012::createHisto() {
-  memset(hA,0,sizeof(hA));
+  //memset(hA,0,sizeof(hA));
 
-  hA[0]=new L2Histo(0,(char*)"L0triggered: highest endcap tower ET; x: tower ET; y: counts", 100); // title set in initRun
-  hA[1]=new L2Histo(1,(char*)"accepted: highest endcap tower ET; x: tower ET; y: counts", 100); // title set in initRun
+  hA[1]=new L2Histo(1,(char*)"Highest endcap tower ET; x: tower ET; y: counts", 100); // title set in initRun
+  hA[2]=new L2Histo(2,(char*)"ETOW: Seed Tower RDO", 720); // title in initRun
+  //hA[1]=new L2Histo(1,(char*)"accepted: highest endcap tower ET; x: tower ET; y: counts", 100); // title set in initRun
+  
 
   // printf("L2-%s::createHisto() done\n",getName());
 }
 
 /**********************************************************************
   $Log: L2wEemc2012.cxx,v $
+  Revision 1.4  2012/03/23 20:12:09  balewski
+  changes are to write a L2weResult to the L2Result array so we can differentiate random and real accepts, and update the plots so we can have some monitoring,no intended changes to the actual algo
+
   Revision 1.3  2011/10/19 16:12:12  jml
   more 2012 stuff
 
