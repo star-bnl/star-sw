@@ -45,6 +45,8 @@ public:
   float pz () const { return momentum().Pz(); }
   float detEta() const { return mDetEta; }
   float detEta(const TVector3& vertex) const;
+  bool  getBarrelDetectorEta(const TVector3& vertex, float& detEta) const;
+  bool  getEndcapDetectorEta(const TVector3& vertex, float& detEta) const;
   float sumTrackPt() const;
   float sumTrackPt(float radius) const;
   float sumTowerPt() const;

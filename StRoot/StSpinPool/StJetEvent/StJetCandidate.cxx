@@ -21,13 +21,45 @@ StJetCandidate::StJetCandidate(const TVector3& vertex, const TLorentzVector& fou
 
 float StJetCandidate::detEta(const TVector3& vertex) const
 {
-  // Front plate of BEMC towers or BPRS layer (See StEmcGeom/geometry/StEmcGeom.cxx)
-  // This only works for BEMC jets.
-  static const double BEMC_RADIUS = 225.405;
+  float DetEta;
+  if (getBarrelDetectorEta(vertex,DetEta)) return DetEta;
+  if (getEndcapDetectorEta(vertex,DetEta)) return DetEta;
+  return -999;
+}
+
+bool StJetCandidate::getBarrelDetectorEta(const TVector3& vertex, float& detEta) const
+{
+  // Front plate of BEMC or BPRS layer
+  // See StEmcGeom/geometry/StEmcGeom.cxx
+  static const double BEMC_RADIUS = 225.405; // cm
   TVector3 pos = momentum();
   pos.SetMag(BEMC_RADIUS/pos.Unit().Perp());
   pos += vertex;
-  return pos.Eta();
+  detEta = pos.Eta();
+  return fabs(detEta) < 1;
+}
+
+bool StJetCandidate::getEndcapDetectorEta(const TVector3& vertex, float& detEta) const
+{
+  // EEMC preshower1 layer
+  // See StEEmcUtil/EEmcGeom/EEmcGeomDefs.h
+  static const double EEMC_Z = 270.190; // cm
+  TVector3 pos = momentum();
+  if (pos.z() > 0) {
+    // Real endcap
+    pos.SetMag((EEMC_Z-vertex.z())/pos.Unit().z());
+    pos += vertex;
+    detEta = pos.Eta();
+  }
+  else {
+    // Mirror endcap (flip about xy-plane, solve and flip sign)
+    TVector3 pos2(pos.x(),pos.y(),-pos.z());
+    TVector3 vertex2(vertex.x(),vertex.y(),-vertex.z());
+    pos2.SetMag((EEMC_Z-vertex2.z())/pos2.Unit().z());
+    pos2 += vertex2;
+    detEta = -pos2.Eta();
+  }
+  return fabs(detEta) > 1 && fabs(detEta) < 2;
 }
 
 StJetTrack* StJetCandidate::leadingChargedParticle() const
