@@ -367,7 +367,7 @@ Int_t StEventQAMaker::Make() {
   int makeStat = kStOk;
   
   // only process if a primary vertex exists
-  //   and appears to not be pileup!!!
+  //   and appears not to be pileup!!!
   primVtx = event->primaryVertex();
   if (primVtx) {
     Float_t min_rank = -1e6;
@@ -378,8 +378,12 @@ Int_t StEventQAMaker::Make() {
       default                   : break;
     }
     if (primVtx->ranking() >= min_rank &&
-        ((float) (primVtx->numMatchesWithBEMC())) >
-        ((float) (primVtx->numberOfDaughters())) * 0.2) {
+        ((float) (primVtx->numMatchesWithBEMC() +
+                  primVtx->numMatchesWithEEMC() +
+                  primVtx->numMatchesWithBTOF() +
+                  primVtx->numTracksCrossingCentralMembrane())) >
+        ((float) (primVtx->numberOfDaughters())) * 0.199) {
+      // loose criteria for non-pileup passed
       vertExists = 1.;
     } else {
       LOG_WARN << "questionable primary vertex found" << endm;
@@ -2412,8 +2416,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.109 2012/03/19 02:58:45 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.110 2012/03/23 23:15:26 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.110  2012/03/23 23:15:26  genevb
+// Include eemcMatch,btofMatch,crossCM in looking for good vertices
+//
 // Revision 2.109  2012/03/19 02:58:45  genevb
 // Using updated trigger type convention
 //
