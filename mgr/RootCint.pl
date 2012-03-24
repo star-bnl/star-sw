@@ -225,7 +225,7 @@ for my $h  (split /\s/,$sources) {
 	    }
 	  
 	    if ($class) {
-		print "Note - pushing [$nmspc] [$class] from $h\n" if ($nmspc ne "");
+		# print "Note - pushing [$nmspc] [$class] from $h\n" if ($nmspc ne "");
 		$nclass = $nmspc eq ""?$class:$nmspc."::".$class;
 		#$nclass = $class;
 		push @classes, $nclass;
