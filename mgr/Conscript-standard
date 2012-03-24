@@ -228,15 +228,76 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$i = 0;
 	foreach my $s(@srcL) { print "i=", $i++, " src = ", $s, "\n"; }
 	$i = 0;
-	foreach my $s(@h_files) { print "i=", $i++, " h_files = ", $s, "\n"; }
+	foreach my $s(@h_filesL) { print "i=", $i++, " h_files = ", $s, "\n"; }
     }
  
 
-    #if (0==1){
+
+    #+
     # Generate geometries first - this will be hit on any $Dir
     # xgeometry and StarGeometry may not be created however
-    #if ( $Dir =~ m/Geometry/ ){
-    if ( $Dir =~ m/Geometry/ ){
+    #-
+    my($agM,$agE,$agX,$agH);
+    my($trgt);
+
+    if ( $Dir =~ m/(xg)(eometry)/ || $Dir =~ m/(StarG)(eometry)/){
+	# Force dependency creation based on xml - each expected dependencies
+	# have to be known a-priori by cons (the the order will be sorted out)
+	# but we do not want to add the source (hence the derived .o) twice
+	# and use fcheck for tetsing that
+	my $RepDir = $Dir; $RepDir =~ s/$1/G/;
+	my @xmlGeo   = script::find_xml($RepDir);
+	my @src=undef;
+	my @inc=undef;
+	my $fcheck;
+
+	#print "\tBefore ".($#src)." ".($#inc)."\n";
+	foreach $xml (@xmlGeo){
+	    $agM  = $xml; $agM =~ s/\..*//; $agM =~ s/.*\///;
+	    $trgt = "";
+	    $hfl  = "";
+	    if ( $Dir =~ m/xgeometry/ ){
+		$fcheck = $trgt  = $OBJ."/".$Dir."/".$agM.".age"; 
+		$fcheck =~ s/\#//; $trgt = "" if ( -e $fcheck);
+	    } else {
+		# Compat contains redundant defs only needed for the age
+		# .h also needed for Dictionary building
+		if ( $xml !~ m/Compat/ ){
+		    $fcheck = $trgt  = $OBJ."/".$Dir."/".$agM.".cxx"; 
+		    $fcheck =~ s/\#//; $trgt = "" if ( -e $fcheck);
+
+		    $fcheck = $hfl   = $OBJ."/".$Dir."/".$agM.".h";
+		    $fcheck =~ s/\#//; $hfl = "" if ( -e $fcheck);
+		}
+	    }
+	    # push but only if not present - if present, cons will find
+	    # them so there is no need for a predictive target rule
+	    push(@src, $trgt ) if ($trgt ne "" );
+	    push(@inc, $hfl)   if ($hfl  ne "" );
+	}
+	#print "\tAfter  ".($#src)." ".($#inc)."\n";
+
+	# repack now and make sure only one exists
+	push(@srcL,@src)      if ($#src != 0);
+	push(@h_filesL,@inc)  if ($#inc != 0);
+
+	#print "\t".join(",",@src)."\n";
+	print "\tWill be adding ".($#src+1)." sources and ".($#inc+1)." inc to $Dir\n" if ($#src != 0 || $#inc !=0);
+  
+	# probably need a predictive rule for the Cint file here as well
+	#if ( $Dir =~ m/(StarGeometry)/ ){
+	#    my($Cint)= $1."_Cint.cxx";
+	#    if ($#inc != 0){
+	#	$fcheck = "$OBJ/$Dir/$Cint"; $fcheck =~ s/\#//;
+	#	if ( ! -e $fcheck){
+	#	    print "\tWill need to create a $OBJ/$Dir/$Cint\n";
+	#	    Depends $env ["$OBJ/$Dir/$Cint"], @inc ;
+	#	    #push(@srcL,"$OBJ/$Dir/$Cint");
+	#	}
+	#    }
+	#}
+
+    } elsif ( $Dir =~ m/Geometry/ ){
 	my @xmlGeo   = script::find_xml($Dir);
 	
 	#print "DEBUG Found ".($#xmlGeo+1)." XML files in $Dir\n";
@@ -279,7 +340,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
 			} else {
 			    Depends $env ["#".$agX, "#".$agH, "#".$agE], ("#$xml", "#$agml_cmd");
-			  
+			    # Depends $env --> some rule to build extra dict on the fly
+
 			    Command $env ["#".$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
 			    Command $env ["#".$agE], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
 
@@ -313,8 +375,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	     }
 	}
     }
+    # <-- end generating geometries
 
-  
+
+
     foreach my $Rep(@Repo) {
 	my $RepDir = $Rep . "/" . $Dir;
 	print "RepDir = $RepDir\n" if $param::debug;
@@ -844,6 +908,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     my $cscanner = find scan::cpp( $env2->{_cwd}, $env2->{CPPPATH} );
     my @cpps = split /$main::PATH_SEPARATOR/, $env2->{CPPPATH};
     #  print "cpps => @cpps\n";# if $param::debug;
+    #print "cpps => @cpps\n"; 
     my $ROOTCINT_CPP = "";
     my $STIC_CPP     = "";
 
