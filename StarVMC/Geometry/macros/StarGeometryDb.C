@@ -905,6 +905,7 @@ void y2012()
     geom.ftroFlag = "FTROof"; geom.ftroStat = 0;
     geom.ftpcFlag = "FTPCof"; geom.ftpcStat = 0;
     geom.svttFlag = "SVTTof"; geom.svttStat = 0;
+    geom.phmdFlag = "PHMDof"; geom.phmdStat = 0;
     // ================================================ 
     geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
     geom.btofFlag = "BTOF67";  geom.btofStat = 1;
