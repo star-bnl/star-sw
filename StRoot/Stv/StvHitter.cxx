@@ -29,8 +29,8 @@ const StvHits *StvHitter::GetHits(const StvNodePars *pars, const float gate[2])
   const StHitPlane *myHitPlane = StTGeoHelper::Inst()->GetCurrentHitPlane();
   if (!myHitPlane) 		return 0;	//no sensitive volume there
 
-  gGeoManager->FindNode(pars->_x,pars->_y,pars->_z);
-  assert(strcmp(gGeoManager->GetPath(),myHitPlane->GetName())==0);
+//   gGeoManager->FindNode(pars->_x,pars->_y,pars->_z);
+//   assert(strcmp(gGeoManager->GetPath(),myHitPlane->GetName())==0);
 
 
   if (mHitPlane == myHitPlane)  return 0;	//hit plane was already used
