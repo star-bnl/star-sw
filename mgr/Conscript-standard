@@ -318,7 +318,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
 		# local or global install
 		if ( -e "mgr/agmlParser.py"){	$agml_cmd = "mgr/agmlParser.py";
-		} else {			$agml_cmd =     "agmlParser.py";}
+		} else {			$agml_cmd = $env->{ENV}->{STAR}."/mgr/agmlParser.py";}
 		
 		foreach $xml (@xmlGeo){
 		    if ( $xml =~ /StarVMC\/Geometry\// ){
