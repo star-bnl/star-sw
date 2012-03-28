@@ -1,12 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <assert.h>
-#include "TMath.h"
 #include "TCernLib.h"
 #include "StvHitErrCalculator.h"
-#include "StvUtil/StvNodePars.h"
-#include "Stv/StvHit.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 #include <map>
 #include <string>
 
@@ -206,10 +203,10 @@ double StvTpcHitErrCalculator::Trace(const float hiPos[3])
 void StvHitErrCalculator::Test(double phiG,double lamG)
 {
   double par[6]={0};
-  par[kYErr]=0.01*0.01;
-  par[kZErr]=0.02*0.02;
+  par[kYErr]=1;//0.1*0.1;
+  par[kZErr]=4;//0.2*0.2;
   par[kThkDet]=9*9/12;
-  par[kWidTrk]=0.01*0.01;
+  par[kWidTrk]=0.1*0.1;
 
 //   double Lam = 3.14*(gRandom->Rndm()-0.5)/2;
 //   double Phi = 3.14*(gRandom->Rndm()-0.5);
@@ -227,15 +224,15 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
   TVector3 Np(-sP, cP, 0);
   TVector3 Nl(-sL*cP,-sL*sP,cL);
 
-  double LamH = Lam + (gRandom->Rndm()-0.5);
-  double PhiH = Phi + (gRandom->Rndm()-0.5);
-  double cLH = cos(LamH);
-  double sLH = sin(LamH);
-  double cPH = cos(PhiH);
-  double sPH = sin(PhiH);
-  TVector3 NtH(cLH*cPH,cLH*sPH,sLH);
-  TVector3 NpH(-sPH, cPH, 0);
-  TVector3 NlH(-sLH*cPH,-sLH*sPH,cLH);
+//   double LamH = Lam + (gRandom->Rndm()-0.5);
+//   double PhiH = Phi + (gRandom->Rndm()-0.5);
+//   double cLH = cos(LamH);
+//   double sLH = sin(LamH);
+//   double cPH = cos(PhiH);
+//   double sPH = sin(PhiH);
+//   TVector3 NtH(1,0,0);
+//   TVector3 NpH(0,1,0);
+//   TVector3 NlH(0,0,1);
 
 
   TVector3 V;
@@ -245,24 +242,24 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
   double YZ[3]={0},BG[3]={0};
   int nEl=10000,iEl=0;
   while (1) {
-    double alfa = D/(Nt*NtH)*(gRandom->Rndm()-0.5)*10;
+    double alfa = D/(Nt[0])*(gRandom->Rndm()-0.5)*10;
     double beta = gRandom->Gaus()*W;
     double gama = gRandom->Gaus()*W;
     V = Nt*alfa + Np*beta + Nl*gama;
-    if (fabs((V*NtH))>0.5*D) continue;
-    V[1]+=  gRandom->Gaus()*par[kYErr];
-    V[2]+=  gRandom->Gaus()*par[kZErr];
+    if (fabs((V[0]))>0.5*D) continue;
+    V[1]+=  gRandom->Gaus()*sqrt(par[kYErr]);
+    V[2]+=  gRandom->Gaus()*sqrt(par[kZErr]);
 
     if(++iEl>=nEl) break;
 
 //    Project along X to X=0
-    alfa = (V*NtH); V -= alfa*NtH;
+    alfa = (V[0]); V[0] =0;
     beta = (Np*V);
     gama = (Nl*V);
     BG[0]+=beta*beta; BG[1]+=beta*gama;BG[2]+=gama*gama;
 
-    beta = (NpH*V);
-    gama = (NlH*V);
+    beta = (V[1]);
+    gama = (V[2]);
     YZ[0] += beta*beta; YZ[1] += beta*gama;YZ[2] += gama*gama;
   }
   for (int j=0;j<3;j++){YZ[j]/=nEl; BG[j]/=nEl;} 
@@ -275,9 +272,9 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
   double np[3]={ cP,  sP, tL};
   double hitErr[3];
   calc.SetTrack(np);
-  float hiDir[3][3]={{NtH[0],NtH[1],NtH[2]}
-                    ,{NpH[0],NpH[1],NpH[2]}
-		    ,{NlH[0],NlH[1],NlH[2]}};
+  float hiDir[3][3]={{1,0,0}
+                    ,{0,1,0}
+		    ,{0,0,1}};
   calc.CalcDetErrs(0,hiDir,hitErr);
   printf("Calculator:  YY=%g YZ=%g ZZ=%g\n"
         ,hitErr[0],hitErr[1],hitErr[2]);
