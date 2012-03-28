@@ -203,8 +203,8 @@ double StvTpcHitErrCalculator::Trace(const float hiPos[3])
 void StvHitErrCalculator::Test(double phiG,double lamG)
 {
   double par[6]={0};
-  par[kYErr]=1;//0.1*0.1;
-  par[kZErr]=4;//0.2*0.2;
+  par[kYErr]=0.1*0.1;
+  par[kZErr]=0.2*0.2;
   par[kThkDet]=9*9/12;
   par[kWidTrk]=0.1*0.1;
 
@@ -224,15 +224,6 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
   TVector3 Np(-sP, cP, 0);
   TVector3 Nl(-sL*cP,-sL*sP,cL);
 
-//   double LamH = Lam + (gRandom->Rndm()-0.5);
-//   double PhiH = Phi + (gRandom->Rndm()-0.5);
-//   double cLH = cos(LamH);
-//   double sLH = sin(LamH);
-//   double cPH = cos(PhiH);
-//   double sPH = sin(PhiH);
-//   TVector3 NtH(1,0,0);
-//   TVector3 NpH(0,1,0);
-//   TVector3 NlH(0,0,1);
 
 
   TVector3 V;
