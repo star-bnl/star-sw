@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.50 2011/12/11 17:16:43 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.51 2012/03/28 02:05:14 pibero Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -475,9 +475,9 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
     return false;
   }
 
-  // For simulation, get run number from DB time stamp
+  // For simulation (1) and embedding (2), get run number from DB time stamp
 
-  if (mMCflag == 1) {
+  if (mMCflag == 1 || mMCflag == 2) {
     //query = Form("select idx_rn from triggers where beginTime >= '%s' limit 1",GetDBTime().AsSQLString());
     query = Form("select max(idx_rn) from triggers where beginTime <= '%s'",GetDBTime().AsSQLString());
     LOG_INFO << query << endm;
@@ -732,6 +732,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.51  2012/03/28 02:05:14  pibero
+ * Fix for embedding
+ *
  * Revision 1.50  2011/12/11 17:16:43  pibero
  * Add function to set LD301 registers
  *
