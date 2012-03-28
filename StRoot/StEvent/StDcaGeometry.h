@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDcaGeometry.h,v 2.5 2010/01/26 20:34:39 fisyak Exp $
+ * $Id: StDcaGeometry.h,v 2.6 2012/03/28 13:39:46 fisyak Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.h,v $
+ * Revision 2.6  2012/03/28 13:39:46  fisyak
+ * Add default parameter for Print
+ *
  * Revision 2.5  2010/01/26 20:34:39  fisyak
  * Add print out and  conversion from DCA to x,y,z,px,py,pz
  *
@@ -58,7 +61,7 @@ public:
     const float*     params()    const {return &mImp;}	  
     const float*     errMatrix() const {return &mImpImp;} 
     void GetXYZ(Double_t xyzp[6], Double_t CovXyzp[21]) const;
-    virtual void     Print(Option_t *option) const;
+    virtual void     Print(Option_t *option = "") const;
     //
     // Experts only set function
     //
