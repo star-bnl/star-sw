@@ -4,7 +4,11 @@
 <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
 </Export>
 
-<Module name="xgeometry" comment="STARSIM interface to the XML geometries">
+<!-- 
+  [1] Force AgML recompilation of xgeometry.xml
+  -->
+
+<Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
 call geometry
