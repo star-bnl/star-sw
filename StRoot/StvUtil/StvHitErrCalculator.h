@@ -1,14 +1,7 @@
 #ifndef __StvHitErrCalculatorulator_h_
 #define __StvHitErrCalculatorulator_h_
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
 #include "TNamed.h"
 
-class StvHit;
-class StvNodePars;
-class StvHitErrs;
 class StvHitErrCalculator : public TNamed {
 public:	
 enum {kMaxPars=10};
