@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.240 2011/11/22 15:09:19 jwebb Exp $
+* $Id: geometry.g,v 1.241 2012/03/28 15:14:17 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.241  2012/03/28 15:14:17  jwebb
+* Switched pipe12 (old beam pipe) to pipev1 (new narrow beam pipe) for dev13
+* geometry with the HFT.
+*
 * Revision 1.240  2011/11/22 15:09:19  jwebb
 * Added "devE" tag for eStar development.
 *
@@ -1136,6 +1140,9 @@ replace [exe PIPE04;] with [ "The new pipe according to Kai"; PipeConfig = 4;
 replace [exe PIPE14;] with [ "The new pipe according to Kai"; PipeConfig = 4;
                              "pipe wrap only" ;               PipeFlag   = 1;]
 
+replace [exe PIPEv1;] with [ "The beam pipe for the HFT";     PipeConfig = 10;]
+
+
 *                                                                                       Pixel Detector
 
 replace [exe PIXL00;] with [ "Simplest.Gerrit" PIXL=on; PixlConfig=-1;]
@@ -1892,7 +1899,7 @@ REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
     exe SISDof;      "No sisd";
     exe MUTD05;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
-    exe PIPE12;      "The beam pipe";
+    exe PIPEv1;      "The beam pipe";
 
     exe IDSM02;      "Inner detector support";
     exe FGTDv32;     "FGT v3 6 disks";
@@ -1918,7 +1925,7 @@ REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2013.  Currently j
     exe SISDof;      "No sisd";
     exe MUTD05;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
-    exe PIPE12;      "The beam pipe";
+    exe PIPEv1;      "The beam pipe";
 
     exe IDSM02;      "Inner detector support";
     exe FGTDv32;     "FGT v3 6 disks";
@@ -2701,7 +2708,7 @@ If LL>0
                  Geom = 'y2012   ';
                  exe y2012; }
 
-  Case dev13 { dev13 : y2013 stufies;
+  Case dev13 { dev13 : y2013 studies;
                  Geom = 'dev13   ';
                  exe dev13; }
 
@@ -4102,13 +4109,19 @@ c     write(*,*) 'CAVE'
    }
 
 * Pipe:
-   If (PIPE)   {
-c    write(*,*) 'PIPE'
-     call AgDETP new ('PIPE')
-     call AgDETP add ('pipv.PipeConfig=',PipeConfig,1);
-     call AgDETP add ('pipv.PipeFlag=',PipeFlag,1);
-     if (PipeConfig == -1) {Call pipegeo00;}
-     else                  {Call pipegeo;  }
+
+   IF PIPE  {
+
+     Call AgDETP new ('PIPE')
+     IF   PipeConfig < 10 {
+          Call AgDETP add ('pipv.PipeConfig=', PipeConfig,1);
+          Call AgDETP add ('pipv.PipeFlag=',   PipeFlag,  1);
+     }
+
+     IF      PipeConfig == -1 { Call pipegeo00; "Simple beam pipe"   }
+     ELSE IF PipeConfig  < 10 { Call pipegeo;   "Standard beam pipe" }
+     ELSE IF PipeConfig == 10 { Call pipegeo1;  "HFT era beam pipe"  }
+
    }
 
 * Upstream (DX), shield, and D0+Q1+Q2+Q3
