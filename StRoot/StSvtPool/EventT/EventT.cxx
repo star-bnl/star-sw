@@ -84,7 +84,7 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
     UInt_t nDaughters = pVertex->numberOfDaughters();
     nGoodTpcTracks = 0;
     for (UInt_t i=0; i < nDaughters; i++) {
-      StTrack* pTrackT = pVertex->daughter(i,primary);
+      StTrack* pTrackT = pVertex->daughter(i);
       if ( pTrackT->fitTraits().numberOfFitPoints(kTpcId) >=  NoFitPointCutForGoodTrackT) nGoodTpcTracks++;
     }  
     if (nBestTracks < nGoodTpcTracks) {nBestTracks = nGoodTpcTracks; ibest = ipr;}
@@ -124,7 +124,7 @@ Int_t  EventT::Build(StEvent *pEventT, UInt_t MinNoHits, Double_t pCut) {
   SetFlag(1);
   //  Create and Fill the TrackT objects
   for (UInt_t t = 0; t < fNPTracks; t++) {
-    StTrack *pTrackT = pVertex->daughter(t,primary);
+    StTrack *pTrackT = pVertex->daughter(t);
     if (! pTrackT) continue;
     StTrackNode *node = pTrackT->node();
     if (! node) continue;
