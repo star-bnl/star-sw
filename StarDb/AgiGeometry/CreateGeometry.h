@@ -5,7 +5,7 @@ TDataSet *CreateGeometry(const Char_t *name="y2005") {
 	 << name << " ! " << endl;
     return geom;
   }
-  static Char_t *path  = ".:./StarDb/AgiGeometry:$STAR/StarDb/AgiGeometry";
+  Char_t *path  = ".:./StarDb/AgiGeometry:$STAR/StarDb/AgiGeometry";
   TString geomF(name); geomF += ".h";
   Char_t *file = gSystem->Which(path,geomF,kReadPermission);
   if (! file) Fatal("CreateGeometry","File %s has not found in path %s",geomF.Data(),path);
