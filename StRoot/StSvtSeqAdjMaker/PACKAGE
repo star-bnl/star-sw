@@ -1,5 +1,0 @@
-# $Id $
-# package StSvtSeqAdjMaker
-# author: 
-Library:libStSvtSeqAdjMaker.so:LIBS +=   -lStChain  -lStSvtClassLibrary
-#Library:libStSvtSeqAdjMaker.so:LIBS +=   -lStChain  -lStSvtClassLibrary
