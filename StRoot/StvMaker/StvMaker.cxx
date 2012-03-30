@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.16 2012/02/23 17:56:40 perev Exp $
+// $Id: StvMaker.cxx,v 1.17 2012/03/30 16:31:32 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -209,7 +209,7 @@ static int initialized = 0;
 //		Choose seed finders
   TString seeds = SAttr("seedFinders");
   if (!seeds.Length()) seeds = "Default";
-  TObjArray *tokens = seeds.Tokenize(" ,");
+  TObjArray *tokens = seeds.Tokenize(" .,");
   for (int idx=0;idx<=tokens->GetLast();idx++) {
   TString &chunk = ((TObjString*)tokens->At(idx))->String();
     if (chunk.CompareTo("CA"      ,TString::kIgnoreCase)==0) {
