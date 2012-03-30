@@ -2,7 +2,7 @@ l [A-Za-z]
 lun [\_A-Za-z0-9]
 %%
 [<>]			{ RETURN2; }
-\n			{ gLN++; strncpy(gL1,gL2,SZ-2); gL1[SZ-2]=0; *gL2=0;
+\n			{ gLN++; strncpy(gL1,gL2,INFILE-2); gL1[INFILE-2]=0; *gL2=0;
 			  RETURN2; }
 \/\*			{ LS; gC=0; }
 \*\/			{ LS; gC=7; DoComment(__LINE__,"\n"); }
