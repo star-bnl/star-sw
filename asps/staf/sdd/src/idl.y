@@ -50,7 +50,7 @@
 #define IO_INOUT 3
 #define EXE 70
 #define INFILE  70   /* Max # of input files, including recursive includes */
-#define INFILES 170  /*  Max size of any input, including path */
+#define INFILES 255  /*  Max size of any input, including path */
 #define COL 300
 #define COMMENTS 1200
 #define OLC 82
@@ -94,7 +94,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.30 2003/09/30 18:01:03 starlib Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.31 2012/03/30 00:30:58 jeromel Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 char VERSION[132];
