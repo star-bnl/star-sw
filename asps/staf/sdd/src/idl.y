@@ -21,25 +21,20 @@
 #include "stic.h"
 #define FORTRANCOMMENTSIZE 277
 /* #define STUFF_FOR_64_BITS */
-#define P printf(
-#define PP printf(
-#define EE fprintf(stderr,
 #define RETURN if(!gC) DoComment(__LINE__,yytext); else return
 #define RETURN2 if(!gC) DoComment(__LINE__,yytext)
-#define F fprintf(stderr,
 #define FF fprintf(ff,
 #define FH fprintf(gFpH,
 #define FINC fprintf(gFpInc,
-#define SZ 170 /* line size in input file */
-#define ISIZE 83 /* size of identifiers (eg interface names, prototype names */
-#define PROTOTYPES 4 /* max prototypes in interface def */
+#define ISIZE 83        /* size of identifiers (eg interface names, prototype names */
+#define PROTOTYPES 4    /* max prototypes in interface def */
 #define INCDIR 37	/* max -I on command line */
 #define INCDIRS 255	/* max size of path spec in a -I */
 #define ERROR_FORMAT "stic: error on line %d:\n%s\n%s\n"
 #define ERR_FORMAT2 "stic: error on line %d: unused character: %s\n"
 #define OUTFILE 43
 #define NOUTFILE 256
-#define ARGS 90 /* max args per prototype */
+#define ARGS 90         /* max args per prototype */
 #define INC 128
 #define INIT  0
 #define CALL 15
@@ -57,10 +52,11 @@
 #define SINGL (int)yytext[0]
 #define TSIZE 50 /* big enuf for "unsigned short" */
 #define CVSVERSION 100
-#define MODULETAB 80 /* max number of in/out/inout table for a module */
-#define INPUTTAB 80 /* max number of included tables for a module idl file */
+#define MODULETAB 80 /* max number of in/out/inout table for a module       */
+#define INPUTTAB  80 /* max number of included tables for a module idl file */
 #define MODULETABSIZE 40
 #define INPUTTABSIZE 40
+
 int gHaveIncludedPamIdl, gHaveSeen_STAFCV_T, gHaveSeen_amiModule;
 int gFtc,gJj,gIi,gLN=1,gNPamNames=0,gNArgName[PROTOTYPES],gNProto=0;
 int gC=7,gNColTypes=0,gNColNames=0,gNIncFile=0,gNTblName=0;
@@ -71,14 +67,14 @@ char gInputTable[INPUTTAB][INPUTTABSIZE+1];
 
 char gIncDir[INCDIR][INCDIRS];
 char gOrigInputFile[81];
-int gNincDir,gNOutFile=0,gNoMoreComments=0;
+int  gNincDir,gNOutFile=0,gNoMoreComments=0;
 int  gOptions,gOptionH,gOptiont,gOptioni,gOptionM,gOptionT,gOptionstatic,gOptiondynamic;
 int  gOptionr,gOptionf;
 /* An option to process files _quietly_ */
 int  gOptionq;
 char gOlc[COL][OLC],gOutFile[NOUTFILE][OUTFILE+2];
 char gInFile[INFILE][INFILES+1];
-int gNInFile=0;
+int  gNInFile=0;
 char gPass[100],gComments[COMMENTS];
 char gOptioniTempFile[40],gExeName[EXE+2];
 char gInFileName[INFILES+2];
@@ -87,14 +83,14 @@ char gColName[COL][ISIZE+2];
 char gTable[ISIZE+2];
 char gIo[PROTOTYPES][ARGS];
 char gIncFile[INC][ISIZE+2];
-char gL2[SZ+2],gL1[SZ+2];
+char gL2[INFILES+2],gL1[INFILES+2];
 char gPam[ISIZE+2],gMkCc;
 char gPamUp[ISIZE+2];
 char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.31 2012/03/30 00:30:58 jeromel Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.32 2012/03/30 01:07:52 jeromel Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 char VERSION[132];
@@ -161,7 +157,7 @@ void DoComment(int codeLineNum,char *xx) {
   static int len=-10;
   char *rr="\nCOMMENTS TRUNCATED";
   if(len<0) len=strlen(rr)+5;
-  if(xx[0]=='/'&&xx[1]=='/') cc=xx+2; else cc=xx;
+  if(xx[0]=='/' && xx[1]=='/') cc=xx+2; else cc=xx;
   if(gNoMoreComments) return;
   if(strlen(cc)+strlen(gComments)>COMMENTS-len) {
     strcat(gComments,rr); gNoMoreComments=7; return;
@@ -172,17 +168,17 @@ void Fose(void) {
   fprintf(stderr,"ooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n");
 }
 void Idl2Fortran(char *out,const char *in) {
-       if(!strcmp(in,"int"))   strcpy(out,"INTEGER*4");
-  else if(!strcmp(in,"unsigned int"))   strcpy(out,"INTEGER*4");
-  else if(!strcmp(in,"long"))   strcpy(out,"INTEGER*4");
+       if(!strcmp(in,"int"))             strcpy(out,"INTEGER*4");
+  else if(!strcmp(in,"unsigned int"))    strcpy(out,"INTEGER*4");
+  else if(!strcmp(in,"long"))            strcpy(out,"INTEGER*4");
   else if(!strcmp(in,"unsigned long"))   strcpy(out,"INTEGER*4");
-  else if(!strcmp(in,"short"))  strcpy(out,"INTEGER*2");
+  else if(!strcmp(in,"short"))           strcpy(out,"INTEGER*2");
   else if(!strcmp(in,"unsigned short"))  strcpy(out,"INTEGER*2");
-  else if(!strcmp(in,"float"))  strcpy(out,"REAL*4");
-  else if(!strcmp(in,"double")) strcpy(out,"REAL*8");
-  else if(!strcmp(in,"octet")) strcpy(out,"LOGICAL*1");
-  else if(!strcmp(in,"char")) strcpy(out,"CHARACTER*");
-  else strcpy(out,in);
+  else if(!strcmp(in,"float"))           strcpy(out,"REAL*4");
+  else if(!strcmp(in,"double"))          strcpy(out,"REAL*8");
+  else if(!strcmp(in,"octet"))           strcpy(out,"LOGICAL*1");
+  else if(!strcmp(in,"char"))            strcpy(out,"CHARACTER*");
+  else                                   strcpy(out,in);
 }
 void ToLower(char *out,const char *in) {
   int off,ii; char cc;
@@ -193,7 +189,7 @@ void ToLower(char *out,const char *in) {
 void ToUpper(char *out,const char *in) {
   int off,ii; char cc;
   for(ii=strlen(in);ii>=0;ii--) {
-    cc=in[ii]; if(cc>='a'&&cc<='z') off='A'-'a'; else off=0; out[ii]=cc+off;
+    cc=in[ii]; if(cc>='a' && cc<='z') off='A'-'a'; else off=0; out[ii]=cc+off;
   }
 }
 void OutputCommentsFromIdlFile(int fortranOrC,FILE *ff) {
@@ -236,18 +232,18 @@ void StandardBlurb(int fortranOrC,char *mode,FILE *ff) {
 }
 ColType(char *xx) {
   if(gNColTypes>=COL) {
-    F"You are specifying too many columns in the idl file.  Max=%d.\n",COL);
+    fprintf(stderr,"You are specifying too many columns in the idl file.  Max=%d.\n",COL);
     exit(2);
   }
   if(!strcmp(xx,"int")) {
-    EE"Fatal error: \"int\" is not a valid IDL data type.\n"); exit(2);
+    fprintf(stderr,"Fatal error: \"int\" is not a valid IDL data type.\n"); exit(2);
   }
   strncpy(gColType[gNColTypes],xx,TSIZE); /* big enuf for "unsigned short" */
   gNColTypes++;
 }
 Col(char *xx) {
   if(gNColNames>=COL) {
-    F"You are specifying too many columns in the idl file.  Max=%d.\n",COL);
+    fprintf(stderr,"You are specifying too many columns in the idl file.  Max=%d.\n",COL);
     exit(2);
   }
   strncpy(gColName[gNColNames],xx,ISIZE);
@@ -261,13 +257,12 @@ TblName(char *xx) {
   if(strlen(xx)>INPUTTABSIZE) ERR;
   if(gNinputTable>=INPUTTAB) ERR;
   strcpy(gInputTable[gNinputTable++],xx);
-  if(++gNTblName>1) { F"Only one table per idl file.\n"); exit(2); }
+  if(++gNTblName>1) { fprintf(stderr,"Only one table per idl file.\n"); exit(2); }
   strncpy(gTable,xx,ISIZE);
 }
 Err(int xx) {
-  F"ooooooooooooooooooooooooooooooooooooooooooooooooooooo\n");
-  F">>>>> STIC FATAL ERROR line %d of %s.  ward@physics.utexas.edu.\n",xx,
-  __FILE__);
+  fprintf(stderr,"ooooooooooooooooooooooooooooooooooooooooooooooooooooo\n");
+  fprintf(stderr,">>>>> STIC FATAL ERROR line %d of %s.  ward@physics.utexas.edu.\n",xx, __FILE__);
   exit(2);
 }
 void IdlToCOrCpp(char *out,char *in) {
@@ -281,9 +276,9 @@ void IdlToCOrCpp(char *out,char *in) {
   else if(!strcmp(in,"octet"))           strcpy(out,"IDL_OCTET");
   else if(!strcmp(in,"char"))            strcpy(out,"IDL_CHAR");
 #else
-       if(!strcmp(in,"octet"))         strcpy(out,"unsigned char");
-  else if(!strcmp(in,"long"))          strcpy(out,"int"); 
-  else if(!strcmp(in,"unsigned long")) strcpy(out,"unsigned int"); 
+       if(!strcmp(in,"octet"))           strcpy(out,"unsigned char");
+  else if(!strcmp(in,"long"))            strcpy(out,"int"); 
+  else if(!strcmp(in,"unsigned long"))   strcpy(out,"unsigned int"); 
   else strcpy(out,in);
 #endif
 }
@@ -406,7 +401,7 @@ void DotIncFileTbl(void) {
     } else {
       strcpy(buf,gColName[col]); cc=strstr(buf,"[");
       if(cc) {
-        if(!strstr(cc,"]")) { F"Crummy stuff: %s.\n",gColName[col]); exit(2); }
+        if(!strstr(cc,"]")) { fprintf(stderr,"Crummy stuff: %s.\n",gColName[col]); exit(2); }
         nn=atoi(cc+1); cc[0]=0; sprintf(buf2,"%s%d",fort_ran,nn);
       } else sprintf(buf2,"%s1",fort_ran);
       strcpy(fort_ran,buf2);
@@ -422,12 +417,12 @@ void DotIncFileTbl(void) {
   FINC"      PARAMETER    (%s_SPEC=\n",Up(gTable));
   for(ii=BLANK-1;ii>=0;ii--) blank[ii]=' '; blank[BLANK-1]=0;
   totLen=strlen(gTable)+7;
-  here=BLANK-totLen; if(here>=0&&here<BLANK) blank[here]=0; else blank[0]=0;
+  here=BLANK-totLen; if(here>=0 && here<BLANK) blank[here]=0; else blank[0]=0;
   FINC"     + ' struct %s {' %s //\n",gTable,blank);
   for(col=0;col<gNColNames;col++) {
     for(ii=BLANK-1;ii>=0;ii--) blank[ii]=' '; blank[BLANK-1]=0;
     totLen=strlen(gColType[col])+strlen(gColName[col]);
-    here=BLANK-totLen; if(here>=0&&here<BLANK) blank[here]=0; else blank[0]=0;
+    here=BLANK-totLen; if(here>=0 && here<BLANK) blank[here]=0; else blank[0]=0;
     FINC"     + ' %s %s;' %s //\n",gColType[col],gColName[col],blank);
   }
   FINC"     + ' };')\n");
@@ -436,11 +431,11 @@ void DotIncFileTbl(void) {
 void Tbl(void) {
 /*
   if(gOptiont) {
-    Ose(); PP"You have used option -t with a table-type idl file.\n");
-    PP"This does not make sense.  The option -t means 'templates\n");
-    PP"only', and there is no such thing as a template derived from a\n");
-    PP"table-type idl file.\n");
-    PP"FATAL ERROR   FATAL ERROR   FATAL ERROR   FATAL ERROR   \n");
+    Ose(); printf("You have used option -t with a table-type idl file.\n");
+    printf("This does not make sense.  The option -t means 'templates\n");
+    printf("only', and there is no such thing as a template derived from a\n");
+    printf("table-type idl file.\n");
+    printf("FATAL ERROR   FATAL ERROR   FATAL ERROR   FATAL ERROR   \n");
     exit(2);
   }
   */
@@ -451,20 +446,20 @@ void Tbl(void) {
 }
 DumpGlobalsPam(void) {
   int ii,jj; char buf[5];
-  P"The name of the PAM is %s, %d include files, %d prototypes.\n","xyz",
+  printf("The name of the PAM is %s, %d include files, %d prototypes.\n","xyz",
   gNIncFile,gNProto);
   for(ii=0;ii<gNIncFile;ii++) {
-    P"Include file %d: %s.\n",ii+1,gIncFile[ii]);
+    printf("Include file %d: %s.\n",ii+1,gIncFile[ii]);
   }
   for(ii=0;ii<gNProto;ii++) {
-    P"Prototype %d: fncName=%s, %d args.\n",ii+1,gPn[ii],gNArgName[ii]);
-    P"  Args:\n");
+    printf("Prototype %d: fncName=%s, %d args.\n",ii+1,gPn[ii],gNArgName[ii]);
+    printf("  Args:\n");
     for(jj=0;jj<gNArgName[ii];jj++) {
       if(gIo[ii][jj]==IO_IN) strcpy(buf,"in");
       else if(gIo[ii][jj]==IO_OUT) strcpy(buf,"out");
       else if(gIo[ii][jj]==IO_INOUT) strcpy(buf,"inout");
       else Err(__LINE__);
-      P"    %s %s %s\n",buf,gDataType[ii][jj],gArgName[ii][jj]);
+      printf("    %s %s %s\n",buf,gDataType[ii][jj],gArgName[ii][jj]);
     }
   }
   exit(2);
@@ -498,9 +493,9 @@ FILE *OpenOnePamOutput(char *x) {
   ModeFromFn(fn,mode);
   if(gOptionM || gOptionT) return NULL;
   gFile=fopen(fn,mode); /* gOptionf OK */
-  if(!strcmp(mode,"w") && !gOptionq) PP"  out: %s\n",fn);
+  if(!strcmp(mode,"w") && !gOptionq) printf("  out: %s\n",fn);
   StandardBlurb(fortranOrC,mode,gFile);
-  if(gFile==NULL) { F"Can't write %s.\n",fn); exit(2); }
+  if(gFile==NULL) { fprintf(stderr,"Can't write %s.\n",fn); exit(2); }
   return gFile;
 }
 void PrintTheArgs(FILE *ff,int ii) {
@@ -520,11 +515,11 @@ void PrintTheArgs(FILE *ff,int ii) {
   FF");\n");
 }
 void Eose(void) {
-  EE"----------------------------------------------------------------\n");
+  fprintf(stderr,"----------------------------------------------------------------\n");
 }
 void Ose(void) {
   if(gOptionM || gOptionT) return;
-  PP"----------------------------------------------------------------\n");
+  printf("----------------------------------------------------------------\n");
 }
 void PamOutputDotHFile(void) {
   char dt[22],ast[2],comma[12],fName[60],headerName[111];
@@ -543,12 +538,12 @@ void PamOutputDotHFile(void) {
     if(!strcmp(tmp,"\"asu")) ToUpper(tmp2,tmp); else strcpy(tmp2,tmp);
     if(strcmp(tmp2,"\"ASU")) {
       FF"#include %s.h\"\n",tmp2);
-      /* BBB PP"tmp2=%s.\n",tmp2); Sleep(1); */
+      /* BBB printf("tmp2=%s.\n",tmp2); Sleep(1); */
       if(!strcmp(tmp2,"\"PAM")) didPam=7;
     } else {
-      P"\n\n"); Ose(); 
-      P"%cWARNING: Please ",7);
-      P"remove '#include ASU.idl' from the input file.\n\n"); sleep(6);
+      printf("\n\n"); Ose(); 
+      printf("%cWARNING: Please ",7);
+      printf("remove '#include ASU.idl' from the input file.\n\n"); sleep(6);
     }
   }
   if(!didPam) FF"#include \"%s.h\"\n","PAM"); /* 960529c */
@@ -574,7 +569,7 @@ void PamOutputDotHFile(void) {
     }
     FF"/*----------------------------------------------- PROTOTYPES --*/\n");
     FF"extern CC_P STAFCV_T type_of_call %s (\n",fName); /* pam.h */
-    if(initOrCall==INIT&&0) { /* 960215 disabled, not in CET's examples */
+    if(initOrCall==INIT && 0) { /* 960215 disabled, not in CET's examples */
       for(jj=0;jj<gNArgName[ii];jj++) {
         if(gIo[ii][jj]==IO_IN) *ast=0;
         else if(gIo[ii][jj]==IO_OUT) strcpy(ast,"*");
@@ -627,7 +622,7 @@ void PamTemplateFortran(void) {
   sprintf(fn,"%s.F.template",StrippedInFileName(0));
   if(gOptionM || gOptionT) { ExtendOutList(fn); return; }
   if(gOptionf) return; ff=fopen(fn,"w"); /* PamTemplateFortran() */
-  if(ff==NULL) { F"Can't write %s.\n",fn); exit(2); }
+  if(ff==NULL) { fprintf(stderr,"Can't write %s.\n",fn); exit(2); }
 
   TemplateFBegin(fn,ff);
   FF"      INTEGER*4 FUNCTION %s(\n",gPamUp);
@@ -653,7 +648,7 @@ void PamTemplateFortran(void) {
   TemplateFEnd(ff);
   fclose(ff); 
   if (!gOptionq) 
-     F"  out: %s\n",fn);
+     fprintf(stderr,"  out: %s\n",fn);
 }
 void PamCC(void) {
   char headerName[111],tableType[111],fn[100]; FILE *ff; int ii,jj,initOrCall;
@@ -663,7 +658,7 @@ void PamCC(void) {
   sprintf(fn,"%s_i.cc",StrippedInFileName(0));
   if(gOptionM || gOptionT) { ExtendOutList(fn); return; }
   if(gOptionf) return; ff=fopen(fn,"w");  /* PamCC() */
-  if(ff==NULL) { F"Can't write %s.\n",fn); exit(2); }
+  if(ff==NULL) { fprintf(stderr,"Can't write %s.\n",fn); exit(2); }
   FF"/*------------------------------------------------------------------\n");
   /* Q05 */
   FF"FILE:         %s_i.cc\n",StrippedInFileName(0));
@@ -733,7 +728,7 @@ void PamCC(void) {
   /* FF"  printf(\"\\n\");\n"); 960606 */
   FF"  return TRUE;\n");
   FF"}\n");
-  fclose(ff); if (!gOptionq) F"  out: %s\n",fn);
+  fclose(ff); if (!gOptionq) fprintf(stderr,"  out: %s\n",fn);
 }
 char *Xidl(char *x) {
   char *cc;
@@ -745,7 +740,7 @@ char *Xidl(char *x) {
 char *Capitalized(char *x) {
   static char rv[123];
   strncpy(rv,x,122); rv[121]=0;
-  if(rv[0]<='z'&&rv[0]>='a') rv[0]+='A'-'a';
+  if(rv[0]<='z' && rv[0]>='a') rv[0]+='A'-'a';
   return rv;
 }
 char *Nq(char *x) {
@@ -760,7 +755,7 @@ char *Nq(char *x) {
 void FirstRootPamFile(FILE *ff) {
   char *cc,Sifn[123],*sifn; int i, ii, jj;
   sifn=StrippedInFileName(0); strcpy(Sifn,sifn);
-  if(Sifn[0]>='a'&&Sifn[0]<='z') Sifn[0]+='A'-'a';
+  if(Sifn[0]>='a' && Sifn[0]<='z') Sifn[0]+='A'-'a';
   FF"#ifndef STAF_St_%s_Module\n",sifn);
   FF"#define STAF_St_%s_Module\n",sifn);
   FF"\n");
@@ -942,7 +937,8 @@ void WriteTheTwoRootPamFiles(void) {
   FILE *ff; char fn[123];
 
   sprintf(fn,"St_%s_Module.h",StrippedInFileName(0));
-  ff=fopen(fn,"w"); if(!ff) ERR; FirstRootPamFile(ff); fclose(ff); if (!gOptionq) F"  out: %s\n",fn);
+  ff=fopen(fn,"w"); if(!ff) ERR; FirstRootPamFile(ff); fclose(ff); 
+  if (!gOptionq) fprintf(stderr,"  out: %s\n",fn);
 
   sprintf(fn,"St_%s_Module.cxx",StrippedInFileName(0));
   ff=fopen(fn,"w"); if(!ff) ERR; SecondRootPamFile(ff); fclose(ff);
@@ -955,7 +951,7 @@ void PamTemplateC(void) {
   sprintf(fn,"%s.c.template",StrippedInFileName(0));
   if(gOptionM || gOptionT) { ExtendOutList(fn); return; }
   if(gOptionf) return; ff=fopen(fn,"w"); /* PamTemplateC() */
-  if(ff==NULL) { F"Can't write %s.\n",fn); exit(2); }
+  if(ff==NULL) { fprintf(stderr,"Can't write %s.\n",fn); exit(2); }
   TemplateCBegin(ff);
   /* Q11 */
   FF"#include \"%s.h\"\n\n",StrippedInFileName(0));
@@ -1003,7 +999,7 @@ void PamTemplateC(void) {
   TemplateCEnd(ff);
   fclose(ff); 
   if (!gOptionq) 
-     F"  out: %s\n",fn);
+     fprintf(stderr,"  out: %s\n",fn);
 }
 void GenerateStaticLenght(const char *in,char *out) {
   strcpy(out,in); strcat(out,"_h.maxlen");
@@ -1026,7 +1022,7 @@ void PamOutputDotIncFile(void) {
     strcpy(tmp,gIncFile[ii]); doup=0;
     cc=strstr(tmp,".idl"); if(cc!=NULL) *cc=0; /* dont del, modifies tmp */
     if(doup) ToUpper(ooo,tmp); else strcpy(ooo,tmp);
-    if(strcmp(ooo,"ASU")&&strcmp(ooo,"asu")) FF"#include %s.inc\"\n",ooo);
+    if(strcmp(ooo,"ASU") && strcmp(ooo,"asu")) FF"#include %s.inc\"\n",ooo);
   }
   if(gNProto!=1) Err(__LINE__);
   if(gNArgName[gNProto-1]<0) Err(__LINE__);
@@ -1061,19 +1057,19 @@ void Banner(char *xx) { /* makes a big obnoxious banner from input x */
   int ii,line,len; char x[100];
   sprintf(x," %s ",xx);
   len=strlen(x);
-  PP"%c",7);
+  printf("%c",7);
   if(len+2*MARGIN>80) {
-    PP"%s\n",x);
+    printf("%s\n",x);
   } else {
     for(line=0;line<7;line++) {
-      for(ii=MARGIN-1;ii>=0;ii--) PP"X");
+      for(ii=MARGIN-1;ii>=0;ii--) printf("X");
       switch(line) {
-        case 0: case 1: case 5: case 6: for(ii=len-1;ii>=0;ii--) PP"X"); break;
-        case 2: case 4: for(ii=len-1;ii>=0;ii--) PP" "); break;
-        case 3: PP"%s",x);
+        case 0: case 1: case 5: case 6: for(ii=len-1;ii>=0;ii--) printf("X"); break;
+        case 2: case 4: for(ii=len-1;ii>=0;ii--) printf(" "); break;
+        case 3: printf("%s",x);
       }
-      for(ii=MARGIN-1;ii>=0;ii--) PP"X");
-      PP"\n");
+      for(ii=MARGIN-1;ii>=0;ii--) printf("X");
+      printf("\n");
     }
   }
   sleep(5);
@@ -1109,9 +1105,9 @@ void CheckThatAllTablesHaveBeenIncluded(void) {
     }
     if(!ok && !gOptions && !gOptionq) {
       Ose();
-      PP"%cWARNING FROM STIC:  you did not include an IDL file ",7);
-      PP"for table\n");
-      PP"type '%s', which is mentioned in %s.\n",
+      printf("%cWARNING FROM STIC:  you did not include an IDL file ",7);
+      printf("for table\n");
+      printf("type '%s', which is mentioned in %s.\n",
       gModuleTable[i],gOrigInputFile); 
     }
   }
@@ -1128,14 +1124,14 @@ void Pam(void) {
   if(gOptionr) WriteTheTwoRootPamFiles();
 }
 IncludeFileName(char *io) {
-  if(gNIncFile>=INC) { F"Too many include files, max=%d.\n",INC); exit(2); }
+  if(gNIncFile>=INC) { fprintf(stderr,"Too many include files, max=%d.\n",INC); exit(2); }
   strncpy(gIncFile[gNIncFile++],io,ISIZE);
 }
 InOut(char *io) {  /* STEP 1 */
   int whichProto; whichProto=gNProto-1;
   if(gNProto<1) Err(__LINE__);
   if(gNArgName[whichProto]>=ARGS) {
-    F"No more than %d arguments per prototype.\n",ARGS); exit(2);
+    fprintf(stderr,"No more than %d arguments per prototype.\n",ARGS); exit(2);
   }
   if(!strcmp(io,"in")) gIo[whichProto][gNArgName[whichProto]]=IO_IN;
   else if(!strcmp(io,"out")) gIo[whichProto][gNArgName[whichProto]]=IO_OUT;
@@ -1149,7 +1145,7 @@ ArgType(char *theName) {  /* STEP 2 */
   strcpy(gModuleTable[gNmoduleTable++],theName);
   if(gNProto<1) Err(__LINE__);
   if(gNArgName[whichProto]>=ARGS) {
-    F"No more than %d arguments per prototype.\n",ARGS); exit(2);
+    fprintf(stderr,"No more than %d arguments per prototype.\n",ARGS); exit(2);
   }
   strncpy(gDataType[whichProto][gNArgName[whichProto]],theName,TSIZE);
   gDataType[whichProto][gNArgName[whichProto]][TSIZE]=0;
@@ -1158,7 +1154,7 @@ ArgName(char *theName) {  /* STEP 3 */
   int whichProto; whichProto=gNProto-1;
   if(gNProto<1) Err(__LINE__);
   if(gNArgName[whichProto]>=ARGS) {
-    F"No more than %d arguments per prototype.\n",ARGS); exit(2);
+    fprintf(stderr,"No more than %d arguments per prototype.\n",ARGS); exit(2);
   }
   strncpy(gArgName[whichProto][gNArgName[whichProto]++],theName,ISIZE);
 }
@@ -1168,32 +1164,32 @@ void CheckForEqualityWithInputName(void) {
   StripOffIdl(gInFileNameNoPath,xxx);
   if(strcmp(xxx,gPam)) {
     Ose();
-    EE"Fatal error in file %s:\n",gInFileName);
-    EE"The name of the interface (%s) does not\n",gPam);
-    EE"match the file name (%s).\n",gInFileNameNoPath);
-    EE"Either rename the file %s.idl, or\n",gPam);
-    EE"change the name of the interface in the file to %s.\n",xxx);
-    EE"Eg: interface %s : ...\n",xxx);
+    fprintf(stderr,"Fatal error in file %s:\n",gInFileName);
+    fprintf(stderr,"The name of the interface (%s) does not\n",gPam);
+    fprintf(stderr,"match the file name (%s).\n",gInFileNameNoPath);
+    fprintf(stderr,"Either rename the file %s.idl, or\n",gPam);
+    fprintf(stderr,"change the name of the interface in the file to %s.\n",xxx);
+    fprintf(stderr,"Eg: interface %s : ...\n",xxx);
     exit(2);
   }
 }
 ----------------------------------------------------*/
 PamName(char *theName) {
   gNPamNames++;
-  if(gNPamNames>1) { F"Only one interface definition per file.\n"); exit(2); }
+  if(gNPamNames>1) { fprintf(stderr,"Only one interface definition per file.\n"); exit(2); }
   strncpy(gPam,yylval.str,ISIZE);
   /* 961113 CheckForEqualityWithInputName(); */
   ToUpper(gPamUp,gPam);
 }
 FncType(char *theName) {
   if(gNProto>=PROTOTYPES) {
-     F"Too many prototype names (max %d).\n",PROTOTYPES); exit(2);
+     fprintf(stderr,"Too many prototype names (max %d).\n",PROTOTYPES); exit(2);
   }
   strncpy(gFncType[gNProto],theName,TSIZE);
 }
 PrototypeName(char *theName) {
   if(gNProto>=PROTOTYPES) {
-     F"Too many prototype names (max %d).\n",PROTOTYPES); exit(2);
+     fprintf(stderr,"Too many prototype names (max %d).\n",PROTOTYPES); exit(2);
   }
   strncpy(gPn[gNProto++],theName,ISIZE);
 }
@@ -1226,37 +1222,37 @@ void Init(void) {
   }
 }
 void Help(void) {
- P"For help is using STIC with STAF, write CETull@lbl.gov or\n");
- P"ward@physics.utexas.edu\n");
+ printf("For help is using STIC with STAF, write CETull@lbl.gov or\n");
+ printf("ward@physics.utexas.edu\n");
  Usage();
 }
 void Usage(void) {
-  F"Usage: %s [-h?rMTivftq] [-Iincdir] [-static|-dynamic] [xxx.idl]\n",
+  fprintf(stderr,"Usage: %s [-h?rMTivftq] [-Iincdir] [-static|-dynamic] [xxx.idl]\n",
   gExeName);
-  F"All options are optional.\n");
-  F"\n");
-  F"You can type multiple options on the command line with a single\n");
-  F"dash (eg, %s -ti xxx.idl).\n",gExeName);
-  F"This does not imply that all option combinations are sensible.\n");
-  F"\n");
-  F"You don't need an input idl file for options h and v.\n");
-  F"\n");
-  F"-? Prints this usage message and then immediately quit.\n");
-  F"-dynamic Dynamic tables.\n");
-  F"-f Produce only header files (.h and .inc).\n");
-  F"-h Prints this usage message and then immediately quit.\n");
-  F"-H Produce only the header   files.\n");
-  F"-i Ignore case (upper converted to lower).\n");
-  F"-I Mechanism for specifying list of include directories.\n");
-  F"-M Write string to stdout for use in a Makefile, no other output.\n");
-  F"-s Do not process include files in module idl files.\n");
-  F"-T Write string with used tables to stdout for use in a Makefile, no other output.\n");
-  F"-q Operate quietly.\n");
-  F"-static  Static tables.\n");
-  F"-t Produce only the template files.\n");
-  F"-r Produce only the ROOT files.\n");
-  F"-v Write version info to stdout, no other output is produced.\n");
-  F"-version XXX adds an arbitrary version XXX to the output file.\n");
+  fprintf(stderr,"All options are optional.\n");
+  fprintf(stderr,"\n");
+  fprintf(stderr,"You can type multiple options on the command line with a single\n");
+  fprintf(stderr,"dash (eg, %s -ti xxx.idl).\n",gExeName);
+  fprintf(stderr,"This does not imply that all option combinations are sensible.\n");
+  fprintf(stderr,"\n");
+  fprintf(stderr,"You don't need an input idl file for options h and v.\n");
+  fprintf(stderr,"\n");
+  fprintf(stderr,"-? Prints this usage message and then immediately quit.\n");
+  fprintf(stderr,"-dynamic Dynamic tables.\n");
+  fprintf(stderr,"-f Produce only header files (.h and .inc).\n");
+  fprintf(stderr,"-h Prints this usage message and then immediately quit.\n");
+  fprintf(stderr,"-H Produce only the header   files.\n");
+  fprintf(stderr,"-i Ignore case (upper converted to lower).\n");
+  fprintf(stderr,"-I Mechanism for specifying list of include directories.\n");
+  fprintf(stderr,"-M Write string to stdout for use in a Makefile, no other output.\n");
+  fprintf(stderr,"-s Do not process include files in module idl files.\n");
+  fprintf(stderr,"-T Write string with used tables to stdout for use in a Makefile, no other output.\n");
+  fprintf(stderr,"-q Operate quietly.\n");
+  fprintf(stderr,"-static  Static tables.\n");
+  fprintf(stderr,"-t Produce only the template files.\n");
+  fprintf(stderr,"-r Produce only the ROOT files.\n");
+  fprintf(stderr,"-v Write version info to stdout, no other output is produced.\n");
+  fprintf(stderr,"-version XXX adds an arbitrary version XXX to the output file.\n");
   exit(2);
 }
 void OpenAllTblOutput(void) {
@@ -1270,8 +1266,8 @@ void OpenAllTblOutput(void) {
     ExtendOutList(fn);
   } else {
     gFpInc=fopen(fn,mode); /* gOptionf OK */
-    if(gFpInc==NULL) { F"Can't write %s.\n",fn); exit(2); }
-    if(!gOptionM&&!gOptionT&&!strcmp(mode,"w")&&!gOptionq) P"  out: %s\n",fn);
+    if(gFpInc==NULL) { fprintf(stderr,"Can't write %s.\n",fn); exit(2); }
+    if(!gOptionM && !gOptionT && !strcmp(mode,"w") && !gOptionq) printf("  out: %s\n",fn);
     StandardBlurb(1,mode,gFpInc);
   }
 
@@ -1280,8 +1276,8 @@ void OpenAllTblOutput(void) {
     ExtendOutList(fn);
   } else {
     gFpH=fopen(fn,mode); /* gOptionf OK */
-    if(gFpH==NULL) { F"Can't write %s.\n",fn); exit(2); }
-    if(!gOptionM&&!gOptionT&&!strcmp(mode,"w")&&!gOptionq) P"  out: %s\n",fn); 
+    if(gFpH==NULL) { fprintf(stderr,"Can't write %s.\n",fn); exit(2); }
+    if(!gOptionM && !gOptionT && !strcmp(mode,"w") && !gOptionq) printf("  out: %s\n",fn); 
     StandardBlurb(2,mode,gFpH);
   }
 }
@@ -1296,17 +1292,17 @@ void SetYyinFilePtr(char *xx) {
   FILE *ff; char line[203]; int qq,ii;
   yyin=fopen(xx,"r");
   if(yyin==NULL) {
-    F"I can't read %s.  Check existence and permissions.\n",xx); exit(2);
+    fprintf(stderr,"I can't read %s.  Check existence and permissions.\n",xx); exit(2);
   }
   if(gOptioni) {
     ff=fopen(gOptioniTempFile,"w"); /* gOptionf OK */
-    if(!ff) { PP"Fatal error: can't write %s.\n",gOptioniTempFile); exit(2); }
+    if(!ff) { printf("Fatal error: can't write %s.\n",gOptioniTempFile); exit(2); }
     while(fgets(line,200,yyin)) {
       qq=0;
       for(ii=0;line[ii];ii++) {
         if(line[ii]=='\"') qq++; if(qq%2==1) continue;
         if(FirstCharsSame(line+ii,"STAFCV_T")) { ii+=8; continue; }
-        if(line[ii]>='A'&&line[ii]<='Z') line[ii]+='a'-'A';
+        if(line[ii]>='A' && line[ii]<='Z') line[ii]+='a'-'A';
       }
       fprintf(ff,"%s",line);
     } fclose(ff); fclose(yyin);
@@ -1315,7 +1311,7 @@ void SetYyinFilePtr(char *xx) {
 }
 void DoOneLineComment(char *x) {
   int ii;
-  if(gNColNames>0&&gNColNames<=COL&&gFtc>=0&&gFtc<COL) {
+  if(gNColNames>0 && gNColNames<=COL && gFtc>=0 && gFtc<COL) {
     for(ii=gFtc;ii<gNColNames;ii++) {
       if(strlen(x)>=OLC) Err(__LINE__);
       if(ii==gFtc) strcpy(gOlc[ii],x); else strcpy(gOlc[ii],"/* ditto */");
@@ -1323,12 +1319,12 @@ void DoOneLineComment(char *x) {
   }
 }
 void CheckSelfConsistencyOfOptions(void) {
-  if(gOptionstatic&&gOptiondynamic) {
-    Ose(); P"Don't use both -dynamic and -static on command line.\n"); exit(2);
+  if(gOptionstatic && gOptiondynamic) {
+    Ose(); printf("Don't use both -dynamic and -static on command line.\n"); exit(2);
   }
 }
 void TooManyIncs(void) {
-  EE"You have too many \"-I\"s on the command line.  Max=%d.\n",INCDIR);
+  fprintf(stderr,"You have too many \"-I\"s on the command line.  Max=%d.\n",INCDIR);
 }
 void PrintVersionAndExit(void) {
   printf("%s\n",gCvsVersion); exit(0);
@@ -1340,16 +1336,16 @@ void TypeIncDirs(FILE *xx) {
   fprintf(xx,"------------------------\n");
  }
 void DumpOptionsAndExit(void) {
-  PP"%20s %d\n","gOptionM",gOptionM);
-  PP"%20s %d\n","gOptionT",gOptionT);
-  PP"%20s %d\n","gOptionf",gOptionf);
-  PP"%20s %d\n","gOptiondynamic",gOptiondynamic);
-  PP"%20s %d\n","gOptioni",gOptioni);
-  PP"%20s %s\n","gOptioniTempFile",gOptioniTempFile);
-  PP"%20s %d\n","gOptionstatic",gOptionstatic);
-  PP"%20s %d\n","gOptionH",gOptionH);
-  PP"%20s %d\n","gOptions",gOptions);
-  PP"%20s %d\n","gOptiont",gOptiont);
+  printf("%20s %d\n","gOptionM",gOptionM);
+  printf("%20s %d\n","gOptionT",gOptionT);
+  printf("%20s %d\n","gOptionf",gOptionf);
+  printf("%20s %d\n","gOptiondynamic",gOptiondynamic);
+  printf("%20s %d\n","gOptioni",gOptioni);
+  printf("%20s %s\n","gOptioniTempFile",gOptioniTempFile);
+  printf("%20s %d\n","gOptionstatic",gOptionstatic);
+  printf("%20s %d\n","gOptionH",gOptionH);
+  printf("%20s %d\n","gOptions",gOptions);
+  printf("%20s %d\n","gOptiont",gOptiont);
   exit(2);
 }
 void ReadOptions(int nnn,char *aaa[]) {
@@ -1385,7 +1381,7 @@ void ReadOptions(int nnn,char *aaa[]) {
           else if(aaa[ii][jj]=='?') Usage();
           else if(aaa[ii][jj]=='v') PrintVersionAndExit();
           else {
-            Ose(); PP"Unknown option: %s\n",aaa[ii]); Usage();
+            Ose(); printf("Unknown option: %s\n",aaa[ii]); Usage();
           }
         }
       }
@@ -1395,12 +1391,12 @@ void ReadOptions(int nnn,char *aaa[]) {
       strcpy(gOrigInputFile,aaa[ii]+jj+1);
       strncpy(      gInFileName,aaa[ii],     INFILES);
       if (!gOptionq) 
-        PP"Input file %s\n",gInFileNameNoPath);
+        printf("Input file %s\n",gInFileNameNoPath);
       filenameCount++;
     }
   }
-  if(filenameCount>1) P"You specified too many input files.\n");
-  if(filenameCount<1) P"You did not specify an input file.\n");
+  if(filenameCount>1) printf("You specified too many input files.\n");
+  if(filenameCount<1) printf("You did not specify an input file.\n");
   if(die||filenameCount!=1) Usage();
   CheckSelfConsistencyOfOptions();
   /* DumpOptionsAndExit(); */
@@ -1411,12 +1407,12 @@ void Init2(void) {
 }
 #define INCFILES 50 /* max length of included idl file's name */
 void NoFindIncFile(char *incFile,const char *curFile) {
-  Eose(); EE"Fatal error in STIC.  Could not find\n");
-  EE"%s, ",incFile);
-  EE"which was included in idl file %s.\n",curFile);
-  EE"I searched the following directories:\n");
+  Eose(); fprintf(stderr,"Fatal error in STIC.  Could not find\n");
+  fprintf(stderr,"%s, ",incFile);
+  fprintf(stderr,"which was included in idl file %s.\n",curFile);
+  fprintf(stderr,"I searched the following directories:\n");
   TypeIncDirs(stderr);
-  EE"To add to this list of directories, use my -I option.\n");
+  fprintf(stderr,"To add to this list of directories, use my -I option.\n");
   Eose();
   exit(2);
 }
@@ -1433,15 +1429,17 @@ void RecursiveProcessingOfIncludeFiles(const char *curFile) {
   char cheapFix[20];
   FILE *incFileFp,*curFileFp;
   curFileFp=fopen(curFile,"r");
-  if(!curFileFp) { EE"No can read %s.\n",curFile); exit(2); }
+  if(!curFileFp) { fprintf(stderr,"No can read %s.\n",curFile); exit(2); }
   while(fgets(line,222,curFileFp)) {
     save=line[10]; line[10]=0; strncpy(cheapFix,line,15); cheapFix[9]=0;
     if(!strcmp(cheapFix,"#include ")) {
       line[10]=save; for(ii=0;line[ii];ii++) if(line[ii]=='\"') break;
-      if(line[ii]!='\"') { PP"Did not find quotes %s\n",line); exit(2); }
+      if(line[ii]!='\"') { printf("Did not find quotes %s\n",line); exit(2); }
       quote=ii; strtok(line+quote+1,"\""); incFile=line+quote+1;
       if(strstr(incFile,".idl")) {
-        if(!gOptionM && !gOptionT && !gOptionq) PP"Processing %23s included in %23s\n",incFile,curFile);
+        if(!gOptionM && !gOptionT && !gOptionq){
+	  printf("Processing %23s included in %23s\n",incFile,curFile);
+	}
         for(ii=0;ii<gNincDir;ii++) {
           sprintf(incFileFullPath,"%s/%s",gIncDir[ii],incFile);
           incFileFp=fopen(incFileFullPath,"r");
@@ -1481,7 +1479,7 @@ void HandleOneInputFile(char *inFile) { /* maybe inFile=gInFileName */
       fclose(gFpH); 
   }
   if(!gOptions) RecursiveProcessingOfIncludeFiles(buffer);
-  if(!gOptionM&&!gOptionT&&!gOptionq) PP"----- finished with %s\n",buffer);
+  if(!gOptionM && !gOptionT && !gOptionq) printf("----- finished with %s\n",buffer);
 } /* save inFile buffer gInFileName */
 void FixVersionInfo(void) {
   int ii;
@@ -1500,22 +1498,22 @@ int main(int nnn,char *aaa[]) {
   sprintf(gOptioniTempFile,"/tmp/stic.option.i.%d",getpid());
   if(nnn<2) Usage();
   ReadOptions(nnn,aaa);
-  if(!gOptionM&&!gOptionT&&!gOptionq) P"For help type %s help.\n",gExeName);
+  if(!gOptionM && !gOptionT && !gOptionq) printf("For help type %s help.\n",gExeName);
   if(!strcmp(gInFileName,"help")) Help();
   HandleOneInputFile(gInFileName);
   CheckThatAllTablesHaveBeenIncluded();
   if(gOptionM) {
     for(i=0;i<gNOutFile;i++) {
       if(strstr(gOutFile[i],"template")) continue;
-      PP"%s",gOutFile[i]); if(i<gNOutFile-1) PP" ");
+      printf("%s",gOutFile[i]); if(i<gNOutFile-1) printf(" ");
     }
-    PP":\t");
-    for(i=0;i<gNInFile;i++) { PP"%s",gInFile[i]); if(i<gNInFile-1) PP" "); }
-    PP"\n");
+    printf(":\t");
+    for(i=0;i<gNInFile;i++) { printf("%s",gInFile[i]); if(i<gNInFile-1) printf(" "); }
+    printf("\n");
   }
   if (gOptionT) {
-    for(i=1;i<gNInFile;i++) { PP"%s",gInFile[i]); if(i<gNInFile-1) PP" "); }
-    PP"\n");
+    for(i=1;i<gNInFile;i++) { printf("%s",gInFile[i]); if(i<gNInFile-1) printf(" "); }
+    printf("\n");
   }
   fflush(stdout); 
   exit(0);
