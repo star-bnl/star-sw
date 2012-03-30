@@ -965,8 +965,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 		my $stic_cmd =
 		    "test -d \$STICTMP && /bin/rm -rf \$STICTMP ; ".
 		    "/bin/mkdir -m 777 \$STICTMP && cd \$STICTMP && ".
-		    "$STIC -s -r $STIC_CPPPATH -q %<:a && /bin/mv %>:f %>:a && ".
-		    "cd /tmp  &&  /bin/rm -rf \$STICTMP";
+		    "/bin/cp %<:a . && $STIC -s -r $STIC_CPPPATH -q %<:f && ".
+		    "(/bin/mv %>:f %>:a ; cd /tmp  &&  /bin/rm -rf \$STICTMP)";
 		Command $env2 [$modh], @idlS, qq($stic_cmd);
 		Command $env2 [$modi], @idlS, qq($stic_cmd);
 		Command $env2 [$modH], @idlS, qq($stic_cmd);
@@ -1174,9 +1174,10 @@ if ( $#idlL > -1 ) {
 	  $env3->{ENV}->{STICTMP} = "/tmp/$<$$";
 	  my $stic_cmd  =
 	    "test -d \$STICTMP && /bin/rm -rf \$STICTMP ; ".
-	      "/bin/mkdir -p -m 777 \$STICTMP && cd \$STICTMP && ".
-		"$STIC -q %<:a && ".
-		  "(/bin/mv %>:f %>:a ; cd /tmp ; /bin/rm -rf \$STICTMP)";
+	    "/bin/mkdir -p -m 777 \$STICTMP && cd \$STICTMP && ".
+	    "/bin/cp %<:a . && $STIC -q %<:f && ".
+	    "(/bin/mv %>:f %>:a ; cd /tmp ; /bin/rm -rf \$STICTMP)";
+
 	  Command $env3 [$idlh], @Deps, qq ($stic_cmd);
 	  Command $env3 [$idli], @Deps, qq ($stic_cmd);
 	  push @Deps, $idlh;
