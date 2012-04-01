@@ -1548,7 +1548,7 @@ AvalancheMicroscopic::TransportElectron(
                 }
                 
                 if (typeDxc == DxcProdTypeElectron) {
-                  if (!aval || (int)stack.size() >= sizeCut) continue;
+                  if (!aval || (sizeCut > 0 && (int)stack.size() >= sizeCut)) continue;
                   // Penning ionisation
                   newElectron = stack[iE];
                   double xDxc = x, yDxc = y, zDxc = z;
@@ -1859,7 +1859,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     newElectron.kz = ctheta;
     newElectron.status = 0;
     newElectron.driftLine.clear();
-    if ((int)stack.size() < sizeCut) stack.push_back(newElectron);
+    if (sizeCut <= 0 || (int)stack.size() < sizeCut) stack.push_back(newElectron);
     // Increment the electron and ion counters.        
     ++nElectrons; ++nIons;
   } else if (type == PhotonCollisionTypeExcitation) {
