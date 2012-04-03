@@ -1,6 +1,9 @@
-// $Id: TpcResponseSimulator.y2009.C,v 1.11 2012/04/03 14:06:55 fisyak Exp $
-// $Log: TpcResponseSimulator.y2009.C,v $
-// Revision 1.11  2012/04/03 14:06:55  fisyak
+// $Id: TpcResponseSimulator.y2012.C,v 1.1 2012/04/03 14:06:55 fisyak Exp $
+// $Log: TpcResponseSimulator.y2012.C,v $
+// Revision 1.1  2012/04/03 14:06:55  fisyak
+// Speed up using  GetSaveL (__PAD_BLOCK__), sluggish shape histograms, Heed electron generation
+//
+// Revision 1.7  2012/04/03 14:06:55  fisyak
 // Speed up using  GetSaveL (__PAD_BLOCK__), sluggish shape histograms, Heed electron generation
 //
 // Revision 1.6  2012/01/18 13:57:57  fisyak
@@ -65,8 +68,8 @@ TDataSet *CreateTable() {
   row.tauXO                 =  74.6e-9;// secs Tpx Outer integration time 
   row.tauCI                 =   0;  
   row.tauCO                 =   0;  
-  row.SigmaJitterTI         = 0;// i 0.25; // f 0.38;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
-  row.SigmaJitterTO         = 0;// i 0.25; // f 0.38;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
+  row.SigmaJitterTI         = 0;// 0.4317;// 0.25;//ad  0.0;// b for Tpx inner 
+  row.SigmaJitterTO         = 0;// 0.4300;// E: 0.4801;//0.25;//ad  0.0;// b for Tpx outer 
   row.SigmaJitterXI         = 0;// 0.1027785; // P: 0.1353*1.05/1.10; //O: 0.1353*1.05;// N: 0.1353; // C:0.;
   row.SigmaJitterXO         = 0;// 0.107525;  // P: 0.1472*1.05/1.03; //O: 0.1472*1.05;// N: 0.1472; // C:0.;
   row.longitudinalDiffusion = 0.03624; // Magboltz // HD 0.03624*1.5; //HC 0.03624; // Magboltz 
@@ -76,19 +79,16 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.44083315017355607e-01 + 4.48625e-02;
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.12486177000493281e+00 - 1.45850e-01;
-  /* 	SecRow3CGFTpcRS_2009_pp200_a  - SecRow3CGFdaq_2009_pp200 */
-  /* SecRow3CGFTpcRS_2005_CuCu22_a :  FitP->Draw("sigma:y>>s(45,0.5,45.5)","(i&&j)/dsigma**2","profg")
-     SecRow3CGFdaq_2009_pp200    : Inner : 3.82589e-01, Outer:  2.97251e-01
-     SecRow3CGFTpcRS_2009_pp200_a: Inner : 3.40720e-01, Outer:  2.71217e-01
-     diff                        :         1.74024e-01,         1.21653e-01 
-     SecRow3CGFTpcRS_2009_pp200_f:         3.66156e-01          2.85218e-01
-     SecRow3CGFTpcRS_2009_pp200_g:         3.45247e-01          2.26954e-01 
-  */
-  const Double_t RowSigmaTrs[4] = {//  
-    1.74024e-01, 0., 
-    1.21653e-01, 0.};
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02;
+  // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
+  //                                          3.22907e-01                          2.72715e-01
+  // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
+  // diff                                   : 9.13675e-02                          6.29849e-02
+  // SecRow3CGFTpcRS_2011_pp500LowLum_g     : 3.12857e-01                          2.67379e-01
+  const Double_t RowSigmaTrs[4] = {
+    9.13675e-02, 0,  // Inner
+    6.29849e-02, 0}; // Outer
   Float_t *b = &row.SecRowSigIW[0];
   for (Int_t i = 0; i < 8; i++) {
     b[i] = RowSigmaTrs[i%4];
@@ -100,7 +100,7 @@ TDataSet *CreateTable() {
   // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   // The corection has to be added                                                                    M             P
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
-  row.T0offset   = 0.50-5.73196e-01; // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  row.T0offset   = 0.50 -1.43663e-01;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
