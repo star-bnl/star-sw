@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.11 2008/11/03 21:00:37 mattheww Exp $
+ * $Id: StEmcGeom.cxx,v 1.12 2012/04/03 00:04:04 perev Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.12  2012/04/03 00:04:04  perev
+ * Defence against zero size table added
+ *
  * Revision 1.11  2008/11/03 21:00:37  mattheww
  * updated the geometry again
  *
@@ -986,7 +989,7 @@ StEmcGeom::getGeantGeometryTable()
 	
 	if(mGeantGeom) {
 		mCalg    = (St_calb_calg   *) mGeantGeom->Find("calb_calg");
-		if(mCalg) {
+		if(mCalg && mCalg->GetNRows()) {
 			mCalg_st = mCalg->GetTable();
 			printf("calb_calr get from Geant::"); 
 			for(Int_t i=0;i<2;i++) printf(" Barrel %i Angle shift %6.0f ", i+1, mCalg_st->shift[i]);
