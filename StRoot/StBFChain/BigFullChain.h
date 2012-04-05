@@ -30,9 +30,9 @@ Bfc_st BFC[] = { // standard chains
   {"DbV1211"     ,""  ,"","db,ry1h"        ,"","",           "20011211/0 Db Version for prod p01gl",kFALSE},
 
   {"AgML"        ,""  ,"","-Agi,-VmcGeo","","StarAgmlLib,StarGeometry,Geometry"
-   ,                                                             "alias VmcGeomtry to AgMLGeometry",kFALSE},
-  {"Agi" ,""  ,"","-AgML,-VmcGeo","","","alias VmcGeomtry to AgiGeometry (gstar original geometry)",kFALSE},
-  {"VmcGeo"      ,""  ,"","-AgML,-Agi"                    ,"",""      ,"alias VmcGeomtry to VmcGeo",kFALSE},
+   ,                                                            "Alias VmcGeometry to AgMLGeometry",kFALSE},
+  {"Agi" ,"" ,"","-AgML,-VmcGeo","","","Alias VmcGeometry to AgiGeometry (gstar original geometry)",kFALSE},
+  {"VmcGeo"      ,""  ,"","-AgML,-Agi"                    ,"",""     ,"Alias VmcGeometry to VmcGeo",kFALSE},
   
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
