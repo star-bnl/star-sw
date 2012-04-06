@@ -1,7 +1,8 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.554 2010/01/02 18:23:29 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.554.2.1 2012/04/06 21:15:00 didenko Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
+#include "TPRegexp.h"
 #include "TString.h"
 #include "TObjString.h"
 #include "TSystem.h"
@@ -34,6 +35,9 @@
 // ITTF Chains
 //#include "BFC2.h"
 #endif
+
+// JL - define this once, use two places
+#define BFC_DBREGEXP "(dbv|sdt)(\\d+)(_)(.*)(_)(.*)"
 
 // NoChainOptions -> Number of chain options auto-calculated
 TableImpl(Bfc);
@@ -195,8 +199,8 @@ Int_t StBFChain::Instantiate()
   Int_t status = kStOk;
   Int_t i;
   if (! fNoChainOptions) return status;
-  Long64_t maxsize = kMaxLong64; 
-  TTree::SetMaxTreeSize(maxsize);  
+  Long64_t maxsize = kMaxLong64;
+  TTree::SetMaxTreeSize(maxsize);
   for (i = 1; i< fNoChainOptions; i++) {// Instantiate Makers if any
     if (! fBFC[i].Flag) continue;
     TString maker(fBFC[i].Maker);
@@ -207,53 +211,62 @@ Int_t StBFChain::Instantiate()
     StMaker *myChain = 0;
     StMaker *mk = 0;
     // Require only instance for the following named makers
-    if (maker == "St_db_Maker"  || maker == "StTpcDbMaker" || 
-	maker == "StSvtDbMaker" || maker == "StSsdDbMaker" || 
-	maker == "StDetectorDbMaker" || 
-	maker == "StMagFMaker"    || 
-	maker == "StEEmcDbMaker"  || 
+    if (maker == "St_db_Maker"  || maker == "StTpcDbMaker" ||
+	maker == "StSvtDbMaker" || maker == "StSsdDbMaker" ||
+	maker == "StDetectorDbMaker" ||
+	maker == "StMagFMaker"    ||
+	maker == "StEEmcDbMaker"  ||
 	maker == "St_geant_Maker" ||
 	maker == "StVMCMaker") {
       mk = GetTopChain()->GetMakerInheritsFrom(maker);
       if (mk) {
-	if (name == "" || name == mk->GetName()) {
-	  LOG_INFO << "StBFChain::Instantiate ignore request for instantiation of " << maker 
-		   << "(\"" << fBFC[i].Name << "\") because chain alreary has one" << endm;
+	if (maker == "St_geant_Maker" || maker == "StVMCMaker") {
+	  LOG_INFO << "StBFChain::Instantiate ignore request for instantiation of " << maker
+		   << "(\"" << fBFC[i].Name << "\") because chain alreary has one." << endm;
 	  continue;
-	} 
+	}
+	if (name == "" || name == mk->GetName()) {
+	  LOG_INFO << "StBFChain::Instantiate ignore request for instantiation of " << maker
+		   << "(\"" << fBFC[i].Name << "\") because chain alreary has one"
+		   << " but accumulate options" << endm;
+	  //Accumulate option for these makers	  continue;
+	}
       }
     }
     if (strlen(fBFC[i].Chain) > 0) myChain = GetMaker(fBFC[i].Chain);
     if (maker == "St_db_Maker"){
       if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
-	TString MySQLDb("MySQL:StarDb");
-	TString MainCintDb("$STAR/StarDb");
-	TString MyCintDb("$PWD/StarDb");
-	if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
-	// Removed twice already and put back (start to be a bit boring)
-	// DO NOT REMOVE THE NEXT OPTION - Used in AutoCalibration
-	if (GetOption("NoCintCalDb")) {MyCintDb = "";}
-	if (GetOption("NoCintDb"))    {MainCintDb = ""; MyCintDb = "";}
+	St_db_Maker* dbMk = (St_db_Maker *) mk;
+	if (! dbMk) {
+	  TString MySQLDb("MySQL:StarDb");
+	  TString MainCintDb("$STAR/StarDb");
+	  TString MyCintDb("$PWD/StarDb");
+	  if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
+	  // Removed twice already and put back (start to be a bit boring)
+	  // DO NOT REMOVE THE NEXT OPTION - Used in AutoCalibration
+	  if (GetOption("NoCintCalDb")) {MyCintDb = "";}
+	  if (GetOption("NoCintDb"))    {MainCintDb = ""; MyCintDb = "";}
 	
-	TString Dirs[3];
-	Int_t j;
-	for (j = 0; j < 3; j++) Dirs[j] = "";
-	j = 0;
-	if (MySQLDb    != "") {Dirs[j] = MySQLDb;    j++;}
-	if (MainCintDb != "") {Dirs[j] = MainCintDb; j++;}
-	if (MyCintDb   != "") {Dirs[j] = MyCintDb;   j++;}
-	St_db_Maker*  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2]);
-	if (!dbMk) goto Error;
-	mk = dbMk;
-	strcpy (fBFC[i].Name, (Char_t *) dbMk->GetName());
-	if (GetOption("Simu") && ! GetOption("NoSimuDb")) dbMk->SetFlavor("sim+ofl");
-	else                                              dbMk->SetFlavor("ofl");
+	  TString Dirs[3];
+	  Int_t j;
+	  for (j = 0; j < 3; j++) Dirs[j] = "";
+	  j = 0;
+	  if (MySQLDb    != "") {Dirs[j] = MySQLDb;    j++;}
+	  if (MainCintDb != "") {Dirs[j] = MainCintDb; j++;}
+	  if (MyCintDb   != "") {Dirs[j] = MyCintDb;   j++;}
+	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2]);
+	  if (!dbMk) goto Error;
+	  mk = dbMk;
+	  strcpy (fBFC[i].Name, (Char_t *) dbMk->GetName());
+	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) dbMk->SetFlavor("sim+ofl");
+	  else                                              dbMk->SetFlavor("ofl");
+	}
 	if (GetOption("dbSnapshot")) dbMk->SetAttr("dbSnapshot","dbSnapshot.root",dbMk->GetName());
+	SetDbOptions(dbMk);
       }
-      SetDbOptions(mk);
       goto Add2Chain;
     }
-    if (maker == "StIOMaker" && fSetFiles) {
+    if (!mk && maker == "StIOMaker" && fSetFiles) {
       StIOMaker *inpMk=0;
       if (GetOption("InTree")) {
 	Char_t line[80] = "bfcTree";
@@ -279,7 +292,7 @@ Int_t StBFChain::Instantiate()
       }
       goto Error;
     }
-    if (maker == "StTreeMaker" && fFileOut != "") {
+    if (!mk && maker == "StTreeMaker" && fFileOut != "") {
       StTreeMaker    *treeMk  = 0;
       if (GetOption("OutTree")) {
 	Char_t line[80] = "bfcTree";
@@ -298,17 +311,19 @@ Int_t StBFChain::Instantiate()
     }
     // Special makers already created or action which
     // need to take place before 'maker' is created.
-    if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
-    else                          mk = New(fBFC[i].Maker);
+    if (! mk) {
+      if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
+      else                          mk = New(fBFC[i].Maker);
+    }
     if (! mk) {
       LOG_FATAL  << Form("StBFChain::Instantiate() problem with instatiation %s",fBFC[i].Maker) << endm;
       assert(mk);
     }
     strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
 
-    if (maker == "StDAQMaker") { 
+    if (maker == "StDAQMaker") {
       if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
-    } 
+    }
 
     if (maker == "St_geant_Maker") { // takes only first request for geant, if it is active then it should be the first one
       Int_t NwGeant = 10; // default geant parameters
@@ -949,11 +964,28 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     if       (Tag ==  opt) {return  i;}
     else {if (Tag == nopt) {return -i;}}
   }
+  //
+  // JL - sdt and dbv for timestamp
+  //
+  // Gopt for arbitrary property on 3 letter name (wildcard would be added) and length
+  // 6 for a value. Not advertized / not used and implementation is not complete (needed
+  // a case and di not have a clear one). TBD.
+  //
+  // 2011/11 added the possibility of detector sub-system specific timestamps.
+  // DBV only for now, logic is similar if we equally parse.
+  //
   // {sdt|dbv}YYYYMMDD -> {sdt|dbv} 3 / YYYYMMDD 8 => 11 || YYYYMMDD.HHMMSS = 15 => 18
   if (Tag.BeginsWith("dbv") || Tag.BeginsWith("sdt")) {
     Check = kTRUE;
+
     if (Tag.Length() == 11  || Tag.Length() == 18) return 0;
+
+    // Else we need to parse some more - assume a pattern {dbv|sdt}YYYYMMDD[.HHMMSS]_XXX_ZZZZZ
+    // First, detect it using quick counting 
+    Tag.ToLower();
+    if ( TPRegexp(BFC_DBREGEXP).Match(Tag)  == 7) return 0;
   }
+
   // GoptXXXvvvvvv -> Gopt 4 / XXX 3 / vvvvvv 6 = 13
   if ( Tag.BeginsWith("gopt") && Tag.Length() == 13 ) return 0;
 
@@ -1005,15 +1037,44 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	  if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"dbv%8d",&FDate);
 	  if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"dbv%8d.%6d",&FDate,&FTime);
 	  if (Tag.Length() == 11 || Tag.Length() == 18) {
-	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (MaxEntryTime) "
+	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Max DB EntryTime) "
 			       << FDate  << "." << FTime << endm;
+          } else {
+	    // we passed kOpt() parsing was fine
+	    //if ( TPRegexp(BFC_DBREGEXP).Match(Tag)  == 7) return 0;
+	    TObjArray *subStrL = TPRegexp(BFC_DBREGEXP).MatchS(Tag);
+	    BFCTimeStamp TS;
+	    TString realm;
+
+	    TS.Type     = 1;
+	    TS.Date     = (((TObjString *) subStrL->At(2))->GetString()).Atoi();
+	    TS.Time     = 0; // for now, avoid parsing this as user use simple TS 99% of the time
+	    TS.Detector = ((TObjString *) subStrL->At(4))->GetString();
+	    TS.Realm    = ((TObjString *) subStrL->At(6))->GetString();
+
+	    if ( TS.Realm.IsNull() ){ realm = "*";}
+	    else {                    realm = TS.Realm;}
+
+	    GTSOptions.push_back(TS);
+
+	    LOG_WARN << "Override timestamp for detector requested\n\t"
+	             << "Detector " << TS.Detector  << "\n\t"
+	             << "Realm    " << realm        << "\n\t"
+	             << "Date     " << TS.Date      << "\n\t"
+	             << "Time     " << TS.Time      << endm;
 	  }
+
+
+
 	} else if (Tag.BeginsWith("sdt")) {
 	  if (Tag.Length() == 11)  (void) sscanf(Tag.Data(),"sdt%8d",&FDateS);
 	  if (Tag.Length() == 18)  (void) sscanf(Tag.Data(),"sdt%8d.%6d",&FDateS,&FTimeS);
 	  if (Tag.Length() == 11 || Tag.Length() == 18) {
-	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (MaxEntryTime) "
+	    gMessMgr->QAInfo() << Tag.Data() << " ... but still will be considered as a dynamic timestamp (Event Time) "
 			       << FDateS  << "." << FTimeS << endm;
+	    // <<< same logic for GTSOptions can be inserted here
+	    // <<< if so, use TS.Type     = 2
+
 	  }
 	} else if ( Tag.BeginsWith("gopt") && Tag.Length() == 13){
 	  char GOptName[3],GOptValue[6];
@@ -1470,13 +1531,40 @@ void StBFChain::SetDbOptions(StMaker *mk){
       gMessMgr->QAInfo() << GetName() << " Chain set time from  " << db->GetName() << endm;
       m_EvtHddr->SetDateTime(db->GetDateTime());
     }
-    // MaxEntry over-write
-    if (Idate) {
-      db->SetMaxEntryTime(Idate,Itime);
-      gMessMgr->Info() << "\tSet DataBase max entry time " << Idate << "/" << Itime
-		       << " for St_db_Maker(\"" << db->GetName() <<"\")" << endm;
-    }
+  }
+  // MaxEntry over-write
+  if (Idate) {
+    db->SetMaxEntryTime(Idate,Itime);
+    gMessMgr->Info() << "\tSet DataBase max entry time " << Idate << "/" << Itime
+		     << " for St_db_Maker(\"" << db->GetName() <<"\")" << endm;
   } // check if maker is St_db_Maker
+
+  //        
+  // Now treat the detector specific options
+  //        
+  TString realm;
+  for (unsigned int i = 0; i < GTSOptions.size() ; i++){
+    if ( (GTSOptions[i].Realm).IsNull() ){ realm = "*";}
+    else {                                 realm = GTSOptions[i].Realm;}
+            
+    if ( GTSOptions[i].Type == 1){
+      db->AddMaxEntryTimeOverride(GTSOptions[i].Date,0,
+				  (char *) realm.Data(),
+				  (char *) GTSOptions[i].Detector.Data());
+            
+      LOG_INFO << "Recovering override stamp " << i << " :: "
+	       << GTSOptions[i].Detector << ", " << realm << ", "
+	       << GTSOptions[i].Date     << ", " << GTSOptions[i].Time  << endm;
+    } else {
+      LOG_WARN << "Found override type " << GTSOptions[i].Type << " no treated yet"
+	       << GTSOptions[i].Detector << ", " << realm << ", "
+	       << GTSOptions[i].Date     << ", " << GTSOptions[i].Time  << endm;
+    }
+  }
+  //abort(); <-- for debugging
+
+
+
   if (!GetOption("fzin")) {
     struct Field_t {
       const Char_t *name;
