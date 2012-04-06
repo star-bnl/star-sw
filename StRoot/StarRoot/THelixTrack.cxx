@@ -343,6 +343,16 @@ double THelixTrack::Move(double step)
   } 
   return step;
 }
+//_____________________________________________________________________________
+double THelixTrack::Move(double step,double F[5][5]) 
+{
+  double xyz[3],dir[3],rho;
+  Eval(step,xyz,dir,rho);
+  Set(xyz,dir,rho,fDRho);
+  MakeMtx(step,F);
+  if (fEmx) fEmx->Move(F); 
+  return step;
+}
 
 //_____________________________________________________________________________
 double THelixTrack::Step(double stmax,const  double *surf, int nsurf,
@@ -1475,7 +1485,7 @@ void  TCircleFitter::Add(double x,double y,const double *errs)
   if (fArr.GetSize()<n) {fArr.Set(n*2);fAux=0;}
   if (!fAux) fAux = GetAux(0);
   TCircleFitterAux *aux = fAux+fN-1;
-  aux->x = x; aux->y=y; aux->exy[0]=0; aux->exy[2]=0; aux->wt=0;
+  aux->x = x; aux->y=y; aux->exy[0]=1; aux->exy[2]=1; aux->ezz=1;aux->wt=1;
   if (errs) AddErr(errs);
 }
 //______________________________________________________________________________
@@ -1486,7 +1496,8 @@ void  TCircleFitter::Add(double x,double y,double z)
   if (fArr.GetSize()<n) {fArr.Set(n*2);fAux=0;}
   if (!fAux) fAux = GetAux(0);
   TCircleFitterAux *aux = fAux+fN-1;
-  aux->x = x; aux->y=y; aux->z=z;aux->exy[0]=-1; aux->exy[2]=0;aux->wt=0;
+  aux->x = x; aux->y=y; aux->z=z;
+  aux->exy[0]=1; aux->exy[1]=0; aux->exy[2]=1;aux->ezz=1;aux->wt=1;
 }
 //______________________________________________________________________________
 void  TCircleFitter::AddErr(const double *errs,double ezz) 
@@ -2687,7 +2698,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.44 2009/11/09 19:58:58 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.45 2010/04/23 22:51:27 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2703,6 +2714,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.45  2010/04/23 22:51:27  perev
+ * Method Move with derivatives adde
+ *
  * Revision 1.44  2009/11/09 19:58:58  perev
  * FitZ removed everywhere
  *

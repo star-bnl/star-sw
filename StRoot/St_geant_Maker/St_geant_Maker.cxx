@@ -1,5 +1,35 @@
-// $Id: St_geant_Maker.cxx,v 1.123 2008/10/28 22:28:34 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.135 2010/08/10 16:35:33 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.135  2010/08/10 16:35:33  fisyak
+// Add initialization of starsim parameter tables after opening zebra-file
+//
+// Revision 1.134  2010/05/27 13:36:14  fisyak
+// 3rd attemp to synchronize mag.field. Now take care that the maker can be not Active and do InitRun in Work
+//
+// Revision 1.132  2010/05/24 15:38:40  fisyak
+// Move geometry and mag.field initialization from Init into InitRun in order to allow mag. field settings from StMagFMaker::InitRun
+//
+// Revision 1.130  2010/05/10 14:19:52  fisyak
+// move geometry load from Init to InitRun in order to allow MagF maker to set mag.field
+//
+// Revision 1.129  2010/04/23 23:19:26  perev
+// Remove not needed and expencive call AgstHits
+//
+// Revision 1.128  2010/03/31 19:15:45  fine
+// RT #1890 Fix the side effect introduced  yesterdays
+//
+// Revision 1.127  2010/03/29 20:37:54  fine
+// RT #1890 Fix the geometry leak that entails the warning message
+//
+// Revision 1.126  2010/02/22 15:02:18  fisyak
+// Clean up, fix bug #1860 by replacing skip => trig
+//
+// Revision 1.125  2010/01/07 19:16:24  perev
+// mArgs for agvolume is 9 now
+//
+// Revision 1.124  2009/12/31 00:02:59  perev
+// Add the material name to the volume name
+//
 // Revision 1.123  2008/10/28 22:28:34  perev
 // FGZD hits added
 //
@@ -399,6 +429,7 @@
 #include "Stiostream.h"
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include "TSystem.h"
 #include "GtHash.h"
 #include "TGeometry.h"
@@ -492,7 +523,7 @@
 #include "StMagF.h"
 #include "StMessMgr.h"
 #ifdef DetectorIndex
-#include "StarG2T2VMCMap.h"
+#include "StarDetectorMap.h"
 #endif
 #ifdef F77_NAME
 #define    geometry	 F77_NAME(geometry,GEOMETRY)
@@ -554,22 +585,12 @@ R__EXTERN "C" {
    */
   void type_of_call rootmaptable_(DEFCHARD,DEFCHARD,DEFCHARD, Int_t&,Char_t * 
 				  DEFCHARL DEFCHARL DEFCHARL);
-  Int_t type_of_call agvolume(TVolume*&,Float_t*&,Float_t*&,Float_t*&,
-    			      Int_t&,Int_t&,Float_t*&,Int_t&);
-#if 0
-  Int_t type_of_call agvolume(void*&,Float_t*&,Float_t*&,Float_t*&,
-			      Int_t&,Int_t&,Float_t*&,Int_t&);
-#endif
+  Int_t type_of_call agvolume(TVolume*&, Float_t*&, Float_t*&, Float_t*&, Int_t&
+                             ,Int_t&,    Float_t*&, Int_t&,    int *);
   Int_t type_of_call agvoluma(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*);
   void type_of_call uhtoc(Int_t&,Int_t &,DEFCHARD,Int_t& DEFCHARL);
-#if 0
-  void type_of_call mfldgeo();
-#endif
   int  type_of_call agfdig0 (const char*,const char*,int,int);
   void type_of_call agfdpar (float &hits,const char *chit, float &alim, float &blim, float &bin, int);
-#if 0
-  Char_t type_of_call *acfromr(Float_t r=8009359);
-#endif
   void  type_of_call agfpath(Int_t *);
 }
 Char_t type_of_call *acfromr(Float_t r=8009359);
@@ -626,21 +647,23 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
      ds = StMaker::FindDataSet(logInput,uppMk,dowMk); 
   } else {
      if (lookupHall) {
-        if (!fVolume) ((St_geant_Maker *)this)->Work();
-  
-        if (fVolume) {
+        ds = fVolume;
+        if (!fVolume) {
+           ((St_geant_Maker *)this)->Work();
            ds = fVolume;
-           if (gGeometry) {
-              TList *listOfVolume = gGeometry->GetListOfNodes();
+           if (fVolume) {
+              if (gGeometry) {
+                 TList *listOfVolume = gGeometry->GetListOfNodes();
 
-              // Remove hall from the list of ROOT nodes to make it free of ROOT control
-              listOfVolume->Remove(fVolume);
-              listOfVolume->Remove(fVolume);
+                 // Remove hall from the list of ROOT nodes to make it free of ROOT control
+                 listOfVolume->Remove(fVolume);
+                 listOfVolume->Remove(fVolume);
+              }
+              // Add "hall" into ".const" area of this maker
+              ((St_geant_Maker *)this)->AddConst(fVolume);
+              if (Debug()) fVolume->ls(3);
            }
-            // Add "hall" into ".const" area of this maker
-            ((St_geant_Maker *)this)->AddConst(fVolume);
-            if (Debug()) fVolume->ls(3);
-        } 
+        }
     } else if (lookupGeoDir) {
         if (!fGeoDirectory) {
            TString file("pams/geometry");
@@ -681,20 +704,20 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
   // Initialize GEANT
-  if (! geant3) {
-    PrintInfo();
-    geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
-    assert(geant3);
-    cquest = (Quest_t  *) geant3->Quest();
-    clink  = (Gclink_t *) geant3->Gclink();
-    cflag  = (Gcflag_t *) geant3->Gcflag();
-    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
-    cnum   = (Gcnum_t  *) geant3->Gcnum();
-    z_iq   = (Int_t    *) geant3->Iq();
-    z_lq   = (Int_t    *) geant3->Lq();
-    z_q    = (Float_t  *) geant3->Q();
-    csets  = (Gcsets_t *) geant3->Gcsets();
-  }
+  if (  geant3) return kStOK;
+  PrintInfo();
+  geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
+  assert(geant3);
+  cquest = (Quest_t  *) geant3->Quest();
+  clink  = (Gclink_t *) geant3->Gclink();
+  cflag  = (Gcflag_t *) geant3->Gcflag();
+  cvolu  = (Gcvolu_t *) geant3->Gcvolu();
+  cnum   = (Gcnum_t  *) geant3->Gcnum();
+  z_iq   = (Int_t    *) geant3->Iq();
+  z_lq   = (Int_t    *) geant3->Lq();
+  z_q    = (Float_t  *) geant3->Q();
+  csets  = (Gcsets_t *) geant3->Gcsets();
+
   TString InputFile(fInputFile);
   if (fInputFile != "") {//check that first word contains .fz then add "gfile p" 
     //                                       -"-          .nt then add "user/input user" 
@@ -718,19 +741,60 @@ Int_t St_geant_Maker::Init(){
       if (InputFile != "") Do(InputFile.Data());
       InputFile = "";
     }
+  } else {  
+    if (IsActive()) {// default
+      Do("subevent 0;");
+      // gkine #particles partid ptrange yrange phirange vertexrange
+      Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
+      Do("mode g2tm prin 1;");
+      //  Do("next;");
+      //  Do("dcut cave z 1 10 10 0.03 0.03;");
+      if ((m_Mode/1000)%10 == 1) {// phys_off
+	gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
+	Do("DCAY 0");
+	Do("ANNI 0");
+	Do("BREM 0");
+	Do("COMP 0");
+	Do("HADR 0");
+	Do("MUNU 0");
+	Do("PAIR 0");
+	Do("PFIS 0");
+	Do("PHOT 0");
+	Do("RAYL 0");
+	Do("LOSS 4"); // no fluctuations 
+	//  Do("LOSS 1"); // with delta electron above dcute
+	Do("DRAY 0");
+	Do("MULS 0");
+	Do("STRA 0");
+	//                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
+	Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
+	Do("gclose all");
+	Do("physi");
+      }	
+      if (Debug() > 1) {
+	Do("debug on;");
+	Do("swit 2 2;");
+      }
+    }
   }
+  return kStOK;
+}
+//________________________________________________________________________________
+Int_t St_geant_Maker::InitRun(Int_t run){
   if (mInitialization != "") {
+    gMessMgr->Info() << "St_geant_Maker::InitRun -- Do geometry initialization" << endm;
     Do(mInitialization.Data()); 
     Geometry();
+    mInitialization = "";
+    Do("gclose all");
   }
-  Do("gclose all");
   Agstroot();
+  gMessMgr->Info() << "St_geant_Maker::InitRun -- Do mag.field initialization" << endm;
   m_geom_gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
   if (m_geom_gdat)  {
     AddRunco(new St_geom_gdat(*m_geom_gdat));
   }
-  BookHist();   // Create Histograms    
-  if (m_Mode%100 != 1 &&  IsActive() ) { // Mixer mode == 1 or reco - do not modify EvtHddr and MagF
+  if (m_Mode%10 != 1 && IsActive() ) { // Mixer mode == 1 or reco - do not modify EvtHddr and MagF
     fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
     if (!fEvtHddr) {                            // Standalone run
       fEvtHddr = new StEvtHddr(m_ConstSet);
@@ -764,10 +828,10 @@ Int_t St_geant_Maker::Init(){
       }
       gMessMgr->Info()  << "St_geant_Maker::Init mfscale = " << mfscale		       << endm;
       struct Field_t {
-	Char_t *name;
+	const Char_t *name;
 	Float_t scale;
       };
-      Field_t FieldOptions[5] = {
+      const Field_t FieldOptions[5] = {
 	{"FullMagFNegative", -1.0},
 	{"FullMagFPositive",  1.0},
 	{"HalfMagFNegative", -0.5},
@@ -799,42 +863,7 @@ Int_t St_geant_Maker::Init(){
       }
     }
   }
-  // Kinematics
-  if (fInputFile == "" && IsActive()) {// default
-      Do("subevent 0;");
-      // gkine #particles partid ptrange yrange phirange vertexrange
-      Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
-      Do("mode g2tm prin 1;");
-      //  Do("next;");
-      //  Do("dcut cave z 1 10 10 0.03 0.03;");
-      if ((m_Mode/1000)%10 == 1) {// phys_off
-	gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
-	Do("DCAY 0");
-	Do("ANNI 0");
-	Do("BREM 0");
-	Do("COMP 0");
-	Do("HADR 0");
-	Do("MUNU 0");
-	Do("PAIR 0");
-	Do("PFIS 0");
-	Do("PHOT 0");
-	Do("RAYL 0");
-	Do("LOSS 4"); // no fluctuations 
-	//  Do("LOSS 1"); // with delta electron above dcute
-	Do("DRAY 0");
-	Do("MULS 0");
-	Do("STRA 0");
-	//                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-	Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
-	Do("gclose all");
-	Do("physi");
-      }	
-      if (Debug() > 1) {
-	Do("debug on;");
-	Do("swit 2 2;");
-      }
-  }
-  return StMaker::Init();
+  return kStOK;
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Make()
@@ -1209,9 +1238,6 @@ Int_t St_geant_Maker::Make()
   if (address) csjcal(&address,&narg);
 #endif
   
-  // Fill Histograms    
-  FillHist();
-  
   if (cflag->ieorun) return kStEOF; 
   if (cflag->ieotri) return kStErr; 
   return kStOK;
@@ -1233,7 +1259,7 @@ void St_geant_Maker::Draw(const char* opt)
   Int_t two = 2;
   Int_t zero = 0;
   Int_t one = 1;
-  Char_t *path = " ";
+  const char *path = " ";
   Dzddiv (two,zero,path,opt,one,zero,one,one);
 }
 //_____________________________________________________________________________
@@ -1425,11 +1451,14 @@ void St_geant_Maker::ClearRootGeoms()
 //_____________________________________________________________________________
 TDataSet *St_geant_Maker::Work()
 {  
+  if (mInitialization != "") {
+    InitRun(-1);
+  }
   struct  Medium 
   { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
   struct  Volume
   { Char_t name[4],nick[4]; Int_t npar; Float_t par[50]; };
-  
+  char matName[24];  
   //  Int_t node = 0;
   //  TVolume   *volume=0;
   TVolume   *node=0;
@@ -1447,7 +1476,7 @@ TDataSet *St_geant_Maker::Work()
   //   ===============================================================
   //  while(agvolume(node,volu,position,mother,who,copy,p,npar)) {
     //  while(agvolume(&node,&volu,&position,&mother,&who,&copy,&p,&npar)) {
-    while (Agvolume(node,volu,position,mother,who,copy,p,npar)) 
+    while (Agvolume(node,volu,position,mother,who,copy,p,npar,matName)) 
     { // ===============================================================
       
       typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
@@ -1472,31 +1501,31 @@ TDataSet *St_geant_Maker::Work()
       Hp = (TVolume *) H->GetPointer(p,npar+1);
       if (Hp)  newVolume = Hp; 
       else
-	{ // printf(" creating object %s  %f  %f  %f \n", name,p[0],p[1],p[2]);
+	{ // printf(" creating object %s  %f  %f  %f %s \n", name,p[0],p[1],p[2], );
 	  switch (shape) 
-	    { case BOX:  t=new TBRIK(nick,"BRIK","void",
+	    { case BOX:  t=new TBRIK(nick,"BRIK",matName,
 				     p[0],p[1],p[2]);                         break;
-	    case TRD1: t=new TTRD1(nick,"TRD1","void",
+	    case TRD1: t=new TTRD1(nick,"TRD1",matName,
 				   p[0],p[1],p[2],p[3]);                    break;
-	    case TRD2: t=new TTRD2(nick,"TRD2","void",
+	    case TRD2: t=new TTRD2(nick,"TRD2",matName,
 				   p[0],p[1],p[2],p[3],p[4]);               break;
-	    case TRAP: t=new TTRAP(nick,"TRAP","void",
+	    case TRAP: t=new TTRAP(nick,"TRAP",matName,
 				   p[0],p[1],p[2],p[3],p[4],p[5],
 				   p[6],p[7],p[8],p[9],p[10]);              break;
-	    case TUBE: t=new TTUBE(nick,"TUBE","void",
+	    case TUBE: t=new TTUBE(nick,"TUBE",matName,
 				   p[0],p[1],p[2]);                         break;
-	    case TUBS: t=new TTUBS(nick,"TUBS","void",
+	    case TUBS: t=new TTUBS(nick,"TUBS",matName,
 				   p[0],p[1],p[2],p[3],p[4]);               break;
-	    case CONE: t=new TCONE(nick,"CONE","void",
+	    case CONE: t=new TCONE(nick,"CONE",matName,
 				   p[0],p[1],p[2],p[3],p[4]);               break;
-	    case CONS: t=new TCONS(nick,"CONS","void",    // take care !
+	    case CONS: t=new TCONS(nick,"CONS",matName,    // take care !
 				   p[0],p[1],p[2],p[3],p[4],p[5],p[6]);     break;
 	    //                         p[1],p[2],p[3],p[4],p[0],p[5],p[6]);     break;
-	    case SPHE: t=new TSPHE(nick,"SPHE","void",
+	    case SPHE: t=new TSPHE(nick,"SPHE",matName,
 				   p[0],p[1],p[2],p[3],p[4],p[5]);          break;
-	    case PARA: t=new TPARA(nick,"PARA","void",
+	    case PARA: t=new TPARA(nick,"PARA",matName,
 				   p[0],p[1],p[2],p[3],p[4],p[5]);          break;
-	    case PGON: t=new TPGON(nick,"PGON","void",p[0],p[1],(int)p[2],(int)p[3]);  
+	    case PGON: t=new TPGON(nick,"PGON",matName,p[0],p[1],(int)p[2],(int)p[3]);  
 	      { Float_t *pp = p+4;
 	      for (Int_t i=0; i<p[3]; i++) {
 		Float_t z    = *pp++;
@@ -1507,7 +1536,7 @@ TDataSet *St_geant_Maker::Work()
 		//                         (( TPGON*)t)->DefineSection(i,*pp++,*pp++,*pp++);
 	      }
 	      }                                              break;
-	    case PCON: t=new TPCON(nick,"PCON","void",p[0],p[1],(int)p[2]);
+	    case PCON: t=new TPCON(nick,"PCON",matName,p[0],p[1],(int)p[2]);
 	      { Float_t *pp = p+3;
 	      for (Int_t i=0; i<p[2]; i++) {
 		Float_t z    = *pp++;
@@ -1518,23 +1547,24 @@ TDataSet *St_geant_Maker::Work()
 		//                         ((TPCON *)t)->DefineSection(i,*pp++,*pp++,*pp++);
 	      }
 	      }                                              break;
-	    case ELTU: t=new TELTU(nick,"ELTU","void",
+	    case ELTU: t=new TELTU(nick,"ELTU",matName,
 				   p[0],p[1],p[2]);                         break;
-	    //      case HYPE: t=new THYPE(nick,"HYPE","void",
+	    //      case HYPE: t=new THYPE(nick,"HYPE",matName,
 	    //                       p[0],p[1],p[2],p[3]);                    break;
-	    case GTRA: t=new TGTRA(nick,"GTRA","void",
+	    case GTRA: t=new TGTRA(nick,"GTRA",matName,
 				   p[0],p[1],p[2],p[3],p[4],p[5],
 				   p[6],p[7],p[8],p[9],p[10],p[11]);        break;
-	    case CTUB: t=new TCTUB(nick,"CTUB","void",
+	    case CTUB: t=new TCTUB(nick,"CTUB",matName,
 				   p[0],p[1],p[2],p[3],p[4],p[5],
 				   p[6],p[7],p[8],p[9],p[10]);              break;
-	    default:   t=new TBRIK(nick,"BRIK","void",
+	    default:   t=new TBRIK(nick,"BRIK",matName,
 				   p[0],p[1],p[2]);                         break;
 	    };
 	  t->SetLineColor((int)att[4]);
 	  
 	  // to build a compressed tree, name should be checked for repetition
-	  newVolume = new TVolume(name,nick,t);
+	  std::string nickMat = Form("%s(%s)", nick,matName);
+	  newVolume = new TVolume(name,nickMat.c_str(),t);
 	  //      newVolume -> SetVisibility(ENodeSEEN(MapGEANT2StNodeVis(att[1])));
 	  newVolume -> SetVisibility((TVolume::ENodeSEEN)TVolume::MapGEANT2StNodeVis((int)att[1]));
 	  H->SetPointer(newVolume);
@@ -1689,7 +1719,7 @@ Int_t St_geant_Maker::Skip(Int_t Nskip)
 {
   if (Nskip >= 0) {
     Char_t kuip[20];
-    sprintf (kuip,"skip %i",Nskip);
+    sprintf (kuip,"trig %i",Nskip);
     if (GetDebug()) printf("St_geant_Maker skip %i\n record(s)",Nskip); 
     Do((const char*)kuip);
     
@@ -1742,9 +1772,15 @@ Int_t St_geant_Maker::G2t_volume_id(const Char_t *name, Int_t *numbv){
   return g2t_volume_id(PASSCHARD(name),numbv PASSCHARL(name));
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Agvolume(TVolume *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
-			       Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar){
-  return agvolume(node,par,pos,mot,who,copy,par1,npar);
+Int_t St_geant_Maker::Agvolume(TVolume *&node, Float_t *&par, Float_t *&pos
+                              ,Float_t *&mot,  Int_t &who,    Int_t &copy
+			      ,Float_t *&par1, Int_t &npar,   char matName[24])
+{
+
+  int ans = agvolume(node,par,pos,mot,who,copy,par1,npar,(int*)matName);
+  matName[20]=0; char *cc = strstr(matName," "); if (cc) *cc=0;
+  return ans;
+
 }
 
 //_____________________________________________________________________________
@@ -1772,7 +1808,7 @@ void St_geant_Maker::Geometry() {
 }
 //______________________________________________________________________________
 Int_t St_geant_Maker::Agstroot() {
-  AgstHits();
+//VP not used  AgstHits();
   return agstroot();
 }
 //_____________________________________________________________________________
@@ -1795,7 +1831,7 @@ void St_geant_Maker::Dzddiv(Int_t& idiv ,Int_t &Ldummy,const Char_t* path,const 
 }
 
 //_____________________________________________________________________________
-
+#if 0
 void St_geant_Maker::BookHist(){
   
   gMessMgr->Info() << "St_geant_Maker::***********  St_geant_Maker - bookhist!!!! *********" << endm;
@@ -1838,10 +1874,11 @@ void St_geant_Maker::FillHist(){
   
   gMessMgr->Info() << "St_geant_Maker:: geant event vertex: " << 
     gvt->ge_x[0] << "\t" << gvt->ge_x[1] << "\t" << gvt->ge_x[2] << endm;
-  
+#if 0  
   m_histvx->Fill(gvt->ge_x[0]);
   m_histvy->Fill(gvt->ge_x[1]);
   m_histvz->Fill(gvt->ge_x[2]);
+#endif
 }
 //________________________________________________________________________________
 TGeoVolume* St_geant_Maker::Ag2Geom() { 
@@ -2147,6 +2184,7 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
   fTopGeoVolume = volume;
   return GetTopGeoVolume();
 }
+#endif
 #if 1
 //________________________________________________________________________________
 void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
@@ -2243,7 +2281,8 @@ Char_t *acfromr(Float_t r) {// 'TYPE'
 }
 #endif
 //________________________________________________________________________________
-Int_t St_geant_Maker::AgstHits() {
+Int_t St_geant_Maker::AgstHits() 
+{
   if (! geant3) return kStErr;
   Int_t JSET = clink->jset;
   if (JSET <= 0) return kStErr;

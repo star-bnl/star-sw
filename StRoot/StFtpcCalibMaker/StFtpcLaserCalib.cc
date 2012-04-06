@@ -1,6 +1,10 @@
-// $Id: StFtpcLaserCalib.cc,v 1.9 2009/10/14 15:59:55 jcs Exp $
+// $Id: StFtpcLaserCalib.cc,v 1.10 2009/12/09 14:41:30 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.cc,v $
+// Revision 1.10  2009/12/09 14:41:30  jcs
+// delta_t0 and delta_gas can now both = 0
+// new space point calculation always necessary since reconstruction done with data t0
+//
 // Revision 1.9  2009/10/14 15:59:55  jcs
 // changes to be able to vary the gas temperature in addition to varying t0 and
 // gas composition
@@ -84,7 +88,7 @@ StFtpcLaserCalib::StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, i
 
   magf=gmagf;
 
-  if (deltat0!=0 || deltagas!=0)
+  //if (deltat0!=0 || deltagas!=0)
     mtrafo=trafo;
 }
 
@@ -272,7 +276,9 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
   // * calculate new space point depending on gas & t0 *
   // ***************************************************
 
-  if ((deltat0!=0 || deltagas!=0) && nhits>0)
+
+  //if ((deltat0!=0 || deltagas!=0) && nhits>0)
+  if (nhits>0)
     {
       //LOG_DEBUG<<"calculating new space point..."<<endm;
       for (int i=0;i<nhits;i++) // debug : <=nhits
@@ -673,6 +679,7 @@ void StFtpcLaserCalib::PositionLog()
 
 void StFtpcLaserCalib::fillarray(float tx,float ty,float tz,float tex,float tey,int n,int nsec,float gppos,float gppossigma, int gsoftsec, int gsoftrow, float gtimepos, float getpadl, float gettimel, float getmaxadc, float getcharge)
 {
+
   radius[n]=sqrt(tx*tx+ty*ty);
   phi[n]=zyltrafo(tx,ty,tz);
   //phi[n]=atan2(ty,tx);

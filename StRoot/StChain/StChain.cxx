@@ -27,6 +27,9 @@
                                                                       
  The function StChain::Maketree must be called after the creation     
  of the StChain object to create a Root Tree (not yet implemented).   
+ 
+ The eventloop method can terminated earlier with the external TERM (-15) signal
+ (for example, Condor sends this signal to notifye the job aboyt the its intent to evict the job.
                                                                       
 */
 #define   STAR_TRACKING 1
@@ -42,6 +45,7 @@
 #include "StEvtHddr.h"
 #include "StMessMgr.h"
 #include "StMemStat.h"
+#include "StCloseFileOnTerminate.h"
 
 ClassImp(StChain)
 
@@ -87,6 +91,7 @@ Int_t StChain::Finish(){
  SetBIT  (kFiniEnd);
  // StopTimer();
  PrintTotalTime();
+ // delete gMessMgr; gMessMgr = 0;
  return res;
 }
 //_____________________________________________________________________________
@@ -157,7 +162,16 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 #endif         
 #endif                
   if (jBeg > 1) Skip(jBeg-1);
-  for (jCur=jBeg; jCur<=jEnd; jCur++) {
+  // End of the event loop as soon as the application receives TERM (-15) system signal
+  class teminator : public StTerminateNotified {
+        bool fEnd_of_time;
+     public: 
+        teminator() : StTerminateNotified(), fEnd_of_time(false){;}
+        void SetNotifiedCallBack() { fEnd_of_time = true; }
+        bool Notified() const { return !fEnd_of_time; }
+  } endOfTime;
+  
+  for (jCur=jBeg; jCur<=jEnd  && endOfTime.Notified(); jCur++) {
      evnt.Reset(); evnt.Start("QAInfo:");
 
      Clear();
@@ -259,8 +273,20 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.73 2009/06/23 19:37:33 fine Exp $
+// $Id: StChain.cxx,v 1.77 2010/04/27 21:31:44 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.77  2010/04/27 21:31:44  fine
+// remove the logger destruction side effect
+//
+// Revision 1.76  2010/04/23 22:40:08  fine
+// RT #1911. Close the local logger at Finish
+//
+// Revision 1.75  2010/03/02 23:09:24  fine
+// Simplify Close/Terminate interface
+//
+// Revision 1.74  2010/03/01 23:37:41  fine
+// Terminate StChain::EventLoop with the extrenal TERM 15 signal
+//
 // Revision 1.73  2009/06/23 19:37:33  fine
 // replace QA logger with the dedicated UCM one
 //

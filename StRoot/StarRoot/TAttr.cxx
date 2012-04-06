@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TAttr.cxx,v 1.4 2008/01/20 00:41:18 perev Exp $
+ * $Id: TAttr.cxx,v 1.6 2010/01/28 18:18:32 perev Exp $
  *
  ***************************************************************************
  *
@@ -43,11 +43,9 @@ void TAttr::SetAttr(const char *key, const char *val)
    if (!val) val ="";
    TString tv(val);tv = tv.Strip(TString::kBoth)     ;tv.ReplaceAll("\t","");
 
-   if (tv == ".remove") {
-       TObject *t = FindObject(tk.Data());
-       if(t){Remove(t); delete t;}}
-   else {
-       AddFirst(new TNamed(tk.Data(),tv.Data()));}
+   TObject *t = FindObject(tk.Data());
+   if (t) {Remove(t); delete t;}
+   if (tv != ".remove") {AddFirst(new TNamed(tk.Data(),tv.Data()));}
    if (_debug)
      Info("SetAttr","(\"%s\",\"%s\",\")",tk.Data(),tv.Data());
 
@@ -57,7 +55,7 @@ int TAttr::SetAttr(const TAttr *att)
 {
    TListIter iter(att,kIterBackward);
    int add=0; const TNamed *tn=0; 
-   while (tn = (const TNamed*)iter()) {AddFirst(new TNamed(*tn));add++;}
+   while ((tn = (const TNamed*)iter())) {AddFirst(new TNamed(*tn));add++;}
    return add;
 }
 //_____________________________________________________________________________

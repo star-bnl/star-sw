@@ -1,4 +1,4 @@
-// $Id: StEEmcFastMaker.h,v 1.11 2007/03/23 03:26:23 balewski Exp $
+// $Id: StEEmcFastMaker.h,v 1.12 2009/12/09 20:38:00 ogrebeny Exp $
 
 
 /* \class StEEmcFastMaker        
@@ -100,7 +100,7 @@ class StEEmcFastMaker : public StMaker {
   void mEE2ST(EEeventDst*, StEmcCollection* emcC); ///< TTree-->StEvent
 
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.11 2007/03/23 03:26:23 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.12 2009/12/09 20:38:00 ogrebeny Exp $";
   
  protected:
  public: 
@@ -113,10 +113,14 @@ class StEEmcFastMaker : public StMaker {
   void SetLocalStEvent();
   void SetEmcCollectionLocal(bool x=true){mEmcCollectionIsLocal=x;}
   void SetEmbeddingMode(){SetEmcCollectionLocal(true);}
+  void UseFullTower(bool flag = true) { mUseFullTower = flag; } // always create all hits, even if ADC=0
+  void UseFullPreShower(bool flag = true) { mUseFullPreShower = flag; }	// includes pre1/pre2/post
+  void UseFullSmdu(bool flag = true) { mUseFullSmdu = flag; }
+  void UseFullSmdv(bool flag = true) { mUseFullSmdv = flag; }
   StEmcCollection * GetLocalEmcCollection() { return mLocalStEmcCollection;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.11 2007/03/23 03:26:23 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.12 2009/12/09 20:38:00 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  private:
@@ -127,6 +131,10 @@ class StEEmcFastMaker : public StMaker {
 
   StEmcCollection *mLocalStEmcCollection; // for special uses (embedding)
   bool mEmcCollectionIsLocal;
+  bool mUseFullTower;
+  bool mUseFullPreShower;
+  bool mUseFullSmdu;
+  bool mUseFullSmdv;
   
   ClassDef(StEEmcFastMaker,0)   
 };
@@ -135,6 +143,9 @@ class StEEmcFastMaker : public StMaker {
 
 
 // $Log: StEEmcFastMaker.h,v $
+// Revision 1.12  2009/12/09 20:38:00  ogrebeny
+// User-switchable function added to always create all hits, even if ADC=0. Requested by Pibero for the trigger simulator.
+//
 // Revision 1.11  2007/03/23 03:26:23  balewski
 // Corretions from Victor
 //

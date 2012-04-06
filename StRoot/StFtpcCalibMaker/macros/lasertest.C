@@ -1,6 +1,9 @@
-// $Id: lasertest.C,v 1.10 2009/10/14 15:58:43 jcs Exp $
+// $Id: lasertest.C,v 1.11 2009/12/09 14:41:49 jcs Exp $
 //
 // $Log: lasertest.C,v $
+// Revision 1.11  2009/12/09 14:41:49  jcs
+// delta_t0 and delta_gas can now both = 0
+//
 // Revision 1.10  2009/10/14 15:58:43  jcs
 // change and add macros so that in addition to varying t0 and the gas compostion,
 // the gas temperature can be varied
@@ -60,11 +63,6 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit,char*
   cout<<"                            maxz     = "<<maxz<<endl;
   cout<<"                            minrad   = "<<minrad<<endl;
   cout<<"                            maxrad   = "<<maxrad<<endl;
-// if both t0 and gas = "0", set t0=".000001" otherwise program will seg fault
-  if (atof(t0)==0 && atof(gas)==0) {
-     t0 = ".000001";
-     cout<<"     changed t0=0 to        t0       = "<<t0<<" to avoid seg fault"<<endl;
-  } else
   cout<<"                            t0       = "<<t0<<endl;
   cout<<"                            gas      = "<<gas<<endl;
   cout<<"                            gastemp  = "<<gastemp<<endl;
@@ -149,7 +147,7 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit,char*
 	}
     }
 
-  laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,"0.000001","0",gastemp,mbfield);
+  laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,"0","0",gastemp,mbfield);
 
   delete laser;
 }

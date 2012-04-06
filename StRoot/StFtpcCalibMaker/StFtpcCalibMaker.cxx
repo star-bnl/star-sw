@@ -1,6 +1,10 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.12 2009/11/18 12:09:50 jcs Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.13 2009/12/09 14:41:30 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.13  2009/12/09 14:41:30  jcs
+// delta_t0 and delta_gas can now both = 0
+// new space point calculation always necessary since reconstruction done with data t0
+//
 // Revision 1.12  2009/11/18 12:09:50  jcs
 // add USE_LOCAL_DRIFTMAP instructions
 //
@@ -261,9 +265,9 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
   StarMagField *m_magf=new StarMagField(StarMagField::kMapped, mbfield, kTRUE);
   // analoges Problem bei Magnetfeld 0 shift nicht machen in Track !!!
 
-
-  if (atof(t0)!=0 || atof(gas)!=0)
-    {
+  // new space point calculation only necessary if atof(t0)!=0 || atof(gas)!=0
+  //if (atof(t0)!=0 || atof(gas)!=0) {
+  // new space point calculation always necessary since reconstruction done with data t0
       trafo=new StFtpcLaserTrafo(dbReader,paramReader,atof(t0),atof(gas),micropertime,deltap,mbfield,tZero);
       if (trafo->calcpadtrans()) {
         LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - calcpadtrans done !"<<endm;
@@ -273,7 +277,7 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
         delete trafo;
         return;
       }
-    }
+  //}
 
   StFtpcLaserCalib *l=new StFtpcLaserCalib(ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,atof(t0),atof(gas),gastemp,trafo,m_magf);
  
@@ -372,8 +376,9 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
   tZero = dbReader->tZero();
   LOG_INFO<<"StFtpcCalibMaker::DoT0Calib entered with filename "<<filename<<" t0 "<<t0<<" gas "<<gas<<" mbfield "<<mbfield<<" and tZero = "<<tZero<<endm;
 
-  if (atof(t0)!=0 || atof(gas)!=0)
-  {
+  // new space point calculation only necessary if atof(t0)!=0 || atof(gas)!=0
+  // new space point calculation always necessary since reconstruction done with data t0
+  //if (atof(t0)!=0 || atof(gas)!=0) {
       // FTPC West
 
       deltap = deltapW;
@@ -407,7 +412,7 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
          return;
       }
 
-  }
+  //}
 
 
   LOG_INFO<<"StFtpcCalibMaker::DoT0Calib() ..."<<endm;
@@ -426,8 +431,7 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
 
   Float_t x,y,rad;//,phi;
 
-  for (int k=0;k<=maxentries;k++)
-    {
+  for (int k=0;k<=maxentries;k++) {
 
       if (k%(maxentries/10)==0 && k>0) {
          //LOG_DEBUG<<k<<" cluster on tracks processed"<<endm;
@@ -435,35 +439,32 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
     
       l->GetClusterTreeEntry(k);
 
-      if (atof(t0)!=0 || atof(gas)!=0)
-        {
+  // new space point calculation always necessary since reconstruction done with data t0
+      //if (atof(t0)!=0 || atof(gas)!=0) {
           if (l->cluster.sec<31)
             trafo->padtrans(l->cluster.row,l->cluster.sec,l->cluster.timepos,l->cluster.padpos,&x,&y);
           else
             trafo2->padtrans(l->cluster.row,l->cluster.sec,l->cluster.timepos,l->cluster.padpos,&x,&y);
-        } 
-      else
-        {
-           x=l->hit.x;
-           y=l->hit.y;
-        }
+      //} 
+      //else {
+      //     x=l->hit.x;
+      //     y=l->hit.y;
+      //}
 
       rad=sqrt(x*x+y*y);
 
-      if (l->cluster.sec<31)
-        {
+      if (l->cluster.sec<31) {
           hradwall->Fill(rad);
           hradw->Fill(rad);
           htimew->Fill(l->cluster.timepos);
-        }
-      else
-        {
+      }
+      else {
           hradeall->Fill(rad);
           hrade->Fill(rad);
           htimee->Fill(l->cluster.timepos);
-        }
+      }
 
-    }
+  }
 
   delete l;
 
