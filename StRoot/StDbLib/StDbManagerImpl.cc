@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.38 2011/06/16 14:44:00 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.39 2012/04/08 20:48:09 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.39  2012/04/08 20:48:09  dmitry
+ * added alternate hardcoded location for dbLoadBalancerLocalConfig_BNL.xml
+ *
  * Revision 1.38  2011/06/16 14:44:00  dmitry
  * added new domain - FGT
  *
@@ -563,7 +566,11 @@ void StDbManagerImpl::lookUpServers(){
 	else
 	  {
 	    configFileNames.push_back(fLocalConfig);
+		configFileNames.push_back("/star/data07/dbbackup/dbLoadBalancerLocalConfig_BNL.xml"); // alternate local config
 	  }
+
+
+
 /******Removing option to allow LB in $HOME***********************
 	const char* HOME = getenv("HOME");
 
@@ -604,6 +611,7 @@ void StDbManagerImpl::lookUpServers(){
 	  {
 	     configFileNames.push_back((string)STAR+"/StDb/servers/"+dbLoadBalancerGlobalConfig);
 	  }
+
 
 	// try opening the files until the first one that opens is found
 
