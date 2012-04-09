@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.39 2012/04/08 20:48:09 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.40 2012/04/09 14:32:26 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.40  2012/04/09 14:32:26  dmitry
+ * AFS-related patch commented out
+ *
  * Revision 1.39  2012/04/08 20:48:09  dmitry
  * added alternate hardcoded location for dbLoadBalancerLocalConfig_BNL.xml
  *
@@ -566,7 +569,7 @@ void StDbManagerImpl::lookUpServers(){
 	else
 	  {
 	    configFileNames.push_back(fLocalConfig);
-		configFileNames.push_back("/star/data07/dbbackup/dbLoadBalancerLocalConfig_BNL.xml"); // alternate local config
+		//configFileNames.push_back("/star/data07/dbbackup/dbLoadBalancerLocalConfig_BNL.xml"); // alternate local config, used during AFS outage
 	  }
 
 
