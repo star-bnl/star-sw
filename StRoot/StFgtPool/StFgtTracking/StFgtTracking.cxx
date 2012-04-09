@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtTracking.cxx,v 1.2 2012/03/14 22:22:40 sgliske Exp $
+ * $Id: StFgtTracking.cxx,v 1.3 2012/04/09 21:08:24 sgliske Exp $
  * Author: S. Gliske, March 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtTracking.cxx,v $
+ * Revision 1.3  2012/04/09 21:08:24  sgliske
+ * many bugs fixed--seems to be working
+ *
  * Revision 1.2  2012/03/14 22:22:40  sgliske
  * update
  *
@@ -177,15 +180,19 @@ Int_t StFgtTracking::makePoints(){
          };
 
 #ifdef DEBUG
-         LOG_INFO << "oct " << disc+1 << (Char_t)(oct/2+'A') << "." << ( oct%2 ? 'S' : 'L' )
-                  << " r/phi clusters? " << rClusVec.size() << ' ' << pClusVec.size() << " points per disc " << pointVec.size() << endm;
+         if( rClusVec.size() || pClusVec.size() ){
+            LOG_INFO << "oct " << disc+1 << (Char_t)(oct/2+'A') << "." << ( oct%2 ? 'S' : 'L' )
+                     << " r/phi clusters? " << rClusVec.size() << ' ' << pClusVec.size() << " points per disc " << pointVec.size() << endm;
+         };
 #endif
       };
 
       mPointsTot += pointVec.size();
 
 #ifdef DEBUG
-      LOG_INFO << "Disc " << disc+1 << " contributes " << pointVec.size() << " new points, for a total of " << mPointsTot << " clusters" << endm;
+      if( pointVec.size() ){
+         LOG_INFO << "Disc " << disc+1 << " contributes " << pointVec.size() << " new points, for a total of " << mPointsTot << " clusters" << endm;
+      };
 #endif
    };
 
@@ -207,9 +214,9 @@ void StFgtTracking::Clear( const Option_t *opt ){
    mPointsTot = 0;
    StFgtTrPoint::lastIdx = -1;
 
-   for( Int_t discQuad = 0; discQuad < kFgtNumDiscs*kFgtNumQuads; ++discQuad ){
-      mRclusVecPerOctDisc[discQuad].clear();
-      mPclusVecPerOctDisc[discQuad].clear();
+   for( Int_t discOct = 0; discOct < kFgtNumDiscs*kFgtNumOctantsPerDisc; ++discOct ){
+      mRclusVecPerOctDisc[discOct].clear();
+      mPclusVecPerOctDisc[discOct].clear();
    };
    for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc )
       mPointVecPerDisc[disc].clear();
