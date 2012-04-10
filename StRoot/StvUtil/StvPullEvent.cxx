@@ -162,7 +162,7 @@ static int nCall=0; nCall++;
         hiP->mTrackNumber=iTkG+1; 
 	hiP->mVertex=vertex;
       }
-      assert(nHits==trkP->nAllHits);
+      assert(nHits<=trkP->nAllHits);
       trkP->mTrackNumber= iTkG+1; iTkP++;
     }//end It is a primary
 
@@ -172,7 +172,7 @@ static int nCall=0; nCall++;
       nHits++;
       hiG->mTrackNumber=iTkG+1; hiG->mVertex=vertex;
     }
-    assert(nHits==trkG->nAllHits);
+    assert(nHits<=trkG->nAllHits);
     trkG->mVertex = vertex; 
     trkG->mTrackNumber= iTkG+1; 
   }

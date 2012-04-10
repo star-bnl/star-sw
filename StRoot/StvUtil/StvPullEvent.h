@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StvPullEvent.h,v 1.4 2011/08/19 16:27:06 perev Exp $
+ * $Id: StvPullEvent.h,v 1.5 2012/04/10 22:44:15 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StvPullEvent.h,v $
+ * Revision 1.5  2012/04/10 22:44:15  perev
+ * Chi2 for primary track + vertex added
+ *
  * Revision 1.4  2011/08/19 16:27:06  perev
  * track errors added
  *
@@ -89,6 +92,7 @@ unsigned char mL; 		//Length of track
 unsigned char mTypeEnd; 	//Type of end tracking
 
 float mChi2;
+float mChi2P;
 float mCurv;        		//curvature
 float mPt;        		//pt
 float mPsi;			//track Psi(around beam)  in global  Stv frame
