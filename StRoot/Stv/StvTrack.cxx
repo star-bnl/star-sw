@@ -175,6 +175,17 @@ double StvTrack::GetXi2() const
 
 }
 //_____________________________________________________________________________
+double StvTrack::GetXi2P() const
+{
+  if (!IsPrimary()) return 0;
+  const StvNode *node = GetNode(kPrimPoint);
+  assert(node);
+  double Xi2 = node->GetXi2();
+  assert(Xi2<1000.);
+  return Xi2;
+}
+  
+//_____________________________________________________________________________
 int StvTrack::ReleaseHits()
 {
   int nd=0;
