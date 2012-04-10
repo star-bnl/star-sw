@@ -1,13 +1,16 @@
 //StvStEventFiller.h
 /***************************************************************************
  *
- * $Id: StvStEventFiller.h,v 1.2 2010/09/29 23:39:12 perev Exp $
+ * $Id: StvStEventFiller.h,v 1.3 2012/04/10 22:41:54 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  * Author: Victor Perev, Jun 2010
  ***************************************************************************
  *
  * $Log: StvStEventFiller.h,v $
+ * Revision 1.3  2012/04/10 22:41:54  perev
+ * Cleanup
+ *
  * Revision 1.2  2010/09/29 23:39:12  perev
  * Intereface fillPulls(...) chamnged
  *
@@ -69,6 +72,7 @@ public:
     double impactParameter(StTrack* strack , StThreeVectorD &vertexPosition);
     void setPullEvent(StvPullEvent *pe) 		{mPullEvent=pe;}
     void getAllPointCount(const StvTrack *track,int count[1][3]);
+    const StvHit *GetHit(const StvNode *node) const;
 private:
  void fillResHack(StHit *hh,const StvHit *stiHit, const StvNode *node);
  void fillPulls  (double len,StHit *hh,const StvHit *stiHit
