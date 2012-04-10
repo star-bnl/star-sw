@@ -23,7 +23,7 @@ class StFgtAVEfficiencyMaker : public StFgtQaMaker {
    Int_t Finish();
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtAVEfficiencyMaker.h,v 1.1 2012/03/20 17:57:20 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtAVEfficiencyMaker.h,v 1.2 2012/04/10 13:21:53 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
 
    //   Double_t getRPhiRatio(StSPtrVecFgtHitConstIterator hitIterBegin, StSPtrVecFgtHitConstIterator hitIterEnd);
@@ -33,6 +33,16 @@ class StFgtAVEfficiencyMaker : public StFgtQaMaker {
    TH1D** rPhiRatioPlots;
    TH1D** rEff;
    TH1D** rNonEff;
+
+   TH2D** chargeCorr;
+   TH1D** h_clusterSizeR;
+   TH1D** h_clusterSizePhi;
+   TH1D** h_clusterChargeR;
+   TH1D** h_clusterChargePhi;
+
+   TH2D* hIp;
+   TH1D* hIpZAtX0;
+   TH1D* hIpZAtY0;
 
    TFile* myRootFile;
    int runningEvtNr;
