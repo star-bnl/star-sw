@@ -1,5 +1,8 @@
-/* $Id: StEtrFastSimMaker.cxx,v 1.1 2012/03/22 01:19:12 perev Exp $
+/* $Id: StEtrFastSimMaker.cxx,v 1.2 2012/04/10 22:38:18 perev Exp $
     $Log: StEtrFastSimMaker.cxx,v $
+    Revision 1.2  2012/04/10 22:38:18  perev
+    Errors increased to 300 microns
+
     Revision 1.1  2012/03/22 01:19:12  perev
     *** empty log message ***
 
@@ -23,7 +26,7 @@ ClassImp(StEtrFastSimMaker);
 StEtrFastSimMaker::StEtrFastSimMaker(const char *name):StMaker(name)
 {
   myRandom = new TRandom();
-  mErr[0] = 1e-2;  mErr[1] = 1e-2; mErr[2] = 1e-2;
+  mErr[0] = 3e-2;  mErr[1] = 3e-2; mErr[2] = 0;
 }
 
 
@@ -57,7 +60,10 @@ int StEtrFastSimMaker::Make()
   for (int i = 0; i < Nhits; i++)    {
     double xyzG[3];
     g2t_etr_hit_st *tb =  g2t+i;
-    for (int j=0;j<3;j++) {xyzG[j] = tb->x[j]+gRandom->Gaus(0, mErr[j]);}
+    for (int j=0;j<3;j++) {xyzG[j] = tb->x[j];}
+//		Smearing only x,y, not Z
+    for (int j=0;j<2;j++) {xyzG[j]+= gRandom->Gaus(0, mErr[j]);}
+
 //          volume_id = section + 100*layer + 10000*sector
     int section =(tb->volume_id      )%100;
     int layer =  (tb->volume_id/100  )%100; 	// 3 disk in TRD, iLayer=0, 1, 2
