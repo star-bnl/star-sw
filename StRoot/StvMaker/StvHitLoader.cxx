@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.9 2012/02/10 20:56:57 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.10 2012/04/10 22:39:59 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -16,6 +16,7 @@ Main tasks:
 #include <Stiostream.h>
 #include <math.h>
 #include <string>
+#include "TGeoManager.h"
 #include "StvHitLoader.h"
 #include "Stv/StvHit.h"
 #include "Stv/StvToolkit.h"
@@ -73,7 +74,7 @@ enum {kFCF_CHOPPED=256		// 0x100 cluster is chopped from its neighbour: OFFLINE 
 static int nCall=0; nCall++;
 static int myGraph=0;
 
-
+int nErr = 0;
 StvDraw *myDraw=0;
 StvHits *myHits=0;
 if (myGraph) { //create canvas
@@ -89,6 +90,9 @@ if (myGraph) { //create canvas
   for (; ; ++(*mHitIter)) {
     stHit=*(*mHitIter);
     StDetectorId did = mHitIter->DetectorId();
+
+    if (did == kTpcId && TpcHitTest(stHit)>0) nErr++;
+    
     if (did != didOld || !stHit) {
       if (didOld) {
         Info("LoadHits","Loaded  %d good and failed %d %s hits"
@@ -113,7 +117,7 @@ if (myHits) (*myHits)+= stiHit;
   assert(nTotHits==nIniHits);
   Info("LoadHits","Loaded %d good and failed %d of all hits",nTotHits,nTotHitz);
 if (myDraw) {myDraw->Hits(*myHits,kUnusedHit); myDraw->Wait();}
-
+  assert(!nErr);
   return nTotHits;
 }
 //_____________________________________________________________________________
@@ -139,3 +143,55 @@ StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath)
    stiHit->set(hp,stHit,xyz);
    return stiHit;
 }
+//_____________________________________________________________________________
+int StvHitLoader::TpcHitTest(const StHit *stHit)
+{
+  enum {nbpads = 73,maxpads=100};
+  int tpads[maxpads]   =   {  1, 1, 1, 2, 2, 2, 3, 3, 3, 4,
+			      4, 4, 5, 5, 5, 6, 6, 6, 7, 7,
+			      7, 8, 8, 8, 9, 9, 9,10,10,10,
+			     11,11,11,12,12,12,13,13,13,14,
+			     14,15,16,17,18,19,20,21,22,23,
+			     24,25,26,27,28,29,30,31,32,33,
+			     34,35,36,37,38,39,40,41,42,43,
+			     44,45,45};                    
+
+  int isdets[maxpads]   =  { 1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+			     0, 2, 1, 0, 2, 1, 0, 2, 1, 0,
+			     2, 1, 0, 2, 1, 0, 2, 1, 0, 2,
+			     1, 0, 2, 1, 0, 2, 1, 0, 2, 1,
+			     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			     0, 0, 2};                    
+
+
+  StThreeVectorF v3f = stHit->position();
+  TGeoNode *node = gGeoManager->FindNode(v3f[0],v3f[1],v3f[2]);
+  assert(node);
+  if (strncmp("TPA",node->GetName(),3)) return -1;
+  int numbv[3];
+  for (int i=0;i<3;i++) {
+    node = gGeoManager->GetMother(i);
+    numbv[2-i] = node->GetNumber();
+  }
+  int tpgv  = numbv[0];
+  int tpss  = numbv[1];
+  int sector= tpss+12*(tpgv-1) ;
+  int tpad  = numbv[2];
+  int isdet = 0;
+
+  if (tpad > nbpads) tpad -= nbpads;
+  isdet = isdets[tpad-1];
+  tpad  = tpads [tpad-1];
+  if (isdet) {
+    Warning("TpcHitTest","TpcHit(%g,%g,%g) isdet=%d WRONG WRONG WRONG"
+           ,v3f[0],v3f[1],v3f[2], isdet);
+  }
+  return isdet;
+}
+    
+    
+    
+  
+  
