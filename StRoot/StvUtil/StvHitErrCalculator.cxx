@@ -22,12 +22,13 @@ static std::map<std::string,StvHitErrCalculator *> calcMap;
 
 ClassImp(StvHitErrCalculator)
 //______________________________________________________________________________
-StvHitErrCalculator::StvHitErrCalculator(const char *name):TNamed(name,"")
+StvHitErrCalculator::StvHitErrCalculator(const char *name,int nPar):TNamed(name,"")
 {
+  mNPar = nPar;
   memset(mPar,0,sizeof(mPar));
   if (!*GetName()) return;
   StvHitErrCalculator *&calc = calcMap[GetName()];
-  assert(!calc);
+  assert(!calc && "Name clash");
   calc = this;
 }
 //______________________________________________________________________________
@@ -90,9 +91,19 @@ void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][
 /// track is along x axis, Y axis comes thru hit point 
 
   float *NtG = mNG[0];		   
-  float  NL[3][3], *Nt=NL[0],*Np=NL[1],*Nl=NL[2];
+  float  NL[3][3], *Nt=NL[0],*Np=NL[1],*Nl=NL[2],Pz=0,Lz=0;
   for (int j=0;j<3;j++) {
     Nt[j] = (hiDir[j][0]*NtG[0]+hiDir[j][1]*NtG[1]+hiDir[j][2]*NtG[2]);}
+//	In new coordinate system Phi vector may be not orthogonal to Z axis
+//	Rotation around track is the mTT transformation
+  Pz    = (hiDir[2][0]*mNG[1][0]+hiDir[2][1]*mNG[1][1]+hiDir[2][2]*mNG[1][2]);
+  Lz    = (hiDir[2][0]*mNG[2][0]+hiDir[2][1]*mNG[2][1]+hiDir[2][2]*mNG[2][2]);
+  mTT[0][0]= Lz; mTT[0][1]=-Pz; 
+  float myNor = sqrt(mTT[0][0]*mTT[0][0]+mTT[0][1]*mTT[0][1]);
+  assert(myNor>1e-6);
+  mTT[0][0]/=  myNor;    mTT[0][1]/= myNor;
+  mTT[1][0] = -mTT[0][1];mTT[1][1] = mTT[0][0];
+
 
 //		Nt = (cos(Lam)*cos(Phi),cos(Lam)*sin(Phi),sin(Lam))
   mSl = Nt[2],mCl = ((1-mSl)*(1+mSl));
@@ -100,14 +111,6 @@ void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][
   else          { mCl=sqrt(mCl); mSp = Nt[1]/mCl, mCp = Nt[0]/mCl;}
   Np[0]=-mSp;     Np[1]=mCp;     Np[2]=0;
   Nl[0]=-mSl*mCp; Nl[1]=-mSl*mSp;Nl[2]=mCl;
-
-  float tmp[3][3],T[3][3];
-  TCL::mxmpy3(hiDir[0],NL[0] ,tmp[0],3,3,3);
-  TCL::mxmpy (mNG[0]   ,tmp[0],T[0]  ,3,3,3);
-  mTT[0][0]=T[1][1]; mTT[0][1]=T[1][2];mTT[1][0]=T[2][1];mTT[1][1]=T[2][2];
-  float myDet = mTT[0][0]*mTT[1][1]-mTT[0][1]*mTT[1][0];
-  assert(fabs(fabs(myDet)-1)<0.001);
-
 
   float g[3],G[3];
   memset(mDD[0],0,sizeof(mDD));
@@ -219,19 +222,13 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
   double tL = tan(Lam);
   double cP = cos(Phi);
   double sP = sin(Phi);
-//double tP = tan(Phi);
   TVector3 Nt(cL*cP,cL*sP,sL);
   TVector3 Np(-sP, cP, 0);
   TVector3 Nl(-sL*cP,-sL*sP,cL);
 
-
-
   TVector3 V;
-//   printf("Nt="); Nt.Print();
-//   printf("Np="); Np.Print();
-//   printf("Nl="); Nl.Print();
   double YZ[3]={0},BG[3]={0};
-  int nEl=10000,iEl=0;
+  int nEl=100000,iEl=0;
   while (1) {
     double alfa = D/(Nt[0])*(gRandom->Rndm()-0.5)*10;
     double beta = gRandom->Gaus()*W;
@@ -255,10 +252,10 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
   }
   for (int j=0;j<3;j++){YZ[j]/=nEl; BG[j]/=nEl;} 
   
-  printf("Phi=%d Lam=%d: YY=%g YZ=%g ZZ=%g\n"
-        , int(Phi/3.1415*180),int(Lam/3.1415*180),YZ[0],YZ[1],YZ[2]);
+  printf("Phi=%d Lam=%d: \tYY=%g \tYZ=%g \tZZ=%g \tTrace=%g\n"
+        , int(Phi/3.1415*180),int(Lam/3.1415*180),YZ[0],YZ[1],YZ[2],YZ[0]+YZ[2]);
 
-  StvHitErrCalculator calc;
+  StvHitErrCalculator calc("",4);
   calc.SetPars(par);
   double np[3]={ cP,  sP, tL};
   double hitErr[3];
@@ -267,13 +264,36 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
                     ,{0,1,0}
 		    ,{0,0,1}};
   calc.CalcDetErrs(0,hiDir,hitErr);
-  printf("Calculator:  YY=%g YZ=%g ZZ=%g\n"
-        ,hitErr[0],hitErr[1],hitErr[2]);
+  printf("Det Calc:  \tYY=%g \tYZ=%g \tZZ=%g \tTrace=%g\n"
+        ,hitErr[0],hitErr[1],hitErr[2],hitErr[0]+hitErr[2]);
 
-  printf("DCA       : BB=%g BG=%g GG=%g\n",BG[0],BG[1],BG[2]);
+  printf("DCA       : \tBB=%g \tBG=%g \tGG=%g \tTrace=%g\n",BG[0],BG[1],BG[2],BG[0]+BG[2]);
   calc.CalcDcaErrs(0,hiDir,hitErr);
-  printf("DCA Calc  : BB=%g BG=%g GG=%g\n"
-        ,hitErr[0],hitErr[1],hitErr[2]);
+  printf("DCA Calc  : \tBB=%g \tBG=%g \tGG=%g \tTrace=%g\n"
+        ,hitErr[0],hitErr[1],hitErr[2],hitErr[0]+hitErr[2]);
+
+   double LamH = (gRandom->Rndm()-0.5);
+   double PhiH = (gRandom->Rndm()-0.5);
+//		copy all info from arrays to TVector3
+   TVector3 myV[4];
+   for (int i=0;i<3;i++) { myV[i] = TVector3(hiDir[i]);}
+   myV[3] = TVector3(np);
+//		Rotate it
+   for (int i=0;i<4;i++) { myV[i].RotateZ(PhiH);myV[i].RotateX(LamH);}
+
+//		copy all info back into arrays
+   for (int i=0;i<3;i++) { np[i] = myV[3][i];
+   for (int j=0;j<3;j++) { hiDir[i][j] = myV[i][j]; }}
+//		Now try how life is here
+   calc.SetTrack(np);
+   calc.CalcDetErrs(0,hiDir,hitErr);
+   printf("Det Rot   :  \tYY=%g \tYZ=%g \tZZ=%g \tTrace=%g\n"
+        ,hitErr[0],hitErr[1],hitErr[2],hitErr[0]+hitErr[2]);
+
+   calc.CalcDcaErrs(0,hiDir,hitErr);
+   printf("DCA Rot   : \tBB=%g \tBG=%g \tGG=%g \tTrace=%g\n"
+        ,hitErr[0],hitErr[1],hitErr[2],hitErr[0]+hitErr[2]);
+
 
 
 }
@@ -296,7 +316,22 @@ void StvHitErrCalculator::Dest(double phiG,double lamG)
   float  hiPos[3]   = {100,0,0};
   float  hiDir[3][3]={{1,0,0},{0,1,0},{0,0,1}};
 
-  StvHitErrCalculator calc;
+   double LamH = (gRandom->Rndm()-0.5);
+   double PhiH = (gRandom->Rndm()-0.5);
+//		copy all info from arrays to TVector3
+   TVector3 myV[4];
+   for (int i=0;i<3;i++) { myV[i] = TVector3(hiDir[i]);}
+   myV[3] = TVector3(Nt);
+//		Rotate it
+   for (int i=0;i<4;i++) { myV[i].RotateZ(PhiH);myV[i].RotateX(LamH);}
+
+//		copy all info back into arrays
+   for (int i=0;i<3;i++) { Nt[i] = myV[3][i];
+   for (int j=0;j<3;j++) { hiDir[i][j] = myV[i][j]; }}
+
+
+
+  StvHitErrCalculator calc("",4);
   calc.SetPars(par);
   calc.SetTrack(Nt);
   double hRR[3],dRR[10][3];
@@ -307,7 +342,7 @@ void StvHitErrCalculator::Dest(double phiG,double lamG)
           ,dRR[0][j],dRR[1][j],dRR[2][j],dRR[3][j]);
   }
 
-  StvHitErrCalculator calk;
+  StvHitErrCalculator calk("",4);
   for (int ider=0;ider<4;ider++) {
     double myPar[4],delta;
     memcpy(myPar,par,sizeof(myPar));
@@ -320,7 +355,7 @@ void StvHitErrCalculator::Dest(double phiG,double lamG)
     for (int j=0;j<3;j++) {
       double est = (myRR[j]-hRR[j])/delta;
       double eps = (dRR[ider][j]-est)/(fabs(dRR[ider][j])+fabs(est)+1e-10);
-      printf("Der[%d][%d]=%g num=%g eps=%g\n",ider,j,dRR[ider][j],est,eps);
+      printf("Der[%d][%d]=%g \tnum=%g \teps=%g\n",ider,j,dRR[ider][j],est,eps);
     }
   }
 }
@@ -333,8 +368,8 @@ void StvTpcHitErrCalculator::Dest(double phiG,double lamG)
   par[kThkDet]=3*3/12.;
   par[kWidTrk]=0.1*0.1;
   par[kWidTrk]=0.1*0.1;
-  par[kYDiff]=par[kYErr]*0.3;
-  par[kZDiff]=par[kZErr]*0.5;
+  par[kYDiff]=par[kYErr]*1;
+  par[kZDiff]=par[kZErr]*2;
 
   double Lam = lamG/180*M_PI;
   double Phi = phiG/180*M_PI;
@@ -346,7 +381,21 @@ void StvTpcHitErrCalculator::Dest(double phiG,double lamG)
   float  hiPos[3]   = {100,0,155};
   float  hiDir[3][3]={{1,0,0},{0,1,0},{0,0,1}};
 
-  StvTpcHitErrCalculator calc;
+//		Randomize orientation
+  double LamH = (gRandom->Rndm()-0.5);
+  double PhiH = (gRandom->Rndm()-0.5);
+//		copy all info from arrays to TVector3
+  TVector3 myV[4];
+  for (int i=0;i<3;i++) { myV[i] = TVector3(hiDir[i]);}
+  myV[3] = TVector3(Nt);
+//		Rotate it
+  for (int i=0;i<4;i++) { myV[i].RotateZ(PhiH);myV[i].RotateX(LamH);}
+
+//		copy all info back into arrays
+  for (int i=0;i<3;i++) { Nt[i] = myV[3][i];
+  for (int j=0;j<3;j++) { hiDir[i][j] = myV[i][j]; }}
+
+  StvTpcHitErrCalculator calc("");
   calc.SetPars(par);
   calc.SetTrack(Nt);
   double hRR[3],dRR[10][3];
@@ -357,7 +406,7 @@ void StvTpcHitErrCalculator::Dest(double phiG,double lamG)
           ,dRR[0][j],dRR[1][j],dRR[2][j],dRR[3][j]);
   }
 
-  StvTpcHitErrCalculator calk;
+  StvTpcHitErrCalculator calk("");
   for (int ider=0;ider<6;ider++) {
     double myPar[6],delta;
     memcpy(myPar,par,sizeof(myPar));
@@ -370,7 +419,7 @@ void StvTpcHitErrCalculator::Dest(double phiG,double lamG)
     for (int j=0;j<3;j++) {
       double est = (myRR[j]-hRR[j])/delta;
       double eps = (dRR[ider][j]-est)/(fabs(dRR[ider][j])+fabs(est)+1e-10);
-      printf("Der[%d][%d]=%g num=%g eps=%g\n",ider,j,dRR[ider][j],est,eps);
+      printf("Der[%d][%d]=%g \tnum=%g \teps=%g\n",ider,j,dRR[ider][j],est,eps);
     }
   }
 }
