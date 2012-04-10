@@ -14,7 +14,7 @@ class StvHit;
 class StvTrack: public StvNodes
 {
  public:
- enum EPointType {kPrimPoint,kDcaPoint,kFirstPoint,kLastPoint}; 
+ enum EPointType {kDcaPoint,kFirstPoint,kLastPoint,kPrimPoint}; 
  public:
   StvTrack(); 
   
@@ -58,6 +58,7 @@ const StvNode *GetNode(EPointType poTy) const;
 
    int ReleaseHits();
 double GetXi2() const;   	// chi2/ndf of fit,        all nodes
+double GetXi2P() const;   	// chi2 of fit to primary vertex
 double GetRes() const;		// Average residual
 
   void SetFlag(int flag) 	{mFlag = flag;}
@@ -76,9 +77,9 @@ double GetRes() const;		// Average residual
 protected:
  int mFlag;  
 public:
-int mId; 
-int mPrimary;
-int mTypeEnd;		// Type of end tracking. 0=Dca,
+unsigned int  mId; 
+unsigned char mPrimary;
+unsigned char mTypeEnd;	// Type of end tracking. 0=Dca,
                         // 1 = too many continues nits,2 = too many total nits
 static int mDebug; 	// Debug level
 static int mgId; 	// static track counter
