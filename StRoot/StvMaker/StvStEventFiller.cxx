@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.16 2012/03/22 00:19:14 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.17 2012/04/10 22:42:13 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.17  2012/04/10 22:42:13  perev
+ * Cleanup
+ *
  * Revision 1.16  2012/03/22 00:19:14  perev
  * Cleanup
  *
@@ -953,15 +956,12 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
 
 
       if (node->GetType() != StvNode::kRegNode) continue;
-      const StvHit *stiHit = node->GetHit();
+      const StvHit *stiHit = GetHit(node);
       if (!stiHit)		continue;
-      if (node->GetXi2()>1000)  continue;
 
 // 	EXCEPTION Fill StHit errors for Gene
       StHit *hh = (StHit*)stiHit->stHit();
       FillStHitErr(hh,node);
-
-      if (!hh) 			continue;
       
       detInfo->addHit(hh,refCountIncr);
       if (!refCountIncr) 	continue;
@@ -1311,6 +1311,7 @@ static int nCall=0; nCall++;
   aux.mL       = (unsigned char)track->GetLength();
   aux.mTypeEnd = (unsigned char)track->GetTypeEnd();
   aux.mChi2    = track->GetXi2();
+  aux.mChi2P    = track->GetXi2P();
 
 
   aux.mCurv    = fp._curv;
@@ -1350,16 +1351,10 @@ static int nCall=0; nCall++;
   for (StvNodeConstIter tNode=track->begin();tNode!=track->end();++tNode) 
   {
       const StvNode *node = (*tNode);
-
-      if (node->GetType() != StvNode::kRegNode) continue;
-      if (!node->GetDetId()) 	continue;
-      StvHit *stiHit = node->GetHit();
+      const StvHit *stiHit = GetHit(node);
       if (!stiHit)		continue;
-      if (!stiHit->detector())  continue;
-
-      if (node->GetXi2()>1000)  continue;
       StHit *hh = (StHit*)stiHit->stHit();
-      if (!hh) 			continue;
+      assert(hh);
       const StvNodePars &fp = node->GetFP();
       double dL = (stiHit->x()[0]-fp._x)*fp._cosCA 
 	        + (stiHit->x()[1]-fp._y)*fp._sinCA;
@@ -1409,8 +1404,8 @@ static int nCall=0; nCall++;
   aux.lZHitErr = sqrt(node->GetHE()[2]);
   aux.lYPulErr = yzErr[0];
   aux.lZPulErr = yzErr[1];
-  aux.lYPul = aux.lYHit/aux.lYPulErr; if (fabs(aux.lYPul)>10) aux.lYPul=0;
-  aux.lZPul = aux.lZHit/aux.lZPulErr; if (fabs(aux.lZPul)>10) aux.lZPul=0;
+  aux.lYPul = aux.lYHit/aux.lYPulErr; if (fabs(aux.lYPul)>10) aux.lYPul=10;
+  aux.lZPul = aux.lZHit/aux.lZPulErr; if (fabs(aux.lZPul)>10) aux.lZPul=10;
   aux.lLen = len;
 
 // 		global frame
@@ -1458,6 +1453,21 @@ static int nCall=0; nCall++;
 
 }
 //_____________________________________________________________________________
+const StvHit* StvStEventFiller::GetHit(const StvNode *node) const
+{
+    const StvHit* h = node->GetHit();
+    if (!h) 					return 0;
+    if (node->GetType() != StvNode::kRegNode) 	return 0;
+    int detId= node->GetDetId();
+    if (!detId)					return 0;
+    if (!h->stHit())				return 0;
+    const StHitPlane *hitPlane = h->detector();
+    if (!hitPlane) 				return 0;
+    if (node->GetXi2()>1000) 			return 0;
+    return h;
+}
+
+//_____________________________________________________________________________
 void StvStEventFiller::getAllPointCount(const StvTrack *track,int count[1][3])
 {
 //  output array actually is count[maxDetId+1][3] 
@@ -1473,20 +1483,13 @@ enum {kPP=0,kMP=1,kFP=2};
 
   for (it=track->begin();it!=track->end();it++){
     const StvNode *node = (*it);
-    if (node->GetType() != StvNode::kRegNode) continue;
     int detId= node->GetDetId();
     if (!detId)			continue;
-    const StvHit* h = node->GetHit();
-
 //fill possible points
     count[0][kPP]++; count[detId][kPP]++;
-    
+    const StvHit* h = GetHit(node);
     if (!h ) 			continue;
-    if (!h->detector())		continue;
-//fill measured points
     count[0][kMP]++; count[detId][kMP]++;
-    if (node->GetXi2()>1000) 	continue;
-    if (!h->stHit())		continue;
     count[0][kFP]++; count[detId][kFP]++;
   }
 }
