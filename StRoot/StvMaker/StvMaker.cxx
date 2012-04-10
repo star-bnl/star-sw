@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.17 2012/03/30 16:31:32 perev Exp $
+// $Id: StvMaker.cxx,v 1.18 2012/04/10 22:41:07 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -165,8 +165,8 @@ Int_t StvMaker::InitDetectors()
   } }
 
   if (IAttr("activeEtr")) {	//Etr error calculators
-      StvHitErrCalculator *hec = new StvHitErrCalculator("EtrHitErrs");
-      double etrPars[StvHitErrCalculator::kMaxPars]={1e-4,1e-4};
+      StvHitErrCalculator *hec = new StvHitErrCalculator("EtrHitErrs",2);
+      double etrPars[StvHitErrCalculator::kMaxPars]={9e-4,9e-4};
       hec->SetPars(etrPars);
       int nHP = tgh->SetHitErrCalc(kEtrId,hec,0);
       Info("Init","%s: %d HitPlanes","EtrHitErrs",nHP);
