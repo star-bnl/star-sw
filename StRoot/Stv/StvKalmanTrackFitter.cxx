@@ -139,6 +139,7 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4};
 	myXi2 = fitt->Xi2(hit);
 	if (myXi2> kons->mXi2Hit)  	{
 	  node->SetFit(node->mPP[dir],node->mPE[dir],dir); 	
+	  node->SetXi2(1e11,dir);
           kase -= kHit;
 	} else {
           nFitLeft++; kase|=kLeft;
