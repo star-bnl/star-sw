@@ -12,9 +12,9 @@ StvConst::StvConst(const char *name):TNamed(name,"")
   assert(!mgConst);
   mgConst = this;
 
-  mXi2Hit = 55;		//Xi2 to accept new hit
-  mXi2Vtx = 300;	//Xi2 to accept vertex
-  mXi2Joi = 99;		//Xi2 in Refit join left & right subtrack
+  mXi2Hit = 22;		//Xi2 to accept new hit
+  mXi2Vtx = 55;		//Xi2 to accept vertex
+  mXi2Joi = 33;		//Xi2 in Refit join left & right subtrack
   mXi2Hlx = mXi2Hit*9;  //Xi2 in Helix, .
   mRxyMax = 300;	//Max radius for tracking
   mZMax   = 300;	//Max Z      for tracking
