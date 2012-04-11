@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEEmcFgtLHTrackQa.cxx,v 1.1 2012/04/11 21:39:19 sgliske Exp $
+ * $Id: StEEmcFgtLHTrackQa.cxx,v 1.2 2012/04/11 22:13:24 sgliske Exp $
  * Author: S. Gliske, April 2012
  *
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEEmcFgtLHTrackQa.cxx,v $
- * Revision 1.1  2012/04/11 21:39:19  sgliske
- * creation
+ * Revision 1.2  2012/04/11 22:13:24  sgliske
+ * update
  *
  *
  **************************************************************************/
@@ -25,8 +25,9 @@
 #include "StRoot/StEEmcPool/StEEmcA2EMaker/StEEmcA2EMaker.h"
 #include "StRoot/StEEmcPool/StEEmcA2EMaker/StEEmcTower.h"
 
-StEEmcFgtLHTrackQa::StEEmcFgtLHTrackQa( const Char_t* name, const Char_t* a2eMkrName ) : StMaker( name ), mEnergyPerTrack(0), mEnergy(0) {
+StEEmcFgtLHTrackQa::StEEmcFgtLHTrackQa( const Char_t* name, const Char_t* a2eMkrName, const Char_t* fgtLHTkrName ) : StMaker( name ), mEnergyPerTrack(0), mEnergy(0) {
    mEEmcA2EMkr = static_cast< StEEmcA2EMaker* >( GetMaker( a2eMkrName ) );
+   mFgtLHTkr = 
 };
 
 // deconstructor
@@ -36,11 +37,16 @@ Int_t StEEmcFgtLHTrackQa::Init(){
    mEnergy = new TH1F( "hEnergy", "", 20, 0, 30 );
    mEnergyPerTrack = new TH1F( "hEnergyPerTrack", "", 20, 0, 30 );
    assert( mEEmcA2EMkr );
+
+   return kStOK;
 };
 
 Int_t StEEmcFgtLHTrackQa::Make(){
-   StFgtLHTrackData *data = static_cast< StFgtLHTrackData* >( GetData( "LHTracks", ".FgtTracking" ) );
+
+   StFgtLHTrackData *data = static_cast< StFgtLHTrackData* >( GetData( "LHTracks" ) );
    assert( mEEmcA2EMkr );
+
+   LOG_INFO << "Event " << GetEventNumber() << " data at " << data << endm;
 
    if( data ){
       const StFgtLHTrackVec& trackVec = data->getTrackVec();
@@ -83,6 +89,8 @@ Int_t StEEmcFgtLHTrackQa::Make(){
          cout << "EEMC tower: " << index << ' ' << num << ' ' << energy << endl;
       };
    };
+
+   return kStOK;
 };
 
 ClassImp(StEEmcFgtLHTrackQa);

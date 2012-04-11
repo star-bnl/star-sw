@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtLHTracking.h,v 1.2 2012/04/09 21:08:24 sgliske Exp $
+ * $Id: StFgtLHTracking.h,v 1.3 2012/04/11 22:13:30 sgliske Exp $
  * Author: S. Gliske, March 2012
  *
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFgtLHTracking.h,v $
+ * Revision 1.3  2012/04/11 22:13:30  sgliske
+ * update
+ *
  * Revision 1.2  2012/04/09 21:08:24  sgliske
  * many bugs fixed--seems to be working
  *
@@ -86,6 +89,9 @@ class StFgtLHTracking : public StFgtTracking {
    void setNumAgreeThres( Int_t val );
    void setFitThres( Double_t val );
    void setIncludeThres( Double_t val );
+   void setUseVertex( Bool_t val );
+
+   const StFgtLHTrackVec& getTrackVec();
 
  protected:
    // containers
@@ -97,6 +103,7 @@ class StFgtLHTracking : public StFgtTracking {
    Double_t mFitThres;       // threshold for sqrt of sum of squared perp distances between line and points [cm]
    Double_t mIncludeThres;   // threshold for sq. perp. dist. between line and point--whether to include point with the track [cm^2]
    Int_t mNumAgreeThres;     // how many points the same for different tracks for of the tracks to be removed
+   Bool_t mUseVertex;        // whether to use the vertex point for FGT tracking
 
    // find the tracks
    virtual Int_t findTracks();
@@ -124,5 +131,9 @@ inline void StFgtLHTracking::setNumPoints( Int_t val ){ mPoints = val; };
 inline void StFgtLHTracking::setNumAgreeThres( Int_t val ){ mNumAgreeThres = val; };
 inline void StFgtLHTracking::setFitThres( Double_t val ){ mFitThres = val; };
 inline void StFgtLHTracking::setIncludeThres( Double_t val ){ mIncludeThres = val; };
+inline void StFgtLHTracking::setUseVertex( Bool_t val ){ mUseVertex = val; };
+
+inline const StFgtLHTrackVec& StFgtLHTracking::getTrackVec(){ return mTrackVec; };
+
 
 #endif
