@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEEmcFgtLHTrackQa.h,v 1.1 2012/04/11 21:39:19 sgliske Exp $
+ * $Id: StEEmcFgtLHTrackQa.h,v 1.2 2012/04/11 22:13:24 sgliske Exp $
  * Author: S. Gliske, April 2012
  *
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEEmcFgtLHTrackQa.h,v $
+ * Revision 1.2  2012/04/11 22:13:24  sgliske
+ * update
+ *
  * Revision 1.1  2012/04/11 21:39:19  sgliske
  * creation
  *
@@ -26,7 +29,7 @@ class StEEmcA2EMaker;
 class StEEmcFgtLHTrackQa : public StMaker {
  public:
    // constructors
-   StEEmcFgtLHTrackQa( const Char_t* name = "fgtTracking", const Char_t* a2eMkrName = "EEmcA2EMaker" );
+   StEEmcFgtLHTrackQa( const Char_t* name = "fgtTracking", const Char_t* a2eMkrName = "EEmcA2EMaker", const Char_t* fgtLHTkrName = "FgtLHTracker" );
 
    // deconstructor
    virtual ~StEEmcFgtLHTrackQa();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtLHTracking.cxx,v 1.2 2012/04/09 21:08:24 sgliske Exp $
+ * $Id: StFgtLHTracking.cxx,v 1.3 2012/04/11 22:13:30 sgliske Exp $
  * Author: S. Gliske, March 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtLHTracking.cxx,v $
+ * Revision 1.3  2012/04/11 22:13:30  sgliske
+ * update
+ *
  * Revision 1.2  2012/04/09 21:08:24  sgliske
  * many bugs fixed--seems to be working
  *
@@ -24,8 +27,14 @@
 
 #define DEBUG
 
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StarClassLibrary/StThreeVectorF.hh"
+#include <TVector3.h>
+
 // constructor
-StFgtLHTracking::StFgtLHTracking( const Char_t* name ) : StFgtTracking( name ), mPoints( 3 ), mFitThres( 1 ), mIncludeThres( 0.5 ), mNumAgreeThres( mPoints-1 ) { /* */ };
+StFgtLHTracking::StFgtLHTracking( const Char_t* name ) : StFgtTracking( name ), mPoints( 3 ), mFitThres( 1 ), mIncludeThres( 0.5 ), mNumAgreeThres( mPoints-1 ), mUseVertex(0) { /* */ };
 
 // deconstructor
 StFgtLHTracking::~StFgtLHTracking(){ /* */ };
@@ -43,6 +52,25 @@ Int_t StFgtLHTracking::findTracks(){
    StFgtTrPointVec tempPoints;
    Int_t startDiscIdx = 0;
    UShort_t discBitArray = 0;
+   TVector3 vertex;
+   Bool_t vertexValid = 0;
+
+   if( mUseVertex ){
+      StMuDstMaker* muDstMkr = static_cast< StMuDstMaker* >( GetMaker( "MuDst" ) );
+      if( muDstMkr ){
+         StMuEvent *event = muDstMkr->muDst()->event();
+
+         if( event ){
+            const StThreeVectorF& v = event->primaryVertexPosition();
+            tempPoints.push_back( StFgtTrPoint( v.x(), v.y(), v.z() ) );
+            vertex.SetXYZ( v.x(), v.y(), v.z() );
+            vertexValid = 1;
+         } else {
+            LOG_ERROR << "ERROR finding vertex from StMuEvent" << endl;
+         };
+      };
+   };
+
    makePointTuples( tempPoints, startDiscIdx, discBitArray );
 
    Int_t nLines = mLineVec.size();
@@ -112,6 +140,12 @@ Int_t StFgtLHTracking::findTracks(){
          if( trackIter1->pointPerDisc[0] > -2 ){
             trackIter1->effResSq = 0;
             Int_t nDiscs = 0;
+
+            if( vertexValid ){
+               ++nDiscs;
+               trackIter1->effResSq += perpDistSqLineToPoint( trackIter1->line, vertex );
+            };
+
             for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc )
                if( trackIter1->pointPerDisc[disc] > -1 ){
                   trackIter1->effResSq += trackIter1->resSqPerDisc[disc];
@@ -162,9 +196,14 @@ Int_t StFgtLHTracking::findTracks(){
       // refit the line
       mLineVec.clear();
       StFgtTrPointVec points;
+      StFgtTrPoint vertex2( vertex.X(), vertex.Y(), vertex.Z() );
+ 
       for( trackIter1 = mTrackVec.begin(); trackIter1 != mTrackVec.end(); ++trackIter1, ++trackIdx ){
          points.clear();
          UShort_t bitArray = 0;
+
+         if( vertexValid )
+            points.push_back( vertex2 );
 
          for( Int_t i = 0; i<kFgtNumDiscs; ++i )
             if( trackIter1->pointPerDisc[i] > -1 ){
@@ -181,10 +220,45 @@ Int_t StFgtLHTracking::findTracks(){
 
 #ifdef DEBUG
          Double_t perp2 = trackIter1->line.bx*trackIter1->line.bx + trackIter1->line.by*trackIter1->line.by;
-         cout << "\tTrack new vertZ " << trackIter1->line.vertZ << ", effRes " << sqrt( trackIter1->effResSq )
-              << ", bitVec 0x" << std::hex << bitArray << std::dec << ", perp at z=0 " << sqrt(perp2) <<  endl;
+         Double_t x =  trackIter1->line.bx +  trackIter1->line.mx*120;
+         Double_t y =  trackIter1->line.by +  trackIter1->line.my*120;
+         Double_t perpB = sqrt(x*x+y*y);
+         cout << "\tEvent " << GetEventNumber() << " Track new vertZ " << trackIter1->line.vertZ << ", effRes " << sqrt( trackIter1->effResSq )
+              << ", bitVec 0x" << std::hex << bitArray << std::dec << ", perp at z=0 " << sqrt(perp2) << " perp at z=120 " << perpB;
+
+         {
+            StMuDstMaker* muDstMkr = static_cast< StMuDstMaker* >( GetMaker( "MuDst" ) );
+            if( muDstMkr ){
+               StMuEvent *event = muDstMkr->muDst()->event();
+
+               if( event ){
+                  const StThreeVectorF& v = event->primaryVertexPosition();
+                  cout << " delta vertZ = " << trackIter1->line.vertZ - v.z();
+               };
+            };
+         };
+         cout << endl;
 #endif
       };
+
+#ifdef DEBUG
+      StMuDstMaker* muDstMkr = static_cast< StMuDstMaker* >( GetMaker( "MuDst" ) );
+      if( muDstMkr ){
+         StMuEvent *event = muDstMkr->muDst()->event();
+
+         if( event ){
+            const StThreeVectorF& v = event->primaryVertexPosition();
+            cout << "-----> Real vertex at " << v.x() << ' ' << v.y() << ' ' << v.z() << endl;
+         };
+      };
+#endif
+
+//       if( nTracks ){
+//          StFgtLHTrackData *data = new StFgtLHTrackData( "LHTracks", mTrackVec );
+//          AddData( data );
+//          cout << "Event " << GetEventNumber() << " added data is at "
+//               << GetData( "LHTracks" ) << endl;
+//       };
    };
    
    return kStOk;

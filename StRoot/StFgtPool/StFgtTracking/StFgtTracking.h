@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtTracking.h,v 1.3 2012/03/16 21:51:26 sgliske Exp $
+ * $Id: StFgtTracking.h,v 1.4 2012/04/11 22:13:30 sgliske Exp $
  * Author: S. Gliske, March 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtTracking.h,v $
+ * Revision 1.4  2012/04/11 22:13:30  sgliske
+ * update
+ *
  * Revision 1.3  2012/03/16 21:51:26  sgliske
  * update
  *
@@ -53,6 +56,7 @@ struct StFgtTrPoint {
    StFgtTrPoint( const StFgtTrClus& rClus, const StFgtTrClus& pClus, Float_t z ) : ptIdx(++lastIdx), rIdx(rClus.idx), pIdx(pClus.idx), pos(rClus.pos,0,z) {
       pos.SetPhi(pClus.pos);
    };
+   StFgtTrPoint( Float_t x, Float_t y, Float_t z ) : ptIdx(++lastIdx), rIdx(-1), pIdx(-1), pos( x,y,z ) { /* */ };
 };
 
 

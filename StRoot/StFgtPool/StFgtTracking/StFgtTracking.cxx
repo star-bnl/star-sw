@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtTracking.cxx,v 1.3 2012/04/09 21:08:24 sgliske Exp $
+ * $Id: StFgtTracking.cxx,v 1.4 2012/04/11 22:13:30 sgliske Exp $
  * Author: S. Gliske, March 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtTracking.cxx,v $
+ * Revision 1.4  2012/04/11 22:13:30  sgliske
+ * update
+ *
  * Revision 1.3  2012/04/09 21:08:24  sgliske
  * many bugs fixed--seems to be working
  *
@@ -129,6 +132,9 @@ Int_t StFgtTracking::computePointsFromMuDst(){
          ierr = kStOk;
 
          Int_t nClusters = fgtClusters->GetEntriesFast();
+#ifdef DEBUG
+         LOG_INFO << "Number of clusters " << nClusters << endm;
+#endif
 
          for( Int_t i = 0; i < nClusters; ++i ){
             StMuFgtCluster* clus = static_cast< StMuFgtCluster* >( (*fgtClusters)[i] );
