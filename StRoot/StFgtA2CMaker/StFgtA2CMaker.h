@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.16 2012/03/07 17:46:55 sgliske Exp $
+ * $Id: StFgtA2CMaker.h,v 1.17 2012/04/13 18:56:56 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -26,9 +26,22 @@
  * strips with bit 3 set, set the mask to 0x04, etc.  Status is
  * currently only a uchar.
  *
+ * Strips with no "signal" (as defined by the thresholds) are marked
+ * as no signal, and the strip charge is marked as invalid.
+ *
+ * Strips are only removed from StEvent if the status bit bitwise
+ * anded with the mask is non-zero or if the pedestal value is outside
+ * the possible dynamic range (0-kFgtMaxAdc).
+ * 
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.17  2012/04/13 18:56:56  sgliske
+ * More adjustments based on the review:
+ * - Lastest StEvents from Thomas U.
+ * - StFgtA2CMaker can no longer remove strips other than bad status or bad ped
+ * - other related updates
+ *
  * Revision 1.16  2012/03/07 17:46:55  sgliske
  * Added options for not removing strips
  *
@@ -124,24 +137,20 @@ class StFgtA2CMaker : public StMaker {
    virtual Int_t Make();
 
    // modifiers
-   void setAbsThres( Float_t thres );     // set to below -4096 to skip cut
+   void setAbsThres( Float_t thres );     // set to below -kFgtMaxAdc (-4096) to skip cut
    void setRelThres( Float_t thres );     // set to zero to skip cut
-   void setFgtDb( StFgtDb *fgtDb);
-   void doCutBadStatus();                 // sets status mask to 0xFF, so any bad status is cut
-   void setStatusMask( UChar_t mask );
-   void doRemoveNonPulse( Bool_t doIt = 1 );  // Whether to remove strips not near a valid pulse from the StFgtCollection
-   void doRemoveNonSignal( Bool_t doIt = 1 ); // Whether to remove strips with no timebins above thresholds from the StFgtCollection
-                                              // Only relevant if mRemoveNonPulse is false.
+   void setFgtDb( StFgtDb *fgtDb);        // set pointer to StFgtDb
+   void doCutBadStatus();                 // set status mask to 0xFF, so any bad status is cut
+   void setStatusMask( UChar_t mask );    // set status mask to some other value
 
    // cvs tag
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.16 2012/03/07 17:46:55 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.17 2012/04/13 18:56:56 sgliske Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    Short_t checkValidPulse(StFgtStrip* pStrip, Float_t ped);
    // parameters
-   Bool_t mRemoveNonPulse, mRemoveNonSignal;
-   Int_t mStatusMask;
+   UChar_t mStatusMask;
    Float_t mAbsThres, mRelThres;
 
    // pointer to the DB
@@ -163,6 +172,5 @@ inline void StFgtA2CMaker::setRelThres( Float_t thres ){ mRelThres = thres; };
 inline void StFgtA2CMaker::setFgtDb(StFgtDb* db ){mDb=db; };
 inline void StFgtA2CMaker::doCutBadStatus(){ mStatusMask = 0xFF; };
 inline void StFgtA2CMaker::setStatusMask( UChar_t mask ){ mStatusMask = mask; };
-inline void StFgtA2CMaker::doRemoveNonPulse( Bool_t doIt ){ mRemoveNonPulse = doIt; };
-inline void StFgtA2CMaker::doRemoveNonSignal( Bool_t doIt ){ mRemoveNonSignal = doIt; };
+
 #endif
