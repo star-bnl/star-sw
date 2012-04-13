@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.32 2012/03/27 15:50:44 cpowell Exp $
+// $Id: bfcMixer_Tpx.C,v 1.33 2012/04/13 17:39:11 cpowell Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.33  2012/04/13 17:39:11  cpowell
+// Added chain options for P10ikAuAu62
+//
 // Revision 1.32  2012/03/27 15:50:44  cpowell
 // Added chain options for P10ikAuAu39 (same as P10ihAuAu39)
 //
@@ -77,6 +80,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
 	 prodP11ibpp500 += " VFPPVnoCTB beamLine TpxClu -VFMinuit -hitfilt";
 
   // BES Run10 chains
+  TString prodP10ikAuAu62("DbV20110413 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10ihAuAu39("DbV20100909 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10ikAuAu39("DbV20100909 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10ihAuAu11("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
@@ -125,6 +129,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   else if (prodName == "P11ibpp500")   { chain3Opt = prodP11ibpp500;    chain2Opt += geomP10ic;}
   else if (prodName == "P10iapp")      { chain3Opt = prodP10iapp;       chain2Opt += geomP10ih;}
   else if (prodName == "P10icpp200")   { chain3Opt = prodP10icpp200;    chain2Opt += geomP10ic;}
+  else if (prodName == "P10ikAuAu62")  { chain3Opt = prodP10ikAuAu62;   chain2Opt += geomP10ik;}
   else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih;}
   else if (prodName == "P10ikAuAu39")  { chain3Opt = prodP10ikAuAu39;   chain2Opt += geomP10ik;}
   else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih;}
