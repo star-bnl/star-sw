@@ -9,22 +9,24 @@
 // forward declarations
 class StChain;
 class StMuDstMaker;    
+class St_db_Maker;
 class StEEmcDbMaker;
-class StEEmcA2EMaker;
+class StEEmcRawMapMaker;
 class StFgtLHTracking;
 class StEEmcFgtLHTrackQa;
 
 // global variables
 StChain            *analysisChain = 0;
 StMuDstMaker       *muDstMaker    = 0;
+St_db_Maker        *starDatabase  = 0;
 StEEmcDbMaker      *eemcDbMaker   = 0;
-StEEmcA2EMaker     *a2EMakerPtr   = 0;
+StEEmcRawMapMaker  *rawMapMkr     = 0;
 StFgtLHTracking    *fgtTrkMkr     = 0;
 StEEmcFgtLHTrackQa *fgtTrkQa      = 0;
 
-void runFgtLHTracking_MuDst( const Char_t *filename, 
-                             Int_t neventsIn = 10,
-                             std::string key = "" ){
+void runFgtLHTracking_MuDst( const Char_t *filenameIn, 
+                             const Char_t *filenameOut,
+                             Int_t neventsIn = 10 ){
 
    // load the shared libraries
    std::cout << "***** Loading libraries *****" << endl;
@@ -42,27 +44,26 @@ void runFgtLHTracking_MuDst( const Char_t *filename,
    // MuDst maker for reading input
    //
    Int_t nfiles = 10000;
-   muDstMaker = new StMuDstMaker( 0, 0, "", filename, "MuDst", nfiles );
+   muDstMaker = new StMuDstMaker( 0, 0, "", filenameIn, "MuDst", nfiles );
    muDstMaker->SetStatus("*",0);
    muDstMaker->SetStatus("Event",1);
    muDstMaker->SetStatus("MuEvent",1);
    muDstMaker->SetStatus("PrimaryVertices",1);
    muDstMaker->SetStatus("FgtStrip",1);
    muDstMaker->SetStatus("FgtCluster",1);
+   muDstMaker->SetStatus("EmcAll",1);
 
    //
-   // EEMC A2CMaker for the QA
+   // Connect to the STAR databse
    //
-   eemcDbMaker = new StEEmcDbMaker("eemcDb");
-   a2EMakerPtr = new StEEmcA2EMaker("EEmcA2EMaker");
-   a2EMakerPtr->database("eemcDb");          // sets db connection
-   a2EMakerPtr->source("MuDst",1);           // sets mudst as input
-   a2EMakerPtr->threshold(3.0,0);            // tower threshold
-   a2EMakerPtr->threshold(3.0,1);            // pre1 threshold 
-   a2EMakerPtr->threshold(3.0,2);            // pre2 threshold
-   a2EMakerPtr->threshold(3.0,3);            // post threshold
-   a2EMakerPtr->threshold(3.0,4);            // smdu threshold
-   a2EMakerPtr->threshold(3.0,5);            // smdv threshold
+   starDatabase = new St_db_Maker("StarDb", "MySQL:StarDb");
+
+   //
+   // EEMC raw map maker
+   //
+   eemcDbMaker = new StEEmcDbMaker( "EEmcDbMkr" );
+   rawMapMkr = new StEEmcRawMapMaker( "EEmcRawMapMaker" );
+   rawMapMkr->setInput("MuDst",1);           // sets mudst as input
 
    //
    // the track maker
@@ -77,11 +78,12 @@ void runFgtLHTracking_MuDst( const Char_t *filename,
    //
    // QA Makers
    //
-   fgtTrkQa = new StEEmcFgtLHTrackQa( "EEmcFgtLHTrackQa", "EEmcA2EMaker" );
+   fgtTrkQa = new StEEmcFgtLHTrackQa( "EEmcFgtLHTrackQa", "EEmcRawMapMaker", "fgtTrkMkr" );
+   fgtTrkQa->setFileOutName( filenameOut );
 
    // debugging info
    std::cout << "***** Done instanciating all the classes *****" << endl;
-   analysisChain->ls(3);
+   //analysisChain->ls(3);
 
    //
    // Initialize all makers
@@ -118,24 +120,6 @@ void runFgtLHTracking_MuDst( const Char_t *filename,
    //
    analysisChain->Finish(); 
 
-   gStyle->SetStyle("Plain");
-   TCanvas *can = new TCanvas;
-
-   if( !key.empty() )
-      key += ".";
-
-   TH1F *hE  = fgtTrkQa->getEnergy();
-   hE->SetTitle("Energy of Towers pointed at by FGT Tracks; EEMC Tower Energy [GeV]; Counts Energy Bin");
-   hE->SetLineColor(kBlue);
-   hE->Draw("HIST");
-   can->Print( (std::string("eemcEnergyForFgtTracks.") + key + "eps" ).data() );
-
-   TH1F *hEp = fgtTrkQa->getEnergyPerTrack();
-   hEp->SetTitle("Energy of Towers pointed at by FGT Tracks / Number of Tracks; EEMC Tower Energy [GeV]; Counts Energy Bin");
-   hEp->SetLineColor(kBlue);
-   hEp->Draw("HIST");
-   can->Print( (std::string("eemcEnergyPerFgtTrack.") + key + "eps" ).data() );
-
    //
    // Delete the chain
    //
@@ -150,26 +134,27 @@ void runFgtLHTracking_MuDst( const Char_t *filename,
 void LoadLibs() {
    // commong shared libraries
    gROOT->Macro("loadMuDst.C");
-   //gROOT->Macro("LoadLogger.C");
 
    // and a few others
-//    gSystem->Load("StDbLib");
-//    gSystem->Load("StDbBroker");
-//    gSystem->Load("St_db_Maker");
-//    gSystem->Load("StStarLogger");
+   gSystem->Load("StDbLib");
+   gSystem->Load("StDbBroker");
+   gSystem->Load("St_db_Maker");
 
    gSystem->Load("StFgtUtil");
    gSystem->Load("StMuFgtQa");
    gSystem->Load("StFgtTracking");
+   gSystem->Load("StEEmcDbMaker");
    gSystem->Load("StEEmcUtil");
-   gSystem->Load("StEEmcA2EMaker");
    gSystem->Load("StEEmcFgt");
 
 };
 
 /*
- * $Id: runFgtLHTracking_MuDst.C,v 1.2 2012/04/11 22:13:30 sgliske Exp $
+ * $Id: runFgtLHTracking_MuDst.C,v 1.3 2012/04/13 15:08:58 sgliske Exp $
  * $Log: runFgtLHTracking_MuDst.C,v $
+ * Revision 1.3  2012/04/13 15:08:58  sgliske
+ * updates
+ *
  * Revision 1.2  2012/04/11 22:13:30  sgliske
  * update
  *
