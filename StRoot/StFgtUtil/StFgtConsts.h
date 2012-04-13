@@ -7,67 +7,26 @@
  *
  */
 
-#ifndef _ST_FGT_ENUMS_H_
-#define _ST_FGT_ENUMS_H_
+#ifndef _ST_FGT_CONSTS_H_
+#define _ST_FGT_CONSTS_H_
 
+#include "StEvent/StEnumerations.h" // as many FGT consts are defined there
 #include <string>
 
-// constants related to electric coordinates
-enum { 
-   kFgtNumRdos = 2,           // rdo in {1,2}
-   kFgtNumArms = 6,           // arm in 0-5, though 5 not used in run12.
-   kFgtNumChannels = 128,     // channel in 0-127
-   kFgtApvsPerAssembly = 12,  //
-   kFgtMaxApvId=kFgtApvsPerAssembly*2, // covers 0-23 
-   kFgtApvGap = 2,            // i.e. apvs 10 & 11
-   kFgtApvsPerOct = 5,
-   kFgtApvsPerQuad = 10,
-   kFgtApvsPerArm = 20,
-   kFgtNumElecIds = kFgtNumChannels * kFgtApvsPerArm * kFgtNumArms * kFgtNumRdos  // elec id in 0 to kFgtNumElecIds-1
-};
-
-// constants related to physical coordinates
-enum {
-   kFgtNumDiscs = 6,
-   kFgtNumQuads = 4,
-   kFgtNumOctantsPerDisc = 8,
-   kFgtNumOctants = kFgtNumOctantsPerDisc*kFgtNumDiscs,
-   kFgtNumLayers = 2,
-   kFgtNumStrips = 720,
-   kFgtNumGeoIds = kFgtNumQuads * kFgtNumDiscs * kFgtNumLayers * kFgtNumStrips,   // geoId in 0 to kFgtNumGeoIds-1
-   kFgtNumPstripsPerOctant = 360,
-   kFgtNumRstripsPerOctant = 280,
-   kFgtLowerStripOctant = 'L',    // i.e. a strip is in octant "kFgtLowerStripOctant" if
-   kFgtHigherStripOctant = 'S',   // the strip index is below the number of strips per octant
-                                  // for that layer
-   kFgtNumStripsPerDisc = kFgtNumQuads  * kFgtNumLayers * kFgtNumStrips // includes both planes, geoId for given disc will not exceed this range after common disc-offset is subtracted 
-};
-
-// unsorted constants
-enum {
-   kFgtNumTimeBins = 9,           // if using cosmic data, recompile with this value set to 7
-   kFgtMaxAdc = 4096
-};
-
-///cluster seed types
-enum {
-   kFgtSeedTypeNo,
-   kFgtDeadStrip,
-   kFgtSeedType1,
-   kFgtSeedType2,
-   kFgtSeedType3,
-   kFgtClusterPart,
-   kFgtNextToDeadGuy,
-   kFgtClusterEndUp,
-   kFgtClusterEndDown,
-   kFgtStripShared,
-   kFgtClusterTooBig,
-   kFgtClusterSeedInSeaOfNoise
-};
-
-const Int_t kFgtError = -999;
-const Char_t kFgtErrorChar = -1;
+// The following are only used in StFgtGeom and StFgtDb, at present
+const Int_t       kFgtError       = -999;
+const Char_t      kFgtErrorChar   = -1;
 const std::string kFgtErrorString = "XXXXXX";
+
+// Constants related to clustering and pulses
+const Int_t kFgtMaxClusterSize      = 11;
+const Int_t kFgtNumAdditionalStrips = 5;
+
+// For some reason, the MuDst directory fails during linking, so a seperate value is needed.
+// For now, it is required that kMuFgtNumTimeBins == kFgtNumTimeBins
+const Int_t kMuFgtNumTimeBins = 9;
+
+
 
 // Jan's definitions for the final 400-800 micron pitch design 
 // Note:
@@ -93,8 +52,14 @@ const std::string kFgtErrorString = "XXXXXX";
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.17 2012/03/15 00:17:58 wwitzke Exp $
+ * $Id: StFgtConsts.h,v 1.18 2012/04/13 18:56:56 sgliske Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.18  2012/04/13 18:56:56  sgliske
+ * More adjustments based on the review:
+ * - Lastest StEvents from Thomas U.
+ * - StFgtA2CMaker can no longer remove strips other than bad status or bad ped
+ * - other related updates
+ *
  * Revision 1.17  2012/03/15 00:17:58  wwitzke
  * Added error constants to StFgtConsts.h
  *

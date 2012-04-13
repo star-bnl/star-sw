@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.36 2012/03/21 19:25:06 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.37 2012/04/13 18:56:56 sgliske Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.37  2012/04/13 18:56:56  sgliske
+ * More adjustments based on the review:
+ * - Lastest StEvents from Thomas U.
+ * - StFgtA2CMaker can no longer remove strips other than bad status or bad ped
+ * - other related updates
+ *
  * Revision 1.36  2012/03/21 19:25:06  sgliske
  * fixed bug in changed from geoId to elecId for DB lookups
  *
@@ -157,7 +163,7 @@
 
 // constructors
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
-   : StMaker( name ), mRemoveNonPulse(1), mRemoveNonSignal(1), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(5), mDb(0) { /* */ };
+   : StMaker( name ), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(5), mDb(0) { /* */ };
 
 
 Int_t StFgtA2CMaker::Init(){
@@ -242,8 +248,8 @@ Int_t StFgtA2CMaker::Make(){
                   strip->setPed(ped);
                   strip->setPedErr(pedErr);
 
-                  if( ped > 4096 || ped < 0 ){
-                     strip->setGeoId( -1 );
+                  if( ped > kFgtMaxAdc || ped < 0 ){
+                     strip->setGeoId( -1 );      // flag for removal
                   } else {
                      for( Int_t timebin = 0; timebin < kFgtNumTimeBins && strip->getGeoId() > -1; ++timebin ){
                         Int_t adc = strip->getAdc( timebin );
@@ -256,7 +262,7 @@ Int_t StFgtA2CMaker::Make(){
                         if( adcMinusPed > -1000)
                            sumC += adcMinusPed;
 
-                        if( (mRelThres && adcMinusPed > mRelThres*pedErr) || (mAbsThres>-4096 && adcMinusPed > mAbsThres)) {
+                        if( (mRelThres && adcMinusPed > mRelThres*pedErr) || (mAbsThres>-kFgtMaxAdc && adcMinusPed > mAbsThres)) {
                            // only add if it is above pedestal, otherwise negative values can be added...
                            ++nTbAboveThres;
                         };
@@ -274,18 +280,12 @@ Int_t StFgtA2CMaker::Make(){
                   strip->setChargeUncert(gain ? sqrt(7)*pedErr/gain : 10000);
 
                   // check if any signal here
-                  if( !nTbAboveThres && (mRelThres || mAbsThres>-4096) ){
-                     // no time bins above thresholds for this strip
-                     // i.e. no signal
+                  if( !nTbAboveThres && (mRelThres || mAbsThres>-kFgtMaxAdc) ){
+                     // No time bins above thresholds for this strip
+                     // and thresholds are set, thus no signal
                      strip->setClusterSeedType(kFgtSeedTypeNo);
 
-                     // If not removing strips far from pulses, check
-                     // if supposed to remove non-signal.  Flag geoId
-                     // if this is the case.
-                     if( !mRemoveNonPulse && mRemoveNonSignal )
-                        strip->setGeoId( -1 );
-
-                  } else if( mRelThres || mAbsThres>-4096 ){
+                  } else if( mRelThres || mAbsThres>-kFgtMaxAdc ){
                      // but if it is +/- n strips from valid pulse, keep it
                      strip->setClusterSeedType(checkValidPulse(strip, pedErr));
                   } else {
@@ -303,7 +303,7 @@ Int_t StFgtA2CMaker::Make(){
 
             // always check if any need removed, as it is possible
             // some ``bad'' strips may have abnormally large st. dev.
-            stripCollectionPtr->removeFlagged( mRemoveNonPulse );
+            stripCollectionPtr->removeFlagged();
          };
       };
    };
