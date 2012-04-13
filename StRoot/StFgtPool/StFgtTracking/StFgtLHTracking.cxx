@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtLHTracking.cxx,v 1.3 2012/04/11 22:13:30 sgliske Exp $
+ * $Id: StFgtLHTracking.cxx,v 1.4 2012/04/13 15:08:58 sgliske Exp $
  * Author: S. Gliske, March 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtLHTracking.cxx,v $
+ * Revision 1.4  2012/04/13 15:08:58  sgliske
+ * updates
+ *
  * Revision 1.3  2012/04/11 22:13:30  sgliske
  * update
  *
@@ -25,7 +28,7 @@
 #include "StFgtLHTracking.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 
-#define DEBUG
+//#define DEBUG
 
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"

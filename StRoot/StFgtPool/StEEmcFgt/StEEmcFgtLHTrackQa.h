@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEEmcFgtLHTrackQa.h,v 1.3 2012/04/12 17:12:05 sgliske Exp $
+ * $Id: StEEmcFgtLHTrackQa.h,v 1.4 2012/04/13 15:08:43 sgliske Exp $
  * Author: S. Gliske, April 2012
  *
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEEmcFgtLHTrackQa.h,v $
+ * Revision 1.4  2012/04/13 15:08:43  sgliske
+ * updates
+ *
  * Revision 1.3  2012/04/12 17:12:05  sgliske
  * update to not use A2EMaker but StEEmcRawMaker
  *
@@ -42,20 +45,29 @@ class StEEmcFgtLHTrackQa : public StMaker {
 
    virtual Int_t Make();
    virtual Int_t Init();
+   virtual Int_t Finish();
 
-   TH1F* getEnergy(){ return mEnergy; };
-   TH1F* getEnergyPerTrack(){ return mEnergyPerTrack; };
+   TH1F* getSigHist( Int_t i ){ return (i>=0 && i<4 ? mSig[i] : 0); };
+   TH1F* getSigPerHist( Int_t i ){ return (i>=0 && i<4 ? mSigPer[i] : 0); };
+
+   void setFileOutName( const Char_t* name );
 
  protected:
    StEEmcRawMapMaker *mEEmcRawMapMkr;
    StFgtLHTracking *mFgtLHTkr;
+   Float_t mThres;
+   std::string mFileOutName;
 
-   TH1F *mEnergyPerTrack;
-   TH1F *mEnergy;
+   TH1F *mSig[4];
+   TH1F *mSigPer[4];
 
  private:   
    ClassDef(StEEmcFgtLHTrackQa,1);
 
 }; 
+
+// inline
+inline void StEEmcFgtLHTrackQa::setFileOutName( const Char_t* name ){ mFileOutName = name; };
+
 
 #endif

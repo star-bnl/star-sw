@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEEmcFgtLHTrackQa.cxx,v 1.3 2012/04/12 17:12:05 sgliske Exp $
+ * $Id: StEEmcFgtLHTrackQa.cxx,v 1.4 2012/04/13 15:08:43 sgliske Exp $
  * Author: S. Gliske, April 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEEmcFgtLHTrackQa.cxx,v $
+ * Revision 1.4  2012/04/13 15:08:43  sgliske
+ * updates
+ *
  * Revision 1.3  2012/04/12 17:12:05  sgliske
  * update to not use A2EMaker but StEEmcRawMaker
  *
@@ -21,6 +24,8 @@
 
 #include <vector>
 #include <TVector3.h>
+#include <TROOT.h>
+#include <TFile.h>
 #include "StEEmcFgtLHTrackQa.h"
 #include "StRoot/StFgtPool/StFgtTracking/StFgtLHTracking.h"
 #include "StRoot/StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
@@ -29,17 +34,41 @@
 
 #define DEBUG
 
-StEEmcFgtLHTrackQa::StEEmcFgtLHTrackQa( const Char_t* name, const Char_t* rawMapMkrName, const Char_t* fgtLHTkrName ) : StMaker( name ), mEnergyPerTrack(0), mEnergy(0) {
+StEEmcFgtLHTrackQa::StEEmcFgtLHTrackQa( const Char_t* name, const Char_t* rawMapMkrName, const Char_t* fgtLHTkrName ) :
+   StMaker( name ), mEEmcRawMapMkr(0), mFgtLHTkr(0), mThres(3) {
+
    mEEmcRawMapMkr = static_cast< StEEmcRawMapMaker* >( GetMaker( rawMapMkrName ) );
    mFgtLHTkr = static_cast< StFgtLHTracking* >( GetMaker( fgtLHTkrName ) );
+
+   for( Int_t i=0; i<4; ++i )
+      mSig[i] = mSigPer[i] = 0;
 };
 
 // deconstructor
 StEEmcFgtLHTrackQa::~StEEmcFgtLHTrackQa(){ /* */ };
 
 Int_t StEEmcFgtLHTrackQa::Init(){
-   mEnergy = new TH1F( "hEnergy", "", 20, 0, 30 );
-   mEnergyPerTrack = new TH1F( "hEnergyPerTrack", "", 20, 0, 30 );
+
+   std::stringstream ss;
+
+   gROOT->cd();
+   for( Int_t i=0; i<4; ++i ){
+      ss.str("");
+      ss.clear();
+      ss << "hSig_" << i;
+      mSig[i] = new TH1F( ss.str().data(), ";; Counts", 2, -0.5, 1.5 );
+
+      ss.str("");
+      ss.clear();
+      ss << "hSigPer_" << i;
+      mSigPer[i] = new TH1F( ss.str().data(), ";; Counts", 2, -0.5, 1.5 );
+
+      mSig[i]->GetXaxis()->SetBinLabel( 1, "Noise" );
+      mSig[i]->GetXaxis()->SetBinLabel( 2, "Signal" );
+      mSigPer[i]->GetXaxis()->SetBinLabel( 1, "Noise" );
+      mSigPer[i]->GetXaxis()->SetBinLabel( 2, "Signal" );
+   };
+
    assert( mEEmcRawMapMkr );
    assert( mFgtLHTkr );
 
@@ -54,11 +83,11 @@ Int_t StEEmcFgtLHTrackQa::Make(){
    const StEEmcRawMap* eemcMap[4];
    Bool_t eemcEmpty = 1;
    for( Int_t i=0; i<4; ++i ){
-      eemcMap[i] = &mEEmcRawMapMkr->getMap( 0 );
+      eemcMap[i] = &mEEmcRawMapMkr->getMap( i );
       eemcEmpty &= eemcMap[i]->empty();
    };
 
-#ifdef DEBUG
+#ifdef DEBUG2
    if( !eemcMap[0]->empty() ){
       LOG_INFO << "\t-> Towers has size " << eemcMap[0]->size() << endm;
    };
@@ -69,7 +98,7 @@ Int_t StEEmcFgtLHTrackQa::Make(){
 
 #ifdef DEBUG
       LOG_INFO << "Event " << GetEventNumber() << " # tracks " << trackVec.size() << endm;
-      LOG_INFO << "\t-> Towers has size " << eemcMap[0]->size() << endm;
+      //LOG_INFO << "\t-> Towers has size " << eemcMap[0]->size() << endm;
 #endif
 
       std::map< Int_t, Int_t > towMap;
@@ -120,16 +149,39 @@ Int_t StEEmcFgtLHTrackQa::Make(){
 
                Double_t val = (data.rawAdc - data.ped) / data.pedSigma;
 
-               //mSig[i]->Fill( val );
-               //mSigPer[i]->Fill( val/num );
+               mSig[i]->Fill( (Int_t)(val > mThres) );
+               mSigPer[i]->Fill( (Int_t)(val/num > mThres) );
 
-               cout << "EEMC tower: " << i << ' ' << index << ' ' << data.rawAdc << ' ' << data.ped << ' ' << data.pedSigma << ' ' << val << ' ' << num << endl;
+               cout << "EEMC tower: " << i << ' ' << index << ' ' << data.rawAdc << ' ' << data.ped << ' ' << data.pedSigma << ' ' << val << ' ' << num
+                    << (val > mThres ? " SIGNAL" : " ") << endl;
             };
          };
       };
    };
 
    return kStOK;
+};
+
+Int_t StEEmcFgtLHTrackQa::Finish(){
+   Int_t ierr = kStOk;
+
+   if( !mFileOutName.empty() ){
+      TFile *f = new TFile( mFileOutName.data(), "RECREATE" );
+
+      if( !f->IsOpen() ){
+         LOG_ERROR << "Error opening file '" << mFileOutName << "'" << endl;
+         ierr = kStErr;
+      } else {
+         f->cd();
+
+         for(Int_t i=0; i<4; ++i ){
+            mSig[i]->Write();
+            mSigPer[i]->Write();
+         };
+      };
+   };
+
+   return ierr;
 };
 
 ClassImp(StEEmcFgtLHTrackQa);

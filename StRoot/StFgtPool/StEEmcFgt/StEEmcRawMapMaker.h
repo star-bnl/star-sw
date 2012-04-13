@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEEmcRawMapMaker.h,v 1.1 2012/04/12 17:11:16 sgliske Exp $
+ * $Id: StEEmcRawMapMaker.h,v 1.2 2012/04/13 15:08:43 sgliske Exp $
  * Author: S. Gliske, April 2012
  *
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEEmcRawMapMaker.h,v $
+ * Revision 1.2  2012/04/13 15:08:43  sgliske
+ * updates
+ *
  * Revision 1.1  2012/04/12 17:11:16  sgliske
  * creation
  *
@@ -57,8 +60,8 @@ class StEEmcRawMapMaker : public StMaker {
    enum layer_t { TOWER, PRE1, PRE2, POST };
 
    Int_t mInputType;
-   std::string mInputName;
-   const StEEmcDb      *mDbMaker;
+   std::string mInputName, mDbName;
+   const StEEmcDb *mEEmcDb;
 
    Int_t loadFromMuDst();
    Int_t loadFromStEvent();

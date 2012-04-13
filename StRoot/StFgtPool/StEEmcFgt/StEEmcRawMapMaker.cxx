@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEEmcRawMapMaker.cxx,v 1.1 2012/04/12 17:11:16 sgliske Exp $
+ * $Id: StEEmcRawMapMaker.cxx,v 1.2 2012/04/13 15:08:43 sgliske Exp $
  * Author: S. Gliske, April 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEEmcRawMapMaker.cxx,v $
+ * Revision 1.2  2012/04/13 15:08:43  sgliske
+ * updates
+ *
  * Revision 1.1  2012/04/12 17:11:16  sgliske
  * creation
  *
@@ -36,8 +39,17 @@
 
 #include "StMessMgr.h"
 
+#define TRIG
+//#define DEBUG
+
+#ifdef TRIG
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StEvent/StTriggerIdCollection.h"
+#include "StEvent/StTriggerId.h"
+#endif
+
 // constructors
-StEEmcRawMapMaker::StEEmcRawMapMaker( const Char_t* name ) : StMaker( name ), mInputType(-1), mInputName(""), mDbMaker(0) { /* */ };
+StEEmcRawMapMaker::StEEmcRawMapMaker( const Char_t* name ) : StMaker( name ), mInputType(-1), mInputName(""), mEEmcDb(0) { /* */ };
 
 // deconstructor
 StEEmcRawMapMaker::~StEEmcRawMapMaker(){ /* */ };
@@ -46,7 +58,7 @@ Int_t StEEmcRawMapMaker::setInput( const Char_t *name, Int_t type ){
    Int_t ierr = kStOk;
 
    if( type == 0 || type == 1){
-      mInputType = 0;
+      mInputType = type;
       mInputName = name;
    } else {
       LOG_ERROR << "Invalid input type" << endm;
@@ -63,22 +75,27 @@ Int_t StEEmcRawMapMaker::Init(){
       ierr = kStFatal;
    };
 
-   mDbMaker = (const StEEmcDb*)this->GetDataSet("StEEmcDb");
-   if( !mDbMaker ){
-      LOG_ERROR << "Error finding EEMC DB Maker" << endm;
-      ierr = kStFatal;
-   };
-
    return ierr;
 };
 
 Int_t StEEmcRawMapMaker::Make(){
+   StEEmcRawMapMaker::Clear();
+
    Int_t ierr = kStOk;
 
-   if( mInputType ){
-      ierr = loadFromMuDst();
-   } else {
-      ierr = loadFromStEvent();
+   mEEmcDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
+   if( !mEEmcDb ){
+      LOG_ERROR << "Error finding EEMC DB" << endm;
+      this->ls();
+      ierr = kStFatal;
+   };
+
+   if( !ierr ){
+      if( mInputType ){
+         ierr = loadFromMuDst();
+      } else {
+         ierr = loadFromStEvent();
+      };
    };
 
    return ierr;
@@ -98,6 +115,11 @@ Int_t StEEmcRawMapMaker::loadFromMuDst(){
    };
 
    if( !ierr ){
+
+#ifdef DEBUG2
+      LOG_INFO << "Number of towers in MuDst " << emc->getNEndcapTowerADC() << endm;
+#endif
+
       /// Loop over all towers
       for ( Int_t i = 0; i < emc->getNEndcapTowerADC(); ++i ){
          Int_t adc, sec, sub, eta;
@@ -127,9 +149,22 @@ Int_t StEEmcRawMapMaker::loadFromMuDst(){
 
             if( (sec >= 0) && (sec < kEEmcNumSectors ) && (sub >= 0) && (sub < kEEmcNumSubSectors ) && (eta >= 0) && (eta < kEEmcNumEtas) )
                addHitTower(sec,sub,eta,adc,det);
+
          };
       };
    };
+
+#ifdef TRIG
+   StMuEvent *event = muDst->event();
+   if( event ){
+      const StTriggerId& l1trig = event->triggerIdCollection().l1();
+      cout << "Passed trigger? " << l1trig.isTrigger( 380301 ) << ' ' << l1trig.isTrigger( 380302 ) << endl;
+   };
+#endif
+
+#ifdef DEBUG
+   LOG_INFO << "Number of towers in MuDst " << emc->getNEndcapTowerADC() << " vs in raw Map " << mMap[0].size() << endm;
+#endif
 
    return ierr;
 };
@@ -193,15 +228,22 @@ Int_t StEEmcRawMapMaker::loadFromStEvent(){
 };
 
 void StEEmcRawMapMaker::addHitTower( Int_t sec, Int_t sub, Int_t eta, Int_t adc, Int_t layer ){
+
    Int_t index = kEEmcNumEtas*( kEEmcNumSubSectors*sec + sub ) + eta;
+
+// #ifdef DEBUG2
+//    if( GetEventNumber() == 868734 && index == 336 ){
+//       LOG_INFO << "Event " << GetEventNumber() << " adding tower " << index << ' ' << layer << ' ' << adc << endm;
+//    };
+// #endif
 
    StEEmcRawMapData& data = mMap[layer][index];
    data.rawAdc = adc;
 
-   assert( mDbMaker );
+   assert( mEEmcDb );
    static const Char_t subsectors[] = { 'A','B','C','D','E' };
    static const Char_t detectors[] = { 'T', 'P', 'Q', 'R' };
-   const EEmcDbItem *dbitem = mDbMaker->getTile( sec+1,subsectors[sub],eta+1, detectors[layer] );
+   const EEmcDbItem *dbitem = mEEmcDb->getTile( sec+1,subsectors[sub],eta+1, detectors[layer] );
    assert( dbitem );
 
    data.fail = dbitem->fail;
