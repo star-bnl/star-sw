@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.31 2012/03/08 17:43:40 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.32 2012/04/13 18:43:13 sgliske Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -42,7 +42,7 @@ Int_t StFgtClusterMaker::Make()
 
    if( !ierr ){
      for( UInt_t discIdx=0; discIdx<fgtCollectionPtr->getNumDiscs(); ++discIdx ){
-       LOG_INFO << "disc: " << discIdx << " has strips: " << fgtCollectionPtr->getNumStrips(discIdx) << endm;
+        //LOG_INFO << "disc: " << discIdx << " has strips: " << fgtCollectionPtr->getNumStrips(discIdx) << endm;
        
        StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( discIdx );
        StFgtHitCollection *hitCollectionPtr = fgtCollectionPtr->getHitCollection( discIdx );
@@ -96,7 +96,7 @@ Int_t StFgtClusterMaker::Make()
 	   (*it)->setPositionZ(StFgtGeom::getDiscZ(disc));
 	   (*it)->setErrorZ(0.2); // the thickens of sensitive volume (2mm), Jan
 
-	   //printf("CLM:  centStrgeoId=%d, disc=%d at phi=%f and Z=%f Z2=%f, phi1=%f  phi2=%f\n",centralStripGeoId,disc,StFgtGeom::phiQuadXaxis(quad), StFgtGeom::getDiscZ(disc),(*it)->getPositionZ(),mPhi,(*it)->getPositionPhi());
+	   //printf("CLM:  ev= %6d centStrgeoId= %5d, disc=%d at phi=%f and Z=%f Z2=%f, phi1=%f  phi2=%f\n",GetEventNumber(), centralStripGeoId,disc,StFgtGeom::phiQuadXaxis(quad), StFgtGeom::getDiscZ(disc),(*it)->getPositionZ(),mPhi,(*it)->getPositionPhi());
 
 	 }
        ///////
@@ -181,6 +181,10 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.32  2012/04/13 18:43:13  sgliske
+//   Commented out a LOG_INFO that should have been a LOG_DEBUG
+//   but isn't really needed
+//
 //   Revision 1.31  2012/03/08 17:43:40  avossen
 //   added default cluster algo, made StFgtIClusterAlgo destructor =0
 //
