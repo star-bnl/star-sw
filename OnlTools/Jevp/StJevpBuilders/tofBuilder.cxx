@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>   
+#include <stdlib.h>
 #include <algorithm>
 
 #include "Jevp/StJevpPlot/JevpPlotSet.h"
@@ -35,6 +35,9 @@ tofBuilder::tofBuilder(JevpServer *parent) : JevpPlotSet(parent) {
   TOF_Error1_label = NULL;
   TOF_Error2_label = NULL;
   TOF_Error3_label = NULL;
+  TOF_Error1_list = NULL;
+  TOF_Error2_list = NULL;
+  TOF_Error3_list = NULL;
 }
 
 tofBuilder::~tofBuilder() {
@@ -65,7 +68,6 @@ void tofBuilder::initialize(int argc, char *argv[]) {
     sprintf(tmpchr,"TOF_Tray%03d_LE_hitmap",i+1);
     sprintf(tmpchr1,"Tray %03d Leading hitmap",i+1);
     contents.TOF_Tray_LEhitmap[i] = new TH1F(tmpchr,tmpchr1,192,-0.5,191.5);
-    //cout<<"booking "<<i<<"\t"<<contents.TOF_Tray_LEhitmap[i]<<endl;
     contents.TOF_Tray_LEhitmap[i]->SetLineColor(2);
 
     sprintf(tmpchr,"TOF_Tray%03d_TE_hitmap",i+1);
@@ -125,23 +127,35 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   plots[++n] = new JevpPlot(contents.TOF_Error1);
   plots[n]->logy=0;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
   plots[n]->getHisto(0)->histo->SetMinimum(0);
+  nperror1 = n;
   TOF_Error1_label = new TLatex();
   TOF_Error1_label->SetNDC();
   plots[n]->addElement(TOF_Error1_label);
+  TOF_Error1_list = new TLatex();
+  TOF_Error1_list->SetNDC();
+  plots[n]->addElement(TOF_Error1_list);
 
   plots[++n] = new JevpPlot(contents.TOF_Error2);
   plots[n]->logy=0;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
   plots[n]->getHisto(0)->histo->SetMinimum(0);
+  nperror2 = n;
   TOF_Error2_label = new TLatex();
   TOF_Error2_label->SetNDC(); 
-  plots[n]->addElement(TOF_Error2_label); 
+  plots[n]->addElement(TOF_Error2_label);
+  TOF_Error2_list = new TLatex();
+  TOF_Error2_list->SetNDC(); 
+  plots[n]->addElement(TOF_Error2_list); 
   
   plots[++n] = new JevpPlot(contents.TOF_Error3);
   plots[n]->logy=0;plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
   plots[n]->getHisto(0)->histo->SetMinimum(0);
+  nperror3 = n;
   TOF_Error3_label = new TLatex();
   TOF_Error3_label->SetNDC();  
   plots[n]->addElement(TOF_Error3_label);
+  TOF_Error3_list = new TLatex();
+  TOF_Error3_list->SetNDC();  
+  plots[n]->addElement(TOF_Error3_list);
   
   //hits vs tray
   plots[++n] = new JevpPlot(contents.TOF_Tray_hits1);
@@ -378,7 +392,7 @@ int tofBuilder::parseData(daqReader *rdr)
 	    // ignore tray95-0 error until bad HPTDC replaced!!!!! 
       // Contact kefeng.xin@rice.edu
 	    if(trayid != 95) {
-	      contents.TOF_Error1->Fill(trayid+0.5*halftrayid); 
+	      contents.TOF_Error1->Fill(trayid-0.5+0.5*halftrayid); 
 	    }
 	  }
 
@@ -678,12 +692,80 @@ void tofBuilder::event(daqReader *rdr)
     if(leadingtime[ieast]*leadingtime[iwest]<1) continue;
     contents.upvpd_eastT_vs_westT->Fill(leadingtime[ieast],leadingtime[iwest]);
   }
-
+  if(contents.upvpd_eastT_vs_westT->GetEntries()==0) contents.upvpd_eastT_vs_westT->Fill(0.,0.); //Geary wants to see this even if it is empty..
 
   if(trgd) delete trgd;
 }
 
 void tofBuilder::stoprun(daqReader *rdr) {
+  
+  //label error bins
+  char tmpchr[255], tmpchr1[255], tmpchr2[255], tmpchr3[255];
+  sprintf(tmpchr1, "%s", "List of bad trays: ");
+  sprintf(tmpchr2, "%s", "List of bad trays: ");
+  sprintf(tmpchr3, "%s", "List of bad trays: ");
+  
+  int nbad1=0, nbad2=0, nbad3=0;
+  for(int traynum=1;traynum<=122;traynum++){
+    if(contents.TOF_Error1->GetBinContent(traynum*2-1)>0 || contents.TOF_Error1->GetBinContent(traynum*2)>0){
+      nbad1++;
+      sprintf(tmpchr, "%d, ", traynum);
+      strcat (tmpchr1, tmpchr);
+    }
+    if(contents.TOF_Error2->GetBinContent(traynum)>0) {
+      nbad2++;
+      sprintf(tmpchr, "%d, ", traynum);
+      strcat (tmpchr2, tmpchr);
+    }
+    if(contents.TOF_Error3->GetBinContent(traynum)>0) {
+      nbad3++; 
+      sprintf(tmpchr, "%d, ", traynum); 
+      strcat (tmpchr3, tmpchr);
+    }
+  }
+  tmpchr1[strlen(tmpchr1)-2]=0;
+  tmpchr2[strlen(tmpchr2)-2]=0;
+  tmpchr3[strlen(tmpchr3)-2]=0;
+  
+  
+  if (nbad1>8) {
+    sprintf(tmpchr1, "More than 8 bad trays!");
+    TOF_Error1_list->SetTextColor(2);
+  }
+  else if(nbad1<10&&nbad1>0){
+    TOF_Error1_list->SetTextColor(2);
+  }
+  else{
+    TOF_Error1_list->SetTextColor(3);
+    sprintf(tmpchr1, " ");
+  }
+  TOF_Error1_list->SetText(.15,.6,tmpchr1);
+  
+  if (nbad2>8) {
+    sprintf(tmpchr2, "More than 8 bad trays!");
+    TOF_Error2_list->SetTextColor(2);
+  }
+  else if(nbad2<10&&nbad2>0){
+    TOF_Error2_list->SetTextColor(2);
+  }
+  else{
+    TOF_Error2_list->SetTextColor(3);
+    sprintf(tmpchr2," ");
+  }
+  TOF_Error2_list->SetText(.15,.6,tmpchr2);
+  
+  if (nbad3>8) {
+    sprintf(tmpchr3, "More than 8 bad trays!");
+    TOF_Error3_list->SetTextColor(2);
+  }
+  else if(nbad3<10&&nbad3>0){
+    TOF_Error3_list->SetTextColor(2);
+  }
+  else{
+    TOF_Error3_list->SetTextColor(3);
+    sprintf(tmpchr3," ");
+  }
+  TOF_Error3_list->SetText(.15,.6,tmpchr3);
 }
 
 void tofBuilder::main(int argc, char *argv[])
