@@ -87,6 +87,10 @@ public:
   TLatex *TOF_Error1_label;
   TLatex *TOF_Error2_label;
   TLatex *TOF_Error3_label;
+  TLatex *TOF_Error1_list;
+  TLatex *TOF_Error2_list;
+  TLatex *TOF_Error3_list;
+  int nperror1, nperror2, nperror3;
   
   void ReadTrayList();
   void ReadValidBunchidPhase();
