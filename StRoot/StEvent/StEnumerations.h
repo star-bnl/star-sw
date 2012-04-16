@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.41 2012/02/21 18:46:21 perev Exp $
+ * $Id: StEnumerations.h,v 2.42 2012/04/16 20:22:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.42  2012/04/16 20:22:16  ullrich
+ * Changes necessary to add Fgt package.
+ *
  * Revision 2.41  2012/02/21 18:46:21  perev
  * max numeber of detid ==40
  *
@@ -389,6 +392,70 @@ enum StL2TriggerResultType {	l2Trg2006BEMCGammaPi = 0,
 		         	l2Trg2006DiJet,
 		         	l2Trg2006RandomJet};
 
+/*!
+ * \enum StFgtElecConsts
+ */
+// constants related to electric coordinates
+enum StFgtElecConsts { 
+    kFgtNumRdos = 2,                    // rdo in {1,2}
+    kFgtNumArms = 6,                    // arm in 0-5, though 5 not used in run12.
+    kFgtNumChannels = 128,              // channel in 0-127
+    kFgtApvsPerAssembly = 12,           //
+    kFgtMaxApvId=kFgtApvsPerAssembly*2, // covers 0-23 
+    kFgtApvGap = 2,                     // i.e. apvs 10 & 11
+    kFgtApvsPerOct = 5,
+    kFgtApvsPerQuad = 10,
+    kFgtApvsPerArm = 20,
+    kFgtNumElecIds = kFgtNumChannels * kFgtApvsPerArm * kFgtNumArms * kFgtNumRdos  // elec id in 0 to kFgtNumElecIds-1
+};
+
+/*!
+ * \enum StFgtPhysConsts
+ */
+// constants related to physical coordinates
+enum StFgtPhysConsts {
+    kFgtNumDiscs = 6,
+    kFgtNumQuads = 4,
+    kFgtNumOctantsPerDisc = 8,
+    kFgtNumOctants = kFgtNumOctantsPerDisc*kFgtNumDiscs,
+    kFgtNumLayers = 2,
+    kFgtNumStrips = 720,
+    kFgtNumGeoIds = kFgtNumQuads * kFgtNumDiscs * kFgtNumLayers * kFgtNumStrips,   // geoId in 0 to kFgtNumGeoIds-1
+    kFgtNumPstripsPerOctant = 360,
+    kFgtNumRstripsPerOctant = 280,
+    kFgtLowerStripOctant = 'L',    // i.e. a strip is in octant "kFgtLowerStripOctant" if
+    kFgtHigherStripOctant = 'S',   // the strip index is below the number of strips per octant
+    // for that layer
+    kFgtNumStripsPerDisc = kFgtNumQuads  * kFgtNumLayers * kFgtNumStrips // includes both planes, geoId for given disc will not exceed this range after common disc-offset is subtracted 
+};
+
+/*!
+ * \enum StFgtGeneralConsts
+ */
+// unsorted constants
+enum StFgtGeneralConsts {
+    kFgtNumTimeBins = 9,
+    kFgtMaxAdc = 4096,
+};
+
+/*!
+ * \enum StFgtClusterSeedType
+ */
+// cluster seed types
+enum StFgtClusterSeedType {
+    kFgtSeedTypeNo,
+    kFgtDeadStrip,
+    kFgtSeedType1,
+    kFgtSeedType2,
+    kFgtSeedType3,
+    kFgtClusterPart,
+    kFgtNextToDeadGuy,
+    kFgtClusterEndUp,
+    kFgtClusterEndDown,
+    kFgtStripShared,
+    kFgtClusterTooBig,
+    kFgtClusterSeedInSeaOfNoise
+};
 
 const char *detectorNameById(StDetectorId id);
 StDetectorId detectorIdByName(const char *name);

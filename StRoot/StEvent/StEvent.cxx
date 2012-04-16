@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.50 2012/01/24 03:01:38 perev Exp $
+ * $Id: StEvent.cxx,v 2.51 2012/04/16 20:22:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.51  2012/04/16 20:22:16  ullrich
+ * Changes necessary to add Fgt package.
+ *
  * Revision 2.50  2012/01/24 03:01:38  perev
  * Etr detector added
  *
@@ -210,14 +213,17 @@
 #include "StAutoBrowse.h"
 #include "StEventBranch.h"
 #include "StHltEvent.h"
+#include "StFgtCollection.h"
+
 #include "StTrackNode.h"
 #include "StTrack.h"
+
 #ifndef ST_NO_NAMESPACES
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.50 2012/01/24 03:01:38 perev Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.50 2012/01/24 03:01:38 perev Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.51 2012/04/16 20:22:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.51 2012/04/16 20:22:16 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -751,6 +757,22 @@ StEvent::hltEvent() const
     return hlt;
 }
 
+StFgtCollection*
+StEvent::fgtCollection()
+{
+    StFgtCollection *fgtCollection = 0;
+    _lookup(fgtCollection, mContent);
+    return fgtCollection;
+}
+
+const StFgtCollection*
+StEvent::fgtCollection() const
+{
+    StFgtCollection *fgtCollection = 0;
+    _lookup(fgtCollection, mContent);
+    return fgtCollection;
+}
+
 StSPtrVecTrackDetectorInfo&
 StEvent::trackDetectorInfo()
 {
@@ -1159,25 +1181,32 @@ StEvent::setL1Trigger(StL1Trigger* val)
     _lookupAndSet(val, mContent);
 }
 
-//______________________________________________________________________________
-void StEvent::setL3Trigger(StL3Trigger* val)
+void 
+StEvent::setL3Trigger(StL3Trigger* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-//______________________________________________________________________________
-void StEvent::setEtrHitCollection(StEtrHitCollection* val)
-{
-    _lookupAndSet(val, mContent);
-}
-//______________________________________________________________________________
-void StEvent::setHltEvent(StHltEvent* val)
+void 
+StEvent::setEtrHitCollection(StEtrHitCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
 
-//______________________________________________________________________________
-void StEvent::addPrimaryVertex(StPrimaryVertex* vertex, StPrimaryVertexOrder order)
+void 
+StEvent::setHltEvent(StHltEvent* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
+StEvent::setFgtCollection(StFgtCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void 
+StEvent::addPrimaryVertex(StPrimaryVertex* vertex, StPrimaryVertexOrder order)
 {
     if (!vertex) return;  // not a valid vertex, do nothing
 
@@ -1315,6 +1344,7 @@ void StEvent::statistics()
     cout << "\t# of Kinks:                  " << kinkVertices().size() << endl;
     cout << "\t# of hits in EMC:            " << (emcCollection() ? emcCollection()->barrelPoints().size() : 0) << endl;
     cout << "\t# of hits in EEMC:           " << (emcCollection() ? emcCollection()->endcapPoints().size() : 0) << endl;
+    cout << "\t# of hits in FGT:            " << (fgtCollection() ? fgtCollection()->getNumHits() : 0) << endl;
     cout << "\t# of hits in RICH:           " << (richCollection() ? richCollection()->getRichHits().size() : 0) << endl;
     cout << "\t# of PSDs:                   " << numberOfPsds() << endl;
 }
