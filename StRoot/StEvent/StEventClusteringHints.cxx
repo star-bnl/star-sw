@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.30 2012/01/24 03:03:13 perev Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.31 2012/04/16 20:28:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.31  2012/04/16 20:28:37  ullrich
+ * Added StFgtCollection.
+ *
  * Revision 2.30  2012/01/24 03:03:13  perev
  * Open for new detectors
  *
@@ -104,7 +107,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.30 2012/01/24 03:03:13 perev Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.31 2012/04/16 20:28:37 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -156,7 +159,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StFtpcHitCollection",         "evt_hits",     8);
     setBranch("StRnDHitCollection",          "evt_hits",     8);
     setBranch("StHltEvent",                  "evt_hlt",      9);
-    setBranch("StFgtEvent",                  "evt_fgt",      9);
+    setBranch("StFgtCollection",             "evt_fgt",      9);
     
     setDstMode();
     setBranch("StRunInfo",                   "event", 1);
@@ -199,7 +202,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StPhmdCollection",            "event", 1);
     setBranch("StRnDHitCollection",          "event", 1);
     setBranch("StHltEvent",                  "event", 1);
-    setBranch("StFgtEvent",                  "event", 1);
+    setBranch("StFgtCollection",             "event", 1);
 } 
 
 void
