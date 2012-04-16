@@ -38,20 +38,20 @@ static myMap gMyMap[] = {
 //_____________________________________________________________________________
 const char *detectorNameById(StDetectorId id)
 {
- for (int i=0;gMyMap[i].name;i++) { if (gMyMap[i].id==id) return gMyMap[i].name;}
- return gMyMap[0].name;
+    for (int i=0;gMyMap[i].name;i++) { if (gMyMap[i].id==id) return gMyMap[i].name;}
+    return gMyMap[0].name;
 }
 //_____________________________________________________________________________
 StDetectorId detectorIdByName(const char *name)
 {
-  int lmin=99,imin=0;
-  
-  for (int i =0;gMyMap[i].name; i++) {
-    if (!TString(gMyMap[i].name).BeginsWith(name,TString::kIgnoreCase))
-    			continue;
-    int l = strlen(gMyMap[i].name);
-    if (l>=lmin) 	continue;
-    lmin = l; imin=i;
-  }
-  return (StDetectorId)gMyMap[imin].id;
+    int lmin=99,imin=0;
+    
+    for (int i =0;gMyMap[i].name; i++) {
+        if (!TString(gMyMap[i].name).BeginsWith(name,TString::kIgnoreCase))
+            continue;
+        int l = strlen(gMyMap[i].name);
+        if (l>=lmin) 	continue;
+        lmin = l; imin=i;
+    }
+    return (StDetectorId)gMyMap[imin].id;
 }

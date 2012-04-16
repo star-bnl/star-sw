@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.44 2012/02/21 18:47:13 perev Exp $
+ * $Id: StEvent.h,v 2.45 2012/04/16 20:22:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.45  2012/04/16 20:22:16  ullrich
+ * Changes necessary to add Fgt package.
+ *
  * Revision 2.44  2012/02/21 18:47:13  perev
  * Add IsMain() related to I/O
  *
@@ -192,6 +195,7 @@ class StKinkVertex;
 class StPsd;
 class StRnDHitCollection;
 class StHltEvent;
+class StFgtCollection;
 
 class StEvent : public StXRefMain {
 public:
@@ -249,6 +253,8 @@ public:
     const StEtrHitCollection*           etrHitCollection() const;
     StHltEvent*                         hltEvent();
     const StHltEvent*                   hltEvent() const;
+    StFgtCollection*                    fgtCollection();
+    const StFgtCollection*              fgtCollection() const;
     
     StL0Trigger*                        l0Trigger();
     const StL0Trigger*                  l0Trigger() const;
@@ -310,6 +316,8 @@ public:
     void setInfo(StEventInfo*);
     void setRunInfo(StRunInfo*);
     void setSummary(StEventSummary*);
+    void setIdTruth();
+
     void setTpcHitCollection(StTpcHitCollection*);
     void setRnDHitCollection(StRnDHitCollection*);
     void setEtrHitCollection(StEtrHitCollection*);
@@ -332,7 +340,7 @@ public:
     void setL1Trigger(StL1Trigger*);
     void setL3Trigger(StL3Trigger*);
     void setHltEvent(StHltEvent*);
-    void setIdTruth();
+    void setFgtCollection(StFgtCollection*);
     void addPrimaryVertex(StPrimaryVertex*, StPrimaryVertexOrder = orderByNumberOfDaughters);
     void addCalibrationVertex(StCalibrationVertex*);
     void addDetectorState(StDetectorState*);

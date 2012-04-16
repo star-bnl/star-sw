@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.27 2012/01/24 02:57:05 perev Exp $
+ * $Id: StContainers.h,v 2.28 2012/04/16 20:22:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.28  2012/04/16 20:22:16  ullrich
+ * Changes necessary to add Fgt package.
+ *
  * Revision 2.27  2012/01/24 02:57:05  perev
  * Etr detector added
  *
@@ -149,6 +152,9 @@ class StHltHighPt;
 class StHltHeavyFragment;
 class StHltDiElectron;
 class StHltTriggerReason;
+class StFgtStrip;
+class StFgtHit;
+class StFgtPoint;
 
 StCollectionDef(Object)
 StCollectionDef(BTofHit)
@@ -202,6 +208,9 @@ StCollectionDef(HltHighPt)
 StCollectionDef(HltHeavyFragment)
 StCollectionDef(HltDiElectron)
 StCollectionDef(HltTriggerReason)
+StCollectionDef(FgtHit)
+StCollectionDef(FgtStrip)
+StCollectionDef(FgtPoint)
 
 
 #endif

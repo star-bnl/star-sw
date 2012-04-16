@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.24 2012/01/24 02:57:09 perev Exp $
+ * $Id: StContainers.cxx,v 2.25 2012/04/16 20:22:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.25  2012/04/16 20:22:16  ullrich
+ * Changes necessary to add Fgt package.
+ *
  * Revision 2.24  2012/01/24 02:57:09  perev
  * Etr detector added
  *
@@ -133,6 +136,9 @@
 #include "StHltTriggerReason.h"
 #include "StMtdHit.h"
 #include "StMtdRawHit.h"
+#include "StFgtStrip.h"
+#include "StFgtPoint.h"
+#include "StFgtHit.h"
 
 StCollectionImp(Object)
 StCollectionImp(CalibrationVertex)
@@ -186,3 +192,6 @@ StCollectionImp(HltHighPt)
 StCollectionImp(HltHeavyFragment)
 StCollectionImp(HltDiElectron)
 StCollectionImp(HltTriggerReason)
+StCollectionImp(FgtHit)
+StCollectionImp(FgtStrip)
+StCollectionImp(FgtPoint)
