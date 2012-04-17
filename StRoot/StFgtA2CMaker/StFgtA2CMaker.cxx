@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.37 2012/04/13 18:56:56 sgliske Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.38 2012/04/17 17:47:51 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.38  2012/04/17 17:47:51  avossen
+ * changed seedType3
+ *
  * Revision 1.37  2012/04/13 18:56:56  sgliske
  * More adjustments based on the review:
  * - Lastest StEvents from Thomas U.
@@ -199,7 +202,7 @@ Int_t StFgtA2CMaker::Make(){
       // so just silently skip the event
       return kStFatal;
    };
-
+   //   cout <<"in a2cmaker " << endl;
    StEvent* eventPtr = 0;
    eventPtr = (StEvent*)GetInputDS("StEvent");
 
@@ -221,12 +224,15 @@ Int_t StFgtA2CMaker::Make(){
 
    if( !ierr ){
       for( UInt_t discIdx=0; discIdx<fgtCollectionPtr->getNumDiscs(); ++discIdx ){
+	//	cout <<"looking at disc: " << discIdx <<endl;
          StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( discIdx );
          if( stripCollectionPtr ){
+	   //	      cout <<"got strip coll" <<endl;
             StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
             StSPtrVecFgtStripIterator stripIter;
-
+	    //	    	    cout <<stripVec.size() <<" strips " << endl;
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
+	      //	      cout <<" running over strips .. " <<endl;
                StFgtStrip *strip = *stripIter;
                Float_t ped = 0, pedErr = 0;
                if( strip ){
@@ -244,9 +250,11 @@ Int_t StFgtA2CMaker::Make(){
 
                   // get the pedestal
                   ped = mDb->getPedestalFromElecId( elecId );
+
                   pedErr = mDb->getPedestalSigmaFromElecId( elecId );
                   strip->setPed(ped);
                   strip->setPedErr(pedErr);
+		  //		  cout <<"we got ped: " << ped << " error: " << pedErr <<endl;
 
                   if( ped > kFgtMaxAdc || ped < 0 ){
                      strip->setGeoId( -1 );      // flag for removal
@@ -377,7 +385,7 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    if(pStrip->getAdc(0) <3*ped && numHighBins==2 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=2)
       return kFgtSeedType2;
 
-   if(pStrip->getAdc(0) <3*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=3&& numAlmostHighBins>=2)
+   if(pStrip->getAdc(0) <3*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=1&& numAlmostHighBins>=2)
       return kFgtSeedType3;
 
    return kFgtSeedTypeNo;
