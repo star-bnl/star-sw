@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.33 2012/04/13 17:39:11 cpowell Exp $
+// $Id: bfcMixer_Tpx.C,v 1.34 2012/04/18 03:47:34 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.34  2012/04/18 03:47:34  zhux
+// Corrected string name for Run 11 Au+Au 19.6 GeV chain
+//
 // Revision 1.33  2012/04/13 17:39:11  cpowell
 // Added chain options for P10ikAuAu62
 //
@@ -96,7 +99,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   TString prodP11idAuAu27("DbV20110911 P2011a btof mtddat pmdReco BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
 
   // Run11 Au+Au 19.6 GeV chain  
-  TString prodP11idAuAu27("DbV20110820 P2011a btof mtddat pmdReco BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP11idAuAu19("DbV20110820 P2011a btof mtddat pmdReco BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
 
    // Run11 pp 500 GeV chain  
   TString prodP11idpp500("DbV20110923 pp2011a btof mtddat fmsdat BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
