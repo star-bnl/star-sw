@@ -8,8 +8,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.34 2012/03/22 13:56:27 fisyak Exp $
+ * $Id: StMcEvent.cc,v 2.35 2012/04/19 16:22:51 perev Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.35  2012/04/19 16:22:51  perev
+ * Cleanup
+ *
  * Revision 2.34  2012/03/22 13:56:27  fisyak
  * Add missing parentheses
  *
@@ -169,8 +172,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.34 2012/03/22 13:56:27 fisyak Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.34 2012/03/22 13:56:27 fisyak Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.35 2012/04/19 16:22:51 perev Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.35 2012/04/19 16:22:51 perev Exp $";
 ClassImp(StMcEvent);
 //______________________________________________________________________________
 void StMcEvent::initToZero()
@@ -470,7 +473,8 @@ void StMcEvent::setFgtHitCollection(StMcFgtHitCollection* val)
 {
     if (mFgtHits && mFgtHits!= val) delete mFgtHits;
     mFgtHits = val;
-}   
+}
+//______________________________________________________________________________
 //______________________________________________________________________________
 #define PrintHeader(Name,name) \
   const StMc ## Name ## HitCollection *name ## Coll = name ## HitCollection();\
