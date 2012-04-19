@@ -393,7 +393,7 @@ void THelixTrack::MakeMtx(double step,double F[5][5])
 
   F[kZ][kH] = -dSdH*tanL;
   F[kZ][kA] = -dSdA*tanL;
-  F[kZ][kC] =  dSdC*tanL;
+  F[kZ][kC] = dSdC*tanL;
   F[kZ][kZ] = 1;
   F[kZ][kL] = S/(fCosL*fCosL);
   F[kL][kL] = 1;
@@ -3190,7 +3190,7 @@ return ans;
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.55 2012/01/30 17:27:19 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.56 2012/04/19 16:16:14 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3206,6 +3206,9 @@ return ans;
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.56  2012/04/19 16:16:14  perev
+ * Cleanup
+ *
  * Revision 1.55  2012/01/30 17:27:19  perev
  * Improve Errors
  *
