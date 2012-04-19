@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.23 2012/03/21 23:43:41 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.24 2012/04/19 01:09:13 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -693,7 +693,7 @@ const StHitPlane *StTGeoHelper::AddHit(void *hit,const float xyz[3],unsigned int
 {
 static int nCall = 0;  nCall++;  
 //		Test of hardware id assignment quality
-enum 		{kMaxTest=100,kMaxFail=10};
+enum 		{kMaxTest=1000,kMaxFail=100};
 static int 	nTest=0,nFail=0,detId=0;
 //
 //   Break(nCall);
@@ -773,32 +773,40 @@ static const float dirs[26][3] = {
 { 0.5774,        0.5774,         0.5774}};
 
   double pnt[3]={xyz[0],xyz[1],xyz[2]};
-  TGeoNode *node = gGeoManager->FindNode(pnt[0],pnt[1],pnt[2]);
+  const TGeoNode *node = gGeoManager->FindNode(pnt[0],pnt[1],pnt[2]);
   assert(node);
   StHitPlane *hp = GetCurrentHitPlane();     
   if (hp  && hp->GetHitErrCalc() && IsHitted(pnt)) return hp;
   double Rxy = sqrt(pnt[0]*pnt[0]+pnt[1]*pnt[1]);
   double myCos= pnt[0]/Rxy,mySin=pnt[1]/Rxy;
-  double myDir[3];
+  double myDir[3],myPnt[3];
   double minDist=10;
   StHitPlane *minHitPlane=0;
   for (int idir=0;idir<26; idir++) {
     gGeoManager->SetCurrentPoint(pnt);
-    gGeoManager->FindNode();
+    node = gGeoManager->FindNode();
     myDir[0] = dirs[idir][0]*myCos - dirs[idir][1]*mySin; 
     myDir[1] = dirs[idir][0]*mySin + dirs[idir][1]*myCos; 
     myDir[2] = dirs[idir][2];
     gGeoManager->SetCurrentDirection(myDir);
-    double myStep = 0;
-    for (int istep=0;istep<10;istep++) {
-      node = gGeoManager->FindNextBoundaryAndStep();
-      if (!node) 					break;
-      double stp = gGeoManager->GetStep();
-      if (stp<1e-4) 		stp=1e-4; 	//One micron
-      if (stp<myStep*0.01) 	stp=myStep*0.01;
-      myStep +=stp;
-      if (myStep>minDist) 				break;
-      
+    TString prevPath(gGeoManager->GetPath());
+    double myStep = 0,epsStp = 1e-4,minStp = epsStp,stp=0;
+    for (int istep=0;istep<100 ;istep++) {
+      const TGeoNode *myNode = gGeoManager->FindNextBoundaryAndStep(minDist-myStep);
+      if (!myNode) 					break;
+      TString currPath(gGeoManager->GetPath());
+      stp = gGeoManager->GetStep();
+      int same = (currPath == prevPath);
+      if (stp<1e-4 && same) {//Same volume
+        stp=minStp; minStp*=2;
+        const double *x = gGeoManager->GetCurrentPoint();
+        for (int j=0;j<3;j++) { myPnt[j]=x[j]+myDir[j]*stp;}
+        gGeoManager->SetCurrentPoint(myPnt);
+        gGeoManager->FindNode();
+      } 
+      myStep +=stp;if (same) continue;
+
+      prevPath=currPath; minStp = epsStp; 
       hp = GetCurrentHitPlane();     
       if (!hp || !hp->GetHitErrCalc()) 			continue;
       if (!IsHitted(gGeoManager->GetLastPoint()))	continue;
@@ -911,8 +919,8 @@ StHitPlaneInfo::StHitPlaneInfo(int volId) : StVoluInfo(volId)
 }
 //_____________________________________________________________________________
 StHitPlane *StHitPlaneInfo::MakeHitPlane(const StTGeoIter &it)
-
 {
+static const double kCos45 = 1./sqrt(2.);
 static int nCall=0; nCall++;
   const TGeoVolume *volu = *it;
   const TGeoShape  *sh = volu->GetShape();
@@ -930,6 +938,17 @@ static int nCall=0; nCall++;
   it.LocalToMaster(fOrg, hp->fOrg);
   for (int i=0;i<3;i++) {it.LocalToMasterVect(fDir[i], hp->fDir[i]);}
   assert(fabs(hp->fDir[0][0])+fabs(hp->fDir[0][1])+fabs(hp->fDir[0][2])>0.5);
+
+  if (fabs(hp->fDir[2][2])<kCos45 && fabs(hp->fDir[1][2])>kCos45) {
+//		Rotate around X to keep local Zaxis close to global one 
+    double qq[3];
+    TCL::ucopy(hp->fDir[2],qq,3);
+    TCL::ucopy(hp->fDir[1],hp->fDir[2],3);
+    TCL::ucopy(qq,hp->fDir[1],3);
+    if (hp->fDir[2][2]<0) TCL::vcopyn(hp->fDir[2],hp->fDir[2],3);
+    else                  TCL::vcopyn(hp->fDir[1],hp->fDir[1],3);
+  }  
+  
   if (ht) {
     double par[9];float pnt[3]={0};
     sh->GetBoundingCylinder(par);
