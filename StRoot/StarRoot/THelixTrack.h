@@ -10,6 +10,8 @@ const double *Arr() const 	{ return &mHH;}
       double *Arr()   	{ return &mHH;}
 const double &operator[](int idx) const 	{ return (&mHH)[idx];}
       double &operator[](int idx)       	{ return (&mHH)[idx];}
+      TCEmx_t &operator*=(double f)       	
+              { for (int i=0;i<6;i++) {Arr()[i]*=f;} return *this;}
 void Clear()  			{ memset(this,0,sizeof(*this));}
      TCEmx_t()			{ Clear();}
 void Set(const double *err);  	
@@ -32,6 +34,8 @@ const double *Arr() const 	{ return &mHH;}
       double *Arr()   	{ return &mHH;}
 const double &operator[](int idx) const 	{ return (&mHH)[idx];}
       double &operator[](int idx)       	{ return (&mHH)[idx];}
+      THEmx_t &operator*=(double f)       	
+              { for (int i=0;i<15;i++) {Arr()[i]*=f;} return *this;}
 void Clear()  			{ memset(this,0,sizeof(*this));}
 void Set(const double *err);
 void Set(const double *errxy,const double *errz);
