@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.10 2012/04/10 22:39:59 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.11 2012/04/19 00:58:32 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -74,7 +74,6 @@ enum {kFCF_CHOPPED=256		// 0x100 cluster is chopped from its neighbour: OFFLINE 
 static int nCall=0; nCall++;
 static int myGraph=0;
 
-int nErr = 0;
 StvDraw *myDraw=0;
 StvHits *myHits=0;
 if (myGraph) { //create canvas
@@ -90,8 +89,6 @@ if (myGraph) { //create canvas
   for (; ; ++(*mHitIter)) {
     stHit=*(*mHitIter);
     StDetectorId did = mHitIter->DetectorId();
-
-    if (did == kTpcId && TpcHitTest(stHit)>0) nErr++;
     
     if (did != didOld || !stHit) {
       if (didOld) {
@@ -108,16 +105,14 @@ if (myGraph) { //create canvas
 if (myHits) (*myHits)+= stiHit;   
 
     if (stiHit) {nHits++;nTotHits++;}  
-    else 	{nHitz++;nTotHitz++;} 
+    else 	{nHitz++;nTotHitz++;
+      if (did == kTpcId) TpcHitTest(stHit);} 
     didOld = did; 
-    if (!stiHit) continue;
-
   }
   int nIniHits = StTGeoHelper::Inst()->InitHits();
   assert(nTotHits==nIniHits);
   Info("LoadHits","Loaded %d good and failed %d of all hits",nTotHits,nTotHitz);
 if (myDraw) {myDraw->Hits(*myHits,kUnusedHit); myDraw->Wait();}
-  assert(!nErr);
   return nTotHits;
 }
 //_____________________________________________________________________________
