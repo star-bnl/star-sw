@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TRandomVector.cxx,v 1.2 2010/12/16 21:22:53 perev Exp $
+ * $Id: TRandomVector.cxx,v 1.3 2012/04/19 16:17:31 perev Exp $
  *
  ***************************************************************************
  *
@@ -105,23 +105,20 @@ const TVectorD& TRandomVector::Gaus()
 void TRandomVector::Test(int nevt)
 {
 enum {kMySize=15};
-TRandomVector *RV=0;
-TMatrixDSym S(kMySize);
+  TRandomVector *RV=0;
+  TMatrixDSym S(kMySize);
 
-if (nevt>0 ) {
-  for (int i=0;i<kMySize;i++) {
-   S[i][i] = (i+1)*(1+0.1*gRandom->Rndm());
-   for (int j=0;j<i;j++) {
-     double corr = sqrt(S[i][i]*S[j][j])*(0.5-gRandom->Rndm())*0.1;
-     S[i][j]=corr;  
-     S[j][i]=corr;  
-  } }
-  RV = new TRandomVector(S);
-} else { //vector case
   TVectorD V(kMySize);
   for (int i=0;i<kMySize;i++) {
     V[i] = (i+1)*(1+0.1*gRandom->Rndm());
+    S[i][i] = V[i];
   }
+
+if (nevt>0 ) {
+  RandRotate(S);
+  assert(TRandomVector::Sign(S)>0);
+  RV = new TRandomVector(S);
+} else { //vector case
   RV = new TRandomVector(V);
   S = RV->GetMtx();
 }  
@@ -150,3 +147,71 @@ int n = ((kMySize*kMySize+kMySize)/2);
 Qa/=(n);
 printf("Quality %g < %g < 1\n",Qa,maxQa);
 }
+//_____________________________________________________________________________
+void TRandomVector::RandRotate(TMatrixDSym& errMtx)
+{
+  int nDim = errMtx.GetNrows();
+  assert(Sign(errMtx)>0);
+  double spur = 0;
+  for (int i=0;i<nDim;i++){spur+=errMtx[i][i];}
+
+  TMatrixD T(nDim,nDim);for (int i=0;i<nDim;i++){T[i][i]=1.;}
+  for (int ir1=0;ir1<nDim;ir1++) {
+  for (int ir2=0;ir2<ir1 ;ir2++) {
+  for (int ic =0;ic <nDim;ic++ ) {
+    double x = T[ir1][ic];
+    double y = T[ir2][ic];
+    if (fabs(x)+fabs(y)<=0.) continue;
+    double c = gRandom->Rndm();
+    double s = sqrt(fabs(1.-c*c));
+    T[ir1][ic] = x*c + y*s;
+    T[ir2][ic] =-x*s + y*c;
+  }}}
+  errMtx.Similarity(T);
+  double spur2 = 0;
+  for (int i=0;i<nDim;i++){spur2+=errMtx[i][i];}
+  assert(fabs(spur2-spur)<(fabs(spur2)+fabs(spur))*1e-5);
+  assert(Sign(errMtx)>0);
+}
+
+//_____________________________________________________________________________
+double TRandomVector::Sign(const TMatrixDSym &Si)
+{
+  int n = Si.GetNrows();
+  TMatrixDSym S(Si);
+  TVectorD coe(n);
+  for (int i=0;i< n;++i) {
+    double qwe = S[i][i];
+    if(qwe<=0) return qwe;
+    qwe = pow(2.,-int(log(qwe)/(2*log(2))));
+    coe[i]=qwe;
+  }
+
+  for (int i=0;i< n;++i) {
+    for (int j=0;j< n;j++) {S[i][j]*=coe[i]*coe[j];}}
+
+  TVectorD EigVal(n);  
+  S.EigenVectors(EigVal);
+
+  double ans = 3e33;
+  for (int i=0;i<n;i++) {if (EigVal[i]<ans) ans = EigVal[i];}
+  return ans;
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
