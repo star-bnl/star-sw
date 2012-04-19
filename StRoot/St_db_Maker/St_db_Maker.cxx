@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.129 2012/03/20 23:44:00 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.130 2012/04/19 16:20:38 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.130  2012/04/19 16:20:38  perev
+// Add test for unrecognized file
+//
 // Revision 1.129  2012/03/20 23:44:00  perev
 // FullFileName() bug #2303 fix
 //
@@ -807,8 +810,11 @@ TDataSet *St_db_Maker::FindLeft(StValiSet *val, TDatime vals[2], const TDatime &
     if (set == val->fDat) continue;  //MySQL object ignored
     const char *filename = set->GetName();
     UInt_t ucur = St_db_Maker::Time(filename).Get();
-    if (uevent < ucur)
-    { utmp = ucur - uevent;
+    if (!ucur) {
+      Warning("FindLeft","*** Unrecognozed file %s ***",filename);
+      continue;
+    } else if (uevent < ucur) {
+      utmp = ucur - uevent;
       if (utmp <= udifrite) { udifrite=utmp; rite=set;}
     }else{
       utmp = uevent - ucur;
