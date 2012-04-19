@@ -366,24 +366,24 @@ mHz = hz;assert(fabs(hz)<0.002);
 const THEmx_t *emx = he->Emx();
 double  cosL = he->GetCos();
 double  sinL = he->GetSin();
-double  rho = he->GetRho();
+double  rho  = he->GetRho();
+double  dAdZ = -sinL*cosL*rho;
 mHH = emx->mHH;
 mHZ = cosL*emx->mHZ;
 mZZ = cosL*emx->mZZ*cosL;
-mHA = emx->mHA + (-sinL*rho)*emx->mHZ;
-mZA = (emx->mAZ + (-sinL*rho)*emx->mZZ)*cosL;
-mAA = emx->mAA + (-sinL*rho)*emx->mAZ + (emx->mAZ + (-sinL*rho)*emx->mZZ)*(-sinL*rho);
+mHA = emx->mHA + (dAdZ)*emx->mHZ;
+mZA = (emx->mAZ + (dAdZ)*emx->mZZ)*cosL;
+mAA = emx->mAA + (dAdZ)*emx->mAZ + (emx->mAZ + (dAdZ)*emx->mZZ)*(dAdZ);
 mHL = emx->mHL;
 mZL = emx->mZL*cosL;
-mAL = emx->mAL + emx->mZL*(-sinL*rho);
+mAL = emx->mAL + emx->mZL*(dAdZ);
 mLL = emx->mLL;
 mHP = (1/mHz)*emx->mHC;
 mZP = (1/mHz)*emx->mCZ*cosL;
-mAP = (1/mHz)*emx->mAC + (1/mHz)*emx->mCZ*(-sinL*rho);
+mAP = (1/mHz)*emx->mAC + (1/mHz)*emx->mCZ*(dAdZ);
 mLP = (1/mHz)*emx->mCL;
 mPP = (1/mHz)*emx->mCC*(1/mHz);
-Recov();
-
+  Recov();
 }  
 //______________________________________________________________________________
 void StvFitErrs::Get(THelixTrack *he) const
@@ -392,24 +392,25 @@ void StvFitErrs::Get(THelixTrack *he) const
   he->SetEmx(0);
   THEmx_t *emx = he->Emx();
   double  cosL = he->GetCos();
-  double  tanL = he->GetSin()/cosL;
+  double  sinL = he->GetSin();
   double  rho  = he->GetRho();
-
+  double  dAdZeta = sinL*rho;
   emx->mHH = mHH;
-  emx->mHA = ( tanL*rho)*mHZ + mHA;
-  emx->mAA = ( tanL*rho)*(mZZ*( tanL*rho) + mZA) + mZA*( tanL*rho) + mAA;
+  emx->mHA = ( dAdZeta)*mHZ + mHA;
+  emx->mAA = ( dAdZeta)*(mZZ*( dAdZeta) + mZA) + mZA*( dAdZeta) + mAA;
   emx->mHC = (mHz)*mHP;
-  emx->mAC = (mHz)*(mZP*( tanL*rho) + mAP);
+  emx->mAC = (mHz)*(mZP*( dAdZeta) + mAP);
   emx->mCC = (mHz)*mPP*(mHz);
   emx->mHZ = 1/cosL*mHZ;
-  emx->mAZ = 1/cosL*(mZZ*( tanL*rho) + mZA);
+  emx->mAZ = 1/cosL*(mZZ*( dAdZeta) + mZA);
   emx->mCZ = 1/cosL*mZP*(mHz);
   emx->mZZ = 1/cosL*mZZ*1/cosL;
   emx->mHL = mHL;
-  emx->mAL = mZL*( tanL*rho) + mAL;
+  emx->mAL = mZL*( dAdZeta) + mAL;
   emx->mCL = mLP*(mHz);
   emx->mZL = mZL*1/cosL;
   emx->mLL = mLL;
+
 }  
 //_____________________________________________________________________________
 void StvFitErrs::Set(const StvFitErrs &fr,double errFactor)
@@ -745,6 +746,7 @@ RETN: if (B!=buf) delete B;
 #include "TMatrixDSym.h"
 #include "TMatrixD.h"
 #include "TVectorD.h"
+#include "TVector3.h"
 #include "StarRoot/TRandomVector.h"
 //_____________________________________________________________________________
 ClassImp(StvNodeParsTest);
@@ -852,79 +854,157 @@ StvFitErrs fE;
   qA/=15;
   printf("Quality %g < %g < 1\n",qA,qAmax);
 }
+
+//_____________________________________________________________________________
+static void Add(THelixTrack &ht,const double add[5]) 
+{
+// add = H,A,C,Z,L
+  TVector3  pos(ht.Pos()),dir(ht.Dir()),ort(-dir[1],dir[0],0.);
+  ort = ort.Unit();
+  double rho=ht.GetRho();
+  pos+=ort*add[0]; pos[2]+=add[3];
+  dir.SetMagThetaPhi(1.,dir.Theta()-add[4],dir.Phi()+add[1]);
+  double wk[7]={pos[0],pos[1],pos[2],dir[0],dir[1],dir[2],rho+add[2]};
+  ht.Set(wk,wk+3,wk[6]);
+}
+
+
 //_____________________________________________________________________________
 void StvNodeParsTest::TestErrProp(int nEv)
 {
 
 StvNodePars iP,iPR,oP,oPR;
-double dia[5],*e,*er,vtx[3];
+THelixTrack iH,iHR,oH,ht;
+
+THEmx_t oHE,oHER;
+double dia[5],*e,*er,*vtx;
 
   iP._cosCA = 0.051522195951218416; iP._sinCA = -0.99867184876021664;  iP._x   = 56.80456301948584; 
   iP._y     = -179.95090442478528;  iP._z     = 16.833129146428401;    iP._psi = -1.5192513089402997; iP._ptin = -4.286089548109465; 
   iP._tanl  = -0.71077992742240803; iP._curv  = -0.0063779138641975935;iP._hz=(0.0014880496061989194);
-  
+  iP.ready();
 StvFitErrs iE,oE,oER;
-  iE.mHH = 0.0025928369042255385; iE.mHZ = -4.9934860023454386e-11; iE.mZZ = 0.014598355970801268; iE.mHA = -0.00059887440419442305; 
-  iE.mZA = 1.0958739205478152e-11; iE.mAA = 0.00026524379894739812; iE.mHL = 3.463001237863329e-12; iE.mZL = -0.0016525557966380938; 
-  iE.mAL = 8.3669926017237923e-13; iE.mLL = 0.00041855110437868546; iE.mHP = 0.0043962440767417576; iE.mZP = -2.904206508909407e-11; 
+  iE.mHH = 0.0025928369042255385;  iE.mHZ = -4.9934860023454386e-11; iE.mZZ = 0.014598355970801268; iE.mHA = -0.00059887440419442305; 
+  iE.mZA = 1.0958739205478152e-11; iE.mAA = 0.00026524379894739812;  iE.mHL = 3.463001237863329e-12; iE.mZL = -0.0016525557966380938; 
+  iE.mAL = 8.3669926017237923e-13; iE.mLL = 0.00041855110437868546;  iE.mHP = 0.0043962440767417576; iE.mZP = -2.904206508909407e-11; 
   iE.mAP = -0.0041320793241820105; iE.mLP = -2.5031139398137018e-12; iE.mPP = 0.78568815092933286; iE.SetHz(0.0014880496061989194);
 
-  e = iE.Arr();
-  for (int i=0,li=0;i< 5;li+=++i) {
-    dia[i]=e[li+i];
-    for (int j=0;j<i;j++) {
-      e[li+j] = sqrt(dia[i]*dia[j])*0.001*((j&2)-1);
-  } }
+  oER*=0.;
+  oHER.Clear();
 
-
+//		Prepare error matrix for TRandomVector
   TMatrixDSym S(5);
-  e = &iE.mHH;
+  e = iE.Arr();
+  for (int i=0,li=0;i< 5;li+=++i) {S[i][i] = e[li+i];}
+  TRandomVector::RandRotate(S);
+
+  for (int i=0,li=0;i< 5;li+=++i) {
+    for (int j=0;j<=i;j++)        { e[li+j] = S[i][j];}}
+//
+  iE.Print("Input StvFitErrs");
+
+  iP.get(&iH);	// nodePar => Helix
+  iE.Get(&iH);	// fitErr  => HelixErr
+  iE.Set(&iH,iP._hz);
+  iE.Print("Input StvFitErrs => THEmx_t => StvFitErrs");
+
+
+  iH.Emx()->Print("Input Helix Errs");
+  oH = iH;
+  double myDist = 33;
+  oH.Move(myDist);		//Move helix to 100cm
+  oP.set(&oH,iP._hz);		//helix100 => nodePar100
+  oE.Set(&oH,iP._hz);		//helixErr100 => fitErr100
+  oE.Print("Output StvFitErrs");
+  oH.Emx()->Print("Output Helix Errs");
+
+  vtx = oH.Pos();
+  TVector3 Vtx(vtx);
+  TVector3 Dir(oH.Dir());
+  TVector3 Nxy(-Dir[1],Dir[0],0.); Nxy = Nxy.Unit();
+
+static int iHELIX=0;
+
+//		Prepare error matrix for TRandomVector
+  e = (iHELIX) ? iH.Emx()->Arr() : iE.Arr();
   for (int i=0,li=0;i< 5;li+=++i) {
     for (int j=0;j<=i;j++    ) {
        S[i][j]=e[li+j]; S[j][i]=e[li+j];
     } }
   TRandomVector RV(S);
-  memset(&oER,0,sizeof(oER));
-  THelixTrack ht;
+
+//		Event loop
   for (int ev=0;ev <= nEv;ev++) {
     iPR = iP;
-    if (ev) {
-      const TVectorD &res = RV.Gaus();
-      StvFitPars fp(res.GetMatrixArray());
-      iPR+=fp;
-    }
-    iPR.get(&ht);
-    ht.SetEmx(0);
-    if (!ev) {iE.Get(&ht);}
-    ht.Backward();
-    if (!ev) {
-      ht.Move(100.);
-      memcpy(vtx,ht.Pos(),sizeof(vtx));
+    ht = iH;
+//		Randomize fit parameters
+    const TVectorD res = RV.Gaus();
+
+    if (iHELIX) { //Randomize helix directly
+      Add(ht,res.GetMatrixArray());
     } else {
-      double my100 = ht.Path(vtx);
-      ht.Move(my100);
+      StvFitPars fp(res.GetMatrixArray()); iPR+=fp;
+//		Create THelixTrack from StvNodePars
+      iPR.get(&ht);
+//		Set no error matrix to helix
+      ht.SetEmx(0);
     }
-
-    oPR.set(&ht,iP._hz);
-
-    if (!ev) {
-      oP=oPR;
-      oE.Set(&ht,iP._hz);
       
-    } else {
-      StvFitPars fp = (oPR-oP);
-      double *e = oER.Arr();
-      for (int i=0,li=0;i< 5;li+=++i) {
-         for (int j=0;j<=i;j++    ) {
-         e[li+j]+=fp.Arr()[i]*fp.Arr()[j];
-    } } }
+// //		Change helix direction for fun
+//     ht.Backward();
+//		Move random helix to DCA point of etalon vertex
+    double my100 = ht.Path(vtx);
+    assert(fabs(my100-myDist) <20);
+    ht.Move(my100);
+    oPR.set(&ht,iP._hz);
+    StvFitPars fp = (oPR-oP);
+    double *e = oER.Arr();
+    double *d = fp.Arr();
+    for (int i=0,li=0;i< 5;li+=++i) {
+      for (int j=0;j<=i;j++    ) {
+        e[li+j]+=d[i]*d[j];
+    } } 
+    double dS = ht.Path(vtx[0],vtx[1]);
+    ht.Move(dS);
+    double D[5];
+    TVector3 VPos(ht.Pos()),VDir(ht.Dir());
+    D[0] = (VPos-Vtx)*Nxy;
+    D[1] = VDir.DeltaPhi(Dir);
+    D[2] = ht.GetRho()-oH.GetRho();
+    D[3] = VPos[2]-Vtx[2];
+    D[4] = -(VDir.Theta()-Dir.Theta());// "-" due to theta)= Pi-Lambda
+
+    e = oHER.Arr();
+    for (int i=0,li=0;i< 5;li+=++i) {
+      for (int j=0;j<=i;j++    ) {
+        e[li+j]+=D[i]*D[j];
+    } } 
+
+
   }//EndEvts
-  for (int j=0;j<15;j++) { oER.Arr()[j] /=nEv;}
+
+  oER *= (1./nEv);
+  oHER*= (1./nEv);
+  
+  printf("*** Check THelixTrack Error matrix ***\n");
+  e = oH.Emx()->Arr();
+  er = oHER.Arr();
+  double qA=0,qAmax=0;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    dia[i]=e[li+i];
+    for (int j=0;j<=i;j++) {
+    double dif = (er[li+j]-e[li+j])/sqrt(dia[i]*dia[j]);
+    printf("(%d %d) \t%g = \t%g \t%g\n",i,j,er[li+j],e[li+j],dif);
+    dif = fabs(dif);
+    qA+= (dif); if (dif>qAmax) qAmax=dif;
+  } }
+  printf("Quality %g < %g < 1\n",qA,qAmax);
 
 
+  printf("*** Check StvFitErr Error matrix ***\n");
   e = oE.Arr();
   er = oER.Arr();
-  double qA=0,qAmax=0;
+  qA=0;qAmax=0;
   for (int i=0,li=0;i< 5;li+=++i) {
     dia[i]=e[li+i];
     for (int j=0;j<=i;j++) {
@@ -937,6 +1017,7 @@ StvFitErrs iE,oE,oER;
   printf("Quality %g < %g < 1\n",qA,qAmax);
 
 }
+
 //_____________________________________________________________________________
 #include "TMatrixT.h"
 #include "TMatrixTSym.h"
