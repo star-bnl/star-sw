@@ -163,7 +163,7 @@ EnTransfCS::EnTransfCS
     r = 1.0 / sqrt(r);
     r = log(r);
     log1C[ne] = r;
-    check_econd11a( log1C[ne] , < 0.0 , "ne="<<ne, mcerr);
+    // check_econd11a( log1C[ne] , < 0.0 , "ne="<<ne, mcerr);
   }  
   for (ne = 0; ne < qe; ne++) {
     r = 2.0 * 0.511 * betta2 / hmd->energy_mesh->get_ec(ne);

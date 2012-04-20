@@ -5209,10 +5209,10 @@ MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
         if (debug) {
           std::cout << className << "::GenerateGasTable:\n";
           std::cout << "    E = " << eFields[i] 
-                    << " V/cm, B = " << bFields[j] 
-                    << " T, angle: " << bAngles[k] << " rad\n";
+                    << " V/cm, B = " << bFields[k] 
+                    << " T, angle: " << bAngles[j] << " rad\n";
         }
-        RunMagboltz(eFields[i], bFields[j], bAngles[k],
+        RunMagboltz(eFields[i], bFields[k], bAngles[j],
                     numColl, verbose,
                     vx, vy, vz,
                     difl, dift,
