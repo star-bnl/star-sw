@@ -1783,10 +1783,9 @@ Medium::SetFieldGrid(double emin, double emax, int ne, bool logE,
     bAnglesNew[0] = HalfPi;
   } else {
     for (int i = 0; i < na; ++i) {
-      bAnglesNew[i] = i * astep;
+      bAnglesNew[i] = amin + i * astep;
     }
   }
-  
   SetFieldGrid(eFieldsNew, bFieldsNew, bAnglesNew);
   
 }
