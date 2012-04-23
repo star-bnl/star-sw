@@ -4,11 +4,14 @@
  * \author A. Rose LBL, Y. Fisyak BNL, L. Barnby U. Birmingham
  * \date   May 2007
  *
- * $Id: StPrepEmbedMaker.h,v 1.5 2011/12/05 15:49:05 zhux Exp $
+ * $Id: StPrepEmbedMaker.h,v 1.6 2012/04/23 23:52:54 zhux Exp $
  *
  *
  * -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.h,v $
+ * Revision 1.6  2012/04/23 23:52:54  zhux
+ * Added a switch to cut on |VpdVz-Vz|
+ *
  * Revision 1.5  2011/12/05 15:49:05  zhux
  * Add switch to prime the first event with deuterons (for dbar, tbar and hypertritons embedding).
  * see tickets 2097 for details.
@@ -77,7 +80,7 @@ class StPrepEmbedMaker : public StMaker {
   Int_t  InitRun(const int runnum);
   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.5 2011/12/05 15:49:05 zhux Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.6 2012/04/23 23:52:54 zhux Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -100,8 +103,10 @@ class StPrepEmbedMaker : public StMaker {
   void SetTrgOpt(const Int_t TrgId); // Set trigger id cut
   void SetZVertexCut(const Double_t vzlow, const Double_t vzhigh); // Set z-vertex cut
   void SetVrCut(const Double_t vr) ; // Set vr = sqrt{vx^2 + vy^2} cut
+  void SetVpdVzCut(const Double_t vpdvz) ; // Set |vpdvz-vz| cut
   void OpenFzFile() ; /// Switch to enable writing .fz file
   void SetPrimeMode(const Bool_t flag=kFALSE) ; //Switch to prime mode for nucleus (with geantID > 10000) embedding
+  void SetVpdVzCutMode(const Bool_t flag=kFALSE) ; //Switch to turn on cut for |VpdVz-Vz|
 
   /// Do phasespace command from input pt, y
   ///   Force to make rapidity distribute within +/- mRapidityMaximumCut for 'spectrum' option
@@ -135,6 +140,8 @@ class StPrepEmbedMaker : public StMaker {
   Bool_t mPrimeMode;  /// Flag to enable/disable prime mode
   Int_t  mSavePid;
   Bool_t mPrimed;  // 
+
+  Bool_t mVpdVzCutMode;  /// Flag to enable/disable prime mode
 
   ClassDef(StPrepEmbedMaker,0)    
 };

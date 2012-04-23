@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.5 2011/12/05 15:50:49 zhux Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.6 2012/04/23 23:53:23 zhux Exp $
  *
  */
 
@@ -50,6 +50,7 @@ struct embedSettings{
   Double_t vzlow;
   Double_t vzhigh;
   Double_t vr;
+  Double_t vpdvz;
   Int_t NReqTrg;
   static const Int_t nTriggerId = 32 ;
   Int_t ReqTrgId[nTriggerId];
@@ -98,6 +99,7 @@ StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name)
   mOpenFzFile = kFALSE; /// Do not write .fz file
   mPrimeMode = kFALSE; /// Do not prime the first event
   mPrimed = kFALSE;
+  mVpdVzCutMode = kFALSE; /// Do not cut on VpdVz
 }
 //____________________________________________________________________________________________________
 StPrepEmbedMaker::~StPrepEmbedMaker() { 
@@ -317,6 +319,53 @@ Int_t StPrepEmbedMaker::Make()
       return kStSKIP;
     }
   }
+
+  // more skipping. cut on VpdVz in btofheader
+  Float_t vpdvz;
+  if(mSkipMode == kTRUE && mVpdVzCutMode == kTRUE)
+  {
+      // (Run 10, 11 and 12) need an external file (moretags.root).
+      nFound=0;
+      nFound = (Int_t) mTree->Draw("VpdVz",
+				   Form("mRunNumber==%i&&mEventNumber==%i",
+					EvtHddr->GetRunNumber(),
+					EvtHddr->GetEventNumber()),"goff");
+
+      //get primary vertex errors from moretags.root
+      if(nFound == -1 && mMoreTree) {
+        nFound = (Int_t) mMoreTree->Draw("VpdVz",
+             Form("RunId==%i&&EvtId==%i",
+                  EvtHddr->GetRunNumber(),
+                  EvtHddr->GetEventNumber()),
+             "goff");
+
+        LOG_INFO << "StPrepEmbedMaker::Make Use moretags file to extract VpdVz, nFound =" << nFound << endm ;
+      }
+
+      if (nFound != 1) {
+        LOG_ERROR << "StPrepEmbedMaker::Make Run/Event = " << EvtHddr->GetRunNumber() << "/" << EvtHddr->GetEventNumber()
+             << " has been found in moretags file " << nFound << " times" <<  endm;
+        return kStErr;
+     }
+     vpdvz = mMoreTree->GetV1()[0];
+     LOG_INFO << vpdvz << endm;
+
+     //cut on events
+     if( fabs(vpdvz) < 1e-7 ) {
+	  LOG_INFO << "StPrepEmbedMaker::Make  Event " << EvtHddr->GetEventNumber()
+	     << " has tags with vertex at (" << xyz[0] << "," << xyz[1] << "," << xyz[2]
+	     << "), VpdVz = " << vpdvz
+	     << " - VpdVz is too small (i.e. no BTOF in this run), skipping." << endm;
+	  return kStSKIP;
+     }
+     if( fabs(xyz[2]-vpdvz) > mSettings->vpdvz ) {
+	  LOG_INFO << "StPrepEmbedMaker::Make  Event " << EvtHddr->GetEventNumber()
+	     << " has tags with vertex at (" << xyz[0] << "," << xyz[1] << "," << xyz[2]
+	     << "), VpdVz = " << vpdvz
+	     << " - out of |Vz-VpdVz| range, skipping." << endm;
+	  return kStSKIP;
+     }
+  }
   //Done set up for event.
 
   //Setup embedded particle
@@ -529,6 +578,27 @@ void StPrepEmbedMaker::SetPrimeMode(const Bool_t flag)
 }
 
 //____________________________________________________________________________________________________
+void StPrepEmbedMaker::SetVpdVzCutMode(const Bool_t flag)
+{
+
+  mVpdVzCutMode=flag;
+
+  LOG_INFO << "StPrepEmbedMaker::SetVpdVzCutMode  set VpdVz cut mode= ";
+
+  if( mVpdVzCutMode ){
+    LOG_INFO << " ON" << endm ;
+  }
+  else{
+    LOG_INFO << " OFF" << endm ;
+  }
+ 
+  if(flag){
+     //now moretags.root needed for VpdVz  
+     SetSpreadMode(flag);
+  }
+}
+
+//____________________________________________________________________________________________________
 Int_t StPrepEmbedMaker::getMultiplicity(const StEvtHddr& EvtHddr, const Int_t nprimarytracks) const
 {
   /// Get multiplicity generated in the embedding
@@ -604,6 +674,20 @@ void StPrepEmbedMaker::SetVrCut(const Double_t vr)
 }
 
 //________________________________________________________________________________
+void StPrepEmbedMaker::SetVpdVzCut(const Double_t vpdvz)
+{
+  // Make sure vpdvz > 0
+  if( vpdvz <= 0.0 ){
+    LOG_ERROR << "StPrepEmbedMaker::SetVpdVzCut  input |vpdvz-vz| <= 0" << endm;
+    return;
+  }
+
+  mSettings->vpdvz = vpdvz ;
+  LOG_INFO << "StPrepEmbedMaker::SetVpdVzCut  Cut |vpdvz-vz| in " << mSettings->vpdvz
+    << " (cm)" << endm;
+}
+
+//________________________________________________________________________________
 void StPrepEmbedMaker::OpenFzFile()
 {
   // Swtich to enable writing .fz file (default is off, i.e. do not write .fz file) 
@@ -656,6 +740,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.6  2012/04/23 23:53:23  zhux
+ * Added a switch to cut on |VpdVz-Vz|
+ *
  * Revision 1.5  2011/12/05 15:50:49  zhux
  * Add switch to prime the first event with deuterons (for dbar, tbar and hypertritons embedding).
  * see ticket# 2097 for details.
