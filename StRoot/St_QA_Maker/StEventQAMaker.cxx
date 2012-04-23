@@ -582,6 +582,11 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_rzf0->Fill(dif.z(),1.);
 	hists->m_glb_rzl0->Fill(azimdifl,0.);
         hists->m_glb_rzl0->Fill(difl.z(),1.);
+
+        if (TMath::Abs(dcaToBeam.z()-pvert.z())<6) {
+        // Fill impact parameters only for tracks near vtx in z
+        //   to reduce pile-up contributions
+
         hists->m_glb_impactT->Fill(logImpact,2.);
         hists->m_glb_simpactT->Fill(sImpact,2.);
         if ((firstPoint.z() < 0) && (lastPoint.z() < 0)) { // east-only
@@ -597,6 +602,8 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_impactTTS->Fill(logImpact,1.);
         hists->m_glb_impactrTTS->Fill(globtrk->impactParameter(),1.);
         }
+
+        } // vtx z cut for impact parameter
 	
 	// TPC padrow histogram
 	Int_t minpadrow = 0;
@@ -2416,8 +2423,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.110 2012/03/23 23:15:26 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.111 2012/04/23 02:54:36 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.111  2012/04/23 02:54:36  genevb
+// Reduce pile-up contributions in impact parameter plots
+//
 // Revision 2.110  2012/03/23 23:15:26  genevb
 // Include eemcMatch,btofMatch,crossCM in looking for good vertices
 //
