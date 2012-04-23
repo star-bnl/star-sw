@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.41 2012/03/02 23:56:48 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.42 2012/04/23 18:17:30 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.42  2012/04/23 18:17:30  genevb
+// Modify list of BEMC hists for QA shift
+//
 // Revision 2.41  2012/03/02 23:56:48  genevb
 // Place TPC sector plots in QA Shift
 //
@@ -218,20 +221,16 @@
   ":tpx,svt;tpc,svt:QaGtrkRZf0TS",
   ":tpx,svt:QaPtrkRZf0",
   ":tpx,svt;tpc,svt:QaPtrkRZf0TS",
-  ":emc:bemcClNum",
-  ":emc:bemcClEnergy",
-  ":emc:bemcEta",
-  ":emc:bemcPhi",
   ":bsmd:bsmdeClNum",
   ":bsmd:bsmdeEta",
   ":bsmd:bsmdpClNum",
   ":bsmd:bsmdpPhi",
-  ":emc:EmcCat4_Point_Energy",
-  ":emc:EmcCat4_Point_Eta",
-  ":emc:EmcCat4_Point_Phi",
-  ":emc:EmcCat4_Sigma_Eta",
-  ":emc:EmcCat4_Sigma_Phi",
-  ":emc: Point Flag",
+  ":emc:bsmd:EmcCat4_Point_Energy",
+  ":emc:bsmd:EmcCat4_Point_Eta",
+  ":emc:bsmd:EmcCat4_Point_Phi",
+  ":emc:bsmd:EmcCat4_Sigma_Eta",
+  ":emc:bsmd:EmcCat4_Sigma_Phi",
+  ":emc:bsmd: Point Flag",
   "QaGRpvtxDx",
   "QaGRpvtxDy",
   "QaGRpvtxDz",
