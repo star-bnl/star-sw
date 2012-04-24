@@ -595,7 +595,8 @@ void tofBuilder::event(daqReader *rdr)
 
   float TOF_L1mult = (float)trgd->tofMultiplicity(0);
 
-  contents.TOF_L1mult_vs_ZDCadcsum->Fill(TOF_L1mult, trgd->zdcHardwareSum());
+  float zdcHardwaresum = float(trgd->zdcAttenuated(east)) + float(trgd->zdcAttenuated(west));
+  contents.TOF_L1mult_vs_ZDCadcsum->Fill(TOF_L1mult, zdcHardwaresum);
   contents.TOF_L1mult_vs_sumL0->Fill(TOF_L1mult, sum_L0_hit);
 
   contents.TOF_EventCount->Fill(1);
