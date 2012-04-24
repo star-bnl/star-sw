@@ -33,8 +33,12 @@ public:
       // UPC_Zdc_HG
       TH1* h_zdce_sum;             // spectrum of ZDCE unattanuated sum
       TH1* h_zdcw_sum;             // spectrum of ZDCW unattanuated sum
-      TH1* h_zdce_sum_vs_ctb_sum;  // ZDCE unattanuated sum vs. CTB ADC sum
-      TH1* h_zdcw_sum_vs_ctb_sum;  // ZDCW unattanuated sum vs. CTB ADC sum
+      TH1* h_zdce_sum_vs_zdcw_sum;  // ZDCE unattanuated sum vs. ZDCW Unnattenuated sum
+
+      TH1* h_bbce_adc;             // BBC East adc
+      TH1* h_bbcw_adc;             // BBC East adc
+
+      TH1* upcTOF_L1mult_vs_ZDCadcsum; //TOF mult vs ZDCadcsum
     };
   } contents;
   
