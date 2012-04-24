@@ -366,8 +366,14 @@ void trgBuilder::event(daqReader *rdr)
   h478_zdc_unatt_east3->Fill(float(trgd->zdcADC(east,3)));
   h479_zdc_unatt_west3->Fill(float(trgd->zdcADC(west,3)));
 
-  h482_zdc_sum_bbc->Fill(float(trgd->bbcADCSum(east))+float(trgd->bbcADCSum(west)), float(trgd->zdcHardwareSum()));
-  h483_zdc_hardwaresum->Fill(float(trgd->zdcHardwareSum()));
+
+  // Hardware Sum no longer exists. It is the sum of the attenuated signals...
+  // h482_zdc_sum_bbc->Fill(float(trgd->bbcADCSum(east))+float(trgd->bbcADCSum(west)), float(trgd->zdcHardwareSum()));
+  // h483_zdc_hardwaresum->Fill(float(trgd->zdcHardwareSum()));
+
+  float zdcHardwareSum = float(trgd->zdcAttenuated(east)) + float(trgd->zdcAttenuated(west));
+  h482_zdc_sum_bbc->Fill(float(trgd->bbcADCSum(east))+float(trgd->bbcADCSum(west)), zdcHardwareSum);
+  h483_zdc_hardwaresum->Fill(float(zdcHardwareSum));
 
   unsigned int bunch7bit = trgd->bunchId7Bit();
   h266_bbc_bunchid_y->Fill(bunch7bit);
