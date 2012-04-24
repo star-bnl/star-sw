@@ -234,10 +234,10 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 
 	sprintf(fname,"/RTScache/altro_ped_%d_%03d.txt",rb+1,timebins) ;
 
-//	fff = fopen(fname,"w") ;
-//	if(fff==0) {
-//		LOG(WARN,"Can't open \"%s\"",fname) ;
-//	}
+	fff = fopen(fname,"w") ;
+	if(fff==0) {
+		LOG(WARN,"Can't open \"%s\"",fname) ;
+	}
 
 	char *rbuff = buff ;
 
