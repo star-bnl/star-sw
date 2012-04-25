@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.48 2011/08/23 22:15:10 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.49 2012/04/25 19:22:56 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.49  2012/04/25 19:22:56  genevb
+ * More use of GLWeights, more realistic geometry model in PredictSpaceCharge
+ *
  * Revision 1.48  2011/08/23 22:15:10  genevb
  * Introduce sector alignment distortion corrections and big speed improvements to Poisson relaxations
  *
@@ -374,6 +377,7 @@ class StMagUtilities {
 						 Float_t Pt, 
 						 Float_t VertexZ, 
 						 Float_t PseudoRapidity, 
+						 Float_t Phi,
 						 Float_t DCA,  
 						 const unsigned int RowMask1, 
 						 const unsigned int RowMask2, 
