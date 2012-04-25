@@ -364,8 +364,8 @@ int tofBuilder::parseData(daqReader *rdr)
 		2902.7,2902.3,2894.8,2895.3,2895.3,2899.7,2897.8,2899.8,2897.7,2899.8,
 		2900.0,2905.5,2908.3,2903.9,2906.9,2904.0,2912.6,2914.0,2914.6,2913.3,
 		2913.0,2913.3,2913.2,2913.2,2904.3,2905.4,2904.8,2904.1,2903.9,2897.7,
-		2897.9,2898.1,2898.1,2898.4,  0.0,2911.0,2911.1,2911.3,2911.3,2919.8,
-		2919.9,  0.0,2919.7,2918.4,2918.7,2918.5,2919.8,2918.4,2918.0,2918.4,
+		2897.9,2898.1,2898.1,2898.4,   0.0,2911.0,2911.1,2911.3,2911.3,2919.8,
+		2919.9,   0.0,2919.7,2918.4,2918.7,2918.5,2919.8,2918.4,2918.0,2918.4,
 		2917.8,2910.1,2913.0,2909.8,2910.1,2910.8,2910.2,2901.7,2901.5,2902.4,
 		259.5,271.7
       };
@@ -438,7 +438,8 @@ int tofBuilder::parseData(daqReader *rdr)
 	    moduleid=trayid;
 	    modulechan=tdcchan2upvpdPMTchan(globaltdcchan,edgeid,trayid);
 	    globalmodulechan=modulechan;
-		if (timeDiff<trigwindowLowpertray[trayid-1] || timeDiff>trigwindowHighpertray[trayid-1]){ 
+		if ( timeDiff >= trigwindowLowpertray[trayid-1] 
+		  && timeDiff <= trigwindowHighpertray[trayid-1] ){ 
 			contents.upvpd_hitmap[edgeid-4]->Fill(modulechan);  
 			numberforsort= time+globalmodulechan*1.e5+trayid*1.e8;
 			if(edgeid==4) leadinghits.push_back(numberforsort);
