@@ -119,8 +119,10 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   
   //L1mult
   plots[++n] = new JevpPlot(contents.TOF_L1mult_vs_ZDCadcsum);
+  plots[n]->optstat = 0;
   plots[n]->setDrawOpts("colz");
   plots[++n] = new JevpPlot(contents.TOF_L1mult_vs_sumL0);
+  plots[n]->optstat = 0;
   plots[n]->setDrawOpts("colz");
   
   //error check
@@ -159,10 +161,12 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   
   //hits vs tray
   plots[++n] = new JevpPlot(contents.TOF_Tray_hits1);
+  plots[n]->optstat = 0;
   plots[n]->addHisto(contents.TOF_Tray_hits2);
+  plots[n]->optstat = 0;
   plots[n]->logy=1;
-  plots[n]->getHisto(0)->histo->SetFillColor(5);plots[n]->optstat = 0;
-  plots[n]->getHisto(1)->histo->SetFillColor(7);plots[n]->optstat = 0;  
+  plots[n]->getHisto(0)->histo->SetFillColor(5); plots[n]->optstat = 0;
+  plots[n]->getHisto(1)->histo->SetFillColor(7); plots[n]->optstat = 0;  
   
   plots[++n] = new JevpPlot(contents.TOF_EventCount);
   plots[++n] = new JevpPlot(contents.hBunchidShiftVSthub);
