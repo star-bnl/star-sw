@@ -388,6 +388,8 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           StPhysicalHelixD hh = triGeom->helix();
 
           Float_t eta=pvec.pseudoRapidity();
+          Float_t phi=0;
+          Double_t pathlen = 0;
           //Float_t DCA=hh.geometricSignedDistance(0,0); // for testing only
           Float_t DCA3=-999;
           Float_t DCA2=-999;
@@ -400,9 +402,12 @@ Int_t StSpaceChargeEbyEMaker::Make() {
             // helix() gets the sign of DCA2, thelix() gets the error
             THelixTrack thelix = triDcaGeom->thelix();
             thelix.Dca(ooo.x(),ooo.y(),&DCAerr);
+            phi = TMath::ATan2(dcahh.cy(pathlen),dcahh.cx(pathlen));
           } else {
             DCA3 = hh.distance(ooo,kFALSE);
             DCA2 = hh.geometricSignedDistance(ooo.x(),ooo.y());
+            pathlen = hh.pathLength(ooo.x(),ooo.y());
+            phi = TMath::ATan2(hh.cy(pathlen),hh.cx(pathlen));
           }
           if (DCA3 > 4) continue; // cut out pileup tracks!
           if (QAmode) cutshist->Fill(31);
@@ -441,8 +446,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           
           Float_t space = 10000.;
           if (!(m_ExB->PredictSpaceChargeDistortion(ch,oldPt,ooo.z(),
-	  //   eta,DCA2,map.data(0),map.data(1),space))) continue;
-	     eta,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space))) continue;
+	     eta,phi,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space))) continue;
           if (QAmode) cutshist->Fill(33);
 
           Double_t spaceErr = TMath::Abs(space*DCAerr/DCA2);
@@ -1171,8 +1175,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.40 2012/01/14 00:21:04 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.41 2012/04/25 19:23:55 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.41  2012/04/25 19:23:55  genevb
+// Pointing angle near vertex needed for improved PredictSpaceCharge
+//
 // Revision 1.40  2012/01/14 00:21:04  genevb
 // Add code for EMC match, set default to required
 //
