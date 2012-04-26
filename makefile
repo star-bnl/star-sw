@@ -238,7 +238,8 @@ $(OBJDIR)/ViewGeometry.o: \
 
 $(OBJDIR)/Medium.o: \
 	$(SRCDIR)/Medium.cc $(INCDIR)/Medium.hh \
-	$(INCDIR)/FundamentalConstants.hh
+	$(INCDIR)/FundamentalConstants.hh \
+	$(INCDIR)/Numerics.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/MediumGas.o: \

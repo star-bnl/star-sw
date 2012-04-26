@@ -111,7 +111,7 @@ namespace Numerics {
          std::vector<double>& yAxis,
          std::vector<double>& zAxis, 
          int nx, int ny, int nz,
-         double xx, double yy, double zz, double f, int iOrder);
+         double xx, double yy, double zz, double& f, int iOrder);
 
 }
 

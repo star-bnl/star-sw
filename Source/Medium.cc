@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <cmath>
 
 #include "Medium.hh"
@@ -286,6 +287,17 @@ Medium::ElectronVelocity(const double ex, const double ey, const double ez,
       ubt[0] = ue[0];
       ubt[1] = ue[1];
       ubt[2] = ue[2];
+    }
+    
+    if (debug) {
+      std::cout << std::setprecision(5);
+      std::cout << className << "::ElectronVelocity:\n";
+      std::cout << "    unit vector along E:     ("
+                << ue[0] << ", " << ue[1] << ", " << ue[2] << ")\n";
+      std::cout << "    unit vector along E x B: ("
+                << uexb[0] << ", " << uexb[1] << ", " << uexb[2] << ")\n";
+      std::cout << "    unit vector along Bt:    ("
+                << ubt[0] << ", " << ubt[1] << ", " << ubt[2] << ")\n";
     }
 
     // Calculate the velocities in all directions.

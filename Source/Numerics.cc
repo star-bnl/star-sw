@@ -787,18 +787,18 @@ Divdif(const std::vector<double>& f, const std::vector<double>& a,
 
 bool
 Boxin3(std::vector<std::vector<std::vector<double> > >& value, 
-      std::vector<double>& xAxis, 
-      std::vector<double>& yAxis, 
-      std::vector<double>& zAxis, 
-      int nx, int ny, int nz, 
-      double xx, double yy, double zz, double f, int iOrder) {
+       std::vector<double>& xAxis, 
+       std::vector<double>& yAxis, 
+       std::vector<double>& zAxis, 
+       int nx, int ny, int nz, 
+       double xx, double yy, double zz, double& f, int iOrder) {
 
-  std::cout << nx << ", " << ny << ", " << nz << "\n";
- //-----------------------------------------------------------------------
- //   BOXIN3 - interpolation of order 1 and 2 in an irregular rectangular
- //            3-dimensional grid.
- //   (Last changed on 13/ 2/00.)
- //-----------------------------------------------------------------------
+  // std::cout << nx << ", " << ny << ", " << nz << "\n";
+  //-----------------------------------------------------------------------
+  //   BOXIN3 - interpolation of order 1 and 2 in an irregular rectangular
+  //            3-dimensional grid.
+  //   (Last changed on 13/ 2/00.)
+  //-----------------------------------------------------------------------
 
   int iX0 = 0, iX1 = 0;
   int iY0 = 0, iY1 = 0;
@@ -1212,16 +1212,17 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
   }
 
   f = 0.;
-  for (int i = iX0; i <= iX1; i++) {
-    for (int j = iY0; j <= iY1; j++) {
-      for (int k = iZ0; k <= iZ1; k++) {
-        std::cout << "i = " << i << ", j = " << j << ", k = " << k << "\n";
-        std::cout << "value: " << value[i][j][k] << "\n";
-        std::cout << "fX = " << fX[i - iX0] << ", fY = " << fY[j - iY0] << ", fZ = " << fZ[k - iZ0] << "\n";
+  for (int i = iX0; i <= iX1; ++i) {
+    for (int j = iY0; j <= iY1; ++j) {
+      for (int k = iZ0; k <= iZ1; ++k) {
+        // std::cout << "i = " << i << ", j = " << j << ", k = " << k << "\n";
+        // std::cout << "value: " << value[i][j][k] << "\n";
+        // std::cout << "fX = " << fX[i - iX0] << ", fY = " << fY[j - iY0] << ", fZ = " << fZ[k - iZ0] << "\n";
         f += value[i][j][k] * fX[i - iX0] * fY[j - iY0] * fZ[k - iZ0];
       }
     }
   }
+  // std::cout << f << std::endl;
   return true;
 
 }
