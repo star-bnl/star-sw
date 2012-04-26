@@ -39,6 +39,11 @@ void RunJetFinder2009sim(int nevents = 1e6,
   gSystem->Load("StMCAsymMaker");
   gSystem->Load("StRandomSelector");
   gSystem->Load("libfastjet.so");
+  gSystem->Load("libCDFConesPlugin.so");
+  gSystem->Load("libEECambridgePlugin.so");
+  gSystem->Load("libJadePlugin.so");
+  gSystem->Load("libNestedDefsPlugin.so");
+  gSystem->Load("libSISConePlugin.so");
   gSystem->Load("StJetFinder");
   gSystem->Load("StJetSkimEvent");
   gSystem->Load("StJets");
