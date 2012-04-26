@@ -80,7 +80,7 @@ class StFgtGeneralBase : public StMaker {
  public:
   StFgtGeneralBase(const Char_t* name="FgtGeneralBase");
 
-
+  void doLooseClustering();
   Int_t Make();
   Int_t Finish();
   Int_t fillFromStEvent();
