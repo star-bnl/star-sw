@@ -24,12 +24,17 @@
 #include <set>
 
 #define CHARGE_MEASURE clusterCharge
-
+#define MAX_DIST_STRIP_R 0.1
+#define MAX_DIST_STRIP_PHI 0.05
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StFgtCollection.h"
 //disk for which I want to calculate efficieny
+
+
+#define MAX_CHARGE_RATIO
+#define MIN_CHARGE_RATIO
 
 #define DISK_EFF 2
 #define QUAD_EFF 1
@@ -43,6 +48,37 @@
 #define MAX_DIST2 1.0
 
 #define MIN_NUM_POINTS 3
+#define DISK_DIM 40
+#define NUM_EFF_BIN 10
+
+
+
+
+void doNormalize(TH2D** hEff, TH2D** hNonEff)
+{
+  for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
+    {
+      TH2D* tmpAllCounts=(TH2D*)hEff[iD]->Clone("tmp");
+      hEff[iD]->Add(hNonEff[iD]);//all counts
+      for(int nx=1;nx<hEff[iD]->GetNbinsX()+1;nx++)
+	{
+	  for(int ny=1;ny<hEff[iD]->GetNbinsY()+1;ny++)
+	    {
+	      Double_t denom=hEff[iD]->GetBinContent(nx,ny);
+	      if(denom>0 && (tmpAllCounts->GetBinContent(nx,ny)/denom)<=1.0)
+		{
+		  hEff[iD]->SetBinContent(nx,ny,tmpAllCounts->GetBinContent(nx,ny)/denom);
+		}
+	      else
+		{
+		  hEff[iD]->SetBinContent(nx,ny,0.0);
+		}
+	    }
+	}
+  delete tmpAllCounts;
+    }
+
+}
 
 
 pair<double,double> StFgtGenAVEMaker::getDca(  vector<AVTrack>::iterator it)
@@ -70,6 +106,109 @@ pair<double,double> StFgtGenAVEMaker::getDca(  vector<AVTrack>::iterator it)
   return pair<double,double>(optZ,sqrt(dist));
 }
 
+
+Double_t StFgtGenAVEMaker::findClosestStrip(Char_t layer, double ord, Int_t iD, Int_t iQ)
+{
+  if(iD<0 || iD >5)
+    {
+      return -99999;
+    }
+  vector<generalCluster> &hitVec=*(pClusters[iD]);
+  Double_t dist=99999;
+  for(vector<generalCluster>::iterator it=hitVec.begin();it!=hitVec.end();it++)
+    {
+      if(it->layer!=layer)
+	continue;
+      Double_t mDist=9999;
+      if(it->layer!='R')
+	{
+	  mDist=fabs(it->posPhi-ord);
+	}
+      else
+	mDist=fabs(it->posR-ord);
+      
+      if(mDist<dist)
+	dist=mDist;
+    }
+  return dist;
+}
+
+//is there something where we expect it?
+Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t iq)
+{
+      Double_t maxRCharge=-9999;
+      Double_t maxPhiCharge=-9999;
+      Double_t maxRChargeUncert=-9999;
+      Double_t maxPhiChargeUncert=-9999;
+      Int_t maxRInd=-1;
+      Int_t maxPInd=-1;
+      for(int i=0;i<  pStrips[iD*4+iq].size();i++)
+	{
+	  Int_t geoId=pStrips[iD*4+iq][i].geoId;
+	  generalStrip& pStrip=pStrips[iD*4+iq][i];
+	  Short_t disc, quadrant,strip;
+	  Char_t layer;
+	  Double_t ordinate, lowerSpan, upperSpan;//, prvOrdinate;
+	  StFgtGeom::getPhysicalCoordinate(geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+	  StFgtGeom::decodeGeoId(geoId,disc, quadrant, layer, strip);
+	  char buffer[100];
+	  //      if(layer=='P' && disc==iD && iq==quadrant)
+	  //	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
+	  if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<0.7) || (layer=='P' && fabs(ordinate-phi)<0.03) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.03)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.03)))
+	    {
+	      if(layer=='P')
+		{
+		  if(pStrip.charge>maxPhiCharge)
+		    {
+		      maxPhiCharge=pStrip.charge;
+		      maxPhiChargeUncert=pStrip.chargeUncert;
+		      maxPInd=i;
+		    }
+		}
+	      else
+		{
+		  if(pStrip.charge>maxRCharge)
+		    {
+		      maxRCharge=pStrip.charge;
+		      maxRInd=i;
+		      maxRChargeUncert=pStrip.chargeUncert;
+		    }
+		}
+	    }
+	}
+      if(maxRInd>=0 && maxPInd>=0)
+	{
+	  if(maxRCharge>3*maxRChargeUncert && maxPhiCharge>3*maxRChargeUncert)
+	    {
+	      ////might pick up phi strips... oh wlll
+	      if(maxRInd>0)
+		maxRCharge+=pStrips[iD*4+iq][maxRInd-1].charge;
+	      if(maxRInd< (pStrips[iD*4+iq].size()-1))
+		maxRCharge+=pStrips[iD*4+iq][maxRInd+1].charge;
+	      if(maxPInd>0)
+		maxPhiCharge+=pStrips[iD*4+iq][maxPInd-1].charge;
+	      if(maxPInd< (pStrips[iD*4+iq].size()-1))
+		maxPhiCharge+=pStrips[iD*4+iq][maxPInd+1].charge;
+	      
+	      if(maxRCharge>maxPhiCharge)
+		{
+		  if(maxRCharge/maxPhiCharge<2)
+		    return true;
+		  else
+		    return false;
+		   }
+	      else
+		{
+		  if(maxPhiCharge/maxPhiCharge<2)
+		    return true;
+		  else
+		    return false;
+		}
+	    }
+	  
+	}
+      return false;
+}
 
 
 Double_t StFgtGenAVEMaker::findClosestPoint(double xE, double yE, Int_t iD)
@@ -534,6 +673,24 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	    ///for disk for which we want to compute effi:
 	    if(i==DISK_EFF && quad==QUAD_EFF)
 	      {
+		//do the r/phi thing
+		if(findClosestStrip('R',r,i,quad)<MAX_DIST_STRIP_R)
+		  radioPlotsEffR[i]->Fill(xExp,yExp);
+		else
+		  radioPlotsNonEffR[i]->Fill(xExp,yExp);
+		if(findClosestStrip('P',r,i,quad)<MAX_DIST_STRIP_PHI)
+		  radioPlotsEffPhi[i]->Fill(xExp,yExp);
+		else
+		  radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
+
+		if(isSomewhatEff(r,phi,i,quad))
+		  radioPlotsEffLoose[i]->Fill(xExp,yExp);
+		else
+		  radioPlotsNonEffLoose[i]->Fill(xExp,yExp);
+
+		///
+
+
 
 		Double_t closestPoint=findClosestPoint(xExp,yExp,i);
 		cout <<"cloest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
@@ -1055,7 +1212,7 @@ Int_t StFgtGenAVEMaker::Finish(){
   outTxtFile->close();
   cout <<" 2 " << endl;
   gStyle->SetPalette(1);
-  cout <<"cluster plotter finish function " <<endl;
+  cout <<"AVE finish function " <<endl;
   Int_t ierr = kStOk;
   cout <<" 3 " << endl;
 
@@ -1089,12 +1246,19 @@ counter++;
 	  hIpDca->Fill(dca.second);
 	}
     }
-
+  cout <<"canvases etc.. " << endl;
   //////////////////////////////////////////////////
   TCanvas* cRadio=new TCanvas("radioPlots","radioPlot",1000,1500);
+  TCanvas* cRadioLoose=new TCanvas("radioPlotsLoose","radioPlotLoose",1000,1500);
+  TCanvas* cRadioR=new TCanvas("radioPlotsR","radioPlotR",1000,1500);
+  TCanvas* cRadioPhi=new TCanvas("radioPlotsPhi","radioPlotPhi",1000,1500);
+
   TCanvas* cRadioHits=new TCanvas("radioPlotsHits","radioPlotHits",1000,1500);
   TCanvas* cRadioNonHits=new TCanvas("radioPlotsNonHits","radioPlotNonHits",1000,1500);
+  cout <<"divide "<<endl;
   cRadio->Divide(2,3); //6 discs
+  cRadioR->Divide(2,3); //6 discs
+  cRadioPhi->Divide(2,3); //6 discs
   cRadioHits->Divide(2,3); //6 discs
   cRadioNonHits->Divide(2,3); //6 discs
   TCanvas* cRPRatio=new TCanvas("rPhiRatio","rPhiRatios",1000,1500);
@@ -1103,7 +1267,7 @@ counter++;
   TCanvas* cREff=new TCanvas("crEff","crEff",1000,1500);
 
   cREff->Divide(2,3); //6 discs
-
+  cout <<"drawing hits " <<endl;
   for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
     {
       //      cRadio->cd(iD+1)->SetLogz();
@@ -1111,7 +1275,6 @@ counter++;
       radioPlotsEff[iD]->Draw("colz");
       cRadioNonHits->cd(iD+1);
       radioPlotsNonEff[iD]->Draw("colz");
-
     }
   cRadioHits->SaveAs("radioPlotsHits.png");
   cRadioNonHits->SaveAs("radioPlotsNonHits.png");
@@ -1191,7 +1354,15 @@ counter++;
   cClusterChargeR->SaveAs("clusterChargeR.png");
   cClusterChargePhi->SaveAs("clusterChargePhi.png");
 
-  //  cout <<"saving .." <<endl;
+   cout <<"saving .." <<endl;
+
+
+  doNormalize(radioPlotsEffR, radioPlotsNonEffR);
+  cout <<"norm 1 " <<endl;
+  doNormalize(radioPlotsEffPhi, radioPlotsNonEffPhi);
+  cout <<"norm 2 " <<endl;
+  doNormalize(radioPlotsEffLoose, radioPlotsNonEffLoose);
+  cout <<"norm 3 " <<endl;
 
   for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
     {
@@ -1228,38 +1399,16 @@ counter++;
       //      radioPlotsEff[iD]->Divide(tmpAllCounts);
       radioPlotsEff[iD]->SetMaximum(1.0);
       radioPlotsEff[iD]->Draw("colz");
-      TArc *innerArc = new TArc(0,0,103.5+11.5,0.0,90.0);
-      TArc *outerArc = new TArc(0,0,394.0-11.5,0.0,90.0);
-      TLine *left = new TLine( 11.5, 103.5+11.5, 11.5, 394.0-11.5 );
-      TLine *right = new TLine( 103.5+11.5, 11.5, 394.0-11.5, 11.5 );
-      TLine *center = new TLine(
-				(103.5+11.5)*cos( 0.785398163 ),
-				(103.5+11.5)*sin( 0.785398163 ),
-				(394.0-11.5)*cos( 0.785398163 ),
-				(394.0-11.5)*sin( 0.785398163 )
-				);
-      TLine *weird = new TLine(
-			       (394.0-11.5)*cos( 0.190240888 ),
-			       (394.0-11.5)*sin( 0.190240888 ),
-			       (394.0-11.5)*cos( 0.891863248 ),
-			       (394.0-11.5)*sin( 0.891863248 )
-			       );
-      innerArc->SetFillStyle(0);
-      outerArc->SetFillStyle(0);
-      innerArc->SetLineWidth(2);
-      outerArc->SetLineWidth(2);
-      left->SetLineWidth(2);
-      right->SetLineWidth(2);
-      center->SetLineWidth(2);
-      weird->SetLineWidth(2);
-      outerArc->Draw("only");
-      innerArc->Draw("only");
-      left->Draw();
-      right->Draw();
-      center->Draw();
-      weird->Draw();
 
-
+      radioPlotsEffR[iD]->SetMaximum(1.0);
+      radioPlotsEffPhi[iD]->SetMaximum(1.0);
+      radioPlotsEffLoose[iD]->SetMaximum(1.0);
+      cRadioR->cd(iD+1);
+      radioPlotsEffR[iD]->Draw("colz");
+      cRadioPhi->cd(iD+1);
+      radioPlotsEffPhi[iD]->Draw("colz");
+      cRadioLoose->cd(iD+1);
+      radioPlotsEffLoose[iD]->Draw("colz");   
 
 
 
@@ -1281,6 +1430,10 @@ counter++;
     }
   cRadio->SaveAs("radioPlotsEff.png");
   cRadio->SaveAs("radioPlotsEff.pdf");
+  cRadioR->SaveAs("radioPlotsR.png");
+  cRadioPhi->SaveAs("radioPlotsPhi.png");
+  cRadioLoose->SaveAs("radioPlotsLoose.png");
+
   cRadio->cd(0);
   chargeRatioInEffDisk->Draw("colz");
   cRadio->SaveAs("chargeRatioInEffDisk.png");
@@ -1325,9 +1478,9 @@ Int_t StFgtGenAVEMaker::Init(){
   char buffer[100];
 
 
-  chargeRatioInEffDisk=new TH2D("chargeRatioInEffDisk","chargeRatioInEffDisk",10,-40,40,10,-40,40);
+  chargeRatioInEffDisk=new TH2D("chargeRatioInEffDisk","chargeRatioInEffDisk",NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
   chargeRatioInEffDisk->SetMaximum(2.0);
-  chargeAsymInEffDisk=new TH2D("chargeAsymInEffDisk","chargeAsymInEffDisk",10,-40,40,10,-40,40);
+  chargeAsymInEffDisk=new TH2D("chargeAsymInEffDisk","chargeAsymInEffDisk",NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
   chargeAsymInEffDisk->SetMaximum(1.0);
   chargeCorrInEffDisk=new TH2D("chargeCorrInEffDisk","chargeCorrInEffDisk",50,0,50000,50,0,50000);
   hChargeAsym=new TH1D("chargeAsym","chargeAsym",100,0,50);
@@ -1336,6 +1489,10 @@ Int_t StFgtGenAVEMaker::Init(){
 
   radioPlotsEff=new TH2D*[kFgtNumDiscs];
   radioPlotsNonEff=new TH2D*[kFgtNumDiscs];
+  radioPlotsEffR=new TH2D*[kFgtNumDiscs];
+  radioPlotsNonEffR=new TH2D*[kFgtNumDiscs];
+  radioPlotsEffPhi=new TH2D*[kFgtNumDiscs];
+  radioPlotsNonEffPhi=new TH2D*[kFgtNumDiscs];
   rPhiRatioPlots=new TH1D*[kFgtNumDiscs];
   rEff=new TH1D*[kFgtNumDiscs];
   rNonEff=new TH1D*[kFgtNumDiscs];
@@ -1368,12 +1525,19 @@ Int_t StFgtGenAVEMaker::Init(){
     {
       //      cout <<"id: " << iD <<endl;
       sprintf(buffer,"radioDiskEff_%d",iD);
-      radioPlotsEff[iD]=new TH2D(buffer,buffer,10,-40,40,10,-40,40);
+      radioPlotsEff[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+      sprintf(buffer,"radioDiskEffR_%d",iD);
+      radioPlotsEffR[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+      sprintf(buffer,"radioDiskEffPhi_%d",iD);
+      radioPlotsEffPhi[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+      sprintf(buffer,"radioDiskEffLoose_%d",iD);
+      radioPlotsEffLoose[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+
       //      cout <<"1" <<endl;
       sprintf(buffer,"rEff_%d",iD);
-      rEff[iD]=new TH1D(buffer,buffer,100,0,40);
+      rEff[iD]=new TH1D(buffer,buffer,100,0,DISK_DIM);
       sprintf(buffer,"rNonEff_%d",iD);
-      rNonEff[iD]=new TH1D(buffer,buffer,100,0,40);
+      rNonEff[iD]=new TH1D(buffer,buffer,100,0,DISK_DIM);
       sprintf(buffer,"clusterSizeR_Disk_%d",iD);
       h_clusterSizeR[iD]=new TH1D(buffer,buffer,20,0,20);
       h_clusterSizeR[iD]->SetFillColor(kYellow);
@@ -1402,7 +1566,13 @@ Int_t StFgtGenAVEMaker::Init(){
 	  chargeCorr[iD*4+iq]=new TH2D(buffer,buffer,200,0,70000,200,0,70000);
 	}
       sprintf(buffer,"radioDiskNonEff_%d",iD);
-      radioPlotsNonEff[iD]=new TH2D(buffer,buffer,10,-40,40,10,-40,40);
+      radioPlotsNonEff[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+      sprintf(buffer,"radioDiskNonEffR_%d",iD);
+      radioPlotsNonEffR[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+      sprintf(buffer,"radioDiskNonEffPhi_%d",iD);
+      radioPlotsNonEffPhi[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+      sprintf(buffer,"radioDiskNonEffLoose_%d",iD);
+      radioPlotsNonEffLoose[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
       for(int nx=0;nx<rEff[iD]->GetNbinsX();nx++)
 	{
 	  //	   rEff[iD]->SetBinContent(nx,0.1);

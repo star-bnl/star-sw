@@ -97,7 +97,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    Int_t Finish();
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.2 2012/04/26 13:49:39 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.3 2012/04/26 20:08:18 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    ofstream* outTxtFile;
    Short_t getQuadFromCoo(Double_t x, Double_t y);
@@ -110,6 +110,8 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    StFgtCollection *mFgtCollectionPtr;
    Double_t getRPhiRatio(vector<generalCluster>::iterator hitIterBegin, vector<generalCluster>::iterator hitIterEnd);
    Double_t findClosestPoint(double xE, double yE, Int_t iD);
+   Bool_t isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t iq);
+   Double_t findClosestStrip(Char_t layer, double ord, Int_t iD, Int_t iQ);
    // for knowing what & how to plot
 
 
@@ -119,6 +121,17 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    //   Double_t getRPhiRatio();
    TH2D** radioPlotsEff;
    TH2D** radioPlotsNonEff;
+
+   TH2D** radioPlotsEffR;
+   TH2D** radioPlotsNonEffR;
+
+   TH2D** radioPlotsEffPhi;
+   TH2D** radioPlotsNonEffPhi;
+
+   TH2D** radioPlotsEffLoose;
+   TH2D** radioPlotsNonEffLoose;
+
+
    TH1D** rPhiRatioPlots;
    TH1D** rEff;
    TH1D* hChargeAsym;

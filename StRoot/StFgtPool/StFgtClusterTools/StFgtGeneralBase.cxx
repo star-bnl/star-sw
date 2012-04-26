@@ -217,7 +217,7 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		     //               addClus( i, clus->getCentralStripGeoId(), clus->getR(), clus->getPhi() );
          };
       }
-            if(fgtStrips)
+      if(fgtStrips)
       //      if(false)
 	{
 	  //	  cout <<"got strip " <<endl;
@@ -258,6 +258,7 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 
 		    pStrips[disc*4+quad].back().maxAdc=maxAdc;
 		    //		    	    cout <<"just set max Adc to " << maxAdc <<endl;
+
 		    if(mapGeoId2Cluster.find(geoId)!=mapGeoId2Cluster.end())
 		      {
 			//have to find all strips...
@@ -270,6 +271,9 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		
 	      }
 	 }
+
+
+
 	 ///find the other strips for clusters....
 	 //	 cout <<"finding the other strip " <<endl;
 	 for(int iDx=0;iDx<6;iDx++)
@@ -329,7 +333,73 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 
 	}
    }
+   //   doLooseClustering();
+
+
    return ierr;
 };
+
+
+void StFgtGeneralBase::doLooseClustering()
+{
+  for(int iDx=0;iDx<6;iDx++)
+    {
+
+      Int_t stripCounter=0;
+      for(int iQ=0;iQ<4;iQ++)
+	{
+	  for(vector<generalStrip>::iterator it=pStrips[iDx*4+iQ].begin();it!=pStrips[iDx*4+iQ].end();it++)
+	    {
+	      if(it->charge > 3*it->chargeUncert && it->seedType==kFgtSeedTypeNo)
+		{
+		  //not cluster midpoint
+
+		  Char_t layerPrv, layerNext, layer;
+		  Double_t posR, posPhi;
+		  Int_t geoId=it->geoId;
+		   Short_t quad, disc, strip;
+		   Double_t ordinate, lowerSpan, upperSpan;
+		   Double_t discZ=StFgtGeom::getDiscZ(disc);
+		   Int_t clusterSize=3;
+		   StFgtGeom::getPhysicalCoordinate(it->geoId,disc,quad,layer,ordinate,lowerSpan,upperSpan);
+		   if((it+1)<pStrips[iDx*4+iQ].end())
+		     StFgtGeom::getPhysicalCoordinate((it+1)->geoId,disc,quad,layerNext,ordinate,lowerSpan,upperSpan);
+		   if((it-1)>=pStrips[iDx*4+iQ].begin())
+		     StFgtGeom::getPhysicalCoordinate(it->geoId,disc,quad,layerPrv,ordinate,lowerSpan,upperSpan);
+
+		  if((it+1)<pStrips[iDx*4+iQ].end() && layerNext==layer && (it+1)->charge > it->charge)
+		    continue;
+		   
+		   Double_t clusterCharge=it->charge;
+		   if((it+1)<pStrips[iDx*4+iQ].end() && (layer==layerNext))
+		     clusterCharge+=(it+1)->charge;
+		   if((it-1)>=pStrips[iDx*4+iQ].begin() && (layer==layerPrv))
+		     clusterCharge+=(it-1)->charge;
+
+		   StFgtGeom::decodeGeoId(geoId,disc, quad, layer, strip);
+		   StFgtGeom::getPhysicalCoordinate(it->geoId,disc,quad,layer,ordinate,lowerSpan,upperSpan);
+		   if( layer == 'R' ){
+		     posR = ordinate;
+		     posPhi = 0.5*(upperSpan + lowerSpan);  
+		   } else {
+		     posPhi=ordinate;
+		     posR = 0.5*(upperSpan + lowerSpan);   // mid point of the strip
+		   };		   
+		   pClusters[iDx]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge));		  
+		   mapGeoId2Cluster[geoId]=(pClusters[iDx]->size()-1);
+		   (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=stripCounter;
+		   (*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdc=it->maxAdc;
+		   //don't care for now
+		   (*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdcInt=it->maxAdc;
+		}
+	      stripCounter++;
+	    }
+	}
+    }
+
+}
+
+
+
 
 ClassImp(StFgtGeneralBase);
