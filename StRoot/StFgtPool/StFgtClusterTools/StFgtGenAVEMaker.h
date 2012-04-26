@@ -24,12 +24,20 @@ struct AVPoint
   Double_t phiCharge;
   Double_t rSize;
   Double_t phiSize;
+  Int_t rMaxAdc;
+  Int_t phiMaxAdc;
+  Int_t rMaxAdcInt;
+  Int_t phiMaxAdcInt;
+  Int_t geoIdR;
+  Int_t geoIdPhi;
 
   Int_t dID;
   Int_t quadID;
   AVPoint(){};
   AVPoint(Double_t mx, Double_t my, Double_t mz, Double_t mr, Double_t mPhi, Int_t mdID,Int_t mQuad,  Double_t mRCharge, Double_t mPhiCharge, Double_t mRSize, Double_t mPhiSize)
   {
+    geoIdR=-1;
+    geoIdPhi=-1;
     x=mx;
     y=my;
     z=mz;
@@ -41,6 +49,12 @@ struct AVPoint
     phiCharge=mPhiCharge;
     rSize=mRSize;
     phiSize=mPhiSize;
+    rMaxAdc=-1;
+    phiMaxAdc=-1;
+    rMaxAdcInt=-1;
+    phiMaxAdcInt=-1;
+
+
   }
 };
 
@@ -50,8 +64,13 @@ struct AVTrack
   Double_t my;
   Double_t ax;
   Double_t ay;
+  Double_t ipZEv;
   Double_t ipZ;
   Double_t chi2;
+  Double_t dca;
+  Double_t trkZ;
+
+
   AVTrack(){};
   AVTrack(Double_t m_mx, Double_t m_my, Double_t m_ax, Double_t m_ay, Double_t m_ipZ=0.0,Double_t m_chi2=0.0)
   {
@@ -59,8 +78,11 @@ struct AVTrack
     my=m_my;
     ax=m_ax;
     ay=m_ay;
-    ipZ=m_ipZ;
+    ipZEv=m_ipZ;
     chi2=m_chi2;
+    dca=-9999;
+    trkZ=-9999;
+    ipZ=-9999;
   }
 };
 
@@ -75,14 +97,19 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    Int_t Finish();
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.1 2012/04/16 19:37:37 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.2 2012/04/26 13:49:39 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
+   ofstream* outTxtFile;
+   Short_t getQuadFromCoo(Double_t x, Double_t y);
+   pair<Double_t,Double_t> getChargeRatio(Float_t r, Float_t phi, Int_t iD, Int_t iq);
+   Bool_t printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq);
    Bool_t getTrack(vector<AVPoint>& points, Double_t ipZ);
+   pair<double,double> getDca(  vector<AVTrack>::iterator it);
    vector<AVTrack> m_tracks;
    // for accessing the data
    StFgtCollection *mFgtCollectionPtr;
    Double_t getRPhiRatio(vector<generalCluster>::iterator hitIterBegin, vector<generalCluster>::iterator hitIterEnd);
-
+   Double_t findClosestPoint(double xE, double yE, Int_t iD);
    // for knowing what & how to plot
 
 
@@ -94,8 +121,18 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    TH2D** radioPlotsNonEff;
    TH1D** rPhiRatioPlots;
    TH1D** rEff;
+   TH1D* hChargeAsym;
+   TH1D* hChargeRatio;
    TH1D** rNonEff;
+   TH2D* chargeRatioInEffDisk;
+   TH2D* chargeAsymInEffDisk;
+   TH2D* chargeCorrInEffDisk;
    TH2D* tpcFgtZVertexCorr;
+   TH2D* tpcFgtZVertexCorr2;
+   TH2D* tpcFgtZVertexCorr3;
+
+
+
 
    TH2D** chargeCorr;
    TH1D** h_clusterSizeR;
@@ -104,11 +141,18 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    TH1D** h_clusterChargePhi;
 
    TH2D* hIp;
-   TH1D* hIpZAtX0;
-   TH1D* hIpZAtY0;
+   TH1D* hIpZ;
+   TH1D* hIpDca;
+
 
    TH1D* hTrkZ;
    TH1D* hChi2;
+   TH1D* hBx;
+   TH1D* hBy;
+   TH1D* hResidua;
+
+   TH1D* hMx;
+   TH1D* hMy;
 
    TFile* myRootFile;
    int runningEvtNr;

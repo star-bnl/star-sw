@@ -554,16 +554,16 @@ Int_t StFgtGenPlotter::Init(){
       for(int iQ=0;iQ<4;iQ++)
 	{
 	  sprintf(buffer,"clusterMult%d_QuadR%d_phi",iD,iQ);
-	  multPerDiscR[iD*2+iQ]=new TH1I(buffer,buffer,200,0,10);
+	  multPerDiscR[iD*2+iQ]=new TH1I(buffer,buffer,10,0,10);
 	  multPerDiscR[iD*2+iQ]->SetFillColor(kYellow);
 	  sprintf(buffer,"clusterMult%d_QuadP%d_phi",iD,iQ);
-	  multPerDiscP[iD*2+iQ]=new TH1I(buffer,buffer,200,0,10);
+	  multPerDiscP[iD*2+iQ]=new TH1I(buffer,buffer,10,0,10);
 	  multPerDiscP[iD*2+iQ]->SetFillColor(kYellow);
 	  sprintf(buffer,"seeds%d_QuadR%d_phi",iD,iQ);
-	  seedsPerDiscR[iD*2+iQ]=new TH1I(buffer,buffer,200,0,10);
+	  seedsPerDiscR[iD*2+iQ]=new TH1I(buffer,buffer,10,0,10);
 	  seedsPerDiscR[iD*2+iQ]->SetFillColor(kYellow);
 	  sprintf(buffer,"seeds%d_QuadP%d_phi",iD,iQ);
-	  seedsPerDiscP[iD*2+iQ]=new TH1I(buffer,buffer,200,0,10);
+	  seedsPerDiscP[iD*2+iQ]=new TH1I(buffer,buffer,10,0,10);
 	  seedsPerDiscP[iD*2+iQ]->SetFillColor(kYellow);
 	}
       cout <<"2" <<endl;
@@ -575,8 +575,10 @@ Int_t StFgtGenPlotter::Init(){
 	  hCChargePosSpaceR[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,200,10,35, 200, 0, 2000);
 	  sprintf(buffer,"clusterSizeDisk%d_Quad%d_phi",iD,iQ);
 	  hClusSizePhi[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,1000,-4,4, 20, 0, 20);
+	  //	  hClusSizePhi[iD*kFgtNumQuads+iQ]->SetFillColor(kYellow);
 	  sprintf(buffer,"clusterSizeDisk%d_Quad%d_R",iD,iQ);
 	  hClusSizeR[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,1000,10,35, 20, 0, 20);
+	  //	  hClusSizeR[iD*kFgtNumQuads+iQ]->SetFillColor(kYellow);
 	  sprintf(buffer,"clusterSizeDisk%d_Quad%d_ElecSpace",iD,iQ);
 	  hClusSizeElecSpace[iD*kFgtNumQuads+iQ]=new TH2D(buffer,buffer,100,0,1000, 20, 0, 20);
 	  sprintf(buffer,"clusterChargeDisk%d_Quad%d_ElecSpace",iD,iQ);

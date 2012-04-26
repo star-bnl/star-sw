@@ -29,6 +29,8 @@ struct generalStrip
     seedType=mSeedType;
     charge=mCharge;
     chargeUncert=mChargeUncert;
+    maxAdc=-1;
+
   };
   Int_t geoId;
   Int_t ped;
@@ -37,6 +39,8 @@ struct generalStrip
   Int_t adc[7]; //timebins
   Double_t charge;
   Double_t chargeUncert;
+  Double_t maxAdc;
+
 };
 struct generalCluster
 {
@@ -54,6 +58,8 @@ struct generalCluster
       clusterSize=cs;
       clusterCharge=cc;
       centerStripIdx=-1;
+      maxAdcInt=-1;
+      maxAdc=-1;
     };
     Int_t centralStripGeoId;
     Char_t layer;
@@ -66,6 +72,8 @@ struct generalCluster
     Int_t clusterSize;
     Int_t clusterCharge;
   Int_t centerStripIdx;
+  Double_t maxAdc;
+  Double_t maxAdcInt;
 };
 
 class StFgtGeneralBase : public StMaker {
@@ -74,12 +82,19 @@ class StFgtGeneralBase : public StMaker {
 
 
   Int_t Make();
+  Int_t Finish();
   Int_t fillFromStEvent();
   Int_t fillFromMuDst();
 
  protected:
+   TH2D* chargeMaxAdcCorr;
+   TH2D* chargeMaxAdcIntCorr;
+   TH1D* hIpZEv;
   map<Int_t, Int_t> mapGeoId2Cluster;
   StFgtDb* mDb;
+  Double_t vtxZ;
+  Int_t vtxRank;
+  Int_t evtNr;
   vector<generalCluster> clustersD1;
   vector<generalCluster> clustersD2;
   vector<generalCluster> clustersD3;
