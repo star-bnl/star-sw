@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.248 2012/01/30 17:19:59 perev Exp $
+// $Id: StMaker.cxx,v 1.249 2012/04/27 00:17:45 perev Exp $
 //
 //
 /*!
@@ -810,11 +810,7 @@ Int_t StMaker::Init()
       maker->StartTimer();
       
       if (GetDebug()) {
-#ifdef STAR_LOGGER 
         LOG_DEBUG << "*** Call << " << maker->ClassName() << ":Init() ***" << endm;       
-#else      
-        printf("\n*** Call %s::Init() ***\n\n",maker->ClassName());
-#endif      
      }
       TString ts1(maker->ClassName()); ts1+="("; ts1+=maker->GetName(); ts1+=")::";
       TString ts2 = ts1; ts2+="Make ";
@@ -823,11 +819,7 @@ Int_t StMaker::Init()
       maker->fMemStatClear = new StMemStat(ts2);
       
       if ( maker->Init()) {
-#ifdef STAR_LOGGER 
         LOG_ERROR << "   Maker "<< maker->GetName() << " failed in Init" << endm;
-#else        
-        printf("   Maker %s failed in Init\n", maker->GetName());
-#endif        
         return kStErr;
       }
       maker->StopTimer();
@@ -864,17 +856,7 @@ void StMaker::StartMaker()
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
   /*if (GetNumber()>3)*/ 
-  if (fMemStatMake) {
-     if (GetNumber()>20) fMemStatMake->Start();
-     else  if (GetDebug()) {
-#ifdef STAR_LOGGER 
-        LOG_DEBUG << "StMaker::StartMaker : cannot use StMemStat (no Init()) in [" << 
-              GetName() << "]" << endm;
-#else        
-        printf("StMaker::StartMaker : cannot use StMemStat (no Init()) in [%s]\n",GetName());
-#endif        
-     }
-  }
+  if (fMemStatMake && GetNumber()>20) fMemStatMake->Start();
 
   
 
@@ -891,20 +873,7 @@ void StMaker::EndMaker(Int_t ierr)
   ::doPs(GetName(),"EndMaker");
   
   /*if (GetNumber()>3)*/ 
-  if (fMemStatMake) {
-     if (GetNumber()>20) fMemStatMake->Stop();
-     else if (GetDebug()) {
-#ifdef STAR_LOGGER     
-     LOG_DEBUG << "StMaker::EndMaker : cannot use StMemStat (no Init()) in [" 
-               <<   GetName() 
-               << "]" 
-               << endm ;    
-#else     
-        printf("StMaker::EndMaker : cannot use StMemStat (no Init()) in [%s]\n",GetName());
-#endif
-     }
-  }
-
+  if (fMemStatMake && GetNumber()>20) fMemStatMake->Stop();
 
   StopTimer();
   // Restore the previous logger status
@@ -1974,6 +1943,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.249  2012/04/27 00:17:45  perev
+// Cleanup
+//
 // Revision 1.248  2012/01/30 17:19:59  perev
 // devE geometry added
 //
