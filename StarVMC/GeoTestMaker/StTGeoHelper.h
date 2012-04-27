@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.20 2012/03/21 23:43:32 perev Exp $
+// $Id: StTGeoHelper.h,v 1.21 2012/04/27 00:14:25 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -268,7 +268,7 @@ StHitPlane   *GetCurrentHitPlane ();
         void  AddHitPlane(StHitPlane *pla);
 
 const StHitPlane *AddHit(void *hit,const float xyz[3],unsigned int hardw,int seed);
-      StHitPlane *FindHitPlane(const float xyz[3]);
+      StHitPlane *FindHitPlane(const float xyz[3],int &sure);
 
         void  ShootZR(double z,double rxy);
 
