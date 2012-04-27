@@ -83,6 +83,9 @@ void StvDiver::SetSkip(int skip)
 //_____________________________________________________________________________
 int  StvDiver::Dive()
 {
+// ****************** Replacing ROOT random by empty one. Dangerous
+// ****************** At the end of method it is returned back
+  assert(gRandom != gMyRandom);
   TRandom *myRandom = gRandom;
   gRandom = gMyRandom;
 
@@ -96,7 +99,7 @@ int  StvDiver::Dive()
     if (!mDir) mHelix->Backward();
 
     TVirtualMC::GetMC()->ProcessEvent();
-    if (mSteps->GetExit()==kDiveBreak) return kDiveBreak;
+    if (mSteps->GetExit()==kDiveBreak) break;
 
     TVector3 pos = mSteps->CurrentPosition().Vect();
     TVector3 mom = mSteps->CurrentMomentum().Vect();
@@ -340,7 +343,7 @@ static int nCall=0; nCall++;
   if (fabs(pos[2])<200) {
     assert (curva*rho>=-1e-6);
 
-    assert (fabs(curva)+fabs(rho)< 1e-4 
+    assert (fabs(curva)+fabs(rho)< 1e-3 
           ||fabs(curva-rho)<=0.5*(fabs(curva)+fabs(rho))*(dL+1));
   } 
 
