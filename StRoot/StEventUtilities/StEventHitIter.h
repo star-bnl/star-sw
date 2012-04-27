@@ -5,74 +5,70 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StEventHelper                                                        //
+// StEventHitIter                                                       //
 //                                                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
 #include "Rtypes.h"
+#include "TObject.h"
 #include "StEnumerations.h"
-#include "StHit.h"
+#include "vector"
 class StEvent;
 class StHit;
 
 
+//namespace QWERTY {
 //..............................................................................
-class StHitIter 
+class StHitIter : public TObject
 {
-private:
-  class StkCell_t {
-  public:
-    const void *mV;	//pointer to collection of objects
-    int mN;		//size of collection
-    int mJ; 		//current index of object in collection
-  };
-enum {kINI=0,kDOW=1,kHOR=2,kUPP=3,kHIT=4,kEND};
+public: 
+    		StHitIter();
+virtual        ~StHitIter();
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *operator++();
+virtual const TObject *Get () const;
+virtual const TObject *GetObject (int idx) const=0;
+virtual           int  GetSize   ()        const=0;
+virtual  StDetectorId  DetectorId() const {return kUnknownId;}
+                 void  SetDowIter(StHitIter *it) {fDowIter=it;}
+virtual          void  UPath(ULong64_t &upath) const;
 protected:
-    StHitIter(const void *cont=0);
-virtual const void *GetObj(const void *cont,int lev,int idx) const =0; 
-virtual       int  GetSize(const void *cont,int lev        ) const =0; 
-public:
-virtual void Reset(const StEvent *evt=0);
-virtual void Reset(const void *cont);
-virtual StDetectorId DetectorId() const = 0;
-virtual int          HitPlaneId() const{return 0;};
-virtual int operator++();
-virtual StHit *operator*();
-virtual UInt_t UPath() const;
-virtual const void *GetContainer(const StEvent *ev) const=0;
-virtual void Print(const char *opt="");
+
+const TObject *fCont;
+StHitIter  *fDowIter;
+int fJIter;
+int fNIter;
+};
+//..............................................................................
+class StHitIterGroup : public StHitIter {
+public: 
+    		StHitIterGroup();
+virtual        ~StHitIterGroup();
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *operator++();
+virtual const TObject *Get () const;
+virtual const StHit *operator*() const 		{return (StHit*)Get();}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize   () const 	{return fGroup.size();};
+virtual StDetectorId DetectorId()   const 	{return fDetectorId;}
+                void UPath(ULong64_t &upa) const;
+              UInt_t UPath() const;
+virtual void Add(StHitIter* iter);
 protected:
-const void *fCont;
-int fKase;
-int fLev;
-StkCell_t fStk[10];
+mutable StDetectorId fDetectorId;
+std::vector<StHitIter*> fGroup;
 };
 
 //..............................................................................
-class StEventHitIter : public StHitIter {
-  enum {kMaxIters=10};
+class StEventHitIter : public StHitIterGroup {
 public:
-  StEventHitIter(const StEvent *ev);
-  virtual ~StEventHitIter();
-  void  Reset(const StEvent *evt=0);
+  StEventHitIter(const TObject *ev=0){if (ev) Reset(ev);}
+  virtual ~StEventHitIter(){;}
   int   AddDetector(StDetectorId detId);
   int   AddDetector(const char *name);
-  StDetectorId DetectorId() const;
-  UInt_t      UPath() const;
-  int    operator++();
-  StHit *operator*();
-
-protected:
-  const void *GetObj (const void *cont,int lev,int idx) const{return 0;} 
-        int   GetSize(const void *cont,int lev        ) const{return 0;} 
 private:
-  const void *GetContainer(const StEvent *ev) const{return 0;}
-  void  Reset(const void *cont){assert(0);}
-
-private:
-  const StEvent *fStEvent;
-  int    fJter,fNter;  
-  StHitIter 	*fIter[kMaxIters];
 };
+
+//}// QWERTY
 #endif //ROOT_StEventHelper

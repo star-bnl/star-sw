@@ -14,502 +14,598 @@
 #include "StRnDHitCollection.h"
 #include "StEtrHitCollection.h"
 #include "StTofCollection.h"
+//________________________________________________________________________________
+StHitIter::StHitIter()
+{
+fCont = 0;
+fDowIter=0;
+fJIter=-1;
+fNIter=0;
+}
+//________________________________________________________________________________
+StHitIter::~StHitIter()
+{
+  delete fDowIter;fDowIter=0;
+}
+//________________________________________________________________________________
+const TObject *StHitIter::Reset(const TObject *cont) 
+{
+  fCont = cont;
+  if (!fCont) return 0;
+  fNIter = GetSize();
+  for (fJIter =0;fJIter<fNIter;fJIter++) {
+    const TObject *dowCont = GetObject(fJIter);
+    if (!dowCont) continue;
+    if (!fDowIter)	return dowCont;
+    const TObject *to = fDowIter->Reset(dowCont);
+    if (to) return to;
+  }
+  return 0;
+}
+//________________________________________________________________________________
+const TObject *StHitIter::Get() const
+{
+   if (fJIter>=fNIter) return 0;
+   const TObject *obj = GetObject(fJIter);
+   if (!obj) return 0;
+   if (!fDowIter) return obj;
+   return fDowIter->Get();
+}
+//________________________________________________________________________________
+const TObject *StHitIter::operator++()
+{
+  const TObject *to=0;
+  if (fJIter>=fNIter) 	return 0;
+  if (!fDowIter) { 	//Lowest level. Hits are there
+    while (++fJIter<fNIter) 	{
+      if ((to = GetObject(fJIter))) return to;;
+    }
+    return 0;
+  }
+//		Intermediate level, containers there
+  if ((to= ++(*fDowIter))) 		return to; 
+  while(++fJIter<fNIter) {
+    if (!(to=GetObject(fJIter)))	continue;;
+    if ( (to=fDowIter->Reset(to)))	return to;
+  }
+  return 0;  
+}
+//________________________________________________________________________________
+void StHitIter::UPath(ULong64_t &upath) const
+{
+  if (fDowIter) fDowIter->UPath(upath);
+  upath*=fNIter; upath+=fJIter; 
+}
 
+//________________________________________________________________________________
+//________________________________________________________________________________
+StHitIterGroup::StHitIterGroup()
+{
+  fDetectorId = kUnknownId;
+}
+//________________________________________________________________________________
+StHitIterGroup::~StHitIterGroup()
+{
+  for (int i=0;i<(int)fGroup.size();i++) { delete fGroup[i];}
+}
+//________________________________________________________________________________
+const TObject *StHitIterGroup::Reset(const TObject *cont)
+{
+  if (cont) fCont=cont;
+  if (!fCont) return 0;
+  fDetectorId = kUnknownId;
+  fNIter = fGroup.size();
+  for (fJIter=0;fJIter<fNIter;fJIter++) {
+    const TObject *to=fGroup[fJIter]->Reset(fCont);
+    if (to) return to;
+  }
+  return 0;
+}
+//________________________________________________________________________________
+void StHitIterGroup::Add(StHitIter* iter)
+{
+  fGroup.push_back(iter);
+  fNIter = fGroup.size();
+}
+//________________________________________________________________________________
+const TObject *StHitIterGroup::GetObject (int) const
+{ assert(0 && "In StHitIterGroup::GetObject");}
+//________________________________________________________________________________
+const TObject *StHitIterGroup::Get () const
+{
+  fDetectorId = kUnknownId;
+  if (fJIter>=fNIter) return 0;
+  fDetectorId = fGroup[fJIter]->DetectorId();
+  return fGroup[fJIter]->Get();
+}
+//________________________________________________________________________________
+const TObject *StHitIterGroup::operator++()
+{
+ if (fJIter>=fNIter) return 0;
+ const TObject *to;
+ if ((to=++(*fGroup[fJIter]))) 	return to;
+
+ while(++fJIter<fNIter) {
+   to = fGroup[fJIter]->Reset(fCont);
+   if (to) return to;
+ } 
+ return 0;
+}
+//________________________________________________________________________________
+UInt_t StHitIterGroup::UPath() const
+{
+  ULong64_t ul=0;
+  UPath(ul);
+  assert(!(ul>>32));
+  return ul;
+}
+//________________________________________________________________________________
+void StHitIterGroup::UPath(ULong64_t &ul) const
+{
+  fGroup[fJIter]->UPath(ul);
+}
 
 //________________________________________________________________________________
+//_______TPC_______TPC_______TPC_______TPC_______TPC_______TPC_______TPC_______TPC
 //________________________________________________________________________________
-//________________________________________________________________________________
+
 //..............................................................................
-class StTpcHitCollection;
 class StTpcHitIter : public StHitIter {
 public:
-  StTpcHitIter(const StTpcHitCollection *hc):StHitIter(hc){}
-  StTpcHitIter(const StEvent            *ev){Reset(ev);}
+    		StTpcHitIter();
+virtual        ~StTpcHitIter(){;}
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
   StDetectorId DetectorId() const {return kTpcId;}
-  const void *GetContainer(const StEvent *ev) const;
-
 protected:
-const void *GetObj(const void *cont,int lev,int idx) const; 
-      int  GetSize(const void *cont,int lev        ) const; 
 };
 
 //..............................................................................
-class StSvtHitCollection;
+class StTpcSectorHitIter : public StHitIter {
+public:
+    		StTpcSectorHitIter(){;}
+virtual        ~StTpcSectorHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+//..............................................................................
+class StTpcPadrowHitIter : public StHitIter {
+public:
+    		StTpcPadrowHitIter(){;}
+virtual        ~StTpcPadrowHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+
+//________________________________________________________________________________
+StTpcHitIter::StTpcHitIter()
+{
+  StHitIter *obj=this,*hi;
+  obj->SetDowIter((hi=new StTpcSectorHitIter())); obj = hi;
+  obj->SetDowIter((hi=new StTpcPadrowHitIter())); obj = hi;
+}
+//________________________________________________________________________________
+const TObject *StTpcHitIter::Reset(const TObject *cont)
+{
+  const StTpcHitCollection *to = 0;
+  if (cont) to = ((StEvent*)cont)->tpcHitCollection();
+  return StHitIter::Reset(to);
+}
+
+//________________________________________________________________________________
+int StTpcHitIter::GetSize()const
+{ return ((StTpcHitCollection*)fCont)->numberOfSectors();}
+
+
+//________________________________________________________________________________
+const TObject *StTpcHitIter::GetObject (int idx) const
+{
+  return ((StTpcHitCollection*)fCont)->sector(idx);
+}
+//________________________________________________________________________________
+const TObject *StTpcSectorHitIter::GetObject (int idx) const
+{
+  return ((StTpcSectorHitCollection*)fCont)->padrow(idx);
+}
+//________________________________________________________________________________
+int StTpcSectorHitIter::GetSize () const
+{
+  return ((StTpcSectorHitCollection*)fCont)->numberOfPadrows();
+}
+//________________________________________________________________________________
+const TObject *StTpcPadrowHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StTpcPadrowHitCollection*)fCont)->hits().at(idx);
+}
+//________________________________________________________________________________
+int StTpcPadrowHitIter::GetSize () const
+{
+  return ((StTpcPadrowHitCollection*)fCont)->hits().size();
+}
+
+//________________________________________________________________________________
+//_______SVT_______SVT_______SVT_______SVT_______SVT_______SVT_______SVT_______SVT
+//________________________________________________________________________________
+
+//..............................................................................
 class StSvtHitIter : public StHitIter {
 public:
-  StSvtHitIter(const StEvent            *ev) {Reset(ev);}
-  StSvtHitIter(const StSvtHitCollection *hc):StHitIter(hc){}
+    		StSvtHitIter();
+virtual        ~StSvtHitIter(){;}
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
   StDetectorId DetectorId() const {return kSvtId;}
-  const void *GetContainer(const StEvent *ev) const;
 protected:
-const void *GetObj(const void *cont,int lev,int idx) const; 
-      int  GetSize(const void *cont,int lev        ) const; 
 };
-
-
 //..............................................................................
-class StSsdHitCollection;
-class StSsdHitIter : public StHitIter {
+class StSvtBarrelHitIter : public StHitIter {
 public:
-  StSsdHitIter(const StEvent            *ev){Reset(ev);}
-  StSsdHitIter(const StSsdHitCollection *hc):StHitIter(hc){}
-  StDetectorId DetectorId() const {return kSsdId;}
-  const void *GetContainer(const StEvent *ev) const;
+    		StSvtBarrelHitIter();
+virtual        ~StSvtBarrelHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
 protected:
-const void *GetObj(const void *cont,int lev,int idx) const; 
-      int  GetSize(const void *cont,int lev        ) const; 
 };
-
-
 //..............................................................................
-class StFtpcHitCollection;
-class StFtpcHitIter : public StHitIter {
+class StSvtLadderHitIter : public StHitIter {
 public:
-  StFtpcHitIter(const StEvent             *ev){Reset(ev);}
-  StFtpcHitIter(const StFtpcHitCollection *hc):StHitIter(hc){}
-  StDetectorId DetectorId() const {return kFtpcWestId;}
-  const void *GetContainer(const StEvent *ev) const;
+    		StSvtLadderHitIter();
+virtual        ~StSvtLadderHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
 protected:
-const void *GetObj(const void *cont,int lev,int idx) const; 
-      int  GetSize(const void *cont,int lev        ) const; 
 };
-
-
 //..............................................................................
-class StRnDHitCollection;
-class StRnDHitIter : public StHitIter {
+class StSvtWaferHitIter : public StHitIter {
 public:
-  StRnDHitIter(const StEvent*ev,StDetectorId id){fId=id;Reset(ev);}
-  StRnDHitIter(const StRnDHitCollection *hc,StDetectorId id):StHitIter(hc){fId=id;}
-  StDetectorId DetectorId() const {return fId;}
-  const void *GetContainer(const StEvent *ev) const;
+    		StSvtWaferHitIter();
+virtual        ~StSvtWaferHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
 protected:
-const void *GetObj(const void *cont,int lev,int idx) const; 
-      int  GetSize(const void *cont,int lev        ) const; 
-private:
-  StDetectorId fId;
 };
+//________________________________________________________________________________
+StSvtHitIter::StSvtHitIter()
+{
+  StHitIter *iter = this,*jter=0;
+  iter->SetDowIter((jter=new StSvtBarrelHitIter())); iter=jter;
+  iter->SetDowIter((jter=new StSvtLadderHitIter())); iter=jter;
+  iter->SetDowIter((jter=new StSvtWaferHitIter ())); iter=jter;
+}
+//________________________________________________________________________________
+const TObject *StSvtHitIter::Reset(const TObject *cont)
+{
+  const StSvtHitCollection *to = 0;
+  if (cont) to = ((StEvent*)cont)->svtHitCollection();
+  return StHitIter::Reset(to);
+}
+//________________________________________________________________________________
+const TObject *StSvtHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StSvtHitCollection*)fCont)->barrel(idx);
+}
+//________________________________________________________________________________
+int StSvtHitIter::GetSize () const
+{
+  return ((StSvtHitCollection*)fCont)->numberOfBarrels();
+}
 
+//________________________________________________________________________________
+const TObject *StSvtBarrelHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StSvtBarrelHitCollection*)fCont)->ladder(idx);
+}
+//________________________________________________________________________________
+int StSvtBarrelHitIter::GetSize () const
+{
+  return ((StSvtBarrelHitCollection*)fCont)->numberOfLadders();
+}
+//________________________________________________________________________________
+const TObject *StSvtLadderHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StSvtLadderHitCollection*)fCont)->wafer(idx);
+}
+//________________________________________________________________________________
+int StSvtLadderHitIter::GetSize () const
+{
+  return ((StSvtLadderHitCollection*)fCont)->numberOfWafers();
+}
+//________________________________________________________________________________
+const TObject *StSvtWaferHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StSvtWaferHitCollection*)fCont)->hits().at(idx);
+}
+//________________________________________________________________________________
+int StSvtWaferHitIter::GetSize () const
+{
+  return ((StSvtWaferHitCollection*)fCont)->hits().size();
+}
+
+//________________________________________________________________________________
+//_______ETR_______ETR_______ETR_______ETR_______ETR_______ETR_______ETR_______ETR
+//________________________________________________________________________________
 //..............................................................................
-class StTofCollection;
-class StTofHitIter : public StHitIter {
-public:
-  StTofHitIter(const StEvent *ev){Reset(ev);}
-  StTofHitIter(const StTofCollection *hc):StHitIter(hc){}
-  StDetectorId DetectorId() const {return kTofId;}
-  const void *GetContainer(const StEvent *ev) const;
-protected:
-const void *GetObj(const void *cont,int lev,int idx) const; 
-      int  GetSize(const void *cont,int lev        ) const; 
-};
-//..............................................................................
-class StEtrHitCollection;
 class StEtrHitIter : public StHitIter {
 public:
-  StEtrHitIter(const StEvent *ev){Reset(ev);}
-  StEtrHitIter(const StEtrHitCollection *hc):StHitIter(hc){}
+    		StEtrHitIter(){;}
+virtual        ~StEtrHitIter(){;}
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
   StDetectorId DetectorId() const {return kEtrId;}
-  const void *GetContainer(const StEvent *ev) const;
+public:
 protected:
-const void *GetObj(const void *cont,int lev,int idx) const; 
-      int  GetSize(const void *cont,int lev        ) const; 
+};
+//________________________________________________________________________________
+const TObject *StEtrHitIter::Reset(const TObject *cont)
+{
+  const StEtrHitCollection *to = 0;
+  if (cont) to = ((StEvent*)cont)->etrHitCollection();
+  return StHitIter::Reset(to);
+}
+//________________________________________________________________________________
+const TObject *StEtrHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StEtrHitCollection*)fCont)->hits().at(idx);
+}
+//________________________________________________________________________________
+int StEtrHitIter::GetSize () const
+{
+  return ((StEtrHitCollection*)fCont)->hits().size();
+}
+//________________________________________________________________________________
+//_______SSD_______SSD_______SSD_______SSD_______SSD_______SSD_______SSD_______SSD
+//________________________________________________________________________________
+//..............................................................................
+class StSsdHitIter : public StHitIter {
+public:
+    		StSsdHitIter();
+virtual        ~StSsdHitIter(){;}
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+  StDetectorId DetectorId() const {return kSsdId;}
+protected:
+};
+//..............................................................................
+class StSsdLadderHitIter : public StHitIter {
+public:
+    		StSsdLadderHitIter();
+virtual        ~StSsdLadderHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+//..............................................................................
+class StSsdWaferHitIter : public StHitIter {
+public:
+    		StSsdWaferHitIter();
+virtual        ~StSsdWaferHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+//________________________________________________________________________________
+StSsdHitIter::StSsdHitIter()
+{
+  StHitIter *iter = this,*jter=0;
+  iter->SetDowIter((jter=new StSsdLadderHitIter())); iter=jter;
+  iter->SetDowIter((jter=new StSsdWaferHitIter ()));
+}
+//________________________________________________________________________________
+const TObject *StSsdHitIter::Reset(const TObject *cont)
+{
+  const StSsdHitCollection *to = 0;
+  if (cont) to = ((StEvent*)cont)->ssdHitCollection();
+  return StHitIter::Reset(to);
+}
+//________________________________________________________________________________
+const TObject *StSsdHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StSsdHitCollection*)fCont)->ladder(idx);
+}
+//________________________________________________________________________________
+int StSsdHitIter::GetSize () const
+{
+  return ((StSsdHitCollection*)fCont)->numberOfLadders();
+}
+
+//________________________________________________________________________________
+const TObject *StSsdLadderHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StSsdLadderHitCollection*)fCont)->wafer(idx);
+}
+//________________________________________________________________________________
+int StSsdLadderHitIter::GetSize () const
+{
+  return ((StSsdLadderHitCollection*)fCont)->numberOfWafers();
+}
+//________________________________________________________________________________
+const TObject *StSsdWaferHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StSsdWaferHitCollection*)fCont)->hits().at(idx);
+}
+//________________________________________________________________________________
+int StSsdWaferHitIter::GetSize () const
+{
+  return ((StSsdWaferHitCollection*)fCont)->hits().size();
+}
+
+//________________________________________________________________________________
+//_______FTPC______FTPC______FTPC______FTPC______FTPC______FTPC______FTPC______TPC
+//________________________________________________________________________________
+
+//..............................................................................
+class StFtpcHitIter : public StHitIter {
+public:
+    		StFtpcHitIter();
+virtual        ~StFtpcHitIter(){;}
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+  StDetectorId DetectorId() const {return kFtpcEastId;}
+protected:
 };
 
+//..............................................................................
+class StFtpcPlaneHitIter : public StHitIter {
+public:
+    		StFtpcPlaneHitIter(){;}
+virtual        ~StFtpcPlaneHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
+//..............................................................................
+class StFtpcSectorHitIter : public StHitIter {
+public:
+    		StFtpcSectorHitIter(){;}
+virtual        ~StFtpcSectorHitIter(){;}
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+protected:
+};
 
 //________________________________________________________________________________
- StHitIter::StHitIter(const void *cont)
+StFtpcHitIter::StFtpcHitIter()
 {
-  fCont=0;Reset(cont);
-} 
-//________________________________________________________________________________
-void StHitIter::Reset(const void *cont)
-{
-  fKase=kINI; fLev=0;
-  if (cont) fCont = cont; 
-}  
-//________________________________________________________________________________
-void StHitIter::Reset(const StEvent *evt)
-{
-  fKase=kINI; fLev=0;  
-  if (!evt) return;
-  fCont = (evt)?  GetContainer(evt):0;
+  StHitIter *obj=this,*hi;
+  obj->SetDowIter((hi=new StFtpcPlaneHitIter())); obj = hi;
+  obj->SetDowIter((hi=new StFtpcSectorHitIter())); obj = hi;
 }
 //________________________________________________________________________________
-int StHitIter::operator++()
+const TObject *StFtpcHitIter::Reset(const TObject *cont)
 {
-   int n,j; const void *v;
-   do  {
-     switch (fKase) {
-
-     case kINI: {
-       if (!fCont) {fKase = kEND; break;}
-       fLev=0; fStk[0].mN=GetSize(fCont,0); fStk[0].mJ=0; fStk[0].mV=fCont;
-       fKase = kDOW; if (!fStk[0].mN) fKase = kEND; 
-       break;}
-
-     case kDOW: {
-       fStk[fLev+1].mV = v = GetObj(fStk[fLev].mV,fLev,fStk[fLev].mJ);
-       if (!v) {fKase=kHOR; break;}
-       fStk[++fLev].mN = n = GetSize(v,fLev);
-       fStk[  fLev].mJ = -1;
-       if (n==-1){fKase=kHIT; break;} 
-       fKase = kHOR; break;}
-
-
-
-     case kHIT: {
-      j = ++fStk[fLev-1].mJ; 
-      if (j >=fStk[fLev-1].mN) {fLev++; fKase=kUPP; break;}
-      fStk[fLev].mV = v = GetObj(fStk[fLev-1].mV,fLev-1,j);
-      break;}
-
-     case kHOR: {
-       j = ++(fStk[fLev].mJ);
-       if(j>=fStk[fLev].mN) {fKase=kUPP; break;}
-       fStk[fLev+1].mV = v = GetObj(fStk[fLev].mV,fLev,j); if (!v) break;
-       fStk[fLev+1].mN = n = GetSize(v           ,fLev+1); if (!n) break;
-       fStk[++fLev].mJ = -1;
-       if (n == -1) {fKase=kHIT; break;}
-       fKase = kHOR; break;}
-
-     case kUPP: {
-       fLev--; if (fLev<0) { fKase = kEND; break;}
-       fKase = kHOR; break;
-     }
-     case kEND: break;
-     
-     default: assert(0 && "Wrong fKase");
-     }
-
-   } while (fKase!=kEND && !(fKase==kHIT && fStk[fLev].mV));
-   return (fKase!=kEND);      
-}     
-//________________________________________________________________________________
-StHit *StHitIter::operator*() 
-{ 
-  if (fKase==kINI) ++(*this);
-  return (StHit*)((fKase==kHIT)? fStk[fLev].mV:0);
-}     
-//________________________________________________________________________________
-UInt_t StHitIter::UPath() const
-{ 
-  assert (fKase==kHIT);
-  UInt_t u=0;
-  for (int j=0;j<fLev;j++) { u = u*(fStk[j].mN+1)+fStk[j].mJ+1;}
-  return u;
-}     
-//________________________________________________________________________________
-void StHitIter::Print(const char *opt) 
-{ 
-  Reset((StEvent*)0);
-  StHitIter &it = *this;
-  StHit *hit=0;
-  int nhit = 0;
-  for (;(hit=*it);++it) {
-    nhit++;
-    printf("%4d - Det=%d(%d) Hardw=%p XYZ=%g %g %g\n",nhit
-          ,(int)it.DetectorId(),(int)hit->detector()
-	  ,(void*)hit->hardwarePosition()
-	  ,hit->position().x()
-	  ,hit->position().y()
-	  ,hit->position().z());
-  }
-  Reset((StEvent*)0);
-}
-//________________________________________________________________________________
-const void *StTpcHitIter::GetContainer(const StEvent *ev) const
-{ return (ev)? ev->tpcHitCollection():0; }
-//________________________________________________________________________________
-const void *StTpcHitIter::GetObj(const void *cont,int lev,int idx) const 
-{
-   switch (lev) {
-   
-     case 0: return ((StTpcHitCollection*)cont)->sector(idx);
-
-     case 1: return ((StTpcSectorHitCollection*)cont)->padrow(idx);
-
-     case 2: return ((StTpcPadrowHitCollection*)cont)->hits().at(idx);
-
-     default: return 0;
-   }
+  const StFtpcHitCollection *to = 0;
+  if (cont) to = ((StEvent*)cont)->ftpcHitCollection();
+  return StHitIter::Reset(to);
 }
 
 //________________________________________________________________________________
-int StTpcHitIter::GetSize(const void *cont,int lev) const 
+int StFtpcHitIter::GetSize()const
+{ return ((StFtpcHitCollection*)fCont)->numberOfPlanes();}
+
+
+//________________________________________________________________________________
+const TObject *StFtpcHitIter::GetObject (int idx) const
 {
-   switch (lev) {
-   
-     case 0: return ((StTpcHitCollection*)cont)->numberOfSectors();
-
-     case 1: return ((StTpcSectorHitCollection*)cont)->numberOfPadrows();
-
-     case 2: return ((StTpcPadrowHitCollection*)cont)->hits().size();
-
-     case 3: return -1;
-
-     default: assert(0 && "Wrong level");;
-   }
+  return ((StFtpcHitCollection*)fCont)->plane(idx);
 }
 //________________________________________________________________________________
-//________________________________________________________________________________
-const void *StSvtHitIter::GetContainer(const StEvent *ev) const
-{ return (ev)? ev->svtHitCollection():0; }
-//________________________________________________________________________________
-const void *StSvtHitIter::GetObj(const void *cont,int lev,int idx) const 
+const TObject *StFtpcPlaneHitIter::GetObject (int idx) const
 {
-   switch (lev) {
-   
-     case 0: return ((StSvtHitCollection*)cont)->barrel(idx);
-
-     case 1: return ((StSvtBarrelHitCollection*)cont)->ladder(idx);
-
-     case 2: return ((StSvtLadderHitCollection*)cont)->wafer(idx);
-
-     case 3: return ((StSvtWaferHitCollection*)cont)->hits().at(idx);
-
-     default: return 0;
-   }
+  return ((StFtpcPlaneHitCollection*)fCont)->sector(idx);
+}
+//________________________________________________________________________________
+int StFtpcPlaneHitIter::GetSize () const
+{
+  return ((StFtpcPlaneHitCollection*)fCont)->numberOfSectors();
+}
+//________________________________________________________________________________
+const TObject *StFtpcSectorHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StFtpcSectorHitCollection*)fCont)->hits().at(idx);
+}
+//________________________________________________________________________________
+int StFtpcSectorHitIter::GetSize () const
+{
+  return ((StFtpcSectorHitCollection*)fCont)->hits().size();
 }
 
 //________________________________________________________________________________
-int StSvtHitIter::GetSize(const void *cont,int lev) const 
+//_______RND_______RND_______RND_______RND_______RND_______RND_______RND_______TPC
+//________________________________________________________________________________
+//..............................................................................
+class StRnDHitIter : public StHitIter {
+public:
+    		StRnDHitIter(StDetectorId id){fDetectorId=id;}
+virtual        ~StRnDHitIter(){;}
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+  StDetectorId DetectorId() const {return fDetectorId;}
+protected:
+StDetectorId fDetectorId;
+};
+//________________________________________________________________________________
+const TObject *StRnDHitIter::Reset(const TObject *cont)
 {
-   switch (lev) {
-   
-     case 0: return ((StSvtHitCollection*)cont)->numberOfBarrels();
-
-     case 1: return ((StSvtBarrelHitCollection*)cont)->numberOfLadders();
-
-     case 2: return ((StSvtLadderHitCollection*)cont)->numberOfWafers();
-
-     case 3: return ((StSvtWaferHitCollection*)cont)->hits().size();
-
-     case 4: return -1;
-
-     default: assert(0 && "Wrong level");;
-   }
+  const StRnDHitCollection *to = 0;
+  if (cont) to = ((StEvent*)cont)->rndHitCollection();
+  return StHitIter::Reset(to);
 }
 //________________________________________________________________________________
-//________________________________________________________________________________
-const void *StSsdHitIter::GetContainer(const StEvent *ev) const
-{ return (ev)? ev->ssdHitCollection():0; }
-//________________________________________________________________________________
-const void *StSsdHitIter::GetObj(const void *cont,int lev,int idx) const 
+const TObject *StRnDHitIter::GetObject (int idx) const
 {
-   switch (lev) {
-   
-     case 0: return ((StSsdHitCollection*)cont)->ladder(idx);
-
-     case 1: return ((StSsdLadderHitCollection*)cont)->wafer(idx);
-
-     case 2: return ((StSsdWaferHitCollection*)cont)->hits().at(idx);
-
-     default: return 0;
-   }
-}
-
-//________________________________________________________________________________
-int StSsdHitIter::GetSize(const void *cont,int lev) const 
-{
-   switch (lev) {
-   
-     case 0: return ((StSsdHitCollection*)cont)->numberOfLadders();
-
-     case 1: return ((StSsdLadderHitCollection*)cont)->numberOfWafers();
-
-     case 2: return ((StSsdWaferHitCollection*)cont)->hits().size();
-
-     case 3: return -1;
-
-     default: assert(0 && "Wrong level");;
-   }
+  return (const TObject*)((StRnDHitCollection*)fCont)->hits().at(idx);
 }
 //________________________________________________________________________________
-//________________________________________________________________________________
-//________________________________________________________________________________
-const void *StFtpcHitIter::GetContainer(const StEvent *ev) const
-{ return (ev)? ev->ftpcHitCollection():0; }
-//________________________________________________________________________________
-const void *StFtpcHitIter::GetObj(const void *cont,int lev,int idx) const 
+int StRnDHitIter::GetSize () const
 {
-   switch (lev) {
-   
-     case 0: return ((StFtpcHitCollection*)cont)->plane(idx);
+  return ((StRnDHitCollection*)fCont)->hits().size();
+}
+//________________________________________________________________________________
+//_______TOF_______TOF_______TOF_______TOF_______TOF_______TOF_______TOF_______TOF
+//________________________________________________________________________________
+//..............................................................................
+#define StTofHitCollection StTofCollection
+#define tofHitCollection tofCollection
 
-     case 1: return ((StFtpcPlaneHitCollection*)cont)->sector(idx);
-
-     case 2: return ((StFtpcSectorHitCollection*)cont)->hits().at(idx);
-
-     default: return 0;
-   }
+class StTofHitIter : public StHitIter {
+public:
+    		StTofHitIter(){;}
+virtual        ~StTofHitIter(){;}
+virtual const TObject *Reset(const TObject *cont);
+virtual const TObject *GetObject (int idx) const;
+virtual           int  GetSize () const;
+  StDetectorId DetectorId() const {return kTofId;}
+public:
+protected:
+};
+//________________________________________________________________________________
+const TObject *StTofHitIter::Reset(const TObject *cont)
+{
+  const StTofHitCollection *to = 0;
+  if (cont) to = ((StEvent*)cont)->tofHitCollection();
+  return StHitIter::Reset(to);
+}
+//________________________________________________________________________________
+const TObject *StTofHitIter::GetObject (int idx) const
+{
+  return (const TObject*)((StTofHitCollection*)fCont)->tofHits().at(idx);
+}
+//________________________________________________________________________________
+int StTofHitIter::GetSize () const
+{
+  return ((StTofHitCollection*)fCont)->tofHits().size();
 }
 
 //________________________________________________________________________________
-int StFtpcHitIter::GetSize(const void *cont,int lev) const 
-{
-   switch (lev) {
-   
-     case 0: return ((StFtpcHitCollection*)cont)->numberOfPlanes();
-
-     case 1: return ((StFtpcPlaneHitCollection*)cont)->numberOfSectors();
-
-     case 2: return ((StFtpcSectorHitCollection*)cont)->hits().size();
-
-     case 3: return -1;
-
-     default: assert(0 && "Wrong level");;
-   }
-}
-//________________________________________________________________________________
-//________________________________________________________________________________
-//________________________________________________________________________________
-const void *StRnDHitIter::GetContainer(const StEvent *ev) const
-{ return (ev)? ev->rndHitCollection():0; }
-//________________________________________________________________________________
-const void *StRnDHitIter::GetObj(const void *cont,int lev,int idx) const 
-{
-   switch (lev) {
-   
-     case 0: return ((StRnDHitCollection*)cont)->hits().at(idx);
-     default: return 0;
-   }
-}
-
-//________________________________________________________________________________
-int StRnDHitIter::GetSize(const void *cont,int lev) const 
-{
-   switch (lev) {
-   
-     case 0: return ((StRnDHitCollection*)cont)->hits().size();
-
-     case 1: return -1;
-
-     default: assert(0 && "Wrong level");;
-   }
-}
-//________________________________________________________________________________
-//________________________________________________________________________________
-const void *StTofHitIter::GetContainer(const StEvent *ev) const
-{ return (ev)? ev->tofCollection():0; }
-//________________________________________________________________________________
-const void *StTofHitIter::GetObj(const void *cont,int lev,int idx) const 
-{
-   switch (lev) {
-   
-     case 0: return ((const StTofCollection*)cont)->tofHits().at(idx);
-     default: return 0;
-   }
-}
-
-//________________________________________________________________________________
-int StTofHitIter::GetSize(const void *cont,int lev) const 
-{
-   switch (lev) {
-   
-     case 0: return ((const StTofCollection*)cont)->tofHits().size();
-
-     case 1: return -1;
-
-     default: assert(0 && "Wrong level");;
-   }
-}
-//________________________________________________________________________________
-
-const void *StEtrHitIter::GetContainer(const StEvent *ev) const
-{ return (ev)? ev->etrHitCollection():0; }
-//________________________________________________________________________________
-const void *StEtrHitIter::GetObj(const void *cont,int lev,int idx) const 
-{
-   switch (lev) {
-   
-     case 0: return ((const StEtrHitCollection*)cont)->hits().at(idx);
-     default: return 0;
-   }
-}
-
-//________________________________________________________________________________
-int StEtrHitIter::GetSize(const void *cont,int lev) const 
-{
-   switch (lev) {
-   
-     case 0: return ((const StEtrHitCollection*)cont)->hits().size();
-
-     case 1: return -1;
-
-     default: assert(0 && "Wrong level");;
-   }
-}
-//________________________________________________________________________________
-//________________________________________________________________________________
-StEventHitIter::StEventHitIter(const StEvent *ev)
-{
- fStEvent = ev;
- fJter=0; fNter=0;
- memset(fIter,0,sizeof(fIter));
-}
-//________________________________________________________________________________
-StEventHitIter::~StEventHitIter()
-{
-  for (int jk=0;jk<fNter;jk++) {delete fIter[jk];fIter[jk]=0;}
-}
+//_______EVENT_____EVENT_____EVENT_____EVENT_____EVENT_____EVENT_____EVENT_____TOF
 //________________________________________________________________________________
 int StEventHitIter::AddDetector(StDetectorId detId)
 {
    switch ((int)detId) {
    
-     case kTpcId: fIter[fNter++] = new StTpcHitIter(fStEvent);break;
-     case kSvtId: fIter[fNter++] = new StSvtHitIter(fStEvent);break;
-     case kSsdId: fIter[fNter++] = new StSsdHitIter(fStEvent);break;
+     case kTpcId: Add(new StTpcHitIter());break;
+     case kSvtId: Add(new StSvtHitIter());break;
+     case kSsdId: Add(new StSsdHitIter());break;
      case kFtpcWestId:; 
      case kFtpcEastId:
-                  fIter[fNter++] = new StFtpcHitIter(fStEvent);break;
+                  Add(new StFtpcHitIter());break;
      case kPxlId: case kIstId: case kFgtId: case kFmsId: 
-                  fIter[fNter++] = new StRnDHitIter(fStEvent,detId);break;
+                  Add(new StRnDHitIter(detId));break;
 
-     case kTofId: fIter[fNter++] = new StTofHitIter(fStEvent)   ;break;
-     case kEtrId: fIter[fNter++] = new StEtrHitIter(fStEvent)   ;break;
+     case kTofId: Add(new StTofHitIter()) ;break;
+     case kEtrId: Add(new StEtrHitIter()) ;break;
 
      default: printf("StEventHitIter::AddDetector: No iterator for detectorId=%d",(int)detId);
      assert(0 && "No iterator for detectorId");
      return 1;
   }
   return 0;
-}
-//________________________________________________________________________________
-int StEventHitIter::AddDetector(const char *name)
-{
-   return AddDetector(detectorIdByName(name));
-}
-//________________________________________________________________________________
-void StEventHitIter::Reset(const StEvent *ev)
-{
-  fJter = 0;
-  if (ev) fStEvent = ev;
-  for (int jk=0;jk<fNter;jk++) {fIter[jk]->Reset(fStEvent);}
-  StHitIter::Reset((void*)0);
-}
-//________________________________________________________________________________
-int StEventHitIter::operator++()
-{
-  for (;fJter<fNter;fJter++) {if (++(*fIter[fJter])) return 1;}
-  return 0;
-}
-
-//________________________________________________________________________________
-StDetectorId StEventHitIter::DetectorId() const
-{
-   if (fJter >= fNter) return kUnknownId;
-   return fIter[fJter]->DetectorId();
-}
-//________________________________________________________________________________
-UInt_t StEventHitIter::UPath() const
-{
-   if (fJter >= fNter) return 0;
-   return fIter[fJter]->UPath();
-}
-//________________________________________________________________________________
-StHit *StEventHitIter::operator*() 
-{
-   if (fJter>=fNter) return 0;
-   return *(*(fIter[fJter]));
 }
