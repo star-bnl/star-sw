@@ -1,13 +1,16 @@
 //StvStEventFiller.h
 /***************************************************************************
  *
- * $Id: StvStEventFiller.h,v 1.3 2012/04/10 22:41:54 perev Exp $
+ * $Id: StvStEventFiller.h,v 1.4 2012/04/27 01:40:19 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  * Author: Victor Perev, Jun 2010
  ***************************************************************************
  *
  * $Log: StvStEventFiller.h,v $
+ * Revision 1.4  2012/04/27 01:40:19  perev
+ * Add konstant min hit number
+ *
  * Revision 1.3  2012/04/10 22:41:54  perev
  * Cleanup
  *
@@ -31,6 +34,10 @@
 #ifndef StvStEventFiller_HH
 #define StvStEventFiller_HH
 #include "StDetectorId.h"
+
+enum ECuts { kMinFitPoints=10 };
+
+
 class StEvent;
 class StTrackNode;
 class StTrackDetectorInfo;
