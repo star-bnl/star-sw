@@ -110,8 +110,10 @@ public:
 	static int fcf_decode(unsigned int *p_buff, daq_sim_cld *sdc, unsigned short version=0) ;
 	static int afterburner(int cou, daq_cld *store[]) ;
 
+	static char *fcf_flags(u_char flags) ;
+
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.12 2010/10/17 14:34:02 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.13 2012/04/27 09:04:48 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
 private:

@@ -25,6 +25,30 @@
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
 
+char *tpxFCF::fcf_flags(u_char flags)
+{
+	static char c_flags[32] ;
+
+	c_flags[0] = 0 ;	// empty string...
+
+	if(flags & FCF_IN_DOUBLE) strcat(c_flags,"?") ;	// can't be
+
+	if(flags & FCF_DEAD_EDGE) strcat(c_flags,"D") ;
+	if(flags & FCF_BROKEN_EDGE) strcat(c_flags,"B") ;
+	if(flags & FCF_ROW_EDGE) strcat(c_flags,"E") ;
+
+	if(flags & FCF_BIG_CHARGE) strcat(c_flags,"c") ;
+	if(flags & FCF_DOUBLE_T) strcat(c_flags,"!") ;	// can't be
+	if(flags & FCF_MERGED) strcat(c_flags,"m") ;
+	if(flags & FCF_ONEPAD) strcat(c_flags,"1") ;
+	
+	if(c_flags[0] == 0) strcpy(c_flags,"0") ;
+
+	return c_flags ;
+}
+
+
+
 int tpxFCF::afterburner(int cou, daq_cld *store[])
 {
 	int merged ;
