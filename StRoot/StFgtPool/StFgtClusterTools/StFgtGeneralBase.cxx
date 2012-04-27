@@ -281,6 +281,8 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 	     vector<generalCluster>::iterator it=pClusters[iDx]->begin();
 	     for(;it!=pClusters[iDx]->end();it++)
 	       {
+		 //when we are at it, set the matched flag for cluster from file, we don't want to loose them
+		 it->hasMatch=true;
 		 Int_t centerStripId=it->centerStripIdx;
 		 //		 cout <<"looking at cluster with center strip id:" << it->centralStripGeoId <<endl;
 		 if(centerStripId<0)
@@ -333,27 +335,106 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 
 	}
    }
-   //   doLooseClustering();
-
+   //      doLooseClustering();
+      checkMatches();
 
    return ierr;
 };
+void StFgtGeneralBase::checkMatches()
+{
 
+
+ for(int iDx=0;iDx<6;iDx++)
+    {
+      Int_t numMatched=0;
+      Int_t numNotMatched=0;
+      if((*pClusters[iDx]).size()<2)
+	continue;
+      for(vector<generalCluster>::iterator it=(*pClusters[iDx]).begin();it!=((*pClusters[iDx]).end()-1);it++)
+	{
+
+	  //	  if(it->hasMatch)
+	  //	  continue;
+	  Char_t layer=it->layer;
+	  for(vector<generalCluster>::iterator it2=it+1;it2!=(*pClusters[iDx]).end();it2++)
+	    {
+	      if(it2->layer==layer)
+		continue;
+	      if(it->clusterCharge<100 || it2->clusterCharge<100)
+		continue;
+	      //	      if(it2->hasMatch)//can have two matches?
+	      //		continue;
+
+	      if(it->clusterCharge>it2->clusterCharge)
+		{
+		  if((it->clusterCharge/it2->clusterCharge)<1.3)
+		    {
+		      it->hasMatch=true;
+		      it2->hasMatch=true;
+		    }
+		}
+	      else
+		{
+		  if((it2->clusterCharge/it->clusterCharge)<1.3)
+		    {
+		      it->hasMatch=true;
+		      it2->hasMatch=true;
+
+		    }
+		}
+	    }
+
+	}
+      for(vector<generalCluster>::iterator it=(*pClusters[iDx]).begin();it!=(*pClusters[iDx]).end();it++)
+	{
+	  if(it->hasMatch)
+	    numMatched++;
+	  else
+	    numNotMatched++;
+	}
+
+      cout <<"disk: " << iDx<<" found " << numMatched <<" clusters and " << numNotMatched << " clusters that were not matched" <<endl;
+    }
+
+}
 
 void StFgtGeneralBase::doLooseClustering()
 {
   for(int iDx=0;iDx<6;iDx++)
     {
-
+      if(iDx!=2)
+	continue;
       Int_t stripCounter=0;
       for(int iQ=0;iQ<4;iQ++)
 	{
+	  cout <<" loose clustering in disk: " << iDx << " quad: " << iQ <<" we have: " << (*pClusters[iDx]).size() <<" clusters " <<endl;
 	  for(vector<generalStrip>::iterator it=pStrips[iDx*4+iQ].begin();it!=pStrips[iDx*4+iQ].end();it++)
 	    {
-	      if(it->charge > 3*it->chargeUncert && it->seedType==kFgtSeedTypeNo)
+	      //nodead strips
+	      if(it->charge > 5*it->chargeUncert && it->seedType==kFgtSeedTypeNo)
 		{
-		  //not cluster midpoint
+		  //implement seedtype3
+		  Double_t pedErr=it->pedErr;
+		  //   if(pStrip->getAdc(0) <3*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=1&& numAlmostHighBins>=2)
+		  Int_t numHighBins=0;
+		  Int_t numAlmostHighBins=0;
+		  Int_t peakAdc=-9999;
+		  for(int i=0;i<7;i++)
+		    {
+		      if(i>=2 && i<=5)
+			{
+			  if(it->adc[i]>3*pedErr)
+			    numAlmostHighBins++;
+			}
+		      if(it->adc[i]>peakAdc)
+			peakAdc=it->adc[i];
+		      if(it->adc[i]> 5*pedErr)
+			numHighBins++;
+		    }
 
+		  //		  if(!(it->adc[0]<3*pedErr && numHighBins>=1 && peakAdc> it->adc[6] && numAlmostHighBins>=2) )
+		  //		    continue;
+		  //not cluster midpoint
 		  Char_t layerPrv, layerNext, layer;
 		  Double_t posR, posPhi;
 		  Int_t geoId=it->geoId;
@@ -385,6 +466,8 @@ void StFgtGeneralBase::doLooseClustering()
 		     posPhi=ordinate;
 		     posR = 0.5*(upperSpan + lowerSpan);   // mid point of the strip
 		   };		   
+		   posPhi+=StFgtGeom::phiQuadXaxis(quad);
+
 		   pClusters[iDx]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge));		  
 		   mapGeoId2Cluster[geoId]=(pClusters[iDx]->size()-1);
 		   (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=stripCounter;

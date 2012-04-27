@@ -60,6 +60,7 @@ struct generalCluster
       centerStripIdx=-1;
       maxAdcInt=-1;
       maxAdc=-1;
+      hasMatch=false;
     };
     Int_t centralStripGeoId;
     Char_t layer;
@@ -74,6 +75,7 @@ struct generalCluster
   Int_t centerStripIdx;
   Double_t maxAdc;
   Double_t maxAdcInt;
+  Bool_t hasMatch;
 };
 
 class StFgtGeneralBase : public StMaker {
@@ -81,6 +83,8 @@ class StFgtGeneralBase : public StMaker {
   StFgtGeneralBase(const Char_t* name="FgtGeneralBase");
 
   void doLooseClustering();
+  //check if cluster has energy match in other layer
+  void checkMatches();
   Int_t Make();
   Int_t Finish();
   Int_t fillFromStEvent();
