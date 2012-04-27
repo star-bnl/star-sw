@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.17 2012/04/10 22:42:13 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.18 2012/04/27 01:43:08 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.18  2012/04/27 01:43:08  perev
+ * Use totFitsPointNumber for flag setting
+ *
  * Revision 1.17  2012/04/10 22:42:13  perev
  * Cleanup
  *
@@ -946,7 +949,7 @@ void StvStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StvT
   int dets[kMaxDetectorId][3];
   getAllPointCount(track,dets);
   const StvNode *node = 0;
-  for (int i=1;i<kMaxDetectorId;i++) {
+  for (int i=0;i<kMaxDetectorId;i++) {
     if (!dets[i][1]) continue;
     detInfo->setNumberOfPoints(dets[i][1],static_cast<StDetectorId>(i));
   }
@@ -1055,11 +1058,11 @@ void StvStEventFiller::fillFitTraits(StTrack* gTrack, const StvTrack* track){
 
   int dets[kMaxDetectorId][3]; 
   getAllPointCount(track,dets);
-
-  for (int i=1;i<kMaxDetectorId;i++) {
+  for (int i=0;i<kMaxDetectorId;i++) {
     if (!dets[i][2]) continue;
     fitTraits.setNumberOfFitPoints((unsigned char)dets[i][2],(StDetectorId)i);
   }
+  
   if (gTrack->type()==primary) {
      fitTraits.setPrimaryVertexUsedInFit(true);
   }
@@ -1106,35 +1109,12 @@ void StvStEventFiller::fillFlags(StTrack* gTrack) {
   else if (gTrack->type()==primary) {
     gTrack->setFlag(301);
   }
-  StTrackFitTraits& fitTrait = gTrack->fitTraits();
-  //int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
-  int svtFitPoints = fitTrait.numberOfFitPoints(kSvtId);
-  int ssdFitPoints = fitTrait.numberOfFitPoints(kSsdId);
-  int pxlFitPoints = fitTrait.numberOfFitPoints(kPxlId);
-  int istFitPoints = fitTrait.numberOfFitPoints(kIstId);
-  //  int totFitPoints = fitTrait.numberOfFitPoints();
-  /// In the flagging scheme, I will put in the cases for
-  /// TPC only, and TPC+SVT (plus their respective cases with vertex)
-  /// Ftpc case has their own code and SSD doesn't have a flag...
-
-  // first case is default above, tpc only = 101 and tpc+vertex = 301
-  // next case is:
-  // if the track has svt points, it will be an svt+tpc track
-  // (we assume that the ittf tracks start from tpc, so we don't
-  // use the "svt only" case.)
-  if (svtFitPoints+ssdFitPoints+pxlFitPoints+istFitPoints>0) {
-      if (gTrack->type()==global) {
-	  gTrack->setFlag(501); //svt+tpc
-      }
-      else if (gTrack->type()==primary) {
-	  gTrack->setFlag(601); //svt+tpc+primary
-      }
-  }
+  const StTrackFitTraits &fitTrait = gTrack->fitTraits();
+  int totFitPoints = fitTrait.numberOfFitPoints();
+//int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
   const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
   if (dinfo) {
     Int_t NoTpcFitPoints = dinfo->numberOfPoints(kTpcId);
-    Int_t NoFtpcWestId   = dinfo->numberOfPoints(kFtpcWestId);
-    Int_t NoFtpcEastId   = dinfo->numberOfPoints(kFtpcEastId);
     // Check that it could be TPC pile-up track, i.e. in the same half TPC (West East) 
     // there are more than 2 hits with wrong Z -position
     Int_t flag = TMath::Abs(gTrack->flag());
@@ -1151,14 +1131,13 @@ void StvStEventFiller::fillFlags(StTrack* gTrack) {
       if (NoWrongSignZ >= 2) 
 	gTrack->setFlag((flag%1000) + 1000); // +1000
     }
-    if (NoTpcFitPoints < 11 && NoFtpcWestId < 5 && NoFtpcEastId < 5) { 
+    if (totFitPoints < kMinFitPoints ) { 
       // hadrcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx
       //keep most sig. digit, set last digit to 2, and set negative sign
       gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
       if (gTrack->geometry()) {
 	const StThreeVectorF &momentum = gTrack->geometry()->momentum();
 	if (momentum.pseudoRapidity() > 0.5) {
-	  const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
 	  const StPtrVecHit& hits = dinfo->hits();
 	  Int_t Nhits = hits.size();
 	  for (Int_t i = 0; i < Nhits; i++) {
