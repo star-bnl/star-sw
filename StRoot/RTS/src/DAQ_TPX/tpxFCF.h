@@ -89,7 +89,7 @@ public:
 	tpxFCF() ;
 	~tpxFCF() ;
 
-	void config(unsigned int rb_mask, int modes = 0) ;	// modes bitmask
+	void config(unsigned int rb_mask, int modes=0, int rows=0, unsigned char *rowlen=0) ;	// modes bitmask
 	int modes ;	// bit mask: 1 run simulated; 2 run simulated with local id
 
 	void apply_gains(int sector, tpxGain *gains) ;
@@ -109,19 +109,24 @@ public:
 	static int fcf_decode(unsigned int *p_buff, daq_cld *dc, unsigned short version=0) ;
 	static int fcf_decode(unsigned int *p_buff, daq_sim_cld *sdc, unsigned short version=0) ;
 	static int afterburner(int cou, daq_cld *store[]) ;
-
 	static char *fcf_flags(u_char flags) ;
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.13 2012/04/27 09:04:48 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.14 2012/04/27 09:15:15 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
+
+
 
 private:
 
 	unsigned int *loc_buff ;
 	int cur_row ;
 	int cur_row_clusters ;
-	
+
+	int row_count ;	// will default to 45 in the constructor unless overriden!
+	unsigned char *tpx_rowlen ;
+	int tpx_padplane ;
+
 	int cl_marker ;
 
 	struct stage1 {
@@ -146,11 +151,7 @@ private:
 	}
 
 
-
-
-	int row_ix[46] ;
-
-
+	int row_ix[256] ;	// we exaggerate! normally was "46"
 
 	unsigned int rbs ;
 	int sector ;

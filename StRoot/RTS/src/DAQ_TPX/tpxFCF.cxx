@@ -48,7 +48,6 @@ char *tpxFCF::fcf_flags(u_char flags)
 }
 
 
-
 int tpxFCF::afterburner(int cou, daq_cld *store[])
 {
 	int merged ;
@@ -203,7 +202,7 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 	t_tmp = *p_buff >> 16 ;
 
 
-	if(version==FCF_V_FY08) {
+	if(version==FCF_V_FY08) {	// had a bug in FY08...
 		p = (double)(p_tmp & 0x3FFF) / 32.0 ;
 		t = (double)(t_tmp & 0x7FFF) / 32.0 ;
 	}
@@ -305,6 +304,9 @@ tpxFCF::tpxFCF()
 	do_cuts = 2 ;	// 1 means always, 2 means don't cut edges (for i.e. pulser run), 0 means don't...
 	ch_min = 10 ;
 
+	row_count = 45 ;	// default for our usual TPC
+	tpx_rowlen = tpc_rowlen ;	// default for out usual TPC
+	tpx_padplane = 0 ;		// original padplane
 
 	memset(row_ix,0xFF,sizeof(row_ix)) ;
 	storage = 0 ;
@@ -330,7 +332,7 @@ tpxFCF::~tpxFCF()
 /*
 	Called once at startup
 */
-void tpxFCF::config(u_int mask, int mode)
+void tpxFCF::config(u_int mask, int mode, int rows, unsigned char *rowlen)
 {
 	rbs = mask ;
 	modes = mode ;
@@ -339,36 +341,50 @@ void tpxFCF::config(u_int mask, int mode)
 	int row, pad ;
 	int a, ch ;
 
-	for(r=0;r<=45;r++) {
-		row_ix[r] = 0 ;	// nix...
-	} 
+	memset(row_ix,0,sizeof(row_ix)) ;
+
+	if((rowlen==0) || (rows<=0)) {
+		tpx_rowlen = tpc_rowlen ;
+		row_count = 45 ;	// force override
+		tpx_padplane = 0 ;	// original
+	}
+	else {
+		tpx_rowlen = rowlen ;
+		row_count = rows ;
+		tpx_padplane = 1 ;	// new padplane
+	}
 
 
-	LOG(NOTE,"calling config: mask 0x%X, mode %d",mask,mode) ;
+	LOG(NOTE,"calling config: mask 0x%X, mode %d, rows %3d",mask,mode,row_count) ;
 
 	// There is some amount of acrobatics involved so
 	// bear with me...
 
-	// First, we figure out which rows are needed from the RB mask
-	for(r=0;r<6;r++) {
+	if(tpx_padplane) {	// some new padplane
+		for(row=1;row<=row_count;row++) row_ix[row] = 1 ;
+	}
+	else {	// original TPC padplane
+		// First, we figure out which rows are needed from the RB mask
+		for(r=0;r<6;r++) {	// hell, let's assume 32 RDOs per sector...
 		if(rbs & (1<<r)) {
 			for(a=0;a<256;a++) {
 			for(ch=0;ch<16;ch++) {
 				tpx_from_altro(r,a,ch,row,pad) ;
 
-				if(row > 45) continue ;	// not in this RDO...
+				if(row > 250) continue ;	// not in this RDO...
 				if(row == 0) continue ;	// will nix row 0 as well...
 				row_ix[row] = 1  ;	// mark as needed...
 			}
 			}
 		}
+		}
 	}
 
 	// get the count of pads needed assuming _whole_ rows!
 	int tot_count = 0 ;
-	for(row=0;row<=45;row++) {
+	for(row=0;row<=row_count;row++) {
 		if(row_ix[row]) {
-			tot_count += tpc_rowlen[row] ;	// allocate whole rows!
+			tot_count += tpx_rowlen[row] ;	// allocate whole rows!
 		}
 	}
 
@@ -394,7 +410,7 @@ void tpxFCF::config(u_int mask, int mode)
 
 	// re-create offsets which we use in the row+pad navigation
 	tot_count = 0 ;	// re use...
-	for(row=0;row<=45;row++) {
+	for(row=0;row<=row_count;row++) {
 		if(row_ix[row] == 0) {
 			row_ix[row] = -1 ;	// nix!
 			continue ;
@@ -402,26 +418,37 @@ void tpxFCF::config(u_int mask, int mode)
 
 		row_ix[row] = tot_count ;
 
-		tot_count += tpc_rowlen[row] ;
+		tot_count += tpx_rowlen[row] ;
 	}
 
 	// OK -- we have the storage and the navigation via get_stage1(row,pad) ready.
 	// Now let's get the per-pad flags ready:
 
-	// Mark pads which are there as present...
-	for(r=0;r<6;r++) {
-		if(rbs & (1<<r)) {
+	if(tpx_padplane) {
+		for(row=1;row<=row_count;row++) {
+			for(pad=1;pad<=tpx_rowlen[row];pad++) {
+				get_stage1(row,pad)->f = 0x8000 | FCF_ONEPAD ;
+				get_stage1(row,pad)->g = 1.0 ;
+				get_stage1(row,pad)->t0 = 0.0 ;
+			}
+		}
+	}
+	else {
+		// Mark pads which are there as present...
+		for(r=0;r<6;r++) {
+			if(rbs & (1<<r)) {
 			for(a=0;a<256;a++) {
 			for(ch=0;ch<16;ch++) {
 				tpx_from_altro(r,a,ch,row,pad) ;
 
-				if(row > 45) continue ;
+				if(row > 250) continue ;
 				if(row == 0) continue ;
 
 				get_stage1(row, pad)->f = 0x8000 | FCF_ONEPAD ;
 				get_stage1(row, pad)->g = 1.0 ;
 				get_stage1(row, pad)->t0 = 0.0 ;
 
+			}
 			}
 			}
 		}
@@ -440,18 +467,20 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 	int row, pad ;
 
+	if(tpx_padplane) gains = 0 ;	// force it!
+
 	if(gains == 0) {
-		LOG(WARN,"Sector %2d, gains NULL\n",sector) ;
+		LOG(WARN,"Sector %2d, gains NULL",sector) ;
 	}
 	else {
 		LOG(NOTE,"Applying gains to sector %d [%p ?]",sector,gains) ;
 	}
 
 	// clear all flags but the existing ones
-	for(row=1;row<=45;row++) {
+	for(row=1;row<=row_count;row++) {
 		if(row_ix[row] < 0) continue ;
 
-		for(pad=1;pad <= tpc_rowlen[row]; pad++) {
+		for(pad=1;pad <= tpx_rowlen[row]; pad++) {
 
 			get_stage1(row, pad)->f &= 0xFF00 ;	// clear, keeping upper bits intact...
 		}
@@ -459,12 +488,10 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 
 	// put gains & flags
-	for(row=1;row<=45;row++) {
+	for(row=1;row<=row_count;row++) {
 		if(row_ix[row] < 0) continue ;
 
-
-
-		for(pad=1;pad<=tpc_rowlen[row];pad++) {	
+		for(pad=1;pad<=tpx_rowlen[row];pad++) {	
 			stage1 *s = get_stage1(row, pad) ;
 
 			if(gains) {
@@ -476,12 +503,9 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 				s->t0 = 0.0 ;
 			}
 
-//			s->t0 = -1.0 ;
-//if((sector==16) && (pad==10)) printf("GGGGG row %d, pad %d %f %f\n",row,pad,s->g,s->t0) ;
-
 			u_int fl = 0 ;
 
-			if(!(s->f & 0x8000)) {	// not really here
+			if(!(s->f & 0x8000)) {	// not really here; missing in the RDO...
 				//LOG(WARN,"Applying broken edge to row:pad %d:%d",row,pad) ;
 				fl |= FCF_BROKEN_EDGE ;
 			}
@@ -496,25 +520,14 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 				if(pad>1) {
 					get_stage1(row,pad-1)->f |= fl ;	// bad_edge
 				}
-				if(pad < tpc_rowlen[row]) {
+				if(pad < tpx_rowlen[row]) {
 					get_stage1(row,pad+1)->f |= fl ;	// bad_edge ;
 				}
 
 			}
-#if 0
-			if(row==8) {
-				switch(pad) {
-				case 12 :
-				case 13 :
-				case 130 :
-				case 131 :
-					fl |= FCF_BROKEN_EDGE ;
-					break ;
-				}
-			}
-#endif
+
 			// marks the first and last pad as "edge"
-			if((pad==1) || (pad==tpc_rowlen[row])) {
+			if((pad==1) || (pad==tpx_rowlen[row])) {
 				fl |= FCF_ROW_EDGE ;
 			}
 			
@@ -535,11 +548,10 @@ void tpxFCF::start_evt()
 {
 	cl_marker = 10000 ;	// used to mark unique clusters sector...
 
-	for(int r=1;r<=45;r++) {
+	for(int r=1;r<=row_count;r++) {
 		if(row_ix[r] < 0) continue ;
 
-// BUG IN FY08 run:		for(int p=1;p<tpc_rowlen[r];p++) {
-		for(int p=1;p<=tpc_rowlen[r];p++) {
+		for(int p=1;p<=tpx_rowlen[r];p++) {
 			struct stage1 *o ;
 			o = get_stage1(r, p) ;
 			if(unlikely(o==0)) {
@@ -561,9 +573,9 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 {
 	struct stage1 *s ;
 
-	if(unlikely(a->row > 45)) return 0 ;
+	if(unlikely(a->row > 250)) return 0 ;
 	if(unlikely(a->row == 0)) return 0 ;
-
+	if(unlikely(a->pad > tpx_rowlen[a->row])) return 0 ;
 
 
 	s = get_stage1(a->row, a->pad) ;
@@ -828,7 +840,7 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 	loc_buff = outbuff ;	// copy over
 
 
-	for(r=0;r<=45;r++) {
+	for(r=0;r<=row_count;r++) {
 		if(row_ix[r] < 0) {
 			continue ;
 		}
@@ -854,7 +866,7 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 		//LOG(DBG,"going into row %d",r) ;
 
 		// scan from first pad to one before the last...
-		for(p=1;p<tpc_rowlen[r];p++) {
+		for(p=1;p<tpx_rowlen[r];p++) {
 
 			old1 = get_stage1(r,p) ;
 			old = old1->cl ;
@@ -1350,7 +1362,6 @@ void tpxFCF::dump(tpxFCF_cl *cl, int row)
 	if(fla & FCF_BROKEN_EDGE) tmp_fl |= 0x4000 ;
 
 	if(cha > 0x7FFF) cha = 0x8000 | (cha/1024) ;
-
 
 	// watchout for ordering!
 	*loc_buff++ = (time_c << 16) | pad_c ;

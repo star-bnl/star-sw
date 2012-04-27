@@ -88,7 +88,9 @@ public:
 	}
 
 	struct gains *get_gains(int s, int r, int p) {
-		if(gains[s-1] == 0) return &dummy_gain ;
+		if(gains[s-1]==0) {	// not applied yet!
+			return &dummy_gain ;
+		}
 
 		return (gains[s-1] + r*182 + (p-1)) ;
 	}

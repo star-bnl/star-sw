@@ -77,6 +77,10 @@ public:
 	char fcf_run_compatibility ;
 	char fcf_do_cuts ;
 
+	// for use by simulation
+	int sim_row_count ;
+	unsigned char *sim_tpx_rowlen ;
+
 
 	class tpxFCF *fcf_algo[25] ;
 

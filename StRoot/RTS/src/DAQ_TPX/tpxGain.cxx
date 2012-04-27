@@ -91,8 +91,7 @@ tpxGain::tpxGain()
 	means = 0 ;
 	fee_found = 0 ;
 	memset(gains,0,sizeof(gains)) ;
-	
-
+		
 	dummy_gain.g = 1.0 ;
 	dummy_gain.t0 = 0.0 ;
 
@@ -1005,7 +1004,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.28 2012/04/27 09:05:15 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.29 2012/04/27 09:15:15 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
