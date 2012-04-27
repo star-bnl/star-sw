@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.33 2012/01/24 03:11:32 perev Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.34 2012/04/27 00:20:23 perev Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TSystem.h"
@@ -586,7 +586,7 @@ StuDraw3DEvent *gEventDisplay = new StuDraw3DEvent();
 void StuDraw3DEvent::Hits(StEventHitIter &iter)
 {
   std::vector<float> hitPoints;
-  for (StHit *sth=0;(sth = *(iter));++iter) {
+  for (const StHit *sth=0;(sth = *(iter));++iter) {
     const float *f = sth->position().xyz();
     hitPoints.push_back(f[0]);
     hitPoints.push_back(f[1]);
