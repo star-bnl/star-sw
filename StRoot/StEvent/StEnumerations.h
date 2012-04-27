@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.42 2012/04/16 20:22:16 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.43 2012/04/27 01:32:13 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.43  2012/04/27 01:32:13  perev
+ * Tracking now is not TPC only
+ *
  * Revision 2.42  2012/04/16 20:22:16  ullrich
  * Changes necessary to add Fgt package.
  *
@@ -342,8 +345,8 @@ enum StEmcCrateStatus {crateUnknown       = 0,
  * \enum StarMaxSize
  */
 // maximal sizes of tracking part of STAR in cm (Victor)
-enum StarMaxTrackRangeSize {kStarMaxTrackRangeR = 200,
-                            kStarMaxTrackRangeZ = 269};
+enum StarMaxTrackRangeSize {kStarMaxTrackRangeR = 500,
+                            kStarMaxTrackRangeZ = 300};
 
 
 /*!
