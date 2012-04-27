@@ -92,6 +92,10 @@ tpxGain::tpxGain()
 	fee_found = 0 ;
 	memset(gains,0,sizeof(gains)) ;
 	
+
+	dummy_gain.g = 1.0 ;
+	dummy_gain.t0 = 0.0 ;
+
 	// bad_fee's are sticky and can only be entered via a file!
 	memset(bad_fee,0,sizeof(bad_fee)) ;
 	tpx_odd_fee_count = 0 ;
@@ -1001,7 +1005,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.27 2012/03/12 11:39:31 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.28 2012/04/27 09:05:15 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
