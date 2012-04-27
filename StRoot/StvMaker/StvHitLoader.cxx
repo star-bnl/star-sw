@@ -1,6 +1,6 @@
-// $Id: StvHitLoader.cxx,v 1.11 2012/04/19 00:58:32 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.12 2012/04/27 00:22:40 perev Exp $
 /*!
-\author V Perev 2010
+\author V Perev 2010  
 
 A StvHitLoader loads  Stv hits.
 <br>
@@ -33,7 +33,7 @@ ClassImp(StvHitLoader)
 StvHitLoader::StvHitLoader(const char *name) : TNamed(name,"")
 
 {
-  mHitIter = new StEventHitIter(0);
+  mHitIter = new StEventHitIter();
 }
 
 //_____________________________________________________________________________
@@ -82,7 +82,7 @@ if (myGraph) { //create canvas
 }
 
   mHitIter->Reset(stev);
-  StHit *stHit=0;
+  const StHit *stHit=0;
   StDetectorId didOld = kUnknownId;
   int nTotHits = 0,nTotHitz=0, nHits=0,nHitz=0;
 
@@ -121,6 +121,7 @@ StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath)
    StvHit *stiHit = StvToolkit::Inst()->GetHit();
    StDetectorId did = stHit->detector();
    UInt_t hard = stHit->hardwarePosition();
+   if (!hard) hard = upath;
    StThreeVectorF v3f = stHit->position();
    const float *xyz = v3f.xyz();
    int seed = 1;
@@ -170,9 +171,9 @@ int StvHitLoader::TpcHitTest(const StHit *stHit)
     node = gGeoManager->GetMother(i);
     numbv[2-i] = node->GetNumber();
   }
-  int tpgv  = numbv[0];
-  int tpss  = numbv[1];
-  int sector= tpss+12*(tpgv-1) ;
+//int tpgv  = numbv[0];
+//int tpss  = numbv[1];
+//int sector= tpss+12*(tpgv-1) ;
   int tpad  = numbv[2];
   int isdet = 0;
 
