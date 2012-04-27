@@ -88,6 +88,8 @@ public:
 	}
 
 	struct gains *get_gains(int s, int r, int p) {
+		if(gains[s-1] == 0) return &dummy_gain ;
+
 		return (gains[s-1] + r*182 + (p-1)) ;
 	}
 
@@ -178,6 +180,8 @@ private:
 	int tb_start, tb_stop ;	// timebin window
 
 	int clock_mode ;
+
+	struct gains dummy_gain ;
 
 //	struct tpx_odd_fee_t tpx_odd_fee[256] ;
 //	int tpx_odd_fee_count  ;
