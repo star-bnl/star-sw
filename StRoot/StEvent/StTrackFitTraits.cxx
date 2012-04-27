@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.19 2011/10/05 20:59:44 perev Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.20 2012/04/27 01:45:07 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.20  2012/04/27 01:45:07  perev
+ * Logic for total numbers of fit points changed
+ *
  * Revision 2.19  2011/10/05 20:59:44  perev
  * Comments++
  *
@@ -86,12 +89,12 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.19 2011/10/05 20:59:44 perev Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.20 2012/04/27 01:45:07 perev Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
     mPidHypothesis = 0;
-    mNumberOfFitPoints = 0;
+    mNumberOfFitPoints = 0xA000;
     mNumberOfFitPointsTpc = 0;
     mNumberOfFitPointsFtpcWest = 0;
     mNumberOfFitPointsFtpcEast = 0;
@@ -108,7 +111,7 @@ StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
                  float chi[2], float cov[15])
 {
     mPidHypothesis = pid;
-    mNumberOfFitPoints = nfp;
+    mNumberOfFitPoints = nfp|0xA000;
     copy(chi, chi+2, mChi2);
     mCovariantMatrix.Set(15, cov);
     mNumberOfFitPointsTpc = 0;
@@ -127,16 +130,21 @@ unsigned short
 StTrackFitTraits::numberOfFitPoints() const
 {
     unsigned short result;
+ 
+// y2012 version
+     if (mNumberOfFitPoints & 0xA000) {
+         result = (mNumberOfFitPoints & 0x7FFF);
+     }
     //
     // Old and obsolete
     //
-    if (mNumberOfFitPoints) {
+    else if (mNumberOfFitPoints) {
         result = numberOfFitPoints(kTpcId) +
-	  numberOfFitPoints(kSvtId) +
-	  numberOfFitPoints(kSsdId);
+	         numberOfFitPoints(kSvtId) +
+	         numberOfFitPoints(kSsdId);
     }
     //
-    // New version
+    //  version < Y2012
     //
     else {
         result = numberOfFitPoints(kTpcId) +
@@ -156,7 +164,7 @@ StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
     //
     // Old and obsolete
     //
-    if (mNumberOfFitPoints) {    
+    if (mNumberOfFitPoints && !(mNumberOfFitPoints&0xa000)) {    
 	// 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
 	switch (det) {
 	case kFtpcWestId:
@@ -200,6 +208,8 @@ StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
 	case kIstId:
 	    return mNumberOfFitPointsIst;
 	    break;
+        case kUnknownId:
+            return mNumberOfFitPoints&0x7FFF;
 	default:
 	    return 0;
 	}
@@ -257,7 +267,7 @@ StTrackFitTraits::clearCovariantMatrix() {mCovariantMatrix.Set(0);}
 void
 StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
 {
-    mNumberOfFitPoints = 0;  // make sure old method is NOT active
+    mNumberOfFitPoints|=  0xA000;  // make sure old method is NOT active
     switch (det) {
     case kFtpcWestId:
 	mNumberOfFitPointsFtpcWest = val;
@@ -280,6 +290,9 @@ StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
     case kIstId:
 	mNumberOfFitPointsIst = val;
 	break;
+    case kUnknownId:
+        mNumberOfFitPoints = val|0xA000;
+
     default:
 	break;
     }

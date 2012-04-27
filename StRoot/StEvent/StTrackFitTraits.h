@@ -4,13 +4,23 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.15 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTrackFitTraits.h,v 2.16 2012/04/27 01:45:12 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
  *
+ * With the arrival of new detectors when even not known will be this 
+ * detector installed or not the following modification was made:
+    1) mNumberOfFitPoints == 0xA000 + total number of fit points
+    2) numberOfFitPoints() returns total amount of fitted points 
+    3) number of hits for XXXX detector is 
+       numberOfFitPoints()-numberOfFitPoints(kTpcId)
+    4) If detector XXXX will be installed, according member could be added
+      
+   (VP)  
+
  * Note the following: with the arrival of ITTF it is now possible to
  * store the numberOfFitPoints for every detector individually. Before
  * that and because of the way the tables were defined TPC and FTPC were
@@ -31,6 +41,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.16  2012/04/27 01:45:12  perev
+ * Logic for total numbers of fit points changed
+ *
  * Revision 2.15  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -107,7 +120,7 @@ public:
     bool                   primaryVertexUsedInFit() const;
 
     void                   clearCovariantMatrix();
-    void                   setNumberOfFitPoints(unsigned char, StDetectorId);
+    void                   setNumberOfFitPoints(unsigned char n, StDetectorId id=kUnknownId);
     void                   setPrimaryVertexUsedInFit(bool);
     
     void                   setPidHypothesis(unsigned short);
