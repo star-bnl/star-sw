@@ -24,7 +24,7 @@
 #include <set>
 
 #define CHARGE_MEASURE clusterCharge
-#define MAX_DIST_STRIP_R 0.1
+#define MAX_DIST_STRIP_R 0.2
 #define MAX_DIST_STRIP_PHI 0.05
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 
@@ -133,7 +133,7 @@ Double_t StFgtGenAVEMaker::findClosestStrip(Char_t layer, double ord, Int_t iD, 
   return dist;
 }
 
-//is there something where we expect it?
+//is there something where we expect it? Again, here phi is relative to the quadrant!!
 Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
       Double_t maxRCharge=-9999;
@@ -192,14 +192,14 @@ Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t i
 	      
 	      if(maxRCharge>maxPhiCharge)
 		{
-		  if(maxRCharge/maxPhiCharge<2)
+		  if(maxRCharge/maxPhiCharge<4)
 		    return true;
 		  else
 		    return false;
 		   }
 	      else
 		{
-		  if(maxPhiCharge/maxPhiCharge<2)
+		  if(maxPhiCharge/maxPhiCharge<4)
 		    return true;
 		  else
 		    return false;
@@ -678,13 +678,23 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		  radioPlotsEffR[i]->Fill(xExp,yExp);
 		else
 		  radioPlotsNonEffR[i]->Fill(xExp,yExp);
-		if(findClosestStrip('P',r,i,quad)<MAX_DIST_STRIP_PHI)
-		  radioPlotsEffPhi[i]->Fill(xExp,yExp);
+		//correct phi again, so it is absolute in space, like the quads
+		if(findClosestStrip('P',phi+StFgtGeom::phiQuadXaxis(quad),i,quad)<MAX_DIST_STRIP_PHI)
+		  {
+		    cout <<" found phi " <<endl;
+		    radioPlotsEffPhi[i]->Fill(xExp,yExp);
+		  }
 		else
+		  {
+		    cout << " not found, dist is:" <<findClosestStrip('P',phi,i,quad) <<endl;
 		  radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
+		  }
 
 		if(isSomewhatEff(r,phi,i,quad))
-		  radioPlotsEffLoose[i]->Fill(xExp,yExp);
+		  {
+		    cout <<" somewhat eff: " << xExp <<" y: " << yExp <<endl;
+		    radioPlotsEffLoose[i]->Fill(xExp,yExp);
+		  }
 		else
 		  radioPlotsNonEffLoose[i]->Fill(xExp,yExp);
 
@@ -1259,6 +1269,7 @@ counter++;
   cRadio->Divide(2,3); //6 discs
   cRadioR->Divide(2,3); //6 discs
   cRadioPhi->Divide(2,3); //6 discs
+  cRadioLoose->Divide(2,3); //6 discs
   cRadioHits->Divide(2,3); //6 discs
   cRadioNonHits->Divide(2,3); //6 discs
   TCanvas* cRPRatio=new TCanvas("rPhiRatio","rPhiRatios",1000,1500);
@@ -1271,11 +1282,17 @@ counter++;
   for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
     {
       //      cRadio->cd(iD+1)->SetLogz();
+      cout <<iD <<" 1 " << endl;
       cRadioHits->cd(iD+1);
+      cout <<iD <<" 2 " << endl;
       radioPlotsEff[iD]->Draw("colz");
+      cout <<iD <<" 3 " << endl;
       cRadioNonHits->cd(iD+1);
+      cout <<iD <<" 4 " << endl;
       radioPlotsNonEff[iD]->Draw("colz");
+      cout <<iD <<" 5 " << endl;
     }
+  cout <<"drawing hits2 " <<endl;
   cRadioHits->SaveAs("radioPlotsHits.png");
   cRadioNonHits->SaveAs("radioPlotsNonHits.png");
   cout <<" 5 " << endl;
@@ -1410,8 +1427,6 @@ counter++;
       cRadioLoose->cd(iD+1);
       radioPlotsEffLoose[iD]->Draw("colz");   
 
-
-
       cRPRatio->cd(iD+1);
       rPhiRatioPlots[iD]->Draw();
       cREff->cd(iD+1);
@@ -1430,6 +1445,7 @@ counter++;
     }
   cRadio->SaveAs("radioPlotsEff.png");
   cRadio->SaveAs("radioPlotsEff.pdf");
+
   cRadioR->SaveAs("radioPlotsR.png");
   cRadioPhi->SaveAs("radioPlotsPhi.png");
   cRadioLoose->SaveAs("radioPlotsLoose.png");
@@ -1484,7 +1500,7 @@ Int_t StFgtGenAVEMaker::Init(){
   chargeAsymInEffDisk->SetMaximum(1.0);
   chargeCorrInEffDisk=new TH2D("chargeCorrInEffDisk","chargeCorrInEffDisk",50,0,50000,50,0,50000);
   hChargeAsym=new TH1D("chargeAsym","chargeAsym",100,0,50);
-  hChargeRatio=new TH1D("chargeAsym","chargeAsym",100,0,50);
+  hChargeRatio=new TH1D("chargeRatio","chargeRatio",100,0,50);
 
 
   radioPlotsEff=new TH2D*[kFgtNumDiscs];
@@ -1492,11 +1508,13 @@ Int_t StFgtGenAVEMaker::Init(){
   radioPlotsEffR=new TH2D*[kFgtNumDiscs];
   radioPlotsNonEffR=new TH2D*[kFgtNumDiscs];
   radioPlotsEffPhi=new TH2D*[kFgtNumDiscs];
+  radioPlotsEffLoose=new TH2D*[kFgtNumDiscs];
   radioPlotsNonEffPhi=new TH2D*[kFgtNumDiscs];
+  radioPlotsNonEffLoose=new TH2D*[kFgtNumDiscs];
   rPhiRatioPlots=new TH1D*[kFgtNumDiscs];
   rEff=new TH1D*[kFgtNumDiscs];
   rNonEff=new TH1D*[kFgtNumDiscs];
-
+  cout <<"ave2" << endl;
 
   chargeCorr=new TH2D*[kFgtNumDiscs*4];
   h_clusterSizeR=new TH1D*[kFgtNumDiscs];
@@ -1504,7 +1522,7 @@ Int_t StFgtGenAVEMaker::Init(){
 
   h_clusterChargeR=new TH1D*[kFgtNumDiscs];
   h_clusterChargePhi=new TH1D*[kFgtNumDiscs];
-
+  cout <<"ave3" << endl;
 
   hIp=new TH2D("Proj_to_IP","Proj_to_Ip",50,-100,100,50,-100,100);
   hBx=new TH1D("hBx","hBx",50,-100,100);
@@ -1520,19 +1538,22 @@ Int_t StFgtGenAVEMaker::Init(){
   tpcFgtZVertexCorr=new TH2D("tpc_fgt_corr","tpc_fgt_corr",100,-120,120,100,-120,120);
   tpcFgtZVertexCorr2=new TH2D("tpc_fgt_corr2","tpc_fgt_corr2",100,-120,120,100,-120,120);
   tpcFgtZVertexCorr3=new TH2D("fgt_fgt_corr","fgt_fgt_corr",50,-50,50,50,-50,50);
-
+  cout <<"ave4" << endl;
   for(int iD=0;iD<kFgtNumDiscs;iD++)
     {
-      //      cout <<"id: " << iD <<endl;
+      cout <<"id: " << iD <<endl;
       sprintf(buffer,"radioDiskEff_%d",iD);
       radioPlotsEff[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+      cout <<"-1" <<endl;
       sprintf(buffer,"radioDiskEffR_%d",iD);
       radioPlotsEffR[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+      cout <<"-2" <<endl;
       sprintf(buffer,"radioDiskEffPhi_%d",iD);
       radioPlotsEffPhi[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+      cout <<"-3" <<endl;
       sprintf(buffer,"radioDiskEffLoose_%d",iD);
       radioPlotsEffLoose[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
-
+      cout <<"-4" <<endl;
       //      cout <<"1" <<endl;
       sprintf(buffer,"rEff_%d",iD);
       rEff[iD]=new TH1D(buffer,buffer,100,0,DISK_DIM);
@@ -1567,6 +1588,7 @@ Int_t StFgtGenAVEMaker::Init(){
 	}
       sprintf(buffer,"radioDiskNonEff_%d",iD);
       radioPlotsNonEff[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
+      cout <<" created non eff histo " << endl;
       sprintf(buffer,"radioDiskNonEffR_%d",iD);
       radioPlotsNonEffR[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
       sprintf(buffer,"radioDiskNonEffPhi_%d",iD);
