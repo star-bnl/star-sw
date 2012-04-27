@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.24 2012/04/19 01:09:13 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.25 2012/04/27 00:15:48 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -705,7 +705,8 @@ static int 	nTest=0,nFail=0,detId=0;
   hp = hpMap;
   if (hpMap==0 || nTest < kMaxTest) { 
      nTest++;
-     hpGeo = FindHitPlane(xyz);
+     int sure = 0;
+     hpGeo = FindHitPlane(xyz,sure);
      if (!hpGeo) {
        double pnt[3]={xyz[0],xyz[1],xyz[2]};
        gGeoManager->SetCurrentPoint(pnt);
@@ -720,7 +721,7 @@ static int 	nTest=0,nFail=0,detId=0;
               ,pnt[0],pnt[1],pnt[2],hpMap->GetName(),hpGeo->GetName());
        assert(nFail<=kMaxFail);
      }
-     (*fHitPlaneHardMap)[hardw]=hp;
+     if (sure) (*fHitPlaneHardMap)[hardw]=hp;
   }
   if (hp->GetDetId() != detId) { // New detector started
     nTest=0; nFail=0; detId = hp->GetDetId();
@@ -740,7 +741,7 @@ static int 	nTest=0,nFail=0,detId=0;
   return hp;
 }
 //_____________________________________________________________________________
-StHitPlane *StTGeoHelper::FindHitPlane(const float xyz[3])
+StHitPlane *StTGeoHelper::FindHitPlane(const float xyz[3],int &sure)
 {
 // cos(a+b) = cos(a)*cos(b) - sin(a)*sin(b)
 // sin(a+b) = cos(a)*sin(b) + sin(a)*cos(b)
@@ -772,11 +773,15 @@ static const float dirs[26][3] = {
 { 0.7071,        0.7071,         0.0000}, 
 { 0.5774,        0.5774,         0.5774}};
 
+static int nCall=0; nCall++;
   double pnt[3]={xyz[0],xyz[1],xyz[2]};
   const TGeoNode *node = gGeoManager->FindNode(pnt[0],pnt[1],pnt[2]);
   assert(node);
   StHitPlane *hp = GetCurrentHitPlane();     
+  sure = 1;
   if (hp  && hp->GetHitErrCalc() && IsHitted(pnt)) return hp;
+  sure = 0;
+
   double Rxy = sqrt(pnt[0]*pnt[0]+pnt[1]*pnt[1]);
   double myCos= pnt[0]/Rxy,mySin=pnt[1]/Rxy;
   double myDir[3],myPnt[3];
@@ -792,8 +797,9 @@ static const float dirs[26][3] = {
     TString prevPath(gGeoManager->GetPath());
     double myStep = 0,epsStp = 1e-4,minStp = epsStp,stp=0;
     for (int istep=0;istep<100 ;istep++) {
-      const TGeoNode *myNode = gGeoManager->FindNextBoundaryAndStep(minDist-myStep);
-      if (!myNode) 					break;
+      const TGeoNode *myNode = 
+        gGeoManager->FindNextBoundaryAndStep(1.001*(minDist-myStep));
+      if (!myNode) 				break;
       TString currPath(gGeoManager->GetPath());
       stp = gGeoManager->GetStep();
       int same = (currPath == prevPath);
@@ -804,13 +810,14 @@ static const float dirs[26][3] = {
         gGeoManager->SetCurrentPoint(myPnt);
         gGeoManager->FindNode();
       } 
-      myStep +=stp;if (same) continue;
+      myStep +=stp; if (myStep>=minDist) 	break; 
+      if (same) 				continue;
 
       prevPath=currPath; minStp = epsStp; 
       hp = GetCurrentHitPlane();     
-      if (!hp || !hp->GetHitErrCalc()) 			continue;
+      if (!hp || !hp->GetHitErrCalc()) 		continue;
       if (!IsHitted(gGeoManager->GetLastPoint()))	continue;
-      minDist = myStep; minHitPlane = hp; 		break;
+      minDist = myStep; minHitPlane = hp; 	break;
     }
 
   }
