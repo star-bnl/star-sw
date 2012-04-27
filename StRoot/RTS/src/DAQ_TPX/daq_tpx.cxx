@@ -513,6 +513,13 @@ daq_dta *daq_tpx::put(const char *in_bank, int sec, int row, int pad, void *p1, 
 	assert(in_bank) ;
 
 	if(strcasecmp(in_bank,"adc_sim")==0) {
+		if((row<=0)) sim_row_count = 45 ;
+		else sim_row_count = row ;
+
+		sim_tpx_rowlen = (u_char *)p1 ;
+
+		LOG(NOTE,"adc_sim: row count %d, rowlen %p",sim_row_count,sim_tpx_rowlen) ;
+
 		adc_sim->create(32*1024,(char *)"adc_sim",rts_id,DAQ_DTA_STRUCT(daq_sim_adc_tb)) ;
 		return adc_sim ;
 	}
@@ -1354,9 +1361,9 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 
 	if(row <= 0) {
 		min_row = 1 ;
-		max_row = 45 ;
+		max_row = sim_row_count ;
 	}
-	else if((row<0) || (row>45)) return 0 ;
+	else if((row<0) || (row>250)) return 0 ;
 	else {
 		min_row = max_row = row ;
 	}
@@ -1366,7 +1373,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 	
 	for(int s=min_sec;s<=max_sec;s++) {
 		if(fcf_algo[s]) {
-			LOG(DBG,"start_evt(): sec %d\n",s) ;
+			LOG(DBG,"start_evt(): sec %d",s) ;
 			fcf_algo[s]->start_evt() ;	// make sure we start a new event!
 		}
 
@@ -1399,12 +1406,12 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 		if(fcf_algo[sim->sec]==0) {
 			LOG(NOTE,"No algo assigned for sector %d -- creating one!",sim->sec) ;
 			fcf_algo[sim->sec] = new tpxFCF ;
-			fcf_algo[sim->sec]->config(0x3F,1) ;	// assume all 6 RDOs; extra data + annotations
+			fcf_algo[sim->sec]->config(0x3F,1,sim_row_count,sim_tpx_rowlen) ;	// assume all 6 RDOs; extra data + annotations
 			fcf_algo[sim->sec]->run_compatibility = fcf_run_compatibility ;
 			fcf_algo[sim->sec]->do_cuts = fcf_do_cuts ;
 
 			fcf_algo[sim->sec]->apply_gains(sim->sec,gain_algo) ;
-//			fcf_algo[sim->sec]->apply_gains(sim->sec,0) ;
+
 			fcf_algo[sim->sec]->start_evt() ;
 
 			if(fcf_tmp_storage==0) {
