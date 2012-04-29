@@ -31,6 +31,7 @@ class Bichsel {
   static Double_t CalcCorrection(const tpcCorrection_st *cor,const Double_t x);
   static Double_t SumSeries(const Double_t &X,const Int_t &N,const Double_t *params);
   static void Clean();
+#ifdef  __OWN_INTERPOLATION__
   Double_t    GetMostProbableZ(Double_t log10bg, Double_t log2dx = 1., Int_t kase=0) {
     return m_dEdxParameterization->GetMostProbableZ(log10bg,log2dx,kase);
   }
@@ -63,6 +64,40 @@ class Bichsel {
   }
   Double_t    GetProbability(Double_t log10bg, Double_t log2dx, Double_t z, Int_t kase=0) {
     return m_dEdxParameterization->GetProbability(log10bg,log2dx,z,kase);}
+#else /* !  __OWN_INTERPOLATION__ */ 
+  Double_t    GetMostProbableZ(Double_t log10bg, Double_t log2dx = 1.) {
+    return m_dEdxParameterization->GetMostProbableZ(log10bg,log2dx);
+  }
+  Double_t    GetMostProbableZM(Double_t log10bg, Double_t log2dx = 1.) {
+    return m_dEdxParameterization->GetMostProbableZM(log10bg,log2dx);
+  }
+  Double_t    GetAverageZ(Double_t log10bg, Double_t log2dx = 1.) {
+    return m_dEdxParameterization->GetAverageZ(log10bg,log2dx);
+  }
+  Double_t    GetAverageZM(Double_t log10bg, Double_t log2dx = 1.) {
+    return m_dEdxParameterization->GetAverageZM(log10bg,log2dx);
+  }
+  Double_t    GetRmsZ(Double_t log10bg, Double_t log2dx = 1.) {
+    return m_dEdxParameterization->GetRmsZ(log10bg,log2dx);
+  }
+  Double_t    GetI70(Double_t log10bg, Double_t log2dx = 1.) {
+    return m_dEdxParameterization->GetI70(log10bg,log2dx);
+  }
+  Double_t    GetI70M(Double_t log10bg, Double_t log2dx = 1.) {
+    return m_dEdxParameterization->GetI70M(log10bg,log2dx);
+  }
+  Double_t    GetI60(Double_t log10bg, Double_t log2dx = 1.)  {
+    return m_dEdxParameterization->GetI60(log10bg,log2dx);
+  }
+  Double_t    GetMostProbabledEdx(Double_t log10bg, Double_t log2dx = 1.) {
+    return m_dEdxParameterization->GetMostProbabledEdx(log10bg,log2dx);
+  }
+  Double_t    GetdEdxWidth(Double_t log10bg, Double_t log2dx = 1.) {
+    return m_dEdxParameterization->GetdEdxWidth(log10bg,log2dx);
+  }
+  Double_t    GetProbability(Double_t log10bg, Double_t log2dx, Double_t z) {
+    return m_dEdxParameterization->GetProbability(log10bg,log2dx,z);}
+#endif /*  __OWN_INTERPOLATION__ */
 #if 0
   Double_t    TofCorrection(Double_t log10bg);
 #endif
