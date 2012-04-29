@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.3 2011/10/12 15:27:28 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.4 2012/04/29 22:52:59 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -172,7 +172,8 @@ class dEdxY2_t : public TObject {
   Double_t Qcm;     // accumulated charge uC/cm
   Double_t Crow;    // Current per row;
   Double_t Zdc;     // ZDC rate from trigger
-  Double_t Weight; // 1/.sigma^2 of TpcSecRow gas gain correction
+  Double_t Weight;  // 1/.sigma^2 of TpcSecRow gas gain correction
+  Double_t adc;     //  adc count from cluster finder
   dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections]; //!
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
