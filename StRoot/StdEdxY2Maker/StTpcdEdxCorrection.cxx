@@ -13,6 +13,7 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcAvCurrentC.h"
+#include "St_db_Maker/St_db_Maker.h"
 ClassImp(dEdxY2_t);
 ClassImp(StTpcdEdxCorrection)
 //________________________________________________________________________________
@@ -28,7 +29,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   m_Corrections[kEdge                ] = dEdxCorrection_t("TpcEdge"             ,"Dependence of the Gain on distance from Chamber edge");
   m_Corrections[kTpcdCharge          ] = dEdxCorrection_t("TpcdCharge"          ,"ADC/Clustering undershoot correction");
   m_Corrections[kTpcrCharge          ] = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction");
-  m_Corrections[kTpcCurrentCorrection] = dEdxCorrection_t("TpcCurrentCorrection"        ,"Correction due to sagg of Voltage due to anode current");
+  m_Corrections[kTpcCurrentCorrection] = dEdxCorrection_t("TpcCurrentCorrection","Correction due to sagg of Voltage due to anode current");
   m_Corrections[kTpcRowQ             ] = dEdxCorrection_t("TpcRowQ"         	,"Gas gain correction for row versus accumulated charge, absolute normalization");
   m_Corrections[kTpcSecRowB          ] = dEdxCorrection_t("TpcSecRowB"         	,"Gas gain correction for sector/row");
   m_Corrections[kTpcSecRowC          ] = dEdxCorrection_t("TpcSecRowC"         	,"Additional Gas gain correction for sector/row");
@@ -62,6 +63,16 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     assert(k_tpcGas);
   }
   SettpcGas(k_tpcGas);
+  TDatime t[2];					\
+  if (St_db_Maker::GetValidity(k_tpcGas,t) > 0) {				\
+    Int_t Nrows = k_tpcGas->GetNRows();					\
+    LOG_WARN << "StTpcdEdxCorrection::ReSetCorrections found table " << k_tpcGas->GetName() \
+	     << " with NRows = " << Nrows << " in db" << endm;		\
+    LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	\
+	     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; \
+    if (Nrows > 10) Nrows = 10;						\
+    if (k_tpcGas->GetRowSize() < 256) k_tpcGas->Print(0,Nrows);		\
+  }
   St_TpcSecRowCor *TpcSecRow = 0;
   St_tpcCorrection *table = 0;
   tpcCorrection_st *cor = 0;
@@ -114,6 +125,17 @@ void StTpcdEdxCorrection::ReSetCorrections() {
 	continue;
       }	
       SetCorrection(k,table);
+      if (table) {
+	if (St_db_Maker::GetValidity(table,t) > 0) {			\
+	  Int_t Nrows = table->GetNRows();				\
+	  LOG_WARN << "StTpcdEdxCorrection::ReSetCorrections found table " << table->GetName() \
+		   << " with NRows = " << Nrows << " in db" << endm;	\
+	  LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime() \
+		   << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; \
+	  if (Nrows > 10) Nrows = 10;					\
+	  if (table->GetRowSize() < 256) table->Print(0,Nrows);		\
+	}
+      }
     }
   }
 }
@@ -154,7 +176,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   CdEdx.ZdriftDistanceO2 = ZdriftDistanceO2;
   CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
   Double_t gc, ADC, xL2, dXCorr;
-  Int_t l, N;
+  Double_t adcCF = CdEdx.adc;
+  Int_t l;
   tpcCorrection_st *cor = 0;
   tpcCorrection_st *corl = 0;
   TpcSecRowCor_st *gain = 0;
@@ -182,6 +205,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	dE *= 2.116;//  1.75; // 1.25 is in Trs already <<<< !!!!!!
       } else {
 	ADC = dE/mAdc2GeV;
+	if (TMath::Abs(ADC - adcCF) > 1) {
+	  // check
+	}
 	dE = Adc2GeVReal*m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,ADC,TMath::Abs(CdEdx.zG));
 	if (dE <= 0) return 3;
       }
@@ -227,11 +253,10 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       iCut = 1; // Always cut
       break;
     case    kdXCorrection:
-      N = m_Corrections[k].Chair->GetNRows();
       xL2 = TMath::Log2(dx);
       dXCorr = m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,xL2); 
-      if (N > 2) dXCorr += m_Corrections[k].Chair->CalcCorrection(2,xL2);
-      if (N > 6) dXCorr += m_Corrections[k].Chair->CalcCorrection(5+kTpcOutIn,xL2);
+      if (nrows > 2) dXCorr += m_Corrections[k].Chair->CalcCorrection(2,xL2);
+      if (nrows > 6) dXCorr += m_Corrections[k].Chair->CalcCorrection(5+kTpcOutIn,xL2);
       dE *= TMath::Exp(-dXCorr);
       goto ENDL;
     case    kTpcdEdxCor:
