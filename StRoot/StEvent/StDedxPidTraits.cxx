@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.15 2010/08/31 19:51:56 fisyak Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.16 2012/04/29 22:51:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
+ * Revision 2.16  2012/04/29 22:51:18  fisyak
+ * Add field for Log2(<dX>)
+ *
  * Revision 2.15  2010/08/31 19:51:56  fisyak
  * Clean up
  *
@@ -62,7 +65,7 @@
 #include "Stiostream.h"
 ClassImp(StDedxPidTraits)
 
-static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.15 2010/08/31 19:51:56 fisyak Exp $";
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.16 2012/04/29 22:51:18 fisyak Exp $";
 
 Float_t StDedxPidTraits::mean() const { 
 #ifdef P03ia
@@ -146,7 +149,8 @@ void StDedxPidTraits::Print(Option_t *opt) const {
        << "\t numberOfPoints : " << numberOfPoints() 
        << "\t length : "         << length()         
        << "\t mean : "           << mean()           
-       << "\t errorOnMean : "    << errorOnMean()  << endl;
+       << "\t errorOnMean : "    << errorOnMean()  
+       << "\t Log2<dX> : "       << log2dX() << endl;
        
  }
 

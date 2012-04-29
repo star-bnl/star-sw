@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.14 2010/08/31 19:51:56 fisyak Exp $
+ * $Id: StDedxPidTraits.h,v 2.15 2012/04/29 22:51:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
+ * Revision 2.15  2012/04/29 22:51:18  fisyak
+ * Add field for Log2(<dX>)
+ *
  * Revision 2.14  2010/08/31 19:51:56  fisyak
  * Clean up
  *
@@ -65,14 +68,14 @@
 class StDedxPidTraits : public StTrackPidTraits {
  public:
   StDedxPidTraits(StDetectorId det=kUnknownId, Short_t meth=kUndefinedMethodId,
-		  UShort_t n=0, Float_t dedx=0, Float_t sig=0) :
+		  UShort_t n=0, Float_t dedx=0, Float_t sig=0, Float_t log2dx=1) :
     StTrackPidTraits(det),
-    mNumberOfPoints(n), mMethod(meth), mDedx(dedx), mSigma(sig) { /* noop */ }
+    mNumberOfPoints(n), mMethod(meth), mDedx(dedx), mSigma(sig), mLog2dX(log2dx) { /* noop */ }
 
   StDedxPidTraits(const dst_dedx_st& t) :
     StTrackPidTraits(t),
     mNumberOfPoints(t.ndedx), mMethod(t.method), mDedx(t.dedx[0]),
-    mSigma(t.dedx[1]) { /* noop */ }
+    mSigma(t.dedx[1]), mLog2dX(t.dedx[2]) { /* noop */ }
 
   ~StDedxPidTraits() { /* noop */ }
 
@@ -83,12 +86,13 @@ class StDedxPidTraits : public StTrackPidTraits {
   Float_t      mean() const;
   Float_t      errorOnMean() const;
   void         Print(Option_t *opt = "") const;
-  
+  Float_t      log2dX() const {return mLog2dX;}
 protected:
   UShort_t   mNumberOfPoints;
   Short_t    mMethod;
   Float_t    mDedx;
   Float_t    mSigma;
-  ClassDef(StDedxPidTraits,3)
+  Float_t    mLog2dX; // Log2 from average dX
+  ClassDef(StDedxPidTraits,4)
 };
 #endif
