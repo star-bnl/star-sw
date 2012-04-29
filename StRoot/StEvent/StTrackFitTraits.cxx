@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.20 2012/04/27 01:45:07 perev Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.21 2012/04/29 22:49:48 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.21  2012/04/29 22:49:48  fisyak
+ * Back to old scheme of no. of fitted points for Sti, keep as possiblity a new scheme for Stv
+ *
  * Revision 2.20  2012/04/27 01:45:07  perev
  * Logic for total numbers of fit points changed
  *
@@ -89,7 +92,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.20 2012/04/27 01:45:07 perev Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.21 2012/04/29 22:49:48 fisyak Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -267,7 +270,7 @@ StTrackFitTraits::clearCovariantMatrix() {mCovariantMatrix.Set(0);}
 void
 StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
 {
-    mNumberOfFitPoints|=  0xA000;  // make sure old method is NOT active
+    mNumberOfFitPoints = ! 0xA000;  // make sure old method is working 
     switch (det) {
     case kFtpcWestId:
 	mNumberOfFitPointsFtpcWest = val;
