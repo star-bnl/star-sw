@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.19 2012/02/01 17:00:07 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.20 2012/04/30 15:19:11 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.20  2012/04/30 15:19:11  ullrich
+ * Added access function for l2sum (Akio)
+ *
  * Revision 2.19  2012/02/01 17:00:07  ullrich
  * Fixed bug concerning seg failt when MIX DSM not in run and added new arg to MtdVpdTacDiff()
  *
@@ -70,7 +73,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.19 2012/02/01 17:00:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.20 2012/04/30 15:19:11 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -260,4 +263,5 @@ unsigned short* StTriggerData::getDsm1_FMS(int prepost) const {return 0;}
 unsigned short* StTriggerData::getDsm2_FMS() const {return 0;}
 int StTriggerData::L2ResultsOffset(StL2AlgorithmId id) const {return -1;}  
 bool StTriggerData::isL2Triggered(StL2TriggerResultType id) const {return false;}  
+unsigned long long StTriggerData::l2sum() const {return 0;}  
 void StTriggerData::killFMS() {return;}

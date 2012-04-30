@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2012.h,v 2.2 2012/02/01 17:00:07 ullrich Exp $
+ * $Id: StTriggerData2012.h,v 2.3 2012/04/30 15:19:12 ullrich Exp $
  *
  * Author: Akio Ogawa, Nov 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2012.h,v $
+ * Revision 2.3  2012/04/30 15:19:12  ullrich
+ * Added access function for l2sum (Akio)
+ *
  * Revision 2.2  2012/02/01 17:00:07  ullrich
  * Fixed bug concerning seg failt when MIX DSM not in run and added new arg to MtdVpdTacDiff()
  *
@@ -56,7 +59,8 @@ public:
     // L2 offsets
     int  L2ResultsOffset(StL2AlgorithmId id) const;  
     bool isL2Triggered(StL2TriggerResultType id) const;
-    
+    unsigned long long l2sum() const;
+
     // Bunch and spin bits
     unsigned int bunchCounterHigh() const;
     unsigned int bunchCounterLow() const;
