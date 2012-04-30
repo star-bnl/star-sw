@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2012.cxx,v 2.2 2012/02/01 17:00:07 ullrich Exp $
+ * $Id: StTriggerData2012.cxx,v 2.3 2012/04/30 15:19:11 ullrich Exp $
  *
  * Author: Akio Ogawa,Nov 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2012.cxx,v $
+ * Revision 2.3  2012/04/30 15:19:11  ullrich
+ * Added access function for l2sum (Akio)
+ *
  * Revision 2.2  2012/02/01 17:00:07  ullrich
  * Fixed bug concerning seg failt when MIX DSM not in run and added new arg to MtdVpdTacDiff()
  *
@@ -957,6 +960,14 @@ unsigned int StTriggerData2012::l2ResultLength() const
 const unsigned int* StTriggerData2012::l2Result() const
 {
     return TrgSum->L2Result;
+}
+
+unsigned long long StTriggerData2012::l2sum() const 
+{
+  //printf("L2sum0=%08o\n",TrgSum->L2Sum[0]);
+  //printf("L2sum1=%08o\n",TrgSum->L2Sum[1]);
+  unsigned long long mask=(TrgSum->L2Sum[1]<<32) | TrgSum->L2Sum[0];
+  return mask;
 }
 
 unsigned short StTriggerData2012::vpdADC(StBeamDirection eastwest, int pmt, int prepost) const

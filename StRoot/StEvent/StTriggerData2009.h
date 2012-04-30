@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.18 2011/02/15 18:56:09 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.19 2012/04/30 15:19:11 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.19  2012/04/30 15:19:11  ullrich
+ * Added access function for l2sum (Akio)
+ *
  * Revision 2.18  2011/02/15 18:56:09  ullrich
  * New access fct for ZDCSMD, new ZDCSMD map, spinBit() modified.
  *
@@ -105,7 +108,8 @@ public:
     // L2 offsets
     int  L2ResultsOffset(StL2AlgorithmId id) const;  
     bool isL2Triggered(StL2TriggerResultType id) const;
-    
+    unsigned long long l2sum() const;
+
     // Bunch and spin bits
     unsigned int bunchCounterHigh() const;
     unsigned int bunchCounterLow() const;
