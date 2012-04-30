@@ -26,10 +26,7 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
   fMostProbableZShift(MostProbableZShift),
   fAverageZShift(AverageZShift),
   fI70Shift(I70Shift),
-  fI60Shift(I60Shift),
-  fbgL10min(-1), fbgL10max(4),
-  fdxL2min(-0.3), fdxL2max(3),
-  fzmin(-4), fzmax(6)
+  fI60Shift(I60Shift)
 {
   TDirectory *dir = gDirectory;
   const Char_t                                   *rootf = "P10T.root";
@@ -51,12 +48,6 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
   fW   = (TProfile2D *) pFile->Get("bichW");   assert(fW);   fW->SetDirectory(0);
   fPhi = (TH3D       *) pFile->Get("bichPhi"); assert(fPhi); fPhi->SetDirectory(0);
   delete pFile;  
-  fbgL10min = fPhi->GetXaxis()->GetBinCenter(1) + 1e-7;
-  fbgL10max = fPhi->GetXaxis()->GetBinCenter(fPhi->GetXaxis()->GetNbins()) - 1e-7;
-  fdxL2min  = fPhi->GetYaxis()->GetBinCenter(1) + 1e-7;
-  fdxL2max  = fPhi->GetYaxis()->GetBinCenter(fPhi->GetYaxis()->GetNbins()) - 1e-7;
-  fzmin  = fPhi->GetZaxis()->GetBinCenter(1) + 1e-7;
-  fzmax  = fPhi->GetZaxis()->GetBinCenter(fPhi->GetZaxis()->GetNbins()) - 1e-7;
   if (dir) dir->cd();
   for (Int_t i = 0; i<3; i++) {
     if (i == 0) fAXYZ[i] = fPhi->GetXaxis(); 
@@ -75,13 +66,8 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
   static const Double_t MIPBetaGamma10 = TMath::Log10(4.);
   //  fMostProbableZShift = TMath::Log(dEdxMIP) - Interpolation(fP,MIPBetaGamma10,1,0);
   //  fAverageZShift      = TMath::Log(dEdxMIP) - Interpolation(fA,MIPBetaGamma10,1,0);
-#ifdef  __OWN_INTERPOLATION__
   fI70Shift           *= dEdxMIP/GetI70(MIPBetaGamma10,1,0);
   fI60Shift           *= dEdxMIP/GetI60(MIPBetaGamma10,1,0);
-#else /* !  __OWN_INTERPOLATION__ */ 
-  fI70Shift           *= dEdxMIP/GetI70(MIPBetaGamma10,1);
-  fI60Shift           *= dEdxMIP/GetI60(MIPBetaGamma10,1);
-#endif /*  __OWN_INTERPOLATION__ */
   fMostProbableZShift  = TMath::Log(fI70Shift);
   fAverageZShift       = fMostProbableZShift;
 }
@@ -96,7 +82,6 @@ dEdxParameterization::~dEdxParameterization() {
   SafeDelete(fW);
   SafeDelete(fPhi);
 }    
-#ifdef __OWN_INTERPOLATION__
 //________________________________________________________________________________
 Double_t    dEdxParameterization::Interpolation(Int_t Narg, TH1 *hist, Double_t *XYZ, Int_t kase) {
   assert(hist);
@@ -208,7 +193,6 @@ Double_t   dEdxParameterization:: Interpolation(TH1 *hist, Double_t X, Int_t kas
   XYZ[0] = X;
   return Interpolation(1, hist, XYZ, kase);
 }
-#endif
 //________________________________________________________________________________
 void dEdxParameterization::Print() {
   PrP(fTag); cout << endl;
