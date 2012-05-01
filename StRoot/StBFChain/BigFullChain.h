@@ -223,9 +223,11 @@ Bfc_st BFC[] = { // standard chains
   // Note that we always need to start with VFMinuit as VFPPV is full of asserts
   //
   {"B2009.1","","","ry2009,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","","",
-   "Base chain for 2009 ITTF (tpc)",kFALSE},
+   ,                                              "Base chain for 2009 ITTF (tpc), assymptotic geo",kFALSE},
   {"B2009.2","","","ry2009a,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","","",
-   "Base chain for 2009 ITTF (tpc)",kFALSE},
+       ,                                            "Base chain for 2009 ITTF (tpc), geo version a",kFALSE},
+  {"B2009.3","","","ry2009d,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   ,                                                "Base chain for 2009 ITTF (tpc), geo version d",kFALSE},
   
   {"pp2009a"      ,"" ,"",   
    "B2009.1,IAna,hitfilt,ppOpt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis"
@@ -236,8 +238,10 @@ Bfc_st BFC[] = { // standard chains
   {"pp2009c"      ,"" ,"",   
    "B2009.2,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis","",""
    ,          "Production chain for 2009 data - no Corr, no VF (+l3, bcc/fpd, ftpc, e/b-emc, trig)",kFALSE},
-  
-  
+  {"pp2009d"      ,"" ,"",   
+   "B2009.3,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis","",""
+   ,          "Production chain for 2009 data - no Corr, no VF (+l3, bcc/fpd, ftpc, e/b-emc, trig)",kFALSE},  
+
   
   // chains for year 10
   {"B2010","","","ry2010,in,tpcX,ITTF,tpcDB,TpcHitMover,Idst,tags,Tree,evout","","",
