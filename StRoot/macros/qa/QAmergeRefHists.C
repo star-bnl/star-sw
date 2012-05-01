@@ -48,6 +48,11 @@ void QAmergeRefHists(char* listFile, char* oldFile, char* modFile, char* newFile
       } else modifyName = kFALSE;
     }
     TKey* modKey = (TKey*) (modKeys->FindObject(histName.Data()));
+    if (!modKey) {
+      histName.ReplaceAll('_',' ');
+      if (modifyName) modName.ReplaceAll('_',' ');
+      modKey = (TKey*) (modKeys->FindObject(histName.Data()));
+    }
     if (modKey) {
       // Don't add the same key twice
       if (newKeys.FindObject(modKey)) continue;
@@ -85,8 +90,11 @@ void QAmergeRefHists(char* listFile, char* oldFile, char* modFile, char* newFile
 }
 
 ////////////////////////////////////////////////////////////////////////
-// $Id: QAmergeRefHists.C,v 1.3 2011/03/15 23:02:12 genevb Exp $
+// $Id: QAmergeRefHists.C,v 1.4 2012/05/01 20:44:16 genevb Exp $
 // $Log: QAmergeRefHists.C,v $
+// Revision 1.4  2012/05/01 20:44:16  genevb
+// Account for when underscore represent space
+//
 // Revision 1.3  2011/03/15 23:02:12  genevb
 // Use __ delimeters, more careful about modifier spec
 //
