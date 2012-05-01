@@ -20,9 +20,11 @@ include rules.make
 
 SRCFILES1 := $(wildcard *.cc)
 SRCFILES2 := $(wildcard *.cxx)
+SRCFILES3 := $(wildcard *.cpp)
 
 SRCFILES := $(SRCFILES1)
 SRCFILES += $(SRCFILES2)
+SRCFILES += $(SRCFILES3)
 
 HEADERS  += $(wildcard *.h)
 HHEADERS += $(wildcard *.hh)
