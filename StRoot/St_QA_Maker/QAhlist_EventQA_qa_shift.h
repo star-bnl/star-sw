@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.42 2012/04/23 18:17:30 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.43 2012/05/01 16:01:35 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.43  2012/05/01 16:01:35  genevb
+// correction on required detectors for EmcCat4 plots
+//
 // Revision 2.42  2012/04/23 18:17:30  genevb
 // Modify list of BEMC hists for QA shift
 //
@@ -225,12 +228,12 @@
   ":bsmd:bsmdeEta",
   ":bsmd:bsmdpClNum",
   ":bsmd:bsmdpPhi",
-  ":emc:bsmd:EmcCat4_Point_Energy",
-  ":emc:bsmd:EmcCat4_Point_Eta",
-  ":emc:bsmd:EmcCat4_Point_Phi",
-  ":emc:bsmd:EmcCat4_Sigma_Eta",
-  ":emc:bsmd:EmcCat4_Sigma_Phi",
-  ":emc:bsmd: Point Flag",
+  ":emc,bsmd:EmcCat4_Point_Energy",
+  ":emc,bsmd:EmcCat4_Point_Eta",
+  ":emc,bsmd:EmcCat4_Point_Phi",
+  ":emc,bsmd:EmcCat4_Sigma_Eta",
+  ":emc,bsmd:EmcCat4_Sigma_Phi",
+  ":emc,bsmd: Point Flag",
   "QaGRpvtxDx",
   "QaGRpvtxDy",
   "QaGRpvtxDz",
