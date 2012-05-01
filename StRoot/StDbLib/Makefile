@@ -30,8 +30,10 @@ HEADERS  += $(wildcard *.h)
 HHEADERS += $(wildcard *.hh)
 LINK_OBJS1 := $(subst .cc,.o, $(SRCFILES1))
 LINK_OBJS2 := $(subst .cxx,.o, $(SRCFILES2))
+LINK_OBJS3 := $(subst .cpp,.o, $(SRCFILES3))
 LINK_OBJS := $(LINK_OBJS1)
 LINK_OBJS += $(LINK_OBJS2)
+LINK_OBJS += $(LINK_OBJS3)
 
 
 
