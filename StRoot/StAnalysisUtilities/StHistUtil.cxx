@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.87 2012/03/07 02:04:10 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.88 2012/05/01 18:37:19 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.88  2012/05/01 18:37:19  genevb
+// ZCol for Vtx XY distribution
+//
 // Revision 2.87  2012/03/07 02:04:10  genevb
 // Differentiate event counts for Reference
 //
@@ -919,6 +922,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           } else if ((chkdim == 2) &&
                      (oName.EndsWith("SvtLoc") ||
                       oName.EndsWith("PVsDedx") ||
+                      oName.EndsWith("VtxPrXY") ||
                       oName.EndsWith("SSD") ||
                       oName.EndsWith("PointXYSvt") ||
                       oName.Contains("TpcSector") ||
