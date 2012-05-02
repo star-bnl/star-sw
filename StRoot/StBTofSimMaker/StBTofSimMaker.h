@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.h,v 1.3 2010/08/10 19:18:32 geurts Exp $
+ * $Id: StBTofSimMaker.h,v 1.4 2011/02/03 19:01:01 geurts Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.h,v $
+ * Revision 1.4  2011/02/03 19:01:01  geurts
+ * Introduce option to switch writing simulated hits to StEvent. Default behavior is OFF.
+ *
  * Revision 1.3  2010/08/10 19:18:32  geurts
  * Look for geant data in bfc ("geant") or geant.root ("geantBranch"); Protect storing BTofMcHitCollection in case McEvent is NULL.  [Xin]
  *
@@ -85,6 +88,7 @@ class StBTofSimMaker : public StMaker{
 		Bool_t mCellXtalk;     //! switch for cell xtalk
 		Bool_t mSlow;
 		Bool_t mBookHisto;
+		Bool_t mWriteStEvent;  //! switch to enable Maker to write out simulated hits to StEvent
 
 		Int_t     mTofHitFlag[mNTray][mNTOF];   //! hit flag for tof geant hits
 		Int_t   mVpdHitFlag[2*mNVPD];         //! hit flag for vpd geant hits
@@ -199,9 +203,10 @@ class StBTofSimMaker : public StMaker{
 		void   setCellXtalk(Bool_t val) { mCellXtalk = val; }
 		void   setHistFileName(string s);
 		void   setBookHist(Bool_t val) { mBookHisto = val; }
+		void   writeStEvent(Bool_t val = kTRUE) {mWriteStEvent = val;}
 
 		virtual const char *GetCVS() const
-		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.3 2010/08/10 19:18:32 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.4 2011/02/03 19:01:01 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 		ClassDef(StBTofSimMaker,1)
 };

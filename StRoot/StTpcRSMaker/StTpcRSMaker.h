@@ -18,6 +18,7 @@ using namespace units;
 #include "StTpcRawData.h"
 #include "TF1F.h"
 #include "TH1.h"
+#include "TH3.h"
 #include "TTree.h"
 #include "PAI.h"
 // g2t tables
@@ -48,14 +49,13 @@ class StTpcRSMaker : public StMaker {
   virtual Int_t         Make();
   virtual Int_t  	Finish();
   TF1F *GetShaperResponse(Int_t io = 0, Int_t sector = 1) {return (TF1F *) mShaperResponses[io][sector-1];}          
-  TF1F *GetChargeFractionInner()     {return (TF1F *) mChargeFractionInner;}     
-  TF1F *GetPadResponseFunctionInner(){return (TF1F *) mPadResponseFunctionInner;}
-  TF1F *GetChargeFractionOuter()     {return (TF1F *) mChargeFractionOuter;}     
-  TF1F *GetPadResponseFunctionOuter(){return (TF1F *) mPadResponseFunctionOuter;}
+  TF1F *GetChargeFraction(Int_t io = 0)     {return (TF1F *) mChargeFraction[io];}     
+  TF1F *GetPadResponseFunction(Int_t io = 0){return (TF1F *) mPadResponseFunction[io];}
   TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
   TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
   TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
-  Double_t GetNoPrimaryClusters(Double_t betaGamma);
+  TH3F *GetYXTProd(Int_t io = 0, Int_t sector = 1) {return mYXTProducts[io][sector-1];}
+  Double_t GetNoPrimaryClusters(Double_t betaGamma, Int_t charge);
   virtual void Print(Option_t *option="") const;
   void DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
@@ -85,12 +85,11 @@ class StTpcRSMaker : public StMaker {
   static TF1F     *fgTimeShape3[2];   //!
   static TF1F     *fgTimeShape0[2];   //!
   TF1F  *mShaperResponses[2][24];     //!
-  TF1F  *mChargeFractionInner;        //!
-  TF1F  *mPadResponseFunctionInner;   //!
-  TF1F  *mChargeFractionOuter;        //!
-  TF1F  *mPadResponseFunctionOuter;   //!
+  TF1F  *mChargeFraction[2];          //!
+  TF1F  *mPadResponseFunction[2];     //!
   TF1F  *mPolya[2];                   //!
   TF1F  *mGG;                         //! Gating Grid Transperency
+  TH3F  *mYXTProducts[2][24];//! precalculated product of mChargeFractionInner/mChargeFractionOuter by mPadResponseFunctionInner/mPadResponseFunctionOuter by mShaperResponses
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   PAI  *mPAI;                         //!
   Double_t             mLaserScale;   //!
@@ -129,14 +128,23 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.18 2010/06/14 23:34:26 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.22 2011/10/14 23:27:51 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.18 2010/06/14 23:34:26 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.22 2011/10/14 23:27:51 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.22  2011/10/14 23:27:51  fisyak
+// Back to standard version
+//
+// Revision 1.20  2011/09/18 22:39:48  fisyak
+// Extend dN/dx table (H.Bichsel 09/12/2011) to fix bug #2174 and #2181, clean-up
+//
+// Revision 1.19  2011/03/17 14:29:31  fisyak
+// Add extrapolation in region beta*gamma < 0.3
+//
 // Revision 1.18  2010/06/14 23:34:26  fisyak
 // Freeze at Version V
 //

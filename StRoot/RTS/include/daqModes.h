@@ -42,7 +42,6 @@
 #define RUN_TYPE_PED_A		200
 #define RUN_TYPE_PED_B		201
 #define RUN_TYPE_PULSER_A	202
-#define RUN_TYPE_HLT_DEBUG	203	// special pedestal setup to simulate clusters
 
 /* special DAQ commands sent out via Trigger */
 #define DAQCMD_DEFAULT		0	/* Run cluster finder _and_ wait for FORMAT_DATA */

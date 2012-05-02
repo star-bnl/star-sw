@@ -23,6 +23,8 @@
 #include "StEmcUtil/database/StBemcTables.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
+#include <vector>
+
 class EEmcGeomSimple;
 class StBemcTables;
 class StMuTrack;
@@ -36,7 +38,7 @@ class StGammaRawMaker: public StMaker
         ~StGammaRawMaker();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaRawMaker.h,v 1.6 2009/06/18 05:52:56 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaRawMaker.h,v 1.7 2010/11/13 22:51:22 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
         
         // Required Maker Methods
         Int_t Init();
@@ -64,6 +66,8 @@ class StGammaRawMaker: public StMaker
 
         void AddEtaStrip(StGammaStrip *strip);
         void AddPhiStrip(StGammaStrip *strip);
+
+        void excludeBemcTower(int softId) { mExcludedBemcTowers.push_back(softId); }
 
     protected:
 
@@ -106,6 +110,8 @@ class StGammaRawMaker: public StMaker
     
         bool mUseBemc;
         bool mUseEemc;
+
+        vector<int> mExcludedBemcTowers;
     
         StMuDstMaker *mMuDstMaker;
         StGammaEventMaker *mGammaMaker;

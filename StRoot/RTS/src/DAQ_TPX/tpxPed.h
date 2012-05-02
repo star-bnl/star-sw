@@ -34,7 +34,6 @@ public:
 	int to_cache(char *fname = 0, u_int run = 0) ;			// to cached file from ped_store
 
 	int special_setup(int run_type, int sub_type) ;
-	int hlt_debug_setup(int param) ;
 
 	void kill_bad(int row, int pad) ;		// kills this specific pad in ped_store
 
