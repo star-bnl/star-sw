@@ -18,6 +18,7 @@
 
 #include "tables/St_pp2ppPedestal_Table.h"
 #include "tables/St_pp2ppOffset_Table.h"
+#include "tables/St_pp2ppZ_Table.h"
 
 #include "StEvent/StEvent.h"
 #include "StEvent/StRpsCollection.h"
@@ -30,7 +31,7 @@ using namespace std;
 ClassImp(St_pp2pp_Maker)
 
   St_pp2pp_Maker::St_pp2pp_Maker(const char *name) : StRTSBaseMaker("pp2pp",name),   
-						     mpedestal_perchannel_filename("pedestal.in.perchannel"), mLDoCluster(kTRUE) {
+						     mPedestalPerchannelFilename("pedestal.in.perchannel"), mLDoCluster(kTRUE) {
   // ctor
   //  nevt_count = 0 ;
 }
@@ -42,28 +43,29 @@ St_pp2pp_Maker::~St_pp2pp_Maker() {
 //_____________________________________________________________________________
 /// Init - is a first method the top level StChain calls to initialize all its makers 
 Int_t St_pp2pp_Maker::Init() {
-  mLast_svx   = ErrorCode;
-  mLast_chain = ErrorCode;
-  mLast_seq   = ErrorCode ;
+  mLastSvx   = ErrorCode;
+  mLastChain = ErrorCode;
+  mLastSeq   = ErrorCode ;
   return StMaker::Init();
 }
 
 Int_t St_pp2pp_Maker::InitRun(int runumber) {
   if ( mLDoCluster ) {
-    read_pedestal_perchannel() ;
-    read_offset_perplane() ;
+    readPedestalPerchannel() ;
+    readOffsetPerplane() ;
+    readZPerplane() ;
   }
-  return 0;
+  return kStOk ;
 }
 
-Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
+Int_t St_pp2pp_Maker::readPedestalPerchannel() {
 
   //  cout << "Size of each struct in DB : " << sizeof(pp2ppPedestal_st) << endl ;
 
-  //  cout << "Size of mpedave : " << sizeof(mpedave) << " , Size of mpedrms : " << sizeof(mpedrms) << endl ;
+  //  cout << "Size of mPedave : " << sizeof(mPedave) << " , Size of mPedrms : " << sizeof(mPedrms) << endl ;
 
-  memset(mpedave,0,sizeof(mpedave));
-  memset(mpedrms,0,sizeof(mpedrms));
+  memset(mPedave,0,sizeof(mPedave));
+  memset(mPedrms,0,sizeof(mPedrms));
 
   Int_t s, c, sv, ch, idb = 0 ;
 
@@ -101,10 +103,10 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
 	  ch = (Int_t) table[idb].channel ;
 
 	  if ( s > 0 ) { /// protect against zero entries (such as 10185015 with 2D switched off)
-	    mpedave[s-1][c][sv][ch] = table[idb].mean ;
-	    mpedrms[s-1][c][sv][ch] = table[idb].rms ;
+	    mPedave[s-1][c][sv][ch] = table[idb].mean ;
+	    mPedrms[s-1][c][sv][ch] = table[idb].rms ;
 	  }
-	  //		  cout << s << " " << c << " "  << sv << " " << ch << " " << mpedave[s-1][c][sv][ch] << " " << mpedrms[s-1][c][sv][ch] << endl ; 
+	  //		  cout << s << " " << c << " "  << sv << " " << ch << " " << mPedave[s-1][c][sv][ch] << " " << mPedrms[s-1][c][sv][ch] << endl ; 
 
 	}
     } else {
@@ -115,13 +117,13 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
   LOG_DEBUG << idb << " pedestal entries read from DB table Calibration/pp2pp read. " << endm ;
 
 
-  return 1 ;
+  return kStOk ;
 
 }
 
-Int_t St_pp2pp_Maker::read_offset_perplane() {
+Int_t St_pp2pp_Maker::readOffsetPerplane() {
 
-  moffset_table = 0;
+  mOffsetTable = 0;
 
   TDataSet *DB = 0;
   DB = GetInputDB("Geometry/pp2pp");
@@ -135,12 +137,12 @@ Int_t St_pp2pp_Maker::read_offset_perplane() {
     descr = (St_pp2ppOffset*) DB->Find("pp2ppOffset");
     // fetch data and place it to appropriate structure
     if (descr) {
-      moffset_table = descr->GetTable();
+      mOffsetTable = descr->GetTable();
       LOG_DEBUG << "Reading pp2ppOffset table with nrows = " << descr->GetNRows() << endm ;
       /*
       for (Int_t i = 0; i < descr->GetNRows(); i++) {
 	for ( Int_t j = 0; j< 32 ; j++ )
-	  std::cout << moffset_table[i].rp_offset_plane[j] << " "  ; 
+	  std::cout << mOffsetTable[i].rp_offset_plane[j] << " "  ; 
 	cout << endl ;
       }
       */
@@ -150,7 +152,43 @@ Int_t St_pp2pp_Maker::read_offset_perplane() {
 
   }
 
-  return 1 ;
+  return kStOk ;
+
+}
+
+
+Int_t St_pp2pp_Maker::readZPerplane() {
+
+  mZTable = 0;
+
+  TDataSet *DB = 0;
+  DB = GetInputDB("Geometry/pp2pp");
+  if (!DB) { 
+    LOG_ERROR << "ERROR: cannot find database Geometry_pp2pp?" << std::endl; 
+  }
+  else {
+
+    // fetch ROOT descriptor of db table
+    St_pp2ppZ *descr = 0;
+    descr = (St_pp2ppZ*) DB->Find("pp2ppZ");
+    // fetch data and place it to appropriate structure
+    if (descr) {
+      mZTable = descr->GetTable();
+      LOG_DEBUG << "Reading pp2ppZ table with nrows = " << descr->GetNRows() << endm ;
+      /*
+      for (Int_t i = 0; i < descr->GetNRows(); i++) {
+	for ( Int_t j = 0; j< 32 ; j++ )
+	  std::cout << mZTable[i].rp_z_plane[j] << " "  ; 
+	cout << endl ;
+      }
+      */
+    } else {
+      LOG_ERROR << "St_pp2pp_Maker : No data in pp2ppZ table (wrong timestamp?). Nothing to return, then" << endm ;
+    }
+
+  }
+
+  return kStOk ;
 
 }
 
@@ -161,9 +199,9 @@ Int_t St_pp2pp_Maker::read_offset_perplane() {
 void  St_pp2pp_Maker::Clear(Option_t *) {
 
   // Deleting previous cluster info.
-  for ( Int_t i=0; i<MAXSEQ; i++)
-    for ( Int_t j=0; j<MAXCHAIN; j++)
-      (mvalidhits[i][j]).clear();
+  for ( Int_t i=0; i<kMAXSEQ; i++)
+    for ( Int_t j=0; j<kMAXCHAIN; j++)
+      (mValidHits[i][j]).clear();
 
   StMaker::Clear(); // perform the basic clear (mandatory)
 
@@ -217,10 +255,10 @@ Int_t St_pp2pp_Maker::Make(){
 
   if ( mLDoCluster ) { 
 
-    for ( Int_t i=0; i<MAXSEQ; i++)
-      for ( Int_t j=0; j<MAXCHAIN; j++) {
-	sort( (mvalidhits[i][j]).begin(), (mvalidhits[i][j]).end(), hitcompare);
-	//	cout << "Size of vector of sequencer " << i+1 << " chain " << j << " " << dec << (mvalidhits[i][j]).size() << endl ;
+    for ( Int_t i=0; i<kMAXSEQ; i++)
+      for ( Int_t j=0; j<kMAXCHAIN; j++) {
+	sort( (mValidHits[i][j]).begin(), (mValidHits[i][j]).end(), hitcompare);
+	//	cout << "Size of vector of sequencer " << i+1 << " chain " << j << " " << dec << (mValidHits[i][j]).size() << endl ;
       }
 
     MakeClusters();
@@ -248,30 +286,30 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
   // One known case is for SEQ 3, CHAIN 2 and SVX is 7 but it should be 3.
   // Mostly, just some debugging codes that we've used in the past and shouldn't happen
 
-  if ( (oneSihit.svx != mLast_svx) && (mLast_svx != ErrorCode) ) {
+  if ( (oneSihit.svx != mLastSvx) && (mLastSvx != ErrorCode) ) {
 
-    if (  Int_t(oneSihit.svx-1) != mLast_svx )
+    if (  Int_t(oneSihit.svx-1) != mLastSvx )
 
-      if (  ( (oneSihit.svx-mLast_svx) != -3 && ( (oneSihit.chain%2)==1 ) ) ||
-	    ( (oneSihit.svx-mLast_svx) != -5 && ( (oneSihit.chain%2)==0 ) ) ) {
+      if (  ( (oneSihit.svx-mLastSvx) != -3 && ( (oneSihit.chain%2)==1 ) ) ||
+	    ( (oneSihit.svx-mLastSvx) != -5 && ( (oneSihit.chain%2)==0 ) ) ) {
 
 	if ( oneSihit.svx == 7 && oneSihit.sequencer == 3 && oneSihit.chain == 2 )
 	  oneSihit.svx = 3 ;
-	//		  else if ( oneSihit.svx < mLast_svx ) {
-	else if ( oneSihit.svx < mLast_svx && ( GetRunNumber()<10185015 || (mLast_seq!=2 && mLast_chain!=2)) ) { // bad seq 2 and chain D
+	//		  else if ( oneSihit.svx < mLastSvx ) {
+	else if ( oneSihit.svx < mLastSvx && ( GetRunNumber()<10185015 || (mLastSeq!=2 && mLastChain!=2)) ) { // bad seq 2 and chain D
 
-	  LOG_WARN << "Decreased ? " <<  GetEventNumber() << " : mLast_seq = " << mLast_seq << ", mLast_chain = " << mLast_chain << ", mLast_svx = " << mLast_svx << endm ;
+	  LOG_WARN << "Decreased ? " <<  GetEventNumber() << " : mLastSeq = " << mLastSeq << ", mLastChain = " << mLastChain << ", mLastSvx = " << mLastSvx << endm ;
 	  LOG_WARN << "Decreased ?  " << GetEventNumber() << " : Now, seq = " << (int) oneSihit.sequencer << ", chain = " << (int) oneSihit.chain << ", svx = " << (int) oneSihit.svx << endm ;
 	  
-	  oneSihit.svx = mLast_svx + 1 ;
+	  oneSihit.svx = mLastSvx + 1 ;
 		    
 	  LOG_WARN << "Decreased ? : So -> " << " svx is now = " << (int) oneSihit.svx << endm ;	      
 
 	}
-	//	else if ( mLast_seq!=2 && mLast_chain!=2 ) { // bad seq 2 and chain D
-	else if ( GetRunNumber()<10185015 || ( mLast_seq!=2 && mLast_chain!=2 ) ) { // bad seq 2 and chain D
+	//	else if ( mLastSeq!=2 && mLastChain!=2 ) { // bad seq 2 and chain D
+	else if ( GetRunNumber()<10185015 || ( mLastSeq!=2 && mLastChain!=2 ) ) { // bad seq 2 and chain D
 
-	  LOG_WARN << GetEventNumber() << " : mLast_seq = " << mLast_seq << ", mLast_chain = " << mLast_chain << ", mLast_svx = " << mLast_svx << endm ;
+	  LOG_WARN << GetEventNumber() << " : mLastSeq = " << mLastSeq << ", mLastChain = " << mLastChain << ", mLastSvx = " << mLastSvx << endm ;
 	  LOG_WARN << GetEventNumber() << " : Now, seq = " << (int) oneSihit.sequencer << ", chain = " << (int) oneSihit.chain << ", svx = " << (int) oneSihit.svx << endm ;
 
 	}
@@ -280,21 +318,21 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 	      
 
   }
-  else if ( (oneSihit.chain==mLast_chain) && (mLast_chain != ErrorCode) ) {
-    LOG_WARN << "Repeated ? :" << GetEventNumber() << " : mLast_seq = " << mLast_seq << ", mLast_chain = " << mLast_chain << ", mLast_svx = " << mLast_svx << endm ;
+  else if ( (oneSihit.chain==mLastChain) && (mLastChain != ErrorCode) ) {
+    LOG_WARN << "Repeated ? :" << GetEventNumber() << " : mLastSeq = " << mLastSeq << ", mLastChain = " << mLastChain << ", mLastSvx = " << mLastSvx << endm ;
     LOG_WARN << "Repeated ? : " << GetEventNumber() << " : Now, seq = " << (int) oneSihit.sequencer << ", chain = " << (int) oneSihit.chain << ", svx = " << (int) oneSihit.svx << endm ;
 
-    oneSihit.svx = mLast_svx + 1 ;
+    oneSihit.svx = mLastSvx + 1 ;
 
     LOG_WARN << "Repeated : So -> " << " svx is now = " << (int) oneSihit.svx << endm ;	      
   }
 
 
-  mLast_seq = oneSihit.sequencer; 
-  mLast_chain = oneSihit.chain;
-  mLast_svx = oneSihit.svx;
+  mLastSeq = oneSihit.sequencer; 
+  mLastChain = oneSihit.chain;
+  mLastSvx = oneSihit.svx;
 
-  //  cout << "Seq: " << mLast_seq << " , chain " << mLast_chain << ", SVX = " << mLast_svx << endl ;
+  //  cout << "Seq: " << mLastSeq << " , chain " << mLastChain << ", SVX = " << mLastSvx << endl ;
 
   for(unsigned int c=0;c<sizeof(d.adc);c++) {
     //	      if( d.adc[c] ) printf("   %3d: %3d [0x%02X]\n",c,d.adc[c],d.adc[c]) ;
@@ -309,13 +347,13 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
       if ( mLDoCluster && (c != 127) && (c != 0) ) { // Avoid the channels at 2 ends of SVX
 	
 	// Getting rid of the 1st channel (0) and the last channel (127)
-	onehit.first = mLast_svx*(MAXSTRIP-2) + oneSihit.channel - 1  ; 
+	onehit.first = mLastSvx*(kMAXSTRIP-2) + oneSihit.channel - 1  ; 
 
-	onehit.second = oneSihit.adc -  mpedave[mLast_seq-1][mLast_chain][mLast_svx][oneSihit.channel] ;
+	onehit.second = oneSihit.adc -  mPedave[mLastSeq-1][mLastChain][mLastSvx][oneSihit.channel] ;
 
-	if ( onehit.second > 5*mpedrms[mLast_seq-1][mLast_chain][mLast_svx][oneSihit.channel] ) {
-	  (mvalidhits[mLast_seq-1][mLast_chain]).push_back(onehit);
-	  //	  cout << "mvalidhits : position " << onehit.first << " , energy " << onehit.second << endl ;
+	if ( onehit.second > 5*mPedrms[mLastSeq-1][mLastChain][mLastSvx][oneSihit.channel] ) {
+	  (mValidHits[mLastSeq-1][mLastChain]).push_back(onehit);
+	  //	  cout << "mValidHits : position " << onehit.first << " , energy " << onehit.second << endl ;
 	}
       }
 
@@ -326,7 +364,7 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 		<< " is duplicated ? ==> " << (Int_t) d.adc[c] << std::endl ;
   }
 
-  return 1;
+  return kStOk;
 
 }
 
@@ -335,14 +373,14 @@ Int_t St_pp2pp_Maker::MakeClusters() {
   //  const Int_t MAX_Cls_L = 5 ;
   //  const Int_t MIN_Charge = 20 ;
   /// Orientations for each silicon plane
-  const short orientations[MAXCHAIN*MAXSEQ] = {-1,1,-1,1,  1,-1,1,-1,  1,1,1,1, -1,-1,-1,-1,  -1,-1,-1,-1,  1,1,1,1,  -1,1,-1,1, 1,-1,1,-1 };
+  const short orientations[kMAXCHAIN*kMAXSEQ] = {-1,1,-1,1,  1,-1,1,-1,  1,1,1,1, -1,-1,-1,-1,  -1,-1,-1,-1,  1,1,1,1,  -1,1,-1,1, 1,-1,1,-1 };
   /// Assume 4 planes have the same z at least for now
-  const double zcoordinates[MAXSEQ] = { -55.496, -55.496, -58.496, -58.496, 55.496, 55.496, 58.496, 58.496 };
+  const double zcoordinates[kMAXSEQ] = { -55.496, -55.496, -58.496, -58.496, 55.496, 55.496, 58.496, 58.496 };
 
   /// Mappings to deal with the trigger data
-  const short EW[MAXSEQ]   = { 0, 0, 0, 0, 1, 1, 1, 1 } ; /// East = 0, West = 1
-  const short VH[MAXSEQ]   = { 1, 1, 0, 0, 1, 1, 0, 0 } ; /// Vertical = 0, Horizontal = 1
-  const short UDOI[MAXSEQ] = { 1, 0, 0, 1, 1, 0, 1, 0 } ; /// Up=0, Down=1; Outer=0, Inner=1
+  const short EW[kMAXSEQ]   = { 0, 0, 0, 0, 1, 1, 1, 1 } ; /// East = 0, West = 1
+  const short VH[kMAXSEQ]   = { 1, 1, 0, 0, 1, 1, 0, 0 } ; /// Vertical = 0, Horizontal = 1
+  const short UDOI[kMAXSEQ] = { 1, 0, 0, 1, 1, 0, 1, 0 } ; /// Up=0, Down=1; Outer=0, Inner=1
 
   Bool_t is_candidate_to_store ;
 
@@ -362,8 +400,8 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
   vector< HitChannel >::iterator it, it_next ;
 
-  for ( Int_t i=0; i<MAXSEQ; i++) /// each sequencer/roman-pot
-    for ( Int_t j=0; j<MAXCHAIN; j++) { /// each chain/silicon-plane
+  for ( Int_t i=0; i<kMAXSEQ; i++) /// each sequencer/roman-pot
+    for ( Int_t j=0; j<kMAXCHAIN; j++) { /// each chain/silicon-plane
 
 
       // Put in trigger stuff 
@@ -382,21 +420,24 @@ Int_t St_pp2pp_Maker::MakeClusters() {
       ECluster = 0 ;
       POStimesE = 0 ;
 
-      pp2ppColl->romanPot(i)->plane(j)->setZ(zcoordinates[i]) ; 
+      if ( mZTable )
+	pp2ppColl->romanPot(i)->plane(j)->setZ( mZTable[0].rp_z_plane[4*i+j] ) ; /// z coordinates all in m
+      else
+	pp2ppColl->romanPot(i)->plane(j)->setZ(zcoordinates[i]) ; 
 
-      if ( moffset_table )
-	offset = moffset_table[0].rp_offset_plane[4*i+j]/1000. ; /// all in m
+      if ( mOffsetTable )
+	offset = mOffsetTable[0].rp_offset_plane[4*i+j]/1000. ; /// offsets all in m
       else
 	offset = double(ErrorCode) ;
-      //      cout << "Offsets : " <<  i << " " << j << " " << moffset_table[0].rp_offset_plane[4*i+j] << endl ; 
+      //      cout << "Offsets : " <<  i << " " << j << " " << mOffsetTable[0].rp_offset_plane[4*i+j] << endl ; 
 
       pp2ppColl->romanPot(i)->plane(j)->setOffset( offset ) ; 
 
       pp2ppColl->romanPot(i)->plane(j)->setOrientation( orientations[4*i+j] ) ;
 
-      it = (mvalidhits[i][j]).begin() ;
+      it = (mValidHits[i][j]).begin() ;
 
-      while ( it != (mvalidhits[i][j]).end() ) {
+      while ( it != (mValidHits[i][j]).end() ) {
 
 	//	cout << "Seq: " << i+1 << " , chain " << j << ", channel : " << it->first << " , energy : " << it->second << endl ;
 	NCluster_Length++ ;
@@ -408,7 +449,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 	is_candidate_to_store = kFALSE ;
 
 	// Deciding whether it's time to finish this particular clustering process
-	if ( it_next != (mvalidhits[i][j]).end() ) {
+	if ( it_next != (mValidHits[i][j]).end() ) {
 
 	  // if the next one is not a neighbor --> a candidate cluster
 	  if ( (it_next->first - it->first)!=1  ) 
@@ -458,7 +499,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
       } // while
 
-    } // for ( Int_t j=0; j<MAXCHAIN; j++) {
+    } // for ( Int_t j=0; j<kMAXCHAIN; j++) {
 
 
   mEvent = (StEvent *) GetInputDS("StEvent");
@@ -469,7 +510,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
   else
     LOG_ERROR << "St_pp2pp_Maker : StEvent not found !" << endm ;
   
-  return 1 ;
+  return kStOk ;
 
 }
 

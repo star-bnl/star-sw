@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.43 2009/08/04 08:37:28 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.44 2009/12/11 15:41:06 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.44  2009/12/11 15:41:06  jcs
+// For laser run use laserTZero and no inner cathode correction
+//
 // Revision 1.43  2009/08/04 08:37:28  jcs
 // When the flaser option is included in the bfc, the 'perfect' gain table and
 // adjustAverageWest = adjustAverageEast = 0.0, will be used for cluster finding
@@ -821,6 +824,8 @@ Bool_t StFtpcDbReader::setLaserRun(Bool_t laserRun)
       gasTable->adjustAverageWest = 0.0;
       gasTable->adjustAverageEast = 0.0;
       LOG_INFO << "LASER RUN:   Using 'perfect' gain table and adjustAverageWest = adjustAverageEast = 0.0"<< endm;
+      mTZero = mLaserTZero;
+      LOG_INFO << "             mTZero = mLaserTZero = "<<mTZero<<endm;      
    }
    return 0;
 }
