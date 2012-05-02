@@ -60,7 +60,7 @@ const char* StHyperCacheFileLocal::get(const std::string& group_key, const std::
 
 	std::ifstream cf(cache_file.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
 	std::ifstream::pos_type file_size = cf.tellg();
-	if (file_size == 0) { return 0; }
+	if ((size_t)file_size == (size_t)0) { return 0; }
 	char* memblock = new char[(size_t)(file_size)+(size_t)(1)];
     cf.seekg (0, std::ios::beg);
     cf.read (memblock, file_size);

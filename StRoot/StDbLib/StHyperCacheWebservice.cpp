@@ -13,6 +13,8 @@
 #include "StHyperUtilFilesystem.h"
 #include "StHyperCacheConfig.h"
 
+#include <curl/curlver.h>
+
 namespace { // to localize json_writer helper function to this unit
 
 // This is the writer call back function used by curl
@@ -58,7 +60,17 @@ const char* StHyperCacheWebservice::get(const std::string& group_key, const std:
 	// group_key = database, key = mysql query
 	value_length = 0;
 
+#ifdef LIBCURL_VERSION_NUM
+# if LIBCURL_VERSION_NUM > 0x70F03
 	char* escaped_key = curl_easy_escape(curl , key.c_str() , key.size());
+# else 
+	char* escaped_key = curl_escape(key.c_str() , key.size());
+# endif 
+#else
+	char* escaped_key = curl_easy_escape(curl , key.c_str() , key.size());
+#endif
+
+//	char* escaped_key = curl_easy_escape(curl , key.c_str() , key.size());
 	std::string query = escaped_key;
     curl_free(escaped_key);
 
@@ -73,7 +85,17 @@ const char* StHyperCacheWebservice::get(const std::string& group_key, const std:
         m_post_query_url += "\", \"query\" : \"";
         m_post_query_url += key;
         m_post_query_url += "\" }";
+
+#ifdef LIBCURL_VERSION_NUM
+# if LIBCURL_VERSION_NUM > 0x70F03
         post_query_url = curl_easy_escape(curl, m_post_query_url.c_str(), m_post_query_url.size());
+# else 
+        post_query_url = curl_escape(m_post_query_url.c_str(), m_post_query_url.size());
+# endif 
+#else
+        post_query_url = curl_easy_escape(curl, m_post_query_url.c_str(), m_post_query_url.size());
+#endif
+
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 0);
         curl_easy_setopt(curl, CURLOPT_POST, 1);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_query_url.c_str() );

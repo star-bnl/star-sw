@@ -242,8 +242,14 @@ st_md5_process_bytes (const void *buffer, size_t len, struct st_md5_ctx *ctx)
     /* Process available complete blocks.  */
     if (len >= 64) {
 #if !_STRING_ARCH_unaligned
-# define alignof(type) offsetof (struct { char c; type x; }, x)
-# define UNALIGNED_P(p) (((size_t) p) % alignof (uint32_t) != 0)
+//# define alignof(type) offsetof (struct { char c; type x; }, x)
+
+#ifdef UINT32_MAX
+# define UNALIGNED_P(p) (((size_t) p) % __alignof__ (uint32_t) != 0)
+#else 
+# define UNALIGNED_P(p) (((size_t) p) % __alignof__ (int) != 0)
+#endif
+
         if (UNALIGNED_P (buffer))
             while (len > 64) {
                 st_md5_process_block (memcpy (ctx->buffer, buffer, 64), 64, ctx);
