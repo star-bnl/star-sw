@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StTpcMixerMaker.cxx,v 1.2 2012/03/20 15:43:30 fisyak Exp $
+ * $Id: StTpcMixerMaker.cxx,v 1.3 2012/05/02 22:21:59 fisyak Exp $
  * $Log: StTpcMixerMaker.cxx,v $
+ * Revision 1.3  2012/05/02 22:21:59  fisyak
+ * Remove requirement to have 2 and only 2 inputs
+ *
  * Revision 1.2  2012/03/20 15:43:30  fisyak
  * Ignore  Input1/2 setting, find Event data sets from chain in order which they have been instantiated, bug 2299
  *
@@ -16,30 +19,6 @@
 ClassImp(StTpcMixerMaker)
 //______________________________________________________________________________
 Int_t StTpcMixerMaker::Make() {
-#if 0
-  static const char *input[2] = {"Input1","Input2"};
-  TObjectSet *eventDAQ = (TObjectSet *) GetDataSet("Input1");
-  if (! eventDAQ ) {
-    LOG_WARN << "No Tpc DAQ Event on Input1" << endm;
-    return kStWarn;
-  }
-  StTpcRawData *rawDAQ = (StTpcRawData *) eventDAQ->GetObject();
-  if (! rawDAQ ) {
-    LOG_WARN << "No Tpc DAQ Raw on Input1" << endm;
-    return kStWarn;
-  }
-  TObjectSet *eventTRS = (TObjectSet *) GetDataSet("Input2");
-  if (! eventTRS ) {
-    LOG_WARN << "No Tpc TRS Event on Input2" << endm;
-    return kStWarn;
-  }
-  StTpcRawData *rawTRS = (StTpcRawData *) eventTRS->GetObject();
-  if (! rawTRS ) {
-    LOG_WARN << "No Tpc TRS Raw on Input2" << endm;
-    return kStWarn;
-  }
-  *rawDAQ += *rawTRS;
-#else
   StTpcRawData *inputs[2] = {0, 0};
   TDataSetIter next(StMaker::GetTopChain(),9999);
   TDataSet *set = 0;
@@ -53,11 +32,14 @@ Int_t StTpcMixerMaker::Make() {
     if (! inputs[nfound]) continue;
     LOG_INFO << "Found \t" << Path << " in " << set->Path() << "\tas Input" << nfound+1 << endm;
     nfound++;
+    if (nfound == 2) break;
   }
-  assert(nfound==2);
-  *inputs[0] += *inputs[1];
-#endif
+  if (nfound==2) {
+    *inputs[0] += *inputs[1];
+  } else {
+    LOG_INFO << "Found only " << nfound << " Event with StTpcRawData ==> Do nothing!" << endm;
+  }
   return kStOK;
-} // Make() 
+} 
 
 
