@@ -8,7 +8,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHelix.hh,v 1.12 2006/06/29 15:53:22 ullrich Exp $
+ * $Id: StHelix.hh,v 1.13 2010/10/18 21:55:11 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.hh,v $
+ * Revision 1.13  2010/10/18 21:55:11  fisyak
+ * Warn off for gcc4.5.1 64bits
+ *
  * Revision 1.12  2006/06/29 15:53:22  ullrich
  * Added direction vector at given pathlength (written by Yuri).
  *
@@ -86,7 +89,7 @@ public:
     /// pointing vector of helix at point s
     double       cx(double s)  const;
     double       cy(double s)  const;
-    double       cz(double s)  const;
+    double       cz(double s = 0)  const;
     
     StThreeVector<double>  cat(double s) const;
 
@@ -206,7 +209,7 @@ inline double StHelix::cy(double s)  const
 	return cos(mPhase + s*mH*mCurvature*mCosDipAngle)*mH*mCosDipAngle;
 }
 
-inline double StHelix::cz(double s)  const
+inline double StHelix::cz(double /* s */)  const
 {
     return mSinDipAngle;
 }    
@@ -223,9 +226,9 @@ inline StThreeVector<double> StHelix::cat(double s) const
     return StThreeVector<double>(cx(s), cy(s), cz(s));
 }
 
-inline double StHelix::pathLength(double x, double y) const
+inline double StHelix::pathLength(double X, double Y) const
 {
-    return fudgePathLength(StThreeVector<double>(x, y, 0));
+    return fudgePathLength(StThreeVector<double>(X, Y, 0));
 }
 inline int StHelix::bad(double WorldSize) const
 {

@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.20 2009/01/09 19:43:47 tone421 Exp $
+ * $Id: StMuEvent.cxx,v 1.22 2010/02/03 17:16:22 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -27,6 +27,7 @@
 #include "StMuDebug.h"
 #include "StMuDst.h"
 #include "StMuPrimaryVertex.h"
+#include "StMuBTofHit.h"
 
 #include "TClonesArray.h"
 #include "TObject.h"
@@ -235,9 +236,42 @@ unsigned short StMuEvent::grefmult(int vtx_id){
     }
 	else return 0;
 }
+
+unsigned short StMuEvent::btofTrayMultiplicity(){
+
+	unsigned short btofmult = (unsigned short)StMuDst::numberOfBTofHit();
+	for(unsigned int i=0;i< StMuDst::numberOfBTofHit();i++) if(StMuDst::btofHit(i)->tray() > 120) btofmult--;
+	return btofmult;
+
+}
+
+float StMuEvent::nearestVertexZ(int vtx_id){
+
+	float dz = 999.0;
+	//For old MuDsts where there was one vertex per event
+	if (StMuDst::numberOfPrimaryVertices()==0) return dz;
+	const int Nvert = StMuDst::primaryVertices()->GetEntries();
+	if(Nvert < 2) return dz;
+	
+	if (vtx_id == -1) vtx_id = StMuDst::currentVertexIndex();	
+	float z =  primaryVertexPosition(vtx_id).z();
+	for(int i=0;i<Nvert;i++){
+		if(vtx_id!=i) {
+			if(fabs(z-StMuDst::primaryVertex(i)->position().z()) < dz) dz = fabs(z-StMuDst::primaryVertex(i)->position().z());
+		}
+	}
+	return dz;
+}
+
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.22  2010/02/03 17:16:22  tone421
+ * Added function StMuEvent::nearestVertexZ(int vtx_id) which returns the z distance of the nearest vertex in relation to vertex vtx_id
+ *
+ * Revision 1.21  2010/02/03 04:54:45  tone421
+ * Added StMuEvent::btofTrayMultiplicity() to return only TOF hits from trays. Should be looked at instead of ctbSum for run 9 and beyond.
+ *
  * Revision 1.20  2009/01/09 19:43:47  tone421
  * OAdded gremult in StMuEvent (globals tracks with DCA < 3cm, >= 10 TPC fit hits and |eta| < 0.5)
  *

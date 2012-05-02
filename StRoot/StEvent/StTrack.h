@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.23 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTrack.h,v 2.24 2010/08/31 20:00:09 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -16,19 +16,14 @@
  * that and because of the way the tables were defined TPC and FTPC were
  * one and the same. This caused confusion. However, since we have to
  * stay backwards compatible the "old way" is still working.
- * If
- * a) mNumberOfPossiblePoints == 0 the new encoding is the one to use, i.e.,
+ *    mNumberOfPossiblePoints ==>  seedQuality 
  *    mNumberOfPossiblePointsTpc
  *    mNumberOfPossiblePointsFtpcWest 
  *    mNumberOfPossiblePointsFtpcEast 
  *    mNumberOfPossiblePointsSvt 
  *    mNumberOfPossiblePointsSsd 
  *    are the ones that count
- * b) mNumberOfPossiblePoints != 0 then we still loaded the info from
- *    the tables and all is as it was before, i.e., we do not distinguish
- *    between FTPC and TPC.
- *
- * --------------------------------------------------------------------------
+  * --------------------------------------------------------------------------
  *  The track flag (mFlag accessed via flag() method) definitions with ITTF 
  *  (flag definition in EGR era can be found at
  *   http://www.star.bnl.gov/STAR/html/all_l/html/dst_track_flags.html)
@@ -63,6 +58,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.24  2010/08/31 20:00:09  fisyak
+ * Clean up, add mSeedQuality
+ *
  * Revision 2.23  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -187,7 +185,8 @@ public:
     const StParticleDefinition*    pidTraits(StPidAlgorithm&) const;
     StTrackNode*                   node();
     const StTrackNode*             node() const;
-    
+    UShort_t                       seedQuality() const {return mSeedQuality;}
+
     void         setFlag(short);
     void         setKey(unsigned short);
     void         setEncodedMethod(unsigned short);
@@ -202,7 +201,7 @@ public:
     void         setNode(StTrackNode*);
     int          bad() const;
     void         setNumberOfPossiblePoints(unsigned char, StDetectorId);
-    
+    void         setSeedQuality(UShort_t qa) {mSeedQuality = qa;}
 protected:
     void         setNumberOfPossiblePoints(unsigned short); // obsolete
     
@@ -210,7 +209,7 @@ protected:
     UShort_t                mKey;
     Short_t                 mFlag;
     UShort_t                mEncodedMethod;
-    UShort_t                mNumberOfPossiblePoints;   // obsolete if ITTF is running
+    UShort_t                mSeedQuality;   // ITTF: this is seed quality
     UChar_t                 mNumberOfPossiblePointsTpc;
     UChar_t                 mNumberOfPossiblePointsFtpcWest;
     UChar_t                 mNumberOfPossiblePointsFtpcEast;
@@ -236,6 +235,6 @@ protected:
 
     StSPtrVecTrackPidTraits mPidTraitsVec;
 
-    ClassDef(StTrack,5)
+    ClassDef(StTrack,6)
 };
 #endif

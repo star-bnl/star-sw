@@ -1,11 +1,48 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.6 2009/12/22 21:39:30 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.18 2011/04/01 05:00:20 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.18  2011/04/01 05:00:20  hmasui
+ * Move track cuts into StEmbeddingQAUtilities, added global momentum for embedding
+ *
+ * Revision 1.17  2011/02/11 23:22:12  hmasui
+ * Added missing charge check in isNSigmaOk(), and error check for geantid
+ *
+ * Revision 1.16  2011/02/11 03:55:50  hmasui
+ * Change geantid type to integer
+ *
+ * Revision 1.15  2011/02/09 20:56:07  hmasui
+ * Fix initialization of particle id's for real data
+ *
+ * Revision 1.14  2011/01/12 21:36:15  hmasui
+ * Add nHitsFit/nHitsPoss cut
+ *
+ * Revision 1.13  2010/08/13 21:55:36  hmasui
+ * Separate charge for pi/K/p in isNSigmaOk() function
+ *
+ * Revision 1.12  2010/08/04 21:16:50  hmasui
+ * Use MC phi angle for reconstructed embedding tracks
+ *
+ * Revision 1.11  2010/07/12 21:28:55  hmasui
+ * Use StEmbeddingQAUtilities::getParticleDefinition() instead of StParticleTable
+ *
+ * Revision 1.10  2010/05/14 19:49:09  hmasui
+ * Add rapidity cut
+ *
+ * Revision 1.9  2010/04/24 20:20:15  hmasui
+ * Add geant process, and modift the type of parent, parent-parent geantid to match the data members in minimc tree
+ *
+ * Revision 1.8  2010/02/16 02:11:49  hmasui
+ * Add parent-parent geantid
+ *
+ * Revision 1.7  2010/02/12 16:24:54  hmasui
+ * Fix the primary vertex subtraction for nhit
+ *
  * Revision 1.6  2009/12/22 21:39:30  hmasui
  * Add comments for functions and members
  *
  ****************************************************************************************************/
 
+#include <assert.h>
 #include <iostream>
 
 #include "TMath.h"
@@ -15,7 +52,6 @@
 #include "StMiniMcEvent/StMiniMcPair.h"
 #include "StMiniMcEvent/StContamPair.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
-#include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
 
 #include "StEmbeddingQATrack.h"
@@ -23,19 +59,12 @@
 
 using namespace std ;
 
-  /// Define static const data members here
-  const Float_t StEmbeddingQATrack::kPtMinCut   = 0.1 ;   /// Minimum pt cut, pt > 0.1 GeV/c
-  const Float_t StEmbeddingQATrack::kPtMaxCut   = 10.0 ;  /// Minimum pt cut, pt < 10 GeV/c
-  const Float_t StEmbeddingQATrack::kEtaCut     = 1.5 ;   /// Eta cut, |eta| < 1.5
-  const Short_t StEmbeddingQATrack::kNHitCut    = 10 ;    /// Minimum Nfit cut, Nfit >= 10
-  const Float_t StEmbeddingQATrack::kDcaCut     = 3.0 ;   /// Global dca cut, |dca_{gl}| < 3 cm
-  const Double_t StEmbeddingQATrack::kNSigmaCut = 2.0 ;   /// Nsigma cut, |Nsigma| < 2
-
 ClassImp(StEmbeddingQATrack)
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack()
-  : mNCommonHit(-10), mParentGeantId(-10), mGeantId(-10), mNHit(-10), mNHitPoss(-10), mCharge(-10),
+  : mNCommonHit(-10), mParentParentGeantId(-10), mParentGeantId(-10), mGeantId(-10), mGeantProcess(-10),
+  mNHit(-10), mNHitPoss(-10), mCharge(-10),
   mVectorMc(-9999., -9999., -9999., -9999.),
   mVectorRc(-9999., -9999., -9999., -9999.),
   mPhi(-9999.), mdEdx(-9999.), mDcaGl(-9999.), 
@@ -47,10 +76,11 @@ StEmbeddingQATrack::StEmbeddingQATrack()
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StTinyMcTrack& track)
-  : mNCommonHit(-10), mParentGeantId(track.parentGeantId()), mGeantId(track.geantId()), 
+  : mNCommonHit(-10), 
+  mParentParentGeantId(-10), mParentGeantId(track.parentGeantId()), mGeantId(track.geantId()), mGeantProcess(-10),
   mNHit(track.nHitMc()), mNHitPoss(-10), mCharge(track.chargeMc()),
   mVectorMc(track.pxMc(), track.pyMc(), track.pzMc(), 
-      TMath::Sqrt(track.pMc()*track.pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track.geantId())->mass(),2.0))),
+      TMath::Sqrt(track.pMc()*track.pMc() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track.geantId())->mass(),2.0))),
   mVectorRc(-9999., -9999., -9999., -9999.), // No reconstructed momentum for MC tracks
   mPhi(track.phiMc()), mdEdx(-9999.), mDcaGl(-9999.), 
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
@@ -62,13 +92,16 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StTinyMcTrack& 
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StMiniMcPair* track)
-  : mNCommonHit(track->commonHits()), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), 
+  : mNCommonHit(track->commonHits()),
+  mParentParentGeantId(-10), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), mGeantProcess(-10),
   mNHit(track->fitPts()), mNHitPoss(track->nPossiblePts()), mCharge(track->charge()),
   mVectorMc(track->pxMc(), track->pyMc(), track->pzMc(), 
-      TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
+      TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
   mVectorRc(track->pxPr(), track->pyPr(), track->pzPr(), 
-      TMath::Sqrt(track->pPr()*track->pPr() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
-  mPhi(track->phiPr()), mdEdx(track->dedx()), mDcaGl(track->dcaGl()), 
+      TMath::Sqrt(track->pPr()*track->pPr() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
+  mVectorGl(track->pxGl(), track->pyGl(), track->pzGl(), 
+      TMath::Sqrt(track->pGl()*track->pGl() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
+  mPhi(track->phiMc()), mdEdx(track->dedx()), mDcaGl(track->dcaGl()), 
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
   mName(name)
 {
@@ -78,27 +111,33 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StMiniMcPair* track)
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
-  : mNCommonHit(track->commonHits()), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), 
+  : mNCommonHit(track->commonHits()), 
+  mParentParentGeantId(track->mParentParentGeantId), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), 
+  mGeantProcess(track->mGeantProcess),
   mNHit(track->fitPts()), mNHitPoss(track->nPossiblePts()), mCharge(track->charge()),
   mVectorMc(track->pxMc(), track->pyMc(), track->pzMc(), 
-      TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
+      TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
   mVectorRc(track->pxPr(), track->pyPr(), track->pzPr(), 
-      TMath::Sqrt(track->pPr()*track->pPr() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
-  mPhi(track->phiGl()), mdEdx(track->dedx()), mDcaGl(track->dcaGl()), 
+      TMath::Sqrt(track->pPr()*track->pPr() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
+  mVectorGl(track->pxGl(), track->pyGl(), track->pzGl(), 
+      TMath::Sqrt(track->pGl()*track->pGl() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
+  mPhi(track->phiMc()), mdEdx(track->dedx()), mDcaGl(track->dcaGl()), 
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
   mName(name)
 {
   /// Constructor for Contaminated pairs (StContamPair)
   /// No Nsigma informations
+  /// Implement parent-parent geantid 
 }
 
 //____________________________________________________________________________________________________
-StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& track, const Short_t geantid)
-  : mNCommonHit(-10), mParentGeantId(-10), mGeantId(geantid),
-  mNHit(track.nHitsFit(kTpcId)-1), mNHitPoss(track.nHitsPoss(kTpcId)-1), mCharge(track.charge()),
+StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& track, const Int_t geantid)
+  : mNCommonHit(0), mParentParentGeantId(0), mParentGeantId(0), mGeantId(geantid), mGeantProcess(0),
+  mNHit(track.nHitsFit(kTpcId)), mNHitPoss(track.nHitsPoss(kTpcId)), mCharge(track.charge()),
   mVectorMc(-9999., -9999., -9999., -9999.), // No MC momentum for real tracks
   mVectorRc(track.p().x(), track.p().y(), track.p().z(), 
-      TMath::Sqrt(track.p().mag2() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(geantid)->mass(),2.0))),
+      TMath::Sqrt(track.p().mag2() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(geantid)->mass(),2.0))),
+  mVectorGl(-9999., -9999., -9999., -9999.), // Global momentum will be filled in the mVectorRc for global tracks
   mPhi(track.phi()), mdEdx(track.dEdx()), mDcaGl(track.dcaGlobal().mag()), 
   mNSigmaElectron(track.nSigmaElectron()), mNSigmaPion(track.nSigmaPion()), mNSigmaKaon(track.nSigmaKaon()), mNSigmaProton(track.nSigmaProton()),
   mName(name)
@@ -123,13 +162,24 @@ Bool_t StEmbeddingQATrack::isPtAndEtaOk() const
 { 
   /// Pt cut only for MC tracks. 
   /// Pt & eta cuts for embedding/real tracks
-  const Float_t pt     = (StEmbeddingQAUtilities::instance()->isReal(mName)) ? getPtRc() : getPtMc() ;
-  const Float_t eta    = (StEmbeddingQAUtilities::instance()->isReal(mName)) ? getEtaRc() : getEtaMc() ;
+  const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+  const Float_t pt     = (utility->isReal(mName)) ? getPtRc() : getPtMc() ;
+  const Float_t eta    = (utility->isReal(mName)) ? getEtaRc() : getEtaMc() ;
 
-  const Bool_t isPtOk  = pt > kPtMinCut ;
-  const Bool_t isEtaOk = TMath::Abs(eta) < kEtaCut ;
+  const Bool_t isPtOk  = utility->isPtOk(pt) ;
+  const Bool_t isEtaOk = utility->isEtaOk(eta) ;
 
   return (StEmbeddingQAUtilities::instance()->isMc(mName)) ? isPtOk : (isPtOk && isEtaOk) ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQATrack::isRapidityOk(const Double_t ycut) const
+{
+  /// Rapidity cut (mainly for real data)
+  /// No cut on the MC tracks
+  const Float_t y = (StEmbeddingQAUtilities::instance()->isReal(mName)) ? getRapidityRc() : getRapidityMc() ;
+
+  return (StEmbeddingQAUtilities::instance()->isMc(mName)) ? kTRUE : (TMath::Abs(y)<ycut) ;
 }
 
 //__________________________________________________________________________________________
@@ -137,9 +187,21 @@ Bool_t StEmbeddingQATrack::isNHitOk() const
 { 
   /// Add NcommonHit cuts for embedding tracks (see isCommonHitOk())
   /// No NHit cut for MC tracks
-  const Bool_t isNHitOk = (StEmbeddingQAUtilities::instance()->isMc(mName)) ? kTRUE : mNHit >= kNHitCut ;
+  const Bool_t isNHitOk = (StEmbeddingQAUtilities::instance()->isMc(mName)) ? kTRUE
+    : StEmbeddingQAUtilities::instance()->isNHitsFitOk(mNHit)
+    ;
 
   return isCommonHitOk() && isNHitOk ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQATrack::isNHitToNPossOk() const
+{
+  /// Cut ratio of NHitFit to NHitPoss
+  const Float_t ratio = (mNHitPoss>0) ? (Float_t)mNHit/(Float_t)mNHitPoss : -1.0 ;
+
+  return (StEmbeddingQAUtilities::instance()->isMc(mName)) ? kTRUE
+    : StEmbeddingQAUtilities::instance()->isNHitToNPossOk(ratio) ;
 }
 
 //__________________________________________________________________________________________
@@ -148,19 +210,22 @@ Bool_t StEmbeddingQATrack::isDcaOk() const
   /// Dca cut
   /// No Dca cut for MC tracks
 
-  return (StEmbeddingQAUtilities::instance()->isMc(mName)) ? kTRUE : (mDcaGl >= 0.0 && mDcaGl < kDcaCut) ;
+  return (StEmbeddingQAUtilities::instance()->isMc(mName)) ? kTRUE 
+    : StEmbeddingQAUtilities::instance()->isDcaOk(mDcaGl) ;
 }
 
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQATrack::isCommonHitOk() const
 { 
   /// NcommonHit cuts (only for embedding tracks)
+  // Use the 'isNHitsFitOk()' function for common hits
 
-  return (StEmbeddingQAUtilities::instance()->isEmbedding(mName)) ? mNCommonHit >= kNHitCut : kTRUE ;
+  return (StEmbeddingQAUtilities::instance()->isEmbedding(mName)) ? StEmbeddingQAUtilities::instance()->isNHitsFitOk(mNCommonHit)
+    : kTRUE ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQATrack::isNSigmaOk(const Short_t geantid) const
+Bool_t StEmbeddingQATrack::isNSigmaOk(const Int_t geantid) const
 {
   /// Nsigma cut for electrons/pions/kaons/protons
 
@@ -172,16 +237,44 @@ Bool_t StEmbeddingQATrack::isNSigmaOk(const Short_t geantid) const
   /// NSigma cut will only apply for e/pi/K/p
   if ( !utility->isEPiKP(geantid) ) return kTRUE ;
 
-  /// NSigma cut for e, pi, K and p
-  if ( utility->isElectrons(geantid) )    return TMath::Abs(mNSigmaElectron) < kNSigmaCut ;
-  else if ( utility->isPions(geantid) )   return TMath::Abs(mNSigmaPion) < kNSigmaCut ;
-  else if ( utility->isKaons(geantid) )   return TMath::Abs(mNSigmaKaon) < kNSigmaCut ;
-  else if ( utility->isProtons(geantid) ) return TMath::Abs(mNSigmaProton) < kNSigmaCut ;
-  else{
-    return kTRUE ;
-  }
+  /// Check charge
+  const Bool_t isChargeOk = utility->getParticleDefinition(geantid)->charge() == mCharge ;
+  if(!isChargeOk) return kFALSE ;
 
-  return kTRUE ;
+  /// NSigma cut for e, pi, K and p
+  /// Implement different charge
+  if( mCharge < 0 ){
+    // Negative charged particles
+    if ( utility->isElectron(geantid) )     return utility->isNSigmaOk(mNSigmaElectron) ;
+    else if ( utility->isPiMinus(geantid) ) return utility->isNSigmaOk(mNSigmaPion) ;
+    else if ( utility->isKMinus(geantid) )  return utility->isNSigmaOk(mNSigmaKaon) ;
+    else if ( utility->isPBar(geantid) )    return utility->isNSigmaOk(mNSigmaProton) ;
+    else{
+      /// This should not happen
+      LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Geant id is not e, pi, K or p, geantid= " << geantid << endm;
+      LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Please check geantid, real data QA should only contain e, pi, K and p" << endm;
+      assert(0);
+    }
+  }
+  else if ( mCharge > 0 ) {
+    // Positive charged particles
+    if ( utility->isPositron(geantid) )    return utility->isNSigmaOk(mNSigmaElectron) ;
+    else if ( utility->isPiPlus(geantid) ) return utility->isNSigmaOk(mNSigmaPion) ;
+    else if ( utility->isKPlus(geantid) )  return utility->isNSigmaOk(mNSigmaKaon) ;
+    else if ( utility->isProton(geantid) ) return utility->isNSigmaOk(mNSigmaProton) ;
+    else{
+      /// This should not happen
+      LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Geant id is not e, pi, K or p, geantid= " << geantid << endm;
+      LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Please check geantid, real data QA should only contain e, pi, K and p" << endm;
+      assert(0);
+    }
+  }
+  else{
+    /// This should not happen
+    LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Charge == 0, charge=" << mCharge << ", geantid= " << geantid << endm;
+    LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Please check geantid, real data QA should only contain e, pi, K and p" << endm;
+    assert(0);
+  }
 }
 
 //____________________________________________________________________________________________________
@@ -195,9 +288,25 @@ StLorentzVectorD StEmbeddingQATrack::getVectorMc() const
 //____________________________________________________________________________________________________
 StLorentzVectorD StEmbeddingQATrack::getVectorRc() const
 { 
-  /// Get reconstructed 4-momentum vector
+  /// Get reconstructed 4-momentum vector (primary)
 
   return mVectorRc ;
+}
+
+//____________________________________________________________________________________________________
+StLorentzVectorD StEmbeddingQATrack::getVectorPr() const
+{ 
+  /// Get reconstructed 4-momentum vector (primary)
+
+  return getVectorRc() ;
+}
+
+//____________________________________________________________________________________________________
+StLorentzVectorD StEmbeddingQATrack::getVectorGl() const
+{ 
+  /// Get reconstructed 4-momentum vector (global)
+
+  return mVectorGl ;
 }
 
 //____________________________________________________________________________________________________
@@ -207,19 +316,22 @@ void StEmbeddingQATrack::print() const
 
   LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
   LOG_INFO << Form("StEmbeddingQATrack::print() : Track informations (%s)", mName.Data()) << endm;
-  LOG_INFO << "  getNCommonHit()      " <<  getNCommonHit()  << endm;
-  LOG_INFO << "  getGeantId()         " <<  getGeantId()     << endm;
-  LOG_INFO << "  getNHit()            " <<  getNHit()        << endm;
-  LOG_INFO << "  getMass() (MC, RC)  (" <<  getMassMc() << ", " << getMassRc() << ")" << endm;
-  LOG_INFO << "  getPt() (MC, RC)    (" <<  getPtMc() << ", " << getPtRc() << ")" << endm;
-  LOG_INFO << "  getPx() (MC, RC)    (" <<  getPxMc() << ", " << getPxRc() << ")" << endm;
-  LOG_INFO << "  getPy() (MC, RC)    (" <<  getPyMc() << ", " << getPyRc() << ")" << endm;
-  LOG_INFO << "  getPz() (MC, RC)    (" <<  getPzMc() << ", " << getPzRc() << ")" << endm;
-  LOG_INFO << "  getP()  (MC, RC)    (" <<  getPMc() << ", " << getPRc() << ")" << endm;
-  LOG_INFO << "  getEta() (MC, RC)   (" <<  getEtaMc() << ", " << getEtaRc() << ")" << endm;
-  LOG_INFO << "  getPhi()             " <<  getPhi()         << endm;
-  LOG_INFO << "  getdEdx()            " <<  getdEdx()        << endm;
-  LOG_INFO << "  getDcaGl()           " <<  getDcaGl()       << endm;
+  LOG_INFO << "  getNCommonHit()           " <<  getNCommonHit()  << endm;
+  LOG_INFO << "  getParentParentGeantId()  " <<  getParentParentGeantId()     << endm;
+  LOG_INFO << "  getParentGeantId()        " <<  getParentGeantId()     << endm;
+  LOG_INFO << "  getGeantId()              " <<  getGeantId()     << endm;
+  LOG_INFO << "  getGeantProcess()         " <<  getGeantProcess()     << endm;
+  LOG_INFO << "  getNHit()                 " <<  getNHit()        << endm;
+  LOG_INFO << "  getMass() (MC, RC)       (" <<  getMassMc() << ", " << getMassRc() << ")" << endm;
+  LOG_INFO << "  getPt() (MC, RC)         (" <<  getPtMc() << ", " << getPtRc() << ")" << endm;
+  LOG_INFO << "  getPx() (MC, RC)         (" <<  getPxMc() << ", " << getPxRc() << ")" << endm;
+  LOG_INFO << "  getPy() (MC, RC)         (" <<  getPyMc() << ", " << getPyRc() << ")" << endm;
+  LOG_INFO << "  getPz() (MC, RC)         (" <<  getPzMc() << ", " << getPzRc() << ")" << endm;
+  LOG_INFO << "  getP()  (MC, RC)         (" <<  getPMc() << ", " << getPRc() << ")" << endm;
+  LOG_INFO << "  getEta() (MC, RC)        (" <<  getEtaMc() << ", " << getEtaRc() << ")" << endm;
+  LOG_INFO << "  getPhi()                  " <<  getPhi()         << endm;
+  LOG_INFO << "  getdEdx()                 " <<  getdEdx()        << endm;
+  LOG_INFO << "  getDcaGl()                " <<  getDcaGl()       << endm;
   LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
 }
 

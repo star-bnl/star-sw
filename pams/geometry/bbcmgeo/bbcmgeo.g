@@ -27,6 +27,7 @@ Fill	BBCG					! BBC geometry
 	Version = 1.0				! Geometry version
 	Onoff	= {3,3,3}			! 0 off, 1 west on, 2 east on, 3 both on: for BBC,Small tiles,Large tiles
 	zdis	= {374.24,-374.24}		! z-coord from center in STAR (715/2+6*2.54+1=373.8)
+EndFILL
 
 *
 * ----------------------------------------------------------------------------
@@ -39,6 +40,7 @@ Fill	HEXG					! hexagon tile geometry
 	zoffset	= 1.5			! z-offset from center of BBCW (1), or BBCE (2)
 	xoffset	= 0.0			! x-offset center from beam for BBCW (1), or BBCE (2)
 	yoffset	= 0.0			! y-offset center from beam for BBCW (1), or BBCE (2)
+EndFILL
 *
 *
 Fill	HEXG					! hexagon tile geometry
@@ -49,6 +51,7 @@ Fill	HEXG					! hexagon tile geometry
 	zoffset	= -1.5			! z-offset from center of BBCW (1), or BBCE (2)
 	xoffset	= 0.0			! x-offset center from beam for BBCW (1), or BBCE (2)
 	yoffset	= 0.0			! y-offset center from beam for BBCW (1), or BBCE (2)
+EndFILL
 *
 *----------------------------------------------------------------------------
 *

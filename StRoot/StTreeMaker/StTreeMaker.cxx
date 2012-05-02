@@ -7,9 +7,8 @@
 #include "TError.h"
 #include "St_DataSetIter.h"
 #include "StTreeMaker.h"
-#include "tables/St_dst_bfc_status_Table.h"
 #include "StObject.h"
-
+TableImpl(dst_bfc_status);
 
 ClassImp(StTreeMaker)
 static void RuncoHist(StTree *tree);
@@ -253,7 +252,7 @@ Int_t StTreeMaker::MakeBfcStatus()
     kont = kContinue;
     if (!ds->InheritsFrom(StMaker::Class()))	continue;
     int ret = ((StMaker*)ds)->GetMakeReturn();
-    if (!ret) 					continue;
+    //    if (!ret) 					continue;
     fBfcStatus->SetNRows(++nrows);
     char * mkName = (*fBfcStatus)[nrows-1].maker_name;   
     mkName[0]=0; strncat(mkName,name,11);

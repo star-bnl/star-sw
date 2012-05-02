@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StMcEvent/StMcCalorimeterHit.hh"
 #include "StMcEventTypes.hh"
 #include "StMcEvent.hh"
 #include "StEventTypes.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.34 2009/12/07 23:44:58 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.35 2010/05/27 19:14:26 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.35  2010/05/27 19:14:26  fisyak
+ * Take out flavoring by 'sim' for tpcGlobalPosition,tpcSectorPosition and starClockOnl tables. remove usage tpcISTimeOffsets and tpcOSTimeOffsets tables
+ *
  * Revision 1.34  2009/12/07 23:44:58  fisyak
  * Drop coordinate transformation for fortran, remove TpcHitErr
  *
@@ -103,7 +106,6 @@
 #include "StRTpcWirePlane.h"
 #include "StRTpcDimensions.h"
 #include "StRTpcElectronics.h"
-#include "StRTpcT0.h"
 #include "StRTpcSlowControlSim.h"
 #include "StDetectorDbMaker/St_tpcGlobalPositionC.h"
 #include "StDetectorDbMaker/St_tpcSectorPositionC.h"
@@ -129,7 +131,6 @@ class StTpcDb {
  StTpcDimensionsI*     dimensions;    //! 
  StTpcSlowControlSimI* slowControlSim;//! 
  StTpcElectronicsI*    electronics;   //!
- StTpcT0I*             t0[24];        //!
  StTpcFieldCageI*      FC;
  TDataSet*           tpctrg[3];     //!
  St_tpcDriftVelocity*  dvel;          //!
@@ -159,12 +160,11 @@ class StTpcDb {
    StTpcElectronicsI* Electronics();
    St_tpcGlobalPositionC* GlobalPosition() {return St_tpcGlobalPositionC::instance();}
    StTpcFieldCageI* FieldCage();
-   StTpcT0I* T0(int sector);
    St_tpcSectorPositionC *SectorPosition() {return St_tpcSectorPositionC::instance();}
    TTable *getTpcTable(int i);
    St_tpcPedestalC *Pedestal();
-   St_tpcPadGainT0C     *tpcGain() {return St_tpcPadGainT0C::instance();}
-    St_tpcPadGainT0C    *tpcT0()   {return St_tpcPadGainT0C::instance();}
+   St_tpcPadGainT0C    *tpcGain() {return St_tpcPadGainT0C::instance();}
+   St_tpcPadGainT0C    *tpcT0()   {return St_tpcPadGainT0C::instance();}
    St_tpcPadResponseC *PadResponse();
    TTable          *FindTable(const Char_t *name, Int_t dbIndex=kCalibration);
    //small pieces of data:

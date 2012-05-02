@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.2 2009/12/04 22:22:17 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.3 2010/01/29 19:51:08 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.3  2010/01/29 19:51:08  geurts
+ * Fixed a bug in vzVpdFinder outlier bookkeeping (Xin Dong)
+ *
  * Revision 1.2  2009/12/04 22:22:17  geurts
  * two updates (Xin):
  * - use the new calibration table vpdTotCorr
@@ -303,8 +306,13 @@ Bool_t StVpdCalibMaker::writeVpdData() const
     tofHeader->setVpdVz(mVPDVtxZ[i],i);
   }
 
+
     LOG_INFO << " TofCollection: NWest = " << tofHeader->numberOfVpdHits(west) 
 	     << " NEast = " << tofHeader->numberOfVpdHits(east) << endm;
+    if(tofHeader->numberOfVpdHits(west)!=mNWest ||
+       tofHeader->numberOfVpdHits(east)!=mNEast) {
+      LOG_WARN << " Local nWest = " << mNWest << " nEast = " << mNEast << endm;
+    }
     LOG_INFO <<" vpd vz = " << mVPDVtxZ[0] <<endm;
 // added
     LOG_INFO << " TSum West " << mTSumWest << " East " << mTSumEast << endm;
@@ -460,6 +468,7 @@ void StVpdCalibMaker::vzVpdFinder()
         mTSumWest -= mVPDLeTime[i];
         mVPDLeTime[i] = 0.;
         mNWest--;
+        mVPDHitPatternWest &= ( 0x7ffff - (1<<i) );
       }
     }
     if(i>=NVPD&&mNEast>1) {  // east VPD
@@ -468,6 +477,7 @@ void StVpdCalibMaker::vzVpdFinder()
         mTSumEast -= mVPDLeTime[i];
         mVPDLeTime[i] = 0.;
         mNEast--; 
+        mVPDHitPatternEast &= ( 0x7ffff - (1<<(i-NVPD)) );
       }
     }
   }

@@ -16,6 +16,10 @@ public:
 	StMuRpsCollection(const StRpsCollection& vertex);
 	~StMuRpsCollection() {;}
 
+//Event level info
+
+	unsigned char siliconBunch() const;
+
 //Roman pot Level Info
 
      unsigned int numberOfRomanPots() const  { return mNumberOfRomanPot; }
@@ -46,6 +50,8 @@ private:
 
      enum {mNumberOfRomanPot = 8, mNumberOfPlanes = 4};
 
+	unsigned char mSiliconBunch;
+
 	int mNumberPlanes[mNumberOfRomanPot];
 	int mNumberPlanesWithClusters[mNumberOfRomanPot];
 	unsigned char mStatusRomanPot[mNumberOfRomanPot];
@@ -73,10 +79,10 @@ private:
 
 
 
-ClassDef(StMuRpsCollection,1)
+ClassDef(StMuRpsCollection,2)
 
 };
-
+inline unsigned char StMuRpsCollection::siliconBunch() const { return mSiliconBunch ; }
 inline unsigned int StMuRpsCollection::numberOfPlanesWithClusters(int romanPotId) const { return romanPotId < mNumberOfRomanPot ? mNumberPlanesWithClusters[romanPotId] : 0; }
 inline unsigned char StMuRpsCollection::status(int romanPotId) const { 
 	if  (romanPotId < mNumberOfRomanPot) return mStatusRomanPot[romanPotId];

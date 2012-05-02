@@ -1,7 +1,10 @@
 *
-* $Id: fpdmgeo1.g,v 1.4 2009/08/14 22:40:26 perev Exp $
+* $Id: fpdmgeo1.g,v 1.5 2011/02/28 16:20:01 jwebb Exp $
 * $Name:  $
 * $Log: fpdmgeo1.g,v $
+* Revision 1.5  2011/02/28 16:20:01  jwebb
+* Switched from fortran-style to mortran-style continuation lines.
+*
 * Revision 1.4  2009/08/14 22:40:26  perev
 * Fix BIRK3 constant
 *
@@ -24,8 +27,8 @@
 * Changes also made to the steering part in geometry.g
 ******************************************************************************
 Module FPDMGEO1 is the Forward Pion Detector Modules GEOmetry
-Created   12 Nov 2003
-Author    Akio Ogawa
+      Created   12 Nov 2003
+      Author    Akio Ogawa
 +CDE,AGECOM,GCONST,GCUNIT.
 *
       Content    FBOX,FLGT,FWAL,FLGR,FPRB,FPCT,FUMT,PBPT,FSHM,FHMS,FXGT
@@ -91,6 +94,7 @@ Fill  FPOS                          ! Fpd EN positioning
       Y=0.0                         ! Y distance from beam to edge of detector
       Z=-751.8                      ! Z distance from IP to surface of detector
       AY=180                        ! Angle aroound Y (0 for west, 180 for east)
+EndFILL
 
 Fill  FPOS                          ! Fpd ES positioning
       iMod=2                        ! Module# (EN=1, ES=2, ET=3, EB=4, WN=5...)
@@ -99,6 +103,7 @@ Fill  FPOS                          ! Fpd ES positioning
       Y=0.0                         ! Y distance from beam to edge of detector
       Z=-752.4                      ! Z distance from IP to surface of detector
       AY=180                        ! Angle aroound Y (0 for west, 180 for east)
+EndFILL
 
 Fill  FPOS                          ! Fpd ET positioning
       iMod=3                        ! Module# (EN=1, ES=2, ET=3, EB=4, WN=5...)
@@ -107,6 +112,7 @@ Fill  FPOS                          ! Fpd ET positioning
       Y=30.8                        ! Y distance from beam to edge of detector
       Z=-590.2                      ! Z distance from IP to surface of detector
       AY=180                        ! Angle aroound Y (0 for west, 180 for east)
+EndFILL
 
 Fill  FPOS                          ! Fpd EB positioning
       iMod=4                        ! Module# (EN=1, ES=2, ET=3, EB=4, WN=5...)
@@ -115,6 +121,7 @@ Fill  FPOS                          ! Fpd EB positioning
       Y=-30.2                       ! Y distance from beam to edge of detector
       Z=-590.2                      ! Z distance from IP to surface of detector
       AY=180                        ! Angle aroound Y (0 for west, 180 for east)
+EndFILL
 
 Fill  FPOS                          ! Fpd EN positioning
       iMod=5                        ! Module# (EN=1, ES=2, ET=3, EB=4, WN=5...)
@@ -123,6 +130,7 @@ Fill  FPOS                          ! Fpd EN positioning
       Y=0.0                         ! Y distance from beam to edge of detector
       Z=751.8                       ! Z distance from IP to surface of detector
       AY=0                          ! Angle aroound Y (0 for west, 180 for east)
+EndFILL
 
 Fill  FPOS                          ! Fpd ES positioning
       iMod=6                        ! Module# (EN=1, ES=2, ET=3, EB=4, WN=5...)
@@ -131,6 +139,7 @@ Fill  FPOS                          ! Fpd ES positioning
       Y=0.0                         ! Y distance from beam to edge of detector
       Z=752.4                       ! Z distance from IP to surface of detector
       AY=0                          ! Angle aroound Y (0 for west, 180 for east)
+EndFILL
 
 Fill  FPOS                          ! Fpd ET positioning
       iMod=7                        ! Module# (EN=1, ES=2, ET=3, EB=4, WN=5...)
@@ -139,6 +148,7 @@ Fill  FPOS                          ! Fpd ET positioning
       Y=30.8                        ! Y distance from beam to edge of detector
       Z=590.2                       ! Z distance from IP to surface of detector
       AY=0                          ! Angle aroound Y (0 for west, 180 for east)
+EndFILL
 
 Fill  FPOS                          ! Fpd EB positioning
       iMod=8                        ! Module# (EN=1, ES=2, ET=3, EB=4, WN=5...)
@@ -147,6 +157,7 @@ Fill  FPOS                          ! Fpd EB positioning
       Y=-30.2                       ! Y distance from beam to edge of detector
       Z=590.2                       ! Z distance from IP to surface of detector
       AY=0                          ! Angle aroound Y (0 for west, 180 for east)
+EndFILL
 * ----------------------------------------------------------------------------
 Fill FBXD                           ! FPD Box Geometry
       Type=1                        ! Type (1=7*7+SMD+PreShower, 2=5*5)
@@ -158,6 +169,7 @@ Fill FBXD                           ! FPD Box Geometry
       ZOffset=19                    ! tower z offset from box edge to PbG edge      
       PSOffset=2.0                  ! PreShower z offset from box edge to PbG edge
       SmdOffset=8.0                 ! SMD V-plane z offset from box edge
+EndFILL
 Fill FBXD                           ! FPD Box Geometry
       Type=2                        ! Type (1=7*7+SMD+PreShower, 2=5*5)
       Height=20                     ! Box height
@@ -167,7 +179,8 @@ Fill FBXD                           ! FPD Box Geometry
       XOffset=0.0                   ! tower x offset from box edge to PbG edge
       ZOffset=1                     ! tower z offset from box edge to PbG edge
       PSOffset=0                    ! PreShower z offset from box edge to PbG edge
-      SmdOffset=0.0                 ! SMD z offset from box edge
+      SmdOffset=0.0                 ! SMD z offset from box edg
+EndFILL
 *----------------------------------------------------------------------------
 Fill FLGG                           ! PbG detector geometry
       Width    = 3.81		    ! PbG width	
@@ -179,6 +192,7 @@ Fill FLGG                           ! PbG detector geometry
       PhCathR  = 1.8 		    ! Photo Cathode radius  (real)
       MuMetDz  = 11.0 		    ! Mu Metal Length
       MuMetR   = 1.9 		    ! Mu metal outer Radius  (real)
+EndFILL
 *----------------------------------------------------------------------------
 Fill FLGM			    ! PbG detector materials
       Density  = 3.86		    ! gdensity [/cm^3]
@@ -186,11 +200,13 @@ Fill FLGM			    ! PbG detector materials
       PbCont   = 65.4		    ! PbO content [%]
       CritEne  = 0.0158   	    ! critical energy [GeV]
       MoliereR = 3.32		    ! Moliere radius [cm]
+EndFILL
 *----------------------------------------------------------------------------
 Fill PBPD                           ! Pb Plate dimensions
       Width=33.02                   ! Width
       Height=33.02                  ! Height
       Thick=1.27                    ! Thickness
+EndFILL
 *----------------------------------------------------------------------------
 Fill FMXG                           ! SMD geometry
       Version=2                     ! Geometry version
@@ -201,6 +217,7 @@ Fill FMXG                           ! SMD geometry
       G10Width=27.0                 ! G10 plate width
       G10Height=27.0                ! G10 plate height
       G10Thick=0.15                 ! G10 plate thickness
+EndFILL
 *----------------------------------------------------------------------------
 
       USE FMCG

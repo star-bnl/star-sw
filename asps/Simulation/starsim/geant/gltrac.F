@@ -1,8 +1,18 @@
 *
-* $Id: gltrac.F,v 1.1.1.1 2004/01/12 23:49:40 potekhin Exp $
+* $Id: gltrac.F,v 1.2 2011/03/30 19:34:08 jwebb Exp $
 *
 * $Log: gltrac.F,v $
+* Revision 1.2  2011/03/30 19:34:08  jwebb
+* gthion.F -- modified such that the effective charge used in dE/dx generation
+*             depends on |Q| rather than Q to prevent Q**(2/3) generating a
+*             NaN condition.
+*
+*             Also added code to permit unstable (hyper) nuclei to decay.
+*
+* gltrac.F -- modified to initialize decay of unstable (hyper) nuclei.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:40  potekhin
+*
 *
 * Revision 1.1  2001/02/27 10:15:38  nevski
 *  first working release
@@ -197,9 +207,10 @@ C.    ------------------------------------------------------------------
          ZINTLA = -LOG(RNDM(1))
       ELSE IF (ITRTYP.EQ.8) THEN
 *       Ions
-         CALL GRNDM(RNDM,2)
-         ZINTHA = -LOG(RNDM(1))
-         ZINTDR = -LOG(RNDM(2))
+         CALL GRNDM(RNDM,3)
+         SUMLIF = -CLIGHT*TLIFE*LOG(RNDM(1)) !-- Added lifetime for unstable nuclei (e.g. hypernuclei)
+         ZINTHA = -LOG(RNDM(2))
+         ZINTDR = -LOG(RNDM(3))
       ENDIF
 *
 *   * Prepare common /GCVOLU/ and structure JGPAR, if needed
