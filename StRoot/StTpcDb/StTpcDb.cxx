@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.57 2011/07/21 16:48:53 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.58 2012/05/03 23:56:48 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.58  2012/05/03 23:56:48  fisyak
+ * Set interpolation for one week only, fix sign of interpolation (thanks Gene), add TriggerId
+ *
  * Revision 1.57  2011/07/21 16:48:53  fisyak
  * New schema for Sub Sector Alginement: SuperSectror position (defined by inner sub sector) and Outer sector position wrt SuperSectror position
  *
@@ -236,7 +239,7 @@ void StTpcDb::SetDriftVelocity() {
       u0 = TUnixTime(t[0],1).GetUTime();
       u1 = TUnixTime(t[1],1).GetUTime();
       SafeDelete(dvel1);
-      if (u1 < umax) 
+      if (u1 < umax && u1 - u0 <  7*24*3600) // do not extrapolate for more than 1 week 
 	dvel1 = (St_tpcDriftVelocity *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcDriftVelocity",&t[1]);
     }//End First time only
     
@@ -256,14 +259,14 @@ void StTpcDb::SetDriftVelocity() {
     if (dvel1) {
       tpcDriftVelocity_st *d1 = dvel1->GetTable();
       if (d0->laserDriftVelocityWest > 0 && d1->laserDriftVelocityWest > 0)
-	mDriftVel[0] = (d0->laserDriftVelocityWest  *(uc-u0) + d1->laserDriftVelocityWest  *(u1-uc))/(u1 - u0);
+	mDriftVel[0] = (d1->laserDriftVelocityWest  *(uc-u0) + d0->laserDriftVelocityWest  *(u1-uc))/(u1 - u0);
       if (d0->laserDriftVelocityEast > 0 && d1->laserDriftVelocityEast > 0) 
-	mDriftVel[1] = (d0->laserDriftVelocityEast  *(uc-u0) + d1->laserDriftVelocityEast  *(u1-uc))/(u1 - u0);
+	mDriftVel[1] = (d1->laserDriftVelocityEast  *(uc-u0) + d0->laserDriftVelocityEast  *(u1-uc))/(u1 - u0);
       if (mDriftVel[0] <= 0.0 || mDriftVel[1] <= 0.0) {
 	if (d0->cathodeDriftVelocityWest > 0 && d1->cathodeDriftVelocityWest > 0) 
-	  mDriftVel[0] = (d0->cathodeDriftVelocityWest*(uc-u0) + d1->cathodeDriftVelocityWest*(u1-uc))/(u1 - u0);
+	  mDriftVel[0] = (d1->cathodeDriftVelocityWest*(uc-u0) + d0->cathodeDriftVelocityWest*(u1-uc))/(u1 - u0);
 	if (d0->cathodeDriftVelocityEast > 0 && d1->cathodeDriftVelocityEast > 0) 
-	  mDriftVel[1] = (d0->cathodeDriftVelocityEast*(uc-u0) + d1->cathodeDriftVelocityEast*(u1-uc))/(u1 - u0);
+	  mDriftVel[1] = (d1->cathodeDriftVelocityEast*(uc-u0) + d0->cathodeDriftVelocityEast*(u1-uc))/(u1 - u0);
       }
     }
     if (mDriftVel[0] <= 0.0 || mDriftVel[1] <= 0.0) {
@@ -289,6 +292,12 @@ void StTpcDb::SetTpcRotations() {
   // =>  StTpcSuperSectorPosition(sector) = Flip() * SubSInner2SupS(sector) * Flip()^-1
   //      StTpcSuperSectorPosition(sector) * Flip() * StTpcOuterSectorPosition(sector) = Flip() *  SubSOuter2SupS(sector)
   // =>  StTpcOuterSectorPosition(sector) = Flip()^-1 * StTpcSuperSectorPosition(sector)^-1 *  Flip() *  SubSOuter2SupS(sector)
+  /*
+    .                                                                                             <-- the system of coordinate where Outer to Inner Alignment done -->
+    global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {                     I | StTpcOuterSectorPosition(sector)} * local
+    .                                                result of super sector alignment                                      result of Outer to Inner sub sector alignment
+   */
+
   TGeoTranslation T123(0,123,0); T123.SetName("T123"); if (Debug() > 1) T123.Print();
   assert(Dimensions()->numberOfSectors() == 24);
   Double_t phi, theta, psi;

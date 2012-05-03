@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.37 2011/07/21 16:48:53 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.38 2012/05/03 23:56:48 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.38  2012/05/03 23:56:48  fisyak
+ * Set interpolation for one week only, fix sign of interpolation (thanks Gene), add TriggerId
+ *
  * Revision 1.37  2011/07/21 16:48:53  fisyak
  * New schema for Sub Sector Alginement: SuperSectror position (defined by inner sub sector) and Outer sector position wrt SuperSectror position
  *
@@ -167,7 +170,8 @@ class StTpcDb {
   TGeoHMatrix          *mTpcSectorRotations[24][kTotalTpcSectorRotaions]; 
   Float_t               mDriftVel[2];   //!
   UInt_t                mUc;            //! time for which above mDriftVel have been calculated
-  Char_t                mEnd[1];         //!
+  Int_t                 mTriggerId;     //! to distinguish local clock and RHIC clock
+  Char_t                mEnd[1];        //!
  private:
   StTpcDb();
  public:
@@ -199,6 +203,8 @@ class StTpcDb {
   }
   void SetDebug(Int_t m) {m_Debug = m;}
   Int_t Debug() {return m_Debug;}
+  void  SetTriggerId(Int_t m) {mTriggerId = m;}
+  Int_t TriggerId() {return mTriggerId;}
   const TGeoHMatrix &Flip()                           const {return *mFlip;}
   const TGeoHMatrix &Tpc2GlobalMatrix()               const {return *mTpc2GlobMatrix;}
   const TGeoHMatrix &TpcRot(Int_t sector, Int_t k)    const {return *mTpcSectorRotations[sector-1][k];}
@@ -224,7 +230,7 @@ class StTpcDb {
 
   const TGeoHMatrix &Pad2SupS(Int_t sector = 1, Int_t row = 1)  const {Int_t k = (row <= 13) ? kPadInner2SupS: kPadOuter2SupS; return TpcRot(sector,k);}
   const TGeoHMatrix &Pad2Tpc(Int_t sector = 1, Int_t row = 1)   const {Int_t k = (row <= 13) ? kPadInner2Tpc: kPadOuter2Tpc; return TpcRot(sector,k);}
-  const TGeoHMatrix &Pad2Glob(Int_t sector = 1, Int_t row = 1)  const {Int_t k = (row <= 13) ?kPadInner2Glob: kPadOuter2Glob; return TpcRot(sector,k);}
+  const TGeoHMatrix &Pad2Glob(Int_t sector = 1, Int_t row = 1)  const {Int_t k = (row <= 13) ? kPadInner2Glob: kPadOuter2Glob; return TpcRot(sector,k);}
   ClassDef(StTpcDb,0)
 };
 #endif
