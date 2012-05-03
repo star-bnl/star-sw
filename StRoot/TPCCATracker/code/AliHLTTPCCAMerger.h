@@ -52,6 +52,7 @@ class AliHLTTPCCAClusterInfo;
                      AliHLTTPCCATrackParam t0, float Alpha0, int hits[], int &NHits,  bool dir = 0 );
 
     void SetSlices ( int i, AliHLTTPCCATracker *sl );
+    static void SetDoNotMergeBorders(int i = 0) {fgDoNotMergeBorders = i;}
 
   private:
   
@@ -73,6 +74,7 @@ class AliHLTTPCCAClusterInfo;
     void Merging(int number=0);
 
     static const int fgkNSlices = AliHLTTPCCAParameters::NumberOfSlices;       //* N slices
+    static       int fgDoNotMergeBorders;
     AliHLTTPCCAParam fSliceParam;           //* slice parameters (geometry, calibr, etc.)
     const AliHLTTPCCASliceOutput *fkSlices[fgkNSlices]; //* array of input slice tracks
     AliHLTTPCCAMergerOutput *fOutput;       //* array of output merged tracks
