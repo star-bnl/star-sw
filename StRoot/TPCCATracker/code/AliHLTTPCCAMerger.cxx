@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.11 2011/10/04 14:43:46 fisyak Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.12 2012/05/03 14:00:26 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -53,7 +53,7 @@
 #ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
 #define DO_MERGER_PERF
 #endif //DO_TPCCATRACKER_EFF_PERFORMANCE
-
+int AliHLTTPCCAMerger::fgDoNotMergeBorders = 0;
 class AliHLTTPCCAMerger::AliHLTTPCCAClusterInfo
 {
 
@@ -1196,13 +1196,13 @@ void AliHLTTPCCAMerger::Merging(int number)
   for ( int iSlice = 0; iSlice < fgkNSlices; iSlice++ ) {
     if ( maxNSliceTracks < fSliceNTrackInfos[iSlice] ) maxNSliceTracks = fSliceNTrackInfos[iSlice];
   }
-
-  AliHLTTPCCABorderTrackGlobal *bCurr = new AliHLTTPCCABorderTrackGlobal[maxNSliceTracks*10*24];
-  int nCurr = 0;
-  MakeBorderTracksGlobal(bCurr,nCurr);
-  SplitBorderTracksGlobal( bCurr, nCurr, bCurr, nCurr, number );
-
-  if ( bCurr ) delete[] bCurr;
+  if (! fgDoNotMergeBorders ) {// Don't merge over borders ?
+    AliHLTTPCCABorderTrackGlobal *bCurr = new AliHLTTPCCABorderTrackGlobal[maxNSliceTracks*10*24];
+    int nCurr = 0;
+    MakeBorderTracksGlobal(bCurr,nCurr);
+    SplitBorderTracksGlobal( bCurr, nCurr, bCurr, nCurr, number );
+    if ( bCurr ) delete[] bCurr;
+  }
 
   int nOutTracks = 0;
   int nOutTrackClusters = 0;
