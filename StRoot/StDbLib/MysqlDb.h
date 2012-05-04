@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.28 2011/01/07 18:19:02 dmitry Exp $
+ * $Id: MysqlDb.h,v 1.29 2012/05/04 17:19:14 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.29  2012/05/04 17:19:14  dmitry
+ * Part One integration for Hyper Cache. HyperCache added to workflow, but config is set to DISABLE
+ *
  * Revision 1.28  2011/01/07 18:19:02  dmitry
  * user name lookup is done once now (for speedup, based on profiler report)
  *
@@ -146,6 +149,7 @@ typedef  int MYSQL_FIELD;
 #include "StDbLogger.hh"
 #include "parseXmlString.hh"
 #include "StDbManagerImpl.hh"
+#include "StHyperCacheManager.h"
 
 #include <string>
 
@@ -242,8 +246,22 @@ public:
 	const char *aPasswd, const char *aDb, const int aPort=0);
   virtual bool reConnect();
 
-  virtual unsigned NbRows (){if(mqueryState)return mRes->NbRows(); return 0;};
-  virtual unsigned NbFields(){if(mqueryState)return mRes->NbFields(); return 0;};
+  virtual unsigned NbRows() { 
+	if (mqueryState) { 
+		if (m_Mgr.isActive() && m_Mgr.isValueFound()) { return m_Mgr.getNumRows(); }
+		return mRes->NbRows();   
+	}; 
+	return 0; 
+  };
+
+  virtual unsigned NbFields() { 
+	if (mqueryState) { 
+		if (m_Mgr.isActive() && m_Mgr.isValueFound()) { return m_Mgr.getNumFields(); }
+		return mRes->NbFields(); 
+	}; 
+	return 0; 
+  };
+
   virtual void Release() {mRes->Release();};
 
   virtual char* printQuery();
@@ -284,6 +302,9 @@ public:
 protected:
   virtual void RazQuery() ;
   virtual bool ExecQuery();
+
+  StHyperCacheManager m_Mgr;
+
   //virtual column* NextRow();    
   //virtual column* PrepareWrite();  
   //virtual void Print() {cout << mQueryMess << "|" <<mQueryLast <<endl;};  // debug

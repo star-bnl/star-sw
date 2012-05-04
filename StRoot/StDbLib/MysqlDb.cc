@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.60 2011/04/04 15:44:24 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.61 2012/05/04 17:19:14 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.61  2012/05/04 17:19:14  dmitry
+ * Part One integration for Hyper Cache. HyperCache added to workflow, but config is set to DISABLE
+ *
  * Revision 1.60  2011/04/04 15:44:24  dmitry
  * fix to blacklist Calibrations_bla only
  *
@@ -322,7 +325,6 @@ mRes= new MysqlResult;
   if (pwd) {
     mSysusername = pwd->pw_name;
   }
-
 }
 //////////////////////////////////////////////////////////////////////
 
@@ -422,6 +424,8 @@ bool MysqlDb::reConnect(){
 //////////////////////////////////////////////////////////////////////// 
 bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,  const char *aDb, const int aPort){
 #define __METHOD__ "Connect(host,user,pw,database,port)"
+
+	m_Mgr.init();
 
   if(aUser){
    if(mdbuser) delete [] mdbuser;
@@ -585,7 +589,17 @@ bool MysqlDb::ExecQuery(){
 
 mqueryState=false;
 
+	size_t cache_length = 0;
+	if (m_Mgr.isActive()) {
+		std::string dbName = mdbName ? mdbName : "";
+		const char* res = m_Mgr.get(dbName, mQuery, cache_length);
+		if (res && cache_length) {
+			return mqueryState = true;			
+		}
+	}
+
 if(mlogTime)mqueryLog.start();
+
 
 //int status=mysql_real_query(&mData,mQuery,mQueryLen);
   int status=mysql_real_query(&mData,mQ.c_str(), mQ.size());
@@ -842,6 +856,24 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
 ////////////////////////////////////////////////////////////////////////
 
 bool  MysqlDb::Output(StDbBuffer *aBuff){
+	//std::cout << "processing db: " << mdbName << ", query: " << mQuery << std::endl;
+
+
+  if (m_Mgr.isValueFound()) {
+	//std::cout << "Found value in cache! " << std::endl;
+	// process JSON data
+	return m_Mgr.processOutput(aBuff);
+  } else if (!m_Mgr.isValueFound() && mRes->mRes) {
+	if (!m_Mgr.getLastGroupKey().empty() && !m_Mgr.getLastKey().empty() && m_Mgr.getLastGroupKey() != " " && m_Mgr.getLastKey() != " ") {
+		//std::cout << "lastdb: " << m_Mgr.getLastGroupKey() << " | query: " << m_Mgr.getLastKey() << ", " << std::endl;
+		
+		aBuff->SetStorageMode();
+  		m_Mgr.set(m_Mgr.getLastGroupKey().c_str(), m_Mgr.getLastKey().c_str(), mRes->mRes, 0);
+		mysql_data_seek(mRes->mRes, 0); // return to the beginning of result set..
+		aBuff->SetClientMode();
+	}
+  }
+
 
   if(mlogTime)msocketLog.start();
   MYSQL_ROW tRow=mysql_fetch_row(mRes->mRes);

@@ -25,7 +25,7 @@ StHyperCacheFileLocal::~StHyperCacheFileLocal()
 
 bool StHyperCacheFileLocal::init()
 {
-	std::cout << "READING FILELOCAL CONFIG: \n" ;
+	//std::cout << "READING FILELOCAL CONFIG: \n" ;
 
 	StHyperCacheConfig& cfg = StHyperCacheConfigSingleton::Instance();
 
@@ -35,7 +35,7 @@ bool StHyperCacheFileLocal::init()
 	m_MaxItemSizeKb  = cfg.getParameter<int>(m_Name+"_max_item_size_kb");
 	m_IgnoreKeywords = cfg.getParameter<int>(m_Name+"_ignore");
 
-	std::cout << "FILELOCAL CONFIG COMPLETE \n" ;
+	//std::cout << "FILELOCAL CONFIG COMPLETE \n" ;
 
 	if ( !StHyperUtilFilesystem::path_exists(m_BasePath) ) { 
 		StHyperUtilFilesystem::create_dir_recursive(m_BasePath); 
@@ -65,6 +65,7 @@ const char* StHyperCacheFileLocal::get(const std::string& group_key, const std::
     cf.seekg (0, std::ios::beg);
     cf.read (memblock, file_size);
     cf.close();
+	memblock[(size_t)(file_size)] = '\0';
 	value_length = file_size;
 	return memblock;
 }
@@ -73,6 +74,7 @@ bool StHyperCacheFileLocal::set(const std::string& group_key, const std::string&
 	std::string cache_file = m_Path + StHyperHash::md5sum(group_key + key)+std::string(".cache");
 	std::ofstream cf(cache_file.c_str(), std::ios::out | std::ios::binary);
     cf.write (data, dataLength);
+//	cf << " | " << group_key << " | " << key << " |";
 	cf.close();
 	return false;
 }

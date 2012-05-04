@@ -12,7 +12,8 @@
 #include <cstdlib>
 
 StHyperCacheManager::StHyperCacheManager() : m_Name("STAR HyperCache Manager"), m_Version("1.0.0"), m_Type("ST_HYPERCACHE_MANAGER"),
-	m_ValueFound(false), m_Active(false), m_PathToConfigFile("")
+	m_ValueFound(false), m_Active(false), m_PathToConfigFile(""),
+	m_JsonBuffer(0), m_JsonBufferSize(0), m_NumRows(0), m_NumFields(0)
 {
 }
 
@@ -37,6 +38,8 @@ bool StHyperCacheManager::init()
 	if (!readParametersFromJsonFile()) {
 		m_Active = false;
 		return m_Active;
+	} else {
+		m_Active = true;
 	}
 
 	// initialize cache engines
@@ -46,7 +49,8 @@ bool StHyperCacheManager::init()
 			std::cout << "Initialized: " << (*it)->getName() << " : " << (*it)->getVersion() << " : " << (*it)->getType() << "\n";
 		}
 	}
-	return true;
+
+	return m_Active;
 }
 
 bool StHyperCacheManager::readParametersFromJsonFile() {
@@ -56,6 +60,10 @@ bool StHyperCacheManager::readParametersFromJsonFile() {
 	pathList.push_back("config/hyperconfig.json");
 	if (getenv("HYPERCONFIG_LOCATION")) {
 		pathList.push_back(getenv("HYPERCONFIG_LOCATION"));
+	}
+	// uncomment block for a site-wide deployment
+	if (getenv("STAR_PATH")) {
+		pathList.push_back(std::string(getenv("STAR_PATH"))+std::string("/conf/hyperconfig.json"));
 	}
 
 	for(std::vector<std::string>::iterator it = pathList.begin(); it != pathList.end(); ++it) {
@@ -70,7 +78,7 @@ bool StHyperCacheManager::readParametersFromJsonFile() {
 	if (!ifs.is_open()) { return false; }
 
 	picojson::value v;
-	std::cout << "reading config from " << m_PathToConfigFile << std::endl;
+	std::cout << "StHyperCacheManager: reading cache config from " << m_PathToConfigFile << std::endl;
 	ifs >> v;
 
 	ifs.close();
@@ -79,23 +87,28 @@ bool StHyperCacheManager::readParametersFromJsonFile() {
 
 	picojson::object& obj = v.get<picojson::object>();
 	picojson::array& caches = obj["caches"].get<picojson::array>();
+	bool cache_active = false;
 	for (picojson::array::iterator it = caches.begin(); it != caches.end(); ++it) {
 		picojson::object& cache = (*it).get<picojson::object>();
-		if (cache["enabled"].get<std::string>() != std::string("yes")) { continue; }
+		if (cache["enabled"].get<std::string>() != std::string("yes")) { 
+			continue; 
+		} else {
+			cache_active = true;
+		}
 		std::string cache_name = cache["type"].get<std::string>();
-		std::cout << "CACHE NAME: " << cache_name << "\n";
+		//std::cout << "CACHE NAME: " << cache_name << "\n";
 		StHyperCacheI* cacheInstance = StHyperCacheFactoryS::Instance().getStHyperCacheInstance( cache_name );
 		if (!cacheInstance) { continue; }
 		m_CacheImp.push_back(cacheInstance); // add cache instance to storage
 		picojson::object& params = cache["params"].get<picojson::object>();
 		for (picojson::object::iterator pit = params.begin(); pit != params.end(); ++pit) {
 			const std::string& name = pit->first;
-			std::cout << cache_name << " :: param = " << name << " ";
+			//std::cout << cache_name << " :: param = " << name << " ";
 			cfg.setParameter( cache_name + std::string("_") + name, (pit->second).to_str() );
 		}
-		std::cout << "\n";
+		//std::cout << "\n";
 	}
-	return true;
+	return cache_active;
 }
 
 std::string StHyperCacheManager::getStat() {
@@ -103,43 +116,73 @@ std::string StHyperCacheManager::getStat() {
 }
 
 const char* StHyperCacheManager::get(const std::string& group_key, const std::string& key, size_t& value_length) {
+	if (!isActive()) return 0;
+	if (m_JsonBuffer && m_JsonBufferSize > 0) {
+		delete [] m_JsonBuffer;
+		m_JsonBuffer = 0;
+		m_JsonBufferSize = 0;
+	}
+	m_LastGroupKey = group_key;
+	m_LastKey = key;
+	StHyperUtilGeneric::trim(m_LastGroupKey);
+	StHyperUtilGeneric::trim(m_LastKey);
 	m_ValueFound = false;
+
     for(std::vector<StHyperCacheI*>::iterator it = m_CacheImp.begin(); it != m_CacheImp.end(); ++it) {
+		value_length = 0;
 		if (*it) {
         	const char* result = (*it)->get(group_key, key, value_length);
-			if (result) {
+			if (result && value_length > 4) { // FIXME: 4 
 				m_ValueFound = true;
-				//m_JsonBuffer = const_cast<char*>(result);
-				//m_JsonBufferSize = value_length;
-				return result;
+				m_JsonBuffer = const_cast<char*>(result);
+				m_JsonBufferSize = value_length;
+				m_JsonDocument.clear();
+				m_JsonDocumentIter == m_JsonDocument.begin();
+				if (parseJsonBuffer()) { return result; }
+				return 0;
 			}
 		}
     }
+
 	return 0;
 }
 
 bool StHyperCacheManager::set(const std::string& group_key, const std::string& key, const char* data, size_t dataLength, time_t expirationTime) {
-	std::cout << "TRYING TO SET SOMETHING TO CACHE: \n";
+	if (!isActive()) return false;
+	if (dataLength < 5) return false;
+	m_LastGroupKey = "";
+	m_LastKey = "";
+	//std::cout << "TRYING TO SET SOMETHING TO CACHE: \n";
 	m_ValueFound = false;
 	bool result = false;
     for(std::vector<StHyperCacheI*>::iterator it = m_CacheImp.begin(); it != m_CacheImp.end(); ++it) {
 		if (*it) {
         	result = (*it)->set(group_key, key, data, dataLength, expirationTime);
-			if (result) { return result; }
+			if (result) { 
+				return result; 
+			}
 		}
     }
 	return false;
 }
 
 bool StHyperCacheManager::set(const std::string& group_key, const std::string& key, MYSQL_RES* myresult, time_t expirationTime) {
+	if (!isActive()) return false;
+	m_LastGroupKey = "";
+	m_LastKey = "";
 	m_ValueFound = false;
 	bool result = false;
 	std::string res = convertMysqlResultToJson(myresult);
+	if (res.size() < 5) return false;
 	result = set(group_key, key, res.c_str(), res.length(), expirationTime);
+	//std::cout << "set " << group_key << "| Q: " << key << " | result = " << result << "\n";
 	return result;
 }
 
 bool StHyperCacheManager::replace(const std::string& group_key, const std::string& key, const char* data, size_t dataLength, time_t expirationTime) {
+	if (!isActive()) return false;
+	m_LastGroupKey = "";
+	m_LastKey = "";
 	m_ValueFound = false;
 	bool result = false;
     for(std::vector<StHyperCacheI*>::iterator it = m_CacheImp.begin(); it != m_CacheImp.end(); ++it) {
@@ -149,6 +192,9 @@ bool StHyperCacheManager::replace(const std::string& group_key, const std::strin
 }
 
 bool StHyperCacheManager::remove(const std::string& group_key, const std::string& key) {
+	if (!isActive()) return false;
+	m_LastGroupKey = "";
+	m_LastKey = "";
 	m_ValueFound = false;
 	bool result = false;
     for(std::vector<StHyperCacheI*>::iterator it = m_CacheImp.begin(); it != m_CacheImp.end(); ++it) {
@@ -158,6 +204,9 @@ bool StHyperCacheManager::remove(const std::string& group_key, const std::string
 }
 
 void StHyperCacheManager::clear() {
+	if (!isActive()) return;
+	m_LastGroupKey = "";
+	m_LastKey = "";
 	m_ValueFound = false;
     for(std::vector<StHyperCacheI*>::iterator it = m_CacheImp.begin(); it != m_CacheImp.end(); ++it) {
 		(*it)->clear();
@@ -166,6 +215,7 @@ void StHyperCacheManager::clear() {
 }
 
 std::string StHyperCacheManager::convertMysqlResultToJson(MYSQL_RES* result) {
+	if (!isActive()) return "";
     MYSQL_ROW row;
     MYSQL_FIELD *fields;
     int num_fields;
@@ -226,17 +276,26 @@ bool  StHyperCacheManager::setParameter(const std::string& param, const std::str
 }
 
 bool StHyperCacheManager::parseJsonBuffer() {
+	//std::cout << "Preparing to parse JSON Buffer " << std::endl;
 	if (!m_JsonBuffer || m_JsonBufferSize <= 0) {
 		return false; // buffer is empty for some reason. Likely, query produced no results (no rows found).
 	}
+	if (!m_JsonDocument.empty()) { return true; } // buffer was already parsed..
+	//std::cout << "Preparing to parse JSON Buffer - checks completed" << std::endl;
 	m_NumRows = 0; m_NumFields = 0;
 	picojson::value v;
 	std::istringstream istr(m_JsonBuffer);
+	//std::cout << "Preparing to parse JSON Buffer, raw: " << m_JsonBuffer << std::endl;
     istr >> v;
 	m_JsonDocument = v.get<picojson::array>();
-	if (isJsonError()) { return false; } // db reported error
+	if (isJsonError()) { 
+		//std::cout << "JSON ERROR: " << v << std::endl;
+		return false; 
+	} // db reported error
+	//std::cout << "Preparing to calculate Rows n Fields:" << std::endl;
 	calculateRowsFields();
 	m_JsonDocumentIter = m_JsonDocument.begin();
+	//std::cout << "Preparing to parse JSON Buffer parsed" << std::endl;
 	return true; // true = raw json parsed successully into json object
 }
 
@@ -274,17 +333,37 @@ bool StHyperCacheManager::isJsonError() {
 }
 
 bool StHyperCacheManager::processOutput(StDbBuffer* aBuff) {
+	//std::cout << "processOutput: START" << std::endl;
 	// Sanity checks
 	if (!m_JsonBuffer || m_JsonBufferSize <= 0) {
+		//std::cout << "processOutput ERROR: json buffer is empty" << std::endl;
 		return false; // buffer is empty for some reason. Likely, query produced no results (no rows found).
+	} else {
+		//std::cout << "processOutput: json buffer found.." << std::endl;
 	}
 	if (m_JsonDocument.size() <= 0) {
 		bool res = parseJsonBuffer();
-		if (!res) return false; // something is deeply wrong with buffer - invalid json?
+		if (!res) { 
+			//std::cout << "processOutput ERROR: something is wrong, invalid json?" << std::endl;
+			return false; // something is deeply wrong with buffer - invalid json?
+		} else {
+			//std::cout << "processOuput: json buffer parsed successfully.." << std::endl;
+		}
 	}
 	if (m_JsonDocumentIter == m_JsonDocument.end()) {
+		//std::cout << "processOutput WARN: no more rows left to process" << std::endl;
+		/*
+		m_JsonDocument.clear();
+		m_JsonDocumentIter == m_JsonDocument.begin();
+		m_LastGroupKey = "";
+		m_LastKey = "";
+		m_ValueFound = false;
+		*/
 		return false; // no more rows left..
+	} else {
+		//std::cout << "processOutput: json buffer still has rows.." << std::endl;
 	}
+	//std::cout << "processOutput: START, no errors" << std::endl;
 
 	// Scan for binary attributes - will need decoding from base64
 	std::map<std::string,std::string> encCols; // list of columns, which needs to be decoded
@@ -300,6 +379,7 @@ bool StHyperCacheManager::processOutput(StDbBuffer* aBuff) {
 			encCols.insert(std::make_pair<std::string, std::string>(aname, avalue));
 		}
 	}
+	//std::cout << "processOutput: binary attribute search complete" << std::endl;
 
 	// Parse data at current json iterator position
 	std::map<std::string,std::string>::iterator iter;
@@ -331,8 +411,9 @@ bool StHyperCacheManager::processOutput(StDbBuffer* aBuff) {
 		}
 	}
 	++m_JsonDocumentIter;
+	//std::cout << "processOutput: data at current json iter parsed" << std::endl;
 
-	return false;
+	return true;
 }
 
 char** StHyperCacheManager::DecodeStrArray(const char* strinput , int &aLen) {
