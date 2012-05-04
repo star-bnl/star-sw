@@ -53,6 +53,21 @@
 
 
 
+template<class T> void createPlots(T*** pH, int numH, char* nameBase, int numBin, int first, int last)
+{
+  char buffer[100];
+  (*pH)=new T*[numH];
+  for(int iD=0;iD<kFgtNumDiscs;iD++)
+    {
+      for(int iQ=0;iQ<4;iQ++)
+	{
+	  sprintf(buffer,"%s_disc%d_quad%d",nameBase,iD+1,iQ);
+	  (*pH)[iD*4+iQ]=new T(buffer,buffer,numBin,first,last);
+	}
+    }
+}
+template void createPlots(TH1I*** pH, int numH, char* nameBase,  int numBin, int first, int last);
+template void createPlots(TH1F*** pH, int numH, char* nameBase, int numBin, int first, int last);
 
 void doNormalize(TH2D** hEff, TH2D** hNonEff)
 {
@@ -132,6 +147,232 @@ Double_t StFgtGenAVEMaker::findClosestStrip(Char_t layer, double ord, Int_t iD, 
     }
   return dist;
 }
+
+
+void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t iq)
+{
+  bool partOfClusterP=false;
+  bool partOfClusterR=false;
+      Double_t maxRCharge=-9999;
+      Double_t maxPhiCharge=-9999;
+      Double_t maxRChargeUncert=-9999;
+      Double_t maxPhiChargeUncert=-9999;
+      Int_t maxRInd=-1;
+      Int_t maxPInd=-1;
+      Int_t maxRTb=-1;
+      Int_t maxPTb=-1;
+      Int_t maxRAdc=-1;
+      Int_t maxPAdc=-1;
+      Int_t maxSigAdcR=-1;
+      Int_t maxSigAdcP=-1;
+      Int_t numFSigP=0;
+      Int_t numFSigR=0;
+      Int_t firstFSigTbP=0;
+      Int_t firstFSigTbR=0;
+
+      Float_t secondToLastRatioP=0;
+      Float_t secondToLastRatioR=0;
+
+      Float_t firstTbSigR=-1;
+      Float_t firstTbSigP=-1;
+
+
+
+      for(int i=0;i<  pStrips[iD*4+iq].size();i++)
+	{
+	  Int_t geoId=pStrips[iD*4+iq][i].geoId;
+	  generalStrip& pStrip=pStrips[iD*4+iq][i];
+	  Short_t disc, quadrant,strip;
+	  Char_t layer;
+	  Double_t ordinate, lowerSpan, upperSpan;//, prvOrdinate;
+	  StFgtGeom::getPhysicalCoordinate(geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+	  StFgtGeom::decodeGeoId(geoId,disc, quadrant, layer, strip);
+	  char buffer[100];
+	  //      if(layer=='P' && disc==iD && iq==quadrant)
+	  //	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
+	  if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<0.7) || (layer=='P' && fabs(ordinate-phi)<0.03) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.03)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.03)))
+	    {
+	      if(layer=='P')
+		{
+		  if(pStrip.charge>maxPhiCharge)
+		    {
+		      if(pStrip.seedType==kFgtSeedType1|| pStrip.seedType==kFgtSeedType2 || pStrip.seedType==kFgtSeedType3 || pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
+			partOfClusterP=true;
+		      else
+			partOfClusterP=false;
+		      maxPhiCharge=pStrip.charge;
+		      maxPhiChargeUncert=pStrip.chargeUncert;
+		      maxPInd=i;
+		      maxPAdc=-9999;
+		      maxSigAdcP=-9999;
+		      numFSigP=0;
+		      firstFSigTbP=-1;
+		      firstTbSigP=-1;
+
+		      if(pStrip.adc[6]>0)
+			secondToLastRatioP=pStrip.adc[5]/(float)pStrip.adc[6];
+		      if(pStrip.pedErr>0)
+			firstTbSigP=pStrip.adc[0]/(float)pStrip.pedErr;
+		      for(int iAdc=0;iAdc<7;iAdc++)
+			{
+			  if(pStrip.adc[iAdc]>5*pStrip.pedErr)
+			    {
+			      numFSigP++;
+			      if(firstFSigTbP<0)
+				firstFSigTbP=iAdc;
+			    }
+			  if(pStrip.adc[iAdc]>maxPAdc)
+			    {
+			      maxPAdc=pStrip.adc[iAdc];
+			      maxPTb=iAdc;
+			      if(pStrip.pedErr>0)
+				maxSigAdcP=maxPAdc/pStrip.pedErr;
+			    }
+			}
+		    }
+		}
+	      else
+		{
+		  if(pStrip.charge>maxRCharge)
+		    {
+		      if(pStrip.seedType==kFgtSeedType1|| pStrip.seedType==kFgtSeedType2 || pStrip.seedType==kFgtSeedType3 || pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
+			partOfClusterR=true;
+		      else
+			partOfClusterR=false;
+
+		      maxRCharge=pStrip.charge;
+		      maxRInd=i;
+		      maxRChargeUncert=pStrip.chargeUncert;
+		      maxRAdc=-9999;
+		      maxSigAdcR=-9999;
+		      numFSigR=0;
+		      firstFSigTbR=-1;
+		      firstTbSigR=-1;
+
+		      if(pStrip.adc[6]>0)
+			secondToLastRatioR=pStrip.adc[5]/(float)pStrip.adc[6];
+		      if(pStrip.pedErr>0)
+			firstTbSigR=pStrip.adc[0]/(float)pStrip.pedErr;
+		      for(int iAdc=0;iAdc<7;iAdc++)
+			{
+			  if(pStrip.adc[iAdc]>5*pStrip.pedErr)
+			    {
+			      numFSigR++;
+			      if(firstFSigTbR<0)
+				firstFSigTbR=iAdc;
+
+			    }
+			  if(pStrip.adc[iAdc]>maxRAdc)
+			    {
+			      maxRAdc=pStrip.adc[iAdc];
+			      maxRTb=iAdc;
+			      if(pStrip.pedErr>0)
+				maxSigAdcR=maxPAdc/pStrip.pedErr;
+			    }
+			}
+		    }
+		}
+	    }
+	}
+      //fill histos
+      if(maxPhiCharge>1000)
+	{
+	  firstTbSigCloseClusterP[iD*4+iq]->Fill(firstTbSigP);
+	  maxAdcCloseClusterP[iD*4+iq]->Fill(maxPAdc);
+	  maxSigTrackClusterP[iD*4+iq]->Fill(maxSigAdcP);
+	  maxTbCloseClusterP[iD*4+iq]->Fill(maxPTb);
+	  numFSigCloseClusterP[iD*4+iq]->Fill(numFSigP);
+	  numFirstHighCloseClusterP[iD*4+iq]->Fill(firstFSigTbP);
+	  maxAdcCloseClusterP[iD*4+iq]->Fill(maxPAdc);
+	  maxSigCloseClusterP[iD*4+iq]->Fill(maxSigAdcP);
+	  cout <<"firstFSigtbP: " << firstFSigTbP <<endl;
+	  cout <<"filling ratio with : " << secondToLastRatioP <<endl;
+	  secondToLastRatioCloseClusterP[iD*4+iq]->Fill(secondToLastRatioP);
+
+	  if((float)pStrips[iD*4+iq][maxPInd].pedErr>0)
+	    {
+	      pulseCounterP++;
+	      for(int iB=0;iB<7;iB++)
+		{
+		  exPulseMaxAdcNormP->SetBinContent(iB+1,exPulseMaxAdcNormP->GetBinContent(iB+1)+pStrips[iD*4+iq][maxPInd].adc[iB]/(float)maxPAdc);
+		  exPulseSigP->SetBinContent(iB+1,exPulseSigP->GetBinContent(iB+1)+pStrips[iD*4+iq][maxPInd].adc[iB]/(float)pStrips[iD*4+iq][maxPInd].pedErr);
+		}
+	    }
+	}
+      if(maxRCharge>1000)
+	{
+	  firstTbSigCloseClusterR[iD*4+iq]->Fill(firstTbSigR);
+	  maxTbCloseClusterR[iD*4+iq]->Fill(maxPTb);
+	  maxAdcCloseClusterR[iD*4+iq]->Fill(maxRAdc);
+	  maxSigTrackClusterR[iD*4+iq]->Fill(maxSigAdcR);
+	  numFSigCloseClusterR[iD*4+iq]->Fill(numFSigR);
+	  numFirstHighCloseClusterR[iD*4+iq]->Fill(firstFSigTbR);
+	  cout <<"firstFSigtbR: " << firstFSigTbR <<endl;
+	  maxAdcCloseClusterR[iD*4+iq]->Fill(maxRAdc);
+	  maxSigCloseClusterR[iD*4+iq]->Fill(maxSigAdcR);
+	  cout <<"filling ratio R with : " << secondToLastRatioR <<endl;
+	  secondToLastRatioCloseClusterR[iD*4+iq]->Fill(secondToLastRatioR);
+	  if((float)pStrips[iD*4+iq][maxRInd].pedErr>0)
+	    {
+	      pulseCounterR++;
+	      for(int iB=0;iB<7;iB++)
+		{
+		  exPulseMaxAdcNormR->SetBinContent(iB+1,exPulseMaxAdcNormR->GetBinContent(iB+1)+pStrips[iD*4+iq][maxRInd].adc[iB]/(float)maxRAdc);
+		  exPulseSigR->SetBinContent(iB+1,exPulseSigR->GetBinContent(iB+1)+pStrips[iD*4+iq][maxRInd].adc[iB]/(float)pStrips[iD*4+iq][maxRInd].pedErr);
+		}
+	    }
+	}
+
+      if(partOfClusterP)
+	{
+	  firstTbSigTrackClusterP[iD*4+iq]->Fill(firstTbSigP);
+	  maxAdcTrackClusterP[iD*4+iq]->Fill(maxPAdc);
+	  maxSigTrackClusterP[iD*4+iq]->Fill(maxSigAdcP);
+	  maxTbTrackClusterP[iD*4+iq]->Fill(maxPTb);
+	  numFSigTrackClusterP[iD*4+iq]->Fill(numFSigP);
+	  numFirstHighTrackClusterP[iD*4+iq]->Fill(firstFSigTbP);
+	  maxAdcTrackClusterP[iD*4+iq]->Fill(maxPAdc);
+	  maxSigTrackClusterP[iD*4+iq]->Fill(maxSigAdcP);
+	  secondToLastRatioTrackClusterP[iD*4+iq]->Fill(secondToLastRatioP);
+	  if((float)pStrips[iD*4+iq][maxPInd].pedErr>0)
+	    {
+	      pulseCounterTP++;
+	      for(int iB=0;iB<7;iB++)
+		{
+		  exPulseMaxAdcNormTrackP->SetBinContent(iB+1,exPulseMaxAdcNormTrackP->GetBinContent(iB+1)+pStrips[iD*4+iq][maxPInd].adc[iB]/(float)maxPAdc);
+		  
+		  exPulseSigTrackP->SetBinContent(iB+1,exPulseSigTrackP->GetBinContent(iB+1)+pStrips[iD*4+iq][maxPInd].adc[iB]/(float)pStrips[iD*4+iq][maxPInd].pedErr);
+		
+		}
+	    }
+
+	}
+      if(partOfClusterR)
+	{
+	  firstTbSigTrackClusterR[iD*4+iq]->Fill(firstTbSigR);
+	  maxTbTrackClusterR[iD*4+iq]->Fill(maxPTb);
+	  maxAdcTrackClusterR[iD*4+iq]->Fill(maxRAdc);
+	  maxSigTrackClusterR[iD*4+iq]->Fill(maxSigAdcR);
+	  numFSigTrackClusterR[iD*4+iq]->Fill(numFSigR);
+	  numFirstHighTrackClusterR[iD*4+iq]->Fill(firstFSigTbR);
+	  maxAdcTrackClusterR[iD*4+iq]->Fill(maxRAdc);
+	  maxSigTrackClusterR[iD*4+iq]->Fill(maxSigAdcR);
+	  secondToLastRatioTrackClusterR[iD*4+iq]->Fill(secondToLastRatioR);
+
+	      if((float)pStrips[iD*4+iq][maxRInd].pedErr>0)
+		{
+		  pulseCounterTR++;
+		  for(int iB=0;iB<7;iB++)
+		    {
+		      
+		      exPulseMaxAdcNormTrackR->SetBinContent(iB+1,exPulseMaxAdcNormTrackR->GetBinContent(iB+1)+pStrips[iD*4+iq][maxRInd].adc[iB]/(float)maxRAdc);
+		      exPulseSigTrackR->SetBinContent(iB+1,exPulseSigTrackR->GetBinContent(iB+1)+pStrips[iD*4+iq][maxRInd].adc[iB]/(float)pStrips[iD*4+iq][maxRInd].pedErr);
+		    }
+		}
+	}
+
+}
+
 
 //is there something where we expect it? Again, here phi is relative to the quadrant!!
 Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t iq)
@@ -306,7 +547,7 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 	}
 
       if(layer=='P' && disc==iD && iq==quadrant)
-	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
+	//	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
       if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<0.7) || (layer=='P' && fabs(ordinate-phi)<0.03) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.03)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.03)))
 	{
 	  cout <<" found!!!" << endl;
@@ -386,22 +627,6 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::getChargeRatio(Float_t r, Float_t phi,
     }
   return pair<Double_t,Double_t>(-9999,-9999);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -671,6 +896,9 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		printArea(r,phi,i,quad);
 	      }
 	    ///for disk for which we want to compute effi:
+
+	    cout <<"fill strip histos " << endl;
+	    fillStripHistos(r,phi,i,quad);
 	    if(i==DISK_EFF && quad==QUAD_EFF)
 	      {
 		//do the r/phi thing
@@ -689,6 +917,8 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		    cout << " not found, dist is:" <<findClosestStrip('P',phi,i,quad) <<endl;
 		  radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
 		  }
+
+
 
 		if(isSomewhatEff(r,phi,i,quad))
 		  {
@@ -1302,6 +1532,90 @@ counter++;
       radioPlotsNonEff[iD]->Draw("colz");
       cout <<iD <<" 5 " << endl;
     }
+
+  TFile *f1 = new TFile("signalShapes.root","recreate");
+  f1->cd();
+
+  //normalize
+  for(int iB=1;iB<8;iB++)
+    {
+      exPulseMaxAdcNormP->SetBinContent(iB,exPulseMaxAdcNormP->GetBinContent(iB)/(float)pulseCounterP);
+      exPulseSigP->SetBinContent(iB,exPulseSigP->GetBinContent(iB)/(float)pulseCounterP);
+  
+      exPulseMaxAdcNormR->SetBinContent(iB,exPulseMaxAdcNormR->GetBinContent(iB)/(float)pulseCounterR);
+      exPulseSigR->SetBinContent(iB,exPulseSigR->GetBinContent(iB)/(float)pulseCounterR);
+  
+      exPulseMaxAdcNormTrackP->SetBinContent(iB,exPulseMaxAdcNormTrackP->GetBinContent(iB)/(float)pulseCounterTP);
+      exPulseSigTrackP->SetBinContent(iB,exPulseSigTrackP->GetBinContent(iB)/(float)pulseCounterTP);
+      
+      exPulseMaxAdcNormTrackR->SetBinContent(iB,exPulseMaxAdcNormTrackR->GetBinContent(iB)/(float)pulseCounterTR);
+      exPulseSigTrackR->SetBinContent(iB,exPulseSigTrackR->GetBinContent(iB)/(float)pulseCounterTR);
+    }
+
+  exPulseMaxAdcNormP->Write();
+  exPulseSigP->Write();
+  
+  exPulseMaxAdcNormR->Write();
+  exPulseSigR->Write();
+  
+  exPulseMaxAdcNormTrackP->Write();
+  exPulseSigTrackP->Write();
+  
+  exPulseMaxAdcNormTrackR->Write();
+  exPulseSigTrackR->Write();
+  
+  for(int iD=0;iD<kFgtNumDiscs;iD++)
+    {
+      for(int iq=0;iq<4;iq++)
+	{
+
+
+	  cout <<"writing id: " << iD <<  " iq: " << iq <<endl;
+	  maxTbCloseClusterP[iD*4+iq]->Write();
+	  maxTbCloseClusterR[iD*4+iq]->Write();
+	  maxAdcCloseClusterP[iD*4+iq]->Write();
+	  maxSigTrackClusterP[iD*4+iq]->Write();
+	  numFSigCloseClusterP[iD*4+iq]->Write();
+	  numFirstHighCloseClusterP[iD*4+iq]->Write();
+	  maxAdcCloseClusterP[iD*4+iq]->Write();
+	  maxSigCloseClusterP[iD*4+iq]->Write();
+	  secondToLastRatioCloseClusterP[iD*4+iq]->Write();
+	  maxAdcCloseClusterR[iD*4+iq]->Write();
+	  maxSigCloseClusterR[iD*4+iq]->Write();
+	  numFSigCloseClusterR[iD*4+iq]->Write();
+	  numFirstHighCloseClusterR[iD*4+iq]->Write();
+	  maxAdcCloseClusterR[iD*4+iq]->Write();
+	  maxSigCloseClusterR[iD*4+iq]->Write();
+	  secondToLastRatioCloseClusterR[iD*4+iq]->Write();
+	  firstTbSigCloseClusterR[iD*4+iq]->Write();
+	  firstTbSigCloseClusterP[iD*4+iq]->Write();
+
+	  maxTbTrackClusterP[iD*4+iq]->Write();
+	  maxTbTrackClusterR[iD*4+iq]->Write();
+	  maxAdcTrackClusterP[iD*4+iq]->Write();
+	  maxSigTrackClusterP[iD*4+iq]->Write();
+	  numFSigTrackClusterP[iD*4+iq]->Write();
+	  numFirstHighTrackClusterP[iD*4+iq]->Write();
+	  maxAdcTrackClusterP[iD*4+iq]->Write();
+	  maxSigTrackClusterP[iD*4+iq]->Write();
+	  secondToLastRatioTrackClusterP[iD*4+iq]->Write();
+	  maxAdcTrackClusterR[iD*4+iq]->Write();
+	  maxSigTrackClusterR[iD*4+iq]->Write();
+	  numFSigTrackClusterR[iD*4+iq]->Write();
+	  numFirstHighTrackClusterR[iD*4+iq]->Write();
+	  maxAdcTrackClusterR[iD*4+iq]->Write();
+	  maxSigTrackClusterR[iD*4+iq]->Write();
+	  secondToLastRatioTrackClusterR[iD*4+iq]->Write();
+	  firstTbSigTrackClusterR[iD*4+iq]->Write();
+	  firstTbSigTrackClusterP[iD*4+iq]->Write();
+
+	}
+    }
+
+  f1->Write();
+  f1->Close();
+  cout <<"writen and closed " << endl;
+
   cout <<"drawing hits2 " <<endl;
   cRadioHits->SaveAs("radioPlotsHits.png");
   cRadioNonHits->SaveAs("radioPlotsNonHits.png");
@@ -1522,6 +1836,68 @@ Int_t StFgtGenAVEMaker::Init(){
   radioPlotsNonEffPhi=new TH2D*[kFgtNumDiscs];
   radioPlotsNonEffLoose=new TH2D*[kFgtNumDiscs];
   rPhiRatioPlots=new TH1D*[kFgtNumDiscs];
+
+
+  exPulseMaxAdcNormP=new TH1F("pulseMaxAdcNormP","pulseMaxAdcNormP",7,0,6);
+  exPulseSigP=new TH1F("pulseSigNormP","pulseSigNormP",7,0,6);
+
+  exPulseMaxAdcNormR=new TH1F("pulseMaxAdcNormR","pulseMaxAdcNormR",7,0,6);
+  exPulseSigR=new TH1F("pulseSigNormR","pulseSigNormR",7,0,6);
+
+  exPulseMaxAdcNormTrackP=new TH1F("pulseMaxAdcNormTrackP","pulseMaxAdcNormTrackP",7,0,6);
+  exPulseSigTrackP=new TH1F("pulseSigNormTrackP","pulseSigNormTrackP",7,0,6);
+
+  exPulseMaxAdcNormTrackR=new TH1F("pulseMaxAdcNormTrackR","pulseMaxAdcNormTrackR",7,0,6);
+  exPulseSigTrackR=new TH1F("pulseSigNormTrackR","pulseSigNormTrackR",7,0,6);
+
+
+  pulseCounterP=0;
+  pulseCounterR=0;
+
+  pulseCounterTP=0;
+  pulseCounterTR=0;
+
+
+  createPlots(&firstTbSigCloseClusterR,kFgtNumDiscs*4,"firstTbSigCloseClusterR",100,0,20);
+  createPlots(&firstTbSigCloseClusterP,kFgtNumDiscs*4,"firstTbSigCloseClusterP",100,0,20);
+  createPlots(&firstTbSigTrackClusterR,kFgtNumDiscs*4,"firstTbSigTrackClusterR",100,0,20);
+  createPlots(&firstTbSigTrackClusterP,kFgtNumDiscs*4,"firstTbSigTrackClusterP",100,0,20);
+
+
+  createPlots(&maxAdcTrackClusterR,kFgtNumDiscs*4,"maxAdcTrackClusterR",10,0,5000);
+  createPlots(&maxAdcCloseClusterR,kFgtNumDiscs*4,"maxAdcCloseClusterR",100,0,5000);
+  createPlots(&maxSigTrackClusterR,kFgtNumDiscs*4,"maxSigTrackClusterR",100,1,20);
+  createPlots(&maxSigCloseClusterR,kFgtNumDiscs*4,"maxSigCloseClusterR",100,1,20);
+  createPlots(&numFSigTrackClusterR,kFgtNumDiscs*4,"numFSigTrackClusterR",8,0,7);
+  createPlots(&maxTbCloseClusterR,kFgtNumDiscs*4,"maxTbCloseClusterR",8,0,7);
+
+  createPlots(&maxTbCloseClusterP,kFgtNumDiscs*4,"maxTbCloseClusterP",8,0,7);
+
+  createPlots(&maxTbTrackClusterR,kFgtNumDiscs*4,"maxTbTrackClusterR",8,0,7);
+
+  createPlots(&maxTbTrackClusterP,kFgtNumDiscs*4,"maxTbTrackClusterP",8,0,7);
+  createPlots(&numFSigCloseClusterR,kFgtNumDiscs*4,"numFSigCloseClusterR",8,0,7);
+
+  createPlots(&numFirstHighTrackClusterR,kFgtNumDiscs*4,"numFirstHighTrackClusterR",8,0,7);
+  createPlots(&numFirstHighCloseClusterR,kFgtNumDiscs*4,"numFirstHighCloseClusterR",8,0,7);
+
+  createPlots(&maxAdcTrackClusterP,kFgtNumDiscs*4,"maxAdcTrackClusterP",100,0,5000);
+  createPlots(&maxAdcCloseClusterP,kFgtNumDiscs*4,"maxAdcCloseClusterP",100,0,5000);
+  createPlots(&maxSigTrackClusterP,kFgtNumDiscs*4,"maxSigTrackClusterP",100,1,20);
+  createPlots(&maxSigCloseClusterP,kFgtNumDiscs*4,"maxSigCloseClusterP",100,1,20);
+  createPlots(&numFSigTrackClusterP,kFgtNumDiscs*4,"numFSigTrackClusterP",8,0,7);
+  createPlots(&numFSigCloseClusterP,kFgtNumDiscs*4,"numFSigCloseClusterP",8,0,7);
+  createPlots(&numFirstHighTrackClusterP,kFgtNumDiscs*4,"numFirstHighTrackClusterP",8,0,7);
+  createPlots(&numFirstHighCloseClusterP,kFgtNumDiscs*4,"numFirstHighCloseClusterP",8,0,7);
+  createPlots(&secondToLastRatioCloseClusterP,kFgtNumDiscs*4,"secondToLastRatioClosClusterP",100,0,5);
+
+  createPlots(&secondToLastRatioCloseClusterR,kFgtNumDiscs*4,"secondToLastRatioClosClusterR",100,0,5);
+
+  createPlots(&secondToLastRatioTrackClusterP,kFgtNumDiscs*4,"secondToLastRatioTrackClusterP",100,0,5);
+
+  createPlots(&secondToLastRatioTrackClusterR,kFgtNumDiscs*4,"secondToLastRatioTrackClusterR",100,0,5);
+
+
   rEff=new TH1D*[kFgtNumDiscs];
   rNonEff=new TH1D*[kFgtNumDiscs];
   cout <<"ave2" << endl;

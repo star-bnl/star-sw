@@ -97,7 +97,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    Int_t Finish();
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.3 2012/04/26 20:08:18 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.4 2012/05/04 23:09:04 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    ofstream* outTxtFile;
    Short_t getQuadFromCoo(Double_t x, Double_t y);
@@ -111,6 +111,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    Double_t getRPhiRatio(vector<generalCluster>::iterator hitIterBegin, vector<generalCluster>::iterator hitIterEnd);
    Double_t findClosestPoint(double xE, double yE, Int_t iD);
    Bool_t isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t iq);
+   void fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t iq);
    Double_t findClosestStrip(Char_t layer, double ord, Int_t iD, Int_t iQ);
    // for knowing what & how to plot
 
@@ -130,6 +131,65 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
 
    TH2D** radioPlotsEffLoose;
    TH2D** radioPlotsNonEffLoose;
+
+   TH1F** firstTbSigCloseClusterR;
+   TH1F** firstTbSigCloseClusterP;
+   TH1F** firstTbSigTrackClusterR;
+   TH1F** firstTbSigTrackClusterP;
+
+
+   TH1I** maxTbCloseClusterR;
+   TH1I** maxTbCloseClusterP;
+
+   TH1I** maxTbTrackClusterR;
+   TH1I** maxTbTrackClusterP;
+
+   TH1I** maxAdcTrackClusterR;
+   TH1I** maxAdcCloseClusterR;
+
+   TH1I** maxSigTrackClusterR;
+   TH1I** maxSigCloseClusterR;
+
+   TH1I** numFSigTrackClusterR;
+   TH1I** numFSigCloseClusterR;
+
+   TH1I** numFirstHighTrackClusterR;
+   TH1I** numFirstHighCloseClusterR;
+
+   TH1I** maxAdcTrackClusterP;
+   TH1I** maxAdcCloseClusterP;
+
+   TH1F** maxSigTrackClusterP;
+   TH1F** maxSigCloseClusterP;
+
+   TH1I** numFSigTrackClusterP;
+   TH1I** numFSigCloseClusterP;
+
+   TH1I** numFirstHighTrackClusterP;
+   TH1I** numFirstHighCloseClusterP;
+
+   TH1F** secondToLastRatioCloseClusterP;
+   TH1F** secondToLastRatioCloseClusterR;
+
+   TH1F** secondToLastRatioTrackClusterP;
+   TH1F** secondToLastRatioTrackClusterR;
+
+
+   TH1F* exPulseMaxAdcNormR;
+   TH1F* exPulseSigR;
+   TH1F* exPulseMaxAdcNormP;
+   TH1F* exPulseSigP;
+
+   TH1F* exPulseMaxAdcNormTrackR;
+   TH1F* exPulseSigTrackR;
+   TH1F* exPulseMaxAdcNormTrackP;
+   TH1F* exPulseSigTrackP;
+
+   int pulseCounterP;
+   int pulseCounterR;
+
+   int pulseCounterTP;
+   int pulseCounterTR;
 
 
    TH1D** rPhiRatioPlots;

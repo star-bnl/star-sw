@@ -402,7 +402,7 @@ void StFgtGeneralBase::doLooseClustering()
 {
   for(int iDx=0;iDx<6;iDx++)
     {
-      if(iDx!=2)
+      if(iDx==3) //disk 3 is noisy at high HV
 	continue;
       Int_t stripCounter=0;
       for(int iQ=0;iQ<4;iQ++)
