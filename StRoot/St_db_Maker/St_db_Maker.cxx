@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.130 2012/04/19 16:20:38 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.131 2012/05/04 19:42:34 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.131  2012/05/04 19:42:34  perev
+// Ignore wrong timing for RunLog tables
+//
 // Revision 1.130  2012/04/19 16:20:38  perev
 // Add test for unrecognized file
 //
@@ -769,6 +772,8 @@ SWITCH:  switch (kase) {
 
     case 4:
       if( ! ((val->fTimeMin.Get()<= uevent) && (uevent<val->fTimeMax.Get()) )){
+//	wrong timing. We can forgive it, if it is RunLog. Akio case
+        if (val->Path().Contains("RunLog/onl")) break;
         (void) printf("CheckFail:: Assert will fail for Table %s TimeMin=%d TimeMax=%d uevent=%d\n",
                       val->GetName(),val->fTimeMin.Get(),val->fTimeMax.Get(),uevent);
         (void) printf("\tTimeMin "); val->fTimeMin.Print();
