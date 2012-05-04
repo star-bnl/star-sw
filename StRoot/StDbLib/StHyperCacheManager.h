@@ -27,6 +27,12 @@ public:
     const std::string& getVersion() { return m_Version; };
     const std::string& getType()    { return m_Type; };
 
+	const std::string& getLastGroupKey() { return m_LastGroupKey; }
+	const std::string& getLastKey() { return m_LastKey; }
+
+	size_t getNumRows()   { return m_NumRows; }
+	size_t getNumFields() { return m_NumFields; }
+
 	bool  setParameter(const std::string& param, const std::string& value);
 
 	bool isActive() { return m_Active; }
@@ -59,6 +65,9 @@ protected:
 	size_t m_NumFields;      // number of fields in parsed json buffer
 	picojson::array m_JsonDocument; // parsed json document
 	picojson::array::const_iterator m_JsonDocumentIter; // json document iterator, pointing at current row
+
+	std::string m_LastGroupKey;
+	std::string m_LastKey;
 
 	std::vector<StHyperCacheI*> m_CacheImp;
 
