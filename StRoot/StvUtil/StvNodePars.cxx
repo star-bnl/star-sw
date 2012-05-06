@@ -222,19 +222,14 @@ static StvFitPars fp;
   double dy = _y-sub._y;
   double dz = _z-sub._z;
   
-  fp.mH = dx*(     -sub._sinCA)+ dy*(      sub._cosCA);
+  fp.mH = dx*(    -sub._sinCA)+ dy*(     sub._cosCA);
   fp.mZ = dx*(-sinL*sub._cosCA)+ dy*(-sinL*sub._sinCA) +dz*cosL;
-  fp.mA = (_psi -sub._psi );
-  if (fp.mA < -M_PI) fp.mA += M_PI*2;
-  if (fp.mA >  M_PI) fp.mA -= M_PI*2;
+  fp.mA = (_psi -sub._psi )*cosL;
+  if      (fp.mA < -M_PI) {fp.mA += M_PI*2;}
+  else if (fp.mA >  M_PI) {fp.mA -= M_PI*2;}
   fp.mP = (_ptin-sub._ptin);
   double tL = (_tanl-sub._tanl)/(1+_tanl*sub._tanl);
-  if (fabs(tL)<0.05) { fp.mL = tL*(1-tL*tL/3); }
-  else               { fp.mL = atan(tL)      ; }
-  if (fp.mL < -M_PI) fp.mL += M_PI*2;
-  if (fp.mL >  M_PI) fp.mL -= M_PI*2;
-
-//  fp.Check("StvNodePars::operator-");
+  fp.mL = tL*(1+tL*tL*(-1./3+tL*tL/5)); 
   return fp;
 }
 //______________________________________________________________________________
@@ -248,9 +243,9 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   _y +=  _cosCA*fp.mH - sinL*_sinCA*fp.mZ;
   _z +=                 cosL       *fp.mZ;
 
-  double a = fp.mA,cA,sA;
-  if (fabs(a) < 0.1) { sA = a*(1-a*a/6); cA = 1-a*a/2;}
-  else               { sA = sin(a)     ; cA = cos(a) ;}                
+  double a = fp.mA/cosL,cA,sA;
+  if (fabs(a) < 0.1) {sA = a*(1-a*a/6); cA = 1-a*a/2;}
+  else               {sA = sin(a);      cA = cos(a) ;} 
  _psi   += a;
   double cosCA = _cosCA;
   _cosCA = cosCA*cA-_sinCA*sA;
@@ -259,9 +254,10 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   _ptin  += fp.mP;
 
   double l = fp.mL,tL;
-  if (fabs(l) < 0.1) { tL = l*(1+l*l/3); }
-  else               { tL = tan(l)      ;}                
-  _tanl = (tL+_tanl)/(1.-_tanl*tL);
+  if (fabs(l) < 0.1) {tL = l*(1+l*l/3);}
+  else               {tL = tan(l)     ;}
+  _tanl = (_tanl+tL)/(1.-_tanl*tL);
+
   if (_tanl < -MAXTAN) _tanl = -MAXTAN;
   if (_tanl >  MAXTAN) _tanl =  MAXTAN;
   _curv   = _hz *_ptin;
@@ -283,36 +279,29 @@ enum {kHh,kAh,kCh,kZh,kLh};
 
   double cosL = 1/sqrt(1+_tanl*_tanl);
   double sinL = _tanl*cosL;
-  double tanL = _tanl;
   double rho = _curv;
   double mHz = _hz;
 
   assert(_hz);
+  memset(fitDer[0],0,25*sizeof(fitDer[0][0]));
+//====================================
 fitDer[kHf][kHf] = hlxDer[kHh][kHh];
-fitDer[kHf][kZf] = hlxDer[kHh][kAh]*( tanL*rho) + hlxDer[kHh][kZh]*1/cosL;
-fitDer[kHf][kAf] = hlxDer[kHh][kAh];
-fitDer[kHf][kLf] = hlxDer[kHh][kLh];
+fitDer[kHf][kZf] = hlxDer[kHh][kAh]*(sinL*rho);
+fitDer[kHf][kAf] = hlxDer[kHh][kAh]*1/cosL;
 fitDer[kHf][kPf] = hlxDer[kHh][kCh]*(mHz);
 fitDer[kZf][kHf] = cosL*hlxDer[kZh][kHh];
-fitDer[kZf][kZf] = cosL*(hlxDer[kZh][kAh]*( tanL*rho) + hlxDer[kZh][kZh]*1/cosL);
-fitDer[kZf][kAf] = cosL*hlxDer[kZh][kAh];
+fitDer[kZf][kZf] = cosL*(hlxDer[kZh][kAh]*(sinL*rho)) + 1;
+fitDer[kZf][kAf] = cosL*hlxDer[kZh][kAh]*1/cosL;
 fitDer[kZf][kLf] = cosL*hlxDer[kZh][kLh];
 fitDer[kZf][kPf] = cosL*hlxDer[kZh][kCh]*(mHz);
-fitDer[kAf][kHf] = hlxDer[kAh][kHh] + (-sinL*rho)*hlxDer[kZh][kHh];
-fitDer[kAf][kZf] = hlxDer[kAh][kAh]*( tanL*rho) + hlxDer[kAh][kZh]*1/cosL + (-sinL*rho)*(hlxDer[kZh][kAh]*( tanL*rho) + hlxDer[kZh][kZh]*1/cosL);
-fitDer[kAf][kAf] = hlxDer[kAh][kAh] + (-sinL*rho)*hlxDer[kZh][kAh];
-fitDer[kAf][kLf] = hlxDer[kAh][kLh] + (-sinL*rho)*hlxDer[kZh][kLh];
-fitDer[kAf][kPf] = hlxDer[kAh][kCh]*(mHz) + (-sinL*rho)*hlxDer[kZh][kCh]*(mHz);
-fitDer[kLf][kHf] = hlxDer[kLh][kHh];
-fitDer[kLf][kZf] = hlxDer[kLh][kAh]*( tanL*rho) + hlxDer[kLh][kZh]*1/cosL;
-fitDer[kLf][kAf] = hlxDer[kLh][kAh];
-fitDer[kLf][kLf] = hlxDer[kLh][kLh];
-fitDer[kLf][kPf] = hlxDer[kLh][kCh]*(mHz);
-fitDer[kPf][kHf] = (1/mHz)*hlxDer[kCh][kHh];
-fitDer[kPf][kZf] = (1/mHz)*(hlxDer[kCh][kAh]*( tanL*rho) + hlxDer[kCh][kZh]*1/cosL);
-fitDer[kPf][kAf] = (1/mHz)*hlxDer[kCh][kAh];
-fitDer[kPf][kLf] = (1/mHz)*hlxDer[kCh][kLh];
-fitDer[kPf][kPf] = (1/mHz)*hlxDer[kCh][kCh]*(mHz);
+fitDer[kAf][kHf] = cosL*hlxDer[kAh][kHh] + (-sinL*cosL*cosL*rho)*hlxDer[kZh][kHh];
+fitDer[kAf][kZf] = cosL*hlxDer[kAh][kAh]*(sinL*rho) + (-sinL*cosL*cosL*rho)*(hlxDer[kZh][kAh]*(sinL*rho) + 1/cosL);
+fitDer[kAf][kAf] = hlxDer[kAh][kAh] + (-sinL*cosL*cosL*rho)*hlxDer[kZh][kAh]*1/cosL;
+fitDer[kAf][kLf] = (-sinL*cosL*cosL*rho)*hlxDer[kZh][kLh];
+fitDer[kAf][kPf] = cosL*hlxDer[kAh][kCh]*(mHz) + (-sinL*cosL*cosL*rho)*hlxDer[kZh][kCh]*(mHz);
+fitDer[kLf][kLf] = 1;
+fitDer[kPf][kPf] = 1;
+//====================================
 
 
 }
@@ -367,23 +356,26 @@ const THEmx_t *emx = he->Emx();
 double  cosL = he->GetCos();
 double  sinL = he->GetSin();
 double  rho  = he->GetRho();
-double  dAdZ = -sinL*cosL*rho;
+//double  dAdZ = -sinL*rho;
+
 mHH = emx->mHH;
 mHZ = cosL*emx->mHZ;
 mZZ = cosL*emx->mZZ*cosL;
-mHA = emx->mHA + (dAdZ)*emx->mHZ;
-mZA = (emx->mAZ + (dAdZ)*emx->mZZ)*cosL;
-mAA = emx->mAA + (dAdZ)*emx->mAZ + (emx->mAZ + (dAdZ)*emx->mZZ)*(dAdZ);
+mHA = cosL*emx->mHA + (-sinL*cosL*cosL*rho)*emx->mHZ;
+mZA = (cosL*emx->mAZ + (-sinL*cosL*cosL*rho)*emx->mZZ)*cosL;
+mAA = (cosL*emx->mAA + (-sinL*cosL*cosL*rho)*emx->mAZ)*cosL + (cosL*emx->mAZ + (-sinL*cosL*cosL*rho)*emx->mZZ)*(-sinL*cosL*cosL*rho);
 mHL = emx->mHL;
 mZL = emx->mZL*cosL;
-mAL = emx->mAL + emx->mZL*(dAdZ);
+mAL = emx->mAL*cosL + emx->mZL*(-sinL*cosL*cosL*rho);
 mLL = emx->mLL;
 mHP = (1/mHz)*emx->mHC;
 mZP = (1/mHz)*emx->mCZ*cosL;
-mAP = (1/mHz)*emx->mAC + (1/mHz)*emx->mCZ*(dAdZ);
+mAP = (1/mHz)*emx->mAC*cosL + (1/mHz)*emx->mCZ*(-sinL*cosL*cosL*rho);
 mLP = (1/mHz)*emx->mCL;
 mPP = (1/mHz)*emx->mCC*(1/mHz);
-  Recov();
+
+
+//  Recov();
 }  
 //______________________________________________________________________________
 void StvFitErrs::Get(THelixTrack *he) const
@@ -395,21 +387,23 @@ void StvFitErrs::Get(THelixTrack *he) const
   double  sinL = he->GetSin();
   double  rho  = he->GetRho();
   double  dAdZeta = sinL*rho;
-  emx->mHH = mHH;
-  emx->mHA = ( dAdZeta)*mHZ + mHA;
-  emx->mAA = ( dAdZeta)*(mZZ*( dAdZeta) + mZA) + mZA*( dAdZeta) + mAA;
-  emx->mHC = (mHz)*mHP;
-  emx->mAC = (mHz)*(mZP*( dAdZeta) + mAP);
-  emx->mCC = (mHz)*mPP*(mHz);
-  emx->mHZ = 1/cosL*mHZ;
-  emx->mAZ = 1/cosL*(mZZ*( dAdZeta) + mZA);
-  emx->mCZ = 1/cosL*mZP*(mHz);
-  emx->mZZ = 1/cosL*mZZ*1/cosL;
-  emx->mHL = mHL;
-  emx->mAL = mZL*( dAdZeta) + mAL;
-  emx->mCL = mLP*(mHz);
-  emx->mZL = mZL*1/cosL;
-  emx->mLL = mLL;
+
+emx->mHH = mHH;
+emx->mHA = dAdZeta*mHZ + 1/cosL*mHA;
+emx->mAA = dAdZeta*mZZ*dAdZeta + 2/cosL*(mZA*dAdZeta) + mAA/cosL/cosL;
+emx->mHC = (mHz)*mHP;
+emx->mAC = (mHz)*(mZP*dAdZeta + mAP/cosL);
+emx->mCC = (mHz)*mPP*(mHz);
+emx->mHZ = 1/cosL*mHZ;
+emx->mAZ = 1/cosL*(mZZ*dAdZeta + mZA*1/cosL);
+emx->mCZ = 1/cosL*mZP*(mHz);
+emx->mZZ = 1/cosL*mZZ*1/cosL;
+emx->mHL = mHL;
+emx->mAL = mZL*dAdZeta + mAL*1/cosL;
+emx->mCL = mLP*(mHz);
+emx->mZL = mZL*1/cosL;
+emx->mLL = mLL;
+
 
 }  
 //_____________________________________________________________________________
@@ -563,7 +557,11 @@ void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs 
        ,jRPhiTan,jZTan,jTanTan
        ,jRPhiPsi,jZPsi,jTanPsi,jPsiPsi
        ,jRPhiPti,jZPti,jTanPti,jPsiPti,jPtiPti};
-  double rxy = getRxy();
+  double r2xy = _x*_x+_y*_y, rxy=sqrt(r2xy);
+  double cos2L = 1./(1+_tanl*_tanl);
+  double cosL = sqrt(cos2L);
+  double sinL = _tanl*cosL;
+
   radPar[jRad] = rxy;
   radPar[jPhi] = atan2(_y,_x);
   radPar[jZ  ] = _z;
@@ -572,46 +570,43 @@ void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs 
   radPar[jPti] = _ptin;
   if (!radErr) return;
 
-//double R2 = radPar[jRad]*radPar[jRad];
-  double cos2L = 1./(1+_tanl*_tanl);
-  double cosL = sqrt(cos2L);
-  double sinL = _tanl*cosL;
-			
-  double dcaFrame[3][3]={{  cosL*_cosCA, cosL*_sinCA, sinL}	
-                        ,{      -_sinCA,      _cosCA,    0}
-                        ,{ -sinL*_cosCA,-sinL*_sinCA, cosL}};
-			
 
-  double radFrame[3][3]={{  _x/radPar[jRad],_y/radPar[jRad], 0}	
-                        ,{ -_y/radPar[jRad],_x/radPar[jRad], 0}
-                        ,{                0,              0, 1}};
+  double A[6][5]=
+/*		H		   Z    A       L       P */
+/*--------------------------------------------------------*/
+/*x*/ {{  -_sinCA,	-sinL*_cosCA,	0,	0,	0},
+/*y*/  {   _cosCA,   	-sinL*_sinCA,	0,	0,	0},
+/*z*/  {        0,           	cosL,	0,	0,	0},
+/*A*/  {        0,           	   0,	1,	0,	0},
+/*L*/  {        0,           	   0,	0,	1,	0},
+/*P*/  {        0,           	   0,	0,	0,	1}};
 
+  double g[6][1]=
+      {{ cosL*_cosCA 	},
+       { cosL*_sinCA 	},
+       { sinL        	},
+       { cosL*cosL*_curv},
+       { 0         	},
+       { 0         	}};
 
-  double radDca[3][3];
+  double myX[1][6] = {{_x,_y,0,0,0,0}};
 
-  TCL::mxmpy1(radFrame[0],dcaFrame[0],radDca[0],3,3,3);
-  if (fabs(radDca[0][0])<1e-5) {
-    radDca[0][0] = (radDca[0][0]<0)? -1e-5:1e-5;}
+  TMatrixD MA(6,5,A[0]),Mg(6,1,g[0]),Mx(1,6,myX[0]);
+  double xg = -1./(Mx*Mg)[0][0];
+  TMatrixD T1 = MA+(Mg*(Mx*MA))*xg;
 
-  double asd[2][2];
-  for (int i=0;i<2;i++) {
-  for (int j=0;j<2;j++) {
-    asd[i][j] = radDca[i+1][j+1] - radDca[i+1][0]*radDca[0][j+1]/radDca[0][0];}}
+//
+double dRad[5][6] = 
+/*                        x,       y,   z,      A,      L,  P
+/*----------------------------------------------------------*/
+/*jRPhi*/	{{-  _y/rxy,  _x/rxy,   0,      0,      0,  0}
+/*jZ  */	,{        0,       0,   1,      0,      0,  0}
+/*jTan*/	,{        0,       0,   0,      0,1/cos2L,  0}
+/*jPsi*/	,{        0,       0,   0, 1/cosL,      0,  0}
+/*jPti*/	,{        0,       0,   0,      0,      0,  1}};
 
-  double T[5][5] = {{asd[0][0], asd[0][1], 0,        0, 0}
-                   ,{asd[1][0], asd[1][1], 0,        0,	0}
-                   ,{        0,         0, 0, 1./cos2L, 0}
-                   ,{        0,         0, 1,        0, 0}
-                   ,{        0,         0, 0,        0, 1}};
-
-  TCL::trasat(T[0],fitErr->Arr(),radErr,5,5); 
-  
-  double dia[5];
-  for (int i=0,li=0;i<5;li+=++i) {
-    dia[i]= radErr[li+i];assert(dia[i]>0);
-    for (int j=0;j<i;j++) {
-      assert(radErr[li+j]*radErr[li+j]< dia[i]*dia[j]); }}
-
+  TMatrixD T2=TMatrixD(5,6,dRad[0])*T1;
+  TCL::trasat(T2.GetMatrixArray(),fitErr->Arr(),radErr,5,5); 
 
 }
 //_____________________________________________________________________________
@@ -786,8 +781,8 @@ StvFitErrs fE;
   TVectorD D(5);
   D[0] = 1.0*1.0	*f;
   D[1] = 2.0*2.0	*f;
-  D[2] = 0.03*0.01	*f;
-  D[3] = 0.04*0.01	*f;
+  D[2] = 0.03*0.03	*f;
+  D[3] = 0.04*0.04	*f;
   D[4] = 0.07*0.07	*f;
   TRandomVector RV(D);
 
@@ -832,22 +827,25 @@ StvFitErrs fE;
     myNode +=fitPars;
 //		Project it to x*x+y*y=r*r
     myNode.moveToR(myRad);
+    assert(fabs(pow(myNode._x,2)+pow(myNode._y,2)-myRad*myRad)<1e-4*myRad);
     double rP[6];
     myNode.GetRadial(rP);
-    
+    assert(fabs(rP[0]-myRad)<1e-4);
     for (int i=0,li=0;i< 5;li+=++i) {
       for (int j=0;j<=i;j++    ) {
       rE[li+j]+= (rP[i+1]-radPar[i+1])*(rP[j+1]-radPar[j+1]);
     } }
   }  //End events
-  for (int j=0;j<15;j++) {rE[j]/=(nEv);}
+static const char *radTit[6]= {"Rad","Phi","Z  ","Tan","Psi","Pti"};
+  double fak[5]={myRad,1,1,1,1};
+  for (int i=0,li=0;i< 5;li+=++i){for (int j=0;j<=i;j++){rE[li+j]*=fak[i]*fak[j]/nEv;}}
   double qA=0,qAmax=0,dia[5];
   for (int i=0,li=0;i< 5;li+=++i) {
     dia[i]=radErr[li+i];
     for (int j=0;j<=i;j++) {
       double nor = sqrt(dia[i]*dia[j]);
       double dif = (rE[li+j]-radErr[li+j])/nor;
-      printf("(%d %d) \t%g = \t%g \t%g\n",i,j,radErr[li+j]/nor,rE[li+j]/nor,dif);
+      printf("([%s][%s] \t%g = \t%g \t%g\n",radTit[i+1],radTit[j+1],radErr[li+j]/nor,rE[li+j]/nor,dif);
       dif = fabs(dif);
       qA+= (dif); if (dif>qAmax) qAmax=dif;
   } }
@@ -1015,6 +1013,75 @@ static int iHELIX=0;
   } }
   qA/=15;
   printf("Quality %g < %g < 1\n",qA,qAmax);
+
+}
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+void StvNodeParsTest::TestMtx() 
+{
+  double maxEps = 0;  
+  double hz = 0.0014880496061989194;
+  int nErr=0;
+  int iR = 10+ gRandom->Rndm()*100;
+  int iAlf=10+ gRandom->Rndm()*100;
+  int iLam=10+ gRandom->Rndm()*100;
+  double alf = iAlf/180.*M_PI;
+  double lam = iLam/180.*M_PI;
+  StvNodePars basePar,modiPar,baseEndPar,modiEndPar;
+  double Rho = 1./iR;
+  basePar._x=0.10;
+  basePar._y=0.20; 
+  basePar._z=0.30;
+  basePar._psi=alf;
+  basePar._ptin=Rho/hz;;  
+  basePar._tanl=tan(lam);
+  basePar._curv=Rho;  
+  basePar._hz=hz;  
+  basePar.ready();
+  
+  THelixTrack baseHlx,modiHlx,baseEndHlx,modiEndHlx;
+  Mtx55D_t mtxHlx,mtxStv,mtxNum;
+  basePar.get(&baseHlx);
+  double len = 33;
+  baseEndHlx = baseHlx; baseEndHlx.Move(len,mtxHlx);
+  baseEndPar.set(&baseEndHlx,hz);
+  baseEndPar.convert(mtxStv , mtxHlx);
+
+  double stpArr[]={0.1, 0.1, 3.14/180, 3.14/180, 0.1*basePar._ptin+1e-2};
+  double fak=0.1;
+  memset(mtxNum[0],0,sizeof(mtxNum));
+  for (int ip=0;ip<5; ip++) { //Loop thru input parameters
+    StvFitPars fp; fp.Arr()[ip]=stpArr[ip]*fak;
+    modiPar = basePar;
+    modiPar+= fp;
+    modiPar.get(&modiHlx);
+    modiEndHlx = modiHlx;
+    modiEndHlx.Move(len);
+    double myLen = modiEndHlx.Path(baseEndHlx.Pos());
+    modiEndHlx.Move(myLen);
+    myLen = (TVector3(modiEndHlx.Pos())-TVector3(baseEndHlx.Pos()))*TVector3(baseEndHlx.Dir());
+    myLen/=-(TVector3(modiEndHlx.Dir())*TVector3(baseEndHlx.Dir()));
+    modiEndHlx.Move(myLen);
+    modiEndPar.set(&modiEndHlx,hz);
+    fp = modiEndPar-baseEndPar;
+
+    for (int jp=0;jp<5;jp++) {
+      mtxNum[jp][ip] = fp.Arr()[jp]/(stpArr[ip]*fak);
+  } }
+    printf("TestMtx: Angle=%d Lam=%d \tRad=%d\n",iAlf,iLam,iR);
+
+static const char T[]="HZALP";
+  for (int ip=0;ip<5; ip++) { //Loop thru input parameters
+    for (int jp=0;jp<5;jp++) {
+      double est = mtxNum[jp][ip];
+      double ana = mtxStv[jp][ip];
+      double eps = 2*fabs(est-ana)/(stpArr[jp]/stpArr[ip]);
+      if (eps>maxEps) maxEps=eps;
+      if (eps < 1e-2) continue;
+      nErr++;
+      printf(" m%c%c \t%g \t%g \t%g\n",T[jp],T[ip],ana,est,eps);
+ } }  
+    printf("TestMtx: %d errors maxEps=%g\n",nErr,maxEps);
 
 }
 
