@@ -1,3 +1,4 @@
+#include <string.h>
 #include "TSystem.h"
 #include "TBrowser.h"
 #include "TCernLib.h"
@@ -10,6 +11,9 @@
 #include "Stv/StvStl.h"
 #include "THelixTrack.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+
+#include "Stv/StvToolkit.h"
+
 StvDraw *StvDraw::fgStvDraw=0;
 //_____________________________________________________________________________
 //_____________________________________________________________________________
@@ -20,6 +24,14 @@ StvDraw::StvDraw(const char *name):StDraw3D(name)
 }
 //_____________________________________________________________________________
 TObject *StvDraw::Hits(const std::vector<StvHit*> &hits, EDraw3DStyle sty)
+{
+const std::vector<const StvHit*>&vc = (std::vector<const StvHit*>&)hits;
+return Hits(vc,sty);
+}
+
+
+//_____________________________________________________________________________
+TObject *StvDraw::Hits(const std::vector<const StvHit*> &hits, EDraw3DStyle sty)
 {
   int n = hits.size();
   std::vector<float> vec(n*3);
@@ -51,6 +63,12 @@ TObject *StvDraw::Hits(const std::vector<const float*> &hits, EDraw3DStyle sty)
 //_____________________________________________________________________________
 TObject *StvDraw::Trak(const THelixTrack &helx,const std::vector<StvHit*>  &hits, EDraw3DStyle sty)
 {
+const std::vector<const StvHit*>&vc = (std::vector<const StvHit*>&)hits;
+return Trak(helx,vc,sty);
+}
+//_____________________________________________________________________________
+TObject *StvDraw::Trak(const THelixTrack &helx,const std::vector<const StvHit*>  &hits, EDraw3DStyle sty)
+{
   int n = hits.size(); if (!n) return 0;
   for (int i=0;i<n; i++) {
     printf("%d %g\n",i,atan2(hits[i]->x()[1],hits[i]->x()[0]));}
@@ -81,13 +99,13 @@ TObject *StvDraw::Trak(const std::vector<float> &pnts, EDraw3DStyle sty)
 //_____________________________________________________________________________
 void  StvDraw::Trak(const StvTrack *tk, EDraw3DStyle sty)
 {
-  StvHits myHits,ihHits;
+  StvConstHits myHits,ihHits;
   StvPoints  myPoits;
   const StvNode *lNode=0,*rNode;
   for (StvNodeConstIter it = tk->begin();it != tk->end();++it) {
     rNode = *it;
 //    ((StvNodePars&)(rNode->GetFP())).ready();
-    StvHit  *hit  = rNode->GetHit();
+    const StvHit  *hit  = rNode->GetHit();
     if (hit) {
       if (rNode->GetXi2()<1000) {myHits+=hit;} else {ihHits+=hit;}}
       
@@ -140,10 +158,10 @@ void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
   
   StVoidArr *vHits = StTGeoHelper::Inst()->GetAllHits();
   int nHits = vHits->size();
-  std::vector<StvHit*> unHits;
+  std::vector<const StvHit*> unHits;
   myDir=myDir.Unit();
   for (int ih=0;ih<nHits;ih++) {//loop hit
-    StvHit *hit = (StvHit*)(*vHits)[ih];
+    const StvHit *hit = (const StvHit*)(*vHits)[ih];
     TVector3 hi(hit->x()); 
     TVector3 hl = hi-myFst;
     double dot = hl.Dot(myDir);
@@ -223,5 +241,28 @@ void StvDraw::Wait()
 void StvDraw::KBrowse(const TObject *to)
 {
   new TBrowser("StvDraw",(TObject*)to);
+}
+//_____________________________________________________________________________
+void  StvDraw::All(const char *opt)
+{
+  if (!opt || !*opt) opt = "THh";
+
+  if (strstr(opt,"T")) {
+    StvTracks &tks = StvToolkit::Inst()->GetTracks();
+    for (StvTrackConstIter it=tks.begin(); it!=tks.end(); ++it) {
+      const StvTrack *tk = *it;
+      Trak(tk);
+  }  }
+
+  if (strstr(opt,"h")) {
+    StVoidArr *vHits = StTGeoHelper::Inst()->GetAllHits();  
+    std::vector<const StvHit*> sHits;
+    for (int ihit=0;ihit<(int)vHits->size();ihit++) {
+      const StvHit *stvHit = (StvHit*)(*vHits)[ihit];
+      if (stvHit->timesUsed()) continue;
+      sHits.push_back(stvHit);
+    }
+    Hits(sHits,kUnusedHit);
+  }  
 }
 
