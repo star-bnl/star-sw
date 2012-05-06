@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TRandomVector.cxx,v 1.3 2012/04/19 16:17:31 perev Exp $
+ * $Id: TRandomVector.cxx,v 1.4 2012/05/06 02:30:53 perev Exp $
  *
  ***************************************************************************
  *
@@ -26,37 +26,13 @@ TRandomVector::TRandomVector(const TMatrixDSym& errMtx,UInt_t seed)
 //_____________________________________________________________________________
 TRandomVector::TRandomVector(const TVectorD& errDia,UInt_t seed)
 { 
-static const double kSMALL = 0.1;
-
   fDim = errDia.GetNrows();
   TMatrixDSym mtx(fDim);
   fRandom.SetSeed(seed);
   for (int i=0;i<fDim;i++){assert(errDia[i]>0); mtx[i][i] = errDia[i];}
-  TMatrixD T(2,2),Tt(2,2),ext(2,2);
-  for (int i=0;  i<fDim-1;i++) {
-  for (int j=i+1;j<fDim  ;j++) {
-    double phiMax = kSMALL; 
-    double dDia = fabs(errDia[i]-errDia[j])+1e-10;
-    double myMax = 2*errDia[i]*kSMALL/dDia;
-    if (phiMax*phiMax> myMax) phiMax = sqrt(myMax);
-    myMax = 2*errDia[j]*kSMALL/dDia;
-    if (phiMax*phiMax> myMax) phiMax = sqrt(myMax);
-    myMax = kSMALL*kSMALL*errDia[i]*errDia[j]/(dDia*dDia);
-    if (phiMax*phiMax> myMax) phiMax = sqrt(myMax);
-    double phi = (fRandom.Rndm()<0.5)? -phiMax:phiMax;
-    double c = cos(phi),s=sin(phi); 
-    T[0][0]= c; T[0][1]= s;
-    T[1][0]=-s; T[1][1]= c;
-    Tt = T; Tt.T();
-    ext[0][0] = mtx[i][i];ext[0][1] = mtx[i][j];
-    ext[1][0] = mtx[j][i];ext[1][1] = mtx[j][j];
-
-    ext = T*(ext*Tt);
-    assert(ext[0][0]*ext[1][1]>ext[0][1]*ext[1][0]);
-    mtx[i][i] = ext[0][0]; mtx[i][j] = ext[0][1];
-    mtx[j][i] = ext[0][1]; mtx[j][j] = ext[1][1];
-  } }
-    assert(! Set(mtx,0)); 
+  
+  RandRotate(mtx);
+  assert(! Set(mtx,seed)); 
 }
 //_____________________________________________________________________________
 int TRandomVector::Set(const TMatrixDSym& errMtx,UInt_t  seed)

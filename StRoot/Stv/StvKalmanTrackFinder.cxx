@@ -345,6 +345,7 @@ int StvKalmanTrackFinder::Refit(int idir)
 static int nCall=0;nCall++;
 static       StvTrackFitter *tkf = StvTrackFitter::Inst();
 static const StvConst       *kon = StvConst::Inst();
+  StvNode *node = 0;
   int ans=0;
   for (int refIt=0; refIt<5; refIt++)  {
     ans = tkf->Refit(mCurrTrak,idir,1);
@@ -354,7 +355,7 @@ static const StvConst       *kon = StvConst::Inst();
 	int nHits = mCurrTrak->GetNHits();
 	if (nHits<kon->mMinHits) return 10;
 	tkf->Helix(mCurrTrak,1|2);
-	StvNode *node = tkf->GetWorstNode();
+	node = tkf->GetWorstNode();
 	assert(node);
 	double badXi2 = tkf->GetWorstXi2();
 	if (badXi2<kon->mXi2Hlx) break;
@@ -366,7 +367,7 @@ static const StvConst       *kon = StvConst::Inst();
       if (!ans) break;
     }
   }
-  StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
+  node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
   if (!node) return ans;
   node->UpdateDca();
   return ans;
