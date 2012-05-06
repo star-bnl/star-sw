@@ -7,6 +7,7 @@
 #include "TTree.h"
 #include "TH1.h"
 #include "TF1.h"
+#include "TMath.h"
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TCernLib.h"
@@ -20,7 +21,9 @@
 #include "TInterpreter.h"
 #include "TMinuit.h"
 #include "StvUtil/StvHitErrCalculator.h"
+#include "TPolinom.h"
 #include <vector>
+//#define APPROX
 //______________________________________________________________________________
 class FEEvent;
 class StvHitErrCalculator;
@@ -100,6 +103,7 @@ const   int &run;
 const   int &evt;
 const   int   &nGHits;
 const   float *&mCurv;
+const   float *&mChi2;
 const   float *&mPt;
 const   short *&mTrackNumber;
 const unsigned char *&nAllHits; 	//number of all hits in track
@@ -200,11 +204,12 @@ public:
     void End()	{mTks.push_back(0.);}
 
     void InitFitter();
-    void ResetFitter();
-    int GetNPars() const 		{return mNPars;}
-double* GetPars()       		{return mPars ;}
-    int GetNFixd() const 		{return mNFixd;}
-   void Update(const double *upd);
+     int GetNPars() const 		{return mNPars;}
+double*  GetPars()       		{return mPars ;}
+     int GetNFixd() const 		{return mNFixd;}
+    void Update(const double *upd);
+    void Synchro(char from,const double *par=0);
+    void Approx(int nonBias);
 const FETrak* GetTrak()  	        {return (FETrak*)&mTks[0];}
 FECalcHolder *GetCalc(int id,const float hiPos[3]);
    void  Eval(int  npar, double* grad, double& fval, double* par, int flag);
@@ -212,7 +217,7 @@ FECalcHolder *GetCalc(int id,const float hiPos[3]);
     int  IsFixed(int iPar) const 	{return mFix[iPar];}
     int  Fit();
    void  AvErr(const char *tit);
-
+    int  IsEnded() const;
 static  void Fcn(int &npar, double* grad, double& fval, double* par, int flag);
 
 
@@ -226,6 +231,7 @@ int  mNHits;
 int  mN00;
 int  mNCall;
 double mPars[100];
+double mFist[100];
 double mVal00;
 double mXi2;
 char mEnd[1];
@@ -233,7 +239,7 @@ std::vector<FECalcHolder*> 	mCas;
 std::vector<float> 		mTks;
 static FEFcn *mgInst;
 };
-
+#ifdef APPROX
 //______________________________________________________________________________
 class FEApprox 
 {
@@ -251,6 +257,9 @@ TVectorD mB,mP,mPrev,mClo,mIclo,mCup,mIcup;
 TVectorD mXlo,mIxlo,mXup,mIxup;
 double mXi2;
 };
+#endif //APPROX
+
+
 FEFcn *FEFcn::mgInst=0;
 
 //______________________________________________________________________________
@@ -281,16 +290,15 @@ int StvFitErr(const char *file)
   }
   printf ("StvFitErr: %d Events used\n",nEv);
   myFcn.End();
+#ifdef APPROX
   FEApprox app(&myFcn);
+#endif
   myFcn.AvErr("Before Fit");
   int ans =0;
-//  app.Test(); return 0;
-//  myFcn.ResetFitter();
   ans = myFcn.Fit();
-//  ans = app.Approx();
   myFcn.AvErr("After Fit");
   myFcn.DbSave();
-  return (!ans)? 99:0;
+  return (myFcn.IsEnded())? 99:0;
 }
 //______________________________________________________________________________
 void CalcInit()
@@ -525,8 +533,15 @@ void Poli2::Test()
   pp.Fit(); 
 //  pp.MyTest();
   double Xi2 = pp.Xi2();
-  double Xi2Eva = pp.EvalXi2();
-  printf ("Xi2 = %g == %g\n",Xi2,Xi2Eva);
+  double Xi2Eva = pp.EvalXi2(); if ( Xi2Eva) {};
+  printf ("Xi2 = %g Fun(10)= %g\n",Xi2,pp.Fun(10.));
+
+  TPoliFitter pf(2);
+  for (int i=0;i<20;i++) { pf.Add(X[i],Y[i],1./W[i]);}
+  Xi2 =pf.Fit()*(20-3);
+  printf ("Xi2 = %g Fun(10)= %g\n",Xi2,pf.Eval(10.));
+   
+
 //   for (int i=0; i<20; i++) {
 //     printf(" %g %g : %g\n",X[i],YY[i],pp.Fun(X[i]));
 //   }
@@ -630,6 +645,7 @@ FEEvent::FEEvent(TTreeIter &th):
   evt 		( th("mEvt")),
   nGHits    	( th("mHitsG")),
   mCurv    	( th("mHitsG.mCurv")),
+  mChi2    	( th("mHitsG.mChi2")),
   mPt      	( th("mHitsG.mPt")),
   mTrackNumber 	( th("mHitsG.mTrackNumber")),
   nAllHits 	( th("mHitsG.nAllHits")),
@@ -836,28 +852,16 @@ void FEFcn::InitFitter()
 {
   myFitter.SetMaxIterations(2000);
   myFitter.SetPrintLevel(1);
-  int parNo=0;
-  for (int i=0;i<(int)mCas.size();i++) {
-    StvHitErrCalculator *calc = mCas[i]->GetCalc();
-    int nP = calc->GetNPars();
-    const double *p = calc->GetPars();
-    for (int ip=0;ip<nP;ip++) {
-      TString ts(calc->GetName());ts+="_";ts+=ip;
-      printf("Parameter[%d] %s\t %g\n",parNo,ts.Data(),p[ip]);
-      double qwe = p[ip]; if (qwe<1e-8) qwe=1e-8;
-      double stp = qwe*0.1; if (stp<1e-8) stp = 0.8e-6;
-      myFitter.DefineParameter(parNo,ts.Data(), qwe, stp, 1e-8, 1.);
-      mPars[parNo] = qwe;
-      parNo++;
-    }
-  }
+  Synchro('C');
+  TCL::ucopy(mPars,mFist,mNPars);
+
   printf("mCas[0]->GetName()=%s\n",mCas[0]->GetName());
   printf("mCas[1]->GetName()=%s\n",mCas[1]->GetName());
   assert(strstr(mCas[0]->GetName(),"TpcInner"));
   assert(strstr(mCas[1]->GetName(),"TpcOuter"));
-  assert(myFitter.GetNumPars()==12);
-  FixPar(StvHitErrCalculator::kThkDet+0,2);
-  FixPar(StvHitErrCalculator::kThkDet+6,2);
+//??  assert(myFitter.GetNumPars()==12);
+//???   FixPar(StvHitErrCalculator::kThkDet+0,2);
+//???  FixPar(StvHitErrCalculator::kThkDet+6,2);
   myFitter.SetFCN(&Fcn);
 }
 //______________________________________________________________________________
@@ -872,29 +876,11 @@ void FEFcn::DbSave()
 }
 
 //______________________________________________________________________________
-void FEFcn::ResetFitter()
-{
-  int parNo=0;
-  for (int i=0;i<(int)mCas.size();i++) {
-    StvHitErrCalculator *calc = mCas[i]->GetCalc();
-    int nP = calc->GetNPars();
-    const double *p = calc->GetPars();
-    for (int ip=0;ip<nP;ip++) {
-      TString ts(calc->GetName());ts+="_";ts+=ip;
-      double qwe = p[ip]; if (qwe<1e-8) qwe=1e-8;
-      double stp = qwe*0.1; if (stp<1e-8) stp = 0.8e-6;
-      myFitter.DefineParameter(parNo,ts.Data(), qwe, stp, 1e-8, 1.);
-      mPars[parNo] = qwe;
-      parNo++;
-    }
-  }
-}
 void FEFcn::Update(const double *upd)
 {
   for (int i=0;i<(int)mCas.size();i++) { 
     mCas[i]->Update(upd);
   }
-  memcpy(mPars,upd,mNPars*sizeof(mPars[0]));
 }
 //______________________________________________________________________________
 int FEFcn::Fit()
@@ -909,6 +895,7 @@ int FEFcn::Fit()
   stat=myFitter.Command("SHOW EPS");
   stat=myFitter.Command("SHOW ERR");
   for (int it=0;it<10;it++) {  
+    Approx(0);
     stat = myFitter.Migrad();
     printf("Migrad() == %d\n",stat);
     if (!stat) break;
@@ -916,6 +903,7 @@ int FEFcn::Fit()
     printf("Scan() == %d\n",stat);
   }
   myFitter.Command("IMPROVE");
+  Approx(1);
   printf("FEFcn::Fit() Average Xi2/Ndf = %g\n",mXi2);
   return 0;
 
@@ -940,13 +928,21 @@ int FEFcn::Add(FEEvent* ev)
   FENode node;
   while ((jl=ev->NextTrack(jr))>-1) 
   {
-    if (fabs(ev->mCurv[jl])>1./300) continue;
+    if (fabs(ev->mCurv[jl])>1./300) 	continue;
 ///    if (fabs(ev->mPt[jl])<0.5) continue;
-    if (ev->nAllHits[jl] < 15) continue;
+    if (ev->nAllHits[jl] < 15) 		continue;
     assert(jr-jl+1>=15);
     int nNodes=0;
     int jN = mTks.size(); mTks.resize(jN+1);
+    double y00=0,z00=0;
+
+//		drop 5 worst hits
+    int n = jr-jl+1;
+    int idx[100];
+    TMath::Sort(n,ev->mChi2+jl,idx);
+    float minXi2 = ev->mChi2[jl+idx[4]];
     for (int j=jl;j<=jr;j++) {   
+      if (ev->mChi2[j]>=minXi2) continue;
       double psi = ev->gPsi[j];
       double dip = ev->gDip[j];
       node.tkDir[0] = cos(dip)*cos(psi);
@@ -978,8 +974,9 @@ int FEFcn::Add(FEEvent* ev)
 
       node.s = ev->lLen[j];
       assert(node.s<300);
-      node.yz[0] = ev->lYHit[j];
-      node.yz[1] = ev->lZHit[j];
+      if (!y00) { y00=ev->lYHit[j]; z00=ev->lZHit[j];}
+      node.yz[0] = ev->lYHit[j]-y00;
+      node.yz[1] = ev->lZHit[j]-z00;
       node.detId = ev->mDetector[j];
       nNodes++;
       int n = mTks.size(); mTks.resize(n+sizeof(FENode)/sizeof(float));
@@ -989,19 +986,23 @@ int FEFcn::Add(FEEvent* ev)
     mNHits += nNodes;
     mNTks++;
   }        
+  mN00 = (int)(log(double(mNHits))/log(2.)+1); 
+  mN00 = 1<<mN00; 
   return 0;
 }
 //______________________________________________________________________________
 void FEFcn::Eval(int npar, double* gradp, double& fvalp, double* par, int flag)
 {
+static const double oleg = 1e-6;
+static const double igor = 1;
    assert(npar<=mNPars);
    mNCall++;
-   long double grad[100],fval=0,myXi2=0;
+   long double grad[100]={0},fval=0,myXi2=0;
+   long double gra2[100]={0},fval2=0;
    int myN=0;
-   if (flag==2) { for (int i=0;i<mNPars;i++){grad[i]=0;}};
 
 //	Update calc's params by current ones
-   Update(par);
+   Synchro('A',par);
    Poli2 poliSY(2),poliSZ(1);
    const FETrak* trak = GetTrak();
    for (;trak;trak=trak->Next()) {   //Loop over tracks 
@@ -1024,8 +1025,9 @@ void FEFcn::Eval(int npar, double* gradp, double& fvalp, double* par, int flag)
      poliSY.Fit(); 
      poliSZ.Fit(); 
      fval += ((poliSY.LiH()+poliSZ.LiH()));
-     myXi2 += poliSY.Xi2()/(nNodes-2)+poliSZ.Xi2()/(nNodes-1);
-     myN++;
+     myXi2 += poliSY.Xi2()-(nNodes-3)+poliSZ.Xi2()-(nNodes-2);
+     fval2 += poliSY.Xi2()+poliSZ.Xi2()- 2*nNodes;
+     myN+=(nNodes-3)+(nNodes-2);
 
      if (flag==2) {
 
@@ -1038,39 +1040,180 @@ void FEFcn::Eval(int npar, double* gradp, double& fvalp, double* par, int flag)
   //		dLih/dW*dW/dErr2
 	 double dLihdErrY = -poliSY.dLiHdW(iNode)/(hRR[0]*hRR[0]);
 	 double dLihdErrZ = -poliSZ.dLiHdW(iNode)/(hRR[2]*hRR[2]);
+	 double dXi2dErrY = -poliSY.dXi2dW(iNode)/(hRR[0]*hRR[0]);
+	 double dXi2dErrZ = -poliSZ.dXi2dW(iNode)/(hRR[2]*hRR[2]);
 	 int nPar=calc->GetNPars();
 	 int offs=hold[iNode]->GetOffset();
 	 for (int jPar=0;jPar<nPar;jPar++) {// Loop over Calc params
   //    		dErr2/dPar      
             double qwe =(dLihdErrY*dRR[jPar][0]+dLihdErrZ*dRR[jPar][2]);
             grad[offs+jPar]+=qwe;
+                   qwe =(dXi2dErrY*dRR[jPar][0]+dXi2dErrZ*dRR[jPar][2]);
+            gra2[offs+jPar]+=qwe;
  	 }// end Loop over Calc params
 
       }// end 2nd Loop over nodes
 
     }//endif flag==2
   }//End tracks
-  mXi2 = myXi2/myN;
-  if (!mN00) {
-    mN00 = (int)(log(double(myN))/log(2.)); 
-    mN00 = 1<<mN00; mVal00=fval/mN00;
-    printf("FEFcn::Eval mVal00 = %g mN00=%d\n",mVal00,mN00);
-  }
-
-  fvalp = fval/mN00-mVal00;
-static const double oleg = 1e-4;
-  for (int ip=0;ip<npar;ip++) { fvalp += oleg*0.5*par[ip]*par[ip];}
+  mXi2 = 1+myXi2/myN;
+  fval2 /= mN00; fval  /= mN00;
+  fval = fval + igor*0.5*(fval2*fval2);
+  for (int ip=0;ip<npar;ip++) { fval += oleg*0.5*par[ip]*par[ip];}
+  if (!mVal00) mVal00 = fval;
+  fvalp = fval-mVal00;
   if (flag==2)   {
-    for (int i=0;i<mNPars;i++){gradp[i]=grad[i]/mN00+oleg*par[i];}}
+    for (int i=0;i<mNPars;i++){
+      gradp[i]=(grad[i]+igor*(fval2)*gra2[i])/mN00  +oleg*par[i];}}
 }
 //______________________________________________________________________________
+void FEFcn::Approx(int nonBias)
+{
+   Synchro('M');
+   long double myXi2=0;
+   int myN=0;
+
+//	Update calc's params by current ones
+   Poli2 poliSY(2),poliSZ(1);
+   const FETrak* trak = GetTrak();
+   for (;trak;trak=trak->Next()) {   //Loop over tracks 
+     int nNodes = trak->GetNNodes();
+     poliSY.Clear(); poliSZ.Clear();
+     FECalcHolder *hold[100];
+     double hRR[3];
+     for (int iNode=0;iNode<nNodes;iNode++) {//1st Loop over nodes
+       const FENode *n = trak->GetNode(iNode);
+       hold[iNode] = GetCalc((int)n->detId,n->hiPos);
+       StvHitErrCalculator *calc = hold[iNode]->GetCalc();
+       calc->SetTrack(n->tkDir);
+       calc->CalcDcaErrs(n->hiPos,n->hiDir,hRR);
+       assert(hRR[0]>0);
+       assert(hRR[2]>0);
+       poliSY.Add(n->s,n->yz[0],1./hRR[0]); 
+       poliSZ.Add(n->s,n->yz[1],1./hRR[2]); 
+     } // end 1st Loop over nodes
+
+     poliSY.Fit(); 
+     poliSZ.Fit(); 
+     myXi2 += poliSY.Xi2()+poliSZ.Xi2() - 2*nNodes;
+     myN+=2*nNodes;
+  }//End tracks
+  
+  mXi2 = 1+myXi2/myN;
+  if (nonBias) mXi2 = 1+(mXi2-1)*myN/double(myN -mNTks*5);
+  TCL::vscale(mPars,mXi2,mPars,mNPars);
+  Synchro('P');
+}
+//______________________________________________________________________________
+void FEFcn::Synchro(char from,const double* Arr )
+{
+// from: 0=from StvHitErrCals's; 1=from Minuit; 2 = FEFcn::mPar; 3=from array
+
+  switch (from) {
+  case 'C': {// input from StvHitErrCals's
+    int nump = 0;  
+    for (int i=0;i<(int)mCas.size();i++) {
+      StvHitErrCalculator *calc = mCas[i]->GetCalc();
+      int nP = calc->GetNPars();
+      const double *p = calc->GetPars();
+      for (int ip=0;ip<nP;ip++) {
+        TString ts(calc->GetName());ts+="_";ts+=ip;
+        double qwe = p[ip]; if (qwe<1e-8) qwe=1e-8;
+        double stp = qwe*0.1; if (stp<1e-8) stp = 0.8e-6;
+        myFitter.DefineParameter(nump,ts.Data(), qwe, stp, 0, 0.1);
+        mPars[nump] = qwe;
+        nump++;
+      }
+    }
+    if (!mNPars) mNPars = nump;
+    assert(mNPars==nump);
+    break;}
+
+  case 'M': {// input from Minuit
+     double err;
+     for (int ipar=0;ipar<mNPars;ipar++) {
+       myFitter.GetParameter(ipar,mPars[ipar],err);}
+     Update(mPars);
+     break; }
+     
+  case 'P': {// input from FEFcn::mPar
+    Update(mPars);
+    TString chnam;
+    double val,err,xlolim,xuplim;
+    int iuint,ierr;
+    for (int ipar=0;ipar<mNPars;ipar++) {
+      myFitter.mnpout(ipar,chnam,val, err,xlolim,xuplim,iuint);
+      val = mPars[ipar];
+      myFitter.mnparm(ipar,chnam,val,err,xlolim,xuplim, ierr);
+    }
+    break; }   
+
+  case 'A': {// input from array
+    TCL::ucopy(Arr,mPars,mNPars);
+    Update(mPars);
+    break;}
+
+  default: assert(0 && "Undefined case");
+  }//end switch
+
+}
+
 //______________________________________________________________________________
 void FEFcn::Fcn(int &npar, double* grad, double& fval, double* par, int flag)
 {
   mgInst->Eval(npar,grad,fval,par,flag);
 }
 
+//______________________________________________________________________________
+void FEFcn::AvErr(const char *tit)
+{
+  for (int ih=0;ih<(int)mCas.size();ih++) 
+  {
+    FECalcHolder *hold = mCas[ih]; hold->AvInit();
+  }
+  const FETrak* trak = GetTrak();
+  for (;trak;trak=trak->Next()) {   
+    int nNodes = trak->GetNNodes();
+    double hRR[3];
+    for (int iNode=0;iNode<nNodes;iNode++) {//1st Loop over nodes
+      const FENode *n = trak->GetNode(iNode);
+      int detId = n->detId;
+      FECalcHolder *hold = GetCalc(detId,n->hiPos);
+      StvHitErrCalculator *calc = hold->GetCalc();
+      calc->SetTrack(n->tkDir);
+      calc->CalcDcaErrs(n->hiPos,n->hiDir,hRR);
+      hold->AvAdd(hRR);
+    } // end Loop over nodes
+  }//End tracks
 
+
+  printf("\n ====== AvErr(%s) Events=%d  Tracks=%d Hits=%d\n"
+        ,tit,mNEvs,mNTks,mNHits);
+
+  for (int ih=0;ih<(int)mCas.size();ih++) 
+  {
+    FECalcHolder *hold = mCas[ih];
+    hold->AvEnd();
+  }
+  return;
+}
+//______________________________________________________________________________
+int FEFcn::IsEnded() const
+{
+  double sum = 0,dlt=0;
+  for (int i=0;i<mNPars;i++) {
+    sum += mPars[i];
+    double myDlt = fabs(mPars[i]-mFist[i]);
+    if (dlt<myDlt) dlt=myDlt;
+  }
+  printf(" *** IsEnded *** %g\n",dlt/sum);
+  return dlt < 1e-2*sum;
+}  
+  
+  
+//______________________________________________________________________________
+//______________________________________________________________________________
+#ifdef APPROX
 //______________________________________________________________________________
 FEApprox::FEApprox(FEFcn *fefcn)
 {
@@ -1221,8 +1364,6 @@ int FEApprox::Prepare()
   }
   return 0;
 }
-
-//______________________________________________________________________________
 #include "Riostream.h"
 #include "TMath.h"
 #include "TSystem.h"
@@ -1389,40 +1530,7 @@ int FEApprox::Approx()
   
   return iter;
 }		
-//______________________________________________________________________________
-void FEFcn::AvErr(const char *tit)
-{
-  for (int ih=0;ih<(int)mCas.size();ih++) 
-  {
-    FECalcHolder *hold = mCas[ih]; hold->AvInit();
-  }
-  const FETrak* trak = GetTrak();
-  for (;trak;trak=trak->Next()) {   
-    int nNodes = trak->GetNNodes();
-    double hRR[3];
-    for (int iNode=0;iNode<nNodes;iNode++) {//1st Loop over nodes
-      const FENode *n = trak->GetNode(iNode);
-      int detId = n->detId;
-      FECalcHolder *hold = GetCalc(detId,n->hiPos);
-      StvHitErrCalculator *calc = hold->GetCalc();
-      calc->SetTrack(n->tkDir);
-      calc->CalcDcaErrs(n->hiPos,n->hiDir,hRR);
-      hold->AvAdd(hRR);
-    } // end Loop over nodes
-  }//End tracks
-
-
-  printf("\n ====== AvErr(%s) Events=%d  Tracks=%d Hits=%d\n"
-        ,tit,mNEvs,mNTks,mNHits);
-
-  for (int ih=0;ih<(int)mCas.size();ih++) 
-  {
-    FECalcHolder *hold = mCas[ih];
-    hold->AvEnd();
-  }
-  return;
-}
-
+#endif // APPROX
 
 
 
