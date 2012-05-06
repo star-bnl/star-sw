@@ -265,6 +265,7 @@ static StvFitter *fitt = StvFitter::Inst();
 }   
 //_____________________________________________________________________________
 THelixTrack* StvKalmanTrackFitter::GetHelix() const {return mHelx;}
+
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
 {
@@ -272,20 +273,20 @@ static int nCall=0;nCall++;
 // mode.bit0 = use err
 // mode.bit1 = update track
 // mode.bit2 = print
+// mode.bit3 = print+compare
 
-  if (!mode) mode = 4;
-  
+  if (!mode  ) mode = 4;
+  if ( mode&8) mode|= 4;
+  mWorstXi2=0,mWorstNode = 0;mXi2 = 0;
   if (!mHelx) mHelx = new THelixFitter;
   mHelx->Clear();
+  double Fhlx[5][5],Fstv[5][5];
   THelixFitter& hlx = *mHelx;
-  int iNode=0;
-  StvNode *fstNode = 0,*lstNode = 0,*node=0,*preNode=0;
+  StvNode *node=0,*preNode=0;
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
-    node = *it; iNode++;
+    node = *it; 
     const StvHit *hit= node->GetHit();
     if (!hit) continue;
-    if (!fstNode) fstNode = node;
-    lstNode = node;
     hlx.Add(hit->x()[0],hit->x()[1],hit->x()[2]);
     if(mode&1) {	//Account errors
       double cos2li = node->GetFP()._tanl; cos2li = (1+cos2li*cos2li);
@@ -293,139 +294,77 @@ static int nCall=0;nCall++;
       assert(rr[0]>0);
       assert(rr[2]>0);
       assert(rr[0]*rr[2]>rr[1]*rr[1]);
-
-
-      StvDebug::Count("HHhlx",sqrt(rr[0]));
-      StvDebug::Count("ZZhlx",sqrt(rr[2]));
-
       hlx.AddErr( rr[0],rr[2]*cos2li);
     }
   }  
   mXi2 =hlx.Fit();
-  if(mode&1) {
-    hlx.MakeErrs(); 
-    assert(hlx.Emx()->Sign()>=0);}
+  if(mode&1) { hlx.MakeErrs(); assert(hlx.Emx()->Sign()>=0);}
   double dL = hlx.Path(trak->front()->GetFP().P);
   hlx.Move(dL);
 
-  iNode=0;
   int nHits = 0;
-  iNode = 0;node=0;
-  double dHit[3],tstXi2=0;
+  node=0;
+  double dHit[3],tstXi2=0,myXi2=0;
 
-//		Find total energy loss and update length
-  double totLoss = 0,totLen=0;
+//		Loop for Print,compare & update
+  double totLen=0;
   THelixTrack myHlx(hlx);
-  int on = 0;
+  int iNode = -1;
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
-    preNode=node; node = *it; iNode++;
-    StvNodePars FP = node->GetFP(2);
+    iNode++;preNode=node; node = *it;
+    StvNodePars sFP = node->GetFP(2);
     const StvHit *hit = node->GetHit();
-    const double *X = FP.P;
+    const double *X = sFP.P;
     if (hit) {for (int i=0;i<3;i++) {dHit[i]=hit->x()[i];};X = dHit;}
-    double dS = myHlx.Path(X); myHlx.Move(dS);
-    totLen+=dS; node->mLen = totLen;
-    if (on) totLoss += node->GetELoss().mdPPdL*dS;
-    if (node == fstNode) on=1;
-    if (node == lstNode) on=0;
-    if (!hit) continue;
-    const THEmx_t *emx = myHlx.Emx();
-    assert(emx->Sign()>=0);
-//??    const double  *rr  = node->GetHE();    
-//??    assert(emx->mHH < rr[0]);
-//??    double cos2li = 1.+pow(node->GetFP()._tanl,2); 
-//??    assert(emx->mZZ < rr[2]*cos2li);
-  }
+    double dS = myHlx.Path(X); myHlx.Move(dS,Fhlx);
+    totLen+=dS;
+    StvNodePars hFP; hFP.set(&myHlx,sFP._hz);
+    StvFitErrs  sFE = node->GetFE(2);
+    StvFitErrs  hFE; hFE.Set(&myHlx,sFP._hz);
 
-  if (mode&2) { //	Now find the middle iterator & node
-    double midLoss = 0.5*fabs(totLoss),midLen=0; totLoss = 0;
-    StvNodeIter midIt; iNode = 0; node=0;totLen=0;
-    on = 0;
-    for (midIt=trak->begin();midIt!=trak->end(); ++midIt) {
-      preNode = node; node = *midIt; iNode++;
-      if (preNode) {
-	double dS = node->mLen-preNode->mLen; midLen+=dS;
-	if (on) totLoss += fabs(node->GetELoss().mdPPdL*dS);
+
+    if (hit) {//Hit is there. Calculate Xi2i etc...
+      const float  *hix = hit->x();
+      StvNodePars iFP(hFP); iFP._x=hix[0];iFP._y=hix[1];iFP._z=hix[2];
+      StvFitPars  fp = hFP-iFP;
+
+      const double *hRR = node->GetHE();
+      myXi2 = fp.mH /(hFE.mHH+hRR[0]) *fp.mH;
+      myXi2+= fp.mZ /(hFE.mZZ+hRR[2]) *fp.mZ;
+
+      if (mWorstXi2 < myXi2) { mWorstXi2 = myXi2; mWorstNode = node;}
+      tstXi2 +=  myXi2;
+
+// 	Node is ready. What to do with?    
+      switch(mode&(4|8)) {
+        case 4: 
+         printf("HelixPars(%g) Xi2i=%g ",totLen,         myXi2); hFP.print();
+         hFE.Print("HelixErrs");
+         break;
+
+        case 4|8: 
+         printf("HelixPars(%g) Xi2i=%g ",totLen,         myXi2); hFP.print();
+         printf("StvixPars(%g) Xi2i=%g ",totLen,node->GetXi2()); sFP.print();
+         hFE.Print("HelixErrs");
+         sFE.Print("StvixErrs");
+         break;
       }
-      if (node == fstNode) on=1;
-      if (node == lstNode) on=0;
-      if (totLoss>= midLoss) break; 
-    }
 
-  //  		Now update  
-    mWorstNode = 0;mWorstXi2=0;
-    for (int idir = 0; idir<2; idir++) { 
-      StvNodeIter itEnd;
-      if (idir) { itEnd = trak->end()		;}
-      else      { itEnd = trak->begin();--itEnd	;}
+    }//end if hit loop
 
-      myHlx=hlx; myHlx.Move(midLen);
-      node =0;
-      for (StvNodeIter it=midIt;it!=itEnd; (idir)? ++it:--it) {
-	preNode = node; node = *it; iNode++;
-	StvNodePars FP = node->GetFP(2);
-	StvFitErrs  FE = node->GetFE(2);
-	const StvHit *hit = node->GetHit();
-	const double *X = FP.P;
-	if (hit) {for (int i=0;i<3;i++) {dHit[i]=hit->x()[i];};X = dHit;}
-	double dS = (node->GetType()==StvNode::kDcaNode)? myHlx.Path(0.,0.) : myHlx.Path(X);
-	double Fhlx[5][5],Fstv[5][5];
-	myHlx.Move(dS,Fhlx);
-	if (preNode) { //Update helix
-          double rho = myHlx.GetRho();
-          rho += -rho*node->GetELoss().mdPPdL*dS;
-          myHlx.Set(rho);
-	}
-	FP.set(&myHlx,FP._hz); 
-	FE.Set(&myHlx,FP._hz); 
-        node->SetPre(FP,FE,0);node->SetPre(FP,FE,1);
-        node->SetFit(FP,FE,0);node->SetFit(FP,FE,1);
-        if (preNode) {FP.convert(Fstv,Fhlx); node->SetDer(Fstv,idir);}    
+    if (!(mode&2))	continue; //No update
+    node->mLen = totLen;
+    node->SetPre(hFP,hFE,0);node->SetPre(hFP,hFE,1);
+    node->SetFit(hFP,hFE,0);node->SetFit(hFP,hFE,1);
+    if (preNode) {hFP.convert(Fstv,Fhlx); node->SetDer(Fstv,1);}    
+    if (!hit) 		continue;
+    node->SetXi2(myXi2,0);node->SetXi2(myXi2,1);
+  }//end of 2nd loop
+  tstXi2/=hlx.Ndf();
+  double qwe = mXi2;
+//??  assert(fabs(tstXi2-mXi2)< 0.1*(tstXi2+mXi2));
 
-	if (hit) {
-	  nHits++;
-          double cosL = myHlx.GetCos(), tanL = myHlx.GetTan();
-          const double *pos = myHlx.Pos();
-          const double *dir = myHlx.Dir();
-          const double *hRR = node->GetHE();
-          const double dX[3] = { X[0]-pos[0],X[1]-pos[1],X[2]-pos[2]};
-          double delta = (dX[0]*dir[1]-dX[1]*dir[0])/cosL;
-          double myXi2 = delta /(FE.mHH+hRR[0]) *delta;
-          double nL[3] = { -dir[0]*tanL,-dir[1]*tanL, cosL};
-          delta = dX[0]*nL[0]+dX[1]*nL[1]+dX[2]*nL[2];
-          myXi2 += delta /(FE.mZZ+hRR[2]) *delta;
-          if (mWorstXi2 < myXi2) { mWorstXi2 = myXi2; mWorstNode = node;}
-          tstXi2 +=  myXi2;
-          if (mode&2){ node->SetXi2(myXi2,0);node->SetXi2(myXi2,1);}
-	} 
-    } 
-    tstXi2/=nHits*3-5;
-    double qqq = mXi2;if (qqq){};
-  //VP    assert(fabs(mXi2-tstXi2)<0.1*(mXi2+tstXi2));
-    }
-  } //End of update
 
-  if (!mode || mode&4) {//Printout only
-    double myPsi = atan2(hlx.Dir()[1],hlx.Dir()[0]);
-    double myTan = tan(asin(hlx.Dir()[2]));
-    double myCur = hlx.GetRho();
-    printf("StvTrack::Approx(fstHelx) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n", mXi2,myPsi,myTan,myCur);
-    dL = hlx.Path(lstNode->GetFP().P); hlx.Move(dL);
-    myPsi = atan2(hlx.Dir()[1],hlx.Dir()[0]);
-    myTan = tan(asin(hlx.Dir()[2]));
-    myCur = hlx.GetRho();
-    printf("StvTrack::Approx(lstHelx) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n", mXi2,myPsi,myTan,myCur);
-    myPsi = fstNode->GetFP()._psi;
-    myTan = fstNode->GetFP()._tanl;
-    myCur = fstNode->GetFP()._curv;
-    double myXi2 = fstNode->GetXi2();
-    printf("StvTrack::Approx(fstNode) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",myXi2,myPsi,myTan,myCur);
-    myPsi = lstNode->GetFP()._psi;
-    myTan = lstNode->GetFP()._tanl;
-    myCur = lstNode->GetFP()._curv;
-    myXi2 = lstNode->GetXi2();
-    printf("StvTrack::Approx(lstNode) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",myXi2,myPsi,myTan,myCur);
-  }
   return 0;
 }
 //_____________________________________________________________________________
