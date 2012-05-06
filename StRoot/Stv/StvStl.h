@@ -12,6 +12,12 @@ StvHits &operator+=(      StvHit  *add)		{push_back(add);return *this;}
 StvHits &operator+=(const StvHits &add);
 void unused();
 };
+class StvConstHits : public std::vector<const StvHit*>
+{
+public:
+StvConstHits &operator+=(const StvHit  *add) {push_back(add);return *this;}
+void unused();
+};
 
 class StvPoints : public std::vector<float>{
 public:
