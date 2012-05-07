@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.18 2011/01/18 14:34:28 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.19 2012/05/07 14:38:41 fisyak Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.19  2012/05/07 14:38:41  fisyak
+ * Remvoe hardcoded separation between Inner and Outer Sectors
+ *
  * Revision 1.18  2011/01/18 14:34:28  fisyak
  * Clean up TpcDb interfaces and Tpc coordinate transformation
  *
@@ -231,6 +234,9 @@ private:
   Double_t    mTimeBinWidth;
   Double_t    mInnerSectorzOffset; 
   Double_t    mOuterSectorzOffset; 
+  Int_t       mNoOfInnerRows;
+  Int_t       mNoOfRows;
+  
   //  ClassDef(StTpcCoordinateTransform,0) //
 };
 
