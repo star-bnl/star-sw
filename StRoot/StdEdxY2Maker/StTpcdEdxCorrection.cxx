@@ -63,15 +63,15 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     assert(k_tpcGas);
   }
   SettpcGas(k_tpcGas);
-  TDatime t[2];					\
-  if (St_db_Maker::GetValidity(k_tpcGas,t) > 0) {				\
-    Int_t Nrows = k_tpcGas->GetNRows();					\
-    LOG_WARN << "StTpcdEdxCorrection::ReSetCorrections found table " << k_tpcGas->GetName() \
-	     << " with NRows = " << Nrows << " in db" << endm;		\
-    LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	\
-	     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; \
-    if (Nrows > 10) Nrows = 10;						\
-    if (k_tpcGas->GetRowSize() < 256) k_tpcGas->Print(0,Nrows);		\
+  TDatime t[2];					
+  if (St_db_Maker::GetValidity(k_tpcGas,t) > 0) {				
+    Int_t Nrows = k_tpcGas->GetNRows();					
+    LOG_WARN << "StTpcdEdxCorrection::ReSetCorrections found table " << k_tpcGas->GetName() 
+	     << " with NRows = " << Nrows << " in db" << endm;		
+    LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	
+	     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; 
+    if (Nrows > 10) Nrows = 10;						
+    if (k_tpcGas->GetRowSize() < 256) k_tpcGas->Print(0,Nrows);		
   }
   St_TpcSecRowCor *TpcSecRow = 0;
   St_tpcCorrection *table = 0;
@@ -126,14 +126,14 @@ void StTpcdEdxCorrection::ReSetCorrections() {
       }	
       SetCorrection(k,table);
       if (table) {
-	if (St_db_Maker::GetValidity(table,t) > 0) {			\
-	  Int_t Nrows = table->GetNRows();				\
-	  LOG_WARN << "StTpcdEdxCorrection::ReSetCorrections found table " << table->GetName() \
-		   << " with NRows = " << Nrows << " in db" << endm;	\
-	  LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime() \
-		   << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; \
-	  if (Nrows > 10) Nrows = 10;					\
-	  if (table->GetRowSize() < 256) table->Print(0,Nrows);		\
+	if (St_db_Maker::GetValidity(table,t) > 0) {			
+	  Int_t Nrows = table->GetNRows();				
+	  LOG_WARN << "StTpcdEdxCorrection::ReSetCorrections found table " << table->GetName() 
+		   << " with NRows = " << Nrows << " in db" << endm;	
+	  LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime() 
+		   << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; 
+	  if (Nrows > 10) Nrows = 10;					
+	  if (table->GetRowSize() < 256) table->Print(0,Nrows);		
 	}
       }
     }

@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.74 2012/04/29 22:52:59 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.75 2012/05/07 15:54:35 fisyak Exp $
 #define CompareWithToF 
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -1712,7 +1712,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (dXdEA) dXdEA->Fill(FdEdx[k].dx,FdEdx[k].row,FdEdx[k].C[StTpcdEdxCorrection::kdXCorrection].dEdxN);
 	if (dXdEC) dXdEC->Fill(FdEdx[k].dx,FdEdx[k].row,FdEdx[k].dEdxN);
       }
-      if (TESTBIT(m_Mode, kZBGX) && PiDkeyU3 >= 0 && zbgx) 
+      //      if (TESTBIT(m_Mode, kZBGX) && PiDkeyU3 >= 0 && zbgx) 
+      if (TESTBIT(m_Mode, kZBGX) && zbgx) // for all hyps
 	zbgx[2*PiDkeyU3+sCharge]->Fill(bghyp[PiDkeyU3],TMath::Log(FdEdx[k].dx)/TMath::Log(2.),FdEdx[k].dEdxL-GeV2keV);
     }
     if ((TESTBIT(m_Mode, kCORRELATION))) Correlations();
