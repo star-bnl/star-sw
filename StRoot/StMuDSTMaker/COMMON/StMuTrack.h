@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.40 2011/10/17 00:19:14 fisyak Exp $
+ * $Id: StMuTrack.h,v 1.41 2012/05/07 14:47:06 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -58,6 +58,7 @@ class StMuTrack : public TObject {
     short id() const; ///< Returns the track id(or key), is unique for a track node, i.e. global and primary tracks have the same id.
     short type() const; ///< Returns the track type: 0=global, 1=primary, etc (see StEvent manual for type information) 
     short flag() const; ///< Returns flag, (see StEvent manual for type information) 
+    UInt_t                         flagExtension() const { return mFlagExtension; }
     int   bad () const; // track is bad
     /// Returns index of associated global track. If not in order can be set with StMuDst::fixTrackIndeces() (but is taken care of in StMuDstReader.)  
     int index2Global() const;
@@ -128,6 +129,7 @@ protected:
   Short_t mId;
   Short_t mType;
   Short_t mFlag;
+  UInt_t  mFlagExtension; // bit wise fast detector matching status
   Int_t mIndex2Global;
   Int_t mIndex2RichSpectra;
   Int_t mIndex2BTofHit;     // dongx
@@ -182,7 +184,7 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,12)
+  ClassDef(StMuTrack,13)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -234,6 +236,9 @@ ostream&              operator<<(ostream& os, StMuTrack const & v);
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.41  2012/05/07 14:47:06  fisyak
+ * Add handles for track to fast detector matching
+ *
  * Revision 1.40  2011/10/17 00:19:14  fisyak
  * Active handing of IdTruth
  *
