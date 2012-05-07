@@ -6,6 +6,7 @@
 #include "TObjArray.h"
 #include "StMessMgr.h"
 #include "StPhiEtaHitList.h"
+#include "StMaker.h"
 //________________________________________________________________________________
 ClassImp(StPhiEtaHitList);
 const Char_t *StPhiEtaHitList::names[3] = {"Active","Fired","Track"};
@@ -72,7 +73,7 @@ StBtofHitList::~StBtofHitList() {SafeDelete(myTable); }
 //________________________________________________________________________________
 void StBtofHitList::initRun() {
   LOG_INFO <<Form("StBtofHitList::initRun() start")<<endm;
-  myTable->loadTables();
+  myTable->loadTables(StMaker::GetChain());
   Int_t nB=0; Int_t nA=0;
   for(Int_t tray = 1; tray <= mxTray;tray++) 
     for(Int_t module = 1; module <= mxModule;module++) 
