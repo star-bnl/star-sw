@@ -38,6 +38,9 @@ class St_tpcPadPlanesC : public TChair {
   Double_t 	outerSectorPadPlaneZ(Int_t i = 0){return Struct(i)->outerSectorPadPlaneZ;}
   Int_t* 	innerPadsPerRow(Int_t i = 0) 	 {return Struct(i)->innerPadsPerRow;}
   Int_t* 	outerPadsPerRow(Int_t i = 0) 	 {return Struct(i)->outerPadsPerRow;}
+  Int_t         padsPerRow(Int_t row = 1)        {return (row <= innerPadRows()) ? 
+      innerPadsPerRow()[row-1] : 
+      outerPadsPerRow()[row-1-innerPadRows()];}
   Double_t* 	innerRowRadii(Int_t i = 0) 	 {return Struct(i)->innerRowRadii;}
   Double_t* 	outerRowRadii(Int_t i = 0) 	 {return Struct(i)->outerRowRadii;}
   // taken from StRTpcPadPlane

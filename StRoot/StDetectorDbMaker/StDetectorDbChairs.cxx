@@ -683,4 +683,50 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
 //__________________Calibrations/rhic______________________________________________________________
 #include "St_vertexSeedC.h"
 MakeChairInstance(vertexSeed,Calibrations/rhic/vertexSeed);
-//________________________________________________________________________________
+//__________________Calibrations/tof______________________________________________________________
+#include "St_tofGeomAlignC.h"
+MakeChairInstance(tofGeomAlign,Calibrations/tof/tofGeomAlign);
+#include "St_tofTrayConfigC.h"
+MakeChairInstance(tofTrayConfig,Calibrations/tof/tofTrayConfig);
+#include "St_tofStatusC.h"
+MakeChairInstance(tofStatus,Calibrations/tof/tofStatus);
+//____________________________Calibrations/emc____________________________________________________
+#include "St_emcPedC.h"
+MakeChairInstance2(emcPed,St_bemcPedC,Calibrations/emc/y3bemc/bemcPed);
+MakeChairInstance2(emcPed,St_bprsPedC,Calibrations/emc/y3bprs/bprsPed);
+#include "St_emcStatusC.h"
+MakeChairInstance2(emcStatus,St_bemcStatusC,Calibrations/emc/y3bemc/bemcStatus);
+MakeChairInstance2(emcStatus,St_bprsStatusC,Calibrations/emc/y3bprs/bprsStatus);
+#include "St_emcCalibC.h"
+MakeChairInstance2(emcCalib,St_bemcCalibC,Calibrations/emc/y3bemc/bemcCalib);
+MakeChairInstance2(emcCalib,St_bprsCalibC,Calibrations/emc/y3bprs/bprsCalib);
+#include "St_emcGainC.h"
+MakeChairInstance2(emcGain,St_bemcGainC,Calibrations/emc/y3bemc/bemcGain);
+MakeChairInstance2(emcGain,St_bprsGainC,Calibrations/emc/y3bprs/bprsGain);
+
+#include "St_smdPedC.h"
+MakeChairInstance2(smdPed,St_bsmdePedC,Calibrations/smd/y3bsmde/bsmdePed);
+MakeChairInstance2(smdPed,St_bsmdpPedC,Calibrations/smd/y3bsmdp/bsmdpPed);
+#include "St_smdStatusC.h"
+MakeChairInstance2(smdStatus,St_bsmdeStatusC,Calibrations/smd/y3bsmde/bsmdeStatus);
+MakeChairInstance2(smdStatus,St_bsmdpStatusC,Calibrations/smd/y3bsmdp/bsmdpStatus);
+#include "St_smdCalibC.h"
+MakeChairInstance2(smdCalib,St_bsmdeCalibC,Calibrations/smd/y3bsmde/bsmdeCalib);
+MakeChairInstance2(smdCalib,St_bsmdpCalibC,Calibrations/smd/y3bsmdp/bsmdpCalib);
+#include "St_smdGainC.h"
+MakeChairInstance2(smdGain,St_bsmdeGainC,Calibrations/smd/y3bsmde/bsmdeGain);
+MakeChairInstance2(smdGain,St_bsmdpGainC,Calibrations/smd/y3bsmdp/bsmdpGain);
+#include "St_emcTriggerStatusC.h"
+MakeChairInstance2(emcTriggerStatus,St_bemcTriggerStatusC,Calibrations/emc/trigger/bemcTriggerStatus);
+#include "St_emcTriggerPedC.h"
+MakeChairInstance2(emcTriggerPed,St_bemcTriggerPedC,Calibrations/emc/trigger/bemcTriggerPed);
+#include "St_emcTriggerLUTC.h"
+MakeChairInstance2(emcTriggerLUT,St_bemcTriggerLUTC,Calibrations/emc/trigger/bemcTriggerLUT);
+#include "St_bemcMapC.h"
+MakeChairInstance(bemcMap,Calibrations/emc/map/bemcMap);
+#include "St_bprsMapC.h"
+MakeChairInstance(bprsMap,Calibrations/prs/map/bprsMap);
+#include "St_bsmdeMapC.h"
+MakeChairInstance(bsmdeMap,Calibrations/smde/map/bsmdeMap);
+#include "St_bsmdpMapC.h"
+MakeChairInstance(bsmdpMap,Calibrations/smdp/map/bsmdpMap);
