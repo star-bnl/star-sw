@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.8 2011/03/08 18:20:44 genevb Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.9 2012/05/07 15:51:01 fisyak Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.9  2012/05/07 15:51:01  fisyak
+ * Remove hard coded TPC numbers
+ *
  * Revision 1.8  2011/03/08 18:20:44  genevb
  * Limit on number of hits starting at time bin 0
  *
@@ -60,6 +63,7 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t    maxHits[24];
   Int_t    maxBin0Hits;
   Int_t    bin0Hits;
+  Int_t    NoRows;
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
