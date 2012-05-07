@@ -43,10 +43,12 @@ class StiMaker : public StMaker
             Int_t FillPulls();
     virtual Int_t InitRun(int);
     virtual Int_t Make();
+    virtual Int_t MakeGlobalTracks(StEvent  *event);
+    virtual Int_t MakePrimaryTracks(StEvent *event);
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.31 2011/10/17 00:14:34 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.32 2012/05/07 14:56:14 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();

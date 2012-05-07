@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.97 2011/10/17 00:14:34 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.98 2012/05/07 14:56:14 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.98  2012/05/07 14:56:14  fisyak
+ * Add StKFVertexMaker
+ *
  * Revision 2.97  2011/10/17 00:14:34  fisyak
  * Move handles for IdTruth to StEvent
  *
@@ -497,12 +500,16 @@ using namespace std;
 //StiMaker
 #include "StiMaker/StiStEventFiller.h"
 #include "TMath.h"
+#include "StTrack2FastDetectorMatcher.h"
 #define NICE(angle) StiKalmanTrackNode::nice((angle))
-
+map<StiKalmanTrack*, StTrackNode*> StiStEventFiller::mTrkNodeMap;
+map<StTrackNode*, StiKalmanTrack*> StiStEventFiller::mNodeTrkMap;
+StiStEventFiller *StiStEventFiller::fgStiStEventFiller = 0;
 
 //_____________________________________________________________________________
-StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
+StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mFastDetectorMatcher(0)
 {
+  fgStiStEventFiller = this;
    mUseAux = 0;
    mAux    = 0;
    mGloPri = 0;
@@ -527,40 +534,16 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
   //               256  +   7 = 263;
   unsigned short bit = 1 << tpcOther;  // shifting the "1" exactly tpcOther places to the left
   mStiEncoded = kITKalmanFitId + bit; // adding that to the proper fitting Id
-
+  mFastDetectorMatcher = new StTrack2FastDetectorMatcher();
 }
-
 //_____________________________________________________________________________
 StiStEventFiller::~StiStEventFiller()
 {
  delete physicalHelix; physicalHelix=0;
  delete originD;       originD      =0;
+ SafeDelete(mFastDetectorMatcher);
    cout <<"StiStEventFiller::~StiStEventFiller()"<<endl;
 }
-
-//Helper functor, gotta live some place else, just a temp. test of StiKalmanTrack::stHits() method
-//_____________________________________________________________________________
-struct StreamStHit
-{
-  void operator()(const StHit* h) 
-  {
-    //cout << "DetectorId: " << (unsigned long) h->detector();
-    if (const StTpcHit* hit = dynamic_cast<const StTpcHit*>(h)) 
-      {
-	cout <<hit->position() << " Sector: " << hit->sector() << " Padrow: " << hit->padrow() << endl;
-      }
-    else if (const StSvtHit* hit = dynamic_cast<const StSvtHit*>(h)) 
-      {
-	cout << hit->position() << " layer: " << hit->layer() << " ladder: " << hit->ladder()
-	     << " wafer: " << hit->wafer() << " barrel: " << hit->barrel() << endl;
-      }
-    else 
-      {	
-	cout << hit->position() << endl;
-      }
-  }
-};
-
 //_____________________________________________________________________________
 /*! 
   Algorithm:
@@ -616,6 +599,8 @@ struct StreamStHit
 //_____________________________________________________________________________
 void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 {
+  mFastDetectorMatcher->Clear();
+  mFastDetectorMatcher->fillArrays(e);
   //cout << "StiStEventFiller::fillEvent() -I- Started"<<endl;
   mGloPri=0;
   if (e==0 || t==0) 
@@ -631,6 +616,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   if (mUseAux) { mAux = new StiAux; e->Add(mAux);}
   mTrackStore = t;
   mTrkNodeMap.clear();  // need to reset for this event
+  mNodeTrkMap.clear();
   StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
   StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
   int errorCount=0; 
@@ -666,7 +652,9 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  // having the proper track->detectorInfo() relationship
 	  // and a valid StDetectorInfo object.
 	  //cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
-	  mTrkNodeMap.insert(map<StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
+	  StTrackNode* node = trNodeVec.back();
+	  mTrkNodeMap.insert(pair<StiKalmanTrack*,StTrackNode*> (kTrack,node) );
+	  mNodeTrkMap.insert(pair<StTrackNode*,StiKalmanTrack*> (node,kTrack) );
 	  if (trackNode->entries(global)<1)
 	    cout << "StiStEventFiller::fillEvent() -E- Track Node has no entries!! -------------------------" << endl;  
           int ibad = gTrack->bad();
@@ -776,7 +764,6 @@ void StiStEventFiller::fillEventPrimaries()
       fillPulls(kTrack,1); 
       StPrimaryTrack* pTrack = new StPrimaryTrack;
       pTrack->setKey( gTrack->key());
-
       fillTrack(pTrack,kTrack, detInfo);
       // set up relationships between objects
       detInfoVec.push_back(detInfo);
@@ -800,6 +787,8 @@ void StiStEventFiller::fillEventPrimaries()
       if (pTrack) pTrack->setImpactParameter(minDca);
 
   } // kalman track loop
+  for (mVertN=0; (vertex = mEvent->primaryVertex(mVertN));mVertN++) {vertex->setTrackNumbers();}
+
   mTrkNodeMap.clear();  // need to reset for the next event
   cout <<"StiStEventFiller::fillEventPrimaries() -I- Primaries (1):"<< fillTrackCount1<< " (2):"<< fillTrackCount2<< " no pipe node:"<<noPipe<<" with IFC:"<< ifcOK<<endl;
   cout <<"StiStEventFiller::fillEventPrimaries() -I- GOOD:"<< fillTrackCountG <<endl;
@@ -841,11 +830,11 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       if (!fistNode) fistNode = node;
       lastNode = node;
       StHit *hh = (StHit*)stiHit->stHit();
-// 	Fill StHit errors for Gene
-      FillStHitErr(hh,node);
       if (!detector) 		continue;
       if (!hh) 			continue;
       assert(detector->getGroupId()==hh->detector());
+// 	Fill StHit errors for Gene
+      FillStHitErr(hh,node);
       
       detInfo->addHit(hh,refCountIncr);
       if (!refCountIncr) 	continue;
@@ -1013,11 +1002,12 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
 ///       = -x11 -> Short track pointing to EEMC
 
 void StiStEventFiller::fillFlags(StTrack* gTrack) {
+  Int_t flag = 0;
   if (gTrack->type()==global) {
-    gTrack->setFlag(101); //change: make sure flag is ok
+    flag = 101; //change: make sure flag is ok
   }
   else if (gTrack->type()==primary) {
-    gTrack->setFlag(301);
+    flag = 301;
   }
   StTrackFitTraits& fitTrait = gTrack->fitTraits();
   //int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
@@ -1037,10 +1027,10 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
   // use the "svt only" case.)
   if (svtFitPoints+ssdFitPoints+pxlFitPoints+istFitPoints>0) {
       if (gTrack->type()==global) {
-	  gTrack->setFlag(501); //svt+tpc
+	flag = 501; //svt+tpc
       }
       else if (gTrack->type()==primary) {
-	  gTrack->setFlag(601); //svt+tpc+primary
+	flag = 601;  //svt+tpc+primary
       }
   }
   const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
@@ -1050,93 +1040,77 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
     Int_t NoFtpcEastId   = dinfo->numberOfPoints(kFtpcEastId);
     // Check that it could be TPC pile-up track, i.e. in the same half TPC (West East) 
     // there are more than 2 hits with wrong Z -position
-    Int_t flag = TMath::Abs(gTrack->flag());
     if (NoTpcFitPoints >= 11) {
       const StPtrVecHit& hits = dinfo->hits(kTpcId);
       Int_t Nhits = hits.size();
       Int_t NoWrongSignZ = 0;
+      Int_t NoPositiveSignZ = 0;
+      Int_t NoNegativeSignZ = 0;
+      Int_t NoPromptHits = 0;
       for (Int_t i = 0; i < Nhits; i++) {
 	const StTpcHit *hit = (StTpcHit *) hits[i];
 	if ((hit->position().z() < -1.0 && hit->sector() <= 12) ||
 	    (hit->position().z() >  1.0 && hit->sector() >  12)) NoWrongSignZ++;
+	else {
+	  if (hit->position().z() < -1.0) NoNegativeSignZ++;
+	  if (hit->position().z() >  1.0) NoPositiveSignZ++;
+	}
+	if (TMath::Abs(209.4 - TMath::Abs(hit->position().z())) < 3.0) NoPromptHits++;
       }
-      if (NoWrongSignZ >= 2) 
-	gTrack->setFlag((flag%1000) + 1000); // +1000
+      if (NoWrongSignZ >= 2)                             gTrack->setPostCrossingTrack();
+      else {
+	if (NoPromptHits == 1)                           gTrack->setPromptTrack();
+	if (NoPositiveSignZ >= 2 && NoNegativeSignZ >=2) gTrack->setMembraneCrossingTrack();
+      }
     }
     if (NoTpcFitPoints < 11 && NoFtpcWestId < 5 && NoFtpcEastId < 5) { 
       // hadrcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx
       //keep most sig. digit, set last digit to 2, and set negative sign
-      gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
+      gTrack->setRejected();
+      flag = - ((flag/100)*100 + 2); // -x02 
       if (gTrack->geometry()) {
 	const StThreeVectorF &momentum = gTrack->geometry()->momentum();
 	if (momentum.pseudoRapidity() > 0.5) {
 	  const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
 	  const StPtrVecHit& hits = dinfo->hits();
 	  Int_t Nhits = hits.size();
+	  Bool_t ShortTrack2EMC = kFALSE;
 	  for (Int_t i = 0; i < Nhits; i++) {
 	    const StHit *hit = hits[i];
 	    if (hit->position().z() > 150.0) {
-	      gTrack->setFlag((((flag/100)*100)+11)); // +x11 
-	      return;
+	      ShortTrack2EMC = kTRUE;
+	      break;
 	    }
+	  }
+	  if (ShortTrack2EMC) {
+	    gTrack->setShortTrack2EMC();
+	    flag = (TMath::Abs(flag)/100)*100+11; ; // +x11 
 	  }
 	}
       }
     }
-#if 0
-    // Propagate hit IdTruth info to track one.
-    struct trackPing {
-      Int_t  Id;
-      Int_t nPings;
-      Int_t nPingsTpc;
-      Int_t nPingsSvt;
-      Int_t nPingsSsd;
-      Int_t nPingsFtpc;
-      Int_t noPingsUnk;
-    };
-    static trackPing candidates[50];
-    memset(candidates,0,sizeof(candidates));
-    UInt_t N = 0;
-    const StPtrVecHit &hits = dinfo->hits();
-    Int_t Nhits = hits.size();
-    Int_t NDhits = 0;
-    for (Int_t i = 0; i < Nhits; i++) {
-      const StHit *hit = hits[i];
-      if (! hit) continue;
-      if (! hit->detector()) continue;
-      NDhits++;
-      if (! hit->idTruth()) continue;
-      Int_t J = -1;
-      for (UInt_t j = 0; j < N; j++) if (candidates[j].Id == hit->idTruth()) {J = j; break;}
-      if (J < 0) {J = N; N++;}
-      candidates[J].Id = hit->idTruth();
-      candidates[J].nPings++;
-      switch (hit->detector()) {
-      case kTpcId: candidates[J].nPingsTpc++; break;
-      case kSvtId: candidates[J].nPingsSvt++; break;
-      case kSsdId: candidates[J].nPingsSsd++; break;
-      case kFtpcWestId:
-      case kFtpcEastId: candidates[J].nPingsFtpc++; break;
-      default: candidates[J].noPingsUnk++;
-      }
-    }
-    Int_t dominant = -1;
-    Int_t J = -1;
-    for (UInt_t j = 0; j < N; j++) if (candidates[j].nPings > dominant) 
-      {dominant = candidates[j].nPings; J = j;}
-    if (J > -1 && dominant > 2) {
-      Int_t IdTruth = candidates[J].Id;
-      Int_t QA      = (100*dominant)/NDhits;
-      static Int_t MaxG2tTracks = 100000;
-      if (IdTruth <= 0 || IdTruth > MaxG2tTracks  || QA > 100) {
-	cout << "Illegal IdTruth: " << IdTruth << "/" << QA << endl;
-      } else {
-	gTrack->setIdTruth(IdTruth,QA);
-	Int_t IdVx = StG2TrackVertexMap::instance()->IdVertex(IdTruth);
-	gTrack->setIdParentVx(IdVx);
-      }
-    }
-#endif
+  }
+  
+  gTrack->setFlag( flag);
+  // Match with fast detectors
+  StPhysicalHelixD hlx = gTrack->outerGeometry()->helix();
+  TrackData t;
+  mFastDetectorMatcher->matchTrack2FastDetectors(&hlx,&t);
+  if (t.btofBin > 0) {
+    if (t.mBtof > 0) gTrack->setToFMatched();
+    else             gTrack->setToFNotMatched();
+  }
+  if (t.ctbBin > 0) {
+    if (t.mCtb  > 0) gTrack->setCtbMatched();
+    else             gTrack->setCtbNotMatched();
+  }
+  if (t.bemcBin > 0) {
+    if (t.mBemc  > 0) gTrack->setBemcMatched();
+    else              gTrack->setBemcNotMatched();
+  }
+  if (t.eemcBin > 0) {
+    if (t.mEemc  > 0) gTrack->setEemcMatched();
+    else              gTrack->setEemcNotMatched();
   }
 }
 //_____________________________________________________________________________

@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.24 2006/12/18 01:30:52 perev Exp $
+ * $Id: StiStEventFiller.h,v 2.25 2012/05/07 14:56:14 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.25  2012/05/07 14:56:14  fisyak
+ * Add StKFVertexMaker
+ *
  * Revision 2.24  2006/12/18 01:30:52  perev
  * fillPulls reorganized
  *
@@ -161,7 +164,7 @@ class StiKalmanTrack;
 class StHelix;
 class StHelixModel;
 #include "StPhysicalHelixD.hh"
-
+class StTrack2FastDetectorMatcher;
 /*! \class StiStEventFiller
     StiStEventFiller is a utilitity class meant to properly convert StiKalmanTrack
     objects into StTrack (Global/Primary) objects and hang these on the StEvent
@@ -177,6 +180,7 @@ public:
     StiStEventFiller();
     void setUseAux(int aux=1)		{mUseAux=aux;}
     virtual ~StiStEventFiller();
+    static StiStEventFiller *instance() {return fgStiStEventFiller;}
     void fillEvent(StEvent* e, StiTrackContainer* t);
     void fillEventPrimaries();
     void fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanTrack* kTrack,bool refCountIncr);
@@ -189,6 +193,8 @@ public:
     double impactParameter(StiKalmanTrack* kTrack, StThreeVectorD &vertexPosition);
     double impactParameter(StTrack* strack, StThreeVectorD &vertexPosition);
     void setPullEvent(StiPullEvent *pe) 		{mPullEvent=pe;}
+ static map<StiKalmanTrack*, StTrackNode*> *Track2NodeMap() {return &mTrkNodeMap;}
+ static map<StTrackNode*, StiKalmanTrack*> *Node2TrackMap() {return &mNodeTrkMap;}
 private:
  void fillResHack(StHit *hh,const StiHit *stiHit, const StiKalmanTrackNode *node);
  void fillPulls  (StHit *hh,const StiHit *stiHit
@@ -206,14 +212,14 @@ private:
     int mUseAux;
     int mGloPri;		//0=filing global,1=filing primary
     int mTrackNumber;
-    map<StiKalmanTrack*, StTrackNode*> mTrkNodeMap;
-
+    static map<StiKalmanTrack*, StTrackNode*> mTrkNodeMap;
+    static map<StTrackNode*, StiKalmanTrack*> mNodeTrkMap;
     unsigned short mStiEncoded;
     //helix parameters
     StThreeVectorD *originD;
     StPhysicalHelixD * physicalHelix;
-
-
+    StTrack2FastDetectorMatcher *mFastDetectorMatcher;
+    static StiStEventFiller* fgStiStEventFiller;
 };
 
 #endif
