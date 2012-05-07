@@ -17,11 +17,14 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.h,v 2.9 2012/03/22 23:45:16 fisyak Exp $
+ * $Id: StAnalysisMaker.h,v 2.10 2012/05/07 13:59:44 fisyak Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.h,v $
+ * Revision 2.10  2012/05/07 13:59:44  fisyak
+ * enhance print out for primary vertixes
+ *
  * Revision 2.9  2012/03/22 23:45:16  fisyak
  * Compress output for Event summary
  *
@@ -68,12 +71,8 @@
 //
 //  Include files. StMaker.h is needed since your maker
 //  inherits from StMaker. 
-//  <string> contains the STL string class. It's a system
-//  header therefore it is enclosed in <> and not in double
-//  quotes.
-//
 #include "StMaker.h"
-#include <string>
+#include "TString.h"
 
 //
 //  Forward declarations.
@@ -90,68 +89,57 @@ class StEvent;
 class StTrack;
 
 //
-//  On some systems (e.g. Sun) the STL is contained in
-//  namespace 'std'. We have to tell the compiler where
-//  to look for string. Since not all compilers
-//  use namespaces we have to protects is by using the
-//  ST_NO_NAMESPACES macro which is automatically set
-//  (or unset) when compiling the code with 'cons'.
-//
-#ifndef ST_NO_NAMESPACES
-using std::string;
-#endif
-
-//
 //  The class declaration. Every maker has to
 //  inherit from StMaker.
 //
 class StAnalysisMaker : public StMaker {
 public:
-
-    StAnalysisMaker(const Char_t *name="analysis");     // constructor
-    ~StAnalysisMaker() {}                               // destructor
-    
-    Int_t  Make();                      // invoked for every event
-    Int_t  Finish();                    // called once at the end
-    static void PrintStEvent(Int_t k = 0, Int_t minFitPts = 0);
-    static void PrintTpcHits(Int_t sector = 0, Int_t row = 0, Bool_t plot = kFALSE, Int_t IdTruth=-1);
-    static void PrintSvtHits();
-    static void PrintSsdHits();
-    static void PrintRnDHits();
-    virtual const char *GetCVS() const {
-      static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.9 2012/03/22 23:45:16 fisyak Exp $ built "__DATE__" "__TIME__ ; 
-      return cvs;
-    }
-
-private:
-    //
-    //  Add your data member and new methods here.
-    //  The "//!" means that rootcint is not adding
-    //  the data member to the streamer. Don't worry
-    //  if you don't know what this means.
-    //  In general it is a good idea in analysis makers
-    //  to always add the //! after a member.
-    //
-
-    //
-    //  Methods (== member functions)
-    //  Remember: these are just examples!
-    //
-    Bool_t accept(StEvent*);            // this method serves as an event filter
-    Bool_t accept(StTrack*);            // and this is used to select tracks
-
-    //
-    //  Data members
-    //  Note, that it is recommended to start all member names with
-    //  an 'm'. This makes it easier to read the code later.
-    //
-    Int_t        mEventCounter;  //!
-
-    //
-    //  This is needed to make your maker known to root4star.
-    //  It must be always the last statement in the class.
-    //  Note that this is a macro, that's why the ';' is missing.
-    //
-    ClassDef(StAnalysisMaker,0)
+  
+  StAnalysisMaker(const Char_t *name="analysis");     // constructor
+  ~StAnalysisMaker() {}                               // destructor
+  
+  Int_t  Make();                      // invoked for every event
+  Int_t  Finish();                    // called once at the end
+  static void summarizeEvent(StEvent *event=0, Int_t mEventCounter=0);
+  static void PrintStEvent(TString opt="vpg");
+  static void PrintTpcHits(Int_t sector = 0, Int_t row = 0, Bool_t plot = kFALSE, Int_t IdTruth=-1);
+  static void PrintSvtHits();
+  static void PrintSsdHits();
+  static void PrintRnDHits();
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.10 2012/05/07 13:59:44 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
+  
+ private:
+  //
+  //  Add your data member and new methods here.
+  //  The "//!" means that rootcint is not adding
+  //  the data member to the streamer. Don't worry
+  //  if you don't know what this means.
+  //  In general it is a good idea in analysis makers
+  //  to always add the //! after a member.
+  //
+  
+  //
+  //  Methods (== member functions)
+  //  Remember: these are just examples!
+  //
+  Bool_t accept(StEvent*);            // this method serves as an event filter
+  Bool_t accept(StTrack*);            // and this is used to select tracks
+  
+  //
+  //  Data members
+  //  Note, that it is recommended to start all member names with
+  //  an 'm'. This makes it easier to read the code later.
+  //
+  Int_t        mEventCounter;  //!
+  
+  //
+  //  This is needed to make your maker known to root4star.
+  //  It must be always the last statement in the class.
+  //  Note that this is a macro, that's why the ';' is missing.
+  //
+  ClassDef(StAnalysisMaker,0)
 };
 #endif

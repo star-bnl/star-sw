@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.16 2012/03/22 23:45:16 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.17 2012/05/07 13:59:44 fisyak Exp $
  *
  */
 
@@ -54,11 +54,6 @@
 //  You most likely will not need them but they can serve
 //  as an example for your own functions.
 //
-void summarizeEvent(StEvent&, const int&);
-long countPrimaryTracks(StEvent&);
-long countPrimaryPions(StEvent&);
-
-
 //
 //  This is needed to make your maker work in root4star.
 //  It can be place anywhere in the file. Note that this
@@ -105,7 +100,7 @@ Int_t StAnalysisMaker::Make() {
     //  QA folks use this maker for their QA runs.
     //  You do not need this.
     //  
-    summarizeEvent(*event, mEventCounter); 
+    summarizeEvent(event, mEventCounter); 
 
     //
     //  See if this event survives the event filter.
@@ -140,84 +135,41 @@ bool StAnalysisMaker::accept(StTrack* track)
     return track && track->flag() >= 0;
 }
 //________________________________________________________________________________
-void StAnalysisMaker::PrintStEvent(Int_t k, Int_t minFitPts) {
-  static const Char_t *trackType[] = {"global", "primary", "tpt", "secondary", "estGlobal", "estPrimary"};
+void StAnalysisMaker::PrintStEvent(TString opt) {
+  // opt = vpg => "v" print vertex, "p" and primary tracks, "g" print global tracks 
   StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
   if (!pEvent) return;
   cout << "Event: Run "<< pEvent->runId() << " Event No: " << pEvent->id() << endl;
-  cout << "Vertex Positions" << endl;
   UInt_t NpVX = pEvent->numberOfPrimaryVertices();
-  if (NpVX ) {
-    for (UInt_t i = 0; i < NpVX; i++) {
-      const StPrimaryVertex *vx = pEvent->primaryVertex(i);
-      const StThreeVectorF &position = vx->position();
-      cout << Form("Vertex: %i Position: %8.3f %8.3f %8.3f type: %3i Fl: %3i IdT: %4i Q: %4i",
-		   i,position.x(),position.y(),position.z(),
-		   vx->type(),vx->flag(), vx->idTruth(), vx->qaTruth()) << endl;
+  if (NpVX) {
+    if (opt.Contains("v",TString::kIgnoreCase)) {
+      for (UInt_t i = 0; i < NpVX; i++) {
+	const StPrimaryVertex *vx = pEvent->primaryVertex(i);
+	cout << Form("Vertex: %3i ",i) << *vx << endl;
+	if (opt.Contains("p",TString::kIgnoreCase)) {
+	  UInt_t nDaughters = vx->numberOfDaughters();
+	  for (UInt_t j = 0; j < nDaughters; j++) {
+	    StPrimaryTrack* pTrack = (StPrimaryTrack*) vx->daughter(j);
+	    if (! pTrack) continue;
+	    cout << *pTrack << endl;
+	  }
+	}
+      }
     }
   } else {
     cout << "Event: Vertex Not Found" << endl;
   }
-  
-  StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
-  UInt_t nTracks = trackNode.size();
-  StTrackNode *node = 0;
-  Int_t line = 0;
-  for (UInt_t  i=0; i < nTracks; i++) {
-    node = trackNode[i]; if (!node) continue;
-    StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
-    if (! gTrack->detectorInfo()) {cout << "Missing detectorInfo for track " << i << " ==========" << endl;}
-    const StDcaGeometry* dca    = gTrack->dcaGeometry();
-    StPrimaryTrack *pTrack = 	static_cast<StPrimaryTrack*>(node->track(primary));
-    for (int l = 0; l < 2; l++) {
-      StTrack        *track = 0;
-      if (k%10 > 0 && k%10 != l+1) continue;
-      if (l == global)  track = gTrack;
-      if (l == primary) track = pTrack;
-      if (track) {
-	if (minFitPts > 0 && track->fitTraits().numberOfFitPoints() < minFitPts) continue;
-	if (dca && l == global) {
-	  if (! line) {
-	    cout << "track# type   flag" << endl;
-	    line++;
-	  }
-	  cout << *dca;
-	  Double_t length = track->length();
-	  if (length > 9999.) length = 9999.;
-	  cout << Form(" L %8.3f", length);
-	  cout << Form(" NF %4d chi2 %8.3f NP %4d Id: %4i Q: %4i",
-		       track->fitTraits().numberOfFitPoints(), track->fitTraits().chi2(), track->numberOfPossiblePoints(),
-		       track->idTruth(), track->qaTruth());
-	} else 	{
-	  //                      1234567890123456781234567812345678 12345678 12345678 12345678   123 12345678 12345678 123 12345678 
-	  if (! line) {
-	    cout << "track# type   flag       z     mom     pT     eta     phi  c      pX      pY      pZ  "
-		 << "Max  length     dca  NFP    chi2 NP BEMC" << endl; //FhitXYZ" << endl;
-	    line++;
-	  }
-	  Short_t charge = track->geometry()->charge();
-	  StThreeVectorD g3 = track->geometry()->momentum(); // p of global track
-	  cout << Form("%4d%10s%4d%8.3f%8.3f%8.3f%8.3f%8.2f",
-		       i,trackType[l],track->flag(),track->geometry()->origin().z(),
-		       g3.mag(),g3.perp(),g3.pseudoRapidity(),180/TMath::Pi()*g3.phi());
-	  cout << Form(" %2d%8.3f%8.3f%8.3f",charge,g3.x(),g3.y(),g3.z());
-	  Double_t length = track->length();
-	  if (length > 9999.) length = 9999.;
-	  cout << Form(" %4d%8.3f%8.3f", track->numberOfPossiblePoints(),length,track->impactParameter());
-	  cout << Form(" %4d%8.3f%4d",track->fitTraits().numberOfFitPoints(), track->fitTraits().chi2(), track->detectorInfo()->numberOfPoints());
-	  if (track->vertex())
-	    cout << Form(" B%3i",((StPrimaryVertex *)track->vertex())->numMatchesWithBEMC());
-	}
-#if 0
-      cout << " Svt p/h/f" << track->numberOfPossiblePoints(kSvtId) 
-	   << "/" << track->detectorInfo()->hits(kSvtId).size()
-	   << "/" << track->fitTraits().numberOfFitPoints(kSvtId);
-#endif
-      cout << endl;
-      }
-    } // l
-    //    if (i > 5) break;
-  }  
+  if (opt.Contains("g",TString::kIgnoreCase)) {
+    StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
+    UInt_t nTracks = trackNode.size();
+    StTrackNode *node = 0;
+    cout << " Global tracks " << endl;
+    for (UInt_t  i=0; i < nTracks; i++) {
+      node = trackNode[i]; if (!node) continue;
+      StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
+      cout << *gTrack << endl;
+    } 
+  }
 }
 //________________________________________________________________________________
 void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Bool_t plot, Int_t IdTruth) {
@@ -389,8 +341,303 @@ void StAnalysisMaker::PrintRnDHits() {
     }
   }
 }
+//________________________________________________________________________________
+void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
+  if (! event) event = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  static const UInt_t NoFitPointCutForGoodTrack = StVertex::NoFitPointCutForGoodTrack();
+  LOG_QA << "StAnalysisMaker,  Reading Event: " << mEventCounter
+	 << "  Type: " << event->type()
+	 << "  Run: " << event->runId() 
+	 << "  EventId: " << event->id() <<   endm;
+  
+  StSPtrVecTrackNode& trackNode = event->trackNodes();
+  UInt_t nTracks = trackNode.size();
+  StTrackNode *node = 0;
+  UInt_t nGoodTracks = 0;
+  UInt_t nGoodFtpcTracks = 0;
+  UInt_t nBeamBackTracks = 0;
+  UInt_t nGoodBeamBackTracks = 0;
+  UInt_t nShortTrackForEEmc = 0;
+  UInt_t pcTracks = 0; // PostCrossingTrack 
+  UInt_t promptTracks = 0; // tracks with prompt hits
+  UInt_t crossMembrane = 0;
+  UInt_t nToFMatched   = 0;
+  UInt_t nEmcMatched   = 0;
+  StGlobalTrack* gTrack = 0;
+  for (UInt_t i=0; i < nTracks; i++) {
+    node = trackNode[i]; if (!node) continue;
+    gTrack = static_cast<StGlobalTrack*>(node->track(global));
+    if (! gTrack) continue;
+    if (gTrack->flag() < 0) continue;
+    if (TMath::Abs(gTrack->flag())%100 == 11) nShortTrackForEEmc++;
+    if (gTrack->flag()/100 == 9) {
+      nBeamBackTracks++;
+      if (! gTrack->bad()) nGoodBeamBackTracks++;
+    }
+    if (gTrack->flag() >= 700 && gTrack->flag() < 900) nGoodFtpcTracks++;
+    if (gTrack->isPostXTrack())                 pcTracks++;
+    if (gTrack->isPromptTrack())                       promptTracks++;
+    if (gTrack->isMembraneCrossingTrack())             crossMembrane++;
+    if (gTrack->isToFMatched())                        nToFMatched++;
+    if (gTrack->isBemcMatched() || 
+	gTrack->isEemcMatched() )                      nEmcMatched++;
+    if (gTrack->fitTraits().numberOfFitPoints() <  NoFitPointCutForGoodTrack) continue;
+    nGoodTracks++;
+  }
+  LOG_QA << "# track nodes:   \t"
+	 <<  nTracks << ":\tgood globals with NFitP>="<< NoFitPointCutForGoodTrack << ":\t" << nGoodTracks 
+	 << ":\tFtpc tracks :\t" << nGoodFtpcTracks << endm;
+  LOG_QA  << "BeamBack tracks:\t" << nBeamBackTracks << ":\tgood ones:\t" << nGoodBeamBackTracks
+	  << ":\tShort tracks pointing to EEMC :\t" << nShortTrackForEEmc << endm;
+  LOG_QA  << "post (C)rossing tracks :" << pcTracks << ":\t(P)rompt:" << promptTracks << ":\t(X) membrane :" << crossMembrane
+	  << ":\t(T)of/ctb matches:" << nToFMatched << ":\t(E)mc matches: " << nEmcMatched
+	  << endm;
+  // Report for jobTracking Db        
+  if (nTracks) {
+    //        LOG_QA << "SequenceValue=" << mEventCounter 
+    LOG_QA 
+      << "StageID='3'"
+      << ",MessageKey=" << "'nodes all'" 
+      << ",MessageValue='" <<  nTracks 
+      << "'" << endm;
+  }
+  
+  if (nGoodTracks) { 
+    //        LOG_QA << "SequenceValue=" << mEventCounter 
+    LOG_QA 
+      << "StageID='3'"
+      << ",MessageKey=" << "'nodes good'" 
+      << ",MessageValue='" << nGoodTracks 
+      << "'" << endm;
+  }
+  
+  StPrimaryVertex *pVertex=0;
+  for (Int_t ipr=0;(pVertex=event->primaryVertex(ipr));ipr++) {
+    LOG_QA << Form("#V[%3i]",ipr) << *pVertex << endm;
+    // Report for jobTracking Db   (non-zero entry only)    
+    if (pVertex->numberOfDaughters()) {
+      //            LOG_QA << "SequenceValue=" << mEventCounter
+      LOG_QA 
+	<< "StageID='3'"
+	<< ",MessageKey=" << "'primary all'"  
+	<< ",MessageValue='" <<  pVertex->numberOfDaughters()
+	<< "'" << endm;
+    }
+    if (pVertex->numberOfGoodTracks()) {
+      //            LOG_QA << "SequenceValue=" << mEventCounter
+      LOG_QA 
+	<< "StageID='3'"
+	<< ",MessageKey=" << "'primary good'" 
+	<< ",MessageValue='" << pVertex->numberOfGoodTracks()
+	<< "'" << endm;
+    }
+  }// end prim vtx    
+  if (event->v0Vertices()  .size()) {
+    LOG_QA << "# V0 vertices:       "
+	 << event->v0Vertices().size() << endm;
+  }
+  if (event->xiVertices()  .size()) {
+    LOG_QA << "# Xi vertices:       "
+	   << event->xiVertices().size() << endm;
+  }
+  if (event->kinkVertices().size()) {
+    LOG_QA << "# Kink vertices:       "
+	 << event->kinkVertices().size() << endm;
+  }
+  // Report for jobTracking Db   (non-zero entry only)      
+  if (event->v0Vertices()  .size()) {
+    //        LOG_QA << "SequenceValue=" << mEventCounter 
+    LOG_QA 
+      << "StageID='3'"
+      << ",MessageKey=" << "'V0Vertices', " << "MessageValue=" << event->v0Vertices()  .size() << endm;
+  }
+  if (event->xiVertices()  .size()) {
+    //        LOG_QA << "SequenceValue=" << mEventCounter 
+    LOG_QA 
+      << "StageID='3'"
+      << ",MessageKey=" << "'XiVertices', " << "MessageValue="<< event->xiVertices()  .size()  << endm;
+  }
+  
+  if (event->kinkVertices().size()) {
+    //        LOG_QA << "SequenceValue=" << mEventCounter 
+    LOG_QA 
+      << "StageID='3'"
+      << ",MessageKey=" << "'KinkVertices'," << "MessageValue="<< event->kinkVertices().size() << endm;
+  }
+  
+  UInt_t TotalNoOfTpcHits = 0, noBadTpcHits = 0, noTpcHitsUsedInFit = 0;
+  StTpcHitCollection* TpcHitCollection = event->tpcHitCollection();
+  if (TpcHitCollection) {
+    UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
+    for (UInt_t i = 0; i< numberOfSectors; i++) {
+      StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
+      if (sectorCollection) {
+	Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
+	for (Int_t j = 0; j< numberOfPadrows; j++) {
+	  StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
+	  if (rowCollection) {
+	    StSPtrVecTpcHit &hits = rowCollection->hits();
+	    UInt_t NoHits = hits.size();
+	    for (UInt_t k = 0; k < NoHits; k++) {
+	      StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
+	      if (tpcHit) {
+		TotalNoOfTpcHits++;
+		if ( tpcHit->flag()) noBadTpcHits++;
+		if (tpcHit->usedInFit()) noTpcHitsUsedInFit++;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+  if (TotalNoOfTpcHits) {
+    LOG_QA   << "# TPC hits:          " << TotalNoOfTpcHits 
+	     << ":\tBad ones (! flag):     " << noBadTpcHits 
+	     << ":\tUsed in Fit:      " << noTpcHitsUsedInFit << endm;
+  }
+  UInt_t TotalNoOfSvtHits = 0, noBadSvtHits = 0, noSvtHitsUsedInFit = 0;
+  StSvtHitCollection* svthits = event->svtHitCollection();
+  if (svthits) {
+    StSvtHit* hit;
+    for (UInt_t barrel=0; barrel<svthits->numberOfBarrels(); ++barrel) {
+      StSvtBarrelHitCollection* barrelhits = svthits->barrel(barrel);
+      if (!barrelhits) continue;
+      for (UInt_t ladder=0; ladder<barrelhits->numberOfLadders(); ++ladder) {
+	StSvtLadderHitCollection* ladderhits = barrelhits->ladder(ladder);
+	if (!ladderhits) continue;
+	for (UInt_t wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
+	  StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer);
+	  if (!waferhits) continue;
+	  const StSPtrVecSvtHit& hits = waferhits->hits();
+	  for (const_StSvtHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	    hit = static_cast<StSvtHit*>(*it);
+	    if (!hit) continue;
+	    TotalNoOfSvtHits++;
+	    if (hit->flag() >3)   noBadSvtHits++;
+	    if (hit->usedInFit()) noSvtHitsUsedInFit++;
+	  }
+	}
+      }
+    }
+  }
+  if (TotalNoOfSvtHits) {
+    LOG_QA << "# SVT hits:          " << TotalNoOfSvtHits 
+	   << ":\tBad ones(flag >3): " << noBadSvtHits 
+	   << ":\tUsed in Fit:      " << noSvtHitsUsedInFit << endm;
+  }
+  UInt_t TotalNoOfSsdHits = 0, noBadSsdHits = 0, noSsdHitsUsedInFit = 0;
+  StSsdHitCollection* ssdhits = event->ssdHitCollection();
+  if (ssdhits) {
+    StSsdHit* hit;
+    for (UInt_t ladder=0; ladder<ssdhits->numberOfLadders(); ++ladder) {
+      StSsdLadderHitCollection* ladderhits = ssdhits->ladder(ladder);
+      if (!ladderhits) continue;
+      for (UInt_t wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
+	StSsdWaferHitCollection* waferhits = ladderhits->wafer(wafer);
+	if (!waferhits) continue;
+	const StSPtrVecSsdHit& hits = waferhits->hits();
+	for (const_StSsdHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	  hit = static_cast<StSsdHit*>(*it);
+	  if (!hit) continue;
+	  TotalNoOfSsdHits++;
+	  if (hit->flag() >3) noBadSsdHits++;
+	  if (hit->usedInFit()) noSsdHitsUsedInFit++;
+	}
+      }
+    }
+  }
+  if (TotalNoOfSsdHits) {
+    LOG_QA << "# SSD hits:          " << TotalNoOfSsdHits 
+	   << ":\tBad ones(flag>3): " << noBadSsdHits 
+	   << ":\tUsed in Fit:      " << noSsdHitsUsedInFit << endm;
+  }
+  UInt_t TotalNoOfFtpcHits = 0, noBadFtpcHits = 0, noFtpcHitsUsedInFit = 0;
+  StFtpcHitCollection* ftpchits = event->ftpcHitCollection();
+  if (ftpchits) {
+    StFtpcHit* hit;
+    for (UInt_t plane=0; plane<ftpchits->numberOfPlanes(); ++plane) {
+      StFtpcPlaneHitCollection* planehits = ftpchits->plane(plane);
+      if (!planehits) continue;
+      for (UInt_t sector=0; sector<planehits->numberOfSectors(); ++sector) {
+	StFtpcSectorHitCollection* sectorhits = planehits->sector(sector);
+	if (!sectorhits) continue;
+	const StSPtrVecFtpcHit& hits = sectorhits->hits();
+	for (const_StFtpcHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	  hit = static_cast<StFtpcHit*>(*it);
+	  if (!hit) continue;
+	  TotalNoOfFtpcHits++;
+	  /*
+	    bit0:unfolded
+	    bit1:unfold failed
+	    bit2:saturated
+	    bit3:bad shape
+	    bit4:cut off
+	    bit5:tracked
+	    bit6:global coords
+	    bit7:don't use for tracking
+	    
+	    I assume good hits have bit 0 and 5 (if included on a track) on
+	    
+	    Joern and Marcus - is this correct?
+	    
+	    Janet
+	  */
+	  if (! ( hit->flag() & 1 || hit->flag() & (1 << 5))) noBadFtpcHits++;
+	  else if (hit->flag() & (1 << 5))  noFtpcHitsUsedInFit++;
+	}
+      }
+    }
+  }
+  if (TotalNoOfFtpcHits) {
+    LOG_QA << "# FTPC hits:         " << TotalNoOfFtpcHits 
+	   << ":\tBad ones(!bit0): " << noBadFtpcHits 
+	   << ":\tUsed in Fit:      " << noFtpcHitsUsedInFit << endm;
+  }
+  StRnDHitCollection* rndhits = event->rndHitCollection();
+  if (rndhits) {
+    StSPtrVecRnDHit&  hits = rndhits->hits();
+    Int_t NoHits =  rndhits->numberOfHits();
+    if (NoHits) {
+      struct NoHits_t {
+	StDetectorId  kId;
+	const Char_t *Name;
+	Int_t         TotalNoOfHits;
+	Int_t         noBadHits;
+	Int_t         noHitsUsedInFit;
+      };
+      const Int_t NHtypes = 4;
+      NoHits_t Hits[7] = {
+	{kPxlId, "Hft", 0, 0, 0},
+	{kIstId, "Ist", 0, 0, 0},           
+	{kFgtId, "Fgt", 0, 0, 0},           
+	{kUnknownId,"UnKnown", 0, 0, 0}
+      };           
+      StRnDHit* hit;
+      for (Int_t i = 0; i < NoHits; i++) {
+	hit = hits[i];
+	Int_t j = 0;
+	for (j = 0; j < NHtypes-1; j++) if ( Hits[j].kId == hit->detector()) break;
+	Hits[j].TotalNoOfHits++;
+	if (hit->flag())  Hits[j].noBadHits++;
+	if (hit->usedInFit()) Hits[j].noHitsUsedInFit++;
+      }
+      for (Int_t j = 0; j < NHtypes; j++) {
+	if (Hits[j].TotalNoOfHits) {
+	  LOG_QA << "# " << Hits[j].Name << " hits:         " << Hits[j].TotalNoOfHits
+		 << ":\tBad ones: " << Hits[j].noBadHits
+		 << ":\tUsed in Fit:      " << Hits[j].noHitsUsedInFit << endm;
+	}
+      }
+    }
+  }
+}
+//________________________________________________________________________________
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.17  2012/05/07 13:59:44  fisyak
+ * enhance print out for primary vertixes
+ *
  * Revision 2.16  2012/03/22 23:45:16  fisyak
  * Compress output for Event summary
  *
