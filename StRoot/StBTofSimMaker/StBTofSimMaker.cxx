@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.5 2011/02/03 19:01:01 geurts Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.6 2012/05/07 14:16:40 fisyak Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.cxx,v $
+ * Revision 1.6  2012/05/07 14:16:40  fisyak
+ * Write hit to StEvent, set kBTofId for hit
+ *
  * Revision 1.5  2011/02/03 19:01:01  geurts
  * Introduce option to switch writing simulated hits to StEvent. Default behavior is OFF.
  *
@@ -78,7 +81,7 @@ StBTofSimMaker::StBTofSimMaker(const char *name):StMaker(name)
 	mBookHisto=kFALSE;// histograms 
 	mSlow=kTRUE;
 	mCellXtalk=kTRUE;
-	mWriteStEvent=kFALSE;
+	mWriteStEvent=kTRUE;
 	mDaqMap=0;
 	Reset();
 
@@ -634,6 +637,7 @@ Int_t StBTofSimMaker::fillEvent()
 
 	    Float_t mcTof=aMcBTofHit->tof()/1000.;//from picoseconds to nanoseconds
 
+	    aBTofHit.setHardwarePosition(kBTofId);
 	    aBTofHit.setTray((Int_t)aMcBTofHit->tray());
 	    aBTofHit.setModule((unsigned char)aMcBTofHit->module());
 	    aBTofHit.setCell((Int_t)aMcBTofHit->cell());
