@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.105 2011/10/17 00:19:13 fisyak Exp $
+ * $Id: StMuDstMaker.cxx,v 1.106 2012/05/07 14:47:06 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -1206,7 +1206,7 @@ void StMuDstMaker::fillVertices(StEvent* ev) {
   for (Int_t i_vtx=0; i_vtx < n_vtx; i_vtx++) {
     const StPrimaryVertex *vtx=ev->primaryVertex(i_vtx);
     addType( mArrays[muPrimaryVertex], vtx, typeOfVertex );
-    mVtxList.AddAt(ev->primaryVertex(i_vtx),i_vtx);
+    mVtxList.AddAtAndExpand(ev->primaryVertex(i_vtx),i_vtx);
   }
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
@@ -1635,6 +1635,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.106  2012/05/07 14:47:06  fisyak
+ * Add handles for track to fast detector matching
+ *
  * Revision 1.105  2011/10/17 00:19:13  fisyak
  * Active handing of IdTruth
  *

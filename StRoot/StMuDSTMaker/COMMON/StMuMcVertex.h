@@ -12,7 +12,7 @@ class StMuMcVertex : public TObject {
   Int_t Id()                   const {return mId;}          /* primary key */			
   Int_t NoDaughters()          const {return mNoDaughters;} /* Number of daughter tracks */	
   Int_t IsIntermedate()        const {return mIsInterm;}    /* flags intermediate vertex */	
-  Int_t Time()                 const {return mTime;}        /* GEANT vertex production time */
+  Float_t Time()               const {return mTime;}        /* GEANT vertex production time (nsec) */
   const StThreeVectorF &XyzV() const {return *&mXyzV;}      /* GEANT vertex coordinate (Cartesian) */
   Int_t IdParTrk()             const {return mIdParTrk;}
   virtual void Print(Option_t* option = "") const;          //

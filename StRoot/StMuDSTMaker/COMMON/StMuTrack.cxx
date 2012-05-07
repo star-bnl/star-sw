@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.47 2011/10/17 00:19:14 fisyak Exp $
+ * $Id: StMuTrack.cxx,v 1.48 2012/05/07 14:47:06 fisyak Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -38,7 +38,7 @@ double StMuTrack::mProbabilityPidCentrality=0;
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex *vertex, int index2Global, int index2RichSpectra, bool l3, TObjArray *vtxList) : 
-  mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), 
+  mId(0), mType(0), mFlag(0), mFlagExtension(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), 
   mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), 
   /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ 
   mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.), mIndex2Cov(-1), mIdTruth(0), mQuality(0), mIdParentVx(0)  {
@@ -48,6 +48,7 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mId = track->key();
   mType = track->type();
   mFlag = track->flag();
+  mFlagExtension = track->flagExtension();
   mTopologyMap = track->topologyMap();
   mIdTruth = track->idTruth();
   mQuality = track->qaTruth();
@@ -421,11 +422,13 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
       if (dedxPidTraits->method() == kTruncatedMeanIdentifier)  {
 	  mProbPidTraits.setdEdxTruncated( dedxPidTraits->mean() ); 
 	  mProbPidTraits.setdEdxErrorTruncated( dedxPidTraits->errorOnMean() ); 
+	  mProbPidTraits.setLog2dX( dedxPidTraits->log2dX() );
       }
       if (dedxPidTraits->method() == kLikelihoodFitIdentifier)  {
 	  mProbPidTraits.setdEdxFit( dedxPidTraits->mean() ); 
 	  mProbPidTraits.setdEdxErrorFit( dedxPidTraits->errorOnMean() ); 
 	  mProbPidTraits.setdEdxTrackLength( dedxPidTraits->length() ); 
+	  mProbPidTraits.setLog2dX( dedxPidTraits->log2dX() );
       }
   }
   if (StMuDebug::level()>=3) {
@@ -505,7 +508,7 @@ ostream&  operator<<(ostream& os, const StMuTrack& v) {
   os << Form("id:%5i fl:%5i vx:%3i p:%8.3f %8.3f %8.3f",v.id(),v.flag(),v.vertexIndex(), v.p().x(), v.p().y(), v.p().z());
   os << Form(" q:%2i eta:%6.3f phi:%6.3f pT: %6.3f",v.charge(),v.eta(),v.phi(),v.pt());
   os << Form(" DCA:%6.3f %6.3f %6.3f",v.dca().x(),v.dca().y(),v.dca().z());
-  os << Form("Total hits:%2i fitted:%2i poss:%2i",v.nHits(),v.nHitsFit(),v.nHitsPoss());
+  os << Form(" Total hits:%2i fitted:%2i poss:%2i",v.nHits(),v.nHitsFit(),v.nHitsPoss());
   os << Form(" Points F: %6.3f %6.3f %6.3f L: %6.3f %6.3f %6.3f", 
 	     v.firstPoint().x(),v.firstPoint().y(),v.firstPoint().z(),
 	     v.lastPoint().x(),v.lastPoint().y(),v.lastPoint().z());
@@ -662,6 +665,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.48  2012/05/07 14:47:06  fisyak
+ * Add handles for track to fast detector matching
+ *
  * Revision 1.47  2011/10/17 00:19:14  fisyak
  * Active handing of IdTruth
  *

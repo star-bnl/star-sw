@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuProbPidTraits.h,v 1.6 2007/07/12 19:46:19 fisyak Exp $
+ * $Id: StMuProbPidTraits.h,v 1.7 2012/05/07 14:47:06 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -34,6 +34,7 @@ public:
   double dEdxTruncated() const;                ///< returns the truncated 70% dEdx value
   double dEdxErrorTruncated() const;           ///< returns the truncated 70% dEdx resolution value
   double dEdxTrackLength() const;              ///< returns the track length in TPC used for dE/dx calculations
+  double log2dX() const { return mLog2dX;}
   double ndf() const;                          ///< returns number of degrees of freedon
   double probability(unsigned int i) const;    ///< returns the probability of the track being of particle type i
   double sum() const;                          ///< returns the sum of all probabilities
@@ -46,7 +47,7 @@ public:
   void   setdEdxTrackLength(double dedx );     ///< sets the track length in TPC used for dE/dx calculations
   void   setNdf(unsigned int);                 ///< set number of degrees of freedom
   void   setProbability(unsigned int, double); ///< set the probability for particle i
-
+  void   setLog2dX(Float_t log2dX = 1) {mLog2dX = log2dX;}
 protected:
   unsigned char mNDF; 
   float mdEdxFit;
@@ -54,9 +55,10 @@ protected:
   float mdEdxTruncated;
   float mdEdxErrorTruncated;
   float mdEdxTrackLength;
+  float mLog2dX;
   float mProbabilities[__NPARTICLES__];      ///< array holding the pid probabilities
 
-  ClassDef(StMuProbPidTraits,3)
+  ClassDef(StMuProbPidTraits,4)
 };
 
 inline double StMuProbPidTraits::dEdxFit() const {return mdEdxFit;}
@@ -84,6 +86,9 @@ inline void   StMuProbPidTraits::setNdf(unsigned int i) { mNDF = i; }
 /***************************************************************************
  *
  * $Log: StMuProbPidTraits.h,v $
+ * Revision 1.7  2012/05/07 14:47:06  fisyak
+ * Add handles for track to fast detector matching
+ *
  * Revision 1.6  2007/07/12 19:46:19  fisyak
  * Add includes for ROOT 5.16
  *

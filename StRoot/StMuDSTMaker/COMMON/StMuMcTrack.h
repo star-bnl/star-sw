@@ -1,4 +1,4 @@
-// $Id: StMuMcTrack.h,v 1.2 2011/10/17 00:19:14 fisyak Exp $
+// $Id: StMuMcTrack.h,v 1.3 2012/05/07 14:47:06 fisyak Exp $
 #ifndef __StMuMcTrack_h__
 #define __StMuMcTrack_h__
 #include "tables/St_g2t_track_Table.h" 
@@ -73,7 +73,9 @@ class StMuMcTrack : public TObject {
   Float_t               pT         ()  const {return mpT;         } /* Transverse momentum */	 	   
   Float_t        	Ptot       ()  const {return mPtot;       } /* Total momentum */	 	   
   Float_t        	Rapidity   ()  const {return mRapidity;   } /* Rapidity */                        
-  virtual void Print(Option_t* option = "") const;  ///< Print track info
+  virtual void          Print(Option_t* option = "") const;  ///< Print track info
+  static Int_t          CorrectGePid(Int_t gePid);
+  const Char_t         *GeName();
  private:
   Int_t          mGePid;       /* GEANT particle id */
   Int_t          mId;          /* primary key */
@@ -94,6 +96,9 @@ class StMuMcTrack : public TObject {
 ostream&              operator<<(ostream& os, StMuMcTrack const & v);
 #endif
 // $Log: StMuMcTrack.h,v $
+// Revision 1.3  2012/05/07 14:47:06  fisyak
+// Add handles for track to fast detector matching
+//
 // Revision 1.2  2011/10/17 00:19:14  fisyak
 // Active handing of IdTruth
 //
