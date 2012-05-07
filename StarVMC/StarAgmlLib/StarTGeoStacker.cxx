@@ -258,7 +258,7 @@ TGeoMaterial *BuildMaterial( AgMaterial &ag_material )
   TString mat_name = ag_material.GetName();
   TString name;
 
-  std::cout << "BuildMaterial: " << mat_name.Data() << std::endl;
+  //  std::cout << "BuildMaterial: " << mat_name.Data() << std::endl;
 
   Double_t aa   = ag_material.par("a");      
   Double_t zz   = ag_material.par("z");
