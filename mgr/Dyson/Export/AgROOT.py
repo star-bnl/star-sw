@@ -625,16 +625,14 @@ class Block( Handler ):
         document.head('///@brief %s'%str(self.comment) )
         document.head('class %s : public AgBlock' % name )
         document.head('{  public:')
+        document.head('   static AgBlock *Instance();' )
         document.head('%s() : AgBlock("%s","%s"){ };'%(name,name,comm))
         document.head('~%s(){ };'%name)
         document.head('virtual void Block( AgCreate c );')
         document.head('virtual void End(){ };')
-
-##        if namespace:
-##            document.head('ClassDef(%s::%s,1);'%(document.agmodule,name))
-##        else:
-
-        document.head('ClassDef(%s,1);'%name)
+        document.head('protected:')
+        document.head('  static AgBlock *mInstance;')
+        #document.head('ClassDef(%s,1);'%name)
         document.head('};')
 
         # ---------------------------------------------------------------
@@ -646,6 +644,11 @@ class Block( Handler ):
         # ---------------------------------------------------------------
         # Add the block builder to the block stream
         # ---------------------------------------------------------------
+        document.impl('AgBlock *%s::mInstance = 0;'%name, unit=current)
+        document.impl('AgBlock *%s::Instance(){'%name,unit=current)
+        document.impl('   if ( mInstance==0 ) mInstance = new %s();'%name,unit=current)
+        document.impl('   return mInstance;',unit=current)
+        document.impl('}',unit=current)
         document.impl('void %s::Block( AgCreate create )' % name, unit=current)
         document.impl('{ ', unit=current )
         document.impl('///@addtogroup %s_doc'%name, unit=current);
@@ -841,7 +844,7 @@ class Content ( Handler ):
         for block in blocks:
             block=block.strip()
             if len(block):
-                document.impl( 'AddBlock("%s");' % block, unit=current ) # ought to be modctr
+                document.impl( 'AddBlock("%s", %s::Instance());' %(block,block), unit=current ) # ought to be modctr
                 document.content.append('%s'%block)
 
 
