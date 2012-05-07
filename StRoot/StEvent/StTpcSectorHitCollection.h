@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcSectorHitCollection.h,v 2.4 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTpcSectorHitCollection.h,v 2.5 2012/05/07 14:42:58 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcSectorHitCollection.h,v $
+ * Revision 2.5  2012/05/07 14:42:58  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.4  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -48,7 +51,7 @@ public:
     const StTpcPadrowHitCollection* padrow(unsigned int) const;
 
 private:
-    enum { mNumberOfPadrows = 45 };
+    enum { mNumberOfPadrows = 100 }; // Keep in mind that it could be chnaged
     StTpcPadrowHitCollection mPadrows[mNumberOfPadrows];
     
     ClassDef(StTpcSectorHitCollection,1)

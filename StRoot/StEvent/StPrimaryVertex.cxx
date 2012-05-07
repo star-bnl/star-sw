@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.15 2009/11/23 22:25:21 ullrich Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.16 2012/05/07 14:42:58 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.16  2012/05/07 14:42:58  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.15  2009/11/23 22:25:21  ullrich
  * Added new member mNumMatchesWithBTOF and related access fcts.
  *
@@ -62,10 +65,13 @@
 #include "StPrimaryTrack.h"
 #include "StTrack.h"
 #include "StFunctional.h"
-
+#include "StTrackNode.h"
+#include "StGlobalTrack.h"
+#include "TMath.h"
+#include "StTrackGeometry.h"
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.15 2009/11/23 22:25:21 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.16 2012/05/07 14:42:58 fisyak Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 {init();}
@@ -74,15 +80,7 @@ void StPrimaryVertex::init()
 {
     mType = kEventVtxId;
     mVertexFinderId = undefinedVertexFinder; 
-    mNumTracksUsedInFinder = 0;
-    mNumMatchesWithCTB = 0; 
-    mNumMatchesWithBEMC = 0;
-    mNumMatchesWithEEMC = 0;
-    mNumMatchesWithBTOF = 0;
-    mNumTracksCrossingCentralMembrane = 0; 
-    mMeanDip = 0;
-    mSumOfTrackPt = 0;
-    mRanking = 0;    
+    memset(mBeg, 0, mEnd-mBeg+1);
 }
 
 StPrimaryVertex::~StPrimaryVertex() {/* noop */};
@@ -90,81 +88,39 @@ StPrimaryVertex::~StPrimaryVertex() {/* noop */};
 StVertexId
 StPrimaryVertex::type() const { return kEventVtxId; }
 
-unsigned int
+UInt_t
 StPrimaryVertex::numberOfDaughters() const
 {
     return mDaughters.size();
 }
-
-unsigned int
-StPrimaryVertex::numberOfDaughters(StTrackType type) const
-{
-    if (type == primary)
-	return mDaughters.size();
-    else
-	return 0;
+UInt_t StPrimaryVertex::numberOfGoodTracks() const {
+  UInt_t no = 0;
+  for (UInt_t i=0; i<mDaughters.size(); i++) {
+    const StTrack *track = daughter(i);
+    if (track && track->flag() >= 0 && track->fitTraits().numberOfFitPoints() >=  NoFitPointCutForGoodTrack()) no++;
+  }  
+  return no;
 }
 
 StTrack*
-StPrimaryVertex::daughter(unsigned int i)
-{
-    return i < mDaughters.size() ? mDaughters[i] : 0;
-}
-
-StTrack*
-StPrimaryVertex::daughter(unsigned int i, StTrackType type)
-{
-    if (type == primary)
-	return i < mDaughters.size() ? mDaughters[i] : 0;
-    else
-	return 0;
-}
-
-const StTrack*
-StPrimaryVertex::daughter(unsigned int i) const
+StPrimaryVertex::daughter(UInt_t i)
 {
     return i < mDaughters.size() ? mDaughters[i] : 0;
 }
 
 const StTrack*
-StPrimaryVertex::daughter(unsigned int i, StTrackType type) const
+StPrimaryVertex::daughter(UInt_t i) const
 {
-    if (type == primary)
-	return i < mDaughters.size() ? mDaughters[i] : 0;
-    else
-	return 0;
+    return i < mDaughters.size() ? mDaughters[i] : 0;
 }
 
 StPtrVecTrack
 StPrimaryVertex::daughters(StTrackFilter& filter)
 {
     StPtrVecTrack vec;
-    for (unsigned int i=0; i<mDaughters.size(); i++)
+    for (UInt_t i=0; i<mDaughters.size(); i++)
 	if (filter(mDaughters[i])) vec.push_back(mDaughters[i]);
     return vec;
-}
-
-StPtrVecTrack
-StPrimaryVertex::daughters(StTrackFilter& filter, StTrackType type)
-{
-    StPtrVecTrack vec;
-    if (type == primary) {
-	for (unsigned int i=0; i<mDaughters.size(); i++)
-	    if (filter(mDaughters[i])) vec.push_back(mDaughters[i]);
-    }
-    return vec;
-}
-
-StSPtrVecPrimaryTrack&
-StPrimaryVertex::daughters(StTrackType type)
-{
-	return mDaughters;	     
-}
-
-const StSPtrVecPrimaryTrack&
-StPrimaryVertex::daughters(StTrackType type) const
-{
-	return mDaughters;	     
 }
 
 void
@@ -199,5 +155,85 @@ StPrimaryVertex::setParent(StTrack*)
 {
     cerr << "StPrimaryVertex::setParent(): StPrimaryVertex cannot have a parent." << endl;
 }
-
+//________________________________________________________________________________
+void StPrimaryVertex::setTrackNumbers() {
+  mNumMatchesWithTOF = 0;
+  mNumMatchesWithCTB = 0;
+  mNumMatchesWithBEMC = 0;
+  mNumMatchesWithEEMC = 0;
+  mNumNotMatchesWithTOF = 0;
+  mNumNotMatchesWithCTB = 0;
+  mNumNotMatchesWithBEMC = 0;
+  mNumNotMatchesWithEEMC = 0;
+  mNumTracksCrossingCentralMembrane = 0;
+  mNumPostXTracks = 0;
+  mNumTracksWithPromptHit = 0;
+  mMeanDip = 0;
+  mSumOfTrackPt = 0;
+  UInt_t nDaughters = numberOfDaughters();
+  UShort_t n_trk_vtx = 0;
+  for (UInt_t i = 0; i < nDaughters; i++) {
+    StPrimaryTrack* pTrack = (StPrimaryTrack*) daughter(i);
+    if (! pTrack) continue;
+    n_trk_vtx++;
+    StThreeVectorD g3 = pTrack->geometry()->momentum();
+    mMeanDip += TMath::PiOver2() - g3.theta();
+    mSumOfTrackPt   += g3.perp();
+    if (! pTrack->flagExtension()) { // check consitency with global track
+      const StTrackNode* node = pTrack->node();
+      const StTrack *gTrack = node->track(global);
+      if (gTrack) pTrack->setFlagExtension(gTrack->flagExtension());
+    }
+    if (pTrack->isCtbMatched()    )        mNumMatchesWithCTB++;    
+    if (pTrack->isCtbNotMatched() ) 	   mNumNotMatchesWithCTB++; 
+    if (pTrack->isToFMatched()    ) 	   mNumMatchesWithTOF++;    
+    if (pTrack->isToFNotMatched() ) 	   mNumNotMatchesWithTOF++; 
+    if (pTrack->isBemcMatched()   ) 	   mNumMatchesWithBEMC++;   
+    if (pTrack->isBemcNotMatched()) 	   mNumNotMatchesWithBEMC++;
+    if (pTrack->isEemcMatched()   ) 	   mNumMatchesWithEEMC++;   
+    if (pTrack->isEemcNotMatched()) 	   mNumNotMatchesWithEEMC++;
+    if (pTrack->isMembraneCrossingTrack()) mNumTracksCrossingCentralMembrane++;
+    if (pTrack->isPostXTrack())     mNumPostXTracks++;
+    if (pTrack-> isPromptTrack())          mNumTracksWithPromptHit++;
+  }
+  if (n_trk_vtx > 0) mMeanDip /= n_trk_vtx;
+}
+//________________________________________________________________________________
+ostream&  operator<<(ostream& os,  const StPrimaryVertex& v) {
+  UInt_t nGoodTpcTracks = 0, nTpcTracks = 0;
+  UInt_t nDaughters = v.numberOfDaughters();
+  for (UInt_t i=0; i < nDaughters; i++) {
+    StPrimaryTrack* pTrack = (StPrimaryTrack*) v.daughter(i);
+    if (! pTrack) continue;
+    Int_t good = (pTrack->flag() > 0 && pTrack->fitTraits().numberOfFitPoints() >=  StVertex::NoFitPointCutForGoodTrack()) ? 1 : 0;
+    if (pTrack->fitTraits().numberOfFitPoints(kTpcId)) {
+      nTpcTracks++; nGoodTpcTracks+=good;
+    } 
+  }
+  const Char_t *beam = (v.isBeamConstrained()) ? "B" : " ";
+  //  os << Form("%2s:C/P/X/T/E %i/%i/%i/%i/%i: %8.3f,%8.3f,%8.3f",
+  os << Form("%1s:",beam);
+  if (v.numPostXTracks() < 10) os << Form("%i/",v.numPostXTracks());
+  else                                os <<       "*/";
+  if (v.numTracksWithPromptHit() < 10) os << Form("%i/",v.numTracksWithPromptHit());
+  else                                os <<       "*/";
+  if (v.numTracksCrossingCentralMembrane() < 10) os << Form("%i/",v.numTracksCrossingCentralMembrane());
+  else                                os <<       "*/";
+  if ((v.numMatchesWithCTB()+v.numMatchesWithBTOF()) < 10) os << Form("%i/",(v.numMatchesWithCTB()+v.numMatchesWithBTOF()));
+  else                                os <<       "*/";
+  if ((v.numMatchesWithBEMC()+v.numMatchesWithEEMC()) < 10) os << Form("%i",(v.numMatchesWithBEMC()+v.numMatchesWithEEMC()));
+  else                                os <<       "*";
+  const Float_t *xyz = v.position().xyz();
+  const Float_t *dxyz = v.positionError().xyz();
+  for (Int_t i = 0; i < 3; i++)     os << Form("%8.3f+/-%5.3f,",xyz[i],dxyz[i]);
+  os << " Prob/Chi2: " << Form("%5.3f/%7.2f",v.probChiSquared(),v.chiSquared())
+     << " Rank: "      << Form("%8.3f",v.ranking())
+     << Form(" tracks(U/T/G): %2i,%2i,%2i", v.numTracksUsedInFinder(),nDaughters,v.numberOfGoodTracks());
+  if (nTpcTracks != nDaughters || nGoodTpcTracks != v.numberOfGoodTracks()) {
+    os << Form(" TPC:%4i,%4i",nTpcTracks,nGoodTpcTracks);
+  }
+  if (v.idTruth())
+    os << Form(" IdT: %4i Q: %4i", v.idTruth(), v.qaTruth());
+  return os;
+}
 

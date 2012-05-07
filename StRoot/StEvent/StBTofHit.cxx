@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHit.cxx,v 2.4 2011/10/17 15:37:04 fisyak Exp $
+ * $Id: StBTofHit.cxx,v 2.5 2012/05/07 14:42:57 fisyak Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHit.cxx,v $
+ * Revision 2.5  2012/05/07 14:42:57  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.4  2011/10/17 15:37:04  fisyak
  * One line print out
  *
@@ -26,89 +29,37 @@
  **************************************************************************/
 #include "StBTofHit.h"
 #include "StTrack.h"
-
-ClassImp(StBTofHit)
-
-StBTofHit::StBTofHit()
-{
-    mTray             = 0;
-    mModule           = 0;
-    mCell             = 0;
-    mLeadingEdgeTime  = 0.;
-    mTrailingEdgeTime = 0.;
-
-    mAssociatedTrack  = 0;
-    mIdTruth          = 0;
-    mQuality          = 0;
+const Float_t StBTofHit::mBTofPadWidth = 3.45; 
+ClassImp(StBTofHit);
+//________________________________________________________________________________
+StBTofHit::StBTofHit() {
+  mTray             = 0;
+  mModule           = 0;
+  mCell             = 0;
+  mLeadingEdgeTime  = 0.;
+  mTrailingEdgeTime = 0.;
+  mAssociatedTrack  = 0;
 }
-
-StBTofHit::~StBTofHit() {/* noop */}
-
-int
-StBTofHit::tray() const { return mTray; }
-
-int
-StBTofHit::module() const { return mModule; }
-
-int
-StBTofHit::cell() const { return mCell; }
-
-double
-StBTofHit::leadingEdgeTime() const { return mLeadingEdgeTime; }
-
-double
-StBTofHit::trailingEdgeTime() const { return mTrailingEdgeTime; }
-
-double
-StBTofHit::tot() const { return mTrailingEdgeTime - mLeadingEdgeTime; }
-
-StTrack*
-StBTofHit::associatedTrack() { return mAssociatedTrack; }
-
-const StTrack*
-StBTofHit::associatedTrack() const { return mAssociatedTrack; }
-
-int
-StBTofHit::idTruth() const { return mIdTruth; }
-
-int
-StBTofHit::qaTruth() const { return mQuality; }
-
-void
-StBTofHit::setTray(unsigned char trayId) { mTray = trayId; }
-
-void
-StBTofHit::setModule(unsigned char moduleId) { mModule = moduleId; }
-
-void
-StBTofHit::setCell(unsigned char cellId) { mCell = cellId; }
-
-void
-StBTofHit::setLeadingEdgeTime(double time) { mLeadingEdgeTime = time; }
-
-void
-StBTofHit::setTrailingEdgeTime(double time) { mTrailingEdgeTime = time; }
-
+//________________________________________________________________________________
+const StTrack* StBTofHit::associatedTrack() const { return mAssociatedTrack; }
+      StTrack* StBTofHit::associatedTrack()       { return mAssociatedTrack; }
+//________________________________________________________________________________
 void
 StBTofHit::setAssociatedTrack(StTrack* val) { mAssociatedTrack = val; }
-
-void
-StBTofHit::setIdTruth(int idtru,int qatru)
-{
-    if (qatru==0) qatru = (idtru>>16);
-    idtru    = idtru&((1<<16)-1);
-    mIdTruth = static_cast<UShort_t>(idtru);
-    mQuality = static_cast<UShort_t>(qatru);
+//________________________________________________________________________________
+const StThreeVectorF& StBTofHit::position() const {
+  static StThreeVectorF pos;
+  pos.set(0.,mBTofPadWidth*(cell() - 3.5), 0.);
+  return *&pos;
 }
-
-ostream&
-operator<<(ostream &os, const StBTofHit& hit)
-{
-    os << " Tray:" << hit.tray() << "  Module:" << hit.module()
-       << " Cell:" << hit.cell() 
-       << " LeTime " << hit.leadingEdgeTime() 
-       << " TeTime " << hit.trailingEdgeTime() 
-       << " Track " << (hit.associatedTrack() ? hit.associatedTrack()->key() : 0) 
-       << " IdTruth " << hit.idTruth() << " Quality " << hit.qaTruth();
-    return os;
+//________________________________________________________________________________
+ostream& operator<<(ostream &os, const StBTofHit& hit) {
+  os << " Tray:" << hit.tray() << "  Module:" << hit.module()
+     << " Cell:" << hit.cell() 
+     << " LeTime " << hit.leadingEdgeTime() 
+     << " TeTime " << hit.trailingEdgeTime() 
+     << " Track " << (hit.associatedTrack() ? hit.associatedTrack()->key() : 0) 
+     << " IdTruth " << hit.idTruth() << " Quality " << hit.qaTruth();
+  return os;
 }
+//________________________________________________________________________________

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.38 2011/10/17 00:13:49 fisyak Exp $
+ * $Id: StTrack.cxx,v 2.39 2012/05/07 14:42:58 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.39  2012/05/07 14:42:58  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.38  2011/10/17 00:13:49  fisyak
  * Add handles for IdTruth info
  *
@@ -145,103 +148,53 @@
 #include "StG2TrackVertexMap.h"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.38 2011/10/17 00:13:49 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.39 2012/05/07 14:42:58 fisyak Exp $";
 
 StTrack::StTrack()
 {
-    mFlag = 0;
-    mKey = 0;
-    mEncodedMethod = 0;
-    mImpactParameter = 0;
-    mLength = 0;
-    mSeedQuality = 0;
-    mNumberOfPossiblePointsTpc = 0;
-    mNumberOfPossiblePointsFtpcWest = 0;
-    mNumberOfPossiblePointsFtpcEast = 0;
-    mNumberOfPossiblePointsSvt = 0;
-    mNumberOfPossiblePointsSsd = 0;
-    mNumberOfPossiblePointsPxl = 0;
-    mNumberOfPossiblePointsIst = 0;
-    mGeometry = 0;
-    mOuterGeometry = 0;
-    mDetectorInfo = 0;
-    mNode = 0;
-    mIdTruth = mQuality = 0;
-    mIdParentVx = 0;
+  memset(mBeg, 0, mEnd-mBeg+1);
 }
 
 
-StTrack::StTrack(const StTrack& track)
-{
-    mKey = track.mKey;
-    mFlag = track.mFlag;
-    mEncodedMethod = track.mEncodedMethod;
-    mImpactParameter = track.mImpactParameter;
-    mLength = track.mLength;
-    mSeedQuality = track.mSeedQuality;
-    mNumberOfPossiblePointsTpc = track.mNumberOfPossiblePointsTpc;
-    mNumberOfPossiblePointsFtpcWest = track.mNumberOfPossiblePointsFtpcWest;
-    mNumberOfPossiblePointsFtpcEast = track.mNumberOfPossiblePointsFtpcEast;
-    mNumberOfPossiblePointsSvt = track.mNumberOfPossiblePointsSvt;
-    mNumberOfPossiblePointsSsd = track.mNumberOfPossiblePointsSsd;
-    mNumberOfPossiblePointsPxl = track.mNumberOfPossiblePointsPxl;
-    mNumberOfPossiblePointsIst = track.mNumberOfPossiblePointsIst;
-    mTopologyMap = track.mTopologyMap;
-    mFitTraits = track.mFitTraits;
-    if (track.mGeometry)
-        mGeometry = track.mGeometry->copy();
-    else
-        mGeometry = 0;
-    if (track.mOuterGeometry)
-        mOuterGeometry = track.mOuterGeometry->copy();
-    else
-        mOuterGeometry = 0;
-    mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
-    mPidTraitsVec = track.mPidTraitsVec;
-    mNode = 0;                                 // do not assume any context here
-    mSeedQuality = track.mSeedQuality;
-    mIdTruth = track.mIdTruth;
-    mQuality = track.mQuality;
-    mIdParentVx = track.mIdParentVx;
+StTrack::StTrack(const StTrack& track) {
+  for (Int_t bit = 14; bit < 23; bit++) if (track.TestBit(BIT(bit))) SetBit(BIT(bit));
+  memcpy (mBeg, track.mBeg, mEnd-mBeg+1);
+  mTopologyMap = track.mTopologyMap;
+  mFitTraits = track.mFitTraits;
+  if (track.mGeometry)
+    mGeometry = track.mGeometry->copy();
+  else
+    mGeometry = 0;
+  if (track.mOuterGeometry)
+    mOuterGeometry = track.mOuterGeometry->copy();
+  else
+    mOuterGeometry = 0;
+  mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
+  mPidTraitsVec = track.mPidTraitsVec;
+  mNode = 0;                                 // do not assume any context here
 }
 
 StTrack&
-StTrack::operator=(const StTrack& track)
-{
-    if (this != &track) {
-        mFlag = track.mFlag;
-        mKey = track.mKey;
-        mEncodedMethod = track.mEncodedMethod;
-        mImpactParameter = track.mImpactParameter;
-        mLength = track.mLength;
-        mSeedQuality = track.mSeedQuality;
-        mNumberOfPossiblePointsTpc = track.mNumberOfPossiblePointsTpc;
-        mNumberOfPossiblePointsFtpcWest = track.mNumberOfPossiblePointsFtpcWest;
-        mNumberOfPossiblePointsFtpcEast = track.mNumberOfPossiblePointsFtpcEast;
-        mNumberOfPossiblePointsSvt = track.mNumberOfPossiblePointsSvt;
-        mNumberOfPossiblePointsSsd = track.mNumberOfPossiblePointsSsd;
-        mNumberOfPossiblePointsPxl = track.mNumberOfPossiblePointsPxl;
-        mNumberOfPossiblePointsIst = track.mNumberOfPossiblePointsIst;
-        mTopologyMap = track.mTopologyMap;
-        mFitTraits = track.mFitTraits;
-        if (mGeometry) delete mGeometry;
-        if (track.mGeometry)
-            mGeometry = track.mGeometry->copy();
-        else
-            mGeometry = 0;
-        if (mOuterGeometry) delete mOuterGeometry;
-        if (track.mOuterGeometry)
-            mOuterGeometry = track.mOuterGeometry->copy();
-        else
-            mOuterGeometry = 0;
-        mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
-        mPidTraitsVec = track.mPidTraitsVec;
-        mNode = 0;                                 // do not assume any context here
-	mIdTruth = track.mIdTruth;
-	mQuality = track.mQuality;
-	mIdParentVx = track.mIdParentVx;
-    }
-    return *this;
+StTrack::operator=(const StTrack& track) {
+  if (this != &track) {
+    for (Int_t bit = 14; bit < 23; bit++) if (track.TestBit(BIT(bit))) SetBit(BIT(bit));
+    memcpy (mBeg, track.mBeg, mEnd-mBeg+1);
+    mTopologyMap = track.mTopologyMap;
+    mFitTraits = track.mFitTraits;
+    if (mGeometry) delete mGeometry;
+    if (track.mGeometry)
+      mGeometry = track.mGeometry->copy();
+    else
+      mGeometry = 0;
+    if (mOuterGeometry) delete mOuterGeometry;
+    if (track.mOuterGeometry)
+      mOuterGeometry = track.mOuterGeometry->copy();
+    else
+      mOuterGeometry = 0;
+    mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
+    mPidTraitsVec = track.mPidTraitsVec;
+  }
+  return *this;
 }
 
 StTrack::~StTrack()
@@ -250,11 +203,11 @@ StTrack::~StTrack()
     delete mOuterGeometry;
 }
 
-short
+Short_t
 StTrack::flag() const { return mFlag; }
 
 
-unsigned short
+UShort_t
 StTrack::encodedMethod() const { return mEncodedMethod; }
 
 bool
@@ -266,7 +219,7 @@ StTrack::finderMethod(StTrackFinderMethod bit) const
 StTrackFittingMethod
 StTrack::fittingMethod() const
 {
-    int method = mEncodedMethod & 0xf;
+    Int_t method = mEncodedMethod & 0xf;
     switch(method) {
     case kHelix2StepId:
         return kHelix2StepId;
@@ -302,10 +255,10 @@ StTrack::impactParameter() const { return mImpactParameter; }
 float
 StTrack::length() const { return mLength; }
 
-unsigned short
+UShort_t
 StTrack::numberOfPossiblePoints() const
 {
-    unsigned short result;
+    UShort_t result;
     result = numberOfPossiblePoints(kTpcId) +
       numberOfPossiblePoints(kFtpcWestId) +
       numberOfPossiblePoints(kFtpcEastId) +
@@ -317,7 +270,7 @@ StTrack::numberOfPossiblePoints() const
     return result;
 }
 
-unsigned short
+UShort_t
 StTrack::numberOfPossiblePoints(StDetectorId det) const
 {
 	switch (det) {
@@ -384,7 +337,7 @@ StPtrVecTrackPidTraits
 StTrack::pidTraits(StDetectorId det) const
 {
     StPtrVecTrackPidTraits vec;
-    for (unsigned int i=0; i<mPidTraitsVec.size(); i++)
+    for (UInt_t i=0; i<mPidTraitsVec.size(); i++)
         if (mPidTraitsVec[i]->detector() == det)
             vec.push_back(mPidTraitsVec[i]);
     return vec;
@@ -403,17 +356,17 @@ StTrackNode*
 StTrack::node() { return mNode; }
 
 void
-StTrack::setFlag(short val) { mFlag = val; }
+StTrack::setFlag(Short_t val) { mFlag = val; }
 
 
 void
-StTrack::setEncodedMethod(unsigned short val) { mEncodedMethod = val; }
+StTrack::setEncodedMethod(UShort_t val) { mEncodedMethod = val; }
 
 void
-StTrack::setImpactParameter(float val) { mImpactParameter = val; }
+StTrack::setImpactParameter(Float_t val) { mImpactParameter = val; }
 
 void
-StTrack::setLength(float val) { mLength = val; }
+StTrack::setLength(Float_t val) { mLength = val; }
 
 void
 StTrack::setTopologyMap(const StTrackTopologyMap& val) { mTopologyMap = val; }
@@ -476,10 +429,10 @@ void
 StTrack::setNode(StTrackNode* val) { mNode = val; }
 
 #include "StHelixModel.h"
-int StTrack::bad() const
+Int_t StTrack::bad() const
 {
     static const double world = 1.e+5;
-    int ierr;
+    Int_t ierr;
     if (!StMath::Finite(mImpactParameter))	return   12;
     if (!StMath::Finite(mLength)         )    	return   13;
     if (mFlag  <0                        )	return   21;
@@ -499,7 +452,7 @@ int StTrack::bad() const
     if (!di                              )   	return   26;
     ierr = di->bad();
     if (ierr                             )   	return    6+100*ierr;
-    if (flag() == 901) return 0; // don't check Helix for Beam Background tracks
+    if ((flag()/100)%10 == 9) return 0; // don't check Helix for Beam Background tracks
     StPhysicalHelixD hlx1 = mGeometry->helix();
     StThreeVectorD   ori2 = mOuterGeometry->origin();
     double len12 = hlx1.pathLength(ori2);

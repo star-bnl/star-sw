@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.43 2012/04/27 01:32:13 perev Exp $
+ * $Id: StEnumerations.h,v 2.44 2012/05/07 14:42:57 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.44  2012/05/07 14:42:57  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.43  2012/04/27 01:32:13  perev
  * Tracking now is not TPC only
  *
@@ -151,6 +154,7 @@
 // Fortran code. The orginal definitions are implemented via pre-
 // processor #define statements. For compatibility reasons we have
 // to leave it as is for now.
+#include "Rtypes.h"
 #include "StDetectorDefinitions.h"
 #include "StDedxDefinitions.h"
 #include "StVertexDefinitions.h"
@@ -184,6 +188,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kFtpcWestId  = kFtpcWestIdentifier,
                    kFtpcEastId  = kFtpcEastIdentifier,
                    kTofId       = kTofIdentifier,
+                   kBTofId      = kTofIdentifier,
                    kCtbId       = kCtbIdentifier,
                    kSsdId       = kSsdIdentifier,
                    kBarrelEmcTowerId     = kBarrelEmcTowerIdentifier,
@@ -262,18 +267,39 @@ enum StTrackFittingMethod {kUndefinedFitterId         = kUndefinedFitterIdentifi
                            kLine3DId                  = kLine3DIdentifier,
                            kL3FitId                   = kL3FitIdentifier,
                            kITKalmanFitId             = kITKalmanFitIdentifier};
-
+/*!
+  ETrackStatusBits
+ */
+enum ETrackStatusBits {
+  kCtbMatched      = BIT(14),   // track has CTB hit match
+  kToFMatched      = BIT(15),   // track has ToF hit match
+  kCtbNotMatched   = BIT(16),   // track has CTB prediction but no hit to match (veto)
+  kToFNotMatched   = BIT(17),   // track has ToF prediction but no hit to match (veto)
+  kBemcMatched     = BIT(18),   // track has     Bemc          hit match
+  kEemcMatched     = BIT(19),   // track has     Eemc          hit match
+  kBemcNotMatched  = BIT(20),   // track has     Bemc          prediction but no hit to match (veto)
+  kEemcNotMatched  = BIT(21),   // track has             Eemc  prediction but no hit to match (veto)
+  kDecayTrack      = BIT(22),   // track fit to decay vertex (V0, ...) 
+  kPromptTrack     = BIT(23),   // track has prompt TPC hit: |209.4 - |z|| < 3 cm
+  kPostXTrack      = BIT(24),   // Post Crossing Track, track which has >= 2 hit with wrong Z / Sector 
+  kXMembrane       = BIT(25),   // track which has >= 2 hits from both sides of Membrane (z = 0)
+  kShortTrack2EMC  = BIT(26),   // Short track pointing to EEMC
+  kRejectedTrack   = BIT(27)    // track rejected by small no. of fit points (< 10)
+};			     
 /*!
  * \enum StVertexId
  */
 enum StVertexId {kUndefinedVtxId   = kUndefinedVertexIdentifier,
                  kEventVtxId       = kEventVertexIdentifier,
+		 kPrimaryVtxId     = kEventVertexIdentifier,
                  kV0VtxId          = kV0DecayIdentifier,
                  kXiVtxId          = kXiDecayIdentifier,
                  kKinkVtxId        = kKinkDecayIdentifier,
                  kOtherVtxId       = kOtherTypeIdentifier,
                  kFtpcEastCalVtxId = kFtpcEastCalibrationVertexIdentifier,
-                 kFtpcWestCalVtxId = kFtpcWestCalibrationVertexIdentifier};
+                 kFtpcWestCalVtxId = kFtpcWestCalibrationVertexIdentifier,
+		 kBEAMConstrVtxId,
+		 kRejectedVtxId};
 
 /*!
  * \enum StRichPidFlag
@@ -345,9 +371,9 @@ enum StEmcCrateStatus {crateUnknown       = 0,
  * \enum StarMaxSize
  */
 // maximal sizes of tracking part of STAR in cm (Victor)
-enum StarMaxTrackRangeSize {kStarMaxTrackRangeR = 500,
-                            kStarMaxTrackRangeZ = 300};
-
+enum StarMaxTrackRangeSize {kStarMaxTrackRangeR =  500, // including MTD
+                            kStarMaxTrackRangeZ =  300,
+                            kStarMinTrackRangeZ = -kStarMaxTrackRangeZ};
 
 /*!
  * \enum StVertexFinderId

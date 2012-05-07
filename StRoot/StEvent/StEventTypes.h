@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.35 2011/04/27 22:28:56 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.36 2012/05/07 14:42:57 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.36  2012/05/07 14:42:57  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.35  2011/04/27 22:28:56  ullrich
  * Add MTD.
  *
@@ -221,6 +224,8 @@
 #include "StTofCell.h"
 #include "StTofData.h"
 #include "StTofRawData.h"
+#include "StBTofHit.h"
+#include "StBTofCollection.h"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StTpcHit.h"
 #include "StTpcHitCollection.h"
