@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.12 2011/10/17 15:35:49 fisyak Exp $
+ * $Id: StVertex.cxx,v 2.13 2012/05/07 14:42:58 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
+ * Revision 2.13  2012/05/07 14:42:58  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.12  2011/10/17 15:35:49  fisyak
  * Comment's fix
  *
@@ -51,12 +54,13 @@
  *
  **************************************************************************/
 #include <algorithm>
+#include "Riostream.h"
 #include "TClass.h"
 #include "TFile.h"
 #include "StVertex.h"
 #include "StTrack.h"
 #include "StG2TrackVertexMap.h"
-
+#include "TString.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
@@ -64,21 +68,15 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.12 2011/10/17 15:35:49 fisyak Exp $";
-
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.13 2012/05/07 14:42:58 fisyak Exp $";
+UInt_t StVertex::fgNoFitPointCutForGoodTrack = 15;
 StVertex::StVertex()
 {
     mType = kUndefinedVtxId;
-    mFlag = 0;
-    mChiSquared     = 0;
-    mProbChiSquared = 0;
-    mParent = 0;
-    fill_n(mCovariantMatrix, 6, 0);
+    memset(mBeg, 0, mEnd-mBeg+1);
 }
 
-StVertex::~StVertex() {/* noop */};
-
-int
+Int_t
 StVertex::operator==(const StVertex& v) const
 {
     return mType == v.mType &&
@@ -87,20 +85,11 @@ StVertex::operator==(const StVertex& v) const
         mChiSquared == v.mChiSquared;
 }
 
-int
+Int_t
 StVertex::operator!=(const StVertex& v) const
 {
     return !(v == *this);
 }
-
-int
-StVertex::flag() const { return mFlag; }
-
-float
-StVertex::chiSquared() const { return mChiSquared; }
-
-float
-StVertex::probChiSquared() const { return mProbChiSquared; }
 
 StMatrixF
 StVertex::covariantMatrix() const
@@ -121,26 +110,8 @@ StVertex::positionError() const
     return StThreeVectorF(::sqrt(mCovariantMatrix[0]), ::sqrt(mCovariantMatrix[2]), ::sqrt(mCovariantMatrix[5]));
 }
 
-StTrack*
-StVertex::parent() { return mParent; }
-
-const StTrack*
-StVertex::parent() const { return mParent; }
-
-void
-StVertex::setFlag(int val) { mFlag = val; }
-
-void
-StVertex::setCovariantMatrix(float val[6]) { copy(val, val+6, mCovariantMatrix); }
-
-void
-StVertex::setChiSquared(float val) { mChiSquared = val; }
-
-void
-StVertex::setProbChiSquared(float val) { mProbChiSquared = val; }
-
-void
-StVertex::setParent(StTrack* val) { mParent = val; }
+void StVertex::setParent(StTrack* val) { mParent = val; }
+void StVertex::setCovariantMatrix(float val[6]) { copy(val, val+6, mCovariantMatrix); }
 
 void StVertex::Streamer(TBuffer &R__b)
 {
@@ -174,8 +145,8 @@ void StVertex::Streamer(TBuffer &R__b)
 } 
 //________________________________________________________________________________
 void StVertex::setIdTruth() { // match with IdTruth
-  typedef std::map< int,float>  myMap_t;
-  typedef std::pair<int,float>  myPair_t;
+  typedef std::map< Int_t,Float_t>  myMap_t;
+  typedef std::pair<Int_t,Float_t>  myPair_t;
   typedef myMap_t::const_iterator myIter_t;
   myMap_t  idTruths;
   // Loop to store all the mc vertex keys and quality of every reco track on the vertex.
@@ -205,6 +176,10 @@ void StVertex::setIdTruth() { // match with IdTruth
   setIdTruth(vxBest,avgQua);
   Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(vxBest);
   setIdParent(IdParentTk);
+}
+//______________________________________________________________________________
+void StVertex::NotImplemented(const Char_t *method) const {
+  cout << "StVertex::" << method << " is no implemented" <<  endl;
 }
 
 

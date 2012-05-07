@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.cxx,v 2.8 2009/11/23 16:34:06 fisyak Exp $
+ * $Id: StPrimaryTrack.cxx,v 2.9 2012/05/07 14:42:57 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.cxx,v $
+ * Revision 2.9  2012/05/07 14:42:57  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.8  2009/11/23 16:34:06  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -37,44 +40,18 @@
  *
  **************************************************************************/
 #include "TClass.h"
+#include "TString.h"
 #include "StPrimaryTrack.h"
 #include "StPrimaryVertex.h"
-
+#include "StTrackGeometry.h"
 ClassImp(StPrimaryTrack)
 
-static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.8 2009/11/23 16:34:06 fisyak Exp $";
-
-StPrimaryTrack::StPrimaryTrack() : mVertex(0) {/* noop */}
-
-StPrimaryTrack::StPrimaryTrack(const StPrimaryTrack& track) :
-    StTrack(track)
-{
-    mVertex = track.mVertex;
-}
-
-StPrimaryTrack&
-StPrimaryTrack::operator=(const StPrimaryTrack& track)
-{
-    if (this != &track) {
-        static_cast<StTrack&>(*this) = track;
-        mVertex = track.mVertex;
-    }
-    return *this;
-}
-
-StPrimaryTrack::~StPrimaryTrack() {/* noop */}
-
-StTrackType
-StPrimaryTrack::type() const { return primary; }
-
-const StVertex*
-StPrimaryTrack::vertex() const { return mVertex; }
-
-void
-StPrimaryTrack::setVertex(StVertex* val)
-{
-    StPrimaryVertex *p = dynamic_cast<StPrimaryVertex*>(val);
-    if (p) mVertex = p;
+static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.9 2012/05/07 14:42:57 fisyak Exp $";
+StPrimaryTrack::StPrimaryTrack(): mVertex(0) {/* noop */} 
+const StVertex*  StPrimaryTrack::vertex() const{ return mVertex; }
+void StPrimaryTrack::setVertex(StVertex* val) {
+  StPrimaryVertex *p = dynamic_cast<StPrimaryVertex*>(val);
+  if (p) mVertex = p;
 }
 
 void StPrimaryTrack::Streamer(TBuffer &R__b)
@@ -101,3 +78,19 @@ void StPrimaryTrack::Streamer(TBuffer &R__b)
        Class()->WriteBuffer(R__b,this);
     }
 } 
+//________________________________________________________________________________
+ostream&  operator<<(ostream& os,  const StPrimaryTrack& track) {
+  Short_t charge = track.geometry()->charge();
+  StThreeVectorD g3 = track.geometry()->momentum(); // p of global track
+  os << Form("%4d primary %4d q/pT %8.3f eta %8.3f phi %8.3f",
+	     track.key(),track.flag(),
+	     charge/g3.perp(),g3.pseudoRapidity(),g3.phi());
+  os << Form(" pxyz %8.3f%8.3f%8.3f",g3.x(),g3.y(),g3.z());
+  Double_t length = track.length();
+  if (length > 9999.) length = 9999.;
+  os << Form(" NP %2d NF %2d L %8.3f chi2 %8.3f/%8.3f", track.numberOfPossiblePoints(),track.fitTraits().numberOfFitPoints(),
+	     length,track.fitTraits().chi2(0),track.fitTraits().chi2(1));
+  if (track.idTruth())
+    os << Form(" IdT: %4i Q: %4i", track.idTruth(), track.qaTruth());
+ return os;
+}

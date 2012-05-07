@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StGlobalTrack.h,v 2.6 2009/11/23 16:34:06 fisyak Exp $
+ * $Id: StGlobalTrack.h,v 2.7 2012/05/07 14:42:57 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.h,v $
+ * Revision 2.7  2012/05/07 14:42:57  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.6  2009/11/23 16:34:06  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -41,27 +44,29 @@
 #define StGlobalTrack_hh
 
 #include "StTrack.h"
-
-class StDcaGeometry;
+#include "StDcaGeometry.h"
+class StGlobalTrack;
+ostream&  operator<<(ostream& os,  const StGlobalTrack& t);
 
 class StGlobalTrack : public StTrack {
-public:
-    StGlobalTrack();
-    StGlobalTrack(const StGlobalTrack&);
-    StGlobalTrack& operator=(const StGlobalTrack&);
-    ~StGlobalTrack();
-
-    StTrackType     type() const;
-    const StVertex* vertex() const;
-
-    const StDcaGeometry* dcaGeometry() const;
-    StDcaGeometry* dcaGeometry();
-    void setDcaGeometry(StDcaGeometry*);
-
-protected:
-    StDcaGeometry *mDcaGeometry;
-    
-    ClassDef(StGlobalTrack,2)
+ public:
+  StGlobalTrack() : mDcaGeometry(0) {}
+  StGlobalTrack(const StGlobalTrack&);
+  StGlobalTrack& operator=(const StGlobalTrack&);
+  ~StGlobalTrack() {SafeDelete(mDcaGeometry);}
+  
+  StTrackType     type() const  { return global; }
+  const StVertex* vertex() const  { return 0; }
+  
+  const StDcaGeometry* dcaGeometry() const  {return mDcaGeometry;}
+  StDcaGeometry* dcaGeometry()  {return mDcaGeometry;}
+  void setDcaGeometry(StDcaGeometry* dca) {mDcaGeometry=dca;}
+  
+  void Print(Option_t *option="") const {cout << option << *this << endl; }
+ protected:
+  StDcaGeometry *mDcaGeometry;
+  
+  ClassDef(StGlobalTrack,2)
 };
 
 #endif

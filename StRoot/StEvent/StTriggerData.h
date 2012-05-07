@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.41 2012/04/30 15:19:11 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.42 2012/05/07 14:42:58 fisyak Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.42  2012/05/07 14:42:58  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.41  2012/04/30 15:19:11  ullrich
  * Added access function for l2sum (Akio)
  *
@@ -359,7 +362,7 @@ protected:
 
     unsigned int mDebug; //!
 
-    ClassDef(StTriggerData,6) 
+    ClassDef(StTriggerData,7) 
 };
 
 inline void StTriggerData::swapI(unsigned int *var){

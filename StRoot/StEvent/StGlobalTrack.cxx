@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cxx,v 2.6 2009/11/23 16:34:06 fisyak Exp $
+ * $Id: StGlobalTrack.cxx,v 2.7 2012/05/07 14:42:57 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cxx,v $
+ * Revision 2.7  2012/05/07 14:42:57  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.6  2009/11/23 16:34:06  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -38,10 +41,7 @@
 
 ClassImp(StGlobalTrack)
 
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.6 2009/11/23 16:34:06 fisyak Exp $";
-
-StGlobalTrack::StGlobalTrack() {mDcaGeometry = 0;}
-
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.7 2012/05/07 14:42:57 fisyak Exp $";
 StGlobalTrack::StGlobalTrack(const StGlobalTrack& track) : StTrack(track)
 {
     mDcaGeometry=0;
@@ -57,15 +57,17 @@ StGlobalTrack& StGlobalTrack::operator=(const StGlobalTrack& track)
     }
     return *this;
 }
-
-StGlobalTrack::~StGlobalTrack() {delete mDcaGeometry;}
-
-StTrackType StGlobalTrack::type() const { return global; }
-
-const StVertex* StGlobalTrack::vertex() const { return 0; }
-
-const StDcaGeometry* StGlobalTrack::dcaGeometry() const {return mDcaGeometry;}
-
-StDcaGeometry* StGlobalTrack::dcaGeometry() {return mDcaGeometry;}
-
-void StGlobalTrack::setDcaGeometry(StDcaGeometry *dca) {mDcaGeometry=dca;}
+//________________________________________________________________________________
+ostream&  operator<<(ostream& os,  const StGlobalTrack& track) {
+  const StDcaGeometry* dca    = track.dcaGeometry();
+  os << Form("%4i global %4i",track.key(),track.flag());
+  if (dca) os << *dca;
+  Double_t length = track.length();
+  if (length > 9999.) length = 9999.;
+  os << Form(" NP %2d NF %2d L %8.3f chi2 %8.3f", track.numberOfPossiblePoints(),track.fitTraits().numberOfFitPoints(),
+	     length,track.fitTraits().chi2(0));
+  if (track.idTruth())
+    os << Form(" IdT: %4i Q: %4i", track.idTruth(), track.qaTruth());
+ return os;
+}
+//________________________________________________________________________________

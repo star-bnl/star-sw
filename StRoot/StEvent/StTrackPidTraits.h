@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 2.8 2009/11/19 14:04:33 fisyak Exp $
+ * $Id: StTrackPidTraits.h,v 2.9 2012/05/07 14:42:58 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
+ * Revision 2.9  2012/05/07 14:42:58  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.8  2009/11/19 14:04:33  fisyak
  * move definition of dst_dedx_st IN
  *
@@ -51,10 +54,10 @@
 #ifndef DST_DEDX_H
 #define DST_DEDX_H
 struct dst_dedx_st {
-  Float_t dedx[2]; /* dE/dx summary info; mean,sigma of mean           */
-  Int_t id_track;  /* Foreign key to dst_track                         */
-  Int_t det_id;    /* Det ID-SVT,TPC,FTPC, use StDetectorDefinitions.h */
-  Int_t method;    /* dE/dx calculation method (see  comments above)   */
+  Float_t dedx[3]; /* dE/dx summary info; mean,sigma of mean, log2(<dX>) */
+  Int_t id_track;  /* Foreign key to dst_track                           */
+  Int_t det_id;    /* Det ID-SVT,TPC,FTPC, use StDetectorDefinitions.h   */
+  Int_t method;    /* dE/dx calculation method (see  comments above)     */
   Int_t ndedx;     /* number of points used in dE/dx calcu. + 100*((int)TrackLength) for fit */
 };
 #endif
@@ -70,6 +73,6 @@ public:
 protected:
     Short_t mDetectorId;
 
-    ClassDef(StTrackPidTraits,1)
+    ClassDef(StTrackPidTraits,2)
 };
 #endif

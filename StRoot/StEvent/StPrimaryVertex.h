@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.14 2009/11/23 22:25:21 ullrich Exp $
+ * $Id: StPrimaryVertex.h,v 2.15 2012/05/07 14:42:58 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
+ * Revision 2.15  2012/05/07 14:42:58  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.14  2009/11/23 22:25:21  ullrich
  * Added new member mNumMatchesWithBTOF and related access fcts.
  *
@@ -61,7 +64,8 @@
 #ifndef StPrimaryVertex_hh
 #define StPrimaryVertex_hh
 #include "StVertex.h"
-
+class StPrimaryVertex;
+ostream&  operator<<(ostream& os,  const StPrimaryVertex& v);
 class StPrimaryVertex : public StVertex {
 public:
     StPrimaryVertex();
@@ -70,87 +74,81 @@ public:
     ~StPrimaryVertex();
     
     StVertexId                   type() const;
-    unsigned int                 numberOfDaughters() const;
-    unsigned int                 numberOfDaughters(StTrackType) const;      // remove when EST becomes standard
-    StTrack*                     daughter(unsigned int);
-    const StTrack*               daughter(unsigned int) const;
-    StTrack*                     daughter(unsigned int, StTrackType);       // remove when EST becomes standard
-    const StTrack*               daughter(unsigned int, StTrackType) const; // remove when EST becomes standard
+    UInt_t                       numberOfDaughters() const;
+    UInt_t                       numberOfGoodTracks() const; 
+    StTrack*                     daughter(UInt_t); 
+    const StTrack*               daughter(UInt_t) const;
+    StSPtrVecPrimaryTrack       &daughters()       {return mDaughters;}
+    const StSPtrVecPrimaryTrack &daughters() const {return mDaughters;}
     StPtrVecTrack                daughters(StTrackFilter&);
-    StPtrVecTrack                daughters(StTrackFilter&, StTrackType);    // remove when EST becomes standard
-    StSPtrVecPrimaryTrack&       daughters(StTrackType = primary);          // change when EST becomes standard
-    const StSPtrVecPrimaryTrack& daughters(StTrackType = primary) const;    // change when EST becomes standard
     void                         addDaughter(StTrack*);
     void                         removeDaughter(StTrack*);
-
     void setParent(StTrack*);     // overwrite inherited
-
     //
     //  Vertex finder specifics
     //
-    StVertexFinderId vertexFinderId() const; 
-    unsigned short  numTracksUsedInFinder() const; 
-    unsigned short  numMatchesWithCTB() const; 
-    unsigned short  numMatchesWithBEMC() const; 
-    unsigned short  numMatchesWithEEMC() const; 
-    unsigned short  numMatchesWithBTOF() const; 
-    unsigned short  numTracksCrossingCentralMembrane() const;  
-    float           meanDip() const;  
-    float           sumOfTrackPt() const; 
-    float           ranking() const;
-    
-    void setVertexFinderId(StVertexFinderId);
-    void setNumTracksUsedInFinder(unsigned short);
-    void setNumMatchesWithCTB(unsigned short);
-    void setNumMatchesWithBEMC(unsigned short);
-    void setNumMatchesWithEEMC(unsigned short);
-    void setNumMatchesWithBTOF(unsigned short);
-    void setNumTracksCrossingCentralMembrane(unsigned short);
-    void setMeanDip(float);
-    void setSumOfTrackPt(float);
-    void setRanking(float);
-    
+    StVertexFinderId vertexFinderId()           const {return mVertexFinderId;}
+    UShort_t numTracksUsedInFinder()            const {return mNumTracksUsedInFinder;} 		
+    UShort_t numMatchesWithCTB()     		const {return mNumMatchesWithCTB;}    
+    UShort_t numMatchesWithTOF()     		const {return mNumMatchesWithTOF;}    
+    UShort_t numMatchesWithBTOF()    		const {return mNumMatchesWithTOF;}    
+    UShort_t numMatchesWithBEMC()    		const {return mNumMatchesWithBEMC;}   
+    UShort_t numMatchesWithEEMC()    		const {return mNumMatchesWithEEMC;}   
+    UShort_t numNotMatchesWithCTB()  		const {return mNumNotMatchesWithCTB;} 
+    UShort_t numNotMatchesWithTOF()  		const {return mNumNotMatchesWithTOF;} 
+    UShort_t numNotMatchesWithBTOF() 		const {return mNumNotMatchesWithTOF;} 
+    UShort_t numNotMatchesWithBEMC()  		const {return mNumNotMatchesWithBEMC;}
+    UShort_t numNotMatchesWithEEMC()  		const {return mNumNotMatchesWithEEMC;}
+    UShort_t numTracksCrossingCentralMembrane() const {return mNumTracksCrossingCentralMembrane;} 
+    Float_t  meanDip()                          const {return mMeanDip;}
+    Float_t  sumOfTrackPt()                     const {return mSumOfTrackPt;}
+    Float_t  ranking()                          const {return mRanking;}
+    UShort_t numTracksWithPromptHit()           const {return mNumTracksWithPromptHit;}
+    UShort_t numPostXTracks()            const {return mNumPostXTracks;}
+    void setTrackNumbers();
+    void setNumMatchesWithCTB(UShort_t val)     {mNumMatchesWithCTB  = val;} 
+    void setNumMatchesWithTOF(UShort_t val)  	{mNumMatchesWithTOF  = val;} 
+    void setNumMatchesWithBTOF(UShort_t val) 	{mNumMatchesWithTOF  = val;} 
+    void setNumMatchesWithBEMC(UShort_t val) 	{mNumMatchesWithBEMC = val;}
+    void setNumMatchesWithEEMC(UShort_t val) 	{mNumMatchesWithEEMC = val;}
+    void setNumNotMatchesWithCTB(UShort_t val)  {mNumNotMatchesWithCTB  = val;}
+    void setNumNotMatchesWithTOF(UShort_t val)  {mNumNotMatchesWithTOF  = val;}
+    void setNumNotMatchesWithBTOF(UShort_t val) {mNumNotMatchesWithTOF  = val;}
+    void setNumNotMatchesWithBEMC(UShort_t val) {mNumNotMatchesWithBEMC = val;}
+    void setNumNotMatchesWithEEMC(UShort_t val) {mNumNotMatchesWithEEMC = val;}
+    void setVertexFinderId(StVertexFinderId val)           {mVertexFinderId = val;}
+    void setNumTracksUsedInFinder(UShort_t val)            {mNumTracksUsedInFinder = val;}
+    void setNumTracksCrossingCentralMembrane(UShort_t val) {mNumTracksCrossingCentralMembrane = val;}
+    void setMeanDip(Float_t val)                           {mMeanDip = val;}
+    void setSumOfTrackPt(Float_t val)                      {mSumOfTrackPt = val;}
+    void setRanking(Float_t val)                           {mRanking = val;}
+    void setNumTracksWithPromptHit(UShort_t p)             {mNumTracksWithPromptHit = p;}
+    void setNumPostXTracks(UShort_t p)              {mNumPostXTracks = p;}
+    void Print(Option_t *option="") const {cout << option << *this << endl; }
 private:
     void init();
-    
 protected:
     StSPtrVecPrimaryTrack    mDaughters;
-    StSPtrVecPrimaryTrack    mEstDaughters;  // remove when EST becomes standard
 
 private:
     StVertexFinderId mVertexFinderId; 
+    Char_t           mBeg[1]; //! 
     UShort_t         mNumTracksUsedInFinder;
     UShort_t         mNumMatchesWithCTB; 
+    UShort_t         mNumMatchesWithTOF; 
     UShort_t         mNumMatchesWithBEMC;
     UShort_t         mNumMatchesWithEEMC;
+    UShort_t         mNumNotMatchesWithCTB; 
+    UShort_t         mNumNotMatchesWithTOF; 
+    UShort_t         mNumNotMatchesWithBEMC;
+    UShort_t         mNumNotMatchesWithEEMC;
     UShort_t         mNumTracksCrossingCentralMembrane; 
     Float_t          mMeanDip;
     Float_t          mSumOfTrackPt;
     Float_t          mRanking;
-    UShort_t         mNumMatchesWithBTOF;
-
-    ClassDef(StPrimaryVertex,5)
+    UShort_t         mNumTracksWithPromptHit;
+    UShort_t         mNumPostXTracks;
+    Char_t           mEnd[1]; //!
+    ClassDef(StPrimaryVertex,6)
 };
-
-inline StVertexFinderId StPrimaryVertex::vertexFinderId() const {return mVertexFinderId;}
-inline unsigned short StPrimaryVertex::numTracksUsedInFinder() const {return mNumTracksUsedInFinder;}
-inline unsigned short StPrimaryVertex::numMatchesWithCTB() const {return mNumMatchesWithCTB;} 
-inline unsigned short StPrimaryVertex::numMatchesWithBEMC() const {return mNumMatchesWithBEMC;} 
-inline unsigned short StPrimaryVertex::numMatchesWithEEMC() const {return mNumMatchesWithEEMC;} 
-inline unsigned short StPrimaryVertex::numMatchesWithBTOF() const {return mNumMatchesWithBTOF;} 
-inline unsigned short StPrimaryVertex::numTracksCrossingCentralMembrane() const {return mNumTracksCrossingCentralMembrane;} 
-inline float StPrimaryVertex::meanDip() const {return mMeanDip;}
-inline float StPrimaryVertex::sumOfTrackPt() const {return mSumOfTrackPt;}
-inline float StPrimaryVertex::ranking() const {return mRanking;}
-inline void StPrimaryVertex::setVertexFinderId(StVertexFinderId val) {mVertexFinderId = val;}
-inline void StPrimaryVertex::setNumTracksUsedInFinder(unsigned short val) {mNumTracksUsedInFinder = val;}
-inline void StPrimaryVertex::setNumMatchesWithCTB(unsigned short val) {mNumMatchesWithCTB = val;}
-inline void StPrimaryVertex::setNumMatchesWithBEMC(unsigned short val) {mNumMatchesWithBEMC = val;}
-inline void StPrimaryVertex::setNumMatchesWithEEMC(unsigned short val) {mNumMatchesWithEEMC = val;}
-inline void StPrimaryVertex::setNumMatchesWithBTOF(unsigned short val) {mNumMatchesWithBTOF = val;}
-inline void StPrimaryVertex::setNumTracksCrossingCentralMembrane(unsigned short val) {mNumTracksCrossingCentralMembrane = val;}
-inline void StPrimaryVertex::setMeanDip(float val) {mMeanDip = val;}
-inline void StPrimaryVertex::setSumOfTrackPt(float val) {mSumOfTrackPt = val;}
-inline void StPrimaryVertex::setRanking(float val) {mRanking = val;}
-
 #endif

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcCluster.h,v 2.8 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StEmcCluster.h,v 2.9 2012/05/07 14:42:57 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.h,v $
+ * Revision 2.9  2012/05/07 14:42:57  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.8  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -44,10 +47,10 @@
 #define StEmcCluster_hh
 
 #include <Stiostream.h>
-#include "StObject.h"
+#include "StHit.h"
 #include "StContainers.h"
 
-class StEmcCluster : public StObject {
+class StEmcCluster : public StHit {
 public:
     StEmcCluster();
     ~StEmcCluster();
@@ -90,7 +93,7 @@ private:
     StPtrVecEmcCluster mNeighbors;
     StPtrVecTrack      mTracks;
     
-    ClassDef(StEmcCluster,1)
+    ClassDef(StEmcCluster,2)
 };
 
 ostream& operator<<(ostream&, const StEmcCluster&); // Printing operator

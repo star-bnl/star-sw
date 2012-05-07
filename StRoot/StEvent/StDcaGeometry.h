@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDcaGeometry.h,v 2.6 2012/03/28 13:39:46 fisyak Exp $
+ * $Id: StDcaGeometry.h,v 2.7 2012/05/07 14:42:57 fisyak Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.h,v $
+ * Revision 2.7  2012/05/07 14:42:57  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.6  2012/03/28 13:39:46  fisyak
  * Add default parameter for Print
  *
@@ -45,7 +48,7 @@ public:
     StDcaGeometry();
     virtual ~StDcaGeometry();
 
-    Int_t            charge()    const {return (mPti<0)? -1:1;}  
+    Int_t            charge()    const {return (mPti>0)? -1:1;}  // synchro with StiTrackNode charge definition
     Double_t         impact()    const {return mImp;}		  
     Double_t         curvature() const {return mCurv;}		  
     Double_t         psi()       const {return mPsi ;}		  

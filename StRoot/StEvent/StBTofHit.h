@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBTofHit.h,v 2.3 2009/02/13 22:29:03 ullrich Exp $
+ * $Id: StBTofHit.h,v 2.4 2012/05/07 14:42:57 fisyak Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHit.h,v $
+ * Revision 2.4  2012/05/07 14:42:57  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.3  2009/02/13 22:29:03  ullrich
  * Fixed typo in ostream<< operator.
  *
@@ -29,55 +32,51 @@
 #define StBTofHit_hh
 
 #include <Stiostream.h>
-#include "StObject.h"
+#include "StHit.h"
 #include "StContainers.h"
 
 class StTrack;
 
-class StBTofHit : public StObject {
-public:
-    StBTofHit();
-    ~StBTofHit();
-
-    int             tray() const;
-    int             module() const;
-    int             cell() const;
-    double          leadingEdgeTime() const;
-    double          trailingEdgeTime() const;
-    double          tot() const;
-
-    StTrack*        associatedTrack();
-    const StTrack*  associatedTrack() const;
-    
-    int             idTruth() const;
-    int             qaTruth() const;
-
-    void setTray(unsigned char);
-    void setModule(unsigned char);
-    void setCell(unsigned char);
-    void setLeadingEdgeTime(double);
-    void setTrailingEdgeTime(double);
-    void setAssociatedTrack(StTrack*);
-    void setIdTruth(Int_t idtru, Int_t qatru=0);
-
+class StBTofHit : public StHit {
+ public:
+  enum {
+    kNTray   = 120,  //! 120 TOF trays
+    kNModule =  32,  //! 32 modules per tray
+    kNCell     = 6   //! 6 cells per module
+  };
+  StBTofHit();
+  ~StBTofHit() {}
+  Int_t             tray()             const { return mTray; }
+  Int_t             module()           const { return mModule; }
+  Int_t             cell()             const { return mCell; }
+  Int_t             ID()               const { return kNModule*(tray()-1) + module() - 1;}
+  Double_t          leadingEdgeTime()  const { return mLeadingEdgeTime; }
+  Double_t          trailingEdgeTime() const { return mTrailingEdgeTime; }
+  Double_t          tot()              const { return mTrailingEdgeTime - mLeadingEdgeTime; }
+  StTrack*          associatedTrack();
+  const StTrack*    associatedTrack() const;
+  void setTray(UChar_t trayId)            { mTray = trayId; }
+  void setModule(UChar_t moduleId)        { mModule = moduleId; }
+  void setCell(UChar_t cellId)            { mCell = cellId; }
+  void setLeadingEdgeTime(Double_t time)  { mLeadingEdgeTime = time; }
+  void setTrailingEdgeTime(Double_t time) { mTrailingEdgeTime = time; }
+  void setAssociatedTrack(StTrack*);
+  const StThreeVectorF& position() const;
+  static Float_t    padWidth()            { return mBTofPadWidth;}
  protected:
-    UChar_t   mTray;
-    UChar_t   mModule;
-    UChar_t   mCell;
-    Double_t  mLeadingEdgeTime;
-    Double_t  mTrailingEdgeTime;
-    //    StTrack *mAssociatedTrack;   //$LINK
+  UChar_t   mTray;
+  UChar_t   mModule;
+  UChar_t   mCell;
+  Double_t  mLeadingEdgeTime;
+  Double_t  mTrailingEdgeTime;
+  const static Float_t mBTofPadWidth;
+  //    StTrack *mAssociatedTrack;   //$LINK
 #ifdef __CINT__
-    StObjLink        mAssociatedTrack;		
+  StObjLink        mAssociatedTrack;		
 #else
-    StLink<StTrack>  mAssociatedTrack;		
+  StLink<StTrack>  mAssociatedTrack;		
 #endif //__CINT__
-    UShort_t  mIdTruth;  // simulation associated track id
-    UShort_t  mQuality;  // quality of this information (percentage of charge produced by mIdTruth)
-
-    ClassDef(StBTofHit,1)
+  ClassDef(StBTofHit,2)
 };
-
 ostream& operator<<(ostream&, const StBTofHit&); // Printing operator
-
 #endif

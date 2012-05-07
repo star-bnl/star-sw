@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.h,v 2.8 2009/11/23 22:20:51 ullrich Exp $
+ * $Id: StPrimaryTrack.h,v 2.9 2012/05/07 14:42:57 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.h,v $
+ * Revision 2.9  2012/05/07 14:42:57  fisyak
+ * Add handilings for Track to Fast Detectors Matching
+ *
  * Revision 2.8  2009/11/23 22:20:51  ullrich
  * Minor cleanup performed, fixed compiler warnings.
  *
@@ -45,27 +48,26 @@
 
 #include "StTrack.h"
 class StPrimaryVertex;
+class StPrimaryTrack;
+ostream&  operator<<(ostream& os,  const StPrimaryTrack& t);
 
 class StPrimaryTrack : public StTrack {
-public:
-    StPrimaryTrack();
-    StPrimaryTrack(const StPrimaryTrack&);
-    StPrimaryTrack& operator=(const StPrimaryTrack&);
-    ~StPrimaryTrack();
+ public:
+  StPrimaryTrack();
+  ~StPrimaryTrack()  {/* noop */}
 
-    StTrackType      type() const;
-    const StVertex*  vertex() const;
-
-    void setVertex(StVertex*);
-    
-private:
-//  StPrimaryVertex*         	mVertex; 	//$LINK
+  StTrackType      type() const  { return primary; }
+  const StVertex*  vertex() const;
+  
+  void setVertex(StVertex*);
+  void Print(Option_t *option="") const {cout << option << *this << endl; }
+ private:
+  //  StPrimaryVertex*         	mVertex; 	//$LINK
 #ifdef __CINT__
-    StObjLink  		mVertex; 	
+  StObjLink  		mVertex; 	
 #else
-    StLink<StPrimaryVertex>  	mVertex; 	
+  StLink<StPrimaryVertex>  	mVertex; 	
 #endif //__CINT__
-    
-    ClassDef(StPrimaryTrack,2)
+  ClassDef(StPrimaryTrack,2)
 };
 #endif
