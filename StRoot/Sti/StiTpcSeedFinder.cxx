@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.cxx,v 2.6 2011/02/05 14:58:04 fisyak Exp $
+// $Id: StiTpcSeedFinder.cxx,v 2.7 2012/05/07 14:55:38 fisyak Exp $
 #ifdef DO_TPCCATRACKER
 #include "StiTpcSeedFinder.h"
 #include "StiToolkit.h"
@@ -14,148 +14,9 @@
 #ifdef PRINT_FIT_ERR_STATISTIC
 #include <map>
 #endif // PRINT_FIT_ERR_STATISTIC
-
-
-static const Short_t kPadRows = 44;
-static const Short_t kStartRow = 0;
-static const Double_t innerSectorPadPitch = 0.335;
-static const Double_t outerSectorPadPitch = 0.675;
-static const Double_t mTimeBinWidth = 1.06580379191673078e-7;
-static const Double_t DriftVelocity = 5.5e-6;
-static const Int_t split = 99;
-static const Int_t bsize = 64000;
-static const Int_t kMaxSector = 24;
 //#define EXTRAPOLATION_CUT
 //#define KINK_REJECTION  
 #define OVERLAP_REJECTION
-
-static Double_t innerR[13] = {60.000,  64.800,  69.600,  74.400,  79.200, //  5
-			      84.000,  88.800,  93.600,  98.800, 104.000, // 10
-			      109.200, 114.400, 119.600};
-static Double_t outerR[32] = {127.195, 129.195, // 15
-			      131.195, 133.195, 135.195, 137.195, 139.195, // 20
-			      141.195, 143.195, 145.195, 147.195, 149.195, // 25
-			      151.195, 153.195, 155.195, 157.195, 159.195, // 30
-			      161.195, 163.195, 165.195, 167.195, 169.195, // 35
-			      171.195, 173.195, 175.195, 177.195, 179.195, // 40
-			      181.195, 183.195, 185.195, 187.195, 189.195};// 45
-static const Int_t NumberOfPadsAtRow[45] = {
-    88, 96,104,112,118,126,134,142,150,158, // Inner
-   166,174,182,
-                98,100,102,104,106,106,108, // Outer
-   110,112,112,114,116,118,120,122,122,124,
-   126,128,128,130,132,134,136,138,138,140,
-   142,144,144,144,144
-};
-//________________________________________________________________________________
-Int_t StiTpcSeedFinder::padp(Int_t pad, Int_t row) {
-  Int_t p = 0;
-  p = (Int_t)(pad - NumberOfPadsAtRow[row]/2);
-  if(row<13)
-    p = (Int_t)p/2;
-  return p;
-}
-//________________________________________________________________________________
-Double_t StiTpcSeedFinder::padpF(Double_t pad, Int_t row) {
-  Double_t p = 0;
-  p = (Double_t)(pad - NumberOfPadsAtRow[row]/2);
-  if(row<13)
-    p = (Double_t)p/2;
-  return p;
-}
-//________________________________________________________________________________
-Double_t StiTpcSeedFinder::padpFNoScale(Double_t pad, Int_t row){
-  Double_t spad = pad - NumberOfPadsAtRow[row]/2;
-  return spad;
-}
-//________________________________________________________________________________
-Double_t StiTpcSeedFinder::shiftToPad(Double_t spad, Int_t row){
-  Double_t pad = spad + (NumberOfPadsAtRow[row])/2.;
-  return pad;
-}
-//________________________________________________________________________________
-Double_t StiTpcSeedFinder::padToX(Double_t pad, Int_t row){
-  Double_t x = 0;
-  if(row >= 13)
-    x = outerSectorPadPitch * padpFNoScale(pad, row);
-  else
-    x = innerSectorPadPitch * padpFNoScale(pad, row);
-  return x;
-}
-//________________________________________________________________________________
-Double_t StiTpcSeedFinder::xToPad(Double_t x, Int_t row){
-  Double_t pad = 0;
-  if(row >= 13)
-    pad = shiftToPad(x/outerSectorPadPitch, row);
-  else
-    pad = shiftToPad(x/innerSectorPadPitch, row);
-  return pad;
-}
-//________________________________________________________________________________
-Double_t StiTpcSeedFinder::rowToY(Int_t row){
-  Double_t y;
-  if(row>=13)
-    y = outerR[row-13];
-  else
-    y = innerR[row];
-  return y;
-}
-//________________________________________________________________________________
-Double_t StiTpcSeedFinder::zToTime(Double_t z, Int_t row){
-  Double_t time = 0;
-  time = z;
-  return time;
-}
-//________________________________________________________________________________
-Double_t StiTpcSeedFinder::timeToZ(Double_t time, Int_t row){
-  Double_t z = 0;
-  z = time;
-  return z;
-}
-//________________________________________________________________________________
-void StiTpcSeedFinder::clusterXYZ(Double_t pad, Int_t row, Double_t time, Double_t &x, Double_t &y, Double_t &z) {
-  x = padToX(pad, row);
-  y = rowToY(row);
-  z = timeToZ(time, row);
-}
-//________________________________________________________________________________
-void StiTpcSeedFinder::clusterPRT(Double_t x, Double_t z, Double_t &pad, Double_t &time, Int_t row){
-  pad = xToPad(x, row);
-  time = zToTime(z, row);//(z * DriftVelocity) / mTimeBinWidth;
-}
-//________________________________________________________________________________
-Bool_t StiTpcSeedFinder::OverONot(SeedHit_t *hit, SeedHit_t *match, Int_t tollerance) {
-  Bool_t status = kFALSE;
-  if( (((hit->mMinPad  >= match->mMinPad-tollerance && 
-	 hit->mMinPad  <= match->mMaxPad+tollerance) || 
-	(hit->mMaxPad  >= match->mMinPad-tollerance && 
-	 hit->mMaxPad  <= match->mMaxPad+tollerance)) 
-       && 
-       (
-	(hit->mMinTmbk >= match->mMinTmbk-tollerance && 
-	 hit->mMinTmbk <= match->mMaxTmbk+tollerance) || 
-	(hit->mMaxTmbk >= match->mMinTmbk-tollerance && 
-	 hit->mMaxTmbk <= match->mMaxTmbk+tollerance)
-	)
-       ) 
-      ||
-      (((hit->mMinPad  >= match->mMinPad-tollerance &&
-	 hit->mMaxPad  <= match->mMaxPad+tollerance) || 
-	(hit->mMinPad  <= match->mMinPad+tollerance &&
-	 hit->mMaxPad  >= match->mMaxPad-tollerance)) && 
-       ((hit->mMinTmbk >= match->mMinTmbk+tollerance &&
-	 hit->mMaxTmbk <= match->mMaxTmbk-tollerance) || 
-	(hit->mMinTmbk <= match->mMinTmbk+tollerance && 
-	 hit->mMaxTmbk >= match->mMaxTmbk-tollerance))) ) {
-    status = kTRUE;
-  }
-  return status;
-}
-//________________________________________________________________________________
-// sort for the status 
-Bool_t StiTpcSeedFinder::HitsCompareStatus(const SeedHit_t a, const SeedHit_t b){
-  return (a.status > b.status);
-}
 //________________________________________________________________________________
 Bool_t StiTpcSeedFinder::SeedsCompareStatus(const Seed_t a, const Seed_t b){
   return (a.total_hits < b.total_hits);
@@ -230,6 +91,9 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
 }
 #endif /* DO_TPCCATRACKER */
 // $Log: StiTpcSeedFinder.cxx,v $
+// Revision 2.7  2012/05/07 14:55:38  fisyak
+// Clean up from hard coded Tpc parameters
+//
 // Revision 2.6  2011/02/05 14:58:04  fisyak
 // reduce print outs
 //

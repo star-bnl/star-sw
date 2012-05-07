@@ -28,6 +28,7 @@
   // for sti perfo
 #include "TPCCATracker/code/AliHLTTPCCAStiPerformance.h"
 #include "TPCCATracker/code/AliHLTTPCCAMergerPerformance.h"
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StiKalmanTrack.h"
 
 #include <vector>
@@ -287,19 +288,8 @@ void StiTPCCATrackerInterface::MakeSettings()
 {
 
   const int NSlices = 24; //TODO initialize from StRoot
-  const int NRows = 45;
-
-  Float_t R[NRows] = {   60.000,  64.800,  69.600,  74.400,  79.200, //  5  //TODO initialize from StRoot
-                         84.000,  88.800,  93.600,  98.800, 104.000, // 10
-                         109.200, 114.400, 119.600, 
-                         127.195, 129.195, // 15
-                         131.195, 133.195, 135.195, 137.195, 139.195, // 20
-                         141.195, 143.195, 145.195, 147.195, 149.195, // 25
-                         151.195, 153.195, 155.195, 157.195, 159.195, // 30
-                         161.195, 163.195, 165.195, 167.195, 169.195, // 35
-                         171.195, 173.195, 175.195, 177.195, 179.195, // 40
-                         181.195, 183.195, 185.195, 187.195, 189.195};// 45
-
+  const int NoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
+  const int NRows = St_tpcPadPlanesC::instance()->padRows();
   for ( int iSlice = 0; iSlice < NSlices; iSlice++ ) {
     AliHLTTPCCAParam SlicePar;
     memset(&SlicePar, 0, sizeof(AliHLTTPCCAParam));
@@ -334,7 +324,11 @@ void StiTPCCATrackerInterface::MakeSettings()
       SlicePar.SetZMax     (   0. );                                        //TODO initialize from StRoot
     }
     for( int iR = 0; iR < NRows; iR++){
-      SlicePar.SetRowX(iR, R[iR]);
+      if (iR < NoOfInnerRows) {
+	SlicePar.SetRowX(iR, St_tpcPadPlanesC::instance()->innerRowRadii()[iR]);
+      } else {
+	SlicePar.SetRowX(iR, St_tpcPadPlanesC::instance()->outerRowRadii()[iR-NoOfInnerRows]);
+      }
     }
 
     Double_t *coeffInner = StiTpcInnerHitErrorCalculator::instance()->coeff();
@@ -406,10 +400,10 @@ void StiTPCCATrackerInterface::MakeHits()
 
         // obtain seed Hit
       SeedHit_t hitc;
-      hitc.mMinPad  = fSeedFinder->padp((Int_t) tpcHit->minPad(),  tpcHit->padrow()-1);
-      hitc.mMaxPad  = fSeedFinder->padp((Int_t) tpcHit->maxPad(),  tpcHit->padrow()-1);
-      hitc.mMinTmbk = (Int_t) tpcHit->minTmbk();
-      hitc.mMaxTmbk = (Int_t) tpcHit->maxTmbk();
+      hitc.mMinPad  = tpcHit->minPad();
+      hitc.mMaxPad  = tpcHit->maxPad();
+      hitc.mMinTmbk = tpcHit->minTmbk();
+      hitc.mMaxTmbk = tpcHit->maxTmbk();
       hitc.padrow = tpcHit->padrow()-1;
       hitc.x = loc.position().x();
       hitc.y = loc.position().y();
@@ -688,7 +682,7 @@ void StiTPCCATrackerInterface::FillPerformance(const vector<AliHLTTPCCAGBHit>& c
     mcTracks[0].SetFirstMCPointID(0);
     int iPLast = 0;
     int iTr = 0;
-    for( int iP = 0; iP < mcPoints.size(); ++iP ) {
+    for( UInt_t iP = 0; iP < mcPoints.size(); ++iP ) {
       if ( mcPoints[iP].TrackI() != iTr ) {
         mcTracks[iTr].SetNMCPoints(iP - iPLast);
         iPLast = iP;
