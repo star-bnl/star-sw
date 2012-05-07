@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.8 2011/03/31 19:27:47 fisyak Exp $
+ * $Id: StTpcRawData.h,v 2.9 2012/05/07 14:41:59 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.9  2012/05/07 14:41:59  fisyak
+ * Remove hardcoded separation between Inner and Outer Sectors
+ *
  * Revision 2.8  2011/03/31 19:27:47  fisyak
  * Add more safety for work with pixel data
  *
@@ -43,7 +46,7 @@
 #include <utility>
 #include "StSequence.hh"
 #include "StTpcPixel.h"
-#define __NumberOfRows__ 45
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #define __MaxNumberOfTimeBins__ 512
 typedef std::vector<Short_t>  StVectorADC;
 typedef std::vector<UShort_t> StVectorIDT;
@@ -113,7 +116,7 @@ public:
     virtual void   Print(const Option_t *opt="") const;
     virtual Int_t  PrintTimeAdc(Int_t row, Int_t pad) const;
     StTpcDigitalSector &operator+= (StTpcDigitalSector& v);
-    static Int_t numberOfPadsAtRow(Int_t row);
+    Int_t numberOfPadsAtRow(Int_t row) {return (row > 0 && row <= mNoRows) ? St_tpcPadPlanesC::instance()->padsPerRow(row) : 0;}
     StTpcDigitalSector& operator=(const StTpcDigitalSector&);
 private:
     StTpcDigitalSector(const StTpcDigitalSector&);
@@ -124,8 +127,8 @@ private:
     StVecPads             mPadList;
     StVecSequence         mSequence;
     StVecIds              mIds;
-    
-    ClassDef(StTpcDigitalSector,1)
+    Int_t                 mNoRows;
+    ClassDef(StTpcDigitalSector,2)
 };
 
 class StTpcRawData : public StObject {
