@@ -48,7 +48,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.92 2011/02/02 20:21:06 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.93 2012/05/07 14:44:50 fisyak Exp $";
 //______________________________________________________________________________
 ClassImp(StEventMaker)
     //______________________________________________________________________________
@@ -422,6 +422,20 @@ StEventMaker::makeEvent()
 	    }
 // We need to make a copy of the nominal to avoid problems in delete??
 	    if (triggerIdColl->nominal()) triggerIdColl->setNominal(new StTriggerId(*(triggerIdColl->nominal())));
+	    if (StTpcDb::instance()) {
+	      Int_t TriggerId = -1; // Unknown
+	      if (triggerIdColl) {
+		static Int_t goodIds[5] = {9200,9201,310811,310812,310813};
+		const StTriggerId *nominal = triggerIdColl->nominal();
+		TriggerId = 0;
+		if (nominal) {
+		  for (Int_t i = 0; i < 5; i++) {
+		    if (nominal->isTrigger(goodIds[i])) {TriggerId = goodIds[i]; break;}
+		  }
+		}
+	      }
+	      StTpcDb::instance()->SetTriggerId(TriggerId);
+	    }
 	}
     }
     
@@ -836,8 +850,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.92 2011/02/02 20:21:06 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.93 2012/05/07 14:44:50 fisyak Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.93  2012/05/07 14:44:50  fisyak
+ * Give StTpcDb hit about TriggerId
+ *
  * Revision 2.92  2011/02/02 20:21:06  ullrich
  * Changes die to modified StTriggerId (32 -> 64 bit) (Jamie)
  *
