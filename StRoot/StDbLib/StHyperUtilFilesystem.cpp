@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <sstream>
+#include <limits.h>
 
 namespace StHyperUtilFilesystem
 {
