@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.28 2012/05/07 15:51:01 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.29 2012/05/07 23:01:37 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -52,6 +52,7 @@ ClassImp(StTpcRTSHitMaker);
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
   SafeDelete(fTpx);
+   delete [] mTpx_RowLen;
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Init() {
@@ -65,7 +66,15 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
-  NoRows = St_tpcPadPlanesC::instance()->innerPadRows()+St_tpcPadPlanesC::instance()->outerPadRows();
+  Int_t NoRowsInner = St_tpcPadPlanesC::instance()->innerPadRows();
+  Int_t NoRowsOuter = St_tpcPadPlanesC::instance()->outerPadRows();
+  NoRows = NoRowsInner + NoRowsOuter;
+  // Fill no. of pad per row 
+  mTpx_RowLen = new UChar_t[NoRows+1];
+  mTpx_RowLen[0] = 0;
+  for (Int_t i = 1; i <= NoRows; i++) {
+    mTpx_RowLen[i] = St_tpcPadPlanesC::instance()->padsPerRow(i);
+  }
   SetAttr("maxRow",NoRows);
   SafeDelete(fTpx);
   fTpx = new daq_tpx() ; 
@@ -86,11 +95,11 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     Int_t liveSecPads = 0;
     Int_t totalSecPads = 0;
     for(Int_t row=1;row<=NoRows;row++) {
-      daq_det_gain *gain = (daq_det_gain *) dta->request(183);	// max pad+1		
+      Int_t numPadsAtRow = St_tpcPadPlanesC::instance()->padsPerRow(row);
+      daq_det_gain *gain = (daq_det_gain *) dta->request(numPadsAtRow+1);	// max pad+1		
       assert(gain);
       gain[0].gain = 0.0;	// kill pad0 just in case..
       gain[0].t0   = 0.0;
-      Int_t numPadsAtRow = St_tpcPadPlanesC::instance()->padsPerRow(row);
       for(Int_t pad = 1; pad <= numPadsAtRow; pad++) {
 	if (m_Mode == 2) {
 	  if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) > 0) 
@@ -104,7 +113,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	  gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
 	}
       }
-      dta->finalize(183,sector,row);
+      dta->finalize(numPadsAtRow+1,sector,row);
       if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
         totalSecPads += numPadsAtRow;
         if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
@@ -177,7 +186,7 @@ Int_t StTpcRTSHitMaker::Make() {
     StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
     if (! digitalSector) continue;
     UShort_t Id = 0;
-    daq_dta *dta = fTpx->put("adc_sim"); // used for any kind of data; transparent pointer
+    daq_dta *dta = fTpx->put("adc_sim",0,NoRows+1,0,mTpx_RowLen); // used for any kind of data; transparent pointer
     Int_t hitsAdded = 0;
     Int_t nup = 0;
     Int_t NoAdcs = 0;
