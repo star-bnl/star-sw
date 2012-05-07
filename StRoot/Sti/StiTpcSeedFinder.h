@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.h,v 2.2 2010/09/06 18:20:49 fisyak Exp $
+// $Id: StiTpcSeedFinder.h,v 2.3 2012/05/07 14:55:38 fisyak Exp $
 #ifndef __StiTpcSeedFinder_h__
 #define __StiTpcSeedFinder_h__
 #ifdef DO_TPCCATRACKER
@@ -21,23 +21,13 @@ struct Seed_t {
 };
 class StiTpcSeedFinder {
  public:
-  static Int_t    padp(Int_t pad, Int_t row);
-  static Double_t padpF(Double_t pad, Int_t row);
-  static Double_t padpFNoScale(Double_t pad, Int_t row);
-  static Double_t shiftToPad(Double_t spad, Int_t row);
-  static Double_t padToX(Double_t pad, Int_t row);
-  static Double_t xToPad(Double_t x, Int_t row);
-  static Double_t rowToY(Int_t row);
-  static Double_t zToTime(Double_t z, Int_t row);
-  static Double_t timeToZ(Double_t time, Int_t row);
-  static void     clusterXYZ(Double_t pad, Int_t row, Double_t time, Double_t &x, Double_t &y, Double_t &z);
-  static void     clusterPRT(Double_t x, Double_t z, Double_t &pad, Double_t &time, Int_t row);
-  static Bool_t   OverONot(SeedHit_t *hit, SeedHit_t *match, Int_t tollerance);
-  static Bool_t   HitsCompareStatus(const SeedHit_t a, const SeedHit_t b);
   static Bool_t   SeedsCompareStatus(const Seed_t a, const Seed_t b);
   static void     findTpcTracks(StiTPCCATrackerInterface &caTrackerInt);
 };
 // $Log: StiTpcSeedFinder.h,v $
+// Revision 2.3  2012/05/07 14:55:38  fisyak
+// Clean up from hard coded Tpc parameters
+//
 // Revision 2.2  2010/09/06 18:20:49  fisyak
 // Add TPCCATracker
 //
