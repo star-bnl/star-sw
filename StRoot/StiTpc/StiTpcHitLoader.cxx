@@ -15,22 +15,25 @@
 #include "Sti/StiDetectorBuilder.h"
 #include "StiTpcHitLoader.h"
 #include "Sti/StiHitTest.h"
+#include "Sti/StiKalmanTrackNode.h"
 #include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 //________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"), 
-				    _minRow(1), _maxRow(45), _minSector(1), _maxSector(24) {}
+				    _minRow(1), _maxRow(-1), _minSector(1), _maxSector(24) {}
 //________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(StiHitContainer* hitContainer,
                                  Factory<StiHit>*hitFactory,
                                  StiDetectorBuilder * detector)
 : StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader",hitContainer,hitFactory,detector), 
-				    _minRow(1), _maxRow(45), _minSector(1), _maxSector(24) {}
+				    _minRow(1), _maxRow(-1), _minSector(1), _maxSector(24) {}
 //________________________________________________________________________________
 void StiTpcHitLoader::loadHits(StEvent* source,
                                Filter<StiTrack> * trackFilter,
                                Filter<StiHit> * hitFilter)
 {
   Int_t debug = 0;
+  _maxRow = St_tpcPadPlanesC::instance()->padRows();
   cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Started" << endl;
   if (!_detector)
     throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
@@ -55,7 +58,6 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       cout << "StiTpcHitLoader::loadHits(StEvent* source) -W- no hits for sector:"<<sector<<endl;
       break;
     }
-    //    for (UInt_t row=0; row<45; row++)
     Float_t driftvel = 1e-6*gStTpcDb->DriftVelocity(sector+1); // cm/mkmsec
     for (UInt_t row=_minRow-1; row<_maxRow; row++) {
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
@@ -69,7 +71,9 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       StiHitTest hitTest;
       for (iter = hitvec.begin();iter != hitvec.end();++iter)        {
         StTpcHit*hit=*iter;
+	if (StiKalmanTrackNode::IsLaser() && hit->flag()) continue;
 	if (hit->flag() & FCF_CHOPPED || hit->flag() & FCF_SANITY)     continue; // ignore hits marked by AfterBurner as chopped or bad sanity
+	if (hit->pad() > 182 || hit->timeBucket() > 511) continue; // some garbadge  for y2001 daq
         if(!_hitFactory) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- _hitFactory==0");
         stiHit = _hitFactory->getInstance();
         if(!stiHit)   throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- stiHit==0");

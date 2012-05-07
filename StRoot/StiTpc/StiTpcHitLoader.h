@@ -28,7 +28,6 @@ class StiTpcHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
 			Filter<StiTrack> * trackFilter, 
 			Filter<StiHit> * hitFilter);
   void         setMinRow(UInt_t r= 1) {_minRow = r;}
-  void         setMaxRow(UInt_t r=45) {_maxRow = r;}
   void         setMinSector(UInt_t r= 1) {_minSector = r;}
   void         setMaxSector(UInt_t r=24) {_maxSector = r;}
   UInt_t        minRow() {return _minRow;}

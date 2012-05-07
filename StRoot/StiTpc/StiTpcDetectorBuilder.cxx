@@ -30,16 +30,10 @@
 #include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 //#define TPC_IDEAL_GEOM
 
-StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, const string & inputFile)
-  : StiDetectorBuilder("Tpc",active,inputFile), _fcMaterial(0)
-{
-}
+StiTpcDetectorBuilder::StiTpcDetectorBuilder(Bool_t active, const string & inputFile)
+  : StiDetectorBuilder("Tpc",active,inputFile), _fcMaterial(0){}
 
-
-
-StiTpcDetectorBuilder::~StiTpcDetectorBuilder()
-{}
-
+StiTpcDetectorBuilder::~StiTpcDetectorBuilder() {}
 
 /*! Build all detector components of the TPC.
 The material currently used are P10, and NOMEX. The properties
@@ -59,7 +53,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
 }
 //________________________________________________________________________________
 void StiTpcDetectorBuilder::useVMCGeometry() {
-  int debug = 0;
+  Int_t debug = 0;
 
   if (debug>1) StiVMCToolKit::SetDebug(1);
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
@@ -72,15 +66,20 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     //  {"TOFC","outer field cage - fill it with insulating gas already","HALL_1/CAVE_1/TPCE_1/TOFC_1/*","",""},
     {"TIFC","Inner Field Cage","HALL_1/CAVE_1/TPCE_1/TIFC_1","",""},
     {"TIFC","Inner Field Cage","HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TIFC_1","",""},
+    {"TOFC","Inner Field Cage","HALL_1/CAVE_1/TPCE_1/TOFC_1","",""},
+    {"TOFC","Inner Field Cage","HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TOFC_1","",""},
     //  {"TPGV","the Gas Volume placed in TPC","HALL_1/CAVE_1/TPCE_1/TPGV_1-2/*","",""},
     //  {"TPSS","a division of gas volume corresponding to a supersectors","HALL_1/CAVE_1/TPCE_1/TPGV_1-2/TPSS_1-12/*","",""},
     {"TPAD","inner pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d","tpc",""},// <+++
     {"TPA1","outer pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPA1_%d","tpc",""},
     {"tpad","all pad rows","/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TpcSectorWhole_%d/TpcGas_1/TpcPadPlane_%d/tpad_%d","tpc"} // VMC
   };
+  Bool_t newRefSystem = kTRUE;
+  TString path("HALL_1/CAVE_1/TpcRefSys_1/TPCE_1");
+  if (! gGeoManager->cd(path)) newRefSystem = kFALSE;
 
   // change to +1 instead of +2 to remove the ofc.
-  unsigned int nRows = St_tpcPadPlanesC::instance()->numberOfRows();// Only sensitive detectors
+  UInt_t nRows = St_tpcPadPlanesC::instance()->numberOfRows();// Only sensitive detectors
   setNRows(nRows);
   UInt_t row;
 #if 0
@@ -88,7 +87,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 #else
   Int_t NoStiSectors = 12;
 #endif
-  for (row = 0; row < nRows - 1; row++) setNSectors(row,NoStiSectors);
+  for (row = 0; row < nRows; row++) setNSectors(row,NoStiSectors);
   // Get Materials
   TGeoVolume *volT = gGeoManager->GetVolume("TPAD"); 
   if (! volT) volT = gGeoManager->GetVolume("tpad"); 
@@ -107,12 +106,12 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   StiPlanarShape *pShape;
   //Active TPC padrows
-  //  double radToDeg = 180./3.1415927;
+  //  Double_t radToDeg = 180./3.1415927;
   StTpcCoordinateTransform transform(gStTpcDb);
   StMatrixD  local2GlobalRotation;
   StMatrixD  unit(3,3,1);
   StThreeVectorD RowPosition;
-  unsigned int _nInnerPadrows = St_tpcPadPlanesC::instance()->numberOfInnerRows();
+  UInt_t nInnerPadrows = St_tpcPadPlanesC::instance()->numberOfInnerRows();
   for(row = 0; row<45; row++)    {
     //Nominal pad row information.
     // create properties shared by all sectors in this padrow
@@ -122,7 +121,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     if (!pShape)
       throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - pShape==0||ofcShape==0");
     Double_t dZ = 0;
-    if(row<_nInnerPadrows) {
+    if(row < nInnerPadrows) {
       pShape->setThickness(St_tpcPadPlanesC::instance()->innerSectorPadLength());
       dZ = St_tpcPadPlanesC::instance()->innerSectorPadPlaneZ();
     }
@@ -133,14 +132,14 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     pShape->setHalfDepth(dZ*24/NoStiSectors);
     pShape->setHalfWidth(St_tpcPadPlanesC::instance()->PadPitchAtRow(row+1) * St_tpcPadPlanesC::instance()->numberOfPadsAtRow(row+1) / 2.);
     pShape->setName(name.Data()); if (debug>1) cout << *pShape << endl;
-    for(unsigned int sector = 0; sector<getNSectors(); sector++) {
+    for(UInt_t sector = 0; sector<getNSectors(); sector++) {
       //Retrieve position and orientation of the TPC pad rows from the database.
       StTpcLocalSectorDirection  dirLS[3];
       dirLS[0] = StTpcLocalSectorDirection(1.,0.,0.,sector+1,row+1);
       dirLS[1] = StTpcLocalSectorDirection(0.,1.,0.,sector+1,row+1);
       dirLS[2] = StTpcLocalSectorDirection(0.,0.,1.,sector+1,row+1);
       local2GlobalRotation = unit;
-      for (int i = 0; i < 3; i++) {
+      for (Int_t i = 0; i < 3; i++) {
 	//	if (debug>1) cout << "dirLS\t" << dirLS[i] << endl;
 #ifndef TPC_IDEAL_GEOM
 	StTpcLocalDirection        dirL;
@@ -158,8 +157,8 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 	local2GlobalRotation(i+1,3) = dirG.position().z();
       }
       //      if (debug>1) cout << "Local2GlobalRotation = " << local2GlobalRotation << endl;
-      double y  = transform.yFromRow(row+1);
-       StTpcLocalSectorCoordinate  lsCoord(0., y, dZ, sector+1, row+1);// if (debug>1) cout << lsCoord << endl;
+      Double_t y  = transform.yFromRow(row+1);
+      StTpcLocalSectorCoordinate  lsCoord(0., y, dZ, sector+1, row+1);// if (debug>1) cout << lsCoord << endl;
 #ifndef TPC_IDEAL_GEOM
       StTpcLocalSectorAlignedCoordinate lsCoordA;
       transform(lsCoord,lsCoordA);//                       if (debug>1) cout << lsCoordA << endl;
@@ -176,9 +175,9 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 				  local2GlobalRotation(2,3));
       Double_t prod = centerVector*normalVector;
       if (prod < 0) normalVector *= -1;
-      double phi  = centerVector.phi();
-      double phiD = normalVector.phi();
-      double r = centerVector.perp();
+      Double_t phi  = centerVector.phi();
+      Double_t phiD = normalVector.phi();
+      Double_t r = centerVector.perp();
       StiPlacement *pPlacement = new StiPlacement;
       Double_t zc = 0;
       if (NoStiSectors != 12) zc = centerVector.z();
@@ -193,9 +192,9 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       pDetector->setName(name.Data());
       pDetector->setIsOn(true);
 
-      int iRdo  = s_pRdoMasks->rdoForPadrow(row+1);
-      bool west = s_pRdoMasks->isOn(sector+1, iRdo);
-      bool east = s_pRdoMasks->isOn( 24-(sector+1)%12, iRdo);
+      Int_t iRdo  = s_pRdoMasks->rdoForPadrow(row+1);
+      Bool_t west = s_pRdoMasks->isOn(sector+1, iRdo);
+      Bool_t east = s_pRdoMasks->isOn( 24-(sector+1)%12, iRdo);
 
 #if 0
       if (row==12) {
@@ -220,7 +219,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       pDetector->setGas(_gasMat);
       pDetector->setShape(pShape);
       pDetector->setPlacement(pPlacement);
-      if (row<13)
+      if (row < nInnerPadrows)
 	pDetector->setHitErrorCalculator(StiTpcInnerHitErrorCalculator::instance());
       else
 	pDetector->setHitErrorCalculator(StiTpcOuterHitErrorCalculator::instance());
@@ -230,12 +229,13 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       add(row,sector,pDetector); if (debug>1) cout << *pDetector << endl;
     }// for sector
   }// for row
-  TString path("");
-  for (Int_t i = 0; i < 2; i++) {
+  for (Int_t i = 0; i < 4; i++) {
     gGeoManager->RestoreMasterVolume();
     gGeoManager->CdTop();
     TGeoNode *nodeT = gGeoManager->GetCurrentNode();
     path = TpcVolumes[i].path;
+    if (  newRefSystem && ! path.Contains("TpcRefSys")) continue;
+    if (! newRefSystem &&   path.Contains("TpcRefSys")) continue;
     if (! gGeoManager->cd(path)) continue;
     nodeT = gGeoManager->GetCurrentNode();
     if (! nodeT) continue;
