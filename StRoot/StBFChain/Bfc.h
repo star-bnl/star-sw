@@ -9,10 +9,10 @@ struct Bfc_st {
   Char_t       Key[63];      /* nick name */
   Char_t       Name[63];     /* maker name */
   Char_t       Chain[63];    /* its chain */
-  Char_t       Opts[257];    /* required options */
+  Char_t       Opts[255];    /* required options */
   Char_t       Maker[63];    /* required Makers */
-  Char_t       Libs[127];    /* libraries to be loaded */
-  Char_t       Comment[257];  
+  Char_t       Libs[255];    /* libraries to be loaded */
+  Char_t       Comment[255];  
   Char_t       Flag;         /* F/T to use it in chain */
 };
 
