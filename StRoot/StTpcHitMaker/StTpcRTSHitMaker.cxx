@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.27 2011/06/09 20:52:08 genevb Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.28 2012/05/07 15:51:01 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -27,6 +27,7 @@
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StMessMgr.h" 
 
 #ifndef NEW_DAQ_READER
@@ -54,10 +55,6 @@ StTpcRTSHitMaker::~StTpcRTSHitMaker() {
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Init() {
-  SetAttr("minSector",1);
-  SetAttr("maxSector",24);
-  SetAttr("minRow",1);
-  SetAttr("maxRow",45);
   memset(maxHits,0,sizeof(maxHits));
   maxBin0Hits = 0;
   bin0Hits = 0;
@@ -65,6 +62,11 @@ Int_t StTpcRTSHitMaker::Init() {
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
+  SetAttr("minSector",1);
+  SetAttr("maxSector",24);
+  SetAttr("minRow",1);
+  NoRows = St_tpcPadPlanesC::instance()->innerPadRows()+St_tpcPadPlanesC::instance()->outerPadRows();
+  SetAttr("maxRow",NoRows);
   SafeDelete(fTpx);
   fTpx = new daq_tpx() ; 
   if (GetDate() >= 20091215) fTpx->fcf_run_compatibility = 10 ;
@@ -83,12 +85,12 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   for(Int_t sector=1;sector<=24;sector++) {
     Int_t liveSecPads = 0;
     Int_t totalSecPads = 0;
-    for(Int_t row=1;row<=45;row++) {
+    for(Int_t row=1;row<=NoRows;row++) {
       daq_det_gain *gain = (daq_det_gain *) dta->request(183);	// max pad+1		
       assert(gain);
       gain[0].gain = 0.0;	// kill pad0 just in case..
       gain[0].t0   = 0.0;
-      Int_t numPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
+      Int_t numPadsAtRow = St_tpcPadPlanesC::instance()->padsPerRow(row);
       for(Int_t pad = 1; pad <= numPadsAtRow; pad++) {
 	if (m_Mode == 2) {
 	  if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) > 0) 
@@ -286,23 +288,26 @@ Int_t StTpcRTSHitMaker::Make() {
 	Double_t q = ADC2GeV*dta->sim_cld[i].cld.charge;
 	Id++;
 	StTpcHit *hit = StTpcHitMaker::StTpcHitFlag(L.position(),hard_coded_errors,hw,q
-				     , (UChar_t ) 0  // counter 
-				     , (UShort_t) dta->sim_cld[i].track_id  // idTruth=0
-				     , (UShort_t) dta->sim_cld[i].quality   // quality=0,
-				     , Id                                   // id =0,
-				     , dta->sim_cld[i].cld.p1 //  mnpad
-				     , dta->sim_cld[i].cld.p2 //  mxpad
-				     , dta->sim_cld[i].cld.t1 //  mntmbk
-				     , dta->sim_cld[i].cld.t2 //  mxtmbk
-				     , dta->sim_cld[i].cld.pad
-				     , dta->sim_cld[i].cld.tb 
-				     , dta->sim_cld[i].cld.charge
-				     , dta->sim_cld[i].cld.flags);
+						    , (UChar_t ) 0  // counter 
+						    , (UShort_t) dta->sim_cld[i].track_id  // idTruth=0
+						    , (UShort_t) dta->sim_cld[i].quality   // quality=0,
+						    , Id                                   // id =0,
+						    , dta->sim_cld[i].cld.p1 //  mnpad
+						    , dta->sim_cld[i].cld.p2 //  mxpad
+						    , dta->sim_cld[i].cld.t1 //  mntmbk
+						    , dta->sim_cld[i].cld.t2 //  mxtmbk
+						    , dta->sim_cld[i].cld.pad
+						    , dta->sim_cld[i].cld.tb 
+						    , dta->sim_cld[i].cld.charge
+						    , dta->sim_cld[i].cld.flags);
 	/*tpxFCF.h
 	  #define FCF_ROW_EDGE            16      // 0x10 touched end of row
 	  #define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
-	  #define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad */
-        hitsAdded++;
+	  #define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad 
+	*/
+	assert(dta->sim_cld[i].cld.pad >  0 && dta->sim_cld[i].cld.pad <= 182 && 
+	       dta->sim_cld[i].cld.tb  >= 0 && dta->sim_cld[i].cld.tb  <  512);
+	hitsAdded++;
         if (hit->minTmbk() == 0) bin0Hits++;
 	hitCollection->addHit(hit);
       }
