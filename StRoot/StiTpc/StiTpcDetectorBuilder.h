@@ -11,10 +11,10 @@ public:
     virtual ~StiTpcDetectorBuilder(); 	
     virtual void buildDetectors(StMaker&s);
     /// returns the azimuthal angle [-pi, pi) for tpc sector [1-24]
-    double phiForTpcSector(unsigned int iSector) const;
-    double phiForSector(unsigned int iSector,     unsigned int nSectors) const;
-    double phiForWestSector(unsigned int iSector, unsigned int nSectors) const;
-    double phiForEastSector(unsigned int iSector, unsigned int nSectors) const;
+    double phiForTpcSector(UInt_t iSector) const;
+    double phiForSector(UInt_t iSector,     UInt_t nSectors) const;
+    double phiForWestSector(UInt_t iSector, UInt_t nSectors) const;
+    double phiForEastSector(UInt_t iSector, UInt_t nSectors) const;
     void         useVMCGeometry();		
     //    virtual void AverageVolume(TGeoPhysicalNode *nodeP);
  protected:
@@ -22,7 +22,7 @@ public:
 };
 
 /// Get the azimuthal angle of the given sector
-inline double StiTpcDetectorBuilder::phiForTpcSector(unsigned int sector) const
+inline double StiTpcDetectorBuilder::phiForTpcSector(UInt_t sector) const
 {
   if(sector<0 || sector>=12)
     {
@@ -34,8 +34,8 @@ inline double StiTpcDetectorBuilder::phiForTpcSector(unsigned int sector) const
 
 /// nSectors is the number of sectors in 360 degrees (one half of the
 /// TPC or all of the SVT, for example)
-inline double StiTpcDetectorBuilder::phiForSector(unsigned int iSector, 
-					unsigned int nSectors) const
+inline double StiTpcDetectorBuilder::phiForSector(UInt_t iSector, 
+					UInt_t nSectors) const
 {
   if(iSector>=2*nSectors)
     {
@@ -57,24 +57,24 @@ inline double StiTpcDetectorBuilder::phiForSector(unsigned int iSector,
 ///
 /// nSectors is the number of sectors in the west half of the detector,
 /// not both halves.
-inline double StiTpcDetectorBuilder::phiForWestSector(unsigned int iSector, 
-					    unsigned int nSectors) const
+inline Double_t StiTpcDetectorBuilder::phiForWestSector(UInt_t iSector, 
+					    UInt_t nSectors) const
 {
-  int offset = nSectors/4;
-  double deltaPhi = 2.*M_PI/nSectors;
+  Int_t offset = nSectors/4;
+  Double_t deltaPhi = 2.*M_PI/nSectors;
   
   // make phi ~ sector (not -sector) and correct offset
-  double dPhi = (offset - static_cast<int>(iSector+1))*deltaPhi;
+  Double_t dPhi = (offset - static_cast<Int_t>(iSector+1))*deltaPhi;
   return nice(dPhi);  
 } // phiForWestSector
 
 /// as above, but numbering _increases_ with increasing phi.
-inline double StiTpcDetectorBuilder::phiForEastSector(unsigned int iSector, 
-					    unsigned int nSectors) const
+inline Double_t StiTpcDetectorBuilder::phiForEastSector(UInt_t iSector, 
+					    UInt_t nSectors) const
 {
-  int offset = 3*nSectors/4;
-  double deltaPhi = 2.*M_PI/nSectors;
-  double dPhi = (static_cast<int>(iSector+1) - offset)*deltaPhi;
+  Int_t offset = 3*nSectors/4;
+  Double_t deltaPhi = 2.*M_PI/nSectors;
+  Double_t dPhi = (static_cast<Int_t>(iSector+1) - offset)*deltaPhi;
   return nice(dPhi);  
 } // phiForEastSector
 
