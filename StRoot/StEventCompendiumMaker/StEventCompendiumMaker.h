@@ -1,5 +1,5 @@
 /*!
-// $Id: StEventCompendiumMaker.h,v 1.2 2006/03/10 00:55:00 jeromel Exp $
+// $Id: StEventCompendiumMaker.h,v 1.3 2012/05/07 14:43:47 fisyak Exp $
 //
 // \class StEventCompendiumMaker
 // \brief Class for Making a Compendium of the information in StEvent.
@@ -28,22 +28,18 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+class StEvent;
 class StEventCompendiumMaker : public StMaker {
-
-public: 
-    StEventCompendiumMaker(const char *name="StEventCompendiumMaker");
-    ~StEventCompendiumMaker();
-    Int_t  Init();
-    virtual void Clear(const char* opt="");
-    Int_t  Make();
-    Int_t  Finish();
-    virtual const char *GetCVS() const {
-      static const char cvs[]= "Tag $Name:  $ $Id: StEventCompendiumMaker.h,v 1.2 2006/03/10 00:55:00 jeromel Exp $ built __DATE__ __TIME__" ; 
-      return cvs;
-    }
-private:
-    ClassDef(StEventCompendiumMaker, 1)
-    
+ public: 
+  StEventCompendiumMaker(const char *name="StEventCompendiumMaker"): StMaker(name) {}
+  virtual  ~StEventCompendiumMaker() {}
+  Int_t  Make();
+  virtual const char *GetCVS() const {
+    static const char cvs[]= "Tag $Name:  $ $Id: StEventCompendiumMaker.h,v 1.3 2012/05/07 14:43:47 fisyak Exp $ built __DATE__ __TIME__" ; 
+    return cvs;
+  }
+ private:
+  void fillEventSummary(StEvent* e);
+  ClassDef(StEventCompendiumMaker,0)
 };
-
 #endif
