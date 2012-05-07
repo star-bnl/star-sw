@@ -11,7 +11,7 @@ AgModule::AgModule( const Char_t *name, const Char_t *comment ) : AgBlock(name,c
   _module = this;
 }
 // ---------------------------------------------------------------------------------------------
-AgBlock *AgModule::AddBlock( const Char_t *name )
+AgBlock *AgModule::AddBlock( const Char_t *name, AgBlock *_block )
 {
 
   TString Name      = name;
@@ -26,23 +26,8 @@ AgBlock *AgModule::AddBlock( const Char_t *name )
 
   if ( !block )
     {
+      mBlocks[name]=_block; // should use a singleton to pass here
 
-      //
-      // If it doesn't exist, consult the ROOT dictionary to find the class.
-      // We will create a new instance of this block and add it to the local
-      // list of blocks, and to the global block table.  
-      //
-      // We ensure at this point that the class we obtain is from the namespace
-      // implied by the module name.
-      //
-      TClass *_class = TClass::GetClass( Name );
-
-      if ( !_class )
-      {
-    	  Warning("AgModule::AddBlock(const Char_t *name)",Form("Block %s declared in content but not defined.",name));
-    	  return NULL;
-      }
-      mBlocks[name] = (AgBlock *) _class -> New();
       block = mBlocks[name];
       block -> Init();
       block -> SetModule( this );
