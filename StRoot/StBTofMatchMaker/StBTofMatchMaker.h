@@ -6,11 +6,14 @@
  *
  * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
  * 
- * $Id: StBTofMatchMaker.h,v 1.10 2011/07/27 16:13:58 geurts Exp $
+ * $Id: StBTofMatchMaker.h,v 1.11 2012/05/07 14:11:16 fisyak Exp $
  */
 /*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.11  2012/05/07 14:11:16  fisyak
+ * Keep btofGeometry in const area for future use
+ *
  * Revision 1.10  2011/07/27 16:13:58  geurts
  * Alignment calibration modifications [Patrick Huck]:
  *  -  modified to open the local Z window cut to determine the z offset
@@ -65,7 +68,6 @@
 #define STBTOFMATCHMAKER_HH
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
-
 #include <string>
 #include <vector>
 #ifndef ST_NO_NAMESPACES
@@ -325,7 +327,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.10 2011/07/27 16:13:58 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.11 2012/05/07 14:11:16 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };

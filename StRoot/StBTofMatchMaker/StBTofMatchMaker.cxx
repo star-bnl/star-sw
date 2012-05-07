@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.18 2011/08/04 19:14:02 geurts Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.19 2012/05/07 14:11:16 fisyak Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.19  2012/05/07 14:11:16  fisyak
+ * Keep btofGeometry in const area for future use
+ *
  * Revision 1.18  2011/08/04 19:14:02  geurts
  * Bug fix: allow ideal geometry setting in the case an alignment file is used [Patrick]
  *
@@ -229,6 +232,7 @@ Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
   } else {
     mBTofGeom = new StBTofGeometry("btofGeometry","btofGeometry in MatchMaker");
     LOG_INFO << " Create a new btofGeometry ... " << endm;
+    AddConst(new TObjectSet("btofGeometry",mBTofGeom));
   } 
   if(mBTofGeom && !mBTofGeom->IsInitDone()) {
     LOG_INFO << " BTofGeometry initialization ... " << endm;
@@ -237,9 +241,8 @@ Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
     else                   mBTofGeom->SetMCOff();
     LOG_INFO << " Alignment file: " << mAlignFileName.c_str() << endm;
     mBTofGeom->SetAlignFile(mAlignFileName.c_str());
-    TVolume *starHall = (TVolume *)GetDataSet("HALL");
-    mBTofGeom->Init(this, starHall);
-//    AddConst(new TObjectSet("btofGeometry",mBTofGeom));
+      TVolume *starHall = (TVolume *)GetDataSet("HALL");
+      mBTofGeom->Init(this, starHall);
   }
 
   geomTimer.stop();
