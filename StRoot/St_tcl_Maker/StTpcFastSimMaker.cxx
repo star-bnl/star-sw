@@ -1,5 +1,8 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.4 2011/01/04 21:40:22 fisyak Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.5 2012/05/07 14:54:45 fisyak Exp $
     $Log: StTpcFastSimMaker.cxx,v $
+    Revision 1.5  2012/05/07 14:54:45  fisyak
+    Add printout
+
     Revision 1.4  2011/01/04 21:40:22  fisyak
     Add pile-up
 
@@ -126,6 +129,7 @@ Int_t StTpcFastSimMaker::Make() {
 				    0,                                   // id
 				    0,  0, 0,                            // mnpad, mxpad, mntmbk
 				    0, Pad.pad(), Pad.timeBucket());     // mxtmbk, cl_x , cl_t
+    if (Debug() > 1) tpcHit->Print();
     rCol->addHit(tpcHit);
   }
   return kStOK;
