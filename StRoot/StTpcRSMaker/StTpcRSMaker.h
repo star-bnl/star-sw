@@ -124,22 +124,25 @@ class StTpcRSMaker : public StMaker {
   Double_t      mtauIntegrationX[2];  //! for TPX inner=0/outer=1
   Double_t      mtauCX[2];            //! -"- 
   const Int_t NoOfSectors;            //!
-  const Int_t NoOfRows;               //!
-  const Int_t NoOfInnerRows;          //!
+  Int_t       NoOfRows;               //!
+  Int_t       NoOfInnerRows;          //!
   const Int_t NoOfPads;               //!
   const Int_t NoOfTimeBins;           //!
   Double_t   mCutEle;                 //! cut for delta electrons
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.24 2012/04/03 14:05:18 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.25 2012/05/07 15:36:22 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.24 2012/04/03 14:05:18 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.25 2012/05/07 15:36:22 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.25  2012/05/07 15:36:22  fisyak
+// Remove hardcoded TPC parameters
+//
 // Revision 1.24  2012/04/03 14:05:18  fisyak
 // Speed up using  GetSaveL (__PAD_BLOCK__), sluggish shape histograms, Heed electron generation
 //

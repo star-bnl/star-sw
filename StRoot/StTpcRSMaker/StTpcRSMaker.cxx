@@ -41,6 +41,7 @@
 #include "StDetectorDbMaker/St_TpcResponseSimulatorC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
 #include "Altro.h"
@@ -52,7 +53,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.58 2012/04/03 14:05:18 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.59 2012/05/07 15:36:22 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -88,8 +89,8 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   ElectronRangeEnergy(3000), // eV
   ElectronRangePower(1.78), // sigma =  ElectronRange*(eEnery/ElectronRangeEnergy)**ElectronRangePower
   NoOfSectors(24),
-  NoOfRows(45),
-  NoOfInnerRows(13),
+  NoOfRows(-1),
+  NoOfInnerRows(-1),
   NoOfPads(182),
   NoOfTimeBins(__MaxNumberOfTimeBins__),
   mCutEle(1e-4)
@@ -132,6 +133,8 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumberOf */) {
     LOG_ERROR << "Database Missing! Can't initialize TpcRS" << endm;
     return kStFatal;
   }
+  NoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
+  NoOfRows      = NoOfInnerRows + St_tpcPadPlanesC::instance()->outerPadRows();
 #if 0
   if (! gMC) {
     LOG_INFO << "TVirtualMC has not been instantiated" << endm;
@@ -205,7 +208,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumberOf */) {
   Int_t nAliveInner = 0;
   Int_t nAliveOuter = 0;
   for (Int_t sec = 1; sec <= 24; sec++) {
-    for (Int_t row = 1; row <= 45; row++) {
+    for (Int_t row = 1; row <= NoOfRows; row++) {
       if (St_tpcAnodeHVavgC::instance()->livePadrow(sec,row)) {
 	if (row <= NoOfInnerRows) {
 	  nAliveInner++;
@@ -422,63 +425,65 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumberOf */) {
   memset (checkList, 0, sizeof(checkList));
   if (GetTFile()) {
     GetTFile()->cd();
-    Int_t color = 1;
-    struct Name_t {
-      const Char_t *Name;
-      const Char_t *Title;
-    };
-    const Name_t InOut[6] = {
-      {"Inner","Inner old electronics"},
-      {"Outer","Outer old electronics"},
-      {"InnerX","Inner new electronics"},
-      {"OuterX","Outer new electronics"},
-      {"I","Inner"},
-      {"O","Outer"}
-    };
-    const Name_t PadTime[2] = {
-      {"Pad","Pad"},
-      {"Time","Time"},
-    };
-    for (Int_t io = 0; io < 4; io++) {
-      for (Int_t pt = 0; pt < 2; pt++) {
-	TString Name(InOut[io].Name); Name += PadTime[pt].Name; Name += "Mc";
-	TString Title(InOut[io].Title); Title += PadTime[pt].Title; Title += "Mc";
-	hist[io][pt] = (TProfile2D *) gDirectory->Get(Name);
-	if (! hist[io][pt]) {
-	  hist[io][pt] = new TProfile2D(Name,Title,nx[pt],xmin[pt],xmax[pt],nz,zmin,zmax,""); 
-	  hist[io][pt]->SetMarkerStyle(20);
-	  hist[io][pt]->SetMarkerColor(color++);
-	}
+  } else {
+    new TFile("TpcRSCheckList.root","recreate");
+  }
+  Int_t color = 1;
+  struct Name_t {
+    const Char_t *Name;
+    const Char_t *Title;
+  };
+  const Name_t InOut[6] = {
+    {"Inner","Inner old electronics"},
+    {"Outer","Outer old electronics"},
+    {"InnerX","Inner new electronics"},
+    {"OuterX","Outer new electronics"},
+    {"I","Inner"},
+    {"O","Outer"}
+  };
+  const Name_t PadTime[2] = {
+    {"Pad","Pad"},
+    {"Time","Time"},
+  };
+  for (Int_t io = 0; io < 4; io++) {
+    for (Int_t pt = 0; pt < 2; pt++) {
+      TString Name(InOut[io].Name); Name += PadTime[pt].Name; Name += "Mc";
+      TString Title(InOut[io].Title); Title += PadTime[pt].Title; Title += "Mc";
+      hist[io][pt] = (TProfile2D *) gDirectory->Get(Name);
+      if (! hist[io][pt]) {
+	hist[io][pt] = new TProfile2D(Name,Title,nx[pt],xmin[pt],xmax[pt],nz,zmin,zmax,""); 
+	hist[io][pt]->SetMarkerStyle(20);
+	hist[io][pt]->SetMarkerColor(color++);
       }
     }
-    const Name_t Checks[20] = {
-      {"dEGeant","dE in Geant"}, // 0
-      {"dSGeant","ds in Geant"}, // 1
-      {"Gain","Gas Gain after Voltage"}, // 2
-      {"GainMc","Gas Gain after MC correction"}, // 3
-      {"dEdxCor","correction of dEdx"}, // 4
-      {"lgam","lgam"}, // 5
-      {"NPGEANT","no. of primary electros from GEANT"}, // 6
-      {"NP","no. of primary electros"}, // 7
-      {"Nt","total no. of electors per cluster"}, // 8
-      {"Qav","Gas gain flactuations"}, // 9
-      {"localYDirectionCoupling","localYDirectionCoupling"}, //10
-      {"n0","No. electrons per primary interaction"}, //11
-      {"padGain","padGain"}, // 12
-      {"localXDirectionCoupling","localXDirectionCoupling"}, // 13
-      {"XYcoupling","XYcoupling"}, //14 
-      {"dE","dE"}, // 15
-      {"dS","dS"}, // 16
-      {"adc","adc"},// 17
-      {"NE","Total no. of generated electors"} // 18
-     };
-    for (Int_t io = 0; io < 2; io++) {
-      for (Int_t i = 0; i < nChecks; i++) {
-	TString Name(Checks[i].Name); Name += InOut[4+io].Name;
-	TString Title(Checks[i].Title); Title += InOut[4+io].Title;
-	if (i != 11) checkList[io][i] = new TProfile(Name,Title,nz,zmin,zmax,""); 
-	else 	     checkList[io][i] = new TH2D(Name,Title,nz,zmin,zmax,100,-0.5,99.5); 
-      }
+  }
+  const Name_t Checks[20] = {
+    {"dEGeant","dE in Geant"}, // 0
+    {"dSGeant","ds in Geant"}, // 1
+    {"Gain","Gas Gain after Voltage"}, // 2
+    {"GainMc","Gas Gain after MC correction"}, // 3
+    {"dEdxCor","correction of dEdx"}, // 4
+    {"lgam","lgam"}, // 5
+    {"NPGEANT","no. of primary electros from GEANT"}, // 6
+    {"NP","no. of primary electros"}, // 7
+    {"Nt","total no. of electors per cluster"}, // 8
+    {"Qav","Gas gain flactuations"}, // 9
+    {"localYDirectionCoupling","localYDirectionCoupling"}, //10
+    {"n0","No. electrons per primary interaction"}, //11
+    {"padGain","padGain"}, // 12
+    {"localXDirectionCoupling","localXDirectionCoupling"}, // 13
+    {"XYcoupling","XYcoupling"}, //14 
+    {"dE","dE"}, // 15
+    {"dS","dS"}, // 16
+    {"adc","adc"},// 17
+    {"NE","Total no. of generated electors"} // 18
+  };
+  for (Int_t io = 0; io < 2; io++) {
+    for (Int_t i = 0; i < nChecks; i++) {
+      TString Name(Checks[i].Name); Name += InOut[4+io].Name;
+      TString Title(Checks[i].Title); Title += InOut[4+io].Title;
+      if (i != 11) checkList[io][i] = new TProfile(Name,Title,nz,zmin,zmax,""); 
+      else 	     checkList[io][i] = new TH2D(Name,Title,nz,zmin,zmax,100,-0.5,99.5); 
     }
   }
 #endif /* __ClusterProfile__ */
@@ -1291,7 +1296,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
   } else 
     digitalSector->clear();
   for (row = 1;  row <= NoOfRows; row++) {
-    Int_t NoOfPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
+    Int_t NoOfPadsAtRow = St_tpcPadPlanesC::instance()->padsPerRow(row);
     Int_t io = 0;
     if (row > NoOfInnerRows) io = 1;
     for (pad = 1; pad <= NoOfPadsAtRow; pad++) {
@@ -1595,8 +1600,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.58 2012/04/03 14:05:18 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.59 2012/05/07 15:36:22 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.59  2012/05/07 15:36:22  fisyak
+// Remove hardcoded TPC parameters
+//
 // Revision 1.58  2012/04/03 14:05:18  fisyak
 // Speed up using  GetSaveL (__PAD_BLOCK__), sluggish shape histograms, Heed electron generation
 //

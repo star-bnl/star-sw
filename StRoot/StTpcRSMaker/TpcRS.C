@@ -38,10 +38,12 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   TString RunOpt(Run);
   RunOpt.ToLower();
   //  ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
-  ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,NoHistos,NoRunco,";
+  ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
   ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
   //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
-  ChainOpt += ",CMuDst,MiniMcMk,McTpcAna,IdTruth,useInTracker,";
+  ChainOpt += ",CMuDst,MiniMcMk,IdTruth,useInTracker,";
+  if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2") ChainOpt += "McTpcAna,NoHistos,NoRunco,";
+  else                                                     ChainOpt += "tags,";
   // ChainOpt += "MiniMcMk,IdTruth,useInTracker,-hitfilt,CMuDst,Tree,tags,evout,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
     ChainOpt += "tpl,tpcI,";
@@ -157,8 +159,11 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     //    SETBIT(Mode,StdEdxY2Maker::kDoNotCorrectdEdx);
 #endif    
     Int_t Mode = 2;
+    
     SETBIT(Mode,StdEdxY2Maker::kPadSelection); 
     SETBIT(Mode,StdEdxY2Maker::kCalibration);
+    SETBIT(Mode,StdEdxY2Maker::kZBGX);
+    SETBIT(Mode,StdEdxY2Maker::kGASHISTOGRAMS);
     if (Mode) {
       cout << " set dEdxY2 Mode" << Mode << " =======================================" << endl;
       dEdx->SetMode(Mode); 
