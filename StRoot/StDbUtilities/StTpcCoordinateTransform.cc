@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.36 2011/01/18 14:34:28 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.37 2012/05/07 14:38:41 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.37  2012/05/07 14:38:41  fisyak
+ * Remvoe hardcoded separation between Inner and Outer Sectors
+ *
  * Revision 1.36  2011/01/18 14:34:28  fisyak
  * Clean up TpcDb interfaces and Tpc coordinate transformation
  *
@@ -218,6 +221,7 @@
 #include "StDetectorDbMaker/St_tpcSectorT0offsetC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0C.h"
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "TMath.h"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
@@ -233,7 +237,6 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
     if (! gTpcDbPtr) gTpcDbPtr = StTpcDb::instance();
     if (gTpcDbPtr->PadPlaneGeometry() &&
 	gTpcDbPtr->Electronics() &&
-	gTpcDbPtr->SlowControlSim() && 
         gTpcDbPtr->GlobalPosition()) { 
 	mTimeBinWidth = 1./gTpcDbPtr->Electronics()->samplingFrequency();
         mInnerSectorzOffset = gTpcDbPtr->Dimensions()->zInnerOffset();
@@ -243,9 +246,10 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
 	gMessMgr->Error() << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endm;
 	assert(gTpcDbPtr->PadPlaneGeometry());
 	assert(gTpcDbPtr->Electronics());
-	assert(gTpcDbPtr->SlowControlSim()); 
         assert(gTpcDbPtr->GlobalPosition());
     }
+    mNoOfInnerRows = St_tpcPadPlanesC::instance()->innerPadRows();
+    mNoOfRows      = mNoOfInnerRows + St_tpcPadPlanesC::instance()->outerPadRows();
 }
 //________________________________________________________________________________
 //      Local Sector Coordnate    <->  Tpc Raw Pad Coordinate
@@ -253,10 +257,10 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 { // useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and  = kFALSE for MC
   Int_t sector = a.fromSector();
   Int_t row    = a.fromRow();
-  if (row < 1 || row > 45) row    = rowFromLocal(a);
+  if (row < 1 || row > mNoOfRows) row    = rowFromLocal(a);
     
   Double_t probablePad = padFromLocal(a);
-  Double_t zoffset=(row>13) ?
+  Double_t zoffset=(row>mNoOfInnerRows) ?
     mOuterSectorzOffset
     :mInnerSectorzOffset;
   Double_t t0offset = (useT0 && sector>=1&&sector<=24) ? St_tpcPadGainT0C::instance()->T0(sector,row,TMath::Nint (probablePad)) : 0;
@@ -271,7 +275,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLocalSectorCoordinate& b, Bool_t useT0, Bool_t useTau) 
 { // useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and = kFALSE for MC
   StThreeVector<double>  tmp=xyFromRow(a);
-  Double_t zoffset= (a.row()>13) ? mOuterSectorzOffset : mInnerSectorzOffset;
+  Double_t zoffset= (a.row()>mNoOfInnerRows) ? mOuterSectorzOffset : mInnerSectorzOffset;
   Double_t t0offset = useT0 ? St_tpcPadGainT0C::instance()->T0(a.sector(),a.row(),TMath::Nint(a.pad())) : 0;
   t0offset *= mTimeBinWidth;
   if (! useT0 && useTau) // for cluster
@@ -285,7 +289,7 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
 //________________________________________________________________________________
 Double_t StTpcCoordinateTransform::padFromX(Double_t x, Int_t row) const
 {
-  Double_t pitch = (row<14) ?
+  Double_t pitch = (row <= mNoOfInnerRows) ?
     gTpcDbPtr->PadPlaneGeometry()->innerSectorPadPitch() :
     gTpcDbPtr->PadPlaneGeometry()->outerSectorPadPitch();
   // x coordinate in sector 12
@@ -330,9 +334,9 @@ Int_t StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) con
     Double_t boundary =
 	gTpcDbPtr->PadPlaneGeometry()->outerSectorEdge();
     if(b.y() > boundary) {    // in the outer sector
-	referencePosition = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(14);
+	referencePosition = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(mNoOfInnerRows+1);
 	rowPitch          = gTpcDbPtr->PadPlaneGeometry()->outerSectorRowPitch();
-	offset            = 14;
+	offset            = mNoOfInnerRows+1;
     }
     else if(b.y() > gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(8)) {
 	referencePosition = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(8);
@@ -352,16 +356,16 @@ Int_t StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) con
     Int_t probableRow =
 	static_cast<int>( (b.y() - (referencePosition-rowPitch/2))/rowPitch )+offset;
 
-    if(b.y() < boundary && probableRow>13) {
-	probableRow=13;
+    if(b.y() < boundary && probableRow>mNoOfInnerRows) {
+	probableRow=mNoOfInnerRows;
     } 
-    if(b.y() > boundary && probableRow<14){ 
-	probableRow=14;
+    if(b.y() > boundary && probableRow<mNoOfInnerRows+1){ 
+	probableRow=mNoOfInnerRows+1;
     }
     if (probableRow<1)
 	probableRow = 1;
-    if (probableRow>45)
-	probableRow=45;
+    if (probableRow>mNoOfRows)
+	probableRow=mNoOfRows;
     
 //     PR(probableRow);
 
