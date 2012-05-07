@@ -1074,6 +1074,27 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
 	}
       }
     }
+    // sector 20 and sector 04 pT distributins
+    TH1D *secpT[2][6];
+    const Char_t *secNames[4] = {"20","04","17","07"};
+    const Char_t *pTNames[6] = {Old.Data(), New.Data(),
+				Form("%sNot%s",Old.Data(),New.Data()), Form("%sNot%s", New.Data(),Old.Data()),
+				Form("%sAnd%s",Old.Data(),New.Data()), Form("%sAnd%s", New.Data(),Old.Data())};
+    const Char_t *pTitles[6] = {Old.Data(), New.Data(),
+				Form("Reconstructed by %s and Not by %s",Old.Data(),New.Data()), Form("reconstructed by %s and Not by %s", New.Data(),Old.Data()),
+				Form("Reconstructed by both %s And %s",Old.Data(),New.Data()), Form("reconstructed by both %s And %s", New.Data(),Old.Data())};
+    for (Int_t i = 0; i < 4; i++) { // s = 0 => Sector 20; s = 1 => Sector 04, s = 2 => Sector 17; s = 3 => Sector 07
+      for (Int_t t = 0; t < 6; t++) {
+	Name = pTNames[t]; Name += secNames[i];
+	Title = "Sector "; Title +=  secNames[i]; Title += " "; Title += pTitles[i];
+	secpT[i][t] = new TH1D(Name,Title,100,0,10);
+      }
+    }
+    TH2F *etaphi[2];
+    etaphi[0] = new TH2F(Form("EtaPhi%s",Old.Data()),Form("#phi versus #eta for %s",Old.Data()),
+			 200,-2,2,90,-180,180);
+    etaphi[1] = new TH2F(Form("EtaPhi%s",New.Data()),Form("#phi versus #eta for %s",New.Data()),
+			 200,-2,2,90,-180,180);
     // Loop
     Long64_t nentries = fChain->GetEntriesFast();
     if (Nentries > 0 && nentries > Nentries) nentries = Nentries;
@@ -1094,9 +1115,50 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
       Double_t pTdiffPr  = -9999;
       Double_t pTdiffPrR = -9999;
       Double_t pTInvdiffPrR = -9999;
-      
-      if (data.newFitPtsGl >= effNFP) {pTEf[0][0]->Fill(data.newPtGl,refMult); PhiEf[0][0]->Fill(TMath::RadToDeg()*data.newPhiGl,refMult);}
-      if (data.oldFitPtsGl >= effNFP) {pTEf[0][1]->Fill(data.oldPtGl,refMult); PhiEf[0][1]->Fill(TMath::RadToDeg()*data.oldPhiGl,refMult);}
+      Int_t oldSec = -1;
+      if (data.oldFitPtsGl >= effNFP) {
+	etaphi[0]->Fill(data.oldEtaGl,TMath::RadToDeg()*data.oldPhiGl);
+	if (data.oldEtaGl < 0) {
+	  if ( -45 < TMath::RadToDeg()*data.oldPhiGl && TMath::RadToDeg()*data.oldPhiGl <  -15) oldSec = 0;
+	  if (-135 < TMath::RadToDeg()*data.oldPhiGl && TMath::RadToDeg()*data.oldPhiGl < -105) oldSec = 2;
+	} else {
+	  if ( -45 < TMath::RadToDeg()*data.oldPhiGl && TMath::RadToDeg()*data.oldPhiGl <  -15) oldSec = 1;
+	  if (-135 < TMath::RadToDeg()*data.oldPhiGl && TMath::RadToDeg()*data.oldPhiGl < -105) oldSec = 3;
+	}
+      }
+      Int_t newSec = -1;
+      if (data.newFitPtsGl >= effNFP) {
+	etaphi[1]->Fill(data.newEtaGl,TMath::RadToDeg()*data.newPhiGl);
+	if (data.newEtaGl < 0) {
+	  if ( -45 < TMath::RadToDeg()*data.newPhiGl && TMath::RadToDeg()*data.newPhiGl <  -15) newSec = 0;
+	  if (-135 < TMath::RadToDeg()*data.newPhiGl && TMath::RadToDeg()*data.newPhiGl < -105) newSec = 2;
+	} else {
+	  if ( -45 < TMath::RadToDeg()*data.newPhiGl && TMath::RadToDeg()*data.newPhiGl <  -15) newSec = 1;
+	  if (-135 < TMath::RadToDeg()*data.newPhiGl && TMath::RadToDeg()*data.newPhiGl < -105) newSec = 3;
+	}
+      }
+      if (data.newFitPtsGl >= effNFP) {
+	pTEf[0][0]->Fill(data.newPtGl,refMult); 
+	PhiEf[0][0]->Fill(TMath::RadToDeg()*data.newPhiGl,refMult);
+	if (newSec >= 0) {
+	  secpT[newSec][1]->Fill(data.newPtGl); // StiCA
+	  if (oldSec < 0) 
+	    secpT[newSec][3]->Fill(data.newPtGl); // StiCA but not Sti
+	  else 
+	    secpT[newSec][5]->Fill(data.newPtGl); // StiCA and Sti
+	}
+      }
+      if (data.oldFitPtsGl >= effNFP) {
+	pTEf[0][1]->Fill(data.oldPtGl,refMult); 
+	PhiEf[0][1]->Fill(TMath::RadToDeg()*data.oldPhiGl,refMult);
+	if (oldSec >= 0) {
+	  secpT[oldSec][0]->Fill(data.oldPtGl); // Sti
+	  if (newSec < 0) 
+	    secpT[oldSec][2]->Fill(data.oldPtGl); // Sti but not StiCA
+	  else 
+	    secpT[oldSec][4]->Fill(data.oldPtGl); // Sti and  StiCA
+	}
+      }
       Int_t Prim = (Int_t) data.Prim;
       if (Prim%10 && data.newFitPtsPr >= effNFP) {pTEf[1][0]->Fill(data.newPtPr,refMult); PhiEf[1][0]->Fill(TMath::RadToDeg()*data.newPhiPr,refMult);}
       if (Prim/10 && data.oldFitPtsPr >= effNFP) {pTEf[1][1]->Fill(data.oldPtPr,refMult); PhiEf[1][1]->Fill(TMath::RadToDeg()*data.oldPhiPr,refMult);}
