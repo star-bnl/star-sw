@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.18 2010/05/27 17:03:18 geurts Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.19 2012/05/07 14:06:07 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -338,6 +338,7 @@ void StBTofHitMaker::fillBTofHitCollection()
       double tetime = tmptdc_f*VHRBIN2PS / 1000.;
 
       StBTofHit *aHit = new StBTofHit();
+      aHit->setHardwarePosition(kBTofId);
       aHit->setTray((UChar_t)trayId);   
       aHit->setModule((UChar_t)moduleId);
       aHit->setCell((UChar_t)cellId);
