@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.593 2012/04/26 17:36:41 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.594 2012/05/07 14:04:34 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -328,10 +328,10 @@ Int_t StBFChain::Instantiate()
     if (! mk) {
       if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
       else                          mk = New(fBFC[i].Maker);
-    }
-    if (! mk) {
-      LOG_FATAL  << Form("StBFChain::Instantiate() problem with instatiation %s",fBFC[i].Maker) << endm;
-      assert(mk);
+      if (! mk) {
+	LOG_FATAL  << Form("StBFChain::Instantiate() problem with instatiation %s",fBFC[i].Maker) << endm;
+	assert(mk);
+      }
     }
     strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
 
@@ -407,6 +407,10 @@ Int_t StBFChain::Instantiate()
 	mk->SetAttr("useHpd"  ,kTRUE);
 	mk->SetAttr("activeHpd",kTRUE);
       }
+      if (GetOption("BTofIT")){
+	mk->SetAttr("useBTof"  ,kTRUE);
+	mk->SetAttr("activeBTof",kTRUE);
+      }
 
       if (GetOption("StiPulls") || 
 	  GetOption("StvPulls"))  mk->SetAttr("makePulls"  ,kTRUE);
@@ -439,6 +443,9 @@ Int_t StBFChain::Instantiate()
       if (GetOption("usePct4Vtx" ) ) mk->SetAttr("PCT"          , kTRUE);
       if (GetOption("useBTOF4Vtx") ) mk->SetAttr("BTOF"         , kTRUE);
       mk->PrintAttr();
+    }
+    if (maker=="StKFVertexMaker") {
+      if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, kTRUE);
     }
     if (maker=="StAssociationMaker") {
 
@@ -989,13 +996,21 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
       Tag.ToLower();
       // printf ("Chain %s\n",tChain.Data());
       kgo = kOpt(Tag.Data(),kFALSE);
-      if (kgo != 0){
+      if (kgo != 0) {
 	SetOption(kgo,chain);
 	if (kgo > 0) {
 	  TString Comment(fBFC[kgo].Comment);
-	  if (Tag.BeginsWith("Test.",TString::kIgnoreCase) && Comment.BeginsWith("/star/") ) {
-	    fkChain = kgo;
-	    gMessMgr->QAInfo() << "Default Test chain set " << fBFC[fkChain].Key << " with input " << fBFC[fkChain].Comment << endm;
+	  TString Opts(fBFC[kgo].Opts);
+	  if (Tag.BeginsWith("Test.",TString::kIgnoreCase) && ! Comment.BeginsWith("/star/") && 
+	      Opts.BeginsWith("test_",TString::kIgnoreCase)) {
+	    SetOptions(Opts,Tag);
+	  } else {
+	    if ((Tag.BeginsWith("Test.",TString::kIgnoreCase) ||
+		 Tag.BeginsWith("test_",TString::kIgnoreCase) ||
+		 Tag.BeginsWith("eval_",TString::kIgnoreCase)) && Comment.BeginsWith("/star/") ) {
+	      fkChain = kgo;
+	      gMessMgr->QAInfo() << "Default Test chain set " << fBFC[fkChain].Key << " with input " << fBFC[fkChain].Comment << endm;
+	    } 
 	  }
 	}
       } else {
@@ -1268,6 +1283,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-SvtIT","Default,Stv");
       SetOption("-SsdIT","Default,Stv");
       SetOption("-HpdIT","Default,Stv");
+      SetOption("-BTofIT","Default,Stv");
       SetOption("-PixelIT","Default,Stv");
       SetOption("-IstIT","Default,Stv");
     }  
@@ -1352,6 +1368,7 @@ void StBFChain::SetInputFile (const Char_t *infile){
   } else {
     if (fkChain >= 0) {
       fInFile = fBFC[fkChain].Comment;
+      fInFile.ReplaceAll("\n",";");
       gMessMgr->QAInfo() << "Default Input file name = " << fInFile.Data() << " for chain : " << fBFC[fkChain].Key << endm;
     }
   }
