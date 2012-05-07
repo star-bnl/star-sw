@@ -45,8 +45,8 @@ ClassImp(Geometry);
 /* ClassImp(FgtdGeom_t); */ FgtdGeom_t fgtdGeom;
 /* ClassImp(IdsmGeom_t); */ IdsmGeom_t idsmGeom;
 /* ClassImp(FsceGeom_t); */ FsceGeom_t fsceGeom;
-
 /* ClassImp(EiddGeom_t); */ EiddGeom_t eiddGeom;
+/* ClassImp(TpcxGeom_t); */ TpcxGeom_t tpcxGeom;
 
 // ----------------------------------------------------------------------
 Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
@@ -57,7 +57,7 @@ Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
   CalbInit(); CaveInit(); EcalInit(); FpdmInit(); FtpcInit(); MutdInit(); PipeInit();
   PixlInit(); SconInit(); SisdInit(); SvttInit(); BtofInit(); TpceInit(); VpddInit();
   UpstInit(); ZcalInit(); FtroInit(); RichInit(); PhmdInit(); FgtdInit(); IdsmInit();
-  FsceInit(); EiddInit();
+  FsceInit(); EiddInit(); TpcxInit(); 
 
   const Char_t *path = ".:StarVMC/Geometry/macros/:$STAR/StarVMC/Geometry/macros/";
   const Char_t *file = gSystem->Which( path, "StarGeometryDb.C", kReadPermission );
@@ -126,6 +126,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
 
   // Tracking detectors
   geom.success_tpce = ConstructTpce( geom.tpceFlag, geom.tpceStat );
+  geom.success_tpcx = ConstructTpcx( geom.tpcxFlag, geom.tpcxStat );                     assert( geom.tpceFlag != geom.tpcxFlag);
 
   geom.success_svtt = ConstructSvtt( geom.svttFlag, geom.svttStat ); // SVT must preceede FTPC and SISD
   geom.success_sisd = ConstructSisd( geom.sisdFlag, geom.sisdStat ); // 
@@ -370,7 +371,8 @@ Bool_t Geometry::ConstructFpdm( const Char_t *flag, Bool_t go )
     }
   return true;
 }
-
+// ----------------------------------------------------------------------
+//
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructTpce( const Char_t *flag, Bool_t go )
 { if (!go) return false;
@@ -395,6 +397,36 @@ Bool_t Geometry::ConstructTpce( const Char_t *flag, Bool_t go )
   if ( !CreateModule( tpceGeom.module ) )
     {
       Warning(GetName(),"Could not create module "+tpceGeom.module);
+      return false;
+    }
+  return true;
+}
+// ----------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------
+Bool_t Geometry::ConstructTpcx( const Char_t *flag, Bool_t go )
+{ if (!go) return false;
+
+  if ( !tpcxGeom.Use( "select", flag ) )
+    {
+      Error(GetName(),Form("Cannot locate configuration %s",flag));
+      return false;
+    }
+
+  AgStructure::AgDetpNew( tpcxGeom.module, Form("Time Projection Chamber with configuration %s",flag));
+  if ( tpcxGeom.dens > 0 )
+    {
+      AgStructure::AgDetpAdd( "Tpcg_t", "gascorr", (Float_t)2 );
+    }
+  if ( tpcxGeom.rmax > 0 )
+    {
+      AgStructure::AgDetpAdd( "Tpcg_t", "rmax", (Float_t)207.77 );
+    }
+
+  if ( go )
+  if ( !CreateModule( tpcxGeom.module ) )
+    {
+      Warning(GetName(),"Could not create module "+tpcxGeom.module);
       return false;
     }
   return true;
@@ -1028,7 +1060,9 @@ Bool_t Geometry::EcalInit()
   }
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::FpdmInit()
 {
 
@@ -1043,19 +1077,25 @@ Bool_t Geometry::FpdmInit()
 
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::FsceInit()
 {
   fsceGeom.select="FSCEv0"; fsceGeom.config=1; fsceGeom.module="FsceGeo"; fsceGeom.fill();
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::EiddInit()
 {
   eiddGeom.select="EIDDv0"; eiddGeom.config=1; eiddGeom.module="EiddGeo"; eiddGeom.fill();
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::FtpcInit()
 {
   //replace [exe FTPCof;] with ["ftpc configuration"; FTPC=off;]
@@ -1086,7 +1126,9 @@ Bool_t Geometry::FtpcInit()
   }
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::MfldInit()
 {
   //replace [exe MFLDof;] with [ MFLD=off;]
@@ -1099,7 +1141,9 @@ Bool_t Geometry::MfldInit()
   mfldGeom.select="MFLD54"; mfldGeom.config=4; mfldGeom.field=5.0; mfldGeom.fill();
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::MutdInit()
 {
 
@@ -1147,7 +1191,9 @@ Bool_t Geometry::MutdInit()
   }
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::PhmdInit()
 {
   //replace [exe PHMDof;] with ["Photon Multiplicity Detector Version ";PHMD=off; PhmdConfig = 0;]
@@ -1176,7 +1222,9 @@ Bool_t Geometry::PhmdInit()
 
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::PipeInit() // Does this break the config=-1 scheme?
 {
 
@@ -1238,7 +1286,9 @@ Bool_t Geometry::PipeInit() // Does this break the config=-1 scheme?
 
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::PixlInit() // Probably breaks config=-1 scheme
 {
   pixlGeom.module="PixlGeo3";
@@ -1249,7 +1299,9 @@ Bool_t Geometry::PixlInit() // Probably breaks config=-1 scheme
   pixlGeom.select="PIXL02"; pixlGeom.config=1; pixlGeom.location=2.0; pixlGeom.fill();
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::SconInit()
 {
   sconGeom.select="SCONof"; {
@@ -1263,7 +1315,9 @@ Bool_t Geometry::SconInit()
   sconGeom.select="SCON14"; sconGeom.module="SconGeo"; sconGeom.config=4; sconGeom.fill();
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::SisdInit()
 {
   //replace [exe SISDof;] with ["Silicon Strip Detector off "; SISD=off;]
@@ -1284,7 +1338,9 @@ Bool_t Geometry::SisdInit()
 
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::SvttInit()
 {
 
@@ -1631,7 +1687,23 @@ Bool_t Geometry::BtofInit()
   }
   return true;
 }
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+Bool_t Geometry::TpcxInit()
+{
 
+  tpcxGeom.select = "TPCX10"; {
+    tpcxGeom.config    = 1;
+    tpcxGeom.padconfig = 0;
+    tpcxGeom.module = "TpcxGeo1";
+    tpcxGeom.fill();
+  };
+
+}
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::TpceInit()
 {
   //replace [exe TPCE00;] with [;"New version of the TPC backplane "; TpceConfig = 1;]
@@ -1688,10 +1760,12 @@ Bool_t Geometry::TpceInit()
     tpceGeom.module="TpceGeo3a";
     tpceGeom.fill();
   }
-  //                            ]  
+
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::VpddInit()
 {
   //replace [exe VPDDof;] with [;VPDD=off;]
@@ -1730,7 +1804,9 @@ Bool_t Geometry::VpddInit()
   }
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::BbcmInit()
 {
 
@@ -1738,35 +1814,45 @@ Bool_t Geometry::BbcmInit()
   bbcmGeom.select="BBCMof"; bbcmGeom.module="none"; bbcmGeom.fill();
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::MagpInit()
 {
   magpGeom.select="MAGPon"; magpGeom.module="MagpGeo"; magpGeom.fill();
   magpGeom.select="MAGPof"; magpGeom.module="None";    magpGeom.fill();
   return true;
 };
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::UpstInit()
 {
   upstGeom.select="UPSTon"; upstGeom.module="UpstGeo"; upstGeom.fill();
   upstGeom.select="UPSTof"; upstGeom.module="None"; upstGeom.fill();
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::ZcalInit()
 {
   zcalGeom.select="ZCALon"; zcalGeom.module="ZcalGeo"; zcalGeom.fill();
   zcalGeom.select="ZCALof"; zcalGeom.module="None"; zcalGeom.fill();
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::RichInit()
 {
   richGeom.select="RICHon"; richGeom.module="RichGeo"; richGeom.fill();
   richGeom.select="RICHof"; richGeom.module="None"; richGeom.fill();
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::FgtdInit()
 {
 
@@ -1786,7 +1872,9 @@ Bool_t Geometry::FgtdInit()
   */
   return true;
 }
-
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
 Bool_t Geometry::IdsmInit()
 {
   idsmGeom.select="IDSMof"; idsmGeom.module="None"    ; idsmGeom.config=0; idsmGeom.fill();
@@ -1803,8 +1891,8 @@ Bool_t Geometry::FtroInit()
   ftroGeom.select="FTRO01"; ftroGeom.module="FtroGeo"; ftroGeom.config=1; ftroGeom.fill();
   return true;
 }
-
-
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------
 Bool_t Geometry::GeomInit()
 {

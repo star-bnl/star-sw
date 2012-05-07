@@ -17,6 +17,21 @@ from warnings import warn
 
 from pyparsing  import *
 
+banner = """
+/*
+ ******************************************************************************
+ ******************************************************************************
+ **                                                                          **
+ ** This is generated code.  Do not alter.  You should instead edit the XML  **
+ ** module which corresponds to your detector.  This code will be replaced   **
+ ** on the next compilation.                                                 **
+ **                                                                          **
+ ******************************************************************************
+ ******************************************************************************
+ */
+"""
+
+
 # Legacy modules have errors in their definitions which must be preserved
 # as a reference for past data sets.  We do not want to issue compile-time
 # warnings for these modules.
@@ -449,6 +464,7 @@ class Module ( Handler ):
         # Global scope of implementation file
         # ---------------------------------------------------------------        
         document.impl('#include "%s.h"' % document.agmodule, unit='global')
+        document.impl( banner, unit='global' )
 ##        document.impl('ClassImp(%s);'   % document.agmodule, unit='global')
         document.impl(seperator, unit='global')
         document.impl(skip, unit='global')
@@ -484,6 +500,7 @@ class Module ( Handler ):
         # ---------------------------------------------------------------        
         document.head('#ifndef __%s__' % document.agmodule )
         document.head('#define __%s__' % document.agmodule )
+        document.head( banner );
         document.head('')
         document.head('#include "StarVMC/StarAgmlLib/AgModule.h"')
         document.head('')

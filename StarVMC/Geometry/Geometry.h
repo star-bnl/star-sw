@@ -26,9 +26,9 @@ class Geom_t : public AgStructure
 
   SetDetector(istd); // placeholder for IST
   SetDetector(pxld); // placeholder for PXL
-
   SetDetector(fsce); // Forward calorimeter upgrade
   SetDetector(eidd); // East poletip detectors
+  SetDetector(tpcx); // eXtended TPC
 
       ecalCuts=1;
       calbCuts=1;
@@ -56,9 +56,9 @@ class Geom_t : public AgStructure
 
   AddDetector(istd);
   AddDetector(pxld);
-
   AddDetector(fsce);
   AddDetector(eidd);
+  AddDetector(tpcx); // eXtended TPC
 
   Int_t ecalCuts;
   Int_t calbCuts;
@@ -367,6 +367,22 @@ class TpceGeom_t : public AgStructure
   Int_t rmax;
 };
 
+class TpcxGeom_t : public AgStructure
+{ public:
+  ClassDef(TpcxGeom_t,1);
+  TpcxGeom_t(): AgStructure("TpcxGeom_t","STAR Time Projection Chamber Master Geometry Table")
+    {
+      select="default"; module="TpcxGeom"; config=-1; dens=-1; rmax=-1;
+    };
+ ~TpcxGeom_t(){ };
+  TString select;
+  TString module;
+  Int_t   config;
+  Int_t   padconfig;
+  Int_t   dens;
+  Int_t   rmax;
+};
+
 // ----------------------------------------------------------------------
 class VpddGeom_t : public AgStructure
 { public:
@@ -514,7 +530,7 @@ class Geometry : public AgModule
   Bool_t VpddInit();  Bool_t MagpInit();  Bool_t UpstInit();
   Bool_t ZcalInit();  Bool_t FtroInit();  Bool_t RichInit();
   Bool_t FgtdInit();  Bool_t IdsmInit();  Bool_t FsceInit();
-  Bool_t EiddInit();
+  Bool_t EiddInit();  Bool_t TpcxInit();
 
   Bool_t IstdInit(){ /* placeholder */ return false; }
   Bool_t PxldInit(){ /* placeholder */ return false; }
@@ -549,7 +565,6 @@ class Geometry : public AgModule
   Bool_t ConstructFgtd( const Char_t *flag, Bool_t go=true );
   Bool_t ConstructIdsm( const Char_t *flag, Bool_t go=true );
 
-
   // New Inner Detectors
   Bool_t ConstructIstd( const Char_t *flag, Bool_t go=false ) { /* placeholder */ return false; }
   Bool_t ConstructPxld( const Char_t *flag, Bool_t go=false ) { /* placeholder */ return false; }
@@ -557,6 +572,9 @@ class Geometry : public AgModule
   // eSTAR Upgrades
   Bool_t ConstructFsce( const Char_t *flag, Bool_t go=true );
   Bool_t ConstructEidd( const Char_t *flag, Bool_t go=true );
+
+  // TPC Upgrade
+  Bool_t ConstructTpcx( const Char_t *flag, Bool_t go=true );
 
  public:
   AgModule *CreateModule( const Char_t *name, const Char_t *top = NULL );
