@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.241 2012/03/28 15:14:17 jwebb Exp $
+* $Id: geometry.g,v 1.242 2012/05/07 21:44:06 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.242  2012/05/07 21:44:06  jwebb
+* Added "devT" geometry tag for TPC upgrade studies.
+*
 * Revision 1.241  2012/03/28 15:14:17  jwebb
 * Switched pipe12 (old beam pipe) to pipev1 (new narrow beam pipe) for dev13
 * geometry with the HFT.
@@ -1263,8 +1266,15 @@ replace [exe TPCE04;] with [;"New version of the TPC backplane "; TpceConfig = 4
                              "gas density correction";            DensConfig = 1;]
 replace [exe TPCE04r;] with [;"New version of the TPC backplane "; TpceConfig = 4;
                               "gas density correction";            DensConfig = 1;
-                              "radius correction";                 RmaxConfig = 1;
-                            ]
+                              "radius correction";                 RmaxConfig = 1;]
+
+replace [exe tpcx10;] with [;"TPC test version";    TpcxConfig=1;
+                            ;"Disable old TPC";     TpceConfig=0;
+                            ;"Set 1st TPAD config"; TpadConfig=0;]
+replace [exe tpcx11;] with [;"TPC test version";    TpcxConfig=1;
+                            ;"Disable old TPC";     TpceConfig=0;
+                            ;"Set 1st TPAD config"; TpadConfig=1;]
+                            
 
 replace [exe ISTB00;] with [;ISTB=on;IstbConfig=-1;]
 
@@ -1969,12 +1979,13 @@ REPLACE [exe devE;] with ["DEVE eSTAR upgrade geometry";
        FsceConfig=1;
 
     """Activate the EIDD geometry"""
-       EIDD=on;
-       EiddConfig=1;
-
-]
+       EIDD=on; 
+       EiddConfig=1; ]
 
 
+Replace [exe devT;] with ["DEVT TPC Upgrade Geometry";
+       exe devE;    "eSTAR baseline";
+       exe Tpcx10;  "TPC upgrade geometry w/ default pads"; ]
 
 
 
@@ -2125,7 +2136,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
-              FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig
+              FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig, TpcxConfig, TpadConfig
 
    Integer    FpdmPosition / 0 /
 
@@ -2245,6 +2256,8 @@ replace[;Case#{#;] with [
    FhcmConfig  = 0 ! Forward Hadron Detector off by default
    FsceConfig  = 0 ! Forward Sphagettoni Calorimeter off by default
    EiddConfig  = 0 ! EAst side, Trd, Tof and Calo for eSTAR studies
+   TpcxConfig  = 0 ! Tpc Experimental 
+   TpadConfig  = 0 ! Tpad configuration
 
    pipeFlag = 3 ! pipe wrap + svt shield
 
@@ -2715,6 +2728,10 @@ If LL>0
   Case devE  { devE : eSTAR development geometry;
                  Geom = 'devE    ';
                  exe devE; }
+
+  Case DevT  { devT : TPC upgrade studies;
+               Geom = 'devT';
+               exe devT; }
 
 
 ****************************************************************************************
@@ -4255,6 +4272,9 @@ c     write(*,*) 'TPC';
      if ( RmaxConfig>0) {        Call AgDetp add ('tpcg.rmax=',207.77,1);     }
                                  Call tpcegeo3
                         }
+
+     IF TpcxConfig==1 { Call TpcxGeo1; }
+
    }
    if (ftpc) then
 c       write(*,*) 'FTPC'
