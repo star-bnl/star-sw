@@ -47,6 +47,7 @@
 /* special DAQ commands sent out via Trigger */
 /* Note that the daq_cmd is mostly a bit mask! */
 
+#define DAQCMD_HLT_RUN				1	/* is first bit is set, run HLT */
 #define DAQCMD_DAQ10K_DISABLE			2	/* if the 2nd bit is _not_ set, run daq10k TPC sector */
 #define DAQCMD_FMT_ONLY				4	/* force raw (non ZS or non CLD) data */
 
