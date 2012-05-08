@@ -8,9 +8,24 @@
 #include <cstdio>
 #include <sstream>
 #include <limits.h>
+#include <sys/statvfs.h>
 
 namespace StHyperUtilFilesystem
 {
+
+float get_free_space_percentage(const char* path) {
+    size_t size_free = 0;
+    size_t size_total = 0;
+    float percentage = 0;
+    struct statvfs info;
+    if ( -1 == statvfs ( path, &info) ) {
+    } else {
+        size_free = info.f_bsize * info.f_bfree;
+        size_total = info.f_bsize * info.f_blocks;
+        percentage = (float) ( ( (double)size_free / (double)size_total ) * 100.0 );
+    }
+    return percentage;
+}
 
 bool path_exists (const std::string& file)
 {

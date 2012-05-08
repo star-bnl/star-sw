@@ -7,6 +7,9 @@
 namespace StHyperUtilFilesystem
 {
 
+// calculate free space percentage from path (/tmp, /scratch etc)
+float get_free_space_percentage(const char* path);
+
 // check if file exists on disk
 bool path_exists (const std::string& file);
 
