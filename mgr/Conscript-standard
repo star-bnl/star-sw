@@ -61,6 +61,7 @@ if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
 }
 
 $env1 = $env->clone('Package'  => $pkg);
+my $DEBUG   = $env1->{DEBUG};
 my $CXXFLAGS= $env1->{CXXFLAGS};
 my $CFLAGS  = $env1->{CFLAGS};
 my $FC      = $env1->{FC};
@@ -806,7 +807,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 				  'EXTRA_CXXFLAGS' => $extraCXXFLAGS,# . " -DDRAW", # -DHLTCA_STANDALONE
 				  'CPPPATH'  => $CPPPATH,
 				  'LIBPATH'  => $LIB . $main::PATH_SEPARATOR .$env->{Packages}->{ROOT}->{LIBDIR},
-				  'LIBS'     => $libs
+				  'LIBS'     => $libs,
+				  'DEBUG'    => $DEBUG
 				 );
 	  my @programs = ($DirPath . "/CA.C");
 	  foreach my $progD (@programs) {
@@ -817,7 +819,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
     }
     if ( $pkg =~ m/^Sti$/) {  
-      if ($env1->{DEBUG} =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for Sti with gcc432
+      if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for Sti with gcc432
 	$envNoDeb = $env->clone('DEBUG' => '-g');
 	for ($i = 0; $i < $#src; $i++) {
 	  if ($src[$i] =~ /StiVMCToolKit\.cxx/) {
@@ -828,7 +830,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
       }
     }
-
+    if ( $pkg =~ m/^StiMaker/) {  
+      if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for StiMaker with gcc432
+	$DEBUG = "-g";
+      }
+    }
+    
     if ( $#idlM > -1 ) {
 	$CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH;
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
@@ -889,7 +896,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			 'LIBS'     => $LIBS,
 			 'SOFLAGS'  => $SOFLAGS,
 			 'LIBPATH'  => $libpath,
-			 'ObjDir'   => $obj_dir
+			 'ObjDir'   => $obj_dir,
+			 'DEBUG'    => $DEBUG
 			 );
 #    bless $env2, "cons"; #?
 #  print "env2 : CPPPATH => $env2->{CPPPATH} \tCPPFLAGS => $env2->{CPPFLAGS}\n";
