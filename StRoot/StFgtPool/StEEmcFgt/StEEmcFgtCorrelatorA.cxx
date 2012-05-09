@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEEmcFgtCorrelatorA.cxx,v 1.1 2012/05/09 17:26:26 sgliske Exp $
+ * $Id: StEEmcFgtCorrelatorA.cxx,v 1.2 2012/05/09 21:11:58 sgliske Exp $
  * Author: S. Gliske, May 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEEmcFgtCorrelatorA.cxx,v $
+ * Revision 1.2  2012/05/09 21:11:58  sgliske
+ * updates
+ *
  * Revision 1.1  2012/05/09 17:26:26  sgliske
  * creation
  *
@@ -27,6 +30,7 @@
 #include "StRoot/StEvent/StPrimaryVertex.h"
 #include "StRoot/StMuDSTMaker/COMMON/StMuDst.h"
 #include "StRoot/StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 
 
 #define DEBUG
@@ -36,7 +40,8 @@
 
 // constructors
 StEEmcFgtCorrelatorA::StEEmcFgtCorrelatorA( const Char_t* name, const Char_t* rawMapMkrName ) :
-   StMaker( name ), mInputType(1), mInputName("MuDst"), mEEmcRawMapMkr(0) {
+   StMaker( name ), mInputType(1), mInputName("MuDst"), mEEmcRawMapMkr(0),
+   mMipMin(5), mMipMax(50), mSigThres(3) {
 
    mEEmcRawMapMkr = static_cast< StEEmcRawMapMaker* >( GetMaker( rawMapMkrName ) );
    assert( mEEmcRawMapMkr );
@@ -49,7 +54,7 @@ StEEmcFgtCorrelatorA::~StEEmcFgtCorrelatorA(){ /* */ };
 
 // init
 Int_t StEEmcFgtCorrelatorA::Init(){
-
+   return kStOk;
 };
 
 Int_t StEEmcFgtCorrelatorA::Make(){
@@ -80,12 +85,14 @@ Int_t StEEmcFgtCorrelatorA::Make(){
       };
    };
 
-#ifdef DEBUG
-   LOG_INFO << GetEventNumber() << " found " << seedIdxVec.size() << " MIP seeds out of " << eemcMap.size() << " strips" << endm;
+#ifdef DEBUG2
+   LOG_INFO << "zzz " << GetEventNumber() << " found " << seedIdxVec.size() << " MIP seeds out of " << eemcMap.size() << " strips" << endm;
 #endif
 
    Int_t nMipClus = 0;
-   if( !seedIdxVec.size() ){
+   Int_t nFailBothAdj = 0, nFailFail = 0, nFailSideHigh = 0, nFailNonIso = 0;
+
+   if( !seedIdxVec.empty() ){
       std::vector< Int_t >::const_iterator seedIter;
 
       Float_t clusterShape[CLUSTER_SIZE];
@@ -101,13 +108,14 @@ Int_t StEEmcFgtCorrelatorA::Make(){
          Int_t last = first + kEEmcNumStrips;
 
          // compute range of the cluster
+         Int_t offset = *seedIter - CLUSTER_WIDTH;
          Int_t low  = std::max( first, *seedIter - CLUSTER_WIDTH );
          Int_t high = std::min( last,  *seedIter + CLUSTER_WIDTH + 1 );
 
          // copy response values to the cluster shape array
-         for( Int_t i = 0; i<CLUSTER_SIZE; ++i ){
+         for( Int_t i = offset; i<offset+CLUSTER_SIZE; ++i ){
             if( i >= low && i < high ){
-               mapIter = eemcMap.find( *seedIter - 1 );
+               mapIter = eemcMap.find( i );
 
                if( mapIter != eemcMap.end() ){
                   const StEEmcRawMapData& data = mapIter->second;
@@ -118,24 +126,39 @@ Int_t StEEmcFgtCorrelatorA::Make(){
                   if( data.fail || data.stat )
                      resp = FAIL_FLAG;  // magic value to flag bad strip
 
-                  clusterShape[i] = resp;
+                  clusterShape[i-offset] = resp;
                };
             };
          };
+
+#ifdef DEBUG_CLUS_SHAPE
+         LOG_INFO << "zzz cluster shape: ";
+         for( Int_t i=0; i<CLUSTER_SIZE; ++i )
+            LOG_INFO << clusterShape[i] << ' ';
+         LOG_INFO << endm;
+#endif
 
          // now check the cluster shape to see if it qualifies as a MIP
 
          // ensure exactly one of the adjacent have signal
          Bool_t pass = (( clusterShape[CLUSTER_WIDTH-1] > mSigThres ) ^ ( clusterShape[CLUSTER_WIDTH+1] > mSigThres ));
+         if( !pass )
+            ++nFailBothAdj;
+
+
+         //cout << "zzz " << clusterShape[CLUSTER_WIDTH-1] << ' ' << clusterShape[CLUSTER_WIDTH+1] << endl;
 
          // ensure adjacent are good strips and that they are less than the seed
-         if( pass && (clusterShape[CLUSTER_WIDTH+1] == FAIL_FLAG || clusterShape[CLUSTER_WIDTH-1] == FAIL_FLAG) )
+         if( pass && (clusterShape[CLUSTER_WIDTH+1] == FAIL_FLAG || clusterShape[CLUSTER_WIDTH-1] == FAIL_FLAG) ){
+            ++nFailFail;
             pass = 0;
-         if( pass && clusterShape[CLUSTER_WIDTH+1] > clusterShape[CLUSTER_WIDTH] )
+         };
+         if( pass && ( clusterShape[CLUSTER_WIDTH+1] > clusterShape[CLUSTER_WIDTH] || clusterShape[CLUSTER_WIDTH-1] > clusterShape[CLUSTER_WIDTH] ) ){
+            ++nFailSideHigh;
             pass = 0;
-         if( pass && clusterShape[CLUSTER_WIDTH-1] > clusterShape[CLUSTER_WIDTH] )
-            pass = 0;
+         };
 
+         Bool_t passOlder = pass;
          // ensure the farther strips have no signal
          for( Int_t i = 0; i<CLUSTER_WIDTH-1 && pass; ++i )
             if( clusterShape[i] > mSigThres )
@@ -144,11 +167,14 @@ Int_t StEEmcFgtCorrelatorA::Make(){
             if( clusterShape[i] > mSigThres )
                pass = 0;
 
+         if( passOlder && !pass )
+            ++nFailNonIso;
+
          if( pass ){
             // determine position better
-            Float_t posA = CLUSTER_WIDTH;
+            Float_t posA = *seedIter;
             Float_t wA = clusterShape[CLUSTER_WIDTH];
-            Float_t posB = (( clusterShape[CLUSTER_WIDTH+1] > clusterShape[CLUSTER_WIDTH-1] ) ? CLUSTER_WIDTH+1 : CLUSTER_WIDTH-1 );
+            Float_t posB = (( clusterShape[CLUSTER_WIDTH+1] > clusterShape[CLUSTER_WIDTH-1] ) ? *seedIter+1 : *seedIter-1 );
             Float_t wB = std::max( clusterShape[CLUSTER_WIDTH+1], clusterShape[CLUSTER_WIDTH-1] );
 
             ++nMipClus;
@@ -158,14 +184,30 @@ Int_t StEEmcFgtCorrelatorA::Make(){
       };
    };
 
-#ifdef DEBUG
-   LOG_INFO << "FOUND " << nMipClus << " possible MIP clusters" << endm;
+#ifdef DEBUG2
+   LOG_INFO << "zzz FOUND " << nMipClus << " possible MIP clusters, "
+            << "failed " << nFailBothAdj << ' ' << nFailFail << ' ' << nFailSideHigh << ' ' << nFailNonIso << endm;
 #endif
 
    if( nMipClus ){
       std::vector< Float_t >::iterator mipClusPosIter;  // still in u/v indexing, but with fraction position between strips
 
-      for( Int_t sec = 0; sec<kEEmcNumSectors; ++sec ){
+      // limit to only sectors 6-12, since only have half coverage of FGT in 2012
+      for( Int_t sec = 6; sec<kEEmcNumSectors; ++sec ){
+#ifdef DEBUG3
+         LOG_INFO << "zzz \t sector " << sec << " has " << mipClusPosVec[sec].size() << " MIP clusters " << endm;
+
+         for( UInt_t j = 0; j<mipClusPosVec[sec].size(); ++j ){
+            Float_t idx = mipClusPosVec[sec][j];
+            Int_t idx2 = idx;
+            Int_t strip = idx2 % kEEmcNumStrips;
+            Bool_t isV = (idx2 / kEEmcNumStrips)%2;
+            Int_t sec = (idx2 / kEEmcNumStrips)/2;
+
+            LOG_INFO << "zzz \t\t " << idx << ' ' << sec << ' ' << (isV ? 'v' : 'u') << ' ' << strip << ' ' << strip+idx-idx2 << endm;
+         };
+#endif
+
          if( mipClusPosVec[sec].size() == 2 ){
             Float_t idx1 = mipClusPosVec[sec][0];
             Float_t idx2 = mipClusPosVec[sec][1];
@@ -185,8 +227,34 @@ Int_t StEEmcFgtCorrelatorA::Make(){
    };
 
 #ifdef DEBUG
-   LOG_INFO << "FOUND " << mipPosVec.size() << " MIP points" << endm;
+   if( !mipPosVec.empty() ){
+      LOG_INFO << "zzz EVENT " << GetEventNumber() << " FOUND " << mipPosVec.size() << " MIP points" << endm;
+   };
 #endif
+
+   if( !mipPosVec.empty() ){
+#ifdef DEBUG
+      LOG_INFO << "zzz -> vertex " << mVertex.X() << ' ' << mVertex.Y() << ' ' << mVertex.Z() << endm;
+#endif
+
+      for( UInt_t j = 0; j < mipPosVec.size(); ++j ){
+         TVector3& smdPt = mipPosVec[j];
+         TVector3 delta = smdPt - mVertex;
+
+#ifdef DEBUG
+         LOG_INFO << "zzz -> ESMD point " << smdPt.X() << ' ' << smdPt.Y() << ' ' << smdPt.Z() << endm;
+#endif
+         for( Int_t disc = 0; disc<kFgtNumDiscs; ++disc ){
+            Float_t z = StFgtGeom::getDiscZ( disc );
+            Float_t alpha = ( z - mVertex.Z() ) / ( smdPt.Z() - mVertex.Z() );
+            TVector3 pos = alpha*delta + mVertex;
+
+#ifdef DEBUG
+            LOG_INFO << "zzz ----> disc " << disc+1 << " line passes through " << pos.X() << ' ' << pos.Y() << ' ' << pos.Z() << endm;
+#endif
+         };
+      };
+   };
 
    return ierr;
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEEmcRawMapMaker.h,v 1.2 2012/04/13 15:08:43 sgliske Exp $
+ * $Id: StEEmcRawMapMaker.h,v 1.3 2012/05/09 21:11:58 sgliske Exp $
  * Author: S. Gliske, April 2012
  *
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEEmcRawMapMaker.h,v $
+ * Revision 1.3  2012/05/09 21:11:58  sgliske
+ * updates
+ *
  * Revision 1.2  2012/04/13 15:08:43  sgliske
  * updates
  *
@@ -57,7 +60,7 @@ class StEEmcRawMapMaker : public StMaker {
    const StEEmcRawMap& getMap( Int_t layer );
 
  protected:
-   enum layer_t { TOWER, PRE1, PRE2, POST };
+   enum layer_t { TOWER, PRE1, PRE2, POST, ESMD };
 
    Int_t mInputType;
    std::string mInputName, mDbName;
@@ -66,8 +69,9 @@ class StEEmcRawMapMaker : public StMaker {
    Int_t loadFromMuDst();
    Int_t loadFromStEvent();
    void addHitTower( Int_t sec, Int_t sub, Int_t eta, Int_t adc, Int_t layer );
+   void addHitStrip( Int_t sec, Bool_t layerIsV, Int_t strip, Int_t adc );
 
-   StEEmcRawMap mMap[4];  // one for each layer
+   StEEmcRawMap mMap[5];  // one for each layer+SMD
 
  private:   
    ClassDef(StEEmcRawMapMaker,1);
@@ -75,7 +79,7 @@ class StEEmcRawMapMaker : public StMaker {
 }; 
 
 // inline
-inline const StEEmcRawMap& StEEmcRawMapMaker::getMap( Int_t layer ){ return mMap[ (layer>0&&layer<4) ? layer : 0 ]; };
+inline const StEEmcRawMap& StEEmcRawMapMaker::getMap( Int_t layer ){ return mMap[ (layer>0&&layer<5) ? layer : 0 ]; };
 
 
 #endif
