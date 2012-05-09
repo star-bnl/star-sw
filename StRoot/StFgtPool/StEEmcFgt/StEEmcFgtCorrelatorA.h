@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEEmcFgtCorrelatorA.h,v 1.1 2012/05/09 17:26:26 sgliske Exp $
+ * $Id: StEEmcFgtCorrelatorA.h,v 1.2 2012/05/09 21:11:58 sgliske Exp $
  * Author: S. Gliske, May 2012
  *
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEEmcFgtCorrelatorA.h,v $
+ * Revision 1.2  2012/05/09 21:11:58  sgliske
+ * updates
+ *
  * Revision 1.1  2012/05/09 17:26:26  sgliske
  * creation
  *
@@ -41,6 +44,8 @@ class StEEmcFgtCorrelatorA : public StMaker {
    virtual void Clear( Option_t *opt = "" );
 
    Int_t setInput( const Char_t *name, Int_t type );   // type = 0 is StEvent, type == 1 is MuDst
+   void setMipWindow( Float_t min, Float_t max );
+   void setSigThres( Float_t thres );
 
  protected:
    Int_t mInputType;
@@ -57,5 +62,10 @@ class StEEmcFgtCorrelatorA : public StMaker {
    ClassDef(StEEmcFgtCorrelatorA,1);
 
 }; 
+
+// inline functions
+
+inline void StEEmcFgtCorrelatorA::setMipWindow( Float_t min, Float_t max ){ mMipMin = min; mMipMax = max; };
+inline void StEEmcFgtCorrelatorA::setSigThres( Float_t thres ){ mSigThres = thres; };
 
 #endif

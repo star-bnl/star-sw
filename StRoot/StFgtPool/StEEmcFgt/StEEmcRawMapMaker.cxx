@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEEmcRawMapMaker.cxx,v 1.2 2012/04/13 15:08:43 sgliske Exp $
+ * $Id: StEEmcRawMapMaker.cxx,v 1.3 2012/05/09 21:11:58 sgliske Exp $
  * Author: S. Gliske, April 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEEmcRawMapMaker.cxx,v $
+ * Revision 1.3  2012/05/09 21:11:58  sgliske
+ * updates
+ *
  * Revision 1.2  2012/04/13 15:08:43  sgliske
  * updates
  *
@@ -154,6 +157,27 @@ Int_t StEEmcRawMapMaker::loadFromMuDst(){
       };
    };
 
+   //
+   // LOAD SMD DATA
+   //
+   if( !ierr ){
+      Char_t cpl[] = { 'U','V' };
+      for ( Int_t plane = 0; plane < 2; plane++ ){
+         for ( Int_t ihit = 0; ihit < emc->getNEndcapSmdHits(cpl[plane]); ihit++ ) {
+            Int_t sec, strip, adc;
+            const StMuEmcHit *hit = emc->getEndcapSmdHit( cpl[plane], ihit, sec, strip );
+            adc = hit->getAdc();
+
+            sec--;   // adjust indexing
+            strip--; // 
+
+            if ((sec >= 0) && (sec < 12) && (strip >= 0) && (strip < 288))
+               addHitStrip(sec,plane,strip,adc);
+         };
+      };
+   };
+
+
 #ifdef TRIG
    StMuEvent *event = muDst->event();
    if( event ){
@@ -185,6 +209,10 @@ Int_t StEEmcRawMapMaker::loadFromStEvent(){
 
    const StEmcDetector *detector = 0;
    StDetectorId detectorIds[] = { kEndcapEmcTowerId, kEndcapEmcPreShowerId };
+
+   //
+   // TOWERS, PRESHOWERS and POSTSHOWER
+   //
 
    if( !ierr ){
       for( Int_t iDet = 0; iDet < 2; ++iDet ){
@@ -224,12 +252,43 @@ Int_t StEEmcRawMapMaker::loadFromStEvent(){
       };
    };
 
+   //
+   // SMD STRIPS
+   //
+
+   if( !ierr ){
+      StDetectorId ids[] = { kEndcapSmdUStripId, kEndcapSmdVStripId };
+      /// Loop over U & V planes
+      for( Int_t iplane=0; iplane<2; iplane++ ){
+
+         /// Get the eemc smd collections
+         detector=emc->detector( ids[iplane] );
+         assert( detector );
+
+         for( UInt_t sec = 0; sec<detector->numberOfModules(); sec++ ){
+            /// Remember to watch out for fortran holdovers in
+            /// the numbering scheme
+            const StEmcModule *sector = detector->module( sec+1 );
+            const StSPtrVecEmcRawHit &hits = sector->hits();
+                    
+            /// Loop over all raw hits in this sector
+            for ( UInt_t ihit=0; ihit<hits.size(); ihit++ ){
+               Int_t isector = hits[ihit]->module()-1;
+               Int_t istrip  = hits[ihit]->eta()-1;
+               Int_t adc     = hits[ihit]->adc();
+               if( (isector >= 0) && (isector < 12) && (istrip >= 0) && (istrip < 288) )
+                  addHitStrip( isector, iplane, istrip, adc);
+            };
+         };
+      };
+   };
+
    return ierr;
 };
 
 void StEEmcRawMapMaker::addHitTower( Int_t sec, Int_t sub, Int_t eta, Int_t adc, Int_t layer ){
 
-   Int_t index = kEEmcNumEtas*( kEEmcNumSubSectors*sec + sub ) + eta;
+   Int_t index = eta + kEEmcNumEtas*( sub + kEEmcNumSubSectors*sec );
 
 // #ifdef DEBUG2
 //    if( GetEventNumber() == 868734 && index == 336 ){
@@ -244,6 +303,24 @@ void StEEmcRawMapMaker::addHitTower( Int_t sec, Int_t sub, Int_t eta, Int_t adc,
    static const Char_t subsectors[] = { 'A','B','C','D','E' };
    static const Char_t detectors[] = { 'T', 'P', 'Q', 'R' };
    const EEmcDbItem *dbitem = mEEmcDb->getTile( sec+1,subsectors[sub],eta+1, detectors[layer] );
+   assert( dbitem );
+
+   data.fail = dbitem->fail;
+   data.stat = dbitem->stat;
+   data.ped = dbitem->ped;
+   data.pedSigma = dbitem->sigPed;
+   data.gain = dbitem->gain;
+};
+
+void StEEmcRawMapMaker::addHitStrip( Int_t sec, Bool_t layerIsV, Int_t strip, Int_t adc ){
+
+   Int_t index = strip + kEEmcNumStrips*( layerIsV + kEEmcNumSmdUVs*sec );
+
+   StEEmcRawMapData& data = mMap[ESMD][index];
+   data.rawAdc = adc;
+
+   assert( mEEmcDb );
+   const EEmcDbItem *dbitem = mEEmcDb->getByStrip ( sec+1, (layerIsV ? 'V' : 'U'), strip+1 );
    assert( dbitem );
 
    data.fail = dbitem->fail;
