@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.38 2012/04/17 17:47:51 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.39 2012/05/10 14:37:19 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.39  2012/05/10 14:37:19  avossen
+ * modified pulse finder
+ *
  * Revision 1.38  2012/04/17 17:47:51  avossen
  * changed seedType3
  *
@@ -385,9 +388,20 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    if(pStrip->getAdc(0) <3*ped && numHighBins==2 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=2)
       return kFgtSeedType2;
 
-   if(pStrip->getAdc(0) <3*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=1&& numAlmostHighBins>=2)
-      return kFgtSeedType3;
+   //   if(pStrip->getAdc(0) <3*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=1&& numAlmostHighBins>=2)
 
+   for( Int_t timebin = 0; timebin < (kFgtNumTimeBins-2) && pStrip->getGeoId() > -1; ++timebin ) {
+      Float_t adc1=pStrip->getAdc(timebin);
+      Float_t adc2=pStrip->getAdc(timebin+1);
+      Float_t adc3=pStrip->getAdc(timebin+2);
+      if(adc1> 5*ped && adc2> 5*ped && adc3 > 5*ped)
+	{
+	  //found some sort of rising edge
+	  if(adc1 < adc2 && adc2 < adc3)
+	    return kFgtSeedType3;
+	}
+
+   }
    return kFgtSeedTypeNo;
 };
 
