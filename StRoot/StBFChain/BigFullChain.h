@@ -1311,7 +1311,7 @@ Bfc_st BFC[] = { // standard chains
   {"StiTpc"   ,"","","TpcDb,ITTF,tpc_T,dbutil,detDb,StarMagField,magF"   ,"","StiTpc","Load StiTpc",kFALSE},
   {"StiSvt"   ,"",""," "                  ,"","StSvtClassLibrary,StSvtDbMaker,StiSvt","Load StiSvt",kFALSE},
   {"StiSsd"   ,"","",""                           ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSvt",kFALSE},
-  {"StiLibs"  ,"","","StiTpc,StiSvt,StiSsd"            ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
+  {"StiLibs"  ,"","","StiTpc,StiSvt,StiSsd,BTofUtil"   ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
   {"VFPPV"    ,""  ,"","ctf_T,StiLib","StGenericVertexMaker"
    ,         "ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
   {"VFPPVnoCTB"     ,""  ,"","VFPPV",""                ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
