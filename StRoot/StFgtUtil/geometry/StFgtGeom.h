@@ -55,19 +55,42 @@ class StFgtGeom
 				   Short_t & strip );
 	static std::string translateGeoIdToGeoName( Int_t geoId );
 	static Int_t translateGeoNameToGeoId( const std::string & geoName );
+
+	//Returns range upper and lower range of R or Phi valus depending on geoId.  
+	//NOTE phi values are only local - that is they are the same for each quadrant
+	//The ordinate, lowerSpan and upperSpan are all in centimeters or radians
 	static Int_t getPhysicalCoordinate( Int_t geoId, Short_t & disc,
 					   Short_t & quadrant, Char_t & layer,
 					   Double_t & ordinate, 
 					   Double_t & lowerSpan, 
 					   Double_t & upperSpan );
+
+
       
-	//  The ordinate, lowerSpan and upperSpan are all in centimeters or
-	//  radians, depending on the layer.
+	//Returns range upper and lower range of R or Phi valus depending on geoName.  
+	//NOTE phi values are only local - that is they are the same for each quadrant
+	//The ordinate, lowerSpan and upperSpan are all in centimeters or radians
 	static Int_t getPhysicalCoordinate( const std::string & geoName,
-					   Short_t & disc, Short_t & quadrant,
-					   Char_t & layer, Double_t & ordinate,
-					   Double_t & lowerSpan,
-					   Double_t & upperSpan );
+					    Short_t & disc, Short_t & quadrant,
+					    Char_t & layer, Double_t & ordinate,
+					    Double_t & lowerSpan,
+					    Double_t & upperSpan );
+	
+
+	//Similar to getPhysicalCoordinate but returns phi in STAR coordinate system
+	static Int_t getGlobalPhysicalCoordinate( Int_t geoId, Short_t & disc,
+					    Short_t & quadrant, Char_t & layer,
+					    Double_t & ordinate, 
+					    Double_t & lowerSpan, 
+					    Double_t & upperSpan );
+
+	//Similar to getPhysicalCoordinate but returns phi in STAR coordinate system
+	static Int_t getGlobalPhysicalCoordinate( const std::string & geoName,
+					    Short_t & disc, Short_t & quadrant,
+					    Char_t & layer, Double_t & ordinate,
+					    Double_t & lowerSpan,
+					    Double_t & upperSpan );
+
   
 	//  Please note that the following functions do NOT access the STAR
 	//  database to find mapping information. They assume the most
@@ -259,8 +282,11 @@ inline Int_t StFgtGeom::getNaivePhysCoordFromElecCoord
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.42 2012/03/15 00:18:12 wwitzke Exp $
+ *  $Id: StFgtGeom.h,v 1.43 2012/05/11 19:45:02 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.43  2012/05/11 19:45:02  rfatemi
+ *  added getGlobalPhysicalCoordinate
+ *
  *  Revision 1.42  2012/03/15 00:18:12  wwitzke
  *  Added boundary conditions to StFgtGeom.
  *

@@ -395,6 +395,105 @@ Int_t StFgtGeom::getPhysicalCoordinate
     return 0;
 }
 
+
+Int_t StFgtGeom::getGlobalPhysicalCoordinate
+(
+    Int_t geoId,
+    Short_t & disc, Short_t & quadrant, Char_t & layer,
+    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
+)
+{
+
+  if ( geoId < 0 || geoId >= kFgtNumGeoIds )
+    {
+	LOG_DEBUG << "GeoId " << geoId << " out of range in StFgtGeom::getPhysicalCoordinate." << endm;
+	disc = kFgtError;
+	quadrant = kFgtError;
+	layer = kFgtErrorChar;
+	ordinate = kFgtError;
+	lowerSpan = kFgtError;
+	upperSpan = kFgtError;
+
+	return kFgtError;
+    }
+
+    Short_t strip;
+
+    decodeGeoId( geoId, disc, quadrant, layer, strip );
+    ordinate =
+        mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].ordinate;
+    lowerSpan =
+    mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].lowerSpan;
+    upperSpan =
+        mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].upperSpan; 
+
+
+    
+    if (layer == 'P')
+      {
+	upperSpan-=StFgtGeom::phiQuadXaxis(quadrant);
+	lowerSpan-=StFgtGeom::phiQuadXaxis(quadrant);
+      }
+
+  
+    return 0;
+}
+
+//  The ordinate, lowerSpan and upperSpan are all in centimeters or
+//  radians, depending on the layer.
+Int_t StFgtGeom::getGlobalPhysicalCoordinate
+(
+    const std::string & geoName,
+    Short_t & disc, Short_t & quadrant, Char_t & layer,
+    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
+)
+{
+    Short_t strip;
+
+    if ( decodeGeoName( geoName, disc, quadrant, layer, strip ) < 0 )
+    {
+	//  Error is mostly handled by the decodeGeoName call.
+	disc = kFgtError;
+	quadrant = kFgtError;
+	layer = kFgtErrorChar;
+	ordinate = kFgtError;
+	lowerSpan = kFgtError;
+	upperSpan = kFgtError;
+
+	return kFgtError;
+    }
+
+    ordinate =
+        mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].ordinate;
+    lowerSpan =
+        mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].lowerSpan;
+    upperSpan =
+        mStrips[
+            (layer == 'P') * kFgtNumStrips + strip
+            ].upperSpan;
+
+    if (layer == 'P')
+      {
+	upperSpan-=StFgtGeom::phiQuadXaxis(quadrant);
+	lowerSpan-=StFgtGeom::phiQuadXaxis(quadrant);
+      }
+
+    return 0;
+}
+
+
+
+
 //  Please note that the following functions do NOT access the STAR
 //  database to find mapping information. They assume the most
 //  straight-forward mapping scheme and use that.
@@ -4053,8 +4152,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.32 2012/03/15 17:17:44 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.33 2012/05/11 19:45:18 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.33  2012/05/11 19:45:18  rfatemi
+ *  added getGlobalPhysicalCoordinate
+ *
  *  Revision 1.32  2012/03/15 17:17:44  rfatemi
  *  more INFO->DEBUG
  *
