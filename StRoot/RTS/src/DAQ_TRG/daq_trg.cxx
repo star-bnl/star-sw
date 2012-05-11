@@ -87,7 +87,7 @@ daq_dta *daq_trg::handle_legacy()
 {
 
 	if(!(present & DET_PRESENT_DATAP)) {
-		LOG(WARN,"%s: can't have legacy without DATAP (post FY08), yet...",name) ;
+		LOG(NOTE,"%s: can't have legacy without DATAP (post FY08), yet...",name) ;
 		return 0 ;
 	}
 
