@@ -46,10 +46,11 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.46 2012/01/12 16:48:10 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.47 2012/05/11 09:30:55 tonko Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
+
 DATAP *getlegacydatap(char *mem, int bytes);
 
 //static int thisNode = EVP_NODE ;
@@ -655,7 +656,42 @@ char *daqReader::get(int num, int type)
     }
   }
 
-  
+  	/* Tonko; May 11, 2012
+		Catch the TPC FY12 UU future-protection bug
+  	*/
+	detector_bugs = 0;	// clear them all first
+
+	if(detectors & (1 << TPX_ID)) {
+	if((run >= 13114025) && (run < 13130030)) {
+	if(trgcmd == 4) {
+
+		for(int s=1;s<=24;s++) {
+			for(int r=1;r<=6;r++) {
+	                        // skip known dead RDOs during this period
+        	                if((s==5) && (r==1)) continue ;
+                	        if((s==6) && (r==1)) continue ;
+                        	if((s==7) && (r==1)) continue ;
+                        	if((s==14) && (r==3)) continue ;
+                        	if((s==21) && (r==1)) continue ;
+                        	if((s==22) && (r==2)) continue ;
+
+	
+				char name[32] ;
+
+				sprintf(name,"tpx/sec%02d/cld%02d",s,r) ;
+				if(!get_sfs_name(name)) {
+					detectors &= ~(1<<TPX_ID) ;
+					LOG(WARN,"run %d, seq %d -- removing TPX due to FY12 UU future-protection bug",run,seq) ;
+
+					detector_bugs |= (1<<TPX_ID) ;	// set tje bug status
+					goto bug_check_done ;
+				}
+			}
+		}
+	}
+	}
+	bug_check_done:;
+	}
 
   // Tonko: before we return, call Make which prepares the DETs for operation...
   //Make() ;

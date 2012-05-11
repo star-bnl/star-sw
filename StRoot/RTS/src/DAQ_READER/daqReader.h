@@ -219,6 +219,8 @@ class daqReader {
   u_int seq ;		// event sequence from EVB
   u_int detectors ;	// detectors present bit mask according to DAQ!
 
+  u_int detector_bugs ;	// for per-detector bug tracing i.e. FY12 UU future protection TPX bug
+
   u_int detsinrun ;
   u_int evpgroupsinrun;
 

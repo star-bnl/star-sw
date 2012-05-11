@@ -477,9 +477,8 @@ daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, 
 	// after this all the banks need to be in the file...
 	Make() ;
 	if(!present) return 0 ;	// this det is not in this event...
+	if(caller && (caller->detector_bugs & (1<<TPX_ID))) return 0 ; // FY12 UU future-protection bug
 
-
-//	LOG(TERR,"TPX in global event \"seq\" %u",get_global_event_num()) ;
 
 	if(strcasecmp(bank,"raw")==0) {
 		return handle_raw(sec,row) ;		// actually sec, rdo; r

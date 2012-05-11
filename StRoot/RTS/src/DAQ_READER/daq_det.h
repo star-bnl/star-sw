@@ -79,6 +79,8 @@ protected:
 
 	const char *sfs_name ;	// name in sfs bank (if any) i.e. "tpx"
 	int rts_id ;		// RTS_ID
+
+
 private:
 
 public:
@@ -125,7 +127,7 @@ public:
 	} ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.7 2012/02/04 17:33:36 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.8 2012/05/11 09:30:58 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	} ;
 
@@ -145,8 +147,6 @@ public:
 
 	char *out_buffer ;
 	int out_bytes ;
-
-
 
 	// used for the container only and not subclases!
 //	daq_det *mydet[32] ;
