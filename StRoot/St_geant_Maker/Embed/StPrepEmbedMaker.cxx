@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.6 2012/04/23 23:53:23 zhux Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.7 2012/05/13 06:37:04 zhux Exp $
  *
  */
 
@@ -100,6 +100,7 @@ StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name)
   mPrimeMode = kFALSE; /// Do not prime the first event
   mPrimed = kFALSE;
   mVpdVzCutMode = kFALSE; /// Do not cut on VpdVz
+  mRapidityMode = kTRUE;  /// flat in rapidity 
 }
 //____________________________________________________________________________________________________
 StPrepEmbedMaker::~StPrepEmbedMaker() { 
@@ -426,7 +427,7 @@ Int_t StPrepEmbedMaker::Make()
   gkine(npart, xyz[2], xyz[2]);
 
   // Flat (pt, y)
-  phasespace(npart);
+  if( mRapidityMode ) phasespace(npart);
   
   Do(Form("gvertex %f %f %f",xyz[0],xyz[1],xyz[2]));
   if( mSettings->mode.CompareTo("strange", TString::kIgnoreCase) == 0 )
@@ -574,6 +575,21 @@ void StPrepEmbedMaker::SetPrimeMode(const Bool_t flag)
   }
   else{
     LOG_INFO << " OFF" << endm ;
+  }
+}
+
+//____________________________________________________________________________________________________
+void StPrepEmbedMaker::SetRapidityMode(const Bool_t flag)
+{
+  mRapidityMode=flag;
+
+  LOG_INFO << "StPrepEmbedMaker::SetRapidityMode  set rapidity mode= ";
+
+  if( mRapidityMode ){
+    LOG_INFO << " Rapidity" << endm ;
+  }
+  else{
+    LOG_INFO << " Pseudo-rapidity" << endm ;
   }
 }
 
@@ -740,6 +756,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.7  2012/05/13 06:37:04  zhux
+ * Added switch to choose between the two kinematic variables: rapidty or pseudo-rapdity
+ *
  * Revision 1.6  2012/04/23 23:53:23  zhux
  * Added a switch to cut on |VpdVz-Vz|
  *
