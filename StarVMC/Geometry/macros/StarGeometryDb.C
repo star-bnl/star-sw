@@ -1037,7 +1037,7 @@ void estar()
   };
 
 
-  geom.select = "devt"; {
+  geom.select = "devT"; {
     // ================================================ The 4th version of the CAVE
     geom.caveFlag = "CAVE04";  geom.caveStat = 1;
     // ================================================ Disable old STAR inner detectors
