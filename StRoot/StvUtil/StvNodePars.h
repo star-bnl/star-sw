@@ -79,7 +79,8 @@ void  operator+=(const StvFitPars &add);
 StvNodePars &operator=(const StvNodePars &fr);
 const StvFitPars &operator-(const StvNodePars& sub) const;
 void    print() const;
-  void GetRadial(double radPar[6],double *radErr=0,const StvFitErrs *fE=0)  const;
+  void GetRadial (double radPar[6],double *radErr=0,const StvFitErrs *fE=0)  const;
+  void GetPrimial(double radPar[6],double *radErr=0,const StvFitErrs *fE=0)  const;
   void GetImpact(StvImpact *imp,const StvFitErrs *fE=0)  const;
 
   enum {kX=0,kY,kZ,kPhi,kCurv,kTanL};
@@ -163,7 +164,8 @@ union{
 //------------------------------------------------------------------------------
 class StvImpact {
 public:    
-
+StvImpact();
+void Print(const char *opt) const;
 public:    
     /// signed impact parameter; Signed in such a way that:
     ///     x =  -impact*sin(Psi)
@@ -208,7 +210,8 @@ public:
 static void Test();
 static void TestGetRadial(int nEv=10000);
 static void TestErrProp  (int nEv=10000);
-static void TestMtx    ();
+static void TestMtx      ();
+static void TestImpErr   (int nEv=10000) ;
 ClassDef(StvNodeParsTest,0)
 };
 
@@ -251,10 +254,9 @@ inline void StvNodePars::reverse()
  _tanl  = -_tanl ; _curv = -_curv ; _ptin = -_ptin;
 }
 //------------------------------------------------------------------------------
-inline void StvFitErrs::Add(const StvELossData &el,const StvNodePars &pa)
+inline void StvFitErrs::Add(const StvELossData &el,const StvNodePars &)
 {    
-  double cos2L = pa.getCos2L();
-  mAA+= el.mTheta2/cos2L;
+  mAA+= el.mTheta2;
   mLL+= el.mTheta2;
   mHH+= el.mOrt2;
   mZZ+= el.mOrt2;
