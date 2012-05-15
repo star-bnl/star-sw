@@ -5,6 +5,7 @@
 #include "TMath.h"
 #include "TMath.h"
 #include "StvUtil/StvNodePars.h"
+#include "StvUtil/StvDebug.h"
 #include "Stv/StvToolkit.h"
 
   static const int idx66[6][6] =
@@ -244,7 +245,7 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   _z +=                 cosL       *fp.mZ;
 
   double a = fp.mA/cosL,cA,sA;
-  if (fabs(a) < 0.1) {sA = a*(1-a*a/6); cA = 1-a*a/2;}
+  if (fabs(a) < 0.01) {sA = a*(1-a*a/6); cA = 1-a*a/2;}
   else               {sA = sin(a);      cA = cos(a) ;} 
  _psi   += a;
   double cosCA = _cosCA;
@@ -375,7 +376,7 @@ mLP = (1/mHz)*emx->mCL;
 mPP = (1/mHz)*emx->mCC*(1/mHz);
 
 
-//  Recov();
+ Recov();
 }  
 //______________________________________________________________________________
 void StvFitErrs::Get(THelixTrack *he) const
@@ -429,6 +430,7 @@ void StvFitErrs::Backward()
 int StvFitErrs::Check(const char *tit) const
 {
   ((StvFitErrs*)((void*)this))->Recov();
+  if (!StvDebug::mgCheck) return 0;
   int ierr=0;
   double dia[5];const double *e=&mHH;
   for (int i=0,li=0;i< 5;li+=++i) {
@@ -452,6 +454,7 @@ int StvFitErrs::Recov()
   double dia[5],fak[5];double *e=&mHH;
 
   int nerr=0;
+  if (!StvDebug::mgRecov) return 0;
 //		Check diag errs
   for (int i=0,li=0;i< 5;li+=++i) {
     fak[i]=1;
@@ -597,25 +600,27 @@ void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs 
 
 //
 double dRad[5][6] = 
-/*                        x,       y,   z,      A,      L,  P
-/*----------------------------------------------------------*/
+/*                        x,       y,   z,      A,      L,  P*/
+/*-----------------------------------------------------------*/
 /*jRPhi*/	{{-  _y/rxy,  _x/rxy,   0,      0,      0,  0}
 /*jZ  */	,{        0,       0,   1,      0,      0,  0}
 /*jTan*/	,{        0,       0,   0,      0,1/cos2L,  0}
 /*jPsi*/	,{        0,       0,   0, 1/cosL,      0,  0}
 /*jPti*/	,{        0,       0,   0,      0,      0,  1}};
+/*-----------------------------------------------------------*/
 
   TMatrixD T2=TMatrixD(5,6,dRad[0])*T1;
   TCL::trasat(T2.GetMatrixArray(),fitErr->Arr(),radErr,5,5); 
 
 }
+#if 0
 //_____________________________________________________________________________
 void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
 {
     /// signed impact parameter; Signed in such a way that:
     ///     x =  -impact*sin(Psi)
     ///     y =   impact*cos(Psi)
-  imp->mImp = _x*(-_sinCA) + _y*(_cosCA);
+  imp->mImp = -(_x*(-_sinCA) + _y*(_cosCA));
   double tst = _x*(_cosCA) + _y*(_sinCA);
   assert(fabs(tst)<1e-5 || fabs(imp->mImp) > 1000*fabs(tst));
   imp->mZ   = _z;
@@ -626,17 +631,77 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
   if (!fe) return;
 
   double cos2L = 1./(1+_tanl*_tanl);
-  double cosL  =sqrt(cos2L);
-  double Rxy   = fabs(imp->mImp);
-  double T[5][5] = {
-  {1,    0,         0, 0,          0},
-  {0, cosL, _tanl*Rxy, 0,          0},
-  {0,    0,         1, 0,          0},
-  {0,    0,         0, 0,          1},
-  {0,    0,         0, 1/cos2L,    0}};
+  double cosL  = sqrt(cos2L);
+  double sinL  = cosL*_tanl;
+  double myImp   = imp->mImp;
+//		StvFitPars
+// mH;	 direction perpendicular movement and Z
+// mZ;	 Pseudo Z, direction perpendicular movement & H
+// mA;	 Angle in XY. cos(A),sin(A),T moving direction
+// mL;	 Angle lambda in Rxy/Z
+// mP;	 1/pt with curvature sign
+
+//      		Impacts
+//     float  mImpImp;
+//     float  mZImp, mZZ;
+//     float  mPsiImp, mPsiZ, mPsiPsi;
+//     float  mPtiImp, mPtiZ, mPtiPsi, mPtiPti;
+//     float  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;
+ double T[5][5] = {
+/*        H,   Zeta,         	  A,       L,P */
+/*----------------------------------------------*/
+/*Imp*/  {-1,     0,         	   0,	    0,0},
+/*Z  */  { 0,1/cosL,               0, 	    0,0},
+/*Psi*/  { 0,_curv*sinL,          1/cosL,   0,0},
+/*Pti*/  { 0,     0,         	   0, 	    0,1},
+/*Tan*/  { 0,     0,         	   0, 1/cos2L,0}};
+/*---------------------------------------------*/
+
   double qwe[15];
   TCL::trasat(T[0],fe->Arr(),qwe,5,5); 
   TCL::ucopy(qwe,&imp->mImpImp,15);
+}
+#endif
+//_____________________________________________________________________________
+void StvNodePars::GetPrimial(double radPar[6],double radErr[15],const StvFitErrs *fitErr) const
+{
+/// This is GetRadial for primary track. Radial representation of errors
+/// is senseless for primary. But our oldfashiond TPT format demanding it. 
+/// All space errors supposed to be zeros.
+
+//Remind StvFitPars:
+//double mH;	// direction perpendicular movement and Z
+//double mZ;	// Pseudo Z, direction perpendicular movement & H
+//double mA;	// Angle in XY. cos(A),sin(A),T moving direction
+//double mL;	// Angle lambda in Rxy/Z
+//double mP;	// 1/pt with curvature sign
+
+  enum {jRad =0,jPhi   ,jZ  ,jTan,jPsi,jPti};
+
+  double r2xy = _x*_x+_y*_y, rxy=sqrt(r2xy);
+  double cos2L = 1./(1+_tanl*_tanl);
+  double cosL = sqrt(cos2L);
+
+  radPar[jRad] = rxy;
+  radPar[jPhi] = atan2(_y,_x);
+  radPar[jZ  ] = _z;
+  radPar[jTan] = _tanl;
+  radPar[jPsi] = _psi;
+  radPar[jPti] = _ptin;
+  if (!radErr) return;
+
+double T[5][5] = 
+/*                     H,     Z,     A,      L,      P*/
+/*----------------------------------------------------*/
+/*jRPhi*/	{{     0,     0,     0,      0,      0}
+/*jZ  */	,{     0,     0,     0,      0,      0}
+/*jTan*/	,{     0,     0,     0,      1/cos2L,0}
+/*jPsi*/	,{     0,     0,1/cosL,      0,      0}
+/*jPti*/	,{     0,     0,     0,      0,      1}};
+/*----------------------------------------------------*/
+
+  TCL::trasat(T[0],fitErr->Arr(),radErr,5,5); 
+
 }
 //______________________________________________________________________________
 const StvFitPars &StvFitPars::operator*(const Mtx55D_t &t) const  
@@ -665,6 +730,30 @@ void StvFitErrs::Get(const StvNodePars *np,  StvNodeErrs *ne) const
   TCL::trasat(T[0],this->Arr(),ne->A,5,6); 
 
 }
+//______________________________________________________________________________
+StvImpact::StvImpact() {memset(this,0,sizeof(*this));}
+
+//______________________________________________________________________________
+void StvImpact::Print(const char *opt) const
+{
+  if (!opt) opt = "";
+  printf("StvImpact::Print(%s) ==\n",opt);
+
+static const char* tit[]={"Imp","Z  ","Psi","Pti","Cur",0};
+  const float* P=&mImp;
+  for (int i=0;i<5;i++) {printf("%s = %g, ",tit[i],P[i]);}
+  printf("\n");
+  if (mImpImp<=0) return;
+  const float *e = &mImpImp;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    printf("%s ",tit[i]);
+    for (int j=0;j<=i;j++) {
+    printf("%g\t",e[li+j]);} 
+    printf("\n");
+  }
+
+
+}   
 #if 0 //
 //____________________________________________________________
 double EmxSign(int n,const double *a) 
@@ -747,6 +836,7 @@ RETN: if (B!=buf) delete B;
 ClassImp(StvNodeParsTest);
 void StvNodeParsTest::Test()
 {
+  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
   double thPars[7+15],Hz=0.000299792458 * 4.98478;
   for (int i=0;i<7+15;i++) {thPars[i]=gRandom->Rndm();}
   THelixTrack th(thPars,thPars+3,thPars[6]),thh;
@@ -771,12 +861,13 @@ void StvNodeParsTest::Test()
     if (fabs(thhPars[i]-thPars[i]) <1e-6) continue;
     nerr++;printf("%d = %g %g \n",i,thPars[i],thhPars[i]);}
   printf("nmErrs = %d\n",nerr);
-  
+  StvDebug::mgRecov=saveRecov;
 }
 //_____________________________________________________________________________
 void StvNodeParsTest::TestGetRadial(int nEv)
 {
 StvFitErrs fE;
+  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
   double f = 0.01;
   TVectorD D(5);
   D[0] = 1.0*1.0	*f;
@@ -851,6 +942,7 @@ static const char *radTit[6]= {"Rad","Phi","Z  ","Tan","Psi","Pti"};
   } }
   qA/=15;
   printf("Quality %g < %g < 1\n",qA,qAmax);
+  StvDebug::mgRecov=saveRecov;
 }
 
 //_____________________________________________________________________________
@@ -889,6 +981,7 @@ StvFitErrs iE,oE,oER;
 
   oER*=0.;
   oHER.Clear();
+  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
 
 //		Prepare error matrix for TRandomVector
   TMatrixDSym S(5);
@@ -1013,12 +1106,14 @@ static int iHELIX=0;
   } }
   qA/=15;
   printf("Quality %g < %g < 1\n",qA,qAmax);
+  StvDebug::mgRecov=saveRecov;
 
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 void StvNodeParsTest::TestMtx() 
 {
+  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
   double maxEps = 0;  
   double hz = 0.0014880496061989194;
   int nErr=0;
@@ -1080,10 +1175,313 @@ static const char T[]="HZALP";
       if (eps < 1e-2) continue;
       nErr++;
       printf(" m%c%c \t%g \t%g \t%g\n",T[jp],T[ip],ana,est,eps);
- } }  
-    printf("TestMtx: %d errors maxEps=%g\n",nErr,maxEps);
+  } }  
+  printf("TestMtx: %d errors maxEps=%g\n",nErr,maxEps);
+  StvDebug::mgRecov=saveRecov;
 
 }
+
+//_____________________________________________________________________________
+// Some math for:
+// 
+// 	(cL*cP)
+// T =  (cL*sP)
+// 	(sL   )
+// 
+// 
+// 	(-sP)
+// P = 	( cP)
+// 	( 0 )
+// 
+// 
+// 
+// 	(-sL*cP)
+// L = 	(-sL*sP)
+// 	( cL   )
+// 
+// 
+// dX = T*t + P*h + L*l
+// 
+// 
+// 	(cP)
+// D =  	(sP)
+// 	(0 )
+// 
+// X0 = -imp*P
+// dD = P*dPsi = P*(a/cL + rho*(cL*t -sL*l))
+// 
+// 
+// 
+// d(X*D) = dX*D + X*dD = 0  //DCA condition
+// 
+// d(X*D) = cL*t - sL*l -imp*(a/cL + rho*(cL*t -sL*l)) = 0
+// (1-imp*rho)*cL*t - (1-imp*rho)*sL*l -imp/cL*a = 0
+// (1-imp*rho)*cL*t = (1-imp*rho)*sL*l +imp/cL*a
+// 
+// t = tL*l +imp/(1-imp*rho)*a
+// ===========================
+//_____________________________________________________________________________
+void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
+{
+    /// signed impact parameter; Signed in such a way that:
+    ///     x =  -impact*sin(Psi)
+    ///     y =   impact*cos(Psi)
+  imp->mImp  = -(_x*(-_sinCA) + _y*(_cosCA));
+  double tst =   _x*( _cosCA) + _y*(_sinCA);
+  assert(fabs(tst)<1e-5 || fabs(imp->mImp) > 1000*fabs(tst));
+  imp->mZ   = _z;
+  imp->mPsi = _psi;
+  imp->mPti = _ptin;
+  imp->mTan = _tanl;
+  imp->mCurv= _curv;
+  if (!fe) return;
+
+  double c2L = 1./(1+_tanl*_tanl);
+  double cL  = sqrt(c2L);
+  double sL  = cL*_tanl;
+//		StvFitPars
+// mH;	 direction perpendicular movement and Z
+// mZ;	 Pseudo Z, direction perpendicular movement & H
+// mA;	 Angle in XY. cos(A),sin(A),T moving direction
+// mL;	 Angle lambda in Rxy/Z
+// mP;	 1/pt with curvature sign
+
+//      		Impacts
+//     float  mImpImp;
+//     float  mZImp, mZZ;
+//     float  mPsiImp, mPsiZ, mPsiPsi;
+//     float  mPtiImp, mPtiZ, mPtiPsi, mPtiPti;
+//     float  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;
+
+// t = tL*l +imp/(1-imp*rho)*a
+// ===========================
+double dtdl = sL/cL ;               	 
+double dtda = imp->mImp/(1-imp->mImp*_curv);	 
+
+double T65[6][5] = {
+
+/*      h,     l,    a,  L, p */
+/*----------------------------------------------*/
+/*t*/  {0,  dtdl,  dtda, 0, 0},
+/*h*/  {1,     0,     0, 0, 0},
+/*v*/  {0,     1,     0, 0, 0},
+/*a*/  {0,     0,     1, 0, 0},
+/*l*/  {0,     0,     0, 1, 0},
+/*p*/  {0,     0,     0, 0, 1}};
+/*---------------------------------------------*/
+
+
+ double T56[5][6] = {
+/*        t        h,        l,     a,      L,P */
+/*----------------------------------------------*/
+/*Imp*/  {0,      -1,        0,     0,	    0,0},
+/*Z  */  {sL,      0,       cL,     0, 	    0,0},
+/*Psi*/  {_curv*cL,0,-_curv*sL,  1/cL,      0,0},
+/*Pti*/  {0,       0,        0,     0, 	    0,1},
+/*Tan*/  {0,       0,        0,     0,  1/c2L,0}};
+/*---------------------------------------------*/
+
+
+  TMatrixD MT = TMatrixD(5,6,T56[0])*TMatrixD(6,5,T65[0]);
+  double qwe[15];
+  TCL::trasat(MT.GetMatrixArray(),fe->Arr(),qwe,5,5); 
+  TCL::ucopy(qwe,&imp->mImpImp,15);
+}
+//_____________________________________________________________________________
+void StvNodeParsTest::TestImpErr(int nEv)
+{
+
+StvNodePars iP,iPR,oP,oPR;
+THelixTrack iH,iHR,oH,ht;
+
+THEmx_t oHE,oHER;
+double dia[5],*e,qA,qAmax;
+float *ef,*erf;
+
+  iP._cosCA = 0.051522195951218416; iP._sinCA = -0.99867184876021664;  iP._x   = 56.80456301948584; 
+  iP._y     = -179.95090442478528;  iP._z     = 16.833129146428401;    iP._psi = -1.5192513089402997; iP._ptin = -4.286089548109465; 
+  iP._tanl  = -0.71077992742240803; iP._curv  = -0.0063779138641975935;iP._hz=(0.0014880496061989194);
+  iP.ready();
+StvFitErrs iE,oE,oER;
+  iE.mHH = 0.0025928369042255385;  iE.mHZ = -4.9934860023454386e-11; iE.mZZ = 0.014598355970801268; iE.mHA = -0.00059887440419442305; 
+  iE.mZA = 1.0958739205478152e-11; iE.mAA = 0.00026524379894739812;  iE.mHL = 3.463001237863329e-12; iE.mZL = -0.0016525557966380938; 
+  iE.mAL = 8.3669926017237923e-13; iE.mLL = 0.00041855110437868546;  iE.mHP = 0.0043962440767417576; iE.mZP = -2.904206508909407e-11; 
+  iE.mAP = -0.0041320793241820105; iE.mLP = -2.5031139398137018e-12; iE.mPP = 0.78568815092933286; iE.SetHz(0.0014880496061989194);
+
+  iP._curv*=10;
+  iP._ptin*=10;
+  iE.mPP=100;
+  oER*=0.;
+  oHER.Clear();
+  int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
+
+//		Prepare error matrix for TRandomVector
+  TMatrixDSym S(5);
+  e = iE.Arr();
+  for (int i=0,li=0;i< 5;li+=++i) {S[i][i] = e[li+i];}
+  S*=0.01;
+  TRandomVector::RandRotate(S);
+
+  for (int i=0,li=0;i< 5;li+=++i) {
+    for (int j=0;j<=i;j++)        { e[li+j] = S[i][j];}}
+//
+//  iE.Print("Input StvFitErrs");
+
+  iP.get(&iH);	// nodePar => Helix
+  iE.Get(&iH);	// fitErr  => HelixErr
+  iE.Set(&iH,iP._hz);
+//  iE.Print("Input StvFitErrs => THEmx_t => StvFitErrs");
+
+
+//  iH.Emx()->Print("Input Helix Errs");
+  oH = iH;
+  double myDist = oH.Path(0.,0.);
+  oH.Move(myDist);		//Move helix to 100cm
+  oP.set(&oH,iP._hz);		//helix100 => nodePar100
+  oE.Set(&oH,iP._hz);		//helixErr100 => fitErr100
+  oE.Print("Output StvFitErrs");
+//  oH.Emx()->Print("Output Helix Errs");
+  StvImpact oI,oIR;
+  oP.GetImpact(&oI,&oE);
+  oI.Print("Output StvImpact");
+
+
+
+//		Prepare error matrix for TRandomVector
+  e = iE.Arr();
+  for (int i=0,li=0;i< 5;li+=++i) {
+    for (int j=0;j<=i;j++    ) {
+       S[i][j]=e[li+j]; S[j][i]=e[li+j];
+    } }
+  TRandomVector RV(S);
+
+//		Event loop
+  double oErr[15]={0};
+  for (int ev=0;ev <= nEv;ev++) {
+    iPR = iP;
+    ht = iH;
+//		Randomize fit parameters
+    const TVectorD res = RV.Gaus();
+
+    StvFitPars fp(res.GetMatrixArray()); iPR+=fp;
+//		Create THelixTrack from StvNodePars
+    iPR.get(&ht);
+//		Set no error matrix to helix
+    ht.SetEmx(0);
+      
+    double my100 = ht.Path(0.,0.);
+    assert(fabs(my100-myDist) <33);
+    ht.Move(my100);
+    oPR.set(&ht,iP._hz);
+    oPR.GetImpact(&oIR,0);
+    TVectorF d = TVectorF(5,&oIR.mImp)-TVectorF(5,&oI.mImp);
+    if (d[2]<=-M_PI) d[2]+=2*M_PI;
+    if (d[2]>= M_PI) d[2]-=2*M_PI;
+//    float *ef = &oIR.mImpImp;
+    for (int i=0,li=0;i< 5;li+=++i) {
+      for (int j=0;j<=i;j++    ) {
+//      ef[li+j]+=d[i]*d[j];
+        oErr[li+j]+=d[i]*d[j];
+    } } 
+
+    my100 = ht.Path(oP.P);
+    ht.Move(my100);
+    oPR.set(&ht,iP._hz);
+    fp = oPR-oP;
+    const double *q = fp.Arr();
+    e = oER.Arr();
+    for (int i=0,li=0;i< 5;li+=++i) {
+      for (int j=0;j<=i;j++    ) {
+      e[li+j]+=q[i]*q[j];
+    } } 
+  }//EndEvts
+  TCL::vscale(oErr,(1./nEv),oErr,15);
+  TCL::ucopy (oErr,&oIR.mImpImp, 15);
+  oER*=(1./nEv);
+
+  printf("*** Check StvFitErr matrix ***\n");
+
+  qA=0;qAmax=0;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    dia[i]=oE[li+i];
+    for (int j=0;j<=i;j++) {
+    double dif = (oER[li+j]-oE[li+j])/sqrt(dia[i]*dia[j]);
+    printf("(%d %d) \t%g = \t%g \t%g\n",i,j,oER[li+j],oE[li+j],dif);
+    dif = fabs(dif);
+    qA+= (dif); if (dif>qAmax) qAmax=dif;
+  } }
+  qA/=15;
+  printf("Quality %g < %g < 1\n",qA,qAmax);
+  
+  
+  printf("/n*** Check StvImpact Error matrix ***\n");
+  ef  = &oI.mImpImp;
+  erf = &oIR.mImpImp;
+  qA=0;qAmax=0;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    dia[i]=ef[li+i];
+    for (int j=0;j<=i;j++) {
+    double dif = (erf[li+j]-ef[li+j])/sqrt(dia[i]*dia[j]);
+    printf("(%d %d) \t%g = \t%g \t%g\n",i,j,erf[li+j],ef[li+j],dif);
+    dif = fabs(dif);
+    qA+= (dif); if (dif>qAmax) qAmax=dif;
+  } }
+  qA/=15;
+  printf("Quality %g < %g < 1\n",qA,qAmax);
+  StvDebug::mgRecov=saveRecov;
+
+}
+#if 0
+
+
+
+	(cL*cP)
+T =  	(cL*sP)
+	(sL   )
+
+
+	(-sP)
+P = 	( cP)
+	( 0 )
+
+
+
+	(-sL*cP)
+L = 	(-sL*sP)
+	( cL   )
+
+
+dX = T*t + P*h + L*l
+
+
+	(cP)
+D =  	(sP)
+	(0 )
+
+X0 = -imp*P
+dD = P*dPsi = P*(a/cL + rho*(cL*t -sL*l))
+
+
+
+d(X*D) = dX*D + X*dD = 0
+
+d(X*D) = cL*t - sL*l -imp*(a/cL + rho*(cL*t -sL*l)) = 0
+(1-imp*rho)*cL*t - (1-imp*rho)*sL*l -imp/cL*a = 0
+(1-imp*rho)*cL*t = (1-imp*rho)*sL*l +imp/cL*a
+
+t = tL*l +imp/(1-imp*rho)*a
+===========================
+#endif
+
+
+
+
+
+
+
+
+
+
 
 //_____________________________________________________________________________
 #include "TMatrixT.h"
