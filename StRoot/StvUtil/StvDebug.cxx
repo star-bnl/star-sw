@@ -9,7 +9,9 @@
 #include "TSystem.h"
 #include "TString.h"
 #include "StvDebug.h"
-
+int StvDebug::mgDebug=1;
+int StvDebug::mgRecov=1;
+int StvDebug::mgCheck=1;
 
 typedef std::map<std::string, TH1F*>   myDebMap_t;
 typedef myDebMap_t::const_iterator myDebIter_t;

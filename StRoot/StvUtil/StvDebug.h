@@ -16,6 +16,12 @@ static  int Level();
 static int& Flag(const char *key);
 private:
 static void Draw(int nH,TH1** H);
+public:
+static int mgDebug;
+static int mgRecov;
+static int mgCheck;
+
+
 #if 0
 ClassDef(StvDebug,0)
 #endif
