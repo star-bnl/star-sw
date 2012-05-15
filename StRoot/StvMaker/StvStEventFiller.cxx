@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.18 2012/04/27 01:43:08 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.19 2012/05/15 17:54:13 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.19  2012/05/15 17:54:13  perev
+ * Avoid Dca node in fillFitTraits
+ *
  * Revision 1.18  2012/04/27 01:43:08  perev
  * Use totFitsPointNumber for flag setting
  *
@@ -640,7 +643,8 @@ static const int toUpp[15] = 	{0,
 
   double xx[6],ee[15];
   const StvNodePars &fp = node->GetFP();
-  fp.GetRadial(xx,ee,&node->GetFE());
+  if (node->GetType()==StvNode::kPrimNode) {fp.GetPrimial(xx,ee,&node->GetFE());}
+  else                                     {fp.GetRadial (xx,ee,&node->GetFE());}
 
   for (int i=0;i<6;i++) {x[i] = (float)(xx[i]);}
   if (!e) return;
@@ -1027,7 +1031,9 @@ void StvStEventFiller::fillGeometry(StTrack* gTrack, const StvTrack* track, bool
 // }
 
 //_____________________________________________________________________________
-void StvStEventFiller::fillFitTraits(StTrack* gTrack, const StvTrack* track){
+void StvStEventFiller::fillFitTraits(StTrack* gTrack, const StvTrack* track)
+{
+static int nCall=0; nCall++;
   // mass
   // this makes no sense right now... double massHyp = track->getMass();  // change: perhaps this mass is not set right?
   unsigned short geantIdPidHyp = 9999;
@@ -1035,7 +1041,10 @@ void StvStEventFiller::fillFitTraits(StTrack* gTrack, const StvTrack* track){
   geantIdPidHyp = 9;
   // chi square and covariance matrix, plus other stuff from the
   // innermost track node
-  const StvNode* node = track->front();
+  StvTrack::EPointType needNode = (track->IsPrimary())? StvTrack::kPrimPoint : StvTrack::kFirstPoint;
+  const StvNode* node = track->GetNode(needNode);
+  assert(node);
+
   float x[6],covMFloat[15];
   getTpt(node,x,covMFloat);
   float chi2[2];
@@ -1045,6 +1054,7 @@ void StvStEventFiller::fillFitTraits(StTrack* gTrack, const StvTrack* track){
   // December 04: The second element of the array will now hold the incremental chi2 of adding
   // the vertex for primary tracks
   if (gTrack->type()==primary) {
+    node = track->GetNode(StvTrack::kPrimPoint);
     assert(!node->GetDetId());
     chi2[1]=node->GetXi2();
   }
