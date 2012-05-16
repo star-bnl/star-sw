@@ -30,8 +30,7 @@ St_db_Maker *dbMk = 0;
 #endif
 //________________________________________________________________________________
 void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",  
-	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd", const Char_t *opt = "Bichsel", 
-	   Int_t tauIX = 0, Int_t tauCX = 0) {
+	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd", const Char_t *opt = "Bichsel", const Char_t *kuip = 0) {
   gROOT->LoadMacro("bfc.C"); 
   TString ChainOpt("");
   TString RootFile("");
@@ -39,10 +38,11 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
   TString RunOpt(Run);
   RunOpt.ToLower();
   //  ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
-  ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
-  ChainOpt += "Corr4,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
+  ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,NoHistos,NoRunco,";
+  ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
   //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
-  ChainOpt += "MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
+  ChainOpt += ",CMuDst,MiniMcMk,McTpcAna,IdTruth,useInTracker,";
+  // ChainOpt += "MiniMcMk,IdTruth,useInTracker,-hitfilt,CMuDst,Tree,tags,evout,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
     ChainOpt += "tpl,tpcI,";
     RunOpt.ReplaceAll("TpcRS,","");
@@ -53,37 +53,43 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
   //  Bool_t needAlias = kFALSE;
   TString FileIn(fileIn);
   if (FileIn == "") {
-    ChainOpt += "gstar,"; RootFile += "gstar_y8";
-    if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2009,";
+    ChainOpt += "gstar,"; RootFile += "gstar";
+    if (RunOpt.Contains("hadr_of",TString::kIgnoreCase) ||
+	   Opt.Contains("hadr_of",TString::kIgnoreCase)) ChainOpt += "hadr_off,";
+    if (RunOpt.Contains("phys_of",TString::kIgnoreCase) ||
+	   Opt.Contains("phys_of",TString::kIgnoreCase)) ChainOpt += "phys_off,";
+    if (RunOpt.Contains("PhysicsOff",TString::kIgnoreCase) ||
+	   Opt.Contains("PhysicsOff",TString::kIgnoreCase)) ChainOpt += "phys_off,";
+    if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2011,";
     if      (Opt.Contains("FieldOff" ,TString::kIgnoreCase)) ChainOpt += "FieldOff,";
     else if (Opt.Contains("HalfField",TString::kIgnoreCase)) ChainOpt += "HalfField,";
     else                                                     ChainOpt += "FieldOn,";
-  }
-  if (FileIn.Contains(".daq",TString::kIgnoreCase)) {
-    ChainOpt += "in,TpxRaw,";
-    RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
-    RootFile.ReplaceAll(".daq","");
   } else {
-    ChainOpt += ",McAna,";
-    if (FileIn.Contains(".fz",TString::kIgnoreCase)) {
-      RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
-      ChainOpt += "fzin,";
-      RootFile.ReplaceAll(".fzd","");
-      RootFile.ReplaceAll(".fz","");
+    RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
+    if (FileIn.Contains(".daq",TString::kIgnoreCase)) {
+      ChainOpt += "in,TpxRaw,";
+      RootFile.ReplaceAll(".daq","");
     } else {
-      if (FileIn.Contains(".geant.root",TString::kIgnoreCase)) {
-	RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
-	ChainOpt += "in,";
-	RootFile.ReplaceAll(".geant.root","");
-	//	needAlias = kTRUE;
+      if (FileIn.Contains(".fz",TString::kIgnoreCase)) {
+	ChainOpt += "fzin,";
+	RootFile.ReplaceAll(".fzd","");
+	RootFile.ReplaceAll(".fz","");
+      } else {
+	if (FileIn.Contains(".geant.root",TString::kIgnoreCase)) {
+	  ChainOpt += "in,";
+	  RootFile.ReplaceAll(".geant.root","");
+	} else {
+	  if (FileIn.Contains(".MuDst",TString::kIgnoreCase)) {
+	    ChainOpt += "mtin,";
+	    RootFile.ReplaceAll(".MuDst.root","");
+	  }
+	}
       }
     }
   }
   ChainOpt += RunOpt;
   RootFile += Form("_%s_%s_%i_%i",Run,Opt.Data(),First,Last);
   RootFile.ReplaceAll(",","_");
-  if (tauIX > 0) {RootFile += "jI=";RootFile += tauIX;}
-  if (tauCX > 0) {RootFile += "tauCX=";RootFile += tauCX;}
   if (RootFile.Contains(";")) {
     Int_t index = RootFile.Index(";");
     RootFile = RootFile(0,index);
@@ -112,8 +118,6 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
 #endif
       //      CLRBIT(m_Mode,StTpcRSMaker::kDistortion);  // Check that distorton are IN chain
       tpcRS->SetMode(m_Mode);
-      if (tauIX  > 0) tpcRS->SettauIntegrationX(1e-9*tauIX);
-      if (tauCX  > 0) tpcRS->SettauCX(1e-9*tauCX);
       //      tpcRS->SetDebug(13);
     }
   }
@@ -173,39 +177,18 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
   }
   if (FileIn == "" && gClassTable->GetID("TGiant3") >= 0) {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
-#if 0
-    geant->Do("debug on");
-    geant->Do("swit 1 2");
-    geant->Do("swit 2 2");
-#endif
-    //    geant->SetDebug(0);
+    if (Opt.Contains("debug",TString::kIgnoreCase)) {
+      geant->Do("debug on");
+      geant->SetDebug(1);
+      geant->Do("swit 1 2");
+      geant->Do("swit 2 2");
+    }
     //            NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
     //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
     cout << Opt << endl;
     if (First > 0) {
       Int_t i = (gSystem->GetPid()+ First)%256;
       geant->Do(Form("rndm %i; rndm;",i));
-    }
-    if (Opt.Contains("PhysicsOff",TString::kIgnoreCase)) {
-      geant->Do("DCAY 0");
-      geant->Do("ANNI 0");
-      geant->Do("BREM 0");
-      geant->Do("COMP 0");
-      geant->Do("HADR 0");
-      geant->Do("MUNU 0");
-      geant->Do("PAIR 0");
-      geant->Do("PFIS 0");
-      geant->Do("PHOT 0");
-      geant->Do("RAYL 0");
-      geant->Do("LOSS 4"); // no fluctuations 
-      //    geant->Do("LOSS 1"); // with delta electron above dcute
-      geant->Do("DRAY 0");
-      geant->Do("MULS 1");
-      geant->Do("STRA 0");
-      //         CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-      geant->Do("CUTS     1e-4   1e-4   .001   .001   .001  .001  .001  1e-4  .001   .001 50.e-6");
-      //    geant->Do("gclose all");
-      geant->Do("physi");
     }
     if ( Opt.Contains("laser",TString::kIgnoreCase)) {
       gSystem->Load("gstar.so");
@@ -221,12 +204,20 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
 	geant->Do("gkine   1  6   0.4     1.  -.1     .1      0    0     -50.    50.;");
       else if (Opt.Contains("50muons1GeV",TString::kIgnoreCase)) 
 	geant->Do("gkine  50  6   1.     1.  -1     1      0    6.28    -50.    50.;");
+      else if (Opt.Contains("1000muons1GeV",TString::kIgnoreCase)) 
+	geant->Do("gkine  1000  6   1.     1.  -1     1      0    6.28    -50.    50.;");
+      else if (Opt.Contains("1alpha1GeV",TString::kIgnoreCase)) 
+	geant->Do("gkine  1  47   1.     1.  -1     1      0    6.28    -50.    50.;");
       else if (Opt.Contains("50muons0.5GeV",TString::kIgnoreCase)) 
 	geant->Do("gkine  50  6  0.5  0.5  -1     1      0    6.28    -50.    50.;");
       else if (Opt.Contains("deuteron",TString::kIgnoreCase)) 
 	geant->Do("gkine 100 45   0.05  100.  -1     1      0    6.28    -50.    50.;");
-      else // proton
+      else if (Opt.Contains("proton",TString::kIgnoreCase)) // proton
 	geant->Do("gkine 100 14   0.05   50.  -1     1      0    6.28    -50.    50.;");
+    if (kuip) {
+      TString Kuip(kuip);
+      geant->Do(kuip);
+    }
   }
   if (Last > 0)  chain->EventLoop(First,Last);
 }
@@ -236,12 +227,10 @@ void TpcRS(Int_t Last=100,
 	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd",
 	   //		 const Char_t *fileIn = 0,
 	   //"/star/rcf/simu/auau200/hijing/b0_20/inverse/year2001/hadronic_on/gstardata/rcf0191_01_380evts.fzd",
-	   const Char_t *opt = "Bichsel",
-	   Int_t tauIX = 0, Int_t tauCX = 0
-	   ) {
+	   const Char_t *opt = "Bichsel", const Char_t *kuip = 0) {
   //  /star/data03/daq/2004/093/st_physics_adc_5093007_raw_2050001.daq
   //  /star/data03/daq/2004/fisyak/st_physics_adc_5114043_raw_2080001.daq
   // nofield /star/data03/daq/2004/076/st_physics_adc_5076061_raw_2060001.daq
   //                                   st_physics_adc_5076061_raw_4050001.daq
-  TpcRS(1,Last,Run,fileIn,opt,tauIX,tauCX);
+  TpcRS(1,Last,Run,fileIn,opt,kuip);
 }

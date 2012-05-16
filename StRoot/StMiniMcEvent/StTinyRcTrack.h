@@ -29,7 +29,9 @@ class StTinyRcTrack {
   void setPzPr(Float_t val){ mPzPr=val; }
   void setEtaPr(Float_t val) { mEtaPr=val; }
   void setPhiPr(Float_t val) { mPhiPr=val; }
+  void setDca(int idca) { mIsDca=idca; }
   void setDcaPr(Float_t val) { mDcaPr=val; }
+//vp  void setDca00(Float_t val) { mDca00=val; }
   void setDcaXYPr(Float_t val) { mDcaXYPr=val; }
   void setDcaZPr(Float_t val) { mDcaZPrMcV=val; }
   void setDcaXYPrMcV(Float_t val) { mDcaXYPrMcV=val; }
@@ -46,6 +48,7 @@ class StTinyRcTrack {
   void setPzGl(Float_t val){ mPzGl=val; }
   void setEtaGl(Float_t val) { mEtaGl=val; }
   void setPhiGl(Float_t val) { mPhiGl=val; }
+  void setDca00(Float_t val) { mDca00=val; }
   void setDcaGl(Float_t val) { mDcaGl=val; }
   void setDcaXYGl(Float_t val) { mDcaXYGl=val; }
   void setDcaZGl(Float_t val) { mDcaZGl=val; }
@@ -150,6 +153,7 @@ class StTinyRcTrack {
 private:
   // primary stuff
   Char_t     mIsValidGl;
+  Char_t     mIsDca;
   Float_t    mPtPr;
   Float_t    mPzPr;
   Float_t    mEtaPr;
@@ -157,6 +161,7 @@ private:
   Float_t    mDcaPr;     // 3D distance to primary vertex from primary track
   Float_t    mDcaXYPr;   // 2D dca with respect to primary vertex     
   Float_t    mDcaZPr;	 // Z distance to   -"-		       
+//vp  Float_t    mDca00;	 // 2D dca with respect to x=0,y=0	       
   Float_t    mDcaXYPrMcV;// 2D dca with respect to MC vertex	       
   Float_t    mDcaZPrMcV; // Z  distance  -"-                          
   Float_t    mCurvPr;
@@ -178,6 +183,7 @@ private:
   Float_t    mPzGl;
   Float_t    mEtaGl;
   Float_t    mPhiGl;
+  Float_t    mDca00;      // 2D DCA to x=y=0  
   Float_t    mDcaGl;      // 3D distance to primary vertex from global trazck 
   Float_t    mDcaXYGl;    // 2D dca with respect to primary vertex     
   Float_t    mDcaZGl;     // Z distance to   -"-		       
@@ -233,6 +239,9 @@ private:
 #endif
 //
 // $Log: StTinyRcTrack.h,v $
+// Revision 1.10  2011/07/19 19:16:33  perev
+// mDca00 added
+//
 // Revision 1.9  2010/08/31 20:16:48  fisyak
 // Add track seedQuality
 //
@@ -266,6 +275,9 @@ private:
 //
 // Revision 1.2  2002/06/06 18:58:30  calderon
 // Added $Log: StTinyRcTrack.h,v $
+// Added Revision 1.10  2011/07/19 19:16:33  perev
+// Added mDca00 added
+// Added
 // Added Revision 1.9  2010/08/31 20:16:48  fisyak
 // Added Add track seedQuality
 // Added

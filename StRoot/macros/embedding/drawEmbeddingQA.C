@@ -14,14 +14,41 @@ void drawEmbeddingQA(
     const TString realDataFile  = "qa_real_2005_P07ie.root",
     const Int_t geantid = 8,
     const Double_t ptmax = 5.0, // default is 5 GeV/c
-    const Bool_t isEmbeddingOnly = kFALSE
+    const Bool_t isEmbeddingOnly = kFALSE,
+    const Int_t parentGeantId = 0
 ){
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMiniMcEvent");
   gSystem->Load("StEmbeddingUtilities");
 
+  // Set relevant cut parameters here used in the base QA
+  // The default parameters can be found in the constructor of StRoot/StEmbeddingUtilities/StEmbeddingQAUtilities.cxx
+  // You should have consistent parameters in both doEmbeddingQAMaker.C and drawEmbeddingQA.C
+  // Below are the examples how to change the parameters
+  // All values used here are default ones
+  //
+  // NOTE: These are just used to print them out in the pdf, not really affect the real QA process
+  const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+//  utility->setPtMinCut(0.1);
+//  utility->setPtMaxCut(10.0);
+//  utility->setEtaCut(1.5);
+//  utility->setNHitCut(10);
+//  utility->setNHitToNPossCut(0.51);
+//  utility->setDcaCut(3.0);
+//  utility->setNSigmaCut(2.0);
+//  utility->setRapidityCut(10.0);
+//  utility->setZVertexCut(30.0);
+//  //
+//  //  Default is no trigger cut, you can add multiple trigger id's like
+//  utility->addTriggerIdCut(290001);
+//  utility->addTriggerIdCut(290004);
+
+
   StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, geantid, isEmbeddingOnly);
+  maker->setParentGeantId(parentGeantId) ;
+  maker->init();
   maker->setOutputDirectory(outputDirectory);
+
 
   // Flag for output figures (default is false)
 //  maker->setPNGOn() ; // Print png file
@@ -72,13 +99,16 @@ void drawEmbeddingQA(
     const TString production,
     const Int_t geantid,
     const Double_t ptmax,
-    const Bool_t isEmbeddingOnly = kFALSE
+    const Bool_t isEmbeddingOnly = kFALSE,
+    const Int_t parentgeantId = 0
 ){
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMiniMcEvent");
   gSystem->Load("StEmbeddingUtilities");
 
   StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, year, production, geantid, isEmbeddingOnly);
+//  maker->setParentGeantId(parentGeantId) ;
+  maker->init();
   maker->setOutputDirectory(outputDirectory);
 
   // Flag for output figures (default is false)

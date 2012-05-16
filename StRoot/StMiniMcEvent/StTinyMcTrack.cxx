@@ -8,10 +8,23 @@
  * \date   March 2001
  *  
  */
+#include <assert.h>
 #include "StTinyMcTrack.h"
 #include "Stiostream.h"
 #include "TString.h"
 ClassImp(StTinyMcTrack);
+//________________________________________________________________________________
+void StTinyMcTrack::setGeantId(int val) 
+{
+  assert(val>=0 && val <= 0xFFFF);
+  mGeantId=val; 
+}
+//________________________________________________________________________________
+  void StTinyMcTrack::setParentGeantId(int val) 
+{
+  assert(val>=0 && val <= 0xFFFF);
+  mParentGeantId=val; 
+}
 
 StTinyMcTrack::StTinyMcTrack() {memset(&mIsValid, 0,((Char_t*) &mIsPrimary)-&mIsValid);}
 //________________________________________________________________________________
@@ -35,6 +48,12 @@ void StTinyMcTrack::Print(Option_t *option) const {
 }
 //
 // $Log: StTinyMcTrack.cxx,v $
+// Revision 1.6  2011/02/16 00:49:06  perev
+// geandId could be zero
+//
+// Revision 1.5  2011/02/11 03:32:14  perev
+// geantid now is ushort
+//
 // Revision 1.4  2010/08/02 20:14:16  perev
 // Format fix, thanks to Hiroshi
 //

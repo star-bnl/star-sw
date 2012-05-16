@@ -268,7 +268,6 @@ THelixTrack &operator=(const THelixTrack &from);
         double GetDRho()	const {return fDRho ;}
         double GetCos() 	const {return fCosL;}
         double GetSin() 	const {return fP[2];}
-        double GetTan() 	const {return fP[2]/fCosL;}
         double GetPeriod() const ;
         void Rot(double angle);
         void Rot(double cosa,double sina);
@@ -276,7 +275,6 @@ THelixTrack &operator=(const THelixTrack &from);
         void Show(double len, const THelixTrack *other=0) const;
         void Print(Option_t *opt="") const;
 //	statics
-static  void InvertMtx(double derivs[5][5]);
 static  void Test1();
 static  void Test2();
 static  void Test3();
