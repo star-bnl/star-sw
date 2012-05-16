@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcSectorHitCollection.hh,v 2.4 2012/03/22 01:02:31 perev Exp $
+ * $Id: StMcTpcSectorHitCollection.hh,v 2.5 2012/05/16 21:36:15 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcSectorHitCollection.hh,v $
+ * Revision 2.5  2012/05/16 21:36:15  fisyak
+ * Incresa no. possible row to 100
+ *
  * Revision 2.4  2012/03/22 01:02:31  perev
  * private => protected
  *
@@ -50,7 +53,7 @@ public:
     const StMcTpcPadrowHitCollection* padrow(unsigned int) const;
 
 protected:
-    enum { mNumberOfPadrows = 45 };
+    enum { mNumberOfPadrows = 100 };
     StMcTpcPadrowHitCollection mPadrows[mNumberOfPadrows];
     ClassDef(StMcTpcSectorHitCollection,1)
 };
