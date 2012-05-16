@@ -41,7 +41,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
   ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
   //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
-  ChainOpt += ",CMuDst,MiniMcMk,IdTruth,useInTracker,";
+  ChainOpt += ",CMuDst,MiniMcMk,IdTruth,useInTracker,tree,";
   if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2") ChainOpt += "McTpcAna,NoHistos,NoRunco,";
   else                                                     ChainOpt += "tags,";
   // ChainOpt += "MiniMcMk,IdTruth,useInTracker,-hitfilt,CMuDst,Tree,tags,evout,";
@@ -62,7 +62,9 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 	   Opt.Contains("phys_of",TString::kIgnoreCase)) ChainOpt += "phys_off,";
     if (RunOpt.Contains("PhysicsOff",TString::kIgnoreCase) ||
 	   Opt.Contains("PhysicsOff",TString::kIgnoreCase)) ChainOpt += "phys_off,";
-    if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2011,";
+    if (! RunOpt.Contains("Y200",TString::kIgnoreCase) &&
+	! RunOpt.Contains("dev",TString::kIgnoreCase)
+	) ChainOpt += "Y2011,";
     if      (Opt.Contains("FieldOff" ,TString::kIgnoreCase)) ChainOpt += "FieldOff,";
     else if (Opt.Contains("HalfField",TString::kIgnoreCase)) ChainOpt += "HalfField,";
     else                                                     ChainOpt += "FieldOn,";
@@ -162,7 +164,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     
     SETBIT(Mode,StdEdxY2Maker::kPadSelection); 
     SETBIT(Mode,StdEdxY2Maker::kCalibration);
-    SETBIT(Mode,StdEdxY2Maker::kZBGX);
+    if (TString(gSystem->Getenv("STAR_VERSION")) == ".DEV2") 
+      SETBIT(Mode,StdEdxY2Maker::kZBGX);
     SETBIT(Mode,StdEdxY2Maker::kGASHISTOGRAMS);
     if (Mode) {
       cout << " set dEdxY2 Mode" << Mode << " =======================================" << endl;
@@ -238,8 +241,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
 //________________________________________________________________________________
 void TpcRS(Int_t Last=100,
 	   const Char_t *Run = "y2009,TpcRS",//trs,fcf", // "TpcRS,fcf",
-	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd",
-	   //		 const Char_t *fileIn = 0,
+	   //	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd",
+	   const Char_t *fileIn = 0,
 	   //"/star/rcf/simu/auau200/hijing/b0_20/inverse/year2001/hadronic_on/gstardata/rcf0191_01_380evts.fzd",
 	   const Char_t *opt = "Bichsel", const Char_t *kuip = 0) {
   //  /star/data03/daq/2004/093/st_physics_adc_5093007_raw_2050001.daq
