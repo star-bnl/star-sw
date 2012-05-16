@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcSectorHitCollection.h,v 2.5 2012/05/07 14:42:58 fisyak Exp $
+ * $Id: StTpcSectorHitCollection.h,v 2.6 2012/05/16 21:35:03 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcSectorHitCollection.h,v $
+ * Revision 2.6  2012/05/16 21:35:03  fisyak
+ * replace StDigitalPair by its reference
+ *
  * Revision 2.5  2012/05/07 14:42:58  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -51,7 +54,7 @@ public:
     const StTpcPadrowHitCollection* padrow(unsigned int) const;
 
 private:
-    enum { mNumberOfPadrows = 100 }; // Keep in mind that it could be chnaged
+    enum { mNumberOfPadrows = 100 }; // Keep in mind that it could be changed
     StTpcPadrowHitCollection mPadrows[mNumberOfPadrows];
     
     ClassDef(StTpcSectorHitCollection,1)

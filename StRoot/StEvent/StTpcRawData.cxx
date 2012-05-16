@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.11 2012/05/07 14:41:59 fisyak Exp $
+ * $Id: StTpcRawData.cxx,v 2.12 2012/05/16 21:35:03 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.12  2012/05/16 21:35:03  fisyak
+ * replace StDigitalPair by its reference
+ *
  * Revision 2.11  2012/05/07 14:41:59  fisyak
  * Remove hardcoded separation between Inner and Outer Sectors
  *
@@ -191,7 +194,7 @@ Int_t StTpcDigitalSector::getTimeAdc(Int_t row, Int_t pad,
   nTimeSeqs = trsPadData.size();
   if (! nTimeSeqs) return nTimeSeqs;
   for (UInt_t i = 0; i < nTimeSeqs; i++) {
-    StDigitalPair digPair = trsPadData[i];
+    StDigitalPair &digPair = trsPadData[i];
     UInt_t ntbk = digPair.size();
     UInt_t tb   = digPair.time();
     UInt_t isIdt= digPair.isIdt();
@@ -217,7 +220,7 @@ Int_t StTpcDigitalSector::getTimeAdc(Int_t row, Int_t pad,
   nTimeSeqs = trsPadData.size();
   if (! nTimeSeqs) return nTimeSeqs;
   for (UInt_t i = 0; i < nTimeSeqs; i++) {
-    StDigitalPair digPair = trsPadData[i];
+    StDigitalPair &digPair = trsPadData[i];
     UInt_t ntbk = digPair.size();
     UInt_t tb   = digPair.time();
     UInt_t isIdt= digPair.isIdt();
