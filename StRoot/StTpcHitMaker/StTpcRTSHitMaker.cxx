@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.29 2012/05/07 23:01:37 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.30 2012/05/17 20:05:59 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -52,7 +52,7 @@ ClassImp(StTpcRTSHitMaker);
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
   SafeDelete(fTpx);
-   delete [] mTpx_RowLen;
+  if (mTpx_RowLen) delete [] mTpx_RowLen;
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Init() {
@@ -69,11 +69,13 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   Int_t NoRowsInner = St_tpcPadPlanesC::instance()->innerPadRows();
   Int_t NoRowsOuter = St_tpcPadPlanesC::instance()->outerPadRows();
   NoRows = NoRowsInner + NoRowsOuter;
-  // Fill no. of pad per row 
-  mTpx_RowLen = new UChar_t[NoRows+1];
-  mTpx_RowLen[0] = 0;
-  for (Int_t i = 1; i <= NoRows; i++) {
-    mTpx_RowLen[i] = St_tpcPadPlanesC::instance()->padsPerRow(i);
+  if (NoRows != 45) {
+    // Fill no. of pad per row 
+    mTpx_RowLen = new UChar_t[NoRows+1];
+    mTpx_RowLen[0] = 0;
+    for (Int_t i = 1; i <= NoRows; i++) {
+      mTpx_RowLen[i] = St_tpcPadPlanesC::instance()->padsPerRow(i);
+    }
   }
   SetAttr("maxRow",NoRows);
   SafeDelete(fTpx);
@@ -81,68 +83,70 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   if (GetDate() >= 20091215) fTpx->fcf_run_compatibility = 10 ;
   if (GetDate() <= 20090101) fminCharge = 40;
   // do gains example; one loads them from database but I don't know how...
-  daq_dta *dta  = fTpx->put("gain");
-
-  // Prepare scaled hit maxima
-
-  // No hit maxima if these DB params are 0
-  Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
-  Int_t maxBinZeroHits = St_tpcMaxHitsC::instance()->maxBinZeroHits();
-  Int_t livePads = 0;
-  Int_t totalPads = 0;
-  Float_t liveFrac = 1;
-  for(Int_t sector=1;sector<=24;sector++) {
-    Int_t liveSecPads = 0;
-    Int_t totalSecPads = 0;
-    for(Int_t row=1;row<=NoRows;row++) {
-      Int_t numPadsAtRow = St_tpcPadPlanesC::instance()->padsPerRow(row);
-      daq_det_gain *gain = (daq_det_gain *) dta->request(numPadsAtRow+1);	// max pad+1		
-      assert(gain);
-      gain[0].gain = 0.0;	// kill pad0 just in case..
-      gain[0].t0   = 0.0;
-      for(Int_t pad = 1; pad <= numPadsAtRow; pad++) {
-	if (m_Mode == 2) {
-	  if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) > 0) 
-	    gain[pad].gain = 1.;
-	  else 
-	    gain[pad].gain = .0;
-	  gain[pad].t0   = 0.;
-	} else {
-	  if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
-	  gain[pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
-	  gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
+  if (NoRows <= 45) { // hack for now take Tonko's defaults for iTpx
+    daq_dta *dta  = fTpx->put("gain");
+    
+    // Prepare scaled hit maxima
+    
+    // No hit maxima if these DB params are 0
+    Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
+    Int_t maxBinZeroHits = St_tpcMaxHitsC::instance()->maxBinZeroHits();
+    Int_t livePads = 0;
+    Int_t totalPads = 0;
+    Float_t liveFrac = 1;
+    for(Int_t sector=1;sector<=24;sector++) {
+      Int_t liveSecPads = 0;
+      Int_t totalSecPads = 0;
+      for(Int_t row=1;row<=NoRows;row++) {
+	Int_t numPadsAtRow = St_tpcPadPlanesC::instance()->padsPerRow(row);
+	daq_det_gain *gain = (daq_det_gain *) dta->request(183);	// max pad+1		
+	assert(gain);
+	gain[0].gain = 0.0;	// kill pad0 just in case..
+	gain[0].t0   = 0.0;
+	for(Int_t pad = 1; pad <= numPadsAtRow; pad++) {
+	  if (m_Mode == 2) {
+	    if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) > 0) 
+	      gain[pad].gain = 1.;
+	    else 
+	      gain[pad].gain = .0;
+	    gain[pad].t0   = 0.;
+	  } else {
+	    if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
+	    gain[pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
+	    gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
+	  }
+	}
+	dta->finalize(183,sector,row);
+	if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
+	  totalSecPads += numPadsAtRow;
+	  if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
+            StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
+	      St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
+	    liveSecPads += numPadsAtRow;
 	}
       }
-      dta->finalize(numPadsAtRow+1,sector,row);
-      if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
-        totalSecPads += numPadsAtRow;
-        if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
-            StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
-            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
-          liveSecPads += numPadsAtRow;
+      livePads += liveSecPads;
+      totalPads += totalSecPads;
+      if (maxHitsPerSector > 0) {
+	liveFrac = TMath::Max((Float_t) 0.1,
+			      ((Float_t) liveSecPads) / ((Float_t) totalSecPads));
+	maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
+	if (Debug()) {LOG_INFO << "maxHits in sector " << sector
+			       << " = " << maxHits[sector-1] << endm;}
+      } else {
+	maxHits[sector-1] = 0;
+	if (Debug()) {LOG_INFO << "No maxHits in sector " << sector << endm;}
       }
     }
-    livePads += liveSecPads;
-    totalPads += totalSecPads;
-    if (maxHitsPerSector > 0) {
+    if (maxBinZeroHits > 0) {
       liveFrac = TMath::Max((Float_t) 0.1,
-                 ((Float_t) liveSecPads) / ((Float_t) totalSecPads));
-      maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
-      if (Debug()) {LOG_INFO << "maxHits in sector " << sector
-                             << " = " << maxHits[sector-1] << endm;}
+			    ((Float_t) livePads) / ((Float_t) totalPads));
+      maxBin0Hits = (Int_t) (liveFrac * maxBinZeroHits);
+      if (Debug()) {LOG_INFO << "maxBinZeroHits " << maxBin0Hits << endm;}
     } else {
-      maxHits[sector-1] = 0;
-      if (Debug()) {LOG_INFO << "No maxHits in sector " << sector << endm;}
+      maxBin0Hits = 0;
+      if (Debug()) {LOG_INFO << "No maxBinZeroHits" << endm;}
     }
-  }
-  if (maxBinZeroHits > 0) {
-    liveFrac = TMath::Max((Float_t) 0.1,
-               ((Float_t) livePads) / ((Float_t) totalPads));
-    maxBin0Hits = (Int_t) (liveFrac * maxBinZeroHits);
-    if (Debug()) {LOG_INFO << "maxBinZeroHits " << maxBin0Hits << endm;}
-  } else {
-    maxBin0Hits = 0;
-    if (Debug()) {LOG_INFO << "No maxBinZeroHits" << endm;}
   }
   /*
     InitRun will setup the internal representations of gain 
@@ -181,12 +185,13 @@ Int_t StTpcRTSHitMaker::Make() {
   Int_t maxRow    = IAttr("maxRow");
 
   bin0Hits = 0;
-
+  daq_dta *dta = 0;
   for (Int_t sec = minSector; sec <= maxSector; sec++) {
     StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
     if (! digitalSector) continue;
     UShort_t Id = 0;
-    daq_dta *dta = fTpx->put("adc_sim",0,NoRows+1,0,mTpx_RowLen); // used for any kind of data; transparent pointer
+    if (NoRows != 45) dta = fTpx->put("adc_sim",0,NoRows+1,0,mTpx_RowLen); // used for any kind of data; transparent pointer
+    else              dta = fTpx->put("adc_sim");
     Int_t hitsAdded = 0;
     Int_t nup = 0;
     Int_t NoAdcs = 0;
