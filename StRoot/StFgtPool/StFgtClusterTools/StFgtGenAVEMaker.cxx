@@ -49,7 +49,7 @@
 
 #define MIN_NUM_POINTS 3
 #define DISK_DIM 40
-#define NUM_EFF_BIN 10
+#define NUM_EFF_BIN 20
 
 
 
@@ -177,14 +177,16 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
       Float_t firstTbSigP=-1;
 
 
-
+	  Double_t ordinate, lowerSpan, upperSpan;//, prvOrdinate;
+	  Short_t disc, quadrant,strip;
+	  Char_t layer;
       for(int i=0;i<  pStrips[iD*4+iq].size();i++)
 	{
 	  Int_t geoId=pStrips[iD*4+iq][i].geoId;
 	  generalStrip& pStrip=pStrips[iD*4+iq][i];
-	  Short_t disc, quadrant,strip;
-	  Char_t layer;
-	  Double_t ordinate, lowerSpan, upperSpan;//, prvOrdinate;
+
+
+
 	  StFgtGeom::getPhysicalCoordinate(geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
 	  StFgtGeom::decodeGeoId(geoId,disc, quadrant, layer, strip);
 	  char buffer[100];
@@ -289,7 +291,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	  cout <<"filling ratio with : " << secondToLastRatioP <<endl;
 	  secondToLastRatioCloseClusterP[iD*4+iq]->Fill(secondToLastRatioP);
 
-	  if((float)pStrips[iD*4+iq][maxPInd].pedErr>0)
+	  if(iD==2 && iq==1 && (float)pStrips[iD*4+iq][maxPInd].pedErr>0)
 	    {
 	      pulseCounterP++;
 	      for(int iB=0;iB<7;iB++)
@@ -299,10 +301,30 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 		}
 	    }
 	}
+
+
+      if(maxRCharge> 1000 && maxPhiCharge>1000)// && (float)pStrips[iD*4+iq][maxRInd].charge)
+	{
+	  StFgtGeom::getPhysicalCoordinate((float)pStrips[iD*4+iq][maxRInd].geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+	  if(ordinate>20)
+	    {
+	      chargeCorrMaxStrip->Fill(maxRCharge,maxPhiCharge);
+	      chargeCorrMaxAdc->Fill(maxRAdc,maxPAdc);
+
+	  if(maxRInd>0 && maxPInd>0 && maxRInd< pStrips[iD*4+iq].size()&& maxPInd < pStrips[iD*4+iq].size())
+	    {
+	      float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
+	      float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
+	      chargeCorrSum3->Fill(intRCharge,intPCharge);
+	    }
+	    }
+	}
+	  if(iD==2 && iq==1 && (float)pStrips[iD*4+iq][maxRInd].pedErr>0)
+
       if(maxRCharge>1000)
 	{
 	  firstTbSigCloseClusterR[iD*4+iq]->Fill(firstTbSigR);
-	  maxTbCloseClusterR[iD*4+iq]->Fill(maxPTb);
+	  maxTbCloseClusterR[iD*4+iq]->Fill(maxRTb);
 	  maxAdcCloseClusterR[iD*4+iq]->Fill(maxRAdc);
 	  maxSigTrackClusterR[iD*4+iq]->Fill(maxSigAdcR);
 	  numFSigCloseClusterR[iD*4+iq]->Fill(numFSigR);
@@ -312,7 +334,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	  maxSigCloseClusterR[iD*4+iq]->Fill(maxSigAdcR);
 	  cout <<"filling ratio R with : " << secondToLastRatioR <<endl;
 	  secondToLastRatioCloseClusterR[iD*4+iq]->Fill(secondToLastRatioR);
-	  if((float)pStrips[iD*4+iq][maxRInd].pedErr>0)
+	  if(iD==2 && iq==1 && (float)pStrips[iD*4+iq][maxRInd].pedErr>0)
 	    {
 	      pulseCounterR++;
 	      for(int iB=0;iB<7;iB++)
@@ -322,6 +344,9 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 		}
 	    }
 	}
+
+
+
 
       if(partOfClusterP)
 	{
@@ -334,8 +359,16 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	  maxAdcTrackClusterP[iD*4+iq]->Fill(maxPAdc);
 	  maxSigTrackClusterP[iD*4+iq]->Fill(maxSigAdcP);
 	  secondToLastRatioTrackClusterP[iD*4+iq]->Fill(secondToLastRatioP);
-	  if((float)pStrips[iD*4+iq][maxPInd].pedErr>0)
+
+
+
+
+
+	  if(iD==2 && iq==1 && (float)pStrips[iD*4+iq][maxPInd].pedErr>0)
 	    {
+
+
+
 	      pulseCounterTP++;
 	      for(int iB=0;iB<7;iB++)
 		{
@@ -350,7 +383,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
       if(partOfClusterR)
 	{
 	  firstTbSigTrackClusterR[iD*4+iq]->Fill(firstTbSigR);
-	  maxTbTrackClusterR[iD*4+iq]->Fill(maxPTb);
+	  maxTbTrackClusterR[iD*4+iq]->Fill(maxRTb);
 	  maxAdcTrackClusterR[iD*4+iq]->Fill(maxRAdc);
 	  maxSigTrackClusterR[iD*4+iq]->Fill(maxSigAdcR);
 	  numFSigTrackClusterR[iD*4+iq]->Fill(numFSigR);
@@ -359,12 +392,11 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	  maxSigTrackClusterR[iD*4+iq]->Fill(maxSigAdcR);
 	  secondToLastRatioTrackClusterR[iD*4+iq]->Fill(secondToLastRatioR);
 
-	      if((float)pStrips[iD*4+iq][maxRInd].pedErr>0)
+	      if(iD==2 && iq==1 && (float)pStrips[iD*4+iq][maxRInd].pedErr>0)
 		{
 		  pulseCounterTR++;
 		  for(int iB=0;iB<7;iB++)
 		    {
-		      
 		      exPulseMaxAdcNormTrackR->SetBinContent(iB+1,exPulseMaxAdcNormTrackR->GetBinContent(iB+1)+pStrips[iD*4+iq][maxRInd].adc[iB]/(float)maxRAdc);
 		      exPulseSigTrackR->SetBinContent(iB+1,exPulseSigTrackR->GetBinContent(iB+1)+pStrips[iD*4+iq][maxRInd].adc[iB]/(float)pStrips[iD*4+iq][maxRInd].pedErr);
 		    }
@@ -372,6 +404,8 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	}
 
 }
+//is this a good hit in the loose term. We can implement different criteria, so either pulse or some charge sum
+//Bool_t StFgtGenAVEMaker::isGoodHit(
 
 
 //is there something where we expect it? Again, here phi is relative to the quadrant!!
@@ -383,6 +417,8 @@ Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t i
       Double_t maxPhiChargeUncert=-9999;
       Int_t maxRInd=-1;
       Int_t maxPInd=-1;
+      Bool_t validPhiPulse=false;
+      Bool_t validRPulse=false;
       for(int i=0;i<  pStrips[iD*4+iq].size();i++)
 	{
 	  Int_t geoId=pStrips[iD*4+iq][i].geoId;
@@ -399,6 +435,9 @@ Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t i
 	    {
 	      if(layer=='P')
 		{
+		  if(validPulse(pStrip))
+		    validPhiPulse=true;
+
 		  if(pStrip.charge>maxPhiCharge)
 		    {
 		      maxPhiCharge=pStrip.charge;
@@ -408,6 +447,9 @@ Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t i
 		}
 	      else
 		{
+		  if(validPulse(pStrip))
+		    validRPulse=true;
+
 		  if(pStrip.charge>maxRCharge)
 		    {
 		      maxRCharge=pStrip.charge;
@@ -417,20 +459,31 @@ Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t i
 		}
 	    }
 	}
+      if(validPhiPulse && validRPulse)
+	return true;
+
+
       if(maxRInd>=0 && maxPInd>=0)
 	{
-	  if(maxRCharge>3*maxRChargeUncert && maxPhiCharge>3*maxRChargeUncert)
+
+
+
+	  /////add neighbouring strips
+	  if(maxRInd>0)
+	    maxRCharge+=pStrips[iD*4+iq][maxRInd-1].charge;
+	  if(maxRInd< (pStrips[iD*4+iq].size()-1))
+	    maxRCharge+=pStrips[iD*4+iq][maxRInd+1].charge;
+	  if(maxPInd>0)
+	    maxPhiCharge+=pStrips[iD*4+iq][maxPInd-1].charge;
+	  if(maxPInd< (pStrips[iD*4+iq].size()-1))
+	    maxPhiCharge+=pStrips[iD*4+iq][maxPInd+1].charge;
+	  ///////////////////////////////////
+
+	  //	  cout <<"charge: "<< maxRCharge<< " 3* uncert " << 3*maxRChargeUncert <<" maxPhiCharge " << maxPhiCharge<<" 3*phi "<< 3*maxPhiChargeUncert <<endl;
+	  if(maxRCharge>3*maxRChargeUncert && maxPhiCharge>3*maxPhiChargeUncert)
 	    {
-	      ////might pick up phi strips... oh wlll
-	      if(maxRInd>0)
-		maxRCharge+=pStrips[iD*4+iq][maxRInd-1].charge;
-	      if(maxRInd< (pStrips[iD*4+iq].size()-1))
-		maxRCharge+=pStrips[iD*4+iq][maxRInd+1].charge;
-	      if(maxPInd>0)
-		maxPhiCharge+=pStrips[iD*4+iq][maxPInd-1].charge;
-	      if(maxPInd< (pStrips[iD*4+iq].size()-1))
-		maxPhiCharge+=pStrips[iD*4+iq][maxPInd+1].charge;
-	      
+	      //if we don't care about charge ratio
+	      //  return true;
 	      if(maxRCharge>maxPhiCharge)
 		{
 		  if(maxRCharge/maxPhiCharge<4)
@@ -546,7 +599,7 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 	  sprintf(buffer,"somethingWrong: %d", pStrip.seedType);
 	}
 
-      if(layer=='P' && disc==iD && iq==quadrant)
+      //     if(layer=='P' && disc==iD && iq==quadrant)
 	//	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
       if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<0.7) || (layer=='P' && fabs(ordinate-phi)<0.03) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.03)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.03)))
 	{
@@ -840,7 +893,8 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	  //	  cout <<"testing" << endl;
 	  //	  cout <<"get track10-3, " << iterP->dID<<" quad: " << iterP->quadID << endl;
 	  cout <<" filling disk " << iterP->dID <<" quad " << iterP->quadID <<" with r charge: " << iterP->rCharge <<" phic " << iterP->phiCharge<<endl;
-	  chargeCorr[iterP->dID*4+iterP->quadID]->Fill(iterP->rCharge,iterP->phiCharge);
+	  if(iterP->r>20)
+	    chargeCorr[iterP->dID*4+iterP->quadID]->Fill(iterP->rCharge,iterP->phiCharge);
 	  //	  cout <<"get track10-31" <<endl;
 	  h_clusterChargeR[iterP->dID]->Fill(iterP->rCharge);
 	  //	  cout <<"get track10-4" <<endl;
@@ -879,8 +933,6 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 
 	   if(phi<0)
 	     phi+=MY_PI;
-
-
 	    (*outTxtFile) << " looking at Track with chi2/ndf *[cm}: " << it_lastTrack->chi2 << " z vertex: " << it_lastTrack->ipZ << endl;
 	    if(disksHit.find(i)!=disksHit.end())
 	      {
@@ -899,6 +951,17 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 
 	    cout <<"fill strip histos " << endl;
 	    fillStripHistos(r,phi,i,quad);
+	    if(isSomewhatEff(r,phi,i,quad))
+	      {
+		cout <<" somewhat eff: " << xExp <<" y: " << yExp <<" disk: " << i <<endl;
+		radioPlotsEffLoose[i]->Fill(xExp,yExp);
+	      }
+		else
+		  {
+		    cout <<"not somewhat eff: " << xExp <<" y: " << yExp <<endl;
+		    radioPlotsNonEffLoose[i]->Fill(xExp,yExp);
+		  }
+
 	    if(i==DISK_EFF && quad==QUAD_EFF)
 	      {
 		//do the r/phi thing
@@ -915,18 +978,10 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		else
 		  {
 		    cout << " not found, dist is:" <<findClosestStrip('P',phi,i,quad) <<endl;
-		  radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
+		    radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
 		  }
 
 
-
-		if(isSomewhatEff(r,phi,i,quad))
-		  {
-		    cout <<" somewhat eff: " << xExp <<" y: " << yExp <<endl;
-		    radioPlotsEffLoose[i]->Fill(xExp,yExp);
-		  }
-		else
-		  radioPlotsNonEffLoose[i]->Fill(xExp,yExp);
 
 		///
 
@@ -1552,6 +1607,11 @@ counter++;
       exPulseSigTrackR->SetBinContent(iB,exPulseSigTrackR->GetBinContent(iB)/(float)pulseCounterTR);
     }
 
+
+  chargeCorrSum3->Write();
+  chargeCorrMaxStrip->Write();
+  chargeCorrMaxAdc->Write();
+
   exPulseMaxAdcNormP->Write();
   exPulseSigP->Write();
   
@@ -1612,8 +1672,7 @@ counter++;
 	}
     }
 
-  f1->Write();
-  f1->Close();
+
   cout <<"writen and closed " << endl;
 
   cout <<"drawing hits2 " <<endl;
@@ -1681,6 +1740,7 @@ counter++;
 	{
 	  cChargeCorr->cd(iD*4+iq+1);
 	  chargeCorr[iD*4+iq]->Draw("colz");
+	  chargeCorr[iD*4+iq]->Write();
 	}
       cClusterChargeR->cd(iD+1);
       h_clusterChargeR[iD]->Draw();
@@ -1688,6 +1748,8 @@ counter++;
       h_clusterChargePhi[iD]->Draw();
 
     }
+  f1->Write();
+
   cClusterSizeR->SaveAs("clusterSizeR.png");
   cClusterSizePhi->SaveAs("clusterSizePhi.png");
   cChargeCorr->SaveAs("chargeCorrelation.png");
@@ -1696,14 +1758,10 @@ counter++;
   cClusterChargePhi->SaveAs("clusterChargePhi.png");
 
    cout <<"saving .." <<endl;
-
-
   doNormalize(radioPlotsEffR, radioPlotsNonEffR);
-  cout <<"norm 1 " <<endl;
   doNormalize(radioPlotsEffPhi, radioPlotsNonEffPhi);
-  cout <<"norm 2 " <<endl;
   doNormalize(radioPlotsEffLoose, radioPlotsNonEffLoose);
-  cout <<"norm 3 " <<endl;
+
 
   for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
     {
@@ -1746,14 +1804,18 @@ counter++;
       radioPlotsEffLoose[iD]->SetMaximum(1.0);
       cRadioR->cd(iD+1);
       radioPlotsEffR[iD]->Draw("colz");
+      radioPlotsEffR[iD]->Write();
       cRadioPhi->cd(iD+1);
       radioPlotsEffPhi[iD]->Draw("colz");
+      radioPlotsEffPhi[iD]->Write();
       cRadioLoose->cd(iD+1);
       radioPlotsEffLoose[iD]->Draw("colz");   
-
+      radioPlotsEffLoose[iD]->Write();
+      radioPlotsNonEffLoose[iD]->Write();
       cRPRatio->cd(iD+1);
       rPhiRatioPlots[iD]->Draw();
       cREff->cd(iD+1);
+  f1->Write();
 
       TH1D* tmpR=(TH1D*)rEff[iD]->Clone("tmpR");
       rEff[iD]->Add(rNonEff[iD]);
@@ -1767,6 +1829,7 @@ counter++;
 	}
       rEff[iD]->Draw();
     }
+  f1->Close();
   cRadio->SaveAs("radioPlotsEff.png");
   cRadio->SaveAs("radioPlotsEff.pdf");
 
@@ -1780,6 +1843,7 @@ counter++;
   chargeAsymInEffDisk->Draw("colz");
   cRadio->SaveAs("chargeAsymInEffDisk.png");
   chargeCorrInEffDisk->Draw("colz");
+  chargeCorrInEffDisk->Write();
   cRadio->SaveAs("chargeCorrInEffDisk.png");
   hChargeAsym->Draw();
   cRadio->SaveAs("chargeAsym.png");
@@ -1825,6 +1889,11 @@ Int_t StFgtGenAVEMaker::Init(){
   chargeCorrInEffDisk=new TH2D("chargeCorrInEffDisk","chargeCorrInEffDisk",50,0,50000,50,0,50000);
   hChargeAsym=new TH1D("chargeAsym","chargeAsym",100,0,50);
   hChargeRatio=new TH1D("chargeRatio","chargeRatio",100,0,50);
+
+
+  chargeCorrSum3=new TH2D("chargeCorrSum3","chargeCorrSum3",500,0,50000,500,0,50000);
+  chargeCorrMaxStrip=new TH2D("chargeCorrMaxStrip","chargeCorrMaxStrip",500,0,20000,500,0,20000);
+  chargeCorrMaxAdc=new TH2D("chargeCorrMaxAdc","chargeCorrMaxAdc",500,0,5000,500,0,5000);
 
 
   radioPlotsEff=new TH2D*[kFgtNumDiscs];
@@ -1939,7 +2008,6 @@ Int_t StFgtGenAVEMaker::Init(){
       cout <<"-3" <<endl;
       sprintf(buffer,"radioDiskEffLoose_%d",iD);
       radioPlotsEffLoose[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
-      cout <<"-4" <<endl;
       //      cout <<"1" <<endl;
       sprintf(buffer,"rEff_%d",iD);
       rEff[iD]=new TH1D(buffer,buffer,100,0,DISK_DIM);
