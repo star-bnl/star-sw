@@ -97,7 +97,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    Int_t Finish();
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.4 2012/05/04 23:09:04 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.5 2012/05/21 02:53:23 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    ofstream* outTxtFile;
    Short_t getQuadFromCoo(Double_t x, Double_t y);
@@ -131,6 +131,13 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
 
    TH2D** radioPlotsEffLoose;
    TH2D** radioPlotsNonEffLoose;
+
+
+   TH2D* chargeCorrSum3;
+   //   TH2D* chargeCorrCluster;
+      TH2D* chargeCorrMaxStrip;
+   TH2D* chargeCorrMaxAdc;
+
 
    TH1F** firstTbSigCloseClusterR;
    TH1F** firstTbSigCloseClusterP;

@@ -94,6 +94,11 @@ class StFgtGeneralBase : public StMaker {
    TH2D* chargeMaxAdcCorr;
    TH2D* chargeMaxAdcIntCorr;
    TH1D* hIpZEv;
+   TH1D** hNumPulsesP;
+   TH1D** hNumChargesP;
+   TH1D** hNumPulsesR;
+   TH1D** hNumChargesR;
+
   map<Int_t, Int_t> mapGeoId2Cluster;
   StFgtDb* mDb;
   Double_t vtxZ;
@@ -106,8 +111,9 @@ class StFgtGeneralBase : public StMaker {
   vector<generalCluster> clustersD5;
   vector<generalCluster> clustersD6;
   vector<generalCluster>** pClusters;
-
   vector<generalStrip>* pStrips;
+  Bool_t validPulse(generalStrip& strip);
+  void checkNumPulses();
 
 
  private:   

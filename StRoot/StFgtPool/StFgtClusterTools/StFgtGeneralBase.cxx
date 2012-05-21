@@ -42,6 +42,27 @@ StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), evtNr(0
     chargeMaxAdcIntCorr=new TH2D("chargeMaxIntAdcCorr","chargeMaxAdcIntCorr",50,0,10000,50,0,1000);
     hIpZEv=new TH1D("IP_ZEv","IP_ZEv",70,-150,150);
 
+    char buffer[100];
+    hNumPulsesP=new TH1D*[6*4];
+    hNumChargesP=new TH1D*[6*4];
+    hNumPulsesR=new TH1D*[6*4];
+    hNumChargesR=new TH1D*[6*4];
+    for(int iD=0;iD<6;iD++)
+      {
+	for(int iQ=0;iQ<4;iQ++)
+	  {
+	    sprintf(buffer,"validPulsesP_D%d_Q%d",iD+1,iQ);
+	    hNumPulsesP[iD*4+iQ]=new TH1D(buffer,buffer,100,0,100);
+	    sprintf(buffer,"validPulsesR_D%d_Q%d",iD+1,iQ);
+	    hNumPulsesR[iD*4+iQ]=new TH1D(buffer,buffer,100,0,100);
+	    sprintf(buffer,"validChargesR_D%d_Q%d",iD+1,iQ);
+	    hNumChargesR[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
+	    sprintf(buffer,"validChargesP_D%d_Q%d",iD+1,iQ);
+	    hNumChargesP[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
+	  }
+      }
+
+
 }
 Int_t StFgtGeneralBase::Finish()
 {
@@ -53,7 +74,41 @@ Int_t StFgtGeneralBase::Finish()
   hIpZEv->Draw();
   c.SaveAs("ipZEv.png");
   cout <<"done saving" <<endl;
+  TFile f("pulses.root","recreate");
+    for(int iD=0;iD<6;iD++)
+      {
+	for(int iQ=0;iQ<4;iQ++)
+	  {
+	    hNumPulsesP[iD*4+iQ]->Write();
+	    hNumChargesP[iD*4+iQ]->Write();
+	    hNumPulsesR[iD*4+iQ]->Write();
+	    hNumChargesR[iD*4+iQ]->Write();
+	  }
+      }
+
+    f.Write();
+    f.Close();
 }
+
+Bool_t StFgtGeneralBase::validPulse(generalStrip& strip)
+{
+  for(int i=0;i<4;i++)
+    {
+
+	  Float_t adc1=strip.adc[i];
+	  Float_t adc2=strip.adc[i+1];
+	  Float_t adc3=strip.adc[i+2];
+	  Float_t cut=5*strip.pedErr;
+	  if(adc1>cut && adc2 >cut && adc3 > cut)
+	    {
+	      if(adc1 <adc2 && adc2 < adc3)
+		return true;
+	    }
+    }
+  return false;
+}
+
+
 Int_t StFgtGeneralBase::Make()
 {
   Int_t ierr=kStOk;
@@ -128,9 +183,103 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		   mapGeoId2Cluster[geoId]=((pClusters[disc]->size()-1));
 		 }
             };
-         };
-      };
-   };
+         }
+	 ///////////////////////
+         for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc )
+	   {
+	     StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( disc);
+	     if( stripCollectionPtr)
+	       {
+		 StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
+		 StSPtrVecFgtStripIterator stripIter;
+		 for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
+		   StFgtStrip *strip = *stripIter;
+		   Float_t ped = 0, pedErr = 0;
+		   if( strip ){
+		     Int_t geoId=strip->getGeoId();
+		     Int_t cSeedType=strip->getClusterSeedType();
+		     Double_t charge=strip->getCharge();
+		     Double_t chargeUncert=strip->getChargeUncert();
+		     Short_t quad, disc, stripI;
+		     Char_t layer;
+		     StFgtGeom::decodeGeoId(geoId,disc, quad, layer, stripI);
+		     Double_t ped=0.0; //get from DB
+		     Double_t pedErr=0.0; 
+		     Int_t rdo, arm, apv, chan; 
+		     mDb->getElecCoordFromGeoId(geoId, rdo,arm,apv,chan);
+		     Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
+		     ped = mDb->getPedestalFromElecId( elecId );
+		     pedErr = mDb->getPedestalSigmaFromElecId( elecId );
+		     
+		     if(quad<4)
+		       {
+			 pStrips[disc*4+quad].push_back(generalStrip(geoId,ped,pedErr,cSeedType,charge, chargeUncert));
+			 Double_t maxAdc=-9999;
+			 for(int j=0;j<7;j++)
+			   {
+			     pStrips[disc*4+quad].back().adc[j]=strip->getAdc(j);
+			     if(strip->getAdc(j)>maxAdc)
+			       maxAdc=strip->getAdc(j);
+			   }
+			 pStrips[disc*4+quad].back().maxAdc=maxAdc;
+			 if(mapGeoId2Cluster.find(geoId)!=mapGeoId2Cluster.end())
+			   {
+			     (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=(pStrips[disc*4+quad].size()-1);
+			     (*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdc=maxAdc;
+			   }
+		       }
+
+		   }
+		 }
+	       }
+	   }
+	 for(int iDx=0;iDx<6;iDx++)
+	   {
+	     vector<generalCluster>::iterator it=pClusters[iDx]->begin();
+	     for(;it!=pClusters[iDx]->end();it++)
+	       {
+		 it->hasMatch=true;
+		 Int_t centerStripId=it->centerStripIdx;
+		 if(centerStripId<0)
+		   continue;
+		 Int_t stripCounter=(centerStripId-1);
+		 Double_t maxChargeInt=it->maxAdc;
+		 Int_t oldGeoId=(pStrips[iDx*4+it->quad])[centerStripId].geoId;
+		 while(stripCounter>=0)     
+		   {
+		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
+		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
+		       break;
+		     if(fabs(oldGeoId-(pStrips[iDx*4+it->quad])[stripCounter].geoId)>1)
+		       break;
+
+		     maxChargeInt+=(pStrips[iDx*4+it->quad])[stripCounter].maxAdc;
+		     oldGeoId=(pStrips[iDx*4+it->quad])[stripCounter].geoId;
+		     stripCounter--;
+		   }
+		 //and go up
+		 stripCounter=(centerStripId+1);
+		 while(stripCounter<=(pStrips[iDx*4+it->quad]).size())
+		   {
+		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
+		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
+		       break;
+		     if(fabs(oldGeoId-(pStrips[iDx*4+it->quad])[stripCounter].geoId)>1)
+		       break;
+		     maxChargeInt+=(pStrips[iDx*4+it->quad])[stripCounter].maxAdc;
+		     oldGeoId=(pStrips[iDx*4+it->quad])[stripCounter].geoId;
+		     stripCounter++;
+		   }
+		 it->maxAdcInt=maxChargeInt;
+		 chargeMaxAdcCorr->Fill(it->clusterCharge,it->maxAdc);
+		 chargeMaxAdcIntCorr->Fill(it->clusterCharge,maxChargeInt);
+	       }
+	   }
+	 //////////////////////////////
+      }
+   }
+
+
 
    return ierr;
 
@@ -217,6 +366,8 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		     //               addClus( i, clus->getCentralStripGeoId(), clus->getR(), clus->getPhi() );
          };
       }
+
+
       if(fgtStrips)
       //      if(false)
 	{
@@ -253,7 +404,6 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 			pStrips[disc*4+quad].back().adc[j]=strip->getAdc(j);
 			if(strip->getAdc(j)>maxAdc)
 			  maxAdc=strip->getAdc(j);
-
 		      }
 
 		    pStrips[disc*4+quad].back().maxAdc=maxAdc;
@@ -271,11 +421,8 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		
 	      }
 	 }
-
-
-
-	 ///find the other strips for clusters....
 	 //	 cout <<"finding the other strip " <<endl;
+	 ///find the other strips for clusters....
 	 for(int iDx=0;iDx<6;iDx++)
 	   {
 	     vector<generalCluster>::iterator it=pClusters[iDx]->begin();
@@ -337,9 +484,52 @@ Int_t StFgtGeneralBase::fillFromMuDst()
    }
    //      doLooseClustering();
       checkMatches();
-
+      checkNumPulses();
    return ierr;
 };
+
+void StFgtGeneralBase::checkNumPulses()
+{
+
+  for(int iDx=0;iDx<6;iDx++)
+    {
+      for(int iQ=0;iQ<4;iQ++)
+	{
+
+	  int iValPulseP=0;
+	  int iValChargeP=0;
+	  int iValPulseR=0;
+	  int iValChargeR=0;
+	  Char_t layer;
+	  Short_t quad, disc, strip;
+	  Double_t ordinate, lowerSpan, upperSpan;
+	  for(vector<generalStrip>::iterator it=pStrips[iDx*4+iQ].begin();it!=pStrips[iDx*4+iQ].end();it++)
+	    {
+	      StFgtGeom::getPhysicalCoordinate(it->geoId,disc,quad,layer,ordinate,lowerSpan,upperSpan);
+	      if(validPulse((*it)))
+		{
+		  if(layer=='P')
+		    iValPulseP++;
+		  else
+		    iValPulseR++;
+		}
+	      if(it->charge>3*it->chargeUncert)
+		{
+		  if(layer=='P')
+		    iValChargeP++;
+		  else
+		    iValChargeR++;
+		}
+	    }
+	  hNumPulsesR[iDx*4+iQ]->Fill(iValPulseR);
+	  hNumPulsesP[iDx*4+iQ]->Fill(iValPulseP);
+	  hNumChargesR[iDx*4+iQ]->Fill(iValChargeR);
+	  hNumChargesP[iDx*4+iQ]->Fill(iValChargeP);
+	  //	  cout <<"disk: " << iDx+1<< " quad: " << iQ << " has " <<iValPulse <<" valid pulses and " << iValCharge <<" valid charges " <<endl;
+	}
+    }
+}
+
 void StFgtGeneralBase::checkMatches()
 {
 
