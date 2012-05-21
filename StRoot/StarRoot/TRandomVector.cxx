@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TRandomVector.cxx,v 1.4 2012/05/06 02:30:53 perev Exp $
+ * $Id: TRandomVector.cxx,v 1.5 2012/05/21 21:27:45 perev Exp $
  *
  ***************************************************************************
  *
@@ -128,8 +128,9 @@ void TRandomVector::RandRotate(TMatrixDSym& errMtx)
 {
   int nDim = errMtx.GetNrows();
   assert(Sign(errMtx)>0);
-  double spur = 0;
-  for (int i=0;i<nDim;i++){spur+=errMtx[i][i];}
+  TVectorD dia(nDim);
+  for (int i=0;i<nDim;i++){dia[i]=sqrt(errMtx[i][i]);}
+  for (int i=0;i<nDim;i++){for (int j=0;j<nDim;j++){errMtx[i][j]/=dia[i]*dia[j];}}
 
   TMatrixD T(nDim,nDim);for (int i=0;i<nDim;i++){T[i][i]=1.;}
   for (int ir1=0;ir1<nDim;ir1++) {
@@ -144,9 +145,7 @@ void TRandomVector::RandRotate(TMatrixDSym& errMtx)
     T[ir2][ic] =-x*s + y*c;
   }}}
   errMtx.Similarity(T);
-  double spur2 = 0;
-  for (int i=0;i<nDim;i++){spur2+=errMtx[i][i];}
-  assert(fabs(spur2-spur)<(fabs(spur2)+fabs(spur))*1e-5);
+  for (int i=0;i<nDim;i++){ for (int j=0;j<nDim;j++){errMtx[i][j]*=dia[i]*dia[j];}}
   assert(Sign(errMtx)>0);
 }
 
