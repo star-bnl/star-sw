@@ -246,7 +246,7 @@ void StvNodePars::operator+=(const StvFitPars &fp)
 
   double a = fp.mA/cosL,cA,sA;
   if (fabs(a) < 0.01) {sA = a*(1-a*a/6); cA = 1-a*a/2;}
-  else               {sA = sin(a);      cA = cos(a) ;} 
+  else                {sA = sin(a);      cA = cos(a) ;} 
  _psi   += a;
   double cosCA = _cosCA;
   _cosCA = cosCA*cA-_sinCA*sA;
@@ -1204,7 +1204,7 @@ static const char T[]="HZALP";
 // 
 // 
 // 	(cP)
-// D =  	(sP)
+// D =  (sP)
 // 	(0 )
 // 
 // X0 = -imp*P
@@ -1212,21 +1212,44 @@ static const char T[]="HZALP";
 // 
 // 
 // 
-// d(X*D) = dX*D + X*dD = 0  //DCA condition
+// (Tk =  T*s/cL + P*(-Imp+h+dFi0*s +rho*s*s/2) + L*l
 // 
-// d(X*D) = cL*t - sL*l -imp*(a/cL + rho*(cL*t -sL*l)) = 0
-// (1-imp*rho)*cL*t - (1-imp*rho)*sL*l -imp/cL*a = 0
-// (1-imp*rho)*cL*t = (1-imp*rho)*sL*l +imp/cL*a
+// ACCOUNT ONLY 2D
+// Tk = D*(s-sL*l) + P*(-Imp+h+dFi0*s+rho*s*s/2) 
+// dTk= D          + P*(dFi0+rho*s)
 // 
-// t = tL*l +imp/(1-imp*rho)*a
-// ===========================
+// (Tk*dTk) = 0
+// 
+// Now keep only the biggest order of magnitude
+// 
+// Tk = D*(s-sL*l) + P*(-Imp) 
+// dTk= D          + P*(dFi0+rho*s)
+// 
+// (s-sL*l)-Imp*(dFi0+rho*s)= 0
+// (1-Imp*rho)*s -sL*l -Imp*dFi0=0
+// s= (sL*l+Imp*dFi0)/(1-Imp*rho)
+// dFi = dFi0 +rho*(sL*l+Imp*dFi0)/(1-Imp*rho)
+// dFi = (dFi0*(1+rho*Imp) +rho*sL*l)/(1-rho*Imp)
+// 
+// dFidFi0 = (1.)/(1-rho*Imp);
+// dFidl   =      rho*sL/(1-rho*Imp);
+// 
+// dFidA = (1+rho*Imp)/(1-rho*Imp) /cL
+// 
+// dtdA = Imp/c2L/(1-Imp*rho)
+// dtdl =     tL/(1-Imp*rho)
+//  
+// dZda = sL*dtdA; 
+// dZdl = sL*dtdl+cL; 
+//  
+
 //_____________________________________________________________________________
 void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
 {
     /// signed impact parameter; Signed in such a way that:
     ///     x =  -impact*sin(Psi)
     ///     y =   impact*cos(Psi)
-  imp->mImp  = -(_x*(-_sinCA) + _y*(_cosCA));
+  imp->mImp  = -(_x*(-_sinCA) + _y*(_cosCA));//- because point == (0-x.0-y)
   double tst =   _x*( _cosCA) + _y*(_sinCA);
   assert(fabs(tst)<1e-5 || fabs(imp->mImp) > 1000*fabs(tst));
   imp->mZ   = _z;
@@ -1253,42 +1276,38 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
 //     float  mPtiImp, mPtiZ, mPtiPsi, mPtiPti;
 //     float  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;
 
-// t = tL*l +imp/(1-imp*rho)*a
+// t = tL*l + imp/cL/cL/(1-imp*rho)*a
 // ===========================
-double dtdl = sL/cL ;               	 
-double dtda = imp->mImp/(1-imp->mImp*_curv);	 
-
-double T65[6][5] = {
-
-/*      h,     l,    a,  L, p */
-/*----------------------------------------------*/
-/*t*/  {0,  dtdl,  dtda, 0, 0},
-/*h*/  {1,     0,     0, 0, 0},
-/*v*/  {0,     1,     0, 0, 0},
-/*a*/  {0,     0,     1, 0, 0},
-/*l*/  {0,     0,     0, 1, 0},
-/*p*/  {0,     0,     0, 0, 1}};
-/*---------------------------------------------*/
 
 
- double T56[5][6] = {
-/*        t        h,        l,     a,      L,P */
-/*----------------------------------------------*/
-/*Imp*/  {0,      -1,        0,     0,	    0,0},
-/*Z  */  {sL,      0,       cL,     0, 	    0,0},
-/*Psi*/  {_curv*cL,0,-_curv*sL,  1/cL,      0,0},
-/*Pti*/  {0,       0,        0,     0, 	    0,1},
-/*Tan*/  {0,       0,        0,     0,  1/c2L,0}};
-/*---------------------------------------------*/
+double mImp = imp->mImp;
+double nomMins = (1-mImp*_curv);
+//		d/dA
+double dtda = mImp/nomMins  /c2L;
+double dpsida = 1/nomMins   /cL;
+double dZda = sL*dtda;
+//		d/dl
+double dsdl   = sL/nomMins;
+double dPsidl = _curv*dsdl;
+double dtdl   = dsdl/cL;
+double dZdl   = sL*dtdl + cL;
 
 
-  TMatrixD MT = TMatrixD(5,6,T56[0])*TMatrixD(6,5,T65[0]);
+double T[5][5]={
+/*       h     l         A   Lam  Pti  */
+/*------------------------------------*/
+/*Imp*/{-1,     0,       0,    0,   0},
+/*Z  */{ 0,  dZdl,    dZda,    0,   0},
+/*Psi*/{ 0,dPsidl,  dpsida,    0,   0},
+/*Pti*/{ 0,     0,       0,    0,   1},
+/*Tan*/{ 0,     0,       0,1/c2L,   0}};
+/*-------------------------------------*/
   double qwe[15];
-  TCL::trasat(MT.GetMatrixArray(),fe->Arr(),qwe,5,5); 
+  TCL::trasat(T[0],fe->Arr(),qwe,5,5); 
   TCL::ucopy(qwe,&imp->mImpImp,15);
 }
 //_____________________________________________________________________________
-void StvNodeParsTest::TestImpErr(int nEv)
+void StvNodeParsTest::TestImpact(int nEv)
 {
 
 StvNodePars iP,iPR,oP,oPR;
@@ -1308,9 +1327,9 @@ StvFitErrs iE,oE,oER;
   iE.mAL = 8.3669926017237923e-13; iE.mLL = 0.00041855110437868546;  iE.mHP = 0.0043962440767417576; iE.mZP = -2.904206508909407e-11; 
   iE.mAP = -0.0041320793241820105; iE.mLP = -2.5031139398137018e-12; iE.mPP = 0.78568815092933286; iE.SetHz(0.0014880496061989194);
 
-  iP._curv*=10;
-  iP._ptin*=10;
-  iE.mPP=100;
+//  iP._curv  =0; iP._ptin=0;////???????????????????????????????????????????
+//  iP._tanl = 0; //????????????????????????????????????????
+
   oER*=0.;
   oHER.Clear();
   int saveRecov = StvDebug::mgRecov;  StvDebug::mgRecov=0;
@@ -1320,15 +1339,15 @@ StvFitErrs iE,oE,oER;
   e = iE.Arr();
   for (int i=0,li=0;i< 5;li+=++i) {S[i][i] = e[li+i];}
   S*=0.01;
+//		Make huge correlations
   TRandomVector::RandRotate(S);
-
-  for (int i=0,li=0;i< 5;li+=++i) {
-    for (int j=0;j<=i;j++)        { e[li+j] = S[i][j];}}
+//		And put it back
+  for (int i=0,li=0;i< 5;li+=++i) {for (int j=0;j<=i;j++){e[li+j] = S[i][j];}}
 //
 //  iE.Print("Input StvFitErrs");
 
-  iP.get(&iH);	// nodePar => Helix
-  iE.Get(&iH);	// fitErr  => HelixErr
+  iP.get(&iH);			// nodePar => Helix
+  iE.Get(&iH);			// fitErr  => HelixErr
   iE.Set(&iH,iP._hz);
 //  iE.Print("Input StvFitErrs => THEmx_t => StvFitErrs");
 
@@ -1361,8 +1380,8 @@ StvFitErrs iE,oE,oER;
     iPR = iP;
     ht = iH;
 //		Randomize fit parameters
-    const TVectorD res = RV.Gaus();
-
+    TVectorD res = RV.Gaus();
+//????    {double tmp = res[2];     res=0.; res[2]=tmp;}
     StvFitPars fp(res.GetMatrixArray()); iPR+=fp;
 //		Create THelixTrack from StvNodePars
     iPR.get(&ht);
@@ -1370,7 +1389,7 @@ StvFitErrs iE,oE,oER;
     ht.SetEmx(0);
       
     double my100 = ht.Path(0.,0.);
-    assert(fabs(my100-myDist) <33);
+    assert(fabs(my100-myDist)<fabs(myDist*0.1));
     ht.Move(my100);
     oPR.set(&ht,iP._hz);
     oPR.GetImpact(&oIR,0);
@@ -1431,58 +1450,6 @@ StvFitErrs iE,oE,oER;
   StvDebug::mgRecov=saveRecov;
 
 }
-#if 0
-
-
-
-	(cL*cP)
-T =  	(cL*sP)
-	(sL   )
-
-
-	(-sP)
-P = 	( cP)
-	( 0 )
-
-
-
-	(-sL*cP)
-L = 	(-sL*sP)
-	( cL   )
-
-
-dX = T*t + P*h + L*l
-
-
-	(cP)
-D =  	(sP)
-	(0 )
-
-X0 = -imp*P
-dD = P*dPsi = P*(a/cL + rho*(cL*t -sL*l))
-
-
-
-d(X*D) = dX*D + X*dD = 0
-
-d(X*D) = cL*t - sL*l -imp*(a/cL + rho*(cL*t -sL*l)) = 0
-(1-imp*rho)*cL*t - (1-imp*rho)*sL*l -imp/cL*a = 0
-(1-imp*rho)*cL*t = (1-imp*rho)*sL*l +imp/cL*a
-
-t = tL*l +imp/(1-imp*rho)*a
-===========================
-#endif
-
-
-
-
-
-
-
-
-
-
-
 //_____________________________________________________________________________
 #include "TMatrixT.h"
 #include "TMatrixTSym.h"

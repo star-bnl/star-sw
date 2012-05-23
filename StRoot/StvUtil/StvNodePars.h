@@ -211,7 +211,7 @@ static void Test();
 static void TestGetRadial(int nEv=10000);
 static void TestErrProp  (int nEv=10000);
 static void TestMtx      ();
-static void TestImpErr   (int nEv=10000) ;
+static void TestImpact   (int nEv=10000) ;
 ClassDef(StvNodeParsTest,0)
 };
 
