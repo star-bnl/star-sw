@@ -13,7 +13,7 @@ StMuDstMaker       *muDstMaker    = 0;
 StFgtGenPlotter    *fgtGenPlotter     = 0;
 StFgtGenAVEMaker    *fgtAVEffMkr     = 0;
 
-void runMuDstAVEff( const Char_t *filename, 
+void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
                              Int_t neventsIn = 50 ){
   cout <<" looking at file: " << filename << endl;
    // load the shared libraries
@@ -72,7 +72,7 @@ void runMuDstAVEff( const Char_t *filename,
    cout <<"construction genplotter " <<endl;
    //fgtGenPlotter = new StFgtGenPlotter( "fgtGenPlotter" );
    fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
-
+   fgtAVEffMkr->SetFileBase(baseFilename);
 
    // debugging info
    std::cout << "***** Done instanciating all the classes *****" << endl;
@@ -144,8 +144,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.1 2012/04/16 19:50:04 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.2 2012/05/25 00:36:11 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.2  2012/05/25 00:36:11  avossen
+made fit for stevent reading
+
 Revision 1.1  2012/04/16 19:50:04  avossen
 added cluster tools macro
 

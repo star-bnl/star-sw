@@ -15,8 +15,8 @@
 
 #include <set>
 
-#define ONE_HIT_PER_QUAD
-
+//#define ONE_HIT_PER_QUAD
+//#define USE_VTX
 
 StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), evtNr(0)
 {
@@ -61,9 +61,17 @@ StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), evtNr(0
 	    hNumChargesP[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
 	  }
       }
-
+    sprintf(fileBase,".");
 
 }
+
+
+void StFgtGeneralBase::SetFileBase(const Char_t* m_filebase)
+{
+  cout <<"setting file base to " << m_filebase <<endl;
+  sprintf(fileBase,"%s",m_filebase);
+}
+
 Int_t StFgtGeneralBase::Finish()
 {
   TCanvas c;
@@ -74,7 +82,9 @@ Int_t StFgtGeneralBase::Finish()
   hIpZEv->Draw();
   c.SaveAs("ipZEv.png");
   cout <<"done saving" <<endl;
-  TFile f("pulses.root","recreate");
+  char buffer[100];
+  sprintf(buffer,"%s/pulses.root",fileBase);
+  TFile f(buffer,"recreate");
     for(int iD=0;iD<6;iD++)
       {
 	for(int iQ=0;iQ<4;iQ++)
@@ -126,9 +136,9 @@ Int_t StFgtGeneralBase::Make()
     }
   //  cout << " done" <<endl;
 
-  //  fillFromStEvent();
-  fillFromMuDst();
-
+    fillFromStEvent();
+    //fillFromMuDst();
+    mapGeoId2Cluster.clear();
   return ierr;
 }
 
@@ -153,7 +163,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
          // loop over discs
          for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc ){
             fgtHitColPtr = fgtCollectionPtr->getHitCollection( disc );
-
+	    cout <<"looking at disc: " << disc<<endl;
             if( fgtHitColPtr ){
                const StSPtrVecFgtHit& hitVec = fgtHitColPtr->getHitVec();
                StSPtrVecFgtHitConstIterator hitIter;
@@ -161,13 +171,13 @@ Int_t StFgtGeneralBase::fillFromStEvent()
                Int_t idx = 0;
                for( hitIter = hitVec.begin(); hitIter != hitVec.end(); ++hitIter, ++idx )
 		 {
-		   Short_t quad, disc, strip;
+		   Short_t quad, discK, strip;
 		   Char_t layer; 
 		   Double_t posR=(*hitIter)->getPositionR();
 		   Double_t posPhi=(*hitIter)->getPositionPhi();
 		   Int_t geoId=(*hitIter)->getCentralStripGeoId();
 		   Double_t discZ=StFgtGeom::getDiscZ(disc);
-		   StFgtGeom::decodeGeoId((*hitIter)->getCentralStripGeoId(),disc, quad, layer, strip);
+		   StFgtGeom::decodeGeoId((*hitIter)->getCentralStripGeoId(),discK, quad, layer, strip);
 #ifdef ONE_HIT_PER_QUAD
 		   if(quadsHit.find(quad)!=quadsHit.end())
 		     {
@@ -179,11 +189,14 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		   //				  Int_t clusterSizePhi=(*hitIter)->getStripWeightMap().size();
 		   Int_t clusterSize=(*hitIter)->getStripWeightMap().size();
 		   Double_t clusterCharge=(*hitIter)->charge();
+		   cout <<"pushing into " << disc <<endl;
 		   pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge));
 		   mapGeoId2Cluster[geoId]=((pClusters[disc]->size()-1));
 		 }
             };
          }
+
+	 cout <<" done with hits" << endl;
 	 ///////////////////////
          for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc )
 	   {
@@ -200,9 +213,9 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		     Int_t cSeedType=strip->getClusterSeedType();
 		     Double_t charge=strip->getCharge();
 		     Double_t chargeUncert=strip->getChargeUncert();
-		     Short_t quad, disc, stripI;
+		     Short_t quad, discK, stripI;
 		     Char_t layer;
-		     StFgtGeom::decodeGeoId(geoId,disc, quad, layer, stripI);
+		     StFgtGeom::decodeGeoId(geoId,discK, quad, layer, stripI);
 		     Double_t ped=0.0; //get from DB
 		     Double_t pedErr=0.0; 
 		     Int_t rdo, arm, apv, chan; 
@@ -233,6 +246,8 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		 }
 	       }
 	   }
+
+	 cout <<"done with strips " <<endl;
 	 for(int iDx=0;iDx<6;iDx++)
 	   {
 	     vector<generalCluster>::iterator it=pClusters[iDx]->begin();
@@ -279,7 +294,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
       }
    }
 
-
+   cout <<"filled from event " <<endl;
 
    return ierr;
 
@@ -321,7 +336,9 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 	  }
 	  else
 	    {
-	      //	      return false; //primary vertex is not good...
+#ifdef USE_VTX
+	           return false; //primary vertex is not good...
+#endif
 	    }
 	}
 	//	if(fabs(ipZ)>20)
@@ -513,7 +530,9 @@ void StFgtGeneralBase::checkNumPulses()
 		  else
 		    iValPulseR++;
 		}
-	      if(it->charge>3*it->chargeUncert)
+	      ///	      if(it->charge>3*it->chargeUncert)
+	      ///lens condition:
+	      if(it->charge>1000)
 		{
 		  if(layer=='P')
 		    iValChargeP++;

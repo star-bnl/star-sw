@@ -145,7 +145,7 @@ Int_t StFgtClusterPlotter::Make()
 		 break;
 
 	       default:
-		 (*outTxtFile) <<"x";
+		 (*outTxtFile) <<"-";
 	       }
 	     if((*it)->getClusterSeedType()==kFgtDeadStrip) 
 	       stripDead=true;

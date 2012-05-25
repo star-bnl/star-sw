@@ -11,16 +11,20 @@ class StFgtPedStatQA;
 class St_db_Maker;
 class StDbConfigNode;
 class StDbManager;
+class StFgtGenPlotter;
+class StFgtGenAVEMaker;
 
 StChain           *analysisChain = 0;
 St_db_Maker       *dbMkr         = 0;
 StFgtDbMaker      *fgtDbMkr      = 0; 
 StFgtRawDaqReader *daqRdr        = 0;
+StFgtGenPlotter    *fgtGenPlotter     = 0;
+StFgtGenAVEMaker    *fgtAVEffMkr     = 0;
 /// /star/data03/daq/2012/064/13064033p_jb/st_physics_13064033_raw_1010001.daq
 ///star/data03/daq/2012/061/13061024fR/st_fgt_13061024_raw_1340001.daq",
 int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/st_physics_13064033_raw_1010001.daq",
 		       Int_t runnumber = 13064033,
-                       Int_t nevents = 200,
+                       Int_t nevents = 100,
 	     Bool_t cutShortEvents = 1 ){
    LoadLibs();   
 
@@ -36,6 +40,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
    gSystem->Load("StDbLib.so");
    gSystem->Load("St_db_Maker");
    gSystem->Load("StDbBroker");
+
 
    TString dir0 = "MySQL:StarDb";
    TString dir1 = "$STAR/StarDb";
@@ -77,21 +82,24 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
    a2cMkr->doCutBadStatus();
 
    ///this cuts ~10% of the events
-   a2cMkr->doRemoveNonSignal(false);
-   a2cMkr->doRemoveNonPulse(false);
+   //   a2cMkr->doRemoveNonSignal(false);
+   //   a2cMkr->doRemoveNonPulse(false);
 
    Char_t *myMaker = "StFgtClusterMaker";
   if (gClassTable->GetID(myMaker) < 0) {
 	  gSystem->Load(myMaker);//  TString ts("load "; ts+=myMaker; StMemStat::PrintMem(ts.Data());
   }
   StFgtClusterMaker* myMk =new StFgtClusterMaker("FgtClustMaker"); 
-  simpleClusAlgo = new StFgtSimpleClusterAlgo();
+  //  simpleClusAlgo = new StFgtSimpleClusterAlgo();
   seededClusAlgo = new StFgtSeededClusterAlgo();
   seededClusAlgo->setJumpSingleStrip(true); // if a strip in cluster has no charge 
+  myMk->setClusterAlgo( seededClusAlgo );
   cout <<"1" <<endl;
   // StFgtAVEfficiencyMaker* effMkr=new StFgtAVEfficiencyMaker("FgtAVEfficiencyMaker");
-  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
 
+  //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
+  fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
+  //   fgtGenPlotter = new StFgtGenPlotter( "genPlotter" );
 
    // debug
    // analysisChain->ls(4);
@@ -154,25 +162,24 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
 // load the shared libraries
 void LoadLibs() {
    // common shared libraries
-
+   gROOT->Macro("loadMuDst.C");
   gSystem->Load("libPhysics");
   gSystem->Load("St_base");
   gSystem->Load("StChain");
-  gSystem->Load("StFgtUtil");
+  //  gSystem->Load("StFgtUtil");
   gSystem->Load("StUtilities");
   gSystem->Load("StEvent");
   cout << "loaded StEvent library" << endl;
 
   gSystem->Load("RTS");
   gSystem->Load("StFgtUtil");
-  gSystem->Load("StFgtPool");
-  cout << "Loading StFgtDbMaker" << endl;
    gSystem->Load("StFgtDbMaker");
-
-   gSystem->Load("StFgtPedPlotter");
-   gSystem->Load("StFgtPedMaker");
-   gSystem->Load("StFgtQaMakers");
+   gSystem->Load("StFgtClusterTools");
+   //   gSystem->Load("StFgtPedPlotter");
+   //  gSystem->Load("StFgtPool");
+   //   gSystem->Load("StFgtPedMaker");
   gSystem->Load("StFgtRawDaqReader");
+  //   gSystem->Load("StFgtQaMakers");
 
 
 };
