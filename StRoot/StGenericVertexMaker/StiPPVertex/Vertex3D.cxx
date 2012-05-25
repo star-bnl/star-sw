@@ -131,7 +131,7 @@ Vertex3D::doExtrapolation(){ // study track cov matrix for individual tracks usi
      } // end of nodes w/ hits
  
      for(int iDir=0;iDir<2;iDir++) {
-       if(iDir==0)  printf("extrapolate track toward vertex, inLx=%.1f\n",minLx);
+       if(iDir==0)  printf("extrapolate track toward vertex, innLx=%.1f\n",minLx);
        if(iDir==1)  printf("extrapolate track toward BSMD, outLx=%.1f\n",maxLx);       
        for(int iI=0;iI<17;iI++) {
 	 float Lx=100.;StiKalmanTrackNode* node=0; int ret=-2;
@@ -173,7 +173,7 @@ Vertex3D::study(TVector3 r, int eveID){
   hA[1]->Fill(track.size());
   dumpPrimTracks4beamLine(Z0, eveID);
   trackChi2QA(Z0);
-  doExtrapolation(); /* for cov-matrix study, activate by hand */
+  // doExtrapolation(); /* for cov-matrix study, activate by hand */
   if (track.size()<cut_numTrack)  return;
   hA[0]->Fill(11);
 
@@ -182,7 +182,7 @@ Vertex3D::study(TVector3 r, int eveID){
     TList *Lyx= hYX[nHE]->GetListOfFunctions(); 
     TList *Lyz= hYZ[nHE]->GetListOfFunctions(); 
     TArrow *ar=0;
-    printf("Z0=%f, eveID=%d\n",Z0,eveID);
+    //printf("Z0=%f, eveID=%d\n",Z0,eveID);
     float D=2.5; // cm half length of tracklet
     float mxPt=0;
     for(uint i=0;i<track.size();i++) {
@@ -203,7 +203,7 @@ Vertex3D::study(TVector3 r, int eveID){
       float head=pt/100.;
       int width=int(3.* (0.2*0.2)/sig/sig);
       if(mxPt<pt) mxPt=pt;
-      printf("tr PT=%f  x=%f dx=%f y=%f dy=%f z=%f vz=%f head=%f width=%d sig=%f\n",pt, x,ux,y,uy,z,vz,head, width,sig);
+      // printf("tr PT=%f  x=%f dx=%f y=%f dy=%f z=%f vz=%f head=%f width=%d sig=%f\n",pt, x,ux,y,uy,z,vz,head, width,sig);
 
       ar=new TArrow(x-ux,y-uy,x+ux,y+uy,head,"|>");  
       ar->SetLineColor(kBlue); ar->SetLineWidth(width); Lyx->Add(ar);
