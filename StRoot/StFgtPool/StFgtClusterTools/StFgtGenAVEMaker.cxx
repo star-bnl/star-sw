@@ -25,7 +25,7 @@
 
 
 //max num clusters any disk is allowed to have
-#define MAX_CLUSTERS 10
+#define MAX_CLUSTERS 1000
 #define CHARGE_MEASURE clusterCharge
 #define MAX_DIST_STRIP_R 0.7
 #define MAX_DIST_STRIP_PHI 0.03
@@ -42,7 +42,7 @@
 #define MAX_CHARGE_RATIO
 #define MIN_CHARGE_RATIO
 
-#define DISK_EFF 1
+#define DISK_EFF 10
 #define QUAD_EFF 1
 #define MY_PI 3.14159
 //#define  REFIT_WITH_VERTEX

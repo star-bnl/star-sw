@@ -16,7 +16,7 @@
 #include <set>
 
 //#define ONE_HIT_PER_QUAD
-//#define USE_VTX
+#define USE_VTX
 
 StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), evtNr(0)
 {
@@ -136,8 +136,8 @@ Int_t StFgtGeneralBase::Make()
     }
   //  cout << " done" <<endl;
 
-    fillFromStEvent();
-    //fillFromMuDst();
+  //fillFromStEvent();
+   fillFromMuDst();
     mapGeoId2Cluster.clear();
   return ierr;
 }
@@ -294,8 +294,8 @@ Int_t StFgtGeneralBase::fillFromStEvent()
       }
    }
 
-   cout <<"filled from event " <<endl;
-
+   //   cout <<"filled from event " <<endl;
+      checkNumPulses();
    return ierr;
 
 }
