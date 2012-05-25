@@ -3,8 +3,11 @@
 //    - Provide category id, such as 'MC' track in the minimc tree
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.h,v 1.11 2011/04/26 20:27:22 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.h,v 1.12 2012/03/05 10:32:50 cpowell Exp $
  * $Log: StEmbeddingQAUtilities.h,v $
+ * Revision 1.12  2012/03/05 10:32:50  cpowell
+ * Functions added to cut on refMult
+ *
  * Revision 1.11  2011/04/26 20:27:22  hmasui
  * Add isGamma function
  *
@@ -130,6 +133,8 @@ class StEmbeddingQAUtilities {
     Double_t getNSigmaCut() const ;
     Float_t getRapidityCut() const ;
     Float_t getZVertexCut() const ;
+    Int_t 	getRefMultMinCut() const ;
+    Int_t 	getRefMultMaxCut() const ;
     std::vector<UInt_t> getTriggerIdCut() const ;
 
     /// Set track and event selections, return new value
@@ -142,6 +147,8 @@ class StEmbeddingQAUtilities {
     Double_t setNSigmaCut(const Double_t val) ;
     Float_t setRapidityCut(const Float_t val) ;
     Float_t setZVertexCut(const Float_t val) ;
+    Int_t 	setRefMultMinCut(const Int_t val) ;
+    Int_t 	setRefMultMaxCut(const Int_t val) ;
     void addTriggerIdCut(const UInt_t val) ;
 
     /// Track and event cuts
@@ -153,6 +160,7 @@ class StEmbeddingQAUtilities {
     Bool_t isNSigmaOk(const Float_t nsigma) const ;
     Bool_t isRapidityOk(const Float_t y) const ;
     Bool_t isZVertexOk(const Float_t vz) const ;
+    Bool_t isRefMultOk(const Int_t refMult) const ;
     Bool_t isTriggerOk(const UInt_t trigger) const ;
 
     /// Print all track selections
@@ -187,6 +195,8 @@ class StEmbeddingQAUtilities {
     Double_t mNSigmaCut               ;  /// Nsigma cut (default |Nsigma| < 2)
     Float_t mRapidityCut              ;  /// Rapidity cut (default |y| < 10, i.e. basically no cut)
     Float_t mZVertexCut               ;  /// z-vertex cut (default is |vz| < 30cm)
+    Int_t 	mRefMultMinCut            ;  /// refMult minimum cut (default is refMult >= 0)
+    Int_t 	mRefMultMaxCut            ;  /// refMult maximum cut (default is refMult < 1000)
     std::vector<UInt_t> mTriggerIdCut ;  /// Trigger id cut (default is no cut)
 
 

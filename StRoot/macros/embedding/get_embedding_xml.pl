@@ -4,8 +4,17 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.15 2011/02/25 17:53:19 hmasui Exp $
+# $Id: get_embedding_xml.pl,v 1.18 2012/03/01 05:46:38 cpowell Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.18  2012/03/01 05:46:38  cpowell
+# Corrected parameters for bfcMixer_TpcSvtSsd.C
+#
+# Revision 1.17  2012/01/31 00:25:11  cpowell
+# Allow pt bin subfolder with option -ptbin. Generalize usage with event simulator.
+#
+# Revision 1.16  2011/08/04 19:50:04  cpowell
+# Flag included to embed Pythia events. This excludes StPrepEmbedmaker from the chain and runs starsim before reconstruction.
+#
 # Revision 1.15  2011/02/25 17:53:19  hmasui
 # Move csh files into eliza disk, remove list files. Fix xml syntax in local test.csh.
 #
@@ -55,7 +64,12 @@ my $ymax          = 1.5 ;                                           # Default ra
 my $pid           = 8 ;                                             # Default geant id (is pi+)
 my $multiplicity  = 1 ;                                             # Default multiplicity (is 1)
 my $particleName  = "PiPlus" ;                                      # Default particle name (is pi+)
-my $prodName      = $production ;                                   # Default prodName (second last argument in the bfcMixer)
+my $prodName      = $production ;                                   # Default prodName (4th last argument in the bfcMixer)
+my $simulatorMode = 0 ;                                             # Default mode (OFF) for using starsim (no StPrepEmbedding) 			
+my $kumacFile     = "StRoot/macros/embedding/pythiaTuneA_template.kumac"; # Kumac file for starsim 			
+my $seed          = "StRoot/macros/embedding/get_random_seed";      # Random seed generator for starsim		
+my $daqEvents     = "$staroflDir/embedding/$production";            # File list for starsim with daq files and number of events for each file		
+my $ptbin         = 0 ;                                             # Default mode (OFF) for multiple pt hard bins for a single request 			
 
 # Output path will be the following structure
 # $elizaDisk/star/starprod/embedding/${TRGSETUPNAME}/${PARTICLENAME}_${FSET}_${REQUESTNUMBER}/${PRODUCTION}.${LIBRARY}/${YEAR}/${DAY}
@@ -104,6 +118,11 @@ GetOptions (
     'ymin=f' => \$ymin,                    # Minimum rapidity cut
     'ymax=f' => \$ymax,                    # Maximum rapidity cut
     'zvertex=f' => \$zvertexCut,           # Set z-vertex cut
+    'simulator=i' => \$simulatorMode,      # Set Simulator mode	
+    'kumacfile=s' => \$kumacFile,          # Set Simulator input	
+    'seed=s' => \$seed,                    # Set Simulator random seed generator
+    'daqevents=s' => \$daqEvents,          # Set Simulator daq file and event number list
+    'ptbin=i' => \$ptbin,                  # Set pt bin description in output directory	
     'verbose' => \$verbose
 );
 
@@ -159,6 +178,16 @@ my $usage = q(
 
   -z (or --zvertex) [max. z-vertex cut] Set z-vertex cut. The cut will be |vz| < cut
 
+  -simulator [Simulator flag: 0 (off) or 1 (on) ] Set mode for using a simulator to generate events (kumac required, no StPrepEmbed)													
+
+  -ptbin [ptbin flag: 0 (off) or 1 (on)] Set ptbin info in output folder
+
+  -kumacfile [kumac file name]          Set directory and file name of kumac to generate events using a simulator
+
+  -seed                                 Set location of random seed generator for simulator
+
+  -daqevents [daq file directory]       Set daq file list containing number of events in each daq file (needed for starsim) 
+
   -verbose                              Verbose flag to show debug messages
 
 );
@@ -196,6 +225,11 @@ checkDirectory($tagsDirectory, "tag");
 checkDirectory($daqsDirectory, "daq");
 checkDirectory($generatorDir,  "generator");
 checkDirectory($tempLogDirectory,  "temporary log");
+if ( $simulatorMode == 1 ) {
+	checkFile($kumacFile);
+	checkFile($seed);
+	checkFile($daqEvents);
+}
 
 # No checks for logs anymore. will be created dynamically in the xml file
 #checkDirectory($logDirectory,  "log");
@@ -277,11 +311,19 @@ print OUT "\n";
 #print OUT "setenv EMHPSS $hpssLogDir\n";
 
 printDebug("Set output path ...");
-my $outputDirectory = getOutputDirectory($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library);
-my $listDirectory   = getListDirectory($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library);
 print OUT "<!-- Set output directory path -->\n";
-print OUT "setenv EMOUTPUT $outputDirectory\n";
-print OUT "setenv EMLIST $listDirectory\n";
+if ( $ptbin == 1 ){
+	my $outputDirectoryPt = getOutputDirectoryPt($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library, $ptmin, $ptmax);
+	my $listDirectoryPt   = getListDirectoryPt($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library, $ptmin, $ptmax);
+	print OUT "setenv EMOUTPUT $outputDirectoryPt\n";
+	print OUT "setenv EMLIST $listDirectoryPt\n";
+}
+ else {
+	my $outputDirectory = getOutputDirectory($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library);
+	my $listDirectory   = getListDirectory($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library);
+	print OUT "setenv EMOUTPUT $outputDirectory\n";
+	print OUT "setenv EMLIST $listDirectory\n";
+ }
 print OUT "\n";
 
 print OUT "\n";
@@ -302,9 +344,39 @@ my $tagFile = "\$EMBEDTAGDIR/$fileBaseNameXml.tags.root"; #Define tag file
 printDebug("Set tags file: $tagFile");
 
 #----------------------------------------------------------------------------------------------------
+# Set fzd file
+#----------------------------------------------------------------------------------------------------
+my $fzdFile = "$fileBaseNameXml.fzd"; #Define fzd file - it will be created, and lives in the current directory 
+printDebug("Set fzd file: $fzdFile");
+
+#----------------------------------------------------------------------------------------------------
 # Set bfcMixer
 #----------------------------------------------------------------------------------------------------
 printDebug("Set bfcMixer: $bfcMixer ...");
+
+#---------------------------------------------------------------------------------------------------
+# Run starsim with kumac file and random number generator
+#---------------------------------------------------------------------------------------------------
+if ( $simulatorMode == 1 ) {
+	print OUT "\n";
+	print OUT "<!-- Run starsim with kumac file -->\n";
+	use File::Basename;
+#	my($kumacBaseFileName, $kumacBaseDirectory) = fileparse($kumacFile);
+#	my($seedBaseFileName, $seedBaseDirectory) = fileparse($seed);
+#	my($daqEventsBaseFileName, $daqEventsSeedBaseDirectory) = fileparse($daqEvents);
+#	print OUT "set daqEventsBaseFileName=$daqEventsBaseFileName\n";
+	print OUT "set daqevents=$daqEvents\n";
+#	print OUT "set kumac=$kumacBaseFileName\n";
+	print OUT "set kumac=$kumacFile\n";
+	print OUT "set fzdFile=$fzdFile\n";
+# print OUT "set random=`$seedBaseFileName`\n";
+	print OUT "set random=`$seed`\n";
+	print OUT "set ptmin=$ptmin\n";
+	print OUT "set ptmax=$ptmax\n";
+	print OUT "set nevents=`grep \$FILEBASENAME \$daqevents | awk '{print \$2}'`\n";
+	print OUT "echo nevents = \$nevents, random = \$random, kumac = \$kumac, fzdFile=\$fzdFile, ptmin = \$ptmin, ptmax = \$ptmax\n";
+	print OUT "starsim -w 0 -b \$kumac \$fzdFile \$random \$nevents \$ptmin	\$ptmax\n\n";
+}
 
 # Determine trigger string
 my $triggerString = "0";
@@ -314,7 +386,7 @@ if ( @triggerId ){
 
 # Get bfcMixer
 $execute_bfcMixer = get_bfcMixer($bfcMixer, $nevents, "\$INPUTFILE0", $tagFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, $vrCut,
-    $pid, $multiplicity, $triggerString, $prodName, $ptOption) ;
+    $pid, $multiplicity, $triggerString, $prodName, $ptOption, $simulatorMode, $fzdFile) ;
 
 print OUT "echo 'Executing $execute_bfcMixer ...'\n";
 print OUT "\n";
@@ -404,6 +476,7 @@ printDebug("Locations of log/elog, daq files, csh/list and local sand-box ...");
 # Files will be moved a new path determined by production, particle name, request number and FSET
 print OUT "<!-- Define locations of ROOT files -->\n";
 print OUT "<output fromScratch=\"*.root\" toURL=\"\$EMOUTPUT/\"/>\n";
+if ( $simulatorMode == 1 ) { print OUT "<output fromScratch=\"*.fzd\" toURL=\"\$EMOUTPUT/\"/>\n"; }
 print OUT "\n";
 print OUT "<!-- Define locations of log/elog files -->\n";
 print OUT "<stdout URL=\"file:$tempLogDirectory/$jobIdXml.log\"/>\n";
@@ -423,6 +496,11 @@ print OUT "  <Package name=\"Localmakerlibs\">\n";
 print OUT "    <File>file:./$libraryPath/</File>\n";
 print OUT "    <File>file:./StRoot/</File>\n";
 print OUT "    <File>file:./pams/</File>\n";
+#if ( $simulatorMode == 1 ) { 
+#	print OUT " 	<File>file:$seed</File>\n"; 
+#	print OUT " 	<File>file:$kumacFile</File>\n";
+#	print OUT " 	<File>file:$daqEvents</File>\n"; 
+#}
 print OUT "  </Package>\n";
 print OUT "</SandBox>\n";
 print OUT "</job>\n";
@@ -452,11 +530,13 @@ if($local){
   # Find one daq file from the path, and also find the corredponding tags file
   my $daqOneFile  = `find $daqsDirectory -type f -iname "*daq" | head -n1`;
   chomp($daqOneFile);
+  my $daqOneFileBaseName  = `basename $daqOneFile`;
+  chomp($daqOneFileBaseName);
 
   # Make sure daq file exists
   if ( ! -f $daqOneFile ){
-    print "Can't find $daqOneFile. Stop\n";
-    exit(0);
+   	print "Can't find $daqOneFile. Stop\n";
+   	exit(0);
   }
   printDebug("Found one daq file: $daqOneFile");
 
@@ -466,10 +546,17 @@ if($local){
 
   # Make sure tags file exists
   if ( ! -f $tagsOneFile ){
-    print "Can't find $tagsOneFile. Stop\n";
-    exit(0);
+		if ( $simulatorMode != 1 ){
+    	print "Can't find $tagsOneFile. Stop\n";
+    	exit(0);
+		}
   }
   printDebug("Found one tags file: $tagsOneFile");
+
+	#Make sure fzd file exists
+  my $fzdOneFile = `basename $daqOneFile | sed 's/\\.daq/\\.fzd/g'`;
+	chomp($fzdOneFile);
+  printDebug("Create one fzd file: $fzdOneFile");
   
   open (LOCAL, ">$localTestScript") || die "can't open $localTestScript\n"; 
   print LOCAL "#!/bin/csh\n";
@@ -481,12 +568,32 @@ if($local){
 
   # Get bfcMixer
   $execute_bfcMixer = get_bfcMixer($bfcMixer, 10, $daqOneFile, $tagsOneFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, $vrCut,
-      $pid, $multiplicity, $triggerString, $prodName, $ptOption);
+      $pid, $multiplicity, $triggerString, $prodName, $ptOption, $simulatorMode, $fzdOneFile);
 
-  print LOCAL "echo 'Executing $execute_bfcMixer ...'\n";
-  print LOCAL "\n";
-  print LOCAL "root4star -b <<EOF\n";
-
+# Run starsim
+	if ( $simulatorMode == 1 ){
+		use File::Basename;
+#		my($kumacBaseFileName, $kumacBaseDirectory) = fileparse($kumacFile);
+#		my($seedBaseFileName, $seedBaseDirectory) = fileparse($seed);
+#		my($daqEventsBaseFileName, $daqEventsSeedBaseDirectory) = fileparse($daqEvents);
+#		print LOCAL "set kumac=$kumacBaseFileName\n";
+		print LOCAL "set kumac=$kumacFile\n";
+		print LOCAL "set fzd=$fzdOneFile\n";
+		print LOCAL "set daqevents=$daqEvents\n";
+#		print LOCAL "set random=`$seedBaseFileName`\n";
+		print LOCAL "set random=`$seed`\n";
+		print LOCAL "set ptmin=$ptmin\n";
+		print LOCAL "set ptmax=$ptmax\n";
+		print LOCAL "set nevents=`grep \'$daqOneFileBaseName\' \$daqevents | awk '{print \$2}'`\n";
+		print LOCAL "echo nevents = \$nevents, random = \$random, kumac = \$kumac, fzd=\$fzd, ptmin = \$ptmin, ptmax = \$ptmax\n";
+		print LOCAL "\n";
+		print LOCAL "echo Running \"starsim -w 0 -b \$kumac \$fzd \$random \$nevents \$ptmin \$ptmax\"\n";
+		print LOCAL "starsim -w 0 -b \$kumac \$fzd \$random \$nevents \$ptmin	\$ptmax\n\n";
+	}
+ 	print LOCAL "echo 'Executing $execute_bfcMixer ...'\n";
+ 	print LOCAL "\n";
+ 	print LOCAL "root4star -b <<EOF\n";
+	
   # Put Trigger id's (Need to fix &lt; and &gt; by hand -> fixed)
   print LOCAL getTriggerVector(1, $triggerString, @triggerId) ;
 
@@ -524,6 +631,8 @@ sub get_bfcMixer {
   my $trigger      = shift @_ ;
   my $prodname     = shift @_ ;
   my $ptOption     = shift @_ ;
+  my $simulator 		   = shift @_ ;
+  my $fzdfile		   = shift @_ ;
 
   # Remove '.C' from macro
   my $bfcMixerFunction = `basename $bfcMixer`;
@@ -540,7 +649,13 @@ sub get_bfcMixer {
 
     $execute_bfcMixer = "$bfcMixerFunction($nevents, 1, 1, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\");";
   }
-  else{
+  elsif ( $bfcMixer =~ /.*Tpx.C/  ){
+    # bfcMixers with PYTHIA flag option (Tpx only) (CBPowell)
+    printDebug("Starndard (without SVT/SSD) bfcMixer (Tpx only)");
+
+    $execute_bfcMixer = "$bfcMixerFunction($nevents, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $vrcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\", $simulator, \"$fzdfile\");";
+  }
+	else {	
     # Other bfcMixers (TpcOnly or Tpx)
     printDebug("Starndard (without SVT/SSD) bfcMixer");
 
@@ -717,6 +832,20 @@ sub getOutputDirectory {
 }
 
 #----------------------------------------------------------------------------------------------------
+# Get output directory (with pt hard bin)
+#----------------------------------------------------------------------------------------------------
+sub getOutputDirectoryPt {
+  my $elizadisk     = shift @_ ;
+  my $trgsetupname  = shift @_ ;
+  my $particleName  = shift @_ ;
+  my $requestNumber = shift @_ ;
+  my $production    = shift @_ ;
+  my $library       = shift @_ ;
+  my $ptmin 	      = shift @_ ;
+  my $ptmax 	      = shift @_ ;
+  return "$elizadisk/star/starprod/embedding/$trgsetupname/$particleName\_&FSET;_$requestNumber/$production.$library/\$EMYEAR/\$EMDAY/Pt\_$ptmin\_$ptmax";
+}
+#----------------------------------------------------------------------------------------------------
 # Get list directory
 #----------------------------------------------------------------------------------------------------
 sub getListDirectory {
@@ -727,6 +856,20 @@ sub getListDirectory {
   my $production    = shift @_ ;
   my $library       = shift @_ ;
   return "$elizadisk/star/starprod/embedding/$trgsetupname/$particleName\_$requestNumber/FSET&FSET;_$production.$library\_\$EMYEAR";
+}
+#----------------------------------------------------------------------------------------------------
+# Get list directory (with pt hard bin)
+#----------------------------------------------------------------------------------------------------
+sub getListDirectoryPt {
+  my $elizadisk     = shift @_ ;
+  my $trgsetupname  = shift @_ ;
+  my $particleName  = shift @_ ;
+  my $requestNumber = shift @_ ;
+  my $production    = shift @_ ;
+  my $library       = shift @_ ;
+  my $ptmin 	      = shift @_ ;
+  my $ptmax 	      = shift @_ ;
+  return "$elizadisk/star/starprod/embedding/$trgsetupname/$particleName\_$requestNumber/FSET&FSET;_$production.$library\_\$EMYEAR/Pt\_$ptmin\_$ptmax";
 }
 
 #----------------------------------------------------------------------------------------------------
@@ -769,7 +912,6 @@ sub checkFile {
   print "\n";
   exit(0);
 }
-
 
 #----------------------------------------------------------------------------------------------------
 # Check directory exists

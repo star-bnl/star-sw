@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.57 2011/02/10 17:31:01 dmitry Exp $
+ * $Id: StDbBroker.cxx,v 1.58 2011/11/28 17:03:07 dmitry Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.58  2011/11/28 17:03:07  dmitry
+ * dbv override support in StDbLib,StDbBroker,St_db_Maker
+ *
  * Revision 1.57  2011/02/10 17:31:01  dmitry
  * added an option to blacklist domains
  *
@@ -467,6 +470,17 @@ void StDbBroker::SetProdTime(UInt_t ptime){
 }
 
 //____________________________________________________________________________
+void StDbBroker::AddProdTimeOverride(UInt_t ptime, char* dbType, char* dbDomain) {
+  if (m_Tree) {
+    m_Tree->setProdTimeOverride(ptime, dbType, dbDomain);
+    //std::cout << "SPECIAL: StDbBroker - setting override " << dbType << " / " << dbDomain << " = " << ptime << "\n";
+  } else {
+    //std::cout << "SPECIAL: StDbBroker - override was not set, no m_Tree! \n";
+  }
+  m_prodTimeOverride.insert( std::make_pair<std::pair<char*,char*>, unsigned int>( std::make_pair<char*,char*>(dbType,dbDomain), ptime ) );
+}
+
+//____________________________________________________________________________
 void StDbBroker::SetFlavor(const char* flavor){
 
   if(!flavor)return;
@@ -810,7 +824,17 @@ if(!versionName){
  dbConfig_st* configTable = 0;
  if(!m_Tree) return configTable;
 
- if(m_prodTime!=0)m_Tree->setProdTime(m_prodTime); 
+ if(m_prodTime!=0) { 
+	m_Tree->setProdTime(m_prodTime); 
+    for (std::map<std::pair<char*,char*>, unsigned int>::iterator it = m_prodTimeOverride.begin(); it != m_prodTimeOverride.end(); it++ ) {
+      //if ( (*it).first.first ) {
+        //std::cout << "SPECIAL: StDbBroker - Setting override to m_Tree : " << (*it).first.first << " _ " << (*it).first.second << " = " << (*it).second << "\n";
+      //} else {
+        //std::cout << "SPECIAL: StDbBroker - Setting override to m_Tree : [all domains] _ " << (*it).first.second << " = " << (*it).second << "\n";
+      //}
+      m_Tree->setProdTimeOverride((*it).second, (*it).first.first, (*it).first.second);
+    }
+ }
  if(m_flavor)m_Tree->setFlavor(m_flavor);
 
  if(m_isVerbose){
