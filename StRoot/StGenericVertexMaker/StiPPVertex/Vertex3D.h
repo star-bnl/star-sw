@@ -9,7 +9,7 @@ class TObjArray;
 
 class Vertex3D {
  private:
-  enum {mxHA=16, mxHE=50};
+  enum {mxHA=16, mxHE=10};
   TH1 *hA[mxHA];
   TH1 *hYX[mxHE], *hYZ[mxHE]; // event histogram
   int nHE;// counter of used histos

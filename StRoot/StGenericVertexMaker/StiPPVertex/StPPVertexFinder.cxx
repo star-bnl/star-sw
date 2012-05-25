@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.39 2012/05/07 15:55:30 fisyak Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.40 2012/05/25 20:19:40 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -657,7 +657,7 @@ StPPVertexFinder::buildLikelihoodZ(){
   float dzMax2=mMaxZradius*mMaxZradius;
 
   int nt=mTrackData.size();
-  LOG_INFO<< Form("PPV::buildLikelihood() pool of nTracks=%d",nt)<<endm;
+  LOG_DEBUG<< Form("PPV::buildLikelihood() pool of nTracks=%d",nt)<<endm;
   if(nt<=0) return false;
 
   int n1=0;
@@ -695,7 +695,7 @@ StPPVertexFinder::buildLikelihoodZ(){
     // break; // tmp , to get only one track
   }
 
- LOG_INFO<< Form("PPV::buildLikelihood() %d tracks w/ matched @ Lmax=%f",n1,hL->GetMaximum())<<endm;
+ LOG_DEBUG<< Form("PPV::buildLikelihood() %d tracks w/ matched @ Lmax=%f",n1,hL->GetMaximum())<<endm;
 
 #if 0 // save .ps for every vertex found
   //tmp
@@ -748,7 +748,7 @@ StPPVertexFinder::findVertexZ(VertexData &V) {
 
   float kSig= sqrt(2*(Lmax-Llow)/avrW);
   float sigZ= (zHigh-zLow)/2/kSig;
-  LOG_INFO<< Form("PPV:: iLow/iMax/iHigh=%d/%d/%d\n",iLow,iMax,iHigh)
+  LOG_DEBUG<< Form("PPV:: iLow/iMax/iHigh=%d/%d/%d\n",iLow,iMax,iHigh)
 	  <<Form(" accM=%f  accW=%f  avrW=%f\n",accM,accW,avrW)   
 	  <<Form("  Z low/max/high=%f %f %f, kSig=%f, sig=%f\n",zLow,z0,zHigh,kSig,sigZ)
 	  <<Form(" found  PPVertex(ID=%d,neve=%d) z0 =%.2f +/- %.2f\n",V.id,mTotEve,z0,sigZ)<<endm;
@@ -815,7 +815,7 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
   if(!validVertex) { // discrad vertex
     //no match tracks in this vertex, tag vertex ID in tracks differently
     //V.print(cout);
-    LOG_INFO << "StPPVertexFinder::evalVertex Vid="<<V.id<<" rejected"<<endm;
+    LOG_DEBUG << "StPPVertexFinder::evalVertex Vid="<<V.id<<" rejected"<<endm;
     for(i=0;i<nt;i++) {
       TrackData *t=&mTrackData[i];
       if(t->vertexID!=V.id) continue;
@@ -1106,7 +1106,7 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* track,TrackData &t){
     path=d2.second;
     if(d2.first>=0 || d2.second<=0) {
       LOG_DEBUG <<Form("WARN MatchTrk , unexpected solution for track crossing CTB\n")<<
-      Form(" d2.firts=%f, second=%f, try first", d2.first, d2.second)<<endm;
+	Form(" d2.firts=%f, second=%f, try first", d2.first, d2.second)<<endm;
       path=d2.first;
     }
     posCTB = hlx.at(path);
@@ -1168,9 +1168,8 @@ StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t, floa
   d2 = hlx.pathLength(Rxy);
   path=d2.second;
   if(d2.first>=0 || d2.second<=0) {
-    printf("WARN MatchTrk , unexpected solution for track crossing Cyl\n");
-    printf(" d2.firts=%f, second=%f, try first\n",
-	   d2.first, d2.second);
+    LOG_DEBUG <<Form("WARN MatchTrk , unexpected solution for track crossing BEMC Cyl\n")<<
+      Form(" d2.firts=%f, second=%f, try first\n", d2.first, d2.second)<<endm;
     path=d2.first;
   }
   posCyl = hlx.at(path);
@@ -1235,8 +1234,8 @@ StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t,float
   float periodL=hlx. period();
  
   if(periodL<2*path) {
-    printf(" Warn, long path fac=%.1f ",path/periodL);
-    printf("  punchEEMC1 x,y,z=%.1f, %.1f, %.1f path=%.1f period=%.1f\n",r.x(),r.y(),r.z(),path,periodL); 
+    LOG_DEBUG <<Form(" Warn, long path fac=%.1f ",path/periodL)<<
+      Form("  punchEEMC1 x,y,z=%.1f, %.1f, %.1f path=%.1f period=%.1f\n",r.x(),r.y(),r.z(),path,periodL)<<endm; 
   }
 
   float phi=atan2(r.y(),r.x());
@@ -1282,7 +1281,7 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     // .........node is within TPC fiducial volume
     if(lastRxy<=rxy){
       LOG_WARN << "StPPVertexFinder::matchTrack2Membrane() \n the "<<in<<" node of the kalmanTrack below is out of order and is ignorred in (some) of vertex finder analysis"<<"\n  Z="<<z<<" rXY="<<rxy<<" last_rxy="<<lastRxy<<endm;
-      dumpKalmanNodes(track);
+      //dumpKalmanNodes(track);
       continue;
     }
     lastRxy=rxy;
@@ -1292,7 +1291,7 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
       if(lastZ*z<0) {             // track just crossed Z=0 plane
 	if(jz0>0) {
 	  LOG_WARN << "StPPVertexFinder::matchTrack2Membrane() \n the "<<in<<" node of the kalmanTrack crosses Z=0 for the 2nd time, this track has a strange list of nodes - continue"<<endm;
-	  dumpKalmanNodes(track);
+	  //dumpKalmanNodes(track);
 	}
 	//assert(jz0==0); // only one crosss point is expected
 	jz0=hitPatt.size();
@@ -1355,6 +1354,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.40  2012/05/25 20:19:40  balewski
+ * convert many LOG_INFO to LOG_DEBUG to make PPV more silent. No intencional change of PPV logic.
+ *
  * Revision 1.39  2012/05/07 15:55:30  fisyak
  * Proper handing of btofGeometry
  *
