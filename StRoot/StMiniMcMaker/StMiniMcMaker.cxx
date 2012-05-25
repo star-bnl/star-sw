@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.40 2012/03/15 23:37:36 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.41 2012/05/25 18:35:30 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.41  2012/05/25 18:35:30  perev
+ * Wrong DcaGl fixed. Thanx #2362
+ *
  * Revision 1.40  2012/03/15 23:37:36  perev
  * Uncorrected globals added(Chris)
  *
@@ -174,6 +177,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.41  2012/05/25 18:35:30  perev
+ * Wrong DcaGl fixed. Thanx #2362
+ *
  * Revision 1.40  2012/03/15 23:37:36  perev
  * Uncorrected globals added(Chris)
  *
@@ -336,7 +342,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.40 2012/03/15 23:37:36 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.41 2012/05/25 18:35:30 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -1790,7 +1796,7 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   tinyRcTrack->setRecoKey(glTrack->key());
   tinyRcTrack->setDca00(1000.);
   if (dcaGeo ) { 
-    tinyRcTrack->setDca00(dcaGeo->params()[0]);
+    tinyRcTrack->setDca00(dcaGeo->impact());
     tinyRcTrack->setDca(1);
     StThreeVectorF glMom = dcaGeo->momentum();
     THelixTrack glHelix = dcaGeo->thelix();
@@ -1817,7 +1823,6 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     tinyRcTrack->setCurvGl(dcaGeo->curvature());
     tinyRcTrack->setTanLGl(dcaGeo->tanDip());
     tinyRcTrack->setSeedQuality(glTrack->seedQuality());
-    tinyRcTrack->setDcaGl(dcaGeo->impact());
     float errorGl[5] = {dcaErr[kImpImp],dcaErr[kZZ],dcaErr[kPsiPsi]
                        ,dcaErr[kPtiPti]*pow(pt,4)
 		       ,dcaErr[kTanTan]};
@@ -1828,6 +1833,7 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     double s = glHelix.Dca(vtx,dcaXY,dcaZ,0);
     tinyRcTrack->setDcaXYGl(dcaXY);
     tinyRcTrack->setDcaZGl(dcaZ);
+    tinyRcTrack->setDcaGl(sqrt(dcaXY*dcaXY+dcaZ*dcaZ));
     double mcv[3]={mMcVertexPos[0][0],mMcVertexPos[0][1],mMcVertexPos[0][2]};
     s = glHelix.Dca(mcv,dcaXY,dcaZ,0);
     tinyRcTrack->setDcaXYGlMcV(dcaXY);
@@ -2817,9 +2823,12 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 
 //______________________________________________________________________________
 //
-// $Id: StMiniMcMaker.cxx,v 1.40 2012/03/15 23:37:36 perev Exp $
+// $Id: StMiniMcMaker.cxx,v 1.41 2012/05/25 18:35:30 perev Exp $
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.41  2012/05/25 18:35:30  perev
+// Wrong DcaGl fixed. Thanx #2362
+//
 // Revision 1.40  2012/03/15 23:37:36  perev
 // Uncorrected globals added(Chris)
 //
@@ -2846,6 +2855,9 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 //
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.41  2012/05/25 18:35:30  perev
+// Wrong DcaGl fixed. Thanx #2362
+//
 // Revision 1.40  2012/03/15 23:37:36  perev
 // Uncorrected globals added(Chris)
 //
