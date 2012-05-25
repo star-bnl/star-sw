@@ -63,7 +63,7 @@ Int_t StFgtGenPlotter::Make()
 	      Short_t tDisc, tQuad,tStrip;
 	      Char_t tLayer;
 	      Int_t geoId=stripIter->geoId;
-	  //	  cout <<" looking at strip with geo : " << stripIter->geoId<<endl;
+	  	  cout <<" looking at strip with geo : " << stripIter->geoId<<endl;
 	  //get strip id from the geo id
 	      StFgtGeom::decodeGeoId(geoId,tDisc,tQuad,tLayer,tStrip);     
 	      //	cout <<"seed is : " << stripIter->seedType <<endl;

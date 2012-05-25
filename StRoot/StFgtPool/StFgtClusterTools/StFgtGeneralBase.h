@@ -62,7 +62,11 @@ struct generalCluster
       maxAdc=-1;
       hasMatch=false;
     };
-    Int_t centralStripGeoId;
+
+
+
+
+  Int_t centralStripGeoId;
     Char_t layer;
     Double_t discZ;
     Double_t posPhi;
@@ -81,7 +85,7 @@ struct generalCluster
 class StFgtGeneralBase : public StMaker {
  public:
   StFgtGeneralBase(const Char_t* name="FgtGeneralBase");
-
+  void SetFileBase(const Char_t* filebase);
   void doLooseClustering();
   //check if cluster has energy match in other layer
   void checkMatches();
@@ -91,6 +95,7 @@ class StFgtGeneralBase : public StMaker {
   Int_t fillFromMuDst();
 
  protected:
+  Char_t fileBase[300];
    TH2D* chargeMaxAdcCorr;
    TH2D* chargeMaxAdcIntCorr;
    TH1D* hIpZEv;
@@ -98,6 +103,8 @@ class StFgtGeneralBase : public StMaker {
    TH1D** hNumChargesP;
    TH1D** hNumPulsesR;
    TH1D** hNumChargesR;
+
+
 
   map<Int_t, Int_t> mapGeoId2Cluster;
   StFgtDb* mDb;
