@@ -3,6 +3,7 @@
 #include "TObject.h"
 #include "TArrayD.h"
 #include "TPolinom.h"
+//..............................................................................
 class TCEmx_t
 { 
 public:
@@ -26,10 +27,13 @@ mHA, mAA,
 mHC, mAC, mCC;
 };
 
+//..............................................................................
 class THEmx_t
 { 
 public:
      THEmx_t()			{ Clear();}
+operator const double* ()	{ return &mHH;}		
+operator       double* ()	{ return &mHH;}		
 const double *Arr() const 	{ return &mHH;}
       double *Arr()   	{ return &mHH;}
 const double &operator[](int idx) const 	{ return (&mHH)[idx];}
@@ -55,6 +59,7 @@ mHL, mAL, mCL, mZL, mLL;
 };
 
 
+//..............................................................................
 class TCircle: public TObject
 {
 friend class THelixTrack;
@@ -111,7 +116,7 @@ TCEmx_t *fEmx; //let h = fX[1]*fD[0], a=atan2(fD[1],fD[0]),c=fRho
 		// ch,ca,cc
 ClassDef(TCircle,0)
 };
-class TCircleFitterAux;
+//..............................................................................
 class TCircleFitterAux
 {
   public:
@@ -123,6 +128,7 @@ class TCircleFitterAux
   double wt;		//calculated weight
 
 };
+//..............................................................................
 class TCircleFitter: public TCircle
 {
 public:
@@ -205,6 +211,7 @@ ClassDef(TCircleFitter,0)
 };
 
 
+//..............................................................................
 class THelixTrack : public TObject 
 {
 public:
@@ -344,8 +351,8 @@ double Chi2() const 			{return fChi2;}
 int    Ndf()  const			{return fCircleFitter.Ndf()+fPoli1Fitter.Ndf();}
 double Chi2XY () const 			{return fCircleFitter.Chi2();}
 double Chi2SZ () const 			{return fPoli1Fitter.Chi2() ;}
-int    NdfXY ()  const 			{return fCircleFitter.Ndf();}
-int    NdfSZ ()  const 			{return fPoli1Fitter.Ndf() ;}
+int    NdfXY ()  const 			{return fCircleFitter.Ndf() ;}
+int    NdfSZ ()  const 			{return fPoli1Fitter.Ndf()  ;}
 TCircleFitterAux* GetAux(int i) const   {return fCircleFitter.GetAux(i);}
 double EvalChi2();
 void   Clear(const char *opt ="");
@@ -360,5 +367,35 @@ TCircleFitter fCircleFitter;
 TPoliFitter   fPoli1Fitter;
 double fChi2;
 ClassDef(THelixFitter,0)
+};
+
+
+
+
+//..............................................................................
+#include <vector>
+class THelixKFitterAux { public: double x[3],e[6],wt,xi2; };
+typedef std::vector<THelixKFitterAux> THelixKFitterAuxV;
+class THelixKFitter: public THelixTrack
+{
+public:
+       THelixKFitter()				{Clear();}
+      ~THelixKFitter(){;}
+void   Add (const double x[3]); 
+void   AddErr(const double err[6]); 
+double Fit();   
+double Chi2() const 				{return fChi2		;}
+int    Ndf()  const			        {return 2*fAux.size()-5	;}
+int    Size() const 				{return fAux.size()	;}
+const THelixKFitterAux* GetAux(int i) const   	{return &fAux[i]	;}
+void   Clear(const char *opt ="")		{fAux.clear();fChi2=0	;}
+void   Print(const char* chopt = "") const;
+void   Show() const;
+
+static void Test(int kase=0);
+private:
+THelixKFitterAuxV fAux;
+double fChi2;
+ClassDef(THelixKFitter,0)
 };
 #endif // THELIXTRACK_H
