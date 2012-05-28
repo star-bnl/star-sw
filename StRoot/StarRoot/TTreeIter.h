@@ -25,24 +25,25 @@ class TTreeIterCast
   
   operator const Char_t  		&();	//type 1
   operator const Short_t 		&();	//type 2
-  operator const Int_t 		&();	//type 3
-  operator const Long_t		&();	//type 4
-  operator const Float_t 		&();	//type 5
-  operator const Double_t 	&();	//type 8
+  operator const Int_t 		&();		//type 3
+  operator const Long_t		&();		//type 4
+  operator const Float_t 	&();		//type 5
+  operator const Double_t 	&();		//type 8
   // 	operator const Double32_t 	&();	//type 9
-  operator const UChar_t  	&();	//type 11
-  operator const UShort_t 	&();	//type 12
-  operator const UInt_t 		&();	//type 13
-  operator const ULong_t		&();	//type 14
+  operator const UChar_t  	&();		//type 11
+  operator const UShort_t 	&();		//type 12
+  operator const UInt_t 	&();		//type 13
+  operator const ULong_t	&();		//type 14
   
-  operator const Char_t*  	&();	//type 21
-  operator const Short_t* 	&();	//type 22
-  operator const Int_t* 		&();	//type 23
-  operator const Long_t*		&();	//type 24
-  operator const Float_t* 	&();	//type 25
-  operator const Double_t* 	&();	//type 28//  	operator const Double32_t* 	&();	//type 29
-  operator const UChar_t*  	&();	//type 31
-  operator const UShort_t* 	&();	//type 32
+  operator const Char_t*  	&();		//type 21
+  operator const Short_t* 	&();		//type 22
+  operator const Int_t* 	&();		//type 23
+  operator const Long_t*	&();		//type 24
+  operator const Float_t* 	&();		//type 25
+  operator const Double_t* 	&();		//type 28
+  //  	operator const Double32_t* 	&();	//type 29
+  operator const UChar_t*  	&();		//type 31
+  operator const UShort_t* 	&();		//type 32
   operator const UInt_t* 		&();	//type 33
   operator const ULong_t*		&();	//type 34
   void *Addr(){return fV;}
