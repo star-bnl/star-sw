@@ -95,9 +95,9 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
   seededClusAlgo->setJumpSingleStrip(true); // if a strip in cluster has no charge 
   myMk->setClusterAlgo( seededClusAlgo );
   cout <<"1" <<endl;
-  StFgtAVEfficiencyMaker* effMkr=new StFgtAVEfficiencyMaker("FgtAVEfficiencyMaker");
+  //  StFgtAVEfficiencyMaker* effMkr=new StFgtAVEfficiencyMaker("FgtAVEfficiencyMaker");
   //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
-  //  fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
+    fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
   //   fgtGenPlotter = new StFgtGenPlotter( "genPlotter" );
 
    // debug
