@@ -30,5 +30,5 @@ for(Int_t i=1;i<h->GetNbinsX()-1;i++)
       }
   }
 //cout <<"avg eff: " << eff/count <<endl;
-cout <<"avg eff: " << eff/overallErr <<endl;
+ cout <<"avg eff: " << eff/overallErr <<" +- "<< sqrt(1/overallErr)<<endl;
 }
