@@ -358,23 +358,23 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
       if(maxRCharge> 1000 && maxPhiCharge>1000 && iD==DISK_EFF)// && (float)pStrips[iD*4+iq][maxRInd].charge)
 	{
 	  StFgtGeom::getPhysicalCoordinate((float)pStrips[iD*4+iq][maxRInd].geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
-	  if(ordinate>20)
+	  //  if(ordinate>20)
 	    {
 	      chargeCorrMaxStrip->Fill(maxRCharge,maxPhiCharge);
 	      chargeCorrMaxAdc->Fill(maxRAdc,maxPAdc);
-
-	  if(maxRInd>0 && maxPInd>0 && maxRInd< pStrips[iD*4+iq].size()&& maxPInd < pStrips[iD*4+iq].size())
-	    {
-	      float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
-	      float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
-	      chargeCorrSum3->Fill(intRCharge,intPCharge);
-	    }
+	      
+	      if(maxRInd>0 && maxPInd>0 && maxRInd< pStrips[iD*4+iq].size()&& maxPInd < pStrips[iD*4+iq].size())
+		{
+		  float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
+		  float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
+		  chargeCorrSum3->Fill(intRCharge,intPCharge);
+		}
 	    }
 	}
       //	  if(iD==2 && iq==1 && (float)pStrips[iD*4+iq][maxRInd].pedErr>0)
-
-
-
+      
+      
+      
       if(partOfClusterR&& partOfClusterP && iD==DISK_EFF)
 	{
 	  chargeCorrInEffDisk->Fill(clusterChargeR,clusterChargeP);
