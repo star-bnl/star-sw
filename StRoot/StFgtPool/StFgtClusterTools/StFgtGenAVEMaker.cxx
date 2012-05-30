@@ -25,13 +25,13 @@
 
 
 //max num clusters any disk is allowed to have
-#define MAX_CLUSTERS 1000
+#define MAX_CLUSTERS 10
 #define CHARGE_MEASURE clusterCharge
 #define MAX_DIST_STRIP_R 0.7
 #define MAX_DIST_STRIP_PHI 0.03
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
-#define LEN_CONDITION
-//#define PULSE_CONDITION
+//#define LEN_CONDITION
+#define PULSE_CONDITION
 //#define DO_PRINT
 
 #include "StRoot/StEvent/StEvent.h"
@@ -42,7 +42,7 @@
 #define MAX_CHARGE_RATIO
 #define MIN_CHARGE_RATIO
 
-#define DISK_EFF 10
+#define DISK_EFF 2
 #define QUAD_EFF 1
 #define MY_PI 3.14159
 //#define  REFIT_WITH_VERTEX
@@ -990,13 +990,6 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		    //		    cout << " not found, dist is:" <<findClosestStrip('P',phi,i,quad) <<endl;
 		    radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
 		  }
-
-
-
-		///
-
-
-
 		Double_t closestPoint=findClosestPoint(xExp,yExp,i);
 		//		cout <<"cloest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
 		if(findClosestPoint(xExp,yExp,i)<MAX_DIST2_EFF)
@@ -1732,39 +1725,53 @@ counter++;
 
   TCanvas cIPProj;
   hIp->Draw("colz");
+  hIp->Write();
   cIPProj.SaveAs("ipProj.png");
 
   hBx->Draw();
+  hBx->Write();
   cIPProj.SaveAs("hBx.png");
   hBy->Draw();
+  hBy->Write();
   cIPProj.SaveAs("hBy.png");
   hMx->Draw();
+  hMx->Write();
   cIPProj.SaveAs("hMx.png");
   hMy->Draw();
+  hMy->Write();
   cIPProj.SaveAs("hMy.png");
 
   
   hIpZ->Draw();
+  hIpZ->Write();
   cIPProj.SaveAs("ipZ.png");
 
 
   hIpDca->Draw();
+  hIpDca->Write();
   cIPProj.SaveAs("ipDca.png");
 
   hTrkZ->Draw();
+  hTrkZ->Write();
   cIPProj.SaveAs("hTrkZ.png");
 
   hResidua->Draw();
+  hResidua->Write();
   cIPProj.SaveAs("hResidua.png");
 
   hChi2->Draw();
+  hChi2->Write();
   cIPProj.SaveAs("chi2Dist.png");
 
   tpcFgtZVertexCorr->Draw("colz");
+  tpcFgtZVertexCorr->Write();
   cIPProj.SaveAs("tpcFgtCorr.png");
+
   tpcFgtZVertexCorr2->Draw("colz");
+  tpcFgtZVertexCorr2->Write();
   cIPProj.SaveAs("tpcFgtCorr2.png");
   tpcFgtZVertexCorr3->Draw("colz");
+  tpcFgtZVertexCorr3->Write();
   cIPProj.SaveAs("trackTrackZCorr.png");
 
 
@@ -1878,7 +1885,7 @@ counter++;
 	}
       rEff[iD]->Draw();
     }
-  f1->Close();
+
   cRadio->SaveAs("radioPlotsEff.png");
   cRadio->SaveAs("radioPlotsEff.pdf");
 
@@ -1905,7 +1912,9 @@ counter++;
 
   cRPRatio->SaveAs("rpRatio.png");
   cRPRatio->SaveAs("rpRatio.pdf");
+  f1->Write();
   ////this has to be the last thing!!!! Otherwise the histos become invalid and the code seg faults...
+  f1->Close();
   myRootFile->Write();
   myRootFile->Close();
   cout <<"returning after finish" <<endl;
@@ -1935,7 +1944,7 @@ Int_t StFgtGenAVEMaker::Init(){
   chargeRatioInEffDisk->SetMaximum(2.0);
   chargeAsymInEffDisk=new TH2D("chargeAsymInEffDisk","chargeAsymInEffDisk",NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
   chargeAsymInEffDisk->SetMaximum(1.0);
-  chargeCorrInEffDisk=new TH2D("chargeCorrInEffDisk","chargeCorrInEffDisk",50,0,50000,50,0,50000);
+  chargeCorrInEffDisk=new TH2D("chargeCorrInEffDisk","chargeCorrInEffDisk",500,0,50000,500,0,50000);
   hChargeAsym=new TH1D("chargeAsym","chargeAsym",100,0,50);
   hChargeRatio=new TH1D("chargeRatio","chargeRatio",100,0,50);
 
