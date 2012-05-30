@@ -159,6 +159,8 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 {
   bool partOfClusterP=false;
   bool partOfClusterR=false;
+  Double_t clusterChargeR=-9999;
+  Double_t clusterChargeP=-9999;
       Double_t maxRCharge=-9999;
       Double_t maxPhiCharge=-9999;
       Double_t maxRChargeUncert=-9999;
@@ -205,9 +207,15 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 		  if(pStrip.charge>maxPhiCharge)
 		    {
 		      if(pStrip.seedType==kFgtSeedType1|| pStrip.seedType==kFgtSeedType2 || pStrip.seedType==kFgtSeedType3 || pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
-			partOfClusterP=true;
+			{
+			  partOfClusterP=true;
+			  clusterChargeP=findCluCharge(iD,'P',ordinate);
+			}
 		      else
-			partOfClusterP=false;
+			{
+			  partOfClusterP=false;
+			  clusterChargeP=-9999;
+			}
 		      maxPhiCharge=pStrip.charge;
 		      maxPhiChargeUncert=pStrip.chargeUncert;
 		      maxPInd=i;
@@ -244,9 +252,15 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 		  if(pStrip.charge>maxRCharge)
 		    {
 		      if(pStrip.seedType==kFgtSeedType1|| pStrip.seedType==kFgtSeedType2 || pStrip.seedType==kFgtSeedType3 || pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
-			partOfClusterR=true;
+			{
+			  clusterChargeR=findCluCharge(iD,'R',ordinate);
+			  partOfClusterR=true;
+			}
 		      else
-			partOfClusterR=false;
+			{
+			  clusterChargeR=-9999;
+			  partOfClusterR=false;
+			}
 
 		      maxRCharge=pStrip.charge;
 		      maxRInd=i;
@@ -351,9 +365,12 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 
 
 
+      if(partOfClusterR&& partOfClusterP)
+	{
+	  chargeCorrInEffDisk->Fill(clusterChargeP,clusterChargeR);
 
-
-
+	}
+      
       if(partOfClusterP)
 	{
 	  firstTbSigTrackClusterP[iD*4+iq]->Fill(firstTbSigP);
@@ -509,7 +526,41 @@ Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t i
 	}
       return false;
 }
+Double_t StFgtGenAVEMaker::findCluCharge(Int_t iD,Char_t layer, Double_t ordinate)
+{
+  if(iD<0 || iD >5)
+    {
+      return -99999;
+    }
+  vector<generalCluster> &hitVec=*(pClusters[iD]);
+  Double_t charge=-99999;
+  Double_t minDist=99999;
+  for(vector<generalCluster>::iterator it=hitVec.begin();it!=hitVec.end();it++)
+    {
+      if(it->layer!=layer)
+	continue;
+      Float_t ord=-9999;
+      if(layer=='R')
+	{
+	  ord=it->posR;
+	}
+      else
+	{
+	  ord=it->posPhi;
+	  if(fabs(ordinate-(ord+MY_PI))<fabs(ord-ordinate))
+	    ord=ord+MY_PI;
+	  if(fabs(ordinate-(ord-MY_PI))<fabs(ord-ordinate))
+	    ord=ord-MY_PI;
+	}
 
+      if(fabs(ordinate-ord)<minDist)
+	{
+	  charge=it->clusterCharge;
+	  minDist=fabs(ordinate-ord);
+	}
+    }
+  return charge;
+}
 
 Double_t StFgtGenAVEMaker::findClosestPoint(double xE, double yE, Int_t iD)
 {
@@ -997,6 +1048,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		    //		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<endl;
 		    radioPlotsEff[i]->Fill(xExp,yExp);
 		    hResidua->Fill(sqrt(closestPoint));
+		    //		    chargeCorrInEffDisk->Fill(rPhiRatio.first,rPhiRatio.second);
 		  }
 		else
 		  {
@@ -1004,7 +1056,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		    radioPlotsNonEff[i]->Fill(xExp,yExp);
 		  }
 		pair<Double_t,Double_t> rPhiRatio=getChargeRatio(r,phi,i,quad);
-		chargeCorrInEffDisk->Fill(rPhiRatio.first,rPhiRatio.second);
+
 		if(rPhiRatio.first>0 && rPhiRatio.second>0)
 		  {
 		    double asym=fabs((Double_t)1-rPhiRatio.first/rPhiRatio.second);

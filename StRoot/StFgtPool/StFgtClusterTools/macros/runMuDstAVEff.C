@@ -12,6 +12,7 @@ StChain            *analysisChain = 0;
 StMuDstMaker       *muDstMaker    = 0;
 StFgtGenPlotter    *fgtGenPlotter     = 0;
 StFgtGenAVEMaker    *fgtAVEffMkr     = 0;
+StFgtDbMaker *fgtDbMkr=0;
 
 void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
                              Int_t neventsIn = 50 ){
@@ -144,8 +145,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.2 2012/05/25 00:36:11 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.3 2012/05/30 13:38:35 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.3  2012/05/30 13:38:35  avossen
+*** empty log message ***
+
 Revision 1.2  2012/05/25 00:36:11  avossen
 made fit for stevent reading
 
