@@ -155,12 +155,18 @@ Double_t StFgtGenAVEMaker::findClosestStrip(Char_t layer, double ord, Int_t iD, 
 }
 
 
+///careful here if called for every disk. The function now checks for chargeCorr, cluster size histos if it is you are 
+///looking at DISK_EFF and only fills then. Assuming that for the other discs you use the points from the found tracks
 void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
   bool partOfClusterP=false;
   bool partOfClusterR=false;
   Double_t clusterChargeR=-9999;
   Double_t clusterChargeP=-9999;
+
+  Double_t mClusterSizeP=-9999;
+  Double_t mClusterSizeR=-9999;
+
       Double_t maxRCharge=-9999;
       Double_t maxPhiCharge=-9999;
       Double_t maxRChargeUncert=-9999;
@@ -209,7 +215,9 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 		      if(pStrip.seedType==kFgtSeedType1|| pStrip.seedType==kFgtSeedType2 || pStrip.seedType==kFgtSeedType3 || pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
 			{
 			  partOfClusterP=true;
-			  clusterChargeP=findCluCharge(iD,'P',ordinate);
+			  pair<Double_t, Double_t> cluSize=findCluChargeSize(iD,'P',ordinate);
+			  clusterChargeP=cluSize.first;
+			  mClusterSizeP=cluSize.second;
 			}
 		      else
 			{
@@ -253,8 +261,10 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 		    {
 		      if(pStrip.seedType==kFgtSeedType1|| pStrip.seedType==kFgtSeedType2 || pStrip.seedType==kFgtSeedType3 || pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
 			{
-			  clusterChargeR=findCluCharge(iD,'R',ordinate);
 			  partOfClusterR=true;
+			  pair<Double_t, Double_t> cluSize=findCluChargeSize(iD,'R',ordinate);
+			  clusterChargeR=cluSize.first;
+			  mClusterSizeR=cluSize.second;
 			}
 		      else
 			{
@@ -345,7 +355,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	}
 
 
-      if(maxRCharge> 1000 && maxPhiCharge>1000)// && (float)pStrips[iD*4+iq][maxRInd].charge)
+      if(maxRCharge> 1000 && maxPhiCharge>1000 && iD==DISK_EFF)// && (float)pStrips[iD*4+iq][maxRInd].charge)
 	{
 	  StFgtGeom::getPhysicalCoordinate((float)pStrips[iD*4+iq][maxRInd].geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
 	  if(ordinate>20)
@@ -365,11 +375,15 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 
 
 
-      if(partOfClusterR&& partOfClusterP)
+      if(partOfClusterR&& partOfClusterP && iD==DISK_EFF)
 	{
-	  chargeCorrInEffDisk->Fill(clusterChargeP,clusterChargeR);
-
+	  chargeCorrInEffDisk->Fill(clusterChargeR,clusterChargeP);
+	  chargeCorr[iD*4+iq]->Fill(clusterChargeR,clusterChargeP);
+	  //basically only here we fill with the estimated cluster, for the other disks we fill with the cluster on the track
+	  clusterSizeR[iD*4+iq]->Fill(mClusterSizeR);
+	  clusterSizeP[iD*4+iq]->Fill(mClusterSizeP);
 	}
+
       
       if(partOfClusterP)
 	{
@@ -526,14 +540,15 @@ Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t i
 	}
       return false;
 }
-Double_t StFgtGenAVEMaker::findCluCharge(Int_t iD,Char_t layer, Double_t ordinate)
+pair<Double_t,Double_t> StFgtGenAVEMaker::findCluChargeSize(Int_t iD,Char_t layer, Double_t ordinate)
 {
   if(iD<0 || iD >5)
     {
-      return -99999;
+      return pair<Double_t,Double_t>(-99999,-99999);
     }
   vector<generalCluster> &hitVec=*(pClusters[iD]);
   Double_t charge=-99999;
+  Double_t cluSize=-9999;
   Double_t minDist=99999;
   for(vector<generalCluster>::iterator it=hitVec.begin();it!=hitVec.end();it++)
     {
@@ -556,10 +571,11 @@ Double_t StFgtGenAVEMaker::findCluCharge(Int_t iD,Char_t layer, Double_t ordinat
       if(fabs(ordinate-ord)<minDist)
 	{
 	  charge=it->clusterCharge;
+	  cluSize=it->clusterSize;
 	  minDist=fabs(ordinate-ord);
 	}
     }
-  return charge;
+  return pair<Double_t,Double_t>(charge,cluSize);
 }
 
 Double_t StFgtGenAVEMaker::findClosestPoint(double xE, double yE, Int_t iD)
@@ -951,7 +967,11 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	  //	  cout <<"get track10-3, " << iterP->dID<<" quad: " << iterP->quadID << endl;
 	  //	  cout <<" filling disk " << iterP->dID <<" quad " << iterP->quadID <<" with r charge: " << iterP->rCharge <<" phic " << iterP->phiCharge<<endl;
 	  if(iterP->r>20)
-	    chargeCorr[iterP->dID*4+iterP->quadID]->Fill(iterP->rCharge,iterP->phiCharge);
+	    {
+	      chargeCorr[iterP->dID*4+iterP->quadID]->Fill(iterP->rCharge,iterP->phiCharge);
+	      clusterSizeP[iterP->dID*4+iterP->quadID]->Fill(iterP->phiSize);
+	      clusterSizeR[iterP->dID*4+iterP->quadID]->Fill(iterP->rSize);
+	    }
 	  //	  cout <<"get track10-31" <<endl;
 	  h_clusterChargeR[iterP->dID]->Fill(iterP->rCharge);
 	  //	  cout <<"get track10-4" <<endl;
@@ -1838,6 +1858,8 @@ counter++;
 	  cChargeCorr->cd(iD*4+iq+1);
 	  chargeCorr[iD*4+iq]->Draw("colz");
 	  chargeCorr[iD*4+iq]->Write();
+	  clusterSizeR[iD*4+iq]->Write();
+	  clusterSizeP[iD*4+iq]->Write();
 	}
       cClusterChargeR->cd(iD+1);
       h_clusterChargeR[iD]->Draw();
@@ -2081,6 +2103,8 @@ Int_t StFgtGenAVEMaker::Init(){
   rNonEff=new TH1D*[kFgtNumDiscs];
   cout <<"ave2" << endl;
 
+  clusterSizeP=new TH1D*[kFgtNumDiscs*4];
+  clusterSizeR=new TH1D*[kFgtNumDiscs*4];
   chargeCorr=new TH2D*[kFgtNumDiscs*4];
   h_clusterSizeR=new TH1D*[kFgtNumDiscs];
   h_clusterSizePhi=new TH1D*[kFgtNumDiscs];
@@ -2147,8 +2171,12 @@ Int_t StFgtGenAVEMaker::Init(){
       //      cout <<"3" <<endl;
       for(int iq=0;iq<4;iq++)
 	{
-	  sprintf(buffer,"r_phi_ChargeCorrelationInDisk_%d_quad_%d",iD,iq);
+	  sprintf(buffer,"r_phi_ChargeCorrelationInDisk_%d_quad_%d",iD+1,iq);
 	  chargeCorr[iD*4+iq]=new TH2D(buffer,buffer,200,0,70000,200,0,70000);
+	  sprintf(buffer,"clusterSizeRInDisk_%d_quad_%d",iD+1,iq);
+	  clusterSizeR[iD*4+iq]=new TH1D(buffer,buffer,100,0,100);
+	  sprintf(buffer,"clusterSizePInDisk_%d_quad_%d",iD+1,iq);
+	  clusterSizeP[iD*4+iq]=new TH1D(buffer,buffer,100,0,100);
 	}
       sprintf(buffer,"radioDiskNonEff_%d",iD);
       radioPlotsNonEff[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
