@@ -14,9 +14,9 @@
 #include "StarClassLibrary/StThreeVectorF.hh"
 
 #include <set>
-
+#define FILL_FROM_EVENT
 //#define ONE_HIT_PER_QUAD
-#define USE_VTX
+//#define USE_VTX
 
 StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), evtNr(0)
 {
@@ -135,9 +135,11 @@ Int_t StFgtGeneralBase::Make()
       pStrips[i].clear();
     }
   //  cout << " done" <<endl;
-
-  //fillFromStEvent();
+#ifdef FILL_FROM_EVENT
+  fillFromStEvent();
+#else
    fillFromMuDst();
+#endif
     mapGeoId2Cluster.clear();
   return ierr;
 }
@@ -146,24 +148,19 @@ Int_t StFgtGeneralBase::Make()
 Int_t StFgtGeneralBase::fillFromStEvent()
 {
    Int_t ierr = kStFatal;
-
    StEvent* eventPtr = 0;
    StFgtCollection *fgtCollectionPtr = 0;
    StFgtHitCollection *fgtHitColPtr = 0;
 
    eventPtr = (StEvent*)GetInputDS("StEvent");
-
    if( eventPtr ) {
       fgtCollectionPtr = eventPtr->fgtCollection();
-
       if( fgtCollectionPtr ){
          // got this far, so flag that this is the right input.
          ierr = kStOk;
-
          // loop over discs
          for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc ){
             fgtHitColPtr = fgtCollectionPtr->getHitCollection( disc );
-	    cout <<"looking at disc: " << disc<<endl;
             if( fgtHitColPtr ){
                const StSPtrVecFgtHit& hitVec = fgtHitColPtr->getHitVec();
                StSPtrVecFgtHitConstIterator hitIter;
@@ -189,14 +186,13 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		   //				  Int_t clusterSizePhi=(*hitIter)->getStripWeightMap().size();
 		   Int_t clusterSize=(*hitIter)->getStripWeightMap().size();
 		   Double_t clusterCharge=(*hitIter)->charge();
-		   cout <<"pushing into " << disc <<endl;
 		   pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge));
 		   mapGeoId2Cluster[geoId]=((pClusters[disc]->size()-1));
 		 }
             };
          }
 
-	 cout <<" done with hits" << endl;
+
 	 ///////////////////////
          for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc )
 	   {
@@ -247,7 +243,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 	       }
 	   }
 
-	 cout <<"done with strips " <<endl;
+
 	 for(int iDx=0;iDx<6;iDx++)
 	   {
 	     vector<generalCluster>::iterator it=pClusters[iDx]->begin();
