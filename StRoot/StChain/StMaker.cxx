@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.249 2012/04/27 00:17:45 perev Exp $
+// $Id: StMaker.cxx,v 1.250 2012/05/31 21:54:36 fisyak Exp $
 //
 //
 /*!
@@ -266,14 +266,16 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2010b",      20091215,     2, "y2010b",   "TOF fix & TPCE redused"},
   {"y2010c",      20091215,     3, "y2010c",   "Honey sandwich fix"},
   {"y2011",       20101215,     0, "y2011",    "y2011 TOF fix & TPCE redused & honey"},
-  {"y2011a",      20101215,     1, "y2011a",    "y2011a == y2011 now "},
+  {"y2011a",      20101215,     1, "y2011a",   "y2011a == y2011 now "},
   {"y2012",       20111215,     0, "y2012",    "y2012 Very preliminary"},
+  {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
   //  {"complete",    20190101,     1, "complete", "non-production"},
   //  {"ist1",        20190101,     2, "ist1",     "non-production"},
   //  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
+  {"devT",        20170101,     1, "devT",      "dev geo for Inner Tpc Sector Upgrade, Variant 1"}, // 
   {"upgr01",      20190101,     4, "upgr01",   ""},
   {"upgr02",      20190101,     5, "upgr02",   ""},
   {"upgr03",      20190101,     6, "upgr03",   ""},
@@ -1943,6 +1945,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.250  2012/05/31 21:54:36  fisyak
+// Add y2012a and devT geometry tags
+//
 // Revision 1.249  2012/04/27 00:17:45  perev
 // Cleanup
 //
