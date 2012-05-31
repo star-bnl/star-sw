@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.242 2012/05/07 21:44:06 jwebb Exp $
+* $Id: geometry.g,v 1.243 2012/05/31 20:57:28 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.243  2012/05/31 20:57:28  jwebb
+* Added y2012a production tag
+*
 * Revision 1.242  2012/05/07 21:44:06  jwebb
 * Added "devT" geometry tag for TPC upgrade studies.
 *
@@ -1867,9 +1870,11 @@ REPLACE [exe y2011a;] with ["y2011a: Pro.  consistent with production series P11
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
 ]
+
+c ===============================================================================
+c ===============================================================================
 c ===============================================================================
 
-!$$$    [exe upgr2012;] with [exe y2012;]   upgrade 2012 retired
 REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
     exe BTOF67;      "time of flight";
@@ -1892,6 +1897,30 @@ REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe FGTDv31;     "FGT v3 5 half + 1 full disks";
 ]
 
+REPLACE [exe y2012a;] with ["y2012a production geometry tag";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD05;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+    exe IDSM01;      "Inner detector support";
+    exe FGTDv31;     "FGT v3 5 half + 1 full disks";
+]
+
+c ===============================================================================
+c ===============================================================================
+c ===============================================================================
 
 REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
@@ -2720,6 +2749,10 @@ If LL>0
   Case y2012 { y2012 : Y2012 geometry first cut;
                  Geom = 'y2012   ';
                  exe y2012; }
+
+  Case y2012a { y2012a : Y2012a production geometry tag;
+                 Geom = 'y2012a  ';
+                 exe y2012a; }
 
   Case dev13 { dev13 : y2013 studies;
                  Geom = 'dev13   ';

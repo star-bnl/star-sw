@@ -6,7 +6,8 @@
 
 <!-- 
   [1] Force AgML recompilation of xgeometry.xml
-  [2] Added devT tag to geometry.g... force recompilation...
+  [2] Added devT   tag to geometry.g
+  [3] Added y2012a tag to geometry.g
   -->
 
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
