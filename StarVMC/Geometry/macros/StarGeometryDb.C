@@ -924,6 +924,35 @@ void y2012()
     geom.fill();
   };
 
+  geom.select = "y2012a"; {
+    // ================================================ 
+    geom.caveFlag = "CAVE04";  geom.caveStat = 1;
+    // ================================================ 
+    geom.sconFlag = "SCONof"; geom.sconStat = 0;
+    geom.ftroFlag = "FTROof"; geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof"; geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof"; geom.svttStat = 0;
+    geom.phmdFlag = "PHMDof"; geom.phmdStat = 0;
+    // ================================================ 
+    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
+    geom.btofFlag = "BTOF67";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1;
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD04";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPE12";  geom.pipeStat = 1;
+    setTitle("First cut");
+    // ================================================ 
+    geom.idsmFlag = "IDSM01";   geom.idsmStat = 1;
+    geom.fgtdFlag = "FGTD31";   geom.fgtdStat=1;
+    // ================================================ 
+    setTitle("y2012a production geometry tag");
+    geom.fill();
+  };
+
+
 }
 
 void dev13()
