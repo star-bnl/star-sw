@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcSectorHitCollection.h,v 2.6 2012/05/16 21:35:03 fisyak Exp $
+ * $Id: StTpcSectorHitCollection.h,v 2.7 2012/06/01 14:18:38 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcSectorHitCollection.h,v $
+ * Revision 2.7  2012/06/01 14:18:38  fisyak
+ * Increment version to account change in max. no. of pad rows
+ *
  * Revision 2.6  2012/05/16 21:35:03  fisyak
  * replace StDigitalPair by its reference
  *
@@ -57,6 +60,6 @@ private:
     enum { mNumberOfPadrows = 100 }; // Keep in mind that it could be changed
     StTpcPadrowHitCollection mPadrows[mNumberOfPadrows];
     
-    ClassDef(StTpcSectorHitCollection,1)
+    ClassDef(StTpcSectorHitCollection,2)
 };
 #endif
