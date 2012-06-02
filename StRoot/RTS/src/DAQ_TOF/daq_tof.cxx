@@ -273,7 +273,7 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	int in_words = words ;
 
 	int err = 0 ;
-	int trg_start ;
+	int trg_start = -1 ;
 
 	w = (u_int *)addr ;
 	words-- ;	// point to last datum now...
@@ -427,3 +427,4 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	return t_cou ;
 }
+
