@@ -702,7 +702,7 @@ int tpxPed::hlt_debug_setup(int param)
 int tpxPed::special_setup(int run_type, int sub_type)
 {
 	int r, p, t ;
-	int m ;
+//	int m ;
 
 	switch(run_type) {
 	case RUN_TYPE_PULSER_A :
@@ -762,6 +762,9 @@ int tpxPed::special_setup(int run_type, int sub_type)
 
 			break ;
 		case RUN_TYPE_PED_B :	// starts with ped=1
+
+
+/* don't know what this was...
 			m = 1 ;			
 			for(t=0;t<512;) {
 				for(int i=0;i<16;i++) {
@@ -771,6 +774,11 @@ int tpxPed::special_setup(int run_type, int sub_type)
 				else m = 0 ;
 				t += 16 ;
 			}
+*/
+
+			// use the first timebin for all...
+			for(t=1;t<512;t++) ped->ped[t] = ped->ped[0] ;
+
 			break ;
 		default :	// some pattern
 			for(t=0;t<512;t++) ped->ped[t] = 1023.0 ;	// kill all

@@ -354,6 +354,8 @@ int daq_tpx::InitRun(int run)
 		LOG(NOTE,"Using externally generated gains") ;
 		gain_algo->init(0) ;
 		while(g->iterate()) {
+			if(g->row > 45) continue ;	// NO iTPX yet!
+
 			LOG(DBG,"\tsec %d, row %d: %d",g->sec,g->row,g->ncontent) ;
 			int max_pad = tpc_rowlen[g->row] ;
 			if((int)g->ncontent > max_pad) {
