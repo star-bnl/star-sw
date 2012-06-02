@@ -44,6 +44,7 @@ extern inline int daq100Decision(int t, u_int daq_cmd, u_int run_type, u_int cl_
 	// special run types override
 	switch(run_type) {
 	case RUN_TYPE_PULSER :
+	case RUN_TYPE_PED_B :	// misc tests...
 //	case RUN_TYPE_LASER :	// Tonko: removed laser on Apr 14, 2009
 		fmt = 1 ;
 		break ;
