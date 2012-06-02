@@ -16,14 +16,54 @@
 #include <signal.h>
 #include <errno.h>
 
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 #define CONNECT_WAIT 5
 
 static char tbuff[10240] ;
 
 
+struct daqman_shared_t {
+	u_int run_number ;
 
+} ;
 
+void *map_shared()
+{
+	int shmid = shmget(0xFD000001, 128*1024,0777 | IPC_CREAT | IPC_EXCL) ;
+	if((shmid == -1) && (errno != EEXIST)) return 0 ;	//error
+
+	if(shmid == -1) {	// already exists...
+		shmid = shmget(0xFD000001,0,0) ;
+		if(shmid == -1) return 0 ;	
+	}
+
+	void *vptr = (void *)shmat(shmid,0,0) ;
+
+	if(vptr == ((void *)-1)) vptr = 0 ;
+
+	return vptr ;
+}
+
+u_int get_run_tick(char *buff)
+{
+	if(strstr(buff,"RUN_TICK")) {
+		syslog(LOG_INFO,"Got run-tick [%s]\n",buff) ;
+
+		char *s_run = strstr(buff,"Run") ;
+		if(s_run) {
+			u_int run = 0 ;
+
+			s_run += 4 ;
+			sscanf(s_run,"%u",&run) ;
+			syslog(LOG_INFO,"Extracted [%u]\n",run) ;
+		}
+
+	}
+
+	return 0 ;
+}
 
 
 #ifdef __sun
@@ -45,6 +85,8 @@ int main(int argc, char *argv[])
 	static char hname[256], hname_short[256] ;
 	struct hostent *hent ;
 	int testing = 0 ;
+	int is_handler = 0 ;
+	char *just_file ;
 
 	if(argc > 3) {
 		fprintf(stderr,"Usage: %s <file> [port]\n",argv[0]) ;	
@@ -58,8 +100,27 @@ int main(int argc, char *argv[])
 	}
 	else port = 0 ;
 
-	if(port) syslog(LOG_INFO,"Started on port %d, file %s\n",port,argv[1]) ;
-	else syslog(LOG_INFO,"Started on stdin, file %s\n",argv[1]) ;
+	daqman_shared_t *daqman_shared = (daqman_shared_t *) map_shared() ;
+
+	if(strstr(argv[1],"handler")) is_handler = 1 ;
+
+	{
+		char *ctmp = rindex(argv[1]) ;
+		if(ctmp) {
+			ctmp++ ;
+			
+			just_file = ctmp ;
+		}
+		else {
+			just_file = "unkown.log" ;
+		}
+	}
+
+	if(port) syslog(LOG_INFO,"Started on port %d, file %s, segment %p, is_handler %d, just_file [%s]\n",port,argv[1],daqman_shared,is_handler,just_file) ;
+	else syslog(LOG_INFO,"Started on stdin, file %s, segment %p, is_handler %d, just_file [%s]\n",argv[1],daqman_shared,is_handler,just_file) ;
+
+
+	
 
 	cSize = sizeof(cAddr) ;
 
@@ -103,12 +164,17 @@ int main(int argc, char *argv[])
 
 		int first = 1 ;
 
+		u_int old_run = 0 ;
+		
 		for(;;) {
+			u_int run ;
+
 			int i, j ;
 //			int *counter = (int *)buffer ;
  
 			ret = recvfrom(s,buffer,sizeof(tbuff)-pre_len-10,0,
 				       (struct sockaddr *)&cAddr, (socklen_t *)&cSize) ;
+
 
 			i = (inet_lnaof(cAddr.sin_addr) & 0xFF00) >> 8 ;
 			j = inet_lnaof(cAddr.sin_addr) & 0xFF ;
@@ -116,6 +182,29 @@ int main(int argc, char *argv[])
 			// sanity...
 			tbuff[sizeof(tbuff)-1] = 0 ;	// just to make sure that strlen will work!
 			
+
+			*(buffer+ret) = 0 ;
+
+			// extract run_tick!
+			if(is_handler) {
+				u_int new_run = get_run_tick(buffer+4) ;
+				if(new_run && daqman_shared) {
+					daqman_shared->run_number = new_run ;	
+				}
+			}
+
+
+			if(daqman_shared) {
+				run = daqman_shared->run_number ;
+
+				if(run != old_run) {
+
+
+				}
+			}
+			else {
+				run = 0 ;
+			}
 
 			hent = gethostbyaddr((char *)&cAddr.sin_addr,4,AF_INET) ;
 			// testing!
@@ -186,6 +275,7 @@ int main(int argc, char *argv[])
 				}
 				first = 0;
 				write(fd,tbuff,len+1) ;
+
 			}
 
 		}
