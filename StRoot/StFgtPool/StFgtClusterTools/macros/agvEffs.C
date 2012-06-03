@@ -24,7 +24,7 @@ StFgtGenAVEMaker    *fgtAVEffMkr     = 0;
 ///star/data03/daq/2012/061/13061024fR/st_fgt_13061024_raw_1340001.daq",
 int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/st_physics_13064033_raw_1010001.daq",
 		       Int_t runnumber = 13064033,
-                       Int_t nevents = 100,
+	     Int_t nevents = 100, Int_t effDisk=2,
 	     Bool_t cutShortEvents = 1 ){
    LoadLibs();   
 
@@ -98,6 +98,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
   //  StFgtAVEfficiencyMaker* effMkr=new StFgtAVEfficiencyMaker("FgtAVEfficiencyMaker");
   //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
     fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
+    fgtAVEffMkr->SetEffDisk(effDisk);
   //   fgtGenPlotter = new StFgtGenPlotter( "genPlotter" );
 
    // debug
