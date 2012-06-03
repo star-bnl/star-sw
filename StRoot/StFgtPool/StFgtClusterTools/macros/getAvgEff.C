@@ -2,8 +2,8 @@
 void getAvgEff()
 {
   gStyle->SetPalette(1);
-  // TFile f("rootOut/mrgSignalShapes.root");
-  TFile f("signalShapes.root");
+   TFile f("rootOut/mrgSignalShapes.root");
+  //TFile f("signalShapes.root");
  TH2D* h=(TH2D*)f.Get("radioDiskEffLoose_2");
  TH2D* hEff=(TH2D*)f.Get("allCountsLooseDisk_3");//counting different for this histo
  TH2D* hNonEff=(TH2D*)f.Get("radioDiskNonEffLoose_2");
@@ -55,8 +55,13 @@ for(Int_t i=1;i<h->GetNbinsX()+1;i++)
       }
   }
  TCanvas c;
+ char buffer[100];
+ sprintf(buffer,"Average Efficiency is %f +- %f",eff/overallErr,sqrt(1/overallErr));
+ TLatex t1(-30,0,buffer);
  OverallEff.Draw("colz");
+ t1.Draw();
  c.SaveAs("overallEff.png");
+ c.SaveAs("overallEff.C");
 //cout <<"avg eff: " << eff/count <<endl;
  cout <<"avg eff: " << eff/overallErr <<" +- "<< sqrt(1/overallErr)<<endl;
 }
