@@ -1,5 +1,5 @@
 
-void saveSignalChar(Char_t* signalFile="signalShapes.root")
+void saveSignalChar(Char_t* f="signalShapes.root")
 {
   TFile f(signalFile);
   Char_t buffer[100];
