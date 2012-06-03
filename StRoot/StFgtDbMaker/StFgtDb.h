@@ -11,6 +11,7 @@
 
 #include <cstdlib>
 #include "tables/St_fgtElosCutoff_Table.h"
+#include "tables/St_fgtSimuParams_Table.h"
 #include "tables/St_fgtPedestal_Table.h"
 #include "tables/St_fgtMapping_Table.h"
 #include "tables/St_fgtGain_Table.h"
@@ -44,7 +45,8 @@ class StFgtDb
 	    fgtStatus_st * status,
 	    fgtPedestal_st * pedestal,
 	    fgtGain_st * gain,
-	    fgtElosCutoff_st* mLossTab
+	    fgtElosCutoff_st* mLossTab,
+	    fgtSimuParams_st* mSimuParTab
 	)
 	{
 	    m_map = map;
@@ -53,6 +55,7 @@ class StFgtDb
 	    m_pedestal = pedestal;
 	    m_gain = gain;
 	    m_eLoss=mLossTab;
+	    m_simPar= mSimuParTab;
 	}
 
 	//----------------------------------------------------------
@@ -312,6 +315,12 @@ class StFgtDb
 	  return m_eLoss[0].cutoff[bin];
 	};
 
+	virtual Double_t getSimuParam(Int_t bin)
+	{
+	  return m_simPar[0].param[bin];
+	};
+
+
 	//dump of FGT status/peds/pedSigma for each strip
 	void printFgtDumpCSV1(TString fname, int myDate, int myTime);
 
@@ -325,7 +334,7 @@ class StFgtDb
 	fgtPedestal_st * m_pedestal;
 	fgtGain_st * m_gain;
 	fgtElosCutoff_st* m_eLoss;
-
+	fgtSimuParams_st* m_simPar;
 };
 
 

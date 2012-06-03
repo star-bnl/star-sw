@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.19 2012/03/19 01:18:52 rfatemi Exp $
+// $Id: StFgtDbMaker.cxx,v 1.20 2012/06/03 16:52:18 balewski Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 */
@@ -7,6 +7,7 @@
 #include "TDataSetIter.h"
 #include "StMessMgr.h"
 #include "tables/St_fgtElosCutoff_Table.h"
+#include "tables/St_fgtSimuParams_Table.h"
 #include "tables/St_fgtPedestal_Table.h"
 #include "tables/St_fgtMapping_Table.h"
 #include "tables/St_fgtGain_Table.h"
@@ -59,6 +60,8 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 
     ////start here
     St_fgtElosCutoff *eLossDataset=0;
+    St_fgtSimuParams *simuParamsDataset=0;
+
     St_fgtMapping * mapDataset = 0;
     St_fgtGain * gainDataset = 0;
     St_fgtPedestal * pedDataset = 0;
@@ -72,6 +75,16 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
       {
 	LOG_FATAL
 	  << "ERROR: no table found in db for eloss, or malformed local db config" 
+	  << endm;
+      }
+    
+    /// Go get database tables
+    LOG_INFO <<  "::RequestDataBase() for slow-simu params  ..."<< endl;    
+    TDataSet *SimuParamsDB = GetDataBase("Calibrations/fgt/fgtSimuParams");
+    if (!SimuParamsDB)
+      {
+	LOG_FATAL
+	  << "ERROR: no table found in db for slow-simu params , or malformed local db config" 
 	  << endm;
       }
     
@@ -110,7 +123,16 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
     Int_t rows = eLossDataset->GetNRows();
     if (rows > 1) 
       {
-	LOG_FATAL   << " found INDEXED table with " << rows
+	LOG_FATAL   << " found INDEXED fgtElosCutoff table with " << rows
+		    << " rows, this is fatal, fix DB content" << endm;
+      }
+    
+    
+    simuParamsDataset=(St_fgtSimuParams*)SimuParamsDB->Find("fgtSimuParams"); 
+    rows =simuParamsDataset->GetNRows();
+    if (rows > 1) 
+      {
+	LOG_FATAL   << " found INDEXED fgtSimuParams table with " << rows
 		    << " rows, this is fatal, fix DB content" << endm;
       }
     
@@ -149,7 +171,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
       }
     
     
-    if (pedDataset && statusDataset && mapDataset && gainDataset && eLossDataset)
+    if (pedDataset && statusDataset && mapDataset && gainDataset && eLossDataset && simuParamsDataset)
       {
 	if ( m_rmap )
 	  delete m_rmap;
@@ -169,7 +191,8 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    statusDataset->GetTable(),
 	    pedDataset->GetTable(),
 	    gainDataset->GetTable(),
-	    eLossDataset->GetTable()
+	    eLossDataset->GetTable(),
+	    simuParamsDataset->GetTable()
 	);
 
 	LOG_INFO
@@ -184,7 +207,8 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	displayBeginEndTime(statusDataset);
 	displayBeginEndTime(pedDataset);
 	displayBeginEndTime(gainDataset);
-	displayBeginEndTime(eLossDataset);
+	displayBeginEndTime(eLossDataset);  LOG_INFO <<eLossDataset->GetTable()->comment<<endl;
+	displayBeginEndTime(simuParamsDataset); LOG_INFO <<simuParamsDataset->GetTable()->comment<<endl;
 
     }
     else 
@@ -212,6 +236,11 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	if ( !eLossDataset )
 	{
 	    LOG_FATAL << Form("%s :: eLoss table failed,",GetName())
+		      << endm;
+	}
+	if ( !simuParamsDataset )
+	{
+	    LOG_FATAL << Form("%s :: SimuParams table failed,",GetName())
 		      << endm;
 	}
     }
@@ -270,6 +299,9 @@ Int_t StFgtDbMaker::Finish()
 
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.20  2012/06/03 16:52:18  balewski
+// added access to fgtSimuParam table, all I/O .C code is saved in macros
+//
 // Revision 1.19  2012/03/19 01:18:52  rfatemi
 // Modified for removal of StFgtDbImpl and StFgtDbIdealImpl
 //
