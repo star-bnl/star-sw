@@ -2,8 +2,9 @@
 void getAvgEff()
 {
   gStyle->SetPalette(1);
-   TFile f("rootOut/mrgSignalShapes.root");
-  //TFile f("signalShapes.root");
+  gStyle->SetOptStat(0);
+  // TFile f("rootOut/mrgSignalShapes.root");
+  TFile f("signalShapes.root");
  TH2D* h=(TH2D*)f.Get("radioDiskEffLoose_2");
  TH2D* hEff=(TH2D*)f.Get("allCountsLooseDisk_3");//counting different for this histo
  TH2D* hNonEff=(TH2D*)f.Get("radioDiskNonEffLoose_2");
@@ -14,7 +15,8 @@ void getAvgEff()
  // cout <<"max: " << max << " min: " << min << " numBins: "<< h->GetNbinsX() <<endl;
 
  TH2D OverallEff("overallEff","overallEff",h->GetNbinsX(),min,max,h->GetNbinsY(),min,max);
-
+ OverallEff.GetXaxis()->SetTitle("x [cm]");
+ OverallEff.GetYaxis()->SetTitle("y [cm]");
 Double_t eff=0;
 Int_t count=0;
 
