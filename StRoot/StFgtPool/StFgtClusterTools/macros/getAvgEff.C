@@ -1,5 +1,5 @@
 
-void getAvgEff(Char_t* signalFile="signalShapes.root")
+void getAvgEff(Char_t* signalFile="signalShapes.root", Bool_t onlyQuadB=true)
 {
   gStyle->SetPalette(1);
   gStyle->SetOptStat(0);
@@ -26,9 +26,11 @@ for(Int_t i=1;i<h->GetNbinsX()+1;i++)
     for(Int_t j=1;j<h->GetNbinsY()+1;j++)
       {
 	///do you only want to use Quad B?
-
-	if(i<(h->GetNbinsX()-1)/2|| j>(h->GetNbinsY()-1)/2)
-	  continue;
+	if(onlyQuadB)
+	  {
+	    if(i<(h->GetNbinsX()-1)/2|| j>(h->GetNbinsY()-1)/2)
+	      continue;
+	  }
 	//Int_t gBin=h->GetBin(i,j);
 	//	Double_t xpos=h->GetXaxis()->GetBinCenter(gBin);
 	//	Double_t ypos=h->GetYaxis()->GetBinCenter(gBin);
