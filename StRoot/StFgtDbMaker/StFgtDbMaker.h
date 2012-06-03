@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.15 2012/03/19 01:19:20 rfatemi Exp $
+// $Id: StFgtDbMaker.h,v 1.16 2012/06/03 16:52:18 balewski Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -13,6 +13,7 @@
 #include "StFgtUtil/geometry/StFgtGeom.h"
 
 class fgtElosCutoff_st;
+class fgtSimuParams_st;
 
 class StFgtDbMaker : public StMaker {
  
@@ -35,11 +36,14 @@ class StFgtDbMaker : public StMaker {
   virtual void setFlavor( const char *flav, const char *tabname );
 
   Float_t eLossTab(int bin); //  built from BichselELossProbHighBG.dat used to reject very high and unrealistic loss value
+  Double_t simuParams(int bin); // initialization of fgt-slow-simulator
+ 
   StFgtGeom *getFgtGeom(){ return m_geom;} 
 
 private:
 
   fgtElosCutoff_st *m_LossTab;
+  fgtSimuParams_st *m_simuParTab;
   StFgtGeom *m_geom;
   StFgtDb * m_tables;
   fgtMapping_st * m_rmap;
@@ -47,13 +51,16 @@ private:
  public:
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.15 2012/03/19 01:19:20 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.16 2012/06/03 16:52:18 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.16  2012/06/03 16:52:18  balewski
+// added access to fgtSimuParam table, all I/O .C code is saved in macros
+//
 // Revision 1.15  2012/03/19 01:19:20  rfatemi
 // modified for removal of StFgtDbImpl and StFgtIdealDbImpl
 //
