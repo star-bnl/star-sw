@@ -1,10 +1,10 @@
 
-void getAvgEff()
+void getAvgEff(Char_t* signalFile="signalShapes.root")
 {
   gStyle->SetPalette(1);
   gStyle->SetOptStat(0);
-  // TFile f("rootOut/mrgSignalShapes.root");
-  TFile f("signalShapes.root");
+   TFile f("rootOut/mrgSignalShapes.root");
+   //TFile f("signalShapes.root");
  TH2D* h=(TH2D*)f.Get("radioDiskEffLoose_2");
  TH2D* hEff=(TH2D*)f.Get("allCountsLooseDisk_3");//counting different for this histo
  TH2D* hNonEff=(TH2D*)f.Get("radioDiskNonEffLoose_2");
