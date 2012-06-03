@@ -1,7 +1,7 @@
 
 void getAvgEff()
 {
-TFile f("signalShapes.root");
+TFile f("rootOut/mrgSignalShapes.root");
  TH2D* h=(TH2D*)f.Get("radioDiskEffLoose_2");
  TH2D* hEff=(TH2D*)f.Get("allCountsLooseDisk_3");//counting different for this histo
  TH2D* hNonEff=(TH2D*)f.Get("radioDiskNonEffLoose_2");
@@ -14,12 +14,17 @@ for(Int_t i=1;i<h->GetNbinsX()-1;i++)
   {
     for(Int_t j=1;j<h->GetNbinsY()-1;j++)
       {
-	Double_t efficiency=h->GetBinContent(i,j);
-	if(efficiency>0.05)
-	  {
 	    Int_t numEff=hEff->GetBinContent(i,j);
 	    Int_t numNonEff=hNonEff->GetBinContent(i,j);
 	    Int_t numCounts=numEff+numNonEff;
+	    Double_t efficiency=0;
+	    if(numCounts>0)
+	      efficiency=(Double_t)numEff/(Double_t)numCounts;
+
+	if(efficiency>0.05)
+	  {
+
+
 	    //
 	    Double_t relErr=sqrt((1/(Double_t)(numEff+numNonEff)+1/(Double_t)numEff));
 	    Double_t err=relErr*efficiency;
