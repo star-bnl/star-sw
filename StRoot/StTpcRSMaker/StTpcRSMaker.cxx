@@ -47,13 +47,14 @@
 #include "Altro.h"
 #include "TRVector.h"
 #include "StBichsel/Bichsel.h"
+#define Old_dNdx_Table
 //#define __DEBUG__
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.59 2012/05/07 15:36:22 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.60 2012/06/04 15:14:18 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -1600,8 +1601,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.59 2012/05/07 15:36:22 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.60 2012/06/04 15:14:18 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.60  2012/06/04 15:14:18  fisyak
+// restore old hack for dN/dx table to fix bug #2347
+//
 // Revision 1.59  2012/05/07 15:36:22  fisyak
 // Remove hardcoded TPC parameters
 //
