@@ -1,5 +1,0 @@
-<Document file="StarVMC/Compat/ffpdstep.xml">
-<Export language="Mortran">
-<Import file="pams/geometry/fpdmgeo/ffpdstep.g" verbatim="true" />
-</Export>
-</Document>
