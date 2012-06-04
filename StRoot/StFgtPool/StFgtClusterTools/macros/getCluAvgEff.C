@@ -1,38 +1,37 @@
 
-void getAvgEff(Char_t* signalFile="signalShapes.root", Bool_t onlyQuadB=true, Int_t diskNr=3)
+void getCluAvgEff(Char_t* signalFile="signalShapes.root", Bool_t onlyQuadB=true, Int_t diskNr=3)
 {
   gStyle->SetPalette(1);
   gStyle->SetOptStat(0);
    TFile f(signalFile);
    //TFile f("signalShapes.root");
  char buffer[100];
- sprintf(buffer,"radioDiskEffLoose_%d",diskNr-1);
- TH2D* h=(TH2D*)f.Get(buffer);
- sprintf(buffer,"allCountsLooseDisk_%d",diskNr);//counting different for this histo
+
+ sprintf(buffer,"allClusterCountsDisk_%d",diskNr);//counting different for this histo
  TH2D* hEff=(TH2D*)f.Get(buffer);
- sprintf(buffer,"radioDiskNonEffLoose_%d",diskNr-1);
+ sprintf(buffer,"radioDiskNonEff_%d",diskNr-1);
  TH2D* hNonEff=(TH2D*)f.Get(buffer);
 
- Double_t max=h->GetXaxis()->GetXmax();
- Double_t min=h->GetXaxis()->GetXmin();
+ Double_t max=hEff->GetXaxis()->GetXmax();
+ Double_t min=hEff->GetXaxis()->GetXmin();
 
  // cout <<"max: " << max << " min: " << min << " numBins: "<< h->GetNbinsX() <<endl;
 
- TH2D OverallEff("overallEff","overallEff",h->GetNbinsX(),min,max,h->GetNbinsY(),min,max);
+ TH2D OverallEff("overallEff","overallEff",hEff->GetNbinsX(),min,max,hEff->GetNbinsY(),min,max);
  OverallEff.GetXaxis()->SetTitle("x [cm]");
  OverallEff.GetYaxis()->SetTitle("y [cm]");
 Double_t eff=0;
 Int_t count=0;
 
  Double_t overallErr=0;
-for(Int_t i=1;i<h->GetNbinsX()+1;i++)
+for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
   {
-    for(Int_t j=1;j<h->GetNbinsY()+1;j++)
+    for(Int_t j=1;j<hEff->GetNbinsY()+1;j++)
       {
 	///do you only want to use Quad B?
 	if(onlyQuadB)
 	  {
-	    if(i<(h->GetNbinsX()-1)/2|| j>(h->GetNbinsY()-1)/2)
+	    if(i<(hEff->GetNbinsX()-1)/2|| j>(hEff->GetNbinsY()-1)/2)
 	      continue;
 	  }
 	//Int_t gBin=h->GetBin(i,j);

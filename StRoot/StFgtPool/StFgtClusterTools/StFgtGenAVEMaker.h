@@ -91,15 +91,20 @@ class StFgtCollection;
 class StFgtGenAVEMaker : public StFgtGeneralBase {
  public:
   StFgtGenAVEMaker(const Char_t* name="FgtGenAVEMaker");
-  Double_t findCluCharge(Int_t iD,Char_t layer, Double_t ordinate);
+  pair<Double_t,Double_t> findCluChargeSize(Int_t iD,Char_t layer, Double_t ordinate);
   virtual ~StFgtGenAVEMaker();
    Int_t Init();
    Int_t Make();
    Int_t Finish();
+   void SetEffDisk(Int_t disk)
+   {
+     m_effDisk=disk;
+   }
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.6 2012/05/30 13:38:35 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.7 2012/06/04 16:14:28 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
+   Int_t m_effDisk;
    ofstream* outTxtFile;
    Short_t getQuadFromCoo(Double_t x, Double_t y);
    pair<Double_t,Double_t> getChargeRatio(Float_t r, Float_t phi, Int_t iD, Int_t iq);
@@ -216,6 +221,8 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
 
 
    TH2D** chargeCorr;
+   TH1D** clusterSizeR;
+   TH1D** clusterSizeP;
    TH1D** h_clusterSizeR;
    TH1D** h_clusterSizePhi;
    TH1D** h_clusterChargeR;

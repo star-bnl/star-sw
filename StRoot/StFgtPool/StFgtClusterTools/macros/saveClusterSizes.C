@@ -8,7 +8,7 @@ void saveClusterSizes(Char_t* signalFile="signalShapes.root")
   Char_t layerName[10];
   Int_t counter=0;
   sprintf(buffer,"ClusterSizes");
-  TCanvas c(buffer,buffer,10,10,3000,2000);
+  TCanvas c(buffer,buffer,10,10,4000,3000);
   c.Divide(6,5);
   for(int iD=1;iD<7;iD++)
     {
@@ -34,7 +34,7 @@ void saveClusterSizes(Char_t* signalFile="signalShapes.root")
 
   //clusterSizePInDisk_6_quad_3-
 	      sprintf(buffer,"clusterSize%sInDisk_%d_quad_%d",layerName,iD,iQ);
-	      cout <<"loading " << buffer <<endl;
+	      cout <<"loading " << buffer <<" counter: " << counter <<endl;
 	      //	     TCanvas c2;
 	      TH1D* h=(TH1D*)f.Get(buffer);
 	      h->SetFillColor(kYellow);
@@ -52,5 +52,7 @@ void saveClusterSizes(Char_t* signalFile="signalShapes.root")
 	}
     }
   sprintf(buffer,"ClusterSizes.png");
+  c.SaveAs(buffer);
+  sprintf(buffer,"ClusterSizes.C");
   c.SaveAs(buffer);
 }
