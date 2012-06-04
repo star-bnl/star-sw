@@ -42,7 +42,7 @@
 #define MAX_CHARGE_RATIO
 #define MIN_CHARGE_RATIO
 
-#define DISK_EFF 2
+//#define DISK_EFF 2
 #define QUAD_EFF 1
 #define MY_PI 3.14159
 //#define  REFIT_WITH_VERTEX
@@ -55,7 +55,7 @@
 
 #define MIN_NUM_POINTS 3
 #define DISK_DIM 40
-#define NUM_EFF_BIN 20
+#define NUM_EFF_BIN 30
 
 
 
@@ -156,7 +156,7 @@ Double_t StFgtGenAVEMaker::findClosestStrip(Char_t layer, double ord, Int_t iD, 
 
 
 ///careful here if called for every disk. The function now checks for chargeCorr, cluster size histos if it is you are 
-///looking at DISK_EFF and only fills then. Assuming that for the other discs you use the points from the found tracks
+///looking at m_effDisk and only fills then. Assuming that for the other discs you use the points from the found tracks
 void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
   bool partOfClusterP=false;
@@ -355,7 +355,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	}
 
 
-      if(maxRCharge> 1000 && maxPhiCharge>1000 && iD==DISK_EFF)// && (float)pStrips[iD*4+iq][maxRInd].charge)
+      if(maxRCharge> 1000 && maxPhiCharge>1000 && iD==m_effDisk)// && (float)pStrips[iD*4+iq][maxRInd].charge)
 	{
 	  StFgtGeom::getPhysicalCoordinate((float)pStrips[iD*4+iq][maxRInd].geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
 	  //  if(ordinate>20)
@@ -375,13 +375,16 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
       
       
       
-      if(partOfClusterR&& partOfClusterP && iD==DISK_EFF)
+      if(partOfClusterR&& partOfClusterP && iD==m_effDisk)
 	{
 	  chargeCorrInEffDisk->Fill(clusterChargeR,clusterChargeP);
 	  chargeCorr[iD*4+iq]->Fill(clusterChargeR,clusterChargeP);
 	  //basically only here we fill with the estimated cluster, for the other disks we fill with the cluster on the track
-	  clusterSizeR[iD*4+iq]->Fill(mClusterSizeR);
-	  clusterSizeP[iD*4+iq]->Fill(mClusterSizeP);
+	  if(r>20)
+	    {
+	      clusterSizeR[iD*4+iq]->Fill(mClusterSizeR);
+	      clusterSizeP[iD*4+iq]->Fill(mClusterSizeP);
+	    }
 	}
 
       
@@ -395,13 +398,8 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	  numFirstHighTrackClusterP[iD*4+iq]->Fill(firstFSigTbP);
 	  secondToLastRatioTrackClusterP[iD*4+iq]->Fill(secondToLastRatioP);
 
-
-
-
-
 	  if(iD==2 && iq==1 && (float)pStrips[iD*4+iq][maxPInd].pedErr>0)
 	    {
-
 
 
 	      pulseCounterTP++;
@@ -1037,13 +1035,13 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		//		cout <<" somewhat eff: " << xExp <<" y: " << yExp <<" disk: " << i <<endl;
 		radioPlotsEffLoose[i]->Fill(xExp,yExp);
 	      }
-		else
-		  {
-		    //		    cout <<"not somewhat eff: " << xExp <<" y: " << yExp <<endl;
-		    radioPlotsNonEffLoose[i]->Fill(xExp,yExp);
+	    else
+	      {
+		//		    cout <<"not somewhat eff: " << xExp <<" y: " << yExp <<endl;
+		radioPlotsNonEffLoose[i]->Fill(xExp,yExp);
 		  }
-
-	    if(i==DISK_EFF && quad==QUAD_EFF)
+	    
+	    if(i==m_effDisk && quad==QUAD_EFF)
 	      {
 		//do the r/phi thing
 		if(findClosestStrip('R',r,i,quad)<MAX_DIST_STRIP_R)
@@ -1061,6 +1059,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		    //		    cout << " not found, dist is:" <<findClosestStrip('P',phi,i,quad) <<endl;
 		    radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
 		  }
+	      }
 		Double_t closestPoint=findClosestPoint(xExp,yExp,i);
 		//		cout <<"cloest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
 		if(findClosestPoint(xExp,yExp,i)<MAX_DIST2_EFF)
@@ -1091,7 +1090,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 			chargeAsymInEffDisk->Fill(xExp,yExp,asym);
 		      }
 		  }
-	      }
+
 	  }
       }
     //    cout <<" returning true " <<endl;
@@ -1217,7 +1216,7 @@ Int_t StFgtGenAVEMaker::Make()
 	  //	  (*outTxtFile) << " using " << iSeed1 <<" and " << iSeed2 << " as seeds " << endl;
 	  //	  if((iSeed2-iSeed1)<3)//to have large enough lever arm..
 	  //	    continue;
-	  if(iSeed1==DISK_EFF || iSeed2==DISK_EFF)
+	  if(iSeed1==m_effDisk || iSeed2==m_effDisk)
 	    continue;
 	  	  cout <<"using " << iSeed1 << " and " << iSeed2 << " as seed " <<endl;
 	  vector<generalCluster> &hitVecSeed1=*(pClusters[iSeed1]);
@@ -1381,7 +1380,7 @@ Int_t StFgtGenAVEMaker::Make()
 			  for(int iD=0;iD<6;iD++)
 			    {
 			      //			      cout <<"testting disk: " << iD <<endl;
-			      if(iD==iSeed1 || iD==iSeed2 || iD==DISK_EFF)
+			      if(iD==iSeed1 || iD==iSeed2 || iD==m_effDisk)
 				continue;
 			      //			      cout <<"not seed " << endl;
 			      Bool_t found=false;
@@ -1600,7 +1599,7 @@ Int_t StFgtGenAVEMaker::Make()
 
 };
  
-StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),runningEvtNr(0),hitCounter(0),hitCounterR(0)
+StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),runningEvtNr(0),hitCounter(0),hitCounterR(0),m_effDisk(2)
 {
   cout <<"AVE constructor!!" <<endl;
 
@@ -1865,6 +1864,8 @@ counter++;
       h_clusterChargeR[iD]->Draw();
       cClusterChargePhi->cd(iD+1);
       h_clusterChargePhi[iD]->Draw();
+      h_clusterChargeR[iD]->Write();
+      h_clusterChargePhi[iD]->Write();
 
     }
   f1->Write();
@@ -1886,6 +1887,9 @@ counter++;
       sprintf(buffer,"allCountsLooseDisk_%d",iD+1);
       TH2D* tmpAllCountsLoose=(TH2D*)radioPlotsEffLoose[iD]->Clone(buffer);
       tmpAllCountsLoose->Write();
+      sprintf(buffer,"allClusterCountsDisk_%d",iD+1);
+      TH2D* tmpAllClusterCounts=(TH2D*)radioPlotsEff[iD]->Clone(buffer);
+      tmpAllClusterCounts->Write();
     }
 
   doNormalize(radioPlotsEffLoose, radioPlotsNonEffLoose);
@@ -1911,7 +1915,7 @@ counter++;
 		{
 		  cout <<" efficiency bin nx: " << nx << " ny: " << ny << ", num counts " << tmpAllCounts->GetBinContent(nx,ny) << " / " << denom << " : " << tmpAllCounts->GetBinContent(nx,ny)/denom <<endl;
 		  radioPlotsEff[iD]->SetBinContent(nx,ny,tmpAllCounts->GetBinContent(nx,ny)/denom);
-		  if(iD==DISK_EFF)
+		  if(iD==m_effDisk)
 		    {
 		      cout <<"chargeRatio is: " << chargeRatioInEffDisk->GetBinContent(nx,ny)<<endl;
 		      chargeRatioInEffDisk->SetBinContent(nx,ny,chargeRatioInEffDisk->GetBinContent(nx,ny)/denom);
@@ -1942,6 +1946,7 @@ counter++;
       radioPlotsEffLoose[iD]->Draw("colz");   
       radioPlotsEffLoose[iD]->Write();
       radioPlotsNonEffLoose[iD]->Write();
+      radioPlotsNonEff[iD]->Write();
       cRPRatio->cd(iD+1);
       rPhiRatioPlots[iD]->Draw();
       cREff->cd(iD+1);
