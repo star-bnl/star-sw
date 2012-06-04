@@ -5,8 +5,17 @@
 //  for instructions
 //****************************************************************************************************
 /****************************************************************************************************
- * $Id: StEmbeddingQA.h,v 1.7 2010/07/12 21:29:40 hmasui Exp $
+ * $Id: StEmbeddingQA.h,v 1.10 2011/04/01 05:05:47 hmasui Exp $
  * $Log: StEmbeddingQA.h,v $
+ * Revision 1.10  2011/04/01 05:05:47  hmasui
+ * Track selections by StEmbeddingQAUtilities. Added 1/pt(RC)-1/pt(MC) vs pt, and pt dependent Ncommon vs NhitFit histograms
+ *
+ * Revision 1.9  2011/02/11 03:55:44  hmasui
+ * Change geantid type to integer
+ *
+ * Revision 1.8  2011/01/31 21:32:10  hmasui
+ * Modify histogram keys to TString to take into account parent geantid
+ *
  * Revision 1.7  2010/07/12 21:29:40  hmasui
  * Move isGeantIdOk() function into StEmbeddingQAUtilities
  *
@@ -46,6 +55,7 @@ class TH1 ;
 class TH2 ;
 class TH3 ;
 class TObject ;
+//class TTree ;
 
 class StContamPair ;
 class StEmbeddingQAPair ;
@@ -69,6 +79,8 @@ class StEmbeddingQA {
     /// Destructor
     virtual ~StEmbeddingQA();
 
+    void init() ;  /// Initialization 
+
     /// Book histograms
     /// Default output is 'ana_{type}_{year}_{production}_{particleId}.root'
     /// if you don't put any words in the argument (i.e. whitespace)
@@ -91,12 +103,15 @@ class StEmbeddingQA {
     Bool_t end() const;
 
     /// set z-vertex cut (default is |vz|<30cm unless otherwise specified)
+    /// Moved to StEmbeddingQAUtilities but keep the function for backward compatibility
     void setZVertexCut(const Float_t vz) ;
 
     /// Add trigger id cut (default is no trigger id selections). Multiple trigger can be added
+    /// Moved to StEmbeddingQAUtilities but keep the function for backward compatibility
     void addTriggerIdCut(const UInt_t id) ;
 
     /// Set rapidity cut (default is |y|<10, i.e. no rapidity cut)
+    /// Moved to StEmbeddingQAUtilities but keep the function for backward compatibility
     void setRapidityCut(const Float_t ycut) ;
 
   private:
@@ -105,7 +120,6 @@ class StEmbeddingQA {
     const Bool_t mIsSimulation ;      /// kTRUE : embedding QA,  kFALSE : real data QA
 
     void clear() ; /// Clear all histograms
-    void init() ;  /// Initialization
 
     // Fill histograms
     Bool_t fillEmbedding(const TString inputFileName) ; // Fill embedding histograms
@@ -124,11 +138,11 @@ class StEmbeddingQA {
     void fillHistograms(const StEmbeddingQATrack& track, const Int_t categoryid);
 
     /// Expand histograms if a new geantid is found in either MC or reconstructed track
-    void expandHistograms(const Int_t categoryid, const Short_t geantid, const Int_t parentid,
+    void expandHistograms(const Int_t categoryid, const Int_t geantid, const Int_t parentid,
         const Int_t parentparentid, const Int_t geantprocess);
 
     /// Push back a new geant id in mGeantId array
-    Bool_t pushBackGeantId(const Int_t categoryid, const Short_t geantid, const Int_t parentid,
+    Bool_t pushBackGeantId(const Int_t categoryid, const Int_t geantid, const Int_t parentid,
         const Int_t parentparentid, const Int_t geantprocess) ;
 
     /// Z-vertex cut
@@ -140,10 +154,11 @@ class StEmbeddingQA {
     /// Number of tracks
     Int_t getNtrack(const Int_t categoryid, const StMiniMcEvent& mcevent) const ;
 
+    /// Get combination string of geantid, parent and parent-parent id
+    /// The format is ("%d_%d_%d", geantid, parentid, parentparentid)
+    TString getIdCollection(const Int_t geantid, const Int_t parentid, const Int_t parentparentid) const ;
+
     StMuDstMaker* mMuDstMaker ; /// Pointer to the StMuDstMaker
-    Float_t mVertexCut ; /// z-vertex cut (Default is 30 cm)
-    std::vector<UInt_t> mTriggerId ; /// Trigger id cut (can be multiple trigger id's)
-    Float_t mRapidityCut ; /// rapidity cut (Default is 10)
 
     TFile* mOutput ; /// Output histograms
 
@@ -168,34 +183,33 @@ class StEmbeddingQA {
     //
     //  - Use MC momentum instead of reconstructed momentum (Update on Nov/13/2009)
     //  - Add p (reco) vs p (MC) (Update on Nov/13/2009)
-    std::vector<Short_t> mGeantId[StEmbeddingQAConst::mNCategory] ; /// Geant id in both MC tracks and reconstructed pairs
+    std::vector<Int_t> mGeantId[StEmbeddingQAConst::mNCategory] ; /// Geant id in both MC tracks and reconstructed pairs
     std::vector<TString> mGeantIdCollection ;                       /// Array of (parent-parent id, parent id, geantid)
                                                                     /// for Contaminated pairs only
 
     TH1* mhGeantId[StEmbeddingQAConst::mNCategory];                               /// Geant id
-    std::map<Int_t, TH3*> mhNHit[StEmbeddingQAConst::mNCategory] ;                /// Nhit distribution vs eta vs pt
-    std::map<Int_t, TH3*> mhDca[StEmbeddingQAConst::mNCategory] ;                 /// Dca vs eta vs pt
-    std::map<Int_t, TH2*> mhPtVsEta[StEmbeddingQAConst::mNCategory] ;             /// pt vs pseudo-rapidity
-    std::map<Int_t, TH2*> mhPtVsY[StEmbeddingQAConst::mNCategory] ;               /// pt vs rapidity
-    std::map<Int_t, TH2*> mhPtVsPhi[StEmbeddingQAConst::mNCategory] ;             /// pt vs phi
-    std::map<Int_t, TH2*> mhPtVsMom[StEmbeddingQAConst::mNCategory] ;             /// pt vs momentum
-    std::map<Int_t, TH2*> mhdPtVsPt[StEmbeddingQAConst::mNCategory] ;             /// pt - pt(MC) vs pt
-    std::map<Int_t, TH2*> mhMomVsEta[StEmbeddingQAConst::mNCategory] ;            /// momentum vs eta
-    std::map<Int_t, TH2*> mhdEdxVsMomMc[StEmbeddingQAConst::mNCategory] ;         /// dE/dx vs MC momentum (no PID cut)
-    std::map<Int_t, TH2*> mhdEdxVsMomMcPidCut[StEmbeddingQAConst::mNCategory] ;   /// dE/dx vs MC momentum (with PID cut, 2 sigma)
-    std::map<Int_t, TH2*> mhdEdxVsMomReco[StEmbeddingQAConst::mNCategory] ;       /// dE/dx vs reconstructed momentum (no PID cut)
-    std::map<Int_t, TH2*> mhdEdxVsMomRecoPidCut[StEmbeddingQAConst::mNCategory] ; /// dE/dx vs reconstructed momentum (with PID cut, 2 sigma)
-    std::map<Int_t, TH2*> mhRecoPVsMcP[StEmbeddingQAConst::mNCategory] ;          /// Reconstructed momentum vs MC momentum
-    std::map<Int_t, TH2*> mhNCommonHitVsNHit[StEmbeddingQAConst::mNCategory] ;      /// Ncommon hit vs Nhit
+    std::map<TString, TH3*> mhNHit[StEmbeddingQAConst::mNCategory] ;                /// Nhit distribution vs eta vs pt
+    std::map<TString, TH3*> mhDca[StEmbeddingQAConst::mNCategory] ;                 /// Dca vs eta vs pt
+    std::map<TString, TH2*> mhPtVsEta[StEmbeddingQAConst::mNCategory] ;             /// pt vs pseudo-rapidity
+    std::map<TString, TH2*> mhPtVsY[StEmbeddingQAConst::mNCategory] ;               /// pt vs rapidity
+    std::map<TString, TH2*> mhPtVsPhi[StEmbeddingQAConst::mNCategory] ;             /// pt vs phi
+    std::map<TString, TH2*> mhPtVsMom[StEmbeddingQAConst::mNCategory] ;             /// pt vs momentum
+    std::map<TString, TH2*> mhdPtVsPt[StEmbeddingQAConst::mNCategory] ;             /// pt(RC) - pt(MC) vs pt
+    std::map<TString, TH2*> mhdInvPtVsPt[StEmbeddingQAConst::mNCategory] ;          /// 1/pt(RC) - 1/pt(MC) vs pt
+    std::map<TString, TH2*> mhMomVsEta[StEmbeddingQAConst::mNCategory] ;            /// momentum vs eta
+    std::map<TString, TH2*> mhdEdxVsMomMc[StEmbeddingQAConst::mNCategory] ;         /// dE/dx vs MC momentum (no PID cut)
+    std::map<TString, TH2*> mhdEdxVsMomMcPidCut[StEmbeddingQAConst::mNCategory] ;   /// dE/dx vs MC momentum (with PID cut, 2 sigma)
+    std::map<TString, TH2*> mhdEdxVsMomReco[StEmbeddingQAConst::mNCategory] ;       /// dE/dx vs reconstructed momentum (no PID cut)
+    std::map<TString, TH2*> mhdEdxVsMomRecoPidCut[StEmbeddingQAConst::mNCategory] ; /// dE/dx vs reconstructed momentum (with PID cut, 2 sigma)
+    std::map<TString, TH2*> mhRecoPVsMcP[StEmbeddingQAConst::mNCategory] ;          /// Reconstructed momentum vs MC momentum
+    std::map<TString, TH3*> mhNCommonHitVsNHit[StEmbeddingQAConst::mNCategory] ;      /// Ncommon hit vs Nhit vs pT
 
-    std::map<Int_t, TH2*> mhEtaVsPhi[StEmbeddingQAConst::mNCategory] ;  /// pseudo-rapidity vs phi
-    std::map<Int_t, TH2*> mhEtaVsVz[StEmbeddingQAConst::mNCategory] ;   /// pseudo-rapidity vs vz
-    std::map<Int_t, TH2*> mhYVsVz[StEmbeddingQAConst::mNCategory] ;     /// rapidity vs vz
+    std::map<TString, TH2*> mhEtaVsPhi[StEmbeddingQAConst::mNCategory] ;  /// pseudo-rapidity vs phi
+    std::map<TString, TH2*> mhEtaVsVz[StEmbeddingQAConst::mNCategory] ;   /// pseudo-rapidity vs vz
+    std::map<TString, TH2*> mhYVsVz[StEmbeddingQAConst::mNCategory] ;     /// rapidity vs vz
 
     ClassDef(StEmbeddingQA, 1);
 };
-
-inline void StEmbeddingQA::setZVertexCut(const Float_t vz) { mVertexCut = vz ; }
 
 #endif
 

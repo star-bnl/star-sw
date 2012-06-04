@@ -1,7 +1,10 @@
-* $Id: sisdgeo1.g,v 1.6 2008/11/19 04:08:28 perev Exp $
+* $Id: sisdgeo1.g,v 1.7 2011/02/28 16:36:38 jwebb Exp $
 * $Log: sisdgeo1.g,v $
+* Revision 1.7  2011/02/28 16:36:38  jwebb
+* Cosmetic changes needed for AgML syntax matching.
+*
 * Revision 1.6  2008/11/19 04:08:28  perev
-* updates to the corrected(vp) starsim
+*  updates to the corrected(vp) starsim
 *
 * Revision 1.5  2005/01/03 22:09:57  potekhin
 * Need to optionally position the Strip Detector in
@@ -79,8 +82,8 @@ Module  SISDGEO1  is the Silicon Strip Detector
                        ssLen,    wpLen,    sdlen,    tilt,     
                        cprad,    cpral,    cfrad,    gpThk,
                        Int ladderMap(20),
-                       ladderAngle(20), ladderTilt(20),LadderRadius(20)
-                       }
+                       ladderAngle(20), ladderTilt(20),LadderRadius(20)  }
+
 *
 
       Integer ilad,iwaf,jwaf,nc

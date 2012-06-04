@@ -23,7 +23,8 @@
 ClassImp(KFParticleBase);
 
 
-KFParticleBase::KFParticleBase() :fID(0), fQ(0), fNDF(-3), fChi2(0), fSFromDecay(0), fAtProductionVertex(0), fIsLinearized(0)
+KFParticleBase::KFParticleBase() :fID(0), fQ(0), fNDF(-3), fChi2(0), fSFromDecay(0), fAtProductionVertex(0), fIsLinearized(0), 
+				  fIdTruth(0), fQuality(0), fIdParentVx(0)
 { 
   //* Constructor 
 
@@ -762,7 +763,7 @@ void KFParticleBase::Construct( const KFParticleBase* vDaughters[], Int_t NDaugh
   //* Full reconstruction in one go
 
   Int_t maxIter = 1;
-  bool wasLinearized = fIsLinearized;
+  Bool_t wasLinearized = fIsLinearized;
   if( !fIsLinearized || IsConstrained ){
     //fVtxGuess[0] = fVtxGuess[1] = fVtxGuess[2] = 0;  //!!!!
     fVtxGuess[0] = GetX();
@@ -816,7 +817,7 @@ void KFParticleBase::Construct( const KFParticleBase* vDaughters[], Int_t NDaugh
 }
 
 
-void KFParticleBase::Convert( bool ToProduction )
+void KFParticleBase::Convert( Bool_t ToProduction )
 {
   //* Tricky function - convert the particle error along its trajectory to 
   //* the value which corresponds to its production/decay vertex
@@ -1448,8 +1449,8 @@ Double_t KFParticleBase::GetDeviationFromVertex( const Double_t v[], const Doubl
 
   Double_t mP[8];
   Double_t mC[36];
-  
-  Transport( GetDStoPoint(v), mP, mC );  
+  Double_t dS = GetDStoPoint(v);
+  Transport(dS , mP, mC );  
 
   Double_t d[3]={ v[0]-mP[0], v[1]-mP[1], v[2]-mP[2]};
 
@@ -1691,13 +1692,13 @@ void KFParticleBase::TransportLine( Double_t dS,
 
 
 void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
-					  const KFParticleBase &daughter2, double Bz  )
+					  const KFParticleBase &daughter2, Double_t Bz  )
 { 
   //* Create gamma
   
   const KFParticleBase *daughters[2] = { &daughter1, &daughter2};
 
-  double v0[3];
+  Double_t v0[3];
   
   if( !fIsLinearized ){
     Double_t ds, ds1;
@@ -1732,14 +1733,14 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
   
   // fit daughters to the vertex guess
   
-  double daughterP[2][8], daughterC[2][36];
-  double vtxMom[2][3];
+  Double_t daughterP[2][8], daughterC[2][36];
+  Double_t vtxMom[2][3];
 
   {  
-    for( int id=0; id<2; id++ ){
+    for( Int_t id=0; id<2; id++ ){
     
-      double *p = daughterP[id];
-      double *mC = daughterC[id];
+      Double_t *p = daughterP[id];
+      Double_t *mC = daughterC[id];
       
       daughters[id]->GetMeasurement( v0, p, mC );
       
@@ -1776,20 +1777,20 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
     // fit new vertex
   {
       
-    double mpx0 =  vtxMom[0][0]+vtxMom[1][0];
-    double mpy0 =  vtxMom[0][1]+vtxMom[1][1];
-    double mpt0 = TMath::Sqrt(mpx0*mpx0 + mpy0*mpy0);
-    // double a0 = TMath::ATan2(mpy0,mpx0);
+    Double_t mpx0 =  vtxMom[0][0]+vtxMom[1][0];
+    Double_t mpy0 =  vtxMom[0][1]+vtxMom[1][1];
+    Double_t mpt0 = TMath::Sqrt(mpx0*mpx0 + mpy0*mpy0);
+    // Double_t a0 = TMath::ATan2(mpy0,mpx0);
     
-    double ca0 = mpx0/mpt0;
-    double sa0 = mpy0/mpt0;
-    double r[3] = { v0[0], v0[1], v0[2] };
-    double mC[3][3] = {{10000., 0 ,   0  },
+    Double_t ca0 = mpx0/mpt0;
+    Double_t sa0 = mpy0/mpt0;
+    Double_t r[3] = { v0[0], v0[1], v0[2] };
+    Double_t mC[3][3] = {{10000., 0 ,   0  },
 		       {0,  10000.,   0  },
 		       {0,     0, 10000. } };
-    double chi2=0;
+    Double_t chi2=0;
     
-    for( int id=0; id<2; id++ ){		
+    for( Int_t id=0; id<2; id++ ){		
       const Double_t kCLight = 0.000299792458;
       Double_t q = Bz*daughters[id]->GetQ()*kCLight;
       Double_t px0 = vtxMom[id][0];
@@ -1848,23 +1849,23 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
 
       // V = GVGt
 
-      double mGV[3][6];
-      double mV[6];
-      double m[3];
-      for( int i=0; i<3; i++ ){
+      Double_t mGV[3][6];
+      Double_t mV[6];
+      Double_t m[3];
+      for( Int_t i=0; i<3; i++ ){
 	m[i] = mB[i];
-	for( int k=0; k<6; k++ ) m[i]+=mG[i][k]*daughterP[id][k];
+	for( Int_t k=0; k<6; k++ ) m[i]+=mG[i][k]*daughterP[id][k];
       }
-      for( int i=0; i<3; i++ ){
-	for( int j=0; j<6; j++ ){
+      for( Int_t i=0; i<3; i++ ){
+	for( Int_t j=0; j<6; j++ ){
 	  mGV[i][j] = 0;
-	  for( int k=0; k<6; k++ ) mGV[i][j]+=mG[i][k]*daughterC[id][ IJ(k,j) ];
+	  for( Int_t k=0; k<6; k++ ) mGV[i][j]+=mG[i][k]*daughterC[id][ IJ(k,j) ];
 	}
       }
-      for( int i=0, k=0; i<3; i++ ){
-	for( int j=0; j<=i; j++,k++ ){
+      for( Int_t i=0, k=0; i<3; i++ ){
+	for( Int_t j=0; j<=i; j++,k++ ){
 	  mV[k] = 0;
-	  for( int l=0; l<6; l++ ) mV[k]+=mGV[i][l]*mG[j][l];
+	  for( Int_t l=0; l<6; l++ ) mV[k]+=mGV[i][l]*mG[j][l];
 	}
       }
       
@@ -1874,22 +1875,22 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
       Double_t mCHt[3][3];
       Double_t mHCHt[6];
       Double_t mHr[3];
-      for( int i=0; i<3; i++ ){	  
+      for( Int_t i=0; i<3; i++ ){	  
 	mHr[i] = 0;
-	for( int k=0; k<3; k++ ) mHr[i]+= mH[i][k]*r[k];
+	for( Int_t k=0; k<3; k++ ) mHr[i]+= mH[i][k]*r[k];
       }
       
-      for( int i=0; i<3; i++ ){
-	for( int j=0; j<3; j++){
+      for( Int_t i=0; i<3; i++ ){
+	for( Int_t j=0; j<3; j++){
 	  mCHt[i][j] = 0;
-	  for( int k=0; k<3; k++ ) mCHt[i][j]+= mC[i][k]*mH[j][k];
+	  for( Int_t k=0; k<3; k++ ) mCHt[i][j]+= mC[i][k]*mH[j][k];
 	}
       }
 
-      for( int i=0, k=0; i<3; i++ ){
-	for( int j=0; j<=i; j++, k++ ){
+      for( Int_t i=0, k=0; i<3; i++ ){
+	for( Int_t j=0; j<=i; j++, k++ ){
 	  mHCHt[k] = 0;
-	  for( int l=0; l<3; l++ ) mHCHt[k]+= mH[i][l]*mCHt[l][j];
+	  for( Int_t l=0; l<3; l++ ) mHCHt[k]+= mH[i][l]*mCHt[l][j];
 	}
       }
       
@@ -1940,9 +1941,9 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
     
     fNDF  = 2;
     fChi2 = chi2;
-    for( int i=0; i<3; i++ ) fP[i] = r[i];
-    for( int i=0,k=0; i<3; i++ ){
-      for( int j=0; j<=i; j++,k++ ){
+    for( Int_t i=0; i<3; i++ ) fP[i] = r[i];
+    for( Int_t i=0,k=0; i<3; i++ ){
+      for( Int_t j=0; j<=i; j++,k++ ){
 	fC[k] = mC[i][j];
       }
     }
@@ -1957,10 +1958,10 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
   for(Int_t i=6;i<36;++i) fC[i]=0.;
 
 
-  for( int id=0; id<2; id++ ){
+  for( Int_t id=0; id<2; id++ ){
 
-    double *p = daughterP[id];
-    double *mC = daughterC[id];      
+    Double_t *p = daughterP[id];
+    Double_t *mC = daughterC[id];      
     daughters[id]->GetMeasurement( v0, p, mC );
 
     const Double_t *m = fP, *mV = fC;
@@ -2063,8 +2064,8 @@ Bool_t KFParticleBase::InvertSym3( const Double_t A[], Double_t Ai[] )
 {
   //* Invert symmetric matric stored in low-triagonal form 
 
-  bool ret = 0;
-  double a0 = A[0], a1 = A[1], a2 = A[2], a3 = A[3];
+  Bool_t ret = 0;
+  Double_t a0 = A[0], a1 = A[1], a2 = A[2], a3 = A[3];
 
   Ai[0] = a2*A[5] - A[4]*A[4];
   Ai[1] = a3*A[4] - a1*A[5];

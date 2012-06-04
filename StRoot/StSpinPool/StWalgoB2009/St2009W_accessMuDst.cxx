@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.16 2010/11/09 23:06:46 balewski Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.14 2010/06/30 19:00:03 rcorliss Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -219,12 +219,6 @@ St2009WMaker::accessTracks(){ // return non-zero on abort
       */
       float globChi2dof=glTr->chi2();
       hA[35]->Fill(globChi2dof);
-      {// monitor chi2 for east/west TPC separately
-	StThreeVectorF ri=glTr->firstPoint();
-	if(ri.z()>0 && ro.z()>0)  hA[58]->Fill(globChi2dof);
-	if(ri.z()<0 && ro.z()<0)  hA[59]->Fill(globChi2dof);
-      }
-
       hA[36]->Fill(globChi2dof,ro.pseudoRapidity());
 
       float dedx=prTr->dEdx()*1e6;
@@ -691,9 +685,6 @@ St2009WMaker::rejectMcTr(float effic){ //reject track in MC to match TPC efficie
 
 
 //$Log: St2009W_accessMuDst.cxx,v $
-//Revision 1.16  2010/11/09 23:06:46  balewski
-//small change
-//
 //Revision 1.14  2010/06/30 19:00:03  rcorliss
 //passes_L0() now works for simulation, using trigger simu in new macro
 //

@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.38 2009/11/17 15:55:48 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.39 2010/12/22 22:58:57 stevens4 Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.39  2010/12/22 22:58:57  stevens4
+// Patch for BSMDE mapping problem in P10ih and P10ij productions (RT #2043)
+//
 // Revision 1.38  2009/11/17 15:55:48  mattheww
 // fixed a bunch of warnings
 //
@@ -157,6 +160,8 @@ StBemcRaw::StBemcRaw():TObject()
     mPsdMapBug = kFALSE;
     mPsdMapBug2 = kFALSE;
     mTowerMapBug = kFALSE;
+    mSmdMapBug = kFALSE;
+    mProdVer = "";
     mDecoder = 0;
     mDate = 0;
     mTime = 0;
@@ -666,7 +671,13 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
         mDecoder->GetPreshowerBugCorrectionShift(id,shift);
         id+=shift;
     }
-
+    if(det==BSMDE && mSmdMapBug && mDate>=20100101 && mDate<20110101 && (!mProdVer.compare("SL10h") || !mProdVer.compare("SL10i") || !mProdVer.compare("SL10j")))
+    {
+        Int_t shift = 0;
+        mDecoder->GetSmdBugCorrectionShift(id,shift);
+        if(id+shift < 0) return kZero; //mask lost channels
+        id+=shift;
+    }
     if(CRATE>0 && CRATE<=MAXCRATES && mControlADCtoE->CheckCrate[det-1]==1)
         if((mCrateStatus[det-1][CRATE-1]!=crateOK &&
                 mCrateStatus[det-1][CRATE-1]!=crateUnknown) &&
@@ -773,7 +784,6 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
         id+=PsdOffset_ok[wire-1];
         //cout <<"PSD old id = "<<oldId<<"  new id = "<<id<<"  wire = "<<wire<<endl;
     }
-    
     Int_t m,e,s;
     geo->getBin(id,m,e,s);
     StEmcRawHit* hit=new StEmcRawHit(did,m,e,s,(UInt_t)ADC);

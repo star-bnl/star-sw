@@ -17,7 +17,7 @@
   REPLACE [unit(inches)] with [*2.5400]
   REPLACE [unit(foot)]   with [*12.0*2.5400]
   REPLACE [unit(feet)]   with [*12.0*2.5400]
-  REPLACE [unit(cm)]     with []
+  REPLACE [unit(cm)]     with [*1.0]
   REPLACE [unit(m)]      with [*100.0]
   REPLACE [unit(mm)]     with [*0.100]
 *

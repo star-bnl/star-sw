@@ -4,8 +4,14 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.14 2010/11/07 23:31:48 hmasui Exp $
+# $Id: get_embedding_xml.pl,v 1.16 2011/08/04 19:50:04 cpowell Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.16  2011/08/04 19:50:04  cpowell
+# Flag included to embed Pythia events. This excludes StPrepEmbedmaker from the chain and runs starsim before reconstruction.
+#
+# Revision 1.15  2011/02/25 17:53:19  hmasui
+# Move csh files into eliza disk, remove list files. Fix xml syntax in local test.csh.
+#
 # Revision 1.14  2010/11/07 23:31:48  hmasui
 # Added transverse vertex cut. Use eliza disk instead of HPSS. Determine local library path based on 32sl44
 #
@@ -37,7 +43,7 @@ $EMLOGS = "/project/projectdirs/star/embedding";
 my $force         = 0;                                              # Default is false (do not overwrite existing xml file)
 my $production    = "P08ic";                                        # Default production
 my $library       = getLibrary($production);                        # Default library
-my $outputXml     = getXmlFileName($production);                    # Default xml file name
+my $outputXml 		= getXmlFileName($production);                    # Default xml file name
 my $requestNumber = 9999999999 ;                                    # Default request number
 my $daqsDirectory = "$staroflDir/embedding/$production";            # Default daq files directory
 my $tagsDirectory = "$staroflDir/embedding/$production";            # Default tag files directory
@@ -52,7 +58,11 @@ my $ymax          = 1.5 ;                                           # Default ra
 my $pid           = 8 ;                                             # Default geant id (is pi+)
 my $multiplicity  = 1 ;                                             # Default multiplicity (is 1)
 my $particleName  = "PiPlus" ;                                      # Default particle name (is pi+)
-my $prodName      = $production ;                                   # Default prodName (second last argument in the bfcMixer)
+my $prodName      = $production ;                                   # Default prodName (4th last argument in the bfcMixer)
+my $pythiaInput 	= 0 ; 																						# Default mode (OFF) for using PYTHIA events fed in from external file (no StPrepEmbedding) 			
+my $kumacFile 		= "StRoot/macros/embedding/pythiaTuneA_template.kumac";	# Kumac file if using PYTHIA 			
+my $seed 		      = "StRoot/macros/embedding/get_random_seed";			# Random seed generator for PYTHIA		
+my $daqEvents 		= "$staroflDir/embedding/$production";						# File list for PYTHIA with daq files and number of events for each file		
 
 # Output path will be the following structure
 # $elizaDisk/star/starprod/embedding/${TRGSETUPNAME}/${PARTICLENAME}_${FSET}_${REQUESTNUMBER}/${PRODUCTION}.${LIBRARY}/${YEAR}/${DAY}
@@ -101,6 +111,10 @@ GetOptions (
     'ymin=f' => \$ymin,                    # Minimum rapidity cut
     'ymax=f' => \$ymax,                    # Maximum rapidity cut
     'zvertex=f' => \$zvertexCut,           # Set z-vertex cut
+		'pythia=i' => \$pythiaInput,					 # Set Pythia mode	
+		'kumacfile=s' => \$kumacFile,					 # Set Pythia input	
+		'seed=s' => \$seed,				             # Set Pythia random seed generator
+		'daqevents=s' => \$daqEvents,				 	 # Set Pythia daq file and event number list
     'verbose' => \$verbose
 );
 
@@ -156,6 +170,15 @@ my $usage = q(
 
   -z (or --zvertex) [max. z-vertex cut] Set z-vertex cut. The cut will be |vz| < cut
 
+  -pythia [PYTHIA flag: 0 or 1 ]        Set mode (e.g. 1 = true, 0 = false) for using PYTHIA to generate events (JetCorr)													
+                                        (if true, then pt, vz, etc., cuts will be ignored and StPrepEmbed will not be included)
+
+  -kumacfile [kumac file name]          Set directory and file name of kumac to generate PYTHIA events
+
+  -seed                                 Set location of random seed generator for PYTHIA
+
+  -daqevents [daq file directory]       Set daq file list containing number of events in each daq file (needed for PYTHIA) 
+
   -verbose                              Verbose flag to show debug messages
 
 );
@@ -193,11 +216,21 @@ checkDirectory($tagsDirectory, "tag");
 checkDirectory($daqsDirectory, "daq");
 checkDirectory($generatorDir,  "generator");
 checkDirectory($tempLogDirectory,  "temporary log");
+if ( $pythiaInput == 1 ) {
+	checkFile($kumacFile);
+	checkFile($seed);
+	checkFile($daqEvents);
+}
 
 # No checks for logs anymore. will be created dynamically in the xml file
 #checkDirectory($logDirectory,  "log");
 
-$outputXml = getXmlFileName($production);
+if ( $pythiaInput == 1 ) {
+	$outputXml = getXmlFileNamePythia($production, $ptmin, $ptmax);
+}
+else {
+	$outputXml = getXmlFileName($production);
+}
 
   print "\n";
   print "  Production:         $production\n";
@@ -236,7 +269,7 @@ printDebug("Open $outputXml ... (ok)");
 #----------------------------------------------------------------------------------------------------
 print OUT "<!-- Generated by $0 on $date -->\n";
 print OUT "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-print OUT "<job maxFilesPerProcess=\"$maxFilesPerProcess\" fileListSyntax=\"$fileListSyntax\">\n";
+print OUT "<job maxFilesPerProcess=\"$maxFilesPerProcess\" fileListSyntax=\"$fileListSyntax\" simulateSubmission=\"false\">\n";
 print OUT "\n";
 print OUT "<command>\n";
 
@@ -274,9 +307,19 @@ print OUT "\n";
 #print OUT "setenv EMHPSS $hpssLogDir\n";
 
 printDebug("Set output path ...");
-my $outputDirectory = getOutputDirectory($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library);
 print OUT "<!-- Set output directory path -->\n";
-print OUT "setenv EMOUTPUT $outputDirectory\n";
+if ( $pythiaInput == 1 ){
+	my $outputDirectoryPythia = getOutputDirectoryPythia($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library, $ptmin, $ptmax);
+	my $listDirectoryPythia   = getListDirectoryPythia($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library, $ptmin, $ptmax);
+	print OUT "setenv EMOUTPUT $outputDirectoryPythia\n";
+	print OUT "setenv EMLIST $listDirectoryPythia\n";
+}
+ else {
+	my $outputDirectory = getOutputDirectory($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library);
+	my $listDirectory   = getListDirectory($elizaDisk, $trgsetupName, $particleName, $requestNumber, $production, $library);
+	print OUT "setenv EMOUTPUT $outputDirectory\n";
+	print OUT "setenv EMLIST $listDirectory\n";
+ }
 print OUT "\n";
 
 print OUT "\n";
@@ -285,6 +328,7 @@ print OUT "echo EMYEAR   : \$EMYEAR\n";
 print OUT "echo EMDAY    : \$EMDAY\n";
 print OUT "echo EMLOGS   : \$EMLOGS\n";
 print OUT "echo EMOUTPUT : \$EMOUTPUT\n";
+print OUT "echo EMLIST   : \$EMLIST\n";
 #print OUT "echo EMHPSS : \$EMHPSS\n";
 print OUT "\n";
 print OUT "<!-- Start job -->\n";
@@ -296,9 +340,37 @@ my $tagFile = "\$EMBEDTAGDIR/$fileBaseNameXml.tags.root"; #Define tag file
 printDebug("Set tags file: $tagFile");
 
 #----------------------------------------------------------------------------------------------------
+# Set fzd file
+#----------------------------------------------------------------------------------------------------
+my $fzdFile = "$fileBaseNameXml.fzd"; #Define fzd file - it will be created, and lives in the current directory 
+printDebug("Set fzd file: $fzdFile");
+
+#----------------------------------------------------------------------------------------------------
 # Set bfcMixer
 #----------------------------------------------------------------------------------------------------
 printDebug("Set bfcMixer: $bfcMixer ...");
+
+#---------------------------------------------------------------------------------------------------
+# Run starsim with kumac file and random number generator
+#---------------------------------------------------------------------------------------------------
+if ( $pythiaInput == 1 ) {
+	print OUT "\n";
+	print OUT "<!-- Run starsim with kumac file -->\n";
+	use File::Basename;
+#	my($kumacBaseFileName, $kumacBaseDirectory) = fileparse($kumacFile);
+#	my($seedBaseFileName, $seedBaseDirectory) = fileparse($seed);
+#	my($daqEventsBaseFileName, $daqEventsSeedBaseDirectory) = fileparse($daqEvents);
+#	print OUT "set daqEventsBaseFileName=$daqEventsBaseFileName\n";
+	print OUT "set daqevents=$daqEvents\n";
+#	print OUT "set kumac=$kumacBaseFileName\n";
+	print OUT "set kumac=$kumacFile\n";
+	print OUT "set fzdFile=$fzdFile\n";
+# print OUT "set random=`$seedBaseFileName`\n";
+	print OUT "set random=`$seed`\n";
+	print OUT "set nevents=`grep \$FILEBASENAME \$daqevents | awk '{print \$2}'`\n";
+	print OUT "echo nevents = \$nevents, random = \$random, kumac = \$kumac, fzdFile=\$fzdFile\n";
+	print OUT "starsim -w 0 -b \$kumac \$fzdFile \$random \$nevents\n\n";
+}
 
 # Determine trigger string
 my $triggerString = "0";
@@ -308,14 +380,14 @@ if ( @triggerId ){
 
 # Get bfcMixer
 $execute_bfcMixer = get_bfcMixer($bfcMixer, $nevents, "\$INPUTFILE0", $tagFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, $vrCut,
-    $pid, $multiplicity, $triggerString, $prodName, $ptOption) ;
+    $pid, $multiplicity, $triggerString, $prodName, $ptOption, $pythiaInput, $fzdFile) ;
 
 print OUT "echo 'Executing $execute_bfcMixer ...'\n";
 print OUT "\n";
 print OUT "root4star -b &lt;&lt;EOF\n";
 
 # Put Trigger id's 
-print OUT getTriggerVector($triggerString, @triggerId) ;
+print OUT getTriggerVector(0, $triggerString, @triggerId) ;
 
 print OUT "  .L $bfcMixer\n";
 print OUT "  $execute_bfcMixer\n";
@@ -327,9 +399,15 @@ print OUT "\n\n";
 #----------------------------------------------------------------------------------------------------
 # Make output directory
 #----------------------------------------------------------------------------------------------------
-print OUT "<!-- Make output directory -->\n";
-print OUT "mkdir -pv \$EMOUTPUT\n";
-print OUT "chmod -R ug+rw \$EMOUTPUT\n";
+print OUT "<!-- Make output and list directory (if they don't exist) -->\n";
+print OUT "if ( ! -f \$EMOUTPUT ) then \n";
+print OUT "  mkdir -pv \$EMOUTPUT\n";
+print OUT "  chmod -R ug+rw \$EMOUTPUT\n";
+print OUT "endif\n";
+print OUT "if ( ! -f \$EMLIST ) then \n";
+print OUT "  mkdir -pv \$EMLIST\n";
+print OUT "  chmod -R ug+rw \$EMLIST\n";
+print OUT "endif\n";
 print OUT "\n\n";
 
 #----------------------------------------------------------------------------------------------------
@@ -343,12 +421,14 @@ printDebug("Set errfilename: $errFileName ...");
 
 #print OUT "cp " . getTempLogDirectory($production, 0) . "/$jobIdXml.log $logFileName\n";
 #print OUT "cp " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog $errFileName\n";
-print OUT "<!-- Copy LOG files to eliza disk -->\n";
+print OUT "<!-- Move LOG files and csh to eliza disk, remove list files -->\n";
 print OUT "mv -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.log \$EMOUTPUT/$logFileName\n";
 print OUT "mv -v " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog \$EMOUTPUT/$errFileName\n";
+print OUT "mv -v $generatorDir/sched\$JOBID.csh \$EMLIST/\n";
+print OUT "rm -v $generatorDir/sched\$JOBID.list\n";
 print OUT "\n";
-print OUT "<!-- Copy ROOT files to eliza disk -->\n";
-print OUT "cp -v *.root \$EMOUTPUT/\n";
+#print OUT "<!-- Copy ROOT files to eliza disk -->\n";
+#print OUT "cp -v *.root \$EMOUTPUT/\n";
 
 #print OUT "<!-- New command to organize log files -->\n";
 #print OUT "mkdir -p $logDirectory\n";
@@ -388,6 +468,10 @@ printDebug("Locations of log/elog, daq files, csh/list and local sand-box ...");
 
 # Now, the directory for LOG files here is the temporary path to store the files.
 # Files will be moved a new path determined by production, particle name, request number and FSET
+print OUT "<!-- Define locations of ROOT files -->\n";
+print OUT "<output fromScratch=\"*.root\" toURL=\"\$EMOUTPUT/\"/>\n";
+if ( $pythiaInput == 1 ) { print OUT "<output fromScratch=\"*.fzd\" toURL=\"\$EMOUTPUT/\"/>\n"; }
+print OUT "\n";
 print OUT "<!-- Define locations of log/elog files -->\n";
 print OUT "<stdout URL=\"file:$tempLogDirectory/$jobIdXml.log\"/>\n";
 print OUT "<stderr URL=\"file:$tempLogDirectory/$jobIdXml.elog\"/>\n";
@@ -406,6 +490,11 @@ print OUT "  <Package name=\"Localmakerlibs\">\n";
 print OUT "    <File>file:./$libraryPath/</File>\n";
 print OUT "    <File>file:./StRoot/</File>\n";
 print OUT "    <File>file:./pams/</File>\n";
+#if ( $pythiaInput == 1 ) { 
+#	print OUT " 	<File>file:$seed</File>\n"; 
+#	print OUT " 	<File>file:$kumacFile</File>\n";
+#	print OUT " 	<File>file:$daqEvents</File>\n"; 
+#}
 print OUT "  </Package>\n";
 print OUT "</SandBox>\n";
 print OUT "</job>\n";
@@ -435,11 +524,13 @@ if($local){
   # Find one daq file from the path, and also find the corredponding tags file
   my $daqOneFile  = `find $daqsDirectory -type f -iname "*daq" | head -n1`;
   chomp($daqOneFile);
+  my $daqOneFileBaseName  = `basename $daqOneFile`;
+  chomp($daqOneFileBaseName);
 
   # Make sure daq file exists
   if ( ! -f $daqOneFile ){
-    print "Can't find $daqOneFile. Stop\n";
-    exit(0);
+   	print "Can't find $daqOneFile. Stop\n";
+   	exit(0);
   }
   printDebug("Found one daq file: $daqOneFile");
 
@@ -449,10 +540,17 @@ if($local){
 
   # Make sure tags file exists
   if ( ! -f $tagsOneFile ){
-    print "Can't find $tagsOneFile. Stop\n";
-    exit(0);
+		if ( $pythiaInput != 1 ){
+    	print "Can't find $tagsOneFile. Stop\n";
+    	exit(0);
+		}
   }
   printDebug("Found one tags file: $tagsOneFile");
+
+	#Make sure fzd file exists
+  my $fzdOneFile = `basename $daqOneFile | sed 's/\\.daq/\\.fzd/g'`;
+	chomp($fzdOneFile);
+  printDebug("Create one fzd file: $fzdOneFile");
   
   open (LOCAL, ">$localTestScript") || die "can't open $localTestScript\n"; 
   print LOCAL "#!/bin/csh\n";
@@ -464,14 +562,32 @@ if($local){
 
   # Get bfcMixer
   $execute_bfcMixer = get_bfcMixer($bfcMixer, 10, $daqOneFile, $tagsOneFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, $vrCut,
-      $pid, $multiplicity, $triggerString, $prodName, $ptOption) ;
+      $pid, $multiplicity, $triggerString, $prodName, $ptOption, $pythiaInput, $fzdOneFile);
 
-  print LOCAL "echo 'Executing $execute_bfcMixer ...'\n";
-  print LOCAL "\n";
-  print LOCAL "root4star -b <<EOF\n";
-
-  # Put Trigger id's (Need to fix &lt; and &gt; by hand)
-  print LOCAL getTriggerVector($triggerString, @triggerId) ;
+# Run starsim
+	if ( $pythiaInput == 1 ){
+		use File::Basename;
+#		my($kumacBaseFileName, $kumacBaseDirectory) = fileparse($kumacFile);
+#		my($seedBaseFileName, $seedBaseDirectory) = fileparse($seed);
+#		my($daqEventsBaseFileName, $daqEventsSeedBaseDirectory) = fileparse($daqEvents);
+#		print LOCAL "set kumac=$kumacBaseFileName\n";
+		print LOCAL "set kumac=$kumacFile\n";
+		print LOCAL "set fzd=$fzdOneFile\n";
+		print LOCAL "set daqevents=$daqEvents\n";
+#		print LOCAL "set random=`$seedBaseFileName`\n";
+		print LOCAL "set random=`$seed`\n";
+		print LOCAL "set nevents=`grep \'$daqOneFileBaseName\' \$daqevents | awk '{print \$2}'`\n";
+		print LOCAL "echo nevents = \$nevents, random = \$random, kumac = \$kumac, fzd=\$fzd\n";
+		print LOCAL "\n";
+		print LOCAL "echo Running \"starsim -w 0 -b \$kumac \$fzd \$random \$nevents\"\n";
+		print LOCAL "starsim -w 0 -b \$kumac \$fzd \$random \$nevents\n\n";
+	}
+ 	print LOCAL "echo 'Executing $execute_bfcMixer ...'\n";
+ 	print LOCAL "\n";
+ 	print LOCAL "root4star -b <<EOF\n";
+	
+  # Put Trigger id's (Need to fix &lt; and &gt; by hand -> fixed)
+  print LOCAL getTriggerVector(1, $triggerString, @triggerId) ;
 
   print LOCAL "  .L $bfcMixer\n";
   print LOCAL "  $execute_bfcMixer\n";
@@ -507,6 +623,8 @@ sub get_bfcMixer {
   my $trigger      = shift @_ ;
   my $prodname     = shift @_ ;
   my $ptOption     = shift @_ ;
+  my $pythia 		   = shift @_ ;
+  my $fzdfile		   = shift @_ ;
 
   # Remove '.C' from macro
   my $bfcMixerFunction = `basename $bfcMixer`;
@@ -521,9 +639,15 @@ sub get_bfcMixer {
     # bfcMixer_TpcSvtSsd.C needs two additional switches
     printDebug("SVT/SSD flags are added in the 2nd/3rd arguments");
 
-    $execute_bfcMixer = "$bfcMixerFunction($nevents, 1, 1, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\");";
+    $execute_bfcMixer = "$bfcMixerFunction($nevents, 1, 1, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\", $pythia);";
   }
-  else{
+  elsif ( $bfcMixer =~ /.*Tpx.C/  ){
+    # bfcMixers with PYTHIA flag option (Tpx only) (CBPowell)
+    printDebug("Starndard (without SVT/SSD) bfcMixer (Tpx only)");
+
+    $execute_bfcMixer = "$bfcMixerFunction($nevents, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $vrcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\", $pythia, \"$fzdfile\");";
+  }
+	else {	
     # Other bfcMixers (TpcOnly or Tpx)
     printDebug("Starndard (without SVT/SSD) bfcMixer");
 
@@ -538,13 +662,19 @@ sub get_bfcMixer {
 # Get trigger vectors
 #----------------------------------------------------------------------------------------------------
 sub getTriggerVector {
+  my $flag          = shift @_ ;
   my $triggerString = shift @_ ;
   my @triggerArray = @_ ;
 
   $val = "";
   if ( @triggerArray ) {
     printDebug("Trigger id(s) requested");
-    $val = $val . "  std::vector&lt;Int_t&gt; $triggerString;\n";
+    if ( $flag eq 0 ) {
+      $val = $val . "  std::vector&lt;Int_t&gt; $triggerString;\n";
+    }
+    else {
+      $val = $val . "  std::vector<Int_t> $triggerString;\n";
+    }
     while ( @triggerArray ){
       $trigger = shift @triggerArray ;
       $val = $val . "  $triggerString.push_back($trigger);\n";
@@ -561,6 +691,16 @@ sub getTriggerVector {
 sub getXmlFileName {
   my $production = shift @_ ;
   return "embed_template_$production.xml";
+}
+
+#----------------------------------------------------------------------------------------------------
+# Output filename (xml with pt hard bin)
+#----------------------------------------------------------------------------------------------------
+sub getXmlFileNamePythia {
+  my $production 	= shift @_ ;
+  my $ptmin 			= shift @_ ;
+  my $ptmax 			= shift @_ ;
+  return "embed_template_$production\_PtHard_$ptmin\_$ptmax.xml";
 }
 
 #----------------------------------------------------------------------------------------------------
@@ -694,6 +834,47 @@ sub getOutputDirectory {
 }
 
 #----------------------------------------------------------------------------------------------------
+# Get output directory (with pt hard bin)
+#----------------------------------------------------------------------------------------------------
+sub getOutputDirectoryPythia {
+  my $elizadisk     = shift @_ ;
+  my $trgsetupname  = shift @_ ;
+  my $particleName  = shift @_ ;
+  my $requestNumber = shift @_ ;
+  my $production    = shift @_ ;
+  my $library       = shift @_ ;
+  my $ptmin 	      = shift @_ ;
+  my $ptmax 	      = shift @_ ;
+  return "$elizadisk/star/starprod/embedding/$trgsetupname/$particleName\_&FSET;_$requestNumber\_PtHard\_$ptmin\_$ptmax/$production.$library/\$EMYEAR/\$EMDAY";
+}
+#----------------------------------------------------------------------------------------------------
+# Get list directory
+#----------------------------------------------------------------------------------------------------
+sub getListDirectory {
+  my $elizadisk     = shift @_ ;
+  my $trgsetupname  = shift @_ ;
+  my $particleName  = shift @_ ;
+  my $requestNumber = shift @_ ;
+  my $production    = shift @_ ;
+  my $library       = shift @_ ;
+  return "$elizadisk/star/starprod/embedding/$trgsetupname/$particleName\_$requestNumber/FSET&FSET;_$production.$library\_\$EMYEAR";
+}
+#----------------------------------------------------------------------------------------------------
+# Get list directory (with pt hard bin)
+#----------------------------------------------------------------------------------------------------
+sub getListDirectoryPythia {
+  my $elizadisk     = shift @_ ;
+  my $trgsetupname  = shift @_ ;
+  my $particleName  = shift @_ ;
+  my $requestNumber = shift @_ ;
+  my $production    = shift @_ ;
+  my $library       = shift @_ ;
+  my $ptmin 	      = shift @_ ;
+  my $ptmax 	      = shift @_ ;
+  return "$elizadisk/star/starprod/embedding/$trgsetupname/$particleName\_$requestNumber/FSET&FSET;_PtHard\_$ptmin\_$ptmax\_$production.$library\_\$EMYEAR";
+}
+
+#----------------------------------------------------------------------------------------------------
 # Get local library path
 #----------------------------------------------------------------------------------------------------
 sub getLocalLibraryPath {
@@ -733,7 +914,6 @@ sub checkFile {
   print "\n";
   exit(0);
 }
-
 
 #----------------------------------------------------------------------------------------------------
 # Check directory exists

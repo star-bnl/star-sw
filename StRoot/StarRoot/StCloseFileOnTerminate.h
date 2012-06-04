@@ -1,6 +1,6 @@
 #ifndef STAR_STCLOSEFILEONTERMINATE
 #define STAR_STCLOSEFILEONTERMINATE
-// $Id: StCloseFileOnTerminate.h,v 1.6 2010/07/02 19:42:59 fine Exp $
+// $Id: StCloseFileOnTerminate.h,v 1.7 2011/06/20 22:36:48 fisyak Exp $
 
 #include "TSysEvtHandler.h"
 
@@ -37,7 +37,9 @@ class StCloseFileOnTerminate : public TSignalHandler {
        // ! singleton ctor 
        StCloseFileOnTerminate();
        //! Create an instance of the signal handler (Should be called at once  by code)
+ public:
        static StCloseFileOnTerminate &Instantiate();
+ protected:
        static bool Exists() {return fgCloseFileOnTerminate;}
        //! Close the open ROOT files upon SIGTERM sent by system to terminate the job
        virtual Bool_t Notify();

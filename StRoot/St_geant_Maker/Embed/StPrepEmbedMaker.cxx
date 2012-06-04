@@ -15,11 +15,12 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.3 2010/11/07 23:28:36 hmasui Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.5 2011/12/05 15:50:49 zhux Exp $
  *
  */
 
 #include "TFile.h"
+#include "StIOMaker/StIOMaker.h"
 #include "StMessMgr.h"
 #include "StPrepEmbedMaker.h"
 #include "StEvtHddr.h"
@@ -64,6 +65,7 @@ StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name)
   mGeant3=0;
   mTagFile = "" ;
   mMoreTagsFile = "" ;
+  mFzFile = "temp.fz";
   mEventCounter = 0;
 
   if( !mSettings ){
@@ -93,6 +95,9 @@ StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name)
   mTree = 0;
   mSkipMode = kFALSE; /// Do not skip the false vertex
   mSpreadMode = kFALSE; /// Do not smear z-vertex
+  mOpenFzFile = kFALSE; /// Do not write .fz file
+  mPrimeMode = kFALSE; /// Do not prime the first event
+  mPrimed = kFALSE;
 }
 //____________________________________________________________________________________________________
 StPrepEmbedMaker::~StPrepEmbedMaker() { 
@@ -195,6 +200,21 @@ Int_t StPrepEmbedMaker::InitRun(const int runnum)
   }//end if Spectrum
 #endif
 
+  if( mOpenFzFile ) {
+    // Open .fz file
+    // Name fz file with same basename as daq file
+    // If there are no daq files, use default name "temp.fz"
+    if (StIOMaker* ioMaker = (StIOMaker*)GetMakerInheritsFrom("StIOMaker")) {
+      if (const Char_t* daqfile = ioMaker->GetFile()) {
+        LOG_DEBUG << "StPrepEmbedMaker::InitRun  daq file: " << daqfile << endm;
+        mFzFile = gSystem->BaseName(daqfile);
+        mFzFile.ReplaceAll(".daq",".fz");
+      }
+    }
+    LOG_INFO << "StPrepEmbedMaker::InitRun  Open FZ file: " << mFzFile << endm;
+    Do("user/output o " + mFzFile);
+  }
+  
   // Common geant settings
   Do("make gstar"); // Make user-defined particles available
   gSystem->Load("libgstar");
@@ -348,12 +368,16 @@ Int_t StPrepEmbedMaker::Make()
      vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
   }
 
+  if( mPrimeMode && !mPrimed ) {
+     mSavePid = mSettings->pid;
+     mSettings->pid = 45;
+  }
+
   // gkine is needed to set the z-vertex
   gkine(npart, xyz[2], xyz[2]);
 
   // Flat (pt, y)
   phasespace(npart);
-  
   
   Do(Form("gvertex %f %f %f",xyz[0],xyz[1],xyz[2]));
   if( mSettings->mode.CompareTo("strange", TString::kIgnoreCase) == 0 )
@@ -394,14 +418,22 @@ Int_t StPrepEmbedMaker::Make()
 
   Do("trig 1");
 
+  if( mPrimeMode && !mPrimed ){
+     mSettings->pid = mSavePid;
+     mPrimed = kTRUE;
+  }   
+
   return kStOK;
 }
 
 //____________________________________________________________________________________________________
 Int_t StPrepEmbedMaker::Finish()
 {
-  TString cmd("user/output c temp.fz");
-  Do(cmd.Data());
+  if( mOpenFzFile ) {
+    /// Write and close .fz file
+    LOG_INFO << "StPrepEmbedMaker::Finish  Write and close fz file: " << mFzFile << endm;
+    Do("user/output c " + mFzFile);
+  }
   return 0;
 }
 
@@ -474,6 +506,21 @@ void StPrepEmbedMaker::SetSpreadMode(const Bool_t flag)
   LOG_INFO << "StPrepEmbedMaker::SetSpreadMode  set spread mode= ";
 
   if( mSpreadMode ){
+    LOG_INFO << " ON" << endm ;
+  }
+  else{
+    LOG_INFO << " OFF" << endm ;
+  }
+}
+
+//____________________________________________________________________________________________________
+void StPrepEmbedMaker::SetPrimeMode(const Bool_t flag)
+{
+  mPrimeMode=flag;
+
+  LOG_INFO << "StPrepEmbedMaker::SetPrimeMode  set prime mode= ";
+
+  if( mPrimeMode ){
     LOG_INFO << " ON" << endm ;
   }
   else{
@@ -556,6 +603,15 @@ void StPrepEmbedMaker::SetVrCut(const Double_t vr)
     << " (cm)" << endm;
 }
 
+//________________________________________________________________________________
+void StPrepEmbedMaker::OpenFzFile()
+{
+  // Swtich to enable writing .fz file (default is off, i.e. do not write .fz file) 
+  mOpenFzFile = kTRUE ;
+  LOG_INFO << "StPrepEmbedMaker::OpenFzFile  Write .fz file. File basename will be taken "
+           << "from daq file basename" << endm;
+}
+
 
 //________________________________________________________________________________
 void StPrepEmbedMaker::phasespace(const Int_t mult)
@@ -600,6 +656,13 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.5  2011/12/05 15:50:49  zhux
+ * Add switch to prime the first event with deuterons (for dbar, tbar and hypertritons embedding).
+ * see ticket# 2097 for details.
+ *
+ * Revision 1.4  2010/11/30 23:32:22  hmasui
+ * Add fz file and a switch to enable writing fz file
+ *
  * Revision 1.3  2010/11/07 23:28:36  hmasui
  * Added transverse vertex cut
  *

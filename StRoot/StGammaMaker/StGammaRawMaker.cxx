@@ -290,13 +290,17 @@ void StGammaRawMaker::GetBarrel()
                 int id = tempRawHit->softId(BTOW);
  
                 // Ignore excluded towers
-                for(int i = 0; i < mExcludedBemcTowers.size(); ++i)
+                bool excludedTower = false;
+
+                for(UInt_t i = 0; i < mExcludedBemcTowers.size(); ++i)
                 {
-                    if(id == mExcludedBemcTowers.at(i))
-                    {
-                        LOG_DEBUG << " Excluding tower "<< id << endm;
-                        continue;
-                    }
+                    if(id == mExcludedBemcTowers.at(i)) excludedTower = true;
+                }
+
+                if(excludedTower)
+                {
+                    LOG_DEBUG << " Excluding tower "<< id << endm;
+                    continue;
                 }
 
                 int status;

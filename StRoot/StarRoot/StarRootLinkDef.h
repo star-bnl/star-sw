@@ -61,6 +61,10 @@
 #pragma link C++ enum  EDraw3DStyle;
 //IncFile=TPolynomial.h
 #pragma link C++ namespace TPolynomial;
-#pragma link C++ class MTrack;
-#pragma link C++ class MVertex;
+#pragma link C++ class KFParticleBase+;
+#pragma link C++ class KFParticle+;
+#pragma link C++ class MTrack+;
+#pragma link C++ class MVertex+;
+#pragma link C++ class TTreeIter-;
+#pragma link C++ class TTreeIterCast-;
 #endif

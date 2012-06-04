@@ -12,10 +12,10 @@ plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oP
   //iPath="./";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
   //iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-march15-PRL/data/";
-  iPath="/star/data05/scratch/balewski/2009-Wana-SL10j-aW/data/";
+  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-a3/data/";
   //core0="R10090018";
   //core0="run9setABCD";
-  core0="sum";
+  core0="run9setP1234";
   //core0="mcSetD1_ppWprod";
   //core0="mcSetD2_ppQCD10_inf_filter_tot";
   // core0="mcSetD1_ppZprod";
@@ -711,9 +711,6 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
-// Revision 1.17  2010/11/09 23:00:56  balewski
-// added chi2/dof for East & West TPC separately
-//
 // Revision 1.16  2010/03/22 16:11:44  balewski
 // better computation of AL(QCD)
 //

@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.19 2010/11/09 23:00:50 balewski Exp $
+// $Id: St2009W_histo.cxx,v 1.18 2010/05/01 01:31:44 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -173,9 +173,7 @@ St2009WMaker::initHistos(){
   hA[56]=h=new TH1F("muSmallNearTpcPT",Form("TPC PT in #Delta R =%.1f from lepton candidate; PT (GeV)",par_smallNearDeltaR),100,0,100);
   hA[57]=h=new TH2F("muTr2D1pt5","lastHit on track (pt > 5); detector eta ; detector phi (rad)",100,-1.1,1.1,240,-PI,PI);
 
-
-  hA[58]=new TH1F("muTrch2West","track glob chi2/dof  West TPC ; chi2/dof",100,0,5);
-  hA[59]=new TH1F("muTrch2East","track glob chi2/dof  East TPC ; chi2/dof",100,0,5);
+  //free 58-59
 
   //... final golden plots ....
 
@@ -285,9 +283,6 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
-// Revision 1.19  2010/11/09 23:00:50  balewski
-// added chi2/dof for East & West TPC separately
-//
 // Revision 1.18  2010/05/01 01:31:44  balewski
 // added W->JJ code & JES calibration
 //

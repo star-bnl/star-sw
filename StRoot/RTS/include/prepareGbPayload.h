@@ -30,7 +30,7 @@ public:
  
 
   struct evpCfg {
-    UINT32 groupdef[TRIGGERS_MAX][2];  // [trigger group] [0 low mask, 1 highmask]
+    UINT32 groupdef[TRIGGERS_MAX];  // [trgger_group]
     float rate[TRIGGERS_MAX];   // -1 -> take every one, 0 -> take none
     int policy;
   } evpCfg;
@@ -53,9 +53,7 @@ public:
     EvpGroup *groups = cfg->trg_setup.evpGroup;
     evpCfg.policy = cfg->trg_run.EvpPolicy;
     for(int i=0;i<TRIGGERS_MAX;i++) {
-      evpCfg.groupdef[i][0] = groups[i].definition[0];
-      evpCfg.groupdef[i][1] = groups[i].definition[1];
-      
+      evpCfg.groupdef[i] = groups[i].definition;
       evpCfg.rate[i] = groups[i].rate;
       if((evpCfg.rate[i] > 0) && (divisor > 1)) {
 	evpCfg.rate[i] /= divisor;
@@ -103,7 +101,7 @@ public:
     return ret;
   }
 
-  UINT32 evpAssign(UINT32 trg_lo, UINT32 trg_hi)
+  UINT32 evpAssign(UINT32 trg)
   {
     if(evpCtrs.runStartTime == -1) {
       evpCtrs.runStartTime = time(NULL);
@@ -115,8 +113,7 @@ public:
     // get event group mask
     UINT32 grpmask = 0;
     for(int i=0;i<32;i++) {
-      if((trg_lo & evpCfg.groupdef[i][0]) ||
-	 (trg_hi & evpCfg.groupdef[i][1])) grpmask |= (1<<i);
+      if(trg & evpCfg.groupdef[i]) grpmask |= (1<<i);
     }
 
     // get firemask (after rates)
@@ -176,7 +173,7 @@ public:
     pay->L1summary[0] = l2h32(l1trg);
     pay->L2summary[0] = l2h32(l2trg);
     pay->L3summary[0] = l2h32(l2trg);
-    pay->evp = l2h32(evpAssign(l2trg, 0));
+    pay->evp = l2h32(evpAssign(l2trg));
     pay->L3summary[3] = pay->evp;
     
 #ifdef __vxworks

@@ -57,7 +57,7 @@ enum Input_Type { none, live, file, pointer, dir };
 #define EVP_STAT_LOG  (-4)
 
 typedef unsigned int u_int;
-typedef unsigned long long int u_longlong;
+
 
 struct SummaryInfo {
   u_int token ;		// current token
@@ -68,7 +68,7 @@ struct SummaryInfo {
   u_int daqbits_l2;
   u_int evpgroups;
   u_int evp_daqbits;
-  
+
   u_int trgword;
   u_int trgcmd;	// current trigger command
   u_int daqcmd;	// current DAQ command
@@ -208,11 +208,6 @@ class daqReader {
   u_int daqbits ;		// "offline" bits aka L3 summary...
   u_int daqbits_l1;       // triggers satisfying l1 
   u_int daqbits_l2;       // triggers satisfying l2
-
-  u_longlong daqbits64;
-  u_longlong daqbits64_l1;
-  u_longlong daqbits64_l2;
-
   u_int evpgroups ;       // evp groups aka L3 summary[2]     
 
   u_int evt_time ;	// time in UNIX seconds

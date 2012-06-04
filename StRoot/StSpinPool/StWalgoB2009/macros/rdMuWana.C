@@ -15,7 +15,7 @@ class StChain;
 StChain *chain=0;
 int useEtow=3;// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
 
-int  spinSort=false;
+int  spinSort=true;
 bool isJanWjj=false; 
 int  isJustin=false;
 bool isRoss=true; 
@@ -26,22 +26,20 @@ int rdMuWana(
 	     char* inDir   = "",// make it empty for scheduler 
 	     char* file    = "/star/u/balewski/2009-Wana-pp500/fillListD/F10535/R10102105_230531_230601.lis",
 	     int nFiles  = 5000, // max # of muDst files
-	     int isMC=0, // 0=run9-data 200=new MC w/ EEss in BFC
+	     int isMC=0, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
 	     int useJetFinder = 2 // 0 - no jets=badWalgo; 1 generate jet trees; 2 read jet trees 
  ) { 
 char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
 
   TString jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.15.2010/"; //default location of jet trees for run 9 data
-  TString jetTreeDir = "/star/data05/scratch/balewski/2009-Wana-SL10j-aJ/data/";
 
   if(isJanWjj){ // Jan: use isMC=100 for interactive M-C,
     if(isMC==0) jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.16.2010phys/"; 
   }
-  if(isMC &&  useJetFinder==2) geant=true;
+  if(isJanWjj && isMC &&  useJetFinder==2) geant=true;
 
-  printf("aaaa\n");
-  if(isMC==100 )  jetTreeDir="./";
-  if(isMC==200 )  jetTreeDir="/star/institutions/mit/balewski/2009-Wsim-setD/data/";// new M-C w/ EEss in BFC
+
+  if(isMC==100||isMC==200 )  jetTreeDir="./";
   if(isMC==104)   jetTreeDir ="/star/data05/scratch/balewski/2010-Wsimu-a3/jetR04/";
   if(isMC==105)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR04split05/";
   if(isMC==107)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR07/";
@@ -51,10 +49,9 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
   if(isMC==30) geant=true; //uses geant files
   
   if(isMC) spinSort=false;
-  printf("aaaa2\n");
+
   TString outF=file;
   int runNo=0,bht3ID=0,l2wID=0,fillNo=0;
-  printf("aaaa2.1\n");
   if(isMC==0) {//real data: runNum, trigID, L2ID from list name
     printf("Unpack file=%s=\n",file); 
     char *file1=strstr(file,"/R")+1;
@@ -72,14 +69,12 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
     printf("OutF=%s=\n",outF.Data());
   } 
   else { //  new  MC w/ working time stamp
-    printf("aaaa3\n");
     char *file1=strstr(file,"cn100"); assert(file1);
     file1--;
     printf("file1=%s=\n",file1);
     outF=file1; outF.ReplaceAll(".MuDst.root","");
     TString fileG=file; fileG.ReplaceAll("MuDst","geant");
   }
-  printf("aaaa4\n");
   printf("TRIG ID: bht3=%d l2w=%d isMC=%d\n",bht3ID,l2wID,isMC);
   
   
@@ -479,12 +474,6 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
 
 
 // $Log: rdMuWana.C,v $
-// Revision 1.43  2010/11/09 23:00:56  balewski
-// added chi2/dof for East & West TPC separately
-//
-// Revision 1.42  2010/10/25 01:58:19  balewski
-// isMC=200 point jet reader to mit-balewski disk
-//
 // Revision 1.41  2010/08/13 16:29:07  balewski
 // *** empty log message ***
 //

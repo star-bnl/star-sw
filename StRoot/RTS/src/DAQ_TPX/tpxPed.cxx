@@ -552,50 +552,6 @@ int tpxPed::to_cache(char *fname, u_int run)
 	return 1 ;
 }
 
-int tpxPed::hlt_debug_setup(int param)
-{
-	int delta_tb = param % 100 ;
-	int delta_pad = param / 100 ;
-	int hits ;
-
-	if(delta_tb < 6) delta_tb = 6 ;
-	if(delta_pad < 3) delta_pad = 3 ;
-
-	hits = 0 ;
-
-	for(int r=1;r<=45;r++) {
-
-	for(int p=3;p<=(tpc_rowlen[r]-delta_pad-2);p+=delta_pad) {
-
-		for(int pd=0;pd<2;pd++) {
-			struct peds *ped = get(r,p+pd) ;
-
-			for(int t=15;t<400;t+=delta_tb) {
-
-
-				hits++ ;
-
-				for(int td=0;td<5;td++) {
-					double val = ped->ped[t+td] ;
-					// lower the pedestal 5 ADC counts
-					if(val < 10.0) val = 0.0 ;
-					else val -= 10.0 ;
-
-					ped->ped[t+td] = val ;
-				}
-			}
-		}
-	}
-	}
-
-	LOG(TERR,"param %u: delta pad %d,time %d: %d hits",param,delta_pad,delta_tb,hits/2) ;
-
-	valid = 1 ;
-	smoothed = 1 ;
-
-	return 1 ;
-}
-
 int tpxPed::special_setup(int run_type, int sub_type)
 {
 	int r, p, t ;
@@ -606,14 +562,8 @@ int tpxPed::special_setup(int run_type, int sub_type)
 	case RUN_TYPE_PULSER :
 	case RUN_TYPE_PED_A :
 	case RUN_TYPE_PED_B :
-
 		LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
 		break ;
-	case RUN_TYPE_HLT_DEBUG :
-		LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
-		hlt_debug_setup(sub_type) ;
-		return 1 ; 
-		
 	default :
 		return 1 ;
 	}
@@ -632,9 +582,6 @@ int tpxPed::special_setup(int run_type, int sub_type)
 			break ;
 		case RUN_TYPE_PULSER :
 			for(t=TPX_PULSER_PED_START;t<=TPX_PULSER_PED_STOP;t++) ped->ped[t] = 0.0 ;
-			break ;
-		case RUN_TYPE_HLT_DEBUG :
-			
 			break ;
 		case RUN_TYPE_PED_A :	// starts with ped=0
 			m = 0 ;			

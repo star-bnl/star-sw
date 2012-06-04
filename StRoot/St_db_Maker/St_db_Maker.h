@@ -1,5 +1,14 @@
-// $Id: St_db_Maker.h,v 1.38 2010/05/05 18:35:04 dmitry Exp $
+// $Id: St_db_Maker.h,v 1.42 2012/03/16 19:36:18 dmitry Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.42  2012/03/16 19:36:18  dmitry
+// converted dangled char pointers to std::string objects + fixed typo
+//
+// Revision 1.41  2011/11/28 17:03:09  dmitry
+// dbv override support in StDbLib,StDbBroker,St_db_Maker
+//
+// Revision 1.40  2011/03/19 02:50:57  perev
+// blacklist added
+//
 // Revision 1.38  2010/05/05 18:35:04  dmitry
 // addon: single datasets also saved
 //
@@ -106,6 +115,9 @@
 #include "TDatime.h"
 #include "StDbBroker/dbConfig.h"
 
+#include <map>
+#include <utility>
+
 class TFileSet;
 class TList;
 class TBrowser;
@@ -124,11 +136,12 @@ private:
   TDatime     fDBTime;          //! Own DB time stamp
   Int_t       fUpdateMode;      //!
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
+  std::map<std::pair<std::string,std::string>,UInt_t> fMaxEntryTimeOverride; // DBV override for specific subsystems
   TStopwatch  fTimer[6];        //!Timer object
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.38 2010/05/05 18:35:04 dmitry Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.42 2012/03/16 19:36:18 dmitry Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -155,6 +168,7 @@ private:
    virtual void    Clear(Option_t *opt="");
    virtual Int_t   Finish();
            void    SetMaxEntryTime(Int_t idate,Int_t itime);
+           void    AddMaxEntryTimeOverride(Int_t idate,Int_t itime, char* dbType = 0, char* dbDomain = 0);
 private:
    virtual TDataSet* UpdateDB (TDataSet* ds);
    virtual int UpdateTable(UInt_t parId, TTable* dat, const TDatime &req, TDatime val[2]);
@@ -175,7 +189,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.38 2010/05/05 18:35:04 dmitry Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.42 2012/03/16 19:36:18 dmitry Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };

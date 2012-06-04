@@ -3,7 +3,7 @@
 
 #include "TChair.h"
 #include "tables/St_tpcElectronics_Table.h"
-
+#include "St_starClockOnlC.h"
 class St_tpcElectronicsC : public TChair {
  public:
   static St_tpcElectronicsC* 	instance();
@@ -11,7 +11,8 @@ class St_tpcElectronicsC : public TChair {
   UInt_t     	getNumRows()                	{return GetNRows();}
   Int_t 	numberOfTimeBins(Int_t i = 0) 	{return Struct(i)->numberOfTimeBins;}
   Double_t 	nominalGain(Int_t i = 0) 	{return Struct(i)->nominalGain;}
-  Double_t 	samplingFrequency(Int_t i = 0) 	{return Struct(i)->samplingFrequency;}
+  //  Double_t 	samplingFrequency(Int_t i = 0) 	{return Struct(i)->samplingFrequency;}  obsolete
+  Double_t      samplingFrequency(Int_t i = -1) {return 1e-6*St_starClockOnlC::instance()->CurrentFrequency(i);}
   Double_t 	tZero(Int_t i = 0) 	        {return Struct(i)->tZero;}
   Double_t 	adcCharge(Int_t i = 0) 	        {return Struct(i)->adcCharge;}
   Double_t 	adcConversion(Int_t i = 0) 	{return Struct(i)->adcConversion;}

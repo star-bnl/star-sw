@@ -166,10 +166,10 @@ so we keep it here for source compatibility
 */
 
 #define TPC_SYSTEM	0
-#define TPC_ID		TPC_SYSTEM	/* retired */
+#define TPC_ID		TPC_SYSTEM
 
 #define	SVT_SYSTEM	1
-#define SVT_ID		SVT_SYSTEM	/* retired */
+#define SVT_ID		SVT_SYSTEM
 
 #define TOF_SYSTEM	2
 #define TOF_ID		TOF_SYSTEM
@@ -211,7 +211,7 @@ so we keep it here for source compatibility
 #define PMD_ID		PMD_SYSTEM
 
 #define SSD_SYSTEM	13
-#define SSD_ID		SSD_SYSTEM	/* retired */
+#define SSD_ID		SSD_SYSTEM
 
 /* Endcap Tower!*/
 #define ETOW_SYSTEM	14
@@ -237,22 +237,13 @@ so we keep it here for source compatibility
 #define TPX_SYSTEM      20
 #define TPX_ID          TPX_SYSTEM    /* DAQ1000 detector */
 
-#define PXL_SYSTEM      21
-#define PXL_ID          PXL_SYSTEM     /* HFT's Pixel; Used to be HFT_ID */
+#define HFT_SYSTEM      21
+#define HFT_ID          HFT_SYSTEM     /* Heavy Flavor Tracker */
 
 #define MTD_SYSTEM      22
 #define MTD_ID          MTD_SYSTEM     /* Muon Tracking Detector */
 
-#define IST_SYSTEM      23
-#define IST_ID          IST_SYSTEM     /* HFT's Inner Silicon Tracker */
-
-#define SS2_SYSTEM      24
-#define SS2_ID          SS2_SYSTEM     /* HFT's SSD */
-
-#define RPII_SYSTEM      25
-#define RPII_ID          RPII_SYSTEM     /* Roman Pots, Phase II */
-
-#define RTS_NUM_SYSTEMS	26	/* current maximum. Can not be greater than 32! */
+#define RTS_NUM_SYSTEMS	23	/* current maximum. Can not be greater than 32! */
 
 #define PP_SEQE_INSTANCE  1
 #define PP_SEQW_INSTANCE  2
@@ -514,12 +505,9 @@ so we keep it here for source compatibility
 #define PP_NODES(x) ((EXT_SYSTEM<<12) | ((PP_SYSTEM)<<4) | (x))
 
 #define TPX_NODES(x)     ((EXT2_SYSTEM<<12) | (TPX_SYSTEM<<7) | (x))
+#define HFT_NODES(x)     ((EXT2_SYSTEM<<12) | (HFT_SYSTEM<<7) | (x))
 #define MTD_NODES(x)	 ((EXT2_SYSTEM<<12) | (MTD_SYSTEM<<7) | (x))
 
-#define PXL_NODES(x)     ((EXT2_SYSTEM<<12) | (PXL_SYSTEM<<7) | (x))
-#define IST_NODES(x)     ((EXT2_SYSTEM<<12) | (IST_SYSTEM<<7) | (x))
-#define SS2_NODES(x)     ((EXT2_SYSTEM<<12) | (SS2_SYSTEM<<7) | (x))
-#define RPII_NODES(x)     ((EXT2_SYSTEM<<12) | (RPII_SYSTEM<<7) | (x))
 
 extern inline const char *rts2name(int rts_id)
 {
@@ -558,22 +546,16 @@ extern inline const char *rts2name(int rts_id)
 		return "SC" ;
 	case TPX_SYSTEM :
 	        return "TPX" ;
-	case PXL_SYSTEM :
-	        return "PXL" ;
+	case HFT_SYSTEM :
+	        return "HFT" ;
 	case PP_SYSTEM :
 	        return "PP2PP" ;
 	case RIC_SYSTEM :
 		return "RICH" ;
 	case MTD_SYSTEM :
 		return "MTD" ;
-	case IST_SYSTEM :
-		return "IST" ;
-	case SS2_SYSTEM :
-		return "SS2" ;
-	case RPII_SYSTEM :
-		return "RPII" ;
 	default :
-	  return (const char *)NULL ;	// unknown!
+		return NULL ;	// unknown!
 	}
 } ;
 
@@ -590,12 +572,9 @@ extern inline int name2rts(const char *name)
 #endif
 
 
-/* return >= 0 only in case of real detectors */
-/* Why do we need this?? Tonko. */
 extern inline int rts2det(int ix)
 {
 	switch(ix) {
-	case RIC_ID :
 	case TPC_ID :
 	case SVT_ID :
 	case TOF_ID :
@@ -608,13 +587,10 @@ extern inline int rts2det(int ix)
 	case BSMD_ID :
 	case ESMD_ID :
 	case TPX_ID :
-	case PXL_ID :
+	case HFT_ID :
 	case PP_ID :
 	case FGT_ID :
 	case MTD_ID :
-	case IST_ID :
-	case SS2_ID :
-	case RPII_ID :
 		return ix ;
 	default :
 		return -1 ;
@@ -708,8 +684,7 @@ extern inline int tcd2rts(int tcd)
 
 // BTOW, ETOW now part of trigger:   jan 2008
 #define LEGACY_DETS (1<<FTP_ID)
-#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<PXL_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
-		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<IST_ID) | (1<<SS2_ID) | (1<<RPII_ID))
+#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<HFT_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID))
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 extern inline u_int grp2rts_mask(int grp)

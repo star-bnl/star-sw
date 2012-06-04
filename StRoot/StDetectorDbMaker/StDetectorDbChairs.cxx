@@ -315,6 +315,94 @@ St_TpcPadCorrectionC::~St_TpcPadCorrectionC() {
 }
 #include "St_tpcGainCorrectionC.h"
 MakeChairInstance2(tpcCorrection,St_tpcGainCorrectionC,Calibrations/tpc/tpcGainCorrection);
+#include "StTpcHitErrors.h"
+StTpcHitErrors *StTpcHitErrors::fgInstance = 0;
+StTpcHitErrors *StTpcHitErrors::instance() {
+  if (! fgInstance) {
+    StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcHitErrors");
+    cout << "StTpcHitErrors have been instantiated with" << endl
+	 << "StTpcHitErrors fnXZ(" <<  fgInstance->fXZ << "," << fgInstance->fSec << "," << fgInstance->fRow << "," 
+	 << fgInstance->fMS << "," << fgInstance->fPrompt << ") = " << fgInstance->fNxz << endl;
+  }
+  return fgInstance;
+}
+Double_t StTpcHitErrors::calcError(Int_t iXZ, Int_t sec, Int_t row, Double_t _z,  Double_t _eta, Double_t _tanl, Int_t Npads, Int_t Ntmbks, Double_t AdcL, Double_t xPad) {
+  const static Double_t PitchLog[3] = {TMath::Log(0.335), TMath::Log(0.675), TMath::Log(5.78602945878541108e-01)};
+  /*
+    X[0] =            fit.Npads;
+    X[1] =            fit.Ntmbks;
+    X[2] = TMath::Tan(fit.phiL);
+    X[3] = TMath::Tan(fit.dipL);
+    X[4] =            fit.zL;
+    X[5] =            fit.AdcL;
+    X[6] =            fit.xPad;
+  */
+  Int_t s = 0, r = 0, p = 0;
+  if (sec > 12) s = 1;
+  if (row > 13) r = 1;
+  Int_t pitch = s;
+  if (iXZ) pitch = 2;
+  Double_t Vars[7] = {
+    Npads,             // 0 => no. of pads in cluster
+    Ntmbks,            // 1 => no. of time buckets in cluster
+    -TMath::Tan(_eta), // 2 => tan(phiL)
+    _tanl,             // 3 => tan(dipL)
+    _z,                // 4 => zL
+    TMath::Log(AdcL),  // 5 => Adc counts
+    xPad};             // 6=> xPad
+  if (s) {// East 
+    Vars[3] = - Vars[3];
+    Vars[4] = - Vars[4];
+  }
+  if (Vars[3] > 195) p = 1;
+  TMDFParameters *mdf = GetSigmaSQ(iXZ,s,r,p);
+  assert(mdf);
+  Double_t valueLog = mdf->Eval(Vars);
+  return   TMath::Exp(2*(valueLog + PitchLog[pitch]));
+}
+#include "St_tpcStatusC.h"
+MakeChairInstance(tpcStatus,Calibrations/tpc/tpcStatus);
+#include "St_TpcAvgCurrentC.h"
+MakeChairInstance(TpcAvgCurrent,Calibrations/tpc/TpcAvgCurrent);
+//________________________________________________________________________________
+Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t row) {
+  if (row <  1 || row > 45) return -1;
+  if (row <  3) return 1;
+  if (row <  7) return 2;
+  if (row < 10) return 3;
+  if (row < 14) return 4;
+  if (row < 22) return 5;
+  if (row < 30) return 6;
+  if (row < 38) return 7;
+  return 8;
+}
+//________________________________________________________________________________
+Int_t St_TpcAvgCurrentC::ChannelFromSocket(Int_t socket) {
+  Int_t channel = -1;
+  switch (socket) {
+  case 1:
+  case 2 : channel = 1; break;
+  case 3:
+  case 4:  channel = 2; break;
+  case 5:
+  case 6:  channel = 3; break;
+  case 7:
+  case 8:
+  case 17: channel = 4; break;
+  case 9:
+  case 10:
+  case 18: channel = 5; break;
+  case 11:
+  case 12: channel = 6; break;
+  case 13:
+  case 14: channel = 7; break;
+  case 15:
+  case 16:
+  case 19: channel = 8; break;
+  default:              break;
+  }
+  return channel;
+}
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
@@ -543,6 +631,16 @@ MakeChairInstance2(Survey,StSsdOnGlobal,Geometry/ssd/SsdOnGlobal);
 MakeChairInstance2(Survey,StSsdSectorsOnGlobal,Geometry/ssd/SsdSectorsOnGlobal);
 MakeChairInstance2(Survey,StSsdLaddersOnSectors,Geometry/ssd/SsdLaddersOnSectors);
 MakeChairInstance2(Survey,StSsdWafersOnLadders,Geometry/ssd/SsdWafersOnLadders);
+#include "StTpcSurveyC.h"
+MakeChairInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPosition);
+MakeChairInstance2(Survey,StTpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPosition);
+//________________________________________________________________________________
+const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
+  static TGeoHMatrix rot;
+  rot.SetRotation(Rotation(i));
+  rot.SetTranslation(Translation(i));
+  return *&rot;
+}
 //________________________________________________________________________________
 void St_SurveyC::GetAngles(Double_t &phi, Double_t &the, Double_t &psi, Int_t i) {
   phi = the = psi = 0;  // Korn 14.10-5
@@ -569,14 +667,66 @@ void St_SurveyC::GetAngles(Double_t &phi, Double_t &the, Double_t &psi, Int_t i)
 //________________________________________________________________________________
 St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   TString Name(name);
-  if (Name == "SvtOnGlobal")          return (St_SurveyC   *) StSvtOnGlobal::instance();	    
-  if (Name == "ShellOnGlobal")        return (St_SurveyC   *) StSvtShellOnGlobal::instance();  
-  if (Name == "LadderOnSurvey")       return (St_SurveyC   *) StSvtLadderOnSurvey::instance(); 
-  if (Name == "LadderOnShell")        return (St_SurveyC   *) StSvtLadderOnShell::instance();  
-  if (Name == "WaferOnLadder")        return (St_SurveyC   *) StSvtWaferOnLadder::instance();  
-  if (Name == "SsdOnGlobal")          return (St_SurveyC   *) StSsdOnGlobal::instance();
-  if (Name == "SsdSectorsOnGlobal")   return (St_SurveyC   *) StSsdSectorsOnGlobal::instance();
-  if (Name == "SsdLaddersOnSectors")  return (St_SurveyC   *) StSsdLaddersOnSectors::instance();
-  if (Name == "SsdWafersOnLadders")   return (St_SurveyC   *) StSsdWafersOnLadders::instance();
+  if (Name == "SvtOnGlobal")            return (St_SurveyC   *) StSvtOnGlobal::instance();	    
+  if (Name == "ShellOnGlobal")        	return (St_SurveyC   *) StSvtShellOnGlobal::instance();  	
+  if (Name == "LadderOnSurvey")       	return (St_SurveyC   *) StSvtLadderOnSurvey::instance(); 	
+  if (Name == "LadderOnShell")        	return (St_SurveyC   *) StSvtLadderOnShell::instance();  	
+  if (Name == "WaferOnLadder")        	return (St_SurveyC   *) StSvtWaferOnLadder::instance();  	
+  if (Name == "SsdOnGlobal")          	return (St_SurveyC   *) StSsdOnGlobal::instance();	
+  if (Name == "SsdSectorsOnGlobal")   	return (St_SurveyC   *) StSsdSectorsOnGlobal::instance();	
+  if (Name == "SsdLaddersOnSectors")  	return (St_SurveyC   *) StSsdLaddersOnSectors::instance();
+  if (Name == "SsdWafersOnLadders")   	return (St_SurveyC   *) StSsdWafersOnLadders::instance(); 
+  if (Name == "TpcOuterSectorPosition") return (St_SurveyC   *) StTpcOuterSectorPosition::instance();
+  if (Name == "TpcSuperSectorPosition") return (St_SurveyC   *) StTpcSuperSectorPosition::instance();
   return 0;
 }
+//__________________Calibrations/rhic______________________________________________________________
+#include "St_vertexSeedC.h"
+MakeChairInstance(vertexSeed,Calibrations/rhic/vertexSeed);
+//__________________Calibrations/tof______________________________________________________________
+#include "St_tofGeomAlignC.h"
+MakeChairInstance(tofGeomAlign,Calibrations/tof/tofGeomAlign);
+#include "St_tofTrayConfigC.h"
+MakeChairInstance(tofTrayConfig,Calibrations/tof/tofTrayConfig);
+#include "St_tofStatusC.h"
+MakeChairInstance(tofStatus,Calibrations/tof/tofStatus);
+//____________________________Calibrations/emc____________________________________________________
+#include "St_emcPedC.h"
+MakeChairInstance2(emcPed,St_bemcPedC,Calibrations/emc/y3bemc/bemcPed);
+MakeChairInstance2(emcPed,St_bprsPedC,Calibrations/emc/y3bprs/bprsPed);
+#include "St_emcStatusC.h"
+MakeChairInstance2(emcStatus,St_bemcStatusC,Calibrations/emc/y3bemc/bemcStatus);
+MakeChairInstance2(emcStatus,St_bprsStatusC,Calibrations/emc/y3bprs/bprsStatus);
+#include "St_emcCalibC.h"
+MakeChairInstance2(emcCalib,St_bemcCalibC,Calibrations/emc/y3bemc/bemcCalib);
+MakeChairInstance2(emcCalib,St_bprsCalibC,Calibrations/emc/y3bprs/bprsCalib);
+#include "St_emcGainC.h"
+MakeChairInstance2(emcGain,St_bemcGainC,Calibrations/emc/y3bemc/bemcGain);
+MakeChairInstance2(emcGain,St_bprsGainC,Calibrations/emc/y3bprs/bprsGain);
+
+#include "St_smdPedC.h"
+MakeChairInstance2(smdPed,St_bsmdePedC,Calibrations/smd/y3bsmde/bsmdePed);
+MakeChairInstance2(smdPed,St_bsmdpPedC,Calibrations/smd/y3bsmdp/bsmdpPed);
+#include "St_smdStatusC.h"
+MakeChairInstance2(smdStatus,St_bsmdeStatusC,Calibrations/smd/y3bsmde/bsmdeStatus);
+MakeChairInstance2(smdStatus,St_bsmdpStatusC,Calibrations/smd/y3bsmdp/bsmdpStatus);
+#include "St_smdCalibC.h"
+MakeChairInstance2(smdCalib,St_bsmdeCalibC,Calibrations/smd/y3bsmde/bsmdeCalib);
+MakeChairInstance2(smdCalib,St_bsmdpCalibC,Calibrations/smd/y3bsmdp/bsmdpCalib);
+#include "St_smdGainC.h"
+MakeChairInstance2(smdGain,St_bsmdeGainC,Calibrations/smd/y3bsmde/bsmdeGain);
+MakeChairInstance2(smdGain,St_bsmdpGainC,Calibrations/smd/y3bsmdp/bsmdpGain);
+#include "St_emcTriggerStatusC.h"
+MakeChairInstance2(emcTriggerStatus,St_bemcTriggerStatusC,Calibrations/emc/trigger/bemcTriggerStatus);
+#include "St_emcTriggerPedC.h"
+MakeChairInstance2(emcTriggerPed,St_bemcTriggerPedC,Calibrations/emc/trigger/bemcTriggerPed);
+#include "St_emcTriggerLUTC.h"
+MakeChairInstance2(emcTriggerLUT,St_bemcTriggerLUTC,Calibrations/emc/trigger/bemcTriggerLUT);
+#include "St_bemcMapC.h"
+MakeChairInstance(bemcMap,Calibrations/emc/map/bemcMap);
+#include "St_bprsMapC.h"
+MakeChairInstance(bprsMap,Calibrations/prs/map/bprsMap);
+#include "St_bsmdeMapC.h"
+MakeChairInstance(bsmdeMap,Calibrations/smde/map/bsmdeMap);
+#include "St_bsmdpMapC.h"
+MakeChairInstance(bsmdpMap,Calibrations/smdp/map/bsmdpMap);
