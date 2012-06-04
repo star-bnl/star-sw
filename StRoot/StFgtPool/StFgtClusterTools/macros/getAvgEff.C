@@ -1,13 +1,17 @@
 
-void getAvgEff(Char_t* signalFile="signalShapes.root", Bool_t onlyQuadB=true)
+void getAvgEff(Char_t* signalFile="signalShapes.root", Bool_t onlyQuadB=true, Int_t diskNr)
 {
   gStyle->SetPalette(1);
   gStyle->SetOptStat(0);
-   TFile f("rootOut/mrgSignalShapes.root");
+   TFile f(signalFile);
    //TFile f("signalShapes.root");
- TH2D* h=(TH2D*)f.Get("radioDiskEffLoose_2");
- TH2D* hEff=(TH2D*)f.Get("allCountsLooseDisk_3");//counting different for this histo
- TH2D* hNonEff=(TH2D*)f.Get("radioDiskNonEffLoose_2");
+ char buffer[100];
+ sprintf(buffer,"radioDiskEffLoose_%d",diskNr-1);
+ TH2D* h=(TH2D*)f.Get(buffer);
+ sprintf(buffer,"allCountsLooseDisk_%d",diskNr);//counting different for this histo
+ TH2D* hEff=(TH2D*)f.Get(buffer);
+ sprintf(buffer,"radioDiskNonEffLoose_%d",diskNr-1);
+ TH2D* hNonEff=(TH2D*)f.Get(buffer);
 
  Double_t max=h->GetXaxis()->GetXmax();
  Double_t min=h->GetXaxis()->GetXmin();
@@ -59,7 +63,7 @@ for(Int_t i=1;i<h->GetNbinsX()+1;i++)
       }
   }
  TCanvas c;
- char buffer[100];
+
  sprintf(buffer,"Average Efficiency is %f +- %f",eff/overallErr,sqrt(1/overallErr));
  TLatex t1(-30,0,buffer);
  OverallEff.Draw("colz");
