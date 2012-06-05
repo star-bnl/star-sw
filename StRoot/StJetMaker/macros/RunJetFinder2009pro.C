@@ -93,6 +93,12 @@ void RunJetFinder2009pro(int nevents = 1e6,
   filterMaker->addTrigger(240124);
   filterMaker->addTrigger(240224);
 
+  // 2011 pp500
+  filterMaker->addTrigger(330600);
+  filterMaker->addTrigger(330601);
+  filterMaker->addTrigger(330603);
+  filterMaker->addTrigger(330612);
+
   // star database
   St_db_Maker* starDb = new St_db_Maker("StarDb","MySQL:StarDb");
 
@@ -148,8 +154,9 @@ void RunJetFinder2009pro(int nevents = 1e6,
   anapars12->addTpcCut(new StjTrackCutNHits(12));
   anapars12->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
   anapars12->addTpcCut(new StjTrackCutDca(3));
-  anapars12->addTpcCut(new StjTrackCutDcaPtDependent);
-  anapars12->addTpcCut(new StjTrackCutChi2(0,4));
+  //anapars12->addTpcCut(new StjTrackCutDcaPtDependent);
+  anapars12->addTpcCut(new StjTrackCutTdcaPtDependent);
+  //anapars12->addTpcCut(new StjTrackCutChi2(0,4));
   anapars12->addTpcCut(new StjTrackCutPt(0.2,200));
   anapars12->addTpcCut(new StjTrackCutEta(-2.5,2.5));
   anapars12->addTpcCut(new StjTrackCutLastPoint(125));
@@ -185,8 +192,9 @@ void RunJetFinder2009pro(int nevents = 1e6,
   anapars5->addTpcCut(new StjTrackCutNHits(5));
   anapars5->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
   anapars5->addTpcCut(new StjTrackCutDca(3));
-  anapars5->addTpcCut(new StjTrackCutDcaPtDependent);
-  anapars5->addTpcCut(new StjTrackCutChi2(0,4));
+  //anapars5->addTpcCut(new StjTrackCutDcaPtDependent);
+  anapars5->addTpcCut(new StjTrackCutTdcaPtDependent);
+  //anapars5->addTpcCut(new StjTrackCutChi2(0,4));
   anapars5->addTpcCut(new StjTrackCutPt(0.2,200));
   anapars5->addTpcCut(new StjTrackCutEta(-2.5,2.5));
 
