@@ -23,6 +23,9 @@ void getCluAvgEff(Char_t* signalFile="signalShapes.root", Bool_t onlyQuadB=true,
 Double_t eff=0;
 Int_t count=0;
 
+ Int_t sumEff=0;
+ Int_t sumNonEff=0;
+
  Double_t overallErr=0;
 for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
   {
@@ -44,9 +47,19 @@ for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
 	    Int_t numEff=hEff->GetBinContent(i,j);
 	    Int_t numNonEff=hNonEff->GetBinContent(i,j);
 	    Int_t numCounts=numEff+numNonEff;
+
+
 	    Double_t efficiency=0;
 	    if(numCounts>0)
+	      {
+
 	      efficiency=(Double_t)numEff/(Double_t)numCounts;
+	      }
+	    if(numEff>0)
+	      {
+		sumEff+=numEff;
+		sumNonEff+=numNonEff;
+	      }
 
 	    OverallEff.SetBinContent(i,j,efficiency);
 
@@ -73,13 +86,16 @@ for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
       }
   }
  TCanvas c;
-
- sprintf(buffer,"Average Efficiency is %f +- %f",eff/overallErr,sqrt(1/overallErr));
+ Double_t avgEff=sumEff/(Double_t)(sumEff+sumNonEff);
+ //binomial error, beware of 0
+ Double_t effErr=sqrt(avgEff*(1-avgEff)*(sumEff+sumNonEff));
+ sprintf(buffer,"Average Efficiency is %f +- %f",avgEff,effErr);
  TLatex t1(-30,0,buffer);
  OverallEff.Draw("colz");
  t1.Draw();
  c.SaveAs("overallEff.png");
  c.SaveAs("overallEff.C");
 //cout <<"avg eff: " << eff/count <<endl;
- cout <<"avg eff: " << eff/overallErr <<" +- "<< sqrt(1/overallErr)<<endl;
+ cout <<"Hits found: " << sumEff <<" Hits not found: " << sumNonEff<< " efficiency: " <<avgEff<<" +- " << effErr<<endl;
+
 }
