@@ -1260,6 +1260,11 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 			u_int row = *p_buff++ ;
 			u_int cou = *p_buff++ ;
 			
+			if(cou > 1000000) {
+				LOG(WARN,"Bad data in S%02d-%d, row %d -- count is %d -- skipping",
+				    s,r,row,cou) ;
+				break ;
+			}
 
 			u_int version = (row >> 16) ;	// decoder needs the version
 			row &= 0xFFFF ;			// finalize the row...
