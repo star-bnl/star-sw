@@ -37,7 +37,7 @@ class StjTrackCutTdcaPtDependent : public StjTrackCut {
    */
 
 public:
-  StjTrackCutTdcaPtDependent(double pt1 = 0.5, double dcaMax1 = 2.0, double pt2 = 1.0, double dcaMax2 = 1.0)
+  StjTrackCutTdcaPtDependent(double pt1 = 0.5, double dcaMax1 = 2.0, double pt2 = 1.5, double dcaMax2 = 1.0)
     : _pt1(pt1), _dcaMax1(dcaMax1), _pt2(pt2), _dcaMax2(dcaMax2) { }
 
   bool operator()(const StjTrack& track) const
