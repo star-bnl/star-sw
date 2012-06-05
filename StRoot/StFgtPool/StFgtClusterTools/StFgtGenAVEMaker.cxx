@@ -1009,23 +1009,18 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	   if(phi<0)
 	     phi+=MY_PI;
 	    (*outTxtFile) << " looking at Track with chi2/ndf *[cm}: " << it_lastTrack->chi2 << " z vertex: " << it_lastTrack->ipZ << endl;
-	    if(disksHit.find(i)!=disksHit.end())
+
+	    //this snipplet is only good for the disks in which we don't look for efficiencies, otherwise it overcounts the nonEff
+	    //so either use the findClosest point for all, or check if we look at efficient disk or not...
+	    /*	    if(disksHit.find(i)!=disksHit.end())
 	      {
-		(*outTxtFile) <<"***** found hit in disk " <<i << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
-#ifdef DO_PRINT
-		printArea(r,phi,i,quad);
-#endif
 		radioPlotsEff[i]->Fill(xExp,yExp);
 	      }
 	    else//not efficient
 	      {
 		radioPlotsNonEff[i]->Fill(xExp,yExp);
-		(*outTxtFile) <<"expected (but haven't found)  point on disk " << i <<", x: " << xExp <<" y: " << yExp << " r: " << r  <<" phi: " << phi << " quad:: " << quad << endl;
-		////		cout <<" expect hit at disc " << iD <<" quad: " << iq  << " r: " <<  r <<" phi: "<< phi <<endl;
-#ifdef DO_PRINT
-		printArea(r,phi,i,quad);
-#endif
-	      }
+
+		}*/
 	    ///for disk for which we want to compute effi:
 
 	    //	    cout <<"fill strip histos " << endl;
@@ -1067,12 +1062,21 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		    //		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<endl;
 		    radioPlotsEff[i]->Fill(xExp,yExp);
 		    hResidua->Fill(sqrt(closestPoint));
+		(*outTxtFile) <<"***** found hit in disk " <<i << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
+#ifdef DO_PRINT
+		printArea(r,phi,i,quad);
+#endif
 		    //		    chargeCorrInEffDisk->Fill(rPhiRatio.first,rPhiRatio.second);
 		  }
 		else
 		  {
 		    //		    cout <<"non eff disk, x: " << xExp <<" y: " << yExp <<endl;
 		    radioPlotsNonEff[i]->Fill(xExp,yExp);
+		(*outTxtFile) <<"expected (but haven't found)  point on disk " << i <<", x: " << xExp <<" y: " << yExp << " r: " << r  <<" phi: " << phi << " quad:: " << quad << endl;
+		////		cout <<" expect hit at disc " << iD <<" quad: " << iq  << " r: " <<  r <<" phi: "<< phi <<endl;
+#ifdef DO_PRINT
+		printArea(r,phi,i,quad);
+#endif
 		  }
 		pair<Double_t,Double_t> rPhiRatio=getChargeRatio(r,phi,i,quad);
 
