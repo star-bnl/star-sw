@@ -168,8 +168,9 @@ void RunJetFinder2009sim(int nevents = 1e6,
   anapars12_100->addTpcCut(new StjTrackCutNHits(12));
   anapars12_100->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
   anapars12_100->addTpcCut(new StjTrackCutDca(3));
-  anapars12_100->addTpcCut(new StjTrackCutDcaPtDependent);
-  anapars12_100->addTpcCut(new StjTrackCutChi2(0,4));
+  //anapars12_100->addTpcCut(new StjTrackCutDcaPtDependent);
+  anapars12_100->addTpcCut(new StjTrackCutTdcaPtDependent);
+  //anapars12_100->addTpcCut(new StjTrackCutChi2(0,4));
   anapars12_100->addTpcCut(new StjTrackCutPt(0.2,200));
   anapars12_100->addTpcCut(new StjTrackCutEta(-2.5,2.5));
   anapars12_100->addTpcCut(new StjTrackCutLastPoint(125));
@@ -208,8 +209,9 @@ void RunJetFinder2009sim(int nevents = 1e6,
   anapars12_093->addTpcCut(new StjTrackCutNHits(12));
   anapars12_093->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
   anapars12_093->addTpcCut(new StjTrackCutDca(3));
-  anapars12_093->addTpcCut(new StjTrackCutDcaPtDependent);
-  anapars12_093->addTpcCut(new StjTrackCutChi2(0,4));
+  //anapars12_093->addTpcCut(new StjTrackCutDcaPtDependent);
+  anapars12_093->addTpcCut(new StjTrackCutTdcaPtDependent);
+  //anapars12_093->addTpcCut(new StjTrackCutChi2(0,4));
   anapars12_093->addTpcCut(new StjTrackCutPt(0.2,200));
   anapars12_093->addTpcCut(new StjTrackCutEta(-2.5,2.5));
   anapars12_093->addTpcCut(new StjTrackCutLastPoint(125));
@@ -248,8 +250,9 @@ void RunJetFinder2009sim(int nevents = 1e6,
   anapars5->addTpcCut(new StjTrackCutNHits(5));
   anapars5->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
   anapars5->addTpcCut(new StjTrackCutDca(3));
-  anapars5->addTpcCut(new StjTrackCutDcaPtDependent);
-  anapars5->addTpcCut(new StjTrackCutChi2(0,4));
+  //anapars5->addTpcCut(new StjTrackCutDcaPtDependent);
+  anapars5->addTpcCut(new StjTrackCutTdcaPtDependent);
+  //anapars5->addTpcCut(new StjTrackCutChi2(0,4));
   anapars5->addTpcCut(new StjTrackCutPt(0.2,200));
   anapars5->addTpcCut(new StjTrackCutEta(-2.5,2.5));
 
