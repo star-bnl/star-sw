@@ -1,0 +1,64 @@
+MACRO aaa nevent=1   file=junk
+trace on
+
+swit 2 3
+swit 4 3
+*debug on
+dhits
+
+detp  geom y2012
+*detp geom dev13
+
+* to change geometry version of FGT do:
+*DETP FGTD fggg(1) fgstconfig=2.0
+*detp  geom upgr2012
+
+
+gstat time size mult stak
+
+
+* use private local geometry
+*gexec .$STAR_LIB/libStarMagFieldNoDict.so
+*gexec .$STAR_HOST_SYS/lib/xgeometry.so
+* use official geometry
+gexe $STAR_LIB/libStarMagFieldNoDict.so
+gexe $STAR_LIB/xgeometry.so
+*               ! Finalize GEANT data structures 
+gclose all
+
+*exe plFgtGallery#q Z=69.5
+*exe plFgtGallery#s2 x=2.
+*nex; dcut cave x 10 -8. 10 0.2 0.2
+exe plFgtGallery#d z=120
+exe plFgtGallery#eve4 
+
+* disk 1 & cables at 90
+*nex; dcut cave x 1.5 -8. 10 0.2 0.2
+*nex; dcut cave x 1.5 -4. 10 0.1 0.1
+
+return
+macro aa
+<Shape type="CONE"  RMN1="23.7"  RMX1="24.7"   RMN2="37.8" RMX2="38.8"  dz="7.1/2."  />
+* exe plV#track 0 1.8 3
+
+
+*all 
+* nex; dcut cave x 1 0. 10 0.1 0.1
+* side zoom, 6 disks
+*   nex;dcut CAVE x 0.1 .5 6.0 0.065 0.065
+
+* side zoom, st1 disks, out of scale
+*   nex;dcut CAVE x 0. -70. 10.0 1.2 0.2
+*larger zoom on disk 1
+ nex;dcut CAVE x 15. -290. 10.0 3. 0.2
+
+* all 6 disks zoom 
+*   nex;dcut CAVE x 1. -8. 10.0 0.2 0.2
+
+* nex;dcut CAVE z 81.5 10. 10.0 0.2 0.2
+
+ daxis 0 0 0 70
+return
+
+
+*/star/u/wzhang/fgtVMC/fgtInt2/StRoot/StEEmcPool/FgtSandbox1
