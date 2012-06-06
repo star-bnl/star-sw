@@ -88,14 +88,15 @@ for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
  TCanvas c;
  Double_t avgEff=sumEff/(Double_t)(sumEff+sumNonEff);
  //binomial error, beware of 0
- Double_t effErr=sqrt(avgEff*(1-avgEff)*(sumEff+sumNonEff));
- sprintf(buffer,"Average Efficiency is %f +- %f",avgEff,effErr);
+ Double_t errOnEffNum=sqrt(avgEff*(1-avgEff)*(sumEff+sumNonEff));
+ Double_t altErr= ((Double_t)1/(Double_t)(sumEff+sumNonEff))*sqrt(sumEff*(Double_t)(1-sumEff/(sumEff+sumNonEff)));
+ sprintf(buffer,"Average Efficiency is %f +- %f",avgEff,altErr);
  TLatex t1(-30,0,buffer);
  OverallEff.Draw("colz");
  t1.Draw();
  c.SaveAs("overallEff.png");
  c.SaveAs("overallEff.C");
 //cout <<"avg eff: " << eff/count <<endl;
- cout <<"Hits found: " << sumEff <<" Hits not found: " << sumNonEff<< " efficiency: " <<avgEff<<" +- " << effErr<<endl;
+ cout <<"Hits found: " << sumEff <<" Hits not found: " << sumNonEff<< " efficiency: " <<avgEff<<" +- " << altErr<<endl;
 
 }
