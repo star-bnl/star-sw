@@ -40,7 +40,7 @@ class UtilBeamLine3D {
   vector<TrackStump> track;
   void readTracks(const TString fnameT);
   void initHisto( TObjArray * HList);
-  void qaTracks();
+  int qaTracks();
   void scanChi2(double *par, int mode);
   void evalSolution(double *par);
   UtilBeamLine3D ();

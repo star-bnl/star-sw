@@ -22,8 +22,9 @@ UtilBeamLine3D::UtilBeamLine3D() {
   cut_minP=1.2; // GeV/c 
   // minimization:
   cut_Dmax=1.0; // likelhood cut-off  
-  par_filter=0; // 0=all, 1: +Z & +eta
-  printf("constr of UtilBeamLine3D \n");
+  par_filter=0; // 0=all, 1: West-only = +Z & +eta
+  printf("Params of UtilBeamLine3D\n  INPUT tracks: maxRxy=%.1fcm, maxZ=%.1fcm, Chi2=[%.1f,%.1f]  minP=%.1f GeVC/c \n  Minimization: Dmax=%.1fcm, WestOnly=%d \n\n",
+	 cut_maxRxy,cut_maxZ,cut_minChi2, cut_maxChi2,cut_minP,cut_Dmax,par_filter);
 }
 
 //========================
@@ -35,7 +36,10 @@ UtilBeamLine3D:: initHisto( TObjArray * HList){
   memset(hA,0,sizeof(hA));
   printf("helper:initHist\n");
 
-  hA[0]=new TH1F("trStat","statistics for tracks",20,0.5,20.5);
+  hA[0]=h=new TH1F("trStat","statistics for tracks",20,0.5,20.5);
+  h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
+  h->SetLineColor(kBlue);h->SetLineWidth(2);
+  h->SetMarkerSize(2);//<-- large text
 
   hA[1]=h=new TH1F("trCh2","input track chi2; chi2/dof",100,0,10);
   ln=new TLine(cut_minChi2,0,cut_minChi2,yMax);
@@ -77,23 +81,35 @@ UtilBeamLine3D:: initHisto( TObjArray * HList){
   hA[6]=new TH1F("trPt","input track momentum PT @DCA; PT (GeV/c)",100,0,10);
   //free 7..12
 
-  hA[13]=h= new TH2D("fcnChiXY","ln(3D likelihood), STAR X-Y plane;  X-axis (cm); Y-axis(cm)",60,-.8,.8,60,-.8,.8);
+  int nB=30;
+  hA[13]=h= new TH2D("fcnChiXY","ln(3D likelihood), STAR X-Y plane;  X-axis (cm); Y-axis(cm)",nB,-.3,.3,nB,-.3,.3);
   ln=new TLine(-10,0,10,0);  ln->SetLineColor(kMagenta); 
   L= h->GetListOfFunctions();  L->Add(ln);
   ln=new TLine(0,-10,0,10);  ln->SetLineColor(kMagenta); 
   L= h->GetListOfFunctions();  L->Add(ln);
  
-  hA[14]=h= new TH2D("fcnChiXnX","ln(3D likelihood), STAR X-n_{X} plane;  X-axis (cm); slope X ",60,0,1,60,-2e-3,2e-3);
+  hA[14]=h= new TH2D("fcnChiXnX","ln(3D likelihood), STAR X-n_{X} plane;  X-axis (cm); slope X ",nB,0,1,nB,-2e-3,2e-3);
   ln=new TLine(0,-10,0,10);  ln->SetLineColor(kMagenta); 
   L= h->GetListOfFunctions();  L->Add(ln);
+  ln=new TLine(-10,0,10,0);  ln->SetLineColor(kMagenta); 
+  L= h->GetListOfFunctions();  L->Add(ln);
 
-  hA[15]=h= new TH2D("fcnChiYnY","ln(3D likelihood),  STAR Y-n_{Y} plane;  Y-axis (cm); slope Y ",60,0,1,60,-2e-3,2e-3);
+  hA[15]=h= new TH2D("fcnChiYnY","ln(3D likelihood),  STAR Y-n_{Y} plane;  Y-axis (cm); slope Y ",nB,0,1,nB,-2e-3,2e-3);
   ln=new TLine(0,-10,0,10);  ln->SetLineColor(kMagenta); 
+  L= h->GetListOfFunctions();  L->Add(ln);
+  ln=new TLine(-10,0,10,0);  ln->SetLineColor(kMagenta); 
   L= h->GetListOfFunctions();  L->Add(ln);
   // free 16..18
 
-  hA[19]=h=new TH1F("bmSol","Solution of 3D fit, beam line params; value",1,1,1);
-  h->SetMarkerStyle(20);
+  hA[19]=h=new TH1F("bmSol","Beam line params (3D fit); value",4,1,1);
+  h->SetMarkerStyle(24);
+  float mY=0.3;
+  h->SetMaximum(mY);  h->SetMinimum(-mY);
+  h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05);
+  h->SetLineColor(kBlue);h->SetLineWidth(2);
+  // h->SetMarkerSize(2);//<-- large text
+
+  ln=new TLine(0,0,6,0);    L= h->GetListOfFunctions();  L->Add(ln);
 
   //20-30: reserved for chi2 monitoring
   hA[20]=new TH1F("fcnDet","FCN: determinant from DCA solution",200,0,1.01);
@@ -117,7 +133,7 @@ UtilBeamLine3D:: initHisto( TObjArray * HList){
 
 //========================
 //========================
-void 
+int 
 UtilBeamLine3D::qaTracks(){
   printf("qaTRacks start=%d\n",(int)track.size());
   int nOK=0;
@@ -158,6 +174,7 @@ UtilBeamLine3D::qaTracks(){
     hA[6]->Fill(t->Pt);
   }
   printf("qaTRacks end=%d\n",nOK);
+  return nOK;
 }
 
 
@@ -176,8 +193,8 @@ UtilBeamLine3D::print(int k) {
 //========================
 void 
 UtilBeamLine3D::scanChi2(double *par, int mode){
-  assert(mode==0 || mode==1);
-  // mode:  //0=Vx-Vy, 1=Vx-Ux
+
+  // mode:  //0=x-y, 1=x-nx , 2= y-ny
   printf("scan chi2, mode=%d ....\n",mode);   
   // working variables for likelihod fcn
   int npar,iflag=0;
@@ -196,15 +213,17 @@ UtilBeamLine3D::scanChi2(double *par, int mode){
   TAxis *yax=h2->GetYaxis();
   
   if(mode==0) { // adjust only if too much displaced
-    if(fabs(par[0])>0.5 ||fabs(par[1])>0.5 ){
-      xax->Set(xax->GetNbins(),par[0]-0.8,par[0]+0.8); 
-      yax->Set(yax->GetNbins(),par[1]-0.8,par[1]+0.8); 
+    if(fabs(par[0])>0.2 ||fabs(par[1])>0.2 ){
+      xax->Set(xax->GetNbins(),par[0]-0.3,par[0]+0.3); 
+      yax->Set(yax->GetNbins(),par[1]-0.3,par[1]+0.3); 
     }
   }
-  if(mode==1) { // always adjust
-    xax->Set(xax->GetNbins(),par[0]-0.8,par[0]+0.8); 
-    yax->Set(yax->GetNbins(),par[2]-4e-2,par[2]+4e-2);  
+  if(mode>0) { // always adjust
+    xax->Set(xax->GetNbins(),par[0]-0.3,par[0]+0.3); 
+    yax->Set(yax->GetNbins(),par[2]-2e-2,par[2]+2e-2);  
   }
+
+  // fill chi2 values
   for(int bx=1;bx<=xax->GetNbins();bx++){
     double x=xax->GetBinCenter(bx);
     for(int by=1;by<=yax->GetNbins();by++){
@@ -216,6 +235,11 @@ UtilBeamLine3D::scanChi2(double *par, int mode){
       if(mode==1) { // X-nX
 	wrkPar[0]=x;	  wrkPar[1]=par[1];
 	wrkPar[2]=y;      wrkPar[3]=par[3];
+      }
+
+      if(mode==2) { // X-nX
+	wrkPar[0]=par[0];      wrkPar[1]=x;
+	wrkPar[2]=par[2];      wrkPar[3]=y;
       }
 
       beamLineLike3D(npar,grad,fcnval, wrkPar,iflag);
