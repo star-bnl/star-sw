@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.13 2012/06/08 03:52:41 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.14 2012/06/08 20:22:21 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.14  2012/06/08 20:22:21  avossen
+//  updated cluster algo to find even p clusters
+//
 //  Revision 1.13  2012/06/08 03:52:41  avossen
 //  added one sigma strips to clusters
 //
@@ -73,6 +76,8 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
   Short_t disc, quadrant;
   Char_t layer;
   Double_t accuCharge=0;
+  Double_t accuChargeEven=0;
+  Double_t accuChargeUneven=0;
   Double_t accuChargeSq=0;
   Double_t accuChargeError=0;
   Int_t numStrips=0;
@@ -88,8 +93,12 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
     {
       Double_t charge=it->first->getCharge();
       accuCharge+=charge;
-      accuChargeSq+=(charge*charge);
+      if(it->first->getGeoId()%2)
+	accuChargeUneven+=charge;
+      else
+	accuChargeEven+=charge;
 
+      accuChargeSq+=(charge*charge);
       accuChargeError+=it->first->getChargeUncert();
       numStrips++;
       StFgtGeom::getPhysicalCoordinate(it->first->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
@@ -98,6 +107,18 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
       //      cout <<"charge: " << charge << " ordinate: " << ordinate << " meanSqOrd: " << meanSqOrdinate << endl;
       meanGeoId+=((it->first->getGeoId())*(charge));
     }
+
+  if(((accuChargeEven-accuChargeUneven)/accuCharge)>0.75&& layer=='P')
+    {
+      //r is probably in r<20
+      accuCharge-=accuChargeUneven;
+      for(stripWeightMap_t::iterator it=strips.begin();it!=strips.end();it++)
+	{
+	  if(it->first->getGeoId()%2)
+	    strips.erase(it);
+	}
+    }
+
   stripWeightMap_t::reverse_iterator itBack=strips.rbegin();
   //  if(strips.size()>1)
   //    {
@@ -280,7 +301,7 @@ run over all strips, find seeds, use those to start clusters
 	    {
 	      if((*it2)->getClusterSeedType()!=kFgtDeadStrip)
 		{
-		  if((*it2)->getCharge()>1*(*it2)->getChargeUncert())
+		  if((*it2)->getCharge()>2*(*it2)->getChargeUncert())
 		    {
 		      //		      cout <<"   strip: " << (*it2)->getGeoId() << " has high charge " <<endl;
 		      stripsW_Charge++;
