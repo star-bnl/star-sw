@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.12 2012/03/17 23:30:16 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.13 2012/06/08 03:52:41 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.13  2012/06/08 03:52:41  avossen
+//  added one sigma strips to clusters
+//
 //  Revision 1.12  2012/03/17 23:30:16  avossen
 //  fudged the cluster maker
 //
@@ -144,7 +147,7 @@ Bool_t StFgtSeededClusterAlgo::isSameCluster(StSPtrVecFgtStripIterator itSeed,St
 {
   //  Float_t chargeUncert = (*itSeed)->getChargeUncert() > (*nextStrip)->getChargeUncert() ? (*itSeed)->getChargeUncert() : (*nextStrip)->getChargeUncert();
   //  if((*itSeed)->getCharge()  > (*nextStrip)->getCharge() - 2*chargeUncert && (*nextStrip)->getCharge() > 2*(*nextStrip)->getChargeUncert())
-  if((*nextStrip)->getCharge() > 2*(*nextStrip)->getChargeUncert())
+  if((*nextStrip)->getCharge() > 1*(*nextStrip)->getChargeUncert())
     return true;
   else
     return false;
@@ -277,7 +280,7 @@ run over all strips, find seeds, use those to start clusters
 	    {
 	      if((*it2)->getClusterSeedType()!=kFgtDeadStrip)
 		{
-		  if((*it2)->getCharge()>2*(*it2)->getChargeUncert())
+		  if((*it2)->getCharge()>1*(*it2)->getChargeUncert())
 		    {
 		      //		      cout <<"   strip: " << (*it2)->getGeoId() << " has high charge " <<endl;
 		      stripsW_Charge++;
