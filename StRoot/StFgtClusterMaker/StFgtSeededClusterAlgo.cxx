@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.14 2012/06/08 20:22:21 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.15 2012/06/09 18:03:50 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.15  2012/06/09 18:03:50  avossen
+//  fixed bug
+//
 //  Revision 1.14  2012/06/08 20:22:21  avossen
 //  updated cluster algo to find even p clusters
 //
@@ -112,11 +115,18 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
     {
       //r is probably in r<20
       accuCharge-=accuChargeUneven;
-      for(stripWeightMap_t::iterator it=strips.begin();it!=strips.end();it++)
+      stripWeightMap_t::iterator it=strips.begin();
+      while(it!=strips.end())
 	{
 	  if(it->first->getGeoId()%2)
-	    strips.erase(it);
+	    {
+	      strips.erase(it);
+	      it=strips.begin();
+	    }
+	  else
+	    it++;
 	}
+
     }
 
   stripWeightMap_t::reverse_iterator itBack=strips.rbegin();
