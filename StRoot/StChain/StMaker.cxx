@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.250 2012/05/31 21:54:36 fisyak Exp $
+// $Id: StMaker.cxx,v 1.251 2012/06/09 22:46:52 fisyak Exp $
 //
 //
 /*!
@@ -18,6 +18,7 @@
  *                                                                     
  */
 #define STAR_LOGGER 1
+#include "StMaker.h"
 #include "Stiostream.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +38,6 @@
 #include "TClonesArray.h"
 #include "TBrowser.h"
 
-#include "StMaker.h"
 #include "StChainOpt.h"
 #include "TObjectSet.h"
 #include "StChain.h"
@@ -238,7 +238,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 //{"y2006b",      20051201,     2, "y2006b",   "y2006+new FPD+SSD5/CALB2"},// code versions indicated
   {"y2006c",      20051201,     3, "y2006c",   "y2006+new FPD+SSD5/CALB2+noPMD"},// 
   {"y2006g",      20051201,     4, "y2006g",   "y2006c + SVT dead material"},
-  {"y2006h",      20051201,     5, "y2006g",   "y2006g + ecal6+tpc2009(JW)"},
+  {"y2006h",      20051201,     5, "y2006h",   "y2006g + ecal6+tpc2009(JW)"},
 
   // in preparation
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
@@ -1945,6 +1945,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.251  2012/06/09 22:46:52  fisyak
+// Synchronize tag and geometry version for y2006h, thanks to Xianglei, bug #2374
+//
 // Revision 1.250  2012/05/31 21:54:36  fisyak
 // Add y2012a and devT geometry tags
 //
