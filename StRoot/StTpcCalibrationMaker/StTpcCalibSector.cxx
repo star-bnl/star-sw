@@ -1,5 +1,8 @@
-// $Id: StTpcCalibSector.cxx,v 1.9 2008/01/29 18:58:54 perev Exp $
+// $Id: StTpcCalibSector.cxx,v 1.10 2012/06/09 02:22:27 fisyak Exp $
 // $Log: StTpcCalibSector.cxx,v $
+// Revision 1.10  2012/06/09 02:22:27  fisyak
+// namespace std
+//
 // Revision 1.9  2008/01/29 18:58:54  perev
 // WarnOff
 //
@@ -41,7 +44,7 @@
 // Local
 #include "StTpcCalibSector.h"
 #include "StTpcCalibSetup.h"
-
+using namespace std;
 ClassImp(StTpcCalibSector)
 //
 // _____________________________________________________________________

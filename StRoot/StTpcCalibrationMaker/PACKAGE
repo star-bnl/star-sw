@@ -1,0 +1,5 @@
+# $Id $
+# package StTpcCalibrationMaker
+# author: 
+Library:libStTpcCalibrationMaker.so:LIBS +=   -lStChain  -lStDAQMaker
+#Library:libStTpcCalibrationMaker.so:LIBS +=   -lStChain  -lStDAQMaker
