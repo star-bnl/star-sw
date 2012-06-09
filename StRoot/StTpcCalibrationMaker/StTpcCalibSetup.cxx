@@ -1,5 +1,8 @@
-// $Id: StTpcCalibSetup.cxx,v 1.4 2003/09/02 17:59:11 perev Exp $
+// $Id: StTpcCalibSetup.cxx,v 1.5 2012/06/09 02:22:27 fisyak Exp $
 // $Log: StTpcCalibSetup.cxx,v $
+// Revision 1.5  2012/06/09 02:22:27  fisyak
+// namespace std
+//
 // Revision 1.4  2003/09/02 17:59:11  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -11,7 +14,7 @@
 #include <Stsstream.h>
 #include <Stiostream.h>
 #include "StTpcCalibSetup.h"
-
+using namespace std;
 ClassImp(StTpcCalibSetup)
 
 StTpcCalibSetup::StTpcCalibSetup(){
