@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.15 2012/06/09 18:03:50 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.16 2012/06/10 01:05:19 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.16  2012/06/10 01:05:19  avossen
+//  *** empty log message ***
+//
 //  Revision 1.15  2012/06/09 18:03:50  avossen
 //  fixed bug
 //
@@ -121,7 +124,10 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
 	  if(it->first->getGeoId()%2)
 	    {
 	      strips.erase(it);
-	      it=strips.begin();
+	      if(!strips.empty())
+		 it=strips.begin();
+	      else
+		break;
 	    }
 	  else
 	    it++;
