@@ -28,7 +28,7 @@ void saveSignalChar(Char_t* signalFile="signalShapes.root")
 		sprintf(layerName,"R");
 	      sprintf(buffer,"Canvas_Disc_%id_Quad%s_Layer%s",iD,quadName,layerName);
 	      TCanvas c(buffer,buffer,10,10,3000,2000);
-	      c.Divide(3,2);
+	      c.Divide(3,3);
 	      c.cd(1);
 	      sprintf(buffer,"numFSigCloseCluster%s_disc%d_quad%d",layerName,iD,iQ);
 	      cout <<"loading " << buffer <<endl;
@@ -99,6 +99,14 @@ void saveSignalChar(Char_t* signalFile="signalShapes.root")
 		  h2->SetTitle(buffer);
 		  h2->Draw("colz");
 		}
+	      sprintf(buffer,"EnergyForDisk%d_Quad%s_layerR.png",iD,quadName,layerName);
+	      TH1D* projR=h2->ProjectionX(buffer);
+	      sprintf(buffer,"EnergyForDisk%d_Quad%s_layerP.png",iD,quadName,layerName);
+	      TH1D* projP=h2->ProjectionY(buffer);
+	      c.cd(7);
+	      projR->Draw();
+	      c.cd(8);
+	      projP->Draw();
 	      sprintf(buffer,"signalInfoForDisk%d_Quad%s_layer%s.png",iD,quadName,layerName);
 	      c.SaveAs(buffer);
 	    }
