@@ -84,11 +84,13 @@ Int_t StIO::Write(TFile *file, const StUKey &ukey, TObject  *obj)
 
   StIOEvent event;
   event.fObj = obj; event.SetUniqueID(ukey.GetSum());
-  TFile *bakfile = gFile; TDirectory *bakdir = gDirectory; file->cd();
+  //  TFile *bakfile = gFile; 
+  TDirectory *bakdir = gDirectory; file->cd();
 
   event.Write(ukey.GetKey(),TObject::kOverwrite|TObject::kSingleKey);
-  gFile->Flush();
-  gFile=bakfile; gDirectory=bakdir;
+  if (gFile) gFile->Flush();
+  //  gFile=bakfile; 
+  gDirectory=bakdir;
   return 0;
 }
 //_______________________________________________________________________________
@@ -120,7 +122,9 @@ TObject *StIO::Read(TFile *file, const char *name)
 
   toread = key->ReadObj(); if (!toread) toread = (TObject*)(-1);
 
-RETURN: gFile=bakfile; gDirectory=bakdir; return toread;
+RETURN: 
+  //  gFile=bakfile; 
+  gDirectory=bakdir; return toread;
 }
 //_______________________________________________________________________________
 TObject *StIO::Read(TFile *file, const StUKey &ukey)
@@ -575,7 +579,7 @@ void StTree::SetIOMode(Option_t *iomode)
  while ((br=(StBranch*)next())) { br->SetIOMode(iomode);}
 }
 //_______________________________________________________________________________
-Int_t StTree::SetFile(const char *file,const char *mode,int insist)
+Int_t StTree::SetFile(const char *file,const char *mode,int /* insist */)
 {
   if (mode && *mode) StBranch::SetIOMode(mode); 
   if (!file || !*file) 	return 0;

@@ -105,9 +105,13 @@ void StAutoInspector::Inspect(TClass* kl, const char* tit , const char* name, co
 Int_t StAutoBrowse::Browse(TObject *obj,TBrowser *browser)
 {
   if(!obj)	return 0;
+  StAutoInspector insp(browser);
+#if ROOT_VERSION_CODE < 334597
   char cbuf[1000]; *cbuf=0;
 
-  StAutoInspector insp(browser);
   ((TObject*)obj)->ShowMembers(insp,cbuf);
+#else
+  ((TObject*)obj)->ShowMembers(insp);
+#endif
   return insp.fCount;
 }
