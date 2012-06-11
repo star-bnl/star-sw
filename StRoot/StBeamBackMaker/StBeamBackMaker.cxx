@@ -20,7 +20,7 @@
 #define MAX_R_DISTANCE 5.	// cm
 #define MAX_Z_DISTANCE 10.	// cm
 #define MIN_TRACK_SEED_HITS 60
-
+using namespace std;
 struct LessHit {
   bool operator()(const StHit* hit1, const StHit* hit2) const
   {

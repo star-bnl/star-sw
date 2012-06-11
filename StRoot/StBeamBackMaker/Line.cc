@@ -6,7 +6,7 @@
 
 // Local
 #include "Line.hh"
-
+using namespace std;
 Line::Line(const StThreeVectorD& o, const StThreeVectorD& d)
 {
   mOrigin = o;
