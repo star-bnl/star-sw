@@ -53,7 +53,7 @@ using namespace log4cxx::db;
 #if (STAR_LOG4CXX_VERSION == 10)
    using namespace log4cxx::filter;
 #endif
-
+using namespace std;
 class  StMessage  {
   public: StMessage(){}
 };
@@ -516,7 +516,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.39 2010/04/27 21:31:44 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.40 2012/06/11 14:58:55 fisyak Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -949,8 +949,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.39 2010/04/27 21:31:44 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.40 2012/06/11 14:58:55 fisyak Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.40  2012/06/11 14:58:55  fisyak
+// std namespace
+//
 // Revision 1.39  2010/04/27 21:31:44  fine
 // remove the logger destruction side effect
 //
