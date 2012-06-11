@@ -1,4 +1,4 @@
-// $Id: StMCSimplePrimaryGenerator.cxx,v 1.3 2009/10/13 17:19:35 perev Exp $
+// $Id: StMCSimplePrimaryGenerator.cxx,v 1.4 2012/06/11 16:17:42 fisyak Exp $
 #include <stdio.h>
 #include <assert.h>
 #include "Riostream.h"
@@ -7,7 +7,7 @@
 #include "TDatabasePDG.h"
 #include "TRandom.h"
 #include "TMath.h"
-
+using namespace std;
 ClassImp(StMCSimplePrimaryGenerator);
 //_____________________________________________________________________________
   StMCSimplePrimaryGenerator::StMCSimplePrimaryGenerator(

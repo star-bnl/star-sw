@@ -82,6 +82,6 @@ Float_t operator*( const Float_t &A, const AgPower<Int_t> &power );
 Float_t operator*( const Float_t &A, const AgPower<Float_t> &power );
 
 //Float_t operator^(const Float_t &a, const Float_t &b);
-
+using namespace std;
 #endif
  
