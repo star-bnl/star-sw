@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.hh,v 1.10 2007/12/24 06:04:17 fine Exp $
+ * $Id: RecHeaderFormats.hh,v 1.11 2012/06/11 16:38:35 fisyak Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.hh,v $
+ * Revision 1.11  2012/06/11 16:38:35  fisyak
+ * std namespace, remove clash with rtsSystems.h
+ *
  * Revision 1.10  2007/12/24 06:04:17  fine
  * introduce OLDEVP namespace to allow ole and new EVP library concurrently
  *
@@ -161,7 +164,7 @@ struct Bank_DATAP : public Bank
   Pointer TOF;
   Pointer EMC;
 //  Pointer PMD;
-  Pointer EXT_ID;   // DET_ID "EXT_ID" points to DATAPX if it exists! ( Addedd by Susanta for PMD 6th Nov, 2002 )
+  Pointer EXTY_ID;   // clash with rtsSystems.h DET_ID "EXT_ID" points to DATAPX if it exists! ( Addedd by Susanta for PMD 6th Nov, 2002 )
   Pointer FPD;
   Pointer FTPC;
   Pointer RICH;
