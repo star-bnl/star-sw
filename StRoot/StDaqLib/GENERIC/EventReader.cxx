@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.62 2010/01/15 19:51:25 fine Exp $
+ * $Id: EventReader.cxx,v 1.63 2012/06/11 16:38:35 fisyak Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.63  2012/06/11 16:38:35  fisyak
+ * std namespace, remove clash with rtsSystems.h
+ *
  * Revision 1.62  2010/01/15 19:51:25  fine
  * RT #1803 Fix side effect for DAT files
  *
@@ -253,8 +256,8 @@ static const char *detnams[] =
   LOG_INFO<<"===============  Event # "<<EventSeqNo<<"  ============="<<endm;
   LOG_INFO<<"Ev len (wds) "<<EventLength<<endm;
   LOG_INFO<<"Creation Time: "<<ts<<endm;
-  LOG_INFO<<"Trigger word "<< hex << (void *)TrigWord<<
-        "\t\tTrigger Input word "<< hex << (void *)TrigInputWord<<endm;
+  LOG_INFO<<"Trigger word "<< std::hex << (void *)TrigWord<<
+        "\t\tTrigger Input word "<< std::hex << (void *)TrigInputWord<<endm;
   LOG_INFO<<"Token: "<<Token<<endm;
   LOG_INFO<<"Detectors present: ";
   unsigned const char* p=0; int i=0;
@@ -424,7 +427,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
   if((MMAPP = (char *)mmap(0, mapsize, PROT_READ | PROT_WRITE,
 			   MAP_PRIVATE, fd, mmap_offset)) == (caddr_t) -1) { 
     LOG_ERROR<<strerror(errno)<<"mapping file request "
-                              <<hex<<(void*)mapsize<<" bytes"<<endm;
+                              <<std::hex<<(void*)mapsize<<" bytes"<<endm;
     ERROR(ERR_MEM);
   }
 
@@ -744,7 +747,7 @@ int EventReader::system_present(Bank_DATAP *datap, int sys)
   datap->swap();
 
   if(sys >= 10) {
-    pointer = &datap->EXT_ID;
+    pointer = &datap->EXTY_ID;
     if((pointer->offset == 0) || (pointer->length == 0)) {
       return 0;
     }
