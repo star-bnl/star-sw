@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackToJetIndex.h,v 1.9 2010/11/29 02:40:59 pibero Exp $
+// $Id: TrackToJetIndex.h,v 1.10 2012/06/11 14:57:05 fisyak Exp $
 #ifndef TRACKTOJETINDEX_H
 #define TRACKTOJETINDEX_H
 
@@ -121,7 +121,7 @@ private:
   ClassDef(TrackToJetIndex, 6);
 };
 
-inline ostream& operator<<(ostream& os, const TrackToJetIndex& t)
+inline std::ostream& operator<<(std::ostream& os, const TrackToJetIndex& t)
 {
   std::string idstring;
   StDetectorId mDetId = t.detectorId();

@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.10 2009/10/29 18:34:25 fine Exp $
+// $Id: StSsdBarrel.hh,v 1.11 2012/06/11 14:58:24 fisyak Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.11  2012/06/11 14:58:24  fisyak
+// std namespace
+//
 // Revision 1.10  2009/10/29 18:34:25  fine
 // Fix FindMcHit signature
 //
@@ -132,8 +135,8 @@ class StSsdBarrel
   Int_t getNumberOfLadders() { return mNLadder;}
   Int_t getNWaferPerLadder() { return mNWaferPerLadder;}
   Int_t getSsdLayer() { return mSsdLayer;};
-  void Calculation_Ratio(int idWafer,int idClusterP,int idClusterN,vector<const StMcSsdHit*> hitCol, int *ratio, int *idTruth);
-  static Int_t FindMcHit(const vector<int> &id,const vector<const StMcSsdHit*> &hitCol);
+  void Calculation_Ratio(int idWafer,int idClusterP,int idClusterN,std::vector<const StMcSsdHit*> hitCol, int *ratio, int *idTruth);
+  static Int_t FindMcHit(const std::vector<int> &id,const std::vector<const StMcSsdHit*> &hitCol);
   Int_t isSplit(StSsdCluster *currentCluster,int iSide,int lad,int waf);
   StSsdLadder *getLadder(Int_t i=0) {return mLadders[i];}
   ssdDimensions_st *getDimensions() {return mDimensions;}
