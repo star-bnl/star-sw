@@ -34,7 +34,7 @@ class StMultiH2F : public TH3F {
                               { SetNames(ngroup, newname); return 0; }
   virtual        TH1* Rebin(Int_t ngroup, const char* newname, const Double_t* xbins)
                               { SetNames(ngroup, newname); return 0; }
-  virtual        void SavePrimitive(ostream& out, Option_t* option = "");
+  virtual        void SavePrimitive(std::ostream& out, Option_t* option = "");
  protected:
   TString names[10];
   virtual       TH2D* XYProjection(const char* name, Int_t zbin=-1);
@@ -43,8 +43,11 @@ class StMultiH2F : public TH3F {
 
 #endif
 
-// $Id: StMultiH2F.h,v 1.2 2008/07/09 20:52:38 genevb Exp $
+// $Id: StMultiH2F.h,v 1.3 2012/06/11 15:05:34 fisyak Exp $
 // $Log: StMultiH2F.h,v $
+// Revision 1.3  2012/06/11 15:05:34  fisyak
+// std namespace
+//
 // Revision 1.2  2008/07/09 20:52:38  genevb
 // Implement SavePrimitive functions
 //

@@ -11,7 +11,7 @@
 #include "StMessageCounter.h"
 #include "StMessageStream.h"
 #include <cstring>
-
+using namespace std;
 StMessageCounter* StMessageCounter::mInstance = 0;
 
 //_____________________________________________________________________________
@@ -212,8 +212,11 @@ void StMessageCounter::AddType(const char* type) {
 }
 
 //_____________________________________________________________________________
-// $Id: StMessageCounter.cxx,v 1.20 2009/08/26 19:39:04 fine Exp $
+// $Id: StMessageCounter.cxx,v 1.21 2012/06/11 15:05:34 fisyak Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.21  2012/06/11 15:05:34  fisyak
+// std namespace
+//
 // Revision 1.20  2009/08/26 19:39:04  fine
 // fix the compilation issues under SL5_64_bits  gcc 4.3.2
 //

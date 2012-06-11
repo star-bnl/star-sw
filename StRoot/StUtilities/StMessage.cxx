@@ -18,7 +18,7 @@
 #include "StMessageCounter.h"
 #include "Stsstream.h"
 #include "StMessageStream.h"
-
+using namespace std;
 static StMessageCounter* messCounter = StMessageCounter::Instance();
 
 static ostrstream messBuffer;
@@ -178,7 +178,7 @@ size_t StMessage::GetMemoryUsage() {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.27 2004/04/02 22:17:14 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.28 2012/06/11 15:05:34 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -193,8 +193,11 @@ int StMessage::InitBuffer() {
 int tmpp = StMessage::InitBuffer();
 
 //_____________________________________________________________________________
-// $Id: StMessage.cxx,v 1.27 2004/04/02 22:17:14 genevb Exp $
+// $Id: StMessage.cxx,v 1.28 2012/06/11 15:05:34 fisyak Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.28  2012/06/11 15:05:34  fisyak
+// std namespace
+//
 // Revision 1.27  2004/04/02 22:17:14  genevb
 // Added protected Ignore/AllowRepeats() for friend StBFChain class
 //

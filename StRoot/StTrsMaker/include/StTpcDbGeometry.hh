@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcDbGeometry.hh,v 1.4 2003/09/02 17:59:16 perev Exp $
+ * $Id: StTpcDbGeometry.hh,v 1.5 2012/06/11 15:04:55 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  *
@@ -12,6 +12,9 @@
  **********************************************************************
  *
  * $Log: StTpcDbGeometry.hh,v $
+ * Revision 1.5  2012/06/11 15:04:55  fisyak
+ * std namespace
+ *
  * Revision 1.4  2003/09/02 17:59:16  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -36,9 +39,7 @@
 #include <Stiostream.h>
 #include <vector>
 
-#if defined __SUNPRO_CC && __SUNPRO_CC >= 0x500
 using std::vector;
-#endif
 
 #include "StGlobals.hh"
 #include "StThreeVector.hh"

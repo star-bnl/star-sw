@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.17 2009/09/28 18:36:14 perev Exp $
+ * $Id: StTrsDeDx.cc,v 1.18 2012/06/11 15:04:56 fisyak Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
+ * Revision 1.18  2012/06/11 15:04:56  fisyak
+ * std namespace
+ *
  * Revision 1.17  2009/09/28 18:36:14  perev
  * Weird comparison fixed
  *
@@ -141,12 +144,12 @@ StTrsDeDx::StTrsDeDx(const char* gas, double pad)
     if (strcmp(gas, "Ne") && strcmp(gas,"Ar")
      && strcmp(gas,"P10") && strcmp(gas,"p10")) {
 #ifdef ST_USES_EXCEPTIONS
-	cerr << "oops" << endl;
+	std::cerr << "oops" << endl;
 	throw invalid_argument("Gas not currently Implemented.\nMust use either \"Ne\" or \"Ar\" or \"P10\".");
 #else
-	cerr << gas << " gas not currently Implemented." << endl;
-	cerr << "Must use either: \"Ne\", \"Ar\", or \"P10\"." << endl;
-	cerr << "Aborting..." << endl;
+	std::cerr << gas << " gas not currently Implemented." << endl;
+	std::cerr << "Must use either: \"Ne\", \"Ar\", or \"P10\"." << endl;
+	std::cerr << "Aborting..." << endl;
 	abort();
 #endif
     }
@@ -159,12 +162,12 @@ StTrsDeDx::StTrsDeDx(const string& gas, double pad)
     if((gas != "Ne")  && (gas != "Ar") &&
        (gas != "P10") && (gas != "p10")) {
 #ifdef ST_USES_EXCEPTIONS
-	cerr << "oops" << endl;
+	std::cerr << "oops" << endl;
 	throw invalid_argument("Gas not currently Implemented.\nMust use either \"Ne\" or \"Ar\" or \"P10\".");
 #else
-	cerr << gas.c_str() << " gas not currently Implemented." << endl;
-	cerr << "Must use either: \"Ne\", \"Ar\", or \"P10\"." << endl;
-	cerr << "Aborting..." << endl;
+	std::cerr << gas.c_str() << " gas not currently Implemented." << endl;
+	std::cerr << "Must use either: \"Ne\", \"Ar\", or \"P10\"." << endl;
+	std::cerr << "Aborting..." << endl;
 	abort();
 #endif
     }

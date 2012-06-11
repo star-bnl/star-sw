@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcSimpleGeometry.hh,v 1.6 2003/09/02 17:59:16 perev Exp $
+ * $Id: StTpcSimpleGeometry.hh,v 1.7 2012/06/11 15:04:55 fisyak Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -12,6 +12,9 @@
  **********************************************************************
  *
  * $Log: StTpcSimpleGeometry.hh,v $
+ * Revision 1.7  2012/06/11 15:04:55  fisyak
+ * std namespace
+ *
  * Revision 1.6  2003/09/02 17:59:16  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -62,9 +65,7 @@
 
 #include <Stiostream.h>
 #include <vector>
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
-   using std::vector;
-#endif
+using std::vector;
 
 #include "StGlobals.hh"
 #include "StThreeVector.hh"

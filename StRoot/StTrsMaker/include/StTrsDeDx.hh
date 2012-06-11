@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.hh,v 1.7 2000/01/10 23:11:31 lasiuk Exp $
+ * $Id: StTrsDeDx.hh,v 1.8 2012/06/11 15:04:55 fisyak Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.hh,v $
+ * Revision 1.8  2012/06/11 15:04:55  fisyak
+ * std namespace
+ *
  * Revision 1.7  2000/01/10 23:11:31  lasiuk
  * Include MACROS for compatibility with SUN CC5.0
  *
@@ -78,9 +81,7 @@
 #include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
-#if defined(__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using std::string;
-#endif
 #endif
 
 #include "Randomize.h"

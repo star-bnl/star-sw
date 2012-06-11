@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.32 2009/11/03 14:34:19 fisyak Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.33 2012/06/11 15:04:56 fisyak Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.33  2012/06/11 15:04:56  fisyak
+ * std namespace
+ *
  * Revision 1.32  2009/11/03 14:34:19  fisyak
  * Remove default in zFromTB
  *
@@ -154,10 +157,8 @@
         using std::range_error;
 #   endif
 #endif
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using std::min;
 using std::max;
-#endif
 #include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -257,8 +258,8 @@ StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlow
 	mInstance = new StTrsWireHistogram(geoDb, scDb, gasDb,mag);
     }
     else { // do nothing
-	cerr << "Cannot make a second instance of StTrsWireHistogram() " << endl;
-	cerr << "Continuing..." << endl;
+	std::cerr << "Cannot make a second instance of StTrsWireHistogram() " << endl;
+	std::cerr << "Continuing..." << endl;
     }
     return mInstance;
 }
@@ -490,8 +491,8 @@ aTpcWire& StTrsWireHistogram::getWire(int num)
 #ifndef ST_NO_EXCEPTIONS
 	throw range_error("Bounds error in StTrsWireHistogram::wire()");
 #else
-	cerr << "Bounds error...only " << mTotalNumberOfAnodeWires << " wires." << endl;
-	cerr << "Exitting..." << endl;
+	std::cerr << "Bounds error...only " << mTotalNumberOfAnodeWires << " wires." << endl;
+	std::cerr << "Exitting..." << endl;
 	return mSectorWires[0];  // This is a sad/sad workaround for no exceptions!
 #endif
     }
@@ -511,7 +512,7 @@ aTpcWirePlane& StTrsWireHistogram::getWireHistogram()
 // #ifndef ST_NO_EXCEPTIONS
 // 	throw range_error("StTrsWireHistogram::putWire() index error!");
 // #else
-// 	cerr << "StTrsWireHistogram::putWire() index error!" << endl;
+// 	std::cerr << "StTrsWireHistogram::putWire() index error!" << endl;
 // #endif
 //     }
 // }

@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleElectronics.cc,v 1.8 2000/06/07 02:03:11 lasiuk Exp $
+ * $Id: StTpcSimpleElectronics.cc,v 1.9 2012/06/11 15:04:56 fisyak Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleElectronics.cc,v $
+ * Revision 1.9  2012/06/11 15:04:56  fisyak
+ * std namespace
+ *
  * Revision 1.8  2000/06/07 02:03:11  lasiuk
  * exit/abort ultimatum
  *
@@ -93,9 +96,9 @@ StTpcSimpleElectronics::instance()
 #ifndef ST_NO_EXCEPTIONS
 	throw invalid_argument("StTpcSimpleElectronics::getInstance(): Argument Missing!");
 #else
-	cerr << "StTpcSimpleElectronics::getInstance(): Argument Missing!" << endl;
-	cerr << "No arguments for instantiantion" << endl;
-	cerr << "Aborting..." << endl;
+	std::cerr << "StTpcSimpleElectronics::getInstance(): Argument Missing!" << endl;
+	std::cerr << "No arguments for instantiantion" << endl;
+	std::cerr << "Aborting..." << endl;
 	abort();
 #endif
     }
@@ -109,11 +112,11 @@ StTpcSimpleElectronics::instance(const char* file)
 	mInstance = new StTpcSimpleElectronics(file);
     }
     else {
-	cerr << "StTpcSimpleElectronics::instance()"  << endl;
-	cerr << "\tWARNING:" << endl;
-	cerr << "\tSingleton class is already instantiated" << endl;
-	cerr << "\tArgument \"" << file << "\" ignored!!" << endl;
-	cerr << "\tContinuing..." << endl;
+	std::cerr << "StTpcSimpleElectronics::instance()"  << endl;
+	std::cerr << "\tWARNING:" << endl;
+	std::cerr << "\tSingleton class is already instantiated" << endl;
+	std::cerr << "\tArgument \"" << file << "\" ignored!!" << endl;
+	std::cerr << "\tContinuing..." << endl;
     }
     return mInstance;
 }

@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleGeometry.cc,v 1.11 2003/09/02 17:59:18 perev Exp $
+ * $Id: StTpcSimpleGeometry.cc,v 1.12 2012/06/11 15:04:56 fisyak Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleGeometry.cc,v $
+ * Revision 1.12  2012/06/11 15:04:56  fisyak
+ * std namespace
+ *
  * Revision 1.11  2003/09/02 17:59:18  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -85,7 +88,7 @@ using namespace units;
 
 #include "StTpcSimpleGeometry.hh"
 #include "StGetConfigValue.hh"
-
+using namespace std;
 StTpcGeometry* StTpcSimpleGeometry::mInstance = 0; // static data member
 
 StTpcSimpleGeometry::StTpcSimpleGeometry() { /* nopt */ }

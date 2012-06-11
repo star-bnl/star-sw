@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSimpleMagneticField.hh,v 1.6 2003/09/02 17:59:16 perev Exp $
+ * $Id: StSimpleMagneticField.hh,v 1.7 2012/06/11 15:04:55 fisyak Exp $
  *
  * Author: Thomas Ullrich, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSimpleMagneticField.hh,v $
+ * Revision 1.7  2012/06/11 15:04:55  fisyak
+ * std namespace
+ *
  * Revision 1.6  2003/09/02 17:59:16  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -80,10 +83,10 @@ inline StMagneticField*
 StSimpleMagneticField::instance()
 {
     if (mInstance == 0) {
-	cerr << "StSimpleMagneticField::getInstance(): " << endl;	
-	cerr << "\tWARNING" << endl;
-	cerr << "\tNo arguments for instantiation of" << endl;
-	cerr << "\tsingleton class. Zero magnetic field." << endl;
+	std::cerr << "StSimpleMagneticField::getInstance(): " << endl;	
+	std::cerr << "\tWARNING" << endl;
+	std::cerr << "\tNo arguments for instantiation of" << endl;
+	std::cerr << "\tsingleton class. Zero magnetic field." << endl;
         mInstance = new StSimpleMagneticField;
     }
     return mInstance;	
