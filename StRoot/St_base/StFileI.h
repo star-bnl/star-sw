@@ -50,14 +50,14 @@ public:
   virtual ~StFileI(){}
   virtual Int_t SetDebug(Int_t dbl=1){fDebug=dbl; return fDebug;}
   virtual Int_t GetDebug() const {return fDebug;}
-  virtual Int_t Init(int Argc=0, const char** Argv=0){return 0;}
+  virtual Int_t Init(int /* Argc=0 */, const char** /* Argv=0 */){return 0;}
   virtual Int_t Init(const char *argv)
                 {const char *Argv[1]; Argv[0]=argv; return Init(1,Argv);};
  
   virtual void  ls(Option_t *opt="") const {if(opt){};};
-  virtual Int_t AddFile(const char *file,const char *opt=0){return 0;};
-  virtual Int_t AddFile(const char **fileList){return 0;};
-  virtual Int_t AddWild(const char *file,const char *opt=0){return 0;};
+  virtual Int_t AddFile(const char */* file */,const char * opt=0){if (opt) {}; return 0;};
+  virtual Int_t AddFile(const char **/* fileList */){return 0;};
+  virtual Int_t AddWild(const char */* file */,const char */* opt=0 */){return 0;};
   virtual Int_t GetNFiles()=0;
   virtual Int_t GetNBundles()=0;
   virtual Int_t GetBundleSize()=0;

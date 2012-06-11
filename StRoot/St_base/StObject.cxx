@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.26 2012/02/21 18:50:46 perev Exp $
+// $Id: StObject.cxx,v 1.27 2012/06/11 15:08:41 fisyak Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.27  2012/06/11 15:08:41  fisyak
+// std namespace, warn off for x64
+//
 // Revision 1.26  2012/02/21 18:50:46  perev
 // bug #2281 fix
 //
@@ -151,7 +154,11 @@ void StUUId::Generate()
    fID[3] = uu[3]; 
    fID[2] = uu[2]++;
    fID[1] = (UInt_t)((ULong_t)this);
+#if ROOT_VERSION_CODE < 335105 /* ROOT_VERSION(5,29,1) */
    fID[0] = (UInt_t)((ULong_t)gSystem->Now());
+#else 
+   fID[0] = (UInt_t)((ULong64_t)gSystem->Now());
+#endif
 }
 
 //_____________________________________________________________________________

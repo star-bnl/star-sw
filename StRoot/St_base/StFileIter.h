@@ -1,4 +1,4 @@
-// @(#)root/table:$Name:  $:$Id: StFileIter.h,v 1.6 2009/08/04 15:03:00 fine Exp $
+// @(#)root/table:$Name:  $:$Id: StFileIter.h,v 1.7 2012/06/11 15:08:41 fisyak Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 
 /*************************************************************************
@@ -254,6 +254,7 @@ inline void  StFileIter::SaveFileScope()
 
 //__________________________________________________________________________
 inline void StFileIter::RestoreFileScope()
-{  gFile = fFileBackUp; gDirectory = fDirectoryBackUp; }
+{//YF  gFile = fFileBackUp; 
+  gDirectory = fDirectoryBackUp; }
 
 #endif

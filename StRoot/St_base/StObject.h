@@ -1,5 +1,8 @@
-// $Id: StObject.h,v 1.18 2012/02/21 18:48:37 perev Exp $
+// $Id: StObject.h,v 1.19 2012/06/11 15:08:41 fisyak Exp $
 // $Log: StObject.h,v $
+// Revision 1.19  2012/06/11 15:08:41  fisyak
+// std namespace, warn off for x64
+//
 // Revision 1.18  2012/02/21 18:48:37  perev
 // I/O mode flag added
 //
@@ -95,7 +98,7 @@ StXRef(const char *brName="", StXRefMain *evt=0, UInt_t tally=0);
 virtual 		       ~StXRef();
 
 virtual		StXRefMain     *MakeMain() = 0 ;
-virtual		      void      Synchro(int toMain) = 0 ;
+ virtual		      void      Synchro(int /* toMain */) = 0 ;
 virtual		StXRefMain     *GetMain();
 virtual		       int      IsMain() const		{return 0;}
 virtual		      void      SetMain(StXRefMain *m) 	{fMain  = m;}

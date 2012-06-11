@@ -3,15 +3,13 @@
 #include "TDatime.h"
 #define __StarChairDefs_h
 #define DEBUGTABLE(STRUCT)						\
-  St_db_Maker *dbMk = (St_db_Maker *) StMaker::GetChain()->Maker("db");	\
-  if (dbMk && dbMk->Debug() ) {						\
-    TDatime t[2];							\
-    dbMk->GetValidity(table,t);					        \
+  TDatime t[2];								\
+  if (St_db_Maker::GetValidity(table,t) > 0) {				\
     Int_t Nrows = table->GetNRows();					\
     LOG_WARN << "St_" << # STRUCT << "C::instance found table " << table->GetName() \
-	 << " with NRows = " << Nrows << " in db" << endm;		\
+	     << " with NRows = " << Nrows << " in db" << endm;		\
     LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	\
-	 << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; \
+	     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;	\
     if (Nrows > 10) Nrows = 10;						\
     if (table->GetRowSize() < 256) table->Print(0,Nrows);		\
   }

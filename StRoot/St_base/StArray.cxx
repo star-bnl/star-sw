@@ -236,7 +236,7 @@ StStrArray::StStrArray(const StStrArray &from){ *this = from;}
     if (to->TObject::TestBit(TObject::kNotDeleted)) {
       delete fV[i];
     } else {
-      Warning("clear","Object[%d]=%p(%d) is already deleted",i,(void*)to,to);
+      Warning("clear","Object[%d]=%p is already deleted",i,to);
 #if 0
       const char *mk=0;
       mk = StMkDeb::GetName(StMkDeb::GetCurrent());
