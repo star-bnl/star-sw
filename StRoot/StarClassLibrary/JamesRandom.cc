@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: JamesRandom.cc,v 1.2 1999/12/07 23:43:03 ullrich Exp $
+ * $Id: JamesRandom.cc,v 1.3 2012/06/11 15:29:26 fisyak Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -22,6 +22,9 @@
  ***************************************************************************
  *
  * $Log: JamesRandom.cc,v $
+ * Revision 1.3  2012/06/11 15:29:26  fisyak
+ * std namespace
+ *
  * Revision 1.2  1999/12/07 23:43:03  ullrich
  * Modified to get rid of warnings on Linux.
  *
@@ -76,7 +79,7 @@ HepJamesRandom & HepJamesRandom::operator = (const HepJamesRandom &p)
 
 void HepJamesRandom::saveStatus() const
 {
-   ofstream outFile("JamesRand.conf", ios::out ) ;
+   ofstream outFile("JamesRand.conf", std::ios::out ) ;
 
    if (!outFile.bad()) {
      HepInt pos = HepInt(pj97-u);
@@ -92,7 +95,7 @@ void HepJamesRandom::saveStatus() const
 void HepJamesRandom::restoreStatus()
 {
    HepInt ipos, jpos;
-   ifstream inFile("JamesRand.conf", ios::in);
+   ifstream inFile("JamesRand.conf", std::ios::in);
 
    if (!inFile.bad() && !inFile.eof()) {
      inFile >> theSeed;

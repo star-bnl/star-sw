@@ -1,8 +1,8 @@
-// $Id: StMuDstVtxT.cxx,v 2.1 2012/05/07 14:56:14 fisyak Exp $
+// $Id: StMuDstVtxT.cxx,v 2.2 2012/06/11 15:33:41 fisyak Exp $
 #include "StMuDstVtxT.h"
 #include "StKFVertex.h"
 ClassImp(StMuDstVtxT);
-ostream&  operator<<(ostream& os,  const StMuDstVtxT& v) {
+std::ostream&  operator<<(std::ostream& os,  const StMuDstVtxT& v) {
   os << Form("Q:%3i M:%3i/%3i/%3i W/E %3i/%3i tracks rank %5i xyz = %9.3f +/- %5.3f, %9.3f +/- %5.3f, %9.3f +/- %5.3f",
 	     v.Q(),v.MultU(),v.Mult(),v.MultC(),v.MultW(),v.MultE(),v.Rank(),
 	     v.Xyz().x(),v.SigmaXyz().x(),
@@ -14,6 +14,9 @@ ostream&  operator<<(ostream& os,  const StMuDstVtxT& v) {
   return os;
 }
 // $Log: StMuDstVtxT.cxx,v $
+// Revision 2.2  2012/06/11 15:33:41  fisyak
+// std namespace
+//
 // Revision 2.1  2012/05/07 14:56:14  fisyak
 // Add StKFVertexMaker
 //

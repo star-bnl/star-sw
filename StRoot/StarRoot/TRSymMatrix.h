@@ -49,7 +49,7 @@ class TRSymMatrix : public TRArray {
  public:
   ClassDef(TRSymMatrix,1)  // TRSymMatrix class (double precision)
 };
-ostream& operator<<(ostream& s,const TRSymMatrix &target);
+std::ostream& operator<<(std::ostream& s,const TRSymMatrix &target);
 inline Double_t &TRSymMatrix::operator()(Int_t i,Int_t j){
   //  assert(! (j < 0 || j >= fNrows));
   if (j < 0 || j >= fNrows) {

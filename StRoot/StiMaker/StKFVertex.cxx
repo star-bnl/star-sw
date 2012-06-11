@@ -1,4 +1,4 @@
-// $Id: StKFVertex.cxx,v 2.1 2012/05/07 14:56:14 fisyak Exp $
+// $Id: StKFVertex.cxx,v 2.2 2012/06/11 15:33:41 fisyak Exp $
 #include "StKFVertex.h"
 #include "StKFTrack.h"
 #include "TArrayC.h"
@@ -9,6 +9,7 @@
 #else
 #define PrPP(A,B)
 #endif
+using namespace std;
 Int_t StKFVertex::_debug = 0;
 const Char_t *StKFVertex::GeNames[52] = {
   //   1       2       3      4         5           6       7        8         9          10
@@ -215,6 +216,9 @@ void StKFVertex::SetMc(Float_t time, Float_t x, Float_t y, Float_t z, Int_t NoDa
 }
 #undef PrPP
 // $Log: StKFVertex.cxx,v $
+// Revision 2.2  2012/06/11 15:33:41  fisyak
+// std namespace
+//
 // Revision 2.1  2012/05/07 14:56:14  fisyak
 // Add StKFVertexMaker
 //

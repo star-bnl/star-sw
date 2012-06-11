@@ -1,6 +1,6 @@
 #ifndef __StKFTrack_h__
 #define __StKFTrack_h__
-// $Id: StKFTrack.h,v 2.1 2012/05/07 14:56:14 fisyak Exp $
+// $Id: StKFTrack.h,v 2.2 2012/06/11 15:33:41 fisyak Exp $
 #include "Riostream.h"
 #include "TObject.h"
 #include "KFParticle.h"
@@ -8,7 +8,7 @@
 #include "StAnneling.h"
 #include "TString.h"
 class StKFTrack;
-ostream&  operator<<(ostream& os,  const StKFTrack& p);
+std::ostream&  operator<<(std::ostream& os,  const StKFTrack& p);
 class StKFTrack : public TObject {
 public:
   StKFTrack(Int_t k = -1, KFParticle *particle = 0, Double_t chi2=-1, Int_t iWE = 0);
@@ -28,7 +28,7 @@ public:
   KFParticle *OrigParticle() const {return fOrigKFParticle;} // 
   Bool_t      IsWest()   {return fWestOrEast > 0;}
   Bool_t      IsEast()   {return fWestOrEast < 0;}
-  void Print(Option_t *option="") const {if (option) {}; cout << *this << endl;}
+  void Print(Option_t *option="") const {if (option) {}; std::cout << *this << std::endl;}
   static Int_t CorrectGePid(Int_t gePid);
 private:
   const Int_t fK;       // index in particle array 
@@ -41,6 +41,9 @@ private:
   ClassDef(StKFTrack,0)
 };
 // $Log: StKFTrack.h,v $
+// Revision 2.2  2012/06/11 15:33:41  fisyak
+// std namespace
+//
 // Revision 2.1  2012/05/07 14:56:14  fisyak
 // Add StKFVertexMaker
 //

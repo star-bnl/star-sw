@@ -1,4 +1,4 @@
-// $Id: StKFTrack.cxx,v 2.1 2012/05/07 14:56:14 fisyak Exp $
+// $Id: StKFTrack.cxx,v 2.2 2012/06/11 15:33:41 fisyak Exp $
 #include "StKFTrack.h"
 ClassImp(StKFTrack);
 //________________________________________________________________________________
@@ -42,18 +42,21 @@ Int_t StKFTrack::CorrectGePid(Int_t gePid) {
   if (gePid ==           98) gePid =            18;
   if (gePid ==           97) gePid =            26;
   if (gePid < 0 || gePid > 50) {
-    cout << "Illegal gePid " << gePid << endl;
+    std::cout << "Illegal gePid " << gePid << std::endl;
   }
   if (gePid < 0 || gePid > 50) gePid = 51;
   return gePid;
 }
 //________________________________________________________________________________
-ostream&  operator<<(ostream& os,  const StKFTrack& p) {
+std::ostream&  operator<<(std::ostream& os,  const StKFTrack& p) {
   os << Form("%5i %9.3f %9.3f %9.3f %9.3f",
 	     p.K(),p.Weight(),p.W(),p.OrigParticle()->GetZ(),p.Chi2());
   return os;
 }
 // $Log: StKFTrack.cxx,v $
+// Revision 2.2  2012/06/11 15:33:41  fisyak
+// std namespace
+//
 // Revision 2.1  2012/05/07 14:56:14  fisyak
 // Add StKFVertexMaker
 //

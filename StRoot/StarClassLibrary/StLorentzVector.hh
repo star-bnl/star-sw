@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVector.hh,v 1.13 2009/09/22 16:42:38 fine Exp $
+ * $Id: StLorentzVector.hh,v 1.14 2012/06/11 15:29:26 fisyak Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVector.hh,v $
+ * Revision 1.14  2012/06/11 15:29:26  fisyak
+ * std namespace
+ *
  * Revision 1.13  2009/09/22 16:42:38  fine
  * Add the extra ctor to complete the neet the template specilication signatures #1612
  *
@@ -176,8 +179,8 @@ StLorentzVector<T>::StLorentzVector()
     : mThreeVector(0, 0, 0), mX4(0) { /* nop */ }
 
 template<class T>
-StLorentzVector<T>::StLorentzVector(T x, T y, T z, T t)
-    : mThreeVector(x, y, z), mX4(t) { /* nop */ }
+StLorentzVector<T>::StLorentzVector(T X, T Y, T Z, T Time)
+    : mThreeVector(X, Y, Z), mX4(Time) { /* nop */ }
 
 template<class T>
 StLorentzVector<T>::~StLorentzVector() { /* nopt */ }    
@@ -230,28 +233,28 @@ T StLorentzVector<T>::mt() const
 }
 
 template<class T>
-void StLorentzVector<T>::setPx(T x) {mThreeVector.setX(x);}
+void StLorentzVector<T>::setPx(T X) {mThreeVector.setX(X);}
 
 template<class T>
-void StLorentzVector<T>::setPy(T y) {mThreeVector.setY(y);}
+void StLorentzVector<T>::setPy(T Y) {mThreeVector.setY(Y);}
 
 template<class T>
-void StLorentzVector<T>::setPz(T z) {mThreeVector.setZ(z);}
+void StLorentzVector<T>::setPz(T Z) {mThreeVector.setZ(Z);}
 
 template<class T>
-void StLorentzVector<T>::setX(T x) {mThreeVector.setX(x);}
+void StLorentzVector<T>::setX(T X) {mThreeVector.setX(X);}
 
 template<class T>
-void StLorentzVector<T>::setY(T y) {mThreeVector.setY(y);}
+void StLorentzVector<T>::setY(T Y) {mThreeVector.setY(Y);}
 
 template<class T>
-void StLorentzVector<T>::setZ(T z) {mThreeVector.setZ(z);}
+void StLorentzVector<T>::setZ(T Z) {mThreeVector.setZ(Z);}
 
 template<class T>
-void StLorentzVector<T>::setT(T t) {mX4 = t;}
+void StLorentzVector<T>::setT(T Time) {mX4 = Time;}
 
 template<class T>
-void StLorentzVector<T>::setE(T e) {mX4 = e;}
+void StLorentzVector<T>::setE(T E) {mX4 = E;}
 
 template<class T>
 T StLorentzVector<T>::x() const {return mThreeVector.x();}
@@ -401,13 +404,13 @@ StLorentzVector<T>& StLorentzVector<T>::operator/= (double c)
 
 template<class T>
 template<class X>
-StLorentzVector<T>::StLorentzVector(const StThreeVector<X> &vec, T t)
-	: mThreeVector(vec), mX4(t) { /* nop */ }
+StLorentzVector<T>::StLorentzVector(const StThreeVector<X> &vec, T Time)
+	: mThreeVector(vec), mX4(Time) { /* nop */ }
 
 template<class T>
 template<class X>
-StLorentzVector<T>::StLorentzVector(T t, const StThreeVector<X> &vec)
-	: mThreeVector(vec), mX4(t) { /* nop */ }
+StLorentzVector<T>::StLorentzVector(T Time, const StThreeVector<X> &vec)
+	: mThreeVector(vec), mX4(Time) { /* nop */ }
 
 template<class T>
 template<class X>

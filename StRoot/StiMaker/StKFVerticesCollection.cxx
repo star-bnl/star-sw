@@ -1,4 +1,4 @@
-// $Id: StKFVerticesCollection.cxx,v 2.1 2012/05/07 14:56:14 fisyak Exp $
+// $Id: StKFVerticesCollection.cxx,v 2.2 2012/06/11 15:33:41 fisyak Exp $
 #include "StKFVerticesCollection.h"
 #include "TArrayI.h"
 #include "TArrayD.h"
@@ -6,6 +6,7 @@
 #include "TRVector.h"
 #include "TPolyMarker.h"
 #include "TList.h"
+using namespace std;
 ClassImp(StKFVerticesCollection);
 Double_t StKFVerticesCollection::fgVxPenaltyFactor = 1000;
 //________________________________________________________________________________
@@ -368,6 +369,9 @@ Double_t StKFVerticesCollection::Fit(Int_t marker, TCanvas *c1, TH1 *Vtx) {
   return chi2Total;
 }
 // $Log: StKFVerticesCollection.cxx,v $
+// Revision 2.2  2012/06/11 15:33:41  fisyak
+// std namespace
+//
 // Revision 2.1  2012/05/07 14:56:14  fisyak
 // Add StKFVertexMaker
 //

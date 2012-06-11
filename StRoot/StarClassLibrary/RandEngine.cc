@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandEngine.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
+ * $Id: RandEngine.cc,v 1.3 2012/06/11 15:29:26 fisyak Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: RandEngine.cc,v $
+ * Revision 1.3  2012/06/11 15:29:26  fisyak
+ * std namespace
+ *
  * Revision 1.2  1999/12/07 23:43:04  ullrich
  * Modified to get rid of warnings on Linux.
  *
@@ -83,7 +86,7 @@ void RandEngine::setSeeds(const long* seeds, HepInt)
 
 void RandEngine::saveStatus() const
 {
-   ofstream outFile("Rand.conf", ios::out ) ;
+   ofstream outFile("Rand.conf", std::ios::out ) ;
 
    if (!outFile.bad()) {
      outFile << theSeed << endl;
@@ -98,7 +101,7 @@ void RandEngine::restoreStatus()
    // the engine and re-shoot them again. The Rand algorithm does
    // not provide any way of getting its internal status.
 
-   ifstream inFile("Rand.conf", ios::in);
+   ifstream inFile("Rand.conf", std::ios::in);
    long count;
 
    if (!inFile.bad() && !inFile.eof()) {

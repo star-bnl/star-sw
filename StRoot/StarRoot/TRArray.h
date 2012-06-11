@@ -117,7 +117,7 @@ class TRArray : public TArrayD {
  public:
   ClassDef(TRArray,1)  // TRArray class (double precision)
 };
-ostream& operator<<(ostream& s,const TRArray &target);
-istream & operator>>(istream &s, TRArray &target);
+std::ostream& operator<<(std::ostream& s,const TRArray &target);
+std::istream & operator>>(std::istream &s, TRArray &target);
 
 #endif

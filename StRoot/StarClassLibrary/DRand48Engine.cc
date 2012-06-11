@@ -1,6 +1,6 @@
-/***************************************************************************
+ /***************************************************************************
  *
- * $Id: DRand48Engine.cc,v 1.2 1999/12/07 23:43:03 ullrich Exp $
+ * $Id: DRand48Engine.cc,v 1.3 2012/06/11 15:29:26 fisyak Exp $
  *
  * Author:  Gabriele Cosmo - Created: 5th September 1995
  *          modified for SCL bl
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: DRand48Engine.cc,v $
+ * Revision 1.3  2012/06/11 15:29:26  fisyak
+ * std namespace
+ *
  * Revision 1.2  1999/12/07 23:43:03  ullrich
  * Modified to get rid of warnings on Linux.
  *
@@ -216,7 +219,7 @@ void DRand48Engine::setSeeds(const long* seeds, HepInt)
 
 void DRand48Engine::saveStatus() const
 {
-   ofstream outFile("DRand48.conf", ios::out ) ;
+   ofstream outFile("DRand48.conf", std::ios::out ) ;
 
    unsigned short dummy[] = { 0, 0, 0 };
    unsigned short* cseed = seed48(dummy);
@@ -233,7 +236,7 @@ void DRand48Engine::saveStatus() const
 
 void DRand48Engine::restoreStatus()
 {
-   ifstream inFile("DRand48.conf", ios::in);
+   ifstream inFile("DRand48.conf", std::ios::in);
    unsigned short cseed[3];
 
    if (!inFile.bad() && !inFile.eof()) {

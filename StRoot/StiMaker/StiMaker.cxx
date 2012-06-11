@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.202 2012/05/07 14:56:14 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.203 2012/06/11 15:33:41 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.203  2012/06/11 15:33:41  fisyak
+// std namespace
+//
 // Revision 1.202  2012/05/07 14:56:14  fisyak
 // Add StKFVertexMaker
 //
@@ -576,7 +579,7 @@ Int_t StiMaker::InitDetectors()
       }
       cout << "StiMaker::InitDetectors() -I- use hits in sectors[" 
 	   << hitLoader->minSector() << "," << hitLoader->maxSector() << "] and rows["
-	   << hitLoader->minRow() << "," <<  hitLoader->maxRow() << "]" << endl;
+	   << hitLoader->minRow() << ",*]" << endl;
       if (IAttr("laserIT")) {
 	StiKalmanTrackNode::SetLaser(1);
 	cout << "StiMaker::InitDetectors() -I- set laser time of flight correction" << endl;

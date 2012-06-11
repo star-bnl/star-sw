@@ -3,6 +3,7 @@
 #include "TMath.h"
 #include <assert.h>
 TMDFParameters* TMDFParameters::fgTMDFParameters = 0;
+using namespace std;
 ClassImp(TMDFParameters);
 //________________________________________________________________________________
 TArrayD *TMDFParameters::GetTerms(Double_t *x) {

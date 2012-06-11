@@ -170,14 +170,14 @@ ostream& operator<<(ostream& s,const TRSymMatrix &target) {
   s << "Semi Positive DefinedSymMatrix Size \t[" 
     << Nrows << "," << Nrows << "]" << endl;
   if (Array) {
-    s.setf(ios::fixed,ios::scientific);
-    s.setf(ios::showpos);
+    s.setf(std::ios::fixed,std::ios::scientific);
+    s.setf(std::ios::showpos);
     for (int i = 0; i< Nrows; i++) {
       for (int j = 0; j <= i; j++)
 	s << std::setw(width) << std::setprecision(width-3) << Array[i*(i+1)/2 + j] << ":\t";
       s << endl;
     }
-    s.unsetf(ios::showpos);
+    s.unsetf(std::ios::showpos);
   }
   else s << " Empty";   
   return s;

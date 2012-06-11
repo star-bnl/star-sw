@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: PhysicalConstants.h,v 1.2 1999/02/22 16:52:47 didenko Exp $
+ * $Id: PhysicalConstants.h,v 1.3 2012/06/11 15:29:26 fisyak Exp $
  *
  * Author: CLHEP (see below)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: PhysicalConstants.h,v $
+ * Revision 1.3  2012/06/11 15:29:26  fisyak
+ * std namespace
+ *
  * Revision 1.2  1999/02/22 16:52:47  didenko
  * updates from Gene
  *
@@ -22,10 +25,11 @@
  **************************************************************************/
 
 #ifndef HEP_PHYSICAL_CONSTANTS_H
+#ifndef __CINT__
 #define HEP_PHYSICAL_CONSTANTS_H
 
 #include "SystemOfUnits.h"
-#include <math.h>
+#include "TMath.h"
 
 #ifndef ST_NO_NAMESPACES
 using namespace units;
@@ -34,7 +38,7 @@ using namespace units;
 //
 //
 //
-static const double     pi  = M_PI;    // from <math.h>
+static const double     pi  = TMath::Pi();    // from <math.h>
 static const double  twopi  = 2*pi;
 static const double halfpi  = pi/2;
 static const double    pi2  = pi*pi;
@@ -119,7 +123,7 @@ static const double k_Boltzmann = 8.617385e-11 * MeV/kelvin;
 static const double STP_Temperature = 273.15*kelvin;
 static const double STP_Pressure    = 1.*atmosphere;
 static const double kGasThreshold   = 1.e-2*gram/centimeter3;
-
+#endif /* !__CINT__ */
 #endif /* HEP_PHYSICAL_CONSTANTS_H */
 
 
