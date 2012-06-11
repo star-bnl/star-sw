@@ -8,10 +8,10 @@
 #ifndef StMessageStream
 #define StMessageStream
 
-#include <Stiostream.h>
+#include "Riostream.h"
 
-static ostream& myout(cout);
-static ostream& myerr(cerr);
+static std::ostream& myout(std::cout);
+static std::ostream& myerr(std::cerr);
 
 // 64 character string
 static const char* ch64 =
@@ -20,8 +20,11 @@ static const char* ch6a = ch64; // avoids "unused" warning
 
 #endif
 
-// $Id: StMessageStream.h,v 1.2 2003/10/01 20:06:50 genevb Exp $
+// $Id: StMessageStream.h,v 1.3 2012/06/11 15:05:34 fisyak Exp $
 // $Log: StMessageStream.h,v $
+// Revision 1.3  2012/06/11 15:05:34  fisyak
+// std namespace
+//
 // Revision 1.2  2003/10/01 20:06:50  genevb
 // Initialize and test ostrstream buffer sizes (support for gcc before 3.2)
 //

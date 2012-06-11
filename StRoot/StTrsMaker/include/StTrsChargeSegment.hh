@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.hh,v 1.11 2011/01/18 14:40:15 fisyak Exp $
+ * $Id: StTrsChargeSegment.hh,v 1.12 2012/06/11 15:04:55 fisyak Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.hh,v $
+ * Revision 1.12  2012/06/11 15:04:55  fisyak
+ * std namespace
+ *
  * Revision 1.11  2011/01/18 14:40:15  fisyak
  * Clean up TpcDb interfaces and Tpc coordinate transformation
  *
@@ -74,9 +77,7 @@
 #include <Stiostream.h>
 #include <list>
 
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using std::list;
-#endif
 
 #include "SystemOfUnits.h"
 #include "StGlobals.hh"

@@ -9,7 +9,7 @@
 #include "StMessTypeList.h"
 #include "StMessageStream.h"
 #include <ctype.h>
-
+using namespace std;
 StMessTypePair::StMessTypePair(const char* ty, const char* te) :
 type(ty),
 text(te) {}
@@ -87,8 +87,11 @@ int StMessTypeList::ListTypes() {
 }
 
 //_____________________________________________________________________________
-// $Id: StMessTypeList.cxx,v 1.10 2003/09/25 21:19:22 genevb Exp $
+// $Id: StMessTypeList.cxx,v 1.11 2012/06/11 15:05:34 fisyak Exp $
 // $Log: StMessTypeList.cxx,v $
+// Revision 1.11  2012/06/11 15:05:34  fisyak
+// std namespace
+//
 // Revision 1.10  2003/09/25 21:19:22  genevb
 // Some new cout-like functions and friend functions, some doxygen-ization
 //

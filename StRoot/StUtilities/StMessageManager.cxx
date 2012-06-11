@@ -24,7 +24,6 @@
 #include <math.h>
 #endif
 
-
 //________________________________________
 // ostream& operator<<(ostream& os, StMessage* stm) 
 std::ostream& StMessageManager::OperatorShift(std::ostream& os, StMessage* stm)
@@ -203,7 +202,7 @@ void StMessageManager::Print() {
 // If not currenty building a message, print the last one created.
 //
   if (building) {
-    *this << ends;
+    *this << std::ends;
 
     if (fail()) {                   // Check to see if input has failed
       int pos0 = tellp();
@@ -219,7 +218,7 @@ void StMessageManager::Print() {
         myerr << "StMessage: ERROR!!! StMessageManager BUFFER TOO SMALL!"
           << endl;
       }
-      *this << ends;
+      *this << std::ends;
     }
 
     BuildMessage(str(), curType, curOpt);
@@ -388,7 +387,7 @@ void StMessageManager::Summary(size_t nTerms) {
       for (j = messList[i]->Print(max); j<max; j++) myout << ".";
       myout << "..";
       seekp(0);
-      *this << count << ends;
+      *this << count << std::ends;
       if (tellp() > 6) {
         myout << ">999999";
       } else {
@@ -440,7 +439,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.48 2009/06/22 22:36:01 fine Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.49 2012/06/11 15:05:34 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -470,8 +469,11 @@ static StMessMgr* temp=StMessageManager::Instance();
 
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.48 2009/06/22 22:36:01 fine Exp $
+// $Id: StMessageManager.cxx,v 1.49 2012/06/11 15:05:34 fisyak Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.49  2012/06/11 15:05:34  fisyak
+// std namespace
+//
 // Revision 1.48  2009/06/22 22:36:01  fine
 // Add the new dedicated UCM logger, It should force the recompilation of many STAR packages
 //

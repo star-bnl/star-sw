@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSimpleMagneticField.cc,v 1.4 1999/03/16 01:59:27 lasiuk Exp $
+ * $Id: StSimpleMagneticField.cc,v 1.5 2012/06/11 15:04:55 fisyak Exp $
  *
  * Author: Thomas Ullrich, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSimpleMagneticField.cc,v $
+ * Revision 1.5  2012/06/11 15:04:55  fisyak
+ * std namespace
+ *
  * Revision 1.4  1999/03/16 01:59:27  lasiuk
  * Use Units at Initialization
  *
@@ -31,7 +34,7 @@
  **************************************************************************/
 #include "StSimpleMagneticField.hh"
 #include "StGetConfigValue.hh"
-
+using namespace std;
 StMagneticField* StSimpleMagneticField::mInstance = 0;	// static member
 
 StSimpleMagneticField::StSimpleMagneticField() {/* noop */}

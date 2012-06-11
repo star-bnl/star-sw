@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.hh,v 1.7 2005/10/19 21:42:23 perev Exp $
+ * $Id: StTrsSector.hh,v 1.8 2012/06/11 15:04:55 fisyak Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.hh,v $
+ * Revision 1.8  2012/06/11 15:04:55  fisyak
+ * std namespace
+ *
  * Revision 1.7  2005/10/19 21:42:23  perev
  * Add include <algorith> for sort
  *
@@ -56,19 +59,17 @@
 
 #include <vector>
 #include <algorithm>
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using std::vector;
-#endif
 #include "StTrsAnalogSignal.hh"
 #include "StTpcGeometry.hh"
 
 #include "StDbUtilities/StTpcPadCoordinate.hh"
 
-typedef vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> > tpcTimeBins;
-typedef vector<tpcTimeBins, allocator<tpcTimeBins> >             tpcPadRow;
-typedef vector<tpcPadRow, allocator<tpcPadRow> >                 tpcSector;
+typedef std::vector<StTrsAnalogSignal, std::allocator<StTrsAnalogSignal> > tpcTimeBins;
+typedef std::vector<tpcTimeBins, std::allocator<tpcTimeBins> >             tpcPadRow;
+typedef std::vector<tpcPadRow, std::allocator<tpcPadRow> >                 tpcSector;
 
-typedef vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> >::iterator timeBinIterator;
+typedef std::vector<StTrsAnalogSignal, std::allocator<StTrsAnalogSignal> >::iterator timeBinIterator;
 
 typedef tpcPadRow::iterator                 padRowIterator;
 typedef tpcSector::iterator                 rowIterator;
