@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cxx,v 2.7 2012/05/07 14:42:57 fisyak Exp $
+ * $Id: StGlobalTrack.cxx,v 2.8 2012/06/11 14:40:34 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cxx,v $
+ * Revision 2.8  2012/06/11 14:40:34  fisyak
+ * Adjust format
+ *
  * Revision 2.7  2012/05/07 14:42:57  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -41,7 +44,7 @@
 
 ClassImp(StGlobalTrack)
 
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.7 2012/05/07 14:42:57 fisyak Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.8 2012/06/11 14:40:34 fisyak Exp $";
 StGlobalTrack::StGlobalTrack(const StGlobalTrack& track) : StTrack(track)
 {
     mDcaGeometry=0;
@@ -64,7 +67,7 @@ ostream&  operator<<(ostream& os,  const StGlobalTrack& track) {
   if (dca) os << *dca;
   Double_t length = track.length();
   if (length > 9999.) length = 9999.;
-  os << Form(" NP %2d NF %2d L %8.3f chi2 %8.3f", track.numberOfPossiblePoints(),track.fitTraits().numberOfFitPoints(),
+  os << Form(" NP %2d NF %2d L %8.3f chi2 %8.3g", track.numberOfPossiblePoints(),track.fitTraits().numberOfFitPoints(),
 	     length,track.fitTraits().chi2(0));
   if (track.idTruth())
     os << Form(" IdT: %4i Q: %4i", track.idTruth(), track.qaTruth());
