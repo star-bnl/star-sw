@@ -89,8 +89,8 @@ class AgStructure : public TNamed
   /// Finds the last defined version of this structure
   Bool_t Last();
 
-  ostream &Out( ostream &out );
-  ostream &operator << (ostream &out ) 
+  ostream &Out( std::ostream &out );
+  ostream &operator << (std::ostream &out ) 
   {
     return Out( out );
   }

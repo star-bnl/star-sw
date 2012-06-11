@@ -1,4 +1,4 @@
-// $Id: StMCConstructGeometry.cxx,v 1.4 2010/07/29 03:13:13 perev Exp $
+// $Id: StMCConstructGeometry.cxx,v 1.5 2012/06/11 16:17:42 fisyak Exp $
 //
 //
 // Class StMCConstructGeometry
@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "Stiostream.h"
-#include "StMessMgr.h"
+//#include "StMessMgr.h"
 #include "StMCConstructGeometry.h"
 #include "TVirtualMC.h"
 #include "TVirtualMCApplication.h"
