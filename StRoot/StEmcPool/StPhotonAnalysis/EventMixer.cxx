@@ -8,7 +8,7 @@
 #include "AnaCuts.h"
 
 #include "EventMixer.h"
-
+using namespace std;
 ClassImp(EventMixer)
 
 EventMixer::EventMixer(const char *flag)

@@ -8,7 +8,7 @@
 ///
 #include "GainVoltCoeffCalculator.h"
 #include "GainVoltPmtParameters.h"
-
+using namespace std;
 //ClassImp(GainVoltCoeffCalculator)
 
 GainVoltCoeffCalculator::GainVoltCoeffCalculator()

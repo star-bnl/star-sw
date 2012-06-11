@@ -32,7 +32,7 @@ class StEStructAscii : public StEStructEventReader {
   StEStructEventCuts* mECuts;
   StEStructTrackCuts* mTCuts;
 
-  ifstream in;  // input file reader
+  std::ifstream in;  // input file reader
 
   void fillTracks(StEStructEvent* estructEvent);
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbUse.cxx,v 1.12 2007/05/16 22:47:54 deph Exp $
+ * $Id: DbUse.cxx,v 1.13 2012/06/11 14:33:19 fisyak Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: DbUse.cxx,v $
+ * Revision 1.13  2012/06/11 14:33:19  fisyak
+ * std namespace
+ *
  * Revision 1.12  2007/05/16 22:47:54  deph
  * Replaced cerr with LOG_ERROR <<endm; for logger
  *
@@ -157,7 +160,7 @@ Query.seekp(0);
 if(strlen(tableName)>0)
   {
     //find latest date
-    Query << "SELECT DISTINCT MAX(instances.validFrom) FROM instances, structures WHERE instances.strID=structures.ID AND instances.name=\"" << tableName << "\" AND structures.name=\"" << structName << "\" AND instances.validFrom<\""<<currentDateTime<<"\" GROUP BY instances.name"<< ends;
+    Query << "SELECT DISTINCT MAX(instances.validFrom) FROM instances, structures WHERE instances.strID=structures.ID AND instances.name=\"" << tableName << "\" AND structures.name=\"" << structName << "\" AND instances.validFrom<\""<<currentDateTime<<"\" GROUP BY instances.name"<< std::ends;
 // cout << "database query: " << Query.str() << endl;
   }
 else
@@ -236,7 +239,7 @@ else // query succeeded, get result
 
     //find if there are many entries with the latest date
 Query.seekp(0);
-    Query << "SELECT DISTINCT instances.ID, instances.nRows, instances.strID, structures.sizeOfStruct, structures.nElements FROM instances, structures WHERE instances.strID=structures.ID AND instances.name=\"" << tableName << "\" AND structures.name=\"" << structName << "\" AND instances.validFrom=\""<<validFrom<<"\" ORDER BY instances.entered"<< ends;
+    Query << "SELECT DISTINCT instances.ID, instances.nRows, instances.strID, structures.sizeOfStruct, structures.nElements FROM instances, structures WHERE instances.strID=structures.ID AND instances.name=\"" << tableName << "\" AND structures.name=\"" << structName << "\" AND instances.validFrom=\""<<validFrom<<"\" ORDER BY instances.entered"<< std::ends;
 
 //cout << "database query: " << Query.str() << endl;
 
@@ -329,7 +332,7 @@ int *firstDim=0;
 
 Query.seekp(0);
 Query<<"SELECT name, type, offset, nDims, firstDim FROM headers WHERE strID="
-     << latestStrID << " ORDER BY offset" << ends;
+     << latestStrID << " ORDER BY offset" << std::ends;
   //cout << "database query: " << Query.str() << endl;
 
 if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
@@ -459,7 +462,7 @@ uint num_blobs;
 unsigned long *lengths;
 
 Query.seekp(0);
-Query << "SELECT bytes FROM bytes WHERE instanceID="<<latestDirID<< ends;
+Query << "SELECT bytes FROM bytes WHERE instanceID="<<latestDirID<< std::ends;
  
 // cout << "database query: " << Query.str() << endl;
 
@@ -615,7 +618,7 @@ else // query succeeded, get result
 // select just one table with the smallest date after the datetime 
 Query.seekp(0);
     //find latest date
-    Query << "SELECT DISTINCT MIN(instances.validFrom) FROM instances, structures WHERE instances.strID=structures.ID AND instances.name=\"" << tableName << "\" AND structures.name=\"" << structName << "\" AND instances.validFrom>\""<<currentDateTime<<"\" GROUP BY instances.name"<<ends;
+    Query << "SELECT DISTINCT MIN(instances.validFrom) FROM instances, structures WHERE instances.strID=structures.ID AND instances.name=\"" << tableName << "\" AND structures.name=\"" << structName << "\" AND instances.validFrom>\""<<currentDateTime<<"\" GROUP BY instances.name"<<std::ends;
 
 // cout << "database query: " << Query.str() << endl;
 

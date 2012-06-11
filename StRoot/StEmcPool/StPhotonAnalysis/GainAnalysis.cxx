@@ -14,6 +14,7 @@
 //#include <StEmcPool/StPhotonCommon/MyMcTrack.h> 
 
 #include "GainAnalysis.h"
+using namespace std;
 
 ClassImp(GainAnalysis)
 

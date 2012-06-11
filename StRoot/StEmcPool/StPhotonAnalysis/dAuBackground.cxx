@@ -19,6 +19,7 @@
 #include "AnaCuts.h"
 
 #include "dAuBackground.h"
+using namespace std;
 
 ClassImp(dAuBackground)
 

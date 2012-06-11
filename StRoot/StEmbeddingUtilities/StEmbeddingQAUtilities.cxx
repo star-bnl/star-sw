@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.16 2012/03/05 10:32:43 cpowell Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.17 2012/06/11 14:35:55 fisyak Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.17  2012/06/11 14:35:55  fisyak
+ * std namespace
+ *
  * Revision 1.16  2012/03/05 10:32:43  cpowell
  * Functions added to cut on refMult
  *
@@ -49,7 +52,7 @@
 #include "StMessMgr.h"
 #include "StParticleDefinition.hh"
 #include "StParticleTable.hh"
-
+using namespace std;
   StEmbeddingQAUtilities* StEmbeddingQAUtilities::mInstance = 0 ;
 
 //____________________________________________________________________________________________________

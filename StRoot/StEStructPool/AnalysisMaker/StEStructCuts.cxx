@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.10 2011/08/02 20:31:25 prindle Exp $
+ * $Id: StEStructCuts.cxx,v 1.11 2012/06/11 14:35:32 fisyak Exp $
  *
  * Author: Jeff Porter 
  *
@@ -365,7 +365,7 @@ void StEStructCuts::fillHistogram(const char* name, float val1, float val2, bool
     }
 
   // Add "2D" to name.
-  string hName = name;   hName += "2D";
+  std::string hName = name;   hName += "2D";
 //  char *hName = (char *) malloc(strlen(name)+2);
 //  sprintf(hName,"%s2D",name);
   int i;
@@ -450,8 +450,11 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.11  2012/06/11 14:35:32  fisyak
+ * std namespace
+ *
  * Revision 1.10  2011/08/02 20:31:25  prindle
- * Change string handling
+ *   Change string handling
  *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
  *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
  *   Added methods to check if cuts imposed

@@ -8,6 +8,7 @@
 #include <assert.h>
 
 #include "MyDecay.h"
+using namespace std;
 
 ClassImp(MyDecay)
 

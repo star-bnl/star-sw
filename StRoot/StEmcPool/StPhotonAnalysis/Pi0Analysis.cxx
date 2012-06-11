@@ -18,6 +18,7 @@
 #include "EventMixer.h"
 
 #include "Pi0Analysis.h"
+using namespace std;
 
 //temp solution
 Bool_t MINBIAS=kTRUE;

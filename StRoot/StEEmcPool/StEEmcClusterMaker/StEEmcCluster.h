@@ -44,6 +44,7 @@
 #include <TMath.h>
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcTower.h"
 #include "StEEmcBaseCluster.h"
+
 class StEmcCluster;
 
 class StEEmcCluster : public StEEmcBaseCluster {

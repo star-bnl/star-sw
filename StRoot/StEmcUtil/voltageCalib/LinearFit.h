@@ -2,11 +2,12 @@
 #include <stdexcept>
 #include <string>
 #include <math.h>
+using namespace std;
 template<typename Number>
 class LinearFit
 {
 public:
-  typedef map<Number, Number> Points;
+  typedef std::map<Number, Number> Points;
   LinearFit();
   LinearFit(Points * points);
   LinearFit(const LinearFit & fit);
@@ -69,11 +70,11 @@ void LinearFit<Number>::fit()
 {
   int n = _points->size();
   if (n < 2)
-      throw runtime_error("LinearFit<Number>::fit() - FATAL - n<2");
+    throw runtime_error("LinearFit<Number>::fit() - FATAL - n<2");
   Number sumx=0,sumy=0,sumx2=0,sumy2=0,sumxy=0;
   Number x, y,sxx,syy,sxy;
   // Compute error matrix
-  typename map<Number, Number>::const_iterator i;
+  typename std::map<Number, Number>::const_iterator i;
   for (i = _points->begin(); i != _points->end(); i++)
     {
       x = i->first;

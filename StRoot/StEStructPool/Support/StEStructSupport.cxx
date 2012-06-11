@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.28 2011/08/02 20:42:24 prindle Exp $
+ * $Id: StEStructSupport.cxx,v 1.29 2012/06/11 14:35:33 fisyak Exp $
  *
  * Author: Jeff Porter 
  *
@@ -63,7 +63,7 @@ char* StEStructSupport::getFrontName(int itype){
 
   if(mtmpString) delete [] mtmpString;
   mtmpString=new char[256];
-  ostringstream ts;
+  std::ostringstream ts;
   int j,k;
   if(itype<_pair_chargemax){
     j=0; k=itype;
@@ -1885,7 +1885,7 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
   int len1=strlen(s1);
   mtmpString=new char[256];
 
-  ostringstream ts;
+  std::ostringstream ts;
   char* ptr2=ptr1;
   *ptr1='\0';
   ts<<tmp; 
@@ -1902,8 +1902,11 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.29  2012/06/11 14:35:33  fisyak
+ * std namespace
+ *
  * Revision 1.28  2011/08/02 20:42:24  prindle
- * Added YtYtVolumeNormalization.
+ *   Added YtYtVolumeNormalization.
  *   Fixed calculation of error for YtYt \Delta\rho/sqrt(\rho_{ref})
  *   Added error calculation for p_t histograms
  *   Added warning when either \rho_{sib} or \rho_{ref} has an empty bin. Set ratio
