@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEmcHitCollection.hh,v 2.9 2012/03/22 00:33:58 perev Exp $
+ * $Id: StMcEmcHitCollection.hh,v 2.10 2012/06/11 14:51:46 fisyak Exp $
  * $Log: StMcEmcHitCollection.hh,v $
+ * Revision 2.10  2012/06/11 14:51:46  fisyak
+ * std namespace
+ *
  * Revision 2.9  2012/03/22 00:33:58  perev
  * private => protected
  *
@@ -76,5 +79,5 @@ class StMcEmcHitCollection : public TDataSet {
   ClassDef(StMcEmcHitCollection,1)
 };
 
-ostream&  operator<<(ostream& os, const StMcEmcHitCollection&);
+std::ostream&  operator<<(std::ostream& os, const StMcEmcHitCollection&);
 #endif
