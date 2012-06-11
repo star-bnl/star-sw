@@ -19,7 +19,7 @@
 #include <TVector3.h>
 #include "TString.h"
 #include "TObject.h"
-
+#include "TMath.h"
 //#ifdef __ROOT__
 ClassImp(dFitter3d)
     //#endif
@@ -104,7 +104,7 @@ void dFitter3d::FillInternalArrays()
     // get the maximum number of bins
     int maximumInternalArraySize = (mNumerator->GetNbinsX()+2) * (mNumerator->GetNbinsY()+2) * (mNumerator->GetNbinsZ()+2) ;
     if ( maximumInternalArraySize != (mDenominator->GetNbinsX()+2) * (mDenominator->GetNbinsY()+2) * (mDenominator->GetNbinsZ()+2) )
-	cerr << "Warning : different histogram sizes in numerator and denominator\n " ;
+	std::cerr << "Warning : different histogram sizes in numerator and denominator\n " ;
     
     // now create arrays
     mNumeratorInternalArray   = new double[maximumInternalArraySize] ;

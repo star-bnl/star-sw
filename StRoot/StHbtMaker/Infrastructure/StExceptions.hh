@@ -7,13 +7,13 @@
 
 class StException {
 private:
-  string mName;
-  string mMessage;
+  std::string mName;
+  std::string mMessage;
 public:
   StException(const char* c="unknown", const char* m="") : mName(c),mMessage(m) { /* no-op */ }
   virtual ~StException() {}
-  virtual string name() {return mName;}
-  virtual string message() {return mMessage; }
+  virtual std::string name() {return mName;}
+  virtual std::string message() {return mMessage; }
   virtual void print() { cout << "*** StException * " << name() << " *** " << message() << endl; }
 };
 
