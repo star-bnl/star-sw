@@ -1,10 +1,13 @@
 /***************************************************************************
-* $Id: TOF_Reader.hh,v 2.2 2005/04/12 17:22:36 dongx Exp $
+* $Id: TOF_Reader.hh,v 2.3 2012/06/11 16:36:22 fisyak Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.hh,v $
+* Revision 2.3  2012/06/11 16:36:22  fisyak
+* std namespace
+*
 * Revision 2.2  2005/04/12 17:22:36  dongx
 * Update for year 5 new data format, written by Jing Liu.
 * Previous interfaces are separated out for convenience.
@@ -178,9 +181,9 @@ struct TofDATA {
   unsigned short TdcData[TOF_MAX_TDC_CHANNELS];
   	   short A2dData[TOF_MAX_A2D_CHANNELS];
   unsigned short ScaData[TOF_MAX_SCA_CHANNELS];
-  // Jing Liu, use vector to save all hits(include multi-hits)
-  vector<TofRawHit> TofLeadingHits;
-  vector<TofRawHit> TofTrailingHits;
+  // Jing Liu, use std::vector to save all hits(include multi-hits)
+  std::vector<TofRawHit> TofLeadingHits;
+  std::vector<TofRawHit> TofTrailingHits;
   // use array to save hits, w/o multi-hits
   unsigned int LdTdcData[TOF_MAX_TDC_CHANNELS];
   unsigned int TrTdcData[TOF_MAX_TDC_CHANNELS];
