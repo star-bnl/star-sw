@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: parseXmlString.cc,v 1.7 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: parseXmlString.cc,v 1.8 2012/06/11 14:33:47 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: parseXmlString.cc,v $
+ * Revision 1.8  2012/06/11 14:33:47  fisyak
+ * std namespace
+ *
  * Revision 1.7  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -42,7 +45,7 @@
 #include "parseXmlString.hh"
 #include "stdb_streams.h"
 #include <string.h>
-
+using namespace std;
 /////////////////////////////////////////////////////////////////
 
 char*

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.24 2007/08/20 18:21:28 deph Exp $
+ * $Id: StDbBuffer.cc,v 1.25 2012/06/11 14:33:47 fisyak Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.25  2012/06/11 14:33:47  fisyak
+ * std namespace
+ *
  * Revision 1.24  2007/08/20 18:21:28  deph
  * New Version of Load Balancer
  *
@@ -136,7 +139,7 @@
 #ifdef HPUX
 #define freeze(i) str()
 #endif
-
+using namespace std;
 ///////////////////////////////////////////////////////////////////////
 
 void StDbBuffer::Print(){

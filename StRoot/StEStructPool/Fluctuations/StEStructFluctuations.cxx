@@ -227,7 +227,7 @@ void StEStructFluct::fillOccupancies( double dPhi,  double dEta,
     occPNSum->Fill(dPhi,dEta,ns*ps);
     occPNPlus->Fill(dPhi,dEta,nPlus*pPlus);
     occPNMinus->Fill(dPhi,dEta,nMinus*pMinus);
-    occPNDiff->Fill(nd*pd);
+    occPNDiff->Fill(dPhi,dEta,nd*pd);
 }
 void StEStructFluct::fillMults( double nPlus, double nMinus,
                                 double pPlus, double pMinus ) {

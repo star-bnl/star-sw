@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.h,v 1.7 2010/09/02 21:20:09 prindle Exp $
+ * $Id: StEStructCuts.h,v 1.8 2012/06/11 14:35:32 fisyak Exp $
  *
  * Author: Jeff Porter 
  *
@@ -81,9 +81,9 @@ public:
   bool loadBaseCuts(const char* name,const char* val1,const char* val2,const char* val3="",const char* val4="");  // overloaded to accept strings
   virtual void loadUserCuts(const char* name,const char** vals,int nvals)=0; 
   void loadUserCuts(const char* name,const char* val1,const char* val2);  // overloaded to accept strings
-  virtual void printCuts(ostream& of, int i=-1);
+  virtual void printCuts(std::ostream& of, int i=-1);
   virtual void printCuts(const char* fileName);
-  virtual void printCutStats(ostream& of) = 0;
+  virtual void printCutStats(std::ostream& of) = 0;
   virtual bool loadCutDB();   // Loads pre-compiled cuts from database
 
   virtual bool  isCut(const char* cutName);
@@ -191,8 +191,11 @@ inline void StEStructCuts::setDoFillHists(bool filling) {
 /***********************************************************************
  *
  * $Log: StEStructCuts.h,v $
+ * Revision 1.8  2012/06/11 14:35:32  fisyak
+ * std namespace
+ *
  * Revision 1.7  2010/09/02 21:20:09  prindle
- * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
  *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
  *              Add 7, 11 and 39 GeV dataset selections
  *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.

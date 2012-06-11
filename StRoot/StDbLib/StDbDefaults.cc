@@ -2,7 +2,7 @@
 #include "stdb_streams.h"
 #include <dirent.h>
 #include <stdlib.h>
-
+using namespace std;
 StDbDefaults* StDbDefaults::mInstance=0;
 
 StDbDefaults::StDbDefaults(){

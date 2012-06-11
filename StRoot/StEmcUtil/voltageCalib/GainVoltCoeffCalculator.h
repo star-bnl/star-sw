@@ -31,8 +31,8 @@ public:
 
   void setIoMode(int mode);
   void process();
-  friend ostream& operator<<(ostream& os, GainVoltCoeffCalculator& object);
-  friend istream& operator>>(istream& is, GainVoltCoeffCalculator& object);
+  friend std::ostream& operator<<(std::ostream& os, GainVoltCoeffCalculator& object);
+  friend std::istream& operator>>(std::istream& is, GainVoltCoeffCalculator& object);
   GVP_iterator begin();
   GVP_iterator end();
     

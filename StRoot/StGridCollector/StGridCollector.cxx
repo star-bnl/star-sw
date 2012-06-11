@@ -27,21 +27,21 @@ ClassImp(StGridCollector)
 
     TClass *c = gROOT->GetClass("Collector");
     if (!c) {
-	cerr << "ERROR <StGridCollector::Create> failed to GetClass"
-	     << endl;      
+	std::cerr << "ERROR <StGridCollector::Create> failed to GetClass"
+	     << std::endl;      
 	return 0;
     }
 
     serv = (StGridCollector *) c->New();
     if(!serv)
-	cerr << "ERROR <StGridCollector::Create> failed to make a new "
-	     << "GridCollector" << endl;
+	std::cerr << "ERROR <StGridCollector::Create> failed to make a new "
+	     << "GridCollector" << std::endl;
     if (sel) {
 	if (*sel) {
 	    int ierr = serv->Init(sel);
 	    if (ierr) {
-		cerr << "ERROR <StGridCollector::Create(" << sel
-		     << ")> failed to with error code " << ierr << endl;
+		std::cerr << "ERROR <StGridCollector::Create(" << sel
+		     << ")> failed to with error code " << ierr << std::endl;
 		delete serv;
 		serv = 0;
 	    }

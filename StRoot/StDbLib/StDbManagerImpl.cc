@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.40 2012/04/09 14:32:26 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.41 2012/06/11 14:33:47 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.41  2012/06/11 14:33:47  fisyak
+ * std namespace
+ *
  * Revision 1.40  2012/04/09 14:32:26  dmitry
  * AFS-related patch commented out
  *
@@ -292,6 +295,7 @@
 #endif
 
 //#include <stdio.h>
+using namespace std;
 extern char** environ;
 
 #define __CLASS__ "StDbManagerImpl"

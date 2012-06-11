@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManagerImpl.hh,v 1.8 2011/02/10 17:30:42 dmitry Exp $
+ * $Id: StDbManagerImpl.hh,v 1.9 2012/06/11 14:33:47 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.hh,v $
+ * Revision 1.9  2012/06/11 14:33:47  fisyak
+ * std namespace
+ *
  * Revision 1.8  2011/02/10 17:30:42  dmitry
  * added an option to blacklist domains
  *
@@ -111,7 +114,7 @@ using std::list;
 typedef list<dbType*> dbTypes;
 typedef list<dbDomain*> dbDomains;
 typedef list<StDbServer*> ServerList;
-typedef set<std::string> dbDomainBlacklist;
+typedef std::set<std::string> dbDomainBlacklist;
 #endif
 
 

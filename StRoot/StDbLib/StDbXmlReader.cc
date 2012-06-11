@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.14 2007/08/20 18:21:31 deph Exp $
+ * $Id: StDbXmlReader.cc,v 1.15 2012/06/11 14:33:47 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.15  2012/06/11 14:33:47  fisyak
+ * std namespace
+ *
  * Revision 1.14  2007/08/20 18:21:31  deph
  * New Version of Load Balancer
  *
@@ -83,7 +86,7 @@
 #define LOG_QA cout
 #define endm "\n"
 #endif
-
+using namespace std;
 template<class T>
 static void passAux(elem* e, T*& i,  int& len)
 {

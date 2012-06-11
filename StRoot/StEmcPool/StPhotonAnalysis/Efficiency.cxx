@@ -24,7 +24,7 @@
 #include "Pi0Analysis.h"
 
 #include "Efficiency.h"
-
+using namespace std;
 ClassImp(Efficiency)
 
 Efficiency::Efficiency(const char *input,const char *dir,const char *flag)

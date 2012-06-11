@@ -24,8 +24,8 @@ void IO::chain(TChain* chain)
 
   void *pDir = gSystem->OpenDirectory(mDir.Data());
   if(!pDir){
-    cerr << "##Cannot open directory " << mDir.Data() << endl;
-    cerr << "##Goodbye" << endl;
+    std::cerr << "##Cannot open directory " << mDir.Data() << endl;
+    std::cerr << "##Goodbye" << endl;
     exit(1);
   }
   
@@ -86,12 +86,12 @@ void IO::createDb(const char *dbName)
 {
 
   // open db to add entries
-  ofstream dbFile(dbName, ios::app);
+  ofstream dbFile(dbName, std::ios::app);
   
   void *pDir = gSystem->OpenDirectory(mDir.Data());
   if(!pDir){
-    cerr << "##Cannot open directory " << mDir.Data() << endl;
-    cerr << "##Goodbye" << endl;
+    std::cerr << "##Cannot open directory " << mDir.Data() << endl;
+    std::cerr << "##Goodbye" << endl;
     exit(1);
   }
   
@@ -229,7 +229,7 @@ int IO::createDb(const char* dbName, const char* inputList)
   addDb(dbName);
   //showDb();
   // open db to add entries
-  ofstream dbFile(dbName, ios::app);
+  ofstream dbFile(dbName, std::ios::app);
   // open inputList
 
   // check streams

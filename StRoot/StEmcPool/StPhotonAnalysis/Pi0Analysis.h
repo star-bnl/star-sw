@@ -22,9 +22,9 @@ class Pi0Analysis : public TObject{
   TFile *mFile;
   TFile *mFileOut;
 
-  ofstream fout_mb;
-  ofstream fout_ht1;
-  ofstream fout_ht2;
+  std::ofstream fout_mb;
+  std::ofstream fout_ht1;
+  std::ofstream fout_ht2;
 
   TTree *myEventTree;
   AnaCuts *cuts;

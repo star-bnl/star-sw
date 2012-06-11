@@ -5,7 +5,7 @@
 //
 #include <assert.h>
 // C++ STL
-#include <iostream>
+#include "Stiostream.h"
 #include <cassert>
 
 // STAR

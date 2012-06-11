@@ -1,7 +1,10 @@
 ///
-// $Id: StPi0Candidate.h,v 1.4 2005/05/23 12:35:14 suaide Exp $
+// $Id: StPi0Candidate.h,v 1.5 2012/06/11 14:39:43 fisyak Exp $
 //
 // $Log: StPi0Candidate.h,v $
+// Revision 1.5  2012/06/11 14:39:43  fisyak
+// std namespace
+//
 // Revision 1.4  2005/05/23 12:35:14  suaide
 // New Point maker code
 //
@@ -51,7 +54,7 @@ public:
     ClassDef(StPi0Candidate,1)// Base class for electromagnetic calorimeter pi0Candidate
 };
 
-ostream &operator<<(ostream&, StPi0Candidate&); // Printing operator
+std::ostream &operator<<(std::ostream&, StPi0Candidate&); // Printing operator
 
 inline            StPi0Candidate::~StPi0Candidate()
 { /* Nobody */

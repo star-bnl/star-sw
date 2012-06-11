@@ -8,7 +8,7 @@
 //#include <StEmcPool/StPhotonCommon/MyMcTrack.h> 
 
 #include "AnaCuts.h"
-
+using namespace std;
 ClassImp(AnaCuts)
 
 AnaCuts::AnaCuts(const char* flag)

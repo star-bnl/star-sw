@@ -165,6 +165,6 @@ inline Bool_t Key( const StEEmcSmdCluster &me, const StEEmcSmdCluster &you) { re
 
 typedef std::vector<StEEmcSmdCluster> StEEmcSmdClusterVec_t;
 
-ostream& operator<<(ostream &out, const StEEmcSmdCluster &c );
+std::ostream& operator<<(std::ostream &out, const StEEmcSmdCluster &c );
 
 #endif
