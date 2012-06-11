@@ -5,7 +5,7 @@
 #include "TVector3.h"
 #include "StKFTrack.h"
 class StMuDstVtxT;
-ostream&  operator<<(ostream& os,  const StMuDstVtxT& v);
+std::ostream&  operator<<(std::ostream& os,  const StMuDstVtxT& v);
 class StMuDstVtxT : public TObject {
 public:
   StMuDstVtxT(Double_t x = 0, Double_t y = 0, Double_t z = 0, 
@@ -36,7 +36,7 @@ public:
   Float_t   TimeMc()   const {return fTimeMc;}
   Int_t     NoDaughtersMc() const {return fNoDaughtersMc;}
   Int_t     gePidMc()  const {return fgePidMc;}
-  void Print(Option_t *option="") const {if (option) {}; cout << *this << endl;}
+  void Print(Option_t *option="") const {if (option) {}; std::cout << *this << std::endl;}
   void SetMc(Int_t NoMuMcVertex = 0, Int_t NoMuMcTrack = 0, const Float_t *time = 0,
 	     const Float_t *x = 0,const Float_t *y = 0,const Float_t *z = 0,
 	     const Int_t *NoDaughters = 0,const Int_t *IdParTrk = 0,const Int_t *gePid = 0) {

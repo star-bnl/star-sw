@@ -6,7 +6,7 @@
 #include "TNamed.h"
 #include <vector>
 #include "TH2.h"
-typedef vector<Int_t>  IntVec;
+typedef std::vector<Int_t>  IntVec;
 //________________________________________________________________________________
 class StPhiEtaHitList {
  public:

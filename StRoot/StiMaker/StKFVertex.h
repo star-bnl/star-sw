@@ -1,6 +1,6 @@
 #ifndef __StKFVertex_h__
 #define __StKFVertex_h__
-// $Id: StKFVertex.h,v 2.1 2012/05/07 14:56:14 fisyak Exp $
+// $Id: StKFVertex.h,v 2.2 2012/06/11 15:33:41 fisyak Exp $
 #include "Riostream.h"
 #include "TObject.h"
 #include "StKFTrack.h"
@@ -9,7 +9,7 @@
 #include "TVector3.h"
 
 class StKFVertex;
-ostream&  operator<<(ostream& os,  const StKFVertex& v);
+std::ostream&  operator<<(std::ostream& os,  const StKFVertex& v);
 class StKFVertex : public TObject  {
 public:
   StKFVertex(Int_t id = -1) : fID(id) , fIdTruth(0), fQuality(0), fIdParentTk(0),
@@ -42,7 +42,7 @@ public:
   Int_t        MultWE(Int_t k = 1) const;
   Int_t Q() const;
   void operator +=(StKFVertex &vtx);
-  void Print(Option_t *option="") const {cout << option << *this << endl; }
+  void Print(Option_t *option="") const {std::cout << option << *this << std::endl; }
   void PrintW(Option_t *option="") const;
   void SetMc(Float_t time, Float_t x, Float_t y, Float_t z, Int_t NoDaughters, Int_t gePid);
   Float_t   TimeMc()   const {return fTimeMc;}
@@ -68,6 +68,9 @@ private:
   ClassDef(StKFVertex,0)
 };
 // $Log: StKFVertex.h,v $
+// Revision 2.2  2012/06/11 15:33:41  fisyak
+// std namespace
+//
 // Revision 2.1  2012/05/07 14:56:14  fisyak
 // Add StKFVertexMaker
 //

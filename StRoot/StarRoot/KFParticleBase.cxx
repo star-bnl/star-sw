@@ -2109,10 +2109,10 @@ void KFParticleBase::MultQSQt( const Double_t Q[], const Double_t S[], Double_t 
 }
 //________________________________________________________________________________
 void KFParticleBase::Print(Option_t *opt) const {
-  cout << *this << endl;
+  std::cout << *this << std::endl;
 }
 //________________________________________________________________________________
-ostream&  operator<<(ostream& os, const KFParticleBase& particle) {
+std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
   static const Char_t *vn[11] = {"x","y","z","px","py","pz","E","S","Q","Chi2","NDF"};
   os << "KFP:";
   for (Int_t i = 0; i < 8; i++) 
@@ -2122,7 +2122,6 @@ ostream&  operator<<(ostream& os, const KFParticleBase& particle) {
   os << " Q:" << particle.GetQ() << " chi2/NDF : " << particle.GetChi2() << "/" << particle.GetNDF();
   return os;
 }
-
 
 // 72-charachters line to define the printer border
 //3456789012345678901234567890123456789012345678901234567890123456789012

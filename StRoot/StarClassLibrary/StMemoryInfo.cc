@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemoryInfo.cc,v 1.3 1999/12/21 15:14:16 ullrich Exp $
+ * $Id: StMemoryInfo.cc,v 1.4 2012/06/11 15:29:26 fisyak Exp $
  *
  * Author: Thomas Ullrich, June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMemoryInfo.cc,v $
+ * Revision 1.4  2012/06/11 15:29:26  fisyak
+ * std namespace
+ *
  * Revision 1.3  1999/12/21 15:14:16  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -57,13 +60,13 @@ void StMemoryInfo::printLine(ostream& os, const char* str, int cur, int old, con
 {
     os.width(40);
     //    os.fill('.');
-    os.setf(ios::left);
+    os.setf(std::ios::left);
     os << str << ' ' << cur << " (";
-    os.setf(ios::showpos);
+    os.setf(std::ios::showpos);
     os << cur-old << ") ";
     if (unit) os << unit;
     os << endl;
-    os.unsetf(ios::showpos);
+    os.unsetf(std::ios::showpos);
 }
 
 void StMemoryInfo::print(ostream& os)

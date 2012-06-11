@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SystemOfUnits.h,v 1.6 2007/08/17 16:04:46 fine Exp $
+ * $Id: SystemOfUnits.h,v 1.7 2012/06/11 15:29:27 fisyak Exp $
  *
  * Author: blasiuk adapted from CLHEP
  ***************************************************************************
@@ -35,6 +35,9 @@
  ***************************************************************************
  *
  * $Log: SystemOfUnits.h,v $
+ * Revision 1.7  2012/06/11 15:29:27  fisyak
+ * std namespace
+ *
  * Revision 1.6  2007/08/17 16:04:46  fine
  * Eliminate the redundant semicolon - causes the compilation error with the pedantic compilation flag
  *
@@ -144,7 +147,7 @@ namespace units {
     static const double keV     = kiloelectronvolt;
     static const double GeV     = Gigaelectronvolt;
     static const double TeV     = Teraelectronvolt;
-    
+    static const double amu     = 931.49406121 * MeV;//  unified Atomic mass unit     
     static const double joule   = electronvolt/e_SI;
     
     //

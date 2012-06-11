@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.19 2006/04/07 22:02:34 ullrich Exp $
+ * $Id: StMatrix.hh,v 1.20 2012/06/11 15:29:26 fisyak Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.20  2012/06/11 15:29:26  fisyak
+ * std namespace
+ *
  * Revision 1.19  2006/04/07 22:02:34  ullrich
  * Fixed bug in dfinv and dfact that were affecting
  * determinant(), invert(), and inverse().
@@ -416,8 +419,8 @@ StMatrix<DataType>::StMatrix(size_t p,size_t q, size_t init)
 		break;
 	    case 1:
 		if ( mCol == mRow ) {
-		    DataType *a = mElement;
-		    DataType *b = mElement + mSize;
+		    a = mElement;
+		    b = mElement + mSize;
 		    for( ; a<b; a+=(mCol+1)) *a = 1.0;
 		}
 		else {
@@ -1044,7 +1047,7 @@ void StMatrix<DataType>::invert(size_t &ierr) {
 		return;
 	    }
 	    {
-		DataType s = temp/det;
+		s = temp/det;
 		DataType *tmp = mElement;
 		*(tmp++) = s*c11;
 		*(tmp++) = s*c21;
@@ -1720,7 +1723,7 @@ ostream& operator<<(ostream& s, const StMatrix<DataType>& q)
     // Fixed format needs 3 extra characters for field
     // Scientific format needs 7
     unsigned int width;
-    if(s.flags()&ios::fixed)
+    if(s.flags()&std::ios::fixed)
 	width = s.precision()+3;
     else
 	width = s.precision()+7;

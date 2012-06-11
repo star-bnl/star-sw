@@ -12,6 +12,7 @@
 #include "StThreeVector.hh"
 #include "StiVMCToolKit.h"
 #include "TMath.h"
+using namespace std;
 class StiDetector;
 class StiMaterial;
 class StiShape;

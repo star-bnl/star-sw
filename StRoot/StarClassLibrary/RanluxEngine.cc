@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RanluxEngine.cc,v 1.3 2003/09/02 17:59:34 perev Exp $
+ * $Id: RanluxEngine.cc,v 1.4 2012/06/11 15:29:26 fisyak Exp $
  *
  * Author: Original code from CLHEP by G. Cosmo
  *         modified for SCL bl
@@ -22,6 +22,9 @@
  ***************************************************************************
  *
  * $Log: RanluxEngine.cc,v $
+ * Revision 1.4  2012/06/11 15:29:26  fisyak
+ * std namespace
+ *
  * Revision 1.3  2003/09/02 17:59:34  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -207,7 +210,7 @@ void RanluxEngine::setSeeds(const long *seeds, HepInt lux) {
 
 void RanluxEngine::saveStatus() const
 {
-   ofstream outFile("Ranlux.conf", ios::out ) ;
+   ofstream outFile("Ranlux.conf", std::ios::out ) ;
 
    if (!outFile.bad()) {
      outFile << theSeed << endl;
@@ -221,7 +224,7 @@ void RanluxEngine::saveStatus() const
 
 void RanluxEngine::restoreStatus()
 {
-   ifstream inFile("Ranlux.conf", ios::in);
+   ifstream inFile("Ranlux.conf", std::ios::in);
 
    if (!inFile.bad() && !inFile.eof()) {
      inFile >> theSeed;

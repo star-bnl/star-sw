@@ -9,6 +9,7 @@
 #endif
 #include "TObjString.h"
 #include "TObjArray.h"
+using namespace std;
 ClassImp(TRArray);
 //________________________________________________________________________________
 TRArray::TRArray(Int_t N,const Float_t *Array):  TArrayD(N), fValid(kTRUE), fIsNotOwn(kFALSE) {

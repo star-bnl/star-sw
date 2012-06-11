@@ -238,5 +238,5 @@ class KFParticleBase : public TObject {
   
   ClassDef(KFParticleBase,1)			    
 };
-ostream&  operator<<(ostream& os, KFParticleBase const & particle);
+std::ostream&  operator<<(std::ostream& os, KFParticleBase const & particle);
 #endif 

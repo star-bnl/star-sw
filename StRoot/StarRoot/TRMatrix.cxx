@@ -266,26 +266,26 @@ TRMatrix::TRMatrix(const TRSymMatrix &S) {
   TCL::trupck(S.GetArray(),fArray,M);
 }
 //________________________________________________________________________________
-ostream& operator<<(ostream& s,const TRMatrix &target) {
+std::ostream& operator<<(std::ostream& s,const TRMatrix &target) {
   Int_t Nrows = target.GetNrows();
   Int_t Ncols = target.GetNcols();
   const Double_t *Array = target.GetArray();
-  s << "Rectangular Matrix Size \t[" << Nrows << "," << Ncols << "]" << endl;
+  s << "Rectangular Matrix Size \t[" << Nrows << "," << Ncols << "]" << std::endl;
   if (Array) { 
-    s.setf(ios::fixed,ios::scientific);
-    s.setf(ios::showpos);
+    s.setf(std::ios::fixed,std::ios::scientific);
+    s.setf(std::ios::showpos);
     for (int i = 0; i< Nrows; i++) {
       Int_t Nzeros = 0;
       for (int j = Ncols-1; j >= 0; j--) if (Array[j + i*Ncols] == 0.0) {Nzeros++;} else break;
       if (Nzeros == 1) Nzeros = 0;
       for (int j = 0; j < Ncols-Nzeros; j++) s << Form("%10.3f",Array[j + i*Ncols]);
       if (Nzeros) s << Form("%8i*0",Nzeros);
-      s << endl;
+      s << std::endl;
     }
-    s.unsetf(ios::showpos);
+    s.unsetf(std::ios::showpos);
   }
   else s << " Empty";
   return s;
 }
 //________________________________________________________________________________
-void TRMatrix::Print(Option_t *opt) const {if (opt) {}; cout << *this << endl;}
+void TRMatrix::Print(Option_t *opt) const {if (opt) {}; std::cout << *this << std::endl;}

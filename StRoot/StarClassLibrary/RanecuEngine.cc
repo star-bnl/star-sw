@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RanecuEngine.cc,v 1.3 1999/12/21 15:13:58 ullrich Exp $
+ * $Id: RanecuEngine.cc,v 1.4 2012/06/11 15:29:26 fisyak Exp $
  *
  * Author:  Gabriele Cosmo - Created - 2nd February 1996
  *          modified for SCL bl
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: RanecuEngine.cc,v $
+ * Revision 1.4  2012/06/11 15:29:26  fisyak
+ * std namespace
+ *
  * Revision 1.3  1999/12/21 15:13:58  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -109,7 +112,7 @@ void RanecuEngine::setSeeds(const long* seeds, HepInt pos)
 
 void RanecuEngine::saveStatus() const
 {
-   ofstream outFile("Ranecu.conf", ios::out ) ;
+   ofstream outFile("Ranecu.conf", std::ios::out ) ;
 
    if (!outFile.bad()) {
      outFile << theSeed << endl;
@@ -120,7 +123,7 @@ void RanecuEngine::saveStatus() const
 
 void RanecuEngine::restoreStatus()
 {
-   ifstream inFile("Ranecu.conf", ios::in);
+   ifstream inFile("Ranecu.conf", std::ios::in);
 
    if (!inFile.bad() && !inFile.eof()) {
      inFile >> theSeed;
