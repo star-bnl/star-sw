@@ -25,14 +25,14 @@
 
 
 //max num clusters any disk is allowed to have
-#define MAX_CLUSTERS 10
+#define MAX_CLUSTERS 12
 #define CHARGE_MEASURE clusterCharge
 #define MAX_DIST_STRIP_R 0.7
 #define MAX_DIST_STRIP_PHI 0.03
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 //#define LEN_CONDITION
 #define PULSE_CONDITION
-//#define DO_PRINT
+#define DO_PRINT
 
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StFgtCollection.h"
@@ -56,6 +56,7 @@
 #define MIN_NUM_POINTS 3
 #define DISK_DIM 40
 #define NUM_EFF_BIN 30
+
 
 
 
@@ -101,6 +102,35 @@ void doNormalize(TH2D** hEff, TH2D** hNonEff)
 
 }
 
+
+
+void StFgtGenAVEMaker::saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi, Int_t maxR, Int_t maxPhi)
+{
+  Char_t buffer[200];
+  sprintf(buffer,"Sig_Phi_Evt_%d_R_%f_Phi_%f",evtNr,r,phi);
+  TH2D* histoP=new TH2D(buffer,buffer,7,0,6,maxPhi,0,maxPhi-1);
+  for(int i=0;i<maxPhi;i++)
+    {
+      for(int j=0;j<7;j++)
+	{
+	  histoP->SetBinContent(j,i,sigP[i*7+j]);
+	  cout <<"P: setting bin : i: " << i << " j: " << j << " index: "<< i*7+j << " sig: " << sigP[i*7+j]<<endl;
+	}
+    }
+  v_hClusP.push_back(histoP);
+  sprintf(buffer,"Sig_R_Evt_%d_R_%f_Phi_%f",evtNr,r,phi);
+  TH2D* histoR=new TH2D(buffer,buffer,7,0,6,maxR,0,maxR-1);
+  for(int i=0;i<maxR;i++)
+    {
+      for(int j=0;j<7;j++)
+	{
+	  histoR->SetBinContent(j,i,sigR[i*7+j]);
+	  cout <<"R: setting bin : i: " << i << " j: " << j << " index: "<< i*7+j << " sig: " << sigR[i*7+j]<<endl;
+	}
+    }
+  v_hClusR.push_back(histoR);
+  cout <<" done saving sigs" <<endl;
+}
 
 pair<double,double> StFgtGenAVEMaker::getDca(  vector<AVTrack>::iterator it)
 {
@@ -358,7 +388,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
       if(maxRCharge> 1000 && maxPhiCharge>1000 && iD==m_effDisk)// && (float)pStrips[iD*4+iq][maxRInd].charge)
 	{
 	  StFgtGeom::getPhysicalCoordinate((float)pStrips[iD*4+iq][maxRInd].geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
-	  //  if(ordinate>20)
+	  //	    if(ordinate>20)
 	    {
 	      chargeCorrMaxStrip->Fill(maxRCharge,maxPhiCharge);
 	      chargeCorrMaxAdc->Fill(maxRAdc,maxPAdc);
@@ -378,9 +408,13 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
       if(partOfClusterR&& partOfClusterP && iD==m_effDisk)
 	{
 	  chargeCorrInEffDisk->Fill(clusterChargeR,clusterChargeP);
-	  chargeCorr[iD*4+iq]->Fill(clusterChargeR,clusterChargeP);
+	  StFgtGeom::getPhysicalCoordinate((float)pStrips[iD*4+iq][maxRInd].geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+	  //	    if(ordinate>20)
+	      {
+		chargeCorr[iD*4+iq]->Fill(clusterChargeR,clusterChargeP);
+	      }
 	  //basically only here we fill with the estimated cluster, for the other disks we fill with the cluster on the track
-	  if(r>20)
+	      //	   if(r>20)
 	    {
 	      clusterSizeR[iD*4+iq]->Fill(mClusterSizeR);
 	      clusterSizeP[iD*4+iq]->Fill(mClusterSizeP);
@@ -400,8 +434,6 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 
 	  if(iD==2 && iq==1 && (float)pStrips[iD*4+iq][maxPInd].pedErr>0)
 	    {
-
-
 	      pulseCounterTP++;
 	      for(int iB=0;iB<7;iB++)
 		{
@@ -622,7 +654,17 @@ Short_t StFgtGenAVEMaker::getQuadFromCoo(Double_t x, Double_t y)
 //print the strips around the place where we expect hit
 Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
+  //just print the first 1000 clusters
+
+  if(printCounter>1000)
+    return true;
+  printCounter++;
   //first r: 
+  Double_t signalsP[500];
+  Double_t signalsR[500];
+
+  Int_t counterR=0;
+  Int_t counterP=0;
 
   for(int i=0;i<  pStrips[iD*4+iq].size();i++)
     {
@@ -676,16 +718,34 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 	{
 	  //	  cout <<" found!!!" << endl;
 	  (*outTxtFile) <<StFgtGeom::encodeGeoName(iD,iq,layer,strip)<<" ord: " << ordinate <<" layer: " <<layer<<" ped: " << pStrip.ped <<" pedErr: " << pStrip.pedErr <<" seedType: " <<buffer<<" ";
-	  for(int i=0;i<7;i++)
+	  for(int iT=0;iT<7;iT++)
 	    {
-	      if(pStrip.adc[i]<pStrip.pedErr)
+	      if(pStrip.adc[iT]<pStrip.pedErr)
 		(*outTxtFile) << setw(4) << " .  "<< " ";
 	      else
-		(*outTxtFile) <<  setw(4) <<pStrip.adc[i] <<" ";
+		(*outTxtFile) <<  setw(4) <<pStrip.adc[iT] <<" ";
+
+
+	      if(layer=='P'&& counterP<40)
+		{
+		  signalsP[counterP*7+iT]=pStrip.adc[iT];
+		  cout <<"first p: setting bin : i: " << counterP << " j: " << iT << " index: "<< counterP*7+iT << " sig: " << signalsP[counterP*7+iT]<<endl;
+		  if(iT==6)
+		    counterP++;
+		}
+	      if(layer=='R'&& counterR<40)
+		{
+		  signalsR[counterR*7+iT]=pStrip.adc[iT];
+		  cout <<"first R: setting bin : i: " << counterR << " j: " << iT << " index: "<< counterR*7+iT << " sig: " << signalsR[counterP*7+iT]<<endl;
+		  if(iT==6)
+		    counterR++;
+		}
 	    }
 	  (*outTxtFile) <<endl;
 	}
     }
+  cout <<"save signals.." <<endl;
+  saveSigs(signalsR,signalsP,r,phi,counterR,counterP);
   return kStOk;
 }
 
@@ -964,7 +1024,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	  //	  cout <<"testing" << endl;
 	  //	  cout <<"get track10-3, " << iterP->dID<<" quad: " << iterP->quadID << endl;
 	  //	  cout <<" filling disk " << iterP->dID <<" quad " << iterP->quadID <<" with r charge: " << iterP->rCharge <<" phic " << iterP->phiCharge<<endl;
-	  if(iterP->r>20)
+	  //	  if(iterP->r>20)
 	    {
 	      chargeCorr[iterP->dID*4+iterP->quadID]->Fill(iterP->rCharge,iterP->phiCharge);
 	      clusterSizeP[iterP->dID*4+iterP->quadID]->Fill(iterP->phiSize);
@@ -1062,9 +1122,12 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		    //		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<endl;
 		    radioPlotsEff[i]->Fill(xExp,yExp);
 		    hResidua->Fill(sqrt(closestPoint));
-		(*outTxtFile) <<"***** found hit in disk " <<i << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
+		    //		    if(i==m_effDisk)
+		      (*outTxtFile) <<"***** found hit in disk " <<i << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
+
 #ifdef DO_PRINT
-		printArea(r,phi,i,quad);
+		    //		if(i==m_effDisk)
+		  printArea(r,phi,i,quad);
 #endif
 		    //		    chargeCorrInEffDisk->Fill(rPhiRatio.first,rPhiRatio.second);
 		  }
@@ -1072,10 +1135,12 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		  {
 		    //		    cout <<"non eff disk, x: " << xExp <<" y: " << yExp <<endl;
 		    radioPlotsNonEff[i]->Fill(xExp,yExp);
-		(*outTxtFile) <<"expected (but haven't found)  point on disk " << i <<", x: " << xExp <<" y: " << yExp << " r: " << r  <<" phi: " << phi << " quad:: " << quad << endl;
+		    //		    if(i==m_effDisk)
+		    (*outTxtFile) <<"expected (but haven't found)  point on disk " << i <<", x: " << xExp <<" y: " << yExp << " r: " << r  <<" phi: " << phi << " quad:: " << quad << endl;
 		////		cout <<" expect hit at disc " << iD <<" quad: " << iq  << " r: " <<  r <<" phi: "<< phi <<endl;
 #ifdef DO_PRINT
-		printArea(r,phi,i,quad);
+		    //    if(i==m_effDisk)
+		      printArea(r,phi,i,quad);
 #endif
 		  }
 		pair<Double_t,Double_t> rPhiRatio=getChargeRatio(r,phi,i,quad);
@@ -1158,8 +1223,7 @@ Int_t StFgtGenAVEMaker::Make()
   for(int iD=0;iD<6;iD++)
     {
       cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
-      if(pClusters[iD]->size() > MAX_CLUSTERS)
-	return kStOk;
+
 
 
       int numClus=0;
@@ -1218,10 +1282,16 @@ Int_t StFgtGenAVEMaker::Make()
       for(int iSeed2=iSeed1+1;iSeed2<6;iSeed2++)
 	{
 	  //	  (*outTxtFile) << " using " << iSeed1 <<" and " << iSeed2 << " as seeds " << endl;
-	  //	  if((iSeed2-iSeed1)<3)//to have large enough lever arm..
-	  //	    continue;
+	  if((iSeed2-iSeed1)<2)//to have large enough lever arm. Also, since three points are required shouldn't matter?
+	    continue;
+
 	  if(iSeed1==m_effDisk || iSeed2==m_effDisk)
 	    continue;
+	  if(pClusters[iSeed1]->size() > MAX_CLUSTERS || pClusters[iSeed2]->size() > MAX_CLUSTERS)
+	    {
+	      cout <<"too many clusters in the disk!!!"<<endl<<endl;
+	      continue;
+	    }
 	  	  cout <<"using " << iSeed1 << " and " << iSeed2 << " as seed " <<endl;
 	  vector<generalCluster> &hitVecSeed1=*(pClusters[iSeed1]);
 	  vector<generalCluster> &hitVecSeed2=*(pClusters[iSeed2]);
@@ -1603,7 +1673,7 @@ Int_t StFgtGenAVEMaker::Make()
 
 };
  
-StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),runningEvtNr(0),hitCounter(0),hitCounterR(0),m_effDisk(2)
+StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0)
 {
   cout <<"AVE constructor!!" <<endl;
 
@@ -1692,6 +1762,23 @@ counter++;
       cout <<iD <<" 5 " << endl;
     }
   char buffer[100];
+
+
+  sprintf(buffer,"%s/clusterPics.root",fileBase);
+  cout <<"setting cluster pic file to : " << buffer <<endl;
+  TFile *fClu = new TFile(buffer,"recreate");
+  fClu->cd();
+
+  for(int i=0;i<v_hClusP.size();i++)
+    {
+      (v_hClusP[i])->Write();
+    }
+  for(int i=0;i<v_hClusR.size();i++)
+    {
+      (v_hClusR[i])->Write();
+    }
+  fClu->Write();
+  fClu->Close();
   sprintf(buffer,"%s/signalShapes.root",fileBase);
   cout <<"setting signal shapes file to : " << buffer <<endl;
   TFile *f1 = new TFile(buffer,"recreate");

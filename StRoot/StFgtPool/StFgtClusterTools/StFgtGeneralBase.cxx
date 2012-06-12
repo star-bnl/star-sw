@@ -15,10 +15,13 @@
 
 #include <set>
 #define FILL_FROM_EVENT
+
+
+
 //#define ONE_HIT_PER_QUAD
 //#define USE_VTX
 
-StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), evtNr(0)
+StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), evtNr(0),m_effDisk(2)
 {
   pClusters=new vector<generalCluster>*[6];
   pClusters[0]=&clustersD1;
@@ -47,6 +50,10 @@ StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), evtNr(0
     hNumChargesP=new TH1D*[6*4];
     hNumPulsesR=new TH1D*[6*4];
     hNumChargesR=new TH1D*[6*4];
+    hNumClustersP=new TH1D*[6*4];
+    hNumClustersR=new TH1D*[6*4];
+
+
     for(int iD=0;iD<6;iD++)
       {
 	for(int iQ=0;iQ<4;iQ++)
@@ -59,6 +66,10 @@ StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), evtNr(0
 	    hNumChargesR[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
 	    sprintf(buffer,"validChargesP_D%d_Q%d",iD+1,iQ);
 	    hNumChargesP[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
+	    sprintf(buffer,"validClustersP_D%d_Q%d",iD+1,iQ);
+	    hNumClustersP[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
+	    sprintf(buffer,"validClustersR_D%d_Q%d",iD+1,iQ);
+	    hNumClustersR[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
 	  }
       }
     sprintf(fileBase,".");
@@ -74,6 +85,8 @@ void StFgtGeneralBase::SetFileBase(const Char_t* m_filebase)
 
 Int_t StFgtGeneralBase::Finish()
 {
+
+  evStatistics=new TH1D("eventStatistics","eventStatistics",10,0,9);
   TCanvas c;
   chargeMaxAdcCorr->Draw("colz");
   c.SaveAs("chargeMaxAdcCorr.png");
@@ -91,8 +104,10 @@ Int_t StFgtGeneralBase::Finish()
 	  {
 	    hNumPulsesP[iD*4+iQ]->Write();
 	    hNumChargesP[iD*4+iQ]->Write();
+	    hNumClustersP[iD*4+iQ]->Write();
 	    hNumPulsesR[iD*4+iQ]->Write();
 	    hNumChargesR[iD*4+iQ]->Write();
+	    hNumClustersR[iD*4+iQ]->Write();
 	  }
       }
 
@@ -253,17 +268,24 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		 Int_t centerStripId=it->centerStripIdx;
 		 if(centerStripId<0)
 		   continue;
+
+
 		 Int_t stripCounter=(centerStripId-1);
 		 Double_t maxChargeInt=it->maxAdc;
 		 Int_t oldGeoId=(pStrips[iDx*4+it->quad])[centerStripId].geoId;
+		 Int_t m_seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
 		 while(stripCounter>=0)     
 		   {
 		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
+		     if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
+		       {
+			 m_seedType=seedType;
+		       }
+
 		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
 		       break;
 		     if(fabs(oldGeoId-(pStrips[iDx*4+it->quad])[stripCounter].geoId)>1)
 		       break;
-
 		     maxChargeInt+=(pStrips[iDx*4+it->quad])[stripCounter].maxAdc;
 		     oldGeoId=(pStrips[iDx*4+it->quad])[stripCounter].geoId;
 		     stripCounter--;
@@ -280,8 +302,13 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		     maxChargeInt+=(pStrips[iDx*4+it->quad])[stripCounter].maxAdc;
 		     oldGeoId=(pStrips[iDx*4+it->quad])[stripCounter].geoId;
 		     stripCounter++;
+		     if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
+		       {
+			 m_seedType=seedType;
+		       }
 		   }
 		 it->maxAdcInt=maxChargeInt;
+		 it->seedType=m_seedType;
 		 chargeMaxAdcCorr->Fill(it->clusterCharge,it->maxAdc);
 		 chargeMaxAdcIntCorr->Fill(it->clusterCharge,maxChargeInt);
 	       }
@@ -371,6 +398,8 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		   StFgtGeom::decodeGeoId(geoId,disc, quad, layer, strip);
 		   Int_t clusterSize=clus->getNumStrips();
 		   Double_t clusterCharge=clus->getCharge();
+
+
 		   //		   cout <<"looking at geoID: " << geoId <<" r: " << posR <<" phi: " << posPhi <<" charge: " << clusterCharge <<" size: " << clusterSize <<endl;
 		   //		   cout <<" disc: " << disc <<" quad: " << quad << " layer: " << layer <<endl;
 		   pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip,clusterSize,clusterCharge));
@@ -452,10 +481,15 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		 Double_t maxChargeInt=it->maxAdc;
 		 //		 cout <<"max charge:" <<maxChargeInt<<endl;
 		 Int_t oldGeoId=(pStrips[iDx*4+it->quad])[centerStripId].geoId;
+		 Int_t m_seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
 		 //		 cout <<" going down " <<endl;
 		 while(stripCounter>=0)     
 		   {
 		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
+		     if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
+		       {
+			 m_seedType=seedType;
+		       }
 		     //		     cout <<"looking at geo id: " << (pStrips[iDx*2+it->quad])[stripCounter].geoId <<endl;
 		     //		     cout <<"seedtype:" << seedType <<endl;
 		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
@@ -475,6 +509,10 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		 while(stripCounter<=(pStrips[iDx*4+it->quad]).size())
 		   {
 		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
+		     if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
+		       {
+			 m_seedType=seedType;
+		       }
 		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
 		       break;
 		     if(fabs(oldGeoId-(pStrips[iDx*4+it->quad])[stripCounter].geoId)>1)
@@ -486,6 +524,7 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		   }
 		 //		 cout <<"setting max adcInt to :" << maxChargeInt <<endl;
 		 it->maxAdcInt=maxChargeInt;
+		 it->seedType=m_seedType;
 		 chargeMaxAdcCorr->Fill(it->clusterCharge,it->maxAdc);
 		 chargeMaxAdcIntCorr->Fill(it->clusterCharge,maxChargeInt);
 	       }
@@ -504,6 +543,32 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 void StFgtGeneralBase::checkNumPulses()
 {
 
+  Char_t layer;
+  Short_t quad, disc, strip;
+  Double_t ordinate, lowerSpan, upperSpan;
+  Int_t iValCluR[4];
+  Int_t iValCluP[4];
+  for(int iq=0;iq<4;iq++)
+    {
+      iValCluR[iq]=0;
+      iValCluP[iq]=0;
+    }
+  for(int iDx=0;iDx<6;iDx++)
+    {
+      for(vector<generalCluster>::iterator it=(*pClusters[iDx]).begin();it!=(*pClusters[iDx]).end();it++)
+	{
+	  StFgtGeom::getPhysicalCoordinate(it->centralStripGeoId,disc,quad,layer,ordinate,lowerSpan,upperSpan);
+	  if(layer=='R')
+	    iValCluR[quad]++;
+	  else
+	    iValCluP[quad]++;
+	}
+      for(int iQ=0;iQ<4;iQ++)
+	{
+	  hNumClustersR[iDx*4+iQ]->Fill(iValCluR[iQ]);
+	  hNumClustersP[iDx*4+iQ]->Fill(iValCluP[iQ]);
+	}
+    }
   for(int iDx=0;iDx<6;iDx++)
     {
       for(int iQ=0;iQ<4;iQ++)
@@ -686,8 +751,4 @@ void StFgtGeneralBase::doLooseClustering()
     }
 
 }
-
-
-
-
 ClassImp(StFgtGeneralBase);

@@ -61,11 +61,12 @@ struct generalCluster
       maxAdcInt=-1;
       maxAdc=-1;
       hasMatch=false;
+      seedType=kFgtSeedTypeNo;
     };
 
 
 
-
+  Int_t seedType;
   Int_t centralStripGeoId;
     Char_t layer;
     Double_t discZ;
@@ -93,9 +94,21 @@ class StFgtGeneralBase : public StMaker {
   Int_t Finish();
   Int_t fillFromStEvent();
   Int_t fillFromMuDst();
-
+  void SetEffDisk(Int_t disk)
+  {
+    m_effDisk=disk;
+  }
  protected:
+enum evStatCodes
+  {
+    numEvents,
+    numCluster,
+    numCluSeed1,
+    numCluSeed2,
+    numCluSeed3
+  };
   Char_t fileBase[300];
+  TH1D* evStatistics;
    TH2D* chargeMaxAdcCorr;
    TH2D* chargeMaxAdcIntCorr;
    TH1D* hIpZEv;
@@ -103,6 +116,8 @@ class StFgtGeneralBase : public StMaker {
    TH1D** hNumChargesP;
    TH1D** hNumPulsesR;
    TH1D** hNumChargesR;
+   TH1D** hNumClustersP;
+   TH1D** hNumClustersR;
 
 
 
@@ -111,6 +126,7 @@ class StFgtGeneralBase : public StMaker {
   Double_t vtxZ;
   Int_t vtxRank;
   Int_t evtNr;
+  Int_t m_effDisk;
   vector<generalCluster> clustersD1;
   vector<generalCluster> clustersD2;
   vector<generalCluster> clustersD3;

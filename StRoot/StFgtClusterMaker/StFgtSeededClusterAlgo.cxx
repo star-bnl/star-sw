@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.16 2012/06/10 01:05:19 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.17 2012/06/12 19:28:48 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.17  2012/06/12 19:28:48  avossen
+//  *** empty log message ***
+//
 //  Revision 1.16  2012/06/10 01:05:19  avossen
 //  *** empty log message ***
 //
@@ -116,6 +119,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
 
   if(((accuChargeEven-accuChargeUneven)/accuCharge)>0.75&& layer=='P')
     {
+      //            cout <<"r probably < 20"<<endl;
       //r is probably in r<20
       accuCharge-=accuChargeUneven;
       stripWeightMap_t::iterator it=strips.begin();
@@ -132,7 +136,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
 	  else
 	    it++;
 	}
-
+      //      cout <<"done erasing"<<endl;
     }
 
   stripWeightMap_t::reverse_iterator itBack=strips.rbegin();
@@ -305,6 +309,8 @@ run over all strips, find seeds, use those to start clusters
 	  ///check for ringing around cluster
 	  //	  if(ringing( it, strips.getStripVec().begin(),strips.getStripVec().end(), down,0,layer))
 	  //	    continue;  //was it
+	  ///this might not be such a good idea since it is not taking into account geo ids. If we run zs, this will not work
+	  int searchRange=(int)(floor(kFgtMaxClusterSize/2)+kFgtNumAdditionalStrips);
 	  StSPtrVecFgtStripIterator firstStrip=it-(int)(floor(kFgtMaxClusterSize/2)+kFgtNumAdditionalStrips);
 	  StSPtrVecFgtStripIterator lastStrip=it+(int)(floor(kFgtMaxClusterSize/2)+kFgtNumAdditionalStrips);
 	  if(firstStrip<strips.getStripVec().begin())
@@ -315,22 +321,21 @@ run over all strips, find seeds, use those to start clusters
 	  //	  cout << " looking around " << (*it)->getGeoId() << ": " << (*firstStrip)->getGeoId() <<" to something... " <<endl;
 	  for(StSPtrVecFgtStripIterator it2=firstStrip;(it2!=strips.getStripVec().end())&&(it2<=lastStrip);it2++)
 	    {
-	      if((*it2)->getClusterSeedType()!=kFgtDeadStrip)
+	      if(fabs((*it)->getGeoId()-(*it2)->getGeoId())<searchRange)
 		{
-		  if((*it2)->getCharge()>2*(*it2)->getChargeUncert())
+		  if((*it2)->getClusterSeedType()!=kFgtDeadStrip)
 		    {
-		      //		      cout <<"   strip: " << (*it2)->getGeoId() << " has high charge " <<endl;
-		      stripsW_Charge++;
-		    }
-		  else
-		    {
-		      stripsWO_Charge++;
-		      //      cout <<"   strip: " << (*it2)->getGeoId() << " does not " <<endl;
+		      if((*it2)->getCharge()>2*(*it2)->getChargeUncert())
+			{
+			  //		      cout <<"   strip: " << (*it2)->getGeoId() << " has high charge " <<endl;
+			  stripsW_Charge++;
+			}
 		    }
 		}
 	    }
 	  //	  cout<<" high charge strips: " << stripsW_Charge <<" low: " << stripsWO_Charge<<endl;
-	  if(stripsW_Charge>stripsWO_Charge && stripsW_Charge > kFgtMaxClusterSize)
+	  //if more than half the strips have charge
+	  if(stripsW_Charge>searchRange && stripsW_Charge > kFgtMaxClusterSize)
 	    {
 	      (*it)->setClusterSeedType(kFgtClusterSeedInSeaOfNoise);
 	      continue;

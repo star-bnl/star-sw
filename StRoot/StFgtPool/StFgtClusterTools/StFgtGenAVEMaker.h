@@ -96,15 +96,15 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    Int_t Init();
    Int_t Make();
    Int_t Finish();
-   void SetEffDisk(Int_t disk)
-   {
-     m_effDisk=disk;
-   }
+
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.7 2012/06/04 16:14:28 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.8 2012/06/12 19:28:39 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
-   Int_t m_effDisk;
+   vector<TH2D*> v_hClusP;
+   vector<TH2D*> v_hClusR;
+
+   Int_t printCounter;
    ofstream* outTxtFile;
    Short_t getQuadFromCoo(Double_t x, Double_t y);
    pair<Double_t,Double_t> getChargeRatio(Float_t r, Float_t phi, Int_t iD, Int_t iq);
@@ -114,6 +114,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    vector<AVTrack> m_tracks;
    // for accessing the data
    StFgtCollection *mFgtCollectionPtr;
+   void saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi,Int_t maxR, Int_t maxPhi);
    Double_t getRPhiRatio(vector<generalCluster>::iterator hitIterBegin, vector<generalCluster>::iterator hitIterEnd);
    Double_t findClosestPoint(double xE, double yE, Int_t iD);
    Bool_t isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t iq);
@@ -246,8 +247,6 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    int runningEvtNr;
    int hitCounter;
    int hitCounterR;
-
-
    //THD2** 
 
 
