@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <iostream>
 #include "TString.h"
-using namespace std;
+//using namespace std;
 #if 1
 // =================================================================================
 // An array type which can accept both Fortran and c++ indexing.

@@ -59,7 +59,7 @@ Int_t nint(Float_t x);
 Double_t tand(Double_t x);
 Double_t cosd(Double_t x);
 Double_t sind(Double_t x);
-#if 1
+#if 0
 template <typename T> T max(const T &a, const T &b ){ return TMath::Max(a,b); }
 template <typename T> T min(const T &a, const T &b ){ return TMath::Min(a,b); }
 #endif
