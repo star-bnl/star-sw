@@ -10,7 +10,7 @@
 #include "geometryStats.hh"
 
 #include <iostream>
-#include <fstream>
+//#include <fstream>
 
 //#include "St_geant_Maker/St_geant_Maker.h"
 //#include "TGiant3.h"
@@ -1970,13 +1970,8 @@ Bool_t Geometry::GeomInit()
 void printModule( const Char_t *system, const Char_t *flag )
 {
 
-  /**
-  TString cmd="{";
-  cmd+=Form("%s _str;",system);
-  cmd+=
-  cmd+=
-  cmd+="}";
-  **/
+#if 0 /* eliminated */
+
   ofstream out( Form("/tmp/print_%s.C",flag) );
   {
     out << Form("void print_%s()",flag)               << std::endl;
@@ -1990,6 +1985,7 @@ void printModule( const Char_t *system, const Char_t *flag )
   }
 
   gROOT->ProcessLine(Form(".x /tmp/print_%s.C",flag));
+#endif
 
 }
 
