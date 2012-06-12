@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.39 2012/05/10 14:37:19 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.40 2012/06/12 19:28:44 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.40  2012/06/12 19:28:44  avossen
+ * *** empty log message ***
+ *
  * Revision 1.39  2012/05/10 14:37:19  avossen
  * modified pulse finder
  *
@@ -314,6 +317,7 @@ Int_t StFgtA2CMaker::Make(){
 
             // always check if any need removed, as it is possible
             // some ``bad'' strips may have abnormally large st. dev.
+	    //this also removes dead strips
             stripCollectionPtr->removeFlagged();
          };
       };
@@ -343,7 +347,7 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    for( Int_t timebin = 0; timebin < kFgtNumTimeBins && pStrip->getGeoId() > -1; ++timebin ) {
       Float_t adc=pStrip->getAdc(timebin);
 
-      // to remove seeds where all strips are high and close together
+      // to remove seeds where all tbs are high and close together
       if(prvAdc>0 && fabs(prvAdc-adc)<ped && adc>3*ped) {
          numPlateau++;
       };
@@ -377,8 +381,10 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    }
 
    //  deciding on max plateau
-   if(numMaxPlateau>=3) //means basically 4 because we start counting after the first one
-      return kFgtSeedTypeNo;
+   //    if(numMaxPlateau>=3) //means basically 4 because we start counting after the first one
+   //         return kFgtSeedTypeNo;
+
+
 
    //most restrictive condition
    if(pStrip->getAdc(0) <3*ped && numHighBins==3 && peakAdc > pStrip->getAdc(6) && numAlmostHighBins>=3 && numHighBinsAfterLeadingEdge>=2) {
@@ -390,18 +396,24 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
 
    //   if(pStrip->getAdc(0) <3*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=1&& numAlmostHighBins>=2)
 
-   for( Int_t timebin = 0; timebin < (kFgtNumTimeBins-2) && pStrip->getGeoId() > -1; ++timebin ) {
+   for( Int_t timebin = 0; timebin < (kFgtNumTimeBins-2) && pStrip->getGeoId() > -1; timebin++ ) {
       Float_t adc1=pStrip->getAdc(timebin);
       Float_t adc2=pStrip->getAdc(timebin+1);
       Float_t adc3=pStrip->getAdc(timebin+2);
+      //      cout <<" looking at tb: " << timebin <<" " << timebin+1 <<" " << timebin+2 <<" ped: "<< ped <<endl;
       if(adc1> 5*ped && adc2> 5*ped && adc3 > 5*ped)
 	{
 	  //found some sort of rising edge
 	  if(adc1 < adc2 && adc2 < adc3)
-	    return kFgtSeedType3;
+	    {
+	      //
+	      //      cout <<"found seed 3" << endl;
+	      return kFgtSeedType3;
+	    }
 	}
 
    }
+   //   cout <<" no seed found! " << endl;
    return kFgtSeedTypeNo;
 };
 
