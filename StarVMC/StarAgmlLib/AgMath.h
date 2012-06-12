@@ -40,7 +40,6 @@ const Double_t keV    = 0.001 * MeV;
 
 #define tanf _tanf_
 #define fpos _fpos_
-
 //
 // Implement some bitwise functions from fortran land
 //
@@ -60,10 +59,10 @@ Int_t nint(Float_t x);
 Double_t tand(Double_t x);
 Double_t cosd(Double_t x);
 Double_t sind(Double_t x);
-
+#if 0
 template <typename T> T max(const T &a, const T &b ){ return TMath::Max(a,b); }
 template <typename T> T min(const T &a, const T &b ){ return TMath::Min(a,b); }
-
+#endif
 Int_t mod(const Int_t &a, const Int_t &b);
 Float_t mod(const Float_t &a, const Float_t &b);
 
