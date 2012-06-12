@@ -45,6 +45,9 @@ ClassImp(StarTGeoStacker);
 
 #include <assert.h>
 
+#undef min
+#undef max
+
 std::map< Int_t, TString > StarTGeoStacker::mClassMap;
 
 
