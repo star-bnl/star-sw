@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.13 2010/09/01 13:45:03 ikulakov Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.14 2012/06/12 18:05:51 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -58,7 +58,7 @@
 #include <tbb/spin_mutex.h>
 #include <tbb/task_scheduler_init.h>
 #endif //USE_TBB
-
+using namespace std;
 bool SINGLE_THREADED = false;
 
 AliHLTTPCCAGBTracker::AliHLTTPCCAGBTracker()

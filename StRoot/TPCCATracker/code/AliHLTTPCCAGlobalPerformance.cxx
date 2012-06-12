@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.12 2011/10/10 11:47:02 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.13 2012/06/12 18:05:51 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -45,7 +45,7 @@
 #include "TH2.h"
 #include "TProfile.h"
 #include "TStyle.h"
-
+using namespace std;
 void AliHLTTPCCAGlobalPerformance::SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
                             AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
                             AliHLTResizableArray<AliHLTTPCCAMCTrack> *mcTracks,
