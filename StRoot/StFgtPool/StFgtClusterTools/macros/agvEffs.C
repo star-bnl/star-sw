@@ -119,11 +119,12 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
    for( int i=0; i<nevents && !ierr; ++i ){
      // if( i+1 % 100 == 1 )
          cout << "\ton event number **************" << i << endl;
-	 //cout << "clear" << endl;
+	 cout << "clear" << endl;
 	 analysisChain->Clear();
 
-      //cout << "make" << endl;
+      cout << "make" << endl;
 	 ierr = analysisChain->Make();
+	 cout <<" done " <<endl;
    };
 
    //   fgtDbMkr->printFgtDumpCSV("fgtMapDump.csv");
