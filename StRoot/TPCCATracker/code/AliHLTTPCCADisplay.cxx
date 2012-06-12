@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCADisplay.cxx,v 1.3 2010/08/16 21:23:57 ikulakov Exp $
+// $Id: AliHLTTPCCADisplay.cxx,v 1.4 2012/06/12 18:05:51 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -41,7 +41,7 @@
 #include "TCanvas.h"
 #include "TApplication.h"
 #include "TLatex.h"
-
+using namespace std; 
 class AliHLTTPCCADisplay::AliHLTTPCCADisplayTmpHit
 {
 

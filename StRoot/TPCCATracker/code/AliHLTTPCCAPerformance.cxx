@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.13 2010/09/01 10:38:27 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.14 2012/06/12 18:05:51 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -49,7 +49,7 @@
 #include "TH2.h"
 #include "TProfile.h"
 #include "TStyle.h"
-
+using namespace std;
 AliHLTTPCCAPerformance::AliHLTTPCCAPerformance()
 {
   static bool first_call = true;

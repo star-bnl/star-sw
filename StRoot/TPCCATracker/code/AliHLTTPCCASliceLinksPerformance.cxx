@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASliceLinksPerformance.cxx,v 1.6 2010/08/26 15:05:51 ikulakov Exp $
+// $Id: AliHLTTPCCASliceLinksPerformance.cxx,v 1.7 2012/06/12 18:05:51 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -46,7 +46,7 @@
 #include "TH2.h"
 #include "TProfile.h"
 #include "TStyle.h"
-
+using namespace std;
 void AliHLTTPCCASliceLinksPerformance::SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
                             AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
                             AliHLTResizableArray<AliHLTTPCCAMCTrack> *mcTracks,
