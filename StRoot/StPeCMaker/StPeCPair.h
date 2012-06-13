@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.h,v 1.8 2004/01/26 23:01:11 perev Exp $
+// $Id: StPeCPair.h,v 1.9 2012/06/13 15:34:36 ramdebbe Exp $
 // $Log: StPeCPair.h,v $
+// Revision 1.9  2012/06/13 15:34:36  ramdebbe
+// added tof information to both tracks
+//
 // Revision 1.8  2004/01/26 23:01:11  perev
 // WarnOff
 //
@@ -53,6 +56,9 @@
 #include "StPeCTrack.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/projection/StEmcPosition.h"
+#include "StEmcUtil/filters/StEmcFilter.h"
 
 class StPeCPair : public TObject {
 
@@ -70,8 +76,12 @@ public:
                                   StPeCPair ( StTrack *trk1, StTrack *trk2, 
 				              Bool_t primaryFlag, StEvent* event );
 
+                                  StPeCPair ( StMuTrack *trk1, StMuTrack *trk2, 
+				              Bool_t primaryFlag, StMuEvent* event, StEvent* eventP );
+
   Int_t                           fill ( Bool_t primaryFlag, StEvent* event ) ;
   Int_t                           fill ( Bool_t primaryFlag, StMuEvent* event ) ;
+  Int_t                           fill ( Bool_t primaryFlag, StMuEvent* event,  StEvent* eventP ) ;
   Int_t                           fill ( Bool_t primaryFlag, StEventSummary* summary,
                                          StThreeVectorF& p1, StPhysicalHelixD& h1, short charge1,
                                          StThreeVectorF& p2, StPhysicalHelixD& h2, short charge2,    
@@ -120,7 +130,41 @@ private:
   Float_t                         zV0 ;
   
   StPeCTrack                      tr1 ;
+  Int_t                           tr1_bemcModule;
+  Int_t                           tr1_bemcEtabin;
+  Float_t                         tr1_bemcEtaValue;
+  Float_t                         tr1_bemcPhiValue;
+  Int_t                           tr1_bemcSub;  
+  Float_t                         tr1_bemcEnergy;
   StPeCTrack                      tr2 ;
+  Int_t                           tr2_bemcModule;
+  Int_t                           tr2_bemcEtabin;
+  Float_t                         tr2_bemcEtaValue;
+  Float_t                         tr2_bemcPhiValue;
+  Int_t                           tr2_bemcSub;  
+  Float_t                         tr2_bemcEnergy;
+
+  Int_t                           tr1_bsmdeModule;
+  Int_t                           tr1_bsmdeEtabin;
+  Float_t                         tr1_bsmdeEtaValue;
+  Float_t                         tr1_bsmdePhiValue;
+  Int_t                           tr1_bsmdeSub;  
+  Float_t                         tr1_bsmdeEnergy;
+
+  Int_t                           tr2_bsmdeModule;
+  Int_t                           tr2_bsmdeEtabin;
+  Float_t                         tr2_bsmdeEtaValue;
+  Float_t                         tr2_bsmdePhiValue;
+  Int_t                           tr2_bsmdeSub;  
+  Float_t                         tr2_bsmdeEnergy;
+
+  float                           tr1_timeOfFlight;
+  float                           tr1_pathLength;
+  float                           tr1_Beta;
+  float                           tr2_timeOfFlight;
+  float                           tr2_pathLength;
+  float                           tr2_Beta;
+
   
   StPeCSpec                       pionH;
   StPeCSpec                       kaonH;
@@ -133,6 +177,11 @@ private:
   StTrack*                        track2; //!
   StMuTrack*                      muTrack1; //!
   StMuTrack*                      muTrack2; //!
+  StEmcGeom *                     mGeom0;
+  StEmcGeom *                     mGeom2;    
+  StEmcGeom *                     mGeom3;
+
+  Double_t                        bFld;  
 #endif /*__CINT__*/
 
   ClassDef(StPeCPair,1)
