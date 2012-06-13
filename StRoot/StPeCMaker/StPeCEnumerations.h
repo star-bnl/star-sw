@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEnumerations.h,v 1.6 2003/11/25 01:54:25 meissner Exp $
+// $Id: StPeCEnumerations.h,v 1.7 2012/06/13 15:46:53 ramdebbe Exp $
 // $Log: StPeCEnumerations.h,v $
+// Revision 1.7  2012/06/13 15:46:53  ramdebbe
+// Control the number of tracks for UPC selection
+//
 // Revision 1.6  2003/11/25 01:54:25  meissner
 // correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
 //
@@ -36,6 +39,7 @@ const double mMassKaon     =0.493677;
 const double mMassProton   =0.93827231;
 
 // Maximmum number of tracka
-const int  StPeCnMaxTracks =4;
-
+const int  StPeCnMaxTracks =12;
+// maximu number of snapShots
+const int snapLimit = 0;
 #endif
