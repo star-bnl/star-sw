@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.203 2012/06/11 15:33:41 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.204 2012/06/13 20:21:09 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.204  2012/06/13 20:21:09  fisyak
+// Check that vertex fitter exist before getting vertex postion
+//
 // Revision 1.203  2012/06/11 15:33:41  fisyak
 // std namespace
 //
@@ -800,16 +803,18 @@ Int_t StiMaker::FillPulls()
   mPullEvent->mRun  = hddr->GetRunNumber();
   mPullEvent->mEvt  = hddr->GetEventNumber();
   mPullEvent->mDate = hddr->GetDateTime();	//DAQ time (GMT)
-  StiHit *vertex   = _vertexFinder->getVertex(0);
   mPullEvent->mChi2 = 0;	
-  
+    
   memset(mPullEvent->mVtx,0,sizeof(mPullEvent->mVtx));
   memset(mPullEvent->mEtx,0,sizeof(mPullEvent->mEtx));
-  if (vertex) {
-    mPullEvent->mVtx[0] = vertex->x_g();
-    mPullEvent->mVtx[1] = vertex->y_g();
-    mPullEvent->mVtx[2] = vertex->z_g();
-    TCL::ucopy(vertex->errMtx(),mPullEvent->mEtx,6);
+  if (_vertexFinder) {
+    StiHit *vertex   = _vertexFinder->getVertex(0);
+    if (vertex) {
+      mPullEvent->mVtx[0] = vertex->x_g();
+      mPullEvent->mVtx[1] = vertex->y_g();
+      mPullEvent->mVtx[2] = vertex->z_g();
+      TCL::ucopy(vertex->errMtx(),mPullEvent->mEtx,6);
+    }
   }
   mPullEvent->Finish();
   mPullTTree->Fill();
