@@ -35,7 +35,13 @@ void StiStarDetectorBuilder::useVMCGeometry() {
     {"PVAO","its cavity","HALL_1/CAVE_1/PIPE_%d/PIPO_1/PVAO_1","",""},
     //    {"SCON", "Support cone mother","HALL_1/CAVE_1/SVTT_1/SCON_1-2/*","",""},
     {"SROD", "Support rod","HALL_1/CAVE_1/SVTT_1/SROD_1-2","",""},
-    {"SBSP", "Beampipe support mother","HALL_1/CAVE_1/SVTT_1/SBSP_1-2","",""}
+    {"SBSP", "Beampipe support mother","HALL_1/CAVE_1/SVTT_1/SBSP_1-2","",""},
+    //    {"FGTM", "Beampipe support mother","HALL_1/CAVE_1/FGTM_1","",""},
+    {"FGCM", "FGT nylon and Al ring","HALL_1/CAVE_1/FGTM_1","",""},
+    {"FGTH", "mother volume for FGT disk","HALL_1/CAVE_1/FGTM_1","",""},
+    {"FGTD", "mother volume for FGT disk","HALL_1/CAVE_1/FGTM_1","",""},
+    {"FGCN", "FGT nylon 1st ring","HALL_1/CAVE_1/FGTM_1","",""},
+    {"FGCT", "FGT inner cooling tube","HALL_1/CAVE_1/FGTM_1","",""}
   };
   setNSectors(0,1);
   Double_t dPhi = 2*TMath::Pi();
