@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.15 2004/01/26 23:01:03 perev Exp $
+// $Id: StPeCPair.cxx,v 1.16 2012/06/13 15:10:22 ramdebbe Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.16  2012/06/13 15:10:22  ramdebbe
+// added tof information to both tracks
+//
 // Revision 1.15  2004/01/26 23:01:03  perev
 // WarnOff
 //
@@ -52,6 +55,11 @@
 #include <Stiostream.h>
 #include "StPeCPair.h"
 #include "StEventTypes.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/projection/StEmcPosition.h"
+#include "StEmcUtil/filters/StEmcFilter.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/others/emcDetectorName.h"
 
 ClassImp(StPeCPair)
 
@@ -95,6 +103,7 @@ void StPeCPair::Clear(const char *) {
 StPeCPair::StPeCPair ( StTrack* trk1, StTrack* trk2, 
                        Bool_t primaryFlag, StEvent* event ) {
   this->Clear();
+
   if(trk1->geometry()->charge() < 0 && trk2->geometry()->charge()>0 ) { // swap to 1+ 2- if different charges 
     track1 = trk2;
     track2 = trk1;
@@ -110,6 +119,15 @@ StPeCPair::StPeCPair ( StTrack* trk1, StTrack* trk2,
 StPeCPair::StPeCPair ( StMuTrack* trk1, StMuTrack* trk2, 
                        Bool_t primaryFlag, StMuEvent* event ) {
   this->Clear();
+  //
+  // Get Magnetic field from event summary
+  //
+  Double_t bFld;  
+
+  bFld=event->eventSummary().magneticField()/10.;  
+
+
+
   if (trk1->charge() <0 && trk2->charge() >0  ) { // swap to 1+ 2- if different charges 
     muTrack1 = trk2;
     muTrack2 = trk1;
@@ -120,6 +138,42 @@ StPeCPair::StPeCPair ( StMuTrack* trk1, StMuTrack* trk2,
   track1=0;  // clean; might crash otherwise 
   track2=0; 
   fill ( primaryFlag, event ) ;
+}
+
+StPeCPair::StPeCPair ( StMuTrack* trk1, StMuTrack* trk2, 
+                       Bool_t primaryFlag, StMuEvent* event, StEvent* eventP ) {
+  this->Clear();
+  //
+  // Get Magnetic field from event summary
+  //
+
+
+  bFld=event->eventSummary().magneticField()/10.;  
+
+//   cout<<" StPeCPair StEvent StMuEvent ************  Mag field from summary:    "<<bFld<<endl;
+//   // Get EMC calorimeter clusters from StEvent
+
+//   // check if there is a collection
+//   StEmcCollection *emcStEvent = eventP->emcCollection();
+
+//   //
+//   //EMC detector information
+//   //
+//   StEmcDetector* EMCdetector = emcStEvent->detector(kBarrelSmdEtaStripId);  
+//   if (!EMCdetector)
+//     {cout<<"There is no kBarrelSmdEtaStripId Detector ---------"<<endl; return;}
+
+
+  if (trk1->charge() <0 && trk2->charge() >0  ) { // swap to 1+ 2- if different charges 
+    muTrack1 = trk2;
+    muTrack2 = trk1;
+  } else {    // keep for +- and ++, -- 
+    muTrack1 = trk1;
+    muTrack2 = trk2;
+  }
+  track1=0;  // clean; might crash otherwise 
+  track2=0; 
+  fill ( primaryFlag, event, eventP ) ;
 }
 
 
@@ -234,8 +288,8 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
 
    pPtArm = pt1Ptot ;
    pAlpha = (p1AlongPtot-p2AlongPtot)/(p1AlongPtot+p2AlongPtot);
-   // printf ( "p1AlongPtot p1AlongPtot alpha %f %f %f \n",
-//           p1AlongPtot, p2AlongPtot, pAlpha ) ;
+   //   printf ( "p1AlongPtot p1AlongPtot alpha %f %f %f \n",
+   //            p1AlongPtot, p2AlongPtot, pAlpha ) ;
 // printf ( " p1 %f %f %f \n", p1.x(), p1.y(), p1.z() ) ;
 // printf ( " p2 %f %f %f \n", p2.x(), p2.y(), p2.z() ) ;
 // printf ( " p  %f %f %f \n", p.x(), p.y(), p.z() ) ;
@@ -311,7 +365,8 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
       species->yRap         = FourMomentum.rapidity() ;
       species->Mom4         = FourMomentum ;
       species->cosThetaStar = cosThetaStar ;
-   }
+     }
+
 //
 //  fill our local Track class; not save if track pointers not properly reset !!!
 // set does not belong here ! FLK works with pointers which are not arguments of this routine !!
@@ -345,6 +400,8 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event  ) {
    StPhysicalHelixD h1 ;
    StPhysicalHelixD h2 ;
    short charge1, charge2 ;
+ 
+   StThreeVectorD position,momentum;
 //
    p1      = muTrack1->momentum();
    p2      = muTrack2->momentum();
@@ -354,14 +411,212 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event  ) {
    h2      = muTrack2->helix() ;
    
    StThreeVectorF vtx = event->primaryVertexPosition() ;
+
+     fill ( primaryFlag, &(event->eventSummary()), 
+	  p1, h1, charge1, p2, h2, charge2, vtx ) ; 
+
+#ifndef __CINT__
+     tr1.set(1,muTrack1, event); // 1=primary
+     tr2.set(1,muTrack2, event);
+#endif
+   return 0 ;
    
+}
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event, StEvent* eventP  ) {
+
+   pCharge           = muTrack1->charge()+muTrack2->charge();
+   //  cout<<" in PAIR fill event muEvent"<<endl;
+   StThreeVectorF p1 ; 
+   StThreeVectorF p2 ;
+   StPhysicalHelixD h1 ;
+   StPhysicalHelixD h2 ;
+   short charge1, charge2 ;
+   Int_t mod,eta,sub;
+   StThreeVectorD position,momentum;
+
+   tr1_bemcModule   = -999;
+   tr1_bemcEtabin   = -999;
+   tr1_bemcEtaValue = -999;
+   tr1_bemcPhiValue = -999;
+   tr1_bemcSub      = -999;  
+   tr1_bemcEnergy   = -999;
+   tr2_bemcModule   = -999;
+   tr2_bemcEtabin   = -999;
+   tr2_bemcEtaValue = -999;
+   tr2_bemcPhiValue = -999;
+   tr2_bemcSub      = -999;  
+   tr2_bemcEnergy   = -999;
+
+   tr1_bsmdeModule   = -999;
+   tr1_bsmdeEtabin   = -999;
+   tr1_bsmdeEtaValue = -999;
+   tr1_bsmdePhiValue = -999;
+   tr1_bsmdeSub      = -999;  
+   tr1_bsmdeEnergy   = -999;
+   tr2_bsmdeModule   = -999;
+   tr2_bsmdeEtabin   = -999;
+   tr2_bsmdeEtaValue = -999;
+   tr2_bsmdePhiValue = -999;
+   tr2_bsmdeSub      = -999;  
+   tr2_bsmdeEnergy   = -999;
+
+   tr1_timeOfFlight = -999;
+   tr1_pathLength   = -999;
+   tr1_Beta        = -999;
+   tr2_timeOfFlight = -999;
+   tr2_pathLength   = -999;
+   tr2_Beta        = -999;
+
+   p1      = muTrack1->momentum();
+   p2      = muTrack2->momentum();
+   charge1 = muTrack1->charge();
+   charge2 = muTrack2->charge();
+   h1      = muTrack1->helix() ;
+   h2      = muTrack2->helix() ;
+
+   StMuBTofPidTraits mBTofPidTraits_1 = muTrack1->btofPidTraits();
+   StMuBTofPidTraits mBTofPidTraits_2 = muTrack2->btofPidTraits();
+
+   
+   StThreeVectorF vtx = event->primaryVertexPosition() ;
+  // Get EMC calorimeter clusters from StEvent
+
+  // check if there is a collection
+  StEmcCollection *emcStEvent = eventP->emcCollection();
+  //
+  //EMC detector information
+  //
+  StEmcDetector* EMCdetector = emcStEvent->detector(kBarrelEmcTowerId);     //kBarrelSmdEtaStripId);  
+  if (!EMCdetector)
+    {cout<<"There is no kBarrelSmdEtaStripId Detector ---------"<<endl;}
+  //
+  // instantiate object to project track to EMC barrel
+  StEmcPosition * project = new StEmcPosition();
+  StEmcGeom * mGeom2=StEmcGeom::instance("bemc");  
+  Bool_t ok=project->trackOnEmc(&position,&momentum,muTrack1,bFld);
+
+   //if(! ok) cout<<" track projection failed ************************************"<<endl;
+   if(ok) {
+     mGeom2->getBin(position.phi(),position.pseudoRapidity(),mod,eta,sub);
+       //
+       //see if EMC has energy
+       //
+       for(unsigned int i=1;i<=120;i++)
+	 {  
+	   if(fabs(mod)!=i) continue;
+	   StEmcModule* module=EMCdetector->module(i); 
+	   StSPtrVecEmcRawHit& hits=module->hits();
+	   for(unsigned int k=0;k<hits.size();k++) if(hits[k]){
+	     unsigned int module=hits[k]->module(); 
+	     unsigned int Eta=hits[k]->eta();	
+	     float energyT=hits[k]->energy();
+	     int s=fabs(hits[k]->sub());
+	     int did(0);
+	     if (module==fabs(mod) &&  Eta == fabs(eta)){
+	       float energyT1=hits[k]->energy();
+	       mGeom2->getId(module,Eta,s,did);
+	       // cout<<"Matched  hit no "<<k<<"::module no::"<<module<<"::Eta is::"<<Eta<<"::Energy is::"<<energyT1<<endl; 
+	       tr1_bemcModule = module;
+	       tr1_bemcEtabin = Eta;
+	       tr1_bemcEtaValue = position.pseudoRapidity();
+	       tr1_bemcPhiValue = position.phi();
+	       tr1_bemcSub = s;  
+	       tr1_bemcEnergy = energyT1;
+
+	     }
+	   }
+	 }
+   }
+   //second track
+  Bool_t ok2=project->trackOnEmc(&position,&momentum,muTrack2,bFld);
+   //if(! ok) cout<<" track projection failed ************************************"<<endl;
+   if(ok2) {
+     mGeom2->getBin(position.phi(),position.pseudoRapidity(),mod,eta,sub);
+       //
+       //see if EMC has energy
+       //
+       for(unsigned int i=1;i<=120;i++)
+	 {  
+	   if(fabs(mod)!=i) continue;
+	   StEmcModule* module=EMCdetector->module(i); 
+	   StSPtrVecEmcRawHit& hits=module->hits();
+	   for(unsigned int k=0;k<hits.size();k++) if(hits[k]){
+	     unsigned int module=hits[k]->module(); 
+	     unsigned int Eta=hits[k]->eta();	
+	     float energyT=hits[k]->energy();
+	     int s=fabs(hits[k]->sub());
+	     int did(0);
+	     if (module==fabs(mod) &&  Eta == fabs(eta)){
+	       float energyT1=hits[k]->energy();
+	       mGeom2->getId(module,Eta,s,did);
+	       tr2_bemcModule = module;
+	       tr2_bemcEtabin = Eta;
+	       tr2_bemcEtaValue = position.pseudoRapidity();
+	       tr2_bemcPhiValue = position.phi();
+	       tr2_bemcSub = s;  
+	       tr2_bemcEnergy = energyT1;
+
+	     }
+	   }
+	 }
+   }
+   //
+   //repeat extrapolation, this time to shower max detectors
+   //
+  StEmcDetector* SMDdetector = emcStEvent->detector(kBarrelSmdEtaStripId);    
+  if (!SMDdetector)
+    {cout<<"There is no kBarrelSmdEtaStripId Detector ---------"<<endl;}
+  StEmcPosition * projectSmde = new StEmcPosition();
+  StEmcGeom * mGeomSmde=StEmcGeom::instance("bsmde");  
+  Bool_t okSmd=projectSmde->trackOnEmc(&position,&momentum,muTrack1,bFld);
+   if(okSmd) {
+     mGeomSmde->getBin(position.phi(),position.pseudoRapidity(),mod,eta,sub);
+       //
+       //see if SMDe has energy
+       //
+       for(unsigned int i=1;i<=120;i++)
+	 {  
+	   if(fabs(mod)!=i) continue;
+	   StEmcModule* module=SMDdetector->module(i); 
+	   StSPtrVecEmcRawHit& hits=module->hits();
+	   for(unsigned int k=0;k<hits.size();k++) if(hits[k]){
+	     unsigned int module=hits[k]->module(); 
+	     unsigned int Eta=hits[k]->eta();	
+	     float energyT=hits[k]->energy();
+	     int s=fabs(hits[k]->sub());
+	     int did(0);
+	     if (module==fabs(mod) &&  Eta == fabs(eta)){
+	       float energyT1=hits[k]->energy();
+	       mGeomSmde->getId(module,Eta,s,did);
+	       // cout<<"Matched  hit no "<<k<<"::module no::"<<module<<"::Eta is::"<<Eta<<"::Energy is::"<<energyT1<<endl; 
+	       tr1_bsmdeModule = module;
+	       tr1_bsmdeEtabin = Eta;
+	       tr1_bsmdeEtaValue = position.pseudoRapidity();
+	       tr1_bsmdePhiValue = position.phi();
+	       tr1_bsmdeSub = s;  
+	       tr1_bsmdeEnergy = energyT1;
+
+	     }
+	   }
+	 }
+   }
    fill ( primaryFlag, &(event->eventSummary()), 
 	  p1, h1, charge1, p2, h2, charge2, vtx ) ; 
 
 #ifndef __CINT__
-   tr1.set(1,muTrack1); // 1=primary
-   tr2.set(1,muTrack2);
+   tr1.set(1,muTrack1, event); // 1=primary
+   tr2.set(1,muTrack2, event);
 #endif
+   tr1_timeOfFlight = mBTofPidTraits_1.timeOfFlight();
+   tr1_pathLength   = mBTofPidTraits_1.pathLength();
+   tr1_Beta         = mBTofPidTraits_1.beta();
+   tr2_timeOfFlight = mBTofPidTraits_2.timeOfFlight();
+   tr2_pathLength   = mBTofPidTraits_2.pathLength();
+   tr2_Beta         = mBTofPidTraits_2.beta();
    return 0 ;
    
 }
@@ -380,14 +635,17 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
   charge1 = track1->geometry()->charge();
   charge2 = track2->geometry()->charge();
   //   if ( !primaryFlag ) {
+
    h1 = track1->geometry()->helix() ;
    h2 = track2->geometry()->helix() ;
+
    // }
    
    StEventSummary* summary = 0 ;
    StPrimaryVertex* vtx = 0;
    vtx = event->primaryVertex();
    summary = event->summary();
+
    StThreeVectorF vtxP  ;
    //
    //  If there is no primary vertex assume (0,0,0)
@@ -404,8 +662,10 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
    
    // fill local track class 
 #ifndef __CINT__
+
    tr1.set(1,track1); // 1=primary
    tr2.set(1,track2);
+
 #endif
    return 0 ;
 }
