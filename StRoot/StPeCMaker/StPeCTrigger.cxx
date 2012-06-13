@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.9 2007/04/28 17:56:35 perev Exp $
+// $Id: StPeCTrigger.cxx,v 1.10 2012/06/13 15:43:15 ramdebbe Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.10  2012/06/13 15:43:15  ramdebbe
+// topo and main triggers for different run periods
+//
 // Revision 1.9  2007/04/28 17:56:35  perev
 // Redundant StChain.h removed
 //
@@ -84,6 +87,23 @@ Int_t StPeCTrigger::process(StEvent *event)
 //  l0_2000Corrected->setInfoLevel ( infoLevel );
 
   StL0Trigger* l0Data = event->l0Trigger();
+  StTriggerIdCollection* triggerIdColl = event->triggerIdCollection();
+  if(triggerIdColl) {
+    const StTriggerId * ttid= triggerIdColl->nominal();
+    if(ttid) {
+      cout << "Got IDS -------------   " << ttid->isTrigger(400631)<<" topo "<<ttid->isTrigger(1)<<endl; 
+    }
+//     trg_3000     =ttid->isTrigger(350017);  
+//     trg_3001     =ttid->isTrigger(11);     //run12
+//     trg_3000     =ttid->isTrigger(1);  
+//     trg_3001     =0;   //ttid->isTrigger(11); //run11 from 011035 to 039028  no topo trigger  //use in firstList.list
+//     trg_3000     =ttid->isTrigger(260750);  
+//     trg_3001     =0;   //ttid->isTrigger(11); //run11 from 011035 to 039028  no topo trigger used in secondList.list 
+//     trg_3000     =ttid->isTrigger(400631); //run12 UU 
+//     trg_3001     =ttid->isTrigger(400604); //run12 UU starting  from 13125025 to end. Used in thirdList.list and fourth list (out of 4 lists) 
+    trg_3000     =ttid->isTrigger(410601); //run12 cuAu 
+    trg_3001     =ttid->isTrigger(410604); //run12 cuAu starting  from 13139056 to end. 
+  }
   StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
   if ( !trg ) {
      printf ( "StPeCTrigger::StPeCTrigger: No trigger information \n" ) ;
@@ -93,6 +113,8 @@ Int_t StPeCTrigger::process(StEvent *event)
   StMwcTriggerDetector& mwc = trg->mwc();
   StZdcTriggerDetector& zdc = trg->zdc();
   StBbcTriggerDetector& bbc = trg->bbc();
+  StEmcTriggerDetector& emc = trg->emc();
+
 
   if ( l0Data && infoLevel > 0 ){
     cout << "L0 mwcCtbMultiplicity = " << l0Data->mwcCtbMultiplicity() << endl;
@@ -207,7 +229,13 @@ Int_t StPeCTrigger::process(StEvent *event)
   // BBC 
   if(&bbc){
 
-    bbcAdcSumEastSm=bbc.adcSumEast();
+    if ( infoLevel > 1 ) {
+      cout << "BBC East adc[0] = " << bbc.adc(8) << endl;
+      bbc.dump();
+    }
+
+    //    bbcAdcSumEastSm=bbc.adcSumEast();
+    bbcAdcSumEastSm=bbc.adc(8);
     bbcAdcSumWestSm=bbc.adcSumWest();
     bbcAdcSumEastLg=bbc.adcSumEastLarge();;
     bbcAdcSumWestLg=bbc.adcSumWestLarge();;
@@ -255,6 +283,10 @@ Int_t StPeCTrigger::process(StEvent *event)
      }
      printf ( "\n" ) ;
   }
+  //
+  // EMC 
+  //
+  //cout<<" StPeCTrigger ++++++++++++ number of towers +++++++ "<<emc.numberOfTowers()<<endl;
 //
 //   Get Ftpc info
 //
@@ -315,7 +347,8 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
       cout << "TiD " << *iiter << endl;
     }
   
-    trg_3000     =ttid.isTrigger(3000);  
+    //    trg_3000     =ttid.isTrigger(3000); 
+    trg_3000     =ttid.isTrigger(4);  
     trg_3001     =ttid.isTrigger(3001);
     trg_2001     =ttid.isTrigger(2001);
     trg_2004     =ttid.isTrigger(2004);
