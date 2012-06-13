@@ -104,32 +104,33 @@ void doNormalize(TH2D** hEff, TH2D** hNonEff)
 
 
 
-void StFgtGenAVEMaker::saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi, Int_t maxR, Int_t maxPhi)
+void StFgtGenAVEMaker::saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi, Int_t maxR, Int_t maxPhi, Int_t discId, Int_t quad)
 {
   Char_t buffer[200];
-  sprintf(buffer,"Sig_Phi_Evt_%d_R_%f_Phi_%f",evtNr,r,phi);
+  sprintf(buffer,"Sig_Disc%d_quad%d_Phi_Evt_%d_R_%f_Phi_%f",discId,quad,evtNr,r,phi);
   TH2D* histoP=new TH2D(buffer,buffer,7,0,6,maxPhi,0,maxPhi-1);
   for(int i=0;i<maxPhi;i++)
     {
       for(int j=0;j<7;j++)
 	{
 	  histoP->SetBinContent(j,i,sigP[i*7+j]);
-	  cout <<"P: setting bin : i: " << i << " j: " << j << " index: "<< i*7+j << " sig: " << sigP[i*7+j]<<endl;
+	  //	  cout <<"P: setting bin : i: " << i << " j: " << j << " index: "<< i*7+j << " sig: " << sigP[i*7+j]<<endl;
 	}
     }
   v_hClusP.push_back(histoP);
-  sprintf(buffer,"Sig_R_Evt_%d_R_%f_Phi_%f",evtNr,r,phi);
+  sprintf(buffer,"Sig_Disc%d_quad%d_R_Evt_%d_R_%f_Phi_%f",discId,quad,evtNr,r,phi);
   TH2D* histoR=new TH2D(buffer,buffer,7,0,6,maxR,0,maxR-1);
   for(int i=0;i<maxR;i++)
     {
       for(int j=0;j<7;j++)
 	{
 	  histoR->SetBinContent(j,i,sigR[i*7+j]);
-	  cout <<"R: setting bin : i: " << i << " j: " << j << " index: "<< i*7+j << " sig: " << sigR[i*7+j]<<endl;
+	  //	  cout <<"R: setting bin : i: " << i << " j: " << j << " index: "<< i*7+j << " sig: " << sigR[i*7+j]<<endl;
 	}
     }
   v_hClusR.push_back(histoR);
-  cout <<" done saving sigs" <<endl;
+
+
 }
 
 pair<double,double> StFgtGenAVEMaker::getDca(  vector<AVTrack>::iterator it)
@@ -729,14 +730,14 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 	      if(layer=='P'&& counterP<40)
 		{
 		  signalsP[counterP*7+iT]=pStrip.adc[iT];
-		  cout <<"first p: setting bin : i: " << counterP << " j: " << iT << " index: "<< counterP*7+iT << " sig: " << signalsP[counterP*7+iT]<<endl;
+		  //		  cout <<"first p: setting bin : i: " << counterP << " j: " << iT << " index: "<< counterP*7+iT << " sig: " << signalsP[counterP*7+iT]<<endl;
 		  if(iT==6)
 		    counterP++;
 		}
 	      if(layer=='R'&& counterR<40)
 		{
 		  signalsR[counterR*7+iT]=pStrip.adc[iT];
-		  cout <<"first R: setting bin : i: " << counterR << " j: " << iT << " index: "<< counterR*7+iT << " sig: " << signalsR[counterP*7+iT]<<endl;
+		  //		  cout <<"first R: setting bin : i: " << counterR << " j: " << iT << " index: "<< counterR*7+iT << " sig: " << signalsR[counterP*7+iT]<<endl;
 		  if(iT==6)
 		    counterR++;
 		}
@@ -744,8 +745,8 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 	  (*outTxtFile) <<endl;
 	}
     }
-  cout <<"save signals.." <<endl;
-  saveSigs(signalsR,signalsP,r,phi,counterR,counterP);
+
+  saveSigs(signalsR,signalsP,r,phi,counterR,counterP, iD, iq);
   return kStOk;
 }
 
@@ -1222,9 +1223,7 @@ Int_t StFgtGenAVEMaker::Make()
 
   for(int iD=0;iD<6;iD++)
     {
-      cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
-
-
+            cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
 
       int numClus=0;
       int numPulses=0;
@@ -1244,7 +1243,6 @@ Int_t StFgtGenAVEMaker::Make()
 	}
 
     }
-
   set<Int_t> usedPoints;//saves the points that have been used for tracks (and shouldn't be reused)
   Double_t D1Pos=StFgtGeom::getDiscZ(0);
   Double_t D6Pos=StFgtGeom::getDiscZ(5);
@@ -1277,6 +1275,7 @@ Int_t StFgtGenAVEMaker::Make()
     }
 
   ///all seed combinations
+
   for(int iSeed1=0;iSeed1<5;iSeed1++)
     {
       for(int iSeed2=iSeed1+1;iSeed2<6;iSeed2++)
@@ -1347,7 +1346,6 @@ Int_t StFgtGenAVEMaker::Make()
 		  //		  cout <<"strip idx fro first seed;" << hitIterD1R->centerStripIdx<<endl;
 		  //		  cout <<"strip adc2 fro first seed;" << (pStrips[disc*2+quadR])[hitIterD1R->centerStripIdx].adc[2]<<endl;
 		  Int_t quadSeed1=-1;
-
 		  if(layer!='R')
 		    continue;
 
@@ -1395,7 +1393,6 @@ Int_t StFgtGenAVEMaker::Make()
 			  Char_t layer=hitIterD6R->layer;
 			  Double_t seed2ChargeR=hitIterD6R->CHARGE_MEASURE;
 						  //						  cout <<"seed2ChargeR: " << seed2ChargeR <<endl;
-
 						  //						  			   			  Double_t seed2ChargeR=hitIterD6R->maxAdcInt;
 												  //  Double_t seed2ChargeR=hitIterD6R->maxAdc;
 			  Double_t seed2SizeR=hitIterD6R->clusterSize;
@@ -1552,7 +1549,6 @@ Int_t StFgtGenAVEMaker::Make()
 				 				 // cout <<" point is : " << x <<"," <<y <<endl;
 
 
-
 				  //				  Double_t rCharge=iterClosestR->maxAdcInt;
 				  //		  Double_t rCharge=iterClosestR->maxAdc;
 				  //				  Double_t phiCharge=iterClosestPhi->maxAdcInt;
@@ -1662,11 +1658,15 @@ Int_t StFgtGenAVEMaker::Make()
 			  v_rFail.clear();
 	 
 			}
+
 		    }
+
 		}
+
 	    }
 
 	}
+
     }
 
   return ierr;
@@ -1689,11 +1689,9 @@ Int_t StFgtGenAVEMaker::Finish(){
   StFgtGeneralBase::Finish();
   cout <<" closing txt file " << endl;
   outTxtFile->close();
-  cout <<" 2 " << endl;
   gStyle->SetPalette(1);
   cout <<"AVE finish function " <<endl;
   Int_t ierr = kStOk;
-  cout <<" 3 " << endl;
 
   ///////////////////////////track collection
   vector<AVTrack>::iterator it=m_tracks.begin();
@@ -1751,16 +1749,11 @@ counter++;
   for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
     {
       //      cRadio->cd(iD+1)->SetLogz();
-      cout <<iD <<" 1 " << endl;
-      cRadioHits->cd(iD+1);
-      cout <<iD <<" 2 " << endl;
-      radioPlotsEff[iD]->Draw("colz");
-      cout <<iD <<" 3 " << endl;
-      cRadioNonHits->cd(iD+1);
-      cout <<iD <<" 4 " << endl;
-      radioPlotsNonEff[iD]->Draw("colz");
-      cout <<iD <<" 5 " << endl;
-    }
+        cRadioHits->cd(iD+1);
+        radioPlotsEff[iD]->Draw("colz");
+        cRadioNonHits->cd(iD+1);
+        radioPlotsNonEff[iD]->Draw("colz");
+      }
   char buffer[100];
 
 
@@ -1822,8 +1815,6 @@ counter++;
       for(int iq=0;iq<4;iq++)
 	{
 
-
-	  cout <<"writing id: " << iD <<  " iq: " << iq <<endl;
 	  maxTbCloseClusterP[iD*4+iq]->Write();
 	  maxTbCloseClusterR[iD*4+iq]->Write();
 	  maxAdcCloseClusterP[iD*4+iq]->Write();
@@ -1871,7 +1862,6 @@ counter++;
   cout <<"drawing hits2 " <<endl;
   cRadioHits->SaveAs("radioPlotsHits.png");
   cRadioNonHits->SaveAs("radioPlotsNonHits.png");
-  cout <<" 5 " << endl;
 
   TCanvas* cClusterSizeR=new TCanvas("clusterSizeR","clusterSizeR",1000,1500);
   cClusterSizeR->Divide(2,3);
@@ -1994,7 +1984,6 @@ counter++;
       tmpAllCounts->Write();
       radioPlotsEff[iD]->Add(radioPlotsNonEff[iD]);//all counts
       //      radioPlotsEff[iD]->Add(radioPlotsNonEff[iD],-1); //subtract non eff
-      cout <<" disk: " << iD <<endl;
 
       ////argh, overflow bins!!
       for(int nx=1;nx<radioPlotsEff[iD]->GetNbinsX()+1;nx++)
@@ -2004,18 +1993,18 @@ counter++;
 	      Double_t denom=radioPlotsEff[iD]->GetBinContent(nx,ny);
 	      if(denom>0 && (tmpAllCounts->GetBinContent(nx,ny)/denom)<=1.0)
 		{
-		  cout <<" efficiency bin nx: " << nx << " ny: " << ny << ", num counts " << tmpAllCounts->GetBinContent(nx,ny) << " / " << denom << " : " << tmpAllCounts->GetBinContent(nx,ny)/denom <<endl;
+		  //		  cout <<" efficiency bin nx: " << nx << " ny: " << ny << ", num counts " << tmpAllCounts->GetBinContent(nx,ny) << " / " << denom << " : " << tmpAllCounts->GetBinContent(nx,ny)/denom <<endl;
 		  radioPlotsEff[iD]->SetBinContent(nx,ny,tmpAllCounts->GetBinContent(nx,ny)/denom);
 		  if(iD==m_effDisk)
 		    {
-		      cout <<"chargeRatio is: " << chargeRatioInEffDisk->GetBinContent(nx,ny)<<endl;
+		      //		      cout <<"chargeRatio is: " << chargeRatioInEffDisk->GetBinContent(nx,ny)<<endl;
 		      chargeRatioInEffDisk->SetBinContent(nx,ny,chargeRatioInEffDisk->GetBinContent(nx,ny)/denom);
 		      chargeAsymInEffDisk->SetBinContent(nx,ny,chargeAsymInEffDisk->GetBinContent(nx,ny)/denom);
 		    }
 		}
 	      else
 		{
-		  cout <<" efficiency bin nx: " << nx << " ny: " << ny << ", num counts " << tmpAllCounts->GetBinContent(nx,ny) << " / " << denom << " : 0.0" <<endl;
+		  //		  cout <<" efficiency bin nx: " << nx << " ny: " << ny << ", num counts " << tmpAllCounts->GetBinContent(nx,ny) << " / " << denom << " : 0.0" <<endl;
 		  radioPlotsEff[iD]->SetBinContent(nx,ny,0.0);
 		}
 	    }
@@ -2207,7 +2196,7 @@ Int_t StFgtGenAVEMaker::Init(){
 
   h_clusterChargeR=new TH1D*[kFgtNumDiscs];
   h_clusterChargePhi=new TH1D*[kFgtNumDiscs];
-  cout <<"ave3" << endl;
+
 
   hIp=new TH2D("Proj_to_IP","Proj_to_Ip",50,-100,100,50,-100,100);
   hBx=new TH1D("hBx","hBx",50,-100,100);
@@ -2223,19 +2212,19 @@ Int_t StFgtGenAVEMaker::Init(){
   tpcFgtZVertexCorr=new TH2D("tpc_fgt_corr","tpc_fgt_corr",100,-120,120,100,-120,120);
   tpcFgtZVertexCorr2=new TH2D("tpc_fgt_corr2","tpc_fgt_corr2",100,-120,120,100,-120,120);
   tpcFgtZVertexCorr3=new TH2D("fgt_fgt_corr","fgt_fgt_corr",50,-50,50,50,-50,50);
-  cout <<"ave4" << endl;
+
   for(int iD=0;iD<kFgtNumDiscs;iD++)
     {
-      cout <<"id: " << iD <<endl;
+
       sprintf(buffer,"radioDiskEff_%d",iD);
       radioPlotsEff[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
-      cout <<"-1" <<endl;
+
       sprintf(buffer,"radioDiskEffR_%d",iD);
       radioPlotsEffR[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
-      cout <<"-2" <<endl;
+
       sprintf(buffer,"radioDiskEffPhi_%d",iD);
       radioPlotsEffPhi[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
-      cout <<"-3" <<endl;
+
       sprintf(buffer,"radioDiskEffLoose_%d",iD);
       radioPlotsEffLoose[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
       //      cout <<"1" <<endl;
@@ -2287,7 +2276,6 @@ Int_t StFgtGenAVEMaker::Init(){
 	{
 	  //	   rEff[iD]->SetBinContent(nx,0.1);
 	}
-      //      cout <<"4" <<endl;
       sprintf(buffer,"rPhiRatio_%d",iD);
       rPhiRatioPlots[iD]=new TH1D(buffer,buffer,100,-2,10);
     }

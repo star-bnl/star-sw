@@ -99,7 +99,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
 
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.8 2012/06/12 19:28:39 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.9 2012/06/13 14:18:10 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
@@ -114,7 +114,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    vector<AVTrack> m_tracks;
    // for accessing the data
    StFgtCollection *mFgtCollectionPtr;
-   void saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi,Int_t maxR, Int_t maxPhi);
+   void saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi,Int_t maxR, Int_t maxPhi, Int_t discId, Int_t quad);
    Double_t getRPhiRatio(vector<generalCluster>::iterator hitIterBegin, vector<generalCluster>::iterator hitIterEnd);
    Double_t findClosestPoint(double xE, double yE, Int_t iD);
    Bool_t isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t iq);
