@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.15 2003/11/25 01:54:32 meissner Exp $
+// $Id: StPeCMaker.h,v 1.16 2012/06/13 15:45:46 ramdebbe Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.16  2012/06/13 15:45:46  ramdebbe
+// Added flags to include TOF and Vertex branches in tree
+//
 // Revision 1.15  2003/11/25 01:54:32  meissner
 // correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
 //
@@ -69,11 +72,15 @@
 #include "TTree.h"
 #include "TString.h"
 
+
+
 class StEvent;
 class StPeCEvent;
 class TH1F;
 class TH2F;
 class StMuDst;
+
+
 
 class StPeCMaker : public StMaker
 {
@@ -89,9 +96,15 @@ public:
 	void setFilter(Int_t fi) {filter = fi;};
 	void setMuDst(StMuDst* mu) {muDst = mu;};	//Accessor for muDst pointer
 	void setFileName ( TString name ) { treeFileName = name ; } ;
+	void setUseBemc ( Bool_t includeBemc = kFALSE ) { useBemc = includeBemc ; } ;
+	void setUseTOF ( Bool_t includeTOF = kFALSE ) { useTOF = includeTOF ; } ;
+	void setUseVertex ( Bool_t includeVertex = kFALSE ) { useVertex = includeVertex ; } ;
 	void setOutputPerRun ( Int_t in = 1 ) { outputPerRun = in ; } ;
 
 	TString treeFileName ;
+	Bool_t   useBemc;     //if TRUE BEMC information is written to ntuple
+	Bool_t   useTOF;      //if TRUE TOF information is written to ntuple
+	Bool_t   useVertex;   //if TRUE Vertex information is written to ntuple
 protected:
 	TFile* m_outfile;
 
@@ -101,10 +114,14 @@ protected:
 	StPeCEvent* pevent;
 	StPeCTrigger* trigger;
 	StPeCGeant* geant;
+ 
+
 
 	Int_t   infoLevel;
 	Int_t   filter;	//1 == two prong, 2 == four prong
 	Int_t   outputPerRun ; // 1=output per run 0(default)=one output file
+	TList * fSnapShots;
+
 private:
 	StMuDst* muDst;
 
@@ -114,7 +131,7 @@ private:
 	Int_t triggerSim(StEvent*);
 
 	virtual const char *GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.15 2003/11/25 01:54:32 meissner Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.16 2012/06/13 15:45:46 ramdebbe Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 	ClassDef(StPeCMaker,1)
 };

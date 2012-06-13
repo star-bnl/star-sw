@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.27 2007/04/28 17:56:34 perev Exp $
+// $Id: StPeCMaker.cxx,v 1.28 2012/06/13 15:45:42 ramdebbe Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.28  2012/06/13 15:45:42  ramdebbe
+// Added flags to include TOF and Vertex branches in tree
+//
 // Revision 1.27  2007/04/28 17:56:34  perev
 // Redundant StChain.h removed
 //
@@ -94,10 +97,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StPeCMaker.h"
+#include "StPeCEnumerations.h"
 #include "StEventTypes.h"
 #include "Stypes.h"
 #include "StMessMgr.h"
 #include "TH1.h"
+#include "TH2.h"
 #include <vector>
 #ifndef ST_NO_NAMESPACES
 using std::vector;
@@ -118,7 +123,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.27 2007/04/28 17:56:34 perev Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.28 2012/06/13 15:45:42 ramdebbe Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -137,7 +142,9 @@ StPeCMaker::~StPeCMaker()
 
 Int_t StPeCMaker::Init() {
 
-   cout << "tree output file: " << treeFileName << endl;
+   LOG_INFO << "StPeCMake INIT: tree output file:  " << treeFileName << endm;
+   infoLevel = 0;
+   LOG_INFO << "StPeCMake INIT: infoLevel:  " << infoLevel << endm;
 
    //Get the standard root format to be independent of Star IO   
    m_outfile = new TFile(treeFileName, "recreate");
@@ -147,7 +154,7 @@ Int_t StPeCMaker::Init() {
    uDstTree = new TTree("uDst", "Pcol uDst", 99);
 
    //Instantiate StPeCEvent
-   pevent = new StPeCEvent();
+   pevent = new StPeCEvent(useBemc, useTOF, useVertex);
    pevent->setInfoLevel(infoLevel);
 
    trigger = new StPeCTrigger();
@@ -155,11 +162,25 @@ Int_t StPeCMaker::Init() {
 
    geant = new StPeCGeant();
 
+
    //Add branches
-   uDstTree->Branch("Event", "StPeCEvent", &pevent, 64000, 99);
+   uDstTree->Branch("Event", "StPeCEvent", &pevent, 94000, 99);
    uDstTree->Branch("Trigger", "StPeCTrigger", &trigger, 64000, 99);
    uDstTree->Branch("Geant", "StPeCGeant", &geant, 64000, 99);
 
+   //define 2-D histogram to display snapshots of individual events
+   //store then in another directory
+   TDirectory * saveDir = gDirectory;
+   TDirectory * snapShots = gDirectory->mkdir("snapShots");
+   snapShots->cd();
+   fSnapShots = new TList();
+   Int_t snapLimit = 100;
+   for (Int_t i=0;i<snapLimit;i++){
+
+     fSnapShots->Add(new TH2F(Form("snapShot%d",i), Form("y z view of event %d", i) , 100, -250., 250., 100, -200., 200.));
+   }
+   fSnapShots->Add(new TH1F("hNumVtx", "number of vertices in event" , 100, 0., 20.));
+   gDirectory = saveDir;
    return StMaker::Init();
 }
 
@@ -184,14 +205,15 @@ Int_t StPeCMaker::InitRun(Int_t runnr) {
       treeFileName.ReplaceAll("event", "tree");
       treeFileName.ReplaceAll("evtsel", "treeSel");
 
-      cout << "tree output file: " << treeFileName << endl;
+      LOG_INFO << "tree output file: " << treeFileName << endm;
 
    //Get the standard root format to be independent of Star IO   
       m_outfile = new TFile(treeFileName, "recreate");
       m_outfile->SetCompressionLevel(1);
+      LOG_INFO << "Initrun: open and compression "  << endm;
    }
 
-   cout << "Exiting InitRun(Int_t runnr)" << endl;
+
    return StMaker::InitRun(runnr);
 }
 
@@ -204,22 +226,26 @@ Int_t StPeCMaker::Make()
 
    Int_t NTracks = 0 ;
    int tw        = 0 ;
-   if(muDst)
-   {
-      NTracks = muDst->globalTracks()->GetEntries();
+   //
+   // 26-APR 2012 RD we comment the whole muDst part NEEDS TO BE FIXED
+//    if(muDst )  //rd 12-OCT-2010 had && !useBemc
+//    {
+//       LOG_INFO << "StPeCMaker make: using muDst---------- "  << endm;
+//       NTracks = muDst->globalTracks()->GetEntries();
        
-      StL0Trigger &trig = muDst->event()->l0Trigger();
-      tw = trig.triggerWord();
+//       StL0Trigger &trig = muDst->event()->l0Trigger();
+//       tw = trig.triggerWord();
 
-      trigger->process(muDst);
-      
-   }
-   else
-   {
+//       trigger->process(muDst);
+
+//    }
+//    else
+//    {                                           //this needs fix RD 9DEC09
+      LOG_INFO << "StPeCMaker make: using StEvent---------- "  << endm;
       event = (StEvent *)GetInputDS("StEvent");
       if (!event)
       {
-	 cout << "There was no StEvent! Exiting..." << endl;
+	 LOG_ERROR << "There was no StEvent! Exiting..." << endm;
 	 return kStOK; 
       }
       //Process StEvent trigger simulations
@@ -229,7 +255,8 @@ Int_t StPeCMaker::Make()
       NTracks = tempn.size();
 
       tw = event->l0Trigger()->triggerWord();
-   }
+
+      //   }         //rd 9DEC09
 
    
    //Fill geant simulations
@@ -245,7 +272,7 @@ Int_t StPeCMaker::Make()
    // flk 07/17/03
    
    //    if(NTracks > StPeCnMaxTracks) {
-   cout << "Number of tracks: " << NTracks << endl;
+   LOG_INFO << "StPeCMaker::Make Number of tracks nodes: " << NTracks << endm;
    //       cout << "Not a peripheral event (NTracks > 15)" << endl;
    //       //flag = kStErr;
    //    }
@@ -260,12 +287,14 @@ Int_t StPeCMaker::Make()
    // if ( geantBranch || (flag == kStOk) ) {
      
    int ok = 0 ;
-   if (event) ok = pevent->fill(event);
-   else       ok = pevent->fill(muDst);
-      
+//    if (event) ok = pevent->fill(event);
+//    else       ok = pevent->fill(muDst);
+   if (event) ok = pevent->fill(event, muDst);  //RD 
+   //   ok = pevent->fill(muDst); // 11-DEC-2011 for embedding work
    if ( !ok|| geantBranch  ) {
+     //LOG_INFO << "Fill Event to Tree!**********************" << endm;
      uDstTree->Fill();
-     
+
      
      //      //Select only 4 prong candidates
      //      //NOTE: This does not appear to do anything because the return code isn't used
@@ -277,15 +306,16 @@ Int_t StPeCMaker::Make()
      // 	 flag = Cuts4Prong(event, pevent);
      //        }
    } else {
-     cout << "Do Not fill Event to Tree!" << endl;
+     LOG_INFO << "Do Not fill Event to Tree!**********************" << endm;
    }
    
    //Cleanup
+   //LOG_INFO << "Before clean up!**********************" << endm;
    pevent->clear();
    geant->clear();
    trigger->clear();
 
-   cout << "Exiting StPeCMaker::Make()" << endl;
+   //cout << "Exiting StPeCMaker::Make()" << endl;
    
    
    return kStOk;
@@ -360,7 +390,11 @@ Int_t StPeCMaker::Cuts4Prong(StEvent *event, StPeCEvent *pevent)
 Int_t StPeCMaker::Finish()
 {
 	cout << "Entering StPeCMaker::Finish()" << endl;
-
+	TDirectory * saveDir = gDirectory;
+	m_outfile->cd("snapshots");
+	fSnapShots->Write();
+	gDirectory = saveDir;
+	m_outfile->ls();
 	m_outfile->Write();
 	m_outfile->Close();
 	StMaker::Finish();

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.8 2003/11/25 01:54:28 meissner Exp $
+// $Id: StPeCEvent.h,v 1.9 2012/06/13 15:45:06 ramdebbe Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.9  2012/06/13 15:45:06  ramdebbe
+// Added flags to include TOF and Vertex branches in tree
+//
 // Revision 1.8  2003/11/25 01:54:28  meissner
 // correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
 //
@@ -50,12 +53,16 @@
 #include "StPeCPair.h"
 #include "StPeCTrack.h"
 #include "SystemOfUnits.h"
+#include "StEpcMaker/StEpcMaker.h"
+#include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
+
+
 
 class StPeCEvent: public TObject {
 
 public:
 
-                                  StPeCEvent();
+  StPeCEvent(bool useBemc, bool useTOF, bool useVertex);
   virtual                         ~StPeCEvent();
 
 
@@ -74,11 +81,12 @@ public:
   Float_t                         getYVertex() const;
   Float_t                         getZVertex() const;
 #ifndef __CINT__
-  StMuDst* muDst;
+  StMuDst*                        muDst;
   StEvent*                        eventP ;
   void                            addPair(StPeCPair* pair) const;
   Int_t                           fill ( StEvent* event ) ;
   Int_t                           fill(StMuDst* mudst);
+  Int_t                           fill(StEvent* event, StMuDst* mudst);
   Int_t                           infoLevel ;
   void                            setInfoLevel ( Int_t in ) { infoLevel = in ; } ;
   StLorentzVectorF                getEvent4Momentum(StPeCSpecies pid) const;
@@ -88,6 +96,7 @@ public:
 
   Float_t                         mInv(StPeCSpecies pid) const;
   Float_t                         yRap(StPeCSpecies pid) const;
+  void                            matchTOFhitsToTracks(StMuDst *mudst);
 
 private:
   Int_t                           eventN;
@@ -111,7 +120,14 @@ private:
   TClonesArray                   *pPairs ;
   TClonesArray                   *sPairs ;
   TClonesArray                   *tracks;
-
+  TClonesArray                   *treecalo;
+  TClonesArray                   *tofHits;
+  TClonesArray                   *tofTracks;
+  TClonesArray                   *vertices;
+  Int_t                           shotCount;
+  Bool_t                          useBemcLocal;
+  Bool_t                          useTOFlocal;
+  Bool_t                          useVertexLocal;
 
   ClassDef(StPeCEvent,1)
 };
