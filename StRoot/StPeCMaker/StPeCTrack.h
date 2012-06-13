@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrack.h,v 1.5 2003/11/25 01:54:36 meissner Exp $
+// $Id: StPeCTrack.h,v 1.6 2012/06/13 16:09:54 ramdebbe Exp $
 // $Log: StPeCTrack.h,v $
+// Revision 1.6  2012/06/13 16:09:54  ramdebbe
+// Overload constructor and set method to pass vertex information in StMuEvent
+//
 // Revision 1.5  2003/11/25 01:54:36  meissner
 // correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
 //
@@ -53,8 +56,8 @@ public:
   void                            calculatePair4Momentum( ) ;
   Int_t                           fill ( ) ;
 #ifndef __CINT__
-	StPeCTrack(Int_t _primary, StMuTrack *trk);
-	void set ( Int_t _primary, StMuTrack* trk);
+  StPeCTrack(Int_t _primary, StMuTrack *trk, StMuEvent * mudst);
+	void set ( Int_t _primary, StMuTrack* trk, StMuEvent *mudst);
         StPeCTrack ( Int_t _primary, StTrack *trk);
         void set ( Int_t _primary, StTrack* trk);
 #endif /*__CINT__*/
@@ -67,6 +70,10 @@ public:
   Float_t                         psi ; 
   Float_t                         phi0 ;
   Float_t                         length ;
+  Int_t                           vertexIndex;
+  Float_t                         vtxX;
+  Float_t                         vtxY;
+  Float_t                         vtxZ;
   Float_t                         r0 ;
   Float_t                         z0 ;
   Float_t                         dedx ;

@@ -24,9 +24,9 @@ StPeCTrack::StPeCTrack ( Int_t _primary, StTrack* trk) {
    set ( _primary, trk ) ;
 }
 
-StPeCTrack::StPeCTrack(Int_t _primary, StMuTrack* trk)
+StPeCTrack::StPeCTrack(Int_t _primary, StMuTrack* trk, StMuEvent* event)
 {
-   set (_primary, trk);
+  set (_primary, trk, event);
 }
 
 void StPeCTrack::set ( Int_t _primary, StTrack* trk) {
@@ -74,7 +74,7 @@ void StPeCTrack::set ( Int_t _primary, StTrack* trk) {
        nSigmaP   =0;
 	
      }
-     nHits = trk->detectorInfo()->numberOfPoints() ;
+     // nHits = trk->detectorInfo()->numberOfPoints() ;  RD
   }
 //printf ( "pt psi eta r0 phi0 z0 nHits %f %f %f %f %f %f %f \n",
 //   pt, psi, eta, r0, phi0, z0, nHits ) ;
@@ -82,7 +82,7 @@ void StPeCTrack::set ( Int_t _primary, StTrack* trk) {
 
 }
 
-void StPeCTrack::set(Int_t _primary, StMuTrack* trk)
+void StPeCTrack::set(Int_t _primary, StMuTrack* trk, StMuEvent *event)
 {
    key = trk->id();
    primary = _primary;
@@ -95,7 +95,11 @@ void StPeCTrack::set(Int_t _primary, StMuTrack* trk)
    z0 = trk->firstPoint().z(); 
    r0 = trk->firstPoint().perp(); 
    length= trk->length();  // hope this is correct // needed for dedxZ
-   
+   vertexIndex = trk->vertexIndex();
+   vtxX = event->primaryVertexPosition(vertexIndex).x();
+   vtxY = event->primaryVertexPosition(vertexIndex).y();
+   vtxZ = event->primaryVertexPosition(vertexIndex).z();
+
    dedx = trk->dEdx(); 
    // OLd
    //    dedxZel       = getZdEdx(mMassElectron);
