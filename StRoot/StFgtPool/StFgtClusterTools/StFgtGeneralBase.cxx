@@ -162,6 +162,7 @@ Int_t StFgtGeneralBase::Make()
 
 Int_t StFgtGeneralBase::fillFromStEvent()
 {
+  cout <<"fill from ev" <<endl;
    Int_t ierr = kStFatal;
    StEvent* eventPtr = 0;
    StFgtCollection *fgtCollectionPtr = 0;
@@ -181,6 +182,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
                StSPtrVecFgtHitConstIterator hitIter;
 	       set<int> quadsHit;
                Int_t idx = 0;
+
                for( hitIter = hitVec.begin(); hitIter != hitVec.end(); ++hitIter, ++idx )
 		 {
 		   Short_t quad, discK, strip;
@@ -197,7 +199,6 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		     }
 		   quadsHit.insert(quad);
 #endif
-
 		   //				  Int_t clusterSizePhi=(*hitIter)->getStripWeightMap().size();
 		   Int_t clusterSize=(*hitIter)->getStripWeightMap().size();
 		   Double_t clusterCharge=(*hitIter)->charge();
@@ -206,7 +207,6 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		 }
             };
          }
-
 
 	 ///////////////////////
          for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc )
@@ -227,6 +227,8 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		     Short_t quad, discK, stripI;
 		     Char_t layer;
 		     StFgtGeom::decodeGeoId(geoId,discK, quad, layer, stripI);
+		     if(discK<0 || discK>6 || quad <0 || quad > 4 || (layer!='P' && layer !='R'))
+		       continue;
 		     Double_t ped=0.0; //get from DB
 		     Double_t pedErr=0.0; 
 		     Int_t rdo, arm, apv, chan; 
@@ -234,9 +236,9 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		     Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
 		     ped = mDb->getPedestalFromElecId( elecId );
 		     pedErr = mDb->getPedestalSigmaFromElecId( elecId );
-		     
 		     if(quad<4)
 		       {
+			 //		  cout <<"looking at disc: " << disc <<  " quad: " << quad <<" index: " << disc*4+quad <<endl;
 			 pStrips[disc*4+quad].push_back(generalStrip(geoId,ped,pedErr,cSeedType,charge, chargeUncert));
 			 Double_t maxAdc=-9999;
 			 for(int j=0;j<7;j++)
@@ -258,7 +260,6 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 	       }
 	   }
 
-
 	 for(int iDx=0;iDx<6;iDx++)
 	   {
 	     vector<generalCluster>::iterator it=pClusters[iDx]->begin();
@@ -269,19 +270,22 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		 if(centerStripId<0)
 		   continue;
 
-
 		 Int_t stripCounter=(centerStripId-1);
 		 Double_t maxChargeInt=it->maxAdc;
+		 //		 cout <<"center strip" << centerStripId<<" idx: " << iDx << " quad: " << it->quad <<endl;
+		 //		 cout <<" size:" <<pStrips[iDx*4+it->quad].size()<<endl;
+		 if(centerStripId>=pStrips[iDx*4+it->quad].size())
+		   continue;
 		 Int_t oldGeoId=(pStrips[iDx*4+it->quad])[centerStripId].geoId;
-		 Int_t m_seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
+		 Int_t m_seedType=(pStrips[iDx*4+it->quad])[centerStripId].seedType;
 		 while(stripCounter>=0)     
 		   {
+		     //		     cout <<"stripcounter"<< stripCounter <<endl;
 		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
 		     if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
 		       {
 			 m_seedType=seedType;
 		       }
-
 		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
 		       break;
 		     if(fabs(oldGeoId-(pStrips[iDx*4+it->quad])[stripCounter].geoId)>1)
@@ -478,10 +482,12 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		   continue;
 		 //		 cout << " strip geo id is " << pStrips[iDx*2+it->quad][centerStripId].geoId <<endl;
 		 Int_t stripCounter=(centerStripId-1);
+		 if(centerStripId>=pStrips[iDx*4+it->quad].size())
+		   continue;
 		 Double_t maxChargeInt=it->maxAdc;
 		 //		 cout <<"max charge:" <<maxChargeInt<<endl;
 		 Int_t oldGeoId=(pStrips[iDx*4+it->quad])[centerStripId].geoId;
-		 Int_t m_seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
+		 Int_t m_seedType=(pStrips[iDx*4+it->quad])[centerStripId].seedType;
 		 //		 cout <<" going down " <<endl;
 		 while(stripCounter>=0)     
 		   {
