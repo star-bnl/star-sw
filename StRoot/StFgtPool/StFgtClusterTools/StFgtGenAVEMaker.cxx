@@ -60,9 +60,9 @@
 
 
 
-template<class T> void createPlots(T*** pH, int numH, char* nameBase, int numBin, int first, int last)
+template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int numBin, int first, int last)
 {
-  char buffer[100];
+  char buffer[200];
   (*pH)=new T*[numH];
   for(int iD=0;iD<kFgtNumDiscs;iD++)
     {
@@ -73,8 +73,8 @@ template<class T> void createPlots(T*** pH, int numH, char* nameBase, int numBin
 	}
     }
 }
-template void createPlots(TH1I*** pH, int numH, char* nameBase,  int numBin, int first, int last);
-template void createPlots(TH1F*** pH, int numH, char* nameBase, int numBin, int first, int last);
+template void createPlots(TH1I*** pH, int numH,const char* nameBase,  int numBin, int first, int last);
+template void createPlots(TH1F*** pH, int numH, const char* nameBase, int numBin, int first, int last);
 
 void doNormalize(TH2D** hEff, TH2D** hNonEff)
 {
@@ -129,8 +129,6 @@ void StFgtGenAVEMaker::saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Doub
 	}
     }
   v_hClusR.push_back(histoR);
-
-
 }
 
 pair<double,double> StFgtGenAVEMaker::getDca(  vector<AVTrack>::iterator it)
@@ -651,6 +649,8 @@ Short_t StFgtGenAVEMaker::getQuadFromCoo(Double_t x, Double_t y)
     return 2;
   if(x<0 && y>0)
     return 3;
+
+  return -999;
 }
 //print the strips around the place where we expect hit
 Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
@@ -661,8 +661,8 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
     return true;
   printCounter++;
   //first r: 
-  Double_t signalsP[500];
-  Double_t signalsR[500];
+  Double_t signalsP[900];
+  Double_t signalsR[900];
 
   Int_t counterR=0;
   Int_t counterP=0;
@@ -1205,7 +1205,6 @@ Int_t StFgtGenAVEMaker::Make()
   StFgtGeneralBase::Make();
   Float_t x;
   Float_t y;
-  //  Int_t prvGeoId=-1;
   //  if(vtxRank<=1)
   //    return kStOk;
 
@@ -1248,34 +1247,6 @@ Int_t StFgtGenAVEMaker::Make()
   Double_t D6Pos=StFgtGeom::getDiscZ(5);
   Double_t zArm=D6Pos-D1Pos;
   vector<generalCluster>::iterator hitIterD1,hitIterD6, hitIterD1R, hitIterD6R, hitIter, hitIter2;
-  //  cout <<" there are " << hitVecD1.size() << " hits in d1 "<<endl;
-  for(hitIterD1=hitVecD1.begin();hitIterD1 != hitVecD1.end();hitIterD1++)
-    {
-       Short_t quad=hitIterD1->quad;
-           Short_t disc=hitIterD1->disc;
-            Short_t strip=hitIterD1->strip;
-            Char_t layer=hitIterD1->layer;
-      //      if(layer=='P')
-      //	cout <<"found phi d1 " <<endl;
-      //      else
-      //	cout <<"found r d1 " <<endl;
-    }
-  //  cout <<" there are " << hitVecD6.size() << " hits in d6 "<<endl;
-  for(hitIterD1=hitVecD6.begin();hitIterD1 != hitVecD6.end();hitIterD1++)
-    {
-            Short_t quad=hitIterD1->quad;
-            Short_t disc=hitIterD1->disc;
-            Short_t strip=hitIterD1->strip;
-            Char_t layer=hitIterD1->layer;
-
-      //      if(layer=='P')
-      //	cout <<"found phi d6 " <<endl;
-      //      else
-      //	cout <<"found r d6 " <<endl;
-    }
-
-  ///all seed combinations
-
   for(int iSeed1=0;iSeed1<5;iSeed1++)
     {
       for(int iSeed2=iSeed1+1;iSeed2<6;iSeed2++)
@@ -1283,7 +1254,6 @@ Int_t StFgtGenAVEMaker::Make()
 	  //	  (*outTxtFile) << " using " << iSeed1 <<" and " << iSeed2 << " as seeds " << endl;
 	  if((iSeed2-iSeed1)<2)//to have large enough lever arm. Also, since three points are required shouldn't matter?
 	    continue;
-
 	  if(iSeed1==m_effDisk || iSeed2==m_effDisk)
 	    continue;
 	  if(pClusters[iSeed1]->size() > MAX_CLUSTERS || pClusters[iSeed2]->size() > MAX_CLUSTERS)
@@ -1305,16 +1275,11 @@ Int_t StFgtGenAVEMaker::Make()
 	      if(!hitIterD1->hasMatch)
 		continue;
 	      Short_t quadP=hitIterD1->quad;
-	      	      Short_t disc=hitIterD1->disc;
-	      	      Short_t strip=hitIterD1->strip;
+	      Short_t disc=hitIterD1->disc;
+	      Short_t strip=hitIterD1->strip;
 	      Char_t layer=hitIterD1->layer;
 	      
 	      Double_t seed1ChargePhi=hitIterD1->CHARGE_MEASURE;
-	      //	      cout <<"seed1ChargeP: " << seed1ChargePhi <<endl;
-	      //	      	      Double_t seed1ChargePhi=hitIterD1->maxAdcInt;
-	      //	      Double_t seed1ChargePhi=hitIterD1->maxAdc;
-
-	      //	      cout <<"seed charge: " << hitIterD1->maxAdcInt <<endl;
 	      Double_t seed1SizePhi=hitIterD1->clusterSize;
 
 	      if(quadP>2)
@@ -1338,13 +1303,7 @@ Int_t StFgtGenAVEMaker::Make()
 		  Short_t strip=hitIterD1R->strip;
 		  Char_t layer=hitIterD1R->layer;
 		  Double_t seed1ChargeR=hitIterD1R->CHARGE_MEASURE;
-				  //	      cout <<"seed1ChargeR: " << seed1ChargeR <<endl;
-				  //				  			  Double_t seed1ChargeR=hitIterD1R->maxAdcInt;
-				  //			  Double_t seed1ChargeR=hitIterD1R->maxAdc;
-		  //		  cout <<"seed chargeR: " << hitIterD1R->maxAdcInt <<endl;
 		  Double_t seed1SizeR=hitIterD1R->clusterSize;
-		  //		  cout <<"strip idx fro first seed;" << hitIterD1R->centerStripIdx<<endl;
-		  //		  cout <<"strip adc2 fro first seed;" << (pStrips[disc*2+quadR])[hitIterD1R->centerStripIdx].adc[2]<<endl;
 		  Int_t quadSeed1=-1;
 		  if(layer!='R')
 		    continue;
@@ -1365,14 +1324,10 @@ Int_t StFgtGenAVEMaker::Make()
 
 		      Int_t geoIdSeed2=hitIterD6->centralStripGeoId;
 		      Short_t quadP_2=hitIterD6->quad;
-		      		      Short_t disc=hitIterD6->disc;
-		      		      Short_t strip=hitIterD6->strip;
-		      		      Char_t layer=hitIterD6->layer;
-
-				      		      		      Double_t seed2ChargePhi=hitIterD6->CHARGE_MEASURE;
-								      //	      cout <<"seed2ChargeP: " << seed2ChargePhi <<endl;
-				      //				      Double_t seed2ChargePhi=hitIterD6->maxAdcInt;
-				      //				      				      Double_t seed2ChargePhi=hitIterD6->maxAdc;
+		      Short_t disc=hitIterD6->disc;
+		      Short_t strip=hitIterD6->strip;
+		      Char_t layer=hitIterD6->layer;
+		      Double_t seed2ChargePhi=hitIterD6->CHARGE_MEASURE;
 		      Double_t seed2SizePhi=hitIterD6->clusterSize;
 		      if(layer!='P')
 			continue;
@@ -1392,9 +1347,7 @@ Int_t StFgtGenAVEMaker::Make()
 			  Short_t strip=hitIterD6R->strip;
 			  Char_t layer=hitIterD6R->layer;
 			  Double_t seed2ChargeR=hitIterD6R->CHARGE_MEASURE;
-						  //						  cout <<"seed2ChargeR: " << seed2ChargeR <<endl;
-						  //						  			   			  Double_t seed2ChargeR=hitIterD6R->maxAdcInt;
-												  //  Double_t seed2ChargeR=hitIterD6R->maxAdc;
+
 			  Double_t seed2SizeR=hitIterD6R->clusterSize;
 			  Int_t quadSeed2=-1;
 
@@ -1481,10 +1434,8 @@ Int_t StFgtGenAVEMaker::Make()
 				  if(layer!='P')
 				    continue;
 				  Float_t phi=hitIter->posPhi;
-				  //				  cout <<" got phi: " << phi <<endl;
-				  				  Double_t phiCharge=hitIter->CHARGE_MEASURE;
+				  Double_t phiCharge=hitIter->CHARGE_MEASURE;
 
-				  //				  Double_t phiCharge=hitIter->maxAdcInt;
 				  //				  								  Double_t phiCharge=hitIter->maxAdc;
 								  //			  Int_t clusterSizePhi=hitIter->clusterSize;
 				  //				  if(clusterSizePhi<=1)
@@ -1492,8 +1443,8 @@ Int_t StFgtGenAVEMaker::Make()
 				  //    cout <<"ave make5 " <<endl;
 				  for(hitIter2=hitVec.begin();hitIter2!=hitVec.end();hitIter2++)
 				    {
-				  if(!hitIter2->hasMatch)
-				    continue;
+				      if(!hitIter2->hasMatch)
+					continue;
 				      Int_t geoIdR=hitIter2->centralStripGeoId;
 				      StFgtGeom::decodeGeoId(geoIdR,disc, quad, layer, strip);//ok
 				      //				      cout <<" r? " <<endl;
@@ -1516,17 +1467,16 @@ Int_t StFgtGenAVEMaker::Make()
 #ifdef ADD_MULTIPLE
 				      if(dist2<MAX_DIST2)
 					{
-				  Double_t rCharge=hitIter2->CHARGE_MEASURE;
-				  Double_t phiCharge=hitIter->CHARGE_MEASURE;
-				  Int_t clusterSizeR=hitIter2->clusterSize;
-				  Int_t clusterSizePhi=hitIter->clusterSize;
+					  Double_t rCharge=hitIter2->CHARGE_MEASURE;
+					  Double_t phiCharge=hitIter->CHARGE_MEASURE;
+					  Int_t clusterSizeR=hitIter2->clusterSize;
+					  Int_t clusterSizePhi=hitIter->clusterSize;
 					  v_points.push_back(AVPoint(x,y,diskZ,r,phi,iD,quadTestR, rCharge,phiCharge, clusterSizeR,clusterSizePhi));
 					}
 
 #endif
 				      if(dist2<closestDist)
 					{
-					  //					  cout <<"found point with distance : "<< dist2 <<endl;
 					  closestDist=dist2;
 					  iterClosestPhi=hitIter;
 					  iterClosestR=hitIter2;
@@ -1546,12 +1496,6 @@ Int_t StFgtGenAVEMaker::Make()
 
 				  double x=r*cos(phi);
 				  double y=r*sin(phi);
-				 				 // cout <<" point is : " << x <<"," <<y <<endl;
-
-
-				  //				  Double_t rCharge=iterClosestR->maxAdcInt;
-				  //		  Double_t rCharge=iterClosestR->maxAdc;
-				  //				  Double_t phiCharge=iterClosestPhi->maxAdcInt;
 
 				  Double_t rCharge=iterClosestR->CHARGE_MEASURE;
 				  Double_t phiCharge=iterClosestPhi->CHARGE_MEASURE;
@@ -1619,11 +1563,11 @@ Int_t StFgtGenAVEMaker::Make()
 				  {
 				    if(validTrack)
 				      {
-					//at least don't duplicate seeds...
-										usedPoints.insert(geoIdSeed1);
-										usedPoints.insert(geoIdSeed1R);
-										usedPoints.insert(geoIdSeed2);
-										usedPoints.insert(geoIdSeed2R);
+					//at least don't duplicate seeds..., the other ones might belong to multiple tracks
+					usedPoints.insert(geoIdSeed1);
+					usedPoints.insert(geoIdSeed1R);
+					usedPoints.insert(geoIdSeed2);
+					usedPoints.insert(geoIdSeed2R);
 										//					usedPoints.insert(v_geoIDsPhi[i]);
 					//					usedPoints.insert(v_geoIDsR[i]);
 					//					Int_t disk=v_x[i].first;
@@ -1656,7 +1600,6 @@ Int_t StFgtGenAVEMaker::Make()
 			  v_xFail.clear();
 			  v_yFail.clear();
 			  v_rFail.clear();
-	 
 			}
 
 		    }

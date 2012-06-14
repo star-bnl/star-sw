@@ -86,7 +86,7 @@ void StFgtGeneralBase::SetFileBase(const Char_t* m_filebase)
 Int_t StFgtGeneralBase::Finish()
 {
 
-  evStatistics=new TH1D("eventStatistics","eventStatistics",10,0,9);
+  evStatistics=new TH1D("fgtEventStatistics","fgtEventStatistics",10,0,9);
   TCanvas c;
   chargeMaxAdcCorr->Draw("colz");
   c.SaveAs("chargeMaxAdcCorr.png");
@@ -113,6 +113,7 @@ Int_t StFgtGeneralBase::Finish()
 
     f.Write();
     f.Close();
+    return kStOk;
 }
 
 Bool_t StFgtGeneralBase::validPulse(generalStrip& strip)
@@ -155,14 +156,14 @@ Int_t StFgtGeneralBase::Make()
 #else
    fillFromMuDst();
 #endif
-    mapGeoId2Cluster.clear();
+
+   mapGeoId2Cluster.clear();
   return ierr;
 }
 
 
 Int_t StFgtGeneralBase::fillFromStEvent()
 {
-  cout <<"fill from ev" <<endl;
    Int_t ierr = kStFatal;
    StEvent* eventPtr = 0;
    StFgtCollection *fgtCollectionPtr = 0;
@@ -182,7 +183,6 @@ Int_t StFgtGeneralBase::fillFromStEvent()
                StSPtrVecFgtHitConstIterator hitIter;
 	       set<int> quadsHit;
                Int_t idx = 0;
-
                for( hitIter = hitVec.begin(); hitIter != hitVec.end(); ++hitIter, ++idx )
 		 {
 		   Short_t quad, discK, strip;
@@ -192,6 +192,13 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		   Int_t geoId=(*hitIter)->getCentralStripGeoId();
 		   Double_t discZ=StFgtGeom::getDiscZ(disc);
 		   StFgtGeom::decodeGeoId((*hitIter)->getCentralStripGeoId(),discK, quad, layer, strip);
+		   if(quad<0 && discK<0)//Ithink these are the error conditions
+		     {
+		       if(discK!=disc)
+			 cout <<" disc - geo id mismatch...disk: " <<disc <<" or " << discK <<" geo id is " << (*hitIter)->getCentralStripGeoId()<<endl;
+		       cout <<"bad read1" <<endl;
+		     continue;
+		     }
 #ifdef ONE_HIT_PER_QUAD
 		   if(quadsHit.find(quad)!=quadsHit.end())
 		     {
@@ -207,9 +214,9 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		 }
             };
          }
-
+	 ////somewhere int the next loop something weird happens
 	 ///////////////////////
-         for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc )
+         for( Int_t disc = 0; disc < kFgtNumDiscs; disc++ )
 	   {
 	     StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( disc);
 	     if( stripCollectionPtr)
@@ -218,7 +225,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		 StSPtrVecFgtStripIterator stripIter;
 		 for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
 		   StFgtStrip *strip = *stripIter;
-		   Float_t ped = 0, pedErr = 0;
+		   //		   Float_t ped = 0, pedErr = 0;
 		   if( strip ){
 		     Int_t geoId=strip->getGeoId();
 		     Int_t cSeedType=strip->getClusterSeedType();
@@ -228,7 +235,10 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		     Char_t layer;
 		     StFgtGeom::decodeGeoId(geoId,discK, quad, layer, stripI);
 		     if(discK<0 || discK>6 || quad <0 || quad > 4 || (layer!='P' && layer !='R'))
+		       {
+		       cout <<"bad read2" <<endl;
 		       continue;
+		       }
 		     Double_t ped=0.0; //get from DB
 		     Double_t pedErr=0.0; 
 		     Int_t rdo, arm, apv, chan; 
@@ -238,6 +248,8 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		     pedErr = mDb->getPedestalSigmaFromElecId( elecId );
 		     if(quad<4)
 		       {
+			 if(quad<0)
+			   cout <<"bad read3"<<endl;
 			 //		  cout <<"looking at disc: " << disc <<  " quad: " << quad <<" index: " << disc*4+quad <<endl;
 			 pStrips[disc*4+quad].push_back(generalStrip(geoId,ped,pedErr,cSeedType,charge, chargeUncert));
 			 Double_t maxAdc=-9999;
@@ -250,6 +262,12 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 			 pStrips[disc*4+quad].back().maxAdc=maxAdc;
 			 if(mapGeoId2Cluster.find(geoId)!=mapGeoId2Cluster.end())
 			   {
+
+			     if(mapGeoId2Cluster[geoId]>=(*pClusters[disc]).size())
+			       {
+			       cout <<" bad read5" <<endl;
+			       cout <<"geo id: " << geoId << " map: " << mapGeoId2Cluster[geoId] <<" size:" << (*pClusters[disc]).size() <<" disc: " << disc <<endl;
+			       }
 			     (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=(pStrips[disc*4+quad].size()-1);
 			     (*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdc=maxAdc;
 			   }
@@ -260,6 +278,11 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 	       }
 	   }
 
+	 
+	 ///////////----
+
+
+
 	 for(int iDx=0;iDx<6;iDx++)
 	   {
 	     vector<generalCluster>::iterator it=pClusters[iDx]->begin();
@@ -268,16 +291,22 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		 it->hasMatch=true;
 		 Int_t centerStripId=it->centerStripIdx;
 		 if(centerStripId<0)
-		   continue;
+		   {
+		       cout <<"bad read4" <<endl;
+		       continue;
+		   }
 
-		 Int_t stripCounter=(centerStripId-1);
 		 Double_t maxChargeInt=it->maxAdc;
 		 //		 cout <<"center strip" << centerStripId<<" idx: " << iDx << " quad: " << it->quad <<endl;
 		 //		 cout <<" size:" <<pStrips[iDx*4+it->quad].size()<<endl;
 		 if(centerStripId>=pStrips[iDx*4+it->quad].size())
-		   continue;
+		   {
+		       cout <<"bad read5" <<endl;
+		       continue;
+		   }
 		 Int_t oldGeoId=(pStrips[iDx*4+it->quad])[centerStripId].geoId;
 		 Int_t m_seedType=(pStrips[iDx*4+it->quad])[centerStripId].seedType;
+		 Int_t stripCounter=(centerStripId-1);
 		 while(stripCounter>=0)     
 		   {
 		     //		     cout <<"stripcounter"<< stripCounter <<endl;
@@ -296,7 +325,8 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		   }
 		 //and go up
 		 stripCounter=(centerStripId+1);
-		 while(stripCounter<=(pStrips[iDx*4+it->quad]).size())
+		 //should be strictly smaller
+		 while(stripCounter<(pStrips[iDx*4+it->quad]).size())
 		   {
 		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
 		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
@@ -479,6 +509,7 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		 Int_t centerStripId=it->centerStripIdx;
 		 //		 cout <<"looking at cluster with center strip id:" << it->centralStripGeoId <<endl;
 		 if(centerStripId<0)
+
 		   continue;
 		 //		 cout << " strip geo id is " << pStrips[iDx*2+it->quad][centerStripId].geoId <<endl;
 		 Int_t stripCounter=(centerStripId-1);
@@ -512,7 +543,7 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		 //and go up
 		 stripCounter=(centerStripId+1);
 		 //		 cout <<"going up:" << centerStripId <<endl;
-		 while(stripCounter<=(pStrips[iDx*4+it->quad]).size())
+		 while(stripCounter<(pStrips[iDx*4+it->quad]).size())
 		   {
 		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
 		     if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
