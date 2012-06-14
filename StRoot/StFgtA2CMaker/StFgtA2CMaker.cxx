@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.40 2012/06/12 19:28:44 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.41 2012/06/14 12:36:49 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.41  2012/06/14 12:36:49  avossen
+ * *** empty log message ***
+ *
  * Revision 1.40  2012/06/12 19:28:44  avossen
  * *** empty log message ***
  *
@@ -381,8 +384,8 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    }
 
    //  deciding on max plateau
-   //    if(numMaxPlateau>=3) //means basically 4 because we start counting after the first one
-   //         return kFgtSeedTypeNo;
+     if(numMaxPlateau>=3) //means basically 4 because we start counting after the first one
+          return kFgtSeedTypeNo;
 
 
 
