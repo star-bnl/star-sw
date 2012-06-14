@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.17 2012/06/12 19:28:48 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.18 2012/06/14 04:43:03 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.18  2012/06/14 04:43:03  avossen
+//  fixed geoId bug
+//
 //  Revision 1.17  2012/06/12 19:28:48  avossen
 //  *** empty log message ***
 //
@@ -85,9 +88,11 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
   Short_t disc, quadrant;
   Char_t layer;
   Double_t accuCharge=0;
+  Double_t accuChargeWeight=0;
   Double_t accuChargeEven=0;
   Double_t accuChargeUneven=0;
   Double_t accuChargeSq=0;
+  Double_t accuChargeSqWeight=0;
   Double_t accuChargeError=0;
   Int_t numStrips=0;
   Double_t meanOrdinate=0;
@@ -102,6 +107,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
     {
       Double_t charge=it->first->getCharge();
       accuCharge+=charge;
+      accuChargeWeight+=charge;
       if(it->first->getGeoId()%2)
 	accuChargeUneven+=charge;
       else
@@ -115,6 +121,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
       meanSqOrdinate+=ordinate*ordinate*charge*charge;
       //      cout <<"charge: " << charge << " ordinate: " << ordinate << " meanSqOrd: " << meanSqOrdinate << endl;
       meanGeoId+=((it->first->getGeoId())*(charge));
+
     }
 
   if(((accuChargeEven-accuChargeUneven)/accuCharge)>0.75&& layer=='P')
@@ -151,8 +158,8 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
 
   cluster->setCharge(accuCharge);
   numStrips > 1 ? cluster->setChargeUncert(sqrt(accuChargeError/((Double_t)numStrips-1))) : cluster->setChargeUncert(sqrt(accuChargeError/((Double_t)numStrips)));
-  meanOrdinate /= (Double_t)accuCharge;
-  meanGeoId /= accuCharge;
+  meanOrdinate /= (Double_t)accuChargeWeight;
+  meanGeoId /= accuChargeWeight;
   meanSqOrdinate /= (Double_t)accuChargeSq;
   //  cout <<" accuCharge: " << accuCharge << " meanOrd now: " << meanOrdinate << " meanSqOrdinate: " << meanSqOrdinate <<endl;
   meanSqOrdinate -= meanOrdinate*meanOrdinate;
@@ -178,9 +185,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
       cluster->setPositionPhi(meanOrdinate );
       cluster->setErrorPhi(meanSqOrdinate);
     }
-
   cluster->setCentralStripGeoId(floor(meanGeoId+0.5));
-
 }
 
 ///function to check if the strip belongs to the cluster. If it returns false we stop adding strips to the cluster
