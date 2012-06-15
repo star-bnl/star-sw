@@ -220,6 +220,7 @@ close(FO);
 sub GetRef
 {
     my($arg)=@_;
+    return "" if ( ! defined($arg) );
     $arg =~ s/[ !]/_/g;
     $arg;
 }
