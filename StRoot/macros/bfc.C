@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.169 2007/07/12 20:41:56 fisyak Exp $
+// $Id: bfc.C,v 1.169.4.1 2012/06/15 20:58:22 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -17,7 +17,7 @@ class StMessMgr;
 #include "StMessMgr.h"
 #else
 #endif
-#define UseLogger
+//#define UseLogger
 StBFChain    *chain=0; 
 //_____________________________________________________________________
 //_________________ Prototypes _______________________________________________
