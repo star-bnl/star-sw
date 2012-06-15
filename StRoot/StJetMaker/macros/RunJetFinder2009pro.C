@@ -239,6 +239,7 @@ void RunJetFinder2009pro(int nevents = 1e6,
   // Set cone jet finder parameters
   StConePars* conepars = new StConePars;
   conepars->setGridSpacing(105,-3.0,3.0,120,-TMath::Pi(),TMath::Pi());
+  conepars->setConeRadius(0.7);
   conepars->setSeedEtMin(0.5);
   conepars->setAssocEtMin(0.1);
   conepars->setSplitFraction(0.5);
