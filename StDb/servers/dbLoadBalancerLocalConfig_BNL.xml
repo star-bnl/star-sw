@@ -22,49 +22,41 @@
 
 <Scatalog version="1.0.1">
                 <Server scope="Production" user="starreco,priv2" accessMode="read">
-                        <Host name="db02.star.bnl.gov"  port="3316"/>
-                        <Host name="db03.star.bnl.gov"  port="3316"/>
-                        <Host name="db04.star.bnl.gov"  port="3316"/>
-                        <Host name="db05.star.bnl.gov"  port="3316"/>
-                </Server>
-
+                        <Host name="db17.star.bnl.gov"  port="3316" />
+                        <Host name="db18.star.bnl.gov"  port="3316" />
+                </Server>  
 
                 <Server scope="Analysis" accessMode="read">
-                        <Host name="db02.star.bnl.gov"  port="3316"/>
-                        <Host name="db03.star.bnl.gov"  port="3316"/>
-                        <Host name="db04.star.bnl.gov"  port="3316"/>
-                        <Host name="db11.star.bnl.gov"  port="3316" machinePower = ".35" />
-                        <Host name="db05.star.bnl.gov"  port="3316"/>
+                        <Host name="db15.star.bnl.gov"  port="3316" machinePower="3.0" />
+                      <!--  <Host name="db16.star.bnl.gov"  port="3316" /> //-->
+                        <Host name="db11.star.bnl.gov"  port="3316" />
+                        <Host name="db12.star.bnl.gov"  port="3316" />
+                      <!--  <Host name="db03.star.bnl.gov"  port="3316"/>    //-->
+                        <Host name="db06.star.bnl.gov"  port="3316"/>
                         <Host name="db07.star.bnl.gov"  port="3316"/>
                         <Host name="db08.star.bnl.gov"  port="3316"/>
-                        <Host name="bogart.star.bnl.gov"  port="3316"/>
-                        <Host name="db06.star.bnl.gov" port="3316" machinePower= ".5" />
+
                 </Server>
 
+<!--
                <Server scope="Analysis" whenActive="night" accessMode="read">
-                        <Host name="db01.star.bnl.gov" port="3316"/>
-          <!--              <Host name="db10.star.bnl.gov" port="3316" machinePower= ".6" /> -->
+               		    <Host name="db12.star.bnl.gov" port="3316" machinePower="1.0" />
                 </Server> 
-		
-
-               <Server scope="Analysis" user="fisyak,perev,balewski,jwebb,pibero" accessMode="read">
-                        <Host name="db01.star.bnl.gov" port="3316"/>
-               <!--         <Host name="db10.star.bnl.gov" port="3316"/> -->
+-->	
+               <Server scope="Analysis" user="fisyak,perev,balewski,jwebb,pibero,jcs,dunlop,stevens4" accessMode="read">
+          			<Host name="db10.star.bnl.gov" port="3316" machinePower="2.0" />
+               		<Host name="db14.star.bnl.gov" port="3316" machinePower="5.0" />
                 </Server>
 
-               <Server scope="Analysis" user="genevb" accessMode="read">
-                        <Host name="db10.star.bnl.gov" port="3316"/>
-                </Server>
 
-               <Server scope="Analysis" user="krus" accessMode="read">
-                        <Host name="db11.star.bnl.gov" port="3316"  machinePower = "100"/>
-               </Server>
+               <Server scope="Analysis" user="genevb,dunlop" accessMode="read">
+               		    <Host name="db14.star.bnl.gov" port="3316" machinePower="5.0" />
+                </Server>	
 
-<!--               <Server scope="Analysis" user="deph" accessMode="write">
-                        <Host name="db01.star.bnl.gov" machinePower = "100" port="3316"/>
-                        
-                </Server>
--->
+               <Server scope="Analysis" user="jiezhao,xueliang,wuyf,mriganka,starembd" accessMode="read">
+               		    <Host name="db13.star.bnl.gov" port="3316" machinePower="6000.0" />
+                </Server>	
+
                 <Server scope="Analysis" accessMode="write">
                         <Host name="robinson.star.bnl.gov" port="3306"/>
                 </Server>
