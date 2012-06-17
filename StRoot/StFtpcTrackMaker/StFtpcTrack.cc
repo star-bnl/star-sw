@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.37 2008/07/03 07:22:35 jcs Exp $
+// $Id: StFtpcTrack.cc,v 1.38 2012/06/17 19:13:36 fisyak Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.38  2012/06/17 19:13:36  fisyak
+// Resolve  ambiguity in TMath::Power
+//
 // Revision 1.37  2008/07/03 07:22:35  jcs
 // improved LOG_WARN message
 //
@@ -372,7 +375,7 @@ void StFtpcTrack::SetProperties(Bool_t usage, Int_t tracknumber)
     StFtpcConfMapPoint *p = (StFtpcConfMapPoint *)mPoints->At(i);
 
     if (usage == kTRUE) {
-      mRowsWithPoints += (Int_t)TMath::Power(2, ((p->GetPadRow()-1)%StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide())+1);
+      mRowsWithPoints += (Int_t)TMath::Power(2., (Int_t)(((p->GetPadRow()-1)%StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide())+1));
 
       if (i != 0) {
 	p->SetNextHitNumber(((StFtpcConfMapPoint *)mPoints->At(i-1))->GetHitNumber());
@@ -404,7 +407,7 @@ void StFtpcTrack::SetPointDependencies()
   for (Int_t i = 0; i < mPoints->GetEntriesFast(); i++) {    
     StFtpcPoint *p = (StFtpcPoint *)mPoints->At(i);
 
-    mRowsWithPoints += (Int_t)TMath::Power(2, ((p->GetPadRow()-1)%StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide())+1);
+    mRowsWithPoints += (Int_t)TMath::Power(2., (Int_t) (((p->GetPadRow()-1)%StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide())+1));
     
     if (i != 0) {
       p->SetNextHitNumber(((StFtpcPoint *)mPoints->At(i-1))->GetHitNumber());
