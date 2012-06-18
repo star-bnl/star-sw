@@ -1,4 +1,4 @@
-// $Id: WtpcFilter.h,v 1.1 2011/02/10 20:33:27 balewski Exp $
+// $Id: WtpcFilter.h,v 1.2 2012/06/18 18:28:01 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -18,7 +18,7 @@ class StMuTrack ;
 class WtpcFilter {
  public:
   WtpcFilter();
-  void init(const char *core, int sec, TObjArray *HListX);
+  void init(const char *core, int sec, TObjArray *HListX, bool barrel);
   void setCuts(int x, float y, float r1, float r2) {
     par_nFitPts=x; par_nHitFrac=y; par_Rmin=r1; par_Rmax=r2; }
   static int getTpcSec(float phiRad, float etaDet);
@@ -33,7 +33,7 @@ class WtpcFilter {
   // histograms
   TObjArray *HList;
   enum {mxHA=8}; TH1 * hA[mxHA];
-  void initHistos();
+  void initHistos(bool barrel);
 
 };
 
@@ -42,6 +42,9 @@ class WtpcFilter {
 
 
 // $Log: WtpcFilter.h,v $
+// Revision 1.2  2012/06/18 18:28:01  stevens4
+// Updates for Run 9+11+12 AL analysis
+//
 // Revision 1.1  2011/02/10 20:33:27  balewski
 // start
 //

@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.2 2011/02/25 06:03:35 stevens4 Exp $
+// $Id: St2011WMaker.h,v 1.3 2012/06/18 18:28:00 stevens4 Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -146,6 +146,7 @@ class St2011WMaker : public StMaker {
   void  accessEPRS();
   void  accessESMD();
   void  analyzeESMD();
+  void  analyzeEPRS();
 
   bool  passes_L0();
   bool  passes_L2();
@@ -175,6 +176,7 @@ class St2011WMaker : public StMaker {
   WeveCluster maxBtow2x2(int iEta, int iPhi, float zVert);
   WeveCluster sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi,float zVert);
   WeveCluster maxEtow2x1(int iEta, int iPhi, float zVert);
+  WeveCluster maxEtow2x2(int iEta, int iPhi, float zVert);
   WeveCluster sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi,float zVert);
   void patchToEtaPhi(int patch, int*eta, int*phi);
   
@@ -218,7 +220,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.2 2011/02/25 06:03:35 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.3 2012/06/18 18:28:00 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -229,6 +231,9 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.3  2012/06/18 18:28:00  stevens4
+// Updates for Run 9+11+12 AL analysis
+//
 // Revision 1.2  2011/02/25 06:03:35  stevens4
 // addes some histos and enabled running on MC
 //

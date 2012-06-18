@@ -1,4 +1,4 @@
-// $Id: WtpcFilter.cxx,v 1.1 2011/02/10 20:33:27 balewski Exp $
+// $Id: WtpcFilter.cxx,v 1.2 2012/06/18 18:28:01 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -31,7 +31,7 @@ WtpcFilter::WtpcFilter() {
 //--------------------------------------
 //--------------------------------------
 void
-WtpcFilter::init(const char *core, int sec, TObjArray *HListX) {
+WtpcFilter::init(const char *core, int sec, TObjArray *HListX, bool barrel=true) {
   HList=HListX;
   secID=sec;
   name=core; name+=secID; name+="_";
@@ -41,7 +41,7 @@ WtpcFilter::init(const char *core, int sec, TObjArray *HListX) {
   
   LOG_INFO<<Form("::InitTPC filter (sec=%d) done, name=%s=  nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm",secID,name.Data(),par_nFitPts, par_nHitFrac, par_Rmin, par_Rmax)<<endm;
 
-  initHistos();
+  initHistos(barrel);
 }
 
 //--------------------------------------
@@ -104,7 +104,7 @@ WtpcFilter::getTpcSec(float phiRad, float etaDet){ // finds TPC sector for hit(p
 //--------------------------------------
 //--------------------------------------
 void
-WtpcFilter::initHistos() {
+WtpcFilter::initHistos(bool barrel) {
   int myCol=2+ secID%6;
 
   //...... data histograms
@@ -115,10 +115,16 @@ WtpcFilter::initHistos() {
   int nCase=6;
   hA[0]=h=new TH1F(name+"Stat","track counter"+sufix+"; Cases",nCase,0,nCase);
   h->SetLineColor(myCol );
-  
-  hA[1]=h=new TH2F(name+"Tr2D1","lastHit, accepted"+sufix+"; detector eta ; detector phi (rad)",100,-1.1,1.1,200,-3.2,3.2);
-  h->SetLineColor(myCol );
 
+  if(barrel) {
+    hA[1]=h=new TH2F(name+"Tr2D1","lastHit, accepted"+sufix+"; detector eta ; detector phi (rad)",100,-1.1,1.1,200,-3.2,3.2);
+    h->SetLineColor(myCol );
+  }
+  else {
+    hA[1]=h=new TH2F(name+"Tr2D1","lastHit, accepted"+sufix+"; detector eta ; detector phi (rad)",100,-0.2,1.8,200,-3.2,3.2);
+    h->SetLineColor(myCol );
+  }
+  
   hA[2]=h=new TH1F(name+"TrNfit","prim tr nFitP"+sufix+"; nFitPoints",50,0,50);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_nFitPts,0,par_nFitPts,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);

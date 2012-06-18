@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.3 2011/02/25 06:03:41 stevens4 Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.4 2012/06/18 18:28:00 stevens4 Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -237,6 +237,16 @@ St2011WMaker::initEHistos(){
 
   hE[190]=h=new TH2F("muEclustEt_etaWp","Endcap Wp: 2x1 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x1 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
   hE[191]=h=new TH2F("muEclustEt_etaWm","Endcap Wm: 2x1 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x1 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
+
+  sprintf(txt,"Endcap: TPC GLOB Q/PT  ; ETOW 2x1 cluster ET (GeV); Q/PT");
+  hE[200]=h=new TH2F("muEchRecPNg", txt,100,0.,100.,100,-0.1,0.1);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  sprintf(txt,"Endcap: TPC PRIM  Q/PT ; ETOW 2x1 cluster ET (GeV); Q/PT");
+  hE[201]=h=new TH2F("muEchRecPNp", txt,100,0.,100.,100,-0.1,0.1);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHE;i++) {

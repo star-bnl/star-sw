@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.1 2011/02/10 20:33:25 balewski Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.2 2012/06/18 18:28:01 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -58,8 +58,6 @@ St2011pubSpinMaker::FinishRun  (int runNo){
 //
 Int_t 
 St2011pubSpinMaker::InitRun  (int runNo){
-  assert(runNo>= 10081007); // F10407, first pp500 long fill with defined pol pattern
-  assert(runNo<=10103046); // F10536, last pp500 fill in run9
 
   char txt[1000],txt0[100];
   sprintf(txt0,"bxIdeal%d",nRun);
@@ -240,6 +238,9 @@ St2011pubSpinMaker::bXingSort(){
 
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.2  2012/06/18 18:28:01  stevens4
+// Updates for Run 9+11+12 AL analysis
+//
 // Revision 1.1  2011/02/10 20:33:25  balewski
 // start
 //

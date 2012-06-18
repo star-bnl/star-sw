@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.2 2011/02/25 06:03:50 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.3 2012/06/18 18:28:01 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -307,6 +307,10 @@ St2011WMaker::initHistos(){
   hA[240]=h=new TH2F("muclustEt_etaFinal_noE","Barrel: 2x2 Cluster ET vs. lepton eta, final selection (no EEMC in veto); lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
   hA[241]=h=new TH2F("muclustEt_etaFinal","Barrel: 2x2 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
 
+  hA[250]=h=new TH2F("muBclEjetE2D_ET","ratio (2x2/nearCone) ET vs. 2x2 cluster ET; 2x2 cluster ET (GeV); ET(cone-2x2) (GeV)",100,0,100,100,0,1.2);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,par_nearTotEtFrac,1.e6,par_nearTotEtFrac);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
     if(  hA[i]==0) continue;
@@ -319,6 +323,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.3  2012/06/18 18:28:01  stevens4
+// Updates for Run 9+11+12 AL analysis
+//
 // Revision 1.2  2011/02/25 06:03:50  stevens4
 // addes some histos and enabled running on MC
 //

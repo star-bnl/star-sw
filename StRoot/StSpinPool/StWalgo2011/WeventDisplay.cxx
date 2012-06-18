@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.cxx,v 1.1 2011/02/10 20:33:26 balewski Exp $
+// $Id: WeventDisplay.cxx,v 1.2 2012/06/18 18:28:01 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -338,23 +338,23 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
 //-----------------------------
 //-----------------------------
 void
-WeventDisplay::exportEvent( const char *tit, WeveVertex myV, WeveEleTrack myTr){
+WeventDisplay::exportEvent( const char *tit, WeveVertex myV, WeveEleTrack myTr, int vertexIndex){
   if(maxEve<=0) return;
   clear();
-  int eveId=wMK->mMuDstMaker->muDst()->event()->eventId();
-  int runNo=wMK->mMuDstMaker->muDst()->event()->runId();
-  const char *afile = wMK->mMuDstMaker->GetFile();
+  int eveId=wMK->wEve->id; //wMK->mMuDstMaker->muDst()->event()->eventId();
+  int runNo=wMK->wEve->runNo; //wMK->mMuDstMaker->muDst()->event()->runId();
+  const char *afile = ""; //wMK->mMuDstMaker->GetFile();
   int len=strlen(afile);
   int daqSeq=atoi(afile+(len-18));
   //  printf("DDD %s len=%d %d =%s=\n",afile,len,daqSeq,afile+(len-15));
 
   TVector3 rTw=myTr.cluster.position;
   rTw.SetZ(rTw.z()-myV.z);
-  printf("#xcheck-%s run=%d daqSeq=%d eveID=%7d vertID=%2d zVert=%.1f prTrID=%4d  prTrEta=%.3f prTrPhi/deg=%.1f globPT=%.1f hitTwId=%4d twAdc=%.1f clEta=%.3f clPhi/deg=%.1f  clET=%.1f\n",tit,
-	 runNo,daqSeq,eveId,myV.id,myV.z,
-	 myTr.prMuTrack->id(),myTr.prMuTrack->eta(),myTr.prMuTrack->phi()/3.1416*180.,myTr.glMuTrack->pt(),
-	 myTr.pointTower.id,wMK->wEve->bemc.adcTile[kBTow][myTr.pointTower.id-1],
-	 rTw.Eta(),rTw.Phi()/3.1416*180.,myTr.cluster.ET);
+  //printf("#xcheck-%s run=%d daqSeq=%d eveID=%7d vertID=%2d zVert=%.1f prTrID=%4d  prTrEta=%.3f prTrPhi/deg=%.1f globPT=%.1f hitTwId=%4d twAdc=%.1f clEta=%.3f clPhi/deg=%.1f  clET=%.1f\n",tit,
+  //	 runNo,daqSeq,eveId,myV.id,myV.z,
+  //	 myTr.prMuTrack->id(),myTr.prMuTrack->eta(),myTr.prMuTrack->phi()/3.1416*180.,myTr.glMuTrack->pt(),
+  //	 myTr.pointTower.id,wMK->wEve->bemc.adcTile[kBTow][myTr.pointTower.id-1],
+  //	 rTw.Eta(),rTw.Phi()/3.1416*180.,myTr.cluster.ET);
 
   float zVert=myV.z;
   printf("WeventDisplay-%s::export run=%d eve=%d\n",tit,runNo,eveId);
@@ -408,8 +408,9 @@ WeventDisplay::exportEvent( const char *tit, WeveVertex myV, WeveEleTrack myTr){
 
   //... TPC
   hTpcET->SetMinimum(0.3);hTpcET->SetMaximum(10.);
-  getPrimTracks( myV.id);
-  
+  if(wMK->mMuDstMaker) getPrimTracks( myV.id,myTr.pointTower.id);
+  else getPrimTracksFromTree(vertexIndex,myTr.pointTower.id);
+ 
   //.... BSMD-Eta, -Phi
   
   for(int iep=0;iep<mxBSmd;iep++) {
@@ -437,13 +438,13 @@ WeventDisplay::exportEvent( const char *tit, WeveVertex myV, WeveEleTrack myTr){
 
   //.... produce plot & save
   draw(tit,eveId, daqSeq,runNo,myV, myTr);
-  export2sketchup(tit,myV, myTr);
+  //export2sketchup(tit,myV, myTr);
 }
 
 //-----------------------------
 //-----------------------------
 void
-WeventDisplay::getPrimTracks( int vertID) {
+WeventDisplay::getPrimTracks( int vertID,int pointTowId) {
   assert(vertID>=0);
   assert(vertID<(int)wMK->mMuDstMaker->muDst()->numberOfPrimaryVertices());
   StMuPrimaryVertex* V=wMK-> mMuDstMaker->muDst()->primaryVertex(vertID);
@@ -456,7 +457,35 @@ WeventDisplay::getPrimTracks( int vertID) {
   for(int itr=0;itr<nPrimTrAll;itr++) {
     StMuTrack *prTr=wMK->mMuDstMaker->muDst()->primaryTracks(itr);
     if(prTr->flag()<=0) continue;
-    if(prTr->flag()!=301) continue;// TPC-only regular tracks
+    if(prTr->flag()!=301 && pointTowId>0) continue;// TPC-only regular tracks for barrel candidate
+    if(prTr->flag()!=301 && prTr->flag()!=311 && pointTowId<0) continue;// TPC regular and short EEMC tracks for endcap candidate
+    float hitFrac=1.*prTr->nHitsFit()/prTr->nHitsPoss();
+    if(hitFrac<wMK->par_nHitFrac) continue;
+    StThreeVectorF prPvect=prTr->p();
+    TVector3 primP=TVector3(prPvect.x(),prPvect.y(),prPvect.z());
+    float pT=prTr->pt();
+    hTpcET->Fill(prTr->eta(),prTr->phi(),pT);
+
+  }
+}
+
+
+//-----------------------------
+//-----------------------------
+void
+WeventDisplay::getPrimTracksFromTree(int vertID,int pointTowId) {
+
+  // flag=2 use 2D cut, 1= only delta phi
+
+  assert(vertID>=0);
+  assert(vertID<(int)wMK->wEve->vertex.size());
+
+  WeveVertex &V=wMK->wEve->vertex[vertID];
+  for(uint it=0;it<V.prTrList.size();it++){
+    StMuTrack *prTr=V.prTrList[it];
+    if(prTr->flag()<=0) continue;
+    if(prTr->flag()!=301 && pointTowId>0) continue;// TPC-only regular tracks for barrel candidate
+    if(prTr->flag()!=301 && prTr->flag()!=311 && pointTowId<0) continue;// TPC regular and short EEMC tracks for endcap candidate
     float hitFrac=1.*prTr->nHitsFit()/prTr->nHitsPoss();
     if(hitFrac<wMK->par_nHitFrac) continue;
     StThreeVectorF prPvect=prTr->p();
@@ -548,6 +577,9 @@ WeventDisplay::export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack m
 
 
 // $Log: WeventDisplay.cxx,v $
+// Revision 1.2  2012/06/18 18:28:01  stevens4
+// Updates for Run 9+11+12 AL analysis
+//
 // Revision 1.1  2011/02/10 20:33:26  balewski
 // start
 //
