@@ -21,10 +21,10 @@ int rdMuWana2012(
   
   char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
   
-  if(isMC==0) jetDir="/star/institutions/iucf/stevens4/run12w/run9replay/jets/";
+  if(isMC==0) //jetDir="/star/institutions/iucf/stevens4/run12w/sampler-pass2-A/jets/";
   jetDir="./"; 
 
-  if(isMC &&  useJetFinder==2) geant=true;
+  //if(isMC &&  useJetFinder==2) geant=true;
   
   if(isMC) spinSort=false;
   TString outF=file;
@@ -36,16 +36,16 @@ int rdMuWana2012(
     outF=file1; file1=outF.Data();
     printf("OutF=%s=\n",outF.Data());
   } 
-  else if(isMC < 400) { //embedding run with geant files
+  else if(isMC < 400) {
     char *file1;
+    //private 2012 MC
+    if(isMC==100) file1=strstr(file,"jba"); 
+    //embedding run with geant files
     if(isMC==350) file1=strstr(file,"W");
     if(isMC==351) file1=strstr(file,"Wtau");
     if(isMC==352) file1=strstr(file,"Z");
     assert(file1);  printf("file1=%s=\n",file1);
     outF=file1; outF.ReplaceAll(".lis","");
-    //TString nameReweight=file1; nameReweight.ReplaceAll(".lis","");
-    //for(int j=0; j<10; j++) nameReweight.ReplaceAll(Form("%d",j),"");
-    //cout<<"nameReweight="<<nameReweight<<endl;
   }
   else { // bad isMC flag
     cout<<"bad isMC flag"<<endl; return;
@@ -412,8 +412,8 @@ int rdMuWana2012(
 
 
 // $Log: rdMuWana2012.C,v $
-// Revision 1.1  2012/06/18 18:31:44  stevens4
-// Updates for Run 9+11+12 AL analysis
+// Revision 1.2  2012/06/18 18:32:50  stevens4
+// remove hard coded jet path
 //
 // Revision 1.1  2011/02/10 20:33:35  balewski
 // start
