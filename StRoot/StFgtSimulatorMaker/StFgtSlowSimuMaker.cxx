@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski
 // 
-// $Id: StFgtSlowSimuMaker.cxx,v 1.1 2012/06/06 20:35:09 jeromel Exp $
+// $Id: StFgtSlowSimuMaker.cxx,v 1.2 2012/06/18 20:41:37 balewski Exp $
 #include <TVector3.h>
 #include <TH2.h>
 #include <TF1.h>
@@ -59,6 +59,7 @@ StFgtSlowSimuMaker::~StFgtSlowSimuMaker(){
 void
 StFgtSlowSimuMaker::saveHisto(TString fname){
 
+#ifdef __FGT_QA_HISTO__
   CloseHisto();
 
   TString outName=fname+".hist.root";
@@ -68,6 +69,7 @@ StFgtSlowSimuMaker::saveHisto(TString fname){
 
   HList->Write();
   f.Close();
+#endif
 
 }
 
@@ -513,6 +515,9 @@ StFgtSlowSimuMaker::exportStripPlane2StEvent(TH1F *h, Int_t stripIdOffset,  StFg
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StFgtSlowSimuMaker.cxx,v $
+// Revision 1.2  2012/06/18 20:41:37  balewski
+// corrected crash on attampt to save not initializaed histos
+//
 // Revision 1.1  2012/06/06 20:35:09  jeromel
 // Code  review closed (requested Anselm/Jan; reviewed Jonathan/Jason)
 //
