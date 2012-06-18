@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.6 2011/02/25 06:03:45 stevens4 Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.7 2012/06/18 18:28:01 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -277,7 +277,7 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
 	//TPC sector dependent filter 
 	int secID=WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
 	if (mTpcFilter[secID-1].accept(prTr)==false) continue;
-	//if (secID==20) continue; //poorly calibrated sector?
+	if (secID==20) continue; //poorly calibrated sector for Run 9+11+12?
 
 	hA[25]->Fill(glTr->p().perp());
 	if(glTr->charge()<0) hA[27]->Fill(glTr->p().perp());
@@ -309,7 +309,6 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
 	// TPC sector dependent filter 
 	int secID=WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
 	if ( mTpcFilterE[secID-1].accept(prTr)==false) continue;
-	//if (secID==20) continue; //poorly calibrated sector?
 
 	hE[25]->Fill(glTr->p().perp());
 	if(glTr->charge()<0)hE[27]->Fill(glTr->p().perp());
@@ -460,7 +459,6 @@ St2011WMaker::accessBTOW(){
     adcSum+=adc;
   }
 
-  if(isMC>0 && isMC<20) assert(n1==0);//prevent using real peds for private MC
   //printf("NNN %d %d %d %d %d %d id=%d\n",n0,n1,n2,n3,n4,n5,maxID);
   if(n0==mxBtow) return -1 ;  // BTOW was not present in this events
 
@@ -528,7 +526,8 @@ St2011WMaker::fillTowHit(bool vert){
     }
     else if(fillAdc) hA[223+bxBin]->Fill(positionBtow[i].Eta(),positionBtow[i].Phi());
   }
-  
+
+  //some lower threshold plots  
   for(int isec=0;isec<mxEtowSec;isec++){
     for(int isub=0;isub<mxEtowSub;isub++){
       for(int ieta=0;ieta<mxEtowEta;ieta++){
@@ -673,6 +672,9 @@ St2011WMaker::accessBSMD(){
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.7  2012/06/18 18:28:01  stevens4
+//Updates for Run 9+11+12 AL analysis
+//
 //Revision 1.6  2011/02/25 06:03:45  stevens4
 //addes some histos and enabled running on MC
 //

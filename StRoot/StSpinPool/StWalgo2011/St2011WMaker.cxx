@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.4 2011/02/25 06:03:32 stevens4 Exp $
+// $Id: St2011WMaker.cxx,v 1.5 2012/06/18 18:28:00 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -94,7 +94,7 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   par_nHitFrac=0.51;
   par_trackRin=90;  par_trackRout=160; // cm
   par_trackPt=10.;//GeV 
-  par_highET=28.; // (GeV), cut-off for final Barrel W-cluster 
+  par_highET=25.; // (GeV), cut-off for final Barrel W-cluster 
 
   //... Endcap Algo
   parE_trackEtaMin=0.7; // avoid bad extrapolation to ESMD
@@ -145,17 +145,6 @@ St2011WMaker::Init(){
     mBarrelTables = new StBemcTables();
     mDbE = (StEEmcDb*)GetDataSet("StEEmcDb"); 
     assert(mDbE);
-    
-    if (use_gains_file == 1) {
-      fstream f1; f1.open(gains_file,ios::in);
-      cout << "Opening gains file " << gains_file << endl;
-      char str[200];
-      while (f1 >> str) {
-	int softID = atoi(str);
-	f1 >> str; gains_BTOW[softID] = atof(str);
-	f1 >> str; f1 >> str;
-      }
-    }
   }
   else { 
     //setup for reading in tree
@@ -173,21 +162,6 @@ St2011WMaker::Init(){
   wDisaply= new WeventDisplay(this,par_maxDisplEve);
 
   if(isMC) par_minPileupVert=1;
-
-  // ..... initialization of TPC cuts is run dependent, call it 'hack of the day', should be moved to InitRun() and handle multipl runs per job, after APS, JB
-  for(int isec=0;isec<mxTpcSec;isec++) {
-    int sec=isec+1;
-    float Rin=par_trackRin,Rout=par_trackRout;
-    float RinE=parE_trackRin,RoutE=parE_trackRout;
-    //.... Rin ..... changes
-    
-    //.... Rout ..... changes
-    
-    mTpcFilter[isec].setCuts(par_nFitPts,par_nHitFrac,Rin,Rout);
-    mTpcFilter[isec].init("sec",sec,HList);
-    mTpcFilterE[isec].setCuts(parE_nFitPts,parE_nHitFrac,RinE,RoutE);
-    mTpcFilterE[isec].init("secEemcTr",sec,HList);
-  }
 
   //tree only written during MuDst analysis
   if(mMuDstMaker) { 
@@ -213,7 +187,7 @@ St2011WMaker::InitRun(int runNo){
     mRunNo=runNo;
   }
   else {
-    mRunNo=wEve->runNo; // why do we have this line, Jan?
+    mRunNo=wEve->runNo; 
   }
 
   //barrel algo params
@@ -236,7 +210,41 @@ St2011WMaker::InitRun(int runNo){
 		 )<<endl;
   cout<<Form("\n EtowScaleFact=%.2f  BtowScaleFacor=%.2f" ,par_etowScale, par_btowScale)<<endl;
 
-   return kStOK;
+  // initialization of TPC cuts is run dependent
+  for(int isec=0;isec<mxTpcSec;isec++) {
+    int sec=isec+1;
+    float Rin=par_trackRin,Rout=par_trackRout;
+    float RinE=parE_trackRin,RoutE=parE_trackRout;
+    //.... Rin ..... changes
+    
+    //Run 9 (final)
+    if(sec==4  && mRunNo>=10090089) Rin=125.;
+    if(sec==11 && mRunNo>=10083013) Rin=125.;
+    if(sec==15 && mRunNo>=10088096 && mRunNo<=10090112 ) Rin=125.;
+
+    //Run 11 ??
+
+    //Run 12 (not final, need to identify where electronics died, JS)
+    if((sec==5 || sec==6 || sec==7 || sec==21) && mRunNo>=13000000) Rin=125.; //all have dead inner padrows
+
+    //.... Rout ..... changes
+
+    //Run 9 (final)
+    if(sec==5 && mRunNo>=10098029) Rout=140.;
+    if(sec==6 ) Rout=140.;
+    if(sec==20 && mRunNo>=10095120 && mRunNo<=10099078 ) Rout=140.;
+
+    //Run 11 ??
+
+    //Run 12 ??
+
+    mTpcFilter[isec].setCuts(par_nFitPts,par_nHitFrac,Rin,Rout);
+    mTpcFilter[isec].init("sec",sec,HList,true);
+    mTpcFilterE[isec].setCuts(parE_nFitPts,parE_nHitFrac,RinE,RoutE);
+    mTpcFilterE[isec].init("secEemcTr",sec,HList,false);
+  }
+
+  return kStOK;
 }
 
 //________________________________________________
@@ -274,6 +282,7 @@ St2011WMaker::Make(){
   if(mMuDstMaker){ //standard MuDst analysis
     wEve->id=mMuDstMaker->muDst()->event()->eventId();
     wEve->runNo=mMuDstMaker->muDst()->event()->runId();
+    wEve->time=mMuDstMaker->muDst()->event()->eventInfo().time();
     wEve->zdcRate=mMuDstMaker->muDst()->event()->runInfo().zdcCoincidenceRate();
     const char *afile = mMuDstMaker->GetFile();
     //printf("inpEve=%d eveID=%d daqFile=%s\n",nInpEve, wEve->id,afile);
@@ -293,12 +302,12 @@ St2011WMaker::Make(){
     nTrigEve++; 
     
     if(accessVertex()) {
-      fillTowHit(false); //fill 2D tower "hit" histos for _no_ vertex and L2BW trigger
+      fillTowHit(false); //fill 2D tower "hit" histos for _no_ vertex and L2BW trigger (beam background analysis, remove any time JS)
       return kStOK; //skip event w/o ~any reasonable vertex  
     }
 
-    fillTowHit(true); //fill 2D tower "hit" histos for vertex found and L2BW trigger
-    
+    fillTowHit(true); //fill 2D tower "hit" histos for vertex found and L2BW trigger (beam background analysis, remove any time JS)   
+ 
     if( accessTracks()) return kStOK; //skip event w/o ~any highPt track
 
     accessBSMD();// get energy in BSMD
@@ -328,7 +337,10 @@ St2011WMaker::Make(){
   }
   else { //analysis of W tree
     if(getEvent(index++,indexJet++)==kStEOF) return kStEOF; //get next event from W and jet tree
-    if(mJetTreeChain) {// just QA plots for jets
+  
+   if(nInpEve%200==1) printf("\n-----in---- %s, nEve: inp=%d \n", GetName(),nInpEve);//,nTrigEve, nAccEve,afile);  
+
+  if(mJetTreeChain) {// just QA plots for jets
       mJets = getJetsTreeAnalysis(mJetTreeBranch); //get input jet info
       for (int i_jet=0; i_jet< nJets; ++i_jet){
 	StJet* jet = getJet(i_jet);
@@ -364,8 +376,11 @@ St2011WMaker::Make(){
   }
 
   //endcap specific analysis
-  if(!ematch) analyzeESMD();
-  
+  if(!ematch) {
+    analyzeESMD();
+    analyzeEPRS();
+  }  
+
   if(!bmatch) find_W_boson();
   if(!ematch) findEndcap_W_boson();
   if(nAccEve<2 ||nAccEve%1000==1 ) wEve->print(0x0,isMC);
@@ -516,6 +531,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.5  2012/06/18 18:28:00  stevens4
+// Updates for Run 9+11+12 AL analysis
+//
 // Revision 1.4  2011/02/25 06:03:32  stevens4
 // addes some histos and enabled running on MC
 //

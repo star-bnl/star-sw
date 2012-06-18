@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.h,v 1.1 2011/02/10 20:33:27 balewski Exp $
+// $Id: WeventDisplay.h,v 1.2 2012/06/18 18:28:01 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -35,9 +35,10 @@ class WeventDisplay {
 
   WeventDisplay( St2011WMaker* mk, int mxEv);
   void clear();
-  void exportEvent(  const char *tit,WeveVertex myV, WeveEleTrack myTr);
+  void exportEvent(  const char *tit,WeveVertex myV, WeveEleTrack myTr, int vertexIndex);
   void export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack myTr);
-  void getPrimTracks(  int vertID);
+  void getPrimTracks(  int vertID,int pointTowId);
+  void getPrimTracksFromTree(  int vertID,int pointTowId);
   void draw( const char *tit,int eveID, int daqSeq, int runNo,  WeveVertex myV, WeveEleTrack myTr);
 
 };
@@ -46,6 +47,9 @@ class WeventDisplay {
 
 
 // $Log: WeventDisplay.h,v $
+// Revision 1.2  2012/06/18 18:28:01  stevens4
+// Updates for Run 9+11+12 AL analysis
+//
 // Revision 1.1  2011/02/10 20:33:27  balewski
 // start
 //

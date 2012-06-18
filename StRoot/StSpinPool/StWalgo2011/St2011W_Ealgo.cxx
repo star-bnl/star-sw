@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.4 2011/02/25 06:03:39 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.5 2012/06/18 18:28:00 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -81,9 +81,9 @@ St2011WMaker::findEndcap_W_boson(){
         }
       }
 
-      if(0){/***************************/
+      if(1){/***************************/
         printf("\n WWWWWWWWWWWWWWWWWWWWW  Endcap \n");
-        wDisaply->exportEvent( "WE", V, T);
+        wDisaply->exportEvent( "WE", V, T, iv);
         wEve->print();
       }/***************************/
 
@@ -102,6 +102,15 @@ St2011WMaker::findEndcap_W_boson(){
       int k=0; if(T.prMuTrack->charge()<0) k=1;
       hE[94+k]->Fill( T.cluster.ET,T.glMuTrack->dcaD());
       // h95 used above
+
+      // do charge sign plot
+      float ET=T.cluster.ET;
+      const StMuTrack *glTr=T.glMuTrack; assert(glTr);
+      const StMuTrack *prTr=T.prMuTrack; assert(prTr);
+      float g_chrg=glTr->charge();
+      float p_chrg=prTr->charge();
+      hE[200]->Fill(ET,g_chrg/glTr->pt());
+      hE[201]->Fill(ET,p_chrg/prTr->pt());
 
       if(T.cluster.ET<par_highET) continue;  // very likely Ws
       hE[91]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.position.Phi());
@@ -185,13 +194,40 @@ St2011WMaker::analyzeESMD(){
 	//get shower x-point from hitStrip + centroid of fit
 	T.esmdXPcentroid = geoSmd->getIntersection(T.hitSector-1,hitStrip[0]-1+(int)T.esmdShowerCentroid[0],hitStrip[1]-1+(int)T.esmdShowerCentroid[1]);
 	
-      }
-    }
-    
-    
-  }
+        //histos for each plane
+
+
+      } //end plane loop
+
+      //histos for track candidate
+
+
+    } //end track loop
+  } //end vertex loop
 }
 
+
+//________________________________________________
+//________________________________________________
+void
+St2011WMaker::analyzeEPRS(){
+  if(!wEve->l2EbitET) return;
+
+  //printf("========= analyzeEPRS \n");
+  for(uint iv=0;iv<wEve->vertex.size();iv++) {
+    WeveVertex &V=wEve->vertex[iv];
+    for(uint it=0;it<V.eleTrack.size();it++) {
+      WeveEleTrack &T=V.eleTrack[it];
+      if(T.pointTower.id>=0) continue; //skip barrel towers
+      if(T.isMatch2Cl==false) continue;
+      assert(T.cluster.nTower>0); // internal logical error
+
+      //do some clustering of EPRS deposits and plot histos
+
+    }
+  }
+
+}
 
 
 //________________________________________________
@@ -318,7 +354,9 @@ St2011WMaker::matchTrack2EtowCluster(){
       if(T.pointTower.id>=0) continue; //skip barrel towers
             
       float trackPT=T.prMuTrack->momentum().perp();
-      T.cluster=maxEtow2x1(T.pointTower.iEta,T.pointTower.iPhi,zVert);
+      //need to decide on 2x2 or 2x1 for cluster size
+      //T.cluster=maxEtow2x1(T.pointTower.iEta,T.pointTower.iPhi,zVert);
+      T.cluster=maxEtow2x2(T.pointTower.iEta,T.pointTower.iPhi,zVert);
       hE[110]->Fill( T.cluster.ET);
       hE[33]->Fill(T.cluster.ET);
       hE[34]->Fill(T.cluster.adcSum,trackPT);
@@ -401,6 +439,33 @@ St2011WMaker::maxEtow2x1(int iEta, int iPhi, float zVert){
 
 
 //________________________________________________
+//________________________________________________ 
+WeveCluster
+St2011WMaker::maxEtow2x2(int iEta, int iPhi, float zVert){
+  //printf("   maxEtow2x1  seed iEta=%d iPhi=%d \n",iEta, iPhi);
+  const int L=2; // size of the summed square
+
+  WeveCluster maxCL;
+  // just 4 cases of 2x1 clusters
+  float maxET=0;
+  int I0=iEta-1;
+  int J0=iPhi-1;
+  for(int I=I0;I<=I0+1;I++){
+    for(int J=J0;J<=J0+1;J++) {
+      WeveCluster CL=sumEtowPatch(I,J,L,L,zVert);
+      if(maxET>CL.ET) continue;
+      maxET=CL.ET;
+      maxCL=CL;
+      //printf(" maxEtow2x2 A  newMaxETSum=%.1f iEta=%d iPhi=%d \n",maxET, I,iPhi);
+    }
+  }// 4 combinations done
+
+  //printf(" final inpEve=%d SumET2x2=%.1f \n",nInpEve,maxET);
+  return maxCL;
+}
+
+
+//________________________________________________
 //________________________________________________
 WeveCluster
 St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
@@ -446,6 +511,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.5  2012/06/18 18:28:00  stevens4
+// Updates for Run 9+11+12 AL analysis
+//
 // Revision 1.4  2011/02/25 06:03:39  stevens4
 // addes some histos and enabled running on MC
 //

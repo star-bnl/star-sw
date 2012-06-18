@@ -1,4 +1,4 @@
-// $Id: Wevent2011.h,v 1.2 2011/02/25 06:03:56 stevens4 Exp $
+// $Id: Wevent2011.h,v 1.3 2012/06/18 18:28:01 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -215,13 +215,14 @@ class WeveETOW { // info about ETOW
   float adc[mxEtowSec*mxEtowSub][mxEtowEta]; //[phibin][etabin]
   float ene[mxEtowSec*mxEtowSub][mxEtowEta];
   int stat[mxEtowSec*mxEtowSub][mxEtowEta];
-  float maxAdc;
-
+  float maxAdc; int maxSec,maxSub,maxEta;
+  
   void clear() {
     memset(adc,0,sizeof(adc));
     memset(ene,0,sizeof(ene));
     memset(stat,-1,sizeof(stat));  // default all dead
     maxAdc=0;
+    maxSec=maxSub=maxEta=0;
   }
   
  private:
@@ -286,6 +287,7 @@ class Wevent2011 : public TObject {
 
   int id; // eventID
   int runNo;
+  int time;
   float zdcRate;
   int bx7, bx48; // raw from muDst
   bool zTag;
@@ -300,7 +302,7 @@ class Wevent2011 : public TObject {
 
   void clear() { 
     //printf("W2011event:clear()\n");
-    id=runNo=0;
+    id=runNo=time=0;
     zdcRate=0;
     l2bitET=l2bitRnd=0;
     l2EbitET=l2EbitRnd=0;
@@ -330,6 +332,9 @@ class Wevent2011 : public TObject {
 
 
 // $Log: Wevent2011.h,v $
+// Revision 1.3  2012/06/18 18:28:01  stevens4
+// Updates for Run 9+11+12 AL analysis
+//
 // Revision 1.2  2011/02/25 06:03:56  stevens4
 // addes some histos and enabled running on MC
 //

@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.3 2011/02/25 06:03:47 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.4 2012/06/18 18:28:01 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -108,9 +108,9 @@ St2011WMaker::find_W_boson(){
 	hA[204]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.energy/T.prMuTrack->p().mag());
       }
 
-      if(0){/***************************/
+      if(1){/***************************/
 	printf("\n WWWWWWWWWWWWWWWWWWWWW  Barrel \n");
-	wDisaply->exportEvent( "WB", V, T);
+	wDisaply->exportEvent( "WB", V, T, iv);
 	wEve->print();
       }/***************************/
  
@@ -292,7 +292,7 @@ St2011WMaker::findAwayJet(){
 
       //..... add TPC ET
       if(mMuDstMaker) T.awayTpcPT=sumTpcCone(V.id,-T.primP,1,T.pointTower.id);
-      else T.awayTpcPT=sumTpcConeFromTree(V.id,-T.primP,1,T.pointTower.id);
+      else T.awayTpcPT=sumTpcConeFromTree(iv,-T.primP,1,T.pointTower.id);
       T.awayTotET=T.awayEmcET+T.awayTpcPT;
       T.awayTotET_noEEMC=T.awayBtowET+T.awayTpcPT;
       //printf("\n*** in   awayTpc=%.1f awayEmc=%.1f\n  ",T.awayTpcPT,T.awayEmcET); T.print(); 
@@ -320,7 +320,7 @@ St2011WMaker::findNearJet(){
       T.nearEmcET+=T.nearEtowET; 
       // .... sum TPC-near component
       if(mMuDstMaker) T.nearTpcPT=sumTpcCone(V.id,T.primP,2,T.pointTower.id); // '2'=2D cone
-      else T.nearTpcPT=sumTpcConeFromTree(V.id,T.primP,2,T.pointTower.id);
+      else T.nearTpcPT=sumTpcConeFromTree(iv,T.primP,2,T.pointTower.id);
       float nearSum=T.nearEmcET+T.nearTpcPT;
       
       //fill histos separately for 2 types of events
@@ -338,6 +338,7 @@ St2011WMaker::findNearJet(){
 	hA[47]->Fill(T.nearTpcPT);
 	hA[48]->Fill(T.nearEmcET,T.nearTpcPT);
 	hA[49]->Fill(nearSum);
+        hA[250]->Fill(T.cluster.ET,nearTotETfrac);
 
 	// check east/west yield diff
 	hA[210]->Fill(T.cluster.position.PseudoRapidity(),T.nearEtowET);
@@ -640,6 +641,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.4  2012/06/18 18:28:01  stevens4
+// Updates for Run 9+11+12 AL analysis
+//
 // Revision 1.3  2011/02/25 06:03:47  stevens4
 // addes some histos and enabled running on MC
 //

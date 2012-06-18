@@ -1,4 +1,4 @@
-// $Id: St2011W_EacessMuDst.cxx,v 1.3 2011/02/25 06:03:37 stevens4 Exp $
+// $Id: St2011W_EacessMuDst.cxx,v 1.4 2012/06/18 18:28:00 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -10,9 +10,6 @@
 #include <StMuDSTMaker/COMMON/StMuEvent.h>
 #include <StMuDSTMaker/COMMON/StMuTrack.h>
 #include <StMuDSTMaker/COMMON/StMuPrimaryVertex.h>
-
-//#include "StEmcRawMaker/defines.h"
-//#include "StEmcUtil/database/StBemcTables.h"
 
 #include "StEEmcUtil/database/StEEmcDb.h"   
 #include "StEEmcUtil/database/EEmcDbItem.h"  
@@ -69,11 +66,10 @@ St2011WMaker::accessEndcapTrig(){ // return non-zero on abort
   for (int k=0;k<64;k++) 
     if(l2res[k]) printf("k=%2d  val=0x%04x\n",k,l2res[k]);
   printf("L2WE_Result 4-bytes: trg bitET=%d,  bitRnd=%d, highets:  ET/GeV=%.2f,  RDO=%d  hex=0x%08x\n",wEve->l2EbitET,wEve->l2EbitRnd,l2algo->highestEt/256.*60,l2algo->highestRDO,l2res[EEMCW_off]);
-
 #endif
   
 
-  //  hack to make the code work also for run 9
+  //  hack to make the code work also for run 9 and early run 12
   if (mRunNo<11000111) {
     wEve->l2EbitET=1;
     wEve->l2EbitRnd=1;
@@ -123,6 +119,7 @@ St2011WMaker::accessETOW(){
   wEve->etow.etowIn=1; //tag usable ETOW data
   const char *maxIdName=0;
   double maxADC=0,adcSum=0;
+  int maxSec=-1,maxSub=-1,maxEta=-1;
 
   //loop over all towers
   for (int i=0; i< emc->getNEndcapTowerADC(); i++) {
@@ -153,12 +150,13 @@ St2011WMaker::accessETOW(){
     wEve->etow.ene[isec*mxEtowSub+isub][ieta]=ene;
     wEve->etow.stat[isec*mxEtowSub+isub][ieta]=0;
 
-    if(maxADC<adc) { maxIdName=x->name; maxADC=adc;}
+    if(maxADC<adc) { maxIdName=x->name; maxADC=adc; maxSec=isec; maxSub=isub; maxEta=ieta;}
     adcSum+=adc;
   
   }
   
   wEve->etow.maxAdc=maxADC;
+  wEve->etow.maxSec=maxSec; wEve->etow.maxSub=maxSub; wEve->etow.maxEta=maxEta;
   hE[31]->Fill(maxADC);
   hE[32]->Fill(adcSum);
 
@@ -256,6 +254,9 @@ St2011WMaker::accessESMD(){
 
 
 //$Log: St2011W_EacessMuDst.cxx,v $
+//Revision 1.4  2012/06/18 18:28:00  stevens4
+//Updates for Run 9+11+12 AL analysis
+//
 //Revision 1.3  2011/02/25 06:03:37  stevens4
 //addes some histos and enabled running on MC
 //
