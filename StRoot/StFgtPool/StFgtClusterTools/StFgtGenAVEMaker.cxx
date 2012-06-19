@@ -113,7 +113,7 @@ void StFgtGenAVEMaker::saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Doub
     {
       for(int j=0;j<7;j++)
 	{
-	  histoP->SetBinContent(j,i,sigP[i*7+j]);
+	  histoP->SetBinContent(j+1,i+1,sigP[i*7+j]);
 	  //	  cout <<"P: setting bin : i: " << i << " j: " << j << " index: "<< i*7+j << " sig: " << sigP[i*7+j]<<endl;
 	}
     }
@@ -124,7 +124,7 @@ void StFgtGenAVEMaker::saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Doub
     {
       for(int j=0;j<7;j++)
 	{
-	  histoR->SetBinContent(j,i,sigR[i*7+j]);
+	  histoR->SetBinContent(j+1,i+1,sigR[i*7+j]);
 	  //	  cout <<"R: setting bin : i: " << i << " j: " << j << " index: "<< i*7+j << " sig: " << sigR[i*7+j]<<endl;
 	}
     }
@@ -316,6 +316,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 			firstTbSigR=pStrip.adc[0]/(float)pStrip.pedErr;
 		      for(int iAdc=0;iAdc<7;iAdc++)
 			{
+			  //			  cout <<"adc: "<< pStrip.adc[iAdc] <<endl;
 			  if(pStrip.adc[iAdc]>5*pStrip.pedErr)
 			    {
 			      numFSigR++;
@@ -331,6 +332,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 				maxSigAdcR=(Double_t)maxRAdc/pStrip.pedErr;
 			    }
 			}
+		      //		      cout <<"numfSigma: " << numFSigR <<endl;
 		    }
 		}
 	    }
@@ -2097,15 +2099,15 @@ Int_t StFgtGenAVEMaker::Init(){
   createPlots(&maxAdcCloseClusterR,kFgtNumDiscs*4,"maxAdcCloseClusterR",100,0,5000);
   createPlots(&maxSigTrackClusterR,kFgtNumDiscs*4,"maxSigTrackClusterR",100,1,200);
   createPlots(&maxSigCloseClusterR,kFgtNumDiscs*4,"maxSigCloseClusterR",100,1,200);
-  createPlots(&numFSigTrackClusterR,kFgtNumDiscs*4,"numFSigTrackClusterR",8,0,7);
+  createPlots(&numFSigTrackClusterR,kFgtNumDiscs*4,"numFSigTrackClusterR",9,1,8);
   createPlots(&maxTbCloseClusterR,kFgtNumDiscs*4,"maxTbCloseClusterR",8,0,7);
 
   createPlots(&maxTbCloseClusterP,kFgtNumDiscs*4,"maxTbCloseClusterP",8,0,7);
 
   createPlots(&maxTbTrackClusterR,kFgtNumDiscs*4,"maxTbTrackClusterR",8,0,7);
 
-  createPlots(&maxTbTrackClusterP,kFgtNumDiscs*4,"maxTbTrackClusterP",8,0,7);
-  createPlots(&numFSigCloseClusterR,kFgtNumDiscs*4,"numFSigCloseClusterR",8,0,7);
+  createPlots(&maxTbTrackClusterP,kFgtNumDiscs*4,"maxTbTrackClusterP",9,0,8);
+  createPlots(&numFSigCloseClusterR,kFgtNumDiscs*4,"numFSigCloseClusterR",9,0,8);
 
   createPlots(&numFirstHighTrackClusterR,kFgtNumDiscs*4,"numFirstHighTrackClusterR",8,0,7);
   createPlots(&numFirstHighCloseClusterR,kFgtNumDiscs*4,"numFirstHighCloseClusterR",8,0,7);
@@ -2114,8 +2116,8 @@ Int_t StFgtGenAVEMaker::Init(){
   createPlots(&maxAdcCloseClusterP,kFgtNumDiscs*4,"maxAdcCloseClusterP",100,0,5000);
   createPlots(&maxSigTrackClusterP,kFgtNumDiscs*4,"maxSigTrackClusterP",100,1,200);
   createPlots(&maxSigCloseClusterP,kFgtNumDiscs*4,"maxSigCloseClusterP",100,1,200);
-  createPlots(&numFSigTrackClusterP,kFgtNumDiscs*4,"numFSigTrackClusterP",8,0,7);
-  createPlots(&numFSigCloseClusterP,kFgtNumDiscs*4,"numFSigCloseClusterP",8,0,7);
+  createPlots(&numFSigTrackClusterP,kFgtNumDiscs*4,"numFSigTrackClusterP",9,0,8);
+  createPlots(&numFSigCloseClusterP,kFgtNumDiscs*4,"numFSigCloseClusterP",9,0,8);
   createPlots(&numFirstHighTrackClusterP,kFgtNumDiscs*4,"numFirstHighTrackClusterP",8,0,7);
   createPlots(&numFirstHighCloseClusterP,kFgtNumDiscs*4,"numFirstHighCloseClusterP",8,0,7);
   createPlots(&secondToLastRatioCloseClusterP,kFgtNumDiscs*4,"secondToLastRatioClosClusterP",100,0,5);
@@ -2129,7 +2131,7 @@ Int_t StFgtGenAVEMaker::Init(){
 
   rEff=new TH1D*[kFgtNumDiscs];
   rNonEff=new TH1D*[kFgtNumDiscs];
-  cout <<"ave2" << endl;
+    cout <<"ave2" << endl;
 
   clusterSizeP=new TH1D*[kFgtNumDiscs*4];
   clusterSizeR=new TH1D*[kFgtNumDiscs*4];

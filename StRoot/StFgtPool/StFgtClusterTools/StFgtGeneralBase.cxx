@@ -190,6 +190,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		   Double_t posR=(*hitIter)->getPositionR();
 		   Double_t posPhi=(*hitIter)->getPositionPhi();
 		   Int_t geoId=(*hitIter)->getCentralStripGeoId();
+		   //		   cout <<"central geoId in cluster:" << geoId <<endl;
 		   Double_t discZ=StFgtGeom::getDiscZ(disc);
 		   StFgtGeom::decodeGeoId((*hitIter)->getCentralStripGeoId(),discK, quad, layer, strip);
 		   if(quad<0 && discK<0)//Ithink these are the error conditions
@@ -209,12 +210,20 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		   //				  Int_t clusterSizePhi=(*hitIter)->getStripWeightMap().size();
 		   Int_t clusterSize=(*hitIter)->getStripWeightMap().size();
 		   Double_t clusterCharge=(*hitIter)->charge();
-		   pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge));
-		   mapGeoId2Cluster[geoId]=((pClusters[disc]->size()-1));
+		   //sometimes (rarely two clusters have the same geo id (some split I guess), don't insert twice, that messes the indexing up
+		   if(mapGeoId2Cluster.find(geoId)==mapGeoId2Cluster.end())
+		     {
+		       pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge));
+		       //		       cout <<"inserting geo id " << geoId <<" into map at pos: " << ((pClusters[disc]->size()-1)) <<" disc " << disc <<endl;
+		       mapGeoId2Cluster[geoId]=((pClusters[disc]->size()-1));
+		     }
+		   else
+		     {
+		       //		       cout <<"geoId  " << geoId << " already exists " <<endl;
+		     }
 		 }
             };
          }
-	 ////somewhere int the next loop something weird happens
 	 ///////////////////////
          for( Int_t disc = 0; disc < kFgtNumDiscs; disc++ )
 	   {
@@ -262,11 +271,12 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 			 pStrips[disc*4+quad].back().maxAdc=maxAdc;
 			 if(mapGeoId2Cluster.find(geoId)!=mapGeoId2Cluster.end())
 			   {
-
+			     //			     cout <<"this strip geo ID ("<<geoId<<") supposedly belongs to cluster with geo " << (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centralStripGeoId <<" int index: " << mapGeoId2Cluster[geoId] <<endl;
+			     //			     cout <<" strip disc: " << disc <<" cluster disc: " << (*pClusters[disc])[mapGeoId2Cluster[geoId] ].disc <<  " index: " << (pStrips[disc*4+quad].size()-1) << " quad: " << quad <<endl;
 			     if(mapGeoId2Cluster[geoId]>=(*pClusters[disc]).size())
 			       {
-			       cout <<" bad read5" <<endl;
-			       cout <<"geo id: " << geoId << " map: " << mapGeoId2Cluster[geoId] <<" size:" << (*pClusters[disc]).size() <<" disc: " << disc <<endl;
+				 //				 cout <<" bad read5" <<endl;
+				 //				 cout <<"geo id: " << geoId << " map: " << mapGeoId2Cluster[geoId] <<" size:" << (*pClusters[disc]).size() <<" disc: " << disc <<endl;
 			       }
 			     (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=(pStrips[disc*4+quad].size()-1);
 			     (*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdc=maxAdc;
@@ -285,14 +295,16 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 
 	 for(int iDx=0;iDx<6;iDx++)
 	   {
+	     int dCounter=0;
 	     vector<generalCluster>::iterator it=pClusters[iDx]->begin();
 	     for(;it!=pClusters[iDx]->end();it++)
 	       {
+		 dCounter++;
 		 it->hasMatch=true;
 		 Int_t centerStripId=it->centerStripIdx;
 		 if(centerStripId<0)
 		   {
-		       cout <<"bad read4" <<endl;
+		     //		     cout <<"bad read4 for cluster with geoid: "<< it->centralStripGeoId <<" index: " << it->centerStripIdx <<" quad: " << it->quad << "index: " <<dCounter-1<< " disc: " << iDx  <<" phi " << it->posPhi <<" r: " << it->posR <<endl;
 		       continue;
 		   }
 
