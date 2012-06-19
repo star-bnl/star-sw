@@ -392,7 +392,7 @@ void   Clear(const char *opt ="")		{fAux.clear();fChi2=0	;}
 void   Print(const char* chopt = "") const;
 void   Show() const;
 
-static void Test(int kase=0);
+static void Test(int nev=10000);
 private:
 THelixKFitterAuxV fAux;
 double fChi2;

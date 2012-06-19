@@ -3412,8 +3412,10 @@ void THelixKFitter::Test(int nEv)
 {
 static TCanvas* myCanvas[9]={0};
 static TH1F *hh[20]={0};
-static const char *hNams[]={"pHK","pAK","pCK","pZK","pLK","Xi2K"
-                           ,"pHD","pAD","pCD","pZD","pLD","Xi2D"};
+static const char *hNams[]={
+"pHKalmn","pAKalmn","pCKalmn","pZKalmn","pLKalmn","Xi2Kalmn",
+"pHDubna","pADubna","pCDubna","pZDubna","pLDubna","Xi2Dubna"};
+
 static const double lims[][2]={{-5 ,5},{-5 ,5},{-5 ,5},{-5 ,5},{-5 ,5},{ 0 ,10}
                               ,{-5 ,5},{-5 ,5},{-5 ,5},{-5 ,5},{-5 ,5},{ 0 ,10}};
 const int maxPads=3;
@@ -3434,8 +3436,8 @@ const int nCans = nPads/maxPads;
       myCanvas[jCan]->cd(jPad+1); hh[jH]->Draw(); jH++;
   }  }
 
-const int kHits = 30;
-   double R = 50 + 30*gRandom->Rndm();
+const int kHits = 50;
+   double R = 50 + 100*gRandom->Rndm();
    double S = 2*R;
       int iPhi0 =  360*gRandom->Rndm();
       int iLam0 =  100*(gRandom->Rndm()-0.5);
@@ -3473,7 +3475,8 @@ const int kHits = 30;
      myXi2[0] = kf.Fit();
      myXi2[1] = hf.Fit(); 
      hf.MakeErrs();
-     double ds = hf.Path(POS); hf.Move(ds);
+     double ds = hf.Path(POS[0],POS[1]); hf.Move(ds);
+            ds = kf.Path(POS[0],POS[1]); kf.Move(ds);
      
      THelixTrack *hlx = &kf;
      for (int jk=0;jk<2;jk++) {
@@ -3542,7 +3545,7 @@ void THelixKFitter::Show() const
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.57 2012/05/28 02:26:31 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.58 2012/06/19 23:50:42 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3558,6 +3561,9 @@ void THelixKFitter::Show() const
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.58  2012/06/19 23:50:42  perev
+ * Fix KFit::Test
+ *
  * Revision 1.57  2012/05/28 02:26:31  perev
  * Helix Kalman fitter added
  *
