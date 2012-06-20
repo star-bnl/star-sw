@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: runDaq2Root.C,v 1.1 2012/01/28 09:29:26 sgliske Exp $
+ * $Id: runDaq2Root.C,v 1.2 2012/06/20 20:21:35 sgliske Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: runDaq2Root.C,v $
+ * Revision 1.2  2012/06/20 20:21:35  sgliske
+ * update
+ *
  * Revision 1.1  2012/01/28 09:29:26  sgliske
  * creation
  *
@@ -26,8 +29,11 @@ StFgtRawDaqReader  *daqRdr  = 0;
 StFgtDaq2RootMaker *rootMkr = 0;
 
 int runDaq2Root( const Char_t *filenameIn = "testfile.sfs",
-              const Char_t *filenameOut = "testfile.root",
-              Int_t nevents = -1 ){
+                 const Char_t *filenameOut = "testfile.root",
+                 Int_t nevents = -1,
+                 Int_t date = 20120125,
+                 Int_t time = 80350       // run 13025001 2012-01-25 08:03:34 GMT
+                 ){
 
    LoadLibs();
    Int_t ierr = 0;
@@ -35,8 +41,30 @@ int runDaq2Root( const Char_t *filenameIn = "testfile.sfs",
    cerr << "Constructing the chain" << endl;
    analysisChain = new StChain("eemcAnalysisChain");
 
-   cerr << "Constructing the makers" << endl;
-   daqRdr = new StFgtRawDaqReader( "daqRdr", filenameIn );
+   //
+   // Set up the date base
+   //
+   TString dir0 = "MySQL:StarDb";
+   TString dir1 = "$STAR/StarDb";
+   St_db_Maker *dbMkr = new St_db_Maker( "dbMkr", dir0, dir1 );
+
+   dbMkr->SetDateTime(date,time);
+
+   cout << "Loading StFgtDbMaker" << endl;
+   gSystem->Load("StFgtDbMaker");
+
+   cout << "Constructing StFgtDbMaker" << endl;
+   fgtDbMkr = new StFgtDbMaker( "fgtDbMkr" );
+
+   //
+   // Raw DAQ reader
+   //
+   cout << "Constructing the daq reader" << endl;
+   daqRdr = new StFgtRawDaqReader( "daqReader", filenameIn, "fgtDbMkr" );
+   daqRdr->setIsCosmic( 0 );
+   daqRdr->cutShortEvents( 1 );
+
+   cerr << "Constructing the root makers" << endl;
    rootMkr = new StFgtDaq2RootMaker( "daq2root", filenameOut );
 
    cerr << "Initializing" << endl;
@@ -65,20 +93,24 @@ int runDaq2Root( const Char_t *filenameIn = "testfile.sfs",
    return;
 };
 
-
 // load the shared libraries
 void LoadLibs() {
-   // common shared libraries
+   // commong shared libraries
+   gROOT->Macro("loadMuDst.C");
+   //gROOT->Macro("LoadLogger.C");
 
-  gSystem->Load("libPhysics");
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
-  gSystem->Load("StEvent");
-  gSystem->Load("StUtilities");
-  cerr << "loaded StEvent library" << endl;
+   // and a few others
+   gSystem->Load("libStDb_Tables.so");
+   gSystem->Load("StDbLib");
+   gSystem->Load("StDbBroker");
+   gSystem->Load("St_db_Maker");
+   gSystem->Load("StStarLogger");
+   gSystem->Load("StFgtDbMaker");
 
-  gSystem->Load("StFgtUtil");
-  gSystem->Load("StFgtRawMaker");
-  gSystem->Load("RTS");
-  gSystem->Load("StFgtDaq2Root");
+   gSystem->Load("RTS");
+
+   gSystem->Load("StFgtUtil");
+   gSystem->Load("StFgtRawDaqReader");
+   gSystem->Load("StFgtDaq2Root");
 };
+
