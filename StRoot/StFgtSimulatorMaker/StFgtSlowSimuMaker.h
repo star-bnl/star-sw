@@ -1,4 +1,4 @@
-// $Id: StFgtSlowSimuMaker.h,v 1.1 2012/06/06 20:35:09 jeromel Exp $
+// $Id: StFgtSlowSimuMaker.h,v 1.2 2012/06/20 18:32:40 avossen Exp $
 
 
 /*!
@@ -125,6 +125,10 @@ struct fgt_g2t_auxil {
 
 
 class StFgtSlowSimuMaker : public StMaker {   
+ protected:
+
+ static const Float_t pulseShape[20];
+
  private:
 
 
@@ -225,7 +229,7 @@ class StFgtSlowSimuMaker : public StMaker {
 
  
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtSlowSimuMaker.h,v 1.1 2012/06/06 20:35:09 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtSlowSimuMaker.h,v 1.2 2012/06/20 18:32:40 avossen Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  private:
@@ -238,6 +242,9 @@ class StFgtSlowSimuMaker : public StMaker {
 
 
 // $Log: StFgtSlowSimuMaker.h,v $
+// Revision 1.2  2012/06/20 18:32:40  avossen
+// setting elec ids for strips now, implemented pulse shape over 7 timebins
+//
 // Revision 1.1  2012/06/06 20:35:09  jeromel
 // Code  review closed (requested Anselm/Jan; reviewed Jonathan/Jason)
 //

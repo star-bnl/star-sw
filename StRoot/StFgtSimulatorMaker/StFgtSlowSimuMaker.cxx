@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski
 // 
-// $Id: StFgtSlowSimuMaker.cxx,v 1.2 2012/06/18 20:41:37 balewski Exp $
+// $Id: StFgtSlowSimuMaker.cxx,v 1.3 2012/06/20 18:32:40 avossen Exp $
 #include <TVector3.h>
 #include <TH2.h>
 #include <TF1.h>
@@ -21,7 +21,7 @@
 ClassImp(StFgtSlowSimuMaker)
 
 //--------------------------------------------
-StFgtSlowSimuMaker::StFgtSlowSimuMaker(const char *name):StMaker(name){
+  StFgtSlowSimuMaker::StFgtSlowSimuMaker(const char *name):StMaker(name){
   setHList(0);
   memset(hA,0,sizeof(hA));
   fgtDb=0;
@@ -32,7 +32,7 @@ StFgtSlowSimuMaker::StFgtSlowSimuMaker(const char *name):StMaker(name){
 
 }
 
-
+const Float_t StFgtSlowSimuMaker::pulseShape[20]={0.0,0.1,0.3,0.4,0.2,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};//sum 1.0
 //--------------------------------------------
 //--------------------------------------------
 void 
@@ -109,6 +109,7 @@ StFgtSlowSimuMaker::InitRun(Int_t runNumber){
   par_stripThreshAdc=fgtDb->getSimuParam(10); //  drop strips below it
   par_2DampCutoffScale=fgtDb->getSimuParam(11); // in a.u. used in simu
   par_overalGain=fgtDb->getSimuParam(12); // a factor making simulated ADCs comparable to 2012 data 
+  //  cout <<"gain is par_overalGain " << 
   par_PplaneChargeFraction=fgtDb->getSimuParam(13); //  divide charge between P/R plane
 
   LOG_INFO<<Form("::InitRun() runNo=%d  badSetup=0x%x;  params: track cutoff: TOF<%.1fns and  P>%.1f MeV/c ; prim ions/cm=%.1f, X,YamplSigma=%.4f cm,  stripThres=%.2f (ADC),   transDiffusion=%.1f um/1cm, cutoffOfBichel=%d, binStep=%d  Digi: 2DampCutoffScale=%.1f a.u., overalGain=%.2f a.u.  P-planeChargFract=%.2f  switch_addPeds=%d", runNumber, par_badSetup,
@@ -471,40 +472,51 @@ void
 StFgtSlowSimuMaker::exportStripPlane2StEvent(TH1F *h, Int_t stripIdOffset,  StFgtStripCollection  *stripCollectionPtr){
 
   //jjassert(stripCollectionPtr); 
-  //printf("write fgt strips ,  plane=%c --> StEvent: #hits=%d on input\n",cPlane,stripCollectionPtr->getNumStrips());
+  printf("write fgt strips ,   --> StEvent: #hits=%d on input\n",stripCollectionPtr->getNumStrips());
 
   Float_t   *adcPtr=h->GetArray();
   adcPtr++; // root histo counts bins from 1 - incredible silly
-  Int_t   nx=h->GetNbinsX();
+  Int_t   nx=h->GetNbinsX(); //is 720
   Int_t nSeq=0;
   for(Int_t iId=0;iId<nx;iId++) {
     Double_t adc=adcPtr[iId+1];
     nSeq--;
     if(adc >par_stripThreshAdc ) nSeq=3; // adds few strips after every fired for continuity
     if( nSeq<=0) continue;
-
     Int_t geoId=stripIdOffset+iId;
     Int_t timebin=0;
 
     Int_t rdo, arm, apv, chan;
     fgtDb->getElecCoordFromGeoId( geoId, rdo, arm, apv, chan );
- 
+    //    LOG_INFO << Form("got elec ids for geoId: %d , rdo: %d arm:%d apv: %d , chan: %d",geoId, rdo, arm, apv, chan)<<endm;
+
+    Int_t elecId =  StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, chan );
+    StFgtStrip* stripPtr = stripCollectionPtr->getStrip( elecId );
+
+
+    Double_t ped=0;
+    Double_t sigPed=0;
     if( switch_addPeds ) {
       Short_t stat=fgtDb->getStatusFromElecCoord(rdo,arm,apv,chan);
       if(stat) continue; // drop bad strips
-      Double_t ped=fgtDb   ->getPedestalFromGeoId( geoId);
-      Double_t sigPed=fgtDb->getPedestalSigmaFromGeoId( geoId);
-      // printf("geoId=%d adc=%.1f ped=%.1f sigPed=%.f\n", geoId, adc,ped,sigPed);
-      adc+=mRnd->Gaus(ped,sigPed);
-      if(adc<ped-3*sigPed) adc=ped-3*sigPed;
-      if(adc <0 ) adc=0;
-      if(adc >4095 ) adc=4095;
+      ped=fgtDb   ->getPedestalFromGeoId( geoId);
+      sigPed=fgtDb->getPedestalSigmaFromGeoId( geoId);
     }
-      
-    Int_t elecId =  StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, chan );
-    StFgtStrip* stripPtr = stripCollectionPtr->getStrip( elecId );
-    stripPtr->setAdc( (Short_t)adc, timebin );
+
+    for(int iTbOff=0;iTbOff<7;iTbOff++)
+      {
+	if( switch_addPeds ) {
+	  adc*=pulseShape[iTbOff];
+	  adc+=mRnd->Gaus(ped,sigPed);
+	  if(adc<ped-3*sigPed) adc=ped-3*sigPed;
+	  if(adc <0 ) adc=0;
+	  if(adc >4095 ) adc=4095;
+	  //	  LOG_INFO << Form("--->adc: %f, ped: %f adc-ped: %f, geoId: %d",adc, ped, adc-ped,geoId) <<endm;
+	}
+	stripPtr->setAdc( (Short_t)(adc), timebin+iTbOff );
+      }
     stripPtr->setGeoId( geoId );
+    stripPtr->setElecCoords(rdo,arm,apv,chan);
   }
   
 }
@@ -515,6 +527,9 @@ StFgtSlowSimuMaker::exportStripPlane2StEvent(TH1F *h, Int_t stripIdOffset,  StFg
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StFgtSlowSimuMaker.cxx,v $
+// Revision 1.3  2012/06/20 18:32:40  avossen
+// setting elec ids for strips now, implemented pulse shape over 7 timebins
+//
 // Revision 1.2  2012/06/18 20:41:37  balewski
 // corrected crash on attampt to save not initializaed histos
 //
