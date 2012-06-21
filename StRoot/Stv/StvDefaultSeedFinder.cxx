@@ -151,7 +151,7 @@ if (selJkk>=0) printf("***Selected*** selJkk = %d\n",selJkk);
       selHit=0; 
       selJkk = -11;
       float minLen = 1e11;
-      TObject *selObj=0;
+      TObject *selObj=0;	//This guy for graphics only
       for (StMultiKeyNode *node=0;(node = *(*fMultiIter)) ;++(*fMultiIter)) 
       { 
 	StvHit *nexHit = (StvHit*)node->GetObj();
@@ -302,6 +302,7 @@ void  StvConeSelector::UpdateLims()
 //_____________________________________________________________________________
 int  StvConeSelector::Reject(const float x[3])
 {
+static const double kImpFakt = 0.75;
    float myRxy2 = x[0]*x[0]+x[1]*x[1];
    if (myRxy2>mRxy2 && fabs(x[2])>fabs(mHit[2])) 	return 1;
    if (myRxy2>mRxy2 ) 					return 2;
@@ -309,14 +310,15 @@ int  StvConeSelector::Reject(const float x[3])
    float r2xy = xx[0]*xx[0]+xx[1]*xx[1];
    float z2 = xx[2]*xx[2];
    if (r2xy < (kMinCos*kMinCos)*z2) 	return 3;		
-   mHitLen = sqrt(r2xy+z2);
-   if (mHitLen  < 1e-4) 		return 4;
+   mHitLen = (r2xy+z2);
+   if (mHitLen  < 1e-8) 		return 4;
    mHitPrj = Dot(xx,mDir);
    if (mHitPrj<1e-4)			return 5;
    if (mHitPrj>mLen) 			return 6;
-   float imp = sqrt(Impact2(mDir,xx));
+   float imp = (Impact2(mDir,xx));
    float lim = (mErr) + mHitPrj*mTan;
-   if (imp > lim)          		return 7;
+   if (imp > lim*lim)          		return 7;
+   mHitLen = imp*kImpFakt+ r2xy*(1-kImpFakt);
    return -1;
 }
 //_____________________________________________________________________________
