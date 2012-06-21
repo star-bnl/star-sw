@@ -158,7 +158,7 @@ void StvHitErrCalculator::CalcDcaDers(double dRR[kMaxPars][3])
 //______________________________________________________________________________
 void StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3])
 {
-    float zSpan = fabs(hiPos[2]-210)/100;
+    float zSpan = fabs(fabs(hiPos[2])-210)/100;
     double save1 = mPar[kYErr],save2 = mPar[kZErr];
     mPar[kYErr]+=mPar[kYDiff]*zSpan;
     mPar[kZErr]+=mPar[kZDiff]*zSpan;
@@ -168,7 +168,7 @@ void StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[
 //______________________________________________________________________________
 void StvTpcHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3])
 {
-    mZSpan = fabs(hiPos[2]-210)/100;
+    mZSpan = fabs(fabs(hiPos[2])-210)/100;
     double save1 = mPar[kYErr],save2 = mPar[kZErr];
     mPar[kYErr]+=mPar[kYDiff]*mZSpan;
     mPar[kZErr]+=mPar[kZDiff]*mZSpan;
@@ -187,7 +187,7 @@ void StvTpcHitErrCalculator::CalcDcaDers(double dRR[kMaxPars][3])
 //______________________________________________________________________________
 double StvTpcHitErrCalculator::Trace(const float hiPos[3]) 
 {
-    mZSpan = fabs(hiPos[2]-210)/100;
+    mZSpan = fabs(fabs(hiPos[2])-210)/100;
     double save1 = mPar[kYErr],save2 = mPar[kZErr];
     mPar[kYErr]+=mPar[kYDiff]*mZSpan;
     mPar[kZErr]+=mPar[kZDiff]*mZSpan;
