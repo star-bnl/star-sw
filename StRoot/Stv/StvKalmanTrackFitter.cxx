@@ -41,14 +41,24 @@ int  StvKalmanTrackFitter::Refit(StvTrack *trak,int dir,int mode)
 ///     mode=1 Join
 ///     fit direction is imagined from left to rite
 static int nCall=0; nCall++;
-//static const double kBigErrFact = 10;
 static const double kBigErrFact = 16;
 
 static StvFitter *fitt = StvFitter::Inst();
-static StvConst  *kons = StvConst::Inst();
-
+static const StvKonst_st  *kons = StvConst::Inst();
   StvNode *breakNode = 0;
-  trak->MakeFitTally();
+
+//term	LEFT here: Curren Kalman chain of fits from left to rite
+//	Rite here: Previous Kalman chain, allready fitted, in different direction.
+//	It was made from rite to left
+
+
+  int nFits = trak->GetNFits(1-dir);
+  int nFitLeft=0;		// number of fits made by this pass excluding current node
+  int nFitRite=nFits;		// number of fits made during previous
+  				// pass in different direction, including current node 
+  int wasFitted=0;		// this node was fitted in previous pass
+
+
   StvNodeIter it,itBeg,itEnd;
   if (dir) { //fit in ==> out
     itBeg = trak->begin();        itEnd = trak->end();
@@ -57,37 +67,41 @@ static StvConst  *kons = StvConst::Inst();
   }
 
 
-  double myXi2;
-  StvNode *node=0,*preNode=0;
-  int iNode=0,nFitLeft=0;
+  double myXi2=3e33;
+  StvNode *node=0,*preNode=0,*innNode=0,*outNode=0;
+  int iNode=0;
 
   for (it=itBeg; it!=itEnd; (dir)? ++it:--it) {//Main loop
     preNode=node;
-//VP    assert(!mode || !preNode || !preNode->Check());
     node = *it; iNode++;
-
-enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4};
+    if (!dir) 	{ innNode = node; outNode = preNode;}
+    else 	{ outNode = node; innNode = preNode;}
+enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
     int kase = 0;
-    if (nFitLeft) 				kase|=kLeft;
-    if (mode && node->FitTally()[1-dir]) 	kase|=kRite;
-    if (node->GetHit() && (!mode || node->GetXi2(1-dir)<1000 || nFitLeft>2))
-    						kase|=kHit;
+    if (nFitLeft) 		kase|=kLeft;
+    if (mode && nFitRite) 	kase|=kRite;
+    wasFitted = node->IsFitted(1-dir) && (mode&1);
+//     if (wasFitted ) 		kase|=kHit;
+    if (node->GetHit())		kase|=kHit;
+
+
 // kLeft 		= left fits only, no hit
 // kLeft+kHit 		= Left fits only, now hit, 
-// kLeft+kGood 		= Left fits only, now Good Hit, 
 // kRite 		= No left, no hit, rite fits only
 // kLeft+kRite 		= left fits, no hit, rite fits
 // kHit+kRite 		= No left fits, now hit, rite fits
 // kLeft+kRite+kHit 	= Left fits,now hit, rite fits
-// kLeft+kRite+kGood 	= Left fits,now good Hit, Rite fits
     node->SetXi2(3e33,dir);
-    switch (kase) {// 1st switch, fill prediction
+    switch (kase) {// 1st switch, fill PREDICTION
 
       default: assert(0 && "Wrong Case1");
 
+      case kRite|kHit: 	// No left, now Hit, rite fits 
+      case kNull|kHit: 	// No left, now Hit, No rite  
+      case kRite: 	// No left, no  Hit, rite fits 
       case kNull: {	// Empty leading node
-        node->SetPre(node->mFP[2],node->mFE[2],dir);
-        assert(node->mPP[dir].isValid());
+        node->mPP[dir]  =  node->mFP[1-dir];			//prediction from opposite fit
+        node->mPE[dir].Set(node->mFE[1-dir],kBigErrFact);	//prediction from opposite fit
         break;
       }  
       case kLeft: 		// Left fits only, no  Hit
@@ -96,27 +110,15 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4};
       case kLeft|kRite|kHit: 	// Left fits,now Hit, Rite fits
       {
 
-        int ret = Propagate(node,preNode,dir);
+        int ret = Propagate(node,preNode,dir);		//prediction from last fit
         if (ret) return ret;
-        break;
+       break;
       }  
 
-      case kRite: 	// No left, no  Hit, rite fits 
-      {
-        node->SetPre(node->mFP[2],node->mFE[2],dir); 	
-        break;
-      }
-      case kNull|kHit: // No left, now Hit, No rite  
-      case kRite|kHit: // No left, now Hit, rite fits 
-      {
-        node->mPP[dir] = node->mFP[2]; 	
-        node->mPE[dir].Set(node->mFE[2],kBigErrFact);
-        break;
-      }
-    }//End 1st switch
+    }//End 1st prediction switch
 
 
-    switch (kase) {// 2nd switch, fill fit
+    switch (kase) {// 2nd switch, fill FITD
 
       case kNull: 	// No   fits  no  Hit
       case kLeft: 	// Left fits only, no  Hit
@@ -137,11 +139,10 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4};
 	fitt->Prep();
 
 	myXi2 = fitt->Xi2(hit);
-	if (myXi2> kons->mXi2Hit)  	{
+	if (myXi2> kons->mXi2Hit)	{	//Fit failed
 	  node->SetFit(node->mPP[dir],node->mPE[dir],dir); 	
 	  node->SetXi2(1e11,dir);
-          kase -= kHit;
-	} else {
+	} else 				{	//Fit accepted
           nFitLeft++; kase|=kLeft;
 	  node->SetXi2(myXi2,dir);
 	  fitt->Update();
@@ -155,14 +156,13 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4};
     }//end 2nd switch
     if (!mode) continue;
 
-    switch (kase) {// 3rd switch,Join
+    switch (kase) {// 3rd switch,JOIN
 
-      case kLeft+kRite     : 	// Left fits, no Hit, Rite fits
-      case kLeft+kRite+kHit: 	// Left fits,now Hit, Rite fits
+       default:
       {
 	breakNode = (dir)? node:preNode;
-	fitt->Set(node->mFP+0 ,node->mFE+0
-        	 ,node->mFP+1 ,node->mFE+1
+	fitt->Set(node->mFP+dir   ,node->mFE+dir
+        	 ,node->mPP-dir+1 ,node->mPE+dir+1
         	 ,node->mFP+2 ,node->mFE+2);
 	node->SetXi2(3e33,2);
 	myXi2 = fitt->Xi2(); 
@@ -176,45 +176,63 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4};
 	  const char *key = (dir)? "Join111.Fail":"Join000.Fail";
 	  StvDebug::Count(key,myXi2); 
 	  /*trak->CutTail(breakNode);*/ return 4;
-	}
+      }
 
     }//End 3rd case
+    nFitRite-= wasFitted;
 
   }//endMainLoop
   return 0;
 }
 //_____________________________________________________________________________
-int StvKalmanTrackFitter::Propagate(StvNode  *node,const StvNode *preNode,int dir)
+int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir)
 {
-  const StvNode *losNode = (dir)? preNode:node;
+  StvNode *innNode=0,*outNode=0;
+  if (!dir) {innNode = node; outNode=preNode;}
+  else      {outNode = node; innNode=preNode;}
+#if 0 //???????????????????????????????????????????????
   do { //Attempt to propagate with linear approximation;
     node->mPP[dir] = node->mFP[1-dir];
     StvFitPars delPre = preNode->mFP[dir]-preNode->mPP[1-dir];
     if (delPre.TooBig(preNode->mFP[dir])) 	break;
-    StvFitPars del    = delPre*preNode->mDer[dir];
+    StvFitPars del    = delPre*innNode->mDer[dir];
     if (del.TooBig(node->mPP[dir]))    		break; 
     node->mPP[dir]+= del;node->mFP[dir]=node->mPP[dir];
 //        node->mPP[dir]+= ((preNode->mFP[dir]-preNode->mPP[1-dir])*node->mDer[dir]);
     node->mPE[dir] = preNode->mFE[dir]*node->mDer[dir];
     node->mPE[dir].SetHz(node->mPP[dir]._hz);
-    node->mPE[dir].Add(losNode->mELossData,node->mPP[dir]);
+    node->mPE[dir].Add(innNode->mELossData,node->mPP[dir]);
     if(node->mPE[dir].Check()) break; 
     return 0;
   } while(0);
+#endif
 
 //		Propagate with THelixTrack
-  const double *P = node->mFP[1-dir].P;
+  double point[3];
+  const StvHit *hit = node->GetHit();
+  if (hit) {
+    const float *f = hit->x(); 
+    point[0] = f[0]; point[1] = f[1]; point[2]= f[2];}
+  else     {
+    const double *P = node->mFP[1-dir].P;
+    point[0] = P[0]; point[1] = P[1]; point[2]= P[2];}
+
   THelixTrack myHlx;
   preNode->mFP[dir].get(&myHlx);
   preNode->mFE[dir].Get(&myHlx);
-  double dS = myHlx.Path(P);
-  myHlx.Move(dS);
+
+  double dS = myHlx.Path(point);
+  StvHlxDers derHlx;
+  StvFitDers derFit;
+  myHlx.Move(dS,derHlx);
   double rho = myHlx.GetRho();
-  rho += -rho*losNode->GetELoss().mdPPdL*dS;
+  rho += -rho*innNode->GetELoss().mdPPdL*dS;
   myHlx.Set(rho);
-  node->mPP[dir].set(&myHlx,preNode->mFP[dir]._hz);
-  node->mPE[dir].Set(&myHlx,preNode->mFP[dir]._hz);
-  node->mPE[dir].Add(losNode->mELossData,node->mPP[dir]);
+  node->mPP[dir].set(&myHlx,node->GetHz());
+  node->mPE[dir].Set(&myHlx,node->GetHz());
+  node->mPE[dir].Add(innNode->mELossData,node->mPP[dir]);
+  node->mPP[dir].convert(derFit,derHlx);
+  innNode->SetDer(derFit,dir);
   if(node->mPE[dir].Check())  return 1; 
   return 0;
   
@@ -223,7 +241,7 @@ int StvKalmanTrackFitter::Propagate(StvNode  *node,const StvNode *preNode,int di
 int StvKalmanTrackFitter::Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)
 {
 static       StvToolkit *kit     = StvToolkit::Inst();
-static const StvConst   *myConst =   StvConst::Inst();
+static const StvKonst_st *myConst =   StvConst::Inst();
 static const double dca3dVertex = myConst->mDca3dVertex;
 static StvFitter *fitt = StvFitter::Inst();
 
@@ -242,7 +260,8 @@ static StvFitter *fitt = StvFitter::Inst();
     StvDebug::Count("PrimDca3Rej",sqrt(mDca3));
     return 2;
   }
-  Mtx55D_t derivFit,derivHlx;
+  StvFitDers derivFit;
+  StvHlxDers derivHlx;
   if (node) {th.Move(len,derivHlx);} else {th.Move(len);}
   double Hz = kit->GetHz(th.Pos());
   StvNodePars par[2]; par[0].set(&th,Hz);
@@ -260,7 +279,7 @@ static StvFitter *fitt = StvFitter::Inst();
   node->SetPre(par[0],err[0],0);
   node->SetFit(par[1],err[1],0);
   par[1].convert(derivFit,derivHlx);
-  node->SetDer(derivHlx,0);
+  node->SetDer(derivFit,0);
   return 0;
 }   
 //_____________________________________________________________________________
@@ -270,17 +289,19 @@ THelixTrack* StvKalmanTrackFitter::GetHelix() const {return mHelx;}
 int StvKalmanTrackFitter::Helix(StvTrack *trak,int mode)
 {
 static int nCall=0;nCall++;
-// mode.bit0 = use err
-// mode.bit1 = update track
-// mode.bit2 = print
-// mode.bit3 = print+compare
+// mode &1 use err
+// mode &2 = update track
+// mode &4 = print
+// mode &8 = print+compare
+// mode &16 = histogramm
 
   if (!mode  ) mode = 4;
   if ( mode&8) mode|= 4;
   mWorstXi2=0,mWorstNode = 0;mXi2 = 0;
   if (!mHelx) mHelx = new THelixFitter;
   mHelx->Clear();
-  double Fhlx[5][5],Fstv[5][5];
+  StvFitDers Fstv;
+  StvHlxDers Fhlx;
   THelixFitter& hlx = *mHelx;
   StvNode *node=0,*preNode=0;
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
@@ -298,18 +319,17 @@ static int nCall=0;nCall++;
     }
   }  
   mXi2 =hlx.Fit();
-  if(mode&1) { hlx.MakeErrs(); assert(hlx.Emx()->Sign()>=0);}
+  if(mode&1) { hlx.MakeErrs();}
   double dL = hlx.Path(trak->front()->GetFP().P);
   hlx.Move(dL);
 
-  int nHits = 0;
   node=0;
   double dHit[3],tstXi2=0,myXi2=0;
 
 //		Loop for Print,compare & update
   double totLen=0;
   THelixTrack myHlx(hlx);
-  int iNode = -1;
+  int iNode = -1,nHist=0;
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
     iNode++;preNode=node; node = *it;
     StvNodePars sFP = node->GetFP(2);
@@ -334,34 +354,43 @@ static int nCall=0;nCall++;
 
       if (mWorstXi2 < myXi2) { mWorstXi2 = myXi2; mWorstNode = node;}
       tstXi2 +=  myXi2;
+    }
 
-// 	Node is ready. What to do with?    
-      switch(mode&(4|8)) {
-        case 4: 
-         printf("HelixPars(%g) Xi2i=%g ",totLen,         myXi2); hFP.print();
-         hFE.Print("HelixErrs");
-         break;
+    if (mode&2)	{ 		//Update
+      node->mLen = totLen;
+      node->SetPre(hFP,hFE,0);node->SetPre(hFP,hFE,1);
+      node->SetFit(hFP,hFE,0);node->SetFit(hFP,hFE,1);
+      if (preNode) {hFP.convert(Fstv,Fhlx); preNode->SetDer(Fstv,1);}    
+      if (!hit) node->SetXi2(myXi2,0);node->SetXi2(myXi2,1);
+    }
 
-        case 4|8: 
-         printf("HelixPars(%g) Xi2i=%g ",totLen,         myXi2); hFP.print();
-         printf("StvixPars(%g) Xi2i=%g ",totLen,node->GetXi2()); sFP.print();
-         hFE.Print("HelixErrs");
-         sFE.Print("StvixErrs");
-         break;
-      }
+    if (mode&4)	{ 		//Print Helix
+      printf("HelixPars(%g) Xi2i=%g ",totLen,myXi2); hFP.print();
+      if (mode&1) hFE.Print("HelixErrs");
+    }  
 
-    }//end if hit loop
+    if (mode&8)	{ 		//Print StvFit
+      printf("StvixPars(%g) Xi2i=%g ",totLen,node->GetXi2()); sFP.print();
+      sFE.Print("StvixErrs");
+    }
+    if (mode&16 &&  hit && !nHist){ 	//Histogram
+static const char *fiNam[]={"H","Z","A","L","P"};
+      nHist++;
+      for (int i=0,li=0;i< 5;li+=++i) {
+        TString ts("FiterrByHelix"); ts +=fiNam[i];
+	StvDebug::Count(ts,sFE.Arr()[li+i]/hFE.Arr()[li+i]);
+    } }
+    if (mode&16 && node->GetType()==StvNode::kDcaNode){ 	//Dca Histogram
+static const char *fiNam[]={"H","Z","A","L","P"};
+      for (int i=0,li=0;i< 5;li+=++i) {
+        TString ts("FitDcaByHelix"); ts +=fiNam[i];
+	StvDebug::Count(ts,sFE.Arr()[li+i]/hFE.Arr()[li+i]);
+    } }
+    
+  }//end of hit loop
 
-    if (!(mode&2))	continue; //No update
-    node->mLen = totLen;
-    node->SetPre(hFP,hFE,0);node->SetPre(hFP,hFE,1);
-    node->SetFit(hFP,hFE,0);node->SetFit(hFP,hFE,1);
-    if (preNode) {hFP.convert(Fstv,Fhlx); node->SetDer(Fstv,1);}    
-    if (!hit) 		continue;
-    node->SetXi2(myXi2,0);node->SetXi2(myXi2,1);
-  }//end of 2nd loop
-  tstXi2/=hlx.Ndf();
-  double qwe = mXi2;
+  tstXi2/=hlx.Ndf();if (tstXi2){};
+  double qwe = mXi2; if (qwe){};//only to see it in gdb
 //??  assert(fabs(tstXi2-mXi2)< 0.1*(tstXi2+mXi2));
 
 

@@ -61,12 +61,24 @@ int StvTrack::GetNHits(StDetectorId detectorId) const
   int n=0;
   for (StvNodeConstIter it = begin(); it !=end();++it) {
     const StvNode *node = *it; 
-    const StHitPlane *hp = node->GetHitPlane();
-    if (!hp) continue;
-    if (detectorId && hp->GetDetId()!=detectorId) continue;
     if (!node->GetHit()) 	continue;
     if (node->GetXi2()>1000) 	continue;
+    if (detectorId) {
+      const StHitPlane *hp = node->GetHitPlane();
+      if (!hp) continue;
+      if (hp->GetDetId()!=detectorId) continue;
+    }
     n++;    
+  }
+  return n;
+}   
+//______________________________________________________________________________
+int StvTrack::GetNFits(int dir) const
+{
+  int n=0;
+  for (StvNodeConstIter it = begin(); it !=end();++it) {
+    const StvNode *node = *it; 
+    if (node->IsFitted(dir)) n++;    
   }
   return n;
 }   
@@ -311,29 +323,6 @@ int StvTrack::GetCharge() const
 {
   const StvNode *node = front();
   return node->GetFP().getCharge();
-}
-//_____________________________________________________________________________
-void StvTrack::MakeFitTally() 
-{
-  StvNodeConstIter it,itBeg,itEnd;
-  itBeg = end(); --itBeg; itEnd = begin();--itEnd;
-  int nFit = 0;
-  for (it=itBeg;it!=itEnd;--it) {
-    StvNode *node = (*it);
-    node->mFitTally[0] = nFit;
-    if (!node->GetHit()) 		continue;
-    if (node->GetXi2(0) > 1000 )	continue;
-    nFit++;
-  }
-  itBeg = begin(); itEnd = end();
-  nFit = 0;
-  for (it=itBeg;it!=itEnd;++it) {
-    StvNode *node = (*it);
-    node->mFitTally[1] = nFit;
-    if (!node->GetHit()) 		continue;
-    if (node->GetXi2(1) > 1000 )	continue;
-    nFit++;
-  }
 }
 //_____________________________________________________________________________
 //_____________________________________________________________________________
