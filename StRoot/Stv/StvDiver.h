@@ -3,6 +3,7 @@
 #ifndef StvDiver_HH
 #define StvDiver_HH
 #include "TNamed.h"
+#include "StvUtil/StvNodePars.h"
 #include "StarVMC/GeoTestMaker/GCall.h"
 #include "StarVMC/GeoTestMaker/StMCStepping.h"
 #include "StvUtil/StvNodePars.h"
@@ -16,7 +17,6 @@ class TGeoMaterial;
 class THelixTrack;
 class StvFitErrs;
 class StvNodePars;
-typedef double Mtx55D_t[5][5];
 enum StvDiverFlags {kDiveOk=0,kDiveHits,kDiveDca,kDiveBreak,kDiveMany};
 /// \class StvDiver
 class StvDiver : public TNamed
@@ -28,7 +28,7 @@ int  Init();
 void Reset();
 int  Dive();
 void Set(StvNodePars *inpar,const StvFitErrs *inerr,int idir);
-void Set(StvNodePars *otpar,      StvFitErrs *oterr,Mtx55D_t *deriv);
+void Set(StvNodePars *otpar,      StvFitErrs *oterr,StvFitDers *deriv);
 void SetSkip(int skip=1);
 double GetLength() const;
 const StvELossData &GetELossData() const;
@@ -41,10 +41,10 @@ int mDir;
 const StvFitErrs     *mInpErrs;
 StvNodePars    *mOutPars;
 StvFitErrs     *mOutErrs;
-Mtx55D_t       *mOutDeri; //Out derivatives in StvFitPars notation
+StvFitDers       *mOutDeri; //Out derivatives in StvFitPars notation
 THelixTrack    *mHelix;
 StvELossTrak   *mELoss;
-Mtx55D_t        mHlxDeri; //Internal derivatives in StHeliTrack notation
+StvHlxDers        mHlxDeri; //Internal derivatives in StHeliTrack notation
 StvMCStepping  *mSteps;
 StvMCField     *mFld;
 StvMCPrimaryGenerator *mGen;
@@ -82,7 +82,7 @@ void Reset ();
 int  GetExit() const 		{return fExit;}
 void Set(StvELossTrak *eLoss)	{fELossTrak = eLoss;}
 void Set(THelixTrack *helx )	{fHelix    = helx ;}
-void Set(Mtx55D_t    *deriv)	{fDeriv    = deriv;}
+void Set(StvHlxDers  *deriv)	{fDeriv    = deriv;}
 void Set(StvMCField  *field)	{fField    = field;}
 void SetSkip(int skip=1)	{fSkip     = skip ;}
 const StvELossData &GetELossData() const { return fELossData;}
@@ -109,7 +109,7 @@ float  fStartSign;
 float  fCurrentSign;
 char fMidl[1];
 THelixTrack  *fHelix;
-Mtx55D_t     *fDeriv;		//Derivative matrix in THelixTrack notation
+StvHlxDers     *fDeriv;		//Derivative matrix in THelixTrack notation
 StvELossTrak *fELossTrak;	//Energy loss calculator
 StvELossData  fELossData;	//Energy loss data
 StvMCField   *fField;		//Mag field calculator
