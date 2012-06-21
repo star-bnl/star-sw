@@ -110,8 +110,8 @@ double StvFitter::Xi2(const StvHit *hit)
       const StHitPlane *hp = hit->detector(); 
       const Mtx33F_t &hD = hp->GetDir(hit->x());
       mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
-      StvDebug::Count("HHhit",sqrt(mHitErrs[0]));
-      StvDebug::Count("ZZhit",sqrt(mHitErrs[2]));
+       StvDebug::Count("HHhit",sqrt(mHitErrs[0]));
+       StvDebug::Count("ZZhit",sqrt(mHitErrs[2]));
 
     }; break;
 
@@ -128,10 +128,13 @@ double StvFitter::Xi2(const StvHit *hit)
 
 //		Hit position wrt track 
   double dca[3] = {hP[0]-tP[0],hP[1]-tP[1],hP[2]-tP[2]};
-  double dis2=VDOT(dca,dca); mDist = sqrt(dis2);
 
+  mDcaT=VDOT(mDcaFrame[0],dca);
   mDcaP=VDOT(mDcaFrame[1],dca);
   mDcaL=VDOT(mDcaFrame[2],dca);
+//		small account non zero distance to hit along track
+  double dS = mDcaT*mCosL;
+  mDcaP-= 0.5*mTkPars._curv*dS*dS;
 
   double G[3] = {mInErrs->mHH,mInErrs->mHZ,mInErrs->mZZ};
   if (mKase!=2) {for (int j=0;j<3;j++) {G[j]+=mHitErrs[j];}}
@@ -169,7 +172,6 @@ static int nCall=0; nCall++;
   StvFitErrs myHitErrs(mHitErrs[0],mHitErrs[1],mHitErrs[2]);
   StvFitPars myTrkPars;
   StvFitPars myJrkPars;
-  assert(mTkErrs.Sign()>0);
 
   double myXi2 = JoinTwo(2,myHitPars.Arr(),myHitErrs.Arr()
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
@@ -214,13 +216,12 @@ static int nCall=0; nCall++;
   StvFitPars myHitPars(mDcaP, mDcaL );
   StvFitPars myTrkPars;
   StvFitPars myJrkPars;
-  assert(mTkErrs.Sign()>0);
 
   double myXi2 = JoinTwo(2,myHitPars.Arr(),mHitErrs
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
 		        ,  myJrkPars.Arr(),mOtErrs->Arr(),1);
   if (myXi2){}
-//??????  assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
+//assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
   assert(fabs(myJrkPars[0]-myHitPars[0])<1e-6);
   assert(fabs(myJrkPars[1]-myHitPars[1])<1e-6);
   *mOtPars = mTkPars;

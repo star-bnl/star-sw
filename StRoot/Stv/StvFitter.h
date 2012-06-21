@@ -56,7 +56,7 @@ const StHitPlane  *mHitPlane;
       StvFitErrs   mQQErrs;
       double       mHitErrs[3];
       double	   mCos2L,mCosL,mSinL,mCosP,mSinP,mXi2,mDeltaL;
-      double       mDcaP,mDcaL,mDist;
+      double       mDcaT,mDcaP,mDcaL;
       double       mDcaFrame[3][3];
       char         mEnd[1];
 static StvFitter *mgFitter;
