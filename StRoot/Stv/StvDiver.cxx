@@ -95,7 +95,7 @@ int  StvDiver::Dive()
   while(1) {
     mInpPars->get(mHelix);
     mInpErrs->Get(mHelix);
-    mHlxDeri[0][0]=0;
+    mHlxDeri[0][0]=0;		//Mark this matrix is not filled
     if (!mDir) mHelix->Backward();
 
     TVirtualMC::GetMC()->ProcessEvent();
@@ -119,7 +119,7 @@ int  StvDiver::Dive()
 
     if (!mDir) {
       mOutPars->reverse();
-      mOutPars->reverse(*mOutDeri,*mOutDeri);
+      mOutDeri->Reverse();
       mOutErrs->Backward();
       assert(mOutErrs->mPP>0);
     }
@@ -143,7 +143,7 @@ void StvDiver::Set(StvNodePars *inpar,const StvFitErrs *inerr,int idir)
   mGen->Set(inpar,idir);
 }
 //_____________________________________________________________________________
-void StvDiver::Set(StvNodePars *otpar,StvFitErrs *oterr,Mtx55D_t *deriv)
+void StvDiver::Set(StvNodePars *otpar,StvFitErrs *oterr,StvFitDers *deriv)
 {
   mOutPars = otpar;
   mOutErrs = oterr;
@@ -353,18 +353,18 @@ static int nCall=0; nCall++;
   if (!(*fDeriv)[0][0]) {	//first time
     fHelix->Move(dL,*fDeriv);
   } else {
-    double T[5][5],R[5][5];
+    StvHlxDers T,R;
     fHelix->Move(dL,T);
     Multiply(R,T,*fDeriv);
-    memcpy((*fDeriv)[0],R[0],sizeof(R));
+    *fDeriv=R;
   }
-
   double delta=0,*Pos = fHelix->Pos();
   for (int j=0;j<3;j++) {delta+=fabs(Pos[j]-pos[j]);} 
   if (delta>0.3*(dL+1)) return kDiveBreak;
 
   THEmx_t *emx = fHelix->Emx();
   assert(emx->mCC>0);
+
   fELossData.mTheta2 = fELossTrak->GetTheta2();
   fELossData.mOrt2   = fELossTrak->GetOrt2();
   fELossData.mELoss  = fELossTrak->ELoss();
