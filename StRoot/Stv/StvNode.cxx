@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.8 2011/07/19 19:55:58 perev Exp $
+ * $Id: StvNode.cxx,v 1.9 2012/06/21 01:39:21 perev Exp $
  *
  * /author Victor Perev
  */
@@ -97,10 +97,11 @@ static const char *hhh = "xyzre";
   return;
 }    
 //________________________________________________________________________________
-void StvNode::SetDer(const Mtx55D_t &der, int dir)
+void StvNode::SetDer(const StvFitDers &der, int dir)
 {
-   memcpy(mDer[dir][0],der[0],sizeof(Mtx55D_t));
-   mPP[dir].reverse(mDer[1-dir],der);
+   mDer[  dir]=der;
+   mDer[1-dir]=der;
+   mDer[1-dir].Reverse();
 } 
 //________________________________________________________________________________
 void StvNode::SetHit(StvHit *hit)
@@ -123,7 +124,7 @@ static double zero[2]={0};
     if (fabs(dL)<1e-6) return;
     do {
       if (!iter && fabs(dL*mFP[2]._curv)<1e-1) break;
-      TCircle cirk(&(P._x),&(P._cosCA),P._curv);
+      TCircle cirk(&(P._x),&(P._cosCA),P._curv);		//????Error not touched ??
       dL = cirk.Path(zero);
     } while(0);
     for (int i=0;i<5;i++) {mPP[i].move(dL);} 
