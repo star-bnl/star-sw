@@ -63,7 +63,8 @@ void storetofTrgWindow() {
 //  TString ZStoreTime = "2009-11-01 00:01:01"; // updated version, (2nd attempt)includes MTD
 //  TString ZStoreTime = "2010-12-10 00:00:00"; // run 11 new timing (TOCK)
 //  TString ZStoreTime = "2011-12-20 00:00:01"; // run 12 new timing
-  TString ZStoreTime = "2012-03-21 19:50:00"; // run 12 new VPD timing (effective from run 13081013)
+//  TString ZStoreTime = "2012-03-21 19:50:00"; // run 12 new VPD timing (effective from run 13081013)
+  TString ZStoreTime = "2012-03-21 19:50:01"; // run 12 new VPD timing (corrected, effective from run 13081013)
 
 
   //-- add table to the container with descriptor given by Database
@@ -139,8 +140,12 @@ unsigned short cuthi[124]={
 2911,2974,0,0};
 
 // year 12 - updated VPD window to lower TOF deadtime (pp500 -- March 22, 2012)
-  cutlow[120]= 230 ; cuthi[120]= 290;  // VPD West
-  cutlow[121]= 245 ; cuthi[121]= 305;  // VPD East
+//  cutlow[120]= 230 ; cuthi[120]= 290;  // VPD West
+//  cutlow[121]= 245 ; cuthi[121]= 305;  // VPD East
+// year 12 - correct updated VPD window to lower TOF deadtime (pp500 -- March 22, 2012, [5/1'12])
+  cutlow[120]= 2834 ; cuthi[120]= 2919;  // VPD West
+  cutlow[121]= 2896 ; cuthi[121]= 2981;  // VPD East
+
 
 
 // ---------------------------------------------
