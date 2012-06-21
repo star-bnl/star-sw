@@ -56,11 +56,11 @@ public:
   void GetMomentum(double p[3], double e[6]=0) const;
   /// Calculates and returns the Z mag field in the current point.
   /// units: PGeV = Hz*Radcurv_in_CM
-  double GetHz() const;
-  const double *x() const;
-  double GetTime() const;
+  double GetHz() 		const {return mFP[2]._hz;}
+  double GetTime() 		const;
+     int IsFitted(int dir)	const           { return (mHit && mXi2[dir]<1000);}
 
-        StvHit *GetHit() const 			{ return mHit;}
+        StvHit *GetHit() 	const 		{ return mHit;}
   void  SetHit(StvHit *hit); 			
   const StHitPlane *GetHitPlane() const 	{ return mHitPlane  ;}
   void  SetHitPlane(const StHitPlane *hitPlane) { mHitPlane=hitPlane;}
@@ -72,12 +72,11 @@ const StvELossData &GetELoss() const		{return mELossData;}
    void SetXi2(double Xi2,int dir) 		{ mXi2[dir]=Xi2; mXi2[2]=Xi2;}
    void SetPre(StvNodePars &par,StvFitErrs &err,int dir); 	
    void SetFit(StvNodePars &par,StvFitErrs &err,int dir); 
-   void SetDer(const Mtx55D_t &der, int dir);
+   void SetDer(const StvFitDers &der, int dir);
 
  StvNode::ENodeType GetType() const 			{return (StvNode::ENodeType)mType;}
                void SetType(StvNode::ENodeType ty) 	{mType =(char)ty;}
 
-const char *FitTally() const {return mFitTally;}
 StDetectorId GetDetId() const;  
 void UpdateDca();
  int Check(const char *tit="",int dirs=3) const; 
@@ -88,20 +87,20 @@ void Print(const char *opt) const;
 
  char mBeg[1];  
  char mType; 			//0=regular,1=dca,2=primary
- char mFitTally[2]; 		//accumulated number of fitted nodes [0]=down
 const StHitPlane *mHitPlane;
 StvHit *mHit;
 
 ///  Z mag field in units PGev = Hz*Rcm
   mutable double mHz;
+///  indices of arrays 0=moving in, 1=moving out,2=join result of in & out
   StvNodePars mPP[2]; 	// Predicted Parameters
   StvNodePars mFP[3];   // Fitted    Parameters
   StvFitErrs  mPE[2];	// Predicted errors
   StvFitErrs  mFE[3];	// Fitted    errors
-  Mtx55D_t    mDer[2];
+  StvFitDers  mDer[2];  // Derivative matrix 0=from outer to this; 1=from this to outer
   double      mHrr[3];  // Hit errors in DCA frame
-  double      mXi2[3]; 	// Xi2 of fit to hit
-  double      mLen; 	// Length
+  float       mXi2[3]; 	// Xi2 of fit to hit
+  float       mLen; 	// Length
   StvELossData mELossData; //EnergyLoss&MCS from the upper node 
   char   mEnd[1];
 public:

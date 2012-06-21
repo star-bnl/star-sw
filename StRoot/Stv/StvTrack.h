@@ -34,6 +34,8 @@ const StvNode *GetNode(EPointType poTy) const;
    int GetNHits(StDetectorId detectorId=kUnknownId) const;  
 	 /// Return the number of possible hits with this track.
    int GetNPoss(StDetectorId detectorId=kUnknownId) const;
+	 /// Returns the number of fits associated direction.0=OutIn,1=InOut,2=Joined
+   int GetNFits(int dir) const;  
 
 	 /// Returns the End Type i.e reason of the end of tracking
          /// 0=Dca,1 = too many continues nits,2 = too many total nits
@@ -45,7 +47,6 @@ const StvNode *GetNode(EPointType poTy) const;
    	/// Delete all the nodes started form given
   void CutTail(const StvNode *start=0);
 
-  void MakeFitTally();
    /*!
      Returns the track length (in centimeters) from the :
       - first point (kFirstPoint) default;
