@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.19 2012/05/15 17:54:13 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.20 2012/06/21 01:10:54 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.20  2012/06/21 01:10:54  perev
+ * Cleanup
+ *
  * Revision 1.19  2012/05/15 17:54:13  perev
  * Avoid Dca node in fillFitTraits
  *
@@ -1245,7 +1248,7 @@ static int nCall = 0; nCall++;
   }
   pars.GetImpact(&myImp,&errs);
 
-  double signB = EmxSign(5,&myImp.mImpImp);
+  double signB = StvFitErrs::EmxSign(5,&myImp.mImpImp);
   if (signB<=0) {
     Warning("fillDca","-TIVE DCA errors %g %g, SKIPPED",signA,signB);
     return;
