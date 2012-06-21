@@ -16,6 +16,31 @@ typedef double Mtx55D_t[5][5];
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B);
 void Multiply(double res[5], const Mtx55D_t &A,const double B[5]);
 inline void Copy(Mtx55D_t &to,const Mtx55D_t &fr){memcpy(to[0],fr[0],5*5*sizeof(to[0][0]));}
+
+//------------------------------------------------------------------------------
+class StvFitDers 	//Derivative matrix of StvFitPars
+{
+public:
+operator const Mtx55D_t &() const {return mMtx;};
+operator       Mtx55D_t &()       {return mMtx;};
+StvFitDers &operator=( const StvFitDers &fr) 
+         	{memcpy(mMtx[0],fr[0],sizeof(mMtx)); return *this;};
+      void  Reverse();  
+protected:
+Mtx55D_t mMtx;
+};
+//------------------------------------------------------------------------------
+class StvHlxDers 	//Derivative matrix of THelixTrack
+{
+public:
+operator const Mtx55D_t &() const {return mMtx;};
+operator       Mtx55D_t &()       {return mMtx;};
+StvHlxDers &operator=( const StvFitDers &fr) 
+         	{memcpy(mMtx[0],fr[0],sizeof(mMtx)); return *this;};
+protected:
+Mtx55D_t mMtx;
+};
+
 void Invert(Mtx55D_t &to,const Mtx55D_t &fr);
 void Testik(const Mtx55D_t &tt);
 double EmxSign(int n,const double *a); 
@@ -27,13 +52,14 @@ public:
   StvFitPars():mH(0),mZ(0),mA(0),mL(0),mP(0){}
   StvFitPars(double h,double z):mH(h),mZ(z),mA(0),mL(0),mP(0){}
   StvFitPars(const double *arr) 		{memcpy(&mH,arr,5*sizeof(mH));}
-const StvFitPars &operator*(const Mtx55D_t &t) const;    
+const StvFitPars &operator*(const StvFitDers &t) const;    
         void Print(const char *tit=0) const;
          int Check(const char *tit=0) const;
          int TooBig(const StvNodePars &np) const;
       double *Arr() 				{return &mH;}
 const double *Arr()  const 			{return &mH;}
-  double &operator[](int i) 			{return (&mH)[i];}
+operator const double *() const			{return &mH;}
+operator double *() 				{return &mH;}
 public:	
 double mH;	// direction perpendicular movement and Z
 double mZ;	// Pseudo Z, direction perpendicular movement & H
@@ -50,6 +76,7 @@ public:
   StvNodePars()			{reset();}
   void reset();
   void ready();
+   int isReady() const;
   void set(const THelixTrack *ht, double Hz);
   void get(      THelixTrack *ht) const;
 double getPt() const			{ return 1./(fabs(_ptin)+1e-6); }
@@ -61,9 +88,7 @@ double getCos2L() const 		{return 1./(1.+_tanl*_tanl);}
   void reverse(); 
    int isValid() const 	{return  (_hz && _cosCA);};
 ///		convert THelixTrack derivativ matrix into StvFitPar one
-  void convert( Mtx55D_t &fitDer , const Mtx55D_t &hlxDer) const;
-///		invert or reverse StvFitPar derivativ matrix
-  void reverse( Mtx55D_t &fitDerI, const Mtx55D_t &fitDer) const;
+  void convert( StvFitDers &fitDer , const StvHlxDers &hlxDer) const;
 //		move point along helix  
   void move(double dLxy); 
 //		move point along helix  up to given radius in xy
@@ -71,8 +96,8 @@ double getCos2L() const 		{return 1./(1.+_tanl*_tanl);}
 StvNodePars &merge(double wt,StvNodePars &other);
 
 
-double  operator[](int idx) const {return P[idx];}
-double &operator[](int idx)       {return P[idx];}
+operator const double  *() const {return P;}
+operator       double  *()       {return P;}
     int getCharge() const {return (_ptin > 0) ? -1 : 1;}
     int     check(const char *pri=0) const;
 void  operator+=(const StvFitPars &add);
@@ -128,16 +153,19 @@ double GetHz() const   ;//?? 	{ return mHz ;}
   void SetHz(double hz);//??  	{ mHz=hz     ;}
   const double *Arr() const 	{ return &mHH;}
         double *Arr()       	{ return &mHH;}
-double &operator[](int i) 	{ return Arr()[i];}
-double  operator[](int i) const	{ return Arr()[i];}
+operator const double *() const { return &mHH;}
+operator       double *()       { return &mHH;}
   void operator*=(double f) {for (int i=0;i<kNErrs;i++){Arr()[i]*=f;};}
   void Add(const StvELossData &el,const StvNodePars &pa);
   void Backward();
-const StvFitErrs &operator*(const Mtx55D_t &mtx) const; 
+const StvFitErrs &operator*(const StvFitDers &mtx) const; 
 double Sign() const;
    int Check(const char *tit=0) const;
    int Recov();
   void Print(const char *tit=0) const;
+static double EmxSign(int n,const double *S);
+static double EmxSign(int n,const float  *S);
+
 public:	
 double
 mHH,
@@ -198,7 +226,7 @@ public:
   double mOrt2;		//multiple scattering position error
   double mELoss;	//Energy loss
   double mdPPdL;	//dP/P/len
-  double mELossErr2;	//Square or Energy loss error
+  double mELossErr2;	//Square of Energy loss error
 public:
   void Clear() { mTheta2=0; mOrt2=0;mELoss=0;mELossErr2=0; }
 
