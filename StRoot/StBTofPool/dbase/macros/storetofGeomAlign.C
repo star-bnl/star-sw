@@ -49,7 +49,8 @@ void storetofGeomAlign() {
 //  TString ZStoreTime = "2009-12-14 00:00:03";  //  Run10 200GeV update for production (note: TPC sector 20 problem)
 //  TString ZStoreTime = "2010-04-08 15:00:00";  //  Run10 update with final TPC calib 7GeV based) 
 //  TString ZStoreTime = "2010-12-20 00:00:01";  //  Run11 update with final TPC calib (19.6GeV based) 
-  TString ZStoreTime = "2009-02-01 00:00:01";  //  Run9, alignment update following major TPC geometry update
+//  TString ZStoreTime = "2009-02-01 00:00:01";  //  Run9, alignment update following major TPC geometry update
+  TString ZStoreTime = "2009-05-27 00:00:01";  //  Run9, alignment update following major TPC geometry update
 
 //-- add table to the container with descriptor given by Database
   StDbTable* tofGeomAlign = configNode->addDbTable("tofGeomAlign");
