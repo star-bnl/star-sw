@@ -13,11 +13,7 @@ plWana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
   //cout<<iPath<<core0<<endl;
 
   if(page==0) {
-    doAll(core0,iPath);
-    return;
-  }
-  if(page==-1) {
-    doAllMC(core0,iPath);
+    doAll(core0,iPath,page);
     return;
   }
    
@@ -689,8 +685,11 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 }
 
 //============================
-void doAll(char *core0="", char *iPath=""){
-  for(int i=1;i<=23;i++)  { 
+void doAll(char *core0="", char *iPath="", int isMC=0){
+  for(int i=1;i<=23;i++)  {
+    if ( isMC && i==2 ) continue;
+    if ( isMC && i==3 ) continue;
+    if ( isMC && i==4 ) continue;
     plWana(i,2,core0,iPath);
   }
   // TPC by sector:
@@ -698,20 +697,11 @@ void doAll(char *core0="", char *iPath=""){
 
 }
 
-//============================
-void doAllMC(char *core0="", char *iPath=""){
- for(int i=1;i<=23;i++){
-   if(i==2) continue;
-   if(i==3) continue;
-   if(i==4) continue;
-   plWana(i,2,core0,iPath);
- }
- // TPC by sector:
- for(int i=30;i<=42;i++)  plWana(i,2,core0,iPath);
-}
-
 
 // $Log: plWana.C,v $
+// Revision 1.6  2012/06/22 18:14:48  balewski
+// removed doAllMC
+//
 // Revision 1.5  2012/06/22 17:36:57  stevens4
 // *** empty log message ***
 //
