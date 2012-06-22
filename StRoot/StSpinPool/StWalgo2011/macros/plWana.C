@@ -8,7 +8,8 @@ root [7] muWET->Draw()
 */
 
 //=================================================
-plWana(  int page=0,int pl=0, char *core0="sumFeb21_2011", char *iPath="./", char *oPath="out/"){ //1=gif, 2=ps, 3=both
+plWana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institutions/iucf/stevens4/run12w/", char *oPath="out/bemc/"){ //1=gif, 2=ps, 3=both
+
   //cout<<iPath<<core0<<endl;
 
   if(page==0) {
@@ -16,7 +17,7 @@ plWana(  int page=0,int pl=0, char *core0="sumFeb21_2011", char *iPath="./", cha
     return;
   }
   if(page==-1) {
-    doAllMC();
+    doAllMC(core0,iPath);
     return;
   }
    
@@ -329,7 +330,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
       if(i==1 )	{h->SetAxisRange(0,60,"x");h->SetAxisRange(-40,60,"y");}
       if(i==2 ) {
 	h->Draw("eh"); h->SetAxisRange(0,60);
-	float sum=h->Integral(29,100);
+	float sum=h->Integral(26,100);
 	h->Rebin(); h->SetFillColor(4);
 	sprintf(txt,"%.0f eve >thres",sum);
 	tx=new TText(40,h->GetMaximum()*0.9,txt); tx->Draw();
@@ -698,19 +699,22 @@ void doAll(char *core0="", char *iPath=""){
 }
 
 //============================
-void doAllMC(){
+void doAllMC(char *core0="", char *iPath=""){
  for(int i=1;i<=23;i++){
    if(i==2) continue;
    if(i==3) continue;
    if(i==4) continue;
-   plWana(i,2);
+   plWana(i,2,core0,iPath);
  }
-  // TPC by sector:
- for(int i=30;i<=42;i++)  plWana(i,2);
+ // TPC by sector:
+ for(int i=30;i<=42;i++)  plWana(i,2,core0,iPath);
 }
 
 
 // $Log: plWana.C,v $
+// Revision 1.5  2012/06/22 17:36:57  stevens4
+// *** empty log message ***
+//
 // Revision 1.4  2011/02/22 21:38:05  balewski
 // First 100 Ws in run 11
 //
@@ -719,52 +723,4 @@ void doAllMC(){
 //
 // Revision 1.1  2011/02/10 20:33:35  balewski
 // start
-//
-// Revision 1.17  2010/11/09 23:00:56  balewski
-// added chi2/dof for East & West TPC separately
-//
-// Revision 1.16  2010/03/22 16:11:44  balewski
-// better computation of AL(QCD)
-//
-// Revision 1.15  2010/03/20 18:38:43  balewski
-// *** empty log message ***
-//
-// Revision 1.14  2010/03/18 16:52:19  balewski
-// corrected sPtBalance for no-endcap
-//
-// Revision 1.13  2010/03/15 17:05:51  balewski
-// cleanup, used for W AL sort March 15, 2010
-//
-// Revision 1.12  2010/03/14 22:50:34  balewski
-// *** empty log message ***
-//
-// Revision 1.11  2010/02/04 03:48:25  balewski
-// add ET for lumi monitor
-//
-// Revision 1.10  2010/01/30 02:02:56  balewski
-// manore tunes
-//
-// Revision 1.9  2010/01/28 20:10:08  balewski
-// added eta dependent spin sorting
-//
-// Revision 1.8  2010/01/27 22:12:26  balewski
-// spin code matched to x-section code
-//
-// Revision 1.7  2010/01/26 19:28:07  balewski
-// added pt-balanc eplots
-//
-// Revision 1.6  2010/01/21 00:15:30  balewski
-// added sector & run  dependent TPC cuts on Rin, Rout
-//
-// Revision 1.4  2010/01/10 03:01:39  balewski
-// cleanup & nicer histos
-//
-// Revision 1.3  2009/12/30 18:37:08  balewski
-// code tagged in the form close to that used for the Fall 2009 DNP preliminary Jacobian peak
-//
-// Revision 1.2  2009/12/08 16:53:01  balewski
-// *** empty log message ***
-//
-// Revision 1.1  2009/11/23 23:00:20  balewski
-// code moved spin-pool
 //

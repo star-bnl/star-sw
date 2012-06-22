@@ -1,10 +1,10 @@
 TCanvas *can=0;
 
 //=================================================
-plZana(  int page=3,int pl=0, char *core0="sumFeb21_2011", char *iPath="./", char *oPath="./out/"){ //1=gif, 2=ps, 3=both
+plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institutions/iucf/stevens4/run12w/", char *oPath="./out/z/"){ //1=gif, 2=ps, 3=both
   
   if(page==0) {
-    doAll();
+    doAll(core0,iPath);
     return;
   }
   
@@ -25,7 +25,7 @@ plZana(  int page=3,int pl=0, char *core0="sumFeb21_2011", char *iPath="./", cha
     printf("Opened: %s\n",fullInpName.Data());
   }
   if(page==1){ 
-   fd->ls(); 
+   //fd->ls(); 
    h0=(TH1*)fd->Get("_Z_EventType"); assert(h0);
    printf("%s: ",h0->GetName());
    for(int k=1;k<=14;k++) printf("%.0f, ",h0->GetBinContent(k));
@@ -88,8 +88,9 @@ plZana(  int page=3,int pl=0, char *core0="sumFeb21_2011", char *iPath="./", cha
       }
       if(i==3)  {
 	//h->SetFillColor(kYellow);
-	h->SetAxisRange(0,130);
-	h->Fit("gaus","","RH",75.,115.);
+	//h->SetMaximum(4);
+        h->SetAxisRange(0,130);
+	//h->Fit("gaus","","RH",75.,115.);
       }
     }
  
@@ -162,9 +163,9 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 }
 
 //============================
-void doAll(){
+void doAll(char *core0="", char *iPath=""){
  for(int i=1;i<=4;i++)  {
-  plZana(i,2);
+  plZana(i,2,core0,iPath);
  }
 }
 
@@ -172,6 +173,9 @@ void doAll(){
 
 
 // $Log: plZana.C,v $
+// Revision 1.2  2012/06/22 17:36:57  stevens4
+// *** empty log message ***
+//
 // Revision 1.1  2011/02/22 21:38:05  balewski
 // First 100 Ws in run 11
 //
