@@ -14,12 +14,8 @@ plEana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
     
   cout<<iPath<<core0<<endl;
 
-  if(page==0) {
-    doAll(core0,iPath);
-    return;
-  }
-  if(page==-1) {
-    doAllMC(core0,iPath);
+  if(page<=00) {
+    doAll(core0,iPath,page);
     return;
   }
    
@@ -717,9 +713,13 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 }
 
 //============================
-void doAll(char *core0="", char *iPath=""){
+void doAll(char *core0="", char *iPath="", int isMC=0){
   for(int i=1;i<=19;i++)  { 
     if(i==15) continue;
+    if( isMC && i==3) continue;
+    if( isMC &&i==4) continue;
+    if( isMC &&i>=20 && i<=22) continue;
+
     plEana(i,2,core0,iPath);
   }
 
@@ -748,6 +748,9 @@ void doAllMC(char *core0="", char *iPath=""){
 
 
 // $Log: plEana.C,v $
+// Revision 1.5  2012/06/22 18:14:48  balewski
+// removed doAllMC
+//
 // Revision 1.4  2012/06/22 17:36:57  stevens4
 // *** empty log message ***
 //
