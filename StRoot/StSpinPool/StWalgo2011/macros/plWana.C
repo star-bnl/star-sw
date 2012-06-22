@@ -189,13 +189,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       if(i==0) { cL->cd();  
 	h->Draw("colz");
-	for( float eta=-0.8; eta<.6; eta+=1.4) // print sectors IDs
-	  for(float x=-PI-.1; x<PI; x+=PI/6) {
-	    int sec=tpcSec(x, eta);;
-	    char txt[100];
-	    sprintf(txt,"sec %d",sec);
-	    tx=new TText(eta,x,txt); tx->Draw();
-	  }
+	labelTpcSectors() ;
       }
       
       if(i==1 || i==3) {cR->cd(1+i/2); h1=h; h->Draw(); h->SetMinimum(.1);}
@@ -590,7 +584,7 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(2,1);gStyle->SetOptStat(10);
     h2=muTr2D1; // cumulative
-    c->cd(1); h2->Draw("colz");
+    c->cd(1); h2->Draw("colz");labelTpcSectors() ;
     c->cd(2);
   
     for(int i=0;i<24;i++) {
@@ -601,7 +595,7 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
       if(i==0) h->Draw("box");
       else h->Draw("box same");
     }
-
+    labelTpcSectors() ;
  } break;//--------------------------------------
 
  default:
@@ -619,6 +613,17 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
  if(pl&1) can->Print(tit+".gif");
  if(pl&2) can->Print(tit+spinPre+".ps");
  
+}
+
+//-----------------
+void labelTpcSectors() {
+  for( float eta=-0.8; eta<.6; eta+=1.4) // print sectors IDs
+    for(float x=-PI-.1; x<PI; x+=PI/6) {
+      int sec=tpcSec(x, eta);;
+      char txt[100];
+      sprintf(txt,"sec %d",sec);
+      tx=new TText(eta,x,txt); tx->Draw();tx->SetTextSize(0.03);
+    }
 }
 
 //------------------------
@@ -655,7 +660,7 @@ int tpcSec(float phiRad, float etaDet){ // finds TPC sector for hit(phi,eta)
     while(x<0) x+=360;
     sec=13+(int)( x/30.);
   }
-  printf("phi/deg=%.1f, x=%.1f\n",phi,x);
+  //printf("phi/deg=%.1f, x=%.1f\n",phi,x);
   return sec;
 }
 
@@ -699,6 +704,9 @@ void doAll(char *core0="", char *iPath="", int isMC=0){
 
 
 // $Log: plWana.C,v $
+// Revision 1.8  2012/06/22 20:46:19  balewski
+// prints sector ID on page 42
+//
 // Revision 1.7  2012/06/22 18:23:36  balewski
 // *** empty log message ***
 //
