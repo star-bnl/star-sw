@@ -1,9 +1,5 @@
 class StChain;
 StChain *chain=0;
-
-int  spinSort=true;
-bool isZ=true; 
-int  geant=false;
  
 int rdMuWana2012(
 	     int nEve=1e6,
@@ -16,7 +12,10 @@ int rdMuWana2012(
 	     char* muDir   = "",
 	     char* jetDir   = "",
 	     char* histDir   = "",
-	     char* wtreeDir   = ""
+	     char* wtreeDir   = "",
+	     int  spinSort=true,
+	     bool findZ=true,
+	     int  geant=false
   ) { 
   
   char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
@@ -355,7 +354,7 @@ int rdMuWana2012(
     pubMcMk->setHList(HList);
   }
   
-  if (isZ){
+  if (findZ){
     ZMk=new St2011ZMaker("Z"); 
     ZMk->attachWalgoMaker(WmuMk);
     ZMk->setHList(HList); 
@@ -412,6 +411,9 @@ int rdMuWana2012(
 
 
 // $Log: rdMuWana2012.C,v $
+// Revision 1.3  2012/06/22 18:23:36  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2012/06/18 18:32:50  stevens4
 // remove hard coded jet path
 //
