@@ -14,7 +14,7 @@ plEana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
     
   cout<<iPath<<core0<<endl;
 
-  if(page<=00) {
+  if(page<=-1) {
     doAll(core0,iPath,page);
     return;
   }
@@ -748,6 +748,9 @@ void doAllMC(char *core0="", char *iPath=""){
 
 
 // $Log: plEana.C,v $
+// Revision 1.6  2012/06/22 18:23:36  balewski
+// *** empty log message ***
+//
 // Revision 1.5  2012/06/22 18:14:48  balewski
 // removed doAllMC
 //
