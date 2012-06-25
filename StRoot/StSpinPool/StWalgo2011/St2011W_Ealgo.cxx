@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.5 2012/06/18 18:28:00 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.6 2012/06/25 20:53:19 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -22,7 +22,7 @@ St2011WMaker::findEndcap_W_boson(){
   if(!wEve->l2EbitET) return;
 
   //printf("========= findEndcap_W_boson() \n");
-  int nGoldW=0;
+  int nNoNear=0,nNoAway=0,nGoldW=0;
   
   // search for  Ws ............
   for(uint iv=0;iv<wEve->vertex.size();iv++) {
@@ -49,6 +49,7 @@ St2011WMaker::findEndcap_W_boson(){
       if(T.cluster.ET /T.nearTotET< parE_nearTotEtFrac) continue; // too large nearET
 
       hE[20]->Fill("noNear",1.);
+      nNoNear++;
       hE[112]->Fill( T.cluster.ET); // for Joe
       hE[50]->Fill(T.awayTpcPT);
       hE[51]->Fill(T.awayBtowET);
@@ -81,7 +82,7 @@ St2011WMaker::findEndcap_W_boson(){
         }
       }
 
-      if(1){/***************************/
+      if(T.sPtBalance>parE_ptBalance){/***************************/
         printf("\n WWWWWWWWWWWWWWWWWWWWW  Endcap \n");
         wDisaply->exportEvent( "WE", V, T, iv);
         wEve->print();
@@ -94,6 +95,7 @@ St2011WMaker::findEndcap_W_boson(){
       //::::::::::::::::::::::::::::::::::::::::::::::::
 
       hE[20]->Fill("noAway",1.0);
+      nNoAway++;
       hE[113]->Fill( T.cluster.ET);//for Joe
 
       hE[90]->Fill( T.cluster.ET);
@@ -125,6 +127,8 @@ St2011WMaker::findEndcap_W_boson(){
 
     }// loop over tracks
   }// loop over vertices
+  if(nNoNear>0) hE[0]->Fill("noNear",1.);
+  if(nNoAway>0) hE[0]->Fill("noAway",1.);
   if(nGoldW>0)
     hE[0]->Fill("goldW",1.);
 
@@ -355,7 +359,6 @@ St2011WMaker::matchTrack2EtowCluster(){
             
       float trackPT=T.prMuTrack->momentum().perp();
       //need to decide on 2x2 or 2x1 for cluster size
-      //T.cluster=maxEtow2x1(T.pointTower.iEta,T.pointTower.iPhi,zVert);
       T.cluster=maxEtow2x2(T.pointTower.iEta,T.pointTower.iPhi,zVert);
       hE[110]->Fill( T.cluster.ET);
       hE[33]->Fill(T.cluster.ET);
@@ -364,7 +367,6 @@ St2011WMaker::matchTrack2EtowCluster(){
       // ........compute surrounding cluster energy
       int iEta=T.cluster.iEta;
       int iPhi=T.cluster.iPhi;
-      // fix it later in to 3x4 
       T.cl4x4=sumEtowPatch(iEta-1,iPhi-1,4,4,zVert);
 
       if (T.cluster.ET<parE_clustET) continue; // too low energy
@@ -511,6 +513,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.6  2012/06/25 20:53:19  stevens4
+// algo and histo cleanup
+//
 // Revision 1.5  2012/06/18 18:28:00  stevens4
 // Updates for Run 9+11+12 AL analysis
 //

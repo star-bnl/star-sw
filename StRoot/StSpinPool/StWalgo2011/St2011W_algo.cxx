@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.4 2012/06/18 18:28:01 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.5 2012/06/25 20:53:24 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -108,7 +108,7 @@ St2011WMaker::find_W_boson(){
 	hA[204]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.energy/T.prMuTrack->p().mag());
       }
 
-      if(1){/***************************/
+      if(T.sPtBalance>par_ptBalance){/***************************/
 	printf("\n WWWWWWWWWWWWWWWWWWWWW  Barrel \n");
 	wDisaply->exportEvent( "WB", V, T, iv);
 	wEve->print();
@@ -641,6 +641,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.5  2012/06/25 20:53:24  stevens4
+// algo and histo cleanup
+//
 // Revision 1.4  2012/06/18 18:28:01  stevens4
 // Updates for Run 9+11+12 AL analysis
 //

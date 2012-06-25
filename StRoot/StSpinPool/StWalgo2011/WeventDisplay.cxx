@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.cxx,v 1.2 2012/06/18 18:28:01 stevens4 Exp $
+// $Id: WeventDisplay.cxx,v 1.3 2012/06/25 20:53:29 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -10,6 +10,7 @@
 #include <TStyle.h>
 #include <TFile.h>
 #include <TText.h>
+#include <TLatex.h>
 #include <TList.h>
 #include <TBox.h>
 #include <TPaveText.h>
@@ -57,7 +58,7 @@ WeventDisplay::WeventDisplay( St2011WMaker* mk, int mxEv) {
 
   hEmcET=new TH2F("eveBtowET","EMC  ET sum, Z=[0.3,30]GeV; event eta ; phi",38,-1.4,2.4,63,-PI,PI);
 
-  hTpcET=new TH2F("eveTpcET","TPC PT sum, Z[0.3,10]GeV/c; event eta ; phi",28,-1.4,1.4,63,-PI,PI);
+  hTpcET=new TH2F("eveTpcET","TPC PT sum, Z[0.3,10]GeV/c; event eta ; phi",32,-1.6,1.6,63,-PI,PI);
 
   for(int iep=0;iep<mxBSmd;iep++) {
     sprintf(txt1,"eveBsmdAdc_%c",cPlane[iep]);
@@ -119,6 +120,8 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
   string detector=tit;
 
   if(detector.compare("WB") == 0){ //barrel event display
+    sprintf(txt,"display-%s%.0f_run%d.eventId%05dvert%d",tit,myTr.cluster.ET,runNo,eveID,myV.id);
+    TFile hf(Form("%s.root",txt),"recreate"); //TFile hf(txt,"recreate");
     c0=new TCanvas(txt,txt,850,600);
     c0->cd();
     
@@ -186,8 +189,6 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
     printf("WeventDisplay:: BTOW  %s\n",txt);
     pvt->AddText(txt);
     // save dump of histos
-    sprintf(txt,"display-%s_run%d.eventId%05dvert%d.root",tit,runNo,eveID,myV.id);
-    TFile hf(txt,"recreate");
     if(hf.IsOpen()) {
       hEmcET->Write();
       hTpcET->Write();
@@ -196,6 +197,8 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
     }
   }
   else if(detector.compare("WE") == 0){ //endcap event display
+    sprintf(txt,"display-%s%.0f_run%d.eventId%05dvert%d",tit,myTr.cluster.ET,runNo,eveID,myV.id);
+    TFile hf(Form("%s.root",txt),"recreate");
     c0=new TCanvas(txt,txt,1750,1300);
     c0->cd();
 
@@ -249,6 +252,11 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
       tline->Draw(); Lx->Add(tline);
       tlineGlob->SetLineStyle(2); tlineGlob->Draw(); Lx->Add(tlineGlob);
       hEsmdShower[iuv]->Draw();
+
+      //print Q/Pt warning
+      if( iuv==1 && myTr.prMuTrack->pt() >= 100.0 ) {
+	TLatex* tx = new TLatex(3,0.9*hEsmdShower[iuv]->GetMaximum(),"| Q/P_{T} | < 0.01");  tx->SetTextColor(kRed); tx->SetTextSize(0.1); tx->Draw();
+      }
     }
     hEsmdShower[0]->SetFillColor(kBlue-5);
     hEsmdShower[1]->SetFillColor(kGreen-5);
@@ -304,30 +312,42 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
     
     //........... text information .............
     pvt = new TPaveText(0,0.,1,1,"br");
+    TH1F* hText = new TH1F("text"," ",1,0,1);
     cLD->cd();
-    sprintf(txt,"run=%d  eveID=%05d daq=%d vertex:ID=%d Z=%.0fcm",runNo,eveID,daqSeq,myV.id,myV.z);
+    sprintf(txt,"run=%d  eveID=%05d daq=%d vertex:ID=%d Z=%.0fcm ",runNo,eveID,daqSeq,myV.id,myV.z);
     printf("WeventDisplay::Event ID  %s\n",txt);
-    pvt->AddText(txt);
-    sprintf(txt,"TPC PT(GeV/c) near=%.1f  away=%.1f ", myTr.nearTpcPT, myTr.awayTpcPT);
+    pvt->AddText(txt); hText->SetTitle(Form("%s%s",hText->GetTitle(),txt));
+    sprintf(txt,"TPC PT(GeV/c) prim=%.1f  near=%.1f  away=%.1f ", myTr.prMuTrack->pt(),myTr.nearTpcPT, myTr.awayTpcPT);
     printf("WeventDisplay::Event %s\n",txt);
-    pvt->AddText(txt);
+    pvt->AddText(txt); hText->SetTitle(Form("%s%s",hText->GetTitle(),txt));
     
-    sprintf(txt,"ETOW ET/GeV: 2x1=%.1f  EMC: near= %.1f   away= %.1f",myTr.cluster.ET,myTr.nearEmcET,myTr.awayEmcET);
+    sprintf(txt,"ETOW ET/GeV: 2x2=%.1f  EMC: near= %.1f   away= %.1f ",myTr.cluster.ET,myTr.nearEmcET,myTr.awayEmcET);
     printf("WeventDisplay:: %s\n",txt);
-    pvt->AddText(txt);
+    pvt->AddText(txt); hText->SetTitle(Form("%s%s",hText->GetTitle(),txt));
     
-    sprintf(txt,"total ET/GeV:   near= %.1f   away= %.1f  ptBalance= %.1f",myTr.nearTotET,myTr.awayTotET,myTr.ptBalance.Perp());
+    sprintf(txt,"total ET/GeV:   near= %.1f   away= %.1f  ptBalance= %.1f ",myTr.nearTotET,myTr.awayTotET,myTr.ptBalance.Perp());
     printf("WeventDisplay:: %s\n",txt);
-    pvt->AddText(txt);
+    pvt->AddText(txt); hText->SetTitle(Form("%s%s",hText->GetTitle(),txt));
     
-    sprintf(txt,"ESMD E/MeV:   U plane= %.1f  V plane= %.1f ",myTr.esmdE[0],myTr.esmdE[1]);
+    sprintf(txt,"Q/Pt = %.3f   : ESMD E/MeV  U plane= %.1f  V plane= %.1f ",(1.0*myTr.prMuTrack->charge())/myTr.prMuTrack->pt(),myTr.esmdE[0],myTr.esmdE[1]);
     printf("WeventDisplay:: %s\n",txt);
-    pvt->AddText(txt);
+    pvt->AddText(txt); hText->SetTitle(Form("%s%s",hText->GetTitle(),txt));
 
     float chi2=myTr.glMuTrack->chi2(); if(chi2>999.) chi2=-1.;
     sprintf(txt,"Track: eta=%.1f Q=%d nFit=%d nPoss=%d r1=%.0f r2=%.0f chi2=%.1f",myTr.pointTower.R.Eta(),myTr.prMuTrack->charge(),myTr.prMuTrack->nHitsFit(),myTr.prMuTrack->nHitsPoss(),myTr.glMuTrack->firstPoint().perp(),myTr.glMuTrack->lastPoint().perp(),chi2);
     printf("WeventDisplay:: %s\n",txt);
-    pvt->AddText(txt);
+    pvt->AddText(txt); hText->SetTitle(Form("%s%s",hText->GetTitle(),txt));
+
+    // save dump of histos
+    if(hf.IsOpen()) {
+      hText->Write();
+      hEmcET->Write();
+      hTpcET->Write();
+      hEsmdShower[0]->Write();
+      hEsmdShower[1]->Write();
+      hEsmdXpt->Write();
+      hf.Close();
+    }
   }
   
   pvt->Draw();
@@ -577,6 +597,9 @@ WeventDisplay::export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack m
 
 
 // $Log: WeventDisplay.cxx,v $
+// Revision 1.3  2012/06/25 20:53:29  stevens4
+// algo and histo cleanup
+//
 // Revision 1.2  2012/06/18 18:28:01  stevens4
 // Updates for Run 9+11+12 AL analysis
 //
