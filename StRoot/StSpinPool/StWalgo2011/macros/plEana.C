@@ -343,9 +343,9 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); 
+      if(i==2) {h->Rebin(8); h->GetXaxis()->SetRangeUser(0.5,2.0);}
       if(i<2) h->Draw("colz");
       else  h->Draw();
-      if(i==2) h->Rebin(4);
       if(i==3) h->Draw("colz");
     }
    
@@ -421,14 +421,12 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
 
  case 19:{    sprintf(padTit,"charge separation, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(2,1);gStyle->SetOptStat(110110);
-    ln=new TLine(0,0,80,0); ln->SetLineColor(kMagenta);
+    c->Divide(2,1);gStyle->SetOptStat(10);
     char **nameX=nameR2;
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH2*)fd->Get(nameX[i]);  assert(h); h->Rebin2D(3,3);
+      h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw("colz");
-      h->SetAxisRange(0,70); ln->Draw();
     }
  } break;//--------------------------------------
 
@@ -591,9 +589,10 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
  case 40: // TPC dE/dX
  case 41: 
    {    
+   fd->cd("tpc");
    int iew=(page-30)%2; // East-West
    int iCut=(page-30)/2;
-   int sec1=1, sec2=12; if(iew) sec1=13, sec2=24;
+   int sec1=1, sec2=12; if(iew) {sec1=13, sec2=24; return;}
    char *titA[]={"stats","nFitPoints", " nFit/nPossible","1st hit Rxy","last hit Rxy","dE/dX"};
    char *titB[]={"Stat","TrNfit","TrFitFrac","TrRxyIn","TrRxyOut","TrdEdX"};
    sprintf(padTit,"TPC %s   sectors[%d,%d], %s",titA[iCut],sec1,sec2,core0);
@@ -603,7 +602,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
      char name[100];
      sprintf(name,"secEemcTr%d_%s",i+sec1,titB[iCut]);
      printf("->%s<\n",name);
-      h=(TH1*)fd->Get(name);  assert(h);
+      h=(TH1*)gDirectory->Get(name);  assert(h);
       c->cd(i+1);
       if(iCut==5) 
 	h->Draw("colz");
@@ -617,17 +616,19 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
  } break;//--------------------------------------
 
  case 42:{    sprintf(padTit,"TPC accepted tracks, %s",core0);
+    fd->cd();
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(2,1);gStyle->SetOptStat(10);
     h2=muETr2D1; // cumulative
     c->cd(1); h2->Draw("colz");
     c->cd(2);
   
+    fd->cd("tpc");
     for(int i=0;i<24;i++) {
       char name[100];
       sprintf(name,"secEemcTr%d_Tr2D1",i+1);
       printf("->%s<\n",name);
-      h=(TH1*)fd->Get(name);  assert(h); h->SetLineColor(30+i);
+      h=(TH1*)gDirectory->Get(name);  assert(h); h->SetLineColor(30+i);
       if(i==0) h->Draw("box");
       else h->Draw("box same");
     }
@@ -750,8 +751,8 @@ void doAllMC(char *core0="", char *iPath=""){
 
 
 // $Log: plEana.C,v $
-// Revision 1.7  2012/06/25 15:39:22  balewski
-// *** empty log message ***
+// Revision 1.8  2012/06/25 20:58:09  stevens4
+// add directory for tpc histos
 //
 // Revision 1.6  2012/06/22 18:23:36  balewski
 // *** empty log message ***
