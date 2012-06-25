@@ -1,7 +1,10 @@
 
-* $Id: gstar_part.g,v 1.34 2011/08/29 20:30:54 jwebb Exp $
+* $Id: gstar_part.g,v 1.35 2012/06/25 16:02:09 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.35  2012/06/25 16:02:09  jwebb
+* Added Xi0(1530).
+*
 * Revision 1.34  2011/08/29 20:30:54  jwebb
 * Added K+ --> e+ pi0 nu and K- --> e- pi0 nu to satisfy an emedding
 * request http://drupal.star.bnl.gov/STAR/starsimrequests/2010/aug/31/ke3-pp-200-gev-run9
@@ -431,6 +434,21 @@ MODULE gstar_part Is the STAR Particle Database
                       trktyp = kGtNEUT   mass  = 1.31486   ,
                       charge = 0         tlife = 0.290E-9  ,
                       bratio = {1,}      mode  = {9707,}
+
+
+  PARTICLE XiZero1530 code   = 40007     pdg   = 3324      ,
+                      trktyp = kGtNeut   mass  = 1.53180   ,
+                      charge = 0         tlife = 0         ,
+                      bratio = {1.,}     mode  = {2308,}
+
+  PARTICLE XiZeroBar1530 _
+                      code   = 40008     pdg   = -3324     ,
+                      trktyp = kGtNeut   mass  = 1.53180   ,
+                      charge = 0         tlife = 0         ,
+                      bratio = {1.,}     mode  = {3109,}
+
+  
+
 
 
   ! omega(782) --> e+ e- 100%
