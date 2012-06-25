@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.16 2011/08/29 20:28:26 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.17 2012/06/25 16:02:05 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.17  2012/06/25 16:02:05  jwebb
+ * Added Xi0(1530).
+ *
  * Revision 1.16  2011/08/29 20:28:26  jwebb
  * Added K+ --> e+ pi0 nu and K- --> e- pi0 nu to satisfy an emedding
  * request http://drupal.star.bnl.gov/STAR/starsimrequests/2010/aug/31/ke3-pp-200-gev-run9
@@ -297,6 +300,9 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 40004, -3312, XiPlus  );      
        Geant2Pdg( 40005, +3322, XiZero );       
        Geant2Pdg( 40006, +3322, XiZeroBar );
+
+       Geant2Pdg( 40007, +3324, XiZero 1530 );
+       Geant2Pdg( 40008, -3324, XiZero 1530 bar );
 
     ///@}
 
