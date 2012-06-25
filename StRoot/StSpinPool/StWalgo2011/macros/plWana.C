@@ -450,12 +450,14 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
  
  case 21:{    sprintf(padTit,"charge separation, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(2,1);gStyle->SetOptStat(10);
+    c->Divide(2,1);gStyle->SetOptStat(110110);
+    ln=new TLine(0,0,80,0); ln->SetLineColor(kMagenta);
     char **nameX=nameR2;
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
-      c->cd(i+1);  h->Draw("colz");
+      c->cd(i+1);  h->Draw("colz"); h->SetAxisRange(0,70);
+      ln->Draw();
     }
  } break;//--------------------------------------
 
@@ -622,7 +624,7 @@ void labelTpcSectors() {
       int sec=tpcSec(x, eta);;
       char txt[100];
       sprintf(txt,"sec %d",sec);
-      tx=new TText(eta,x,txt); tx->Draw();tx->SetTextSize(0.03);
+      tx=new TText(eta,x,txt); tx->Draw();tx->SetTextSize(0.03); tx->SetTextColor(kMagenta);
     }
 }
 
@@ -704,6 +706,9 @@ void doAll(char *core0="", char *iPath="", int isMC=0){
 
 
 // $Log: plWana.C,v $
+// Revision 1.9  2012/06/25 15:39:22  balewski
+// *** empty log message ***
+//
 // Revision 1.8  2012/06/22 20:46:19  balewski
 // prints sector ID on page 42
 //
