@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.3 2012/06/18 18:28:01 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.4 2012/06/25 20:53:26 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -215,7 +215,7 @@ St2011WMaker::initHistos(){
   
   sprintf(txt,"Barrel W: Vertex Z, final selection, 2x2 ET>%.0f GeV; Z(cm)",par_highET);
   hA[98]=new TH1F("muWcar3",txt, 100, -200,200);
-  hA[99]=h=new TH1F("muWeta","Barrel W: lepton eta final selection; lepton eta",100, -1.5,1.5);
+  hA[99]=h=new TH1F("muWeta","Barrel W: lepton eta final selection; lepton eta",400,-2.0,2.0);
 
   // free 100-109
 
@@ -323,6 +323,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.4  2012/06/25 20:53:26  stevens4
+// algo and histo cleanup
+//
 // Revision 1.3  2012/06/18 18:28:01  stevens4
 // Updates for Run 9+11+12 AL analysis
 //

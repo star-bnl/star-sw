@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.3 2012/06/18 18:28:00 stevens4 Exp $
+// $Id: St2011WMaker.h,v 1.4 2012/06/25 20:53:17 stevens4 Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -182,7 +182,7 @@ class St2011WMaker : public StMaker {
   
 
   // histograms
-  TObjArray *HList;
+  TObjArray *HList; TObjArray *HListTpc;
   enum {mxHA=300}; TH1 * hA[mxHA];
   enum {mxHE=300}; TH1 * hE[mxHE];
     
@@ -204,6 +204,7 @@ class St2011WMaker : public StMaker {
   void setTrigID(  int l2bw, int l2ew) { par_l2bwTrgID=l2bw; parE_l2ewTrgID=l2ew; }
 
   void setHList(TObjArray * x){HList=x;}
+  void setHListTpc(TObjArray * x){HListTpc=x;}
   void setMC(int x){isMC=x;}
   void setMaxDisplayEve(int n) { par_maxDisplEve=n;}
   
@@ -220,7 +221,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.3 2012/06/18 18:28:00 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.4 2012/06/25 20:53:17 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -231,6 +232,9 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.4  2012/06/25 20:53:17  stevens4
+// algo and histo cleanup
+//
 // Revision 1.3  2012/06/18 18:28:00  stevens4
 // Updates for Run 9+11+12 AL analysis
 //

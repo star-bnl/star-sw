@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.4 2012/06/18 18:28:00 stevens4 Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.5 2012/06/25 20:53:23 stevens4 Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -26,7 +26,7 @@ St2011WMaker::initEHistos(){
   h->SetMarkerSize(2);//<-- large text
 
   char key[][200]={"inp","L2ewId","L2ewBits","L2ewET","L2ewRnd","tpcOn","primVert","vertZ","Pt10",
-                   "E-in","E200","TrE","Tr2Cl","eta1","goldW"};
+                   "E-in","E200","TrE","Tr2Cl","noNear","noAway","goldW"};
   for(int i=0;i<15;i++) h->Fill(key[i],0.); // preset the order of keys
 
   hE[1]=h=new TH1F("muEInTrg","mu Endcap W input triggers, WARN: scrambled if manyruns are combined by hadd.C; trigID (random order)",nCase,0,nCase);
@@ -115,11 +115,11 @@ St2011WMaker::initEHistos(){
   hE[31]=h=new TH1F("muEmaxAdc","Endcap: ETOW maxADC in event, in-selection; max tower ADC",200,0,4200);
   hE[32]=h=new TH1F("muEtotAdc","Endcap: ETOW sum of ADC>thres , in-selection;ADC sum/event", 80,0,8000.);
   
-  hE[33]=h=new TH1F("muEclET","matched ETOW 2x1 cluster ET  ;cluster  ET (GeV)",100,0,100);
+  hE[33]=h=new TH1F("muEclET","matched ETOW 2x2 cluster ET  ;cluster  ET (GeV)",100,0,100);
   Lx=h->GetListOfFunctions();
   ln=new TLine(parE_clustET,0,parE_clustET,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
-  hE[34]=h=new TH2F("muEclAdcPt","Endcap: matched  TPC PT vs. ETOW 2x1 cluster ADC sum ; cluster (ADC sum);TPC  PT (GeV)",50,0,5000,75,0,150);
+  hE[34]=h=new TH2F("muEclAdcPt","Endcap: matched  TPC PT vs. ETOW 2x2 cluster ADC sum ; cluster (ADC sum);TPC  PT (GeV)",50,0,5000,75,0,150);
   h->GetXaxis()->SetNdivisions(4);
 
   hE[35]=new TH1F("muETrch2","Endcap: track glob chi2/dof X-Y",100,0,5);
@@ -128,9 +128,9 @@ St2011WMaker::initEHistos(){
 
   //.... 4x4 cluster
   hE[37]=h=new TH1F("muEclET24","matched ETOW 4x4 cluster ET ;cluster 4x4  ET (GeV)",100,0,100);
-  hE[38]=h=new TH2F("muEclE242D","Endcap: Excess energy in ETOW 4x4 cluster vs. 2x1 cluster E;2x1 cluster E (GeV); E(4x4)-E(2x1)  E (GeV)",60,0,120,30,0,30);
+  hE[38]=h=new TH2F("muEclE242D","Endcap: Excess energy in ETOW 4x4 cluster vs. 2x2 cluster E;2x2 cluster E (GeV); E(4x4)-E(2x2)  E (GeV)",60,0,120,30,0,30);
 
-   hE[39]=h=new TH1F("muEclET24R","Endcap: ratio (2x1/4x4) cluster ET ; fraction: cluster ET 2x1/ 4x4 ET",100,0,1.2);
+   hE[39]=h=new TH1F("muEclET24R","Endcap: ratio (2x2/4x4) cluster ET ; fraction: cluster ET 2x2/ 4x4 ET",100,0,1.2);
    Lx=h->GetListOfFunctions();
   ln=new TLine(parE_clustFrac24,0,parE_clustFrac24,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
@@ -138,18 +138,18 @@ St2011WMaker::initEHistos(){
 
    hE[40]=h=new TH1F("muEEMCjetET","Endcap: near 'EM jet' ET ; 'EM jet'  ET (GeV)",100,0,100);
 
-   hE[41]=h=new TH2F("muEclEMCjetE2D","Endcap: Excess nearCone ET  vs. 2x1 E;2x1 cluster ET (GeV); ET(cone-2x1) (GeV)",50,0,80,50,0,60);
+   hE[41]=h=new TH2F("muEclEMCjetE2D","Endcap: Excess nearCone ET  vs. 2x2 E;2x2 cluster ET (GeV); ET(cone-2x2) (GeV)",50,0,80,50,0,60);
 
-   hE[42]=h=new TH1F("muETEMCjetETR","Endcap: ratio (2x1/nearCone) ET ; cluster ET/ near cone ET",100,0,1.2);
+   hE[42]=h=new TH1F("muETEMCjetETR","Endcap: ratio (2x2/nearCone) ET ; cluster ET/ near cone ET",100,0,1.2);
   Lx=h->GetListOfFunctions();
   ln=new TLine(parE_nearTotEtFrac,0,parE_nearTotEtFrac,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
 
   // .... track-EMC distance cuts
-  hE[43]=h=new TH2F("muEdist1","Endcap: X-Y Distance(track-ETOW cluster) vs. 2x1 E;2x1 cluster E (GeV); | distance | (cm)",40,0,120,40,0,25);
+  hE[43]=h=new TH2F("muEdist1","Endcap: X-Y Distance(track-ETOW cluster) vs. 2x2 E;2x2 cluster E (GeV); | distance | (cm)",40,0,120,40,0,25);
   hE[44]=h=new TH2F("muEdist2","Endcap: R#Delta #phi   (track-ETOW cluster) vs.#phi-clust;  .#phi-clust(rad) ;R#Delta #phi (cm)",100,-3.2,3.2,40,-20,20);
-  hE[45]=h=new TH2F("muEdist3","Endcap: R#Delta #phi   (track-ETOW cluster) vs. 2x1 E;2x1 cluster E (GeV); R#Delta #phi (cm)",40,0,120,40,-20,20);
-  hE[46]=h=new TH1F("muEdist4","Endcap: X-Y Distance(track-ETOW cluster) for 2x1 E;| X-Y distance |   (cm)",100,0,50);
+  hE[45]=h=new TH2F("muEdist3","Endcap: R#Delta #phi   (track-ETOW cluster) vs. 2x2 E;2x2 cluster E (GeV); R#Delta #phi (cm)",40,0,120,40,-20,20);
+  hE[46]=h=new TH1F("muEdist4","Endcap: X-Y Distance(track-ETOW cluster) for 2x2 E;| X-Y distance |   (cm)",100,0,50);
   Lx=h->GetListOfFunctions();
   ln=new TLine(parE_delR3D,0,parE_delR3D,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
   
@@ -161,8 +161,8 @@ St2011WMaker::initEHistos(){
   //.. away-side jet  veto
   hE[50]=h=new TH1F("muETwayET","Endcap: TPC away-cone PT sum;   PT (GeV)",100,0,100);
   hE[51]=h=new TH1F("muEBwayET","Endcap: BTOW away-cone ET sum;   ET (GeV)",100,0,100);
-  hE[52]=h=new TH2F("muETotwayET2D","Endcap: away TPC+EMC ET sum  vs. 2x1 ETOW cluster ET;  2x1 ET (GeV); away ET (GeV)",50,0,100,150,0,100);
-  hE[53]=h=new TH2F("muEAwayET2Db","Endcap: away EMC ET sum  vs. 2x1 ETOW cluster ET;  2x1 ET (GeV); away EMC ET (GeV)",50,0,100,80,0,80);
+  hE[52]=h=new TH2F("muETotwayET2D","Endcap: away TPC+EMC ET sum  vs. 2x2 ETOW cluster ET;  2x2 ET (GeV); away ET (GeV)",50,0,100,150,0,100);
+  hE[53]=h=new TH2F("muEAwayET2Db","Endcap: away EMC ET sum  vs. 2x2 ETOW cluster ET;  2x2 ET (GeV); away EMC ET (GeV)",50,0,100,80,0,80);
   hE[54]=h=new TH1F("muEAwayTotEt","Endcap: away-cone TPC+EMC ET sum ; away ET (GeV)",200,0,100);
 
   hE[55]=h=new TH1F("muEEwayET","Endcap: ETOW away-cone ET sum;   ET (GeV)",100,0,100); // away side energy  
@@ -171,51 +171,51 @@ St2011WMaker::initEHistos(){
 
   //... final golden plots ....
 
-  hE[60]=h=new TH2F("muEEclETPt","Endcap: Awayside TPC PT vs.  isolated ETOW 2x1 cluster ET, matched;2x1 cluster ET (GeV) ; Awayside TPC PT (GeV)",50,0,100,75,0,150);
+  hE[60]=h=new TH2F("muEEclETPt","Endcap: Awayside TPC PT vs.  isolated ETOW 2x2 cluster ET, matched;2x2 cluster ET (GeV) ; Awayside TPC PT (GeV)",50,0,100,75,0,150);
   
   hE[61]=new TH1F("muEbX7eht","L2W-EHT-rnd  events vs. bXing; bXing= raw bx7",128,-0.5,127.5); // filled on input
-  hE[62]=h=new TH2F("muEEne_Deta","Endcap W: ETOW 2x1 cluster energy vs. detector eta, final selection; endcap eta bin; 2x1 Energy (GeV)",12,0,12,50,0,100);
+  hE[62]=h=new TH2F("muEEne_Deta","Endcap W: ETOW 2x2 cluster energy vs. detector eta, final selection; endcap eta bin; 2x2 Energy (GeV)",12,0,12,50,0,100);
 
   hE[69]=h=new TH2F("muEeXY","Endcap W: Projected track XY at SMD depth;  X (cm); Y (cm)",100,-280,280,100,-280,280);
 
   //.... final Ws
-  hE[90]=h=new TH1F("muE_WET","Endcap W: Final selection; 2x1 ETOW cluster ET (GeV)", 100,0,100);
+  hE[90]=h=new TH1F("muE_WET","Endcap W: Final selection; 2x2 ETOW cluster ET (GeV)", 100,0,100);
   Lx=h->GetListOfFunctions();
   ln=new TLine(parE_highET,0,parE_highET,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
   sprintf(txt,"Endcap W: Final selection, ET>%.0f GeV 'goldenW'; detector eta ; detector phi (rad)",parE_highET);
   hE[91]=new TH2F("muE_W2D1",txt,15,0.5,2.0,12,-PI,PI);
 
-  hE[92]=new TH2F("muE_Wdedx","Endcap W: Track dEdx, final W selection; 2x1 ET (GeV); dEdx (keV)",100,0,100,100,0,10);
-  hE[93]=new TH2F("muE_WglDca","Endcap W: Track glob vertex abs(DCA), final selection ; 2x1 ET (GeV); |DCA| (cm)",100,0,100,100,0,5);
-  hE[94]=new TH2F("muE_WglDcaSP","Endcap W: Track prim POSITIVE glob signed DCA, final selection; 2x1 ET (GeV); sDCA (cm)",100,0,100,100,-5,5);
-  hE[95]=new TH2F("muE_WglDcaSN","Endcap W: Track prim NEGATIVE glob signed DCA, final selection ; 2x1 ET (GeV); sDCA (cm)",100,0,100,100,-5,5);
+  hE[92]=new TH2F("muE_Wdedx","Endcap W: Track dEdx, final W selection; 2x2 ET (GeV); dEdx (keV)",100,0,100,100,0,10);
+  hE[93]=new TH2F("muE_WglDca","Endcap W: Track glob vertex abs(DCA), final selection ; 2x2 ET (GeV); |DCA| (cm)",100,0,100,100,0,5);
+  hE[94]=new TH2F("muE_WglDcaSP","Endcap W: Track prim POSITIVE glob signed DCA, final selection; 2x2 ET (GeV); sDCA (cm)",100,0,100,100,-5,5);
+  hE[95]=new TH2F("muE_WglDcaSN","Endcap W: Track prim NEGATIVE glob signed DCA, final selection ; 2x2 ET (GeV); sDCA (cm)",100,0,100,100,-5,5);
 
-  sprintf(txt,"Endcap W: Vertex ID, final selection, 2x1 ET>%.0f GeV; vertex ID",parE_highET);
+  sprintf(txt,"Endcap W: Vertex ID, final selection, 2x2 ET>%.0f GeV; vertex ID",parE_highET);
   hE[96]=h=new TH1F("muE_Wcar1",txt,10,-0.5,9.5);
   h->SetLineColor(kBlue);h->SetLineWidth(3);
 
-  sprintf(txt,"Endcap W: Vertex 'funny' rank, final selection, 2x1 ET>%.0f GeV;  X=Log10(rank)+offset",parE_highET);
+  sprintf(txt,"Endcap W: Vertex 'funny' rank, final selection, 2x2 ET>%.0f GeV;  X=Log10(rank)+offset",parE_highET);
   hE[97]=new TH1F("muE_Wcar2",txt, 150, -9,25);
 
-  sprintf(txt,"Vertex Z ,Endcap W: Vertex Z, final selection 2x1 ET>%.0f GeV; Z(cm)",parE_highET);
+  sprintf(txt,"Vertex Z ,Endcap W: Vertex Z, final selection 2x2 ET>%.0f GeV; Z(cm)",parE_highET);
   hE[98]=new TH1F("muE_Wcar3",txt, 100, -200,200);
-  hE[99]=h=new TH1F("muE_Weta","Endcap W: Lepton eta, final selection ; lepton eta",100, 0.5,2.0);
+  hE[99]=h=new TH1F("muE_Weta","Endcap W: Lepton eta, final selection ; lepton eta",400,-2.0,2.0);
   hE[100]=h=new TH2F("muE_WXY","Endcap W: Projected track XY at SMD depth, final selection; X (cm); Y (cm)",100,-280,280,100,-280,280);
 
   // free 101-116
   //..... series of electron ET plots after succesive cuts
-  char tt2[][200]={"max 2x1","track matched","no near ET","no away ET"};
+  char tt2[][200]={"max 2x2","track matched","no near ET","no away ET"};
   for(int i=0;i<4;i++){
-    sprintf(txt,"Endcap electron candidate, cut=%s; 2x1 ET (GeV)",tt2[i]);
+    sprintf(txt,"Endcap electron candidate, cut=%s; 2x2 ET (GeV)",tt2[i]);
     sprintf(txt0,"muE_ETlive%d",i);
     hE[110+i]=h=new TH1F(txt0,txt, 100,0,100);
   }
   
-  hE[132]=h=new TH2F("muEptBalance_clust","Endcap: ptBalance vs cluster ET; 2x1 Cluster ET; ptBalance",100,0,100,100,0,100);
+  hE[132]=h=new TH2F("muEptBalance_clust","Endcap: ptBalance vs cluster ET; 2x2 Cluster ET; ptBalance",100,0,100,100,0,100);
   hE[133]=h=new TH2F("muEptBalance_awayTot","ptBalance vs awayside PT; awayside PT; ptBalance",100,0,100,100,0,100);
 
-  hE[134]=h=new TH2F("muEsPtBalance_clust","Endcap: sPtBalance vs cluster ET; 2x1 Cluster ET (GeV); signed Pt balance (GeV)",100,0,100,100,-100,100);
+  hE[134]=h=new TH2F("muEsPtBalance_clust","Endcap: sPtBalance vs cluster ET; 2x2 Cluster ET (GeV); signed Pt balance (GeV)",100,0,100,100,-100,100);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,parE_ptBalance,100,parE_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
@@ -224,9 +224,9 @@ St2011WMaker::initEHistos(){
   ln=new TLine(0,parE_ptBalance,100,parE_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
 
-  hE[136]=h=new TH1F("muEclustPtBal",Form("Endcap: PT Balance > %.1f ; 2x1 Cluster ET",parE_ptBalance),100,0,100);
-  hE[137]=h=new TH1F("muEclustPtBal_bckgrd",Form("Endcap: PT Balance < %.1f ; 2x1 Cluster ET",parE_ptBalance),100,0,100);
-  hE[140]=h=new TH1F("muEclustPtBalnoE",Form("Endcap: sPT Balance > %.1f (EEMC not included); 2x1 Cluster ET",parE_ptBalance),100,0,100);
+  hE[136]=h=new TH1F("muEclustPtBal",Form("Endcap: PT Balance > %.1f ; 2x2 Cluster ET",parE_ptBalance),100,0,100);
+  hE[137]=h=new TH1F("muEclustPtBal_bckgrd",Form("Endcap: PT Balance < %.1f ; 2x2 Cluster ET",parE_ptBalance),100,0,100);
+  hE[140]=h=new TH1F("muEclustPtBalnoE",Form("Endcap: sPT Balance > %.1f (EEMC not included); 2x2 Cluster ET",parE_ptBalance),100,0,100);
   
   hE[184+2] = new TH1F("Epos_muEclustpTbal_wE","Endcap: pos_muEclustpTbal_wE",100,0,100);
   hE[184+1] = new TH1F("Eneg_muEclustpTbal_wE","Endcap: neg_muEclustpTbal_wE",100,0,100);
@@ -235,15 +235,15 @@ St2011WMaker::initEHistos(){
   hE[184+6] = new TH1F("Epos_muEclustpTbal_back","Endcap: pos_muEclustpTbal_back",100,0,100);
   hE[184+5] = new TH1F("Eneg_muEclustpTbal_back","Endcap: neg_muEclustpTbal_back",100,0,100);
 
-  hE[190]=h=new TH2F("muEclustEt_etaWp","Endcap Wp: 2x1 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x1 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
-  hE[191]=h=new TH2F("muEclustEt_etaWm","Endcap Wm: 2x1 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x1 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
+  hE[190]=h=new TH2F("muEclustEt_etaWp","Endcap Wp: 2x2 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
+  hE[191]=h=new TH2F("muEclustEt_etaWm","Endcap Wm: 2x2 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
 
-  sprintf(txt,"Endcap: TPC GLOB Q/PT  ; ETOW 2x1 cluster ET (GeV); Q/PT");
+  sprintf(txt,"Endcap: TPC GLOB Q/PT  ; ETOW 2x2 cluster ET (GeV); Q/PT");
   hE[200]=h=new TH2F("muEchRecPNg", txt,100,0.,100.,100,-0.1,0.1);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
-  sprintf(txt,"Endcap: TPC PRIM  Q/PT ; ETOW 2x1 cluster ET (GeV); Q/PT");
+  sprintf(txt,"Endcap: TPC PRIM  Q/PT ; ETOW 2x2 cluster ET (GeV); Q/PT");
   hE[201]=h=new TH2F("muEchRecPNp", txt,100,0.,100.,100,-0.1,0.1);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);

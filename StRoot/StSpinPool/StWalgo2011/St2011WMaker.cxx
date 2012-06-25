@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.6 2012/06/22 20:45:58 balewski Exp $
+// $Id: St2011WMaker.cxx,v 1.7 2012/06/25 20:53:15 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -65,6 +65,7 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   par_l2bwTrgID=parE_l2ewTrgID=0;
  
   setHList(0);
+  setHListTpc(0);
   setMC(0);
   nInpEve= nTrigEve= nAccEve=0; 
 
@@ -87,7 +88,7 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   par_clustFrac24=0.95; // ET ratio 2x2/4x4 cluster
   par_nearTotEtFrac=0.88;  // ratio 2x2/near Tot ET 
   par_delR3D=7.; // cm, dist between projected track and center of cluster 
-  par_leptonEta=1.0; // bracket acceptance
+  par_leptonEta=1.5; // bracket acceptance
   par_ptBalance=14.; // (GeV), ele cluster vector + jet sum vector
   //... track
   par_nFitPts=15; // hits on the track
@@ -239,9 +240,9 @@ St2011WMaker::InitRun(int runNo){
     //Run 12 ??
 
     mTpcFilter[isec].setCuts(par_nFitPts,par_nHitFrac,Rin,Rout);
-    mTpcFilter[isec].init("sec",sec,HList,true);
+    mTpcFilter[isec].init("sec",sec,HListTpc,true);
     mTpcFilterE[isec].setCuts(parE_nFitPts,parE_nHitFrac,RinE,RoutE);
-    mTpcFilterE[isec].init("secEemcTr",sec,HList,false);
+    mTpcFilterE[isec].init("secEemcTr",sec,HListTpc,false);
   }
 
   return kStOK;
@@ -531,6 +532,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.7  2012/06/25 20:53:15  stevens4
+// algo and histo cleanup
+//
 // Revision 1.6  2012/06/22 20:45:58  balewski
 // change Rin for M-C matched to 2012 data
 //
