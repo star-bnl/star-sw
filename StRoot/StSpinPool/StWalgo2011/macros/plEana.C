@@ -421,12 +421,14 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
 
  case 19:{    sprintf(padTit,"charge separation, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(2,1);gStyle->SetOptStat(10);
+    c->Divide(2,1);gStyle->SetOptStat(110110);
+    ln=new TLine(0,0,80,0); ln->SetLineColor(kMagenta);
     char **nameX=nameR2;
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH2*)fd->Get(nameX[i]);  assert(h); h->Rebin2D(3,3);
       c->cd(i+1);  h->Draw("colz");
+      h->SetAxisRange(0,70); ln->Draw();
     }
  } break;//--------------------------------------
 
@@ -748,6 +750,9 @@ void doAllMC(char *core0="", char *iPath=""){
 
 
 // $Log: plEana.C,v $
+// Revision 1.7  2012/06/25 15:39:22  balewski
+// *** empty log message ***
+//
 // Revision 1.6  2012/06/22 18:23:36  balewski
 // *** empty log message ***
 //
