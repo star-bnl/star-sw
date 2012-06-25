@@ -18,8 +18,6 @@ int rdMuWana2012(
 	     int  geant=false
   ) { 
   
-  char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
-  
   if(isMC==0) //jetDir="/star/institutions/iucf/stevens4/run12w/sampler-pass2-A/jets/";
   jetDir="./"; 
 
@@ -105,11 +103,6 @@ int rdMuWana2012(
     // libraries for access to MC record  
     assert( !gSystem->Load("StMcEvent"));      
     assert( !gSystem->Load("StMcEventMaker")); 
-    
-    // libraries for trigger simulator
-    assert( !gSystem->Load("StEmcSimulatorMaker"));
-    assert( !gSystem->Load("StEEmcSimulatorMaker"));
-    assert( !gSystem->Load("StEpcMaker"));
   }
   
   cout << " loading done " << endl;
@@ -118,7 +111,8 @@ int rdMuWana2012(
   chain = new StChain("StChain"); 
   // create histogram storage array  (everybody needs it):
   TObjArray* HList=new TObjArray;
-  
+  TObjArray* HListTpc=new TObjArray;
+
   if(geant){                          
     // get geant file                    
     StIOMaker* ioMaker = new StIOMaker();
@@ -179,36 +173,11 @@ int rdMuWana2012(
     mcEventMaker->doPrintMemoryInfo = false;              
   }
   
-  if(geant && useJetFinder!=1){ //only use trigger simulator in W algo
-    //BEMC simulator:
-    StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
-    emcSim->setCalibSpread(kBarrelEmcTowerId,0.15);//spread gains by 15%
-    StEmcADCtoEMaker *bemcAdc = new StEmcADCtoEMaker();//for real data this sets calibration and status
-    
-    //EEMC simulator:
-    new StEEmcDbMaker("eemcDb");
-    StEEmcSlowMaker *slowSim = new StEEmcSlowMaker("slowSim");
-    //slowSim->setSamplingFraction(0.0384); // effectively scales all Tower energies with a factor of 1.3 (for old private filtered simu only!)
-    slowSim->setAddPed(true);
-    slowSim->setSmearPed(true);
-    
-    //Get TriggerMaker
-    StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
-    simuTrig->setHList(HList);
-    simuTrig->setMC(isMC); // must be before individual detectors, to be passed
-    simuTrig->useBbc();
-    simuTrig->useEemc(0);//default=0:just process ADC, 1,2:comp w/trgData,see .
-    simuTrig->eemc->setSetupPath(eemcSetupPath);
-    simuTrig->useBemc();
-    simuTrig->bemc->setConfig(2);
-  }
-  
   //.... Jet finder code ....
   if (useJetFinder > 0)  {
     TString jetFile = jetDir; jetFile+="jets_"+outF+".root";
     cout << "BEGIN: running jet finder/reader =" <<jetFile<<"="<< endl;
   }
-
 
   if (useJetFinder == 1){// run jet finder
     double pi = atan(1.0)*4.0;    
@@ -327,6 +296,7 @@ int rdMuWana2012(
   //Collect all output histograms   
   //already defined this above:  TObjArray* HList=new TObjArray;
   WmuMk->setHList(HList);
+  WmuMk->setHListTpc(HListTpc);
   WpubMk->setHList(HList);
   
   StSpinDbMaker *spDb=0;
@@ -400,6 +370,10 @@ int rdMuWana2012(
   if(hf->IsOpen()) {
     //HList->ls();
     HList->Write();
+    //write TPC histos to new directory
+    TDirectory *tpc = hf->mkdir("tpc");
+    tpc->cd();
+    HListTpc->Write();
     printf("\n Histo saved -->%s<\n",outFh.Data());
   } else {
     printf("\n Failed to open Histo-file -->%s<, continue\n",outFh.Data());
@@ -411,6 +385,9 @@ int rdMuWana2012(
 
 
 // $Log: rdMuWana2012.C,v $
+// Revision 1.4  2012/06/25 20:57:05  stevens4
+// add directory for tpc histos
+//
 // Revision 1.3  2012/06/22 18:23:36  balewski
 // *** empty log message ***
 //
