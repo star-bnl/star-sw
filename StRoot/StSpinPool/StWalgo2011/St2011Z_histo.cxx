@@ -104,11 +104,15 @@ St2011ZMaker::initHistos(){
 
   hA[34]=h=new TH2F(core+"Ene_Deta","final Z: cluster energy vs. detector eta; barrel eta bin; 2x2 Energy (GeV)",40,0,40,50,0,100);
 
-  //endcap Z histos
-  hA[50]=h=new TH1F(core+"Endcap_EventType",core+" event type",nCase,0,nCase);
+  hA[35]=h=new TH2F(core+"eta12","Final Z selection #eta_{1} vs #eta_{2} with two Barrel tracks; #eta_{1} ; #eta_{2} ", 60,-1.0,2.0,60,-1.0,2.0);
+
+  //************* endcap histos ***************
+
+  // barrel track matched with endcap cluster (no track requirement
+  hA[50]=h=new TH1F(core+"EndcapNoTrk_EventType",core+" event type",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
-  const char *keyE[]={"inp","vert","tr1","et1","con1","tr2","et2","con2","phi12","m2"};
+  const char *keyE[]={"inp","vert","trB","etB","conB","trE","etE","conE","phi12","m2"};
   for(int i=0;i<10;i++) h->Fill(keyE[i],0.); // preset the order of keys
 
    hA[51]=h=new TH1F(core+"Eet1iso","Track-1 4x4 ET fract; 2x2ET / 4x4 ET",105,0,1.05);
@@ -121,25 +125,60 @@ St2011ZMaker::initHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_nearTotEtFracZ,0,par_nearTotEtFracZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
-  hA[54]=h=new TH1F(core+"Eet2iso","Track-2 4x4 ET fract; 2x2ET / 4x4 ET",105,0,1.05);
+  hA[54]=h=new TH1F(core+"Eet2isoNoTrk","Track-2 4x4 ET fract; 2x2ET / 4x4 ET",105,0,1.05);
   Lx=h->GetListOfFunctions();
   ln=new TLine(wMK->parE_clustFrac24,0,wMK->parE_clustFrac24,yMax);  ln->SetLineColor(kMagenta);  ln->SetLineStyle(2); Lx->Add(ln);
-  hA[55]=h=new TH1F(core+"Eet2val","Cluster-2 ET before cuts; 2x2ET (GeV)",100,0,100);
+  hA[55]=h=new TH1F(core+"Eet2valNoTrk","Cluster-2 ET before cuts; 2x2ET (GeV)",100,0,100);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_clusterEtZ,0,par_clusterEtZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
-  hA[56]=h=new TH1F(core+"Eet2frac","Cluset-2 cone ET fraction; 2x2ET/nearET",105,0,1.05);
+  hA[56]=h=new TH1F(core+"Eet2fracNoTrk","Cluset-2 cone ET fraction; 2x2ET/nearET",105,0,1.05);
   Lx=h->GetListOfFunctions();
   ln=new TLine(wMK->parE_nearTotEtFrac,0,wMK->parE_nearTotEtFrac,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
-  hA[57]=h=new TH1F(core+"Ephi12","delta phi tr1-tr2; delPhi12(rad)", 100 ,-PI+1.,PI+1.);
+  hA[57]=h=new TH1F(core+"Ephi12NoTrk","delta phi tr1-tr2; delPhi12(rad)", 100 ,-PI+1.,PI+1.);
   h->SetFillColor(kBlue);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_delPhi12,0,par_delPhi12,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   ln=new TLine(-par_delPhi12,0,-par_delPhi12,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
-  hA[58]=h=new TH1F(core+"E_Zmass","  Final Z selection with one track and one Endcap cluster; Invariant Mass (GeV)", 100,0,200);
+  hA[58]=h=new TH1F(core+"E_ZmassNoTrk","  Final Z selection with one varrel track and one Endcap cluster (no track requirement); Invariant Mass (GeV)", 100,0,200);
   h->SetFillColor(kYellow);
   ln=new TLine(91.2,-.2,91.2,10.);  ln->SetLineColor(kGreen); ln->SetLineWidth(3);  ln->SetLineStyle(1); Lx->Add(ln);
 
+  hA[59]=h=new TH2F(core+"Eeta12NoTrk","Final Z selection #eta_{1} vs #eta_{2} with one Barrel track and one Endcap cluster (no track requirement); #eta_{1} ; #eta_{2} ", 60,-1.0,2.0,60,-1.0,2.0);
+  
+
+  // barrel track matched with endcap track candidate
+  hA[60]=h=new TH1F(core+"Endcap_EventType",core+" event type",nCase,0,nCase);
+  h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
+  h->SetLineColor(kBlue);h->SetLineWidth(2);
+  const char *keyE2[]={"inp","vert","trB","etB","conB","trE","etE","conE","phi12","m2","QQ"};
+  for(int i=0;i<11;i++) h->Fill(keyE2[i],0.); // preset the order of keys
+
+  hA[61]=h=new TH1F(core+"Eet2iso","Track-2 4x4 ET fract; 2x2ET / 4x4 ET",105,0,1.05);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(wMK->parE_clustFrac24,0,wMK->parE_clustFrac24,yMax);  ln->SetLineColor(kMagenta);  ln->SetLineStyle(2); Lx->Add(ln);
+  hA[62]=h=new TH1F(core+"Eet2val","Cluster-2 ET before cuts; 2x2ET (GeV)",100,0,100);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_clusterEtZ,0,par_clusterEtZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  hA[63]=h=new TH1F(core+"Eet2frac","Cluset-2 cone ET fraction; 2x2ET/nearET",105,0,1.05);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(wMK->parE_nearTotEtFrac,0,wMK->parE_nearTotEtFrac,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  hA[64]=h=new TH1F(core+"Ephi12","delta phi tr1-tr2; delPhi12(rad)", 100 ,-PI+1.,PI+1.);
+  h->SetFillColor(kBlue);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_delPhi12,0,par_delPhi12,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  ln=new TLine(-par_delPhi12,0,-par_delPhi12,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  
+  hA[65]=h=new TH1F(core+"E_ZmassUnlike","  Final Z unlike charge selection with one Barrel track and one Endcap track; Invariant Mass (GeV)", 100,0,200);
+  h->SetFillColor(kYellow);
+  ln=new TLine(91.2,-.2,91.2,10.);  ln->SetLineColor(kGreen); ln->SetLineWidth(3);  ln->SetLineStyle(1); Lx->Add(ln);
+  hA[66]=h=new TH1F(core+"E_ZmassLike","  Final Z like charge selection with one Barrel track and one Endcap track; Invariant Mass (GeV)", 100,0,200);
+  h->SetFillColor(kYellow);
+  ln=new TLine(91.2,-.2,91.2,10.);  ln->SetLineColor(kGreen); ln->SetLineWidth(3);  ln->SetLineStyle(1); Lx->Add(ln);
+
+
+  hA[67]=h=new TH2F(core+"Eeta12","Final Z selection #eta_{1} vs #eta_{2} with one Barrel track and one Endcap track; #eta_{1} ; #eta_{2} ", 60,-1.0,2.0,60,-1.0,2.0);
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {

@@ -1,4 +1,4 @@
-// $Id: St2011W_EacessMuDst.cxx,v 1.4 2012/06/18 18:28:00 stevens4 Exp $
+// $Id: St2011W_EacessMuDst.cxx,v 1.5 2012/06/26 20:30:23 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -70,7 +70,7 @@ St2011WMaker::accessEndcapTrig(){ // return non-zero on abort
   
 
   //  hack to make the code work also for run 9 and early run 12
-  if (mRunNo<11000111) {
+  if (mRunNo<11000111 || mRunNo>13000000) {  
     wEve->l2EbitET=1;
     wEve->l2EbitRnd=1;
   }
@@ -254,6 +254,9 @@ St2011WMaker::accessESMD(){
 
 
 //$Log: St2011W_EacessMuDst.cxx,v $
+//Revision 1.5  2012/06/26 20:30:23  stevens4
+//Updates ZMaker for mixing barrel and endcap arms
+//
 //Revision 1.4  2012/06/18 18:28:00  stevens4
 //Updates for Run 9+11+12 AL analysis
 //
