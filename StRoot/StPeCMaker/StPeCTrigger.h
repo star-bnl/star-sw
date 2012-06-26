@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.h,v 1.6 2003/11/25 01:54:38 meissner Exp $
+// $Id: StPeCTrigger.h,v 1.7 2012/06/26 18:51:11 ramdebbe Exp $
 // $Log: StPeCTrigger.h,v $
+// Revision 1.7  2012/06/26 18:51:11  ramdebbe
+// previous entry did not include actual changes
+//
 // Revision 1.6  2003/11/25 01:54:38  meissner
 // correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
 //
@@ -52,6 +55,8 @@ public:
   Int_t  p4c ;
   Int_t  p5 ;
 
+  Int_t runN;
+
   Int_t  ctbNE ; // hits in ctb North  East quadrant
   Int_t  ctbSE ; // hits in ctb South  East quadrant 
   Int_t  ctbBE ; // hits in ctb Top    East quadrant
@@ -80,7 +85,7 @@ public:
   Float_t   ctbSum ;
   Float_t   mwcSum ;
   
-  // attanuated 
+  // attenuated 
   Float_t   zdcEast ;
   Float_t   zdcWest ;
   Float_t   zdcSum  ;
