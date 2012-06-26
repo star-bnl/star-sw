@@ -1,4 +1,4 @@
-// $Id: St2011ZMaker.cxx,v 1.1 2011/02/10 20:33:24 balewski Exp $
+// $Id: St2011ZMaker.cxx,v 1.2 2012/06/26 20:30:23 stevens4 Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -75,57 +75,110 @@ St2011ZMaker::findEndcap_Z_boson(){
   Wevent2011 *wEve=wMK->wEve;
   // printf("========= findEndcap_Z_boson() \n");
   
-  hA[50]->Fill("inp",1.);
+  hA[50]->Fill("inp",1.); hA[60]->Fill("inp",1.);
 
   // search for  Zs ............
   for(uint iv=0;iv<wEve->vertex.size();iv++) {
-    hA[50]->Fill("vert",1.);
+    hA[50]->Fill("vert",1.); hA[60]->Fill("vert",1.);
     WeveVertex &V=wEve->vertex[iv];
+
+    //first loop over good barrel tracks
     for(uint it=0;it<V.eleTrack.size();it++) {
-      WeveEleTrack &T=V.eleTrack[it];
-      if(T.isMatch2Cl==false) continue;
-      assert(T.cluster.nTower>0); // internal logical error
-      assert(T.nearTotET>0); // internal logical error
+      WeveEleTrack &TB=V.eleTrack[it];
+      if(TB.pointTower.id<=0) continue; //skip endcap towers
+      if(TB.isMatch2Cl==false) continue;
+      assert(TB.cluster.nTower>0); // internal logical error
+      assert(TB.nearTotET>0); // internal logical error
    
       //place cuts on reco track first (both barrel and endcap tracks allowed)
-      float isoET1=T.cluster.ET /T.cl4x4.ET;
+      float isoET1=TB.cluster.ET /TB.cl4x4.ET;
       hA[51]->Fill(isoET1);
-      hA[52]->Fill(T.cluster.ET);
-      hA[50]->Fill("tr1",1.);
-      if(T.cluster.ET<par_clusterEtZ) continue;
-      hA[50]->Fill("et1",1.);
+      hA[52]->Fill(TB.cluster.ET);
+      hA[50]->Fill("trB",1.); hA[60]->Fill("trB",1.);
+      if(TB.cluster.ET<par_clusterEtZ) continue;
+      hA[50]->Fill("etB",1.); hA[60]->Fill("etB",1.);
 
-      float fracET1=T.cluster.ET /T.nearTotET;
+      float fracET1=TB.cluster.ET /TB.nearTotET;
       hA[53]->Fill(fracET1);
       if(fracET1<par_nearTotEtFracZ) continue; 
-      hA[50]->Fill("con1",1.);
+      hA[50]->Fill("conB",1.); hA[60]->Fill("conB",1.);
 
-      //find highest ET endcap cluster
+      // 1) try to find candidate track in the endcap
+      for(uint it=0;it<V.eleTrack.size();it++) {
+	WeveEleTrack &TE=V.eleTrack[it];
+	if(TE.pointTower.id>=0) continue; //skip barrel towers
+	if(TE.isMatch2Cl==false) continue;
+	assert(TE.cluster.nTower>0); // internal logical error
+	assert(TE.nearTotET>0); // internal logical error
+
+	float isoET2=TE.cluster.ET/TE.cl4x4.ET;
+	hA[61]->Fill(isoET2);
+	hA[62]->Fill(TE.cluster.ET);
+	hA[60]->Fill("trE",1.);
+	if(TE.cluster.ET<par_clusterEtZ) continue;
+	hA[60]->Fill("etE",1.);
+
+	float fracET2=TE.cluster.ET/TE.nearTotET;
+	hA[63]->Fill(fracET2);
+	if(fracET2<par_nearTotEtFracZ) continue; 
+	hA[60]->Fill("conE",1.);
+
+	float e1=TB.cluster.energy;
+	float e2=TE.cluster.energy;
+	TVector3 p1=TB.primP; p1.SetMag(e1);//cluster.position;
+	TVector3 p2=TE.primP; p2.SetMag(e2);//cluster.position;
+
+	float del_phi=p1.DeltaPhi(p2);
+	//printf("del Phi=%f\n",del_phi);
+	float xx=del_phi;
+	if(xx<-PI+1) xx+=2*PI;
+	hA[64]->Fill(xx);
+	if(fabs(del_phi)<par_delPhi12) continue;
+	hA[60]->Fill("phi12",1.);
+
+	TVector3 psum=p1+p2;
+	float mass2=(e1+e2)*(e1+e2)-(psum.Dot(psum));
+	if(mass2<1.) continue; // 9GeV^2) should be param, I'm tired today
+	hA[60]->Fill("m2",1.);
+	hA[67]->Fill(p1.Eta(),p2.Eta());
+
+	float mass=sqrt(mass2);
+	int Q1Q2=TB.prMuTrack->charge()*TE.prMuTrack->charge();
+	if (Q1Q2==1) { //..  same sign , can't be Z-> e+ e-
+	  hA[66]->Fill(mass);
+	  continue;
+	}
+
+	//..... now only opposite sign
+	hA[60]->Fill("QQ",1.);
+	hA[65]->Fill(mass);
+      }
+
+      // 2) use highest ET endcap cluster with no track requirement
       float maxET=0; 
       WeveCluster maxCluster;
       for(int iEta=0; iEta<12; iEta++){ //loop over eta bins
 	for(int iPhi=0; iPhi<60; iPhi++){ //loop over phi bins
 	  
-	  WeveCluster eclust=wMK->maxEtow2x1(iEta,iPhi,V.z);
+	  WeveCluster eclust=wMK->maxEtow2x2(iEta,iPhi,V.z);
 	  if(eclust.ET < par_clusterEtZ) continue;
 	  if(maxET > eclust.ET) continue;
 	  else {
 	    maxET=eclust.ET;
 	    maxCluster=eclust;
 	  }
-	
 	}
       }
       if(maxCluster.ET <= 1.0) continue;//remove low E clusters
 
-      //apply cuts to ETOW cluster
+      //apply cuts to max ETOW cluster and isolation sums
       WeveCluster cl4x4=wMK->sumEtowPatch(maxCluster.iEta-1,maxCluster.iPhi-1,4,4,V.z);
       hA[54]->Fill(maxCluster.ET/cl4x4.ET);
       if(maxCluster.ET/cl4x4.ET<wMK->parE_clustFrac24) continue;
       hA[55]->Fill(maxCluster.ET);
-      hA[50]->Fill("tr2",1.);
+      hA[50]->Fill("trE",1.);
       if(maxCluster.ET < par_clusterEtZ) continue;
-      hA[50]->Fill("et2",1.);
+      hA[50]->Fill("etE",1.);
       
       //assume poor tracking effic so only towers in nearCone
       float nearBtow=wMK->sumBtowCone(V.z,maxCluster.position,2);
@@ -133,28 +186,26 @@ St2011ZMaker::findEndcap_Z_boson(){
       float nearSum=nearBtow; nearSum+=nearEtow;
       hA[56]->Fill(maxCluster.ET/nearSum);
       if(maxCluster.ET/nearSum<wMK->parE_nearTotEtFrac) continue;
-      hA[50]->Fill("con2",1.);
+      hA[50]->Fill("conE",1.);
       
       //add plots of good candidates
-      float e1=T.cluster.energy;
+      float e1=TB.cluster.energy;
       float e2=maxCluster.energy;
-      TVector3 p1=T.primP; p1.SetMag(e1);
+      TVector3 p1=TB.primP; p1.SetMag(e1);
       TVector3 p2=maxCluster.position; p2.SetMag(e2);
-      
       float del_phi=p1.DeltaPhi(p2);
       float xx=del_phi;
       if(xx<-PI+1) xx+=2*PI;
       hA[57]->Fill(xx);
       if(fabs(del_phi)<par_delPhi12) continue;
       hA[50]->Fill("phi12",1.);
-      
       TVector3 psum=p1+p2;
       float mass2=(e1+e2)*(e1+e2)-(psum.Dot(psum));
       if(mass2<1.) continue; 
       hA[50]->Fill("m2",1.);
-      
       float mass=sqrt(mass2);
       hA[58]->Fill(mass);
+      hA[59]->Fill(p1.Eta(),p2.Eta());
 
     } //track loop
   } //vertex loop
@@ -184,6 +235,7 @@ St2011ZMaker::find_Z_boson(){
     //eventually, but for now, just try all of them.
     for(uint it=0;it<V.eleTrack.size()-1;it++) { //.....select first track:
       WeveEleTrack &T1=V.eleTrack[it];
+      if(T1.pointTower.id<=0) continue; //skip endcap towers
       if(T1.isMatch2Cl==false) continue;
       assert(T1.cluster.nTower>0); // internal logical error
       assert(T1.nearTotET>0); // internal logical error
@@ -203,6 +255,7 @@ St2011ZMaker::find_Z_boson(){
 
       for (uint it2=it+1;it2<V.eleTrack.size();it2++) {	//.....select second track:
 	WeveEleTrack &T2=V.eleTrack[it2];
+	if(T2.pointTower.id<=0) continue; //skip endcap towers
 	if(T2.isMatch2Cl==false) continue;
 	assert(T2.cluster.nTower>0); // internal logical error
 	assert(T2.nearTotET>0); // internal logical error
@@ -237,6 +290,7 @@ St2011ZMaker::find_Z_boson(){
 	float mass2=(e1+e2)*(e1+e2)-(psum.Dot(psum));
 	if(mass2<1.) continue; // 9GeV^2) should be param, I'm tired today
 	hA[0]->Fill("m2",1.);
+	hA[35]->Fill(p1.Eta(),p2.Eta());
 
 	float mass=sqrt(mass2);
 	int Q1Q2=T1.prMuTrack->charge()*T2.prMuTrack->charge();
@@ -318,6 +372,9 @@ St2011ZMaker::find_Z_boson(){
 
 
 // $Log: St2011ZMaker.cxx,v $
+// Revision 1.2  2012/06/26 20:30:23  stevens4
+// Updates ZMaker for mixing barrel and endcap arms
+//
 // Revision 1.1  2011/02/10 20:33:24  balewski
 // start
 //

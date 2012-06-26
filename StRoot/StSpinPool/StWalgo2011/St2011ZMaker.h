@@ -1,5 +1,5 @@
 
-// $Id: St2011ZMaker.h,v 1.1 2011/02/10 20:33:24 balewski Exp $
+// $Id: St2011ZMaker.h,v 1.2 2012/06/26 20:30:23 stevens4 Exp $
 
 #ifndef STAR_St2011ZMaker
 #define STAR_St2011ZMaker
@@ -36,12 +36,12 @@ class St2011ZMaker : public StMaker {
   StMuDstMaker *muMK;
   // histograms
   TObjArray *HList;
-  enum {mxHA=64}; TH1 * hA[mxHA];
+  enum {mxHA=100}; TH1 * hA[mxHA];
   
   void initHistos();
   void find_Z_boson();
   void findEndcap_Z_boson();
-  
+
  public: 
   St2011ZMaker(const char *name="2011Zalgo");
   virtual       ~St2011ZMaker(){};
@@ -63,7 +63,7 @@ class St2011ZMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011ZMaker.h,v 1.1 2011/02/10 20:33:24 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011ZMaker.h,v 1.2 2012/06/26 20:30:23 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -74,6 +74,9 @@ class St2011ZMaker : public StMaker {
 
 
 // $Log: St2011ZMaker.h,v $
+// Revision 1.2  2012/06/26 20:30:23  stevens4
+// Updates ZMaker for mixing barrel and endcap arms
+//
 // Revision 1.1  2011/02/10 20:33:24  balewski
 // start
 //
