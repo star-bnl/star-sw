@@ -220,7 +220,7 @@ UtilBeamLine3D::scanChi2(double *par, int mode){
   }
   if(mode>0) { // always adjust
     xax->Set(xax->GetNbins(),par[0]-0.3,par[0]+0.3); 
-    yax->Set(yax->GetNbins(),par[2]-2e-2,par[2]+2e-2);  
+    yax->Set(yax->GetNbins(),par[2]-9e-3,par[2]+9e-3);  
   }
 
   // fill chi2 values
@@ -274,10 +274,23 @@ UtilBeamLine3D::readTracks(const TString fnameT){
   TrackStump t;
   float x,y,z,px,py,pz,ery,eryz,erz;
   track.clear();
+  int mxSkip=2; // max # consecutive of lines allowed to be wrong
+  int nSkip=mxSkip;
+  char buf[3000];
   while(1) { 
-    int ret= fscanf(fd,"%s %f %f %f   %f %f %f   %f %f %f   %d %f  %f %d,",text,&x,&y,&z,&px,&py,&pz,&ery,&eryz,&erz,&t.nFitP,&t.chi2,&t.z0,&t.eveId);
+    char * retc=fgets(buf,3000,fd);    
+    if(retc==0) break;    
+    //if(buf[0]=='#') continue;    
+    //printf("=%s=\n",buf);    
+    int ret=sscanf(buf ,"%s %f %f %f   %f %f %f   %f %f %f   %d %f  %f %d,",text,&x,&y,&z,&px,&py,&pz,&ery,&eryz,&erz,&t.nFitP,&t.chi2,&t.z0,&t.eveId);
     //printf("%d %s %f %f %f   %f %f %f   %f %f %f   %d %f  %.1f %d \n",ret,text,x,y,z,px,py,pz,t.cyy,t.czy,t.czz,t.nFitP,t.chi2,t.z0,t.eveId);
-    if(ret!=14) break;
+    if(ret!=14) {
+      printf("bad ret=%d  nSkip=%d  size=%d\n",ret,nSkip,(int)track.size());
+      nSkip--;
+      if(nSkip) continue; // allow this line as bad ;
+      else break; // do not read from input any more
+    }
+    nSkip=mxSkip;
     // add gentle slope in x & y
     //x=0.0002*z; y=-0.0003*z;
     t.r.SetXYZ(x,y,z);

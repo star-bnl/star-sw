@@ -1,8 +1,10 @@
 #!/bin/sh
 
-#listFull= ~/2012-Wana/run2011_long_trigID.txt
+#listFull= ~/2012-Wana/run2012_long_trigID.csv
 
 
+logPath=/star/institutions/mit/balewski/2012-Wsampler-pass2/
+#logPath=/star/data05/scratch/balewski/W2012mu-A/
 k=0
 outPath=/star/data05/scratch/balewski/tmp2009/
 
@@ -10,7 +12,6 @@ read line
 
 lastFill=1234 
 nFills=0
-aa=16693
 # read from stdinp
 while [ true ]; do
     read line
@@ -19,30 +20,39 @@ while [ true ]; do
     #echo "LINE $k IS: " $line
     #if [ $k -gt 10 ] ; then break ; fi
    
-    Ffill=`echo $line | cut -f1 -d\ `
+    Ffill=`echo $line | cut -f1 -d,`
     fill=`echo $Ffill | cut -f2 -dF`
-    Rrun=`echo $line | cut -f3 -d\ `
+    Rrun=`echo $line | cut -f3 -d,`
     run=`echo $Rrun | cut -f2 -dR`
-    zeroB=`echo $line | cut -f6 -d\ `
+    totSec=`echo $line | cut -f5 -d,`
 
     core=$Ffill\_$Rrun
-    echo generate txt for $core  nRun=$k
-    #grep -h track4beamLine /star/institutions/mit/balewski/2012-Wsampler-pass1/*/log/st_W_$run*.out >inp/globTr_$core.txt
-    #continue
+    #if [  $fill -lt 16668 ]; then  continue; fi
+    echo generate txt for $core  nRun=$k ...
 
-    #if [ 16582 -ne $fill ]; then  continue; fi
+
+#    if [ $run -le 13099000 ]; then  continue; fi
+#    grep -ha track4beamLine $logPath/*/log/st_W_$run*.out >inp/globTr_$core.txt
+    ls -l inp/globTr_$core.txt
+#    if [ $? -ne 0 ]; then continue; fi
+    
+ 
+
+    
+    #if [  $fill -gt 16693 ]; then  break; fi
+
     #echo $lastFill $fill  $Rrun $zeroB
     if [ $lastFill -eq $fill ]; then  
 	continue; 
     fi
 
-    if [ $zeroB -lt 1000 ] ; then echo skip short run $Rrun; continue; fi
+    if [ $totSec -lt 100 ] ; then echo skip short run $Rrun; continue; fi
     echo new fill $Ffill use run $Rrun scanning log files ...
-    lastFill=$fill; 
-  
+    #lastFill=$fill; 
+    
     #continue
 
-    echo prepared txt for core=$core,  fitting ...
+    echo prepared text for core=$core,  fitting ...
 
     Log=out/$core.log
     time (./mainFitBeamLine3D $core X )>& $Log

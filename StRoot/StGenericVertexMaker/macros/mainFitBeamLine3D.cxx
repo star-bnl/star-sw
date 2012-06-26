@@ -53,8 +53,8 @@ int main(int argc, char *argv[]) {
   
   util.print();
   int nOkTr=util.qaTracks();
-
-  assert(nOkTr>8000); // temporary
+#if 1
+  assert(nOkTr>2000); // temporary
 
   TMinuit *gMinuit = new TMinuit(4);
   //..... pass name of the minimized function ......
@@ -101,8 +101,8 @@ int main(int argc, char *argv[]) {
   }
   util.hA[19]->GetXaxis()->SetTitle(core);
  
-  printf("\n#beamLine for %s Xcm,Ycm,Ux,Uy = %.3f , %.3f , %.5f , %.5f  nOkTr=%d\n",core,pval[0],pval[1],pval[2],pval[3], nOkTr);
-  printf("#beamLineErr Xcm,Ycm,Ux,Uy            = %f , %f , %f , %f \n",perr[0],perr[1],perr[2],perr[3] );
+  printf("\n#beamLine for %s Xcm,Ycm,Ux,Uy = %.3f  %.3f  %.5f  %.5f  nOkTr= %d\n",core,pval[0],pval[1],pval[2],pval[3], nOkTr);
+  printf("#beamLineWerr  for %s Xcm,Ycm,Ux,Uy = %.3f %.2e  %.3f %.2e  %.5f %.2e  %.5f %.2e  nOkTr= %d\n",core,pval[0],perr[0],pval[1],perr[1],pval[2],perr[2],pval[3],perr[3], nOkTr );
   //  gMinuit->Delete();
     
   printf("\n    ***done!***, scan Chi2 around solution\n");    
@@ -114,6 +114,7 @@ int main(int argc, char *argv[]) {
     util.scanChi2(pval,2); //2= y-ny
   } else
     printf("skip generation of 2D chi2 plots\n");
+#endif
 
   // Save histograms
   HList.ls();
