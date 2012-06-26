@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.10 2012/06/13 15:43:15 ramdebbe Exp $
+// $Id: StPeCTrigger.cxx,v 1.11 2012/06/26 18:29:29 ramdebbe Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.11  2012/06/26 18:29:29  ramdebbe
+// previous entry did not include actual changes
+//
 // Revision 1.10  2012/06/13 15:43:15  ramdebbe
 // topo and main triggers for different run periods
 //
@@ -81,7 +84,7 @@ Int_t StPeCTrigger::process(StEvent *event)
 
   // get trigger word 
   tw = event->l0Trigger()->triggerWord();
-
+  runN   = event->runId(); 
   
   l0_2000->setInfoLevel ( infoLevel );
 //  l0_2000Corrected->setInfoLevel ( infoLevel );
@@ -93,16 +96,18 @@ Int_t StPeCTrigger::process(StEvent *event)
     if(ttid) {
       cout << "Got IDS -------------   " << ttid->isTrigger(400631)<<" topo "<<ttid->isTrigger(1)<<endl; 
     }
-//     trg_3000     =ttid->isTrigger(350017);  
-//     trg_3001     =ttid->isTrigger(11);     //run12
+    LOG_INFO << "StPeCTrigger::process run number ---------- " <<runN << endm;
+    if(runN>12130030 && runN<= 12146002) trg_3000     =ttid->isTrigger(4);       //run11 UPC Main unofficial
+    if(runN>12130030 && runN<= 12179050) trg_3001     =ttid->isTrigger(11);      //run11 UPC Topo was never official
+    if(runN>12146002 && runN<= 12179050) trg_3000     =ttid->isTrigger(350007);  //run11 UPC Main official
 //     trg_3000     =ttid->isTrigger(1);  
 //     trg_3001     =0;   //ttid->isTrigger(11); //run11 from 011035 to 039028  no topo trigger  //use in firstList.list
 //     trg_3000     =ttid->isTrigger(260750);  
 //     trg_3001     =0;   //ttid->isTrigger(11); //run11 from 011035 to 039028  no topo trigger used in secondList.list 
 //     trg_3000     =ttid->isTrigger(400631); //run12 UU 
 //     trg_3001     =ttid->isTrigger(400604); //run12 UU starting  from 13125025 to end. Used in thirdList.list and fourth list (out of 4 lists) 
-    trg_3000     =ttid->isTrigger(410601); //run12 cuAu 
-    trg_3001     =ttid->isTrigger(410604); //run12 cuAu starting  from 13139056 to end. 
+//     trg_3000     =ttid->isTrigger(410601); //run12 cuAu 
+//     trg_3001     =ttid->isTrigger(410604); //run12 cuAu starting  from 13139056 to end. 
   }
   StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
   if ( !trg ) {
