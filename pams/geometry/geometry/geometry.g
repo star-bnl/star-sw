@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.243 2012/05/31 20:57:28 jwebb Exp $
+* $Id: geometry.g,v 1.244 2012/06/29 15:10:51 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.244  2012/06/29 15:10:51  jwebb
+* Added DEV14 geometry tag.
+*
 * Revision 1.243  2012/05/31 20:57:28  jwebb
 * Added y2012a production tag
 *
@@ -1155,6 +1158,9 @@ replace [exe PIXL00;] with [ "Simplest.Gerrit" PIXL=on; PixlConfig=-1;]
 replace [exe PIXL01;] with [ "Put the pixel detector in" PIXL=on; PixlConfig=1;]
 replace [exe PIXL02;] with [ "Add the pixle detector to the IDSM"; PIXL=on; PixlConfig=6; ]
 
+replace [exe ISTD01;] with [ "Add the ist detector to the IDSM"; ISTD=on; IstdConfig=1; ]
+*replace [exe PXST01;] with [ "Add the PST to the IDSM"; PXST=on; IstdConfig=0; ]
+
 replace [exe RICHof;] with [;RICH=off;]
 replace [exe RICH02;] with [;RICH=on; richPos=2; richConfig=2;]
 
@@ -1177,6 +1183,7 @@ replace [exe SISD35;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=
 replace [exe SISD55;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=55;]
 replace [exe SISD65;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=65;]
 replace [exe SISD75;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=75;]
+replace [exe SISD85;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=85;]
 
 replace [exe SVTTof;] with ["SVTT version"; SVTT=off; SvttConfig = -1;]
 replace [exe SVTT00;] with ["SVTT version"; SVTT=on;
@@ -1947,6 +1954,36 @@ REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
 ]
 
 
+c ===============================================================================
+c ===============================================================================
+c ===============================================================================
+
+REPLACE [exe dev14;] with ["DEV14 upgrade geometry";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+*    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD05;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe IDSM02;      "Inner detector support";
+    exe SISD85;      "SSD version 7"
+    exe PIPEv1;      "The beam pipe";
+    exe FGTDv32;     "FGT v3 6 disks";
+    exe ISTD01;      "IST version 1"
+*  exe PXST01;      "PIXEL detector support version 1"
+    exe PIXL02;      "Development version of the pixl detector";
+]
+
+
 
 REPLACE [exe COMPLETE;] with [ "Extrapolation of geometry to y2013.  Currently just complete FGT.  HFT when available."
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
@@ -2130,7 +2167,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               RICH,ZCAL,MFLD,BBCM,FPDM,PHMD,
               PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
               SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,
-              DUMM,SCON,IDSM,FSCE,EIDD
+              DUMM,SCON,IDSM,FSCE,EIDD,ISTD,PXST
 
 * Qualifiers:  TPC        TOF         etc
    Logical    emsEdit,svtWater,
@@ -2165,7 +2202,8 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
-              FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig, TpcxConfig, TpadConfig
+              FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig, TpcxConfig, TpadConfig,
+              IstdConfig,PxstConfig
 
    Integer    FpdmPosition / 0 /
 
@@ -2199,6 +2237,8 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
 *             PixlConfig, ! Inner Pixel detector
 *             HpdtConfig, ! Heavy Flavor Tracker
 *             IstbConfig, ! Integrated Silicon Tracker
+*             PxstConfig, ! PST
+*             IstdConfig, ! Integrated Silicon Tracker
 *             GembConfig, ! Inner GEM barrel tracker
 *             IgtdConfig, ! GEM disks
 *             FstdConfig, ! Forward Silicon tracker Disks
@@ -2268,6 +2308,7 @@ replace[;Case#{#;] with [
    FtpcConfig  = 0 ! 0  version, 1=gas correction
    HpdtConfig  = 0 ! 0=no, >1=version
    IstbConfig  = 0 ! 0=no, >1=version
+   IstdConfig  = 0 ! 0=no, >1=version
    IgtdConfig  = 1 ! 1=old radii etc, 2=new ones
    GembConfig  = 0 ! 0=no, >1=version
    MutdConfig  = 0 ! same
@@ -2305,7 +2346,7 @@ replace[;Case#{#;] with [
     FTRO,FGTD,SHLD,QUAD,
     MUTD,IGTD,HPDT,ITSP,
     DUMM,SCON,IDSM,FSCE,
-    EIDD} = off;
+    EIDD,ISTD,PXST} = off;
 
    {emsEdit,RICH}=off        " TimeOfFlight, EM calorimeter Sector            "
    nSvtLayer=7; nSvtVafer=0;  svtWaferDim=0; " SVT+SSD, wafer number and width as in code     "
@@ -2757,6 +2798,10 @@ If LL>0
   Case dev13 { dev13 : y2013 studies;
                  Geom = 'dev13   ';
                  exe dev13; }
+
+  Case dev14 { dev14 : y2014 studies;
+                 Geom = 'dev14   ';
+                 exe dev14; }
 
   Case devE  { devE : eSTAR development geometry;
                  Geom = 'devE    ';
@@ -4073,6 +4118,8 @@ If LL>0
 
   Case PIXL_ON    { Optional PIXL added on top of the minimal geo;
                      PIXL=on; }
+  Case ISTD_ON    { Optional PIXL added on top of the minimal geo;
+                     ISTD=on; }
 
   Case FIELD_ONLY { No geometry - only magnetic field;
       NtrSubEv=0;
@@ -4244,47 +4291,6 @@ c    write(*,*) 'SVT'
 * See note on top about using MOD(10) to encode the geometry
 * cut, as opposed to configuration of the detector:
 
-  if(SISD) {
-c      write(*,*) 'SVT' 
-       sisd_level=0
-       call AgDETP new ('SISD')
-
-* if SVT is present, position the SSD in it, otherwise need to position in CAVE (default)
-       if(SVTT) { call AgDETP add ('ssdp.Placement=',1 ,1) };
-
-* In the following, level means the version of the ssd geo code to be loaded
-* It is the most important decimal place of the SisdConfig, and we just check
-* for it here:
-
-       if (SisdConfig>10) then
-         sisd_level=SisdConfig/10
-         if (sisd_level <= 5) SisdConfig=mod(SisdConfig,10)
-
-         call AgDETP add ('ssdp.Config=',SisdConfig ,1)
-         if     (sisd_level.eq.1) then
-            call sisdgeo1
-         elseif (sisd_level.eq.2) then
-            call sisdgeo2
-         elseif (sisd_level.eq.3) then
-            call sisdgeo3
-         elseif (sisd_level.eq.4) then
-            call sisdgeo4
-         else
-            call sisdgeo6	!//only sisdgeo6 is used from now
-         endif
-
-       else
-*        The original version (pretty much obsolete)
-         call AgDETP add ('ssdp.Config=',SisdConfig ,1)
-         call sisdgeo
-       endif
-
-*       write(*,*) '*** Silicon Strip Detector Config and Code Level: ',SisdConfig, ' ',sisd_level
-
-  } !!end SISD
-
-
-
 * Back in July 2003 Yuri has discovered the discrepancy
 * in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
 
@@ -4430,12 +4436,61 @@ c     write(*,*) 'CALB';
    if (MAGP)   { write(*,*) 'MAGP';Call magpgeo;}
 
    IF IDSM { "Inner detector support module" 
-
+      write(*,*) 'IDSM is built'
       Call AgDETP new ('IDSM')
       Call AgDETP add ('IDSC.version=',IdsmConfig,1)
       Call IdsmGeo1
    }
 
+  if(SISD) {
+c      write(*,*) 'SVT' 
+       sisd_level=0
+       call AgDETP new ('SISD')
+
+* if SVT is present, position the SSD in it, otherwise need to position in CAVE (default)
+       if(IDSM) { call AgDETP add ('ssdp.Placement=',1 ,1) };
+
+* In the following, level means the version of the ssd geo code to be loaded
+* It is the most important decimal place of the SisdConfig, and we just check
+* for it here:
+
+       if (SisdConfig>10) then
+         sisd_level=SisdConfig/10
+         if (sisd_level <= 5) SisdConfig=mod(SisdConfig,10)
+
+         call AgDETP add ('ssdp.Config=',SisdConfig ,1)
+         if     (sisd_level.eq.1) then
+            call sisdgeo1
+         elseif (sisd_level.eq.2) then
+            call sisdgeo2
+         elseif (sisd_level.eq.3) then
+            call sisdgeo3
+         elseif (sisd_level.eq.4) then
+            call sisdgeo4
+         elseif (sisd_level.eq.8) then
+            call sisdgeo7
+         else
+            call sisdgeo6	!//only sisdgeo6 is used from now
+         endif
+
+       else
+*        The original version (pretty much obsolete)
+         call AgDETP add ('ssdp.Config=',SisdConfig ,1)
+         call sisdgeo
+       endif
+
+*       write(*,*) '*** Silicon Strip Detector Config and Code Level: ',SisdConfig, ' ',sisd_level
+
+  } !!end SISD
+
+   if (ISTD){
+    write(*,*) 'ISTD'
+     if (IstdConfig==1) Call istdgeo0
+}
+  * if (PXST){
+   * write(*,*) 'PXST'
+    * if (PxstConfig==0) Call pxstgeo1
+*}
    if (MUTD) {
      Call AgDetp NEW ('MUTD')
      if (MutdConfig==1) Call mutdgeo;
@@ -4466,7 +4521,6 @@ c    write(*,*) 'CALB'
            call pixlgeo4
      }
    }
-
    if (ISTB){
 c    write(*,*) 'ISTB'
      if (IstbConfig==-1) Call istbgeo00
