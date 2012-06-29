@@ -73,6 +73,7 @@ void bfcSpin(int nevents = 2000,
   trgsim->useEemc();
   trgsim->eemc->setSource("StEvent");
 
+  gSystem->Load("StMCAsymMaker");
   StBfcTriggerFilterMaker* trgfilt = new StBfcTriggerFilterMaker;
   // The BFC trigger filter will select only JP1, AJP and BHT3 events
   trgfilt->SetJP1();
