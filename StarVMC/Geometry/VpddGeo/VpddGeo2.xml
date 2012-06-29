@@ -10,7 +10,7 @@
         </CDE>
         
         <Content  >
-            VPDD,VPBP,VPBO,VPBA,VPBB,VPBX,VFEE,VLEM,VPIP,VPFP,VPFA,VPFB,VPFC,VPBI,VPST,VPSC,VPSA,VPSB,VPSV,VPSW,VRNG,VSEC,VDET,VXST,VCNV,VPMT,VRAD,VPCL,VPCF,VPCV,VPCH,VDTI,IBEM,IBEH,IBEV,IBEW,IBSA,IBSB,IBSC,IBSD,IBSE,IBSF,IBSG,IBSH,IBAA,IBAB,IBAC,IBSS,IBBC,IBCC
+            VPDD,VPBP,VPBO,VPBA,VPBB,VPBX,VFEE,VLEM,VPIP,VPFP,VPFA,VPFB,VPFC,VPBI,VPST,VPSC,VPSA,VPSB,VPSV,VPSW,VRNG,VSEC,VDET,VXST,VCNV,VPMT,VRAD,VPCL,VPCF,VPCV,VPCH,VDTI,IBEM,IBEH,IBEV,IBEW,IBSA,IBSB,IBSC,IBSD,IBSE,IBSF,IBSG,IBSH,IBAA,IBAB,IBAC,IBST,IBBC,IBCC
         </Content>
         
 
@@ -777,7 +777,7 @@
             <var name="BSELenZ" value="6.35" comment=" IBSE Z length "  />
             <var name="BSFRmax" value="0.95" comment=" IBSF Rmax "  />
             <var name="BSFLenZ" value="182.88" comment=" IBSF Z length "  />
-            <var name="BSSLenZ" value="7.62" comment=" IBSS Z length "  />
+            <var name="BSSLenZ" value="7.62" comment=" IBST Z length "  />
             <var name="BSGRmax" value="0.64" comment=" IBSG Rmax "  />
             <var name="BSGLenZ1" value="10.16" comment=" IBSG Z length 1 for vpdConfig&lt;8 "  />
             <var name="BSGLenZ2" value="12.70" comment=" IBSG Z length 2 for vpdConfig=8 "  />
@@ -982,12 +982,12 @@
                     <Rotation alphay="90"  />
                 </Placement>
                 
-                <Create block="IBSS"  />
-                <Placement y="0" z="+(vpds_IBSFZc)-(vpdg_IBPosZc)" block="IBSS" in="IBEM"  >
+                <Create block="IBST"  />
+                <Placement y="0" z="+(vpds_IBSFZc)-(vpdg_IBPosZc)" block="IBST" in="IBEM"  >
                     <Rotation alphay="90"  />
                 </Placement>
                 
-                <Placement y="0" z="-(vpds_IBSFZc+EWshift)+(vpdg_IBPosZc)" block="IBSS" in="IBEM"  >
+                <Placement y="0" z="-(vpds_IBSFZc+EWshift)+(vpdg_IBPosZc)" block="IBST" in="IBEM"  >
                     <Rotation alphay="90"  />
                 </Placement>
                 
@@ -1878,9 +1878,9 @@
             <Shape type="TUBE" rmax="vpds_BSFRmax" rmin="0" dz="vpds_BSFLenZ/2."  />
         </Block>
         
-        <Block name="IBSS" comment="are the long threaded rods for X-support of the I-beam, short stubs inside IBEM!"  >
+        <Block name="IBST" comment="are the long threaded rods for X-support of the I-beam, short stubs inside IBEM!"  >
             <Material name="Iron"  />
-            <Attribute for="IBSS" seen="0" colo="4"  />
+            <Attribute for="IBST" seen="0" colo="4"  />
             <Shape type="TUBE" rmax="vpds_BSFRmax" rmin="0" dz="vpds_BSSLenZ/2."  />
         </Block>
         
