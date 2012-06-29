@@ -1,8 +1,8 @@
-// $Id: St2011ZMaker.cxx,v 1.2 2012/06/26 20:30:23 stevens4 Exp $
+// $Id: St2011ZMaker.cxx,v 1.3 2012/06/29 21:20:08 stevens4 Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
-// 
+//  changes Justin Stevens, MIT
 
 #include "St2011WMaker.h"
 #include "WeventDisplay.h"
@@ -112,16 +112,16 @@ St2011ZMaker::findEndcap_Z_boson(){
 	assert(TE.nearTotET>0); // internal logical error
 
 	float isoET2=TE.cluster.ET/TE.cl4x4.ET;
-	hA[61]->Fill(isoET2);
-	hA[62]->Fill(TE.cluster.ET);
-	hA[60]->Fill("trE",1.);
+	hA[71]->Fill(isoET2);
+	hA[72]->Fill(TE.cluster.ET);
+	hA[70]->Fill("trE",1.);
 	if(TE.cluster.ET<par_clusterEtZ) continue;
-	hA[60]->Fill("etE",1.);
+	hA[70]->Fill("etE",1.);
 
 	float fracET2=TE.cluster.ET/TE.nearTotET;
-	hA[63]->Fill(fracET2);
+	hA[73]->Fill(fracET2);
 	if(fracET2<par_nearTotEtFracZ) continue; 
-	hA[60]->Fill("conE",1.);
+	hA[70]->Fill("conE",1.);
 
 	float e1=TB.cluster.energy;
 	float e2=TE.cluster.energy;
@@ -132,26 +132,29 @@ St2011ZMaker::findEndcap_Z_boson(){
 	//printf("del Phi=%f\n",del_phi);
 	float xx=del_phi;
 	if(xx<-PI+1) xx+=2*PI;
-	hA[64]->Fill(xx);
+	hA[74]->Fill(xx);
 	if(fabs(del_phi)<par_delPhi12) continue;
-	hA[60]->Fill("phi12",1.);
+	hA[70]->Fill("phi12",1.);
 
 	TVector3 psum=p1+p2;
 	float mass2=(e1+e2)*(e1+e2)-(psum.Dot(psum));
 	if(mass2<1.) continue; // 9GeV^2) should be param, I'm tired today
-	hA[60]->Fill("m2",1.);
-	hA[67]->Fill(p1.Eta(),p2.Eta());
+	hA[70]->Fill("m2",1.);
+	hA[77]->Fill(p1.Eta(),p2.Eta());
+	hA[78]->Fill(psum.Eta());
+	hA[79]->Fill(psum.Pt());
 
 	float mass=sqrt(mass2);
 	int Q1Q2=TB.prMuTrack->charge()*TE.prMuTrack->charge();
 	if (Q1Q2==1) { //..  same sign , can't be Z-> e+ e-
-	  hA[66]->Fill(mass);
-	  continue;
+	  hA[76]->Fill(mass);
+	  hA[80]->Fill(TE.cluster.ET,TE.prMuTrack->charge()/TE.prMuTrack->pt());	  continue;
 	}
 
 	//..... now only opposite sign
-	hA[60]->Fill("QQ",1.);
-	hA[65]->Fill(mass);
+	hA[70]->Fill("QQ",1.);
+	hA[75]->Fill(mass);
+	hA[81]->Fill(TE.cluster.ET,TE.prMuTrack->charge()/TE.prMuTrack->pt());
       }
 
       // 2) use highest ET endcap cluster with no track requirement
@@ -206,6 +209,8 @@ St2011ZMaker::findEndcap_Z_boson(){
       float mass=sqrt(mass2);
       hA[58]->Fill(mass);
       hA[59]->Fill(p1.Eta(),p2.Eta());
+      hA[60]->Fill(psum.Eta());
+      hA[61]->Fill(psum.Pt());
 
     } //track loop
   } //vertex loop
@@ -290,8 +295,7 @@ St2011ZMaker::find_Z_boson(){
 	float mass2=(e1+e2)*(e1+e2)-(psum.Dot(psum));
 	if(mass2<1.) continue; // 9GeV^2) should be param, I'm tired today
 	hA[0]->Fill("m2",1.);
-	hA[35]->Fill(p1.Eta(),p2.Eta());
-
+	
 	float mass=sqrt(mass2);
 	int Q1Q2=T1.prMuTrack->charge()*T2.prMuTrack->charge();
 	if (Q1Q2==1) { //..  same sign , can't be Z-> e+ e-
@@ -306,6 +310,10 @@ St2011ZMaker::find_Z_boson(){
 	hA[33]->Fill(T2.cluster.ET,T2.prMuTrack->charge()/T2.prMuTrack->pt()); 
 	hA[34]->Fill(T1.pointTower.iEta ,T1.cluster.energy);
 	hA[34]->Fill(T2.pointTower.iEta ,T2.cluster.energy);
+	hA[35]->Fill(p1.Eta(),p2.Eta());
+	hA[36]->Fill(psum.Eta());
+	hA[37]->Fill(psum.Pt());
+
 #if 0
 	printf("RCC:  Found Z w/ invmass=%f\n",mass);
         printJan(&T1);
@@ -372,6 +380,9 @@ St2011ZMaker::find_Z_boson(){
 
 
 // $Log: St2011ZMaker.cxx,v $
+// Revision 1.3  2012/06/29 21:20:08  stevens4
+// *** empty log message ***
+//
 // Revision 1.2  2012/06/26 20:30:23  stevens4
 // Updates ZMaker for mixing barrel and endcap arms
 //
