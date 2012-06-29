@@ -44,9 +44,12 @@ ClassImp(Geometry);
 /* ClassImp(RichGeom_t); */ RichGeom_t richGeom;
 /* ClassImp(FgtdGeom_t); */ FgtdGeom_t fgtdGeom;
 /* ClassImp(IdsmGeom_t); */ IdsmGeom_t idsmGeom;
+/* ClassImp(IstdGeom_t); */ IstdGeom_t istdGeom;
 /* ClassImp(FsceGeom_t); */ FsceGeom_t fsceGeom;
 /* ClassImp(EiddGeom_t); */ EiddGeom_t eiddGeom;
 /* ClassImp(TpcxGeom_t); */ TpcxGeom_t tpcxGeom;
+
+/* ClassImp(PxstGeom_t); */ PxstGeom_t pxstGeom;
 
 // ----------------------------------------------------------------------
 Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
@@ -57,7 +60,7 @@ Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
   CalbInit(); CaveInit(); EcalInit(); FpdmInit(); FtpcInit(); MutdInit(); PipeInit();
   PixlInit(); SconInit(); SisdInit(); SvttInit(); BtofInit(); TpceInit(); VpddInit();
   UpstInit(); ZcalInit(); FtroInit(); RichInit(); PhmdInit(); FgtdInit(); IdsmInit();
-  FsceInit(); EiddInit(); TpcxInit(); 
+  FsceInit(); EiddInit(); TpcxInit(); IstdInit(); PxstInit();
 
   const Char_t *path = ".:StarVMC/Geometry/macros/:$STAR/StarVMC/Geometry/macros/";
   const Char_t *file = gSystem->Which( path, "StarGeometryDb.C", kReadPermission );
@@ -95,7 +98,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   Initialize(phmd);  Initialize(svtt);  Initialize(sisd);  Initialize(scon); std::cout << std::endl;
   Initialize(idsm);  Initialize(ftpc);  Initialize(ftro);  Initialize(fgtd); std::cout << std::endl;
   Initialize(calb);  Initialize(ecal);  Initialize(fpdm);  Initialize(upst); std::cout << std::endl;
-  Initialize(fsce);  Initialize(eidd);                                       std::cout << std::endl;
+  Initialize(fsce);  Initialize(eidd);  Initialize(istd);  Initialize(pxst); std::cout << std::endl;
   std::cout << "==============================================================================================================" << std::endl;
 #undef Initialize
 
@@ -129,13 +132,17 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   geom.success_tpcx = ConstructTpcx( geom.tpcxFlag, geom.tpcxStat );                     assert( geom.tpceFlag != geom.tpcxFlag);
 
   geom.success_svtt = ConstructSvtt( geom.svttFlag, geom.svttStat ); // SVT must preceede FTPC and SISD
-  geom.success_sisd = ConstructSisd( geom.sisdFlag, geom.sisdStat ); // 
 
   // Add in the support cone
-  geom.success_scon = ConstructScon( geom.sconFlag, geom.sconStat ); // support cone before SVT
+  geom.success_scon = ConstructScon( geom.sconFlag, geom.sconStat ); // support cone before SVT 
   geom.success_idsm = ConstructIdsm( geom.idsmFlag, geom.idsmStat );
 
+  // SISD must come after the IDSM, as we may place it inside 
+  geom.success_sisd = ConstructSisd( geom.sisdFlag, geom.sisdStat ); // 
+
   geom.success_pixl = ConstructPixl( geom.pixlFlag, geom.pixlStat ); // OLD development pixel detector (must follow idsm, scon)
+  geom.success_istd = ConstructIstd( geom.istdFlag, geom.istdStat ); // JB : ist 
+  geom.success_pxst = ConstructPxst( geom.pxstFlag, geom.pxstStat ); // JB : ist 
 
   geom.success_ftpc = ConstructFtpc( geom.ftpcFlag, geom.ftpcStat );
   geom.success_ftro = ConstructFtro( geom.ftroFlag, geom.ftroStat );
@@ -935,6 +942,57 @@ Bool_t Geometry::ConstructPixl( const Char_t *flag, Bool_t go )
   return true;
 
 }
+
+// ----------------------------------------------------------------------
+Bool_t Geometry::ConstructIstd( const Char_t *flag, Bool_t go )
+{                                                  if (!go) return false;
+
+  if ( !istdGeom.Use("select",flag) )
+    {
+      Error( GetName(), Form("Cannot locate configuration %s",flag) );
+      return false;
+    }
+
+  AgStructure::AgDetpNew(istdGeom.module, Form("IST Configuration %s",flag));
+  /* Not required for PixlGeo4 --> pixlgeo00
+     AgStructure::AgDetpAdd("Pxlv_t","ladver",   2.0f );
+     AgStructure::AgDetpAdd("Pxlv_t","location", pixlGeom.location );
+  */
+
+
+  if (go) if ( !CreateModule(istdGeom.module) ) {
+    Warning(GetName(),Form("Could not create module %s",istdGeom.module.Data()));
+    return false;
+  }
+
+  return true;
+
+}
+// ----------------------------------------------------------------------
+Bool_t Geometry::ConstructPxst( const Char_t *flag, Bool_t go )
+{                                                  if (!go) return false;
+
+  if ( !pxstGeom.Use("select",flag) )
+    {
+      Error( GetName(), Form("Cannot locate configuration %s",flag) );
+      return false;
+    }
+
+  AgStructure::AgDetpNew(pxstGeom.module, Form("PXST Configuration %s",flag));
+  /* Not required for PixlGeo4 --> pixlgeo00
+     AgStructure::AgDetpAdd("Pxlv_t","ladver",   2.0f );
+     AgStructure::AgDetpAdd("Pxlv_t","location", pixlGeom.location );
+  */
+
+
+  if (go) if ( !CreateModule(pxstGeom.module) ) {
+    Warning(GetName(),Form("Could not create module %s",pxstGeom.module.Data()));
+    return false;
+  }
+
+  return true;
+
+}
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -1300,6 +1358,22 @@ Bool_t Geometry::PixlInit() // Probably breaks config=-1 scheme
   return true;
 }
 // ----------------------------------------------------------------------------
+Bool_t Geometry::IstdInit() // Probably breaks config=-1 scheme
+{
+  istdGeom.select="ISTD01";
+  istdGeom.config=1;
+  istdGeom.module="IstdGeo0";
+  istdGeom.fill(); 
+  return true;
+}
+// ----------------------------------------------------------------------------
+Bool_t Geometry::PxstInit() // Probably breaks config=-1 scheme
+{
+  pxstGeom.module="PxstGeo1";
+  pxstGeom.select="PXST01"; pxstGeom.config=-1; pxstGeom.fill(); 
+  return true;
+}
+// ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 Bool_t Geometry::SconInit()
@@ -1335,6 +1409,7 @@ Bool_t Geometry::SisdInit()
   sisdGeom.select="SISD55"; sisdGeom.config=55; sisdGeom.module="SisdGeo6"; sisdGeom.fill();
   sisdGeom.select="SISD65"; sisdGeom.config=65; sisdGeom.module="SisdGeo6"; sisdGeom.fill();
   sisdGeom.select="SISD75"; sisdGeom.config=75; sisdGeom.module="SisdGeo6"; sisdGeom.fill();
+  sisdGeom.select="SISD85"; sisdGeom.config=85; sisdGeom.module="SisdGeo7"; sisdGeom.fill();
 
   return true;
 }

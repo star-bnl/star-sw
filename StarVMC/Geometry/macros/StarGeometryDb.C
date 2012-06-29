@@ -47,8 +47,8 @@ void StarGeometryDb()
   //
   // Upgrade studies tagged with a year (2000+)
   //
-  dev13(); geom.Last(); setTitle("Year 2013 Development Geometry"); geom.select="dev13"; // no fill here
-
+  dev13(); geom.Last(); setTitle("Year 2013 Development Geometry"); geom.select="dev13pro"; geom.fill();
+  dev14(); geom.Last(); setTitle("Year 2014 Development Geometry"); geom.select="dev14pro"; geom.fill();
 
   //
   // Geometries for studying future versions of the detector
@@ -987,6 +987,47 @@ void dev13()
     setTitle("Upgrade studies with 6 complete FGT disks");
     //
     // ================================================ 
+    geom.fill();
+  };
+
+}
+
+
+void dev14()
+{
+  std::cout << " dev14 "<< std::flush;;
+  geom.select = "dev14"; {
+    // ================================================
+    geom.caveFlag = "CAVE04";  geom.caveStat = 1;
+    // ================================================
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    geom.phmdFlag = "PHMDof"; geom.phmdStat = 0;
+    // ================================================
+    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
+    geom.btofFlag = "BTOF67";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1;
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD04";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPEv1";  geom.pipeStat = 1;
+    geom.sisdFlag = "SISD85";  geom.sisdStat = 1;
+    // ================================================
+    geom.pixlFlag = "PIXL02";  geom.pixlStat = 1;
+    geom.istdFlag = "ISTD01";  geom.istdStat = 1;
+    // ================================================
+    geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
+    geom.idsmFlag = "IDSM02";  geom.idsmStat = 1;
+    geom.fgtdFlag = "FGTD32";  geom.fgtdStat = 1;
+    // ================================================
+    //
+    setTitle("Upgrade studies with 6 complete FGT disks");
+    //
+    // ================================================
     geom.fill();
   };
 
