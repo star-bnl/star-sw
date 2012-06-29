@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.251 2012/06/09 22:46:52 fisyak Exp $
+// $Id: StMaker.cxx,v 1.252 2012/06/29 16:13:22 perev Exp $
 //
 //
 /*!
@@ -299,7 +299,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr20",      20200102,    17, "upgr20",   "y2007 +  one TOF"}, // advertized simu 20061101
   {"upgr21",      20200102,    18, "upgr21",   "y2007 + full TOF"}, // advertized simu 20061101
   {"dev13",       20200102,    19, "dev13",    "dev geo for 2013"}, // 
-  {"devE",        20200102,    20, "devE",      "dev geo for Erick"}, // 
+  {"devE",        20200102,    20, "devE",     "dev geo for Erick"}, // 
+  {"dev14",       20200102,    21, "dev14",    "dev geo for 2014"},
   {0,                    0,     0,        0,    0}
 };
 
@@ -1945,6 +1946,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.252  2012/06/29 16:13:22  perev
+// Add dev14 geometry
+//
 // Revision 1.251  2012/06/09 22:46:52  fisyak
 // Synchronize tag and geometry version for y2006h, thanks to Xianglei, bug #2374
 //
