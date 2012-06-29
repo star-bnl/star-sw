@@ -72,7 +72,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
    //fd->ls(); 
    h0=(TH1*)fd->Get("muStatEve"); assert(h0);
    printf("%s: ",h0->GetName());
-   for(int k=1;k<=10;k++) printf("%.0f, ",h0->GetBinContent(k));
+   for(int k=1;k<=17;k++) printf("%.0f, ",h0->GetBinContent(k));
    printf("\n");
  }
   if(page>=23 && page<=25 && fd->Get("AspinStatEve")==0) return; // skip spin plots if maker was not used
@@ -710,6 +710,9 @@ void doAll(char *core0="", char *iPath="", int isMC=0){
 
 
 // $Log: plWana.C,v $
+// Revision 1.12  2012/06/29 20:08:59  balewski
+// *** empty log message ***
+//
 // Revision 1.11  2012/06/29 19:13:36  stevens4
 // Include Jan's edits (previously removed with addition of TPC directory)
 //
