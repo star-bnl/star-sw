@@ -30,6 +30,7 @@ class Geom_t : public AgStructure
   SetDetector(eidd); // East poletip detectors
   SetDetector(tpcx); // eXtended TPC
 
+  SetDetector(pxst);
       ecalCuts=1;
       calbCuts=1;
       
@@ -59,6 +60,8 @@ class Geom_t : public AgStructure
   AddDetector(fsce);
   AddDetector(eidd);
   AddDetector(tpcx); // eXtended TPC
+
+  AddDetector(pxst);
 
   Int_t ecalCuts;
   Int_t calbCuts;
@@ -489,6 +492,19 @@ class IstdGeom_t : public AgStructure
     Int_t config;
 };
 // ----------------------------------------------------------------------
+class PxstGeom_t : public AgStructure
+{ public:
+  ClassDef(PxstGeom_t,1);
+  PxstGeom_t(): AgStructure("PxstGeom_t","STAR PXST Master Geometry Table")
+    {
+      //      select="PXSTon"; module="PxstGeo"; config=1; 
+      select="PXSTon"; module="PixlGeo"; config=1; 
+    }
+    TString select;
+    TString module;
+    Int_t config;
+};
+// ----------------------------------------------------------------------
 class PxldGeom_t : public AgStructure
 { public:
   ClassDef(PxldGeom_t,1);
@@ -532,8 +548,10 @@ class Geometry : public AgModule
   Bool_t FgtdInit();  Bool_t IdsmInit();  Bool_t FsceInit();
   Bool_t EiddInit();  Bool_t TpcxInit();
 
-  Bool_t IstdInit(){ /* placeholder */ return false; }
+  Bool_t IstdInit();
   Bool_t PxldInit(){ /* placeholder */ return false; }
+
+  Bool_t PxstInit();
 
   Bool_t GeomInit();
 
@@ -566,7 +584,8 @@ class Geometry : public AgModule
   Bool_t ConstructIdsm( const Char_t *flag, Bool_t go=true );
 
   // New Inner Detectors
-  Bool_t ConstructIstd( const Char_t *flag, Bool_t go=false ) { /* placeholder */ return false; }
+  Bool_t ConstructPxst( const Char_t *flag, Bool_t go=false );
+  Bool_t ConstructIstd( const Char_t *flag, Bool_t go=false );
   Bool_t ConstructPxld( const Char_t *flag, Bool_t go=false ) { /* placeholder */ return false; }
 
   // eSTAR Upgrades

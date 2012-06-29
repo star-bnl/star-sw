@@ -1,0 +1,237 @@
+<Document file="StarVMC/Geometry/IstdGeo/IstdGeo0.xml">
+<Module name="IstdGeo0" comment=" is the the STAR IST detector test"  >
+  <Created date="  12/06/14 "  />
+  <Author name="Jonathan Bouchet"  />
+  <CDE  >
+    AGECOM
+    GCUNIT
+  </CDE>
+ 
+<!--       
+ March 10,    2008: Gerrit van Nieuwenhuizen
+ Very simple post CD0 geometry
+ 24 ladders with 12 sensors each at Radius=14cm
+ Just active silicon filling up the whole circle at R=14
+ Added some inactive material to mimic total material budget
+ Also 'fixed' some things with versioning (ISVR removed)
+-->
+
+  <!-- Local variables -->
+  <varlist type="float"  >
+    aangle,bangle, raddeg, IniX, IniY, Module_Thk, Ladder_Thk, Ladder_Width, Ladder_Length, xpos, ypos, zpos, ModuleRadius, Half
+  </varlist>
+        
+  <varlist type="int"  >
+   nl, ly, nu, cable, istLayer
+  </varlist>
+
+  <!-- Global stuffs--> 
+  <Content> IBMO, <!-- IST mother volume-->
+            IBAM, <!-- IST ladder mother volume-->
+            IBLM, <!-- IST sensor mother volume-->
+            IBBB, <!--is the Silicon Sensor Active  Area-->
+            <!-- original name was IBSS but already taken by VPD , breaks during compilation-->
+            IBSP  <!--is the Silicon Sensor Passive Area-->
+  </Content>
+  <Structure name="ISMG"  >
+    <var name="Version"  type="int"  />
+    <var name="SubVersion"   type="int"  />
+    <var name="Rin" type="float" />
+    <var name="Rout" type="float" />
+  </Structure>
+        
+  <Structure name="ISBG"  >
+    <var name="Layer" type="int"  />
+    <var name="nLadder" type="int"  />
+    <var name="nUnit" type="int"  />
+    <var name="Radius" type="float"  />
+    <var name="Tilt" type="float"  />
+    <var name="Gap" type="float"  />
+  </Structure>
+        
+  <Structure name="ISAN"  >
+    <var name="Version" type="int"  />
+    <var name="Rmin" type="float"  />
+    <var name="Thk" type="float"  />
+  </Structure>
+        
+  <Structure name="ISSS"  >
+    <var name="Version" type="int"  />
+    <var name="ActiveW" type="float"  />
+    <var name="ActiveH" type="float"  />
+    <var name="ActiveThk" type="float"  />
+    <var name="PassiveThk" type="float"  />
+  </Structure>
+  
+  <Fill name="ISMG" comment="Mother Volume whole detector"  >
+    <var name="Version" value="1.0" comment=" Version, this goes to g2t_volume_id.g !! "  />
+    <var name="SubVersion" value="0" comment=" For future use with g2t_volume_id.g "  />
+    <var name="Rin" value="13.50" comment="Inner Radius" />
+    <var name="Rout" value="15.0" comment="Outer Radius (Length = Ladder length)" />
+  </Fill>
+        
+  <Fill name="ISBG" comment="Inner Silicon Tracker Parameters"  >
+    <var name="Layer" value="1.0" comment=" Layer index, just one layer left "  />
+    <var name="nLadder" value="24" comment=" Number of ladders in this layers "  />
+    <var name="nUnit" value="12" comment="Number of sensors per ladder in this layer"  />
+    <var name="Radius" value="14.0" comment=" Radius centers of active silicon sensors "  />
+    <var name="Tilt" value="15.0" comment=" Tilt angle of the ladders "  />
+    <var name="Gap" value="0.0" comment=" Gaps btw the sensors "  />
+  </Fill>
+  
+  <Fill name="ISAN" comment="Radiation length equivalent tube">
+    <var name="Version" value="1" comment="Version"/>
+    <var name="Rmin" value="14.2" comment="InnerRadius (length = ladder length)"/>
+    <var name="Thk" value="0.0636" comment="Thickness (1% RL silicon)"/>
+  </Fill>
+
+  <Fill name="ISSS" comment="Silicon Sensor"  >
+    <var name="Version" value="1" comment=" Version "  />
+    <var name="ActiveW" value="3.6823" comment=" Active Area Width "  />
+    <var name="ActiveH" value="4.0400" comment=" Active area Height "  />
+    <var name="ActiveThk"  value="0.0300" comment=" Active Area Thickness "  />
+    <var name="PassiveThk" value="0.0800" comment=" Passive Area Thickness "  />
+  </Fill>
+  <!-- sensor is 1.2%X0 with 300microns active Si-->
+   
+  raddeg           = 3.14159265/180.0
+  Half = ISBG_Tilt/2.0
+  <Use struct="ISMG" select="version" value="1" />
+  <Use struct="ISAN" select="version" value="1" />
+  <Use struct="ISSS" select="version" value="1" />
+
+  <!-- Calculate thickness of modules and ladders -->
+  <!-- to properly set the size of the mothervolumes-->
+     
+  Module_Thk = ISSS_ActiveThk+ISSS_PassiveThk
+     
+  <!-- Ladder thickness -->
+  Ladder_Thk = Module_Thk
+    
+  <!-- Ladder width-->
+  Ladder_Width = ISSS_ActiveW
+   
+  <!-- Ladder length, no. module * module width-->
+  Ladder_Length = ISBG_nUnit*ISSS_ActiveH
+
+  <Create block="IBMO"/>
+  <Placement block="IBMO" in="IDSM"/>
+  <Volume name="IBMO" comment="Main volume in the AgML geometry">
+  <Material name="Air"/>
+  <Attribute for="IBMO" seen="0" colo="1"/>  
+  <Shape type="TUBE" rmin="ISMG_Rin" rmax="ISMG_Rout" dz="Ladder_Length/2.0" />
+
+<!-- IBMY was used as a layer virtual volume for the layers, when the IST has 2 layers for example-->
+<!-- not needed anymore-->
+<!-- I keep IBMO parameter because ISMG_Rout(15) > ISAN_Rmin(14.2)-->
+<!--
+  <Create block="IBMY"/>
+  <Placement block="IBMY" in="IBMO"/> 
+  <Volume name="IBMY" comment="is the mother of the IST layer">
+  <Material name="Air"/> 
+  <Attribute for="IBMY" seen="0" colo="1"/>  
+  <Shape type="TUBE" rmin="ISMG_Rin" rmax="ISAN_Rmin" dz="Ladder_Length/2.0" />
+-->
+
+   ModuleRadius = ISBG_Radius+Module_Thk/2.0-ISSS_ActiveThk/2.0
+
+   <Do var="nl" from="1" to="ISBG_nLadder">
+     <!-- Rotate ladders so that they nicely cover the layer-->
+     <!-- quick way to rotate ladder-->
+     aangle=(360.0/ISBG_nLadder)*nl - ISBG_Tilt
+     <!--And tilt a bit so that they can be tiled-->
+     bangle=(aangle+ISBG_Tilt)*raddeg
+     <!--Vector from center of silicon sensor to center ladder volume-->
+     IniX=0.0
+     IniY=0.0
+<!--
+     xpos=ModuleRadius*cos((aangle+Half)*raddeg) + (IniX*cos(bangle+Half)-IniY*sin(bangle+Half))
+     ypos=ModuleRadius*sin((aangle+Half)*raddeg) + (IniX*sin(bangle+Half)+IniY*cos(bangle+Half))
+     zpos=0.0
+-->
+     xpos=ModuleRadius*sin((aangle+Half)*raddeg) 
+     ypos=ModuleRadius*cos((aangle+Half)*raddeg) 
+     zpos=0.0
+
+     <!--<Info format="ladder number={6.2d}"> nl </Info>
+     <Info format="aabgle={6.3f}"> aangle </Info>
+     <Info format="bangle={6.3f}"> bangle </Info>
+     <Info format="x={6.3f}"> xpos </Info>
+     <Info format="y={6.3f}"> ypos </Info>
+     -->
+       <Create block="IBAM"/>
+       <Placement in="IBMO" x="xpos" y="ypos" z="zpos" block="IBAM" konly="'MANY'">
+        <!-- tilt was originally -90, meaning no tilt-->
+        <!-- in this version, ladders are tilted wrt normal radius by angle = 15 degress-->
+        <Rotation alphaz="-1*aangle-ISBG_Tilt"/>
+       </Placement>
+  </Do>
+<!-- end Loop over ladders-->
+<!--  </Volume> -->
+</Volume> 
+
+ <Volume name="IBAM" comment="is the mother of the whole long ladder">
+ <Material name="Air" />
+ <Attribute for="IBAM" seen="0" colo="6"/>
+ <Shape type="BOX" dx="Ladder_Width/2.0" dy="Ladder_Thk/2.0" dz="Ladder_Length/2.0"/>
+ <!--
+ <Info format="ladder_width={6.3f}"> Ladder_Width/2. </Info>
+ <Info format="ladder_thk={6.3f}"> Ladder_thk/2. </Info>
+ <Info format="ladder_Length={6.3f}"> Ladder_Length/2. </Info>
+  -->
+  <!--  <Create block="IBLM"/>-->
+  <Do var="nu" from="1" to="ISBG_nUnit">
+  <Create block="IBLM"/>
+       <Placement in="IBAM" x="0" y="0" z="-1.0*Ladder_Length/2.+ISSS_ActiveH*(nu-0.5)" block="IBLM">
+      <!-- 
+         <Info format="sensor #={6.2d}"> nu </Info>
+         <Info format="zpos={6.3f}"> -1.0*Ladder_Length/2.+ISSS_ActiveH*(nu-0.5) </Info>
+      -->
+       </Placement>
+  </Do>
+<!-- end loop over sensors-->
+</Volume>
+
+ <Volume name="IBLM" comment="mother of the sensor assembly"  >
+       <Material name="Air"  />
+       <Attribute for="IBLM" seen="0" colo="2"  />
+       <Shape type="BOX" dz="ISSS_ActiveH/2.0" dx="Ladder_Width/2.0" dy="Module_Thk/2.0"/>
+       <Create block="IBBB"/>
+       <Placement block="IBBB" x="0.0" z="0.0" y="(-1.0*Module_Thk/2.0)+(ISSS_ActiveThk/2.0)"/>
+       <Create block="IBSP"/>
+       <Placement block="IBSP" x="0.0" z="0.0" y="(1.0*Module_Thk/2.0)-(ISSS_PassiveThk/2.0)"/>
+ </Volume>
+ <Volume name="IBSP" comment="is the Silicon Sensor Passive Area">
+ <Material name="Silicon" /> 
+ <Material name="PassiveSilicon" isvol="0"/>
+ <Attribute for="IBSP" seen="1" colo="4"/>
+ <Shape type="BOX" dz="ISSS_ActiveH/2.0" dx="ISSS_ActiveW/2.0" dy="ISSS_PassiveThk/2.0" />
+ </Volume>
+
+ <Volume name="IBBB" comment="is the Silicon Sensor Active Area">
+       <Material name="Silicon"  />
+       <Material name="ISTSSensitive" isvol="1"/>
+       <Attribute for="IBBB" seen="1" colo="2"/>
+<!--
+       <Info format="box dx={6.4f}">ISSS_ActiveW/2. </Info>
+       <Info format="box dy={6.4f}">ISSS_ActiveThk/2. </Info>
+       <Info format="box dz={6.4f}">ISSS_ActiveH/2. </Info>
+-->
+       <Shape type="BOX" dz="ISSS_ActiveH/2.0" dx="ISSS_ActiveW/2.0" dy="ISSS_ActiveThk/2.0" />
+       <Instrument block="IBBB"  >
+                <Hit meas="z" opts="S" bins=".001"  />
+                <Hit meas="y" bins=".001"  />
+                <Hit meas="x" bins=".001"  />
+                <Hit meas="ptot" nbits="16" min="0" max="100"  />
+                <Hit meas="cx" nbits="10"  />
+                <Hit meas="cy" nbits="10"  />
+                <Hit meas="cz" nbits="10"  />
+                <Hit meas="sleng" nbits="16" min="0" max="500"  />
+                <Hit meas="tof" nbits="16"  />
+                <Hit meas="step" bins=".01"  />
+                <Hit meas="eloss" nbits="16"  />
+        </Instrument>
+ </Volume>
+</Module>
+</Document>
+

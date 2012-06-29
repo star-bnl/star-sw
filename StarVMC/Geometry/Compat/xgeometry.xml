@@ -4,17 +4,21 @@
 <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
 </Export>
 
-<!-- 
-  [1] Force AgML recompilation of xgeometry.xml
-  [2] Added devT   tag to geometry.g
-  [3] Added y2012a tag to geometry.g
-  -->
-
 <Module name="xgeometry" comment="-- STARSIM -- interface to the XML geometries">
 <CDE>AGECOM,GCUNIT</CDE>
 <Export language="Mortran">
 call geometry
 </Export>
 </Module>
+
+<!-- 
+  Author:           $Author: jwebb $
+  Current Revision: $Id: xgeometry.xml,v 1.6 2012/06/29 14:56:21 jwebb Exp $
+
+  $Log: xgeometry.xml,v $
+  Revision 1.6  2012/06/29 14:56:21  jwebb
+  Added DEV14 geometry tag for HFT studies.
+
+  -->
 
 </Document>
