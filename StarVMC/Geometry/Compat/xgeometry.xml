@@ -13,11 +13,14 @@ call geometry
 
 <!-- 
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.6 2012/06/29 14:56:21 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.7 2012/07/02 18:51:27 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.7  2012/07/02 18:51:27  jwebb
+  Force recompilation of xgeometry for dev14 modifications.
+
   Revision 1.6  2012/06/29 14:56:21  jwebb
-  Added DEV14 geometry tag for HFT studies.
+  Added DEV14 geometry tag for HFT studies. 
 
   -->
 
