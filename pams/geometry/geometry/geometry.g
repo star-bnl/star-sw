@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.244 2012/06/29 15:10:51 jwebb Exp $
+* $Id: geometry.g,v 1.245 2012/07/02 18:50:36 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.245  2012/07/02 18:50:36  jwebb
+* Few more modifications for dev14 geometry.  Add VPD and PXST to dev14.
+*
 * Revision 1.244  2012/06/29 15:10:51  jwebb
 * Added DEV14 geometry tag.
 *
@@ -1159,7 +1162,7 @@ replace [exe PIXL01;] with [ "Put the pixel detector in" PIXL=on; PixlConfig=1;]
 replace [exe PIXL02;] with [ "Add the pixle detector to the IDSM"; PIXL=on; PixlConfig=6; ]
 
 replace [exe ISTD01;] with [ "Add the ist detector to the IDSM"; ISTD=on; IstdConfig=1; ]
-*replace [exe PXST01;] with [ "Add the PST to the IDSM"; PXST=on; IstdConfig=0; ]
+replace [exe PXST01;] with [ "Add the PST to the IDSM"; PXST=on; PxstConfig=0; ]
 
 replace [exe RICHof;] with [;RICH=off;]
 replace [exe RICH02;] with [;RICH=on; richPos=2; richConfig=2;]
@@ -1967,7 +1970,7 @@ REPLACE [exe dev14;] with ["DEV14 upgrade geometry";
     exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe BBCMon;      "beam beam counters";
     exe FPDM03;      "Latest version of FPD";
-*    exe VPDD07;      "Latest version of VPD";
+    exe VPDD07;      "Latest version of VPD";
     exe FTPCof;      "FTPC";
     exe SVTTof;      "No SVT";
     exe PHMDof;      "Photon mult detector on";
@@ -1978,8 +1981,8 @@ REPLACE [exe dev14;] with ["DEV14 upgrade geometry";
     exe SISD85;      "SSD version 7"
     exe PIPEv1;      "The beam pipe";
     exe FGTDv32;     "FGT v3 6 disks";
-    exe ISTD01;      "IST version 1"
-*  exe PXST01;      "PIXEL detector support version 1"
+    exe ISTD01;      "IST version 1";
+    exe PXST01;      "PIXEL detector support version 1";
     exe PIXL02;      "Development version of the pixl detector";
 ]
 
@@ -4487,10 +4490,10 @@ c      write(*,*) 'SVT'
     write(*,*) 'ISTD'
      if (IstdConfig==1) Call istdgeo0
 }
-  * if (PXST){
-   * write(*,*) 'PXST'
-    * if (PxstConfig==0) Call pxstgeo1
-*}
+  if (PXST){
+   write(*,*) 'PXST'
+    if (PxstConfig==0) Call pxstgeo1
+}
    if (MUTD) {
      Call AgDetp NEW ('MUTD')
      if (MutdConfig==1) Call mutdgeo;
