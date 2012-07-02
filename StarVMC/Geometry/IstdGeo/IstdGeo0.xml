@@ -7,7 +7,11 @@
     GCUNIT
   </CDE>
  
-<!--       
+<!--   
+ June 12, 2012 : Bouchet
+ This version has paramters : 3 rotations + 3 shifts to allow misalignment of a group of ladder
+ These parameters add a small rotations(or shifts) to the placement of ladders . By default, these parameters are 0 ==> no misaligment
+    
  March 10,    2008: Gerrit van Nieuwenhuizen
  Very simple post CD0 geometry
  24 ladders with 12 sensors each at Radius=14cm
@@ -22,16 +26,15 @@
   </varlist>
         
   <varlist type="int"  >
-   nl, ly, nu, cable, istLayer
+   nl, ly, nu, cable, istLayer, debug
   </varlist>
 
   <!-- Global stuffs--> 
   <Content> IBMO, <!-- IST mother volume-->
             IBAM, <!-- IST ladder mother volume-->
             IBLM, <!-- IST sensor mother volume-->
-            IBBB, <!--is the Silicon Sensor Active  Area-->
-            <!-- original name was IBSS but already taken by VPD , breaks during compilation-->
-            IBSP  <!--is the Silicon Sensor Passive Area-->
+            IBSS, <!-- IST active silicon volume-->
+            IBSP  <!-- IST passive silicon volume-->
   </Content>
   <Structure name="ISMG"  >
     <var name="Version"  type="int"  />
@@ -61,6 +64,24 @@
     <var name="ActiveH" type="float"  />
     <var name="ActiveThk" type="float"  />
     <var name="PassiveThk" type="float"  />
+  </Structure>
+
+  <Structure name="PARO" comment="set of 3 paramters (offset) to misalign a ladder ">
+    <var name="version" type="int" />
+    <var name="DX"   type="float" comment="is the MAX shift in local X allowed, the real shift will be a fraction"/>
+    <var name="DY"   type="float" comment="is the MAX shift in local Y allowed, the real shift will be a fraction"/>
+    <var name="DZ"   type="float" comment="is the MAX shift in local Z allowed, the real shift will be a fraction"/>
+    <var name="mult" type="float" comment="is the multiplicator factor, [0,1]*Shift"/>
+    <var name="lad(24)"  type="int"/>
+  </Structure>
+
+  <Structure name="PARA" comment="set of 3 paramters (angles) to misalign a ladder ">
+    <var name="version" type="int" />
+    <var name="DA"   type="float" comment="is the MAX rotation dAlpha around X allowed, the real rot. will be a fraction"/>
+    <var name="DB"   type="float" comment="is the MAX rotation dBeta around Y allowed, the real rot. will be a fraction"/>
+    <var name="DG"   type="float" comment="is the MAX rotation dGamma around Z allowed, the real rot. will be a fraction"/>
+    <var name="mult" type="float" comment="is the multiplicator factor, [0,1]*rot"/>
+    <var name="lad(24)"  type="int"/>
   </Structure>
   
   <Fill name="ISMG" comment="Mother Volume whole detector"  >
@@ -92,13 +113,51 @@
     <var name="ActiveThk"  value="0.0300" comment=" Active Area Thickness "  />
     <var name="PassiveThk" value="0.0800" comment=" Passive Area Thickness "  />
   </Fill>
-  <!-- sensor is 1.2%X0 with 300microns active Si-->
+
+  <Fill name="PARO" comment="default">
+   <var name="version" value="0"/>
+   <var name="DX" value="0"   comment=" default : no shift "/>
+   <var name="DY" value="0"   comment=" default : no shift "/>
+   <var name="DZ" value="0"   comment=" default : no shift "/>
+   <var name="mult" value="0" comment=" default : no shift "/>
+   <var name="lad"  value="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}" comment="1..24"/>
+  </Fill>
+
+  <Fill name="PARO" comment="shift">
+   <var name="version" value="1"/>
+   <var name="DX" value="0"   comment=" shift for all ladders"/>
+   <var name="DY" value="0"   comment=" default = no shift "/>
+   <var name="DZ" value="1"   comment=" default = no shift "/>
+   <var name="mult" value="5" comment=" max is 1 cm"/>
+   <var name="lad"  value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment="1..24"/>
+  </Fill>
+
+  <Fill name="PARA" comment="default">
+   <var name="version" value="0"/>
+   <var name="DA" value="0"   comment=" default = no rot "/>
+   <var name="DB" value="0"   comment=" default = no rot. "/>
+   <var name="DG" value="0"   comment=" default = no rot. "/>
+   <var name="mult" value="0" comment=" default = no rot. "/>
+   <var name="lad"  value="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}" comment="1..24"/>
+  </Fill>
+
+  <Fill name="PARA" comment="rotation gamma">
+   <var name="version" value="1"/>
+   <var name="DA" value="0"    comment=" no rot."/>
+   <var name="DB" value="0"    comment=" no rot. "/>
+   <var name="DG" value="1"    comment=" rot. for all ladders "/>
+   <var name="mult" value="1" comment=" max is 1 degrees "/>
+   <var name="lad"  value="{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}" comment="1..24"/>
+  </Fill>
    
   raddeg           = 3.14159265/180.0
   Half = ISBG_Tilt/2.0
   <Use struct="ISMG" select="version" value="1" />
   <Use struct="ISAN" select="version" value="1" />
   <Use struct="ISSS" select="version" value="1" />
+  <!-- the next 2 structures are used for misalignment : offset + rotation -->
+  <Use struct="PARO" select="version" value="0" />
+  <Use struct="PARA" select="version" value="0" />
 
   <!-- Calculate thickness of modules and ladders -->
   <!-- to properly set the size of the mothervolumes-->
@@ -111,6 +170,7 @@
   <!-- Ladder width-->
   Ladder_Width = ISSS_ActiveW
    
+  debug = 0
   <!-- Ladder length, no. module * module width-->
   Ladder_Length = ISBG_nUnit*ISSS_ActiveH
 
@@ -144,49 +204,54 @@
      <!--Vector from center of silicon sensor to center ladder volume-->
      IniX=0.0
      IniY=0.0
-<!--
-     xpos=ModuleRadius*cos((aangle+Half)*raddeg) + (IniX*cos(bangle+Half)-IniY*sin(bangle+Half))
-     ypos=ModuleRadius*sin((aangle+Half)*raddeg) + (IniX*sin(bangle+Half)+IniY*cos(bangle+Half))
-     zpos=0.0
--->
-     xpos=ModuleRadius*sin((aangle+Half)*raddeg) 
-     ypos=ModuleRadius*cos((aangle+Half)*raddeg) 
-     zpos=0.0
+     <If expr="debug==1"  >
+     <Info format="shift in X ={6.4f}"> PARO_DX*PARO_mult </Info>
+     <Info format="shift in Y ={6.4f}"> PARO_DY*PARO_mult </Info>
+     <Info format="shift in Z ={6.4f}"> PARO_DZ*PARO_mult </Info>
+     </If>
+     xpos=ModuleRadius*sin((aangle+Half)*raddeg) + (PARO_DX*PARO_mult)*PARO_lad(nl) 
+     ypos=ModuleRadius*cos((aangle+Half)*raddeg) + (PARO_DY*PARO_mult)*PARO_lad(nl)
+     zpos=0.0                                    + (PARO_DZ*PARO_mult)*PARO_lad(nl)
 
-     <!--<Info format="ladder number={6.2d}"> nl </Info>
+     <!-- <Info format="ladder number={6.2d}"> nl </Info>-->
+     <If expr="debug==1"  >
      <Info format="aabgle={6.3f}"> aangle </Info>
      <Info format="bangle={6.3f}"> bangle </Info>
      <Info format="x={6.3f}"> xpos </Info>
      <Info format="y={6.3f}"> ypos </Info>
-     -->
+      </If>
        <Create block="IBAM"/>
        <Placement in="IBMO" x="xpos" y="ypos" z="zpos" block="IBAM" konly="'MANY'">
         <!-- tilt was originally -90, meaning no tilt-->
-        <!-- in this version, ladders are tilted wrt normal radius by angle = 15 degress-->
-        <Rotation alphaz="-1*aangle-ISBG_Tilt"/>
+        <!-- in this version, tilt=-75 meaning ladders are tilted wrt normal radius by angle = 15 degress-->
+        <If expr="debug==1"  >
+        <Info format="rot along X ={6.4f}"> PARA_DA*PARA_mult </Info>
+        <Info format="rot along Y ={6.4f}"> PARA_DB*PARA_mult </Info>
+        <Info format="rot along Z ={6.4f}"> PARA_DG*PARA_mult </Info>
+        </If>
+        <Rotation alphaz="-1*aangle-(ISBG_Tilt + PARA_DG*PARA_mult*PARA_lad(nl))"/>
+        <Rotation alphax="-1*(PARA_DA*PARA_mult)*PARA_lad(nl)"/>
+        <Rotation alphay="-1*(PARA_DB*PARA_mult)*PARA_lad(nl)"/>
        </Placement>
   </Do>
 <!-- end Loop over ladders-->
 <!--  </Volume> -->
 </Volume> 
 
- <Volume name="IBAM" comment="is the mother of the whole long ladder">
+ <Volume name="IBAM" comment="is the mother of the whole lomg ladder">
  <Material name="Air" />
  <Attribute for="IBAM" seen="0" colo="6"/>
  <Shape type="BOX" dx="Ladder_Width/2.0" dy="Ladder_Thk/2.0" dz="Ladder_Length/2.0"/>
- <!--
- <Info format="ladder_width={6.3f}"> Ladder_Width/2. </Info>
- <Info format="ladder_thk={6.3f}"> Ladder_thk/2. </Info>
- <Info format="ladder_Length={6.3f}"> Ladder_Length/2. </Info>
-  -->
+ <!-- virtual volume is created here --> 
+ 
   <!--  <Create block="IBLM"/>-->
   <Do var="nu" from="1" to="ISBG_nUnit">
   <Create block="IBLM"/>
        <Placement in="IBAM" x="0" y="0" z="-1.0*Ladder_Length/2.+ISSS_ActiveH*(nu-0.5)" block="IBLM">
-      <!-- 
-         <Info format="sensor #={6.2d}"> nu </Info>
-         <Info format="zpos={6.3f}"> -1.0*Ladder_Length/2.+ISSS_ActiveH*(nu-0.5) </Info>
-      -->
+      <!-- <Info format="sensor #={6.2d}"> nu </Info>-->
+       <If expr="debug==1"  >
+       <Info format="zpos={6.3f}"> -1.0*Ladder_Length/2.+ISSS_ActiveH*(nu-0.5) </Info>
+       </If>
        </Placement>
   </Do>
 <!-- end loop over sensors-->
@@ -196,8 +261,8 @@
        <Material name="Air"  />
        <Attribute for="IBLM" seen="0" colo="2"  />
        <Shape type="BOX" dz="ISSS_ActiveH/2.0" dx="Ladder_Width/2.0" dy="Module_Thk/2.0"/>
-       <Create block="IBBB"/>
-       <Placement block="IBBB" x="0.0" z="0.0" y="(-1.0*Module_Thk/2.0)+(ISSS_ActiveThk/2.0)"/>
+       <Create block="IBSS"/>
+       <Placement block="IBSS" x="0.0" z="0.0" y="(-1.0*Module_Thk/2.0)+(ISSS_ActiveThk/2.0)"/>
        <Create block="IBSP"/>
        <Placement block="IBSP" x="0.0" z="0.0" y="(1.0*Module_Thk/2.0)-(ISSS_PassiveThk/2.0)"/>
  </Volume>
@@ -208,17 +273,12 @@
  <Shape type="BOX" dz="ISSS_ActiveH/2.0" dx="ISSS_ActiveW/2.0" dy="ISSS_PassiveThk/2.0" />
  </Volume>
 
- <Volume name="IBBB" comment="is the Silicon Sensor Active Area">
+ <Volume name="IBSS" comment="is the Silicon Sensor Active Area">
        <Material name="Silicon"  />
        <Material name="ISTSSensitive" isvol="1"/>
-       <Attribute for="IBBB" seen="1" colo="2"/>
-<!--
-       <Info format="box dx={6.4f}">ISSS_ActiveW/2. </Info>
-       <Info format="box dy={6.4f}">ISSS_ActiveThk/2. </Info>
-       <Info format="box dz={6.4f}">ISSS_ActiveH/2. </Info>
--->
+       <Attribute for="IBSS" seen="1" colo="2"/>
        <Shape type="BOX" dz="ISSS_ActiveH/2.0" dx="ISSS_ActiveW/2.0" dy="ISSS_ActiveThk/2.0" />
-       <Instrument block="IBBB"  >
+       <Instrument block="IBSS"  >
                 <Hit meas="z" opts="S" bins=".001"  />
                 <Hit meas="y" bins=".001"  />
                 <Hit meas="x" bins=".001"  />
