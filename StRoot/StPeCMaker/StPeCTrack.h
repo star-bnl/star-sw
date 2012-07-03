@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrack.h,v 1.6 2012/06/13 16:09:54 ramdebbe Exp $
+// $Id: StPeCTrack.h,v 1.7 2012/07/03 19:38:23 ramdebbe Exp $
 // $Log: StPeCTrack.h,v $
+// Revision 1.7  2012/07/03 19:38:23  ramdebbe
+// raised ClassDef from 1 to 2
+//
 // Revision 1.6  2012/06/13 16:09:54  ramdebbe
 // Overload constructor and set method to pass vertex information in StMuEvent
 //
@@ -94,7 +97,7 @@ public:
 
   Float_t                         getZdEdx(Float_t mass);
 
-  ClassDef(StPeCTrack,1)  
+  ClassDef(StPeCTrack,2)  
 };
 
 

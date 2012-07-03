@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.16 2012/06/13 15:45:46 ramdebbe Exp $
+// $Id: StPeCMaker.h,v 1.17 2012/07/03 19:38:09 ramdebbe Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.17  2012/07/03 19:38:09  ramdebbe
+// raised ClassDef from 1 to 2
+//
 // Revision 1.16  2012/06/13 15:45:46  ramdebbe
 // Added flags to include TOF and Vertex branches in tree
 //
@@ -131,9 +134,9 @@ private:
 	Int_t triggerSim(StEvent*);
 
 	virtual const char *GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.16 2012/06/13 15:45:46 ramdebbe Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.17 2012/07/03 19:38:09 ramdebbe Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-	ClassDef(StPeCMaker,1)
+	ClassDef(StPeCMaker,2)
 };
 
 #endif
