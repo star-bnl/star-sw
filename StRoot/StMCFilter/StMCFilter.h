@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StMCFilter.h,v 1.7 2010/10/01 14:10:14 jwebb Exp $
+// @(#)STAR/eg:$Id: StMCFilter.h,v 1.8 2012/07/03 16:06:12 perev Exp $
 // Author: V.Perev  Mar/2009
 /*!
 
@@ -33,6 +33,8 @@ class StMCFilter
    virtual void Finish() const{;}
 
    const std::string &GetName() const { return fName;}
+   double &User(int idx) 	{return fUser[idx];}
+   double  User(int idx) const 	{return fUser[idx];}
 
  private:
    ///private static methods for Pythia & Geant3 connections
@@ -82,6 +84,7 @@ protected:
    std::string     fName;
    char fBeg[1];
    int  fCnt[3][2];
+   double fUser[20];
    char fEnd[1];
 
 };
