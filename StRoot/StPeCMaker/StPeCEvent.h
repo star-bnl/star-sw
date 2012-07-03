@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.9 2012/06/13 15:45:06 ramdebbe Exp $
+// $Id: StPeCEvent.h,v 1.10 2012/07/03 19:37:25 ramdebbe Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.10  2012/07/03 19:37:25  ramdebbe
+// raised ClassDef from 1 to 2
+//
 // Revision 1.9  2012/06/13 15:45:06  ramdebbe
 // Added flags to include TOF and Vertex branches in tree
 //
@@ -118,18 +121,18 @@ private:
   Int_t                           nPPairs ;
   Int_t                           nSPairs ;
   TClonesArray                   *pPairs ;
-  TClonesArray                   *sPairs ;
+/*   TClonesArray                   *sPairs ; */
   TClonesArray                   *tracks;
   TClonesArray                   *treecalo;
-  TClonesArray                   *tofHits;
-  TClonesArray                   *tofTracks;
+/*   TClonesArray                   *tofHits; */
+/*   TClonesArray                   *tofTracks; */
   TClonesArray                   *vertices;
   Int_t                           shotCount;
   Bool_t                          useBemcLocal;
   Bool_t                          useTOFlocal;
   Bool_t                          useVertexLocal;
 
-  ClassDef(StPeCEvent,1)
+  ClassDef(StPeCEvent,2)
 };
 
 #endif

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.h,v 1.7 2012/06/26 18:51:11 ramdebbe Exp $
+// $Id: StPeCTrigger.h,v 1.8 2012/07/03 19:37:55 ramdebbe Exp $
 // $Log: StPeCTrigger.h,v $
+// Revision 1.8  2012/07/03 19:37:55  ramdebbe
+// raised ClassDef from 1 to 2
+//
 // Revision 1.7  2012/06/26 18:51:11  ramdebbe
 // previous entry did not include actual changes
 //
@@ -130,7 +133,7 @@ private:
   TClonesArray  *ctbSlats ;
 
 
-  ClassDef(StPeCTrigger,1)
+  ClassDef(StPeCTrigger,2)
 };
 
 #endif

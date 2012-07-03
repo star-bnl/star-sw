@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.h,v 1.9 2012/06/13 15:34:36 ramdebbe Exp $
+// $Id: StPeCPair.h,v 1.10 2012/07/03 19:37:40 ramdebbe Exp $
 // $Log: StPeCPair.h,v $
+// Revision 1.10  2012/07/03 19:37:40  ramdebbe
+// raised ClassDef from 1 to 2
+//
 // Revision 1.9  2012/06/13 15:34:36  ramdebbe
 // added tof information to both tracks
 //
@@ -184,7 +187,7 @@ private:
   Double_t                        bFld;  
 #endif /*__CINT__*/
 
-  ClassDef(StPeCPair,1)
+  ClassDef(StPeCPair,2)
 };
 
 #endif
