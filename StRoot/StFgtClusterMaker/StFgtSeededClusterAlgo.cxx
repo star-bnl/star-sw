@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.19 2012/06/30 23:30:37 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.20 2012/07/03 03:32:29 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.20  2012/07/03 03:32:29  avossen
+//  ordinate now computed correctly...
+//
 //  Revision 1.19  2012/06/30 23:30:37  avossen
 //  small changes in seeded cluster finder
 //
@@ -189,8 +192,10 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
 	  meanSqOrdinateEven /= (Double_t)accuChargeSqEven;
 
 	  meanGeoId=meanGeoIdEven;
-	  meanSqOrdinate -= meanOrdinateEven*meanOrdinateEven;
+	  meanOrdinate=meanOrdinateEven;
+	  //	  meanSqOrdinate -= meanOrdinateEven*meanOrdinateEven;
 	  meanSqOrdinate=meanSqOrdinateEven;
+	  meanSqOrdinate=-meanOrdinate*meanOrdinate;
 	  accuChargeError=accuChargeErrorEven;
 	  numStrips=numStripsEven;
 	}
