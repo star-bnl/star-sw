@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.20 2012/07/03 03:32:29 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.21 2012/07/03 23:21:24 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.21  2012/07/03 23:21:24  avossen
+//  *** empty log message ***
+//
 //  Revision 1.20  2012/07/03 03:32:29  avossen
 //  ordinate now computed correctly...
 //
@@ -304,7 +307,7 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
       //in the end we check what range the geoId's of the clusters span, then we know if it is too big
       //      bool adjacentStrip=((abs((*nextStrip)->getGeoId()-(*itSeed)->getGeoId()))<(2+deadStripsSkipped));
       //      cout <<"looking at "<< (*nextStrip)->getGeoId()<< " adjacent: " << adjacentStrip <<endl;
-      bool adjacentStrip=(layer==seedLayer);
+      bool adjacentStrip=((layer==seedLayer)&&((abs((*nextStrip)->getGeoId()-(*itSeed)->getGeoId()))<(2+deadStripsSkipped)));
       bool adjacentStrip2=false;
       ///so the next strip is not dead (we skipped those) and the same layer. So if it is not in the cluster, we give one more chance to the one after that if it is even. But the condition is that it is exactly 2 away. If it is more and still even (so it could be that there is an even
       //hit then nothing due to short phi and then a dead strip and then nothing due to short and then a signal... that would be quite a stretch..
