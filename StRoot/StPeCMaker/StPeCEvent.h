@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.10 2012/07/03 19:37:25 ramdebbe Exp $
+// $Id: StPeCEvent.h,v 1.11 2012/07/03 20:44:44 ramdebbe Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.11  2012/07/03 20:44:44  ramdebbe
+// removed some comments
+//
 // Revision 1.10  2012/07/03 19:37:25  ramdebbe
 // raised ClassDef from 1 to 2
 //
@@ -121,11 +124,11 @@ private:
   Int_t                           nPPairs ;
   Int_t                           nSPairs ;
   TClonesArray                   *pPairs ;
-/*   TClonesArray                   *sPairs ; */
+  TClonesArray                   *sPairs ;
   TClonesArray                   *tracks;
   TClonesArray                   *treecalo;
-/*   TClonesArray                   *tofHits; */
-/*   TClonesArray                   *tofTracks; */
+  TClonesArray                   *tofHits;
+  TClonesArray                   *tofTracks;
   TClonesArray                   *vertices;
   Int_t                           shotCount;
   Bool_t                          useBemcLocal;
