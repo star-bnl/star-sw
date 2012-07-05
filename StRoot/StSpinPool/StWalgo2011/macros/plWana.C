@@ -68,7 +68,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   } else {
     printf("Opened: %s\n",fullInpName.Data());
   }
-  if(page==1){ 
+  if(page==1 || page==13){ 
    //fd->ls(); 
    h0=(TH1*)fd->Get("muStatEve"); assert(h0);
    printf("%s: ",h0->GetName());
@@ -710,6 +710,9 @@ void doAll(char *core0="", char *iPath="", int isMC=0){
 
 
 // $Log: plWana.C,v $
+// Revision 1.13  2012/07/05 20:13:33  balewski
+// *** empty log message ***
+//
 // Revision 1.12  2012/06/29 20:08:59  balewski
 // *** empty log message ***
 //
