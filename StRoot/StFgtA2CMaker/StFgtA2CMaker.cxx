@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.42 2012/07/05 21:39:47 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.43 2012/07/05 21:49:44 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.43  2012/07/05 21:49:44  avossen
+ * *** empty log message ***
+ *
  * Revision 1.42  2012/07/05 21:39:47  avossen
  * added flag to allow long pulses
  *
@@ -391,7 +394,7 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
      {
       if(numMaxPlateau>=3) //means basically 4 because we start counting after the first one
 	return kFgtSeedTypeNo;
-      {
+     }
 
 
 
