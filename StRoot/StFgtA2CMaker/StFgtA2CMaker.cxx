@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.41 2012/06/14 12:36:49 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.42 2012/07/05 21:39:47 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.42  2012/07/05 21:39:47  avossen
+ * added flag to allow long pulses
+ *
  * Revision 1.41  2012/06/14 12:36:49  avossen
  * *** empty log message ***
  *
@@ -175,7 +178,7 @@
 
 // constructors
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
-   : StMaker( name ), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(5), mDb(0) { /* */ };
+  : StMaker( name ), mAcceptLongPulses(false), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(5), mDb(0) { /* */ };
 
 
 Int_t StFgtA2CMaker::Init(){
@@ -365,8 +368,8 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
       prvAdc=adc;
 
       // this excludes the leading edge, don't count if there is a hole after the leading edge
-      if(leadEdgeBin>=0 && adc>3*ped && (timebin-numHighBinsAfterLeadingEdge)>(leadEdgeBin+1))
-         numHighBinsAfterLeadingEdge++;
+      //      if(leadEdgeBin>=0 && adc>3*ped && (timebin-numHighBinsAfterLeadingEdge)>(leadEdgeBin+1))
+      //         numHighBinsAfterLeadingEdge++;
 
       sumAdc += adc;
 
@@ -384,8 +387,11 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    }
 
    //  deciding on max plateau
-     if(numMaxPlateau>=3) //means basically 4 because we start counting after the first one
-          return kFgtSeedTypeNo;
+   if(!mAcceptLongPulses)
+     {
+      if(numMaxPlateau>=3) //means basically 4 because we start counting after the first one
+	return kFgtSeedTypeNo;
+      {
 
 
 
