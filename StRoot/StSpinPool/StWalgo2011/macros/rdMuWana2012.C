@@ -42,12 +42,13 @@ int rdMuWana2012(
     if(isMC==351) file1=strstr(file,"Wtau");
     if(isMC==352) file1=strstr(file,"Z");
     assert(file1);  printf("file1=%s=\n",file1);
-    outF=file1; outF.ReplaceAll(".lis","");
+    outF=file1; 
   }
   else { // bad isMC flag
     cout<<"bad isMC flag"<<endl; return;
   }
   outF=outF.ReplaceAll(".lis","");
+  outF.ReplaceAll(".MuDst.root","");
   printf("TRIG ID: L2BW=%d, L2EW=%d   isMC=%d  useJetFinder=%d\n",idL2BWtrg,idL2EWtrg,isMC, useJetFinder );
 
   
@@ -362,10 +363,13 @@ int rdMuWana2012(
   float rate=1.*eventCounter/(t2-t1);
   printf("#sorting %s done %d of   nEve= %d, CPU rate= %.1f Hz, total time %.1f minute(s) \n\n",file,eventCounter,nEntries,rate,tMnt);
   
+
+  
   
   TString outFh=histDir; outFh+=outF; outFh+=".wana.hist.root";
   
   cout<<"Output histo file "<<outFh<<endl;
+
   hf=new TFile(outFh,"recreate");
   if(hf->IsOpen()) {
     //HList->ls();
@@ -385,6 +389,9 @@ int rdMuWana2012(
 
 
 // $Log: rdMuWana2012.C,v $
+// Revision 1.5  2012/07/05 20:13:33  balewski
+// *** empty log message ***
+//
 // Revision 1.4  2012/06/25 20:57:05  stevens4
 // add directory for tpc histos
 //

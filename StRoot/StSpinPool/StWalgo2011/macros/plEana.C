@@ -71,11 +71,11 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   } else {
     printf("Opened: %s\n",fullInpName.Data());
   }
-  if(page==1){ 
+  if(page==1||page==13){ 
    //fd->ls(); 
-   h0=(TH1*)fd->Get("muStatEve"); assert(h0);
+   h0=(TH1*)fd->Get("muEStatEve"); assert(h0);
    printf("%s: ",h0->GetName());
-   for(int k=1;k<=10;k++) printf("%.0f, ",h0->GetBinContent(k));
+   for(int k=1;k<=16;k++) printf("%.0f, ",h0->GetBinContent(k));
    printf("\n");
  }
   if(page>=23 && page<=25 && fd->Get("AspinStatEve")==0) return; // skip spin plots if maker was not used
@@ -753,6 +753,9 @@ void doAllMC(char *core0="", char *iPath=""){
 
 
 // $Log: plEana.C,v $
+// Revision 1.10  2012/07/05 20:13:33  balewski
+// *** empty log message ***
+//
 // Revision 1.9  2012/06/29 19:13:36  stevens4
 // Include Jan's edits (previously removed with addition of TPC directory)
 //
