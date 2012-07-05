@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.6 2012/06/29 21:20:08 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.7 2012/07/05 19:03:54 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -55,7 +55,7 @@ St2011WMaker::find_W_boson(){
       }
 
       //fill plot for background
-      if(T.cluster.ET > par_highET) hA[251]->Fill(T.nearTotET,T.sPtBalance);
+      if(T.cluster.ET > par_highET) hA[251]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
 
       if(T.cluster.ET /T.nearTotET< par_nearTotEtFrac) continue; // too large nearET
 
@@ -644,6 +644,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.7  2012/07/05 19:03:54  stevens4
+// preset bin labels for TPC histos to preven merge warning
+//
 // Revision 1.6  2012/06/29 21:20:08  stevens4
 // *** empty log message ***
 //

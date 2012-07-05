@@ -1,4 +1,4 @@
-// $Id: WtpcFilter.cxx,v 1.2 2012/06/18 18:28:01 stevens4 Exp $
+// $Id: WtpcFilter.cxx,v 1.3 2012/07/05 19:03:54 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -115,6 +115,8 @@ WtpcFilter::initHistos(bool barrel) {
   int nCase=6;
   hA[0]=h=new TH1F(name+"Stat","track counter"+sufix+"; Cases",nCase,0,nCase);
   h->SetLineColor(myCol );
+  char key[][200]={"inp","nHit","Hfrac","Rin","Rout"};
+  for(int i=0;i<5;i++) h->Fill(key[i],0.); // preset the order of keys
 
   if(barrel) {
     hA[1]=h=new TH2F(name+"Tr2D1","lastHit, accepted"+sufix+"; detector eta ; detector phi (rad)",100,-1.1,1.1,200,-3.2,3.2);

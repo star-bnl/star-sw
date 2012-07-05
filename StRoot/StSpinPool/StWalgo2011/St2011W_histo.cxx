@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.5 2012/06/29 21:20:08 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.6 2012/07/05 19:03:54 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -311,7 +311,7 @@ St2011WMaker::initHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,par_nearTotEtFrac,1.e6,par_nearTotEtFrac);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
-  hA[251]=h=new TH2F("muSpTbal_isoCone","Signed p_{T} Balance vs. 2x2/nearCone; 2x2/nearCone; Signed p_{T} Balance (GeV)",100,-100,100,110,0,1.1);
+  hA[251]=h=new TH2F("muSpTbal_isoCone","Signed p_{T} Balance vs. 2x2/nearCone; 2x2/nearCone; Signed p_{T} Balance (GeV)",110,0,1.1,100,-100,100);
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
@@ -325,6 +325,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.6  2012/07/05 19:03:54  stevens4
+// preset bin labels for TPC histos to preven merge warning
+//
 // Revision 1.5  2012/06/29 21:20:08  stevens4
 // *** empty log message ***
 //
