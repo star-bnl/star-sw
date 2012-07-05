@@ -99,7 +99,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
 
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.9 2012/06/13 14:18:10 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.10 2012/07/05 21:40:25 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
@@ -109,6 +109,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    Short_t getQuadFromCoo(Double_t x, Double_t y);
    pair<Double_t,Double_t> getChargeRatio(Float_t r, Float_t phi, Int_t iD, Int_t iq);
    Bool_t printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq);
+   Bool_t printArea1D(Int_t iD, Int_t iq,Int_t centerGeoId);
    Bool_t getTrack(vector<AVPoint>& points, Double_t ipZ);
    pair<double,double> getDca(  vector<AVTrack>::iterator it);
    vector<AVTrack> m_tracks;

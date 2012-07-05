@@ -23,9 +23,11 @@
 #include <TLine.h>
 #include <set>
 
-
+//#define PRINT_1D
 //max num clusters any disk is allowed to have
-#define MAX_CLUSTERS 12
+
+#define MAX_PHI_DIFF 0.5//the maximal difference in phi a track is allowed 
+#define MAX_CLUSTERS 30
 #define CHARGE_MEASURE clusterCharge
 #define MAX_DIST_STRIP_R 0.7
 #define MAX_DIST_STRIP_PHI 0.03
@@ -33,6 +35,7 @@
 //#define LEN_CONDITION
 #define PULSE_CONDITION
 #define DO_PRINT
+#define VERTEX_CUT 50
 
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StFgtCollection.h"
@@ -654,6 +657,77 @@ Short_t StFgtGenAVEMaker::getQuadFromCoo(Double_t x, Double_t y)
 
   return -999;
 }
+
+
+Bool_t StFgtGenAVEMaker::printArea1D(Int_t iD,Int_t iq, Int_t centerGeoId)
+{
+  
+  for(int i=0;i<pStrips[iD*4+iq].size();i++)
+    {
+      Int_t geoId=pStrips[iD*4+iq][i].geoId;
+      generalStrip& pStrip=pStrips[iD*4+iq][i];
+      Short_t disc, quadrant,strip;
+      Char_t layer;
+      Double_t ordinate, lowerSpan, upperSpan;//, prvOrdinate;
+      StFgtGeom::getPhysicalCoordinate(geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+      StFgtGeom::decodeGeoId(geoId,disc, quadrant, layer, strip);
+      char buffer[100];
+      switch(pStrip.seedType)
+	{
+	case kFgtSeedTypeNo:
+	  sprintf(buffer,"No Seed");
+	  break;
+	case kFgtSeedType1:
+	  sprintf(buffer,"Seed1");
+	  break;
+	case kFgtSeedType2:
+	  sprintf(buffer,"Seed2");
+	  break;
+	case kFgtSeedType3:
+	  sprintf(buffer,"Seed3");
+	  break;
+	case kFgtClusterPart:
+	  sprintf(buffer,"PartOfCluster");
+	  break;
+	case kFgtClusterEndUp:
+	  sprintf(buffer,"EoC");
+	  break;
+	case kFgtClusterEndDown:
+	  sprintf(buffer,"BoC");
+	  break;
+	case kFgtDeadStrip:
+	  sprintf(buffer,"DeadStrip");
+	  break;
+	case kFgtClusterTooBig:
+	  sprintf(buffer,"cluster too big");
+	  break;
+	case kFgtClusterSeedInSeaOfNoise:
+	  sprintf(buffer,"seed in noise");
+	  break;
+	default:
+	  sprintf(buffer,"somethingWrong: %d", pStrip.seedType);
+	}
+
+      //     if(layer=='P' && disc==iD && iq==quadrant)
+	//	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
+      if(abs(geoId-centerGeoId)<8)
+	{
+	  //	  cout <<" found!!!" << endl;
+	  (*outTxtFile) <<StFgtGeom::encodeGeoName(iD,iq,layer,strip)<<"geo: " << geoId<< " ord: " << ordinate <<" layer: " <<layer<<" ped: " << pStrip.ped <<" pedErr: " << pStrip.pedErr <<" seedType: " <<buffer<<" ";
+	  for(int iT=0;iT<7;iT++)
+	    {
+	      if(pStrip.adc[iT]<pStrip.pedErr)
+		(*outTxtFile) << setw(4) << " .  "<< " ";
+	      else
+		(*outTxtFile) <<  setw(4) <<pStrip.adc[iT] <<" ";
+	    }
+	  (*outTxtFile) <<endl;
+	}
+    }
+  return kStOk;
+
+}
+
 //print the strips around the place where we expect hit
 Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
@@ -669,7 +743,7 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
   Int_t counterR=0;
   Int_t counterP=0;
 
-  for(int i=0;i<  pStrips[iD*4+iq].size();i++)
+  for(int i=0;i<pStrips[iD*4+iq].size();i++)
     {
       Int_t geoId=pStrips[iD*4+iq][i].geoId;
       generalStrip& pStrip=pStrips[iD*4+iq][i];
@@ -1205,6 +1279,46 @@ Int_t StFgtGenAVEMaker::Make()
   Int_t ierr = kStOk;
   (*outTxtFile) <<"----------------------------- Event Nr: " << evtNr<<" -----------------" <<endl;
   StFgtGeneralBase::Make();
+  for(int iD=0;iD<6;iD++)
+    {
+      (*outTxtFile) <<" In Disc " << iD << " we have clusters with geo id: ";
+      vector<generalCluster>::iterator hitIter;
+      vector<generalCluster> &hitVec=*(pClusters[iD]);
+      for(hitIter=hitVec.begin();hitIter != hitVec.end();hitIter++)
+	{
+		      (*outTxtFile) << hitIter->centralStripGeoId << ", ";
+	}
+      (*outTxtFile)<<endl;
+
+      for(int iq=0;iq<4;iq++)
+	{
+	  for(int i=0;i<  pStrips[iD*4+iq].size();i++)
+	    {
+	      generalStrip& pStrip=pStrips[iD*4+iq][i];
+	      if(pStrip.seedType==kFgtSeedType1|| pStrip.seedType==kFgtSeedType2 || pStrip.seedType==kFgtSeedType3)
+		{
+
+		  for(hitIter=hitVec.begin();hitIter != hitVec.end();hitIter++)
+		    {
+		      if(abs(hitIter->centralStripGeoId-pStrip.geoId)<2)
+			{
+			  (*outTxtFile) <<"found cluster with geo id: " << hitIter->centralStripGeoId;
+			  Double_t phiQ=StFgtGeom::phiQuadXaxis(iq);
+			  if(hitIter->layer=='R')
+			    (*outTxtFile) <<"R ordinate: " << hitIter->posR<<endl;
+			  else
+			    (*outTxtFile) <<"Phi ordinate: " << hitIter->posPhi-phiQ<<endl;
+			}
+		    }
+#ifdef PRINT_1D
+		  printArea1D(iD,iq,pStrip.geoId);
+#endif
+		}
+	    }
+	}
+    }
+
+
   Float_t x;
   Float_t y;
   //  if(vtxRank<=1)
@@ -1263,7 +1377,7 @@ Int_t StFgtGenAVEMaker::Make()
 	      cout <<"too many clusters in the disk!!!"<<endl<<endl;
 	      continue;
 	    }
-	  	  cout <<"using " << iSeed1 << " and " << iSeed2 << " as seed " <<endl;
+	  //	  	  cout <<"using " << iSeed1 << " and " << iSeed2 << " as seed " <<endl;
 	  vector<generalCluster> &hitVecSeed1=*(pClusters[iSeed1]);
 	  vector<generalCluster> &hitVecSeed2=*(pClusters[iSeed2]);
 
@@ -1284,8 +1398,8 @@ Int_t StFgtGenAVEMaker::Make()
 	      Double_t seed1ChargePhi=hitIterD1->CHARGE_MEASURE;
 	      Double_t seed1SizePhi=hitIterD1->clusterSize;
 
-	      if(quadP>2)
-		continue;
+	      //	      if(quadP>2)
+	      //		continue;
 
 	      //do 1D 'fit' with r strips and the (x,y) thing
 	      Int_t geoIdSeed1=hitIterD1->centralStripGeoId;
@@ -1295,48 +1409,51 @@ Int_t StFgtGenAVEMaker::Make()
 		continue;
 	      //    cout <<"ave make1 " <<endl;
 	      Float_t phiD1=hitIterD1->posPhi;
-	      for(hitIterD1R=hitVecSeed1.begin();hitIterD1R != hitVecSeed1.end();hitIterD1R++)
+	      for(hitIterD6=hitVecSeed2.begin();hitIterD6 != hitVecSeed2.end();hitIterD6++)
 		{
-		  if(!hitIterD1R->hasMatch)
-		    continue;
-		  Int_t geoIdSeed1R=hitIterD1R->centralStripGeoId;
-		  Short_t quadR=hitIterD1R->quad;
-		  Short_t disc=hitIterD1R->disc;
-		  Short_t strip=hitIterD1R->strip;
-		  Char_t layer=hitIterD1R->layer;
-		  Double_t seed1ChargeR=hitIterD1R->CHARGE_MEASURE;
-		  Double_t seed1SizeR=hitIterD1R->clusterSize;
-		  Int_t quadSeed1=-1;
-		  if(layer!='R')
+		  if( !hitIterD6->hasMatch)
 		    continue;
 
-		  if(quadR!=quadP)
+		  Int_t geoIdSeed2=hitIterD6->centralStripGeoId;
+		  Short_t quadP_2=hitIterD6->quad;
+		  Short_t disc=hitIterD6->disc;
+		  Short_t strip=hitIterD6->strip;
+		  Char_t layer=hitIterD6->layer;
+		  Double_t seed2ChargePhi=hitIterD6->CHARGE_MEASURE;
+		  Double_t seed2SizePhi=hitIterD6->clusterSize;
+		  if(layer!='P')
 		    continue;
-		  quadSeed1=quadR;
-		  if(usedPoints.find(geoIdSeed1R)!=usedPoints.end())
+		  if(usedPoints.find(geoIdSeed2)!=usedPoints.end())
 		    continue;
-		  
-		  Float_t rD1=hitIterD1R->posR;
-		  Float_t xD1=rD1*cos(phiD1);
-		  Float_t yD1=rD1*sin(phiD1);
-		  for(hitIterD6=hitVecSeed2.begin();hitIterD6 != hitVecSeed2.end();hitIterD6++)
+		  Float_t phiD6=hitIterD6->posPhi;
+		  if(fabs(phiD6-phiD1)>MAX_PHI_DIFF)
+		    continue;
+
+		  for(hitIterD1R=hitVecSeed1.begin();hitIterD1R != hitVecSeed1.end();hitIterD1R++)
 		    {
-		      if( !hitIterD6->hasMatch)
+		      if(!hitIterD1R->hasMatch)
+			continue;
+		      Int_t geoIdSeed1R=hitIterD1R->centralStripGeoId;
+		      Short_t quadR=hitIterD1R->quad;
+		      Short_t disc=hitIterD1R->disc;
+		      Short_t strip=hitIterD1R->strip;
+		      Char_t layer=hitIterD1R->layer;
+		      Double_t seed1ChargeR=hitIterD1R->CHARGE_MEASURE;
+		      Double_t seed1SizeR=hitIterD1R->clusterSize;
+		      Int_t quadSeed1=-1;
+		      if(layer!='R')
 			continue;
 
-		      Int_t geoIdSeed2=hitIterD6->centralStripGeoId;
-		      Short_t quadP_2=hitIterD6->quad;
-		      Short_t disc=hitIterD6->disc;
-		      Short_t strip=hitIterD6->strip;
-		      Char_t layer=hitIterD6->layer;
-		      Double_t seed2ChargePhi=hitIterD6->CHARGE_MEASURE;
-		      Double_t seed2SizePhi=hitIterD6->clusterSize;
-		      if(layer!='P')
+		      if(quadR!=quadP)
 			continue;
-		      if(usedPoints.find(geoIdSeed2)!=usedPoints.end())
+		      quadSeed1=quadR;
+		      if(usedPoints.find(geoIdSeed1R)!=usedPoints.end())
 			continue;
-		      Float_t phiD6=hitIterD6->posPhi;
-
+		  
+		      Float_t rD1=hitIterD1R->posR;
+		      Float_t xD1=rD1*cos(phiD1);
+		      Float_t yD1=rD1*sin(phiD1);
+		      //		      cout <<"disk: " << iSeed1<<", phiD1: " << phiD1 <<" xD1: " << xD1 <<" yD1: " << yD1 <<" rD1: " << rD1 <<endl;
 		      //    cout <<"ave make3 " <<endl;
 
 		      for(hitIterD6R=hitVecSeed2.begin();hitIterD6R != hitVecSeed2.end();hitIterD6R++)
@@ -1360,12 +1477,18 @@ Int_t StFgtGenAVEMaker::Make()
 			    continue;
 			  if(usedPoints.find(geoIdSeed2R)!=usedPoints.end())
 			    continue;
+			  Float_t rD6=hitIterD6R->posR;
+
+			  //track goes towards smaller radii
+			  if(rD1>rD6)
+			    continue;		  
 
 			  vector<AVPoint> v_points;
 			  //add the seed points to the points
-			  Float_t rD6=hitIterD6R->posR;
+
 			  Double_t xD6=rD6*cos(phiD6);
 			  Double_t yD6=rD6*sin(phiD6);
+			  //			  cout <<"Disk " << iSeed2 <<", phiD6: " << phiD6 <<" xD6: " << xD6 <<" yD6: " << yD6 <<" rD6: " << rD6 <<endl;
 			  v_points.push_back(AVPoint(xD1,yD1,D1Pos,rD1,phiD1,iSeed1,quadSeed1,seed1ChargeR, seed1ChargePhi, seed1SizeR, seed1SizePhi));
 			  v_points.push_back(AVPoint(xD6,yD6,D6Pos,rD6,phiD6,iSeed2,quadSeed2,seed2ChargeR, seed2ChargePhi, seed2SizeR, seed2SizePhi));
 			  ///for each combination in d1,d6
@@ -1436,10 +1559,16 @@ Int_t StFgtGenAVEMaker::Make()
 				  if(layer!='P')
 				    continue;
 				  Float_t phi=hitIter->posPhi;
+
+				  if(fabs(phi-phiD1)>MAX_PHI_DIFF)
+				    continue;
+				  if(fabs(phi-phiD6)>MAX_PHI_DIFF)
+				    continue;
+
 				  Double_t phiCharge=hitIter->CHARGE_MEASURE;
 
 				  //				  								  Double_t phiCharge=hitIter->maxAdc;
-								  //			  Int_t clusterSizePhi=hitIter->clusterSize;
+				  //			  Int_t clusterSizePhi=hitIter->clusterSize;
 				  //				  if(clusterSizePhi<=1)
 				  //				    continue;
 				  //    cout <<"ave make5 " <<endl;
@@ -1459,9 +1588,12 @@ Int_t StFgtGenAVEMaker::Make()
 				      if(quadTestR!=quadTestPhi)
 					continue;
 				      Float_t r=hitIter2->posR;
+				      //make sure that the radius makes sense for a track that goes from inner to outer radious
+				      if(r>rD6 || r<rD1)
+					continue;
 				      x=r*cos(phi);
 				      y=r*sin(phi);
-				      //				      cout <<"checking with x: " << x << " y: " << y <<endl;
+				      //				      cout <<"checking with x: " << x << " y: " << y << " phi: " << phi <<" r: " << r <<endl;
 				      //				      cout <<" x, y: " << x <<", " << y << " exp: " << xPosExp << " , " << yPosExp <<endl;
 				      Double_t dist2=(x-xPosExp)*(x-xPosExp)+(y-yPosExp)*(y-yPosExp);
 				      //				      cout <<" dist2: " << dist2 <<endl;
@@ -1493,6 +1625,7 @@ Int_t StFgtGenAVEMaker::Make()
 				  //				  cout <<"accepted "  <<endl;
 				  double r=iterClosestR->posR;
 				  double phi=iterClosestPhi->posPhi;
+				  //				  cout <<"found closest phi in disk " << iD <<" : " << phi << ", r: " << r << " x: " << x <<" y: " << y << ", this is good enough, distance: " << closestDist <<endl;
 				  Int_t geoIdR=iterClosestR->centralStripGeoId;
 				  Int_t geoIdPhi=iterClosestPhi->centralStripGeoId;
 
@@ -1550,9 +1683,11 @@ Int_t StFgtGenAVEMaker::Make()
 				//				cout <<"about to get track" <<endl;
 				//				cout <<"check for valid track " << endl;
 				validTrack=getTrack(v_points, ipZ);
+
 				//			      cout <<"found 2" <<endl;
 				if(validTrack)
 				  {
+				    //				    cout <<"track was valid, phi1: " << phiD1 <<" phiD6: " << phiD6 << endl;
 				    //				    cout <<"was valid " << endl;
 				  }
 			      }
@@ -1570,7 +1705,7 @@ Int_t StFgtGenAVEMaker::Make()
 					usedPoints.insert(geoIdSeed1R);
 					usedPoints.insert(geoIdSeed2);
 					usedPoints.insert(geoIdSeed2R);
-										//					usedPoints.insert(v_geoIDsPhi[i]);
+					//					usedPoints.insert(v_geoIDsPhi[i]);
 					//					usedPoints.insert(v_geoIDsR[i]);
 					//					Int_t disk=v_x[i].first;
 					//					Double_t x=v_x[i].second;
@@ -1640,19 +1775,19 @@ Int_t StFgtGenAVEMaker::Finish(){
 
   ///////////////////////////track collection
   vector<AVTrack>::iterator it=m_tracks.begin();
-    cout <<"we found " << m_tracks.size() <<" tracks" <<endl;
+  cout <<"we found " << m_tracks.size() <<" tracks" <<endl;
   int counter=0;
   for(;it!=m_tracks.end();it++)
     {
       cout <<" looking at track " << counter <<endl;
-counter++;
+      counter++;
       //      cout <<"This track has parameters: ";
       cout <<" mx: " << it->mx <<" my: " << it->my <<" bx: " << it->ax << " by: " << it->ay << " chi2: " << it->chi2 <<endl;
       Double_t vertZ = (  -( it->mx*it->ax + it->my*it->ay )/(it->mx*it->mx+it->my*it->my));
 
       pair<double,double> dca=getDca(it);
-
-      if(it->chi2<MAX_DIST_CHI && fabs(vertZ)< 50 )
+      cout <<"dca: " << dca.second <<" z vertex: " << vertZ <<" or " << dca.first <<endl;
+      if(it->chi2<MAX_DIST_CHI && fabs(vertZ)< VERTEX_CUT )
 	{
 	  hIpZ->Fill(dca.first);
 	  hIp->Fill(dca.first,dca.second);
@@ -1694,11 +1829,11 @@ counter++;
   for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
     {
       //      cRadio->cd(iD+1)->SetLogz();
-        cRadioHits->cd(iD+1);
-        radioPlotsEff[iD]->Draw("colz");
-        cRadioNonHits->cd(iD+1);
-        radioPlotsNonEff[iD]->Draw("colz");
-      }
+      cRadioHits->cd(iD+1);
+      radioPlotsEff[iD]->Draw("colz");
+      cRadioNonHits->cd(iD+1);
+      radioPlotsNonEff[iD]->Draw("colz");
+    }
   char buffer[100];
 
 
