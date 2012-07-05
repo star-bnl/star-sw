@@ -80,6 +80,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
    a2cMkr ->setRelThres( 4.);  // set to zero to skip cut
    //      a2cMkr->doCutBadStatus(true);//parameter is useless from looking at the function
    a2cMkr->doCutBadStatus();
+   a2cMkr->acceptLongPulses(true);
 
    ///this cuts ~10% of the events
    //   a2cMkr->doRemoveNonSignal(false);
