@@ -56,7 +56,7 @@
 #define MAX_DIST2_EFF 1.0
 #define MAX_DIST2 1.0
 
-#define MIN_NUM_POINTS 3
+#define MIN_NUM_POINTS 4
 #define DISK_DIM 40
 #define NUM_EFF_BIN 30
 
@@ -2304,6 +2304,8 @@ Int_t StFgtGenAVEMaker::Finish(){
 Int_t StFgtGenAVEMaker::Init(){
   outTxtFile=new ofstream;
   outTxtFile->open("clusExpectations.txt");
+  cluNotFoundTxt=new ofstream;
+  cluNotFoundTxt->open("clusNotFound.txt");
   cout <<"AVE!!" <<endl;
   myRootFile=new TFile("clusterEff.root","RECREATE");
   //  outTxtFile=new ofstream;
