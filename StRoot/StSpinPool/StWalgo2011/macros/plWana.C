@@ -8,12 +8,12 @@ root [7] muWET->Draw()
 */
 
 //=================================================
-plWana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institutions/iucf/stevens4/run12w/", char *oPath="out/bemc/"){ //1=gif, 2=ps, 3=both
+plWana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institutions/iucf/stevens4/run12w/", char *oPath="out/bemc/", int isMC=0){ //1=gif, 2=ps, 3=both
 
   //cout<<iPath<<core0<<endl;
 
   if(page<=-1) {
-    doAll(core0,iPath,page);
+    doAll(core0,iPath,isMC);
     return;
   }
    
@@ -76,6 +76,10 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
    printf("\n");
  }
   if(page>=23 && page<=25 && fd->Get("AspinStatEve")==0) return; // skip spin plots if maker was not used
+  
+  //skip some tpc/vertex plots if using tree reader histos
+  if( ((page>=2 && page<=6) || (page>=30 && page<=42) || page==15) && !fd->cd("tpc")) return;
+  fd->cd();
 
  gStyle->SetPalette(1,0);
  gStyle->SetOptStat(0);
@@ -710,6 +714,9 @@ void doAll(char *core0="", char *iPath="", int isMC=0){
 
 
 // $Log: plWana.C,v $
+// Revision 1.14  2012/07/06 20:45:19  stevens4
+// *** empty log message ***
+//
 // Revision 1.13  2012/07/05 20:13:33  balewski
 // *** empty log message ***
 //
