@@ -99,13 +99,14 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
 
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.11 2012/07/06 01:07:39 ezarndt Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.12 2012/07/06 16:13:12 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
 
    Int_t printCounter;
    ofstream* outTxtFile;
+   ofstream* cluNotFoundTxt;
    Short_t getQuadFromCoo(Double_t x, Double_t y);
    pair<Double_t,Double_t> getChargeRatio(Float_t r, Float_t phi, Int_t iD, Int_t iq);
    Bool_t printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq);
