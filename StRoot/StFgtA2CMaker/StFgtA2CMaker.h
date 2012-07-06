@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.18 2012/07/05 21:39:47 avossen Exp $
+ * $Id: StFgtA2CMaker.h,v 1.19 2012/07/06 01:12:17 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -36,6 +36,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.19  2012/07/06 01:12:17  avossen
+ * implemented scaled pulse finder
+ *
  * Revision 1.18  2012/07/05 21:39:47  avossen
  * added flag to allow long pulses
  *
@@ -146,17 +149,17 @@ class StFgtA2CMaker : public StMaker {
    void doCutBadStatus();                 // set status mask to 0xFF, so any bad status is cut
    void setStatusMask( UChar_t mask );    // set status mask to some other value
    void acceptLongPulses(Bool_t accept );
-
+   void setClusterThreshold( Float_t threshold );
    // cvs tag
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.18 2012/07/05 21:39:47 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.19 2012/07/06 01:12:17 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    Short_t checkValidPulse(StFgtStrip* pStrip, Float_t ped);
    // parameters
    Bool_t mAcceptLongPulses;
    UChar_t mStatusMask;
-   Float_t mAbsThres, mRelThres;
+   Float_t mAbsThres, mRelThres,mClusterThreshold;
 
    // pointer to the DB
    StFgtDb* mDb;
@@ -173,6 +176,7 @@ inline StFgtA2CMaker::~StFgtA2CMaker(){ /* */ };
 
 // modifiers
 inline void StFgtA2CMaker::acceptLongPulses( Bool_t accept ){ mAcceptLongPulses = accept; };
+inline void StFgtA2CMaker::setClusterThreshold( Float_t threshold ){ mClusterThreshold = threshold; };
 inline void StFgtA2CMaker::setAbsThres( Float_t thres ){ mAbsThres = thres; };
 inline void StFgtA2CMaker::setRelThres( Float_t thres ){ mRelThres = thres; };
 inline void StFgtA2CMaker::setFgtDb(StFgtDb* db ){mDb=db; };

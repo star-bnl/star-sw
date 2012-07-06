@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.43 2012/07/05 21:49:44 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.44 2012/07/06 01:12:17 avossen Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.44  2012/07/06 01:12:17  avossen
+ * implemented scaled pulse finder
+ *
  * Revision 1.43  2012/07/05 21:49:44  avossen
  * *** empty log message ***
  *
@@ -181,7 +184,7 @@
 
 // constructors
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
-  : StMaker( name ), mAcceptLongPulses(false), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(5), mDb(0) { /* */ };
+  : StMaker( name ), mAcceptLongPulses(false), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(5),mClusterThreshold(1.0), mDb(0) { /* */ };
 
 
 Int_t StFgtA2CMaker::Init(){
@@ -413,7 +416,7 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
       Float_t adc2=pStrip->getAdc(timebin+1);
       Float_t adc3=pStrip->getAdc(timebin+2);
       //      cout <<" looking at tb: " << timebin <<" " << timebin+1 <<" " << timebin+2 <<" ped: "<< ped <<endl;
-      if(adc1> 5*ped && adc2> 5*ped && adc3 > 5*ped)
+      if(adc1> mClusterThreshold*5*ped && adc2> mClusterThreshold*5*ped && adc3 > mClusterThreshold*5*ped)
 	{
 	  //found some sort of rising edge
 	  if(adc1 < adc2 && adc2 < adc3)
