@@ -99,7 +99,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
 
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.10 2012/07/05 21:40:25 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.11 2012/07/06 01:07:39 ezarndt Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
@@ -189,6 +189,20 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    TH1F** secondToLastRatioTrackClusterP;
    TH1F** secondToLastRatioTrackClusterR;
 
+   TH1F** APVfirstTbSigCloseClusterP;
+   TH1F** APVfirstTbSigCloseClusterR;
+   TH1I** APVmaxAdcCloseClusterP;
+   TH1I** APVmaxAdcCloseClusterR;
+   TH1I** APVmaxTbCloseClusterP;
+   TH1I** APVmaxTbCloseClusterR;
+   TH1I** APVnumFSigCloseClusterP;
+   TH1I** APVnumFSigCloseClusterR;
+   TH1I** APVnumFirstHighCloseClusterP;
+   TH1I** APVnumFirstHighCloseClusterR;
+   TH1F** APVmaxSigCloseClusterP;
+   TH1F** APVmaxSigCloseClusterR;
+   TH1F** APVsecondToLastRatioCloseClusterP;
+   TH1F** APVsecondToLastRatioCloseClusterR;
 
    TH1F* exPulseMaxAdcNormR;
    TH1F* exPulseSigR;
