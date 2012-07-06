@@ -100,7 +100,7 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int maxEvents=1e8 )
   char *file1=fileList;
   printf("file1=%s=%s=\n",file1);
   TString outFile="outTree/"; outFile+=file1;
-  outFile.ReplaceAll(".lis","wana.hist.root");
+  outFile.ReplaceAll(".lis",".wana.hist.root");
   outFile.ReplaceAll("lists/treeReader","");
   TFile *outF=new TFile(outFile,"RECREATE");
   if(outF->IsOpen()){
