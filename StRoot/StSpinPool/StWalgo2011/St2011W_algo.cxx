@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.7 2012/07/05 19:03:54 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.8 2012/07/06 17:47:02 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -131,7 +131,7 @@ St2011WMaker::find_W_boson(){
 
       hA[90]->Fill( T.cluster.ET); 
       hA[92]->Fill( T.cluster.ET,T.glMuTrack->dEdx()*1e6); 
-      hA[93]->Fill( T.cluster.ET,T.glMuTrack->dca(V.id).mag());
+      //hA[93]->Fill( T.cluster.ET,T.glMuTrack->dca(V.id).mag());
       int k=0; if(T.prMuTrack->charge()<0) k=1;
       hA[94+k]->Fill( T.cluster.ET,T.glMuTrack->dcaD());
       // h95 used above
@@ -644,6 +644,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.8  2012/07/06 17:47:02  stevens4
+// Updates for tree reader
+//
 // Revision 1.7  2012/07/05 19:03:54  stevens4
 // preset bin labels for TPC histos to preven merge warning
 //
