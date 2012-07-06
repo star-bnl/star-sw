@@ -85,6 +85,7 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int maxEvents=1e8 )
 
   Int_t nevents = wTreeMk->getNumberOfEvents();
   cout<<nevents<<" events in chain"<<endl;
+  if(nevents<1) {cout<<"No events in chain, check your list file"<<endl;  return; }
 
   Int_t stat  = 0;  Int_t event = 0;
   while ( !stat ) 
@@ -98,8 +99,9 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int maxEvents=1e8 )
 
   char *file1=fileList;
   printf("file1=%s=%s=\n",file1);
-  TString outFile=file1;
-  outFile.ReplaceAll(".lis",".root");
+  TString outFile="outTree/"; outFile+=file1;
+  outFile.ReplaceAll(".lis","wana.hist.root");
+  outFile.ReplaceAll("lists/treeReader","");
   TFile *outF=new TFile(outFile,"RECREATE");
   if(outF->IsOpen()){
     HList->Write();
