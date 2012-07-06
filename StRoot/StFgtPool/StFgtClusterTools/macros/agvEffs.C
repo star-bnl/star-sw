@@ -81,6 +81,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
    //      a2cMkr->doCutBadStatus(true);//parameter is useless from looking at the function
    a2cMkr->doCutBadStatus();
    a2cMkr->acceptLongPulses(true);
+   a2cMkr->setClusterThreshold(0.8);
 
    ///this cuts ~10% of the events
    //   a2cMkr->doRemoveNonSignal(false);
