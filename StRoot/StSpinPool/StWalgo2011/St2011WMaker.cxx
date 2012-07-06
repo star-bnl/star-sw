@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.7 2012/06/25 20:53:15 stevens4 Exp $
+// $Id: St2011WMaker.cxx,v 1.8 2012/07/06 17:47:02 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -338,10 +338,14 @@ St2011WMaker::Make(){
   }
   else { //analysis of W tree
     if(getEvent(index++,indexJet++)==kStEOF) return kStEOF; //get next event from W and jet tree
-  
-   if(nInpEve%200==1) printf("\n-----in---- %s, nEve: inp=%d \n", GetName(),nInpEve);//,nTrigEve, nAccEve,afile);  
-
-  if(mJetTreeChain) {// just QA plots for jets
+    
+    
+    
+    if(nInpEve%200==1) printf("\n-----in---- %s, nEve: inp=%d \n", GetName(),nInpEve);//,nTrigEve, nAccEve,afile);  
+    
+    if(wEve->bemc.maxAdc<par_maxADC && wEve->etow.maxAdc<par_maxADC) return kStOK; //skip event w/o energy in BTOW && ETOW 
+    
+    if(mJetTreeChain) {// just QA plots for jets
       mJets = getJetsTreeAnalysis(mJetTreeBranch); //get input jet info
       for (int i_jet=0; i_jet< nJets; ++i_jet){
 	StJet* jet = getJet(i_jet);
@@ -353,7 +357,7 @@ St2011WMaker::Make(){
       }
     }
   }
-
+  
   //find barrel candidates
   extendTrack2Barrel(); 
   int bmatch=matchTrack2BtowCluster(); 
@@ -532,6 +536,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.8  2012/07/06 17:47:02  stevens4
+// Updates for tree reader
+//
 // Revision 1.7  2012/06/25 20:53:15  stevens4
 // algo and histo cleanup
 //

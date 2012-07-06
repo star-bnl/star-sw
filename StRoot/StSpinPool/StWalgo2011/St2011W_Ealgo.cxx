@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.6 2012/06/25 20:53:19 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.7 2012/07/06 17:47:02 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -100,7 +100,7 @@ St2011WMaker::findEndcap_W_boson(){
 
       hE[90]->Fill( T.cluster.ET);
       hE[92]->Fill( T.cluster.ET,T.glMuTrack->dEdx()*1e6);
-      hE[93]->Fill( T.cluster.ET,T.glMuTrack->dca().mag());
+      //hE[93]->Fill( T.cluster.ET,T.glMuTrack->dca().mag());
       int k=0; if(T.prMuTrack->charge()<0) k=1;
       hE[94+k]->Fill( T.cluster.ET,T.glMuTrack->dcaD());
       // h95 used above
@@ -513,6 +513,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.7  2012/07/06 17:47:02  stevens4
+// Updates for tree reader
+//
 // Revision 1.6  2012/06/25 20:53:19  stevens4
 // algo and histo cleanup
 //
