@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.18 2012/06/13 15:44:46 ramdebbe Exp $
+// $Id: StPeCEvent.cxx,v 1.19 2012/07/08 00:40:20 ramdebbe Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.19  2012/07/08 00:40:20  ramdebbe
+// initialized variables per Gene VB advice
+//
 // Revision 1.18  2012/06/13 15:44:46  ramdebbe
 // Added flags to include TOF and Vertex branches in tree
 //
@@ -94,32 +97,49 @@
 
 ClassImp(StPeCEvent)
 
-  StPeCEvent::StPeCEvent(bool useBemc, bool useTOF, bool useVertex) {
+  StPeCEvent::StPeCEvent(bool useBemc, bool useTOF, bool useVertex) :
+    muDst(0), eventP(0), treecalo(0), tofHits(0), tofTracks(0), vertices(0) {
   // StPeCMaxTracks ..... looks more like Fortran......
   pPairs    = new TClonesArray ("StPeCPair", StPeCnMaxTracks);
   sPairs    = new TClonesArray ("StPeCPair", StPeCnMaxTracks);
   tracks    = new TClonesArray ("StPeCTrack",StPeCnMaxTracks);
-  if(useTOF){
+  if((useTOFlocal = useTOF)){
     tofHits   = new TClonesArray ("StMuBTofHit",5*StPeCnMaxTracks);
     tofTracks = new TClonesArray ("StMuTrack",5*StPeCnMaxTracks);
-    useTOFlocal = useTOF;
+
     LOG_INFO << "StPeCEvent constructor: useTOF ---------- " <<useTOF << endm;
   }
-  if(useBemc) {
+  if((useBemcLocal = useBemc)) {
     treecalo  = new TClonesArray ("StEmcCluster",5*StPeCnMaxTracks);
     LOG_INFO << "StPeCEvent constructor: useBemc ---------- " <<useBemc << endm;
-    useBemcLocal = useBemc;
+
   }
-  if(useVertex){
+  if((useVertexLocal = useVertex)){
     vertices  = new TClonesArray ("StMuPrimaryVertex",5*StPeCnMaxTracks);
     LOG_INFO << "StPeCEvent constructor: useVertex ---------- " <<useVertex << endm;
-    useVertexLocal = useVertex;
+
   }
   nPPairs  = 0 ;
   nSPairs  = 0 ;
   nTracks  = 0 ;
   eventP   = 0 ;
   shotCount = 0;
+  eventN = 0;
+  runN = 0;
+  nTot = 0;
+  nPrim = 0;
+  qTot = 0;
+  nGlobalTracks = 0;
+  nPrimaryTracks = 0;
+  nPrimaryTPC = 0;
+  nPrimaryFTPC = 0;
+  bField = 0;
+  pt = 0;
+  xVertex = 0;
+  yVertex = 0;
+  zVertex = 0;
+  rVertex = 0;
+  infoLevel = 0;
 
 
 }
@@ -706,7 +726,7 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
        new((*vertices)[verti]) StMuPrimaryVertex((const StMuPrimaryVertex &) *V);
      }
      //    assert(V);
-     Float_t rank = V->ranking();
+//      Float_t rank = V->ranking();
      //LOG_INFO << "StPeCEvent::  vertex ranking: "<<rank<<endm;
      StMuDst::setVertexIndex(verti);
      size_t Ntracks = muDst->primaryTracks()->GetEntries();
@@ -832,6 +852,7 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
       //     matchTOFhitsToTracks(mudst);
       return 1;
     }
+    return 0;
 }
 
 StPeCPair* StPeCEvent::getPriPair ( Int_t i ) {
@@ -928,7 +949,7 @@ void StPeCEvent::matchTOFhitsToTracks(StMuDst *mudst) {
 
   TObjArray* priTracks = 0;
   TObjArray* gloTracks = 0;
-  StMuTrack *trk;
+//   StMuTrack *trk;
   StMuEvent* event = 0;
   Int_t snapLimit =  10;
   Float_t angleHit;
@@ -984,8 +1005,8 @@ void StPeCEvent::matchTOFhitsToTracks(StMuDst *mudst) {
   //LOG_INFO << "StPeCEvent::matchTOFhitsToTracks #primary tracks: "  <<priTracks->GetEntries()<< endm;
    gloTracks = mudst->globalTracks();
 
-  int nGlobalTracks  = gloTracks->GetEntries();
-  int nPrimaryTracks = priTracks->GetEntries();
+//   int nGlobalTracks  = gloTracks->GetEntries();
+//   int nPrimaryTracks = priTracks->GetEntries();
   int globalTrackCounter = 0;
   //
   //loop on vertex tracks to find those that match TOF hits
