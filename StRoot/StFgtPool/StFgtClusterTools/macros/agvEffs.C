@@ -53,7 +53,8 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
    //for 1305459
    //   dbMkr->SetDateTime(20120223,201805);      
    ///   dbMkr->SetDateTime(20120316,033657); ///
-       dbMkr->SetDateTime(20120404,043459); ///
+   //          dbMkr->SetDateTime(20120404,043459); ///
+             dbMkr->SetDateTime(20120622,043459); ///
 
    ///     dbMkr->SetDateTime(20120307,000717); ///
    //      dbMkr->SetDateTime(20120128,204320);      // run ???
@@ -77,7 +78,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
    a2cMkr->setFgtDb(fgtDbMkr->getDbTables());
    a2cMkr ->setAbsThres( -5000 );  // set to below -4096 to skip cut
     //    a2cMkr ->setAbsThres( 300 );  // set to below -4096 to skip cut
-   a2cMkr ->setRelThres( 4.);  // set to zero to skip cut
+   a2cMkr ->setRelThres( 3.);  // set to zero to skip cut
    //      a2cMkr->doCutBadStatus(true);//parameter is useless from looking at the function
    a2cMkr->doCutBadStatus();
    a2cMkr->acceptLongPulses(true);

@@ -1,7 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.44 2012/07/06 01:12:17 avossen Exp $
- * Author: S. Gliske, Oct 2011
+ * $Id: StFgtA2CMaker.cxx,v 1.45 2012/07/10 21:47:24 avossen Exp $
  *
  ***************************************************************************
  *
@@ -10,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.45  2012/07/10 21:47:24  avossen
+ * random update
+ *
  * Revision 1.44  2012/07/06 01:12:17  avossen
  * implemented scaled pulse finder
  *
@@ -295,6 +297,9 @@ Int_t StFgtA2CMaker::Make(){
                      };
                   };
 
+		  //		    if(strip->getGeoId() >=13092 && strip->getGeoId()<=13105)
+		      //		      cout <<"" <<endl;
+
                   // get gain
                   Double_t gain = mDb->getGainFromElecId( elecId );
 
@@ -313,6 +318,8 @@ Int_t StFgtA2CMaker::Make(){
 
                   } else if( mRelThres || mAbsThres>-kFgtMaxAdc ){
                      // but if it is +/- n strips from valid pulse, keep it
+		    //		    if(strip->getGeoId() >=13092 && strip->getGeoId()<=13105)
+		    //		      cout <<"checking pulse for geoID:  " << strip->getGeoId() <<" adc : " << strip->getAdc(0)<<" " << strip->getAdc(1) <<" " << strip->getAdc(2)<<" " << strip->getAdc(3)<<" " << strip->getAdc(4)<<" " << strip->getAdc(5)<<" " << strip->getAdc(6)<<endl;
                      strip->setClusterSeedType(checkValidPulse(strip, pedErr));
                   } else {
                      strip->invalidateCharge();
@@ -324,8 +331,12 @@ Int_t StFgtA2CMaker::Make(){
                      if( status & mStatusMask )
                         strip->setClusterSeedType(kFgtDeadStrip);
                   };
-               };
-            };
+		  //	    if(strip->getGeoId() >=13092 && strip->getGeoId()<=13105)
+		  //	      cout <<" seed type is: " << strip->getSeedType() <<endl;
+               }
+
+	    }
+
 
             // always check if any need removed, as it is possible
             // some ``bad'' strips may have abnormally large st. dev.
@@ -395,6 +406,7 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    //  deciding on max plateau
    if(!mAcceptLongPulses)
      {
+       cout <<"not accepting long pulses..." <<endl;
       if(numMaxPlateau>=3) //means basically 4 because we start counting after the first one
 	return kFgtSeedTypeNo;
      }
@@ -411,12 +423,17 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
 
    //   if(pStrip->getAdc(0) <3*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=1&& numAlmostHighBins>=2)
 
+
    for( Int_t timebin = 0; timebin < (kFgtNumTimeBins-2) && pStrip->getGeoId() > -1; timebin++ ) {
       Float_t adc1=pStrip->getAdc(timebin);
       Float_t adc2=pStrip->getAdc(timebin+1);
       Float_t adc3=pStrip->getAdc(timebin+2);
+      //   if(pStrip->getGeoId() >=13092 && pStrip->getGeoId()<=13105)
+      //     {
+      //       cout <<"adc1: " << adc1 << " adc2: " << adc2 <<" adc3: " << adc3 << endl;
+      //     }
       //      cout <<" looking at tb: " << timebin <<" " << timebin+1 <<" " << timebin+2 <<" ped: "<< ped <<endl;
-      if(adc1> mClusterThreshold*5*ped && adc2> mClusterThreshold*5*ped && adc3 > mClusterThreshold*5*ped)
+      if(adc1> mClusterThreshold*5*ped && adc2 > mClusterThreshold*5*ped && adc3 > mClusterThreshold*5*ped)
 	{
 	  //found some sort of rising edge
 	  if(adc1 < adc2 && adc2 < adc3)
@@ -425,10 +442,15 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
 	      //      cout <<"found seed 3" << endl;
 	      return kFgtSeedType3;
 	    }
+	  //falling edge for grossly out of time pulses
+	  if(adc1 > adc2 && adc2 > adc3)
+	      return kFgtSeedType3;
 	}
 
    }
    //   cout <<" no seed found! " << endl;
+	      if(pStrip->getGeoId() >=13092 && pStrip->getGeoId()<=13105)
+		cout <<"nope..." << endl;
    return kFgtSeedTypeNo;
 };
 

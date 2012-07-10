@@ -53,7 +53,7 @@
 
 
 #define MAX_DIST_CHI 1.0
-#define MAX_DIST2_EFF 1.0
+#define MAX_DIST2_EFF 2.0
 #define MAX_DIST2 1.0
 
 #define MIN_NUM_POINTS 4
@@ -906,10 +906,10 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 
       //     if(layer=='P' && disc==iD && iq==quadrant)
 	//	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
-      if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<0.7) || (layer=='P' && fabs(ordinate-phi)<0.03) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.03)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.03)))
+      if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<1.0) || (layer=='P' && fabs(ordinate-phi)<0.04) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.04)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.04)))
 	{
 	  //	  cout <<" found!!!" << endl;
-	  (*outTxtFile) <<StFgtGeom::encodeGeoName(iD,iq,layer,strip)<<" ord: " << ordinate <<" layer: " <<layer<<" ped: " << pStrip.ped <<" pedErr: " << pStrip.pedErr <<" seedType: " <<buffer<<" ";
+	  (*outTxtFile) <<"Id: " << geoId<<" "<<StFgtGeom::encodeGeoName(iD,iq,layer,strip)<<" ord: " << ordinate <<" layer: " <<layer<<" ped: " << pStrip.ped <<" pedErr: " << pStrip.pedErr <<" seedType: " <<buffer<<" ";
 	  for(int iT=0;iT<7;iT++)
 	    {
 	      if(pStrip.adc[iT]<pStrip.pedErr)
