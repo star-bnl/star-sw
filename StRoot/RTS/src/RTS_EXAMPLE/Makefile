@@ -22,6 +22,9 @@ all:   $(BINS)
 
 //$(VOBJS):
 
+testMessaging: testMessaging.o $(VOBJS)
+	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
+
 rts_example: rts_example.o $(VOBJS)
 	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 

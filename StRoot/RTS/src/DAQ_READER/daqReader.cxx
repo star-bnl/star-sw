@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.47 2012/05/11 09:30:55 tonko Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.48 2012/07/11 19:18:07 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1320,7 +1320,7 @@ int daqReader::getNextEventFilenameFromLive(int type)
       return -1;		// but also noevent - only on wait!	    
     }
 
-    LOG(DBG, "m.head.status = %d",m.head.status);
+    LOG(DBG, "m.head.status = %d  EOR=%d",m.head.status,EVP_STAT_EOR);
 
     // check misc. 
 
