@@ -99,7 +99,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
 
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.12 2012/07/06 16:13:12 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.13 2012/07/11 17:54:58 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
@@ -165,6 +165,14 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
 
    TH1I** maxSigTrackClusterR;
    TH1I** maxSigCloseClusterR;
+
+
+   TH1I** numClustersR;
+   TH1I** numClustersPhi;
+
+   TH1I** numTrackHits;
+   TH1I* numTracks;
+
 
    TH1I** numFSigTrackClusterR;
    TH1I** numFSigCloseClusterR;

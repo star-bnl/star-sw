@@ -1394,6 +1394,8 @@ Int_t StFgtGenAVEMaker::Make()
   Int_t ierr = kStOk;
   (*outTxtFile) <<"----------------------------- Event Nr: " << evtNr<<" -----------------" <<endl;
   StFgtGeneralBase::Make();
+  unsigned int oldNumTracks=m_tracks.size();
+  //  cout <<" mtracks size: " << m_tracks.size() << " oldnum: "<< oldNumTracks <<endl;
   for(int iD=0;iD<6;iD++)
     {
       (*outTxtFile) <<" In Disc " << iD << " we have clusters with geo id: ";
@@ -1453,7 +1455,26 @@ Int_t StFgtGenAVEMaker::Make()
 
   for(int iD=0;iD<6;iD++)
     {
-            cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
+      cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
+      int clusCounts[8];
+      memset(clusCounts,0,sizeof(int)*8);
+      vector<generalCluster> &tHitVec=*(pClusters[iD]);
+      vector<generalCluster>::iterator tHit=tHitVec.begin();
+      for(;tHit!=tHitVec.end();tHit++)
+	{
+	  if(tHit->quad<3)
+	    {
+	      if(tHit->layer=='R')
+		clusCounts[tHit->quad]++;
+	      else
+		clusCounts[tHit->quad+4]++;
+	    }
+	}
+      for(int iq=0;iq<4;iq++)
+	{
+	  numClustersR[iD*4+iq]->Fill(clusCounts[iq]);
+	  numClustersPhi[iD*4+iq]->Fill(clusCounts[iq+4]);
+	}
 
       int numClus=0;
       int numPulses=0;
@@ -1478,6 +1499,12 @@ Int_t StFgtGenAVEMaker::Make()
   Double_t D6Pos=StFgtGeom::getDiscZ(5);
   Double_t zArm=D6Pos-D1Pos;
   vector<generalCluster>::iterator hitIterD1,hitIterD6, hitIterD1R, hitIterD6R, hitIter, hitIter2;
+
+  int clusCountsTemp[24];
+  int clusCounts[24];
+  memset(clusCounts,0,sizeof(int)*24);
+  memset(clusCountsTemp,0,sizeof(int)*24);
+
   for(int iSeed1=0;iSeed1<5;iSeed1++)
     {
       for(int iSeed2=iSeed1+1;iSeed2<6;iSeed2++)
@@ -1492,6 +1519,8 @@ Int_t StFgtGenAVEMaker::Make()
 	      cout <<"too many clusters in the disk!!!"<<endl<<endl;
 	      continue;
 	    }
+	  //track where we have hits in disks
+
 	  //	  	  cout <<"using " << iSeed1 << " and " << iSeed2 << " as seed " <<endl;
 	  vector<generalCluster> &hitVecSeed1=*(pClusters[iSeed1]);
 	  vector<generalCluster> &hitVecSeed2=*(pClusters[iSeed2]);
@@ -1590,6 +1619,10 @@ Int_t StFgtGenAVEMaker::Make()
 			  quadSeed2=quadP_2;
 			  if(layer!='R')
 			    continue;
+
+
+			  clusCountsTemp[iSeed1*4+quadR]++;
+			  clusCountsTemp[iSeed2*4+quadR_2]++;
 			  if(usedPoints.find(geoIdSeed2R)!=usedPoints.end())
 			    continue;
 			  Float_t rD6=hitIterD6R->posR;
@@ -1737,6 +1770,8 @@ Int_t StFgtGenAVEMaker::Make()
 			      if(closestDist<1000 && closestDist<MAX_DIST2)
 				{
 				  found=true;
+				  clusCountsTemp[iD*4+quadTestR]++;
+
 				  //				  cout <<"accepted "  <<endl;
 				  double r=iterClosestR->posR;
 				  double phi=iterClosestPhi->posPhi;
@@ -1792,6 +1827,10 @@ Int_t StFgtGenAVEMaker::Make()
 			    {
 			      //			      cout <<"found " <<endl;
 			      Bool_t validTrack=false;
+
+
+
+
 			      //			      if(v_x.size()>iFound)
 			      {
 				Double_t ipZ;
@@ -1802,10 +1841,17 @@ Int_t StFgtGenAVEMaker::Make()
 				//			      cout <<"found 2" <<endl;
 				if(validTrack)
 				  {
+				    for(Int_t iD=0;iD<kFgtNumDiscs;iD++){
+				      for(int iq=0;iq<4;iq++){
+					clusCounts[iD*4+iq]+=clusCountsTemp[iD*4+iq];
+				      }}
+
+
 				    //				    cout <<"track was valid, phi1: " << phiD1 <<" phiD6: " << phiD6 << endl;
 				    //				    cout <<"was valid " << endl;
 				  }
 			      }
+
 			      //			      cout <<"found4 " <<endl;
 			      //			      else
 			      {
@@ -1839,7 +1885,6 @@ Int_t StFgtGenAVEMaker::Make()
 				hitCounter++;
 			      }
 			    }
-
 			  //    cout <<"ave make8]11 " <<endl;
 
 			  //start over
@@ -1852,6 +1897,7 @@ Int_t StFgtGenAVEMaker::Make()
 			  v_xFail.clear();
 			  v_yFail.clear();
 			  v_rFail.clear();
+			  memset(clusCountsTemp,0,sizeof(int)*24);
 			}
 
 		    }
@@ -1863,6 +1909,16 @@ Int_t StFgtGenAVEMaker::Make()
 	}
 
     }
+  for(Int_t iD=0;iD<kFgtNumDiscs;iD++){
+    for(int iq=0;iq<4;iq++){
+      //      cout <<"filling clus2: " << iD<<" iq: " << iq << " overall: " << iD*4+iq <<endl;
+      //            cout <<"fill disk " << iD <<" quad: " << iq << " with " << clusCounts[iD*4+iq] <<" clusters from tracks"<<endl;
+      numTrackHits[iD*4+iq]->Fill(clusCounts[iD*4+iq]);
+
+    }}
+  //  cout <<"we have " << m_tracks.size()-oldNumTracks<< " tracks in this event " <<endl;
+  //  cout <<"oldNumtracsk: " << oldNumTracks << " new size: " << m_tracks.size() <<endl;
+  numTracks->Fill(m_tracks.size()-oldNumTracks);
 
   return ierr;
 
@@ -2004,11 +2060,16 @@ Int_t StFgtGenAVEMaker::Finish(){
   
   exPulseMaxAdcNormTrackR->Write();
   exPulseSigTrackR->Write();
+  numTracks->Write();
   
   for(int iD=0;iD<kFgtNumDiscs;iD++)
     {
       for(int iq=0;iq<4;iq++)
 	{
+	  numClustersR[iD*4+iq]->Write();
+	  numClustersPhi[iD*4+iq]->Write();
+	  numTrackHits[iD*4+iq]->Write();
+
 
 	  maxTbCloseClusterP[iD*4+iq]->Write();
 	  maxTbCloseClusterR[iD*4+iq]->Write();
@@ -2361,6 +2422,10 @@ Int_t StFgtGenAVEMaker::Init(){
   pulseCounterTP=0;
   pulseCounterTR=0;
 
+  createPlots(&numClustersR,kFgtNumDiscs*4,"numClustersR",101,0,100);
+  createPlots(&numClustersPhi,kFgtNumDiscs*4,"numClustersPhi",101,0,100);
+  createPlots(&numTrackHits,kFgtNumDiscs*4,"numTrackHits",101,0,100);
+  numTracks=new TH1I("numTracksPerEvent","numTracksPerEvent",101,0,100);
 
   createPlots(&firstTbSigCloseClusterR,kFgtNumDiscs*4,"firstTbSigCloseClusterR",100,0,20);
   createPlots(&firstTbSigCloseClusterP,kFgtNumDiscs*4,"firstTbSigCloseClusterP",100,0,20);
