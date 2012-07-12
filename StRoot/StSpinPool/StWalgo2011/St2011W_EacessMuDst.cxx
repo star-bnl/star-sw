@@ -1,4 +1,4 @@
-// $Id: St2011W_EacessMuDst.cxx,v 1.5 2012/06/26 20:30:23 stevens4 Exp $
+// $Id: St2011W_EacessMuDst.cxx,v 1.6 2012/07/12 20:49:21 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -95,14 +95,16 @@ St2011WMaker::accessEndcapTrig(){ // return non-zero on abort
   hE[3]->Fill(wEve->bx7);
   
   // access L0-HT data
+  int mxVal=-1;
   for (int m=0;m<90;m++)	{
     int val=muEve->emcTriggerDetector().highTowerEndcap(m);
+    if(mxVal<val) mxVal=val;
     if(wEve->l2EbitET) hE[6]->Fill(val);
     if(val<parE_DsmThres) continue;
     if(wEve->l2EbitET) hE[8]->Fill(m);
     //printf("Fired L0 EHT m=%d val=%d\n",m,val);
   }
-
+  wEve->etow.maxHtDsm=mxVal;
   return 0;
 }
 
@@ -254,6 +256,14 @@ St2011WMaker::accessESMD(){
 
 
 //$Log: St2011W_EacessMuDst.cxx,v $
+//Revision 1.6  2012/07/12 20:49:21  balewski
+//added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
+//removed dependence of spinSortingMaker from muDst
+//Now Wtree can be spin-sorted w/o DB
+//rdMu.C & readWtree.C macros modified
+//tested so far on real data run 11
+//lot of misc. code shuffling
+//
 //Revision 1.5  2012/06/26 20:30:23  stevens4
 //Updates ZMaker for mixing barrel and endcap arms
 //

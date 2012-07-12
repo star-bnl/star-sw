@@ -5,7 +5,7 @@ StChain      *chain  = 0;
 St2011WMaker *wTreeMk = 0;
 TString jetTreeDir = "";
 bool isZ=true;
-bool spinSort=false;
+bool spinSort=true;
 
 void readWtree(	const Char_t *fileList="./R10081007.lis", int maxEvents=1e8 )
 {
@@ -28,9 +28,6 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int maxEvents=1e8 )
   TObjArray* HList=new TObjArray;
   TObjArray* HListTpc=new TObjArray;
 
-  //access to DB for spin sorting (not functional yet)
-  St_db_Maker   *dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
-  dbMk->SetDateTime(20110418,090800);
 
   //initiate W maker
   wTreeMk = new St2011WMaker();
@@ -39,16 +36,9 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int maxEvents=1e8 )
   wTreeMk->setHListTpc(HListTpc);
   wTreeMk->setMaxDisplayEve(1); // only first N events will get displayed 
 
-  // pub W maker
-  WpubMk=new St2011pubWanaMaker("pubJan");
-  WpubMk->attachWalgoMaker(wTreeMk);
-  WpubMk->setHList(HList);
 
-  // spin sorting
-  StSpinDbMaker *spDb=0;
+  //......... spin sorting
   if(spinSort){
-    spDb=new StSpinDbMaker("spinDb");
-
     enum {mxSM=5}; // to study eta-cuts, drop Q/PT cut
     St2011pubSpinMaker *spinMkA[mxSM];
     for(int kk=0;kk<mxSM;kk++) {
@@ -56,7 +46,6 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int maxEvents=1e8 )
       printf("add spinMaker %s %d \n",ttx,kk);
       spinMkA[kk]=new St2011pubSpinMaker(ttx); 
       spinMkA[kk]->attachWalgoMaker(wTreeMk);
-      spinMkA[kk]->attachSpinDb(spDb);
       spinMkA[kk]->setHList(HList); 
       if(kk==1) spinMkA[kk]->setEta(-1.,0.);
       if(kk==2) spinMkA[kk]->setEta(0,1.);

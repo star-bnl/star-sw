@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.h,v 1.1 2011/02/10 20:33:25 balewski Exp $
+// $Id: St2011pubSpinMaker.h,v 1.2 2012/07/12 20:49:21 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -24,25 +24,20 @@
 #include <TString.h>
 
 class St2011WMaker;
-class StSpinDbMaker;
 
 class St2011pubSpinMaker : public StMaker {
  private:
-  int nRun;
-  int Tfirst,Tlast;
 
   float par_QPTlow,par_QPThighET0,par_QPThighET1, par_QPThighA ,par_QPThighB; // cuts to drop questionable reco charge charges
   float par_leptonEta1, par_leptonEta2; // narrow the range
   int par_useNoEEMC;
 
   St2011WMaker *wMK; // W-algo maker with all data
-  StSpinDbMaker *spinDb;
   TString core; // name attached to all histos
 
   // histograms
   TObjArray *HList;
   enum {mxHA=32}; TH1 * hA[mxHA];
-  TH1 *hbxIdeal;
   
   void initHistos();
   void bXingSort();  
@@ -58,13 +53,12 @@ class St2011pubSpinMaker : public StMaker {
   void setNoEEMC() {par_useNoEEMC=1;}
 
   void attachWalgoMaker(St2011WMaker *mk) { wMK=mk;}
-  void attachSpinDb(StSpinDbMaker *mk){ spinDb=mk;}
   virtual Int_t FinishRun(int runumber);
 
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.1 2011/02/10 20:33:25 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.2 2012/07/12 20:49:21 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -75,6 +69,14 @@ class St2011pubSpinMaker : public StMaker {
 
 
 // $Log: St2011pubSpinMaker.h,v $
+// Revision 1.2  2012/07/12 20:49:21  balewski
+// added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
+// removed dependence of spinSortingMaker from muDst
+// Now Wtree can be spin-sorted w/o DB
+// rdMu.C & readWtree.C macros modified
+// tested so far on real data run 11
+// lot of misc. code shuffling
+//
 // Revision 1.1  2011/02/10 20:33:25  balewski
 // start
 //

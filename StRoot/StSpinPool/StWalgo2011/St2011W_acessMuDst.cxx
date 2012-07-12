@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.7 2012/06/18 18:28:01 stevens4 Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.8 2012/07/12 20:49:21 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -16,6 +16,8 @@
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+
+#include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
 
 #include "St2011WMaker.h"
 //--------------------------------------
@@ -94,6 +96,18 @@ St2011WMaker::accessBarrelTrig(){ // return non-zero on abort
   wEve->bx48=trig->bunchCrossingId();
   wEve->bx7=trig->bunchCrossingId7bit(mRunNo);
 
+  // store spin info 
+  int bxStar48=-2, bxStar7=-2, spin4=-2;
+  if(spinDb->isValid() &&  // all 3 DB records exist 
+     spinDb->isPolDirLong()) {  // you do not want mix Long & Trans by accident
+   bxStar48= spinDb->BXstarUsingBX48(wEve->bx48);
+   bxStar7=spinDb->BXstarUsingBX7(wEve->bx7);
+   spin4=spinDb->spin4usingBX48(wEve->bx48); 
+  }
+  wEve->bxStar48=bxStar48;
+  wEve->bxStar7=bxStar7;
+  wEve->spin4=spin4;
+  
   //check trigger ID
   if(!tic->nominal().isTrigger(par_l2bwTrgID)) return -2;
   hA[0]->Fill("L2bwId",1.);
@@ -135,13 +149,16 @@ St2011WMaker::accessBarrelTrig(){ // return non-zero on abort
   hA[3]->Fill(wEve->bx7);
 
   // access L0-HT data
+  int mxVal=-1;
   for (int m=0;m<300;m++)	{
     int val=muEve->emcTriggerDetector().highTower(m);
+    if(mxVal<val) mxVal=val;
     if(wEve->l2bitET) hA[6]->Fill(val);
     if(val<par_DsmThres) continue;
     if(wEve->l2bitET) hA[8]->Fill(m);
     //printf("Fired L0 HT m=%d val=%d\n",m,val);
   }
+  wEve->bemc.maxHtDsm=mxVal;
   return 0;
 }
 
@@ -672,6 +689,14 @@ St2011WMaker::accessBSMD(){
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.8  2012/07/12 20:49:21  balewski
+//added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
+//removed dependence of spinSortingMaker from muDst
+//Now Wtree can be spin-sorted w/o DB
+//rdMu.C & readWtree.C macros modified
+//tested so far on real data run 11
+//lot of misc. code shuffling
+//
 //Revision 1.7  2012/06/18 18:28:01  stevens4
 //Updates for Run 9+11+12 AL analysis
 //

@@ -1,4 +1,4 @@
-// $Id: Wevent2011.h,v 1.3 2012/06/18 18:28:01 stevens4 Exp $
+// $Id: Wevent2011.h,v 1.4 2012/07/12 20:49:21 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -158,6 +158,7 @@ class WeveBEMC { // info about BEMC
   float eneTile[mxBTile][mxBtow];
   int   statTile[mxBTile][mxBtow];
   float maxAdc;
+  int maxHtDsm;
 
   //raw BSMD hits, both planes
   float adcBsmd[mxBSmd][mxBStrips];
@@ -171,7 +172,7 @@ class WeveBEMC { // info about BEMC
     memset(adcBsmd,0,sizeof(adcBsmd));
     memset(statBsmd,-1,sizeof(statBsmd));// default all dead
     maxAdc=0;
-    //     memset(,0,sizeof());
+    maxHtDsm=-1;
   }
 
   void print( int flag=0){
@@ -189,7 +190,9 @@ class WeveBEMC { // info about BEMC
       int module= 1+i/150;
       printf("id=%d mod=%d adc=%.1f ;  ",id,module,adcBsmd[ kBSE][i]);
     }    printf("\n");
-    
+
+    printf(" BTOW maxAdc=%.1f  maxHtDsm=%d\n",maxAdc, maxHtDsm);
+   
     if(flag&1) {//..................
       for(int i=0;i<120;i++) {
         int id=7+i*40;
@@ -202,7 +205,7 @@ class WeveBEMC { // info about BEMC
 
  private:
  protected:
-  ClassDef(WeveBEMC,1);
+  ClassDef(WeveBEMC,2);
   
 };
 
@@ -215,7 +218,9 @@ class WeveETOW { // info about ETOW
   float adc[mxEtowSec*mxEtowSub][mxEtowEta]; //[phibin][etabin]
   float ene[mxEtowSec*mxEtowSub][mxEtowEta];
   int stat[mxEtowSec*mxEtowSub][mxEtowEta];
-  float maxAdc; int maxSec,maxSub,maxEta;
+  float maxAdc; 
+  int maxSec,maxSub,maxEta;
+  int maxHtDsm;
   
   void clear() {
     memset(adc,0,sizeof(adc));
@@ -223,11 +228,12 @@ class WeveETOW { // info about ETOW
     memset(stat,-1,sizeof(stat));  // default all dead
     maxAdc=0;
     maxSec=maxSub=maxEta=0;
+    maxHtDsm=-1;
   }
   
  private:
  protected:
-  ClassDef(WeveETOW,1);
+  ClassDef(WeveETOW,2);
 
 };
 
@@ -274,7 +280,7 @@ class WeveESMD { // info about ESMD
   ClassDef(WeveESMD,1);
 
 };
-
+ 
 
 //---------------
 class Wevent2011 : public TObject {
@@ -290,14 +296,15 @@ class Wevent2011 : public TObject {
   int time;
   float zdcRate;
   int bx7, bx48; // raw from muDst
+  int bxStar7, bxStar48, spin4; // using spinDb or -1 if failed
   bool zTag;
   vector <WeveVertex> vertex;
   WeveBEMC bemc;
   WeveETOW etow;
   WeveEPRS eprs;
   WeveESMD esmd;
+
   // .... methods ....
-  //Wevent2011() { clear();}
   Wevent2011() {};
 
   void clear() { 
@@ -308,6 +315,7 @@ class Wevent2011 : public TObject {
     l2EbitET=l2EbitRnd=0;
     bx7=bx48=-1;
     zTag=false;
+    bxStar7=bxStar48= spin4=-1;
     vertex.clear();
     bemc.clear();
     etow.clear(); eprs.clear(); esmd.clear(); 
@@ -315,16 +323,32 @@ class Wevent2011 : public TObject {
   
   //...........................
   void print( int flag=0, int isMC=0) {
-    printf("\nmy W2011event runNo=%d ID=%d  L2Wbits: ET=%d rnd=%d;  bx7=%d bx48=%d nVert=%d\n",runNo,id,l2bitET,l2bitRnd,bx7,bx48, vertex.size());
+    printf("\nmy W2011event runNo=%d ID=%d  L2Wbits: ET=%d rnd=%d;  muDst: bx7=%d bx48=%d nVert=%d star: Bx7m=%d, Bx48=%d, spin4=%d \n",runNo,id,l2bitET,l2bitRnd,bx7,bx48, vertex.size(),bxStar7, bxStar48, spin4);
+    int  yyyymmdd,  hhmmss; getGmt_day_hour( yyyymmdd,  hhmmss);
+    printf("  event time is: day=%d, hour=%d (GMT)\n",yyyymmdd,hhmmss);
+
     for(uint i=0;i< vertex.size();i++) vertex[i].print(flag);
     bemc.print(flag);
     
   }// end of PRINT
   
+  void getGmt_day_hour(int & yyyymmdd, int & hhmmss) {
+    time_t rawtime=this->time;
+    struct tm * timeinfo= gmtime ( &rawtime );
+    char buffer [80];
+    strftime (buffer,80,"%k%M%S",timeinfo);
+    //puts (buffer);
+    hhmmss=atoi(buffer);
+    strftime (buffer,80,"%G%m%d",timeinfo);
+    //puts (buffer);
+    yyyymmdd=atoi(buffer);
+    //printf("day=%d, hour=%d\n",yyyymmdd,hhmmss);
+
+  }
   
  private:
  protected:
-  ClassDef(Wevent2011,1);
+  ClassDef(Wevent2011,2);
 
 };
 
@@ -332,6 +356,14 @@ class Wevent2011 : public TObject {
 
 
 // $Log: Wevent2011.h,v $
+// Revision 1.4  2012/07/12 20:49:21  balewski
+// added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
+// removed dependence of spinSortingMaker from muDst
+// Now Wtree can be spin-sorted w/o DB
+// rdMu.C & readWtree.C macros modified
+// tested so far on real data run 11
+// lot of misc. code shuffling
+//
 // Revision 1.3  2012/06/18 18:28:01  stevens4
 // Updates for Run 9+11+12 AL analysis
 //
