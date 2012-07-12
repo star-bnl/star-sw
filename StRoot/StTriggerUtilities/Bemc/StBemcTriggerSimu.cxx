@@ -3065,6 +3065,13 @@ int StBemcTriggerSimu::barrelJetPatchAdc(int jp) const { return (*mB101)[jp%6].i
 
 void StBemcTriggerSimu::fillStEmcTriggerDetector()
 {
+  if (mEvent && mEvent->triggerDetectorCollection()) {
+    StEmcTriggerDetector& emc = mEvent->triggerDetectorCollection()->emc();
+    for (int triggerPatch = 0; triggerPatch < kNPatches; ++triggerPatch) {
+      emc.setHighTower(triggerPatch,getBEMC_FEE_HT_ADC()[triggerPatch]);
+      emc.setPatch(triggerPatch,getBEMC_FEE_TP_ADC()[triggerPatch]);
+    }
+  }
   if (StMuDst::event()) {
     StEmcTriggerDetector& emc = StMuDst::event()->emcTriggerDetector();
     for (int triggerPatch = 0; triggerPatch < kNPatches; ++triggerPatch) {
