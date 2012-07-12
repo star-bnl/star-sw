@@ -63,6 +63,9 @@ struct PrintTrigger {
 
 int StBfcTriggerFilterMaker::Make()
 {
+  if (mOkAllEvents  ) return kStOk  ;
+  if (mSkipAllEvents) return kStSkip;
+
   const TDatime& datime = GetDBTime();
 
   LOG_INFO << "DB Time = " << datime.AsSQLString() << endm;
