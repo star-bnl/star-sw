@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.51 2012/03/28 02:05:14 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.52 2012/07/12 16:06:48 pibero Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -321,6 +321,7 @@ bool StTriggerSimuMaker::getTriggerDefinitions(int runNumber)
   if (DB) {
     St_triggerDefinition* desc = dynamic_cast<St_triggerDefinition*>(DB->Find("triggerDefinition"));
     if (desc) {
+      LOG_INFO << "Using BEMC offline database for trigger definitions" << endm;
       triggerDefinition_st* table = desc->GetTable();
       LOG_INFO << setw(20) << "triggerIndex"
 	       << setw(20) << "name"
@@ -379,7 +380,7 @@ bool StTriggerSimuMaker::getTriggerThresholds(int runNumber)
   if (DB) {
     St_triggerThreshold* desc = dynamic_cast<St_triggerThreshold*>(DB->Find("triggerThreshold"));
     if (desc) {
-      LOG_INFO << "Using BEMC offline database" << endm;
+      LOG_INFO << "Using BEMC offline database for trigger thresholds" << endm;
       triggerThreshold_st* table = desc->GetTable();
       LOG_INFO << setw(20) << "object"
 	       << setw(20) << "index"
@@ -732,6 +733,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.52  2012/07/12 16:06:48  pibero
+ * Added LOG_INFO
+ *
  * Revision 1.51  2012/03/28 02:05:14  pibero
  * Fix for embedding
  *
