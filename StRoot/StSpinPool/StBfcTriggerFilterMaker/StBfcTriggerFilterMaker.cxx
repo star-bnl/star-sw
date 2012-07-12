@@ -109,8 +109,3 @@ void StBfcTriggerFilterMaker::changeJPThresh(int dsm)
   StTriggerSimuMaker* trgsim = (StTriggerSimuMaker*)GetMakerInheritsFrom("StTriggerSimuMaker");
   trgsim->changeJPThresh(dsm);
 }
-
-void StBfcTriggerFilterMaker::addTrigger(int trigId)
-{
-  mTriggers.push_back(trigId);
-}

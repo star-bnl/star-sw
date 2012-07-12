@@ -76,8 +76,7 @@ public:
   void changeJPThresh(int dsm);	/// Changes the JP Thresholds by dsm
   void SetOkAllEvents  (int ok   = 1) { mOkAllEvents   = ok  ; }
   void SetSkipAllEvents(int skip = 1) { mSkipAllEvents = skip; }
-
-  void addTrigger(int trigId);
+  void addTrigger(int triggerId) { mTriggers.push_back(triggerId); }
 
 private:
   bitset<16> mMask;
