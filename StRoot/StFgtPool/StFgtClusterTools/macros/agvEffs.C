@@ -82,6 +82,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
    //      a2cMkr->doCutBadStatus(true);//parameter is useless from looking at the function
    a2cMkr->doCutBadStatus();
    a2cMkr->acceptLongPulses(true);
+   ////you have to set the relative threshold to 3 if you set the cluster threshold to 0.6 (meaning 3)
    a2cMkr->setClusterThreshold(0.6);
 
    ///this cuts ~10% of the events
@@ -101,6 +102,8 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
   //  StFgtAVEfficiencyMaker* effMkr=new StFgtAVEfficiencyMaker("FgtAVEfficiencyMaker");
   //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
   fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
+  fgtAVEffMkr->setChargeMatchCut(1.5);
+  fgtAVEffMkr->setUseChargeMatch();
   fgtAVEffMkr->SetEffDisk(effDisk);
   //   fgtGenPlotter = new StFgtGenPlotter( "genPlotter" );
 

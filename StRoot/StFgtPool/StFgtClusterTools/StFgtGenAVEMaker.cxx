@@ -1462,12 +1462,15 @@ Int_t StFgtGenAVEMaker::Make()
       vector<generalCluster>::iterator tHit=tHitVec.begin();
       for(;tHit!=tHitVec.end();tHit++)
 	{
-	  if(tHit->quad<3)
+	  if(useChargeMatch && tHit->hasMatch)
 	    {
-	      if(tHit->layer=='R')
-		clusCounts[tHit->quad]++;
-	      else
+	      if(tHit->quad<3)
+		{
+		  if(tHit->layer=='R')
+		    clusCounts[tHit->quad]++;
+		  else
 		clusCounts[tHit->quad+4]++;
+		}
 	    }
 	}
       for(int iq=0;iq<4;iq++)
@@ -1532,7 +1535,7 @@ Int_t StFgtGenAVEMaker::Make()
 	  for(hitIterD1=hitVecSeed1.begin();hitIterD1 != hitVecSeed1.end();hitIterD1++)
 	    {
 	      //this is from the loose clustering and the cluster doesn't have energy match
-	      if(!hitIterD1->hasMatch)
+	      if(useChargeMatch && !hitIterD1->hasMatch)
 		continue;
 	      Short_t quadP=hitIterD1->quad;
 	      Short_t disc=hitIterD1->disc;
@@ -1555,7 +1558,7 @@ Int_t StFgtGenAVEMaker::Make()
 	      Float_t phiD1=hitIterD1->posPhi;
 	      for(hitIterD6=hitVecSeed2.begin();hitIterD6 != hitVecSeed2.end();hitIterD6++)
 		{
-		  if( !hitIterD6->hasMatch)
+		  if(useChargeMatch &&  !hitIterD6->hasMatch)
 		    continue;
 
 		  Int_t geoIdSeed2=hitIterD6->centralStripGeoId;
@@ -1575,7 +1578,7 @@ Int_t StFgtGenAVEMaker::Make()
 
 		  for(hitIterD1R=hitVecSeed1.begin();hitIterD1R != hitVecSeed1.end();hitIterD1R++)
 		    {
-		      if(!hitIterD1R->hasMatch)
+		      if(useChargeMatch && !hitIterD1R->hasMatch)
 			continue;
 		      Int_t geoIdSeed1R=hitIterD1R->centralStripGeoId;
 		      Short_t quadR=hitIterD1R->quad;
@@ -1602,7 +1605,7 @@ Int_t StFgtGenAVEMaker::Make()
 
 		      for(hitIterD6R=hitVecSeed2.begin();hitIterD6R != hitVecSeed2.end();hitIterD6R++)
 			{
-			  if(!hitIterD6R->hasMatch)
+			  if(useChargeMatch && !hitIterD6R->hasMatch)
 			    continue;
 			  Int_t geoIdSeed2R=hitIterD6R->centralStripGeoId;
 			  Short_t quadR_2=hitIterD6R->quad;
@@ -1692,7 +1695,7 @@ Int_t StFgtGenAVEMaker::Make()
 			      vector<generalCluster> &hitVec=*(pClusters[iD]);
 			      for(hitIter=hitVec.begin();hitIter!=hitVec.end();hitIter++)
 				{
-				  if( !hitIter->hasMatch)
+				  if(useChargeMatch &&  !hitIter->hasMatch)
 				    continue;
 				  //do 1D 'fit' with r strips and the (x,y) thing
 				  Int_t geoIdPhi=hitIter->centralStripGeoId;
@@ -1722,7 +1725,7 @@ Int_t StFgtGenAVEMaker::Make()
 				  //    cout <<"ave make5 " <<endl;
 				  for(hitIter2=hitVec.begin();hitIter2!=hitVec.end();hitIter2++)
 				    {
-				      if(!hitIter2->hasMatch)
+				      if(useChargeMatch && !hitIter2->hasMatch)
 					continue;
 				      Int_t geoIdR=hitIter2->centralStripGeoId;
 				      StFgtGeom::decodeGeoId(geoIdR,disc, quad, layer, strip);//ok
@@ -1924,7 +1927,7 @@ Int_t StFgtGenAVEMaker::Make()
 
 };
  
-StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0)
+StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0)
 {
   cout <<"AVE constructor!!" <<endl;
 

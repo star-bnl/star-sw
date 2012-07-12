@@ -45,7 +45,7 @@ struct generalStrip
 struct generalCluster
 {
     generalCluster(){};
-    generalCluster(Int_t csg, Char_t l, Double_t dZ, Double_t pP, Double_t pR, Double_t q, Double_t d, Double_t s, Int_t cs, Int_t cc)
+  generalCluster(Int_t csg, Char_t l, Double_t dZ, Double_t pP, Double_t pR, Double_t q, Double_t d, Double_t s, Int_t cs, Int_t cc, Float_t cUncert)
     {
       centralStripGeoId=csg;
       layer=l;
@@ -62,6 +62,7 @@ struct generalCluster
       maxAdc=-1;
       hasMatch=false;
       seedType=kFgtSeedTypeNo;
+      clusterChargeUncert=cUncert;
     };
 
 
@@ -77,6 +78,7 @@ struct generalCluster
     Short_t strip;
     Int_t clusterSize;
     Int_t clusterCharge;
+  Float_t clusterChargeUncert;
   Int_t centerStripIdx;
   Double_t maxAdc;
   Double_t maxAdcInt;
@@ -94,6 +96,7 @@ class StFgtGeneralBase : public StMaker {
   Int_t Finish();
   Int_t fillFromStEvent();
   Int_t fillFromMuDst();
+  void setChargeMatchCut(Float_t cut);
   void SetEffDisk(Int_t disk)
   {
     m_effDisk=disk;
@@ -108,6 +111,8 @@ enum evStatCodes
     numCluSeed3
   };
   Char_t fileBase[300];
+  TH1D* clusWChargeMatch;
+  TH1D* clusWOChargeMatch;
   TH1D* evStatistics;
    TH2D* chargeMaxAdcCorr;
    TH2D* chargeMaxAdcIntCorr;
@@ -124,6 +129,7 @@ enum evStatCodes
   map<Int_t, Int_t> mapGeoId2Cluster;
   StFgtDb* mDb;
   Double_t vtxZ;
+  Float_t chargeMatchCut;
   Int_t vtxRank;
   Int_t evtNr;
   Int_t m_effDisk;
@@ -142,4 +148,6 @@ enum evStatCodes
  private:   
   ClassDef(StFgtGeneralBase,1);
 };
+inline void StFgtGeneralBase::setChargeMatchCut(Float_t cut)
+{chargeMatchCut=cut;};
 #endif
