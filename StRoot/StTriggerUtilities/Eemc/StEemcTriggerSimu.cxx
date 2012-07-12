@@ -771,6 +771,14 @@ int StEemcTriggerSimu::getOutTPsum(int tp) const { return feeTPTreeADC->TP(tp)->
 
 void StEemcTriggerSimu::fillStEmcTriggerDetector()
 {
+  StEvent* event = (StEvent*)StMaker::GetChain()->GetDataSet("StEvent");
+  if (event && event->triggerDetectorCollection()) {
+    StEmcTriggerDetector& emc = event->triggerDetectorCollection()->emc();
+    for (int triggerPatch = 0; triggerPatch < 90; ++triggerPatch) {
+      emc.setHighTowerEndcap(triggerPatch,feeTPTreeADC->TP(triggerPatch)->getOutHT());
+      emc.setPatchEndcap(triggerPatch,feeTPTreeADC->TP(triggerPatch)->getOutTPsum());
+    }
+  }
   if (StMuDst::event()) {
     StEmcTriggerDetector& emc = StMuDst::event()->emcTriggerDetector();
     for (int triggerPatch = 0; triggerPatch < 90; ++triggerPatch) {
@@ -785,6 +793,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.48  2012/07/12 09:37:10  pibero
+// Fix fillStTriggerDetector()
+//
 // Revision 1.47  2011/10/22 20:25:17  pibero
 // Add getters for output of EEMC FEEs for backward-compatibility
 //
