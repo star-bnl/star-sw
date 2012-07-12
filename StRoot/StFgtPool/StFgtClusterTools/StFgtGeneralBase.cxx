@@ -21,7 +21,7 @@
 //#define ONE_HIT_PER_QUAD
 //#define USE_VTX
 
-StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), evtNr(0),m_effDisk(2)
+StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), chargeMatchCut(1.5),evtNr(0),m_effDisk(2)
 {
   pClusters=new vector<generalCluster>*[6];
   pClusters[0]=&clustersD1;
@@ -44,7 +44,8 @@ StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), evtNr(0
   chargeMaxAdcCorr=new TH2D("chargeMaxAdcCorr","chargeMaxAdcCorr",50,0,10000,50,0,1000);
     chargeMaxAdcIntCorr=new TH2D("chargeMaxIntAdcCorr","chargeMaxAdcIntCorr",50,0,10000,50,0,1000);
     hIpZEv=new TH1D("IP_ZEv","IP_ZEv",70,-150,150);
-
+    clusWChargeMatch=new TH1D("clusWChargeMatch","clusWChargeMatch",101,0,100);
+    clusWOChargeMatch=new TH1D("clusWOChargeMatch","clusWOChargeMatch",101,0,100);
     char buffer[100];
     hNumPulsesP=new TH1D*[6*4];
     hNumChargesP=new TH1D*[6*4];
@@ -98,6 +99,8 @@ Int_t StFgtGeneralBase::Finish()
   char buffer[100];
   sprintf(buffer,"%s/pulses.root",fileBase);
   TFile f(buffer,"recreate");
+  clusWChargeMatch->Write();
+  clusWOChargeMatch->Write();
     for(int iD=0;iD<6;iD++)
       {
 	for(int iQ=0;iQ<4;iQ++)
@@ -210,10 +213,11 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		   //				  Int_t clusterSizePhi=(*hitIter)->getStripWeightMap().size();
 		   Int_t clusterSize=(*hitIter)->getStripWeightMap().size();
 		   Double_t clusterCharge=(*hitIter)->charge();
+		   Double_t clusterUncert=(*hitIter)->getChargeUncert();
 		   //sometimes (rarely two clusters have the same geo id (some split I guess), don't insert twice, that messes the indexing up
 		   if(mapGeoId2Cluster.find(geoId)==mapGeoId2Cluster.end())
 		     {
-		       pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge));
+		       pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge,clusterUncert));
 		       //		       cout <<"inserting geo id " << geoId <<" into map at pos: " << ((pClusters[disc]->size()-1)) <<" disc " << disc <<endl;
 		       mapGeoId2Cluster[geoId]=((pClusters[disc]->size()-1));
 		     }
@@ -300,7 +304,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 	     for(;it!=pClusters[iDx]->end();it++)
 	       {
 		 dCounter++;
-		 it->hasMatch=true;
+		 //		 it->hasMatch=true;
 		 Int_t centerStripId=it->centerStripIdx;
 		 if(centerStripId<0)
 		   {
@@ -364,6 +368,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
    }
 
    //   cout <<"filled from event " <<endl;
+   checkMatches();
       checkNumPulses();
    return ierr;
 
@@ -444,11 +449,12 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		   StFgtGeom::decodeGeoId(geoId,disc, quad, layer, strip);
 		   Int_t clusterSize=clus->getNumStrips();
 		   Double_t clusterCharge=clus->getCharge();
+		   Double_t clusterUncert=clus->getChargeUncert();
 
 
 		   //		   cout <<"looking at geoID: " << geoId <<" r: " << posR <<" phi: " << posPhi <<" charge: " << clusterCharge <<" size: " << clusterSize <<endl;
 		   //		   cout <<" disc: " << disc <<" quad: " << quad << " layer: " << layer <<endl;
-		   pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip,clusterSize,clusterCharge));
+		   pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip,clusterSize,clusterCharge,clusterUncert));
 		   mapGeoId2Cluster[geoId]=((pClusters[disc]->size()-1));
 	      }
 		     //               addClus( i, clus->getCentralStripGeoId(), clus->getR(), clus->getPhi() );
@@ -517,7 +523,7 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 	     for(;it!=pClusters[iDx]->end();it++)
 	       {
 		 //when we are at it, set the matched flag for cluster from file, we don't want to loose them
-		 it->hasMatch=true;
+		 //it->hasMatch=true;
 		 Int_t centerStripId=it->centerStripIdx;
 		 //		 cout <<"looking at cluster with center strip id:" << it->centralStripGeoId <<endl;
 		 if(centerStripId<0)
@@ -584,8 +590,8 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 	}
    }
    //      doLooseClustering();
-      checkMatches();
-      checkNumPulses();
+   checkMatches();
+   checkNumPulses();
    return ierr;
 };
 
@@ -661,8 +667,7 @@ void StFgtGeneralBase::checkNumPulses()
 
 void StFgtGeneralBase::checkMatches()
 {
-
-
+  //  cout <<"checkmatches.." <<endl;
  for(int iDx=0;iDx<6;iDx++)
     {
       Int_t numMatched=0;
@@ -686,7 +691,7 @@ void StFgtGeneralBase::checkMatches()
 
 	      if(it->clusterCharge>it2->clusterCharge)
 		{
-		  if((it->clusterCharge/it2->clusterCharge)<1.3)
+		  if(((it->clusterCharge+it->clusterChargeUncert)/it2->clusterCharge)<chargeMatchCut)
 		    {
 		      it->hasMatch=true;
 		      it2->hasMatch=true;
@@ -694,7 +699,7 @@ void StFgtGeneralBase::checkMatches()
 		}
 	      else
 		{
-		  if((it2->clusterCharge/it->clusterCharge)<1.3)
+		  if(((it2->clusterCharge+it->clusterChargeUncert)/it->clusterCharge)<chargeMatchCut)
 		    {
 		      it->hasMatch=true;
 		      it2->hasMatch=true;
@@ -711,7 +716,8 @@ void StFgtGeneralBase::checkMatches()
 	  else
 	    numNotMatched++;
 	}
-
+      clusWChargeMatch->Fill(numMatched);
+      clusWOChargeMatch->Fill(numNotMatched);
       cout <<"disk: " << iDx<<" found " << numMatched <<" clusters and " << numNotMatched << " clusters that were not matched" <<endl;
     }
 
@@ -787,7 +793,7 @@ void StFgtGeneralBase::doLooseClustering()
 		   };		   
 		   posPhi+=StFgtGeom::phiQuadXaxis(quad);
 
-		   pClusters[iDx]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge));		  
+		   pClusters[iDx]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge,0.0));		  
 		   mapGeoId2Cluster[geoId]=(pClusters[iDx]->size()-1);
 		   (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=stripCounter;
 		   (*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdc=it->maxAdc;

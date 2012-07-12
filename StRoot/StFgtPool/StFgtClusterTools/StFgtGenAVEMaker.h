@@ -96,14 +96,14 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    Int_t Init();
    Int_t Make();
    Int_t Finish();
-
+   void setUseChargeMatch(Bool_t use=true);
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.13 2012/07/11 17:54:58 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.14 2012/07/12 15:02:23 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
-
+   Bool_t useChargeMatch;
    Int_t printCounter;
    ofstream* outTxtFile;
    ofstream* cluNotFoundTxt;
@@ -278,6 +278,6 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
       ClassDef(StFgtGenAVEMaker,1);
 
 };
-
+inline void StFgtGenAVEMaker::setUseChargeMatch(Bool_t use){useChargeMatch=use;};
 #endif
 
