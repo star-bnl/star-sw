@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.8 2012/07/06 17:47:02 stevens4 Exp $
+// $Id: St2011WMaker.cxx,v 1.9 2012/07/12 20:49:21 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -122,6 +122,8 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   setBtowScale(1.0);
   
   mRunNo=0;
+  nRun=0;
+  hbxIdeal=0;
 
   // irrelevant for W analysis
   par_DsmThres=31; // only for monitoring
@@ -245,6 +247,24 @@ St2011WMaker::InitRun(int runNo){
     mTpcFilterE[isec].init("secEemcTr",sec,HListTpc,false);
   }
 
+  //.... spinDB monitoring
+  if(mMuDstMaker)
+    {  char txt[1000],txt0[100];
+    sprintf(txt0,"bxIdeal%d",nRun);
+    sprintf(txt,"intended fill pattern  R%d-%d vs. bXing; %s", runNo,nRun,spinDb->getV124comment());
+    nRun++;
+    Tfirst=int(2e9); Tlast=-Tfirst;
+    hbxIdeal=new TH1F(txt0,txt,128,-0.5,127.5);
+    hbxIdeal->SetFillColor(kYellow);
+    HList->Add(hbxIdeal);
+    
+    spinDb->print(0); // 0=short, 1=huge
+    for(int bx=0;bx<120;bx++){
+      if(spinDb->isBXfilledUsingInternalBX(bx))  hbxIdeal->Fill(bx);   
+    }
+    
+  }
+
   return kStOK;
 }
 
@@ -256,6 +276,12 @@ St2011WMaker::Finish(){
     LOG_INFO<<endl<<"Output tree file "<<mTreeName<<endl<<endl;
     mTreeFile->Write();
     mTreeFile->Close();
+
+
+    char txt[1000];
+    sprintf(txt,"events T= %d %d",Tfirst,Tlast);
+    printf("Finish run=%d , events time range %s\n",mRunNo,txt);
+    hbxIdeal->GetYaxis()->SetTitle(txt);    
   }
   return StMaker::Finish();
 }
@@ -285,9 +311,14 @@ St2011WMaker::Make(){
     wEve->runNo=mMuDstMaker->muDst()->event()->runId();
     wEve->time=mMuDstMaker->muDst()->event()->eventInfo().time();
     wEve->zdcRate=mMuDstMaker->muDst()->event()->runInfo().zdcCoincidenceRate();
+    int T=wEve->time;
+    if(Tlast<T) Tlast=T;
+    if(Tfirst>T) Tfirst=T;
+    
+
     const char *afile = mMuDstMaker->GetFile();
     //printf("inpEve=%d eveID=%d daqFile=%s\n",nInpEve, wEve->id,afile);
-    if(nInpEve%200==1) printf("\n-----in---- %s, nEve: inp=%d trig=%d accpt=%d daqFile=%s\n", GetName(),nInpEve,nTrigEve, nAccEve,afile);
+    if(nInpEve%200==1) printf("\n-----in---- %s, muDst nEve: inp=%d trig=%d accpt=%d daqFile=%s\n", GetName(),nInpEve,nTrigEve, nAccEve,afile);
 
     hA[0]->Fill("inp",1.); 
     hE[0]->Fill("inp",1.); 
@@ -341,7 +372,7 @@ St2011WMaker::Make(){
     
     
     
-    if(nInpEve%200==1) printf("\n-----in---- %s, nEve: inp=%d \n", GetName(),nInpEve);//,nTrigEve, nAccEve,afile);  
+    if(nInpEve%200==1) printf("\n-----in---- %s, W-Tree  nEve: inp=%d \n", GetName(),nInpEve);//,nTrigEve, nAccEve,afile);  
     
     if(wEve->bemc.maxAdc<par_maxADC && wEve->etow.maxAdc<par_maxADC) return kStOK; //skip event w/o energy in BTOW && ETOW 
     
@@ -536,6 +567,14 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.9  2012/07/12 20:49:21  balewski
+// added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
+// removed dependence of spinSortingMaker from muDst
+// Now Wtree can be spin-sorted w/o DB
+// rdMu.C & readWtree.C macros modified
+// tested so far on real data run 11
+// lot of misc. code shuffling
+//
 // Revision 1.8  2012/07/06 17:47:02  stevens4
 // Updates for tree reader
 //

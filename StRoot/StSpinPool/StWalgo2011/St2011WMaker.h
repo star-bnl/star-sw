@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.4 2012/06/25 20:53:17 stevens4 Exp $
+// $Id: St2011WMaker.h,v 1.5 2012/07/12 20:49:21 balewski Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -31,7 +31,8 @@ class  StMuDstMaker;
 class  StEmcGeom;
 class  StEmcDecoder;
 class  StBemcTables;
-class  StEEmcDb;       
+class  StEEmcDb;      
+class  StSpinDbMaker; 
 class  EEmcGeomSimple;
 class  EEmcSmdGeom;
 class  WeventDisplay;
@@ -65,8 +66,9 @@ class St2011WMaker : public StMaker {
   WtpcFilter mTpcFilter[mxTpcSec]; //allows sector dependent filter
   WtpcFilter mTpcFilterE[mxTpcSec]; //allows sector dependent filter for endcap tracks
   int  nInpEve,nTrigEve, nAccEve; //  event counters
-  int mRunNo;
-  int isMC; //0 for real data
+  int  mRunNo, nRun;
+  int  isMC; //0 for real data
+  int Tfirst,Tlast;
 
   //... internal params
   int   par_l0emulAdcThresh;
@@ -89,13 +91,13 @@ class St2011WMaker : public StMaker {
   float par_delR3D, parE_delR3D, par_highET, parE_highET,  par_ptBalance, parE_ptBalance;
   float par_leptonEta,parE_leptonEtaLow,parE_leptonEtaHigh; //bracket acceptance 
   float parE_trackEtaMin;
-  int parE_nSmdStrip;
+  int   parE_nSmdStrip;
         
   float par_etowScale;
   float par_btowScale;
 
   char* gains_file;
-  int use_gains_file;
+  int   use_gains_file;
   float gains_BTOW[4801];
 
  public: // to overwrite default params from .C macro
@@ -130,7 +132,8 @@ class St2011WMaker : public StMaker {
   TVector3 positionBtow[mxBtow]; // vs. tower ID
   TVector3 positionBsmd[mxBSmd][mxBStrips]; // vs. strip ID
  
-  StEEmcDb        *mDbE; // access to EEMC database        
+  StEEmcDb        *mDbE; // access to EEMC database  
+  StSpinDbMaker *spinDb; // access spin information  
   EEmcGeomSimple  *geomE;// access to EEMC geometry 
   EEmcSmdGeom     *geoSmd;// access to ESMD geometry
   TVector3 positionEtow[mxEtowSec*mxEtowSub][mxEtowEta];  
@@ -185,7 +188,8 @@ class St2011WMaker : public StMaker {
   TObjArray *HList; TObjArray *HListTpc;
   enum {mxHA=300}; TH1 * hA[mxHA];
   enum {mxHE=300}; TH1 * hE[mxHE];
-    
+  TH1 *hbxIdeal;    
+
   void initHistos(); void initEHistos();
   void initGeom();
   int L2algoEtaPhi2IJ(float etaF,float phiF,int &kEta, int &kPhi);
@@ -207,7 +211,8 @@ class St2011WMaker : public StMaker {
   void setHListTpc(TObjArray * x){HListTpc=x;}
   void setMC(int x){isMC=x;}
   void setMaxDisplayEve(int n) { par_maxDisplEve=n;}
-  
+  void attachSpinDb(StSpinDbMaker *mk){ spinDb=mk;}
+ 
   //tree analysis
   void chainFile( const Char_t *name );
   void chainJetFile( const Char_t *name );
@@ -221,7 +226,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.4 2012/06/25 20:53:17 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.5 2012/07/12 20:49:21 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -232,6 +237,14 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.5  2012/07/12 20:49:21  balewski
+// added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
+// removed dependence of spinSortingMaker from muDst
+// Now Wtree can be spin-sorted w/o DB
+// rdMu.C & readWtree.C macros modified
+// tested so far on real data run 11
+// lot of misc. code shuffling
+//
 // Revision 1.4  2012/06/25 20:53:17  stevens4
 // algo and histo cleanup
 //

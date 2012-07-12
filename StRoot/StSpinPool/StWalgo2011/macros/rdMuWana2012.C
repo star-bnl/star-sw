@@ -1,3 +1,5 @@
+// example by hand, run 11: root4star -b -q 'rdMuWana2012.C(500000,"./R12099030.lis",0,2,330801,330851,"","/star/institutions/iucf/stevens4/run12w/ana/run11long/jets/")'
+
 class StChain;
 StChain *chain=0;
  
@@ -19,7 +21,7 @@ int rdMuWana2012(
   ) { 
   
   if(isMC==0) //jetDir="/star/institutions/iucf/stevens4/run12w/sampler-pass2-A/jets/";
-  jetDir="./"; 
+    //jetDir="./"; 
 
   //if(isMC &&  useJetFinder==2) geant=true;
   
@@ -36,7 +38,7 @@ int rdMuWana2012(
   else if(isMC < 400) {
     char *file1;
     //private 2012 MC
-    if(isMC==100) file1=strstr(file,"jba"); 
+    if(isMC==100) file1=strstr(file,"jb"); 
     //embedding run with geant files
     if(isMC==350) file1=strstr(file,"W");
     if(isMC==351) file1=strstr(file,"Wtau");
@@ -147,7 +149,7 @@ int rdMuWana2012(
   
 
   //for EEMC, need full db access:
-  St_db_Maker   *dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
+  St_db_Maker   *dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");jbb330_24_50evts.wana.hist.root
   
   if (isMC==0) { 
     //data
@@ -180,10 +182,13 @@ int rdMuWana2012(
     cout << "BEGIN: running jet finder/reader =" <<jetFile<<"="<< endl;
   }
 
+  StSpinDbMaker *spDb=0;
+  if(spinSort || useJetFinder == 1 )  spDb=new StSpinDbMaker("spinDb");
+
+
   if (useJetFinder == 1){// run jet finder
     double pi = atan(1.0)*4.0;    
     // Makers for clusterfinding
-    StSpinDbMaker* spDbMaker = new StSpinDbMaker("spinDb");
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
     
     //here we also tag whether or not to do the swap:
@@ -262,12 +267,14 @@ int rdMuWana2012(
     cout << "END: jet finder " << endl;
     return;
   }
+
   if (useJetFinder == 2)
     {
       cout << "Configure to read jet trees " << endl;
       StJetReader *jetReader = new StJetReader;
       jetReader->InitFile(jetFile);
     }
+
   
   
   //.... W reconstruction code ....
@@ -300,9 +307,8 @@ int rdMuWana2012(
   WmuMk->setHListTpc(HListTpc);
   WpubMk->setHList(HList);
   
-  StSpinDbMaker *spDb=0;
   if(spinSort){
-    spDb=new StSpinDbMaker("spinDb");
+    WmuMk->attachSpinDb(spDb);
     enum {mxSM=5}; // to study eta-cuts, drop Q/PT cut
     St2011pubSpinMaker *spinMkA[mxSM];
     for(int kk=0;kk<mxSM;kk++) {
@@ -310,7 +316,6 @@ int rdMuWana2012(
       printf("add spinMaker %s %d \n",ttx,kk);
       spinMkA[kk]=new St2011pubSpinMaker(ttx); 
       spinMkA[kk]->attachWalgoMaker(WmuMk);
-      spinMkA[kk]->attachSpinDb(spDb);
       spinMkA[kk]->setHList(HList); 
       if(kk==1) spinMkA[kk]->setEta(-1.,0.);
       if(kk==2) spinMkA[kk]->setEta(0,1.);
@@ -389,6 +394,14 @@ int rdMuWana2012(
 
 
 // $Log: rdMuWana2012.C,v $
+// Revision 1.6  2012/07/12 20:49:26  balewski
+// added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
+// removed dependence of spinSortingMaker from muDst
+// Now Wtree can be spin-sorted w/o DB
+// rdMu.C & readWtree.C macros modified
+// tested so far on real data run 11
+// lot of misc. code shuffling
+//
 // Revision 1.5  2012/07/05 20:13:33  balewski
 // *** empty log message ***
 //

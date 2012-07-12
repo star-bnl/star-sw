@@ -1,12 +1,7 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.2 2012/06/18 18:28:01 stevens4 Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.3 2012/07/12 20:49:21 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
-#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
-#include <StMuDSTMaker/COMMON/StMuDst.h>
-#include <StMuDSTMaker/COMMON/StMuEvent.h>
-#include <StEvent/StEventInfo.h> // just to get time
-#include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
 
 #include "St2011WMaker.h"
 
@@ -37,8 +32,6 @@ St2011pubSpinMaker::Init(){
   assert(wMK);
   assert(HList);
   initHistos();
-  nRun=0;
-  hbxIdeal=0;
   return StMaker::Init();
 }
 
@@ -47,10 +40,6 @@ St2011pubSpinMaker::Init(){
 //
 Int_t 
 St2011pubSpinMaker::FinishRun  (int runNo){
-  char txt[1000];
-  sprintf(txt,"events T= %d %d",Tfirst,Tlast);
-  printf("Finish run=%d , events time range %s\n",runNo,txt);
-  hbxIdeal->GetYaxis()->SetTitle(txt);
   return kStOK;
 }
 
@@ -59,25 +48,11 @@ St2011pubSpinMaker::FinishRun  (int runNo){
 Int_t 
 St2011pubSpinMaker::InitRun  (int runNo){
 
-  char txt[1000],txt0[100];
-  sprintf(txt0,"bxIdeal%d",nRun);
-  sprintf(txt,"intended fill pattern  R%d-%d vs. bXing; %s", runNo,nRun,spinDb->getV124comment());
-  nRun++;
-  Tfirst=int(2e9); Tlast=-Tfirst;
-  hbxIdeal=new TH1F(core+txt0,txt,128,-0.5,127.5);
-  hbxIdeal->SetFillColor(kYellow);
-  HList->Add(hbxIdeal);
-  
-  spinDb->print(0); // 0=short, 1=huge
-  for(int bx=0;bx<120;bx++){
-    if(spinDb->isBXfilledUsingInternalBX(bx))  hbxIdeal->Fill(bx);   
-  }
+  //j1  sprintf(txt,"bXing= bx48+off=%d",spinDb->BX48offset());
+  //j1 hA[3]->GetXaxis()->SetTitle(txt);
 
-  sprintf(txt,"bXing= bx48+off=%d",spinDb->BX48offset());
-  hA[3]->GetXaxis()->SetTitle(txt);
-
-  sprintf(txt,"bXing= bx7+off=%d",spinDb->BX7offset());
-  hA[4]->GetXaxis()->SetTitle(txt);
+  //j1 sprintf(txt,"bXing= bx7+off=%d",spinDb->BX7offset());
+  //j1 hA[4]->GetXaxis()->SetTitle(txt);
 
   LOG_INFO<<Form("::InitRun(%d) done, W-spin sorting  params: exclude |Q/PT| < %.2f OR |Q/PT| above line %.3f*(ET-%.1f)-%6e if ET<%.1f, for AL use leptonEta in[%.1f,%.1f] useNoEEMC=%d", runNo,
 		 par_QPTlow,par_QPThighET0, par_QPThighA ,par_QPThighB,par_QPThighET1,par_leptonEta1, par_leptonEta2,par_useNoEEMC
@@ -89,9 +64,6 @@ St2011pubSpinMaker::InitRun  (int runNo){
 //
 Int_t 
 St2011pubSpinMaker::Make(){
-  int T=wMK->mMuDstMaker->muDst()->event()->eventInfo().time();
-  if(Tlast<T) Tlast=T;
-  if(Tfirst>T) Tfirst=T;
 
   bXingSort();
   return kStOK;
@@ -104,17 +76,17 @@ St2011pubSpinMaker::bXingSort(){
   //has access to whole W-algo-maker data via pointer 'wMK'
   
   hA[0]->Fill("inp",1.);
-
-  assert(spinDb->isValid());  // all 3 DB records exist 
-  assert(spinDb->isPolDirLong());  // you do not want mix Long & Trans by accident
-  
+ 
   if(wMK->wEve->vertex.size()<=0) return; 
   //......... require: L2W-trig (ET or rnd) & vertex is reasonable .......
   
   int bx48=wMK->wEve->bx48;
   int bx7=wMK->wEve->bx7;
-  if(spinDb->offsetBX48minusBX7(bx48,bx7)) {
-   printf("BAD bx7=%d bx48=%d del=%d\n",bx7,bx48,spinDb->offsetBX48minusBX7(bx48,bx7));
+  int bxStar48=wMK->wEve->bxStar48;
+  int bxStar7=wMK->wEve->bxStar7;
+
+  if(bxStar48!=bxStar7) {
+   printf("BAD bx7=%d bx48=%d del=%d\n",bx7,bx48,bxStar48-bxStar7);
    hA[0]->Fill("badBx48",1.);
    return; // both counters must be in sync
   }
@@ -127,26 +99,19 @@ St2011pubSpinMaker::bXingSort(){
   hA[1]->Fill(bx48);
   hA[2]->Fill(bx7);
 
-  int bxStar48= spinDb->BXstarUsingBX48(bx48);
-  int bxStar7=spinDb->BXstarUsingBX7(bx7);
   hA[3]->Fill(bxStar48);
   hA[4]->Fill(bxStar7);
 
-  int spin4=spinDb->spin4usingBX48(bx48); 
+  int spin4=wMK->wEve->spin4;
   hA[5]->Fill(bxStar7,spin4);
 
   float par_maxDsmThr=58;
   float par_myET=25; // monitoring cut
-  if( wMK->wEve->l2bitRnd) { // lumi monitor BHT3-random
-    StMuEvent* muEve = wMK->mMuDstMaker->muDst()->event();
-    int max=0;
-    for (int m=0;m<300;m++)  {    // access L0-HT data
-      int val=muEve->emcTriggerDetector().highTower(m);
-      if(max<val) max=val;
-    }
+  if( wMK->wEve->l2bitRnd) { // lumi monitor BHT3-random    
     // avoid too much energy - can be W-events (1/milion :)
-    if(max<par_maxDsmThr)  {  hA[6]->Fill(spin4);  hA[0]->Fill("BG1",1.);}
-    return;
+    if(wMK-> wEve->bemc.maxHtDsm<par_maxDsmThr)  { 
+      hA[6]->Fill(spin4);  hA[0]->Fill("BG1",1.);}
+    return; // LOGICAL ERROR - FIX IT LATER
   }
   
   if( wMK->wEve->l2bitET==0) return; 
@@ -238,6 +203,14 @@ St2011pubSpinMaker::bXingSort(){
 
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.3  2012/07/12 20:49:21  balewski
+// added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
+// removed dependence of spinSortingMaker from muDst
+// Now Wtree can be spin-sorted w/o DB
+// rdMu.C & readWtree.C macros modified
+// tested so far on real data run 11
+// lot of misc. code shuffling
+//
 // Revision 1.2  2012/06/18 18:28:01  stevens4
 // Updates for Run 9+11+12 AL analysis
 //
