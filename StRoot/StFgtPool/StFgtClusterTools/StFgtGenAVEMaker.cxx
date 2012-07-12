@@ -78,7 +78,7 @@ template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int 
             }
         }
     }
-  else
+  else   
     {
       for(int iD=0;iD<kFgtNumDiscs;iD++)
         {
@@ -2479,21 +2479,7 @@ Int_t StFgtGenAVEMaker::Init(){
   createPlots(&APVmaxSigCloseClusterP,kFgtNumDiscs*40,"APVmaxSigCloseClusterP",100,1,200);
   createPlots(&APVmaxSigCloseClusterR,kFgtNumDiscs*40,"APVmaxSigCloseClusterR",100,1,200);
   createPlots(&APVsecondToLastRatioCloseClusterP,kFgtNumDiscs*40,"APVsecondToLastRatioCloseClusterP",100,0,5);
-  createPlots(&APVsecondToLastRatioCloseClusterR,kFgtNumDiscs*40,"APVsecondToLastRatioCloseClusterR",100,0,5);createPlots(&APVfirstTbSigCloseClusterP,kFgtNumDiscs*40,"APVfirstTbSigCloseClusterP",100,0,20);
-  createPlots(&APVfirstTbSigCloseClusterR,kFgtNumDiscs*40,"APVfirstTbSigCloseClusterR",100,0,20);
-  createPlots(&APVmaxAdcCloseClusterP,kFgtNumDiscs*40,"APVmaxAdcCloseClusterP",100,0,5000);
-  createPlots(&APVmaxAdcCloseClusterR,kFgtNumDiscs*40,"APVmaxAdcCloseClusterR",100,0,5000);
-  createPlots(&APVmaxTbCloseClusterP,kFgtNumDiscs*40,"APVmaxTbCloseClusterP",8,0,7);
-  createPlots(&APVmaxTbCloseClusterR,kFgtNumDiscs*40,"APVmaxTbCloseClusterR",8,0,7);
-  createPlots(&APVnumFSigCloseClusterP,kFgtNumDiscs*40,"APVnumFSigCloseClusterP",9,0,8);
-  createPlots(&APVnumFSigCloseClusterR,kFgtNumDiscs*40,"APVnumFSigCloseClusterR",9,0,8);
-  createPlots(&APVnumFirstHighCloseClusterP,kFgtNumDiscs*40,"APVnumFirstHighCloseClusterP",8,0,7);
-  createPlots(&APVnumFirstHighCloseClusterR,kFgtNumDiscs*40,"APVnumFirstHighCloseClusterR",8,0,7);
-  createPlots(&APVmaxSigCloseClusterP,kFgtNumDiscs*40,"APVmaxSigCloseClusterP",100,1,200);
-  createPlots(&APVmaxSigCloseClusterR,kFgtNumDiscs*40,"APVmaxSigCloseClusterR",100,1,200);
-  createPlots(&APVsecondToLastRatioCloseClusterP,kFgtNumDiscs*40,"APVsecondToLastRatioCloseClusterP",100,0,5);
   createPlots(&APVsecondToLastRatioCloseClusterR,kFgtNumDiscs*40,"APVsecondToLastRatioCloseClusterR",100,0,5);
-
 
   rEff=new TH1D*[kFgtNumDiscs];
   rNonEff=new TH1D*[kFgtNumDiscs];
