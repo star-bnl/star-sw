@@ -47,7 +47,12 @@ using namespace std;
 
 class StBfcTriggerFilterMaker : public StMaker {
 public:
-  StBfcTriggerFilterMaker(const char* name = "TriggerFilter") : StMaker(name) {}
+  StBfcTriggerFilterMaker(const char* name = "TriggerFilter")
+    : StMaker(name)
+    , mOkAllEvents(0)
+    , mSkipAllEvents(0)
+  {
+  }
 
   int Init();
   int Make();
@@ -69,12 +74,16 @@ public:
   void SetEAJP(int value = 1) { mMask.set(14,value); }
 
   void changeJPThresh(int dsm);	/// Changes the JP Thresholds by dsm
+  void SetOkAllEvents  (int ok   = 1) { mOkAllEvents   = ok  ; }
+  void SetSkipAllEvents(int skip = 1) { mSkipAllEvents = skip; }
 
   void addTrigger(int trigId);
 
 private:
   bitset<16> mMask;
   vector<int> mTriggers;
+  int mOkAllEvents;
+  int mSkipAllEvents;
 
   ClassDef(StBfcTriggerFilterMaker,0);
 };
