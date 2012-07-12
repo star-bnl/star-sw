@@ -25,7 +25,7 @@ int StBfcTriggerFilterMaker::Init()
   SetAttr(".Privilege",1);
 
   // Print mask
-  LOG_INFO << Form("MASK: BHT0=%d BHT1=%d BHT2=%d BHT3=%d EHT0=%d EHT1=%d JP1=%d JP2=%d BJP1=%d BJP2=%d EJP1=%d EJP2=%d AJP=%d BAJP=%d EAJP=%d",
+  LOG_INFO << Form("MASK: BHT0=%d BHT1=%d BHT2=%d BHT3=%d EHT0=%d EHT1=%d JP1=%d JP2=%d BJP1=%d BJP2=%d EJP1=%d EJP2=%d AJP=%d BAJP=%d EAJP=%d JP0=%d",
 		   mMask.test(0),
 		   mMask.test(1),
 		   mMask.test(2),
@@ -40,7 +40,8 @@ int StBfcTriggerFilterMaker::Init()
 		   mMask.test(11),
 		   mMask.test(12),
 		   mMask.test(13),
-		   mMask.test(14)) << endm;
+		   mMask.test(14),
+		   mMask.test(15)) << endm;
 
   // Print triggers (year < 2009)
   ostringstream os;
@@ -95,23 +96,6 @@ int StBfcTriggerFilterMaker::Make()
 
   // Get output of EMC L2 DSM
   bitset<16> emc(trgsim->emc->EM201output());
-
-  LOG_INFO << Form("EM201: BHT0=%d BHT1=%d BHT2=%d BHT3=%d EHT0=%d EHT1=%d JP1=%d JP2=%d BJP1=%d BJP2=%d EJP1=%d EJP2=%d AJP=%d BAJP=%d EAJP=%d",
-		   emc.test(0),
-		   emc.test(1),
-		   emc.test(2),
-		   emc.test(3),
-		   emc.test(4),
-		   emc.test(5),
-		   emc.test(6),
-		   emc.test(7),
-		   emc.test(8),
-		   emc.test(9),
-		   emc.test(10),
-		   emc.test(11),
-		   emc.test(12),
-		   emc.test(13),
-		   emc.test(14)) << endm;
 
   // Mask out any uninteresting bits
   emc &= mMask;
