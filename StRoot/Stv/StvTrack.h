@@ -57,7 +57,8 @@ const StvNode *GetNode(EPointType poTy) const;
    double GetLength(EPointType ept=kFirstPoint) const;
       int GetCharge() const;
 
-   int ReleaseHits();
+   int ReleaseHits();		// release hits from track
+  void Reverse();		// Inverese node order. For debug only
 double GetXi2() const;   	// chi2/ndf of fit,        all nodes
 double GetXi2P() const;   	// chi2 of fit to primary vertex
 double GetRes() const;		// Average residual
