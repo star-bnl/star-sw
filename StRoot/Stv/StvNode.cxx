@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.9 2012/06/21 01:39:21 perev Exp $
+ * $Id: StvNode.cxx,v 1.10 2012/07/13 23:26:55 perev Exp $
  *
  * /author Victor Perev
  */
@@ -57,10 +57,11 @@ static const char *txt = "XYZAPTCHREL";
 static const char *hhh = "xyzre";
   if (!opt || !opt[0]) opt = "_";
   TString myOpt(opt);
-  const char *cc = strchr(opt,'=');
-  int dir = (cc)? cc[1]-'0':4; //mPP[4]==mFP[2]
-  int djr = (dir<2)? dir:dir-2;
-  if (myOpt.Contains("_")) myOpt.ReplaceAll("_","2RZErze");
+  if (myOpt.Contains("_")) myOpt.ReplaceAll("_","2RZErze =0");
+  int idx = myOpt.Index("=");
+  int djr = (idx>=0)? myOpt[idx+1]-'0':0; //mPP[4]==mFP[2]
+  int dir = (djr<=2)? djr+2:djr-3;
+
   double val,err[2];
   const StvNodePars &fp= mPP[dir];
   const StvFitErrs  &fe= mPE[dir];
@@ -69,7 +70,7 @@ static const char *hhh = "xyzre";
   if (GetType()==kDcaNode ) ts='D';
   if (GetType()==kPrimNode) ts='P';
   printf("%p(%s)",(void*)this,ts.Data());
-  if (myOpt.Contains("2")) printf("\t%s=%g","Xi2",GetXi2(djr));
+  printf("\t%s=%g","Xi2",GetXi2(djr));
   for (int i=0;txt[i];i++) {
     err[0]=-999;val=-999;
     if (myOpt.Index(TString(txt[i]))<0) continue;
