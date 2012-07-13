@@ -13,13 +13,14 @@
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 
 #include "Stv/StvToolkit.h"
+static Color_t gMyColors[] = {kRed,kBlue,kMagenta,kCyan};
 
 StvDraw *StvDraw::fgStvDraw=0;
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 StvDraw::StvDraw(const char *name):StDraw3D(name)
 {
- fgStvDraw = this; mNDoIt=0;mNPow2=1;
+ fgStvDraw = this; mNDoIt=0;mNPow2=1;mIColor=0;
  SetBkColor(kWhite);
 }
 //_____________________________________________________________________________
@@ -91,35 +92,52 @@ TObject *StvDraw::Trak(const THelixTrack &helx,const std::vector<const StvHit*> 
   return to;
 }
 //_____________________________________________________________________________
-TObject *StvDraw::Trak(const std::vector<float> &pnts, EDraw3DStyle sty)
+TObject *StvDraw::Trak(const std::vector<float> &pnts, EDraw3DStyle sty,Color_t color)
 {
   int n = pnts.size(); if (!n) return 0;
-  return Line(pnts,sty);
+  StDraw3DStyle myStyle = Style(sty);
+  if (!color) {
+    myStyle.Col() = gMyColors[mIColor];
+    mIColor = (mIColor+1)%(sizeof(gMyColors)/sizeof(gMyColors[0]));
+  }
+  return Line(pnts, myStyle.Col(),myStyle.Sty(),myStyle.Siz() );
 }
 //_____________________________________________________________________________
-void  StvDraw::Trak(const StvTrack *tk, EDraw3DStyle sty)
+void  StvDraw::Trak(const StvTrack *tk, int dir, EDraw3DStyle sty)
 {
   StvConstHits myHits,ihHits;
   StvPoints  myPoits;
   const StvNode *lNode=0,*rNode;
-  for (StvNodeConstIter it = tk->begin();it != tk->end();++it) {
+  StvNodeConstIter itBeg,itEnd,it;
+
+  if (dir) { //fit in ==> out
+    itBeg = tk->begin();        itEnd = tk->end();
+  } else   {//fit out ==> in
+    itBeg = tk->end(); --itBeg; itEnd = tk->begin();--itEnd;
+  }
+
+//   StvNodeConstIter itBeg =(dir==0)? tk->rbegin():tk->begin();
+//   StvNodeConstIter itEnd =(dir==0)? tk->rend()  :tk->end();
+  
+  for (it=itBeg; it!=itEnd; (dir)? ++it:--it) {//Main loop
     rNode = *it;
-//    ((StvNodePars&)(rNode->GetFP())).ready();
+    if (rNode->mFE[dir].mHH<0) break; 		//this node is not filled
+
     const StvHit  *hit  = rNode->GetHit();
     if (hit) {
-      if (rNode->GetXi2()<1000) {myHits+=hit;} else {ihHits+=hit;}}
+      if (rNode->GetXi2(dir)<1000) {myHits+=hit;} else {ihHits+=hit;}}
       
-    if (!lNode) { myPoits+=rNode->GetFP().P;}
-    else        { Join(lNode,rNode,myPoits);}
+    if (!lNode) { myPoits+=rNode->GetFP(dir).P;}
+    else        { Join(lNode,rNode,myPoits,dir);}
 
-    const double *P = rNode->GetFP().P;
+    const double *P = rNode->GetFP(dir).P;
     if (hit)    {// make connection to hit
       const float  *H = hit->x();
       float con[6] = {H[0],H[1],H[2],P[0],P[1],P[2]};
       Line (2,con);            
     }  	
     {// only short line to mark node
-       const double *D = &rNode->GetFP()._cosCA;
+       const double *D = &rNode->GetFP(dir)._cosCA;
        float con[6] = {P[0]         ,P[1]         ,P[2]
                      ,P[0]-D[1]*0.1,P[1]+D[0]*0.5,P[2]};
        Line (2,con);            
@@ -128,7 +146,7 @@ void  StvDraw::Trak(const StvTrack *tk, EDraw3DStyle sty)
   }
   Hits(myHits,kUsedHit);
   Hits(ihHits,kUnusedHit);
-  Trak(myPoits,sty);
+  Trak(myPoits,sty,0);
 
 }
 //_____________________________________________________________________________
@@ -165,7 +183,7 @@ void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
     TVector3 hi(hit->x()); 
     TVector3 hl = hi-myFst;
     double dot = hl.Dot(myDir);
-    if (dot<0 || dot >dis) 		continue;
+//    if (dot<0 || dot >dis) 		continue;
     if ((hl.Cross(myDir)).Mag2()>sag2)	continue;
     double *d = &(hi[0]);
     double dca = hlx.Dca(d);
@@ -178,37 +196,25 @@ void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
 
 
 //_____________________________________________________________________________
-void StvDraw::Join(const StvNode *left,const StvNode *rite,StvPoints &poits)
+void StvDraw::Join(const StvNode *left,const StvNode *rite,StvPoints &poits,int dir)
 {
 static const double maxStep=0.1;
-  const StvNodePars &lFP = left->GetFP();
-  const StvNodePars &rFP = rite->GetFP();
-  THelixTrack hLeft,hRite;
+  const StvNodePars &lFP = left->GetFP(dir);
+  const StvNodePars &rFP = rite->GetFP(dir);
+  THelixTrack hLeft;
   lFP.get(&hLeft);
-  rFP.get(&hRite);
-  double lenL =  hLeft.Path(rFP._x,rFP._y);
+  double lenL =  hLeft.Path(rFP.P);
 
-  int nStep = fabs(lenL/2)/maxStep; if (nStep <3) nStep = 3;
-  double step = lenL/2/nStep;
+  int nStep = fabs(lenL)/maxStep; if (nStep <3) nStep = 3;
+  double step = lenL/nStep;
   for (int is=0;is<=nStep;is++) {
     poits +=hLeft.Pos();
     hLeft.Move(step);
   }
-  hLeft.Move(-step);
-
-  double lenR =  hRite.Path(hLeft.Pos()[0],hLeft.Pos()[1]); hRite.Move(lenR);
-  step = -lenR/nStep;
-  if (step<0) {poits +=rFP.P; return;}
-  assert(step>0);
-  Points(1,hRite.Pos(),kTrackBegin);
-  
-  for (int is=0;is<=nStep;is++) {
-    poits +=hRite.Pos();
-    hRite.Move(step);
-  }
 }
 //_____________________________________________________________________________
-void StvDraw::Show(const StvTrack *tk){Inst()->Trak(tk);}
+//_____________________________________________________________________________
+void StvDraw::Show(const StvTrack *tk,int dir){Inst()->Trak(tk,dir);}
 //_____________________________________________________________________________
 void StvDraw::Klear(){Inst()->Clear();}
 //_____________________________________________________________________________
