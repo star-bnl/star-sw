@@ -114,6 +114,7 @@ void RunJetFinder2009pro(int nevents = 1e6,
 
   // Trigger simulator
   StTriggerSimuMaker* simuTrig = new StTriggerSimuMaker;
+  simuTrig->useOnlineDB(); // for trigger definitions and thresholds
   simuTrig->setMC(false); // Must be before individual detectors, to be passed
   // BBC was not used in Run 9
   //simuTrig->useBbc();

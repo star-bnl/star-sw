@@ -97,6 +97,7 @@ void RunJetSkim2009sim(int nevents = 1e6,
     simL2Mk->setOutPath("./");
   }
   StTriggerSimuMaker* simuTrig = new StTriggerSimuMaker;
+  simuTrig->useOnlineDB(); // for trigger definitions and thresholds
   simuTrig->setMC(true); // Must be before individual detectors, to be passed
   //simuTrig->useBbc(); // No BBC in Run 9
   simuTrig->useBemc();
