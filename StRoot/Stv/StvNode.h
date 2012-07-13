@@ -44,6 +44,7 @@ public:
   StvFitErrs  &GetPE(int dir) 	{return mPE[dir];}
   StvNodePars &GetFP(int dir) 	{return mFP[dir];}
   StvFitErrs  &GetFE(int dir) 	{return mFE[dir];}
+  const StvNodePars &GetFP(int dir) const	{return mFP[dir];}
   const double *GetHE() const	{return mHrr    ;}
         void  SetHE(const double he[3]) 	
 	                        {mHrr[0]=he[0]; mHrr[1]=he[1];mHrr[2]=he[2];}
