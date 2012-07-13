@@ -20,8 +20,9 @@ static double MAXNODPARS[]   ={555,555,555,6.66,111, MAXTAN+1, .1};
 //                                   h    z   a     l   ptin
 static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,20  };
 static const double BIGFITPARS[]   ={0.1 ,0.1,0.1 ,0.1 ,0.01},BIGFITPART=0.01;
-static const double MAXFITERR[5]   ={0.5,0.5 ,0.3 ,.3 ,10};
-static const double MAXERRFACT     = 1;
+static const double kERRFACT     = 3*3;
+static const double kFitErrs[5]   ={0.5*kERRFACT,0.5*kERRFACT 
+                                   ,0.3*kERRFACT,0.3*kERRFACT ,10*kERRFACT};
 //______________________________________________________________________________ 
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B)
 {
@@ -109,7 +110,7 @@ static const int mius[]= {1,2,5,8,9,10,13,14,0};
 //______________________________________________________________________________
 int StvNodePars::check(const char *pri) const
 {
-
+  if (fabs(_x+_y+_z)<=0) return 0;
   assert(_hz);
   int ierr=0;
 //  temp test
@@ -225,7 +226,7 @@ static StvFitPars fp;
   double dy = _y-sub._y;
   double dz = _z-sub._z;
   
-  fp.mH = dx*(    -sub._sinCA)+ dy*(     sub._cosCA);
+  fp.mH = dx*(     -sub._sinCA)+ dy*(      sub._cosCA);
   fp.mZ = dx*(-sinL*sub._cosCA)+ dy*(-sinL*sub._sinCA) +dz*cosL;
   fp.mA = (_psi -sub._psi )*cosL;
   if      (fp.mA < -M_PI) {fp.mA += M_PI*2;}
@@ -318,7 +319,16 @@ int StvNodePars::isReady( ) const
   if (fabs(_curv -_hz*_ptin)>1e-5) return 0;
   return 1;
 }
-
+//_____________________________________________________________________________
+StvFitPars StvNodePars::delta() const
+{
+   double space = 1e-3+(fabs(_x)+fabs(_y)+fabs(_z))/300;
+   StvFitPars fp;
+   fp.mH = space;    fp.mZ = space; 
+   fp.mA = 3.14/180; fp.mL = 3.14/180;
+   fp.mP = 0.01 + 0.05*fabs(_ptin);
+   return fp;
+}
 //______________________________________________________________________________
 //______________________________________________________________________________
 void StvHitErrs::rotate(double angle)
@@ -351,15 +361,15 @@ static StvFitErrs myFitErrs;
   return myFitErrs;
 }  
 //______________________________________________________________________________
-void StvFitErrs::Reset()
+void StvFitErrs::Reset(double hz)
 {
   memset(this,0,sizeof(*this));
-  mHH =  MAXFITERR[0]*MAXFITERR[0]*MAXERRFACT;
-  mZZ =  MAXFITERR[1]*MAXFITERR[1]*MAXERRFACT;
-  mAA =  MAXFITERR[2]*MAXFITERR[2]*MAXERRFACT;
-  mLL =  MAXFITERR[3]*MAXFITERR[3]*MAXERRFACT;
-  mPP =  MAXFITERR[4]*MAXFITERR[4]*MAXERRFACT;
-  mHz = 3e33;
+  mHH =  kFitErrs[0]*kFitErrs[0];
+  mZZ =  kFitErrs[1]*kFitErrs[1];
+  mAA =  kFitErrs[2]*kFitErrs[2];
+  mLL =  kFitErrs[3]*kFitErrs[3];
+  mPP =  kFitErrs[4]*kFitErrs[4];
+  mHz =  hz;
 }
 
 //______________________________________________________________________________
@@ -421,24 +431,6 @@ emx->mLL = mLL;
 
 }  
 //_____________________________________________________________________________
-void StvFitErrs::Set(const StvFitErrs &fr,double errFactor)
-{
-  Reset();
-  mHz = fr.mHz;  
-  assert(mHz && fabs(mHz)<0.002);
-
-  double const *e =fr.Arr();
-  double       *ee=   Arr();
-  int nerr = 0;
-  for (int i=0,li=0;i< 5;li+=++i) {
-    for (int j=0;j<=i;j++) {
-    double myMax =  MAXFITERR[i]*MAXFITERR[j];
-    ee[li+j] = e[li+j]*errFactor;
-    if (fabs(ee[li+j]) > myMax) nerr++;;
-  } }
-  if (nerr) Recov();
-}
-//_____________________________________________________________________________
 void StvFitErrs::Backward()
 {
   mHA*=-1; mAP*=-1; mHZ*=-1; mZP*=-1; mAL*=-1; mZL*=-1;
@@ -446,18 +438,19 @@ void StvFitErrs::Backward()
 //_____________________________________________________________________________
 int StvFitErrs::Check(const char *tit) const
 {
-  if (!StvDebug::mgCheck) return 0;
+  if (!StvDebug::mgCheck) 	return 0;
+  if (mHH+mZZ<=0) 		return 0;
   ((StvFitErrs*)((void*)this))->Recov();
   int ierr=0;
   double dia[5];const double *e=&mHH;
   for (int i=0,li=0;i< 5;li+=++i) {
     dia[i]=e[li+i];
-    if (dia[i]< 1e-8*MAXFITERR[i]*MAXFITERR[i]) {ierr = i+1; goto ERR;}
-    if (dia[i]> 1e+4*MAXFITERR[i]*MAXFITERR[i]) {ierr = i+6; goto ERR;}
+    if (dia[i]< 1e-8*kFitErrs[i]*kFitErrs[i]) {ierr = i+1; goto ERR;}
+    if (dia[i]> 1e+4*kFitErrs[i]*kFitErrs[i]) {ierr = i+6; goto ERR;}
     for (int j=0;j<i;j++) {
        if (e[li+j]*e[li+j]>=dia[i]*dia[j]){ierr = 100+10*i+j;goto ERR;}
     } }
-  if (!(mHz && fabs(mHz) <.002)) {ierr = 1001; goto ERR;}
+  assert(mHz);
   return 0;
 ERR: if (!tit) return ierr;
   printf("StvFitErrs::Check(%s)=%d\n",tit,ierr);
@@ -475,8 +468,8 @@ int StvFitErrs::Recov()
 //		Check diag errs
   for (int i=0,li=0;i< 5;li+=++i) {
     fak[i]=1;
-    if (e[li+i] < MAXFITERR[i]*MAXFITERR[i]) continue;
-    fak[i] = 0.99*MAXFITERR[i]/sqrt(e[li+i]); nerr++;
+    if (e[li+i] < kFitErrs[i]*kFitErrs[i]) continue;
+    fak[i] = 0.99*kFitErrs[i]/sqrt(e[li+i]); nerr++;
   };
   if (nerr) {  		//Recovery
     for (int i=0,li=0;i< 5;li+=++i) {
