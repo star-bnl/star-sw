@@ -285,6 +285,7 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
     
     case kCONTINUEtrack:
     case kIgnore:
+      if (IsDca00(2)) fKaze = kEXITtrack;
     break;
     
     case kOUTtrack:
@@ -387,6 +388,7 @@ static int nCall=0; nCall++;
 //_____________________________________________________________________________
 int StvMCStepping::IsDca00(int begEnd)
 {
+static int nCall=0; nCall++;
   fCurrentSign = fCurrentMomentum[0]*fCurrentPosition[0]
                + fCurrentMomentum[1]*fCurrentPosition[1];
   switch (begEnd) {
@@ -422,6 +424,10 @@ int StvMCStepping::IsDca00(int begEnd)
       double p  = pt/th.GetCos();
       fCurrentMomentum.SetVectM(TVector3(th.Dir())*p,fMass);
       return ans;
+    }
+    case 2: { // continue volume
+      if ((fCurrentSign<0) != (fDir==0)) return kDiveDca;
+      return 0;
     }
   }
   return kDiveBreak;
