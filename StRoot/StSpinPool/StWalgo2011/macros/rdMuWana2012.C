@@ -15,7 +15,7 @@ int rdMuWana2012(
 	     char* jetDir   = "",
 	     char* histDir   = "",
 	     char* wtreeDir   = "",
-	     int  spinSort=true,
+	     int  spinSort=false,
 	     bool findZ=true,
 	     int  geant=false
   ) { 
@@ -38,7 +38,7 @@ int rdMuWana2012(
   else if(isMC < 400) {
     char *file1;
     //private 2012 MC
-    if(isMC==100) file1=strstr(file,"jb"); 
+    if(isMC==100) file1=strstr(file,"jb");   
     //embedding run with geant files
     if(isMC==350) file1=strstr(file,"W");
     if(isMC==351) file1=strstr(file,"Wtau");
@@ -149,7 +149,7 @@ int rdMuWana2012(
   
 
   //for EEMC, need full db access:
-  St_db_Maker   *dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");jbb330_24_50evts.wana.hist.root
+  St_db_Maker   *dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
   
   if (isMC==0) { 
     //data
@@ -394,6 +394,9 @@ int rdMuWana2012(
 
 
 // $Log: rdMuWana2012.C,v $
+// Revision 1.7  2012/07/13 16:11:49  balewski
+// minor clenup, prevent crash in Finish if zero input events, now it runs on M-C events as well
+//
 // Revision 1.6  2012/07/12 20:49:26  balewski
 // added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
 // removed dependence of spinSortingMaker from muDst

@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.9 2012/07/12 20:49:21 balewski Exp $
+// $Id: St2011WMaker.cxx,v 1.10 2012/07/13 16:11:44 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -248,7 +248,7 @@ St2011WMaker::InitRun(int runNo){
   }
 
   //.... spinDB monitoring
-  if(mMuDstMaker)
+  if(mMuDstMaker && spinDb)
     {  char txt[1000],txt0[100];
     sprintf(txt0,"bxIdeal%d",nRun);
     sprintf(txt,"intended fill pattern  R%d-%d vs. bXing; %s", runNo,nRun,spinDb->getV124comment());
@@ -277,11 +277,12 @@ St2011WMaker::Finish(){
     mTreeFile->Write();
     mTreeFile->Close();
 
-
-    char txt[1000];
-    sprintf(txt,"events T= %d %d",Tfirst,Tlast);
-    printf("Finish run=%d , events time range %s\n",mRunNo,txt);
-    hbxIdeal->GetYaxis()->SetTitle(txt);    
+    if(hbxIdeal) {
+      char txt[1000];
+      sprintf(txt,"events T= %d %d",Tfirst,Tlast);
+      printf("Finish run=%d , events time range %s\n",mRunNo,txt);
+      hbxIdeal->GetYaxis()->SetTitle(txt);    
+    }
   }
   return StMaker::Finish();
 }
@@ -567,6 +568,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.10  2012/07/13 16:11:44  balewski
+// minor clenup, prevent crash in Finish if zero input events, now it runs on M-C events as well
+//
 // Revision 1.9  2012/07/12 20:49:21  balewski
 // added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
 // removed dependence of spinSortingMaker from muDst
