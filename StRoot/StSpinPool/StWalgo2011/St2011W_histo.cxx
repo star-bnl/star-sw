@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.7 2012/07/13 16:11:44 balewski Exp $
+// $Id: St2011W_histo.cxx,v 1.8 2012/07/13 20:53:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -66,6 +66,9 @@ St2011WMaker::initHistos(){
   ln=new TLine(-par_vertexZ,0,-par_vertexZ,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
   hA[12]=new TH1F("muNV","L2WB: # vertices per event, rank>0 & Z in range; # of vertices",10,0,10);
+
+  // intended for QCD MC normalization
+  hA[13]=h=new TH2F("muBtowMaxCl_Zv","L2WB: BTOW max 2x2 cluster ET vs Z of any vertex w/ rank>0;Z-vertex (cm); max BTOW 2x2 Cluster ET",100,-100,100,100,0,100);
 
   //..... Tracks....
   hA[20]=h=new TH1F("muStatTrk","Barrel W-algo: track  count; cases",nCase,0,nCase);
@@ -311,7 +314,8 @@ St2011WMaker::initHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,par_nearTotEtFrac,1.e6,par_nearTotEtFrac);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
-  hA[251]=h=new TH2F("muSpTbal_isoCone","Signed p_{T} Balance vs. 2x2/nearCone; 2x2/nearCone; Signed p_{T} Balance (GeV)",110,0,1.1,100,-100,100);
+  hA[251]=h=new TH2F("muSpTbal_isoConePos","Q+ Signed p_{T} Balance vs. 2x2/nearCone; 2x2/nearCone; Signed p_{T} Balance (GeV)",110,0,1.1,100,-100,100);
+  hA[252]=h=new TH2F("muSpTbal_isoConeNeg","Q- Signed p_{T} Balance vs. 2x2/nearCone; 2x2/nearCone; Signed p_{T} Balance (GeV)",110,0,1.1,100,-100,100);
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
@@ -325,6 +329,10 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.8  2012/07/13 20:53:16  stevens4
+// Add filling of empty events in W tree
+// Minor modifications to histograms
+//
 // Revision 1.7  2012/07/13 16:11:44  balewski
 // minor clenup, prevent crash in Finish if zero input events, now it runs on M-C events as well
 //

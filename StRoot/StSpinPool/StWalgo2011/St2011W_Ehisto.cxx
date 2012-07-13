@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.5 2012/06/25 20:53:23 stevens4 Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.6 2012/07/13 20:53:16 stevens4 Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -66,6 +66,10 @@ St2011WMaker::initEHistos(){
   ln=new TLine(-par_vertexZ,0,-par_vertexZ,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
   hE[12]=new TH1F("muENV","L2WE: # vertices per event, (rank>0 or matched track to ETOW) && Z in range; # of vertices",10,0,10);
+
+   // intended for QCD MC 
+  hE[13]=h=new TH2F("muEtowMaxTow_Zv","L2WE: ETOW max tower ET vs Z of any vertex w/ rank>0;Z-vertex (cm); max ETOW tower ET",100,-100,100,100,0,100);
+
   //..... Tracks....
   hE[20]=h=new TH1F("muEStatTrk","Endcap W-algo: track  count; cases",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);

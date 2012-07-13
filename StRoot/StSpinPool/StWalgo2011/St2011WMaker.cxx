@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.10 2012/07/13 16:11:44 balewski Exp $
+// $Id: St2011WMaker.cxx,v 1.11 2012/07/13 20:53:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -330,18 +330,21 @@ St2011WMaker::Make(){
     int btrig=accessBarrelTrig();
     int etrig=accessEndcapTrig();
 
-    if( btrig && etrig ) return kStOK; //skip event w/o valid trig ID
+    if( btrig && etrig )  {mWtree->Fill(); return kStOK;} //skip event w/o valid trig ID
  
     nTrigEve++; 
     
     if(accessVertex()) {
       fillTowHit(false); //fill 2D tower "hit" histos for _no_ vertex and L2BW trigger (beam background analysis, remove any time JS)
+      mWtree->Fill();
       return kStOK; //skip event w/o ~any reasonable vertex  
     }
-
     fillTowHit(true); //fill 2D tower "hit" histos for vertex found and L2BW trigger (beam background analysis, remove any time JS)   
  
-    if( accessTracks()) return kStOK; //skip event w/o ~any highPt track
+    //add plots for QCD normalization
+    fillNorm();
+
+    if( accessTracks()) {mWtree->Fill(); return kStOK;} //skip event w/o ~any highPt track
 
     accessBSMD();// get energy in BSMD
     accessESMD();// get energy in ESMD
@@ -371,9 +374,43 @@ St2011WMaker::Make(){
   else { //analysis of W tree
     if(getEvent(index++,indexJet++)==kStEOF) return kStEOF; //get next event from W and jet tree
     
-    
-    
+    //allow for manual scale adjustment of BTOW energy (careful!) 
+    for(int i=0; i<4800; i++) wEve->bemc.eneTile[0][i]*=par_btowScale;
+
     if(nInpEve%200==1) printf("\n-----in---- %s, W-Tree  nEve: inp=%d \n", GetName(),nInpEve);//,nTrigEve, nAccEve,afile);  
+    
+    //fill some bins in muStatEve histos for checks
+    hA[0]->Fill("inp",1.); 
+    hE[0]->Fill("inp",1.);
+
+    //fill trigger bins for counter histos
+    if(wEve->l2bitET) hA[0]->Fill("L2bwET",1.); 
+    if(wEve->l2bitRnd) hA[0]->Fill("L2bwRnd",1.);
+    if(wEve->l2EbitET) hE[0]->Fill("L2ewET",1.);
+    if(wEve->l2EbitRnd) hE[0]->Fill("L2ewRnd",1.);
+
+    if(!wEve->l2bitET && !wEve->l2EbitET) return kStOK; //skip event w/o valid trig ID
+    nTrigEve++;
+
+    //fill tpc bins
+    int nVerR=0; int nTrOK=0;
+    for(uint iv=0;iv<wEve->vertex.size();iv++) {
+      if(wEve->vertex[iv].rank > 0) nVerR++;
+      if(wEve->vertex[iv].eleTrack.size() > 0) nTrOK++;
+    }
+    if(wEve->l2bitET && nVerR>0) hA[0]->Fill("vertZ",1.);
+    if(wEve->l2EbitET && wEve->vertex.size()>0) hE[0]->Fill("vertZ",1.);
+    if(wEve->l2bitET && nTrOK>0) hA[0]->Fill("Pt10",1.);
+    if(wEve->l2EbitET && nTrOK>0) hE[0]->Fill("Pt10",1.);
+
+    if(nTrOK<=0) return kStOK;
+
+    //fill some B/ETOW bins
+    if(wEve->l2bitET && wEve->bemc.tileIn[0]==1) hA[0]->Fill("B-in",1.0);
+    if(wEve->l2EbitET && wEve->etow.etowIn==1)    hE[0]->Fill("E-in",1.0);
+    if(wEve->l2bitET && wEve->bemc.maxAdc>par_maxADC) hA[0]->Fill("B200",1.0);
+    if(wEve->l2EbitET && wEve->etow.maxAdc>par_maxADC) hE[0]->Fill("E200",1.0);
+    
     
     if(wEve->bemc.maxAdc<par_maxADC && wEve->etow.maxAdc<par_maxADC) return kStOK; //skip event w/o energy in BTOW && ETOW 
     
@@ -493,6 +530,48 @@ St2011WMaker::L2algoEtaPhi2IJ(float etaF,float phiF,int &iEta, int &iPhi) {
 
 //________________________________________________
 //________________________________________________
+void
+St2011WMaker::fillNorm(){ //intended for normalization of filtered QCD MC
+  
+  //fill max BTOW clustET vs z-vertex distribution for events with positive rank vertex
+  if(wEve->l2bitET && wEve->vertex.size()>0) 
+    if(wEve->vertex[0].rank>0) {
+      float maxBtowET=0;
+      for (int i=0;i<mxBtow;i++)
+	if (wEve->bemc.statTile[0][i]==0) {//zero means good
+	  int ieta=-1; int iphi=-1;
+	  float etaF=positionBtow[i].Eta();
+	  float phiF=positionBtow[i].Phi();
+	  L2algoEtaPhi2IJ(etaF, phiF,ieta,iphi);
+	  WeveCluster c=maxBtow2x2(ieta,iphi,wEve->vertex[0].z);
+	  if(c.ET>maxBtowET) maxBtowET=c.ET; 
+	}
+      hA[13]->Fill(wEve->vertex[0].z,maxBtowET);    
+    }
+  
+  //fill max ETOW towerET vs z-vertex distribution for events with positive rank vertex
+  if(wEve->l2EbitET && wEve->vertex.size()>0) 
+    if(wEve->vertex[0].rank>0) {
+      float maxEtowET=0;
+      for(int isec=0;isec<mxEtowSec;isec++){
+	for(int isub=0;isub<mxEtowSub;isub++){
+	  for(int ieta=0;ieta<mxEtowEta;ieta++){
+	    if(wEve->etow.stat[isec*mxEtowSub+isub][ieta]==0) {
+	      WeveCluster c=sumEtowPatch(ieta,isec*mxEtowSub+isub,1,1,wEve->vertex[0].z);
+	      if(c.ET>maxEtowET) maxEtowET=c.ET;
+	    }
+	  }
+	}
+      }
+      hE[13]->Fill(wEve->vertex[0].z,maxEtowET);
+    }
+
+  return;
+}
+
+
+//________________________________________________
+//________________________________________________
 TClonesArray*
 St2011WMaker::getJets(TString branchName){
   if(mJetReaderMaker ==0) {
@@ -568,6 +647,10 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.11  2012/07/13 20:53:16  stevens4
+// Add filling of empty events in W tree
+// Minor modifications to histograms
+//
 // Revision 1.10  2012/07/13 16:11:44  balewski
 // minor clenup, prevent crash in Finish if zero input events, now it runs on M-C events as well
 //

@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.8 2012/07/06 17:47:02 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.9 2012/07/13 20:53:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -55,7 +55,10 @@ St2011WMaker::find_W_boson(){
       }
 
       //fill plot for background
-      if(T.cluster.ET > par_highET) hA[251]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
+      if(T.cluster.ET > par_highET) {
+	if(T.prMuTrack->charge()>0) hA[251]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
+        else if(T.prMuTrack->charge()<0) hA[252]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
+      }
 
       if(T.cluster.ET /T.nearTotET< par_nearTotEtFrac) continue; // too large nearET
 
@@ -644,6 +647,10 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.9  2012/07/13 20:53:16  stevens4
+// Add filling of empty events in W tree
+// Minor modifications to histograms
+//
 // Revision 1.8  2012/07/06 17:47:02  stevens4
 // Updates for tree reader
 //
