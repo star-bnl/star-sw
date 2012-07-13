@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.52 2012/07/12 16:06:48 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.53 2012/07/13 16:47:26 pibero Exp $
 
 // MySQL C API
 //#include "mysql.h"
@@ -71,7 +71,6 @@
 ClassImp(StTriggerSimuMaker)
 
 StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
-    mDbMk = dynamic_cast<St_db_Maker*> ( this->GetMakerInheritsFrom("St_db_Maker") );
     mYear=-1;
     mMCflag=0;
     eemc=0;
@@ -93,10 +92,10 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
     fill(mOverlapJetPatchTh,mOverlapJetPatchTh+3,-1);
 
     mChangeJPThresh = 0;
+
+    mUseOnlineDB = 0;
+    mUseOfflineDB = 0;
 }
-
-StTriggerSimuMaker::~StTriggerSimuMaker() { /* no-op */ }
-
 
 void StTriggerSimuMaker::useEemc(int flag){
     eemc=new StEemcTriggerSimu();
@@ -162,22 +161,25 @@ void StTriggerSimuMaker::Clear(const Option_t*){
 }
 
 Int_t StTriggerSimuMaker::InitRun(int runNumber) {
-    assert(mDbMk);
-    mYear = mDbMk->GetDateTime().GetYear();
-    int yyyymmdd = mDbMk->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
-    int hhmmss = mDbMk->GetDateTime().GetTime(); //form of 123623 (i.e. 12:36:23)
-    LOG_INFO << Form("InitRun() run=%d yyyymmdd=%d  hhmmss=%06d\n", runNumber, yyyymmdd, hhmmss) << endm;
+    const TDatime& dbTime = GetDBTime();
+    mYear = dbTime.GetYear();
+    LOG_INFO << "runNumber=" << runNumber << " with DB timestamp " << dbTime.AsSQLString() << endm;
 
-    //Use unified EMC trigger for EEMC/BEMC triggers in y=2009 or later
+    //Use unified EMC trigger for EEMC/BEMC triggers in year 2009 or later
     if (mYear >= 2009 && (mSimulators[0] || mSimulators[2])) {
       emc->setHeadMaker(this);
       emc->setBemc(bemc);
       emc->setEemc(eemc);
       emc->setMC(mMCflag);
       mSimulators[3] = emc;
-      if (!get2009DsmRegistersFromOfflineDatabase(runNumber) && !get2009DsmRegistersFromOnlineDatabase(runNumber)) {
-	LOG_WARN << "Can't get 2009 DSM registers" << endm;
+      if (!mUseOnlineDB && !mUseOfflineDB) {
+	LOG_ERROR << "!!! ATTENTION !!! YOU MUST SPECIFY WHICH DATABASE TO USE FOR TRIGGER DEFINITIONS AND THRESHOLDS:" << endm;
+	LOG_ERROR << "StTriggerSimuMaker::useOnlineDB()" << endm;
+	LOG_ERROR << "StTriggerSimuMaker::useOfflineDB()" << endm;
+	assert(mUseOnlineDB || mUseOfflineDB);
       }
+      assert((mUseOnlineDB  && get2009DsmRegistersFromOnlineDatabase (runNumber)) ||
+	     (mUseOfflineDB && get2009DsmRegistersFromOfflineDatabase(runNumber)));
       LOG_INFO << "Overwriting the following registers:" << endm;
       overwrite2009DsmRegisters();
       if (mChangeJPThresh) {
@@ -461,11 +463,12 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   const char* host = "dbbak.starp.bnl.gov";
   const char* user = "";
   const char* pass = "";
-  unsigned int port = 3400+GetDBTime().GetYear()%100-1;
+  //unsigned int port = 3400+GetDBTime().GetYear()%100-1;
+  unsigned int port = 3400+mYear%100-1;
   const char* database = "Conditions_rts";
   const char* unix_socket = NULL;
   unsigned long client_flag = 0;
-  TString query;
+  char query[1024];
 
   LOG_INFO << Form("host=%s user=\"%s\" pass=\"%s\" port=%d database=%s",host,user,pass,port,database) << endm;
 
@@ -480,7 +483,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
   if (mMCflag == 1 || mMCflag == 2) {
     //query = Form("select idx_rn from triggers where beginTime >= '%s' limit 1",GetDBTime().AsSQLString());
-    query = Form("select max(idx_rn) from triggers where beginTime <= '%s'",GetDBTime().AsSQLString());
+    sprintf(query,"select max(idx_rn) from triggers where beginTime <= '%s'",GetDBTime().AsSQLString());
     LOG_INFO << query << endm;
     mysql_query(&mysql,query);
 
@@ -496,7 +499,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   LOG_INFO << "Using BEMC online database" << endm;
 
   // object=DSM crate, idx=DSM board
-  query = Form("select object,idx,reg,label,value,defaultvalue from dict where hash=(select dicthash from run where idx_rn = %d)",runNumber);
+  sprintf(query,"select object,idx,reg,label,value,defaultvalue from dict where hash=(select dicthash from run where idx_rn = %d)",runNumber);
   LOG_INFO << query << endm;
   mysql_query(&mysql,query);
 
@@ -575,16 +578,17 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   LOG_INFO << "The following registers have new values:" << endm;
 
   // Trigger definitions
+  const int MAX_TRIGGERS = 64;
+  TriggerDefinition triggers[MAX_TRIGGERS];
 
-  TriggerDefinition triggers[32];
-
-  query = Form("select idx_trigger,name,offlineBit from triggers where idx_rn = %d", runNumber);
+  sprintf(query,"select idx_trigger,name,offlineBit from triggers where idx_rn = %d",runNumber);
   LOG_INFO << query << endm;
   mysql_query(&mysql,query);
 
   if (MYSQL_RES* result = mysql_store_result(&mysql)) {
     while (MYSQL_ROW row = mysql_fetch_row(result)) {
       int idx_trigger = atoi(row[0]);
+      assert(idx_trigger >= 0 && idx_trigger < MAX_TRIGGERS);
       triggers[idx_trigger].triggerIndex = idx_trigger;
       strcpy(triggers[idx_trigger].name,row[1]);
       triggers[idx_trigger].triggerId = atoi(row[2]);
@@ -592,7 +596,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
     mysql_free_result(result);
   }
 
-  query = Form("select idx_idx,onbits,offbits,onbits1,onbits2,onbits3,offbits1,offbits2,offbits3 from pwc where idx_rn = %d", runNumber);
+  sprintf(query,"select idx_idx,onbits,offbits,onbits1,onbits2,onbits3,offbits1,offbits2,offbits3 from pwc where idx_rn = %d",runNumber);
   LOG_INFO << query << endm;
   mysql_query(&mysql,query);
 
@@ -612,6 +616,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
     while (MYSQL_ROW row = mysql_fetch_row(result)) {
       int idx_trigger = atoi(row[0]);
+      assert(idx_trigger >= 0 && idx_trigger < MAX_TRIGGERS);
       triggers[idx_trigger].onbits = atoi(row[1]);
       emc->defineTrigger(triggers[idx_trigger]);
       LOG_INFO << setw(20) << idx_trigger
@@ -733,6 +738,9 @@ void StTriggerSimuMaker::setLastDsmRegister(int reg, int value)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.53  2012/07/13 16:47:26  pibero
+ * Users must now specify database to use for trigger definitions and thresholds
+ *
  * Revision 1.52  2012/07/12 16:06:48  pibero
  * Added LOG_INFO
  *

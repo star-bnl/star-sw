@@ -46,9 +46,6 @@ private:
   int mYear;
   int mMCflag;			// 0=data, 1=simulation, 2=embedding
   
-  /// useful pointers
-  St_db_Maker *mDbMk;
-    
   /// collection of subdetector trigger simulators, individual pointers also available publicly below
   //vector<StVirtualTriggerSimu*> mSimulators;
   StVirtualTriggerSimu* mSimulators[numSimulators];
@@ -64,6 +61,10 @@ private:
   int mChangeJPThresh;
   void changeJetPatchTh();
 
+  /// Choose DB to access trigger definitions and thresholds
+  int mUseOnlineDB;
+  int mUseOfflineDB;
+
   /// detailed results for individual trigger simulations
   map<int,StTriggerSimuResult> mResults;
 
@@ -75,7 +76,6 @@ private:
 
 public:
   StTriggerSimuMaker(const char *name="StarTrigSimu");
-  virtual           ~StTriggerSimuMaker();
   
   void    useEemc(int flag=0);  //0:just process ADC, 1:compare w/ trigData, see enum in Eemc class
   void    useBbc();
@@ -120,14 +120,21 @@ public:
 
   void setLastDsmRegister(int reg, int value);
 
+  /// Choose DB to access trigger definitions and thresholds
+  void useOnlineDB() { mUseOnlineDB = 1; }
+  void useOfflineDB() { mUseOfflineDB = 1; }
+
   ClassDef(StTriggerSimuMaker,0)
 };
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.30 2011/12/11 17:16:43 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.31 2012/07/13 16:47:26 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.31  2012/07/13 16:47:26  pibero
+// Users must now specify database to use for trigger definitions and thresholds
+//
 // Revision 1.30  2011/12/11 17:16:43  pibero
 // Add function to set LD301 registers
 //
