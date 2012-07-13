@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.5 2012/07/12 20:49:21 balewski Exp $
+// $Id: St2011WMaker.h,v 1.6 2012/07/13 16:11:44 balewski Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -133,7 +133,7 @@ class St2011WMaker : public StMaker {
   TVector3 positionBsmd[mxBSmd][mxBStrips]; // vs. strip ID
  
   StEEmcDb        *mDbE; // access to EEMC database  
-  StSpinDbMaker *spinDb; // access spin information  
+  StSpinDbMaker   *spinDb; // access spin information  
   EEmcGeomSimple  *geomE;// access to EEMC geometry 
   EEmcSmdGeom     *geoSmd;// access to ESMD geometry
   TVector3 positionEtow[mxEtowSec*mxEtowSub][mxEtowEta];  
@@ -226,7 +226,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.5 2012/07/12 20:49:21 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.6 2012/07/13 16:11:44 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -237,6 +237,9 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.6  2012/07/13 16:11:44  balewski
+// minor clenup, prevent crash in Finish if zero input events, now it runs on M-C events as well
+//
 // Revision 1.5  2012/07/12 20:49:21  balewski
 // added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
 // removed dependence of spinSortingMaker from muDst

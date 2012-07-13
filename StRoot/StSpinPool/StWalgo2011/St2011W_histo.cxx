@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.6 2012/07/05 19:03:54 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.7 2012/07/13 16:11:44 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -112,7 +112,7 @@ St2011WMaker::initHistos(){
 
   //..... BTOW .....
 
-  hA[31]=h=new TH1F("muBmaxAdc","Barrel: BTOW maxADC in event, in-selection; max tower ADC",200,0,5500);
+  hA[31]=h=new TH1F("muBmaxAdc","Barrel: BTOW maxADC in event, in-selection; max tower ADC",200,0,4500);
   hA[32]=h=new TH1F("muBtotAdc","Barrel: BTOW sum of ADC>thres , in-selection;ADC sum/event", 120,0,12000.);
 
   hA[33]=h=new TH1F("muBclET","matched BTOW 2x2 cluster ET  ;cluster  ET (GeV)",100,0,100);
@@ -325,6 +325,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.7  2012/07/13 16:11:44  balewski
+// minor clenup, prevent crash in Finish if zero input events, now it runs on M-C events as well
+//
 // Revision 1.6  2012/07/05 19:03:54  stevens4
 // preset bin labels for TPC histos to preven merge warning
 //
