@@ -94,7 +94,8 @@ double getCos2L() const 		{return 1./(1.+_tanl*_tanl);}
 //		move point along helix  up to given radius in xy
   void moveToR(double Rxy); 
 StvNodePars &merge(double wt,StvNodePars &other);
-
+//		typical variations of parametrs
+StvFitPars  delta() const;
 
 operator const double  *() const {return P;}
 operator       double  *()       {return P;}
@@ -144,8 +145,7 @@ class StvFitErrs
 public:	
   enum eFitErrs {kNErrs=15};
   StvFitErrs(double hh=0,double hz=0,double zz=0);
-  void Reset();
-  void Set(const StvFitErrs &fr,double errFactor);
+  void Reset(double hz = 0);
   void Set(const THelixTrack *he,double hz);
   void Get(      THelixTrack *he)     const;
   void Get(const StvNodePars *np,  StvNodeErrs *ne)     const;
