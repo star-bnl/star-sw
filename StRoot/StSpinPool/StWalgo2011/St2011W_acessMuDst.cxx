@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.8 2012/07/12 20:49:21 balewski Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.9 2012/07/13 20:53:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -192,8 +192,8 @@ St2011WMaker::accessVertex(){ // return non-zero on abort
     if(wEve->l2bitET && rank>0) hA[11]->Fill(r.z());
     if(wEve->l2EbitET) hE[11]->Fill(r.z());
     nVer++; // count valid vertices
-    if(rank>0) nVerR++; //count vertices with rank>0
     if(fabs(r.z()) > par_vertexZ) continue;
+    if(rank>0) nVerR++; //count vertices with rank>0
     WeveVertex wv;
     wv.id=iv;
     wv.z=r.z();
@@ -689,6 +689,10 @@ St2011WMaker::accessBSMD(){
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.9  2012/07/13 20:53:16  stevens4
+//Add filling of empty events in W tree
+//Minor modifications to histograms
+//
 //Revision 1.8  2012/07/12 20:49:21  balewski
 //added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
 //removed dependence of spinSortingMaker from muDst

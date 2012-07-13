@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.6 2012/07/13 16:11:44 balewski Exp $
+// $Id: St2011WMaker.h,v 1.7 2012/07/13 20:53:16 stevens4 Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -106,8 +106,8 @@ class St2011WMaker : public StMaker {
   void setEleTrackCuts(int nfp, int hfr, float rin, float rout, float mpt) {
     par_nFitPts=nfp;  par_nHitFrac=hfr; 
     par_trackRin=rin;  par_trackRout=rout; par_trackPt=mpt;}
-  void setWbosonCuts(float a, float fr2,  float bal) {
-    par_highET=a; par_nearTotEtFrac=fr2;  par_ptBalance=bal;}
+  void setWbosonCuts(float a, float fr2,  float bal, float eta) {
+    par_highET=a; par_nearTotEtFrac=fr2;  par_ptBalance=bal;  par_leptonEta=eta;}
   void setEmcCuts(int ksp , float madc, float clet, float fr1, float dr){
     par_kSigPed=ksp; par_maxADC=madc; par_clustET=clet; 
     par_clustFrac24=fr1;}
@@ -142,6 +142,7 @@ class St2011WMaker : public StMaker {
   int   accessEndcapTrig();
   int   accessVertex();
   void  fillTowHit(bool vert);
+  void  fillNorm();
   int   accessTracks();
   int   accessBTOW();
   void  accessBSMD();
@@ -226,7 +227,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.6 2012/07/13 16:11:44 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.7 2012/07/13 20:53:16 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -237,6 +238,10 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.7  2012/07/13 20:53:16  stevens4
+// Add filling of empty events in W tree
+// Minor modifications to histograms
+//
 // Revision 1.6  2012/07/13 16:11:44  balewski
 // minor clenup, prevent crash in Finish if zero input events, now it runs on M-C events as well
 //
