@@ -40,7 +40,7 @@ static double JoinTwo(int nP1,const double *P1,const double *E1
 static void Test();
 protected:
       char         mBeg[1];
-      int          mKase; //0=fit to hit,1=refit,2=fit to vertex
+      int          mKase; 	//0=fit to hit,1=refit,2=fit to vertex
 const StvNodePars *mInPars;
 const StvFitErrs  *mInErrs;
 const StvNodePars *mJnPars;
@@ -54,6 +54,7 @@ const StHitPlane  *mHitPlane;
       StvFitErrs   mTkErrs;
       StvFitPars   mQQPars;
       StvFitErrs   mQQErrs;
+      StvFitPars   mDelta;
       double       mHitErrs[3];
       double	   mCos2L,mCosL,mSinL,mCosP,mSinP,mXi2,mDeltaL;
       double       mDcaT,mDcaP,mDcaL;

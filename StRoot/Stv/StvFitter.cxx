@@ -15,6 +15,8 @@ StvFitter *StvFitter::mgFitter=0;
 #define DIST(a,b)   ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 #define DDOT(a,b,c) ((a[0]-b[0])*c[0]+(a[1]-b[1])*c[1]+(a[2]-b[2])*c[2])
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
+static double kBigErr=1.;
+
 
 static inline double MyXi2(const double G[3],double dA,double dB)  
 {
@@ -35,10 +37,11 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                    ,      StvNodePars *otPars,       StvFitErrs *otErrs)
 {
   memset(mBeg,'@',mEnd-mBeg+1);
-  mKase = 0;
+  mKase = 0;		// track + hit case
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
   mJnPars =      0; mJnErrs =      0;
+  mDelta  = mInPars->delta();
 }
 //______________________________________________________________________________
 void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
@@ -46,10 +49,11 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                    ,      StvNodePars *otPars,       StvFitErrs *otErrs)
 {
   memset(mBeg,'@',mEnd-mBeg+1);
-  mKase = 1;
+  mKase = 1;		// join left & rite part of track
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
   mJnPars = jnPars; mJnErrs = jnErrs;
+  mDelta  = mJnPars->delta();
 }
 //______________________________________________________________________________
 void StvFitter::Prep()
@@ -83,7 +87,7 @@ double StvFitter::Xi2(const StvHit *hit)
   if (mHit == hit) return mXi2;
   mHit = hit;
   const float *errMtx=mHit->errMtx();
-  if (errMtx) mKase=2;
+  if (errMtx) mKase=2; 		//Hit is a vertex
 
   mHitPlane = mHit->detector();
 
@@ -137,7 +141,7 @@ double StvFitter::Xi2(const StvHit *hit)
   mDcaP-= 0.5*mTkPars._curv*dS*dS;
 
   double G[3] = {mInErrs->mHH,mInErrs->mHZ,mInErrs->mZZ};
-  if (mKase!=2) {for (int j=0;j<3;j++) {G[j]+=mHitErrs[j];}}
+  if (mKase==0) {for (int j=0;j<3;j++) {G[j]+=mHitErrs[j];}}
 
 //  (BB*dX*dX-2*BA*dX*dY+AAdY*dY)/det 
   mXi2 = MyXi2(G,mDcaP,mDcaL);
@@ -159,9 +163,9 @@ int StvFitter::Update()
 static int nCall=0; nCall++;
 
   switch (mKase) {
-    case 0: break;
-    case 1: return Jpdate();
-    case 2: return Vpdate();
+    case 0: break;		//Hit+Track
+    case 1: return Jpdate();	//Track join
+    case 2: return Vpdate();	//Vertex+track
   }
 		
   mTkErrs = *mInErrs;
@@ -177,32 +181,13 @@ static int nCall=0; nCall++;
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
 		        ,  myJrkPars.Arr(),mOtErrs->Arr());
   assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2+1));
+//   assert(fabs(myJrkPars.mH) <3.);
+//   assert(fabs(myJrkPars.mZ) <3.);
+
 
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
-  mOtErrs->SetHz(mOtPars->_hz);
-if (StvDebug::Level()) {
-if (StvDebug::Flag("BigPt")) {
-  double iRR,hRR,oRR,eRR; 
-  iRR = mInErrs->mHH;
-  hRR = mHitErrs[0];
-  oRR = mOtErrs->mHH;
-  eRR = 1./(1/iRR + 1/hRR);
-  int rxy = mInPars->getRxy();
-  printf("%3d Fitter iHH=%g hHH=%g oHH=%g (%g)\n",rxy,iRR,hRR,oRR,eRR);
-
-  iRR = mInErrs->mZZ;
-  hRR = mHitErrs[2];
-  oRR = mOtErrs->mZZ;
-  eRR = 1./(1/iRR + 1/hRR);
-  printf("              iZZ=%g hZZ=%g oZZ=%g (%g)\n",iRR,hRR,oRR,eRR);
-
-
-} }
-
-
-
-
+   mOtErrs->SetHz(mOtPars->_hz);
   return 0;
 }  
 //______________________________________________________________________________
@@ -233,7 +218,9 @@ static int nCall=0; nCall++;
 //______________________________________________________________________________
 int StvFitter::Jpdate()
 {
-  *mOtPars = *mJnPars; (*mOtPars)+=mQQPars;
+  *mOtPars = *mJnPars; 
+  *mOtPars+=  mQQPars;
+
 //  assert(!mOtPars->check());
   *mOtErrs =  mQQErrs;   
    mOtErrs->SetHz(mOtPars->_hz);
