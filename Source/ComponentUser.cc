@@ -8,7 +8,8 @@ ComponentUser::ComponentUser() :
   ComponentBase(), 
   hasField(false), field(0), 
   hasPotential(false), potential(0),
-  hasWeightingField(false), wfield(0) {
+  hasWeightingField(false), wfield(0),
+  hasWeightingPotential(false), wpot(0) {
   
   className = "ComponentUser";
 
@@ -103,6 +104,18 @@ ComponentUser::WeightingField(const double x, const double y, const double z,
 
 }
 
+double 
+ComponentUser::WeightingPotential(const double x, const double y, const double z,
+                                  const std::string label) {
+
+  double v = 0.;
+  if (hasWeightingPotential) {
+    wpot(x, y, z, v, label);
+  }
+  return v;
+
+}
+
 void 
 ComponentUser::SetElectricField(
     void (*f)(const double, const double, const double, double&, double&, double&)) {
@@ -145,15 +158,31 @@ ComponentUser::SetWeightingField(void (*f)(const double, const double, const dou
 
 }
 
+void 
+ComponentUser::SetWeightingPotential(
+    void (*f)(const double, const double, const double, double&, const std::string)) {
+
+  if (f == 0) {
+    std::cerr << className << "::SetWeightingPotential:\n";
+    std::cerr << "    Function pointer is null.\n";
+    return;
+  }
+  wpot = f;
+  hasWeightingPotential = true;
+
+}
+
 void
 ComponentUser::Reset() {
 
   field = 0; 
   potential = 0;
   wfield = 0;
+  wpot = 0;
   hasField = false;
   hasPotential = false;
   hasWeightingField = false;
+  hasWeightingPotential = false;
   ready = false;
   
 }

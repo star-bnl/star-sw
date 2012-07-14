@@ -138,6 +138,8 @@ class MediumMagboltz : public MediumGas {
     double fit3dQC2H6, fit3dEtaC2H6;
     double fit4pEtaCH4;
     double fit4pEtaC2H6;
+    double fit4sEtaC2H6;
+    double fitLineCut;
 
   private:
 

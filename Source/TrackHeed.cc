@@ -172,6 +172,13 @@ TrackHeed::NewTrack(
   const double lx = fabs(xmax - xmin);
   const double ly = fabs(ymax - ymin);
   const double lz = fabs(zmax - zmin);
+  if (debug) {
+    std::cout << className << "::NewTrack:\n";
+    std::cout << "    Bounding box dimensions:\n";
+    std::cout << "      x: " << lx << " cm\n";
+    std::cout << "      y: " << ly << " cm\n";
+    std::cout << "      z: " << lz << " cm\n";
+  }
   if (fabs(lx - lX) > Small || 
       fabs(ly - lY) > Small || 
       fabs(lz - lZ) > Small) {
@@ -179,9 +186,28 @@ TrackHeed::NewTrack(
     isChanged = true;
   }
   // Update the center of the bounding box.
-  cX = 0.5 * (xmin + xmax);
-  cY = 0.5 * (ymin + ymax);
-  cZ = 0.5 * (zmin + zmax);
+  if (std::isinf(xmin) || std::isinf(xmax)) {
+    cX = 0.;
+  } else {
+    cX = 0.5 * (xmin + xmax);
+  }
+  if (std::isinf(ymin) || std::isinf(ymax)) {
+    cY = 0.;
+  } else {
+    cY = 0.5 * (ymin + ymax);
+  }
+  if (std::isinf(zmin) || std::isinf(zmax)) {
+    cZ = 0.;
+  } else {
+    cZ = 0.5 * (zmin + zmax);
+  }
+  if (debug) {
+    std::cout << className << "::NewTrack:\n";
+    std::cout << "    Center of bounding box:\n";
+    std::cout << "      x: " << cX << " cm\n";
+    std::cout << "      y: " << cY << " cm\n";
+    std::cout << "      z: " << cZ << " cm\n";
+  }
   
   HeedInterface::sensor = sensor;
   
@@ -198,8 +224,8 @@ TrackHeed::NewTrack(
   }
 
   // Check if the medium has changed since the last call.
-  if (medium->GetName()        != mediumName || 
-      medium->GetMassDensity() != mediumDensity) {
+  if (medium->GetName() != mediumName || 
+      fabs(medium->GetMassDensity() - mediumDensity) > 1.e-9) {
     isChanged = true;
   }
   
@@ -426,8 +452,8 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
       continue;
     }
     // Make sure the medium has not changed.
-    if (medium->GetName()        != mediumName || 
-        medium->GetMassDensity() != mediumDensity || 
+    if (medium->GetName() != mediumName ||
+        fabs(medium->GetMassDensity() - mediumDensity) > 1.e-9 || 
         !medium->IsIonisable()) {
       // Delete this virtual photon and proceed with the next one.
       particle_bank.erase(node);
@@ -660,8 +686,8 @@ TrackHeed::TransportDeltaElectron(
   }
 
   // Check if the medium has changed since the last call.
-  if (medium->GetName()        != mediumName || 
-      medium->GetMassDensity() != mediumDensity) {
+  if (medium->GetName() != mediumName ||
+      fabs(medium->GetMassDensity() -  mediumDensity) > 1.e-9) {
     isChanged = true;
     update = true;
     ready = false;
@@ -781,8 +807,8 @@ TrackHeed::TransportPhoton(
   }
 
   // Check if the medium has changed since the last call.
-  if (medium->GetName()        != mediumName || 
-      medium->GetMassDensity() != mediumDensity) {
+  if (medium->GetName() != mediumName ||
+      fabs(medium->GetMassDensity() - mediumDensity) > 1.e-9) {
     isChanged = true;
     update = true;
     ready = false;

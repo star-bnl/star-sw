@@ -38,6 +38,8 @@ MediumMagboltz::MediumMagboltz() :
   fit3dQCO2 = fit3dQCH4 = fit3dQC2H6 = 1.;
   fit3dEtaCO2 = fit3dEtaCH4 = fit3dEtaC2H6 = 0.5;
   fit4pEtaCH4 = fit4pEtaC2H6 = 0.5;
+  fit4sEtaC2H6 = 0.5;
+  fitLineCut = 1000;
  
   className = "MediumMagboltz";
  
@@ -3746,8 +3748,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       if (level == "Ar_1S5") {
         // Rate constant from Chen and Setser, J. Phys. Chem. 95 (1991)
         const double kQ = 5.29e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        const double pPenning = pPenningWK;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3756,8 +3759,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_1S4") {
         // Rate constant from Velazco et al., J. Chem. Phys. 69 (1978)
         const double kQ = 6.2e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        const double pPenning = pPenningWK;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3766,8 +3770,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_1S3") {
         // Rate constant from Chen and Setser
         const double kQ = 6.53e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        const double pPenning = fit4sEtaC2H6;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3776,8 +3781,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_1S2") {
         // Rate constant from Velazco et al.
         const double kQ = 10.7e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        const double pPenning = pPenningWK;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -4252,8 +4258,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         // Branching ratio for ionization according to 
         // Jones et al., J. Phys. Chem. 89 (1985)
         // p = 0.61, p = 0.74 (agrees roughly with WK estimate)
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        const double pPenning = 0.61;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -4271,8 +4278,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         deexcitations[j].nChannels += 2;
       } else if (level == "Ar_1S3") {
         const double kQ = 5.6e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        const double pPenning = 0.61;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -4291,8 +4299,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P8") {
         // Rate constant from Sadeghi et al., J. Chem. Phys. 115 (2001)
         const double kQ = 5.0e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        const double pPenning = 0.3;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -4301,8 +4310,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P6") {
         // Rate constant from Sadeghi et al.
         const double kQ = 5.7e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        const double pPenning = 0.3;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -4311,8 +4321,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P5") {
         // Rate constant from Sadeghi et al.
         const double kQ = 6.0e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        const double pPenning = 0.3;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -4321,8 +4332,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P1") {
         // Rate constant from Sadeghi et al.
         const double kQ = 5.3e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        const double pPenning = 0.3;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -4333,8 +4345,9 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                  level == "Ar_2P3"  || level == "Ar_2P2") {
         // Average of rate constants given by Sadeghi et al.
         const double kQ = 5.5e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        const double pPenning = 0.3;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -4910,7 +4923,8 @@ MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
                                  (ElectronMass * deexcitations[i].energy);
     // Make an estimate for the width within which a photon can be 
     // absorbed by the line
-    const int nWidths = 1000;
+    // const int nWidths = 1000;
+    const double nWidths = fitLineCut;
     // Calculate the FWHM of the Voigt distribution according to the  
     // approximation formula given in 
     // Olivero and Longbothum, J. Quant. Spectr. Rad. Trans. 17, 233-236
