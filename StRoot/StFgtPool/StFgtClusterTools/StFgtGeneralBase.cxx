@@ -113,9 +113,11 @@ Int_t StFgtGeneralBase::Finish()
 	    hNumClustersR[iD*4+iQ]->Write();
 	  }
       }
-
+    cout <<"writing..." <<endl;
     f.Write();
+    cout <<"closing file" <<endl;
     f.Close();
+    cout <<"return" <<endl;
     return kStOk;
 }
 
@@ -665,6 +667,38 @@ void StFgtGeneralBase::checkNumPulses()
     }
 }
 
+Bool_t StFgtGeneralBase::arePointsMatched(vector<generalCluster>::iterator  c1, vector<generalCluster>::iterator  c2)
+{
+  Float_t tUncert1;
+  Float_t tCharge1;
+
+  Float_t tUncert2;
+  Float_t tCharge2;
+
+  if(c1->clusterCharge<20 || c2->clusterCharge<20)
+    return false;
+  if(c1->clusterCharge<c2->clusterCharge)
+    {
+      tCharge1=c2->clusterCharge;
+      tUncert1=c2->clusterChargeUncert;
+      tCharge2=c1->clusterCharge;
+      tUncert2=c1->clusterChargeUncert;
+    }
+  else
+    {
+      tCharge1=c1->clusterCharge;
+      tUncert1=c1->clusterChargeUncert;
+      tCharge2=c2->clusterCharge;
+      tUncert2=c2->clusterChargeUncert;
+    }
+
+
+  if(((tCharge1/tCharge2) <chargeMatchCut) ||((tCharge1-tUncert1)/(tCharge2+tUncert2))<chargeMatchCut)
+    return true;
+  else 
+    return false;
+}
+
 void StFgtGeneralBase::checkMatches()
 {
   //  cout <<"checkmatches.." <<endl;
@@ -689,23 +723,12 @@ void StFgtGeneralBase::checkMatches()
 	      //	      if(it2->hasMatch)//can have two matches?
 	      //		continue;
 
-	      if(it->clusterCharge>it2->clusterCharge)
+	      if(arePointsMatched(it,it2))
 		{
-		  if(((it->clusterCharge+it->clusterChargeUncert)/it2->clusterCharge)<chargeMatchCut)
-		    {
-		      it->hasMatch=true;
-		      it2->hasMatch=true;
-		    }
+		  it->hasMatch=true;
+		  it2->hasMatch=true;
 		}
-	      else
-		{
-		  if(((it2->clusterCharge+it->clusterChargeUncert)/it->clusterCharge)<chargeMatchCut)
-		    {
-		      it->hasMatch=true;
-		      it2->hasMatch=true;
 
-		    }
-		}
 	    }
 
 	}

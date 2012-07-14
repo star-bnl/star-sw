@@ -102,6 +102,7 @@ class StFgtGeneralBase : public StMaker {
     m_effDisk=disk;
   }
  protected:
+  Bool_t arePointsMatched(vector<generalCluster>::iterator  c1, vector<generalCluster>::iterator  c2);
 enum evStatCodes
   {
     numEvents,

@@ -14,6 +14,7 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
 
+
 #include <TH2D.h>
 #include <TROOT.h>
 #include <TStyle.h>
@@ -61,6 +62,37 @@
 #define NUM_EFF_BIN 30
 
 
+Bool_t StFgtGenAVEMaker::fitTheStrip(generalStrip* pStrip,float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin)
+{
+  if(printCounter>5000)
+    return true;
+  char buffer[100];
+  sprintf(buffer,"d%d_quad%d",iD,iq);
+  pulsePictureFile->cd();
+  pulsePictureFile->cd(buffer);
+  sprintf(buffer,"apv%d",apvBin);
+  gDirectory->cd(buffer);
+  for(Int_t tb=0;tb<7;tb++)
+    {
+      mHistPtr->SetBinContent(tb+1,0);
+      mHistPtr->SetBinError(tb+1,10000);
+      mHistPtr->SetBinContent(tb+1, pStrip->adc[tb]);
+      cout <<"set tb " << tb << " to : " << pStrip->adc[tb]<<" err: "<< pStrip->pedErr<<endl;
+      mHistPtr->SetBinError(tb+1,pStrip->pedErr);
+    }
+
+  //  mHistPtr->Fit(mPulseShapePtr);
+  (*amp)=mPulseShapePtr->GetParameter(0);
+  (*t0)=mPulseShapePtr->GetParameter(4);
+  (*chi2Ndf)=mPulseShapePtr->GetChisquare()/mPulseShapePtr->GetNDF();
+  sprintf(buffer,"pulse histo_APV%d_ev%d",apvBin,evtNr);
+  cout <<"histo name: "<< buffer <<endl;
+  TH1F* tmpPulseHisto=(TH1F*)mHistPtr->Clone(buffer);
+  tmpPulseHisto->Write();
+  pulsePictureFile->cd();
+  myRootFile->cd();
+  return true;
+}
 
 
 template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int numBin, int first, int last)
@@ -190,6 +222,8 @@ Double_t StFgtGenAVEMaker::findClosestStrip(Char_t layer, double ord, Int_t iD, 
   Double_t dist=99999;
   for(vector<generalCluster>::iterator it=hitVec.begin();it!=hitVec.end();it++)
     {
+      if(useChargeMatch && !it->hasMatch)
+	continue;
       if(it->layer!=layer)
 	continue;
       Double_t mDist=9999;
@@ -211,6 +245,8 @@ Double_t StFgtGenAVEMaker::findClosestStrip(Char_t layer, double ord, Int_t iD, 
 ///looking at m_effDisk and only fills then. Assuming that for the other discs you use the points from the found tracks
 void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
+
+  cout <<"filling strip histos " <<endl;
   bool partOfClusterP=false;
   bool partOfClusterR=false;
   Double_t clusterChargeR=-9999;
@@ -433,7 +469,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	}
     }
   //fill histos
-  if(maxPhiCharge>1000)
+  if(maxPhiCharge>200)
     {
       firstTbSigCloseClusterP[iD*4+iq]->Fill(firstTbSigP);
       maxAdcCloseClusterP[iD*4+iq]->Fill(maxPAdc);
@@ -469,7 +505,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	}
     }
   
-  if(maxRCharge>1000)
+  if(maxRCharge>200)
     {
       firstTbSigCloseClusterR[iD*4+iq]->Fill(firstTbSigR);
       maxTbCloseClusterR[iD*4+iq]->Fill(maxRTb);
@@ -504,7 +540,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
     }
   
   
-  if(maxRCharge> 1000 && maxPhiCharge>1000 && iD==m_effDisk)// && (float)pStrips[iD*4+iq][maxRInd].charge)
+  if(maxRCharge> 200 && maxPhiCharge>200 && iD==m_effDisk)// && (float)pStrips[iD*4+iq][maxRInd].charge)
     {
       StFgtGeom::getPhysicalCoordinate((float)pStrips[iD*4+iq][maxRInd].geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
       //	    if(ordinate>20)
@@ -512,12 +548,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	chargeCorrMaxStrip->Fill(maxRCharge,maxPhiCharge);
 	chargeCorrMaxAdc->Fill(maxRAdc,maxPAdc);
 	
-	if(maxRInd>0 && maxPInd>0 && maxRInd< pStrips[iD*4+iq].size()&& maxPInd < pStrips[iD*4+iq].size())
-	  {
-	    float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
-	    float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
-	    chargeCorrSum3->Fill(intRCharge,intPCharge);
-	  }
+
       }
     }
   //	  if(iD==2 && iq==1 && (float)pStrips[iD*4+iq][maxRInd].pedErr>0)
@@ -529,7 +560,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
       chargeCorrInEffDisk->Fill(clusterChargeR,clusterChargeP);
       StFgtGeom::getPhysicalCoordinate((float)pStrips[iD*4+iq][maxRInd].geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
       //	    if(ordinate>20)
-      {
+      {///this is what is plotted lateron
 	chargeCorr[iD*4+iq]->Fill(clusterChargeR,clusterChargeP);
       }
       //basically only here we fill with the estimated cluster, for the other disks we fill with the cluster on the track
@@ -543,6 +574,15 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
   
   if(partOfClusterP)
     {
+      cout <<" part of p cluster " << endl;
+	    float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
+	    float chi2Ndf;
+	    float amp;
+	    float t0;
+	    ///do the fitting...
+	    fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc);
+	    APVfitChi2P[iD*40+APVmaxPAdc]->Fill(chi2Ndf);
+
       firstTbSigTrackClusterP[iD*4+iq]->Fill(firstTbSigP);
       maxAdcTrackClusterP[iD*4+iq]->Fill(maxPAdc);
       maxSigTrackClusterP[iD*4+iq]->Fill(maxSigAdcP);
@@ -566,6 +606,15 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
     }
   if(partOfClusterR)
     {
+      cout <<" part of R cluster " << endl;
+	    float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
+	    float chi2Ndf;
+	    float amp;
+	    float t0;
+	    ///do the fitting...
+	    fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc);
+	    APVfitChi2R[iD*40+APVmaxRAdc]->Fill(chi2Ndf);
+
       firstTbSigTrackClusterR[iD*4+iq]->Fill(firstTbSigR);
       maxTbTrackClusterR[iD*4+iq]->Fill(maxRTb);
       maxAdcTrackClusterR[iD*4+iq]->Fill(maxRAdc);
@@ -689,6 +738,8 @@ Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t i
 	}
       return false;
 }
+
+//if required only return clusters with matches...
 pair<Double_t,Double_t> StFgtGenAVEMaker::findCluChargeSize(Int_t iD,Char_t layer, Double_t ordinate)
 {
   if(iD<0 || iD >5)
@@ -717,7 +768,7 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::findCluChargeSize(Int_t iD,Char_t laye
 	    ord=ord-MY_PI;
 	}
 
-      if(fabs(ordinate-ord)<minDist)
+      if((fabs(ordinate-ord)<minDist) && (!useChargeMatch || it->hasMatch))
 	{
 	  charge=it->clusterCharge;
 	  cluSize=it->clusterSize;
@@ -739,6 +790,10 @@ Double_t StFgtGenAVEMaker::findClosestPoint(double xE, double yE, Int_t iD)
     {
       for(vector<generalCluster>::iterator it2=hitVec.begin();it2!=hitVec.end();it2++)
 	{
+	  //
+	  if(useChargeMatch && !arePointsMatched(it,it2))
+	    continue;
+
 	  if(it->layer==it2->layer)
 	    continue;
 	  Float_t r=it->posR;
@@ -1462,7 +1517,8 @@ Int_t StFgtGenAVEMaker::Make()
       vector<generalCluster>::iterator tHit=tHitVec.begin();
       for(;tHit!=tHitVec.end();tHit++)
 	{
-	  if(useChargeMatch && tHit->hasMatch)
+
+	  if(!useChargeMatch || tHit->hasMatch)
 	    {
 	      if(tHit->quad<3)
 		{
@@ -1930,7 +1986,15 @@ Int_t StFgtGenAVEMaker::Make()
 StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0)
 {
   cout <<"AVE constructor!!" <<endl;
+  int numTb=7;
+  mPulseShapePtr=new TF1("pulseShape","[0]*(x>[4])*(x-[4])**[1]*exp(-[2]*(x-[4]))+[3]",0,numTb);
+  mPulseShapePtr->SetParName( 0, "C" );
+  mPulseShapePtr->SetParName( 1, "a" );
+  mPulseShapePtr->SetParName( 2, "b" );
+  mPulseShapePtr->SetParName( 3, "ped" );
+  mPulseShapePtr->SetParName( 4, "t0" );
 
+  mHistPtr=new TH1F("tempFitHist","tempFitHist",numTb,0,numTb);
 };
 
 StFgtGenAVEMaker::~StFgtGenAVEMaker()
@@ -2119,6 +2183,13 @@ Int_t StFgtGenAVEMaker::Finish(){
     {
       for(int binAPVi=0;binAPVi<40;binAPVi++)
 	{
+	  APVfitChi2P[iD*40+binAPVi]->Write();
+	  APVfitChi2R[iD*40+binAPVi]->Write();
+	  APVfitAmpP[iD*40+binAPVi]->Write();
+	  APVfitAmpR[iD*40+binAPVi]->Write();
+	  APVfitT0P[iD*40+binAPVi]->Write();
+	  APVfitT0R[iD*40+binAPVi]->Write();
+
           APVfirstTbSigCloseClusterP[iD*40+binAPVi]->Write();
           APVmaxAdcCloseClusterP[iD*40+binAPVi]->Write();
           APVmaxTbCloseClusterP[iD*40+binAPVi]->Write();
@@ -2356,6 +2427,8 @@ Int_t StFgtGenAVEMaker::Finish(){
   f1->Close();
   myRootFile->Write();
   myRootFile->Close();
+
+  pulsePictureFile->Write();
   cout <<"returning after finish" <<endl;
   return ierr;
 };
@@ -2372,13 +2445,30 @@ Int_t StFgtGenAVEMaker::Init(){
   cluNotFoundTxt->open("clusNotFound.txt");
   cout <<"AVE!!" <<endl;
   myRootFile=new TFile("clusterEff.root","RECREATE");
+  pulsePictureFile=new TFile("pulsePics.root","RECREATE");
+
+  char buffer[100];
+  for(int i=0;i<6;i++){
+    for(int iq=0;iq<4;iq++){
+      sprintf(buffer,"d%d_quad%d",i,iq);
+      pulsePictureFile->mkdir(buffer);
+      pulsePictureFile->cd(buffer);
+      for(int iA=0;iA<24;iA++)
+	{
+	  sprintf(buffer,"apv%d",iA);
+	 gDirectory->mkdir(buffer);
+	}
+      pulsePictureFile->cd();
+
+    }}
+  myRootFile->cd();
   //  outTxtFile=new ofstream;
   //  outTxtFile->open("clusters.txt");
 
 
   Int_t ierr = kStOk;
 
-  char buffer[100];
+
 
 
   chargeRatioInEffDisk=new TH2D("chargeRatioInEffDisk","chargeRatioInEffDisk",NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
@@ -2468,6 +2558,15 @@ Int_t StFgtGenAVEMaker::Init(){
   createPlots(&secondToLastRatioTrackClusterP,kFgtNumDiscs*4,"secondToLastRatioTrackClusterP",100,0,5);
 
   createPlots(&secondToLastRatioTrackClusterR,kFgtNumDiscs*4,"secondToLastRatioTrackClusterR",100,0,5);
+
+
+
+  createPlots(&APVfitChi2P,kFgtNumDiscs*40,"APVfitChi2P",100,0,30);
+  createPlots(&APVfitChi2R,kFgtNumDiscs*40,"APVfitChi2P",100,0,30);
+  createPlots(&APVfitAmpP,kFgtNumDiscs*40,"APVfitAmpP",100,0,30);
+  createPlots(&APVfitAmpR,kFgtNumDiscs*40,"APVfitAmpP",100,0,30);
+  createPlots(&APVfitT0P,kFgtNumDiscs*40,"APVfitT0P",100,0,30);
+  createPlots(&APVfitT0R,kFgtNumDiscs*40,"APVfitT0P",100,0,30);
 
   createPlots(&APVfirstTbSigCloseClusterP,kFgtNumDiscs*40,"APVfirstTbSigCloseClusterP",100,0,20);
   createPlots(&APVfirstTbSigCloseClusterR,kFgtNumDiscs*40,"APVfirstTbSigCloseClusterR",100,0,20);
