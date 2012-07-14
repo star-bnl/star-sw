@@ -102,7 +102,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
   //  StFgtAVEfficiencyMaker* effMkr=new StFgtAVEfficiencyMaker("FgtAVEfficiencyMaker");
   //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
   fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
-  fgtAVEffMkr->setChargeMatchCut(1.5);
+  fgtAVEffMkr->setChargeMatchCut(2.0);
   fgtAVEffMkr->setUseChargeMatch();
   fgtAVEffMkr->SetEffDisk(effDisk);
   //   fgtGenPlotter = new StFgtGenPlotter( "genPlotter" );

@@ -9,6 +9,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TFile.h>
+#include <TF1.h>
 #include "StFgtGeneralBase.h"
 //#include "StRoot/StEvent/StFgtCollection.h"
 
@@ -99,7 +100,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    void setUseChargeMatch(Bool_t use=true);
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.14 2012/07/12 15:02:23 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.15 2012/07/14 01:14:09 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
@@ -123,12 +124,15 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    void fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t iq);
    Double_t findClosestStrip(Char_t layer, double ord, Int_t iD, Int_t iQ);
    // for knowing what & how to plot
-
+   Bool_t fitTheStrip(generalStrip* pStrip,float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin);
 
    // threshold, in units of # sigma above average
    Float_t mPedThres;
    //   Double_t getRPhiRatio(StSPtrVecFgtHitConstIterator hitIterBegin, StSPtrVecFgtHitConstIterator hitIterEnd);
    //   Double_t getRPhiRatio();
+
+   TF1* mPulseShapePtr;
+   TH1F* mHistPtr;
    TH2D** radioPlotsEff;
    TH2D** radioPlotsNonEff;
 
@@ -197,6 +201,18 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
 
    TH1F** secondToLastRatioTrackClusterP;
    TH1F** secondToLastRatioTrackClusterR;
+
+   TH1F** APVfitChi2P;
+   TH1F** APVfitChi2R;
+
+   TH1F** APVfitAmpP;
+   TH1F** APVfitAmpR;
+
+   TH1F** APVfitT0P;
+   TH1F** APVfitT0R;
+
+
+
 
    TH1F** APVfirstTbSigCloseClusterP;
    TH1F** APVfirstTbSigCloseClusterR;
@@ -267,6 +283,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    TH1D* hMx;
    TH1D* hMy;
 
+   TFile* pulsePictureFile;
    TFile* myRootFile;
    int runningEvtNr;
    int hitCounter;
