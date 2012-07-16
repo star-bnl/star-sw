@@ -16,6 +16,7 @@ class TH2F;
 #include "Board.hh"
 #include "Crate.hh"
 #include "bits.hh"
+#include "TDatime.h"
 #include "StMaker.h"
 
 class StFmsTriggerMaker : public StMaker {
@@ -32,7 +33,7 @@ public:
   void useStEvent() { mUseStEvent = 1; }
 
   //
-  // QT and DSM algorithms and cabling:
+  // QT and DSM algorithms and cabling for 2011:
   //
   // http://www.star.bnl.gov/public/trg/TSL/Software/FMS_2011.pdf
   // http://www.star.bnl.gov/public/trg/TSL/Schematics/FMS_Crate_Cable_Map.pdf
@@ -52,6 +53,14 @@ public:
   int FmsJetPatchTh2() const { return btest(fp201.output,10); }
   int FmsDijet() const { return btest(fp201.output,11); }
   int FPE() const { return btest(fp201.output,14); }
+
+  //
+  // Additions for 2012:
+  //
+  // http://www.star.bnl.gov/public/trg/TSL/Software/FMS.pdf
+  //
+  int FmsFPEcombo1() const { return btest(fp201.output,12); }
+  int FmsFPEcombo2() const { return btest(fp201.output,13); }
 
 private:
   int loadRegisters(int runNumber);
@@ -79,6 +88,9 @@ private:
 
   void fillQtHistogram(const Crate& qtcrate, TH2F* hqtadc);
   void fillQtHistograms();
+
+  // DB time stamp
+  TDatime mDBTime;
 
   // Input mode
   int mUseMuDst;

@@ -21,6 +21,10 @@
 #include "fms_fm101_2011_a.hh"
 #include "fms_fm102_2011_a.hh"
 #include "l1_fp201_2011_a.hh"
+#include "fms_fm001_2012_a.hh"
+#include "fms_fm101_2012_a.hh"
+#include "fms_fm102_2012_a.hh"
+#include "l1_fp201_2012_b.hh"
 #include "StFmsTriggerMaker.h"
 
 using namespace std;
@@ -144,6 +148,7 @@ int StFmsTriggerMaker::Init()
 
 int StFmsTriggerMaker::InitRun(int runNumber)
 {
+  mDBTime = GetDBTime();
   return loadRegisters(runNumber);
 }
 
@@ -151,29 +156,20 @@ int StFmsTriggerMaker::Make()
 {
   if (mUseMuDst) MakeMuDst();
   if (mUseStEvent) MakeStEvent();
-
-  int year = GetDBTime().GetYear();
-  switch (year) {
-  case 2011:
-    if (Debug()) fillQtHistograms();
-    runFpeQtLayer();
-    runFmsQtLayer();
-    writeFpeQtLayerToFpeLayer1(mix);
-    writeFmsQtLayerToFmsLayer0(fms);
-    runFmsLayer0();
-    writeFmsLayer0ToFmsLayer1(fms);
-    runFpeLayer1();
-    runFmsLayer1();
-    writeFpeLayer1ToFpdLayer2(l1);
-    writeFmsLayer1ToFpdLayer2(l1);
-    runFpdLayer2();
-    LOG_INFO << Form("FP201: Fms-HT-th0=%d Fms-HT-th1=%d FmsSml-Cluster-th0=%d FmsSml-Cluster-th1=%d FmsSml-Cluster-th2=%d FmsLrg-Cluster-th0=%d FmsLrg-Cluster-th1=%d FmsLrg-Cluster-th2=%d Fms-JP-th0=%d Fms-JP-th1=%d Fms-JP-th2=%d Fms-dijet=%d FPE=%d",FmsHighTowerTh0(),FmsHighTowerTh1(),FmsSmallClusterTh0(),FmsSmallClusterTh1(),FmsSmallClusterTh2(),FmsLargeClusterTh0(),FmsLargeClusterTh1(),FmsLargeClusterTh2(),FmsJetPatchTh0(),FmsJetPatchTh1(),FmsJetPatchTh2(),FmsDijet(),FPE()) << endm;
+  if (Debug()) fillQtHistograms();
+  runFpeQtLayer();
+  runFmsQtLayer();
+  writeFpeQtLayerToFpeLayer1(mix);
+  writeFmsQtLayerToFmsLayer0(fms);
+  runFmsLayer0();
+  writeFmsLayer0ToFmsLayer1(fms);
+  runFpeLayer1();
+  runFmsLayer1();
+  writeFpeLayer1ToFpdLayer2(l1);
+  writeFmsLayer1ToFpdLayer2(l1);
+  runFpdLayer2();
+  LOG_INFO << Form("FP201: Fms-HT-th0=%d Fms-HT-th1=%d FmsSml-Cluster-th0=%d FmsSml-Cluster-th1=%d FmsSml-Cluster-th2=%d FmsLrg-Cluster-th0=%d FmsLrg-Cluster-th1=%d FmsLrg-Cluster-th2=%d Fms-JP-th0=%d Fms-JP-th1=%d Fms-JP-th2=%d Fms-dijet=%d FPE=%d",FmsHighTowerTh0(),FmsHighTowerTh1(),FmsSmallClusterTh0(),FmsSmallClusterTh1(),FmsSmallClusterTh2(),FmsLargeClusterTh0(),FmsLargeClusterTh1(),FmsLargeClusterTh2(),FmsJetPatchTh0(),FmsJetPatchTh1(),FmsJetPatchTh2(),FmsDijet(),FPE()) << endm;
     //LOG_INFO << Form("FP201: 0x%04x (data) / 0x%04x (simu)",StMuDst::event()->l0Trigger().lastDsmArray(5),FP201output()) << endm;
-    break;
-  default:
-    LOG_ERROR << "Year " << year << " not implemented" << endm;
-    return kStErr;
-  }
   return kStOk;
 }
 
@@ -286,10 +282,20 @@ void StFmsTriggerMaker::runFmsQtLayer()
 
 void StFmsTriggerMaker::runFmsLayer0()
 {
-  fms_fm001_2011_a(fm001);
-  fms_fm001_2011_a(fm002);
-  fms_fm001_2011_a(fm003);
-  fms_fm001_2011_a(fm004);
+  switch (mDBTime.GetYear()) {
+  case 2011:
+    fms_fm001_2011_a(fm001);
+    fms_fm001_2011_a(fm002);
+    fms_fm001_2011_a(fm003);
+    fms_fm001_2011_a(fm004);
+    break;
+  case 2012:
+    fms_fm001_2012_a(fm001);
+    fms_fm001_2012_a(fm002);
+    fms_fm001_2012_a(fm003);
+    fms_fm001_2012_a(fm004);
+    break;
+  }
 
   fms_fm005_2011_a(fm005);
   fms_fm005_2011_a(fm007);
@@ -309,14 +315,26 @@ void StFmsTriggerMaker::runFpeLayer1()
 
 void StFmsTriggerMaker::runFmsLayer1()
 {
-  fms_fm101_2011_a(fm101);
-  fms_fm102_2011_a(fm102);
-  fms_fm102_2011_a(fm103);
+  switch (mDBTime.GetYear()) {
+  case 2011:
+    fms_fm101_2011_a(fm101);
+    fms_fm102_2011_a(fm102);
+    fms_fm102_2011_a(fm103);
+    break;
+  case 2012:
+    fms_fm101_2012_a(fm101);
+    fms_fm102_2012_a(fm102);
+    fms_fm102_2012_a(fm103);
+    break;
+  }
 }
 
 void StFmsTriggerMaker::runFpdLayer2()
 {
-  l1_fp201_2011_a(fp201);
+  switch (mDBTime.GetYear()) {
+  case 2011: l1_fp201_2011_a(fp201); break;
+  case 2012: l1_fp201_2012_b(fp201); break;
+  }
 }
 
 void StFmsTriggerMaker::writeFpeQtLayerToFpeLayer1(Crate& sim)
