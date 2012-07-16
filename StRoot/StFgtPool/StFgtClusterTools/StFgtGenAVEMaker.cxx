@@ -62,22 +62,32 @@
 #define NUM_EFF_BIN 30
 
 
-Bool_t StFgtGenAVEMaker::fitTheStrip(generalStrip* pStrip,float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin)
+Bool_t StFgtGenAVEMaker::fitTheStrip(generalStrip* pStrip, generalStrip* pStripOtherLayer,float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin, Char_t layer)
 {
-  if(printCounter>5000)
+  if(fitCounter>20000)
     return true;
+  fitCounter++;
   char buffer[100];
   sprintf(buffer,"d%d_quad%d",iD,iq);
   pulsePictureFile->cd();
   pulsePictureFile->cd(buffer);
-  sprintf(buffer,"apv%d",apvBin);
+  if(layer=='R')
+    sprintf(buffer,"apv%d_R",apvBin);
+  else
+    sprintf(buffer,"apv%d_P",apvBin);
+  //  cout <<"changing to " << buffer <<endl;
   gDirectory->cd(buffer);
+  Int_t minAdcCount=100000;
+  Int_t maxAdcCount=0;
   for(Int_t tb=0;tb<7;tb++)
     {
       mHistPtr->SetBinContent(tb+1,0);
       mHistPtr->SetBinError(tb+1,10000);
       mHistPtr->SetBinContent(tb+1, pStrip->adc[tb]);
-      cout <<"set tb " << tb << " to : " << pStrip->adc[tb]<<" err: "<< pStrip->pedErr<<endl;
+      if(pStrip->adc[tb]<minAdcCount)
+	minAdcCount=pStrip->adc[tb]-pStrip->pedErr;
+      if(pStrip->adc[tb]>maxAdcCount)
+	maxAdcCount=pStrip->adc[tb]+pStrip->pedErr;
       mHistPtr->SetBinError(tb+1,pStrip->pedErr);
     }
 
@@ -85,10 +95,36 @@ Bool_t StFgtGenAVEMaker::fitTheStrip(generalStrip* pStrip,float* amp, float* t0,
   (*amp)=mPulseShapePtr->GetParameter(0);
   (*t0)=mPulseShapePtr->GetParameter(4);
   (*chi2Ndf)=mPulseShapePtr->GetChisquare()/mPulseShapePtr->GetNDF();
-  sprintf(buffer,"pulse histo_APV%d_ev%d",apvBin,evtNr);
+  sprintf(buffer,"pulse histo_D%d_Q%d_APV%d_ev%d",iD,iq,apvBin,evtNr);
   cout <<"histo name: "<< buffer <<endl;
   TH1F* tmpPulseHisto=(TH1F*)mHistPtr->Clone(buffer);
   tmpPulseHisto->Write();
+  if(pStripOtherLayer!=0)
+    {
+      mCanvas->cd();
+      sprintf(buffer,"tmpCnvsD%d_Q%d_APV%d_ev%d",iD,iq,apvBin,evtNr);
+      TCanvas* tmpCnv=(TCanvas*)mCanvas->Clone(buffer);
+      tmpCnv->SetTitle(buffer);
+      tmpCnv->SetName(buffer);
+      tmpCnv->cd();
+
+      for(Int_t tb=0;tb<7;tb++)
+	{
+	  mHistPtr2->SetBinContent(tb+1,0);
+	  mHistPtr2->SetBinError(tb+1,10000);
+	  mHistPtr2->SetBinContent(tb+1, pStripOtherLayer->adc[tb]);
+	  mHistPtr2->SetBinError(tb+1,pStripOtherLayer->pedErr);
+	  if(pStripOtherLayer->adc[tb]<minAdcCount)
+	    minAdcCount=pStripOtherLayer->adc[tb]-pStripOtherLayer->pedErr;
+	  if(pStripOtherLayer->adc[tb]>maxAdcCount)
+	    maxAdcCount=pStripOtherLayer->adc[tb]+pStripOtherLayer->pedErr;
+	}
+      tmpPulseHisto->GetYaxis()->SetRangeUser(minAdcCount-10,maxAdcCount+10);
+      mHistPtr2->GetYaxis()->SetRangeUser(minAdcCount-10,maxAdcCount+10);
+      tmpPulseHisto->Draw();
+      mHistPtr2->Draw("SAME");
+      tmpCnv->Write();
+  }
   pulsePictureFile->cd();
   myRootFile->cd();
   return true;
@@ -580,7 +616,10 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	    float amp;
 	    float t0;
 	    ///do the fitting...
-	    fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc);
+	    if(partOfClusterR)
+	      fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),&(pStrips[iD*4+iq][maxRInd]),&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
+	    else
+	      fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),0,&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
 	    APVfitChi2P[iD*40+APVmaxPAdc]->Fill(chi2Ndf);
 
       firstTbSigTrackClusterP[iD*4+iq]->Fill(firstTbSigP);
@@ -612,7 +651,10 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
 	    float amp;
 	    float t0;
 	    ///do the fitting...
-	    fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc);
+	    if(partOfClusterP)
+	      fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),&pStrips[iD*4+iq][maxPInd],&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
+	    else
+	      fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),0,&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
 	    APVfitChi2R[iD*40+APVmaxRAdc]->Fill(chi2Ndf);
 
       firstTbSigTrackClusterR[iD*4+iq]->Fill(firstTbSigR);
@@ -1983,7 +2025,7 @@ Int_t StFgtGenAVEMaker::Make()
 
 };
  
-StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0)
+StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0),fitCounter(0)
 {
   cout <<"AVE constructor!!" <<endl;
   int numTb=7;
@@ -1995,6 +2037,11 @@ StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name 
   mPulseShapePtr->SetParName( 4, "t0" );
 
   mHistPtr=new TH1F("tempFitHist","tempFitHist",numTb,0,numTb);
+  mHistPtr2=new TH1F("tempFitHist2","tempFitHist2",numTb,0,numTb);
+  mHistPtr2->SetLineColor(kBlue);
+  mHistPtr2->SetFillColor(kBlue);
+  mHistPtr2->SetMarkerColor(kBlue);
+  mCanvas=new TCanvas("tmpCnvs","tmpCnvs");
 };
 
 StFgtGenAVEMaker::~StFgtGenAVEMaker()
@@ -2455,8 +2502,10 @@ Int_t StFgtGenAVEMaker::Init(){
       pulsePictureFile->cd(buffer);
       for(int iA=0;iA<24;iA++)
 	{
-	  sprintf(buffer,"apv%d",iA);
-	 gDirectory->mkdir(buffer);
+	  sprintf(buffer,"apv%d_R",iA);
+	  gDirectory->mkdir(buffer);
+	  sprintf(buffer,"apv%d_P",iA);
+	  gDirectory->mkdir(buffer);
 	}
       pulsePictureFile->cd();
 

@@ -100,12 +100,13 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    void setUseChargeMatch(Bool_t use=true);
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.15 2012/07/14 01:14:09 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.16 2012/07/16 16:45:38 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
    Bool_t useChargeMatch;
    Int_t printCounter;
+   Int_t fitCounter;
    ofstream* outTxtFile;
    ofstream* cluNotFoundTxt;
    Short_t getQuadFromCoo(Double_t x, Double_t y);
@@ -124,7 +125,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    void fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t iq);
    Double_t findClosestStrip(Char_t layer, double ord, Int_t iD, Int_t iQ);
    // for knowing what & how to plot
-   Bool_t fitTheStrip(generalStrip* pStrip,float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin);
+   Bool_t fitTheStrip(generalStrip* pStrip, generalStrip* pStripOtherLayer, float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin, Char_t layer);
 
    // threshold, in units of # sigma above average
    Float_t mPedThres;
@@ -133,6 +134,8 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
 
    TF1* mPulseShapePtr;
    TH1F* mHistPtr;
+   TH1F* mHistPtr2;
+   TCanvas* mCanvas;
    TH2D** radioPlotsEff;
    TH2D** radioPlotsNonEff;
 
