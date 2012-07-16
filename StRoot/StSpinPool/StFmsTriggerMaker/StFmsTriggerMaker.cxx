@@ -178,8 +178,9 @@ int StFmsTriggerMaker::MakeMuDst()
   StMuFmsCollection* fms = StMuDst::muFmsCollection();
   if (fms) {
     for (size_t i = 0; i < fms->numberOfHits(); ++i) writeQtCrate(fms->getHit(i));
+    return kStOk;
   }
-  return kStOk;
+  return kStErr;
 }
 
 int StFmsTriggerMaker::MakeStEvent()
@@ -188,8 +189,9 @@ int StFmsTriggerMaker::MakeStEvent()
   if (event && event->fmsCollection()) {
     const StSPtrVecFmsHit& hits = event->fmsCollection()->hits();
     for (size_t i = 0; i < hits.size(); ++i) writeQtCrate(hits[i]);
+    return kStOk;
   }
-  return kStOk;
+  return kStErr;
 }
 
 template<class T>
