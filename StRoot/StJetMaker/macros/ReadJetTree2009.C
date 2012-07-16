@@ -1,13 +1,20 @@
-#include <map>
+//
+// Pibero Djawotho <pibero@tamu.edu>
+// Texas A&M
+// 16 July 2012
+//
+// Sample jet tree reader
+//
 
 void ReadJetTree2009(int nentries = 1e6,
-		     const char* jetfile  = "st_physics_10143008_raw_6020001.jets.root",
-		     const char* skimfile = "st_physics_10143008_raw_6020001.skim.root")
+		     const char* jetfile  = "jets.root",
+		     const char* skimfile = "skim.root",
+		     const char* outfile  = "out.root")
 {
   cout << "nentries = " << nentries << endl;
   cout << "jetfile  = " << jetfile  << endl;
   cout << "skimfile = " << skimfile << endl;
-  cout << endl;
+  cout << "outfile  = " << outfile  << endl;
 
   // Load libraries
   gSystem->Load("StJetEvent");
@@ -21,116 +28,72 @@ void ReadJetTree2009(int nentries = 1e6,
   skimChain->Add(skimfile);
 
   // Set jet buffer
-  StJetEvent* jetEvent = 0;
-  jetChain->SetBranchAddress("ConeJets12",&jetEvent);
+  StJetEvent* jets = 0;
+  jetChain->SetBranchAddress("ConeJets12",&jets);
 
   // Set skim buffer
-  StJetSkimEvent* skimEvent = 0;
-  skimChain->SetBranchAddress("skimEventBranch",&skimEvent);
+  StJetSkimEvent* skim = 0;
+  skimChain->SetBranchAddress("skimEventBranch",&skim);
+
+  // Open output file and book histograms
+  TFile* ofile = TFile::Open(outfile,"recreate");
+  assert(ofile);
+
+  TH1F* hJetPt = new TH1F("hJetPt",";jet pt [GeV]",100,0,100);
+  TH1F* hJetEta = new TH1F("hJetEta",";jet #eta",100,-1.5,1.5);
+  TH1F* hJetPhi = new TH1F("hJetPhi",";jet #phi [radians]",100,-TMath::Pi(),TMath::Pi());
+  TH1F* hJetRt = new TH1F("hJetRt",";R_{T}",101,0,1.01);
+  TH1F* hNtracks = new TH1F("hNtracks",";track multiplicity",50,0,50);
+  TH1F* hNtowers = new TH1F("hNtowers",";tower multiplicity",50,0,50);
+
+  TH1F* hTrackPt = new TH1F("hTrackPt",";track pt [GeV]",100,0,100);
+  TH1F* hTrackEta = new TH1F("hTrackEta",";track #eta",100,-1.5,1.5);
+  TH1F* hTrackPhi = new TH1F("hTrackPhi",";track #phi [radians]",100,-TMath::Pi(),TMath::Pi());
+
+  TH1F* hTowerPt = new TH1F("hTowerPt",";tower pt [GeV]",100,0,100);
+  TH1F* hTowerEta = new TH1F("hTowerEta",";tower #eta",100,-1.5,1.5);
+  TH1F* hTowerPhi = new TH1F("hTowerPhi",";tower #phi [radians]",100,-TMath::Pi(),TMath::Pi());
 
   // Event loop
   for (int iEntry = 0; iEntry < nentries; ++iEntry) {
     if (jetChain->GetEvent(iEntry) <= 0 || skimChain->GetEvent(iEntry) <= 0) break;
 
     // Should not be null
-    assert(jetEvent && skimEvent);
+    assert(jets && skim);
 
     // Enforce event synchronization
-    assert(jetEvent->runId() == skimEvent->runId() && jetEvent->eventId() == skimEvent->eventId());
+    assert(jets->runId() == skim->runId() && jets->eventId() == skim->eventId());
 
-    //if (iEntry % 1000 == 0) cout << iEntry << endl;
+    // Progress indicator
+    if (iEntry % 1000 == 0) cout << iEntry << endl;
 
-    cout << "run: " << jetEvent->runId() << endl;
-    cout << "event: " << jetEvent->eventId() << endl;
-
-    // Print triggers
-    cout << "triggers: ";
-    TIter next(skimEvent->triggers());
-    StJetSkimTrig* trig;
-    while (trig = (StJetSkimTrig*)next()) {
-      cout << trig->trigId() << " ";
-    }
-    cout << endl;
-
-#if 0
-    // Get 2009 pp200 JP1 trigger
-    StJetSkimTrig* trig = skimEvent->trigger(240410);
-    if (!trig) continue;
-    if (!trig->didFire()) continue;
-#endif
-
-    // Get jet patches above JP1 threshold
-    map<int,int> barrelJetPatches = skimEvent->barrelJetPatchesAboveTh(1);
-    map<int,int> endcapJetPatches = skimEvent->endcapJetPatchesAboveTh(1);
-    map<int,int> overlapJetPatches = skimEvent->overlapJetPatchesAboveTh(1);
-
-    cout << "barrel jet patches above threshold: ";
-    for (map<int,int>::const_iterator it = barrelJetPatches.begin(); it != barrelJetPatches.end(); ++it) {
-      int jp = it->first;
-      int adc = it->second;
-      cout << "JP" << jp << "=" << adc << " ";
-    }
-    cout << endl;
-
-    cout << "endcap jet patches above threshold: ";
-    for (map<int,int>::const_iterator it = endcapJetPatches.begin(); it != endcapJetPatches.end(); ++it) {
-      int jp = it->first;
-      int adc = it->second;
-      cout << "JP" << jp << "=" << adc << " ";
-    }
-    cout << endl;
-
-    cout << "overlap jet patches above threshold: ";
-    for (map<int,int>::const_iterator it = overlapJetPatches.begin(); it !=overlapJetPatches.end(); ++it) {
-      int jp = it->first;
-      int adc = it->second;
-      cout << "JP" << jp << "=" << adc << " ";
-    }
-    cout << endl;
-
-    int bbctimebin = skimEvent->bbcTimeBin() >> 9 & 0xf;
-    cout << "bbctimebin: " << bbctimebin << endl;
-
-    cout << "nvertices: " << jetEvent->numberOfVertices() << endl;
-
-    for (int iVertex = 0; iVertex < jetEvent->numberOfVertices(); ++iVertex) {
-      StJetVertex* vertex = jetEvent->vertex(iVertex);
-      cout << "Vertex #" << iVertex
-	   << ": vx=" << vertex->position().x()
-	   << " vy=" << vertex->position().y()
-	   << " vz=" << vertex->position().z() << endl;
-      // Jet loop
-      cout << "njets: " << vertex->numberOfJets() << endl;
-      for (int iJet = 0; iJet < vertex->numberOfJets(); ++iJet) {
-	StJetCandidate* jet = vertex->jet(iJet);
-	cout << "Jet #" << iJet
-	     << ": pt=" << jet->pt()
-	     << " eta=" << jet->eta()
-	     << " phi=" << jet->phi()
-	     << " rt=" << jet->neutralFraction()
-	     << " ntracks=" << jet->numberOfTracks()
-	     << " ntowers=" << jet->numberOfTowers() << endl;
-	// Track loop
-	for (int iTrack = 0; iTrack < jet->numberOfTracks(); ++iTrack) {
-	  StJetTrack* track = jet->track(iTrack);
-	  cout << "Track #" << iTrack
-	       << ": id=" << track->id()
-	       << " pt=" << track->pt()
-	       << " eta=" << track->eta()
-	       << " phi=" << track->phi() << endl;
-	} // End track loop
-	// Tower loop
-	for (int iTower = 0; iTower < jet->numberOfTowers(); ++iTower) {
-	  StJetTower* tower = jet->tower(iTower);
-	  cout << "Tower #" << iTower
-	       << ": id=" << tower->id()
-	       << " detid=" << tower->detectorId()
-	       << " pt=" << tower->pt()
-	       << " eta=" << tower->eta()
-	       << " phi=" << tower->phi() << endl;
-	} // End tower loop
-      } // End jet loop
-    } // End vertex loop
-    cout << endl;
+    // Jet loop
+    for (int iJet = 0; iJet < jets->vertex()->numberOfJets(); ++iJet) {
+      StJetCandidate* jet = jets->vertex()->jet(iJet);
+      hJetPt->Fill(jet->pt());
+      hJetEta->Fill(jet->eta());
+      hJetPhi->Fill(jet->phi());
+      hJetRt->Fill(jet->neutralFraction());
+      hNtracks->Fill(jet->numberOfTracks());
+      hNtowers->Fill(jet->numberOfTowers());
+      // Track loop
+      for (int iTrack = 0; iTrack < jet->numberOfTracks(); ++iTrack) {
+	StJetTrack* track = jet->track(iTrack);
+	hTrackPt->Fill(track->pt());
+	hTrackEta->Fill(track->eta());
+	hTrackPhi->Fill(track->phi());
+      } // End track loop
+      // Tower loop
+      for (int iTower = 0; iTower < jet->numberOfTowers(); ++iTower) {
+	StJetTower* tower = jet->tower(iTower);
+	hTowerPt->Fill(tower->pt());
+	hTowerEta->Fill(tower->eta());
+	hTowerPhi->Fill(tower->phi());
+      } // End tower loop
+    } // End jet loop
   } // End event loop
+
+  // Write and close output file
+  ofile->Write();
+  ofile->Close();
 }

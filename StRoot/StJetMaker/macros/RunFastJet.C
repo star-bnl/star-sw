@@ -3,9 +3,12 @@
 // Texas A&M University
 // 31 Aug 2011
 //
-// $Id: RunFastJet.C,v 1.3 2012/03/10 23:10:36 pibero Exp $
+// $Id: RunFastJet.C,v 1.4 2012/07/16 21:50:26 pibero Exp $
 //
 // $Log: RunFastJet.C,v $
+// Revision 1.4  2012/07/16 21:50:26  pibero
+// Updated for easier reading...
+//
 // Revision 1.3  2012/03/10 23:10:36  pibero
 // Added support for fastjet plugins
 //
@@ -15,10 +18,10 @@
 //
 
 void RunFastJet(int nevents = 1e6,
-		const char* mudstfile = "root://xrdstar.rcf.bnl.gov:1095//home/starlib/home/starreco/reco/production2009_200Gev_Single/ReversedFullField/P10ic/2009/143/10143008/st_physics_10143008_raw_6020001.MuDst.root",
-		 const char* jetfile = "jets.root",
-		 const char* skimfile = "skim.root",
-		 bool useL2 = false)
+                const char* mudstfile = "root://xrdstar.rcf.bnl.gov:1095//home/starlib/home/starreco/reco/production2009_200Gev_Single/ReversedFullField/P10ic/2009/143/10143008/st_physics_10143008_raw_6020001.MuDst.root",
+                const char* jetfile = "jets.root",
+		const char* skimfile = "skim.root",
+		bool useL2 = false)
 {
   cout << "Read MuDst file:\t" << mudstfile << endl;
   cout << "Write jet file:\t" << jetfile << endl;
@@ -119,6 +122,7 @@ void RunFastJet(int nevents = 1e6,
 
   // Trigger simulator
   StTriggerSimuMaker* simuTrig = new StTriggerSimuMaker;
+  simuTrig->useOnlineDB();
   simuTrig->setMC(false); // Must be before individual detectors, to be passed
   // BBC was not used in Run 9
   //simuTrig->useBbc();
@@ -239,30 +243,19 @@ void RunFastJet(int nevents = 1e6,
   anaparsEMC->addJetCut(new StProtoJetCutPt(5,200));
   anaparsEMC->addJetCut(new StProtoJetCutEta(-100,100));
 
-  // Set cone jet finder parameters
-  StConePars* conepars = new StConePars;
-  conepars->setGridSpacing(105,-3.0,3.0,120,-TMath::Pi(),TMath::Pi());
-  conepars->setSeedEtMin(0.5);
-  conepars->setAssocEtMin(0.1);
-  conepars->setSplitFraction(0.5);
-  conepars->setPerformMinimization(true);
-  conepars->setAddMidpoints(true);
-  conepars->setRequireStableMidpoints(true);
-  conepars->setDoSplitMerge(true);
-  conepars->setDebug(false);
+  // Set anti-kt parameters
+  const double CONE_RADIUS = 0.6;
 
-  // Set fastjet parameters
-  StFastJetPars* fastpars = new StFastJetPars;
-  fastpars->setJetAlgorithm(StFastJetPars::kt_algorithm);
-  fastpars->setRparam(1.0);
-  fastpars->setRecombinationScheme(StFastJetPars::E_scheme);
-  fastpars->setStrategy(StFastJetPars::Best);
-  fastpars->setPtMin(5.0);
+  StFastJetPars* AntiKtPars = new StFastJetPars;
+  AntiKtPars->setJetAlgorithm(StFastJetPars::antikt_algorithm);
+  AntiKtPars->setRparam(CONE_RADIUS);
+  AntiKtPars->setRecombinationScheme(StFastJetPars::E_scheme);
+  AntiKtPars->setStrategy(StFastJetPars::Best);
+  AntiKtPars->setPtMin(5.0);
 
-  jetmaker->addBranch("ConeJets12",anapars12,conepars);
-  jetmaker->addBranch("ConeJets5",anapars5,conepars);
-  jetmaker->addBranch("ConeJetsEMC",anaparsEMC,conepars);
-  jetmaker->addBranch("FastJets12",anapars12,fastpars);
+  jetmaker->addBranch("ConeJets12",anapars12,AntiKtPars);
+  jetmaker->addBranch("ConeJets5",anapars5,AntiKtPars);
+  jetmaker->addBranch("ConeJetsEMC",anaparsEMC,AntiKtPars);
 
   chain->Init();
   chain->EventLoop(nevents);
