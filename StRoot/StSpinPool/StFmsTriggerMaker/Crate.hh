@@ -1,3 +1,9 @@
+//
+// Pibero Djawotho <pibero@tamu.edu>
+// Texas A&M
+// 16 July 2012
+//
+
 #ifndef CRATE_HH
 #define CRATE_HH
 
