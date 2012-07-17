@@ -6,7 +6,7 @@
 // Macro to run FMS trigger simulator
 //
 
-void RunFmsTrigOverData(int nevents = 1000, const char* mudstfile = "/star/data27/reco/pp500_production_2011/ReversedFullField/P11id/2011/056/12056013/st_physics_12056013_raw_5020002.MuDst.root", const char* outfile = "fms.root")
+void RunFmsTrigOverData(int nevents = 1000, const char* mudstfile = "/star/data27/reco/pp500_production_2011/ReversedFullField/P11id/2011/056/12056013/st_physics_12056013_raw_5020002.MuDst.root")
 {
   // Load shared libraries
   gROOT->Macro("loadMuDst.C");
@@ -29,12 +29,19 @@ void RunFmsTrigOverData(int nevents = 1000, const char* mudstfile = "/star/data2
   StFmsTriggerMaker* fmstrig = new StFmsTriggerMaker;
   fmstrig->useMuDst();
 
-  // Run
+  // Initialize chain
   chain->Init();
-  chain->EventLoop(nevents);
 
-  // Save histograms to ROOT file
-  TFile* ofile = TFile::Open(outfile,"recreate");
-  fmstrig->GetHistList()->Write();
-  ofile->Close();
+  // Event loop
+  for (int iEvent = 1; iEvent <= nevents; ++iEvent) {
+    chain->Clear();
+    int status = chain->Make(iEvent);
+    if (status == kStSkip) continue;
+    if (status % 10 == kStEOF || status % 10 == kStFatal) break;
+
+    // Test FMS dijet trigger
+    if (fmstrig->FmsDijet()) {
+      printf("Run=%d Event=%d - Got FMS dijet trigger\n",chain->GetRunNumber(),chain->GetEventNumber());
+    }
+  } // Event loop
 }
