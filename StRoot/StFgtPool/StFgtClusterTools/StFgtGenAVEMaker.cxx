@@ -2611,11 +2611,11 @@ Int_t StFgtGenAVEMaker::Init(){
 
 
   createPlots(&APVfitChi2P,kFgtNumDiscs*40,"APVfitChi2P",100,0,30);
-  createPlots(&APVfitChi2R,kFgtNumDiscs*40,"APVfitChi2P",100,0,30);
+  createPlots(&APVfitChi2R,kFgtNumDiscs*40,"APVfitChi2R",100,0,30);
   createPlots(&APVfitAmpP,kFgtNumDiscs*40,"APVfitAmpP",100,0,30);
-  createPlots(&APVfitAmpR,kFgtNumDiscs*40,"APVfitAmpP",100,0,30);
+  createPlots(&APVfitAmpR,kFgtNumDiscs*40,"APVfitAmpR",100,0,30);
   createPlots(&APVfitT0P,kFgtNumDiscs*40,"APVfitT0P",100,0,30);
-  createPlots(&APVfitT0R,kFgtNumDiscs*40,"APVfitT0P",100,0,30);
+  createPlots(&APVfitT0R,kFgtNumDiscs*40,"APVfitT0R",100,0,30);
 
   createPlots(&APVfirstTbSigCloseClusterP,kFgtNumDiscs*40,"APVfirstTbSigCloseClusterP",100,0,20);
   createPlots(&APVfirstTbSigCloseClusterR,kFgtNumDiscs*40,"APVfirstTbSigCloseClusterR",100,0,20);
