@@ -6,7 +6,7 @@
 // Macro to run FMS trigger simulator
 //
 
-void RunFmsTrigOverSimu(int nevents = 1000, const char* mudstfile = "test.MuDst.root", const char* geantfile = "test.geant.root", const char* outfile = "fms.root")
+void RunFmsTrigOverSimu(int nevents = 1000, const char* mudstfile = "test.MuDst.root", const char* geantfile = "test.geant.root")
 {
   // Load shared libraries
   gROOT->Macro("loadMuDst.C");
@@ -32,7 +32,6 @@ void RunFmsTrigOverSimu(int nevents = 1000, const char* mudstfile = "test.MuDst.
 
   // FMS database
   StFmsDbMaker* fmsdb = new StFmsDbMaker;
-  //fmsdb->setDebug(1);
 
   // GEANT reader
   StIOMaker* ioMaker = new StIOMaker;
@@ -47,18 +46,25 @@ void RunFmsTrigOverSimu(int nevents = 1000, const char* mudstfile = "test.MuDst.
   mcEventMaker->doPrintMemoryInfo = false;
 
   // FMS hits simulator
-  StFmsFastMaker* fmsSimu = new StFmsFastMaker;
+  StFmsFastMaker* fmssimu = new StFmsFastMaker;
 
   // FMS trigger simulator
   StFmsTriggerMaker* fmstrig = new StFmsTriggerMaker;
   fmstrig->useStEvent();
 
-  // Run
+  // Initialize chain
   chain->Init();
-  chain->EventLoop(nevents);
 
-  // Save histograms to ROOT file
-  TFile* ofile = TFile::Open(outfile,"recreate");
-  fmstrig->GetHistList()->Write();
-  ofile->Close();
+  // Event loop
+  for (int iEvent = 1; iEvent <= nevents; ++iEvent) {
+    chain->Clear();
+    int status = chain->Make(iEvent);
+    if (status == kStSkip) continue;
+    if (status % 10 == kStEOF || status % 10 == kStFatal) break;
+
+    // Test FMS dijet trigger
+    if (fmstrig->FmsDijet()) {
+      printf("Run=%d Event=%d - Got FMS dijet trigger\n",chain->GetRunNumber(),chain->GetEventNumber());
+    }
+  } // Event loop
 }
