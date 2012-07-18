@@ -46,7 +46,7 @@ void RunFmsTrigOverSimu(int nevents = 1000, const char* mudstfile = "test.MuDst.
   mcEventMaker->doPrintMemoryInfo = false;
 
   // FMS hits simulator
-  StFmsFastMaker* fmssimu = new StFmsFastMaker;
+  StFmsSimulatorMaker* fmsSim = new StFmsSimulatorMaker;
 
   // FMS trigger simulator
   StFmsTriggerMaker* fmstrig = new StFmsTriggerMaker;

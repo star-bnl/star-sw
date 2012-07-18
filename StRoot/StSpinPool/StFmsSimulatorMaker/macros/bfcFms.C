@@ -17,8 +17,8 @@ void bfcFms(int nevents = 1000,
   gROOT->LoadMacro("bfc.C");
   bfc(-1,chainopt,fzfile);
   gSystem->Load("StFmsSimulatorMaker");
-  StFmsFastMaker* fmsFastSim = new StFmsFastMaker;
-  chain->AddAfter("fmsDb",fmsFastSim);
+  StFmsSimulatorMaker* fmsSim = new StFmsSimulatorMaker;
+  chain->AddAfter("fmsDb",fmsSim);
   chain->Init();
   chain->EventLoop(nevents);
 }
