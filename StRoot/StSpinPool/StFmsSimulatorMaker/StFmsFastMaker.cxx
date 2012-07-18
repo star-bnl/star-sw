@@ -19,14 +19,14 @@
 //     $STAR/StDb/idl/fmsQTMap.idl
 //
 
-#include "StMcEvent/StMcEventTypes.hh"
+#include "tables/St_g2t_emc_hit_Table.h"
 #include "StEventTypes.h"
 #include "StFmsDbMaker/StFmsDbMaker.h"
 #include "StFmsFastMaker.h"
 
 ClassImp(StFmsFastMaker);
 
-int StFmsFastMaker::getDetectorId(const StMcCalorimeterHit* mcHit) const
+int StFmsFastMaker::getDetectorId(int ew, int nstb) const
 {
   /* --- GEANT hits in StMcCalorimeterHit --- */
 
@@ -52,9 +52,9 @@ int StFmsFastMaker::getDetectorId(const StMcCalorimeterHit* mcHit) const
   /* FHC-North 12 1 0 5 9 12 */
   /* FHC-South 13 1 1 5 9 12 */
 
-  switch (mcHit->module()) {
+  switch (ew) {
   case 1: // fpd
-    switch (mcHit->sub()) {
+    switch (nstb) {
     case 1: return 0; // north
     case 2: return 1; // south
     case 5: return 2; // preshower north
@@ -62,7 +62,7 @@ int StFmsFastMaker::getDetectorId(const StMcCalorimeterHit* mcHit) const
     }
     break;
   case 2: // fms
-    switch (mcHit->sub()) {
+    switch (nstb) {
     case 1: return 8; // north large cells
     case 2: return 9; // south large cells
     case 3: return 10; // north small cells
@@ -73,20 +73,24 @@ int StFmsFastMaker::getDetectorId(const StMcCalorimeterHit* mcHit) const
   return -1;
 }
 
-StFmsHit* StFmsFastMaker::makeFmsHit(const StMcCalorimeterHit* mcHit) const
+StFmsHit* StFmsFastMaker::makeFmsHit(const g2t_emc_hit_st& hit) const
 {
   const int MAX_ADC = 4095;
 
-  int detectorId = getDetectorId(mcHit);
+  // volume_id = ew*10000+nstb*1000+channel
+  int ew      = hit.volume_id / 10000;
+  int nstb    = hit.volume_id / 1000 % 10;
+  int channel = hit.volume_id % 1000;
+
+  int detectorId = getDetectorId(ew,nstb);
 
   assert(detectorId >= 0);
 
-  int channel = mcHit->eta(); 
   int qtCrate, qtSlot, qtChannel;
   gStFmsDbMaker->getMap(detectorId,channel,&qtCrate,&qtSlot,&qtChannel);
   float gain = gStFmsDbMaker->getGain(detectorId,channel);
   float gainCorrection = gStFmsDbMaker->getGainCorrection(detectorId,channel);
-  int adc = int(mcHit->dE()/(gain*gainCorrection)+0.5);
+  int adc = int(hit.de/(gain*gainCorrection)+0.5);
   if (adc > MAX_ADC) adc = MAX_ADC;
   int tdc = 0;
   float energy = adc*gain*gainCorrection;
@@ -95,10 +99,17 @@ StFmsHit* StFmsFastMaker::makeFmsHit(const StMcCalorimeterHit* mcHit) const
 
 int StFmsFastMaker::Make()
 {
-  // Get StMcEvent
-  StMcEvent* mcEvent = (StMcEvent*)GetDataSet("StMcEvent");
-  if (!mcEvent) {
-    LOG_ERROR << "No StMcEvent" << endm;
+  // Get GEANT FPD/FMS hits
+  TDataSet* geant = GetDataSet("geant");
+  if (!geant) {
+    LOG_ERROR << "No geant" << endm;
+    return kStErr;
+  }
+
+  TDataSetIter geantIter(geant);
+  const St_g2t_emc_hit* g2t_fpd_hit = (const St_g2t_emc_hit*)geantIter("g2t_fpd_hit");
+  if (!g2t_fpd_hit) {
+    LOG_ERROR << "No g2t_fpd_hit" << endm;
     return kStErr;
   }
 
@@ -112,9 +123,9 @@ int StFmsFastMaker::Make()
   // Get FMS collection
   if (!event->fmsCollection()) event->setFmsCollection(new StFmsCollection);
 
-  // Digitize FMS hits
+  // Digitize GEANT FPD/FMS hits
   assert(gStFmsDbMaker);
-  fillStEvent(mcEvent,event);
+  fillStEvent(g2t_fpd_hit,event);
 
   // Print
   if (Debug()) {
@@ -126,12 +137,9 @@ int StFmsFastMaker::Make()
   return kStOk;
 }
 
-void StFmsFastMaker::fillStEvent(StMcEvent* mcEvent, StEvent* event)
+void StFmsFastMaker::fillStEvent(const St_g2t_emc_hit* g2t_fpd_hit, StEvent* event)
 {
-  // module: 1=FPD, 2=FMS
-  for (size_t m = 1; m <= mcEvent->fpdHitCollection()->numberOfModules(); ++m) {
-    const StSPtrVecMcCalorimeterHit& mchits = mcEvent->fpdHitCollection()->module(m)->detectorHits();
-    for (size_t i = 0; i < mchits.size(); ++i)
-      event->fmsCollection()->hits().push_back(makeFmsHit(mchits[i]));
-  }
+  const g2t_emc_hit_st* hits = g2t_fpd_hit->GetTable();
+  for (int i = 0; i < g2t_fpd_hit->GetNRows(); ++i)
+    event->fmsCollection()->hits().push_back(makeFmsHit(hits[i]));
 }
