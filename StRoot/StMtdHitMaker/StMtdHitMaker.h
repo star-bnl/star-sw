@@ -3,13 +3,13 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.5 2012/02/11 02:15:11 geurts Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.6 2012/07/18 03:31:24 geurts Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
  ***************************************************************************/
 #include "StRTSBaseMaker.h"
-
+#include "TH3D.h"
 struct mtd_t;
 
 class StEvent;
@@ -17,14 +17,6 @@ class StMtdCollection;
 class StMtdRawHit;
 class StMtdHit;
 class StBTofINLCorr;
-
-struct MtdRawHit {
-  unsigned int   tdc;               /// tdc time (in bin) per hit.
-  unsigned int   dataword;          /// data word before unpack
-  unsigned char  fiberid;           /// 0 1 2,3
-  unsigned char  backlegID;            /// 1,2,...,117
-  unsigned char  globaltdcchan;     /// 0,1,..   
-};
 
 // 
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
@@ -35,6 +27,41 @@ typedef vector<Int_t, allocator<Int_t>>  IntVec;
 typedef vector<UInt_t, allocator<UInt_t>>  UIntVec;
 #endif
 
+struct MtdRawHit {
+  UInt_t   tdc;               /// tdc time (in bin) per hit.
+  UInt_t   dataword;          /// data word before unpack
+  UChar_t  fiberid;           /// 0 1 2,3
+  UChar_t  backlegid;            /// 1,2,...,117
+  UChar_t  globaltdcchan;     /// 0,1,..   
+};
+
+struct MTDSingleHit{
+	Int_t           backleg; // 1-30
+	Int_t           tray;  // 1-5
+	Int_t           channel; // 0-23
+	IntVec 			leadingEdgeTime;     
+	IntVec			trailingEdgeTime;     
+};
+
+struct MTDOneSideHit{
+	Int_t           backleg; // 1-30
+	Int_t           tray;  // 1-5
+	Int_t           channel; // 0-23
+	Double_t        leadingEdgeTime;     
+	Double_t		trailingEdgeTime;     
+};
+
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+  typedef vector<MTDSingleHit> mtdSingleHitVector;
+#else
+  typedef vector<MTDSingleHit,allocator<MTDSingleHit>> mtdSingleHitVector;
+#endif
+  typedef vector<MTDSingleHit>::iterator mtdSingleHitVectorIter;
+
+#define VHRBIN2PS 24.4140625  // Very High resolution mode, pico-second per bin
+                              // 1000*25/1024 (ps/chn)
+#define HRBIN2PS 97.65625     // High resolution mode, pico-second per bin
+                              // 97.65625= 1000*100/1024  (ps/chn)
 
 /**
    \class StMtdHitMaker
@@ -45,38 +72,59 @@ class StMtdHitMaker:public StRTSBaseMaker {
  private: 
   StEvent *mStEvent;
   mtd_t   *fMtd;
+  
+  Int_t mUseMuDst;
 
   Int_t UnpackMtdRawData();
+  Int_t getTdigBoardId(Int_t backlegid, Int_t chn);
+  Int_t getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn);
+  Int_t getTdigLocalChan(Int_t backlegid, Int_t itdigid);
   void fillMtdHeader();
   void fillMtdRawHitCollection();
   void fillMtdHitCollection();
+  void fillMtdSingleHits();
   void fillStEvent();     //! ship collection to StEvent and check
+  IntVec  GetValidTrays();
+  IntVec  GetValidChannel(int backleg, int tray);
+  UIntVec GetLeadingTdc(int backleg, int tray, int channel, bool triggerevent);
+  UIntVec GetTrailingTdc(int backleg, int tray, int channel, bool triggerevent);
   ///----------------------------------------------------
   vector<MtdRawHit> MtdLeadingHits;
   vector<MtdRawHit> MtdTrailingHits;
-
+  
+  static const Int_t mNTRAY    = 5;
+  static const Int_t mNBACKLEG = 30;
+  static const Int_t mNCHAN    = 24;
+  static const Int_t mNFIBER   = 1;
+  static const Int_t mNALLTRAY = 150; 
   Int_t                   mYear;                 //! RHIC run year
   Int_t                   mNValidTrays;          //! number of valid MTD trays
-  unsigned int            mTriggerTimeStamp[2];  //! Trigger Time in 4 fibers
+  UInt_t           		  mTriggerTimeStamp[2];  //! Trigger Time in 4 fibers
   StMtdCollection*        mMtdCollection;        //! pointer to StMtdCollection
-  Int_t                   mTray2TdigMap[30][5];  //! map TDIG-Id to MTD tray
-  Int_t                   mTrayId[30][5];        //! map MTD trayIDs
+  Int_t                   mTray2TdigMap[mNBACKLEG][mNTRAY];  //! map TDIG-Id to MTD tray
+  Int_t                   mTrayId[mNBACKLEG][mNTRAY];        //! map MTD trayIDs
   Int_t                   mTdigId[118];          //! map TDIG Ids on MTD TrayIds
   StBTofINLCorr*          mINLCorr;              //! pointer to INL correction class
+  
+  Int_t 				  mtdStrip[mNCHAN];			 //! strip channel to glabal tdc chan
+  Int_t                   mTriggerTimeWindow[mNALLTRAY][2];  //! map TDIG-Id to MTD tray
+
+  mtdSingleHitVector mSingleHitVec[mNALLTRAY];
 
  protected:
   StRtsTable *GetNextRaw();
-  StRtsTable *GetNextRaw(int sec);
+  StRtsTable *GetNextRaw(Int_t sec);
       
   StMtdCollection *GetMtdCollection();
-  Int_t tdcChan2globalStrip11(int, int, int, int);
-  Int_t tdcChan2globalStrip(int, int, int, int);
+  Int_t tdcChan2globalStrip11(Int_t, Int_t, Int_t, Int_t);
+  Int_t tdcChan2globalStrip(Int_t, Int_t, Int_t, Int_t);
 
  public:
 
   /// Default constructor
   StMtdHitMaker(const char *name="mtd_raw");     
   ~StMtdHitMaker() ;
+  void setUseMuDst(Int_t val);
 
   void   Clear(Option_t* option="");
   Int_t  Init();
@@ -89,7 +137,8 @@ class StMtdHitMaker:public StRTSBaseMaker {
   vector<MtdRawHit> getLeadingHits();
   /// obtain the whole list of trainling edge hits
   vector<MtdRawHit> getTrailingHits();
-     
+  
+  TH3D *hxhyhz;
   /// cvs
   virtual const char *GetCVS() const {
     static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
@@ -100,5 +149,6 @@ class StMtdHitMaker:public StRTSBaseMaker {
 
 inline vector<MtdRawHit> StMtdHitMaker::getLeadingHits()  { return MtdLeadingHits; }
 inline vector<MtdRawHit> StMtdHitMaker::getTrailingHits() { return MtdTrailingHits;}
+inline void StMtdHitMaker::setUseMuDst(Int_t val) { mUseMuDst = val; return;}
 
 #endif
