@@ -22,11 +22,11 @@
 #include "tables/St_g2t_emc_hit_Table.h"
 #include "StEventTypes.h"
 #include "StFmsDbMaker/StFmsDbMaker.h"
-#include "StFmsSimlatorMaker.h"
+#include "StFmsSimulatorMaker.h"
 
-ClassImp(StFmsSimlatorMaker);
+ClassImp(StFmsSimulatorMaker);
 
-int StFmsSimlatorMaker::getDetectorId(int ew, int nstb) const
+int StFmsSimulatorMaker::getDetectorId(int ew, int nstb) const
 {
   /* --- GEANT hits in StMcCalorimeterHit --- */
 
@@ -73,7 +73,7 @@ int StFmsSimlatorMaker::getDetectorId(int ew, int nstb) const
   return -1;
 }
 
-StFmsHit* StFmsSimlatorMaker::makeFmsHit(const g2t_emc_hit_st& hit) const
+StFmsHit* StFmsSimulatorMaker::makeFmsHit(const g2t_emc_hit_st& hit) const
 {
   const int MAX_ADC = 4095;
 
@@ -97,7 +97,7 @@ StFmsHit* StFmsSimlatorMaker::makeFmsHit(const g2t_emc_hit_st& hit) const
   return new StFmsHit(detectorId,channel,qtCrate,qtSlot,qtChannel,adc,tdc,energy);
 }
 
-int StFmsSimlatorMaker::Make()
+int StFmsSimulatorMaker::Make()
 {
   // Get GEANT FPD/FMS hits
   TDataSet* geant = GetDataSet("geant");
@@ -137,7 +137,7 @@ int StFmsSimlatorMaker::Make()
   return kStOk;
 }
 
-void StFmsSimlatorMaker::fillStEvent(const St_g2t_emc_hit* g2t_fpd_hit, StEvent* event)
+void StFmsSimulatorMaker::fillStEvent(const St_g2t_emc_hit* g2t_fpd_hit, StEvent* event)
 {
   const g2t_emc_hit_st* hits = g2t_fpd_hit->GetTable();
   for (int i = 0; i < g2t_fpd_hit->GetNRows(); ++i)
