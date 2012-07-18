@@ -429,7 +429,7 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
   const char* user = "";
   const char* pass = "";
   // See http://drupal.star.bnl.gov/STAR/comp/db/onlinedb/online-sever-port-map
-  unsigned int port = 3400+GetDBTime().GetYear()%100-1;
+  unsigned int port = 3400+mDBTime.GetYear()%100-1;
   const char* database = "Conditions_rts";
   const char* unix_socket = NULL;
   unsigned long client_flag = 0;
@@ -446,7 +446,7 @@ int StFmsTriggerMaker::loadRegisters(int runNumber)
   }
 
   // Get run number associated with DB time stamp
-  sprintf(query,"select max(idx_rn) from triggers where beginTime <= '%s'",GetDBTime().AsSQLString());
+  sprintf(query,"select max(idx_rn) from triggers where beginTime <= '%s'",mDBTime.AsSQLString());
   LOG_INFO << query << endm;
   mysql_query(&mysql,query);
   if (MYSQL_RES* result = mysql_store_result(&mysql)) {
