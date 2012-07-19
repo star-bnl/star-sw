@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StMCFilter.cxx,v 1.8 2010/04/17 18:45:05 betan Exp $
+// @(#)root/eg:$Id: StMCFilter.cxx,v 1.9 2012/07/19 21:32:57 jwebb Exp $
 // Author: Victor Perev  17/03/2009
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -50,7 +50,8 @@ StMCFilter      *StMCFilter::fgSelected   =0;
 StHepParticleMaster *StMCFilter::fgHepParticle =0;
 StG3ParticleMaster  *StMCFilter::fgG3Particle  =0;
 
-extern void *gStarFiltAction;
+extern void *gStarFiltAction; // 
+extern void *gStarFiltConfig; // 
 
 //______________________________________________________________________________
 StMCFilter::StMCFilter(const char *name)
@@ -65,6 +66,7 @@ StMCFilter::StMCFilter(const char *name)
   assert (it == myMap.end() && "Filter name must be unique");
   myMap[myName] = this;
   gStarFiltAction=(void*)&StMCFilter::Action;
+  gStarFiltConfig=(void*)&StMCFilter::Config;
   std::cout << "*** StMCFilter::StMCFilter(" << myName.c_str() << ") CREATED ***" << std::endl;
 }
 //______________________________________________________________________________
@@ -157,6 +159,15 @@ int  StMCFilter::Action(int kase, void *par1,void *par2)
   }
   return 0;
 }    
+//______________________________________________________________________________
+int  StMCFilter::Config( std::string key, const float value )
+{
+  if ( !fgSelected ) return 0; // should issue warning here
+  fgSelected->parseConfig( key, value );
+  return 1;
+}
+
+
 //______________________________________________________________________________
 void StMCFilter::FINISH()
 {

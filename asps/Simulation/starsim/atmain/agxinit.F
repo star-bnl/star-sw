@@ -1477,6 +1477,15 @@
       CALL KUGUID('FPU_CONTROL',GUID,42,'S')
       CALL KUACT('FPU_CONTROL',AGXUSER)
 
+      CALL KUCMD(' ','BUG_REPORT','C')
+      GUID(1)=' send a bug report to nevski@cern.ch'
+      CALL KUGUID('BUG_REPORT',GUID,1,'S')
+      CALL KUACT('BUG_REPORT',AGXUSER)
+
+      CALL KUCMD(' ','AgFilter','C')
+
+      CALL KUCMD('AgFilter',' ','SW')
+
       CALL KUCMD(' ','GFILTER','C')
       CALL KUPAR('GFILTER','filterName','User defined filtername','C',
      +'S')
@@ -1494,10 +1503,20 @@
       CALL KUGUID('GFILTER',GUID,7,'S')
       CALL KUACT('GFILTER',AGXUSER)
 
-      CALL KUCMD(' ','BUG_REPORT','C')
-      GUID(1)=' send a bug report to nevski@cern.ch'
-      CALL KUGUID('BUG_REPORT',GUID,1,'S')
-      CALL KUACT('BUG_REPORT',AGXUSER)
+      CALL KUCMD(' ','GCONFIG','C')
+      CALL KUPAR('GCONFIG','filterKey','User defined filter cut','C',
+     +'S')
+      CALL KUPAR('GCONFIG','filterVal','Value of the cut','R','S')
+      GUID(1)='The GFILTCFG command passes a key and a value to the filt
+     +er''s parseConfig'
+      GUID(2)='method, if it is defined.  The parseConfig method may the
+     +n set various'
+      GUID(3)='cuts in the filter according to the key/value pair which'
+     +//' is provided.'
+      CALL KUGUID('GCONFIG',GUID,3,'S')
+      CALL KUACT('GCONFIG',AGXUSER)
+
+      CALL KUCMD('..',' ','SW')
 
       CALL KUCMD('..',' ','SW')
 

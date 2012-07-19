@@ -1,5 +1,8 @@
-* $Id: agxinit.cdf,v 1.3 2011/10/20 23:07:19 jwebb Exp $
+* $Id: agxinit.cdf,v 1.4 2012/07/19 21:33:14 jwebb Exp $
 * $Log: agxinit.cdf,v $
+* Revision 1.4  2012/07/19 21:33:14  jwebb
+* Added KUIP interface to configuration parameters of the filters.
+*
 * Revision 1.3  2011/10/20 23:07:19  jwebb
 * Added capability to provide a slope in the x,y vertex.
 *
@@ -1237,6 +1240,31 @@ The following is an abstract from fpu_control.
 
 >Action AGXUSER
 *-----------------------------------------------------------------------------
+>COMMAND BUG_REPORT
+>Parameters
+>GUIDANCE 
+ send a bug report to nevski@cern.ch
+>ACTION AGXUSER
+*-----------------------------------------------------------------------------
+* Leave in for backwards compatability
+**>Command GFILTER
+**>Parameters
+**filterName 'User defined filtername' C
+**>Guidance
+**
+** GFILTER command provides a way to install user defined filter.
+** This filter is defined on StMCFilter class. It has two rejection
+**  methods. One for EG (Event Generator) and G3 (End of GEANT3 event)
+** Before this command, library containing filter must be loaded 
+** Example.
+** GEXEC $STAR_LIB)/StMCFilter.so
+** GFILTER  myFilterName
+**
+**>Action AGXUSER
+*-----------------------------------------------------------------------------
+>Menu AgFilter
+>Guidance
+*-----------------------------------------------------------------------------
 >Command GFILTER
 >Parameters
 filterName 'User defined filtername' C
@@ -1252,10 +1280,15 @@ filterName 'User defined filtername' C
 
 >Action AGXUSER
 *-----------------------------------------------------------------------------
->COMMAND BUG_REPORT
+>Command GCONFIG
 >Parameters
->GUIDANCE 
- send a bug report to nevski@cern.ch
->ACTION AGXUSER
-*-----------------------------------------------------------------------------
+filterKey 'User defined filter cut' C
+filterVal 'Value of the cut'        R
+>Guidance
+
+The GFILTCFG command passes a key and a value to the filter's parseConfig
+method, if it is defined.  The parseConfig method may then set various
+cuts in the filter according to the key/value pair which is provided.
+
+>Action AGXUSER
 
