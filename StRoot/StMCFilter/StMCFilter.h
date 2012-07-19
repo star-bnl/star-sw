@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StMCFilter.h,v 1.8 2012/07/03 16:06:12 perev Exp $
+// @(#)STAR/eg:$Id: StMCFilter.h,v 1.9 2012/07/19 21:32:58 jwebb Exp $
 // Author: V.Perev  Mar/2009
 /*!
 
@@ -33,8 +33,18 @@ class StMCFilter
    virtual void Finish() const{;}
 
    const std::string &GetName() const { return fName;}
+
+   /// Return a reference to one of 10 user words
    double &User(int idx) 	{return fUser[idx];}
+   /// Returns one of the 10 user words
    double  User(int idx) const 	{return fUser[idx];}
+
+   /// Method which should be implemented in the concrete filter
+   /// for configuring cuts defined w/in the filter.
+   virtual void parseConfig(std::string key, float value){ /* nada */ };
+
+   /// Returns a pointer to the selected filter
+   static StMCFilter *selected(){ return fgSelected; }
 
  private:
    ///private static methods for Pythia & Geant3 connections
@@ -53,6 +63,8 @@ class StMCFilter
    ///Routine performs connection with pythia and Geant3.
    ///it is called from F77 for EG,GT & GE init and connections
    static int  Action(int kase, void *par1,void *par2);
+
+   static int  Config(std::string key, const float value );
    
  protected:
    ///Number of total EG events

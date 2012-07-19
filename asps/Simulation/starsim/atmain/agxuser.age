@@ -1,5 +1,8 @@
-* $Id: agxuser.age,v 1.5 2011/10/20 23:07:19 jwebb Exp $
+* $Id: agxuser.age,v 1.6 2012/07/19 21:33:14 jwebb Exp $
 * $Log: agxuser.age,v $
+* Revision 1.6  2012/07/19 21:33:14  jwebb
+* Added KUIP interface to configuration parameters of the filters.
+*
 * Revision 1.5  2011/10/20 23:07:19  jwebb
 * Added capability to provide a slope in the x,y vertex.
 *
@@ -103,7 +106,7 @@
      Character     mname*256, library*512, stringL*1024,cline*1024
      data          mname/' '/,library/' '/,stringL/' '/,cline/' '/
 *    character*80  exten/'.make'/
-     Real          PAR(1000),Rval,dummy1,dummy2
+     Real          PAR(1000),Rval,dummy1,dummy2,dummy3
      Integer       iFPUTAG,iFPUSTATUS,iFPUUSED,iFPUOVERFLOW,ICW,IC1,IC0,IIC
 *    force string1,2 at word boundary - comis pass whole words only
      EQUIVALENCE  (string1,dummy1),(string2,dummy2)
@@ -151,6 +154,12 @@
      call uctoh(string1(1:Len1)//char(0),itring1,4,Len1+1);
      itring1(65) = filt_act(0,itring1,     0);  !//Filter selection
      itring1(65) = filt_act(3,gfkine ,gfvert);  !//Init RegectGT (GeantTracking)
+  }
+  else IF COMMAND=='GCONFIG'
+  {
+     CALL KuGETS( string1, len1 ); ! KEY
+     CALL KuGETR( dummy3 );        ! VALU
+     CALL filt_cfg( string1(1:len1)//char(0), dummy3 )
   }
   else If Command=='GFILE'
   {  IER=0
