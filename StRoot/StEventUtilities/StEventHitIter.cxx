@@ -14,6 +14,9 @@
 #include "StRnDHitCollection.h"
 #include "StEtrHitCollection.h"
 #include "StTofCollection.h"
+#include "StFgtCollection.h"
+#include "StFgtHitCollection.h"
+#include "StFgtPointCollection.h"
 //________________________________________________________________________________
 StHitIter::StHitIter()
 {
@@ -584,6 +587,68 @@ int StTofHitIter::GetSize () const
   return ((StTofHitCollection*)fCont)->tofHits().size();
 }
 
+
+// -------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------
+
+//________________________________________________________________________________
+//_______ FGT _____ FGT _____ FGT _____ FGT _____ FGT _____ FGT _____ FGT ____ FGT
+//________________________________________________________________________________
+class StFgtHitIter : public StHitIter 
+{ public:
+  StFgtHitIter(); // implementation below...
+  virtual ~StFgtHitIter(){ /* nada */ };
+  virtual const TObject *Reset( const TObject *container );
+  virtual const TObject *GetObject( Int_t idx ) const;
+  virtual       Int_t    GetSize() const;
+  StDetectorId           DetectorId() const { return kFgtId; }
+  protected:
+  //  StDetectorId fDetectorId;
+};
+
+class StFgtPointHitIter : public StHitIter
+{ public:
+  StFgtPointHitIter(){ /* nada */ };
+  virtual ~StFgtPointHitIter(){ /* nada */ };
+  virtual const TObject *GetObject( Int_t idx ) const;
+  virtual Int_t GetSize() const;
+};
+// -------------------------------------------------------------------------------
+StFgtHitIter::StFgtHitIter()
+{
+  this -> SetDowIter( new StFgtPointHitIter() );
+}
+// -------------------------------------------------------------------------------
+const TObject *StFgtHitIter::Reset( const TObject *cont )
+{
+  const StFgtCollection *to = 0;
+  if ( cont ) to = ((StEvent *)cont)->fgtCollection();
+  return StHitIter::Reset( to );
+}
+// -------------------------------------------------------------------------------
+Int_t StFgtHitIter::GetSize() const
+{
+  return 1; // note mispelling in StEvent
+}
+// -------------------------------------------------------------------------------
+const TObject *StFgtHitIter::GetObject( Int_t idx ) const
+{
+  return (const TObject *)((StFgtCollection *)fCont)->getPointCollection();
+}
+// -------------------------------------------------------------------------------
+const TObject *StFgtPointHitIter::GetObject( Int_t idx ) const
+{
+  return (const TObject *)((StFgtPointCollection *)fCont)->getPointVec().at(idx);
+}
+// -------------------------------------------------------------------------------
+Int_t StFgtPointHitIter::GetSize() const
+{
+  return (Int_t)((StFgtPointCollection *)fCont)->getPointVec().size();
+} 
+// -------------------------------------------------------------------------------
+
+
 //________________________________________________________________________________
 //_______EVENT_____EVENT_____EVENT_____EVENT_____EVENT_____EVENT_____EVENT_____TOF
 //________________________________________________________________________________
@@ -591,21 +656,26 @@ int StEventHitIter::AddDetector(StDetectorId detId)
 {
    switch ((int)detId) {
    
-     case kTpcId: Add(new StTpcHitIter());break;
-     case kSvtId: Add(new StSvtHitIter());break;
-     case kSsdId: Add(new StSsdHitIter());break;
-     case kFtpcWestId:; 
-     case kFtpcEastId:
-                  Add(new StFtpcHitIter());break;
-     case kPxlId: case kIstId: case kFgtId: case kFmsId: 
-                  Add(new StRnDHitIter(detId));break;
-
-     case kTofId: Add(new StTofHitIter()) ;break;
-     case kEtrId: Add(new StEtrHitIter()) ;break;
-
-     default: printf("StEventHitIter::AddDetector: No iterator for detectorId=%d",(int)detId);
+   case kTpcId: Add(new StTpcHitIter());break;
+   case kSvtId: Add(new StSvtHitIter());break;
+   case kSsdId: Add(new StSsdHitIter());break;
+   case kFtpcWestId:; 
+   case kFtpcEastId:
+     Add(new StFtpcHitIter());break;
+   case kPxlId: 
+   case kIstId: 
+     /* case kFgtId: n.b. This will be removing the RnD version of the FGT */ 
+   case kFmsId: 
+     Add(new StRnDHitIter(detId));break;
+     
+   case kTofId: Add(new StTofHitIter()) ;break;
+   case kEtrId: Add(new StEtrHitIter()) ;break;
+   case kFgtId: Add(new StFgtHitIter()) ;break;
+       
+     
+   default: printf("StEventHitIter::AddDetector: No iterator for detectorId=%d",(int)detId);
      assert(0 && "No iterator for detectorId");
      return 1;
-  }
+   }
   return 0;
 }
