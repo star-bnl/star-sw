@@ -19,6 +19,7 @@
 //     $STAR/StDb/idl/fmsQTMap.idl
 //
 
+#include <cassert>
 #include "tables/St_g2t_emc_hit_Table.h"
 #include "StEventTypes.h"
 #include "StFmsDbMaker/StFmsDbMaker.h"
@@ -26,16 +27,22 @@
 
 ClassImp(StFmsSimulatorMaker);
 
+void StFmsSimulatorMaker::decodeVolumeId(int volumeId, int& ew, int& nstb, int& channel) const
+{
+  //
+  // volumeId = ew*10000+nstb*1000+channel
+  //
+  // ew      : 1=FPD, 2=FMS
+  // nstb    : 1=FMS-North-Large, 2=FMS-South-Large, 3=FMS-North-Small, 4=FMS-South-Small
+  // channel : 1-578
+  //
+  ew      = volumeId / 10000;
+  nstb    = volumeId / 1000 % 10;
+  channel = volumeId % 1000;
+}
+
 int StFmsSimulatorMaker::getDetectorId(int ew, int nstb) const
 {
-  /* --- GEANT hits in StMcCalorimeterHit --- */
-
-  /* module : 1=FPD, 2=FMS */
-  /* sub    : 1=FMS-North-Large, 2=FMS-South-Large, 3=FMS-North-Small, 4=FMS-South-Small */
-  /* eta    : 1-578=Channel */
-
-  /* --- FMS hits in StFmsHit --- */
-
   /* Detector Name detectorId ew ns type nX nY */
   /* FPD-North 0 0 0 0 7 7 */
   /* FPD-South 1 0 1 0 7 7 */
@@ -77,11 +84,8 @@ StFmsHit* StFmsSimulatorMaker::makeFmsHit(const g2t_emc_hit_st& hit) const
 {
   const int MAX_ADC = 4095;
 
-  // volume_id = ew*10000+nstb*1000+channel
-  int ew      = hit.volume_id / 10000;
-  int nstb    = hit.volume_id / 1000 % 10;
-  int channel = hit.volume_id % 1000;
-
+  int ew, nstb, channel;
+  decodeVolumeId(hit.volume_id,ew,nstb,channel);
   int detectorId = getDetectorId(ew,nstb);
 
   assert(detectorId >= 0);
@@ -124,7 +128,11 @@ int StFmsSimulatorMaker::Make()
   if (!event->fmsCollection()) event->setFmsCollection(new StFmsCollection);
 
   // Digitize GEANT FPD/FMS hits
-  assert(gStFmsDbMaker);
+  if (!gStFmsDbMaker) {
+    LOG_ERROR << "No gStFmsDbMaker" << endm;
+    return kStErr;
+  }
+
   fillStEvent(g2t_fpd_hit,event);
 
   // Print
@@ -140,6 +148,6 @@ int StFmsSimulatorMaker::Make()
 void StFmsSimulatorMaker::fillStEvent(const St_g2t_emc_hit* g2t_fpd_hit, StEvent* event)
 {
   const g2t_emc_hit_st* hits = g2t_fpd_hit->GetTable();
-  for (int i = 0; i < g2t_fpd_hit->GetNRows(); ++i)
-    event->fmsCollection()->hits().push_back(makeFmsHit(hits[i]));
+  const int nhits = g2t_fpd_hit->GetNRows();
+  for (int i = 0; i < nhits; ++i) event->fmsCollection()->addHit(makeFmsHit(hits[i]));
 }
