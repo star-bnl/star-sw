@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.18 2012/04/10 22:41:07 perev Exp $
+// $Id: StvMaker.cxx,v 1.19 2012/07/20 22:20:01 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -144,6 +144,7 @@ Int_t StvMaker::InitDetectors()
 //		Activate detectors
   if (IAttr("activeTpc")) { assert(tgh->SetActive(kTpcId,1,new StvTpcActive));}
   if (IAttr("activeEtr")) { assert(tgh->SetActive(kEtrId                   ));}
+  if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
 //		Now Initialize TGeo helper
   tgh->Init(1+2+4);
 
@@ -173,12 +174,23 @@ Int_t StvMaker::InitDetectors()
       assert(nHP);
   }
 
+  if (IAttr("activeFgt")) {    // FGT error calculator
+    StvHitErrCalculator *hec = new StvHitErrCalculator( "FgtHitErrs", 2);
+    Double_t fgtPars[ StvHitErrCalculator::kMaxPars]={
+      9e-4,9e-4,
+    };
+    hec -> SetPars( fgtPars );
+    Int_t nHP = tgh->SetHitErrCalc(kFgtId,hec,0);
+    Info("Init","%s: %d Hitplanes", "FgtHitErrs", nHP);
+  }
+     
+
   kit->SetHitLoader(new StvHitLoader);
   assert(kit->HitLoader()->Init());
 
 
   return kStOk;
-}
+} 
 
 //_____________________________________________________________________________
 Int_t StvMaker::InitRun(int run)
