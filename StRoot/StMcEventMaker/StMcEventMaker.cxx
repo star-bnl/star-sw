@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.76 2012/03/22 01:20:55 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.77 2012/07/21 18:45:09 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.77  2012/07/21 18:45:09  perev
+ * Cleanup
+ *
  * Revision 1.76  2012/03/22 01:20:55  perev
  * Etr add
  *
@@ -324,7 +327,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.76 2012/03/22 01:20:55 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.77 2012/07/21 18:45:09 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -782,11 +785,7 @@ Int_t StMcEventMaker::Make()
 	
 	long NVertices = g2t_vertexTablePointer->GetNRows();
 	  
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
 	vector<vertexFlag> vtemp(NVertices); // Temporary array for Step 3
-#else
-	vector<vertexFlag, allocator<vertexFlag> > vtemp(NVertices);
-#endif
        
 	if (Debug()>=1) cout << "Preparing to process and fill VERTEX information ....." << endl;
 	StMcVertex* v = 0;
