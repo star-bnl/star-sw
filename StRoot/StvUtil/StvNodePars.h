@@ -162,6 +162,8 @@ const StvFitErrs &operator*(const StvFitDers &mtx) const;
 double Sign() const;
    int Check(const char *tit=0) const;
    int Recov();
+double MaxCorr() const   ;//  maximal correlation
+  void SetMaxCorr(double maxCorr)  ;//  set maximal correlation
   void Print(const char *tit=0) const;
 static double EmxSign(int n,const double *S);
 static double EmxSign(int n,const float  *S);

@@ -458,6 +458,30 @@ ERR: if (!tit) return ierr;
   return ierr;
 }     
 //_____________________________________________________________________________
+double StvFitErrs::MaxCorr() const
+{
+  if (mHH+mZZ<=0) 		return 0;
+  double dia[5],maxCorr=0;const double *e=&mHH;
+  
+  for (int i=0,li=0;i< 5;li+=++i) {
+    dia[i]=e[li+i];
+    for (int j=0;j<i;j++) {
+      double corr = (e[li+j]/dia[i])*(e[li+j]/dia[j]);
+      if (maxCorr<corr) maxCorr=corr;
+  } }
+  return sqrt(maxCorr);
+}     
+//_____________________________________________________________________________
+void StvFitErrs::SetMaxCorr(double maxCorr) 
+{
+  double myMaxCorr = MaxCorr();
+  if (myMaxCorr<maxCorr) return;
+  double fak=maxCorr/myMaxCorr;
+  double *e = &mHH;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    for (int j=0;j<i;j++) { e[li+j]*=fak;} }
+}
+//_____________________________________________________________________________
 int StvFitErrs::Recov()
 {
 
