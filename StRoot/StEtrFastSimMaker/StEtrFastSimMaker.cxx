@@ -1,5 +1,8 @@
-/* $Id: StEtrFastSimMaker.cxx,v 1.2 2012/04/10 22:38:18 perev Exp $
+/* $Id: StEtrFastSimMaker.cxx,v 1.3 2012/07/21 18:43:53 perev Exp $
     $Log: StEtrFastSimMaker.cxx,v $
+    Revision 1.3  2012/07/21 18:43:53  perev
+    IdTruth added
+
     Revision 1.2  2012/04/10 22:38:18  perev
     Errors increased to 300 microns
 
@@ -70,7 +73,7 @@ int StEtrFastSimMaker::Make()
     int sector = (tb->volume_id/10000)%100;		// 12 sector in TRD layer, 0 - 11
 
     StEtrHit *etrHit = new StEtrHit(StThreeVectorF(xyzG),sector,layer,section,tb->de);
-    
+    etrHit->setIdTruth(tb->track_p,100);
     etrCol->addHit(etrHit);
   }
   Info("Make","%d EtrHits was pushed into StEvent",Nhits);
