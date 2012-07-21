@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.10 2012/07/13 23:26:55 perev Exp $
+ * $Id: StvNode.cxx,v 1.11 2012/07/21 18:58:32 perev Exp $
  *
  * /author Victor Perev
  */
@@ -53,7 +53,7 @@ double StvNode::GetTime() const
 //________________________________________________________________________________
 void StvNode::Print(const char *opt) const
 {
-static const char *txt = "XYZAPTCHREL";
+static const char *txt = "XYZAPTCHRELK";
 static const char *hhh = "xyzre";
   if (!opt || !opt[0]) opt = "_";
   TString myOpt(opt);
@@ -78,6 +78,7 @@ static const char *hhh = "xyzre";
     else if (txt[i]=='P')	{val = fp.getPt() ;}
     else if (txt[i]=='E')	{err[0] = sqrt(fe.mHH); err[1] = sqrt(fe.mZZ);}
     else if (txt[i]=='L')	{val = GetLen();}
+    else if (txt[i]=='K')	{val = fe.MaxCorr();}
     else 			{val = fp[i]      ;}
     if (abs(val+999)>1e-6) 	{ printf("\t%c=%g",txt[i],val);}
     if (err[0]>-999)  		{ printf("\tHH=%7.2g ZZ=%7.2g",err[0],err[1]);}
