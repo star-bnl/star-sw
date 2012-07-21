@@ -79,6 +79,20 @@ double TCEmx_t::Sign() const
   return 0;
 
 }
+//_____________________________________________________________________________
+double THEmx_t::MaxCorr() const
+{
+  if (mHH+mZZ<=0) 		return 0;
+  double dia[5],maxCorr=0;const double *e=&mHH;
+  
+  for (int i=0,li=0;i< 5;li+=++i) {
+    dia[i]=e[li+i];
+    for (int j=0;j<i;j++) {
+      double corr = (e[li+j]/dia[i])*(e[li+j]/dia[j]);
+      if (maxCorr<corr) maxCorr=corr;
+  } }
+  return sqrt(maxCorr);
+}     
 
 //______________________________________________________________________________
 void THEmx_t::Set(const double *errxy,const double *errz)
@@ -3545,7 +3559,7 @@ void THelixKFitter::Show() const
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.58 2012/06/19 23:50:42 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.59 2012/07/21 18:46:38 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3561,6 +3575,9 @@ void THelixKFitter::Show() const
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.59  2012/07/21 18:46:38  perev
+ * Method MaxCorr() added
+ *
  * Revision 1.58  2012/06/19 23:50:42  perev
  * Fix KFit::Test
  *

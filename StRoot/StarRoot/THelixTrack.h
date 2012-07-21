@@ -47,6 +47,7 @@ void Move(double const F[5][5]);
 void Backward();
 void Print(const char *tit=0) const;
 double Sign() const;
+double MaxCorr() const;
 public:
 //  dA: delta azimuth angle; dH: error along ort to dir and Z axis
 //  dC: error of curvature;  dZ == dZ; dL = dLambda
