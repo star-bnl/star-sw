@@ -1100,7 +1100,8 @@ void FEFcn::Approx(int nonBias)
   }//End tracks
   
   mXi2 = 1+myXi2/myN;
-  if (nonBias) mXi2 = 1+(mXi2-1)*myN/double(myN -mNTks*5);
+  if (nonBias) mXi2 = 1+(myXi2)/double(myN -mNTks*5);
+  printf("FEFcn::Approx(%d) = %g\n",nonBias,mXi2);
   TCL::vscale(mPars,mXi2,mPars,mNPars);
   Synchro('P');
 }
