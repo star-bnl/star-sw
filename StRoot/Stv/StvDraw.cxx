@@ -121,7 +121,8 @@ void  StvDraw::Trak(const StvTrack *tk, int dir, EDraw3DStyle sty)
   
   for (it=itBeg; it!=itEnd; (dir)? ++it:--it) {//Main loop
     rNode = *it;
-    if (rNode->mFE[dir].mHH<0) break; 		//this node is not filled
+    if (rNode->mFE[dir].mHH<0) 			continue; 		//this node is not filled
+    if (fabs(rNode->mFP[dir]._cosCA)<=0)  	continue;		//this node is not filled
 
     const StvHit  *hit  = rNode->GetHit();
     if (hit) {
