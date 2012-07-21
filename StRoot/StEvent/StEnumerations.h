@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.44 2012/05/07 14:42:57 fisyak Exp $
+ * $Id: StEnumerations.h,v 2.45 2012/07/21 03:31:37 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.45  2012/07/21 03:31:37  perev
+ * Increase Track Range 300=>500
+ *
  * Revision 2.44  2012/05/07 14:42:57  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -372,7 +375,7 @@ enum StEmcCrateStatus {crateUnknown       = 0,
  */
 // maximal sizes of tracking part of STAR in cm (Victor)
 enum StarMaxTrackRangeSize {kStarMaxTrackRangeR =  500, // including MTD
-                            kStarMaxTrackRangeZ =  300,
+                            kStarMaxTrackRangeZ =  500,
                             kStarMinTrackRangeZ = -kStarMaxTrackRangeZ};
 
 /*!
