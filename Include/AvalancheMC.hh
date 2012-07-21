@@ -66,6 +66,16 @@ class AvalancheMC {
     void SetHoles() {useIons = false;}
     void SetIons()  {useIons = true;}
 
+    void SetElectronSignalScalingFactor(const double scale) {
+      scaleElectronSignal = scale;
+    }
+    void SetHoleSignalScalingFactor(const double scale) {
+      scaleHoleSignal = scale;
+    }
+    void SetIonSignalScalingFactor(const double scale) {
+      scaleIonSignal = scale;
+    }
+
     void GetAvalancheSize(int& ne, int& ni) const {
       ne = nElectrons; ni = nIons;
     }
@@ -96,7 +106,7 @@ class AvalancheMC {
     bool DriftHole(const double x0, const double y0, const double z0,
                    const double t0);
     bool DriftIon(const double x0, const double y0, const double z0,
-                      const double t0);
+                  const double t0);
     bool AvalancheElectron(const double x0, const double y0, const double z0, 
                            const double t0, const bool hole = false);
     bool AvalancheHole(const double x0, const double y0, const double z0, 
@@ -176,18 +186,22 @@ class AvalancheMC {
     bool useIons;
     bool withElectrons;
     bool withHoles;
+    double scaleElectronSignal;
+    double scaleHoleSignal;
+    double scaleIonSignal;
+
     bool debug;
     
     // Compute a drift line with starting point (x0, y0, z0)
     bool DriftLine(const double x0, const double y0, const double z0, 
-                   const double t0, const int q, const bool aval = false);
+                   const double t0, const int type, const bool aval = false);
     bool Avalanche();
     // Compute effective multiplication and ionisation 
     // for the current drift line
     bool ComputeAlphaEta(const int q);
     // Compute the induced signal for the current drift line
-    void ComputeSignal(const int q);
-    void ComputeInducedCharge(const int q);
+    void ComputeSignal(const double q);
+    void ComputeInducedCharge(const double q);
 
     double Min(const double x1, const double x2) const {
       return x1 > x2 ? x2 : x1;

@@ -74,10 +74,10 @@ class Sensor {
     void NewSignal() {++nEvents;}
     // Reset signals and induced charges of all electrodes
     void ClearSignal();
-    void AddSignal(const int q, const double t, const double dt,
+    void AddSignal(const double q, const double t, const double dt,
                    const double x,  const double y,  const double z,
                    const double vx, const double vy, const double vz);
-    void AddInducedCharge(const int q, 
+    void AddInducedCharge(const double q, 
                           const double x0, const double y0, const double z0,
                           const double x1, const double y1, const double z1);
     // Set/get the time window and binning for the signal calculation

@@ -53,8 +53,10 @@ Sensor::ElectricField(const double x, const double y, const double z,
       status = stat;
       medium = med;
     }
-    ex += fx; ey += fy; ez += fz;
-    v += p;
+    if (stat == 0) {
+      ex += fx; ey += fy; ez += fz;
+      v += p;
+    }
   }
 
 }
@@ -77,7 +79,9 @@ Sensor::ElectricField(const double x, const double y, const double z,
       status = stat;
       medium = med;
     }
-    ex += fx; ey += fy; ez += fz;
+    if (stat == 0) {
+      ex += fx; ey += fy; ez += fz;
+    }
   }
 
 }
@@ -109,8 +113,8 @@ Sensor::WeightingField(const double x, const double y, const double z,
     if (electrodes[i].label == label) {
       fx = fy = fz = 0.;
       electrodes[i].comp->WeightingField(x, y, z, fx, fy, fz, label);
+      wx += fx; wy += fy; wz += fz;
     }
-    wx += fx; wy += fy; wz += fz;
   }
 
 }
@@ -417,7 +421,7 @@ Sensor::ClearSignal() {
 }
 
 void 
-Sensor::AddSignal(const int q, const double t, const double dt,
+Sensor::AddSignal(const double q, const double t, const double dt,
                   const double x,  const double y,  const double z,
                   const double vx, const double vy, const double vz) {
  
@@ -506,7 +510,7 @@ Sensor::AddSignal(const int q, const double t, const double dt,
 }
 
 void
-Sensor::AddInducedCharge(const int q, 
+Sensor::AddInducedCharge(const double q, 
                          const double x0, const double y0, const double z0,
                          const double x1, const double y1, const double z1) {
 

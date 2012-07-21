@@ -23,6 +23,7 @@ AvalancheMC::AvalancheMC() :
   useSignal(false), useInducedCharge(false), useEquilibration(true), 
   useDiffusion(true), useAttachment(false), useBfield(false), useIons(true), 
   withElectrons(true), withHoles(true),
+  scaleElectronSignal(1.), scaleHoleSignal(1.), scaleIonSignal(1.),
   debug(false) {
   
   className = "AvalancheMC";
@@ -307,7 +308,7 @@ AvalancheMC::DriftIon(
 
 bool 
 AvalancheMC::DriftLine(const double x0, const double y0, const double z0, 
-                       const double t0, const int q, const bool aval) {
+                       const double t0, const int type, const bool aval) {
 
   // Current position
   double x = x0, y = y0, z = z0;
@@ -384,7 +385,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   while (ok) {
   
     // Compute the drift velocity and the diffusion coefficients.
-    if (q < 0) {
+    if (type < 0) {
       if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) || 
           !medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
         std::cerr << className << "::DriftLine:\n";
@@ -395,7 +396,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         abortReason = StatusCalculationAbandoned;
         break;
       }
-    } else if (q == 1) {
+    } else if (type == 1) {
       if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) || 
           !medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
         std::cerr << className << "::DriftLine:\n";
@@ -406,7 +407,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         abortReason = StatusCalculationAbandoned;
         break;
       }
-    } else if (q == 2) {
+    } else if (type == 2) {
       if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) ||
           !medium->IonDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
         std::cerr << className << "::DriftLine:\n";
@@ -419,7 +420,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       }
     } else {
       std::cerr << className << "::DriftLine:\n";
-      std::cerr << "    Unknown drift line type (" << q << ").\n";
+      std::cerr << "    Unknown drift line type (" << type << ").\n";
       std::cerr << "    Program bug!\n";
       ok = false;
       abortReason = StatusCalculationAbandoned;
@@ -612,10 +613,10 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   int nElectronsOld = nElectrons;
   int nHolesOld = nHoles;
   int nIonsOld = nIons;
-  if ((q == -1 || q == 1) && (aval || useAttachment)) {
+  if ((type == -1 || type == 1) && (aval || useAttachment)) {
   
     // Compute Townsend and attachment coefficient
-    validAlphaEta = ComputeAlphaEta(q);
+    validAlphaEta = ComputeAlphaEta(type);
     if (ok) ok = validAlphaEta;
     
     // Subdivision of a step
@@ -661,9 +662,9 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
           // Check if the particle has survived.
           if (ne <= 0) {
             trapped = true;
-            if (q == -1) {
+            if (type == -1) {
               --nElectrons;
-            } else if (q == 1) {
+            } else if (type == 1) {
               --nHoles;
             } else {
               --nIons;
@@ -678,10 +679,10 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         // If at least one new electron has been created,
         // add the new electrons to the table.
         if (ne - neInit >= 1) {
-          if (q == -1) {
+          if (type == -1) {
             drift[i].ne = ne - neInit;
             nElectrons += ne - neInit;
-          } else if (q == 1) {
+          } else if (type == 1) {
             drift[i].nh = ne - neInit;
             nHoles += ne - neInit;
           } else {
@@ -690,7 +691,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
           }
         }
         if (ni - niInit >= 1) {
-          if (q == -1) {
+          if (type == -1) {
             if (useIons) {
               drift[i].ni = ni - niInit;
               nIons += ni - niInit;
@@ -747,40 +748,44 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
                            << endPoint.z1 << ").\n";
   }
 
-  if (q == -1) {
+  if (type == -1) {
     endpointsElectrons.push_back(endPoint);
     ++nEndpointsElectrons;
-  } else if (q == 1) {
+  } else if (type == 1) {
     endpointsHoles.push_back(endPoint);
     ++nEndpointsHoles;
-  } else if (q == 2) {
+  } else if (type == 2) {
     endpointsIons.push_back(endPoint);
     ++nEndpointsIons;
   }
 
   // Compute the induced signals if requested.
   if (useSignal) {
-    if (q == 2) {
-      ComputeSignal(1);
-    } else {
-      ComputeSignal(q);
+    if (type == 2) {
+      ComputeSignal(1. * scaleIonSignal);
+    } else if (type == 1) {
+      ComputeSignal(1. * scaleHoleSignal);
+    } else if (type < 0) {
+      ComputeSignal(-1. * scaleElectronSignal);
     }
   }
   if (useInducedCharge) {
-    if (q == 2) {
-      ComputeInducedCharge(1);
-    } else {
-      ComputeInducedCharge(1);
+    if (type == 2) {
+      ComputeInducedCharge(1. * scaleIonSignal);
+    } else if (type == 1) {
+      ComputeInducedCharge(1. * scaleHoleSignal);
+    } else if (type < 0) {
+      ComputeInducedCharge(-1. * scaleElectronSignal);
     }
   }
 
   // Plot the drift line if requested.
   if (usePlotting && nDrift > 0) {
     int jL;
-    if (q < 0) {
+    if (type < 0) {
       viewer->NewElectronDriftLine(nDrift, jL, 
                                    drift[0].x, drift[0].y, drift[0].z);
-    } else if (q == 1) {
+    } else if (type == 1) {
       viewer->NewHoleDriftLine(nDrift, jL,
                                drift[0].x, drift[0].y, drift[0].z);
     } else {
@@ -971,7 +976,7 @@ AvalancheMC::Avalanche() {
 }
 
 bool 
-AvalancheMC::ComputeAlphaEta(const int q) {
+AvalancheMC::ComputeAlphaEta(const int type) {
  
   // Locations and weights for 6-point Gaussian integration
   const double tg[6] = {
@@ -1037,7 +1042,7 @@ AvalancheMC::ComputeAlphaEta(const int q) {
         sensor->MagneticField(x, y, z, bx, by, bz, status);
         bx *= Tesla2Internal; by *= Tesla2Internal; bz *= Tesla2Internal;
       }
-      if (q < 0) {
+      if (type < 0) {
         medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
         medium->ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
         medium->ElectronAttachment(ex, ey, ez, bx, by, bz, eta);
@@ -1241,7 +1246,7 @@ AvalancheMC::ComputeAlphaEta(const int q) {
 }
 
 void 
-AvalancheMC::ComputeSignal(const int q) {
+AvalancheMC::ComputeSignal(const double q) {
 
   if (nDrift < 2) return;  
   double dt, dx, dy, dz;
@@ -1260,7 +1265,7 @@ AvalancheMC::ComputeSignal(const int q) {
 }
 
 void
-AvalancheMC::ComputeInducedCharge(const int q) {
+AvalancheMC::ComputeInducedCharge(const double q) {
 
   if (nDrift < 2) return;
   sensor->AddInducedCharge(q, 
