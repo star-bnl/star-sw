@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtHit.h,v 2.1 2012/04/16 20:20:49 ullrich Exp $
+ * $Id: StFgtHit.h,v 2.2 2012/07/21 03:32:34 perev Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtHit.h,v $
+ * Revision 2.2  2012/07/21 03:32:34  perev
+ * BugFix define detector()
+ *
  * Revision 2.1  2012/04/16 20:20:49  ullrich
  * Initial Revision
  *
@@ -41,7 +44,7 @@ public:
     
     // deconstructor
     ~StFgtHit();
-    
+virtual StDetectorId detector() const 		{return kFgtId;};   
     // accessors/modifiers for the map
     stripWeightMap_t& getStripWeightMap();
     const stripWeightMap_t& getStripWeightMap() const;
