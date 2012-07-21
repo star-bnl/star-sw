@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.16 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.17 2012/07/21 03:33:58 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.17  2012/07/21 03:33:58  perev
+ * Add Other hits
+ *
  * Revision 2.16  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -67,14 +70,15 @@
 #include "StThreeVectorD.hh"
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.16 2009/11/23 16:34:07 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.17 2012/07/21 03:33:58 perev Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
 					     mNumberOfPointsTpc(0),
 					     mNumberOfPointsFtpcWest(0),
 					     mNumberOfPointsFtpcEast(0),
 					     mNumberOfPointsSvt(0),
-					     mNumberOfPointsSsd(0)
+					     mNumberOfPointsSsd(0),
+					     mNumberOfPointsOth(0)
 { /* noop */ }
 
 StTrackDetectorInfo::~StTrackDetectorInfo() { /* noop */ }
@@ -141,7 +145,7 @@ StTrackDetectorInfo::numberOfPoints(StDetectorId det) const
 	    return mNumberOfPointsSsd;
 	    break;
 	default:
-	    return 0;
+	    return mNumberOfPointsOth;
 	}
     }
 }
@@ -224,6 +228,8 @@ StTrackDetectorInfo::setNumberOfPoints(unsigned char val, StDetectorId det)
 	mNumberOfPointsSsd = val;
 	break;
     default:
+	mNumberOfPointsOth+= val;
+
 	break;
     }
 }

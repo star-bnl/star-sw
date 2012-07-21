@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.h,v 2.13 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTrackDetectorInfo.h,v 2.14 2012/07/21 03:33:54 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -31,6 +31,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.h,v $
+ * Revision 2.14  2012/07/21 03:33:54  perev
+ * Add Other hits
+ *
  * Revision 2.13  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -90,7 +93,7 @@ public:
     virtual ~StTrackDetectorInfo();
 
     const StThreeVectorF& firstPoint() const;
-    const StThreeVectorF& lastPoint() const;
+    const StThreeVectorF& lastPoint()  const;
 
     unsigned short        numberOfPoints() const;
     unsigned short        numberOfPoints(StDetectorId) const;
@@ -122,6 +125,7 @@ private:
     UChar_t        mNumberOfPointsFtpcEast;
     UChar_t        mNumberOfPointsSvt;
     UChar_t        mNumberOfPointsSsd;
+    UChar_t        mNumberOfPointsOth;	// Other hits 
     StPtrVecHit    mHits;
 
     ClassDef(StTrackDetectorInfo,2)
