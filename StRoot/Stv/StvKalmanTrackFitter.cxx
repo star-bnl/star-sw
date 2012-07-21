@@ -18,7 +18,8 @@
 ClassImp(StvKalmanTrackFitter)
 #define DIST2(a,b) ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 
-
+static const double kMaxCorr = 1.1;
+static const int    kNodesEnough = 3;
 
 //_____________________________________________________________________________
 StvKalmanTrackFitter::StvKalmanTrackFitter():StvTrackFitter("StvKalmanTrackFitter")
@@ -32,7 +33,7 @@ void StvKalmanTrackFitter::Clear(const char*)
 }
 
 //_____________________________________________________________________________
-int  StvKalmanTrackFitter::Refit(StvTrack *trak,int dir,int mode)
+int  StvKalmanTrackFitter::Refit(StvTrack *trak,int dir, int lane, int mode)
 {
 ///	refit or smouthe track, using the previous Kalman.
 ///     dir=0 moving from out to in
@@ -41,7 +42,6 @@ int  StvKalmanTrackFitter::Refit(StvTrack *trak,int dir,int mode)
 ///     mode=1 Join
 ///     fit direction is imagined from left to rite
 static int nCall=0; nCall++;
-static const double kBigErrFact = 16;
 
 static StvFitter *fitt = StvFitter::Inst();
 static const StvKonst_st  *kons = StvConst::Inst();
@@ -51,13 +51,17 @@ static const StvKonst_st  *kons = StvConst::Inst();
 //	Rite here: Previous Kalman chain, allready fitted, in different direction.
 //	It was made from rite to left
 
-
-  int nFits = trak->GetNFits(1-dir);
+  int jane=1-lane;
   int nFitLeft=0;		// number of fits made by this pass excluding current node
-  int nFitRite=nFits;		// number of fits made during previous
+  int nFitRite=0;		// number of fits made during previous
   				// pass in different direction, including current node 
   int wasFitted=0;		// this node was fitted in previous pass
-
+  if (mode&1) {//Join of two lanes
+    nFitRite = trak->GetNFits(jane);}
+  else        {//no join. lanes independent
+    jane=lane;
+  }
+  int nErr = 0;
 
   StvNodeIter it,itBeg,itEnd;
   if (dir) { //fit in ==> out
@@ -68,6 +72,7 @@ static const StvKonst_st  *kons = StvConst::Inst();
 
 
   double myXi2=3e33;
+  mWorstXi2=0;mWorstNode=0;
   StvNode *node=0,*preNode=0,*innNode=0,*outNode=0;
   int iNode=0;
 
@@ -77,12 +82,16 @@ static const StvKonst_st  *kons = StvConst::Inst();
     if (!dir) 	{ innNode = node; outNode = preNode;}
     else 	{ outNode = node; innNode = preNode;}
 enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
+    node->GetFE(lane).mHH = -1;
+    node->GetFE(lane).mHH = -1;
+
     int kase = 0;
     if (nFitLeft) 		kase|=kLeft;
     if (mode && nFitRite) 	kase|=kRite;
-    wasFitted = node->IsFitted(1-dir) && (mode&1);
+    const StvHit *hit = node->GetHit();
+    wasFitted = (mode&1)? 0:node->IsFitted(jane);
 //     if (wasFitted ) 		kase|=kHit;
-    if (node->GetHit())		kase|=kHit;
+    if (hit)			kase|=kHit;
 
 
 // kLeft 		= left fits only, no hit
@@ -91,7 +100,7 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 // kLeft+kRite 		= left fits, no hit, rite fits
 // kHit+kRite 		= No left fits, now hit, rite fits
 // kLeft+kRite+kHit 	= Left fits,now hit, rite fits
-    node->SetXi2(3e33,dir);
+    node->SetXi2(3e33,lane);
     switch (kase) {// 1st switch, fill PREDICTION
 
       default: assert(0 && "Wrong Case1");
@@ -100,8 +109,10 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
       case kNull|kHit: 	// No left, now Hit, No rite  
       case kRite: 	// No left, no  Hit, rite fits 
       case kNull: {	// Empty leading node
-        node->mPP[dir]  =  node->mFP[1-dir];			//prediction from opposite fit
-        node->mPE[dir].Set(node->mFE[1-dir],kBigErrFact);	//prediction from opposite fit
+//		It was not fits before(left) get params from previous dir
+//		and set huge errors
+        node->mPP[lane]  =  node->mFP[jane];		//prediction from opposite fit
+        node->mPE[lane].Reset(node->mPE[jane].mHz);	//Big errors
         break;
       }  
       case kLeft: 		// Left fits only, no  Hit
@@ -109,14 +120,12 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
       case kLeft|kRite     : 	// Left fits, no Hit, Rite fits
       case kLeft|kRite|kHit: 	// Left fits,now Hit, Rite fits
       {
-
-        int ret = Propagate(node,preNode,dir);		//prediction from last fit
-        if (ret) return ret;
+//		It was fits before. Propagate it
+       Propagate(node,preNode,lane);		//prediction from last fit
        break;
       }  
 
     }//End 1st prediction switch
-
 
     switch (kase) {// 2nd switch, fill FITD
 
@@ -125,7 +134,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
       case kRite: 	// Rite fits only, no  Hit
       case kLeft|kRite: // Left fits, no Hit, Rite fits
       {
-        node->SetFit(node->mPP[dir],node->mPE[dir],dir); 
+//		No hit. Fit = Prediction		
+        node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
         break;
       }
 
@@ -134,26 +144,31 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
       case kRite|      kHit: // No left, now Hit, rite fits 
       case kLeft|kRite|kHit: // Left fits,now Hit, Rite fits
       {
-	StvHit *hit = node->GetHit();
-	fitt->Set(node->mPP+dir,node->mPE+dir,node->mFP+dir,node->mFE+dir);
+//		Fit it		
+	fitt->Set(node->mPP+lane,node->mPE+lane,node->mFP+lane,node->mFE+lane);
 	fitt->Prep();
 
 	myXi2 = fitt->Xi2(hit);
-	if (myXi2> kons->mXi2Hit)	{	//Fit failed
-	  node->SetFit(node->mPP[dir],node->mPE[dir],dir); 	
-	  node->SetXi2(1e11,dir);
-	} else 				{	//Fit accepted
-          nFitLeft++; kase|=kLeft;
-	  node->SetXi2(myXi2,dir);
-	  fitt->Update();
-          node->mFP[2] = node->mFP[dir];
-          node->mFE[2] = node->mFE[dir];
+	if (myXi2> kons->mXi2Hit) 	{ //Fit failed
+	  nErr++;		
+          if (myXi2>mWorstXi2) 		{ mWorstXi2= myXi2; mWorstNode=node;}
         }
+        nFitLeft++; kase|=kLeft;
+	node->SetXi2(myXi2,lane);
+	fitt->Update();
+        if (nFitLeft<=kNodesEnough && jane!=lane) {
+	  node->mFP[lane] = node->mFP[jane];}
+
+        node->mFP[2] = node->mFP[lane];
+//??        node->mFE[lane].SetMaxCorr(kMaxCorr);
+        node->mFE[2] = node->mFE[lane];
         break;
       }
+
       default: assert(0 && "Wrong Case2");
 
     }//end 2nd switch
+
     if (!mode) continue;
 
     switch (kase) {// 3rd switch,JOIN
@@ -161,35 +176,38 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
        default:
       {
 	breakNode = (dir)? node:preNode;
-	fitt->Set(node->mFP+dir   ,node->mFE+dir
-        	 ,node->mPP-dir+1 ,node->mPE+dir+1
+        StvNodePars *inP=node->mFP+lane  ,*jnP=node->mPP+jane;
+        StvFitErrs  *inE=node->mFE+lane  ,*jnE=node->mPE+jane;
+	if (inE->mHH+inE->mZZ<jnE->mHH+jnE->mZZ) {
+                     inP=node->mFP+jane; jnP=node->mPP+lane  ;
+		     inE=node->mFE+jane; jnE=node->mPE+lane  ;}
+	fitt->Set(inP         ,inE
+        	 ,jnP         ,jnE
         	 ,node->mFP+2 ,node->mFE+2);
 	node->SetXi2(3e33,2);
 	myXi2 = fitt->Xi2(); 
-	if (myXi2 < kons->mXi2Joi) {
-	  fitt->Update();
-	  node->SetXi2(myXi2,2);
-          break;
-	}
-//		We got a problem, join is faled
-//              if no guilty hit refit failed
-	  const char *key = (dir)? "Join111.Fail":"Join000.Fail";
-	  StvDebug::Count(key,myXi2); 
-	  /*trak->CutTail(breakNode);*/ return 4;
+	if (myXi2 > kons->mXi2Joi) nErr+=100;
+	fitt->Update();
+	node->SetXi2(myXi2,2);
+        break;
       }
 
     }//End 3rd case
     nFitRite-= wasFitted;
 
   }//endMainLoop
-  return 0;
+
+  return nErr;
 }
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir)
 {
+static int nCall=0; nCall++;
   StvNode *innNode=0,*outNode=0;
   if (!dir) {innNode = node; outNode=preNode;}
   else      {outNode = node; innNode=preNode;}
+//????  assert(innNode->GetFP().getRxy()<outNode->GetFP().getRxy());
+
 #if 0 //???????????????????????????????????????????????
   do { //Attempt to propagate with linear approximation;
     node->mPP[dir] = node->mFP[1-dir];
@@ -203,18 +221,18 @@ int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir)
     node->mPE[dir].SetHz(node->mPP[dir]._hz);
     node->mPE[dir].Add(innNode->mELossData,node->mPP[dir]);
     if(node->mPE[dir].Check()) break; 
-    return 0;
+//    return 0;
   } while(0);
 #endif
 
 //		Propagate with THelixTrack
   double point[3];
   const StvHit *hit = node->GetHit();
-  if (hit) {
+  if (hit) {//
     const float *f = hit->x(); 
     point[0] = f[0]; point[1] = f[1]; point[2]= f[2];}
   else     {
-    const double *P = node->mFP[1-dir].P;
+    const double *P = node->mFP[0].P;
     point[0] = P[0]; point[1] = P[1]; point[2]= P[2];}
 
   THelixTrack myHlx;
@@ -224,16 +242,19 @@ int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir)
   double dS = myHlx.Path(point);
   StvHlxDers derHlx;
   StvFitDers derFit;
-  myHlx.Move(dS,derHlx);
   double rho = myHlx.GetRho();
-  rho += -rho*innNode->GetELoss().mdPPdL*dS;
-  myHlx.Set(rho);
+  double dRho = rho*innNode->GetELoss().mdPPdL*dS;
+  myHlx.Set(rho+dRho/3);
+  dS = myHlx.Path(point);
+  myHlx.Move(dS,derHlx);
+  myHlx.Set(rho+dRho);
   node->mPP[dir].set(&myHlx,node->GetHz());
   node->mPE[dir].Set(&myHlx,node->GetHz());
+  node->mPE[dir].SetMaxCorr(kMaxCorr);
   node->mPE[dir].Add(innNode->mELossData,node->mPP[dir]);
   node->mPP[dir].convert(derFit,derHlx);
   innNode->SetDer(derFit,dir);
-  if(node->mPE[dir].Check())  return 1; 
+
   return 0;
   
 }
