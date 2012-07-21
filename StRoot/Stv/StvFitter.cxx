@@ -15,7 +15,6 @@ StvFitter *StvFitter::mgFitter=0;
 #define DIST(a,b)   ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 #define DDOT(a,b,c) ((a[0]-b[0])*c[0]+(a[1]-b[1])*c[1]+(a[2]-b[2])*c[2])
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
-static double kBigErr=1.;
 
 
 static inline double MyXi2(const double G[3],double dA,double dB)  
@@ -181,6 +180,7 @@ static int nCall=0; nCall++;
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
 		        ,  myJrkPars.Arr(),mOtErrs->Arr());
   assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2+1));
+  assert(mOtErrs->MaxCorr()<1);
 //   assert(fabs(myJrkPars.mH) <3.);
 //   assert(fabs(myJrkPars.mZ) <3.);
 
