@@ -11,7 +11,7 @@ St_StvKonst *tableSet = new St_StvKonst("StvKonst",1);
 memset(&row,0,tableSet->GetRowSize());
   row.mXi2Hit = 22*3;		//Xi2 to accept new hit
   row.mXi2Vtx = 55*3;		//Xi2 to accept vertex
-  row.mXi2Joi = 33*3;		//Xi2 in Refit join left & right subtrack
+  row.mXi2Joi = 55*3;		//Xi2 in Refit join left & right subtrack
   row.mXi2Hlx = row.mXi2Hit*9;  //Xi2 in Helix, .
   row.mRxyMax = 300;		//Max radius for tracking
   row.mZMax   = 300;		//Max Z      for tracking
