@@ -62,7 +62,7 @@ static const StvKonst_st  *kons = StvConst::Inst();
     int myMinHits = kons->mMinHits;
     if(sf->Again()) myMinHits = kons->mGoodHits;
     for (int repeat =0;repeat<5;repeat++) {//Repeat search the same seed finder 
-      nTrk = 0;nSeed=0;
+      nTrk = 0;nSeed=0; sf->Again();
       while ((mSeedHelx = sf->NextSeed())) 
       {
 	nSeed++;
@@ -77,25 +77,20 @@ static const StvKonst_st  *kons = StvConst::Inst();
 //         }
 	int ans = 0,fail=13;
     //		Refit track   
-#if 1 ///??????????????????????????????
 	do {
 	  ans = Refit(1);
-	  nHits = mCurrTrak->GetNHits();
-	  if (nHits<myMinHits)			break;
-	  if (ans) 				continue;
-	  if (mCurrTrak->Check("Two",1+2))  	continue;
+	  if (ans) 				break;
 	  nAdded = FindTrack(1);
-          if (nAdded<0)				break;
-	  if (mCurrTrak->Check("THree",2))	continue;
+          if (nAdded<=0)			continue;;
     // few hits added. Refit track to beam again 
 	  ans = Refit(0);
-	  if (ans) 				continue;
-	  if(mCurrTrak->Check("Four",3))	continue;
+	  if (ans) 				break;
 	} while((fail=0));		
-	if (fail) 				continue;
-#endif ////???????????????????????
 	nHits = mCurrTrak->GetNHits();
-	if (nHits < myMinHits)			continue;
+	if (nHits < myMinHits)	fail+=100;		;
+	if (fail) 	{//Track is failed, release hits & continue
+	  mCurrTrak->CutTail();			continue;
+        }
 	StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
 	if (node) node->UpdateDca();
         if (node && fabs(node->GetFP()._curv) <1./300) {
@@ -103,17 +98,17 @@ static const StvKonst_st  *kons = StvConst::Inst();
         }
 
 	kit->GetTracks().push_back(mCurrTrak);
-	nTrk++;
+	nTrk++;nTrkTot++;
 	aveRes += mCurrTrak->GetRes();
 	aveXi2 += mCurrTrak->GetXi2();
 	mCurrTrak=0;
       }
-      myMinHits = kons->mMinHits;
-      nTrkTot+=nTrk; nSeedTot+=nSeed;
+      nSeedTot+=nSeed;
       Info("FindTracks:","SeedFinder(%s) Seeds=%d Tracks=%d ratio=%d\%\n"
           ,sf->GetName(),nSeed,nTrk,(100*nTrk)/(nSeed+1));
       
-      if (!nTrk || !sf->Again()) break;
+      if (!nTrk && myMinHits == kons->mMinHits) break;
+      myMinHits = kons->mMinHits;
     }//End of repeat
   }//End of seed finders
 
@@ -142,7 +137,7 @@ StvHitCount hitCount;
     assert(!idir);
     double Hz = kit->GetHz(mSeedHelx->Pos());
     par[0].set(mSeedHelx,Hz); par[0].reverse();			//Set seed pars into par[0]
-    err[0].Reset(); err[0].SetHz(par[0]._hz);
+    err[0].Reset(Hz); 
   } else 	{//Forward or backward tracking
  
     curNode =(idir)? mCurrTrak->back(): mCurrTrak->front();
@@ -183,7 +178,6 @@ StvFitDers derivFit;
     idive = mDive->Dive();
 
 //+++++++++++++++++++++++++++++++++++++
-//????    assert(!(mySkip && !idive));
     if (mySkip && !idive) {
       Warning("FindTrack","Strange case mySkip!=0 and iDive==0");
       break;
@@ -225,7 +219,8 @@ if (DoShow()) {
 //    assert(!idive || !par[0].check("FindTrack.1"));
     curNode->mLen = (!idir)? totLen:-totLen;
 		// Set prediction
-    curNode->SetPre(par[0],err[0],idir);
+    curNode->SetPre(par[0],err[0],0);
+    assert(!preNode || innNode->GetFP().getRxy()<outNode->GetFP().getRxy());
     innNode->SetDer(derivFit,idir);
     innNode->SetELoss(mDive->GetELossData(),idir);
 
@@ -261,26 +256,21 @@ if (DoShow()) {
       assert(fabs(minXi2-myXi2)<1e-5);
 		//fitted pars again in par[1]
       int iuerr = fitt->Update();if (iuerr){}; 
-      assert(err[0].mHH>err[1].mHH || err[0].mZZ>err[1].mZZ);
-      assert(err[0].mHH*err[0].mZZ > err[1].mHH*err[1].mZZ);
-
-
-      fShowTrak+=&par[1]._x;
-
       nHits++;
-      curNode->SetXi2(myXi2,idir);
-      curNode->SetHE(fitt->GetHitErrs());
-      if (nHits>5 && par[1].check("AfterFitter")) return -1;
-      curNode->SetFit(par[1],err[1],idir);
+      if (nHits<=3) par[1]=par[0]; //Fit is not reliable yet
+      if (par[1].check()) {	//Ugly parameters
+        hitCount.AddNit(); nHits--; curNode->SetHit(0);}
+      else {
+        hitCount.AddHit();
+        curNode->SetXi2(myXi2,0);
+        curNode->SetHE(fitt->GetHitErrs());
+        curNode->SetFit(par[1],err[1],0);
+      }
+
 		// par[0] again keeps the latest version og pars
       par[0]=par[1]; err[0]=err[1];
     }
 
-if (DoShow()) {
-//??    fShowFreeHits+=*localHits;
-    if (minHit)    fShowTrakHits.push_back(minHit);
-    printf("minXi2 = %g\n",minXi2);
-}
 
 
   } // End Dive&Fitter loop 
@@ -298,8 +288,6 @@ if (DoShow()) {
     if (hitCount.nTotNits )StvDebug::Count("GooTNits",hitCount.nTotNits);
     StvDebug::Count("GoodEff",eff);
   }
-
-  if (DoShow()) { Show();}
 
 
 
@@ -357,29 +345,29 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
 int StvKalmanTrackFinder::Refit(int idir)
 {
 static int nCall=0;nCall++;
-static       StvTrackFitter *tkf = StvTrackFitter::Inst();
-static const StvKonst_st    *kon = StvConst::Inst();
+static StvTrackFitter *tkf = StvTrackFitter::Inst();
   StvNode *node = 0;
   int ans=0;
+  int lane = 1;
   for (int refIt=0; refIt<5; refIt++)  {
-    ans = tkf->Refit(mCurrTrak,idir,1);
-    if (!ans) break;
-    for (int iter=0;iter<5;iter++) {
-      for (int ihlx = 0; ihlx <10; ihlx++) {
-	int nHits = mCurrTrak->GetNHits();
-	if (nHits<kon->mMinHits) return 10;
-	tkf->Helix(mCurrTrak,1|2);
-	node = tkf->GetWorstNode();
-	assert(node);
-	double badXi2 = tkf->GetWorstXi2();
-	if (badXi2<kon->mXi2Hlx) break;
-	node->SetHit(0);
-      }
-      ans = tkf->Refit(mCurrTrak,idir,0);
-      if (ans) continue;
-      ans = tkf->Refit(mCurrTrak,1-idir,1);
-      if (!ans) break;
-    }
+
+    ans = tkf->Refit(mCurrTrak,idir,lane,1);
+    if (!ans) 		break;	//SUCCESS
+    int nHits = mCurrTrak->GetNHits();
+    if (nHits<3) 	return 10;
+
+    printf("AfterRefit: worst Xi2 %g(%p)\n"
+          ,tkf->GetWorstXi2(),tkf->GetWorstNode());
+
+    tkf->Helix(mCurrTrak,1|2);
+    node = tkf->GetWorstNode();
+
+    printf("AfterHelix: worst Xi2 %g(%p)\n"
+          ,tkf->GetWorstXi2(),tkf->GetWorstNode());
+
+    assert(node);
+    node->SetHit(0);
+    ans = tkf->Refit(mCurrTrak,1-idir,1-lane,1);
   }
   node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
   if (!node) return ans;

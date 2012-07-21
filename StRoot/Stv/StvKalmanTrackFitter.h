@@ -15,7 +15,7 @@ class StvKalmanTrackFitter : public StvTrackFitter
 public:
   StvKalmanTrackFitter();
   virtual ~StvKalmanTrackFitter(){;}	
-  virtual  int Refit(StvTrack *trak,int dir,int mode=1);
+  virtual  int Refit(StvTrack *trak,int dir,int lane,int mode=1);
   virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node);
            int Propagate(StvNode  *node,StvNode *preNode,int dir);
   virtual  int Helix(StvTrack *trak,int mode);

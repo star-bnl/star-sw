@@ -1,5 +1,5 @@
 /// \File StvKalmanTrackFinder.h
-/// \author Victorb Perev 01/2010
+/// \author Victor Perev 01/2010
 #ifndef StvKalmanTrackFinder_HH
 #define StvKalmanTrackFinder_HH
 #include "StvTrackFinder.h"
