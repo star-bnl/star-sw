@@ -133,8 +133,23 @@ int StFmsSimulatorMaker::Make()
   }
 
   fillStEvent(g2t_fpd_hit,event);
+  printStEventSummary(event);
 
-  // Summarize number of hits and energy per detector
+  return kStOk;
+}
+
+void StFmsSimulatorMaker::fillStEvent(const St_g2t_emc_hit* g2t_fpd_hit, StEvent* event)
+{
+  const g2t_emc_hit_st* hits = g2t_fpd_hit->GetTable();
+  for (int i = 0; i < g2t_fpd_hit->GetNRows(); ++i) {
+    StFmsHit* hit = makeFmsHit(hits[i]);
+    if (hit) event->fmsCollection()->addHit(hit);
+  }
+}
+
+void  StFmsSimulatorMaker::printStEventSummary(const StEvent* event)
+{
+ // Summarize number of hits and energy per detector
   const int NDETECTORS = 14;
   const char* detectorNames[NDETECTORS] = { "FPD-North ", "FPD-South", "FPD-North-Pres", "FPD-South-Pres", "FPD-North-SMDV", "FPD-South-SMDV", "FPD-North-SMDH", "FPD-South-SMDH", "FMS-North-Large", "FMS-South-Large", "FMS-North-Small", "FMS-South-Small", "FHC-North", "FHC-South" };
   int nhits[NDETECTORS];
@@ -158,17 +173,6 @@ int StFmsSimulatorMaker::Make()
     LOG_INFO << detectorId << '\t' << detectorNames[detectorId] << '\t' << nhits[detectorId] << '\t' << detectorEnergy[detectorId] << endm;
   }
 
-  // Print hits
+   // Print hits
   if (Debug()) for (size_t i = 0; i < hits.size(); ++i) hits[i]->print();
-
-  return kStOk;
-}
-
-void StFmsSimulatorMaker::fillStEvent(const St_g2t_emc_hit* g2t_fpd_hit, StEvent* event)
-{
-  const g2t_emc_hit_st* hits = g2t_fpd_hit->GetTable();
-  for (int i = 0; i < g2t_fpd_hit->GetNRows(); ++i) {
-    StFmsHit* hit = makeFmsHit(hits[i]);
-    if (hit) event->fmsCollection()->addHit(hit);
-  }
 }
