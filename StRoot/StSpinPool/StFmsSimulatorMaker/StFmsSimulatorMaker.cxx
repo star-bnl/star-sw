@@ -19,7 +19,6 @@
 //     $STAR/StDb/idl/fmsQTMap.idl
 //
 
-#include <cassert>
 #include "tables/St_g2t_emc_hit_Table.h"
 #include "StEventTypes.h"
 #include "StFmsDbMaker/StFmsDbMaker.h"
@@ -87,18 +86,18 @@ StFmsHit* StFmsSimulatorMaker::makeFmsHit(const g2t_emc_hit_st& hit) const
   int ew, nstb, channel;
   decodeVolumeId(hit.volume_id,ew,nstb,channel);
   int detectorId = getDetectorId(ew,nstb);
-
-  assert(detectorId >= 0);
-
-  int qtCrate, qtSlot, qtChannel;
-  gStFmsDbMaker->getMap(detectorId,channel,&qtCrate,&qtSlot,&qtChannel);
-  float gain = gStFmsDbMaker->getGain(detectorId,channel);
-  float gainCorrection = gStFmsDbMaker->getGainCorrection(detectorId,channel);
-  int adc = int(hit.de/(gain*gainCorrection)+0.5);
-  if (adc > MAX_ADC) adc = MAX_ADC;
-  int tdc = 0;
-  float energy = adc*gain*gainCorrection;
-  return new StFmsHit(detectorId,channel,qtCrate,qtSlot,qtChannel,adc,tdc,energy);
+  if (detectorId >= 0 && detectorId <= gStFmsDbMaker->maxDetectorId()) {
+    int qtCrate, qtSlot, qtChannel;
+    gStFmsDbMaker->getMap(detectorId,channel,&qtCrate,&qtSlot,&qtChannel);
+    float gain = gStFmsDbMaker->getGain(detectorId,channel);
+    float gainCorrection = gStFmsDbMaker->getGainCorrection(detectorId,channel);
+    int adc = int(hit.de/(gain*gainCorrection)+0.5);
+    if (adc > MAX_ADC) adc = MAX_ADC;
+    int tdc = 0;
+    float energy = adc*gain*gainCorrection;
+    return new StFmsHit(detectorId,channel,qtCrate,qtSlot,qtChannel,adc,tdc,energy);
+  }
+  return 0;
 }
 
 int StFmsSimulatorMaker::Make()
@@ -129,18 +128,38 @@ int StFmsSimulatorMaker::Make()
 
   // Digitize GEANT FPD/FMS hits
   if (!gStFmsDbMaker) {
-    LOG_ERROR << "No gStFmsDbMaker" << endm;
+    LOG_ERROR << "No gStFmsDbMaker. StFmsDbMaker library not loaded?" << endm;
     return kStErr;
   }
 
   fillStEvent(g2t_fpd_hit,event);
 
-  // Print
-  if (Debug()) {
-    const StSPtrVecFmsHit& hits = event->fmsCollection()->hits();
-    LOG_INFO << "Number of FPD/FMS hits : " << hits.size() << endm;
-    for (size_t i = 0; i < hits.size(); ++i) hits[i]->print();
+  // Summarize number of hits and energy per detector
+  const int NDETECTORS = 14;
+  const char* detectorNames[NDETECTORS] = { "FPD-North ", "FPD-South", "FPD-North-Pres", "FPD-South-Pres", "FPD-North-SMDV", "FPD-South-SMDV", "FPD-North-SMDH", "FPD-South-SMDH", "FMS-North-Large", "FMS-South-Large", "FMS-North-Small", "FMS-South-Small", "FHC-North", "FHC-South" };
+  int nhits[NDETECTORS];
+  float detectorEnergy[NDETECTORS];
+
+  // Zero
+  fill(nhits,nhits+NDETECTORS,0);
+  fill(detectorEnergy,detectorEnergy+NDETECTORS,0.);
+
+  // Sum number of hits and energies
+  const StSPtrVecFmsHit& hits = event->fmsCollection()->hits();
+  for (size_t i = 0; i < hits.size(); ++i) {
+    const StFmsHit* hit = hits[i];
+    ++nhits[hit->detectorId()];
+    detectorEnergy[hit->detectorId()] += hit->energy();
   }
+
+  // Print detectors summary
+  LOG_INFO << "ID\tNAME\t\tNHITS\tENERGY" << endm;
+  for (int detectorId = 0; detectorId < NDETECTORS; ++detectorId) {
+    LOG_INFO << detectorId << '\t' << detectorNames[detectorId] << '\t' << nhits[detectorId] << '\t' << detectorEnergy[detectorId] << endm;
+  }
+
+  // Print hits
+  if (Debug()) for (size_t i = 0; i < hits.size(); ++i) hits[i]->print();
 
   return kStOk;
 }
@@ -148,6 +167,8 @@ int StFmsSimulatorMaker::Make()
 void StFmsSimulatorMaker::fillStEvent(const St_g2t_emc_hit* g2t_fpd_hit, StEvent* event)
 {
   const g2t_emc_hit_st* hits = g2t_fpd_hit->GetTable();
-  const int nhits = g2t_fpd_hit->GetNRows();
-  for (int i = 0; i < nhits; ++i) event->fmsCollection()->addHit(makeFmsHit(hits[i]));
+  for (int i = 0; i < g2t_fpd_hit->GetNRows(); ++i) {
+    StFmsHit* hit = makeFmsHit(hits[i]);
+    if (hit) event->fmsCollection()->addHit(hit);
+  }
 }
