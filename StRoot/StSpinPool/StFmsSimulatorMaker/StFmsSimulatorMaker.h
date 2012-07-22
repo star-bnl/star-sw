@@ -26,6 +26,7 @@ private:
   int getDetectorId(int ew, int nstb) const;
   StFmsHit* makeFmsHit(const g2t_emc_hit_st&) const;
   void fillStEvent(const St_g2t_emc_hit*, StEvent*);
+  void printStEventSummary(const StEvent*);
 
   ClassDef(StFmsSimulatorMaker,0);
 };
