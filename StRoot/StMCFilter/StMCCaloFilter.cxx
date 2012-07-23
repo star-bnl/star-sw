@@ -1,5 +1,4 @@
-#include "stdlib.h"
-#include "math.h"
+
 #include <iostream>
 #include <vector>
 #include <map>
@@ -7,6 +6,8 @@
 #include "StMCFilter/StGenParticle.h"
 #include "StMCFilter/StMCCaloFilter.h"
 
+#include "TString.h"
+#include "TMath.h"
 
 // IMPORTANT IMPORTANT IMPORTANT
 // Defining the static instance of user filter provides creating this
@@ -104,10 +105,12 @@ int StMCCaloFilter::RejectGT(const StGenParticleMaster &ptl) const
     double p[4] = {0, 0, 0, 0};
     double v[3] = {0, 0, 0};
 
+    //
     // Immediately abort events with extreme vertices
+    //  
     track = ptl(0);
     track->Vertex(v);    
-    if(fabs(v[2]) > mMaxVertex) return 1;
+    if(TMath::Abs(v[2]) > mMaxVertex) return 1;
 
     // Resume instantiations
     double E = 0;
@@ -151,7 +154,7 @@ int StMCCaloFilter::RejectGT(const StGenParticleMaster &ptl) const
         // photons (22), neutral pions (111), eta (221), electrons (11)
         // antiprotons (-2212), and antineutrons (-2112)
 
-        hadronFlag = abs(id) != 22 && abs(id) != 111 && abs(id) != 221 && abs(id) != 11;
+        hadronFlag = TMath::Abs(id) != 22 && TMath::Abs(id) != 111 && TMath::Abs(id) != 221 && TMath::Abs(id) != 11;
         hadronFlag &= id != -2212 && id != -2112;
 
        if(hadronFlag) E *= mHadronEfract;
@@ -161,19 +164,19 @@ int StMCCaloFilter::RejectGT(const StGenParticleMaster &ptl) const
         track->Momentum(p);
 
         pT2 = p[0] * p[0] + p[1] * p[1];
-        particleEt = E * sqrt( pT2 / (pT2 + p[2] * p[2]) );
+        particleEt = E * TMath::Sqrt( pT2 / (pT2 + p[2] * p[2]) );
 
         // Compute track kinematics corrected for vertex
         pdotv = p[0] * v[0] + p[1] + v[1];
         pcrossv = p[0] * v[1] - p[1] * v[0];
-        N = ( - pdotv + sqrt( pT2 * rSmd2 - pcrossv ) ) / pT2;
+        N = ( - pdotv + TMath::Sqrt( pT2 * rSmd2 - pcrossv ) ) / pT2;
 
         for(unsigned int j = 0; j < 3; ++j) p[j] = N * p[j] + v[j];
 
         rho2 = p[0] * p[0] + p[1] * p[1];
 
-        detectorEt = E * sqrt( rho2 / (rho2 + p[2] * p[2] ) );
-        detectorEta = - log( sqrt(rho2) / ( sqrt( rho2 + p[2] * p[2] ) + p[2] ) );
+        detectorEt = E * TMath::Sqrt( rho2 / (rho2 + p[2] * p[2] ) );
+        detectorEta = - log( TMath::Sqrt(rho2) / ( TMath::Sqrt( rho2 + p[2] * p[2] ) + p[2] ) );
         detectorPhi = atan2(p[1], p[0]);
 
         // Ignore tracks outside of the fiducial volume
@@ -259,7 +262,7 @@ int StMCCaloFilter::RejectGT(const StGenParticleMaster &ptl) const
 
             dEta = itSeed->second.eta - itEvent->second.eta;
             dPhi = acos( cos( itSeed->first - itEvent->first) );
-            R = sqrt( dEta * dEta + dPhi * dPhi );
+            R = TMath::Sqrt( dEta * dEta + dPhi * dPhi );
 
             if(R < mConeRadius) EtSum += itEvent->second.Et;
 
@@ -282,10 +285,10 @@ int StMCCaloFilter::RejectGT(const StGenParticleMaster &ptl) const
 
         // If a cluster was found above threshold, 
         // let the event through the filter
-	printf("Filter Found EtSum=%f inpEve=%d\n",EtSum,gInpEvent);
+	cout << Form("Filter Found EtSum=%f inpEve=%d",EtSum,gInpEvent) << endl;
         if(EtSum > mClusterThreshold) {
 	  gKeepEvent++;
-	  printf("Filter Accept %d eve of %d tried,  EtSum=%.1f \n",gKeepEvent,gInpEvent,EtSum);
+	  cout << Form("Filter Accept %d eve of %d tried, Etsum=%.1f\n",gKeepEvent,gInpEvent,EtSum) << endl;
 	  return 0; // 0 FOR BOTH TESTS, keep this event
 	}
  
