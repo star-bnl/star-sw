@@ -93,11 +93,25 @@ void RunJetFinder2009pro(int nevents = 1e6,
   filterMaker->addTrigger(240124);
   filterMaker->addTrigger(240224);
 
-  // 2011 pp500
-  filterMaker->addTrigger(330600);
-  filterMaker->addTrigger(330601);
-  filterMaker->addTrigger(330603);
-  filterMaker->addTrigger(330612);
+  // 2011 pp500 transverse
+  filterMaker->addTrigger(320600); // JP0
+  filterMaker->addTrigger(320601); // JP1
+  filterMaker->addTrigger(320602); // JP2*L2JetHigh
+  filterMaker->addTrigger(320603); // AJP
+  filterMaker->addTrigger(320800); // BHT2*JP1*L2Bgamma
+  filterMaker->addTrigger(320801); // BHT3*L2BW
+  filterMaker->addTrigger(320850); // EHT0*JP1*L2Egamma
+  filterMaker->addTrigger(320851); // EHT1*L2EW
+
+  // 2011 pp500 longitudinal
+  filterMaker->addTrigger(330600); // JP0
+  filterMaker->addTrigger(330601); // JP1
+  filterMaker->addTrigger(330603); // AJP
+  filterMaker->addTrigger(330612); // JP2*L2JetHigh
+  filterMaker->addTrigger(330800); // BHT2*JP1*L2Bgamma
+  filterMaker->addTrigger(330801); // BHT3*L2BW
+  filterMaker->addTrigger(330850); // EHT0*JP1*L2Egamma
+  filterMaker->addTrigger(330851); // EHT1*L2EW
 
   // star database
   St_db_Maker* starDb = new St_db_Maker("StarDb","MySQL:StarDb");
