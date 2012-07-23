@@ -138,10 +138,8 @@ int StFmsSimulatorMaker::Make()
 void StFmsSimulatorMaker::fillStEvent(const St_g2t_emc_hit* g2t_fpd_hit, StEvent* event)
 {
   const g2t_emc_hit_st* hits = g2t_fpd_hit->GetTable();
-  for (int i = 0; i < g2t_fpd_hit->GetNRows(); ++i) {
-    StFmsHit* hit = makeFmsHit(hits[i]);
-    if (hit) event->fmsCollection()->addHit(hit);
-  }
+  for (int i = 0; i < g2t_fpd_hit->GetNRows(); ++i)
+    event->fmsCollection()->addHit(makeFmsHit(hits[i]));
 }
 
 void  StFmsSimulatorMaker::printStEventSummary(const StEvent* event)
