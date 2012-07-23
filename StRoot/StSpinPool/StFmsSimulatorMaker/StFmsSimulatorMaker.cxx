@@ -163,6 +163,7 @@ void  StFmsSimulatorMaker::printStEventSummary(const StEvent* event)
   const StSPtrVecFmsHit& hits = event->fmsCollection()->hits();
   for (size_t i = 0; i < hits.size(); ++i) {
     const StFmsHit* hit = hits[i];
+    if (Debug()) hit->print();
     ++nhits[hit->detectorId()];
     detectorEnergy[hit->detectorId()] += hit->energy();
   }
@@ -172,7 +173,4 @@ void  StFmsSimulatorMaker::printStEventSummary(const StEvent* event)
   for (int detectorId = 0; detectorId < NDETECTORS; ++detectorId) {
     LOG_INFO << detectorId << '\t' << detectorNames[detectorId] << '\t' << nhits[detectorId] << '\t' << detectorEnergy[detectorId] << endm;
   }
-
-   // Print hits
-  if (Debug()) for (size_t i = 0; i < hits.size(); ++i) hits[i]->print();
 }
