@@ -4,15 +4,15 @@
 // 28 May 2010
 //
 
-void RunJetFinder2009pro(int nevents = 1e6,
-			 const char* mudstfile = "root://xrdstar.rcf.bnl.gov:1095//home/starlib/home/starreco/reco/production2009_200Gev_Single/ReversedFullField/P10ic/2009/145/10145032/st_physics_10145032_raw_6030001.MuDst.root",
-			 const char* jetfile   = "jets.root",
-			 const char* skimfile  = "skim.root",
+void RunJetFinder2009pro(int nevents = 1e7,
+			 const char* mudstfile = "/star/data65/reco/production2009_200Gev_Single/FullField/P11id/2009/150/10150053/st_physics_10150053_raw_4030003.MuDst.root",
+			 const char* jetfile = "jets.root",
+			 const char* skimfile = "skim.root",
 			 bool useL2 = false)
 {
-  cout << "Read MuDst file:\t" << mudstfile << endl;
-  cout << "Write jet file:\t" << jetfile << endl;
-  cout << "Write skim file:\t" << skimfile << endl;
+  cout << "mudstfile = " << mudstfile << endl;
+  cout << "jetfile = " << jetfile << endl;
+  cout << "skimfile = " << skimfile << endl;
 
   gROOT->Macro("loadMuDst.C");
   gROOT->Macro("LoadLogger.C");
@@ -225,7 +225,8 @@ void RunJetFinder2009pro(int nevents = 1e6,
 
   // Jet cuts
   anapars5->addJetCut(new StProtoJetCutPt(5,200));
-  anapars5->addJetCut(new StProtoJetCutEta(0.8,2.5));
+  //anapars5->addJetCut(new StProtoJetCutEta(0.8,2.5));
+  anapars5->addJetCut(new StProtoJetCutEta(-100,100));
 
   // Set analysis cuts for EMC branch
   StAnaPars* anaparsEMC = new StAnaPars;
@@ -264,10 +265,46 @@ void RunJetFinder2009pro(int nevents = 1e6,
   conepars->setDoSplitMerge(true);
   conepars->setDebug(false);
 
-  jetmaker->addBranch("ConeJets12",anapars12,conepars);
-  jetmaker->addBranch("ConeJets5",anapars5,conepars);
-  jetmaker->addBranch("ConeJetsEMC",anaparsEMC,conepars);
+  // Set CDF midpoint R=0.7 parameters
+  const double coneRadius = 0.7;
+  StFastJetPars* CdfMidpointR070Pars = new StFastJetPars;
+  CdfMidpointR070Pars->setJetAlgorithm(StFastJetPars::plugin_algorithm);
+  CdfMidpointR070Pars->setRparam(coneRadius);
+  CdfMidpointR070Pars->setRecombinationScheme(StFastJetPars::E_scheme);
+  CdfMidpointR070Pars->setStrategy(StFastJetPars::plugin_strategy);
+  CdfMidpointR070Pars->setPtMin(5.0);
 
+  const double overlapThreshold = 0.75;
+  const double seedThreshold = 0.5;
+  const double coneAreaFraction = 1.0;
+
+  StPlugin* cdf = new StCDFMidPointPlugin(coneRadius,overlapThreshold,seedThreshold,coneAreaFraction);
+  CdfMidpointR070Pars->setPlugin(cdf);
+
+  // Set anti-kt R=0.6 parameters
+  StFastJetPars* AntiKtR060Pars = new StFastJetPars;
+  AntiKtR060Pars->setJetAlgorithm(StFastJetPars::antikt_algorithm);
+  AntiKtR060Pars->setRparam(0.6);
+  AntiKtR060Pars->setRecombinationScheme(StFastJetPars::E_scheme);
+  AntiKtR060Pars->setStrategy(StFastJetPars::Best);
+  AntiKtR060Pars->setPtMin(5.0);
+
+  // Set anti-kt R=0.5 parameters
+  StFastJetPars* AntiKtR050Pars = new StFastJetPars;
+  AntiKtR050Pars->setJetAlgorithm(StFastJetPars::antikt_algorithm);
+  AntiKtR050Pars->setRparam(0.5);
+  AntiKtR050Pars->setRecombinationScheme(StFastJetPars::E_scheme);
+  AntiKtR050Pars->setStrategy(StFastJetPars::Best);
+  AntiKtR050Pars->setPtMin(5.0);
+
+  jetmaker->addBranch("CdfMidpointR070NHits12",anapars12,CdfMidpointR070Pars);
+  jetmaker->addBranch("CdfMidpointR070NHits5",anapars5,CdfMidpointR070Pars);
+  jetmaker->addBranch("AntiKtR060NHits12",anapars12,AntiKtR060Pars);
+  jetmaker->addBranch("AntiKtR060NHits5",anapars5,AntiKtR060Pars);
+  jetmaker->addBranch("AntiKtR050NHits12",anapars12,AntiKtR050Pars);
+  jetmaker->addBranch("AntiKtR050NHits5",anapars5,AntiKtR050Pars);
+
+  // Run
   chain->Init();
   chain->EventLoop(nevents);
 }
