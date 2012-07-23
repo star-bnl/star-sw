@@ -86,18 +86,15 @@ StFmsHit* StFmsSimulatorMaker::makeFmsHit(const g2t_emc_hit_st& hit) const
   int ew, nstb, channel;
   decodeVolumeId(hit.volume_id,ew,nstb,channel);
   int detectorId = getDetectorId(ew,nstb);
-  if (detectorId >= 0 && detectorId <= gStFmsDbMaker->maxDetectorId()) {
-    int qtCrate, qtSlot, qtChannel;
-    gStFmsDbMaker->getMap(detectorId,channel,&qtCrate,&qtSlot,&qtChannel);
-    float gain = gStFmsDbMaker->getGain(detectorId,channel);
-    float gainCorrection = gStFmsDbMaker->getGainCorrection(detectorId,channel);
-    int adc = int(hit.de/(gain*gainCorrection)+0.5);
-    if (adc > MAX_ADC) adc = MAX_ADC;
-    int tdc = 0;
-    float energy = adc*gain*gainCorrection;
-    return new StFmsHit(detectorId,channel,qtCrate,qtSlot,qtChannel,adc,tdc,energy);
-  }
-  return 0;
+  int qtCrate, qtSlot, qtChannel;
+  gStFmsDbMaker->getMap(detectorId,channel,&qtCrate,&qtSlot,&qtChannel);
+  float gain = gStFmsDbMaker->getGain(detectorId,channel);
+  float gainCorrection = gStFmsDbMaker->getGainCorrection(detectorId,channel);
+  int adc = int(hit.de/(gain*gainCorrection)+0.5);
+  if (adc > MAX_ADC) adc = MAX_ADC;
+  int tdc = 0;
+  float energy = adc*gain*gainCorrection;
+  return new StFmsHit(detectorId,channel,qtCrate,qtSlot,qtChannel,adc,tdc,energy);
 }
 
 int StFmsSimulatorMaker::Make()
