@@ -286,51 +286,51 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 #endif
 				}
 
-				if((ntim <= 0) || (ntim > 7)) {
+				if((ntim < 0) || (ntim > 7)) {  // 0 is a valid value (used to encode NHITS=0)
 					LOG(ERR,"Ntim %d ?!",ntim) ;
 					continue ;
 				}
-				if(fmt != 1) {
-					LOG(ERR,"FMT %d != 1 (evt %d)",fmt,get_global_event_num()) ;
+				if((fmt != 1)&&(fmt != 2)) {
+					LOG(ERR,"Invalid FMT %d (evt %d)",fmt,get_global_event_num()) ;
 					continue ;
 				}
 
 
 				// set of Gerard's hadrcoded hacks...
-				// [Gerard]: Modified "my" hardcoded hacks so it would work regardless of which APV's (except #23) are used, despite that the length code is not properly filled in.
-				// This is necessary to support present cosmic ray test setup at STAR, original plan was no good (I forgot we would need different APV channels to support the other half of quadrant readout).
-				// This here remains still quite a hack, I must fix the length code but that is slightly nontrivial for today
-				// This will fail perhaps very occasionally if the data word is just exactly right to make it fail... pretty unlikely I hope!
-				// It also fails if ever APV #23 is recognized / non-truncated. That shouldn't happen, of course (in FGT! not IST!)
-				if (length==2)      // i.e. nothing but 2 header words in this record
-				  continue;         //here paving the way for the length hack to be removed, this should remain working, for non-ZS data at least
-				if (apv==23) {
-				  dta += 3;
-				  continue;
-				}
-				u_long expect0 = *(dta-2);
-				expect0 = (expect0 & 0xffffffe0)|((expect0+1) & 0x0000001f); // increment just the APV id
-				u_long expect1 = *(dta-1);
-				// look for the signature of a skipped APV -- the expected header for next APV found at dta+3 !!
-				// of course, it could be a fluke, then we will mess up, accept that risk
-				if((*(dta+3)==expect0) && (*(dta+4)==expect1)) {
-					dta += 3 ;
-					continue ;
+				if (fmt==1) {  // applies ONLY in fmt 1, which is retired 7/23/2012 [was used for all run 12 operations]
+				  // [Gerard]: Modified "my" hardcoded hacks so it would work regardless of which APV's (except #23) are used, despite that the length code is not properly filled in.
+				  // This is necessary to support present cosmic ray test setup at STAR, original plan was no good (I forgot we would need different APV channels to support the other half of quadrant readout).
+				  // This here remains still quite a hack, I must fix the length code but that is slightly nontrivial for today
+				  // This will fail perhaps very occasionally if the data word is just exactly right to make it fail... pretty unlikely I hope!
+				  // It also fails if ever APV #23 is recognized / non-truncated. That shouldn't happen, of course (in FGT! not IST!)
+				  if (length==2)      // i.e. nothing but 2 header words in this record
+				    continue;         //here paving the way for the length hack to be removed, this should remain working, for non-ZS data at least
+				  if (apv==23) {
+				    dta += 3;
+				    continue;
+				  }
+				  u_long expect0 = *(dta-2);
+				  expect0 = (expect0 & 0xffffffe0)|((expect0+1) & 0x0000001f); // increment just the APV id
+				  u_long expect1 = *(dta-1);
+				  // look for the signature of a skipped APV -- the expected header for next APV found at dta+3 !!
+				  // of course, it could be a fluke, then we will mess up, accept that risk
+				  if((*(dta+3)==expect0) && (*(dta+4)==expect1)) {
+				    dta += 3 ;
+				    continue ;
+				  }
 				}
 				// END of the hacks to deal with skipped APV's
-	
 	
 				fgt_adc_t *fgt_d = (fgt_adc_t *) adc->request(FGT_TB_COU*FGT_CH_COU) ;
 				int cou = 0 ;
 
 				// extract data here...
 
-
 				u_short *d16 = (u_short *) dta ;
 				u_short wfm[2720] ;       // actually use 1000 for 7 timebins, less for less, but better cover worst case length from header
 				int i = 0 ;
 				
-				// it is important to note, this is specifically for format 1, and the length will always be of form 2+3*n
+				// it is important to note, this is specifically for format 1 or 2, and the length will always be of form 2+3*n
 				for(int j=0;j<((length-2)/3)*2;j++) {
 					u_short wtmp ;
 
@@ -355,14 +355,14 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 				LOG(TERR,"Diff %d",dta-o_dta) ;
 				*/
 
-				if ( 27+127+(ntim-1)*140 >= ((length-2)/3)*8 ) {
+				if ((ntim>0) && ( 27+127+(ntim-1)*140 >= ((length-2)/3)*8 )) {
 				  LOG(ERR,"[evt %d]: RDO %d ARM %d APV %d: Trouble in APV block content, it's shorter than required to unpack %d timebins",
 				      get_global_event_num(),r,arm,apv,ntim);
 				  continue;  // this is a recoverable error
 				}
 				for(int ch=0;ch<128;ch++) {
 					int rch = 32*(ch%4) + 8*(ch/4) - 31*(ch/16) ;     // see APV user guide (channel mux sequence)
-					for(int tb=0;tb<ntim;tb++) {
+					for(int tb=0;tb<ntim;tb++) {      // note that ntim=0 in case of skipped APV in format 1 or 2 (non-ZS)
 
 						int adc = wfm[27+ch+tb*140] ;
 						fgt_d[cou].ch = rch ;
@@ -373,7 +373,8 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 				}
 
 				// note the reversal: sector->arm, row->rdo,
-				adc->finalize(cou, arm, r, apv) ;
+				if (nhits>0)
+				  adc->finalize(cou, arm, r, apv) ;
 
 			}
 
