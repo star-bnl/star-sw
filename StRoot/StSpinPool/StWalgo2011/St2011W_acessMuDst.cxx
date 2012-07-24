@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.9 2012/07/13 20:53:16 stevens4 Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.10 2012/07/24 14:59:24 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -98,7 +98,7 @@ St2011WMaker::accessBarrelTrig(){ // return non-zero on abort
 
   // store spin info 
   int bxStar48=-2, bxStar7=-2, spin4=-2;
-  if(spinDb->isValid() &&  // all 3 DB records exist 
+  if(spinDb && spinDb->isValid() &&  // all 3 DB records exist 
      spinDb->isPolDirLong()) {  // you do not want mix Long & Trans by accident
    bxStar48= spinDb->BXstarUsingBX48(wEve->bx48);
    bxStar7=spinDb->BXstarUsingBX7(wEve->bx7);
@@ -689,6 +689,9 @@ St2011WMaker::accessBSMD(){
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.10  2012/07/24 14:59:24  stevens4
+//enable running without spinDb
+//
 //Revision 1.9  2012/07/13 20:53:16  stevens4
 //Add filling of empty events in W tree
 //Minor modifications to histograms
