@@ -83,6 +83,11 @@ void StMCCaloFilter::parseConfig(string attr, float val)
         cout << "StMCCaloFilter::parseConfig() - Setting mMaxVertex to " << val << endl;
         mMaxVertex = val;
     }
+    else if ( attr == "HadronEfract" )
+      {
+        cout << "StMCCaloFilter::parseConfig() - Setting mHadronEfract to " << val << endl;
+	mHadronEfract = val;
+      }
     else
     {
         cout << "StMCCaloFilter::parseConfig() - " << attr << " is not an existing parameter!" << endl;        
