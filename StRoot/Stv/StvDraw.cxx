@@ -165,7 +165,7 @@ void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
   TVector3 myFst(parF.P);
   TVector3 myDir(parL._x-parF._x,parL._y-parF._y,parL._z-parF._z);
   double dxy = myDir.Perp();;
-  double dis = myDir.Mag();;
+//double dis = myDir.Mag();;
   double fi0 = myDir.Phi();
   double rho = parF._curv;
   double dfi = asin(dxy*rho/2);
@@ -183,7 +183,7 @@ void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
     const StvHit *hit = (const StvHit*)(*vHits)[ih];
     TVector3 hi(hit->x()); 
     TVector3 hl = hi-myFst;
-    double dot = hl.Dot(myDir);
+//    double dot = hl.Dot(myDir);
 //    if (dot<0 || dot >dis) 		continue;
     if ((hl.Cross(myDir)).Mag2()>sag2)	continue;
     double *d = &(hi[0]);
