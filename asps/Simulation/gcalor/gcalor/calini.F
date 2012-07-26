@@ -1,5 +1,5 @@
 
-* $Id: calini.F,v 1.1.1.1 2004/01/15 00:08:47 potekhin Exp $
+* $Id: calini.F,v 1.2 2012/07/26 00:12:30 perev Exp $
 * $Name:  $
 #include <commons/config.h>
       SUBROUTINE CALINI
@@ -110,6 +110,15 @@ C fill particle mass array
             CALL GETENV('CERN_ROOT',CHROOT)
             LNROOT = LNBLNK(CHROOT)
             IF(LNROOT.GT.0)BERTF = CHROOT(1:LNROOT)//'/lib/chetc.dat'
+         ENDIF
+         INQUIRE(FILE=BERTF,EXIST=EXISTS)
+         IF(.NOT.EXISTS) THEN
+            CHROOT = ' '
+            CALL GETENV('STAR',CHROOT)
+            LNROOT = LNBLNK(CHROOT)
+            IF(LNROOT.GT.0) then
+	      BERTF = CHROOT(1:LNROOT)//'/pams/sim/gphysdata/chetc.dat'
+            endif
          ENDIF
          INQUIRE(FILE=BERTF,EXIST=EXISTS)
          IF(.NOT.EXISTS) THEN
