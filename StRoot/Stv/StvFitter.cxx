@@ -15,7 +15,7 @@ StvFitter *StvFitter::mgFitter=0;
 #define DIST(a,b)   ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 #define DDOT(a,b,c) ((a[0]-b[0])*c[0]+(a[1]-b[1])*c[1]+(a[2]-b[2])*c[2])
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
-
+enum {kDeltaFactor = 3};
 
 static inline double MyXi2(const double G[3],double dA,double dB)  
 {
@@ -41,6 +41,7 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
   mOtPars = otPars; mOtErrs = otErrs;
   mJnPars =      0; mJnErrs =      0;
   mDelta  = mInPars->delta();
+  mDelta*=kDeltaFactor;
 }
 //______________________________________________________________________________
 void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
@@ -154,6 +155,7 @@ double StvFitter::Xi2()
   double myXi2 = JoinTwo(5,F.Arr()    ,mInErrs->Arr()
                         ,5,Zero       ,mJnErrs->Arr()
 		        ,mQQPars.Arr(),mQQErrs.Arr());
+  if (IsTooBig(mQQPars)) myXi2 = 1e11;
   return myXi2;
 }  
 //______________________________________________________________________________
@@ -184,7 +186,7 @@ static int nCall=0; nCall++;
 //   assert(fabs(myJrkPars.mH) <3.);
 //   assert(fabs(myJrkPars.mZ) <3.);
 
-
+   if (IsTooBig(myJrkPars)) return 1;
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
    mOtErrs->SetHz(mOtPars->_hz);
@@ -224,6 +226,13 @@ int StvFitter::Jpdate()
 //  assert(!mOtPars->check());
   *mOtErrs =  mQQErrs;   
    mOtErrs->SetHz(mOtPars->_hz);
+   if (IsTooBig(mQQPars)) return 1;
+  return 0;
+}
+//______________________________________________________________________________
+int StvFitter::IsTooBig(StvFitPars &fp) const
+{
+  for (int i=0;i<5;i++) { if (fabs(fp[i]) > mDelta[i]) return i+1;}
   return 0;
 }
 //______________________________________________________________________________
@@ -336,8 +345,5 @@ void StvFitter::Test()
     for (int j=0;j<=i; j++) { printf("%g\t",CC[li+j]);}
     printf("\n");
   }
-
-
-
 
 }
