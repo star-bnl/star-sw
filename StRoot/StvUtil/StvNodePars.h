@@ -59,7 +59,10 @@ const StvFitPars &operator*(const StvFitDers &t) const;
       double *Arr() 				{return &mH;}
 const double *Arr()  const 			{return &mH;}
 operator const double *() const			{return &mH;}
-operator double *() 				{return &mH;}
+operator       double *() 			{return &mH;}
+StvFitPars &operator*=(double f) 
+    		{for(int i=0;i<5;i++){(*this)[i]*=f; return *this;}}
+
 public:	
 double mH;	// direction perpendicular movement and Z
 double mZ;	// Pseudo Z, direction perpendicular movement & H
@@ -95,7 +98,8 @@ double getCos2L() const 		{return 1./(1.+_tanl*_tanl);}
   void moveToR(double Rxy); 
 StvNodePars &merge(double wt,StvNodePars &other);
 //		typical variations of parametrs
-StvFitPars  delta() const;
+StvFitPars delta() const;
+StvFitErrs deltaErrs() const;
 
 operator const double  *() const {return P;}
 operator       double  *()       {return P;}
@@ -145,7 +149,7 @@ class StvFitErrs
 public:	
   enum eFitErrs {kNErrs=15};
   StvFitErrs(double hh=0,double hz=0,double zz=0);
-  void Reset(double hz = 0);
+//??  void Reset(double hz = 0);
   void Set(const THelixTrack *he,double hz);
   void Get(      THelixTrack *he)     const;
   void Get(const StvNodePars *np,  StvNodeErrs *ne)     const;

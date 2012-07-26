@@ -252,6 +252,9 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   if (fabs(a) < 0.01) {sA = a*(1-a*a/6); cA = 1-a*a/2;}
   else                {sA = sin(a);      cA = cos(a) ;} 
  _psi   += a;
+  if (_psi < -M_PI) _psi += 2*M_PI;
+  if (_psi >  M_PI) _psi -= 2*M_PI;
+
   double cosCA = _cosCA;
   _cosCA = cosCA*cA-_sinCA*sA;
   _sinCA = cosCA*sA+_sinCA*cA;
@@ -322,13 +325,23 @@ int StvNodePars::isReady( ) const
 //_____________________________________________________________________________
 StvFitPars StvNodePars::delta() const
 {
-   double space = 1e-3+(fabs(_x)+fabs(_y)+fabs(_z))/300;
+   double space = 1e-2+((fabs(_x)+fabs(_y)+fabs(_z))/3)/200*3;
    StvFitPars fp;
    fp.mH = space;    fp.mZ = space; 
-   fp.mA = 3.14/180; fp.mL = 3.14/180;
-   fp.mP = 0.01 + 0.05*fabs(_ptin);
+   fp.mA = 3.14/180*10; fp.mL = 3.14/180*10;	//ten degree
+   fp.mP = 0.01 + 0.1*fabs(_ptin);
    return fp;
 }
+//_____________________________________________________________________________
+StvFitErrs StvNodePars::deltaErrs() const
+{
+   StvFitPars dlt = delta();
+   StvFitErrs fe;
+   for (int i=0,li=0;i< 5;li+=++i) {fe[li+i] = dlt[i]*dlt[i];}
+   fe.mHz = _hz;
+   return fe;
+}
+
 //______________________________________________________________________________
 //______________________________________________________________________________
 void StvHitErrs::rotate(double angle)
@@ -360,17 +373,17 @@ static StvFitErrs myFitErrs;
   myFitErrs.Recov();
   return myFitErrs;
 }  
-//______________________________________________________________________________
-void StvFitErrs::Reset(double hz)
-{
-  memset(this,0,sizeof(*this));
-  mHH =  kFitErrs[0]*kFitErrs[0];
-  mZZ =  kFitErrs[1]*kFitErrs[1];
-  mAA =  kFitErrs[2]*kFitErrs[2];
-  mLL =  kFitErrs[3]*kFitErrs[3];
-  mPP =  kFitErrs[4]*kFitErrs[4];
-  mHz =  hz;
-}
+// //______________________________________________________________________________
+// void StvFitErrs::Reset(double hz)
+// {
+//   memset(this,0,sizeof(*this));
+//   mHH =  kFitErrs[0]*kFitErrs[0];
+//   mZZ =  kFitErrs[1]*kFitErrs[1];
+//   mAA =  kFitErrs[2]*kFitErrs[2];
+//   mLL =  kFitErrs[3]*kFitErrs[3];
+//   mPP =  kFitErrs[4]*kFitErrs[4];
+//   mHz =  hz;
+// }
 
 //______________________________________________________________________________
 void StvFitErrs::Set(const THelixTrack *he, double hz)
