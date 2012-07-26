@@ -111,8 +111,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
       case kNull: {	// Empty leading node
 //		It was not fits before(left) get params from previous dir
 //		and set huge errors
-        node->mPP[lane]  =  node->mFP[jane];		//prediction from opposite fit
-        node->mPE[lane].Reset(node->mPE[jane].mHz);	//Big errors
+        node->mPP[lane] = node->mFP[jane];		//prediction from opposite fit
+        node->mPE[lane] = node->mPP[lane].deltaErrs();	//Big errors
         break;
       }  
       case kLeft: 		// Left fits only, no  Hit
@@ -154,8 +154,15 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
           if (myXi2>mWorstXi2) 		{ mWorstXi2= myXi2; mWorstNode=node;}
         }
         nFitLeft++; kase|=kLeft;
+	int ipdate = fitt->Update();
+        if (ipdate) {		//Update failed
+	  nErr++;myXi2=1e11;		
+          mWorstXi2= myXi2; mWorstNode=node;
+          node->mFP[lane] = node->mPP[lane];
+          node->mFE[lane] = node->mPE[lane];
+        }
+
 	node->SetXi2(myXi2,lane);
-	fitt->Update();
         if (nFitLeft<=kNodesEnough && jane!=lane) {
 	  node->mFP[lane] = node->mFP[jane];}
 
@@ -187,7 +194,10 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 	node->SetXi2(3e33,2);
 	myXi2 = fitt->Xi2(); 
 	if (myXi2 > kons->mXi2Joi) nErr+=100;
-	fitt->Update();
+	int ipdate = fitt->Update();
+        if (ipdate) {//Update error 
+	  myXi2= 1e11;nErr+=1000;
+        }
 	node->SetXi2(myXi2,2);
         break;
       }
