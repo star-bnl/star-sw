@@ -137,7 +137,7 @@ StvHitCount hitCount;
     assert(!idir);
     double Hz = kit->GetHz(mSeedHelx->Pos());
     par[0].set(mSeedHelx,Hz); par[0].reverse();			//Set seed pars into par[0]
-    err[0].Reset(Hz); 
+    err[0]=par[0].deltaErrs(); 
   } else 	{//Forward or backward tracking
  
     curNode =(idir)? mCurrTrak->back(): mCurrTrak->front();
@@ -220,7 +220,7 @@ if (DoShow()) {
     curNode->mLen = (!idir)? totLen:-totLen;
 		// Set prediction
     curNode->SetPre(par[0],err[0],0);
-    assert(!preNode || innNode->GetFP().getRxy()<outNode->GetFP().getRxy());
+//    assert(idir || !preNode || innNode->GetFP().getRxy()<outNode->GetFP().getRxy());
     innNode->SetDer(derivFit,idir);
     innNode->SetELoss(mDive->GetELossData(),idir);
 
@@ -233,60 +233,56 @@ if (DoShow()) {
 
     if (!localHits)	 continue;	//Never hits in curNode 
     curNode->SetHitPlane(mHitter->GetHitPlane());
+    
     if (!localHits->size()) {//No hits in curNode
       hitCount.AddNit(); continue;
     } 
     fitt->Prep();
-    double minXi2 = myConst->mXi2Hit; 
+    double minXi2 = myConst->mXi2Hit,myXi2=3e33; 
     StvHit *minHit=0; int minIdx = -1;
     for (int ihit=0;ihit<(int)localHits->size();ihit++) {
       StvHit *hit = (*localHits)[ihit];
-      double myXi2 = fitt->Xi2(hit);
+      myXi2 = fitt->Xi2(hit);
       if (myXi2 > minXi2) continue;
       minXi2 = myXi2; minHit = hit; minIdx = ihit;
     }
-    curNode->SetHit(minHit); 
-    if (! minHit) {
-      hitCount.AddNit(); 
-    } else {
-      hitCount.AddHit();
+   
+    if (minHit) {	// Fit succesful
 
       (*((StvHits*)localHits))[minIdx]=0;
-      double myXi2 = fitt->Xi2(minHit);
-      assert(fabs(minXi2-myXi2)<1e-5);
-		//fitted pars again in par[1]
-      int iuerr = fitt->Update();if (iuerr){}; 
+      myXi2 = fitt->Xi2(minHit);
       nHits++;
-      if (nHits<=3) par[1]=par[0]; //Fit is not reliable yet
-      if (par[1].check()) {	//Ugly parameters
-        hitCount.AddNit(); nHits--; curNode->SetHit(0);}
-      else {
+      int iuerr = fitt->Update(); 
+      if (!iuerr || (nHits<=3)) {		//Hit accepted
         hitCount.AddHit();
-        curNode->SetXi2(myXi2,0);
+        (*((StvHits*)localHits))[minIdx]=0;
         curNode->SetHE(fitt->GetHitErrs());
         curNode->SetFit(par[1],err[1],0);
-      }
-
-		// par[0] again keeps the latest version og pars
-      par[0]=par[1]; err[0]=err[1];
+        if (nHits>3) par[0]=par[1];
+        err[0]=err[1];nHits++; }
+      else { minHit=0;}
     }
-
-
-
+    if (!minHit) {				//No Hit or ignored
+      myXi2 = 1e11; minHit=0;nHits--;
+      hitCount.AddNit(); 
+    }
+    curNode->SetHit(minHit); 
+    curNode->SetXi2(myXi2,0);
+    
   } // End Dive&Fitter loop 
 
   mCurrTrak->SetTypeEnd(mySkip);
   if (!idir) {
     double eff = hitCount.Eff();
     if (hitCount.Reject()) {
-      StvDebug::Count("BadEff",eff);
-      if (hitCount.nContNits)StvDebug::Count("BadCNits",hitCount.nContNits);
-      if (hitCount.nTotNits )StvDebug::Count("BadTNits",hitCount.nTotNits);
+//      StvDebug::Count("BadEff",eff);
+//      if (hitCount.nContNits)StvDebug::Count("BadCNits",hitCount.nContNits);
+//      if (hitCount.nTotNits )StvDebug::Count("BadTNits",hitCount.nTotNits);
       mCurrTrak->ReleaseHits(); mCurrTrak->unset();
       kit->FreeTrack(mCurrTrak);mCurrTrak=0; return 0; }
-    if (hitCount.nContNits)StvDebug::Count("GooCNits",hitCount.nContNits);
-    if (hitCount.nTotNits )StvDebug::Count("GooTNits",hitCount.nTotNits);
-    StvDebug::Count("GoodEff",eff);
+//    if (hitCount.nContNits)StvDebug::Count("GooCNits",hitCount.nContNits);
+//    if (hitCount.nTotNits )StvDebug::Count("GooTNits",hitCount.nTotNits);
+//    StvDebug::Count("GoodEff",eff);
   }
 
 
@@ -349,21 +345,21 @@ static StvTrackFitter *tkf = StvTrackFitter::Inst();
   StvNode *node = 0;
   int ans=0;
   int lane = 1;
-  for (int refIt=0; refIt<5; refIt++)  {
+  for (int refIt=0; refIt<55; refIt++)  {
 
     ans = tkf->Refit(mCurrTrak,idir,lane,1);
     if (!ans) 		break;	//SUCCESS
     int nHits = mCurrTrak->GetNHits();
     if (nHits<3) 	return 10;
-
-    printf("AfterRefit: worst Xi2 %g(%p)\n"
-          ,tkf->GetWorstXi2(),tkf->GetWorstNode());
+    
+//     printf("AfterRefit: worst Xi2 %g(%p)\n"
+//           ,tkf->GetWorstXi2(),tkf->GetWorstNode());
 
     tkf->Helix(mCurrTrak,1|2);
     node = tkf->GetWorstNode();
 
-    printf("AfterHelix: worst Xi2 %g(%p)\n"
-          ,tkf->GetWorstXi2(),tkf->GetWorstNode());
+//     printf("AfterHelix: worst Xi2 %g(%p)\n"
+//           ,tkf->GetWorstXi2(),tkf->GetWorstNode());
 
     assert(node);
     node->SetHit(0);
