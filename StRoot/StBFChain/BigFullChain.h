@@ -1112,6 +1112,7 @@ Bfc_st BFC[] = { // standard chains
   {"ssdCalDb"    ,""     ,"","ssdDb"         ,"","","Declare Calibrations/ssd as while list member",kFALSE},
   {"eemcDb"      ,"eeDb" ,"","db",               "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb"       ,"fmsDb","","db",                  "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
+  {"fgtDb"       ,"fgtDb","","db,fgtutil",          "StFgtDbMaker","StFgtDbMaker","Load FgtDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1300,8 +1301,13 @@ Bfc_st BFC[] = { // standard chains
   {"fmsSim",""      ,"","StEvent,fmsDb","StFmsSimulatorMaker","StFmsSimulatorMaker","Fms Simulator",kFALSE},
   {"fmsDat"     ,"","", "StEvent,fmsdb", 
    "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",                                  kFALSE},
-  // FGT placeholder
-  {"fgtDat"     ,"","", "event,fgtutil","StFgtRawMaker","StFgtRawMaker",          "FGT Data reader",kFALSE},
+
+  // FGT 
+  {"fgtDat"     ,"","", "event,fgtdb","StFgtRawMaker","StFgtRawMaker",            "FGT Data reader",kFALSE},
+  {"fgtClu"     ,"","", "fgtutil",    "StFgtClusterMaker","StFgtClusterMaker",  "FGT cluster maker",kFALSE},
+  {"fgtAtoC"    ,"","", "fgtdb",      "StFgtA2CMaker","StFgtA2CMaker",    "FGT ADC to Charge maker",kFALSE},
+
+
   // Some global Sti stuff including vertexing
   {"genvtx","","","ctf_T,EEmcUtil","StGenericVertexMaker"
    ,"ctf,St_ctf,St_ctf_Maker,Minuit,StGenericVertexMakerNoSti"         
@@ -1314,6 +1320,12 @@ Bfc_st BFC[] = { // standard chains
   {"VFMCE"          ,""  ,"","VFMinuit"                      ,"","","... Fixed vertex from MCEvent",kFALSE},
   {"VFppLMV"        ,""  ,"","genvtx"                 ,"","","...VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5"       ,""  ,"","VFppLMV"        ,"","","...VertexMaker will use ppLMV method (tuned)",kFALSE},
+  {"VFPPV"    ,""  ,"","ctf_T,StiLib","StGenericVertexMaker"
+   ,         "ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
+  {"VFPPVnoCTB"     ,""  ,"","VFPPV",""                ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
+
+  
+  // Sti options
   {"StiPulls" ,"","",""                                         ,"","", "Request to make Sti Pulls",kFALSE},
   {"StvPulls" ,"","",""                                         ,"","", "Request to make Stv Pulls",kFALSE},
   {"StiLib"   ,"","",""                                                        ,"","Sti","Load Sti",kFALSE},
@@ -1322,15 +1334,12 @@ Bfc_st BFC[] = { // standard chains
   {"StiSvt"   ,"",""," "                  ,"","StSvtClassLibrary,StSvtDbMaker,StiSvt","Load StiSvt",kFALSE},
   {"StiSsd"   ,"","",""                           ,"","StSsdUtil,StSsdDbMaker,StiSsd","Load StiSvt",kFALSE},
   {"StiLibs"  ,"","","StiTpc,StiSvt,StiSsd,BTofUtil"   ,"","StEEmcDbMaker","Load Sti Detector libs",kFALSE},
-  {"VFPPV"    ,""  ,"","ctf_T,StiLib","StGenericVertexMaker"
-   ,         "ctf,St_ctf,St_ctf_Maker,Minui,StGenericVertexMaker","... Pile-up proof vertex finder",kFALSE},
-  {"VFPPVnoCTB"     ,""  ,"","VFPPV",""                ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
+
+  // Sti/Stv chains
   {"Sti"      ,"Sti","","StiLib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
    ,                                         "StEventUtilities,StiUtilities,StiMaker","Sti tracker",kFALSE},
   {"StiCA"    ,"Sti","","-Sti,-StiLib,StiCALib,StiLibs,SCL,StEvent,StDbT,TpcIT,compend,tbutil","StiMaker"
    ,                                "StEventUtilities,libEG,StiUtilities,StiMaker","Sti+CA tracker",kFALSE},
-  {"KFVertex"  ,""  ,"Sti","-genvtx,-VFMinuit,-VFFV,-VFMCE,-VFppLMV,-VFPPVnoCTB,-VFPPV",  "StKFVertexMaker"
-   ,"MathMore,Spectrum",                "...KFParticle base multi vertex reconstruction",kFALSE},
   {"Stv"     ,"Stv","","-TpcIT,-SvtIT,-SsdIT,gen_T,sim_T","StvMaker"
    ,"libHist,libHistPainter,libVMC,StarVMCApplication,StarMiniCern,geant3,GeoTestMaker,StvUtil,Stv,StvMaker" 
    ,                                                                                          "Stv",kFALSE},
@@ -1338,6 +1347,12 @@ Bfc_st BFC[] = { // standard chains
   {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
    ,                                      "StEventUtilities,StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
   {"StiVMCLibs","","","detDb,StarMagField","",                      "","ITTF:load StiVMC libraries",kFALSE},
+
+
+  {"KFVertex"  ,""  ,"Sti","-genvtx,-VFMinuit,-VFFV,-VFMCE,-VFppLMV,-VFPPVnoCTB,-VFPPV",  "StKFVertexMaker"
+                            ,"MathMore,Spectrum",  "...KFParticle base multi vertex reconstruction",kFALSE},
+
+
   {"laserIT"  ,"","","","",                              "TpcIT","use Sti for laser reconstruction",kFALSE},
   {"TpcIT"    ,"","","ITTF"                                              ,"","","Sti tracking: TPC",kFALSE},
   {"SvtIT"    ,"","","ITTF"                                              ,"","","Sti tracking: SVT",kFALSE},
