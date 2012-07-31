@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.16 2012/06/03 16:52:18 balewski Exp $
+// $Id: StFgtDbMaker.h,v 1.17 2012/07/31 18:24:30 jeromel Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -18,14 +18,14 @@ class fgtSimuParams_st;
 class StFgtDbMaker : public StMaker {
  
  public: 
-  StFgtDbMaker(const char *name="FgtDb");
-  virtual       ~StFgtDbMaker();
-  virtual Int_t  Init();
-  virtual Int_t  InitRun(Int_t runNumber);
-  virtual Int_t  Make();
-  virtual Int_t  Finish();
-  virtual StFgtDb * getDbTables() { return m_tables; }
-  virtual void   Clear(const char *opt);
+  StFgtDbMaker(const char *name="fgtDb");
+  ~StFgtDbMaker();
+  Int_t  Init();
+  Int_t  InitRun(Int_t runNumber);
+  Int_t  Make();
+  Int_t  Finish();
+  StFgtDb * getDbTables() { return m_tables; }
+  void   Clear(const char *opt);
   void  printFgtDumpCSV1(TString fname) { m_tables->printFgtDumpCSV1(fname,GetDate(), GetTime());  }
 
   map<string, pair<string, string> > mValidRanges;
@@ -33,7 +33,7 @@ class StFgtDbMaker : public StMaker {
 
   //  You should call getDbTables after calling this with "ideal".  If you do
   //  not, then your StFgtDb object will be out of date.
-  virtual void setFlavor( const char *flav, const char *tabname );
+  void setFlavor( const char *flav, const char *tabname );
 
   Float_t eLossTab(int bin); //  built from BichselELossProbHighBG.dat used to reject very high and unrealistic loss value
   Double_t simuParams(int bin); // initialization of fgt-slow-simulator
@@ -44,20 +44,23 @@ private:
 
   fgtElosCutoff_st *m_LossTab;
   fgtSimuParams_st *m_simuParTab;
-  StFgtGeom *m_geom;
-  StFgtDb * m_tables;
-  fgtMapping_st * m_rmap;
+  StFgtGeom        *m_geom;
+  StFgtDb          *m_tables;
+  fgtMapping_st    *m_rmap;
 
  public:
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.16 2012/06/03 16:52:18 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.17 2012/07/31 18:24:30 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.17  2012/07/31 18:24:30  jeromel
+// Removed virtual + fixed name
+//
 // Revision 1.16  2012/06/03 16:52:18  balewski
 // added access to fgtSimuParam table, all I/O .C code is saved in macros
 //
