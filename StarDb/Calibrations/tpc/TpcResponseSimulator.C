@@ -1,5 +1,11 @@
-// $Id: TpcResponseSimulator.C,v 1.8 2010/10/29 16:04:05 fisyak Exp $
+// $Id: TpcResponseSimulator.C,v 1.11 2011/12/24 22:42:53 fisyak Exp $
 // $Log: TpcResponseSimulator.C,v $
+// Revision 1.11  2011/12/24 22:42:53  fisyak
+// Done with TpcRS_2005_CuCu22_M
+//
+// Revision 1.9  2011/10/11 19:09:23  fisyak
+// Add Yi Guo's tables for Run XI AuAu200 RFF dE/dx calibration
+//
 // Revision 1.8  2010/10/29 16:04:05  fisyak
 // Set proper t0 offset for Run IX
 //
@@ -50,10 +56,12 @@ TDataSet *CreateTable() {
   row.tauXO                 =  74.6e-9;// secs Tpx Outer integration time 
   row.tauCI                 =   0;  
   row.tauCO                 =   0;  
-  row.SigmaJitterTI         =  0.0;//f 0.2;//ad  0.0; //b for Tpx inner 
-  row.SigmaJitterTO         =  0.15;//g 0.0;//f 0.2;//ad  0.0; //b for Tpx outer 
+  row.SigmaJitterTI         =  0.31;// 0.0;//f 0.2;//ad  0.0; //b for Tpx inner 
+  row.SigmaJitterTO         =  0.25;// 0.15;//g 0.0;//f 0.2;//ad  0.0; //b for Tpx outer 
+  row.SigmaJitterXI         =    0.;
+  row.SigmaJitterXO         =    0.;
   row.longitudinalDiffusion = 0.0370;//abd: 0.0370*1.3;//c  0.0232;//K  0.0370;J // cm/sqrt(cm)   ; // 0.0232; from Laser Fit
-  row.transverseDiffusion   = 0.07725; //f: 0.06336; //abd:  0.06336*1.08; //c cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
+  row.transverseDiffusion   =  0.073265; // C: 0.06336;// 0.07725; //f: 0.06336; //abd:  0.06336*1.08; //c cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        =   3.18;//i 2.145*1.25*1.1;  //h 2.145*1.25;  //g 2.145*1.15;  //f 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        =   1.8;   //f 1.8;    //a 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
@@ -65,18 +73,27 @@ TDataSet *CreateTable() {
 /* 	SecRow3CGFy2005_Q.root */
 /* WE */	0.214102,	-0.00151132,	0.0946478,	0.000728438,
 /* W  */	0.215207,	-0.00157779,	0.0845241,	0.000992761,
-/* E  */	0.214664,	-0.000998026,	0.130842,      -8.91701e-05};
-  //
+/* E  */	0.214664,	-0.000998026,	0.130842 , -8.91701e-05};
   Float_t *a = &row.SecRowCorIW[0];
   for (Int_t i = 0; i < 8; i++) {
     a[i] += SecRowTpcRS[i%4];
   }                              //          SecRow3CGFHist032P05if_dedx  SecRow3CGFy2005_S
-  row.SecRowSigIW[0] = row.SecRowSigIE[0] = 0.182; //sqrt(3.45242e-01**2 - 2.93233e-01**2) = 1.82226359989437259e-01
-  row.SecRowSigOW[0] = row.SecRowSigOE[0] = 0.156; //sqrt(3.10911e-01**2 - 2.68642e-01**2) = 1.56515576723213090e-01
+  // SecRow3CGFdaq_2005_CuCu22: Inner = 3.41276e-01, Outer = 2.98547e-01
+  // SecRow3CGFTpcRS_2005_CuCu22        3.18869e-01          2.93606e-01
+  // dif                                1.21622e-01          5.40909e-02
+  // SecRow3CGFTpcRS_2005_CuCu22_C      3.57365e-01          3.14184e-01
+  // diff                              -1.06020e-01         -9.78839e-02
+  // SecRow3CGFTpcRS_2005_CuCu22_D      3.36177e-01          3.03435e-01
+  // diff                               5.87735e-02         -5.42447e-02
+  row.SecRowSigIW[0] = row.SecRowSigIE[0] = 0.182+1.21622e-01*0.5; //sqrt(3.45242e-01**2 - 2.93233e-01**2) = 1.82226359989437259e-01
+  row.SecRowSigOW[0] = row.SecRowSigOE[0] = 0.156+5.40909e-02*0.5; //sqrt(3.10911e-01**2 - 2.68642e-01**2) = 1.56515576723213090e-01
   Float_t *b = &row.SecRowSigIW[0];
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
-  row.T0offset   = 0.00;
+ // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>T(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
+  // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
+  // The corection has to be added
+  row.T0offset   = 2.04661e-01 - 4.12188e-01 +  0.0204879; // M
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

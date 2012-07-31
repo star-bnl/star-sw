@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.25 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: StDbConfigNode.cc,v 1.29 2012/03/16 19:36:18 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,18 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.29  2012/03/16 19:36:18  dmitry
+ * converted dangled char pointers to std::string objects + fixed typo
+ *
+ * Revision 1.28  2012/03/16 17:36:46  dmitry
+ * added * symbol to global override indicators
+ *
+ * Revision 1.27  2012/03/14 18:12:45  dmitry
+ * Added protection against zero-sized strings and whitespaces sent as dbType. Null pointer was expected to indicate omitted dbType, but now StDbLib code receives \0 string instead (from upstream, checked St_db_Maker, StDbBroker, StDbConfigNode).
+ *
+ * Revision 1.26  2011/11/28 17:03:08  dmitry
+ * dbv override support in StDbLib,StDbBroker,St_db_Maker
+ *
  * Revision 1.25  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -185,6 +197,50 @@ StDbConfigNode::setProdTime(unsigned int ptime){
   if(mnextNode)mnextNode->setProdTime(ptime);
 }
 
+////////////////////////////////////////////////////////////////                                                                                                        
+void                                                                                                                                                                    
+StDbConfigNode::setProdTimeOverride(unsigned int ptime, char* dbType, char* dbDomain) {
+    bool isAllTypesAccepted = false;
+
+    // ***** get complete name for user-selected override *****
+    std::string completeName;
+    if (dbType && dbType[0] != '\0' && dbType[0] != ' ' && dbType[0] != '*') {
+        completeName.append(dbType);
+    } else {
+        isAllTypesAccepted = true;
+    }
+    completeName.append("_");
+    if (dbDomain && dbDomain[0] != '\0' && dbDomain[0] != ' ' && dbDomain[0] != '*') {
+        completeName.append(dbDomain);
+    }
+
+    // ***** get current name for a node ******
+    std::string currentName;
+    if (!isAllTypesAccepted) {
+        // strict check, dbType is provided
+        currentName  = StDbManager::Instance()->printDbName( this->getDbType(), this->getDbDomain() ) ;
+    } else {
+        // dbType is not provided, check domainName only
+        currentName.append("_");
+        currentName.append( StDbManager::Instance()->getDbDomainName( this->getDbDomain() ) ) ;
+    }
+
+    // ***** compare names, override if needed *****
+    if (completeName == currentName) {
+        //std::cout << "complete = current = " << completeName <<", overriding\n";
+        setTablesProdTimeOverride(ptime, dbType, dbDomain);
+    }
+
+    if (mfirstChildNode) {
+        //std::cout << "first child node: " << StDbManager::Instance()->printDbName( mfirstChildNode->getDbType(), mfirstChildNode->getDbDomain() ) << "\n";
+        mfirstChildNode->setProdTimeOverride(ptime, dbType, dbDomain);
+    }
+
+    if (mnextNode) {
+        //std::cout << "next node: " << StDbManager::Instance()->printDbName( mnextNode->getDbType(), mnextNode->getDbDomain() ) << "\n";
+        mnextNode->setProdTimeOverride(ptime, dbType, dbDomain);
+    }
+}
 
 ////////////////////////////////////////////////////////////////
 

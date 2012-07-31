@@ -48,10 +48,8 @@ class StTpcRSMaker : public StMaker {
   virtual Int_t         Make();
   virtual Int_t  	Finish();
   TF1F *GetShaperResponse(Int_t io = 0, Int_t sector = 1) {return (TF1F *) mShaperResponses[io][sector-1];}          
-  TF1F *GetChargeFractionInner()     {return (TF1F *) mChargeFractionInner;}     
-  TF1F *GetPadResponseFunctionInner(){return (TF1F *) mPadResponseFunctionInner;}
-  TF1F *GetChargeFractionOuter()     {return (TF1F *) mChargeFractionOuter;}     
-  TF1F *GetPadResponseFunctionOuter(){return (TF1F *) mPadResponseFunctionOuter;}
+  TF1F *GetChargeFraction(Int_t io = 0)     {return (TF1F *) mChargeFraction[io];}     
+  TF1F *GetPadResponseFunction(Int_t io = 0){return (TF1F *) mPadResponseFunction[io];}
   TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
   TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
   TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
@@ -85,10 +83,8 @@ class StTpcRSMaker : public StMaker {
   static TF1F     *fgTimeShape3[2];   //!
   static TF1F     *fgTimeShape0[2];   //!
   TF1F  *mShaperResponses[2][24];     //!
-  TF1F  *mChargeFractionInner;        //!
-  TF1F  *mPadResponseFunctionInner;   //!
-  TF1F  *mChargeFractionOuter;        //!
-  TF1F  *mPadResponseFunctionOuter;   //!
+  TF1F  *mChargeFraction[2];          //!
+  TF1F  *mPadResponseFunction[2];     //!
   TF1F  *mPolya[2];                   //!
   TF1F  *mGG;                         //! Gating Grid Transperency
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
@@ -129,14 +125,23 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.19 2011/03/17 14:29:31 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.23 2011/12/13 17:23:22 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.19 2011/03/17 14:29:31 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.23 2011/12/13 17:23:22 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.23  2011/12/13 17:23:22  fisyak
+// remove YXTProd, add WIREHISTOGRAM and WIREMAP, use particle definition from StarClassLibrary
+//
+// Revision 1.22  2011/10/14 23:27:51  fisyak
+// Back to standard version
+//
+// Revision 1.20  2011/09/18 22:39:48  fisyak
+// Extend dN/dx table (H.Bichsel 09/12/2011) to fix bug #2174 and #2181, clean-up
+//
 // Revision 1.19  2011/03/17 14:29:31  fisyak
 // Add extrapolation in region beta*gamma < 0.3
 //
