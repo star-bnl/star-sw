@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.46 2012/07/31 20:08:11 jeromel Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.47 2012/07/31 20:40:01 jeromel Exp $
  *
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.47  2012/07/31 20:40:01  jeromel
+ * Agreed with Anselm, changed default param - future should be Db based
+ *
  * Revision 1.46  2012/07/31 20:08:11  jeromel
  * Changes to make maker compatible with running in chain (was not)
  *
@@ -188,7 +191,7 @@
 #include "StFgtA2CMaker.h"
 
 /// Class constructors - does nothing else than setting name
-StFgtA2CMaker::StFgtA2CMaker( const Char_t* name ) : StMaker( name ), mAcceptLongPulses(false), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(5),mClusterThreshold(1.0), mDb(0) {
+StFgtA2CMaker::StFgtA2CMaker( const Char_t* name ) : StMaker( name ), mAcceptLongPulses(false), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(4.0),mClusterThreshold(1.0), mDb(0) {
   // do nothing
 }
 
