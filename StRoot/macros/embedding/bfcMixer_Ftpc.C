@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs
 //
 //
-// $Id: bfcMixer_Ftpc.C,v 1.1 2011/07/26 20:42:13 didenko Exp $
+// $Id: bfcMixer_Ftpc.C,v 1.2 2012/02/17 20:47:36 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -52,7 +52,7 @@ void bfcMixer_Ftpc(const Int_t Nevents=20,
     cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
-  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
+  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker"; 
   chain3Opt += ","; chain3Opt += geomP08ic;
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");

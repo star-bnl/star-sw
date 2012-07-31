@@ -4,9 +4,21 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.27 2011/09/23 02:47:40 cpowell Exp $
+// $Id: bfcMixer_Tpx.C,v 1.31 2012/02/17 20:47:36 fisyak Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.31  2012/02/17 20:47:36  fisyak
+// Remove nodefault option from chain3
+//
+// Revision 1.30  2012/02/17 15:01:24  didenko
+// add run 2011 chains
+//
+// Revision 1.29  2012/01/14 02:15:28  zhux
+// Geometry tag addition in Chain3 removed, Chain2 geometry tags are all updated to the latest version (on 2011.1.14).
+//
+// Revision 1.28  2011/12/05 16:06:34  zhux
+// latest geometry (y2010c) used in simulation chain (chain2) for P10ik
+//
 // Revision 1.27  2011/09/23 02:47:40  cpowell
 // Chain for p+p 200 P10ic production added. Setup for W embedding included.
 //
@@ -26,19 +38,19 @@ StChain  *Chain=0;
 class StBFChain;
 StBFChain *chain1, *chain2, *chain3;
 //_____________________________________________________________________
-void bfcMixer_Tpx(const Int_t Nevents=100,
+void bfcMixer_Tpx(Int_t Nevents=100,
 		  const Char_t *daqfile="/star/rcf/test/daq/2009/embed/st_physics_adc_10128048_raw_1320001.daq",
 		  const Char_t *tagfile="/star/rcf/test/daq/2009/embed/st_physics_adc_10128048_raw_1320001.tags.root",
-		  const Double_t pt_low=0.1,
-		  const Double_t pt_high=5.0,
-                  const Double_t eta_low=-1.5,
-                  const Double_t eta_high=1.5,
-                  const Double_t vzlow = -150.0,
-                  const Double_t vzhigh = 150.0,
-                  const Double_t vr = 100.0,
-		  const Int_t pid=9,
-		  const Double_t mult=100,
-                  const std::vector<Int_t> triggers = 0,
+		  Double_t pt_low=0.1,
+		  Double_t pt_high=5.0,
+                  Double_t eta_low=-1.5,
+                  Double_t eta_high=1.5,
+                  Double_t vzlow = -150.0,
+                  Double_t vzhigh = 150.0,
+                  Double_t vr = 100.0,
+		  Int_t pid=9,
+		  Double_t mult=100,
+                  std::vector<Int_t> triggers = 0,
                   const Char_t *prodName = "P08iepp",
                   const Char_t* type = "FlatPt",
 									const bool bPythia = false,
@@ -67,12 +79,26 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   TString prodP10ihAuAu7("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
 
   // Run10 Au+Au 200 GeV chain
-  TString prodP10ikAuAu200("DbV20101213 P2010a pmdReco btof BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D, VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP10ikAuAu200("DbV20101213 P2010a pmdReco btof BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
 
-  TString geomP08ic("ry2008");
-  TString geomP10ic("ry2009a");
-  TString geomP10ih("ry2010");
+   // Run11 Au+Au 200 GeV chain
+  TString prodP11idAuAu200("DbV20111124 P2011a pmdReco btof mtdDat BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
+  
+   // Run11 Au+Au 27 GeV chain  
+  TString prodP11idAuAu27("DbV20110911 P2011a btof mtddat pmdReco BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
+
+  // Run11 Au+Au 19.6 GeV chain  
+  TString prodP11idAuAu27("DbV20110820 P2011a btof mtddat pmdReco BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
+
+   // Run11 pp 500 GeV chain  
+  TString prodP11idpp500("DbV20110923 pp2011a btof mtddat fmsdat BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
+
+  TString geomP08ic("ry2008e");
+  TString geomP10ic("ry2009d");
+  TString geomP10ih("ry2010c");
   TString geomP10ik(geomP10ih); // Same chain as P10ih
+  TString geomP11id("ry2011");
+
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
 //  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
@@ -99,31 +125,16 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih;}
   else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih;}
   else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ik;}
-  else {
-    cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
-    return;
-  }
-  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
-  chain3Opt += ",";
+  else if (prodName == "P11idAuAu200") { chain3Opt = prodP11idAuAu200;  chain2Opt += geomP11id;}
+  else if (prodName == "P11idAuAu27")  { chain3Opt = prodP11idAuAu27;   chain2Opt += geomP11id;}
+  else if (prodName == "P11idAuAu19")  { chain3Opt = prodP11idAuAu19;   chain2Opt += geomP11id;}
+  else if (prodName == "P11idpp500")   { chain3Opt = prodP11idpp500;    chain2Opt += geomP11id;}
 
-  if (prodName == "P08icpp")           { chain3Opt += geomP08ic; }
-  else if (prodName == "P08iepp")      { chain3Opt += geomP08ic; }
-  else if (prodName == "P08icAuAu9")   { chain3Opt += geomP08ic; }
-  else if (prodName == "P08icdAu")     { chain3Opt += geomP08ic; }
-  else if (prodName == "P08iedAu")     { chain3Opt += geomP08ic; }
-  else if (prodName == "P08icAuAu200") { chain3Opt += geomP08ic; }
-  else if (prodName == "P09igpp500")   { chain3Opt += geomP10ic; }
-  else if (prodName == "P11ibpp500")   { chain3Opt += geomP10ic; }
-  else if (prodName == "P10iapp")      { chain3Opt += geomP10ih; }
-  else if (prodName == "P10icpp200")   { chain3Opt += geomP10ic; }
-  else if (prodName == "P10ihAuAu39")  { chain3Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu11")  { chain3Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu7")   { chain3Opt += geomP10ih; }
-  else if (prodName == "P10ikAuAu200") { chain3Opt += geomP10ik; }
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
+  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker"; 
 
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
@@ -287,4 +298,19 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   gMessMgr->QAInfo() << "Run completed " << endm;
   gSystem->Exec("date");
 }
-
+//________________________________________________________________________________
+void bfcMixer_Tpx(Int_t Nevents, const Char_t *daqfile, Char_t *tagfile,
+		  Double_t pt_low, Double_t pt_high, Double_t eta_low, Double_t eta_high, 
+		  Double_t vzlow, Double_t vzhigh, Double_t vr, Int_t pid, Double_t mult,
+		  const Char_t *triggersC, const Char_t *prodName, const Char_t* type) {
+  std::vector<Int_t> triggers;
+  if (triggersC) {
+    TPMERegexp pm(":");
+    Int_t N = pm.Split(triggersC);
+    for (Int_t i = 0; i < N; i++) {
+      TString num(pm[i]);
+      triggers.push_back(num.Atoi());
+    }
+  }
+  bfcMixer_Tpx(Nevents, daqfile, tagfile, pt_low, pt_high, eta_low, eta_high, vzlow, vzhigh, vr, pid, mult, triggers, prodName, type);
+}
