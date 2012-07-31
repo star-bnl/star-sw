@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.20 2012/06/03 16:52:18 balewski Exp $
+// $Id: StFgtDbMaker.cxx,v 1.21 2012/07/31 18:24:30 jeromel Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 */
@@ -42,7 +42,7 @@ void StFgtDbMaker::setFlavor( const char * flav, const char * tabname )
 //_____________________________________________________________________________
 Int_t StFgtDbMaker::Init()
 {
-    LOG_DEBUG << "StFgtDbMaker::Init()"<<endm;
+    LOG_DEBUG << "StFgtDbMaker::Init()" <<endm;
 
     return StMaker::Init();
 }
@@ -299,6 +299,9 @@ Int_t StFgtDbMaker::Finish()
 
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.21  2012/07/31 18:24:30  jeromel
+// Removed virtual + fixed name
+//
 // Revision 1.20  2012/06/03 16:52:18  balewski
 // added access to fgtSimuParam table, all I/O .C code is saved in macros
 //
