@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.32 2012/04/13 18:43:13 sgliske Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.33 2012/07/31 21:45:25 jeromel Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -17,6 +17,17 @@
 };*/
 
 
+StFgtClusterMaker::StFgtClusterMaker( const Char_t* name ) : StMaker(name),mClusterAlgoPtr(0)
+{
+  // noop
+};
+
+StFgtClusterMaker::~StFgtClusterMaker()
+{
+  // noop
+};
+
+
 Int_t StFgtClusterMaker::Make()
 {
    Int_t ierr = kStOk;
@@ -27,18 +38,18 @@ Int_t StFgtClusterMaker::Make()
    if( !eventPtr ) {
       LOG_ERROR << "Error getting pointer to StEvent from '" << ClassName() << "'" << endm;
       ierr = kStErr;
-   };
+   }
 
    StFgtCollection* fgtCollectionPtr = 0;
 
    if( eventPtr ) {
       fgtCollectionPtr=eventPtr->fgtCollection();
-   };
+   }
 
    if( !fgtCollectionPtr) {
       LOG_ERROR << "Error getting pointer to StFgtCollection from '" << ClassName() << "'" << endm;
       ierr = kStErr;
-   };
+   }
 
    if( !ierr ){
      for( UInt_t discIdx=0; discIdx<fgtCollectionPtr->getNumDiscs(); ++discIdx ){
@@ -140,7 +151,7 @@ Int_t StFgtClusterMaker::Make()
   
   return ierr;
 
-};
+}
 
 
 Int_t StFgtClusterMaker::setClusterAlgo(StFgtIClusterAlgo* algo)
@@ -154,33 +165,33 @@ Int_t StFgtClusterMaker::Init()
   //  cout <<"cluster init " <<endl;
   Int_t ierr = kStOk;
 
+  //
+  // Please, conside the Maker's SetMode() method (setting m_Mode but you can get
+  // the value using Getmode() as well ... to switch between cluster agos.
+  // Extrenal setting a-la fgtClusMkr->setClusterAlgo( seededClusAlgo ); is
+  // not appropriate for a chain mades maker.
+  //
   if( !mClusterAlgoPtr ){
      LOG_INFO << "No fgt cluster algorithm specified, using default seededAlgo" << endm;
      mClusterAlgoPtr=new StFgtSeededClusterAlgo();
-  };
+  }
 
   if( !ierr )
      ierr = mClusterAlgoPtr->Init();
 
   return ierr;
-};
+}
   
   
-StFgtClusterMaker::StFgtClusterMaker( const Char_t* name ) : StMaker(name),mClusterAlgoPtr(0)
-{
-   /* */
-};
-
-StFgtClusterMaker::~StFgtClusterMaker()
-{
-	
-};
 
     
 ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.33  2012/07/31 21:45:25  jeromel
+//   Misc reshapes
+//
 //   Revision 1.32  2012/04/13 18:43:13  sgliske
 //   Commented out a LOG_INFO that should have been a LOG_DEBUG
 //   but isn't really needed

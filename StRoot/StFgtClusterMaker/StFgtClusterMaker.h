@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.17 2012/03/08 17:43:40 avossen Exp $
+//   $Id: StFgtClusterMaker.h,v 1.18 2012/07/31 21:45:25 jeromel Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.18  2012/07/31 21:45:25  jeromel
+//   Misc reshapes
+//
 //   Revision 1.17  2012/03/08 17:43:40  avossen
 //   added default cluster algo, made StFgtIClusterAlgo destructor =0
 //
@@ -59,14 +62,14 @@ class StFgtClusterMaker : public StMaker
   //omitted assignment operator and copy constructor on purpose
  public:
   StFgtClusterMaker( const Char_t* name="FgtCluster");
-  virtual ~StFgtClusterMaker();
+  ~StFgtClusterMaker();
   /// Init function. Checks if there is a cluster algo and initializes the same.
-  virtual Int_t Init();
+  Int_t Init();
   /**
-The make function. Uses the cluster algo member to do the actual clustering. Then it does some post processing using the info on the absolute position of the disk that the algo does not have.
+     The make function. Uses the cluster algo member to do the actual clustering. Then it does some post processing using the info on the absolute position of the disk that the algo does not have.
 In addition the cluster error is computed for the orthogonal direction (e.g. for r clusters in phi) from the strip length.
   */
-  virtual Int_t Make();
+  Int_t Make();
   ///clear function is empty at the moment
   //  virtual void Clear( Option_t *opts = "" );
 
@@ -76,7 +79,7 @@ The simple cluster algorithm is the default one. The max cluster only selects on
   Int_t setClusterAlgo(StFgtIClusterAlgo*);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.17 2012/03/08 17:43:40 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.18 2012/07/31 21:45:25 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   StFgtIClusterAlgo* mClusterAlgoPtr;
