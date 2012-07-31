@@ -1,10 +1,13 @@
 //
 // \class StFgtRawMaker
-//  \author Anselm Vossen
+// \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.32 2012/03/07 03:57:23 avossen Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.33 2012/07/31 18:25:53 jeromel Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.33  2012/07/31 18:25:53  jeromel
+//  Remove virtual + add InitRun to get Db point (previous method implied passing from outside a pointer to a maker (sigh!) not appropriate)
+//
 //  Revision 1.32  2012/03/07 03:57:23  avossen
 //  various updates
 //
@@ -98,20 +101,20 @@
 //
 //
 
-#include "StRoot/St_base/StMessMgr.h"
-#include "StRoot/St_base/Stypes.h"
+#include "St_base/StMessMgr.h"
+#include "St_base/Stypes.h"
 
-#include "StRoot/StChain/StRtsTable.h"
-#include "StRoot/StEvent/StEvent.h"
+#include "StChain/StRtsTable.h"
+#include "StEvent/StEvent.h"
 #include "DAQ_FGT/daq_fgt.h"
 #include "DAQ_READER/daq_dta.h"
 
-#include "StRoot/StEvent/StFgtCollection.h"
-#include "StRoot/StEvent/StFgtStripCollection.h"
-#include "StRoot/StEvent/StFgtStrip.h"
-#include "StFgtDbMaker/StFgtDb.h"
-#include "StRoot/St_base/StMessMgr.h"
-#include "StRoot/St_base/Stypes.h"
+#include "StEvent/StFgtCollection.h"
+#include "StEvent/StFgtStripCollection.h"
+#include "StEvent/StFgtStrip.h"
+#include "StFgtDbMaker/StFgtDbMaker.h"
+#include "St_base/StMessMgr.h"
+#include "St_base/Stypes.h"
 
 #include "StFgtRawMaker.h"
 
@@ -272,12 +275,32 @@ Init function. Not doing anything at the moment.
 */
 Int_t StFgtRawMaker::Init()
 {
-  Int_t ierr = kStOk;
-
   LOG_INFO << "StFgtRawMaker::Init we are named "  << GetName() << endm;
-
-  return ierr;
+  return kStOk;
 }
+
+
+/// InitRun will be called after FgtDb due to chain dependencies
+Int_t StFgtRawMaker::InitRun(Int_t runNumber)
+{
+  LOG_INFO << "StFgtRawMaker::InitRun with run = "  << runNumber << endm;
+  if (! mFgtDb ){
+    StFgtDbMaker * fgtMaker;
+    fgtMaker = (StFgtDbMaker *) GetMaker("fgtDb");
+    if ( fgtMaker ){
+      // NOTE JL 2012/07
+      // we can at least return a point to the expected struct to
+      // get back to our feet but this is non-standard
+      mFgtDb = fgtMaker->getDbTables();
+      LOG_INFO   << "::InitRun Getting fgtDb info" << endm;
+    } else {
+      LOG_ERROR  << "::InitRun we will fail as fgtDb is not present" << endm;
+    }
+  }
+  return kStOK;
+}
+
+
 
 /**
 constructor. 
@@ -303,7 +326,7 @@ void StFgtRawMaker::Clear( Option_t *opts )
 
 //StFgtRawMaker& StFgtRawMaker::operator=(const StFgtRawMaker &source)
 //{
-  //  StRTSBaseMaker::operator=(source);
+//  StRTSBaseMaker::operator=(source);
 //  return *this;
 //}
 
