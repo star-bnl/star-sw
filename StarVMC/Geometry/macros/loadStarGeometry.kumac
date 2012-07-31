@@ -1,8 +1,0 @@
-MACRO loadStarGeometry tag=y2009c field=-5.0 close=1 
-
-   DETP GEOM [tag] field=[field]
-   GEXE $STAR_LIB/libStarMagFieldNoDict.so
-   GEXE .$STAR_HOST_SYS/lib/xgeometry.so
-   GCLO ALL
-
-RETURN
