@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.45 2012/07/10 21:47:24 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.46 2012/07/31 20:08:11 jeromel Exp $
  *
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.46  2012/07/31 20:08:11  jeromel
+ * Changes to make maker compatible with running in chain (was not)
+ *
  * Revision 1.45  2012/07/10 21:47:24  avossen
  * random update
  *
@@ -184,34 +187,50 @@
 #include "StRoot/StFgtDbMaker/StFgtDb.h"
 #include "StFgtA2CMaker.h"
 
-// constructors
-StFgtA2CMaker::StFgtA2CMaker( const Char_t* name )
-  : StMaker( name ), mAcceptLongPulses(false), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(5),mClusterThreshold(1.0), mDb(0) { /* */ };
+/// Class constructors - does nothing else than setting name
+StFgtA2CMaker::StFgtA2CMaker( const Char_t* name ) : StMaker( name ), mAcceptLongPulses(false), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(5),mClusterThreshold(1.0), mDb(0) {
+  // do nothing
+}
+
+/// destructor - really does nothing
+StFgtA2CMaker::~StFgtA2CMaker()
+{
+  // nothing to do
+}
 
 
+/// Does nothing else than printing "we are here"
 Int_t StFgtA2CMaker::Init(){
+   LOG_INFO << "StFgtA2CMaker::Init we are named "  << GetName() << endm;
+   return kStOk;
+}
+
+/// Get pointer to fgtDb
+Int_t StFgtA2CMaker::InitRun(Int_t runumber){
    Int_t ierr = kStOk;
 
+   LOG_INFO << "StFgtA2CMaker::InitRun for "  << runumber << endm;
    if( !mDb ){
-      StFgtDbMaker *fgtDbMkr = static_cast< StFgtDbMaker* >( GetMakerInheritsFrom( "StFgtDbMaker" ) );
+      LOG_INFO << "No fgtDb yet, trying to get a hold" << endm;
+      //StFgtDbMaker *fgtDbMkr = static_cast< StFgtDbMaker* >( GetMakerInheritsFrom( "StFgtDbMaker" ) );
+      StFgtDbMaker *fgtDbMkr = static_cast<StFgtDbMaker * >( GetMaker("fgtDb"));
       if( !fgtDbMkr ){
          LOG_FATAL << "StFgtDb not provided and error finding StFgtDbMaker" << endm;
          ierr = kStFatal;
-      };
 
-      if( !ierr ){
-         mDb = fgtDbMkr->getDbTables();
+      } else {
+	 mDb = fgtDbMkr->getDbTables();
 
          if( !mDb ){
             LOG_FATAL << "StFgtDb not provided and error retrieving pointer from StFgtDbMaker '"
                       << fgtDbMkr->GetName() << endm;
             ierr = kStFatal;
-         };
-      };
-   };
-
-   return ierr;
-};
+         } else {
+	   LOG_INFO << "Got on hold on fgtDb, all OK" << endm;
+	 }
+      }
+   }
+}
 
 
 Int_t StFgtA2CMaker::Make(){
@@ -221,26 +240,26 @@ Int_t StFgtA2CMaker::Make(){
       // warning message already given in init,
       // so just silently skip the event
       return kStFatal;
-   };
+   }
    //   cout <<"in a2cmaker " << endl;
    StEvent* eventPtr = 0;
-   eventPtr = (StEvent*)GetInputDS("StEvent");
+   eventPtr = (StEvent*) GetInputDS("StEvent");
 
    if( !eventPtr ) {
       LOG_ERROR << "Error getting pointer to StEvent from '" << ClassName() << "'" << endm;
       ierr = kStErr;
-   };
+   }
 
    StFgtCollection* fgtCollectionPtr = 0;
 
    if( eventPtr ) {
       fgtCollectionPtr=eventPtr->fgtCollection();
-   };
+   }
 
    if( !fgtCollectionPtr) {
       LOG_ERROR << "Error getting pointer to StFgtCollection from '" << ClassName() << "'" << endm;
       ierr = kStErr;
-   };
+   }
 
    if( !ierr ){
       for( UInt_t discIdx=0; discIdx<fgtCollectionPtr->getNumDiscs(); ++discIdx ){
@@ -293,9 +312,9 @@ Int_t StFgtA2CMaker::Make(){
                         if( (mRelThres && adcMinusPed > mRelThres*pedErr) || (mAbsThres>-kFgtMaxAdc && adcMinusPed > mAbsThres)) {
                            // only add if it is above pedestal, otherwise negative values can be added...
                            ++nTbAboveThres;
-                        };
-                     };
-                  };
+                        }
+                     }
+                  }
 
 		  //		    if(strip->getGeoId() >=13092 && strip->getGeoId()<=13105)
 		      //		      cout <<"" <<endl;
@@ -330,7 +349,7 @@ Int_t StFgtA2CMaker::Make(){
 
                      if( status & mStatusMask )
                         strip->setClusterSeedType(kFgtDeadStrip);
-                  };
+                  }
 		  //	    if(strip->getGeoId() >=13092 && strip->getGeoId()<=13105)
 		  //	      cout <<" seed type is: " << strip->getSeedType() <<endl;
                }
@@ -342,12 +361,12 @@ Int_t StFgtA2CMaker::Make(){
             // some ``bad'' strips may have abnormally large st. dev.
 	    //this also removes dead strips
             stripCollectionPtr->removeFlagged();
-         };
-      };
-   };
+         }
+      }
+   }
 
    return ierr;
-};
+}
 
 /// Implementation of Jan's seed finder.
 /// Returns true for a valid pulse
@@ -373,14 +392,14 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
       // to remove seeds where all tbs are high and close together
       if(prvAdc>0 && fabs(prvAdc-adc)<ped && adc>3*ped) {
          numPlateau++;
-      };
+      }
 
       if(numPlateau>numMaxPlateau) {
          numMaxPlateau=numPlateau;
       } else {
          //end of plateau
          numPlateau=0;
-      };
+      }
 
       prvAdc=adc;
 
@@ -452,6 +471,6 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
 	      if(pStrip->getGeoId() >=13092 && pStrip->getGeoId()<=13105)
 		cout <<"nope..." << endl;
    return kFgtSeedTypeNo;
-};
+}
 
 ClassImp(StFgtA2CMaker);
