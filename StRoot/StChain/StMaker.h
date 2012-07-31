@@ -17,6 +17,7 @@
 #include "TString.h"
 #include "TDatime.h"
 #include "TH1.h"
+#include "TFile.h"
 #include "StEvtHddr.h"
 #ifndef ROOT_TClonesArray
 #include "TClonesArray.h"
@@ -38,7 +39,6 @@ class TTable;
 class StMemStat;
 class StEvtHddr;
 class TAttr;
-class TFile;
 
 class StTurnLogger;
 
@@ -246,7 +246,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.98 2011/06/20 15:13:51 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.99 2012/06/09 22:46:52 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char *logInput,
                                     const StMaker *uppMk=0,
@@ -310,8 +310,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.98 2011/06/20 15:13:51 fisyak Exp $
+// $Id: StMaker.h,v 1.99 2012/06/09 22:46:52 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.99  2012/06/09 22:46:52  fisyak
+// Synchronize tag and geometry version for y2006h, thanks to Xianglei, bug #2374
+//
 // Revision 1.98  2011/06/20 15:13:51  fisyak
 // Force to call Finish with SIGTERM signal obtained from condor_vacate_job after time limit reached
 //

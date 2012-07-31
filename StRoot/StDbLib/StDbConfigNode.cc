@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.26 2011/11/28 17:03:08 dmitry Exp $
+ * $Id: StDbConfigNode.cc,v 1.29 2012/03/16 19:36:18 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.29  2012/03/16 19:36:18  dmitry
+ * converted dangled char pointers to std::string objects + fixed typo
+ *
+ * Revision 1.28  2012/03/16 17:36:46  dmitry
+ * added * symbol to global override indicators
+ *
+ * Revision 1.27  2012/03/14 18:12:45  dmitry
+ * Added protection against zero-sized strings and whitespaces sent as dbType. Null pointer was expected to indicate omitted dbType, but now StDbLib code receives \0 string instead (from upstream, checked St_db_Maker, StDbBroker, StDbConfigNode).
+ *
  * Revision 1.26  2011/11/28 17:03:08  dmitry
  * dbv override support in StDbLib,StDbBroker,St_db_Maker
  *
@@ -195,13 +204,13 @@ StDbConfigNode::setProdTimeOverride(unsigned int ptime, char* dbType, char* dbDo
 
     // ***** get complete name for user-selected override *****
     std::string completeName;
-    if (dbType) {
+    if (dbType && dbType[0] != '\0' && dbType[0] != ' ' && dbType[0] != '*') {
         completeName.append(dbType);
     } else {
         isAllTypesAccepted = true;
     }
     completeName.append("_");
-    if (dbDomain) {
+    if (dbDomain && dbDomain[0] != '\0' && dbDomain[0] != ' ' && dbDomain[0] != '*') {
         completeName.append(dbDomain);
     }
 

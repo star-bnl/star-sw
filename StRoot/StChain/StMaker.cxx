@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.248 2012/01/30 17:19:59 perev Exp $
+// $Id: StMaker.cxx,v 1.251 2012/06/09 22:46:52 fisyak Exp $
 //
 //
 /*!
@@ -18,6 +18,7 @@
  *                                                                     
  */
 #define STAR_LOGGER 1
+#include "StMaker.h"
 #include "Stiostream.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +38,6 @@
 #include "TClonesArray.h"
 #include "TBrowser.h"
 
-#include "StMaker.h"
 #include "StChainOpt.h"
 #include "TObjectSet.h"
 #include "StChain.h"
@@ -238,7 +238,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 //{"y2006b",      20051201,     2, "y2006b",   "y2006+new FPD+SSD5/CALB2"},// code versions indicated
   {"y2006c",      20051201,     3, "y2006c",   "y2006+new FPD+SSD5/CALB2+noPMD"},// 
   {"y2006g",      20051201,     4, "y2006g",   "y2006c + SVT dead material"},
-  {"y2006h",      20051201,     5, "y2006g",   "y2006g + ecal6+tpc2009(JW)"},
+  {"y2006h",      20051201,     5, "y2006h",   "y2006g + ecal6+tpc2009(JW)"},
 
   // in preparation
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
@@ -266,14 +266,16 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2010b",      20091215,     2, "y2010b",   "TOF fix & TPCE redused"},
   {"y2010c",      20091215,     3, "y2010c",   "Honey sandwich fix"},
   {"y2011",       20101215,     0, "y2011",    "y2011 TOF fix & TPCE redused & honey"},
-  {"y2011a",      20101215,     1, "y2011a",    "y2011a == y2011 now "},
+  {"y2011a",      20101215,     1, "y2011a",   "y2011a == y2011 now "},
   {"y2012",       20111215,     0, "y2012",    "y2012 Very preliminary"},
+  {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
   //  {"complete",    20190101,     1, "complete", "non-production"},
   //  {"ist1",        20190101,     2, "ist1",     "non-production"},
   //  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
+  {"devT",        20170101,     1, "devT",      "dev geo for Inner Tpc Sector Upgrade, Variant 1"}, // 
   {"upgr01",      20190101,     4, "upgr01",   ""},
   {"upgr02",      20190101,     5, "upgr02",   ""},
   {"upgr03",      20190101,     6, "upgr03",   ""},
@@ -810,11 +812,7 @@ Int_t StMaker::Init()
       maker->StartTimer();
       
       if (GetDebug()) {
-#ifdef STAR_LOGGER 
         LOG_DEBUG << "*** Call << " << maker->ClassName() << ":Init() ***" << endm;       
-#else      
-        printf("\n*** Call %s::Init() ***\n\n",maker->ClassName());
-#endif      
      }
       TString ts1(maker->ClassName()); ts1+="("; ts1+=maker->GetName(); ts1+=")::";
       TString ts2 = ts1; ts2+="Make ";
@@ -823,11 +821,7 @@ Int_t StMaker::Init()
       maker->fMemStatClear = new StMemStat(ts2);
       
       if ( maker->Init()) {
-#ifdef STAR_LOGGER 
         LOG_ERROR << "   Maker "<< maker->GetName() << " failed in Init" << endm;
-#else        
-        printf("   Maker %s failed in Init\n", maker->GetName());
-#endif        
         return kStErr;
       }
       maker->StopTimer();
@@ -864,17 +858,7 @@ void StMaker::StartMaker()
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
   /*if (GetNumber()>3)*/ 
-  if (fMemStatMake) {
-     if (GetNumber()>20) fMemStatMake->Start();
-     else  if (GetDebug()) {
-#ifdef STAR_LOGGER 
-        LOG_DEBUG << "StMaker::StartMaker : cannot use StMemStat (no Init()) in [" << 
-              GetName() << "]" << endm;
-#else        
-        printf("StMaker::StartMaker : cannot use StMemStat (no Init()) in [%s]\n",GetName());
-#endif        
-     }
-  }
+  if (fMemStatMake && GetNumber()>20) fMemStatMake->Start();
 
   
 
@@ -891,20 +875,7 @@ void StMaker::EndMaker(Int_t ierr)
   ::doPs(GetName(),"EndMaker");
   
   /*if (GetNumber()>3)*/ 
-  if (fMemStatMake) {
-     if (GetNumber()>20) fMemStatMake->Stop();
-     else if (GetDebug()) {
-#ifdef STAR_LOGGER     
-     LOG_DEBUG << "StMaker::EndMaker : cannot use StMemStat (no Init()) in [" 
-               <<   GetName() 
-               << "]" 
-               << endm ;    
-#else     
-        printf("StMaker::EndMaker : cannot use StMemStat (no Init()) in [%s]\n",GetName());
-#endif
-     }
-  }
-
+  if (fMemStatMake && GetNumber()>20) fMemStatMake->Stop();
 
   StopTimer();
   // Restore the previous logger status
@@ -1974,6 +1945,15 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.251  2012/06/09 22:46:52  fisyak
+// Synchronize tag and geometry version for y2006h, thanks to Xianglei, bug #2374
+//
+// Revision 1.250  2012/05/31 21:54:36  fisyak
+// Add y2012a and devT geometry tags
+//
+// Revision 1.249  2012/04/27 00:17:45  perev
+// Cleanup
+//
 // Revision 1.248  2012/01/30 17:19:59  perev
 // devE geometry added
 //

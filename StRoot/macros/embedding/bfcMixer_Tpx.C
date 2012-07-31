@@ -4,9 +4,18 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.31 2012/02/17 20:47:36 fisyak Exp $
+// $Id: bfcMixer_Tpx.C,v 1.34 2012/04/18 03:47:34 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.34  2012/04/18 03:47:34  zhux
+// Corrected string name for Run 11 Au+Au 19.6 GeV chain
+//
+// Revision 1.33  2012/04/13 17:39:11  cpowell
+// Added chain options for P10ikAuAu62
+//
+// Revision 1.32  2012/03/27 15:50:44  cpowell
+// Added chain options for P10ikAuAu39 (same as P10ihAuAu39)
+//
 // Revision 1.31  2012/02/17 20:47:36  fisyak
 // Remove nodefault option from chain3
 //
@@ -74,7 +83,9 @@ void bfcMixer_Tpx(Int_t Nevents=100,
 	 prodP11ibpp500 += " VFPPVnoCTB beamLine TpxClu -VFMinuit -hitfilt";
 
   // BES Run10 chains
+  TString prodP10ikAuAu62("DbV20110413 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10ihAuAu39("DbV20100909 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP10ikAuAu39("DbV20100909 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10ihAuAu11("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10ihAuAu7("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
 
@@ -88,7 +99,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   TString prodP11idAuAu27("DbV20110911 P2011a btof mtddat pmdReco BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
 
   // Run11 Au+Au 19.6 GeV chain  
-  TString prodP11idAuAu27("DbV20110820 P2011a btof mtddat pmdReco BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP11idAuAu19("DbV20110820 P2011a btof mtddat pmdReco BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -VFMinuit -hitfilt");
 
    // Run11 pp 500 GeV chain  
   TString prodP11idpp500("DbV20110923 pp2011a btof mtddat fmsdat BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
@@ -121,7 +132,9 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   else if (prodName == "P11ibpp500")   { chain3Opt = prodP11ibpp500;    chain2Opt += geomP10ic;}
   else if (prodName == "P10iapp")      { chain3Opt = prodP10iapp;       chain2Opt += geomP10ih;}
   else if (prodName == "P10icpp200")   { chain3Opt = prodP10icpp200;    chain2Opt += geomP10ic;}
+  else if (prodName == "P10ikAuAu62")  { chain3Opt = prodP10ikAuAu62;   chain2Opt += geomP10ik;}
   else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih;}
+  else if (prodName == "P10ikAuAu39")  { chain3Opt = prodP10ikAuAu39;   chain2Opt += geomP10ik;}
   else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih;}
   else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih;}
   else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ik;}
