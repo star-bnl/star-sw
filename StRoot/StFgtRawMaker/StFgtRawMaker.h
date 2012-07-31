@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtRawMaker.h,v 1.21 2012/03/07 03:57:23 avossen Exp $
+//  $Id: StFgtRawMaker.h,v 1.22 2012/07/31 18:25:53 jeromel Exp $
 //  $Log: StFgtRawMaker.h,v $
+//  Revision 1.22  2012/07/31 18:25:53  jeromel
+//  Remove virtual + add InitRun to get Db point (previous method implied passing from outside a pointer to a maker (sigh!) not appropriate)
+//
 //  Revision 1.21  2012/03/07 03:57:23  avossen
 //  various updates
 //
@@ -47,23 +50,25 @@ class StFgtCollection;
 class StFgtDb;
 
 /**
-   This is the raw maker for the FGT data. It makes use of its base class functions to read daq files into the StFgtEvent Data structure.
-
+   This is the raw maker for the FGT data. It makes use of its base class functions to read daq 
+   files into the StFgtEvent Data structure.
 */
 class StFgtRawMaker : public StRTSBaseMaker
 {
  public: 
   StFgtRawMaker(const Char_t* name="FgtRaw");
-  virtual ~StFgtRawMaker();
-/**
-Init function. Not doing anything at the moment.
-*/
-  virtual Int_t Init();
-/**
-Maker main function. Getting pointer to StEvent and fills the event structure
-*/
-  virtual Int_t Make();
-  virtual void Clear( Option_t *opts = "" );
+  ~StFgtRawMaker();
+  /**
+     Init function. Not doing anything at the moment.
+  */
+  Int_t Init();
+  Int_t  InitRun(Int_t runNumber);
+
+  /**
+     Maker main function. Getting pointer to StEvent and fills the event structure
+  */
+  Int_t Make();
+  void Clear( Option_t *opts = "" );
 
   /**
      sets the pointer to the StFgtDb
@@ -72,14 +77,14 @@ Maker main function. Getting pointer to StEvent and fills the event structure
 
  protected:
 
-/**
-utility function to get the data from the daq file and fill the StEvent structure
-*/
-  virtual Int_t fillHits();
-/**
-Function to get pointer to StEvent datastructures. Creates them if they do not exist already.
-*/
-  virtual Int_t prepareEnvironment();
+  /**
+   utility function to get the data from the daq file and fill the StEvent structure
+  */
+  Int_t fillHits();
+  /**
+     Function to get pointer to StEvent datastructures. Creates them if they do not exist already.
+  */
+  Int_t prepareEnvironment();
   StFgtCollection *mFgtCollectionPtr;
 
  private:
