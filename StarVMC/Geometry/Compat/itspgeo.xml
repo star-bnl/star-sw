@@ -1,5 +1,0 @@
-<Document file="StarVMC/Geometry/Compat/itspgeo.xml">
-<Export language="Mortran">
-<Import file="pams/geometry/itspgeo/itspgeo.g" verbatim="true" />
-</Export>
-</Document>
