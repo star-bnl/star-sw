@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: fgtSingleEvents.C,v 1.1 2012/01/31 09:26:18 sgliske Exp $
+ * $Id: fgtSingleEvents.C,v 1.2 2012/07/31 20:33:13 sgliske Exp $
  * Author: S. Gliske, Jan 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: fgtSingleEvents.C,v $
+ * Revision 1.2  2012/07/31 20:33:13  sgliske
+ * updated to execute without errors with latest other CVS FGT software
+ *
  * Revision 1.1  2012/01/31 09:26:18  sgliske
  * StFgtQaMakers moved to StFgtPool
  *
@@ -48,24 +51,11 @@ StFgtA2CMaker     *a2cMkr        = 0;
 int fgtSingleEvents( const Char_t *filenameIn = "testfile.daq",
                      const Char_t *filenameOut = "testfile.root",
                      Int_t nevents = 200,
-                     Int_t isCosmic = -1,
+                     Bool_t isCosmic = 0,
                      Bool_t cutShortEvents = 0 ){
 
    LoadLibs();
    Int_t ierr = 0;
-
-   // 
-   // DECIDE IF COSMIC OR NOT
-   // 
-
-   if( isCosmic == -1 ){
-      isCosmic = 0;
-      std::string daqFileName( filenameIn );
-      std::string::size_type pos = daqFileName.find_last_of(".");
-      
-      if( pos != std::string::npos && daqFileName.substr( pos ) == ".sfs" )
-         isCosmic = 1;
-   };
 
    if( isCosmic )
       cout << "Is Cosmic" << endl;
@@ -117,13 +107,13 @@ int fgtSingleEvents( const Char_t *filenameIn = "testfile.daq",
 
    cout << "Constructing the A2C converter" << endl;
    a2cMkr = new StFgtA2CMaker( "a2cMaker" );
-   a2cMkr->setTimeBinMask( 0xFF );
+   //a2cMkr->setTimeBinMask( 0xFF );
    a2cMkr->setAbsThres( 100 );  // set to below -4096 to skip cut
    a2cMkr->setRelThres( 0 );  // set to zero to skip cut
    if( !isCosmic )
       a2cMkr->setFgtDb( fgtDbMkr->getDbTables() );
-   a2cMkr->doRemoveOtherTimeBins( 0 );
-   a2cMkr->doCutBadStatus( 0 );
+   //a2cMkr->doRemoveOtherTimeBins( 0 );
+   //a2cMkr->doCutBadStatus( 0 );
 
    cout << "Constructing the QA Maker" << endl;
    qaMkr = new StFgtSingleEventQA( "fgtSingleEventQA" );
@@ -182,9 +172,10 @@ void LoadLibs() {
 
   gSystem->Load("RTS");
   gSystem->Load("StFgtUtil");
-  gSystem->Load("StFgtRawMaker");
-  gSystem->Load("StFgtPedMaker");
-  gSystem->Load("StFgtStatusMaker");
+  gSystem->Load("StFgtDbMaker");
+  gSystem->Load("StFgtRawDaqReader");
+//   gSystem->Load("StFgtPedMaker");
+//   gSystem->Load("StFgtStatusMaker");
   gSystem->Load("StFgtA2CMaker");
   gSystem->Load("StFgtQaMakers");
 };
