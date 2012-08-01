@@ -40,6 +40,10 @@
 
 // I wrapped more complicated detectors inside their own functions
 // for this example
+#ifdef INSIST_ON_EMC_PSEUDO
+static int emc_pseudo_doer(daqReader *rdr, const char *do_print) ;
+#endif
+
 static int bsmd_doer(daqReader *rdr, const char  *do_print) ;
 static int esmd_doer(daqReader *rdr, const char  *do_print) ;
 static int btow_doer(daqReader *rdr, const char  *do_print) ;
@@ -50,7 +54,7 @@ static int trg_doer(daqReader *rdr, const char *do_print) ;
 static int ftp_doer(daqReader *rdr, const char *do_print) ;
 static int pmd_doer(daqReader *rdr, const char *do_print) ;
 static int hlt_doer(daqReader *rdr, const char *do_print) ;
-static int emc_pseudo_doer(daqReader *rdr, const char *do_print) ;
+
 static int pp2pp_doer(daqReader *rdr, const char *do_print) ;
 static int l3_doer(daqReader *rdr, const char *do_print) ;
 static int fgt_doer(daqReader *rdr, const char *do_print) ;
@@ -934,6 +938,7 @@ static int btow_doer(daqReader *rdr, const char *do_print)
 	return found ;
 }
 
+#ifdef INSIST_ON_EMC_PSEUDO
 static int emc_pseudo_doer(daqReader *rdr, const char *do_print)
 {
 	int found = 0 ;
@@ -958,6 +963,7 @@ static int emc_pseudo_doer(daqReader *rdr, const char *do_print)
 	return found ;
 
 }
+#endif
 
 
 static int pp2pp_doer(daqReader *rdr, const char *do_print)
@@ -1197,10 +1203,10 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
     if(dd->iterate()) {
       found = 1;
 
-      int sz = dd->get_size_t();
+//      int sz = dd->get_size_t();
       TriggerDataBlk *trg = (TriggerDataBlk *)dd->Byte;
 
-      EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
+//      EvtDescData *evtDesc = (EvtDescData *)(((char *)trg) + swap32(trg->EventDesc_ofl.offset));
       TrgSumData *trgSum = (TrgSumData *)(((char *)trg) + swap32(trg->Summary_ofl.offset));
       L1_DSM_Data *l1Dsm = (L1_DSM_Data *)(((char *)trg) + swap32(trg->L1_DSM_ofl.offset));
 
