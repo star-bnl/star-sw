@@ -145,7 +145,7 @@ void *daq_dta::request(u_int obj_cou)
 
 	LOG(DBG,"Requesting %d objects",obj_cou) ;
 
-	if(obj_cou == 0) obj_cou = 16 ;	// ad hoc rule...
+	if(obj_cou <= 0) obj_cou = 16 ;	// ad hoc rule...
 
 	tmp_store = get(obj_cou) ;
 
