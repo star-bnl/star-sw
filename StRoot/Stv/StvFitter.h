@@ -35,10 +35,10 @@ int IsTooBig(StvFitPars &fp) const;
 private:
 int  Jpdate();
 int  Vpdate();
-static double JoinTwo(int nP1,const double *P1,const double *E1
-                     ,int nP2,const double *P2,const double *E2
-	             ,              double *PJ,      double *EJ
-                     ,int mode=0);	
+// static double JoinTwo(int nP1,const double *P1,const double *E1
+//                      ,int nP2,const double *P2,const double *E2
+// 	             ,              double *PJ,      double *EJ
+//                      ,int mode=0);	
 static void Test();
 protected:
       char         mBeg[1];

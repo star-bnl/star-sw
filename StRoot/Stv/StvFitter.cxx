@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "TMath.h"
+#include "TMatrixD.h"
+#include "TVectorD.h"
 #include "TCernLib.h"
 #include "StvFitter.h"
 #include "StvUtil/StvNodePars.h"
@@ -22,6 +24,135 @@ static inline double MyXi2(const double G[3],double dA,double dB)
   double Gdet = G[0]*G[2]-G[1]*G[1];
   return  (G[2]*dA*dA-2*G[1]*dA*dB+G[0]*dB*dB)/Gdet;
 }
+//______________________________________________________________________________
+double JoinTwo(int nP1,const double *P1,const double *E1
+              ,int nP2,const double *P2,const double *E2
+	               ,      double *PJ,      double *EJ)
+{
+  assert(nP1<=nP2);
+//int nE1 = nP1*(nP1+1)/2;
+  int nE2 = nP2*(nP2+1)/2;
+  TArrayD ard(nE2*5+nP2*3);
+  double *a = ard.GetArray();  
+  double *E1i = a;
+  double *E2i = (a+=nE2);
+  double *EJi = (a+=nE2);
+  double *EJm = (a+=nE2);
+  double *ERi = (a+=nE2);
+  
+  double *Pdif= (a+=nE2);
+  double *P1J = (a+=nP2);
+  double *P2J = (a+=nP2);
+
+  TCL::trsinv(E1,E1i,nP1);		//E1i = 1/E1
+  TCL::trsinv(E2,E2i,nP2);		//E2i = 1/E2
+  TCL::vadd (E1i,E2i,EJi ,nE2);		//EJi = E1i+E2i
+  TCL::trsinv(EJi,EJm,nP2);		//EJ = 1/EJi
+  TCL::vsub (P1 ,P2 ,Pdif,nP1);		//Pdif = P1-P2
+  TCL::trqsq(E2i,EJm,ERi ,nP2);		//ERi = E2i*EJi*E2i
+  TCL::vsub (E2i,ERi,ERi ,nE2);         //ERi = E2i- E2i*EJi*E2i == 1/(E1+E2)
+  double chi2;
+  TCL::trasat(Pdif,ERi,&chi2,1,nP1); 
+  if (!PJ) return chi2;
+
+  TCL::ucopy(EJm,EJ,nE2);		//EJ = 1/EJi
+  
+  TCL::trsa(E1i,P1,P1J,nP1,1);		//P1J = E1i*P1
+  TCL::trsa(E2i,P2,P2J,nP2,1);		//P2J = E2i*P2
+  TCL::vadd(P2J,P1J,P2J,nP1);		//P2J = P1J+P2J
+  TCL::trsa(EJ,P2J,PJ,nP2,1);		//PJ  = EJ*P3J
+  return chi2;
+}
+//______________________________________________________________________________
+double JoinTwoT(int nP1,const double *P1,const double *E1
+               ,int nP2,const double *P2,const double *E2
+	               ,      double *PJ,      double *EJ)
+{
+///  Fit track(P2) & errors E2 with track or hit (P1) & errors E1
+///  nP1 size of array P1. E1 errors packed as low triangle
+///  nP2 size of array P2. E2 errors packed as low triangle
+///  PJ output parameters size nP2. EJ according packed errors
+
+  assert(nP1<=nP2);
+//  int nE1 = nP1*(nP1+1)/2;
+//  int nE2 = nP2*(nP2+1)/2;
+  TMatrixD  E1i(nP2,nP2 ),E2i(nP2,nP2);
+  for (int i=0,li=0;i< nP1;li+=++i) {
+    for (int j=0;j<=i; j++) {E1i[i][j]=E1[li+j]; E1i[j][i]=E1[li+j];}}
+
+  for (int i=0,li=0;i< nP2;li+=++i) {
+    for (int j=0;j<=i; j++) {E2i[i][j]=E2[li+j]; E2i[j][i]=E2[li+j];}}
+
+  for (int i=nP1;i<nP2;i++) {E1i[i][i]=1;};
+  E1i.Invert();
+  for (int i=nP1;i<nP2;i++) {E1i[i][i]=0;};
+  E2i.Invert();
+  TMatrixD  EJi = E1i+E2i;
+  TMatrixD  EJm = EJi; EJm.Invert();
+  TVectorD P1v(nP2); TCL::ucopy(P1,P1v.GetMatrixArray(),nP1);
+  TVectorD P2v(nP2,P2);
+  
+  TVectorD PJv = EJm*((E1i*P1v) + (E2i*P2v));
+  double chi2 = (PJv-P1v)*(E1i*(PJv-P1v))+(PJv-P2v)*(E2i*(PJv-P2v));
+  if (!PJ) return chi2;
+  TCL::ucopy(PJv.GetMatrixArray(),PJ,nP2);
+  TCL::trpck(EJm.GetMatrixArray(),EJ,nP2);
+  return chi2;
+
+
+}
+//______________________________________________________________________________
+double JoinVtx(int nP1,const double *P1,const double *E1
+              ,int nP2,const double *P2,const double *E2
+	               ,     double *PJ,      double *EJ)
+{
+///  Fit track(P2) & errors E2 with vertex (P1) & errors E1
+///  Track must exactly pass thru the vertex. 
+///  Vertex errors added afterwards
+///  nP1 size of array P1. E1 errors packed as low triangle
+///  nP2 size of array P2. E2 errors packed as low triangle
+///  PJ output parameters size nP2. EJ according packed errors
+
+  assert(nP1<nP2);
+  int nPBig = nP1+nP2;
+
+  TVectorD P1t(nP1,P1),P2t(nP2,P2);
+  TVectorD D = (P1t-P2t.GetSub(0,nP1-1));
+  TMatrixDSym smaMx(nP1);
+  TCL::trupck(E2,smaMx.GetMatrixArray(),nP1);
+  smaMx.Invert();
+  double Xi2 = D*(smaMx*D);
+  if (!PJ) return Xi2;
+
+  TMatrixDSym E2t(nP2);
+  TCL::trupck(E2,E2t.GetMatrixArray(),nP2);
+  E2t.Invert();
+
+  TVectorD bigB(nPBig),bigP(nPBig);
+  bigB.SetSub(0,E2t*P2t);
+  bigB.SetSub(nP2,P1t);
+
+  TMatrixDSym bigMx(nPBig);
+  bigMx.SetSub(0,E2t);
+  for (int i=nP2,j=0;i< nPBig;++i,j++) {bigMx[i][j]=1;bigMx[j][i]=1;}
+  bigMx.Invert();
+  bigP = bigMx*bigB;
+  assert(fabs(bigP[0]-P1[0])<1e-5);
+  assert(fabs(bigP[1]-P1[1])<1e-5);
+
+//		set vertex errors (not add because in bigMx they are zeros
+  TMatrixDSym E1t(nP1);
+  TCL::trupck(E1,E1t.GetMatrixArray(),nP1);
+  bigMx.SetSub(0,E1t);
+
+//		To output  
+  TCL::ucopy(bigP.GetMatrixArray(),PJ,nP2);
+  TCL::trpck(bigMx.GetSub(0,nP2-1,0,nP2-1).GetMatrixArray(),EJ,nP2);
+  return Xi2;
+
+
+}
+
 
 
 //______________________________________________________________________________
@@ -204,9 +335,9 @@ static int nCall=0; nCall++;
   StvFitPars myTrkPars;
   StvFitPars myJrkPars;
 
-  double myXi2 = JoinTwo(2,myHitPars.Arr(),mHitErrs
+  double myXi2 = JoinVtx(2,myHitPars.Arr(),mHitErrs
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
-		        ,  myJrkPars.Arr(),mOtErrs->Arr(),1);
+		        ,  myJrkPars.Arr(),mOtErrs->Arr());
   if (myXi2){}
 //assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
   assert(fabs(myJrkPars[0]-myHitPars[0])<1e-6);
@@ -235,6 +366,7 @@ int StvFitter::IsTooBig(StvFitPars &fp) const
   for (int i=0;i<5;i++) { if (fabs(fp[i]) > mDelta[i]) return i+1;}
   return 0;
 }
+#if 0
 //______________________________________________________________________________
 double StvFitter::JoinTwo(int nP1,const double *P1,const double *E1
                          ,int nP2,const double *P2,const double *E2
@@ -243,6 +375,8 @@ double StvFitter::JoinTwo(int nP1,const double *P1,const double *E1
 {
 // 		mode=0 normal case
 //		mode=1 assign to vertex where 1st nP1 words of PJ must be == P1
+static int nCall =0; nCall++;
+
   assert(nP1<=nP2);
   int nE1 = nP1*(nP1+1)/2;
   int nE2 = nP2*(nP2+1)/2;
@@ -278,13 +412,51 @@ double StvFitter::JoinTwo(int nP1,const double *P1,const double *E1
       
   } while(0);
 //  	Join params
+    double Xi2X,Xi2T;
+    if (!mode) {
+     Xi2X = JoinTwoX(nP1,P1,E1,nP2,P2,E2,0,0);
+     Xi2T = JoinTwoT(nP1,P1,E1,nP2,P2,E2,0,0);
+    assert(fabs(Xi2X-Xi2T) < (Xi2X+Xi2T+0.1)*1e-3);
+    } else {
+     Xi2T = JoinVtx(nP1,P1,E1,nP2,P2,E2,0,0);
+    }
+    assert(fabs(chi2-Xi2T) < (chi2+Xi2T+0.1)*1e-3);
   if (!PJ) return chi2;
   TCL::tras(subP     ,sumEI,sumEIsubP,1,nP1);
   TCL::tras(sumEIsubP,E2   ,PJ       ,1,nP2);
   TCL::vadd(PJ       ,P2   ,PJ         ,nP2);
 
+  double PJX[5],PJT[5],EJX[15],EJT[15];
+
+    if (!mode) {
+      Xi2X = JoinTwoX(nP1,P1,E1,nP2,P2,E2,PJX,EJX);
+      Xi2T = JoinTwoT(nP1,P1,E1,nP2,P2,E2,PJT,EJT);
+      TCL::ucopy(PJT,PJ,nP2);
+      TCL::ucopy(EJT,EJ,nE2);
+      for (int i=0;i<5;i++) {
+        assert (fabs(PJX[i]-PJT[i])<1e-5*(fabs(PJT[i]+0.1)));
+      }
+    } else {
+      Xi2T = JoinVtx(nP1,P1,E1,nP2,P2,E2,PJT,EJT);
+      TCL::ucopy(PJT,PJX,nP2);
+      TCL::ucopy(EJT,EJX,nE2);
+    }
+     
+    for (int i=0;i<5;i++) {
+      assert (fabs( PJ[i]-PJT[i])<1e-1*(fabs(PJT[i]+0.1)));
+    }
+    for (int i=0;i<15;i++) {
+      assert (fabs(EJX[i]-EJT[i])<1e-5*(fabs(EJT[i]+0.1)));
+    }
+
+    for (int i=0;i<15;i++) {
+      assert (fabs( EJ[i]-EJT[i])<1e-1*(fabs(EJT[i]+0.1)));
+    }
+   
+
   return chi2;
 }
+#endif
 //______________________________________________________________________________
 void StvFitter::Test()
 {
