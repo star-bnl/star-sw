@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.47 2012/07/31 20:40:01 jeromel Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.48 2012/08/02 05:41:06 avossen Exp $
  *
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.48  2012/08/02 05:41:06  avossen
+ * *** empty log message ***
+ *
  * Revision 1.47  2012/07/31 20:40:01  jeromel
  * Agreed with Anselm, changed default param - future should be Db based
  *
@@ -191,7 +194,7 @@
 #include "StFgtA2CMaker.h"
 
 /// Class constructors - does nothing else than setting name
-StFgtA2CMaker::StFgtA2CMaker( const Char_t* name ) : StMaker( name ), mAcceptLongPulses(false), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(4.0),mClusterThreshold(1.0), mDb(0) {
+StFgtA2CMaker::StFgtA2CMaker( const Char_t* name ) : StMaker( name ), mAcceptLongPulses(true), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(4.0),mClusterThreshold(1.0), mDb(0) {
   // do nothing
 }
 
@@ -428,7 +431,7 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    //  deciding on max plateau
    if(!mAcceptLongPulses)
      {
-       cout <<"not accepting long pulses..." <<endl;
+       //       cout <<"not accepting long pulses..." <<endl;
       if(numMaxPlateau>=3) //means basically 4 because we start counting after the first one
 	return kFgtSeedTypeNo;
      }
@@ -471,8 +474,8 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
 
    }
    //   cout <<" no seed found! " << endl;
-	      if(pStrip->getGeoId() >=13092 && pStrip->getGeoId()<=13105)
-		cout <<"nope..." << endl;
+   //	      if(pStrip->getGeoId() >=13092 && pStrip->getGeoId()<=13105)
+   //		cout <<"nope..." << endl;
    return kFgtSeedTypeNo;
 }
 
