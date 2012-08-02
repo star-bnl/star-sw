@@ -341,6 +341,18 @@ StvFitErrs StvNodePars::deltaErrs() const
    fe.mHz = _hz;
    return fe;
 }
+//_____________________________________________________________________________
+double StvNodePars::diff(const StvNodePars &other) const 
+{ 
+  StvFitPars fp = *this-other;
+  StvFitPars dlt = delta();
+  double myMax=0;
+  for (int i=0;i<5;i++) {
+    double d = fabs(fp[i])/dlt[i];
+    if (myMax<d) myMax=d;
+  }
+  return myMax;
+}
 
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -1537,3 +1549,4 @@ void StvFitErrs::SetHz(double hz)
 { mHz=hz; assert(mHz && fabs(mHz)<0.002) ;}
 double StvFitErrs::GetHz() const
 {assert(mHz && fabs(mHz)<0.002);  return mHz ;}
+//_____________________________________________________________________________
