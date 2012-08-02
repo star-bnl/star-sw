@@ -60,8 +60,10 @@ const StvFitPars &operator*(const StvFitDers &t) const;
 const double *Arr()  const 			{return &mH;}
 operator const double *() const			{return &mH;}
 operator       double *() 			{return &mH;}
+//       double &operator[](int i)       		{return (&mH)[i];}
+// const double &operator[](int i) const      	{return (&mH)[i];}
 StvFitPars &operator*=(double f) 
-    		{for(int i=0;i<5;i++){(*this)[i]*=f; return *this;}}
+    		{for(int i=0;i<5;i++){(*this)[i]*=f;} return *this;}
 
 public:	
 double mH;	// direction perpendicular movement and Z
@@ -100,6 +102,7 @@ StvNodePars &merge(double wt,StvNodePars &other);
 //		typical variations of parametrs
 StvFitPars delta() const;
 StvFitErrs deltaErrs() const;
+double diff(const StvNodePars &other) const;
 
 operator const double  *() const {return P;}
 operator       double  *()       {return P;}
