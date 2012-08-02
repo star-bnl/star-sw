@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.48 2012/08/02 05:41:06 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.49 2012/08/02 05:42:05 avossen Exp $
  *
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.49  2012/08/02 05:42:05  avossen
+ * removed printout, set accept long pulses as default
+ *
  * Revision 1.48  2012/08/02 05:41:06  avossen
  * *** empty log message ***
  *
@@ -374,7 +377,6 @@ Int_t StFgtA2CMaker::Make(){
    return ierr;
 }
 
-/// Implementation of Jan's seed finder.
 /// Returns true for a valid pulse
 Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
 
