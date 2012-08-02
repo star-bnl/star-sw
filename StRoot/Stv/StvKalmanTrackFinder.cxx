@@ -70,7 +70,10 @@ static const StvKonst_st  *kons = StvConst::Inst();
 	if (!mCurrTrak) mCurrTrak = kit->GetTrack();
 	mCurrTrak->CutTail();	//Clean track from previous failure
 	nAdded = FindTrack(0);
+
 	if (!nAdded) 				continue;
+{  double tlen = mCurrTrak->GetLength();
+  assert(tlen >0.0 && tlen<1000.);}
 //        StvNode *myNode = mCurrTrak->GetNode(StvTrack::kFirstPoint);
 //        if (fabs(myNode->GetFP()._curv) <1./300) {
 //  	  StvTrackFitter::Inst()->Helix(mCurrTrak,16|1);
@@ -82,6 +85,8 @@ static const StvKonst_st  *kons = StvConst::Inst();
 	  if (ans) 				break;
 	  nAdded = FindTrack(1);
           if (nAdded<=0)			continue;;
+{  double tlen = mCurrTrak->GetLength();
+  assert(tlen >0.0 && tlen<1000.);}
     // few hits added. Refit track to beam again 
 	  ans = Refit(0);
 	  if (ans) 				break;
@@ -91,6 +96,8 @@ static const StvKonst_st  *kons = StvConst::Inst();
 	if (fail) 	{//Track is failed, release hits & continue
 	  mCurrTrak->CutTail();			continue;
         }
+{  double tlen = mCurrTrak->GetLength();
+  assert(tlen >0.0 && tlen<1000.);}
 	StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
 	if (node) node->UpdateDca();
         if (node && fabs(node->GetFP()._curv) <1./300) {
@@ -284,7 +291,10 @@ if (DoShow()) {
 //    if (hitCount.nTotNits )StvDebug::Count("GooTNits",hitCount.nTotNits);
 //    StvDebug::Count("GoodEff",eff);
   }
-
+  if (nHits>3) {
+    double tlen = mCurrTrak->GetLength();
+    assert(tlen >0.0 && tlen<1000.);
+  }
 
 
   return nHits;
