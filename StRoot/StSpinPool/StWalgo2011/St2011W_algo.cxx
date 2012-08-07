@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.9 2012/07/13 20:53:16 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.10 2012/08/07 21:06:38 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -22,7 +22,7 @@ St2011WMaker::find_W_boson(){
   if(!wEve->l2bitET) return;
 
   //printf("========= find_W_boson() \n");
-  int nNoNear=0,nNoAway=0,nEta1=0,nGoldW=0;
+  int nNoNear=0,nNoAway=0,nEta1=0,nGoldW=0,nGoldWp=0,nGoldWn=0;
   //remove events tagged as Zs
   if(wEve->zTag) return;
 
@@ -36,8 +36,8 @@ St2011WMaker::find_W_boson(){
       assert(T.cluster.nTower>0); // internal logical error
       assert(T.nearTotET>0); // internal logical error
       
-      //make cut on lepton |eta|  
-      if(fabs(T.primP.Eta()) > par_leptonEta) continue;      
+      //make cut on lepton eta 
+      if(T.primP.Eta() < par_leptonEtaLow || T.primP.Eta() > par_leptonEtaHigh) continue;      
       hA[20]->Fill("eta1",1.);
       nEta1++;
 
@@ -144,7 +144,10 @@ St2011WMaker::find_W_boson(){
       hA[201]->Fill(T.cluster.position.PseudoRapidity(),T.prMuTrack->pt());
       hA[203]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.energy/T.prMuTrack->p().mag());
       hA[205]->Fill(T.prMuTrack->lastPoint().pseudoRapidity(),T.prMuTrack->lastPoint().phi());
-      
+
+      //Q/pT plot
+      hA[100]->Fill(T.cluster.ET,T.glMuTrack->charge()/T.glMuTrack->pt());
+      hA[101]->Fill(T.cluster.ET,T.prMuTrack->charge()/T.prMuTrack->pt());
 
       if(T.cluster.ET<par_highET) continue;  // very likely Ws
       hA[91]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.position.Phi());
@@ -156,6 +159,8 @@ St2011WMaker::find_W_boson(){
       
       hA[20]->Fill("goldW",1.);
       nGoldW++;
+      if(T.prMuTrack->charge()>0) nGoldWp++;
+      else if(T.prMuTrack->charge()<0) nGoldWn++;
     
     }// loop over tracks
   }// loop over vertices
@@ -163,6 +168,8 @@ St2011WMaker::find_W_boson(){
   if(nNoAway>0) hA[0]->Fill("noAway",1.);
   if(nEta1>0) hA[0]->Fill("eta1",1.);
   if(nGoldW>0) hA[0]->Fill("goldW",1.);
+  if(nGoldWp>0) hA[0]->Fill("goldW+",1.);
+  if(nGoldWn>0) hA[0]->Fill("goldW-",1.);
 
 }
 
@@ -463,6 +470,9 @@ St2011WMaker::extendTrack2Barrel(){// return # of extended tracks
       WeveEleTrack &T=V.eleTrack[it];
       if(T.prMuTrack->flag()!=301) continue; //remove track for endcap algo only
 
+      //do eta sorting at track level (tree analysis)
+      if(T.primP.Eta() < par_leptonEtaLow || T.primP.Eta() > par_leptonEtaHigh) continue;
+
       //.... extrapolate track to the barrel @ R=entrance....
       const StPhysicalHelixD TrkHlx=T.prMuTrack->outerHelix();
       float Rcylinder= mBtowGeom->Radius();
@@ -647,6 +657,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.10  2012/08/07 21:06:38  stevens4
+// update to tree analysis to produce independent histos in a TDirectory for each eta-bin
+//
 // Revision 1.9  2012/07/13 20:53:16  stevens4
 // Add filling of empty events in W tree
 // Minor modifications to histograms

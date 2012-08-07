@@ -1,4 +1,4 @@
-// $Id: St2011pubSpin_histo.cxx,v 1.1 2011/02/10 20:33:26 balewski Exp $
+// $Id: St2011pubSpin_histo.cxx,v 1.2 2012/08/07 21:06:38 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -42,7 +42,7 @@ St2011pubSpinMaker::initHistos(){
 
 
   hA[6]=new TH1F(core+"Y0","BG1: L2W-BHT3-rnd & vertex OK & low ET; spin4 ",16,-0.5,15.5);
-  hA[7]=new TH1F(core+"Y1","BG2: vertex & ET<20 &  ET 2x2 << 4x4 ; spin4 ",16,-0.5,15.5);
+  hA[7]=new TH1F(core+"Y1",Form("BG2: vertex & ET<20 &  ET 2x2 << 4x4 : %s; spin4 ",coreTitle.Data()),16,-0.5,15.5);
 
   hA[8]=h=new TH1F(core+"QpT","reco Q/PT,W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.099,0.099);
   float highCut=par_QPThighA - (par_QPThighET1-par_QPThighET0)*par_QPThighB; 
@@ -76,34 +76,34 @@ St2011pubSpinMaker::initHistos(){
     
     //.... J-peak 
     sprintf(txt0,"ET_%c",cPM[ipn]);
-    sprintf(txt,"Final W, charge=%c ; 2x2 ET (GeV) ",cPM[ipn]);
+    sprintf(txt,"Final W, charge=%c : %s; 2x2 ET (GeV) ",cPM[ipn],coreTitle.Data());
     hA[10+ipn]=h=new TH1F(core+txt0,txt, 100,1,101); // shifted by 1 for nicer Rebin
     h->SetFillColor(iCol[ipn]);
 
     //.... 1D spin sorting         
     sprintf(txt0,"Y2_%c",cPM[ipn]);
-    sprintf(txt,"Final W Q=%c, 2x2 ET=[25,50]GeV ; spin4  ",cPM[ipn]);
+    sprintf(txt,"Final W Q=%c, 2x2 ET=[25,50]GeV : %s; spin4  ",cPM[ipn],coreTitle.Data());
     hA[12+ipn]=h=new TH1F(core+txt0,txt,16,-0.5,15.5);
     h->SetFillColor(iCol[ipn]);
 
     sprintf(txt0,"Y3_%c",cPM[ipn]);
-    sprintf(txt,"Final W Q=%c, 2x2 ET=[32,44]GeV ; spin4  ",cPM[ipn]);
+    sprintf(txt,"Final W Q=%c, 2x2 ET=[32,44]GeV : %s; spin4  ",cPM[ipn],coreTitle.Data());
     hA[14+ipn]=h=new TH1F(core+txt0,txt,16,-0.5,15.5);
     h->SetFillColor(iCol[ipn]);
 
     sprintf(txt0,"Y4_%c",cPM[ipn]);
-    sprintf(txt,"Final QCD Q=%c, 2x2 ET=[15,20]GeV ; spin4  ",cPM[ipn]);
+    sprintf(txt,"Final QCD Q=%c, 2x2 ET=[15,20]GeV : %s; spin4  ",cPM[ipn],coreTitle.Data());
     hA[16+ipn]=h=new TH1F(core+txt0,txt,16,-0.5,15.5);
     h->SetFillColor(iCol[ipn]);
 
     sprintf(txt0,"Y5_%c",cPM[ipn]);
-    sprintf(txt,"Final 2x2 ET  Q=%c; spin4 ; 2x2 cluster ET (GeV) ",cPM[ipn]);
+    sprintf(txt,"Final 2x2 ET  Q=%c; spin4 : %s; 2x2 cluster ET (GeV) ",cPM[ipn],coreTitle.Data());
     hA[18+ipn]=h=new TH2F(core+txt0,txt,16,-0.5,15.5,10,0,100);
     h->SetFillColor(iCol[ipn]);
   }
   // free 20-29
 
-  hA[30]=h=new TH1F(core+"LepEta","selecting Ws ; lepton LAB eta",100, -1.5,1.5);
+  hA[30]=h=new TH1F(core+"LepEta",Form("selecting Ws : %s ; lepton LAB eta",coreTitle.Data()),100, -1.5,1.5);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_leptonEta1,0,par_leptonEta1,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
   ln=new TLine(par_leptonEta2,0,par_leptonEta2,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
@@ -124,6 +124,9 @@ St2011pubSpinMaker::initHistos(){
 
 
 // $Log: St2011pubSpin_histo.cxx,v $
+// Revision 1.2  2012/08/07 21:06:38  stevens4
+// update to tree analysis to produce independent histos in a TDirectory for each eta-bin
+//
 // Revision 1.1  2011/02/10 20:33:26  balewski
 // start
 //

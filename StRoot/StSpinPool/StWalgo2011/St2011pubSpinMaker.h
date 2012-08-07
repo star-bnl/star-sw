@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.h,v 1.2 2012/07/12 20:49:21 balewski Exp $
+// $Id: St2011pubSpinMaker.h,v 1.3 2012/08/07 21:06:38 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -34,6 +34,7 @@ class St2011pubSpinMaker : public StMaker {
 
   St2011WMaker *wMK; // W-algo maker with all data
   TString core; // name attached to all histos
+  TString coreTitle; // eta bin name added title of key histos
 
   // histograms
   TObjArray *HList;
@@ -42,7 +43,7 @@ class St2011pubSpinMaker : public StMaker {
   void initHistos();
   void bXingSort();  
  public: 
-  St2011pubSpinMaker(const char *name="2011pubSpin");
+  St2011pubSpinMaker(const char *name="2011pubSpin", const char* etaName="Eta7");
   virtual       ~St2011pubSpinMaker(){};
   virtual Int_t  Init();
   virtual Int_t  InitRun  (int runumber);
@@ -58,7 +59,7 @@ class St2011pubSpinMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.2 2012/07/12 20:49:21 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.3 2012/08/07 21:06:38 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -69,6 +70,9 @@ class St2011pubSpinMaker : public StMaker {
 
 
 // $Log: St2011pubSpinMaker.h,v $
+// Revision 1.3  2012/08/07 21:06:38  stevens4
+// update to tree analysis to produce independent histos in a TDirectory for each eta-bin
+//
 // Revision 1.2  2012/07/12 20:49:21  balewski
 // added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
 // removed dependence of spinSortingMaker from muDst

@@ -15,7 +15,7 @@ int rdMuWana2012(
 	     char* jetDir   = "",
 	     char* histDir   = "",
 	     char* wtreeDir   = "",
-	     int  spinSort=false,
+	     int  spinSort=true,
 	     bool findZ=true,
 	     int  geant=false
   ) { 
@@ -251,6 +251,7 @@ int rdMuWana2012(
     for (Int_t iev=0;iev<nEntries; iev++) {
       if(eventCounter>=nEve) break;
       chain->Clear();
+      cout<<iev<<endl;
       int stat = chain->Make();
       if(stat != kStOk && stat != kStSkip) break; // EOF or input error
       eventCounter++;
@@ -394,6 +395,9 @@ int rdMuWana2012(
 
 
 // $Log: rdMuWana2012.C,v $
+// Revision 1.8  2012/08/07 21:06:56  stevens4
+// update to tree analysis to produce independent histos in a TDirectory for each eta-bin
+//
 // Revision 1.7  2012/07/13 16:11:49  balewski
 // minor clenup, prevent crash in Finish if zero input events, now it runs on M-C events as well
 //

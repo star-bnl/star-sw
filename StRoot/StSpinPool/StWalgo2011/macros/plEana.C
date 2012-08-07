@@ -10,12 +10,12 @@ root [7] muWET->Draw()
 // Endcap reco algo
 
 //=================================================
-plEana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institutions/iucf/stevens4/run12w/", char *oPath="out/eemc/", int isMC=0){ //1=gif, 2=ps, 3=both
+plEana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institutions/iucf/stevens4/run12w/", char *oPath="out/eemc/", int isMC=0, char *etaBin="Eta7"){ //1=gif, 2=ps, 3=both
     
   cout<<iPath<<core0<<endl;
 
   if(page<=-1) {
-    doAll(core0,iPath,isMC);
+    doAll(core0,iPath,isMC,oPath,etaBin);
     return;
   }
    
@@ -71,18 +71,23 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   } else {
     printf("Opened: %s\n",fullInpName.Data());
   }
+
+  //switch to TDirectory for eta binning
+  if(fd->Get("muStatEve")==0)
+    fd->cd(etaBin);
+
   if(page==1||page==13){ 
    //fd->ls(); 
-   h0=(TH1*)fd->Get("muEStatEve"); assert(h0);
+   h0=(TH1*)gDirectory->Get("muEStatEve"); assert(h0);
    printf("%s: ",h0->GetName());
    for(int k=1;k<=16;k++) printf("%.0f, ",h0->GetBinContent(k));
    printf("\n");
  }
-  if(page>=23 && page<=25 && fd->Get("AspinStatEve")==0) return; // skip spin plots if maker was not used
+  if(page>=23 && page<=25 && gDirectory->Get("AspinStatEve")==0) return; // skip spin plots if maker was not used
 
   //skip tpc plots if using tree reader code
   if( ((page>=2 && page<=6) || (page>=30 && page<=42)) && !fd->cd("tpc")) return;
-  fd->cd();
+  fd->cd(etaBin);
 
  gStyle->SetPalette(1,0);
  gStyle->SetOptStat(0);
@@ -97,7 +102,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=nameA;
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==0) h->Draw("h text");
     }
@@ -111,7 +116,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=nameB;
     for(int i=0;i<4;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==1) h->Fit("gaus","","hR",-50,50);
     }
@@ -128,7 +133,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     c->cd(1);
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
-      hA[i]=(TH1F*)fd->Get(nameX[i]);  assert(hA[i]);
+      hA[i]=(TH1F*)gDirectory->Get(nameX[i]);  assert(hA[i]);
       if(i==0)  hA[i]->Draw();
       else  hA[i]->Draw("same");
       
@@ -154,7 +159,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=nameD;
     for(int i=0;i<4;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==3) {
 	  h->SetFillColor(kBlue);
@@ -173,7 +178,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=nameE;
     for(int i=0;i<6;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==5) h->Draw("colz");
     }
@@ -192,7 +197,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     TH1F *h1,*h2;
     for(int i=0;i<5;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       if(i==0) { cL->cd();  
 	h->Draw("colz");
 	for( float eta=-0.8; eta<.6; eta+=1.4) // print sectors IDs
@@ -222,7 +227,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=nameG;
     for(int i=0;i<5;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==3 || i==0) h->Draw("colz");
       if(i==3) h->SetMaximum(0.6* h->GetMaximum());
@@ -239,7 +244,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=nameH;
     for(int i=0;i<3;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==1  ) h->Draw("colz");
     }
@@ -253,7 +258,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=nameJ;
     for(int i=0;i<4;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); 
       if(i==3) h->Draw();
       else h->Draw("colz");
@@ -266,7 +271,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=nameL;
     for(int i=0;i<3;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==1  ) h->Draw("colz");
     }
@@ -282,7 +287,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=nameK;
     for(int i=0;i<3;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==1  ) h->Draw("colz");
     }
@@ -297,7 +302,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=nameM;
     for(int i=0;i<4;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==2)	h->SetAxisRange(0,60);
       if(i==2  ){
@@ -318,7 +323,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     for(int i=0;i<4;i++) {
       char txt[100];
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       if(i==3) { // draw on previous
 	float sum=h->GetEntries();
 	sprintf(txt,"%.0f eve >thres",sum);
@@ -345,7 +350,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=namePB;
     for(int i=0;i<4;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); 
       if(i==2) {h->Rebin(8); h->GetXaxis()->SetRangeUser(0.5,2.0);}
       if(i<2) h->Draw("colz");
@@ -362,7 +367,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     char **nameX=nameB1;
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
     }
    c->GetPad(1)->SetLogy();       
@@ -376,7 +381,7 @@ case 16:{    sprintf(padTit,"TPC dEdx for all & W tracks, %s",core0);
     char **nameX=nameN;
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw("colz");
     }
     c->GetPad(1)->SetLogz();   
@@ -388,7 +393,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     char **nameX=nameO;
     for(int i=0;i<3;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw("colz");
       h->SetAxisRange(0,60);      h->SetAxisRange(-2.,2.,"y");
     }
@@ -404,7 +409,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     cL->cd(); cR->Divide(1,3);
     for(int i=0;i<7;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       if(i==0) { h->Draw(); h->SetAxisRange(0,60);}
       if(i>0 && i<4)   h->Draw("same");
       if(i==1) h->SetFillColor(kBlue);
@@ -430,7 +435,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     char **nameX=nameR2;
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH2*)fd->Get(nameX[i]);  assert(h); h->Rebin2D(3,3);
+      h=(TH2*)gDirectory->Get(nameX[i]);  assert(h); h->Rebin2D(3,3);
       c->cd(i+1);  h->Draw("colz");
       h->SetAxisRange(0,70); ln->Draw();
     }
@@ -442,7 +447,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     char **nameX=nameR1;
     for(int i=0;i<3;i++) {
         printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       if(i==4) {
 	h->Draw("same e");
 	break;
@@ -461,7 +466,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     char **nameX=nameQ;
     for(int i=0;i<8;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw();
       h->SetFillColor(30+i*5);
       if(i==7) h->Draw("colz");
@@ -475,7 +480,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     char **nameX=nameR3;
     for(int i=0;i<6;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw();
     }
  } break;//--------------------------------------
@@ -488,7 +493,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     char **nameX=nameS1;
     for(int i=0;i<6;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(spinPre+nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==1) { h->Draw("colz");}
     }
@@ -503,7 +508,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
    char **nameX=nameS5;
    for(int i=0;i<4;i++) {
      printf("->%s<\n",nameX[i]);
-     h=(TH1*)fd->Get(spinPre+nameX[i]);  assert(h);
+     h=(TH1*)gDirectory->Get(spinPre+nameX[i]);  assert(h);
      c->cd(i+1);  h->Draw();
      if(i==2) { hx=(TH1*) h->Clone(); h->SetFillColor(9); hx->SetFillColor(46);
        hx->SetAxisRange(0,1); hx->Draw("same");
@@ -529,7 +534,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
 
     for(int i=0;i<4;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(spinPre+nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1); h->Draw("h  text");
     }
  } break;//--------------------------------------
@@ -540,7 +545,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     char **nameX=nameS4;
     for(int i=0;i<3;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(spinPre+nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw("colz");
       if(i==2) h->Draw();
     }
@@ -553,7 +558,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
      char **nameX=nameEsmd1;
      for(int i=0;i<6;i++) {
        printf("->%s<\n",nameX[i]);
-       h=(TH2F*)fd->Get(nameX[i]);  assert(h);
+       h=(TH2F*)gDirectory->Get(nameX[i]);  assert(h);
        c->cd(i+1);  h->Draw("colz");
      }
  } break;//--------------------------------------
@@ -564,7 +569,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
      char **nameX=nameEsmd2;
      for(int i=0;i<6;i++) {
        printf("->%s<\n",nameX[i]);
-       h=(TH2F*)fd->Get(nameX[i]);  assert(h);
+       h=(TH2F*)gDirectory->Get(nameX[i]);  assert(h);
        c->cd(i+1);  h->Draw("colz");
      }
  } break;//--------------------------------------
@@ -575,7 +580,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
      char **nameX=nameEprs;
      for(int i=0;i<6;i++) {
        printf("->%s<\n",nameX[i]);
-       h=(TH2F*)fd->Get(nameX[i]);  assert(h);
+       h=(TH2F*)gDirectory->Get(nameX[i]);  assert(h);
        c->cd(i+1);  h->Draw("colz");
      }
  } break;//--------------------------------------
@@ -722,21 +727,21 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 }
 
 //============================
-void doAll(char *core0="", char *iPath="", int isMC=0){
+void doAll(char *core0="", char *iPath="", int isMC=0, char* oPath="", char* etaBin=""){
   for(int i=1;i<=19;i++)  { 
     if(i==15) continue;
     if( isMC && i==3) continue;
     if( isMC &&i==4) continue;
     if( isMC &&i>=20 && i<=22) continue;
 
-    plEana(i,2,core0,iPath);
+    plEana(i,2,core0,iPath,oPath,isMC,etaBin);
   }
 
   //for(int i = 27; i<=29; i++) plEana(i,2);
  
   
   // TPC by sector:
-  for(int i=30;i<=42;i++)  plEana(i,2,core0,iPath);
+  for(int i=30;i<=42;i++)  plEana(i,2,core0,iPath,oPath,isMC,etaBin);
 
 }
 
@@ -757,6 +762,9 @@ void doAllMC(char *core0="", char *iPath=""){
 
 
 // $Log: plEana.C,v $
+// Revision 1.12  2012/08/07 21:06:56  stevens4
+// update to tree analysis to produce independent histos in a TDirectory for each eta-bin
+//
 // Revision 1.11  2012/07/06 20:45:19  stevens4
 // *** empty log message ***
 //
