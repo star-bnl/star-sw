@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.3 2012/07/12 20:49:21 balewski Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.4 2012/08/07 21:06:38 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -11,9 +11,10 @@ ClassImp(St2011pubSpinMaker)
 
 //_____________________________________________________________________________
 //
-St2011pubSpinMaker::St2011pubSpinMaker(const char *name):StMaker(name){
+  St2011pubSpinMaker::St2011pubSpinMaker(const char *name, const char *etaName):StMaker(name){
   wMK=0;HList=0;
   core=name;
+  coreTitle=etaName;
   par_QPTlow=0.010;
 
   par_QPThighET0=25; 
@@ -156,9 +157,8 @@ St2011pubSpinMaker::bXingSort(){
 
       hA[0]->Fill("Wcut",1.);
 
-      hA[30]->Fill(T.prMuTrack->eta());
-      if(fabs(T.primP.Eta()) > wMK->par_leptonEta) continue;     
-      // allows further cuts on eta
+      hA[30]->Fill(T.prMuTrack->eta());  
+      // allows spin specific cuts on eta
       if(T.prMuTrack->eta()<par_leptonEta1) continue;
       if(T.prMuTrack->eta()>par_leptonEta2) continue;
       hA[0]->Fill("eta",1.);
@@ -203,6 +203,9 @@ St2011pubSpinMaker::bXingSort(){
 
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.4  2012/08/07 21:06:38  stevens4
+// update to tree analysis to produce independent histos in a TDirectory for each eta-bin
+//
 // Revision 1.3  2012/07/12 20:49:21  balewski
 // added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
 // removed dependence of spinSortingMaker from muDst

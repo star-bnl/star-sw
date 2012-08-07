@@ -24,9 +24,14 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
   } else {
     printf("Opened: %s\n",fullInpName.Data());
   }
+
+  //switch to TDirectory for eta binning
+  if(fd->Get("muStatEve")==0)
+    fd->cd("Z");
+
   if(page==1){ 
    //fd->ls(); 
-   h0=(TH1*)fd->Get("_Z_EventType"); assert(h0);
+   h0=(TH1*)gDirectory->Get("_Z_EventType"); assert(h0);
    printf("%s: ",h0->GetName());
    for(int k=1;k<=14;k++) printf("%.0f, ",h0->GetBinContent(k));
    printf("\n");
@@ -45,7 +50,7 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
     for(int i=0;i<1;i++) {
       char txt[100];
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==0) h->Draw("h text");
     }
@@ -60,7 +65,7 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
     for(int i=0;i<6;i++) {
       char txt[100];
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
     }
    c->GetPad(2)->SetLogy();
@@ -76,15 +81,15 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
     for(int i=0;i<4;i++) {
       char txt[100];
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==2) {
 	h2=(TH2F*) h;
 	h2->Rebin2D(2,2);h2->SetMaximum(3);
 	h2->Draw("box"); h2->SetFillColor(kBlack);
-	h3=(TH2F*)pubchRecPNp;	h3->Rebin2D(2,2);
-	h3->Draw("colz same");
-	h2->Draw("box same");  
+	//h3=(TH2F*)pubchRecPNp;	h3->Rebin2D(2,2);
+	//h3->Draw("colz same");
+	//h2->Draw("box same");  
       }
       if(i==3)  {
 	//h->SetFillColor(kYellow);
@@ -103,8 +108,9 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
     char **nameX=nameD;
     for(int i=0;i<2;i++) {
       char txt[100];
+      if(i==0) continue;
       printf("->%s<\n",nameX[i]);
-      h2=(TH2F*)fd->Get(nameX[i]);  assert(h2);
+      h2=(TH2F*)gDirectory->Get(nameX[i]);  assert(h2);
       h2->Rebin2D(2,2);
       c->cd(i+1); h2->Draw("colz");	
     }
@@ -173,6 +179,9 @@ void doAll(char *core0="", char *iPath=""){
 
 
 // $Log: plZana.C,v $
+// Revision 1.3  2012/08/07 21:06:56  stevens4
+// update to tree analysis to produce independent histos in a TDirectory for each eta-bin
+//
 // Revision 1.2  2012/06/22 17:36:57  stevens4
 // *** empty log message ***
 //

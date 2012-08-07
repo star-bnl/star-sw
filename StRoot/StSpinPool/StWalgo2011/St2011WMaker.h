@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.7 2012/07/13 20:53:16 stevens4 Exp $
+// $Id: St2011WMaker.h,v 1.8 2012/08/07 21:06:38 stevens4 Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -53,7 +53,7 @@ class St2011WMaker : public StMaker {
  friend class St2011pubMcMaker;
  friend class St2011WlumiMaker;
  friend class St2011ZMaker;
- 
+
  private:
   StMuDstMaker* mMuDstMaker;
   StJetReader* mJetReaderMaker;
@@ -89,7 +89,7 @@ class St2011WMaker : public StMaker {
   float parE_clustFrac24,parE_nearTotEtFrac;
   float par_nearDeltaR, par_awayDeltaPhi;
   float par_delR3D, parE_delR3D, par_highET, parE_highET,  par_ptBalance, parE_ptBalance;
-  float par_leptonEta,parE_leptonEtaLow,parE_leptonEtaHigh; //bracket acceptance 
+  float par_leptonEtaLow,par_leptonEtaHigh,parE_leptonEtaLow,parE_leptonEtaHigh; //bracket acceptance 
   float parE_trackEtaMin;
   int   parE_nSmdStrip;
         
@@ -99,6 +99,8 @@ class St2011WMaker : public StMaker {
   char* gains_file;
   int   use_gains_file;
   float gains_BTOW[4801];
+  
+  TString coreTitle;
 
  public: // to overwrite default params from .C macro
   void setVertexCuts(float zm, int npv) {
@@ -106,8 +108,10 @@ class St2011WMaker : public StMaker {
   void setEleTrackCuts(int nfp, int hfr, float rin, float rout, float mpt) {
     par_nFitPts=nfp;  par_nHitFrac=hfr; 
     par_trackRin=rin;  par_trackRout=rout; par_trackPt=mpt;}
-  void setWbosonCuts(float a, float fr2,  float bal, float eta) {
-    par_highET=a; par_nearTotEtFrac=fr2;  par_ptBalance=bal;  par_leptonEta=eta;}
+  void setWbosonCuts(float a, float fr2,  float bal, float etaLow, float etaHigh) {
+    par_highET=a; par_nearTotEtFrac=fr2;  par_ptBalance=bal;  par_leptonEtaLow=etaLow; par_leptonEtaHigh=etaHigh;}
+  void setE_WbosonCuts(float a, float fr2,  float bal, float etaLow, float etaHigh) {
+    parE_highET=a; parE_nearTotEtFrac=fr2;  parE_ptBalance=bal;  parE_leptonEtaLow=etaLow; parE_leptonEtaHigh=etaHigh;}
   void setEmcCuts(int ksp , float madc, float clet, float fr1, float dr){
     par_kSigPed=ksp; par_maxADC=madc; par_clustET=clet; 
     par_clustFrac24=fr1;}
@@ -227,7 +231,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.7 2012/07/13 20:53:16 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.8 2012/08/07 21:06:38 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -238,6 +242,9 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.8  2012/08/07 21:06:38  stevens4
+// update to tree analysis to produce independent histos in a TDirectory for each eta-bin
+//
 // Revision 1.7  2012/07/13 20:53:16  stevens4
 // Add filling of empty events in W tree
 // Minor modifications to histograms

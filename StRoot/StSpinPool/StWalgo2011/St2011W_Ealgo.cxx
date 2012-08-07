@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.7 2012/07/06 17:47:02 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.8 2012/08/07 21:06:38 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -284,6 +284,9 @@ St2011WMaker::extendTrack2Endcap(){// return # of extended tracks
       if(T.prMuTrack->eta()<parE_trackEtaMin) 
 	continue; // to avoid extrapolation nonsense
 
+      //do eta sorting at track level (tree analysis)
+      if(T.primP.Eta() < parE_leptonEtaLow || T.primP.Eta() > parE_leptonEtaHigh) continue;
+      
       //.... extrapolate track to the disk perpendicular to the z-axis
       const StPhysicalHelixD trkHlx=T.prMuTrack->outerHelix(); 
       StThreeVectorD diskPosition=StThreeVectorD(0,0,parE_zSMD);
@@ -513,6 +516,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.8  2012/08/07 21:06:38  stevens4
+// update to tree analysis to produce independent histos in a TDirectory for each eta-bin
+//
 // Revision 1.7  2012/07/06 17:47:02  stevens4
 // Updates for tree reader
 //

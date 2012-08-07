@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.8 2012/07/13 20:53:16 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.9 2012/08/07 21:06:38 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -19,15 +19,15 @@ St2011WMaker::initHistos(){
   memset(hA,0,sizeof(hA));
   TList *Lx;  TLine *ln;TH1 *h; 
   char txt[1000], txt0[100];
-  int nCase=18;
-  hA[0]=h=new TH1F("muStatEve","Barrel W-algo: event count",nCase,0,nCase);
+  int nCase=20;
+  hA[0]=h=new TH1F("muStatEve",Form("Barrel W-algo: event count : %s",coreTitle.Data()),nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
   h->SetMarkerSize(2);//<-- large text
 
   char key[][200]={"inp","L2bwId","L2bwBits","L2bwET","L2bwRnd","tpcOn","primVert","vertZ","Pt10",
-		   "B-in","B200","TrB","Tr2Cl","eta1","noNear","noAway","goldW"};
-  for(int i=0;i<17;i++) h->Fill(key[i],0.); // preset the order of keys
+		   "B-in","B200","TrB","Tr2Cl","eta1","noNear","noAway","goldW","goldW+","goldW-"};
+  for(int i=0;i<19;i++) h->Fill(key[i],0.); // preset the order of keys
   
   hA[1]=h=new TH1F("muInTrg","mu Barrel W input triggers, WARN: scrambled if manyruns are combined by hadd.C; trigID (random order)",nCase,0,nCase);
   h->GetXaxis()->SetLabelSize(0.06);
@@ -197,7 +197,7 @@ St2011WMaker::initHistos(){
   }// end of E-,P-planes
 
   //.... final Ws
-  hA[90]=h=new TH1F("muWET","Barrel W: Final Selection; 2x2 cluster ET (GeV)", 100,0,100);
+  hA[90]=h=new TH1F("muWET",Form("Barrel W: Final Selection : %s; 2x2 cluster ET (GeV)",coreTitle.Data()), 100,0,100);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_highET,0,par_highET,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
@@ -218,9 +218,20 @@ St2011WMaker::initHistos(){
   
   sprintf(txt,"Barrel W: Vertex Z, final selection, 2x2 ET>%.0f GeV; Z(cm)",par_highET);
   hA[98]=new TH1F("muWcar3",txt, 100, -200,200);
-  hA[99]=h=new TH1F("muWeta","Barrel W: lepton eta final selection; lepton eta",400,-2.0,2.0);
+  hA[99]=h=new TH1F("muWeta",Form("Barrel W: lepton eta final selection %s ; lepton eta",coreTitle.Data()),400,-2.0,2.0);
 
-  // free 100-109
+  //Q/pt plots
+  sprintf(txt,"TPC GLOB Q/PT  ; 2x2 cluster ET (GeV); Q/PT");
+  hA[100]=h=new TH2F("muChRecPNg", txt,100,0.,100.,100,-0.1,0.1);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  sprintf(txt,"TPC PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT");
+  hA[101]=h=new TH2F("muChRecPNp", txt,100,0.,100.,100,-0.1,0.1);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  
+  // free 102-109
 
   //..... series of electron ET plots after succesive cuts
   char tt2[][200]={"max 2x2","track matched","no near ET","no away ET"};
@@ -329,6 +340,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.9  2012/08/07 21:06:38  stevens4
+// update to tree analysis to produce independent histos in a TDirectory for each eta-bin
+//
 // Revision 1.8  2012/07/13 20:53:16  stevens4
 // Add filling of empty events in W tree
 // Minor modifications to histograms
