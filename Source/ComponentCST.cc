@@ -738,7 +738,6 @@ ComponentCST::ElectricField(
   lastElement = imap;
 
   double inv_jac[3][3];
-  det = fabs(det);
   inv_jac[0][0] = (1./det) * (jac[1][1] * jac[2][2] - jac[1][2] * jac[2][1]);
   inv_jac[0][1] = (1./det) * (jac[0][2] * jac[2][1] - jac[0][1] * jac[2][2]);
   inv_jac[0][2] = (1./det) * (jac[0][1] * jac[1][2] - jac[0][2] * jac[1][1]);
