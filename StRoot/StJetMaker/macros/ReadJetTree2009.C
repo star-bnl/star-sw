@@ -39,6 +39,9 @@ void ReadJetTree2009(int nentries = 1e6,
   TFile* ofile = TFile::Open(outfile,"recreate");
   assert(ofile);
 
+  TH1F* hTriggers = new TH1F("hTriggers",";trigger ID",5,0,5);
+  TH1F* hVertexZ = new TH1F("hVertexZ",";z-vertex [cm]",100,-200,200);
+
   TH1F* hJetPt = new TH1F("hJetPt",";jet pt [GeV]",100,0,100);
   TH1F* hJetEta = new TH1F("hJetEta",";jet #eta",100,-1.5,1.5);
   TH1F* hJetPhi = new TH1F("hJetPhi",";jet #phi [radians]",100,-TMath::Pi(),TMath::Pi());
@@ -67,6 +70,18 @@ void ReadJetTree2009(int nentries = 1e6,
     // Progress indicator
     if (iEntry % 1000 == 0) cout << iEntry << endl;
 
+    // Trigger loop
+    for (int i = 0; i < skim->triggers()->GetEntriesFast(); ++i) {
+      StJetSkimTrig* trig = (StJetSkimTrig*)skim->triggers()->At(i);
+      // Data only
+      if (trig && trig->didFire()) {
+	hTriggers->Fill(Form("%d",trig->trigId()),1);
+      }
+    } // End trigger loop
+
+    // Vertex
+    hVertexZ->Fill(jets->vertex()->position().z());
+
     // Jet loop
     for (int iJet = 0; iJet < jets->vertex()->numberOfJets(); ++iJet) {
       StJetCandidate* jet = jets->vertex()->jet(iJet);
@@ -92,6 +107,9 @@ void ReadJetTree2009(int nentries = 1e6,
       } // End tower loop
     } // End jet loop
   } // End event loop
+
+  // Remove bins with no label
+  hTriggers->LabelsDeflate();
 
   // Write and close output file
   ofile->Write();
