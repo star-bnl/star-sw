@@ -30,14 +30,14 @@ public:
  
 
   struct evpCfg {
-    UINT32 groupdef[TRIGGERS_MAX][2];  // [trigger group] [0 low mask, 1 highmask]
-    float rate[TRIGGERS_MAX];   // -1 -> take every one, 0 -> take none
+    UINT32 groupdef[EVP_GROUP_MAX][2];  // [trigger group] [0 low mask, 1 highmask]
+    float rate[EVP_GROUP_MAX];   // -1 -> take every one, 0 -> take none
     int policy;
   } evpCfg;
 
   struct evpCtrs {
-    UINT32 runStartTime;
-    int cnt[TRIGGERS_MAX];
+    float runStartTime;
+    int cnt[EVP_GROUP_MAX];
   } evpCtrs;
 
   Lxgbx() {};
@@ -46,25 +46,26 @@ public:
   int configEvp(STAR_CFG *cfg, int divisor=1)
   {
     // zero out counters...
-    evpCtrs.runStartTime = (UINT32)-1;   // untill the first event!
+    evpCtrs.runStartTime = 0;   // untill the first event!
     memset(evpCtrs.cnt, 0, sizeof(evpCtrs.cnt));
 
     // do configuration
     EvpGroup *groups = cfg->trg_setup.evpGroup;
     evpCfg.policy = cfg->trg_run.EvpPolicy;
-    for(int i=0;i<32;i++) {
-      
-
+    for(int i=0;i<EVP_GROUP_MAX;i++) {
+ 
       evpCfg.groupdef[i][0] = groups[i].definition[0];
       evpCfg.groupdef[i][1] = groups[i].definition[1];
       
+      LOG(DBG, "Groups[%d].rate = %f",i,groups[i].rate);
+
       evpCfg.rate[i] = groups[i].rate;
       if((evpCfg.rate[i] > 0.0) && (divisor > 1)) {
 	evpCfg.rate[i] /= (float)divisor;
       }
       
       if((int)(evpCfg.rate[i]*1000) > 0) {
-	LOG(DBG, "configEvp: rate[%d]*1000 = %d",i,(int)(evpCfg.rate[i]*1000),0,0,0);
+	LOG("JEFF", "configEvp: rate[%d]*1000 = %d (0x%x-0x%x): divisor=%d",i,(int)(evpCfg.rate[i]*1000),evpCfg.groupdef[i][0],evpCfg.groupdef[i][1],divisor);
       }
     } 
 
@@ -109,77 +110,93 @@ public:
     return ret;
   }
 
-  UINT32 evpAssign(UINT32 trg_lo, UINT32 trg_hi)
-  {
-    if(evpCtrs.runStartTime == (UINT32)-1) {
-      evpCtrs.runStartTime = time(NULL);
-    }
-
+  double mygettime() {
 #ifdef __vxworks
     UINT32 sec = time(NULL);
-    UINT32 iet = sec - evpCtrs.runStartTime;
-    float et = (float)iet;
-    if(et < 1.0) et = 1;
-
-    LOG(DBG, "et=%d",(int)et,0,0,0,0);
+    float currtime = (float)sec;
 #else
     struct timeval tm;
     gettimeofday(&tm, NULL);
-    float sec = tm.tv_sec;
-    float usec = tm.tv_usec;
+    double sec = tm.tv_sec;
+    double usec = tm.tv_usec;
 
-    float currtime = sec + usec / 1000000.0;
+    double currtime = sec + usec / 1000000.0;
 
-    float et = currtime - evpCtrs.runStartTime;
-    if(et < 1.0) et = 1;
+    LOG(DBG, "currtime = %lf",currtime);
 #endif
-   
+
+
+    return currtime;
+  }
+
+  UINT32 evpAssign(UINT32 trg_lo, UINT32 trg_hi)
+  {
+    static double resettime=0;
+
+    
+    double currtime = mygettime();
+    if(currtime > 15 + resettime) {
+      resettime = currtime;
+      for(int i=0;i<EVP_GROUP_MAX;i++) {
+	evpCtrs.cnt[i] = 0;
+      }
+    }
+
+    double et = currtime - resettime;
+    if(et < .1) et = .1;
+    LOG(DBG, "currtime=%lf resettime=%lf et=%lf",currtime,resettime,et);
+
     // get event group mask
     UINT32 grpmask = 0;
-    for(int i=0;i<32;i++) {
+    for(int i=0;i<EVP_GROUP_MAX;i++) {
       if((trg_lo & evpCfg.groupdef[i][0]) ||
 	 (trg_hi & evpCfg.groupdef[i][1])) {
 	grpmask |= (1<<i);
       }
     }
 
+    LOG(DBG, "Event: et*1000=%d trg_lo=0x%x trg_hi=0x%x grpmask=0x%x",1000*((int)et),trg_lo,trg_hi,grpmask);
+
     // get firemask (after rates)
     UINT32 firemask = 0;
-    for(int i=0;i<32;i++) {
+    for(int i=0;i<EVP_GROUP_MAX;i++) {
       if(!(grpmask & (1<<i))) continue;
-
-      float r = ((float)evpCtrs.cnt[i]/et);
+      
+      double r = ((double)evpCtrs.cnt[i]/et);
       
       if(r < evpCfg.rate[i]) {
 	firemask |= (1<<i);
-
-	LOG(DBG, "Set fire mask because of rate[%d]: r*1000=%d rate*1000=%d, cnt=%d et=%d",i,(int)r*1000,(int)evpCfg.rate[i]*1000,evpCtrs.cnt[i],(int)et);
+	
+	LOG(DBG, "EVP[%d]: r*1000=%d rate*1000=%d, cnt=%d et=%d",i,(int)(r*1000),(int)(evpCfg.rate[i]*1000),evpCtrs.cnt[i],(int)et);
       }
-
+      else {
+	LOG(DBG, "NOEVP[%d]: r*1000=%d rate*1000=%d, cnt=%d et=%d",i,(int)(r*1000),(int)(evpCfg.rate[i]*1000),evpCtrs.cnt[i],(int)et);
+      }
+      
       if(evpCfg.rate[i] < 0) {
-	LOG(DBG, "Set fire mask because of neg rate[%d]*1000 %d?",i,evpCfg.rate[i]*1000,0,0,0);
+	LOG(DBG, "Set fire mask because of neg rate[%d]*1000 %d?",i,(int)(evpCfg.rate[i]*1000),0,0,0);
 	firemask |= (1<<i);
       }
     }
+    
 
     if(evpCfg.policy == 1) { // all events
       LOG(DBG, "Set fire mask because of take all",0,0,0,0,0);
-      firemask |= 1;
+      firemask = 1;
     }
     
     if(evpCfg.policy == 2) { // 10 hz
-      float r = ((float)evpCtrs.cnt[0]/et);
+      double r = ((double)evpCtrs.cnt[0]/et);
       if(r < 10.0) {
 	LOG(DBG, "Set fire mask because of 10hz",0,0,0,0,0);
-	firemask |= 1;
+	firemask = 1;
       }
-      else 
+      else {
 	firemask = 0;
+      }
     }
-
-    if(firemask) firemask |= 1;  // all triggers satisfy "any"
     
-    for(int i=0;i<32;i++) {
+    for(int i=0;i<EVP_GROUP_MAX;i++) {
       if(firemask & (1<<i)) evpCtrs.cnt[i]++;
     }
 
