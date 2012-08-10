@@ -57,7 +57,7 @@ public:
       evpCfg.groupdef[i][0] = groups[i].definition[0];
       evpCfg.groupdef[i][1] = groups[i].definition[1];
       
-      LOG(DBG, "Groups[%d].rate = %f",i,groups[i].rate);
+      LOG(DBG, "Groups[%d].rate = %f",i,groups[i].rate,0,0,0);
 
       evpCfg.rate[i] = groups[i].rate;
       if((evpCfg.rate[i] > 0.0) && (divisor > 1)) {
@@ -144,7 +144,7 @@ public:
 
     double et = currtime - resettime;
     if(et < .1) et = .1;
-    LOG(DBG, "currtime=%lf resettime=%lf et=%lf",currtime,resettime,et);
+    LOG(DBG, "currtime=%lf resettime=%lf et=%lf",currtime,resettime,et,0,0);
 
     // get event group mask
     UINT32 grpmask = 0;
@@ -155,7 +155,7 @@ public:
       }
     }
 
-    LOG(DBG, "Event: et*1000=%d trg_lo=0x%x trg_hi=0x%x grpmask=0x%x",1000*((int)et),trg_lo,trg_hi,grpmask);
+    LOG(DBG, "Event: et*1000=%d trg_lo=0x%x trg_hi=0x%x grpmask=0x%x",1000*((int)et),trg_lo,trg_hi,grpmask,0);
 
     // get firemask (after rates)
     UINT32 firemask = 0;
