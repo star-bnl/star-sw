@@ -14,7 +14,7 @@ StFgtDb::printFgtDumpCSV1(TString fname, int myDate, int myTime) {
 
       cout<<"Saving FGT output in "<<fname.Data()<<endl;
       
-      fd <<"#  FGT mapping, timeStamp "<< myDate<<" "<<myTime<<"\n";
+      fd<<"#  FGT mapping, timeStamp "<< myDate<<" "<<myTime<<"\n";
       fd<<"# electId,geoID,   RDO(1;2),ARM(0-4),APV(0-9;12-21),chan(0-127),  disk(1-6),quad(A-D),layer(P;R),strip(P:0-719;R0-279+400-679), ordinate(rad;cm),lowSpan(cm;rad),upSpan(cm;rad), geoName, stat,ped(ADC),sigPed(ADC)\n";
       
 
@@ -32,19 +32,20 @@ StFgtDb::printFgtDumpCSV1(TString fname, int myDate, int myTime) {
 	      int geoId=fgtDb->getGeoIdFromElecCoord(rdo, arm, apv, channel);
 	      if (geoId<0) continue;
 	      nMap++;
-	      Short_t disk,quad,strip; Char_t layer;
+	      Short_t disk,quad,quad2,strip; Char_t layer;
 	      Double_t  ordinate,  lowerSpan,  upperSpan;
 	      StFgtGeom::decodeGeoId(geoId,disk,quad,layer,strip);
-	      StFgtGeom::getPhysicalCoordinate(geoId,disk,quad,layer,ordinate,  lowerSpan,  upperSpan);
+	      quad2= quad;
+	      StFgtGeom::getPhysicalCoordinate(geoId,disk,quad2,layer,ordinate,lowerSpan,upperSpan);
 	      
 	      double  ped=fgtDb->getPedestalFromElecCoord(rdo,arm,apv,channel);
 	      double  pedSig=fgtDb->getPedestalSigmaFromElecCoord(rdo,arm,apv,channel);
 	      Short_t stat=fgtDb->getStatusFromElecCoord(rdo,arm,apv,channel);	      
 	      int     electId = StFgtGeom::getElectIdFromElecCoord(rdo,arm,apv,channel);
 	      std::string  geoName=fgtDb->getGeoNameFromElecCoord(rdo,arm,apv,channel);	 
+
 	      
-	      
-	      fd<<electId<<" "<<geoId<<"  "<<rdo<<"  "<<arm<<"  "<<apv<<"  "<<channel<<"  "<<disk+1<<"  "<<quad+'A'<<"  "<<layer<<"  "<<strip<<"  "<<ordinate<<"  "<<lowerSpan<<"  "<<upperSpan<<"  "<<geoName.data()<<"  "<<stat<<"  "<<ped<<"  "<<pedSig<<"\n";
+	      fd<<electId<<", "<<geoId<<", "<<rdo<<", "<<arm<<", "<<apv<<", "<<channel<<", "<<disk+1<<", "<<quad<<", "<<layer<<", "<<strip<<", "<<ordinate<<", "<<lowerSpan<<", "<<upperSpan<<", "<<geoName.data()<<", "<<stat<<", "<<ped<<",  "<<pedSig<<"\n";
 	    
 	    }
 	  }
