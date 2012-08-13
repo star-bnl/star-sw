@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.14 2012/06/12 18:05:51 fisyak Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.15 2012/08/13 19:35:05 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -6,6 +6,9 @@
 // Primary Authors: Sergey Gorbunov <sergey.gorbunov@kip.uni-heidelberg.de> *
 //                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
 //                  for The ALICE HLT Project.                              *
+//                                                                          *
+// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
+//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
 //                                                                          *
 // Permission to use, copy, modify and distribute this software and its     *
 // documentation strictly for non-commercial purposes is hereby granted     *
@@ -227,6 +230,15 @@ void AliHLTTPCCAGBTracker::FindTracks()
   tbb::parallel_sort( fHits.Data(), fHits.Data() + fNHits, AliHLTTPCCAGBHit::Compare );
 #else //USE_TBB
   std::sort( fHits.Data(), fHits.Data() + fNHits, AliHLTTPCCAGBHit::Compare );
+  /// \brief The necessary data is transfered to the track-finder
+/// The necessary data is transfered to the track-finder
+///Data is structured and saved by track-finders for each sector. 
+///To speed up the process  in each row 2D-grid with the bin size
+///inversely proportional to the number of hits in the row is introduced.
+///Hits are sorted by grid bins and for each grid bin 1st  hit is found and saved. 
+///Such data structure allows to quickly   find closest hits to the point with given
+///coordinates, which is required while neighbours hits are searched and additional 
+///hits are attached to segments.
 #endif //USE_TBB
 
 //  GroupHits();
