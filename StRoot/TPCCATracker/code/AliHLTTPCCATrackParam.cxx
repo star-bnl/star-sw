@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCATrackParam.cxx,v 1.6 2011/05/20 16:11:22 fisyak Exp $
+// $Id: AliHLTTPCCATrackParam.cxx,v 1.7 2012/08/13 19:35:06 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -6,6 +6,9 @@
 // Primary Authors: Sergey Gorbunov <sergey.gorbunov@kip.uni-heidelberg.de> *
 //                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
 //                  for The ALICE HLT Project.                              *
+//                                                                          *
+// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
+//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
 //                                                                          *
 // Permission to use, copy, modify and distribute this software and its     *
 // documentation strictly for non-commercial purposes is hereby granted     *

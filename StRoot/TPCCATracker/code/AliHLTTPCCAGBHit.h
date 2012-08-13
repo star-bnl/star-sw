@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAGBHit.h,v 1.2 2010/09/01 10:38:27 ikulakov Exp $
+// $Id: AliHLTTPCCAGBHit.h,v 1.3 2012/08/13 19:35:05 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -59,11 +59,17 @@ class AliHLTTPCCAGBHit
 
     static bool Compare( const AliHLTTPCCAGBHit &a, const AliHLTTPCCAGBHit &b );
 
+/// \brief Hits reordering  in accordance with the geometry and the track-finder needs:
+/// Hits are sorted by sector number at first, than by row number and at last by z-coordinate
+
     static bool CompareRowDown( const AliHLTTPCCAGBHit &a, const AliHLTTPCCAGBHit &b ) {
       return ( a.fIRow > b.fIRow );
+      
+/// Hits are sorted by  row number 
     }
     static bool ComparePRowDown( const AliHLTTPCCAGBHit *a, const AliHLTTPCCAGBHit *b ) {
       return ( a->fIRow > b->fIRow );
+/// Hits are sorted by  row number 
     }
 
   friend ostream& operator<<(ostream& out, const AliHLTTPCCAGBHit &a);
@@ -90,6 +96,12 @@ class AliHLTTPCCAGBHit
 };
 
 inline bool AliHLTTPCCAGBHit::Compare( const AliHLTTPCCAGBHit &a, const AliHLTTPCCAGBHit &b )
+
+/// \brief Hits reordering  in accordance with the geometry and the track-finder needs:
+/// Hits are sorted by sector number at first, than by row number and at last by z-coordinate.
+
+
+
 {
   //* Comparison function for sorting hits
   if ( a.fISlice < b.fISlice ) return 1;

@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMCPoint.cxx,v 1.2 2010/09/01 10:38:27 ikulakov Exp $
+// $Id: AliHLTTPCCAMCPoint.cxx,v 1.3 2012/08/13 19:35:05 fisyak Exp $
 //***************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -6,6 +6,9 @@
 // Primary Authors: Sergey Gorbunov <sergey.gorbunov@kip.uni-heidelberg.de> *
 //                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
 //                  for The ALICE HLT Project.                              *
+//                                                                          *
+// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
+//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
 //                                                                          *
 // Permission to use, copy, modify and distribute this software and its     *
 // documentation strictly for non-commercial purposes is hereby granted     *

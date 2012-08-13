@@ -6,6 +6,9 @@
 //                  Ivan Kisel <kisel@kip.uni-heidelberg.de>                *
 //                  for The ALICE HLT Project.                              *
 //                                                                          *
+// Developed by:   Igor Kulakov <I.Kulakov@gsi.de>                          *
+//                 Maksym Zyzak <M.Zyzak@gsi.de>                            *
+//                                                                          *
 // Permission to use, copy, modify and distribute this software and its     *
 // documentation strictly for non-commercial purposes is hereby granted     *
 // without fee, provided that the above copyright notice appears in all     *
