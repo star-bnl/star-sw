@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.176 2012/03/08 16:58:51 fisyak Exp $
+# $Id: Construct,v 1.177 2012/08/14 16:33:39 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -203,14 +203,15 @@ foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
     Install $env $INCLUDE, @incT;
   }
 }
-foreach my $dir qw(StRoot/Vc/include/Vc StRoot/Vc/common  StRoot/Vc/simple StRoot/Vc/sse 
+foreach my $dir qw(StRoot/Vc/include/Vc StRoot/Vc/common  StRoot/Vc/scalar StRoot/Vc/sse StRoot/Vc/include/Vc/internal
 		   StRoot/TBB/include/tbb StRoot/TBB/include/tbb/machine) {
   next if ! -r $dir;
   my $installdir = $INCLUDE;
   if ($dir =~ /Vc/) {
     $installdir = $INCLUDE . "/Vc";
+    if ($dir =~ /internal$/) {$installdir .= "/internal";}
     if ($dir =~ /common$/) {$installdir .= "/common";}
-    if ($dir =~ /simple$/) {$installdir .= "/simple";}
+    if ($dir =~ /scalar$/) {$installdir .= "/scalar";}
     if ($dir =~ /sse$/)    {$installdir .= "/sse";}
   }
   if ($dir =~ /tbb/) {
@@ -255,17 +256,14 @@ if ($USE_64BITS and $USE_64BITS != "0"){
   $items .= "|gstar|control"; 
 }
 #print "CXX MAJOR = $env->{CXX_MAJOR} CXX MINOR =  $env->{CXX_MINOR}\n";
-if ($env->{CXX_MAJOR} < 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 4)) {
-    $items .= "|Vc|TBB|TPCCATracker";
-}
-if ($FC eq 'ifort') { 
-    $items .= "|StMCAsymMaker";
-}
+#if ($env->{CXX_MAJOR} < 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 4)) {
+#    $items .= "|Vc|TBB|TPCCATracker";
+#}
 if ($STAR_SYS =~ /x86_darwin/) {
     $items .= "|StStarLogger|StEventDisplayMaker|St_geom_Maker"; # if no QT
 }
 #if ($items ne '(') {$items .= "|";}
-#$items .= "StBTofPool|StTriggerUtilities";
+#$items .= "StBTofPool|StTriggerUtilities|StFgtPool|StPeCMaker";
 # closing exclusion list
 if ( $items ne ""){  
     $items = "(".substr($items,1,length($items)-1).")";
