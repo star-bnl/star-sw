@@ -103,24 +103,44 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
     if (obits[trkn]) otpc += (int) (::pow(2,trkn));
   }
 
+  //detmap will store number of matches in other detectors
+
   unsigned short nBEMC = primVtx->numMatchesWithBEMC();
   if (nBEMC>7) nBEMC=7; // 7 should be enough to convince
   // pack into bits 0,1,2
   detmap += nBEMC;
+
+  unsigned short nEEMC = primVtx->numMatchesWithEEMC();
+  if (nEEMC>7) nEEMC=7; // 7 should be enough to convince
+  // pack into bits 3,4,5
+  detmap += 8*nEEMC;
+
+  unsigned short nBTOF = primVtx->numMatchesWithBTOF();
+  if (nBTOF>7) nBTOF=7; // 7 should be enough to convince
+  // pack into bits 6,7,8
+  detmap += 64*nBTOF;
+
+  unsigned short nCRCM = primVtx->numTracksCrossingCentralMembrane();
+  if (nCRCM>3) nCRCM=3; // 3 should be enough to convince
+  // pack into bits 9,10
+  detmap += 512*nCRCM;
 
   return kStOk;
 }
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.6 2009/06/12 17:09:17 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.7 2012/08/14 23:56:06 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.6 2009/06/12 17:09:17 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.7 2012/08/14 23:56:06 genevb Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.7  2012/08/14 23:56:06  genevb
+// detmap now includes BEMC+EEMC+BTOF+CM, added mean zdc to log output
+//
 // Revision 1.6  2009/06/12 17:09:17  genevb
 // Match mult for MuDst and StEvent
 //

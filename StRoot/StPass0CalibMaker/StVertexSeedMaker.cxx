@@ -126,6 +126,7 @@ void StVertexSeedMaker::Reset() {
   zVertexMin = -100.0;
   r2VertexMax = 15.0;
   nverts = 0;
+  sumzdc = 0;
   Clear("");
   xguess = 0;
   yguess = 0;
@@ -143,6 +144,17 @@ void StVertexSeedMaker::Reset() {
     gSystem->GetPid()),"RECREATE");
   resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey");
   LOG_INFO << "Opening new temp file at " << mTempOut->GetName() << endm;
+
+  // Notes on detmap, map of fast detector matches:
+  // Bits 0,1,2  :  Number of BEMC matches (capped at 7)
+  // Bits 3,4,5  :  Number of EEMC matches (capped at 7)
+  // Bits 6,7,8  :  Number of BTOW matches (capped at 7)
+  // Bits 9,10   :  Number of CM crossers (capped at 3)
+  // Using TTree::Draw() methods allows the bit-shifting operator in cuts:
+  //   resNtuple.Draw("x","((detmap>>6)&7)==7");
+  // ...but reserves '>>' for histogram direction in the selection.
+  // Alternatively, one can see the TOF matches via:
+  //   resNtuple.Draw("(detmap&(7*8*8))/(8*8)");
 
   date = 0;
   time = 0;
@@ -226,6 +238,7 @@ Int_t StVertexSeedMaker::Make(){
                     (float) run,(float) fill,zdc,rank,
                     (float) itpc,(float) otpc,(float) detmap,exvertex,eyvertex);
     addVert(xvertex,yvertex,zvertex,mult,exvertex,eyvertex);
+    sumzdc += zdc;
   }
 
   return kStOk;
@@ -285,13 +298,14 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 
   if (writeIt) WriteTableToFile();
   else { LOG_WARN << "Not writing table!!!!!" << endm; }
+  LOG_INFO << "Mean ZDC was: " << sumzdc/((float) nverts) << endm;
 
   if (mHistOut) WriteHistFile();
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.47 2012/02/29 02:00:04 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.48 2012/08/14 23:56:06 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -624,8 +638,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.47 2012/02/29 02:00:04 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.48 2012/08/14 23:56:06 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.48  2012/08/14 23:56:06  genevb
+// detmap now includes BEMC+EEMC+BTOF+CM, added mean zdc to log output
+//
 // Revision 1.47  2012/02/29 02:00:04  genevb
 // Hack to get TVirtualFitter to allow more than 3 parameters
 //
