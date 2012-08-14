@@ -381,7 +381,8 @@ inline void AliHLTTPCCASliceData::MaximizeHitWeight( const AliHLTTPCCARow &row,
   }
 #endif
   // XXX critical section if the TrackletConstructor gets multi-threaded
-  const ushort_v oldWeight( row.fHitWeights, hitIndex, mask, Vc::Zero );
+  // const ushort_v oldWeight( row.fHitWeights, hitIndex, mask, Vc::Zero ); // CHECKME
+  const ushort_v oldWeight( row.fHitWeights, hitIndex, mask );
   debugF() << "scatter HitWeigths " << weight << " to " << hitIndex << ( weight > oldWeight && mask ) << " old: " << oldWeight << std::endl;
   weight.scatter( row.fHitWeights, hitIndex, weight > oldWeight && mask );
 }
@@ -396,7 +397,8 @@ inline ushort_v AliHLTTPCCASliceData::HitWeight( const AliHLTTPCCARow &row, cons
     }
   }
 #endif
-  return ushort_v( row.fHitWeights, hitIndex, mask, Vc::Zero );
+  // return ushort_v( row.fHitWeights, hitIndex, mask, Vc::Zero ); // CHECKME
+  return ushort_v( row.fHitWeights, hitIndex, mask );
 }
 
 typedef AliHLTTPCCASliceData SliceData;

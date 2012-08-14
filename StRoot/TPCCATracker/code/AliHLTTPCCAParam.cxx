@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.6 2012/08/13 19:35:05 fisyak Exp $
+// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.7 2012/08/14 16:30:42 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -28,7 +28,7 @@
 #include "debug.h"
 
 AliHLTTPCCAParam::AliHLTTPCCAParam()
-  : fISlice( 0 ), fNRows( AliHLTTPCCAParameters::NumberOfInnerRows ), fAlpha( 0.174533 ), fDAlpha( 0.349066 ),
+  : fISlice( 0 ), fNRows( 0 ), fAlpha( 0.174533 ), fDAlpha( 0.349066 ),
     fCosAlpha( 0 ), fSinAlpha( 0 ), fAngleMin( 0 ), fAngleMax( 0 ), fRMin( 83.65 ), fRMax( 133.3 ),
     fZMin( 0.0529937 ), fZMax( 249.778 ), fErrX( 0 ), fErrY( 0 ), fErrZ( 0.228808 ), fPadPitch( 0.4 ), fBz( -5. ),
     fHitPickUpFactor( 1. ),

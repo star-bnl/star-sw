@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.7 2012/08/13 19:35:06 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.8 2012/08/14 16:30:42 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -161,8 +161,8 @@ inline void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, int row
   debugF() << "r.fCurrentHitIndex changed from " << oldHitIndex << " to " << r.fCurrentHitIndex << endl;
 
   const sfloat_v x = fData.RowX( rowIndex ); // convert to sfloat_v once now
-  const sfloat_v y( fData.HitDataY( row ), oldHitIndex, active, Vc::Zero );
-  const sfloat_v z( fData.HitDataZ( row ), oldHitIndex, active, Vc::Zero );
+  const sfloat_v y( fData.HitDataY( row ), oldHitIndex, active );
+  const sfloat_v z( fData.HitDataZ( row ), oldHitIndex, active );
   VALGRIND_CHECK_VALUE_IS_DEFINED( x );
   VALGRIND_CHECK_VALUE_IS_DEFINED( y );
   VALGRIND_CHECK_VALUE_IS_DEFINED( z );
@@ -225,7 +225,7 @@ inline void AliHLTTPCCATrackletConstructor::FitTracklet( TrackMemory &r, int row
     debugF() << "hits: " << r.fNHits << ", sinphi: " << r.fParam.SinPhi() << endl;
     const short_m invalidTracklet = ( r.fNHits < 3
         || static_cast<short_m>( CAMath::Abs( r.fParam.SinPhi() ) > .999f ) ) && fittingDone;
-    r.fNHits.makeZero( invalidTracklet );
+    r.fNHits.setZero( invalidTracklet );
     r.fStage( invalidTracklet ) = DoneStage; // XXX: NullStage?
     debugF() << "r.fStage: " << r.fStage << endl;
   }
@@ -637,7 +637,7 @@ void AliHLTTPCCATrackletConstructor::run()
 #endif
     } // END: fit and extrapolate upwards
 #else // DISABLE_HIT_SEARCH
-    while ( rowIndex < AliHLTTPCCAParameters::NumberOfRows && ( r.fStage == ExtrapolateUp ).isEmpty() ) {
+    while ( rowIndex < fTracker.Param().NRows() && ( r.fStage == ExtrapolateUp ).isEmpty() ) {
       ++r.fStage( rowIndex == activationRow ); // goes to FitLinkedHits on activation row
       FitTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration] );
       ++rowIndex;
@@ -645,7 +645,7 @@ void AliHLTTPCCATrackletConstructor::run()
 
     debugF() << "========================================== Start Extrapolating Upwards ==========================================" << endl;
 
-    while ( rowIndex < AliHLTTPCCAParameters::NumberOfRows && !( r.fStage <= FitLinkedHits ).isEmpty() ) {
+    while ( rowIndex < fTracker.Param().NRows() && !( r.fStage <= FitLinkedHits ).isEmpty() ) {
       ++r.fStage( rowIndex == activationRow ); // goes to FitLinkedHits on activation row
       const short_m toExtrapolate = (r.fStage == ExtrapolateUp);
       const short_m &extrapolated = ExtrapolateTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration], toExtrapolate );
@@ -669,7 +669,7 @@ void AliHLTTPCCATrackletConstructor::run()
     }
 #endif
     short_m mask;
-    while ( rowIndex < AliHLTTPCCAParameters::NumberOfRows && !( mask = r.fStage == ExtrapolateUp ).isEmpty() ) {
+    while ( rowIndex < fTracker.Param().NRows() && !( mask = r.fStage == ExtrapolateUp ).isEmpty() ) {
       const short_m &extrapolated = ExtrapolateTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration], mask );
       r.fLastRow( extrapolated ) = rowIndex;
 // #ifdef LOSE_DEBUG
@@ -780,7 +780,7 @@ void AliHLTTPCCATrackletConstructor::run()
     debugF() << r.fParam << "-> trackletOk: " << trackletOkF << endl;
 
     const short_m trackletOk( trackletOkF );
-    r.fNHits.makeZero( !trackletOk );
+    r.fNHits.setZero( !trackletOk );
 
     //////////////////////////////////////////////////////////////////////
     //
@@ -828,13 +828,13 @@ void AliHLTTPCCATrackletConstructor::run()
 
 void InitTracklets::operator()( int rowIndex )
 {
-  if ( ISUNLIKELY( rowIndex >= AliHLTTPCCAParameters::NumberOfRows ) ) {
+  if ( ISUNLIKELY( rowIndex >= fTracker.Param().NRows() ) ) {
     return;
   }
   debugF() << "InitTracklets(" << rowIndex << ")" << endl;
 //std::cout<< "InitTracklets(" << rowIndex << ")" << std::endl;
   const int rowStep = AliHLTTPCCAParameters::RowStep;
-  assert( rowIndex < AliHLTTPCCAParameters::NumberOfRows - rowStep );
+  assert( rowIndex < fTracker.Param().NRows() - rowStep );
   // the first hit is a special case (easy)
   const ushort_m &mask = rowIndex == r.fStartRow;
   const sfloat_m maskF( mask );
@@ -861,8 +861,8 @@ void InitTracklets::operator()( int rowIndex )
     const AliHLTTPCCARow &row = fData.Row( rowIndex );
     const sfloat_v x = fData.RowX( rowIndex );
     const ushort_v &hitIndex = static_cast<ushort_v>( r.fCurrentHitIndex );
-    const sfloat_v y( fData.HitDataY( row ), hitIndex, mask, Vc::Zero );
-    const sfloat_v z( fData.HitDataZ( row ), hitIndex, mask, Vc::Zero );
+    const sfloat_v y( fData.HitDataY( row ), hitIndex, mask );
+    const sfloat_v z( fData.HitDataZ( row ), hitIndex, mask );
     const sfloat_v &dx = x - r.fParam.X();
     const sfloat_v &dy = y - r.fParam.Y();
     const sfloat_v &dz = z - r.fParam.Z();

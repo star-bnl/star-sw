@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.15 2012/08/13 19:35:05 fisyak Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.16 2012/08/14 16:30:42 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -252,7 +252,8 @@ void AliHLTTPCCAGBTracker::FindTracks()
     do {
       fFirstSliceHit[nextSlice] = offset;
       AliHLTTPCCAClusterData &data = clusterData[numberOfUsedSlices++];
-      data.readEvent( fHits.Data(), &offset, fNHits );
+      assert( fSlices.Size() > 0 );
+      data.readEvent( fHits.Data(), &offset, fNHits, fSlices[0].Param().NRows8() );
 
       while ( nextSlice < data.Slice() ) {
         fSlices[nextSlice++].StartEvent();

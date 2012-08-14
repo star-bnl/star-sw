@@ -61,13 +61,15 @@ class AliHLTTPCCATrackletVector
 
     void AddHitIds( const ushort_v &rowIndexes, const ushort_v &hitIndexes, const ushort_m &mask );
 
+    int MaxNRows() const { return fRowHits.Size(); }
   private:
     ushort_v fNHits;      // N hits
     ushort_v fFirstRow;   // first TPC row
     ushort_v fLastRow;    // last TPC row
     TrackParamVector fParam;   // tracklet parameters
-    AliHLTFixedArray<ushort_v::Memory, AliHLTArraySize<AliHLTTPCCAParameters::NumberOfRows> > fRowHits; // hit index for each TPC row
+    AliHLTFixedArray<ushort_v::Memory, AliHLTArraySize<AliHLTTPCCAParameters::MaxNumberOfRows8> > fRowHits; // hit index for each TPC row
 };
+
 
 inline void AliHLTTPCCATrackletVector::SetRowHits( int rowIndex, const ushort_v &trackIndex,
     const ushort_v &hitIndex )

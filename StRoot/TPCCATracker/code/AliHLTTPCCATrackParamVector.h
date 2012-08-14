@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCATrackParamVector.h,v 1.3 2011/01/31 17:18:32 fisyak Exp $
+// $Id: AliHLTTPCCATrackParamVector.h,v 1.4 2012/08/14 16:30:42 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -44,8 +44,8 @@ class AliHLTTPCCATrackParamVector
       fChi2( Vc::Zero ),
       fNDF( Vc::Zero )
     {
-      for ( int i = 0; i <  5; ++i ) fP[i].makeZero();
-      for ( int i = 0; i < 15; ++i ) fC[i].makeZero();
+      for ( int i = 0; i <  5; ++i ) fP[i].setZero();
+      for ( int i = 0; i < 15; ++i ) fC[i].setZero();
     }
 
     struct AliHLTTPCCATrackFitParam {
@@ -283,7 +283,7 @@ inline sfloat_m AliHLTTPCCATrackParamVector::TransportToX( const sfloat_v &x, co
 #define VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( v, k ) \
 { \
   __typeof__( v + v ) tmp( v ); \
-  tmp.makeZero( !k ); \
+  tmp.setZero( !k ); \
   VALGRIND_CHECK_VALUE_IS_DEFINED( tmp ); \
 }
 #endif
@@ -306,8 +306,8 @@ inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, 
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( err2Y, mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( err2Z, mask );
 #ifndef NVALGRIND
-  err2Y.makeZero( !mask );
-  err2Z.makeZero( !mask );
+  err2Y.setZero( !mask );
+  err2Z.setZero( !mask );
 #endif
   VALGRIND_CHECK_VALUE_IS_DEFINED( maxSinPhi );
 
@@ -424,8 +424,8 @@ inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( err2Y, mask );
   VALGRIND_CHECK_MASKED_VECTOR_IS_DEFINED( err2Z, mask );
 #ifndef NVALGRIND
-  err2Y.makeZero( !mask );
-  err2Z.makeZero( !mask );
+  err2Y.setZero( !mask );
+  err2Z.setZero( !mask );
 #endif
   VALGRIND_CHECK_VALUE_IS_DEFINED( maxSinPhi );
 

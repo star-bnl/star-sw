@@ -302,7 +302,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     hitNumberOffset += NextMultipleOf<VectorAlignment>( row.fNHits );
   }
 
-  for ( int rowIndex = data.LastRow() + 1; rowIndex < AliHLTTPCCAParameters::NumberOfRows2; ++rowIndex ) {
+  for ( int rowIndex = data.LastRow() + 1; rowIndex < fParam->NRows8(); ++rowIndex ) {
     AliHLTTPCCARow &row = fRows[rowIndex];
     row.fGrid.CreateEmpty();
     row.fNHits = 0;
@@ -320,7 +320,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
 void AliHLTTPCCASliceData::ClearHitWeights()
 {
   const ushort_v v0( Vc::Zero );
-  const unsigned short *const end = fRows[AliHLTTPCCAParameters::NumberOfRows].fHitWeights;
+  const unsigned short *const end = fRows[fParam->NRows()].fHitWeights;
   for ( unsigned short *mem = fRows[0].fHitWeights; mem < end; mem += v0.Size ) {
     v0.store( mem );
   }
@@ -329,11 +329,11 @@ void AliHLTTPCCASliceData::ClearHitWeights()
 void AliHLTTPCCASliceData::ClearLinks()
 {
   const short_v v0( -1 );
-  const short *const end1 = fRows[AliHLTTPCCAParameters::NumberOfRows].fLinkUpData;
+  const short *const end1 = fRows[fParam->NRows()].fLinkUpData;
   for ( short *mem = fRows[0].fLinkUpData; mem < end1; mem += v0.Size ) {
     v0.store( mem );
   }
-  const short *const end2 = fRows[AliHLTTPCCAParameters::NumberOfRows].fLinkDownData;
+  const short *const end2 = fRows[fParam->NRows()].fLinkDownData;
   for ( short *mem = fRows[0].fLinkDownData; mem < end2; mem += v0.Size ) {
     v0.store( mem );
   }

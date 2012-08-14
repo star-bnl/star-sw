@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.5 2012/08/13 19:35:06 fisyak Exp $
+// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.6 2012/08/14 16:30:42 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -138,7 +138,7 @@ void AliHLTTPCCATrackletSelector::run()
         if ( outHit[i] ) {
           assert( hitIndexes[i] < fData.Row( rowIndex ).NHits() );
           tracks[i]->fHitIdArray[tracks[i]->fNumberOfHits++].Set( rowIndex, hitIndexes[i] );
-        } else if ( gap[i] > AliHLTTPCCAParameters::MaximumRowGap ) {
+        } else if ( gap[i] > static_cast<ushort_v>(AliHLTTPCCAParameters::MaximumRowGap) ) {
           if ( tracks[i]->fNumberOfHits >= AliHLTTPCCAParameters::MinimumHitsForTrack ) {
             numberOfHits += tracks[i]->fNumberOfHits;
             tracks[i] = new Track;
@@ -148,9 +148,9 @@ void AliHLTTPCCATrackletSelector::run()
           }
         }
       }
-      gap.makeZero( outHit );
+      gap.setZero( outHit );
       ++tNHitsNew( outHit );
-      tNHitsNew.makeZero( gap > AliHLTTPCCAParameters::MaximumRowGap );
+      tNHitsNew.setZero( gap > AliHLTTPCCAParameters::MaximumRowGap );
       ++nShared( !own && outHit );
     }
 
@@ -168,6 +168,6 @@ void AliHLTTPCCATrackletSelector::run()
     //debugTS() << "NTracks: " << fTracker.NTracks() << ", NTrackHits: " << fTracker.NTrackHits() << endl;
   }
   fNumberOfHits = numberOfHits;
-  fTracks.resize( numberOfTracks + 1 );
+  fTracks.resize( numberOfTracks + 1, 0 );
   fNumberOfTracks = numberOfTracks + 1 - recycleBin.size();
 }
