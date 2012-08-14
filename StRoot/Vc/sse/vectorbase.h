@@ -37,20 +37,6 @@ namespace SSE
         friend struct VectorHelperSize<short>;
         friend struct VectorHelperSize<unsigned short>;
         friend struct VectorHelperSize<float8>;
-        friend struct GatherHelper<float>;
-        friend struct GatherHelper<float8>;
-        friend struct GatherHelper<double>;
-        friend struct GatherHelper<int>;
-        friend struct GatherHelper<unsigned int>;
-        friend struct GatherHelper<short>;
-        friend struct GatherHelper<unsigned short>;
-        friend struct ScatterHelper<float>;
-        friend struct ScatterHelper<float8>;
-        friend struct ScatterHelper<double>;
-        friend struct ScatterHelper<int>;
-        friend struct ScatterHelper<unsigned int>;
-        friend struct ScatterHelper<short>;
-        friend struct ScatterHelper<unsigned short>;
         friend struct GeneralHelpers;
         public:
             enum { Size = 16 / sizeof(T) };
@@ -59,28 +45,34 @@ namespace SSE
             typedef VectorBase<typename IndexTypeHelper<Size>::Type> IndexType;
             typedef Mask<Size> MaskType;
             typedef MaskType GatherMaskType;
+#if defined VC_MSVC && defined _WIN32
+            typedef const Vector<T> &AsArg;
+#else
+            typedef Vector<T> AsArg;
+#endif
 
-            inline Vector<EntryType> &operator|= (const VectorBase<EntryType> &x) ALWAYS_INLINE;
-            inline Vector<EntryType> &operator&= (const VectorBase<EntryType> &x) ALWAYS_INLINE;
-            inline Vector<EntryType> &operator^= (const VectorBase<EntryType> &x) ALWAYS_INLINE;
-            inline Vector<EntryType> &operator>>=(const VectorBase<EntryType> &x) ALWAYS_INLINE;
-            inline Vector<EntryType> &operator<<=(const VectorBase<EntryType> &x) ALWAYS_INLINE;
-            inline Vector<EntryType> &operator>>=(int x) ALWAYS_INLINE;
-            inline Vector<EntryType> &operator<<=(int x) ALWAYS_INLINE;
+            inline INTRINSIC_L Vector<EntryType> &operator|= (const VectorBase<EntryType> &x) INTRINSIC_R;
+            inline INTRINSIC_L Vector<EntryType> &operator&= (const VectorBase<EntryType> &x) INTRINSIC_R;
+            inline INTRINSIC_L Vector<EntryType> &operator^= (const VectorBase<EntryType> &x) INTRINSIC_R;
+            inline Vector<EntryType> &operator>>=(const VectorBase<EntryType> &x);
+            inline Vector<EntryType> &operator<<=(const VectorBase<EntryType> &x);
+            inline INTRINSIC_L Vector<EntryType> &operator>>=(int x) INTRINSIC_R;
+            inline INTRINSIC_L Vector<EntryType> &operator<<=(int x) INTRINSIC_R;
 
-            inline Vector<EntryType> operator| (const VectorBase<EntryType> &x) const ALWAYS_INLINE;
-            inline Vector<EntryType> operator& (const VectorBase<EntryType> &x) const ALWAYS_INLINE;
-            inline Vector<EntryType> operator^ (const VectorBase<EntryType> &x) const ALWAYS_INLINE;
-            inline Vector<EntryType> operator>>(const VectorBase<EntryType> &x) const ALWAYS_INLINE;
-            inline Vector<EntryType> operator<<(const VectorBase<EntryType> &x) const ALWAYS_INLINE;
-            inline Vector<EntryType> operator>>(int x) const ALWAYS_INLINE_X;
-            inline Vector<EntryType> operator<<(int x) const ALWAYS_INLINE_X;
+            inline INTRINSIC_L Vector<EntryType> operator| (const VectorBase<EntryType> &x) const INTRINSIC_R PURE;
+            inline INTRINSIC_L Vector<EntryType> operator& (const VectorBase<EntryType> &x) const INTRINSIC_R PURE;
+            inline INTRINSIC_L Vector<EntryType> operator^ (const VectorBase<EntryType> &x) const INTRINSIC_R PURE;
+            inline INTRINSIC_L Vector<EntryType> operator>>(const VectorBase<EntryType> &x) const INTRINSIC_R PURE;
+            inline INTRINSIC_L Vector<EntryType> operator<<(const VectorBase<EntryType> &x) const INTRINSIC_R PURE;
+            inline INTRINSIC_L Vector<EntryType> operator>>(int x) const INTRINSIC_R PURE;
+            inline INTRINSIC_L Vector<EntryType> operator<<(int x) const INTRINSIC_R PURE;
 
             VectorType &data() { return d.v(); }
             const VectorType &data() const { return d.v(); }
 
             inline VectorBase(VectorType x) : d(x) {}
         protected:
+            enum { HasVectorDivision = 0 };
             inline VectorBase() {}
 
             typedef Common::VectorMemoryUnion<VectorType, EntryType> StorageType;
@@ -101,8 +93,6 @@ namespace SSE
     template<> class VectorBase<float8> {
         friend struct VectorHelperSize<float8>;
         friend struct VectorHelperSize<float>;
-        friend struct GatherHelper<float8>;
-        friend struct ScatterHelper<float8>;
         friend struct GeneralHelpers;
         public:
             enum { Size = 8 };
@@ -112,12 +102,20 @@ namespace SSE
             typedef Float8Mask MaskType;
             typedef Float8GatherMask GatherMaskType;
 
+            typedef ParameterHelper<VectorType>::ByValue ByValue;
+#if defined VC_MSVC && defined _WIN32
+            typedef const Vector<float8> &AsArg;
+#else
+            typedef Vector<float8> AsArg;
+#endif
+
             VectorType &data() { return d.v(); }
             const VectorType &data() const { return d.v(); }
 
         protected:
+            enum { HasVectorDivision = 1 };
             inline VectorBase() {}
-            inline VectorBase(const VectorType &x) : d(x) {}
+            inline VectorBase(ByValue x) : d(x) {}
 
             typedef Common::VectorMemoryUnion<VectorType, EntryType> StorageType;
             StorageType d;
@@ -125,8 +123,6 @@ namespace SSE
 
     template<> class VectorBase<float> {
         friend struct VectorHelperSize<float>;
-        friend struct GatherHelper<float>;
-        friend struct ScatterHelper<float>;
         friend struct GeneralHelpers;
         public:
             enum { Size = 16 / sizeof(float) };
@@ -135,11 +131,17 @@ namespace SSE
             typedef VectorBase<IndexTypeHelper<Size>::Type> IndexType;
             typedef Mask<Size> MaskType;
             typedef MaskType GatherMaskType;
+#if defined VC_MSVC && defined _WIN32
+            typedef const Vector<float> &AsArg;
+#else
+            typedef Vector<float> AsArg;
+#endif
 
             VectorType &data() { return d.v(); }
             const VectorType &data() const { return d.v(); }
 
         protected:
+            enum { HasVectorDivision = 1 };
             inline VectorBase() {}
             inline VectorBase(VectorType x) : d(x) {}
 
@@ -149,8 +151,6 @@ namespace SSE
 
     template<> class VectorBase<double> {
         friend struct VectorHelperSize<double>;
-        friend struct GatherHelper<double>;
-        friend struct ScatterHelper<double>;
         friend struct GeneralHelpers;
         public:
             enum { Size = 16 / sizeof(double) };
@@ -159,11 +159,17 @@ namespace SSE
             typedef VectorBase<IndexTypeHelper<Size>::Type> IndexType;
             typedef Mask<Size> MaskType;
             typedef MaskType GatherMaskType;
+#if defined VC_MSVC && defined _WIN32
+            typedef const Vector<double> &AsArg;
+#else
+            typedef Vector<double> AsArg;
+#endif
 
             VectorType &data() { return d.v(); }
             const VectorType &data() const { return d.v(); }
 
         protected:
+            enum { HasVectorDivision = 1 };
             inline VectorBase() {}
             inline VectorBase(VectorType x) : d(x) {}
 

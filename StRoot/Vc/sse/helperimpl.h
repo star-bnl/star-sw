@@ -20,6 +20,8 @@
 #ifndef VC_SSE_DEINTERLEAVE_H
 #define VC_SSE_DEINTERLEAVE_H
 
+#include "macros.h"
+
 namespace Vc
 {
 namespace Internal
@@ -54,6 +56,16 @@ template<> struct HelperImpl<Vc::SSE2Impl>
     template<typename A> static void deinterleave(short_v &, short_v &, const short *, A);
 
     template<typename A> static void deinterleave(ushort_v &, ushort_v &, const unsigned short *, A);
+
+    static inline ALWAYS_INLINE_L void prefetchForOneRead(const void *addr) ALWAYS_INLINE_R;
+    static inline ALWAYS_INLINE_L void prefetchForModify(const void *addr) ALWAYS_INLINE_R;
+    static inline ALWAYS_INLINE_L void prefetchClose(const void *addr) ALWAYS_INLINE_R;
+    static inline ALWAYS_INLINE_L void prefetchMid(const void *addr) ALWAYS_INLINE_R;
+    static inline ALWAYS_INLINE_L void prefetchFar(const void *addr) ALWAYS_INLINE_R;
+
+    template<Vc::MallocAlignment A>
+    static inline ALWAYS_INLINE_L void *malloc(size_t n) ALWAYS_INLINE_R;
+    static inline ALWAYS_INLINE_L void free(void *p) ALWAYS_INLINE_R;
 };
 
 template<> struct HelperImpl<SSE3Impl> : public HelperImpl<SSE2Impl> {};
@@ -62,8 +74,13 @@ template<> struct HelperImpl<SSE41Impl> : public HelperImpl<SSSE3Impl> {};
 template<> struct HelperImpl<SSE42Impl> : public HelperImpl<SSE41Impl> {};
 template<> struct HelperImpl<SSE4aImpl> : public HelperImpl<SSE3Impl> {};
 
+
 } // namespace Internal
 } // namespace Vc
 
+#include "undomacros.h"
 #include "deinterleave.tcc"
+#include "prefetches.tcc"
+#include "helperimpl.tcc"
+
 #endif // VC_SSE_DEINTERLEAVE_H

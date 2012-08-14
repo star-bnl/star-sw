@@ -30,14 +30,11 @@ namespace SSE
 {
     template<typename T> class Vector;
 
-    // define our own long because on Windows long == int while on Linux long == max. register width
+    // define our own long because on Windows64 long == int while on Linux long == max. register width
     // since we want to have a type that depends on 32 vs. 64 bit we need to do some special casing on Windows
 #ifdef _WIN64
     typedef __int64 _long;
     typedef unsigned __int64 _ulong;
-#elif defined(_WIN32)
-    typedef int _long;
-    typedef unsigned int _ulong;
 #else
     typedef long _long;
     typedef unsigned long _ulong;
@@ -64,9 +61,27 @@ namespace SSE
             _M128 d[2];
     };
 
+    template<typename T> struct ParameterHelper {
+        typedef T ByValue;
+        typedef T & Reference;
+        typedef const T & ConstRef;
+    };
+#if defined VC_MSVC && !defined _WIN64
+    // The calling convention on WIN32 can't guarantee alignment.
+    // An exception are the first three arguments, which may be passed in a register.
+    template<> struct ParameterHelper<M256> {
+        typedef const M256 & ByValue;
+        typedef M256 & Reference;
+        typedef const M256 & ConstRef;
+    };
+#endif
+
     template<typename T> struct VectorHelper {};
-    template<typename T> struct GatherHelper;
-    template<typename T> struct ScatterHelper;
+
+    template<typename T> struct NegateTypeHelper { typedef T Type; };
+    template<> struct NegateTypeHelper<unsigned char > { typedef char  Type; };
+    template<> struct NegateTypeHelper<unsigned short> { typedef short Type; };
+    template<> struct NegateTypeHelper<unsigned int  > { typedef int   Type; };
 
     template<unsigned int Size> struct IndexTypeHelper;
     template<> struct IndexTypeHelper<2u> { typedef unsigned int   Type; };
@@ -74,18 +89,28 @@ namespace SSE
     template<> struct IndexTypeHelper<8u> { typedef unsigned short Type; };
     template<> struct IndexTypeHelper<16u>{ typedef unsigned char  Type; };
 
+    template<typename T> struct CtorTypeHelper { typedef T Type; };
+    template<> struct CtorTypeHelper<short> { typedef int Type; };
+    template<> struct CtorTypeHelper<unsigned short> { typedef unsigned int Type; };
+    template<> struct CtorTypeHelper<float> { typedef double Type; };
+
+    template<typename T> struct ExpandTypeHelper { typedef T Type; };
+    template<> struct ExpandTypeHelper<short> { typedef int Type; };
+    template<> struct ExpandTypeHelper<unsigned short> { typedef unsigned int Type; };
+    template<> struct ExpandTypeHelper<float> { typedef double Type; };
+
     template<typename T> struct VectorHelperSize;
 
     namespace VectorSpecialInitializerZero { enum ZEnum { Zero = 0 }; }
     namespace VectorSpecialInitializerOne { enum OEnum { One = 1 }; }
-    namespace VectorSpecialInitializerRandom { enum REnum { Random }; }
     namespace VectorSpecialInitializerIndexesFromZero { enum IEnum { IndexesFromZero }; }
 
-    class VectorAlignedBase
+    template<typename V = Vector<float> >
+    class STRUCT_ALIGN1(16) VectorAlignedBaseT
     {
         public:
             FREE_STORE_OPERATORS_ALIGNED(16)
-    } ALIGN(16);
+    } STRUCT_ALIGN2(16);
 
 } // namespace SSE
 } // namespace Vc

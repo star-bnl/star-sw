@@ -51,6 +51,16 @@ template<unsigned int VectorSize> class Mask
     friend class Float8Mask;
     public:
         FREE_STORE_OPERATORS_ALIGNED(16)
+        
+        // abstracts the way Masks are passed to functions, it can easily be changed to const ref here
+        // Also Float8Mask requires const ref on MSVC 32bit.
+#if defined VC_MSVC && defined _WIN32
+        typedef const Mask<VectorSize> &Argument;
+#else
+        typedef Mask<VectorSize> Argument;
+#endif
+
+
         inline Mask() {}
         inline Mask(const __m128  &x) : k(x) {}
         inline Mask(const __m128d &x) : k(_mm_castpd_ps(x)) {}
@@ -118,14 +128,11 @@ template<unsigned int VectorSize> class Mask
 
         inline operator bool() const { return isFull(); }
 
-        inline int shiftMask() const CONST;
+        inline int CONST_L shiftMask() const CONST_R;
 
-        int toInt() const CONST;
+        int CONST_L toInt() const CONST_R;
 
         inline _M128  data () const { return k; }
-#ifdef VC_GATHER_SET
-        inline _M128  dataIndex() const { return k; }
-#endif
         inline _M128I dataI() const { return _mm_castps_si128(k); }
         inline _M128D dataD() const { return _mm_castps_pd(k); }
 
@@ -154,7 +161,10 @@ struct ForeachHelper
     inline bool outer() const { return mask != 0; }
     inline bool inner() { return (brk = !brk); }
     inline _long next() {
-#ifdef _WIN64
+#ifdef __GNUC__ // the compiler understands inline asm
+        const _long bit = __builtin_ctzl(mask);
+        __asm__("btr %1,%0" : "+r"(mask) : "r"(bit));
+#elif defined(_WIN64)
        unsigned long bit;
        _BitScanForward64(&bit, mask);
        _bittestandreset64(&mask, bit);
@@ -163,8 +173,7 @@ struct ForeachHelper
        _BitScanForward(&bit, mask);
        _bittestandreset(&mask, bit);
 #else
-        const _long bit = __builtin_ctzl(mask);
-        __asm__("btr %1,%0" : "+r"(mask) : "r"(bit));
+#error "Not implemented yet. Please contact vc-devel@compeng.uni-frankfurt.de"
 #endif
         return bit;
     }
@@ -173,8 +182,6 @@ struct ForeachHelper
 #define Vc_foreach_bit(_it_, _mask_) \
     for (Vc::SSE::ForeachHelper _Vc_foreach_bit_helper((_mask_).toInt()); _Vc_foreach_bit_helper.outer(); ) \
         for (_it_ = _Vc_foreach_bit_helper.next(); _Vc_foreach_bit_helper.inner(); )
-
-#define foreach_bit(_it_, _mask_) Vc_foreach_bit(_it_, _mask_)
 
 template<unsigned int Size> inline int Mask<Size>::shiftMask() const
 {
@@ -245,17 +252,23 @@ template<> inline int Mask<2>::count() const
 
 template<> inline int Mask<4>::count() const
 {
-//X     int tmp = _mm_movemask_ps(data());
+#ifdef VC_IMPL_SSE4_2
+    return _mm_popcnt_u32(_mm_movemask_ps(data()));
 //X     tmp = (tmp & 5) + ((tmp >> 1) & 5);
 //X     return (tmp & 3) + ((tmp >> 2) & 3);
+#else
     _M128I x = _mm_srli_epi32(dataI(), 31);
     x = _mm_add_epi32(x, _mm_shuffle_epi32(x, _MM_SHUFFLE(0, 1, 2, 3)));
     x = _mm_add_epi32(x, _mm_shufflelo_epi16(x, _MM_SHUFFLE(1, 0, 3, 2)));
     return _mm_cvtsi128_si32(x);
+#endif
 }
 
 template<> inline int Mask<8>::count() const
 {
+#ifdef VC_IMPL_SSE4_2
+    return _mm_popcnt_u32(_mm_movemask_epi8(dataI())) / 2;
+#else
 //X     int tmp = _mm_movemask_epi8(dataI());
 //X     tmp = (tmp & 0x1111) + ((tmp >> 2) & 0x1111);
 //X     tmp = (tmp & 0x0303) + ((tmp >> 4) & 0x0303);
@@ -265,15 +278,20 @@ template<> inline int Mask<8>::count() const
     x = _mm_add_epi16(x, _mm_shufflelo_epi16(x, _MM_SHUFFLE(0, 1, 2, 3)));
     x = _mm_add_epi16(x, _mm_shufflelo_epi16(x, _MM_SHUFFLE(2, 3, 0, 1)));
     return _mm_extract_epi16(x, 0);
+#endif
 }
 
 template<> inline int Mask<16>::count() const
 {
     int tmp = _mm_movemask_epi8(dataI());
+#ifdef VC_IMPL_SSE4_2
+    return _mm_popcnt_u32(tmp);
+#else
     tmp = (tmp & 0x5555) + ((tmp >> 1) & 0x5555);
     tmp = (tmp & 0x3333) + ((tmp >> 2) & 0x3333);
     tmp = (tmp & 0x0f0f) + ((tmp >> 4) & 0x0f0f);
     return (tmp & 0x00ff) + ((tmp >> 8) & 0x00ff);
+#endif
 }
 
 
@@ -285,6 +303,15 @@ class Float8Mask
     };
     public:
         FREE_STORE_OPERATORS_ALIGNED(16)
+
+        // abstracts the way Masks are passed to functions, it can easily be changed to const ref here
+        // Also Float8Mask requires const ref on MSVC 32bit.
+#if defined VC_MSVC && defined _WIN32
+        typedef const Float8Mask & Argument;
+#else
+        typedef Float8Mask Argument;
+#endif
+
         inline Float8Mask() {}
         inline Float8Mask(const M256 &x) : k(x) {}
         inline explicit Float8Mask(VectorSpecialInitializerZero::ZEnum) {
@@ -405,6 +432,9 @@ class Float8Mask
         }
 
         inline int count() const {
+#ifdef VC_IMPL_SSE4_2
+		return _mm_popcnt_u32(toInt());
+#else
 //X             int tmp1 = _mm_movemask_ps(k[0]);
 //X             int tmp2 = _mm_movemask_ps(k[1]);
 //X             tmp1 = (tmp1 & 5) + ((tmp1 >> 1) & 5);
@@ -415,6 +445,7 @@ class Float8Mask
             x = _mm_add_epi32(x, _mm_shuffle_epi32(x, _MM_SHUFFLE(0, 1, 2, 3)));
             x = _mm_add_epi32(x, _mm_shufflelo_epi16(x, _MM_SHUFFLE(1, 0, 3, 2)));
             return _mm_cvtsi128_si32(x);
+#endif
         }
 
         int firstOne() const;
@@ -455,21 +486,10 @@ inline Mask<VectorSize>::Mask(const Float8Mask &m)
 class Float8GatherMask
 {
     public:
-#ifdef VC_GATHER_SET
-        Float8GatherMask(const Mask<8u> &k)   : smallMask(k), bigMask(k), mask(k.toInt()) {}
-        Float8GatherMask(const Float8Mask &k) : smallMask(k), bigMask(k), mask(k.toInt()) {}
-        const __m128 dataIndex() const { return smallMask.data(); }
-        const M256 data() const { return bigMask.data(); }
-#else
         Float8GatherMask(const Mask<8u> &k)   : mask(k.toInt()) {}
         Float8GatherMask(const Float8Mask &k) : mask(k.toInt()) {}
-#endif
         int toInt() const { return mask; }
     private:
-#ifdef VC_GATHER_SET
-        const Mask<8u> smallMask;
-        const Float8Mask bigMask;
-#endif
         const int mask;
 };
 

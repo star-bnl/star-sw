@@ -26,7 +26,7 @@ namespace Vc
 /**
  * \ingroup Utilities
  *
- * Loads two vectors of values from two interleaved arrays.
+ * Loads two vectors of values from an interleaved array.
  *
  * \param a, b The vectors to load the values from memory into.
  * \param memory The memory location where to read the next 2 * V::Size values from
@@ -37,7 +37,7 @@ namespace Vc
  * \code
  * struct { float x, y; } m[1000];
  * \endcode
- * then the deinterleave function allows you to read \p Size concurrect x and y values like this:
+ * then the deinterleave function allows you to read \p Size concurrent x and y values like this:
  * \code
  * Vc::float_v x, y;
  * Vc::deinterleave(&x, &y, &m[10], Vc::Unaligned);

@@ -21,16 +21,17 @@
 #define VECTOR_H
 
 #include "global.h"
+#include "internal/namespace.h"
 
-#if VC_IMPL_LRBni
-# include "larrabee/vector.h"
-# define VECTOR_NAMESPACE LRBni
-#elif VC_IMPL_Scalar
-# include "simple/vector.h"
-# define VECTOR_NAMESPACE Simple
-#else
+#if VC_IMPL_Scalar
+# include "scalar/vector.h"
+# include "scalar/helperimpl.h"
+#elif VC_IMPL_AVX
+# include "avx/vector.h"
+# include "avx/helperimpl.h"
+#elif VC_IMPL_SSE
 # include "sse/vector.h"
-# define VECTOR_NAMESPACE SSE
+# include "sse/helperimpl.h"
 #endif
 
 #ifdef isfinite
@@ -43,10 +44,10 @@
 namespace Vc
 {
   using VECTOR_NAMESPACE::VectorAlignment;
-  using VECTOR_NAMESPACE::VectorAlignedBase;
+  using VECTOR_NAMESPACE::VectorAlignedBaseT;
+  typedef VectorAlignedBaseT<> VectorAlignedBase;
   using namespace VECTOR_NAMESPACE::VectorSpecialInitializerZero;
   using namespace VECTOR_NAMESPACE::VectorSpecialInitializerOne;
-  using namespace VECTOR_NAMESPACE::VectorSpecialInitializerRandom;
   using namespace VECTOR_NAMESPACE::VectorSpecialInitializerIndexesFromZero;
   using VECTOR_NAMESPACE::min;
   using VECTOR_NAMESPACE::max;
@@ -67,6 +68,10 @@ namespace Vc
   using VECTOR_NAMESPACE::forceToRegisters;
   using VECTOR_NAMESPACE::Vector;
 } // namespace Vc
+
+#ifndef VC_CLEAN_NAMESPACE
+#define foreach_bit(_it_, _mask_) Vc_foreach_bit(_it_, _mask_)
+#endif
 
 #undef VECTOR_NAMESPACE
 

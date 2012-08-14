@@ -17,17 +17,10 @@
 
 */
 
-#ifndef VC_UTILS
-#define VC_UTILS
-
-#include "global.h"
-
 #if VC_IMPL_Scalar
-# define VECTOR_NAMESPACE Scalar
-#else
-# define VECTOR_NAMESPACE SSE
+# define VECTOR_NAMESPACE Vc::Scalar
+#elif VC_IMPL_AVX
+# define VECTOR_NAMESPACE Vc::AVX
+#elif VC_IMPL_SSE
+# define VECTOR_NAMESPACE Vc::SSE
 #endif
-
-#include "common/deinterleave.h"
-
-#endif // VC_UTILS
