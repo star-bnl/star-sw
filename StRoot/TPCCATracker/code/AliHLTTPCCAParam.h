@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCAParam.h,v 1.4 2011/10/01 00:23:44 perev Exp $
+// @(#) $Id: AliHLTTPCCAParam.h,v 1.5 2012/08/14 16:30:42 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -16,6 +16,8 @@
 #include "AliHLTTPCCATrackParam.h"
 #include "AliHLTTPCCAParameters.h"
 #include <cstdio>
+#include <vector>
+using std::vector;
 
 namespace std
 {
@@ -57,8 +59,10 @@ class AliHLTTPCCAParam
 
     int ISlice() const { return fISlice;}
     int NRows() const { return fNRows;}
+  int NRows8() const { return fNRows + sfloat_v::Size - (fNRows-1)%sfloat_v::Size - 1;} // NRows8 % sfloat_v::Size == 0 && NRows + sfloat_v::Size > NRows8 >= NRows
+    int NInnerRows() const { return fNInnerRows;}
 // 
-    const float *RowX() const { return fRowX; }
+    const float *RowX() const { return &(fRowX[0]); }
     float RowX( int iRow ) const { return fRowX[iRow]; }
 
     float Alpha() const { return fAlpha;}
@@ -87,7 +91,8 @@ class AliHLTTPCCAParam
 
 
     void SetISlice( int v ) {  fISlice = v;}
-    void SetNRows( int v ) {  fNRows = v;}
+    void SetNRows( int v ) {  fNRows = v; fRowX.resize(fNRows);}
+    void SetNInnerRows( int v ) {  fNInnerRows = v;}
     void SetRowX( int iRow, float v ) {  fRowX[iRow] = v; }
     void SetAlpha( float v ) {  fAlpha = v;}
     void SetDAlpha( float v ) {  fDAlpha = v;}
@@ -142,6 +147,7 @@ class AliHLTTPCCAParam
 
     int fISlice; // slice number
     int fNRows; // number of rows
+    int fNInnerRows; // number of inner rows
 
     float fAlpha, fDAlpha; // slice angle and angular size
     float fCosAlpha, fSinAlpha;// sign and cosine of the slice angle
@@ -159,7 +165,7 @@ class AliHLTTPCCAParam
     float fTrackChiCut; // cut for track Sqrt(Chi2/NDF);
     float fTrackChi2Cut;// cut for track Chi^2/NDF
 
-    float fRowX[AliHLTTPCCAParameters::NumberOfRows];// X-coordinate of rows 
+    vector<float> fRowX;// X-coordinate of rows 
     int   fRecoType;		   // 0=Sti error parametrization; 1=Stv
     float fParamS0Par[2][3][7];    // cluster error parameterization coeficients
     float fPolinomialFieldBz[6];   // field coefficients
@@ -177,19 +183,19 @@ class AliHLTTPCCAParam
     }
     inline ushort_v errorType( short_v row ) const {
       ushort_v type( 14 );
-    type.makeZero( row < AliHLTTPCCAParameters::NumberOfInnerRows );
+    type.setZero( row < AliHLTTPCCAParameters::NumberOfInnerRows );
       type( row > 126 ) = 7;
       return type;
     }
 */
     inline int errorType( int row ) const {
       int type = 0;
-      type = ( row < AliHLTTPCCAParameters::NumberOfInnerRows ? 0 : 1 );
+      type = ( row < fNInnerRows ? 0 : 1 );
       return type;
     }
     inline ushort_v errorType( short_v row ) const {
       ushort_v type( 7 );
-      type.makeZero( row < AliHLTTPCCAParameters::NumberOfInnerRows );
+      type.setZero( row < fNInnerRows );
       //type( row > 126 ) = 7;
       return type;
     }

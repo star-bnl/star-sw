@@ -66,10 +66,10 @@ void AliHLTTPCCAClusterData::readEvent( const AliHLTArray<AliHLTTPCSpacePointDat
 }
 #endif // HAVE_ALIROOT
 
-void AliHLTTPCCAClusterData::readEvent( const AliHLTTPCCAGBHit *hits, int *offset, int numberOfClusters )
+void AliHLTTPCCAClusterData::readEvent( const AliHLTTPCCAGBHit *hits, int *offset, int numberOfClusters, int nRows8 )
 {
-  fNumberOfClusters.reserve( AliHLTTPCCAParameters::NumberOfRows2 );
-  fRowOffset.reserve( AliHLTTPCCAParameters::NumberOfRows2 );
+  fNumberOfClusters.reserve( nRows8 );
+  fRowOffset.reserve( nRows8 );
   fData.reserve( CAMath::Min( 64, numberOfClusters / 64 ) );
 
   fSlice = hits[*offset].ISlice();

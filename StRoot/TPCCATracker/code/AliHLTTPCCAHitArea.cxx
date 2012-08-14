@@ -56,10 +56,10 @@ AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTT
   if ( !invalidMask.isEmpty() ) {
     debugS() << "not all parts of the HitArea are valid: " << mask << std::endl;
 
-    fBZmax.makeZero( invalidMask );
-    fBDY.makeZero( invalidMask );
-    fIndYmin.makeZero( invalidMask );
-    fIz.makeZero( invalidMask );
+    fBZmax.setZero( invalidMask );
+    fBDY.setZero( invalidMask );
+    fIndYmin.setZero( invalidMask );
+    fIz.setZero( invalidMask );
 
     // for given fIz (which is min atm.) get
     fIh.gather( fSlice.FirstHitInBin( fRow ), fIndYmin, mask ); // first and
@@ -130,9 +130,9 @@ bool AliHLTTPCCAHitArea::GetNext( NeighbourData *data )
 
   const sfloat_m valid( data->fValid );
 
-  data->fY.makeZero();
+  data->fY.setZero();
   data->fY.gather( fSlice.HitDataY( fRow ), fIh, valid );
-  data->fZ.makeZero();
+  data->fZ.setZero();
   data->fZ.gather( fSlice.HitDataZ( fRow ), fIh, valid );
 
   data->fLinks = fIh.staticCast<short_v>();

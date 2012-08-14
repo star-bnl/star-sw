@@ -37,26 +37,19 @@ class AliHLTTPCSpacePointData;
 class AliHLTTPCCAClusterData
 {
   public:
-#ifdef HAVE_ALIROOT
-    /**
-     * Construct AliHLTTPCCAClusterData object from AliHLTTPCSpacePointData array.
-     */
-    AliHLTTPCCAClusterData( const AliHLTArray<AliHLTTPCSpacePointData *> &clusters,
-        int numberOfClusters, double ClusterZCut ) { readEvent( clusters, numberOfClusters, ClusterZCut ); }
-#endif // HAVE_ALIROOT
 
     /**
      * Construct AliHLTTPCCAClusterData object from GBHit array.
      */
-    AliHLTTPCCAClusterData( const AliHLTTPCCAGBHit *hits, int *offset, int numberOfClusters ) {
-      readEvent( hits, offset, numberOfClusters );
+  AliHLTTPCCAClusterData( const AliHLTTPCCAGBHit *hits, int *offset, int numberOfClusters, int nRows ) {
+      readEvent( hits, offset, numberOfClusters, nRows );
     }
 
     AliHLTTPCCAClusterData() {}
 
     void readEvent( const AliHLTArray<AliHLTTPCSpacePointData *> &clusters,
         int numberOfClusters, double ClusterZCut );
-    void readEvent( const AliHLTTPCCAGBHit *hits, int *offset, int numberOfClusters );
+    void readEvent( const AliHLTTPCCAGBHit *hits, int *offset, int numberOfClusters, int nRows );
 
     /**
      * "remove" two clusters and "add" a new one, keeping history.

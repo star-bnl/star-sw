@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCATrackParamVector.cxx,v 1.2 2012/08/13 19:35:06 fisyak Exp $
+// $Id: AliHLTTPCCATrackParamVector.cxx,v 1.3 2012/08/14 16:30:42 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -365,7 +365,7 @@ sfloat_v AliHLTTPCCATrackParamVector::ApproximateBetheBloch( const sfloat_v &bet
   sfloat_v ret = _0p000153_beta2 * ( log_5940 + log_beta2_1subBeta2 - beta2 );
   ret( beta2_1subBeta2 > 3.5f*3.5f ) =
     _0p000153_beta2 * ( log_3p5mul5940 + 0.5f * log_beta2_1subBeta2 - beta2 );
-  ret.makeZero( beta2 >= sfloat_v( Vc::One ) );
+  ret.setZero( beta2 >= sfloat_v( Vc::One ) );
   return ret;
 }
 
