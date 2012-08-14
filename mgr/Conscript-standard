@@ -133,10 +133,11 @@ if ($pkg eq "RTS") {
 # Some directories will need extra includes for the RTS DAQ reader
 my @DAQ_pkgs = qw(StDAQMaker StTofHitMaker StTpcHitMaker StEEmcPoolmuEztPanitkin  
 		  StBEMCPlots StBTofHitMaker StMtdHitMaker StPmdReadMaker St_pp2pp_Maker
+		  StTriggerUtilities StFmsTriggerMaker
 		); 
 # But any *Raw* in StRoot/ would have this automatically done / handled
 if ( $pkg =~ m/Raw/ ){
-    print "Found [$pkg] as Raw package\n";
+#    print "Found [$pkg] as Raw package\n";
     push(@DAQ_pkgs,$pkg);
 }
 
@@ -149,7 +150,7 @@ my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src"
 if (!$OnlinePackage) { $OnlinePackage=grep(m/$pkg/,@DAQ_pkgs); }
 
 if ($OnlinePackage) {
-    $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . "#OnlTools" . $main::PATH_SEPARATOR . $CPPPATH;
+    $CPPPATH = $main::PATH_SEPARATOR . "#OnlTools" . $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH;
 #. "/usr/include/libxml2" . $main::PATH_SEPARATOR 
 }
 if ( $pkg eq "OnlinePlots") {
@@ -762,7 +763,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#      "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include";
 	#    print "CPPPATH => $CPPPATH\n";
 	$CXXFLAGS .= " -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics";
-	$CXXFLAGS .= " -Wno-variadic-macros -DVC_COMPILE_LIB"; # flags needed by vc-0.4
+	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
+	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE";}
 	my @srcC = ();
 	foreach my $s (@src) {
 	    #      print "$s\n";
@@ -785,18 +787,26 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #
     }  elsif ( $pkg =~ m/^TPCCATracker$/) {
         $CPPPATH .=
-	    $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/code";
+	  $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/code";
+#	  $main::PATH_SEPARATOR . "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/code" .
+#	    $main::PATH_SEPARATOR . "#" . $Dir . "/code/KFParticle" .  $main::PATH_SEPARATOR . "#" . $Dir . "/code/Performance";
 	#    $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/TBB/include";
 	#    print "CPPPATH => $CPPPATH\n";
 	
-	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
+	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION  -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
+#	my $extraCXXFLAGS = " -DDO_TPCCATRACKER_EFF_PERFORMANCE -DDRAW -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
+#	my $extraCXXFLAGS = " -DDO_TPCCATRACKER_EFF_PERFORMANCE -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
+#	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
 	$extraCXXFLAGS .= " -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function";
 	$extraCXXFLAGS .= " -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1";
+#	$extraCXXFLAGS .= " -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -msse3 -mssse3 -msse4.1 -Wshadow -fno-threadsafe-statics -DTBB_DO_ASSERT=1 -ltr";
 	#    $extraCXXFLAGS .= " -DUSE_TBB "; # uncomment if you do want to use TBB
-	#    $extraCXXFLAGS .= " -DDRAW3"; # uncomment for use TPCCATracker event display
-	#    $extraCXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE"; # uncomment for CA Efficiencies output
+	#	$extraCXXFLAGS .= " -DDRAW3"; # uncomment for use TPCCATracker event display
+	#	$extraCXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE"; # uncomment for CA Efficiencies output
 	$extraCXXFLAGS .= " -DNODEBUG";
 	$CXXFLAGS .= $extraCXXFLAGS;
+	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
+	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE";}
 	# c++ `root-config --ldflags` -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
 	$LIBS = "-lVc";
 	if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
@@ -810,10 +820,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 				  'LIBS'     => $libs,
 				  'DEBUG'    => $DEBUG
 				 );
-	  my @programs = ($DirPath . "/CA.C");
+	  my @programs = glob($Dir . "/*.C");# print "programs: @programs\n";
 	  foreach my $progD (@programs) {
 	    my $prog = File::Basename::basename($progD,".C");
-	    Program      $envTPCCA $prog, ("#" . $progD);
+	    next if $prog eq 'MakeSettings';
+	    Program      $envTPCCA $prog, ($prog . ".C");
 	    Install $envTPCCA $BIN, $prog;
 	  }
 	}
@@ -1297,13 +1308,11 @@ if ( $#src > -1 ) {
 	my $ListCA = join('|',@ListCA);
 	@PlainObj = ();
 	@Obj = ();
-#	print "$#src => @src \n";
 	my @o;
 	foreach my $s (@src) {
 	  $o[0] = $s;
 	  if ($s !~ m/\.o$/) {@o = Objects $env2 ($s);}
 	  push  @Obj, $o[0];
-#	  print "$s => $src[$i]\n";
 	  if ($s =~ m/$ListCA/) {@o = Objects $envCA ($s); push @PlainObj, $o[0];}
 	  else                  {push @PlainObj, $o[0];}
 	}
@@ -1311,10 +1320,11 @@ if ( $#src > -1 ) {
 #	print "$#src => @src \n";
 #	print "$#PlainObj => @PlainObj \n";
 	
-	$envPlain = $env2->clone('LIBPATH'  => $LIB, # . $main::PATH_SEPARATOR . $env->{Packages}->{ROOT}->{LIBDIR},
+	$envPlain = $env2->clone('LIBPATH'  => $LIB, 
 				 'LIBS'     => "-lTPCCATracker ");# . $env->{Packages}->{ROOT}->{LIBS} . " -lEG");
       }
     }
+#________________________________________________________________________________
     if ($pkg =~ m/^StGenericVertexMaker$/) { # For Stv no Sti 
       $SO_PKG_PLAIN = $pkg . "NoSti";
       printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
@@ -1332,6 +1342,37 @@ if ( $#src > -1 ) {
 #      print "$#src => @src \n";
 #      print "$#PlainObj => @PlainObj \n";
     }
+#    if ($pkg =~ m/^StMuDSTMaker$/) { # MuDst without Strange MuDst
+#	$SO_PKG_PLAIN = $pkg . "NoStrange";
+#	printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+#	$SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+#	$envPlain = $env2->clone('SUFOBJ'   => "NoStrange.o",
+#				 'CXXFLAGS' => $CXXFLAGS . " -D__NO_STRANGE_MUDST__");
+#	@PlainObj = @src;
+##	push @PlainObj, "StMuDSTMaker_Cint.cxx";
+#    }
+#________________________________________________________________________________
+#    if ($pkg =~ m/^StMuDSTMaker$/) { # MuDst without makers
+#      $SO_PKG_PLAIN = "StMuDst";
+#      printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
+#      $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
+#      @PlainObj = ();
+#      @Obj = Objects $env2  (@src);
+##      print "$#src => @src \n";
+##      print "$#Obj => @Obj \n";
+#      foreach my $o (@Obj) {
+##	print "o ++++++> $o\n";
+#	if ($o =~ m/EZTREE/) {next;}
+#	my $oo = File::Basename::basename($o); 
+#	if ($oo =~ m/Maker/) {next;} 
+#	if ($oo =~ m/SchedulerExample/) {next;}
+#	if ($oo =~ m/Cint/) {next;}
+#	push @PlainObj, $o;
+#      }
+#      @src = @Obj;
+##      print "$#src => @src \n";
+##      print "$#PlainObj => @PlainObj \n";
+#    }
     LinkedModule $env2 $SO_PKG, @src;
     Install $env2 $LIB,         $SO_PKG;
     my $lib = $LIB . "/" . $SO_PKG;
