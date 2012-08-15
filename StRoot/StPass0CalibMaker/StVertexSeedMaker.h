@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.16 2012/08/15 22:11:06 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.17 2012/08/15 22:16:53 genevb Exp $
  * \brief BeamLine Constraint calibration base class
  *
  * StVertexSeedMaker calculates mean primary vertex positions from
@@ -50,10 +50,10 @@
  *   <tr><td>  9,10 </td><td> TPC CM crossers     </td><td>     3     </td></tr>
  *   </table>
  *   ...where a cap at N means values larger than N are recorded as N.<br><br>
- *   Using TTree::Draw() methods allows the bit-shifting operator in cuts:<br>
+ *   Using TTree::Draw() methods allows the bit-shifting operator in selection cuts:<br>
  *   <code> resNtuple.Draw("x","((detmap>>6)&7)==7"); </code><br>
- *   ...but reserves <code> >> </code> for histogram direction in the selection.
- *   Alternatively, one can see the BTOF matches via:<br>
+ *   While <code> >> </code> is reserved for histogram (re)direction in the
+ *   drawn variables expression, one can alternatively draw the BTOF matches via:<br>
  *   <code> resNtuple.Draw("(detmap&(7*8*8))/(8*8)"); </code>
  *
  */
@@ -102,7 +102,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.16 2012/08/15 22:11:06 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.17 2012/08/15 22:16:53 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -184,8 +184,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.16 2012/08/15 22:11:06 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.17 2012/08/15 22:16:53 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.17  2012/08/15 22:16:53  genevb
+// Re-worded documentation
+//
 // Revision 1.16  2012/08/15 22:11:06  genevb
 // Improved doxygen-ready documentation
 //
