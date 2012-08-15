@@ -133,8 +133,8 @@ if ($pkg eq "RTS") {
 # Some directories will need extra includes for the RTS DAQ reader
 my @DAQ_pkgs = qw(StDAQMaker StTofHitMaker StTpcHitMaker StEEmcPoolmuEztPanitkin  
 		  StBEMCPlots StBTofHitMaker StMtdHitMaker StPmdReadMaker St_pp2pp_Maker
-		  StTriggerUtilities StFmsTriggerMaker
 		); 
+#		  StTriggerUtilities StFmsTriggerMaker
 # But any *Raw* in StRoot/ would have this automatically done / handled
 if ( $pkg =~ m/Raw/ ){
 #    print "Found [$pkg] as Raw package\n";
