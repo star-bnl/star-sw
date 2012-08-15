@@ -1297,8 +1297,8 @@ if ( $#src > -1 ) {
       $env2 = $envg;
     }
     if ($pkg =~ m/^Sti$/) { # For use CATracker
-      if (  -e "StRoot/TPCCATracker" && 
-	    ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3))  	){
+      if (  -e "StRoot/TPCCATracker" ) {
+#	    ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3))  	){
 	$SO_PKG_PLAIN = $pkg . "CA";
 	printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
 	$SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
