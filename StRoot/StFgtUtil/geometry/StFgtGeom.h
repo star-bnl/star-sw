@@ -225,6 +225,15 @@ class StFgtGeom
         static Bool_t mReverseNaiveMappingValid;
 	static Int_t mReverseNaiveMapping[ 2*kFgtNumStrips ];
         static void makeReverseNaiveMappingValid();
+
+	
+     private: 
+
+	//  Calculates coordinates of strip in global coordinate system
+        //  Units are in cm andradians, depending on the layer.
+        static Int_t computeGlobalPhysicalCoordinate(Short_t & quadrant, Char_t & layer,
+                                                     Double_t & ordinate, Double_t & lowerSpan, 
+                                                     Double_t & upperSpan, Short_t & strip);
 };
 
 inline Int_t StFgtGeom::getElectIdFromElecCoord
@@ -282,8 +291,11 @@ inline Int_t StFgtGeom::getNaivePhysCoordFromElecCoord
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.43 2012/05/11 19:45:02 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.44 2012/08/15 18:02:59 rfatemi Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.44  2012/08/15 18:02:59  rfatemi
+ *  Bug fix in getGlobalPhysicalCoordinate by pnord, computation now done by computeGlobalPhysicalCoordinate
+ *
  *  Revision 1.43  2012/05/11 19:45:02  rfatemi
  *  added getGlobalPhysicalCoordinate
  *
