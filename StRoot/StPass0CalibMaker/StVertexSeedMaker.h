@@ -1,12 +1,61 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.15 2012/08/14 23:56:06 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.16 2012/08/15 22:11:06 genevb Exp $
+ * \brief BeamLine Constraint calibration base class
  *
- * calculates mean primary vertex positions from
- * suitable events to use as seeds in finding better       
- * primary vertex positions (helpful for low               
- * multiplicity events like pp collisions)                 
+ * StVertexSeedMaker calculates mean primary vertex positions from
+ * suitable events to use as seeds in finding better
+ * primary vertex positions (helpful for low
+ * multiplicity events like pp collisions).
+ *
+ * More information on the BeamLine Constraint calibration can be found here:
+ * http://drupal.star.bnl.gov/STAR/comp/calib/BeamLine
+ *
+ * If sufficient statistics exist, a file called vertexSeed.DDDDDDD.TTTTTT.C
+ * will be written out (preferentially to a StarDb/Calibrations/rhic subdirectory,
+ * otherwise the current directory) containing the calibration results, where
+ * DDDDDDDD.TTTTTT is a date/timestamp associated with the first event processed.
+ * When aggregating (see the macro AggregateVtxSeed.C),
+ * the date/timestamp representing the start of a fill will be used.
+ *
+ * Relevant information for vertices used in the calibration
+ * is stored in an ntuple in a file called vertexseedhist.DDDDDDDD.TTTTTT.ROOT,
+ * location and date/timestamp as noted for the .C file, and the suffix
+ * is capitalized to avoid being read in automatically by running jobs. The
+ * ntuple file will be generated even if the .C file is not, and also contains
+ * some basic histograms of the data.
+ *
+ * The ntuple is called resNtuple and includes the following quantities
+ * for each vertex:
+ * - event  : serial ID number of the event in which the vertex was found
+ * - run    : run in which the event was acquired
+ * - fill   : collider fill in which the run was acquired
+ * - zdc    : ZDC coincidence rate at the time the event was acquired
+ * - trig   : an offline trigger ID which the event satisfies
+ *   (though an event may satisfy more than one, only one is stored)
+ * - x,y,z  : coordinates of the vertex position
+ * - ex,ey  : uncertainties on x,y
+ * - rank   : ranking assigned to the vertex by the vertex-finder used
+ * - mult   : number of daughter tracks for the vertex
+ * - i/otpc : bitmaps of inner/outer TPC sectors where daughter tracks have hits
+ *   (bits 0-23 represent sectors 1-24)
+ * - detmap : packed information on daughter tracks matched in detectors
+ *   (the number of matched tracks is always a subset of mult)...
+ *   <table>
+ *   <tr><th> bits  </th><th> store the number of </th><th> capped at </th></tr>
+ *   <tr><td> 0,1,2 </td><td> BEMC matches        </td><td>     7     </td></tr>
+ *   <tr><td> 3,4,5 </td><td> EEMC matches        </td><td>     7     </td></tr>
+ *   <tr><td> 6,7,8 </td><td> BTOF matches        </td><td>     7     </td></tr>
+ *   <tr><td>  9,10 </td><td> TPC CM crossers     </td><td>     3     </td></tr>
+ *   </table>
+ *   ...where a cap at N means values larger than N are recorded as N.<br><br>
+ *   Using TTree::Draw() methods allows the bit-shifting operator in cuts:<br>
+ *   <code> resNtuple.Draw("x","((detmap>>6)&7)==7"); </code><br>
+ *   ...but reserves <code> >> </code> for histogram direction in the selection.
+ *   Alternatively, one can see the BTOF matches via:<br>
+ *   <code> resNtuple.Draw("(detmap&(7*8*8))/(8*8)"); </code>
+ *
  */
 
 
@@ -53,7 +102,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.15 2012/08/14 23:56:06 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.16 2012/08/15 22:11:06 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -135,8 +184,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.15 2012/08/14 23:56:06 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.16 2012/08/15 22:11:06 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.16  2012/08/15 22:11:06  genevb
+// Improved doxygen-ready documentation
+//
 // Revision 1.15  2012/08/14 23:56:06  genevb
 // detmap now includes BEMC+EEMC+BTOF+CM, added mean zdc to log output
 //
