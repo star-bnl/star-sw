@@ -396,6 +396,39 @@ Int_t StFgtGeom::getPhysicalCoordinate
 }
 
 
+//  Calculates coordinates of strip in global coordinate system
+//  Units are in cm andradians, depending on the layer.
+Int_t StFgtGeom::computeGlobalPhysicalCoordinate
+(
+    Short_t & quadrant, Char_t & layer,
+    Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan, Short_t & strip
+)
+{
+    switch (layer) {
+	case ('P') :
+            ordinate =
+                mStrips[kFgtNumStrips + strip].ordinate + StFgtGeom::phiQuadXaxis(quadrant);
+            lowerSpan =
+                mStrips[kFgtNumStrips + strip].lowerSpan;
+            upperSpan =
+                mStrips[kFgtNumStrips + strip].upperSpan;
+            break;
+	case ('R') :
+            ordinate =
+                mStrips[strip].ordinate;
+            lowerSpan =
+                mStrips[strip].lowerSpan + StFgtGeom::phiQuadXaxis(quadrant);
+            upperSpan =
+                mStrips[strip].upperSpan + StFgtGeom::phiQuadXaxis(quadrant);
+            break;
+        default:
+	    return kFgtError;
+	    break;
+    }
+
+    return 0;
+}
+
 Int_t StFgtGeom::getGlobalPhysicalCoordinate
 (
     Int_t geoId,
@@ -403,6 +436,10 @@ Int_t StFgtGeom::getGlobalPhysicalCoordinate
     Double_t & ordinate, Double_t & lowerSpan, Double_t & upperSpan
 )
 {
+  Short_t strip;
+ 
+  decodeGeoId( geoId, disc, quadrant, layer, strip );
+
 
   if ( geoId < 0 || geoId >= kFgtNumGeoIds )
     {
@@ -417,32 +454,8 @@ Int_t StFgtGeom::getGlobalPhysicalCoordinate
 	return kFgtError;
     }
 
-    Short_t strip;
-
-    decodeGeoId( geoId, disc, quadrant, layer, strip );
-    ordinate =
-        mStrips[
-            (layer == 'P') * kFgtNumStrips + strip
-            ].ordinate;
-    lowerSpan =
-    mStrips[
-            (layer == 'P') * kFgtNumStrips + strip
-            ].lowerSpan;
-    upperSpan =
-        mStrips[
-            (layer == 'P') * kFgtNumStrips + strip
-            ].upperSpan; 
-
-
-    
-    if (layer == 'P')
-      {
-	upperSpan-=StFgtGeom::phiQuadXaxis(quadrant);
-	lowerSpan-=StFgtGeom::phiQuadXaxis(quadrant);
-      }
-
-  
-    return 0;
+    return computeGlobalPhysicalCoordinate( quadrant, layer,
+                                            ordinate, lowerSpan, upperSpan, strip);
 }
 
 //  The ordinate, lowerSpan and upperSpan are all in centimeters or
@@ -469,26 +482,9 @@ Int_t StFgtGeom::getGlobalPhysicalCoordinate
 	return kFgtError;
     }
 
-    ordinate =
-        mStrips[
-            (layer == 'P') * kFgtNumStrips + strip
-            ].ordinate;
-    lowerSpan =
-        mStrips[
-            (layer == 'P') * kFgtNumStrips + strip
-            ].lowerSpan;
-    upperSpan =
-        mStrips[
-            (layer == 'P') * kFgtNumStrips + strip
-            ].upperSpan;
+    return computeGlobalPhysicalCoordinate( quadrant, layer,
+                                            ordinate, lowerSpan, upperSpan, strip);
 
-    if (layer == 'P')
-      {
-	upperSpan-=StFgtGeom::phiQuadXaxis(quadrant);
-	lowerSpan-=StFgtGeom::phiQuadXaxis(quadrant);
-      }
-
-    return 0;
 }
 
 
@@ -4152,8 +4148,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.33 2012/05/11 19:45:18 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.34 2012/08/15 18:03:36 rfatemi Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.34  2012/08/15 18:03:36  rfatemi
+ *  Bug fix for getGlobalPhysicalCoordinate by pnord, computation done in computeGlobalPhysicalCoordinate
+ *
  *  Revision 1.33  2012/05/11 19:45:18  rfatemi
  *  added getGlobalPhysicalCoordinate
  *
