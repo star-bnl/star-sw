@@ -64,7 +64,7 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
   }
   StRunInfo* runInfo = event->runInfo();
   if (runInfo) {
-    zdc = (float) (runInfo->zdcWestRate() + runInfo->zdcEastRate());
+    zdc = (float) (runInfo->zdcCoincidenceRate());
     fill = (int) (runInfo->beamFillNumber(blue));
     run = runInfo->runId();
   }
@@ -130,14 +130,17 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.7 2012/08/14 23:56:06 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.8 2012/08/15 00:08:09 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.7 2012/08/14 23:56:06 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.8 2012/08/15 00:08:09 genevb Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.8  2012/08/15 00:08:09  genevb
+// ZDC sum rate -> ZDC coincidence rate
+//
 // Revision 1.7  2012/08/14 23:56:06  genevb
 // detmap now includes BEMC+EEMC+BTOF+CM, added mean zdc to log output
 //
