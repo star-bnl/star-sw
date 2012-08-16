@@ -295,7 +295,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.49 2012/08/15 22:11:06 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.50 2012/08/16 05:37:07 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -613,6 +613,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
           addVert(vals[1],vals[2],vals[3],vals[4],vals[13],vals[14]);
         else
           addVert(vals[1],vals[2],vals[3],vals[4],0.,0.);
+        sumzdc += vals[8];
       } else {
         LOG_INFO << "Invalid trigger: " << tid << endm;
       }
@@ -628,8 +629,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.49 2012/08/15 22:11:06 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.50 2012/08/16 05:37:07 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.50  2012/08/16 05:37:07  genevb
+// Missing mean ZDC for aggregation
+//
 // Revision 1.49  2012/08/15 22:11:06  genevb
 // Improved doxygen-ready documentation
 //
