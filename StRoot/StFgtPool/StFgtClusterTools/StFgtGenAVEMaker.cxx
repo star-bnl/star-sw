@@ -321,8 +321,8 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
   //These variables will store the APV number at which the relevant stuff happens for the overall quad.                                                                                                    
   Int_t APVmaxRCharge=-9999;
   Int_t APVmaxPhiCharge=-9999;
-  Int_t APVmaxRChargeUncert=-9999;
-  Int_t APVmaxPhiChargeUncert=-9999;
+  //Int_t APVmaxRChargeUncert=-9999;
+  //Int_t APVmaxPhiChargeUncert=-9999;
   Int_t APVmaxRInd=-1;
   Int_t APVmaxPInd=-1;
   Int_t APVmaxRTb=-1;
@@ -344,7 +344,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
   
   
   
-  for(int i=0;i<  pStrips[iD*4+iq].size();i++)
+  for(unsigned int i=0;i<  pStrips[iD*4+iq].size();i++)
     {
       Int_t geoId=pStrips[iD*4+iq][i].geoId;
       generalStrip& pStrip=pStrips[iD*4+iq][i];
@@ -356,7 +356,7 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
       
       StFgtGeom::getPhysicalCoordinate(geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
       StFgtGeom::decodeGeoId(geoId,disc, quadrant, layer, strip);
-      char buffer[100];
+      //char buffer[100];
       //      if(layer=='P' && disc==iD && iq==quadrant)
       //	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
       if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<0.7) || (layer=='P' && fabs(ordinate-phi)<0.03) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.03)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.03)))
@@ -611,16 +611,16 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
   if(partOfClusterP)
     {
       cout <<" part of p cluster " << endl;
-	    float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
-	    float chi2Ndf;
-	    float amp;
-	    float t0;
-	    ///do the fitting...
-	    if(partOfClusterR)
-	      fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),&(pStrips[iD*4+iq][maxRInd]),&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
-	    else
-	      fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),0,&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
-	    APVfitChi2P[iD*40+APVmaxPAdc]->Fill(chi2Ndf);
+      //float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
+      float chi2Ndf;
+      float amp;
+      float t0;
+      ///do the fitting...
+      if(partOfClusterR)
+	fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),&(pStrips[iD*4+iq][maxRInd]),&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
+      else
+	fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),0,&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
+      APVfitChi2P[iD*40+APVmaxPAdc]->Fill(chi2Ndf);
 
       firstTbSigTrackClusterP[iD*4+iq]->Fill(firstTbSigP);
       maxAdcTrackClusterP[iD*4+iq]->Fill(maxPAdc);
@@ -646,16 +646,16 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
   if(partOfClusterR)
     {
       cout <<" part of R cluster " << endl;
-	    float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
-	    float chi2Ndf;
-	    float amp;
-	    float t0;
-	    ///do the fitting...
-	    if(partOfClusterP)
-	      fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),&pStrips[iD*4+iq][maxPInd],&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
-	    else
-	      fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),0,&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
-	    APVfitChi2R[iD*40+APVmaxRAdc]->Fill(chi2Ndf);
+      //float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
+      float chi2Ndf;
+      float amp;
+      float t0;
+      ///do the fitting...
+      if(partOfClusterP)
+	fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),&pStrips[iD*4+iq][maxPInd],&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
+      else
+	fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),0,&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
+      APVfitChi2R[iD*40+APVmaxRAdc]->Fill(chi2Ndf);
 
       firstTbSigTrackClusterR[iD*4+iq]->Fill(firstTbSigR);
       maxTbTrackClusterR[iD*4+iq]->Fill(maxRTb);
@@ -692,7 +692,7 @@ Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t i
       Int_t maxPInd=-1;
       Bool_t validPhiPulse=false;
       Bool_t validRPulse=false;
-      for(int i=0;i<  pStrips[iD*4+iq].size();i++)
+      for(unsigned int i=0;i<  pStrips[iD*4+iq].size();i++)
 	{
 	  Int_t geoId=pStrips[iD*4+iq][i].geoId;
 	  generalStrip& pStrip=pStrips[iD*4+iq][i];
@@ -701,7 +701,6 @@ Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t i
 	  Double_t ordinate, lowerSpan, upperSpan;//, prvOrdinate;
 	  StFgtGeom::getPhysicalCoordinate(geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
 	  StFgtGeom::decodeGeoId(geoId,disc, quadrant, layer, strip);
-	  char buffer[100];
 	  //      if(layer=='P' && disc==iD && iq==quadrant)
 	  //	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
 	  if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<0.7) || (layer=='P' && fabs(ordinate-phi)<0.04) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.04)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.04)))
@@ -748,11 +747,11 @@ Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t i
 	  /////add neighbouring strips
 	  if(maxRInd>0)
 	    maxRCharge+=pStrips[iD*4+iq][maxRInd-1].charge;
-	  if(maxRInd< (pStrips[iD*4+iq].size()-1))
+	  if(maxRInd< (int)(pStrips[iD*4+iq].size()-1))
 	    maxRCharge+=pStrips[iD*4+iq][maxRInd+1].charge;
 	  if(maxPInd>0)
 	    maxPhiCharge+=pStrips[iD*4+iq][maxPInd-1].charge;
-	  if(maxPInd< (pStrips[iD*4+iq].size()-1))
+	  if(maxPInd< (int)(pStrips[iD*4+iq].size()-1))
 	    maxPhiCharge+=pStrips[iD*4+iq][maxPInd+1].charge;
 	  ///////////////////////////////////
 
@@ -874,7 +873,7 @@ Short_t StFgtGenAVEMaker::getQuadFromCoo(Double_t x, Double_t y)
 Bool_t StFgtGenAVEMaker::printArea1D(Int_t iD,Int_t iq, Int_t centerGeoId)
 {
   
-  for(int i=0;i<pStrips[iD*4+iq].size();i++)
+  for(unsigned int i=0;i<pStrips[iD*4+iq].size();i++)
     {
       Int_t geoId=pStrips[iD*4+iq][i].geoId;
       generalStrip& pStrip=pStrips[iD*4+iq][i];
@@ -955,7 +954,7 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
   Int_t counterR=0;
   Int_t counterP=0;
 
-  for(int i=0;i<pStrips[iD*4+iq].size();i++)
+  for(unsigned int i=0;i<pStrips[iD*4+iq].size();i++)
     {
       Int_t geoId=pStrips[iD*4+iq][i].geoId;
       generalStrip& pStrip=pStrips[iD*4+iq][i];
@@ -1048,7 +1047,7 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::getChargeRatio(Float_t r, Float_t phi,
       Double_t maxPhiCharge=-9999;
       Int_t maxRInd=-1;
       Int_t maxPInd=-1;
-  for(int i=0;i<  pStrips[iD*4+iq].size();i++)
+  for(unsigned int i=0;i<  pStrips[iD*4+iq].size();i++)
     {
       Int_t geoId=pStrips[iD*4+iq][i].geoId;
       generalStrip& pStrip=pStrips[iD*4+iq][i];
@@ -1057,7 +1056,6 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::getChargeRatio(Float_t r, Float_t phi,
       Double_t ordinate, lowerSpan, upperSpan;//, prvOrdinate;
       StFgtGeom::getPhysicalCoordinate(geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
       StFgtGeom::decodeGeoId(geoId,disc, quadrant, layer, strip);
-      char buffer[100];
       //      if(layer=='P' && disc==iD && iq==quadrant)
       //	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
       if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<0.7) || (layer=='P' && fabs(ordinate-phi)<0.03) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.03)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.03 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.03)))
@@ -1087,11 +1085,11 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::getChargeRatio(Float_t r, Float_t phi,
 	  ////might pick up phi strips... oh wlll
 	  if(maxRInd>0)
 	    maxRCharge+=pStrips[iD*4+iq][maxRInd-1].charge;
-	  if(maxRInd< (pStrips[iD*4+iq].size()-1))
+	  if(maxRInd< (int)(pStrips[iD*4+iq].size()-1))
 	    maxRCharge+=pStrips[iD*4+iq][maxRInd+1].charge;
 	  if(maxPInd>0)
 	    maxPhiCharge+=pStrips[iD*4+iq][maxPInd-1].charge;
-	  if(maxPInd< (pStrips[iD*4+iq].size()-1))
+	  if(maxPInd< (int)(pStrips[iD*4+iq].size()-1))
 	    maxPhiCharge+=pStrips[iD*4+iq][maxPInd+1].charge;
 
 	  return pair<Double_t,Double_t>(maxRCharge,maxPhiCharge);
@@ -1280,9 +1278,9 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     ///         mLineVec.pop_back();
 
     //  cout <<"get track9" <<endl;
-    Double_t zIpExpX0=0;//x(D6Pos-(xD6/xD1)*D1Pos)*1/(1-xD6/xD1);
+    //Double_t zIpExpX0=0;//x(D6Pos-(xD6/xD1)*D1Pos)*1/(1-xD6/xD1);
 			  ///at y = 0
-    Double_t zIpExpY0=0;//(D6Pos-yD6/yD1*D1Pos)*1/(1-yD6/yD1);
+    //Double_t zIpExpY0=0;//(D6Pos-yD6/yD1*D1Pos)*1/(1-yD6/yD1);
 
     for(vector<AVPoint>::iterator iter = points.begin(); iter != points.end(); ++iter ){
       //           cout << "--- Location at each disc at z: " << iter->z << " "
@@ -1506,7 +1504,7 @@ Int_t StFgtGenAVEMaker::Make()
 
       for(int iq=0;iq<4;iq++)
 	{
-	  for(int i=0;i<  pStrips[iD*4+iq].size();i++)
+	  for(unsigned int i=0;i<  pStrips[iD*4+iq].size();i++)
 	    {
 	      generalStrip& pStrip=pStrips[iD*4+iq][i];
 	      if(pStrip.seedType==kFgtSeedType1|| pStrip.seedType==kFgtSeedType2 || pStrip.seedType==kFgtSeedType3)
@@ -1546,8 +1544,8 @@ Int_t StFgtGenAVEMaker::Make()
       //      cout << "ratio for disk: " << i << " is " << ratio <<" disk has: " << tmpClusterCol->getHitVec().size() << "hits" <<endl;
   //    }
 
-  vector<generalCluster> &hitVecD1=*(pClusters[0]);
-  vector<generalCluster> &hitVecD6=*(pClusters[5]);
+  //vector<generalCluster> &hitVecD1=*(pClusters[0]);
+  //vector<generalCluster> &hitVecD6=*(pClusters[5]);
 
 
   for(int iD=0;iD<6;iD++)
@@ -1582,7 +1580,7 @@ Int_t StFgtGenAVEMaker::Make()
 
       for(int iq=0;iq<4;iq++)
 	{
-	  for(int i=0;i<  pStrips[iD*4+iq].size();i++)
+	  for(unsigned int i=0;i<  pStrips[iD*4+iq].size();i++)
 	    {
 	      if(pStrips[iD*4+iq][i].charge>1000)
 		{
@@ -1636,8 +1634,8 @@ Int_t StFgtGenAVEMaker::Make()
 	      if(useChargeMatch && !hitIterD1->hasMatch)
 		continue;
 	      Short_t quadP=hitIterD1->quad;
-	      Short_t disc=hitIterD1->disc;
-	      Short_t strip=hitIterD1->strip;
+	      //Short_t disc=hitIterD1->disc;
+	      //Short_t strip=hitIterD1->strip;
 	      Char_t layer=hitIterD1->layer;
 	      
 	      Double_t seed1ChargePhi=hitIterD1->CHARGE_MEASURE;
@@ -1661,8 +1659,8 @@ Int_t StFgtGenAVEMaker::Make()
 
 		  Int_t geoIdSeed2=hitIterD6->centralStripGeoId;
 		  Short_t quadP_2=hitIterD6->quad;
-		  Short_t disc=hitIterD6->disc;
-		  Short_t strip=hitIterD6->strip;
+		  //Short_t disc=hitIterD6->disc;
+		  //Short_t strip=hitIterD6->strip;
 		  Char_t layer=hitIterD6->layer;
 		  Double_t seed2ChargePhi=hitIterD6->CHARGE_MEASURE;
 		  Double_t seed2SizePhi=hitIterD6->clusterSize;
@@ -1680,8 +1678,8 @@ Int_t StFgtGenAVEMaker::Make()
 			continue;
 		      Int_t geoIdSeed1R=hitIterD1R->centralStripGeoId;
 		      Short_t quadR=hitIterD1R->quad;
-		      Short_t disc=hitIterD1R->disc;
-		      Short_t strip=hitIterD1R->strip;
+		      //Short_t disc=hitIterD1R->disc;
+		      //Short_t strip=hitIterD1R->strip;
 		      Char_t layer=hitIterD1R->layer;
 		      Double_t seed1ChargeR=hitIterD1R->CHARGE_MEASURE;
 		      Double_t seed1SizeR=hitIterD1R->clusterSize;
@@ -1707,8 +1705,8 @@ Int_t StFgtGenAVEMaker::Make()
 			    continue;
 			  Int_t geoIdSeed2R=hitIterD6R->centralStripGeoId;
 			  Short_t quadR_2=hitIterD6R->quad;
-			  Short_t disc=hitIterD6R->disc;
-			  Short_t strip=hitIterD6R->strip;
+			  //Short_t disc=hitIterD6R->disc;
+			  //Short_t strip=hitIterD6R->strip;
 			  Char_t layer=hitIterD6R->layer;
 			  Double_t seed2ChargeR=hitIterD6R->CHARGE_MEASURE;
 
@@ -1762,12 +1760,12 @@ Int_t StFgtGenAVEMaker::Make()
 			  int iFoundR=0;
 			  //    cout <<"ave make4 " <<endl;
 			  //zarm is d6 position - D1
-			  Double_t xIpExp=xD1+(xD6-xD1)*(-D1Pos)/zArm;
-			  Double_t yIpExp=yD1+(yD6-yD1)*(-D1Pos)/zArm;
+			  //Double_t xIpExp=xD1+(xD6-xD1)*(-D1Pos)/zArm;
+			  //Double_t yIpExp=yD1+(yD6-yD1)*(-D1Pos)/zArm;
 			  ////at x = 0
-			  Double_t zIpExpX0=(D6Pos-(xD6/xD1)*D1Pos)*1/(1-xD6/xD1);
+			  //Double_t zIpExpX0=(D6Pos-(xD6/xD1)*D1Pos)*1/(1-xD6/xD1);
 			  ///at y = 0
-			  Double_t zIpExpY0=(D6Pos-yD6/yD1*D1Pos)*1/(1-yD6/yD1);
+			  //Double_t zIpExpY0=(D6Pos-yD6/yD1*D1Pos)*1/(1-yD6/yD1);
 			  //		  cout <<" 
 			  //now find other points
 			  vector<generalCluster>::iterator iterClosestPhi;
@@ -1814,7 +1812,7 @@ Int_t StFgtGenAVEMaker::Make()
 				  if(fabs(phi-phiD6)>MAX_PHI_DIFF)
 				    continue;
 
-				  Double_t phiCharge=hitIter->CHARGE_MEASURE;
+				  //Double_t phiCharge=hitIter->CHARGE_MEASURE;
 
 				  //				  								  Double_t phiCharge=hitIter->maxAdc;
 				  //			  Int_t clusterSizePhi=hitIter->clusterSize;
@@ -2127,11 +2125,11 @@ Int_t StFgtGenAVEMaker::Finish(){
   TFile *fClu = new TFile(buffer,"recreate");
   fClu->cd();
 
-  for(int i=0;i<v_hClusP.size();i++)
+  for(unsigned int i=0;i<v_hClusP.size();i++)
     {
       (v_hClusP[i])->Write();
     }
-  for(int i=0;i<v_hClusR.size();i++)
+  for(unsigned int i=0;i<v_hClusR.size();i++)
     {
       (v_hClusR[i])->Write();
     }
