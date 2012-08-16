@@ -758,78 +758,78 @@ ComponentCST::ElectricField(
           nodes[elements[imap].emap[7]].v * (1 - t1) * (1 + t2) * (1 + t3)) / 8.;
   ex = (1. / 8.) * (
           nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
-                                             (1 - t1) * -1 * (1 - t3) * inv_jac[1][0] +
-                                             (1 - t1) * (1 - t2) * -1 * inv_jac[2][0]) +
+                                             (1 - t1) * -1 * (1 - t3) * inv_jac[0][1] +
+                                             (1 - t1) * (1 - t2) * -1 * inv_jac[0][2]) +
           nodes[elements[imap].emap[1]].v * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
-                                             (1 + t1) * -1 * (1 - t3) * inv_jac[1][0] +
-                                             (1 + t1) * (1 - t2) * -1 * inv_jac[2][0]) +
+                                             (1 + t1) * -1 * (1 - t3) * inv_jac[0][1] +
+                                             (1 + t1) * (1 - t2) * -1 * inv_jac[0][2]) +
           nodes[elements[imap].emap[2]].v * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][0] +
-                                             (1 + t1) * +1 * (1 - t3) * inv_jac[1][0] +
-                                             (1 + t1) * (1 + t2) * -1 * inv_jac[2][0]) +
+                                             (1 + t1) * +1 * (1 - t3) * inv_jac[0][1] +
+                                             (1 + t1) * (1 + t2) * -1 * inv_jac[0][2]) +
           nodes[elements[imap].emap[3]].v * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][0] +
-                                             (1 - t1) * +1 * (1 - t3) * inv_jac[1][0] +
-                                             (1 - t1) * (1 + t2) * -1 * inv_jac[2][0]) +
+                                             (1 - t1) * +1 * (1 - t3) * inv_jac[0][1] +
+                                             (1 - t1) * (1 + t2) * -1 * inv_jac[0][2]) +
           nodes[elements[imap].emap[4]].v * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][0] +
-                                             (1 - t1) * -1 * (1 + t3) * inv_jac[1][0] +
-                                             (1 - t1) * (1 - t2) * +1 * inv_jac[2][0]) +
+                                             (1 - t1) * -1 * (1 + t3) * inv_jac[0][1] +
+                                             (1 - t1) * (1 - t2) * +1 * inv_jac[0][2]) +
           nodes[elements[imap].emap[5]].v * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][0] +
-                                             (1 + t1) * -1 * (1 + t3) * inv_jac[1][0] +
-                                             (1 + t1) * (1 - t2) * +1 * inv_jac[2][0]) +
+                                             (1 + t1) * -1 * (1 + t3) * inv_jac[0][1] +
+                                             (1 + t1) * (1 - t2) * +1 * inv_jac[0][2]) +
           nodes[elements[imap].emap[6]].v * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][0] +
-                                             (1 + t1) * +1 * (1 + t3) * inv_jac[1][0] +
-                                             (1 + t1) * (1 + t2) * +1 * inv_jac[2][0]) +
+                                             (1 + t1) * +1 * (1 + t3) * inv_jac[0][1] +
+                                             (1 + t1) * (1 + t2) * +1 * inv_jac[0][2]) +
           nodes[elements[imap].emap[7]].v * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][0] +
-                                             (1 - t1) * +1 * (1 + t3) * inv_jac[1][0] +
-                                             (1 - t1) * (1 + t2) * +1 * inv_jac[2][0]));
+                                             (1 - t1) * +1 * (1 + t3) * inv_jac[0][1] +
+                                             (1 - t1) * (1 + t2) * +1 * inv_jac[0][2]));
   ey = (1. / 8.) * (
-          nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][1] +
+          nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[1][0] +
                                              (1 - t1) * -1 * (1 - t3) * inv_jac[1][1] +
-                                             (1 - t1) * (1 - t2) * -1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[1]].v * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][1] +
+                                             (1 - t1) * (1 - t2) * -1 * inv_jac[1][2]) +
+          nodes[elements[imap].emap[1]].v * (+1 * (1 - t2) * (1 - t3) * inv_jac[1][0] +
                                              (1 + t1) * -1 * (1 - t3) * inv_jac[1][1] +
-                                             (1 + t1) * (1 - t2) * -1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[2]].v * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][1] +
+                                             (1 + t1) * (1 - t2) * -1 * inv_jac[1][2]) +
+          nodes[elements[imap].emap[2]].v * (+1 * (1 + t2) * (1 - t3) * inv_jac[1][0] +
                                              (1 + t1) * +1 * (1 - t3) * inv_jac[1][1] +
-                                             (1 + t1) * (1 + t2) * -1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[3]].v * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][1] +
+                                             (1 + t1) * (1 + t2) * -1 * inv_jac[1][2]) +
+          nodes[elements[imap].emap[3]].v * (-1 * (1 + t2) * (1 - t3) * inv_jac[1][0] +
                                              (1 - t1) * +1 * (1 - t3) * inv_jac[1][1] +
-                                             (1 - t1) * (1 + t2) * -1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[4]].v * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][1] +
+                                             (1 - t1) * (1 + t2) * -1 * inv_jac[1][2]) +
+          nodes[elements[imap].emap[4]].v * (-1 * (1 - t2) * (1 + t3) * inv_jac[1][0] +
                                              (1 - t1) * -1 * (1 + t3) * inv_jac[1][1] +
-                                             (1 - t1) * (1 - t2) * +1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[5]].v * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][1] +
+                                             (1 - t1) * (1 - t2) * +1 * inv_jac[1][2]) +
+          nodes[elements[imap].emap[5]].v * (+1 * (1 - t2) * (1 + t3) * inv_jac[1][0] +
                                              (1 + t1) * -1 * (1 + t3) * inv_jac[1][1] +
-                                             (1 + t1) * (1 - t2) * +1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[6]].v * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][1] +
+                                             (1 + t1) * (1 - t2) * +1 * inv_jac[1][2]) +
+          nodes[elements[imap].emap[6]].v * (+1 * (1 + t2) * (1 + t3) * inv_jac[1][0] +
                                              (1 + t1) * +1 * (1 + t3) * inv_jac[1][1] +
-                                             (1 + t1) * (1 + t2) * +1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[7]].v * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][1] +
+                                             (1 + t1) * (1 + t2) * +1 * inv_jac[1][2]) +
+          nodes[elements[imap].emap[7]].v * (-1 * (1 + t2) * (1 + t3) * inv_jac[1][0] +
                                              (1 - t1) * +1 * (1 + t3) * inv_jac[1][1] +
-                                             (1 - t1) * (1 + t2) * +1 * inv_jac[2][1]));
+                                             (1 - t1) * (1 + t2) * +1 * inv_jac[1][2]));
   ez = (-1. / 8.) * (
-          nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][2] +
-                                             (1 - t1) * -1 * (1 - t3) * inv_jac[1][2] +
+          nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[2][0] +
+                                             (1 - t1) * -1 * (1 - t3) * inv_jac[2][1] +
                                              (1 - t1) * (1 - t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[1]].v * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][2] +
-                                             (1 + t1) * -1 * (1 - t3) * inv_jac[1][2] +
+          nodes[elements[imap].emap[1]].v * (+1 * (1 - t2) * (1 - t3) * inv_jac[2][0] +
+                                             (1 + t1) * -1 * (1 - t3) * inv_jac[2][1] +
                                              (1 + t1) * (1 - t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[2]].v * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][2] +
-                                             (1 + t1) * +1 * (1 - t3) * inv_jac[1][2] +
+          nodes[elements[imap].emap[2]].v * (+1 * (1 + t2) * (1 - t3) * inv_jac[2][0] +
+                                             (1 + t1) * +1 * (1 - t3) * inv_jac[2][1] +
                                              (1 + t1) * (1 + t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[3]].v * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][2] +
-                                             (1 - t1) * +1 * (1 - t3) * inv_jac[1][2] +
+          nodes[elements[imap].emap[3]].v * (-1 * (1 + t2) * (1 - t3) * inv_jac[2][0] +
+                                             (1 - t1) * +1 * (1 - t3) * inv_jac[2][1] +
                                              (1 - t1) * (1 + t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[4]].v * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][2] +
-                                             (1 - t1) * -1 * (1 + t3) * inv_jac[1][2] +
+          nodes[elements[imap].emap[4]].v * (-1 * (1 - t2) * (1 + t3) * inv_jac[2][0] +
+                                             (1 - t1) * -1 * (1 + t3) * inv_jac[2][1] +
                                              (1 - t1) * (1 - t2) * +1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[5]].v * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][2] +
-                                             (1 + t1) * -1 * (1 + t3) * inv_jac[1][2] +
+          nodes[elements[imap].emap[5]].v * (+1 * (1 - t2) * (1 + t3) * inv_jac[2][0] +
+                                             (1 + t1) * -1 * (1 + t3) * inv_jac[2][1] +
                                              (1 + t1) * (1 - t2) * +1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[6]].v * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][2] +
-                                             (1 + t1) * +1 * (1 + t3) * inv_jac[1][2] +
+          nodes[elements[imap].emap[6]].v * (+1 * (1 + t2) * (1 + t3) * inv_jac[2][0] +
+                                             (1 + t1) * +1 * (1 + t3) * inv_jac[2][1] +
                                              (1 + t1) * (1 + t2) * +1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[7]].v * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][2] +
-                                             (1 - t1) * +1 * (1 + t3) * inv_jac[1][2] +
+          nodes[elements[imap].emap[7]].v * (-1 * (1 + t2) * (1 + t3) * inv_jac[2][0] +
+                                             (1 - t1) * +1 * (1 + t3) * inv_jac[2][1] +
                                              (1 - t1) * (1 + t2) * +1 * inv_jac[2][2]));
   // Transform field to global coordinates
   UnmapFields(ex, ey, ez, x, y, z,
