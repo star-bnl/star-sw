@@ -143,7 +143,7 @@ void StVertexSeedMaker::Reset() {
   mTempOut = new TFile(Form("%s/vertexseedhist.%d.root",
     gSystem->TempDirectory(),
     gSystem->GetPid()),"RECREATE");
-  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey");
+  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey:index");
   LOG_INFO << "Opening new temp file at " << mTempOut->GetName() << endm;
 
   date = 0;
@@ -152,6 +152,7 @@ void StVertexSeedMaker::Reset() {
   run = -1;
   zdc = -1;
   rank = 0;
+  pvn = 0;
   itpc = 0;
   otpc = 0;
   detmap = 0;
@@ -223,10 +224,25 @@ Int_t StVertexSeedMaker::Make(){
     xerr ->Fill(xvertex-xguess);
     ydist->Fill(yvertex);
     yerr ->Fill(yvertex-yguess);
-    eventNumber = (float)GetEventNumber();
-    resNtuple->Fill(eventNumber,xvertex,yvertex,zvertex,mult,trig,
-                    (float) run,(float) fill,zdc,rank,
-                    (float) itpc,(float) otpc,(float) detmap,exvertex,eyvertex);
+
+    float XX[16];
+    XX[0]  = (float) GetEventNumber();
+    XX[1]  = xvertex;
+    XX[2]  = yvertex;
+    XX[3]  = zvertex;
+    XX[4]  = mult;
+    XX[5]  = trig;
+    XX[6]  = (float) run;
+    XX[7]  = (float) fill;
+    XX[8]  = zdc;
+    XX[9]  = rank;
+    XX[10] = (float) itpc;
+    XX[11] = (float) otpc;
+    XX[12] = (float) detmap;
+    XX[13] = exvertex;
+    XX[14] = eyvertex;
+    XX[15] = (float) pvn;
+    resNtuple->Fill(XX);
     addVert(xvertex,yvertex,zvertex,mult,exvertex,eyvertex);
     sumzdc += zdc;
   }
@@ -295,7 +311,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.50 2012/08/16 05:37:07 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.51 2012/08/17 22:57:33 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -629,8 +645,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.50 2012/08/16 05:37:07 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.51 2012/08/17 22:57:33 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.51  2012/08/17 22:57:33  genevb
+// Add index of vertex within event to ntuple
+//
 // Revision 1.50  2012/08/16 05:37:07  genevb
 // Missing mean ZDC for aggregation
 //
