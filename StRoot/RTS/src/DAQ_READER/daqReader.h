@@ -109,7 +109,7 @@ class daqReader {
   void Make() ;
   char *get_sfs_name(char *snippet=0) ;	// returns the full name of the SFS
   char *get(int which, int type=EVP_TYPE_ANY) ;	
-
+  char *skip_then_get(int numToSkip, int num, int type=EVP_TYPE_ANY);
   // The following are the descriptors and pointers defining the event
 
 	
