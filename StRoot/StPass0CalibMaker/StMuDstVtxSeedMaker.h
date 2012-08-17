@@ -1,7 +1,7 @@
 /*!
  * \class StMuDstVtxSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StMuDstVtxSeedMaker.h,v 1.2 2006/09/01 22:27:16 genevb Exp $
+ * \version $Id: StMuDstVtxSeedMaker.h,v 1.3 2012/08/17 22:57:33 genevb Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -30,7 +30,7 @@ class StMuDstVtxSeedMaker : public StVertexSeedMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StMuDstVtxSeedMaker.h,v 1.2 2006/09/01 22:27:16 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StMuDstVtxSeedMaker.h,v 1.3 2012/08/17 22:57:33 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -40,7 +40,6 @@ class StMuDstVtxSeedMaker : public StVertexSeedMaker {
 
    StMuDst* mudst;
    StMuEvent* event;
-   unsigned int pvn;
 
   ClassDef(StMuDstVtxSeedMaker,0)
 };
@@ -49,8 +48,11 @@ class StMuDstVtxSeedMaker : public StVertexSeedMaker {
 
 #endif
 
-// $Id: StMuDstVtxSeedMaker.h,v 1.2 2006/09/01 22:27:16 genevb Exp $
+// $Id: StMuDstVtxSeedMaker.h,v 1.3 2012/08/17 22:57:33 genevb Exp $
 // $Log: StMuDstVtxSeedMaker.h,v $
+// Revision 1.3  2012/08/17 22:57:33  genevb
+// Add index of vertex within event to ntuple
+//
 // Revision 1.2  2006/09/01 22:27:16  genevb
 // More detailed info in ntuple
 //

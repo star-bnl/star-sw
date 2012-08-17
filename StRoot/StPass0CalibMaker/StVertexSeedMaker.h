@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.17 2012/08/15 22:16:53 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.18 2012/08/17 22:57:33 genevb Exp $
  * \brief BeamLine Constraint calibration base class
  *
  * StVertexSeedMaker calculates mean primary vertex positions from
@@ -37,6 +37,7 @@
  * - x,y,z  : coordinates of the vertex position
  * - ex,ey  : uncertainties on x,y
  * - rank   : ranking assigned to the vertex by the vertex-finder used
+ * - index  : ranking order among vertices in an event (0 = highest)
  * - mult   : number of daughter tracks for the vertex
  * - i/otpc : bitmaps of inner/outer TPC sectors where daughter tracks have hits
  *   (bits 0-23 represent sectors 1-24)
@@ -102,7 +103,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.17 2012/08/15 22:16:53 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.18 2012/08/17 22:57:33 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -132,7 +133,6 @@ class StVertexSeedMaker : public StMaker {
   float exvertex;
   float mult;
   float trig;
-  float eventNumber;
   float HIST_MIN;
   float HIST_MAX;
   float zVertexMax; //maximum allowed z vertex for mean calculation
@@ -150,6 +150,7 @@ class StVertexSeedMaker : public StMaker {
   int    otpc; // inner tpc track map
   int    detmap; // map any other detectors
   float  rank;
+  unsigned int pvn; // primery vertex index number
   int    minEntries;
   float    maxX0Err;
   float    maxY0Err;
@@ -184,8 +185,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.17 2012/08/15 22:16:53 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.18 2012/08/17 22:57:33 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.18  2012/08/17 22:57:33  genevb
+// Add index of vertex within event to ntuple
+//
 // Revision 1.17  2012/08/15 22:16:53  genevb
 // Re-worded documentation
 //
