@@ -21,6 +21,7 @@
 #include "StBTofPidTraits.h"
 #include "StTrackPidTraits.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
+#include "StDetectorDbMaker/StDetectorDbRichScalers.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/projection/StEmcPosition.h"
 
@@ -33,10 +34,10 @@
 #include "TPad.h"
 
 // Histogram ranges:
-const int   SCN1 = 200;
+const int   SCN1 = 400;
 const int   SCN2 = 100;
 const float SCL = -0.015;
-const float SCH =  0.085;
+const float SCH =  0.185;
 const float SCB = (SCH-SCL)/SCN1;
 const float SCX = SCB/TMath::Sqrt(TMath::TwoPi());
 
@@ -485,11 +486,11 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
   if (doGaps) DetermineGaps();
   if (doNtuple) {
-      static float X[39];
+      static float X[42];
       static float ntent = 0.0;
       static float nttrk = 0.0;
 
-      if (ntent == 0.0) for (i=0; i<39; i++) X[i] = 0.0;
+      if (ntent == 0.0) for (i=0; i<42; i++) X[i] = 0.0;
       ntent++;  // # entries since last reset, including this one
       float last_nttrk = nttrk;
       nttrk = ntrks[curhist];  // # tracks since last reset, including these
@@ -550,6 +551,18 @@ Int_t StSpaceChargeEbyEMaker::Make() {
                                  runinfo->zdcEastRate(),runinfo->zdcWestRate());
       X[38] = s0*X[38] + s1*St_trigDetSumsC::Nc(runinfo->bbcCoincidenceRate(),
                                  runinfo->bbcEastRate(),runinfo->bbcWestRate());
+
+      // VPD data:
+      // StRunInfo's backgroundRate is filled in StEventMaker from 'mult' of trigDetSums
+      // trigDetSums fills 'mult' from rich scaler rs11 in the DAQ stream
+      //   (but in the offline database, it is migrated from rs16)
+      // rs11 stores VPD coincidence rate as of 2007-12-19
+      // rs16 stores MTD rate as of Run 9
+      // VPD east and west are rs8 and 9, and are not stored in StEvent
+      StDetectorDbRichScalers* richScalers = StDetectorDbRichScalers::instance();
+      X[39] = s0*X[39] + s1*runinfo->backgroundRate();
+      X[40] = s0*X[40] + s1*richScalers->getPVPDWest();
+      X[41] = s0*X[41] + s1*richScalers->getPVPDEast();
 
       // In calib mode, only fill when doReset (we found an sc)
       if (doReset || !Calibmode) ntup->Fill(X);
@@ -766,7 +779,7 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
   }
 
   if (doNtuple) ntup = new TNtuple("SC","Space Charge",
-    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:zdcc:bbcc");
+    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:zdcc:bbcc:vpdx:vpdw:vpde");
     //"sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:sce:scw:dcae:dcaw:gapf:gapd:gapfn:gapdn:gapfp:gapdp:gapfe:gapde:gapfw:gapdw:usc:uscmode");
 
   if (doGaps) {
@@ -1175,8 +1188,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.41 2012/04/25 19:23:55 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.42 2012/08/18 02:11:59 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.42  2012/08/18 02:11:59  genevb
+// Expand SC hist ranges, add VPD to ntuple
+//
 // Revision 1.41  2012/04/25 19:23:55  genevb
 // Pointing angle near vertex needed for improved PredictSpaceCharge
 //
