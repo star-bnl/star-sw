@@ -57,7 +57,7 @@ class AliHLTTPCCATracklet
 
     void ClearRowHits() {
       const short_v zero( Vc::Zero );
-      for ( int i = 0; i < fRowHits.Size(); i += short_v::Size ) {
+      for ( int i = 0; i < AliHLTTPCCAParameters::MaxNumberOfRows8; i += short_v::Size ) {
         zero.store( &fRowHits[i] );
       }
     }

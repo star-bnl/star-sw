@@ -9,7 +9,6 @@
 
 #include "AliHLTTPCCADef.h"
 #include "AliHLTTPCCATracker.h"
-#include "AliHLTTPCCASliceData.h"
 #include "AliHLTTPCCATrackletVector.h"
 #include "AliHLTArray.h"
 
