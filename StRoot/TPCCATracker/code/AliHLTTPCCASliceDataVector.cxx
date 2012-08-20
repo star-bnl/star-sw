@@ -18,7 +18,7 @@
 
 */
 
-#include "AliHLTTPCCASliceData.h"
+#include "AliHLTTPCCASliceDataVector.h"
 #include "AliHLTTPCCAClusterData.h"
 #include "AliHLTTPCCAMath.h"
 #include "AliHLTArray.h"
@@ -302,7 +302,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     hitNumberOffset += NextMultipleOf<VectorAlignment>( row.fNHits );
   }
 
-  for ( int rowIndex = data.LastRow() + 1; rowIndex < fParam->NRows8(); ++rowIndex ) {
+  for ( int rowIndex = data.LastRow() + 1; rowIndex < AliHLTTPCCAParameters::MaxNumberOfRows8; ++rowIndex ) {
     AliHLTTPCCARow &row = fRows[rowIndex];
     row.fGrid.CreateEmpty();
     row.fNHits = 0;

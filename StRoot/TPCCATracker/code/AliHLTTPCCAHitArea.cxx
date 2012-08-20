@@ -20,7 +20,7 @@
 //***************************************************************************
 
 #include "AliHLTTPCCAHitArea.h"
-#include "AliHLTTPCCASliceData.h"
+#include "AliHLTTPCCASliceDataVector.h"
 #include "AliHLTTPCCAGrid.h"
 #include "AliHLTTPCCARow.h"
 #include "debug.h"

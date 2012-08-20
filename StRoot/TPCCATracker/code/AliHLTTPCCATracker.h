@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCATracker.h,v 1.2 2010/08/18 14:11:05 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATracker.h,v 1.3 2012/08/20 14:12:59 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -22,7 +22,7 @@
 #include "AliHLTTPCCAHitId.h"
 #include "AliHLTTPCCAOutTrack.h"
 #include <cstdio>
-#include "AliHLTTPCCASliceData.h"
+#include "AliHLTTPCCASliceDataVector.h"
 #include <vector>
 
 class AliHLTTPCCATrack;
