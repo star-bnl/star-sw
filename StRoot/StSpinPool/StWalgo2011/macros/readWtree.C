@@ -9,7 +9,7 @@ bool isZ=false;
 void readWtree(	const Char_t *fileList="./R10081007.lis", int etaBin=7, int maxEvents=1e8, bool spinSort=true)
 {
 
-  if(etaBin==7) isZ=true;
+  if(etaBin==8) isZ=true;
 
   // load shared libraries
   gROOT -> LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -30,8 +30,8 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int etaBin=7, int maxE
   TObjArray* HListEta=new TObjArray;;
   
   //define eta ranges
-  float etaLow[7] = {-0.9, -0.4, 0.0, 0.4, 0.9, 1.15, -1.};
-  float etaHigh[7] = {-0.4, 0.0, 0.4, 0.9, 1.15, 1.35, 1.};
+  float etaLow[8] = {-0.9, -0.4, 0.0, 0.4, 0.9, 1.15, 0.9, -1.};
+  float etaHigh[8] = {-0.4, 0.0, 0.4, 0.9, 1.15, 1.35, 1.5, 1.};
 
   //initiate W maker
   wTreeMk = new St2011WMaker(Form("Eta%d",etaBin));
@@ -40,7 +40,7 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int etaBin=7, int maxE
   wTreeMk->setWbosonCuts(25., 0.88, 14., etaLow[etaBin-1], etaHigh[etaBin-1]); //highET, nearTotEtFrac, ptBalance, etaLow, etaHigh
   wTreeMk->setE_WbosonCuts(25., 0.85, 14., etaLow[etaBin-1], etaHigh[etaBin-1]); //highET, nearTotEtFrac, ptBalance, etaLow, etaHigh
   wTreeMk->setHList(HListEta);
-  wTreeMk->setMaxDisplayEve(1); // only first N events will get displayed 
+  wTreeMk->setMaxDisplayEve(1e6); // only first N events will get displayed 
 
   //......... spin sorting
   if(spinSort){
