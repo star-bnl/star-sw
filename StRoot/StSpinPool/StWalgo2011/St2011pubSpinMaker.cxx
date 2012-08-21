@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.4 2012/08/07 21:06:38 stevens4 Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.5 2012/08/21 21:28:22 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -15,14 +15,22 @@ ClassImp(St2011pubSpinMaker)
   wMK=0;HList=0;
   core=name;
   coreTitle=etaName;
-  par_QPTlow=0.010;
 
+  par_QPTlow=0.010;
   par_QPThighET0=25; 
   par_QPThighET1=50; 
   par_QPThighA=0.08; 
   par_QPThighB=0.0013; 
   par_leptonEta1=-1.; par_leptonEta2=1.;
   par_useNoEEMC=0;
+  
+  parE_QPTlow=0.010;
+  parE_QPThighET0=25; 
+  parE_QPThighET1=50; 
+  parE_QPThighA=0.08; 
+  parE_QPThighB=0.0013;
+  parE_leptonEta1=0.8; parE_leptonEta2=1.5;
+
  }
 
 
@@ -67,6 +75,7 @@ Int_t
 St2011pubSpinMaker::Make(){
 
   bXingSort();
+  bXingSortEndcap();
   return kStOK;
 }
 
@@ -78,8 +87,9 @@ St2011pubSpinMaker::bXingSort(){
   
   hA[0]->Fill("inp",1.);
  
+  if((wMK->wEve->l2bitRnd || wMK->wEve->l2bitET)==0) return;
   if(wMK->wEve->vertex.size()<=0) return; 
-  //......... require: L2W-trig (ET or rnd) & vertex is reasonable .......
+  //......... require: L2BW-trig (ET or rnd) & vertex is reasonable .......
   
   int bx48=wMK->wEve->bx48;
   int bx7=wMK->wEve->bx7;
@@ -95,7 +105,6 @@ St2011pubSpinMaker::bXingSort(){
   //remove events tagged as Zs
   if(wMK->wEve->zTag) return;
   hA[0]->Fill("noZ",1.);
- 
 
   hA[1]->Fill(bx48);
   hA[2]->Fill(bx7);
@@ -112,7 +121,7 @@ St2011pubSpinMaker::bXingSort(){
     // avoid too much energy - can be W-events (1/milion :)
     if(wMK-> wEve->bemc.maxHtDsm<par_maxDsmThr)  { 
       hA[6]->Fill(spin4);  hA[0]->Fill("BG1",1.);}
-    return; // LOGICAL ERROR - FIX IT LATER
+    //removed veto of random bits here in previous version JS
   }
   
   if( wMK->wEve->l2bitET==0) return; 
@@ -124,7 +133,7 @@ St2011pubSpinMaker::bXingSort(){
     WeveVertex &V=wMK->wEve->vertex[iv];
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
-      if(T.pointTower.id==0) continue;
+      if(T.pointTower.id<=0) continue; //skip endcap towers
 
       /* Collect QCD background for lumi monitors */
       float frac24=T.cluster.ET/(T.cl4x4.ET);
@@ -201,8 +210,137 @@ St2011pubSpinMaker::bXingSort(){
 
 }
 
+//_____________________________________________________________________________
+//
+void 
+St2011pubSpinMaker::bXingSortEndcap(){
+  //has access to whole W-algo-maker data via pointer 'wMK'
+  
+  hE[0]->Fill("inp",1.);
+ 
+  if((wMK->wEve->l2EbitRnd || wMK->wEve->l2EbitET)==0) return;
+  if(wMK->wEve->vertex.size()<=0) return; 
+  //......... require: L2EW-trig (ET or rnd) & vertex is reasonable .......
+  
+  int bx48=wMK->wEve->bx48;
+  int bx7=wMK->wEve->bx7;
+  int bxStar48=wMK->wEve->bxStar48;
+  int bxStar7=wMK->wEve->bxStar7;
+
+  if(bxStar48!=bxStar7) {
+   printf("BAD bx7=%d bx48=%d del=%d\n",bx7,bx48,bxStar48-bxStar7);
+   hE[0]->Fill("badBx48",1.);
+   return; // both counters must be in sync
+  }
+
+  //remove events tagged as Zs
+  if(wMK->wEve->zTag) return;
+  hE[0]->Fill("noZ",1.);
+
+  hE[1]->Fill(bx48);
+  hE[2]->Fill(bx7);
+
+  hE[3]->Fill(bxStar48);
+  hE[4]->Fill(bxStar7);
+
+  int spin4=wMK->wEve->spin4;
+  hE[5]->Fill(bxStar7,spin4);
+
+  float par_maxDsmThr=58;
+  float par_myET=25; // monitoring cut
+  if( wMK->wEve->l2EbitRnd) { // lumi monitor BHT3-random    
+    // avoid too much energy - can be W-events (1/milion :)
+    if(wMK-> wEve->etow.maxHtDsm<par_maxDsmThr)  { 
+      hE[6]->Fill(spin4);  hE[0]->Fill("BG1",1.);}
+  }
+  
+  if( wMK->wEve->l2EbitET==0) return; 
+  //..... it is guaranteed ..... L2EW-ET>11? did fired  ......
+  
+  
+  // search for  Ws ............
+  for(uint iv=0;iv<wMK->wEve->vertex.size();iv++) {
+    WeveVertex &V=wMK->wEve->vertex[iv];
+    for(uint it=0;it<V.eleTrack.size();it++) {
+      WeveEleTrack &T=V.eleTrack[it];
+      if(T.pointTower.id>=0) continue; //skip barrel towers
+
+      /* Collect QCD background for lumi monitors */
+      float frac24=T.cluster.ET/(T.cl4x4.ET);
+      if(iv==0 && it==0 && frac24<wMK->par_clustFrac24) {
+	hE[31]->Fill(T.cluster.ET);
+	if( T.cluster.ET <20. ) { hE[7]->Fill(spin4);  hE[0]->Fill("BG2",1.);}
+      }
+
+      if(T.isMatch2Cl==false) continue;
+      assert(T.cluster.nTower>0); // internal logical error
+      assert(T.nearTotET>0); // internal logical error
+
+      int iQ=0; // plus
+      float p_Q=T.prMuTrack->charge();
+      if( p_Q<0 ) iQ=1;// minus
+      float ET=T.cluster.ET;
+      
+      //put final W cut here
+      bool isW= T.cluster.ET /T.nearTotET> wMK->parE_nearTotEtFrac; // near cone
+      isW=isW && (T.esmdEsum7[0]/T.esmdE[0]>wMK->parE_smdRatio && T.esmdEsum7[1]/T.esmdE[1]>wMK->parE_smdRatio); // smdRatio
+      isW=isW && T.sPtBalance>wMK->parE_ptBalance; // awayET
+    
+      if(!isW) { // !!!! This is not all QCD for the endcap !!!!
+	if(ET>15 && ET<20 ) hE[16+iQ]->Fill(spin4);
+	continue;
+      }
+
+      hE[0]->Fill("Wcut",1.);
+
+      hE[30]->Fill(T.prMuTrack->eta());  
+      // allows spin specific cuts on eta
+      if(T.prMuTrack->eta()<parE_leptonEta1) continue;
+      if(T.prMuTrack->eta()>parE_leptonEta2) continue;
+      hE[0]->Fill("eta",1.);
+
+      //::::::::::::::::::::::::::::::::::::::::::::::::
+      //:::::accepted W events for x-section :::::::::::
+      //::::::::::::::::::::::::::::::::::::::::::::::::
+
+      if(ET>par_myET) hE[0]->Fill("W25",1.);
+      float q2pt=T.prMuTrack->charge()/T.prMuTrack->pt();
+      if(ET>par_myET) hE[8]->Fill(q2pt);
+      hE[9]->Fill(ET,q2pt);
+      
+      // apply cut on reco charge
+      if( fabs(q2pt)< parE_QPTlow) continue;
+      if(ET>par_myET) hE[0]->Fill("Qlow",1.);
+
+      if(parE_QPTlow>0) { // abaility to skip all Q/PT cuts
+	if( fabs(q2pt)< parE_QPTlow) continue;
+	float highCut=parE_QPThighA - (ET-parE_QPThighET0)*parE_QPThighB;
+	// printf("fff ET=%f q2pr=%f highCut=%f passed=%d\n",ET, q2pt,highCut,fabs(q2pt)<highCut);
+	if( ET>par_myET && ET<parE_QPThighET1 && fabs(q2pt)>highCut) continue;
+      }
+
+      if(ET>par_myET) {
+	hE[0]->Fill("Qhigh",1.);
+	if(p_Q>0) hE[0]->Fill("Q +",1.);
+	else  hE[0]->Fill("Q -",1.);
+      }
+
+     
+      hE[10+iQ]->Fill(ET);
+      if(ET>25 &&ET<50 ) hE[12+iQ]->Fill(spin4);
+      if(ET>32 &&ET<44 ) hE[14+iQ]->Fill(spin4);
+     
+      hE[18+iQ]->Fill(spin4,ET);	 
+     
+    } // end of loop over tracks
+  }// end of loop ove vertices
+
+}
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.5  2012/08/21 21:28:22  stevens4
+// Add spin sorting for endcap Ws
+//
 // Revision 1.4  2012/08/07 21:06:38  stevens4
 // update to tree analysis to produce independent histos in a TDirectory for each eta-bin
 //

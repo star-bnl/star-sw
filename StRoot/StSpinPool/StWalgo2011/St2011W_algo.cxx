@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.11 2012/08/21 18:29:16 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.12 2012/08/21 21:28:22 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -193,7 +193,6 @@ St2011WMaker::tag_Z_boson(){
       if(T1.isMatch2Cl==false) continue;
       assert(T1.cluster.nTower>0); // internal logical error
       assert(T1.nearTotET>0); // internal logical error
-      if(T1.cluster.ET/T1.nearTotET< par_nearTotEtFrac) continue; // too large nearET
 
       //match lepton candidate with jet
       TLorentzVector jetVec;
@@ -659,6 +658,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.12  2012/08/21 21:28:22  stevens4
+// Add spin sorting for endcap Ws
+//
 // Revision 1.11  2012/08/21 18:29:16  stevens4
 // Updates to endcap W selection using ESMD strip ratio
 //

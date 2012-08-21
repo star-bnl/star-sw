@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.9 2012/08/21 18:29:16 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.10 2012/08/21 21:28:22 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -23,7 +23,9 @@ St2011WMaker::findEndcap_W_boson(){
 
   //printf("========= findEndcap_W_boson() \n");
   int nNoNear=0,nSmdRatio=0,nNoAway=0,nGoldW=0,nGoldWp=0,nGoldWn=0;
-  
+  //remove events tagged as Zs
+  if(wEve->zTag) return;
+
   // search for  Ws ............
   for(uint iv=0;iv<wEve->vertex.size();iv++) {
     WeveVertex &V=wEve->vertex[iv];
@@ -184,7 +186,7 @@ St2011WMaker::findEndcap_W_boson(){
     }// loop over tracks
   }// loop over vertices
   if(nNoNear>0) hE[0]->Fill("noNear",1.);
-  if(nSmdRatio>0) hE[0]->Fill("noSmdRatio",1.);
+  if(nSmdRatio>0) hE[0]->Fill("smdRatio",1.);
   if(nNoAway>0) hE[0]->Fill("noAway",1.);
   if(nGoldW>0)  hE[0]->Fill("goldW",1.);
   if(nGoldWp>0) hE[0]->Fill("goldW+",1.);
@@ -577,6 +579,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.10  2012/08/21 21:28:22  stevens4
+// Add spin sorting for endcap Ws
+//
 // Revision 1.9  2012/08/21 18:29:16  stevens4
 // Updates to endcap W selection using ESMD strip ratio
 //
