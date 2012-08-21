@@ -9,28 +9,26 @@ root4star -b -q 'rdMuWana2011.C(2e3,"st_W_12037041_raw_1400001.MuDst.root",0,1,5
 */
 
 
-class StChain;
-class StMuDSTMaker;
-class St2009pubMcMaker;
-class St2011WMaker;
-class St2011ZMaker;
 
+class StChain;
+StChain *chain = 0;
+
+int  spinSort = false;
+bool isZ      = false;
+int  geant    = false;
 
 int rdMuWana2011(
-   int   nEve                = 1e6,
-   char *inMuDstFileListName = "st_W_12037063_raw_1380001_1201.MuDst.root",
-   int   isMC                = 0,                                           // 0                                      = run9-data  200                                   = new MC w/ EEss in BFC
-   int   useJetFinder        = 0,                                           // 0 - no jets                            = badWalgo; 1 generate jet trees; 2 read jet trees
-   int   idL2BWtrg           = 0,                                           // offline Ids  needed for real data
-   int   idL2EWtrg           = 0,                                           // run 9 L2EW
+   int   nEve         = 1e6,
+   char* file         = "st_W_12037063_raw_1380001_1201.MuDst.root",
+   int   isMC         = 0, // 0           = run9-data  200 = new MC w/ EEss in BFC
+   int   useJetFinder = 0, // 0 - no jets = badWalgo; 1 generate jet trees; 2 read jet trees
+   int   idL2BWtrg    = 0, //  offline Ids  needed for real data
+   int   idL2EWtrg    = 0, // run 9 L2EW
    // make those below  empty for scheduler
-   char *muDir               = "",
-   char *jetDir              = "",
-   char *histDir             = "",
-   char *wtreeDir            = "",
-   int   spinSort            = false,
-   bool  findZ               = false,
-   int   geant               = false
+   char* muDir        = "",
+   char* jetDir       = "",
+   char* histDir      = "",
+   char* wtreeDir     = ""
 )
 {
    char *eemcSetupPath = "/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
@@ -39,7 +37,7 @@ int rdMuWana2011(
 
    if (isMC) spinSort = false;
 
-   string inputPathFile(inMuDstFileListName);
+   string  inputPathFile(file);
 
    size_t iLastSlash = inputPathFile.find_last_of("/");
 
@@ -49,28 +47,28 @@ int rdMuWana2011(
       inputPath = inputPathFile.substr(0, iLastSlash);
    else inputPath = "";
 
-   string inputFile = inputPathFile.substr(iLastSlash + 1);
+   string inputFile  = inputPathFile.substr(iLastSlash + 1);
 
    printf("Input path: %s\n", inputPath.c_str());
-   printf("Input inMuDstFileListName: %s\n", inputFile.c_str());
+   printf("Input file: %s\n", inputFile.c_str());
 
    TString outF = inputFile;
    outF = outF.ReplaceAll(".MuDst.root", "");
    outF = outF.ReplaceAll(".lis", "");
 
    if (!isMC) {
-      //outF = inMuDstFileListName;
+      //outF = file;
       //outF = outF;
    }
    else { //  new  MC w/ working time stamp
       //assert(2==5); M-C not unpacking not implemented
-      char *file1 = strstr(inMuDstFileListName, "cn100");
+      char *file1 = strstr(file, "cn100");
       assert(file1);
       file1--;
       printf("file1: %s\n", file1);
       outF = file1;
       //outF.ReplaceAll(".MuDst.root","");
-      TString fileG = inMuDstFileListName;
+      TString fileG = file;
       fileG.ReplaceAll("MuDst", "geant");
    }
 
@@ -133,15 +131,14 @@ int rdMuWana2011(
    cout << " loading done " << endl;
 
    // create chain
-   StChain *chain = new StChain("StChain");
+   chain = new StChain("StChain");
 
    // create histogram storage array  (everybody needs it):
-   TObjArray *HList    = new TObjArray;
-   TObjArray *HListTpc = new TObjArray;
+   TObjArray* HList = new TObjArray;
 
    if (geant) {
       // get geant file
-      StIOMaker *ioMaker = new StIOMaker();
+      StIOMaker* ioMaker = new StIOMaker();
       printf("\n %s \n\n", fileG.Data());
       ioMaker->SetFile(fileG.Data());
 
@@ -154,7 +151,7 @@ int rdMuWana2011(
    // Now we add Makers to the chain...
    int maxFiles = 1000;
 
-   StMuDstMaker *stMuDstMaker = new StMuDstMaker(0, 0, muDir, inMuDstFileListName, "MuDst.root", maxFiles);
+   StMuDstMaker *stMuDstMaker = new StMuDstMaker(0, 0, muDir, file, "MuDst.root", maxFiles);
 
    stMuDstMaker->SetStatus("*", 0);
    stMuDstMaker->SetStatus("MuEvent", 1);
@@ -165,7 +162,7 @@ int rdMuWana2011(
    stMuDstMaker->SetStatus("GlobalTracks", 1);
    stMuDstMaker->SetStatus("PrimaryTracks", 1);
 
-   TChain *stMuDstMakerChain = stMuDstMaker->chain();
+   TChain* stMuDstMakerChain = stMuDstMaker->chain();
 
    assert(stMuDstMakerChain);
 
@@ -193,18 +190,17 @@ int rdMuWana2011(
       assert(1 == 2);
    }
 
+
    //.... load EEMC database
-   StEEmcDbMaker *mEEmcDatabase = new StEEmcDbMaker("eemcDb");
+   StEEmcDbMaker*  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
 
 #if 0 // drop abs lumi for now   
-
-   if (!isMC && strstr(inMuDstFileListName, "fillListPhys")) {
+   if (!isMC && strstr(file, "fillListPhys")) {
       StTriggerFilterMaker *filterMaker = new StTriggerFilterMaker;
       filterMaker->addTrigger(230420); // AJP
       filterMaker->addTrigger(230411); // JP2
       filterMaker->addTrigger(bht3ID); // regular W -> e+ analysis
    }
-
 #endif
 
    if (geant) {
@@ -215,7 +211,7 @@ int rdMuWana2011(
 
    if (geant && useJetFinder != 1) { // only use trigger simulator in W algo
       //BEMC simulator:
-      StEmcSimulatorMaker *emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
+      StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
       emcSim->setCalibSpread(kBarrelEmcTowerId, 0.15); //spread gains by 15%
       StEmcADCtoEMaker *bemcAdc = new StEmcADCtoEMaker();//for real data this sets calibration and status
 
@@ -249,8 +245,8 @@ int rdMuWana2011(
    }
 
 
-   if (useJetFinder == 1) {
-      //{{{ // run jet finder
+   if (useJetFinder == 1)
+   { //{{{ // run jet finder
       double pi = atan(1.0) * 4.0;
       // Makers for clusterfinding
       StSpinDbMaker    *uspDbMaker = new StSpinDbMaker("spinDb");
@@ -262,23 +258,23 @@ int rdMuWana2011(
       bool use2006TowerCuts = true;
 
       //4p maker using 100% tower energy correction
-      StBET4pMaker *bet4pMakerFrac100 = new StBET4pMaker("BET4pMakerFrac100", stMuDstMaker, doTowerSwapFix, new StjTowerEnergyCorrectionForTracksFraction(1.0));
+      StBET4pMaker* bet4pMakerFrac100 = new StBET4pMaker("BET4pMakerFrac100", stMuDstMaker, doTowerSwapFix, new StjTowerEnergyCorrectionForTracksFraction(1.0));
       bet4pMakerFrac100->setUse2003Cuts(use2003TowerCuts);
       bet4pMakerFrac100->setUseEndcap(true);
       bet4pMakerFrac100->setUse2006Cuts(use2006TowerCuts);
 
       //4p maker using 100% tower energy correction (no endcap)
-      StBET4pMaker *bet4pMakerFrac100_noEEMC = new StBET4pMaker("BET4pMakerFrac100_noEEMC", stMuDstMaker, doTowerSwapFix, new StjTowerEnergyCorrectionForTracksFraction(1.0));
+      StBET4pMaker* bet4pMakerFrac100_noEEMC = new StBET4pMaker("BET4pMakerFrac100_noEEMC", stMuDstMaker, doTowerSwapFix, new StjTowerEnergyCorrectionForTracksFraction(1.0));
       bet4pMakerFrac100_noEEMC->setUse2003Cuts(use2003TowerCuts);
       bet4pMakerFrac100_noEEMC->setUseEndcap(false);
       bet4pMakerFrac100_noEEMC->setUse2006Cuts(use2006TowerCuts);
 
       //Instantiate the JetMaker and SkimEventMaker
-      StJetMaker *emcJetMaker = new StJetMaker("emcJetMaker", stMuDstMaker, jetFile);
+      StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", stMuDstMaker, jetFile);
       //StJetSkimEventMaker* skimEventMaker = new StJetSkimEventMaker("StJetSkimEventMaker", stMuDstMaker,outSkimFile);
 
       //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
-      StppAnaPars *anapars = new StppAnaPars();
+      StppAnaPars* anapars = new StppAnaPars();
       anapars->setFlagMin(0); //track->flag() > 0
       anapars->setNhits(12); //track->nHitsFit()>12
       anapars->setCutPtMin(0.2); //track->pt() > 0.2
@@ -289,7 +285,7 @@ int rdMuWana2011(
       anapars->setJetNmin(0);
 
       //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
-      StConePars *cpars = new StConePars();
+      StConePars* cpars = new StConePars();
       cpars->setGridSpacing(105, -3.0, 3.0, 120, -pi, pi);  //include EEMC
       cpars->setConeRadius(0.7); // default=0.7
       cpars->setSeedEtMin(0.5);
@@ -316,23 +312,18 @@ int rdMuWana2011(
 
       for (Int_t iev = 0; iev < nEntries; iev++) {
          if (eventCounter >= nEve) break;
-
          chain->Clear();
          int stat = chain->Make();
-
          if (stat != kStOk && stat != kStSkip) break; // EOF or input error
-
          eventCounter++;
       }
 
-      cout << "run " << inMuDstFileListName << " nEve=" << eventCounter << " total ";
+      cout << "run " << file << " nEve=" << eventCounter << " total ";
       tt.Print();
       printf("****************************************** \n");
 
       int t2 = time(0);
-
       if (t2 == t1) t2 = t1 + 1;
-
       float tMnt = (t2 - t1) / 60.;
       float rate = 1.*eventCounter / (t2 - t1);
 
@@ -357,7 +348,7 @@ int rdMuWana2011(
       //WmuMk->setJetNeutScaleMC(1.0);
       //WmuMk->setJetChrgScaleMC(1.0);
    }
-   else { // real data
+   else {  // real data
       WmuMk->setTrigID(idL2BWtrg, idL2EWtrg);
    }
 
@@ -384,11 +375,9 @@ int rdMuWana2011(
    //Collect all output histograms
    //already defined this above:  TObjArray* HList=new TObjArray;
    WmuMk->setHList(HList);
-   WmuMk->setHListTpc(HListTpc);
    WpubMk->setHList(HList);
 
    StSpinDbMaker *spDb = 0;
-
    if (spinSort) {
       spDb = new StSpinDbMaker("spinDb");
       enum {mxSM = 5}; // to study eta-cuts, drop Q/PT cut
@@ -402,25 +391,21 @@ int rdMuWana2011(
          spinMkA[kk]->attachWalgoMaker(WmuMk);
          spinMkA[kk]->attachSpinDb(spDb);
          spinMkA[kk]->setHList(HList);
-
          if (kk == 1) spinMkA[kk]->setEta(-1., 0.);
-
          if (kk == 2) spinMkA[kk]->setEta(0, 1.);
-
          if (kk == 3) spinMkA[kk]->setQPT(-1); // disable Q/PT cut
-
          if (kk == 4) spinMkA[kk]->setNoEEMC();
       }
    }
 
    if (geant) {
-      St2009pubMcMaker *pubMcMk = new St2009pubMcMaker("pubMc");
+      pubMcMk = new St2009pubMcMaker("pubMc");
       pubMcMk->attachWalgoMaker(WmuMk);
       pubMcMk->setHList(HList);
    }
 
-   if (findZ) {
-      St2011ZMaker *ZMk = new St2011ZMaker("Z");
+   if (isZ) {
+      ZMk = new St2011ZMaker("Z");
       ZMk->attachWalgoMaker(WmuMk);
       ZMk->setHList(HList);
       ZMk->setNearEtFrac(0.88);
@@ -440,33 +425,27 @@ int rdMuWana2011(
    TStopwatch tt;
 
    for (Int_t iev = 0; iev < nEntries; iev++) {
-      //Info("rdMuWana2011", "Analyzing event %d", iev);
-
+      Info("rdMuWana2011", "Analyzing event %d", iev);
       if (eventCounter >= nEve) break;
-
       chain->Clear();
       int stat = chain->Make();
-
       if (stat != kStOk && stat != kStSkip) break; // EOF or input error
-
       eventCounter++;
    }
 
    //chain->Finish();
 
-   cout << "run " << inMuDstFileListName << " nEve=" << eventCounter << " total ";
+   cout << "run " << file << " nEve=" << eventCounter << " total ";
    tt.Print();
 
    printf("****************************************** \n");
 
    int t2 = time(0);
-
    if (t2 == t1) t2 = t1 + 1;
-
    float tMnt = (t2 - t1) / 60.;
    float rate = 1.*eventCounter / (t2 - t1);
 
-   printf("#sorting %s done %d of   nEve= %d, CPU rate= %.1f Hz, total time %.1f minute(s) \n\n", inMuDstFileListName, eventCounter, nEntries, rate, tMnt);
+   printf("#sorting %s done %d of   nEve= %d, CPU rate= %.1f Hz, total time %.1f minute(s) \n\n", file, eventCounter, nEntries, rate, tMnt);
 
 
    TString histFileName = histDir;
@@ -480,14 +459,10 @@ int rdMuWana2011(
    if (hf->IsOpen()) {
       //HList->ls();
       HList->Write();
-      //write TPC histos to new directory
-      TDirectory *tpc = hf->mkdir("tpc");
-      tpc->cd();
-      HListTpc->Write();
-      printf("\n Histo saved -->%s<\n", histFileName.Data());
+      printf("\n Histo saved -->%s<\n", outFh.Data());
    }
    else {
-      printf("\n Failed to open Histo-file -->%s<, continue\n", histFileName.Data());
+      printf("\n Failed to open Histo-file -->%s<, continue\n", outFh.Data());
    }
 
    //WmuMk->Finish();
@@ -497,8 +472,8 @@ int rdMuWana2011(
 
 
 // $Log: rdMuWana2011.C,v $
-// Revision 1.4  2012/08/20 23:43:02  smirnovd
-// Improved readability
+// Revision 1.5  2012/08/21 17:40:15  stevens4
+// Revert to previous version
 //
 // Revision 1.3  2012/03/19 23:45:23  smirnovd
 // Major clean up. Removed hardcoded references etc.
