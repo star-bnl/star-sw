@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.6 2012/07/13 20:53:16 stevens4 Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.7 2012/08/21 18:29:16 stevens4 Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -26,8 +26,8 @@ St2011WMaker::initEHistos(){
   h->SetMarkerSize(2);//<-- large text
 
   char key[][200]={"inp","L2ewId","L2ewBits","L2ewET","L2ewRnd","tpcOn","primVert","vertZ","Pt10",
-                   "E-in","E200","TrE","Tr2Cl","noNear","noAway","goldW"};
-  for(int i=0;i<15;i++) h->Fill(key[i],0.); // preset the order of keys
+                   "E-in","E200","TrE","Tr2Cl","noNear","smdRatio","noAway","goldW","goldW+","goldW-"};
+  for(int i=0;i<19;i++) h->Fill(key[i],0.); // preset the order of keys
 
   hE[1]=h=new TH1F("muEInTrg","mu Endcap W input triggers, WARN: scrambled if manyruns are combined by hadd.C; trigID (random order)",nCase,0,nCase);
   h->GetXaxis()->SetLabelSize(0.06);
@@ -207,10 +207,10 @@ St2011WMaker::initEHistos(){
   hE[99]=h=new TH1F("muE_Weta","Endcap W: Lepton eta, final selection ; lepton eta",400,-2.0,2.0);
   hE[100]=h=new TH2F("muE_WXY","Endcap W: Projected track XY at SMD depth, final selection; X (cm); Y (cm)",100,-280,280,100,-280,280);
 
-  // free 101-116
+  // free 101-109
   //..... series of electron ET plots after succesive cuts
-  char tt2[][200]={"max 2x2","track matched","no near ET","no away ET"};
-  for(int i=0;i<4;i++){
+  char tt2[][200]={"max 2x2","track matched","no near ET","smdRatio","no away ET"};
+  for(int i=0;i<5;i++){
     sprintf(txt,"Endcap electron candidate, cut=%s; 2x2 ET (GeV)",tt2[i]);
     sprintf(txt0,"muE_ETlive%d",i);
     hE[110+i]=h=new TH1F(txt0,txt, 100,0,100);
@@ -232,6 +232,8 @@ St2011WMaker::initEHistos(){
   hE[137]=h=new TH1F("muEclustPtBal_bckgrd",Form("Endcap: PT Balance < %.1f ; 2x2 Cluster ET",parE_ptBalance),100,0,100);
   hE[140]=h=new TH1F("muEclustPtBalnoE",Form("Endcap: sPT Balance > %.1f (EEMC not included); 2x2 Cluster ET",parE_ptBalance),100,0,100);
   
+  hE[141]=h=new TH2F("muEsPtBalanceDiff_sPtBalanceDiff","Endcap:(sPtBalance - sPtBalance2) vs sPtBalance; sPtBalance; sPtBalance - sPtBalance2",100,-100,100,100,-50,50);
+
   hE[184+2] = new TH1F("Epos_muEclustpTbal_wE","Endcap: pos_muEclustpTbal_wE",100,0,100);
   hE[184+1] = new TH1F("Eneg_muEclustpTbal_wE","Endcap: neg_muEclustpTbal_wE",100,0,100);
   hE[184+4] = new TH1F("Epos_muEclustpTbal_noE","Endcap: pos_muEclustpTbal_noE",100,0,100);  
@@ -243,14 +245,47 @@ St2011WMaker::initEHistos(){
   hE[191]=h=new TH2F("muEclustEt_etaWm","Endcap Wm: 2x2 Cluster ET vs. lepton eta, final selection; lepton eta in LAB; lepton 2x2 Cluster ET (GeV)",32,-2.,2.,60,0.,60.);
 
   sprintf(txt,"Endcap: TPC GLOB Q/PT  ; ETOW 2x2 cluster ET (GeV); Q/PT");
-  hE[200]=h=new TH2F("muEchRecPNg", txt,100,0.,100.,100,-0.1,0.1);
+  hE[200]=h=new TH2F("muEchRecPNg", txt,100,0.,100.,150,-0.15,0.15);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
   sprintf(txt,"Endcap: TPC PRIM  Q/PT ; ETOW 2x2 cluster ET (GeV); Q/PT");
-  hE[201]=h=new TH2F("muEchRecPNp", txt,100,0.,100.,100,-0.1,0.1);
+  hE[201]=h=new TH2F("muEchRecPNp", txt,100,0.,100.,150,-0.15,0.15);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  hE[211]=h=new TH2F("muEsmdNhit","Number of hit strips; U plane; V plane",50,0.,50.,50,0.,50.);
+  hE[212]=h=new TH2F("muEsmdEne","Energy in SMD Planes; U plane; V plane",100,0.,500.,100,0.,500.);
+  hE[213]=h=new TH2F("muEsmdNhit_Ene","Number of hit strips vs Energy in SMD Planes; Nhit (U+V); Energy (U+V)",100,0.,100.,500,0.,1000.);
+  hE[214]=h=new TH2F("muEclustET_esmdEne","Tower cluster E_{T} vs. Energy in SMD Planes; Tower cluster E_{T}; SMD Energy (U+V)",100,0.,100.,500,0.,1000.);
+  hE[215]=h=new TH2F("muEclustET_esmdNhit","Tower cluster E_{T} vs. Number of hit strips; Tower cluster E_{T}; Nhit (U+V)",100,0.,100.,100,0.,100.);
+  hE[216]=h=new TH2F("muEsmdWidth","Width of of shower shape; U plane; V plane",50,0.,5.,50,0.,5.);
+  hE[217]=h=new TH2F("muEsmdCrossXY","Difference in SMD XP (track - SMD); X position; Y postion",50,-2.5,2.5,50,-2.5,2.5);
+  hE[218]=h=new TH2F("muEsmdCrossEtaPhi","Difference in SMD XP (track - SMD); Eta position; Phi postion",50,-.05,.05,50,-.05,.05);
+  hE[219]=h=new TH2F("muEsmdRatioUV","Ratio of 7 strip sum to 20 strip sum; U ratio ; V ratio",50,0.,1.,50,0.,1.);
+  hE[220]=h=new TH2F("muEclustET_esmdRatio","Tower cluster E_{T} vs. Ratio of 7 strip sum to 20 strip sum (U+V); Tower cluster E_{T} ; U+V ratio",100,0.,100.,50,0.,1.);
+
+  hE[221]=h=new TH2F("muEpre2_pre1","Preshower 2 vs Preshower 1 Energy; Pre1 ene; Pre2 ene",50,0.,.02,50,0.,.05);
+  hE[222]=h=new TH2F("muEpost_pre12","Postshower vs Preshower 1+2; Pre1+2 ene; Post ene",50,0.,.1,60,0.,.03);
+  hE[223]=h=new TH2F("muEclustET_pre12","Preshower 1+2 vs Tower cluster E_{T}; Tower cluster E_{T}; Pre1+2 ene",100,0.,100.,50,0.,.1);
+  hE[224]=h=new TH2F("muEclustET_post"," Postshower vs Tower cluster E_{T}; Tower cluster E_{T}; Post ene",100,0.,100.,60,0.,.03);
+  hE[225]=h=new TH2F("muEsmdEne_pre12","SMD Energy vs Preshower 1+2; Pre1+2 ene; SMD energy",50.,0.,.1,100,0.,1000.);
+  hE[226]=h=new TH2F("muEsmdEne_post","SMD Energy vs Postshower; Post ene; SMD energy",60.,0.,.03,500,0.,1000.);
+  hE[227]=h=new TH2F("muEclustET_esmdEneSum7","Tower cluster E_{T} vs. Energy in SMD Planes (7 strip sum); Tower cluster E_{T}; SMD Energy (U+V)",100,0.,100.,500,0.,1000.);
+  hE[228]=h=new TH2F("muEclustET_esmdMaxADC","Tower cluster E_{T} vs. ESMD Max ADC; Tower cluster E_{T}; SMD Max ADC",100,0.,100.,420,0.,4200.);
+
+  hE[230]=h=new TH2F("muEsPtBalance_clustPassSMD","Endcap: sPtBalance vs cluster ET (pass SMD ratio cut); 2x2 Cluster ET (GeV); signed Pt balance (GeV)",100,0,100,100,-100,100);
+  hE[231]=h=new TH2F("muEsPtBalance2_clustPassSMD","Endcap: sPtBalance2 vs cluster ET (pass SMD ratio cut); 2x2 Cluster ET (GeV); signed Pt balance 2 (GeV)",100,0,100,100,-100,100);
+
+  hE[232]=h=new TH2F("muEsPtBalance_clustFailSMD","Endcap: sPtBalance vs cluster ET (fail SMD ratio cut); 2x2 Cluster ET (GeV); signed Pt balance (GeV)",100,0,100,100,-100,100);
+  hE[233]=h=new TH2F("muEsPtBalance2_clustFailSMD","Endcap: sPtBalance2 vs cluster ET (fail SMD ratio cut); 2x2 Cluster ET (GeV); signed Pt balance 2 (GeV)",100,0,100,100,-100,100);
+
+  hE[235]=h=new TH2F("muEsmdRatioUVfailPtBal_highET","Ratio of 7 strip sum to 20 strip sum; U ratio ; V ratio",50,0.,1.,50,0.,1.);
+  hE[236]=h=new TH2F("muEclustET_esmdRatiofailPtBal","Tower cluster E_{T} vs. Ratio of 7 strip sum to 20 strip sum (U+V); Tower cluster E_{T} ; U+V ratio",100,0.,100.,50,0.,1.);
+
+  hE[237]=h=new TH2F("muEsPtBalance_esmdRatio_highET","sPtBalance vs. Ratio of 7 strip sum to 20 strip sum (U+V); sPtBalance ; U+V ratio",100,-100.,100.,50,0.,1.);
+  hE[238]=h=new TH2F("muEsPtBalance2_esmdRatio_highET","sPtBalance2 vs. Ratio of 7 strip sum to 20 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,50,0.,1.);
+
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHE;i++) {

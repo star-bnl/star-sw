@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.cxx,v 1.3 2012/06/25 20:53:29 stevens4 Exp $
+// $Id: WeventDisplay.cxx,v 1.4 2012/08/21 18:29:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -287,7 +287,7 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
 	  tline=new TLine(end1.X(),end1.Y(),end2.X(),end2.Y());
 	  if(iuv==0) tline->SetLineColor(kBlue-nSub);
 	  if(iuv==1) tline->SetLineColor(kGreen-nSub);
-	  if(wMK->wEve->esmd.ene[secLoop[isec]][iuv][k]*1e3 > 100) tline->SetLineColor(2);
+	  if(wMK->wEve->esmd.adc[secLoop[isec]][iuv][k] > 3896) tline->SetLineColor(2); //saturation with ped=200
 	  tline->Draw(); Lx->Add(tline);
 	}
       }
@@ -597,6 +597,9 @@ WeventDisplay::export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack m
 
 
 // $Log: WeventDisplay.cxx,v $
+// Revision 1.4  2012/08/21 18:29:16  stevens4
+// Updates to endcap W selection using ESMD strip ratio
+//
 // Revision 1.3  2012/06/25 20:53:29  stevens4
 // algo and histo cleanup
 //

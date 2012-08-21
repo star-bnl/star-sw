@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.12 2012/08/21 17:40:09 stevens4 Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.13 2012/08/21 18:29:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -504,7 +504,7 @@ St2011WMaker::accessBTOW(){
 //________________________________________________
 void
 St2011WMaker::fillTowHit(bool vert){
-  if(!wEve->l2bitET) return; //only barrel triggers
+  if(!wEve->l2EbitET) return; //only barrel triggers
 
   //find highest rank vertex
   float maxRank=0; uint maxRankId=0;
@@ -689,6 +689,9 @@ St2011WMaker::accessBSMD(){
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.13  2012/08/21 18:29:16  stevens4
+//Updates to endcap W selection using ESMD strip ratio
+//
 //Revision 1.12  2012/08/21 17:40:09  stevens4
 //Revert to previous version
 //

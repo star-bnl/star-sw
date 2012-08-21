@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.10 2012/08/07 21:06:38 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.11 2012/08/21 18:29:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -263,7 +263,8 @@ St2011WMaker::findPtBalance(){
       T.ptBalance+=clustPt;
       T.sPtBalance = T.ptBalance.Perp();
       if(T.ptBalance.Dot(clustPt)<0) T.sPtBalance *=-1.;
-      
+      T.sPtBalance2 = T.ptBalance.Dot(clustPt)/T.cluster.ET; //invariant
+
       //****loop over branch without EEMC****
       mJets = getJets(mJetTreeBranch_noEEMC); 
       if(mJetTreeChain) mJets = getJetsTreeAnalysis(mJetTreeBranch_noEEMC);
@@ -278,6 +279,7 @@ St2011WMaker::findPtBalance(){
       T.ptBalance_noEEMC+=clustPt;
       T.sPtBalance_noEEMC = T.ptBalance_noEEMC.Perp();
       if(T.ptBalance_noEEMC.Dot(clustPt)<0) T.sPtBalance_noEEMC *=-1.;
+      T.sPtBalance_noEEMC2 = T.ptBalance_noEEMC.Dot(clustPt)/T.cluster.ET; //invariant
 
     }// end of loop over tracks
   }// end of loop over vertices
@@ -657,6 +659,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.11  2012/08/21 18:29:16  stevens4
+// Updates to endcap W selection using ESMD strip ratio
+//
 // Revision 1.10  2012/08/07 21:06:38  stevens4
 // update to tree analysis to produce independent histos in a TDirectory for each eta-bin
 //
