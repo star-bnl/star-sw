@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.7 2012/08/21 18:29:16 stevens4 Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.8 2012/08/21 21:28:22 stevens4 Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -75,9 +75,9 @@ St2011WMaker::initEHistos(){
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kGreen); h->SetLineWidth(2);
   char keyT[][200]={"flag","pt1","#eta>0.7","nHit","Hfrac","Rin","Rout","ptOK","@E","CL","fr24",
-                    "#Delta R","noNear","noAway","goldW"};
+                    "#Delta R","noNear","smdRatio","noAway","goldW"};
 
-  for(int i=0;i<15;i++) h->Fill(keyT[i],0.); // preset the order of keys
+  for(int i=0;i<16;i++) h->Fill(keyT[i],0.); // preset the order of keys
 
 
   hE[21]=h=new TH1F("muETrNfit","Endcap: primary track  in-selection & vertexZ; nFitPoints",50,0,50);

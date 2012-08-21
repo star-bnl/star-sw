@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.h,v 1.3 2012/08/07 21:06:38 stevens4 Exp $
+// $Id: St2011pubSpinMaker.h,v 1.4 2012/08/21 21:28:22 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -32,6 +32,9 @@ class St2011pubSpinMaker : public StMaker {
   float par_leptonEta1, par_leptonEta2; // narrow the range
   int par_useNoEEMC;
 
+  float parE_QPTlow,parE_QPThighET0,parE_QPThighET1, parE_QPThighA ,parE_QPThighB; // cuts to drop questionable reco charge charges
+  float parE_leptonEta1, parE_leptonEta2; // narrow the range
+
   St2011WMaker *wMK; // W-algo maker with all data
   TString core; // name attached to all histos
   TString coreTitle; // eta bin name added title of key histos
@@ -39,9 +42,11 @@ class St2011pubSpinMaker : public StMaker {
   // histograms
   TObjArray *HList;
   enum {mxHA=32}; TH1 * hA[mxHA];
+  enum {mxHE=32}; TH1 * hE[mxHE];
   
   void initHistos();
-  void bXingSort();  
+  void bXingSort();
+  void bXingSortEndcap();
  public: 
   St2011pubSpinMaker(const char *name="2011pubSpin", const char* etaName="Eta7");
   virtual       ~St2011pubSpinMaker(){};
@@ -59,7 +64,7 @@ class St2011pubSpinMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.3 2012/08/07 21:06:38 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.4 2012/08/21 21:28:22 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -70,6 +75,9 @@ class St2011pubSpinMaker : public StMaker {
 
 
 // $Log: St2011pubSpinMaker.h,v $
+// Revision 1.4  2012/08/21 21:28:22  stevens4
+// Add spin sorting for endcap Ws
+//
 // Revision 1.3  2012/08/07 21:06:38  stevens4
 // update to tree analysis to produce independent histos in a TDirectory for each eta-bin
 //
