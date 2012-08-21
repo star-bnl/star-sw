@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.14 2012/08/21 17:40:09 stevens4 Exp $
+// $Id: St2011WMaker.cxx,v 1.15 2012/08/21 18:29:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -114,6 +114,7 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   parE_trackRin=120;  parE_trackRout=70; // cm
   parE_trackPt=7.;//GeV 
   parE_nSmdStrip=20;
+  parE_smdRatio=0.6;
   parE_highET=25.; // (GeV), cut-off for final Endcap W-cluster 
 
   //... search for W's
@@ -650,6 +651,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.15  2012/08/21 18:29:16  stevens4
+// Updates to endcap W selection using ESMD strip ratio
+//
 // Revision 1.14  2012/08/21 17:40:09  stevens4
 // Revert to previous version
 //

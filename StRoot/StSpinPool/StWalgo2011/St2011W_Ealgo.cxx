@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.8 2012/08/07 21:06:38 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.9 2012/08/21 18:29:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -22,7 +22,7 @@ St2011WMaker::findEndcap_W_boson(){
   if(!wEve->l2EbitET) return;
 
   //printf("========= findEndcap_W_boson() \n");
-  int nNoNear=0,nNoAway=0,nGoldW=0;
+  int nNoNear=0,nSmdRatio=0,nNoAway=0,nGoldW=0,nGoldWp=0,nGoldWn=0;
   
   // search for  Ws ............
   for(uint iv=0;iv<wEve->vertex.size();iv++) {
@@ -64,6 +64,9 @@ St2011WMaker::findEndcap_W_boson(){
       hE[134]->Fill(T.cluster.ET,T.sPtBalance);
       hE[135]->Fill(T.awayTotET,T.sPtBalance);
       
+      //alternate sPtBalance
+      hE[141]->Fill(T.sPtBalance,T.sPtBalance-T.sPtBalance2);
+
       //plots for backg sub yield
       if(T.sPtBalance>parE_ptBalance ) {
         hE[136]->Fill(T.cluster.ET);//signal
@@ -82,12 +85,63 @@ St2011WMaker::findEndcap_W_boson(){
         }
       }
 
+      //event display
       if(T.sPtBalance>parE_ptBalance){/***************************/
         printf("\n WWWWWWWWWWWWWWWWWWWWW  Endcap \n");
         wDisaply->exportEvent( "WE", V, T, iv);
         wEve->print();
       }/***************************/
-
+      
+      //some ESMD QA plots
+      if(T.sPtBalance>parE_ptBalance){
+        hE[214]->Fill(T.cluster.ET,T.esmdE[0]+T.esmdE[1]);
+        hE[215]->Fill(T.cluster.ET,T.esmdNhit[0]+T.esmdNhit[1]);
+        hE[220]->Fill(T.cluster.ET,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+        hE[223]->Fill(T.cluster.ET,T.enePre1+T.enePre2);
+        hE[224]->Fill(T.cluster.ET,T.enePost);
+        hE[227]->Fill(T.cluster.ET,T.esmdEsum7[0]+T.esmdEsum7[1]);
+        hE[228]->Fill(T.cluster.ET,T.esmdMaxADC);
+	
+        if(T.cluster.ET>parE_highET) { //most W like
+          hE[211]->Fill(T.esmdNhit[0],T.esmdNhit[1]);
+          hE[212]->Fill(T.esmdE[0],T.esmdE[1]);
+          hE[213]->Fill(T.esmdNhit[0]+T.esmdNhit[1],T.esmdE[0]+T.esmdE[1]);
+          hE[216]->Fill(T.esmdShowerWidth[0],T.esmdShowerWidth[1]);
+          hE[217]->Fill(T.pointTower.R.X()-T.esmdXPcentroid.X(),T.pointTower.R.Y()-T.esmdXPcentroid.Y());
+          hE[218]->Fill(T.pointTower.R.Eta()-T.esmdXPcentroid.Eta(),T.pointTower.R.Phi()-T.esmdXPcentroid.Phi());
+          hE[219]->Fill(T.esmdEsum7[0]/T.esmdE[0],T.esmdEsum7[1]/T.esmdE[1]);
+	  
+          hE[221]->Fill(T.enePre1,T.enePre2);
+          hE[222]->Fill(T.enePre1+T.enePre2,T.enePost);
+          hE[225]->Fill(T.enePre1+T.enePre2,T.esmdE[0]+T.esmdE[1]);
+          hE[226]->Fill(T.enePost,T.esmdE[0]+T.esmdE[1]);
+        }
+      }
+      else { //mostly QCD
+        if(T.cluster.ET>parE_highET) hE[235]->Fill(T.esmdEsum7[0]/T.esmdE[0],T.esmdEsum7[1]/T.esmdE[1]);
+        hE[236]->Fill(T.cluster.ET,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+      }
+      
+      //correlate ratio with sPtBal for goldWs (possibly use for background)
+      if(T.cluster.ET>parE_highET){
+        hE[237]->Fill(T.sPtBalance,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+        hE[238]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+      }
+      
+      //cut on ESMD ratio
+      if(T.esmdEsum7[0]/T.esmdE[0] < parE_smdRatio || T.esmdEsum7[1]/T.esmdE[1] < parE_smdRatio){
+        hE[232]->Fill(T.cluster.ET,T.sPtBalance);
+        hE[233]->Fill(T.cluster.ET,T.sPtBalance2);
+        continue;
+      }
+      
+      hE[20]->Fill("smdRatio",1.0);
+      nSmdRatio++;
+      
+      hE[113]->Fill( T.cluster.ET);//for Joe
+      hE[230]->Fill(T.cluster.ET,T.sPtBalance);
+      hE[231]->Fill(T.cluster.ET,T.sPtBalance2);
+      
       //put final W cut here
       if(T.sPtBalance<parE_ptBalance)  continue;
       //::::::::::::::::::::::::::::::::::::::::::::::::
@@ -96,7 +150,7 @@ St2011WMaker::findEndcap_W_boson(){
 
       hE[20]->Fill("noAway",1.0);
       nNoAway++;
-      hE[113]->Fill( T.cluster.ET);//for Joe
+      hE[114]->Fill( T.cluster.ET);//for Joe
 
       hE[90]->Fill( T.cluster.ET);
       hE[92]->Fill( T.cluster.ET,T.glMuTrack->dEdx()*1e6);
@@ -114,7 +168,7 @@ St2011WMaker::findEndcap_W_boson(){
       hE[200]->Fill(ET,g_chrg/glTr->pt());
       hE[201]->Fill(ET,p_chrg/prTr->pt());
 
-      if(T.cluster.ET<par_highET) continue;  // very likely Ws
+      if(T.cluster.ET<parE_highET) continue;  // very likely Ws
       hE[91]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.position.Phi());
       hE[96]->Fill(V.id);
       hE[97]->Fill(V.funnyRank);
@@ -124,13 +178,17 @@ St2011WMaker::findEndcap_W_boson(){
       hE[190+k]->Fill(T.prMuTrack->eta(),T.cluster.ET);
       hE[20]->Fill("goldW",1.);
       nGoldW++;
+      if(T.prMuTrack->charge()>0) nGoldWp++;
+      else if(T.prMuTrack->charge()<0) nGoldWn++;
 
     }// loop over tracks
   }// loop over vertices
   if(nNoNear>0) hE[0]->Fill("noNear",1.);
+  if(nSmdRatio>0) hE[0]->Fill("noSmdRatio",1.);
   if(nNoAway>0) hE[0]->Fill("noAway",1.);
-  if(nGoldW>0)
-    hE[0]->Fill("goldW",1.);
+  if(nGoldW>0)  hE[0]->Fill("goldW",1.);
+  if(nGoldWp>0) hE[0]->Fill("goldW+",1.);
+  if(nGoldWn>0) hE[0]->Fill("goldW-",1.);
 
 }
 
@@ -164,9 +222,7 @@ St2011WMaker::analyzeESMD(){
 	
         Float_t dcaGlob; //global extrapolation to smd plane
 	const StructEEmcStrip *stripPtrGlob = geoSmd->getDca2Strip(iuv,T.pointTower.Rglob,&dcaGlob); // find pointed strip
-	
-	int maxStripId=-1; float maxE=-1;
-	
+
         int stripId=stripPtr->stripStructId.stripId;
         int sectorId=stripPtr->stripStructId.sectorId;
         T.hitSector=sectorId;
@@ -178,13 +234,18 @@ St2011WMaker::analyzeESMD(){
         int str1=stripId - parE_nSmdStrip; if(str1<1) str1=1;
         int str2=stripId + parE_nSmdStrip; if(str2>288) str2=288;
         for(int istrip=str1; istrip<=str2; istrip++){
-          float ene=wEve->esmd.ene[sectorId-1][iuv][istrip-1]*1e3;
+          float ene = wEve->esmd.ene[sectorId-1][iuv][istrip-1]*1e3;
+	  int adc = wEve->esmd.adc[sectorId-1][iuv][istrip-1];
 	  esmdShowerHist[iuv]->SetBinContent(istrip-stripId+parE_nSmdStrip+1,ene);
 	  T.esmdShower[iuv][istrip-stripId+parE_nSmdStrip]=ene;
-          if(ene > maxE){ maxStripId=istrip; maxE=ene; }
+	  if(adc > T.esmdMaxADC){ T.esmdMaxADC=adc; }
           if(ene > 0){
-            T.esmdE[iuv]+=ene;
+            T.esmdE[iuv]+=ene; //total energy
             T.esmdNhit[iuv]++;
+	    if(abs(istrip-stripId)<4){ //7 central sum
+              //cout<<istrip<<" "<<stripId<<" "<<ene<<endl;
+              T.esmdEsum7[iuv]+=ene;
+            }
           }
         }// end loop over strips
 	
@@ -202,9 +263,6 @@ St2011WMaker::analyzeESMD(){
 
 
       } //end plane loop
-
-      //histos for track candidate
-
 
     } //end track loop
   } //end vertex loop
@@ -227,6 +285,9 @@ St2011WMaker::analyzeEPRS(){
       assert(T.cluster.nTower>0); // internal logical error
 
       //do some clustering of EPRS deposits and plot histos
+      T.enePre1 = wEve->eprs.ene[T.cluster.iPhi][T.cluster.iEta][0];
+      T.enePre2 = wEve->eprs.ene[T.cluster.iPhi][T.cluster.iEta][1];
+      T.enePost = wEve->eprs.ene[T.cluster.iPhi][T.cluster.iEta][2];
 
     }
   }
@@ -516,6 +577,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.9  2012/08/21 18:29:16  stevens4
+// Updates to endcap W selection using ESMD strip ratio
+//
 // Revision 1.8  2012/08/07 21:06:38  stevens4
 // update to tree analysis to produce independent histos in a TDirectory for each eta-bin
 //

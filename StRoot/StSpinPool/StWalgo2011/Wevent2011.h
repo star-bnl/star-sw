@@ -1,4 +1,4 @@
-// $Id: Wevent2011.h,v 1.4 2012/07/12 20:49:21 balewski Exp $
+// $Id: Wevent2011.h,v 1.5 2012/08/21 18:29:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -74,6 +74,7 @@ class WeveEleTrack { // electron track info
      
   TVector3 ptBalance,ptBalance_noEEMC;
   float sPtBalance,sPtBalance_noEEMC;// signed pT balance (GeV/c)
+  float sPtBalance2,sPtBalance_noEEMC2;// invariant
 
   TVector3 hadronicRecoil;
 
@@ -81,9 +82,13 @@ class WeveEleTrack { // electron track info
   int hitSector; int esmdGlobStrip[mxEsmdPlane];
   float esmdShower[mxEsmdPlane][41];
   float esmdDca[mxEsmdPlane]; float esmdDcaGlob[mxEsmdPlane];
-  float esmdE[mxEsmdPlane]; int esmdNhit[mxEsmdPlane];
+  float esmdE[mxEsmdPlane]; float esmdEsum7[mxEsmdPlane]; int esmdNhit[mxEsmdPlane];
   float esmdShowerCentroid[mxEsmdPlane]; float esmdShowerWidth[mxEsmdPlane];
   TVector3 esmdXPcentroid;
+  int esmdMaxADC;
+
+  //eprs cluster
+  float enePre1,enePre2,enePost;
 
   WeveEleTrack() { clear();}
   
@@ -91,14 +96,16 @@ class WeveEleTrack { // electron track info
     cluster.clear();cl4x4.clear();  isMatch2Cl=false;  primP=TVector3(0,0,0);
     prMuTrack=glMuTrack=0; 
     awayTpcPT=nearTpcPT=nearTotET=awayTotET=nearEmcET=awayEmcET=nearBtowET=awayBtowET=nearEtowET=awayEtowET=smallNearTpcPT=nearTotET_noEEMC=awayTotET_noEEMC=0; 
-    
+    enePre1=enePre2=enePost=0; esmdMaxADC=0;
+
     ptBalance=TVector3(0,0,0); ptBalance_noEEMC=TVector3(0,0,0); 
     sPtBalance=sPtBalance_noEEMC=0;
+    sPtBalance2=sPtBalance_noEEMC2=0;
 
     hadronicRecoil=TVector3(0,0,0);
 
     memset(esmdGlobStrip,-999,sizeof(esmdGlobStrip));
-    memset(esmdDca,-999.,sizeof(esmdDca)); memset(esmdDcaGlob,-999.,sizeof(esmdDcaGlob)); memset(esmdE,0.,sizeof(esmdE)); memset(esmdNhit,0,sizeof(esmdNhit)); memset(esmdShowerCentroid,999.,sizeof(esmdShowerCentroid)); memset(esmdShowerWidth,999.,sizeof(esmdShowerWidth));
+    memset(esmdDca,-999.,sizeof(esmdDca)); memset(esmdDcaGlob,-999.,sizeof(esmdDcaGlob)); memset(esmdE,0.,sizeof(esmdE)); memset(esmdEsum7,0.,sizeof(esmdEsum7)); memset(esmdNhit,0,sizeof(esmdNhit)); memset(esmdShowerCentroid,999.,sizeof(esmdShowerCentroid)); memset(esmdShowerWidth,999.,sizeof(esmdShowerWidth));
     esmdXPcentroid=TVector3(0,0,0);
 
   } 
@@ -356,6 +363,9 @@ class Wevent2011 : public TObject {
 
 
 // $Log: Wevent2011.h,v $
+// Revision 1.5  2012/08/21 18:29:16  stevens4
+// Updates to endcap W selection using ESMD strip ratio
+//
 // Revision 1.4  2012/07/12 20:49:21  balewski
 // added spin info(star: bx48, bx7, spin4) and maxHtDSM & BTOW to Wtree
 // removed dependence of spinSortingMaker from muDst

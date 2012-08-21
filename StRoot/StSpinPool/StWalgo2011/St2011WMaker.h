@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.10 2012/08/21 17:40:09 stevens4 Exp $
+// $Id: St2011WMaker.h,v 1.11 2012/08/21 18:29:16 stevens4 Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -92,6 +92,7 @@ class St2011WMaker : public StMaker {
   float par_leptonEtaLow,par_leptonEtaHigh,parE_leptonEtaLow,parE_leptonEtaHigh; //bracket acceptance 
   float parE_trackEtaMin;
   int   parE_nSmdStrip;
+  float parE_smdRatio;
         
   float par_etowScale;
   float par_btowScale;
@@ -231,7 +232,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.10 2012/08/21 17:40:09 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.11 2012/08/21 18:29:16 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -242,6 +243,9 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.11  2012/08/21 18:29:16  stevens4
+// Updates to endcap W selection using ESMD strip ratio
+//
 // Revision 1.10  2012/08/21 17:40:09  stevens4
 // Revert to previous version
 //
