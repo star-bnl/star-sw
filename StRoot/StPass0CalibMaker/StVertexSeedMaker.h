@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.18 2012/08/17 22:57:33 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.19 2012/08/22 04:52:35 genevb Exp $
  * \brief BeamLine Constraint calibration base class
  *
  * StVertexSeedMaker calculates mean primary vertex positions from
@@ -68,6 +68,7 @@
 #endif
 #include "TString.h"
 class TNtuple;
+class TNtupleD;
 class St_vertexSeed;
 class St_vertexSeedTriggers;
 
@@ -96,14 +97,14 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetMinEntries(int entries);  //minimum number of valid events for seed
    virtual void SetMaxX0Err(float err);  //maximum allowed error for x0 
    virtual void SetMaxY0Err(float err);  //maximum allowed error for y0 
-   virtual void WriteHistFile();       // Write out vertexseedhist.root file w/results
+   virtual void WriteHistFile(Bool_t writeFit);   // Write out vertexseedhist.root file w/results
    virtual void HistFileByDefault();   // Write out file on Finish
    virtual void SetVertexZmax(float zmax);  //Set max z vertex for seed calculation
    virtual void SetVertexZmin(float zmin);  //Set min z vertex for seed calculation
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.18 2012/08/17 22:57:33 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.19 2012/08/22 04:52:35 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -118,12 +119,14 @@ class StVertexSeedMaker : public StMaker {
    virtual Bool_t CheckTriggers() { return kTRUE; }
    virtual Bool_t ValidTrigger(unsigned int);
    virtual Int_t GetEventData() { return kStErr; }
+   virtual void AddResults(TNtupleD* ntup);
 
   TH1F* xdist;
   TH1F* ydist;
   TH1F* xerr;
   TH1F* yerr;
   TNtuple* resNtuple;
+  TNtupleD* parsNtuple;
   float xguess;
   float yguess;
   float zvertex;
@@ -185,8 +188,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.18 2012/08/17 22:57:33 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.19 2012/08/22 04:52:35 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.19  2012/08/22 04:52:35  genevb
+// Add BeamLine parameter ntuples to output
+//
 // Revision 1.18  2012/08/17 22:57:33  genevb
 // Add index of vertex within event to ntuple
 //
