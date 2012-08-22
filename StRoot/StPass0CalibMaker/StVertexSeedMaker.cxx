@@ -25,6 +25,8 @@
 #include "TFile.h"
 #include "TVirtualFitter.h"
 #include "TNtuple.h"
+#include "TNtupleD.h"
+#include "TTimeStamp.h"
 #include "TEventList.h"
 #include "TArrayF.h"
 #include "StTree.h"
@@ -110,6 +112,7 @@ StVertexSeedMaker::StVertexSeedMaker(const char *name,
   defDir = defaultDir;
   mTempOut = 0;
   resNtuple = 0;
+  parsNtuple = 0;
   nsize = 0;
   setArraySize(512);
   UseEventDateTime(); // By default, use the data & time from the first event
@@ -304,14 +307,13 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 
   if (writeIt) WriteTableToFile();
   else { LOG_WARN << "Not writing table!!!!!" << endm; }
-  LOG_INFO << "Mean ZDC was: " << sumzdc/((float) nverts) << endm;
 
-  if (mHistOut) WriteHistFile();
+  if (mHistOut) WriteHistFile(writeIt);
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.51 2012/08/17 22:57:33 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.52 2012/08/22 04:52:35 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -334,7 +336,22 @@ void StVertexSeedMaker::WriteTableToFile(){
   }
   ofstream *out = new ofstream(filename);
   VertexSeedTable()->SavePrimitive(*out,"");
+  if (parsNtuple) AddResults(parsNtuple);
   return;
+}
+//_____________________________________________________________________________
+void StVertexSeedMaker::AddResults(TNtupleD* ntup){
+  double datetime = ((double) date) + 1e-6*((double) time);
+  TTimeStamp dt1(date,time,0,true,0);
+  dt1.SetSec(dt1.GetSec() - 4*60*60); // convert GMT -> EDT
+  int tm = dt1.GetTime();
+  int se = tm%100; int hm = (tm-se)/100;
+  int mn = hm%100; int hr = (hm-mn)/100;
+  double days = ((double) dt1.GetDayOfYear()) +
+                ((double) ((hr*60+mn)*60+se))/(24.*60.*60.);
+  ntup->Fill(days,p[0],ep[0],p[2],ep[2],p[1],ep[1],p[3],ep[3],
+             (double) nverts, datetime, (double) fill,
+             sumzdc/((double) nverts));
 }
 //_____________________________________________________________________________
 St_vertexSeed* StVertexSeedMaker::VertexSeedTable(){
@@ -355,7 +372,7 @@ St_vertexSeed* StVertexSeedMaker::VertexSeedTable(){
   return table;
 }
 //_____________________________________________________________________________
-void StVertexSeedMaker::WriteHistFile(){
+void StVertexSeedMaker::WriteHistFile(Bool_t writeFit){
   if (resNtuple->GetEntries() == 0) {
     LOG_INFO << "Not writing histograms - no entries!!!" << endm;
     return;
@@ -386,6 +403,12 @@ void StVertexSeedMaker::WriteHistFile(){
   }
   TFile out(fileName.Data(),"UPDATE");
   GetHistList()->Write();
+  if (writeFit) {
+    TNtupleD* pars1Ntuple = new TNtupleD("BLpars","BeamLine parameters",
+    "days:x0:err_x0:y0:err_y0:dxdz:err_dxdz:dydz:err_dydz:stats:date:fill:zdc");
+    AddResults(pars1Ntuple);
+    out.Write();
+  }
   out.Close();
 }
 //_____________________________________________________________________________
@@ -557,6 +580,10 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   // vertexseedhist.DDDDDDDD.TTTTTT.root
   // where D and T are 8 and 6 digit representations of date and time
 
+  TFile* parsOut = new TFile("BLpars.root","RECREATE");
+  parsNtuple = new TNtupleD("BLpars","BeamLine parameters",
+    "days:x0:err_x0:y0:err_y0:dxdz:err_dxdz:dydz:err_dydz:stats:date:fill:zdc");
+
   const char* defaultDir = "./";
   TString dirStr = dir;
   if (!dir) dirStr = defaultDir;
@@ -641,12 +668,20 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
     currentFile = 0;
     FindResult(kFALSE);
   }
+  if (parsOut) {
+    parsOut->Write();
+    parsOut->Close();
+    parsOut = 0;
+  }
   LOG_INFO << "Examined " << nfiles << " files" << endm;
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.51 2012/08/17 22:57:33 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.52 2012/08/22 04:52:35 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.52  2012/08/22 04:52:35  genevb
+// Add BeamLine parameter ntuples to output
+//
 // Revision 1.51  2012/08/17 22:57:33  genevb
 // Add index of vertex within event to ntuple
 //
