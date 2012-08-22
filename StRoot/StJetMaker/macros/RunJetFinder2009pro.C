@@ -299,10 +299,13 @@ void RunJetFinder2009pro(int nevents = 1e7,
 
   jetmaker->addBranch("CdfMidpointR070NHits12",anapars12,CdfMidpointR070Pars);
   jetmaker->addBranch("CdfMidpointR070NHits5",anapars5,CdfMidpointR070Pars);
+  jetmaker->addBranch("CdfMidpointR070EMC",anaparsEMC,CdfMidpointR070Pars);
   jetmaker->addBranch("AntiKtR060NHits12",anapars12,AntiKtR060Pars);
   jetmaker->addBranch("AntiKtR060NHits5",anapars5,AntiKtR060Pars);
+  jetmaker->addBranch("AntiKtR060EMC",anaparsEMC,AntiKtR060Pars);
   jetmaker->addBranch("AntiKtR050NHits12",anapars12,AntiKtR050Pars);
   jetmaker->addBranch("AntiKtR050NHits5",anapars5,AntiKtR050Pars);
+  jetmaker->addBranch("AntiKtR050EMC",anaparsEMC,AntiKtR050Pars);
 
   // Run
   chain->Init();
