@@ -188,10 +188,10 @@ Int_t StFgtRawDaqReader::Make() {
 
 #if 1
 	    // year 2012 exclusions -- adjusted (bug fixed) 02/29/12 by sgliske
-            if( ( (rdo==1 && arm==1) || (rdo==2 && arm==2) || (rdo==1 && arm==4) ) && apv>4 && apv<10 ) continue;
-            if( ( (rdo==2 && arm==1) || (rdo==1 && arm==3) || (rdo==2 && arm==4) ) && apv<5 ) continue;
-            if( ( (rdo==2 && arm==1) || (rdo==1 && arm==3) || (rdo==2 && arm==4) ) && apv>16 ) continue;
-            if( ( (rdo==1 && arm==2) || (rdo==2 && arm==3) || (rdo==2 && arm==4) ) && apv>9 && apv<17) continue;
+	    //            if( ( (rdo==1 && arm==1) || (rdo==2 && arm==2) || (rdo==1 && arm==4) ) && apv>4 && apv<10 ) continue;
+	    //            if( ( (rdo==2 && arm==1) || (rdo==1 && arm==3) || (rdo==2 && arm==4) ) && apv<5 ) continue;
+	    //            if( ( (rdo==2 && arm==1) || (rdo==1 && arm==3) || (rdo==2 && arm==4) ) && apv>16 ) continue;
+	    //            if( ( (rdo==1 && arm==2) || (rdo==2 && arm==3) || (rdo==2 && arm==4) ) && apv>9 && apv<17) continue;
             // end of 2012 exclusions
 #endif 
             Short_t quad, strip;
@@ -266,15 +266,24 @@ Int_t StFgtRawDaqReader::Make() {
 void StFgtRawDaqReader::Clear( Option_t *opts )
 {
    if( mFgtCollectionPtr )
+     {
+       //       LOG_DEBUG<<"info" <<endl;
+       //       cout <<"clearing collectons...  " <<endl;
+
       mFgtCollectionPtr->Clear( opts );
+      //      cout <<"done " <<endl;
+     }
 };
 
 
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.9 2012/03/07 15:23:52 sgliske Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.10 2012/08/23 20:05:35 avossen Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.10  2012/08/23 20:05:35  avossen
+ * commented out year 12 exclusions
+ *
  * Revision 1.9  2012/03/07 15:23:52  sgliske
  * StFgtStrip no longer has a type field
  *
