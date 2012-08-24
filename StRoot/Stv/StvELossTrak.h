@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.5 2012/01/27 19:00:52 perev Exp $
+// $Id: StvELossTrak.h,v 1.6 2012/08/24 19:44:14 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -29,13 +29,16 @@ public:
   double ELossErr2(double len) 	const;
   double ELoss    () 		const	{return fTotELoss;}
   double ELossErr2() 		const	{return fTotELossErr2;}
-  double dPPdL   () 		const;	
+  double dPP     () 		const;	
+  double dPPErr2() 		const;	
+  double TotLen() 		const	{return fTotLen;}	
 
 private:
 char   fBeg[1];
 double fdEdX,fdEdXErr2;
 double fP;		//momentum 
 double fM;		//mass 
+double fE;		//energy 
 double fCharge2;	//particle charge **2
 double fFak;
 double fA,fZ,fDens,fX0;
