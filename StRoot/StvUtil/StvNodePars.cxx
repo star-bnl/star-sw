@@ -15,8 +15,8 @@ static const double recvCORRMAX  = 0.99;
 static const double chekCORRMAX  = 0.9999;
 
 static double MAXTAN = 100;
-//                              x   y   z  psi   pt  tan      cur
-static double MAXNODPARS[]   ={555,555,555,6.66,111, MAXTAN+1, .1};
+//                              x   y   z  psi   pti  tan      cur
+static double MAXNODPARS[]   ={555,555,555,6.66,100, MAXTAN+1, .1};
 //                                   h    z   a     l   ptin
 static const double MAXFITPARS[]   ={1.0 ,1.0,0.5 ,0.5 ,20  };
 static const double BIGFITPARS[]   ={0.1 ,0.1,0.1 ,0.1 ,0.01},BIGFITPART=0.01;
@@ -119,7 +119,7 @@ int StvNodePars::check(const char *pri) const
   if (fabs(_hz)>=1e-5 && fabs(tmp)> 1e-3*fabs(_curv)) {ierr=1001; 	   	goto FAILED;}
   for (int i=0;i<=kNPars;i++){if (fabs(P[i]) > MAXNODPARS[i]) {ierr = i+ 1;	goto FAILED;}} 
 
-  for (int i=-2;i<0;i++)     {if (fabs(P[i]) > 1.0001)        {ierr = i+12;	goto FAILED;}} 
+  for (int i=-2;i<0;i++)     {if (fabs(P[i]) > 1.0001)        {ierr = i+1010;	goto FAILED;}} 
   tmp = fabs(cos(_psi)-_cosCA);
   ierr = 1002; if (tmp>1e-4) 							goto FAILED;
   tmp = fabs(sin(_psi)-_sinCA);
@@ -127,6 +127,7 @@ int StvNodePars::check(const char *pri) const
   ierr = 1004; if (fabs(_z) <= 1e-10) 						goto FAILED;
   return 0;
 FAILED: 
+  assert(ierr<1000);
   if (!pri ) return ierr;
   printf("StvNodePars::check(%s) == FAILED(%d)\n",pri,ierr);  print();
   return ierr;
@@ -208,7 +209,7 @@ StvNodePars &StvNodePars::operator=(const StvNodePars& fr)
 {
   if (&fr==this)	return *this;
   memcpy(this,&fr,sizeof(*this));
-  assert(_hz);
+assert(fabs(_hz-0.00149681)<0.0001);
   return *this;
 }
 //______________________________________________________________________________
@@ -325,11 +326,11 @@ int StvNodePars::isReady( ) const
 //_____________________________________________________________________________
 StvFitPars StvNodePars::delta() const
 {
-   double space = 1e-2+((fabs(_x)+fabs(_y)+fabs(_z))/3)/200*3;
+   double space = 1.+((fabs(_x)+fabs(_y)+fabs(_z))/3)/200*3;
    StvFitPars fp;
    fp.mH = space;    fp.mZ = space; 
    fp.mA = 3.14/180*10; fp.mL = 3.14/180*10;	//ten degree
-   fp.mP = 0.01 + 0.1*fabs(_ptin);
+   fp.mP = 1./500/fabs(_hz);
    return fp;
 }
 //_____________________________________________________________________________
@@ -337,7 +338,7 @@ StvFitErrs StvNodePars::deltaErrs() const
 {
    StvFitPars dlt = delta();
    StvFitErrs fe;
-   for (int i=0,li=0;i< 5;li+=++i) {fe[li+i] = dlt[i]*dlt[i];}
+   for (int i=0,li=0;i< 5;li+=++i) {fe[li+i] = kERRFACT*dlt[i]*dlt[i];}
    fe.mHz = _hz;
    return fe;
 }
@@ -385,6 +386,14 @@ static StvFitErrs myFitErrs;
   myFitErrs.Recov();
   return myFitErrs;
 }  
+//______________________________________________________________________________
+StvFitErrs &StvFitErrs::operator=(const StvFitErrs &fr) 
+{
+  if (&fr==this)	return *this;
+  memcpy(this,&fr,sizeof(*this));
+assert(fabs(mHz-0.00149681)<0.0001);
+  return *this;
+}
 // //______________________________________________________________________________
 // void StvFitErrs::Reset(double hz)
 // {
@@ -1027,19 +1036,29 @@ void StvNodeParsTest::TestErrProp(int nEv)
 
 StvNodePars iP,iPR,oP,oPR;
 THelixTrack iH,iHR,oH,ht;
+StvFitErrs iE,oE,oER;
 
 THEmx_t oHE,oHER;
 double dia[5],*e,*er,*vtx;
+  iP._cosCA = 0.99999209770847208, iP._sinCA = 0.0039754899835676982, iP._x = 153.15599597873157, 
+  iP._y = 61.139971243562862, iP._z = -165.47715347045698, iP._psi = 0.0039755004554277579, iP._ptin = 3.000133812200076, iP._tanl = -1.1705121686438043, 
+  iP._curv = 0.0044971007445879334, iP._hz = 0.0014989667215176954;
 
+  iE.mHH = 0.008422599212098222, iE.mHZ = -0.0091916832962463078, iE.mZZ = 0.019038123366318632, iE.mHA = -0.00039625080910056564, 
+  iE.mZA = 0.00027601715939822415, iE.mAA = 3.8654618686681686e-05, iE.mHL = 0.00029431818666556691, iE.mZL = -0.00060667408715620378, 
+  iE.mAL = -1.2045956628097832e-05, iE.mLL = 2.6946791206097881e-05, iE.mHP = 0.013476203596402746, iE.mZP = -0.00058380596704562366, 
+  iE.mAP = -0.0021487322180886877, iE.mLP = 0.00016358043963761329, iE.mPP = 0.17711658543201794, iE.mHz = 0.0014989667215176954;
+#if 0
   iP._cosCA = 0.051522195951218416; iP._sinCA = -0.99867184876021664;  iP._x   = 56.80456301948584; 
   iP._y     = -179.95090442478528;  iP._z     = 16.833129146428401;    iP._psi = -1.5192513089402997; iP._ptin = -4.286089548109465; 
   iP._tanl  = -0.71077992742240803; iP._curv  = -0.0063779138641975935;iP._hz=(0.0014880496061989194);
   iP.ready();
-StvFitErrs iE,oE,oER;
+
   iE.mHH = 0.0025928369042255385;  iE.mHZ = -4.9934860023454386e-11; iE.mZZ = 0.014598355970801268; iE.mHA = -0.00059887440419442305; 
   iE.mZA = 1.0958739205478152e-11; iE.mAA = 0.00026524379894739812;  iE.mHL = 3.463001237863329e-12; iE.mZL = -0.0016525557966380938; 
   iE.mAL = 8.3669926017237923e-13; iE.mLL = 0.00041855110437868546;  iE.mHP = 0.0043962440767417576; iE.mZP = -2.904206508909407e-11; 
   iE.mAP = -0.0041320793241820105; iE.mLP = -2.5031139398137018e-12; iE.mPP = 0.78568815092933286; iE.SetHz(0.0014880496061989194);
+#endif
 
   oER*=0.;
   oHER.Clear();
@@ -1235,7 +1254,7 @@ static const char T[]="HZALP";
       double ana = mtxStv[jp][ip];
       double eps = 2*fabs(est-ana)/(stpArr[jp]/stpArr[ip]);
       if (eps>maxEps) maxEps=eps;
-      if (eps < 1e-2) continue;
+      if (eps < 1e-3) continue;
       nErr++;
       printf(" m%c%c \t%g \t%g \t%g\n",T[jp],T[ip],ana,est,eps);
   } }  
