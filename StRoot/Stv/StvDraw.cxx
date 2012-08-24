@@ -140,7 +140,7 @@ void  StvDraw::Trak(const StvTrack *tk, int dir, EDraw3DStyle sty)
     {// only short line to mark node
        const double *D = &rNode->GetFP(dir)._cosCA;
        float con[6] = {P[0]         ,P[1]         ,P[2]
-                     ,P[0]-D[1]*0.1,P[1]+D[0]*0.5,P[2]};
+                     ,P[0]-D[1]*0.1,P[1]+D[0]*0.1,P[2]};
        Line (2,con);            
     }
     lNode = rNode;
