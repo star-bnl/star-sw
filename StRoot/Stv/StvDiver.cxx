@@ -35,7 +35,18 @@ static void mybreak(int key)
 ClassImp(StvDiver)
 //_____________________________________________________________________________
 //_____________________________________________________________________________
-const StvELossData &StvDiver::GetELossData() const { return mSteps->GetELossData();}
+const StvELossData StvDiver::GetELossData() const
+{
+ StvELossData eld;
+ 
+  eld.mTheta2 = mELoss->GetTheta2();
+  eld.mOrt2   = mELoss->GetOrt2();
+  eld.mELoss  = mELoss->ELoss();
+  eld.mdPP    = mELoss->dPP();
+  eld.mdPPErr2= mELoss->dPPErr2();
+  eld.mTotLen = mELoss->TotLen();
+  return eld;
+}
 //_____________________________________________________________________________
 StvDiver::StvDiver(const char *name):TNamed(name,"")
 {
@@ -91,7 +102,8 @@ int  StvDiver::Dive()
 
   mFld->SetHz(mInpPars->_hz);	//Set initial value of mag field
   assert(fabs(mInpPars->_hz)<0.01);
-
+  mELoss->Reset();
+  int myExit = 0;
   while(1) {
     mInpPars->get(mHelix);
     mInpErrs->Get(mHelix);
@@ -99,7 +111,8 @@ int  StvDiver::Dive()
     if (!mDir) mHelix->Backward();
 
     TVirtualMC::GetMC()->ProcessEvent();
-    if (mSteps->GetExit()==kDiveBreak) break;
+    myExit = mSteps->GetExit();
+    if (myExit==kDiveBreak) break;
 
     TVector3 pos = mSteps->CurrentPosition().Vect();
     TVector3 mom = mSteps->CurrentMomentum().Vect();
@@ -123,12 +136,12 @@ int  StvDiver::Dive()
       mOutErrs->Backward();
       assert(mOutErrs->mPP>0);
     }
-    if (mSteps->GetExit() !=kDiveMany) break;
+    if (myExit !=kDiveMany) break;
     *mInpPars = *mOutPars;
     double push = (mDir)?  -1:1;
     mInpPars->move(push);
   }
-  assert (mInpPars->_ptin * mOutPars->_ptin >=0);
+  assert (myExit >1 || mInpPars->_ptin * mOutPars->_ptin >=0);
   gRandom = myRandom;
 
   return mSteps->GetExit();
@@ -234,7 +247,6 @@ StvMCStepping::~StvMCStepping()
 void StvMCStepping::Reset() 
 {
   memset(fFist,0,fMidl-fFist);
-  fELossTrak->Reset();
 }		
 //_____________________________________________________________________________
 void StvMCStepping::Print(const Option_t*) const
@@ -320,7 +332,6 @@ int StvMCStepping::BegVolume()
 {
 static int nCall=0; nCall++;
 
-  fELossTrak->Reset(); 
   fPrevMat = fMaterial;
   fELossTrak->Set(fMaterial->GetA(),fMaterial->GetZ(),fMaterial->GetDensity(), fX0);
   fELossTrak->Set(fEnterMomentum.Vect().Mag());
@@ -330,7 +341,7 @@ static int nCall=0; nCall++;
 int StvMCStepping::EndVolume()
 {
 static int nCall=0; nCall++;
-  double pos[4],mom[4];
+  double pos[4]={0},mom[4]={0};
 
   int isDca = (IsDca00(1));
   if (isDca>=kDiveBreak) return isDca;
@@ -363,25 +374,6 @@ static int nCall=0; nCall++;
   for (int j=0;j<3;j++) {delta+=fabs(Pos[j]-pos[j]);} 
   if (delta>0.3*(dL+1)) return kDiveBreak;
 
-  THEmx_t *emx = fHelix->Emx();
-  assert(emx->mCC>0);
-
-  fELossData.mTheta2 = fELossTrak->GetTheta2();
-  fELossData.mOrt2   = fELossTrak->GetOrt2();
-  fELossData.mELoss  = fELossTrak->ELoss();
-  fELossData.mELossErr2 = fELossTrak->ELossErr2();
-  fELossData.mdPPdL = fELossTrak->dPPdL();
-
-  double cosL = fHelix->GetCos();
-  double tanL = fHelix->GetTan();
-  emx->mAA+=fELossData.mTheta2/(cosL*cosL);
-  emx->mLL+=fELossData.mTheta2;
-  emx->mCC+=fELossData.mTheta2*pow(curva*tanL,2);
-  emx->mCL-=fELossData.mTheta2*curva*tanL;
-
-  emx->mHH+= fELossData.mOrt2;
-  emx->mZZ+= fELossData.mOrt2/(cosL*cosL);
-//  double eerr2= fELossTrak->ELossErr2();
   fHelix->Set(pos,mom,curva);
   return isDca;
 }
@@ -505,7 +497,7 @@ int StvMCPrimaryGenerator::Fun()
  // Particle type
  int pdg  = (mPars->getCharge()>0)? gMyPiPdg:-gMyPiPdg;
  // Particle momentum
- double p[3];
+ double p[3]={0};
  mPars->getMom(p);
 
  if (!mDir) { pdg = -pdg; p[0]=-p[0]; p[1]=-p[1];p[2]=-p[2];}

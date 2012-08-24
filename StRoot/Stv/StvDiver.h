@@ -31,7 +31,7 @@ void Set(StvNodePars *inpar,const StvFitErrs *inerr,int idir);
 void Set(StvNodePars *otpar,      StvFitErrs *oterr,StvFitDers *deriv);
 void SetSkip(int skip=1);
 double GetLength() const;
-const StvELossData &GetELossData() const;
+const StvELossData GetELossData() const;
 void SetRZmax(double rMax,double zMax); 
 
 protected:
@@ -85,7 +85,6 @@ void Set(THelixTrack *helx )	{fHelix    = helx ;}
 void Set(StvHlxDers  *deriv)	{fDeriv    = deriv;}
 void Set(StvMCField  *field)	{fField    = field;}
 void SetSkip(int skip=1)	{fSkip     = skip ;}
-const StvELossData &GetELossData() const { return fELossData;}
 
 
  int BegVolume();
@@ -111,7 +110,6 @@ char fMidl[1];
 THelixTrack  *fHelix;
 StvHlxDers     *fDeriv;		//Derivative matrix in THelixTrack notation
 StvELossTrak *fELossTrak;	//Energy loss calculator
-StvELossData  fELossData;	//Energy loss data
 StvMCField   *fField;		//Mag field calculator
 const TGeoMaterial *fPrevMat;
 char fLast[1];
