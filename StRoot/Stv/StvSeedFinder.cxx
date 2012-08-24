@@ -96,10 +96,13 @@ const double BAD_RHO=0.1;
 #endif // APPROX_DEBUG
   if (Xi2>BAD_XI2) return 0; //Xi2 too bad, no updates
   if (fabs(circ.GetRho()) >BAD_RHO) return 0;
-
-  const float *fx = fSeedHits[0]->x();
+  int startSeed = 0;
+  if (fHelix.Pos()[0]*fHelix.Dir()[0]+fHelix.Pos()[1]*fHelix.Dir()[1]>0) {
+    fHelix.Backward(); startSeed = fSeedHits.size()-1;
+  }
+  const float *fx = fSeedHits[startSeed]->x();
   const double dx[3]={fx[0],fx[1],fx[2]};
-  double l = fHelix.Path(dx); fHelix.Move(l);
+  double l = fHelix.Path(dx); fHelix.Move(l*1.2);
   return &fHelix;
 }    
 //_____________________________________________________________________________
