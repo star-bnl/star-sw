@@ -18,19 +18,23 @@ StvFitter *StvFitter::mgFitter=0;
 #define DDOT(a,b,c) ((a[0]-b[0])*c[0]+(a[1]-b[1])*c[1]+(a[2]-b[2])*c[2])
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
 enum {kDeltaFactor = 3};
-
 static inline double MyXi2(const double G[3],double dA,double dB)  
 {
   double Gdet = G[0]*G[2]-G[1]*G[1];
   return  (G[2]*dA*dA-2*G[1]*dA*dB+G[0]*dB*dB)/Gdet;
 }
+double JoinTwoT(int nP1,const double *P1,const double *E1
+               ,int nP2,const double *P2,const double *E2
+	               ,      double *PJ,      double *EJ);
 //______________________________________________________________________________
 double JoinTwo(int nP1,const double *P1,const double *E1
               ,int nP2,const double *P2,const double *E2
-	               ,      double *PJ,      double *EJ)
+	               ,     double *PJ,      double *EJ)
 {
+static int nCall = 0;  nCall++;
+StvDebug::Break(nCall);
   assert(nP1<=nP2);
-//int nE1 = nP1*(nP1+1)/2;
+  int nE1 = nP1*(nP1+1)/2;
   int nE2 = nP2*(nP2+1)/2;
   TArrayD ard(nE2*5+nP2*3);
   double *a = ard.GetArray();  
@@ -49,18 +53,30 @@ double JoinTwo(int nP1,const double *P1,const double *E1
   TCL::vadd (E1i,E2i,EJi ,nE2);		//EJi = E1i+E2i
   TCL::trsinv(EJi,EJm,nP2);		//EJ = 1/EJi
   TCL::vsub (P1 ,P2 ,Pdif,nP1);		//Pdif = P1-P2
-  TCL::trqsq(E2i,EJm,ERi ,nP2);		//ERi = E2i*EJi*E2i
-  TCL::vsub (E2i,ERi,ERi ,nE2);         //ERi = E2i- E2i*EJi*E2i == 1/(E1+E2)
+  TCL::trqsq(E1i,EJm,ERi ,nP1);		//ERi = E1i*EJm*E1i
+  TCL::vsub (E1i,ERi,ERi ,nE1);         //ERi = E1i- E1i*EJi*E1i == 1/(E1+E2)
   double chi2;
   TCL::trasat(Pdif,ERi,&chi2,1,nP1); 
-  if (!PJ) return chi2;
 
+  double PJt[5],EJt[15];
+  double chi2T =JoinTwoT(nP1,P1,E1,nP2,P2,E2,PJt,EJt);
+  assert(fabs(chi2-chi2T) <1e-4*(chi2+chi2T+1));
+  if (!PJ)      return chi2;
+  if (chi2>=kExtraBigXi2) return chi2;
   TCL::ucopy(EJm,EJ,nE2);		//EJ = 1/EJi
   
   TCL::trsa(E1i,P1,P1J,nP1,1);		//P1J = E1i*P1
   TCL::trsa(E2i,P2,P2J,nP2,1);		//P2J = E2i*P2
   TCL::vadd(P2J,P1J,P2J,nP1);		//P2J = P1J+P2J
   TCL::trsa(EJ,P2J,PJ,nP2,1);		//PJ  = EJ*P3J
+
+  double dia[5];
+  for (int i=0,li=0;i< 5;li+=++i) {
+    dia[i]= sqrt(EJt[li+i]);
+    assert(fabs(PJ[i]-PJt[i])<1e-4*dia[i]);
+    for (int j=0;j<=i; j++) {
+      assert( fabs(EJ[li+j]-EJt[li+j])<(dia[i]*dia[j]));}}
+
   return chi2;
 }
 //______________________________________________________________________________
@@ -171,8 +187,6 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
   mJnPars =      0; mJnErrs =      0;
-  mDelta  = mInPars->delta();
-  mDelta*=kDeltaFactor;
 }
 //______________________________________________________________________________
 void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
@@ -184,11 +198,12 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
   mJnPars = jnPars; mJnErrs = jnErrs;
-  mDelta  = mJnPars->delta();
 }
 //______________________________________________________________________________
 void StvFitter::Prep()
 {
+  mDelta  = mInPars->delta();
+  mDelta *= kDeltaFactor;
   mHit   = 0; mHitPlane = 0;
   double myTan = mInPars->_tanl;
   mCos2L = 1./(1+myTan*myTan);
@@ -281,24 +296,40 @@ double StvFitter::Xi2(const StvHit *hit)
 //______________________________________________________________________________
 double StvFitter::Xi2()
 {
+  double inErr = mInErrs->mHH+mInErrs->mZZ;
+  double jnErr = mJnErrs->mHH+mJnErrs->mZZ;
+  if (jnErr>inErr) {//Not good order
+    const StvNodePars *swp = mInPars; mInPars=mJnPars; mJnPars=swp;
+    const StvFitErrs  *swe = mInErrs; mInErrs=mJnErrs; mJnErrs=swe;
+  }
   StvFitPars F   = (*mInPars-*mJnPars);
   double     Zero[5]= {0};
   double myXi2 = JoinTwo(5,F.Arr()    ,mInErrs->Arr()
                         ,5,Zero       ,mJnErrs->Arr()
 		        ,mQQPars.Arr(),mQQErrs.Arr());
-  if (IsTooBig(mQQPars)) myXi2 = 1e11;
+  mQQErrs.mHz = mInPars->_hz;
   return myXi2;
 }  
 //______________________________________________________________________________
 int StvFitter::Update()
 {
 static int nCall=0; nCall++;
-
+StvDebug::Break(nCall);
+  int ifail = 0;
   switch (mKase) {
-    case 0: break;		//Hit+Track
-    case 1: return Jpdate();	//Track join
-    case 2: return Vpdate();	//Vertex+track
+    case 0: ifail = Hpdate(); 	break;		//Hit+Track
+    case 1: ifail = Jpdate();	break; 		//Track join
+    case 2: ifail = Vpdate();	break;		//Vertex+track
   }
+  
+  if (ifail) return ifail;
+  if (mOtPars->check()) return 2; 
+  return 0;
+}
+//______________________________________________________________________________
+int StvFitter::Hpdate()
+{
+///		this is Update for track+hit fit
 		
   mTkErrs = *mInErrs;
 
@@ -312,20 +343,26 @@ static int nCall=0; nCall++;
   double myXi2 = JoinTwo(2,myHitPars.Arr(),myHitErrs.Arr()
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
 		        ,  myJrkPars.Arr(),mOtErrs->Arr());
-  assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2+1));
+  if (myXi2>kExtraBigXi2) return 1313;
+  assert(fabs(myXi2-mXi2)<1e-4*(myXi2+mXi2+1));
   assert(mOtErrs->MaxCorr()<1);
 //   assert(fabs(myJrkPars.mH) <3.);
 //   assert(fabs(myJrkPars.mZ) <3.);
-
-   if (IsTooBig(myJrkPars)) return 1;
+//  assert(myHitPars.mH*myJrkPars.mH+myHitPars.mZ*myJrkPars.mZ>0);
+  int ierr = 0;
+  for (int i=0;i<5;i++) {
+    if (myJrkPars[i]<-mDelta[i]) {ierr++; myJrkPars[i]= -mDelta[i];}
+    if (myJrkPars[i]> mDelta[i]) {ierr++; myJrkPars[i]=  mDelta[i];}
+  }
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
    mOtErrs->SetHz(mOtPars->_hz);
-  return 0;
+  return ierr!=0;
 }  
 //______________________________________________________________________________
 int StvFitter::Vpdate()
 {
+///		this is Update for track+vertex fit
 static int nCall=0; nCall++;
 
   mTkErrs = *mInErrs;
@@ -339,7 +376,7 @@ static int nCall=0; nCall++;
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
 		        ,  myJrkPars.Arr(),mOtErrs->Arr());
   if (myXi2){}
-//assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
+//assert(fabs(myXi2-mXi2)<1e-4*(myXi2+mXi2));
   assert(fabs(myJrkPars[0]-myHitPars[0])<1e-6);
   assert(fabs(myJrkPars[1]-myHitPars[1])<1e-6);
   *mOtPars = mTkPars;
@@ -351,20 +388,30 @@ static int nCall=0; nCall++;
 //______________________________________________________________________________
 int StvFitter::Jpdate()
 {
+///		this is Update for sub track+sub track fit (join)
+  int ierr = 0;
+  for (int i=0;i<5;i++) {
+    if (mQQPars[i]<-mDelta[i]) {ierr++; mQQPars[i]= -mDelta[i];}
+    if (mQQPars[i]> mDelta[i]) {ierr++; mQQPars[i]=  mDelta[i];}
+  }
   *mOtPars = *mJnPars; 
   *mOtPars+=  mQQPars;
-
-//  assert(!mOtPars->check());
   *mOtErrs =  mQQErrs;   
    mOtErrs->SetHz(mOtPars->_hz);
-   if (IsTooBig(mQQPars)) return 1;
-  return 0;
+  return ierr!=0;
 }
 //______________________________________________________________________________
-int StvFitter::IsTooBig(StvFitPars &fp) const
+double StvFitter::TooBig(StvFitPars &fp, int *mask) const
 {
-  for (int i=0;i<5;i++) { if (fabs(fp[i]) > mDelta[i]) return i+1;}
-  return 0;
+  double fakt = 0;
+  int msk=0;
+  for (int i=0;i<5;i++) { 
+    double f = fabs(fp[i])/mDelta[i];
+    if (fakt>f) continue;
+    fakt=f; msk|= 1<<i;
+  }
+  if (mask) *mask = msk;
+  return fakt;
 }
 #if 0
 //______________________________________________________________________________
@@ -380,7 +427,7 @@ static int nCall =0; nCall++;
   assert(nP1<=nP2);
   int nE1 = nP1*(nP1+1)/2;
   int nE2 = nP2*(nP2+1)/2;
-  TArrayD ard(nE2*6+nP2*nP2+nP1*nP2);
+  TArrayD ard(nE2*6+2*nP2*nP2);
   double *a = ard.GetArray();  
   double *sumE 		= (a);
   double *sumEI 	= (a+=nE2);
@@ -389,6 +436,8 @@ static int nCall =0; nCall++;
   double *sumEIsubP	= (a+=nE2);
   double *E2U           = (a+=nE2);
   double *E2UsumEI      = (a+=nP2*nP2);
+  a+=nP2*nP2);
+  assert(a-ard.GetArray()<=ard.GetSize());
 
   double chi2=3e33;
 
@@ -416,11 +465,11 @@ static int nCall =0; nCall++;
     if (!mode) {
      Xi2X = JoinTwoX(nP1,P1,E1,nP2,P2,E2,0,0);
      Xi2T = JoinTwoT(nP1,P1,E1,nP2,P2,E2,0,0);
-    assert(fabs(Xi2X-Xi2T) < (Xi2X+Xi2T+0.1)*1e-3);
+    assert(fabs(Xi2X-Xi2T) < (Xi2X+Xi2T+0.1)*1e-4);
     } else {
      Xi2T = JoinVtx(nP1,P1,E1,nP2,P2,E2,0,0);
     }
-    assert(fabs(chi2-Xi2T) < (chi2+Xi2T+0.1)*1e-3);
+    assert(fabs(chi2-Xi2T) < (chi2+Xi2T+0.1)*1e-4);
   if (!PJ) return chi2;
   TCL::tras(subP     ,sumEI,sumEIsubP,1,nP1);
   TCL::tras(sumEIsubP,E2   ,PJ       ,1,nP2);
@@ -443,14 +492,14 @@ static int nCall =0; nCall++;
     }
      
     for (int i=0;i<5;i++) {
-      assert (fabs( PJ[i]-PJT[i])<1e-1*(fabs(PJT[i]+0.1)));
+      assert (fabs( PJ[i]-PJT[i])<1e-4*(fabs(PJT[i]+0.1)));
     }
     for (int i=0;i<15;i++) {
       assert (fabs(EJX[i]-EJT[i])<1e-5*(fabs(EJT[i]+0.1)));
     }
 
     for (int i=0;i<15;i++) {
-      assert (fabs( EJ[i]-EJT[i])<1e-1*(fabs(EJT[i]+0.1)));
+      assert (fabs( EJ[i]-EJT[i])<1e-4*(fabs(EJT[i]+0.1)));
     }
    
 

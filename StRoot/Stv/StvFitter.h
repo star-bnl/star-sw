@@ -12,6 +12,8 @@ class StvNodePars;
 class StvHitErrs;
 class StHitPlane;
 class StvHitErrCalculator;
+#define kExtraBigXi2 3e3
+
 
 class StvFitter : public TNamed {
 public:	
@@ -22,19 +24,21 @@ StvFitter(const char *name="DefaultFitter");
       void    Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                  ,const StvNodePars *jnPars, const StvFitErrs *jnErrs
                  ,      StvNodePars *otPars,       StvFitErrs *otErrs);
-const double *GetHitErrs() const {return mHitErrs;}        
+         int  Failed() const 		{return mFailed;}
+const double *GetHitErrs() const 	{return mHitErrs;}        
   void Prep();
 
-double Xi2(const StvHit *hit);
-double Xi2();
+double Xi2(const StvHit *hit);	//Xi2 for hit or vertex
+double Xi2();			//Xi2 for 2 subtracks joining
 int  Update();
 static StvFitter *Inst() {return mgFitter;}	
 
 private:
-int IsTooBig(StvFitPars &fp) const;
+double TooBig(StvFitPars &fp, int *mask) const;
 private:
-int  Jpdate();
-int  Vpdate();
+int  Hpdate();		//Update Hit fit
+int  Jpdate();		//Updatejoin fit
+int  Vpdate();		//Update vertex fit
 // static double JoinTwo(int nP1,const double *P1,const double *E1
 //                      ,int nP2,const double *P2,const double *E2
 // 	             ,              double *PJ,      double *EJ
@@ -42,13 +46,14 @@ int  Vpdate();
 static void Test();
 protected:
       char         mBeg[1];
+      int          mFailed; 	//Fail flag. Something completely wrong
       int          mKase; 	//0=fit to hit,1=refit,2=fit to vertex
-const StvNodePars *mInPars;
-const StvFitErrs  *mInErrs;
-const StvNodePars *mJnPars;
-const StvFitErrs  *mJnErrs;
-      StvNodePars *mOtPars;
-      StvFitErrs  *mOtErrs;
+const StvNodePars *mInPars;	//1st input params
+const StvFitErrs  *mInErrs;	//1st input params errors
+const StvNodePars *mJnPars;	//2nd input params
+const StvFitErrs  *mJnErrs;	//2nd input params errors
+      StvNodePars *mOtPars;	//Output params
+      StvFitErrs  *mOtErrs;	//Output errors
 const StvHit      *mHit;
 const StHitPlane  *mHitPlane;
       StvHitErrCalculator *mHitErrCalc;
@@ -56,7 +61,7 @@ const StHitPlane  *mHitPlane;
       StvFitErrs   mTkErrs;
       StvFitPars   mQQPars;
       StvFitErrs   mQQErrs;
-      StvFitPars   mDelta;
+      StvFitPars   mDelta;	//typical deltas for parameters in current env
       double       mHitErrs[3];
       double	   mCos2L,mCosL,mSinL,mCosP,mSinP,mXi2,mDeltaL;
       double       mDcaT,mDcaP,mDcaL;
