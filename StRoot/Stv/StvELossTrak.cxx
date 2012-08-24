@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.6 2012/01/27 19:00:38 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.7 2012/08/24 19:44:20 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -40,8 +40,9 @@ void StvELossTrak::Set(double p)
   fP = p; if (fP>100) fP=100;
   fdEdX=0;fdEdXErr2=0;
   double p2 = fP*fP,m2 = fM*fM;
+  fE = sqrt(p2+m2);
   fFak = (14.1*14.1*(p2+m2))/(p2*p2*1e6);
-  double T = sqrt(p2+m2)-fM;
+  double T = fE-fM;
   if (fA>0) {
     fdEdX = gdrelx(fA,fZ,fDens,T,fM)*fDens*fCharge2;
     double beta2 = p2/(p2+m2);
@@ -85,10 +86,28 @@ double StvELossTrak::GetOrt2() const
   return fFak*(fMCS[2]+fTotLen*(fMCS[1]+fTotLen*fMCS[0]));
 }
 //_____________________________________________________________________________
-double StvELossTrak::dPPdL() const	
+double StvELossTrak::dPP() const	
 {
- return fTotELoss*sqrt(fP*fP+fM*fM)/(fP*fP*fTotLen);
+ return fTotELoss*fE/(fP*fP);
 }
+//_____________________________________________________________________________
+double StvELossTrak::dPPErr2() const	
+{
+ return fTotELossErr2*fE*fE/(fP*fP*fP*fP);
+}
+//_____________________________________________________________________________
+#if 0
+extern "C" void g3drelx_(float &A,float &Z    ,float &DENS
+                        ,float &T,float &HMASS,float &DEDX);
+double gdrelx(double A,double Z,double DENS,double T,double HMASS)
+{
+   float dedx;
+   float a = A, z=Z,dens = DENS,t=T, hmass=HMASS;
+   g3drelx_(a,z,dens,t,hmass,dedx);
+   return dedx;
+}
+#endif //1
+#if 1
 //______________________________________________________________________________
 //* Revision 1.1.1.1  1995/10/24 10:21:24  cernlib
 //* Geant
@@ -399,6 +418,8 @@ double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
   }
   return dedx;
 }
+#endif //0
+
 //*CMZ :  3.21/02 29/03/94  15.41.21  by  S.Giani
 //-- Author :
 //______________________________________________________________________________
