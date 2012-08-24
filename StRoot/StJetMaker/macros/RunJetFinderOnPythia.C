@@ -49,7 +49,7 @@ void RunJetFinderOnPythia(int nevents = 1000,
   // Create chain
   StChain* chain = new StChain;
 
-  // STAR database
+  // STAR database: Dummy. Not used for PYTHIA jets, but required by StJetMaker.
   St_db_Maker* starDb = new St_db_Maker("StarDb","MySQL:StarDb");
   starDb->SetDateTime(20090628,53220); // Run 10179006
 
