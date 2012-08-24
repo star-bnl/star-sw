@@ -24,7 +24,7 @@ const StvHits& StvVertexFinder::Result()
   if (mResulted) return mResult;	
   mResulted=1; mResult.clear();
   StvToolkit *kit = StvToolkit::Inst();
-  double Xd[9]; float  Xf[9];
+  double Xd[9]={0}; float  Xf[9]={0};
 
   for (int i=0;(!GetVertex(i,Xd,Xd+3));i++) {
     StvHit *hit=kit->GetVertex();

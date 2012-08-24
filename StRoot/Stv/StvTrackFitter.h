@@ -15,10 +15,10 @@ class StvFitErrs;
 class StvTrackFitter : public TNamed
 {
 public:
-  StvTrackFitter(const char *name):TNamed(name,""){fgInst=this;Clear();}
-  virtual ~StvTrackFitter()			{if(this==fgInst) fgInst=0;}
-  virtual  int Refit(StvTrack *trak,int dir,int lane, int mode=1)	=0;
-  virtual void Clear(const char *opt="")	{mNDF=0; mXi2=3e33;}
+  StvTrackFitter(const char *name);
+  virtual ~StvTrackFitter();
+  virtual  int Refit(StvTrack *trak,int dir,int lane, int mode=1)=0;
+  virtual void Clear(const char *opt="");	
   virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)=0;
   virtual  int Helix(StvTrack *trak,int mode)=0;
   virtual  int Check(StvTrack *trak) 		{return 0;}
@@ -33,11 +33,13 @@ public:
 static StvTrackFitter *Inst() {return fgInst;}
 
 protected:
+char mBeg[1];
 int    mNDF;
+StvNode *mWorstNode;
 double mXi2;
 double mWorstXi2;
 double mDca3;
-StvNode *mWorstNode;
+char mEnd[1];
 private:
 static StvTrackFitter *fgInst;
 
