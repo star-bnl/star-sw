@@ -162,6 +162,7 @@ double GetHz() const   ;//?? 	{ return mHz ;}
         double *Arr()       	{ return &mHH;}
 operator const double *() const { return &mHH;}
 operator       double *()       { return &mHH;}
+StvFitErrs &operator=(const StvFitErrs &fr) ;
   void operator*=(double f) {for (int i=0;i<kNErrs;i++){Arr()[i]*=f;};}
   void Add(const StvELossData &el,const StvNodePars &pa);
   void Backward();
@@ -234,10 +235,10 @@ public:
   double mTheta2;	//multiple scattering angle error
   double mOrt2;		//multiple scattering position error
   double mELoss;	//Energy loss
-  double mdPPdL;	//dP/P/len
-  double mELossErr2;	//Square of Energy loss error
+  double mdPP;		//dP/P
+  double mdPPErr2;	//Square error of mdPP
+  double mTotLen;	//Total length where errors accumulated
 public:
-  void Clear() { mTheta2=0; mOrt2=0;mELoss=0;mELossErr2=0; }
 
 };
 //------------------------------------------------------------------------------
@@ -291,12 +292,13 @@ inline void StvNodePars::reverse()
  _tanl  = -_tanl ; _curv = -_curv ; _ptin = -_ptin;
 }
 //------------------------------------------------------------------------------
-inline void StvFitErrs::Add(const StvELossData &el,const StvNodePars &)
+inline void StvFitErrs::Add(const StvELossData &el,const StvNodePars &pa)
 {    
   mAA+= el.mTheta2;
   mLL+= el.mTheta2;
   mHH+= el.mOrt2;
   mZZ+= el.mOrt2;
+  mPP+= el.mdPPErr2*(pa._ptin*pa._ptin);
 }
 
 #endif
