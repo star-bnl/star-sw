@@ -94,14 +94,15 @@ StvHit *mHit;
 ///  Z mag field in units PGev = Hz*Rcm
   mutable double mHz;
 ///  indices of arrays 0=moving in, 1=moving out,2=join result of in & out
-  StvNodePars mPP[2]; 	// Predicted Parameters
   StvNodePars mFP[3];   // Fitted    Parameters
-  StvFitErrs  mPE[2];	// Predicted errors
+  StvNodePars mPP[2]; 	// Predicted Parameters
   StvFitErrs  mFE[3];	// Fitted    errors
+  StvFitErrs  mPE[2];	// Predicted errors
   StvFitDers  mDer[2];  // Derivative matrix 0=from outer to this; 1=from this to outer
   double      mHrr[3];  // Hit errors in DCA frame
   float       mXi2[3]; 	// Xi2 of fit to hit
   float       mLen; 	// Length
+  StvNodePars mQP;   // Saved,Parameters ???????????????????????????????????????
   StvELossData mELossData; //EnergyLoss&MCS from the upper node 
   char   mEnd[1];
 public:
