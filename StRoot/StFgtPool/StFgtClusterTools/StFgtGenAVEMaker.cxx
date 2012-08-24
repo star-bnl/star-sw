@@ -54,7 +54,7 @@
 
 
 #define MAX_DIST_CHI 1.0
-#define MAX_DIST2_EFF 2.0
+#define MAX_DIST2_EFF 1.0
 #define MAX_DIST2 1.0
 
 #define MIN_NUM_POINTS 4
@@ -96,7 +96,7 @@ Bool_t StFgtGenAVEMaker::fitTheStrip(generalStrip* pStrip, generalStrip* pStripO
   (*t0)=mPulseShapePtr->GetParameter(4);
   (*chi2Ndf)=mPulseShapePtr->GetChisquare()/mPulseShapePtr->GetNDF();
   sprintf(buffer,"pulse histo_D%d_Q%d_APV%d_ev%d",iD,iq,apvBin,evtNr);
-  cout <<"histo name: "<< buffer <<endl;
+  //  cout <<"histo name: "<< buffer <<endl;
   TH1F* tmpPulseHisto=(TH1F*)mHistPtr->Clone(buffer);
   tmpPulseHisto->Write();
   if(pStripOtherLayer!=0)
@@ -282,7 +282,7 @@ Double_t StFgtGenAVEMaker::findClosestStrip(Char_t layer, double ord, Int_t iD, 
 void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
 
-  cout <<"filling strip histos " <<endl;
+  //  cout <<"filling strip histos " <<endl;
   bool partOfClusterP=false;
   bool partOfClusterR=false;
   Double_t clusterChargeR=-9999;
@@ -610,17 +610,20 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
   
   if(partOfClusterP)
     {
-      cout <<" part of p cluster " << endl;
-      //float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
-      float chi2Ndf;
-      float amp;
-      float t0;
-      ///do the fitting...
-      if(partOfClusterR)
-	fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),&(pStrips[iD*4+iq][maxRInd]),&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
-      else
-	fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),0,&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
-      APVfitChi2P[iD*40+APVmaxPAdc]->Fill(chi2Ndf);
+
+      //      cout <<" part of p cluster " << endl;
+	    float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
+	    float chi2Ndf;
+	    float amp;
+	    float t0;
+	    ///do the fitting...
+	    if(partOfClusterR)
+	      fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),&(pStrips[iD*4+iq][maxRInd]),&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
+	    else
+	      fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),0,&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
+
+	    APVfitChi2P[iD*40+APVmaxPAdc]->Fill(chi2Ndf);
+
 
       firstTbSigTrackClusterP[iD*4+iq]->Fill(firstTbSigP);
       maxAdcTrackClusterP[iD*4+iq]->Fill(maxPAdc);
@@ -645,17 +648,19 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
     }
   if(partOfClusterR)
     {
-      cout <<" part of R cluster " << endl;
-      //float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
-      float chi2Ndf;
-      float amp;
-      float t0;
-      ///do the fitting...
-      if(partOfClusterP)
-	fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),&pStrips[iD*4+iq][maxPInd],&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
-      else
-	fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),0,&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
-      APVfitChi2R[iD*40+APVmaxRAdc]->Fill(chi2Ndf);
+
+      //      cout <<" part of R cluster " << endl;
+	    float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
+	    float chi2Ndf;
+	    float amp;
+	    float t0;
+	    ///do the fitting...
+	    if(partOfClusterP)
+	      fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),&pStrips[iD*4+iq][maxPInd],&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
+	    else
+	      fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),0,&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
+	    APVfitChi2R[iD*40+APVmaxRAdc]->Fill(chi2Ndf);
+
 
       firstTbSigTrackClusterR[iD*4+iq]->Fill(firstTbSigR);
       maxTbTrackClusterR[iD*4+iq]->Fill(maxRTb);
@@ -1408,8 +1413,9 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		  {
 		    //		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<endl;
 		    radioPlotsEff[i]->Fill(xExp,yExp);
-		    hResidua->Fill(sqrt(closestPoint));
-		    //		    if(i==m_effDisk)
+		    if(i==m_effDisk)
+		      hResidua->Fill(sqrt(closestPoint));
+
 		      (*outTxtFile) <<"***** found hit in disk " <<i << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
 
 #ifdef DO_PRINT
@@ -1485,7 +1491,7 @@ Double_t StFgtGenAVEMaker::getRPhiRatio(vector<generalCluster>::iterator hitIter
 */
 Int_t StFgtGenAVEMaker::Make()
 {
-  cout <<"ave make " <<endl;
+  //  cout <<"ave make " <<endl;
   Int_t ierr = kStOk;
   (*outTxtFile) <<"----------------------------- Event Nr: " << evtNr<<" -----------------" <<endl;
   StFgtGeneralBase::Make();
@@ -1550,7 +1556,7 @@ Int_t StFgtGenAVEMaker::Make()
 
   for(int iD=0;iD<6;iD++)
     {
-      cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
+      //      cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
       int clusCounts[8];
       memset(clusCounts,0,sizeof(int)*8);
       vector<generalCluster> &tHitVec=*(pClusters[iD]);
@@ -1589,7 +1595,7 @@ Int_t StFgtGenAVEMaker::Make()
 	      if(validPulse(pStrips[iD*4+iq][i]))
 		numPulses++;
 	    }
-	  cout <<"disk " << iD+1 << " quad " << iq <<" has " << numClus << " charges and " << numPulses <<" pulses " << endl;
+	  //	  cout <<"disk " << iD+1 << " quad " << iq <<" has " << numClus << " charges and " << numPulses <<" pulses " << endl;
 	}
 
     }
@@ -1615,7 +1621,7 @@ Int_t StFgtGenAVEMaker::Make()
 	    continue;
 	  if(pClusters[iSeed1]->size() > MAX_CLUSTERS || pClusters[iSeed2]->size() > MAX_CLUSTERS)
 	    {
-	      cout <<"too many clusters in the disk!!!"<<endl<<endl;
+	      //	      cout <<"too many clusters in the disk!!!"<<endl<<endl;
 	      continue;
 	    }
 	  //track where we have hits in disks
@@ -2025,7 +2031,7 @@ Int_t StFgtGenAVEMaker::Make()
  
 StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0),fitCounter(0)
 {
-  cout <<"AVE constructor!!" <<endl;
+  //  cout <<"AVE constructor!!" <<endl;
   int numTb=7;
   mPulseShapePtr=new TF1("pulseShape","[0]*(x>[4])*(x-[4])**[1]*exp(-[2]*(x-[4]))+[3]",0,numTb);
   mPulseShapePtr->SetParName( 0, "C" );
@@ -2256,8 +2262,8 @@ Int_t StFgtGenAVEMaker::Finish(){
   cout <<"writen and closed " << endl;
 
   cout <<"drawing hits2 " <<endl;
-  cRadioHits->SaveAs("radioPlotsHits.png");
-  cRadioNonHits->SaveAs("radioPlotsNonHits.png");
+  ///---->   cRadioHits->SaveAs("radioPlotsHits.png");
+  ///---->  cRadioNonHits->SaveAs("radioPlotsNonHits.png");
 
   TCanvas* cClusterSizeR=new TCanvas("clusterSizeR","clusterSizeR",1000,1500);
   cClusterSizeR->Divide(2,3);
@@ -2274,53 +2280,53 @@ Int_t StFgtGenAVEMaker::Finish(){
   TCanvas cIPProj;
   hIp->Draw("colz");
   hIp->Write();
-  cIPProj.SaveAs("ipProj.png");
+  ///---->  cIPProj.SaveAs("ipProj.png");
 
   hBx->Draw();
   hBx->Write();
-  cIPProj.SaveAs("hBx.png");
+  ///---->  cIPProj.SaveAs("hBx.png");
   hBy->Draw();
   hBy->Write();
-  cIPProj.SaveAs("hBy.png");
+  ///---->  cIPProj.SaveAs("hBy.png");
   hMx->Draw();
   hMx->Write();
-  cIPProj.SaveAs("hMx.png");
+  ///---->  cIPProj.SaveAs("hMx.png");
   hMy->Draw();
   hMy->Write();
-  cIPProj.SaveAs("hMy.png");
+  ///---->  cIPProj.SaveAs("hMy.png");
 
   
   hIpZ->Draw();
   hIpZ->Write();
-  cIPProj.SaveAs("ipZ.png");
+  ///---->  cIPProj.SaveAs("ipZ.png");
 
 
   hIpDca->Draw();
   hIpDca->Write();
-  cIPProj.SaveAs("ipDca.png");
+  ///---->  cIPProj.SaveAs("ipDca.png");
 
   hTrkZ->Draw();
   hTrkZ->Write();
-  cIPProj.SaveAs("hTrkZ.png");
+  ///---->  cIPProj.SaveAs("hTrkZ.png");
 
   hResidua->Draw();
   hResidua->Write();
-  cIPProj.SaveAs("hResidua.png");
+  ///---->  cIPProj.SaveAs("hResidua.png");
 
   hChi2->Draw();
   hChi2->Write();
-  cIPProj.SaveAs("chi2Dist.png");
+  ///---->  cIPProj.SaveAs("chi2Dist.png");
 
   tpcFgtZVertexCorr->Draw("colz");
   tpcFgtZVertexCorr->Write();
-  cIPProj.SaveAs("tpcFgtCorr.png");
+  ///---->  cIPProj.SaveAs("tpcFgtCorr.png");
 
   tpcFgtZVertexCorr2->Draw("colz");
   tpcFgtZVertexCorr2->Write();
-  cIPProj.SaveAs("tpcFgtCorr2.png");
+  ///---->  cIPProj.SaveAs("tpcFgtCorr2.png");
   tpcFgtZVertexCorr3->Draw("colz");
   tpcFgtZVertexCorr3->Write();
-  cIPProj.SaveAs("trackTrackZCorr.png");
+  ///---->  cIPProj.SaveAs("trackTrackZCorr.png");
 
 
   for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
@@ -2347,12 +2353,12 @@ Int_t StFgtGenAVEMaker::Finish(){
     }
   f1->Write();
 
-  cClusterSizeR->SaveAs("clusterSizeR.png");
-  cClusterSizePhi->SaveAs("clusterSizePhi.png");
-  cChargeCorr->SaveAs("chargeCorrelation.png");
+  ///---->  cClusterSizeR->SaveAs("clusterSizeR.png");
+  ///---->  cClusterSizePhi->SaveAs("clusterSizePhi.png");
+  ///---->  cChargeCorr->SaveAs("chargeCorrelation.png");
 
-  cClusterChargeR->SaveAs("clusterChargeR.png");
-  cClusterChargePhi->SaveAs("clusterChargePhi.png");
+  ///---->  cClusterChargeR->SaveAs("clusterChargeR.png");
+  ///---->  cClusterChargePhi->SaveAs("clusterChargePhi.png");
 
    cout <<"saving .." <<endl;
   doNormalize(radioPlotsEffR, radioPlotsNonEffR);
@@ -2441,32 +2447,32 @@ Int_t StFgtGenAVEMaker::Finish(){
       rEff[iD]->Draw();
     }
 
-  cRadio->SaveAs("radioPlotsEff.png");
-  cRadio->SaveAs("radioPlotsEff.pdf");
+  ///---->  cRadio->SaveAs("radioPlotsEff.png");
+  ///---->  cRadio->SaveAs("radioPlotsEff.pdf");
 
-  cRadioR->SaveAs("radioPlotsR.png");
-  cRadioPhi->SaveAs("radioPlotsPhi.png");
-  cRadioLoose->SaveAs("radioPlotsLoose.png");
+  ///---->  cRadioR->SaveAs("radioPlotsR.png");
+  ///---->  cRadioPhi->SaveAs("radioPlotsPhi.png");
+  ///---->  cRadioLoose->SaveAs("radioPlotsLoose.png");
 
   cRadio->cd(0);
   chargeRatioInEffDisk->Draw("colz");
-  cRadio->SaveAs("chargeRatioInEffDisk.png");
+  ///---->  cRadio->SaveAs("chargeRatioInEffDisk.png");
   chargeAsymInEffDisk->Draw("colz");
-  cRadio->SaveAs("chargeAsymInEffDisk.png");
+  ///---->  cRadio->SaveAs("chargeAsymInEffDisk.png");
   chargeCorrInEffDisk->Draw("colz");
   chargeCorrInEffDisk->Write();
-  cRadio->SaveAs("chargeCorrInEffDisk.png");
+  ///---->  cRadio->SaveAs("chargeCorrInEffDisk.png");
   hChargeAsym->Draw();
-  cRadio->SaveAs("chargeAsym.png");
+  ///---->  cRadio->SaveAs("chargeAsym.png");
   hChargeRatio->Draw();
-  cRadio->SaveAs("chargeRatio.png");
+  ///---->  cRadio->SaveAs("chargeRatio.png");
 
 
-  cREff->SaveAs("rEff.png");
-  cREff->SaveAs("rEff.pdf");
+  ///---->  cREff->SaveAs("rEff.png");
+  ///---->  cREff->SaveAs("rEff.pdf");
 
-  cRPRatio->SaveAs("rpRatio.png");
-  cRPRatio->SaveAs("rpRatio.pdf");
+  ///---->  cRPRatio->SaveAs("rpRatio.png");
+  ///---->  cRPRatio->SaveAs("rpRatio.pdf");
   f1->Write();
   ////this has to be the last thing!!!! Otherwise the histos become invalid and the code seg faults...
   f1->Close();
@@ -2653,7 +2659,7 @@ Int_t StFgtGenAVEMaker::Init(){
 
   hIpDca=new TH1D("ipDCA","ipDCA",50,-100,100);
   hTrkZ=new TH1D("z_Vtx_From_trk_fit","z_Vtx_From_trk_fit",50,-100,100);
-  hResidua=new TH1D("residua","residua",100,0,50);
+  hResidua=new TH1D("residua","residua",100,0,10);
   hChi2=new TH1D("chi2","chi2",50,0,2);
   tpcFgtZVertexCorr=new TH2D("tpc_fgt_corr","tpc_fgt_corr",100,-120,120,100,-120,120);
   tpcFgtZVertexCorr2=new TH2D("tpc_fgt_corr2","tpc_fgt_corr2",100,-120,120,100,-120,120);

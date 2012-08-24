@@ -90,11 +90,11 @@ Int_t StFgtGeneralBase::Finish()
   evStatistics=new TH1D("fgtEventStatistics","fgtEventStatistics",10,0,9);
   TCanvas c;
   chargeMaxAdcCorr->Draw("colz");
-  c.SaveAs("chargeMaxAdcCorr.png");
+  ///---->  c.SaveAs("chargeMaxAdcCorr.png");
   chargeMaxAdcIntCorr->Draw("colz");
-  c.SaveAs("chargeMaxAdcIntCorr.png");
+  ///---->  c.SaveAs("chargeMaxAdcIntCorr.png");
   hIpZEv->Draw();
-  c.SaveAs("ipZEv.png");
+  ///---->  c.SaveAs("ipZEv.png");
   cout <<"done saving" <<endl;
   char buffer[100];
   sprintf(buffer,"%s/pulses.root",fileBase);
@@ -244,6 +244,8 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		   if( strip ){
 		     Int_t geoId=strip->getGeoId();
 		     Int_t cSeedType=strip->getClusterSeedType();
+		     //		     if(cSeedType==kFgtClusterSeedInSeaOfNoise)
+		     //		       cout <<"noisy strip " << geoId <<endl;
 		     Double_t charge=strip->getCharge();
 		     Double_t chargeUncert=strip->getChargeUncert();
 		     Short_t quad, discK, stripI;
