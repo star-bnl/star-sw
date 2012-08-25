@@ -49,7 +49,7 @@
 
 //#define DISK_EFF 2
 #define QUAD_EFF 1
-#define MY_PI 3.14159
+#define MY_PI 3.14159265359
 //#define  REFIT_WITH_VERTEX
 //#define FIT_WITH_VERTEX
 
@@ -829,7 +829,7 @@ Double_t StFgtGenAVEMaker::findClosestPoint(double xE, double yE, Int_t iD)
 {
   if(iD<0 || iD >5)
     {
-      return -99999;
+      return 99999;
     }
   vector<generalCluster> &hitVec=*(pClusters[iD]);
   Double_t dist2=99999;
@@ -855,14 +855,21 @@ Double_t StFgtGenAVEMaker::findClosestPoint(double xE, double yE, Int_t iD)
 	  Float_t y=r*sin(phi);
 	  Double_t mDist=(x-xE)*(x-xE)+(y-yE)*(y-yE);
 	  if(mDist<dist2)
-	    dist2=mDist;
+	    {
+	      dist2=mDist;
+	      //	      (*outTxtFile) <<"point found, x: " << x <<" y: " << y << " dist: " << dist2 <<endl;
+	    }
 	}
     }
+  //  (*outTxtFile) <<"returning : " << dist2<<endl;
   return dist2;
 }
 
+
+///this is too naive..., assumes non-rotated quads
 Short_t StFgtGenAVEMaker::getQuadFromCoo(Double_t x, Double_t y)
 {
+  cout <<"do not use this function!!!" <<endl;
   if(x>0 && y>0)
     return 0;
   if(x>0 && y<0)
@@ -872,7 +879,7 @@ Short_t StFgtGenAVEMaker::getQuadFromCoo(Double_t x, Double_t y)
   if(x<0 && y>0)
     return 3;
 
-  return -999;
+  return -9999;
 }
 
 
@@ -950,6 +957,7 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
   //just print the first 1000 clusters
 
+  //  cout <<" looking for r: " << r <<" phi: " << phi<< " to print " <<endl;
   if(printCounter>1000)
     return true;
   printCounter++;
@@ -959,7 +967,7 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 
   Int_t counterR=0;
   Int_t counterP=0;
-
+  //  cout <<" looking for strips.., we have: " << pStrips[iD*4+iq].size() << " in iD: " << iD << " iq: " << iq <<endl;
   for(unsigned int i=0;i<pStrips[iD*4+iq].size();i++)
     {
       Int_t geoId=pStrips[iD*4+iq][i].geoId;
@@ -1006,8 +1014,10 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 	  sprintf(buffer,"somethingWrong: %d", pStrip.seedType);
 	}
 
-      //     if(layer=='P' && disc==iD && iq==quadrant)
-	//	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
+      //          if(layer=='P' && disc==iD && iq==quadrant)
+	    //	    cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
+      //          if(layer=='R' && disc==iD && iq==quadrant)
+      //	    cout <<"looking for r=" << r << " have: " << ordinate <<" diff: " << fabs(ordinate-r) <<endl;
       if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<1.0) || (layer=='P' && fabs(ordinate-phi)<0.04) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.04)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.04)))
 	{
 	  //	  cout <<" found!!!" << endl;
@@ -1342,15 +1352,21 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	    //x=r*cos(phi)
 	    //y=r*sin(phi)
 	    Double_t r=sqrt(xExp*xExp+yExp*yExp);
+	    //if both, x and y, are negative we get the wrong angle
 	    Double_t phi=atan(yExp/xExp);
-	    if(phi<0)
-	      phi+=MY_PI;
-	    if(phi>MY_PI)
-	      phi-=2*MY_PI;
+	    if(xExp <0 && yExp <0)
+	      phi-=TMath::Pi();
+	    //	    cout <<"phi: "<<phi << " from x: " << xExp <<" y: " << yExp<<endl;
 	    if(phi<-MY_PI)
 	      phi+=2*MY_PI;
+	    if(phi>MY_PI)
+	      phi-=2*MY_PI;
+	    //	    if(phi<-MY_PI)
+	    //	      phi+=2*MY_PI;
 
-	    quad=getQuadFromCoo(xExp,yExp);
+	    //	    quad=getQuadFromCoo(xExp,yExp);
+	    quad=StFgtGeom::getQuad(phi);
+	    //	    cout <<"got quad : " << quad << " for phi: " << phi <<endl;
 	    //convert to phi in quad.., so we have to subtract that axis...
 	    phi-=StFgtGeom::phiQuadXaxis(quad);
 
@@ -1409,15 +1425,15 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		  }
 	      }
 		Double_t closestPoint=findClosestPoint(xExp,yExp,i);
-		//		cout <<"cloest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
+		//		 (*outTxtFile) <<"closest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
 		if(findClosestPoint(xExp,yExp,i)<MAX_DIST2_EFF)
 		  {
-		    //		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<endl;
+		    //		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<", dist: " << findClosestPoint(xExp,yExp,i) <<endl;
 		    radioPlotsEff[i]->Fill(xExp,yExp);
 		    if(i==m_effDisk)
 		      hResidua->Fill(sqrt(closestPoint));
 
-		      (*outTxtFile) <<"***** found hit in disk " <<i << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
+		    (*outTxtFile) <<"***** found hit in disk " <<i << " quad: " << quad << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
 
 #ifdef DO_PRINT
 		    //		if(i==m_effDisk)
@@ -1557,7 +1573,7 @@ Int_t StFgtGenAVEMaker::Make()
 
   for(int iD=0;iD<6;iD++)
     {
-      //      cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
+            cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
       int clusCounts[8];
       memset(clusCounts,0,sizeof(int)*8);
       vector<generalCluster> &tHitVec=*(pClusters[iD]);
@@ -1957,8 +1973,8 @@ Int_t StFgtGenAVEMaker::Make()
 				      }}
 
 
-				    cout <<"track was valid, phi1: " << phiD1 <<" phiD6: " << phiD6;
-				    cout <<", rD1: " << rD1 <<" rD6: " << rD6<<endl;
+				    //				    cout <<"track was valid, phi1: " << phiD1 <<" phiD6: " << phiD6;
+				    //				    cout <<", rD1: " << rD1 <<" rD6: " << rD6<<endl;
 				    //				    cout <<"was valid " << endl;
 				  }
 			      }
@@ -2098,7 +2114,7 @@ Int_t StFgtGenAVEMaker::Finish(){
 	  hIpDca->Fill(dca.second);
 	}
     }
-  cout <<"canvases etc.. " << endl;
+  ///  cout <<"canvases etc.. " << endl;
   //////////////////////////////////////////////////
   TCanvas* cRadio=new TCanvas("radioPlots","radioPlot",1000,1500);
   TCanvas* cRadioLoose=new TCanvas("radioPlotsLoose","radioPlotLoose",1000,1500);
@@ -2107,7 +2123,7 @@ Int_t StFgtGenAVEMaker::Finish(){
 
   TCanvas* cRadioHits=new TCanvas("radioPlotsHits","radioPlotHits",1000,1500);
   TCanvas* cRadioNonHits=new TCanvas("radioPlotsNonHits","radioPlotNonHits",1000,1500);
-  cout <<"divide "<<endl;
+  //  cout <<"divide "<<endl;
   cRadio->Divide(2,3); //6 discs
   cRadioR->Divide(2,3); //6 discs
   cRadioPhi->Divide(2,3); //6 discs
@@ -2120,7 +2136,7 @@ Int_t StFgtGenAVEMaker::Finish(){
   TCanvas* cREff=new TCanvas("crEff","crEff",1000,1500);
 
   cREff->Divide(2,3); //6 discs
-  cout <<"drawing hits " <<endl;
+  //  cout <<"drawing hits " <<endl;
   for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
     {
       //      cRadio->cd(iD+1)->SetLogz();
@@ -2644,7 +2660,7 @@ Int_t StFgtGenAVEMaker::Init(){
 
   rEff=new TH1D*[kFgtNumDiscs];
   rNonEff=new TH1D*[kFgtNumDiscs];
-    cout <<"ave2" << endl;
+  //    cout <<"ave2" << endl;
 
   clusterSizeP=new TH1D*[kFgtNumDiscs*4];
   clusterSizeR=new TH1D*[kFgtNumDiscs*4];
@@ -2723,7 +2739,7 @@ Int_t StFgtGenAVEMaker::Init(){
 	}
       sprintf(buffer,"radioDiskNonEff_%d",iD);
       radioPlotsNonEff[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
-      cout <<" created non eff histo " << endl;
+      //      cout <<" created non eff histo " << endl;
       sprintf(buffer,"radioDiskNonEffR_%d",iD);
       radioPlotsNonEffR[iD]=new TH2D(buffer,buffer,NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
       sprintf(buffer,"radioDiskNonEffPhi_%d",iD);
