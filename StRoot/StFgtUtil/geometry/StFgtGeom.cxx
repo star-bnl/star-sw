@@ -124,6 +124,13 @@ int StFgtGeom::getQuad( double phiLab )
   //  printf("StFgtGeom::getQuad phiLab/rad=%f\n", phiLab );
   //assert(phiLab <= mPi );
   //assert(phiLab >= -mPi );
+  
+  if(phiLab<(-mPi))
+    phiLab+=(2*mPi);
+  if(phiLab>mPi)
+    phiLab-=(2*mPi);
+
+
   if ( phiLab > phiQuadXaxis(1) && phiLab <= phiQuadXaxis(0) )
     return 1;
   if ( phiLab > phiQuadXaxis(0) && phiLab <= phiQuadXaxis(3) )
@@ -4148,8 +4155,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.34 2012/08/15 18:03:36 rfatemi Exp $
+ *  $Id: StFgtGeom.cxx,v 1.35 2012/08/25 17:23:34 avossen Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.35  2012/08/25 17:23:34  avossen
+ *  made getQuad compatible with angles between 0 and 2*pi
+ *
  *  Revision 1.34  2012/08/15 18:03:36  rfatemi
  *  Bug fix for getGlobalPhysicalCoordinate by pnord, computation done in computeGlobalPhysicalCoordinate
  *
