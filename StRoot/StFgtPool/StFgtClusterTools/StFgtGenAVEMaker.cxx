@@ -27,8 +27,9 @@
 //#define PRINT_1D
 //max num clusters any disk is allowed to have
 
+#define COSMIC
 #define MAX_PHI_DIFF 0.5//the maximal difference in phi a track is allowed 
-#define MAX_CLUSTERS 30
+#define MAX_CLUSTERS 5
 #define CHARGE_MEASURE clusterCharge
 #define MAX_DIST_STRIP_R 0.7
 #define MAX_DIST_STRIP_PHI 0.03
@@ -57,7 +58,7 @@
 #define MAX_DIST2_EFF 1.0
 #define MAX_DIST2 1.0
 
-#define MIN_NUM_POINTS 4
+#define MIN_NUM_POINTS 2
 #define DISK_DIM 40
 #define NUM_EFF_BIN 30
 
@@ -1615,7 +1616,7 @@ Int_t StFgtGenAVEMaker::Make()
       for(int iSeed2=iSeed1+1;iSeed2<6;iSeed2++)
 	{
 	  //	  (*outTxtFile) << " using " << iSeed1 <<" and " << iSeed2 << " as seeds " << endl;
-	  if((iSeed2-iSeed1)<2)//to have large enough lever arm. Also, since three points are required shouldn't matter?
+	  if((iSeed2-iSeed1)<1)//to have large enough lever arm. Also, since three points are required shouldn't matter?
 	    continue;
 	  if(iSeed1==m_effDisk || iSeed2==m_effDisk)
 	    continue;
@@ -1732,9 +1733,11 @@ Int_t StFgtGenAVEMaker::Make()
 			    continue;
 			  Float_t rD6=hitIterD6R->posR;
 
-			  //track goes towards smaller radii
-			  if(rD1>rD6)
-			    continue;		  
+			  			  //track goes towards smaller radii
+#ifndef COSMIC
+			  			  if(rD1>rD6)
+			  			    continue;		  
+#endif
 
 			  vector<AVPoint> v_points;
 			  //add the seed points to the points
@@ -1842,8 +1845,10 @@ Int_t StFgtGenAVEMaker::Make()
 					continue;
 				      Float_t r=hitIter2->posR;
 				      //make sure that the radius makes sense for a track that goes from inner to outer radious
+#ifndef COSMIC
 				      if(r>rD6 || r<rD1)
 					continue;
+#endif
 				      x=r*cos(phi);
 				      y=r*sin(phi);
 				      //				      cout <<"checking with x: " << x << " y: " << y << " phi: " << phi <<" r: " << r <<endl;
@@ -1930,7 +1935,7 @@ Int_t StFgtGenAVEMaker::Make()
 			  //			  cout << " we found " << iFound <<" points " << endl;
 			  if(iFound>=(MIN_NUM_POINTS-2)) //at least one hit plus seed and pointing roughly to the interaction region
 			    {
-			      //			      cout <<"found " <<endl;
+			           cout <<"found " <<endl;
 			      Bool_t validTrack=false;
 
 
@@ -1952,7 +1957,8 @@ Int_t StFgtGenAVEMaker::Make()
 				      }}
 
 
-				    //				    cout <<"track was valid, phi1: " << phiD1 <<" phiD6: " << phiD6 << endl;
+				    cout <<"track was valid, phi1: " << phiD1 <<" phiD6: " << phiD6;
+				    cout <<", rD1: " << rD1 <<" rD6: " << rD6<<endl;
 				    //				    cout <<"was valid " << endl;
 				  }
 			      }
