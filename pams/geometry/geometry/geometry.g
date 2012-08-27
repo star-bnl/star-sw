@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.245 2012/07/02 18:50:36 jwebb Exp $
+* $Id: geometry.g,v 1.246 2012/08/27 14:56:12 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.246  2012/08/27 14:56:12  jwebb
+* Added vfgt to definition of the estar development geometry.
+*
 * Revision 1.245  2012/07/02 18:50:36  jwebb
 * Few more modifications for dev14 geometry.  Add VPD and PXST to dev14.
 *
@@ -1301,6 +1304,7 @@ replace [exe VPDD07;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConf
 replace [exe FGTD02;] with  [;FGTD=on;FgtdConfig=2;  "GEM forward tracker"]
 replace [exe FGTDv31;] with [;FGTD=on;FgtdConfig=31; "FGT v3 5 half plus one full disk"]
 replace [exe FGTDv32;] with [;FGTD=on;FgtdConfig=32; "FGT v3 6 disks"]
+replace [exe FGTDv55;] with [;FGTD=on;FgtdConfig=55; "FGT very forward upgrade w/ 12 disks"]
 
 replace [exe IDSM01;] with [;IDSM=on;IdsmConfig=1; "Inner Detector Support"]
 replace [exe IDSM02;] with [;IDSM=on;IdsmConfig=2; "Inner Detector Support"]
@@ -2036,7 +2040,7 @@ REPLACE [exe devE;] with ["DEVE eSTAR upgrade geometry";
     exe PIPE12;      "The beam pipe";
 
     exe IDSM02;      "Inner detector support";
-    exe FGTDv32;     "FGT v3 6 disks";
+    exe FGTDv55;     "Very forward FGT, 12 disks";
 
     exe PIXL02;      "Development version of the pixl detector";
 
@@ -4560,10 +4564,13 @@ c     write(*,*) 'FSTD'
      if (FgtdConfig==3)    Call fgtdgeo2
 
      IF FgtdConfig>30 {                                           """Apply FGT configuration and construct geometry"""
-        IF FgtdConfig==31 { Call AgDETP add ( 'FGGG.FgstConfig=', 1.0, 1 ); }
-        IF FgtdConfig==32 { Call AgDetp add ( 'FGGG.FgstConfig=', 2.0, 1 ); }
-        Call FgtdGeo3
+        IF FgtdConfig==31 { Call AgDETP add ( 'FGGG.FgstConfig=', 1.0, 1 );         Call FgtdGeo3; }
+        IF FgtdConfig==32 { Call AgDetp add ( 'FGGG.FgstConfig=', 2.0, 1 );         Call FgtdGeo3; }
+        IF FgtdConfig==55 {                                               ;         Call FgtdGeoV; }
+ 
+
      }
+
 
    ENDIF
 
