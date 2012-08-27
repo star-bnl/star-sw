@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.246 2012/08/27 14:56:12 jwebb Exp $
+* $Id: geometry.g,v 1.247 2012/08/27 17:50:28 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.247  2012/08/27 17:50:28  jwebb
+* Added estar1 and tpciv1 geometry tags.
+*
 * Revision 1.246  2012/08/27 14:56:12  jwebb
 * Added vfgt to definition of the estar development geometry.
 *
@@ -2061,6 +2064,11 @@ Replace [exe devT;] with ["DEVT TPC Upgrade Geometry";
        exe Tpcx10;  "TPC upgrade geometry w/ default pads"; ]
 
 
+** Aliases to devE and devT geometries to work around the field bug **
+Replace [exe estar1;] with [exe devE;]
+Replace [exe TPCIv1;] with [exe devT;]
+
+
 
 !//______________________________________________________________________________
 replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
@@ -2817,6 +2825,9 @@ If LL>0
   Case DevT  { devT : TPC upgrade studies;
                Geom = 'devT';
                exe devT; }
+
+  Case estar1  { eStar1 : eStar development geometry;     Geom = 'estar1  ';  exe estar1; }
+  Case TPCIv1  { TPCIv1 : TPC inner pad upgrade geometry; Geom = 'TPCIv1  ';  exe TPCIv1; }
 
 
 ****************************************************************************************
