@@ -885,7 +885,9 @@ Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
 
 
   AgStructure::AgDetpNew( fgtdGeom.module, Form("Forward GEM Tracker with configuration %s", flag));
-  AgStructure::AgDetpAdd( "Fggg_t", "fgstconfig", (Float_t) (fgtdGeom.config%30) );
+
+  if ( fgtdGeom.config<40 )
+    AgStructure::AgDetpAdd( "Fggg_t", "fgstconfig", (Float_t) (fgtdGeom.config%30) );
 
   if ( go )
   if ( !CreateModule( fgtdGeom.module  ) )
@@ -1940,6 +1942,12 @@ Bool_t Geometry::FgtdInit()
   fgtdGeom.select="FGTD31";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=31;   fgtdGeom.fill();
   // 32 -- anticipated full config y2013 and beyond
   fgtdGeom.select="FGTD32";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=32;   fgtdGeom.fill();
+
+
+  // vf -- very forward FGT
+  fgtdGeom.select="FGTDvf";   fgtdGeom.module="FgtdGeoV"; fgtdGeom.config=55;   fgtdGeom.fill();
+
+
   /*
     fgtdGeom.select="FGTD32";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=32;   fgtdGeom.fill();
     fgtdGeom.select="FGTD33";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=33;   fgtdGeom.fill();
