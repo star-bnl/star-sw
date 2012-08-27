@@ -70,6 +70,7 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   int highTowerMask[90]; // mask applied to high tower output of FEE
   int patchSumMask[90]; // mask applied to patch sum output of FEE
   float ped[mxCr*mxChan];
+  float gain[mxCr*mxChan];
 
 public: 
   //  pedestal treatment
@@ -162,6 +163,9 @@ public:
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.27  2012/08/27 17:16:41  pibero
+// Add logging of EEMC gains from DB
+//
 // Revision 1.26  2011/10/22 20:25:17  pibero
 // Add getters for output of EEMC FEEs for backward-compatibility
 //
