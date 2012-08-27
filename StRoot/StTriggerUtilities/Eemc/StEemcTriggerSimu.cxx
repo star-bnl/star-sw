@@ -178,6 +178,7 @@ void
 StEemcTriggerSimu::InitRun(int runnumber){
 
   memset(ped,0,sizeof(ped));
+  memset(gain,0,sizeof(gain));
   memset(feePed,0,sizeof(feePed));
   memset(feeMask,0xff,sizeof(feeMask)); // mask everything as bad
   getEemcFeeMask();		// get offline mask
@@ -210,6 +211,7 @@ StEemcTriggerSimu::InitRun(int runnumber){
 	if (!x) continue; // skip not mapped channels
 	int rdo = getRdo(crate,chan);
 	ped[rdo] = x->ped;
+	gain[rdo] = x->gain;
 	feePed[rdo] = computePed4(x->ped);
       } // for chan
     } // for crate
@@ -230,12 +232,12 @@ StEemcTriggerSimu::InitRun(int runnumber){
     break;
   }
 
-  LOG_INFO << "rdo\tcr\tchan\tsta\tped\tped4" << endm;
+  LOG_INFO << "rdo\tcr\tchan\tsta\tped\tped4\tgain" << endm;
 
   for (int crate = 1; crate <= mxCr; ++crate) {
     for (int chan = 0; chan < 120; ++chan) {
       int rdo = getRdo(crate,chan);
-      LOG_INFO << rdo << '\t' << crate << '\t' << chan << '\t' << feeMask[rdo] << '\t' << ped[rdo] << '\t' << feePed[rdo] << endm;
+      LOG_INFO << rdo << '\t' << crate << '\t' << chan << '\t' << feeMask[rdo] << '\t' << ped[rdo] << '\t' << feePed[rdo] << '\t' << gain[rdo] << endm;
     }
   }
 
@@ -793,6 +795,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.49  2012/08/27 17:16:41  pibero
+// Add logging of EEMC gains from DB
+//
 // Revision 1.48  2012/07/12 09:37:10  pibero
 // Fix fillStTriggerDetector()
 //
