@@ -1096,7 +1096,7 @@ void estar()
     setTitle("First cut");
     // ================================================ The new Inner Detectors
     geom.idsmFlag = "IDSM01";  geom.idsmStat = 1;
-    geom.fgtdFlag = "FGTD31";  geom.fgtdStat = 1;
+    geom.fgtdFlag = "FGTDvf";  geom.fgtdStat = 1;
     // ================================================ 
     geom.fpdmFlag = "FPDM13";  geom.fpdmStat = 1;        // open FPDM
     geom.fsceFlag = "FSCEv0";  geom.fsceStat = 1;
