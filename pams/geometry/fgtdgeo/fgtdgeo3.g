@@ -777,3 +777,9 @@
       ENDBLOCK
       <W> '===>> 	[End AgML Module IDSMGEO1]	 <<==='; (A32,/,/);
       END! Module IDSMGEO1
+
+
+      MODULE FGTDGEOV    very forward GEM tracking detector for estar
+      STOP
+      RETURN
+      END
