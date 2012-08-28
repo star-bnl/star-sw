@@ -1,6 +1,5 @@
 TCanvas *can=0;
 const float PI=2*acos(0);
-TString spinPre='A';
 /* to fix/change colors of lines embedded in histos do:
 root [5] TLine* ln = (TLine*)muWET->GetListOfFunctions()->At(0)
 root [6] ln->SetLineColor(kRed)
@@ -42,22 +41,23 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *namePB[]={"muEsPtBalance_clust", "muEsPtBalance_awayTot","muE_Weta","muE_WXY"};// pg 14 -Pt-Balance plots
   //pg 15 blank -> add ESMD plots
   char *nameN[]={"muETrdEdX","muE_Wdedx"}; //pg 16
-  char *nameO[]={"muE_WglDca","muE_WglDcaSP","muE_WglDcaSN"}; // pg 17
+  char *nameO[]={"muE_WglDcaSP","muE_WglDcaSN"}; // pg 17
   
   char *nameP[]={"muE_ETlive0","muE_ETlive1","muE_ETlive2","muE_ETlive3","muE_Wcar1","muE_Wcar2","muE_Wcar3"}; // pg 18
   
   //add histograms for q/pt plots etc.
   char *nameR2[]={"muEchRecPNg","muEchRecPNp"};// pg 19
+  char *nameR3[]={"muE_WETPg"  ,"muE_WETPp","muE_CFP0" ,"muE_WETNg" ,"muE_WETNp","muE_CFN0"};// pg 20
 
-  char *nameS1[]={"spinStatEve","spins4mon","spinbX48","spinbX7","spinbX48c","spinbX7c"};// pg 23
-  char *nameS5[]={"spinET_P","spinET_N","spinQpT","spinQpT2"};// pg 24
-  char *nameS2[]={"spinY0","spinY1","spinY2_P","spinY2_N"};// pg 25
-  char *nameS3[]={,"spinY3_P","spinY3_N","spinY4_P","spinY4_N"};// pg 26
-  char *nameS4[]={"spinY5_P","spinY5_N","spinLepEta"};// pg 27
+  TString spinPre='A';
+  char *nameS1[]={"spinEStatEve","spinEs4mon","spinEbX48","spinEbX7","spinEbX48c","spinEbX7c"};// pg 23
+  char *nameS5[]={"spinE_ET_P","spinE_ET_N","spinEQpT","spinEQpT2"};// pg 24
+  char *nameS2[]={"spinEY0","spinEY1","spinEY2_P","spinEY2_N"};// pg 25
+  char *nameS3[]={,"spinEY3_P","spinEY3_N","spinEY4_P","spinEY4_N"};// pg 26
+  char *nameS4[]={"spinEY5_P","spinEY5_N","spinELepEta_P","spinELepEta_N"};// pg 27
 
-  char *nameEsmd1[]={"muWEsmdNhitUV","muBEsmdNhitUV","muWEsmdEUV","muBEsmdEUV","muWEsmdSumE_clET","muBEsmdSumE_clET"};//pg 27
-  char *nameEsmd2[]={"muWEsmdE41_7U","muBEsmdE41_7U","muWEsmdE41_7V","muBEsmdE41_7V","muWEsmdEUVratio_clET","muBEsmdEUVratio_clET"};//pg 28
-  char *nameEprs[]={"muWEpre2_clET","muBEpre2_clET","muWEpost_clET","muBEpost_clET","muWEpreSum_smdSumE","muBEpreSum_smdSumE"};//pg 29
+  char *nameEsmd1[]={"muEsmdNhit","muEsmdEne","muEsmdRatioUV","muEclustET_esmdNhit","muEclustET_esmdEne","muEclustET_esmdRatio"};//pg 28
+  char *nameEsmd2[]={"muEclustET_esmdEneSum7","muEsPtBalance_clustPassSMD","muEsPtBalance_clustFailSMD","muEsPtBalance_esmdRatio_highET","muEsPtBalance2_clustPassSMD","muEsPtBalance2_clustFailSMD"};//pg 29
 
   //use  Page 30-42 TPC sectors per cut, 2 pages per cut
 
@@ -73,8 +73,14 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   }
 
   //switch to TDirectory for eta binning
-  if(fd->Get("muStatEve")==0)
-    fd->cd(etaBin);
+  if(fd->Get("muEStatEve")==0) {
+    cout<<"Switching to etaBin"<<etaBin<<" now have to use gDirectory"<<endl;
+    spinPre+=etaBin;
+    if(!fd->cd(etaBin)) {
+      cout<<"Missing TDirectory of interest, no plots!"<<endl;
+      return;
+    }
+  }
 
   if(page==1||page==13){ 
    //fd->ls(); 
@@ -391,7 +397,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameO;
-    for(int i=0;i<3;i++) {
+    for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw("colz");
@@ -441,40 +447,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     }
  } break;//--------------------------------------
 
- case 20:{    sprintf(padTit,"pub-maker misc, %s",core0);
-    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(2,2);gStyle->SetOptStat(10);
-    char **nameX=nameR1;
-    for(int i=0;i<3;i++) {
-        printf("->%s<\n",nameX[i]);
-      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
-      if(i==4) {
-	h->Draw("same e");
-	break;
-      }
-      c->cd(i+1); h->Draw();
-      if(i==1)  h->Draw("colz");
-      if(i==0) h->Draw("h text");
-    }
-    c->GetPad(2)->SetLogz();          
-    c->GetPad(1)->SetLogy();
- } break;//--------------------------------------
-
- case 21:{    sprintf(padTit,"Background study for Joe, %s",core0);
-    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(3,3);gStyle->SetOptStat(10);
-    char **nameX=nameQ;
-    for(int i=0;i<8;i++) {
-      printf("->%s<\n",nameX[i]);
-      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
-      c->cd(i+1);  h->Draw();
-      h->SetFillColor(30+i*5);
-      if(i==7) h->Draw("colz");
-    }
-    c->GetPad(1)->SetLogy();
- } break;//--------------------------------------
- 
- case 22:{    sprintf(padTit,"charge separation, %s",core0);
+  case 20:{    sprintf(padTit,"charge separation, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(3,2);gStyle->SetOptStat(10);
     char **nameX=nameR3;
@@ -482,10 +455,12 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
       printf("->%s<\n",nameX[i]);
       h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw();
+      h->SetFillColor(4);
+      if(i==0 ||i==3) h->SetFillColor(3);
+      h->Rebin();
+      h->SetAxisRange(0,80);
     }
  } break;//--------------------------------------
-
-
 
  case 23:{    sprintf(padTit,"bXing & spin QA, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
@@ -502,7 +477,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
  } break;//--------------------------------------
 
 
- case 24:{    sprintf(padTit,"Final Ws for spin analysis, %s",core0);
+ case 24:{    sprintf(padTit,"Final Endcap Ws for spin analysis, %s",core0);
    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
    c->Divide(2,2);gStyle->SetOptStat(10);
    char **nameX=nameS5;
@@ -522,8 +497,6 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
  } break;//--------------------------------------
    
 
-#if 0
- 
  case 25:
  case 26:
    {    sprintf(padTit,"spin sorting: lumi & Ws, %s",core0);
@@ -534,6 +507,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
 
     for(int i=0;i<4;i++) {
       printf("->%s<\n",nameX[i]);
+      cout<<spinPre+nameX[i]<<endl;
       h=(TH1*)gDirectory->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1); h->Draw("h  text");
     }
@@ -543,48 +517,49 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameS4;
-    for(int i=0;i<3;i++) {
+    for(int i=0;i<4;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)gDirectory->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw("colz");
-      if(i==2) h->Draw();
+      if(i>1) h->Draw();
     }
  } break;//--------------------------------------
-#endif
 
- case 27:{    sprintf(padTit,"ESMD 1, %s",core0);
+ case 28:{    sprintf(padTit,"ESMD 1, %s",core0);
      can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-     c->Divide(2,3);gStyle->SetOptStat(10);
+     c->Divide(3,2);gStyle->SetOptStat(10);
      char **nameX=nameEsmd1;
      for(int i=0;i<6;i++) {
        printf("->%s<\n",nameX[i]);
        h=(TH2F*)gDirectory->Get(nameX[i]);  assert(h);
+       if(i==1) h->Rebin2D(4,4);
+       if(i==3) h->Rebin2D(4,2);
+       if(i==4) h->Rebin2D(4,10);
+       if(i==5) h->Rebin2D(4,2); 
+       if(i>2) h->GetXaxis()->SetRangeUser(0,70);
+     
        c->cd(i+1);  h->Draw("colz");
      }
  } break;//--------------------------------------
 
- case 28:{    sprintf(padTit,"ESMD 2, %s",core0);
+ case 29:{    sprintf(padTit,"ESMD 2, %s",core0);
      can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-     c->Divide(2,3);gStyle->SetOptStat(10);
+     c->Divide(3,2);gStyle->SetOptStat(10);
      char **nameX=nameEsmd2;
      for(int i=0;i<6;i++) {
        printf("->%s<\n",nameX[i]);
        h=(TH2F*)gDirectory->Get(nameX[i]);  assert(h);
+       if(i==0) {
+	 h->Rebin2D(4,10);
+	 h->GetXaxis()->SetRangeUser(0,70);
+       }
+       if(i!=0 && i!=3) {
+	 h->GetXaxis()->SetRangeUser(0,70);
+	 h->GetYaxis()->SetRangeUser(-60,60);
+       }
        c->cd(i+1);  h->Draw("colz");
      }
- } break;//--------------------------------------
-   
- case 29:{    sprintf(padTit,"EPRS, %s",core0);
-     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-     c->Divide(2,3);gStyle->SetOptStat(10);
-     char **nameX=nameEprs;
-     for(int i=0;i<6;i++) {
-       printf("->%s<\n",nameX[i]);
-       h=(TH2F*)gDirectory->Get(nameX[i]);  assert(h);
-       c->cd(i+1);  h->Draw("colz");
-     }
- } break;//--------------------------------------
-
+ } break;//--------------------------------------   
 
 
  case 30: // TPC stats 
@@ -728,17 +703,17 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 
 //============================
 void doAll(char *core0="", char *iPath="", int isMC=0, char* oPath="", char* etaBin=""){
-  for(int i=1;i<=19;i++)  { 
-    if(i==15) continue;
+  for(int i=1;i<=27;i++)  { 
+    if(i==15 || i==20) continue; //remove 20 for sign flip!
     if( isMC && i==3) continue;
     if( isMC &&i==4) continue;
-    if( isMC &&i>=20 && i<=22) continue;
+    if( isMC && i>=20) continue;
 
     plEana(i,2,core0,iPath,oPath,isMC,etaBin);
   }
 
-  //for(int i = 27; i<=29; i++) plEana(i,2);
- 
+  // ESMD QA
+  for(int i = 28; i<=29; i++) plEana(i,2,core0,iPath,oPath,isMC,etaBin);
   
   // TPC by sector:
   for(int i=30;i<=42;i++)  plEana(i,2,core0,iPath,oPath,isMC,etaBin);
@@ -762,6 +737,9 @@ void doAllMC(char *core0="", char *iPath=""){
 
 
 // $Log: plEana.C,v $
+// Revision 1.13  2012/08/28 14:28:48  stevens4
+// updates to movie makers
+//
 // Revision 1.12  2012/08/07 21:06:56  stevens4
 // update to tree analysis to produce independent histos in a TDirectory for each eta-bin
 //

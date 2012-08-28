@@ -14,6 +14,10 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
   char *nameC[]={"_Z_phi12","_Z_ZmassLike","_Z_chRecPNp","_Z_ZmassUnlike"};
   char *nameD[]={"muEne_Deta","_Z_Ene_Deta"};// pg 4
 
+  char *nameE[]={"_Z_Endcap_EventType"}; //pg 1
+  char *nameF[]={"_Z_Eet1iso","_Z_Eet1val","_Z_Eet1frac","_Z_Eet2iso","_Z_Eet2val","_Z_Eet2frac"}; //pg 2
+  char *nameG[]={"_Z_Ephi12","_Z_ELike_chRecPNp","_Z_E_ZmassLike","_Z_Eeta12","_Z_EUnlike_chRecPNp","_Z_E_ZmassUnlike"}
+
   gStyle->SetOptFit(1);
   TString fullInpName=iPath;  fullInpName+=core0;
   fullInpName+=".wana.hist.root";  
@@ -30,12 +34,12 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
     fd->cd("Z");
 
   if(page==1){ 
-   //fd->ls(); 
-   h0=(TH1*)gDirectory->Get("_Z_EventType"); assert(h0);
-   printf("%s: ",h0->GetName());
-   for(int k=1;k<=14;k++) printf("%.0f, ",h0->GetBinContent(k));
-   printf("\n");
- }
+    //fd->ls(); 
+    h0=(TH1*)gDirectory->Get("_Z_EventType"); assert(h0);
+    printf("%s: ",h0->GetName());
+    for(int k=1;k<=14;k++) printf("%.0f, ",h0->GetBinContent(k));
+    printf("\n");
+  }
  gStyle->SetPalette(1,0);
  gStyle->SetOptStat(0);
  char padTit[1000];
@@ -85,8 +89,9 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
       c->cd(i+1); h->Draw();
       if(i==2) {
 	h2=(TH2F*) h;
-	h2->Rebin2D(2,2);h2->SetMaximum(3);
-	h2->Draw("box"); h2->SetFillColor(kBlack);
+	h2->Rebin2D(2,2); //h2->SetMaximum(3);
+	h2->Draw("colz");
+	//h2->Draw("box"); h2->SetFillColor(kBlack);
 	//h3=(TH2F*)pubchRecPNp;	h3->Rebin2D(2,2);
 	//h3->Draw("colz same");
 	//h2->Draw("box same");  
@@ -114,9 +119,69 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
       h2->Rebin2D(2,2);
       c->cd(i+1); h2->Draw("colz");	
     }
-  
+ 
+ } break;//--------------------------------------
+
+ case 5:{   
+    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    c->Divide(1,1);gStyle->SetOptStat(0);
+    char **nameX=nameE;
+    for(int i=0;i<1;i++) {
+      char txt[100];
+      printf("->%s<\n",nameX[i]);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
+      c->cd(i+1); h->Draw();
+      if(i==0) h->Draw("h text");
+    }
+    c->GetPad(1)->SetLogy();
    
  } break;//--------------------------------------
+
+ case 6:{   
+    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    c->Divide(3,2);gStyle->SetOptStat(1110);
+    char **nameX=nameF;
+    for(int i=0;i<6;i++) {
+      char txt[100];
+      printf("->%s<\n",nameX[i]);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
+      c->cd(i+1); h->Draw();
+    }
+   c->GetPad(2)->SetLogy();
+   
+ } break;//--------------------------------------
+   
+ case 7:{  
+    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    //can->SetGrayscale();
+    c->Divide(3,2);gStyle->SetOptStat(10);
+    char **nameX=nameG;
+    for(int i=0;i<6;i++) {
+      char txt[100];
+      printf("->%s<\n",nameX[i]);
+      h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
+      c->cd(i+1); h->Draw();
+      if(i==3) h->Draw("colz");
+      if(i==1 || i==4) {
+	h2=(TH2F*) h;
+	h2->Rebin2D(2,2); //h2->SetMaximum(3);
+	h2->Draw("colz");
+	//h2->Draw("box"); h2->SetFillColor(kBlack);
+	//h3=(TH2F*)pubchRecPNp;	h3->Rebin2D(2,2);
+	//h3->Draw("colz same");
+	//h2->Draw("box same");  
+      }
+      //if(i==3)  {
+	//h->SetFillColor(kYellow);
+	//h->SetMaximum(4);
+        //h->SetAxisRange(0,130);
+	//h->Fit("gaus","","RH",75.,115.);
+      //}
+    }
+ 
+        
+ } break;//--------------------------------------
+
  
  default:
      printf("page=%d NOT defined\n",page);
@@ -170,7 +235,7 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 
 //============================
 void doAll(char *core0="", char *iPath=""){
- for(int i=1;i<=4;i++)  {
+ for(int i=1;i<=7;i++)  {
   plZana(i,2,core0,iPath);
  }
 }
@@ -179,6 +244,9 @@ void doAll(char *core0="", char *iPath=""){
 
 
 // $Log: plZana.C,v $
+// Revision 1.4  2012/08/28 14:28:49  stevens4
+// updates to movie makers
+//
 // Revision 1.3  2012/08/07 21:06:56  stevens4
 // update to tree analysis to produce independent histos in a TDirectory for each eta-bin
 //
