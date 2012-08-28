@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.8 2012/08/21 21:28:22 stevens4 Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.9 2012/08/28 14:28:27 stevens4 Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -19,7 +19,7 @@ St2011WMaker::initEHistos(){
   memset(hE,0,sizeof(hE));
   TList *Lx;  TLine *ln;TH1 *h;
   char txt[1000], txt0[100];
-  int nCase=16;
+  int nCase=20;
   hE[0]=h=new TH1F("muEStatEve","Endcap W-algo: event count",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
@@ -262,8 +262,8 @@ St2011WMaker::initEHistos(){
   hE[216]=h=new TH2F("muEsmdWidth","Width of of shower shape; U plane; V plane",50,0.,5.,50,0.,5.);
   hE[217]=h=new TH2F("muEsmdCrossXY","Difference in SMD XP (track - SMD); X position; Y postion",50,-2.5,2.5,50,-2.5,2.5);
   hE[218]=h=new TH2F("muEsmdCrossEtaPhi","Difference in SMD XP (track - SMD); Eta position; Phi postion",50,-.05,.05,50,-.05,.05);
-  hE[219]=h=new TH2F("muEsmdRatioUV","Ratio of 7 strip sum to 20 strip sum; U ratio ; V ratio",50,0.,1.,50,0.,1.);
-  hE[220]=h=new TH2F("muEclustET_esmdRatio","Tower cluster E_{T} vs. Ratio of 7 strip sum to 20 strip sum (U+V); Tower cluster E_{T} ; U+V ratio",100,0.,100.,50,0.,1.);
+  hE[219]=h=new TH2F("muEsmdRatioUV","Ratio of 7 strip sum to 41 strip sum; U ratio ; V ratio",50,0.,1.,50,0.,1.);
+  hE[220]=h=new TH2F("muEclustET_esmdRatio","Tower cluster E_{T} vs. Ratio of 7 strip sum to 41 strip sum (U+V); Tower cluster E_{T} ; U+V ratio",100,0.,100.,50,0.,1.);
 
   hE[221]=h=new TH2F("muEpre2_pre1","Preshower 2 vs Preshower 1 Energy; Pre1 ene; Pre2 ene",50,0.,.02,50,0.,.05);
   hE[222]=h=new TH2F("muEpost_pre12","Postshower vs Preshower 1+2; Pre1+2 ene; Post ene",50,0.,.1,60,0.,.03);
@@ -280,12 +280,34 @@ St2011WMaker::initEHistos(){
   hE[232]=h=new TH2F("muEsPtBalance_clustFailSMD","Endcap: sPtBalance vs cluster ET (fail SMD ratio cut); 2x2 Cluster ET (GeV); signed Pt balance (GeV)",100,0,100,100,-100,100);
   hE[233]=h=new TH2F("muEsPtBalance2_clustFailSMD","Endcap: sPtBalance2 vs cluster ET (fail SMD ratio cut); 2x2 Cluster ET (GeV); signed Pt balance 2 (GeV)",100,0,100,100,-100,100);
 
-  hE[235]=h=new TH2F("muEsmdRatioUVfailPtBal_highET","Ratio of 7 strip sum to 20 strip sum; U ratio ; V ratio",50,0.,1.,50,0.,1.);
-  hE[236]=h=new TH2F("muEclustET_esmdRatiofailPtBal","Tower cluster E_{T} vs. Ratio of 7 strip sum to 20 strip sum (U+V); Tower cluster E_{T} ; U+V ratio",100,0.,100.,50,0.,1.);
+  hE[235]=h=new TH2F("muEsmdRatioUVfailPtBal_highET","Ratio of 7 strip sum to 41 strip sum; U ratio ; V ratio",50,0.,1.,50,0.,1.);
+  hE[236]=h=new TH2F("muEclustET_esmdRatiofailPtBal","Tower cluster E_{T} vs. Ratio of 7 strip sum to 41 strip sum (U+V); Tower cluster E_{T} ; U+V ratio",100,0.,100.,50,0.,1.);
 
-  hE[237]=h=new TH2F("muEsPtBalance_esmdRatio_highET","sPtBalance vs. Ratio of 7 strip sum to 20 strip sum (U+V); sPtBalance ; U+V ratio",100,-100.,100.,50,0.,1.);
-  hE[238]=h=new TH2F("muEsPtBalance2_esmdRatio_highET","sPtBalance2 vs. Ratio of 7 strip sum to 20 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,50,0.,1.);
+  hE[237]=h=new TH2F("muEsPtBalance_esmdRatio_highET","sPtBalance vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance ; U+V ratio",100,-100.,100.,50,0.,1.);
+  hE[238]=h=new TH2F("muEsPtBalance2_esmdRatio_highET","sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,50,0.,1.);
 
+  
+  //charge sign flip with vertex refit
+  char cPM[2]={'P','N'}; // Positive, Negative
+  for(int ipn=0;ipn<2;ipn++){
+    sprintf(txt0,"muE_WET%cg",cPM[ipn]);
+    sprintf(txt,"Final Endcap W glob Q=%c; 2x2 cluster ET ",cPM[ipn]);
+    hE[240+ipn]=h=new TH1F(txt0, txt, 100,0,100);
+    Lx=h->GetListOfFunctions();
+    ln=new TLine(parE_highET,0,parE_highET,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+    
+    sprintf(txt0,"muE_WET%cp",cPM[ipn]);
+    sprintf(txt,"Final W Endcap prim Q=%c; 2x2 cluster ET ",cPM[ipn]);
+    hE[242+ipn]=h=new TH1F(txt0, txt, 100,0,100);
+    Lx=h->GetListOfFunctions();
+    ln=new TLine(parE_highET,0,parE_highET,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+    
+    
+    sprintf(txt0,"muE_CF%c0",cPM[ipn]);
+    sprintf(txt,"Endcap prim sign=%c flip after V-refit; 2x2 cluster ET ",cPM[ipn]);
+    hE[244+ipn]=h=new TH1F(txt0, txt, 100,0,100);
+  }
+  
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHE;i++) {

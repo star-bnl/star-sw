@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.11 2012/08/21 18:29:16 stevens4 Exp $
+// $Id: St2011WMaker.h,v 1.12 2012/08/28 14:28:27 stevens4 Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -192,7 +192,7 @@ class St2011WMaker : public StMaker {
 
   // histograms
   TObjArray *HList; TObjArray *HListTpc;
-  enum {mxHA=300}; TH1 * hA[mxHA];
+  enum {mxHA=400}; TH1 * hA[mxHA];
   enum {mxHE=300}; TH1 * hE[mxHE];
   TH1 *hbxIdeal;    
 
@@ -232,7 +232,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.11 2012/08/21 18:29:16 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.12 2012/08/28 14:28:27 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -243,6 +243,9 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.12  2012/08/28 14:28:27  stevens4
+// add histos for barrel and endcap algos
+//
 // Revision 1.11  2012/08/21 18:29:16  stevens4
 // Updates to endcap W selection using ESMD strip ratio
 //

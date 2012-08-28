@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.9 2012/08/07 21:06:38 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.10 2012/08/28 14:28:27 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -220,6 +220,8 @@ St2011WMaker::initHistos(){
   hA[98]=new TH1F("muWcar3",txt, 100, -200,200);
   hA[99]=h=new TH1F("muWeta",Form("Barrel W: lepton eta final selection %s ; lepton eta",coreTitle.Data()),400,-2.0,2.0);
 
+  hA[102]=h=new TH1F("muWtime",Form("Barrel Golden W: unix time final selection %s 3/18/12 - 4/19/12; unixtime (bin = 10 min)",coreTitle.Data()),4608,1332028800,1334793600);
+
   //Q/pt plots
   sprintf(txt,"TPC GLOB Q/PT  ; 2x2 cluster ET (GeV); Q/PT");
   hA[100]=h=new TH2F("muChRecPNg", txt,100,0.,100.,100,-0.1,0.1);
@@ -328,6 +330,25 @@ St2011WMaker::initHistos(){
   hA[251]=h=new TH2F("muSpTbal_isoConePos","Q+ Signed p_{T} Balance vs. 2x2/nearCone; 2x2/nearCone; Signed p_{T} Balance (GeV)",110,0,1.1,100,-100,100);
   hA[252]=h=new TH2F("muSpTbal_isoConeNeg","Q- Signed p_{T} Balance vs. 2x2/nearCone; 2x2/nearCone; Signed p_{T} Balance (GeV)",110,0,1.1,100,-100,100);
 
+  
+  //Q/pt plots for each sector
+  for(int isec=0; isec<24; isec++){
+    sprintf(txt,"TPC Sector %d : GLOB Q/PT  ; 2x2 cluster ET (GeV); Q/PT",isec+1);
+    hA[260+isec]=h=new TH2F(Form("muChRecPNgSec%d",isec+1), txt,100,0.,100.,100,-0.1,0.1);
+    Lx=h->GetListOfFunctions();
+    ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+    sprintf(txt,"TPC Sector %d : PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT",isec+1);
+    hA[284+isec]=h=new TH2F(Form("muChRecPNpSec%d",isec+1), txt,100,0.,100.,100,-0.1,0.1);
+    Lx=h->GetListOfFunctions();
+    ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+    sprintf(txt,"Barrel W: TPC Sector %d Track prim POSITIVE glob signed DCA, final selection; 2x2 ET (GeV); sDCA (cm)",isec+1);
+    hA[308+isec]=h=new TH2F(Form("muWglDcaSP_Sec%d",isec+1), txt,100,0.,100.,100,-5,5);
+    sprintf(txt,"Barrel W: TPC Sector %d Track prim NEGATIVE glob signed DCA, final selection; 2x2 ET (GeV); sDCA (cm)",isec+1);
+    hA[332+isec]=h=new TH2F(Form("muWglDcaSN_Sec%d",isec+1), txt,100,0.,100.,100,-5,5);
+  }    
+
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
     if(  hA[i]==0) continue;
@@ -340,6 +361,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.10  2012/08/28 14:28:27  stevens4
+// add histos for barrel and endcap algos
+//
 // Revision 1.9  2012/08/07 21:06:38  stevens4
 // update to tree analysis to produce independent histos in a TDirectory for each eta-bin
 //
