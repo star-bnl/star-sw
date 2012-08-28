@@ -39,7 +39,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *namePB[]={"musPtBalance_clust", "musPtBalance_awayTot","muWeta"};// pg 14 -Pt-Balance plots
   char *nameB1[]={"muSEadc1","muSPadc1"}; // pg 15 BSMD spectra
   char *nameN[]={"muTrdEdX","muWdedx"}; //pg 16
-  char *nameO[]={"muWglDca","muWglDcaSP","muWglDcaSN"}; // pg 17
+  char *nameO[]={"muWglDcaSP","muWglDcaSN"}; // pg 17
   
   char *nameP[]={"muETlive0","muETlive1", "muETlive2","muETlive3","muWcar1","muWcar2","muWcar3"}; // pg 18
   
@@ -54,7 +54,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameS5[]={"spinET_P","spinET_N","spinQpT","spinQpT2"};// pg 24
   char *nameS2[]={"spinY0","spinY1","spinY2_P","spinY2_N"};// pg 25
   char *nameS3[]={,"spinY3_P","spinY3_N","spinY4_P","spinY4_N"};// pg 26
-  char *nameS4[]={"spinY5_P","spinY5_N","spinLepEta"};// pg 27
+  char *nameS4[]={"spinY5_P","spinY5_N","spinLepEta_P","spinLepEta_N"};// pg 27
 
   //use  Page 30 -42 TPC sectors per cut, 2 pages per cut
 
@@ -398,7 +398,7 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameO;
-    for(int i=0;i<3;i++) {
+    for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw("colz");
@@ -556,11 +556,11 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameS4;
-    for(int i=0;i<3;i++) {
+    for(int i=0;i<4;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)gDirectory->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw("colz");
-      if(i==2) h->Draw();
+      if(i>1) h->Draw();
     }
  } break;//--------------------------------------
 
@@ -719,10 +719,11 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 
 //============================
 void doAll(char *core0="", char *iPath="", int isMC=0, char* oPath="", char* etaBin=""){
-  for(int i=1;i<=25;i++)  {
+  for(int i=1;i<=27;i++)  {
     if ( isMC && i==2 ) continue;
     if ( isMC && i==3 ) continue;
     if ( isMC && i==4 ) continue;
+    if ( isMC && i>=23 ) continue;
     plWana(i,2,core0,iPath,oPath,isMC,etaBin);
   }
   // TPC by sector:
@@ -732,6 +733,9 @@ void doAll(char *core0="", char *iPath="", int isMC=0, char* oPath="", char* eta
 
 
 // $Log: plWana.C,v $
+// Revision 1.16  2012/08/28 14:28:49  stevens4
+// updates to movie makers
+//
 // Revision 1.15  2012/08/07 21:06:56  stevens4
 // update to tree analysis to produce independent histos in a TDirectory for each eta-bin
 //
