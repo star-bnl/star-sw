@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.12 2012/08/21 21:28:22 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.13 2012/08/28 14:28:27 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -42,17 +42,17 @@ St2011WMaker::find_W_boson(){
       nEta1++;
 
       //signal plots w/o EEMC in veto
-      if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
-	if(T.sPtBalance_noEEMC>par_ptBalance ) {//only signed ptBalance cut 
-	  hA[140]->Fill(T.cluster.ET);
-	  hA[240]->Fill(T.prMuTrack->eta(),T.cluster.ET);
-          if (T.prMuTrack->charge() < 0) {
-            hA[184+3]->Fill(T.cluster.ET);
-          } else if (T.prMuTrack->charge() > 0) {
-            hA[184+4]->Fill(T.cluster.ET);
-          }
-        }
+      if(T.sPtBalance_noEEMC>par_ptBalance ) {//only signed ptBalance cut 
+	hA[140]->Fill(T.cluster.ET);
+	hA[240]->Fill(T.prMuTrack->eta(),T.cluster.ET);
+	if (T.prMuTrack->charge() < 0) {
+	  hA[184+3]->Fill(T.cluster.ET);
+	} else if (T.prMuTrack->charge() > 0) {
+	  hA[184+4]->Fill(T.cluster.ET);
+	}
       }
+      //if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
+      //}
 
       //fill plot for background
       if(T.cluster.ET > par_highET) {
@@ -148,6 +148,13 @@ St2011WMaker::find_W_boson(){
       //Q/pT plot
       hA[100]->Fill(T.cluster.ET,T.glMuTrack->charge()/T.glMuTrack->pt());
       hA[101]->Fill(T.cluster.ET,T.prMuTrack->charge()/T.prMuTrack->pt());
+      //for each sector
+      StThreeVectorF ro=T.glMuTrack->lastPoint();
+      int isec = WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity())-1;
+      hA[260+isec]->Fill(T.cluster.ET,T.glMuTrack->charge()/T.glMuTrack->pt());
+      hA[284+isec]->Fill(T.cluster.ET,T.prMuTrack->charge()/T.prMuTrack->pt());
+      if(k==0) hA[308+isec]->Fill( T.cluster.ET,T.glMuTrack->dcaD());
+      else hA[332+isec]->Fill( T.cluster.ET,T.glMuTrack->dcaD());
 
       if(T.cluster.ET<par_highET) continue;  // very likely Ws
       hA[91]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.position.Phi());
@@ -161,7 +168,8 @@ St2011WMaker::find_W_boson(){
       nGoldW++;
       if(T.prMuTrack->charge()>0) nGoldWp++;
       else if(T.prMuTrack->charge()<0) nGoldWn++;
-    
+      hA[102]->Fill(wEve->time);
+
     }// loop over tracks
   }// loop over vertices
   if(nNoNear>0) hA[0]->Fill("noNear",1.);
@@ -658,6 +666,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.13  2012/08/28 14:28:27  stevens4
+// add histos for barrel and endcap algos
+//
 // Revision 1.12  2012/08/21 21:28:22  stevens4
 // Add spin sorting for endcap Ws
 //

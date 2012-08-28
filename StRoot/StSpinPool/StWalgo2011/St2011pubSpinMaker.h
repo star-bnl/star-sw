@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.h,v 1.4 2012/08/21 21:28:22 stevens4 Exp $
+// $Id: St2011pubSpinMaker.h,v 1.5 2012/08/28 14:28:27 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -55,6 +55,7 @@ class St2011pubSpinMaker : public StMaker {
   virtual Int_t  Make();
   void setHList(TObjArray * x){HList=x;}
   void setEta(float x, float y) { par_leptonEta1=x; par_leptonEta2=y;};
+  void setEtaE(float x, float y) { parE_leptonEta1=x; parE_leptonEta2=y;};
   void setQPT(float x){  par_QPTlow=x;}
   void setNoEEMC() {par_useNoEEMC=1;}
 
@@ -64,7 +65,7 @@ class St2011pubSpinMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.4 2012/08/21 21:28:22 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011pubSpinMaker.h,v 1.5 2012/08/28 14:28:27 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -75,6 +76,9 @@ class St2011pubSpinMaker : public StMaker {
 
 
 // $Log: St2011pubSpinMaker.h,v $
+// Revision 1.5  2012/08/28 14:28:27  stevens4
+// add histos for barrel and endcap algos
+//
 // Revision 1.4  2012/08/21 21:28:22  stevens4
 // Add spin sorting for endcap Ws
 //

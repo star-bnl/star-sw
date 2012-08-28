@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.5 2012/08/21 21:28:22 stevens4 Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.6 2012/08/28 14:28:27 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -29,7 +29,7 @@ ClassImp(St2011pubSpinMaker)
   parE_QPThighET1=50; 
   parE_QPThighA=0.08; 
   parE_QPThighB=0.0013;
-  parE_leptonEta1=0.8; parE_leptonEta2=1.5;
+  parE_leptonEta1=0.7; parE_leptonEta2=2.5;
 
  }
 
@@ -165,11 +165,11 @@ St2011pubSpinMaker::bXingSort(){
       }
 
       hA[0]->Fill("Wcut",1.);
-
-      hA[30]->Fill(T.prMuTrack->eta());  
+  
       // allows spin specific cuts on eta
       if(T.prMuTrack->eta()<par_leptonEta1) continue;
       if(T.prMuTrack->eta()>par_leptonEta2) continue;
+      hA[29+iQ]->Fill(T.prMuTrack->eta()); 
       hA[0]->Fill("eta",1.);
 
       //::::::::::::::::::::::::::::::::::::::::::::::::
@@ -292,11 +292,11 @@ St2011pubSpinMaker::bXingSortEndcap(){
       }
 
       hE[0]->Fill("Wcut",1.);
-
-      hE[30]->Fill(T.prMuTrack->eta());  
+ 
       // allows spin specific cuts on eta
       if(T.prMuTrack->eta()<parE_leptonEta1) continue;
       if(T.prMuTrack->eta()>parE_leptonEta2) continue;
+      hE[29+iQ]->Fill(T.prMuTrack->eta()); 
       hE[0]->Fill("eta",1.);
 
       //::::::::::::::::::::::::::::::::::::::::::::::::
@@ -338,6 +338,9 @@ St2011pubSpinMaker::bXingSortEndcap(){
 }
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.6  2012/08/28 14:28:27  stevens4
+// add histos for barrel and endcap algos
+//
 // Revision 1.5  2012/08/21 21:28:22  stevens4
 // Add spin sorting for endcap Ws
 //

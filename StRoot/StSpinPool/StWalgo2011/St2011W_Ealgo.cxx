@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.10 2012/08/21 21:28:22 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.11 2012/08/28 14:28:27 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -37,16 +37,16 @@ St2011WMaker::findEndcap_W_boson(){
       assert(T.nearTotET>0); // internal logical error
 
       //signal plots w/o EEMC in veto
-      if(T.cluster.ET/T.nearTotET_noEEMC>parE_nearTotEtFrac){
-	if(T.sPtBalance_noEEMC>parE_ptBalance ) {//only signed ptBalance cut 
-          hE[140]->Fill(T.cluster.ET);
-          if (T.prMuTrack->charge() < 0) {
-            hE[184+3]->Fill(T.cluster.ET);
-          } else if (T.prMuTrack->charge() > 0) {
-            hE[184+4]->Fill(T.cluster.ET);
-	  }
-        }
+      if(T.sPtBalance_noEEMC>parE_ptBalance ) {//only signed ptBalance cut 
+	hE[140]->Fill(T.cluster.ET);
+	if (T.prMuTrack->charge() < 0) {
+	  hE[184+3]->Fill(T.cluster.ET);
+	} else if (T.prMuTrack->charge() > 0) {
+	  hE[184+4]->Fill(T.cluster.ET);
+	}
       }
+      //if(T.cluster.ET/T.nearTotET_noEEMC>parE_nearTotEtFrac){	
+      //}
 
       if(T.cluster.ET /T.nearTotET< parE_nearTotEtFrac) continue; // too large nearET
 
@@ -169,6 +169,14 @@ St2011WMaker::findEndcap_W_boson(){
       float p_chrg=prTr->charge();
       hE[200]->Fill(ET,g_chrg/glTr->pt());
       hE[201]->Fill(ET,p_chrg/prTr->pt());
+      
+      //charge sign flip with vertex refit
+      int g_ipn=0, p_ipn=0; // plus
+      if( g_chrg<0 ) g_ipn=1;// minus
+      if( p_chrg<0 ) p_ipn=1;// minus
+      hE[240+g_ipn]->Fill(ET);
+      hE[242+p_ipn]->Fill(ET);
+      if(g_chrg* p_chrg <-0.5) hE[244+p_ipn]->Fill(ET); // charge flip
 
       if(T.cluster.ET<parE_highET) continue;  // very likely Ws
       hE[91]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.position.Phi());
@@ -579,6 +587,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.11  2012/08/28 14:28:27  stevens4
+// add histos for barrel and endcap algos
+//
 // Revision 1.10  2012/08/21 21:28:22  stevens4
 // Add spin sorting for endcap Ws
 //
