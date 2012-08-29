@@ -37,7 +37,11 @@
 //#define LEN_CONDITION
 #define PULSE_CONDITION
 #define DO_PRINT
+#ifndef COSMIC
 #define VERTEX_CUT 50
+#else
+#define VERTEX_CUT 100000000
+#endif
 
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StFgtCollection.h"
@@ -60,8 +64,11 @@
 
 #define MIN_NUM_POINTS 2
 #define DISK_DIM 40
+#ifndef COSMIC
 #define NUM_EFF_BIN 30
-
+#else
+#define NUM_EFF_BIN 100
+#endif
 
 Bool_t StFgtGenAVEMaker::fitTheStrip(generalStrip* pStrip, generalStrip* pStripOtherLayer,float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin, Char_t layer)
 {
@@ -1316,7 +1323,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     it_lastTrack->ipZ=dca.first;
 
     //  cout <<"get track10" <<endl;
-    if(dist< MAX_DIST_CHI && fabs(vertZ)<50)// && fabs(bx)<40 && fabs(by)<40)
+    if(dist< MAX_DIST_CHI && fabs(vertZ)<VERTEX_CUT)// && fabs(bx)<40 && fabs(by)<40)
       {
 	//	cout <<" track accepted " <<endl;
 	//  cout <<"get track10-10" <<endl;
@@ -1573,7 +1580,7 @@ Int_t StFgtGenAVEMaker::Make()
 
   for(int iD=0;iD<6;iD++)
     {
-            cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
+      //            cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
       int clusCounts[8];
       memset(clusCounts,0,sizeof(int)*8);
       vector<generalCluster> &tHitVec=*(pClusters[iD]);
