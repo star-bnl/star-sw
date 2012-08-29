@@ -238,6 +238,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 	       {
 		 StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
 		 StSPtrVecFgtStripIterator stripIter;
+		 //		 cout <<"we have " << stripVec.size() << " strips in disc: " << disc <<endl;
 		 for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
 		   StFgtStrip *strip = *stripIter;
 		   //		   Float_t ped = 0, pedErr = 0;
@@ -251,6 +252,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		     Short_t quad, discK, stripI;
 		     Char_t layer;
 		     StFgtGeom::decodeGeoId(geoId,discK, quad, layer, stripI);
+		     //		     cout <<"quad: " << quad <<endl;
 		     if(discK<0 || discK>6 || quad <0 || quad > 4 || (layer!='P' && layer !='R'))
 		       {
 		       cout <<"bad read2" <<endl;
@@ -268,6 +270,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 			 if(quad<0)
 			   cout <<"bad read3"<<endl;
 			 //		  cout <<"looking at disc: " << disc <<  " quad: " << quad <<" index: " << disc*4+quad <<endl;
+			 //			 cout <<"pushing back to disc: "<< disc <<" quad: " << quad <<endl;
 			 pStrips[disc*4+quad].push_back(generalStrip(geoId,ped,pedErr,cSeedType,charge, chargeUncert));
 			 Double_t maxAdc=-9999;
 			 for(int j=0;j<7;j++)
@@ -743,7 +746,7 @@ void StFgtGeneralBase::checkMatches()
 	}
       clusWChargeMatch->Fill(numMatched);
       clusWOChargeMatch->Fill(numNotMatched);
-      cout <<"disk: " << iDx<<" found " << numMatched <<" clusters and " << numNotMatched << " clusters that were not matched" <<endl;
+      //      cout <<"disk: " << iDx<<" found " << numMatched <<" clusters and " << numNotMatched << " clusters that were not matched" <<endl;
     }
 
 }
