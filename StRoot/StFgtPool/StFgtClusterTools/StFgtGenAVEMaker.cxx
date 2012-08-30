@@ -143,7 +143,18 @@ template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int 
 {
   char buffer[200];
   (*pH)=new T*[numH];
-  if(numH == kFgtNumDiscs*4)
+  
+  if (numH==22)
+    {
+      for(int iD=0;iD<numH;iD++)
+        {  
+	  sprintf(buffer, "%s_APV%d", nameBase, iD);
+	  (*pH)[iD]=new T(buffer,buffer,numBin, first, last);
+	}
+    }
+  
+  if ((numH == kFgtNumDiscs*4)&&(numH!=22))
+    //if ((numH == kFgtNumDiscs*4))
     {
       for(int iD=0;iD<kFgtNumDiscs;iD++)
         {
@@ -158,21 +169,31 @@ template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int 
     {
       for(int iD=0;iD<kFgtNumDiscs;iD++)
         {
-          for(int binAPVi=0;binAPVi<40;binAPVi++)
-            {
-              int iQ = -1;
-              if((binAPVi>= 0) && (binAPVi<= 9)) iQ=0;
-              if((binAPVi>=10) && (binAPVi<=19)) iQ=1;
-              if((binAPVi>=20) && (binAPVi<=29)) iQ=2;
-              if((binAPVi>=30) && (binAPVi<=39)) iQ=3;
-              sprintf(buffer,"%s_disc%d_quad%d_apvBIN%d",nameBase,iD+1,iQ,binAPVi);
-              (*pH)[iD*40+binAPVi]=new T(buffer,buffer,numBin,first,last);
-            }
-        }
+
+	  if (numH==kFgtNumDiscs)
+	    {
+	      sprintf(buffer, "%s_disc%d", nameBase, iD+1);
+	      (*pH)[iD]=new T(buffer, buffer,numBin, first, last);
+	    }
+	  else
+	    {
+	      for(int binAPVi=0;binAPVi<40;binAPVi++)
+		{
+		  int iQ = -1;
+		  if((binAPVi>= 0) && (binAPVi<= 9)) iQ=0;
+		  if((binAPVi>=10) && (binAPVi<=19)) iQ=1;
+		  if((binAPVi>=20) && (binAPVi<=29)) iQ=2;
+		  if((binAPVi>=30) && (binAPVi<=39)) iQ=3;
+		  sprintf(buffer,"%s_disc%d_quad%d_apvBIN%d",nameBase,iD+1,iQ,binAPVi);
+		  (*pH)[iD*40+binAPVi]=new T(buffer,buffer,numBin,first,last);
+		}
+	    }
+	}
     }
 }
 
-template void createPlots(TH1I*** pH, int numH,const char* nameBase,  int numBin, int first, int last);
+
+template void createPlots(TH1I*** pH, int numH,const char* nameBase, int numBin, int first, int last);
 template void createPlots(TH1F*** pH, int numH, const char* nameBase, int numBin, int first, int last);
 
 void doNormalize(TH2D** hEff, TH2D** hNonEff)
@@ -1529,6 +1550,31 @@ Int_t StFgtGenAVEMaker::Make()
       for(hitIter=hitVec.begin();hitIter != hitVec.end();hitIter++)
 	{
 		      (*outTxtFile) << hitIter->centralStripGeoId << ", ";
+
+		      
+		      clusterGeoId[iD]->Fill(hitIter->centralStripGeoId);
+		      
+		      //Adding to fill APV noise histograms for disk 1, quad A, RDO=1, ARM=0, APV 0-4, 17-21
+		      Int_t geoId, rdo, arm,  apv, chan;
+		      mDb->getElecCoordFromGeoId(geoId, rdo,arm,apv,chan);		      
+		      
+		      if(iD==0 && rdo==1 && arm==0)
+			//disk1QuadA[apv]->Fill(chan);
+			
+			  if(hitIter->layer=='R')
+			    {
+			    (*outTxtFile) <<"R ordinate: " << hitIter->posR<<endl;
+			    //added this line under hitIter layer R
+			    clustersR[iD]->Fill(hitIter->posR);
+			    }
+			  else
+			    {
+			    Double_t phiQ=StFgtGeom::phiQuadXaxis(hitIter->quad);
+			    (*outTxtFile) <<"Phi ordinate: " << hitIter->posPhi-phiQ<<endl;
+			    //added this line under phi ordinate
+			    clustersP[iD]->Fill(hitIter->posPhi);
+			    }
+			  
 	}
       (*outTxtFile)<<endl;
 
@@ -2208,9 +2254,23 @@ Int_t StFgtGenAVEMaker::Finish(){
   exPulseMaxAdcNormTrackR->Write();
   exPulseSigTrackR->Write();
   numTracks->Write();
+
+  /*
+  for(int apvcounter=0; apvcounter<22; apvcounter++){
+    disk1QuadA[apvcounter]->Write();
+  }
+  */
   
   for(int iD=0;iD<kFgtNumDiscs;iD++)
     {
+
+      //Added for writing geoId, R, phi cluster histrograms
+      
+      clusterGeoId[iD]->Write();
+      clustersR[iD]->Write();
+      clustersP[iD]->Write();
+     
+
       for(int iq=0;iq<4;iq++)
 	{
 	  numClustersR[iD*4+iq]->Write();
@@ -2385,11 +2445,10 @@ Int_t StFgtGenAVEMaker::Finish(){
   ///---->  cClusterSizeR->SaveAs("clusterSizeR.png");
   ///---->  cClusterSizePhi->SaveAs("clusterSizePhi.png");
   ///---->  cChargeCorr->SaveAs("chargeCorrelation.png");
-
   ///---->  cClusterChargeR->SaveAs("clusterChargeR.png");
   ///---->  cClusterChargePhi->SaveAs("clusterChargePhi.png");
 
-   cout <<"saving .." <<endl;
+  cout <<"saving .." <<endl;
   doNormalize(radioPlotsEffR, radioPlotsNonEffR);
   doNormalize(radioPlotsEffPhi, radioPlotsNonEffPhi);
 
@@ -2461,8 +2520,8 @@ Int_t StFgtGenAVEMaker::Finish(){
       cRPRatio->cd(iD+1);
       rPhiRatioPlots[iD]->Draw();
       cREff->cd(iD+1);
-  f1->Write();
-
+      f1->Write();
+      
       TH1D* tmpR=(TH1D*)rEff[iD]->Clone("tmpR");
       rEff[iD]->Add(rNonEff[iD]);
       for(int nx=0;nx<rEff[iD]->GetNbinsX();nx++)
@@ -2501,7 +2560,7 @@ Int_t StFgtGenAVEMaker::Finish(){
   ///---->  cREff->SaveAs("rEff.pdf");
 
   ///---->  cRPRatio->SaveAs("rpRatio.png");
-  ///---->  cRPRatio->SaveAs("rpRatio.pdf");
+  ///---->  cRPRatio->SaveAs("rpRatio.pdf"
   f1->Write();
   ////this has to be the last thing!!!! Otherwise the histos become invalid and the code seg faults...
   f1->Close();
@@ -2549,9 +2608,6 @@ Int_t StFgtGenAVEMaker::Init(){
 
 
   Int_t ierr = kStOk;
-
-
-
 
   chargeRatioInEffDisk=new TH2D("chargeRatioInEffDisk","chargeRatioInEffDisk",NUM_EFF_BIN,-DISK_DIM,DISK_DIM,NUM_EFF_BIN,-DISK_DIM,DISK_DIM);
   chargeRatioInEffDisk->SetMaximum(2.0);
@@ -2664,6 +2720,14 @@ Int_t StFgtGenAVEMaker::Init(){
   createPlots(&APVmaxSigCloseClusterR,kFgtNumDiscs*40,"APVmaxSigCloseClusterR",100,1,200);
   createPlots(&APVsecondToLastRatioCloseClusterP,kFgtNumDiscs*40,"APVsecondToLastRatioCloseClusterP",100,0,5);
   createPlots(&APVsecondToLastRatioCloseClusterR,kFgtNumDiscs*40,"APVsecondToLastRatioCloseClusterR",100,0,5);
+  
+
+  //Joes plots
+  createPlots(&clusterGeoId, kFgtNumDiscs,"clusterGeoId",32000,0,32000);
+  createPlots(&clustersR, kFgtNumDiscs,"clustersR", 500, 0, 50);
+  createPlots(&clustersP, kFgtNumDiscs,"clustersP", 100, -3.14159, 3.14159);
+  //createPlots(&disk1QuadA, 22,"disk1QuadA",128,0,128);
+  
 
   rEff=new TH1D*[kFgtNumDiscs];
   rNonEff=new TH1D*[kFgtNumDiscs];
