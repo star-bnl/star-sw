@@ -7,7 +7,7 @@ root [7] muWET->Draw()
 */
 
 //=================================================
-plWana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institutions/iucf/stevens4/run12w/", char *oPath="out/bemc/", int isMC=0, char *etaBin="Eta7"){ //1=gif, 2=ps, 3=both
+plWana(  int page=0,int pl=2, char *core0="run12long", char *iPath="8.29.12/", char *oPath="out/bemc/", int isMC=0, char *etaBin="Eta5"){ //1=gif, 2=ps, 3=both
 
   //cout<<iPath<<core0<<endl;
   //cout<<etaBin<<endl;
@@ -31,8 +31,8 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameH[]={"muBclET24","muBclE242D","muBclET24R"};//pg 8
   
   char *nameJ[]={"muBdist1","muBdist2","muBdist3","muBdist4"};//pg 9
-  char *nameK[]={"muBjetETR","muTjetBjet2D","muTBjetET"};//pg 10
-  char *nameL[]={"muBjetET","muBclEjetE2D","muTjetET"};//pg 11
+  char *nameK[]={"muBjetETR","muTjetBjet2D","muTBjetET"};//pg 11
+  char *nameL[]={"muBjetET","muBclEjetE2D","muTjetET"};//pg 10
   char *nameM[]={"muTwayET","muBwayET","muBclETPt","muEwayET"};//pg 12
   
   char *nameW[]={"muTotwayET2D","musPtBalance_clust","muWET","muW2D1"};//pg 13
@@ -560,7 +560,7 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
       printf("->%s<\n",nameX[i]);
       h=(TH1*)gDirectory->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw("colz");
-      if(i>1) h->Draw();
+      if(i>1) { h->Draw(); h->Rebin(4);}
     }
  } break;//--------------------------------------
 
@@ -733,6 +733,9 @@ void doAll(char *core0="", char *iPath="", int isMC=0, char* oPath="", char* eta
 
 
 // $Log: plWana.C,v $
+// Revision 1.17  2012/08/31 20:56:06  balewski
+// Toy pol eve generator and reco
+//
 // Revision 1.16  2012/08/28 14:28:49  stevens4
 // updates to movie makers
 //
