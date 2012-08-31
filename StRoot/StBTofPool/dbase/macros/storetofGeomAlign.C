@@ -49,9 +49,11 @@ void storetofGeomAlign() {
 //  TString ZStoreTime = "2009-12-14 00:00:03";  //  Run10 200GeV update for production (note: TPC sector 20 problem)
 //  TString ZStoreTime = "2010-04-08 15:00:00";  //  Run10 update with final TPC calib 7GeV based) 
 //  TString ZStoreTime = "2010-12-20 00:00:01";  //  Run11 update with final TPC calib (19.6GeV based) 
-//  TString ZStoreTime = "2009-02-01 00:00:01";  //  Run9, alignment update following major TPC geometry update
-//  TString ZStoreTime = "2009-05-27 00:00:01";  //  Run9, alignment update following major TPC geometry update
-  TString ZStoreTime = "2011-12-20 00:00:01";  //  Run12 update with final TPC calib (193GeV UU based, w/ TPC y2000 geometry) 
+//  TString ZStoreTime = "2009-05-27 00:00:01";  //  Run9-FF, alignment update following major TPC geometry update
+//  TString ZStoreTime = "2011-12-20 00:00:01";  //  Run12 update with final TPC calib (193GeV UU based, w/ TPC y2000 geometry) 
+  TString ZStoreTime = "2009-02-01 00:00:01";  //  Run9-RFF, alignment update (based on FF)  following major TPC geometry update
+
+
 
 //-- add table to the container with descriptor given by Database
   StDbTable* tofGeomAlign = configNode->addDbTable("tofGeomAlign");
@@ -62,7 +64,7 @@ void storetofGeomAlign() {
 // year10+
   float shifty[NMAX], shiftz[NMAX], shiftx[NMAX];
   ifstream inData;
-  inData.open("data/run12/alignment/geomAlign_uu193_120705.txt");
+  inData.open("data/run9/alignment/geomAlign_200GeV_120322.txt");
   for(int i=0;i<NMAX;i++) {
     inData >> shifty[i] >> shiftz[i] >> shiftx[i];
   }
