@@ -1,4 +1,5 @@
-// $Id: St2011W_algo.cxx,v 1.13 2012/08/28 14:28:27 stevens4 Exp $
+
+// $Id: St2011W_algo.cxx,v 1.14 2012/08/31 20:10:52 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -41,23 +42,24 @@ St2011WMaker::find_W_boson(){
       hA[20]->Fill("eta1",1.);
       nEta1++;
 
-      //signal plots w/o EEMC in veto
-      if(T.sPtBalance_noEEMC>par_ptBalance ) {//only signed ptBalance cut 
-	hA[140]->Fill(T.cluster.ET);
-	hA[240]->Fill(T.prMuTrack->eta(),T.cluster.ET);
-	if (T.prMuTrack->charge() < 0) {
-	  hA[184+3]->Fill(T.cluster.ET);
-	} else if (T.prMuTrack->charge() > 0) {
-	  hA[184+4]->Fill(T.cluster.ET);
+      //signal plots w/o EEMC in awayside veto
+      if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
+	if(T.sPtBalance_noEEMC>par_ptBalance ) {//only signed ptBalance cut 
+	  hA[140]->Fill(T.cluster.ET);
+	  hA[240]->Fill(T.prMuTrack->eta(),T.cluster.ET);
+	  if (T.prMuTrack->charge() < 0) {
+	    hA[184+3]->Fill(T.cluster.ET);
+	  } else if (T.prMuTrack->charge() > 0) {
+	    hA[184+4]->Fill(T.cluster.ET);
+	  }
 	}
       }
-      //if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
-      //}
 
       //fill plot for background
       if(T.cluster.ET > par_highET) {
 	if(T.prMuTrack->charge()>0) hA[251]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
         else if(T.prMuTrack->charge()<0) hA[252]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
+	hA[135]->Fill(T.awayTotET,T.sPtBalance);
       }
 
       if(T.cluster.ET /T.nearTotET< par_nearTotEtFrac) continue; // too large nearET
@@ -78,6 +80,7 @@ St2011WMaker::find_W_boson(){
       hA[134]->Fill(T.cluster.ET,T.sPtBalance);
       hA[135]->Fill(T.awayTotET,T.sPtBalance);
       hA[209]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.ET);
+      if(T.cluster.ET > par_highET) hA[253]->Fill(T.awayTotET,T.sPtBalance);
 
       for (int i=0; i<=20; i++) {
 	//  float awayTot_cut = 10.+2.*((float) i);
@@ -666,6 +669,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.14  2012/08/31 20:10:52  stevens4
+// switch to second EEMC background using both isolation and sPt-Bal (for mirror symmetry (also adjust eta binning)
+//
 // Revision 1.13  2012/08/28 14:28:27  stevens4
 // add histos for barrel and endcap algos
 //

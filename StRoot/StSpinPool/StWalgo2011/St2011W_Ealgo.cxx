@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.11 2012/08/28 14:28:27 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.12 2012/08/31 20:10:51 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -36,17 +36,17 @@ St2011WMaker::findEndcap_W_boson(){
       assert(T.cluster.nTower>0); // internal logical error
       assert(T.nearTotET>0); // internal logical error
 
-      //signal plots w/o EEMC in veto
-      if(T.sPtBalance_noEEMC>parE_ptBalance ) {//only signed ptBalance cut 
-	hE[140]->Fill(T.cluster.ET);
-	if (T.prMuTrack->charge() < 0) {
-	  hE[184+3]->Fill(T.cluster.ET);
-	} else if (T.prMuTrack->charge() > 0) {
-	  hE[184+4]->Fill(T.cluster.ET);
+      //signal plots w/o EEMC in awayside veto
+      if(T.cluster.ET/T.nearTotET_noEEMC>parE_nearTotEtFrac){	
+	if(T.sPtBalance_noEEMC>parE_ptBalance ) {//only signed ptBalance cut 
+	  hE[140]->Fill(T.cluster.ET);
+	  if (T.prMuTrack->charge() < 0) {
+	    hE[184+3]->Fill(T.cluster.ET);
+	  } else if (T.prMuTrack->charge() > 0) {
+	    hE[184+4]->Fill(T.cluster.ET);
+	  }
 	}
       }
-      //if(T.cluster.ET/T.nearTotET_noEEMC>parE_nearTotEtFrac){	
-      //}
 
       if(T.cluster.ET /T.nearTotET< parE_nearTotEtFrac) continue; // too large nearET
 
@@ -65,7 +65,8 @@ St2011WMaker::findEndcap_W_boson(){
       hE[133]->Fill(T.awayTotET,T.ptBalance.Perp());
       hE[134]->Fill(T.cluster.ET,T.sPtBalance);
       hE[135]->Fill(T.awayTotET,T.sPtBalance);
-      
+      if(T.cluster.ET > parE_highET) hE[239]->Fill(T.awayTotET,T.sPtBalance);
+
       //alternate sPtBalance
       hE[141]->Fill(T.sPtBalance,T.sPtBalance-T.sPtBalance2);
 
@@ -186,6 +187,10 @@ St2011WMaker::findEndcap_W_boson(){
       hE[99]->Fill( T.prMuTrack->eta());
       hE[100]->Fill(T.pointTower.R.X(),T.pointTower.R.Y());
       hE[190+k]->Fill(T.prMuTrack->eta(),T.cluster.ET);
+      hE[101]->Fill(T.cluster.ET/T.cl4x4.ET,T.sPtBalance);
+      hE[102]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
+      hE[103]->Fill(T.glMuTrack->dEdx()*1e6,T.sPtBalance);
+
       hE[20]->Fill("goldW",1.);
       nGoldW++;
       if(T.prMuTrack->charge()>0) nGoldWp++;
@@ -587,6 +592,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.12  2012/08/31 20:10:51  stevens4
+// switch to second EEMC background using both isolation and sPt-Bal (for mirror symmetry (also adjust eta binning)
+//
 // Revision 1.11  2012/08/28 14:28:27  stevens4
 // add histos for barrel and endcap algos
 //

@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.6 2012/08/28 14:28:27 stevens4 Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.7 2012/08/31 20:10:52 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -169,7 +169,6 @@ St2011pubSpinMaker::bXingSort(){
       // allows spin specific cuts on eta
       if(T.prMuTrack->eta()<par_leptonEta1) continue;
       if(T.prMuTrack->eta()>par_leptonEta2) continue;
-      hA[29+iQ]->Fill(T.prMuTrack->eta()); 
       hA[0]->Fill("eta",1.);
 
       //::::::::::::::::::::::::::::::::::::::::::::::::
@@ -200,7 +199,10 @@ St2011pubSpinMaker::bXingSort(){
 
      
       hA[10+iQ]->Fill(ET);
-      if(ET>25 &&ET<50 ) hA[12+iQ]->Fill(spin4);
+      if(ET>25 &&ET<50 ) {
+	hA[12+iQ]->Fill(spin4);
+	hA[29+iQ]->Fill(T.prMuTrack->eta()); 
+      }
       if(ET>32 &&ET<44 ) hA[14+iQ]->Fill(spin4);
      
       hA[18+iQ]->Fill(spin4,ET);	 
@@ -296,7 +298,6 @@ St2011pubSpinMaker::bXingSortEndcap(){
       // allows spin specific cuts on eta
       if(T.prMuTrack->eta()<parE_leptonEta1) continue;
       if(T.prMuTrack->eta()>parE_leptonEta2) continue;
-      hE[29+iQ]->Fill(T.prMuTrack->eta()); 
       hE[0]->Fill("eta",1.);
 
       //::::::::::::::::::::::::::::::::::::::::::::::::
@@ -327,7 +328,10 @@ St2011pubSpinMaker::bXingSortEndcap(){
 
      
       hE[10+iQ]->Fill(ET);
-      if(ET>25 &&ET<50 ) hE[12+iQ]->Fill(spin4);
+      if(ET>25 &&ET<50 ) {
+	hE[12+iQ]->Fill(spin4);
+	hE[29+iQ]->Fill(T.prMuTrack->eta()); 
+      }
       if(ET>32 &&ET<44 ) hE[14+iQ]->Fill(spin4);
      
       hE[18+iQ]->Fill(spin4,ET);	 
@@ -338,6 +342,9 @@ St2011pubSpinMaker::bXingSortEndcap(){
 }
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.7  2012/08/31 20:10:52  stevens4
+// switch to second EEMC background using both isolation and sPt-Bal (for mirror symmetry (also adjust eta binning)
+//
 // Revision 1.6  2012/08/28 14:28:27  stevens4
 // add histos for barrel and endcap algos
 //
