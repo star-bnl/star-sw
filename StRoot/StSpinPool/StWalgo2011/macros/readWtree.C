@@ -30,15 +30,15 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int etaBin=7, int maxE
   TObjArray* HListEta=new TObjArray;;
   
   //define eta ranges
-  float etaLow[8] = {-0.9, -0.4, 0.0, 0.4, 0.9, 1.15, 0.9, -1.};
-  float etaHigh[8] = {-0.4, 0.0, 0.4, 0.9, 1.15, 1.35, 1.5, 1.};
+  float etaLow[8] = {-1.0, -0.5, 0.0, 0.5, 1.0, 1.15, 0.7, -1.5};
+  float etaHigh[8] = {-0.5, 0.0, 0.5, 1.0, 1.15, 1.5, 2.5, 2.0};
 
   //initiate W maker
   wTreeMk = new St2011WMaker(Form("Eta%d",etaBin));
   wTreeMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
   //set cuts for barrle and endcap algos
   wTreeMk->setWbosonCuts(25., 0.88, 14., etaLow[etaBin-1], etaHigh[etaBin-1]); //highET, nearTotEtFrac, ptBalance, etaLow, etaHigh
-  wTreeMk->setE_WbosonCuts(25., 0.85, 14., etaLow[etaBin-1], etaHigh[etaBin-1]); //highET, nearTotEtFrac, ptBalance, etaLow, etaHigh
+  wTreeMk->setE_WbosonCuts(25., 0.9, 14., etaLow[etaBin-1], etaHigh[etaBin-1]); //highET, nearTotEtFrac, ptBalance, etaLow, etaHigh
   wTreeMk->setHList(HListEta);
   wTreeMk->setMaxDisplayEve(1e6); // only first N events will get displayed 
 
@@ -54,7 +54,17 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int etaBin=7, int maxE
       spinMkA[kk]->setHList(HListEta);
       //assign eta bin same as W maker
       spinMkA[kk]->setEta(etaLow[etaBin-1],etaHigh[etaBin-1]); 
-      
+      spinMkA[kk]->setEtaE(etaLow[etaBin-1],etaHigh[etaBin-1]); 
+
+      //special cases
+      if(etaBin==7) {
+	spinMkA[kk]->setEta(999.,999.); //mask barrel for for etaBin 7
+      }
+      if(etaBin==8) {
+	spinMkA[kk]->setEta(-1.,1.); //diff eta range for spin sorting
+	spinMkA[kk]->setEtaE(999.,999.); //mask endcap for for etaBin 8
+      }
+
       //possibly add other copies for systematic checks later
       //if(kk==1) spinMkA[kk]->setEta(-1.,0.);
       //if(kk==2) spinMkA[kk]->setEta(0,1.);

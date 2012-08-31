@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.10 2012/08/28 14:28:27 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.11 2012/08/31 20:10:52 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -330,6 +330,9 @@ St2011WMaker::initHistos(){
   hA[251]=h=new TH2F("muSpTbal_isoConePos","Q+ Signed p_{T} Balance vs. 2x2/nearCone; 2x2/nearCone; Signed p_{T} Balance (GeV)",110,0,1.1,100,-100,100);
   hA[252]=h=new TH2F("muSpTbal_isoConeNeg","Q- Signed p_{T} Balance vs. 2x2/nearCone; 2x2/nearCone; Signed p_{T} Balance (GeV)",110,0,1.1,100,-100,100);
 
+  hA[253]=h=new TH2F("musPtBalance_awayTot_highEt","Barrel (ET > 25): sPtBalance vs awayside PT; awayside PT; sPtBalance",100,0,100,100,-100,100);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,par_ptBalance,100,par_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
   
   //Q/pt plots for each sector
   for(int isec=0; isec<24; isec++){
@@ -361,6 +364,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.11  2012/08/31 20:10:52  stevens4
+// switch to second EEMC background using both isolation and sPt-Bal (for mirror symmetry (also adjust eta binning)
+//
 // Revision 1.10  2012/08/28 14:28:27  stevens4
 // add histos for barrel and endcap algos
 //

@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.9 2012/08/28 14:28:27 stevens4 Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.10 2012/08/31 20:10:52 stevens4 Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -207,6 +207,10 @@ St2011WMaker::initEHistos(){
   hE[99]=h=new TH1F("muE_Weta","Endcap W: Lepton eta, final selection ; lepton eta",400,-2.0,2.0);
   hE[100]=h=new TH2F("muE_WXY","Endcap W: Projected track XY at SMD depth, final selection; X (cm); Y (cm)",100,-280,280,100,-280,280);
 
+  hE[101]=h=new TH2F("muE_W_sPtBalsmallIso","Endcap W: sPt-Bal vs 2x2/4x4 ratio, final selection ; 2x2/4x4 ratio; signed Pt-Balance",100,0,1.2,100,-100,100);
+  hE[102]=h=new TH2F("muE_W_sPtBalnearIso","Endcap W: sPt-Bal vs 2x2/nearCone ratio, final selection ; 2x2/nearCone ratio; signed Pt-Balance",100,0,1.2,100,-100,100);
+  hE[103]=h=new TH2F("muE_W_sPtBaldedx","Endcap W: sPt-Bal vs dE/dx, final selection ; dE/dx (keV); signed Pt-Balance",100,0,10,100,-100,100);
+
   // free 101-109
   //..... series of electron ET plots after succesive cuts
   char tt2[][200]={"max 2x2","track matched","no near ET","smdRatio","no away ET"};
@@ -286,6 +290,9 @@ St2011WMaker::initEHistos(){
   hE[237]=h=new TH2F("muEsPtBalance_esmdRatio_highET","sPtBalance vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance ; U+V ratio",100,-100.,100.,50,0.,1.);
   hE[238]=h=new TH2F("muEsPtBalance2_esmdRatio_highET","sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,50,0.,1.);
 
+  hE[239]=h=new TH2F("muEsPtBalance_awayTot_highEt","Endcap (ET > 25): sPtBalance vs awayside PT; awayside PT; sPtBalance",100,0,100,100,-100,100);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,parE_ptBalance,100,parE_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
   
   //charge sign flip with vertex refit
   char cPM[2]={'P','N'}; // Positive, Negative
