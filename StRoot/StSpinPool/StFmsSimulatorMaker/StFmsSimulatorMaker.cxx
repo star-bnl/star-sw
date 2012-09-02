@@ -19,26 +19,12 @@
 //     $STAR/StDb/idl/fmsQTMap.idl
 //
 
-#include "tables/St_g2t_emc_hit_Table.h"
+#include "StMcEventTypes.hh"
 #include "StEventTypes.h"
 #include "StFmsDbMaker/StFmsDbMaker.h"
 #include "StFmsSimulatorMaker.h"
 
 ClassImp(StFmsSimulatorMaker);
-
-void StFmsSimulatorMaker::decodeVolumeId(int volumeId, int& ew, int& nstb, int& channel) const
-{
-  //
-  // volumeId = ew*10000+nstb*1000+channel
-  //
-  // ew      : 1=FPD, 2=FMS
-  // nstb    : 1=FMS-North-Large, 2=FMS-South-Large, 3=FMS-North-Small, 4=FMS-South-Small
-  // channel : 1-578
-  //
-  ew      = volumeId / 10000;
-  nstb    = volumeId / 1000 % 10;
-  channel = volumeId % 1000;
-}
 
 int StFmsSimulatorMaker::getDetectorId(int ew, int nstb) const
 {
@@ -79,19 +65,20 @@ int StFmsSimulatorMaker::getDetectorId(int ew, int nstb) const
   return -1;
 }
 
-StFmsHit* StFmsSimulatorMaker::makeFmsHit(const g2t_emc_hit_st& hit) const
+StFmsHit* StFmsSimulatorMaker::makeFmsHit(const StMcCalorimeterHit* hit) const
 {
   const int MAX_ADC = 4095;
-
-  int ew, nstb, channel;
-  decodeVolumeId(hit.volume_id,ew,nstb,channel);
+  const int ew = hit->module();
+  const int nstb = hit->sub();
+  const int channel = hit->eta();
   int detectorId = getDetectorId(ew,nstb);
   int qtCrate, qtSlot, qtChannel;
   gStFmsDbMaker->getMap(detectorId,channel,&qtCrate,&qtSlot,&qtChannel);
   float gain = gStFmsDbMaker->getGain(detectorId,channel);
   float gainCorrection = gStFmsDbMaker->getGainCorrection(detectorId,channel);
-  int adc = int(hit.de/(gain*gainCorrection)+0.5);
-  if (adc > MAX_ADC) adc = MAX_ADC;
+  int adc = int(hit->dE()/(gain*gainCorrection)+0.5);
+  if (adc < 0) adc = 0; // underflow
+  if (adc > MAX_ADC) adc = MAX_ADC; // overflow
   int tdc = 0;
   float energy = adc*gain*gainCorrection;
   return new StFmsHit(detectorId,channel,qtCrate,qtSlot,qtChannel,adc,tdc,energy);
@@ -99,17 +86,10 @@ StFmsHit* StFmsSimulatorMaker::makeFmsHit(const g2t_emc_hit_st& hit) const
 
 int StFmsSimulatorMaker::Make()
 {
-  // Get GEANT FPD/FMS hits
-  TDataSet* geant = GetDataSet("geant");
-  if (!geant) {
-    LOG_ERROR << "No geant" << endm;
-    return kStErr;
-  }
-
-  TDataSetIter geantIter(geant);
-  const St_g2t_emc_hit* g2t_fpd_hit = (const St_g2t_emc_hit*)geantIter("g2t_fpd_hit");
-  if (!g2t_fpd_hit) {
-    LOG_ERROR << "No g2t_fpd_hit" << endm;
+  // Get StMcEvent
+  StMcEvent* mcEvent = (StMcEvent*)GetDataSet("StMcEvent");
+  if (!mcEvent) {
+    LOG_ERROR << "No StMcEvent" << endm;
     return kStErr;
   }
 
@@ -129,17 +109,21 @@ int StFmsSimulatorMaker::Make()
     return kStErr;
   }
 
-  fillStEvent(g2t_fpd_hit,event);
+  //fillStEvent(g2t_fpd_hit,event);
+  fillStEvent(mcEvent,event);
   printStEventSummary(event);
 
   return kStOk;
 }
 
-void StFmsSimulatorMaker::fillStEvent(const St_g2t_emc_hit* g2t_fpd_hit, StEvent* event)
+void StFmsSimulatorMaker::fillStEvent(const StMcEvent* mcEvent, StEvent* event)
 {
-  const g2t_emc_hit_st* hits = g2t_fpd_hit->GetTable();
-  for (int i = 0; i < g2t_fpd_hit->GetNRows(); ++i)
-    event->fmsCollection()->addHit(makeFmsHit(hits[i]));
+  for (size_t m = 1; m <= mcEvent->fpdHitCollection()->numberOfModules(); ++m) {
+    const StMcEmcModuleHitCollection* module = mcEvent->fpdHitCollection()->module(m);
+    for (size_t i = 0; i < module->detectorHits().size(); ++i) {
+      event->fmsCollection()->addHit(makeFmsHit(module->detectorHits()[i]));
+    }
+  }
 }
 
 void  StFmsSimulatorMaker::printStEventSummary(const StEvent* event)
