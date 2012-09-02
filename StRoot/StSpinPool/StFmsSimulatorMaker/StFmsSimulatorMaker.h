@@ -9,8 +9,8 @@
 #ifndef ST_FMS_SIMULATOR_MAKER_H
 #define ST_FMS_SIMULATOR_MAKER_H
 
-class St_g2t_emc_hit;
-class g2t_emc_hit_st;
+class StMcCalorimeterHit;
+class StMcEvent;
 class StFmsHit;
 class StEvent;
 
@@ -22,10 +22,9 @@ public:
   int Make();
 
 private:
-  void decodeVolumeId(int volumeId, int& ew, int& nstb, int& channel) const;
   int getDetectorId(int ew, int nstb) const;
-  StFmsHit* makeFmsHit(const g2t_emc_hit_st&) const;
-  void fillStEvent(const St_g2t_emc_hit*, StEvent*);
+  StFmsHit* makeFmsHit(const StMcCalorimeterHit*) const;
+  void fillStEvent(const StMcEvent*, StEvent*);
   void printStEventSummary(const StEvent*);
 
   ClassDef(StFmsSimulatorMaker,0);
