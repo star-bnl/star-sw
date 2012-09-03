@@ -125,6 +125,10 @@ StJetCandidate* StjeJetEventTreeWriter::fillJet(StJetEvent* jetEvent, StJetVerte
       track->mPt             = mom.Pt();
       track->mEta            = mom.Eta();
       track->mPhi            = mom.Phi();
+      track->mNSigmaPion     = t->nSigmaPion();
+      track->mNSigmaKaon     = t->nSigmaKaon();
+      track->mNSigmaProton   = t->nSigmaProton();
+      track->mNSigmaElectron = t->nSigmaElectron();
       jet->addTrack(track)->setJet(jet);
     }
 
