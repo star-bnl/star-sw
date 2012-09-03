@@ -27,6 +27,10 @@ public:
     , mChi2(0)
     , mChi2Prob(0)
     , mBeta(0)
+    , mNSigmaPion(0)
+    , mNSigmaKaon(0)
+    , mNSigmaProton(0)
+    , mNSigmaElectron(0)
   {
   }
 
@@ -52,6 +56,10 @@ public:
   float beta()                const { return mBeta; }
   const TVector3& firstPoint() const { return mFirstPoint; }
   const TVector3&  lastPoint() const { return mLastPoint;  }
+  float nSigmaPion()           const { return mNSigmaPion; }
+  float nSigmaKaon()           const { return mNSigmaKaon; }
+  float nSigmaProton()         const { return mNSigmaProton; }
+  float nSigmaElectron()       const { return mNSigmaElectron; }
 
 private:
   short    mFlag;
@@ -71,8 +79,12 @@ private:
   float    mBeta;
   TVector3 mFirstPoint;
   TVector3 mLastPoint;
+  float    mNSigmaPion;
+  float    mNSigmaKaon;
+  float    mNSigmaProton;
+  float    mNSigmaElectron;
 
-  ClassDef(StJetTrack,4);
+  ClassDef(StJetTrack,5);
 };
 
 #endif // ST_JET_TRACK_H
