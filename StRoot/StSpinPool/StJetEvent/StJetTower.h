@@ -30,6 +30,20 @@ public:
   float rms()      const { return mRms; }
   short status()   const { return mStatus; }
 
+  // ID: 9=BEMC, 13=EEMC
+
+  // EEMC sector: 1-12
+  short sector() const { return (id()/60)+1; }
+
+  // EEMC subsector: 1-5
+  short subsector() const { return (id()%60)/12+1; }
+
+  // EEMC etabin: 1-12
+  short etabin() const { return (id()%60)%12+1; }
+
+  // EEMC phibin: 1-60
+  short phibin() const { return (sector()-1)*5+subsector(); }
+
 private:
   short mAdc;
   float mPedestal;
