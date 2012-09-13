@@ -49,13 +49,13 @@
 #include "StBichsel/Bichsel.h"
 //#define ElectronHack
 #define Old_dNdx_Table
-#define __DEBUG__
+//#define __DEBUG__
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.61 2012/09/13 21:02:52 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.62 2012/09/13 21:54:43 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -1141,7 +1141,8 @@ Double_t StTpcRSMaker::GetNoPrimaryClusters(Double_t betaGamma, Int_t charge) {
   Double_t beta = betaGamma/TMath::Sqrt(1.0 + betaGamma*betaGamma);
 #if defined(Old_dNdx_Table) 
   Double_t dNdx = 1.21773e+01*Bichsel::Instance()->GetI70M(TMath::Log10(betaGamma));
-#elsif  defined(ElectronHack)
+#else
+#if defined(ElectronHack) 
   Int_t elepos = charge/100;
   Double_t dNdx = mdNdx->Interpolate(betaGamma);
   if (elepos) {
@@ -1151,6 +1152,7 @@ Double_t StTpcRSMaker::GetNoPrimaryClusters(Double_t betaGamma, Int_t charge) {
 #else /* new H.Bichsel dNdx table 09/12/11 */
   Double_t dNdx = mdNdx->Interpolate(betaGamma);
 #endif /* Old_dNdx_Table || ElectronHack */
+#endif
   Double_t Q_eff = TMath::Abs(charge%100);
   if (Q_eff > 1)   {
     // Effective charge from GEANT ghion.F
@@ -1604,8 +1606,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.61 2012/09/13 21:02:52 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.62 2012/09/13 21:54:43 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.62  2012/09/13 21:54:43  fisyak
+// replace elsif by else and if
+//
 // Revision 1.61  2012/09/13 21:02:52  fisyak
 // Corrections for iTpx
 //
