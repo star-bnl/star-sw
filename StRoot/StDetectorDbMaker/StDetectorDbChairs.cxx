@@ -273,6 +273,8 @@ Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
 //________________________________________________________________________________
 #include "St_tpcPadGainT0C.h"
 MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
+#include "St_tpcPadGainT0BC.h"
+MakeChairInstance(tpcPadGainT0B,Calibrations/tpc/tpcPadGainT0B);
 #include "St_tpcSlewingC.h"
 MakeChairInstance(tpcSlewing,Calibrations/tpc/tpcSlewing);
 #include "St_tpcAcChargeC.h"
@@ -339,7 +341,7 @@ Double_t StTpcHitErrors::calcError(Int_t iXZ, Int_t sec, Int_t row, Double_t _z,
   */
   Int_t s = 0, r = 0, p = 0;
   if (sec > 12) s = 1;
-  if (row > 13) r = 1;
+  if (row > St_tpcPadPlanesC::instance()->innerPadRows()) r = 1;
   Int_t pitch = s;
   if (iXZ) pitch = 2;
   Double_t Vars[7] = {
@@ -366,7 +368,7 @@ MakeChairInstance(tpcStatus,Calibrations/tpc/tpcStatus);
 MakeChairInstance(TpcAvgCurrent,Calibrations/tpc/TpcAvgCurrent);
 //________________________________________________________________________________
 Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t row) {
-  if (row <  1 || row > 45) return -1;
+  if (row <  1 || row > St_tpcPadPlanesC::instance()->padRows()) return -1;
   if (row <  3) return 1;
   if (row <  7) return 2;
   if (row < 10) return 3;
@@ -416,9 +418,14 @@ MakeChairInstance(tss_tsspar,tpc/tsspars/tsspar);
 Float_t St_tss_tssparC::gain(Int_t sec, Int_t row) {
   Int_t l = 0;
   Double_t V_nominal = 1390;
-  if (row <= 13) {l = 1; V_nominal = 1170;}
-  Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
+  Float_t V = 0;
   Float_t gain = 0;
+  if (row <= St_tpcPadPlanesC::instance()->innerPadRows()) {l = 1; V_nominal = 1170;}
+  if (St_tpcPadPlanesC::instance()->getNumRows() == 45) {// ! iTpx
+    V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
+  } else {
+    V = (l == 1) ? St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,13) : St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,45);
+  }
   if (V > 0) {
     St_tpcGainCorrectionC *gC = St_tpcGainCorrectionC::instance();
     Double_t v = V - V_nominal;
@@ -632,8 +639,10 @@ MakeChairInstance2(Survey,StSsdSectorsOnGlobal,Geometry/ssd/SsdSectorsOnGlobal);
 MakeChairInstance2(Survey,StSsdLaddersOnSectors,Geometry/ssd/SsdLaddersOnSectors);
 MakeChairInstance2(Survey,StSsdWafersOnLadders,Geometry/ssd/SsdWafersOnLadders);
 #include "StTpcSurveyC.h"
+MakeChairInstance2(Survey,StTpcInnerSectorPosition,Geometry/tpc/TpcInnerSectorPosition);
 MakeChairInstance2(Survey,StTpcOuterSectorPosition,Geometry/tpc/TpcOuterSectorPosition);
 MakeChairInstance2(Survey,StTpcSuperSectorPosition,Geometry/tpc/TpcSuperSectorPosition);
+MakeChairInstance2(Survey,StTpcHalfPosition,Geometry/tpc/TpcHalfPosition);
 //________________________________________________________________________________
 const TGeoHMatrix &St_SurveyC::GetMatrix(Int_t i) {
   static TGeoHMatrix rot;
@@ -676,8 +685,10 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   if (Name == "SsdSectorsOnGlobal")   	return (St_SurveyC   *) StSsdSectorsOnGlobal::instance();	
   if (Name == "SsdLaddersOnSectors")  	return (St_SurveyC   *) StSsdLaddersOnSectors::instance();
   if (Name == "SsdWafersOnLadders")   	return (St_SurveyC   *) StSsdWafersOnLadders::instance(); 
+  if (Name == "TpcInnerSectorPosition") return (St_SurveyC   *) StTpcInnerSectorPosition::instance();
   if (Name == "TpcOuterSectorPosition") return (St_SurveyC   *) StTpcOuterSectorPosition::instance();
   if (Name == "TpcSuperSectorPosition") return (St_SurveyC   *) StTpcSuperSectorPosition::instance();
+  if (Name == "TpcHalfPosition")        return (St_SurveyC   *) StTpcHalfPosition::instance();
   return 0;
 }
 //__________________Calibrations/rhic______________________________________________________________

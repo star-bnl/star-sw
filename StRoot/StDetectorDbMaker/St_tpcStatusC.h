@@ -3,14 +3,14 @@
 
 #include "TChair.h"
 #include "tables/St_tpcStatus_Table.h"
-
+#include "St_tpcPadPlanesC.h"
 class St_tpcStatusC : public TChair {
  public:
   static St_tpcStatusC* 	instance();
   tpcStatus_st 	*Struct(Int_t i = 0) 	const {return ((St_tpcStatus*) Table())->GetTable()+i;}
   UInt_t     	getNumRows()                	const {return GetNRows();}
   UChar_t* 	status(Int_t i = 0) 	const {return Struct(i)->status;}
-  UChar_t       status(Int_t sector, Int_t row) const {return status()[45*(sector-1)+(row-1)];}
+  UChar_t       status(Int_t sector, Int_t row) const {return status()[St_tpcPadPlanesC::instance()->padRows()*(sector-1)+(row-1)];}
  protected:
   St_tpcStatusC(St_tpcStatus *table=0) : TChair(table) {}
   virtual ~St_tpcStatusC() {fgInstance = 0;}
