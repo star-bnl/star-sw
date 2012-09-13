@@ -8,6 +8,6 @@
 
 struct tpcPedestal { 
 
-   float  Pedestal[45][182];   /*  Pedestals per */
-   float  Rms[45][182];        /*  Rms per */
+   float  Pedestal[100][182];   /*  Pedestals per */
+   float  Rms[100][182];        /*  Rms per */
  };  
