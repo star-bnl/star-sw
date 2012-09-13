@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.10 2012/05/07 23:01:37 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.11 2012/09/13 21:00:04 fisyak Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.11  2012/09/13 21:00:04  fisyak
+ * Corrections for iTpx, clean up
+ *
  * Revision 1.10  2012/05/07 23:01:37  fisyak
  * Add Tonko's interface for variable no. of pad rows
  *
@@ -67,6 +70,7 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t    maxBin0Hits;
   Int_t    bin0Hits;
   Int_t    NoRows;
+  Int_t    NoInnerPadRows;
   UChar_t *mTpx_RowLen;
   // cvs
   virtual const char *GetCVS() const    {

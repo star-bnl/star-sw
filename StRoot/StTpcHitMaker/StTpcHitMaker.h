@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.14 2012/05/07 15:51:01 fisyak Exp $
+ * $Id: StTpcHitMaker.h,v 1.15 2012/09/13 21:00:04 fisyak Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.15  2012/09/13 21:00:04  fisyak
+ * Corrections for iTpx, clean up
+ *
  * Revision 1.14  2012/05/07 15:51:01  fisyak
  * Remove hard coded TPC numbers
  *
@@ -78,11 +81,9 @@ class StTpcHitMaker : public StRTSBaseMaker {
   enum EMode {kUndefined, 
 	      kTpc, kTpx, 
 	      kTpcPulser, kTpxPulser, 
-#if 0
-	      kTpcPadMonitor, kTpxPadMonitor, 
-#endif
 	      kTpcDumpPxls2Nt, kTpxDumpPxls2Nt, 
-	      kTpcRaw, kTpxRaw, kTpcAvLaser, kTpxAvLaser,
+	      kTpcRaw, kTpxRaw, 
+	      kTpcAvLaser, kTpxAvLaser,      // averaging on pixel level
 	      kAll};
     StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker("tpc",name), kMode(kUndefined),
       kReaderType(kUnknown), mQuery(""), fTpc(0), fAvLaser(0) {}
@@ -102,6 +103,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   Int_t   RawTpxData(Int_t sector);
   THnSparseF *CompressTHn(THnSparseF *hist, Double_t compress = 1e3);
   StTpcDigitalSector *GetDigitalSector(Int_t sector);
+  virtual Int_t        Finish();
  private:
 
   EMode   kMode;
@@ -116,6 +118,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   Int_t    bin0Hits;
   THnSparseF **fAvLaser;
   Int_t    NoRows;
+  Int_t    NoInnerPadRows;
  protected:
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);

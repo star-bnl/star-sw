@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.30 2012/05/17 20:05:59 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.31 2012/09/13 21:00:04 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -23,25 +23,17 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
-#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StMessMgr.h" 
-
-#ifndef NEW_DAQ_READER
-#  include "RTS/include/rtsLog.h"
-#  include "RTS/src/RTS_READER/rts_reader.h"
-#  include "RTS/src/RTS_READER/daq_dta.h"
-#  include "RTS/src/DAQ_TPX/daq_tpx.h"
-#else /* NEW_DAQ_READER */
 #  include "StDAQMaker/StDAQReader.h"
 #  include "StRtsTable.h"
 #  include "DAQ_TPX/daq_tpx.h"
 #  include "DAQ_READER/daq_dta.h"
 #  include "DAQ_READER/daqReader.h"
-#endif /* NEW_DAQ_READER */
 ClassImp(StTpcRTSHitMaker); 
 #define __DEBUG__
 #ifdef __DEBUG__
@@ -66,9 +58,9 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SetAttr("minSector",1);
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
-  Int_t NoRowsInner = St_tpcPadPlanesC::instance()->innerPadRows();
+  NoInnerPadRows = St_tpcPadPlanesC::instance()->innerPadRows();
   Int_t NoRowsOuter = St_tpcPadPlanesC::instance()->outerPadRows();
-  NoRows = NoRowsInner + NoRowsOuter;
+  NoRows = NoInnerPadRows + NoRowsOuter;
   if (NoRows != 45) {
     // Fill no. of pad per row 
     mTpx_RowLen = new UChar_t[NoRows+1];
@@ -104,16 +96,15 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	gain[0].gain = 0.0;	// kill pad0 just in case..
 	gain[0].t0   = 0.0;
 	for(Int_t pad = 1; pad <= numPadsAtRow; pad++) {
+	  gain[pad].gain = 0.; // be sure that dead pads are killed
+	  gain[pad].t0   = 0.;
 	  if (m_Mode == 2) {
-	    if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) > 0) 
-	      gain[pad].gain = 1.;
-	    else 
-	      gain[pad].gain = .0;
+	    if (St_tpcPadGainT0BC::instance()->Gain(sector,row,pad) > 0) gain[pad].gain = 1.;
 	    gain[pad].t0   = 0.;
 	  } else {
-	    if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) <= 0) continue;
-	    gain[pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
-	    gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
+	    if (St_tpcPadGainT0BC::instance()->Gain(sector,row,pad) <= 0) continue;
+	    gain[pad].gain = St_tpcPadGainT0BC::instance()->Gain(sector,row,pad);
+	    gain[pad].t0   = St_tpcPadGainT0BC::instance()->T0(sector,row,pad);
 	  }
 	}
 	dta->finalize(183,sector,row);
@@ -154,7 +145,9 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     been previously loaded as shown in the example above they
     will be set to 1.0!
   */
-  fTpx->InitRun(runnumber);
+  if (NoRows <= 45) { // hack for now take Tonko's defaults for iTpx
+    fTpx->InitRun(runnumber);
+  }
   return kStOK;
 }
 //________________________________________________________________________________
@@ -196,7 +189,7 @@ Int_t StTpcRTSHitMaker::Make() {
     Int_t nup = 0;
     Int_t NoAdcs = 0;
     for (Int_t row = minRow; row <= maxRow; row++) {
-      if (! St_tpcPadGainT0C::instance()->livePadrow(sec,row)) continue;
+      if (! St_tpcPadGainT0BC::instance()->livePadrow(sec,row)) continue;
       Int_t Npads = digitalSector->numberOfPadsInRow(row);
       if (! Npads) continue;
       for(Int_t pad = 1; pad <= Npads; pad++) {
@@ -283,8 +276,8 @@ Int_t StTpcRTSHitMaker::Make() {
 	transform(LS,L);                                                                             PrPP(Make,L);
 	if (dta->row != rowOld) {
 	  rowOld = dta->row;
-	  Double_t gain = (dta->row<=13) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
-	  Double_t wire_coupling = (dta->row<=13) ? 
+	  Double_t gain = (dta->row<=NoInnerPadRows) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
+	  Double_t wire_coupling = (dta->row<=NoInnerPadRows) ? 
 	    St_tss_tssparC::instance()->wire_coupling_in() : 
 	    St_tss_tssparC::instance()->wire_coupling_out();
 	  ADC2GeV = ((Double_t) St_tss_tssparC::instance()->ave_ion_pot() * 
