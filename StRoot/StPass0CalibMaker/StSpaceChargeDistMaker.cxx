@@ -9,7 +9,7 @@
 #include "StMessMgr.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
-#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
@@ -240,7 +240,7 @@ void StSpaceChargeDistMaker::Pads() {
         ipad = k + 1;
         l = k + NR*j + NS*i;
         PLIVE[l] = (liveRow &&
-             St_tpcPadGainT0C::instance()->Gain(isec,irow,ipad) > MINGAIN);
+             St_tpcPadGainT0BC::instance()->Gain(isec,irow,ipad) > MINGAIN);
         if (i==0) YMIN[l] = pitch * (k - 0.5*Npads[j]);
       }
     }
@@ -328,8 +328,11 @@ void StSpaceChargeDistMaker::Pads() {
 
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.cxx,v 1.1 2012/07/06 17:23:00 genevb Exp $
+// $Id: StSpaceChargeDistMaker.cxx,v 1.2 2012/09/13 20:58:56 fisyak Exp $
 // $Log: StSpaceChargeDistMaker.cxx,v $
+// Revision 1.2  2012/09/13 20:58:56  fisyak
+// Corrections for iTpx
+//
 // Revision 1.1  2012/07/06 17:23:00  genevb
 // Introduce StSpaceChargeDistMaker
 //
