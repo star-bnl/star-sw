@@ -37,7 +37,7 @@
 #include "StDetectorDbMaker/St_tpcAltroParamsC.h"
 #include "StDetectorDbMaker/St_asic_thresholdsC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
-#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDetectorDbMaker/St_TpcResponseSimulatorC.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
@@ -47,14 +47,15 @@
 #include "Altro.h"
 #include "TRVector.h"
 #include "StBichsel/Bichsel.h"
+//#define ElectronHack
 #define Old_dNdx_Table
-//#define __DEBUG__
+#define __DEBUG__
 #if defined(__DEBUG__)
 #define PrPP(A,B) if (Debug()%10 > 2) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.60 2012/06/04 15:14:18 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.61 2012/09/13 21:02:52 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -129,7 +130,7 @@ Int_t StTpcRSMaker::Finish() {
   return StMaker::Finish();
 }
 //________________________________________________________________________________
-Int_t StTpcRSMaker::InitRun(Int_t /* runnumberOf */) {
+Int_t StTpcRSMaker::InitRun(Int_t /* runnumber */) {
   if (!gStTpcDb) {
     LOG_ERROR << "Database Missing! Can't initialize TpcRS" << endm;
     return kStFatal;
@@ -210,7 +211,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumberOf */) {
   Int_t nAliveOuter = 0;
   for (Int_t sec = 1; sec <= 24; sec++) {
     for (Int_t row = 1; row <= NoOfRows; row++) {
-      if (St_tpcAnodeHVavgC::instance()->livePadrow(sec,row)) {
+      if (NoOfRows != 45 || St_tpcAnodeHVavgC::instance()->livePadrow(sec,row)) { // iTpx
 	if (row <= NoOfInnerRows) {
 	  nAliveInner++;
 	  innerSectorAnodeVoltage += St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
@@ -419,7 +420,7 @@ Int_t StTpcRSMaker::InitRun(Int_t /* runnumberOf */) {
     mPolya[io]->SetParameters(gamma, 0., 1./gamma);
   }
   // tss
-  mGG = new TF1F("GaitingGridTransperency","1-6.27594134307865925e+00*TMath::Exp(-2.87987e-01*(x-1.46222e+01))",21,56);
+  mGG = new TF1F("GaitingGridTransperency","TMath::Max(0.,1-6.27594134307865925e+00*TMath::Exp(-2.87987e-01*(x-1.46222e+01)))",10,56);
   if (Debug()) Print();
 #ifdef __ClusterProfile__
   memset (hist, 0, sizeof(hist));
@@ -496,8 +497,13 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   // constants
 #ifdef __DEBUG__
   static Int_t iBreak = 0;
-  static Int_t iSec  = 0, iRow = 0;
+  static Int_t iSec  = 0;
 #endif
+  if (Debug()%10) {
+    gBenchmark->Reset();
+    gBenchmark->Start("TpcRS");
+    LOG_INFO << "\n -- Begin TpcRS Processing -- \n";
+  }
   static StTpcCoordinateTransform transform(gStTpcDb);
 #if defined(__PAD_BLOCK__) || defined(__ClusterProfile__)
   enum {kPadMax = 32, kTimeBacketMax = 64};
@@ -506,13 +512,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   static Double_t XDirectionCouplings[kPadMax];
   static Double_t TimeCouplings[kTimeBacketMax];
 #endif /* __PAD_BLOCK__ */
-  Int_t Ndebug = 0, Idebug; // debug printout depth
-  if (Debug()%10) {
-    if (Debug()%10 > 1) Ndebug = 10;
-    gBenchmark->Reset();
-    gBenchmark->Start("TpcRS");
-    LOG_INFO << "\n -- Begin TpcRS Processing -- \n";
-  }
   St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) GetDataSet("geant/g2t_tpc_hit");
   if (!g2t_tpc_hit) return kStWarn;
   Int_t no_tpc_hits       = g2t_tpc_hit->GetNRows();               if (no_tpc_hits<1) return kStOK;
@@ -530,7 +529,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   Int_t sortedIndex = 0;
   tpc_hit = tpc_hit_begin;
   for (Int_t sector = 1; sector <= NoOfSectors; sector++) {
-    Idebug = 0;
     Int_t NoHitsInTheSector = 0;
     SignalSum_t *SignalSum = ResetSignalSum();
     // it is assumed that hit are ordered by sector, trackId, pad rows, and track length
@@ -581,7 +579,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  sortedIndex++;
 	  continue;
 	}
-      }
+      } // special treatment for electron/positron 
+      if (ipart == 2) charge =  101;
+      if (ipart == 3) charge = -101;
       // Track segment to propagate
       struct HitPoint_t {
 	Int_t indx;
@@ -707,19 +707,21 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	g2t_tpc_hit_st *tpc_hitC = TrackSegmentHits[iSegHits].tpc_hitC;
 	volId = tpc_hitC->volume_id%100000;
 	Int_t row = volId%100;
-#ifdef __DEBUG__
-	if (Debug() && iRow && iRow != row) continue;
-#endif
 	io = (row <= NoOfInnerRows) ? 0 : 1;
 	// Generate signal 
-	Double_t Gain = St_tss_tssparC::instance()->gain(sector,row); 
+	Double_t Gain = 0;
+	if (NoOfRows == 45) Gain = St_tss_tssparC::instance()->gain(sector,row);                // ! iTpx
+	else                Gain = St_tss_tssparC::instance()->gain(sector, (! io ) ? 13 : 45); //   iTpx
 	TF1F *mShaperResponse = mShaperResponses[io][sector-1];
-	Int_t rowMin = row;
-	Int_t rowMax = row;
-	if(row > NoOfInnerRows) { // Outer
-	  rowMin                 = TMath::Max(row - 1, NoOfInnerRows+1);
-	  rowMax                 = TMath::Min(row + 1, NoOfRows);
-	}
+	Double_t dY   = TMath::Abs(tpc_hitC->ds)/2 + mChargeFraction[io]->GetXmax();
+	Double_t yLmin = TrackSegmentHits[iSegHits].coorLS.position().y() - dY;
+	Double_t yLmax = yLmin + 2*dY;
+	Int_t    rowMin  = transform.rowFromLocalY(yLmin);
+	Int_t    rowMax  = transform.rowFromLocalY(yLmax);
+	Double_t yRmin = transform.yFromRow(rowMin);
+	Double_t yRmax = transform.yFromRow(rowMax);
+	if (yRmin > yLmax) continue;
+	if (yRmax < yLmin) continue;
 #ifdef __ClusterProfile__
 	checkList[io][2]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),Gain);
 #endif	/* __ClusterProfile__ */
@@ -987,9 +989,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    checkList[io][9]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),QAv);
 #endif	/* __ClusterProfile__ */
 	    for(Int_t r = rowMin; r <= rowMax; r++) {              
-	      Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(r);
-	      if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
-	      if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,r))  continue;
+	      if (NoOfRows == 45) { // ! iTpx
+		Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(r);
+		if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(sector,iRdo)) continue;
+		if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(sector,r))  continue;
+	      }
 	      StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, r);
 	      static StTpcPadCoordinate Pad;
 	      transform(xyzW,Pad,kFALSE,kFALSE); // don't use T0, don't use Tau
@@ -1009,7 +1013,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      if (CentralPad < 1) continue;
 	      Int_t PadsAtRow = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(r);
 	      if(CentralPad > PadsAtRow) continue;
-	      Int_t DeltaPad = TMath::Nint(mPadResponseFunction[io]->GetXmax());
+	      Int_t DeltaPad = TMath::Nint(mPadResponseFunction[io]->GetXmax()) + 1;
 	      Int_t padMin = TMath::Max(CentralPad - DeltaPad ,1);
 	      Int_t padMax = TMath::Min(CentralPad + DeltaPad ,PadsAtRow);
 #ifdef __PAD_BLOCK__
@@ -1022,9 +1026,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		Double_t gain = QAv*GainLocal;
 		Double_t dt = dT;
 		if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
-		  gain   *= St_tpcPadGainT0C::instance()->Gain(sector,r,pad);
+		  gain   *= St_tpcPadGainT0BC::instance()->Gain(sector,r,pad);
 		  if (gain <= 0.0) continue;
-		  dt -= St_tpcPadGainT0C::instance()->T0(sector,r,pad);
+		  dt -= St_tpcPadGainT0BC::instance()->T0(sector,r,pad);
 		}
 #ifdef __ClusterProfile__
 		checkList[io][12]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),gain);
@@ -1077,7 +1081,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		      if ( SignalSum[index].TrackId != TrackSegmentHits[iSegHits].TrackId && SignalSum[index].Sum < 2*signal) 
 			SignalSum[index].TrackId = TrackSegmentHits[iSegHits].TrackId;
 		  }
-#ifdef __ClusterProfile__
 #ifdef __DEBUG__
 		  if (Debug()%10 > 2 && (SignalSum[index].Sum > 0 || ! TMath::Finite(SignalSum[index].Sum)) ) {
 		    LOG_INFO << "simu R/P/T/I = " << r << " /\t" << pad << " /\t" << itbin << " /\t" << index 
@@ -1087,9 +1090,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		    if (! TMath::Finite(SignalSum[index].Sum)) {
 		      LOG_INFO << "Not Finite" << endm;
 		    }
-#endif /* __DEBUG__ */
 		  }
-#endif  /* __ClusterProfile__ */
+#endif /* __DEBUG__ */
 		} // time 
 	      } // pad limits
 	    } // r limits
@@ -1137,28 +1139,19 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 //________________________________________________________________________________
 Double_t StTpcRSMaker::GetNoPrimaryClusters(Double_t betaGamma, Int_t charge) {
   Double_t beta = betaGamma/TMath::Sqrt(1.0 + betaGamma*betaGamma);
-#ifdef Old_dNdx_Table
-#ifdef SimpleMindedExtrapolation
-  static Double_t slope = 8.91704e-01;
-  static Double_t betaGammaMin = mdNdx->GetBinCenter(1);
-  static Double_t betaGammaMax = mdNdx->GetXaxis()->GetXmax();
-  static Double_t betaMin  = betaGammaMin/TMath::Sqrt(1.0 - betaGammaMin*betaGammaMin);
-  Double_t dNdx = mdNdx->Interpolate(betaGamma);
-  if (betaGamma <  betaGammaMin) {
-    dNdx *= TMath::Power(betaMin/beta,2*slope);
-  }
-  if (betaGamma > betaGammaMax) {
-    // hack, it is needed to recalculate dNdx with expansion beta*gamma => 1e4 instead 1e2 
-    // which create early saturation dE/dx for electrons (bug. bug2174)
-    dNdx = charge*charge*mdNdx->Interpolate(betaGammaMax) + 1.61623e+00*TMath::Log(betaGamma/betaGammaMax);
-  }
-#else /* an other hack for the same problem */
+#if defined(Old_dNdx_Table) 
   Double_t dNdx = 1.21773e+01*Bichsel::Instance()->GetI70M(TMath::Log10(betaGamma));
-#endif /* SimpleMindedExtrapolation */
+#elsif  defined(ElectronHack)
+  Int_t elepos = charge/100;
+  Double_t dNdx = mdNdx->Interpolate(betaGamma);
+  if (elepos) {
+    dNdx += 1.21773e+01*Bichsel::Instance()->GetI70M(TMath::Log10(betaGamma));
+    dNdx /= 2;
+  }  
 #else /* new H.Bichsel dNdx table 09/12/11 */
   Double_t dNdx = mdNdx->Interpolate(betaGamma);
-#endif /* Old_dNdx_Table */
-  Double_t Q_eff = TMath::Abs(charge);
+#endif /* Old_dNdx_Table || ElectronHack */
+  Double_t Q_eff = TMath::Abs(charge%100);
   if (Q_eff > 1)   {
     // Effective charge from GEANT ghion.F
     Double_t w1 = 1.034 - 0.1777*TMath::Exp(-0.08114*Q_eff);
@@ -1301,7 +1294,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
     Int_t io = 0;
     if (row > NoOfInnerRows) io = 1;
     for (pad = 1; pad <= NoOfPadsAtRow; pad++) {
-      gain = St_tpcPadGainT0C::instance()->Gain(Sector,row,pad);
+      gain = St_tpcPadGainT0BC::instance()->Gain(Sector,row,pad);
       if (gain <= 0.0) continue;
       ped    = St_TpcResponseSimulatorC::instance()->AveragePedestal();
       static  Short_t ADCs[__MaxNumberOfTimeBins__];
@@ -1331,7 +1324,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
 	NoTB++;
 	ADCs[bin] = adc;
 	IDTs[bin] = SignalSum[index].TrackId;
-#if 1
+#ifdef __DEBUG__
 	if (Debug()%10 > 2 && SignalSum[index].Sum > 0) {
 	  LOG_INFO << "digi R/P/T/I = " << row << " /\t" << pad << " /\t" << bin << " /\t" << index 
 	       << "\tSum/Adc/TrackId = " << SignalSum[index].Sum << " /\t" 
@@ -1378,8 +1371,18 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
 	}
 	delete out;
 #endif
+	NoTB = 0;
 	for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	  if (ADCs[i] && ! mAltro->ADCkeep[i]) {ADCs[i] = 0; NoTB--;}
+	  if (ADCs[i] && ! mAltro->ADCkeep[i]) ADCs[i] = 0;
+	  if (ADCs[i]) {
+	    NoTB++;
+#ifdef __DEBUG__
+	    if (Debug()%10 > 2) {
+	      LOG_INFO << "Altro R/P/T/I = " << row << " /\t" << pad << " /\t" << i 
+		       << "\tAdc/TrackId = " << ADCs[i] << " /\t" << IDTs[i] << endm;
+	    }
+#endif
+	  }
 	}
       }
       else {
@@ -1601,8 +1604,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.60 2012/06/04 15:14:18 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.61 2012/09/13 21:02:52 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.61  2012/09/13 21:02:52  fisyak
+// Corrections for iTpx
+//
 // Revision 1.60  2012/06/04 15:14:18  fisyak
 // restore old hack for dN/dx table to fix bug #2347
 //

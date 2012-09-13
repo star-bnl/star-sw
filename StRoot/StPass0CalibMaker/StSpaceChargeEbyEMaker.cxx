@@ -171,9 +171,13 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   // Get instance of StMagUtilities
   m_ExB = StMagUtilities::Instance();
   if (!m_ExB) {
+#ifdef __NEW_MagUtilities__
+    m_ExB = new StMagUtilities(gStTpcDb,(kSpaceChargeR2 | kGridLeak));
+#else
     TDataSet *RunLog = GetDataBase("RunLog");
     if (!RunLog) gMessMgr->Warning("StSpaceChargeEbyEMaker: No RunLog found.");
     m_ExB = new StMagUtilities(gStTpcDb,RunLog,(kSpaceChargeR2 | kGridLeak));
+#endif
   }
   lastsc = m_ExB->CurrentSpaceChargeR2();
 
@@ -1188,8 +1192,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.42 2012/08/18 02:11:59 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.43 2012/09/13 20:58:56 fisyak Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.43  2012/09/13 20:58:56  fisyak
+// Corrections for iTpx
+//
 // Revision 1.42  2012/08/18 02:11:59  genevb
 // Expand SC hist ranges, add VPD to ntuple
 //

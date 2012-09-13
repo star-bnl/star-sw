@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.19 2012/05/07 14:38:41 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.20 2012/09/13 20:57:28 fisyak Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.20  2012/09/13 20:57:28  fisyak
+ * Corrections for iTpx
+ *
  * Revision 1.19  2012/05/07 14:38:41  fisyak
  * Remvoe hardcoded separation between Inner and Outer Sectors
  *
@@ -208,7 +211,8 @@ public:
   Double_t  zFromTB(Double_t tb, Int_t sector, Int_t row) const;
   // Transformation Routines!!
   // Raw Data (pad row timebin or drift L From tpc local sector Coordinates
-  Int_t       rowFromLocal(const StThreeVector<Double_t>& a)         const;
+  static Int_t       rowFromLocalY(Double_t y);
+  static Int_t       rowFromLocal(const StThreeVector<Double_t>& a)            {return rowFromLocalY(a.y());}
   Double_t    padFromLocal(const StThreeVector<Double_t>& a, Int_t row)  const {return padFromX(a.x(), row);}
   Double_t    padFromX(Double_t x, Int_t row)                        const; 
   Int_t       rowFromLocal(const StTpcLocalSectorCoordinate& a)      const {return rowFromLocal(a.position());}

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.37 2012/05/07 14:38:41 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.38 2012/09/13 20:57:28 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.38  2012/09/13 20:57:28  fisyak
+ * Corrections for iTpx
+ *
  * Revision 1.37  2012/05/07 14:38:41  fisyak
  * Remvoe hardcoded separation between Inner and Outer Sectors
  *
@@ -220,7 +223,7 @@
 #include "StDetectorDbMaker/St_tpcPadrowT0C.h"
 #include "StDetectorDbMaker/St_tpcSectorT0offsetC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
-#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "TMath.h"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
@@ -260,10 +263,13 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
   if (row < 1 || row > mNoOfRows) row    = rowFromLocal(a);
     
   Double_t probablePad = padFromLocal(a);
-  Double_t zoffset=(row>mNoOfInnerRows) ?
-    mOuterSectorzOffset
-    :mInnerSectorzOffset;
-  Double_t t0offset = (useT0 && sector>=1&&sector<=24) ? St_tpcPadGainT0C::instance()->T0(sector,row,TMath::Nint (probablePad)) : 0;
+#if 0 /* Don't apply zOffSet for prompt hits */
+  Double_t zoffset = 0; // Don't apply zOffSet for prompt hits
+  if (a.position().z() < 3) zoffset = (row>mNoOfInnerRows) ? mOuterSectorzOffset :mInnerSectorzOffset;
+#else
+  Double_t                  zoffset = (row>mNoOfInnerRows) ? mOuterSectorzOffset :mInnerSectorzOffset;
+#endif /* Don't apply zOffSet for prompt hits */
+  Double_t t0offset = (useT0 && sector>=1&&sector<=24) ? St_tpcPadGainT0BC::instance()->T0(sector,row,TMath::Nint (probablePad)) : 0;
   t0offset *= mTimeBinWidth;
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
@@ -275,8 +281,13 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLocalSectorCoordinate& b, Bool_t useT0, Bool_t useTau) 
 { // useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and = kFALSE for MC
   StThreeVector<double>  tmp=xyFromRow(a);
-  Double_t zoffset= (a.row()>mNoOfInnerRows) ? mOuterSectorzOffset : mInnerSectorzOffset;
-  Double_t t0offset = useT0 ? St_tpcPadGainT0C::instance()->T0(a.sector(),a.row(),TMath::Nint(a.pad())) : 0;
+#if 0 /* Don't apply zOffSet for prompt hits */
+  Double_t zoffset= 0; // Don't apply zOffSet for prompt hits
+  if (a.timeBucket() > 6) zoffset =  (a.row()>mNoOfInnerRows) ? mOuterSectorzOffset : mInnerSectorzOffset;
+#else
+  Double_t                zoffset =  (a.row()>mNoOfInnerRows) ? mOuterSectorzOffset : mInnerSectorzOffset;
+#endif /* Don't apply zOffSet for prompt hits */
+  Double_t t0offset = useT0 ? St_tpcPadGainT0BC::instance()->T0(a.sector(),a.row(),TMath::Nint(a.pad())) : 0;
   t0offset *= mTimeBinWidth;
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
@@ -326,49 +337,23 @@ Double_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) 
 }
 //________________________________________________________________________________
 // FOR SECTOR 12 ONLY!!!! (Local coordinate);
-Int_t StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
-{
-    Double_t referencePosition;
-    Double_t rowPitch;
-    Int_t    offset;
-    Double_t boundary =
-	gTpcDbPtr->PadPlaneGeometry()->outerSectorEdge();
-    if(b.y() > boundary) {    // in the outer sector
-	referencePosition = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(mNoOfInnerRows+1);
-	rowPitch          = gTpcDbPtr->PadPlaneGeometry()->outerSectorRowPitch();
-	offset            = mNoOfInnerRows+1;
+Int_t StTpcCoordinateTransform::rowFromLocalY(Double_t y) {
+  static Int_t Nrows = 0;
+  static Double_t *Radii = 0;
+  if (! Nrows) {
+    Nrows = St_tpcPadPlanesC::instance()->padRows();
+    Radii = new Double_t[Nrows];
+    for (Int_t i = 1; i <= Nrows; i++) {
+      Radii[i-1] = St_tpcPadPlanesC::instance()->radialDistanceAtRow(i);
     }
-    else if(b.y() > gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(8)) {
-	referencePosition = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(8);
-	rowPitch          = gTpcDbPtr->PadPlaneGeometry()->innerSectorRowPitch2();
-	offset            = 8;
-    }
-    else {
-	referencePosition = gTpcDbPtr->PadPlaneGeometry()->radialDistanceAtRow(1);
-	rowPitch          = gTpcDbPtr->PadPlaneGeometry()->innerSectorRowPitch1();
-	offset            = 1;	
-    }
-
-//     PR(b.y());
-//     PR(referencePosition);
-//     PR(rowPitch);
-//     PR(offset);
-    Int_t probableRow =
-	static_cast<int>( (b.y() - (referencePosition-rowPitch/2))/rowPitch )+offset;
-
-    if(b.y() < boundary && probableRow>mNoOfInnerRows) {
-	probableRow=mNoOfInnerRows;
-    } 
-    if(b.y() > boundary && probableRow<mNoOfInnerRows+1){ 
-	probableRow=mNoOfInnerRows+1;
-    }
-    if (probableRow<1)
-	probableRow = 1;
-    if (probableRow>mNoOfRows)
-	probableRow=mNoOfRows;
-    
-//     PR(probableRow);
-
-    return (probableRow);
+  }
+  if (y < Radii[0]) return 1;
+  if (y > Radii[Nrows-1]) return Nrows;
+  Long64_t row = TMath::BinarySearch(Nrows, Radii, y);
+  if (row < Nrows - 1) {
+    if (TMath::Abs(Radii[row]-y) > TMath::Abs(Radii[row+1]-y)) row++;
+  }
+  row++;
+  return row;
 }
 

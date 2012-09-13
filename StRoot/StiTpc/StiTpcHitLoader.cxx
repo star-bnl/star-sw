@@ -20,19 +20,19 @@
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 //________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"), 
-				    _minRow(1), _maxRow(-1), _minSector(1), _maxSector(24) {}
+				    _minRow(1), _maxRow(100), _minSector(1), _maxSector(24) {}
 //________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(StiHitContainer* hitContainer,
                                  Factory<StiHit>*hitFactory,
                                  StiDetectorBuilder * detector)
 : StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader",hitContainer,hitFactory,detector), 
-				    _minRow(1), _maxRow(-1), _minSector(1), _maxSector(24) {}
+				    _minRow(1), _maxRow(100), _minSector(1), _maxSector(24) {}
 //________________________________________________________________________________
 void StiTpcHitLoader::loadHits(StEvent* source,
                                Filter<StiTrack> * trackFilter,
                                Filter<StiHit> * hitFilter)
 {
-  Int_t debug = 0;
+  static Int_t debug = 0;
   _maxRow = St_tpcPadPlanesC::instance()->padRows();
   cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Started" << endl;
   if (!_detector)
