@@ -34,8 +34,8 @@ void StSCReader::FillTime(  unsigned int utime)
   //Keep BBCBkg scalers flipped as they were historically before 2009
   //Note that new DAQ reader leads to UTime = 0, or tm_year=70 (1970)
   //but new DAQ reader only gets used for 2009+ anyhow
-  unsigned int UTime = utime; //er->getEventInfo().UnixTime;
-  struct tm *time=gmtime((time_t*) &UTime);
+  time_t UTime = utime; //er->getEventInfo().UnixTime;
+  struct tm *time=gmtime(&UTime);
   flipBBCBkg = (time->tm_year > 95 && time->tm_year < 109 ? 1 : 0) ;
 }
 

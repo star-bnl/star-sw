@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.87 2010/01/25 17:17:10 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.88 2012/09/13 20:01:49 fisyak Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.88  2012/09/13 20:01:49  fisyak
+ * Clean up, use Jeff's skip_then_get
+ *
  * Revision 1.87  2010/01/25 17:17:10  fine
  * Remove the redundant RecordSize method
  *
@@ -284,11 +287,7 @@
 #include "StDAQReader.h"
 
 #include "StDaqLib/GENERIC/EventReader.hh"
-#if !defined(OLD_EVP_READER) && !defined(NEW_DAQ_READER)
-#   include "RTS/src/EVP_READER/evpReaderClass.h"
-#elif NEW_DAQ_READER
 #   include "RTS/src/DAQ_READER/daqReader.h"
-#endif
 
 #include "StDaqLib/RICH/RICH_Reader.hh"
 #include "StDaqLib/L3/L3_Reader.hh"
@@ -426,7 +425,6 @@ StDAQReader::~StDAQReader()
 /// NextEvent - this method is called to advance the next daq event if any
 void StDAQReader::nextEvent()
 {
-#ifndef OLD_EVP_READER
    // Create the next event from evp data
    // qDebug() << " StEvpReader::NextEvent() - fEventType = " <<  fEventType;
    char *currentData = fDaqFileReader->get(0,EVP_TYPE_ANY); // EventNumber(),fEventType);
@@ -441,6 +439,9 @@ void StDAQReader::nextEvent()
     if(currentData && (fDaqFileReader->status == EVP_STAT_OK) ) {
        fOffset = 1;
     } else { // event is not valid
+      /* STAT_EOR is end of run.   In the case of reading from files, it means end of the file.
+	 STAT_EVT is an error or corrupt event.  The next event can still be read but this one is junk
+	 STAT_CRIT is an error that prevents us from reading more events... */
        switch(fDaqFileReader->status) {
           case EVP_STAT_EOR :  // EOR or EOR - might contain token 0!
              if(fDaqFileReader->IsEvp()) { // keep going until the next run...
@@ -463,7 +464,6 @@ void StDAQReader::nextEvent()
        };
     } 
     fEventStatus = fDaqFileReader->status;
-#endif
  }
 //_____________________________________________________________________________
 int StDAQReader::Make() 
@@ -558,25 +558,24 @@ int StDAQReader::readEvent()
 //_____________________________________________________________________________
 int StDAQReader::skipEvent(int nskip)
 {
-  for (int isk=0; nskip; nskip--,isk++) 
-  {
-    delete fEventReader;
-    if (fOffset == -1) {
-      LOG_WARN << Form("EOF after record %d\n",isk)<< endm;
-      break;}  
-#ifdef OLD_EVP_READER
-    fEventReader = new EventReader();
-    //    fEventReader->InitEventReader(fFd, fOffset, 0);
-    fEventReader->InitEventReader(fFd, fOffset);
-    if(fEventReader->errorNo()) {
-      LOG_WARN << Form("<Warning: StDAQReader::skipEvent> ReadError on record %d",isk)<<endm;
-      fOffset = -1; break;}  
-    fOffset = fEventReader->NextEventOffset();
-#else
-    nextEvent();
-#endif
+  if (nskip == 1) {
+     nextEvent();
+  } else {
+    char *currentData = 0;
+    if (nskip == 2) currentData = fDaqFileReader->get(0,EVP_TYPE_ANY);
+    else            currentData = fDaqFileReader->skip_then_get(nskip-2,0,EVP_TYPE_ANY); 
+    fOffset = -1;
+    if(currentData && (fDaqFileReader->status == EVP_STAT_OK) ) {
+      fOffset = 1;
+      nextEvent();
+    } 
   }
-  return  nskip;
+  Int_t ok = 0;
+  if (fOffset == -1) {
+    ok = 1;
+    LOG_WARN << Form("EOF with skipEvent(%d)",nskip)<< endm;
+  }  
+  return ok;
 }
 
 
