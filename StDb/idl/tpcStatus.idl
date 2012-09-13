@@ -5,5 +5,5 @@
 *       description: TPC padrow status for 24 sectors, 45 padrows each
 */
 struct tpcStatus {
-   octet   status[1080]; // padrow status, id = NSECTOR * NPADROW_MAX + NPADROW
+   octet   status[2400]; // padrow status, id = NSECTOR * NPADROW_MAX + NPADROW
  };
