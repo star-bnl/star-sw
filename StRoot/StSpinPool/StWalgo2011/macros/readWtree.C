@@ -1,3 +1,5 @@
+// example uses bin 8 : root4star -b -q 'readWtree.C("./R13109027.lis",8,1e8)'
+
 class StChain;
 class St2011WMaker;
 
@@ -6,7 +8,7 @@ St2011WMaker *wTreeMk = 0;
 TString jetTreeDir = "";
 bool isZ=false;
 
-void readWtree(	const Char_t *fileList="./R10081007.lis", int etaBin=7, int maxEvents=1e8, bool spinSort=true)
+void readWtree(	const Char_t *fileList="./R13104003.lis", int etaBin=8, int maxEvents=1e8, bool spinSort=true)
 {
 
   if(etaBin==8) isZ=true;
@@ -44,6 +46,13 @@ void readWtree(	const Char_t *fileList="./R10081007.lis", int etaBin=7, int maxE
 
   //......... spin sorting
   if(spinSort){
+ 
+    if(etaBin==8){
+      St2011WlumiMaker *lumiMk=new St2011WlumiMaker;
+      lumiMk->setHList(HListEta);
+      lumiMk->attachWalgoMaker(wTreeMk);
+    }
+ 
     enum {mxSM=1}; // only one for now
     St2011pubSpinMaker *spinMkA[mxSM];
     for(int kk=0;kk<mxSM;kk++) {
