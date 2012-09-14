@@ -20,7 +20,7 @@ ClassImp(StTpcdEdxCorrection)
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
   m_Mask(option), m_tpcGas(0),// m_trigDetSums(0), m_trig(0),
   m_TpcSecRowB(0),
-  m_TpcSecRowC(0),
+  m_TpcSecRowC(0), mNumberOfRows(-1), mNumberOfInnerRows(-1),
   m_Debug(debug)
 {
   assert(gStTpcDb);
@@ -48,6 +48,8 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   m_Corrections[kPhiDirection        ] = dEdxCorrection_t("TpcPhiDirection"     ,"Dependence of the Gain on interception angle");
   m_Corrections[kTpcdEdxCor          ] = dEdxCorrection_t("TpcdEdxCor"         	,"dEdx correction wrt Bichsel parameterization"); 
   m_Corrections[kTpcLengthCorrection ] = dEdxCorrection_t("TpcLengthCorrectionB","Variation on Track length and relative error in Ionization");
+  mNumberOfRows      = gStTpcDb->PadPlaneGeometry()->numberOfRows();
+  mNumberOfInnerRows      = gStTpcDb->PadPlaneGeometry()->numberOfInnerRows();
 
   if (!m_Mask) m_Mask = -1;
   // 
@@ -153,14 +155,13 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Int_t row       	  = CdEdx.row;   
   Double_t dx     	  = CdEdx.dx;    
   if (dE <= 0 || dx <= 0) return 3;
-  
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
   ESector kTpcOutIn = kTpcOuter;
-  if (row <= 13) kTpcOutIn = kTpcInner;
+  if (row <= mNumberOfInnerRows) kTpcOutIn = kTpcInner;
   St_tss_tssparC *tsspar = St_tss_tssparC::instance();
   Float_t gasGain = 1;
   Float_t gainNominal = 0;
-  if (row > 13) {
+  if (row > mNumberOfInnerRows) {
     gainNominal = tsspar->gain_out()*tsspar->wire_coupling_out();
     gasGain = tsspar->gain_out(sector,row)*tsspar->wire_coupling_out();
   } else {
@@ -194,8 +195,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (! cor) goto ENDL;
       nrows = cor->nrows;
       l = kTpcOuter;
-      if (nrows > 1 && nrows < 45) l = kTpcOutIn;
-      else if (nrows == 45) l = row - 1;
+      if (nrows > 1 && nrows < mNumberOfRows) l = kTpcOutIn;
+      else if (nrows == mNumberOfRows) l = row - 1;
       corl = cor + l;
     }
     iCut = 0;
