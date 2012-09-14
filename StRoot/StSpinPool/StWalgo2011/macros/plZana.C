@@ -14,9 +14,9 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
   char *nameC[]={"_Z_phi12","_Z_ZmassLike","_Z_chRecPNp","_Z_ZmassUnlike"};
   char *nameD[]={"muEne_Deta","_Z_Ene_Deta"};// pg 4
 
-  char *nameE[]={"_Z_Endcap_EventType"}; //pg 1
-  char *nameF[]={"_Z_Eet1iso","_Z_Eet1val","_Z_Eet1frac","_Z_Eet2iso","_Z_Eet2val","_Z_Eet2frac"}; //pg 2
-  char *nameG[]={"_Z_Ephi12","_Z_ELike_chRecPNp","_Z_E_ZmassLike","_Z_Eeta12","_Z_EUnlike_chRecPNp","_Z_E_ZmassUnlike"}
+  char *nameE[]={"_Z_Endcap_EventType","_Z_Y2"}; //pg 5
+  char *nameF[]={"_Z_Eet1iso","_Z_Eet1val","_Z_Eet1frac","_Z_Eet2iso","_Z_Eet2val","_Z_Eet2frac"}; //pg 6
+  char *nameG[]={"_Z_Ephi12","_Z_ELike_chRecPNp","_Z_E_ZmassLike","_Z_Eeta12","_Z_EUnlike_chRecPNp","_Z_E_ZmassUnlike"} //pg7
 
   gStyle->SetOptFit(1);
   TString fullInpName=iPath;  fullInpName+=core0;
@@ -124,14 +124,14 @@ plZana(  int page=0,int pl=2, char *core0="day77_79", char *iPath="/star/institu
 
  case 5:{   
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(1,1);gStyle->SetOptStat(0);
+    c->Divide(1,2);gStyle->SetOptStat(0);
     char **nameX=nameE;
-    for(int i=0;i<1;i++) {
+    for(int i=0;i<2;i++) {
       char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
-      if(i==0) h->Draw("h text");
+      h->Draw("h text");
     }
     c->GetPad(1)->SetLogy();
    
@@ -244,6 +244,10 @@ void doAll(char *core0="", char *iPath=""){
 
 
 // $Log: plZana.C,v $
+// Revision 1.5  2012/09/14 21:02:31  balewski
+// *lumi-maker re-written to accumulate alternative rel lumi monitors,
+// * added spin sorting to Zs
+//
 // Revision 1.4  2012/08/28 14:28:49  stevens4
 // updates to movie makers
 //
