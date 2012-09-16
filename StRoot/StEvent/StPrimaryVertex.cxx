@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.16 2012/05/07 14:42:58 fisyak Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.17 2012/09/16 21:37:13 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.17  2012/09/16 21:37:13  fisyak
+ * Add no. of Tpc West Only and East only tracks
+ *
  * Revision 2.16  2012/05/07 14:42:58  fisyak
- * Add handilings for Track to Fast Detectors Matching
+ * Add handlings for Track to Fast Detectors Matching
  *
  * Revision 2.15  2009/11/23 22:25:21  ullrich
  * Added new member mNumMatchesWithBTOF and related access fcts.
@@ -71,7 +74,7 @@
 #include "StTrackGeometry.h"
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.16 2012/05/07 14:42:58 fisyak Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.17 2012/09/16 21:37:13 fisyak Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 {init();}
@@ -168,6 +171,7 @@ void StPrimaryVertex::setTrackNumbers() {
   mNumTracksCrossingCentralMembrane = 0;
   mNumPostXTracks = 0;
   mNumTracksWithPromptHit = 0;
+  mNumTracksTpcWestOnly = mNumTracksTpcEastOnly = 0;
   mMeanDip = 0;
   mSumOfTrackPt = 0;
   UInt_t nDaughters = numberOfDaughters();
@@ -193,8 +197,10 @@ void StPrimaryVertex::setTrackNumbers() {
     if (pTrack->isEemcMatched()   ) 	   mNumMatchesWithEEMC++;   
     if (pTrack->isEemcNotMatched()) 	   mNumNotMatchesWithEEMC++;
     if (pTrack->isMembraneCrossingTrack()) mNumTracksCrossingCentralMembrane++;
-    if (pTrack->isPostXTrack())     mNumPostXTracks++;
+    if (pTrack->isPostXTrack())            mNumPostXTracks++;
     if (pTrack-> isPromptTrack())          mNumTracksWithPromptHit++;
+    if (pTrack->isWestTpcOnly())           mNumTracksTpcWestOnly++;
+    if (pTrack->isEastTpcOnly())           mNumTracksTpcEastOnly++;
   }
   if (n_trk_vtx > 0) mMeanDip /= n_trk_vtx;
 }
@@ -221,14 +227,18 @@ ostream&  operator<<(ostream& os,  const StPrimaryVertex& v) {
   else                                os <<       "*/";
   if ((v.numMatchesWithCTB()+v.numMatchesWithBTOF()) < 10) os << Form("%i/",(v.numMatchesWithCTB()+v.numMatchesWithBTOF()));
   else                                os <<       "*/";
-  if ((v.numMatchesWithBEMC()+v.numMatchesWithEEMC()) < 10) os << Form("%i",(v.numMatchesWithBEMC()+v.numMatchesWithEEMC()));
+  if ((v.numMatchesWithBEMC()+v.numMatchesWithEEMC()) < 10) os << Form("%i/",(v.numMatchesWithBEMC()+v.numMatchesWithEEMC()));
+  else                                os <<       "*/";
+  if (v.numTracksTpcWestOnly() < 10) os << Form("%i/",v.numTracksTpcWestOnly());
+  else                                os <<       "*/";
+  if (v.numTracksTpcEastOnly() < 10) os << Form("%i",v.numTracksTpcEastOnly());
   else                                os <<       "*";
   const Float_t *xyz = v.position().xyz();
   const Float_t *dxyz = v.positionError().xyz();
   for (Int_t i = 0; i < 3; i++)     os << Form("%8.3f+/-%5.3f,",xyz[i],dxyz[i]);
   os << " Prob/Chi2: " << Form("%5.3f/%7.2f",v.probChiSquared(),v.chiSquared())
      << " Rank: "      << Form("%8.3f",v.ranking())
-     << Form(" tracks(U/T/G): %2i,%2i,%2i", v.numTracksUsedInFinder(),nDaughters,v.numberOfGoodTracks());
+    << Form(" U/T/G: %4i,%4i,%4i", v.numTracksUsedInFinder(),nDaughters,v.numberOfGoodTracks());
   if (nTpcTracks != nDaughters || nGoodTpcTracks != v.numberOfGoodTracks()) {
     os << Form(" TPC:%4i,%4i",nTpcTracks,nGoodTpcTracks);
   }

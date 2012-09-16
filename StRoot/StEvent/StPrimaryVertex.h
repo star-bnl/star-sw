@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.15 2012/05/07 14:42:58 fisyak Exp $
+ * $Id: StPrimaryVertex.h,v 2.16 2012/09/16 21:37:13 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
+ * Revision 2.16  2012/09/16 21:37:13  fisyak
+ * Add no. of Tpc West Only and East only tracks
+ *
  * Revision 2.15  2012/05/07 14:42:58  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -105,6 +108,8 @@ public:
     Float_t  ranking()                          const {return mRanking;}
     UShort_t numTracksWithPromptHit()           const {return mNumTracksWithPromptHit;}
     UShort_t numPostXTracks()            const {return mNumPostXTracks;}
+    UShort_t numTracksTpcWestOnly() const {return mNumTracksTpcWestOnly;} 
+    UShort_t numTracksTpcEastOnly() const {return mNumTracksTpcEastOnly;} 
     void setTrackNumbers();
     void setNumMatchesWithCTB(UShort_t val)     {mNumMatchesWithCTB  = val;} 
     void setNumMatchesWithTOF(UShort_t val)  	{mNumMatchesWithTOF  = val;} 
@@ -124,6 +129,8 @@ public:
     void setRanking(Float_t val)                           {mRanking = val;}
     void setNumTracksWithPromptHit(UShort_t p)             {mNumTracksWithPromptHit = p;}
     void setNumPostXTracks(UShort_t p)              {mNumPostXTracks = p;}
+    void setNumTracksTpcWestOnly(UShort_t val) {mNumTracksTpcWestOnly = val;}
+    void setNumTracksTpcEastOnly(UShort_t val) {mNumTracksTpcEastOnly = val;}
     void Print(Option_t *option="") const {cout << option << *this << endl; }
 private:
     void init();
@@ -148,7 +155,9 @@ private:
     Float_t          mRanking;
     UShort_t         mNumTracksWithPromptHit;
     UShort_t         mNumPostXTracks;
+    UShort_t         mNumTracksTpcWestOnly; 
+    UShort_t         mNumTracksTpcEastOnly; 
     Char_t           mEnd[1]; //!
-    ClassDef(StPrimaryVertex,6)
+    ClassDef(StPrimaryVertex,7)
 };
 #endif
