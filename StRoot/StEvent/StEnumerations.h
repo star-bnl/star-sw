@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.46 2012/07/30 14:41:52 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.47 2012/09/16 21:34:48 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.47  2012/09/16 21:34:48  fisyak
+ * Add Tpc West Only and East only bits
+ *
  * Revision 2.46  2012/07/30 14:41:52  ullrich
  * Added 2 new variables to enum StFgtClusterSeedType
  *
@@ -290,7 +293,9 @@ enum ETrackStatusBits {
   kPostXTrack      = BIT(24),   // Post Crossing Track, track which has >= 2 hit with wrong Z / Sector 
   kXMembrane       = BIT(25),   // track which has >= 2 hits from both sides of Membrane (z = 0)
   kShortTrack2EMC  = BIT(26),   // Short track pointing to EEMC
-  kRejectedTrack   = BIT(27)    // track rejected by small no. of fit points (< 10)
+  kRejectedTrack   = BIT(27),   // track rejected by small no. of fit points (< 10)
+  kWestTpcOnlyTrack= BIT(28),   // track has hits only from West Tpc (sector <= 12)
+  kEastTpcOnlyTrack= BIT(29)    // track has hits only from East Tpc (sector >  12)
 };			     
 /*!
  * \enum StVertexId
