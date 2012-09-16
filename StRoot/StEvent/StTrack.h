@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.28 2012/05/07 14:42:58 fisyak Exp $
+ * $Id: StTrack.h,v 2.29 2012/09/16 21:36:09 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -58,6 +58,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.29  2012/09/16 21:36:09  fisyak
+ * Handlers for Tpc Only West and Only East bits
+ *
  * Revision 2.28  2012/05/07 14:42:58  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -217,6 +220,8 @@ public:
     Bool_t       isMembraneCrossingTrack() {return testBit(kXMembrane);} 
     Bool_t       isShortTrack2EMC()        {return testBit(kShortTrack2EMC);}
     Bool_t       isRejected()              {return testBit(kRejectedTrack);}
+    Bool_t       isWestTpcOnly()           {return testBit(kWestTpcOnlyTrack);}
+    Bool_t       isEastTpcOnly()           {return testBit(kEastTpcOnlyTrack);}
 
     virtual void setCtbMatched()           {setBit(kCtbMatched);}   
     virtual void setToFMatched()  	   {setBit(kToFMatched);}   
@@ -235,6 +240,8 @@ public:
     virtual void setMembraneCrossingTrack(){setBit(kXMembrane);} 
     virtual void setShortTrack2EMC()       {reSetBit(kRejectedTrack); setBit(kShortTrack2EMC);}
     virtual void setRejected()             {setBit(kRejectedTrack);}
+    virtual void setWestTpcOnly()          {setBit(kWestTpcOnlyTrack);}
+    virtual void setEastTpcOnly()          {setBit(kEastTpcOnlyTrack);}
     virtual void setFlagExtension(UInt_t i){mFlagExtension = i;}
     void         setFlag(Short_t);
     void         setKey(Int_t val) { mKey = val; }
