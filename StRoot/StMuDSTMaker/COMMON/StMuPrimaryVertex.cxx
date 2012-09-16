@@ -3,7 +3,7 @@
  * A simple class to store porimary vertex information
  * All functions are inline
  *
- * $Id: StMuPrimaryVertex.cxx,v 1.8 2012/05/07 14:47:06 fisyak Exp $ 
+ * $Id: StMuPrimaryVertex.cxx,v 1.9 2012/09/16 21:58:16 fisyak Exp $ 
  */
 
 #include "StMuPrimaryVertex.h"
@@ -31,6 +31,8 @@ StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex*& vertex) {
   mNEEMCNotMatch     = vertex->numNotMatchesWithEEMC();
 
   mNCrossCentralMembrane = vertex->numTracksCrossingCentralMembrane();
+  mNTpcWestOnly = vertex->numTracksTpcWestOnly();
+  mNTpcEastOnly = vertex->numTracksTpcEastOnly();
   mNTracksWithPromptHit  = vertex->numTracksWithPromptHit();
   mNPostXTracks   = vertex->numPostXTracks();
   mSumTrackPt     = vertex->sumOfTrackPt();
@@ -80,6 +82,9 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
   os << Form(" M:%4i:R%4i",v.noTracks(),v.refMult());
   //  os << Form(" RefMult:%4i(%4i%4i)",v.refMult(),v.refMultPos(),-v.refMultNeg());
   os << Form(" U:%4i ",v.nTracksUsed());
+  os << Form(" W:%4i ",v.nTpcWestOnly());
+  os << Form(" E:%4i ",v.nTpcEastOnly());
+  if (v.qaTruth())
   os << Form(" QA:%3i",v.qaTruth());
   return os;
 }
@@ -87,6 +92,9 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
 void StMuPrimaryVertex::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________
 // $Log: StMuPrimaryVertex.cxx,v $
+// Revision 1.9  2012/09/16 21:58:16  fisyak
+// Make use of Tpc West and East Only no. of tracks
+//
 // Revision 1.8  2012/05/07 14:47:06  fisyak
 // Add handles for track to fast detector matching
 //
