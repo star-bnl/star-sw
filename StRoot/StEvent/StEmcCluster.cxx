@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCluster.cxx,v 2.6 2004/07/15 16:36:23 ullrich Exp $
+ * $Id: StEmcCluster.cxx,v 2.7 2012/09/16 21:33:33 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.cxx,v $
+ * Revision 2.7  2012/09/16 21:33:33  fisyak
+ * Make one line print out
+ *
  * Revision 2.6  2004/07/15 16:36:23  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -33,7 +36,7 @@
 
 ClassImp(StEmcCluster)
     
-static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.6 2004/07/15 16:36:23 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.7 2012/09/16 21:33:33 fisyak Exp $";
 
 StEmcCluster::StEmcCluster() {/* noop*/};
 
@@ -108,9 +111,11 @@ StEmcCluster::addTrack(StTrack* track) {mTracks.push_back(track);}
 ostream&
 operator<<(ostream &os, const StEmcCluster& cl)
 {
-  return (os << " Energy " << cl.energy() << endl
-          << " Eta "    << cl.eta() << "+/-" << cl.sigmaEta() << endl
-          << " Phi "    << cl.phi() << "+/-" << cl.sigmaPhi() << endl
-          << " # of hits " << cl.nHits() << ",# of neighbor " << cl.nNeighbors() << endl);
+  return os << "EmcCluster Energy " << cl.energy() 
+	    << " Eta "    << cl.eta() << "+/-" << cl.sigmaEta() 
+	    << " Phi "    << cl.phi() << "+/-" << cl.sigmaPhi() 
+	    << " # of hits " << cl.nHits() << ",# of neighbor " << cl.nNeighbors();
+    //	    << *((StHit *)&cl);
 }
+void   StEmcCluster::Print(Option_t *option) const {cout << *this << endl;}
 
