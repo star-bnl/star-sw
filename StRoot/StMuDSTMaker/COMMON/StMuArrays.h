@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.23 2011/10/17 00:19:13 fisyak Exp $
+ * $Id: StMuArrays.h,v 1.24 2012/09/16 21:58:16 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -63,6 +63,7 @@ __NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__
 class StMuArrays {
  public:
  StMuArrays();
+#ifndef __CINT__
 ///< names of the TBranches in the TTree/File 
     static const char*         arrayNames    [__NALLARRAYS__    ];
 #ifndef __NO_STRANGE_MUDST__
@@ -114,6 +115,7 @@ class StMuArrays {
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
     static int*   btofArrayCounters;// [__NBTOFARRAYS__   ]  // dongx
     static int*    eztArrayCounters;// [__NEZARRAYS__    ]
+#endif
     ClassDef(StMuArrays,0)
 };
 
@@ -122,6 +124,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.24  2012/09/16 21:58:16  fisyak
+ * Make use of Tpc West and East Only no. of tracks
+ *
  * Revision 1.23  2011/10/17 00:19:13  fisyak
  * Active handing of IdTruth
  *

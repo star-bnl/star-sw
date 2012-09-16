@@ -4,7 +4,7 @@
  * Simple class to store primary vertices. Data members are a mainly a copy of 
  * StPrimaryVertex
  *
- * $Id: StMuPrimaryVertex.h,v 1.8 2012/05/07 14:47:06 fisyak Exp $ 
+ * $Id: StMuPrimaryVertex.h,v 1.9 2012/09/16 21:58:16 fisyak Exp $ 
  */
 
 #include "TObject.h"
@@ -18,7 +18,7 @@ class StMuPrimaryVertex : public TObject {
  public:
   StMuPrimaryVertex(): mFlag(0), mPosition(-999,-999,-999), mPosError(-999,-999,-999), mVertexFinderId(undefinedVertexFinder), 
     mRanking(999),mNTracksUsed(0), mNCTBMatch(0), mNBEMCMatch(0), mNEEMCMatch(0), mNCrossCentralMembrane(0),
-    mSumTrackPt(-999),mMeanDip(-999), mChiSquared(9999), mNTracks(0), mRefMultNeg(0), mRefMultPos(0), mRefMultFtpcWest(0), 
+    mSumTrackPt(-999),mMeanDip(-999), mChiSquared(9999), mNTracks(0), mNTpcWestOnly(0), mNTpcEastOnly(0), mRefMultNeg(0), mRefMultPos(0), mRefMultFtpcWest(0), 
     mRefMultFtpcEast(0), mIdTruth(0), mQuality(0), mIdParent(0) {}
   StMuPrimaryVertex(const StPrimaryVertex*& vertex);
   ~StMuPrimaryVertex() {;}
@@ -39,6 +39,8 @@ class StMuPrimaryVertex : public TObject {
    UShort_t         nBEMCNotMatch() const      { return mNBEMCNotMatch; }
    UShort_t         nEEMCNotMatch() const      { return mNEEMCNotMatch; }
    UShort_t         nCrossCentralMembrane() const  { return mNCrossCentralMembrane; }
+   UShort_t         nTpcWestOnly() const  { return mNTpcWestOnly; }
+   UShort_t         nTpcEastOnly() const  { return mNTpcEastOnly; }
    
    Float_t          sumTrackPt() const      { return mSumTrackPt; }
    Float_t          meanDip() const         { return mMeanDip; }
@@ -61,7 +63,7 @@ class StMuPrimaryVertex : public TObject {
    Bool_t        isBeamConstrained() const {return TESTBIT(mFlag,kBEAMConstrVtxId);}
    virtual void     Print(Option_t *option="") const; ///< Print essential vertex info
 
-  ClassDef(StMuPrimaryVertex,7)
+  ClassDef(StMuPrimaryVertex,8)
     
     private:
   Int_t            mFlag;
@@ -85,6 +87,8 @@ class StMuPrimaryVertex : public TObject {
   Float_t          mMeanDip;
   Float_t          mChiSquared;
   UShort_t         mNTracks;
+  UShort_t         mNTpcWestOnly;
+  UShort_t         mNTpcEastOnly;
   // RefMult fields
   UShort_t         mRefMultNeg;
   UShort_t         mRefMultPos;
@@ -99,6 +103,9 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v);
 #endif
 /*
  * $Log: StMuPrimaryVertex.h,v $
+ * Revision 1.9  2012/09/16 21:58:16  fisyak
+ * Make use of Tpc West and East Only no. of tracks
+ *
  * Revision 1.8  2012/05/07 14:47:06  fisyak
  * Add handles for track to fast detector matching
  *
