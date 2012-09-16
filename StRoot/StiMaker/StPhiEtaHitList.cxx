@@ -10,7 +10,9 @@
 //________________________________________________________________________________
 ClassImp(StPhiEtaHitList);
 const Char_t *StPhiEtaHitList::names[3] = {"Active","Fired","Track"};
-Int_t StPhiEtaHitList::_debug = 0;
+static Int_t _debug = 0;
+void StPhiEtaHitList::SetDebug(Int_t k) {_debug = k;}
+Int_t StPhiEtaHitList::Debug() {return _debug;}
 //________________________________________________________________________________
 StPhiEtaHitList::StPhiEtaHitList() : Wmatch(4), Wveto(0.75) {
   memset(beg, 0, end - beg + 1);
@@ -101,7 +103,7 @@ void StBtofHitList::build ( StBTofCollection *btofColl){
     Double_t phi = Phi(t,m,c);
     Double_t eta = Eta(t,m,c);
     Int_t iBin = mFired->Fill(phi,eta);
-    if (Debug()) {
+    if (StPhiEtaHitList::Debug()) {
       LOG_INFO << "StBtofHitList::build add fired at iBin = " << iBin << " with phi = " << phi << " eta = " << eta << endm;
     }
   }
@@ -111,7 +113,7 @@ Int_t StBtofHitList::addBtofTrack(Int_t t, Int_t m, Int_t c) {
   Double_t phi = Phi(t,m,c);
   Double_t eta = Eta(t,m,c);
   Int_t iBin = mTrack->Fill(phi,eta);
-  if (Debug()) {
+  if (StPhiEtaHitList::Debug()) {
     LOG_INFO << "StBtofHitList::addBtofTrack add track at iBin = " << iBin << " with phi = " << phi << " eta = " << eta 
 	     << " tray = " << t << " module = " << m << " cell = " << c
 	     << endm;
@@ -285,7 +287,7 @@ void  StCtbHitList::buildFromData(StTriggerData *trgD){
       if(adc<mCtbThres_ch) continue;
       ctb_get_slat_from_data(slat, tray, phi, eta);
       Int_t iBin = mFired->Fill(phi,eta);
-      if (Debug()) {
+      if (StPhiEtaHitList::Debug()) {
 	LOG_INFO << "StCtbHitList::buildFromData add fired at iBin = " << iBin << " with phi = " << phi << " eta = " << eta << endm;
       }
     }
@@ -394,7 +396,7 @@ void StBemcHitList::build ( StEmcDetector*det, Float_t adcMin){
       Float_t adc= rawAdc -ped;
       if(adc< adcMin) continue;
       Int_t iBin = mFired->Fill(phi,eta);
-      if (Debug()) {
+      if (StPhiEtaHitList::Debug()) {
 	LOG_INFO << "StBemcHitList::build add fired at iBin = " << iBin << " with phi = " << phi << " eta = " << eta << endm;
       }
     }
@@ -496,7 +498,7 @@ void StEemcHitList::build ( StEmcDetector*det, Float_t adcMin){
       if(adc < adcMin) continue; // too low response for MIP
       // printf("add Eemc hit %s adc=%.1f\n",x->name,adc);
       Int_t iBin = mFired->Fill(Phi,Eta);
-      if (Debug()) {
+      if (StPhiEtaHitList::Debug()) {
 	LOG_INFO << "StEemcHitList::build add fired at iBin = " << iBin << " with phi = " << Phi << " eta = " << Eta << endm;
       }
     }

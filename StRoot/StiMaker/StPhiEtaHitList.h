@@ -42,8 +42,8 @@ class StPhiEtaHitList {
   void     setTrack(Int_t iBin)  { mTrack->AddBinContent(iBin); }
   Double_t MinPhi() {return phiMin;}
   Int_t    NoHits() {return mFired ? mFired->GetEntries():0;}
-  static void     setDebug(Int_t k) {_debug = k;}
-  static Int_t    Debug() {return _debug;}
+  static void     SetDebug(Int_t k = 1);
+  static Int_t    Debug();
  protected:
   Char_t  beg[1]; //!
   TH2C    *mActive;
@@ -53,7 +53,6 @@ class StPhiEtaHitList {
   Char_t   end[1]; //!
   Float_t  Wmatch, Wveto;
   static  const Char_t *names[3];
-  static  Int_t   _debug;
   ClassDef(StPhiEtaHitList,0)
 };
 //________________________________________________________________________________

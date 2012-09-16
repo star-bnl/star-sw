@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.98 2012/05/07 14:56:14 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.99 2012/09/16 21:38:42 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.99  2012/09/16 21:38:42  fisyak
+ * use of Tpc West Only and East Only tracks, clean up
+ *
  * Revision 2.98  2012/05/07 14:56:14  fisyak
  * Add StKFVertexMaker
  *
@@ -833,9 +836,10 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       if (!detector) 		continue;
       if (!hh) 			continue;
       assert(detector->getGroupId()==hh->detector());
+#if 0
 // 	Fill StHit errors for Gene
       FillStHitErr(hh,node);
-      
+#endif      
       detInfo->addHit(hh,refCountIncr);
       if (!refCountIncr) 	continue;
       hh->setFitFlag(1);
@@ -1047,21 +1051,35 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
       Int_t NoPositiveSignZ = 0;
       Int_t NoNegativeSignZ = 0;
       Int_t NoPromptHits = 0;
+      Double_t zE = -200, zW = 200;
+      Int_t    rE = 0, rW = 0;
+      Int_t   nW = 0, nE = 0;
       for (Int_t i = 0; i < Nhits; i++) {
 	const StTpcHit *hit = (StTpcHit *) hits[i];
-	if ((hit->position().z() < -1.0 && hit->sector() <= 12) ||
-	    (hit->position().z() >  1.0 && hit->sector() >  12)) NoWrongSignZ++;
+	Double_t z = hit->position().z();
+	Int_t sector = hit->sector();
+	if (sector <= 12) nW++;
+	else              nE++;
+	Int_t row    = hit->padrow();
+	if ((z < -1.0 && sector <= 12) ||
+	    (z >  1.0 && sector >  12)) NoWrongSignZ++;
 	else {
-	  if (hit->position().z() < -1.0) NoNegativeSignZ++;
-	  if (hit->position().z() >  1.0) NoPositiveSignZ++;
+	  if (z < -1.0) {NoNegativeSignZ++; if (z > zE) {zE = z; rE = row;}}
+	  if (z >  1.0) {NoPositiveSignZ++; if (z < zW) {zW = z; rW = row;}}
 	}
-	if (TMath::Abs(209.4 - TMath::Abs(hit->position().z())) < 3.0) NoPromptHits++;
+	if (TMath::Abs(209.4 - TMath::Abs(z)) < 3.0) NoPromptHits++;
       }
       if (NoWrongSignZ >= 2)                             gTrack->setPostCrossingTrack();
       else {
 	if (NoPromptHits == 1)                           gTrack->setPromptTrack();
-	if (NoPositiveSignZ >= 2 && NoNegativeSignZ >=2) gTrack->setMembraneCrossingTrack();
+	if (NoPositiveSignZ >= 2 && NoNegativeSignZ >=2) {
+	  if (zW - zE < 10 ||
+	      TMath::Abs(rW - rE) < 3) 
+	    gTrack->setMembraneCrossingTrack();
+	}
       }
+      if (nW >  0 && nE == 0) gTrack->setWestTpcOnly();
+      if (nW == 0 && nE >  0) gTrack->setEastTpcOnly();
     }
     if (NoTpcFitPoints < 11 && NoFtpcWestId < 5 && NoFtpcEastId < 5) { 
       // hadrcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx

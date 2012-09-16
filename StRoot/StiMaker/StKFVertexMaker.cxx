@@ -1,4 +1,4 @@
-// $Id: StKFVertexMaker.cxx,v 2.1 2012/05/07 14:56:14 fisyak Exp $
+// $Id: StKFVertexMaker.cxx,v 2.2 2012/09/16 21:38:42 fisyak Exp $
 #include "RVersion.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -359,16 +359,18 @@ void StKFVertexMaker::calculateRank(StPrimaryVertex *primV) {
   // Calculation of veretx ranks to select 'best' (i.e. triggered)  vertex
   // Simpilfied version (w/o weighting)
   Float_t rank = primV->probChiSquared();
-  static Double_t Wveto = 1;
-  static Double_t Wmatch = 4;
+  static Float_t Wveto = 1;
+  static Float_t Wmatch = 4;
   if (primV->isBeamConstrained()) rank += Wmatch;
-  rank -= Wmatch*primV->numPostXTracks();
+  rank -= Wveto*primV->numPostXTracks();
   rank += Wmatch*primV->numTracksWithPromptHit();
   rank += Wmatch*primV->numTracksCrossingCentralMembrane();
   rank += Wmatch*(primV->numMatchesWithCTB() + primV->numMatchesWithBTOF()) 
     -     Wveto*(primV->numNotMatchesWithCTB() + primV->numNotMatchesWithBTOF());
   rank += Wmatch*(primV->numMatchesWithBEMC() + primV->numMatchesWithEEMC()) 
     -     Wveto*(primV->numNotMatchesWithBEMC() + primV->numNotMatchesWithEEMC());
+  if (primV->numTracksTpcWestOnly() > 0 && primV->numTracksTpcEastOnly() > 0) 
+    rank += Wmatch*TMath::Min(primV->numTracksTpcWestOnly(),primV->numTracksTpcEastOnly());
   primV->setRanking(rank); 
   if (Debug()) primV->Print();
 }
@@ -494,14 +496,14 @@ void StKFVertexMaker::Fit() {
   fcVertices->MergeDuplicatedVertices();
   if (! fcVertices->NoVertices()) return;
   // Double_t Temperature = TMath::Exp(TempLog);
-  
+  TempLog = 5;
+  Double_t Temperature = TMath::Exp(TempLog);
+#if 1  
   // secondary vertices
   Int_t pass = fNPasses;
   if (fVerticesPass[pass]) {delete fVerticesPass[pass]; fVerticesPass[pass] = 0;}
   fVerticesPass[pass] = new StKFVerticesCollection();
   fcVertices = fVerticesPass[pass];
-  TempLog = 5;
-  Double_t Temperature = TMath::Exp(TempLog);
   StAnneling::SetTemperature(Temperature);
   for (Int_t k = 1; k < NGoodGlobals; k++) {
     KFParticle *particleK = (KFParticle *) Particles()[k];
@@ -548,6 +550,7 @@ void StKFVertexMaker::Fit() {
     *fVerticesPass[0] += *fVerticesPass[fNPasses];
   }
   // end of loop for secondary vertices
+#endif
   fcVertices = fVerticesPass[0];
   fcVertices->Compress();
   if (! fcVertices->NoVertices()) return;
@@ -576,6 +579,9 @@ Double_t StKFVertexMaker::AnnelingFcn(Double_t TInv) {
 }
 //________________________________________________________________________________
 // $Log: StKFVertexMaker.cxx,v $
+// Revision 2.2  2012/09/16 21:38:42  fisyak
+// use of Tpc West Only and East Only tracks, clean up
+//
 // Revision 2.1  2012/05/07 14:56:14  fisyak
 // Add StKFVertexMaker
 //
