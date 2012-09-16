@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.17 2012/05/07 13:59:44 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.18 2012/09/16 21:59:14 fisyak Exp $
  *
  */
 
@@ -38,6 +38,8 @@
 #endif
 #include "TClassTable.h"
 #include "TNtuple.h"
+#include "StThreeVectorF.hh"
+#include "StDetectorName.h"
 //
 //  The following line defines a static string. Currently it contains
 //  the cvs Id. The compiler will put the string (literally) in the
@@ -59,8 +61,7 @@
 //  It can be place anywhere in the file. Note that this
 //  is a macro, that's why the ';' is missing.
 //
-ClassImp(StAnalysisMaker)
-
+ClassImp(StAnalysisMaker);
 
 /// The constructor. Initialize you data members here.
 StAnalysisMaker::StAnalysisMaker(const Char_t *name) : StMaker(name)
@@ -172,11 +173,19 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
   }
 }
 //________________________________________________________________________________
-void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Bool_t plot, Int_t IdTruth) {
+void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t IdTruth) {
+  // plot = 1 => All hits;
+  // plot = 2 => prompt hits only |z| > 190
   struct BPoint_t {
-    Float_t sector, row, x, y, z, q;
+    Float_t                     sector,row,x,y,z,q,adc,pad,timebucket;
   };
-    
+  static const Char_t *vname = "sector:row:x:y:z:q:adc:pad:timebucket";
+  BPoint_t BPoint;
+  static TNtuple *Nt = 0;
+  if (plot && Nt == 0) {
+    TFile *tf =  StMaker::GetTopChain()->GetTFile();
+    if (tf) {tf->cd(); Nt = new TNtuple("TpcHit","TpcHit",vname);}
+  }
   StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
   if (!pEvent) { cout << "Can't find StEvent" << endl; return;}
   //  StSPtrVecTrackNode& trackNode = pEvent->trackNodes();
@@ -205,7 +214,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Bool_t plot, Int_t I
 	      TotalNoOfTpcHits += NoHits;
 	      TArrayD dT(NoHits);   Double_t *d = dT.GetArray();
 	      for (Long64_t k = 0; k < NoHits; k++) {
-		StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
+		const StTpcHit *tpcHit = static_cast<const StTpcHit *> (hits[k]);
 		const StThreeVectorF& xyz = tpcHit->position();
 		d[k] = xyz.z();
 	      }
@@ -215,7 +224,23 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Bool_t plot, Int_t I
 		StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[l]);
 		if (! tpcHit) continue;
 		if (IdTruth >= 0 && tpcHit->idTruth() != IdTruth) continue;
-		tpcHit->Print();
+		if (! plot) 		tpcHit->Print();
+		else {
+		  if (Nt) {
+		    const StThreeVectorF& xyz = tpcHit->position();
+		    if (plot == 2 && TMath::Abs(xyz.z()) < 195.0) continue;
+		    BPoint.sector = i+1;
+		    BPoint.row = j+1;
+		    BPoint.x = xyz.x();
+		    BPoint.y = xyz.y();
+		    BPoint.z = xyz.z();
+		    BPoint.q = 1.e6*tpcHit->charge();
+		    BPoint.adc = tpcHit->adc();
+		    BPoint.pad = tpcHit->pad();
+		    BPoint.timebucket = tpcHit->timeBucket();
+		    Nt->Fill(&BPoint.sector);
+		  }
+		}
 	      }
 	    }
 	  }
@@ -225,6 +250,46 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Bool_t plot, Int_t I
     //    break;
   }
   cout << "TotalNoOfTpcHits = " << TotalNoOfTpcHits << endl;
+}
+//________________________________________________________________________________
+void StAnalysisMaker::PrintEmcHits(Int_t det, Int_t mod) {
+
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) { cout << "Can't find StEvent" << endl; return;}
+  StEmcCollection* emccol=(StEmcCollection*) pEvent->emcCollection();
+  if (! emccol) { cout << "No Emc Hit Collection" << endl; return;}
+  //cout <<"Filling hits and clusters \n";
+  Int_t d1 = 0, d2 = 7;
+  if (det >= 0 && det <= 7) {d1 = d2 = det;}
+  for(Int_t d = d1; d <= d2; d++)  {  
+    StDetectorId id = static_cast<StDetectorId>(d+kBarrelEmcTowerId);
+    const StEmcDetector* detector=emccol->detector(id);
+    if(detector) {                          
+      Int_t maxMod = 121;
+      if (d > 3) maxMod = 14;
+      Int_t j1 = 1;
+      if (mod > 0 and mod < maxMod) {j1 = maxMod = mod;}
+      //cout <<"Filling hits for detetor "<<EmcDet<<endl;
+      for(Int_t j = j1; j < maxMod; j++) {
+        const StEmcModule* module = detector->module(j);
+        if(module) {
+          const StSPtrVecEmcRawHit& rawHit=module->hits();
+          Int_t nhits = (Int_t) rawHit.size();
+	  for(Int_t k = 0; k < nhits; k++) if (rawHit[k]->energy() > 0) cout << DetectorName(id) << "\t" << *rawHit[k] << endl;
+	}
+      }
+      const StEmcClusterCollection *cl = detector->cluster();
+      if (cl) {
+	Int_t NoCls = cl->numberOfClusters();
+	if (NoCls) {
+	  const StSPtrVecEmcCluster&       clusters = cl->clusters();
+	  for (Int_t i = 0; i < NoCls; i++) {
+	    if (clusters[i]->energy() > 0) cout << DetectorName(id) << "\t" << *clusters[i] << endl;
+	  }
+	}
+      }
+    }
+  } 
 }
 //________________________________________________________________________________
 void StAnalysisMaker::PrintSvtHits() {
@@ -363,6 +428,8 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   UInt_t crossMembrane = 0;
   UInt_t nToFMatched   = 0;
   UInt_t nEmcMatched   = 0;
+  UInt_t nWestTpcOnly = 0;
+  UInt_t nEastTpcOnly = 0;
   StGlobalTrack* gTrack = 0;
   for (UInt_t i=0; i < nTracks; i++) {
     node = trackNode[i]; if (!node) continue;
@@ -382,16 +449,25 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
     if (gTrack->isBemcMatched() || 
 	gTrack->isEemcMatched() )                      nEmcMatched++;
     if (gTrack->fitTraits().numberOfFitPoints() <  NoFitPointCutForGoodTrack) continue;
+    if (gTrack->isWestTpcOnly())                        nWestTpcOnly++;
+    if (gTrack->isEastTpcOnly())                        nEastTpcOnly++;
+    
     nGoodTracks++;
   }
   LOG_QA << "# track nodes:   \t"
-	 <<  nTracks << ":\tgood globals with NFitP>="<< NoFitPointCutForGoodTrack << ":\t" << nGoodTracks 
-	 << ":\tFtpc tracks :\t" << nGoodFtpcTracks << endm;
-  LOG_QA  << "BeamBack tracks:\t" << nBeamBackTracks << ":\tgood ones:\t" << nGoodBeamBackTracks
-	  << ":\tShort tracks pointing to EEMC :\t" << nShortTrackForEEmc << endm;
-  LOG_QA  << "post (C)rossing tracks :" << pcTracks << ":\t(P)rompt:" << promptTracks << ":\t(X) membrane :" << crossMembrane
-	  << ":\t(T)of/ctb matches:" << nToFMatched << ":\t(E)mc matches: " << nEmcMatched
-	  << endm;
+	 <<  nTracks << ": good globals with NFitP>="<< NoFitPointCutForGoodTrack << ": " << nGoodTracks 
+	 << ": Ftpc tracks : " << nGoodFtpcTracks << endm;
+  LOG_QA  << "BeamBack tracks: " << nBeamBackTracks << ": good ones: " << nGoodBeamBackTracks
+	  << ": Short tracks pointing to EEMC : " << nShortTrackForEEmc << endm;
+  LOG_QA  << "post (C)rossing tracks :" << pcTracks << ": (P)rompt:" << promptTracks 
+	  << ": (X) membrane :" << crossMembrane
+	  << "(T)of/ctb matches:" << nToFMatched << " :(E)mc matches: " << nEmcMatched
+	  << " :Only W:" << nWestTpcOnly << " E:" << nEastTpcOnly;
+  if (event->btofCollection()) {
+    if (event->btofCollection()->tofHeader() && event->btofCollection()->tofHeader()->vpdVz() > -250) 
+      LOG_QA  << " VpdZ:" << Form("%7.2f",event->btofCollection()->tofHeader()->vpdVz());
+  }
+  LOG_QA  << endm;
   // Report for jobTracking Db        
   if (nTracks) {
     //        LOG_QA << "SequenceValue=" << mEventCounter 
@@ -412,6 +488,11 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   }
   
   StPrimaryVertex *pVertex=0;
+  Int_t NoVertexPos = 0; // no. of vertices with positive rank
+  for (Int_t ipr=0;(pVertex=event->primaryVertex(ipr));ipr++) {
+    if (pVertex->ranking() > 0) NoVertexPos++;
+  }
+  LOG_QA << "StageID='3'" << ",MessageKey=" << "'No. of Vertices with positive rank'" << ",MessageValue='" << NoVertexPos << "'" << endm;
   for (Int_t ipr=0;(pVertex=event->primaryVertex(ipr));ipr++) {
     LOG_QA << Form("#V[%3i]",ipr) << *pVertex << endm;
     // Report for jobTracking Db   (non-zero entry only)    
@@ -635,6 +716,9 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 //________________________________________________________________________________
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.18  2012/09/16 21:59:14  fisyak
+ * Compress print out, add PrintEmcHits
+ *
  * Revision 2.17  2012/05/07 13:59:44  fisyak
  * enhance print out for primary vertixes
  *
