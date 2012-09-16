@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcRawHit.h,v 2.8 2004/07/20 17:07:49 perev Exp $
+ * $Id: StEmcRawHit.h,v 2.9 2012/09/16 21:33:57 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.h,v $
+ * Revision 2.9  2012/09/16 21:33:57  fisyak
+ * Add print out
+ *
  * Revision 2.8  2004/07/20 17:07:49  perev
  * Pavlinov corrs for TBrowser
  *
@@ -72,7 +75,7 @@ public:
     void setCalibrationType(const unsigned int);
     void setAdc(const unsigned int);
     void setEnergy(const float);
-    
+    void     Print(Option_t *option="") const;
 protected:
     unsigned int    bits(unsigned int, unsigned int) const;
     
@@ -85,6 +88,7 @@ protected:
 
     ClassDef(StEmcRawHit,1)
 }; 
+ostream&              operator<<(ostream& os, StEmcRawHit const & v);
 #endif
 
 
