@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcCluster.h,v 2.9 2012/05/07 14:42:57 fisyak Exp $
+ * $Id: StEmcCluster.h,v 2.10 2012/09/16 21:33:33 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.h,v $
+ * Revision 2.10  2012/09/16 21:33:33  fisyak
+ * Make one line print out
+ *
  * Revision 2.9  2012/05/07 14:42:57  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -82,7 +85,7 @@ public:
     void addHit(StEmcRawHit*);
     void addNeighbor(StEmcCluster*);
     void addTrack(StTrack*);
-    
+    void Print(Option_t *option = "") const;
 private:
     Float_t mEta;
     Float_t mPhi;
