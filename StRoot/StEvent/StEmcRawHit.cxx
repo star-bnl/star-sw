@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.cxx,v 2.8 2007/01/25 02:52:35 ullrich Exp $
+ * $Id: StEmcRawHit.cxx,v 2.9 2012/09/16 21:33:57 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.cxx,v $
+ * Revision 2.9  2012/09/16 21:33:57  fisyak
+ * Add print out
+ *
  * Revision 2.8  2007/01/25 02:52:35  ullrich
  * Changes to modEtaSub() and sub() implemented by Adam Kocoloski.
  * sub() now returns 1 instead of -1.
@@ -39,7 +42,7 @@
 #include "StEmcRawHit.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
-static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.8 2007/01/25 02:52:35 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.9 2012/09/16 21:33:57 fisyak Exp $";
 
 ClassImp(StEmcRawHit)
 
@@ -157,3 +160,8 @@ StEmcRawHit::setAdc(const unsigned int adc) {mAdc=adc;}
 
 void
 StEmcRawHit::setEnergy(const float energy) {mEnergy=energy;}
+
+ostream&  operator<<(ostream& os, const StEmcRawHit& v) {
+  return os << Form("EmcRawHit d/m %3i/%3i eta/sub  %3i/%3i adc/enery %4i/%f",v.detector(),v.module(), v.eta(), v.sub(), v.adc(), v.energy());
+}
+void   StEmcRawHit::Print(Option_t *option) const {cout << *this << endl;}
