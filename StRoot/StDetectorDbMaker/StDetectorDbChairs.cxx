@@ -158,8 +158,6 @@ MakeChairInstance(tpcPedestal,Calibrations/tpc/tpcPedestal);
 MakeChairInstance(tpcPadResponse,Calibrations/tpc/tpcPadResponse);
 #include "St_tpcSlowControlSimC.h"
 MakeChairInstance(tpcSlowControlSim,Calibrations/tpc/tpcSlowControlSim);
-#include "St_tpcHitErrorsC.h"
-MakeChairInstance(tpcHitErrors,Calibrations/tpc/tpcHitErrors);
 #include "St_tpcGainMonitorC.h"
 MakeChairInstance(tpcGainMonitor,Calibrations/tpc/tpcGainMonitor);
 #include "St_tpcHighVoltagesC.h"
