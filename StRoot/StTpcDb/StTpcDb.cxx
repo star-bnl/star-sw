@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.58 2012/05/03 23:56:48 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.59 2012/09/17 19:39:44 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.59  2012/09/17 19:39:44  fisyak
+ * Add rotation for Half Tpc's
+ *
  * Revision 1.58  2012/05/03 23:56:48  fisyak
  * Set interpolation for one week only, fix sign of interpolation (thanks Gene), add TriggerId
  *
@@ -190,6 +193,8 @@ StTpcDb::StTpcDb() {
 			  0, 0,-1};
   Double_t Translation[3] = {0, 0, DriftDistance};
   mFlip->SetName("Flip"); mFlip->SetRotation(Rotation); mFlip->SetTranslation(Translation);
+  mHalf[0] = new TGeoHMatrix("Default for east part of TPC");
+  mHalf[1] = new TGeoHMatrix("Default for west part of TPC");
   gStTpcDb = this;
 }
 //_____________________________________________________________________________
@@ -199,6 +204,8 @@ StTpcDb::~StTpcDb() {
     for (Int_t k = 0; k < kTotalTpcSectorRotaions; k++) 
     SafeDelete(mTpcSectorRotations[i][k]);
   }
+  SafeDelete(mHalf[0]);  
+  SafeDelete(mHalf[1]);
   SafeDelete(mExB);
   SafeDelete(mTpc2GlobMatrix);
   SafeDelete(mFlip);
@@ -331,10 +338,14 @@ void StTpcDb::SetTpcRotations() {
 				      tpcGlobalPosition->LocalyShift(),
 				      tpcGlobalPosition->LocalzShift()};
 	rotA.SetTranslation(transTpcRefSys);
+	*mHalf[east] = StTpcHalfPosition::instance()->GetEastMatrix();
+	*mHalf[west] = StTpcHalfPosition::instance()->GetWestMatrix();
       } else {
 	Id = 10*sector + k;
 	TGeoTranslation TIO; 
 	TGeoRotation    RIO;
+	StBeamDirection part = east;
+	if (sector <= 12) part = west;
 	switch (k) {
 	case kSupS2Tpc: // SupS => Tpc
 	  if (sector <= 12) {iphi = (360 + 90 - 30* sector      )%360; Rot = Form("R%03i",iphi);}
@@ -349,7 +360,7 @@ void StTpcDb::SetTpcRotations() {
 	    else              rotm = new TGeoRotation(Rot,   90.0,    0.0,  90.0,  -90.0,  180.0,    0.00); // Flip (x,y,z) => ( x,-y,-z)
 	    rotm->RotateZ(iphi);
 	  }
-	  rotA = *rotm;
+	  rotA = (*mHalf[part]) * (*rotm);
 #ifdef  __NEW__SCHEMA_FOR_ROTATION__
 	  rotA *= StTpcSuperSectorPosition::instance()->GetMatrix(sector-1);
 #endif

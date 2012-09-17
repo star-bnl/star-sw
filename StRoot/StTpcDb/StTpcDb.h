@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.38 2012/05/03 23:56:48 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.39 2012/09/17 19:39:44 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.39  2012/09/17 19:39:44  fisyak
+ * Add rotation for Half Tpc's
+ *
  * Revision 1.38  2012/05/03 23:56:48  fisyak
  * Set interpolation for one week only, fix sign of interpolation (thanks Gene), add TriggerId
  *
@@ -111,6 +114,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "StMessMgr.h"
+#include "StEnumerations.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StDetectorDbMaker/St_tpcWirePlanesC.h"
 #include "StDetectorDbMaker/St_tpcDimensionsC.h"
@@ -135,7 +139,8 @@ class StTpcDb {
  public:    
   static StTpcDb* instance() {if (! gStTpcDb) new StTpcDb(); return gStTpcDb;}
   // Glob     = Global coordinate 
-  // Tpc      = Tpc    -"-
+  // Tpc      = Tpc    -"-                survey
+  // Half     = Tpc Half west / east -"-  survey
   // SupS     = super sector misalignment(?)
   // SubS[io] = SubSector[io] misalignment
   // SecL     = sector -"- coordinate (y_p, x_p, DriftDistance - z_p);
@@ -158,16 +163,16 @@ class StTpcDb {
 			       kPadOuter2Tpc    =11, // -"- 
 			       kPadInner2Glob   =12, // (Pad => SecL) => (SubS[io] => SupS => Tpc => Glob)
 			       kPadOuter2Glob   =13, // -"- 
-			       
 			       kTotalTpcSectorRotaions =14}; 
  private:
-  Char_t                mBeg[1];         //!
+  Char_t                mBeg[1];        //!
   St_tpcDriftVelocity*  dvel;           //!
   StMagUtilities*       mExB;           //!
   Int_t                 m_Debug;        //!
   TGeoHMatrix          *mFlip;          //!
   TGeoHMatrix          *mTpc2GlobMatrix;//!
-  TGeoHMatrix          *mTpcSectorRotations[24][kTotalTpcSectorRotaions]; 
+  TGeoHMatrix          *mHalf[2];       //!
+  TGeoHMatrix          *mTpcSectorRotations[24][kTotalTpcSectorRotaions]; //!
   Float_t               mDriftVel[2];   //!
   UInt_t                mUc;            //! time for which above mDriftVel have been calculated
   Int_t                 mTriggerId;     //! to distinguish local clock and RHIC clock
@@ -201,11 +206,12 @@ class StTpcDb {
     if (sector == 0)  {if (m) *mTpc2GlobMatrix = *m;}
     else              {if (m) *mTpcSectorRotations[sector-1][k] = *m;}
   }
-  void SetDebug(Int_t m) {m_Debug = m;}
+  void  SetDebug(Int_t m) {m_Debug = m;}
   Int_t Debug() {return m_Debug;}
   void  SetTriggerId(Int_t m) {mTriggerId = m;}
   Int_t TriggerId() {return mTriggerId;}
   const TGeoHMatrix &Flip()                           const {return *mFlip;}
+  const TGeoHMatrix &TpcHalf(StBeamDirection part)    const {return *mHalf[part];}
   const TGeoHMatrix &Tpc2GlobalMatrix()               const {return *mTpc2GlobMatrix;}
   const TGeoHMatrix &TpcRot(Int_t sector, Int_t k)    const {return *mTpcSectorRotations[sector-1][k];}
   const TGeoHMatrix &SupS2Tpc(Int_t sector = 1)       const {return TpcRot(sector,kSupS2Tpc);}
