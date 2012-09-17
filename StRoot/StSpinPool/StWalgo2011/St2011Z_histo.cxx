@@ -25,6 +25,7 @@ St2011ZMaker::initHistos(){
   hA[0]=h=new TH1F(core+"EventType",core+" event type",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
+  h->SetMarkerSize(2);//<-- large text
   const char *key[]={"inp","vert","TT","tr1","et1","con1","tr2","et2","con2","phi12","m2","QQ","Zlow","Zhigh"};
   for(int i=0;i<14;i++) h->Fill(key[i],0.); // preset the order of keys
 
@@ -109,8 +110,8 @@ St2011ZMaker::initHistos(){
   hA[36]=h=new TH1F(core+"etaZ","Z boson #eta; #eta_{Z}",100,-5.,5.);
   hA[37]=h=new TH1F(core+"ptZ","Z boson p_{T}; p_{T}^{Z}",100,0.,20.);
 
-  hA[38]=new TH1F(core+"Y2","golden Z spin sorted; spin4 ",16,-0.5,15.5);
-
+  hA[38]=h=new TH1F(core+"Y2","golden Z spin sorted; spin4 ",16,-0.5,15.5);
+  h->SetMarkerSize(2);//<-- large text
   //************* endcap histos ***************
 
   // barrel track matched with endcap cluster (no track requirement
