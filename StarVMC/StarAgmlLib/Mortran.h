@@ -52,7 +52,7 @@ template <typename T> class Array_t
     mData.resize(size());
   } /// Sets the range of 1D fortran-like arrays
 
-  std::ostream &Out( ostream &out );
+  std::ostream &Out( std::ostream &out );
   
  private:
  protected:
