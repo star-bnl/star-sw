@@ -570,7 +570,7 @@ Bool_t AgStructure::CopyDataMembers( AgStructure *other, const Char_t *only, Boo
 }
 
 
-ostream &AgStructure::Out( ostream &out )
+std::ostream &AgStructure::Out( std::ostream &out )
 {
 
   // Get the class description for this structure
