@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.13 2012/08/21 18:29:16 stevens4 Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.14 2012/09/17 03:29:30 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -594,7 +594,8 @@ St2011WMaker::sumTpcCone(int vertID, TVector3 refAxis, int flag, int pointTowId)
     StMuTrack *prTr=mMuDstMaker->muDst()->primaryTracks(itr);
     if(prTr->flag()<=0) continue;
     if(prTr->flag()!=301 && pointTowId>0) continue;// TPC-only regular tracks for barrel candidate
-    if(prTr->flag()!=301 && prTr->flag()!=311 && pointTowId<0) continue;// TPC regular and short EEMC tracks for endcap candidate
+    if(prTr->flag()!=301 && pointTowId<0) continue;// TPC regular and short EEMC tracks for endcap candidate
+    //JS remove short tracks from iso cone && prTr->flag()!=311
     float hitFrac=1.*prTr->nHitsFit()/prTr->nHitsPoss();
     if(hitFrac<par_nHitFrac) continue;
     StThreeVectorF prPvect=prTr->p();
@@ -689,6 +690,9 @@ St2011WMaker::accessBSMD(){
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.14  2012/09/17 03:29:30  stevens4
+//Updates to Endcap algo and Q*ET/PT charge separation
+//
 //Revision 1.13  2012/08/21 18:29:16  stevens4
 //Updates to endcap W selection using ESMD strip ratio
 //

@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.12 2012/08/31 20:10:51 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.13 2012/09/17 03:29:29 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -48,6 +48,16 @@ St2011WMaker::findEndcap_W_boson(){
 	}
       }
 
+      // track matched to cluster plots
+      StThreeVectorF ri=T.glMuTrack->firstPoint();
+      StThreeVectorF ro=T.glMuTrack->lastPoint();
+      int sec = WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
+      if((sec < 5 || sec > 7) && sec!=21) { //skip sectors with dead padrows for this
+	hE[63]->Fill(T.prMuTrack->nHitsFit());
+	hE[64]->Fill(1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss());
+	hE[65]->Fill(ri.perp());
+      }
+
       if(T.cluster.ET /T.nearTotET< parE_nearTotEtFrac) continue; // too large nearET
 
       hE[20]->Fill("noNear",1.);
@@ -87,13 +97,6 @@ St2011WMaker::findEndcap_W_boson(){
           hE[184+6]->Fill(T.cluster.ET);
         }
       }
-
-      //event display
-      if(T.sPtBalance>parE_ptBalance){/***************************/
-        printf("\n WWWWWWWWWWWWWWWWWWWWW  Endcap \n");
-        wDisaply->exportEvent( "WE", V, T, iv);
-        wEve->print();
-      }/***************************/
       
       //some ESMD QA plots
       if(T.sPtBalance>parE_ptBalance){
@@ -126,27 +129,50 @@ St2011WMaker::findEndcap_W_boson(){
       }
       
       //correlate ratio with sPtBal for goldWs (possibly use for background)
-      if(T.cluster.ET>parE_highET){
+      if(T.cluster.ET > parE_highET){
         hE[237]->Fill(T.sPtBalance,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
         hE[238]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	if(T.prMuTrack->charge()>0) 
+	  hE[250]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	else
+	  hE[251]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
       }
-      
-      //cut on ESMD ratio
-      if(T.esmdEsum7[0]/T.esmdE[0] < parE_smdRatio || T.esmdEsum7[1]/T.esmdE[1] < parE_smdRatio){
-        hE[232]->Fill(T.cluster.ET,T.sPtBalance);
+      // try lower threshold to find background
+      if(T.cluster.ET > 20.){
+        hE[252]->Fill(T.sPtBalance,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+        hE[253]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	if(T.prMuTrack->charge()>0) 
+	  hE[254]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	else
+	  hE[255]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+      }
+
+      //fail ratio cut at 0.5 (mostly BG)
+      if((T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]) < 0.5){
+	hE[232]->Fill(T.cluster.ET,T.sPtBalance);
         hE[233]->Fill(T.cluster.ET,T.sPtBalance2);
-        continue;
       }
+
+      //event display
+      if(T.sPtBalance>parE_ptBalance && (T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]) > parE_smdRatio){/***************************/
+        printf("\n WWWWWWWWWWWWWWWWWWWWW  Endcap \n");
+        wDisaply->exportEvent( "WE", V, T, iv);
+        wEve->print();
+      }/***************************/
+
+      //cut on ESMD ratio
+      if((T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]) < parE_smdRatio)
+        continue;
       
       hE[20]->Fill("smdRatio",1.0);
       nSmdRatio++;
-      
+
       hE[113]->Fill( T.cluster.ET);//for Joe
       hE[230]->Fill(T.cluster.ET,T.sPtBalance);
       hE[231]->Fill(T.cluster.ET,T.sPtBalance2);
       
       //put final W cut here
-      if(T.sPtBalance<parE_ptBalance)  continue;
+      if(T.sPtBalance2<parE_ptBalance)  continue;
       //::::::::::::::::::::::::::::::::::::::::::::::::
       //:::::accepted W events for x-section :::::::::::
       //::::::::::::::::::::::::::::::::::::::::::::::::
@@ -171,6 +197,13 @@ St2011WMaker::findEndcap_W_boson(){
       hE[200]->Fill(ET,g_chrg/glTr->pt());
       hE[201]->Fill(ET,p_chrg/prTr->pt());
       
+      float q2pt_g = T.glMuTrack->charge()/T.glMuTrack->pt();
+      float q2pt_p = T.prMuTrack->charge()/T.prMuTrack->pt();
+      float hypCorr_g = q2pt_g*(T.cluster.ET);
+      float hypCorr_p = q2pt_p*(T.cluster.ET);
+      hE[202]->Fill(T.cluster.ET,hypCorr_g);
+      hE[203]->Fill(T.cluster.ET,hypCorr_p);
+
       //charge sign flip with vertex refit
       int g_ipn=0, p_ipn=0; // plus
       if( g_chrg<0 ) g_ipn=1;// minus
@@ -189,7 +222,19 @@ St2011WMaker::findEndcap_W_boson(){
       hE[190+k]->Fill(T.prMuTrack->eta(),T.cluster.ET);
       hE[101]->Fill(T.cluster.ET/T.cl4x4.ET,T.sPtBalance);
       hE[102]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
-      hE[103]->Fill(T.glMuTrack->dEdx()*1e6,T.sPtBalance);
+      hE[103]->Fill(T.cluster.ET/T.nearEmcET,T.sPtBalance);
+      hE[104]->Fill(T.cluster.ET/T.nearEtowET,T.sPtBalance);
+      hE[105]->Fill(T.glMuTrack->dEdx()*1e6,T.sPtBalance);
+      float dEdxFit = T.glMuTrack->probPidTraits().dEdxFit()*1e6;
+      float dEdxTruncated = T.glMuTrack->probPidTraits().dEdxTruncated()*1e6;
+      hE[106]->Fill(T.glMuTrack->dEdx()*1e6,dEdxFit);
+      //hE[107]->Fill(dEdxTruncated,dEdxFit);
+      
+      hE[107]->Fill(sec,hypCorr_p);
+      hE[108]->Fill(T.glMuTrack->nHitsFit(),hypCorr_p);
+      hE[109]->Fill(T.glMuTrack->dEdx()*1e6,hypCorr_p);
+
+      //cout<<" dEdxFit="<<dEdxFit<<endl;
 
       hE[20]->Fill("goldW",1.);
       nGoldW++;
@@ -592,6 +637,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.13  2012/09/17 03:29:29  stevens4
+// Updates to Endcap algo and Q*ET/PT charge separation
+//
 // Revision 1.12  2012/08/31 20:10:51  stevens4
 // switch to second EEMC background using both isolation and sPt-Bal (for mirror symmetry (also adjust eta binning)
 //

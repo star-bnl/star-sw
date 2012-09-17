@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.11 2012/08/31 20:10:52 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.12 2012/09/17 03:29:30 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -186,6 +186,20 @@ St2011WMaker::initHistos(){
   hA[61]=new TH1F("mubX7bht","L2BW-BHT-rnd  events vs. bXing; bXing= raw bx7",128,-0.5,127.5); // filled on input
   hA[62]=h=new TH2F("muEne_Deta","Barrel W: cluster energy vs. detector eta, final selection; barrel eta bin; 2x2 Energy (GeV)",40,0,40,50,0,100);
 
+  
+  // track matched to cluster plots
+  hA[63]=h=new TH1F("muTrNfitTr2Cl","Barrel: primary track in-muTr2Cl; nFitPoints",50,0,50);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_nFitPts,0,par_nFitPts,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
+  hA[64]=h=new TH1F("muTrFitFracTr2Cl","Barrel: primary track in-muTr2Cl; nFit/nPoss ",50,0,1.1);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_nHitFrac,0,par_nHitFrac,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
+  hA[65]=h=new TH1F("muTrRxyInTr2Cl","Barrel: primary track first hit  in-muTr2Cl; Rxy (cm)",60,50,170.);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_trackRin,0,par_trackRin,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
   // free 63-69
 
   //..... BSMD ......reserve 2x10= [70:e.... 80:p.... 89]
@@ -204,7 +218,7 @@ St2011WMaker::initHistos(){
   sprintf(txt,"Barrel W: Final selection, ET>%.0f GeV 'goldenW'; detector eta ; detector phi (rad)",par_highET);
   hA[91]=new TH2F("muW2D1",txt,10,-1.0,1.0,24,-PI,PI);
 
-  hA[92]=new TH2F("muWdedx","Barrel W: Track dEdx, final selection; 2x2 ET (GeV); dEdx (keV)",100,0,100,100,0,10);
+  hA[92]=new TH2F("muWdedx","Barrel W: Track dEdx, final selection; 2x2 ET (GeV); dEdx (keV)",100,0,100,100,0,20);
   hA[93]=new TH2F("muWglDca","Barrel W: Track glob vertex abs(DCA), final selection ; 2x2 ET (GeV); |DCA| (cm)",100,0,100,100,0,5);
   hA[94]=new TH2F("muWglDcaSP","Barrel W: Track prim POSITIVE glob signed DCA, final selection; 2x2 ET (GeV); sDCA (cm)",100,0,100,100,-5,5);
   hA[95]=new TH2F("muWglDcaSN","Barrel W: Track prim NEGATIVE glob signed DCA, final selection ; 2x2 ET (GeV); sDCA (cm)",100,0,100,100,-5,5);
@@ -230,6 +244,17 @@ St2011WMaker::initHistos(){
 
   sprintf(txt,"TPC PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT");
   hA[101]=h=new TH2F("muChRecPNp", txt,100,0.,100.,100,-0.1,0.1);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  // "straightened" charge separation plots
+  sprintf(txt,"TPC GLOB Charge Separation Hyperbola Corrected ; 2x2 cluster ET (GeV); Q*ET/PT");
+  hA[102]=h=new TH2F("muChRecHypCorrPNg", txt,100,0.,100.,100,-4,4);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  sprintf(txt,"TPC PRIM Charge Separation Hyperbola Corrected ; 2x2 cluster ET (GeV); Q*ET/PT");
+  hA[103]=h=new TH2F("muChRecHypCorrPNp", txt,100,0.,100.,100,-4,4);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   
@@ -350,6 +375,11 @@ St2011WMaker::initHistos(){
     hA[308+isec]=h=new TH2F(Form("muWglDcaSP_Sec%d",isec+1), txt,100,0.,100.,100,-5,5);
     sprintf(txt,"Barrel W: TPC Sector %d Track prim NEGATIVE glob signed DCA, final selection; 2x2 ET (GeV); sDCA (cm)",isec+1);
     hA[332+isec]=h=new TH2F(Form("muWglDcaSN_Sec%d",isec+1), txt,100,0.,100.,100,-5,5);
+
+    sprintf(txt,"TPC Sector %d : PRIM Charge Separation Hyperbola Corrected ; 2x2 cluster ET (GeV); Q*ET/PT",isec+1);
+    hA[356+isec]=h=new TH2F(Form("muChRecHypCorrPNpSec%d",isec+1), txt,100,0.,100.,100,-4,4);
+    Lx=h->GetListOfFunctions();
+    ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   }    
 
   // add histos to the list (if provided)
@@ -364,6 +394,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.12  2012/09/17 03:29:30  stevens4
+// Updates to Endcap algo and Q*ET/PT charge separation
+//
 // Revision 1.11  2012/08/31 20:10:52  stevens4
 // switch to second EEMC background using both isolation and sPt-Bal (for mirror symmetry (also adjust eta binning)
 //

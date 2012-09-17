@@ -1,5 +1,5 @@
 
-// $Id: St2011W_algo.cxx,v 1.14 2012/08/31 20:10:52 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.15 2012/09/17 03:29:30 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -60,6 +60,16 @@ St2011WMaker::find_W_boson(){
 	if(T.prMuTrack->charge()>0) hA[251]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
         else if(T.prMuTrack->charge()<0) hA[252]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
 	hA[135]->Fill(T.awayTotET,T.sPtBalance);
+      }
+
+      // track matched to cluster plots
+      StThreeVectorF ri=T.glMuTrack->firstPoint();
+      StThreeVectorF ro=T.glMuTrack->lastPoint();
+      int sec = WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
+      if((sec < 5 || sec > 7) && sec!=21) { //skip sectors with dead padrows for this
+	hA[63]->Fill(T.prMuTrack->nHitsFit());
+	hA[64]->Fill(1.*T.prMuTrack->nHitsFit()/T.prMuTrack->nHitsPoss());
+	hA[65]->Fill(ri.perp());
       }
 
       if(T.cluster.ET /T.nearTotET< par_nearTotEtFrac) continue; // too large nearET
@@ -151,11 +161,19 @@ St2011WMaker::find_W_boson(){
       //Q/pT plot
       hA[100]->Fill(T.cluster.ET,T.glMuTrack->charge()/T.glMuTrack->pt());
       hA[101]->Fill(T.cluster.ET,T.prMuTrack->charge()/T.prMuTrack->pt());
+
+      float q2pt_g = T.glMuTrack->charge()/T.glMuTrack->pt();
+      float q2pt_p = T.prMuTrack->charge()/T.prMuTrack->pt();
+      float hypCorr_g = q2pt_g*(T.cluster.ET);
+      float hypCorr_p = q2pt_p*(T.cluster.ET);
+      hA[102]->Fill(T.cluster.ET,hypCorr_g);
+      hA[103]->Fill(T.cluster.ET,hypCorr_p);
+
       //for each sector
-      StThreeVectorF ro=T.glMuTrack->lastPoint();
       int isec = WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity())-1;
       hA[260+isec]->Fill(T.cluster.ET,T.glMuTrack->charge()/T.glMuTrack->pt());
       hA[284+isec]->Fill(T.cluster.ET,T.prMuTrack->charge()/T.prMuTrack->pt());
+      hA[356+isec]->Fill(T.cluster.ET,hypCorr_p);
       if(k==0) hA[308+isec]->Fill( T.cluster.ET,T.glMuTrack->dcaD());
       else hA[332+isec]->Fill( T.cluster.ET,T.glMuTrack->dcaD());
 
@@ -373,8 +391,10 @@ St2011WMaker::findNearJet(){
       }
       else if(T.pointTower.id<0) { //only endcap towers
 	/* correct for double counting of electron track in near cone rarely primTrPT<10 GeV & globPT>10 - handle this here */
-	if(T.primP.Pt()>parE_trackPt) nearSum-=parE_trackPt; 
-	else  nearSum-=T.primP.Pt();
+	if(T.prMuTrack->flag()==301){ //short tracks aren't added to nearCone
+	  if(T.primP.Pt()>parE_trackPt) nearSum-=parE_trackPt; 
+	  else  nearSum-=T.primP.Pt();
+	}
 	T.nearTotET=nearSum;
 	T.nearTotET_noEEMC=nearSum-T.nearEtowET;
 	float nearTotETfrac=T.cluster.ET/ T.nearTotET;
@@ -382,6 +402,8 @@ St2011WMaker::findNearJet(){
 	hE[40]->Fill(T.nearEmcET);
 	hE[41]->Fill(T.cluster.ET,T.nearEmcET-T.cluster.ET);
 	hE[42]->Fill(nearTotETfrac);
+	hE[70]->Fill(T.cluster.ET/T.nearEmcET);
+	hE[71]->Fill(T.cluster.ET/T.nearEtowET);
 	hE[47]->Fill(T.nearTpcPT);
 	hE[48]->Fill(T.nearEmcET,T.nearTpcPT);
 	hE[49]->Fill(nearSum);
@@ -437,7 +459,8 @@ St2011WMaker::sumTpcConeFromTree(int vertID, TVector3 refAxis, int flag,int poin
     StMuTrack *prTr=V.prTrList[it];
     if(prTr->flag()<=0) continue;
     if(prTr->flag()!=301 && pointTowId>0) continue;// TPC-only regular tracks for barrel candidate
-    if(prTr->flag()!=301 && prTr->flag()!=311 && pointTowId<0) continue;// TPC regular and short EEMC tracks for endcap candidate
+    if(prTr->flag()!=301 && pointTowId<0) continue;// TPC regular and short EEMC tracks for endcap candidate 
+    //JS remove short tracks from iso cone && prTr->flag()!=311
     float hitFrac=1.*prTr->nHitsFit()/prTr->nHitsPoss();
     if(hitFrac<par_nHitFrac) continue;
     StThreeVectorF prPvect=prTr->p();
@@ -669,6 +692,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.15  2012/09/17 03:29:30  stevens4
+// Updates to Endcap algo and Q*ET/PT charge separation
+//
 // Revision 1.14  2012/08/31 20:10:52  stevens4
 // switch to second EEMC background using both isolation and sPt-Bal (for mirror symmetry (also adjust eta binning)
 //

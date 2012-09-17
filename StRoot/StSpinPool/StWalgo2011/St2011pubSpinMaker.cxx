@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.7 2012/08/31 20:10:52 stevens4 Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.8 2012/09/17 03:29:30 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -24,10 +24,10 @@ ClassImp(St2011pubSpinMaker)
   par_leptonEta1=-1.; par_leptonEta2=1.;
   par_useNoEEMC=0;
   
-  parE_QPTlow=0.010;
+  parE_QPTlow=0.4;
   parE_QPThighET0=25; 
   parE_QPThighET1=50; 
-  parE_QPThighA=0.08; 
+  parE_QPThighA=1.8; 
   parE_QPThighB=0.0013;
   parE_leptonEta1=0.7; parE_leptonEta2=2.5;
 
@@ -142,16 +142,23 @@ St2011pubSpinMaker::bXingSort(){
 	if( T.cluster.ET <20. ) { hA[7]->Fill(spin4);  hA[0]->Fill("BG2",1.);}
       }
 
-      if(T.isMatch2Cl==false) continue;
-      assert(T.cluster.nTower>0); // internal logical error
-      assert(T.nearTotET>0); // internal logical error
-
       int iQ=0; // plus
       float p_Q=T.prMuTrack->charge();
       if( p_Q<0 ) iQ=1;// minus
       float ET=T.cluster.ET;
       
-
+      if(T.isMatch2Cl==false) continue;
+      assert(T.cluster.nTower>0); // internal logical error
+      assert(T.nearTotET>0); // internal logical error
+      
+      // high-pT QCD condition here
+      if( T.cluster.ET/T.nearTotET < wMK->par_nearTotEtFrac && T.sPtBalance < wMK->par_ptBalance) //not isolated && doesn't pass sPtBal
+	{
+	  hA[22+iQ]->Fill(spin4,ET);
+	  if(T.prMuTrack->eta()>par_leptonEta1 && T.prMuTrack->eta()<par_leptonEta2 && ET>25 && ET<50) //kinematic conditions
+	    hA[20+iQ]->Fill(spin4);
+	}
+      
       //put final W cut here
       bool isW= T.cluster.ET /T.nearTotET> wMK->par_nearTotEtFrac;  // near cone
       if(par_useNoEEMC) 
@@ -284,8 +291,8 @@ St2011pubSpinMaker::bXingSortEndcap(){
       float ET=T.cluster.ET;
       
       //put final W cut here
-      bool isW= T.cluster.ET /T.nearTotET> wMK->parE_nearTotEtFrac; // near cone
-      isW=isW && (T.esmdEsum7[0]/T.esmdE[0]>wMK->parE_smdRatio && T.esmdEsum7[1]/T.esmdE[1]>wMK->parE_smdRatio); // smdRatio
+      bool isW= T.cluster.ET/T.nearTotET > wMK->parE_nearTotEtFrac; // near cone
+      isW=isW && ((T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]) > wMK->parE_smdRatio); // smdRatio
       isW=isW && T.sPtBalance>wMK->parE_ptBalance; // awayET
     
       if(!isW) { // !!!! This is not all QCD for the endcap !!!!
@@ -308,16 +315,13 @@ St2011pubSpinMaker::bXingSortEndcap(){
       float q2pt=T.prMuTrack->charge()/T.prMuTrack->pt();
       if(ET>par_myET) hE[8]->Fill(q2pt);
       hE[9]->Fill(ET,q2pt);
-      
-      // apply cut on reco charge
-      if( fabs(q2pt)< parE_QPTlow) continue;
-      if(ET>par_myET) hE[0]->Fill("Qlow",1.);
 
+      // new charge rejection Q*ET/PT
+      float hypCorr = q2pt*(T.cluster.ET);
       if(parE_QPTlow>0) { // abaility to skip all Q/PT cuts
-	if( fabs(q2pt)< parE_QPTlow) continue;
-	float highCut=parE_QPThighA - (ET-parE_QPThighET0)*parE_QPThighB;
-	// printf("fff ET=%f q2pr=%f highCut=%f passed=%d\n",ET, q2pt,highCut,fabs(q2pt)<highCut);
-	if( ET>par_myET && ET<parE_QPThighET1 && fabs(q2pt)>highCut) continue;
+	if( fabs(hypCorr) < parE_QPTlow) continue;
+	if(ET>par_myET) hE[0]->Fill("Qlow",1.);
+	if( fabs(hypCorr) > parE_QPThighA) continue;
       }
 
       if(ET>par_myET) {
@@ -325,7 +329,6 @@ St2011pubSpinMaker::bXingSortEndcap(){
 	if(p_Q>0) hE[0]->Fill("Q +",1.);
 	else  hE[0]->Fill("Q -",1.);
       }
-
      
       hE[10+iQ]->Fill(ET);
       if(ET>25 &&ET<50 ) {
@@ -342,6 +345,9 @@ St2011pubSpinMaker::bXingSortEndcap(){
 }
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.8  2012/09/17 03:29:30  stevens4
+// Updates to Endcap algo and Q*ET/PT charge separation
+//
 // Revision 1.7  2012/08/31 20:10:52  stevens4
 // switch to second EEMC background using both isolation and sPt-Bal (for mirror symmetry (also adjust eta binning)
 //
