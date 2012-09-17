@@ -26,5 +26,6 @@ StMuPrimaryTrackCovariance::StMuPrimaryTrackCovariance(const Float_t *cov) {
 ostream&  operator<<(ostream& os, const StMuPrimaryTrackCovariance& v) {
   TRSymMatrix cov(3,v.errMatrix());
   os << "StMuPrimaryTrackCovariance: " << cov;
+  return os;
 }
 void StMuPrimaryTrackCovariance::Print(Option_t *option) const {cout << *this << endl;}
