@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.8 2012/09/17 03:29:30 stevens4 Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.9 2012/09/17 22:05:50 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -131,6 +131,9 @@ St2011pubSpinMaker::bXingSort(){
   // search for  Ws ............
   for(uint iv=0;iv<wMK->wEve->vertex.size();iv++) {
     WeveVertex &V=wMK->wEve->vertex[iv];
+
+    if(iv>0) continue; //temp skip not-highest-rank vertex JS
+
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.pointTower.id<=0) continue; //skip endcap towers
@@ -270,6 +273,9 @@ St2011pubSpinMaker::bXingSortEndcap(){
   // search for  Ws ............
   for(uint iv=0;iv<wMK->wEve->vertex.size();iv++) {
     WeveVertex &V=wMK->wEve->vertex[iv];
+
+    if(iv>0 || V.rank<=0) continue; //temp skip not-highest-rank vertex JS
+
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.pointTower.id>=0) continue; //skip barrel towers
@@ -293,7 +299,7 @@ St2011pubSpinMaker::bXingSortEndcap(){
       //put final W cut here
       bool isW= T.cluster.ET/T.nearTotET > wMK->parE_nearTotEtFrac; // near cone
       isW=isW && ((T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]) > wMK->parE_smdRatio); // smdRatio
-      isW=isW && T.sPtBalance>wMK->parE_ptBalance; // awayET
+      isW=isW && T.sPtBalance2>wMK->parE_ptBalance; // awayET
     
       if(!isW) { // !!!! This is not all QCD for the endcap !!!!
 	if(ET>15 && ET<20 ) hE[16+iQ]->Fill(spin4);
@@ -345,6 +351,9 @@ St2011pubSpinMaker::bXingSortEndcap(){
 }
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.9  2012/09/17 22:05:50  stevens4
+// exclude not-highest rank vertex until jet issue is resolved
+//
 // Revision 1.8  2012/09/17 03:29:30  stevens4
 // Updates to Endcap algo and Q*ET/PT charge separation
 //

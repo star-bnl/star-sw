@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.13 2012/09/17 03:29:29 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.14 2012/09/17 22:05:50 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -29,6 +29,9 @@ St2011WMaker::findEndcap_W_boson(){
   // search for  Ws ............
   for(uint iv=0;iv<wEve->vertex.size();iv++) {
     WeveVertex &V=wEve->vertex[iv];
+    
+    if(iv>0 || V.rank<=0) continue; //temp skip not-highest-rank vertex JS
+
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.pointTower.id>=0) continue; //skip barrel towers
@@ -154,7 +157,7 @@ St2011WMaker::findEndcap_W_boson(){
       }
 
       //event display
-      if(T.sPtBalance>parE_ptBalance && (T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]) > parE_smdRatio){/***************************/
+      if(T.sPtBalance2>parE_ptBalance && (T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]) > parE_smdRatio){/***************************/
         printf("\n WWWWWWWWWWWWWWWWWWWWW  Endcap \n");
         wDisaply->exportEvent( "WE", V, T, iv);
         wEve->print();
@@ -637,6 +640,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.14  2012/09/17 22:05:50  stevens4
+// exclude not-highest rank vertex until jet issue is resolved
+//
 // Revision 1.13  2012/09/17 03:29:29  stevens4
 // Updates to Endcap algo and Q*ET/PT charge separation
 //
