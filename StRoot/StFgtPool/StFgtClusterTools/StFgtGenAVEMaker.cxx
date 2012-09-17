@@ -1555,26 +1555,26 @@ Int_t StFgtGenAVEMaker::Make()
 		      clusterGeoId[iD]->Fill(hitIter->centralStripGeoId);
 		      
 		      //Adding to fill APV noise histograms for disk 1, quad A, RDO=1, ARM=0, APV 0-4, 17-21
-		      Int_t geoId, rdo, arm,  apv, chan;
-		      mDb->getElecCoordFromGeoId(geoId, rdo,arm,apv,chan);		      
+		      Int_t rdo, arm,  apv, chan;
+		      mDb->getElecCoordFromGeoId(hitIter->centralStripGeoId, rdo,arm,apv,chan);		      
+		      //cout<<"  WHAT IS APV="<<apv<<" rdo="<<rdo<<" iD="<<iD<<" arm="<<arm<<endl;
+		      if(iD==0 && rdo==1 && arm==0){
+			disk1QuadA[apv]->Fill(chan);
+		      }
+		      if(hitIter->layer=='R')
+			{
+			  (*outTxtFile) <<"R ordinate: " << hitIter->posR<<endl;
+			  //added this line under hitIter layer R
+			  clustersR[iD]->Fill(hitIter->posR);
+			}
+		      else
+			{
+			  Double_t phiQ=StFgtGeom::phiQuadXaxis(hitIter->quad);
+			  (*outTxtFile) <<"Phi ordinate: " << hitIter->posPhi-phiQ<<endl;
+			  //added this line under phi ordinate
+			  clustersP[iD]->Fill(hitIter->posPhi);
+			}
 		      
-		      if(iD==0 && rdo==1 && arm==0)
-			//disk1QuadA[apv]->Fill(chan);
-			
-			  if(hitIter->layer=='R')
-			    {
-			    (*outTxtFile) <<"R ordinate: " << hitIter->posR<<endl;
-			    //added this line under hitIter layer R
-			    clustersR[iD]->Fill(hitIter->posR);
-			    }
-			  else
-			    {
-			    Double_t phiQ=StFgtGeom::phiQuadXaxis(hitIter->quad);
-			    (*outTxtFile) <<"Phi ordinate: " << hitIter->posPhi-phiQ<<endl;
-			    //added this line under phi ordinate
-			    clustersP[iD]->Fill(hitIter->posPhi);
-			    }
-			  
 	}
       (*outTxtFile)<<endl;
 
@@ -2255,11 +2255,13 @@ Int_t StFgtGenAVEMaker::Finish(){
   exPulseSigTrackR->Write();
   numTracks->Write();
 
-  /*
-  for(int apvcounter=0; apvcounter<22; apvcounter++){
-    disk1QuadA[apvcounter]->Write();
-  }
-  */
+  
+  for(int xx=0; xx<22; xx++){
+
+    disk1QuadA[xx]->Write();
+   }
+
+  
   
   for(int iD=0;iD<kFgtNumDiscs;iD++)
     {
@@ -2573,10 +2575,10 @@ Int_t StFgtGenAVEMaker::Finish(){
 };
 
 
-/**
-   construct histograms
 
-*/
+// construct histograms
+
+
 Int_t StFgtGenAVEMaker::Init(){
   outTxtFile=new ofstream;
   outTxtFile->open("clusExpectations.txt");
@@ -2727,7 +2729,12 @@ Int_t StFgtGenAVEMaker::Init(){
   createPlots(&clustersR, kFgtNumDiscs,"clustersR", 500, 0, 50);
   createPlots(&clustersP, kFgtNumDiscs,"clustersP", 100, -3.14159, 3.14159);
   //createPlots(&disk1QuadA, 22,"disk1QuadA",128,0,128);
-  
+  for (Int_t iii=0;iii< 22;iii++)
+    { 
+      char buffer[100];
+      sprintf(buffer, "%s_APV%d", "disk1QuadA",iii);
+      disk1QuadA[iii]=new TH1I(buffer,buffer,128,0,128);
+    }
 
   rEff=new TH1D*[kFgtNumDiscs];
   rNonEff=new TH1D*[kFgtNumDiscs];
