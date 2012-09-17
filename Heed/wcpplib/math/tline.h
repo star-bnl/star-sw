@@ -2630,6 +2630,88 @@ T t_mean_step_ar(const M& mesh,
   return xinteg / integ;
 }
 
+template<class T>
+T t_value_straight_2point
+(T x1, T y1, T x2, T y2,   
+ T x,
+ int s_ban_neg
+)
+{
+  mfunname("double t_value_straight_2point(...)");
+  check_econd12(x1 , == , x2, mcerr);  
+
+  T a = (y2 - y1)/(x2 - x1);
+  // Less numerical precision
+  //T b = y[n1];
+  //T res = a * ( x - x1) + b;
+  // More numerical precision (although it is not proved), 
+  // starting from what is closer to x
+  T res;
+  T dx1 = x - x1;
+  T adx1 = (dx1 > 0) ? dx1 : -dx1;       // absolute value
+  //if(dx1 > 0) 
+  //  adx1 = dx1;
+  //else
+  //  adx1 = -dx1;
+  T dx2 = x - x2;
+  T adx2 = (dx2 > 0) ? dx2 : -dx2;            // absolute value
+  //if(dx2 > 0) 
+  //  adx2 = dx2;
+  //else
+  //  adx2 = -dx2;
+  if(adx1 < adx2)  // x is closer to x1
+  {
+    res = a * dx1 + y1;
+  }
+  else
+  {
+    res = a * dx2 + y2;
+  }
+  if(s_ban_neg == 1 && res < 0.0) res = 0.0;
+  return res;
+}
+
+
+template<class T>
+T t_integ_straight_2point
+(T x1, T y1, T x2, T y2,   
+ T xl, T xr,
+ int xpower,   // currently 0 or 1
+ int s_ban_neg
+)
+  // 0 - not include, 1 - include  
+{
+  mfunname("double t_integ_straight_2point(...)");
+  check_econd12(x1 , == , x2, mcerr);  
+
+  T a = (y2 - y1)/(x2 - x1);
+  T b = y1;
+  T yl = a * ( xl - x1) + b;
+  T yr = a * ( xr - x1) + b;
+  if(s_ban_neg ==1)
+  {
+    if(yl <= 0.0 && yr <= 0.0) return 0.0;
+    if(yl < 0.0 || yr < 0.0)
+    {
+      T xz = x1 - b / a;
+      if(yl < 0.0)
+      {
+	xl = xz; yl = 0.0;
+      }
+      else
+      {
+	xr = xz; yr = 0.0;
+      }
+    }
+  }
+  T res;
+  if(xpower == 0)
+    res = 0.5*a*(xr*xr - xl*xl) + (b - a*x1)*(xr - xl);
+  else
+    res = a*(xr*xr*xr - xl*xl*xl) / 3.0 + 0.5 * (b - a*x1)*(xr*xr - xl*xl);
+
+  return res;
+}
 
 // Extract value defined by this array for abscissa x
 // y have dimension q or qi+1.
@@ -2739,89 +2821,6 @@ T t_value_generic_point_ar
   T x2;
   mesh.get_scoor(n2, x2); 
   return funval(x1, y[n1], x2, y[n2], left_bond, right_bond, x);
-}
-
-template<class T>
-T t_value_straight_2point
-(T x1, T y1, T x2, T y2,   
- T x,
- int s_ban_neg
-)
-{
-  mfunname("double t_value_straight_2point(...)");
-  check_econd12(x1 , == , x2, mcerr);  
-
-  T a = (y2 - y1)/(x2 - x1);
-  // Less numerical precision
-  //T b = y[n1];
-  //T res = a * ( x - x1) + b;
-  // More numerical precision (although it is not proved), 
-  // starting from what is closer to x
-  T res;
-  T dx1 = x - x1;
-  T adx1 = (dx1 > 0) ? dx1 : -dx1;       // absolute value
-  //if(dx1 > 0) 
-  //  adx1 = dx1;
-  //else
-  //  adx1 = -dx1;
-  T dx2 = x - x2;
-  T adx2 = (dx2 > 0) ? dx2 : -dx2;            // absolute value
-  //if(dx2 > 0) 
-  //  adx2 = dx2;
-  //else
-  //  adx2 = -dx2;
-  if(adx1 < adx2)  // x is closer to x1
-  {
-    res = a * dx1 + y1;
-  }
-  else
-  {
-    res = a * dx2 + y2;
-  }
-  if(s_ban_neg == 1 && res < 0.0) res = 0.0;
-  return res;
-}
-
-
-template<class T>
-T t_integ_straight_2point
-(T x1, T y1, T x2, T y2,   
- T xl, T xr,
- int xpower,   // currently 0 or 1
- int s_ban_neg
-)
-  // 0 - not include, 1 - include  
-{
-  mfunname("double t_integ_straight_2point(...)");
-  check_econd12(x1 , == , x2, mcerr);  
-
-  T a = (y2 - y1)/(x2 - x1);
-  T b = y1;
-  T yl = a * ( xl - x1) + b;
-  T yr = a * ( xr - x1) + b;
-  if(s_ban_neg ==1)
-  {
-    if(yl <= 0.0 && yr <= 0.0) return 0.0;
-    if(yl < 0.0 || yr < 0.0)
-    {
-      T xz = x1 - b / a;
-      if(yl < 0.0)
-      {
-	xl = xz; yl = 0.0;
-      }
-      else
-      {
-	xr = xz; yr = 0.0;
-      }
-    }
-  }
-  T res;
-  if(xpower == 0)
-    res = 0.5*a*(xr*xr - xl*xl) + (b - a*x1)*(xr - xl);
-  else
-    res = a*(xr*xr*xr - xl*xl*xl) / 3.0 + 0.5 * (b - a*x1)*(xr*xr - xl*xl);
-
-  return res;
 }
 
 // power function x^pw
