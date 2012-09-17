@@ -42,16 +42,17 @@
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalSectorDirection&, StTpcLocalSectorAlignedDirection&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalSectorAlignedDirection&, StTpcLocalSectorDirection&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate&, StGlobalCoordinate&);
-#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalCoordinate& ,StTpcLocalSectorCoordinate&);
+#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalCoordinate& ,StTpcLocalSectorCoordinate&,Int_t,Int_t);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalSectorDirection&, StGlobalDirection&);
-#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalDirection& ,StTpcLocalSectorDirection&,int, int);
+#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalDirection& ,StTpcLocalSectorDirection&,Int_t, Int_t);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&, StGlobalCoordinate&);
-#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalCoordinate&, StTpcLocalCoordinate&);
+#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalCoordinate&, StTpcLocalCoordinate&,Int_t, Int_t);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalDirection&, StGlobalDirection&);
-#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalDirection&, StTpcLocalDirection&,int, int);
+#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalDirection&, StTpcLocalDirection&,Int_t, Int_t);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcPadCoordinate&, StGlobalCoordinate&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalCoordinate&, StTpcPadCoordinate&);
 #pragma link C++ enum  Prime;
 #pragma link C++ enum  DistortSelect;
-
+#pragma link C++ enum  EBField;
+#pragma link C++ enum  EBMapSizes;
 #endif
