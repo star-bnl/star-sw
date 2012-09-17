@@ -100,7 +100,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    void setUseChargeMatch(Bool_t use=true);
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.17 2012/08/30 02:27:10 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.18 2012/09/17 18:41:04 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
@@ -214,9 +214,6 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    TH1F** APVfitT0P;
    TH1F** APVfitT0R;
 
-
-
-
    TH1F** APVfirstTbSigCloseClusterP;
    TH1F** APVfirstTbSigCloseClusterR;
    TH1I** APVmaxAdcCloseClusterP;
@@ -242,12 +239,12 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    TH1F* exPulseMaxAdcNormTrackP;
    TH1F* exPulseSigTrackP;
 
- //joe's histograms added
- TH1I** clusterGeoId;
- TH1I** clustersR;
- TH1I** clustersP;
- TH1I** disk1QuadA;
-
+   //joe's histograms added
+   TH1I** clusterGeoId;
+   TH1I** clustersR;
+   TH1I** clustersP;
+   TH1I*disk1QuadA[22];
+   
    int pulseCounterP;
    int pulseCounterR;
 
