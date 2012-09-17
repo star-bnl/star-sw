@@ -52,7 +52,7 @@ template <typename T> class Array_t
     mData.resize(size());
   } /// Sets the range of 1D fortran-like arrays
 
-  ostream &Out( ostream &out );
+  std::ostream &Out( ostream &out );
   
  private:
  protected:
@@ -66,7 +66,7 @@ template <typename T> class Array_t
    
 };
 
-template <typename T> ostream &operator<<( ostream &out, Array_t<T> &array ){ return array.Out(out); }
+template <typename T> std::ostream &operator<<( std::ostream &out, Array_t<T> &array ){ return array.Out(out); }
 
 template <typename T> Array_t<T>::Array_t(int n, int m) : _size(n*m), _n(n), _m(m)
 {
@@ -84,7 +84,7 @@ template <typename T> Array_t<T>::Array_t( const Array_t &other )
   _max  = other._max;
 }
 
-template <typename T> ostream &Array_t<T>::Out( ostream &out )
+template <typename T> std::ostream &Array_t<T>::Out( std::ostream &out )
 {
   out << "["; 
   for ( int i=0;i<_m;i++ ) 
