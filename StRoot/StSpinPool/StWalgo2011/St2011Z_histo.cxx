@@ -112,6 +112,12 @@ St2011ZMaker::initHistos(){
 
   hA[38]=h=new TH1F(core+"Y2","golden Z spin sorted; spin4 ",16,-0.5,15.5);
   h->SetMarkerSize(2);//<-- large text
+  hA[39]=h=new TH1F(core+"Y2a","golden Z , STAR #eta<-1 , spin sorted; spin4 ",16,-0.5,15.5);
+  h->SetMarkerSize(2);//<-- large text
+  hA[40]=h=new TH1F(core+"Y2b","golden Z , STAR -1<#eta<1 , spin sorted; spin4 ",16,-0.5,15.5);
+  h->SetMarkerSize(2);//<-- large text
+  hA[41]=h=new TH1F(core+"Y2c","golden Z , STAR #eta>1 , spin sorted; spin4 ",16,-0.5,15.5);
+  h->SetMarkerSize(2);//<-- large text
   //************* endcap histos ***************
 
   // barrel track matched with endcap cluster (no track requirement
