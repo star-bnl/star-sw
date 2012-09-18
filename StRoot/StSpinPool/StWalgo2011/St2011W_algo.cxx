@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.16 2012/09/18 21:10:07 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.17 2012/09/18 22:30:18 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -9,8 +9,12 @@
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 #include "StEEmcUtil/StEEmcSmd/EEmcSmdGeom.h"
 #include "WeventDisplay.h"
-#include "StSpinPool/StJets/StJet.h"
-#include "StSpinPool/StJets/TowerToJetIndex.h"
+
+//new jet tree format
+#include "StSpinPool/StJetEvent/StJetEvent.h"
+#include "StSpinPool/StJetEvent/StJetVertex.h"
+#include "StSpinPool/StJetEvent/StJetCandidate.h"
+#include "StSpinPool/StJetEvent/StJetTower.h"
 
 #include "St2011WMaker.h"
 
@@ -209,9 +213,6 @@ St2011WMaker::tag_Z_boson(){
 
   float par_jetPt=10.;
   float lowMass=70.; float highMass=140.;
-  //select specific jet-type
-  mJets = getJets(mJetTreeBranch); 
-  if(mJetTreeChain) mJets = getJetsTreeAnalysis(mJetTreeBranch);
 
   //form invariant mass from lepton candidate and jet
   for(uint iv=0;iv<wEve->vertex.size();iv++) {//vertex loop
@@ -224,23 +225,31 @@ St2011WMaker::tag_Z_boson(){
 
       //match lepton candidate with jet
       TLorentzVector jetVec;
-      for (int i_jet=0; i_jet< nJets; i_jet++){//jet loop
-        jetVec = *((StJet*)mJets->At(i_jet));
+
+      getJetEvent(); //check that jet and W event match
+
+      StJetVertex* jetVertex = mJetEvent->vertex(V.id);
+      int nJets = jetVertex->numberOfJets();
+      for (int i_jet=0; i_jet< nJets; i_jet++){//loop over jets
+	StJetCandidate* jet = jetVertex->jet(i_jet);
+
+        jetVec = jet->fourMomentum();
         if(jetVec.Pt()<par_jetPt) continue;//remove low pt jets
 	
 	//electron like cut on jets
-        StJet* jet = getJet(i_jet);  float maxCluster=0.; 
-        int totTowers=jet->nBtowers+jet->nEtowers;
+	float maxCluster=0.; 
+        int totTowers = jet->numberOfTowers();
         for(int itow=0;itow<totTowers;itow++){//loop over towers
-	  if(jet->tower(itow)->detectorId()==13)//drop endcap towers
+	  StJetTower *tower = jet->tower(itow);
+	  if(tower->detectorId()==13)//drop endcap towers
 	    continue;
           
-	  int softId=jet->tower(itow)->towerId();
+	  int softId=tower->id();
           //find highest 2x2 BTOW cluster in jet
           TVector3 pos=positionBtow[softId-1]; int iEta,iPhi;
           if( L2algoEtaPhi2IJ(pos.Eta(),pos.Phi(),iEta,iPhi)) 
 	    continue;
-	  float cluster=maxBtow2x2(iEta,iPhi,jet->zVertex).ET;
+	  float cluster=maxBtow2x2(iEta,iPhi,V.z).ET;
           if(cluster>maxCluster) maxCluster=cluster;
         }
 
@@ -254,7 +263,7 @@ St2011WMaker::tag_Z_boson(){
         TLorentzVector ele1(p1,e1); //lepton candidate 4- mom
         TLorentzVector sum=ele1+jetVec;
         float invM=sqrt(sum*sum);
-	if(maxCluster/jet->jetPt < 0.5) continue;
+	if(maxCluster/jetVec3.Pt() < 0.5) continue;
 	if(invM > lowMass && invM < highMass)
           wEve->zTag=true;
       }
@@ -274,14 +283,17 @@ St2011WMaker::findPtBalance(){
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
 
+      getJetEvent(); //check that jet and W event match
+
       //****loop over branch with EEMC****
-      mJets = getJets(mJetTreeBranch); 
-      if(mJetTreeChain) mJets = getJetsTreeAnalysis(mJetTreeBranch); 
-      int nJetsWE=nJets;
+      StJetVertex* jetVertex = mJetEvent->vertex(V.id);
+      assert(jetVertex);
+      assert(jetVertex->position().z() == V.z); //check that vert-z position match
+      int nJetsWE = jetVertex->numberOfJets();
       for (int i_jet=0; i_jet< nJetsWE; i_jet++){//loop over jets
-	StJet* jet = getJet(i_jet);
+	StJetCandidate* jet = jetVertex->jet(i_jet);
 	TVector3 jetVec; //vector for jet momentum
-	jetVec.SetPtEtaPhi(jet->Pt(),jet->Eta(),jet->Phi());
+	jetVec.SetPtEtaPhi(jet->pt(),jet->eta(),jet->phi());
 	if(jetVec.DeltaR(T.primP) > par_nearDeltaR)
               T.ptBalance+=jetVec;
       }
@@ -293,13 +305,13 @@ St2011WMaker::findPtBalance(){
       T.sPtBalance2 = T.ptBalance.Dot(clustPt)/T.cluster.ET; //invariant
 
       //****loop over branch without EEMC****
-      mJets = getJets(mJetTreeBranch_noEEMC); 
-      if(mJetTreeChain) mJets = getJetsTreeAnalysis(mJetTreeBranch_noEEMC);
-      int nJetsNE=nJets;
+      StJetVertex* jetVertex_noEEMC = mJetEvent_noEEMC->vertex(V.id);
+      assert(jetVertex_noEEMC->position().z() == V.z); //check that vert-z position match
+      int nJetsNE = jetVertex_noEEMC->numberOfJets();
       for (int i_jet=0; i_jet< nJetsNE; i_jet++){//loop over jets
-	StJet* jet = getJet(i_jet);
+	StJetCandidate* jet = jetVertex_noEEMC->jet(i_jet);
 	TVector3 jetVec; //vector for jet momentum
-	jetVec.SetPtEtaPhi(jet->Pt(),jet->Eta(),jet->Phi());
+	jetVec.SetPtEtaPhi(jet->pt(),jet->eta(),jet->phi());
 	if(jetVec.DeltaR(T.primP) > par_nearDeltaR)
 	  T.ptBalance_noEEMC+=jetVec;
       }
@@ -691,6 +703,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.17  2012/09/18 22:30:18  stevens4
+// change to new jet tree format with access to all rank>0 vertices
+//
 // Revision 1.16  2012/09/18 21:10:07  stevens4
 // Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
 //
