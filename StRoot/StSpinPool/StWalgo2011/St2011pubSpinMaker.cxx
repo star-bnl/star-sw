@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.9 2012/09/17 22:05:50 stevens4 Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.10 2012/09/18 21:10:08 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -85,6 +85,8 @@ void
 St2011pubSpinMaker::bXingSort(){
   //has access to whole W-algo-maker data via pointer 'wMK'
   
+  int nIsW=0;
+
   hA[0]->Fill("inp",1.);
  
   if((wMK->wEve->l2bitRnd || wMK->wEve->l2bitET)==0) return;
@@ -131,9 +133,6 @@ St2011pubSpinMaker::bXingSort(){
   // search for  Ws ............
   for(uint iv=0;iv<wMK->wEve->vertex.size();iv++) {
     WeveVertex &V=wMK->wEve->vertex[iv];
-
-    if(iv>0) continue; //temp skip not-highest-rank vertex JS
-
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.pointTower.id<=0) continue; //skip endcap towers
@@ -212,6 +211,7 @@ St2011pubSpinMaker::bXingSort(){
       if(ET>25 &&ET<50 ) {
 	hA[12+iQ]->Fill(spin4);
 	hA[29+iQ]->Fill(T.prMuTrack->eta()); 
+	nIsW++;
       }
       if(ET>32 &&ET<44 ) hA[14+iQ]->Fill(spin4);
      
@@ -219,6 +219,8 @@ St2011pubSpinMaker::bXingSort(){
      
     } // end of loop over tracks
   }// end of loop ove vertices
+
+  if(nIsW>1) hA[0]->Fill("multiW",1.);
 
 }
 
@@ -228,6 +230,8 @@ void
 St2011pubSpinMaker::bXingSortEndcap(){
   //has access to whole W-algo-maker data via pointer 'wMK'
   
+  int nIsW=0;
+
   hE[0]->Fill("inp",1.);
  
   if((wMK->wEve->l2EbitRnd || wMK->wEve->l2EbitET)==0) return;
@@ -273,9 +277,6 @@ St2011pubSpinMaker::bXingSortEndcap(){
   // search for  Ws ............
   for(uint iv=0;iv<wMK->wEve->vertex.size();iv++) {
     WeveVertex &V=wMK->wEve->vertex[iv];
-
-    if(iv>0 || V.rank<=0) continue; //temp skip not-highest-rank vertex JS
-
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.pointTower.id>=0) continue; //skip barrel towers
@@ -340,6 +341,7 @@ St2011pubSpinMaker::bXingSortEndcap(){
       if(ET>25 &&ET<50 ) {
 	hE[12+iQ]->Fill(spin4);
 	hE[29+iQ]->Fill(T.prMuTrack->eta()); 
+	nIsW++;
       }
       if(ET>32 &&ET<44 ) hE[14+iQ]->Fill(spin4);
      
@@ -348,9 +350,14 @@ St2011pubSpinMaker::bXingSortEndcap(){
     } // end of loop over tracks
   }// end of loop ove vertices
 
+  if(nIsW>1) hE[0]->Fill("multiW",1.);
+
 }
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.10  2012/09/18 21:10:08  stevens4
+// Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
+//
 // Revision 1.9  2012/09/17 22:05:50  stevens4
 // exclude not-highest rank vertex until jet issue is resolved
 //

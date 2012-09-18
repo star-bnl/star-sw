@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.cxx,v 1.4 2012/08/21 18:29:16 stevens4 Exp $
+// $Id: WeventDisplay.cxx,v 1.5 2012/09/18 21:10:09 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -471,7 +471,7 @@ WeventDisplay::getPrimTracks( int vertID,int pointTowId) {
   assert(V);
   wMK-> mMuDstMaker->muDst()->setVertexIndex(vertID);
   float rank=V->ranking();
-  assert(rank>0 || (rank<0 && V->nEEMCMatch()));
+  assert(rank>0);
   
   Int_t nPrimTrAll=wMK->mMuDstMaker->muDst()->GetNPrimaryTrack();
   for(int itr=0;itr<nPrimTrAll;itr++) {
@@ -535,7 +535,7 @@ WeventDisplay::export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack m
   assert(V);
   wMK-> mMuDstMaker->muDst()->setVertexIndex(vertID);
   float rank=V->ranking();
-  assert(rank>0 || (rank<0 && V->nEEMCMatch()));
+  assert(rank>0);
   const StThreeVectorF &rV=V->position();
   Int_t nPrimTrAll=wMK->mMuDstMaker->muDst()->GetNPrimaryTrack();
   for(int itr=0;itr<nPrimTrAll;itr++) {
@@ -597,6 +597,9 @@ WeventDisplay::export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack m
 
 
 // $Log: WeventDisplay.cxx,v $
+// Revision 1.5  2012/09/18 21:10:09  stevens4
+// Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
+//
 // Revision 1.4  2012/08/21 18:29:16  stevens4
 // Updates to endcap W selection using ESMD strip ratio
 //

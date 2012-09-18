@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.14 2012/09/17 22:05:50 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.15 2012/09/18 21:10:06 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -29,9 +29,6 @@ St2011WMaker::findEndcap_W_boson(){
   // search for  Ws ............
   for(uint iv=0;iv<wEve->vertex.size();iv++) {
     WeveVertex &V=wEve->vertex[iv];
-    
-    if(iv>0 || V.rank<=0) continue; //temp skip not-highest-rank vertex JS
-
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       if(T.pointTower.id>=0) continue; //skip barrel towers
@@ -131,23 +128,31 @@ St2011WMaker::findEndcap_W_boson(){
         hE[236]->Fill(T.cluster.ET,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
       }
       
-      //correlate ratio with sPtBal for goldWs (possibly use for background)
-      if(T.cluster.ET > parE_highET){
-        hE[237]->Fill(T.sPtBalance,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
-        hE[238]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
-	if(T.prMuTrack->charge()>0) 
-	  hE[250]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
-	else
-	  hE[251]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
-      }
-      // try lower threshold to find background
-      if(T.cluster.ET > 20.){
-        hE[252]->Fill(T.sPtBalance,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
-        hE[253]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
-	if(T.prMuTrack->charge()>0) 
-	  hE[254]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
-	else
-	  hE[255]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+      //define charge separation
+      float q2pt_g = T.glMuTrack->charge()/T.glMuTrack->pt();
+      float q2pt_p = T.prMuTrack->charge()/T.prMuTrack->pt();
+      float hypCorr_g = q2pt_g*(T.cluster.ET);
+      float hypCorr_p = q2pt_p*(T.cluster.ET);
+
+      //correlate ratio with sPtBal for goldWs (used for background)
+      if( fabs(hypCorr_p) > 0.4 && fabs(hypCorr_p) < 1.8) { //remove ambiguous charges BG treatment
+	if(T.cluster.ET > parE_highET){
+	  hE[237]->Fill(T.sPtBalance,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	  hE[238]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	  if(T.prMuTrack->charge()>0) 
+	    hE[250]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	  else
+	    hE[251]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	}
+	// try lower threshold to find background
+	if(T.cluster.ET > 20.){
+	  hE[252]->Fill(T.sPtBalance,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	  hE[253]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	  if(T.prMuTrack->charge()>0) 
+	    hE[254]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	  else
+	    hE[255]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	}
       }
 
       //fail ratio cut at 0.5 (mostly BG)
@@ -199,11 +204,6 @@ St2011WMaker::findEndcap_W_boson(){
       float p_chrg=prTr->charge();
       hE[200]->Fill(ET,g_chrg/glTr->pt());
       hE[201]->Fill(ET,p_chrg/prTr->pt());
-      
-      float q2pt_g = T.glMuTrack->charge()/T.glMuTrack->pt();
-      float q2pt_p = T.prMuTrack->charge()/T.prMuTrack->pt();
-      float hypCorr_g = q2pt_g*(T.cluster.ET);
-      float hypCorr_p = q2pt_p*(T.cluster.ET);
       hE[202]->Fill(T.cluster.ET,hypCorr_g);
       hE[203]->Fill(T.cluster.ET,hypCorr_p);
 
@@ -640,6 +640,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.15  2012/09/18 21:10:06  stevens4
+// Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
+//
 // Revision 1.14  2012/09/17 22:05:50  stevens4
 // exclude not-highest rank vertex until jet issue is resolved
 //
