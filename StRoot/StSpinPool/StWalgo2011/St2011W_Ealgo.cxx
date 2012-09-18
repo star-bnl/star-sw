@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.15 2012/09/18 21:10:06 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.16 2012/09/18 22:30:18 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -229,7 +229,7 @@ St2011WMaker::findEndcap_W_boson(){
       hE[104]->Fill(T.cluster.ET/T.nearEtowET,T.sPtBalance);
       hE[105]->Fill(T.glMuTrack->dEdx()*1e6,T.sPtBalance);
       float dEdxFit = T.glMuTrack->probPidTraits().dEdxFit()*1e6;
-      float dEdxTruncated = T.glMuTrack->probPidTraits().dEdxTruncated()*1e6;
+      //float dEdxTruncated = T.glMuTrack->probPidTraits().dEdxTruncated()*1e6;
       hE[106]->Fill(T.glMuTrack->dEdx()*1e6,dEdxFit);
       //hE[107]->Fill(dEdxTruncated,dEdxFit);
       
@@ -640,6 +640,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.16  2012/09/18 22:30:18  stevens4
+// change to new jet tree format with access to all rank>0 vertices
+//
 // Revision 1.15  2012/09/18 21:10:06  stevens4
 // Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
 //

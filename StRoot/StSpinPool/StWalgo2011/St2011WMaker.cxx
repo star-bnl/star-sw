@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.16 2012/09/17 03:29:29 stevens4 Exp $
+// $Id: St2011WMaker.cxx,v 1.17 2012/09/18 22:30:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -25,14 +25,12 @@
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 #include "StEEmcUtil/StEEmcSmd/EEmcSmdGeom.h"
 
-//jets
-#include "StSpinPool/StJets/StJet.h"
-#include "StSpinPool/StJets/StJets.h"
-#include "StJetMaker/StJetMaker.h"
-#include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
-#include "StJetMaker/StJetReader.h"
-#include "StJetMaker/StJetSkimEventMaker.h"
+//new jet tree format
+#include "StSpinPool/StJetEvent/StJetEvent.h"
+#include "StSpinPool/StJetEvent/StJetVertex.h"
+#include "StSpinPool/StJetEvent/StJetCandidate.h"
 
+#include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
 #include "WeventDisplay.h"
 #include "St2011WMaker.h"
 
@@ -53,13 +51,12 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   //must have either MuDst or W tree
   assert(mMuDstMaker || mTreeChain);
 
-  mJetReaderMaker = (StJetReader*)GetMaker("JetReader");  
-  if(!mJetReaderMaker && mTreeChain) { //jet chain for reading W tree
-    mJetTreeChain=new TChain("jet","Jet Tree");
-    indexJet=0;
-  }
+  mJetTreeChain=new TChain("jet","Jet Tree");
+  indexJet=0;
+  mJetEvent = 0;
+  mJetEvent_noEEMC = 0;
     
-  if(!mJetTreeChain && !mJetReaderMaker)
+  if(!mJetTreeChain)
     LOG_WARN<<GetName()<<Form("::constructor() NO JETS , W-algo is not working properly, continue")<<endm;
   
   // preset or clear some params
@@ -146,6 +143,9 @@ St2011WMaker::Init(){
   initHistos();
   initEHistos();
 
+  mJetTreeChain->SetBranchAddress(mJetTreeBranch,&mJetEvent);
+  mJetTreeChain->SetBranchAddress(mJetTreeBranch_noEEMC,&mJetEvent_noEEMC);
+
   if(mMuDstMaker) { 
     //only need DB tables for MuDst analysis
     mBarrelTables = new StBemcTables();
@@ -225,8 +225,8 @@ St2011WMaker::InitRun(int runNo){
       //.... Rin ..... changes
       
       //Run 9 (final)
-      if(sec==4  && mRunNo>=10090089) Rin=125.;
-      if(sec==11 && mRunNo>=10083013) Rin=125.;
+      if(sec==4  && mRunNo>=10090089 && mRunNo<=11000000 ) Rin=125.;
+      if(sec==11 && mRunNo>=10083013 && mRunNo<=11000000 ) Rin=125.;
       if(sec==15 && mRunNo>=10088096 && mRunNo<=10090112 ) Rin=125.;
       
       //Run 11 ??
@@ -237,8 +237,8 @@ St2011WMaker::InitRun(int runNo){
       //.... Rout ..... changes
       
       //Run 9 (final)
-      if(sec==5 && mRunNo>=10098029) Rout=140.;
-      if(sec==6 ) Rout=140.;
+      if(sec==5 && mRunNo>=10098029 && mRunNo<=11000000) Rout=140.;
+      if(sec==6 && mRunNo<=11000000 ) Rout=140.;
       if(sec==20 && mRunNo>=10095120 && mRunNo<=10099078 ) Rout=140.;
       
       //Run 11 ??
@@ -320,6 +320,8 @@ St2011WMaker::Make(){
     if(Tlast<T) Tlast=T;
     if(Tfirst>T) Tfirst=T;
     
+    // get next event from jet tree
+    mJetTreeChain->GetEntry(indexJet++);
 
     const char *afile = mMuDstMaker->GetFile();
     //printf("inpEve=%d eveID=%d daqFile=%s\n",nInpEve, wEve->id,afile);
@@ -363,17 +365,17 @@ St2011WMaker::Make(){
 
     if( btowStat && etowStat ) return kStOK; //skip event w/o energy in BTOW && ETOW   
     
-    if(mJetReaderMaker) {// just QA plots for jets
-      mJets = getJets(mJetTreeBranch); //get input jet info
-      for (int i_jet=0; i_jet< nJets; ++i_jet){
-	StJet* jet = getJet(i_jet);
-	float jet_pt = jet->Pt();
-	float jet_eta = jet->Eta();
-	float jet_phi = jet->Phi();
+    if(mJetTreeChain) {// just QA plots for jets
+      getJetEvent(); //get input jet info (new jet format)
+      for (int i_jet=0; i_jet<mJetEvent->vertex()->numberOfJets(); ++i_jet){ //just first vertex
+	StJetCandidate* jet = mJetEvent->vertex()->jet(i_jet); 
+	float jet_pt = jet->pt();
+	float jet_eta = jet->eta();
+	float jet_phi = jet->phi();
 	hA[117]->Fill(jet_eta,jet_phi);
 	hA[118]->Fill(jet_pt);
       }
-    }
+    }    
   }
   else { //analysis of W tree
     if(getEvent(index++,indexJet++)==kStEOF) return kStEOF; //get next event from W and jet tree
@@ -419,12 +421,12 @@ St2011WMaker::Make(){
     if(wEve->bemc.maxAdc<par_maxADC && wEve->etow.maxAdc<par_maxADC) return kStOK; //skip event w/o energy in BTOW && ETOW 
     
     if(mJetTreeChain) {// just QA plots for jets
-      mJets = getJetsTreeAnalysis(mJetTreeBranch); //get input jet info
-      for (int i_jet=0; i_jet< nJets; ++i_jet){
-	StJet* jet = getJet(i_jet);
-	float jet_pt = jet->Pt();
-	float jet_eta = jet->Eta();
-	float jet_phi = jet->Phi();
+      getJetEvent(); //get input jet info (new jet format)
+      for (int i_jet=0; i_jet<mJetEvent->vertex()->numberOfJets(); ++i_jet){
+	StJetCandidate* jet = mJetEvent->vertex()->jet(i_jet);
+	float jet_pt = jet->pt();
+	float jet_eta = jet->eta();
+	float jet_phi = jet->phi();
 	hA[117]->Fill(jet_eta,jet_phi);
 	hA[118]->Fill(jet_pt);
       }
@@ -448,7 +450,7 @@ St2011WMaker::Make(){
   findNearJet();
   findAwayJet();
 
-  if(mJetReaderMaker || mJetTreeChain) {
+  if(mJetTreeChain) {
     findPtBalance();
     if(!bmatch) tag_Z_boson();
   }
@@ -576,48 +578,24 @@ St2011WMaker::fillNorm(){ //intended for normalization of filtered QCD MC
 
 //________________________________________________
 //________________________________________________
-TClonesArray*
-St2011WMaker::getJets(TString branchName){
-  if(mJetReaderMaker ==0) {
-    nJets=-1; return 0;
-  }
-  assert(mJetReaderMaker->getStJets(branchName)->eventId()==wEve->id);
-  assert(mJetReaderMaker->getStJets(branchName)->runId()==wEve->runNo);
-  nJets = mJetReaderMaker->getStJets(branchName)->nJets();
-  return mJetReaderMaker->getStJets(branchName)->jets();
-
-}
-
-// Below is only used for Tree analysis
-// ----------------------------------------------------------------------------
-TClonesArray*
-St2011WMaker::getJetsTreeAnalysis(TString branchName){
-  if(mJetTreeChain==0){
-    nJets=-1; return 0;
-  }
-
-  //cout<<"looking for matching jet event"<<endl;
-
-  StJets* jetTmp=getStJetsCopy(branchName);
-  while(jetTmp->eventId()!=wEve->id || jetTmp->runId()!=wEve->runNo) {
+void 
+St2011WMaker::getJetEvent(){
+  if(mJetTreeChain==0)
+    return;
+  
+  // if jets are out of sink for some reason find matching event
+  while(mJetEvent->eventId()!=wEve->id || mJetEvent->runId()!=wEve->runNo) {
     mJetTreeChain->GetEntry(indexJet++);
-    jetTmp=getStJetsCopy(branchName);
   }
+  
+  assert(mJetEvent->eventId()==wEve->id);
+  assert(mJetEvent->runId()==wEve->runNo);
+  assert(mJetEvent_noEEMC->eventId()==wEve->id);
+  assert(mJetEvent_noEEMC->runId()==wEve->runNo);
+  return;
 
-  //cout<<"found matching jet event"<<endl;
-
-  assert(jetTmp->eventId()==wEve->id);
-  assert(jetTmp->runId()==wEve->runNo);
-  nJets = jetTmp->nJets();
-  return jetTmp->jets();
 }
 
-// ----------------------------------------------------------------------------
-StJets* 
-St2011WMaker::getStJetsCopy(TString branchName){
-  TBranch* branch = mJetTreeChain->GetBranch(branchName);
-  return branch ? *(StJets**)branch->GetAddress() : 0;
-}
 
 // ----------------------------------------------------------------------------
 Int_t St2011WMaker::getEvent(Int_t i, Int_t ijet)
@@ -651,6 +629,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.17  2012/09/18 22:30:16  stevens4
+// change to new jet tree format with access to all rank>0 vertices
+//
 // Revision 1.16  2012/09/17 03:29:29  stevens4
 // Updates to Endcap algo and Q*ET/PT charge separation
 //
