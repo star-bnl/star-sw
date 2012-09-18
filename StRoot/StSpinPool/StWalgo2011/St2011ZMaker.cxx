@@ -1,4 +1,4 @@
-// $Id: St2011ZMaker.cxx,v 1.6 2012/09/14 21:02:29 balewski Exp $
+// $Id: St2011ZMaker.cxx,v 1.7 2012/09/18 19:34:22 balewski Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -347,9 +347,9 @@ St2011ZMaker::find_Z_boson(){
 	 
 	 int spin4=wMK->wEve->spin4;  
 	 hA[38]->Fill(spin4); 
-  
-
-
+	 if(psum.Eta()<-1) hA[39]->Fill(spin4);
+	 else if(psum.Eta()<1) hA[40]->Fill(spin4);
+	 else hA[41]->Fill(spin4);
 
 	// **** I stoped changes here, Jan 
 
@@ -393,6 +393,9 @@ St2011ZMaker::find_Z_boson(){
 
 
 // $Log: St2011ZMaker.cxx,v $
+// Revision 1.7  2012/09/18 19:34:22  balewski
+// fill eta-dependent spin sort
+//
 // Revision 1.6  2012/09/14 21:02:29  balewski
 // *lumi-maker re-written to accumulate alternative rel lumi monitors,
 // * added spin sorting to Zs
