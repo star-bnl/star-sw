@@ -20,7 +20,7 @@ int rdMuWana2012(
 	     int  geant=false
   ) { 
   
-  if(isMC==0) jetDir="./aaa/"; 
+  if(isMC==0) jetDir="./"; 
 
   //if(isMC &&  useJetFinder==2) geant=true;
   
@@ -470,8 +470,8 @@ void chainFiles(const Char_t *fileList)
 
 
 // $Log: rdMuWana2012.C,v $
-// Revision 1.9  2012/09/18 22:30:27  stevens4
-// change to new jet tree format with access to all rank>0 vertices
+// Revision 1.10  2012/09/18 22:33:07  stevens4
+// remove hardcoded jet tree path
 //
 // Revision 1.8  2012/08/07 21:06:56  stevens4
 // update to tree analysis to produce independent histos in a TDirectory for each eta-bin
