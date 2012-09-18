@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.14 2012/09/17 03:29:30 stevens4 Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.15 2012/09/18 21:10:06 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -185,11 +185,10 @@ St2011WMaker::accessVertex(){ // return non-zero on abort
     else   funnyR=log(rank+1e6)-10;
     if(wEve->l2bitET) hA[10]->Fill(funnyR);
     if(wEve->l2EbitET) hE[10]->Fill(funnyR);
-    //keep some neg. rank vertices for endcap if matched to ETOW
-    if (rank<=0 && V->nEEMCMatch()<=0) continue; 
+    if (rank<=0) continue; 
     const StThreeVectorF &r=V->position();
     //   StThreeVectorF &er=V->posError();
-    if(wEve->l2bitET && rank>0) hA[11]->Fill(r.z());
+    if(wEve->l2bitET) hA[11]->Fill(r.z());
     if(wEve->l2EbitET) hE[11]->Fill(r.z());
     nVer++; // count valid vertices
     if(fabs(r.z()) > par_vertexZ) continue;
@@ -203,7 +202,7 @@ St2011WMaker::accessVertex(){ // return non-zero on abort
     wEve->vertex.push_back(wv);
   }
   if(nVer<=0) return -2;
-  if(wEve->l2bitET && nVerR>0) {
+  if(wEve->l2bitET) {
     hA[0]->Fill("primVert",1.);
     hA[4]->Fill(wEve->bx48);
     hA[5]->Fill(wEve->bx7);
@@ -252,7 +251,7 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
     assert(V);
     mMuDstMaker->muDst()->setVertexIndex(vertID);
     float rank=V->ranking();
-    assert(rank>0 || (rank<0 && V->nEEMCMatch()));
+    assert(rank>0);
     Int_t nPrimTrAll=mMuDstMaker->muDst()->GetNPrimaryTrack();
     for(int itr=0;itr<nPrimTrAll;itr++) {
       StMuTrack *prTr=mMuDstMaker->muDst()->primaryTracks(itr);
@@ -265,14 +264,14 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
 
       // TPC+prim vertex tracks and short EEMC tracks
       if(prTr->flag()!=301 && prTr->flag()!=311) continue;
-      if(wEve->l2bitET && rank>0 && prTr->flag()==301) 
+      if(wEve->l2bitET && prTr->flag()==301) 
 	hA[20]->Fill("flag",1.); 
       if(wEve->l2EbitET && ro.pseudoRapidity()>parE_trackEtaMin)
 	hE[20]->Fill("flag",1.); 
       
       float pt=prTr->pt();
       if(pt<1.0) continue;
-      if(wEve->l2bitET && rank>0 && prTr->flag()==301) 
+      if(wEve->l2bitET && prTr->flag()==301) 
 	hA[20]->Fill("pt1",1.);
       if(wEve->l2EbitET && ro.pseudoRapidity()>parE_trackEtaMin)
 	hE[20]->Fill("pt1",1.);
@@ -285,7 +284,7 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
       float dedx=prTr->dEdx()*1e6;
      
       //barrel algo track monitors
-      if(wEve->l2bitET && rank>0 && prTr->flag()==301){ 
+      if(wEve->l2bitET && prTr->flag()==301){ 
 	hA[21]->Fill(prTr->nHitsFit());
 	hA[22]->Fill(hitFrac);
 	hA[23]->Fill(ri.perp());
@@ -341,7 +340,7 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
       }
 
       
-      bool barrelTrack=(wEve->l2bitET && rank>0 && prTr->flag()==301 && pt>par_trackPt); 
+      bool barrelTrack=(wEve->l2bitET && prTr->flag()==301 && pt>par_trackPt); 
       if(barrelTrack) hA[20]->Fill("ptOK",1.);//good barrel candidate
       bool endcapTrack=(wEve->l2EbitET && ro.pseudoRapidity()>parE_trackEtaMin && pt>parE_trackPt); 
       if(endcapTrack) hE[20]->Fill("ptOK",1.);//good endcap candidate
@@ -587,7 +586,7 @@ St2011WMaker::sumTpcCone(int vertID, TVector3 refAxis, int flag, int pointTowId)
   assert(V);
   mMuDstMaker->muDst()->setVertexIndex(vertID);
   float rank=V->ranking();
-  assert(rank>0 || (rank<0 && V->nEEMCMatch()));
+  assert(rank>0);
   double ptSum=0;
   Int_t nPrimTrAll=mMuDstMaker->muDst()->GetNPrimaryTrack();
   for(int itr=0;itr<nPrimTrAll;itr++) {
@@ -690,6 +689,9 @@ St2011WMaker::accessBSMD(){
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.15  2012/09/18 21:10:06  stevens4
+//Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
+//
 //Revision 1.14  2012/09/17 03:29:30  stevens4
 //Updates to Endcap algo and Q*ET/PT charge separation
 //

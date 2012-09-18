@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.12 2012/09/17 03:29:30 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.13 2012/09/18 21:10:08 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -234,8 +234,6 @@ St2011WMaker::initHistos(){
   hA[98]=new TH1F("muWcar3",txt, 100, -200,200);
   hA[99]=h=new TH1F("muWeta",Form("Barrel W: lepton eta final selection %s ; lepton eta",coreTitle.Data()),400,-2.0,2.0);
 
-  hA[102]=h=new TH1F("muWtime",Form("Barrel Golden W: unix time final selection %s 3/18/12 - 4/19/12; unixtime (bin = 10 min)",coreTitle.Data()),4608,1332028800,1334793600);
-
   //Q/pt plots
   sprintf(txt,"TPC GLOB Q/PT  ; 2x2 cluster ET (GeV); Q/PT");
   hA[100]=h=new TH2F("muChRecPNg", txt,100,0.,100.,100,-0.1,0.1);
@@ -259,6 +257,7 @@ St2011WMaker::initHistos(){
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   
   // free 102-109
+  hA[104]=h=new TH1F("muWtime",Form("Barrel Golden W: unix time final selection %s 3/18/12 - 4/19/12; unixtime (bin = 10 min)",coreTitle.Data()),4608,1332028800,1334793600);
 
   //..... series of electron ET plots after succesive cuts
   char tt2[][200]={"max 2x2","track matched","no near ET","no away ET"};
@@ -394,6 +393,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.13  2012/09/18 21:10:08  stevens4
+// Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
+//
 // Revision 1.12  2012/09/17 03:29:30  stevens4
 // Updates to Endcap algo and Q*ET/PT charge separation
 //

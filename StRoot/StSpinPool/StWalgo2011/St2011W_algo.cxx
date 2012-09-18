@@ -1,5 +1,4 @@
-
-// $Id: St2011W_algo.cxx,v 1.15 2012/09/17 03:29:30 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.16 2012/09/18 21:10:07 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -189,7 +188,7 @@ St2011WMaker::find_W_boson(){
       nGoldW++;
       if(T.prMuTrack->charge()>0) nGoldWp++;
       else if(T.prMuTrack->charge()<0) nGoldWn++;
-      hA[102]->Fill(wEve->time);
+      hA[104]->Fill(wEve->time);
 
     }// loop over tracks
   }// loop over vertices
@@ -692,6 +691,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.16  2012/09/18 21:10:07  stevens4
+// Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
+//
 // Revision 1.15  2012/09/17 03:29:30  stevens4
 // Updates to Endcap algo and Q*ET/PT charge separation
 //
