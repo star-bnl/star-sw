@@ -1104,7 +1104,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                      "Mag.field map with scale factor from Db",kFALSE},
   {"mtin"        ,"geant"  ,"","-fzin,-geant,-gstar,geantL,gstarLib,-magF","St_geant_Maker"
    ,                                                                "gstar","read event from MuDst",kFALSE},
-  {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,detDb,StarMagField,magF"    ,"StTpcDbMaker","StTpcDb","",kFALSE},
+  {"tpcDB"   ,"tpcDB","","tpc_T,dbutil,detDb,StarMagField,magF,StEvent","StTpcDbMaker","StTpcDb","",kFALSE},
   {"dbutil"      ,""     ,"","detDb,StDbT"                 ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"svtDb"       ,"svtDb","","tpcDb,SvtCL", "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
   {"ssdDb"      ,"ssdDb","","tpcDb,SsdUtil","StSsdDbMaker","StSsdDbMaker","Load and run SsdDbMaker",kFALSE},
