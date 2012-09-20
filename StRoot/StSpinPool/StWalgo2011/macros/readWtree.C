@@ -1,4 +1,5 @@
 // example uses bin 8 : root4star -b -q 'readWtree.C("./R13109027.lis",8,1e8)'
+// W+ M-C:  root4star -b -q 'readWtree.C("./jbc310.lis",8,1e2,false)'
 
 class StChain;
 class St2011WMaker;
@@ -25,6 +26,7 @@ void readWtree(	const Char_t *fileList="./R13104003.lis", int etaBin=8, int maxE
   assert( !gSystem->Load("StWalgo2011"));
   assert( !gSystem->Load("StSpinDbMaker"));
   assert( !gSystem->Load("StJets"));
+  assert( !gSystem->Load("StJetEvent"));
     
   // create analysis chain
   chain = new StChain("chain");
