@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.17 2012/09/18 22:30:16 stevens4 Exp $
+// $Id: St2011WMaker.cxx,v 1.18 2012/09/21 16:59:09 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -111,8 +111,16 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   parE_trackRin=120;  parE_trackRout=70; // cm
   parE_trackPt=7.;//GeV 
   parE_nSmdStrip=20;
+  parE_esmdGL=3; // 2N+1=7 size of the integration gate len
+  parE_esmdWL=7; // 2N+1=15 size of the allowed window len
+
   parE_smdRatio=0.55;
   parE_highET=25.; // (GeV), cut-off for final Endcap W-cluster 
+
+  assert(2*parE_nSmdStrip+1==41);// as hardcoded in Wtree for esmdShower[mxEsmdPlane][], it should be solved by using <vector> or TArray - left for next year to be fixed
+  assert(parE_esmdGL<=parE_esmdWL); // if equal then peak adjusting is disabled
+  assert(parE_esmdWL<parE_nSmdStrip);
+
 
   //... search for W's
   par_nearDeltaR=0.7; //(~rad) near-cone size
@@ -206,13 +214,13 @@ St2011WMaker::InitRun(int runNo){
 		 par_highET,par_awayDeltaPhi,par_ptBalance,par_leptonEtaLow,par_leptonEtaHigh
 		 )<<endm;
   //endcap algo params
-  cout<<Form("\n Endcap W-algo params: trigID: L2EW=%d isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, primEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n ETOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x1/ET4x4>%0.2f  ET2x1/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n W selection highET>%.1f awayDelPhi<%.1frad  ptBalance>%.1fGeV ",
+  cout<<Form("\n Endcap W-algo params: trigID: L2EW=%d isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, primEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n ETOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x1/ET4x4>%0.2f  ET2x1/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n W selection highET>%.1f awayDelPhi<%.1frad  ptBalance>%.1fGeV , \n ESMD: nSmdStrip=%d, gateL=%d windowL=%d smdRatio=%.2f",
 		 parE_l2ewTrgID,isMC,
 		 par_minPileupVert,par_vertexZ,
 		 parE_nFitPts,parE_nHitFrac,parE_trackRin,parE_trackRout,parE_trackPt,
 		 par_kSigPed,par_AdcThres,par_maxADC,parE_clustET,parE_clustFrac24,parE_nearTotEtFrac,
 		 parE_delR3D,par_nearDeltaR,
-		 par_highET,par_awayDeltaPhi,parE_ptBalance
+	     par_highET,par_awayDeltaPhi,parE_ptBalance, parE_nSmdStrip, parE_esmdGL, parE_esmdWL, parE_smdRatio
 		 )<<endl;
   cout<<Form("\n EtowScaleFact=%.2f  BtowScaleFacor=%.2f" ,par_etowScale, par_btowScale)<<endl;
 
@@ -629,6 +637,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.18  2012/09/21 16:59:09  balewski
+// added ESMD peak adjustement - partialy finished
+//
 // Revision 1.17  2012/09/18 22:30:16  stevens4
 // change to new jet tree format with access to all rank>0 vertices
 //

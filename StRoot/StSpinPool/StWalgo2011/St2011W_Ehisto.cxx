@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.11 2012/09/17 03:29:29 stevens4 Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.12 2012/09/21 16:59:10 balewski Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -302,7 +302,7 @@ St2011WMaker::initEHistos(){
   hE[213]=h=new TH2F("muEsmdNhit_Ene","Number of hit strips vs Energy in SMD Planes; Nhit (U+V); Energy (U+V)",100,0.,100.,500,0.,1000.);
   hE[214]=h=new TH2F("muEclustET_esmdEne","Tower cluster E_{T} vs. Energy in SMD Planes; Tower cluster E_{T}; SMD Energy (U+V)",100,0.,100.,500,0.,1000.);
   hE[215]=h=new TH2F("muEclustET_esmdNhit","Tower cluster E_{T} vs. Number of hit strips; Tower cluster E_{T}; Nhit (U+V)",100,0.,100.,100,0.,100.);
-  hE[216]=h=new TH2F("muEsmdWidth","Width of of shower shape; U plane; V plane",50,0.,5.,50,0.,5.);
+  hE[216]=0;
   hE[217]=h=new TH2F("muEsmdCrossXY","Difference in SMD XP (track - SMD); X position; Y postion",50,-2.5,2.5,50,-2.5,2.5);
   hE[218]=h=new TH2F("muEsmdCrossEtaPhi","Difference in SMD XP (track - SMD); Eta position; Phi postion",50,-.05,.05,50,-.05,.05);
   hE[219]=h=new TH2F("muEsmdRatioUV","Ratio of 7 strip sum to 41 strip sum; U ratio ; V ratio",50,0.,1.,50,0.,1.);
@@ -361,6 +361,18 @@ St2011WMaker::initEHistos(){
   hE[253]=h=new TH2F("muEsPtBalance2_esmdRatio_ET20","ET>20: sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,100,0.,1.);
   hE[254]=h=new TH2F("muEsPtBalance2_esmdRatio_ET20_P","Q+ ET>20: sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,100,0.,1.);
   hE[255]=h=new TH2F("muEsPtBalance2_esmdRatio_ET20_N","Q- ET>20: sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,100,0.,1.);
+
+  hE[256]=h=new TH2F("muE_UoffStr","peak offset from track ESMD-U; track phi(deg); #Delta strip", 48,-PI,PI,11,-5.5,5.5);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(-PI,-parE_esmdWL-0.5, PI, -parE_esmdWL-0.5);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(-PI,parE_esmdWL+0.5, PI, parE_esmdWL+0.5);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(-PI,0, PI, 0.);  ln->SetLineColor(kBlue);  Lx->Add(ln);
+
+  hE[257]=h=new TH2F("muE_VoffStr","peak offset from track ESMD-V; (4 bins per TPC sector)      TPC track phi(deg); #Delta strip", 48,-PI,PI,11,-5.5,5.5);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(-PI,-parE_esmdWL-0.5, PI, -parE_esmdWL-0.5);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(-PI,parE_esmdWL+0.5, PI, parE_esmdWL+0.5);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(-PI,0, PI, 0.);  ln->SetLineColor(kBlue);  Lx->Add(ln);
 
 
   // add histos to the list (if provided)

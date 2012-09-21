@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.16 2012/09/18 22:30:18 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.17 2012/09/21 16:59:10 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -112,7 +112,7 @@ St2011WMaker::findEndcap_W_boson(){
           hE[211]->Fill(T.esmdNhit[0],T.esmdNhit[1]);
           hE[212]->Fill(T.esmdE[0],T.esmdE[1]);
           hE[213]->Fill(T.esmdNhit[0]+T.esmdNhit[1],T.esmdE[0]+T.esmdE[1]);
-          hE[216]->Fill(T.esmdShowerWidth[0],T.esmdShowerWidth[1]);
+	  // hE[216]->Fill(
           hE[217]->Fill(T.pointTower.R.X()-T.esmdXPcentroid.X(),T.pointTower.R.Y()-T.esmdXPcentroid.Y());
           hE[218]->Fill(T.pointTower.R.Eta()-T.esmdXPcentroid.Eta(),T.pointTower.R.Phi()-T.esmdXPcentroid.Phi());
           hE[219]->Fill(T.esmdEsum7[0]/T.esmdE[0],T.esmdEsum7[1]/T.esmdE[1]);
@@ -121,6 +121,8 @@ St2011WMaker::findEndcap_W_boson(){
           hE[222]->Fill(T.enePre1+T.enePre2,T.enePost);
           hE[225]->Fill(T.enePre1+T.enePre2,T.esmdE[0]+T.esmdE[1]);
           hE[226]->Fill(T.enePost,T.esmdE[0]+T.esmdE[1]);
+	  hE[256]->Fill(T.pointTower.R.Phi(), T.esmdPeakOffset[0]);
+	  hE[257]->Fill(T.pointTower.R.Phi(), T.esmdPeakOffset[1]);
         }
       }
       else { //mostly QCD
@@ -166,6 +168,7 @@ St2011WMaker::findEndcap_W_boson(){
         printf("\n WWWWWWWWWWWWWWWWWWWWW  Endcap \n");
         wDisaply->exportEvent( "WE", V, T, iv);
         wEve->print();
+	//	assert(1==2);
       }/***************************/
 
       //cut on ESMD ratio
@@ -272,16 +275,12 @@ St2011WMaker::analyzeESMD(){
           
       //id of strips pointed by prim and glob tracks in each plane
       int hitStrip[2]={-1,-1}; int hitStripGlob[2]={-1,-1};
-      //initialize shower shape histograms
-      TH1F* esmdShowerHist[2];
-      esmdShowerHist[0] = new TH1F(Form("esmdU%d",wEve->id),"esmdU",41,-10.25,10.25);
-      esmdShowerHist[1] = new TH1F(Form("esmdV%d",wEve->id),"esmdV",41,-10.25,10.25);
       
       for(int iuv=0; iuv<2; iuv++){ //loop over planes
         Float_t dca; //primary extrapolation to smd plane
 	const StructEEmcStrip *stripPtr = geoSmd->getDca2Strip(iuv,T.pointTower.R,&dca); // find pointed strip
         if(!stripPtr) {cout<<"No Strip found"<<endl; continue;}
-        if(fabs(dca)>0.5 /*cm*/) {cout<<"DCA to big"<<endl; continue;}
+        if(fabs(dca)>0.51 /*cm*/) {cout<<"Esmd DCA to big ="<<dca<<endl; continue;}
 	
         Float_t dcaGlob; //global extrapolation to smd plane
 	const StructEEmcStrip *stripPtrGlob = geoSmd->getDca2Strip(iuv,T.pointTower.Rglob,&dcaGlob); // find pointed strip
@@ -297,9 +296,8 @@ St2011WMaker::analyzeESMD(){
         int str1=stripId - parE_nSmdStrip; if(str1<1) str1=1;
         int str2=stripId + parE_nSmdStrip; if(str2>288) str2=288;
         for(int istrip=str1; istrip<=str2; istrip++){
-          float ene = wEve->esmd.ene[sectorId-1][iuv][istrip-1]*1e3;
+          float ene = wEve->esmd.ene[sectorId-1][iuv][istrip-1]*1e3; // in MeV now
 	  int adc = wEve->esmd.adc[sectorId-1][iuv][istrip-1];
-	  esmdShowerHist[iuv]->SetBinContent(istrip-stripId+parE_nSmdStrip+1,ene);
 	  T.esmdShower[iuv][istrip-stripId+parE_nSmdStrip]=ene;
 	  if(adc > T.esmdMaxADC){ T.esmdMaxADC=adc; }
           if(ene > 0){
@@ -311,18 +309,28 @@ St2011WMaker::analyzeESMD(){
             }
           }
         }// end loop over strips
-	
-	// fit shower shape and fill shower properties
-        TF1 *f = new TF1("f","gaus",-5.,5.);
-        f->SetParameter(1,0);
-        esmdShowerHist[iuv]->Fit(f,"RQ","RQ",-5.,5.);
-        T.esmdShowerCentroid[iuv]=f->GetParameter(1);
-        T.esmdShowerWidth[iuv]=f->GetParameter(2);
-	
+
+	//  finding smd-peak center correction
+	float bestSum=-1; 
+	int bestOff=9999;
+	int delOff=parE_esmdWL -parE_esmdGL;
+	for(int off1=-delOff; off1<=delOff; off1++) {
+	  float sum=0;
+	  for(int off2=-parE_esmdGL; off2<=parE_esmdGL; off2++)
+	    sum+=T.esmdShower[iuv][parE_nSmdStrip+off1+off2];
+	  //printf("off1=%d sum=%.1f  bestSum=%.1f bestOff=%d\n",off1,sum,bestSum,bestOff);
+	  if(bestSum>sum) continue;
+	  bestSum=sum;
+	  bestOff=off1;
+	}
+	//printf("do slide iuv=%d  sum7=%.1f  bestSum=%.1f bestOff=%d\n",iuv, T.esmdEsum7[iuv], bestSum,bestOff);
+	T.esmdPeakSumE[iuv]=bestSum;	
+	T.esmdPeakOffset[iuv]=bestOff;
+
+
 	//get shower x-point from hitStrip + centroid of fit
-	T.esmdXPcentroid = geoSmd->getIntersection(T.hitSector-1,hitStrip[0]-1+(int)T.esmdShowerCentroid[0],hitStrip[1]-1+(int)T.esmdShowerCentroid[1]);
+	T.esmdXPcentroid = geoSmd->getIntersection(T.hitSector-1,hitStrip[0]-1+T.esmdPeakOffset[0],hitStrip[1]-1+T.esmdPeakOffset[0]);//janCheck
 	
-        //histos for each plane
 
 
       } //end plane loop
@@ -640,6 +648,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.17  2012/09/21 16:59:10  balewski
+// added ESMD peak adjustement - partialy finished
+//
 // Revision 1.16  2012/09/18 22:30:18  stevens4
 // change to new jet tree format with access to all rank>0 vertices
 //
