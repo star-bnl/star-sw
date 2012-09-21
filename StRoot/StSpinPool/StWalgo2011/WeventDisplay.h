@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.h,v 1.2 2012/06/18 18:28:01 stevens4 Exp $
+// $Id: WeventDisplay.h,v 1.3 2012/09/21 16:59:10 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -31,6 +31,7 @@ class WeventDisplay {
   TLine *etaBL_ln, *etaBR_ln; // barrel
   TLine *etaEL_ln, *etaER_ln; // endcap
   TBox  *bxT, *bxE,*bxS; // tpc, emc, bsmd
+  TBox  *bxEs[mxEsmdPlane]; // Esmd used sum range
   St2011WMaker* wMK;
 
   WeventDisplay( St2011WMaker* mk, int mxEv);
@@ -47,6 +48,9 @@ class WeventDisplay {
 
 
 // $Log: WeventDisplay.h,v $
+// Revision 1.3  2012/09/21 16:59:10  balewski
+// added ESMD peak adjustement - partialy finished
+//
 // Revision 1.2  2012/06/18 18:28:01  stevens4
 // Updates for Run 9+11+12 AL analysis
 //
