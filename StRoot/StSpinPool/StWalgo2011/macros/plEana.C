@@ -470,7 +470,15 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)gDirectory->Get(nameX[i]);  assert(h);
-      c->cd(i+1);  h->Draw("colz");
+      c->cd(i+1);  h->Draw("box");
+      for(int sec=1;sec<=12;sec++) {
+	float phiC= (3-sec)*30;
+	if(phiC<-179) phiC+=360;
+	float phiL= (phiC-15.)/180*3.1416;
+	//printf("sec=%d phiC/deg=%.0d  phiL/rad=%.2f\n",sec,phiC, phiL);
+	ln=new TLine(phiL,-7,phiL,7); ln->Draw(); ln->SetLineColor(8);
+	tx=new TText(phiL+0.05,5,Form("sec %d",sec)); tx->Draw();
+      }
     }
  } break;//--------------------------------------
 
@@ -749,6 +757,10 @@ void doAllMC(char *core0="", char *iPath=""){
 
 
 // $Log: plEana.C,v $
+// Revision 1.15  2012/09/21 21:14:08  balewski
+// plane/sectord dependent Z-location for ESMD implemented in matching of TPC track to ESMD shower.
+// I'm done
+//
 // Revision 1.14  2012/09/21 16:59:13  balewski
 // added ESMD peak adjustement - partialy finished
 //
