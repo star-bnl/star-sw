@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.12 2012/09/21 16:59:10 balewski Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.13 2012/09/21 21:14:04 balewski Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -362,16 +362,17 @@ St2011WMaker::initEHistos(){
   hE[254]=h=new TH2F("muEsPtBalance2_esmdRatio_ET20_P","Q+ ET>20: sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,100,0.,1.);
   hE[255]=h=new TH2F("muEsPtBalance2_esmdRatio_ET20_N","Q- ET>20: sPtBalance2 vs. Ratio of 7 strip sum to 41 strip sum (U+V); sPtBalance2 ; U+V ratio",100,-100.,100.,100,0.,1.);
 
-  hE[256]=h=new TH2F("muE_UoffStr","peak offset from track ESMD-U; track phi(deg); #Delta strip", 48,-PI,PI,11,-5.5,5.5);
+  hE[256]=h=new TH2F("muE_UoffStr","peak offset from track ESMD-U; track phi(rad); #Delta strip", 48,-PI,PI,11,-5.5,5.5);
   Lx=h->GetListOfFunctions();
-  ln=new TLine(-PI,-parE_esmdWL-0.5, PI, -parE_esmdWL-0.5);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  ln=new TLine(-PI,parE_esmdWL+0.5, PI, parE_esmdWL+0.5);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  int dd=parE_esmdWL-parE_esmdGL+0.5;
+  ln=new TLine(-PI,-dd, PI, -dd);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(-PI,dd, PI, dd);  ln->SetLineColor(kRed);  Lx->Add(ln);
   ln=new TLine(-PI,0, PI, 0.);  ln->SetLineColor(kBlue);  Lx->Add(ln);
-
-  hE[257]=h=new TH2F("muE_VoffStr","peak offset from track ESMD-V; (4 bins per TPC sector)      TPC track phi(deg); #Delta strip", 48,-PI,PI,11,-5.5,5.5);
-  Lx=h->GetListOfFunctions();
-  ln=new TLine(-PI,-parE_esmdWL-0.5, PI, -parE_esmdWL-0.5);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  ln=new TLine(-PI,parE_esmdWL+0.5, PI, parE_esmdWL+0.5);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  
+  hE[257]=h=new TH2F("muE_VoffStr","peak offset from track ESMD-V; (4 bins per TPC sector)      TPC track phi(rad); #Delta strip", 48,-PI,PI,11,-5.5,5.5);
+  Lx=h->GetListOfFunctions();  
+  ln=new TLine(-PI,-dd, PI, -dd);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(-PI,dd, PI, dd);  ln->SetLineColor(kRed);  Lx->Add(ln);
   ln=new TLine(-PI,0, PI, 0.);  ln->SetLineColor(kBlue);  Lx->Add(ln);
 
 

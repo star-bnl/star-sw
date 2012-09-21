@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.17 2012/09/21 16:59:10 balewski Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.18 2012/09/21 21:14:04 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -26,7 +26,8 @@ St2011WMaker::findEndcap_W_boson(){
   //remove events tagged as Zs
   if(wEve->zTag) return;
 
-  // search for  Ws ............
+ 
+  // search for  Ws ............ 
   for(uint iv=0;iv<wEve->vertex.size();iv++) {
     WeveVertex &V=wEve->vertex[iv];
     for(uint it=0;it<V.eleTrack.size();it++) {
@@ -275,15 +276,35 @@ St2011WMaker::analyzeESMD(){
           
       //id of strips pointed by prim and glob tracks in each plane
       int hitStrip[2]={-1,-1}; int hitStripGlob[2]={-1,-1};
-      
+
+      int isec=T.pointTower.iPhi/mxEtowSub;
+      int layer[2]={((isec+2)%3) +1, (isec%3) +1};
+   
       for(int iuv=0; iuv<2; iuv++){ //loop over planes
+
+	//.... extrapolate track to the disk perpendicular to the z-axis
+	const StPhysicalHelixD trkHlx=T.prMuTrack->outerHelix();    
+	// to account for the z-depth of each plane, sector dependent, (cm), Z=smd depth
+	StThreeVectorD diskPosition=StThreeVectorD(0,0,geomE->getZSMD() + (layer[iuv]-2)* 1.25);
+	//	diskPosition.SetZ(geomE->getZSMD());// restore fixed, average  Z-DSM - discard after testing
+	StThreeVectorD diskNormal=StThreeVectorD(0,0,1);
+	printf(" ESMD sec=%d iuv=%d  layer=%d, smdZ=%.1f\n", isec+1, iuv,layer[iuv],diskPosition.z() );
+	//path length at intersection with plane
+	double path = trkHlx.pathLength(diskPosition,diskNormal);	
+	StThreeVectorD r = trkHlx.at(path);
+	TVector3 rCross(r.x(),r.y(),r.z());
+
         Float_t dca; //primary extrapolation to smd plane
-	const StructEEmcStrip *stripPtr = geoSmd->getDca2Strip(iuv,T.pointTower.R,&dca); // find pointed strip
+	const StructEEmcStrip *stripPtr = geoSmd->getDca2Strip(iuv,rCross,&dca); // find pointed strip
         if(!stripPtr) {cout<<"No Strip found"<<endl; continue;}
         if(fabs(dca)>0.51 /*cm*/) {cout<<"Esmd DCA to big ="<<dca<<endl; continue;}
 	
         Float_t dcaGlob; //global extrapolation to smd plane
-	const StructEEmcStrip *stripPtrGlob = geoSmd->getDca2Strip(iuv,T.pointTower.Rglob,&dcaGlob); // find pointed strip
+	const StPhysicalHelixD trkHlxGlob=T.glMuTrack->outerHelix();
+	double pathGlob = trkHlxGlob.pathLength(diskPosition,diskNormal);
+	StThreeVectorD rGlob = trkHlxGlob.at(pathGlob);
+	TVector3 rCrossGlob(rGlob.x(),rGlob.y(),rGlob.z());	
+	const StructEEmcStrip *stripPtrGlob = geoSmd->getDca2Strip(iuv,rCrossGlob,&dcaGlob); // find pointed strip
 
         int stripId=stripPtr->stripStructId.stripId;
         int sectorId=stripPtr->stripStructId.sectorId;
@@ -323,7 +344,7 @@ St2011WMaker::analyzeESMD(){
 	  bestSum=sum;
 	  bestOff=off1;
 	}
-	//printf("do slide iuv=%d  sum7=%.1f  bestSum=%.1f bestOff=%d\n",iuv, T.esmdEsum7[iuv], bestSum,bestOff);
+	printf("do slide iuv=%d  sum7=%.1f  bestSum=%.1f bestOff=%d\n",iuv, T.esmdEsum7[iuv], bestSum,bestOff);
 	T.esmdPeakSumE[iuv]=bestSum;	
 	T.esmdPeakOffset[iuv]=bestOff;
 
@@ -648,6 +669,10 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.18  2012/09/21 21:14:04  balewski
+// plane/sectord dependent Z-location for ESMD implemented in matching of TPC track to ESMD shower.
+// I'm done
+//
 // Revision 1.17  2012/09/21 16:59:10  balewski
 // added ESMD peak adjustement - partialy finished
 //
