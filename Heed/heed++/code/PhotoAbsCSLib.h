@@ -15,9 +15,6 @@ and moleculas
 2004, I. Smirnov
 */
 
-// extern String shelllist_dir_name;  
-// extern String pacs_table_dir_name;
-
 extern HydrogenPhotoAbsCS Hydrogen_shell_PACS;
 extern SimpleAtomPhotoAbsCS Hydrogen_PACS;
 extern SimpleAtomPhotoAbsCS Hydrogen_for_H2_PACS;
@@ -49,7 +46,7 @@ extern ExAtomPhotoAbsCS Aluminium_PACS;
 extern ExAtomPhotoAbsCS Silicon_PACS;
 extern ExAtomPhotoAbsCS Silicon_crystal_PACS;
 extern ExAtomPhotoAbsCS Silicon_G4_PACS;
-extern ExAtomPhotoAbsCS Phosphor_PACS;
+extern ExAtomPhotoAbsCS Phosphorus_PACS;
 extern ExAtomPhotoAbsCS Sulfur_PACS;
 extern ExAtomPhotoAbsCS Chlorine_PACS;
 extern ExAtomPhotoAbsCS Argon_PACS;

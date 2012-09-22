@@ -513,31 +513,3 @@ std::ostream& operator << (std::ostream& file, const AtomMixDef& f)
   return file;
 }
 
-
-/*
-HepAList <atom_def> atom_def::cont;
-// This call should be before all atom_def
-// otherwise they are all lost.
-
-atom_def Hydrogen(  "Hydrogen",   "H",   1, 1.00794 * gram/mole);
-atom_def Helium(    "Helium",     "He",  2, 4.002602 * gram/mole);
-atom_def Lithium(   "Lithium",    "Li",  3, 6.941 * gram/mole);
-atom_def Beryllium( "Beryllium",  "Be",  4, 9.012182 * gram/mole);
-atom_def Boron(     "Boron",      "B",   5, 10.811 * gram/mole);
-atom_def Carbon(    "Carbon",     "C",   6, 12.011 * gram/mole);
-atom_def Nitrogen(  "Nitrogen",   "N",   7, 14.00674 * gram/mole);
-atom_def Oxygen(    "Oxygen",     "O",   8, 15.9994 * gram/mole);
-atom_def Fluorine(  "Fluorine",   "F",   9, 18.9984032 * gram/mole);
-atom_def Neon(      "Neon",       "Ne", 10, 20.1797 * gram/mole);
-atom_def Sodium(    "Sodium",     "Na", 11, 22.989768 * gram/mole);
-atom_def Magnesium( "Magnesium",  "Mg", 12, 24.3050 * gram/mole);
-atom_def Aluminium( "Aluminium",  "Al", 13, 26981539 * gram/mole);
-atom_def Silicon(   "Silicon",    "Si", 14, 28.0855 * gram/mole);
-atom_def Phosphor(  "Phosphor",   "P",  15, 30.973762 * gram/mole);
-atom_def Sulfur(    "Sulfur",     "S",  16, 32.066 * gram/mole);
-atom_def Chlorine(  "Chlorine",   "Cl", 17, 35.066 * gram/mole);
-atom_def Argon(     "Argon",      "Ar", 18, 39.948 * gram/mole);
-atom_def Krypton(   "Krypton",    "Kr", 36, 83.80 * gram/mole);
-atom_def Xenon(     "Xenon",      "Xe", 54, 131.29 * gram/mole);
-atom_def Uranium(   "Uranium",    "U",  92, 238.0289 * gram/mole);
-*/

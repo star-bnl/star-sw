@@ -111,5 +111,4 @@ public:
 };
 std::ostream& operator << (std::ostream& file, const MoleculeDef& f);
 
-
 #endif

@@ -173,9 +173,9 @@ ExAtomPhotoAbsCS Silicon_G4_PACS(14,
                                  "shelllist_solid.dat", 
                                  shelllist_dir_name + "Si_G4.dat",
                                  "Si_G4");
-ExAtomPhotoAbsCS Phosphor_PACS(15, 
-                               shelllist_dir_name + "shelllist.dat", 
-                               pacs_table_dir_name + "P.dat"); 
+ExAtomPhotoAbsCS Phosphorus_PACS(15, 
+                                shelllist_dir_name + "shelllist.dat", 
+                                pacs_table_dir_name + "P.dat"); 
 ExAtomPhotoAbsCS Sulfur_PACS(16, 
                              shelllist_dir_name + "shelllist.dat", 
                              pacs_table_dir_name + "S.dat"); 
@@ -209,8 +209,7 @@ ExAtomPhotoAbsCS Chlorine_PACS(17,
 //                             shelllist_dir_name + "mw3.dat",
 //                             40.0e-6, 2, 0.0);
 
-ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void)
-{
+ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void) {
   mfunnamep("ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void)");
   ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, 
                                       shelllist_dir_name + "shelllist.dat", 
