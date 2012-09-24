@@ -107,8 +107,8 @@ St2011ZMaker::initHistos(){
 
   hA[35]=h=new TH2F(core+"eta12","Final Z selection #eta_{1} vs #eta_{2} with two Barrel tracks; #eta_{1} ; #eta_{2} ", 60,-1.0,2.0,60,-1.0,2.0);
   
-  hA[36]=h=new TH1F(core+"etaZ","Z boson #eta; #eta_{Z}",100,-5.,5.);
-  hA[37]=h=new TH1F(core+"ptZ","Z boson p_{T}; p_{T}^{Z}",100,0.,20.);
+  hA[36]=h=new TH1F(core+"etaZ","golden Z boson #eta; #eta_{Z}",100,-5.,5.);
+  hA[37]=h=new TH1F(core+"ptZ","golden Z boson p_{T}; p_{T}^{Z}",100,0.,20.);
 
   hA[38]=h=new TH1F(core+"Y2","golden Z spin sorted; spin4 ",16,-0.5,15.5);
   h->SetMarkerSize(2);//<-- large text
