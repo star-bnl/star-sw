@@ -1,4 +1,4 @@
-// $Id: St2011ZMaker.cxx,v 1.7 2012/09/18 19:34:22 balewski Exp $
+// $Id: St2011ZMaker.cxx,v 1.8 2012/09/24 19:28:15 balewski Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -311,8 +311,6 @@ St2011ZMaker::find_Z_boson(){
 	hA[34]->Fill(T1.pointTower.iEta ,T1.cluster.energy);
 	hA[34]->Fill(T2.pointTower.iEta ,T2.cluster.energy);
 	hA[35]->Fill(p1.Eta(),p2.Eta());
-	hA[36]->Fill(psum.Eta());
-	hA[37]->Fill(psum.Pt());
 
 #if 0
 	printf("RCC:  Found Z w/ invmass=%f\n",mass);
@@ -338,21 +336,24 @@ St2011ZMaker::find_Z_boson(){
 	if (mass>par_maxMassZ) continue; //enforce an upper bound
 	hA[0]->Fill("Zhigh",1.);
 
-	 int bxStar7=wMK->wEve->bxStar7;
-	 int bxStar48=wMK->wEve->bxStar48; 
-	 if(bxStar48!=bxStar7) {
-	   hA[0]->Fill("badBx48",1.);
-	   return; // both counters must be in sync
-	 }
-	 
-	 int spin4=wMK->wEve->spin4;  
-	 hA[38]->Fill(spin4); 
-	 if(psum.Eta()<-1) hA[39]->Fill(spin4);
-	 else if(psum.Eta()<1) hA[40]->Fill(spin4);
-	 else hA[41]->Fill(spin4);
-
+	hA[36]->Fill(psum.Eta());
+	hA[37]->Fill(psum.Pt());
+	
+	int bxStar7=wMK->wEve->bxStar7;
+	int bxStar48=wMK->wEve->bxStar48; 
+	if(bxStar48!=bxStar7) {
+	  hA[0]->Fill("badBx48",1.);
+	  return; // both counters must be in sync
+	}
+	
+	int spin4=wMK->wEve->spin4;  
+	hA[38]->Fill(spin4); 
+	if(psum.Eta()<-1) hA[39]->Fill(spin4);
+	else if(psum.Eta()<1) hA[40]->Fill(spin4);
+	else hA[41]->Fill(spin4);
+	
 	// **** I stoped changes here, Jan 
-
+	
 	float fmax1=T1.cluster.ET/T1.cl4x4.ET;
 	float fmax2=T2.cluster.ET/T2.cl4x4.ET;
 
@@ -393,6 +394,9 @@ St2011ZMaker::find_Z_boson(){
 
 
 // $Log: St2011ZMaker.cxx,v $
+// Revision 1.8  2012/09/24 19:28:15  balewski
+// moved eta & pT hitso to be filled after invM cut, now they are 'golden Z'
+//
 // Revision 1.7  2012/09/18 19:34:22  balewski
 // fill eta-dependent spin sort
 //
