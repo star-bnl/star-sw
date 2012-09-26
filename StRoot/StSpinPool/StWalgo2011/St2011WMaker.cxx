@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.18 2012/09/21 16:59:09 balewski Exp $
+// $Id: St2011WMaker.cxx,v 1.19 2012/09/26 14:20:59 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -114,7 +114,7 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   parE_esmdGL=3; // 2N+1=7 size of the integration gate len
   parE_esmdWL=7; // 2N+1=15 size of the allowed window len
 
-  parE_smdRatio=0.55;
+  parE_smdRatio=0.6;
   parE_highET=25.; // (GeV), cut-off for final Endcap W-cluster 
 
   assert(2*parE_nSmdStrip+1==41);// as hardcoded in Wtree for esmdShower[mxEsmdPlane][], it should be solved by using <vector> or TArray - left for next year to be fixed
@@ -637,6 +637,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.19  2012/09/26 14:20:59  stevens4
+// use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
+//
 // Revision 1.18  2012/09/21 16:59:09  balewski
 // added ESMD peak adjustement - partialy finished
 //

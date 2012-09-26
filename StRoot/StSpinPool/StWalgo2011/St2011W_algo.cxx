@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.17 2012/09/18 22:30:18 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.18 2012/09/26 14:20:59 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -47,7 +47,7 @@ St2011WMaker::find_W_boson(){
 
       //signal plots w/o EEMC in awayside veto
       if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
-	if(T.sPtBalance_noEEMC>par_ptBalance ) {//only signed ptBalance cut 
+	if(T.sPtBalance_noEEMC2>par_ptBalance ) {//only signed ptBalance cut 
 	  hA[140]->Fill(T.cluster.ET);
 	  hA[240]->Fill(T.prMuTrack->eta(),T.cluster.ET);
 	  if (T.prMuTrack->charge() < 0) {
@@ -60,9 +60,9 @@ St2011WMaker::find_W_boson(){
 
       //fill plot for background
       if(T.cluster.ET > par_highET) {
-	if(T.prMuTrack->charge()>0) hA[251]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
-        else if(T.prMuTrack->charge()<0) hA[252]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance);
-	hA[135]->Fill(T.awayTotET,T.sPtBalance);
+	if(T.prMuTrack->charge()>0) hA[251]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance2);
+        else if(T.prMuTrack->charge()<0) hA[252]->Fill(T.cluster.ET/T.nearTotET,T.sPtBalance2);
+	hA[135]->Fill(T.awayTotET,T.sPtBalance2);
       }
 
       // track matched to cluster plots
@@ -99,7 +99,7 @@ St2011WMaker::find_W_boson(){
 	//  float awayTot_cut = 10.+2.*((float) i);
         for (int j=0; j<=20; j++) {
           float pTBal_cut = 5.+((float) j);
-          if (T.sPtBalance<pTBal_cut) { 
+          if (T.sPtBalance2<pTBal_cut) { 
             if (T.prMuTrack->charge() < 0) {
               hA[142+i]->Fill(T.cluster.ET,j);
             } else if (T.prMuTrack->charge() > 0) {
@@ -110,7 +110,7 @@ St2011WMaker::find_W_boson(){
       }
 
       //plots for backg sub yield
-      if(T.sPtBalance>par_ptBalance ) {
+      if(T.sPtBalance2>par_ptBalance ) {
         hA[136]->Fill(T.cluster.ET);//signal
 	hA[241]->Fill(T.prMuTrack->eta(),T.cluster.ET);
         hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
@@ -130,7 +130,7 @@ St2011WMaker::find_W_boson(){
 	hA[204]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.energy/T.prMuTrack->p().mag());
       }
 
-      if(T.sPtBalance>par_ptBalance){/***************************/
+      if(T.sPtBalance2>par_ptBalance){/***************************/
 	printf("\n WWWWWWWWWWWWWWWWWWWWW  Barrel \n");
 	wDisaply->exportEvent( "WB", V, T, iv);
 	wEve->print();
@@ -138,7 +138,7 @@ St2011WMaker::find_W_boson(){
  
       
       //put final W cut here
-      if(T.sPtBalance<par_ptBalance)  continue;
+      if(T.sPtBalance2<par_ptBalance)  continue;
       hA[20]->Fill("noAway",1.0);
       nNoAway++;
 
@@ -281,7 +281,6 @@ St2011WMaker::findPtBalance(){
     WeveVertex &V=wEve->vertex[iv];
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
-      if(T.isMatch2Cl==false) continue;
 
       getJetEvent(); //check that jet and W event match
 
@@ -336,7 +335,6 @@ St2011WMaker::findAwayJet(){
     WeveVertex &V=wEve->vertex[iv];
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
-      if(T.isMatch2Cl==false) continue;
       
       // .... sum opposite in phi EMC components
       T.awayBtowET=sumBtowCone(V.z,-T.primP,1); // '1'= only cut on delta phi
@@ -365,7 +363,6 @@ St2011WMaker::findNearJet(){
     WeveVertex &V=wEve->vertex[iv];
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
-      if(T.isMatch2Cl==false) continue;
 
        // .... sum EMC-jet component
       T.nearBtowET=sumBtowCone(V.z,T.primP,2); // '2'=2D cone
@@ -385,6 +382,9 @@ St2011WMaker::findNearJet(){
 	T.nearTotET=nearSum;
 	T.nearTotET_noEEMC=nearSum-T.nearEtowET; 
 	float nearTotETfrac=T.cluster.ET/ T.nearTotET;
+
+	//move requirement here for consistency, but now calc nearCone for all candidates
+	if(T.isMatch2Cl==false) continue;
 
 	hA[40]->Fill(T.nearEmcET);
 	hA[41]->Fill(T.cluster.ET,T.nearEmcET-T.cluster.ET);
@@ -409,6 +409,9 @@ St2011WMaker::findNearJet(){
 	T.nearTotET=nearSum;
 	T.nearTotET_noEEMC=nearSum-T.nearEtowET;
 	float nearTotETfrac=T.cluster.ET/ T.nearTotET;
+
+	//move requirement here for consistency, but now calc nearCone for all candidates
+	if(T.isMatch2Cl==false) continue;
 
 	hE[40]->Fill(T.nearEmcET);
 	hE[41]->Fill(T.cluster.ET,T.nearEmcET-T.cluster.ET);
@@ -703,6 +706,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.18  2012/09/26 14:20:59  stevens4
+// use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
+//
 // Revision 1.17  2012/09/18 22:30:18  stevens4
 // change to new jet tree format with access to all rank>0 vertices
 //

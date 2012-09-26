@@ -1,4 +1,4 @@
-// $Id: St2011pubSpin_histo.cxx,v 1.5 2012/09/17 03:29:30 stevens4 Exp $
+// $Id: St2011pubSpin_histo.cxx,v 1.6 2012/09/26 14:21:00 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -111,7 +111,7 @@ St2011pubSpinMaker::initHistos(){
 
     sprintf(txt0,"Y7_%c",cPM[ipn]);
     sprintf(txt,"High pT Barrel  QCD 2x2 ET  Q=%c; spin4 : %s; 2x2 cluster ET (GeV) ",cPM[ipn],coreTitle.Data());
-    hA[22+ipn]=h=new TH2F(core+txt0,txt,16,-0.5,15.5,10,0,100);
+    hA[22+ipn]=h=new TH2F(core+txt0,txt,16,-0.5,15.5,100,0,100);
     h->SetFillColor(iCol[ipn]);
 
     sprintf(txt0,"LepEta_%c",cPM[ipn]);
@@ -231,6 +231,9 @@ St2011pubSpinMaker::initHistos(){
 
 
 // $Log: St2011pubSpin_histo.cxx,v $
+// Revision 1.6  2012/09/26 14:21:00  stevens4
+// use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
+//
 // Revision 1.5  2012/09/17 03:29:30  stevens4
 // Updates to Endcap algo and Q*ET/PT charge separation
 //
