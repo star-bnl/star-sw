@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.10 2012/09/18 21:10:08 stevens4 Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.11 2012/09/26 01:10:51 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -299,7 +299,7 @@ St2011pubSpinMaker::bXingSortEndcap(){
       
       //put final W cut here
       bool isW= T.cluster.ET/T.nearTotET > wMK->parE_nearTotEtFrac; // near cone
-      isW=isW && ((T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]) > wMK->parE_smdRatio); // smdRatio
+      isW=isW && ((T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]) > wMK->parE_smdRatio); // smdRatio
       isW=isW && T.sPtBalance2>wMK->parE_ptBalance; // awayET
     
       if(!isW) { // !!!! This is not all QCD for the endcap !!!!
@@ -355,6 +355,9 @@ St2011pubSpinMaker::bXingSortEndcap(){
 }
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.11  2012/09/26 01:10:51  stevens4
+// apply R_ESMD cut using maximum of sliding window
+//
 // Revision 1.10  2012/09/18 21:10:08  stevens4
 // Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
 //
