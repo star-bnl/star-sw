@@ -43,10 +43,10 @@ struct fgt_pedrms_t {
 
 class daq_fgt : public daq_det {
 private:
-	class daq_dta *handle_raw(int rdo) ;
+	class daq_dta *handle_raw(int sec, int rdo) ;
 
 	class daq_dta *handle_phys(int disk, int quadrant, int strip_type) ;
-	class daq_dta *handle_ped(int rdo) ;
+	class daq_dta *handle_ped(int sec, int rdo) ;
 
 	class daq_dta *raw ;	// "raw"
 	class daq_dta *adc ;	// "adc"
@@ -63,6 +63,8 @@ public:
 	~daq_fgt() ;
 
 
+	void set_flavor(int id) ;
+
 	daq_dta  *get(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0) ;
 
 	int get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt) ;
@@ -72,7 +74,7 @@ public:
 	}
 
 
-	class daq_dta *handle_adc(int rdo, char *rdobuff = 0 ) ;
+	class daq_dta *handle_adc(int sec, int rdo, char *rdobuff = 0 ) ;
 
 #if 0
 	struct fgt_adc_to_phys_t {

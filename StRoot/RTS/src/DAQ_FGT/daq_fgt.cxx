@@ -20,6 +20,7 @@ const char *daq_fgt::help_string = "FGT\n\
 adc	returns fgt_t;\n\
 raw	returns raw data\n" ;
 
+// for FGT proper
 class daq_det_fgt_factory : public daq_det_factory
 {
 public:
@@ -34,6 +35,64 @@ public:
 
 static daq_det_fgt_factory fgt_factory ;
 
+
+// for IST
+class daq_det_ist_factory : public daq_det_factory
+{
+public:
+	daq_det_ist_factory() {
+		daq_det_factory::det_factories[IST_ID] = this ;
+	}
+
+	daq_det *create() {
+		daq_det *dd = new daq_fgt ;
+
+		((daq_fgt *)dd)->set_flavor(IST_ID) ;
+
+		return dd ;
+	}
+} ;
+
+static daq_det_ist_factory ist_factory ;
+
+// for GMT
+class daq_det_gmt_factory : public daq_det_factory
+{
+public:
+	daq_det_gmt_factory() {
+		daq_det_factory::det_factories[GMT_ID] = this ;
+	}
+
+	daq_det *create() {
+		daq_det *dd = new daq_fgt ;
+
+		((daq_fgt *)dd)->set_flavor(GMT_ID) ;
+
+		return dd ;
+	}
+} ;
+
+static daq_det_gmt_factory gmt_factory ;
+
+
+
+void daq_fgt::set_flavor(int id)
+{
+	switch(id) {
+	case IST_ID :
+		rts_id = id ;
+		name = rts2name(rts_id) ;
+		sfs_name = "ist" ;
+	default :
+		rts_id = FGT_ID ;	
+		name = rts2name(rts_id) ;
+		sfs_name = "fgt" ;
+	}
+
+	LOG(DBG,"set_flavor %d [%s]",rts_id,name) ;
+
+	return ;
+} ;
 
 daq_fgt::daq_fgt(daqReader *rts_caller) 
 {
@@ -83,16 +142,13 @@ daq_dta *daq_fgt::get(const char *bank, int sec, int rdo, int pad, void *p1, voi
 
 
 	if(strcasecmp(bank,"raw")==0) {
-		return handle_raw(rdo) ;
+		return handle_raw(sec,rdo) ;
 	}
 	else if(strcasecmp(bank,"adc")==0) {
-		return handle_adc(rdo,0) ;
-	}
-	else if(strcasecmp(bank,"phys")==0) {
-		return handle_phys(sec,rdo,pad) ;
+		return handle_adc(sec,rdo,0) ;
 	}
 	else if(strcasecmp(bank,"pedrms")==0) {
-		return handle_ped(rdo) ;
+		return handle_ped(sec,rdo) ;
 	}
 
 
@@ -102,11 +158,12 @@ daq_dta *daq_fgt::get(const char *bank, int sec, int rdo, int pad, void *p1, voi
 
 
 
-daq_dta *daq_fgt::handle_raw(int rdo)
+daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 {
 	char *st ;
 	int r_start, r_stop ;
 	int bytes ;
+	int s = 1 ;
 
 	assert(caller) ;	// sanity...
 
@@ -133,7 +190,7 @@ daq_dta *daq_fgt::handle_raw(int rdo)
 	raw->create(8*1024,"fgt_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
 
 	for(int r=r_start;r<=r_stop;r++) {
-		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, 1, r) ;
+		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, s, r) ;
 		full_name = caller->get_sfs_name(str) ;
 		
 		if(!full_name) continue ;
@@ -159,10 +216,10 @@ daq_dta *daq_fgt::handle_raw(int rdo)
 
 	
 
-daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
+daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 {
 	int r_start, r_stop ;
-
+	int s = 1 ;	// for now...
 
 	adc->create(1000,"fgt_adc",rts_id,DAQ_DTA_STRUCT(fgt_adc_t)) ;
 
@@ -182,7 +239,7 @@ daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 		u_int *d ;
 
 		if(rdobuff == 0) {
-			daq_dta *dd = handle_raw(r) ;
+			daq_dta *dd = handle_raw(s,r) ;
 			if(dd == 0) continue ;
 
 			if(dd->iterate() == 0) continue ;
@@ -390,11 +447,11 @@ unrecoverable_error:
 			
 }
 
-daq_dta *daq_fgt::handle_ped(int rdo)
+daq_dta *daq_fgt::handle_ped(int sec, int rdo)
 {
 
 	int r_start, r_stop ;
-
+	
 
 	LOG(NOTE,"FGT PED is not yet supported") ;
 	return 0 ;
@@ -448,14 +505,6 @@ daq_dta *daq_fgt::handle_ped(int rdo)
 }
 
 
-daq_dta *daq_fgt::handle_phys(int disk, int quadrant, int strip_type)
-{
-
-	return 0 ;
-
-	LOG(WARN,"FGT PHYS not yet supported....") ;
-	return 0 ;
-}
 
 
 // used to grab trigger info from the event header
