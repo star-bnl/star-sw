@@ -39,7 +39,9 @@ void readWtree(	const Char_t *fileList="./R13104003.lis", int etaBin=8, int maxE
 
   //initiate W maker
   wTreeMk = new St2011WMaker(Form("Eta%d",etaBin));
-  wTreeMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
+  //wTreeMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
+  wTreeMk->setJetTreeBranch("AntiKtR060NHits12","AntiKtR060NHits12_noEEMC");
+
   //set cuts for barrle and endcap algos
   wTreeMk->setWbosonCuts(25., 0.88, 14., etaLow[etaBin-1], etaHigh[etaBin-1]); //highET, nearTotEtFrac, ptBalance, etaLow, etaHigh
   wTreeMk->setE_WbosonCuts(25., 0.85, 20., etaLow[etaBin-1], etaHigh[etaBin-1]); //highET, nearTotEtFrac, ptBalance, etaLow, etaHigh
