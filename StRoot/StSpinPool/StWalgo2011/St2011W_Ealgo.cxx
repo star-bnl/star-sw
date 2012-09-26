@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.18 2012/09/21 21:14:04 balewski Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.19 2012/09/26 01:10:51 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -103,10 +103,10 @@ St2011WMaker::findEndcap_W_boson(){
       if(T.sPtBalance>parE_ptBalance){
         hE[214]->Fill(T.cluster.ET,T.esmdE[0]+T.esmdE[1]);
         hE[215]->Fill(T.cluster.ET,T.esmdNhit[0]+T.esmdNhit[1]);
-        hE[220]->Fill(T.cluster.ET,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+        hE[220]->Fill(T.cluster.ET,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
         hE[223]->Fill(T.cluster.ET,T.enePre1+T.enePre2);
         hE[224]->Fill(T.cluster.ET,T.enePost);
-        hE[227]->Fill(T.cluster.ET,T.esmdEsum7[0]+T.esmdEsum7[1]);
+        hE[227]->Fill(T.cluster.ET,T.esmdPeakSumE[0]+T.esmdPeakSumE[1]);
         hE[228]->Fill(T.cluster.ET,T.esmdMaxADC);
 	
         if(T.cluster.ET>parE_highET) { //most W like
@@ -116,7 +116,7 @@ St2011WMaker::findEndcap_W_boson(){
 	  // hE[216]->Fill(
           hE[217]->Fill(T.pointTower.R.X()-T.esmdXPcentroid.X(),T.pointTower.R.Y()-T.esmdXPcentroid.Y());
           hE[218]->Fill(T.pointTower.R.Eta()-T.esmdXPcentroid.Eta(),T.pointTower.R.Phi()-T.esmdXPcentroid.Phi());
-          hE[219]->Fill(T.esmdEsum7[0]/T.esmdE[0],T.esmdEsum7[1]/T.esmdE[1]);
+          hE[219]->Fill(T.esmdPeakSumE[0]/T.esmdE[0],T.esmdPeakSumE[1]/T.esmdE[1]);
 	  
           hE[221]->Fill(T.enePre1,T.enePre2);
           hE[222]->Fill(T.enePre1+T.enePre2,T.enePost);
@@ -127,8 +127,8 @@ St2011WMaker::findEndcap_W_boson(){
         }
       }
       else { //mostly QCD
-        if(T.cluster.ET>parE_highET) hE[235]->Fill(T.esmdEsum7[0]/T.esmdE[0],T.esmdEsum7[1]/T.esmdE[1]);
-        hE[236]->Fill(T.cluster.ET,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+        if(T.cluster.ET>parE_highET) hE[235]->Fill(T.esmdPeakSumE[0]/T.esmdE[0],T.esmdPeakSumE[1]/T.esmdE[1]);
+        hE[236]->Fill(T.cluster.ET,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
       }
       
       //define charge separation
@@ -140,32 +140,32 @@ St2011WMaker::findEndcap_W_boson(){
       //correlate ratio with sPtBal for goldWs (used for background)
       if( fabs(hypCorr_p) > 0.4 && fabs(hypCorr_p) < 1.8) { //remove ambiguous charges BG treatment
 	if(T.cluster.ET > parE_highET){
-	  hE[237]->Fill(T.sPtBalance,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
-	  hE[238]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	  hE[237]->Fill(T.sPtBalance,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
+	  hE[238]->Fill(T.sPtBalance2,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
 	  if(T.prMuTrack->charge()>0) 
-	    hE[250]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	    hE[250]->Fill(T.sPtBalance2,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
 	  else
-	    hE[251]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	    hE[251]->Fill(T.sPtBalance2,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
 	}
 	// try lower threshold to find background
 	if(T.cluster.ET > 20.){
-	  hE[252]->Fill(T.sPtBalance,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
-	  hE[253]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	  hE[252]->Fill(T.sPtBalance,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
+	  hE[253]->Fill(T.sPtBalance2,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
 	  if(T.prMuTrack->charge()>0) 
-	    hE[254]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	    hE[254]->Fill(T.sPtBalance2,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
 	  else
-	    hE[255]->Fill(T.sPtBalance2,(T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]));
+	    hE[255]->Fill(T.sPtBalance2,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
 	}
       }
 
       //fail ratio cut at 0.5 (mostly BG)
-      if((T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]) < 0.5){
+      if((T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]) < 0.5){
 	hE[232]->Fill(T.cluster.ET,T.sPtBalance);
         hE[233]->Fill(T.cluster.ET,T.sPtBalance2);
       }
 
       //event display
-      if(T.sPtBalance2>parE_ptBalance && (T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]) > parE_smdRatio){/***************************/
+      if(T.sPtBalance2>parE_ptBalance && (T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]) > parE_smdRatio){/***************************/
         printf("\n WWWWWWWWWWWWWWWWWWWWW  Endcap \n");
         wDisaply->exportEvent( "WE", V, T, iv);
         wEve->print();
@@ -173,7 +173,7 @@ St2011WMaker::findEndcap_W_boson(){
       }/***************************/
 
       //cut on ESMD ratio
-      if((T.esmdEsum7[0]+T.esmdEsum7[1])/(T.esmdE[0]+T.esmdE[1]) < parE_smdRatio)
+      if((T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]) < parE_smdRatio)
         continue;
       
       hE[20]->Fill("smdRatio",1.0);
@@ -669,6 +669,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.19  2012/09/26 01:10:51  stevens4
+// apply R_ESMD cut using maximum of sliding window
+//
 // Revision 1.18  2012/09/21 21:14:04  balewski
 // plane/sectord dependent Z-location for ESMD implemented in matching of TPC track to ESMD shower.
 // I'm done
