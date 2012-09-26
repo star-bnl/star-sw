@@ -34,9 +34,9 @@
 #include <DAQ_TPX/daq_tpx.h>
 #include <DAQ_TRG/daq_trg.h>
 #include <DAQ_HLT/daq_hlt.h>
-#include <DAQ_FGT/daq_fgt.h>
+#include <DAQ_FGT/daq_fgt.h>	//includes GMT & IST
 #include <DAQ_MTD/daq_mtd.h>
-//#include <DAQ_GMT/daq_gmt.h>
+
 
 // I wrapped more complicated detectors inside their own functions
 // for this example
@@ -60,7 +60,9 @@ static int l3_doer(daqReader *rdr, const char *do_print) ;
 static int fgt_doer(daqReader *rdr, const char *do_print) ;
 static int mtd_doer(daqReader *rdr, const char *do_print) ;
 static int tinfo_doer(daqReader *rdr, const char *do_print);
-//static int gmt_doer(daqReader *rdr, const char *do_print) ;
+
+static int gmt_doer(daqReader *rdr, const char *do_print) ;
+//static int ist_doer(daqReader *rdr, const char *do_print) ;
 
 static int good ;
 
@@ -285,7 +287,7 @@ int main(int argc, char *argv[])
 		if(mtd_doer(evp,print_det)) LOG(INFO,"MTD found") ;
 
 		/*************************** GMT **************************/
-		//if(gmt_doer(evp,print_det)) LOG(INFO,"GMT found") ;
+		if(gmt_doer(evp,print_det)) LOG(INFO,"GMT found") ;
 		
 
 
@@ -1043,7 +1045,6 @@ static int fgt_doer(daqReader *rdr, const char *do_print)
 	else do_print = 0 ;
 
 
-	// right now only the "raw" pointer is available/known
 	dd = rdr->det("fgt")->get("raw") ;
 	if(dd) {
 		while(dd->iterate()) {
@@ -1154,7 +1155,6 @@ static int mtd_doer(daqReader *rdr, const char *do_print)
 	return found ;
 }
 
-#if 0
 static int gmt_doer(daqReader *rdr, const char *do_print)
 {
 	int found = 0 ;
@@ -1175,7 +1175,7 @@ static int gmt_doer(daqReader *rdr, const char *do_print)
 
 
 			if(do_print) {
-				printf("GMT: RDO %d: %d bytes\n",dd->rdo,dd->ncontent) ;
+				printf("GMT RAW: RDO %d: %d bytes (%d words)\n",dd->rdo,dd->ncontent,dd->ncontent/4) ;
 				// dump a few
 				for(int i=0;i<10;i++) {
 					printf(" %2d: 0x%08X\n",i,d[i]) ;
@@ -1188,7 +1188,6 @@ static int gmt_doer(daqReader *rdr, const char *do_print)
 	return found ;
 }
 
-#endif
 
 
 
