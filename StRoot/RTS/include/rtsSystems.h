@@ -82,15 +82,14 @@
 #define TCD_BSMD        15      //0x19
 #define TCD_CTB         16	//0x1A, trigger-only
 #define TCD_BTOW        17      //0x1B
-#define TCD_FTPC        18      //0x1C; gone in Sep '11
-#define TCD_PMD         19      //0x1D; gone in Sep '11
+#define TCD_SST         18      //0x1C; was FTPC; gone in Sep '11
+#define TCD_PXL         19      //0x1D; was PMD; gone in Sep '11
 #define TCD_GMT         20      //0x1E; WAS: empty, Nov, 2008
 #define TCD_VPD		21      //0x1F trigger-only
 
 
 
 // 2012 Group definitions...
-#define FTP_GRP		0
 #define SST_GRP		0	// same as old FTPC
 
 #define PP_GRP	        1
@@ -101,7 +100,6 @@
 #define ESMD_GRP	6
 #define TPX_GRP		7
 
-#define PMD_GRP         8
 #define PXL_GRP		8	// same as old PMD
 
 #define FGT_GRP         9
@@ -647,14 +645,14 @@ extern inline int rts2tcd(int rts)
 		TCD_TOF,	//2
 		TCD_BTOW,	//3
 		-1,		//4: FPD gone...
-		TCD_FTPC,	//5: FTPC 
+		-1,		//5: FTPC gone
 		-1,		//6
 		-1,		//7
 		-1,		//8
 		-1,		//9
 		-1,		//10
 		-1,		//11
-		TCD_PMD,	//12: PMD
+		-1,		//12: PMD gone
 		-1,		//13: SSD gone...
 		TCD_ETOW,	//14
 		-1,		//15: generic DAQ
@@ -663,10 +661,10 @@ extern inline int rts2tcd(int rts)
 		TCD_BSMD,	//18
 		TCD_ESMD,	//19
 		TCD_TPX,	//20
-		-1,		//21 PXL
+		TCD_PXL,	//21 PXL
 		TCD_MTD,	//22 MTD
 		-1,		//23 IST
-		-1,		//24 SST
+		TCD_SST,	//24 SST
 		-1,		//25 RPII
 		TCD_GMT		//26 GMT
 		-1,		//27
@@ -675,6 +673,9 @@ extern inline int rts2tcd(int rts)
 		-1,		//30
 		-1,		//31
 	} ;
+
+	if(rts < 0) return -1 ;
+	if(rts >31) return -1 ;
 
 	return map[rts] ;
 
@@ -701,8 +702,8 @@ extern inline int tcd2rts(int tcd)
         BSMD_SYSTEM,	//15
         -1,		//16 CTB aka ZDC
         BTOW_SYSTEM,	//17
-        FTP_SYSTEM,	//18
-        PMD_SYSTEM,	//19
+        SST_SYSTEM,	//18
+        PXL_SYSTEM,	//19
         GMT_SYSTEM,	//20 GMT; EMPTY until Aug 11; TPC was here... removed Sep 08
         -1,		//21 VPD
         -1,		//22
@@ -735,8 +736,8 @@ extern inline u_int grp2rts_mask(int grp)
 
 	ret = 0 ;
 
-	if(grp & (1<<FTP_GRP)) {
-	  ret  |= (1<<FTP_SYSTEM) ;
+	if(grp & (1<<SST_GRP)) {
+	  ret  |= (1<<SST_SYSTEM) ;
 	}
 	if(grp & (1 << PP_GRP)) {
 	  ret |= (1 << PP_SYSTEM);
@@ -759,8 +760,8 @@ extern inline u_int grp2rts_mask(int grp)
 	if(grp & (1 << TPX_GRP)) {
 	  ret |= (1 << TPX_SYSTEM);
 	}
-	if(grp & (1 << PMD_GRP)) {
-	  ret |= (1 << PMD_SYSTEM);
+	if(grp & (1 << PXL_GRP)) {
+	  ret |= (1 << PXL_SYSTEM);
 	}
 	if(grp & (1 << FGT_GRP)) {
 	  ret |= (1 << FGT_SYSTEM);
@@ -781,8 +782,6 @@ extern inline int rts2grp(int rts)
   switch(rts)
     {
 	// Instance doesn't matter...
-	case FTP_ID:
-		return FTP_GRP;
 	case PP_ID:
 		return PP_GRP;
 	case ETOW_ID:
@@ -797,8 +796,6 @@ extern inline int rts2grp(int rts)
 		return TOF_GRP;
 	case TPX_ID:
 		return TPX_GRP;
-	case PMD_ID:
-		return PMD_GRP;
 	case FGT_ID:
 		return FGT_GRP;
 	case MTD_ID:
