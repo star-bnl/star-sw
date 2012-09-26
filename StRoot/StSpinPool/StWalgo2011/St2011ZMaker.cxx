@@ -1,4 +1,4 @@
-// $Id: St2011ZMaker.cxx,v 1.8 2012/09/24 19:28:15 balewski Exp $
+// $Id: St2011ZMaker.cxx,v 1.9 2012/09/26 14:20:59 stevens4 Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -293,6 +293,7 @@ St2011ZMaker::find_Z_boson(){
 
 	TVector3 psum=p1+p2;
 	float mass2=(e1+e2)*(e1+e2)-(psum.Dot(psum));
+	float yZ=0.5*log((e1+e2+psum.Z())/(e1+e2-psum.Z()));
 	if(mass2<1.) continue; // 9GeV^2) should be param, I'm tired today
 	hA[0]->Fill("m2",1.);
 	
@@ -336,7 +337,7 @@ St2011ZMaker::find_Z_boson(){
 	if (mass>par_maxMassZ) continue; //enforce an upper bound
 	hA[0]->Fill("Zhigh",1.);
 
-	hA[36]->Fill(psum.Eta());
+	hA[36]->Fill(yZ);//psum.Eta());
 	hA[37]->Fill(psum.Pt());
 	
 	int bxStar7=wMK->wEve->bxStar7;
@@ -348,8 +349,8 @@ St2011ZMaker::find_Z_boson(){
 	
 	int spin4=wMK->wEve->spin4;  
 	hA[38]->Fill(spin4); 
-	if(psum.Eta()<-1) hA[39]->Fill(spin4);
-	else if(psum.Eta()<1) hA[40]->Fill(spin4);
+	if(yZ<-0.3) hA[39]->Fill(spin4);
+	else if(yZ<0.3) hA[40]->Fill(spin4);
 	else hA[41]->Fill(spin4);
 	
 	// **** I stoped changes here, Jan 
@@ -394,6 +395,9 @@ St2011ZMaker::find_Z_boson(){
 
 
 // $Log: St2011ZMaker.cxx,v $
+// Revision 1.9  2012/09/26 14:20:59  stevens4
+// use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
+//
 // Revision 1.8  2012/09/24 19:28:15  balewski
 // moved eta & pT hitso to be filled after invM cut, now they are 'golden Z'
 //

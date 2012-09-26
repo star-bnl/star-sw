@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.19 2012/09/26 01:10:51 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.20 2012/09/26 14:20:59 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -100,7 +100,7 @@ St2011WMaker::findEndcap_W_boson(){
       }
       
       //some ESMD QA plots
-      if(T.sPtBalance>parE_ptBalance){
+      if(T.sPtBalance2>parE_ptBalance){
         hE[214]->Fill(T.cluster.ET,T.esmdE[0]+T.esmdE[1]);
         hE[215]->Fill(T.cluster.ET,T.esmdNhit[0]+T.esmdNhit[1]);
         hE[220]->Fill(T.cluster.ET,(T.esmdPeakSumE[0]+T.esmdPeakSumE[1])/(T.esmdE[0]+T.esmdE[1]));
@@ -669,6 +669,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.20  2012/09/26 14:20:59  stevens4
+// use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
+//
 // Revision 1.19  2012/09/26 01:10:51  stevens4
 // apply R_ESMD cut using maximum of sliding window
 //

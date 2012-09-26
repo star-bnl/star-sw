@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.13 2012/09/18 21:10:08 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.14 2012/09/26 14:20:59 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -257,7 +257,7 @@ St2011WMaker::initHistos(){
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   
   // free 102-109
-  hA[104]=h=new TH1F("muWtime",Form("Barrel Golden W: unix time final selection %s 3/18/12 - 4/19/12; unixtime (bin = 10 min)",coreTitle.Data()),4608,1332028800,1334793600);
+  hA[104]=h=new TH1F("muWtime",Form("Barrel Golden W: unix time final selection %s 3/17/12 - 4/20/12; unixtime (bin = 10 min)",coreTitle.Data()),4896,1331942400,1334880000);
 
   //..... series of electron ET plots after succesive cuts
   char tt2[][200]={"max 2x2","track matched","no near ET","no away ET"};
@@ -393,6 +393,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.14  2012/09/26 14:20:59  stevens4
+// use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
+//
 // Revision 1.13  2012/09/18 21:10:08  stevens4
 // Include all rank>0 vertex again (new jet format coming next), and remove rank<0 endcap vertices.
 //

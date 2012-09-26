@@ -1,4 +1,4 @@
-// $Id: St2011pubSpinMaker.cxx,v 1.11 2012/09/26 01:10:51 stevens4 Exp $
+// $Id: St2011pubSpinMaker.cxx,v 1.12 2012/09/26 14:20:59 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -16,10 +16,10 @@ ClassImp(St2011pubSpinMaker)
   core=name;
   coreTitle=etaName;
 
-  par_QPTlow=0.010;
+  par_QPTlow=0.4;
   par_QPThighET0=25; 
   par_QPThighET1=50; 
-  par_QPThighA=0.08; 
+  par_QPThighA=1.8; 
   par_QPThighB=0.0013; 
   par_leptonEta1=-1.; par_leptonEta2=1.;
   par_useNoEEMC=0;
@@ -149,24 +149,24 @@ St2011pubSpinMaker::bXingSort(){
       if( p_Q<0 ) iQ=1;// minus
       float ET=T.cluster.ET;
       
+      // high-pT QCD condition here
+      if( frac24 < wMK->par_clustFrac24 && T.cluster.ET/T.nearTotET < wMK->par_nearTotEtFrac && T.sPtBalance2 < wMK->par_ptBalance) //not isolated && doesn't pass sPtBal
+	{
+	  hA[22+iQ]->Fill(spin4,ET);
+	  if(T.prMuTrack->eta()>par_leptonEta1 && T.prMuTrack->eta()<par_leptonEta2 && ET>25 && ET<50)//kinematic conditions
+	    hA[20+iQ]->Fill(spin4);
+	}
+
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
       assert(T.nearTotET>0); // internal logical error
       
-      // high-pT QCD condition here
-      if( T.cluster.ET/T.nearTotET < wMK->par_nearTotEtFrac && T.sPtBalance < wMK->par_ptBalance) //not isolated && doesn't pass sPtBal
-	{
-	  hA[22+iQ]->Fill(spin4,ET);
-	  if(T.prMuTrack->eta()>par_leptonEta1 && T.prMuTrack->eta()<par_leptonEta2 && ET>25 && ET<50) //kinematic conditions
-	    hA[20+iQ]->Fill(spin4);
-	}
-      
       //put final W cut here
       bool isW= T.cluster.ET /T.nearTotET> wMK->par_nearTotEtFrac;  // near cone
       if(par_useNoEEMC) 
-	isW=isW && T.sPtBalance_noEEMC>wMK->par_ptBalance; // awayET
+	isW=isW && T.sPtBalance_noEEMC2>wMK->par_ptBalance; // awayET
       else
-	isW=isW && T.sPtBalance>wMK->par_ptBalance; // awayET
+	isW=isW && T.sPtBalance2>wMK->par_ptBalance; // awayET
     
       if(!isW) { // AL(QCD)
 	if(ET>15 &&ET<20 ) hA[16+iQ]->Fill(spin4);
@@ -189,15 +189,12 @@ St2011pubSpinMaker::bXingSort(){
       if(ET>par_myET) hA[8]->Fill(q2pt);
       hA[9]->Fill(ET,q2pt);
       
-      // apply cut on reco charge
-      if( fabs(q2pt)< par_QPTlow) continue;
-      if(ET>par_myET) hA[0]->Fill("Qlow",1.);
-
-      if(par_QPTlow>0) { // abaility to skip all Q/PT cuts
-	if( fabs(q2pt)< par_QPTlow) continue;
-	float highCut=par_QPThighA - (ET-par_QPThighET0)*par_QPThighB;
-	// printf("fff ET=%f q2pr=%f highCut=%f passed=%d\n",ET, q2pt,highCut,fabs(q2pt)<highCut);
-	if( ET>par_myET && ET<par_QPThighET1 && fabs(q2pt)>highCut) continue;
+      // new charge rejection Q*ET/PT
+      float hypCorr = q2pt*(T.cluster.ET);
+      if(par_QPTlow>0) { // ability to skip all Q/PT cuts
+	if( fabs(hypCorr) < par_QPTlow) continue;
+	if(ET>par_myET) hA[0]->Fill("Qlow",1.);
+	if( fabs(hypCorr) > par_QPThighA) continue;
       }
 
       if(ET>par_myET) {
@@ -325,7 +322,7 @@ St2011pubSpinMaker::bXingSortEndcap(){
 
       // new charge rejection Q*ET/PT
       float hypCorr = q2pt*(T.cluster.ET);
-      if(parE_QPTlow>0) { // abaility to skip all Q/PT cuts
+      if(parE_QPTlow>0) { // ability to skip all Q/PT cuts
 	if( fabs(hypCorr) < parE_QPTlow) continue;
 	if(ET>par_myET) hE[0]->Fill("Qlow",1.);
 	if( fabs(hypCorr) > parE_QPThighA) continue;
@@ -355,6 +352,9 @@ St2011pubSpinMaker::bXingSortEndcap(){
 }
 
 // $Log: St2011pubSpinMaker.cxx,v $
+// Revision 1.12  2012/09/26 14:20:59  stevens4
+// use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
+//
 // Revision 1.11  2012/09/26 01:10:51  stevens4
 // apply R_ESMD cut using maximum of sliding window
 //
