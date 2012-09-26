@@ -151,7 +151,7 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 
 	struct peds *p = ped_store + rdo ;
 
-	daq_dta *dd = fgt_rdr->handle_adc(rdo1, evbuff) ;
+	daq_dta *dd = fgt_rdr->handle_adc(1,rdo1, evbuff) ;
 
 	while(dd->iterate()) {
 		if(dd->rdo != rdo1) continue ;
