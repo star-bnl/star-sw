@@ -38,8 +38,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
   TString RunOpt(Run);
   RunOpt.ToLower();
   //ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
-  ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
-  ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
+  ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,TpcHitMover,";
+  //  ChainOpt += "Corr4";// no dynamical distortion ! ,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
   //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
   //  ChainOpt += ",CMuDst,MiniMcMk,IdTruth,useInTracker,tree,";
   ChainOpt += ",CMuDst,McAna,IdTruth,useInTracker,tree,";
@@ -110,7 +110,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2011,TpcRS",
     bfc(-1,ChainOpt.Data(),0,0,0);
     return;
   }
-  if (RunOpt.Contains("devT",TString::kIgnoreCase)) ChainOpt += ",useXgeom";
+  if (RunOpt.Contains("devT,",TString::kIgnoreCase)) ChainOpt += ",useXgeom";
   bfc(-1,ChainOpt.Data(),fileIn,output.Data(),RootFile.Data());
   if (ChainOpt.Contains("TpcRS",TString::kIgnoreCase)) {
     StTpcRSMaker *tpcRS = (StTpcRSMaker *) chain->Maker("TpcRS");
