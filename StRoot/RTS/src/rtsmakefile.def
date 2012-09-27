@@ -12,8 +12,8 @@ export HOST_CPU := $(shell uname -m)
 export HOST_NAME := $(shell uname -n)
 ifeq ($(HOST_NAME),daqman.starp.bnl.gov)
 	export ENABLE_CROSS_COMPILER := 1
-else
-	export ENABLE_CROSS_COMPILER := 0
+#else
+#	export ENABLE_CROSS_COMPILER := 0
 endif
 
 
