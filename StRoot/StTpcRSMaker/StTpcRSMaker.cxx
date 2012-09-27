@@ -55,7 +55,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.63 2012/09/27 16:14:43 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.64 2012/09/27 19:17:02 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -497,8 +497,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   // constants
 #ifdef __DEBUG__
   static Int_t iBreak = 0;
-  static Int_t iSec  = 0;
 #endif
+  static Int_t iSec  = 0;
   if (Debug()%10) {
     gBenchmark->Reset();
     gBenchmark->Start("TpcRS");
@@ -1606,8 +1606,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.63 2012/09/27 16:14:43 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.64 2012/09/27 19:17:02 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.64  2012/09/27 19:17:02  fisyak
+// Fix missing declaration
+//
 // Revision 1.63  2012/09/27 16:14:43  fisyak
 // Change debug print out scheme
 //
