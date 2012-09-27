@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.76 2012/09/14 13:45:40 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.77 2012/09/27 16:10:56 fisyak Exp $
 #define CompareWithToF 
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -190,8 +190,8 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
       mNormal[sector-1][row-1] = new StThreeVectorD(dirG.position().unit());
       if (Debug()>1) cout << "Normal[" << sector-1 << "][" << row-1 << "] = " << *mNormal[sector-1][row-1] << endl;
       Double_t padlength;
-      if (row<14) padlength = gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();
-      else 	  padlength = gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();
+      if (row <= NumberOfInnerRows) padlength = gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();
+      else 	                    padlength = gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();
       for (Int_t l = 0; l < 3; l++) {
 	if (! mRowPosition[sector-1][l]) {
 	  mRowPosition[sector-1][l]  = new StThreeVectorD*[NumberOfRows]; 
@@ -218,7 +218,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
       if (Debug()>1) cout << "========= West (0) or  East(1) / Inner(0) or Outer (1)  ========" 
 			  << iWestEast << "/" << io << endl;
       Int_t sector = (iWestEast == 0) ? 12 : 24;
-      Int_t row    = (io    == 0) ?  1 : 14;
+      Int_t row    = (io    == 0) ?  1 : NumberOfInnerRows+1;
       StTpcLocalSectorDirection  dirLS(0.,0.,1.0,sector,row);  if (Debug()>1) cout << "dirLS\t" << dirLS << endl;
       StTpcLocalDirection        dirL;      
       StTpcLocalSectorAlignedDirection  dirLSA;
@@ -407,8 +407,8 @@ Int_t StdEdxY2Maker::Make(){
 	if (NumberOfRows == 45) {// ! iTpx
 	  // Check that Voltage above "-100V" from nominal, mark as unrecoverable
 	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sector,row);
-	  if ((row <= 13 && 1170 - V > 100) || 
-	      (row >  13 && 1390 - V > 100)) {BadHit(9,tpcHit->position()); continue;}
+	  if ((row <= NumberOfInnerRows && 1170 - V > 100) || 
+	      (row >  NumberOfInnerRows && 1390 - V > 100)) {BadHit(9,tpcHit->position()); continue;}
 	}
 	// check that helix prediction is consistent with measurement
 	if (Propagate(middle,normal,helixI,helixO,bField,xyz[0],dirG,s,w)) {BadHit(2,tpcHit->position()); continue;}
@@ -456,7 +456,7 @@ Int_t StdEdxY2Maker::Make(){
 	  Int_t iWestEast = 0;
 	  if (sector > 12) iWestEast = 1;
 	  Int_t io = 0;
-	  if (row > 13) io = 1;
+	  if (row > NumberOfInnerRows) io = 1;
 	  const StThreeVectorD &PromptNormal = *mPromptNormal[iWestEast][io];
 	  const StThreeVectorD &anode = *mPromptPosition[iWestEast][io][0];
 	  const StThreeVectorD &gg    = *mPromptPosition[iWestEast][io][1];
@@ -565,7 +565,7 @@ Int_t StdEdxY2Maker::Make(){
 	//	if ((TESTBIT(m_Mode, kXYZcheck)) && (TESTBIT(m_Mode, kCalibration))) XyzCheck(&global, iokCheck);
 	if ((TESTBIT(m_Mode, kPadSelection)) && iokCheck) {BadHit(3, tpcHit->position()); continue;}
 	if ((TESTBIT(m_Mode, kPadSelection)) && (dx < 0.5 || dx > 25.)) {BadHit(4, tpcHit->position()); continue;}
-	StTpcdEdxCorrection::ESector kTpcOutIn = StTpcdEdxCorrection::kTpcOuter;
+	StTpcdEdxCorrection::ESector  kTpcOutIn = StTpcdEdxCorrection::kTpcOuter;
 	if (row <= NumberOfInnerRows) kTpcOutIn = StTpcdEdxCorrection::kTpcInner;
 	// Corrections
 	CdEdx[NdEdx].Reset();
@@ -601,7 +601,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].xyz[1] = localSect[3].position().y();
 	CdEdx[NdEdx].xyz[2] = localSect[3].position().z();
 	Double_t probablePad = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row)/2;
-	Double_t pitch = (row<14) ?
+	Double_t pitch = (row <= NumberOfInnerRows) ?
 	  gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch() :
 	  gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
 	Double_t PhiMax = TMath::ATan2(probablePad*pitch, gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(row));
@@ -678,13 +678,13 @@ Int_t StdEdxY2Maker::Make(){
 	  Double_t I70A = 0;
 	  Double_t D70A = 0;
 	  Int_t Nouter = 0;
-	  for (k = 0; k < NdEdx; k++) if (dEdxS[k].row > 13) Nouter++;
+	  for (k = 0; k < NdEdx; k++) if (dEdxS[k].row > NumberOfInnerRows) Nouter++;
 	  Int_t N70outer = Nouter - (int) (0.3*Nouter + 0.5);
 	  Double_t TrackLengthA = 0;
 	  if (N70outer > 1) {
 	    Int_t N = 0;
 	    for (k = 0; k < N70outer; k++) {
-	      if (dEdxS[k].row <= 13 || N > N70outer) continue;
+	      if (dEdxS[k].row <= NumberOfInnerRows || N > N70outer) continue;
 	      N++;
 	      I70A += dEdxS[k].dEdx;
 	      D70A += dEdxS[k].dEdx*dEdxS[k].dEdx;
@@ -1534,7 +1534,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (FdEdx[k].C[l].dEdx > 0)
 	  FdEdx[k].C[l].dEdxN = TMath::Log(FdEdx[k].C[l].dEdx/predB);
       }
-      if (FdEdx[k].row < 14) {
+      if (FdEdx[k].row <= NumberOfInnerRows) {
 	hdEI->Fill(TMath::Log10(FdEdx[k].dE));
 	hdEUI->Fill(TMath::Log10(FdEdx[k].C[StTpcdEdxCorrection::kUncorrected].dE));
 	hdERI->Fill(TMath::Log10(FdEdx[k].C[StTpcdEdxCorrection::kAdcCorrection].dE));
@@ -1561,7 +1561,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  Double_t PredA = 1.e-6*TMath::Exp(zA);
 	  Double_t PredE =  PredA*FdEdx[k].dx;
 	  Double_t PredEL = TMath::Log10(PredE);
-	  if (FdEdx[k].row < 14) {
+	  if (FdEdx[k].row <= NumberOfInnerRows) {
 	    if (AdcI)        AdcI->Fill(PredEL,TMath::Log10(FdEdx[k].C[StTpcdEdxCorrection::kUncorrected].dE));
 	    if (AdcIC)      AdcIC->Fill(PredEL,TMath::Log10(FdEdx[k].dE));
 	  }
@@ -1574,7 +1574,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	  Double_t PredEULN = TMath::Log(PredEU);
 	  Double_t PredEUkeV = 1.e6*PredE;
 	  if (tpcGas) {
-	    if (FdEdx[k].row < 14) {
+	    if (FdEdx[k].row <= NumberOfInnerRows) {
 	      if (Adc3I)   Adc3I->Fill(PredEUL,TMath::Log10(FdEdx[k].C[StTpcdEdxCorrection::kUncorrected].dE));
 	      if (Adc3IC) Adc3IC->Fill(PredEUL,TMath::Log10(FdEdx[k].dE));
 	      if (Adc3Ip && Adc3Ip[PiDkeyU3]) 
@@ -1635,8 +1635,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    if (BBC3) BBC3->Fill(FdEdx[k].row,TMath::Log10(St_trigDetSumsC::instance()->bbcX()), FdEdx[k].dEdxN);
 	  }
 	  if (St_trigDetSumsC::instance()->mult() > 0) {
-	    if (MultiplicityPI && FdEdx[k].row < 14) MultiplicityPI->Fill(TMath::Log10(St_trigDetSumsC::instance()->mult()), FdEdx[k].dEdxN);
-	    if (MultiplicityPO && FdEdx[k].row > 13) MultiplicityPO->Fill(TMath::Log10(St_trigDetSumsC::instance()->mult()), FdEdx[k].dEdxN);
+	    if (MultiplicityPI && FdEdx[k].row <= NumberOfInnerRows) MultiplicityPI->Fill(TMath::Log10(St_trigDetSumsC::instance()->mult()), FdEdx[k].dEdxN);
+	    if (MultiplicityPO && FdEdx[k].row >  NumberOfInnerRows) MultiplicityPO->Fill(TMath::Log10(St_trigDetSumsC::instance()->mult()), FdEdx[k].dEdxN);
 	  }
 	}
 	Double_t Pad2Edge = FdEdx[k].edge;
@@ -1672,7 +1672,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    if (PressureC) PressureC->Fill(FdEdx[k].row,press,FdEdx[k].dEdxN);
 	  }
 	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(FdEdx[k].sector,FdEdx[k].row);
-	  Double_t VN = (FdEdx[k].row <= 13) ? V - 1170 : V - 1390;
+	  Double_t VN = (FdEdx[k].row <= NumberOfInnerRows) ? V - 1170 : V - 1390;
 	  if (V > 0) {
 	    if (Voltage)  Voltage ->Fill(NumberOfRows*(FdEdx[k].sector-1)+FdEdx[k].row,
 					 VN,FdEdx[k].C[StTpcdEdxCorrection::ktpcPressure-1].dEdxN);
@@ -1680,7 +1680,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 					 V,FdEdx[k].dEdxN);
 	  }
 	  Double_t               Q = St_tpcAvCurrentC::instance()->chargeI();
-	  if (FdEdx[k].row > 13) Q = St_tpcAvCurrentC::instance()->chargeO();
+	  if (FdEdx[k].row > NumberOfInnerRows) Q = St_tpcAvCurrentC::instance()->chargeO();
 	  AcCharge->Fill(FdEdx[k].row,Q,FdEdx[k].dEdxN);
 	  Qcm->Fill(FdEdx[k].row,FdEdx[k].Qcm,FdEdx[k].dEdxN);
 	  AvCurrent->Fill(FdEdx[k].row,FdEdx[k].Crow,FdEdx[k].dEdxN);
@@ -2239,14 +2239,14 @@ void StdEdxY2Maker::Correlations() {
   for (Int_t k = 0; k < NdEdx; k++) {
     Double_t zk  = FdEdx[k].zdev;
     if (FdEdx[k].Prob > 1.e-12) {
-      if (FdEdx[k].row > 13) corrO1w->Fill(zk,1./FdEdx[k].Prob);
+      if (FdEdx[k].row > NumberOfInnerRows) corrO1w->Fill(zk,1./FdEdx[k].Prob);
       else                   corrI1w->Fill(zk,1./FdEdx[k].Prob);
     }
     for (Int_t m = 0; m < NdEdx; m++){
       if (k == m) continue;
       Double_t zl  = FdEdx[m].zdev;
       if (FdEdx[m].row%2 == 1 && FdEdx[m].row - FdEdx[k].row  == 1) {
-	if (FdEdx[k].row > 13) {
+	if (FdEdx[k].row > NumberOfInnerRows) {
 	  corrO->Fill(zk,zl); 
 	  if (FdEdx[k].Prob*FdEdx[m].Prob > 1.e-12) 
 	    corrOw->Fill(zk,zl,1./(FdEdx[k].Prob*FdEdx[m].Prob));
@@ -2258,7 +2258,7 @@ void StdEdxY2Maker::Correlations() {
 	}
       }
       if (FdEdx[m].row%2 == 1 && FdEdx[m].row - FdEdx[k].row  == 2) {
-	if (FdEdx[k].row > 13) {
+	if (FdEdx[k].row > NumberOfInnerRows) {
 	  corrO2->Fill(zk,zl); 
 	  if (FdEdx[k].Prob*FdEdx[m].Prob > 1.e-12) 
 	    corrO2w->Fill(zk,zl,1./(FdEdx[k].Prob*FdEdx[m].Prob));
@@ -2270,7 +2270,7 @@ void StdEdxY2Maker::Correlations() {
 	}
       }
       if (FdEdx[m].row%2 == 1 && FdEdx[m].row - FdEdx[k].row  == 5) {
-	if (FdEdx[k].row > 13) {
+	if (FdEdx[k].row > NumberOfInnerRows) {
 	  corrO5->Fill(zk,zl); 
 	  if (FdEdx[k].Prob*FdEdx[m].Prob > 1.e-12) 
 	    corrO5w->Fill(zk,zl,1./(FdEdx[k].Prob*FdEdx[m].Prob));
