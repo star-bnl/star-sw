@@ -42,7 +42,7 @@ daq_tpc.o: daq_tpc.h
 daq_tpc.o: ../DAQ_READER/daq_det.h
 tpc_FCFReader.o: ../../../../StRoot/RTS/include/daqFormats.h
 tpc_FCFReader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-tpc_FCFReader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+tpc_FCFReader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
 tpc_FCFReader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 tpc_FCFReader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 tpc_FCFReader.o: ../../../../StRoot/RTS/include/rtsLog.h
@@ -54,7 +54,7 @@ tpc_FCFReader.o: daq_tpc.h
 tpc_FCFReader.o: ../DAQ_READER/daq_det.h
 tpc_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 tpc_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-tpc_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+tpc_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
 tpc_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 tpc_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 tpc_reader.o: ../../../../StRoot/RTS/include/rtsLog.h

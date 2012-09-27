@@ -7,7 +7,7 @@ LDLIBS =
 
 
 LIBS = librtslog.a
-BINS =  rtsLogServer critServer logTest operDisplay rtsLog operDisplay.sh
+BINS =  rtsLogServer critServer logTest operDisplay rtsLog
 
 
 all: $(LIBS) $(BINS)
