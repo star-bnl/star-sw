@@ -70,6 +70,47 @@ u_int get_run_tick(char *buff)
 typedef int socklen_t ;
 #endif
 
+
+void parse_msg(char *buff, int len)
+{
+	static FILE *fout ;
+
+	if(fout==0) {
+		fout = fopen("/log/parser.log","a") ;
+	}
+
+	char *c = buff ;
+
+	c++ ;	// skip [
+	strncpy(host,c,8) ;
+
+	c+=8 ;	// skip hostname
+	c++ ;	// skip space
+	
+	c = rindex(c,']') ;	// skip to closing ]
+
+	c = rindex(c,'(') ;	// jump to opening
+	c++ ;			// now at exe name
+	
+	char *tc = rindex(c,')') ;	// where is the closing 
+
+	memcpy(exe,c,tc-c) ;
+	exe[tc-c] = 0 ;
+
+	c = tc ;	// at closing paren
+	c++ ;		// at :
+	c++ ;		// skip space
+
+	// now we are either at the ANSI escapes or at the severity...
+	tc = rindex(c,':') ;	// mark closing :
+	memcpy(sev,c,tc-c) ;
+	sev[tc-c] = 0 ;		// close string...
+
+}
+	
+	
+
+		
 int main(int argc, char *argv[])
 {
 	int s ;
@@ -86,6 +127,8 @@ int main(int argc, char *argv[])
 	struct hostent *hent ;
 	int testing = 0 ;
 	int is_handler = 0 ;
+	int is_test = 0 ;
+
 	char *just_file ;
 
 	if(argc > 3) {
@@ -103,9 +146,12 @@ int main(int argc, char *argv[])
 	daqman_shared_t *daqman_shared = (daqman_shared_t *) map_shared() ;
 
 	if(strstr(argv[1],"handler")) is_handler = 1 ;
+	if(strstr(argv[1],"test")) is_test = 1 ;
 
+
+	// what is this???
 	{
-		char *ctmp = rindex(argv[1]) ;
+		char *ctmp = rindex(argv[1],'-') ;
 		if(ctmp) {
 			ctmp++ ;
 			
@@ -198,7 +244,7 @@ int main(int argc, char *argv[])
 				run = daqman_shared->run_number ;
 
 				if(run != old_run) {
-
+					
 
 				}
 			}
@@ -242,9 +288,11 @@ int main(int argc, char *argv[])
 			t = time(NULL) ;
 			tm = localtime(&t) ;
 
-			char tmp = *(buffer+4) ;
+			char tmp = *(buffer+4) ;	// save because sprintf will put a 0 there
 			sprintf(tbuff,"[%-8s %02d:%02d:%02d %03d] ",hname_short,tm->tm_hour,tm->tm_min,tm->tm_sec,tm->tm_yday+1) ;
-			*(buffer+4) = tmp ;
+			*(buffer+4) = tmp ;		// return, overwriting the 0
+
+
 
 			// skip the first INT which has the counter in it and for NL
 
@@ -275,6 +323,10 @@ int main(int argc, char *argv[])
 				}
 				first = 0;
 				write(fd,tbuff,len+1) ;
+
+				if(is_test) {
+					parse_msg(tbuff,len+1) ;
+				}
 
 			}
 

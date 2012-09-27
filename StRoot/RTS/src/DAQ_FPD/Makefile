@@ -42,7 +42,7 @@ fpd_reader.o: ../../../../StRoot/RTS/include/rts.h
 fpd_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 fpd_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 fpd_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-fpd_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+fpd_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
 fpd_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 fpd_reader.o: daq_fpd.h
 fpd_reader.o: ../DAQ_READER/daq_det.h

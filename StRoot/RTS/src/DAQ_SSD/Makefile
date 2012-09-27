@@ -39,7 +39,7 @@ daq_ssd.o: daq_ssd.h
 daq_ssd.o: ../DAQ_READER/daq_det.h
 ssd_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 ssd_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-ssd_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+ssd_reader.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
 ssd_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 ssd_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 ssd_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
