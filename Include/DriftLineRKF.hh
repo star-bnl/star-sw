@@ -34,6 +34,9 @@ namespace Garfield {
     void DriftIon(const double x0, const double y0, const double z0,
                   const double t0);
 
+    void GetEndPoint(double& xend, double& yend, double& zend, double& tend,
+		     std::string& status) const;
+
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
 
