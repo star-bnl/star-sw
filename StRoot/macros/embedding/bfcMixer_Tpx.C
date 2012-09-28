@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.34 2012/04/18 03:47:34 zhux Exp $
+// $Id: bfcMixer_Tpx.C,v 1.35 2012/09/28 16:02:42 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.35  2012/09/28 16:02:42  zhux
+// Chain for Run 9 p+p 200 GeV (P11id) added; 'Embedding' option removed from Chain3 (see ticket #2419).
+//
 // Revision 1.34  2012/04/18 03:47:34  zhux
 // Corrected string name for Run 11 Au+Au 19.6 GeV chain
 //
@@ -76,6 +79,8 @@ void bfcMixer_Tpx(Int_t Nevents=100,
 
    // production chain for P10ic p+p RFF & FF
    TString prodP10icpp200("DbV20100301 pp2009c ITTF BEmcChkStat btof Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
+   // production chain for run 9 p+p 200 (P11id) RFF & FF
+   TString prodP11idpp200("DbV20120908,pp2009d,ITTF,BEmcChkStat,btof,fmsdat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE,TpxClu,-hitfilt");
    // production chain for P09ig p+p 500 GeV RFF & FF
    TString prodP09igpp500("DbV20091225 pp2009c ITTF BEmcChkStat btof Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
    // production chain for P11b p+p 500 GeV run 2009  st_W reproduction with fixed bug for Pt >= 20GeV (not using VFMCE)
@@ -132,6 +137,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
   else if (prodName == "P11ibpp500")   { chain3Opt = prodP11ibpp500;    chain2Opt += geomP10ic;}
   else if (prodName == "P10iapp")      { chain3Opt = prodP10iapp;       chain2Opt += geomP10ih;}
   else if (prodName == "P10icpp200")   { chain3Opt = prodP10icpp200;    chain2Opt += geomP10ic;}
+  else if (prodName == "P11idpp200")   { chain3Opt = prodP11idpp200;    chain2Opt += geomP10ic;}
   else if (prodName == "P10ikAuAu62")  { chain3Opt = prodP10ikAuAu62;   chain2Opt += geomP10ik;}
   else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih;}
   else if (prodName == "P10ikAuAu39")  { chain3Opt = prodP10ikAuAu39;   chain2Opt += geomP10ik;}
@@ -147,7 +153,7 @@ void bfcMixer_Tpx(Int_t Nevents=100,
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
-  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker"; 
+  chain3Opt += ",TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker"; 
 
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
