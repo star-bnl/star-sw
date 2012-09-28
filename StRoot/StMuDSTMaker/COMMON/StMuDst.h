@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.42 2011/05/04 19:51:32 tone421 Exp $
+ * $Id: StMuDst.h,v 1.43 2012/09/28 22:38:05 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -61,6 +61,9 @@ class StMuPrimaryTrackCovariance;
 class StMuRpsCollection;
 class StMuMtdCollection;
 
+class StMuMtdHit;
+class StMuMtdRawHit;
+class StMuMtdHeader;
 
 #include "StPhysicalHelixD.hh"
 
@@ -103,13 +106,15 @@ public:
 		    TClonesArray** fms_ptca=0, 
 		    TClonesArray** pmd_ptca=0, 
 		    TClonesArray** tof_ptca=0, 
-		    TClonesArray** btof_ptca=0, 
-		    TClonesArray *emc_tca=0, 
+		    TClonesArray** btof_ptca=0,
+            TClonesArray *emc_tca=0, 
 		    StMuEmcCollection *emc_col=0, 
 		    StMuFmsCollection *fms_col=0, 
 		    TClonesArray *pmd_tca=0, 
 		    StMuPmdCollection *pmd_col=0, 
-		    TClonesArray** ezt_ptca=0);
+		    TClonesArray** ezt_ptca=0,
+            TClonesArray** mtd_ptca=0 
+);
   /// set pointer to current StEmcCollection
   static void setEmcCollection(StEmcCollection *emc_coll) { mEmcCollection=emc_coll; }
   
@@ -153,7 +158,9 @@ public:
   /// array of TClonesArrays for the stuff inherited from the BTOF // dongx
   static TClonesArray** btofArrays;  
   // pointer to array with MuEmcCollection (for backward compatible mode)
-  static TClonesArray *mMuEmcCollectionArray;
+    static TClonesArray** mtdArrays;  
+    // pointer to array with MuEmcCollection (for backward compatible mode)
+    static TClonesArray *mMuEmcCollectionArray;
   /// pointer to EmcCollection (manages the EmcArrays)
   static StMuEmcCollection *mMuEmcCollection;
   // pointer to array with MuPmdCollection (for backward compatible mode)
@@ -199,7 +206,9 @@ public:
   /// returns pointer to the n-th TClonesArray from the btof arrays // dongx
   static TClonesArray* btofArray(int type) { return btofArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the ezt arrays
-  static TClonesArray* eztArray(int type) { return eztArrays[type]; }
+    static TClonesArray* mtdArray(int type) { return mtdArrays[type]; }
+
+    static TClonesArray* eztArray(int type) { return eztArrays[type]; }
 
   /// returns pointer to the primary vertex list
   static TClonesArray* primaryVertices() { return arrays[muPrimaryVertex]; }
@@ -316,9 +325,17 @@ public:
   /// returns pointer to the btofHeader - dongx
   static StBTofHeader* btofHeader() { return (StBTofHeader*)btofArrays[muBTofHeader]->UncheckedAt(0); }
 
+  static StMuMtdHit* mtdHit(int i) { return (StMuMtdHit*)mtdArrays[muMTDHit]->UncheckedAt(i); }
+    static StMuMtdRawHit* mtdRawHit(int i) { return (StMuMtdRawHit*)mtdArrays[muMTDRawHit]->UncheckedAt(i); }
+    static StMuMtdHeader* mtdHeader() { return (StMuMtdHeader*)mtdArrays[muMTDHeader]->UncheckedAt(0); } 
+    
+    
   /// returns pointer to eztHeader 
   static  EztEventHeader* eztHeader() { return (EztEventHeader*)eztArrays[muEztHead]->UncheckedAt(0); }
 
+//    static StMuBTofHit* btofHit(int i) { return (StMuBTofHit*)btofArrays[muBTofHit]->UncheckedAt(i); }
+
+    
   /// returns pointer to eztTrig 
   static  EztTrigBlob* eztTrig() 
         { return (EztTrigBlob*)eztArrays[muEztTrig]->UncheckedAt(0); }
@@ -366,6 +383,9 @@ public:
   static unsigned int numberOfBTofHit()       { return btofArrays[muBTofHit]->GetEntries(); }
   static unsigned int numberOfBTofRawHit()    { return btofArrays[muBTofRawHit]->GetEntries(); }
 
+  static unsigned int numberOfMTDHit()       { return mtdArrays[muMTDHit]->GetEntries(); }
+  static unsigned int numberOfBMTDRawHit()    { return mtdArrays[muMTDRawHit]->GetEntries(); }
+    
   static unsigned int GetNPrimaryVertex()    { return numberOfPrimaryVertices(); }  
   static unsigned int GetNPrimaryTrack()    { return numberOfPrimaryTracks(); }  
   static unsigned int GetNGlobalTrack()     { return numberOfGlobalTracks(); }   
@@ -395,6 +415,9 @@ public:
   static unsigned int GetNBTofHit()         { return numberOfBTofHit(); }
   static unsigned int GetNBTofRawHit()      { return numberOfBTofRawHit(); }
 
+  static unsigned int GetNMTDHit()         { return numberOfMTDHit(); }
+  static unsigned int GetNMTDRawHit()      { return numberOfBMTDRawHit(); }
+    
   virtual void Print(Option_t *option = "") const; ///< Print basic event info
   static void printPrimaryTracks();
   static void printGlobalTracks() ;
@@ -410,6 +433,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.43  2012/09/28 22:38:05  tone421
+ * Changed array stucture of MTD upon request of the TOF group. MTD arrays now on top level, rather than within __NARRAYS__
+ *
  * Revision 1.42  2011/05/04 19:51:32  tone421
  * Added MTD infomation
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.53 2011/05/04 19:51:32 tone421 Exp $
+ * $Id: StMuDstMaker.h,v 1.54 2012/09/28 22:38:05 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -91,6 +91,9 @@ class TEventList;
 class StMuRpsCollection;
 class StMuMtdCollection;
 
+class StMuMtdHit;
+class StMuMtdRawHit;
+class StMuMtdHeader;
 
 /**
    \class StMuDstMaker
@@ -174,7 +177,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.53 2011/05/04 19:51:32 tone421 Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.54 2012/09/28 22:38:05 tone421 Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -291,7 +294,8 @@ virtual   void closeRead();
   void fillTof(StEvent* ev);
   /// dongx
   void fillBTof(StEvent* ev);
-  void fillEzt(StEvent* ev);
+
+    void fillEzt(StEvent* ev);
 
   void fillHddr();
 
@@ -348,7 +352,9 @@ virtual   void closeRead();
   /// dongx
   TClonesArray** mBTofArrays;   //[__NBTOFARRAYS__    ];
   TClonesArray** mEztArrays;    //[__NEZTARRAYS__    ];
-  char           mStatusArrays    [__NALLARRAYS__    ];
+  TClonesArray** mMTDArrays;
+    
+    char           mStatusArrays    [__NALLARRAYS__    ];
   TClonesArray*  mEmcCollectionArray; // Needed to hold old format
   StMuEmcCollection *mEmcCollection;
   StMuFmsCollection *mFmsCollection;
@@ -395,6 +401,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.54  2012/09/28 22:38:05  tone421
+ * Changed array stucture of MTD upon request of the TOF group. MTD arrays now on top level, rather than within __NARRAYS__
+ *
  * Revision 1.53  2011/05/04 19:51:32  tone421
  * Added MTD infomation
  *

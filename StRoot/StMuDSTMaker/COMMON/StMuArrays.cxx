@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.24 2011/10/17 00:19:13 fisyak Exp $
+ * $Id: StMuArrays.cxx,v 1.25 2012/09/28 22:38:05 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -33,8 +33,9 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVer
 /*tofArrayNames    [__NTOFARRAYS__    ]*/                  "TofHit","TofData",
 							   "TofRawData",
 /*btofArrayNames   [__NBTOFARRAYS__   ]*/                  "BTofHit","BTofRawHit","BTofHeader", // dongx
-/*eztArrayNames    [__NEZTARRAYS__    ]*/                  "EztHead","EztTrig",
-							   "EztETow","EztESmd","EztFpd"};
+                                                            "MTDHit","MTDRawHit","MTDHeader",
+    /*eztArrayNames    [__NEZTARRAYS__    ]*/               "EztHead","EztTrig","EztETow","EztESmd","EztFpd"};
+                                                            
 #ifndef __NO_STRANGE_MUDST__
 const char** StMuArrays::strangeArrayNames = StMuArrays::arrayNames   +__NARRAYS__;
 const char** StMuArrays::mcArrayNames = StMuArrays::strangeArrayNames +__NSTRANGEARRAYS__;
@@ -46,7 +47,9 @@ const char** StMuArrays::pmdArrayNames = StMuArrays::emcArrayNames    +__NEMCARR
 const char** StMuArrays::fmsArrayNames = StMuArrays::pmdArrayNames    +__NPMDARRAYS__;
 const char** StMuArrays::tofArrayNames = StMuArrays::fmsArrayNames    +__NFMSARRAYS__;
 const char** StMuArrays::btofArrayNames = StMuArrays::tofArrayNames   +__NTOFARRAYS__;  // dongx
-const char** StMuArrays::eztArrayNames = StMuArrays::btofArrayNames   +__NBTOFARRAYS__; // dongx
+const char** StMuArrays::mtdArrayNames = StMuArrays::btofArrayNames   +__NBTOFARRAYS__;
+const char** StMuArrays::eztArrayNames = StMuArrays::mtdArrayNames    +__NMTDARRAYS__; // dongx
+
 
 //		ARRAY TYPES
 //============================================================================================
@@ -68,6 +71,7 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrim
 /*fmsArrayTypes   [__NFMSARRAYS__     ]*/                  "StMuFmsHit",							   
 /*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData","StTofRawData",
 /*btofArrayTypes  [__NBTOFARRAYS__    ]*/                  "StMuBTofHit","StBTofRawHit","StBTofHeader",  // dongx
+                                                            "StMuMtdHit","StMuMtdRawHit","StMuMtdHeader",
 /*eztArrayTypes   [__NEZTARRAYS__     ]*/                  "EztEventHeader","EztTrigBlob","EztEmcRawData","EztEmcRawData","EztFpdBlob"};
 #ifndef __NO_STRANGE_MUDST__
 const char** StMuArrays::strangeArrayTypes = StMuArrays::arrayTypes    +__NARRAYS__;
@@ -80,7 +84,8 @@ const char** StMuArrays::pmdArrayTypes =  StMuArrays::emcArrayTypes    +__NEMCAR
 const char** StMuArrays::fmsArrayTypes =  StMuArrays::pmdArrayTypes    +__NPMDARRAYS__;
 const char** StMuArrays::tofArrayTypes = StMuArrays::fmsArrayTypes     +__NFMSARRAYS__;
 const char** StMuArrays::btofArrayTypes = StMuArrays::tofArrayTypes    +__NTOFARRAYS__;  // dongx
-const char** StMuArrays::eztArrayTypes = StMuArrays::btofArrayTypes    +__NBTOFARRAYS__;  // dongx
+const char** StMuArrays::mtdArrayTypes = StMuArrays::btofArrayTypes    +__NBTOFARRAYS__;  // dongx
+const char** StMuArrays::eztArrayTypes = StMuArrays::mtdArrayTypes    +__NMTDARRAYS__;
 
 //		ARRAY SIZES
 //============================================================================================
@@ -97,7 +102,8 @@ int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,10,1000,1000,1000,1
 /*fmsArraySizes    [__NFMSARRAYS__    ]*/                  1,
 /*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200, 1000,
 /*btofArraySizes   [__NBTOFARRAYS__   ]*/                  1000,1000,1,   // dongx
-/*eztArraySizes    [__NEZTARRAYS__    ]*/                  1, 1, 1, 1, 1};
+                                                           1000,1000,1,
+    /*eztArraySizes    [__NEZTARRAYS__    ]*/                  1, 1, 1, 1, 1};
 #ifndef __NO_STRANGE_MUDST__
 int* StMuArrays::strangeArraySizes = StMuArrays::arraySizes    +__NARRAYS__;
 int* StMuArrays::mcArraySizes = StMuArrays::strangeArraySizes  +__NSTRANGEARRAYS__;
@@ -109,7 +115,8 @@ int* StMuArrays::pmdArraySizes = StMuArrays::emcArraySizes     +__NEMCARRAYS__;
 int* StMuArrays::fmsArraySizes = StMuArrays::pmdArraySizes     +__NPMDARRAYS__;
 int* StMuArrays::tofArraySizes = StMuArrays::fmsArraySizes     +__NFMSARRAYS__;
 int* StMuArrays::btofArraySizes = StMuArrays::tofArraySizes    +__NTOFARRAYS__;  // dongx
-int* StMuArrays::eztArraySizes = StMuArrays::btofArraySizes    +__NBTOFARRAYS__;  // dongx
+int* StMuArrays::mtdArraySizes = StMuArrays::btofArraySizes    +__NBTOFARRAYS__;  // dongx
+int* StMuArrays::eztArraySizes = StMuArrays::mtdArraySizes     +__NMTDARRAYS__;
 
 //		ARRAY COUNTERS
 //============================================================================================
@@ -123,7 +130,8 @@ int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,0,0
 /*fmsArrayCounters    [__NFMSARRAYS__    ]*/               0,
 /*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0, 0,
 /*btofArrayCounters   [__NBTOFARRAYS__   ]*/               0, 0, 0,      // dongx
-/*eztArrayCounters    [__NEZTARRAYS__    ]*/               0, 0, 0, 0, 0};
+                                                           0, 0, 0,
+    /*eztArrayCounters    [__NEZTARRAYS__    ]*/            0, 0, 0, 0, 0};
 
 StMuArrays test;
 #ifndef __NO_STRANGE_MUDST__
@@ -137,7 +145,9 @@ int* StMuArrays::pmdArrayCounters = StMuArrays::emcArrayCounters     +__NEMCARRA
 int* StMuArrays::fmsArrayCounters = StMuArrays::pmdArrayCounters     +__NPMDARRAYS__;
 int* StMuArrays::tofArrayCounters = StMuArrays::fmsArrayCounters     +__NFMSARRAYS__;
 int* StMuArrays::btofArrayCounters = StMuArrays::tofArrayCounters    +__NTOFARRAYS__;  // dongx
-int* StMuArrays::eztArrayCounters = StMuArrays::btofArrayCounters    +__NBTOFARRAYS__;  // dongx
+int* StMuArrays::mtdArrayCounters = StMuArrays::btofArrayCounters    +__NBTOFARRAYS__;  // dongx
+int* StMuArrays::eztArrayCounters = StMuArrays::mtdArrayCounters     +__NMTDARRAYS__;  
+
 ClassImp(StMuArrays);
 StMuArrays::StMuArrays()
 {
@@ -164,6 +174,9 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.25  2012/09/28 22:38:05  tone421
+ * Changed array stucture of MTD upon request of the TOF group. MTD arrays now on top level, rather than within __NARRAYS__
+ *
  * Revision 1.24  2011/10/17 00:19:13  fisyak
  * Active handing of IdTruth
  *

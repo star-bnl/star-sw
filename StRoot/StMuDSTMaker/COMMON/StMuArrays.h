@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.24 2012/09/16 21:58:16 fisyak Exp $
+ * $Id: StMuArrays.h,v 1.25 2012/09/28 22:38:05 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -37,6 +37,9 @@ enum tofTypes {muTofHit=0, muTofData, muTofRawData};
 /// dongx
 enum btofTypes {muBTofHit=0, muBTofRawHit, muBTofHeader};
 
+enum mtdTypes {muMTDHit=0, muMTDRawHit, muMTDHeader};
+
+
 /// @enum eztTypes enumeration to to index the eztArrays (IUCF-ezTree)
 enum eztTypes {muEztHead=0, muEztTrig, muEztETow, muEztESmd,muEztFpd};
 
@@ -52,19 +55,21 @@ __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArray
 // run 5 - dongx
 __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NBTOFARRAYS__    =3 ,  /// dongx
+__NMTDARRAYS__    =3,
 __NEZTARRAYS__     =5 ,  ///< size of the ez arrays >
+     
 /// dongx
 #ifndef __NO_STRANGE_MUDST__
-__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__
+__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NEZTARRAYS__
 #else
-__NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__
+__NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NEZTARRAYS__
 #endif
 };
 class StMuArrays {
  public:
  StMuArrays();
-#ifndef __CINT__
-///< names of the TBranches in the TTree/File 
+ #ifndef __CINT__
+    ///< names of the TBranches in the TTree/File 
     static const char*         arrayNames    [__NALLARRAYS__    ];
 #ifndef __NO_STRANGE_MUDST__
     static const char** strangeArrayNames; //[__NSTRANGEARRAYS__]
@@ -76,7 +81,8 @@ class StMuArrays {
     static const char**      tofArrayNames;//[__NTOFARRAYS__    ]
     static const char**     btofArrayNames;//[__NBTOFARRAYS__   ] // dongx
     static const char**      eztArrayNames;//[__NEZARRAYS__    ]
-
+    static const char**      mtdArrayNames;
+    
 ///< names of the classes, the TClonesArrays are arrays of this type
     static const char*   arrayTypes          [__NALLARRAYS__    ];
 #ifndef __NO_STRANGE_MUDST__
@@ -89,7 +95,8 @@ class StMuArrays {
     static const char**  tofArrayTypes;//    [__NTOFARRAYS__    ]
     static const char**  btofArrayTypes;//   [__NBTOFARRAYS__   ]  // dongx
     static const char**  eztArrayTypes;//    [__NEZARRAYS__    ]
-
+    static const char**  mtdArrayTypes;
+    
 ///< maximum sizes of the TClonesArrays
     static int           arraySizes    [__NALLARRAYS__    ];
 #ifndef __NO_STRANGE_MUDST__
@@ -102,7 +109,8 @@ class StMuArrays {
     static int*       tofArraySizes;// [__NTOFARRAYS__    ]
     static int*      btofArraySizes;// [__NBTOFARRAYS__   ]  // dongx
     static int*       eztArraySizes;// [__NEZARRAYS__    ]
-
+    static int*       mtdArraySizes;
+    
 ///< number of entries in current event, currently not used
     static int        arrayCounters    [__NALLARRAYS__    ];
 #ifndef __NO_STRANGE_MUDST__
@@ -115,7 +123,8 @@ class StMuArrays {
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
     static int*   btofArrayCounters;// [__NBTOFARRAYS__   ]  // dongx
     static int*    eztArrayCounters;// [__NEZARRAYS__    ]
-#endif
+    static int*    mtdArrayCounters;// [__NEZARRAYS__    ]
+#endif    
     ClassDef(StMuArrays,0)
 };
 
@@ -124,8 +133,8 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
- * Revision 1.24  2012/09/16 21:58:16  fisyak
- * Make use of Tpc West and East Only no. of tracks
+ * Revision 1.25  2012/09/28 22:38:05  tone421
+ * Changed array stucture of MTD upon request of the TOF group. MTD arrays now on top level, rather than within __NARRAYS__
  *
  * Revision 1.23  2011/10/17 00:19:13  fisyak
  * Active handing of IdTruth

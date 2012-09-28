@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.106 2012/05/07 14:47:06 fisyak Exp $
+ * $Id: StMuDstMaker.cxx,v 1.107 2012/09/28 22:38:05 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -44,6 +44,9 @@
 #include "StMuPrimaryVertex.h"
 #include "StMuRpsCollection.h"
 #include "StMuMtdCollection.h"
+#include "StMuMtdRawHit.h"
+#include "StMuMtdHit.h"
+#include "StMuMtdHeader.h"
 #include "StMuTrack.h"
 #include "StMuDebug.h"
 #include "StMuCut.h"
@@ -181,7 +184,8 @@ void StMuDstMaker::assignArrays()
   mFmsArrays      = mPmdArrays     + __NPMDARRAYS__;      
   mTofArrays      = mFmsArrays     + __NFMSARRAYS__;    
   mBTofArrays     = mTofArrays     + __NTOFARRAYS__;  /// dongx
-  mEztArrays      = mBTofArrays    + __NBTOFARRAYS__; /// dongx
+  mMTDArrays      = mBTofArrays    + __NBTOFARRAYS__; /// dongx
+  mEztArrays      = mMTDArrays     + __NMTDARRAYS__;
 }
 
 void StMuDstMaker::clearArrays()
@@ -215,7 +219,7 @@ void StMuDstMaker::zeroArrays()
 #endif
 			__NMCARRAYS__+
 			__NEMCARRAYS__+
-			__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__],(char)0,__NEZTARRAYS__);  /// dongx
+			__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__],(char)0,__NEZTARRAYS__);  /// dongx
   
 }
 //-----------------------------------------------------------------------
@@ -248,9 +252,9 @@ void StMuDstMaker::zeroArrays()
 void StMuDstMaker::SetStatus(const char *arrType,int status)
 {
 #ifndef __NO_STRANGE_MUDST__
-  static const char *specNames[]={"MuEventAll","StrangeAll","MCAll" ,"EmcAll","PmdAll","FMSAll","TofAll","BTofAll","EztAll",0};  /// dongx
+  static const char *specNames[]={"MuEventAll","StrangeAll","MCAll" ,"EmcAll","PmdAll","FMSAll","TofAll","BTofAll","MTDAll","EztAll",0};  /// dongx
 #else
-  static const char *specNames[]={"MuEventAll","MCAll"     ,"EmcAll","PmdAll","FMSAll","TofAll","BTofAll","EztAll",0};  /// dongx
+  static const char *specNames[]={"MuEventAll","MCAll"     ,"EmcAll","PmdAll","FMSAll","TofAll","BTofAll","MTDAll","EztAll",0};  /// dongx
 #endif
   static const int   specIndex[]={
     0, 
@@ -263,7 +267,8 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
     __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
-    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__,   /// dongx
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__, /// dongx
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NEZTARRAYS__,
 #else
     __NARRAYS__+__NMCARRAYS__,
     __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__,
@@ -271,7 +276,8 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
     __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__,
     __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__,
     __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
-    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__,   /// dongx
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__,   /// dongx
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__,+__NEZTARRAYS__,
 #endif
     -1};
 
@@ -1121,6 +1127,37 @@ void StMuDstMaker::fillBTof(StEvent* ev) {
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
+
+void StMuDstMaker::fillmtd(StEvent* ev) {
+	DEBUGMESSAGE2("");
+	StTimer timer;
+	timer.start();
+	
+//	StMuMtdCollection *typeOfMtd=0;
+	
+	const StMtdCollection *mtd=ev->mtdCollection();
+	if(!mtd) return;
+    StMuMtdCollection mMTD(*mtd); 
+    cout<<"In mtd with raw hits"<<mMTD.rawHitsPresent()<<endl;
+        
+    for(size_t i=0; i < (size_t)mMTD.hitsPresent(); i++) {
+        StMuMtdHit* mtdHit = (StMuMtdHit*)mMTD.MtdHit(i);
+        addType( mMTDArrays[muMTDHit], *mtdHit );
+    }
+    
+    for(size_t i=0; i < (size_t)mMTD.rawHitsPresent(); i++) {
+        cout<<"In for ?"<<endl;
+        StMtdRawHit* mtdHit = (StMtdRawHit*)mMTD.RawMtdHit(i);
+        addType( mMTDArrays[muMTDRawHit], *mtdHit );
+    }
+    StMuMtdHeader *mtdHead = mMTD.mtdHeader();
+    if(mtdHead) addType(mMTDArrays[muMTDHeader],*mtdHead);
+
+    //if (mtd) addType( mArrays[muMtd], *mtd, typeOfMtd );
+	timer.stop();
+	DEBUGVALUE2(timer.elapsedTime());
+}
+
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1226,18 +1263,6 @@ void StMuDstMaker::fillpp2pp(StEvent* ev) {
   DEBUGVALUE2(timer.elapsedTime());
 }
 
-void StMuDstMaker::fillmtd(StEvent* ev) {
-	DEBUGMESSAGE2("");
-	StTimer timer;
-	timer.start();
-	
-	StMuMtdCollection *typeOfMtd=0;
-	
-	const StMtdCollection *mtd=ev->mtdCollection();
-	if (mtd) addType( mArrays[muMtd], *mtd, typeOfMtd );
-	timer.stop();
-	DEBUGVALUE2(timer.elapsedTime());
-}
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1635,6 +1660,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.107  2012/09/28 22:38:05  tone421
+ * Changed array stucture of MTD upon request of the TOF group. MTD arrays now on top level, rather than within __NARRAYS__
+ *
  * Revision 1.106  2012/05/07 14:47:06  fisyak
  * Add handles for track to fast detector matching
  *
