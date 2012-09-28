@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.20 2012/09/26 14:20:59 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.21 2012/09/28 16:00:41 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -286,7 +286,7 @@ St2011WMaker::analyzeESMD(){
 	const StPhysicalHelixD trkHlx=T.prMuTrack->outerHelix();    
 	// to account for the z-depth of each plane, sector dependent, (cm), Z=smd depth
 	StThreeVectorD diskPosition=StThreeVectorD(0,0,geomE->getZSMD() + (layer[iuv]-2)* 1.25);
-	//	diskPosition.SetZ(geomE->getZSMD());// restore fixed, average  Z-DSM - discard after testing
+	//diskPosition.setZ(geomE->getZSMD());// restore fixed, average  Z-DSM - discard after testing
 	StThreeVectorD diskNormal=StThreeVectorD(0,0,1);
 	printf(" ESMD sec=%d iuv=%d  layer=%d, smdZ=%.1f\n", isec+1, iuv,layer[iuv],diskPosition.z() );
 	//path length at intersection with plane
@@ -669,6 +669,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.21  2012/09/28 16:00:41  stevens4
+// add Q*ET/PT requirement to WB histos used for background estimation to be consistent with spin sorting
+//
 // Revision 1.20  2012/09/26 14:20:59  stevens4
 // use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
 //

@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.18 2012/09/26 14:20:59 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.19 2012/09/28 16:00:42 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -45,15 +45,24 @@ St2011WMaker::find_W_boson(){
       hA[20]->Fill("eta1",1.);
       nEta1++;
 
-      //signal plots w/o EEMC in awayside veto
-      if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
-	if(T.sPtBalance_noEEMC2>par_ptBalance ) {//only signed ptBalance cut 
-	  hA[140]->Fill(T.cluster.ET);
-	  hA[240]->Fill(T.prMuTrack->eta(),T.cluster.ET);
-	  if (T.prMuTrack->charge() < 0) {
-	    hA[184+3]->Fill(T.cluster.ET);
-	  } else if (T.prMuTrack->charge() > 0) {
-	    hA[184+4]->Fill(T.cluster.ET);
+      //define charge separation
+      float q2pt_g = T.glMuTrack->charge()/T.glMuTrack->pt();
+      float q2pt_p = T.prMuTrack->charge()/T.prMuTrack->pt();
+      float hypCorr_g = q2pt_g*(T.cluster.ET);
+      float hypCorr_p = q2pt_p*(T.cluster.ET);
+
+      //remove ambiguous charges from BG treatment histos
+      if( fabs(hypCorr_p) > 0.4 && fabs(hypCorr_p) < 1.8) {
+	//signal plots w/o EEMC in awayside veto
+	if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
+	  if(T.sPtBalance_noEEMC2>par_ptBalance ) {//only signed ptBalance cut 
+	    hA[140]->Fill(T.cluster.ET);
+	    hA[240]->Fill(T.prMuTrack->eta(),T.cluster.ET);
+	    if (T.prMuTrack->charge() < 0) {
+	      hA[184+3]->Fill(T.cluster.ET);
+	    } else if (T.prMuTrack->charge() > 0) {
+	      hA[184+4]->Fill(T.cluster.ET);
+	    }
 	  }
 	}
       }
@@ -95,40 +104,44 @@ St2011WMaker::find_W_boson(){
       hA[209]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.ET);
       if(T.cluster.ET > par_highET) hA[253]->Fill(T.awayTotET,T.sPtBalance);
 
-      for (int i=0; i<=20; i++) {
-	//  float awayTot_cut = 10.+2.*((float) i);
-        for (int j=0; j<=20; j++) {
-          float pTBal_cut = 5.+((float) j);
-          if (T.sPtBalance2<pTBal_cut) { 
-            if (T.prMuTrack->charge() < 0) {
-              hA[142+i]->Fill(T.cluster.ET,j);
-            } else if (T.prMuTrack->charge() > 0) {
-              hA[163+i]->Fill(T.cluster.ET,j);
-            }
-          }
-        }
-      }
+      //remove ambiguous charges from BG treatment histos
+      if( fabs(hypCorr_p) > 0.4 && fabs(hypCorr_p) < 1.8) { 
+	for (int i=0; i<=20; i++) {
+	  //  float awayTot_cut = 10.+2.*((float) i);
+	  for (int j=0; j<=20; j++) {
+	    float pTBal_cut = 5.+((float) j);
+	    if (T.sPtBalance2<pTBal_cut) { 
+	      if (T.prMuTrack->charge() < 0) {
+		hA[142+i]->Fill(T.cluster.ET,j);
+	      } else if (T.prMuTrack->charge() > 0) {
+		hA[163+i]->Fill(T.cluster.ET,j);
+	      }
+	    }
+	  }
+	}
 
-      //plots for backg sub yield
-      if(T.sPtBalance2>par_ptBalance ) {
-        hA[136]->Fill(T.cluster.ET);//signal
-	hA[241]->Fill(T.prMuTrack->eta(),T.cluster.ET);
-        hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
-        if (T.prMuTrack->charge() < 0) {
-          hA[184+1]->Fill(T.cluster.ET);
-        } else if (T.prMuTrack->charge() > 0) {
-          hA[184+2]->Fill(T.cluster.ET);
-        }
-      } else {
-        hA[137]->Fill(T.cluster.ET);//background
-        if (T.prMuTrack->charge() < 0) {
-          hA[184+5]->Fill(T.cluster.ET);
-        } else if (T.prMuTrack->charge() > 0) {
-          hA[184+6]->Fill(T.cluster.ET);
-        }
-	hA[202]->Fill(T.cluster.position.PseudoRapidity(),T.prMuTrack->pt());
-	hA[204]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.energy/T.prMuTrack->p().mag());
-      }
+	//plots for backg sub yield
+	if(T.sPtBalance2>par_ptBalance ) {
+	  hA[136]->Fill(T.cluster.ET);//signal
+	  hA[241]->Fill(T.prMuTrack->eta(),T.cluster.ET);
+	  hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
+	  if (T.prMuTrack->charge() < 0) {
+	    hA[184+1]->Fill(T.cluster.ET);
+	  } else if (T.prMuTrack->charge() > 0) {
+	    hA[184+2]->Fill(T.cluster.ET);
+	  }
+	} else {
+	  hA[137]->Fill(T.cluster.ET);//background
+	  if (T.prMuTrack->charge() < 0) {
+	    hA[184+5]->Fill(T.cluster.ET);
+	  } else if (T.prMuTrack->charge() > 0) {
+	    hA[184+6]->Fill(T.cluster.ET);
+	  }
+	  hA[202]->Fill(T.cluster.position.PseudoRapidity(),T.prMuTrack->pt());
+	  hA[204]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.energy/T.prMuTrack->p().mag());
+	}
+      }	
+
 
       if(T.sPtBalance2>par_ptBalance){/***************************/
 	printf("\n WWWWWWWWWWWWWWWWWWWWW  Barrel \n");
@@ -164,11 +177,6 @@ St2011WMaker::find_W_boson(){
       //Q/pT plot
       hA[100]->Fill(T.cluster.ET,T.glMuTrack->charge()/T.glMuTrack->pt());
       hA[101]->Fill(T.cluster.ET,T.prMuTrack->charge()/T.prMuTrack->pt());
-
-      float q2pt_g = T.glMuTrack->charge()/T.glMuTrack->pt();
-      float q2pt_p = T.prMuTrack->charge()/T.prMuTrack->pt();
-      float hypCorr_g = q2pt_g*(T.cluster.ET);
-      float hypCorr_p = q2pt_p*(T.cluster.ET);
       hA[102]->Fill(T.cluster.ET,hypCorr_g);
       hA[103]->Fill(T.cluster.ET,hypCorr_p);
 
@@ -706,6 +714,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.19  2012/09/28 16:00:42  stevens4
+// add Q*ET/PT requirement to WB histos used for background estimation to be consistent with spin sorting
+//
 // Revision 1.18  2012/09/26 14:20:59  stevens4
 // use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
 //
