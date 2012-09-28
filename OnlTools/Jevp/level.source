@@ -1,7 +1,0 @@
-# STAR LEVEL for EVP code
-
-# pro as of 10/28/11
-starver SL11d
-
-echo "The STAR Level as of 12/13/2011: SL11d"
-echo `STAR_LEVELS`
