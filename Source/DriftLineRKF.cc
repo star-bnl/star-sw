@@ -660,6 +660,16 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0,
   path.back().tf = path.back().ti + timeToDrift;
 
 }
+
+  void DriftLineRKF::GetEndPoint(double& xend, double& yend, double& zend, double& tend,
+				 std::string& stat) const {
+    const int nSteps = path.size();
+    xend = path[nSteps-1].xi;
+    yend = path[nSteps-1].yi;
+    zend = path[nSteps-1].zi;
+    tend = path[nSteps-1].ti;
+    stat = path[nSteps-1].status;
+  }
   
 double 
 DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
