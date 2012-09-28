@@ -29,7 +29,7 @@ public:
 	int hitsPresent();
 	int rawHitsPresent();
 	
-private:
+protected:
 
     vector<StMuMtdHeader> mMtdHeader;
 	vector<StMuMtdHit> mMtdHits;	
