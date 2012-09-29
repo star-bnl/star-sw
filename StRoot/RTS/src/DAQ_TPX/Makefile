@@ -18,8 +18,8 @@ endif
 ifeq ($(HOST_NAME),localhost.localdomain)
 	DEFINES +=  -DTEST_RDO
 endif
-ifeq ($(HOST_NAME),lx2.star.bnl.gov)
-	DEFINES +=  -DTEST_RDO
+ifeq ($(HOST_NAME),ettie.star.bnl.gov)
+	DEFINES +=  -DTEST_ETTIE
 endif
 
 
@@ -100,9 +100,6 @@ tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
 tpxStat.o: tpxCore.h
 tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxStat.o: tpxStat.h
-tpxDecodeGains.o: ../DAQ_TPX/tpxGain.h
-tpxDecodeGains.o: tpxCore.h
-tpxDecodeGains.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 daq_tpx.o: ../DAQ_READER/daq_det.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxFCF.o: tpxFCF_flags.h
