@@ -461,6 +461,9 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 				found = 1 ;	// any sector...
 				sec_found = 1 ;
 				adc_found = 1 ;	// any sector...
+
+				s_mask[dd->sec-1]=1 ;
+
 				if(do_print) {
 					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				}
@@ -1175,7 +1178,7 @@ static int gmt_doer(daqReader *rdr, const char *do_print)
 
 
 			if(do_print) {
-				printf("GMT RAW: RDO %d: %d bytes (%d words)\n",dd->rdo,dd->ncontent,dd->ncontent/4) ;
+				printf("GMT RAW: ARC %d: %d bytes (%d words)\n",dd->rdo,dd->ncontent,dd->ncontent/4) ;
 				// dump a few
 				for(int i=0;i<10;i++) {
 					printf(" %2d: 0x%08X\n",i,d[i]) ;
@@ -1184,6 +1187,25 @@ static int gmt_doer(daqReader *rdr, const char *do_print)
 
 		}
 	}
+
+
+	// one can get the data in the electronics/logical layout
+	dd = rdr->det("gmt")->get("adc") ;
+	while(dd && dd->iterate()) {
+		found = 1 ;
+
+		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
+
+		if(do_print) {
+			printf("GMT ADC: ARC %d, ARM %d, APV %d: %d values\n",dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
+
+			for(u_int i=0;i<dd->ncontent;i++) {
+				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
+			}
+		}
+	}
+				
+
 
 	return found ;
 }
