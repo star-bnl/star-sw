@@ -95,8 +95,25 @@ void tpx_to_altro(int row, int pad, int &rdo, int &a, int &ch)
 */
 void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 {
+	
 	row = tpx_altro_to_pad[rdo][a][ch].row ;
 	pad = tpx_altro_to_pad[rdo][a][ch].pad ;
+
+
+	// This is a hack for ETTIE's test!
+	// Should not happen for normal TPX data so I will leave it in the formal code.
+	if(rdo==1) {
+		//printf("RDO %d: ALTRO %d:%d, row:pad %d:%d\n",rdo+1,a,ch,row,pad) ;
+		if((a==252) || (a==253)) {
+			row = a - 210 ;
+			pad = ch + 1 ;
+		}
+	}
+
+#ifdef TEST_ETTIE
+	row = a - 210 ;
+	pad = ch + 1 ;
+#endif
 
 #ifdef TEST_RDO
 	if(rdo==5) {	// only 6th RDO can be a test!
