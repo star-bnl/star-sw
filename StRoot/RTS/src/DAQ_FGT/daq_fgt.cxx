@@ -83,13 +83,20 @@ void daq_fgt::set_flavor(int id)
 		rts_id = id ;
 		name = rts2name(rts_id) ;
 		sfs_name = "ist" ;
+		break ;
+	case GMT_ID :
+		rts_id = id ;
+		name = rts2name(rts_id) ;
+		sfs_name = "gmt" ;
+		break ;
 	default :
 		rts_id = FGT_ID ;	
 		name = rts2name(rts_id) ;
 		sfs_name = "fgt" ;
+		break ;
 	}
 
-	LOG(DBG,"set_flavor %d [%s]",rts_id,name) ;
+	LOG(DBG,"set_flavor %d [%s]",id,name) ;
 
 	return ;
 } ;
