@@ -110,10 +110,10 @@ void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 		}
 	}
 
-#ifdef TEST_ETTIE
-	row = a - 210 ;
-	pad = ch + 1 ;
-#endif
+//#ifdef TEST_ETTIE
+//	row = a - 210 ;
+//	pad = ch + 1 ;
+//#endif
 
 #ifdef TEST_RDO
 	if(rdo==5) {	// only 6th RDO can be a test!
