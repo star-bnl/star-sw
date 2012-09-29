@@ -265,21 +265,13 @@ int daq_etow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo1)
 
 	// L0 part
 	trg[0].t = t_hi*256 + t_lo ;
-	trg[0].daq = 0 ;
-	trg[0].trg = 4 ;	// BTOW does not give the correct L0, only L2 so we invent 4
+	trg[0].daq = us[1] ;
+	trg[0].trg = us[0] ;	
 	trg[0].rhic = l2h16(us[4]) ;
 
-	/*
-	// L2 part
-	trg[1].t = trg[0].t ;	// copy over token
-	trg[1].trg = 15 ;	// for now! us[0] ;	// this is where the trg cmd ought to be
-	trg[1].daq = us[1] ;
-	trg[1].rhic = trg[0].rhic + 1 ;
-	*/
 
-	if(us[0] != 0xF) {
-		err |= 1 ;
-		LOG(ERR,"trg cmd not 15 == 0x%04X",us[0]) ;
+	if(us[0] != 4) {
+		LOG(WARN,"trg cmd not 4 == 0x%04X",us[0]) ;
 	}
 
 	if(trg[0].t == 0) {

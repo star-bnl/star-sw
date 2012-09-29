@@ -279,42 +279,19 @@ int daq_btow::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 	// L0 part
 	trg[tcou].t = t_hi*256 + t_lo ;
-	trg[tcou].daq = 0 ;
-	trg[tcou].trg = 4 ;	// BTOW does not give the correct L0, only L2 so we invent 4
+	trg[tcou].daq = us[1] ;
+	trg[tcou].trg = us[0] ;	
 	trg[tcou].rhic = l2h16(us[4]) ;
 	tcou++ ;
 
-	/* gone
-	// L2 part
-	trg[tcou].t = trg[0].t ;	// copy over token
-	trg[tcou].trg = 15 ;	// for now! us[0] ;	// this is where the trg cmd ought to be
-	trg[tcou].daq = us[1] ;
-	trg[tcou].rhic = trg[0].rhic + 1 ;
-	tcou++ ;
-	*/
 
-	if(us[0] != 0xF) {	// in data!!!
-		err |= 1 ;
-		LOG(ERR,"trg cmd not 15 == 0x%04X",us[0]) ;
+	if(us[0] != 4) {	// in data!!!
+		LOG(WARN,"trg cmd not 4 == 0x%04X",us[0]) ;
 	}
 
 	if(trg[0].t == 0) {
-		/*
-		static int t_hack = 0 ;
-
-		t_hack++ ;
-		if(t_hack > 4095) t_hack = 1 ;
-
-		trg[0].t = t_hack ;
-		trg[1].t = t_hack ;
-
-
-		LOG(WARN,"Was token 0 -- changing to %d",t_hack) ;
-		*/
-
 		err |= 1 ;
 		LOG(ERR,"token 0!") ;
-
 	}
 
 	if(err) {
