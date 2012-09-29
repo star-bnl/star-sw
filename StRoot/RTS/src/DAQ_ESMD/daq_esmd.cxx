@@ -250,17 +250,21 @@ int daq_esmd::get_l2(char *buff, int buff_words, struct daq_trg_word *trg, int r
 	}
 
 
+	if(us[0] != 4) {	// Gerard fixed the trigger command
+		LOG(WARN,"trg_cmd %d?",us[0]) ;
+	}
+
 	// L0 part
 	trg[0].t = t_hi*256 + t_lo ;
-	trg[0].daq = 0 ;
-	trg[0].trg = 4 ;	// ESMD does not give the correct L0, only L2 so we invent 4
+	trg[0].daq = us[1] ;	
+	trg[0].trg = us[0] ;	
 	trg[0].rhic = l2h16(us[4]) ;
 	
 
-	if(us[0] != 0xF) {
-		err |= 1 ;
-		LOG(ERR,"trg cmd not 15 == 0x%04X",us[0]) ;
-	}
+//	if(us[0] != 0xF) {
+//		err |= 1 ;
+//		LOG(ERR,"trg cmd not 15 == 0x%04X",us[0]) ;
+//	}
 
 	if(trg[0].t == 0) {
 		err |= 1 ;
