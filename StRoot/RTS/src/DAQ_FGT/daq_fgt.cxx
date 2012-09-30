@@ -187,7 +187,7 @@ daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 
 	if(rdo<=0) {
 		r_start = 1 ;
-		r_stop = 2 ;	
+		r_stop = 6 ;	
 	}
 	else {
 		r_start = r_stop = rdo ;
@@ -232,9 +232,9 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 
 	LOG(NOTE,"FGT: doing ADC") ;
 
-	if((rdo <= 0) || (rdo > FGT_RDO_COU)){
+	if((rdo <= 0) || (rdo > 6)){
 		r_start = 1 ;
-		r_stop = FGT_RDO_COU ;
+		r_stop = 6 ;
 	}
 	else {
 		r_start = r_stop = rdo ;

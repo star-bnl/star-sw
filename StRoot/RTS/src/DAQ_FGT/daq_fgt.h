@@ -76,25 +76,9 @@ public:
 
 	class daq_dta *handle_adc(int sec, int rdo, char *rdobuff = 0 ) ;
 
-#if 0
-	struct fgt_adc_to_phys_t {
-		char disk ;		// -1: doesn't exist
-		unsigned char quadrant ;
-		unsigned char type ;
-		unsigned short strip ;
-	} adc_to_phys[FGT_RDO_COU][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
 
-
-	struct fgt_phys_to_adc_t {
-		char rdo ;		// -1: doesn't exist
-		unsigned char arm ;
-		unsigned char apv ;
-		unsigned char ch ;
-	} phys_to_adc[FGT_DISK_COU][FGT_QUADRANT_COU][FGT_STRIP_TYPE_COU][FGT_STRIP_PHI_COU] ;
-#endif
-
-	u_int rdo_warns[3] ;	// number of warnings issued, per rdo
-	u_char rdo_id[3] ;	// for RDO checks in get_l2
+	u_int rdo_warns[7] ;	// number of warnings issued, per rdo; count from 1
+	u_char rdo_id[7] ;	// for RDO checks in get_l2; count from 1
 	u_int t_data ;		// for trg_cmd==1 pattern tests...
 } ;
 
