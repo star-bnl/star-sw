@@ -112,12 +112,16 @@ St2011ZMaker::initHistos(){
 
   hA[38]=h=new TH1F(core+"Y2","golden Z spin sorted; spin4 ",16,-0.5,15.5);
   h->SetMarkerSize(2);//<-- large text
-  hA[39]=h=new TH1F(core+"Y2a","golden Z , STAR #eta<-0.3 , spin sorted; spin4 ",16,-0.5,15.5);
+  hA[39]=h=new TH1F(core+"Y2a","golden Z , STAR #eta<0 , spin sorted; spin4 ",16,-0.5,15.5);
   h->SetMarkerSize(2);//<-- large text
-  hA[40]=h=new TH1F(core+"Y2b","golden Z , STAR -0.3<#eta<0.3 , spin sorted; spin4 ",16,-0.5,15.5);
+  hA[40]=h=new TH1F(core+"Y2b","golden Z , STAR #eta>0 , spin sorted; spin4 ",16,-0.5,15.5);
   h->SetMarkerSize(2);//<-- large text
-  hA[41]=h=new TH1F(core+"Y2c","golden Z , STAR #eta>0.3 , spin sorted; spin4 ",16,-0.5,15.5);
-  h->SetMarkerSize(2);//<-- large text
+  
+  hA[42]=h=new TH2F(core+"phiCorr12","#phi correlation; #phi_{e+} (rad); #phi_{e-} (rad)", 240,-PI,PI,240,-PI,PI);
+  hA[43]=h=new TH2F(core+"ChRecHypCorrPNp","TPC PRIM  Charge Separation Hyperbola Corrected ; 2x2 cluster ET (GeV); Q*ET/PT",100,0.,100.,100,-4,4);
+  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  hA[44]=h=new TH2F(core+"xCorr12","reconstructed bjorken-x correlation; x_{1}; x_{2}", 100,0,0.5,100,0,0.5);
+
   //************* endcap histos ***************
 
   // barrel track matched with endcap cluster (no track requirement

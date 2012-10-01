@@ -1,8 +1,10 @@
-// $Id: St2011ZMaker.cxx,v 1.9 2012/09/26 14:20:59 stevens4 Exp $
+// $Id: St2011ZMaker.cxx,v 1.10 2012/10/01 19:48:20 stevens4 Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
 //  changes Justin Stevens, MIT
+
+#include <TMath.h>
 
 #include "St2011WMaker.h"
 #include "WeventDisplay.h"
@@ -312,6 +314,11 @@ St2011ZMaker::find_Z_boson(){
 	hA[34]->Fill(T1.pointTower.iEta ,T1.cluster.energy);
 	hA[34]->Fill(T2.pointTower.iEta ,T2.cluster.energy);
 	hA[35]->Fill(p1.Eta(),p2.Eta());
+	
+	if(T1.prMuTrack->charge()>0) hA[42]->Fill(p1.Phi(),p2.Phi());
+	else hA[42]->Fill(p2.Phi(),p1.Phi());
+	hA[43]->Fill(T1.cluster.ET,T1.prMuTrack->charge()*T1.cluster.ET/T1.prMuTrack->pt()); 
+	hA[43]->Fill(T2.cluster.ET,T2.prMuTrack->charge()*T2.cluster.ET/T2.prMuTrack->pt()); 
 
 #if 0
 	printf("RCC:  Found Z w/ invmass=%f\n",mass);
@@ -349,10 +356,16 @@ St2011ZMaker::find_Z_boson(){
 	
 	int spin4=wMK->wEve->spin4;  
 	hA[38]->Fill(spin4); 
-	if(yZ<-0.3) hA[39]->Fill(spin4);
-	else if(yZ<0.3) hA[40]->Fill(spin4);
-	else hA[41]->Fill(spin4);
-	
+	if(yZ<0) hA[39]->Fill(spin4);
+	else if(yZ>0) hA[40]->Fill(spin4);
+
+	// L0 x1 and x2 computation
+	float mZ = 91.188; //mass; //
+	float roots = 510.;
+	float x1 = mZ/roots * TMath::Exp(fabs(yZ));
+	float x2 = mZ/roots * TMath::Exp(-1.*fabs(yZ));
+	hA[44]->Fill(x1,x2);
+
 	// **** I stoped changes here, Jan 
 	
 	float fmax1=T1.cluster.ET/T1.cl4x4.ET;
@@ -395,6 +408,9 @@ St2011ZMaker::find_Z_boson(){
 
 
 // $Log: St2011ZMaker.cxx,v $
+// Revision 1.10  2012/10/01 19:48:20  stevens4
+// add plots for Z result and move esmd cross point calculation outside plane loop
+//
 // Revision 1.9  2012/09/26 14:20:59  stevens4
 // use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
 //

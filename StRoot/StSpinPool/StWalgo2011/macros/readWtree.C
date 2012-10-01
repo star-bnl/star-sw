@@ -93,10 +93,10 @@ void readWtree(	const Char_t *fileList="./R13104003.lis", int etaBin=8, int maxE
     ZMk->attachWalgoMaker(wTreeMk);
     ZMk->setHList(HListZ); 
     ZMk->setNearEtFrac(0.88);
-    ZMk->setClusterMinEt(15);
+    ZMk->setClusterMinEt(14);
     ZMk->setPhi12Min(3.1416/2.);
-    ZMk->setMinZMass(73.); // Zmass -20%
-    ZMk->setMaxZMass(114.);// Zmass +20%
+    ZMk->setMinZMass(70.); // Zmass -20%
+    ZMk->setMaxZMass(110.);// Zmass +20%
   }
 
   //chain W and jet trees in W maker
