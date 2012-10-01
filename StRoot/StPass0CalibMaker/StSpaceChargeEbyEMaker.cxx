@@ -171,13 +171,9 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   // Get instance of StMagUtilities
   m_ExB = StMagUtilities::Instance();
   if (!m_ExB) {
-#ifdef __NEW_MagUtilities__
-    m_ExB = new StMagUtilities(gStTpcDb,(kSpaceChargeR2 | kGridLeak));
-#else
-    TDataSet *RunLog = GetDataBase("RunLog");
-    if (!RunLog) gMessMgr->Warning("StSpaceChargeEbyEMaker: No RunLog found.");
+    TDataSet *RunLog = GetDataBase("RunLog/MagFactor");
+    if (!RunLog) gMessMgr->Warning("StSpaceChargeEbyEMaker: No RunLog/MagFactor found.");
     m_ExB = new StMagUtilities(gStTpcDb,RunLog,(kSpaceChargeR2 | kGridLeak));
-#endif
   }
   lastsc = m_ExB->CurrentSpaceChargeR2();
 
@@ -1192,8 +1188,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.43 2012/09/13 20:58:56 fisyak Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.44 2012/10/01 17:50:07 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.44  2012/10/01 17:50:07  genevb
+// Reduce some overhead DB queries by being more specific about needed tables
+//
 // Revision 1.43  2012/09/13 20:58:56  fisyak
 // Corrections for iTpx
 //

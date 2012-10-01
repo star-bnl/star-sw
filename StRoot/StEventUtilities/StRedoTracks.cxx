@@ -42,8 +42,8 @@ Int_t StRedoTracks::Make(){
   // Get instance of StMagUtilities
   int option = 0;
   if (!m_ExB) {
-    TDataSet *RunLog = GetDataBase("RunLog");
-    if (!RunLog) gMessMgr->Warning("StRedoTracks: No RunLog found.");
+    TDataSet *RunLog = GetDataBase("RunLog/MagFactor");
+    if (!RunLog) gMessMgr->Warning("StRedoTracks: No RunLog/MagFactor found.");
     m_ExB = new StMagUtilities(tpcDbMaker->tpcDbInterface(),RunLog,option);
   }
 
@@ -123,8 +123,11 @@ Int_t StRedoTracks::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-// $Id: StRedoTracks.cxx,v 1.4 2003/09/02 17:58:09 perev Exp $
+// $Id: StRedoTracks.cxx,v 1.5 2012/10/01 17:50:06 genevb Exp $
 // $Log: StRedoTracks.cxx,v $
+// Revision 1.5  2012/10/01 17:50:06  genevb
+// Reduce some overhead DB queries by being more specific about needed tables
+//
 // Revision 1.4  2003/09/02 17:58:09  perev
 // gcc 3.2 updates + WarnOff
 //

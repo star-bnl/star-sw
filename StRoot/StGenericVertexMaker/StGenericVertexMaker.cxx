@@ -186,7 +186,7 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
      double dydz = 0.;
 
      // Get Current Beam Line Constraint from database
-     TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic");
+     TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic/vertexSeed");
 
      if (dbDataSet) {
        vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
