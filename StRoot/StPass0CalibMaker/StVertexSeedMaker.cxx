@@ -313,7 +313,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.52 2012/08/22 04:52:35 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.53 2012/10/01 17:50:07 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -413,9 +413,9 @@ void StVertexSeedMaker::WriteHistFile(Bool_t writeFit){
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::FillAssumed(){
-  TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
+  TDataSet* dbDataSet = GetDataBase("Calibrations/rhic/vertexSeed");
   if (!dbDataSet) {
-    LOG_ERROR << "Could not find Calibrations/rhic database" << endm;
+    LOG_ERROR << "Could not find Calibrations/rhic/vertexSeed in database" << endm;
     return kStErr;
   }
   St_vertexSeed* dbTableC =
@@ -443,9 +443,9 @@ Int_t StVertexSeedMaker::FillAssumed(){
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::GetVertexSeedTriggers(){
-  TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
+  TDataSet* dbDataSet = GetDataBase("Calibrations/rhic/vertexSeedTriggers");
   if (!dbDataSet) {
-    LOG_ERROR << "Could not find Calibrations/rhic database" << endm;
+    LOG_ERROR << "Could not find Calibrations/rhic/vertexSeedTriggers in database" << endm;
     return kStErr;
   }
   dbTriggersTable =
@@ -677,8 +677,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.52 2012/08/22 04:52:35 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.53 2012/10/01 17:50:07 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.53  2012/10/01 17:50:07  genevb
+// Reduce some overhead DB queries by being more specific about needed tables
+//
 // Revision 1.52  2012/08/22 04:52:35  genevb
 // Add BeamLine parameter ntuples to output
 //
