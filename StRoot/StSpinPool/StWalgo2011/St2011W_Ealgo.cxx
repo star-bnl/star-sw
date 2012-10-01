@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.21 2012/09/28 16:00:41 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.22 2012/10/01 19:48:20 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -348,14 +348,11 @@ St2011WMaker::analyzeESMD(){
 	T.esmdPeakSumE[iuv]=bestSum;	
 	T.esmdPeakOffset[iuv]=bestOff;
 
-
-	//get shower x-point from hitStrip + centroid of fit
-	T.esmdXPcentroid = geoSmd->getIntersection(T.hitSector-1,hitStrip[0]-1+T.esmdPeakOffset[0],hitStrip[1]-1+T.esmdPeakOffset[0]);//janCheck
-	
-
-
       } //end plane loop
 
+      //get shower x-point from hitStrip + centroid of fit
+      T.esmdXPcentroid = geoSmd->getIntersection(T.hitSector-1,hitStrip[0]-1+T.esmdPeakOffset[0],hitStrip[1]-1+T.esmdPeakOffset[1]);//janCheck
+	
     } //end track loop
   } //end vertex loop
 }
@@ -669,6 +666,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.22  2012/10/01 19:48:20  stevens4
+// add plots for Z result and move esmd cross point calculation outside plane loop
+//
 // Revision 1.21  2012/09/28 16:00:41  stevens4
 // add Q*ET/PT requirement to WB histos used for background estimation to be consistent with spin sorting
 //
