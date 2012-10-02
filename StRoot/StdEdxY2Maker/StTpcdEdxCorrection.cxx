@@ -57,9 +57,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 }
 //________________________________________________________________________________
 void StTpcdEdxCorrection::ReSetCorrections() {
-  TDataSet *tpc_calib  = StMaker::GetChain()->GetDataBase("Calibrations/tpc"); assert(tpc_calib);
-  if (Debug() > 1) tpc_calib->ls(3);
-  St_tpcGas *k_tpcGas = (St_tpcGas *) tpc_calib->Find("tpcGas");
+  St_tpcGas *k_tpcGas = (St_tpcGas *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcGas");
   if (!k_tpcGas || ! k_tpcGas->GetNRows()) {
     gMessMgr->Error() << "=== tpcGas is missing ===" << endm; 
     assert(k_tpcGas);
@@ -90,17 +88,17 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     gMessMgr->Warning() << "StTpcdEdxCorrection: " << m_Corrections[k].Name << "/" << m_Corrections[k].Title << endm;
     switch (k) {
     case kTpcSecRowB:
-      TpcSecRow  = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRowB"); 
+      TpcSecRow  = (St_TpcSecRowCor *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcSecRowB"); 
       if (TpcSecRow) SetTpcSecRowB(TpcSecRow);
       else {CLRBIT(m_Mask,k); gMessMgr->Warning() << " \tis missing" << endm;}
       break;
     case kTpcSecRowC:
-      TpcSecRow  = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRowC"); 
+      TpcSecRow  = (St_TpcSecRowCor *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcSecRowC"); 
       if (TpcSecRow) SetTpcSecRowC(TpcSecRow);
       else {CLRBIT(m_Mask,k); gMessMgr->Warning() << " \tis missing" << endm;}
       break;
     default:
-      table = (St_tpcCorrection *) tpc_calib->Find(m_Corrections[k].Name);
+      table = (St_tpcCorrection *) StMaker::GetChain()->GetDataBase(Form("Calibrations/tpc/TpcSecRowC/%s",m_Corrections[k].Name));
       if (! table) {
 	gMessMgr->Warning() << " \tis missing" << endm;
 	CLRBIT(m_Mask,k); 
