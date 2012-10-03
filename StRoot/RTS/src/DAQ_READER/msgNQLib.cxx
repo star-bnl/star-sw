@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#ifdef __linux
+#if defined(__linux__) || defined(__APPLE__)
 
 #endif
 
@@ -83,7 +83,7 @@ int msgNQCreate(char *host, int port, int msglen)
 	}
 
 
-#ifdef __linux
+#if defined(__linux__) || defined(__APPLE__)
 	LOG(DBG,"Before fcntl") ;
 	errno = 0 ;
 	ret = fcntl(dsc,F_SETFL, O_NONBLOCK) ;
@@ -210,7 +210,7 @@ int msgNQReceive(int dsc, char *where, int size, int timeout)
 	if(timeout < 0) timeout = 100000000 ;
 
 	pollstruct.fd = dsc ;
-#ifdef __linux
+#if defined(__linux__) || defined(__APPLE__)
 	pollstruct.events = POLLIN | POLLPRI ;
 #else
 	pollstruct.events = POLLIN | POLLRDNORM | POLLRDBAND | POLLPRI ;
@@ -298,7 +298,7 @@ int msgNQCheck(int dsc)
 {
 	int optval ;
 	int ret ;
-#ifdef __linux
+#if defined(__linux__) || defined(__APPLE__)
 	socklen_t size;
 #else
 	int size ;

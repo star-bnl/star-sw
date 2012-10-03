@@ -13,7 +13,7 @@
 
 
 
-#ifdef linux
+#if defined(linux) || defined(__APPLE__)
 /* prototypes for compiler, not seen by nios code */
 
 /* Returns length of opcode buffer */

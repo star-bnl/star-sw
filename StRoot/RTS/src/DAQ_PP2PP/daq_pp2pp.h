@@ -1,6 +1,8 @@
 #ifndef _DAQ_PP2PP_H_
 #define _DAQ_PP2PP_H_
 
+#include <sys/types.h>
+
 #define PP2PP_SVX_CH	128
 
 struct pp2pp_t {

@@ -13,7 +13,7 @@
 #include <assert.h>
 #include <iccp2k.h>
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 #include <sched.h>
 // some older Linuxes (notably 6.2) crash and burn
 // because of not having madvise so...
@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.49 2012/08/17 19:23:33 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.50 2012/10/03 18:50:55 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1388,7 +1388,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       if(ret == STAT_TIMED_OUT) {	// retry ...
 	timedout = 1;
    
-#ifdef __linux
+#if defined(__linux__) || defined(__APPLE__)
 	sched_yield() ;
 #else
 	yield() ;		// give up time slice?
@@ -1950,7 +1950,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
 
 
       static const char *str = "(no-name)" ;
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
       FILE *file ;
       static char name[128] ;
       int dummy ;

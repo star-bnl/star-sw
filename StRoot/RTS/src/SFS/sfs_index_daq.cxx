@@ -11,9 +11,10 @@
 #include <errno.h>
 #include <rtsLog.h>
 
-#include <byteswap.h>
-#define swap16(x) bswap_16(x)
-#define swap32(x) bswap_32(x)
+#include <rts.h>
+// #include <byteswap.h>
+// #define swap16(x) bswap_16(x)
+// #define swap32(x) bswap_32(x)
 
 #include <daqFormats.h>
 

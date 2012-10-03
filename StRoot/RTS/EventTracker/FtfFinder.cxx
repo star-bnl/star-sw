@@ -26,7 +26,7 @@
 #include "FtfFinder.h"
 
 #include <stdlib.h>
-
+#include <sys/types.h>
 
 //*********************************************************************
 //      Initializes the package

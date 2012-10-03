@@ -29,6 +29,7 @@
 #ifndef _RTS_H_
 #define _RTS_H_
 
+#ifndef __CINT__
 #ifndef __GNUC__
 #warning "This may NOT work on non-GNUC compilers!"
 #endif
@@ -88,6 +89,8 @@
 
 #if defined(__linux__)
 #define TARGET_SYSTEM "LINUX"
+#elif defined(__APPLE__)
+#define TARGET_SYSTEM "LINUX"
 #elif defined(__sun__)
 #define TARGET_SYSTEM "SUN"
 #elif defined(__osf__)
@@ -105,6 +108,7 @@
 #endif
 
 #endif	/* TARGET_SYSTEM */
+#endif  /* !__CINT__ */
 
 /******************** if any of RTS_PROJECT_XXX variables are not defined, we'll define it here ******/
 #ifdef RTS_PROJECT_STAR
@@ -135,7 +139,7 @@
 
 /* ********************** BYTESWAPPING STUFF ***********************/
 
-#ifdef __linux__
+#if defined(__linux__) && ! defined(__APPLE__)
 /* linux has its own (fast) swaps */
 #include <byteswap.h>
 
@@ -220,6 +224,7 @@ extern inline void swapBuff32(unsigned int *buff, int n)
 
 
 /********** UGLINESS for CINT which does not seem to be able to parse "sys/types.h" ********/
+
 #ifdef __CINT__
 #define u_int unsigned int
 typedef unsigned char u_char ;
@@ -234,5 +239,11 @@ typedef unsigned long long int UINT64;
 #define hi64(x) ((UINT32)(x >> 32))
 #define lo64(x) ((UINT32)(x & 0xffffffff))
 #define make64(lo, hi)  ((UINT64)(((UINT64)hi << 32) | lo))
+
+#ifdef __APPLE__
+#define open64 open
+#define lseek64 lseek
+#define mmap64 mmap
+#endif /* __APPLE__ */
 
 #endif /* _RTS_H_ */

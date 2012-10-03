@@ -7,6 +7,8 @@
 #ifndef _FCF_CLASS_HH_
 #define _FCF_CLASS_HH_
 
+#include <sys/types.h>
+
 
 // steering - watch it!
 //#define FCF_ANNOTATE_CLUSTERS

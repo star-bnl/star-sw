@@ -362,7 +362,8 @@ inline void pMuxLock(MUX_ID mux)
 
 // This is only implemented on linux...
 // other platforms block...
-#ifdef linux
+#if defined(__linux__) || defined(__APPLE__)
+
 inline bool pMuxTryLock(MUX_ID mux)
 {
 #ifdef sun
@@ -410,7 +411,7 @@ inline void pMuxUnlock(MUX_ID mux)
 #define IPCQLIB 
 #endif
 
-#ifdef linux
+#if defined(__linux__) || defined(__APPLE__)
 #define THREAD_MSG_QUEUE
 #endif
 #endif

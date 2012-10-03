@@ -11,7 +11,7 @@
 	  //        
 	  //        
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 inline void MSG_ERR_LOCAL(ic_msg *msg, 
 		     char *file,
 		     char *str,
