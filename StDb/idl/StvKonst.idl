@@ -10,7 +10,9 @@ struct StvKonst {
       float     mDca2dZeroXY;		/*max 2d dca to X=Y=0  for primary track*/
       float     mDca3dVertex;  		/*max 3d dca to vertex for primary track*/
       float     mMaxCurv;		/*Maximal allowed curvature*/
-      float     mMinP2;		        /*Minimal allowed momentum**2*/
+      float     mMinP2;		        /*Minimal allowed momentum**2 for Geant3*/
+      float     mMaxPti;		/*Maximal allowed 1/pt */
+      float     mMaxRes;		/*Maximal allowed residual */
       float     mMaxWindow;		/*Maximal window to search hits*/
       long      mMinHits;		/*Min number of hits allowed*/
       long      mGoodHits;		/*Min umber of Good hits in track*/
