@@ -42,7 +42,7 @@
 #include <rtsSystems.h>
 #include <fcfClass.hh>
 
-static char *fcf_cvs_revision = "$Revision: 1.4 $" ;
+static char *fcf_cvs_revision = "$Revision: 1.5 $" ;
 
 #ifdef __ROOT__	// STAR Offline
 
@@ -104,7 +104,7 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 
 
 
-#ifdef __unix
+#if defined(__unix) || defined(__APPLE__)
 
 
 #define FCF_MAX_RES_COU_FAST	8
@@ -263,7 +263,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 //		u_int mark = mzFastTimerMark() ;
 
 
-#ifdef __unix
+#if defined(__unix) || defined(__APPLE__)
 		static u_int cppStore[32] ;
 		u_int *ptrs = cppStore ;
 #else
@@ -288,7 +288,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 			register unsigned int fourth FCF_960_R11 ;
 
 			preburst4(cpp_r) ;	// this guy puts the results in r8 and r9!!!
-#ifdef __unix
+#if defined(__unix) || defined(__APPLE__)
 			first = *cpp_r ;
 			second = *(cpp_r+1) ;
 			third = *(cpp_r+2) ;
@@ -556,7 +556,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				charge *= GC ;	// charge is now 64 times larger!
 
 
-#ifdef __unix
+#if defined(__unix) || defined(__APPLE__)
 				if(charge > 0x7FFFFFFF) {
 					LOG(ERR,"Whoa charge 0x%08X, %d GC",charge,GC,0,0,0) ;
 				}
@@ -829,7 +829,7 @@ fcfClass::fcfClass(int det, u_short *table)
 {
 	detector = det ;
 
-#ifdef __unix
+#if defined(__unix) || defined(__APPLE__)
 	a8to10 = adc8to10_storage ;
 #else	// I960
 	a8to10 = fastMem->adc8to10 ;
@@ -923,7 +923,7 @@ fcfClass::fcfClass(int det, u_short *table)
 	minAdcPad *= FCF_GAIN_FACTOR ;
 
 	static struct fcfResx res_slow[2][512] ;
-#ifdef __unix
+#if defined(__unix) || defined(__APPLE__)
 	static struct fcfResx res_fast_ux[2][FCF_MAX_RES_COU_FAST] ;
 	struct fcfResx *res_fast[2] = { res_fast_ux[0], res_fast_ux[1] } ;
 #else

@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#ifdef __linux__	
+#if defined(__linux__) || defined(__APPLE__)	
 #else	/* Solaris */
 #include <procfs.h>	
 #endif
@@ -304,7 +304,7 @@ static char *getCmd(void)
 
 
 	static char *str = "(no-name)" ;
-#ifdef __linux__	
+#if defined(__linux__) || defined(__APPLE__)	
 	FILE *file ;
 	static char name[128] ;
 	char *ptr ;

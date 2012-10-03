@@ -75,7 +75,7 @@ template <class T> thrMsgQueue<T>::thrMsgQueue(int s)
 #endif
 };
 //--------------------------------------------------------------
-#ifdef linux
+#if defined(linux) || defined(__APPLE__)
 template <class T> int thrMsgQueue<T>::send(T* a, int prio) 
 #else
 template <class T> int thrMsgQueue<T>::send(T* a, int prio = 0) 

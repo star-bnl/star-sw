@@ -1,6 +1,8 @@
 #ifndef _DAQ_DTA_STRUCTS_H_
 #define _DAQ_DTA_STRUCTS_H_
 
+#include <sys/types.h>
+
 // Trigger basics
 struct daq_trg_word {
 	short t ;		// token

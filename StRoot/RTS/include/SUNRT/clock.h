@@ -3,7 +3,7 @@
 
 #include <unistd.h>
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
 #ifndef linux
 #define linux
 #endif

@@ -1,6 +1,7 @@
 #ifndef _DAQ_PMD_H_
 #define _DAQ_PMD_H_
 
+#include <sys/types.h>
 #include <daqFormats.h>
 
 struct pmd_t {

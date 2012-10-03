@@ -30,7 +30,8 @@ int myriReadFile(char *filename, void *buffer, int size, int node);
 int myriWriteFile(char *filename, void *buffer, int size, int node);
 #endif
 
-#ifdef linux
+#if defined(__linux__) || defined(__APPLE__)
+
 // pnode should point to a UINT16 or be NULL!
 extern void *vxFileRequestServer(void *pnode=NULL);
 #endif
