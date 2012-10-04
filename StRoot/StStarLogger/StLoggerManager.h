@@ -75,7 +75,7 @@ class StLoggerManager : public StMessMgr {
    // messVec     messList;
    // messTypeVec messCollection;
     static inline int LevelIndex(char level);
-
+    static bool   mColorEnabled;
  protected:
    StLoggerManager(const char *loggerName="BFC");
    StLoggerManager(const StLoggerManager&);
@@ -114,7 +114,8 @@ protected:
    virtual bool isEnabledFor()    const;
    virtual bool isQAInfoEnabled() const;
    virtual bool isUCMInfoEnabled()const;
-
+   static  bool isColorEnabled()  {return mColorEnabled;}
+   static  void setColorEnabled(bool t = true) {mColorEnabled = t;}
 
 // Generic Messages:
    virtual ostrstream& Message(const char* mess="", const char* type="",
@@ -249,4 +250,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.16 2010/04/23 22:39:11 fine Exp $
+// $Id: StLoggerManager.h,v 1.17 2012/10/04 23:32:29 fisyak Exp $
