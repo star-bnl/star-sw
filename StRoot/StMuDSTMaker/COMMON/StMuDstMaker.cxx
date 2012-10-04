@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.107 2012/09/28 22:38:05 tone421 Exp $
+ * $Id: StMuDstMaker.cxx,v 1.108 2012/10/04 18:57:59 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -1194,7 +1194,7 @@ void StMuDstMaker::fillEzt(StEvent* ev) {
       gMessMgr->Message("","W") <<  GetName()<<"::fillEzt(), missing StEmcCollection, EEMC raw data NOT saved in muDst" <<endm;
     } else { //........... EMC-Collection in StEvent exist
       StEmcRawData *eeRaw=emcCol->eemcRawData();
-      
+      if (eeRaw) {
       if(eztArrayStatus[muEztETow]) {
 	EztEmcRawData* ETow = mEzTree->copyETow(eeRaw);
 	addType(mEztArrays[muEztETow], *ETow);
@@ -1203,6 +1203,7 @@ void StMuDstMaker::fillEzt(StEvent* ev) {
       if(eztArrayStatus[muEztESmd]) {
 	EztEmcRawData* ESmd = mEzTree->copyESmd(eeRaw);
 	addType(mEztArrays[muEztESmd], *ESmd);
+      }
       }
     }
   }
@@ -1660,6 +1661,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.108  2012/10/04 18:57:59  fisyak
+ * Add protection for empty emc raw data
+ *
  * Revision 1.107  2012/09/28 22:38:05  tone421
  * Changed array stucture of MTD upon request of the TOF group. MTD arrays now on top level, rather than within __NARRAYS__
  *
