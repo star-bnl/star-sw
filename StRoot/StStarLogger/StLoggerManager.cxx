@@ -39,6 +39,7 @@
 #define COLOR_PINK   "\033[35m"
 
 #include "StLoggerManager.h"
+bool StLoggerManager::mColorEnabled = true;
 
 #include <log4cxx/basicconfigurator.h>
 #include <log4cxx/propertyconfigurator.h>
@@ -114,17 +115,17 @@ if (gErrorIgnoreLevel == kUnset) {
    
 
    if (level >= kFatal) {
-        LOG_FATAL << location << COLOR_PINK << msg << COLOR_NORMAL << endm;
+        LOG_FATAL << location << msg << endm;
      } else if (level >= kSysError) {
-        LOG_FATAL << location << " : " << COLOR_PINK << msg << COLOR_NORMAL << endm;  
+        LOG_FATAL << location << " : " << msg << endm;  
      } else if (level >= kBreak) {
-        LOG_FATAL << location << " : " << COLOR_RED << msg << COLOR_NORMAL << endm;  
+        LOG_FATAL << location << " : " << msg << endm;  
      } else if (level >= kError) { 
-        LOG_ERROR << location << " : " << COLOR_RED << msg << COLOR_NORMAL << endm;
+        LOG_ERROR << location << " : " << msg << endm;
 //   else if (level >= kWarning)
-//        LOG_WARN << location << " : " << COLOR_YELLOW << msg << COLOR_NORMAL << endm;
+//        LOG_WARN << location << " : " << msg << endm;
      } else if (level >= kInfo) {
-        LOG_INFO << location << " : " << COLOR_GREEN << msg << COLOR_NORMAL << endm;
+        LOG_INFO << location << " : " << msg << endm;
      }
 
    if (abort) {
@@ -247,6 +248,8 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
 #ifndef __ROOT__
     String propertyFile = "log4j.xml";
 #else
+    TString Color = gEnv->GetValue("Logger.Color","yes");
+    mColorEnabled = Color.CompareTo("no",TString::kIgnoreCase);
     TString fullPropertyFileName = gEnv->GetValue("Logger.Configuration","log4j.xml");
     gSystem->ExpandPathName(fullPropertyFileName);
     String propertyFile = (const char*)fullPropertyFileName;
@@ -410,47 +413,60 @@ void StLoggerManager::BuildMessage(const char* mess, unsigned char type,
 void StLoggerManager::PrintLogger(const char* mess, unsigned char type,
     const char* opt,const char *sourceFileName, int lineNumber) 
 {
-   if (!opt) opt = "";
-   unsigned char typeChar = 'I';
- //  if (type && type[0]) typeChar = type[0];
-   if (type) typeChar = type;
-   if (!(sourceFileName || fSourceFileNames[LevelIndex(typeChar)].empty() ) ) 
-   {
+  if (!opt) opt = "";
+  unsigned char typeChar = 'I';
+  //  if (type && type[0]) typeChar = type[0];
+  if (type) typeChar = type;
+  if (!(sourceFileName || fSourceFileNames[LevelIndex(typeChar)].empty() ) ) 
+    {
       sourceFileName = fSourceFileNames[LevelIndex(typeChar)].c_str();
-   }
-
-   if ( lineNumber == -1) 
-      lineNumber = fLineNumbers[LevelIndex(typeChar)];
-   bool canPrint = true;
-   if (fAllowRepeat >= 0 ) {
-        // compare the current message with the buffered
-      if ( mess == fLastMessage ) {
-         fLastRepeatCounter++;
-         canPrint = (fAllowRepeat >= fLastRepeatCounter);
-      } else {
-        fLastRepeatCounter= 0;
-        fLastMessage = mess;
-      }
-   }
-   if (canPrint) {
-      if ( (mess == 0) || (mess[0] == 0)) mess = "."; // logger doesn't like the empty messages 
-      // fprintf(stderr, " **** LOGGER **** %c %s\n", typeChar, mess);
+    }
+  
+  if ( lineNumber == -1) 
+    lineNumber = fLineNumbers[LevelIndex(typeChar)];
+  bool canPrint = true;
+  if (fAllowRepeat >= 0 ) {
+    // compare the current message with the buffered
+    if ( mess == fLastMessage ) {
+      fLastRepeatCounter++;
+      canPrint = (fAllowRepeat >= fLastRepeatCounter);
+    } else {
+      fLastRepeatCounter= 0;
+      fLastMessage = mess;
+    }
+  }
+  if (canPrint) {
+    if ( (mess == 0) || (mess[0] == 0)) mess = "."; // logger doesn't like the empty messages 
+    // fprintf(stderr, " **** LOGGER **** %c %s\n", typeChar, mess);
+    if (mColorEnabled) {
       TString Mess(mess);
       switch (typeChar)  {
-        case 'F': fLogger->fatal   (_T(COLOR_PINK   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'E': fLogger->error   (_T(COLOR_RED    + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'W': fLogger->warn    (_T(COLOR_YELLOW + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'I': fLogger->info    (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'D': fLogger->debug   (_T(COLOR_BLUE   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'Q': fgQALogger->info (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'U': fgUCMLogger->info(_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-        default: fLogger->info     (_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber));     break;
+      case 'F': fLogger->fatal   (_T(COLOR_PINK   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'E': fLogger->error   (_T(COLOR_RED    + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'W': fLogger->warn    (_T(COLOR_YELLOW + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'I': fLogger->info    (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'D': fLogger->debug   (_T(COLOR_BLUE   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'Q': fgQALogger->info (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'U': fgUCMLogger->info(_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      default: fLogger->info     (_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
       };
-   }
-//   seekp(0);
-   if (lineNumber != -1) { // restore the context
-         NDC::pop();
-   }
+    } else {
+      switch (typeChar)  {
+      case 'F': fLogger->fatal   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'E': fLogger->error   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'W': fLogger->warn    (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'I': fLogger->info    (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'D': fLogger->debug   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'Q': fgQALogger->info (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'U': fgUCMLogger->info(_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      default: fLogger->info     (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      };
+    }
+  }
+  //   seekp(0);
+  if (lineNumber != -1) { // restore the context
+    NDC::pop();
+  }
 }
 //_____________________________________________________________________________
 void StLoggerManager::Print() {
@@ -525,7 +541,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.41 2012/10/04 15:44:20 fisyak Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.42 2012/10/04 23:32:29 fisyak Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -958,8 +974,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.41 2012/10/04 15:44:20 fisyak Exp $
+// $Id: StLoggerManager.cxx,v 1.42 2012/10/04 23:32:29 fisyak Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.42  2012/10/04 23:32:29  fisyak
+// allow to switch off color by putting in .rootrc line with Logger.Color  no
+//
 // Revision 1.41  2012/10/04 15:44:20  fisyak
 // Add colors
 //
