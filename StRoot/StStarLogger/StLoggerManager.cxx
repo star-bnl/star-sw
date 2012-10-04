@@ -10,6 +10,7 @@
 /// finding and summary tools are also available.                        //
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
+#include <assert.h> 
 #include <stdlib.h>
 
 #ifdef __ROOT__
@@ -29,6 +30,13 @@
    NDC::pop();                         \
 }
 #endif 
+//           echo -e "\033[31m ME \033[0m COOL"
+#define COLOR_NORMAL "\033[0m"
+#define COLOR_RED    "\033[31m"
+#define COLOR_GREEN  "\033[32m"
+#define COLOR_YELLOW "\033[33m"
+#define COLOR_BLUE   "\033[34m"
+#define COLOR_PINK   "\033[35m"
 
 #include "StLoggerManager.h"
 
@@ -106,17 +114,17 @@ if (gErrorIgnoreLevel == kUnset) {
    
 
    if (level >= kFatal) {
-        LOG_FATAL << location <<msg << endm;
+        LOG_FATAL << location << COLOR_PINK << msg << COLOR_NORMAL << endm;
      } else if (level >= kSysError) {
-        LOG_FATAL << location << " : " << msg << endm;  
+        LOG_FATAL << location << " : " << COLOR_PINK << msg << COLOR_NORMAL << endm;  
      } else if (level >= kBreak) {
-        LOG_FATAL << location << " : " << msg << endm;  
+        LOG_FATAL << location << " : " << COLOR_RED << msg << COLOR_NORMAL << endm;  
      } else if (level >= kError) { 
-        LOG_ERROR << location << " : " << msg << endm;
+        LOG_ERROR << location << " : " << COLOR_RED << msg << COLOR_NORMAL << endm;
 //   else if (level >= kWarning)
-//        LOG_WARN << location << " : " << msg << endm;
+//        LOG_WARN << location << " : " << COLOR_YELLOW << msg << COLOR_NORMAL << endm;
      } else if (level >= kInfo) {
-        LOG_INFO << location << " : " << msg << endm;
+        LOG_INFO << location << " : " << COLOR_GREEN << msg << COLOR_NORMAL << endm;
      }
 
    if (abort) {
@@ -427,15 +435,16 @@ void StLoggerManager::PrintLogger(const char* mess, unsigned char type,
    if (canPrint) {
       if ( (mess == 0) || (mess[0] == 0)) mess = "."; // logger doesn't like the empty messages 
       // fprintf(stderr, " **** LOGGER **** %c %s\n", typeChar, mess);
+      TString Mess(mess);
       switch (typeChar)  {
-        case 'F': fLogger->fatal  (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'E': fLogger->error  (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'W': fLogger->warn   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'I': fLogger->info   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'D': fLogger->debug  (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'Q': fgQALogger->info(_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-        case 'U': fgUCMLogger->info(_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-        default: fLogger->info(_T(mess),LocationInfo(sourceFileName,"",lineNumber));     break;
+        case 'F': fLogger->fatal   (_T(COLOR_PINK   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'E': fLogger->error   (_T(COLOR_RED    + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'W': fLogger->warn    (_T(COLOR_YELLOW + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'I': fLogger->info    (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'D': fLogger->debug   (_T(COLOR_BLUE   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'Q': fgQALogger->info (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'U': fgUCMLogger->info(_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+        default: fLogger->info     (_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber));     break;
       };
    }
 //   seekp(0);
@@ -516,7 +525,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.40 2012/06/11 14:58:55 fisyak Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.41 2012/10/04 15:44:20 fisyak Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -949,8 +958,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.40 2012/06/11 14:58:55 fisyak Exp $
+// $Id: StLoggerManager.cxx,v 1.41 2012/10/04 15:44:20 fisyak Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.41  2012/10/04 15:44:20  fisyak
+// Add colors
+//
 // Revision 1.40  2012/06/11 14:58:55  fisyak
 // std namespace
 //
