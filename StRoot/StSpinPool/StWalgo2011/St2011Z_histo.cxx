@@ -121,6 +121,7 @@ St2011ZMaker::initHistos(){
   hA[43]=h=new TH2F(core+"ChRecHypCorrPNp","TPC PRIM  Charge Separation Hyperbola Corrected ; 2x2 cluster ET (GeV); Q*ET/PT",100,0.,100.,100,-4,4);
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   hA[44]=h=new TH2F(core+"xCorr12","reconstructed bjorken-x correlation; x_{1}; x_{2}", 100,0,0.5,100,0,0.5);
+  hA[45]=h=new TH2F(core+"xCorr12recoM","reconstructed bjorken-x correlation (reco mass); x_{1}; x_{2}", 100,0,0.5,100,0,0.5);
 
   //************* endcap histos ***************
 

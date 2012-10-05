@@ -1,4 +1,4 @@
-// $Id: St2011ZMaker.cxx,v 1.10 2012/10/01 19:48:20 stevens4 Exp $
+// $Id: St2011ZMaker.cxx,v 1.11 2012/10/05 16:44:31 stevens4 Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -360,11 +360,12 @@ St2011ZMaker::find_Z_boson(){
 	else if(yZ>0) hA[40]->Fill(spin4);
 
 	// L0 x1 and x2 computation
-	float mZ = 91.188; //mass; //
+	float mZ = 91.188; 
 	float roots = 510.;
-	float x1 = mZ/roots * TMath::Exp(fabs(yZ));
-	float x2 = mZ/roots * TMath::Exp(-1.*fabs(yZ));
+	float x1 = mZ/roots * TMath::Exp(yZ);
+	float x2 = mZ/roots * TMath::Exp(-1.*yZ);
 	hA[44]->Fill(x1,x2);
+	hA[45]->Fill(x1*mass/mZ,x2*mass/mZ);
 
 	// **** I stoped changes here, Jan 
 	
@@ -408,6 +409,9 @@ St2011ZMaker::find_Z_boson(){
 
 
 // $Log: St2011ZMaker.cxx,v $
+// Revision 1.11  2012/10/05 16:44:31  stevens4
+// final z plots: update x1-x2 correlation in z maker
+//
 // Revision 1.10  2012/10/01 19:48:20  stevens4
 // add plots for Z result and move esmd cross point calculation outside plane loop
 //
