@@ -1,4 +1,4 @@
-// $Id: St2011ZMaker.cxx,v 1.11 2012/10/05 16:44:31 stevens4 Exp $
+// $Id: St2011ZMaker.cxx,v 1.12 2012/10/05 17:53:53 balewski Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -367,6 +367,14 @@ St2011ZMaker::find_Z_boson(){
 	hA[44]->Fill(x1,x2);
 	hA[45]->Fill(x1*mass/mZ,x2*mass/mZ);
 
+	// free quark search
+	if(T1.prMuTrack->charge()>0) 
+	  hA[46]->Fill( T1.prMuTrack->charge()*T1.cluster.ET/T1.prMuTrack->pt(),
+			T2.prMuTrack->charge()*T2.cluster.ET/T2.prMuTrack->pt());
+	else
+	  hA[46]->Fill( T2.prMuTrack->charge()*T2.cluster.ET/T2.prMuTrack->pt(),
+			T1.prMuTrack->charge()*T1.cluster.ET/T1.prMuTrack->pt());
+	
 	// **** I stoped changes here, Jan 
 	
 	float fmax1=T1.cluster.ET/T1.cl4x4.ET;
@@ -409,6 +417,9 @@ St2011ZMaker::find_Z_boson(){
 
 
 // $Log: St2011ZMaker.cxx,v $
+// Revision 1.12  2012/10/05 17:53:53  balewski
+// added correlation plots for reco Q in Z, W algos
+//
 // Revision 1.11  2012/10/05 16:44:31  stevens4
 // final z plots: update x1-x2 correlation in z maker
 //

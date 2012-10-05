@@ -1,4 +1,4 @@
-// $Id: St2011W_histo.cxx,v 1.14 2012/09/26 14:20:59 stevens4 Exp $
+// $Id: St2011W_histo.cxx,v 1.15 2012/10/05 17:53:53 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -259,6 +259,8 @@ St2011WMaker::initHistos(){
   // free 102-109
   hA[104]=h=new TH1F("muWtime",Form("Barrel Golden W: unix time final selection %s 3/17/12 - 4/20/12; unixtime (bin = 10 min)",coreTitle.Data()),4896,1331942400,1334880000);
 
+  hA[105]=h=new TH2F("muWfreeQ","reco charge vs. TPC dedx, golden W+; Q *ET/PT;  dEdx (keV)",200,-5,5,100,0,20);
+
   //..... series of electron ET plots after succesive cuts
   char tt2[][200]={"max 2x2","track matched","no near ET","no away ET"};
   for(int i=0;i<4;i++){
@@ -393,6 +395,9 @@ St2011WMaker::initHistos(){
 }
 
 // $Log: St2011W_histo.cxx,v $
+// Revision 1.15  2012/10/05 17:53:53  balewski
+// added correlation plots for reco Q in Z, W algos
+//
 // Revision 1.14  2012/09/26 14:20:59  stevens4
 // use PtBal cos(phi) for WB and WE algos and use Q*ET/PT for barrel charge sign
 //
