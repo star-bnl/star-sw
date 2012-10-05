@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.19 2012/09/28 16:00:42 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.20 2012/10/05 17:53:53 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -201,6 +201,9 @@ St2011WMaker::find_W_boson(){
       if(T.prMuTrack->charge()>0) nGoldWp++;
       else if(T.prMuTrack->charge()<0) nGoldWn++;
       hA[104]->Fill(wEve->time);
+
+      // free quark search
+      hA[105]->Fill(hypCorr_p,T.glMuTrack->dEdx()*1e6); 
 
     }// loop over tracks
   }// loop over vertices
@@ -714,6 +717,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.20  2012/10/05 17:53:53  balewski
+// added correlation plots for reco Q in Z, W algos
+//
 // Revision 1.19  2012/09/28 16:00:42  stevens4
 // add Q*ET/PT requirement to WB histos used for background estimation to be consistent with spin sorting
 //

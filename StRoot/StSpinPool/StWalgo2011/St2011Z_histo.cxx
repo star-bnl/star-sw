@@ -120,9 +120,10 @@ St2011ZMaker::initHistos(){
   hA[42]=h=new TH2F(core+"phiCorr12","#phi correlation; #phi_{e+} (rad); #phi_{e-} (rad)", 240,-PI,PI,240,-PI,PI);
   hA[43]=h=new TH2F(core+"ChRecHypCorrPNp","TPC PRIM  Charge Separation Hyperbola Corrected ; 2x2 cluster ET (GeV); Q*ET/PT",100,0.,100.,100,-4,4);
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
-  hA[44]=h=new TH2F(core+"xCorr12","reconstructed bjorken-x correlation; x_{1}; x_{2}", 100,0,0.5,100,0,0.5);
+  hA[44]=h=new TH2F(core+"xCorr12","reconstructed bjorken-x correlation; x_{1}; x_{2}", 300,0,0.5,300,0,0.5);
   hA[45]=h=new TH2F(core+"xCorr12recoM","reconstructed bjorken-x correlation (reco mass); x_{1}; x_{2}", 100,0,0.5,100,0,0.5);
 
+  hA[46]=h=new TH2F(core+"FreeQ","reco charges correlation, golden Z; e+ Q *ET/PT; e- Q *ET/PT",100,0.,5.,100,-5.,0);
   //************* endcap histos ***************
 
   // barrel track matched with endcap cluster (no track requirement
