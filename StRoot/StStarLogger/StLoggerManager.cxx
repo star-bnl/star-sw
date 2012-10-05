@@ -248,7 +248,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
 #ifndef __ROOT__
     String propertyFile = "log4j.xml";
 #else
-    TString Color = gEnv->GetValue("Logger.Color","yes");
+    TString Color = gEnv->GetValue("Logger.Color","no");
     mColorEnabled = Color.CompareTo("no",TString::kIgnoreCase);
     TString fullPropertyFileName = gEnv->GetValue("Logger.Configuration","log4j.xml");
     gSystem->ExpandPathName(fullPropertyFileName);
@@ -541,7 +541,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.42 2012/10/04 23:32:29 fisyak Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.43 2012/10/05 14:16:48 fisyak Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -974,8 +974,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.42 2012/10/04 23:32:29 fisyak Exp $
+// $Id: StLoggerManager.cxx,v 1.43 2012/10/05 14:16:48 fisyak Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.43  2012/10/05 14:16:48  fisyak
+// Change default from color => non color
+//
 // Revision 1.42  2012/10/04 23:32:29  fisyak
 // allow to switch off color by putting in .rootrc line with Logger.Color  no
 //
