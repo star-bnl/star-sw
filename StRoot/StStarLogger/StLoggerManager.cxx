@@ -39,7 +39,7 @@
 #define COLOR_PINK   "\033[35m"
 
 #include "StLoggerManager.h"
-bool StLoggerManager::mColorEnabled = true;
+bool StLoggerManager::mColorEnabled = false;
 
 #include <log4cxx/basicconfigurator.h>
 #include <log4cxx/propertyconfigurator.h>
@@ -248,8 +248,8 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
 #ifndef __ROOT__
     String propertyFile = "log4j.xml";
 #else
-    TString Color = gEnv->GetValue("Logger.Color","no");
-    mColorEnabled = Color.CompareTo("no",TString::kIgnoreCase);
+    TString Color = gEnv->GetValue("Logger.Color","yes");
+    mColorEnabled = Color.CompareTo("yes",TString::kIgnoreCase);
     TString fullPropertyFileName = gEnv->GetValue("Logger.Configuration","log4j.xml");
     gSystem->ExpandPathName(fullPropertyFileName);
     String propertyFile = (const char*)fullPropertyFileName;
@@ -439,16 +439,29 @@ void StLoggerManager::PrintLogger(const char* mess, unsigned char type,
     if ( (mess == 0) || (mess[0] == 0)) mess = "."; // logger doesn't like the empty messages 
     // fprintf(stderr, " **** LOGGER **** %c %s\n", typeChar, mess);
     if (mColorEnabled) {
-      TString Mess(mess);
+      //TString Mess(mess);
+      //
+      // fLogger->XXX does not take TSring but char * under older log4cxx version
+      //
       switch (typeChar)  {
-      case 'F': fLogger->fatal   (_T(COLOR_PINK   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'E': fLogger->error   (_T(COLOR_RED    + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'W': fLogger->warn    (_T(COLOR_YELLOW + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'I': fLogger->info    (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'D': fLogger->debug   (_T(COLOR_BLUE   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'Q': fgQALogger->info (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'U': fgUCMLogger->info(_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-      default: fLogger->info     (_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'F': fLogger->fatal   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'E': fLogger->error   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'W': fLogger->warn    (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'I': fLogger->info    (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'D': fLogger->debug   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'Q': fgQALogger->info (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'U': fgUCMLogger->info(_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+      default: fLogger->info     (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+
+
+	//case 'F': fLogger->fatal   (_T( sprintf("%s%s%s",COLOR_PINK,mess,COLOR_NORMAL)) ,LocationInfo(sourceFileName,"",lineNumber)); break;
+	//case 'E': fLogger->error   (_T(COLOR_RED    + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+	//case 'W': fLogger->warn    (_T(COLOR_YELLOW + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+	//case 'I': fLogger->info    (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+	//case 'D': fLogger->debug   (_T(COLOR_BLUE   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+	//case 'Q': fgQALogger->info (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+	//case 'U': fgUCMLogger->info(_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+	//default: fLogger->info     (_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
       };
     } else {
       switch (typeChar)  {
@@ -541,7 +554,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.43 2012/10/05 14:16:48 fisyak Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.44 2012/10/05 17:14:32 jeromel Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -974,8 +987,18 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.43 2012/10/05 14:16:48 fisyak Exp $
+// $Id: StLoggerManager.cxx,v 1.44 2012/10/05 17:14:32 jeromel Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.44  2012/10/05 17:14:32  jeromel
+// Made no color the default (set yes to Logger.color to yes if one wants to enable)
+//
+// For now, restored no color as fLogger->XXX does not take TSring but char * under
+// older log4cxx version (compilation would break). Other solution to be found later.
+//
+// A side note that a xml based setting for colors (including which color goes to
+// what level of messages) is likely the proper approach to avoid mixing config
+// approach.
+//
 // Revision 1.43  2012/10/05 14:16:48  fisyak
 // Change default from color => non color
 //
