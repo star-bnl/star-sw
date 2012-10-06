@@ -36,7 +36,7 @@
 #include <DAQ_HLT/daq_hlt.h>
 #include <DAQ_FGT/daq_fgt.h>	//includes GMT & IST
 #include <DAQ_MTD/daq_mtd.h>
-
+#include <DAQ_PXL/daq_pxl.h>
 
 // I wrapped more complicated detectors inside their own functions
 // for this example
@@ -63,6 +63,8 @@ static int tinfo_doer(daqReader *rdr, const char *do_print);
 
 static int gmt_doer(daqReader *rdr, const char *do_print) ;
 //static int ist_doer(daqReader *rdr, const char *do_print) ;
+
+static int pxl_doer(daqReader *rdr, const char *do_print) ;
 
 static int good ;
 
@@ -288,6 +290,9 @@ int main(int argc, char *argv[])
 
 		/*************************** GMT **************************/
 		if(gmt_doer(evp,print_det)) LOG(INFO,"GMT found") ;
+
+		/*************************** PXL **************************/
+		if(pxl_doer(evp,print_det)) LOG(INFO,"PXL found") ;
 		
 
 
@@ -1243,4 +1248,41 @@ static int tinfo_doer(daqReader *rdr, const char *do_print)
   }
   
   return found;
+}
+
+
+
+static int pxl_doer(daqReader *rdr, const char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"pxl")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	// right now only the "raw" pointer is available/known
+	dd = rdr->det("pxl")->get("raw") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			// point to the start of the DDL raw data
+			u_int *d = (u_int *) dd->Void ;	
+
+
+			if(do_print) {
+				printf("PXL RAW: RDO %d: %d bytes (%d words)\n",dd->rdo,dd->ncontent,dd->ncontent/4) ;
+				// dump a few
+				for(int i=0;i<10;i++) {
+					printf(" %2d: 0x%08X\n",i,d[i]) ;
+				}
+			}
+
+		}
+	}
+
+
+
+	return found ;
 }
