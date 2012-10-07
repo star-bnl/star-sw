@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml_rcf.pl,v 1.1 2012/10/07 01:10:30 huck Exp $
+# $Id: get_embedding_xml_rcf.pl,v 1.20 2012/10/07 01:20:32 huck Exp $
 # $Log: get_embedding_xml_rcf.pl,v $
+# Revision 1.20  2012/10/07 01:20:32  huck
+# tagging get_embedding_xml_rcf.pl with r 1.20
+#
 # Revision 1.1  2012/10/07 01:10:30  huck
 # added get_embedding_xml_rcf.pl for usage at RCF (localStRoot flag)
 #
