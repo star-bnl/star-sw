@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserTrafo.cc,v 1.6 2007/01/22 13:08:15 jcs Exp $
+// $Id: StFtpcLaserTrafo.cc,v 1.7 2009/12/09 14:40:01 jcs Exp $
 //
 // $Log: StFtpcLaserTrafo.cc,v $
+// Revision 1.7  2009/12/09 14:40:01  jcs
+// update comment
+//
 // Revision 1.6  2007/01/22 13:08:15  jcs
 // replace cout with LOG
 //
@@ -341,7 +344,7 @@ int StFtpcLaserTrafo::padtrans(int iRow,int iSec,float timepos, float padpos,flo
   
   TimeCoordinate = timepos; 
 
-  // Laser t0 = 1.0
+  // Laser t0 from Calibrations_ftpc/ftpcElectronics 
   // Data  t0 from Calibrations_ftpc/ftpcElectronics
 
   TimeCoordinate += (tZero+deltat0)/micropertime;

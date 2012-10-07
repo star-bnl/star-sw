@@ -1,6 +1,9 @@
-// $Id: t0_ana.C,v 1.3 2008/05/16 18:36:56 jcs Exp $
+// $Id: t0_ana.C,v 1.4 2009/12/09 14:41:49 jcs Exp $
 //
 // $Log: t0_ana.C,v $
+// Revision 1.4  2009/12/09 14:41:49  jcs
+// delta_t0 and delta_gas can now both = 0
+//
 // Revision 1.3  2008/05/16 18:36:56  jcs
 // update FTPC calibration macros
 //
@@ -67,8 +70,7 @@ void t0_ana(TString input)
       if (i==0)
 	{
 	  filename +="_";
-	 // filename += "0";
-	  filename += "0.000001";
+	  filename += "0";
 	  filename +="_0_t0.root";
 	  
 	  sprintf(t,"%.2f",step);

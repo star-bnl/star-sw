@@ -23,7 +23,7 @@
 #include "TTable.h"
 #include "Ttypes.h"
 
-/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.45 2008/03/22 23:45:43 jeromel Exp $ */
+/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.46.2.1 2011/12/28 20:18:34 jeromel Exp $ */
 struct Bfc_st {
   Char_t       Key[63];      /* nick name */
   Char_t       Name[63];     /* maker name */
@@ -37,8 +37,19 @@ struct Bfc_st {
 class St_Bfc : public TTable {
  public:
   ClassDefTable(St_Bfc,Bfc_st)
-  ClassDef(St_Bfc,1) //C++ container for VMC detector path
+  ClassDef(St_Bfc,1) //C++ container for chain/makers status 
 };
+
+struct BFCTimeStamp {
+  Int_t     Type;     //< 1 for DBV and 2 for SDT
+  Int_t     Date;     //< A date in YYYYMMDD format
+  Int_t     Time;     //< A time in HHmmss format
+  TString   Detector; //< This detector tag needs to follow the DB branch
+  TString   Realm;    //< Realm is Calibrations or Geometry or ...
+};
+typedef std::vector<BFCTimeStamp> StVecBFCTS;
+
+
 //_____________________________________________________________________
 
 class StFileI;
@@ -59,6 +70,7 @@ class StBFChain : public StChain {
   TString             Gproperty;  // a global property name
   TString             Gpattern;   // a global pattern
   TString             Gvalue;     // a global value
+  StVecBFCTS          GTSOptions; // global set of detector specific timestamps
 
   St_Bfc             *fchainOpt;
   Int_t               fkChain;    // Master chain option
@@ -115,7 +127,7 @@ class StBFChain : public StChain {
    virtual const TString &GetFileOut() const {return *(&fFileOut);}
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.45 2008/03/22 23:45:43 jeromel Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.46.2.1 2011/12/28 20:18:34 jeromel Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class

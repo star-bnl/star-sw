@@ -74,6 +74,7 @@ my $FEXTEND = $env1->{FEXTEND};
 my $FPPFLAGS= $env1->{FPPFLAGS};
 my $FCCOM   = $env1->{FCCOM};
 my $LIBS    = $env1->{LIBS};
+my $SOFLAGS = $env1->{SOFLAGS};
 my $LIBPATH = $env1->{LIBPATH};
 my $STIC    = $env1->{STIC};
 my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
@@ -99,6 +100,7 @@ my @h_filesL = script::find_hfiles($Dir);
 my @uiQT     = script::find_ui($Dir);
 my @xpmQT    = script::find_xpm($Dir);
 my @qrcQT    = script::find_qrc($Dir);
+
 
 
 print "idlL = @idlL\n" if $param::debug;
@@ -186,6 +188,12 @@ if ($FC eq 'g77' or $FC eq 'gfortran'){
     # If fortran, grab the -lg2c or -lgfortran for linking
     if ( $DirPath =~ /StarVMC/ ){
 	$LIBS .= " " . $env1->{FLIBS};
+    }
+
+    if ( $FC eq 'gfortran' && grep(/.F$/,@srcL) ){
+	print "\tFound .F in sources and adding [".
+	      $env1->{FLIBS}."] to $pkg\n";
+	$SOFLAGS .= " " . $env1->{FLIBS};
     }
 }
 
@@ -381,6 +389,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     # directory structure using auto-globbing for include purposes
   } elsif ( $pkg =~ m/^StAssociationMaker$/ ||
 	    $pkg =~ m/EmcUtil$/             ||
+	    $pkg =~ m/St_geant_Maker$/      ||
 	    $pkg =~ m/^StMuDSTMaker$/       ||
 	    $pkg =~ m/^StJetMaker$/         ||
 	    $pkg =~ m/^StEmcPool$/          ||
@@ -566,6 +575,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 		       'CPPFLAGS' => $CPPFLAGS,
 		       'FCCOM'    => $FCCOM,
 		       'LIBS'     => $LIBS,
+		       'SOFLAGS'  => $SOFLAGS,
 		       'LIBPATH'  => $libpath,
 		       'ObjDir'   => $obj_dir
 		      );
