@@ -31,11 +31,10 @@ double ElElasticScatDataStruct::CS(double theta)
   if (A[0] == -1.0) return -1.0;
   double s = 0.0;
   double ctheta = cos(theta);
-  long n;
-  for (n = 0; n < 4; n++) {
-    s += A[n] / (pow(1.0 - ctheta + 2.0 * B , double(n + 1)));
+  for (long n = 0; n < 4; ++n) {
+    s += A[n] / (pow(1.0 - ctheta + 2.0 * B, double(n + 1)));
   }
-  for (n = 0; n < 7; n++) {
+  for (long n = 0; n < 7; ++n) {
     s += C[n] * polleg(n, ctheta);
   }
   //mcout << "ElElasticScatDataStruct::CS: theta=" << theta << " s=" << s << '\n';
@@ -46,22 +45,21 @@ ElElasticScat::ElElasticScat(const String& file_name):atom(0)
 {
   mfunnamep("ElElasticScat::ElElasticScat(const String& filename)");
 #ifdef USE_STLSTRING
-  ifstream file(file_name.c_str());
+  std::ifstream file(file_name.c_str());
 #else
-  ifstream file(file_name);
+  std::ifstream file(file_name);
 #endif
-  if(!file) {
+  if (!file) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << file_name << std::endl;
     spexit(mcerr);
   }
   int i = findmark(file, "#");
-  check_econd11a( i , != 1 , "cannot find sign #, wrong file format", mcerr);
+  check_econd11a(i , != 1 , "cannot find sign #, wrong file format", mcerr);
   file >> qe;
   energy_mesh = DynLinArr< double >(qe);
   gamma_betta2 = DynLinArr< double >(qe);
-  long ne;
-  for (ne = 0; ne < qe; ne++) {
+  for (long ne = 0; ne < qe; ++ne) {
     file >> energy_mesh[ne];
     if (!file.good()) {
       funnw.ehdr(mcerr);
@@ -72,7 +70,7 @@ ElElasticScat::ElElasticScat(const String& file_name):atom(0)
     // energy_mesh[ne] in KeV
     double beta2 = (2.0 * 0.001 * energy_mesh[ne] / ELMAS + 
                     pow(0.001 * energy_mesh[ne] / ELMAS, 2.0)) /
-                   pow(gamma, 2.0);
+                    pow(gamma, 2.0);
     gamma_betta2[ne] = gamma * beta2;
   }
   while (findmark(file, "$") == 1) {
@@ -80,12 +78,10 @@ ElElasticScat::ElElasticScat(const String& file_name):atom(0)
     long na = atom.get_qel() - 1;
     long Z;
     file >> Z;
-    check_econd21( Z , < 1 || , > 110 , mcerr); 
+    check_econd21(Z, < 1 || , > 110 , mcerr); 
     atom[na] = ElElasticScatData(Z, qe);
-    int nc;
-    for (nc = 0; nc < 4; nc++) {
-      long ne;
-      for (ne = 0; ne < qe; ne++) {
+    for (int nc = 0; nc < 4; ++nc) {
+      for (long ne = 0; ne < qe; ++ne) {
         file >> atom[na].data[ne].A[nc];
         if (!file.good()) {
           funnw.ehdr(mcerr);
@@ -95,9 +91,8 @@ ElElasticScat::ElElasticScat(const String& file_name):atom(0)
         }
       }
     }
-    for (nc = 0; nc < 7; nc++) {
-      long ne;
-      for (ne = 0; ne < qe; ne++) {
+    for (int nc = 0; nc < 7; ++nc) {
+      for (long ne = 0; ne < qe; ++ne) {
         file >> atom[na].data[ne].C[nc];
         if (!file.good()) {
           funnw.ehdr(mcerr);
@@ -107,8 +102,7 @@ ElElasticScat::ElElasticScat(const String& file_name):atom(0)
         }
       }
     }
-    long ne;
-    for (ne = 0; ne < qe; ne++) {
+    for (long ne = 0; ne < qe; ++ne) {
       file >> atom[na].data[ne].B;
       if (!file.good()) {
         funnw.ehdr(mcerr);
@@ -118,9 +112,8 @@ ElElasticScat::ElElasticScat(const String& file_name):atom(0)
       }
     }
     /*
-    for (nc = 0; nc < 2; nc++) {
-      long ne;
-      for (ne = 0; ne < qe; ne++) {
+    for (int nc = 0; nc < 2; ++nc) {
+      for (long ne = 0; ne < qe; ++ne) {
         file >> atom[na].data[ne].D[nc];
         if (!file.good()) {
           funnw.ehdr(mcerr);
@@ -672,52 +665,48 @@ void ElElasticScat::print(std::ostream& file, int l) const
         << " atom.get_gel()=" << atom.get_qel() << std::endl;
   if (l <= 1) return;
   indn.n += 2;
-  long qa = atom.get_qel(); 
-  long na;
-  long ne;      
   Ifile << "energy_mesh=";
-  for (ne = 0; ne < qe; ne++) {
+  for (long ne = 0; ne < qe; ++ne) {
     file << std::setw(12) << energy_mesh[ne];
   }
   file << std::endl;
   Ifile << "gamma_betta2=";
-  for (ne = 0; ne < qe; ne++) {
+  for (long ne = 0; ne < qe; ++ne) {
     file << std::setw(12) << gamma_betta2[ne];
   }
   file << std::endl;
-
   indn.n -= 2;
-  for (na = 0; na < qa; na++) {
+  long qa = atom.get_qel(); 
+  for (long na = 0; na < qa; ++na) {
     Ifile << "atom[na].Z=" << atom[na].Z << '\n';
     Ifile << "     ";
-    for (ne = 0; ne < qe; ne++) {
+    for (long ne = 0; ne < qe; ++ne) {
       file << std::setw(12) << energy_mesh[ne];
     }
     file << std::endl;
-    long n;
-    for (n = 0; n < 4; n++) {
+    for (long n = 0; n < 4; ++n) {
       Ifile << "A[" << n << "]";
-      for (ne = 0; ne < qe; ne++) {
+      for (long ne = 0; ne < qe; ++ne) {
         file << std::setw(12) << atom[na].data[ne].A[n];
       }
       file << std::endl;
     }
-    for (n = 0; n < 7; n++) {
-      Ifile << "C[" << n <<"]";
-      for (ne = 0; ne < qe; ne++) {
+    for (int n = 0; n < 7; ++n) {
+      Ifile << "C[" << n << "]";
+      for (long ne = 0; ne < qe; ++ne) {
         file << std::setw(12) << atom[na].data[ne].C[n];
       }
       file << std::endl;
     }
     Ifile << "B     ";
-    for (ne = 0; ne < qe; ne++) {
+    for (long ne = 0; ne < qe; ++ne) {
       file << std::setw(12) << atom[na].data[ne].B;
     }
     file << std::endl;
     /*
-    for (n = 0; n < 2; n++) {
+    for (int n = 0; n < 2; ++n) {
       Ifile << "D[" << n << "]";
-      for (ne = 0; ne < qe; ne++) {
+      for (long ne = 0; ne < qe; ++ne) {
         file << std::setw(12) << atom[na].data[ne].D[n];
       }
       file << std::endl;
@@ -732,31 +721,29 @@ ElElasticScatLowSigma::ElElasticScatLowSigma(ElElasticScat* fees,
 {
   mfunnamep("ElElasticScatLowSigma::ElElasticScatLowSigma(...)");
 #ifdef USE_STLSTRING
-  ifstream file(file_name.c_str());
+  std::ifstream file(file_name.c_str());
 #else
-  ifstream file(file_name);
+  std::ifstream file(file_name);
 #endif
-  if(!file) {
+  if (!file) {
     funnw.ehdr(mcerr);
     mcerr << "cannot open file " << file_name << std::endl;
     spexit(mcerr);
   }
   int i = findmark(file, "$");
-  check_econd11( i , != 1 , mcerr);
+  check_econd11(i, != 1 , mcerr);
   file >> qat >> qscat;
   check_econd11(qat , <= 0 , mcerr);
   check_econd11(qscat , <= 0 , mcerr);
   mean_coef = DynLinArr<DynLinArr< double > >(qat);
   coef = DynLinArr <DynLinArr< double > >(qat);
-  long nat;
-  for (nat = 0; nat < qat; nat++) {
+  for (long nat = 0; nat < qat; ++nat) {
     mean_coef[nat] = DynLinArr< double >(ees->get_qe());
     coef[nat] = DynLinArr< double >(ees->get_qe());
     long z;
     file >> z;
     check_econd12(z , != , nat+1 , mcerr);
-    long ne;
-    for (ne = 0; ne < ees->get_qe(); ne++) {
+    for (long ne = 0; ne < ees->get_qe(); ++ne) {
       long fne; 
       double e;
       mean_coef[nat][ne] = 0.0;
@@ -844,12 +831,11 @@ ElElasticScatLowSigma::ElElasticScatLowSigma
 {
   mfunname("ElElasticScatLowSigma::ElElasticScatLowSigma(...)");
 #ifdef USE_STLSTRING
-  ifstream file(file_name.c_str());
+  std::ifstream file(file_name.c_str());
 #else
-  ifstream file(file_name);
+  std::ifstream file(file_name);
 #endif
-  if( !file )
-  {
+  if(!file)  {
     funnw.ehdr(mcerr);
     mcerr<<"cannot open file "<<file_name<<endl;
     spexit(mcerr);
@@ -861,23 +847,19 @@ ElElasticScatLowSigma::ElElasticScatLowSigma
   check_econd11(qscat , <= 0 , mcerr);
   sigma = DynLinArr< DynLinArr <DynLinArr< double > > >(qat);
   long nat;
-  for(nat=0; nat<qat; nat++)
-  {
+  for(nat=0; nat<qat; nat++) {
     sigma[nat] = DynLinArr <DynLinArr< double > >(ees->get_qe());
     long z;
     file>>z;
     check_econd12(z , != , nat+1 , mcerr);
-    long ne;
-    for( ne=0; ne<ees->get_qe(); ne++)
-    {
+    for(long ne = 0; ne < ees->get_qe(); ++ne) {
       sigma[nat][ne] = DynLinArr< double >(qscat);
       long fne; double e;
       file>>fne>>e;
       check_econd12(fne, != , ne, mcerr);
       check_econd12(e, != , ees->get_energy_mesh(ne), mcerr);
       long nscat;
-      for(nscat=0; nscat<qscat; nscat++)
-      {
+      for(nscat=0; nscat<qscat; nscat++) {
         long fnscat=-1;
         double mean=-1, fsigma=-1;
         file>>fnscat>>mean>>fsigma;
@@ -903,8 +885,7 @@ double ElElasticScatLowSigma::get_sigma
   long n1 = 0;
   long n2 = ees->get_qe()-1;
   long n3;
-  while( n2-n1 > 1 )
-  {
+  while( n2-n1 > 1 ) {
     n3=n1 + (n2-n1)/2;
     if(energyKeV < ees->get_energy_mesh(n3))
       n2=n3;
