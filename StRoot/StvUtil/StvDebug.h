@@ -9,10 +9,12 @@ public:
   StvDebug(){}
 static  int Break(int kount);
 static  int Break(double x,double y,double z);
+static  int Debug() {return mgDebug;};
 static void Count(const char *key,double val=0);
 static void Sumary();
 static void Reset();
-static  int Level();
+static const char *Env(const char *key);
+static        int  Inv(const char *key);
 static int& Flag(const char *key);
 private:
 static void Draw(int nH,TH1** H);
