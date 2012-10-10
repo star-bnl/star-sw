@@ -9,7 +9,7 @@
 #include "TSystem.h"
 #include "TString.h"
 #include "StvDebug.h"
-int StvDebug::mgDebug=1;
+int StvDebug::mgDebug=1; //0=no debug, 1=Normal, 2=count is on
 int StvDebug::mgRecov=1;
 int StvDebug::mgCheck=1;
 
@@ -44,6 +44,7 @@ int StvDebug::Break(double x,double y,double z)
 //______________________________________________________________________________ 
 void StvDebug::Count(const char *key,double val)
 {
+  if (mgDebug<2) return;
   TH1F *&h = myDebMap[key];
   if (!h) { h = new TH1F(key,key,100,0.,0.);}
   h->Fill(val);
@@ -93,11 +94,14 @@ static int nCall=0; nCall++;
   C->Modified();C->Update();
 }
 //______________________________________________________________________________ 
-int StvDebug::Level()
+const char *StvDebug::Env(const char *key)
 {
-static const char *StvDebugLevel = gSystem->Getenv("StvDebugLevel");
-  if (!StvDebugLevel) return 0;
-  return StvDebugLevel[0]-'0';
+  return gSystem->Getenv(key);
+}
+//______________________________________________________________________________ 
+int StvDebug::Inv(const char *key)
+{
+  return atoi(Env(key));
 }
 //______________________________________________________________________________ 
 int &StvDebug::Flag(const char *key)
