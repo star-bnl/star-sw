@@ -3,14 +3,14 @@
 #include "TNamed.h"
 #include "tables/St_StvKonst_Table.h"
 
-class StvConst : public TNamed 
+class StvConst : public StvKonst_st
 {
 public:	
 StvConst();
-static const StvKonst_st *Inst() {return mgConst;}	
+static const StvConst *Inst(){ return mgConst;}
 
 private:
-static const StvKonst_st *mgConst;
+static const StvConst *mgConst;
 ClassDef(StvConst,0)//
 };
 #endif //__StvConst_h_
