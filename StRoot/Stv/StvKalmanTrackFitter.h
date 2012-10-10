@@ -19,6 +19,7 @@ public:
   virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node);
            int Propagate(StvNode  *node,StvNode *preNode,int dir,int lane);
   virtual  int Helix(StvTrack *trak,int mode);
+  virtual  int Clean(StvTrack *trak); 		
   virtual  int Check(StvTrack *trak);
   virtual  int Check(const StvNodePars &parA,const StvFitErrs &errA,
 		     const StvNodePars &parB,const StvFitErrs &errB);
