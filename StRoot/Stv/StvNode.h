@@ -65,12 +65,12 @@ public:
   void  SetHit(StvHit *hit); 			
   const StHitPlane *GetHitPlane() const 	{ return mHitPlane  ;}
   void  SetHitPlane(const StHitPlane *hitPlane) { mHitPlane=hitPlane;}
-  void  SetELoss(const StvELossData &el,int   ) {mELossData=el;}  
-const StvELossData &GetELoss() const		{return mELossData;}  
+  void  SetELoss(const StvELossData &el,int   ) { mELossData=el;}  
+const StvELossData &GetELoss() const		{ return mELossData;}  
   
  double GetXi2(int dir=2) const 		{ return mXi2[dir];}
  double GetLen() const 				{ return mLen;}
-   void SetXi2(double Xi2,int dir) 		{ mXi2[dir]=Xi2; mXi2[2]=Xi2;}
+   void SetXi2(double Xi2,int dir=2) 		{ mXi2[dir]=Xi2; mXi2[2]=Xi2;}
    void SetPre(StvNodePars &par,StvFitErrs &err,int dir); 	
    void SetFit(StvNodePars &par,StvFitErrs &err,int dir); 
    void SetDer(const StvFitDers &der, int dir);
@@ -94,15 +94,14 @@ StvHit *mHit;
 ///  Z mag field in units PGev = Hz*Rcm
   mutable double mHz;
 ///  indices of arrays 0=moving in, 1=moving out,2=join result of in & out
-  StvNodePars mFP[3];   // Fitted    Parameters
-  StvNodePars mPP[2]; 	// Predicted Parameters
-  StvFitErrs  mFE[3];	// Fitted    errors
+  StvNodePars mFP[4];   // Fitted    Parameters
+  StvNodePars mPP[2]; 	// Predicted Parameters+last id for helix
+  StvFitErrs  mFE[4];	// Fitted    errors
   StvFitErrs  mPE[2];	// Predicted errors
   StvFitDers  mDer[2];  // Derivative matrix 0=from outer to this; 1=from this to outer
   double      mHrr[3];  // Hit errors in DCA frame
-  float       mXi2[3]; 	// Xi2 of fit to hit
+  float       mXi2[4]; 	// Xi2 of fit to hit,join,helix
   float       mLen; 	// Length
-  StvNodePars mQP;   // Saved,Parameters ???????????????????????????????????????
   StvELossData mELossData; //EnergyLoss&MCS from the upper node 
   char   mEnd[1];
 public:
