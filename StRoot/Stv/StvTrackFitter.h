@@ -24,20 +24,20 @@ public:
   virtual  int Check(StvTrack *trak) 		{return 0;}
   virtual  int Check(const StvNodePars &parA,const StvFitErrs &errA,
 		     const StvNodePars &parB,const StvFitErrs &errB) {return 0;}
+  virtual  int Clean(StvTrack *trak)=0;		
   virtual  THelixTrack* GetHelix() const 	{return     0;}
-           int GetNDF() const 			{return mNDF ;}     
+           int GetNDF()  const 			{return mNDF ;}     
         double GetDca3() const 			{return mDca3;}     
-        double GetXi2() const 			{return mXi2 ;}     
-      StvNode* GetWorstNode() const             {return mWorstNode;}
-        double GetWorstXi2()  const             {return mWorstXi2 ;}
+        double GetXi2()  const 			{return mXi2 ;}     
+           int Failed()  const 			{return mFailed;}     
+ 
 static StvTrackFitter *Inst() {return fgInst;}
 
 protected:
 char mBeg[1];
+char mFailed;
 int    mNDF;
-StvNode *mWorstNode;
 double mXi2;
-double mWorstXi2;
 double mDca3;
 char mEnd[1];
 private:
