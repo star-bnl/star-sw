@@ -229,9 +229,10 @@ static StvFitPars fp;
   
   fp.mH = dx*(     -sub._sinCA)+ dy*(      sub._cosCA);
   fp.mZ = dx*(-sinL*sub._cosCA)+ dy*(-sinL*sub._sinCA) +dz*cosL;
-  fp.mA = (_psi -sub._psi )*cosL;
-  if      (fp.mA < -M_PI) {fp.mA += M_PI*2;}
-  else if (fp.mA >  M_PI) {fp.mA -= M_PI*2;}
+  double a = (_psi -sub._psi );
+  if      (a < -M_PI) {a += M_PI*2;}
+  else if (a >  M_PI) {a -= M_PI*2;}
+  fp.mA = a;
   fp.mP = (_ptin-sub._ptin);
   double tL = (_tanl-sub._tanl)/(1+_tanl*sub._tanl);
   fp.mL = tL*(1+tL*tL*(-1./3+tL*tL/5)); 
@@ -326,10 +327,10 @@ int StvNodePars::isReady( ) const
 //_____________________________________________________________________________
 StvFitPars StvNodePars::delta() const
 {
-   double space = 1.+((fabs(_x)+fabs(_y)+fabs(_z))/3)/200*3;
+   double space = 0.1+sqrt(_x*_x+_y*_y+_z*_z)/200;
    StvFitPars fp;
    fp.mH = space;    fp.mZ = space; 
-   fp.mA = 3.14/180*10; fp.mL = 3.14/180*10;	//ten degree
+   fp.mA = 3.14/180*3; fp.mL = 3.14/180*3;	//ten degree
    fp.mP = 1./500/fabs(_hz);
    return fp;
 }
@@ -352,6 +353,17 @@ double StvNodePars::diff(const StvNodePars &other) const
     double d = fabs(fp[i])/dlt[i];
     if (myMax<d) myMax=d;
   }
+  return myMax;
+}
+//_____________________________________________________________________________
+double StvNodePars::diff(const float hit[3]) const 
+{ 
+  StvNodePars other(*this);
+  other._x = hit[0]; other._y = hit[1]; other._z = hit[2];
+
+  StvFitPars fp = *this-other;
+  double myMax=fabs(fp.mH) ;
+  if (myMax < fabs(fp.mZ)) myMax = fabs(fp.mZ);
   return myMax;
 }
 
