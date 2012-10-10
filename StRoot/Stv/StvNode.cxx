@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.12 2012/08/24 19:52:16 perev Exp $
+ * $Id: StvNode.cxx,v 1.13 2012/10/10 19:33:11 perev Exp $
  *
  * /author Victor Perev
  */
@@ -59,7 +59,7 @@ static const char *hhh = "x y z r e ";
   TString myOpt(opt);myOpt+=" ";
   int dir = myOpt.Index("=");
   dir = (dir<0)? 2:myOpt[dir+1]-'0';
-  int djr = dir; if (djr>2) djr-=3;
+  int djr = dir; if (djr>3) djr-=4;
   double val,err[2];
   const StvNodePars &fp= mFP[dir];
   const StvFitErrs  &fe= mFE[dir];
@@ -130,9 +130,10 @@ void StvNode::SetDer(const StvFitDers &der, int dir)
 //________________________________________________________________________________
 void StvNode::SetHit(StvHit *hit)
 {
+   if (mHit == hit) 	return;
    if (mHit) mHit->addTimesUsed(-1);
    mHit = hit;
-   if (!mHit) return;
+   if (!mHit) 		return;
    assert(!mHit->timesUsed());
    mHit->addTimesUsed(1);
 } 
