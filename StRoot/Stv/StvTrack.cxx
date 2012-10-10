@@ -121,19 +121,6 @@ StvNode *StvTrack::GetNode(EPointType noTy)
 //______________________________________________________________________________
 const StvNode *StvTrack::GetNode(EPointType noTy) const
 { return ((StvTrack*)this)->GetNode(noTy); }
-//______________________________________________________________________________
-int StvTrack::CountHits(StvHitCount &cnt) const
-{
-  cnt.Clear();
-  for (StvNodeConstIter it = begin();it != end();++it) 
-  {
-    StvNode *node = *it;
-    if (node->GetType()!= StvNode::kRegNode) 	continue;
-    if (!node->GetHitPlane()) 			continue;
-    if (node->GetXi2()<1000) {cnt.AddHit();} else {cnt.AddNit();}
-  }
-  return cnt.nGoodHits;
-}
 //_____________________________________________________________________________
 double StvTrack::GetLength(EPointType ept) const
 {
@@ -327,55 +314,3 @@ int StvTrack::GetCharge() const
 //_____________________________________________________________________________
 void StvTrack::Reverse() 
 { reverse(); }
-//_____________________________________________________________________________
-//_____________________________________________________________________________
-//_____________________________________________________________________________
-enum {kTotHits=6	//Min number hits for track
-     ,kGoodHits=3	//Min number good hits for track
-     ,kContHits=2	//Min length of good hit sequence
-     ,kContNits=13	//Max length of acceptable non hit sequence
-     ,kTotNits=20	//Max number of acceptable non hits
-     };
-//_____________________________________________________________________________
-void StvHitCount::AddHit()
-{
-  nPossHits++;  nTotHits++;nContHits++;
-  if (!nContNits)		return;
-  if (nContHits<kContHits) 	return;
-  if (nContNits>kContNits) 	nSeqLong++;
-  nContNits=0;nSeqNits++;
-}
-
-//_____________________________________________________________________________
-void StvHitCount::AddNit()
-{
-  nPossHits++;nContNits++;nTotNits++;
-  if (!nContHits) 	return;
-  if (nContHits<kContHits) {nSeqShort++;} else { nGoodHits+=nContHits;}
-  nContHits=0;nSeqHits++;
-}
-//_____________________________________________________________________________
-int StvHitCount::Reject() const
-{
-  int rej = 0;
-  if (nGoodHits+nContHits<kGoodHits) rej+=1;
-  if (nTotHits <kTotHits ) rej+=2;
-//if (nTotNits+nContNits> kTotNits) rej+=4;
-
-  return rej;
-}
-//_____________________________________________________________________________
-int StvHitCount::Skip() const
-{
-  int rej = 0;
-  if (nContNits>kContNits) rej+= 1;
-  if (nTotNits > kTotNits) rej+= 2;
-  return rej ;
-}
-//_____________________________________________________________________________
-double StvHitCount::Eff() const
-{
-  double p = nTotHits/(nPossHits-nContNits+1e-6);
-  double q = 1-p;
-  return p +3*sqrt(p*q/(nPossHits+1e-6));
-}

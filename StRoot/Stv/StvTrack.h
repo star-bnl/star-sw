@@ -9,7 +9,6 @@
 #include "StEvent/StEnumerations.h"
 #include "Stv/StvStl.h"
 
-class StvHitCount;
 class StvHit;
 class StvTrack: public StvNodes
 {
@@ -40,9 +39,6 @@ const StvNode *GetNode(EPointType poTy) const;
 	 /// Returns the End Type i.e reason of the end of tracking
          /// 0=Dca,1 = too many continues nits,2 = too many total nits
    int GetTypeEnd () const	{return mTypeEnd;} 
-
-	 /// Returns the number of hits associated and used in the fit of this track.
-   int CountHits(StvHitCount &cnt) const;  
 
    	/// Delete all the nodes started form given
   void CutTail(const StvNode *start=0);
@@ -86,31 +82,6 @@ unsigned char mTypeEnd;	// Type of end tracking. 0=Dca,
 static int mDebug; 	// Debug level
 static int mgId; 	// static track counter
 
-};
-/// Hit counting
-class StvHitCount
-{ 
-public:
-StvHitCount()		{Clear();}
-void Clear()		{memset(mBeg,0,mEnd-mBeg+1);}
-void AddHit();
-void AddNit();
-int  Reject() const;
-int  Skip()   const;
-double Eff()  const;
-public:
-char mBeg[1] ;
-int nPossHits;	// Number of possible hits;
-int nTotHits ;	// Total number of hits
-int nGoodHits;  // Number of good hits (hits in sequences > kContHits
-int nSeqHits ;	// Number of hit sequences
-int nSeqShort;	// Number of too short hit sequences
-int nTotNits ;	// Total number of Non Hits(Nits) 
-int nSeqNits ;	// Number of Non Hit(Nit) sequences
-int nSeqLong ;	// Number of too long Non Hit(Nit) sequences
-int nContHits;	// Number of hits in current Hit sequence
-int nContNits;	// Number of nits in current nonHit sequence
-char mEnd[1] ;
 };
 
 #endif
