@@ -8,6 +8,7 @@
 #include "StvFitter.h"
 #include "StvUtil/StvNodePars.h"
 #include "StvHit.h"
+#include "StvConst.h"
 #include "StvUtil/StvDebug.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
@@ -17,11 +18,19 @@ StvFitter *StvFitter::mgFitter=0;
 #define DIST(a,b)   ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 #define DDOT(a,b,c) ((a[0]-b[0])*c[0]+(a[1]-b[1])*c[1]+(a[2]-b[2])*c[2])
 #define VADD(a,b)   { a[0]+=b[0];a[1]+=b[1];a[2]+=b[2];}
+
 enum {kDeltaFactor = 3};
+
+
+static const double kXtraBigXi2 = 9e9;
+
 static inline double MyXi2(const double G[3],double dA,double dB)  
 {
   double Gdet = G[0]*G[2]-G[1]*G[1];
-  return  (G[2]*dA*dA-2*G[1]*dA*dB+G[0]*dB*dB)/Gdet;
+  if (Gdet < 1e-11) return kXtraBigXi2;
+  double Xi2 =  (G[2]*dA*dA-2*G[1]*dA*dB+G[0]*dB*dB)/Gdet;
+  if (Xi2 > kXtraBigXi2) Xi2 = kXtraBigXi2;
+  return Xi2;
 }
 double JoinTwoT(int nP1,const double *P1,const double *E1
                ,int nP2,const double *P2,const double *E2
@@ -60,9 +69,9 @@ StvDebug::Break(nCall);
 
   double PJt[5],EJt[15];
   double chi2T =JoinTwoT(nP1,P1,E1,nP2,P2,E2,PJt,EJt);
-  assert(fabs(chi2-chi2T) <1e-4*(chi2+chi2T+1));
+//  assert(fabs(chi2-chi2T) <1e-3*(chi2+chi2T+1));
   if (!PJ)      return chi2;
-  if (chi2>=kExtraBigXi2) return chi2;
+  if (chi2>=kXtraBigXi2) return chi2;
   TCL::ucopy(EJm,EJ,nE2);		//EJ = 1/EJi
   
   TCL::trsa(E1i,P1,P1J,nP1,1);		//P1J = E1i*P1
@@ -182,7 +191,7 @@ StvFitter::StvFitter(const char *name):TNamed(name,"")
 void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                    ,      StvNodePars *otPars,       StvFitErrs *otErrs)
 {
-  memset(mBeg,'@',mEnd-mBeg+1);
+  memset(mBeg,'Z',mEnd-mBeg+1);
   mKase = 0;		// track + hit case
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
@@ -193,7 +202,6 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                    ,const StvNodePars *jnPars, const StvFitErrs *jnErrs
                    ,      StvNodePars *otPars,       StvFitErrs *otErrs)
 {
-  memset(mBeg,'@',mEnd-mBeg+1);
   mKase = 1;		// join left & rite part of track
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
@@ -204,6 +212,7 @@ void StvFitter::Prep()
 {
   mDelta  = mInPars->delta();
   mDelta *= kDeltaFactor;
+  assert(mDelta.mA<1);
   mHit   = 0; mHitPlane = 0;
   double myTan = mInPars->_tanl;
   mCos2L = 1./(1+myTan*myTan);
@@ -231,6 +240,8 @@ void StvFitter::Prep()
 double StvFitter::Xi2(const StvHit *hit)
 {
   if (mHit == hit) return mXi2;
+assert(mDelta.mA<1);
+  mFailed = 0;
   mHit = hit;
   const float *errMtx=mHit->errMtx();
   if (errMtx) mKase=2; 		//Hit is a vertex
@@ -260,8 +271,6 @@ double StvFitter::Xi2(const StvHit *hit)
       const StHitPlane *hp = hit->detector(); 
       const Mtx33F_t &hD = hp->GetDir(hit->x());
       mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
-       StvDebug::Count("HHhit",sqrt(mHitErrs[0]));
-       StvDebug::Count("ZZhit",sqrt(mHitErrs[2]));
 
     }; break;
 
@@ -291,40 +300,58 @@ double StvFitter::Xi2(const StvHit *hit)
 
 //  (BB*dX*dX-2*BA*dX*dY+AAdY*dY)/det 
   mXi2 = MyXi2(G,mDcaP,mDcaL);
+  if (mXi2 >= kXtraBigXi2) {mXi2 = kXtraBigXi2; mFailed = 99;}
+  if (!mHit) return mXi2;
   return mXi2 ; 
 }  
 //______________________________________________________________________________
 double StvFitter::Xi2()
 {
+  mFailed = 0;
   double inErr = mInErrs->mHH+mInErrs->mZZ;
   double jnErr = mJnErrs->mHH+mJnErrs->mZZ;
   if (jnErr>inErr) {//Not good order
     const StvNodePars *swp = mInPars; mInPars=mJnPars; mJnPars=swp;
     const StvFitErrs  *swe = mInErrs; mInErrs=mJnErrs; mJnErrs=swe;
   }
+  mDelta  = mInPars->delta(); mDelta *= kDeltaFactor;
+
   StvFitPars F   = (*mInPars-*mJnPars);
+assert(mDelta.mA<1);
+  for (int i=0;i<5;i++) {
+    if (F[i]<-mDelta[i]) {mFailed = -1; F[i]= -mDelta[i];}
+    if (F[i]> mDelta[i]) {mFailed = -1; F[i]=  mDelta[i];}
+  }
   double     Zero[5]= {0};
   double myXi2 = JoinTwo(5,F.Arr()    ,mInErrs->Arr()
                         ,5,Zero       ,mJnErrs->Arr()
 		        ,mQQPars.Arr(),mQQErrs.Arr());
   mQQErrs.mHz = mInPars->_hz;
+  for (int i=0;i<5;i++) {
+    if (mQQPars[i]<-mDelta[i]) {mFailed = -1; mQQPars[i]= -mDelta[i];}
+    if (mQQPars[i]> mDelta[i]) {mFailed = -1; mQQPars[i]=  mDelta[i];}
+  }
+  if ( myXi2>= kXtraBigXi2) mFailed = 99;
   return myXi2;
 }  
 //______________________________________________________________________________
 int StvFitter::Update()
 {
 static int nCall=0; nCall++;
+static const StvConst  *kons = StvConst::Inst();
 StvDebug::Break(nCall);
-  int ifail = 0;
+  if (mFailed>0) return mFailed;
   switch (mKase) {
-    case 0: ifail = Hpdate(); 	break;		//Hit+Track
-    case 1: ifail = Jpdate();	break; 		//Track join
-    case 2: ifail = Vpdate();	break;		//Vertex+track
+    case 0: mFailed = Hpdate(); break;		//Hit+Track
+    case 1: mFailed = Jpdate();	break; 		//Track join
+    case 2: mFailed = Vpdate();	break;		//Vertex+track
   }
   
-  if (ifail) return ifail;
-  if (mOtPars->check()) return 2; 
-  return 0;
+  if (mFailed>0) return mFailed;
+  if (mHit && mOtPars->diff(mHit->x())>kons->mMaxRes) 	mXi2=1001;
+  if (fabs(mOtPars->_ptin)           > kons->mMaxPti) 	mXi2=1002;
+  if (mOtPars->check()) 				mXi2=1013; 
+  return mFailed;
 }
 //______________________________________________________________________________
 int StvFitter::Hpdate()
@@ -343,28 +370,23 @@ int StvFitter::Hpdate()
   double myXi2 = JoinTwo(2,myHitPars.Arr(),myHitErrs.Arr()
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
 		        ,  myJrkPars.Arr(),mOtErrs->Arr());
-  if (myXi2>kExtraBigXi2) return 1313;
-  assert(fabs(myXi2-mXi2)<1e-4*(myXi2+mXi2+1));
-  assert(mOtErrs->MaxCorr()<1);
-//   assert(fabs(myJrkPars.mH) <3.);
-//   assert(fabs(myJrkPars.mZ) <3.);
-//  assert(myHitPars.mH*myJrkPars.mH+myHitPars.mZ*myJrkPars.mZ>0);
-  int ierr = 0;
+  if (myXi2>kXtraBigXi2) { mFailed=99; return mFailed;}
+  assert(fabs(myXi2-mXi2)<1e-3*(myXi2+mXi2+1));
   for (int i=0;i<5;i++) {
-    if (myJrkPars[i]<-mDelta[i]) {ierr++; myJrkPars[i]= -mDelta[i];}
-    if (myJrkPars[i]> mDelta[i]) {ierr++; myJrkPars[i]=  mDelta[i];}
+    if (myJrkPars[i]<-mDelta[i]) {mFailed=-1; myJrkPars[i]= -mDelta[i];}
+    if (myJrkPars[i]> mDelta[i]) {mFailed=-1; myJrkPars[i]=  mDelta[i];}
   }
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
    mOtErrs->SetHz(mOtPars->_hz);
-  return ierr!=0;
+
+  return mFailed;
 }  
 //______________________________________________________________________________
 int StvFitter::Vpdate()
 {
 ///		this is Update for track+vertex fit
 static int nCall=0; nCall++;
-
   mTkErrs = *mInErrs;
 
 //		New Z ortogonal to X (track direction)
@@ -379,6 +401,10 @@ static int nCall=0; nCall++;
 //assert(fabs(myXi2-mXi2)<1e-4*(myXi2+mXi2));
   assert(fabs(myJrkPars[0]-myHitPars[0])<1e-6);
   assert(fabs(myJrkPars[1]-myHitPars[1])<1e-6);
+  for (int i=0;i<5;i++) {
+    if (myJrkPars[i]<-mDelta[i]) {mFailed=-1; myJrkPars[i]= -mDelta[i];}
+    if (myJrkPars[i]> mDelta[i]) {mFailed=-1; myJrkPars[i]=  mDelta[i];}
+  }
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
   mOtErrs->SetHz(mOtPars->_hz);
@@ -389,16 +415,11 @@ static int nCall=0; nCall++;
 int StvFitter::Jpdate()
 {
 ///		this is Update for sub track+sub track fit (join)
-  int ierr = 0;
-  for (int i=0;i<5;i++) {
-    if (mQQPars[i]<-mDelta[i]) {ierr++; mQQPars[i]= -mDelta[i];}
-    if (mQQPars[i]> mDelta[i]) {ierr++; mQQPars[i]=  mDelta[i];}
-  }
   *mOtPars = *mJnPars; 
   *mOtPars+=  mQQPars;
   *mOtErrs =  mQQErrs;   
    mOtErrs->SetHz(mOtPars->_hz);
-  return ierr!=0;
+  return mFailed;
 }
 //______________________________________________________________________________
 double StvFitter::TooBig(StvFitPars &fp, int *mask) const

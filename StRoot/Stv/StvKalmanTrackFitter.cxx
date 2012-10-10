@@ -19,9 +19,8 @@ ClassImp(StvKalmanTrackFitter)
 #define DIST2(a,b) ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 
 static const double kMaxCorr = 1.1;
-static const double kMinPti = 0.05;	//min value 1/pt allowed
 static const int    kNodesEnough = 3;	//min number of nodes to define helix
-static const int    kXtendFactor  = 9;	//Xi2 factor that fit sure failed
+static const int    kXtendFactor  = 100;//Xi2 factor that fit sure failed
 
 //_____________________________________________________________________________
 StvKalmanTrackFitter::StvKalmanTrackFitter():StvTrackFitter("StvKalmanTrackFitter")
@@ -46,8 +45,7 @@ int StvKalmanTrackFitter::Refit(StvTrack *trak,int dir, int lane, int mode)
 static int nCall=0; nCall++;
 
 static StvFitter *fitt = StvFitter::Inst();
-static const StvKonst_st  *kons = StvConst::Inst();
-  StvNode *breakNode = 0;
+static const StvConst  *kons = StvConst::Inst();
 
 //term	LEFT here: Curren Kalman chain of fits from left to rite
 //	Rite here: Previous Kalman chain, allready fitted, in different direction.
@@ -74,9 +72,8 @@ static const StvKonst_st  *kons = StvConst::Inst();
 
 
   double myXi2=3e33;
-  mWorstXi2=0;mWorstNode=0;
   StvNode *node=0,*preNode=0,*innNode=0,*outNode=0;
-  int iNode=0;
+  int iNode=0,iFailed=0;
 
   for (it=itBeg; it!=itEnd; (dir)? ++it:--it) {//Main loop
     preNode=node;
@@ -158,21 +155,28 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 	fitt->Set(node->mPP+lane,node->mPE+lane,node->mFP+lane,node->mFE+lane);
 	fitt->Prep();
 
-	myXi2 = fitt->Xi2(hit);
-//      =======================
-	if (myXi2> kons->mXi2Hit) 	{ //Fit is bad yet
+	myXi2 = fitt->Xi2(hit); iFailed = fitt->IsFailed();
+//      =================================================
+
+	if (iFailed || myXi2> kons->mXi2Hit) 	{ //Fit is bad yet
 	  nErr++;		
-          if (myXi2> kons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
-             node->SetHit(0);
+          if (iFailed>0 || myXi2> kons->mXi2Hit*kXtendFactor) { // Fit failed. Hit not accepted
+            node->SetHit(0);nFitLeft--;
 //		No hit anymore. Fit = Prediction		
-             node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
-             break;}
+            node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
+            break;
+	  }
         }
-        if (myXi2>mWorstXi2) 		{ mWorstXi2= myXi2; 		mWorstNode=node;}
-        if (node->mXi2[jane]>mWorstXi2) { mWorstXi2= node->mXi2[jane]; 	mWorstNode=node;}
         nFitLeft++; kase|=kLeft;
 	int ipdate = fitt->Update();
+        myXi2 = fitt->GetXi2();
         if (ipdate) nErr++;		//Update failed
+        if (ipdate>0) { // Fit failed. Hit not accepted
+          node->SetHit(0);nFitLeft--;
+//		No hit anymore. Fit = Prediction		
+          node->SetFit(node->mPP[lane],node->mPE[lane],lane); 
+          break;
+	}
 
 	node->SetXi2(myXi2,lane);
         if (nFitLeft<=kNodesEnough && jane!=lane) {
@@ -212,16 +216,19 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 
        default:
       {
-	breakNode = (dir)? node:preNode;
 	fitt->Set(node->mFP+lane         ,node->mFE+lane
         	 ,node->mPP+jane         ,node->mPE+jane
         	 ,node->mFP+2            ,node->mFE+2   );
 	node->SetXi2(3e33,2);
-	myXi2 = fitt->Xi2(); 
+	myXi2 = fitt->Xi2(); iFailed = fitt->IsFailed();
+//      ==============================================
+        if(iFailed>0) 	return 1313;
 
-	if (myXi2 > kons->mXi2Joi*kXtendFactor) return -13;
-	if (myXi2 > kons->mXi2Joi) nErr+=100;
+	if (iFailed<0 || myXi2 > kons->mXi2Joi) nErr+=100;
 	int ipdate = fitt->Update();
+        myXi2 = fitt->GetXi2();
+        if (ipdate>0) 	return 1413;
+  
         if (ipdate) {//Update error 
 	  myXi2= 3e13;nErr+=1000;
         }
@@ -238,7 +245,7 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
 
   }//endMainLoop
 
-  return nErr;
+  return -nErr;
 }
 //_____________________________________________________________________________
 int StvKalmanTrackFitter::Propagate(StvNode  *node,StvNode *preNode,int dir,int lane)
@@ -296,7 +303,7 @@ static int nCall=0; nCall++;
 int StvKalmanTrackFitter::Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)
 {
 static       StvToolkit *kit     = StvToolkit::Inst();
-static const StvKonst_st *myConst =   StvConst::Inst();
+static const StvConst *myConst =   StvConst::Inst();
 static const double dca3dVertex = myConst->mDca3dVertex;
 static StvFitter *fitt = StvFitter::Inst();
 
@@ -331,6 +338,7 @@ static StvFitter *fitt = StvFitter::Inst();
   if (!node) return 0;
   
   fitt->Update();
+  mXi2 = fitt->GetXi2();
   node->SetPre(par[0],err[0],0);
   node->SetFit(par[1],err[1],0);
   par[1].convert(derivFit,derivHlx);
@@ -352,7 +360,7 @@ static int nCall=0;nCall++;
 
   if (!mode  ) mode = 4;
   if ( mode&8) mode|= 4;
-  mWorstXi2=0,mWorstNode = 0;mXi2 = 0;
+  mXi2 = 0;
   if (!mHelx) mHelx = new THelixFitter;
   mHelx->Clear();
   StvFitDers Fstv;
@@ -373,6 +381,7 @@ static int nCall=0;nCall++;
       hlx.AddErr( rr[0],rr[2]*cos2li);
     }
   }  
+  mXi2 = 3e33; if (hlx.Used()<=3) return 1;
   mXi2 =hlx.Fit();
   if(mode&1) { hlx.MakeErrs();}
   double dL = hlx.Path(trak->front()->GetFP().P);
@@ -387,17 +396,19 @@ static int nCall=0;nCall++;
   int iNode = -1,nHist=0;
   for (StvNodeIter it=trak->begin();it!=trak->end(); ++it) {
     iNode++;preNode=node; node = *it;
-    StvNodePars sFP = node->GetFP(2);
+    StvNodePars sFP = node->GetFP(0);
     const StvHit *hit = node->GetHit();
     const double *X = sFP.P;
     if (hit) {for (int i=0;i<3;i++) {dHit[i]=hit->x()[i];};X = dHit;}
     double dS = myHlx.Path(X); myHlx.Move(dS,Fhlx);
     totLen+=dS;
     StvNodePars hFP; hFP.set(&myHlx,sFP._hz);
+    hFP.convert(Fstv,Fhlx);
     StvFitErrs  sFE = node->GetFE(2);
     StvFitErrs  hFE; hFE.Set(&myHlx,sFP._hz);
 
 
+    myXi2 = 6e6;
     if (hit) {//Hit is there. Calculate Xi2i etc...
       const float  *hix = hit->x();
       StvNodePars iFP(hFP); iFP._x=hix[0];iFP._y=hix[1];iFP._z=hix[2];
@@ -407,16 +418,13 @@ static int nCall=0;nCall++;
       myXi2 = fp.mH /(hFE.mHH+hRR[0]) *fp.mH;
       myXi2+= fp.mZ /(hFE.mZZ+hRR[2]) *fp.mZ;
 
-      if (mWorstXi2 < myXi2) { mWorstXi2 = myXi2; mWorstNode = node;}
-      tstXi2 +=  myXi2;
+       tstXi2 +=  myXi2;
     }
 
     if (mode&2)	{ 		//Update
       node->mLen = totLen;
-      node->SetPre(hFP,hFE,0);node->SetPre(hFP,hFE,1);
-      node->SetFit(hFP,hFE,0);node->SetFit(hFP,hFE,1);
-      if (preNode) {hFP.convert(Fstv,Fhlx); preNode->SetDer(Fstv,1);}    
-      if (!hit) node->SetXi2(myXi2,0);node->SetXi2(myXi2,1);
+      node->SetFit(hFP,hFE,3);
+      node->SetXi2(myXi2,3);
     }
 
     if (mode&4)	{ 		//Print Helix
@@ -455,8 +463,6 @@ static const char *fiNam[]={"H","Z","A","L","P"};
 int StvKalmanTrackFitter::Check(StvTrack *trak)
 {
 static int nCall = 0; nCall++;
-   if (!StvDebug::Level()) 		return 0;
-   if (!StvDebug::Flag("BigPt"))	return 0;
    if (trak->size()<10)			return 0;
    Helix(trak,1);  
    StvNode *node = trak->GetNode(StvTrack::kFirstPoint);
@@ -482,9 +488,6 @@ static int nCall = 0; nCall++;
 int StvKalmanTrackFitter::Check(const StvNodePars &parA,const StvFitErrs &errA,
 				const StvNodePars &parB,const StvFitErrs &errB)
 {
-  if (!StvDebug::Level()) 	return 0;
-  if (!StvDebug::Flag("BigPt")) return 0;
-
   THelixTrack helx;
   parA.get(&helx);  
   errA.Get(&helx);  
@@ -506,5 +509,26 @@ int StvKalmanTrackFitter::Check(const StvNodePars &parA,const StvFitErrs &errA,
   return ierr;
 }
    
-   
-   
+//_____________________________________________________________________________
+int StvKalmanTrackFitter::Clean(StvTrack *trak)
+{
+static const StvConst  *kons = StvConst::Inst();
+  int nErr = 0;
+
+  for (StvNodeIter it=trak->begin();it!=trak->end();++it) 
+  {
+    int fail = 0;
+    StvNode *node = *it;
+    StvHit *hit = node->GetHit();
+    if (!hit) continue;
+    const StvNodePars &np = node->GetFP();
+    if (fabs(np._ptin)    > kons->mMaxPti) 	fail+= 1;
+    if (fabs(np._curv)    > kons->mMaxCurv) 	fail+= 2;
+    if ( np.diff(hit->x())> kons->mMaxRes) 	fail+= 4;
+    if (!fail) continue;   
+    node->SetXi2(3e33);node->SetHit(0); nErr++;
+  }
+  return nErr;
+}
+
+
