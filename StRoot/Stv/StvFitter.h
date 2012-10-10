@@ -12,7 +12,6 @@ class StvNodePars;
 class StvHitErrs;
 class StHitPlane;
 class StvHitErrCalculator;
-#define kExtraBigXi2 3e3
 
 
 class StvFitter : public TNamed {
@@ -24,12 +23,13 @@ StvFitter(const char *name="DefaultFitter");
       void    Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                  ,const StvNodePars *jnPars, const StvFitErrs *jnErrs
                  ,      StvNodePars *otPars,       StvFitErrs *otErrs);
-         int  Failed() const 		{return mFailed;}
+         int  IsFailed() const 		{return mFailed;}
 const double *GetHitErrs() const 	{return mHitErrs;}        
   void Prep();
 
 double Xi2(const StvHit *hit);	//Xi2 for hit or vertex
 double Xi2();			//Xi2 for 2 subtracks joining
+double GetXi2()			{return mXi2;}	//evaluated Xi2
 int  Update();
 static StvFitter *Inst() {return mgFitter;}	
 
@@ -46,8 +46,8 @@ int  Vpdate();		//Update vertex fit
 static void Test();
 protected:
       char         mBeg[1];
-      int          mFailed; 	//Fail flag. Something completely wrong
-      int          mKase; 	//0=fit to hit,1=refit,2=fit to vertex
+      char         mFailed; 	//Fail flag. Something completely wrong
+      char         mKase; 	//0=fit to hit,1=refit,2=fit to vertex
 const StvNodePars *mInPars;	//1st input params
 const StvFitErrs  *mInErrs;	//1st input params errors
 const StvNodePars *mJnPars;	//2nd input params
