@@ -313,7 +313,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.53 2012/10/01 17:50:07 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.54 2012/10/11 16:33:12 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -643,9 +643,9 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
       LOG_ERROR << "No resNtuple found in " << fileName << endm;
       continue;
     }
-    curNtuple->Draw(">>elist",cuts);
-    TEventList* elist = (TEventList*) gDirectory->Get("elist");
-    Int_t nentries = (Int_t) elist->GetN();
+    curNtuple->Draw(">>elistVtxSeed",cuts);
+    TEventList* elist = (TEventList*) gDirectory->Get("elistVtxSeed");
+    Int_t nentries = (elist ? (Int_t) elist->GetN() : 0);
     for (Int_t entryn = 0; entryn < nentries; entryn++) {
       curNtuple->GetEntry(elist->GetEntry(entryn));
       vals = curNtuple->GetArgs();
@@ -677,8 +677,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.53 2012/10/01 17:50:07 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.54 2012/10/11 16:33:12 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.54  2012/10/11 16:33:12  genevb
+// Protect against zero entries, and a more unique entry list name
+//
 // Revision 1.53  2012/10/01 17:50:07  genevb
 // Reduce some overhead DB queries by being more specific about needed tables
 //
