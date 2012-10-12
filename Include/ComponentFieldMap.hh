@@ -2,6 +2,7 @@
 #define G_COMPONENT_FIELD_MAP_H
 
 #include "ComponentBase.hh"
+#include "TMatrixD.h"
 
 namespace Garfield {
 
@@ -186,7 +187,7 @@ class ComponentFieldMap : public ComponentBase {
     // Calculate coordinates for a cube
     int CoordinatesCube(double x, double y, double z,
             double& t1, double& t2, double& t3,
-            double jac[3][3], double& det, int imap);
+            TMatrixD* &jac, std::vector<TMatrixD*> &dN, int imap);
 
     // Calculate Jacobian for curved quadratic triangles            
     void Jacobian3(int i, double u, double v, double w,
@@ -199,7 +200,7 @@ class ComponentFieldMap : public ComponentBase {
                     double& det, double jac[4][4]);
     // Calculate Jacobian for a cube
     void JacobianCube(int i, double t1, double t2, double t3,
-                    double& det, double jac[3][3]);
+                    TMatrixD* &jac, std::vector<TMatrixD*> &dN);
 
     // Find the element for a point in curved quadratic quadrilaterals
     int FindElement5(const double x, const double y, const double z,
@@ -212,7 +213,7 @@ class ComponentFieldMap : public ComponentBase {
     // Find the element for a point in a cube
     int FindElementCube(const double x, const double y, const double z,
                       double& t1, double& t2, double& t3,
-                      double jac[3][3], double& det);
+                      TMatrixD* &jac, std::vector<TMatrixD*> &dN);
                       
     // Move (xpos, ypos, zpos) to field map coordinates
     void MapCoordinates(double& xpos, double& ypos, double& zpos,

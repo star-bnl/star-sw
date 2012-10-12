@@ -7,6 +7,7 @@
 #define G_COMPONENT_CST_H
 
 #include <vector>
+#include "TMatrixD.h"
 #include "ComponentFieldMap.hh"
 
 namespace Garfield {
@@ -60,12 +61,15 @@ class ComponentCST: public ComponentFieldMap {
     void UpdatePeriodicity();
     int FindElementCube(const double x, const double y, const double z,
                         double& t1, double& t2, double& t3,
-                        double jac[3][3], double& det);
+                        TMatrixD* &jac, std::vector<TMatrixD*> &dN);
     double GetElementVolume(const int i);
     void GetAspectRatio(const int i, double& dmin, double& dmax);
     static bool Greater(const double &a, const double &b) {return (a > b);};
     void Element2Index(int element,int &i,int &j, int &k);
     void GetNodesForElement(int element, std::vector<int> &nodes);
+
+  private:
+    void ClearVec(std::vector<TMatrixD*> &vec);
 };
 
 struct PolygonInfo {

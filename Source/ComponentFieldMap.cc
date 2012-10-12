@@ -7,6 +7,8 @@
 #include <math.h>
 #include <string>
 
+
+
 #include "ComponentFieldMap.hh"
 #include "FundamentalConstants.hh"
 
@@ -481,7 +483,7 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
 int
 ComponentFieldMap::FindElementCube(const double x, const double y, const double z,
                       double& t1, double& t2, double& t3,
-                      double jac[3][3], double& det){
+                      TMatrixD* &jac, std::vector<TMatrixD*> &dN){
   
   int imap = -1;
 
@@ -534,7 +536,7 @@ ComponentFieldMap::FindElementCube(const double x, const double y, const double 
     }
     return -1;
   }
-  CoordinatesCube(x,y,z,t1,t2,t3,jac,det,imap);
+  CoordinatesCube(x,y,z,t1,t2,t3,jac,dN,imap);
   if (debug) {
     std::cout << className << "::FindElementCube:\n";
     std::cout << "Global: (" << x << "," << y << "," << z << ") in element " 
@@ -1208,114 +1210,66 @@ v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
 }
 
 void
-ComponentFieldMap::JacobianCube(int i, double t1, double t2, double t3,
-                    double& det, double jac[3][3]){
-  // Initial values
-  det = 0;
-  for (int j = 0; j < 3; ++j) {
-    for (int k = 0; k < 3; ++k) jac[j][k] = 0;
-  }
-
-  // Be sure that the element is within range
-  if (i < 0 || i >= nElements) {
+ComponentFieldMap::JacobianCube(int element, double t1, double t2, double t3,
+                    TMatrixD* &jac, std::vector<TMatrixD*> &dN){
+  if (jac == 0) {
     std::cerr << className << "::JacobianCube:\n";
-    std::cerr << "    Element " << i << " out of range.\n";
+    std::cerr << "    Pointer to Jacobian matrix is empty!\n";
     return;
   }
-  jac[0][0] = 1./8 * (nodes[elements[i].emap[0]].x * -1 * (1 - t2) * (1 - t3) +
-                      nodes[elements[i].emap[1]].x * +1 * (1 - t2) * (1 - t3) +
-                      nodes[elements[i].emap[2]].x * +1 * (1 + t2) * (1 - t3) +
-                      nodes[elements[i].emap[3]].x * -1 * (1 + t2) * (1 - t3) +
-                      nodes[elements[i].emap[4]].x * -1 * (1 - t2) * (1 + t3) +
-                      nodes[elements[i].emap[5]].x * +1 * (1 - t2) * (1 + t3) +
-                      nodes[elements[i].emap[6]].x * +1 * (1 + t2) * (1 + t3) +
-                      nodes[elements[i].emap[7]].x * -1 * (1 + t2) * (1 + t3));
-  jac[0][1] = 1./8 * (nodes[elements[i].emap[0]].y * -1 * (1 - t2) * (1 - t3) +
-                      nodes[elements[i].emap[1]].y * +1 * (1 - t2) * (1 - t3) +
-                      nodes[elements[i].emap[2]].y * +1 * (1 + t2) * (1 - t3) +
-                      nodes[elements[i].emap[3]].y * -1 * (1 + t2) * (1 - t3) +
-                      nodes[elements[i].emap[4]].y * -1 * (1 - t2) * (1 + t3) +
-                      nodes[elements[i].emap[5]].y * +1 * (1 - t2) * (1 + t3) +
-                      nodes[elements[i].emap[6]].y * +1 * (1 + t2) * (1 + t3) +
-                      nodes[elements[i].emap[7]].y * -1 * (1 + t2) * (1 + t3));
-  jac[0][2] = 1./8 * (nodes[elements[i].emap[0]].z * -1 * (1 - t2) * (1 - t3) +
-                      nodes[elements[i].emap[1]].z * +1 * (1 - t2) * (1 - t3) +
-                      nodes[elements[i].emap[2]].z * +1 * (1 + t2) * (1 - t3) +
-                      nodes[elements[i].emap[3]].z * -1 * (1 + t2) * (1 - t3) +
-                      nodes[elements[i].emap[4]].z * -1 * (1 - t2) * (1 + t3) +
-                      nodes[elements[i].emap[5]].z * +1 * (1 - t2) * (1 + t3) +
-                      nodes[elements[i].emap[6]].z * +1 * (1 + t2) * (1 + t3) +
-                      nodes[elements[i].emap[7]].z * -1 * (1 + t2) * (1 + t3));
-  jac[1][0] = 1./8 * (nodes[elements[i].emap[0]].x * (1 - t1) * -1 * (1 - t3) +
-                      nodes[elements[i].emap[1]].x * (1 + t1) * -1 * (1 - t3) +
-                      nodes[elements[i].emap[2]].x * (1 + t1) * +1 * (1 - t3) +
-                      nodes[elements[i].emap[3]].x * (1 - t1) * +1 * (1 - t3) +
-                      nodes[elements[i].emap[4]].x * (1 - t1) * -1 * (1 + t3) +
-                      nodes[elements[i].emap[5]].x * (1 + t1) * -1 * (1 + t3) +
-                      nodes[elements[i].emap[6]].x * (1 + t1) * +1 * (1 + t3) +
-                      nodes[elements[i].emap[7]].x * (1 - t1) * +1 * (1 + t3));
-  jac[1][1] = 1./8 * (nodes[elements[i].emap[0]].y * (1 - t1) * -1 * (1 - t3) +
-                      nodes[elements[i].emap[1]].y * (1 + t1) * -1 * (1 - t3) +
-                      nodes[elements[i].emap[2]].y * (1 + t1) * +1 * (1 - t3) +
-                      nodes[elements[i].emap[3]].y * (1 - t1) * +1 * (1 - t3) +
-                      nodes[elements[i].emap[4]].y * (1 - t1) * -1 * (1 + t3) +
-                      nodes[elements[i].emap[5]].y * (1 + t1) * -1 * (1 + t3) +
-                      nodes[elements[i].emap[6]].y * (1 + t1) * +1 * (1 + t3) +
-                      nodes[elements[i].emap[7]].y * (1 - t1) * +1 * (1 + t3));
-  jac[1][2] = 1./8 * (nodes[elements[i].emap[0]].z * (1 - t1) * -1 * (1 - t3) +
-                      nodes[elements[i].emap[1]].z * (1 + t1) * -1 * (1 - t3) +
-                      nodes[elements[i].emap[2]].z * (1 + t1) * +1 * (1 - t3) +
-                      nodes[elements[i].emap[3]].z * (1 - t1) * +1 * (1 - t3) +
-                      nodes[elements[i].emap[4]].z * (1 - t1) * -1 * (1 + t3) +
-                      nodes[elements[i].emap[5]].z * (1 + t1) * -1 * (1 + t3) +
-                      nodes[elements[i].emap[6]].z * (1 + t1) * +1 * (1 + t3) +
-                      nodes[elements[i].emap[7]].z * (1 - t1) * +1 * (1 + t3));
-  jac[2][0] = 1./8 * (nodes[elements[i].emap[0]].x * (1 - t1) * (1 - t2) * -1 +
-                      nodes[elements[i].emap[1]].x * (1 + t1) * (1 - t2) * -1 +
-                      nodes[elements[i].emap[2]].x * (1 + t1) * (1 + t2) * -1 +
-                      nodes[elements[i].emap[3]].x * (1 - t1) * (1 + t2) * -1 +
-                      nodes[elements[i].emap[4]].x * (1 - t1) * (1 - t2) * +1 +
-                      nodes[elements[i].emap[5]].x * (1 + t1) * (1 - t2) * +1 +
-                      nodes[elements[i].emap[6]].x * (1 + t1) * (1 + t2) * +1 +
-                      nodes[elements[i].emap[7]].x * (1 - t1) * (1 + t2) * +1);
-  jac[2][1] = 1./8 * (nodes[elements[i].emap[0]].y * (1 - t1) * (1 - t2) * -1 +
-                      nodes[elements[i].emap[1]].y * (1 + t1) * (1 - t2) * -1 +
-                      nodes[elements[i].emap[2]].y * (1 + t1) * (1 + t2) * -1 +
-                      nodes[elements[i].emap[3]].y * (1 - t1) * (1 + t2) * -1 +
-                      nodes[elements[i].emap[4]].y * (1 - t1) * (1 - t2) * +1 +
-                      nodes[elements[i].emap[5]].y * (1 + t1) * (1 - t2) * +1 +
-                      nodes[elements[i].emap[6]].y * (1 + t1) * (1 + t2) * +1 +
-                      nodes[elements[i].emap[7]].y * (1 - t1) * (1 + t2) * +1);
-  jac[2][2] = 1./8 * (nodes[elements[i].emap[0]].z * (1 - t1) * (1 - t2) * -1 +
-                      nodes[elements[i].emap[1]].z * (1 + t1) * (1 - t2) * -1 +
-                      nodes[elements[i].emap[2]].z * (1 + t1) * (1 + t2) * -1 +
-                      nodes[elements[i].emap[3]].z * (1 - t1) * (1 + t2) * -1 +
-                      nodes[elements[i].emap[4]].z * (1 - t1) * (1 - t2) * +1 +
-                      nodes[elements[i].emap[5]].z * (1 + t1) * (1 - t2) * +1 +
-                      nodes[elements[i].emap[6]].z * (1 + t1) * (1 + t2) * +1 +
-                      nodes[elements[i].emap[7]].z * (1 - t1) * (1 + t2) * +1);
+  dN.clear();
+  // Be sure that the element is within range
+  if (element < 0 || element >= nElements) {
+    std::cerr << className << "::JacobianCube:\n";
+    std::cerr << "    Element " << element << " out of range.\n";
+    return;
+  }
+  // Here the partial derivatives of the 8 shaping functions are calculated
+  double N1[3] = {-1 * (1 - t2) * (1 - t3), (1 - t1) * -1 * (1 - t3), (1 - t1) * (1 - t2) * -1};
+  double N2[3] = {+1 * (1 - t2) * (1 - t3), (1 + t1) * -1 * (1 - t3), (1 + t1) * (1 - t2) * -1};
+  double N3[3] = {+1 * (1 + t2) * (1 - t3), (1 + t1) * +1 * (1 - t3), (1 + t1) * (1 + t2) * -1};
+  double N4[3] = {-1 * (1 + t2) * (1 - t3), (1 - t1) * +1 * (1 - t3), (1 - t1) * (1 + t2) * -1};
+  double N5[3] = {-1 * (1 - t2) * (1 + t3), (1 - t1) * -1 * (1 + t3), (1 - t1) * (1 - t2) * +1};
+  double N6[3] = {+1 * (1 - t2) * (1 + t3), (1 + t1) * -1 * (1 + t3), (1 + t1) * (1 - t2) * +1};
+  double N7[3] = {+1 * (1 + t2) * (1 + t3), (1 + t1) * +1 * (1 + t3), (1 + t1) * (1 + t2) * +1};
+  double N8[3] = {-1 * (1 + t2) * (1 + t3), (1 - t1) * +1 * (1 + t3), (1 - t1) * (1 + t2) * +1};
+  // Partial derivatives are stored in dN
+  TMatrixD* m_N1 = new TMatrixD(3,1,N1); *m_N1 = (1./8. * (*m_N1)); dN.push_back(m_N1);
+  TMatrixD* m_N2 = new TMatrixD(3,1,N2); *m_N2 = (1./8. * (*m_N2)); dN.push_back(m_N2);
+  TMatrixD* m_N3 = new TMatrixD(3,1,N3); *m_N3 = (1./8. * (*m_N3)); dN.push_back(m_N3);
+  TMatrixD* m_N4 = new TMatrixD(3,1,N4); *m_N4 = (1./8. * (*m_N4)); dN.push_back(m_N4);
+  TMatrixD* m_N5 = new TMatrixD(3,1,N5); *m_N5 = (1./8. * (*m_N5)); dN.push_back(m_N5);
+  TMatrixD* m_N6 = new TMatrixD(3,1,N6); *m_N6 = (1./8. * (*m_N6)); dN.push_back(m_N6);
+  TMatrixD* m_N7 = new TMatrixD(3,1,N7); *m_N7 = (1./8. * (*m_N7)); dN.push_back(m_N7);
+  TMatrixD* m_N8 = new TMatrixD(3,1,N8); *m_N8 = (1./8. * (*m_N8)); dN.push_back(m_N8);
+  // Calculation of the jacobian using dN
+  for(int node = 0; node<8; node++){
+      (*jac)(0,0) += nodes[elements[element].emap[node]].x * ((*dN.at(node))(0,0));
+      (*jac)(0,1) += nodes[elements[element].emap[node]].y * ((*dN.at(node))(0,0));
+      (*jac)(0,2) += nodes[elements[element].emap[node]].z * ((*dN.at(node))(0,0));
+      (*jac)(1,0) += nodes[elements[element].emap[node]].x * ((*dN.at(node))(1,0));
+      (*jac)(1,1) += nodes[elements[element].emap[node]].y * ((*dN.at(node))(1,0));
+      (*jac)(1,2) += nodes[elements[element].emap[node]].z * ((*dN.at(node))(1,0));
+      (*jac)(2,0) += nodes[elements[element].emap[node]].x * ((*dN.at(node))(2,0));
+      (*jac)(2,1) += nodes[elements[element].emap[node]].y * ((*dN.at(node))(2,0));
+      (*jac)(2,2) += nodes[elements[element].emap[node]].z * ((*dN.at(node))(2,0));
+  }
+
   // compute determinant
-  det = jac[0][0] * jac[1][1] * jac[2][2] +
-        jac[0][1] * jac[1][2] * jac[2][0] +
-        jac[0][2] * jac[1][0] * jac[2][1] -
-        jac[0][2] * jac[1][1] * jac[2][0] -
-        jac[0][0] * jac[1][2] * jac[2][1] -
-        jac[0][1] * jac[1][0] * jac[2][2];
   if(debug){
-    std::cout << className << "::JacobianCube:\n";
-    std::cout << "   Det.: " << det << "\n";
-    std::cout << "         " << jac[0][0] << " " << jac[0][1] << " " << jac[0][2] << "\n";
-    std::cout << "         " << jac[1][0] << " " << jac[1][1] << " " << jac[1][2] << "\n";
-    std::cout << "         " << jac[2][0] << " " << jac[2][1] << " " << jac[2][2] << "\n";
-    std::cout << "   Hexahedral coordinates (t, u, v) = (" << t1 << "," << t2 << "," << t3 << ")\n";
-    std::cout << "   Node xyzV\n";
+    std::cout << className << "::JacobianCube:" << std::endl;
+    std::cout << "   Det.: " << jac->Determinant() << std::endl;
+    std::cout << "   Jacobian matrix.: " << std::endl;
+    jac->Print("%11.10g");
+    std::cout << "   Hexahedral coordinates (t, u, v) = (" << t1 << "," << t2 << "," << t3 << ")" << std::endl;
+    std::cout << "   Node xyzV" << std::endl;
     for (int node = 0; node < 8; node++) {
-      std::cout << "         " << elements[i].emap[node]
-                << "          " << nodes[elements[i].emap[node]].x
-                << "         " << nodes[elements[i].emap[node]].y
-                << "         " << nodes[elements[i].emap[node]].z
-                << "         " << nodes[elements[i].emap[node]].v
-                << "\n";
+      std::cout << "         " << elements[element].emap[node]
+                << "          " << nodes[elements[element].emap[node]].x
+                << "         " << nodes[elements[element].emap[node]].y
+                << "         " << nodes[elements[element].emap[node]].z
+                << "         " << nodes[elements[element].emap[node]].v
+                << std::endl;
     }
   }
 }
@@ -2255,18 +2209,18 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
 int
 ComponentFieldMap::CoordinatesCube(double x, double y, double z,
             double& t1, double& t2, double& t3,
-            double jac[3][3], double& det, int imap) {
+            TMatrixD* &jac, std::vector<TMatrixD*> &dN, int imap) {
             
    /*
-   global coordinates   8 _ _ _ _7    t3    t2
+   global coordinates   7__ _ _ 6     t3    t2
                        /       /|     ^   /|
      ^ z              /       / |     |   /
-     |             5 /_______/6 |     |  /
+     |               4_______5  |     |  /
      |              |        |  |     | /
-     |              |  4     |  /3    |/     t1
+     |              |  3     |  2     |/     t1
       ------->      |        | /       ------->
      /      y       |        |/       local coordinates
-    /               1--------2
+    /               0--------1
    /
   v x
   */
@@ -2276,50 +2230,34 @@ ComponentFieldMap::CoordinatesCube(double x, double y, double z,
 
   // Compute hexahedral coordinates (t1->[-1,1],t2->[-1,1],t3->[-1,1]) and
   // t1 (zeta) is in y-direction
-  // t2 (eta)  is in opposit x-direction
+  // t2 (eta)  is in opposite x-direction
   // t3 (mu)   is in z-direction
   // Nodes are set in that way, that node [0] has always lowest x,y,z!
-  t2 = -1.* (2. * (x - nodes[elements[imap].emap[3]].x) / (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x) -1);
+  t2 = (2. * (x - nodes[elements[imap].emap[3]].x) / (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x) -1) * -1.;
   t1 = 2. * (y - nodes[elements[imap].emap[3]].y) / (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y) -1;
   t3 = 2. * (z - nodes[elements[imap].emap[3]].z) / (nodes[elements[imap].emap[7]].z - nodes[elements[imap].emap[3]].z) -1;
   // Re-compute the (x,y,z) position for this coordinate.
   if (debug) {
-    double n1 = 1./8 * (1 - t1) * (1 - t2) * (1 - t3);
-    double n2 = 1./8 * (1 + t1) * (1 - t2) * (1 - t3);
-    double n3 = 1./8 * (1 + t1) * (1 + t2) * (1 - t3);
-    double n4 = 1./8 * (1 - t1) * (1 + t2) * (1 - t3);
-    double n5 = 1./8 * (1 - t1) * (1 - t2) * (1 + t3);
-    double n6 = 1./8 * (1 + t1) * (1 - t2) * (1 + t3);
-    double n7 = 1./8 * (1 + t1) * (1 + t2) * (1 + t3);
-    double n8 = 1./8 * (1 - t1) * (1 + t2) * (1 + t3);
-    double xr =
-      nodes[elements[imap].emap[0]].x * n1 +
-      nodes[elements[imap].emap[1]].x * n2 +
-      nodes[elements[imap].emap[2]].x * n3 +
-      nodes[elements[imap].emap[3]].x * n4 +
-      nodes[elements[imap].emap[4]].x * n5 +
-      nodes[elements[imap].emap[5]].x * n6 +
-      nodes[elements[imap].emap[6]].x * n7 +
-      nodes[elements[imap].emap[7]].x * n8;
-    double yr =
-      nodes[elements[imap].emap[0]].y * n1 +
-      nodes[elements[imap].emap[1]].y * n2 +
-      nodes[elements[imap].emap[2]].y * n3 +
-      nodes[elements[imap].emap[3]].y * n4 +
-      nodes[elements[imap].emap[4]].y * n5 +
-      nodes[elements[imap].emap[5]].y * n6 +
-      nodes[elements[imap].emap[6]].y * n7 +
-      nodes[elements[imap].emap[7]].y * n8;
-    double zr =
-      nodes[elements[imap].emap[0]].z * n1 +
-      nodes[elements[imap].emap[1]].z * n2 +
-      nodes[elements[imap].emap[2]].z * n3 +
-      nodes[elements[imap].emap[3]].z * n4 +
-      nodes[elements[imap].emap[4]].z * n5 +
-      nodes[elements[imap].emap[5]].z * n6 +
-      nodes[elements[imap].emap[6]].z * n7 +
-      nodes[elements[imap].emap[7]].z * n8;
-    double sr = n1 + n2 + n3 + n4 + n5 + n6 + n7 + n8;
+    double n[8];
+    n[0] = 1./8 * (1 - t1) * (1 - t2) * (1 - t3);
+    n[1] = 1./8 * (1 + t1) * (1 - t2) * (1 - t3);
+    n[2] = 1./8 * (1 + t1) * (1 + t2) * (1 - t3);
+    n[3] = 1./8 * (1 - t1) * (1 + t2) * (1 - t3);
+    n[4] = 1./8 * (1 - t1) * (1 - t2) * (1 + t3);
+    n[5] = 1./8 * (1 + t1) * (1 - t2) * (1 + t3);
+    n[6] = 1./8 * (1 + t1) * (1 + t2) * (1 + t3);
+    n[7] = 1./8 * (1 - t1) * (1 + t2) * (1 + t3);
+
+    double xr = 0;
+    double yr = 0;
+    double zr = 0;
+
+    for(int i = 0; i<8; i++){
+      xr += nodes[elements[imap].emap[i]].x * n[i];
+      yr += nodes[elements[imap].emap[i]].y * n[i];
+      zr += nodes[elements[imap].emap[i]].z * n[i];
+    }
+    double sr = n[0] + n[1] + n[2] + n[3] + n[4] + n[5] + n[6] + n[7];
     std::cout << className << "::CoordinatesCube:\n";
     std::cout << "    Position requested:     (" << x << "," << y << "," << z << ")\n";
     std::cout << "    Position reconstructed: (" << xr << "," << yr << "," << zr << ")\n";
@@ -2327,7 +2265,7 @@ ComponentFieldMap::CoordinatesCube(double x, double y, double z,
     std::cout << "    Hexahedral coordinates (t, u, v) = (" << t1 << "," << t2 << "," << t3 << ")\n";
     std::cout << "    Checksum - 1:           " << (sr - 1) << "\n";
   }
-  JacobianCube(imap,t1,t2,t3,det,jac);
+  if(jac != 0) JacobianCube(imap,t1,t2,t3,jac,dN);
   // This should always work.
   ifail = 0;
   return ifail;

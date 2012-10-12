@@ -7,7 +7,9 @@
 #include <math.h>
 #include <algorithm>
 #include <vector>
+#include <iomanip>
 
+#include "TMath.h"
 #include "ComponentCST.hh"
 
 namespace Garfield {
@@ -41,9 +43,9 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
   std::ifstream fmplist;
   fmplist.open(mplist.c_str(), std::ios::in);
   if (fmplist.fail()) {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Could not open material file " << mplist << " for reading.\n",
-    std::cerr << "    The file perhaps does not exist.\n";
+    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << "    Could not open material file " << mplist << " for reading." << std::endl,
+    std::cerr << "    The file perhaps does not exist." << std::endl;
     return false;
   }
 
@@ -65,9 +67,9 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
       token = strtok(NULL, " ");
       nMaterials = ReadInteger(token, -1, readerror);
       if (readerror) {
-        std::cerr << className << "::Initialise:\n";
+        std::cerr << className << "::Initialise:" << std::endl;
         std::cerr << "    Error reading file " <<  mplist 
-                  << " (line " << il << ").\n";
+                  << " (line " << il << ")." << std::endl;
         fmplist.close();
         ok = false;
         return false;
@@ -79,23 +81,23 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
         materials[i].medium = NULL;
       }
       if (debug) {
-    	std::cout << className << "::Initialise:\n";
-        std::cout << "    Number of materials: " << nMaterials << "\n";
+    	std::cout << className << "::Initialise:" << std::endl;
+        std::cout << "    Number of materials: " << nMaterials << "" << std::endl;
       }
     } else if (strcmp(token, "Material") == 0) {
       token = strtok(NULL, " ");
       int imat = ReadInteger(token, -1, readerror);
       if (readerror) {
-    	std::cerr << className << "::Initialise:\n";
+    	std::cerr << className << "::Initialise:" << std::endl;
     	std::cerr << "     Error reading file " << mplist
-                  << " (line " << il << ".\n";
+                  << " (line " << il << "." << std::endl;
         fmplist.close();
         ok = false;
         return false;
       } else if (imat < 1 || imat > nMaterials) {
-    	std::cerr << className << "::Initialise:\n";
-    	std::cerr << "    Found out-of-range material index " << imat << "in\n";
-        std::cerr << "    material properties file " << mplist << ".\n";
+    	std::cerr << className << "::Initialise:" << std::endl;
+    	std::cerr << "    Found out-of-range material index " << imat << "in" << std::endl;
+        std::cerr << "    material properties file " << mplist << "." << std::endl;
         ok = false;
       } else {
         token = strtok(NULL, " ");
@@ -105,10 +107,10 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
         } else if (strcmp(token,"RSVX") == 0) {
           itype = 2;
         } else {
-          std::cerr << className << "::Initialise:\n";
-          std::cerr << "    Found unknown material property flag " << token << "\n";
+          std::cerr << className << "::Initialise:" << std::endl;
+          std::cerr << "    Found unknown material property flag " << token << "" << std::endl;
           std::cerr << "    on material properties file " << mplist
-                    << "(line " << il << ").\n";
+                    << "(line " << il << ")." << std::endl;
           ok = false;
         }
         token = strtok(NULL, " ");
@@ -118,8 +120,8 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
           materials[imat - 1].ohm = ReadDouble(token, -1, readerror);
           token = strtok(NULL, " ");
           if (strcmp(token,"PERX") != 0){
-            std::cerr << className << "::Initialise:\n";
-            std::cerr << "   Found unknown material property falg "<< token << "\n";
+            std::cerr << className << "::Initialise:" << std::endl;
+            std::cerr << "   Found unknown material property falg "<< token << "" << std::endl;
             std::cerr << "   on material file " << mplist
                       << " (material " << imat << ").\n)";
             ok = false;
@@ -129,20 +131,20 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
           }
         }
         if (readerror) {
-          std::cerr << className << "::Initialise:\n";
-          std::cerr << "     Error reading file " << mplist << "(line " << il << ").\n";
+          std::cerr << className << "::Initialise:" << std::endl;
+          std::cerr << "     Error reading file " << mplist << "(line " << il << ")." << std::endl;
           fmplist.close();
           ok = false;
           return false;
         }
         if (debug){
-          std::cout << className << "::Initialise:\n";
-          std::cout << "    Read material properties for material " << (imat-1) << "\n";
+          std::cout << className << "::Initialise:" << std::endl;
+          std::cout << "    Read material properties for material " << (imat-1) << "" << std::endl;
           if (itype == 2) {
             std::cout << "    eps = " << materials[imat - 1].eps 
-                      << " ohm = " << materials[imat - 1].ohm << "\n";
+                      << " ohm = " << materials[imat - 1].ohm << "" << std::endl;
           } else {
-            std::cout << "    eps = " << materials[imat - 1].eps << "\n";
+            std::cout << "    eps = " << materials[imat - 1].eps << "" << std::endl;
           }
         }
       }
@@ -155,9 +157,9 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
   for (int imat = 0; imat < nMaterials; ++imat) {
     if (materials[imat].eps < 0) continue;
     if (materials[imat].eps == 0) {
-      std::cout << className << "::Initialise:\n";
-      std::cout << "    Material " << imat << " has been assigned a permittivity\n";
-      std::cout << "    equal to zero in " << mplist << ".\n";
+      std::cout << className << "::Initialise:" << std::endl;
+      std::cout << "    Material " << imat << " has been assigned a permittivity" << std::endl;
+      std::cout << "    equal to zero in " << mplist << "." << std::endl;
       ok = false;
     } else if (iepsmin < 0 || epsmin > materials[imat].eps) {
       epsmin = materials[imat].eps;
@@ -165,9 +167,9 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
     }
   }
   if (iepsmin < 0) {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "     No material with positive permittivity found in\n";
-    std::cerr << "     material list " << mplist.c_str() << ".\n";
+    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << "     No material with positive permittivity found in" << std::endl;
+    std::cerr << "     material list " << mplist.c_str() << "." << std::endl;
     ok = false;
   } else {
     for (int imat = 0; imat < nMaterials; ++imat) {
@@ -179,9 +181,9 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
     }
   }
   // Tell how many lines read
-  std::cout << className << "::Initialise:\n";
-  std::cout << "    Read properties of " << nMaterials << " materials\n";
-  std::cout << "    from file " << mplist << ".\n";
+  std::cout << className << "::Initialise:" << std::endl;
+  std::cout << "    Read properties of " << nMaterials << " materials" << std::endl;
+  std::cout << "    from file " << mplist << "." << std::endl;
   if (debug) PrintMaterials();
 
   // Check the value of the unit
@@ -199,23 +201,23 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
              strcmp(unit.c_str(),"meter") == 0) {
     funit = 100.0;
   } else {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Unknown length unit " << unit << ".\n";
+    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << "    Unknown length unit " << unit << "." << std::endl;
     ok = false;
     funit = 1.0;
   }
   if (debug) {
-    std::cout << className << "::Initialise:\n";
-    std::cout << "    Unit scaling factor = " << funit << ".\n";
+    std::cout << className << "::Initialise:" << std::endl;
+    std::cout << "    Unit scaling factor = " << funit << "." << std::endl;
   }
 
   // Open the node list
   std::ifstream fnlist;
   fnlist.open(nlist.c_str(), std::ios::in);
   if (fnlist.fail()) {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Could not open nodes file " << nlist << " for reading.\n";
-    std::cerr << "    The file perhaps does not exist.\n";
+    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << "    Could not open nodes file " << nlist << " for reading." << std::endl;
+    std::cerr << "    The file perhaps does not exist." << std::endl;
     return false;
   }
   // Read the node list
@@ -247,24 +249,24 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
     if (strcmp(token, "x-lines\n") == 0 || strcmp(token, "x-lines") == 0) {
       lines_type = 1;
       if (debug) {
-        std::cout << className << "::Initialise:\n";
-        std::cout << "    Reading x-lines from file  " << nlist << ".\n";
+        std::cout << className << "::Initialise:" << std::endl;
+        std::cout << "    Reading x-lines from file  " << nlist << "." << std::endl;
       }
       continue;
     }
     if (strcmp(token, "y-lines\n") == 0 || strcmp(token, "y-lines") == 0) {
       lines_type = 2;
       if (debug) {
-        std::cout << className << "::Initialise:\n";
-        std::cout << "    Reading y-lines from file  " << nlist << ".\n";
+        std::cout << className << "::Initialise:" << std::endl;
+        std::cout << "    Reading y-lines from file  " << nlist << "." << std::endl;
       }
       continue;
     }
     if (strcmp(token, "z-lines\n") == 0 || strcmp(token, "z-lines") == 0) {
       lines_type = 3;
       if (debug) {
-        std::cout << className << "::Initialise:\n";
-        std::cout << "    Reading z-lines from file  " << nlist << ".\n";
+        std::cout << className << "::Initialise:" << std::endl;
+        std::cout << "    Reading z-lines from file  " << nlist << "." << std::endl;
       }
       continue;
     }
@@ -273,11 +275,11 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
     else if (lines_type == 2) m_ylines.push_back(line_tmp * funit);
     else if (lines_type == 3) m_zlines.push_back(line_tmp * funit);
     else {
-      std::cerr << className << "::Initialise:\n";
+      std::cerr << className << "::Initialise:" << std::endl;
       std::cerr << "    Line type was not set in  " << nlist
-                << " (line " << il << ", token = " << token << ").\n";
-      std::cerr << "    Maybe it is in the wrong format\n";
-      std::cerr << "    e.g. missing tailing space after x-lines.\n";
+                << " (line " << il << ", token = " << token << ")." << std::endl;
+      std::cerr << "    Maybe it is in the wrong format" << std::endl;
+      std::cerr << "    e.g. missing tailing space after x-lines." << std::endl;
       ok = false;
       break;
     }
@@ -285,8 +287,8 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
   }
   // Check syntax
   if (readerror) {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Error reading file " << nlist << " (line " << il << ").\n";
+    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << "    Error reading file " << nlist << " (line " << il << ")." << std::endl;
     fnlist.close();
     ok = false;
     return false;
@@ -310,42 +312,42 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
   if ((unsigned)xlines == m_xlines.size() &&
       (unsigned)ylines == m_ylines.size() &&
       (unsigned)zlines == m_zlines.size()) {
-    std::cout << className << "::Initialise:\n";
+    std::cout << className << "::Initialise:" << std::endl;
     std::cout << "    Found in file " << nlist << "\n    "
                               << xlines << " x-lines\n    "
                               << ylines << " y-lines\n    "
-                              << zlines << " z-lines\n";
+                              << zlines << " z-lines" << std::endl;
   } else {
-    std::cerr << className << "::Initialise:\n";
+    std::cerr << className << "::Initialise:" << std::endl;
     std::cerr << "    There should be " << xlines << " x-lines, "
                                         << ylines << " y-lines and "
                                         << zlines << " z-lines in file "
                                         << nlist << " but I found :\n    "
                                         << m_xlines.size() << " x-lines, "
                                         << m_ylines.size() << " x-lines, "
-                                        << m_zlines.size() << " z-lines.\n";
+                                        << m_zlines.size() << " z-lines." << std::endl;
   }
   // Check synchronisation
   if ((xlines * ylines * zlines) != nNodes) {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Synchronisation lost on file " << nlist << ".\n";
+    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << "    Synchronisation lost on file " << nlist << "." << std::endl;
     std::cerr << "    Nodes: " << nNodes << " (expected "
-              << (xlines * ylines * zlines) << ")\n";
+              << (xlines * ylines * zlines) << ")" << std::endl;
     ok = false;
   }
 
   // Tell how many lines read
-  std::cout << className << "::Initialise:\n";
-  std::cout << "    Read " << nNodes << " nodes from file " << nlist << ".\n";
+  std::cout << className << "::Initialise:" << std::endl;
+  std::cout << "    Read " << nNodes << " nodes from file " << nlist << "." << std::endl;
   // Check number of nodes
 
    // Open the element list
   std::ifstream felist;
   felist.open(elist.c_str(), std::ios::in);
   if (felist.fail()) {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Could not open element file " << elist << " for reading.\n";
-    std::cerr << "    The file perhaps does not exist.\n";
+    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << "    Could not open element file " << elist << " for reading." << std::endl;
+    std::cerr << "    The file perhaps does not exist." << std::endl;
     return false;
   }
   // Read the element list
@@ -370,85 +372,55 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
     int ielem = ReadInteger(token, -1, readerror);
     token = strtok(NULL, " "); int imat = ReadInteger(token, -1, readerror);
     // construct node numbers
-    std::vector<int> nodes;
-    GetNodesForElement(ielem,nodes);
-    int in0 = nodes.at(0); int in1 = nodes.at(1); int in2 = nodes.at(2);
-    int in3 = nodes.at(3); int in4 = nodes.at(4); int in5 = nodes.at(5);
-    int in6 = nodes.at(6); int in7 = nodes.at(7);
-
+    std::vector<int> node_nb;
+    GetNodesForElement(ielem,node_nb);
     // Check synchronisation
     if (readerror) {
-      std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Error reading file " << elist << " (line " << il << ").\n";
+      std::cerr << className << "::Initialise:" << std::endl;
+      std::cerr << "    Error reading file " << elist << " (line " << il << ")." << std::endl;
       felist.close();
       ok = false;
       return false;
     } else if (ielem != nElements + nbackground) {
-      std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Synchronisation lost on file " << elist << " (line " << il << ").\n";
+      std::cerr << className << "::Initialise:" << std::endl;
+      std::cerr << "    Synchronisation lost on file " << elist << " (line " << il << ")." << std::endl;
       std::cerr << "    Element: " << ielem << " (expected " << nElements << "), material: " << imat
                 << ", nodes: ("
-                << in0 << " "
-                << in1 << " "
-                << in2 << " "
-                << in3 << " "
-                << in4 << " "
-                << in5 << " "
-                << in6 << " "
-                << in7 << ")\n";
+                << node_nb.at(0) << " "
+                << node_nb.at(1) << " "
+                << node_nb.at(2) << " "
+                << node_nb.at(3) << " "
+                << node_nb.at(4) << " "
+                << node_nb.at(5) << " "
+                << node_nb.at(6) << " "
+                << node_nb.at(7) << ")" << std::endl;
       ok = false;
     }
     // Check the material number and ensure that epsilon is non-negative
     if (imat < 1 || imat > nMaterials) {
-      std::cerr << className << "::Initialise:\n";
+      std::cerr << className << "::Initialise:" << std::endl;
       std::cerr << "   Out-of-range material number on file " << elist 
-                << " (line " << il << ").\n";
+                << " (line " << il << ")." << std::endl;
       std::cerr << "    Element: " << ielem << ", material: " << imat
                 << ", nodes: ("
-                << in0 << " "
-                << in1 << " "
-                << in2 << " "
-                << in3 << " "
-                << in4 << " "
-                << in5 << " "
-                << in6 << " "
-                << in7 << ")\n";
+                << node_nb.at(0) << " "
+                << node_nb.at(1) << " "
+                << node_nb.at(2) << " "
+                << node_nb.at(3) << " "
+                << node_nb.at(4) << " "
+                << node_nb.at(5) << " "
+                << node_nb.at(6) << " "
+                << node_nb.at(7) << ")" << std::endl;
       ok = false;
     }
     if (materials[imat - 1].eps < 0) {
-      std::cerr << className << "::Initialise:\n";
+      std::cerr << className << "::Initialise:" << std::endl;
       std::cerr << "    Element " << ielem << " in element list " << elist 
-                << " uses material " << imat << " which\n";
-      std::cerr << "    has not been assigned a positive permittivity\n";
-      std::cerr << "    in material list " << mplist << ".\n";
+                << " uses material " << imat << " which" << std::endl;
+      std::cerr << "    has not been assigned a positive permittivity" << std::endl;
+      std::cerr << "    in material list " << mplist << "." << std::endl;
       ok = false;
     }
-     // Check the node numbers
-    if (in0 < 0 || in1 < 0 || in2 < 0 || in3 < 0 ||
-        in4 < 0 || in5 < 0 || in6 < 0 || in7 < 0) {
-      std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Found a node number < 0 on file " << elist 
-                << " (line " << il << ").\n";
-      std::cerr << "    Element: " << ielem << ", material: " << imat << ",\n";
-      std::cerr << "    nodes: ("
-                << in0 << " "
-                << in1 << " "
-                << in2 << " "
-                << in3 << " "
-                << in4 << " "
-                << in5 << " "
-                << in6 << " "
-                << in7 <<")\n";
-      ok = false;
-    }
-    if (in0 > highestnode) highestnode = in0;
-    if (in1 > highestnode) highestnode = in1;
-    if (in2 > highestnode) highestnode = in2;
-    if (in3 > highestnode) highestnode = in3;
-    if (in4 > highestnode) highestnode = in4;
-    if (in5 > highestnode) highestnode = in5;
-    if (in6 > highestnode) highestnode = in6;
-    if (in7 > highestnode) highestnode = in7;
     // Skip quadrilaterals which are background.
     if (deleteBackground && materials[imat - 1].ohm == 0) {
       nbackground++;
@@ -458,48 +430,54 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
     newElement.degenerate = false;
     // Store the material reference
     newElement.matmap = imat - 1;
-     // Node references
-    newElement.emap[0] = in0;
-    newElement.emap[1] = in1;
-    newElement.emap[2] = in2;
-    newElement.emap[3] = in3;
-    newElement.emap[4] = in4;
-    newElement.emap[5] = in5;
-    newElement.emap[6] = in6;
-    newElement.emap[7] = in7;
+
+    for(int node = 0; node < 8; node++) {
+      // Check the node numbers
+      if(node_nb.at(node) < 0){
+        std::cerr << className << "::Initialise:" << std::endl;
+              std::cerr << "    Found a node number < 0 on file " << elist
+                        << " (line " << il << ")." << std::endl;
+              std::cerr << "    Element: " << ielem << ", material: " << imat << "," << std::endl;
+              std::cerr << "    nodes: ("
+                        << node_nb.at(0) << " "
+                        << node_nb.at(1) << " "
+                        << node_nb.at(2) << " "
+                        << node_nb.at(3) << " "
+                        << node_nb.at(4) << " "
+                        << node_nb.at(5) << " "
+                        << node_nb.at(6) << " "
+                        << node_nb.at(7) <<")" << std::endl;
+              ok = false;
+      }
+      if(node_nb.at(node) > highestnode) highestnode = node_nb.at(node);
+      newElement.emap[node] = node_nb.at(node);
+    }
     elements.push_back(newElement);
-    // if (nElements > 934100) {
-    //   std::cout << className << "::Initialise\n";
-    //   std::cout << "    Element: " << nElements << "\n";
-    //   std::cout << "    Nodes  : " 
-    //             << in0 << ", " << in1 << ", " << in2 << ", " << in3 << ", "
-    //             << in4 << ", " << in5 << ", " << in6 << ", " << in7 << "\n";
-     // }
     ++nElements;
   }
   // Close the file
   felist.close();
   // Tell how many lines read
-  std::cout << className << "::Initialise:\n";
-  std::cout << "    Read " << nElements << " elements from file " << elist << ",\n";
-  std::cout << "    highest node number: " << highestnode << ",\n";
-  std::cout << "    degenerate elements: " << ndegenerate << ",\n";
-  std::cout << "    background elements skipped: " << nbackground << ".\n";
+  std::cout << className << "::Initialise:" << std::endl;
+  std::cout << "    Read " << nElements << " elements from file " << elist << "," << std::endl;
+  std::cout << "    highest node number: " << highestnode << "," << std::endl;
+  std::cout << "    degenerate elements: " << ndegenerate << "," << std::endl;
+  std::cout << "    background elements skipped: " << nbackground << "." << std::endl;
 
   if (nNodes != (highestnode+1)) {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Number of nodes read (" << nNodes << ") on " << nlist << " \n";
-    std::cerr << "    does not match element list (" << highestnode << ").\n";
-    std::cerr << "    Maybe the line size exceeded 200 characters.\n";
+    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << "    Number of nodes read (" << nNodes << ") on " << nlist << " " << std::endl;
+    std::cerr << "    does not match element list (" << highestnode << ")." << std::endl;
+    std::cerr << "    Maybe the line size exceeded 200 characters." << std::endl;
     ok = false;
   }
   // Open the voltage list
   std::ifstream fprnsol;
   fprnsol.open(prnsol.c_str(), std::ios::in);
   if (fprnsol.fail()) {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Could not open potential file " << prnsol << " for reading.\n";
-    std::cerr << "    The file perhaps does not exist.\n";
+    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << "    Could not open potential file " << prnsol << " for reading." << std::endl;
+    std::cerr << "    The file perhaps does not exist." << std::endl;
     return false;
   }
   // Read the voltage list
@@ -520,17 +498,17 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
     token = strtok(NULL, " "); double volt = ReadDouble(token, -1, readerror);
     // Check syntax
     if (readerror) {
-      std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Error reading file " << prnsol << " (line " << il << ").\n";
+      std::cerr << className << "::Initialise:" << std::endl;
+      std::cerr << "    Error reading file " << prnsol << " (line " << il << ")." << std::endl;
       fprnsol.close();
       ok = false;
       return false;
     }
     // Check node number and store if OK
     if (inode < 1 || inode > nNodes) {
-      std::cerr << className << "::Initialise:\n";
-      std::cerr << "    Node number " << inode << " out of range\n";
-      std::cerr << "    on potential file " << prnsol << " (line " << il << ").\n";
+      std::cerr << className << "::Initialise:" << std::endl;
+      std::cerr << "    Node number " << inode << " out of range" << std::endl;
+      std::cerr << "    on potential file " << prnsol << " (line " << il << ")." << std::endl;
       ok = false;
     } else {
       nodes[inode - 1].v = volt;
@@ -540,22 +518,22 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
   // Close the file
   fprnsol.close();
   // Tell how many lines read
-  std::cout << className << "::Initialise:\n";
-  std::cout << "    Read " << nread << " potentials from file " << prnsol << ".\n";
+  std::cout << className << "::Initialise:" << std::endl;
+  std::cout << "    Read " << nread << " potentials from file " << prnsol << "." << std::endl;
   // Check number of nodes
   if (nread != nNodes) {
-    std::cerr << className << "::Initialise:\n";
+    std::cerr << className << "::Initialise:" << std::endl;
     std::cerr << "    Number of nodes read (" << nread 
-              << ") on potential file " << prnsol << " does not\n";
-    std::cerr << "    match the node list (" << nNodes << ").\n";
+              << ") on potential file " << prnsol << " does not" << std::endl;
+    std::cerr << "    match the node list (" << nNodes << ")." << std::endl;
     ok = false;
   }
   // Set the ready flag
   if (ok) {
     ready = true;
   } else {
-    std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Field map could not be read and cannot be interpolated.\n";
+    std::cerr << className << "::Initialise:" << std::endl;
+    std::cerr << "    Field map could not be read and cannot be interpolated." << std::endl;
     return false;
   }
 
@@ -570,9 +548,9 @@ bool
 ComponentCST::SetWeightingField(std::string prnsol, std::string label) {
 
   if (!ready) {
-    std::cerr << className << "::SetWeightingField:\n";
-    std::cerr << "    No valid field map is present.\n";
-    std::cerr << "    Weighting field cannot be added.\n";
+    std::cerr << className << "::SetWeightingField:" << std::endl;
+    std::cerr << "    No valid field map is present." << std::endl;
+    std::cerr << "    Weighting field cannot be added." << std::endl;
     return false;
   }
 
@@ -580,9 +558,9 @@ ComponentCST::SetWeightingField(std::string prnsol, std::string label) {
   std::ifstream fprnsol;
   fprnsol.open(prnsol.c_str(), std::ios::in);
   if (fprnsol.fail()) {
-    std::cerr << className << "::SetWeightingField:\n";
-    std::cerr << "    Could not open potential file " << prnsol << " for reading.\n";
-    std::cerr << "    The file perhaps does not exist.\n";
+    std::cerr << className << "::SetWeightingField:" << std::endl;
+    std::cerr << "    Could not open potential file " << prnsol << " for reading." << std::endl;
+    std::cerr << "    The file perhaps does not exist." << std::endl;
     return false;
   }
   // Check if a weighting field with the same label already exists.
@@ -601,8 +579,8 @@ ComponentCST::SetWeightingField(std::string prnsol, std::string label) {
       nodes[j].w.resize(nWeightingFields);
     }
   } else {
-    std::cout << className << "::SetWeightingField:\n";
-    std::cout << "    Replacing existing weighting field " << label << ".\n";
+    std::cout << className << "::SetWeightingField:" << std::endl;
+    std::cout << "    Replacing existing weighting field " << label << "." << std::endl;
   }
   wfields[iw] = label;
   wfieldsOk[iw] = false;
@@ -634,18 +612,18 @@ ComponentCST::SetWeightingField(std::string prnsol, std::string label) {
     double volt = ReadDouble(token, -1, readerror);
     // Check syntax
     if (readerror) {
-      std::cerr << className << "::SetWeightingField:\n";
+      std::cerr << className << "::SetWeightingField:" << std::endl;
       std::cerr << "    Error reading file " << prnsol
-                << " (line " << il << ").\n";
+                << " (line " << il << ")." << std::endl;
       fprnsol.close();
       return false;
     }
     // Check node number and store if OK
     if (inode < 1 || inode > nNodes) {
-      std::cerr << className << "::SetWeightingField:\n";
-      std::cerr << "    Node number " << inode << " out of range.\n";
+      std::cerr << className << "::SetWeightingField:" << std::endl;
+      std::cerr << "    Node number " << inode << " out of range." << std::endl;
       std::cerr << "    on potential file " << prnsol
-                << " (line " << il << ").\n";
+                << " (line " << il << ")." << std::endl;
       ok = false;
     } else {
       nodes[inode - 1].w[iw] = volt;
@@ -655,23 +633,23 @@ ComponentCST::SetWeightingField(std::string prnsol, std::string label) {
   // Close the file
   fprnsol.close();
   // Tell how many lines read
-  std::cout << className << "::SetWeightingField:\n";
-  std::cout << "    Read " << nread << " potentials from file " << prnsol << ".\n";
+  std::cout << className << "::SetWeightingField:" << std::endl;
+  std::cout << "    Read " << nread << " potentials from file " << prnsol << "." << std::endl;
   // Check number of nodes
   if (nread != nNodes) {
-    std::cerr << className << "::SetWeightingField:\n";
+    std::cerr << className << "::SetWeightingField:" << std::endl;
     std::cerr << "    Number of nodes read (" << nread << ")"
-              << " on potential file "  << prnsol << "\n";
-    std::cerr << "     does not match the node list (" << nNodes << ".\n";
+              << " on potential file "  << prnsol << "" << std::endl;
+    std::cerr << "     does not match the node list (" << nNodes << "." << std::endl;
     ok = false;
   }
 
   // Set the ready flag.
   wfieldsOk[iw] = ok;
   if (!ok) {
-    std::cerr << className << "::SetWeightingField:\n";
+    std::cerr << className << "::SetWeightingField:" << std::endl;
     std::cerr << "    Field map could not be read "
-              << "and cannot be interpolated.\n";
+              << "and cannot be interpolated." << std::endl;
     return false;
   }
 
@@ -711,42 +689,42 @@ ComponentCST::ElectricField(
   // Do not proceed if not properly initialised.
   if (!ready) {
     status = -10;
-    std::cerr << className << "::ElectricField:\n";
-    std::cerr << "    Field map not available for interpolation.\n";
+    std::cerr << className << "::ElectricField:" << std::endl;
+    std::cerr << "    Field map not available for interpolation." << std::endl;
     return;
   }
 
   if (warning) {
-    std::cout << className << "::ElectricField:\n";
-    std::cout << "    Warnings have been issued for this field map.\n";
+    std::cout << className << "::ElectricField:" << std::endl;
+    std::cout << "    Warnings have been issued for this field map." << std::endl;
   }
-  double t1, t2, t3, jac[3][3], det;
-
-  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det);
+  double t1, t2, t3;
+  TMatrixD* jac = new TMatrixD(3,3);;
+  std::vector<TMatrixD*> dN;
+  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, dN);
 
   if (imap < 0) {
     if (debug) {
-      std::cout << className << "::ElectricField:\n";
+      std::cout << className << "::ElectricField:" << std::endl;
       std::cout << "    Point (" << x << "," << y << "," << z 
-                << ") not in the mesh,\n"; 
-      std::cout << "    it is background or PEC.\n";
+                << ") not in the mesh," << std::endl;
+      std::cout << "    it is background or PEC." << std::endl;
     }
     status = -6;
+    ComponentCST::ClearVec(dN);
+    delete jac;
     return;
   }
   // Save element number of last element
   lastElement = imap;
 
-  double inv_jac[3][3];
-  inv_jac[0][0] = (1./det) * (jac[1][1] * jac[2][2] - jac[1][2] * jac[2][1]);
-  inv_jac[0][1] = (1./det) * (jac[0][2] * jac[2][1] - jac[0][1] * jac[2][2]);
-  inv_jac[0][2] = (1./det) * (jac[0][1] * jac[1][2] - jac[0][2] * jac[1][1]);
-  inv_jac[1][0] = (1./det) * (jac[1][2] * jac[2][0] - jac[1][0] * jac[2][2]);
-  inv_jac[1][1] = (1./det) * (jac[0][0] * jac[2][2] - jac[0][2] * jac[2][0]);
-  inv_jac[1][2] = (1./det) * (jac[0][2] * jac[1][0] - jac[0][0] * jac[1][2]);
-  inv_jac[2][0] = (1./det) * (jac[1][0] * jac[2][1] - jac[1][1] * jac[2][0]);
-  inv_jac[2][1] = (1./det) * (jac[0][1] * jac[2][0] - jac[0][0] * jac[2][1]);
-  inv_jac[2][2] = (1./det) * (jac[0][0] * jac[1][1] - jac[0][1] * jac[1][0]);
+  // invert Matrix
+//  jac->InvertFast();
+  if (debug) {
+    std::cout << className << "::ElectricField:" << std::endl;
+    std::cout << "    Inverse Jacobian is:" << std::endl;
+    jac->Print();
+  }
   // Field calculation
   volt = (nodes[elements[imap].emap[0]].v * (1 - t1) * (1 - t2) * (1 - t3) +
           nodes[elements[imap].emap[1]].v * (1 + t1) * (1 - t2) * (1 - t3) +
@@ -756,95 +734,47 @@ ComponentCST::ElectricField(
           nodes[elements[imap].emap[5]].v * (1 + t1) * (1 - t2) * (1 + t3) +
           nodes[elements[imap].emap[6]].v * (1 + t1) * (1 + t2) * (1 + t3) +
           nodes[elements[imap].emap[7]].v * (1 - t1) * (1 + t2) * (1 + t3)) / 8.;
-  ex = (1. / 8.) * (
-          nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
-                                             (1 - t1) * -1 * (1 - t3) * inv_jac[0][1] +
-                                             (1 - t1) * (1 - t2) * -1 * inv_jac[0][2]) +
-          nodes[elements[imap].emap[1]].v * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
-                                             (1 + t1) * -1 * (1 - t3) * inv_jac[0][1] +
-                                             (1 + t1) * (1 - t2) * -1 * inv_jac[0][2]) +
-          nodes[elements[imap].emap[2]].v * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][0] +
-                                             (1 + t1) * +1 * (1 - t3) * inv_jac[0][1] +
-                                             (1 + t1) * (1 + t2) * -1 * inv_jac[0][2]) +
-          nodes[elements[imap].emap[3]].v * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][0] +
-                                             (1 - t1) * +1 * (1 - t3) * inv_jac[0][1] +
-                                             (1 - t1) * (1 + t2) * -1 * inv_jac[0][2]) +
-          nodes[elements[imap].emap[4]].v * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][0] +
-                                             (1 - t1) * -1 * (1 + t3) * inv_jac[0][1] +
-                                             (1 - t1) * (1 - t2) * +1 * inv_jac[0][2]) +
-          nodes[elements[imap].emap[5]].v * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][0] +
-                                             (1 + t1) * -1 * (1 + t3) * inv_jac[0][1] +
-                                             (1 + t1) * (1 - t2) * +1 * inv_jac[0][2]) +
-          nodes[elements[imap].emap[6]].v * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][0] +
-                                             (1 + t1) * +1 * (1 + t3) * inv_jac[0][1] +
-                                             (1 + t1) * (1 + t2) * +1 * inv_jac[0][2]) +
-          nodes[elements[imap].emap[7]].v * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][0] +
-                                             (1 - t1) * +1 * (1 + t3) * inv_jac[0][1] +
-                                             (1 - t1) * (1 + t2) * +1 * inv_jac[0][2]));
-  ey = (1. / 8.) * (
-          nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[1][0] +
-                                             (1 - t1) * -1 * (1 - t3) * inv_jac[1][1] +
-                                             (1 - t1) * (1 - t2) * -1 * inv_jac[1][2]) +
-          nodes[elements[imap].emap[1]].v * (+1 * (1 - t2) * (1 - t3) * inv_jac[1][0] +
-                                             (1 + t1) * -1 * (1 - t3) * inv_jac[1][1] +
-                                             (1 + t1) * (1 - t2) * -1 * inv_jac[1][2]) +
-          nodes[elements[imap].emap[2]].v * (+1 * (1 + t2) * (1 - t3) * inv_jac[1][0] +
-                                             (1 + t1) * +1 * (1 - t3) * inv_jac[1][1] +
-                                             (1 + t1) * (1 + t2) * -1 * inv_jac[1][2]) +
-          nodes[elements[imap].emap[3]].v * (-1 * (1 + t2) * (1 - t3) * inv_jac[1][0] +
-                                             (1 - t1) * +1 * (1 - t3) * inv_jac[1][1] +
-                                             (1 - t1) * (1 + t2) * -1 * inv_jac[1][2]) +
-          nodes[elements[imap].emap[4]].v * (-1 * (1 - t2) * (1 + t3) * inv_jac[1][0] +
-                                             (1 - t1) * -1 * (1 + t3) * inv_jac[1][1] +
-                                             (1 - t1) * (1 - t2) * +1 * inv_jac[1][2]) +
-          nodes[elements[imap].emap[5]].v * (+1 * (1 - t2) * (1 + t3) * inv_jac[1][0] +
-                                             (1 + t1) * -1 * (1 + t3) * inv_jac[1][1] +
-                                             (1 + t1) * (1 - t2) * +1 * inv_jac[1][2]) +
-          nodes[elements[imap].emap[6]].v * (+1 * (1 + t2) * (1 + t3) * inv_jac[1][0] +
-                                             (1 + t1) * +1 * (1 + t3) * inv_jac[1][1] +
-                                             (1 + t1) * (1 + t2) * +1 * inv_jac[1][2]) +
-          nodes[elements[imap].emap[7]].v * (-1 * (1 + t2) * (1 + t3) * inv_jac[1][0] +
-                                             (1 - t1) * +1 * (1 + t3) * inv_jac[1][1] +
-                                             (1 - t1) * (1 + t2) * +1 * inv_jac[1][2]));
-  ez = (-1. / 8.) * (
-          nodes[elements[imap].emap[0]].v * (-1 * (1 - t2) * (1 - t3) * inv_jac[2][0] +
-                                             (1 - t1) * -1 * (1 - t3) * inv_jac[2][1] +
-                                             (1 - t1) * (1 - t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[1]].v * (+1 * (1 - t2) * (1 - t3) * inv_jac[2][0] +
-                                             (1 + t1) * -1 * (1 - t3) * inv_jac[2][1] +
-                                             (1 + t1) * (1 - t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[2]].v * (+1 * (1 + t2) * (1 - t3) * inv_jac[2][0] +
-                                             (1 + t1) * +1 * (1 - t3) * inv_jac[2][1] +
-                                             (1 + t1) * (1 + t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[3]].v * (-1 * (1 + t2) * (1 - t3) * inv_jac[2][0] +
-                                             (1 - t1) * +1 * (1 - t3) * inv_jac[2][1] +
-                                             (1 - t1) * (1 + t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[4]].v * (-1 * (1 - t2) * (1 + t3) * inv_jac[2][0] +
-                                             (1 - t1) * -1 * (1 + t3) * inv_jac[2][1] +
-                                             (1 - t1) * (1 - t2) * +1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[5]].v * (+1 * (1 - t2) * (1 + t3) * inv_jac[2][0] +
-                                             (1 + t1) * -1 * (1 + t3) * inv_jac[2][1] +
-                                             (1 + t1) * (1 - t2) * +1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[6]].v * (+1 * (1 + t2) * (1 + t3) * inv_jac[2][0] +
-                                             (1 + t1) * +1 * (1 + t3) * inv_jac[2][1] +
-                                             (1 + t1) * (1 + t2) * +1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[7]].v * (-1 * (1 + t2) * (1 + t3) * inv_jac[2][0] +
-                                             (1 - t1) * +1 * (1 + t3) * inv_jac[2][1] +
-                                             (1 - t1) * (1 + t2) * +1 * inv_jac[2][2]));
+//  TMatrixD E(3,1);
+//  E = -1.*(nodes[elements[imap].emap[0]].v * (*jac) * (*dN.at(0)) +
+//      nodes[elements[imap].emap[1]].v * (*jac) * (*dN.at(1)) +
+//      nodes[elements[imap].emap[2]].v * (*jac) * (*dN.at(2)) +
+//      nodes[elements[imap].emap[3]].v * (*jac) * (*dN.at(3)) +
+//      nodes[elements[imap].emap[4]].v * (*jac) * (*dN.at(4)) +
+//      nodes[elements[imap].emap[5]].v * (*jac) * (*dN.at(5)) +
+//      nodes[elements[imap].emap[6]].v * (*jac) * (*dN.at(6)) +
+//      nodes[elements[imap].emap[7]].v * (*jac) * (*dN.at(7)));
+//
+//  ex = E(0,0);
+//  ey = E(1,0);
+//  ez = E(2,0);
+  TMatrixD E(3,1);
+  for(int node = 0; node < 8; node++) {
+    E(0,0) += -1 * nodes[elements[imap].emap[node]].v * ((*dN.at(node))(0,0)) * 1./TMath::Sqrt(TMath::Power(((*jac)(0,0)),2)+TMath::Power(((*jac)(0,1)),2)+TMath::Power(((*jac)(0,2)),2));
+    E(1,0) += -1 * nodes[elements[imap].emap[node]].v * ((*dN.at(node))(1,0)) * 1./TMath::Sqrt(TMath::Power(((*jac)(1,0)),2)+TMath::Power(((*jac)(1,1)),2)+TMath::Power(((*jac)(1,2)),2));
+    E(2,0) += -1 * nodes[elements[imap].emap[node]].v * ((*dN.at(node))(2,0)) * 1./TMath::Sqrt(TMath::Power(((*jac)(2,0)),2)+TMath::Power(((*jac)(2,1)),2)+TMath::Power(((*jac)(2,2)),2));
+  }
+  if(debug) {
+    E.Print();
+  }
+  // here two times -1 because t1 is in opposite direction of x
+  ex = -1 * E(1,0);
+  ey = E(0,0);
+  ez = E(2,0);
+
   // Transform field to global coordinates
   UnmapFields(ex, ey, ez, x, y, z,
               xmirrored, ymirrored, zmirrored,
               rcoordinate, rotation);
 
   if (debug) {
-    std::cout << className << "::ElectricField:\n";
-    std::cout << "    Element number: " << imap << ".\n";
+    std::cout << className << "::ElectricField:" << std::endl;
+    std::cout << "    Element number: " << imap << "." << std::endl;
     std::cout << "    Material " << elements[imap].matmap << ", drift flag " 
-              << materials[elements[imap].matmap].driftmedium << ".\n";
+              << materials[elements[imap].matmap].driftmedium << "." << std::endl;
     std::cout << "    Local Coordinates (" << t1 << "," << t2 << "," << t3 
-              << ") Voltage: " << volt << "\n";
-    std::cout << "    E-Field (" << ex << "," << ey << "," << ez << ")\n";
-    std::cout << "*******End of ComponentCST::ElectricField********\n\n";
+              << ") Voltage: " << volt << "" << std::endl;
+    std::cout << std::setprecision(15) << "    E-Field (" << ex << "," << ey << "," << ez << ")" << std::endl;
+    std::cout << "*******End of ComponentCST::ElectricField********\n" << std::endl;
   }
   // Drift medium?
   m = materials[elements[imap].matmap].medium;
@@ -854,6 +784,9 @@ ComponentCST::ElectricField(
       if (m->IsDriftable()) status = 0;
     }
   }
+  ComponentCST::ClearVec(dN);
+  delete jac;
+
 }
 
 void
@@ -895,125 +828,59 @@ ComponentCST::WeightingField(
                  rcoordinate, rotation);
 
   if (warning) {
-    std::cout << className << "::WeightingField:\n";
-    std::cout << "    Warnings have been issued for this field map.\n";
+    std::cout << className << "::WeightingField:" << std::endl;
+    std::cout << "    Warnings have been issued for this field map." << std::endl;
   }
 
   // Find the element that contains this point
-  double t1, t2, t3, jac[3][3], det;
-
-  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det);
+  double t1, t2, t3;
+  TMatrixD* jac = new TMatrixD(3,3);;
+  std::vector<TMatrixD*> dN;
+  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, dN);
 
   // Check if the point is in the mesh
-  if (imap < 0) return;
+  if (imap < 0) {
+    ComponentCST::ClearVec(dN);
+    delete jac;
+    return;
+  }
 
   if (debug) {
-    std::cout << className << "::WeightingField:\n";
-    std::cout << "    Global: (" << x << "," << y << "," << z << "),\n";
+    std::cout << className << "::WeightingField:" << std::endl;
+    std::cout << "    Global: (" << x << "," << y << "," << z << ")," << std::endl;
     std::cout << "    Local: (" << t1 << "," << t2 << "," << t3 
-              << ") in element " << imap << " \n";
-    std::cout << "    Node xyzV\n";
+              << ") in element " << imap << " " << std::endl;
+    std::cout << "    Node xyzV" << std::endl;
     for (int i = 0; i < 8; i++) {
-      std::cout << "  " << elements[imap].emap[i]
+      std::cout << std::setprecision(15) << "  " << elements[imap].emap[i]
                 << " " << nodes[elements[imap].emap[i]].x
                 << " " << nodes[elements[imap].emap[i]].y
                 << " " << nodes[elements[imap].emap[i]].z
-                << " " << nodes[elements[imap].emap[i]].w[iw] << "\n";
+                << " " << nodes[elements[imap].emap[i]].w[iw] << "" << std::endl;
     }
   }
-  double inv_jac[3][3];
-  det = fabs(det);
-  inv_jac[0][0] = (1. / det) * (jac[1][1] * jac[2][2] - jac[1][2] * jac[2][1]);
-  inv_jac[0][1] = (1. / det) * (jac[0][2] * jac[2][1] - jac[0][1] * jac[2][2]);
-  inv_jac[0][2] = (1. / det) * (jac[0][1] * jac[1][2] - jac[0][2] * jac[1][1]);
-  inv_jac[1][0] = (1. / det) * (jac[1][2] * jac[2][0] - jac[1][0] * jac[2][2]);
-  inv_jac[1][1] = (1. / det) * (jac[0][0] * jac[2][2] - jac[0][2] * jac[2][0]);
-  inv_jac[1][2] = (1. / det) * (jac[0][2] * jac[1][0] - jac[0][0] * jac[1][2]);
-  inv_jac[2][0] = (1. / det) * (jac[1][0] * jac[2][1] - jac[1][1] * jac[2][0]);
-  inv_jac[2][1] = (1. / det) * (jac[0][1] * jac[2][0] - jac[0][0] * jac[2][1]);
-  inv_jac[2][2] = (1. / det) * (jac[0][0] * jac[1][1] - jac[0][1] * jac[1][0]);
+  // invert Matrix
+  jac->InvertFast();
+  // Field calculation
+  TMatrixD E(3,1);
+  E = (nodes[elements[imap].emap[0]].v * (*jac) * (*dN.at(0)) +
+      nodes[elements[imap].emap[1]].v * (*jac) * (*dN.at(1)) +
+      nodes[elements[imap].emap[2]].v * (*jac) * (*dN.at(2)) +
+      nodes[elements[imap].emap[3]].v * (*jac) * (*dN.at(3)) +
+      nodes[elements[imap].emap[4]].v * (*jac) * (*dN.at(4)) +
+      nodes[elements[imap].emap[5]].v * (*jac) * (*dN.at(5)) +
+      nodes[elements[imap].emap[6]].v * (*jac) * (*dN.at(6)) +
+      nodes[elements[imap].emap[7]].v * (*jac) * (*dN.at(7)));
 
-  wx = (1. / 8.) * (
-          nodes[elements[imap].emap[0]].w[iw] * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
-                                                 (1 - t1) * -1 * (1 - t3) * inv_jac[1][0] +
-                                                 (1 - t1) * (1 - t2) * -1 * inv_jac[2][0]) +
-          nodes[elements[imap].emap[1]].w[iw] * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][0] +
-                                                 (1 + t1) * -1 * (1 - t3) * inv_jac[1][0] +
-                                                 (1 + t1) * (1 - t2) * -1 * inv_jac[2][0]) +
-          nodes[elements[imap].emap[2]].w[iw] * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][0] +
-                                                 (1 + t1) * +1 * (1 - t3) * inv_jac[1][0] +
-                                                 (1 + t1) * (1 + t2) * -1 * inv_jac[2][0]) +
-          nodes[elements[imap].emap[3]].w[iw] * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][0] +
-                                                 (1 - t1) * +1 * (1 - t3) * inv_jac[1][0] +
-                                                 (1 - t1) * (1 + t2) * -1 * inv_jac[2][0]) +
-          nodes[elements[imap].emap[4]].w[iw] * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][0] +
-                                                 (1 - t1) * -1 * (1 + t3) * inv_jac[1][0] +
-                                                 (1 - t1) * (1 - t2) * +1 * inv_jac[2][0]) +
-          nodes[elements[imap].emap[5]].w[iw] * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][0] +
-                                                 (1 + t1) * -1 * (1 + t3) * inv_jac[1][0] +
-                                                 (1 + t1) * (1 - t2) * +1 * inv_jac[2][0]) +
-          nodes[elements[imap].emap[6]].w[iw] * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][0] +
-                                                 (1 + t1) * +1 * (1 + t3) * inv_jac[1][0] +
-                                                 (1 + t1) * (1 + t2) * +1 * inv_jac[2][0]) +
-          nodes[elements[imap].emap[7]].w[iw] * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][0] +
-                                                 (1 - t1) * +1 * (1 + t3) * inv_jac[1][0] +
-                                                 (1 - t1) * (1 + t2) * +1 * inv_jac[2][0]));
-  wy = (1. / 8.) * (
-          nodes[elements[imap].emap[0]].w[iw] * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][1] +
-                                                 (1 - t1) * -1 * (1 - t3) * inv_jac[1][1] +
-                                                 (1 - t1) * (1 - t2) * -1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[1]].w[iw] * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][1] +
-                                                 (1 + t1) * -1 * (1 - t3) * inv_jac[1][1] +
-                                                 (1 + t1) * (1 - t2) * -1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[2]].w[iw] * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][1] +
-                                                 (1 + t1) * +1 * (1 - t3) * inv_jac[1][1] +
-                                                 (1 + t1) * (1 + t2) * -1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[3]].w[iw] * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][1] +
-                                                 (1 - t1) * +1 * (1 - t3) * inv_jac[1][1] +
-                                                 (1 - t1) * (1 + t2) * -1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[4]].w[iw] * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][1] +
-                                                 (1 - t1) * -1 * (1 + t3) * inv_jac[1][1] +
-                                                 (1 - t1) * (1 - t2) * +1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[5]].w[iw] * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][1] +
-                                                 (1 + t1) * -1 * (1 + t3) * inv_jac[1][1] +
-                                                 (1 + t1) * (1 - t2) * +1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[6]].w[iw] * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][1] +
-                                                 (1 + t1) * +1 * (1 + t3) * inv_jac[1][1] +
-                                                 (1 + t1) * (1 + t2) * +1 * inv_jac[2][1]) +
-          nodes[elements[imap].emap[7]].w[iw] * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][1] +
-                                                 (1 - t1) * +1 * (1 + t3) * inv_jac[1][1] +
-                                                 (1 - t1) * (1 + t2) * +1 * inv_jac[2][1]));
-  wz = (-1. / 8.) * (
-          nodes[elements[imap].emap[0]].w[iw] * (-1 * (1 - t2) * (1 - t3) * inv_jac[0][2] +
-                                                 (1 - t1) * -1 * (1 - t3) * inv_jac[1][2] +
-                                                 (1 - t1) * (1 - t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[1]].w[iw] * (+1 * (1 - t2) * (1 - t3) * inv_jac[0][2] +
-                                                 (1 + t1) * -1 * (1 - t3) * inv_jac[1][2] +
-                                                 (1 + t1) * (1 - t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[2]].w[iw] * (+1 * (1 + t2) * (1 - t3) * inv_jac[0][2] +
-                                                 (1 + t1) * +1 * (1 - t3) * inv_jac[1][2] +
-                                                 (1 + t1) * (1 + t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[3]].w[iw] * (-1 * (1 + t2) * (1 - t3) * inv_jac[0][2] +
-                                                 (1 - t1) * +1 * (1 - t3) * inv_jac[1][2] +
-                                                 (1 - t1) * (1 + t2) * -1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[4]].w[iw] * (-1 * (1 - t2) * (1 + t3) * inv_jac[0][2] +
-                                                 (1 - t1) * -1 * (1 + t3) * inv_jac[1][2] +
-                                                 (1 - t1) * (1 - t2) * +1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[5]].w[iw] * (+1 * (1 - t2) * (1 + t3) * inv_jac[0][2] +
-                                                 (1 + t1) * -1 * (1 + t3) * inv_jac[1][2] +
-                                                 (1 + t1) * (1 - t2) * +1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[6]].w[iw] * (+1 * (1 + t2) * (1 + t3) * inv_jac[0][2] +
-                                                 (1 + t1) * +1 * (1 + t3) * inv_jac[1][2] +
-                                                 (1 + t1) * (1 + t2) * +1 * inv_jac[2][2]) +
-          nodes[elements[imap].emap[7]].w[iw] * (-1 * (1 + t2) * (1 + t3) * inv_jac[0][2] +
-                                                 (1 - t1) * +1 * (1 + t3) * inv_jac[1][2] +
-                                                 (1 - t1) * (1 + t2) * +1 * inv_jac[2][2]));
-
+  wx = E(0,0);
+  wy = E(1,0);
+  wz = E(2,0);
   // Transform field to global coordinates
   UnmapFields(wx, wy, wz, x, y, z,
               xmirrored, ymirrored, zmirrored,
               rcoordinate, rotation);
-
+  ComponentCST::ClearVec(dN);
+  delete jac;
 }
 
 
@@ -1052,42 +919,41 @@ ComponentCST::WeightingPotential(
                  rcoordinate, rotation);
 
   if (warning) {
-    std::cout << className << "::WeightingPotential:\n";
-    std::cout << "Warnings have been issued for this field map.\n";
+    std::cout << className << "::WeightingPotential:" << std::endl;
+    std::cout << "Warnings have been issued for this field map." << std::endl;
   }
 
   // Find the element that contains this point
-  double t1, t2, t3, jac[3][3], det;
-
-  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det);
-
+  double t1, t2, t3;
+  TMatrixD* jac = 0;
+  std::vector<TMatrixD*> dN;
+  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, dN);
   // Check if the point is in the mesh
   if (imap < 0) return 0.;
 
   if (debug) {
-    std::cout << className << "::WeightingPotential:\n";
-    std::cout << "    Global: (" << x << "," << y << "," << z << "),\n";
+    std::cout << className << "::WeightingPotential:" << std::endl;
+    std::cout << "    Global: (" << x << "," << y << "," << z << ")," << std::endl;
     std::cout << "    Local: (" << t1 << "," << t2 << "," << t3 
-              << ") in element " << imap << "\n";
-    std::cout << "  Node xyzV\n";
+              << ") in element " << imap << "" << std::endl;
+    std::cout << "  Node xyzV" << std::endl;
     for (int i = 0; i < 8; ++i) {
       std::cout << "  " << elements[imap].emap[i]
                 << " " <<  nodes[elements[imap].emap[i]].x
                 << " " <<  nodes[elements[imap].emap[i]].y
                 << " " <<  nodes[elements[imap].emap[i]].z
-                << " " <<  nodes[elements[imap].emap[i]].v << "\n";
+                << " " <<  nodes[elements[imap].emap[i]].v << "" << std::endl;
     }
   }
 
-  return (1. / 8.) * ( 
-          nodes[elements[imap].emap[0]].w[iw] * (1 - t1) * (1 - t2) * (1 - t3) +
-          nodes[elements[imap].emap[1]].w[iw] * (1 + t1) * (1 - t2) * (1 - t3) +
-          nodes[elements[imap].emap[2]].w[iw] * (1 + t1) * (1 + t2) * (1 - t3) +
-          nodes[elements[imap].emap[3]].w[iw] * (1 - t1) * (1 + t2) * (1 - t3) +
-          nodes[elements[imap].emap[4]].w[iw] * (1 - t1) * (1 - t2) * (1 + t3) +
-          nodes[elements[imap].emap[5]].w[iw] * (1 + t1) * (1 - t2) * (1 + t3) +
-          nodes[elements[imap].emap[6]].w[iw] * (1 + t1) * (1 + t2) * (1 + t3) +
-          nodes[elements[imap].emap[7]].w[iw] * (1 - t1) * (1 + t2) * (1 + t3));
+  return (nodes[elements[imap].emap[0]].v * (1 - t1) * (1 - t2) * (1 - t3) +
+      nodes[elements[imap].emap[1]].v * (1 + t1) * (1 - t2) * (1 - t3) +
+      nodes[elements[imap].emap[2]].v * (1 + t1) * (1 + t2) * (1 - t3) +
+      nodes[elements[imap].emap[3]].v * (1 - t1) * (1 + t2) * (1 - t3) +
+      nodes[elements[imap].emap[4]].v * (1 - t1) * (1 - t2) * (1 + t3) +
+      nodes[elements[imap].emap[5]].v * (1 + t1) * (1 - t2) * (1 + t3) +
+      nodes[elements[imap].emap[6]].v * (1 + t1) * (1 + t2) * (1 + t3) +
+      nodes[elements[imap].emap[7]].v * (1 - t1) * (1 + t2) * (1 + t3)) / 8.;
 
 }
 
@@ -1110,52 +976,51 @@ ComponentCST::GetMedium(const double xin, const double yin, const double zin,
 
   // Do not proceed if not properly initialised.
   if (!ready) {
-    std::cerr << className << "::GetMedium:\n";
-    std::cerr << "Field map not available for interpolation.\n";
+    std::cerr << className << "::GetMedium:" << std::endl;
+    std::cerr << "Field map not available for interpolation." << std::endl;
     return false;
   }
   if (warning) {
-    std::cout << className << "::GetMedium:\n";
-    std::cout << "Warnings have been issued for this field map.\n";
+    std::cout << className << "::GetMedium:" << std::endl;
+    std::cout << "Warnings have been issued for this field map." << std::endl;
   }
 
   // Find the element that contains this point.
-  double t1, t2, t3, jac[3][3], det;
-
-  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, det);
-
+  double t1, t2, t3;
+  TMatrixD* jac = 0;
+  std::vector<TMatrixD*> dN;
+  int imap = FindElementCube(x, y, z, t1, t2, t3, jac, dN);
   if (imap < 0) {
     if (debug) {
-      std::cerr << className << "::GetMedium:\n";
-      std::cerr << "Point (" << x << "," << y << "," << z << ") not in the mesh.\n";
+      std::cerr << className << "::GetMedium:" << std::endl;
+      std::cerr << "Point (" << x << "," << y << "," << z << ") not in the mesh." << std::endl;
     }
     return false;
   }
   if (elements[imap].matmap < 0 || elements[imap].matmap >= nMaterials ) {
     if (debug) {
-      std::cerr << className << "::GetMedium:\n";
+      std::cerr << className << "::GetMedium:" << std::endl;
       std::cerr << "Point (" << x << "," << y << "," << z 
-                << ") has out of range material number " << imap << ".\n";
+                << ") has out of range material number " << imap << "." << std::endl;
     }
     return false;
   }
 
   if (debug) {
-    std::cout << className << "::GetMedium:\n";
-    std::cout << "    Global: (" << x << "," << y << "," << z << "),\n";
+    std::cout << className << "::GetMedium:" << std::endl;
+    std::cout << "    Global: (" << x << "," << y << "," << z << ")," << std::endl;
     std::cout << "    Local: (" << t1 << "," << t2 << "," << t3 
               << ") in element " << imap 
-              << " (degenerate: " << elements[imap].degenerate << ")\n";
-    std::cout << "    Node xyzV\n";
+              << " (degenerate: " << elements[imap].degenerate << ")" << std::endl;
+    std::cout << "    Node xyzV" << std::endl;
     for (int i = 0; i < 8; i++) {
       std::cout << "     " <<  elements[imap].emap[i]
                 << " " <<  nodes[elements[imap].emap[i]].x
                 << " " <<  nodes[elements[imap].emap[i]].y
                 << " " <<  nodes[elements[imap].emap[i]].z
-                << " " <<  nodes[elements[imap].emap[i]].v << "\n";
+                << " " <<  nodes[elements[imap].emap[i]].v << "" << std::endl;
     }
   }
-
   // Assign a medium.
   m = materials[elements[imap].matmap].medium;
   if (m == 0) return false;
@@ -1167,8 +1032,8 @@ void
 ComponentCST::SetRangeZ(const double zmin, const double zmax) {
 
   if (fabs(zmax - zmin) <= 0.) {
-    std::cerr << className << "::SetRangeZ:\n";
-    std::cerr << "    Zero range is not permitted.\n";
+    std::cerr << className << "::SetRangeZ:" << std::endl;
+    std::cerr << "    Zero range is not permitted." << std::endl;
     return;
   }
   zMinBoundingBox = std::min(zmin, zmax);
@@ -1269,10 +1134,24 @@ ComponentCST::GetNodesForElement(int element, std::vector<int> &nodes){
 
 int
 ComponentCST::FindElementCube(const double x, const double y, const double z,
-                      double& t1, double& t2, double& t3,
-                      double jac[3][3], double& det){
+                              double& t1, double& t2, double& t3,
+                              TMatrixD* &jac, std::vector<TMatrixD*> &dN){
 
   int imap = -1;
+  // check if point is in the component
+  if(!zPeriodic && !zMirrorPeriodic && !zAxiallyPeriodic && !zRotationSymmetry &&
+          (z < zMinBoundingBox || z >  zMaxBoundingBox))
+    return -1;
+  if(!yPeriodic && !yMirrorPeriodic && !yAxiallyPeriodic && !yRotationSymmetry &&
+          (y < yMinBoundingBox || y >  yMaxBoundingBox))
+    return -1;
+  if(!xPeriodic && !xMirrorPeriodic && !xAxiallyPeriodic && !xRotationSymmetry &&
+      (x < xMinBoundingBox || x >  xMaxBoundingBox))
+    return -1;
+
+
+
+
   // check if the last element matches
   // if yes than leave directly
   if (lastElement >= 0 &&
@@ -1283,7 +1162,7 @@ ComponentCST::FindElementCube(const double x, const double y, const double z,
       y < nodes[elements[lastElement].emap[2]].y &&
       z < nodes[elements[lastElement].emap[7]].z) {
     imap = lastElement;
-    CoordinatesCube(x,y,z,t1,t2,t3,jac,det,imap);
+    CoordinatesCube(x,y,z,t1,t2,t3,jac,dN,imap);
     return imap;
   }
 
@@ -1318,61 +1197,69 @@ ComponentCST::FindElementCube(const double x, const double y, const double z,
       if( x < nodes[elements[imap].emap[3]].x || x > nodes[elements[imap].emap[0]].x ||
           y < nodes[elements[imap].emap[3]].y || y > nodes[elements[imap].emap[2]].y ||
           z < nodes[elements[imap].emap[3]].z || z > nodes[elements[imap].emap[7]].z) {
-        std::cout << "Element: " << imap << "\tPoint: (" << x << "," << y << "," << z << ")\n"
-                << "x: " << nodes[elements[imap].emap[3]].x << " - " << nodes[elements[imap].emap[0]].x << "\n"
-                << "y: " << nodes[elements[imap].emap[3]].y << " - " << nodes[elements[imap].emap[2]].y << "\n"
-                << "z: " << nodes[elements[imap].emap[3]].z << " - " << nodes[elements[imap].emap[7]].z << "\n\n";
+        std::cout << "Element: " << imap << "\tPoint: (" << x << "," << y << "," << z << ")" << std::endl
+                << "x: " << nodes[elements[imap].emap[3]].x << " - " << nodes[elements[imap].emap[0]].x << "" << std::endl
+                << "y: " << nodes[elements[imap].emap[3]].y << " - " << nodes[elements[imap].emap[2]].y << "" << std::endl
+                << "z: " << nodes[elements[imap].emap[3]].z << " - " << nodes[elements[imap].emap[7]].z << "\n" << std::endl;
       }
     }
   }
   // final test - should never fail
   if (imap < 0 || imap > nElements) {
-    std::cerr << className << "::FindElementCube:\n";
+    std::cerr << className << "::FindElementCube:" << std::endl;
     std::cerr << "    Index of the element (imap is " << imap << ") is to large!"
               << "    Number of Elements: " << nElements
               << "\n    index_x: "   << index_x
               << "\n    index_y: " << index_y
               << "\n    index_z: " << index_z << std::endl;
     if (debug) {
-      std::cout << className << "::FindElementCube:\n";
+      std::cout << className << "::FindElementCube:" << std::endl;
       std::cout << "    Point (" << x << "," << y << "," << z
-                << ") not in the mesh, it is background or PEC.\n";
+                << ") not in the mesh, it is background or PEC." << std::endl;
       std::cout << "    First node ("
                 << nodes[elements[0].emap[3]].x << ","
                 << nodes[elements[0].emap[3]].y << ","
                 << nodes[elements[0].emap[3]].z
-                << ") in the mesh.\n";
+                << ") in the mesh." << std::endl;
       std::cout << "    dx= " << (nodes[elements[0].emap[0]].x-nodes[elements[0].emap[3]].x)
                 << ", dy= " << (nodes[elements[0].emap[2]].y-nodes[elements[0].emap[3]].y)
                 << ", dz= " << (nodes[elements[0].emap[7]].z-nodes[elements[0].emap[3]].z)
-                << "\n";
+                << "" << std::endl;
       std::cout << "    Last node (" << nodes[elements[nElements-1].emap[5]].x
                 << "," << nodes[elements[nElements-1].emap[5]].y
                 << "," << nodes[elements[nElements-1].emap[5]].z
-                << ") in the mesh.\n";
+                << ") in the mesh." << std::endl;
       std::cout << "  dx= " << (nodes[elements[nElements-1].emap[0]].x-nodes[elements[nElements-1].emap[3]].x)
                 << ", dy= " << (nodes[elements[nElements-1].emap[2]].y-nodes[elements[nElements-1].emap[3]].y)
                 << ", dz= " << (nodes[elements[nElements-1].emap[7]].z-nodes[elements[nElements-1].emap[3]].z)
-                << "\n";
+                << "" << std::endl;
     }
     return -1;
   }
-  CoordinatesCube(x,y,z,t1,t2,t3,jac,det,imap);
+  CoordinatesCube(x,y,z,t1,t2,t3,jac,dN,imap);
   if (debug) {
-    std::cout << className << "::FindElementCube:\n";
+    std::cout << className << "::FindElementCube:" << std::endl;
     std::cout << "Global: (" << x << "," << y << "," << z << ") in element "
               << imap << " (degenerate: "
-              << elements[imap].degenerate << ")\n";
-   std::cout << "      Node xyzV\n";
+              << elements[imap].degenerate << ")" << std::endl;
+   std::cout << "      Node xyzV" << std::endl;
     for (int i = 0; i < 8; i++) {
       std::cout << "  " << elements[imap].emap[i]
                 << " " << nodes[elements[imap].emap[i]].x
                 << " " << nodes[elements[imap].emap[i]].y
                 << " " << nodes[elements[imap].emap[i]].z
                 << " " << nodes[elements[imap].emap[i]].v
-                << "\n";
+                << "" << std::endl;
     }
   }
   return imap;
+}
+void ComponentCST::ClearVec(std::vector<TMatrixD*> &vec){
+  std::vector<TMatrixD*>::iterator it = vec.begin();
+  std::vector<TMatrixD*>::iterator end = vec.end();
+  while(it != end){
+    delete *it;
+    it++;
+  }
 }
 }
