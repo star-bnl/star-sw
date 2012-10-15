@@ -28,9 +28,18 @@ class StEvtTrigDetSumsMaker : public StMaker {
   virtual Int_t  Make();
   
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEvtTrigDetSumsMaker.h,v 1.1 2012/10/15 17:35:59 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEvtTrigDetSumsMaker.h,v 1.2 2012/10/15 17:38:34 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
-  ClassDef(StEvtTrigDetSumsMaker,0)   //StAF chain virtual base class for Makers
+  ClassDef(StEvtTrigDetSumsMaker,0)
 };
 
 #endif
+
+//_____________________________________________________________________________
+// $Id: StEvtTrigDetSumsMaker.h,v 1.2 2012/10/15 17:38:34 genevb Exp $
+// $Log: StEvtTrigDetSumsMaker.h,v $
+// Revision 1.2  2012/10/15 17:38:34  genevb
+// Add CVS logging
+//
+//
+
