@@ -9,6 +9,7 @@ void tpcDbTest() {
   gSystem->Load("St_db_Maker");
   gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StarMagField");
+  gSystem->Load("StEvent");
   gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
   
@@ -20,8 +21,9 @@ void tpcDbTest() {
   tpcDbMk->SetDebug();
   //  dbMk->SetDateTime(20090701,10000);
   //  dbMk->SetDateTime(20090328,164000);
-  dbMk->SetDateTime(20100107,132403);
-  dbMk->SetDateTime("y2010");
+  //  dbMk->SetDateTime(20100107,132403);
+  dbMk->SetDateTime(20090328,164000);
+  //  dbMk->SetDateTime("y2010");
   chain->SetDebug();
   chain->Init();
   new StarMagField;
@@ -31,7 +33,9 @@ void tpcDbTest() {
   for (Int_t sector = 5; sector <= 24; sector += 12) {
     StTpcPadCoordinate padP(sector,row,1,0);  cout << "padP\t" << padP << endl;
     StTpcLocalCoordinate locP;
+    StTpcLocalSectorCoordinate locS;
     tran(padP,locP,kFALSE,kFALSE);            cout << "locP\t" << locP << endl;
+    tran(locP,locS);                          cout << "locS\t" << locS << endl;
     tran(locP,padP,kFALSE,kFALSE);            cout << "padP\t"  << padP  << endl;
     StGlobalCoordinate globP;
     tran(padP,globP,kFALSE,kFALSE);            cout << "globP\t" << globP << endl;
