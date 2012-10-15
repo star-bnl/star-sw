@@ -53,3 +53,12 @@ Int_t StEvtTrigDetSumsMaker::Make(){
   new St_trigDetSumsC(table);
   return kStOK;
 }
+
+//_____________________________________________________________________________
+// $Id: StEvtTrigDetSumsMaker.cxx,v 1.2 2012/10/15 17:38:34 genevb Exp $
+// $Log: StEvtTrigDetSumsMaker.cxx,v $
+// Revision 1.2  2012/10/15 17:38:34  genevb
+// Add CVS logging
+//
+//
+
