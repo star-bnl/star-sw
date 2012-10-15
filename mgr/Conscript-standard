@@ -39,9 +39,11 @@ my $OnlinePackage=0;
 my @LinkDefs = ();
 my @LinkDefsT = (); # for tables if any
 my @PlainObj = ();
-if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
+
+if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
      ($Dir =~ m/StRoot.*Client\// && $Dir !~ /StRoot.*Client\/St/) ||
-     ($Dir =~ m/StarVMC\/minicern/ )) {
+     ($Dir =~ m/StarVMC\/minicern/ )
+     ) {
     # Added 2003. In Construct, the logic is such
     # that the Pool directories have their sub-directories
     # set as targets (n sub-dir => n libraries). That's
@@ -49,9 +51,15 @@ if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
     # here.
     $pkg = $Dir;
     $pkg =~ s/StRoot\///;
-    $pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/);
-    $pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
-    $pkg = "StarMiniCern"       if ($pkg =~ m/minicern/);
+
+    if ( $Dir =~ m/GeneratorPool/ ){
+	$pkg =~ s/.*Pool\///;
+	#$pkg = "lib$pkg";
+    } else {
+	$pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/  );
+	$pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
+	$pkg = "StarMiniCern"       if ($pkg =~ m/minicern/);
+    }
     $PKG = $pkg;
     print "\t[".File::Basename::basename($Dir)."] (possible name clash) changed to $pkg\n";
 } else {
