@@ -128,6 +128,16 @@ class AgBlock : public TNamed
   /// Methods to examine the block creation stack
   static AgBlock *History(Int_t i){ return mStack[i]; }
 
+  /// Add a reference system group to this block with the specified name.
+  /// A reference group will be a virtual volume which may be used to 
+  /// independently align multiple toplevel volumes
+  void AddGroup( const Char_t *name );//{ mGroups.push_back( name ); }
+  
+  /// Get the list of alignment groups
+  const vector<TString> &groups(){ return mGroups; }
+
+    
+
  private:
  protected:
 
@@ -154,6 +164,8 @@ class AgBlock : public TNamed
 
 
   std::vector< TString >               mNicknames;  // Nicknames
+  std::vector< TString > mGroups;
+
 
   friend class _AgBlockDummy;
 
