@@ -1,7 +1,11 @@
-* $Id: morini.F,v 1.1.1.1 2004/01/15 00:08:48 potekhin Exp $
+* $Id: morini.F,v 1.2 2012/10/16 16:54:36 fisyak Exp $
 * $Name:  $
 * $Log: morini.F,v $
+* Revision 1.2  2012/10/16 16:54:36  fisyak
+* Add STAR location for xsneut96.dat
+*
 * Revision 1.1.1.1  2004/01/15 00:08:48  potekhin
+*
 *
 * Revision 1.4  2003/12/03 16:13:02  nevski
 * prevent morini from double initialization
@@ -103,6 +107,15 @@ C open MICAP I/O units
             LNROOT = LNBLNK(CHROOT)
             IF(LNROOT.GT.0)XSFILE = CHROOT(1:LNROOT)//
      >                     '/lib/xsneut96.dat'
+         ENDIF
+         INQUIRE(FILE=XSFILE,EXIST=EXISTS)
+         IF(.NOT.EXISTS) THEN
+            CHROOT = ' '
+            CALL GETENV('STAR',CHROOT)
+            LNROOT = LNBLNK(CHROOT)
+            IF(LNROOT.GT.0) then
+	      XSFILE = CHROOT(1:LNROOT)//'/pams/sim/gphysdata/xsneut96.dat'
+            endif
          ENDIF
          INQUIRE(FILE=XSFILE,EXIST=EXISTS)
          IF(.NOT.EXISTS) THEN
