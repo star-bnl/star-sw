@@ -701,6 +701,30 @@ class Block( Handler ):
         document.impl( content, unit=current )
        
 
+class Group( Handler ):
+    """
+    
+    """
+    def __init__(self):
+        self. name     = ""
+        self. comment = "DOCUMENTATION NOT PROVIDED"
+        Handler.__init__(self)    
+
+    def setParent(self,p): self.parent = p
+    def startElement(self, tag, attr):
+        global current, current_block
+        
+        self.name = attr.get('name',   None)
+        self.comm = attr.get('comment',None)
+        self.cond = attr.get('if',     None)
+        if self.cond:
+            self.cond = replacements(self.cond).lower()
+
+        if self.cond:
+            document.impl('if (%s)'%self.cond, unit=current)
+        document.impl('{ AddGroup("%s"); }'%(self.name), unit=current)
+
+
 class Export( Handler ):
     """
     Language-specific language block.  Code wrapped in an export block will only
@@ -2233,6 +2257,7 @@ class Placement(Handler):
         # Positional arguements
         block = attr.get('block')        
         into  = attr.get('in',None)
+        group = attr.get('group',None)
         x     = attr.get('x',None)
         y     = attr.get('y',None)
         z     = attr.get('z',None)
@@ -2294,8 +2319,12 @@ class Placement(Handler):
 
         # If provided, add the conditional to the placement
         if cond:            document.impl( 'if ( %s )'%cond, unit=current )
-        
-        document.impl( '{ AgPlacement place = AgPlacement("%s","%s");' %( block, into ), unit=current )
+
+        if group:
+            document.impl( '{ AgPlacement place = AgPlacement("%s","%s","%s");' %( block, into, group ), unit=current )
+        else:
+            document.impl( '{ AgPlacement place = AgPlacement("%s","%s");' %( block, into ), unit=current )
+            
         document.impl( '/// Add daughter volume %s to mother %s'%(block,into), unit=current )
         
         if ( x != None ):

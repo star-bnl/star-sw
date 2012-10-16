@@ -1368,6 +1368,15 @@ class Volume ( Container ):
 class Block( Volume ):
     def __init__(self): Volume.__init__(self)
 
+class Group( Operator ):
+    """
+    """
+    def __init__(self):
+        self.name = ""
+        self.comment = ""
+        Operator.__init__(self,firstKey="name")
+    def setParent(self,p): self.parent=p
+
 class Export ( Container ):
     """
     The export tag is a feature implemented for backwards compatability
