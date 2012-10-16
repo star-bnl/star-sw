@@ -1770,6 +1770,13 @@ Bool_t Geometry::BtofInit()
 Bool_t Geometry::TpcxInit()
 {
 
+  tpcxGeom.select = "TPCXof"; {
+    tpcxGeom.config = -1;
+    tpcxGeom.padconfig = -1;
+    tpcxGeom.module="none";
+    tpcxGeom.fill();
+  }
+  
   tpcxGeom.select = "TPCX10"; {
     tpcxGeom.config    = 1;
     tpcxGeom.padconfig = 0;

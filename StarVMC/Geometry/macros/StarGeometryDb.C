@@ -23,6 +23,8 @@ void StarGeometryDb()
   geom.fsceFlag = "FSCEof";  geom.fsceStat = 0;
   geom.eiddFlag = "EIDDof";  geom.eiddStat = 0;
 
+  geom.tpcxFlag = "TPCXof";  geom.tpcxStat = 0;
+
 
   //
   // Setup STAR Geometries y2000 to present
