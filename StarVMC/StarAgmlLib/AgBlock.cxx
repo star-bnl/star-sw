@@ -62,6 +62,16 @@ void AgBlock::Create( const Char_t *name )
 }
 
 
+void AgBlock::AddGroup( const Char_t *name )
+{
+  mGroups.push_back(name);
+  _stacker -> AddGroup(name);
+}
+
+
+;//{ mGroups.push_back( name ); }
+
+
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> WHY IS THIS COMMENTED OUT???
 void AgBlock::Inherit()
 {

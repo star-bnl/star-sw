@@ -11,7 +11,7 @@ class AgPlacement : public TNamed
 {
  public:
 
-  AgPlacement(const Char_t *block="none", const Char_t *mother="none");
+  AgPlacement(const Char_t *block="none", const Char_t *mother="none", const Char_t *group="none");
   ~AgPlacement(){ /* nada */ };
 
   void AlphaX( Double_t ax );
@@ -33,6 +33,7 @@ class AgPlacement : public TNamed
 
   const Char_t *block();
   const Char_t *mother();
+  const Char_t *group();
 
   /// Returns a reference to the named parameter.
   Double_t &par( const Char_t *name );
@@ -49,6 +50,7 @@ class AgPlacement : public TNamed
 
   TString mBlock;
   TString mMother;
+  TString mGroup;
 
   struct Rotation3 
   {

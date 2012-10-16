@@ -6,15 +6,17 @@ ClassImp(AgPlacement);
 
 #include "TGeoMatrix.h"
 
-AgPlacement::AgPlacement(const Char_t *block, const Char_t *mother):
+AgPlacement::AgPlacement(const Char_t *block, const Char_t *mother, const Char_t *group):
 		  TNamed(block,Form("Place %s into %s",block,mother)), mType(kUnknown)
 {
 	mBlock=block;
 	mMother=mother;
+	mGroup=group;
 }
 
 const Char_t *AgPlacement::block(){ return mBlock.Data(); }
 const Char_t *AgPlacement::mother(){ return mMother.Data(); }
+const Char_t *AgPlacement::group(){ return mGroup.Data(); }
 
 void AgPlacement::AlphaX( Double_t ax )
 {

@@ -28,6 +28,9 @@ class StarTGeoStacker : public StarAgmlStacker
   Bool_t SearchVolume( const AgShape &shape, const AgAttribute &attr );
 
   static std::map< Int_t, TString > mClassMap; // maps shape names to TGeo classes
+
+  void AddGroup( const Char_t *group );
+
  private:
  protected:
 

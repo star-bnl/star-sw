@@ -39,6 +39,8 @@ class StarAgmlStacker : public TNamed
     }
 
   void Debug( const Char_t *name, const Char_t *flag="position" );
+
+  virtual  void AddGroup( const Char_t *name ) = 0;
   
  private:
  protected:

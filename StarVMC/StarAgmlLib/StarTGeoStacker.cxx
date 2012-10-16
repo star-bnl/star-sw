@@ -534,6 +534,10 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
       assert(mShape.type() != AgShape::kUnknown );
     }
 
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Create the volume //
+
+
   TGeoShape  *shape  = 0;
   TGeoVolume *volume = 0;
 
@@ -692,6 +696,30 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
   mVolumeStack.push_back( volume );
   mVolumeTable[ block -> GetName() ] = volume;
 
+
+//   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Add groups //
+//   //
+//   // Groups allow the user to place multiple, comoving volumes into a single reference frame
+//   //
+//   const vector<TString> &groups = block->groups();
+
+//   for ( UInt_t i=0; i<groups.size();i++ )
+//     {
+//       TString name = groups[i];
+//       if ( !mVolumeTable[name] )
+// 	{
+
+// 	  Info(GetName(),Form("Adding reference group %s",name.Data()));
+
+// 	  TGeoVolume *group = new TGeoVolumeAssembly(name);
+// 	  mVolumeTable[ name ] = group;
+// 	  volume->AddNode( group, 1, gGeoIdentity );
+// 	}
+//       else
+// 	Warning(GetName(),Form("A volume group %s has already been defined",name.Data()));
+//     }
+
+
   // Time to get out of here
   return false;
 
@@ -767,7 +795,9 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
   //
   AgBlock    *mother_block = AgBlock::Find( position.mother() );
   TString     mother_name  = mother_block -> nickname();
+  TString     group_name   = position.group();
   TGeoVolume *mother       = mVolumeTable[ mother_name ];
+  TGeoVolume *group        = mVolumeTable[ group_name ];
   TGeoVolume *daughter     = 0;
 
   //
@@ -1092,19 +1122,23 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
     }
 
 
+  // Add the volume to the mother volume or the group
+  TGeoVolume *target = (group)?group:mother;
+
+
   if ( myonly == AgPlacement::kOnly )
     { 
       assert(daughter);
       assert(daughter->IsValid());
       if ( sanityCheck(daughter) )
-	mother -> AddNode( daughter, copy, matrix );
+	target -> AddNode( daughter, copy, matrix );
     }
   else
     { 
       assert(daughter);
       assert(daughter->IsValid());
       if ( sanityCheck(daughter) )
-	mother -> AddNodeOverlap( daughter, copy, matrix );
+	target -> AddNodeOverlap( daughter, copy, matrix );
     }
 
 //   //
@@ -1258,6 +1292,27 @@ Bool_t StarTGeoStacker::SearchVolume( const AgShape &shape, const AgAttribute &a
 
   return false; // No matching volume exists
 
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+void StarTGeoStacker::AddGroup( const Char_t *name )
+{
+  
+  Info(GetName(),Form("Adding reference group %s",name));
+
+  // Get the active block
+  AgBlock *block = AgBlock::active();
+
+  // Retrieve corresponding volume
+  TGeoVolume *volume = gGeoManager -> FindVolumeFast( block->nickname() );
+  assert(volume);
+
+
+  TGeoVolume *group = new TGeoVolumeAssembly(name);
+  mVolumeTable[ name ] = group;
+  volume->AddNode( group, 1, gGeoIdentity );
+
+  return;
+  
 }
 
 
