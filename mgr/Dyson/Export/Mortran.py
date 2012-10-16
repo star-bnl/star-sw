@@ -439,6 +439,16 @@ class Block( Handler ):
         
         form( content, cchar=' _')#debug=True )
 
+class Group( Handler ):
+    def __init__(self):
+        self. name=""
+        self. comment=""
+        Handler.__init__(self)
+    def setParent(self,p): self.parent = p
+    def startElement(self,tag,attr):
+        self.name = attr.get('name')
+        self.cond = attr.get('if',None)
+        form( '! Reference system %s ignored'%self.name )
 
 
 class Export ( Handler ):
@@ -1390,6 +1400,8 @@ class Placement(Handler):
         # Loop over all remaining keys
         for key in self.attr.keys():
 
+            if key=="group": continue
+            
             val=self.attr[key]
             output += '%s=%s '%( key, val )
     

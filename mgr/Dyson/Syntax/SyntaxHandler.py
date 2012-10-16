@@ -97,6 +97,7 @@ class SyntaxHandler ( ContentHandler ):
         self.addToken( 'Module'    , Language.Module        )   
         self.addToken( 'Block'     , Language.Block         )
         self.addToken( 'Volume'    , Language.Block         ) # AgML syntax
+        self.addToken( 'Group'     , Language.Group         ) 
         self.addToken( 'Subroutine', Language.Subroutine    )
         self.addToken( 'Content'   , Language.Content       )
         self.addToken( 'Include'   , Language.Include       )
