@@ -8,6 +8,7 @@
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #endif /* __CORRECT_CHARGE__ */
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "TMath.h"
 ClassImp(StTpcHitMover)
 #define __DEBUG__
@@ -52,6 +53,7 @@ Int_t StTpcHitMover::Make() {
     gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
     return kStErr;
   }
+  static Int_t NoInnerPadRows = St_tpcPadPlanesC::instance()->innerPadRows();
   if (! mTpcTransForm) mTpcTransForm = new StTpcCoordinateTransform(gStTpcDb);
   StTpcCoordinateTransform &transform = *mTpcTransForm;
   StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
@@ -72,7 +74,7 @@ Int_t StTpcHitMover::Make() {
 	for (int j = 0; j< numberOfPadrows; j++) {
 	  Int_t row = j + 1;
 	  Int_t io = 0;
-	  if (row > 13) io = 1;
+	  if (row > NoInnerPadRows) io = 1;
 	  StTpcPadrowHitCollection *rowCollection = sectorCollection->padrow(j);
 	  if (rowCollection) {
 	    StSPtrVecTpcHit &hits = rowCollection->hits();
@@ -129,10 +131,8 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   static StTpcPadCoordinate Pad;
   transform(coorLS,Pad,kFALSE,kFALSE); PrPP(moveTpcHit,Pad);
 #endif
-  static StTpcLocalSectorAlignedCoordinate  coorLSA;
-  transform(coorLS,coorLSA); PrPP(moveTpcHit,coorLSA);// alignment
   static StTpcLocalCoordinate  coorLT; // before undo distortions
-  transform(coorLSA,coorLT); PrPP(moveTpcHit,coorLT);//
+  transform(coorLS,coorLT); PrPP(moveTpcHit,coorLT);//
   static StTpcLocalCoordinate  coorLTD; // after undo distortions
   coorLTD = coorLT;          // distortions
   // ExB corrections
