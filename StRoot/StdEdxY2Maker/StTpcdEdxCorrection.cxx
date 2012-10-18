@@ -59,16 +59,16 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 void StTpcdEdxCorrection::ReSetCorrections() {
   St_tpcGas *k_tpcGas = (St_tpcGas *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/tpcGas");
   if (!k_tpcGas || ! k_tpcGas->GetNRows()) {
-    gMessMgr->Error() << "=== tpcGas is missing ===" << endm; 
+    LOG_ERROR << "=== tpcGas is missing ===" << endm; 
     assert(k_tpcGas);
   }
   SettpcGas(k_tpcGas);
   TDatime t[2];					
   if (St_db_Maker::GetValidity(k_tpcGas,t) > 0) {				
     Int_t Nrows = k_tpcGas->GetNRows();					
-    LOG_WARN << "StTpcdEdxCorrection::ReSetCorrections found table " << k_tpcGas->GetName() 
+    LOG_INFO << "StTpcdEdxCorrection::ReSetCorrections found table " << k_tpcGas->GetName() 
 	     << " with NRows = " << Nrows << " in db" << endm;		
-    LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	
+    LOG_INFO << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	
 	     << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; 
     if (Nrows > 10) Nrows = 10;						
     if (k_tpcGas->GetRowSize() < 256) k_tpcGas->Print(0,Nrows);		
@@ -84,30 +84,30 @@ void StTpcdEdxCorrection::ReSetCorrections() {
     SafeDelete(m_Corrections[k].Chair);
     if (! m_Corrections[k].Name ) {CLRBIT(m_Mask,k); continue;}
     if (! TESTBIT(m_Mask,k)) continue;
-    //    gMessMgr->Warning() << "StTpcdEdxCorrection: " <<  m_Corrections[k].Name << " is ON" << endm;
-    gMessMgr->Warning() << "StTpcdEdxCorrection: " << m_Corrections[k].Name << "/" << m_Corrections[k].Title << endm;
+    //    LOG_INFO << "StTpcdEdxCorrection: " <<  m_Corrections[k].Name << " is ON" << endm;
+    LOG_INFO << "StTpcdEdxCorrection: " << m_Corrections[k].Name << "/" << m_Corrections[k].Title;
     switch (k) {
     case kTpcSecRowB:
       TpcSecRow  = (St_TpcSecRowCor *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcSecRowB"); 
       if (TpcSecRow) SetTpcSecRowB(TpcSecRow);
-      else {CLRBIT(m_Mask,k); gMessMgr->Warning() << " \tis missing" << endm;}
+      else {CLRBIT(m_Mask,k); LOG_INFO << " \tis missing" << endm; continue;}
       break;
     case kTpcSecRowC:
       TpcSecRow  = (St_TpcSecRowCor *) StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcSecRowC"); 
       if (TpcSecRow) SetTpcSecRowC(TpcSecRow);
-      else {CLRBIT(m_Mask,k); gMessMgr->Warning() << " \tis missing" << endm;}
+      else {CLRBIT(m_Mask,k); LOG_INFO << " \tis missing" << endm; continue;}
       break;
     default:
-      table = (St_tpcCorrection *) StMaker::GetChain()->GetDataBase(Form("Calibrations/tpc/TpcSecRowC/%s",m_Corrections[k].Name));
+      table = (St_tpcCorrection *) StMaker::GetChain()->GetDataBase(Form("Calibrations/tpc/%s",m_Corrections[k].Name));
       if (! table) {
-	gMessMgr->Warning() << " \tis missing" << endm;
+	LOG_INFO << " \tis missing" << endm;
 	CLRBIT(m_Mask,k); 
 	continue;
       }
       cor = table->GetTable();
       N = table->GetNRows();
       if (! cor || ! N) {
-	gMessMgr->Warning() << " \tis empty" << endm;
+	LOG_INFO << " \tis empty" << endm;
 	CLRBIT(m_Mask,k); 
 	continue;
       }
@@ -120,17 +120,18 @@ void StTpcdEdxCorrection::ReSetCorrections() {
 	    TMath::Abs(cor->max)    > 1.e-7) npar++;
       }
       if (! npar ) {
-	gMessMgr->Warning() << " \thas no significant corrections => switch it off" << endm;
+	LOG_INFO << " \thas no significant corrections => switch it off" << endm;
 	CLRBIT(m_Mask,k); 
 	continue;
       }	
       SetCorrection(k,table);
+      LOG_INFO << endm;
       if (table) {
 	if (St_db_Maker::GetValidity(table,t) > 0) {			
 	  Int_t Nrows = table->GetNRows();				
-	  LOG_WARN << "StTpcdEdxCorrection::ReSetCorrections found table " << table->GetName() 
+	  LOG_INFO << "StTpcdEdxCorrection::ReSetCorrections found table " << table->GetName() 
 		   << " with NRows = " << Nrows << " in db" << endm;	
-	  LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime() 
+	  LOG_INFO << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime() 
 		   << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; 
 	  if (Nrows > 10) Nrows = 10;					
 	  if (table->GetRowSize() < 256) table->Print(0,Nrows);		
@@ -193,8 +194,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (! cor) goto ENDL;
       nrows = cor->nrows;
       l = kTpcOuter;
-      if (nrows > 1 && nrows < mNumberOfRows) l = kTpcOutIn;
-      else if (nrows == mNumberOfRows) l = row - 1;
+      if (nrows > 1 && nrows < mNumberOfRows) {if (row <= mNumberOfInnerRows) l = kTpcOutIn;}
+      else  {if (nrows == mNumberOfRows) l = row - 1;}
       corl = cor + l;
     }
     iCut = 0;
@@ -355,12 +356,12 @@ void StTpcdEdxCorrection::SetCorrection(Int_t k, St_tpcCorrection *m) {
     m_Corrections[k].Chair = new St_tpcCorrectionC(m);
     tpcCorrection_st *cor = m->GetTable();
     m_Corrections[k].nrows = cor->nrows;
-    gMessMgr->Warning() << "StTpcdEdxCorrection::SetCorrection " << m_Corrections[k].Name
+    LOG_INFO << "StTpcdEdxCorrection::SetCorrection " << m_Corrections[k].Name
 			<< " \thas been set with nrows = " << m_Corrections[k].nrows << endm;
     {
       TDatime t[2];
       St_db_Maker::GetValidity(m,t);
-      gMessMgr->Warning()  << " \tValidity:" << t[0].GetDate() << "/" << t[0].GetTime()
+      LOG_INFO  << " \tValidity:" << t[0].GetDate() << "/" << t[0].GetTime()
 			   << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     }
     if (Debug()) m->Print(0,m_Corrections[k].nrows);
@@ -370,13 +371,11 @@ void StTpcdEdxCorrection::SetCorrection(Int_t k, St_tpcCorrection *m) {
 void StTpcdEdxCorrection::SetTpcSecRowB   (St_TpcSecRowCor *m) {
   if (m) {
     m_TpcSecRowB = m;
-    gMessMgr->Warning() << "StTpcdEdxCorrection::SetTpcSecRowB " << m_Corrections[kTpcSecRowB].Name << "/" 
-			<< m_Corrections[kTpcSecRowB].Title <<  endm; 
-    gMessMgr->Warning() << " \tcorrection has been set" << endm;
+    LOG_INFO << " has been set (StTpcdEdxCorrection::SetTpcSecRowB)" << endm;
     {
       TDatime t[2];
       St_db_Maker::GetValidity(m,t);
-      gMessMgr->Warning()  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
+      LOG_INFO  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
 			   << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     }
   }
@@ -385,13 +384,13 @@ void StTpcdEdxCorrection::SetTpcSecRowB   (St_TpcSecRowCor *m) {
 void StTpcdEdxCorrection::SetTpcSecRowC   (St_TpcSecRowCor *m) {
   if (m) {
     m_TpcSecRowC = m;
-    gMessMgr->Warning() << "StTpcdEdxCorrection::SetTpcSecRowC " << m_Corrections[kTpcSecRowC].Name << "/" 
+    LOG_INFO << "StTpcdEdxCorrection::SetTpcSecRowC " << m_Corrections[kTpcSecRowC].Name << "/" 
 			<< m_Corrections[kTpcSecRowC].Title <<  endm; 
-    gMessMgr->Warning() << " \tcorrection has been set" << endm;
+    LOG_INFO << " \tcorrection has been set" << endm;
     {
       TDatime t[2];
       St_db_Maker::GetValidity(m,t);
-      gMessMgr->Warning()  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
+      LOG_INFO  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
 			   << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     }
   }
@@ -402,11 +401,11 @@ void StTpcdEdxCorrection::SetTpcSecRowC   (St_TpcSecRowCor *m) {
 void StTpcdEdxCorrection::SettpcGas      (St_tpcGas       *m) {
   if (m) {
     m_tpcGas = m;
-    gMessMgr->Warning() << "StTpcdEdxCorrection::SettpcGas St_tpcGas has been set" << endm; 
+    LOG_INFO << "StTpcdEdxCorrection::SettpcGas St_tpcGas has been set" << endm; 
     {
       TDatime t[2];
       St_db_Maker::GetValidity(m,t);
-      gMessMgr->Warning()  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
+      LOG_INFO  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
 			   << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     }
 
