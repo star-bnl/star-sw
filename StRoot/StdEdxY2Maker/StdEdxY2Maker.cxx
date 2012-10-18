@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.77 2012/09/27 16:10:56 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.78 2012/10/18 22:37:40 fisyak Exp $
 #define CompareWithToF 
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
@@ -181,9 +181,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
       if (Debug()>1) cout << "========= sector/row ========" << sector << "/" << row << endl;
       StTpcLocalSectorDirection  dirLS(0.,1.,0.,sector,row);  if (Debug()>1) cout << "dirLS\t" << dirLS << endl;
       StTpcLocalDirection        dirL;      
-      StTpcLocalSectorAlignedDirection  dirLSA;
-      transform(dirLS,dirLSA);   if (Debug()>1) cout << "dirLSA\t" << dirLSA << endl;
-      transform(dirLSA,dirL);                     if (Debug()>1) cout << "dirL\t" << dirL << endl;
+      transform(dirLS,dirL);                     if (Debug()>1) cout << "dirL\t" << dirL << endl;
       StGlobalDirection          dirG;
       transform(dirL,dirG);                       if (Debug()>1) cout << "dirG\t" << dirG << endl;
       SafeDelete(mNormal[sector-1][row-1]);
@@ -202,9 +200,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
 	if (l == 2) y -= padlength/2.;
 	StTpcLocalSectorCoordinate  lsCoord(0., y, 10.,sector,row); if (Debug()>1) cout << lsCoord << endl;
 	StGlobalCoordinate  gCoord; 
-	StTpcLocalSectorAlignedCoordinate lsCoordA;  
-	transform(lsCoord,lsCoordA);                       if (Debug()>1) cout << lsCoordA << endl;                   
-	transform(lsCoordA, gCoord);                       if (Debug()>1) cout << gCoord << endl;                   
+	transform(lsCoord, gCoord);                       if (Debug()>1) cout << gCoord << endl;                   
 	SafeDelete(mRowPosition[sector-1][l][row-1]);
 	mRowPosition[sector-1][l][row-1] = 
 	  new  StThreeVectorD(gCoord.position().x(),gCoord.position().y(),gCoord.position().z());
@@ -221,9 +217,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
       Int_t row    = (io    == 0) ?  1 : NumberOfInnerRows+1;
       StTpcLocalSectorDirection  dirLS(0.,0.,1.0,sector,row);  if (Debug()>1) cout << "dirLS\t" << dirLS << endl;
       StTpcLocalDirection        dirL;      
-      StTpcLocalSectorAlignedDirection  dirLSA;
-      transform(dirLS,dirLSA);   if (Debug()>1) cout << "dirLSA\t" << dirLSA << endl;
-      transform(dirLSA,dirL);    if (Debug()>1) cout << "dirL\t" << dirL << endl;
+      transform(dirLS,dirL);    if (Debug()>1) cout << "dirL\t" << dirL << endl;
       StGlobalDirection dirG;
       transform(dirL,dirG);      if (Debug()>1) cout << "dirG\t" << dirG << endl;
       SafeDelete(mPromptNormal[iWestEast][io]);
@@ -233,16 +227,14 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
       Double_t z[2][3] = { 
 	// Anodes         GG          Pads
 	{ -0.6 - 0.2,     0,  -0.6 - 2*0.2}, // Inner
- 	{ -0.6 - 0.4,     0,  -0.6 - 2*.04}  // Outer
+ 	{ -0.6 - 0.4,     0,  -0.6 - 2*0.4}  // Outer
       };
       for (Int_t l = 0; l < 3; l++) {
 	SafeDelete(mPromptPosition[iWestEast][io][l]); 
 	Double_t y = transform.yFromRow(row);
 	StTpcLocalSectorCoordinate  lsCoord(0., y, z[io][l],sector,row); if (Debug()>1) cout << lsCoord << endl;
 	StGlobalCoordinate  gCoord; 
-	StTpcLocalSectorAlignedCoordinate lsCoordA;  
-	transform(lsCoord,lsCoordA);                       if (Debug()>1) cout << lsCoordA << endl;                   
-	transform(lsCoordA, gCoord);                       if (Debug()>1) cout << gCoord << endl;                   
+	transform(lsCoord, gCoord);                       if (Debug()>1) cout << gCoord << endl;                   
 	SafeDelete(mPromptPosition[iWestEast][io][l]);
 	mPromptPosition[iWestEast][io][l] = 
 	  new  StThreeVectorD(gCoord.position().x(),gCoord.position().y(),gCoord.position().z());
@@ -288,8 +280,6 @@ Int_t StdEdxY2Maker::Make(){
   static  StTpcLocalSectorCoordinate        localSect[4];
   static  StTpcPadCoordinate                PadOfTrack, Pad;
   static  StTpcLocalSectorDirection         localDirectionOfTrack;
-  static  StTpcLocalSectorAlignedDirection  localADirectionOfTrack;
-  static  StTpcLocalSectorAlignedCoordinate localA, lANext;
   static  StThreeVectorD xyz[4];
   static  StThreeVectorD dirG;
   static  Double_t s[2], s_in[2], s_out[2], w[2], w_in[2], w_out[2], s_inP[2], s_outP[2], dx;
@@ -447,8 +437,7 @@ Int_t StdEdxY2Maker::Make(){
 	      cout << "\txyz[3] " << xyz[3] << endl;
 	    }
 	  }
-	  transform(globalOfTrack,localA,sector,row);
-	  transform(localA,localSect[l]);
+	  transform(globalOfTrack,localSect[l],sector,row);
 	}
 	Double_t zP = TMath::Abs(xyz[0].z());
 	//----------------------------- Prompt Hits ? ------------------------------
@@ -500,13 +489,11 @@ Int_t StdEdxY2Maker::Make(){
 		cout << "\txyz[2] " << xyz[2] << "\t s_in = "  << s_in[0]  << "/" << s_in[1]  <<  endl;
 	      }
 	    }
-	    transform(globalOfTrack,localA,sector,row);
-	    transform(localA,localSect[l]);
+	    transform(globalOfTrack,localSect[l],sector,row);
 	  }
 	}
 	transform(localSect[0],PadOfTrack);
-	transform(globalDirectionOfTrack,localADirectionOfTrack,sector,row);
-	transform(localADirectionOfTrack,localDirectionOfTrack);
+	transform(globalDirectionOfTrack,localDirectionOfTrack,sector,row);
 	transform(localSect[3],Pad);
 	CdEdx[NdEdx].Reset();
 	CdEdx[NdEdx].resXYZ[0] = localSect[3].position().x() - localSect[0].position().x();
