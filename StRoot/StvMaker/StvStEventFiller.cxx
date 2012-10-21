@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.20 2012/06/21 01:10:54 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.21 2012/10/21 22:56:56 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.21  2012/10/21 22:56:56  perev
+ * Add IdTruth into pulls
+ *
  * Revision 1.20  2012/06/21 01:10:54  perev
  * Cleanup
  *
@@ -816,6 +819,7 @@ void StvStEventFiller::fillEvent()
 	  detInfoVec.push_back(detInfo);
 	  //cout <<"Setting key: "<<(unsigned short)(trNodeVec.size())<<endl;
 	  gTrack->setKey(kTrack->GetId());
+          gTrack->setIdTruth();
 	  trackNode->addTrack(gTrack);
 	  trNodeVec.push_back(trackNode);
 	  // reuse the utility to fill the topology map
@@ -833,7 +837,7 @@ void StvStEventFiller::fillEvent()
 //VP	    throw runtime_error("StvStEventFiller::fillEvent() StTrack::bad() non zero");
           }
 	  fillTrackCount2++;
-          fillPulls(kTrack,0);
+          fillPulls(kTrack,gTrack,0);
           if (gTrack->numberOfPossiblePoints()<10) continue;
           if (gTrack->geometry()->momentum().mag()<0.1) continue;
 	  fillTrackCountG++;
@@ -909,8 +913,7 @@ void StvStEventFiller::fillEventPrimaries()
       // detector info
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
       fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
-      fillPulls(kTrack,1); 
-      StPrimaryTrack* pTrack = new StPrimaryTrack;
+      pTrack = new StPrimaryTrack;
       pTrack->setKey( gTrack->key());
 
       fillTrack(pTrack,kTrack, detInfo);
@@ -919,6 +922,7 @@ void StvStEventFiller::fillEventPrimaries()
 
       nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
       vertex->addDaughter(pTrack);
+      fillPulls(kTrack,pTrack,1); 
       fillTrackCount2++;
       int ibad = pTrack->bad();
       errh.Add(ibad);
@@ -1280,7 +1284,7 @@ void StvStEventFiller::FillStHitErr(StHit *hh,const StvNode *node)
 #endif //0
 }
 //_____________________________________________________________________________
-void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri) 
+void StvStEventFiller::fillPulls(const StvTrack* track, const StTrack *stTrack,int gloPri) 
 {
 static int nCall=0; nCall++;
   //cout << "StvStEventFiller::fillDetectorInfo() -I- Started"<<endl;
@@ -1320,6 +1324,9 @@ static int nCall=0; nCall++;
   aux.mDipErr  = sqrt(fe.mLL);
   aux.mRxyErr  = sqrt(fe.mHH);
   aux.mZErr    = sqrt(fe.mZZ);
+
+  aux.mIdTruTk = stTrack->idTruth();
+  aux.mQaTruTk = stTrack->qaTruth();
 
   mPullEvent->Add(aux,gloPri);
   if (!gloPri)    { 
@@ -1384,6 +1391,9 @@ static int nCall=0; nCall++;
   getDcaLocal(node,yz,yzErr);
 
   StvPullHit aux;
+  aux.mIdTruth = stHit->idTruth();
+  aux.mQaTruth = stHit->qaTruth();
+
 // local frame
 // local HIT
   aux.mVertex = (unsigned char)track->IsPrimary();

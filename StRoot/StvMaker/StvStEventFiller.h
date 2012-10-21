@@ -1,13 +1,16 @@
 //StvStEventFiller.h
 /***************************************************************************
  *
- * $Id: StvStEventFiller.h,v 1.4 2012/04/27 01:40:19 perev Exp $
+ * $Id: StvStEventFiller.h,v 1.5 2012/10/21 22:57:22 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  * Author: Victor Perev, Jun 2010
  ***************************************************************************
  *
  * $Log: StvStEventFiller.h,v $
+ * Revision 1.5  2012/10/21 22:57:22  perev
+ * Add IdTruth into pulls
+ *
  * Revision 1.4  2012/04/27 01:40:19  perev
  * Add konstant min hit number
  *
@@ -86,7 +89,7 @@ private:
                  ,const StvNode  *node
 		 ,const StvTrack *track
 		 ,int dets[1][3],int gloPri);
- void fillPulls  (const StvTrack *ktrack,int gloPri);
+ void fillPulls  (const StvTrack *ktrack,const StTrack *stTrack,int gloPri);
  bool accept(const StvTrack* kTrack);
  void FillStHitErr(StHit *hh,const StvNode *node);
 
