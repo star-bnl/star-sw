@@ -21,7 +21,9 @@ static const double kFstTan = tan(kFstAng*M_PI/180);
 static const double kMinCos = 0.1;
 
 ClassImp(StvDefaultSeedFinder)
-static const float TpcOuterDeltaR = 15, kTpcHitErr = 0.2;
+//static const float TpcOuterDeltaR = 15, kTpcHitErr = 0.2;
+//static const float TpcOuterDeltaR = 30, kTpcHitErr = 0.2;
+static const float TpcOuterDeltaR = 40, kTpcHitErr = 0.2;
 
 //_____________________________________________________________________________
 StvDefaultSeedFinder::StvDefaultSeedFinder(const char *name):StvSeedFinder(name)
