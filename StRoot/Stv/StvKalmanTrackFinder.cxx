@@ -130,7 +130,7 @@ static const StvConst  *kons = StvConst::Inst();
   for (int isf=0;isf<(int)sfs->size();isf++) { //Loop over seed finders
     StvSeedFinder* sf = (*sfs)[isf];
     int myMinHits = kons->mMinHits;
-    if(sf->Again()) myMinHits = kons->mGoodHits;
+//??    if(sf->Again()) myMinHits = kons->mGoodHits;
     for (int repeat =0;repeat<5;repeat++) {//Repeat search the same seed finder 
       nTrk = 0;nSeed=0; sf->Again();
       while ((mSeedHelx = sf->NextSeed())) 
@@ -238,11 +238,14 @@ StvFitDers derivFit;
 
     do {//Stop tracking?
       idive = 99;
-      if (!nNode)		continue;
+      if (!nNode)		continue;	//No nodes yet, OK
       mySkip = hitCount->Skip();
-      if (!mySkip) 		continue;
+      if (mySkip) StvDebug::Count("hitCountSkip",mySkip);
+      if (!mySkip) 		continue;	//No Skip, OK
       if (idir)   		break;
-      if (hitCount->Reject()) 	break;
+      mySkip = hitCount->Reject();
+      if (mySkip) StvDebug::Count("hitCountReje",mySkip);
+      if (mySkip) 	break;
       mDive->SetSkip();
     } while ((idive=0));
     if (idive) 			break;
@@ -354,7 +357,9 @@ assert(fabs(par[1]._hz-0.00149681)<0.0001);
   mCurrTrak->SetTypeEnd(mySkip);
   if (!idir) {
     double eff = hitCount->Eff(); if (eff){}
-    if (hitCount->Reject()) {
+    int myReject = hitCount->Reject();
+    if (myReject) {
+      StvDebug::Count("hitCountRej2",myReject);
       mCurrTrak->ReleaseHits(); mCurrTrak->unset();
       kit->FreeTrack(mCurrTrak);mCurrTrak=0; return 0; }
   }
@@ -425,7 +430,7 @@ enum {kTryFitMax = 5,kBadHits=5};
   StvNode *node = 0;
   int ans=0,lane = 1;
   StvNode *tstNode = (idir)? mCurrTrak->front(): mCurrTrak->back();
-  double ptiErr = tstNode->mFE[2].mPP;
+//??  double ptiErr = tstNode->mFE[2].mPP;
 
   int tryFit = 0,nBadHits=0;
   ans = tkf->Refit(mCurrTrak,idir,lane,1);
