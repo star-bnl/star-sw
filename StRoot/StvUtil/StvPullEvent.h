@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StvPullEvent.h,v 1.5 2012/04/10 22:44:15 perev Exp $
+ * $Id: StvPullEvent.h,v 1.6 2012/10/21 22:59:41 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StvPullEvent.h,v $
+ * Revision 1.6  2012/10/21 22:59:41  perev
+ * Add IdTruth into pulls
+ *
  * Revision 1.5  2012/04/10 22:44:15  perev
  * Chi2 for primary track + vertex added
  *
@@ -106,8 +109,10 @@ float mPsiErr;			//track Psi error
 float mDipErr;			//track Dip error
 float mRxyErr;			//Rxy error 
 float mZErr;			//z error
+short int mIdTruTk;
+short int mQaTruTk;
 char mEnd[1];
-  ClassDef(StvPullTrk,3);
+  ClassDef(StvPullTrk,4);
 };
 
 class StvPullHit : public TObject {
@@ -118,7 +123,7 @@ public:
     void Print(const char* option = "") const;
 int TestIt();
 public:
-char mBeg[1];
+char mBeg[1];			//! No IO
 short mTrackNumber; 		//track number of hit
 unsigned char mVertex; 		//vertex number for primary track
 unsigned char nAllHits; 	//number of all hits in track
@@ -169,7 +174,9 @@ float gZPulErr;			//  dZ   Pul err in global Stv frame
 
 float gPsi;			//  track Psi in global  Stv frame
 float gDip;			//  track Dip in global  Stv frame
-char mEnd[1];
+short int mIdTruth;
+short int mQaTruth;
+char mEnd[1];			//!No IO
   ClassDef(StvPullHit,2);
 };
 
