@@ -55,7 +55,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.64 2012/09/27 19:17:02 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.65 2012/10/23 20:08:57 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -502,7 +502,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   if (Debug()%10) {
     gBenchmark->Reset();
     gBenchmark->Start("TpcRS");
-    LOG_INFO << "\n -- Begin TpcRS Processing -- \n";
+    LOG_INFO << "Begin TpcRS Processing" << endm;;
   }
   static StTpcCoordinateTransform transform(gStTpcDb);
 #if defined(__PAD_BLOCK__) || defined(__ClusterProfile__)
@@ -709,9 +709,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Int_t row = volId%100;
 	io = (row <= NoOfInnerRows) ? 0 : 1;
 	// Generate signal 
-	Double_t Gain = 0;
-	if (NoOfRows == 45) Gain = St_tss_tssparC::instance()->gain(sector,row);                // ! iTpx
-	else                Gain = St_tss_tssparC::instance()->gain(sector, (! io ) ? 13 : 45); //   iTpx
+	Double_t Gain = St_tss_tssparC::instance()->gain(sector,row); 
 	TF1F *mShaperResponse = mShaperResponses[io][sector-1];
 	Double_t dY   = TMath::Abs(tpc_hitC->ds)/2 + mChargeFraction[io]->GetXmax();
 	Double_t yLmin = TrackSegmentHits[iSegHits].coorLS.position().y() - dY;
@@ -1025,7 +1023,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      for(Int_t pad = padMin; pad <= padMax; pad++) {
 		Double_t gain = QAv*GainLocal;
 		Double_t dt = dT;
-		if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
+		if (NoOfRows ==45 && ! TESTBIT(m_Mode, kGAINOAtALL)) { 
 		  gain   *= St_tpcPadGainT0BC::instance()->Gain(sector,r,pad);
 		  if (gain <= 0.0) continue;
 		  dt -= St_tpcPadGainT0BC::instance()->T0(sector,r,pad);
@@ -1606,8 +1604,11 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.64 2012/09/27 19:17:02 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.65 2012/10/23 20:08:57 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.65  2012/10/23 20:08:57  fisyak
+// Add corrections for iTpx upgrade
+//
 // Revision 1.64  2012/09/27 19:17:02  fisyak
 // Fix missing declaration
 //
