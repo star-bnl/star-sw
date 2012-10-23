@@ -1,0 +1,14 @@
+# - Config file for the Garfield package
+# It defines the following variables
+#  GARFIELD_INCLUDE_DIRS - include directories for Garfield
+ 
+get_filename_component(GARFIELD_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+if(EXISTS "${GARFIELD_CMAKE_DIR}/GarfieldBuildTreeSettings.cmake")
+   # In build tree
+   include("${GARFIELD_CMAKE_DIR}/GarfieldBuildTreeSettings.cmake")
+else()
+   set(GARFIELD_INCLUDE_DIRS "${GARFIELD_CMAKE_DIR}/@CONF_REL_INCLUDE_DIR@")
+endif()
+ 
+# Our library dependencies (contains definitions for IMPORTED targets)
+include("${GARFIELD_CMAKE_DIR}/GarfieldLibraryDepends.cmake")

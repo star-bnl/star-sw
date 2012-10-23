@@ -22,7 +22,7 @@ INCLUDE( MacroRootDict )
 INCLUDE( FindROOT )
 
 ## Add root libs ##
-FIND_PACKAGE( ROOT 5.0 REQUIRED COMPONENTS EG Proof TreePlayer Minuit Spectrum)
+FIND_PACKAGE( ROOT 5.0 REQUIRED COMPONENTS Geom )
 INCLUDE_DIRECTORIES ( ${ROOT_INCLUDE_DIRS} ) 
 LINK_LIBRARIES( ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
 MESSAGE( STATUS "The ROOT Version is found to be ${ROOT_VERSION_MAJOR}.${ROOT_VERSION_MINOR}.${ROOT_VERSION_PATCH}" )
@@ -94,8 +94,46 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib/)
 ## SET include directories 
 INCLUDE_DIRECTORIES( ${ROOT_DICT_INCLUDE_DIRS} Heed )
 ## build the library
-ADD_LIBRARY( ${PROJECT_NAME} SHARED 
+ADD_LIBRARY( ${PROJECT_NAME} SHARED
     ${garfield_sources} 
     ${magboltz_sources}
     ${heed_sources} )
-INSTALL( TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_SOURCE_DIR}/Library )
+
+
+SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
+    VERSION ${${PROJECT_NAME}_VERSION}
+    SOVERSION ${${PROJECT_NAME}_SOVERSION} )
+
+# set library install dir    
+INSTALL( TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_SOURCE_DIR}/Library/  COMPONENT library )
+# put cmake config files in the CMake folder
+INSTALL( FILES ${PROJECT_BINARY_DIR}/GarfieldConfig.cmake
+        ${PROJECT_BINARY_DIR}/GarfieldConfigVersion.cmake
+        ${PROJECT_BINARY_DIR}/GarfieldBuildTreeSettings.cmake
+        ${PROJECT_BINARY_DIR}/GarfieldLibraryDepends.cmake
+        DESTINATION ${PROJECT_SOURCE_DIR}/Library/cmake/
+        COMPONENT cmakefiles )
+
+## EXPORT PACKAGE INFORMATION ##########################
+# Add all targets to the build-tree export set
+export(TARGETS ${PROJECT_NAME}
+  FILE "${PROJECT_BINARY_DIR}/GarfieldLibraryDepends.cmake")
+ 
+# Export the package for use from the build-tree
+# (this registers the build-tree with a global CMake-registry)
+export(PACKAGE ${PROJECT_NAME})
+ 
+# Create a GarfieldBuildTreeSettings.cmake file for the use from the build tree
+configure_file(CMake/GarfieldBuildTreeSettings.cmake.in
+  "${PROJECT_BINARY_DIR}/GarfieldBuildTreeSettings.cmake" @ONLY)
+ 
+# Create the GarfieldConfig.cmake and GarfieldConfigVersion files
+SET( INSTALL_CMAKE_DIR ${PROJECT_BINARY_DIR} CACHE PATH
+  "Installation directory for CMake files" )
+SET( INSTALL_INCLUDE_DIR ${PROJECT_BINARY_DIR}/inlcude CACHE PATH 
+  "Installation directory for Include files" )
+
+configure_file(CMake/GarfieldConfig.cmake.in
+  "${PROJECT_BINARY_DIR}/GarfieldConfig.cmake" @ONLY)
+configure_file(CMake/GarfieldConfigVersion.cmake.in
+  "${PROJECT_BINARY_DIR}/GarfieldConfigVersion.cmake" @ONLY)
