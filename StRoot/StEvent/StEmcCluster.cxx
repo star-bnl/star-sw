@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCluster.cxx,v 2.7 2012/09/16 21:33:33 fisyak Exp $
+ * $Id: StEmcCluster.cxx,v 2.8 2012/10/23 20:18:33 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.cxx,v $
+ * Revision 2.8  2012/10/23 20:18:33  fisyak
+ * Add/modify print outs
+ *
  * Revision 2.7  2012/09/16 21:33:33  fisyak
  * Make one line print out
  *
@@ -36,7 +39,7 @@
 
 ClassImp(StEmcCluster)
     
-static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.7 2012/09/16 21:33:33 fisyak Exp $";
+static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.8 2012/10/23 20:18:33 fisyak Exp $";
 
 StEmcCluster::StEmcCluster() {/* noop*/};
 
@@ -111,9 +114,8 @@ StEmcCluster::addTrack(StTrack* track) {mTracks.push_back(track);}
 ostream&
 operator<<(ostream &os, const StEmcCluster& cl)
 {
-  return os << "EmcCluster Energy " << cl.energy() 
-	    << " Eta "    << cl.eta() << "+/-" << cl.sigmaEta() 
-	    << " Phi "    << cl.phi() << "+/-" << cl.sigmaPhi() 
+  return os << Form("EmcCluster Energy %f5.2 Eta %7.4f +/- %6.4f", cl.energy(), cl.eta(),cl.sigmaEta())
+	    <<                        Form(" Phi %7.4f +/- %6.4f",cl.phi(),cl.sigmaPhi())
 	    << " # of hits " << cl.nHits() << ",# of neighbor " << cl.nNeighbors();
     //	    << *((StHit *)&cl);
 }

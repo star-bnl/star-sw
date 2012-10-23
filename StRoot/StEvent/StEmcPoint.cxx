@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.cxx,v 2.10 2005/07/19 21:31:45 perev Exp $
+ * $Id: StEmcPoint.cxx,v 2.11 2012/10/23 20:18:33 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.cxx,v $
+ * Revision 2.11  2012/10/23 20:18:33  fisyak
+ * Add/modify print outs
+ *
  * Revision 2.10  2005/07/19 21:31:45  perev
  * IdTruth
  *
@@ -42,10 +45,10 @@
  *
  *
  **************************************************************************/
-#include "StEmcPoint.h"
 #include <Stiostream.h>
-
-static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.10 2005/07/19 21:31:45 perev Exp $";
+#include "StEmcPoint.h"
+#include "StEmcCluster.h"
+static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.11 2012/10/23 20:18:33 fisyak Exp $";
 
 ClassImp(StEmcPoint)
 
@@ -104,6 +107,17 @@ StEmcPoint::getDetId(const StDetectorId id) const{
     return 0;
   }
 }
+int
+StEmcPoint::getDetId(Int_t id) const{
+  if(id>=kBarrelEmcTowerId && id<=kBarrelSmdPhiStripId){
+    return id-kBarrelEmcTowerId;
+  }else if(id>=kEndcapEmcTowerId && id<=kEndcapSmdVStripId){
+    return id-kEndcapEmcTowerId;
+  }else{
+    cout<<"***Error at StEmcPoint:::getDetId, Invalid  StDetectorId"<<endl;
+    return 0;
+  }
+}
 
 float
 StEmcPoint::energyInDetector(const StDetectorId id) const{
@@ -152,13 +166,25 @@ StEmcPoint::cluster(const StDetectorId id) const{
   return mCluster[i];
 }
   
+StPtrVecEmcCluster&
+StEmcPoint::cluster(Int_t id){
+  int i = getDetId(id);
+  return mCluster[i];
+}
+  
+const StPtrVecEmcCluster&
+StEmcPoint::cluster(Int_t id) const{
+  int i = getDetId(id);
+  return mCluster[i];
+}
+  
 void
 StEmcPoint::addCluster(const StDetectorId id, const StEmcCluster* c){
   if(!c) return; // 29-oct-2003 
   int i = getDetId(id);
   if(i>=0) mCluster[i].push_back(c);
 }
-
+  
 StPtrVecEmcPoint&
 StEmcPoint::neighbor(){
  return mNeighbors;
@@ -200,4 +226,21 @@ void StEmcPoint::print()
   }
 }
 
+ostream&
+operator<<(ostream &os, const StEmcPoint& pnt)
+{
+  os << "Point Energy " << pnt.energy() 
+     << " size "    << pnt.size() << " #tracks " << pnt.nTracks() << endl; 
+  Int_t Ids[34] = {kBarrelEmcTowerId, kBarrelEmcPreShowerId, kEndcapEmcTowerId, kEndcapEmcPreShowerId};
+  for (Int_t k = 0; k < 4; k++) {
+    const StPtrVecEmcCluster &cl = pnt.cluster(Ids[k]);
+    Int_t ncl = (Int_t) cl.size();
+    for (Int_t i = 0; i < ncl; i++) {
+      cout << *cl[i] << endl;
+    }
+  }
+  os << *((StHit *)&pnt);
+  return os;
+}
+void   StEmcPoint::Print(Option_t *option) const {cout << *this << endl;}
 

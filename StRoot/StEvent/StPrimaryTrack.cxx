@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.cxx,v 2.9 2012/05/07 14:42:57 fisyak Exp $
+ * $Id: StPrimaryTrack.cxx,v 2.10 2012/10/23 20:18:33 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.cxx,v $
+ * Revision 2.10  2012/10/23 20:18:33  fisyak
+ * Add/modify print outs
+ *
  * Revision 2.9  2012/05/07 14:42:57  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -46,7 +49,7 @@
 #include "StTrackGeometry.h"
 ClassImp(StPrimaryTrack)
 
-static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.9 2012/05/07 14:42:57 fisyak Exp $";
+static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.10 2012/10/23 20:18:33 fisyak Exp $";
 StPrimaryTrack::StPrimaryTrack(): mVertex(0) {/* noop */} 
 const StVertex*  StPrimaryTrack::vertex() const{ return mVertex; }
 void StPrimaryTrack::setVertex(StVertex* val) {
@@ -88,9 +91,11 @@ ostream&  operator<<(ostream& os,  const StPrimaryTrack& track) {
   os << Form(" pxyz %8.3f%8.3f%8.3f",g3.x(),g3.y(),g3.z());
   Double_t length = track.length();
   if (length > 9999.) length = 9999.;
+  Double_t chi2_0 = track.fitTraits().chi2(0); if (chi2_0 > 9999.) chi2_0 = 9999.;
+  Double_t chi2_1 = track.fitTraits().chi2(1); if (chi2_1 > 9999.) chi2_1 = 9999.;
   os << Form(" NP %2d NF %2d L %8.3f chi2 %8.3f/%8.3f", track.numberOfPossiblePoints(),track.fitTraits().numberOfFitPoints(),
-	     length,track.fitTraits().chi2(0),track.fitTraits().chi2(1));
+	     length,chi2_0,chi2_1);
   if (track.idTruth())
-    os << Form(" IdT: %4i Q: %4i", track.idTruth(), track.qaTruth());
+    os << Form(" IdT:%5i Q:%3i", track.idTruth(), track.qaTruth());
  return os;
 }

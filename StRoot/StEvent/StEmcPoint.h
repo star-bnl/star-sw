@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcPoint.h,v 2.9 2005/08/31 18:25:41 perev Exp $
+ * $Id: StEmcPoint.h,v 2.10 2012/10/23 20:18:33 fisyak Exp $
  *
  * Author: Akio Ogawa, Mar 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.h,v $
+ * Revision 2.10  2012/10/23 20:18:33  fisyak
+ * Add/modify print outs
+ *
  * Revision 2.9  2005/08/31 18:25:41  perev
  * Class version increased by 1
  *
@@ -84,6 +87,8 @@ public:
     
     StPtrVecEmcCluster&       cluster(const StDetectorId);
     const StPtrVecEmcCluster& cluster(const StDetectorId) const;
+    StPtrVecEmcCluster&       cluster(Int_t);
+    const StPtrVecEmcCluster& cluster(Int_t) const;
 
     void addCluster(const StDetectorId, const StEmcCluster*);
     
@@ -100,6 +105,7 @@ public:
   // 11-nov-03 by PAI
 
     void print();      // *MENU*    
+    void Print(Option_t *option = "") const;
 
     void setQuality(int qua) {myQuality = qua ;}
     int  quality() const     {return myQuality;}
@@ -116,8 +122,10 @@ protected:
     StPtrVecTrack      mTracks;
     int                myQuality;
     int getDetId(const StDetectorId) const;
+    int getDetId(Int_t /* id */) const;
     ClassDef(StEmcPoint,2)
 };
+ostream& operator<<(ostream&, const StEmcPoint&); // Printing operator
 #endif
 
 
