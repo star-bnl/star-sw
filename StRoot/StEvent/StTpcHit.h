@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.21 2011/10/17 00:13:49 fisyak Exp $
+ * $Id: StTpcHit.h,v 2.22 2012/10/23 20:17:16 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.22  2012/10/23 20:17:16  fisyak
+ * Allow more then 64 pad rows
+ *
  * Revision 2.21  2011/10/17 00:13:49  fisyak
  * Add handles for IdTruth info
  *
@@ -110,7 +113,7 @@ public:
     void     setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk);
     void     setAdc(UShort_t Adc = 0) {mAdc = Adc;}
     UInt_t   sector() const {return bits(4, 5);}   // bits 4-8  -> 1-24
-    UInt_t   padrow() const {return bits(9, 6);}   // bits 9-14 -> 1-45
+    UInt_t   padrow() const {return bits(9, 7);}   // bits 9-15 -> 1-128
     UInt_t   padsInHit()   const {return maxPad() - minPad() + 1;} 
     UInt_t   pixelsInHit() const {return bits(22,10);};   // bits 22-31 obsolete (TCL only, FCF put no. of time buckets)
     UChar_t  minPad()   const {return TMath::Nint(mMcl_x/64.) - mMinpad;}
