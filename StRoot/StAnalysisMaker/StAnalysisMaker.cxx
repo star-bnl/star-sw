@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.18 2012/09/16 21:59:14 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.19 2012/10/23 19:44:18 fisyak Exp $
  *
  */
 
@@ -252,8 +252,8 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
   cout << "TotalNoOfTpcHits = " << TotalNoOfTpcHits << endl;
 }
 //________________________________________________________________________________
-void StAnalysisMaker::PrintEmcHits(Int_t det, Int_t mod) {
-
+void StAnalysisMaker::PrintEmcHits(Int_t det, Int_t mod, const Option_t *opt) {
+  TString Opt(opt);
   StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
   if (!pEvent) { cout << "Can't find StEvent" << endl; return;}
   StEmcCollection* emccol=(StEmcCollection*) pEvent->emcCollection();
@@ -270,25 +270,46 @@ void StAnalysisMaker::PrintEmcHits(Int_t det, Int_t mod) {
       Int_t j1 = 1;
       if (mod > 0 and mod < maxMod) {j1 = maxMod = mod;}
       //cout <<"Filling hits for detetor "<<EmcDet<<endl;
-      for(Int_t j = j1; j < maxMod; j++) {
-        const StEmcModule* module = detector->module(j);
-        if(module) {
-          const StSPtrVecEmcRawHit& rawHit=module->hits();
-          Int_t nhits = (Int_t) rawHit.size();
-	  for(Int_t k = 0; k < nhits; k++) if (rawHit[k]->energy() > 0) cout << DetectorName(id) << "\t" << *rawHit[k] << endl;
+      if (Opt.Contains("Adc",TString::kIgnoreCase)) {
+	for(Int_t j = j1; j < maxMod; j++) {
+	  const StEmcModule* module = detector->module(j);
+	  if(module) {
+	    const StSPtrVecEmcRawHit& rawHit=module->hits();
+	    Int_t nhits = (Int_t) rawHit.size();
+	    for(Int_t k = 0; k < nhits; k++) if (rawHit[k]->energy() > 0) cout << DetectorName(id) << "\t" << *rawHit[k] << endl;
+	  }
 	}
       }
-      const StEmcClusterCollection *cl = detector->cluster();
-      if (cl) {
-	Int_t NoCls = cl->numberOfClusters();
-	if (NoCls) {
-	  const StSPtrVecEmcCluster&       clusters = cl->clusters();
-	  for (Int_t i = 0; i < NoCls; i++) {
-	    if (clusters[i]->energy() > 0) cout << DetectorName(id) << "\t" << *clusters[i] << endl;
+      if (Opt.Contains("Clu",TString::kIgnoreCase)) {
+	const StEmcClusterCollection *cl = detector->cluster();
+	if (cl) {
+	  Int_t NoCls = cl->numberOfClusters();
+	  if (NoCls) {
+	    const StSPtrVecEmcCluster&       clusters = cl->clusters();
+	    for (Int_t i = 0; i < NoCls; i++) {
+	      if (clusters[i]->energy() > 0) cout << DetectorName(id) << "\t" << *clusters[i] << endl;
+	    }
 	  }
 	}
       }
     }
+  }
+  if (Opt.Contains("Point",TString::kIgnoreCase)) {
+    const StSPtrVecEmcPoint& bp = emccol->barrelPoints();
+    const StSPtrVecEmcPoint& ep = emccol->endcapPoints();
+    for (Int_t i = 0; i < 2; i++) {// barrel & endcap
+      const StSPtrVecEmcPoint& p = (i == 0) ? bp : ep;
+      Int_t np = (Int_t) p.size();
+      if (np) {
+	cout << "Found " << np << " Points in ";
+	if (! i) cout << "Barrel";
+	else     cout << "Encap";
+	cout << endl;
+	for (Int_t j = 0; j < np; j++) {
+	  cout << *p[j] << endl;
+	}
+      }
+    } 
   } 
 }
 //________________________________________________________________________________
@@ -372,6 +393,25 @@ void StAnalysisMaker::PrintSsdHits() {
       }
     }
   }
+}
+//________________________________________________________________________________
+void StAnalysisMaker::PrintToFHits() {
+  //  Double_t zPrim = 0;
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) return;
+  const StBTofCollection* tof = pEvent->btofCollection();
+  if (! tof) {LOG_QA  << "No BToF collection" << endm; return;}
+  else       {LOG_QA  << "BToF collection";}
+  if (tof->tofHeader() && tof->tofHeader()->vpdVz() > -250) {
+    LOG_QA  << " VpdZ:" << Form("%7.2f",tof->tofHeader()->vpdVz());
+  }
+  LOG_QA << endm;
+  const StSPtrVecBTofHit& tofHits = tof->tofHits();
+  for(size_t i=0;i<tofHits.size();i++) { //loop on hits in modules
+    StBTofHit *aHit = tofHits[i];
+    if(!aHit) continue;
+    LOG_QA  << *aHit << endm;
+  }  
 }
 //________________________________________________________________________________
 void StAnalysisMaker::PrintRnDHits() {
@@ -716,6 +756,9 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 //________________________________________________________________________________
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.19  2012/10/23 19:44:18  fisyak
+ * Add print out for ToF and Emc hits
+ *
  * Revision 2.18  2012/09/16 21:59:14  fisyak
  * Compress print out, add PrintEmcHits
  *
