@@ -5,7 +5,7 @@
 #include <fstream>
 #include <algorithm>
 #include <iostream>
-
+#include <unistd.h>
 #include "StHyperHashSha256.h"
 #include "StHyperHashMd5.h"
 #include "StHyperUtilGeneric.h"
