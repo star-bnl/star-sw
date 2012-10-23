@@ -176,8 +176,14 @@ MakeChairInstance(asic_thresholds,Calibrations/tpc/asic_thresholds);
 MakeChairInstance(asic_thresholds_tpx,Calibrations/tpc/asic_thresholds_tpx);
 #include "St_tpcAnodeHVC.h"
 MakeChairInstance(tpcAnodeHV,Calibrations/tpc/tpcAnodeHV);
+#include "St_tpcPadPlanesC.h"
 //________________________________________________________________________________
 void  St_tpcAnodeHVC::sockets(Int_t sector, Int_t padrow, Int_t &e1, Int_t &e2, Float_t &f2) {
+  if (St_tpcPadPlanesC::instance()->padRows() != 45) {
+    if (padrow <= St_tpcPadPlanesC::instance()->innerPadRows()) {e1 = e2 = 8; f2 = 0;}
+    else                                                        {e1 = e2 = 9; f2 = 0;}
+    return;
+  }
   e1 = (sector-1)*19;
   e2 = e1;
   f2 = 0;
@@ -235,6 +241,7 @@ void  St_tpcAnodeHVC::sockets(Int_t sector, Int_t padrow, Int_t &e1, Int_t &e2, 
 }
 //________________________________________________________________________________
 Float_t St_tpcAnodeHVC::voltagePadrow(Int_t sector, Int_t padrow) const {
+  
   Int_t e1 = 0, e2 = 0;
   Float_t f2 = 0;
   St_tpcAnodeHVC::sockets(sector, padrow, e1, e2, f2);
@@ -246,7 +253,7 @@ Float_t St_tpcAnodeHVC::voltagePadrow(Int_t sector, Int_t padrow) const {
   if (TMath::Abs(v2 - v1) <  1) return v1;
   // different voltages on influencing HVs
   // effective voltage is a sum of exponential gains
-  Float_t B = (padrow <= 13 ? 13.05e-3 : 10.26e-3);
+  Float_t B = (padrow <= St_tpcPadPlanesC::instance()->innerPadRows() ? 13.05e-3 : 10.26e-3);
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
@@ -264,7 +271,7 @@ Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
   if (v2==v1) return v1;
   // different voltages on influencing HVs
   // effective voltage is a sum of exponential gains
-  Float_t B = (padrow <= 13 ? 13.05e-3 : 10.26e-3);
+  Float_t B = (padrow <= St_tpcPadPlanesC::instance()->innerPadRows() ? 13.05e-3 : 10.26e-3);
   Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
   return v_eff;
 }
@@ -367,6 +374,10 @@ MakeChairInstance(TpcAvgCurrent,Calibrations/tpc/TpcAvgCurrent);
 //________________________________________________________________________________
 Int_t St_TpcAvgCurrentC::ChannelFromRow(Int_t row) {
   if (row <  1 || row > St_tpcPadPlanesC::instance()->padRows()) return -1;
+  if (St_tpcPadPlanesC::instance()->padRows() != 45) {
+    if (row <= St_tpcPadPlanesC::instance()->innerPadRows()) return 1;
+    else return 5;
+  }
   if (row <  3) return 1;
   if (row <  7) return 2;
   if (row < 10) return 3;
@@ -419,11 +430,7 @@ Float_t St_tss_tssparC::gain(Int_t sec, Int_t row) {
   Float_t V = 0;
   Float_t gain = 0;
   if (row <= St_tpcPadPlanesC::instance()->innerPadRows()) {l = 1; V_nominal = 1170;}
-  if (St_tpcPadPlanesC::instance()->getNumRows() == 45) {// ! iTpx
-    V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
-  } else {
-    V = (l == 1) ? St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,13) : St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,45);
-  }
+  V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
   if (V > 0) {
     St_tpcGainCorrectionC *gC = St_tpcGainCorrectionC::instance();
     Double_t v = V - V_nominal;
@@ -615,7 +622,6 @@ St_tpcSectorPositionC *St_tpcSectorPositionC::instance() {
 }
 #include "St_tpcFieldCageC.h"
 MakeChairInstance(tpcFieldCage,Geometry/tpc/tpcFieldCage);
-#include "St_tpcPadPlanesC.h"
 MakeChairInstance(tpcPadPlanes,Geometry/tpc/tpcPadPlanes);
 #include "St_tpcGlobalPositionC.h"
 MakeChairInstance(tpcGlobalPosition,Geometry/tpc/tpcGlobalPosition);
