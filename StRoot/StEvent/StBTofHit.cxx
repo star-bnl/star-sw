@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHit.cxx,v 2.5 2012/05/07 14:42:57 fisyak Exp $
+ * $Id: StBTofHit.cxx,v 2.6 2012/10/23 20:16:32 fisyak Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHit.cxx,v $
+ * Revision 2.6  2012/10/23 20:16:32  fisyak
+ * Add print out
+ *
  * Revision 2.5  2012/05/07 14:42:57  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -29,6 +32,7 @@
  **************************************************************************/
 #include "StBTofHit.h"
 #include "StTrack.h"
+#include "TString.h"
 const Float_t StBTofHit::mBTofPadWidth = 3.45; 
 ClassImp(StBTofHit);
 //________________________________________________________________________________
@@ -54,12 +58,14 @@ const StThreeVectorF& StBTofHit::position() const {
 }
 //________________________________________________________________________________
 ostream& operator<<(ostream &os, const StBTofHit& hit) {
-  os << " Tray:" << hit.tray() << "  Module:" << hit.module()
-     << " Cell:" << hit.cell() 
-     << " LeTime " << hit.leadingEdgeTime() 
-     << " TeTime " << hit.trailingEdgeTime() 
-     << " Track " << (hit.associatedTrack() ? hit.associatedTrack()->key() : 0) 
-     << " IdTruth " << hit.idTruth() << " Quality " << hit.qaTruth();
+  os << Form("Tray:%3i",hit.tray()) 
+     << Form(" Module:%2i",hit.module())
+     << Form(" Cell:%2i",hit.cell())
+     << Form(" LeTime %7.2f",hit.leadingEdgeTime())
+     << Form(" TeTime %7.2f",hit.trailingEdgeTime())
+     << Form(" Track %5i",(hit.associatedTrack() ? hit.associatedTrack()->key() : 0))
+     << Form(" IdTruth %5i",hit.idTruth())
+     << Form(" Quality%3i",hit.qaTruth());
   return os;
 }
 //________________________________________________________________________________
