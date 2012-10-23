@@ -7,6 +7,7 @@
 #include <libxml/nanohttp.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 #ifndef __STDB_STANDALONE__
 #include "StMessMgr.h"
 #else
