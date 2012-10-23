@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.12 2012/05/16 21:35:03 fisyak Exp $
+ * $Id: StTpcRawData.cxx,v 2.13 2012/10/23 20:15:57 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.13  2012/10/23 20:15:57  fisyak
+ * Don't add empty ADC
+ *
  * Revision 2.12  2012/05/16 21:35:03  fisyak
  * replace StDigitalPair by its reference
  *
@@ -270,9 +273,10 @@ StTpcDigitalSector &StTpcDigitalSector::operator+= (StTpcDigitalSector& v) {
       }
       getTimeAdc(row,pad,ADCs1,IDTs1);
       v.getTimeAdc(row,pad,ADCs2,IDTs2);
-      Bool_t ifIDT = false;
+      Bool_t ifIDT = kFALSE;
       for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
-	if (! ifIDT && (IDTs1[i] || IDTs2[i])) ifIDT = true;
+	if (! ADCs2[i]) continue;
+	if (! ifIDT && (IDTs1[i] || IDTs2[i])) ifIDT = kTRUE;
 	if ((IDTs1[i] || IDTs2[i]) && ADCs1[i] < ADCs2[i]) IDTs1[i] = IDTs2[i];
 	ADCs1[i] += ADCs2[i];
       }
