@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.cxx,v 2.9 2012/09/16 21:33:57 fisyak Exp $
+ * $Id: StEmcRawHit.cxx,v 2.10 2012/10/23 20:18:33 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.cxx,v $
+ * Revision 2.10  2012/10/23 20:18:33  fisyak
+ * Add/modify print outs
+ *
  * Revision 2.9  2012/09/16 21:33:57  fisyak
  * Add print out
  *
@@ -42,7 +45,7 @@
 #include "StEmcRawHit.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
-static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.9 2012/09/16 21:33:57 fisyak Exp $";
+static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.10 2012/10/23 20:18:33 fisyak Exp $";
 
 ClassImp(StEmcRawHit)
 
@@ -162,6 +165,8 @@ void
 StEmcRawHit::setEnergy(const float energy) {mEnergy=energy;}
 
 ostream&  operator<<(ostream& os, const StEmcRawHit& v) {
-  return os << Form("EmcRawHit d/m %3i/%3i eta/sub  %3i/%3i adc/enery %4i/%f",v.detector(),v.module(), v.eta(), v.sub(), v.adc(), v.energy());
+  os << Form("EmcRawHit d/m %3i/%3i eta/sub  %3i/%3i adc/enery %4i/%f",v.detector(),v.module(), v.eta(), v.sub(), v.adc(), v.energy());
+  if (v.energy() > 0.300) os << " > MIP";
+  return os;
 }
 void   StEmcRawHit::Print(Option_t *option) const {cout << *this << endl;}

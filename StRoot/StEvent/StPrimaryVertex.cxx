@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.17 2012/09/16 21:37:13 fisyak Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.18 2012/10/23 20:18:33 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.18  2012/10/23 20:18:33  fisyak
+ * Add/modify print outs
+ *
  * Revision 2.17  2012/09/16 21:37:13  fisyak
  * Add no. of Tpc West Only and East only tracks
  *
@@ -74,7 +77,7 @@
 #include "StTrackGeometry.h"
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.17 2012/09/16 21:37:13 fisyak Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.18 2012/10/23 20:18:33 fisyak Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 {init();}
@@ -237,13 +240,13 @@ ostream&  operator<<(ostream& os,  const StPrimaryVertex& v) {
   const Float_t *dxyz = v.positionError().xyz();
   for (Int_t i = 0; i < 3; i++)     os << Form("%8.3f+/-%5.3f,",xyz[i],dxyz[i]);
   os << " Prob/Chi2: " << Form("%5.3f/%7.2f",v.probChiSquared(),v.chiSquared())
-     << " Rank: "      << Form("%8.3f",v.ranking())
+     << " Rank: "      << Form("%8.1f",v.ranking())
     << Form(" U/T/G: %4i,%4i,%4i", v.numTracksUsedInFinder(),nDaughters,v.numberOfGoodTracks());
   if (nTpcTracks != nDaughters || nGoodTpcTracks != v.numberOfGoodTracks()) {
     os << Form(" TPC:%4i,%4i",nTpcTracks,nGoodTpcTracks);
   }
   if (v.idTruth())
-    os << Form(" IdT: %4i Q: %4i", v.idTruth(), v.qaTruth());
+    os << Form(" IdT: %5i Q: %4i", v.idTruth(), v.qaTruth());
   return os;
 }
 
