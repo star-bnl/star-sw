@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.42 2011/01/18 14:39:01 fisyak Exp $
+ * $Id: FCFMaker.cxx,v 1.43 2012/10/24 15:06:40 fisyak Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.43  2012/10/24 15:06:40  fisyak
+ * Add fix for no. of pad rows > 64
+ *
  * Revision 1.42  2011/01/18 14:39:01  fisyak
  * Clean up TpcDb interfaces and Tpc coordinate transformation
  *
@@ -1269,9 +1272,10 @@ void StRTSClientFCFMaker::fillStEvent(tcl_tphit_st *hit)
   unsigned int hw = 1;         // detid_tpc
   hw += (hit->row/100 << 4);   // sector
   hw += (hit->row%100 << 9);   // row
+#if 0
   hw += (hit->npads   << 15);  // npads
   hw += (hit->ntmbk   << 22);  // ntmbks...
-
+#endif
   StTpcHit *tpcHit = new StTpcHit(p,e,hw,hit->q, 0,
 				  hit->id_simtrk,hit->id_quality, hit->id, 
 				  hit->minpad, hit->maxpad, hit->mintmbk, hit->maxtmbk,hit->cl_x,hit->cl_t);
