@@ -15,7 +15,7 @@ StFgtGenAVEMaker    *fgtAVEffMkr     = 0;
 StFgtDbMaker *fgtDbMkr=0;
 
 void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
-                             Int_t neventsIn = 50 ){
+                             Int_t neventsIn = 200 ){
   cout <<" looking at file: " << filename << endl;
    // load the shared libraries
    std::cout << "***** Loading libraries *****" << endl;
@@ -36,6 +36,7 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
 
    TString dir0 = "MySQL:StarDb";
    TString dir1 = "$STAR/StarDb";
+   //db maker should not be needed...
    St_db_Maker *dbMkr = new St_db_Maker( "dbMkr", dir0, dir1 );
    dbMkr->SetDateTime(20120310,152618); ///
 
@@ -60,6 +61,7 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    muDstMaker->SetStatus("PrimaryVertices",1);
    muDstMaker->SetStatus("FgtStrip",1);
    muDstMaker->SetStatus("FgtCluster",1);
+   muDstMaker->SetStatus("FgtStripAssociation",1);
 
    //
    // now the QA maker
@@ -145,8 +147,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.3 2012/05/30 13:38:35 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.4 2012/10/24 14:28:57 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.4  2012/10/24 14:28:57  avossen
+adapted macro to new mDst structure
+
 Revision 1.3  2012/05/30 13:38:35  avossen
 *** empty log message ***
 
