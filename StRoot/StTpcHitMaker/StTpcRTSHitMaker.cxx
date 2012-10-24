@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.31 2012/09/13 21:00:04 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.32 2012/10/24 13:36:06 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -165,6 +165,7 @@ Int_t StTpcRTSHitMaker::Make() {
     LOG_WARN << "There is not Tpc Raw Event" << endm;
     return kStWarn;
   }
+  if (Debug()) tpcRawEvent->ls();
   StTpcRawData *tpcRawData = (StTpcRawData *) tpcRawEvent->GetObject();
   if (! tpcRawData) {
     LOG_WARN << "There is not Tpc Raw Data" << endm;
@@ -198,8 +199,6 @@ Int_t StTpcRTSHitMaker::Make() {
 	// allocate space for at least 512 pixels (timebins)
 	daq_sim_adc_tb *d = (daq_sim_adc_tb *) dta->request(__MaxNumberOfTimeBins__);
 	// add adc data for this specific sector:row:pad
-	memset (ADCs, 0, sizeof(ADCs));
-	memset (IDTs, 0, sizeof(IDTs));
 	digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
 	UInt_t l = 0;
 	for (UInt_t k = 0; k < __MaxNumberOfTimeBins__; k++) {
@@ -217,7 +216,7 @@ Int_t StTpcRTSHitMaker::Make() {
       }
     }      
     if (! NoAdcs) continue;
-    if (Debug() > 0) {
+    if (Debug() > 1) {
       // verify data!
       dta = fTpx->get("adc_sim");
       while(dta && dta->iterate()) {
@@ -248,8 +247,8 @@ Int_t StTpcRTSHitMaker::Make() {
 	if (! dta->sim_cld[i].cld.pad) continue;
 	if (dta->sim_cld[i].cld.tb >= __MaxNumberOfTimeBins__) continue;
 	if (dta->sim_cld[i].cld.charge < fminCharge) continue;
-	if (Debug() > 0) {
-	  if (Debug() > 1 || ( dta->sim_cld[i].cld.p2 - dta->sim_cld[i].cld.p1 <= 1 )) {
+	if (Debug()) {
+	  //	  if (Debug() > 1 || ( dta->sim_cld[i].cld.p2 - dta->sim_cld[i].cld.p1 <= 1 )) {
 	    LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
 			     dta->sim_cld[i].cld.pad,
 			     dta->sim_cld[i].cld.p1,
@@ -263,7 +262,7 @@ Int_t StTpcRTSHitMaker::Make() {
 			     dta->sim_cld[i].quality
 			     ) << endm;
 	    iBreak++;
-	  }
+	    //	  }
 	}
 	if (! hitCollection )  {
 	  hitCollection = new StTpcHitCollection();
@@ -286,18 +285,25 @@ Int_t StTpcRTSHitMaker::Make() {
 	UInt_t hw = 1;   // detid_tpc
 	hw += dta->sec << 4;     // (row/100 << 4);   // sector
 	hw += dta->row << 9;     // (row%100 << 9);   // row
-	
+#if 0	
 	Int_t npads = TMath::Abs(dta->sim_cld[i].cld.p2 - dta->sim_cld[i].cld.p1) + 1;
-	hw += (npads   << 15);  // npads
+	hw += (npads   << 16);  // npads
 	
 	Int_t ntmbk = TMath::Abs(dta->sim_cld[i].cld.t2 - dta->sim_cld[i].cld.t1) + 1;
-	hw += (ntmbk << 22);  // ntmbks...
+	hw += (ntmbk << 23);  // ntmbks...
+#endif
 	Double_t q = ADC2GeV*dta->sim_cld[i].cld.charge;
+	UShort_t idTruth = 0;
+	UShort_t quality = 0;
+	if (dta->sim_cld[i].track_id > 0 &&  dta->sim_cld[i].track_id < 100000) {
+	  idTruth = dta->sim_cld[i].track_id;
+	  quality = dta->sim_cld[i].quality;
+	}
 	Id++;
 	StTpcHit *hit = StTpcHitMaker::StTpcHitFlag(L.position(),hard_coded_errors,hw,q
 						    , (UChar_t ) 0  // counter 
-						    , (UShort_t) dta->sim_cld[i].track_id  // idTruth=0
-						    , (UShort_t) dta->sim_cld[i].quality   // quality=0,
+						    , idTruth
+						    , quality
 						    , Id                                   // id =0,
 						    , dta->sim_cld[i].cld.p1 //  mnpad
 						    , dta->sim_cld[i].cld.p2 //  mxpad
@@ -316,6 +322,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	       dta->sim_cld[i].cld.tb  >= 0 && dta->sim_cld[i].cld.tb  <  512);
 	hitsAdded++;
         if (hit->minTmbk() == 0) bin0Hits++;
+	if (Debug()) hit->Print();
 	hitCollection->addHit(hit);
       }
     }
