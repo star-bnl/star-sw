@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.49 2012/04/25 19:22:56 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.50 2012/10/25 22:44:38 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.50  2012/10/25 22:44:38  genevb
+ * Switch from hardcoded to DB for several values, and fix a bug with east-west-asymmetric 3DGridLeak since ver. 1.82
+ *
  * Revision 1.49  2012/04/25 19:22:56  genevb
  * More use of GLWeights, more realistic geometry model in PredictSpaceCharge
  *
@@ -270,8 +273,15 @@ class StMagUtilities {
   Float_t  WESTCLOCKERROR ;             // Phi rotation of West end of TPC in milli-radians
   Float_t  IFCRadius ;                  // Radius of the Inner Field Cage
   Float_t  OFCRadius ;                  // Radius of the Outer Field Cage
-  Float_t  GAPRADIUS ;                  // Radius of the gap between the Inner sectors and the Outer sectors
-  Float_t  GAP13_14 ;                   // Width of the gap between the grids at row 13 and row 14 (cm)
+  Float_t  INNERGGFirst ;               // Radius of the first Inner Gating Grid Wire
+  Float_t  INNERGGLast ;                // Radius of the last Inner Gating Grid Wire
+  Float_t  OUTERGGFirst ;               // Radius of the first Outer Gating Grid Wire
+  Float_t  OUTERGGLast ;                // Radius of the last Outer Gating Grid Wire
+  Float_t  GAPRADIUS ;                  // Radius of the gap between the inner and outer grids (cm)
+  Float_t  WIREGAP ;                    // Width of the gap between the inner and outer grids (cm)
+  Float_t  TPCROWR[128] ;               // Radii of TPC rows along the sector centerlines
+  Int_t    INNER ;                      // Number of TPC rows in the inner sectors
+  Int_t    TPCROWS ;                    // Total number of TPC rows per sector (Inner + Outer)
   Float_t  StarMagE ;                   // STAR Electric Field (V/cm) Magnitude
   Float_t  IFCShift ;                   // Shift of the IFC towards the West Endcap (cm)
   Float_t  TensorV1 ;                   // Omega Tau tensor parameter - in the ExB direction

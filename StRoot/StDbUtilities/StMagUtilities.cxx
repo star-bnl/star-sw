@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.88 2012/04/25 19:22:56 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.89 2012/10/25 22:44:37 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.89  2012/10/25 22:44:37  genevb
+ * Switch from hardcoded to DB for several values, and fix a bug with east-west-asymmetric 3DGridLeak since ver. 1.82
+ *
  * Revision 1.88  2012/04/25 19:22:56  genevb
  * More use of GLWeights, more realistic geometry model in PredictSpaceCharge
  *
@@ -450,14 +453,35 @@ void StMagUtilities::GetMagFactor ()
 
 void StMagUtilities::GetTPCParams ()  
 { 
+  St_tpcWirePlanesC*    wires = thedb->WirePlaneGeometry();
+  St_tpcPadPlanesC*      pads = thedb->PadPlaneGeometry();
+  St_tpcFieldCageC*     cages = thedb->FieldCage();
+  St_tpcDimensionsC*     dims = thedb->Dimensions();
+  St_tpcGlobalPositionC* glob = thedb->GlobalPosition();
+
   StarDriftV     =  1e-6*thedb->DriftVelocity() ;        
-  TPC_Z0         =  thedb->PadPlaneGeometry()->outerSectorPadPlaneZ() -
-                    thedb->WirePlaneGeometry()->outerSectorGatingGridPadPlaneSeparation() ;    
-  XTWIST         =  1e3*thedb->GlobalPosition()->TpcEFieldRotationY() ; 
-  YTWIST         =  -1e3*thedb->GlobalPosition()->TpcEFieldRotationX() ;            
-  IFCShift       =  thedb->FieldCage()->InnerFieldCageShift();
-  EASTCLOCKERROR =  1e3*thedb->FieldCage()->EastClockError();
-  WESTCLOCKERROR =  1e3*thedb->FieldCage()->WestClockError();
+  TPC_Z0         =  dims->gatingGridZ() ;
+  XTWIST         =   1e3*glob->TpcEFieldRotationY() ; 
+  YTWIST         =  -1e3*glob->TpcEFieldRotationX() ;            
+  IFCShift       =      cages->InnerFieldCageShift();
+  EASTCLOCKERROR =  1e3*cages->EastClockError();
+  WESTCLOCKERROR =  1e3*cages->WestClockError();
+  INNER          =  pads->innerPadRows();
+  TPCROWS        =  pads->padRows();
+  IFCRadius      =    47.90 ;  // Radius of the Inner Field Cage (GVB: not sure where in DB?)
+  OFCRadius      =  dims->senseGasOuterRadius();
+  INNERGGFirst   =  wires->firstInnerSectorGatingGridWire();
+  OUTERGGFirst   =  wires->firstOuterSectorGatingGridWire();
+  INNERGGLast    =  INNERGGFirst + 
+                    wires->gatingGridWirePitch() * (wires->numInnerSectorGatingGridWires() - 1);
+  OUTERGGLast    =  OUTERGGFirst + 
+                    wires->gatingGridWirePitch() * (wires->numOuterSectorGatingGridWires() - 1);
+  GAPRADIUS      =  0.5 * (INNERGGLast + OUTERGGFirst);
+  // Note (2012-10-25): currently GAPRADIUS from the DB (121.7975) differs very slightly
+  //                    (by 25 microns) from non-DB value (121.8000)
+  WIREGAP        =  OUTERGGFirst - INNERGGLast;
+  for ( Int_t i = 0 ; i < TPCROWS ; i++ )
+    TPCROWR[i] = pads->radialDistanceAtRow(i+1);
 }
 
 void StMagUtilities::GetTPCVoltages ()  
@@ -475,8 +499,8 @@ void StMagUtilities::GetTPCVoltages ()
   St_tpcAnodeHVavgC* anodeVolts = St_tpcAnodeHVavgC::instance() ;
   // Placeholder: InnerCoef and OuterCoef need to be calibrated
   //for (Int_t i = 1 ; i < 25; i++ ) {
-  //  GLWeights[i] = InnerCoef * TMath::Exp(anodeVolts->voltagePadrow(i,13)) +
-  //                 OuterCoef * TMath::Exp(anodeVolts->voltagePadrow(i,14));
+  //  GLWeights[i] = InnerCoef * TMath::Exp(anodeVolts->voltagePadrow(i,INNER)) +
+  //                 OuterCoef * TMath::Exp(anodeVolts->voltagePadrow(i,INNER+1));
   //}
   // For now, a bit complicated, but assign 1 to those with most common
   //   voltages, and -1 ("unknown") otherwise
@@ -487,15 +511,15 @@ void StMagUtilities::GetTPCVoltages ()
   TH1I innerVs("innerVs","innerVs",5,maxInner-3.5*stepsInner,maxInner+1.5*stepsInner);
   TH1I outerVs("outerVs","outerVs",5,maxOuter-3.5*stepsOuter,maxOuter+1.5*stepsOuter);
   for (Int_t i = 1 ; i < 25; i++ ) {
-    innerVs.Fill(anodeVolts->voltagePadrow(i,13));
-    outerVs.Fill(anodeVolts->voltagePadrow(i,14));
+    innerVs.Fill(anodeVolts->voltagePadrow(i,INNER));
+    outerVs.Fill(anodeVolts->voltagePadrow(i,INNER+1));
   }
   double cmnInner = innerVs.GetBinCenter(innerVs.GetMaximumBin());
   double cmnOuter = outerVs.GetBinCenter(outerVs.GetMaximumBin());
   cout << "StMagUtilities assigning common anode voltages as " << cmnInner << " , " << cmnOuter << endl;
   for (Int_t i = 1 ; i < 25; i++ ) {
-    GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,13) - cmnInner) < stepsInner/2. ) &&
-                     ( TMath::Abs(anodeVolts->voltagePadrow(i,14) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
+    GLWeights[i] = ( ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER) - cmnInner) < stepsInner/2. ) &&
+                     ( TMath::Abs(anodeVolts->voltagePadrow(i,INNER+1) - cmnOuter) < stepsOuter/2. ) ? 1 : -1 );
   }
   
   
@@ -703,14 +727,6 @@ Float_t StMagUtilities::eZList[EMap_nZ] = { -208.5, -208.0, -207.0, -206.0, -205
 void StMagUtilities::CommonStart ( Int_t mode )
 {
 
-  //  These items are not taken from the DB but they should be ... some day.
-      IFCRadius   =    47.90 ;     // Radius of the Inner Field Cage
-      OFCRadius   =    200.0 ;     // Radius of the Outer Field Cage
-      GAPRADIUS   =    121.8 ;     // Radius of gap between rows 13 & 14 at phi = zero degrees (cm)
-      GAP13_14    =    1.595 ;     // Width of the gap between the grids at row 13 and row 14 (cm)
-
-  //  End of list of items that might come from the DB
-
   if ( thedb2 == 0 ) cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected BFIELD setting." << endl ; 
   else  cout << "StMagUtilities::CommonSta  Magnetic Field scale factor is " << gFactor << endl ;
 
@@ -727,6 +743,26 @@ void StMagUtilities::CommonStart ( Int_t mode )
       IFCShift    =   0.0080 ;      // Shift of the IFC towards the West Endcap (cm) (2/1/2002)
       EASTCLOCKERROR =   0.0 ;      // Phi rotation of East end of TPC in milli-radians
       WESTCLOCKERROR = -0.43 ;      // Phi rotation of West end of TPC in milli-radians
+      INNER          =  13   ;      // Number of TPC rows in the inner sectors
+      TPCROWS        =  45   ;      // Total number of TPC rows per sector (Inner + Outer)
+      IFCRadius   =    47.90 ;      // Radius of the Inner Field Cage
+      OFCRadius   =    200.0 ;      // Radius of the Outer Field Cage
+      INNERGGFirst =  53.0   ;      // Radius of the first Inner Gating Grid Wire
+      INNERGGLast  = 121.0   ;      // Radius of the last Inner Gating Grid Wire
+      OUTERGGFirst = 122.595 ;      // Radius of the first Outer Gating Grid Wire
+      OUTERGGLast  = 191.395 ;      // Radius of the last Outer Gating Grid Wire
+      GAPRADIUS   =    121.8 ;      // Radius of the gap between the inner and outer grids (cm) at sector centerline
+      WIREGAP     =    1.595 ;      // Width of the gap between the inner and outer grids (cm)
+      for ( Int_t i = 0 ; i < TPCROWS ; i++ )
+        {
+          if ( i < 8 ) 
+	    TPCROWR[i] = 60.0 + i*4.8 ;
+          else if ( i < INNER ) 
+	    TPCROWR[i] = 93.6 + (i-8+1)*5.2 ;
+          else               
+	    TPCROWR[i] = 127.195 + (i-INNER)*2.0 ;
+        }
+
       cout << "StMagUtilities::CommonSta  WARNING -- Using hard-wired TPC parameters. " << endl ; 
     }
   else  cout << "StMagUtilities::CommonSta  Using TPC parameters from DataBase. " << endl ; 
@@ -1430,9 +1466,9 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
   if ( DoOnce == 0 ) 
     {                          // Put these coefficients in a table to save time
       cout << "StMagUtilities::PadRow13   Please wait for the tables to fill ...  ~5 seconds" << endl ;
-      C[0] = GAP13_14 * GG * SCALE / ( 2 * BOX ) ;   
+      C[0] = WIREGAP * GG * SCALE / ( 2 * BOX ) ;   
       for ( Int_t i = 1 ; i < TERMS ; i++ )
-	  C[i] = 2 * GG * SCALE * TMath::Sin( GAP13_14*i*PI/( 2*BOX ) ) / ( i * PI ) ;
+	  C[i] = 2 * GG * SCALE * TMath::Sin( WIREGAP*i*PI/( 2*BOX ) ) / ( i * PI ) ;
       for ( Int_t i = 0; i < NZDRIFT ; i++ )
 	{
 	  Zdrift = ZDriftArray[i] ;
@@ -3328,7 +3364,8 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
   the hit masks from the microDSTs.  These masks tell you which TPC rows were used in the original track fit.
   For future reference, the masks come in two words.  The first word covers TPC rows 1-24 and the second 
   word covers rows 25-45.  The first 8 bits of the first word are reserved for the FTPC and therefore
-  0xFFFFFF00, 0x1FFFFF represent all 45 rows of the TPC.
+  0xFFFFFF00, 0x1FFFFF represent all 45 rows of the TPC and no SVT or SSD hits. (NB: this is dependent
+  on the implementation of the topology map, and may be subject to change!)
   
   VertexError is quoted in cm (RMS). It is for experts.  If you are working with primary tracks, the vertex
   is included in the fit.  The true error bar is multiplcity dependent.  (sigma**2 increase linearly with mult).
@@ -3346,9 +3383,7 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
   // Return default values if passed a whacko input value (i.e. infinite or NaN)
   if ( finite((double)Charge)*finite(x[0])*finite(x[1])*finite(x[2])*finite(p[0])*finite(p[1])*finite(p[2]) == 0 ) return ;
 
-  const Int_t   INNER8 =  8 ;               // Number of TPC rows in the inner sector with 4.8 cm spacing
-  const Int_t   INNER  = 13 ;               // Number of TPC rows in the inner sectors 
-  const Int_t   ROWS   = 45 ;               // Total number of TPC rows per sector (Inner + Outer)
+  const Int_t   ROWS   = TPCROWS ;               // Total number of TPC rows per sector (Inner + Outer)
   const Float_t TestRadius =  77.00 ;      // A random test radius inside the TPC to compare which way the track is going
 
   Int_t    ChargeB ;
@@ -3366,15 +3401,8 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
   Y0 = x[1] - ChargeB * p[0] * R0 / Pt ; 
   Rotation = TMath::Sign( (double)1.0, (x[0]-X0)*p[1] - (x[1]-Y0)*p[0] ) ; 
 
-  for ( Int_t i = 0 ; i < ROWS ; i++ )
-    {
-      if ( i < INNER8 ) 
-	R[i] = 60.0 + i*4.8 ;                // Not correct because TPC rows aren't circles ... but we dont' care
-      else if ( i < INNER ) 
-	R[i] = 93.6 + (i-INNER8+1)*5.2 ;
-      else               
-	R[i] = 127.195 + (i-INNER)*2.0 ;
-    }
+  memcpy(R,TPCROWR,ROWS*sizeof(Float_t));
+  // Not correct because TPC rows aren't circles ... but we dont' care
 
   if (Y0 == 0.0)  Direction = TMath::Sign((float)1.0,p[1]) ;
   else
@@ -3510,7 +3538,8 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
   the hit masks from the microDSTs.  These masks tell you which TPC rows were used in the original track fit.
   For future reference, the masks come in two words.  The first word covers TPC rows 1-24 and the second 
   word covers rows 25-45.  The first 8 bits of the first word are reserved for the FTPC and therefore
-  0xFFFFFF00, 0x1FFFFF represent all 45 rows of the TPC.
+  0xFFFFFF00, 0x1FFFFF represent all 45 rows of the TPC and no SVT or SSD hits. (NB: this is dependent
+  on the implementation of the topology map, and may be subject to change!)
   
   VertexError is quoted in cm (RMS). It is for experts.  If you are working with primary tracks, the vertex
   is included in the fit.  The true error bar is multiplcity dependent.  (sigma**2 increase linearly with mult).
@@ -3529,9 +3558,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    if ( finite((double)Charge)*finite(x[0])*finite(x[1])*finite(x[2])*finite(p[0])*finite(p[1])*finite(p[2]) == 0 ) return ;
 
    const Float_t InnerOuterRatio = 0.6 ; // Ratio of size of the inner pads to the outer pads (real world == 0.5, GVB likes 0.6)
-   const Int_t   INNER8   =  8  ;        // Number of TPC rows in the inner sector with 4.8 cm spacing
-   const Int_t   INNER    = 13  ;        // Number of TPC rows in the inner sectors
-   const Int_t   ROWS     = 45  ;        // Total number of TPC rows per sector (Inner + Outer)
+   const Int_t   ROWS     = TPCROWS  ;        // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   RefIndex =  7  ;        // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm radius).
    const Int_t   MinHits  = 15  ;        // Minimum number of hits on a track.  If less than this, then no action taken.
    const Int_t   DEBUG    =  0  ;        // Turn on debugging statements and plots
@@ -3558,15 +3585,8 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    Y0 = x[1] - ChargeB * p[0] * R0 / Pt ;
    DCA = TMath::Sqrt( X0*X0 + Y0*Y0 ) - R0 ;  // Negative means (0,0) is inside the circle
 
-   for ( Int_t i = 0 ; i < ROWS ; i++ )       // Note that i starts at zero
-     {
-      if ( i < INNER8 ) 
-	R[i] = 60.0 + i*4.8 ;                 // Not correct because TPC rows aren't circles ... but we dont' care
-      else if ( i < INNER ) 
-	R[i] = 93.6 + (i-INNER8+1)*5.2 ;
-      else              
-	R[i] = 127.195 + (i-INNER)*2.0 ;
-     }
+   memcpy(R,TPCROWR,ROWS*sizeof(Float_t));
+   // Not correct because TPC rows aren't circles ... but we dont' care
 
    // Test which of the two directions the particle goes on the circle
    if (TMath::Abs(Y0) < 0.001 )  Direction = TMath::Sign( (float)1.0, p[1] ) ;  
@@ -3720,9 +3740,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
 	       Float_t DCA,  const unsigned int RowMask1, const unsigned int RowMask2, Float_t &pSpace )
 {
 
-   const Int_t   INNER8           =   8  ;       // Number of TPC rows in the inner sector with 4.8 cm spacing
-   const Int_t   INNER            =  13  ;       // Number of TPC rows in the inner sector
-   const Int_t   ROWS             =  45  ;       // Total number of TPC rows per sector (Inner + Outer)
+   const Int_t   ROWS             =  TPCROWS  ;       // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   RefIndex         =   7  ;       // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm)
    const Int_t   MinInnerTPCHits  =   5  ;       // Minimum number of hits on a track.  If less than this, then no action taken.
    const Int_t   MinOuterTPCHits  =  10  ;       // Minimum number of hits on a track.  If less than this, then no action taken.
@@ -3735,6 +3753,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
        if ( i < INNER )
 	 {
 	   if ( ( i < 24  ) && (( RowMask1 & OneBit<<(i+8)  ) != 0 )) InnerTPCHits++ ;  
+	   if ( ( i >= 24 ) && (( RowMask2 & OneBit<<(i-24) ) != 0 )) InnerTPCHits++ ;  
 	 }
        else
 	 {
@@ -3775,15 +3794,8 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    Pz_over_Pt = TMath::SinH(PseudoRapidity) ;
    Z_coef = ChargeB*R0*Pz_over_Pt ;
  
-   for ( Int_t i = 0 ; i < ROWS ; i++ )       // Note that i starts at zero
-     {
-      if ( i < INNER8 ) 
-	R[i] = 60.0 + i*4.8 ;                 // Not correct because TPC rows aren't circles ... but we dont' care
-      else if ( i < INNER ) 
-	R[i] = 93.6 + (i-INNER8+1)*5.2 ;
-      else              
-	R[i] = 127.195 + (i-INNER)*2.0 ;
-     }
+   memcpy(R,TPCROWR,ROWS*sizeof(Float_t));
+   // Not correct because TPC rows aren't circles ... but we dont' care
 
    Float_t InnerOuterRatio = 0.0 ; // JT test. Ratio of size of the inner pads to the outer pads (Set after daisy chain, below)
    Xreference = Yreference = 0.0 ;
@@ -3920,7 +3932,8 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
   The first 8 bits of the first word describe the vertex, then six layers of the SVT, and finally the SSD.  
   The vertex bit is only set for primary tracks and is not used by this routine.  You should only input global tracks.
   The remaining bits of the first word cover TPC rows 1-24.  The second word covers rows 25-45.  So, for example
-  0xFFFFFF00, 0x1FFFFF represent all 45 rows of the TPC and no SVT or SSD hits.
+  0xFFFFFF00, 0x1FFFFF represent all 45 rows of the TPC and no SVT or SSD hits. (NB: this is dependent
+  on the implementation of the topology map, and may be subject to change!)
 
   You must provide the hit errors by instantiating with two vectors that include the track errors in both X and Y.  
   RowMaskErrorR[]    is the array of hit errors in the radial direction (ie in the direction of a high pt track)
@@ -3941,15 +3954,12 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
 
    const Int_t   INNERDETECTORS   =   6  ;       // Number of inner detector rows in represented in the bit masks
    const Int_t   SSDLAYERS        =   1  ;       // Number of SSD layers
-   const Int_t   INNER8           =   8  ;       // Number of TPC rows in the inner sector with 4.8 cm spacing
-   const Int_t   INNER            =  13  ;       // Number of TPC rows in the inner sector
-   const Int_t   TPCROWS          =  45  ;       // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   MinInnerTPCHits  =   5  ;       // Minimum number of hits on a track.  If less than this, then no action taken.
    const Int_t   MinOuterTPCHits  =  10  ;       // Minimum number of hits on a track.  If less than this, then no action taken.
    const Int_t   DEBUG            =   0  ;       // Turn on debugging statements and plots
 
    const Int_t   TPCOFFSET = INNERDETECTORS + SSDLAYERS + 1 ;   // Add one for the vertex in 0th position in RowMasks
-   const Int_t   BITS      = INNERDETECTORS + TPCROWS + SSDLAYERS + 1 ;  // Number of bits in the row masks (45 TPC Rows + etc.)
+   const Int_t   BITS      = INNERDETECTORS + TPCROWS + SSDLAYERS + 1 ;  // Number of bits in the row masks (TPC Rows + etc.)
 
    unsigned int OneBit = 1 ;
    Int_t InnerTPCHits = 0, OuterTPCHits = 0 ;
@@ -3958,6 +3968,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
        if ( i < INNER )
 	 {
 	   if ( ( i < 24  ) && (( RowMask1 & OneBit<<(i+8)  ) != 0 )) InnerTPCHits++ ;  
+	   if ( ( i >= 24 ) && (( RowMask2 & OneBit<<(i-24) ) != 0 )) InnerTPCHits++ ;  
 	 }
        else
 	 {
@@ -4026,15 +4037,8 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    R[7] = 22.8   ;  // SSD (average) Radius (8th bit)
 
    // JT TEST Add the radii for the TPC Rows.  Note the hardwired offsets.
-   for ( Int_t i = TPCOFFSET ; i < TPCROWS + TPCOFFSET ; i++ )
-     {
-       if ( (i-TPCOFFSET) < INNER8 )  
-	 R[i] = 60.0 + (i-TPCOFFSET)*4.8 ; // Not completly correct because TPC rows are flat.
-       else if ( (i-TPCOFFSET) < INNER )  
-	 R[i] = 93.6 + (i-TPCOFFSET-INNER8+1)*5.2 ; // Not completly correct because TPC rows are flat.
-       else                          
-	 R[i] = 127.195 + (i-TPCOFFSET-INNER)*2.0 ;
-     }
+   memcpy(&(R[TPCOFFSET]),TPCROWR,TPCROWS*sizeof(Float_t));
+   // Not completly correct because TPC rows are flat.
 
    for ( Int_t i = 0 ; i < BITS ; i++ )
      {
@@ -4440,6 +4444,7 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 	{
 	  TMatrix &ArrayV    =  *ArrayofArrayV[k] ;
 	  TMatrix &Charge    =  *ArrayofCharge[k] ;
+          Float_t cosPhiK    =  TMath::Cos(Philist[k]) ;
 
 	  //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.
 	  for ( Int_t i = 0 ; i < ROWS ; i++ )  
@@ -4456,15 +4461,14 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 	  for ( Int_t i = 1 ; i < ROWS-1 ; i++ ) 
 	    { 
 	      Float_t Radius = IFCRadius + i*GRIDSIZER ;
+	      Float_t local_y_hi  = (Radius+GRIDSIZER/2.0) * cosPhiK ;
+	      Float_t local_y_lo  = (Radius-GRIDSIZER/2.0) * cosPhiK ;
+	      Float_t charge_y_hi =  OUTERGGFirst ;   // Use physical Gap dimensions
+	      Float_t charge_y_lo =  INNERGGLast  ;   // Use physical Gap dimensions
 	      for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )    
 		{
 
 		  Float_t top = 0, bottom = 0 ;
-
-		  Float_t local_y_hi  = (Radius+GRIDSIZER/2.0) * TMath::Cos(Philist[k]) ;
-		  Float_t local_y_lo  = (Radius-GRIDSIZER/2.0) * TMath::Cos(Philist[k]) ;
-		  Float_t charge_y_hi =  GAPRADIUS + GAP13_14/2.0 ;   // Use physical Gap radius and width
-		  Float_t charge_y_lo =  GAPRADIUS - GAP13_14/2.0 ;   // Use physical Gap radius and width
 
 		  if (local_y_hi > charge_y_lo && local_y_hi < charge_y_hi) 
 		    {
@@ -4548,8 +4552,8 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 
   r_eff   = r ;                                     // Do not allow calculation to go too near the gap
   local_y = r * TMath::Cos(phi_prime) ;             
-  if ( local_y > GAPRADIUS - GAP13_14 && local_y < GAPRADIUS ) r_eff = (GAPRADIUS - GAP13_14) / TMath::Cos(phi_prime) ;
-  if ( local_y < GAPRADIUS + GAP13_14 && local_y > GAPRADIUS ) r_eff = (GAPRADIUS + GAP13_14) / TMath::Cos(phi_prime) ;
+  if ( local_y > GAPRADIUS - WIREGAP && local_y < GAPRADIUS ) r_eff = (GAPRADIUS - WIREGAP) / TMath::Cos(phi_prime) ;
+  if ( local_y < GAPRADIUS + WIREGAP && local_y > GAPRADIUS ) r_eff = (GAPRADIUS + WIREGAP) / TMath::Cos(phi_prime) ;
 
   // Assume symmetry in Z when looking up data in tables, below
   Er_integral   = Interpolate3DTable( ORDER, r_eff, TMath::Abs(z), phi_prime, neR3D, EMap_nZ, PHISLICES, eRadius, eZList, Philist, ArrayoftiltEr )   ;
@@ -4562,10 +4566,11 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 
   if ( r > 0.0 ) 
     {
-      Float_t Weight = SpaceChargeR2 * (GLWeights[Sector] >= 0 ? GLWeights[Sector] : 1) ;
-      if ( z < 0.0 ) Weight *= SpaceChargeEWRatio ;
+      Float_t Weight = SpaceChargeR2 ;
+      if (GLWeights[Sector] >= 0) Weight *= GLWeights[Sector] ;
+      if (                z <  0) Weight *= SpaceChargeEWRatio ;
       phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-      r   =  r   - Weight * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+      r   =  r   - Weight * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
   Xprime[0] = r * TMath::Cos(phi) ;
@@ -4603,12 +4608,8 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
   const Float_t GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
   const Float_t GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
 
-  const Float_t INNERGGSpan  = 68.0 ;
-  const Float_t OUTERGGSpan  = 68.8 ;
-  const Float_t INNERGGFirst = 53.0 ;
-  const Float_t INNERGGLast  = INNERGGFirst + INNERGGSpan ;
-  const Float_t OUTERGGFirst = INNERGGLast  + GAP13_14    ;
-  const Float_t OUTERGGLast  = OUTERGGFirst + OUTERGGSpan ;
+  const Float_t INNERGGSpan  = INNERGGLast - INNERGGFirst ;
+  const Float_t OUTERGGSpan  = OUTERGGLast - OUTERGGFirst ;
 
   static TMatrix *ArrayofArrayV[PHISLICES]   , *ArrayofCharge[PHISLICES]      ; 
   static TMatrix *ArrayofEroverEzW[PHISLICES], *ArrayofEPhioverEzW[PHISLICES] ; 
@@ -4782,7 +4783,7 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
                   else if (local_y <= INNERGGLast)
                     tempV = iOffsetFirst + (iOffsetLast -iOffsetFirst)*(local_y-INNERGGFirst)/INNERGGSpan;
                   else if (local_y <= OUTERGGFirst)
-                    tempV = iOffsetLast  + (oOffsetFirst-iOffsetLast) *(local_y-INNERGGLast) /GAP13_14;
+                    tempV = iOffsetLast  + (oOffsetFirst-iOffsetLast) *(local_y-INNERGGLast) /WIREGAP;
                   else if (local_y <= OUTERGGLast)
                     tempV = oOffsetFirst + (oOffsetLast -oOffsetFirst)*(local_y-OUTERGGFirst)/OUTERGGSpan;
                   else
