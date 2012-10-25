@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.20 2012/10/10 19:39:52 perev Exp $
+// $Id: StvMaker.cxx,v 1.21 2012/10/25 18:33:32 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -225,8 +225,8 @@ static int initialized = 0;
   for (int idx=0;idx<=tokens->GetLast();idx++) {
   TString &chunk = ((TObjString*)tokens->At(idx))->String();
     if (chunk.CompareTo("CA"      ,TString::kIgnoreCase)==0) {
-      assert(gSystem->Load("Vc.so")		<=0);
-      assert(gSystem->Load("TPCCATracker.so")	<=0);
+      assert(gSystem->Load("Vc.so")		>=0);
+      assert(gSystem->Load("TPCCATracker.so")	>=0);
       kit->SetSeedFinder (new StvCASeedFinder);		continue;}
     if (chunk.CompareTo("Default",TString::kIgnoreCase)==0 ) {
       kit->SetSeedFinder (new StvDefaultSeedFinder);	continue;}
