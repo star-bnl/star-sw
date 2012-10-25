@@ -21,6 +21,7 @@ static std::map<std::string,StvHitErrCalculator *> calcMap;
 //  -T[2][0]*T[1][1]*T[0][2]
 
 ClassImp(StvHitErrCalculator)
+ClassImp(StvTpcHitErrCalculator)
 //______________________________________________________________________________
 StvHitErrCalculator::StvHitErrCalculator(const char *name,int nPar):TNamed(name,"")
 {
