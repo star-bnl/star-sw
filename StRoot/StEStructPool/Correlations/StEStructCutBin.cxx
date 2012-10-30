@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.15 2011/08/02 20:34:02 prindle Exp $
+ * $Id: StEStructCutBin.cxx,v 1.16 2012/10/30 00:16:50 dkettler Exp $
  *
  * Author: Jeff Porter 
  *
@@ -112,6 +112,13 @@ void StEStructCutBin::setMode(int mode){
       mnumBins=15;
       mnumParentBins=5;
       strcpy(mcutModeName," only p_t binning");
+      break;
+    }
+  case 10:
+    {
+      mnumBins=45;
+      mnumParentBins=1;
+      strcpy(mcutModeName," yt x yt dependence, 45 bins");
       break;
     }
   default:
@@ -691,13 +698,60 @@ int StEStructCutBin::notSymmetrizedXX9(int cutBin, int pairCharge) {
     return 0;
 }
 
+//------------------------ Mode=10 -------------------------------------------
+//  Full 2D yt x yt dependence
+//  Part 1
+//
+//  An explanation of the binning is in order.  See the following map in yt x yt space:
+//
+//  8  16 23 29 34 38 41 43 44
+//  7  15 22 28 33 37 40 42 43
+//  6  14 21 27 32 36 39 40 41
+//  5  13 20 26 31 35 36 37 38
+//  4  12 19 25 30 31 32 33 34
+//  3  11 18 24 25 26 27 28 29
+//  2  10 17 18 19 20 21 22 23
+//  1  9  10 11 12 13 14 15 16
+//  0  1  2  3  4  5  6  7  8
+//
+
+int StEStructCutBin::getCutBinMode10(StEStructPairCuts* pc){
+  float yt1=pc->Track1()->Yt();
+  float yt2=pc->Track2()->Yt();
+  int retVal;
+
+  int binMap[9][9] = { 0, 1, 2, 3, 4, 5, 6, 7, 8,
+                       1, 9, 10, 11, 12, 13, 14, 15, 16,
+                       2, 10, 17, 18, 19, 20, 21, 22, 23,
+                       3, 11, 18, 24, 25, 26, 27, 28, 29,
+                       4, 12, 19, 25, 30, 31, 32, 33, 34,
+                       5, 13, 20, 26, 31, 35, 36, 37, 38,
+                       6, 14, 21, 27, 32, 36, 39, 40, 41,
+                       7, 15, 22, 28, 33, 37, 40, 42, 43,
+                       8, 16, 23, 29, 34, 38, 41, 43, 44};
+
+  int i1 = ((int) ((yt1-1.)/.4));
+  int i2 = ((int) ((yt2-1.)/.4));
+
+  if(i1>8) i1=8;
+  if(i2>8) i2=8;
+
+  retVal = binMap[i1][i2];
+
+  return retVal;
+}
+
+
 
 
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.16  2012/10/30 00:16:50  dkettler
+ * Cut bins for marginal pt bins added
+ *
  * Revision 1.15  2011/08/02 20:34:02  prindle
- * More detailed histograms for event mixing.
+ *   More detailed histograms for event mixing.
  *   Buffer: increased mixed events to 4 (from 2)
  *   CutBin: added mode 9 for exploration of p_t space, fixed place in mode 5 where
  *           histogram was written before checking it existed.
