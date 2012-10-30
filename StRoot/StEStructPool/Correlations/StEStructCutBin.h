@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.13 2011/08/02 20:34:02 prindle Exp $
+ * $Id: StEStructCutBin.h,v 1.14 2012/10/30 00:16:50 dkettler Exp $
  *
  * Author: Jeff Porter 
  *
@@ -46,6 +46,7 @@ class StEStructCutBin : public TObject {
   int getCutBinMode7(StEStructPairCuts *pc, int zbin);
   int getCutBinMode8(StEStructPairCuts *pc);
   int getCutBinMode9(StEStructPairCuts *pc);
+  int getCutBinMode10(StEStructPairCuts *pc);
   int ignorePair5(StEStructPairCuts *pc);
   int symmetrizeXX3(StEStructPairCuts *pc);
   int symmetrizeXX5(StEStructPairCuts *pc);
@@ -159,6 +160,11 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc, int pairCase){
  case 9:
    {
      retVal=getCutBinMode9(pc);
+     break;
+   }
+ case 10:
+   {
+     retVal=getCutBinMode10(pc);
      break;
    }
  }
@@ -329,8 +335,11 @@ inline int StEStructCutBin::notSymmetrizedXX(int cutBin, int pairCharge) {
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.14  2012/10/30 00:16:50  dkettler
+ * Cut bins for marginal pt bins added
+ *
  * Revision 1.13  2011/08/02 20:34:02  prindle
- * More detailed histograms for event mixing.
+ *   More detailed histograms for event mixing.
  *   Buffer: increased mixed events to 4 (from 2)
  *   CutBin: added mode 9 for exploration of p_t space, fixed place in mode 5 where
  *           histogram was written before checking it existed.
