@@ -143,40 +143,40 @@ cout << "Input file " << fileName.Data() << endl;
     TH1D *mHEtaP[20][100];
     TH1D *mHEtaM[20][100];
 
-    if (nCutBins > 40) {
-        cout << "Oops... I declared number of Cut bins as less than 40. You have " << nCutBins << endl;
+    if (nCutBins > 50) {
+        cout << "Oops... I declared number of Cut bins as less than 50. You have " << nCutBins << endl;
         return;
     }
-    TH2D *mHYtYt[40][100][8];
-    TH2D *mHNYtYt[40][100][8];
-    TH2D *mHPtPt[40][100][8];
+    TH2D *mHYtYt[50][100][8];
+    TH2D *mHNYtYt[50][100][8];
+    TH2D *mHPtPt[50][100][8];
 
-    TH2D *mHPhiPhi[40][100][8];
-    TH2D *mHNPhiPhi[40][100][8];
-    TH2D *mHEtaEta[40][100][8];
-    TH2D *mHPrPhiPhi[40][100][8];
-    TH2D *mHPrEtaEta[40][100][8];
-    TH2D *mHPaPhiPhi[40][100][8];
-    TH2D *mHPaEtaEta[40][100][8];
-    TH2D *mHPbPhiPhi[40][100][8];
-    TH2D *mHPbEtaEta[40][100][8];
+    TH2D *mHPhiPhi[50][100][8];
+    TH2D *mHNPhiPhi[50][100][8];
+    TH2D *mHEtaEta[50][100][8];
+    TH2D *mHPrPhiPhi[50][100][8];
+    TH2D *mHPrEtaEta[50][100][8];
+    TH2D *mHPaPhiPhi[50][100][8];
+    TH2D *mHPaEtaEta[50][100][8];
+    TH2D *mHPbPhiPhi[50][100][8];
+    TH2D *mHPbEtaEta[50][100][8];
 
-    TH2D *mHAtSYtDYt[40][100][8];
-    TH2D *mHAtNSYtDYt[40][100][8];
-    TH2D *mHJtDEtaDPhi[40][100][8];
-    TH2D *mHJtNDEtaDPhi[40][100][8];
-    TH2D *mHPrJtDEtaDPhi[40][100][8];
-    TH2D *mHPaJtDEtaDPhi[40][100][8];
-    TH2D *mHPbJtDEtaDPhi[40][100][8];
+    TH2D *mHAtSYtDYt[50][100][8];
+    TH2D *mHAtNSYtDYt[50][100][8];
+    TH2D *mHJtDEtaDPhi[50][100][8];
+    TH2D *mHJtNDEtaDPhi[50][100][8];
+    TH2D *mHPrJtDEtaDPhi[50][100][8];
+    TH2D *mHPaJtDEtaDPhi[50][100][8];
+    TH2D *mHPbJtDEtaDPhi[50][100][8];
 
-    TH2D *mHJtSEtaDPhi[40][100][8];
-    TH2D *mHJtNSEtaDPhi[40][100][8];
-    TH2D *mHPrJtSEtaDPhi[40][100][8];
-    TH2D *mHPaJtSEtaDPhi[40][100][8];
-    TH2D *mHPbJtSEtaDPhi[40][100][8];
+    TH2D *mHJtSEtaDPhi[50][100][8];
+    TH2D *mHJtNSEtaDPhi[50][100][8];
+    TH2D *mHPrJtSEtaDPhi[50][100][8];
+    TH2D *mHPaJtSEtaDPhi[50][100][8];
+    TH2D *mHPbJtSEtaDPhi[50][100][8];
 
-    TH1D *mHQinv[40][100][8];
-    TH1D *mHNQinv[40][100][8];
+    TH1D *mHQinv[50][100][8];
+    TH1D *mHNQinv[50][100][8];
 
     // Density histograms. TPC separation
     if (nDenBins > 40) {
