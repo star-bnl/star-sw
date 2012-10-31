@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.89 2012/10/25 22:44:37 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.90 2012/10/31 20:05:10 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.90  2012/10/31 20:05:10  genevb
+ * Row radii stored in arrays of doubles
+ *
  * Revision 1.89  2012/10/25 22:44:37  genevb
  * Switch from hardcoded to DB for several values, and fix a bug with east-west-asymmetric 3DGridLeak since ver. 1.82
  *
@@ -3401,7 +3404,7 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
   Y0 = x[1] - ChargeB * p[0] * R0 / Pt ; 
   Rotation = TMath::Sign( (double)1.0, (x[0]-X0)*p[1] - (x[1]-Y0)*p[0] ) ; 
 
-  memcpy(R,TPCROWR,ROWS*sizeof(Float_t));
+  memcpy(R,TPCROWR,ROWS*sizeof(Double_t));
   // Not correct because TPC rows aren't circles ... but we dont' care
 
   if (Y0 == 0.0)  Direction = TMath::Sign((float)1.0,p[1]) ;
@@ -3585,7 +3588,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    Y0 = x[1] - ChargeB * p[0] * R0 / Pt ;
    DCA = TMath::Sqrt( X0*X0 + Y0*Y0 ) - R0 ;  // Negative means (0,0) is inside the circle
 
-   memcpy(R,TPCROWR,ROWS*sizeof(Float_t));
+   memcpy(R,TPCROWR,ROWS*sizeof(Double_t));
    // Not correct because TPC rows aren't circles ... but we dont' care
 
    // Test which of the two directions the particle goes on the circle
@@ -3794,7 +3797,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    Pz_over_Pt = TMath::SinH(PseudoRapidity) ;
    Z_coef = ChargeB*R0*Pz_over_Pt ;
  
-   memcpy(R,TPCROWR,ROWS*sizeof(Float_t));
+   memcpy(R,TPCROWR,ROWS*sizeof(Double_t));
    // Not correct because TPC rows aren't circles ... but we dont' care
 
    Float_t InnerOuterRatio = 0.0 ; // JT test. Ratio of size of the inner pads to the outer pads (Set after daisy chain, below)
@@ -4037,7 +4040,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    R[7] = 22.8   ;  // SSD (average) Radius (8th bit)
 
    // JT TEST Add the radii for the TPC Rows.  Note the hardwired offsets.
-   memcpy(&(R[TPCOFFSET]),TPCROWR,TPCROWS*sizeof(Float_t));
+   memcpy(&(R[TPCOFFSET]),TPCROWR,TPCROWS*sizeof(Double_t));
    // Not completly correct because TPC rows are flat.
 
    for ( Int_t i = 0 ; i < BITS ; i++ )
