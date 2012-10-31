@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.50 2012/10/25 22:44:38 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.51 2012/10/31 20:05:10 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.51  2012/10/31 20:05:10  genevb
+ * Row radii stored in arrays of doubles
+ *
  * Revision 1.50  2012/10/25 22:44:38  genevb
  * Switch from hardcoded to DB for several values, and fix a bug with east-west-asymmetric 3DGridLeak since ver. 1.82
  *
@@ -279,7 +282,7 @@ class StMagUtilities {
   Float_t  OUTERGGLast ;                // Radius of the last Outer Gating Grid Wire
   Float_t  GAPRADIUS ;                  // Radius of the gap between the inner and outer grids (cm)
   Float_t  WIREGAP ;                    // Width of the gap between the inner and outer grids (cm)
-  Float_t  TPCROWR[128] ;               // Radii of TPC rows along the sector centerlines
+  Double_t TPCROWR[128] ;               // Radii of TPC rows along the sector centerlines
   Int_t    INNER ;                      // Number of TPC rows in the inner sectors
   Int_t    TPCROWS ;                    // Total number of TPC rows per sector (Inner + Outer)
   Float_t  StarMagE ;                   // STAR Electric Field (V/cm) Magnitude
