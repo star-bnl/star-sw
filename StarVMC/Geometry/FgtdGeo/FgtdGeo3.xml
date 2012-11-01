@@ -482,6 +482,10 @@ flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
         <Hit meas="tof" nbits="16" min="0" max="1.0E-6" />
         <Hit meas="step" bins="0.01" />
         <Hit meas="eloss" nbits="16" min="0" max="0.001" />
+	<!-- px:16:(-5000,500) py:16:(-500,500) pz:16:(-500,500) -->
+	<Hit meas="px" nbits="16" min="-250.0" max="+250.0" />
+	<Hit meas="py" nbits="16" min="-250.0" max="+250.0" />
+	<Hit meas="pz" nbits="16" min="-250.0" max="+250.0" />
     </Instrument>
 
     <!--  FFFFFFFFFFFFFFFFFFF   place spacer frame 2 TIMES with an offset in Z and some overlap to make it thicker -->
