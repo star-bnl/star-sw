@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.247 2012/08/27 17:50:28 jwebb Exp $
+* $Id: geometry.g,v 1.248 2012/11/01 20:49:16 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.248  2012/11/01 20:49:16  jwebb
+* Add TOF_MAX configuration option.
+*
 * Revision 1.247  2012/08/27 17:50:28  jwebb
 * Added estar1 and tpciv1 geometry tags.
 *
@@ -4159,6 +4162,11 @@ If LL>0
 		Idebug=max(Idebug,1); Itest=1; }
   Case DEBUG_OFF  { standard debug mode;
            	{Idebug,Itest}=0;              }
+
+  Case TOF_MAX { Configure maximum time of flight for particles in this run;
+                <W> TOFMAX, myArg; ('Change TOFMAX from ',ES8.1,' to ', ES8.1);
+                TOFMAX = myArg; }
+
   } !// end of main moop
 
 * sanity check - if something left in commands (unknown keyword), we stop!
