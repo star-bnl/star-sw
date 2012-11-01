@@ -300,7 +300,8 @@
       SHAPE tubs rmin=diskInR rmax=diskOutR phi1=0.,
             phi2=90. dz=volSensDZ/2.
       HITS FGZC ZZ:0.001:S YY:0.001: XX:0.001: ptot:16:(0,100) cx:10: cy:10: cz:10:,
-            sleng:16:(0,500) tof:16:(0,1.0E-6) step:0.01: eloss:16:(0,0.001)
+            sleng:16:(0,500) tof:16:(0,1.0E-6) step:0.01: eloss:16:(0,0.001),
+            px:16:(-250,250) py:16:(-250,250) pz:16:(-250,250)
       DO k = 0, 1
       zzFGZ=(-volSensDZ+frameDZ)/2. * (1.-2.*k)
       CREATE FGQA
