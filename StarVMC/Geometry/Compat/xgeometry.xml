@@ -13,9 +13,12 @@ call geometry
 
 <!-- 
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.9 2012/11/01 20:49:04 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.10 2012/11/02 15:03:29 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.10  2012/11/02 15:03:29  jwebb
+  Fix format statement for SL4.4, force xgeometry recompile.
+
   Revision 1.9  2012/11/01 20:49:04  jwebb
   Force recompile of xgeometry, to add TOF_MAX configuration option.
 
@@ -27,6 +30,7 @@ call geometry
 
   Revision 1.6  2012/06/29 14:56:21  jwebb
   Added DEV14 geometry tag for HFT studies. 
+
   -->
 
 </Document>
