@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.248 2012/11/01 20:49:16 jwebb Exp $
+* $Id: geometry.g,v 1.249 2012/11/02 15:03:21 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.249  2012/11/02 15:03:21  jwebb
+* Fix format statement for SL4.4.
+*
 * Revision 1.248  2012/11/01 20:49:16  jwebb
 * Add TOF_MAX configuration option.
 *
@@ -4164,7 +4167,7 @@ If LL>0
            	{Idebug,Itest}=0;              }
 
   Case TOF_MAX { Configure maximum time of flight for particles in this run;
-                <W> TOFMAX, myArg; ('Change TOFMAX from ',ES8.1,' to ', ES8.1);
+                <W> TOFMAX, myArg; ('Change TOFMAX from ',E8.1,' to ', E8.1);
                 TOFMAX = myArg; }
 
   } !// end of main moop
