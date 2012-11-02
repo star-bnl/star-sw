@@ -16,6 +16,8 @@ template <typename T> class Array_t
   Array_t( int n=1, int m=1 );     /// 2D constructor
   Array_t( const Array_t &other ); /// copy constructor
 
+  virtual ~Array_t(){ /* nada */ };
+
   int n() const { return _n; }
   int m() const { return _m; }
 
