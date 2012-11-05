@@ -38,22 +38,25 @@ const Int_t kMuFgtNumTimeBins = 9;
 #define kFgtRmid          19.125       //     cm, at Rout/2.
 #define kFgtRin           11.5         //     cm, 
 #define kFgtRfirst        11.5385      // location of first R strip after Rin
-#define kFgtPfirst        0.0324       // location of first Phi strip 
-#define kFgtPlast         1.5384       // location of last Phi strip
+#define kFgtPfirst        0.0323748    // location of first Phi strip 
+#define kFgtPlast         1.53841996   // location of last Phi strip
 #define kFgtRflat         35.85        //     cm, 
 #define kFgtPhiflat       (31.0/180.*3.1416) //  rad 
-#define kFgtRadPitch      0.09538     //     nominal '800 mu pitch'
-#define kFgtPhiPitch      0.08        //     800 mu, at outer radi or at Rmid
-#define kFgtPhiAnglePitch 0.002095 
-#define kFgtDeadQuadEdge  1.2         // (cm) effective dead area along quadrant edges
-#define kFgtMaxClusterSize 11        //maximum cluster size in strips that a cluster algo should return
-#define kFgtNumAdditionalStrips 5        //strips in addition to the cluster size that are passed up. Mainly for debugging.
+#define kFgtRadPitch      0.0954071684 //     nominal '800 mu pitch'
+#define kFgtPhiPitch      0.08         //     800 mu, at outer radi or at Rmid
+#define kFgtPhiAnglePitch 0.0020946386 
+#define kFgtDeadQuadEdge  1.2          // (cm) effective dead area along quadrant edges
+#define kFgtMaxClusterSize 11          //maximum cluster size in strips that a cluster algo should return
+#define kFgtNumAdditionalStrips 5      //strips in addition to the cluster size that are passed up. Mainly for debugging.
 
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.18 2012/04/13 18:56:56 sgliske Exp $
+ * $Id: StFgtConsts.h,v 1.19 2012/11/05 15:43:34 akio Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.19  2012/11/05 15:43:34  akio
+ * FgtSlowSimu related fixes for r/phi consistency & speed up
+ *
  * Revision 1.18  2012/04/13 18:56:56  sgliske
  * More adjustments based on the review:
  * - Lastest StEvents from Thomas U.
