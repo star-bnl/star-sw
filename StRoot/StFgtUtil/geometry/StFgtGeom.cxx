@@ -757,32 +757,54 @@ Int_t StFgtGeom::getNaiveElecCoordFromGeoId
 int StFgtGeom::phi2LocalStripId( double rad, double phiLoc, double *binFrac )
 {
 
-  const int pbins = ((pLast() - pFirst())/phiStrip_pitch());//720 strips total numbered from 0-719
+  /*
+  const int pbins = ((pLast() - pFirst())/phiStrip_pitch()) + 1;//720 strips total numbered from 0-719
 
   double pstrip[pbins];//array that holds phi location of strips
 
   //fill array of pstrip with difference between passed phi and strip phi location values
-  double min_p_diff = phiStrip_pitch();
+  double min_p_diff = phiStrip_pitch()/2.0;
   int pindex = -1;//index in array is the strip value
   for ( int i =0; i < pbins; i++)
     {
+      double p=-i*phiStrip_pitch() + pLast();
       pstrip[i] = (-i*phiStrip_pitch() + pLast() - phiLoc);
       if ( fabs(pstrip[i]) < fabs(min_p_diff) ) 
 	{
 	  min_p_diff = pstrip[i];
 	  pindex = i;
+	  //printf("ppp i=%3d phi=%8.4f p=%8.4f %8.4f %8.4f pst=%8.4f pindex=%3d ",
+	  //        i,phiLoc,p-phiStrip_pitch()/2.0,p,p+phiStrip_pitch()/2.0,pstrip[i],pindex);
+	  //break;
 	}
+      //printf("ppp i=%3d phi=%8.4f p=%8.4f %8.4f %8.4f pst=%8.4f pindex=%3d\n",
+      //       i,phiLoc,p-phiStrip_pitch()/2.0,p,p+phiStrip_pitch()/2.0,pstrip[i],pindex);
     }
+  */
+  int pindex=-1;
+  double p3=0.0;
+  if(phiLoc>=pFirst()-phiStrip_pitch()/2.0 || phiLoc<=pLast()+phiStrip_pitch()/2.0){
+    double p2=pLast()+phiStrip_pitch()/2.0-phiLoc;
+    p3=p2/phiStrip_pitch();
+    pindex=int(p3);
+  }
+  //printf("pindex=%d pindex2=%d diff=%d\n",pindex,pindex2,pindex-pindex2);  
+  //if(pindex!=pindex2) printf("pindex=%d pindex2=%d diff=%d\n",pindex,pindex2,pindex-pindex2);
+
 
   //if r is < 19.125 and >= 11.5 then all even strips are not there
   //if index is odd the width is 2x phiStrip_pitch()
-  if ( (rad < rMid()) && (rad >= rIn()) && (pindex%2) ){
+  if ( (rad < rMid()) && (rad >= rIn()) && (pindex%2==1) && pindex>-1){
  
+    /*
     //if min_p_diff < 0 then phiLoc > stripPhi and is closer to the lower numbered odd strip
     if (min_p_diff <= 0) pindex-=1;
     //if min_p_diff > 0 then phiLoc < stripPhi and is closer to higher numbered odd strip 
     if (min_p_diff > 0) pindex+=1;
-
+    */
+    //printf("EvenOdd pindex=%3d p3=%6.2f mod=%2d\n",pindex,p3,pindex%2);
+    if(p3-pindex<0.5) {pindex-=1;}
+    else              {pindex+=1;}
   }
   
   //the first and last 35 strips have irregular rinner values
@@ -1257,24 +1279,38 @@ double StFgtGeom::pHistrip_R_Low(int pindex){
 //then it returns -1
 int StFgtGeom::rad2LocalStripId( double rad, double phiLoc, double *binFrac )
 {
+  const int rbins = ((rLast() - rFirst())/radStrip_pitch())+1;//280 strips on each side of the quadrant
 
-  const int rbins = ((rLast() - rFirst())/phiStrip_pitch())+1;//280 strips on each side of the quadrant
-
+  /*
   double rstrip[rbins];//array that holds r location of strips
-
   //fill array of rstrip with difference between passed radius and strip r location values
-  double min_r_diff = radStrip_pitch();
+  //double min_r_diff = radStrip_pitch();
+  double min_r_diff = radStrip_pitch()/2.0;
   int rindex = -1;//index in array is the strip value
   for ( int i =0; i < rbins; i++)
     {
+      //double r=-i*radStrip_pitch() + rLast();
       rstrip[i] = fabs(-i*radStrip_pitch() + rLast() - rad);
+      
       if (rstrip[i] < min_r_diff) 
 	{
 	  min_r_diff = rstrip[i];
 	  rindex = i;
+	  //printf("rrr i=%3d rad=%8.4f r=%8.4f %8.4f %8.4f rst=%8.4f rindex=%3d ",
+	  //       i,rad,r-radStrip_pitch()/2.0,r,r+radStrip_pitch()/2.0,rstrip[i],rindex);
+	  break;
 	}
+      //printf("rrr i=%3d r=%8.4f mid=%8.4f rindex=%3d\n",i,r,r+radStrip_pitch()*0.5,rindex);
     }
-  
+  */
+  int rindex=-1;
+  if(rad>=rFirst()-radStrip_pitch()/2.0 || rad<=rLast()+radStrip_pitch()/2.0){
+    double r2=rLast()+radStrip_pitch()/2.0-rad;
+    rindex=int(r2/radStrip_pitch());
+  }
+  //printf("rindex=%d rindex2=%d diff=%d\n",rindex,rindex2,rindex-rindex2);
+  //if(rindex!=rindex2) printf("rindex=%d rindex2=%d diff=%d\n",rindex,rindex2,rindex-rindex2);
+
   //if phi = 45-90 (135-180,0--45, -90-135),  then strips are 0-279  and flag =0  
   Int_t Phi_flag = 0;
   
@@ -4155,8 +4191,11 @@ Int_t StFgtGeom::mNaiveMapping[] =
 };
 
 /*
- *  $Id: StFgtGeom.cxx,v 1.35 2012/08/25 17:23:34 avossen Exp $
+ *  $Id: StFgtGeom.cxx,v 1.36 2012/11/05 15:43:40 akio Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.36  2012/11/05 15:43:40  akio
+ *  FgtSlowSimu related fixes for r/phi consistency & speed up
+ *
  *  Revision 1.35  2012/08/25 17:23:34  avossen
  *  made getQuad compatible with angles between 0 and 2*pi
  *
