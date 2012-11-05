@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.47 2012/09/16 21:34:48 fisyak Exp $
+ * $Id: StEnumerations.h,v 2.48 2012/11/05 18:18:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.48  2012/11/05 18:18:45  ullrich
+ * Add 3 new members to StFgtClusterSeedType.
+ *
  * Revision 2.47  2012/09/16 21:34:48  fisyak
  * Add Tpc West Only and East only bits
  *
@@ -488,6 +491,9 @@ enum StFgtClusterSeedType {
     kFgtSeedType1,
     kFgtSeedType2,
     kFgtSeedType3,
+    kFgtSeedType4,
+    kFgtSeedType5,
+    kFgtSeedTypeMax,
     kFgtClusterPart,
     kFgtNextToDeadGuy,
     kFgtClusterEndUp,
