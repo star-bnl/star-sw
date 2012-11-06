@@ -169,7 +169,7 @@ StCtbHitList::StCtbHitList() : StPhiEtaHitList(), // CTB clibration: 2 MeV==5 AD
   phiMin = -TMath::Pi()/60.;
   Double_t phiMax =  phiMin + TMath::Pi();
   Int_t    nEta   = 4;
-  Double_t etaBins[5] = {-0.97, -0.5, 0.5, 0.97};
+  Double_t etaBins[5] = {-0.97, -0.5, 0.0, 0.5, 0.97};
   TH2C **histList[3] = {&mActive, &mFired, &mTrack};
   for (Int_t i = 0; i < 3; i++) {
     *histList[i] = new TH2C(Form("%sCtb",names[i]),Form("List of %s cells in Ctb",names[i]),nPhi,phiMin,phiMax,nEta,etaBins);
