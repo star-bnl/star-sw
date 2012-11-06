@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.40 2012/05/25 20:19:40 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.41 2012/11/06 20:58:04 fisyak Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -172,7 +172,6 @@ StPPVertexFinder::InitRun(int runnumber){
       LOG_INFO << " BTofGeometry initialization ... " << endm;
       TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
       btofGeom->Init(mydb, starHall);
-      mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
     }
   }
   //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
@@ -1354,6 +1353,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.41  2012/11/06 20:58:04  fisyak
+ * Remove second addition of btofGeom to db maker
+ *
  * Revision 1.40  2012/05/25 20:19:40  balewski
  * convert many LOG_INFO to LOG_DEBUG to make PPV more silent. No intencional change of PPV logic.
  *
