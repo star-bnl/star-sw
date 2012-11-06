@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.63 2012/06/11 16:38:35 fisyak Exp $
+ * $Id: EventReader.cxx,v 1.64 2012/11/06 21:25:41 fisyak Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.64  2012/11/06 21:25:41  fisyak
+ * Jeff's fix for SSD
+ *
  * Revision 1.63  2012/06/11 16:38:35  fisyak
  * std namespace, remove clash with rtsSystems.h
  *
@@ -807,14 +810,14 @@ EventInfo EventReader::getEventInfo()
     ei.TrigWord      = dp->TriggerWord;
     ei.TrigInputWord = dp->TriggerInWord;
     int detpre       = dp->DetectorPresence;
-    ei.UnixTime      = -1;// special case: time was not defined (=0 means : now() )
+    //?yf    ei.UnixTime      = -1;// special case: time was not defined (=0 means : now() )
     ei.EventLength   = -1;// special case: time was not defined (=0 means : now() )
     LOG_INFO<<"EventReader::getEventInfo  detector presence = "<<detpre<<endm;
 
     int sys = 0;
     for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
-      if(system_present(dp, sys)) *p = 1;
-      else *p = 0;
+      *p = 0;
+      if(system_present(dp, sys) || (detpre & (1<<sys))) *p = 1;
       sys++;
     }
     ei.EMCPresent = (ei.BTOWPresent|ei.ETOWPresent|ei.BSMDPresent|ei.ESMDPresent|ei.TRGPresent);
