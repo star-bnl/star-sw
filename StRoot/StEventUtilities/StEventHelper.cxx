@@ -45,6 +45,7 @@
 
 #define  __EVENTHELPER_ONLY__
 #include "StEventHelper.h"
+#include "StEventHitIter.h"
 #undef   __EVENTHELPER_ONLY__
 #include <map>
 
@@ -204,10 +205,13 @@ void StEventInspector::CheckIn(TObject *obj,const char *bwname)
        }
        return;
   }  }
-
-  char cbuf[1000];*cbuf=0;
   StEventInspector insp(fMap,fCount);
+#if ROOT_VERSION_CODE < 334597
+  char cbuf[1000];*cbuf=0;
   obj->ShowMembers(insp,cbuf);
+#else
+  obj->ShowMembers(insp);
+#endif
 }
 //______________________________________________________________________________
 ClassImp(StEventHelper)
@@ -240,9 +244,12 @@ void StEventHelper::Reset(const TObject *evt,const char *opt)
    if (!fObject) return;
    int kount=0;
    StEventInspector insp(fMap,kount,opt);
+#if ROOT_VERSION_CODE < 334597
    char cbuf[1024];
-   
    fObject->ShowMembers(insp,cbuf);
+#else
+   fObject->ShowMembers(insp);
+#endif
 }
 //______________________________________________________________________________
 int StEventHelper::Kind(const TObject *to)
