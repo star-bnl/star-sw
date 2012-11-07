@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.36 2012/05/07 14:42:57 fisyak Exp $
+ * $Id: StEventTypes.h,v 2.37 2012/11/07 21:37:54 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.37  2012/11/07 21:37:54  fisyak
+ * Add includes for Fgt
+ *
  * Revision 2.36  2012/05/07 14:42:57  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -252,5 +255,10 @@
 #include "StZdcTriggerDetector.h"
 #include "StRnDHit.h"
 #include "StRnDHitCollection.h"
+#include "StFgtCollection.h"
+#include "StFgtHit.h"
+#include "StFgtHitCollection.h"
+#include "StFgtPoint.h"
+#include "StFgtPointCollection.h"
  
 #endif
