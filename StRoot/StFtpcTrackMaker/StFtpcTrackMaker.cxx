@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.92 2009/11/25 19:50:21 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.93 2012/11/07 23:30:18 fisyak Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.93  2012/11/07 23:30:18  fisyak
+// Supress warnings
+//
 // Revision 1.92  2009/11/25 19:50:21  jcs
 // remove all references to StFtpcSoftwareMonitor
 //
@@ -457,8 +460,7 @@ cout<<"InitRun StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() = "<<S
 
   // get run dependent tracking parameters from database
   StFtpcTrackingParams::Instance(kTRUE, 
-				 (St_ftpcCoordTrans *)ftpcCalibrations("ftpcCoordTrans"),
-				 GetDataBase("RunLog"));
+				 (St_ftpcCoordTrans *)ftpcCalibrations("ftpcCoordTrans"));
   
   if (StFtpcTrackingParams::Instance()->GetReturnCode() > 0) {
     LOG_ERROR << " FATAL error in StFtpcTrackingParams return code = "<< StFtpcTrackingParams::Instance()->GetReturnCode() <<endm;
@@ -917,7 +919,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.92 2009/11/25 19:50:21 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.93 2012/11/07 23:30:18 fisyak Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {

@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.35 2009/11/14 13:17:36 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.36 2012/11/07 23:30:18 fisyak Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.36  2012/11/07 23:30:18  fisyak
+// Supress warnings
+//
 // Revision 1.35  2009/11/14 13:17:36  jcs
 // add LOG_DEBUG message to print out microsecondsPerTimebi
 //
@@ -303,8 +306,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   				 (St_ftpcPadrowZ *)dblocal_geometry("ftpcPadrowZ"));
   // instance tracking parameters for rotations
   StFtpcTrackingParams::Instance(kTRUE, 
-				 (St_ftpcCoordTrans *)dblocal_calibrations("ftpcCoordTrans"),
-				 GetDataBase("RunLog"));
+				 (St_ftpcCoordTrans *)dblocal_calibrations("ftpcCoordTrans"));
 
   St_DataSet *ftpclocal = GetDataBase("ftpc");  // zum Verwenden der lokalen DB
   if ( !ftpclocal ){

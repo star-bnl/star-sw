@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.37 2010/06/03 11:09:39 jcs Exp $
+// $Id: StFtpcConfMapper.cc,v 1.38 2012/11/07 23:30:18 fisyak Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.38  2012/11/07 23:30:18  fisyak
+// Supress warnings
+//
 // Revision 1.37  2010/06/03 11:09:39  jcs
 // correction for Bug #1939 - TObjArray track was still used after it was removed
 // removed inactive code
@@ -1867,10 +1870,10 @@ void StFtpcConfMapper::CutInfo()
   LOG_INFO << endm;
   LOG_INFO << "Cuts for main vertex constraint on / off" << endm;
   LOG_INFO << "----------------------------------------" << endm;
-  LOG_INFO << Form("Max. angle between last three points of tracklets: %6d / %6d",mMaxAngleTracklet[1],mMaxAngleTracklet[0]) << endm;
-  LOG_INFO << Form("Max. angle between last three points of tracks:    %6d / %6d",mMaxAngleTrack[1],mMaxAngleTrack[0]) << endm;
-  LOG_INFO << Form("Max. distance between circle fit and trackpoint:   %6d / %6d",mMaxCircleDist[1],mMaxCircleDist[0]) << endm;
-  LOG_INFO << Form("Max. distance between length fit and trackpoint:   %6d / %6d",mMaxLengthDist[1],mMaxLengthDist[0])<< endm;
+  LOG_INFO << Form("Max. angle between last three points of tracklets: %6f / %6f",mMaxAngleTracklet[1],mMaxAngleTracklet[0]) << endm;
+  LOG_INFO << Form("Max. angle between last three points of tracks:    %6f / %6f",mMaxAngleTrack[1],mMaxAngleTrack[0]) << endm;
+  LOG_INFO << Form("Max. distance between circle fit and trackpoint:   %6f / %6f",mMaxCircleDist[1],mMaxCircleDist[0]) << endm;
+  LOG_INFO << Form("Max. distance between length fit and trackpoint:   %6f / %6f",mMaxLengthDist[1],mMaxLengthDist[0])<< endm;
 
   return;
 }

@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.hh,v 1.21 2007/12/12 12:55:19 jcs Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.22 2012/11/07 23:30:18 fisyak Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.22  2012/11/07 23:30:18  fisyak
+// Supress warnings
+//
 // Revision 1.21  2007/12/12 12:55:19  jcs
 // Markus Oldenburg replaced assert() with a return code which can be tested in StFtpcTrackMaker
 // replaced 'return 1' with 'return kStOK'
@@ -226,8 +229,7 @@ public:
 					St_ftpcDimensions *dimensions,
 					St_ftpcPadrowZ *padrow_z);
   static StFtpcTrackingParams* Instance(Bool_t debug, 
-					St_ftpcCoordTrans *ftpcCoordTrans, 
-					TDataSet *RunLog);
+					St_ftpcCoordTrans *ftpcCoordTrans);
   static StFtpcTrackingParams* Instance();
   
   virtual ~StFtpcTrackingParams();
