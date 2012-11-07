@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.62 2009/02/18 21:31:22 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.63 2012/11/07 21:54:37 fisyak Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.63  2012/11/07 21:54:37  fisyak
+// Remove check for .histos
+//
 // Revision 1.62  2009/02/18 21:31:22  bouchet
 // fix bug for printing the number of hits/ladder and filling histograms
 //
@@ -221,75 +224,72 @@
 #include "StSsdHitCollection.h"
 #include "StSsdDbMaker/StSsdDbMaker.h"
 #include "TMath.h"
-ClassImp(StSsdPointMaker)
+ClassImp(StSsdPointMaker);
   
 //_____________________________________________________________________________
-  Int_t StSsdPointMaker::Init(){
+Int_t StSsdPointMaker::Init(){
   LOG_INFO << "Init() : Defining the histograms" << endm;
-  if (IAttr(".histos")) {
-    noisDisP  = new TH1F("Noise_p","Noise Distribution",250,0,25);
-    snRatioP  = new TH1F("SN_p","Signal/Noise (p)",200,0,200);
-    stpClusP  = new TH1F("NumberOfStrips_p","Strips per Cluster",8,0,8);
-    totChrgP  = new TH1F("ChargeElectron_p","Total Cluster Charge",100,0,300000);
-    ClusNvsClusP  = new TH2S("ClusNvsClusP","Number of clusters on the n-side vs Number of clusters on the p-side",200,0,200,200,0,200);
-    ClusNvsClusP->SetXTitle("Number of p-Side Clusters");
-    ClusNvsClusP->SetYTitle("Number of n-Side Clusters");
-    noisDisN  = new TH1F("Noise_n","Noise Distribution",250,0,25);
-    snRatioN  = new TH1F("SN_n","Signal/Noise",200,0,200);
-    stpClusN  = new TH1F("NumberOfStrips_n","Strips per Cluster",8,0,8);
-    totChrgN  = new TH1F("ChargeElectron_n","Total Cluster Charge",100,0,300000);
-    ClustMapP = new TH2S("ClustMapP","Number of clusters on the p-side per wafer and ladder",20,0,20,16,0,16);
-    ClustMapP->SetXTitle("Ladder id");
-    ClustMapP->SetYTitle("Wafer id");
-    ClustMapN = new TH2S("ClustMapN","Number of clusters on the n-side per wafer and ladder",20,0,20,16,0,16);
-    ClustMapN->SetXTitle("Ladder id");
-    ClustMapN->SetYTitle("Wafer id");
-    MatchedClusterP = new TH2F("MatchedClusterP","#frac{# clusters matched}{# clusters reconstructed} , wafers on p-side",20,1,21,16,1,17);
-    MatchedClusterP->SetXTitle("Ladder id");
-    MatchedClusterP->SetYTitle("Wafer id");
-    MatchedClusterN = new TH2F("MatchedClusterN","#frac{# clusters matched}{# clusters reconstructed} , wafers on n-side",20,1,21,16,1,17);
-    MatchedClusterN->SetXTitle("Ladder id");
-    MatchedClusterN->SetYTitle("Wafer id");
-    // 		Create SCM histograms
-    matchisto = new TH2S("matchingHisto","Matching Adc (1p-1n)",500,0,1000,500,0,1000);
-    matchisto->SetXTitle("PSide ADC count");
-    matchisto->SetYTitle("NSide ADC count");
-    matchisto->SetZTitle("(1p-1n) hits");
-
-    matchisto->SetTitleOffset(2,"X");
-    matchisto->SetTitleOffset(2,"Y");
-    //   matchisto->SetTitleOffset(-1,"Z");
-
-    matchisto->SetLabelSize(0.03,"X");
-    matchisto->SetLabelSize(0.03,"Y");
-    matchisto->SetLabelSize(0.03,"Z");
-
-    matchisto->SetNdivisions(5,"X");
-    matchisto->SetNdivisions(5,"Y");
-    matchisto->SetNdivisions(10,"Z");
-
-    orthoproj = new TH1S("ProjectionOrtho","Perfect Matching Deviation",320,-80,80);
-    
-    kind = new TH1S("kind","Kind of hits",11,0,11);
-    kind->SetXTitle("kind");
-    kind->SetYTitle("entries");
-    kind->SetTitleOffset(2,"X");
-    kind->SetTitleOffset(2,"Y");
-    
-    TString Title;
-    Char_t *Name = new Char_t[20];
-    Title ="Matching Adc (1p-1n) for ladder";
-    for(Int_t ii=0;ii<20;ii++)
-      {
-	Title = Form("Matching Adc (1p-1n) for ladder = %i",ii+1);
-	sprintf(Name,"%s%d","matchingHisto_",ii);
-	matchisto_[ii] =  new TH2S(Name,Title,500,0,1000, 500, 0, 1000);
-	matchisto_[ii]->SetXTitle("PSide ADC count");
-	matchisto_[ii]->SetYTitle("NSide ADC count");
-	matchisto_[ii]->SetZTitle("(1p-1n) hits");
-      }
-    if (Debug()>1) DeclareNtuple();
+  noisDisP  = new TH1F("Noise_p","Noise Distribution",250,0,25);
+  snRatioP  = new TH1F("SN_p","Signal/Noise (p)",200,0,200);
+  stpClusP  = new TH1F("NumberOfStrips_p","Strips per Cluster",8,0,8);
+  totChrgP  = new TH1F("ChargeElectron_p","Total Cluster Charge",100,0,300000);
+  ClusNvsClusP  = new TH2S("ClusNvsClusP","Number of clusters on the n-side vs Number of clusters on the p-side",200,0,200,200,0,200);
+  ClusNvsClusP->SetXTitle("Number of p-Side Clusters");
+  ClusNvsClusP->SetYTitle("Number of n-Side Clusters");
+  noisDisN  = new TH1F("Noise_n","Noise Distribution",250,0,25);
+  snRatioN  = new TH1F("SN_n","Signal/Noise",200,0,200);
+  stpClusN  = new TH1F("NumberOfStrips_n","Strips per Cluster",8,0,8);
+  totChrgN  = new TH1F("ChargeElectron_n","Total Cluster Charge",100,0,300000);
+  ClustMapP = new TH2S("ClustMapP","Number of clusters on the p-side per wafer and ladder",20,0,20,16,0,16);
+  ClustMapP->SetXTitle("Ladder id");
+  ClustMapP->SetYTitle("Wafer id");
+  ClustMapN = new TH2S("ClustMapN","Number of clusters on the n-side per wafer and ladder",20,0,20,16,0,16);
+  ClustMapN->SetXTitle("Ladder id");
+  ClustMapN->SetYTitle("Wafer id");
+  MatchedClusterP = new TH2F("MatchedClusterP","#frac{# clusters matched}{# clusters reconstructed} , wafers on p-side",20,1,21,16,1,17);
+  MatchedClusterP->SetXTitle("Ladder id");
+  MatchedClusterP->SetYTitle("Wafer id");
+  MatchedClusterN = new TH2F("MatchedClusterN","#frac{# clusters matched}{# clusters reconstructed} , wafers on n-side",20,1,21,16,1,17);
+  MatchedClusterN->SetXTitle("Ladder id");
+  MatchedClusterN->SetYTitle("Wafer id");
+  // 		Create SCM histograms
+  matchisto = new TH2S("matchingHisto","Matching Adc (1p-1n)",500,0,1000,500,0,1000);
+  matchisto->SetXTitle("PSide ADC count");
+  matchisto->SetYTitle("NSide ADC count");
+  matchisto->SetZTitle("(1p-1n) hits");
+  
+  matchisto->SetTitleOffset(2,"X");
+  matchisto->SetTitleOffset(2,"Y");
+  //   matchisto->SetTitleOffset(-1,"Z");
+  
+  matchisto->SetLabelSize(0.03,"X");
+  matchisto->SetLabelSize(0.03,"Y");
+  matchisto->SetLabelSize(0.03,"Z");
+  
+  matchisto->SetNdivisions(5,"X");
+  matchisto->SetNdivisions(5,"Y");
+  matchisto->SetNdivisions(10,"Z");
+  
+  orthoproj = new TH1S("ProjectionOrtho","Perfect Matching Deviation",320,-80,80);
+  
+  kind = new TH1S("kind","Kind of hits",11,0,11);
+  kind->SetXTitle("kind");
+  kind->SetYTitle("entries");
+  kind->SetTitleOffset(2,"X");
+  kind->SetTitleOffset(2,"Y");
+  
+  TString Title;
+  Char_t *Name = new Char_t[20];
+  Title ="Matching Adc (1p-1n) for ladder";
+  for(Int_t ii=0;ii<20;ii++)    {
+    Title = Form("Matching Adc (1p-1n) for ladder = %i",ii+1);
+    sprintf(Name,"%s%d","matchingHisto_",ii);
+    matchisto_[ii] =  new TH2S(Name,Title,500,0,1000, 500, 0, 1000);
+    matchisto_[ii]->SetXTitle("PSide ADC count");
+    matchisto_[ii]->SetYTitle("NSide ADC count");
+    matchisto_[ii]->SetZTitle("(1p-1n) hits");
   }
+  if (Debug()>1) DeclareNtuple();
   return StMaker::Init();
 }
 //_____________________________________________________________________________
