@@ -1,7 +1,6 @@
 #include "Stiostream.h"
 #include <cmath>
 #include <stdio.h>
-#include "StiSvtLayerLadder.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
 #include "Sti/Base/Factory.h"
