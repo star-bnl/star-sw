@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.19 2012/10/23 19:44:18 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.20 2012/11/07 21:35:26 fisyak Exp $
  *
  */
 
@@ -752,10 +752,80 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
       }
     }
   }
+  StEmcCollection* emccol = event->emcCollection();
+  if (emccol) {
+    const Char_t *Names[2] = {"EMC ","EEMC"};
+    for (Int_t be = 0; be < 2; be++) {// Barrel and Endcap
+      Int_t d1 = 0; 
+      Int_t d2 = 3;
+      if (be) {d1 = 4; d2 =7;}
+      Int_t Adcs[4] = {0, 0, 0, 0};
+      Int_t Cls[4]  = {0, 0, 0, 0};
+      for(Int_t d = d1; d <= d2; d++)  {  
+	StDetectorId id = static_cast<StDetectorId>(d+kBarrelEmcTowerId);
+	const StEmcDetector* detector=emccol->detector(id);
+	if (detector) {
+	  Int_t maxMod = 121;
+	  if (d > 3) maxMod = 14;
+	  for(Int_t j = 1; j < maxMod; j++) {
+	    const StEmcModule* module = detector->module(j);
+	    if(module) {
+	      const StSPtrVecEmcRawHit& rawHit=module->hits();
+	      Adcs[d-d1] += rawHit.size();
+	    }
+	  }
+	  const StEmcClusterCollection *cl = detector->cluster();
+	  if (cl) {
+	    Cls[d-d1] = cl->numberOfClusters();
+	  }
+	}
+      }
+      Int_t np = 0;
+      if (! be) np = emccol->barrelPoints().size();
+      else      np = emccol->endcapPoints().size();
+      if (np || 
+	  Adcs[0] || Adcs[1] || Adcs[2] || Adcs[3] ||
+	  Cls[0]  || Cls[1]  || Cls[2]  || Cls[3] ) {
+	LOG_QA << Form("# %s points:%5i",Names[be],np);
+	LOG_QA << Form(": Adc(T/p/E/P) %4i/%4i/%4i/%4i",Adcs[0],Adcs[1],Adcs[2],Adcs[3]);
+	LOG_QA << Form(": Cls(T/p/E/P) %4i/%4i/%4i/%4i",Cls[0],Cls[1],Cls[2],Cls[3]);
+	LOG_QA << endm;
+      }
+    }
+  }
+  const StBTofCollection* tof = event->btofCollection();
+  if (tof) {
+    const StSPtrVecBTofHit& tofHits = tof->tofHits();
+    if (tofHits.size()) {
+      Int_t n = tofHits.size();
+      Int_t m = 0;
+      for(Int_t i=0;i<n;i++) { //loop on hits in modules
+	StBTofHit *aHit = tofHits[i];
+	if(!aHit) continue;
+	if (aHit->associatedTrack()) m++;
+      }
+      LOG_QA << Form("# BTof   hits:%5i: Matched with tracks:%5i",n,m) << endm; 
+    }
+  }
+  if (event->fpdCollection() && event->fpdCollection()->numberOfADC()) {
+    LOG_QA << "# FPD ADCs:            " << event->fpdCollection()->numberOfADC() << endm;
+  }
+  if (event->fgtCollection() && event->fgtCollection()->getNumHits()) {
+    LOG_QA << "# FGT hits:            " << event->fgtCollection()->getNumHits() << endm;
+  }
+  if (event->richCollection() && event->richCollection()->getRichHits().size()) {
+    LOG_QA << "# RICH hits:           " << event->richCollection()->getRichHits().size() << endm;
+  }
+  if (event->numberOfPsds()) {
+    LOG_QA << "# PSDs:                " << event->numberOfPsds() << endm;
+  }
 }
 //________________________________________________________________________________
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.20  2012/11/07 21:35:26  fisyak
+ * Add to summary print out for EMC and ToF
+ *
  * Revision 2.19  2012/10/23 19:44:18  fisyak
  * Add print out for ToF and Emc hits
  *
