@@ -159,12 +159,19 @@ void StvHitErrCalculator::CalcDcaDers(double dRR[kMaxPars][3])
 //______________________________________________________________________________
 void StvTpcHitErrCalculator::CalcDetErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3])
 {
+static const double kMinErr2=0.1*0.1,kMaxErr2=1.0*1.0;
+
     float zSpan = fabs(fabs(hiPos[2])-210)/100;
     double save1 = mPar[kYErr],save2 = mPar[kZErr];
     mPar[kYErr]+=mPar[kYDiff]*zSpan;
     mPar[kZErr]+=mPar[kZDiff]*zSpan;
     StvHitErrCalculator::CalcDetErrs(hiPos,hiDir,hRR);
     mPar[kYErr]=save1;mPar[kZErr]=save2;
+    for (int i=0;i<3;i+=2) {
+      if (hRR[i]<kMinErr2) hRR[i]=kMinErr2;
+      if (hRR[i]>kMaxErr2) hRR[i]=kMaxErr2;
+    }
+
 }
 //______________________________________________________________________________
 void StvTpcHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][3],double hRR[3])
