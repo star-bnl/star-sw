@@ -222,18 +222,18 @@ public:
                      void    Add(StPoints3DABC *add);
                      Int_t   Add(float x, float y, float z){return TPoints3DABC::Add(x,y,z);} //WarnOff
 // Dummies
-               virtual Int_t DistancetoPrimitive(Int_t px, Int_t py){return -1;}
+		     virtual Int_t DistancetoPrimitive(Int_t/* px */, Int_t /* py */){return -1;}
                virtual Int_t GetLastPosition() const {return 0;}
            virtual Option_t* GetOption() const{return 0;}
       virtual const Float_t* GetXYZ(Int_t idx)  {return fXYZ+3*idx;}
       virtual Float_t       *GetXYZ(Float_t *xyz,Int_t idx,Int_t num=1)  const
                              {return TPoints3DABC::GetXYZ(xyz,idx,num);}
-               virtual  void PaintPoints(Int_t n, Float_t* p, Option_t* option){}
-               virtual Int_t SetLastPosition(Int_t idx){return 0;}
-               virtual Int_t SetNextPoint(Float_t x, Float_t y, Float_t z){return 0;}
-                virtual void SetOption(Option_t* option){}
-               virtual Int_t SetPoints(Int_t, Float_t * = 0, const Option_t * = ""){return 0;}
-               virtual Int_t SetPoint(Int_t POINT, Float_t x, Float_t y, Float_t z){return 0;}
+      virtual  void PaintPoints(Int_t /* n */, Float_t* /* p */, Option_t* /* option */){}
+      virtual Int_t SetLastPosition(Int_t /* idx */){return 0;}
+      virtual Int_t SetNextPoint(Float_t /* x */, Float_t /* y */, Float_t /* z */){return 0;}
+      virtual void SetOption(Option_t* /* option */){}
+      virtual Int_t SetPoints(Int_t , Float_t * /* = 0 */, const Option_t * /* = "" */){return 0;}
+      virtual Int_t SetPoint(Int_t /* POINT */, Float_t /* x */, Float_t /* y */, Float_t /* z */){return 0;}
 private:
                         void Init() const;
 
@@ -433,7 +433,7 @@ virtual const char  **GetNams() const;
 protected:
   virtual Int_t  Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&);
           Int_t  Accept(const StTrack *track, Color_t&, Size_t&, Style_t&);
-          Int_t  Accept(StPoints3DABC *pnt){return 1;}
+          Int_t  Accept(StPoints3DABC */* pnt */){return 1;}
           
 protected:
    StTpcDedxPidAlgorithm *fPidAlgorithm;
