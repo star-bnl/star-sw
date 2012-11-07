@@ -42,9 +42,13 @@ Int_t StRedoTracks::Make(){
   // Get instance of StMagUtilities
   int option = 0;
   if (!m_ExB) {
+#ifdef __NEW_MagUtilities__
+    m_ExB = new StMagUtilities(tpcDbMaker->tpcDbInterface(),option);
+#else
     TDataSet *RunLog = GetDataBase("RunLog/MagFactor");
     if (!RunLog) gMessMgr->Warning("StRedoTracks: No RunLog/MagFactor found.");
     m_ExB = new StMagUtilities(tpcDbMaker->tpcDbInterface(),RunLog,option);
+#endif
   }
 
   StEvent* event = (StEvent*) GetInputDS("StEvent");
@@ -123,8 +127,11 @@ Int_t StRedoTracks::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-// $Id: StRedoTracks.cxx,v 1.5 2012/10/01 17:50:06 genevb Exp $
+// $Id: StRedoTracks.cxx,v 1.6 2012/11/07 23:27:55 fisyak Exp $
 // $Log: StRedoTracks.cxx,v $
+// Revision 1.6  2012/11/07 23:27:55  fisyak
+// Add place holder for new StMagUtilities
+//
 // Revision 1.5  2012/10/01 17:50:06  genevb
 // Reduce some overhead DB queries by being more specific about needed tables
 //
