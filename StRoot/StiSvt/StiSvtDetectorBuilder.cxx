@@ -20,8 +20,8 @@
 #include "StDetectorDbMaker/StiSvtHitErrorCalculator.h"
 #include <stdio.h>
 #include "tables/St_HitError_Table.h"
-#include "StiSvtLayerLadder.h"
 #include "StThreeVectorD.hh"
+#include "StiSvtHitLoader.h"
 /*
   Geant names: SVTT the mother of all SVT volumes
                  SFMO: is the mother of all Silicon Strip Detector volumes
@@ -144,7 +144,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
     cout << "  "<<layer<<"     "<<_config->getNumberOfLadders(1+layer/2)/2 << "   " 
 	 << _geometry->getBarrelRadius(layer+1) << endl;
     Int_t svtLayer = layer+1;
-    Int_t svtBarrel = getSvtBarrel(svtLayer);
+    Int_t svtBarrel = StiSvtHitLoader::getSvtBarrel(svtLayer);
     int nWafers = _config->getNumberOfWafers(svtBarrel);
     // Si wafer
     sprintf(name, "Svt/Layer_%d/Wafers", layer);

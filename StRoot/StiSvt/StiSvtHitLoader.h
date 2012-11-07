@@ -28,10 +28,9 @@ public:
 	virtual void loadHits(StEvent* source,
 			      Filter<StiTrack> * trackFilter, 
 			      Filter<StiHit> * hitFilter);
-#if 0
-	int getLayer(int svtLayer) const;
-	int getLadder(int svtLayer, int svtLadder) const;
-#endif	
+        static Int_t getSvtBarrel(Int_t svtLayer) {return (((svtLayer)-1)/2+1);}
+        static Int_t getLayer(Int_t svtLayer)     {return ((svtLayer)-1);}
+        static Int_t getLadder(Int_t /* svtLayer */, Int_t svtLadder)  {return (((svtLadder)-1)/2);}
 };
 
 #endif
