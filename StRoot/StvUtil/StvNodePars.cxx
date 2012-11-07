@@ -209,7 +209,7 @@ StvNodePars &StvNodePars::operator=(const StvNodePars& fr)
 {
   if (&fr==this)	return *this;
   memcpy(this,&fr,sizeof(*this));
-assert(fabs(_hz-0.00149681)<0.0001);
+assert(fabs(_hz-0.00149681)<0.002);
   return *this;
 }
 //______________________________________________________________________________
@@ -403,7 +403,7 @@ StvFitErrs &StvFitErrs::operator=(const StvFitErrs &fr)
 {
   if (&fr==this)	return *this;
   memcpy(this,&fr,sizeof(*this));
-assert(fabs(mHz-0.00149681)<0.0001);
+assert(fabs(mHz-0.00149681)<0.002);
   return *this;
 }
 // //______________________________________________________________________________
