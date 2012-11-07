@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.37 2009/08/25 19:41:19 fine Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.38 2012/11/07 23:30:18 fisyak Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.38  2012/11/07 23:30:18  fisyak
+// Supress warnings
+//
 // Revision 1.37  2009/08/25 19:41:19  fine
 // fix the compilation issues under SL5_64_bits  gcc 4.3.2
 //
@@ -255,7 +258,7 @@ StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug,
 }
 
 
-StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, St_ftpcCoordTrans *ftpcCoordTrans, TDataSet *RunLog) {
+StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, St_ftpcCoordTrans *ftpcCoordTrans) {
   // updates magnetic field, if necessary
 
   mInstance->InitCoordTransformation(ftpcCoordTrans->GetTable()); // Has to be invoked here, because it could change from run to run.
