@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.252 2012/06/29 16:13:22 perev Exp $
+// $Id: StMaker.cxx,v 1.253 2012/11/07 23:05:45 fisyak Exp $
 //
 //
 /*!
@@ -267,15 +267,24 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2010c",      20091215,     3, "y2010c",   "Honey sandwich fix"},
   {"y2011",       20101215,     0, "y2011",    "y2011 TOF fix & TPCE redused & honey"},
   {"y2011a",      20101215,     1, "y2011a",   "y2011a == y2011 now "},
+  {"y2011b",      20101215,     2, "y2011b",   "y2011a + wall "},
   {"y2012",       20111215,     0, "y2012",    "y2012 Very preliminary"},
   {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry"},
+  {"y2012b",      20111215,     2, "y2012b",   "y2012 + wall"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
   //  {"complete",    20190101,     1, "complete", "non-production"},
   //  {"ist1",        20190101,     2, "ist1",     "non-production"},
   //  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
-  {"devT",        20170101,     1, "devT",      "dev geo for Inner Tpc Sector Upgrade, Variant 1"}, // 
+  {"devT",        20170101,     0, "devT",      "dev geo for Inner Tpc Sector Upgrade, Variant 1"}, // 
+  {"devTA",       20170101,     1, "devTA",     "dev geo for Inner Tpc Sector Upgrade, Variant 1"}, // 
+  {"devTB",       20170101,     2, "devTB",     "dev geo for Inner Tpc Sector Upgrade, Variant 2"}, // 
+  {"devTC",       20170101,     3, "devTC",     "dev geo for Inner Tpc Sector Upgrade, Variant 3"}, // 
+  {"devTD",       20170101,     4, "devTD",     "dev geo for Inner Tpc Sector Upgrade, Variant 4"}, // 
+  {"devTE",       20170101,     5, "devTE",     "dev geo for Inner Tpc Sector Upgrade, Variant 5"}, // 
+  {"devTF",       20170101,     6, "devTF",     "dev geo for Inner Tpc Sector Upgrade, Variant 5"}, // 
+
   {"upgr01",      20190101,     4, "upgr01",   ""},
   {"upgr02",      20190101,     5, "upgr02",   ""},
   {"upgr03",      20190101,     6, "upgr03",   ""},
@@ -718,8 +727,13 @@ Int_t icol,islas;
     //		DataSet FOUND
     FOUND: if (uppMk || dowMk) 	return dataset;
 	   if (GetDebug()<2) 	return dataset;
+#ifdef STAR_LOGGER     
+	   LOG_DEBUG << Form("<%s::%s> DataSet %s FOUND in %s\n"
+			     ,ClassName(),"GetDataSet",logInput,(const char*)dataset->Path()) << endm;
+#else
       printf("Remark: <%s::%s> DataSet %s FOUND in %s\n"
       ,ClassName(),"GetDataSet",logInput,(const char*)dataset->Path());
+#endif
     break;
   }
   return dataset;
@@ -1946,6 +1960,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.253  2012/11/07 23:05:45  fisyak
+// Add geometries y2011b, y2012b (wall), devT? (iTpx upgrade)
+//
 // Revision 1.252  2012/06/29 16:13:22  perev
 // Add dev14 geometry
 //
