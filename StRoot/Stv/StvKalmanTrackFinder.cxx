@@ -36,7 +36,7 @@ class StvRefitPermutator
 {
 public:
 enum {kPermNodes=3, kMaxKont=(1<<kPermNodes)-1};
-  StvRefitPermutator(StvTrack *trak);
+  StvRefitPermutator(StvTrack *trak,int lane);
   int operator++();
   int Kont() 		{return mKont;}
 private:
@@ -47,7 +47,7 @@ StvHit  *mHits[kPermNodes];
 
 
 //______________________________________________________________________________
-StvRefitPermutator::StvRefitPermutator(StvTrack *trak)
+StvRefitPermutator::StvRefitPermutator(StvTrack *trak,int lane)
 {
   mNodes.clear();
   mKont = 0;
@@ -56,7 +56,7 @@ StvRefitPermutator::StvRefitPermutator(StvTrack *trak)
   {
     StvNode *node = *it;
     if (!node->GetHit()) 	continue;
-    double Xi2 = node->GetXi2(3);
+    double Xi2 = node->GetXi2(lane);
     if (Xi2>1e5) 		continue;
     myMap[-Xi2] = node;
   }
@@ -66,7 +66,7 @@ StvRefitPermutator::StvRefitPermutator(StvTrack *trak)
   {  
     preNode = node;
     node = (*it).second; iNode++;
-    assert(!preNode || preNode->GetXi2(3)>node->GetXi2(3));
+    assert(!preNode || preNode->GetXi2(lane)>node->GetXi2(lane));
     mNodes.push_back(node);
     if (iNode>=kPermNodes) continue;
     mHits[iNode]=node->GetHit();
@@ -79,12 +79,14 @@ int StvRefitPermutator::operator++()
   int nBadHits = 0;
   if ( mKont < kMaxKont) { // permutations
     for (int jk=0,msk=1; jk<kPermNodes;jk++,msk<<=1) {
+      if (jk>=(int)mNodes.size()) return 999;
       StvNode *node=mNodes[jk];
       if ((mKont&msk)==0)	{ node->SetHit(mHits[jk]);} 
       else            		{ node->SetHit(0); nBadHits++;} 
     }
-  } else 			 { //No permutations, sequentional hit cancelation
+  } else 			{ //No permutations, sequentional hit cancelation
     int jk = mKont-kMaxKont+kPermNodes;
+    if (jk>=(int)mNodes.size()) return 999;
     StvNode *node=mNodes[jk];node->SetHit(0);
     nBadHits = jk+1;
   }
@@ -260,17 +262,6 @@ StvFitDers derivFit;
     }
     if (idive >= kDiveBreak) 			break;
 
-
-
-assert(fabs(par[1]._hz-0.00149681)<0.0002);
-if (idir==0) { ///????
-THelixTrack th(mSeedHelx); 
-double mydca = th.Dca(&par[1]._x);
-static int myDeb=0;
-if (myDeb) printf("MyDca = %g\n",mydca);
-}
-
-
     totLen+=mDive->GetLength();
     par[0]=par[1]; err[0]=err[1];			//pars again in par[0]
 		// Stop tracking when too big Z or Rxy
@@ -338,7 +329,6 @@ static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};
       if (!iuerr || (nHits<=3)) {		//Hit accepted
         hitCount->AddHit();nHits++;
         curNode->SetHE(fitt->GetHitErrs());
-assert(fabs(par[1]._hz-0.00149681)<0.0001);
         curNode->SetFit(par[1],err[1],0);
         if (nHits>3) par[0]=par[1];
         err[0]=err[1]; 
@@ -424,8 +414,10 @@ int StvKalmanTrackFinder::Refit(int idir)
 {
 static int nCall=0;nCall++;
 static StvTrackFitter *tkf = StvTrackFitter::Inst();
-static const double kEps = 1e-3;
+static const double kEps = 1e-2;
 enum {kTryFitMax = 5,kBadHits=5};
+
+//return 0; //??????????????????????????????????????????
 
   StvNode *node = 0;
   int ans=0,lane = 1;
@@ -439,9 +431,9 @@ enum {kTryFitMax = 5,kBadHits=5};
        if (ans>0) { return 130113;}	//Very bad
   else if (ans<=0) { 			//Try to fix
 //	Now do helix fit only to find bad hits
-    ans = tkf->Helix(mCurrTrak,1|2);
-    if (ans)  	return 130213;
-    StvRefitPermutator perm(mCurrTrak);
+//??    ans = tkf->Helix(mCurrTrak,1|2);
+//??    if (ans)  	return 130213;
+    StvRefitPermutator perm(mCurrTrak,2);
 
 
     for (int refIt=0; refIt<55; refIt++)  	//Start iterations
@@ -457,13 +449,13 @@ enum {kTryFitMax = 5,kBadHits=5};
 
       ans = tkf->Refit(mCurrTrak,idir,lane,1);
   //        ==================================
-      if (anz>0)  	return 130513;
+      if (ans>0)  	return 130513;
       ans+=anz*10000;tryFit++;
       double dif = lstPars.diff(tstNode->GetFP());
 
       if ( dif < kEps || tryFit > kTryFitMax) {//Tired to try, probably alien hit 
 	if (!ans) break;
-	nBadHits =  ++perm;
+	nBadHits =  ++perm;  tryFit=0;
 	if (nBadHits >kBadHits) return 130613;
       }  
 
