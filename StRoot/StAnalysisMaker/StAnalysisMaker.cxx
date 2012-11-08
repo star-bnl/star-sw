@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.20 2012/11/07 21:35:26 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.21 2012/11/08 16:57:53 fisyak Exp $
  *
  */
 
@@ -807,6 +807,22 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
       LOG_QA << Form("# BTof   hits:%5i: Matched with tracks:%5i",n,m) << endm; 
     }
   }
+  const StPhmdCollection* pmdcol = event->phmdCollection();
+  if (pmdcol) {
+    const StPhmdDetector* pmd_det = pmdcol->detector(StDetectorId(kPhmdId));
+    const StPhmdDetector* cpv_det = pmdcol->detector(StDetectorId(kPhmdCpvId));
+    Int_t n = 0;
+    Int_t m = 0;
+    if (pmd_det) {
+      const StPhmdClusterCollection* pmd_clusters = pmd_det->cluster();
+      if (pmd_clusters) n = pmd_clusters->numberOfclusters();
+    }
+    if (cpv_det) {
+      const StPhmdClusterCollection* cpv_clusters = cpv_det->cluster();
+      if (cpv_clusters) m = cpv_clusters->numberOfclusters();
+    }
+    LOG_QA << Form("# Pmd  clusters:%5i: Cpv  clusters:%5i",n,m) << endm; 
+  }
   if (event->fpdCollection() && event->fpdCollection()->numberOfADC()) {
     LOG_QA << "# FPD ADCs:            " << event->fpdCollection()->numberOfADC() << endm;
   }
@@ -823,6 +839,9 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 //________________________________________________________________________________
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.21  2012/11/08 16:57:53  fisyak
+ * Add pmd to summary
+ *
  * Revision 2.20  2012/11/07 21:35:26  fisyak
  * Add to summary print out for EMC and ToF
  *
