@@ -209,16 +209,13 @@ StvNodePars &StvNodePars::operator=(const StvNodePars& fr)
 {
   if (&fr==this)	return *this;
   memcpy(this,&fr,sizeof(*this));
-assert(fabs(_hz-0.00149681)<0.002);
+assert(_hz);
   return *this;
 }
 //______________________________________________________________________________
 const StvFitPars &StvNodePars::operator-(const StvNodePars& sub) const
 {
 static StvFitPars fp;
-
-//  assert(isReady());
-//  assert(sub.isReady());
 
   double cos2L = 1./(1+sub._tanl*sub._tanl); 
   double cosL  = sqrt(cos2L);
@@ -241,7 +238,6 @@ static StvFitPars fp;
 //______________________________________________________________________________
 void StvNodePars::operator+=(const StvFitPars &fp)
 {
-//  assert(isReady());
   assert(_hz);
   double cos2L = 1./(1+_tanl*_tanl); 
   double cosL  = sqrt(cos2L);
@@ -272,7 +268,6 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   if (_tanl >  MAXTAN) _tanl =  MAXTAN;
   _curv   = _hz *_ptin;
   if (fabs( _cosCA)>1 || fabs( _sinCA)>1) ready();
-//  assert(isReady());
   assert(!check("StvNodePars::operator+=") || 1);
 }
 //______________________________________________________________________________
@@ -403,7 +398,7 @@ StvFitErrs &StvFitErrs::operator=(const StvFitErrs &fr)
 {
   if (&fr==this)	return *this;
   memcpy(this,&fr,sizeof(*this));
-assert(fabs(mHz-0.00149681)<0.002);
+assert(mHz);
   return *this;
 }
 // //______________________________________________________________________________
@@ -421,7 +416,7 @@ assert(fabs(mHz-0.00149681)<0.002);
 //______________________________________________________________________________
 void StvFitErrs::Set(const THelixTrack *he, double hz)
 {
-mHz = hz;assert(fabs(hz)<0.002);
+mHz = hz;assert(hz);
 const THEmx_t *emx = he->Emx();
 double  cosL = he->GetCos();
 double  sinL = he->GetSin();
@@ -450,7 +445,7 @@ mPP = (1/mHz)*emx->mCC*(1/mHz);
 //______________________________________________________________________________
 void StvFitErrs::Get(THelixTrack *he) const
 {
-  assert(mHz && fabs(mHz)<.002);
+  assert(mHz);
   he->SetEmx(0);
   THEmx_t *emx = he->Emx();
   double  cosL = he->GetCos();
@@ -791,7 +786,6 @@ const StvFitPars &StvFitPars::operator*(const StvFitDers &t) const
 {
 static StvFitPars myPars;
   TCL::vmatl(t[0],Arr(),myPars.Arr(),5,5);
-//  assert(!myPars.Check("StvFitPars::operator*") || 1);
   return myPars;
 }
 //_____________________________________________________________________________
@@ -1577,7 +1571,8 @@ double StvFitErrs::EmxSign(int n,const double *e)
 } 
 //_____________________________________________________________________________
 void StvFitErrs::SetHz(double hz)
-{ mHz=hz; assert(mHz && fabs(mHz)<0.002) ;}
+{ mHz=hz; assert(mHz) ;}
+//_____________________________________________________________________________
 double StvFitErrs::GetHz() const
-{assert(mHz && fabs(mHz)<0.002);  return mHz ;}
+{assert(mHz);  return mHz ;}
 //_____________________________________________________________________________
