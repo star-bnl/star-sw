@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.49 2012/08/02 05:42:05 avossen Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.50 2012/11/08 18:28:15 akio Exp $
  *
  ***************************************************************************
  *
@@ -9,6 +9,12 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.50  2012/11/08 18:28:15  akio
+ * - Split seedTypes3 into raising (kFgtSeedTypes3) and falling (kFgtSeedTypes4)
+ * - Adding new seed Type (kFgtSeedTypes5) with 3 timebins in row above 3 sigma, and not raising nor falling
+ *      You can disable this by setLeastRestrictiveSeed(false)
+ * - Charge uncertainty factor can be adjusted by setPedSigFactor4Charge() [default is 1.0]
+ *
  * Revision 1.49  2012/08/02 05:42:05  avossen
  * removed printout, set accept long pulses as default
  *
@@ -197,7 +203,9 @@
 #include "StFgtA2CMaker.h"
 
 /// Class constructors - does nothing else than setting name
-StFgtA2CMaker::StFgtA2CMaker( const Char_t* name ) : StMaker( name ), mAcceptLongPulses(true), mStatusMask(0xFF), mAbsThres(-10000), mRelThres(4.0),mClusterThreshold(1.0), mDb(0) {
+StFgtA2CMaker::StFgtA2CMaker( const Char_t* name ) : StMaker( name ), mAcceptLongPulses(true), 
+						     mStatusMask(0xfe), mAbsThres(-10000), mRelThres(4.0),mClusterThreshold(1.0), 
+						     mPedSigFactor4Charge(1.0), mUseLeastRestrictiveSeed(true) ,mDb(0) {
   // do nothing
 }
 
@@ -239,6 +247,9 @@ Int_t StFgtA2CMaker::InitRun(Int_t runumber){
 	 }
       }
    }
+   //TString a("dbdump.txt");
+   //mDb->printFgtDumpCSV1(a,1,1);
+   return ierr;
 }
 
 
@@ -272,15 +283,15 @@ Int_t StFgtA2CMaker::Make(){
 
    if( !ierr ){
       for( UInt_t discIdx=0; discIdx<fgtCollectionPtr->getNumDiscs(); ++discIdx ){
-	//	cout <<"looking at disc: " << discIdx <<endl;
+	//cout <<"looking at disc: " << discIdx << endl;
          StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( discIdx );
          if( stripCollectionPtr ){
-	   //	      cout <<"got strip coll" <<endl;
+	    //cout <<"got strip coll" <<endl;
             StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
             StSPtrVecFgtStripIterator stripIter;
-	    //	    	    cout <<stripVec.size() <<" strips " << endl;
+	    //cout <<stripVec.size() <<" strips " << endl;
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
-	      //	      cout <<" running over strips .. " <<endl;
+	      //cout <<" running over strips .. " <<endl;
                StFgtStrip *strip = *stripIter;
                Float_t ped = 0, pedErr = 0;
                if( strip ){
@@ -302,7 +313,7 @@ Int_t StFgtA2CMaker::Make(){
                   pedErr = mDb->getPedestalSigmaFromElecId( elecId );
                   strip->setPed(ped);
                   strip->setPedErr(pedErr);
-		  //		  cout <<"we got ped: " << ped << " error: " << pedErr <<endl;
+		  //cout <<"we got ped: " << ped << " error: " << pedErr <<endl;
 
                   if( ped > kFgtMaxAdc || ped < 0 ){
                      strip->setGeoId( -1 );      // flag for removal
@@ -326,17 +337,21 @@ Int_t StFgtA2CMaker::Make(){
                   }
 
 		  //		    if(strip->getGeoId() >=13092 && strip->getGeoId()<=13105)
-		      //		      cout <<"" <<endl;
+		  //		      cout <<"" <<endl;
 
                   // get gain
                   Double_t gain = mDb->getGainFromElecId( elecId );
 
                   // set the charge
                   strip->setCharge( sumC/gain );
-
+		  int idebug=0;
+		  if(sumC/gain==4713.0 || sumC/gain==5250.0) {
+		    idebug=1;
+		    printf("charge=%f\n ",sumC/gain);
+		  }
                   // for seven timebins... change to some variable...., but does this actuall make sense for high nTB?? then the 
                   // error on the charge is higher than it should be.... (Anselm)
-                  strip->setChargeUncert(gain ? sqrt(7)*pedErr/gain : 10000);
+                  strip->setChargeUncert(gain ? mPedSigFactor4Charge*sqrt(7)*pedErr/gain : 10000);
 
                   // check if any signal here
                   if( !nTbAboveThres && (mRelThres || mAbsThres>-kFgtMaxAdc) ){
@@ -348,17 +363,37 @@ Int_t StFgtA2CMaker::Make(){
                      // but if it is +/- n strips from valid pulse, keep it
 		    //		    if(strip->getGeoId() >=13092 && strip->getGeoId()<=13105)
 		    //		      cout <<"checking pulse for geoID:  " << strip->getGeoId() <<" adc : " << strip->getAdc(0)<<" " << strip->getAdc(1) <<" " << strip->getAdc(2)<<" " << strip->getAdc(3)<<" " << strip->getAdc(4)<<" " << strip->getAdc(5)<<" " << strip->getAdc(6)<<endl;
-                     strip->setClusterSeedType(checkValidPulse(strip, pedErr));
+                     strip->setClusterSeedType(checkValidPulse(strip, pedErr));		    		 
+
                   } else {
                      strip->invalidateCharge();
                   };
-
+		  
                   if( mStatusMask != 0x0 ){
                      UInt_t status=mDb->getStatusFromElecId( elecId );
 
                      if( status & mStatusMask )
                         strip->setClusterSeedType(kFgtDeadStrip);
                   }
+
+		  if(idebug==1){
+		    //if(nTbAboveThres>2 && strip->getCharge()>500 && strip->getClusterSeedType()==0)
+		    printf("geoid=%5d %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f  gain=%3.1f sum=%6.1f pedrms=%6.1f nTbAboveThres=%1d  type=%5d\n",
+			   strip->getGeoId(),
+			   strip->getAdc(0)/pedErr,
+			   strip->getAdc(1)/pedErr,
+			   strip->getAdc(2)/pedErr,
+			   strip->getAdc(3)/pedErr,
+			   strip->getAdc(4)/pedErr,
+			   strip->getAdc(5)/pedErr,
+			   strip->getAdc(6)/pedErr,
+			   gain,
+			   strip->getCharge(),
+			   pedErr,
+			   nTbAboveThres,
+			   strip->getClusterSeedType());
+		  }
+		  
 		  //	    if(strip->getGeoId() >=13092 && strip->getGeoId()<=13105)
 		  //	      cout <<" seed type is: " << strip->getSeedType() <<endl;
                }
@@ -433,9 +468,10 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    //  deciding on max plateau
    if(!mAcceptLongPulses)
      {
-       //       cout <<"not accepting long pulses..." <<endl;
-      if(numMaxPlateau>=3) //means basically 4 because we start counting after the first one
-	return kFgtSeedTypeNo;
+       if(numMaxPlateau>=3) { //means basically 4 because we start counting after the first one
+	 //cout <<"not accepting long pulses..." <<endl;
+	 return kFgtSeedTypeNo;
+       }
      }
 
 
@@ -451,6 +487,7 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    //   if(pStrip->getAdc(0) <3*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=1&& numAlmostHighBins>=2)
 
 
+   int iseed=0;
    for( Int_t timebin = 0; timebin < (kFgtNumTimeBins-2) && pStrip->getGeoId() > -1; timebin++ ) {
       Float_t adc1=pStrip->getAdc(timebin);
       Float_t adc2=pStrip->getAdc(timebin+1);
@@ -463,22 +500,24 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
       if(adc1> mClusterThreshold*5*ped && adc2 > mClusterThreshold*5*ped && adc3 > mClusterThreshold*5*ped)
 	{
 	  //found some sort of rising edge
-	  if(adc1 < adc2 && adc2 < adc3)
-	    {
-	      //
-	      //      cout <<"found seed 3" << endl;
-	      return kFgtSeedType3;
-	    }
+	  if(adc1 < adc2 && adc2 < adc3) {iseed=10; break;}
 	  //falling edge for grossly out of time pulses
-	  if(adc1 > adc2 && adc2 > adc3)
-	      return kFgtSeedType3;
+	  if(adc1 > adc2 && adc2 > adc3 && iseed<10) {iseed=9;}
+	  // Akio-- adding if charge sum is above x3 threshold
+	  if(pStrip->getCharge()> mClusterThreshold*15*ped && mUseLeastRestrictiveSeed && iseed<9) {iseed=8;}
 	}
-
+      
    }
+   switch(iseed){
+   case 10: return kFgtSeedType3;
+   case  9: return kFgtSeedType4;
+   case  8: return kFgtSeedType5;
+   default: return kFgtSeedTypeNo; 
+   }
+
    //   cout <<" no seed found! " << endl;
    //	      if(pStrip->getGeoId() >=13092 && pStrip->getGeoId()<=13105)
    //		cout <<"nope..." << endl;
-   return kFgtSeedTypeNo;
 }
 
 ClassImp(StFgtA2CMaker);

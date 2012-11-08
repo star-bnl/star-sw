@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.20 2012/07/31 20:08:11 jeromel Exp $
+ * $Id: StFgtA2CMaker.h,v 1.21 2012/11/08 18:28:15 akio Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -36,6 +36,12 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.21  2012/11/08 18:28:15  akio
+ * - Split seedTypes3 into raising (kFgtSeedTypes3) and falling (kFgtSeedTypes4)
+ * - Adding new seed Type (kFgtSeedTypes5) with 3 timebins in row above 3 sigma, and not raising nor falling
+ *      You can disable this by setLeastRestrictiveSeed(false)
+ * - Charge uncertainty factor can be adjusted by setPedSigFactor4Charge() [default is 1.0]
+ *
  * Revision 1.20  2012/07/31 20:08:11  jeromel
  * Changes to make maker compatible with running in chain (was not)
  *
@@ -154,21 +160,22 @@ class StFgtA2CMaker : public StMaker {
    void setStatusMask( UChar_t mask );    /// set status mask to some other value
    void acceptLongPulses(Bool_t accept );
    void setClusterThreshold( Float_t threshold );
+   void setPedSigFactor4Charge( Float_t factor);
+   void useLeastRestrictiveSeed(Bool_t v);
 
-   // cvs tag
+  // cvs tag
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.20 2012/07/31 20:08:11 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.21 2012/11/08 18:28:15 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    Short_t checkValidPulse(StFgtStrip* pStrip, Float_t ped);
    // parameters
    Bool_t mAcceptLongPulses;
    UChar_t mStatusMask;
-   Float_t mAbsThres, mRelThres,mClusterThreshold;
-
+   Float_t mAbsThres, mRelThres,mClusterThreshold,mPedSigFactor4Charge;
+   Bool_t mUseLeastRestrictiveSeed;
    // pointer to the DB
    StFgtDb* mDb;
-
 
  private:   
    ClassDef(StFgtA2CMaker,1);
@@ -187,5 +194,6 @@ inline void StFgtA2CMaker::setRelThres( Float_t thres ){             mRelThres =
 inline void StFgtA2CMaker::setFgtDb(StFgtDb* db ){                   mDb=db; };
 inline void StFgtA2CMaker::doCutBadStatus(){                         mStatusMask = 0xFF; };
 inline void StFgtA2CMaker::setStatusMask( UChar_t mask ){            mStatusMask = mask; };
-
+inline void StFgtA2CMaker::setPedSigFactor4Charge( Float_t factor){  mPedSigFactor4Charge=factor;}
+inline void StFgtA2CMaker::useLeastRestrictiveSeed(Bool_t v){        mUseLeastRestrictiveSeed=v;}
 #endif
