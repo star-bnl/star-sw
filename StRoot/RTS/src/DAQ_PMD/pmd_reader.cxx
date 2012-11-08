@@ -243,7 +243,13 @@ static int adcReader(int sec, struct PMDADCD *adcd)
 				ch_num++ ;
 			}
 			else {
-				LOG(ERR,"PMD %d: RB %d, MZ %d: illegal value in channel %d: 0x%08X",sec,rb,mz,j,val) ;
+			  static const int maxCounts = 13;
+			  static int Counts = 0;
+			  if (Counts < maxCounts) {
+			    Counts++;
+			    LOG(ERR,"PMD %d: RB %d, MZ %d: illegal value in channel %d: 0x%08X",sec,rb,mz,j,val) ;
+			    if (Counts == maxCounts) {LOG(ERR,"PMD stop print out after %i counts",Counts) ;}
+			  }
 			}
 		}
 	}
