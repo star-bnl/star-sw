@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtHit.h,v 2.2 2012/07/21 03:32:34 perev Exp $
+ * $Id: StFgtHit.h,v 2.3 2012/11/08 17:58:31 ullrich Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtHit.h,v $
+ * Revision 2.3  2012/11/08 17:58:31  ullrich
+ * major revision, various new methods and member added (Anselm/Akio)
+ *
  * Revision 2.2  2012/07/21 03:32:34  perev
  * BugFix define detector()
  *
@@ -36,7 +39,7 @@ typedef std::map< StFgtStrip*, float, stripPtrLessThan > stripWeightMap_t;
 class StFgtHit : public StHit {
 public:
     // constructors
-    StFgtHit( int key = -1, int centralStripGeoId = -1, float charge = 0, 
+    StFgtHit(int key = -1, int centralStripGeoId = -1, float charge = 0, 
              short disc = -1, short quad = -1, char layer = ' ',
              float rPos = 0, float rErr = 10000, float phiPos = 0, float phiErr = 10000, float zPos = 0, float zErr = 10000 );
     // StFgtHit(const StFgtHit&);             --> use default
@@ -44,7 +47,7 @@ public:
     
     // deconstructor
     ~StFgtHit();
-virtual StDetectorId detector() const 		{return kFgtId;};   
+    virtual StDetectorId detector() const 		{return kFgtId;};   
     // accessors/modifiers for the map
     stripWeightMap_t& getStripWeightMap();
     const stripWeightMap_t& getStripWeightMap() const;
@@ -66,8 +69,13 @@ virtual StDetectorId detector() const 		{return kFgtId;};
     float getErrorZ() const;
     // note: no getCharge, as already have charge() defined through parent StHit
     float getChargeUncert() const;
-    short getMaxAdc() const;
-    
+    short calcMaxAdc();       //get from stripWeightMap_t
+    short getMaxAdc() const;  //get from data member
+    int getNstrip() const;
+    int getMaxTimeBin() const;    
+    int getSeedType() const;    
+    float getEvenOddChargeAsy() const;
+
     // modifiers
     void setCentralStripGeoId( int geoId );
     void setPositionR( float position );
@@ -80,7 +88,12 @@ virtual StDetectorId detector() const 		{return kFgtId;};
     void setQuad( short quad );
     void setLayer( char layer );
     void setChargeUncert( float sigma );
-    
+    void setMaxAdc(short v);
+    void setNstrip(int v);
+    void setMaxTimeBin(int v);
+    void setSeedType(int v);
+    void setEvenOddChargeAsy(float v);
+
 protected:
     void update2error();                          // set x,y part of inherited mPositionError
     
@@ -91,18 +104,23 @@ protected:
     Float_t mR, mErrR, mPhi, mErrPhi;             // r, phi, z position and error
     Int_t   mCentralStripGeoId;                   // obvious
     Float_t mChargeUncert;                        // uncertanity on the charge
+    Short_t mMaxAdc;                              // max adc in all strips and timebin
+    Int_t   mNstrip;                              // number of strips in the hit
+    Int_t   mMaxTimeBin;                          // time bin for max adc
+    Int_t   mSeedType;                            // seed type
+    Float_t mEvenOddChargeAsy;                    // (even-odd)/sum charge for phi layer
     // for keeping track of which strips constribute to which cluster (not persistant)
     stripWeightMap_t mStripWeightMap;             //! 
     
 private:   
-    ClassDef(StFgtHit,1);
+    ClassDef(StFgtHit,2);
 }; 
 
 
 // inline functions
 
-inline short StFgtHit::getMaxAdc() const {
-    short mMaxAdc = -1;
+inline short StFgtHit::calcMaxAdc() {
+    mMaxAdc = -1;
     
     for(stripWeightMap_t::const_iterator it=mStripWeightMap.begin(); it != mStripWeightMap.end(); it++ ){
         short adcVal = it->first->getMaxAdc();
@@ -228,5 +246,15 @@ inline void StFgtHit::setErrorZ( float error ){
 
 inline float StFgtHit::getChargeUncert() const { return mChargeUncert; };
 inline void StFgtHit::setChargeUncert( float sigma ){ mChargeUncert = sigma; };
+inline short StFgtHit::getMaxAdc() const {return mMaxAdc;};
+inline void StFgtHit::setMaxAdc(short v) {mMaxAdc=v;};
+inline int  StFgtHit::getNstrip() const {return mNstrip;};
+inline void StFgtHit::setNstrip(int v)  {mNstrip=v;};
+inline int  StFgtHit::getMaxTimeBin() const {return mMaxTimeBin;};
+inline void StFgtHit::setMaxTimeBin(int v)  {mMaxTimeBin=v;};
+inline int  StFgtHit::getSeedType() const {return mSeedType;};
+inline void StFgtHit::setSeedType(int v)  {mSeedType=v;};
+inline float StFgtHit::getEvenOddChargeAsy() const {return mEvenOddChargeAsy;};
+inline void  StFgtHit::setEvenOddChargeAsy(float v) {mEvenOddChargeAsy=v;};
 
 #endif
