@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski
 // 
-// $Id: StFgtSlowSimuMaker.cxx,v 1.3 2012/06/20 18:32:40 avossen Exp $
+// $Id: StFgtSlowSimuMaker.cxx,v 1.4 2012/11/08 17:16:20 akio Exp $
 #include <TVector3.h>
 #include <TH2.h>
 #include <TF1.h>
@@ -13,6 +13,7 @@
 #include "StFgtSlowSimuMaker.h"
   
 #include  "tables/St_g2t_fgt_hit_Table.h"
+#include "StFgtDbMaker/StFgtDbMaker.h"
 #include "StFgtDbMaker/StFgtDb.h"
 
 #include "StRoot/StEvent/StFgtCollection.h"
@@ -28,7 +29,7 @@ ClassImp(StFgtSlowSimuMaker)
   par_badSetup=0; // default all is OK
   mRnd = new TRandom3(); // general use random generator
   mRnd->SetSeed(0); // activate, assure every set of data is different
-  switch_addPeds=0; //  re-set in bfc.C
+  switch_addPeds=1; //  re-set in bfc.C
 
 }
 
@@ -79,8 +80,13 @@ StFgtSlowSimuMaker::saveHisto(TString fname){
 //--------------------------------------------
 Int_t 
 StFgtSlowSimuMaker::Finish(){ 
- LOG_INFO<<"::Finish() \n"<<  endm; 
+  LOG_INFO<<"::Finish() \n"<<  endm; 
   
+#ifdef __FGT_QA_HISTO__
+  TString a("fgtSlowSimQA");
+  saveHisto(a);
+#endif
+
   return StMaker::Finish();
 }
 
@@ -91,7 +97,18 @@ Int_t
 StFgtSlowSimuMaker::InitRun(Int_t runNumber){
   LOG_INFO<<"::InitRun() "<< runNumber<< endm; 
 
-  if(fgtDb==0) par_badSetup+=0x1; //jjassert(fgtDb);
+  if(fgtDb==0){
+    StFgtDbMaker* dbmkr=(StFgtDbMaker*)GetMaker("fgtDb");
+    if(!dbmkr) {
+      LOG_ERROR<<"StFgtSlowSimuMaker::InitRun could not find FgtDb Maker"<<endm;
+      return kStWarn;
+    }
+    fgtDb=dbmkr->getDbTables();  
+    if(!fgtDb){
+      LOG_ERROR<<"StFgtSlowSimuMaker::InitRun could not find FgtDb table from FgtDbMaker"<<endm;
+      return kStWarn;
+    }
+  }
 
   LOG_INFO<< Form("fgt-simu-params from DB, ver=%.0f:\n",fgtDb->getSimuParam(0))<<endl;
   // for(int kk=0;kk<15;kk++)  printf("par[%d]=%f\n",kk, fgtDb->getSimuParam(kk));
@@ -109,7 +126,8 @@ StFgtSlowSimuMaker::InitRun(Int_t runNumber){
   par_stripThreshAdc=fgtDb->getSimuParam(10); //  drop strips below it
   par_2DampCutoffScale=fgtDb->getSimuParam(11); // in a.u. used in simu
   par_overalGain=fgtDb->getSimuParam(12); // a factor making simulated ADCs comparable to 2012 data 
-  //  cout <<"gain is par_overalGain " << 
+  LOG_INFO<<"par_overalGain from DB = " << par_overalGain << ", but overwriting to 20 for now. Need fix in DB later"<<endm; 
+  par_overalGain=20;
   par_PplaneChargeFraction=fgtDb->getSimuParam(13); //  divide charge between P/R plane
 
   LOG_INFO<<Form("::InitRun() runNo=%d  badSetup=0x%x;  params: track cutoff: TOF<%.1fns and  P>%.1f MeV/c ; prim ions/cm=%.1f, X,YamplSigma=%.4f cm,  stripThres=%.2f (ADC),   transDiffusion=%.1f um/1cm, cutoffOfBichel=%d, binStep=%d  Digi: 2DampCutoffScale=%.1f a.u., overalGain=%.2f a.u.  P-planeChargFract=%.2f  switch_addPeds=%d", runNumber, par_badSetup,
@@ -124,8 +142,7 @@ StFgtSlowSimuMaker::InitRun(Int_t runNumber){
   if(par_XYamplSigma<=0) par_badSetup+=0x2;//jjassert(par_XYamplSigma>0);
   if(par_pairsPerCm <=0) par_badSetup+=0x4;//jjassert(par_pairsPerCm >0);
  
-
-
+  
   return kStOK;
 }
  
@@ -140,10 +157,13 @@ StFgtSlowSimuMaker::Init(){
 
   mInpEve=0;
 
+#ifdef __FGT_QA_HISTO__
+  HList=new TObjArray;
+#endif
+
   InitHisto1();
 
 #ifdef __FGT_QA_HISTO__
-  assert(HList);
   InitHisto2();
 #endif 
 
@@ -159,6 +179,7 @@ StFgtSlowSimuMaker::Init(){
 //--------------------------------------------
 Int_t 
 StFgtSlowSimuMaker::Make(){
+  bool debug=false;
   mInpEve++;  
   
   if( par_badSetup) {
@@ -186,7 +207,7 @@ StFgtSlowSimuMaker::Make(){
   if(fgtColl==0) {
     StFgtCollection*   fgtX=new StFgtCollection();    
     mEvent->setFgtCollection(fgtX);
-    LOG_INFO << Form("%s::Make added a non existing StFgtCollection()",GetName())<<endm;
+    //LOG_INFO << Form("%s::Make added a non existing StFgtCollection()",GetName())<<endm;
     fgtColl= mEvent-> fgtCollection();
   }
 
@@ -220,42 +241,47 @@ StFgtSlowSimuMaker::Make(){
       vector<fgt_g2t_auxil> &L=mG2tHitList[iDisc][iQuad];
       if(L.size()<=0) continue;// drop if empty quad
       Int_t stripIdOffset= kFgtNumStrips * ( iDisc*kFgtNumQuads + iQuad)*2;      
-      //printf(" process  g2t hits in disk=%d quad=%d nHit=%d idOff=%d\n", iDisc,iQuad,L.size(),stripIdOffset);
+      if(debug) LOG_INFO<<Form("Process g2t hits in disk=%d quad=%d nHit=%d idOff=%d",iDisc,iQuad,L.size(),stripIdOffset)<<endm; 
       for(UInt_t i=0;i<L.size();i++) { // populate: quadDigitizationXY
 	responseMipModel(L[i].Rloc,L[i].Dloc);
 #ifdef __FGT_QA_HISTO__
 	hA[11+iDisc] ->Fill(L[i].Rlab.x(),L[i].Rlab.y()); // monitor hit distribution
 #endif
-       	//printf("iQ=%d itr=%d  R/cm=%.2f  phi/deg=%.3f\n",iQuad,i,L[i].Rlab.Perp(), L[i].Rlab.Phi()/3.1416*180); // pi value corrected WMZ
+	if(debug){
+	  printf("DIGIXY Lab: Disc=%1d Quad=%1d itr=%d  x=%8.4f y=%8.4f z=%8.4f R=%8.4f  phi=%10.6f\n",
+		 iDisc,iQuad,i,L[i].Rlab.X(),L[i].Rlab.Y(),L[i].Rlab.Z(),L[i].Rlab.Perp(), L[i].Rlab.Phi()); // pi value corrected WMZ
+	  printf("DIGIXY Loc: Disc=%1d Quad=%1d itr=%d  x=%8.4f y=%8.4f z=%8.4f R=%8.4f  phi=%10.6f\n",
+		 iDisc,iQuad,i,L[i].Rloc.X(),L[i].Rloc.Y(),L[i].Rloc.Z(),L[i].Rloc.Perp(), L[i].Rloc.Phi()); // pi value corrected WMZ
+	}
       }
       // now full quadrtant response is stored in quadDigitizationXY array
+      if(quadDigitizationXY->Integral()<0.1) continue;
       projectQuad2strips( iDisc, iQuad);
       // strips response is generated (and projected to 1D stip histos: R & Phi for QA)
       exportStripPlane2StEvent(quadDigitizationRad,stripIdOffset,fgtColl->getStripCollection(iDisc));
       exportStripPlane2StEvent(quadDigitizationPhi,stripIdOffset+kFgtNumStrips,fgtColl->getStripCollection(iDisc));
-      // LOG_DEBUG<<Form("::exportStrips finished")<<  endm; 
     }// end of quadrant
   } // end of disk
- 
- 
-  LOG_INFO<<Form("....End of fgt-slow-simu \n  FgtColl: numDisc=%d, tot strip=%d  \n",fgtColl->getNumDiscs(),fgtColl -> getNumStrips()  )<<endm;
-  for(iDisc=0; iDisc <(int)fgtColl->getNumDiscs(); iDisc++) {
-    StFgtStripCollection *stripPtr= fgtColl->getStripCollection(iDisc);
-    
-    //printf("  content: iDisc=%d  # of : strips=%d  clust=hits=%d\n" ,stripPtr -> getDisc() ,fgtColl ->getNumStrips(iDisc)  ,fgtColl -> getNumHits( iDisc));
+  
+  LOG_INFO<<Form("End of fgt-slow-simu FgtColl: numDisc=%d, total strips=%d",fgtColl->getNumDiscs(),fgtColl -> getNumStrips()  )<<endm;
 
-    StSPtrVecFgtStrip &stripVec = stripPtr->getStripVec();    
-    Int_t ih=0;
-    for( StSPtrVecFgtStripIterator it=stripVec.begin();it!=stripVec.end();++it, ih++)    {
-      // details of strip localization, use output variables ending w/ X
-      Short_t discX,  quadrantX,  stripX; Char_t  layerX;
-      StFgtGeom::decodeGeoId(((*it))->getGeoId(),discX,quadrantX, layerX, stripX);
-      // octX is 0 for short octant and 1 for long octant
-      //Int_t octX=1; if (stripX<300) octX=0;
-      LOG_DEBUG<<Form("iDisc=%d ih=%d  strip: geoId=%d ADC=%d  charge=%.1f deco0: strip=%d quad=%d oct=%d plane=%c disc=%d \n",iDisc,ih,((*it))->getGeoId(),((*it))->getAdc(0),((*it))->getCharge(),stripX,quadrantX,stripX>=300,layerX,discX)<<endm;
-
-      //printf("     decode -> disc=%d, quad=%d layer=%c, strip=%d xOct=%d\n", disc,quadrant, layer, strip,xOct);
+  if(debug){
+    for(iDisc=0; iDisc <(int)fgtColl->getNumDiscs(); iDisc++) {
+      StFgtStripCollection *stripPtr= fgtColl->getStripCollection(iDisc);
       
+      //printf("  content: iDisc=%d  # of : strips=%d  clust=hits=%d\n" ,stripPtr -> getDisc() ,fgtColl ->getNumStrips(iDisc)  ,fgtColl -> getNumHits( iDisc));
+      
+      StSPtrVecFgtStrip &stripVec = stripPtr->getStripVec();    
+      Int_t ih=0;
+      for( StSPtrVecFgtStripIterator it=stripVec.begin();it!=stripVec.end();++it, ih++)    {
+	// details of strip localization, use output variables ending w/ X
+	Short_t discX,  quadrantX,  stripX; Char_t  layerX;
+	StFgtGeom::decodeGeoId(((*it))->getGeoId(),discX,quadrantX, layerX, stripX);
+	// octX is 0 for short octant and 1 for long octant
+	//Int_t octX=1; if (stripX<300) octX=0;
+	LOG_DEBUG<<Form("iDisc=%d ih=%d  strip: geoId=%d ADC=%d  charge=%.1f deco0: strip=%d quad=%d oct=%d plane=%c disc=%d \n",iDisc,ih,((*it))->getGeoId(),((*it))->getAdc(0),((*it))->getCharge(),stripX,quadrantX,stripX>=300,layerX,discX)<<endm;
+	//printf("     decode -> disc=%d, quad=%d layer=%c, strip=%d xOct=%d\n", disc,quadrant, layer, strip,xOct);      
+      }
     }
   }
 
@@ -269,7 +295,7 @@ void
 StFgtSlowSimuMaker::unpack_g2t_hits( St_g2t_fgt_hit *fgt_hitT){
   g2t_fgt_hit_st *hitPtr  = fgt_hitT->GetTable();
   //jjassert(hitPtr);
-  LOG_INFO<<Form("Unpacking g2t  FGT hits, size=%d",fgt_hitT->GetNRows())<<endm;
+  //LOG_INFO<<Form("Unpacking g2t  FGT hits, size=%d",fgt_hitT->GetNRows())<<endm;
 
   Int_t ntot=0;
   Int_t     nhits      = fgt_hitT->GetNRows();
@@ -289,8 +315,9 @@ StFgtSlowSimuMaker::unpack_g2t_hits( St_g2t_fgt_hit *fgt_hitT){
 
     TVector3 Rlab( hitPtr->x); // entrance point  in Lab ref 
     Float_t   Rxy=sqrt(Rlab.X()*Rlab.X()+Rlab.Y()*Rlab.Y());
-    LOG_DEBUG<<Form("Volume_id ivid=%d discID=%d  QuadID=%c  LAB x=%.2f y=%.2f z=%.2f eta=%.3f  phi=%.1f deg, Rxy/cm=%.3f   de/keV=%g  tof/ns=%f", 
-		   ivid, iDisc+1, iQuad+'A',Rlab.X(),Rlab.Y(),Rlab.Z(), Rlab.Eta(), Rlab.Phi()/3.1416*180., Rxy ,de_keV, tof_ns) <<endm;
+    //LOG_INFO<<Form("Volume_id ivid=%d discID=%d  QuadID=%c  LAB x=%.2f y=%.2f z=%.2f eta=%.3f  phi=%10.6f, Rxy/cm=%8.4f   de/keV=%g  tof/ns=%f", 
+    //	   ivid, iDisc+1, iQuad+'A',Rlab.X(),Rlab.Y(),Rlab.Z(), Rlab.Eta(), Rlab.Phi(), Rxy ,de_keV, tof_ns);
+    //LOG_INFO<<Form(" Px=%8.4f Py=%8.4f Pz=%8.4f\n",hitPtr->p[0],hitPtr->p[1],hitPtr->p[2]);
 
 #if 0 // use only disc #1, for testing
     if(iDisc!=0 || iQuad!=1) {
@@ -308,25 +335,29 @@ StFgtSlowSimuMaker::unpack_g2t_hits( St_g2t_fgt_hit *fgt_hitT){
       and Rloc.y() later would reject them.    WMZ
     */
     
+    //printf("Unpack Rlab: Disc=%1d Quad=%1d x=%10.6f y=%10.6f z=%10.6f R=%10.6f  phi=%10.6f\n",
+    //	   iDisc,iQuad,Rlab.X(),Rlab.Y(),Rlab.Z(),Rlab.Perp(), Rlab.Phi()); 
     TVector3 Rloc=Rlab;  // tmp, no ability to shift/tilt disc in STAR Jan
     Rloc.RotateZ(-StFgtGeom::phiQuadXaxis(iQuad));
+    //printf("Unpack RLoc: Disc=%1d Quad=%1d x=%10.6f y=%10.6f z=%10.6f R=%10.6f  phi=%10.6f\n",
+    //	   iDisc,iQuad,Rloc.X(),Rloc.Y(),Rloc.Z(),Rloc.Perp(), Rloc.Phi()); 
 
 #ifdef __FGT_QA_HISTO__
     hA[3]->Fill(1);
 #endif
-    if(!StFgtGeom::inDisc(Rlab)) continue;  
+    if(!StFgtGeom::inDisc(Rlab)) continue;
 #ifdef __FGT_QA_HISTO__
     hA[3]->Fill(2);
 #endif
-    if(fabs(Rloc.x()) < StFgtGeom::deadQuadEdge())  continue;
+    if(fabs(Rloc.x()) < StFgtGeom::deadQuadEdge()) continue;
 #ifdef __FGT_QA_HISTO__
     hA[3]->Fill(3);
 #endif
-    if(fabs(Rloc.y()) < StFgtGeom::deadQuadEdge())  continue;
+    if(fabs(Rloc.y()) < StFgtGeom::deadQuadEdge()) continue;
 #ifdef __FGT_QA_HISTO__
     hA[3]->Fill(4);
 #endif
-    if(!StFgtGeom::belowFlat(Rloc)) continue;  
+    if(!StFgtGeom::belowFlat(Rloc)) continue;
 #ifdef __FGT_QA_HISTO__
     hA[3]->Fill(5);
     hA[5]->Fill(tof_ns);
@@ -337,6 +368,7 @@ StFgtSlowSimuMaker::unpack_g2t_hits( St_g2t_fgt_hit *fgt_hitT){
 #endif
 
     TVector3 Plab(hitPtr->p);
+    //TVector3 Plab(0,0,1);
 #ifdef __FGT_QA_HISTO__
     if(Plab.Mag()>0) hA[7]->Fill(log10(Plab.Mag()*1000.));
 #endif
@@ -355,6 +387,16 @@ StFgtSlowSimuMaker::unpack_g2t_hits( St_g2t_fgt_hit *fgt_hitT){
     //    if(par_forcePerp) verLab=TVector3(0,0,1);// for testing ONLY:  make track perp to GEM
     TVector3 Rloc2=Rlab+ds*verLab;   Rloc2.RotateZ(-StFgtGeom::phiQuadXaxis(iQuad));
     TVector3 Dloc=Rloc2-Rloc; // local vector along the path
+    /*
+    printf("Unpack Plab: Disc=%1d Quad=%1d x=%10.6f y=%10.6f z=%10.6f R=%10.6f  phi=%10.6f\n",
+	       iDisc,iQuad,Plab.X(),Plab.Y(),Plab.Z(),Plab.Perp(),Plab.Phi());
+    printf("Unpack verL: Disc=%1d Quad=%1d x=%10.6f y=%10.6f z=%10.6f R=%10.6f  phi=%10.6f\n",
+	       iDisc,iQuad,verLab.X(),verLab.Y(),verLab.Z(),verLab.Perp(),verLab.Phi());
+    printf("Unpack RLo2: Disc=%1d Quad=%1d x=%10.6f y=%10.6f z=%10.6f R=%10.6f  phi=%10.6f\n",
+	       iDisc,iQuad,Rloc2.X(),Rloc2.Y(),Rloc2.Z(),Rloc2.Perp(),Rloc2.Phi());
+    printf("Unpack DLoc: Disc=%1d Quad=%1d x=%10.6f y=%10.6f z=%10.6f R=%10.6f  phi=%10.6f\n",
+	       iDisc,iQuad,Dloc.X(),Dloc.Y(),Dloc.Z(),Dloc.Perp(),Dloc.Phi());
+    */
 
     fgt_g2t_auxil aux; 
     aux.Rlab=aux.Rloc=aux.Dloc=TVector3(0,0,0); aux.hitPtr=0; aux.iQuad=-1;// clear it
@@ -382,7 +424,7 @@ StFgtSlowSimuMaker::unpack_g2t_hits( St_g2t_fgt_hit *fgt_hitT){
     hA[6]->Fill(Rlab.Perp());
 #endif    
   }// loop over hits
-  LOG_INFO<<Form("Unpacking g2t FGT %d hits --> accepted %d",nhits,ntot)<<endm;
+  //LOG_INFO<<Form("Unpacking g2t FGT %d hits --> accepted %d",nhits,ntot)<<endm;
 }
 
 
@@ -396,8 +438,8 @@ StFgtSlowSimuMaker::projectQuad2strips( Int_t iDisc, Int_t iQuad ){
   Double_t maxAmp=quadDigitizationXY->GetMaximum();
   Double_t cut_2DampCutoff= maxAmp/par_2DampCutoffScale;
 
-  LOG_INFO<<Form("::digiQuad(iDsc=%d, iQuad=%d)  totAmp=%g , maxAmp=%g(a.u.)",iQuad,  iDisc,totAmp,maxAmp)<<  endm;
-  
+  //LOG_INFO<<Form("::digiQuad(iDsc=%d, iQuad=%d)  totAmp=%g , maxAmp=%g(a.u.)",iQuad,  iDisc,totAmp,maxAmp)<<  endm;
+
   Int_t nPix0=0, nPix1=0;  
   Double_t sumAmp=0.,sumAmpAtten=0., sumAdcP=0., sumAdcR=0.; //for QA
   
@@ -424,16 +466,17 @@ StFgtSlowSimuMaker::projectQuad2strips( Int_t iDisc, Int_t iQuad ){
 	//printf("bad iRad xy->R, x=%f y=%f r=%f phi/deg=%f iRid=%d\n",x,y,r,phi/3.1416*180.,iRadID);
 	continue;
       } 
-      // printf("map xy->R, local x=%f y=%f r=%f phi/deg=%f iRid=%d\n",x,y,r,phi/3.1416*180.,iRadID);
       //jjassert(iRadID>=0 && iRadID<720);
       
       Int_t iPhiID=StFgtGeom::phi2LocalStripId(r,phi,&binFrac);
       if(iPhiID<0) { 
 	//printf("bad iPhi xy->R, x=%f y=%f r=%f phi/deg=%f iPhiID=%d\n",x,y,r,phi/3.1416*180.,iPhiID);
 	continue;
-      } 
-      
+      }       
       //jjassert(iPhiID>=0 && iPhiID<720);
+
+      //printf("x=%f y=%f r=%f phi/deg=%f iRid=%d iPhi=%d amp=%8.4f AmpAttrn=%8.4f > cut_2DampCutoff=%8.4f\n",
+      //     x,y,r,phi/3.1416*180.,iRadID,iPhiID,amp,ampAtten,cut_2DampCutoff);
       
       Double_t adcP=    par_PplaneChargeFraction *ampAtten;       
       Double_t adcR=(1.-par_PplaneChargeFraction)*ampAtten;
@@ -446,6 +489,9 @@ StFgtSlowSimuMaker::projectQuad2strips( Int_t iDisc, Int_t iQuad ){
       //accumulate response of individual strips
       quadDigitizationRad->Fill(iRadID,adcR);
       quadDigitizationPhi->Fill(iPhiID,adcP);
+
+      //printf("DIG disc=%1d ix=%4d iy=%4d ir=%4d ip=%4d x=%8.4f y=%8.4f r=%8.4f p=%10.6f a=%8.4f %8.4f %8.4f\n",
+      //	     iDisc,bx,by,iRadID,iPhiID,x,y,r,phi,ampAtten,adcR,adcP);
     
 #ifdef __FGT_QA_HISTO__
       // monitoring, not cleared, may be dropped out to speed up the code marginally
@@ -472,10 +518,10 @@ void
 StFgtSlowSimuMaker::exportStripPlane2StEvent(TH1F *h, Int_t stripIdOffset,  StFgtStripCollection  *stripCollectionPtr){
 
   //jjassert(stripCollectionPtr); 
-  printf("write fgt strips ,   --> StEvent: #hits=%d on input\n",stripCollectionPtr->getNumStrips());
+  //printf("write fgt strips ,   --> StEvent: #hits=%d on input\n",stripCollectionPtr->getNumStrips());
 
   Float_t   *adcPtr=h->GetArray();
-  adcPtr++; // root histo counts bins from 1 - incredible silly
+  //adcPtr++; // root histo counts bins from 1 - incredible silly --> double accounting with 4 lines below... removing
   Int_t   nx=h->GetNbinsX(); //is 720
   Int_t nSeq=0;
   for(Int_t iId=0;iId<nx;iId++) {
@@ -488,45 +534,64 @@ StFgtSlowSimuMaker::exportStripPlane2StEvent(TH1F *h, Int_t stripIdOffset,  StFg
 
     Int_t rdo, arm, apv, chan;
     fgtDb->getElecCoordFromGeoId( geoId, rdo, arm, apv, chan );
-    //    LOG_INFO << Form("got elec ids for geoId: %d , rdo: %d arm:%d apv: %d , chan: %d",geoId, rdo, arm, apv, chan)<<endm;
-
+    //LOG_INFO << Form("geoId=%5d rdo=%1d arm=%1d apv=%2d ch=%3d",geoId, rdo, arm, apv, chan);
+    
     Int_t elecId =  StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, chan );
     StFgtStrip* stripPtr = stripCollectionPtr->getStrip( elecId );
 
-
     Double_t ped=0;
     Double_t sigPed=0;
+    Short_t stat=0;
     if( switch_addPeds ) {
-      Short_t stat=fgtDb->getStatusFromElecCoord(rdo,arm,apv,chan);
-      if(stat) continue; // drop bad strips
+      stat=fgtDb->getStatusFromElecCoord(rdo,arm,apv,chan);
+      //if(stat) continue; // drop bad strips -> Temp removed status check until DB fixes.
       ped=fgtDb   ->getPedestalFromGeoId( geoId);
       sigPed=fgtDb->getPedestalSigmaFromGeoId( geoId);
+      //LOG_INFO << Form(" ped=%6.1f sig=%6.1f stat=%1d",ped,sigPed,stat);
     }
-
+    
+    //LOG_INFO << " adc-ped=";
+    float sum=0;
+    double adc2;
     for(int iTbOff=0;iTbOff<7;iTbOff++)
       {
 	if( switch_addPeds ) {
-	  adc*=pulseShape[iTbOff];
-	  adc+=mRnd->Gaus(ped,sigPed);
-	  if(adc<ped-3*sigPed) adc=ped-3*sigPed;
-	  if(adc <0 ) adc=0;
-	  if(adc >4095 ) adc=4095;
-	  //	  LOG_INFO << Form("--->adc: %f, ped: %f adc-ped: %f, geoId: %d",adc, ped, adc-ped,geoId) <<endm;
+	  adc2=adc*pulseShape[iTbOff];
+	  adc2+=mRnd->Gaus(ped,sigPed);
+	  if(adc2<ped-3*sigPed) adc2=ped-3*sigPed;
+	  if(adc2 <0 ) adc=0;
+	  if(adc2 >4095 ) adc=4095;
+	  sum+=adc2-ped;
 	}
-	stripPtr->setAdc( (Short_t)(adc), timebin+iTbOff );
+	stripPtr->setAdc( (Short_t)(adc2), timebin+iTbOff );
+	//LOG_INFO << Form("%7.0f",adc2-ped);
       }
     stripPtr->setGeoId( geoId );
     stripPtr->setElecCoords(rdo,arm,apv,chan);
+    //LOG_INFO << Form(" sum=%7.0f",sum) << endm;  
   }
-  
 }
-
+    
 
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StFgtSlowSimuMaker.cxx,v $
+// Revision 1.4  2012/11/08 17:16:20  akio
+// http://www.star.bnl.gov/~akio/fgt/mc/index.php#code
+//
+// - get fgtDb automatically without setting by hand
+// - default changed to do pedestal (switch_addPeds=1 in constructor)
+// - bug fix in logic flaw when creating timebin distribution causing "flat" hit
+// - bug fix which causes a event to take forever when there is a hit but no signal in a quadrant
+// - bug fix for cut_2DampCutoff becoming 0 for empty quadrant digitization, causing taking forever to finish
+// - bug fix in exportStripPlane2StEvent() which account for ROOT histo first bin is at index=1 TWICE
+//
+// Following 2 chages are temp fix and need to be removed one DB is updated
+// - Overwriting par_overalgain=2 from DB by 20
+// - Do NOT do status check (DB entry for 2012Dec15 has status=1 -> need fix in DB)
+//
 // Revision 1.3  2012/06/20 18:32:40  avossen
 // setting elec ids for strips now, implemented pulse shape over 7 timebins
 //
