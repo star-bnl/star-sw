@@ -1,4 +1,4 @@
-// $Id: StvStl.cxx,v 1.1 2010/07/06 20:27:43 perev Exp $
+// $Id: StvStl.cxx,v 1.2 2012/11/09 03:12:20 perev Exp $
 //
 //
 // Class StvStl some stl containers for Stv objects
@@ -8,7 +8,12 @@
 //_____________________________________________________________________________
 StvHits &StvHits::operator+=(const StvHits &add)
 { insert(end(),add.begin(),add.end()); return *this;}
-
+//_____________________________________________________________________________
+StvHits &StvHits::operator+=(const std::vector<void*> &add)
+{
+  const StvHits &myAdd = (const StvHits &)add;
+  (*this)+=myAdd;
+}
 //_____________________________________________________________________________
 void StvHits::unused()
 {
