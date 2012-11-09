@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.25 2012/05/07 14:56:14 fisyak Exp $
+ * $Id: StiStEventFiller.h,v 2.26 2012/11/09 18:28:06 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.26  2012/11/09 18:28:06  perev
+ * fillpull development
+ *
  * Revision 2.25  2012/05/07 14:56:14  fisyak
  * Add StKFVertexMaker
  *
@@ -201,7 +204,7 @@ private:
                  ,const StiKalmanTrackNode *node
 		 ,const StiKalmanTrack     *track
 		 ,int dets[1][3],int gloPri);
- void fillPulls  (StiKalmanTrack *ktrack,int gloPri);
+ void fillPulls  (StiKalmanTrack *ktrack,const StGlobalTrack *gTrack,int gloPri);
  bool accept(StiKalmanTrack* kTrack);
  void FillStHitErr(StHit *hh,const StiKalmanTrackNode *node);
 private:
