@@ -4,6 +4,7 @@
 #include "StDraw3D.h"
 
 class StvHit;
+class StvHits;
 class StvNode;
 class StvTrack;
 class THelixTrack;
@@ -18,7 +19,8 @@ public:
    void  Clear(const char *opt="");
 TObject *Hits(const std::vector<      StvHit*> &hits, EDraw3DStyle sty);
 TObject *Hits(const std::vector<const StvHit*> &hits, EDraw3DStyle sty);
-TObject *Hits(const std::vector<const float*> &hits, EDraw3DStyle sty);
+TObject *Hits(const StvHits                    &hits, EDraw3DStyle sty);
+TObject *Hits(const std::vector<const float*> &hits,  EDraw3DStyle sty);
 
 TObject *Trak(const THelixTrack &helx,const std::vector<const StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack);
 TObject *Trak(const THelixTrack &helx,const std::vector<      StvHit*>  &hits, EDraw3DStyle sty=kGlobalTrack);
@@ -44,6 +46,10 @@ int mNDoIt;
 int mNPow2;
 int mIColor;		//Current color index when it is changing in cycle 
 static StvDraw *fgStvDraw;
+
 };
+
+inline TObject *StvDraw::Hits( const StvHits &hits, EDraw3DStyle sty)
+               { return  Hits((const std::vector<StvHit*>&)hits,sty);}
 
 #endif

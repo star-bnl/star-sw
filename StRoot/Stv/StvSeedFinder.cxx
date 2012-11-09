@@ -86,14 +86,6 @@ const double BAD_RHO=0.1;
     circ.Add(hit->x()[0],hit->x()[1],hit->x()[2]);
   }  
   double Xi2 =circ.Fit();
-//   float myDir[3];
-//   TCL::vsub(fSeedHits[nNode-1]->x(),fSeedHits[0]->x(),myDir,3);
-//   assert(myDir[0]*circ.Dir()[0]+myDir[1]*circ.Dir()[1]>0);
-
-#ifdef APPROX_DEBUG
-  H[0]->Fill(log(Xi2)/log(10.));
-  H[1]->Fill(nNode,Xi2);
-#endif // APPROX_DEBUG
   if (Xi2>BAD_XI2) return 0; //Xi2 too bad, no updates
   if (fabs(circ.GetRho()) >BAD_RHO) return 0;
   int startSeed = 0;

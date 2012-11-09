@@ -16,7 +16,7 @@
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvDraw.h"
 void myBreak(int);
-enum {kMinHits=5,kMaxHits = 10,kFstAng=88,kErrFakt=5,kLenFakt=5,kStpFakt=3};
+enum {kFstAng=88,kErrFakt=5,kLenFakt=5,kStpFakt=3};
 static const double kFstTan = tan(kFstAng*M_PI/180);
 static const double kMinCos = 0.1;
 
