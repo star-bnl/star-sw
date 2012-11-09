@@ -3,20 +3,24 @@
 #define StvStl_HH
 #include <vector>
 #include <list>
+class StvVoids : public std::vector<void*>
+{
+public:
+StvVoids &operator+=(void *add) {push_back(add);return *this;}
+};
 class StvHit;
-
 class StvHits : public std::vector<StvHit*>
 {
 public:
 StvHits &operator+=(      StvHit  *add)		{push_back(add);return *this;}
 StvHits &operator+=(const StvHits &add);
+StvHits &operator+=(const std::vector<void*> &add);
 void unused();
 };
 class StvConstHits : public std::vector<const StvHit*>
 {
 public:
 StvConstHits &operator+=(const StvHit  *add) {push_back(add);return *this;}
-void unused();
 };
 
 class StvPoints : public std::vector<float>{
