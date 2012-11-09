@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.99 2012/09/16 21:38:42 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.100 2012/11/09 18:28:10 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.100  2012/11/09 18:28:10  perev
+ * fillpull development
+ *
  * Revision 2.99  2012/09/16 21:38:42  fisyak
  * use of Tpc West Only and East Only tracks, clean up
  *
@@ -648,6 +651,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  detInfoVec.push_back(detInfo);
 	  //cout <<"Setting key: "<<(unsigned short)(trNodeVec.size())<<endl;
 	  gTrack->setKey(kTrack->getId());
+          gTrack->setIdTruth();
 	  trackNode->addTrack(gTrack);
 	  trNodeVec.push_back(trackNode);
 	  // reuse the utility to fill the topology map
@@ -667,7 +671,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 //VP	    throw runtime_error("StiStEventFiller::fillEvent() StTrack::bad() non zero");
           }
 	  fillTrackCount2++;
-          fillPulls(kTrack,0);
+          fillPulls(kTrack,gTrack,0);
           if (gTrack->numberOfPossiblePoints()<10) continue;
           if (gTrack->geometry()->momentum().mag()<0.1) continue;
 	  fillTrackCountG++;
@@ -764,7 +768,6 @@ void StiStEventFiller::fillEventPrimaries()
       // detector info
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
       fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
-      fillPulls(kTrack,1); 
       StPrimaryTrack* pTrack = new StPrimaryTrack;
       pTrack->setKey( gTrack->key());
       fillTrack(pTrack,kTrack, detInfo);
@@ -773,6 +776,7 @@ void StiStEventFiller::fillEventPrimaries()
 
       nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
       vertex->addDaughter(pTrack);
+      fillPulls(kTrack,gTrack,1); 
       fillTrackCount2++;
       int ibad = pTrack->bad();
       errh.Add(ibad);
@@ -1310,11 +1314,20 @@ void StiStEventFiller::FillStHitErr(StHit *hh,const StiKalmanTrackNode *node)
   hh->setPositionError(f3);
 }
 //_____________________________________________________________________________
-void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri) 
+void StiStEventFiller::fillPulls(StiKalmanTrack* track,const StGlobalTrack *gTrack, int gloPri) 
 {
+enum dcaEmx {kImpImp,
+	     kZImp, kZZ,
+	     kPsiImp, kPsiZ, kPsiPsi,
+	     kPtiImp, kPtiZ, kPtiPsi, kPtiPti,
+	     kTanImp, kTanZ, kTanPsi, kTanPti, kTanTan};
+
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
-  if (!mPullEvent) return;
+  if (!mPullEvent) 	return;
   if (gloPri && track->isPrimary()!=1) return;
+  const StDcaGeometry *myDca = gTrack->dcaGeometry();
+  if (!myDca)		return;
+
   int dets[kMaxDetectorId][3];
   track->getAllPointCount(dets,kMaxDetectorId-1);
   StiPullTrk aux;
@@ -1328,14 +1341,25 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   aux.nIstHits = dets[kIstId][2];
   aux.mL       = (unsigned char)track->getTrackLength();
   aux.mChi2    = track->getChi2();
-  aux.mCurv    = track->getCurvature();
-  aux.mPt      = track->getPt();
-  aux.mPsi     = track->getPhi();
-  aux.mDip     = atan(track->getTanL());
-  StThreeVectorD v3 = track->getPoint();
+  aux.mCurv    = myDca->curvature();
+  aux.mPt      = myDca->pt();
+  aux.mPsi     = myDca->psi();
+  aux.mDip     = myDca->dipAngle();
+  StThreeVectorF v3 = myDca->origin();
   aux.mRxy     = v3.perp();
   aux.mPhi     = v3.phi();
   aux.mZ       = v3.z();
+  
+  const float *errMx = myDca->errMatrix();
+  aux.mPtErr   = sqrt(errMx[kPtiPti])*aux.mPt*aux.mPt;
+  double c2dip = myDca->tanDip(); c2dip = 1./(1.+c2dip*c2dip);
+  aux.mPsiErr  = sqrt(errMx[kPsiPsi]);
+  aux.mDipErr  = sqrt(errMx[kTanTan])*c2dip;
+  aux.mRxyErr  = sqrt(errMx[kImpImp]);
+  aux.mZErr    = sqrt(errMx[kZZ]);
+
+  aux.mIdTruTk = gTrack->idTruth();
+  aux.mQaTruTk = gTrack->qaTruth();
   mPullEvent->Add(aux,gloPri);
 
 
@@ -1384,6 +1408,9 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   StiPullHit aux;
 // local frame
 // local HIT
+  aux.mIdTruth = stHit->idTruth();
+  aux.mQaTruth = stHit->qaTruth();
+
   aux.mVertex = (unsigned char)track->isPrimary();
   aux.nHitCand = node->getHitCand();
   aux.iHitCand = node->getIHitCand();
