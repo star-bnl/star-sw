@@ -85,7 +85,8 @@ int StvTrack::GetNFits(int dir) const
 //______________________________________________________________________________
 StvNode *StvTrack::GetNode(EPointType noTy)
 {
-  StvNode *node=0;int n=0;
+  StvNode *node=0,*foundNode=0;int n=0;
+  double maxXi2 = 0;
   if (noTy!=kLastPoint) {
     for (StvNodeIter it = begin();it != end();++it) {
       node = *it; n++; 
@@ -103,6 +104,13 @@ StvNode *StvTrack::GetNode(EPointType noTy)
 	  if (!node->GetHit()) 		 		break;
 	  if ( node->GetXi2()>1000) 		 	break;
           return node;
+        case kMaxXi2:
+	  if (node->GetType()!=StvNode::kRegNode) 	break;
+	  if (!node->GetHit()) 		 		break;
+ 	  if ( node->GetXi2()>1000) 		 	break;
+          if ( node->GetXi2()<maxXi2) 			break;
+          foundNode = node; maxXi2=node->GetXi2();	break;
+
         default: assert("Wrong Node type" && 0);
        }//end switch
      }//end loop
@@ -115,7 +123,8 @@ StvNode *StvTrack::GetNode(EPointType noTy)
       return node;
     }
   }// end if
-  return 0;
+  
+  return foundNode;
 
 }
 //______________________________________________________________________________

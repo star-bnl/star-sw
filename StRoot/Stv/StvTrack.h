@@ -13,7 +13,7 @@ class StvHit;
 class StvTrack: public StvNodes
 {
  public:
- enum EPointType {kDcaPoint,kFirstPoint,kLastPoint,kPrimPoint}; 
+ enum EPointType {kDcaPoint,kFirstPoint,kLastPoint,kPrimPoint,kMaxXi2}; 
  public:
   StvTrack(); 
   
