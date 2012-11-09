@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StiPullEvent.h,v 1.7 2009/10/24 20:35:33 perev Exp $
+ * $Id: StiPullEvent.h,v 1.8 2012/11/09 18:52:33 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StiPullEvent.h,v $
+ * Revision 1.8  2012/11/09 18:52:33  perev
+ * Erros added
+ *
  * Revision 1.7  2009/10/24 20:35:33  perev
  * Remove redundante definition of StiPullEvent::~StiPullEvent()
  *
@@ -56,7 +59,7 @@ public:
     void Print(const char* option = "") const;
 int TestIt();
 public:
-char mBeg[1];
+char mBeg[1];			//|NoIO
 short mTrackNumber; 		//track number 
 unsigned char mVertex; 		//vertex number for primary track
 unsigned char nAllHits; 	//number of all hits in track
@@ -75,8 +78,16 @@ float mDip;			//track Dip in global  Sti frame
 float mRxy;			//Rxy of track begining 
 float mPhi;			//Phi angle of track begining
 float mZ;
-char mEnd[1];
-  ClassDef(StiPullTrk,2);
+//				Errors
+float mPtErr;        		//pt error
+float mPsiErr;			//track Psi error
+float mDipErr;			//track Dip error
+float mRxyErr;			//Rxy error 
+float mZErr;			//z error
+short int mIdTruTk;
+short int mQaTruTk;
+char mEnd[1];			//|NoIO
+  ClassDef(StiPullTrk,3);
 };
 
 class StiPullHit : public TObject {
@@ -158,8 +169,10 @@ float gPulEmx[3];			//  hit error mtx:PhiRPhiR,PhiRZ,ZZ
 
 float gPsi;			//  track Psi in global  Sti frame
 float gDip;			//  track Dip in global  Sti frame
+short int mIdTruth;
+short int mQaTruth;
 char mEnd[1];
-  ClassDef(StiPullHit,2);
+  ClassDef(StiPullHit,3);
 };
 
 class StiPullEvent : public TObject {
