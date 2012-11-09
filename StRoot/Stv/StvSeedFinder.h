@@ -18,6 +18,8 @@ class THelixTrack;
 class StvSeedFinder : public TNamed
 {
 public:
+enum {kMinHits=5,kMaxHits = 10};
+public:
   StvSeedFinder(const char *name);
   virtual ~StvSeedFinder(){;}
   virtual const THelixTrack *NextSeed()	=0;
