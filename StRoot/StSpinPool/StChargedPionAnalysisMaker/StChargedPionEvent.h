@@ -1,7 +1,7 @@
 #ifndef ST_CHARGED_PION_EVENT_HH
 #define ST_CHARGED_PION_EVENT_HH
 
-// $Id: StChargedPionEvent.h,v 1.6 2008/12/29 15:58:28 kocolosk Exp $
+// $Id: StChargedPionEvent.h,v 1.7 2012/11/09 03:31:34 perev Exp $
 
 #include <string>
 using std::string;
@@ -221,7 +221,13 @@ addJetPatch(short patchId, int ADC) { mJetPatches[patchId] = ADC; }
 
 /*****************************************************************************
  * $Log: StChargedPionEvent.h,v $
+ * Revision 1.7  2012/11/09 03:31:34  perev
+ * Cleanup
+ *
  * Revision 1.6  2008/12/29 15:58:28  kocolosk
- * removed commented code and added Id and Log as needed
+ * removed commented code and added $Id: StChargedPionEvent.h,v 1.7 2012/11/09 03:31:34 perev Exp $/$Log: StChargedPionEvent.h,v $
+ * removed commented code and added $Id$/Revision 1.7  2012/11/09 03:31:34  perev
+ * removed commented code and added $Id$/Cleanup
+ * removed commented code and added $Id$/ as needed
  *
  *****************************************************************************/
