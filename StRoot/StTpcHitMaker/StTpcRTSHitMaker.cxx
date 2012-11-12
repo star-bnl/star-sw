@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.32 2012/10/24 13:36:06 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.33 2012/11/12 20:22:05 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -34,6 +34,7 @@
 #  include "DAQ_TPX/daq_tpx.h"
 #  include "DAQ_READER/daq_dta.h"
 #  include "DAQ_READER/daqReader.h"
+#include "fcfClass.hh"
 ClassImp(StTpcRTSHitMaker); 
 #define __DEBUG__
 #ifdef __DEBUG__
@@ -247,6 +248,8 @@ Int_t StTpcRTSHitMaker::Make() {
 	if (! dta->sim_cld[i].cld.pad) continue;
 	if (dta->sim_cld[i].cld.tb >= __MaxNumberOfTimeBins__) continue;
 	if (dta->sim_cld[i].cld.charge < fminCharge) continue;
+	if (dta->sim_cld[i].cld.flags && FCF_DEAD_EDGE ||
+	    dta->sim_cld[i].cld.flags && FCF_ROW_EDGE) continue;
 	if (Debug()) {
 	  //	  if (Debug() > 1 || ( dta->sim_cld[i].cld.p2 - dta->sim_cld[i].cld.p1 <= 1 )) {
 	    LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
