@@ -10,17 +10,21 @@
 #include "StEvent.h"
 #include "StEventTypes.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0BC.h"
-#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
+#include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_TpcSecRowBC.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
+#include "StdEdxY2Maker/StTpcdEdxCorrection.h"
 
 
 #include "TH2.h"
 #include "TH3.h"
 #include "TFile.h"
 #include "TRandom.h"
+#include "TMatrixD.h"
+#include "TVectorD.h"
 
 static const Int_t nr = 17; //85
 static const Double_t rmin = 40.;
@@ -29,18 +33,29 @@ static const Int_t nph = 12;
 static const Double_t phmin = -TMath::Pi();
 static const Double_t phmax = TMath::Pi();
 static const Double_t PhiMax = TMath::Pi()/12;
-static const Double_t Phi2Max = TMath::Pi()/6;
+static const Int_t nrph = nr*nph;
 static const Double_t ZdcMax = 2e6;
 
 static const Double_t MINGAIN = 0.1;
+
+static TMatrixD RPMatE(nrph,nrph);
+static TVectorD RPMatEH(nrph);
+static TMatrixD RPMatW(nrph,nrph);
+static TVectorD RPMatWH(nrph);
+static TMatrixD RMatE(nr,nr);
+static TVectorD RMatEH(nr);
+static TMatrixD RMatW(nr,nr);
+static TVectorD RMatWH(nr);
 
 ClassImp(StSpaceChargeDistMaker)
   
 //_____________________________________________________________________________
 StSpaceChargeDistMaker::StSpaceChargeDistMaker(const char *name):StMaker(name),
     event(0), Space3ChargePRZ(0), Space3ChargeU(0),
-    Rhist(0), Phist(0), RPhist(0),
-    RPPhist(0), PHhist(0), PPhist(0), ZdcC(0) {
+    thrownR(0), acceptedR(0),
+    thrownRP(0), acceptedRP(0),
+    thrownP(0), acceptedP(0),
+    ZdcC(0) {
   run = 0;
   throws = 500000; // default = 500k throws
   trigs.Set(0);
@@ -48,7 +63,8 @@ StSpaceChargeDistMaker::StSpaceChargeDistMaker(const char *name):StMaker(name),
   memset(Npads,0,128*sizeof(UShort_t));
   memset(XMIN,0,128*sizeof(Float_t));
   memset(YMIN,0,32768*sizeof(Float_t));
-  memset(gainCorr,0,4096*sizeof(Float_t));
+  memset(LiveRow,0,4096*sizeof(Bool_t));
+  memset(LivePad,0,1048576*sizeof(Bool_t));
 }
 //_____________________________________________________________________________
 StSpaceChargeDistMaker::~StSpaceChargeDistMaker() {
@@ -67,24 +83,125 @@ void StSpaceChargeDistMaker::AcceptTrigger(Int_t trig) {
 //_____________________________________________________________________________
 Int_t StSpaceChargeDistMaker::Finish() {
 
-  TH2D *rGeom = new TH2D(*Phist);
+  TH2D *rGeom = new TH2D(*acceptedR);
   rGeom->SetName("rGeom");
-  rGeom->Divide(Rhist);
-  TH2D *phGeom = new TH2D(*PPhist);
+  rGeom->Divide(thrownR);
+  TH2D *phGeom = new TH2D(*acceptedP);
   phGeom->SetName("phGeom");
-  phGeom->Divide(PHhist);
-  TH3D *rpGeom = new TH3D(*RPPhist);
+  phGeom->Divide(thrownP);
+  TH3D *rpGeom = new TH3D(*acceptedRP);
   rpGeom->SetName("rpGeom");
-  rpGeom->Divide(RPhist);
+  rpGeom->Divide(thrownRP);
+
+  // De-smear the real data if possible
+  // Start with matrix of found (rows) and generated (columns),
+  //   invert, then apply to found data
+  LOG_INFO << "StSpaceChargeDistMaker: attempting to de-smear..." << endm;
+  TH3D* S3CPRZ = 0;
+  TH3D* S3CU   = 0;
+  Int_t bingen,binfnd,desmearing_mode = -1;
+  TMatrixD& InvE = RPMatE;
+  TMatrixD& InvW = RPMatW;
+  Double_t DetE = 0;
+  Double_t DetW = 0;
+
+  for (bingen=0;bingen<nrph;bingen++) {
+    for (binfnd=0;binfnd<nrph;binfnd++) {
+      Double_t denom = RPMatEH[bingen];
+      if (denom > 0) RPMatE[binfnd][bingen] /= denom;
+      else if (binfnd==bingen) RPMatE[binfnd][bingen] = 1.0; // diagonals should be ~1
+      denom = RPMatWH[bingen];
+      if (denom > 0) RPMatW[binfnd][bingen] /= denom;
+      else if (binfnd==bingen) RPMatW[binfnd][bingen] = 1.0;
+    }
+  }
+  for (bingen=0;bingen<nr;bingen++) {
+    for (binfnd=0;binfnd<nr;binfnd++) {
+      Double_t denom = RMatEH[bingen];
+      if (denom > 0) RMatE[binfnd][bingen] /= denom;
+      else if (binfnd==bingen) RMatE[binfnd][bingen] = 1.0;
+      denom = RMatWH[bingen];
+      if (denom > 0) RMatW[binfnd][bingen] /= denom;
+      else if (binfnd==bingen) RMatW[binfnd][bingen] = 1.0;
+    }
+  }
+
+  RPMatE.Invert(&DetE);
+  if (DetE) RPMatW.Invert(&DetW);
+  if (DetW) {
+    LOG_INFO << "StSpaceChargeDistMaker: will use r-phi matrices" << endm;
+    desmearing_mode = 2; // r-phi
+  } else {
+    LOG_INFO << "StSpaceChargeDistMaker: could not invert r-phi matrices, trying r..." << endm;
+    RMatE.Invert(&DetE);
+    if (DetE) RPMatW.Invert(&DetW);
+    if (DetW) {
+      LOG_INFO << "StSpaceChargeDistMaker: will use r matrices" << endm;
+      InvE = RMatE;
+      InvW = RMatW;
+      desmearing_mode = 1; // r
+    } else {
+      LOG_WARN << "StSpaceChargeDistMaker: could not invert r matrices, giving up!" << endm;
+      desmearing_mode = 0; // cannot do smearing
+    }
+  }
+  
+  if (desmearing_mode>0) {
+    Double_t newcontPRZ, newcontU, invcoef;
+    Int_t nz = Space3ChargePRZ->GetNbinsZ();
+    S3CPRZ = new TH3D(*Space3ChargePRZ);
+    S3CPRZ->SetName(Form("%sOrig",Space3ChargePRZ->GetName()));
+    S3CU = new TH3D(*Space3ChargeU);
+    S3CU->SetName(Form("%sOrig",Space3ChargeU->GetName()));
+    for (Int_t rbin=1; rbin<=nr; rbin++) {
+      for (Int_t phibin=1; phibin<=nph; phibin++) {
+        bingen = (rbin-1) + (desmearing_mode == 2 ? nr*(phibin-1) : 0);
+        for (Int_t zbin=1; zbin<=nz; zbin++) {
+          newcontPRZ = 0;
+          newcontU   = 0;
+          for (Int_t rbin2=1; rbin2<=nr; rbin2++) {
+            for (Int_t phibin2=1; phibin2<=nph; phibin2++) {
+              if (desmearing_mode == 1 && phibin2 != phibin) continue;
+              binfnd = (rbin2-1) + (desmearing_mode == 2 ? nr*(phibin2-1) : 0);
+              // east or west, or average in middle
+              invcoef = (nz%2==1 && zbin==(nz+1)/2 ?
+                0.5 * (InvE[bingen][binfnd] + InvW[bingen][binfnd]) : // average
+                (zbin <= nz/2 ? InvE[bingen][binfnd] : InvW[bingen][binfnd])); // east/west
+              if (TMath::IsNaN(invcoef)) {
+                LOG_ERROR << "StSpaceChargeDistMaker: inversion matrix element ["
+                  << bingen << "][" << binfnd << "] (zbin=" << zbin << ") is NaN !"
+                  << endm;
+              } else {
+                newcontPRZ += invcoef * S3CPRZ->GetBinContent(phibin2,rbin2,zbin);
+                newcontU   += invcoef * S3CU  ->GetBinContent(phibin2,rbin2,zbin);
+              }
+            }
+          }
+          Space3ChargePRZ->SetBinContent(phibin,rbin,zbin,newcontPRZ);
+          Space3ChargeU  ->SetBinContent(phibin,rbin,zbin,newcontU  );
+        }
+      }
+    }
+  }
 
   TFile* ff = new TFile(Form("SCdist_%d.root",run),"RECREATE");
 
   Space3ChargePRZ->Write();
   Space3ChargeU->Write();
+  if (S3CPRZ) S3CPRZ->Write();
+  if (S3CU) S3CU->Write();
   rGeom->Write();
   phGeom->Write();
   rpGeom->Write();
   ZdcC->Write();
+  RPMatE.Write("RPMatE");
+  RPMatEH.Write("RPMatEH");
+  RPMatW.Write("RPMatW");
+  RPMatWH.Write("RPMatWH");
+  RMatE.Write("RMatE");
+  RMatEH.Write("RMatEH");
+  RMatW.Write("RMatW");
+  RMatWH.Write("RMatWH");
 
   ff->Close();
 
@@ -95,7 +212,7 @@ Int_t StSpaceChargeDistMaker::Finish() {
 }
 //_____________________________________________________________________________
 Int_t StSpaceChargeDistMaker::InitRun(Int_t run) {
-  if (Rhist->GetEntries() < 1) GeomInit();
+  if (thrownR->GetEntries() < 1) GeomInit();
   return kStOk;
 }
 //_____________________________________________________________________________
@@ -106,13 +223,14 @@ Int_t StSpaceChargeDistMaker::Init() {
                               nph,phmin,phmax,nr,rmin,rmax,105,-210.,210.);
   Space3ChargePRZ->Sumw2();
   Space3ChargeU->Sumw2();
-  Rhist = new TH2D("R","r",nr,rmin,rmax,3,-1.5,1.5);
-  Phist = new TH2D("P","pads",nr,rmin,rmax,3,-1.5,1.5);
-  RPhist = new TH3D("RP","rp",nr,rmin,rmax,nph,phmin,phmax,3,-1.5,1.5);
-  RPPhist = new TH3D("RPP","pads rp",nr,rmin,rmax,nph,phmin,phmax,3,-1.5,1.5);
-  PHhist = new TH2D("PH","phi",nph,phmin,phmax,3,-1.5,1.5);
-  PPhist = new TH2D("PP","pads phi",nph,phmin,phmax,3,-1.5,1.5);
+  thrownR = new TH2D("R","r",nr,rmin,rmax,3,-1.5,1.5);
+  acceptedR = new TH2D("P","pads",nr,rmin,rmax,3,-1.5,1.5);
+  thrownRP = new TH3D("RP","rp",nr,rmin,rmax,nph,phmin,phmax,3,-1.5,1.5);
+  acceptedRP = new TH3D("RPP","pads rp",nr,rmin,rmax,nph,phmin,phmax,3,-1.5,1.5);
+  thrownP = new TH2D("PH","phi",nph,phmin,phmax,3,-1.5,1.5);
+  acceptedP = new TH2D("PP","pads phi",nph,phmin,phmax,3,-1.5,1.5);
   ZdcC = new TH1D("ZdcC","ZDC coincidence rate",1024,0,ZdcMax);
+
 
   return StMaker::Init();
 }
@@ -136,7 +254,7 @@ Int_t StSpaceChargeDistMaker::Make() {
     Bool_t passTrigs = kFALSE;
     if (event->triggerIdCollection() &&
         event->triggerIdCollection()->nominal()) {
-      for (int i=0; (!passTrigs) && (i<trigs.GetSize()); i++) {
+      for (Int_t i=0; (!passTrigs) && (i<trigs.GetSize()); i++) {
         passTrigs = event->triggerIdCollection()->nominal()->isTrigger(trigs.At(i));
       }
       if (!passTrigs) { LOG_WARN << "StSpaceChargeDistMaker: Triggers not accepted" << endm; }
@@ -150,6 +268,23 @@ Int_t StSpaceChargeDistMaker::Make() {
   }
   static StTpcCoordinateTransform transform(gStTpcDb);
   static StTpcLocalCoordinate  coorLT; // local TPC coordinate
+  //static StTpcLocalSectorCoordinate coorLS; // local sector coordinate
+
+  static dEdxY2_t CdEdx;
+  static Int_t number_dedx_faults = 0;
+  static Int_t warn_dedx_faults = 1;
+  static StTpcdEdxCorrection* m_TpcdEdxCorrection = 0;
+  if (!m_TpcdEdxCorrection) {
+   Int_t Mask = -1; // 22 bits
+   // Don't know dX, so exclude this correction
+   CLRBIT(Mask,StTpcdEdxCorrection::kdXCorrection);
+   m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask, Debug());
+  }
+  if (!m_TpcdEdxCorrection) {
+    LOG_ERROR << "StSpaceChargeDistMaker: no dE/dx corrections - should quit!" << endm;
+    return kStFatal;
+  }
+  
 
   StTpcHitCollection* TpcHitCollection = event->tpcHitCollection();
   if (TpcHitCollection) {
@@ -166,7 +301,8 @@ Int_t StSpaceChargeDistMaker::Make() {
       StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
       if (sectorCollection) {
         Int_t numberOfPadrows = sectorCollection->numberOfPadrows();
-        for (int j = 0; j< numberOfPadrows; j++) {
+        for (Int_t j = 0; j< numberOfPadrows; j++) {
+          if (! LiveRow[j + NP*i]) continue;
           StTpcPadrowHitCollection *rowCollection = TpcHitCollection->sector(i)->padrow(j);
           if (rowCollection) {
             UInt_t NoHits = rowCollection->hits().size();
@@ -175,19 +311,63 @@ Int_t StSpaceChargeDistMaker::Make() {
               const StThreeVectorF& positionG = tpcHit->position();
 
               // Discard post-central-membrane and hist at gated grid opening
-              if (positionG.z() * (((float) i)-11.5) > 0) continue;
+              if (positionG.z() * (((Float_t) i)-11.5) > 0) continue;
               if (TMath::Abs(positionG.z()) > 180) continue;
 
-              // Discard outermost 3 pads on any row (pad is [1..Npad])
-              if (tpcHit->pad() < 4 || tpcHit->pad() > Npads[j]-3) continue;
+              // Discard outermost 4 pads on any row (pad is [1..Npad])
+              if (tpcHit->pad() < 5 || tpcHit->pad() > Npads[j]-4) continue;
+
+              // Problematic or false hits?
+              Float_t charge = tpcHit->charge();
+              if (charge <= 0) continue;
 
               // Want to fill histograms in TPC local, sector-aligned coordinates
               // Need to convert global coords to TPC local coords
               StGlobalCoordinate coorG(positionG);
               transform(coorG,coorLT,i+1,j+1);
               StThreeVectorD& positionL = coorLT.position();
+              //transform(coorLT,coorLS);
 
-              float charge = tpcHit->charge() * gainCorr[i*128 + j];
+              // dE/dx corrections to charge copied from StTpcRSMaker
+              memset(&CdEdx, 0, sizeof(dEdxY2_t));
+              CdEdx.sector = i+1;
+              CdEdx.row    = j+1;
+              CdEdx.pad    = tpcHit->pad();
+              Double_t edge = CdEdx.pad;
+              if (edge > 0.5*Npads[j])
+                edge -= Npads[j] + 1;
+              CdEdx.edge   = edge;
+              CdEdx.dE     = charge;
+              CdEdx.dx     = XWID[j];
+              CdEdx.xyz[0] = positionL.x();
+              CdEdx.xyz[1] = positionL.y();
+              CdEdx.xyz[2] = positionL.z();
+              //CdEdx.ZdriftDistance = coorLS.position().z(); // drift length
+              // random drift length (may be wrong by as much as +/-full drift length)
+              // is worse than fixed at half full drift length (wrong by as much as
+              // +/-half full drift length, RMS of error down by sqrt(2))
+              CdEdx.ZdriftDistance = 104.3535;
+              St_tpcGas *tpcGas = m_TpcdEdxCorrection->tpcGas();
+              if (tpcGas)
+                CdEdx.ZdriftDistanceO2 = CdEdx.ZdriftDistance*(*tpcGas)[0].ppmOxygenIn;
+              Int_t dedx_status = m_TpcdEdxCorrection->dEdxCorrection(CdEdx);
+              if (dedx_status) {
+                number_dedx_faults++;
+                if (number_dedx_faults == warn_dedx_faults) {
+                  LOG_WARN << "StSpaceChargeDistMaker: found at least " <<
+                    number_dedx_faults << " dE/dx fault(s), code: " << dedx_status << endm;
+                  warn_dedx_faults *= 10;
+                }
+                if (Debug()) {
+                  LOG_WARN << Form("FAULT: %d %d %d %g %d %g %g %g %g %g\n",dedx_status,
+                    i+1,j+1,tpcHit->pad(),Npads[j],
+                    positionL.x(),positionL.y(),positionL.z(),
+                    charge,CdEdx.dE) << endm;
+                }
+                continue;
+              }
+              charge = CdEdx.dE;
+
               Space3ChargePRZ->Fill(positionL.phi(),
                                     positionL.perp(),
                                     positionL.z(),
@@ -197,7 +377,7 @@ Int_t StSpaceChargeDistMaker::Make() {
                                     positionL.perp(),
                                     positionL.z(),
                                     charge);
-              if (throws<1 && k%((int) (1.0/throws))==0)
+              if (throws<1 && k%((Int_t) (1.0/throws))==0)
                 GeomFill(tpcHit);
             }
           }
@@ -212,12 +392,13 @@ void StSpaceChargeDistMaker::GeomInit() {
 
   // Calculated in sector 3 coordinates
 
+  GGZ = St_tpcDimensionsC::instance()->gatingGridZ();
   NP = St_tpcPadPlanesC::instance()->padRows(); // # padrows (45)
   NR = 256; // max # pads/padrow (actually 182)
   NS = NP * NR; // > # pads/sector
 
   /*
-  Double_t widths[2] = {1.2, 2.}; //{1.15, 1.95};
+  Double_t XWID[2] = {1.2, 2.}; //{1.15, 1.95};
   Double_t pitches[2] = {0.335, 0.67};
   Double_t Xpads[NP] = {
     60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.6, 98.8, 104.0,109.2,114.4,119.6, // inner Centres
@@ -234,37 +415,33 @@ void StSpaceChargeDistMaker::GeomInit() {
     124,126,128,128,130,132,134,136,138,138,140,142,144,144,144,144};
   */
 
-  Float_t pitch,width;
-  int i,j,k,l;
+  Float_t pitch;
+  Int_t i,j,k,l,m,isec,irow,ipad;
 
   LOG_INFO << "StSpaceChargeDistMaker: Now reading live/dead/gains for acceptance" << endm;
-  int isec,irow,ipad;
   for (i = 0; i < 24; i++) {
     isec = i + 1;
+    Float_t* gainScales = St_TpcSecRowBC::instance()->GainScale(i);
     for (j = 0; j < NP; j++) {
       irow = j + 1; 
       pitch = St_tpcPadPlanesC::instance()->PadPitchAtRow(irow);
       if (i==0) {
         Npads[j] = St_tpcPadPlanesC::instance()->padsPerRow(irow);
         Xpads[j] = St_tpcPadPlanesC::instance()->radialDistanceAtRow(irow);
-        width = St_tpcPadPlanesC::instance()->PadLengthAtRow(irow);
-        XMIN[j] = Xpads[j] - 0.5*width;
+        XWID[j] = St_tpcPadPlanesC::instance()->PadLengthAtRow(irow);
+        XMIN[j] = Xpads[j] - 0.5*XWID[j];
       }
-      bool liveRow = (StDetectorDbTpcRDOMasks::instance()->isOn(isec,
+      m = j + NP*i;
+      LiveRow[m] = (StDetectorDbTpcRDOMasks::instance()->isOn(isec,
             StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(irow)) &&
-            St_tpcAnodeHVavgC::instance()->livePadrow(isec,irow));
-
-      gainCorr[i*128 + j] = (liveRow ?
-        TMath::Exp(irow <= 13 ? 1170*13.05e-3 : 1390*10.26e-3) /
-        TMath::Exp(St_tpcAnodeHVavgC::instance()->voltagePadrow(isec,irow) *
-                   (irow <= 13 ? 13.05e-3 : 10.26e-3))
-        : 0);
+            (St_tss_tssparC::instance()->gain(isec,irow) > 0) &&
+            gainScales[j]>0); // gainScales necessary for dE/dx
 
       for (k=0; k<Npads[j]; k++) {
         ipad = Npads[j] - k;
         l = k + NR*j + NS*i;
-        PLIVE[l] = (liveRow &&
-             k>2 && k<Npads[j]-3 && // exclude outermost 3 pads on any row
+        LivePad[l] = (LiveRow[m] &&
+             k>3 && k<Npads[j]-4 && // exclude outermost 4 pads on any row
              St_tpcPadGainT0BC::instance()->Gain(isec,irow,ipad) > MINGAIN);
         if (i==0) YMIN[l] = pitch * (k - 0.5*Npads[j]);
       }
@@ -277,15 +454,17 @@ void StSpaceChargeDistMaker::GeomInit() {
 void StSpaceChargeDistMaker::GeomFill(StTpcHit* hit) {
 
   // Monte Carlo approach to determining geometrical acceptance
-  Float_t pitch,width;
-  int j,k,l,i=1;
+  Float_t pitch;
+  Int_t j,k,l,i=1;
 
   // phi0 and phi3 will be in sector 3 local coordinates
   // phi and phi2 are in TPC local coordinates
-  Float_t phi0,phi,phi2,phi3,r,r2,x,y,z,zbin;
+  Float_t phi0,phi,phi2,phi3,phi4,r,r2,r4,x,y,z,zbin,zpileup;
   Float_t pos1[3];
   Float_t pos2[3];
+  Float_t pos4[3];
   Int_t ix,iy,isec;
+  Int_t rbin,phibin,tempbin,bingen,binfnd,bingenR,binfndR;
 
   z = hit->position().z();
   isec = hit->sector(); // 1..24
@@ -302,7 +481,7 @@ void StSpaceChargeDistMaker::GeomFill(StTpcHit* hit) {
   static const Double_t rdist2 = TMath::Power(rmax,rdist0) - rdist1;
   static const Double_t rdist3 = 1.0/rdist0;
 
-  while (i < 12*TMath::Max(1,(int) throws)) {
+  while (i < 12*TMath::Max(1,(Int_t) throws)) {
     // flat in r:
     // r = rmin + gRandom->Rndm()*(rmax - rmin);
 
@@ -310,7 +489,8 @@ void StSpaceChargeDistMaker::GeomFill(StTpcHit* hit) {
     r = TMath::Power(rdist1 + rdist2*gRandom->Rndm(),rdist3);
     
     phi0 = PhiMax*(2*gRandom->Rndm() - 1); //sector 3 coordinates
-    j = (int) (12*gRandom->Rndm());
+    j = (Int_t) (12*gRandom->Rndm());
+    zpileup = GGZ*gRandom->Rndm();
     if (j>=12) j-=12;
     if (isec < 13) {  // west end
       zbin = 1;
@@ -320,20 +500,21 @@ void StSpaceChargeDistMaker::GeomFill(StTpcHit* hit) {
       zbin = -1;
       k = j + 12; // k = [12..23]
       phi = -phi0 + (k-20)*TMath::Pi()/6.0;
+      zpileup *= -1.0;
     }
     while (phi>=phmax) phi -= TMath::TwoPi();
     while (phi< phmin) phi += TMath::TwoPi();
-    Rhist->Fill(r,0);
-    RPhist->Fill(r,phi,0);
-    PHhist->Fill(phi,0);
-    Rhist->Fill(r,zbin);
-    RPhist->Fill(r,phi,zbin);
-    PHhist->Fill(phi,zbin);
+    thrownR->Fill(r,0);
+    thrownRP->Fill(r,phi,0);
+    thrownP->Fill(phi,0);
+    thrownR->Fill(r,zbin);
+    thrownRP->Fill(r,phi,zbin);
+    thrownP->Fill(phi,zbin);
 
     // Apply distortions in TPC local
     pos1[0] = r*TMath::Cos(phi);
     pos1[1] = r*TMath::Sin(phi);
-    pos1[2] = z;
+    pos1[2] = zpileup;
     mExB->DoDistortion(pos1,pos2,k+1);
     phi2 = TMath::ATan2(pos2[1],pos2[0]);
     r2 = TMath::Sqrt(pos2[0]*pos2[0]+pos2[1]*pos2[1]);
@@ -347,16 +528,15 @@ void StSpaceChargeDistMaker::GeomFill(StTpcHit* hit) {
     // Determine if hit falls on a pad
     ix = (Int_t) (TMath::BinarySearch(NP,&XMIN[0],x));
     if (ix < 0 || ix >= NP) continue;
-    width = St_tpcPadPlanesC::instance()->PadLengthAtRow(ix+1);
     pitch = St_tpcPadPlanesC::instance()->PadPitchAtRow(ix+1);
-    if (x > XMIN[ix] + width) continue;
+    if (x > XMIN[ix] + XWID[ix]) continue;
     iy = (Int_t) (TMath::BinarySearch(Npads[ix],&YMIN[ix*NR],y));
     if (y > YMIN[iy + ix*NR] + pitch) continue;
 
     // Determine if hit falls on an active pad
     // Use gains file:
     l = iy + ix*NR + k*NS;
-    if (! PLIVE[l]) continue;
+    if (! LivePad[l]) continue;
 
     // The need to exclude channels like the following should no
     // longer be necessary, but I am leaving it commented here
@@ -369,29 +549,56 @@ void StSpaceChargeDistMaker::GeomFill(StTpcHit* hit) {
     // for padrow 39.
     //if (k==4 && ix == 38) continue;
 
+    // ACCEPTED!
 
     if (Debug()) {
       LOG_INFO << "r " << r << "\tphi " << phi << "\tx " << x << "\tix " << ix 
-           << "\tXMIN[ix] " << XMIN[ix] << "\tRMAX " << XMIN[ix] + width;
+           << "\tXMIN[ix] " << XMIN[ix] << "\tRMAX " << XMIN[ix] + XWID[ix];
       if (ix < 44) { LOG_INFO << "\tXMIN[ix+1] " << XMIN[ix+1]; }
-      if (x <= XMIN[ix] + width) { LOG_INFO << "  o.k."; }
+      if (x <= XMIN[ix] + XWID[ix]) { LOG_INFO << "  o.k."; }
       LOG_INFO << endm;
     }
 
-    Phist->Fill(r,0);
-    PPhist->Fill(phi,0);
-    RPPhist->Fill(r,phi,0);
-    Phist->Fill(r,zbin);
-    PPhist->Fill(phi,zbin);
-    RPPhist->Fill(r,phi,zbin);
+    pos2[2] = z; // generated at zpileup, but found at z
+    mExB->UndoDistortion(pos2,pos4,k+1);
+    phi4 = TMath::ATan2(pos4[1],pos4[0]);
+    r4 = TMath::Sqrt(pos4[0]*pos4[0]+pos4[1]*pos4[1]);
+    // generated at (r,phi), but found at (r4,phi4)
+    acceptedRP->GetBinXYZ(acceptedRP->FindBin(r ,phi ,0),rbin,phibin,tempbin);
+    bingen = (rbin-1) + nr*(phibin-1);
+    bingenR = rbin-1;
+    acceptedRP->GetBinXYZ(acceptedRP->FindBin(r4,phi4,0),rbin,phibin,tempbin);
+    binfnd = (rbin-1) + nr*(phibin-1);
+    binfndR = rbin-1;
+    if (zbin<0) {
+      RPMatE[binfnd][bingen]++;
+      RPMatEH[bingen]++;
+      RMatE[binfndR][bingenR]++;
+      RMatEH[bingenR]++;
+    } else {
+      RPMatW[binfnd][bingen]++;
+      RPMatWH[bingen]++;
+      RMatW[binfndR][bingenR]++;
+      RMatWH[bingenR]++;
+    }
+
+    acceptedR->Fill(r,0);
+    acceptedP->Fill(phi,0);
+    acceptedRP->Fill(r,phi,0);
+    acceptedR->Fill(r,zbin);
+    acceptedP->Fill(phi,zbin);
+    acceptedRP->Fill(r,phi,zbin);
     i++;
   } // i
 }
 
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.cxx,v 1.3 2012/10/15 17:51:12 genevb Exp $
+// $Id: StSpaceChargeDistMaker.cxx,v 1.4 2012/11/13 22:05:19 genevb Exp $
 // $Log: StSpaceChargeDistMaker.cxx,v $
+// Revision 1.4  2012/11/13 22:05:19  genevb
+// Use TPC dE/dx correction code, and introduce de-smearing
+//
 // Revision 1.3  2012/10/15 17:51:12  genevb
 // Include distortion corrections, which must be evenly sampled per event (per hit)
 //
