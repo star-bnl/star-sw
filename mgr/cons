@@ -31,7 +31,7 @@ use Cwd;
 
 use vars qw( $CVS_id $CVS_ver $ver_num $ver_rev $version );
 
-$CVS_id = '$Id: cons,v 1.109 2011/05/11 14:20:52 jeromel Exp $ ';
+$CVS_id = '$Id: cons,v 1.110 2012/11/13 14:57:21 fisyak Exp $ ';
 $CVS_ver = (split(/\s+/, $CVS_id))[2];
 
 $ver_num = "2.3";
@@ -1165,10 +1165,10 @@ sub Salt($) {
 }
 sub find_sources {
   @main::search_files   = ();
-  if (-d $_[0]) {
+  if (-r $_[0]) {
     &File::Find::find({wanted => \&wanted, follow => 1}, @_);
     for my $dir (@_) {
-      if ( -d $dir ) {
+      if ( -r $dir ) {
 	my $i = 0;
 	for ($i=0;$i<=$#main::search_files;$i++) {
 	   $main::search_files[$i] = cutdir($dir, $main::search_files[$i]);
@@ -1196,7 +1196,7 @@ sub find_idlM {
   @main::search_files   = ();
   &File::Find::find({wanted => \&wanted_idlM, follow => 1}, @_);
   for my $dir (@_) {
-    if ( -d $dir ) {# print "dir = $dir\n";
+    if ( -r $dir ) {# print "dir = $dir\n";
       my $i = 0;
       for ($i=0;$i<=$#main::search_files;$i++) {# print "i = ",$i, "src =",  $main::search_files[$i],"\n";
 	 $main::search_files[$i] = cutdir($dir, $main::search_files[$i]);
@@ -1235,15 +1235,16 @@ sub find_qrc {
 sub wanted {
   #  print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d _ &&
+  if ( (-r _ ) &&
        (/^CVS$/ ||
 	/^macros$/ ||
 	/^html$/ ||
 	/^idl$/ ||
 	/^exa$/ ||
 	/^inc$/ ||
-	/^doc$/ ||
+	/^doc/  ||
 	/^run$/ ||
+	/^tmp$/ ||
 	/^examples$/ ||
 	/^images$/ ||
 	/^local$/ ||
@@ -1267,7 +1268,7 @@ sub wanted {
 sub wanted_idlM {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d _ &&
+  if ( (-r _ ) &&
        (/^CVS$/ ||
 	/^macros$/ ||
 	/^html$/ ||
@@ -1298,7 +1299,7 @@ sub wanted_idlM {
 sub wanted_inc {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d _ &&
+  if ( (-r _ ) &&
        (/^CVS$/ ||
 	/^macros$/ ||
 	/^html$/ ||
@@ -1326,7 +1327,7 @@ sub wanted_inc {
 sub wanted_ui {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d _ &&
+  if ( (-r _ ) &&
        (/^CVS$/ ||
 	/^macros$/ ||
 	/^html$/ ||
@@ -1350,7 +1351,7 @@ sub wanted_qrc {
 # Qt4 resource files
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d _ &&
+  if ( (-r _ ) &&
        (/^CVS$/ ||
 	/^macros$/ ||
 	/^html$/ ||
@@ -1373,7 +1374,7 @@ sub wanted_qrc {
 sub wanted_xpm {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d _ &&
+  if ( (-r _ ) &&
        (/^CVS$/ ||
 	/^macros$/ ||
 	/^html$/ ||
@@ -1396,7 +1397,7 @@ sub wanted_xpm {
 sub wanted_xml {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d _ &&
+  if ( (-r _ ) &&
        (/^CVS$/ ||
 	/^macros$/ ||
 	/^doc$/ ||
@@ -1416,7 +1417,7 @@ sub wanted_xml {
 sub wanted_obj {
   #  print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d _ &&
+  if ( (-r _ ) &&
        (/^CVS$/ ||
 	/^macros$/ ||
 	/^html$/ ||
@@ -1459,23 +1460,26 @@ sub sortu {
 }
 #________________________________________
 sub find_hfiles {
-  @main::search_files   = ();
-  &File::Find::find(\&wanted_Def, @_);
-  for my $dir (@_) {
-    if ( -d $dir ) {
+  @main::search_files   = ();#  print "find_hfiles : @_\n";
+  &File::Find::find({wanted=> \&wanted_Def, follow=>1}, @_);
+  # print "search_files = @$main::search_files\n";
+  for my $dir (@_) {# print "find_hfiles in $dir: @main::search_files\n";
+    if ( -r $dir ) {# print "$dir is readbale\n";
       my $i = 0;
       for ($i=0;$i<=$#main::search_files;$i++) {
 	 $main::search_files[$i] = cutdir($dir, $main::search_files[$i]);
       }
     }
   }
-#  print "find_source found $#main::search_files + 1 files\n";
+  #  print "find_source found $#main::search_files + 1 files\n";
   return @main::search_files;
 }
 #________________________________________
 sub wanted_Def {
-  my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);#  print "wanted $_ \n";
-  if ( -d _ &&
+  my $Dir = $_;  # print "wanted $Dir \n";
+    my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($Dir);  
+  # print "wanted $Dir \n";
+  if ( (-r $Dir ) &&
        (/^CVS$/      ||
 	/^macros$/ ||
 	/^html$/ ||
@@ -1497,7 +1501,7 @@ sub wanted_Def {
 sub find_idl {
 #  if (defined($AFS)) {$File::Find::dont_use_nlink;}
   @main::search_files   = ();
-  &File::Find::find(\&wanted_idl, @_);
+  &File::Find::find({wanted=> \&wanted_idl, follow=>1}, @_);
   for my $dir (@_) {
     my $i = 0;
     for ($i=0;$i<=$#main::search_files;$i++) {
@@ -1511,7 +1515,7 @@ sub find_idl {
 sub wanted_idl {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d $_ &&
+  if ( -r $_ &&
        (/^CVS$/ ||
 	/^exa$/ ||
 	/^src$/ ||
@@ -1548,6 +1552,7 @@ sub cutdir($$) {
     next if ($j <= $#Dir and $Dir[$j] eq $File[$j]);
     $file .= $File[$j]; $k++;
   }
+#  print "cutdir dir = $dir; FILE = $FILE; file = $file\n";
   return $file;
 }
 
