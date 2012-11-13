@@ -42,6 +42,7 @@
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
+#include "StDetectorDbMaker/St_tpcGainCorrectionC.h"
 #include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
 #include "Altro.h"
@@ -54,7 +55,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.60 2012/06/04 15:14:18 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.60.2.1 2012/11/13 21:10:44 didenko Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -513,6 +514,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     gBenchmark->Start("TpcRS");
     LOG_INFO << "\n -- Begin TpcRS Processing -- \n";
   }
+  Double_t vminI = St_tpcGainCorrectionC::instance()->Struct(1)->min;
+  Double_t vminO = St_tpcGainCorrectionC::instance()->Struct(0)->min;
   St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) GetDataSet("geant/g2t_tpc_hit");
   if (!g2t_tpc_hit) return kStWarn;
   Int_t no_tpc_hits       = g2t_tpc_hit->GetNRows();               if (no_tpc_hits<1) return kStOK;
@@ -525,6 +528,17 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   if (g2t_ver) gver = g2t_ver->GetTable();
   g2t_tpc_hit_st *tpc_hit_begin = g2t_tpc_hit->GetTable();
   g2t_tpc_hit_st *tpc_hit = tpc_hit_begin;
+  if (m_TpcdEdxCorrection) {
+    St_tpcGainCorrectionC::instance()->Struct(0)->min = -500;
+    St_tpcGainCorrectionC::instance()->Struct(1)->min = -500;
+    if (Debug()) {
+      LOG_INFO << "Reset min for gain Correction to I/O\t" 
+	       << St_tpcGainCorrectionC::instance()->Struct(1)->min 
+	       << "\t" 
+	       << St_tpcGainCorrectionC::instance()->Struct(0)->min 
+	       << " (V)" << endm;
+    }
+  }
   // sort 
   TTableSorter sorter(g2t_tpc_hit,&SearchT,&CompareT);//, 0, no_tpc_hits);
   Int_t sortedIndex = 0;
@@ -1132,6 +1146,17 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     }
   } // sector
   if (Debug()%10) gBenchmark->Show("TpcRS");
+  if (m_TpcdEdxCorrection) {
+    St_tpcGainCorrectionC::instance()->Struct(1)->min = vminI;
+    St_tpcGainCorrectionC::instance()->Struct(0)->min = vminO;
+    if (Debug()) {
+      LOG_INFO << "Reset min for gain Correction to I/O\t" 
+	       << St_tpcGainCorrectionC::instance()->Struct(1)->min 
+	       << "\t" 
+	       << St_tpcGainCorrectionC::instance()->Struct(0)->min 
+	       << " (V)" << endm;
+    }
+  }
   return kStOK;
 }
 //________________________________________________________________________________
@@ -1601,8 +1626,14 @@ TF1 *StTpcRSMaker::StTpcRSMaker::fEc(Double_t w) {
 
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.60 2012/06/04 15:14:18 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.60.2.1 2012/11/13 21:10:44 didenko Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.60.2.1  2012/11/13 21:10:44  didenko
+// fixed revision for bug #2378
+//
+// Revision 1.6.2.1  2012/11/13 18:32:39  didenko
+// updates to fix bug 2378
+//
 // Revision 1.60  2012/06/04 15:14:18  fisyak
 // restore old hack for dN/dx table to fix bug #2347
 //
