@@ -4,7 +4,7 @@
 #include "TTable.h"
 #include "Ttypes.h"
 #define STR_OBSOLETE "WARNING *** Option is OBSOLETE ***"
-
+#define USE_BFCTIMESTAMP
 struct Bfc_st {
   Char_t       Key[63];      /* nick name */
   Char_t       Name[63];     /* maker name */
@@ -15,7 +15,7 @@ struct Bfc_st {
   Char_t       Comment[255];  
   Char_t       Flag;         /* F/T to use it in chain */
 };
-
+#ifdef USE_BFCTIMESTAMP
 struct BFCTimeStamp {
   Int_t     Type;     //< 1 for DBV and 2 for SDT
   Int_t     Date;     //< A date in YYYYMMDD format
@@ -24,7 +24,7 @@ struct BFCTimeStamp {
   TString   Realm;    //< Realm is Calibrations or Geometry or ...
 };
 typedef std::vector<BFCTimeStamp> StVecBFCTS;
-
+#endif /*  USE_BFCTIMESTAMP */
 class St_Bfc : public TTable {
  public:
   ClassDefTable(St_Bfc,Bfc_st)
