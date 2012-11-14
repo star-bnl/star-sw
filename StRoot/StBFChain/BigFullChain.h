@@ -1084,11 +1084,14 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                               "Load GeantLibs",kFALSE},
 #endif
   {"gstarLib","","",""                                                 ,"","gstar","Load gstar lib",kFALSE},
+  {"flux"        ,"","","simu"                                           ,"","flux","Load flux lib",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker"
    ,                                        "","gstar for 80 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
+  {"pythia"      ,"geant" ,"","-gstar,-fzin,-ntin,-geant,geantL","St_geant_Maker"
+   ,                                "Pythia6_4_23,bpythia","Load Pythia in starsim, set pp 510 GeV",kFALSE},
   {"tdaq"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
   {"miniDAQ"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
   {"fzin"        ,"geant","","Simu,-gstar,-ntin,-geant,geantL","St_geant_Maker",""
@@ -1121,6 +1124,7 @@ Bfc_st BFC[] = { // standard chains
    ,                                                   "gstar","read event generated Hbook nt-file",kFALSE},
   {"PrepEmbed","","","geantEmb","StPrepEmbedMaker","St_geant_Maker"
    ,                                                             "Prepare kinematics for embedding",kFALSE},
+  {"PythiaEmbed","","","pythia,-Simu","","",                     "Prepare kinematics for embedding",kFALSE},
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
   {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
