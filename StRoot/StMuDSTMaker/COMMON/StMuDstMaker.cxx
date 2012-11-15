@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.108 2012/10/04 18:57:59 fisyak Exp $
+ * $Id: StMuDstMaker.cxx,v 1.109 2012/11/15 22:26:13 sangalin Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -18,6 +18,11 @@
 #include "StEvent/StRunInfo.h"
 #include "StEvent/StEventInfo.h"
 #include "StEvent/StDcaGeometry.h"
+#include "StEvent/StFgtCollection.h"
+#include "StEvent/StFgtStrip.h"
+#include "StEvent/StFgtHit.h"
+#include "StEvent/StEnumerations.h"
+#include "StFgtUtil/StFgtConsts.h"
 #include "StEventUtilities/StuRefMult.hh"
 #include "StEventUtilities/StuProbabilityPidAlgorithm.h"
 
@@ -58,6 +63,9 @@
 #include "StMuFmsCollection.h"
 #include "StMuFmsUtil.h"
 #include "StMuFmsHit.h"
+#include "StMuFgtStrip.h"
+#include "StMuFgtCluster.h"
+#include "StMuFgtStripAssociation.h"
 #include "StMuPmdCollection.h"
 #include "StMuPmdUtil.h"
 #include "StMuPmdHit.h"
@@ -184,8 +192,9 @@ void StMuDstMaker::assignArrays()
   mFmsArrays      = mPmdArrays     + __NPMDARRAYS__;      
   mTofArrays      = mFmsArrays     + __NFMSARRAYS__;    
   mBTofArrays     = mTofArrays     + __NTOFARRAYS__;  /// dongx
-  mMTDArrays      = mBTofArrays    + __NBTOFARRAYS__; /// dongx
-  mEztArrays      = mMTDArrays     + __NMTDARRAYS__;
+  mMtdArrays      = mBTofArrays    + __NBTOFARRAYS__; /// dongx
+  mFgtArrays      = mMtdArrays     + __NMTDARRAYS__;      
+  mEztArrays      = mFgtArrays     + __NFGTARRAYS__;
 }
 
 void StMuDstMaker::clearArrays()
@@ -196,7 +205,9 @@ void StMuDstMaker::clearArrays()
 #endif
     __NMCARRAYS__+
     __NEMCARRAYS__+
-    __NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__;  /// dongx
+    __NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+  /// dongx
+    __NMTDARRAYS__+__NFGTARRAYS__;
+
   for ( int i=0; i<ezIndex; i++) {
     mAArrays[i]->Clear();
     StMuArrays::arrayCounters[i]=0;
@@ -219,7 +230,8 @@ void StMuDstMaker::zeroArrays()
 #endif
 			__NMCARRAYS__+
 			__NEMCARRAYS__+
-			__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__],(char)0,__NEZTARRAYS__);  /// dongx
+			__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__ /// dongx
+            +__NMTDARRAYS__+__NFGTARRAYS__],(char)0,__NEZTARRAYS__);
   
 }
 //-----------------------------------------------------------------------
@@ -234,6 +246,8 @@ void StMuDstMaker::zeroArrays()
    PmdAll     - all branches related to Pmd
    TofAll     - all branches related to Tof
    BTofAll    - all branches related to BTof  /// dongx
+   MTDAll     - all branches related to MTD
+   FgtAll     - all branches related to Fgt
 
   By default all branches of MuDst are read. If user wants to read only some of
   them, then:
@@ -244,6 +258,8 @@ void StMuDstMaker::zeroArrays()
    SetStatus("PmdAll"    ,1)  // all standard Pmd     branches ON
    SetStatus("TofAll"    ,1)  // all standard Tof     branches ON
    SetStatus("BTofAll"   ,1)  // all standard BTof    branches ON  /// dongx
+   SetStatus("MTDAll"    ,1)  // all standard Mtd     branches ON
+   SetStatus("FgtAll"    ,1)  // all standard Fgt     branches ON
  
    SetStatus("XiAssoc"    ,1) // Strange branch "XiAssoc" is ON  
 
@@ -252,9 +268,9 @@ void StMuDstMaker::zeroArrays()
 void StMuDstMaker::SetStatus(const char *arrType,int status)
 {
 #ifndef __NO_STRANGE_MUDST__
-  static const char *specNames[]={"MuEventAll","StrangeAll","MCAll" ,"EmcAll","PmdAll","FMSAll","TofAll","BTofAll","MTDAll","EztAll",0};  /// dongx
+  static const char *specNames[]={"MuEventAll","StrangeAll","MCAll" ,"EmcAll","PmdAll","FMSAll","TofAll","BTofAll","MTDAll","FgtAll","EztAll",0};  /// dongx
 #else
-  static const char *specNames[]={"MuEventAll","MCAll"     ,"EmcAll","PmdAll","FMSAll","TofAll","BTofAll","MTDAll","EztAll",0};  /// dongx
+  static const char *specNames[]={"MuEventAll","MCAll"     ,"EmcAll","PmdAll","FMSAll","TofAll","BTofAll","MTDAll","FgtAll","EztAll",0};  /// dongx
 #endif
   static const int   specIndex[]={
     0, 
@@ -265,19 +281,23 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
     __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
-    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__, /// dongx
-    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NEZTARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__,                  /// dongx
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__,__NEZTARRAYS__,
 #else
     __NARRAYS__+__NMCARRAYS__,
     __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__,
     __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
     __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__,
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__,
     __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__,
     __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
-    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__,   /// dongx
-    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__,+__NEZTARRAYS__,
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__,                  /// dongx
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__,
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__,   /// dongx
 #endif
     -1};
 
@@ -433,6 +453,9 @@ void  StMuDstMaker::streamerOff() {
   EztTrigBlob::Class()->IgnoreTObjectStreamer();
   EztFpdBlob::Class()->IgnoreTObjectStreamer();
   EztEmcRawData::Class()->IgnoreTObjectStreamer();
+  StMuFgtStrip::Class()->IgnoreTObjectStreamer();
+  StMuFgtCluster::Class()->IgnoreTObjectStreamer();
+  StMuFgtStripAssociation::Class()->IgnoreTObjectStreamer();
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -917,9 +940,11 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     fillDetectorStates(ev);
     fillEmc(ev);
     fillPmd(ev);
-	fillFms(ev);
+    fillFms(ev);
     fillTof(ev);
     fillBTof(ev);  /// dongx
+    fillMtd(ev);
+    fillFgt(ev);
     fillEzt(ev);
   }
   catch(StMuException e) {
@@ -942,13 +967,6 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     e.print();
     throw e;
   }
-	try {
-		fillmtd(ev);
-	}
-	catch(StMuException e) {
-		e.print();
-		throw e;
-	}
   try {
     fillTracks(ev,mTrackFilter);
   }
@@ -974,6 +992,10 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   }
   }
 #endif
+  catch(StMuException e) {
+    e.print();
+    throw e;
+  }
   mStMuDst->set(this);
   mStMuDst->fixTofTrackIndices();
   mStMuDst->fixTrackIndicesG(mStMuDst->numberOfPrimaryVertices());
@@ -1127,8 +1149,109 @@ void StMuDstMaker::fillBTof(StEvent* ev) {
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillFgt(StEvent* ev) {
 
-void StMuDstMaker::fillmtd(StEvent* ev) {
+   const StFgtCollection* fgtCollPtr = 0;
+   if( ev )
+      fgtCollPtr = ev->fgtCollection();
+
+   if( fgtCollPtr ){
+      // assert existance of the arrays
+      assert( mFgtArrays );
+      assert( mFgtArrays[muFgtStrips] );
+      assert( mFgtArrays[muFgtClusters] );
+      assert( mFgtArrays[muFgtStripAssociations] );
+
+      // need pointer types to enforce conversions in StMuDstMaker::addType
+      StMuFgtStrip*   stripClassType = 0;
+      StMuFgtCluster* clusterClassType = 0;
+
+      // need a map to keep track of the index of each strip.
+      // Key = geoId, value = idx in muFgtStrips TClonesArray
+      std::map< Int_t, Int_t > stripGeoIdIdxMap;
+      std::map< Int_t, Int_t >::iterator stripGeoIdIdxIter;
+
+      // iterate over discs
+      for( UShort_t discIdx = 0; discIdx < kFgtNumDiscs; ++discIdx ){
+
+         // copy strips
+         const StSPtrVecFgtStrip& stripVec = fgtCollPtr->mStripCollection[ discIdx ].getStripVec();
+         for( const_StFgtStripIterator stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
+            Short_t stripType = (*stripIter)->getClusterSeedType();
+
+            // save only the strips with a certain type
+            if( stripType == kFgtSeedType1 ||
+                stripType == kFgtSeedType2 ||
+                stripType == kFgtSeedType3 ||
+                stripType == kFgtClusterPart ||
+                stripType == kFgtClusterEndUp ||
+                stripType == kFgtClusterEndDown ||
+                stripType == kFgtStripShared ||
+		stripType == kFgtNextToCluster ||
+		stripType == kFgtKeepStrip ||
+                stripType == kFgtClusterTooBig ){
+
+               // add strip to the TClonesArray
+               Int_t idx = addType( mFgtArrays[muFgtStrips], *(*stripIter), stripClassType );
+
+               // add to the map
+               stripGeoIdIdxMap[ (*stripIter)->getGeoId() ] = idx;
+            };
+         };
+
+         // faster to declare iterator outside of the loop
+         stripWeightMap_t::const_iterator wIter;
+
+         // copy clusters
+         const StSPtrVecFgtHit& hitVec = fgtCollPtr->mHitCollection[ discIdx ].getHitVec();
+         for( const_StFgtHitIterator hitIter = hitVec.begin(); hitIter != hitVec.end(); ++hitIter ){
+            if( (*hitIter)->charge() > 0 ){
+               // add the cluster to the array
+               Int_t clusIdx = addType( mFgtArrays[muFgtClusters], *(*hitIter), clusterClassType );
+
+               // get the map of associations
+               const stripWeightMap_t& wMap = (*hitIter)->getStripWeightMap();
+
+               // iterate over associated strips and add the associations
+               Bool_t isFirst = 1;
+               for( wIter = wMap.begin(); wIter != wMap.end(); ++wIter ){
+
+                  Int_t   geoId  = wIter->first->getGeoId(); // first is a StFgtStrip, which knows its own geoId
+                  Float_t weight = wIter->second;            // second is the weight
+
+                  // determine the stripIdx
+                  stripGeoIdIdxIter = stripGeoIdIdxMap.find( geoId );
+
+                  // make sure the strip was saved
+                  assert( stripGeoIdIdxIter != stripGeoIdIdxMap.end() );
+
+                  Int_t stripIdx = stripGeoIdIdxIter->second;
+
+                  // make the association
+                  StMuFgtStripAssociation association( clusIdx, stripIdx, weight );
+
+                  // add it to the array
+                  Int_t associationIdx = addType( mFgtArrays[muFgtStripAssociations], association );
+
+                  if( isFirst ){
+                     // change the flag state
+                     isFirst = 0;
+
+                     // set the index in the cluster
+                     StMuFgtCluster* clusPtr = (StMuFgtCluster*)mFgtArrays[muFgtClusters]->UncheckedAt( clusIdx );
+                     clusPtr->setFirstStripAssociationIndex( associationIdx );
+                  };
+               };
+            };
+         };
+      };
+   };
+};
+
+void StMuDstMaker::fillMtd(StEvent* ev) {
 	DEBUGMESSAGE2("");
 	StTimer timer;
 	timer.start();
@@ -1142,16 +1265,16 @@ void StMuDstMaker::fillmtd(StEvent* ev) {
         
     for(size_t i=0; i < (size_t)mMTD.hitsPresent(); i++) {
         StMuMtdHit* mtdHit = (StMuMtdHit*)mMTD.MtdHit(i);
-        addType( mMTDArrays[muMTDHit], *mtdHit );
+        addType( mMtdArrays[muMTDHit], *mtdHit );
     }
     
     for(size_t i=0; i < (size_t)mMTD.rawHitsPresent(); i++) {
         cout<<"In for ?"<<endl;
         StMtdRawHit* mtdHit = (StMtdRawHit*)mMTD.RawMtdHit(i);
-        addType( mMTDArrays[muMTDRawHit], *mtdHit );
+        addType( mMtdArrays[muMTDRawHit], *mtdHit );
     }
     StMuMtdHeader *mtdHead = mMTD.mtdHeader();
-    if(mtdHead) addType(mMTDArrays[muMTDHeader],*mtdHead);
+    if(mtdHead) addType(mMtdArrays[muMTDHeader],*mtdHead);
 
     //if (mtd) addType( mArrays[muMtd], *mtd, typeOfMtd );
 	timer.stop();
@@ -1163,15 +1286,12 @@ void StMuDstMaker::fillmtd(StEvent* ev) {
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillEzt(StEvent* ev) {
   if (ev==0)    return;
+  char *eztArrayStatus=&mStatusArrays[__NARRAYS__+
 #ifndef __NO_STRANGE_MUDST__
-  char *eztArrayStatus=&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+
-				      __NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+
-				      __NTOFARRAYS__+__NBTOFARRAYS__]; /// dongx
-#else
-  char *eztArrayStatus=&mStatusArrays[__NARRAYS__+__NMCARRAYS__+
-				      __NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+
-				      __NTOFARRAYS__+__NBTOFARRAYS__]; /// dongx
+                      __NSTRANGEARRAYS__+
 #endif
+                      __NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+
+				      __NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__]; /// dongx
   if(eztArrayStatus[muEztHead]){
     EztEventHeader* header = mEzTree->copyHeader(ev);
     addType(mEztArrays[muEztHead], *header);
@@ -1661,6 +1781,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.109  2012/11/15 22:26:13  sangalin
+ * Added the FGT. Fixed bugs in array offsets for the MTD.
+ *
  * Revision 1.108  2012/10/04 18:57:59  fisyak
  * Add protection for empty emc raw data
  *

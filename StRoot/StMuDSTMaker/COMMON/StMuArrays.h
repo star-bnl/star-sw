@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.25 2012/09/28 22:38:05 tone421 Exp $
+ * $Id: StMuArrays.h,v 1.26 2012/11/15 22:26:13 sangalin Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -16,6 +16,9 @@
 /// @enum emcTypes enumeration to to index the emcArrays
 //enum emcTypes {muEmc=0};
 enum emcTypes {muEmcTow=0, muEmcPrs, muEmcSmde, muEmcSmdp, muEEmcPrs, muEEmcSmdu, muEEmcSmdv};
+
+/// @enum fgtTypes enumeration to to index the fgtArrays
+enum fgtTypes {muFgtStrips=0, muFgtClusters, muFgtStripAssociations };
 
 enum fmsTypes {muFmsHit=0};
 #ifndef __NO_STRANGE_MUDST__
@@ -51,18 +54,19 @@ __NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClo
 __NMCARRAYS__ =2,	///< size of the MCness arrays, i.e. number of TClonesArrays  
 __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
- __NFMSARRAYS__     =1 ,	///< size of the fms arrays, i.e. number of TClonesArrays  
+ __NFMSARRAYS__    =1 ,	///< size of the fms arrays, i.e. number of TClonesArrays  
 // run 5 - dongx
 __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NBTOFARRAYS__    =3 ,  /// dongx
 __NMTDARRAYS__    =3,
+ __NFGTARRAYS__    =3 ,	///< size of the fgt arrays, i.e. number of TClonesArrays  
 __NEZTARRAYS__     =5 ,  ///< size of the ez arrays >
      
 /// dongx
 #ifndef __NO_STRANGE_MUDST__
-__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NEZTARRAYS__
+__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
 #else
-__NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NEZTARRAYS__
+__NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NMTDARRAYS__+__NFGTARRAYS__+__NEZTARRAYS__
 #endif
 };
 class StMuArrays {
@@ -80,8 +84,9 @@ class StMuArrays {
     static const char**      fmsArrayNames;//[__NFMSARRAYS__    ]
     static const char**      tofArrayNames;//[__NTOFARRAYS__    ]
     static const char**     btofArrayNames;//[__NBTOFARRAYS__   ] // dongx
-    static const char**      eztArrayNames;//[__NEZARRAYS__    ]
-    static const char**      mtdArrayNames;
+    static const char**      mtdArrayNames;//[__NMTDARRAYS__    ]
+    static const char**      fgtArrayNames;//[__NFGTARRAYS__    ]
+    static const char**      eztArrayNames;//[__NEZARRAYS__     ]
     
 ///< names of the classes, the TClonesArrays are arrays of this type
     static const char*   arrayTypes          [__NALLARRAYS__    ];
@@ -94,8 +99,9 @@ class StMuArrays {
     static const char**  fmsArrayTypes;//    [__NFMSARRAYS__    ]
     static const char**  tofArrayTypes;//    [__NTOFARRAYS__    ]
     static const char**  btofArrayTypes;//   [__NBTOFARRAYS__   ]  // dongx
-    static const char**  eztArrayTypes;//    [__NEZARRAYS__    ]
-    static const char**  mtdArrayTypes;
+    static const char**  mtdArrayTypes;//    [__NMTDARRAYS__    ]
+    static const char**  fgtArrayTypes;//    [__NFGTARRAYS__    ]
+    static const char**  eztArrayTypes;//    [__NEZARRAYS__     ]
     
 ///< maximum sizes of the TClonesArrays
     static int           arraySizes    [__NALLARRAYS__    ];
@@ -108,8 +114,9 @@ class StMuArrays {
     static int*       fmsArraySizes;// [__NFMSARRAYS__    ]
     static int*       tofArraySizes;// [__NTOFARRAYS__    ]
     static int*      btofArraySizes;// [__NBTOFARRAYS__   ]  // dongx
-    static int*       eztArraySizes;// [__NEZARRAYS__    ]
-    static int*       mtdArraySizes;
+    static int*       mtdArraySizes;// [__NMTDARRAYS__     ]
+    static int*       fgtArraySizes;// [__NFGTARRAYS__    ]
+    static int*       eztArraySizes;// [__NEZARRAYS__     ]
     
 ///< number of entries in current event, currently not used
     static int        arrayCounters    [__NALLARRAYS__    ];
@@ -122,8 +129,9 @@ class StMuArrays {
     static int*    fmsArrayCounters;// [__NFMSARRAYS__    ]
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
     static int*   btofArrayCounters;// [__NBTOFARRAYS__   ]  // dongx
-    static int*    eztArrayCounters;// [__NEZARRAYS__    ]
     static int*    mtdArrayCounters;// [__NEZARRAYS__    ]
+    static int*    fgtArrayCounters;// [__NFGTARRAYS__    ]
+    static int*    eztArrayCounters;// [__NEZARRAYS__    ]
 #endif    
     ClassDef(StMuArrays,0)
 };
@@ -133,6 +141,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.26  2012/11/15 22:26:13  sangalin
+ * Added the FGT. Fixed bugs in array offsets for the MTD.
+ *
  * Revision 1.25  2012/09/28 22:38:05  tone421
  * Changed array stucture of MTD upon request of the TOF group. MTD arrays now on top level, rather than within __NARRAYS__
  *

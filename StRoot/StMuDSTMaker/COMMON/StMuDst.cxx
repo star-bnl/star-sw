@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.57 2012/09/28 22:38:05 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.58 2012/11/15 22:26:13 sangalin Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -56,6 +56,7 @@ TClonesArray** StMuDst::pmdArrays    = 0;
 TClonesArray** StMuDst::tofArrays    = 0;
 TClonesArray** StMuDst::btofArrays    = 0;   /// dongx
 TClonesArray** StMuDst::mtdArrays    = 0;   
+TClonesArray** StMuDst::fgtArrays    = 0;
 TClonesArray *StMuDst::mMuEmcCollectionArray = 0;
 StMuEmcCollection *StMuDst::mMuEmcCollection = 0;
 StMuFmsCollection *StMuDst::mMuFmsCollection = 0;
@@ -83,11 +84,12 @@ void StMuDst::unset() {
 #endif
     mcArrays = 0;
     emcArrays     = 0;
-	fmsArrays     = 0;
+    fmsArrays     = 0;
     pmdArrays     = 0;
     tofArrays     = 0;
     btofArrays    = 0;   // dongx
     mtdArrays    = 0;   // dongx
+    fgtArrays     = 0;
     mMuEmcCollectionArray = 0;
     mMuEmcCollection = 0; 
 	mMuFmsCollection = 0;
@@ -114,7 +116,8 @@ void StMuDst::set(StMuDstMaker* maker) {
   pmdArrays     = maker->mPmdArrays;
   tofArrays     = maker->mTofArrays;
   btofArrays    = maker->mBTofArrays;   // dongx
-  mtdArrays    = maker->mMTDArrays;  
+  mtdArrays    = maker->mMtdArrays;  
+  fgtArrays     = maker->mFgtArrays;
 
     mMuEmcCollectionArray = maker->mEmcCollectionArray;
   mMuEmcCollection      = maker->mEmcCollection;
@@ -141,15 +144,16 @@ void StMuDst::set(TClonesArray** theArrays,
 		  TClonesArray** theEmcArrays,
 		  TClonesArray** theFmsArrays,
 		  TClonesArray** thePmdArrays,
-                  TClonesArray** theTofArrays,
-                  TClonesArray** theBTofArrays,    // dongx
+          TClonesArray** theTofArrays,
+          TClonesArray** theBTofArrays,    // dongx
+          TClonesArray** theMTDArrays,
+		  TClonesArray** theFgtArrays,
+		  TClonesArray** theEztArrays,
                   TClonesArray* emc_arr,
 		  StMuEmcCollection *emc,
  		  StMuFmsCollection *fms,		  
                   TClonesArray* pmd_arr,
-		  StMuPmdCollection *pmd,
-		  TClonesArray** theEztArrays,
-          TClonesArray** theMTDArrays) 
+		  StMuPmdCollection *pmd)
 {
   // I don't understand why this method is still needed,
   // but cannot comile dictionary  when it is removed
@@ -161,6 +165,7 @@ void StMuDst::set(TClonesArray** theArrays,
   mcArrays = theMCArrays;
   emcArrays     = theEmcArrays;   
   fmsArrays     = theFmsArrays;
+  fgtArrays     = theFgtArrays;
   pmdArrays     = thePmdArrays;
   tofArrays     = theTofArrays;
   btofArrays    = theBTofArrays;    // dongx
@@ -745,6 +750,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.58  2012/11/15 22:26:13  sangalin
+ * Added the FGT. Fixed bugs in array offsets for the MTD.
+ *
  * Revision 1.57  2012/09/28 22:38:05  tone421
  * Changed array stucture of MTD upon request of the TOF group. MTD arrays now on top level, rather than within __NARRAYS__
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.54 2012/09/28 22:38:05 tone421 Exp $
+ * $Id: StMuDstMaker.h,v 1.55 2012/11/15 22:26:13 sangalin Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -177,7 +177,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.54 2012/09/28 22:38:05 tone421 Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.55 2012/11/15 22:26:13 sangalin Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -277,7 +277,6 @@ virtual   void closeRead();
   void fillEvent(StEvent* ev, StMuCut* cut=0);
   void fillVertices(StEvent* ev);
   void fillpp2pp(StEvent* ev);
-	void fillmtd(StEvent* ev);
 
 	void fillsttrigger(StEvent* ev);	
   void fillPmd(StEvent* ev);
@@ -294,6 +293,8 @@ virtual   void closeRead();
   void fillTof(StEvent* ev);
   /// dongx
   void fillBTof(StEvent* ev);
+  void fillMtd(StEvent* ev);
+  void fillFgt(StEvent* ev);
 
     void fillEzt(StEvent* ev);
 
@@ -350,9 +351,10 @@ virtual   void closeRead();
   TClonesArray** mPmdArrays;    //[__NPMDARRAYS__    ];
   TClonesArray** mTofArrays;    //[__NTOFARRAYS__    ];
   /// dongx
-  TClonesArray** mBTofArrays;   //[__NBTOFARRAYS__    ];
+  TClonesArray** mBTofArrays;   //[__NBTOFARRAYS__   ];
+  TClonesArray** mMtdArrays;    //[__NMTDARRAYS__    ];
+  TClonesArray** mFgtArrays;    //[__NFGTARRAYS__    ];
   TClonesArray** mEztArrays;    //[__NEZTARRAYS__    ];
-  TClonesArray** mMTDArrays;
     
     char           mStatusArrays    [__NALLARRAYS__    ];
   TClonesArray*  mEmcCollectionArray; // Needed to hold old format
@@ -361,7 +363,8 @@ virtual   void closeRead();
   TClonesArray*  mPmdCollectionArray; // Needed to hold old format
   StMuPmdCollection *mPmdCollection;
 
-  ClassDef(StMuDstMaker, 0)
+  // Increment this by 1 every time the class structure is changed
+  ClassDef(StMuDstMaker, 3)
 };
 
 inline StMuDst* StMuDstMaker::muDst() { return mStMuDst;}
@@ -401,6 +404,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.55  2012/11/15 22:26:13  sangalin
+ * Added the FGT. Fixed bugs in array offsets for the MTD.
+ *
  * Revision 1.54  2012/09/28 22:38:05  tone421
  * Changed array stucture of MTD upon request of the TOF group. MTD arrays now on top level, rather than within __NARRAYS__
  *
