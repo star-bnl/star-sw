@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.33 2012/11/12 20:22:05 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.34 2012/11/15 15:19:03 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -248,8 +248,12 @@ Int_t StTpcRTSHitMaker::Make() {
 	if (! dta->sim_cld[i].cld.pad) continue;
 	if (dta->sim_cld[i].cld.tb >= __MaxNumberOfTimeBins__) continue;
 	if (dta->sim_cld[i].cld.charge < fminCharge) continue;
-	if (dta->sim_cld[i].cld.flags && FCF_DEAD_EDGE ||
-	    dta->sim_cld[i].cld.flags && FCF_ROW_EDGE) continue;
+	/*tpxFCF.h
+	  #define FCF_ROW_EDGE            16      // 0x10 touched end of row
+	  #define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
+	  #define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad 
+	*/
+	if (dta->sim_cld[i].cld.flags & (FCF_DEAD_EDGE | FCF_BROKEN_EDGE | FCF_ROW_EDGE)) continue;
 	if (Debug()) {
 	  //	  if (Debug() > 1 || ( dta->sim_cld[i].cld.p2 - dta->sim_cld[i].cld.p1 <= 1 )) {
 	    LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
@@ -316,11 +320,6 @@ Int_t StTpcRTSHitMaker::Make() {
 						    , dta->sim_cld[i].cld.tb 
 						    , dta->sim_cld[i].cld.charge
 						    , dta->sim_cld[i].cld.flags);
-	/*tpxFCF.h
-	  #define FCF_ROW_EDGE            16      // 0x10 touched end of row
-	  #define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
-	  #define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad 
-	*/
 	assert(dta->sim_cld[i].cld.pad >  0 && dta->sim_cld[i].cld.pad <= 182 && 
 	       dta->sim_cld[i].cld.tb  >= 0 && dta->sim_cld[i].cld.tb  <  512);
 	hitsAdded++;
