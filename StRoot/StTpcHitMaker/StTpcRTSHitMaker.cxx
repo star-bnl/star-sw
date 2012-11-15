@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.34 2012/11/15 15:19:03 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.35 2012/11/15 19:36:37 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -302,7 +302,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	Double_t q = ADC2GeV*dta->sim_cld[i].cld.charge;
 	UShort_t idTruth = 0;
 	UShort_t quality = 0;
-	if (dta->sim_cld[i].track_id > 0 &&  dta->sim_cld[i].track_id < 100000) {
+	if (dta->sim_cld[i].track_id < 10000) {
 	  idTruth = dta->sim_cld[i].track_id;
 	  quality = dta->sim_cld[i].quality;
 	}
