@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.h,v 1.10 2011/08/02 20:36:57 prindle Exp $
+ * $Id: StEStructTrack.h,v 1.11 2012/11/16 21:24:38 prindle Exp $
  *
  * Author: Jeff Porter merge of work from Aya Ishihara and Jeff Reid
  *
@@ -75,7 +75,7 @@ private:
   //-> From old StEbye2ptTrack.... note none are persistent
 
   Bool_t            mIsComplete; //!
-  StPhysicalHelixD  mHelix;  //! Helix taken from MuDST
+  StPhysicalHelixD  mHelix;  //! Recalculate helix so we can make persistent StEStructEvent smaller.
   Float_t           mPt; //!
   Float_t           mPtot; //!
   Float_t           mYt; //!
@@ -99,10 +99,12 @@ private:
 
 public:
 
-  StEStructTrack() : mIsComplete(false), mHelix(0,0,0,StThreeVectorD(), -1), mAssignedMass(0.1396) {};
+  StEStructTrack() : mIsComplete(false), mAssignedMass(0.1396) {};
   StEStructTrack(StEStructTrack* track);
   virtual ~StEStructTrack() {};
 
+  static StThreeVectorD PrimVertex;
+  static Float_t        BField;  //!
   void FillTransientData();
   void evalPt();
   void evalPtot();
@@ -291,8 +293,12 @@ inline int      StEStructTrack::getYtBin() const { return mytbin; };
 /***********************************************************************
  *
  * $Log: StEStructTrack.h,v $
+ * Revision 1.11  2012/11/16 21:24:38  prindle
+ * Changes to support reading/writing of EStructEvent. Fill helix as transient and
+ * get BField from file (?).
+ *
  * Revision 1.10  2011/08/02 20:36:57  prindle
- * Event: modifications for ZDCCoincidence
+ *   Event: modifications for ZDCCoincidence
  *   Track: big changes in evalPID. These should be superseded when TOF-dEdx
  *          space is understood better.
  *
