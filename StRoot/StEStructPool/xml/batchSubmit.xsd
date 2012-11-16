@@ -256,6 +256,7 @@ hell is in this directory.
             <xs:enumeration value='CuCu200GeVProductionMinBias2007ic' Comment='tag for 2005, 200GeV CuCu minimum bias trigger (2007ic production)'/>
             <xs:enumeration value='2007ProductionMinBias' Comment='tag for 2007, 200GeV AuAu minimum bias produced for PMD'/>
             <xs:enumeration value='2007LowLuminosity' Comment='tag for 2007, 200GeV AuAu minimum bias Low Luminosity trigger set'/>
+            <xs:enumeration value='AuAu200GeVMinBias2011' Comment='tag for 2011, 200GeV AuAu minimum bias trigger . Should have pileup suppression'/>
             <xs:enumeration value='AuAu200GeVMinBias2010' Comment='tag for 2010, 200GeV AuAu minimum bias trigger which I am supposed to QA'/>
             <xs:enumeration value='AuAu200GeVProductionMinBias2004'  Comment='tag for 2004, 200GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu200GeVProductionMinBiasA2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger for early in run'/>
@@ -268,6 +269,7 @@ hell is in this directory.
             <xs:enumeration value='AuAu62GeVMinBias2010'  Comment='tag for 2010, 62GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu62GeVMinBias2004'  Comment='tag for 2004, 62GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu39GeVMinBias2010'  Comment='tag for 2010, 39GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu27GeVMinBias2011'  Comment='tag for 2011, 27GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu19GeVMinBias2011'  Comment='tag for 2011, 19.6GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu11GeVMinBias2010'  Comment='tag for 2010, 11GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu7GeVMinBias2010'   Comment='tag for 2010,  7.7GeV AuAu minimum bias trigger'/>
@@ -351,9 +353,22 @@ hell is in this directory.
 <!-- Track cuts are almost the same as the event cuts. -->
 <xs:element name='trackCuts'>
     <xs:complexType>
-        <xs:sequence>
+        <xs:all>
+            <xs:element ref='hijingFragment' minOccurs='0' maxOccurs='unbounded'/>
             <xs:element ref='trackCut' minOccurs='0' maxOccurs='unbounded'/>
-        </xs:sequence>
+        </xs:all>
+    </xs:complexType>
+</xs:element>
+<!-- hijingFragment is an ascii string specifying source of fragmentation. -->
+<xs:element name='hijingFragment'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='projectileString'  Comment='Require track came from fragmentation of a projectile string'/>
+            <xs:enumeration value='targetString'  Comment='Require track came from fragmentation of a target string'/>
+            <xs:enumeration value='softSea' Comment='Require track came from fragmentation of a soft sea quark'/>
+            <xs:enumeration value='hardScatter' Comment='Require track came from fragmentation of a hard scattered parton'/>
+        </xs:restriction>
+        <xs:attribute name='Comment' type='xs:string' use='required'/>
     </xs:complexType>
 </xs:element>
 
