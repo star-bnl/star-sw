@@ -1344,7 +1344,8 @@ proc ::jobMonitor::killSelected {} {
     } else {
         set qstatList [list]
     }
-    if {![catch {exec condor_q -submitter $env(USER) -format " %i " clusterid -format " %s " procId -format " %s " CMD} formatted]} {
+    # Appears that if we ask for procId we get a single entry.     -format " %s " procId
+    if {![catch {exec condor_q -submitter $env(USER) -format " %i " clusterid -format " %s " CMD} formatted]} {
         set condClustList $formatted
     } else {
         set condClustList [list]
@@ -1360,7 +1361,7 @@ proc ::jobMonitor::killSelected {} {
 #            }
 #        } else {
             set jName [string map {condor csh} $jobName]
-            foreach {clusterId procId cmd} $condClustList {
+            foreach {clusterId cmd} $condClustList {
                 # See comment after next use of getJobName as far as use of file tail here.
                 # Used to get command name from csh file. Latest (on Sept. 17, 2010) changed this.
                 # if {[file tail $cmd] eq [file tail $jName]} {}
@@ -1442,7 +1443,8 @@ proc ::jobMonitor::clearErrors {} {
 proc ::jobMonitor::releaseJobs {} {
     global env
 
-    if {![catch {exec condor_q -submitter $env(USER) -format " %i " clusterid -format " %s " procId -format " %s " CMD} formatted]} {
+    #    -format " %s " procId
+    if {![catch {exec condor_q -submitter $env(USER) -format " %i " clusterid -format " %s " CMD} formatted]} {
         set condClustList $formatted
     } else {
         set condClustList [list]
@@ -1450,7 +1452,7 @@ proc ::jobMonitor::releaseJobs {} {
     foreach job $::jobMonitor::actionList {
         set jobName [getJobName [file join $::jobMonitor::scriptDir sched$job.csh]]
         set jName [string map {condor csh} $jobName]
-        foreach {clusterId procId cmd} $condClustList {
+        foreach {clusterId cmd} $condClustList {
             # See comment after next use of getJobName as far as use of file tail here.
             # if {[file tail $cmd] eq [file tail $jName]} {}
             if {[file rootname [file tail $cmd]] eq "sched$job"} {
@@ -1506,7 +1508,8 @@ proc ::jobMonitor::updateStatusIndicators {{job ""}} {
     } else {
         set qstatList [list]
     }
-    if {![catch {exec condor_q -submitter $env(USER) -format " %i " clusterid -format " %s " procId -format " %s " CMD -format " %d " JobStatus} formatted]} {
+    #    -format " %s " procId
+    if {![catch {exec condor_q -submitter $env(USER) -format " %i " clusterid -format " %s " CMD -format " %d " JobStatus} formatted]} {
         set condClustList $formatted
     } else {
         set condClustList [list]
@@ -1544,7 +1547,7 @@ proc ::jobMonitor::updateStatusIndicators {{job ""}} {
             set id ""
             # Replace .condor with .csh in jobName
             set jName [string map {condor csh} $jobName]
-            foreach {clusterId procId cmd jobStat} $condClustList {
+            foreach {clusterId cmd jobStat} $condClustList {
                 # Not sure I want to use file tail here.
                 # It looks like there has been a change to using the full path for the
                 # jobName.
@@ -1664,7 +1667,7 @@ proc ::jobMonitor::getJobName {scriptFile} {
     }
     close $f
     if {[llength $runCmd] == 0} {
-        error "Failed to find job submission command in file $fName!!!!"
+        error "Failed to find job submission command in file $scriptFile!!!!"
     } else {
         return [lindex $runCmd end]
     }

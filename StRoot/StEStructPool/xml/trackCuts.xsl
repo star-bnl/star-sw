@@ -11,6 +11,15 @@
 
 <!-- Note that I add a peroiod<cr> after Comment.
      Without some text the <cr> gets stripped. -->
+<xsl:template match='hijingFragment'>
+    <xsl:text>hijingFragment,</xsl:text>
+    <xsl:value-of select='.'/>
+    <xsl:text>        #</xsl:text>
+    <xsl:value-of select='@Comment'/>
+    <xsl:text>.
+</xsl:text>
+</xsl:template>
+
 <xsl:template match='trackCut'>
     <xsl:apply-templates/>
     <xsl:for-each select='cutName'>
