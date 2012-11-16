@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.14 2010/09/02 21:24:08 prindle Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.15 2012/11/16 21:22:27 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -596,7 +596,9 @@ int StEStructPairCuts::cutPair(){
         }
     }
 
-    if(cutQuality()) return 1;
+    if (cutQuality()) {
+        return 1;
+    }
 
     if(cutMass()) return 1;
 
@@ -889,8 +891,14 @@ double StEStructPairCuts::OuterMidTpcZSeparation() const {
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.15  2012/11/16 21:22:27  prindle
+ * 2ptCorrelations: SS, AS histograms.  Get eta limits from cuts. Fit PtAll histogram. Add histograms to keep track of eta, phi limits. A few more histograms
+ * Binning: Add quality cut.
+ * CutBin: modify mode9
+ * PairCuts: modify goodDeltaZ for case of one track leaving via endcap.
+ *
  * Revision 1.14  2010/09/02 21:24:08  prindle
- * 2ptCorrelations: Fill histograms for event mixing information
+ *   2ptCorrelations: Fill histograms for event mixing information
  *                    Option for common mixing buffer
  *                    Switch to selectively fill QInv histograms (which take a long time)
  *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.16 2012/10/30 00:16:50 dkettler Exp $
+ * $Id: StEStructCutBin.cxx,v 1.17 2012/11/16 21:22:27 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -109,8 +109,8 @@ void StEStructCutBin::setMode(int mode){
     }
   case 9:
     {
-      mnumBins=15;
-      mnumParentBins=5;
+      mnumBins=21;
+      mnumParentBins=6;
       strcpy(mcutModeName," only p_t binning");
       break;
     }
@@ -199,9 +199,9 @@ int StEStructCutBin::getCutBinMode2(StEStructPairCuts* pc){
 //------------------------ Mode=3 -------------------------------------------
 //
 // --> now modified for 
-//        soft= yt<1.8
-//        neck=1.8<=yt<=2.2
-//        hard=yt>2.2
+//        soft= yt<1.99  = 0.5 GeV
+//        neck=1.99<=yt<=2.383  = 0.75 GeV
+//        hard=yt>2.383
 //        rest .. is the rest in the 2pt space ... all pt's satisfy it
 
 // ytyt plot deta,dphi
@@ -225,14 +225,11 @@ int StEStructCutBin::getCutBinMode3(StEStructPairCuts* pc){
   float yt2=pc->Track2()->Yt();
 
   // These numbers are also used in StEStructCutBin::getParentBin (change both)
-  if(yt1<1.8 && yt2<1.8){
+  if(yt1<1.99 && yt2<1.99){
     iyt=0;
-//  } else if(yt1<2.2 && yt2<2.2){
-// This was getting the entire yt square below 2.2 minus the soft.
-// I thought we only wanted the case with both tracks below 2.2 AND ABOVE 1.8
-  } else if( ((1.8<yt1) && (yt1<2.2)) && ((1.8<yt2) && (yt2<2.2))) {
+  } else if( ((1.99<yt1) && (yt1<2.383)) && ((1.99<yt2) && (yt2<2.383))) {
     iyt=1;
-  } else if(yt1>=2.2 && yt2>=2.2){
+  } else if(yt1>=2.383 && yt2>=2.383){
     iyt=2;
   } else {
     iyt=3;
@@ -243,7 +240,7 @@ int StEStructCutBin::getCutBinMode3(StEStructPairCuts* pc){
 
   int idedp;
 
-  if(deta<1.0) { 
+  if(deta<0.5*mMaxDEta) { 
     if(pc->sameSide()){ // dphi<M_PI/2.0 || dphi> 1.5*M_PI){
       idedp=2;
     } else {
@@ -657,34 +654,43 @@ int StEStructCutBin::notSymmetrizedXX8(int cutBin, int pairCharge) {
 
 int StEStructCutBin::getCutBinMode9(StEStructPairCuts* pc){
 
-    int mode[5][5] = {{0, 5, 9, 12, 14}, {5, 1, 6, 10, 13}, {9, 6, 2, 7, 11}, {12, 10, 7, 3, 8}, {14, 13, 11, 8, 4}};
+    int mode[6][6] = {{ 0,  6, 11, 15, 18, 20},
+                      { 6,  1,  7, 12, 16, 19},
+                      {11,  7,  2,  8, 13, 17},
+                      {15, 12,  8,  3,  9, 14},
+                      {18, 16, 13,  9,  4, 10},
+                      {20, 19, 17, 14, 10,  5}};
     int ipt1, ipt2;
 
     float pt1 = pc->Track1()->Pt();
     float pt2 = pc->Track2()->Pt();
 
     // These numbers are also used in StEStructCutBin::getParentBin (change both)
-    if (pt1 < 1.0) {
+    if (pt1 < 0.5) {
         ipt1 = 0;
-    } else if (pt1 < 2.0) {
+    } else if (pt1 < 1.0) {
         ipt1 = 1;
-    } else if (pt1 < 3.0) {
+    } else if (pt1 < 2.0) {
         ipt1 = 2;
-    } else if (pt1 < 4.0) {
+    } else if (pt1 < 3.0) {
         ipt1 = 3;
-    } else {
+    } else if (pt1 < 4.0) {
         ipt1 = 4;
-    }
-    if (pt2 < 1.0) {
-        ipt2 = 0;
-    } else if (pt2 < 2.0) {
-        ipt2 = 1;
-    } else if (pt2 < 3.0) {
-        ipt2 = 2;
-    } else if (pt2 < 4.0) {
-        ipt2 = 3;
     } else {
+        ipt1 = 5;
+    }
+    if (pt2 < 0.5) {
+        ipt2 = 0;
+    } else if (pt2 < 1.0) {
+        ipt2 = 1;
+    } else if (pt2 < 2.0) {
+        ipt2 = 2;
+    } else if (pt2 < 3.0) {
+        ipt2 = 3;
+    } else if (pt2 < 4.0) {
         ipt2 = 4;
+    } else {
+        ipt2 = 5;
     }
     return  mode[ipt1][ipt2];
 }
@@ -743,10 +749,15 @@ int StEStructCutBin::getCutBinMode10(StEStructPairCuts* pc){
 
 
 
-
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.17  2012/11/16 21:22:27  prindle
+ * 2ptCorrelations: SS, AS histograms.  Get eta limits from cuts. Fit PtAll histogram. Add histograms to keep track of eta, phi limits. A few more histograms
+ * Binning: Add quality cut.
+ * CutBin: modify mode9
+ * PairCuts: modify goodDeltaZ for case of one track leaving via endcap.
+ *
  * Revision 1.16  2012/10/30 00:16:50  dkettler
  * Cut bins for marginal pt bins added
  *
