@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.16 2009/05/08 00:09:54 prindle Exp $
+ * $Id: StEStructBinning.h,v 1.17 2012/11/16 21:22:27 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -54,6 +54,7 @@
 #define ESTRUCT_Q_BINS 51
 #define ESTRUCT_TPCSEP_BINS 51
 #define ESTRUCT_TPCSEPPHI_BINS 51
+#define ESTRUCT_TPCQUALITY_BINS 51
 
 #define ESTRUCT_DEDX_BINS 151
 #define ESTRUCT_PTOT_BINS 151
@@ -120,6 +121,9 @@ struct TPCSepBins {
 struct TPCSepPhiBins {
   float sep[ESTRUCT_TPCSEPPHI_BINS];
 };
+struct TPCQualityBins {
+  float sep[ESTRUCT_TPCQUALITY_BINS];
+};
 
 struct dEdxBins {
   float dEdx[ESTRUCT_DEDX_BINS];
@@ -184,9 +188,10 @@ protected:
 
   float maxTPCSep, minTPCSep, dTPCSep; //! TPC separation dist
   float maxTPCSepPhi, minTPCSepPhi, dTPCSepPhi; //! TPC separation dist
+  float maxTPCQuality, minTPCQuality, dTPCQuality;
   float maxdEdx, mindEdx, ddEdx;
   float maxPtot, minPtot, dPtot;
-  int   nTPCSep, nTPCSepPhi, ndEdx, nPtot;
+  int   nTPCSep, nTPCSepPhi, nTPCQuality, ndEdx, nPtot;
 
   float maxQAEta, minQAEta, dQAEta;
   float maxQAPhi, minQAPhi, dQAPhi;
@@ -218,6 +223,7 @@ public:
   int iq(float q);
   int isep(float sep);
   int isepphi(float sep);
+  int iqual(float qual);
   int idedx(float dedx);
   int iptot(float ptot);
   int iqaphi(float phi);
@@ -233,6 +239,7 @@ public:
   float qVal(int iq);
   float sepVal(int is);
   float sepphiVal(int is);
+  float qualityVal(int is);
   float dedxVal(int idedx);
   float ptotVal(int iptot);
   float qaetaVal(int ieta);
@@ -402,6 +409,9 @@ public:
   float TPCSepPhiMax()  { return maxTPCSepPhi; }
   float TPCSepPhiMin()  { return minTPCSepPhi; }
   int   TPCSepPhiBins() { return nTPCSepPhi;   }
+  float TPCQualityMax()  { return maxTPCQuality; }
+  float TPCQualityMin()  { return minTPCQuality; }
+  int   TPCQualityBins() { return nTPCQuality;   }
 
   int   QAEtaBins() { return nQAEta; }
   int   QAPhiBins() { return nQAPhi; }
@@ -442,6 +452,9 @@ inline float StEStructBinning::sepVal(int is){
 inline float StEStructBinning::sepphiVal(int is){
   return minTPCSepPhi+is*dTPCSepPhi+dTPCSepPhi/2;
 }
+inline float StEStructBinning::qualityVal(int is){
+  return minTPCQuality+is*dTPCQuality+dTPCQuality/2;
+}
 
 inline int StEStructBinning::isep(float sep){
   if( sep < minTPCSep ) return ESTRUCT_TPCSEP_BINS - 1;
@@ -456,6 +469,11 @@ inline int StEStructBinning::isepphi(float dphi){
     }
     int j = (int)((dphi + dTPCSepPhi/2 - minTPCSepPhi)/dTPCSepPhi);
     return (j > ESTRUCT_TPCSEPPHI_BINS - 2) ? ESTRUCT_TPCSEPPHI_BINS - 1 : j;
+}
+inline int StEStructBinning::iqual(float qual){
+  if( qual < minTPCQuality ) return ESTRUCT_TPCQUALITY_BINS - 1;
+  int j = (int)((qual-minTPCQuality)/dTPCQuality);
+  return (j > ESTRUCT_TPCQUALITY_BINS - 2) ? ESTRUCT_TPCQUALITY_BINS - 1 : j;
 }
 
 inline int StEStructBinning::iphi(float phi){
@@ -683,6 +701,12 @@ inline float StEStructBinning::qaptVal(int ipt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.17  2012/11/16 21:22:27  prindle
+ * 2ptCorrelations: SS, AS histograms.  Get eta limits from cuts. Fit PtAll histogram. Add histograms to keep track of eta, phi limits. A few more histograms
+ * Binning: Add quality cut.
+ * CutBin: modify mode9
+ * PairCuts: modify goodDeltaZ for case of one track leaving via endcap.
+ *
  * Revision 1.16  2009/05/08 00:09:54  prindle
  * In 2ptCorrelations we added switches to select blocks of histograms to fill.
  * (See constructor in StEStruct2ptCorrelations.cxx)

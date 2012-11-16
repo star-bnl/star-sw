@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.14 2012/10/30 00:16:50 dkettler Exp $
+ * $Id: StEStructCutBin.h,v 1.15 2012/11/16 21:22:27 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -30,11 +30,12 @@ class StEStructCutBin : public TObject {
   int mnumParentBins;
   char* mcutModeName;
   int mcutBinHistMode;
+  double mMaxDEta;
 
   TH1D** mHCutBinHists[8];
 
   static StEStructCutBin* mInstance;
-  StEStructCutBin(): mcutMode(0), mnumBins(1), mcutModeName(0), mcutBinHistMode(0) { setMode(0); };
+  StEStructCutBin(): mcutMode(0), mnumBins(1), mcutModeName(0), mcutBinHistMode(0), mMaxDEta(1) { setMode(0); };
   //  StEStructCutBin(int mode){ setMode(mode); };
 
   int getCutBinMode1(StEStructPairCuts *pc);
@@ -75,6 +76,7 @@ class StEStructCutBin : public TObject {
   int  getMode();
   // Save histograms (mHCutBinHists) to currently opened file.
   void setCutBinHistMode(int mode); // Non-zero means fill histograms.
+  void setMaxDEta(double deta);
   int  getCutBinHistMode();
   void initCutBinHists();
   void writeCutBinHists();
@@ -96,6 +98,8 @@ class StEStructCutBin : public TObject {
 };
 
 inline char* StEStructCutBin::printCutBinName(){ return mcutModeName; }
+
+inline void StEStructCutBin::setMaxDEta(double deta){ mMaxDEta = deta; }
 
 inline int StEStructCutBin::getNumBins(){ return mnumBins; }
 inline int StEStructCutBin::getNumPairDensityBins() {
@@ -186,9 +190,9 @@ inline int StEStructCutBin::getParentBin(StEStructPairCuts *pc, StEStructTrack* 
     if (3 == mcutMode) {
         float yt = trkPtr->Yt();
         // These numbers are also used in StEStructCutBin::getCutBinMode3 (change both)
-        if (yt<1.8) {                        // soft
+        if (yt<1.99) {                        // soft
             return 0;
-        } else if ((1.8<yt) && (yt<2.2)) {   // neck
+        } else if ((1.99<yt) && (yt<2.383)) {   // neck
             return 1;
         } else {                             // hard
             return 2;
@@ -208,16 +212,18 @@ inline int StEStructCutBin::getParentBin(StEStructPairCuts *pc, StEStructTrack* 
     } else if (9 == mcutMode) {
         float pt = trkPtr->Pt();
         // These numbers are also used in StEStructCutBin::getCutBinMode9 (change both)
-        if (pt<1.0) {
+        if (pt<0.5) {
             return 0;
-        } else if (pt<2.0) {
+        } else if (pt<1.0) {
             return 1;
-        } else if (pt<3.0) {
+        } else if (pt<2.0) {
             return 2;
-        } else if (pt<4.0) {
+        } else if (pt<3.0) {
             return 3;
-        } else {
+        } else if (pt<4.0) {
             return 4;
+        } else {
+            return 5;
         }
     } else {
         return 0;
@@ -335,6 +341,12 @@ inline int StEStructCutBin::notSymmetrizedXX(int cutBin, int pairCharge) {
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.15  2012/11/16 21:22:27  prindle
+ * 2ptCorrelations: SS, AS histograms.  Get eta limits from cuts. Fit PtAll histogram. Add histograms to keep track of eta, phi limits. A few more histograms
+ * Binning: Add quality cut.
+ * CutBin: modify mode9
+ * PairCuts: modify goodDeltaZ for case of one track leaving via endcap.
+ *
  * Revision 1.14  2012/10/30 00:16:50  dkettler
  * Cut bins for marginal pt bins added
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.20 2010/09/02 21:24:08 prindle Exp $
+ * $Id: StEStructPairCuts.h,v 1.21 2012/11/16 21:22:27 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -377,11 +377,24 @@ inline int StEStructPairCuts::goodDeltaXY() {
 // I expect a small fraction of pairs are like this so we keep this code
 // simple and hopefully fast, passing a few more pairs on to detailed
 // pair cuts than are really necessary. 
+//
+// I find that the quality cuts can be unexpectedly high (therefore rejecting
+// the pair) when one track exits via the endcap while the other does not.
+// I guess we need to do this cut properly after all.
 inline int StEStructPairCuts::goodDeltaZ() {
     if ( mGooddeltaZdeltaXYCut &&
          MidTpcZSeparation() > mgooddzdxy[0] &&
          OuterMidTpcZSeparation() > mgooddzdxy[0] ) {
         return 1;
+    }
+    double outerDelZ;
+    if ( mGooddeltaZdeltaXYCut ) {
+        if ((outerDelZ = OuterMidTpcZSeparation()) < 0) {
+            return 1;
+        } else if ((MidTpcZSeparation() > mgooddzdxy[0]) &&
+                   (outerDelZ > mgooddzdxy[0] )) {
+            return 1;
+        }
     }
     return 0;
 }
@@ -474,12 +487,12 @@ inline int StEStructPairCuts::cutExitSep(){
    return 0;
 }
 
-inline int StEStructPairCuts::cutQuality(){
-  if( mQualityCut && 
-      ( (mQualityVal=quality()) <mQuality[0]
-	|| mQualityVal>mQuality[1] )
-      ) return ++(mQualityCounter[mType]);
-  return 0;
+inline int StEStructPairCuts::cutQuality() {
+    if( mQualityCut && 
+      ((mQualityVal=quality()) <mQuality[0] || mQualityVal>mQuality[1] )) {
+        return ++(mQualityCounter[mType]);
+    }
+    return 0;
 }
 
 inline int StEStructPairCuts::cutHBT(){
@@ -960,8 +973,14 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.21  2012/11/16 21:22:27  prindle
+ * 2ptCorrelations: SS, AS histograms.  Get eta limits from cuts. Fit PtAll histogram. Add histograms to keep track of eta, phi limits. A few more histograms
+ * Binning: Add quality cut.
+ * CutBin: modify mode9
+ * PairCuts: modify goodDeltaZ for case of one track leaving via endcap.
+ *
  * Revision 1.20  2010/09/02 21:24:08  prindle
- * 2ptCorrelations: Fill histograms for event mixing information
+ *   2ptCorrelations: Fill histograms for event mixing information
  *                    Option for common mixing buffer
  *                    Switch to selectively fill QInv histograms (which take a long time)
  *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.14 2010/03/02 21:45:27 prindle Exp $
+ * $Id: StEStructBinning.cxx,v 1.15 2012/11/16 21:22:27 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -48,7 +48,7 @@ StEStructBinning::StEStructBinning(){
   nEta  = ESTRUCT_ETA_BINS-1;
   nDEta = ESTRUCT_DETA_BINS-1;
   nSEta = ESTRUCT_SETA_BINS-1;
-  setEtaRange(-1.0,1.0);
+  setEtaRange(-1,1);
 
   //--> yt ranges <--
   // With ptMin = 0.15 find YtMin = 0.933. Close to 1.0
@@ -108,6 +108,11 @@ StEStructBinning::StEStructBinning(){
   minTPCSepPhi = -1.0;
   nTPCSepPhi = ESTRUCT_TPCSEPPHI_BINS - 1;
   dTPCSepPhi = (maxTPCSepPhi-minTPCSepPhi)/(float)nTPCSepPhi;
+
+  maxTPCQuality =  1;
+  minTPCQuality = -1;
+  nTPCQuality = ESTRUCT_TPCQUALITY_BINS - 1;
+  dTPCQuality = (maxTPCQuality-minTPCQuality)/(float)nTPCQuality;
 
    //--> dEdx ranges <--
   maxdEdx = 15.0e-6;  //ionization units?
@@ -188,8 +193,14 @@ void StEStructBinning::calculateDEtaWeights() {
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.15  2012/11/16 21:22:27  prindle
+ * 2ptCorrelations: SS, AS histograms.  Get eta limits from cuts. Fit PtAll histogram. Add histograms to keep track of eta, phi limits. A few more histograms
+ * Binning: Add quality cut.
+ * CutBin: modify mode9
+ * PairCuts: modify goodDeltaZ for case of one track leaving via endcap.
+ *
  * Revision 1.14  2010/03/02 21:45:27  prindle
- * Had a problem with pair cuts when one track exited via endplate
+ *   Had a problem with pair cuts when one track exited via endplate
  *   Calculate maxDEta properly
  *   Warning if you try turning histograms for pair cuts on
  *

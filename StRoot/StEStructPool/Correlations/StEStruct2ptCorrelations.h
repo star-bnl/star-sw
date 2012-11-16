@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.17 2011/08/02 20:34:02 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.18 2012/11/16 21:22:27 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -54,6 +54,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
  protected:
 
+  // Histogram to keep track of eta,phi limits.
+  TH2D *mHEtaPhi;
   // Event-level hists needed for normalization and pt-correlations
   TH1D** mHNEventsSib;
   TH1D** mHNEventsMix;
@@ -101,6 +103,14 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   etaBins **mPrEtaEta[8]; //! weight = pt1*pt2
   etaBins **mPaEtaEta[8]; //! weight = pt1
   etaBins **mPbEtaEta[8]; //! weight = pt2
+  etaBins **mEtaEtaSS[8];   //! EtaEta, PhiPhi are controlled by bit 6 of manalysisMode
+  etaBins **mPrEtaEtaSS[8]; //! weight = pt1*pt2
+  etaBins **mPaEtaEtaSS[8]; //! weight = pt1
+  etaBins **mPbEtaEtaSS[8]; //! weight = pt2
+  etaBins **mEtaEtaAS[8];   //! EtaEta, PhiPhi are controlled by bit 6 of manalysisMode
+  etaBins **mPrEtaEtaAS[8]; //! weight = pt1*pt2
+  etaBins **mPaEtaEtaAS[8]; //! weight = pt1
+  etaBins **mPbEtaEtaAS[8]; //! weight = pt2
   phiBins **mPhiPhi[8];   //!
   phiBins **mNPhiPhi[8];  //! Npair for eta_delta weight errors
   phiBins **mPrPhiPhi[8]; //!  "
@@ -114,6 +124,14 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   TH2D ** mHPrEtaEta[8]; //!
   TH2D ** mHPaEtaEta[8]; //!
   TH2D ** mHPbEtaEta[8]; //!
+  TH2D ** mHEtaEtaSS[8];   //!
+  TH2D ** mHPrEtaEtaSS[8]; //!
+  TH2D ** mHPaEtaEtaSS[8]; //!
+  TH2D ** mHPbEtaEtaSS[8]; //!
+  TH2D ** mHEtaEtaAS[8];   //!
+  TH2D ** mHPrEtaEtaAS[8]; //!
+  TH2D ** mHPaEtaEtaAS[8]; //!
+  TH2D ** mHPbEtaEtaAS[8]; //!
   TH2D ** mHPhiPhi[8];   //!
   TH2D ** mHNPhiPhi[8];  //! Npair for eta_delta weight errors
   TH2D ** mHPrPhiPhi[8]; //!
@@ -163,6 +181,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   TPCSepBins *mTPCMidZdptP[8];
   TPCSepBins *mTPCMidZdptN[8];
 
+  TPCSepBins *mTPCQuality[8];
+
   TH1D **  mHTPCAvgTSep[8];
   TH1D **  mHTPCAvgZSep[8];
   TH1D **  mHTPCEntTSep[8];
@@ -177,12 +197,20 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   TH1D **  mHTPCMidZdptP[8];
   TH1D **  mHTPCMidZdptN[8];
 
+  TH1D **  mHTPCQuality[8];
+
   TPCSepBins **mTPCAvgTZ[8];  //2D
   TPCSepBins **mTPCEntTZ[8];
   TPCSepBins **mTPCMidTZ[8];
   TPCSepBins **mTPCMidTZC[8];
   TPCSepBins **mTPCMidTZNC[8];
   TPCSepBins **mTPCExitTZ[8];
+  TPCSepBins **mTPCEntQZ[8];
+  TPCSepBins **mTPCMidQZ[8];
+  TPCSepBins **mTPCEntQT[8];
+  TPCSepBins **mTPCMidQT[8];
+  TPCSepBins **mTPCEntQZT[8];
+  TPCSepBins **mTPCMidQZT[8];
   dptBins **mTPCEntTdpt[8];  // T vs delta-Pt; for joint hists, use bin type of y axis
   dptBins **mTPCMidTdpt[8];
   dptBins **mTPCExitTdpt[8];
@@ -193,6 +221,12 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   TH2D **  mHTPCMidTZC[8];
   TH2D **  mHTPCMidTZNC[8];
   TH2D **  mHTPCExitTZ[8];
+  TH2D **  mHTPCEntQZ[8];
+  TH2D **  mHTPCMidQZ[8];
+  TH2D **  mHTPCEntQT[8];
+  TH2D **  mHTPCMidQT[8];
+  TH2D **  mHTPCEntQZT[8];
+  TH2D **  mHTPCMidQZT[8];
   TH2D **  mHTPCEntTdpt[8];
   TH2D **  mHTPCMidTdpt[8];
   TH2D **  mHTPCExitTdpt[8];
@@ -224,6 +258,7 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   bool mdontFillMeanPt; //!
   bool mdontFillYtYt; //!
   bool mFillQInv; //!
+  bool mFillASSS; //!
   bool mInit;  //! found need when overridding this class
   bool mDeleted;//! "     " ...
   bool mHistosWritten;//! "     " ...
@@ -375,8 +410,14 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.18  2012/11/16 21:22:27  prindle
+ * 2ptCorrelations: SS, AS histograms.  Get eta limits from cuts. Fit PtAll histogram. Add histograms to keep track of eta, phi limits. A few more histograms
+ * Binning: Add quality cut.
+ * CutBin: modify mode9
+ * PairCuts: modify goodDeltaZ for case of one track leaving via endcap.
+ *
  * Revision 1.17  2011/08/02 20:34:02  prindle
- * More detailed histograms for event mixing.
+ *   More detailed histograms for event mixing.
  *   Buffer: increased mixed events to 4 (from 2)
  *   CutBin: added mode 9 for exploration of p_t space, fixed place in mode 5 where
  *           histogram was written before checking it existed.
