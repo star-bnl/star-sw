@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructDstReader.h,v 1.2 2006/02/22 22:03:15 prindle Exp $
+ * $Id: StEStructDstReader.h,v 1.3 2012/11/16 21:19:06 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -9,8 +9,8 @@
  * Description:  Reader class using the StEStructEventMaker
  *
  ***********************************************************************/
-#ifndef __STEStructDSTREADER__H
-#define __STEStructDSTREADER__H
+#ifndef __STESTRUCTDSTREADER__H
+#define __STESTRUCTDSTREADER__H
 
 #include "StEStructEventReader.h"
 
@@ -21,8 +21,6 @@ class StEStructTrackCuts;
 class StEStructDstReader : public StEStructEventReader {
 
   StEStructEventMaker* mMaker;
-  StEStructEventCuts*  mECuts; 
-  StEStructTrackCuts*  mTCuts;
 
   bool  mInChain;
   bool  mAmDone; 
@@ -39,11 +37,7 @@ public:
 
 
   void setEventMaker(StEStructEventMaker* eventMaker, bool inChain=true);
-  void setEventCuts(StEStructEventCuts* cuts);
-  void setTrackCuts(StEStructTrackCuts* cuts);
   bool hasMaker();
-  bool hasEventCuts();
-  bool hasTrackCuts();
 
   virtual StEStructEvent* next();
   virtual bool done();
@@ -59,6 +53,15 @@ inline bool StEStructDstReader::done(){ return mAmDone; };
 /***********************************************************************
  *
  * $Log: StEStructDstReader.h,v $
+ * Revision 1.3  2012/11/16 21:19:06  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.2  2006/02/22 22:03:15  prindle
  * Removed all references to multRef
  *

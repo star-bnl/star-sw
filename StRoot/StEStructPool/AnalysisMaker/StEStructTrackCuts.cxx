@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrackCuts.cxx,v 1.5 2011/08/02 20:31:26 prindle Exp $
+ * $Id: StEStructTrackCuts.cxx,v 1.6 2012/11/16 21:19:08 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -49,6 +49,9 @@ void StEStructTrackCuts::initCuts(){
    mnsigmaPi[0]=mnsigmaPi[1]=0;
    mnsigmaK[0]=mnsigmaK[1]=0;
    mnsigmaP[0]=mnsigmaP[1]=0;
+   mhijingFragment[0]=mhijingFragment[1]=0;
+   mNFragTypes = 0;
+   mnJets = 0;
  
 }
 
@@ -71,6 +74,7 @@ void StEStructTrackCuts::initNames(){
   strcpy(mnsigmaPiName.name,"NSigmaPion");
   strcpy(mnsigmaKName.name,"NSigmaKaon");
   strcpy(mnsigmaPName.name,"NSigmaProton");
+  strcpy(mhijingFragmentName.name,"hijingFragment");
 
 }
      
@@ -184,10 +188,53 @@ bool StEStructTrackCuts::loadBaseCuts(const char* name, const char** vals, int n
     return true;
   }
 
+  if(!strcmp(name,mhijingFragmentName.name)){
+    // I am setting this up so if mNFragTypes is non-zero we only accept
+    // particles that are in the list mFragTypes.
+    // I am not sure how to do accounting so one can look at log files
+    // to see a sensible thing has been done (but at least we have the Cuts
+    // file to see what we were trying to do).
+    sscanf(vals[0],"%s\t",mFragmentType);
+    if (!strcmp(mFragmentType,"projectileString")) {
+        mFragTypes[mNFragTypes] = 3;
+        mNFragTypes++;
+    } else if (!strcmp(mFragmentType,"targetString")) {
+        mFragTypes[mNFragTypes] = 13;
+        mNFragTypes++;
+    } else if (!strcmp(mFragmentType,"hardScatter")) {
+        mFragTypes[mNFragTypes] = 20;
+        mNFragTypes++;
+    } else if (!strcmp(mFragmentType,"softSea")) {
+        mFragTypes[mNFragTypes] = 30;
+        mNFragTypes++;
+    }
+    if (mhijingFragment[1]==0) {
+        mhijingFragment[0]=0; mhijingFragment[1]=50;
+        mhijingFragmentName.idx = createCutHists(name,mhijingFragment);
+    }
+    return true;
+  }
+
 
   return false;
 
 }
+
+bool StEStructTrackCuts::goodFragment(int ifragtype){
+    mvalues[mhijingFragmentName.idx] = ifragtype;
+    if (mNFragTypes == 0) {
+        return true;
+    }
+    for (int it=0;it<mNFragTypes;it++) {
+        if (mFragTypes[it] == ifragtype) {
+            if (ifragtype == 20) {
+                mnJets++;
+            }
+            return true;
+        }
+    }
+    return false;
+};
 
 
 void StEStructTrackCuts::printCutStats(ostream& ofs){
@@ -221,8 +268,17 @@ void StEStructTrackCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructTrackCuts.cxx,v $
+ * Revision 1.6  2012/11/16 21:19:08  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.5  2011/08/02 20:31:26  prindle
- * Change string handling
+ *   Change string handling
  *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
  *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
  *   Added methods to check if cuts imposed

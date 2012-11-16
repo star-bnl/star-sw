@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: StEStructMCReader.h,v 1.5 2006/02/22 22:03:21 prindle Exp $
+ *  $Id: StEStructMCReader.h,v 1.6 2012/11/16 21:19:07 prindle Exp $
  *
  *  Author: Chunhui Han
  *
@@ -15,6 +15,15 @@
  ********************************************************************
  *
  *  $Log: StEStructMCReader.h,v $
+ *  Revision 1.6  2012/11/16 21:19:07  prindle
+ *  Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ *  Added support to write and read EStructEvents.
+ *  Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ *  EventCuts: A few new cuts
+ *  MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ *  QAHists: Add refMult
+ *  TrackCuts: Add some hijing cuts.
+ *
  *  Revision 1.5  2006/02/22 22:03:21  prindle
  *  Removed all references to multRef
  *
@@ -45,8 +54,8 @@
 //   found on file: evgen.1.root
 //////////////////////////////////////////////////////////
 
-#ifndef StEStructMCReader_h
-#define StEStructMCReader_h
+#ifndef STESTRUCTMCREADER_H
+#define STESTRUCTMCREADER_H
 
 #include "StEStructPool/AnalysisMaker/StEStructEventReader.h"
 
@@ -96,9 +105,6 @@ class StEStructMCReader : public StEStructEventReader {
   int mnumTracks;
   int mNentries;
 
-  StEStructEventCuts *mECuts;
-  StEStructTrackCuts *mTCuts;
-
   void fillTracks(StEStructEvent *estructEvent);
   int getTotalEventCount();
   int getCharge(int);
@@ -107,15 +113,13 @@ class StEStructMCReader : public StEStructEventReader {
 
  public:
   StEStructMCReader(TTree *tree=0);
+  // I moved EventCuts and TrackCuts handling to StEStructEventReader which this inherits from.
+  // Think they should be removed from arguments to contructors here. Need to check xml code generating macro where these are used.
   StEStructMCReader(int nevents, TTree *tree = 0, StEStructEventCuts *ecuts = 0, StEStructTrackCuts *tcuts = 0);
   StEStructMCReader(int nevents, const char *fileListFile, StEStructEventCuts *ecuts = 0, StEStructTrackCuts *tcuts = 0);
   ~StEStructMCReader();
 
-  void setEventCuts(StEStructEventCuts *cuts);
-  void setTrackCuts(StEStructTrackCuts *cuts);
   bool hasTree();
-  bool hasEventCuts();
-  bool hasTrackCuts();
   bool measureable(int pid);
   float *globalDCA(float *p, float *v);
 
@@ -138,21 +142,5 @@ inline bool StEStructMCReader::hasTree() {
 }
 
 inline bool StEStructMCReader::done() { return mAmDone; }
-
-inline bool StEStructMCReader::hasEventCuts() {
-  return (mECuts == 0);
-}
-
-inline bool StEStructMCReader::hasTrackCuts() {
-  return (mTCuts == 0);
-}
-
-inline void StEStructMCReader::setEventCuts(StEStructEventCuts *cuts) {
-  mECuts = cuts;
-}
-
-inline void StEStructMCReader::setTrackCuts(StEStructTrackCuts *cuts) {
-  mTCuts = cuts;
-}
 
 #endif

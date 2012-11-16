@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMCReader.cxx,v 1.9 2009/01/26 14:40:43 fisyak Exp $
+ * $Id: StEStructMCReader.cxx,v 1.10 2012/11/16 21:19:07 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -13,6 +13,15 @@
  **********************************************************************
  *
  * $Log: StEStructMCReader.cxx,v $
+ * Revision 1.10  2012/11/16 21:19:07  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.9  2009/01/26 14:40:43  fisyak
  * Add missing (in ROOT 5.22) includes
  *
@@ -65,15 +74,15 @@
 
 ClassImp(StEStructMCReader)
 
-StEStructMCReader::StEStructMCReader(TTree *tree) : meventsToDo(0), meventCount(0), mloopIndex(0), mAmDone(false), mNentries(0), mECuts(0), mTCuts(0), mIPMAX(1000000) {
+StEStructMCReader::StEStructMCReader(TTree *tree) : meventsToDo(0), meventCount(0), mloopIndex(0), mAmDone(false), mNentries(0), mIPMAX(1000000) {
   Init(tree);
 }
 
-StEStructMCReader::StEStructMCReader(int nevents, TTree *tree, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mNentries(0), mECuts(ecuts), mTCuts(tcuts), mIPMAX(1000000) {
+StEStructMCReader::StEStructMCReader(int nevents, TTree *tree, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mNentries(0), mIPMAX(1000000) {
   Init(tree);
 }
 
-StEStructMCReader::StEStructMCReader(int nevents, const char *fileListFile, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mNentries(0), mECuts(ecuts), mTCuts(tcuts), mIPMAX(1000000) {
+StEStructMCReader::StEStructMCReader(int nevents, const char *fileListFile, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mNentries(0), mIPMAX(1000000) {
   ifstream fin(fileListFile);
   char s[256];
   TChain *chain = new TChain("h999");

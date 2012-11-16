@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrackCuts.h,v 1.6 2011/08/02 20:31:26 prindle Exp $
+ * $Id: StEStructTrackCuts.h,v 1.7 2012/11/16 21:19:08 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -10,8 +10,8 @@
  *
  *
  ***********************************************************************/
-#ifndef __STEBYETRACKCUTS__H
-#define __STEBYETRACLCUTS__H
+#ifndef __STESTRUCTTRACKCUTS__H
+#define __STESTRUCTTRACKCUTS__H
 
 
 #include "StEStructCuts.h"
@@ -39,6 +39,7 @@ public:
    CutName mnsigmaPiName;
    CutName mnsigmaKName;
    CutName mnsigmaPName;
+   CutName mhijingFragmentName;
  
   int   mflag[2];
   int   mcharge[2];
@@ -57,6 +58,11 @@ public:
   float mnsigmaPi[2];
   float mnsigmaK[2];
   float mnsigmaP[2];
+  float mhijingFragment[2];
+  char  mFragmentType[1024];
+  int   mFragTypes[10];
+  int   mNFragTypes;
+  int   mnJets;
 
   void init();
   void initCuts();
@@ -84,9 +90,11 @@ public:
   bool goodEta(float e);
   bool goodTOFEMass(float e);
   bool goodElectron(float e);
+  bool hasElectronCut();
   bool goodPion(float p);
   bool goodKaon(float k);
   bool goodProton(float p);
+  bool goodFragment(int ifragtype);
  
 
   ClassDef(StEStructTrackCuts,1)
@@ -197,6 +205,9 @@ inline bool StEStructTrackCuts::goodElectron(float c){
 	   (c>=mnsigmaE[0] && c<=mnsigmaE[1])  ) ;
 
 }
+inline bool StEStructTrackCuts::hasElectronCut() {
+    return ( mnsigmaE[0] != mnsigmaE[1] ) ;
+}
 
 inline bool StEStructTrackCuts::goodPion(float c){
   mvalues[mnsigmaPiName.idx] =c;
@@ -225,8 +236,17 @@ inline bool StEStructTrackCuts::goodProton(float c){
 /***********************************************************************
  *
  * $Log: StEStructTrackCuts.h,v $
+ * Revision 1.7  2012/11/16 21:19:08  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.6  2011/08/02 20:31:26  prindle
- * Change string handling
+ *   Change string handling
  *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
  *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
  *   Added methods to check if cuts imposed

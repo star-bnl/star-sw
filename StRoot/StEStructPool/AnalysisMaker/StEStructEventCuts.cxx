@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.18 2011/08/02 20:31:25 prindle Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.19 2012/11/16 21:19:06 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -111,6 +111,11 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
                mtWord[0] = 260000; 
                mtWord[1] = 260500;
                validRun = 1;
+            } else if (!strcmp("AuAu200GeVMinBias2011",mRunPeriod)) {
+               // trgsetupname=AuAu200_production
+               mtWord[0] = 350000; 
+               mtWord[1] = 350500;
+               validRun = 1;
             } else if (!strcmp("2007ProductionMinBias",mRunPeriod)) {
                // For use with trgsetupname=2007ProductionMinBias; productions P08ic; recommended |Vz|<10 (maybe 5)
                mtWord[0] = 200000;
@@ -140,6 +145,11 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
                // trgsetupname=AuAu30_production; productions P10ih; Not sure about recommended V_z cut yet.
                mtWord[0] = 28000;
                mtWord[1] = 28050;
+               validRun = 1;
+            } else if (!strcmp("AuAu27GeVMinBias2011",mRunPeriod)) {
+               // trgsetupname=AuAu27_production
+               mtWord[0] = 360000;
+               mtWord[1] = 360050;
                validRun = 1;
             } else if (!strcmp("AuAu19GeVMinBias2011",mRunPeriod)) {
                // trgsetupname=AuAu19_production
@@ -207,7 +217,7 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
                 mtWord[0] = 250100; // untested  
                 mtWord[1] = 250150;
                 validRun = 1;
-            } else if (!strcmp("ppProductionMB62",mRunPeriod)) {
+            } else if (!strcmp("ppProductionMB622006",mRunPeriod)) {
                 // ...
                 mtWord[0] = 147000; // untested  
                 mtWord[1] = 147050;
@@ -462,11 +472,12 @@ bool StEStructEventCuts::goodTrigger(StMuDst* muDst) {
                 muEvent->triggerIdCollection().nominal().isTrigger(260011) ||
                 muEvent->triggerIdCollection().nominal().isTrigger(260021) ||
                 muEvent->triggerIdCollection().nominal().isTrigger(260031)) {
-                return goodVertexTopology(muDst);
+                return true;
+//                return goodVertexTopology(muDst);
             }
 if (0) {
             // The triggers ending in 4 are called vpd-mb-slow
-            // Don't know what 9 is.
+            // Don't know what 9 is, must be during setup.
             if (muEvent->triggerIdCollection().nominal().isTrigger(9)) {
                 return true;
             } else if (muEvent->triggerIdCollection().nominal().isTrigger(260001)) {
@@ -483,6 +494,16 @@ if (0) {
                 return true;
             }
 }
+        } else if (!strcmp("AuAu200GeVMinBias2011",mRunPeriod)) {
+            // These vpd-mb triggers were for different run numbers, use catalog query if you want specific trigger.
+            // I don't know why they have different numbers though.
+            if (muEvent->triggerIdCollection().nominal().isTrigger(350003) ||
+                muEvent->triggerIdCollection().nominal().isTrigger(350013) ||
+                muEvent->triggerIdCollection().nominal().isTrigger(350023) ||
+                muEvent->triggerIdCollection().nominal().isTrigger(350033) ||
+                muEvent->triggerIdCollection().nominal().isTrigger(350043)) {
+                return true;
+            }
         } else if (!strcmp("AuAu62GeVMinBias2010",mRunPeriod)) {
             if (muEvent->triggerIdCollection().nominal().isTrigger(270001) ||
                 muEvent->triggerIdCollection().nominal().isTrigger(270011) ||
@@ -500,6 +521,10 @@ if (0) {
             }
         } else if (!strcmp("AuAu39GeVMinBias2010",mRunPeriod)) {
             if (muEvent->triggerIdCollection().nominal().isTrigger(280001)) {
+                return true;
+            }
+        } else if (!strcmp("AuAu27GeVMinBias2011",mRunPeriod)) {
+            if (muEvent->triggerIdCollection().nominal().isTrigger(360001)) {
                 return true;
             }
         } else if (!strcmp("AuAu19GeVMinBias2011",mRunPeriod)) {
@@ -569,7 +594,10 @@ if (0) {
             }
         } else if(!strcmp("ppProductionMB622006",mRunPeriod)){
             if(muEvent->triggerIdCollection().nominal().isTrigger(147001)) {
-                   return true;
+                // Not completely sure this is an optimal cut for reducing pileup.
+                if (muDst->primaryVertex()->ranking()>0) {
+                    return true;
+                }
             }
         }
     } else {
@@ -618,8 +646,17 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.19  2012/11/16 21:19:06  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.18  2011/08/02 20:31:25  prindle
- * Change string handling
+ *   Change string handling
  *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
  *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
  *   Added methods to check if cuts imposed

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEStructAnalysisMaker.cxx,v 1.8 2010/03/02 21:43:37 prindle Exp $
+ * $Id: StEStructAnalysisMaker.cxx,v 1.9 2012/11/16 21:19:05 prindle Exp $
  *
  *************************************************************************
  *
@@ -84,7 +84,9 @@ StEStructAnalysisMaker::Finish()
          StMemoryInfo::instance()->print();
       }     
       for(int i=0;i<numAnalysis;i++) manalysis[i]->finish();
-      mtimer->stop();
+      if (mtimer) {
+          mtimer->stop();
+      }
 
       // Do Not Delete This  -->  if(mQAHists) delete mQAHists;
 
@@ -137,6 +139,57 @@ StEStructAnalysisMaker::Make(){
        mCurrentAnalysis = manalysis[ia];
      }
    }
+
+   if (doPrintMemoryInfo) {
+     StMemoryInfo::instance()->snapshot();
+     StMemoryInfo::instance()->print();
+   }   
+
+   return kStOK;   
+}
+
+//-----------------------------------------------------
+Int_t StEStructAnalysisMaker::Make(StEStructEvent *ev) {
+
+
+  if (doPrintMemoryInfo)StMemoryInfo::instance()->snapshot();
+
+  if(!ev || !manalysis[0] ){ 
+     gMessMgr->Error()<<" No Reader in StEStructAnalysisMaker::Make() "<<endm;
+     return kStFatal;
+   }
+  
+   mEventLoopCounter++;
+   //
+
+   /////    <<<<    below is now gone, kaput, obsolete   >>>>>
+   // model: each reader has a different cut file for event selection.
+   //        if event doesn't pass a reader's cut, there is a check 
+   //        for EOF and, if not, it goes to the next reader. If the event
+   //        passes, then the analysis is run and the loop is broken
+   //        Thus, an event can only be sent to 1 of the analysis modules.
+   //
+
+   mCurrentAnalysis = 0;
+   pEStructEvent = ev;
+
+     int ia = getAnalysisIndex();         // 0 if numAnalysis = 1
+     if (mSorting) {
+         return kStOK;
+     }
+     if(ia>=0 && ia < numAnalysis) {
+       if(doReactionPlaneAnalysis) {
+         pEStructEvent->SetPhiWgt(mWeightFile);
+         //pEStructEvent->SetPhiWgt();
+         pEStructEvent->ShiftPhi();  // This step modifies all Phi values to be w.r.t. the reaction plane
+       }
+
+       manalysis[ia]->doEvent(pEStructEvent);
+       mEventProcessedCounter++;
+       mEventProcessedPerType[ia]++;
+       if(mQAHists)mQAHists->fillHistograms(pEStructEvent,mreader);
+       mCurrentAnalysis = manalysis[ia];
+     }
 
    if (doPrintMemoryInfo) {
      StMemoryInfo::instance()->snapshot();
@@ -307,8 +360,17 @@ void StEStructAnalysisMaker::SetReactionPlaneAnalysis(char* weightFile) {
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.cxx,v $
+ * Revision 1.9  2012/11/16 21:19:05  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.8  2010/03/02 21:43:37  prindle
- * Use outerHelix() for global tracks
+ *   Use outerHelix() for global tracks
  *   Add sensible triggerId histograms
  *   Starting to add support to sort events (available for Hijing)
  *

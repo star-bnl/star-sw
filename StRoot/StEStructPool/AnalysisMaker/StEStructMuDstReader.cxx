@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.19 2011/08/02 20:31:25 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.20 2012/11/16 21:19:07 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -69,41 +69,47 @@ void StEStructMuDstReader::setMuDstMaker(StMuDstMaker* maker, bool inChain){
 
 void StEStructMuDstReader::setEventCuts(StEStructEventCuts* ecuts) {
     mECuts=ecuts;
+    if (!mECuts->doFillHists()) {
+        return;
+    }
     // I want to create histograms for trigger ids here.
     // However, I need an StMuEvent which I think I don't have until fillEvent.
     // Create histograms there.
     // Histograms for ToF cuts.
     //>>>>>>>>>> Need to figure out where to fill these, and how to write them out.
-    if ( mECuts->hasToFFractionCut() ) {      
+    if ( mECuts->hasToFFractionCut() ) {
         mhasToFCuts = 1;
-        ToFBefore = new TH2F("dEdxToFNoCut","dEdxToFNoCut",50,1,1000,50,1,750);
-        ToFAfter  = new TH2F("dEdxToFCut","dEdxToFCut",50,1,1000,50,1,750);
-        mECuts->addCutHists(ToFBefore, ToFAfter, "ToFPlots");
+        ToFBefore = new TH2F("dEdxToFNoCut2D","dEdxToFNoCut2D",50,1,1000,50,1,750);
+        ToFAfter  = new TH2F("dEdxToFCut2D","dEdxToFCut2D",50,1,1000,50,1,750);
+        mECuts->addCutHists(ToFBefore, ToFAfter, "ToFPlots2D");
     }
-    if ( mECuts->hasPrimaryFractionCut() ) {      
+    if ( mECuts->hasPrimaryFractionCut() ) {
         mhasPrimaryCuts = 1;
-        PrimaryBefore = new TH2F("PrimVGlobNoCut","PrimVGlobNoCut",100,1,1000,100,1,2000);
-        PrimaryAfter  = new TH2F("PrimVGlobCut","PrimVGlobCut",100,1,1000,100,1,2000);
-        mECuts->addCutHists(PrimaryBefore, PrimaryAfter, "PrimaryPlots");
+        PrimaryBefore = new TH2F("PrimVGlobNoCut2D","PrimVGlobNoCut2D",120,1,1200,200,1,2000);
+        PrimaryAfter  = new TH2F("PrimVGlobCut2D","PrimVGlobCut2D",120,1,1200,200,1,2000);
+        mECuts->addCutHists(PrimaryBefore, PrimaryAfter, "PrimaryPlots2D");
     }
-    if ( mECuts->hasPrimaryVertexRadiusCut() ) {      
+    if ( mECuts->hasPrimaryVertexRadiusCut() ) {
         mhasVertexRadiusCuts = 1;
-        VRadiusBefore = new TH2F("VertexRadiusNoCut","VertexRadiusNoCut",50,-10,10,50,-10,10);
-        VRadiusAfter  = new TH2F("VertexRadiusCut","VertexRadiusCut",50,-10,10,50,-10,10);
-        mECuts->addCutHists(VRadiusBefore, VRadiusAfter, "VertexRadiusPlots");
+        VRadiusBefore = new TH2F("VertexRadiusNoCut2D","VertexRadiusNoCut2D",50,-10,10,50,-10,10);
+        VRadiusAfter  = new TH2F("VertexRadiusCut2D","VertexRadiusCut2D",50,-10,10,50,-10,10);
+        mECuts->addCutHists(VRadiusBefore, VRadiusAfter, "VertexRadiusPlots2D");
     }
 };
 void StEStructMuDstReader::setTrackCuts(StEStructTrackCuts* tcuts) {
     mTCuts=tcuts;
-    if ( !mTCuts->goodElectron(100.0) ) {      
-        mhasdEdxCuts = 1;
-        dEdxBefore = new TH2F("dEdxNoCut","dEdxNoCut",150,-1.5,1.5,150,0,0.000015);
-        dEdxAfter  = new TH2F("dEdxCut","dEdxCut",150,-1.5,1.5,150,0,0.000015);
-        mTCuts->addCutHists(dEdxBefore, dEdxAfter, "dEdXPlots");
+    if (!mTCuts->doFillHists()) {
+        return;
     }
-    dEdxBetaBefore = new TH3F("dEdxBetaNoCut","dEdxBetaNoCut",100,-2.0,2.0,100,0.0000015,0.000006,100,0.55,1.05);
-    dEdxBetaAfter  = new TH3F("dEdxBetaCut","dEdxBetaCut",100,-2.0,2.0,100,0.0000015,0.000006,100,0.55,1.05);
-    mTCuts->addCutHists(dEdxBetaBefore, dEdxBetaAfter, "dEdXBetaPlots");
+    if ( mTCuts->hasElectronCut() ) {      
+        mhasdEdxCuts = 1;
+        dEdxBefore = new TH2F("dEdxNoCut2D","dEdxNoCut2D",150,-1.5,1.5,150,0,0.000015);
+        dEdxAfter  = new TH2F("dEdxCut2D","dEdxCut2D",150,-1.5,1.5,150,0,0.000015);
+        mTCuts->addCutHists(dEdxBefore, dEdxAfter, "dEdxPlots2D");
+    }
+    dEdxBetaBefore = new TH3F("dEdxBetaNoCut3D","dEdxBetaNoCut3D",100,-2.0,2.0,100,0.0000015,0.000006,100,0.55,1.05);
+    dEdxBetaAfter  = new TH3F("dEdxBetaCut3D","dEdxBetaCut3D",100,-2.0,2.0,100,0.0000015,0.000006,100,0.55,1.05);
+    mTCuts->addCutHists(dEdxBetaBefore, dEdxBetaAfter, "dEdxBetaPlots3D");
 };
 void StEStructMuDstReader::setUseGlobalTracks(bool global) {
     mUseGlobalTracks=global;
@@ -115,8 +121,6 @@ inline bool StEStructMuDstReader::setInChain(bool inChain) {
 };
 inline bool StEStructMuDstReader::InChain(){ return mInChain; };
 bool StEStructMuDstReader::hasMaker() { return (mMaker) ? true : false ; }
-bool StEStructMuDstReader::hasEventCuts() { return (mECuts) ? true : false ; }
-bool StEStructMuDstReader::hasTrackCuts() { return (mTCuts) ? true : false ; }
 
 
 //-------------------------------------------------------------------------
@@ -234,6 +238,8 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
       retVal->SetZDCw((float)muEvent->zdcAdcAttentuatedSumWest());
       // I think this zdc coincidence rate is one number for the event
       // Don't know how to get rate at time of event.
+      // Actually, in old runs this was true. Now it should be updated every
+      // 10 or 15 seconds throughout the run.
       retVal->SetZDCCoincidence((float)muEvent->runInfo().zdcCoincidenceRate());
       retVal->SetBField((float)muEvent->magneticField());
 
@@ -263,24 +269,9 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
     mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,useEvent);
     mECuts->fillHistogram(mECuts->goodtoffractionName(),(float)ndEdx,(float)nToF,useEvent);
 
-    if (mhasToFCuts) {
-        ToFBefore->Fill((double)ndEdx,(double)nToF);
-        if (useEvent) {
-            ToFAfter->Fill((double)ndEdx,(double)nToF);
-        }
-    }
-    if (mhasPrimaryCuts) {
-        PrimaryBefore->Fill((double)nPrimary,(double)nGlobal);
-        if (useEvent) {
-            PrimaryAfter->Fill((double)nPrimary,(double)nGlobal);
-        }
-    }
-    if (mhasVertexRadiusCuts) {
-        VRadiusBefore->Fill(x,y);
-        if (useEvent) {
-            VRadiusAfter->Fill(x,y);
-        }
-    }
+    mECuts->fillHistogram("ToFPlots",(double)ndEdx,(double)nToF,useEvent);
+    mECuts->fillHistogram("PrimaryPlots",(double)nPrimary,(double)nGlobal,useEvent);
+    mECuts->fillHistogram("VertexRadiusPlots",x,y,useEvent);
 
     // Two pileup cuts using my vertex finding.
     // First we look for vertices which have tracks from only one side of TPC.
@@ -359,23 +350,16 @@ bool StEStructMuDstReader::fillTracks(StEStructEvent* estructEvent) {
         float ptot = track->charge() * track->p().magnitude();
         StMuBTofPidTraits dProb = track->btofPidTraits();
         float beta = dProb.beta();
-        if (beta != 0) {
-            dEdxBetaBefore->Fill(ptot,track->dEdx(),beta);
-        }
-        if (mhasdEdxCuts) {
-            dEdxBefore->Fill(ptot,track->dEdx());
-        }
 
         useTrack = isTrackGoodToUse( track ); //this includes track kine cuts
         mTCuts->fillHistograms(useTrack);
 
+        mTCuts->fillHistogram("dEdxPlots",ptot,track->dEdx(),useTrack);
+        if (beta != 0) {
+            mTCuts->fillHistogram("dEdxBetaPlots",ptot,track->dEdx(),beta,useTrack);
+        }
+
         if (useTrack) {
-            if (beta != 0) {
-                dEdxBetaAfter->Fill(ptot,track->dEdx(),beta);
-            }
-            if (mhasdEdxCuts) {
-                dEdxAfter->Fill(ptot,track->dEdx());
-            }
             fillEStructTrack(eTrack,track);
             estructEvent->AddTrack(eTrack);
         }
@@ -435,12 +419,11 @@ bool StEStructMuDstReader::isTrackGood(StMuTrack* track) {
 
     //--> But add a quick electron removal... for selected p ranges
     //    Note I only want to do this if I am defining an electron dEdx cut.
-    if (mhasdEdxCuts && mTCuts->goodElectron( track->nSigmaElectron() ) && useTrack )  {      
-      float p = (track->p()).mag();
-      if( (p>0.2 && p<0.45) || (p>0.7 && p<0.8) ) {
-	useTrack=false;
-	//cout << "  cut e:  p = " << p << ", nsig = " << track->nSigmaElectron() << endl;
-      }
+    if (mhasdEdxCuts && mTCuts->goodElectron( track->nSigmaElectron() ) && useTrack )  {
+        float p = (track->p()).mag();
+        if( (p>0.2 && p<0.45) || (p>0.7 && p<0.8) ) {
+	        useTrack=false;
+        }
     }
     //--> end of electron pid
 
@@ -491,6 +474,15 @@ int StEStructMuDstReader::countGoodTracks(int *ndEdx, int *nToF) {
     if (0==numTracks) {
         return 0;
     }
+    // Want to compare pp analysis with |\eta| < 0.5 and |\eta| < 1.0
+    // countGoodTracks is used for centrality, so we change \eta cuts here
+    // (then change back at and)
+    // >>>>>Expect this code to normally be commented out.<<<<<
+//    double etaMin = mTCuts->meta[0];
+//    double etaMax = mTCuts->meta[1];
+//    mTCuts->meta[0] = -1;
+//    mTCuts->meta[1] = +1;
+
     for(int i=0; i<numTracks; i++) {
         if (mUseGlobalTracks) {
             if (isTrackGood(muDst->globalTracks(i))) {
@@ -526,6 +518,8 @@ int StEStructMuDstReader::countGoodTracks(int *ndEdx, int *nToF) {
     }
     *ndEdx = ndedx;
     *nToF  = ntof;
+//    mTCuts->meta[0] = etaMin;
+//    mTCuts->meta[1] = etaMax;
     return mNumGoodTracks;
 }
 
@@ -605,8 +599,17 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.20  2012/11/16 21:19:07  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.19  2011/08/02 20:31:25  prindle
- * Change string handling
+ *   Change string handling
  *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
  *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
  *   Added methods to check if cuts imposed

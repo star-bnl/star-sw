@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.cxx,v 1.10 2011/08/02 20:31:25 prindle Exp $
+ * $Id: StEStructQAHists.cxx,v 1.11 2012/11/16 21:19:07 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -25,6 +25,7 @@ StEStructQAHists::StEStructQAHists(int itype){
   mEType=itype;
   mCents[0]=mCents[1]=NULL;
   mptCents[0]=mptCents[1]=mptCents[2]=NULL;
+  mRefMult=0;
   mTotMult=mPosMult=mNegMult=0;
   mTotMult4=mPosMult4=mNegMult4=0;
   mntBins = 0;
@@ -94,6 +95,7 @@ void StEStructQAHists::initBaseHistograms(){
   }
   for (int i=0;i<mbNPts;i++) mptCents[i]->Fill(i,cent->ptLimit(i)); 
 
+  mRefMult = new TH1D("refMult","refMult for comparison",2500,-0.5,2500-0.5);
   mTotMult = new TH1D("totalMultiplicity","totalMultiplicity",2500,-0.5,2500-0.5);
   mPosMult = new TH1D("positiveMultiplicity","positiveMultiplicity",1500,-0.5,1500-0.5);
   mNegMult = new TH1D("negativeMultiplicity","negativeMultiplicity",1500,-0.5,1500-0.5);
@@ -145,6 +147,7 @@ void StEStructQAHists::fillBaseHistograms(StEStructEvent* event, StEStructEventR
   int ic = cent->centrality(event->Centrality());
   mCents[0]->Fill(ic);
   if(mptCents[0])mptCents[0]->Fill(ic);
+  mRefMult->Fill(event->RefMult());
   mTotMult->Fill(event->Ntrack());
   mPosMult->Fill(event->Npos());
   mNegMult->Fill(event->Nneg());
@@ -175,6 +178,7 @@ void StEStructQAHists::writeBaseHistograms(TFile* tf){
 
   for(int i=0;i<2;i++)if(mCents[i])mCents[i]->Write();
   for(int i=0;i<3;i++)if(mptCents[i])mptCents[i]->Write();
+  mRefMult->Write();
   mTotMult->Write();
   mPosMult->Write();
   mNegMult->Write();
@@ -363,8 +367,17 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
 /**********************************************************************
  *
  * $Log: StEStructQAHists.cxx,v $
+ * Revision 1.11  2012/11/16 21:19:07  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.10  2011/08/02 20:31:25  prindle
- * Change string handling
+ *   Change string handling
  *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
  *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
  *   Added methods to check if cuts imposed
