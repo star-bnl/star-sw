@@ -5,22 +5,22 @@
 <jobDescription>
     <standardElements>
         <jobControl>
-            <jobName widget='entry' id='jobName'>AuAu200_2010_P0ih</jobName>
-            <outputDir widget='entry' id='outputDir'>$env(MYDATA)/Data/auau200/2010/P0ih</outputDir>
-            <jobPurpose widget='text'>Run over 2010 200GeV AuAu production QA sample.
+            <jobName widget='entry' id='jobName'>AuAu200_2011_P11id</jobName>
+            <outputDir widget='entry' id='outputDir'>$env(MYDATA)/Data/auau200/2011/P11id</outputDir>
+            <jobPurpose widget='text'>Run over 2011 200GeV AuAu production.
             </jobPurpose>
         </jobControl>
 
         <starSubmit simulateSubmission='true'>
-            <input URL="catalog:star.bnl.gov?production=P10ik,trgsetupname=AuAu200_production,magscale=FullField,filetype=daq_reco_MuDst,sanity=1,filename~st_physics,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
+            <input URL="catalog:star.bnl.gov?production=P11id,trgsetupname=AuAu200_production_2011,magscale=FullField,filetype=daq_reco_MuDst,sanity=1,filename~st_physics,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
         </starSubmit>
 
         <eventCuts>
-            <triggerTag Comment = 'Trigger tag for 2010 minbias AuAu data at 200GeV, FullField'>AuAu200GeVMinBias2010</triggerTag>
+            <triggerTag Comment = 'Trigger tag for 2011 minbias AuAu data at 200GeV, FullField'>AuAu200GeVMinBias2011</triggerTag>
             <eventCut Comment = 'cut on position of primary vertex'>
                 <cutName>primaryVertexZ</cutName>
-                <Value widget = 'entry'>-15</Value>
-                <Value widget = 'entry'>15</Value>
+                <Value widget = 'entry'>-25</Value>
+                <Value widget = 'entry'>25</Value>
             </eventCut>
         </eventCuts>
 

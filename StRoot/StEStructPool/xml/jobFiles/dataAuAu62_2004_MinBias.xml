@@ -12,8 +12,8 @@
         </jobControl>
 
         <starSubmit simulateSubmission='true'>
-            <input URL="catalog:star.bnl.gov?production=P04id,trgsetupname=production62GeV,filetype=daq_reco_MuDst,tpc=1,sanity=1,filename!~zerobias,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
-            <input URL="catalog:star.bnl.gov?production=P04ie,trgsetupname=production62GeV,filetype=daq_reco_MuDst,tpc=1,sanity=1,filename!~zerobias,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
+            <input URL="catalog:star.bnl.gov?production=P04id,trgsetupname=production62GeV,filetype=daq_reco_MuDst,tpc=1,sanity=1,filename~st_physics,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
+            <input URL="catalog:star.bnl.gov?production=P04ie,trgsetupname=production62GeV,filetype=daq_reco_MuDst,tpc=1,sanity=1,filename~st_physics,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
         </starSubmit>
 
         <eventCuts>

@@ -13,7 +13,7 @@
 
         <!-- Note: A previous production=P02ge was the standard data set for a long time. -->
         <starSubmit simulateSubmission='true'>
-            <input URL="catalog:star.bnl.gov?production=P07id,trgsetupname=minBias22GeVZDC,filetype=daq_reco_MuDst,tpc=1,ftpc=1,sanity=1,filename!~zerobias,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
+            <input URL="catalog:star.bnl.gov?production=P07id,trgsetupname=minBias22GeVZDC,filetype=daq_reco_MuDst,tpc=1,ftpc=1,sanity=1,filename~st_physics,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
         </starSubmit>
 
         <eventCuts>

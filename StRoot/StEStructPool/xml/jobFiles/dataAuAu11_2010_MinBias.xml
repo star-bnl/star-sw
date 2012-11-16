@@ -12,7 +12,7 @@
         </jobControl>
 
         <starSubmit simulateSubmission='true' maxFilesPerProcess='10'>
-            <input URL="catalog:star.bnl.gov?production=P10ih,trgsetupname=AuAu11_production,magscale=ReversedFullField,filetype=daq_reco_MuDst,sanity=1,filename!~zerobias,filename~st_physics,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
+            <input URL="catalog:star.bnl.gov?production=P10ih,trgsetupname=AuAu11_production,magscale=ReversedFullField,filetype=daq_reco_MuDst,sanity=1,filename~st_physics,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
         </starSubmit>
 
         <eventCuts>
