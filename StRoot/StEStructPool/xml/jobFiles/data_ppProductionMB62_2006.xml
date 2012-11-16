@@ -6,13 +6,13 @@
     <standardElements>
         <jobControl>
             <jobName widget='entry' id='jobName'>ppProductionMB62_2006</jobName>
-            <outputDir widget='entry' id='outputDir'>$env(MYDATA)/Data/pp200/productionMB62_2006</outputDir>
+            <outputDir widget='entry' id='outputDir'>$env(MYDATA)/Data/pp62/productionMB62_2006</outputDir>
             <jobPurpose widget='text'>Analyse 62GeV pp minimum bias 2006 data.
             </jobPurpose>
         </jobControl>
 
         <starSubmit simulateSubmission='true'>
-            <input URL="catalog:star.bnl.gov?production=P06ie,trgsetupname=ppProductionMB62,filetype=daq_reco_MuDst,tpc=1,sanity=1,filename!~zerobias,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
+            <input URL="catalog:star.bnl.gov?production=P12ia,trgsetupname=ppProductionMB62,filetype=daq_reco_MuDst,tpc=1,sanity=1,filename!~zerobias,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
         </starSubmit>
 
         <eventCuts>

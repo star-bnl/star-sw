@@ -12,7 +12,7 @@
         </jobControl>
 
         <starSubmit simulateSubmission='true'>
-            <input  URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_MuDst,tpc=1,sanity=1,filename!~zerobias,storage!=HPSS" singleCopy="true" nFiles="all" />
+            <input  URL="catalog:star.bnl.gov?production=P08ic,trgsetupname=2007ProductionMinBias,filetype=daq_reco_MuDst,tpc=1,sanity=1,filename~st_physics,storage!=HPSS" singleCopy="true" nFiles="all" />
         </starSubmit>
 
         <eventCuts>

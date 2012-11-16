@@ -181,12 +181,12 @@
         // Need to delete and recreate readers. They think they have read everything there is in the chain.
         delete mk;
         delete reader;
+        ecuts-&gt;setDoFillHists(false);
+        tcuts-&gt;setDoFillHists(true);
         mk     = new StMuDstMaker(0,0,"",filelist,".",500);
         reader = new StEStructMuDstReader(mk,ecuts,tcuts);
         reader-&gt;setUseGlobalTracks(useGlobalTracks);
         estructMaker-&gt;SetEventReader(reader);
-        ecuts-&gt;setDoFillHists(false);
-        tcuts-&gt;setDoFillHists(true);
         ch = mk-&gt;chain();
     } else {
         for (int ie=0;ie&lt;nEvents;ie++) {

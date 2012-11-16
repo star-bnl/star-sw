@@ -5,22 +5,22 @@
 <jobDescription>
     <standardElements>
         <jobControl>
-            <jobName widget='entry' id='jobName'>AuAu39_2010_MinBias</jobName>
-            <outputDir widget='entry' id='outputDir'>$env(MYDATA)/Data/auau39/2010/MinBias</outputDir>
-            <jobPurpose widget='text'>Test run over year 10, 39GeV AuAu minimum bias data.
+            <jobName widget='entry' id='jobName'>AuAu27_2011_MinBias</jobName>
+            <outputDir widget='entry' id='outputDir'>$env(MYDATA)/Data/auau27/2011/MinBias</outputDir>
+            <jobPurpose widget='text'>Test run over year 11, 27GeV AuAu minimum bias data.
             </jobPurpose>
         </jobControl>
 
-        <starSubmit simulateSubmission='true'>
-            <input URL="catalog:star.bnl.gov?production=P10ih,trgsetupname=AuAu39_production,filetype=daq_reco_MuDst,sanity=1,filename~st_physics,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
+        <starSubmit minFilesPerProcess='100' maxFilesPerProcess='125' filesPerHour='10' simulateSubmission='true' fileListSyntax='xrootd'>
+            <input URL="catalog:star.bnl.gov?production=P11id,trgsetupname=AuAu27_production_2011,filetype=daq_reco_MuDst,sanity=1,tpx=1,filename~st_physics,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
         </starSubmit>
 
         <eventCuts>
-            <triggerTag Comment = 'Trigger tag for 2010 minbias AuAu data at 39GeV'>AuAu39GeVMinBias2010</triggerTag>
-            <eventCut Comment = 'cut on position of primary vertex'>
+            <triggerTag Comment='Trigger tag for 2011 minbias AuAu data at 27GeV'>AuAu27GeVMinBias2011</triggerTag>
+            <eventCut Comment='cut on position of primary vertex'>
                 <cutName>primaryVertexZ</cutName>
-                <Value widget = 'entry'>-30</Value>
-                <Value widget = 'entry'>30</Value>
+                <Value widget='entry'>-40</Value>
+                <Value widget='entry'>40</Value>
             </eventCut>
             <eventCut Comment="Exclude events with predicted pileup vertex between min and max distances.">
                 <cutName>pileup</cutName>
@@ -39,12 +39,12 @@
             </eventCut>
             <eventCut Comment="Require a reasonable fraction of global tracks are primary tracks.">
                 <cutName>goodPrimaryFraction</cutName>
-                <Value widget="entry">1.9</Value>
+                <Value widget="entry">2</Value>
                 <Value widget="entry">75</Value>
             </eventCut>
             <eventCut Comment="Require a resonable fraction of primary tracks with dEdx also have ToF information.">
                 <cutName>goodToFFraction</cutName>
-                <Value widget="entry">0.55</Value>
+                <Value widget="entry">0.5</Value>
                 <Value widget="entry">75</Value>
             </eventCut>
         </eventCuts>
@@ -68,8 +68,8 @@
         </pairCuts>
 
         <doEStructMacro>
-            <centralities id='centralities' widget='entry'>2 14 29 51 84 128 156 188 224 264 310 361 399 440 486 523 564 602 650 700</centralities>
-            <keepZBuffers id='keepZBuffers' widget='entry'>0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1</keepZBuffers>
+            <centralities id='centralities' widget='entry'>2 13 25 43 70 107 155 186 221 259 302 351 405 439 476 509 552 620</centralities>
+            <keepZBuffers id='keepZBuffers' widget='entry'>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</keepZBuffers>
             <ptCentralities id='ptCentralities' typedef='const  double ptMultCut[] = ' typedef2='int mbNPtBins = '>1 47 123 350 600</ptCentralities>
         </doEStructMacro>
     </standardElements>
