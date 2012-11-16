@@ -118,7 +118,7 @@ int StFmsSimulatorMaker::Make()
 
 void StFmsSimulatorMaker::fillStEvent(const StMcEvent* mcEvent, StEvent* event)
 {
-  if (mcEvent->fpdHitCollection())
+  if (mcEvent->fpdHitCollection() && event->fmsCollection())
     for (size_t m = 1; m <= mcEvent->fpdHitCollection()->numberOfModules(); ++m) {
       const StMcEmcModuleHitCollection* module = mcEvent->fpdHitCollection()->module(m);
       if (module)
