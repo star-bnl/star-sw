@@ -120,9 +120,9 @@ void StFmsSimulatorMaker::fillStEvent(const StMcEvent* mcEvent, StEvent* event)
 {
   for (size_t m = 1; m <= mcEvent->fpdHitCollection()->numberOfModules(); ++m) {
     const StMcEmcModuleHitCollection* module = mcEvent->fpdHitCollection()->module(m);
-    for (size_t i = 0; i < module->detectorHits().size(); ++i) {
-      event->fmsCollection()->addHit(makeFmsHit(module->detectorHits()[i]));
-    }
+    if (module)
+      for (size_t i = 0; i < module->detectorHits().size(); ++i)
+	event->fmsCollection()->addHit(makeFmsHit(module->detectorHits()[i]));
   }
 }
 
