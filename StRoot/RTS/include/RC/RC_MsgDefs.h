@@ -115,6 +115,7 @@ struct rc_drc_run_resume
 struct rc_drc_set_config
 {
   int seq;
+  int length;
 };     
 struct rc_drc_get_config
 {

@@ -165,6 +165,13 @@
 #define DET_EVB_SEND_DONE		0x9D	// to myself
 #define DET_SL3_SEND_DONE		0x9E	// to myself
 
+#define L4_STARTEVENT                  0xa0
+#define L4_EVENTDECISION                   0xa1
+#define L4_CFGDONE                     0xa2
+#define L4_RUNSTARTDONE                0xa3
+#define L4_RUNSTOPDONE                 0xa4
+
+
 // SL3
 #define SL3_SEND_RESULTS	       0xa0	// SL3->DET, DET->RB
 #define SL3_ANNOUNCE_RESULTS   	       0xa1	// ?

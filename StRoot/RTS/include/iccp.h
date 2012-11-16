@@ -349,6 +349,19 @@ struct ic_gl3_announce_data
   uint size_TRG_data ;
   uint size_L3_data[11] ;
 };
+
+struct ic_l4_startevent {
+    uint sz;   // event size
+    uint buff_id;   // event buffer id
+};
+
+struct ic_l4_eventdecision {
+    uint trg_lo;   // lo 32 bits of the trigger mask
+    uint trg_hi;   // hi 32 bits of the trigger mask
+    uint buff_id;  // event buffer id for the hlt data
+    uint len;      // length of the output buffer
+};
+
 //struct ic_announce_trg_sum {uint* addr ;};
 // SB
 struct ic_sb_announce_sl3{ uint size_of_header ; uint size_of_clusters ; uint size_of_tracks ; uint size_of_debug ; } ;
@@ -611,6 +624,9 @@ union ic_load
   ic_spool_free_disk               spool_free_disk;
 
   ic_eth_announce                  eth_announce;
+ 
+  ic_l4_startevent                 l4_startevent;
+  ic_l4_eventdecision              l4_eventdecision;
   
 #endif /* NOT_DAQ */
   //  ic_qdsend_announce_chunk         qdsend_announce_chunk;
