@@ -29,9 +29,6 @@ class StEStructAscii : public StEStructEventReader {
   int mnumTracks;
   int mlineNumber;  // line number of input file 
 
-  StEStructEventCuts* mECuts;
-  StEStructTrackCuts* mTCuts;
-
   std::ifstream in;  // input file reader
 
   void fillTracks(StEStructEvent* estructEvent);
@@ -42,11 +39,7 @@ class StEStructAscii : public StEStructEventReader {
   StEStructAscii(int nevents, char* infile, StEStructEventCuts* ecuts, StEStructTrackCuts* tcuts);
 
   virtual ~StEStructAscii(){};
-  void setEventCuts(StEStructEventCuts* cuts);
-  void setTrackCuts(StEStructTrackCuts* cuts);
   bool hasInputFile();
-  bool hasEventCuts();
-  bool hasTrackCuts();
 
   virtual StEStructEvent* next();
   virtual bool         done();

@@ -27,9 +27,6 @@ class StEStructGevsim : public StEStructEventReader {
 
   TClonesArray *mtrackArray;
 
-  StEStructEventCuts* mECuts;
-  StEStructTrackCuts* mTCuts;
-
   void fillTracks(StEStructEvent* estructEvent);
 
  public:
@@ -38,11 +35,7 @@ class StEStructGevsim : public StEStructEventReader {
   StEStructGevsim(int nevents, TGeVSim* gevsim, StEStructEventCuts* ecuts, StEStructTrackCuts* tcuts);
 
   virtual ~StEStructGevsim(){};
-  void setEventCuts(StEStructEventCuts* cuts);
-  void setTrackCuts(StEStructTrackCuts* cuts);
   bool hasGenerator();
-  bool hasEventCuts();
-  bool hasTrackCuts();
 
   virtual StEStructEvent* next();
   virtual bool         done();

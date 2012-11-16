@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQJ.cxx,v 1.3 2006/04/06 01:03:33 prindle Exp $
+ * $Id: StEStructQJ.cxx,v 1.4 2012/11/16 21:23:19 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -16,7 +16,7 @@
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
 
-StEStructQJ::StEStructQJ(char *fileList): meventCount(0), meventsToDo(0), mAmDone(false), mECuts(0), mTCuts(0){
+StEStructQJ::StEStructQJ(char *fileList): meventCount(0), meventsToDo(0), mAmDone(false) {
     fileListName = fileList;
     fList = NULL;
     inFile = NULL;
@@ -35,8 +35,6 @@ StEStructQJ::StEStructQJ(char *fileList, int nevents, StEStructEventCuts* ecuts,
 };
 
 bool StEStructQJ::hasGenerator() { return true; };
-bool StEStructQJ::hasEventCuts() { return (mECuts) ? true : false ; }
-bool StEStructQJ::hasTrackCuts() { return (mTCuts) ? true : false ; }
 
 
 //-------------------------------------------------------------------------
@@ -171,28 +169,18 @@ cout << "(Should allow us to go on to next file.)" << endl;
    }
 }
 
-//--------------------------------------------------------------------------
-void StEStructQJ::setEventCuts(StEStructEventCuts* cuts) {
-
-  if (mECuts) delete mECuts;
-  mECuts=cuts;
-
-};
-
-//---------------------------------------------------------------
-void StEStructQJ::setTrackCuts(StEStructTrackCuts* cuts) {
-  if (mTCuts) delete mTCuts;
-  mTCuts=cuts;
-}
-
-
 
 
 /**********************************************************************
  *
  * $Log: StEStructQJ.cxx,v $
+ * Revision 1.4  2012/11/16 21:23:19  prindle
+ * EventCuts and TrackCuts were moved to EventReader. Remove that code from
+ * these readers.
+ *
  * Revision 1.3  2006/04/06 01:03:33  prindle
- * Rationalization of centrality binning, as described in AnalysisMaker checkin.
+ *
+ *   Rationalization of centrality binning, as described in AnalysisMaker checkin.
  *
  * Revision 1.2  2006/02/22 22:05:39  prindle
  * Removed all references to multRef (?)

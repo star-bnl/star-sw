@@ -6,7 +6,7 @@
 
 #include "TParticle.h"
 
-StEStructGevsim::StEStructGevsim(): mgevsim(0), meventCount(0), meventsToDo(0), mAmDone(false), mECuts(0), mTCuts(0){};
+StEStructGevsim::StEStructGevsim(): mgevsim(0), meventCount(0), meventsToDo(0), mAmDone(false) {};
 
 StEStructGevsim::StEStructGevsim(int nevents, TGeVSim* gevsim, StEStructEventCuts* ecuts, StEStructTrackCuts* tcuts): meventCount(0), mAmDone(false){
   meventsToDo=nevents;
@@ -19,9 +19,6 @@ StEStructGevsim::StEStructGevsim(int nevents, TGeVSim* gevsim, StEStructEventCut
 };
 
 bool StEStructGevsim::hasGenerator() { return (mgevsim) ? true : false ; };
-bool StEStructGevsim::hasEventCuts() { return (mECuts) ? true : false ; }
-bool StEStructGevsim::hasTrackCuts() { return (mTCuts) ? true : false ; }
-
 
 //-------------------------------------------------------------------------
 StEStructEvent* StEStructGevsim::next() {
@@ -126,20 +123,4 @@ void StEStructGevsim::fillTracks(StEStructEvent* estructEvent){
   return;
   
 }    
-
-
-//--------------------------------------------------------------------------
-void StEStructGevsim::setEventCuts(StEStructEventCuts* cuts){
-
-  if(mECuts) delete mECuts;
-  mECuts=cuts;
-
-};
-
-//---------------------------------------------------------------
-void StEStructGevsim::setTrackCuts(StEStructTrackCuts* cuts){
-  if(mTCuts) delete mTCuts;
-  mTCuts=cuts;
-}
-
 

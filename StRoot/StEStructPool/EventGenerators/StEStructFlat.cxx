@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructFlat.cxx,v 1.6 2006/04/06 01:03:30 prindle Exp $
+ * $Id: StEStructFlat.cxx,v 1.7 2012/11/16 21:23:18 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -45,9 +45,6 @@ StEStructFlat::StEStructFlat( StEStructEventCuts* ecuts,
 };
 
 bool StEStructFlat::hasGenerator() { return true; };
-bool StEStructFlat::hasEventCuts() { return (mECuts) ? true : false ; }
-bool StEStructFlat::hasTrackCuts() { return (mTCuts) ? true : false ; }
-
 
 //-------------------------------------------------------------------------
 void StEStructFlat::setSeed(int iseed) {
@@ -260,16 +257,6 @@ int StEStructFlat::countGoodTracks() {
     return mnumTracks;
 }
 //--------------------------------------------------------------------------
-void StEStructFlat::setEventCuts(StEStructEventCuts* cuts) {
-    if (mECuts) delete mECuts;
-    mECuts=cuts;
-};
-
-//---------------------------------------------------------------
-void StEStructFlat::setTrackCuts(StEStructTrackCuts* cuts) {
-    if (mTCuts) delete mTCuts;
-    mTCuts=cuts;
-}
 double StEStructFlat::gRand48() {
     double x1, x2, w;
  
@@ -294,8 +281,13 @@ double StEStructFlat::gRand48() {
 /**********************************************************************
  *
  * $Log: StEStructFlat.cxx,v $
+ * Revision 1.7  2012/11/16 21:23:18  prindle
+ * EventCuts and TrackCuts were moved to EventReader. Remove that code from
+ * these readers.
+ *
  * Revision 1.6  2006/04/06 01:03:30  prindle
- * Rationalization of centrality binning, as described in AnalysisMaker checkin.
+ *
+ *   Rationalization of centrality binning, as described in AnalysisMaker checkin.
  *
  * Revision 1.5  2006/02/22 22:05:35  prindle
  * Removed all references to multRef (?)

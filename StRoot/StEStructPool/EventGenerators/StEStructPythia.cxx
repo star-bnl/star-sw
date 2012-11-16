@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.14 2010/09/02 21:24:45 prindle Exp $
+ * $Id: StEStructPythia.cxx,v 1.15 2012/11/16 21:23:18 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -45,9 +45,6 @@ StEStructPythia::StEStructPythia(TPythia6* pythia,
 };
 
 bool StEStructPythia::hasGenerator() { return (mPythia) ? true : false ; };
-bool StEStructPythia::hasEventCuts() { return (mECuts) ? true : false ; }
-bool StEStructPythia::hasTrackCuts() { return (mTCuts) ? true : false ; }
-
 
 //-------------------------------------------------------------------------
 StEStructEvent* StEStructPythia::next() {
@@ -283,26 +280,18 @@ int StEStructPythia::countGoodTracks() {
     }
     return mnumTracks;
 }
-//--------------------------------------------------------------------------
-void StEStructPythia::setEventCuts(StEStructEventCuts* cuts) {
-    if(mECuts) delete mECuts;
-    mECuts=cuts;
-}
-
-//---------------------------------------------------------------
-void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts) {
-    if(mTCuts) delete mTCuts;
-    mTCuts=cuts;
-}
-
 
 
 
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.15  2012/11/16 21:23:18  prindle
+ * EventCuts and TrackCuts were moved to EventReader. Remove that code from
+ * these readers.
+ *
  * Revision 1.14  2010/09/02 21:24:45  prindle
- * Pythia: Fill in ToF pid information
+ *   Pythia: Fill in ToF pid information
  *
  * Revision 1.13  2010/03/02 21:46:24  prindle
  *   Option to use getNPartonic as a centrality measure

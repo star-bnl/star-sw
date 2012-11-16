@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructFlat.h,v 1.4 2006/02/22 22:05:36 prindle Exp $
+ * $Id: StEStructFlat.h,v 1.5 2012/11/16 21:23:18 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -24,8 +24,6 @@ class StEStructTrackCuts;
 class StEStructFlat : public StEStructEventReader {
 
   StEStructEvent*     mFlatEvent;
-  StEStructEventCuts* mECuts;
-  StEStructTrackCuts* mTCuts;
   bool mInChain;
   bool mAmDone;
   int  mCentBin;
@@ -52,11 +50,7 @@ class StEStructFlat : public StEStructEventReader {
 
   virtual ~StEStructFlat(){};
   void setSeed(int iseed);
-  void setEventCuts(StEStructEventCuts* cuts);
-  void setTrackCuts(StEStructTrackCuts* cuts);
   bool hasGenerator();
-  bool hasEventCuts();
-  bool hasTrackCuts();
   bool measureable(int pid);
   float* globalDCA(float* p, float* v);
 
@@ -139,6 +133,10 @@ inline float* StEStructFlat::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructFlat.h,v $
+ * Revision 1.5  2012/11/16 21:23:18  prindle
+ * EventCuts and TrackCuts were moved to EventReader. Remove that code from
+ * these readers.
+ *
  * Revision 1.4  2006/02/22 22:05:36  prindle
  * Removed all references to multRef (?)
  *
