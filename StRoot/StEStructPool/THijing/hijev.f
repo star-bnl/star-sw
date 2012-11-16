@@ -88,7 +88,7 @@ CCC#include "headpss.inc"
 *
        hipr1(10) = ptjet           ! Pt jet
 *   
-       hipr1(16) = 2.0           ! Change Q0. Don't seem to have as a parameter!!
+*       hipr1(16) = 2.0           ! Change Q0. Don't seem to have as a parameter!!
 *   
 *****  Initialize HIJING 
           call hijset(efrm,frame,proj,targ,iap,izp,iat,izt)
@@ -121,11 +121,15 @@ C
       PRINT *,'CALL RANLUX(RVEC,LEN) to generate random numbers (V115)'
       end
 *
-* $Id: hijev.f,v 1.3 2011/08/02 20:43:07 prindle Exp $
+* $Id: hijev.f,v 1.4 2012/11/16 21:28:32 prindle Exp $
 *
 * $Log: hijev.f,v $
+* Revision 1.4  2012/11/16 21:28:32  prindle
+* Support for filtering tracks based on local track density.
+* Keep fortran code in 80 columns
+*
 * Revision 1.3  2011/08/02 20:43:07  prindle
-* Changed value of Q0. Probably should put it back.
+*   Changed value of Q0. Probably should put it back.
 *
 * Revision 1.2  2010/03/02 21:49:14  prindle
 *   Save and restore random seeds for event

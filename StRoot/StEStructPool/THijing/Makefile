@@ -14,9 +14,9 @@ ROOTINCDIR = $(shell root-config --incdir)
 # This switch is removed to have identical result as the Hijing fortran program.
 CERNLIBS = -L$(CERN_ROOT)/lib -lpacklib -lkernlib -lmathlib -lpawlib -lgraflib
 CCFLAGS  = -g -Wall -O -fno-second-underscore -fno-automatic
-FORFLAGS = -g -Wall -O -fno-second-underscore -fno-automatic
-CXXFLAGS = -g -Wall -O -fno-automatic 
-SOFLAGS  = -fPIC -shared
+FORFLAGS = -g -m32 -Wall -fPIC -O -fno-second-underscore -fno-automatic
+CXXFLAGS = -g -m32 -Wall -fPIC -O -fno-automatic 
+SOFLAGS  = -fPIC -shared -m32
 CXXLDFLAGS = -lg2c
 CXX      = g++
 FOR      = g77
