@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.29 2012/06/11 14:35:33 fisyak Exp $
+ * $Id: StEStructSupport.cxx,v 1.30 2012/11/16 21:27:23 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -236,6 +236,9 @@ float *StEStructSupport::getChargePairs(int zBin) {
 };
 
 //---------------------------------------------------------
+  /* 09/27/12 djp Now taking eta range from Cuts file. Had been interrogating
+   *              binning class for detaMax. Extract from special purpose histogram instead.
+   */
 double StEStructSupport::getCIdNdEtadPhi() {
     // A == sum over zBins  {nA+} + {nA-}
     // B == sum over zBins  {nB+} + {nB-}
@@ -260,7 +263,16 @@ double StEStructSupport::getCIdNdEtadPhi() {
     }
 
     // The 0.5 is because we integrate tracks over two units of rapidity.
-    retVal = 0.5 * sqrt( nTracksA * nTracksB ) / (2*3.1415926 * nEvents);
+    TH2D *hEtaPhi;
+    mtf->GetObject("EtaPhiRange",hEtaPhi);
+    double etaMin = -1;
+    double etaMax = +1;
+    if (hEtaPhi) {
+        TAxis *x = hEtaPhi->GetXaxis();
+        etaMin = x->GetXmin();
+        etaMax = x->GetXmax();
+    }
+    retVal = sqrt( nTracksA * nTracksB ) / (2*3.1415926 * nEvents * (etaMax-etaMin) );
     return retVal;
 }
 //---------------------------------------------------------
@@ -287,10 +299,20 @@ double *StEStructSupport::getd2NdEtadPhi(int zBin, bool include2s) {
     hname = "etaMB_zBuf_";  hname += zBin;  mtf->GetObject(hname.Data(),hEta);  nTracksBM = hEta->Integral();
 
     // The 0.5 is because we integrate tracks over two units of rapidity.
-    dNdEtaAP = 0.5 * nTracksAP / nEvents;
-    dNdEtaAM = 0.5 * nTracksAM / nEvents;
-    dNdEtaBP = 0.5 * nTracksBP / nEvents;
-    dNdEtaBM = 0.5 * nTracksBM / nEvents;
+    TH2D *hEtaPhi;
+    mtf->GetObject("EtaPhiRange",hEtaPhi);
+    double etaMin = -1;
+    double etaMax = +1;
+    if (hEtaPhi) {
+        TAxis *x = hEtaPhi->GetXaxis();
+        etaMin = x->GetXmin();
+        etaMax = x->GetXmax();
+    }
+
+    dNdEtaAP = nTracksAP / (nEvents * (etaMax-etaMin) );
+    dNdEtaAM = nTracksAM / (nEvents * (etaMax-etaMin) );
+    dNdEtaBP = nTracksBP / (nEvents * (etaMax-etaMin) );
+    dNdEtaBM = nTracksBM / (nEvents * (etaMax-etaMin) );
     retVal[0] = dNdEtaAP*dNdEtaBP / pow(2*3.1415926,2);
     retVal[1] = dNdEtaAP*dNdEtaBM / pow(2*3.1415926,2);
     retVal[2] = dNdEtaAM*dNdEtaBP / pow(2*3.1415926,2);
@@ -301,8 +323,6 @@ double *StEStructSupport::getd2NdEtadPhi(int zBin, bool include2s) {
     // Fix that up here.
     if(include2s) {
         if (mIdenticalPair) {
-            retVal[1] *= 2;
-            retVal[2]  = 0;
             retVal[4] = (dNdEtaAP + dNdEtaAM) / (2*3.1415926);
         } else {
             retVal[0] *= 2;
@@ -319,31 +339,27 @@ double *StEStructSupport::getd2NdEtadPhi(int zBin, bool include2s) {
 // First four values are product  A+B+, A+B-, A-B+, A-A-.
 // Fifth value is A+ + A- + B+ + B- (or one have of that, look in getd2NdEtadPhi).
 double *StEStructSupport::getScaleFactors() {
-    double* retVal = new double[5];
-    retVal = getd2NdEtadPhi(0);
-    for (int iType=0;iType<4;iType++) {
-        retVal[iType] *= retVal[5];
+    double* retVal = new double[6];
+    for (int iType=0;iType<6;iType++) {
+        retVal[iType] = 0;
     }
 
     double *d2NdEtadPhi;
-    for (int iz=1;iz<mNumZBins;iz++) {
+    for (int iz=0;iz<mNumZBins;iz++) {
         d2NdEtadPhi = getd2NdEtadPhi(iz);
-        for (int iType=0;iType<4;iType++) {
+        for (int iType=0;iType<5;iType++) {
             retVal[iType] += d2NdEtadPhi[iType] * d2NdEtadPhi[5];
         }
         retVal[5] += d2NdEtadPhi[5];
         delete [] d2NdEtadPhi;
     }
-    for (int iType=0;iType<4;iType++) {
-        retVal[iType] /= (mNumZBins*retVal[5]);
+    for (int iType=0;iType<5;iType++) {
+        retVal[iType] /= retVal[5];
     }
-    retVal[5] /= mNumZBins;
     return retVal;
 }
 double *StEStructSupport::getScaleFactors(int zBin) {
-    double* retVal = new double[5];
-    retVal = getd2NdEtadPhi(zBin);
-    return retVal;
+    return getd2NdEtadPhi(zBin);
 }
 //---------------------------------------------------------
 double *StEStructSupport::getptHat() {
@@ -734,10 +750,12 @@ void StEStructSupport::symmetrizeUS(const char *name, TH2D** histos) {
   // Histograms to be symmetrized are:
   const char *symHistos[] = {"YtYt",   "NYtYt",   "PtPt",
                              "PhiPhi", "NPhiPhi", "PrPhiPhi", "PaPhiPhi", "PbPhiPhi",
-                             "EtaEta",            "PrEtaEta", "PaEtaEta", "PbEtaEta"};
+                             "EtaEta",            "PrEtaEta", "PaEtaEta", "PbEtaEta",
+                             "EtaEtaSS",          "PrEtaEtaSS", "PaEtaEtaSS", "PbEtaEtaSS",
+                             "EtaEtaAS",          "PrEtaEtaAS", "PaEtaEtaAS", "PbEtaEtaAS"};
   // eight input histograms ++,+-,-+,-- for Sib and Mix
   int symInt[] = {1,2, 5, 6};
-  for (int xy=0;xy<12;xy++) {
+  for (int xy=0;xy<20;xy++) {
       if (!strcmp(name,symHistos[xy])) {
           for (int ih=0;ih<4;ih++) {
               for (int ix=1;ix<=histos[symInt[ih]]->GetNbinsX();ix++) {
@@ -762,11 +780,13 @@ void StEStructSupport::symmetrizePtUS(const char *name, TH2D** histos) {
   // Histograms to be symmetrized are:
   const char *symHistos[] = {"YtYt",   "NYtYt",   "PtPt",
                              "PhiPhi", "NPhiPhi", "PrPhiPhi", "PaPhiPhi", "PbPhiPhi",
-                             "EtaEta",            "PrEtaEta", "PaEtaEta", "PbEtaEta"};
+                             "EtaEta",            "PrEtaEta", "PaEtaEta", "PbEtaEta",
+                             "EtaEtaSS",          "PrEtaEtaSS", "PaEtaEtaSS", "PbEtaEtaSS",
+                             "EtaEtaAS",          "PrEtaEtaAS", "PaEtaEtaAS", "PbEtaEtaAS"};
   int symInt[] = {1,2, 5, 6};
   //    4 groups of 8 (Sibpp,Sibpm,Sibmp,Sibmm,Mixpp,Mixpm,Mixmp,Mixmm) 
   //    1st 8 are number, 2nd 8 are pt1*pt2, 3rd 8 are pt1 and 4th 8 are pt2
-  for (int xy=0;xy<12;xy++) {
+  for (int xy=0;xy<20;xy++) {
       if (!strcmp(name,symHistos[xy])) {
           for (int ig=0;ig<32;ig+=8) {
               for (int ih=0;ih<4;ih++) {
@@ -873,11 +893,6 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
         retVal[i]->Reset();
     }
 
-    double wIdentical[4] = {1, 1, 1, 1};
-    if (mIdenticalPair) {
-        wIdentical[1] = 2;
-        wIdentical[2] = 0;
-    }
     if (opt < 3) {
         // In the final scaling to \Delta\rho/\sqrt(\rho_{ref}) or \Delta\rho/\rho_{ref}
         // one might want to use a {d^2N\over d\eta d\phi} for that specific
@@ -888,59 +903,94 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
         //    Combining centralities in this way will not give the same result as using a larger
         //    centrality bin to begin with, but may remove some of the systematic problems.
 
-        // We weight each zBin by the total number of sibling pairs (integrated over (\eta_\Delta,\phi_\Delta)).
-        // First sum over zBins to get total number of pairs.
-        TH2D** temp;
-        double *wScale[4];
-        wScale[0] = new double[mNumZBins];
-        wScale[1] = new double[mNumZBins];
-        wScale[2] = new double[mNumZBins];
-        wScale[3] = new double[mNumZBins];
-        double wTotal[4]  = {0, 0, 0, 0};
+        // We weight each zBin by the total number of sibling pairs (integrated over (\eta_\Delta,\phi_\Delta))
+        // Divided by the number of pairs summed over zBins.
+
+        // Twist is that if a Sibling OR Mixed  histogram has a zero the ratio of root histograms
+        // gives 0. Want to ignore these in the averaging.
+        // Use histograms for weights, setting individual bins to 0 or weight as described above.
+        TH2D*** wScale = new TH2D**[mNumZBins];
+        TH2D**  wTotal = new TH2D*[4];
+        for (int iType=0;iType<4;iType++) {
+            TString wName("sumWeighting");  wName += iType;
+            wTotal[iType] = (TH2D *) retVal[iType]->Clone(wName.Data());
+        }
         for (int iz=0;iz<mNumZBins;iz++) {
-            temp = getLocalClones(name, iz);
+            wScale[iz] = getLocalClones(name, iz);
+            double weight;
             for (int iType=0;iType<4;iType++) {
-                wScale[iType][iz] = temp[iType]->Integral();
-                wTotal[iType]    += wScale[iType][iz];
-                delete temp[iType];
+                weight = wScale[iz][iType]->Integral();
+                for (int ix=1;ix<=wScale[iz][iType]->GetNbinsX();ix++) {
+                    for (int iy=1;iy<=wScale[iz][iType]->GetNbinsY();iy++) {
+                        double wTot = wTotal[iType]->GetBinContent(ix,iy);
+                        if ((wScale[iz][iType]->GetBinContent(ix,iy) == 0) ||
+                            (wScale[iz][iType+4]->GetBinContent(ix,iy) == 0)) {
+                            wScale[iz][iType]->SetBinContent(ix,iy,0);
+                        } else {
+                            wScale[iz][iType]->SetBinContent(ix,iy,weight);
+                            wTotal[iType]->SetBinContent(ix,iy,wTot+weight);
+                        }
+                    }
+                }
             }
-            delete [] temp;
+        }
+        for (int iz=0;iz<mNumZBins;iz++) {
+            for (int iType=0;iType<4;iType++) {
+                wScale[iz][iType]->Divide(wTotal[iType]);
+            }
         }
 
         // Now sum \Delta\rho / \rho_{ref} weighting by number of pairs in each zBin.
         for (int iz=0;iz<mNumZBins;iz++) {
             TH2D** tmpVal= buildCommon(name, opt, sf, iz);
             for (int iType=0;iType<4;iType++) {
-                if (0 != wTotal[iType]) {
-                    retVal[iType]->Add(tmpVal[iType], wIdentical[iType]*wScale[iType][iz]/wTotal[iType]);
-                }
+                tmpVal[iType]->Multiply(wScale[iz][iType]);
+                retVal[iType]->Add(tmpVal[iType]);
                 delete tmpVal[iType];
             }
             delete [] tmpVal;
         }
 
-        // Have weighted \Delta\rho / \rho_{ref}.
+        // Have \Delta\rho / \rho_{ref}.
         // Scale by some power of d^2N/d\eta d\phi (always using CI for this to be able to compare different charge combinations correctly).
-        double sqrtRho = getCIdNdEtadPhi();
+        // I was normalizing these \Delta\rho / \rho_{ref} by 1/4 thinking that would correct for
+        // adding four normalized histograms together. Actually that was approximately the algebra for
+        // combining to get CI, really wanted things like (n+/Nch)^2 which is close to 1/4.
+        // Move that scaling to code where we calculate  CI, LS, US and CD (unless someone is relying
+        // on the old normalization for PP, PM, MP and MM in which case we move it back here.)
+        double *scale = getScaleFactors();
         if (!msilent) {
-            cout << "@@@@@ In buildCommon: using d^2N/detadphi = " << sqrtRho << endl;
+            cout << "@@@@@ In buildCommon: using d^2N/detadphi = " << scale[4] << endl;
         }
         for (int iType=0;iType<4;iType++) {
-            // This 1/4 is because for CI we add four histograms together, each one of which has been normalized.
-            retVal[iType]->Scale(1./4.);
-            if (0 < sqrtRho) {
-                if (0 == opt) {
-                    // Do nothing
-                } else if (1 == opt) {
-                    retVal[iType]->Scale(sqrtRho*sqrtRho);
-                } else if (2 == opt) {
-                    retVal[iType]->Scale(sqrtRho);
-                }
-            } else {
-                retVal[iType]->Scale(0.0);
+            if (0 == opt) {
+                // Do nothing
+            } else if (1 == opt) {
+                retVal[iType]->Scale(scale[iType]);
+            } else if (2 == opt) {
+                retVal[iType]->Scale(sqrt(scale[iType]));
             }
         }
+
+        // Delete space needed for scaling factors.
+        // Seem to be only deleting first four histograms most times when
+        // we getLocalClones. That really returns 8 histograms.
+        for (int iType=0;iType<8;iType++) {
+            for (int iz=0;iz<mNumZBins;iz++) {
+                delete wScale[iz][iType];
+            }
+        }
+        for (int iType=0;iType<4;iType++) {
+            delete wTotal[iType];
+        }
+        delete [] wScale;
+        delete [] wTotal;
     } else {
+        double wIdentical[4] = {1, 1, 1, 1};
+        if (mIdenticalPair) {
+            wIdentical[1] = 2;
+            wIdentical[2] = 0;
+        }
         // YtYt correlations
         // I don't see any evidence for YtYt depending on the z-vertex position of the event.
         // (I think there is clear evidence that (\eta_\Delta,\phi_\Delta) depends on z-vertex)
@@ -1124,27 +1174,25 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf, int z
         // \Delta\rho/\rho_{ref}
         // Actually calculate \rho/\rho_{ref} - 1 so errors are correct.
         // Don't know a convenient way to subtract one from every bin!!!!
+        // Note that when a bin in retVal[i] or retVal[i+4] is 0 the ratio
+        // will be set to 0 and then we subtract 1. Check for this and don't subtract the 1.
+        // In parent method we hopefully weight this bin with 0 so don't include in an average.
         for (int i=0;i<4;i++) {
             // If rho and rho_ref are empty we skip the calculation
             if ((0 == retVal[i]->Integral()) && (0 == retVal[i]->GetMaximum()) &&
                 (0 == retVal[i+4]->Integral()) && (0 == retVal[i+4]->GetMaximum())) {
                 continue;
             }
-            bool message = false;
             retVal[i]->Divide(retVal[i+4]);                        // rho/rho_{ref}
             for (int ix=1;ix<=retVal[i]->GetNbinsX();ix++) {
                 for (int iy=1;iy<=retVal[i]->GetNbinsY();iy++) {
                     double val = retVal[i]->GetBinContent(ix,iy);
                     if (val == 0) {
-                        message = true;
+                        retVal[i]->SetBinContent(ix,iy,0);
                     } else {
                         retVal[i]->SetBinContent(ix,iy,val-1);         // delta-rho/rho_{ref}
                     }
                 }
-            }
-            if (message) {
-                cout << "!!!!! Had at least one empty bin in N histogram " << name;
-                cout << " zBin " << zBin << " type " << i << "!!!!!" << endl;
             }
         }
     }
@@ -1182,11 +1230,6 @@ TH2D** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract) 
         retVal[i]->Reset();
     }
 
-    double wIdentical[4] = {1, 1, 1, 1};
-    if (mIdenticalPair) {
-        wIdentical[1] = 2;
-        wIdentical[2] = 0;
-    }
     // In the final scaling to \Delta\rho/\sqrt(\rho_{ref}) or \Delta\rho/\rho_{ref}
     // one might want to use a {d^2N\over d\eta d\phi} for that specific
     // charge combination. I always use the value appropriate for CI.
@@ -1212,6 +1255,9 @@ TH2D** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract) 
             wTotal[iType]    += wScale[iType][iz];
             delete temp[iType];
         }
+        for (int iType=4;iType<8;iType++) {
+            delete temp[iType];
+        }
         delete [] temp;
     }
 
@@ -1220,7 +1266,7 @@ TH2D** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract) 
         TH2D** tmpVal= buildPtCommon(name, opt, subtract, iz);
         for (int iType=0;iType<4;iType++) {
             if (0 != wTotal[iType]) {
-                retVal[iType]->Add(tmpVal[iType], wIdentical[iType]*wScale[iType][iz]/wTotal[iType]);
+                retVal[iType]->Add(tmpVal[iType], wScale[iType][iz]/wTotal[iType]);
             }
             delete tmpVal[iType];
         }
@@ -1229,23 +1275,17 @@ TH2D** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract) 
 
     // Have weighted \Delta\rho / \rho_{ref}.
     // Scale by some power of d^2N/d\eta d\phi (always using CI for this to be able to compare different charge combinations correctly).
-    double sqrtRho = getCIdNdEtadPhi();
+    double *scale = getScaleFactors();
     if (!msilent) {
-        cout << "@@@@@ In buildPtCommon: using d^2N/detadphi = " << sqrtRho << endl;
+        cout << "@@@@@ In buildPtCommon: using d^2N/detadphi = " << scale[4] << endl;
     }
     for (int iType=0;iType<4;iType++) {
-        // This 1/4 is because for CI we add four histograms together, each one of which has been normalized.
-        retVal[iType]->Scale(1./4.);
-        if (0 < sqrtRho) {
-            if (0 == opt) {
-                // Do nothing
-            } else if (1 == opt) {
-                retVal[iType]->Scale(sqrtRho*sqrtRho);
-            } else if (2 == opt) {
-                retVal[iType]->Scale(sqrtRho);
-            }
-        } else {
-            retVal[iType]->Scale(0.0);
+        if (0 == opt) {
+            // Do nothing
+        } else if (1 == opt) {
+            retVal[iType]->Scale(scale[iType]);
+        } else if (2 == opt) {
+            retVal[iType]->Scale(sqrt(scale[iType]));
         }
     }
 
@@ -1391,8 +1431,24 @@ TH2D** StEStructSupport::buildChargeTypes(const char* name, int opt, float *sf) 
     }
 
     // Now form LS, US, CD and CI
+    double *scale = getScaleFactors();
+    for (int iType=0;iType<4;iType++) {
+        // Need to undo scaling with charge specific normalization and redo with CI
+        if (0 == opt) {
+            retVal[iType]->Scale(scale[iType]/pow(scale[4],2));
+        } else if (1 == opt) {
+            retVal[iType]->Scale(1.0);
+        } else if (2 == opt) {
+            retVal[iType]->Scale(sqrt(scale[iType])/scale[4]);
+        }
+    }
+    delete [] scale;
     retVal[0]->Add(retVal[3]);
-    retVal[1]->Add(retVal[2]);
+    if (mIdenticalPair) {
+        retVal[1]->Scale(2);
+    } else {
+        retVal[1]->Add(retVal[2]);
+    }
     retVal[2]->Add(retVal[0],retVal[1],1,-1);
     retVal[3]->Add(retVal[0],retVal[1]);
 
@@ -1645,9 +1701,26 @@ TH2D** StEStructSupport::buildPtChargeTypes(const char* name, int opt, int subtr
         retVal[i]->SetTitle(swapIn(retVal[i]->GetTitle(),oldTitle[i],newTitle[i]));
     }
 
-    // Form charge combinations.
+    // Form charge combinations LS, US, CD and CI.
+    // Need to scale PP by (n+/Nch)^2, PM by n+n-/Nch^2 and MM by (n-/Nch)^2 to combine terms properly
+    double *scale = getScaleFactors();
+    for (int iType=0;iType<4;iType++) {
+        // Need to undo scaling with charge specific normalization and redo with CI
+        if (0 == opt) {
+            retVal[iType]->Scale(scale[iType]/pow(scale[4],2));
+        } else if (1 == opt) {
+            retVal[iType]->Scale(1.0);
+        } else if (2 == opt) {
+            retVal[iType]->Scale(sqrt(scale[iType])/scale[4]);
+        }
+    }
+    delete [] scale;
     retVal[0]->Add(retVal[3]);
-    retVal[1]->Add(retVal[2]);
+    if (mIdenticalPair) {
+        retVal[1]->Scale(2);
+    } else {
+        retVal[1]->Add(retVal[2]);
+    }
     retVal[2]->Add(retVal[0],retVal[1],1,-1);
     retVal[3]->Add(retVal[0],retVal[1]);
     return retVal;
@@ -1902,6 +1975,9 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.30  2012/11/16 21:27:23  prindle
+ * AS, SS histograms. Get eta limits from histogram in file. Check for empty bins in ratio (showed up as offset in correlations). Scale histograms according to actual number of pairs, don't assume 1/2 for example.
+ *
  * Revision 1.29  2012/06/11 14:35:33  fisyak
  * std namespace
  *
