@@ -35,7 +35,7 @@ void combineHistograms9(const char *dirName, const char **inNames, const char *o
     TH2D **phiphi;
     TH2D **phiphiC;
 
-    const char* binName[]={"all","below4","below3","below2","below1","above1","above2","above3","above4","one","onetwo","onethree","two","twothree","three"};
+    const char* binName[]={"all","soft","hard","below4","below3","below2","below1","above1","above2","above3","above4","one","onetwo","onethree","two","twothree","three"};
     const char* chargeName[] = {"_LS_", "_US_", "_CD_", "_CI_"};
     const char* chargeType[] = {"_PP_", "_PM_", "_MP_", "_MM_"};
     char outFileName[1024];
@@ -47,7 +47,7 @@ void combineHistograms9(const char *dirName, const char **inNames, const char *o
     // For axial space near/away side is not useful.
     for (int ic=0;ic<nCent;ic++) {
         printf("Centrality %2i:  d2N/dEdP    pHat_{A+}   pHat_{A-}   pHat_{B+}   pHat_{B-}\n",ic);
-        for (int ibin=0;ibin<15;ibin++) {
+        for (int ibin=0;ibin<17;ibin++) {
             sprintf(inFileName,"%s/%s%s.root",dirName,inNames[ic],binName[ibin]);
             tf        = new TFile(inFileName);
             tf->cd();
