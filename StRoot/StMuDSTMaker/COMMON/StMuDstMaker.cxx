@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.109 2012/11/15 22:26:13 sangalin Exp $
+ * $Id: StMuDstMaker.cxx,v 1.110 2012/11/16 12:31:37 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -936,13 +936,13 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
 
   try {
     fillEvent(ev);
-	fillL3AlgorithmInfo(ev);
+    fillL3AlgorithmInfo(ev);
     fillDetectorStates(ev);
     fillEmc(ev);
     fillPmd(ev);
     fillFms(ev);
     fillTof(ev);
-    fillBTof(ev);  /// dongx
+    fillBTof(ev); 
     fillMtd(ev);
     fillFgt(ev);
     fillEzt(ev);
@@ -961,12 +961,13 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   }
 
   try {
-	fillpp2pp(ev);
+    fillpp2pp(ev);
   }
   catch(StMuException e) {
     e.print();
     throw e;
   }
+
   try {
     fillTracks(ev,mTrackFilter);
   }
@@ -974,6 +975,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     e.print();
     throw e;
   }
+
   try {
     fillL3Tracks(ev, mL3TrackFilter);
   }
@@ -981,21 +983,24 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     e.print();
     throw e;
   }
+
 #ifndef __NO_STRANGE_MUDST__
   if (mStStrangeMuDstMaker) {
-  try {
-    fillStrange(mStStrangeMuDstMaker);
-  }
-  catch(StMuException e) {
-    e.print();
-    throw e;
-  }
+    try {
+      fillStrange(mStStrangeMuDstMaker);
+    }
+    catch(StMuException e) {
+      e.print();
+      throw e;
+    }
   }
 #endif
-  catch(StMuException e) {
-    e.print();
-    throw e;
-  }
+
+  //catch(StMuException e) {
+  //  e.print();
+  //  throw e;
+  //}
+
   mStMuDst->set(this);
   mStMuDst->fixTofTrackIndices();
   mStMuDst->fixTrackIndicesG(mStMuDst->numberOfPrimaryVertices());
@@ -1781,6 +1786,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.110  2012/11/16 12:31:37  jeromel
+ * Fix catch without try
+ *
  * Revision 1.109  2012/11/15 22:26:13  sangalin
  * Added the FGT. Fixed bugs in array offsets for the MTD.
  *
