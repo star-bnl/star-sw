@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.21 2012/10/25 18:33:32 perev Exp $
+// $Id: StvMaker.cxx,v 1.22 2012/11/16 01:29:01 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -76,6 +76,7 @@ More detailed: 				<br>
 #include "StvHitLoader.h"
 #include "Stv/StvToolkit.h"
 #include "Stv/StvDefaultSeedFinder.h"
+#include "StvSeed/StvKNSeedFinder.h"
 #include "Stv/StvCASeedFinder.h"
 #include "Stv/StvKalmanTrackFinder.h"
 #include "StvTGSelectors.h"
@@ -230,6 +231,9 @@ static int initialized = 0;
       kit->SetSeedFinder (new StvCASeedFinder);		continue;}
     if (chunk.CompareTo("Default",TString::kIgnoreCase)==0 ) {
       kit->SetSeedFinder (new StvDefaultSeedFinder);	continue;}
+    if (chunk.CompareTo("KN",TString::kIgnoreCase)==0 ) {
+      assert(gSystem->Load("StvSeed.so")		>=0);
+      kit->SetSeedFinder (new StvKNSeedFinder);	continue;}
   };
   delete tokens;
 
