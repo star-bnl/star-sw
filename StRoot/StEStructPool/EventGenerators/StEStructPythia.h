@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.h,v 1.10 2010/03/02 21:46:24 prindle Exp $
+ * $Id: StEStructPythia.h,v 1.11 2012/11/16 21:23:18 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -25,8 +25,6 @@ class StEStructTrackCuts;
 class StEStructPythia : public StEStructEventReader {
 
   TPythia6* mPythia;
-  StEStructEventCuts* mECuts;
-  StEStructTrackCuts* mTCuts;
   bool mInChain;
   bool mAmDone;
   bool museAllTracks;
@@ -51,11 +49,7 @@ class StEStructPythia : public StEStructEventReader {
                   int  eventsToDo);
 
   virtual ~StEStructPythia(){};
-  void setEventCuts(StEStructEventCuts* cuts);
-  void setTrackCuts(StEStructTrackCuts* cuts);
   bool hasGenerator();
-  bool hasEventCuts();
-  bool hasTrackCuts();
   bool setInChain(bool inChain);
   bool InChain();
   bool measureable(int pid);
@@ -190,8 +184,12 @@ inline float* StEStructPythia::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructPythia.h,v $
+ * Revision 1.11  2012/11/16 21:23:18  prindle
+ * EventCuts and TrackCuts were moved to EventReader. Remove that code from
+ * these readers.
+ *
  * Revision 1.10  2010/03/02 21:46:24  prindle
- * Option to use getNPartonic as a centrality measure
+ *   Option to use getNPartonic as a centrality measure
  *
  * Revision 1.9  2009/02/03 14:30:23  fisyak
  * Add missing includes for ROOT 5.22

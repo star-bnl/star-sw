@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructRQMD.cxx,v 1.3 2006/04/06 01:03:35 prindle Exp $
+ * $Id: StEStructRQMD.cxx,v 1.4 2012/11/16 21:23:19 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -16,7 +16,7 @@
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
 
-StEStructRQMD::StEStructRQMD(): meventCount(0), meventsToDo(0), mAmDone(false), mECuts(0), mTCuts(0) {
+StEStructRQMD::StEStructRQMD(): meventCount(0), meventsToDo(0), mAmDone(false) {
     mNFile    = 0;
     mIFile    = 0;
     mMaxFiles = 200;
@@ -38,8 +38,6 @@ StEStructRQMD::StEStructRQMD(int nevents, StEStructEventCuts* ecuts, StEStructTr
 };
 
 bool StEStructRQMD::hasGenerator() { return true; };
-bool StEStructRQMD::hasEventCuts() { return (mECuts) ? true : false ; }
-bool StEStructRQMD::hasTrackCuts() { return (mTCuts) ? true : false ; }
 
 
 //-------------------------------------------------------------------------
@@ -337,28 +335,17 @@ float StEStructRQMD::getPseudoRapidity(float pt, float pz) {
 }
 
 
-//--------------------------------------------------------------------------
-void StEStructRQMD::setEventCuts(StEStructEventCuts* cuts) {
-
-  if (mECuts) delete mECuts;
-  mECuts=cuts;
-
-};
-
-//---------------------------------------------------------------
-void StEStructRQMD::setTrackCuts(StEStructTrackCuts* cuts) {
-  if (mTCuts) delete mTCuts;
-  mTCuts=cuts;
-}
-
-
-
 
 /**********************************************************************
  *
  * $Log: StEStructRQMD.cxx,v $
+ * Revision 1.4  2012/11/16 21:23:19  prindle
+ * EventCuts and TrackCuts were moved to EventReader. Remove that code from
+ * these readers.
+ *
  * Revision 1.3  2006/04/06 01:03:35  prindle
- * Rationalization of centrality binning, as described in AnalysisMaker checkin.
+ *
+ *   Rationalization of centrality binning, as described in AnalysisMaker checkin.
  *
  * Revision 1.2  2006/02/22 22:05:42  prindle
  * Removed all references to multRef (?)

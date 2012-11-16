@@ -16,7 +16,7 @@
 #include "StEStructPool/EventMaker/StEStructTrack.h"
 #include "TLorentzVector.h"
 
-StEStructAscii::StEStructAscii(): meventCount(0), meventsToDo(0), mAmDone(false), mECuts(0), mTCuts(0){};
+StEStructAscii::StEStructAscii(): meventCount(0), meventsToDo(0), mAmDone(false) {};
 
 StEStructAscii::StEStructAscii(int nevents, char* infile, StEStructEventCuts* ecuts, StEStructTrackCuts* tcuts): meventCount(0), mAmDone(false){
 
@@ -33,9 +33,6 @@ StEStructAscii::StEStructAscii(int nevents, char* infile, StEStructEventCuts* ec
 };
 
 bool StEStructAscii::hasInputFile() { return (in.good()) ? true : false ; };
-bool StEStructAscii::hasEventCuts() { return (mECuts) ? true : false ; }
-bool StEStructAscii::hasTrackCuts() { return (mTCuts) ? true : false ; }
-
 
 //-------------------------------------------------------------------------
 StEStructEvent* StEStructAscii::next() {
@@ -145,26 +142,15 @@ void StEStructAscii::fillTracks(StEStructEvent* estructEvent){
 }    
 
 
-//--------------------------------------------------------------------------
-void StEStructAscii::setEventCuts(StEStructEventCuts* cuts){
-
-  if(mECuts) delete mECuts;
-  mECuts=cuts;
-
-};
-
-//---------------------------------------------------------------
-void StEStructAscii::setTrackCuts(StEStructTrackCuts* cuts){
-  if(mTCuts) delete mTCuts;
-  mTCuts=cuts;
-}
-
-
 
 
 /**********************************************************************
  *
  * $Log: StEStructAscii.cxx,v $
+ * Revision 1.5  2012/11/16 21:23:18  prindle
+ * EventCuts and TrackCuts were moved to EventReader. Remove that code from
+ * these readers.
+ *
  * Revision 1.4  2007/01/26 17:19:33  msd
  * Total rewrite.  Now uses simple input text file format of pt,eta,phi for each particle.
  *

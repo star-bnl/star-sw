@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructRQMD.h,v 1.3 2009/11/09 21:32:58 prindle Exp $
+ * $Id: StEStructRQMD.h,v 1.4 2012/11/16 21:23:19 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -18,18 +18,11 @@
 
 #include "TROOT.h"
 
-class StEStructEventCuts;
-class StEStructTrackCuts;
-
-
 class StEStructRQMD : public StEStructEventReader {
 
   int  meventCount;
   int  meventsToDo;
   bool mAmDone;
-
-  StEStructEventCuts* mECuts;
-  StEStructTrackCuts* mTCuts;
 
   void fillTracks(StEStructEvent* estructEvent);
 
@@ -47,11 +40,7 @@ class StEStructRQMD : public StEStructEventReader {
   StEStructRQMD(int nevents, StEStructEventCuts* ecuts, StEStructTrackCuts* tcuts);
 
   virtual ~StEStructRQMD(){};
-  void setEventCuts(StEStructEventCuts* cuts);
-  void setTrackCuts(StEStructTrackCuts* cuts);
   bool hasGenerator();
-  bool hasEventCuts();
-  bool hasTrackCuts();
   float* globalDCA(float* p, float* v);
   float getRapidity(float E, float pz);
   float getPseudoRapidity(float pt, float pz);
@@ -100,6 +89,10 @@ inline float* StEStructRQMD::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructRQMD.h,v $
+ * Revision 1.4  2012/11/16 21:23:19  prindle
+ * EventCuts and TrackCuts were moved to EventReader. Remove that code from
+ * these readers.
+ *
  * Revision 1.3  2009/11/09 21:32:58  prindle
  * Fix warnings about casting char * to a const char * by redeclaring as const char *.
  *

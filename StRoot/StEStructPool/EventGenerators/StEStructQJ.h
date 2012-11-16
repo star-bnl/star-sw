@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQJ.h,v 1.2 2006/02/22 22:05:41 prindle Exp $
+ * $Id: StEStructQJ.h,v 1.3 2012/11/16 21:23:19 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -33,8 +33,6 @@ class StEStructQJ : public StEStructEventReader {
   char  *fileListName;
   std::ifstream *fList;
   std::ifstream *inFile;
-  StEStructEventCuts* mECuts;
-  StEStructTrackCuts* mTCuts;
 
   void fillTracks(StEStructEvent* estructEvent);
 
@@ -45,11 +43,7 @@ class StEStructQJ : public StEStructEventReader {
 
   virtual ~StEStructQJ(){};
   void setSeed(int iseed);
-  void setEventCuts(StEStructEventCuts* cuts);
-  void setTrackCuts(StEStructTrackCuts* cuts);
   bool hasGenerator();
-  bool hasEventCuts();
-  bool hasTrackCuts();
   bool measureable(int pid);
   float* globalDCA(float* p, float* v);
 
@@ -132,6 +126,10 @@ inline float* StEStructQJ::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructQJ.h,v $
+ * Revision 1.3  2012/11/16 21:23:19  prindle
+ * EventCuts and TrackCuts were moved to EventReader. Remove that code from
+ * these readers.
+ *
  * Revision 1.2  2006/02/22 22:05:41  prindle
  * Removed all references to multRef (?)
  *
