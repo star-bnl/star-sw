@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.16 2010/06/23 22:33:41 prindle Exp $
+ * $Id: StEStructHAdd.cxx,v 1.17 2012/11/16 21:27:23 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -36,6 +36,9 @@ ClassImp(StEStructHAdd)
    *              backward could be different. Should re-think this as it may make more
    *              sense to symmetrize.
    */
+  /* 09/27/12 djp Now taking eta range from Cuts file. Had been interrogating
+   *              binning class for detaMax. Extract from special purpose histogram instead.
+   */
   //------------------------------------------------------------------------
 void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                             int* nlist, int ntot, int parentDist[][2], int* nParentDist, int symmXX) {
@@ -45,12 +48,16 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
     const char* knd[]={"YtYt",         "NYtYt",        "PtPt",
                        "PhiPhi",       "NPhiPhi",      "PrPhiPhi",      "PaPhiPhi",      "PbPhiPhi",
                        "EtaEta",                       "PrEtaEta",      "PaEtaEta",      "PbEtaEta",
+                       "EtaEtaSS",                     "PrEtaEtaSS",    "PaEtaEtaSS",    "PbEtaEtaSS",
+                       "EtaEtaAS",                     "PrEtaEtaAS",    "PaEtaEtaAS",    "PbEtaEtaAS",
                        "DEtaDPhiArr",  "NDEtaDPhiArr", "PrDEtaDPhiArr", "PaDEtaDPhiArr", "PbDEtaDPhiArr",
                        "SYtDYt",       "NSYtDYt",
                        "SEtaDPhiArr",  "NSEtaDPhiArr", "PrSEtaDPhiArr", "PaSEtaDPhiArr", "PbSEtaDPhiArr",
                        "Qinv",         "NQinv"};
     int isXXHist[]={1,   1,   1,
                     1,   1,   1,   1,   1,
+                    1,        1,   1,   1,
+                    1,        1,   1,   1,
                     1,        1,   1,   1,
                     0,   0,   0,   0,   0,
                     0,   0,
@@ -62,13 +69,28 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
     const char* Species[]={"A","B"};
     const char* Type[]={" : +.+"," : +.-"," : -.+"," : -.-"};
     StEStructBinning* b=StEStructBinning::Instance();
+    TH2D *hEtaPhi;
+    inFile->GetObject("EtaPhiRange",hEtaPhi);
+    double etaMin = -1;
+    double etaMax = +1;
+    if (hEtaPhi) {
+        TAxis *x = hEtaPhi->GetXaxis();
+        etaMin = x->GetXmin();
+        etaMax = x->GetXmax();
+    }
+    b->setEtaRange(etaMin,etaMax);
+
     StEStructCutBin* cb = StEStructCutBin::Instance();
 
     TFile* outFile = new TFile(outfile,"RECREATE");
+    outFile->cd();
+    if (hEtaPhi) {
+        hEtaPhi->Write();
+    }
 
     for (int i=0;i<2;i++) {
         for (int j=0;j<4;j++) {
-            for (int k=0;k<26;k++) {
+            for (int k=0;k<34;k++) {
 
                 TH2D *outhist=0;
                 TH2D *tmp=0, *cpy=0;
@@ -992,8 +1014,11 @@ void StEStructHAdd::combineUS(TFile * modFile) {
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.17  2012/11/16 21:27:23  prindle
+ * AS, SS histograms. Get eta limits from histogram in file. Check for empty bins in ratio (showed up as offset in correlations). Scale histograms according to actual number of pairs, don't assume 1/2 for example.
+ *
  * Revision 1.16  2010/06/23 22:33:41  prindle
- * In HAdd we distinguish between the parent distributions of the
+ *   In HAdd we distinguish between the parent distributions of the
  *    two particles.
  *   In Support I fixed a number of problems in the Pt correlation section.
  *
