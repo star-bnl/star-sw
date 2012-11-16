@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.h,v 1.8 2011/08/02 20:43:07 prindle Exp $
+ * $Id: StEStructHijing.h,v 1.9 2012/11/16 21:28:32 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -18,23 +18,22 @@
 #include "TMath.h"
 #include "../THijing/THijing.h"
 
-class StEStructEventCuts;
-class StEStructTrackCuts;
-
 class StEStructHijing : public StEStructEventReader {
 
  public:
 
   THijing* mHijing;
-  StEStructEventCuts* mECuts;
-  StEStructTrackCuts* mTCuts;
   bool mInChain;
   bool mAmDone;
   bool museImpactParameter;
   float mImpact;
   int   mnumTracks;
   int   mEventsToDo;
+  int   *mTrackList;
+  double *rTrackList;
 
+  int  filterTracks();
+  int  filterTrackArea();
   void fillTracks(StEStructEvent* estructEvent);
   bool isTrackGood(int i);
   int  countGoodTracks();
@@ -50,11 +49,7 @@ class StEStructHijing : public StEStructEventReader {
 
   virtual ~StEStructHijing(){};
   void setHijingReader(THijing* hijing);  // This method appears to be un-used.
-  void setEventCuts(StEStructEventCuts* cuts);
-  void setTrackCuts(StEStructTrackCuts* cuts);
   bool hasGenerator();
-  bool hasEventCuts();
-  bool hasTrackCuts();
   bool setInChain(bool inChain);
   bool InChain();
   bool measureable(int pid);
