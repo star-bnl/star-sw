@@ -26,7 +26,7 @@
 #       bintargets as a appropriate
 #
 
-STD_DAQ_OBJS := rtsComLib.o rtsLogUnix.o ipcQLib.o rtsMother.o shmLib.o rtsCfgLib.o fs_index.o sfs_index.o sfs_index_daq.o EthernetServer.o
+STD_DAQ_OBJS := rtsComLib.o rtsLogUnix.o ipcQLib.o rtsMother.o shmLib.o rtsCfgLib.o fs_index.o sfs_index.o sfs_index_daq.o EthernetServer.o SimpleXmlDoc.o MemStack.o
 
 
 # these are obsolete now....
@@ -62,7 +62,7 @@ L2ALGOPATH = $(RTS_DIR_PATH)/../../StRoot/StTriggerUtilities/L2Emulator
 
 
 
-MY_VPATH := $(ONLSRC)/L2_SUPPORT:$(ONLSRC)/RTSCOM_STUB:$(OFFSRC)/LOG:$(ONLSRC)/MYRI:$(ONLSRC)/SUNRT:$(ONLSRC)/RTSCFG:$(OFFSRC)/LOG:$(OFFSRC)/SFS:$(OFFSRC)/DAQ_READER:$(OFFRTS)/EventTracker:$(OFFSRC)/RTS_READER:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_PP2PP:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_TOF:$(ONLSRC)/ETHLIB_NEW:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_TPC:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_L3:$(ONLSRC)/L3_SUPPORT:$(L2ALGOPATH)/L2algoUtil:$(L2ALGOPATH)/L2gammaAlgo:$(L2ALGOPATH)/L2hienAlgo:$(L2ALGOPATH)/L2jetAlgo:$(L2ALGOPATH)/L2pedAlgo:$(L2ALGOPATH)/L2upsilon:$(L2ALGOPATH)/L2wAlgo
+MY_VPATH := $(ONLSRC)/L2_SUPPORT:$(ONLSRC)/RTSCOM_STUB:$(OFFSRC)/LOG:$(ONLSRC)/MYRI:$(ONLSRC)/SUNRT:$(ONLSRC)/RTSCFG:$(OFFSRC)/LOG:$(OFFSRC)/SFS:$(OFFSRC)/DAQ_READER:$(OFFRTS)/EventTracker:$(OFFSRC)/RTS_READER:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_PP2PP:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_TOF:$(ONLSRC)/ETHLIB_NEW:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_TPC:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_L3:$(ONLSRC)/L3_SUPPORT:$(L2ALGOPATH)/L2algoUtil:$(L2ALGOPATH)/L2gammaAlgo:$(L2ALGOPATH)/L2hienAlgo:$(L2ALGOPATH)/L2jetAlgo:$(L2ALGOPATH)/L2pedAlgo:$(L2ALGOPATH)/L2upsilon:$(L2ALGOPATH)/L2wAlgo:$(ONLSRC)/XMLCFG
 
 MY_DEPVPATH1 := $(subst :,/*.C ,$(MY_VPATH))
 MY_DEPVPATH2 := $(subst :,/*.cxx ,$(MY_VPATH))
