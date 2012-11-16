@@ -1,4 +1,4 @@
-void subtractPileup5(const char *dirName, const char *pileupCutFile, const char *noPileupCutFile, const char *subFile, double eff=0.75) {
+void subtractPileup5(const char *pileupCutFile, const char *noPileupCutFile, const char *subFile, double eff=0.75) {
 
     // -- Look for correlation histograms in both input files solve for pileup and
     //    noPileup (assuming 75% rejection efficiency for now) and write to outputfile.
@@ -9,7 +9,7 @@ void subtractPileup5(const char *dirName, const char *pileupCutFile, const char 
     //    noCutFile is root histogram file without pileup cuts invoked
     //    Solve for extrapolation to no pileup and to only pileup.
     //    Write histograms to subFile
-    //    Filenames may include releative paths to dirName.
+    //    Filenames include paths.
 
     TFile *tfCut, *tfNoCut, *tfOut;
     TH2D *cut, *noCut, *noPileup, *pileup;
@@ -23,12 +23,9 @@ void subtractPileup5(const char *dirName, const char *pileupCutFile, const char 
                        "NDEtaDPhi", "PtDEtaDPhi", "NSEtaDPhi", "PtSEtaDPhi"};
 
     char buffer[1024];
-    sprintf(buffer,"%s/%s.root",dirName,pileupCutFile);
-    TFile *tfCut = new TFile(buffer);
-    sprintf(buffer,"%s/%s.root",dirName,noPileupCutFile);
-    TFile *tfNoCut = new TFile(buffer);
-    sprintf(buffer,"%s/%s.root",dirName,subFile);
-    TFile *tfOut = new TFile(buffer,"RECREATE");
+    TFile *tfCut = new TFile(pileupCutFile);
+    TFile *tfNoCut = new TFile(noPileupCutFile);
+    TFile *tfOut = new TFile(subFile,"RECREATE");
 
     // Don't know how to ask root for list of histograms.
     // Look for names we believe are possible

@@ -30,6 +30,14 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
     TH2D **ptetaetaC;
     TH2D **etaeta;
     TH2D **etaetaC;
+    TH2D **ptetaetaSS;
+    TH2D **ptetaetaSSC;
+    TH2D **etaetaSS;
+    TH2D **etaetaSSC;
+    TH2D **ptetaetaAS;
+    TH2D **ptetaetaASC;
+    TH2D **etaetaAS;
+    TH2D **etaetaASC;
     TH2D **ptphiphi;
     TH2D **ptphiphiC;
     TH2D **phiphi;
@@ -63,21 +71,29 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
             ptsedpC   = ehelp->buildPtCommon("SEtaDPhi",2,subtract);
             ptdedpC   = ehelp->buildPtCommon("DEtaDPhi",2,subtract);
             ptetaetaC = ehelp->buildPtCommon("EtaEta",2,subtract);
+            ptetaetaSSC = ehelp->buildPtCommon("EtaEtaSS",2,subtract);
+            ptetaetaASC = ehelp->buildPtCommon("EtaEtaAS",2,subtract);
             ptphiphiC = ehelp->buildPtCommon("PhiPhi",2,subtract);
 
             ptsedp   = ehelp->buildPtChargeTypes("SEtaDPhi",2,subtract);
             ptdedp   = ehelp->buildPtChargeTypes("DEtaDPhi",2,subtract);
             ptetaeta = ehelp->buildPtChargeTypes("EtaEta",2,subtract);
+            ptetaetaSS = ehelp->buildPtChargeTypes("EtaEtaSS",2,subtract);
+            ptetaetaAS = ehelp->buildPtChargeTypes("EtaEtaAS",2,subtract);
             ptphiphi = ehelp->buildPtChargeTypes("PhiPhi",2,subtract);
 
             sedpC     = ehelp->buildCommon("SEtaDPhi",2);
             dedpC     = ehelp->buildCommon("DEtaDPhi",2);
             etaetaC   = ehelp->buildCommon("EtaEta",2);
+            etaetaSSC   = ehelp->buildCommon("EtaEtaSS",2);
+            etaetaASC   = ehelp->buildCommon("EtaEtaAS",2);
             phiphiC   = ehelp->buildCommon("PhiPhi",2);
 
             sedp     = ehelp->buildChargeTypes("SEtaDPhi",2);
             dedp     = ehelp->buildChargeTypes("DEtaDPhi",2);
             etaeta   = ehelp->buildChargeTypes("EtaEta",2);
+            etaetaSS   = ehelp->buildChargeTypes("EtaEtaSS",2);
+            etaetaAS   = ehelp->buildChargeTypes("EtaEtaAS",2);
             phiphi   = ehelp->buildChargeTypes("PhiPhi",2);
 
             out->cd();
@@ -155,6 +171,34 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
                     ptetaeta[icharge]->SetTitle(name.Data());
                     ptetaeta[icharge]->Write();
                 }
+                TString name(binName[axialBins[ibin]]);
+                name += "_NEtaEtaSS"; name += chargeName[icharge];  name += ic;
+                if (etaetaSS) {
+                    etaetaSS[icharge]->SetName(name.Data());
+                    etaetaSS[icharge]->SetTitle(name.Data());
+                    etaetaSS[icharge]->Write();
+                }
+                TString name(binName[axialBins[ibin]]);
+                name += "_PtEtaEtaSS"; name += chargeName[icharge];  name += ic;
+                if (ptetaetaSS) {
+                    ptetaetaSS[icharge]->SetName(name.Data());
+                    ptetaetaSS[icharge]->SetTitle(name.Data());
+                    ptetaetaSS[icharge]->Write();
+                }
+                TString name(binName[axialBins[ibin]]);
+                name += "_NEtaEtaAS"; name += chargeName[icharge];  name += ic;
+                if (etaetaAS) {
+                    etaetaAS[icharge]->SetName(name.Data());
+                    etaetaAS[icharge]->SetTitle(name.Data());
+                    etaetaAS[icharge]->Write();
+                }
+                TString name(binName[axialBins[ibin]]);
+                name += "_PtEtaEtaAS"; name += chargeName[icharge];  name += ic;
+                if (ptetaetaAS) {
+                    ptetaetaAS[icharge]->SetName(name.Data());
+                    ptetaetaAS[icharge]->SetTitle(name.Data());
+                    ptetaetaAS[icharge]->Write();
+                }
 
                 TString name(binName[axialBins[ibin]]);
                 name += "_NEtaEta"; name += chargeType[icharge];  name += ic;
@@ -169,6 +213,34 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
                     ptetaetaC[icharge]->SetName(name.Data());
                     ptetaetaC[icharge]->SetTitle(name.Data());
                     ptetaetaC[icharge]->Write();
+                }
+                TString name(binName[axialBins[ibin]]);
+                name += "_NEtaEtaSS"; name += chargeType[icharge];  name += ic;
+                if (etaetaSSC) {
+                    etaetaSSC[icharge]->SetName(name.Data());
+                    etaetaSSC[icharge]->SetTitle(name.Data());
+                    etaetaSSC[icharge]->Write();
+                }
+                TString name(binName[axialBins[ibin]]);
+                name += "_PtEtaEtaSS"; name += chargeType[icharge];  name += ic;
+                if (ptetaetaSSC) {
+                    ptetaetaSSC[icharge]->SetName(name.Data());
+                    ptetaetaSSC[icharge]->SetTitle(name.Data());
+                    ptetaetaSSC[icharge]->Write();
+                }
+                TString name(binName[axialBins[ibin]]);
+                name += "_NEtaEtaAS"; name += chargeType[icharge];  name += ic;
+                if (etaetaASC) {
+                    etaetaASC[icharge]->SetName(name.Data());
+                    etaetaASC[icharge]->SetTitle(name.Data());
+                    etaetaASC[icharge]->Write();
+                }
+                TString name(binName[axialBins[ibin]]);
+                name += "_PtEtaEtaAS"; name += chargeType[icharge];  name += ic;
+                if (ptetaetaASC) {
+                    ptetaetaASC[icharge]->SetName(name.Data());
+                    ptetaetaASC[icharge]->SetTitle(name.Data());
+                    ptetaetaASC[icharge]->Write();
                 }
 
 
@@ -213,10 +285,10 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
         }
     }
 
-    TH2D **ytyt;
-    TH2D **ytytC;
-    TH2D **sytdyt;
-    TH2D **sytdytC;
+    TH2D **ytyt = 0;
+    TH2D **ytytC = 0;
+    TH2D **sytdyt = 0;
+    TH2D **sytdytC = 0;
     gROOT->LoadMacro("minimizeNegative.C");
     double *sFactor[2][3], *eSFactor[2][3];
     for (int it=0;it<2;it++) {
@@ -343,27 +415,35 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
 
             out->cd();
             for (int icharge=0;icharge<4;icharge++) {
-                TString name(binName[ytytBins[ibin]]);
-                name += "_YtYt"; name += chargeName[icharge];  name += ic;
-                ytyt[icharge]->SetName(name.Data());
-                ytyt[icharge]->SetTitle(name.Data());
-                ytyt[icharge]->Write();
-                TString name(binName[ytytBins[ibin]]);
-                name += "_YtYt"; name += chargeType[icharge];  name += ic;
-                ytytC[icharge]->SetName(name.Data());
-                ytytC[icharge]->SetTitle(name.Data());
-                ytytC[icharge]->Write();
+                if (ytyt) {
+                    TString name(binName[ytytBins[ibin]]);
+                    name += "_YtYt"; name += chargeName[icharge];  name += ic;
+                    ytyt[icharge]->SetName(name.Data());
+                    ytyt[icharge]->SetTitle(name.Data());
+                    ytyt[icharge]->Write();
+                }
+                if (ytytC) {
+                    TString name(binName[ytytBins[ibin]]);
+                    name += "_YtYt"; name += chargeType[icharge];  name += ic;
+                    ytytC[icharge]->SetName(name.Data());
+                    ytytC[icharge]->SetTitle(name.Data());
+                    ytytC[icharge]->Write();
+                }
 
-                TString name(binName[ytytBins[ibin]]);
-                name += "_SYtDYt"; name += chargeName[icharge];  name += ic;
-                sytdyt[icharge]->SetName(name.Data());
-                sytdyt[icharge]->SetTitle(name.Data());
-                sytdyt[icharge]->Write();
-                TString name(binName[ytytBins[ibin]]);
-                name += "_SYtDYt"; name += chargeType[icharge];  name += ic;
-                sytdytC[icharge]->SetName(name.Data());
-                sytdytC[icharge]->SetTitle(name.Data());
-                sytdytC[icharge]->Write();
+                if (sytdyt) {
+                    TString name(binName[ytytBins[ibin]]);
+                    name += "_SYtDYt"; name += chargeName[icharge];  name += ic;
+                    sytdyt[icharge]->SetName(name.Data());
+                    sytdyt[icharge]->SetTitle(name.Data());
+                    sytdyt[icharge]->Write();
+                }
+                if (sytdytC) {
+                    TString name(binName[ytytBins[ibin]]);
+                    name += "_SYtDYt"; name += chargeType[icharge];  name += ic;
+                    sytdytC[icharge]->SetName(name.Data());
+                    sytdytC[icharge]->SetTitle(name.Data());
+                    sytdytC[icharge]->Write();
+                }
             }
             delete tf;
             delete ehelp;

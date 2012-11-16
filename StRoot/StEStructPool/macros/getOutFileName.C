@@ -27,6 +27,8 @@ char* getOutFileName(const char* baseDir, const char* jobName,
     outArea+="/";
     if (strstr(type,"centralityDefs")) {
       outArea+="cuts";
+    } else if (strstr(type,"EStruct")) {
+      outArea+="data";
     } else {
       outArea+=type;
     }
@@ -52,6 +54,8 @@ char* getOutFileName(const char* baseDir, const char* jobName,
       outputFileFile+="cutHists";
     } else if(strstr(type,"data")){
       outputFileFile+="dataHists";
+    } else if(strstr(type,"EStruct")){
+      outputFileFile+="EStructEvents";
     } else if(strstr(type,"QA")){
       outputFileFile+="QA";
     } else if(strstr(type,"stats")){
@@ -60,7 +64,7 @@ char* getOutFileName(const char* baseDir, const char* jobName,
     } else if(strstr(type,"centralityDefs")){
       outputFileFile+="centralityDefs";
     } else {
-      outputFileFile+="events";
+      outputFileFile+="data";
       iext=1;
     }
 

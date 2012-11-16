@@ -4,6 +4,10 @@
 #include "TH1D.h"
 #include "TH2D.h"
 
+  /* 09/27/12 djp Now taking eta range from Cuts file. Had been interrogating
+   *              binning class for detaMax. Extract from special purpose histogram ("EtaPhiRange") instead.
+   *              For this to work I need to pass histogram to sum file.
+   */
 
 void addCentralities(const char* dirName, const char* inFile, const char* outFile, int *nFile, int numFiles) {
 
@@ -103,23 +107,24 @@ cout << "Input file " << fileName.Data() << endl;
 //    TH1D *mHmix;
     TH1D *mHcb;
     TH1D *mHptAll;
+    TH2D *mHEtaPhi;
     TH2D *tmp2;
 
-    TH2D *mMix_Z_dN;
-    TH2D *mMix_Z_N;
-    TH2D *mMix_Z_dC;
-    TH2D *mMix_Z_C;
-    TH2D *mMix_Z_dZ;
-    TH2D *mMix_dZ_dN;
-    TH2D *mMix_dZ_N;
-    TH2D *mMix_dZ_dC;
-    TH2D *mMix_dZ_C;
-    TH2D *mMix_N_C;
-    TH2D *mMix_N_dC;
-    TH2D *mMix_N_dN;
-    TH2D *mMix_dN_C;
-    TH2D *mMix_dN_dC;
-    TH2D *mMix_C_dC;
+    TH2D *mHMixed_Z_dN;
+    TH2D *mHMixed_Z_N;
+    TH2D *mHMixed_Z_dC;
+    TH2D *mHMixed_Z_C;
+    TH2D *mHMixed_Z_dZ;
+    TH2D *mHMixed_dZ_dN;
+    TH2D *mHMixed_dZ_N;
+    TH2D *mHMixed_dZ_dC;
+    TH2D *mHMixed_dZ_C;
+    TH2D *mHMixed_N_C;
+    TH2D *mHMixed_N_dC;
+    TH2D *mHMixed_N_dN;
+    TH2D *mHMixed_dN_C;
+    TH2D *mHMixed_dN_dC;
+    TH2D *mHMixed_C_dC;
 
     // Hack: Should do memory allocation, but since these are only arrays of pointers
     // I will just declare them to be bigger than I need.
@@ -241,111 +246,138 @@ cout << "Opening input file " << jf << endl;
         } else {
             mHptAll->Add(tmp);
         }
+        in->GetObject("EtaPhiRange",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHEtaPhi = (TH2D *) tmp2->Clone();
+        } else {
+            mHEtaPhi->Add(tmp2);
+        }
 
         in->GetObject("Mixed_Z_dN",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_Z_dN = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_Z_dN->Add(tmp2);
-        }
-        in->GetObject("Mixed_Z_N",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_Z_N = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_Z_N->Add(tmp2);
-        }
-        in->GetObject("Mixed_Z_dC",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_Z_dC = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_Z_dC->Add(tmp2);
-        }
-        in->GetObject("Mixed_Z_C",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_Z_C = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_Z_C->Add(tmp2);
-        }
-        in->GetObject("Mixed_Z_dZ",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_Z_dZ = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_Z_dZ->Add(tmp2);
-        }
-        in->GetObject("Mixed_dZ_dN",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_dZ_dN = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_dZ_dN->Add(tmp2);
-        }
-        in->GetObject("Mixed_dZ_N",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_dZ_N = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_dZ_N->Add(tmp2);
-        }
-        in->GetObject("Mixed_dZ_dC",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_dZ_dC = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_dZ_dC->Add(tmp2);
-        }
-        in->GetObject("Mixed_dZ_C",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_dZ_C = (TH2D *) tmp2->Clone();
-        } else {
+        // Can't count on mixed event quality information always being there.
+        // If one of the histograms exist assume thay all do.
+        if (tmp2) {
+            out->cd();
+            if (0 == jf) {
+                mHMixed_Z_dN = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_Z_dN->Add(tmp2);
+            }
+            in->GetObject("Mixed_Z_N",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_Z_N = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_Z_N->Add(tmp2);
+            }
+            in->GetObject("Mixed_Z_dC",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_Z_dC = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_Z_dC->Add(tmp2);
+            }
+            in->GetObject("Mixed_Z_C",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_Z_C = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_Z_C->Add(tmp2);
+            }
+            in->GetObject("Mixed_Z_dZ",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_Z_dZ = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_Z_dZ->Add(tmp2);
+            }
+            in->GetObject("Mixed_dZ_dN",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_dZ_dN = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_dZ_dN->Add(tmp2);
+            }
+            in->GetObject("Mixed_dZ_N",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_dZ_N = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_dZ_N->Add(tmp2);
+            }
+            in->GetObject("Mixed_dZ_dC",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_dZ_dC = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_dZ_dC->Add(tmp2);
+            }
+            in->GetObject("Mixed_dZ_C",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_dZ_C = (TH2D *) tmp2->Clone();
+            } else {
             mHMixed_dZ_C->Add(tmp2);
-        }
-        in->GetObject("Mixed_N_dC",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_N_dC = (TH2D *) tmp2->Clone();
+            }
+            in->GetObject("Mixed_N_dC",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_N_dC = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_N_dC->Add(tmp2);
+            }
+            in->GetObject("Mixed_N_C",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_N_C = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_N_C->Add(tmp2);
+            }
+            in->GetObject("Mixed_N_dN",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_N_dN = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_N_dN->Add(tmp2);
+            }
+            in->GetObject("Mixed_dN_dC",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_dN_dC = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_dN_dC->Add(tmp2);
+            }
+            in->GetObject("Mixed_dN_C",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_dN_C = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_dN_C->Add(tmp2);
+            }
+            in->GetObject("Mixed_C_dC",tmp2);
+            out->cd();
+            if (0 == jf) {
+                mHMixed_C_dC = (TH2D *) tmp2->Clone();
+            } else {
+                mHMixed_C_dC->Add(tmp2);
+            }
         } else {
-            mHMixed_N_dC->Add(tmp2);
-        }
-        in->GetObject("Mixed_N_C",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_N_C = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_N_C->Add(tmp2);
-        }
-        in->GetObject("Mixed_N_dN",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_N_dN = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_N_dN->Add(tmp2);
-        }
-        in->GetObject("Mixed_dN_dC",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_dN_dC = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_dN_dC->Add(tmp2);
-        }
-        in->GetObject("Mixed_dN_C",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_dN_C = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_dN_C->Add(tmp2);
-        }
-        in->GetObject("Mixed_C_dC",tmp2);
-        out->cd();
-        if (0 == jf) {
-            mHMixed_C_dC = (TH2D *) tmp2->Clone();
-        } else {
-            mHMixed_C_dC->Add(tmp2);
+            mHMixed_Z_dN = 0;
+            mHMixed_Z_N = 0;
+            mHMixed_Z_dC = 0;
+            mHMixed_Z_C = 0;
+            mHMixed_Z_dZ = 0;
+            mHMixed_dZ_dN = 0;
+            mHMixed_dZ_N = 0;
+            mHMixed_dZ_dC = 0;
+            mHMixed_dZ_C = 0;
+            mHMixed_N_C = 0;
+            mHMixed_N_dC = 0;
+            mHMixed_N_dN = 0;
+            mHMixed_dN_C = 0;
+            mHMixed_dN_dC = 0;
+            mHMixed_C_dC = 0;
         }
 
 
@@ -566,6 +598,88 @@ cout << "Loop over main histograms:  zBin = " << iz << endl;
                         mHPbEtaEta[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
                     } else {
                         mHPbEtaEta[ic][iz+ozBin[jf]][it] = 0;
+                    }
+
+                    // SS and AS EtaEta
+                    histName = type[it]; histName += "EtaEtaSS_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    in->GetObject(histName.Data(),tmp2);
+                    if (tmp2) {
+                        out->cd();
+                        mHEtaEtaSS[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                        outName = type[it];  outName += "EtaEtaSS_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHEtaEtaSS[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHEtaEtaSS[ic][iz+ozBin[jf]][it] = 0;
+                    }
+                    histName = type[it]; histName += "PrEtaEtaSS_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    in->GetObject(histName.Data(),tmp2);
+                    if (tmp2) {
+                        out->cd();
+                        mHPrEtaEtaSS[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                        outName = type[it];  outName += "PrEtaEtaSS_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPrEtaEtaSS[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPrEtaEtaSS[ic][iz+ozBin[jf]][it] = 0;
+                    }
+                    histName = type[it]; histName += "PaEtaEtaSS_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    in->GetObject(histName.Data(),tmp2);
+                    if (tmp2) {
+                        out->cd();
+                        mHPaEtaEtaSS[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                        outName = type[it];  outName += "PaEtaEtaSS_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPaEtaEtaSS[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPaEtaEtaSS[ic][iz+ozBin[jf]][it] = 0;
+                    }
+                    histName = type[it]; histName += "PbEtaEtaSS_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    in->GetObject(histName.Data(),tmp2);
+                    if (tmp2) {
+                        out->cd();
+                        mHPbEtaEtaSS[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                        outName = type[it];  outName += "PbEtaEtaSS_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPbEtaEtaSS[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPbEtaEtaSS[ic][iz+ozBin[jf]][it] = 0;
+                    }
+                    histName = type[it]; histName += "EtaEtaAS_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    in->GetObject(histName.Data(),tmp2);
+                    if (tmp2) {
+                        out->cd();
+                        mHEtaEtaAS[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                        outName = type[it];  outName += "EtaEtaAS_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHEtaEtaAS[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHEtaEtaAS[ic][iz+ozBin[jf]][it] = 0;
+                    }
+                    histName = type[it]; histName += "PrEtaEtaAS_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    in->GetObject(histName.Data(),tmp2);
+                    if (tmp2) {
+                        out->cd();
+                        mHPrEtaEtaAS[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                        outName = type[it];  outName += "PrEtaEtaAS_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPrEtaEtaAS[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPrEtaEtaAS[ic][iz+ozBin[jf]][it] = 0;
+                    }
+                    histName = type[it]; histName += "PaEtaEtaAS_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    in->GetObject(histName.Data(),tmp2);
+                    if (tmp2) {
+                        out->cd();
+                        mHPaEtaEtaAS[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                        outName = type[it];  outName += "PaEtaEtaAS_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPaEtaEtaAS[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPaEtaEtaAS[ic][iz+ozBin[jf]][it] = 0;
+                    }
+                    histName = type[it]; histName += "PbEtaEtaAS_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
+                    in->GetObject(histName.Data(),tmp2);
+                    if (tmp2) {
+                        out->cd();
+                        mHPbEtaEtaAS[ic][iz+ozBin[jf]][it] = (TH2D *) tmp2->Clone();
+                        outName = type[it];  outName += "PbEtaEtaAS_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPbEtaEtaAS[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPbEtaEtaAS[ic][iz+ozBin[jf]][it] = 0;
                     }
 
 
@@ -897,22 +1011,25 @@ cout << "Closing input file " << jf << endl;
 //    mHmix->Write();
     mHcb->Write();
     mHptAll->Write();
+    mHEtaPhi->Write();
 
-    mHMixed_Z_dN->Write();
-    mHMixed_Z_N->Write();
-    mHMixed_Z_dC->Write();
-    mHMixed_Z_C->Write();
-    mHMixed_Z_dZ->Write();
-    mHMixed_dZ_dN->Write();
-    mHMixed_dZ_N->Write();
-    mHMixed_dZ_dC->Write();
-    mHMixed_dZ_C->Write();
-    mHMixed_N_dC->Write();
-    mHMixed_N_C->Write();
-    mHMixed_N_dN->Write();
-    mHMixed_dN_dC->Write();
-    mHMixed_dN_C->Write();
-    mHMixed_C_dC->Write();
+    if (mHMixed_Z_dN) {
+        mHMixed_Z_dN->Write();
+        mHMixed_Z_N->Write();
+        mHMixed_Z_dC->Write();
+        mHMixed_Z_C->Write();
+        mHMixed_Z_dZ->Write();
+        mHMixed_dZ_dN->Write();
+        mHMixed_dZ_N->Write();
+        mHMixed_dZ_dC->Write();
+        mHMixed_dZ_C->Write();
+        mHMixed_N_dC->Write();
+        mHMixed_N_C->Write();
+        mHMixed_N_dN->Write();
+        mHMixed_dN_dC->Write();
+        mHMixed_dN_C->Write();
+        mHMixed_C_dC->Write();
+    }
 
     for (int iz=0;iz<nTotZBins;iz++) {
         mHNEventsSib[iz]->Write();
@@ -944,6 +1061,15 @@ cout << "Closing input file " << jf << endl;
                 if (mHPaEtaEta[ic][iz][it]) mHPaEtaEta[ic][iz][it]->Write();
                 if (mHPbPhiPhi[ic][iz][it]) mHPbPhiPhi[ic][iz][it]->Write();
                 if (mHPbEtaEta[ic][iz][it]) mHPbEtaEta[ic][iz][it]->Write();
+
+                if (mHEtaEtaSS[ic][iz][it]) mHEtaEtaSS[ic][iz][it]->Write();
+                if (mHPrEtaEtaSS[ic][iz][it]) mHPrEtaEtaSS[ic][iz][it]->Write();
+                if (mHPaEtaEtaSS[ic][iz][it]) mHPaEtaEtaSS[ic][iz][it]->Write();
+                if (mHPbEtaEtaSS[ic][iz][it]) mHPbEtaEtaSS[ic][iz][it]->Write();
+                if (mHEtaEtaAS[ic][iz][it]) mHEtaEtaAS[ic][iz][it]->Write();
+                if (mHPrEtaEtaAS[ic][iz][it]) mHPrEtaEtaAS[ic][iz][it]->Write();
+                if (mHPaEtaEtaAS[ic][iz][it]) mHPaEtaEtaAS[ic][iz][it]->Write();
+                if (mHPbEtaEtaAS[ic][iz][it]) mHPbEtaEtaAS[ic][iz][it]->Write();
 
                 if (mHAtSYtDYt[ic][iz][it]) mHAtSYtDYt[ic][iz][it]->Write();
                 if (mHAtNSYtDYt[ic][iz][it]) mHAtNSYtDYt[ic][iz][it]->Write();
