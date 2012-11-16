@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.h,v 1.10 2011/08/02 20:36:57 prindle Exp $
+ * $Id: StEStructEvent.h,v 1.11 2012/11/16 21:24:37 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -50,12 +50,12 @@ class StEStructEvent : public TObject {
 
   // non-persistent data to merge old event and 2ptevent classes
 
-  Double_t mCentrality;               //! centrality measure (depends on analysis)
+  Double_t mCentrality;               // centrality measure (depends on analysis)
   StEStructTrackCollection *mTrackCollectionM; //! negative charge list
   StEStructTrackCollection *mTrackCollectionP; //! positive charge list
 
-  Float_t mPsi;				// Event plane angle
-  TH1F* mPhiWgt;			// Phi weights
+  Float_t mPsi;				//! Event plane angle
+  TH1F* mPhiWgt;			//! Phi weights
      
  public:
   StEStructEvent();
@@ -136,8 +136,12 @@ class StEStructEvent : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructEvent.h,v $
+ * Revision 1.11  2012/11/16 21:24:37  prindle
+ * Changes to support reading/writing of EStructEvent. Fill helix as transient and
+ * get BField from file (?).
+ *
  * Revision 1.10  2011/08/02 20:36:57  prindle
- * Event: modifications for ZDCCoincidence
+ *   Event: modifications for ZDCCoincidence
  *   Track: big changes in evalPID. These should be superseded when TOF-dEdx
  *          space is understood better.
  *

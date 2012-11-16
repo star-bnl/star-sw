@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.cxx,v 1.10 2011/08/02 20:36:57 prindle Exp $
+ * $Id: StEStructTrack.cxx,v 1.11 2012/11/16 21:24:37 prindle Exp $
  *
  * Author: Jeff Porter merge of code from Aya Ishihara and Jeff Reid
  *
@@ -20,7 +20,9 @@ using namespace units;
 
 ClassImp(StEStructTrack)
 
-  StEStructTrack::StEStructTrack(StEStructTrack *track) : TObject(), mHelix(0,0,0,StThreeVectorD(), -1) {
+Float_t StEStructTrack::BField = 0;
+StThreeVectorD StEStructTrack::PrimVertex = StThreeVectorD(0,0,0);
+StEStructTrack::StEStructTrack(StEStructTrack *track) : TObject() {
   mPx = track->Px();
   mPy = track->Py();
   mPz = track->Pz();
@@ -67,7 +69,6 @@ ClassImp(StEStructTrack)
   mTPCNHits = track->TopologyMapTPCNHits();
 
   mHelix = track->Helix();
-
   //
   // check to see if one can complete ... requires event level information
   // such as bfield. If so, complete and set, if not set incomplete.
@@ -84,6 +85,13 @@ ClassImp(StEStructTrack)
 
 //----------------------------------------------------------
 void StEStructTrack::FillTransientData(){
+
+  if (0 != StEStructTrack::BField) {
+      StThreeVectorD momentum(mPx,mPy,mPz);
+      StThreeVectorD origin(mBxPrimary,mByPrimary,mBzPrimary);
+      origin += StEStructTrack::PrimVertex;
+      mHelix = StPhysicalHelixD(momentum,origin,StEStructTrack::BField*kilogauss,mCharge);
+  }
 
   evalPt();
   evalPtot();
@@ -250,7 +258,7 @@ void StEStructTrack::evalPID(){
             }
         }
     } else if (0 == mDedx && 0 == mBeta) {
-        if (pi < 0.1 && tpi < 0.1) {
+        if (pi < 0.1 && tnpi < 0.1) {
             mPID = 1;
         } else if (k < 0.1 && tnK < 0.1) {
             mPID = 2;
@@ -288,7 +296,7 @@ void StEStructTrack::evalFourMomentum(const float mass){
 }
 
 //----------------------------------------------------------
-void StEStructTrack::FillTpcReferencePoints(){
+void StEStructTrack::FillTpcReferencePoints() {
   // Uses fitted helix to calculate intersection points in the TPC
 
   static StThreeVectorF WestEnd(0.,0.,200.);
@@ -412,8 +420,12 @@ Float_t StEStructTrack::DcaGlobal() const {
 /**********************************************************************
  *
  * $Log: StEStructTrack.cxx,v $
+ * Revision 1.11  2012/11/16 21:24:37  prindle
+ * Changes to support reading/writing of EStructEvent. Fill helix as transient and
+ * get BField from file (?).
+ *
  * Revision 1.10  2011/08/02 20:36:57  prindle
- * Event: modifications for ZDCCoincidence
+ *   Event: modifications for ZDCCoincidence
  *   Track: big changes in evalPID. These should be superseded when TOF-dEdx
  *          space is understood better.
  *

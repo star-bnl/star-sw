@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.13 2011/08/02 20:36:57 prindle Exp $
+ * $Id: StEStructEvent.cxx,v 1.14 2012/11/16 21:24:37 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -47,6 +47,7 @@ StEStructEvent::StEStructEvent(StEStructEvent& e){
   mZDCw           = e.ZDCw();
   mZDCCoincidence = e.ZDCCoincidence();
 
+  StEStructTrack::BField = e.BField();
   mNtrack=0;
   fTracks = new TClonesArray("StEStructTrack", 1200);
   for(int i=0;i<e.Ntrack();i++){
@@ -256,8 +257,12 @@ void StEStructEvent::SetPhiWgt(const char* weightFile) {
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.14  2012/11/16 21:24:37  prindle
+ * Changes to support reading/writing of EStructEvent. Fill helix as transient and
+ * get BField from file (?).
+ *
  * Revision 1.13  2011/08/02 20:36:57  prindle
- * Event: modifications for ZDCCoincidence
+ *   Event: modifications for ZDCCoincidence
  *   Track: big changes in evalPID. These should be superseded when TOF-dEdx
  *          space is understood better.
  *
