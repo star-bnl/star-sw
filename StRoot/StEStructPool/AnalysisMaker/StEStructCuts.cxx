@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.11 2012/06/11 14:35:32 fisyak Exp $
+ * $Id: StEStructCuts.cxx,v 1.12 2012/11/16 21:19:05 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -387,6 +387,36 @@ void StEStructCuts::fillHistogram(const char* name, float val1, float val2, bool
   if(passed) mvarHistsCut[i]->Fill(val1,val2);
 
 }
+//------------------------------------------------------------------------
+void StEStructCuts::fillHistogram(const char* name, float val1, float val2, float val3, bool passed){
+
+    if (!mDoFillHists) {
+        return;
+    }
+
+  // Add "3D" to name.
+  string hName = name;   hName += "3D";
+//  char *hName = (char *) malloc(strlen(name)+2);
+//  sprintf(hName,"%s3D",name);
+  int i;
+  for(i=0; i<mnumVars; i++)if(strstr(mvarName[i],hName.c_str())) break;
+
+  if(i==mnumVars) {
+      return;
+  }
+
+  TAxis *x = mvarHistsNoCut[i]->GetXaxis();
+  val1 = (val1 > x->GetXmin()) ? val1 : x->GetXmin()+0.5;
+  val1 = (val1 < x->GetXmax()) ? val1 : x->GetXmax()-0.5;
+
+  TAxis *y = mvarHistsNoCut[i]->GetYaxis();
+  val2 = (val2 > y->GetXmin()) ? val2 : y->GetXmin()+0.5;
+  val2 = (val2 < y->GetXmax()) ? val2 : y->GetXmax()-0.5;
+
+  mvarHistsNoCut[i]->Fill(val1,val2);
+  if(passed) mvarHistsCut[i]->Fill(val1,val2);
+
+}
 
 void StEStructCuts::fillHistograms(bool passed){
 
@@ -450,6 +480,15 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.12  2012/11/16 21:19:05  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.11  2012/06/11 14:35:32  fisyak
  * std namespace
  *

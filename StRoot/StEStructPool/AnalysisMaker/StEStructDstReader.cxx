@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructDstReader.cxx,v 1.3 2006/04/06 00:53:57 prindle Exp $
+ * $Id: StEStructDstReader.cxx,v 1.4 2012/11/16 21:19:06 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -21,7 +21,7 @@
 
 ClassImp(StEStructDstReader)
 
-StEStructDstReader::StEStructDstReader(): mMaker(0), mECuts(0), mTCuts(0), mInChain(false) , mAmDone(false){};
+StEStructDstReader::StEStructDstReader(): mMaker(0), mInChain(false) , mAmDone(false){};
 
 
 StEStructDstReader::StEStructDstReader(StEStructEventMaker* maker, StEStructEventCuts* ecuts, StEStructTrackCuts* tcuts, bool inChain) : mAmDone(false) { 
@@ -40,12 +40,8 @@ void StEStructDstReader::setEventMaker(StEStructEventMaker* maker, bool inChain)
   mMaker=maker; 
 };
 
-void StEStructDstReader::setEventCuts(StEStructEventCuts* ecuts) { mECuts=ecuts; };
-void StEStructDstReader::setTrackCuts(StEStructTrackCuts* tcuts) { mTCuts=tcuts; };
 
 bool StEStructDstReader::hasMaker() { return (mMaker) ? true : false ; }
-bool StEStructDstReader::hasEventCuts() { return (mECuts) ? true : false ; }
-bool StEStructDstReader::hasTrackCuts() { return (mTCuts) ? true : false ; }
 
 
 //-------------------------------------------------------------------------
@@ -126,8 +122,17 @@ int StEStructDstReader::getNumberOfTracks(StEStructEvent* e){
 /***********************************************************************
  *
  * $Log: StEStructDstReader.cxx,v $
+ * Revision 1.4  2012/11/16 21:19:06  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.3  2006/04/06 00:53:57  prindle
- * Tried to rationalize the way centrality is defined.
+ *   Tried to rationalize the way centrality is defined.
  *   Now the reader gives a float to StEStructEvent and this float is
  * what is being used to define centrality. When we need a centrality
  * bin index we pass this number into the centrality singleton object.

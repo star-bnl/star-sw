@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.h,v 1.7 2011/08/02 20:31:25 prindle Exp $
+ * $Id: StEStructQAHists.h,v 1.8 2012/11/16 21:19:07 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -29,6 +29,7 @@ class StEStructQAHists : public TObject {
   TH1D * mCents[2];
   TH1D * mptCents[3];
   TH1D * mTotMult;
+  TH1D * mRefMult;
   TH1D * mPosMult;
   TH1D * mNegMult;
   TH1D * mTotMult4;
@@ -89,8 +90,17 @@ class StEStructQAHists : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructQAHists.h,v $
+ * Revision 1.8  2012/11/16 21:19:07  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.7  2011/08/02 20:31:25  prindle
- * Change string handling
+ *   Change string handling
  *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
  *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
  *   Added methods to check if cuts imposed

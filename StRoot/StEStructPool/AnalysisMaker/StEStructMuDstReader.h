@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.h,v 1.12 2011/08/02 20:31:25 prindle Exp $
+ * $Id: StEStructMuDstReader.h,v 1.13 2012/11/16 21:19:07 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -10,8 +10,8 @@
  *               Uses the StMuDstMaker for real reading
  *
  ***********************************************************************/
-#ifndef __STEBEEMUEventREADER__H
-#define __STEBEEMUEventREADER__H
+#ifndef __STESTRUCTMUEVENTREADER__H
+#define __STESTRUCTMUEVENTREADER__H
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -33,8 +33,6 @@ class StEStructMuDstReader : public StEStructEventReader {
 public:
 
   StMuDstMaker* mMaker; //!
-  StEStructEventCuts* mECuts; //!
-  StEStructTrackCuts* mTCuts; //!
   bool mInChain;
   bool mAmDone;
   bool mUseGlobalTracks;
@@ -67,18 +65,16 @@ public:
   virtual ~StEStructMuDstReader();
 
   void setMuDstMaker(StMuDstMaker* MuDstMaker, bool inChain=true);
-  void setEventCuts(StEStructEventCuts* cuts);
-  void setTrackCuts(StEStructTrackCuts* cuts);
   void setUseGlobalTracks(bool global=false);
   bool setInChain(bool inChain);
   bool InChain();
   bool hasMaker();
-  bool hasEventCuts();
-  bool hasTrackCuts();
 
   virtual StEStructEvent* next();
   virtual bool         done();
 
+  void setEventCuts(StEStructEventCuts* cuts);
+  void setTrackCuts(StEStructTrackCuts* cuts);
   StEStructEvent* fillEvent();
   bool fillTracks(StEStructEvent* estructEvent);
   bool isTrackGood(StMuTrack* track);
@@ -97,8 +93,17 @@ inline bool StEStructMuDstReader::done(){ return mAmDone; };
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.h,v $
+ * Revision 1.13  2012/11/16 21:19:07  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.12  2011/08/02 20:31:25  prindle
- * Change string handling
+ *   Change string handling
  *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
  *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
  *   Added methods to check if cuts imposed

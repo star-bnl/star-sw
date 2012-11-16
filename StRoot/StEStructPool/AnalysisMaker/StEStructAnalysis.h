@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructAnalysis.h,v 1.4 2006/10/02 22:14:05 prindle Exp $
+ * $Id: StEStructAnalysis.h,v 1.5 2012/11/16 21:19:05 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -31,6 +31,8 @@ class StEStructAnalysis {
   StEStructAnalysis();
   virtual ~StEStructAnalysis() {};
 
+  StEStructEventReader* mReader; //!
+
   virtual void setOutputFileName(const char* outFileName) = 0;
   void  setQAHists(StEStructQAHists* qaHists);
   virtual bool doEvent(StEStructEvent* event) = 0;
@@ -42,6 +44,7 @@ class StEStructAnalysis {
   virtual void writeQAHists(TFile * tf){ /* no opt */ };
   virtual void setAnalysisIndex(int i);
   virtual int  analysisIndex();
+  virtual void setEventReader(StEStructEventReader *reader);
 
   // called by the maker when one wants to do some periodic printouts
   virtual void writeDiagnostics(){/* no opt*/ }; 
@@ -55,12 +58,24 @@ inline int StEStructAnalysis::analysisIndex(){ return manalysisIndex; };
 inline void StEStructAnalysis::setQAHists(StEStructQAHists* qahists){
   mQAHists = qahists;
 }
+inline void StEStructAnalysis::setEventReader(StEStructEventReader *reader) {
+    mReader = reader;
+}
 
 #endif
 
 /***********************************************************************
  *
  * $Log: StEStructAnalysis.h,v $
+ * Revision 1.5  2012/11/16 21:19:05  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.4  2006/10/02 22:14:05  prindle
  * Changed for QA histograms. Also addition of ppMinBiasYear5 as a data sample.
  *

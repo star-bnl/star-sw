@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.h,v 1.8 2012/06/11 14:35:32 fisyak Exp $
+ * $Id: StEStructCuts.h,v 1.9 2012/11/16 21:19:06 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -71,10 +71,12 @@ public:
   virtual int createCutHists(const char* name, unsigned int* range, int nvals=2);
   virtual void addCutHists(TH1* before, TH1* after, const char* name=NULL);
   virtual void setDoFillHists(bool filling);
+  virtual bool doFillHists();
 
 
   virtual void fillHistogram(const char* name, float value, bool passed);
   virtual void fillHistogram(const char* name, float val1, float val2, bool passed);
+  virtual void fillHistogram(const char* name, float val1, float val2, float val3, bool passed);
   virtual void fillHistograms(bool passed);
   virtual void writeCutHists(TFile* tf);
   virtual bool loadBaseCuts(const char* name,const char** vals,int nvals)=0;
@@ -183,6 +185,9 @@ inline void StEStructCuts::setRange(const char* cutName, float xmin, float xmax)
 inline void StEStructCuts::setDoFillHists(bool filling) {
     mDoFillHists = filling;
 }
+inline bool StEStructCuts::doFillHists() {
+    return mDoFillHists;
+}
 
 
 #endif
@@ -191,6 +196,15 @@ inline void StEStructCuts::setDoFillHists(bool filling) {
 /***********************************************************************
  *
  * $Log: StEStructCuts.h,v $
+ * Revision 1.9  2012/11/16 21:19:06  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.8  2012/06/11 14:35:32  fisyak
  * std namespace
  *

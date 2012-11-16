@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *$Id: StEStructAnalysisMaker.h,v 1.8 2010/03/02 21:43:37 prindle Exp $
+ *$Id: StEStructAnalysisMaker.h,v 1.9 2012/11/16 21:19:05 prindle Exp $
  *   
  *
  *
@@ -40,6 +40,7 @@ public:
     void          Clear(Option_t *option="");
     Int_t         Init();
     Int_t         Make();
+    Int_t         Make(StEStructEvent *ev);
     Int_t         Finish();
 
     void          SetReaderAnalysisPair(StEStructEventReader* reader, StEStructAnalysis * analysis);
@@ -80,7 +81,7 @@ public:
 
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.8 2010/03/02 21:43:37 prindle Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.9 2012/11/16 21:19:05 prindle Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 //-------------------------------------------------
 
 
@@ -130,7 +131,10 @@ inline void StEStructAnalysisMaker::SetAnalysis(StEStructAnalysis* analysis){
 };
 
 inline void StEStructAnalysisMaker::SetAnalyses(StEStructAnalysis ** analyses, int n){
-  for(int i=0;i<n;i++)manalysis[i]=analyses[i];
+  for(int i=0;i<n;i++) {
+      manalysis[i]=analyses[i];
+      manalysis[i]->setEventReader(mreader);
+  }
   numAnalysis=n;
 };
 
@@ -202,8 +206,17 @@ inline void StEStructAnalysisMaker::logAnalysisStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.h,v $
+ * Revision 1.9  2012/11/16 21:19:05  prindle
+ * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
+ * Added support to write and read EStructEvents.
+ * Cuts: 3D histo support, switch to control filling of histogram for reading EStructEvents
+ * EventCuts: A few new cuts
+ * MuDstReader: Add 2D to some histograms, treat ToFCut, PrimaryCuts, VertexRadius histograms like other cut histograms.
+ * QAHists: Add refMult
+ * TrackCuts: Add some hijing cuts.
+ *
  * Revision 1.8  2010/03/02 21:43:37  prindle
- * Use outerHelix() for global tracks
+ *   Use outerHelix() for global tracks
  *   Add sensible triggerId histograms
  *   Starting to add support to sort events (available for Hijing)
  *
