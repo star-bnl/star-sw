@@ -669,6 +669,8 @@ void swapPP_CFG(PP_CFG *);
 struct ic_msg;
 
 char *cmd2name(int cmd);
+char *getConfigBaseXml(char *filename, int port, int trg);
+char *getConfigBaseXml(char *filename, ic_msg *m);
 char *getConfigBase(char *filename, int port, int trg);
 char *getConfigBase(char *filename, ic_msg *m);
 
@@ -684,7 +686,7 @@ int putConfigFile(STAR_CFG *cfg, char *filename);
 ///////////////////////////////////////////////////////////////
 
 
-struct TrgCfg;
+//struct TrgCfg;
 struct TrgPS;
 
 void writeRCCNF(char *fn, STAR_CFG *cfg);   // write rc def file...

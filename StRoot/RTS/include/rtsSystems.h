@@ -261,8 +261,10 @@ so we keep it here for source compatibility
 #define GMT_SYSTEM      26
 #define GMT_ID          GMT_SYSTEM     /* GEM Monitor for TPC */
 
+#define L4_SYSTEM       27
+#define L4_ID           L4_SYSTEM
 
-#define RTS_NUM_SYSTEMS	27	/* current maximum. Can not be greater than 32! */
+#define RTS_NUM_SYSTEMS	28	/* current maximum. Can not be greater than 32! */
 
 #define PP_SEQE_INSTANCE  1
 #define PP_SEQW_INSTANCE  2
@@ -468,6 +470,9 @@ so we keep it here for source compatibility
 #define L3EVP_NODE      ((L3_SYSTEM<<12) | 1)
 #define L3DISP_NODE     ((L3_SYSTEM<<12) | 2)
 
+#define L4_NODES(x)     ((EXT2_SYSTEM<<12) | (L4_SYSTEM<<7) | (x))
+#define L4_EVP_INSTANCE  0x3f
+#define L4_EVP(x)       ((EXT2_SYSTEM<<12) | (L4_SYSTEM<<7) | L4_EVP_INSTANCE)
 
 /* Trigger */
 #define TRG_NODE        ((TRG_SYSTEM<<12) | TRG_INSTANCE)
