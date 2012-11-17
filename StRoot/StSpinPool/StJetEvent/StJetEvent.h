@@ -37,6 +37,7 @@ public:
   int hour  () const { return mDatime.GetHour  (); }
   int minute() const { return mDatime.GetMinute(); }
   int second() const { return mDatime.GetSecond(); }
+  unsigned int unixTime() const { return mDatime.Convert(); }
 
   int numberOfVertices () const;
   int numberOfJets     () const;
