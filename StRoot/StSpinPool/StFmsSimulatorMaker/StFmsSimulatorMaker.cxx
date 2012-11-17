@@ -93,6 +93,9 @@ int StFmsSimulatorMaker::Make()
     return kStErr;
   }
 
+  // Nothing to do
+  if (!mcEvent->fpdHitCollection()) return kStOk;
+
   // Get StEvent
   StEvent* event = (StEvent*)GetDataSet("StEvent");
   if (!event) {
@@ -109,7 +112,6 @@ int StFmsSimulatorMaker::Make()
     return kStErr;
   }
 
-  //fillStEvent(g2t_fpd_hit,event);
   fillStEvent(mcEvent,event);
   printStEventSummary(event);
 
@@ -118,13 +120,12 @@ int StFmsSimulatorMaker::Make()
 
 void StFmsSimulatorMaker::fillStEvent(const StMcEvent* mcEvent, StEvent* event)
 {
-  if (mcEvent->fpdHitCollection() && event->fmsCollection())
-    for (size_t m = 1; m <= mcEvent->fpdHitCollection()->numberOfModules(); ++m) {
-      const StMcEmcModuleHitCollection* module = mcEvent->fpdHitCollection()->module(m);
-      if (module)
-	for (size_t i = 0; i < module->detectorHits().size(); ++i)
-	  event->fmsCollection()->addHit(makeFmsHit(module->detectorHits()[i]));
-    }
+  for (size_t m = 1; m <= mcEvent->fpdHitCollection()->numberOfModules(); ++m) {
+    const StMcEmcModuleHitCollection* module = mcEvent->fpdHitCollection()->module(m);
+    if (module)
+      for (size_t i = 0; i < module->detectorHits().size(); ++i)
+	event->fmsCollection()->addHit(makeFmsHit(module->detectorHits()[i]));
+  }
 }
 
 void  StFmsSimulatorMaker::printStEventSummary(const StEvent* event)
