@@ -43,6 +43,10 @@ class StSCReader
     double getBBCBlueBkg();
     double getPVPDWest();
     double getPVPDEast();
+    unsigned int getValid();
+    unsigned int getTime();
+    int getTimelag();
+    float getMagField();
     TDataSet* getSCTable(unsigned long runno=0);
   protected: 
     void FillTime(unsigned int utime);

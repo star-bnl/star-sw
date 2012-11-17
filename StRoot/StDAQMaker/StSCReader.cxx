@@ -56,7 +56,7 @@ double StSCReader::getTOFp() {
 }
 
 double StSCReader::getZDCWest() {
-  return  sc.rich_scalers[6];
+  return sc.rich_scalers[6];
 }
 
 double StSCReader::getZDCEast() {
@@ -104,8 +104,25 @@ double StSCReader::getPVPDWest() {
 }
 
 double StSCReader::getPVPDEast() {
-  return  sc.rich_scalers[8];
+  return sc.rich_scalers[8];
 }
+
+unsigned int StSCReader::getValid() {
+  return sc.valid;
+}
+
+unsigned int StSCReader::getTime() {
+  return sc.time;
+}
+
+int StSCReader::getTimelag() {
+  return sc.timelag;
+}
+
+float StSCReader::getMagField() {
+  return sc.mag_field;
+}
+
 StSCReader::StSCReader(sc_t *daqsc,unsigned int utime) : fSC(daqsc)
 { FillTime(utime); }
 
@@ -149,7 +166,7 @@ TDataSet* StSCReader::getSCTable(unsigned long runno) {
   tb->pvpdWest     = getPVPDWest();
   tb->pvpdEast     = getPVPDEast();
   tb->runNumber    = runno;
-  tb->timeOffset  = 0; // not known here?
+  tb->timeOffset   = getTime();
   table->SetNRows(1);
   return table;
 }
