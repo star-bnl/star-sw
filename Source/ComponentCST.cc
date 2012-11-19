@@ -341,7 +341,7 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
   std::cout << "    Read " << nNodes << " nodes from file " << nlist << "." << std::endl;
   // Check number of nodes
 
-   // Open the element list
+  // Open the element list
   std::ifstream felist;
   felist.open(elist.c_str(), std::ios::in);
   if (felist.fail()) {
@@ -366,8 +366,8 @@ ComponentCST::Initialise(std::string elist, std::string nlist,
     token = strtok(line, " ");
     // Skip blank lines and headers
     if (!token || strcmp(token," ") == 0 || strcmp(token,"\n") == 0 ||
-         int(token[0]) == 10 || int(token[0]) == 13 ||
-         strcmp(token,"LIST") == 0 || strcmp(token,"ELEM") == 0) continue;
+        int(token[0]) == 10 || int(token[0]) == 13 ||
+        strcmp(token, "LIST") == 0 || strcmp(token, "ELEM") == 0) continue;
     // Read the element
     int ielem = ReadInteger(token, -1, readerror);
     token = strtok(NULL, " "); int imat = ReadInteger(token, -1, readerror);
@@ -1187,18 +1187,23 @@ ComponentCST::FindElementCube(const double x, const double y, const double z,
     */
 
     // check if the point is out of the mesh
-    if(index_x < 0 || index_y < 0 || index_z < 0 ||
-       index_x == (m_xlines.size()-1) || index_y == (m_ylines.size()-1) || index_z == (m_zlines.size()-1))
+    if (index_x < 0 || index_y < 0 || index_z < 0 ||
+        index_x == int(m_xlines.size() - 1) || 
+        index_y == int(m_ylines.size() - 1) || 
+        index_z == int(m_zlines.size() - 1)) {
       return -1;
-    else
+    } else {
       imap = index_x + (m_xlines.size() - 1) * index_y + (m_xlines.size() - 1) * (m_ylines.size() - 1) * index_z;
-
-    if(debug && imap != -1) {
-      if( x < nodes[elements[imap].emap[3]].x || x > nodes[elements[imap].emap[0]].x ||
-          y < nodes[elements[imap].emap[3]].y || y > nodes[elements[imap].emap[2]].y ||
-          z < nodes[elements[imap].emap[3]].z || z > nodes[elements[imap].emap[7]].z) {
+    }
+    if (debug && imap != -1) {
+      if (x < nodes[elements[imap].emap[3]].x || 
+          x > nodes[elements[imap].emap[0]].x ||
+          y < nodes[elements[imap].emap[3]].y || 
+          y > nodes[elements[imap].emap[2]].y ||
+          z < nodes[elements[imap].emap[3]].z || 
+          z > nodes[elements[imap].emap[7]].z) {
         std::cout << "Element: " << imap << "\tPoint: (" << x << "," << y << "," << z << ")" << std::endl
-                << "x: " << nodes[elements[imap].emap[3]].x << " - " << nodes[elements[imap].emap[0]].x << "" << std::endl
+                  << "x: " << nodes[elements[imap].emap[3]].x << " - " << nodes[elements[imap].emap[0]].x << "" << std::endl
                 << "y: " << nodes[elements[imap].emap[3]].y << " - " << nodes[elements[imap].emap[2]].y << "" << std::endl
                 << "z: " << nodes[elements[imap].emap[3]].z << " - " << nodes[elements[imap].emap[7]].z << "\n" << std::endl;
       }

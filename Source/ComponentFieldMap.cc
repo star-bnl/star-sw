@@ -1459,8 +1459,8 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
 
 int 
 ComponentFieldMap::Coordinates4(double x, double y, double z,
-         double& t1, double& t2, double& t3, double& t4,
-         double jac[4][4], double& det, int imap) {
+                                double& t1, double& t2, double& t3, double& t4,
+                                double jac[4][4], double& det, int imap) {
 
   // Debugging
   if (debug) {
@@ -1644,6 +1644,12 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
   // This should have worked if we get this far.
   ifail = 0;
   return ifail;
+  // Variable jac is not used. 
+  // The following lines are just for quieting the compiler.
+  jac[0][0] = jac[0][1] = jac[0][2] = jac[0][3] = 0.;
+  jac[1][0] = jac[1][1] = jac[1][2] = jac[1][3] = 0.;
+  jac[2][0] = jac[2][1] = jac[2][2] = jac[2][3] = 0.;
+  jac[3][0] = jac[3][1] = jac[3][2] = jac[3][3] = 0.;
 
 }
 

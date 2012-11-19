@@ -35,14 +35,14 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   debug = false;
   ready = false;
 
-  // Keep track of the success
+  // Keep track of the success.
   bool ok = true;
 
   // Buffer for reading
   const int size = 100;
   char line[size];
 
-  // Open the header
+  // Open the header.
   std::ifstream fheader;
   fheader.open(header.c_str(), std::ios::in);
   if (fheader.fail()) {
@@ -57,7 +57,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   bool readstop = false;
   int il = 0;
 
-  // Read the header to get the number of nodes and elements
+  // Read the header to get the number of nodes and elements.
   fheader.getline(line, size, '\n');
   token = strtok(line, " ");
   nNodes = ReadInteger(token, 0, readerror);
@@ -75,10 +75,10 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     return false;
   }
 
-  // Close the header file
+  // Close the header file.
   fheader.close();
 
-  // Open the nodes list
+  // Open the nodes list.
   std::ifstream fnodes;
   fnodes.open(nlist.c_str(), std::ios::in);
   if (fnodes.fail()) {
@@ -87,7 +87,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
               << nlist << " for reading.\n";
   }
 
-  // Check the value of the unit
+  // Check the value of the unit.
   double funit;
   if (strcmp(unit.c_str(),"mum") == 0 || strcmp(unit.c_str(),"micron") == 0 || 
       strcmp(unit.c_str(),"micrometer") == 0) {
@@ -112,19 +112,19 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     std::cout << "    Unit scaling factor = " << funit << ".\n";
   }
 
-  // Read the nodes from the file
+  // Read the nodes from the file.
   node newNode;
   newNode.w.clear();
   for (il = 0; il < nNodes; il++) {
 
-    // Get a line from the nodes file
+    // Get a line from the nodes file.
     fnodes.getline(line, size, '\n');
 
-    // Ignore the first two characters
+    // Ignore the first two characters.
     token = strtok(line, " ");
     token = strtok(NULL, " ");
     
-    // Get the node coordinates
+    // Get the node coordinates.
     token = strtok(NULL, " "); double xnode = ReadDouble(token, -1, readerror);
     token = strtok(NULL, " "); double ynode = ReadDouble(token, -1, readerror);
     token = strtok(NULL, " "); double znode = ReadDouble(token, -1, readerror);
@@ -139,17 +139,17 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     
     // if(il < 60) std::cout << "Got node " << il << " with x=" << xnode << ", y=" << ynode << ", z=" << znode << " and funit=" << funit << "\n";
 
-    // Set up and create a new node
+    // Set up and create a new node.
     newNode.x = xnode * funit;
     newNode.y = ynode * funit;
     newNode.z = znode * funit;
     nodes.push_back(newNode);
   }
 
-  // Close the nodes file
+  // Close the nodes file.
   fnodes.close();
 
-  // Open the potential file
+  // Open the potential file.
   std::ifstream fvolt;
   fvolt.open(volt.c_str(), std::ios::in);
   if (fvolt.fail()) {
@@ -158,33 +158,33 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
               << volt  << " for reading.\n";
   }
 
-  // Reset the line counter
+  // Reset the line counter.
   il = 1;
 
-  // Read past the header
+  // Read past the header.
   while (!readstop && fvolt.getline(line, size, '\n')) {
     token = strtok(line, " ");
     if (strcmp(token, "Perm:") == 0) readstop = true;
     il++;
   }
 
-  // Should have stopped: if not, print error message
+  // Should have stopped: if not, print error message.
   if (!readstop) {
     std::cerr << className << "::Initialise:\n";
     std::cerr << "    Error reading past header of potentials file "
               << volt << ".\n"; 
-    fnodes.close();
+    fvolt.close();
     ok = false;
     return false;  
   }
 
-  // Read past the permutation map (number of lines = nNodes)
+  // Read past the permutation map (number of lines = nNodes).
   for (int tl = 0; tl < nNodes; tl++) { 
     fvolt.getline(line, size, '\n'); 
     il++;
   }
 
-  // Read the potentials
+  // Read the potentials.
   for (int tl = 0; tl < nNodes; tl++) {
     double v;
     fvolt.getline(line, size, '\n');
@@ -194,18 +194,18 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
       std::cerr << className << "::Initialise:\n";
       std::cerr << "    Error reading file " << volt 
                 << " (line " << il << ").\n";
-      fnodes.close();
+      fvolt.close();
       ok = false;
       return false;  
     }
-    // Place the voltage in its appropriate node
+    // Place the voltage in its appropriate node.
     nodes[tl].v = v;
   }
 
-  // Close the potentials file
+  // Close the potentials file.
   fvolt.close();
 
-  // Open the materials file
+  // Open the materials file.
   std::ifstream fmplist;
   fmplist.open(mplist.c_str(), std::ios::in);
   if (fmplist.fail()) {
@@ -214,7 +214,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
               << mplist << " for reading.\n";              
   }
 
-  // Read the dielectric constants from the materials file
+  // Read the dielectric constants from the materials file.
   fmplist.getline(line, size, '\n');
   token = strtok(line, " ");
   if (readerror) {
@@ -250,10 +250,10 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
               << " to eps " << dc << ".\n";
   }
 
-  // Close the materials file
+  // Close the materials file.
   fmplist.close();
 
-  // Find the lowest epsilon, check for eps = 0, set default drift media
+  // Find the lowest epsilon, check for eps = 0, set default drift media.
   double epsmin = -1; int iepsmin = -1;
   for (int imat = 0; imat < nMaterials; ++imat) {
     if (materials[imat].eps < 0) continue;
@@ -284,7 +284,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     }
   }
 
-  // Open the elements file
+  // Open the elements file.
   std::ifstream felems;
   felems.open(elist.c_str(), std::ios::in);
   if (felems.fail()) {
@@ -293,7 +293,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
               << elist << " for reading.\n";
   }
 
-  // Read the elements and their material indices
+  // Read the elements and their material indices.
   elements.clear();  
   int highestnode = 0;
   int nbackground = 0;
@@ -303,7 +303,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     // Get a line
     felems.getline(line, size, '\n');
 
-    // Split into tokens
+    // Split into tokens.
     token = strtok(line, " ");
     // Read the 2nd-order element
     // Note: Ordering of Elmer elements can be described in the 
@@ -332,7 +332,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
                 << " of " << nElements << " with mat " << imat << ".\n";
     }
 
-    // Check synchronisation
+    // Check synchronisation.
     if (readerror) {
       std::cerr << className << "::Initialise:\n";
       std::cerr << "    Error reading file " << elist 
@@ -342,7 +342,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
       return false;
     } 
     
-    // Check the material number and ensure that epsilon is non-negative
+    // Check the material number and ensure that epsilon is non-negative.
     if (imat < 0 || imat > nMaterials) {
       std::cerr << className << "::Initialise:\n";
       std::cerr << "    Out-of-range material number on file "
@@ -365,7 +365,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
       ok = false;
     }
 
-    // Check the node numbers
+    // Check the node numbers.
     if (in0 < 1 || in1 < 1 || in2 < 1 || in3 < 1 || in4 < 1 || 
         in5 < 1 || in6 < 1 || in7 < 1 || in8 < 1 || in9 < 1) {
       std::cerr << className << "::Initialise:\n";
@@ -395,7 +395,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
       continue;
     }    
     
-    // These elements must not be degenerate
+    // These elements must not be degenerate.
     if (in0 == in1 || in0 == in2 || in0 == in3 || in0 == in4 || in0 == in5 || 
         in0 == in6 || in0 == in7 || in0 == in8 || in0 == in9 || 
         in1 == in2 || in1 == in3 || in1 == in4 || in1 == in5 || 
@@ -418,7 +418,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     
     newElement.degenerate = false;
     
-    // Store the material reference
+    // Store the material reference.
     newElement.matmap = imat;
     
     // Node references
@@ -435,10 +435,10 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     elements.push_back(newElement);
   }
 
-  // Close the elements file
+  // Close the elements file.
   felems.close();
 
-  // Set the ready flag
+  // Set the ready flag.
   if (ok) {
     ready = true;
   } else {
@@ -455,7 +455,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   wfieldsOk.clear();
   nWeightingFields = 0;
 
-  // Establish the ranges
+  // Establish the ranges.
   SetRange();
   UpdatePeriodicity();
   return true;
@@ -463,22 +463,25 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
 }
 
 bool
-ComponentElmer::SetWeightingField(std::string prnsol, std::string label) {
+ComponentElmer::SetWeightingField(std::string wvolt, std::string label) {
 
- if (!ready) {
+  if (!ready) {
     std::cerr << className << "::SetWeightingField:\n";
     std::cerr << "    No valid field map is present.\n";
     std::cerr << "    Weighting field cannot be added.\n";
     return false;
   }
 
+  // Keep track of the success.
+  bool ok = true;
+
   // Open the voltage list.
-  std::ifstream fprnsol;
-  fprnsol.open(prnsol.c_str(), std::ios::in);
-  if (fprnsol.fail()) {
+  std::ifstream fwvolt;
+  fwvolt.open(wvolt.c_str(), std::ios::in);
+  if (fwvolt.fail()) {
     std::cerr << className << "::SetWeightingField:\n";
     std::cerr << "    Could not open potential file "
-              << prnsol << " for reading.\n"; 
+              << wvolt << " for reading.\n"; 
     std::cerr << "    The file perhaps does not exist.\n";
     return false;
   }
@@ -505,65 +508,60 @@ ComponentElmer::SetWeightingField(std::string prnsol, std::string label) {
   wfields[iw] = label;
   wfieldsOk[iw] = false;
 
-  // Buffer for reading
+  // Temporary variables for use in file reading
   const int size = 100;
   char line[size];
-
-  bool ok = true;
-  // Read the voltage list.
-  int il = 0;
-  int nread = 0;
+  char* token = NULL;
   bool readerror = false;
+  bool readstop = false;
+  int il = 1;
 
-  while (fprnsol.getline(line, size, '\n')) {
-    il++;
-    // Split the line in tokens.
-    char* token = NULL;
+  // Read past the header.
+  while (!readstop && fwvolt.getline(line, size, '\n')) {
     token = strtok(line, " ");
-    // Skip blank lines and headers.
-    if (!token || strcmp(token, " ") == 0 || strcmp(token, "\n") == 0 || 
-        int(token[0]) == 10 || int(token[0]) == 13 ||
-        strcmp(token, "PRINT")   == 0 || strcmp(token, "*****")   == 0 ||
-        strcmp(token, "LOAD")    == 0 || strcmp(token, "TIME=")   == 0 ||
-        strcmp(token, "MAXIMUM") == 0 || strcmp(token, "VALUE")   == 0 ||
-        strcmp(token, "NODE")    == 0) continue;
-    // Read the element.
-    int inode = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); double volt = ReadDouble(token, -1, readerror);
-    // Check the syntax.
-    if (readerror) {
-      std::cerr << className << "::SetWeightingField:\n";
-      std::cerr << "    Error reading file " << prnsol 
-                << " (line " << il << ").\n";
-      fprnsol.close();
-      return false;
-    }
-    // Check node number and store if OK.
-    if (inode < 1 || inode > nNodes) {
-      std::cerr << className << "::SetWeightingField:\n";
-      std::cerr << "    Node number " << inode << " out of range\n";
-      std::cerr << "    on potential file " << prnsol
-                << " (line " << il << ").\n";
-      ok = false;
-    } else {
-      nodes[inode - 1].w[iw] = volt;
-      nread++;
-    }
+    if (strcmp(token, "Perm:") == 0) readstop = true;
+    il++;
   }
-  // Close the file.
-  fprnsol.close();
-  
-  std::cout << className << "::SetWeightingField:\n";
-  std::cout << "    Read " << nread << " potentials from file " 
-            << prnsol.c_str() << ".\n";
-  // Check the number of nodes.
-  if (nread != nNodes) {
-    std::cerr << className << "::SetWeightingField:\n";
-    std::cerr << "    Number of nodes read (" << nread << ") "
-              << "    on potential file " << prnsol << "\n";
-    std::cerr << "    does not match the node list (" << nNodes << ").\n";
+
+  // Should have stopped: if not, print error message.
+  if (!readstop) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Error reading past header of potentials file "
+              << wvolt << ".\n"; 
+    fwvolt.close();
     ok = false;
+    return false;  
   }
+
+  // Read past the permutation map (number of lines = nNodes).
+  for (int tl = 0; tl < nNodes; tl++) { 
+    fwvolt.getline(line, size, '\n'); 
+    il++;
+  }
+
+  // Read the potentials.
+  for (int tl = 0; tl < nNodes; tl++) {
+    double v;
+    fwvolt.getline(line, size, '\n');
+    token = strtok(line, " ");
+    v = ReadDouble(token, -1, readerror);
+    if(readerror) {
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Error reading file " << wvolt 
+                << " (line " << il << ").\n";
+      fwvolt.close();
+      ok = false;
+      return false;  
+    }
+    // Place the weighting potential at its appropriate node and index.
+    nodes[tl].w[iw] = v;
+  }
+
+  // Close the potentials file.
+  fwvolt.close();
+  std::cout << className << "::SetWeightingField:\n";
+  std::cout << "    Read potentials from file " 
+            << wvolt.c_str() << ".\n";
 
   // Set the ready flag.
   wfieldsOk[iw] = ok;
@@ -633,7 +631,7 @@ ComponentElmer::ElectricField(
     status = -6;
     return;
   }
-  
+
   if (debug) {
     std::cout << className << "::ElectricField:\n";
     std::cout << "    Global: (" << x << ", " << y << ", " << z << "),\n";

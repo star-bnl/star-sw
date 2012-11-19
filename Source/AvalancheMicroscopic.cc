@@ -1445,7 +1445,7 @@ AvalancheMicroscopic::TransportElectron(
                 }
                 newElectron.status = 0;
                 newElectron.driftLine.clear();
-                if (aval && (sizeCut <= 0 || stack.size() < sizeCut)) {
+                if (aval && (sizeCut <= 0 || (int)stack.size() < sizeCut)) {
                   stack.push_back(newElectron);
                 }
                 // Increment the electron counter.

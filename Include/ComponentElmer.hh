@@ -57,7 +57,7 @@ class ComponentElmer: public ComponentFieldMap {
     double GetElementVolume(const int i);
     void GetAspectRatio(const int i, double& dmin, double& dmax);
     
-  };
+};
   
 }
 #endif
