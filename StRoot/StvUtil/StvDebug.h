@@ -12,6 +12,7 @@ static  int Break(double x,double y,double z);
 static  int Debug() {return mgDebug;};
 static void SetDebug(int idb) {mgDebug=idb;};
 static void Count(const char *key,double val=0);
+static void Count(const char *key,double valx,double valy);
 static void Sumary();
 static void Reset();
 static const char *Env(const char *key);
