@@ -400,17 +400,13 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 				}
 				// END of the hacks to deal with skipped APV's
 
-// GV TO TONKO:
-// This is some kind of dynamic memory allocation, right? Wouldn't it be better to use the actual number of timebins as decoded from header, to be a little
-// more efficient in memory usage. Highly unlikely we run 31 timebins for FGT or IST production, much less than that.
 				fgt_adc_t *fgt_d = (fgt_adc_t *) adc->request(FGT_TB_COU*FGT_CH_COU) ;
 				int cou = 0 ;
 
 				// extract data here...
 
 				u_short *d16 = (u_short *) dta ;
-// GV TO TONKO:
-// is it ok to just use this array declaration or you should convert to some dynamic memory allocation? well, whatever is best, I certainly don't know...
+
 				u_short wfm[((2047-2)/3)*8] ;       // worst case wfm length (from header max length value 2047)
 				int i = 0 ;
 				
