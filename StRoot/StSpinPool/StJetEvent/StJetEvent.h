@@ -30,6 +30,8 @@ public:
 
   int runId  () const { return mRunId;   }
   int eventId() const { return mEventId; }
+
+  // Event time should really be moved to skim tree
   const TDatime& dateTime() const { return mDatime; }
   int year  () const { return mDatime.GetYear  (); }
   int month () const { return mDatime.GetMonth (); }
@@ -69,7 +71,7 @@ private:
 
   int mRunId;
   int mEventId;
-  TDatime mDatime;
+  TDatime mDatime; // Event time should really be moved to skim tree
 
   TClonesArray* mVertices;
   TClonesArray* mJets;
