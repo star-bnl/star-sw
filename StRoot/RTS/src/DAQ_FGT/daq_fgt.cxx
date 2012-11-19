@@ -193,8 +193,8 @@ daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 		r_start = r_stop = rdo ;
 	}
 
-
 	raw->create(8*1024,"fgt_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
+
 
 	for(int r=r_start;r<=r_stop;r++) {
 		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, s, r) ;
@@ -311,8 +311,13 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 				LOG(NOTE,"[evt %d]: Handling APV %d",get_global_event_num(),apv) ;
 
 				int apv_id = *dta & 0x1F ;
-				int length = (*dta >> 5) & 0x3FF ;   // it's probable that we never use >0x1ff, so there is a hidden 'reserved' bit here
 				int fmt = (*dta >> 16) & 0xf ;       // promoted to 4 bits on 1/26/2012 (take over reserved=0 bit)
+				int length;
+				if ((fmt==1)||(fmt==2))              // old formats used in run 12 FGT, retired 11/2012
+				  length = (*dta >> 5) & 0x3FF ;
+				else
+				  length = (*dta >> 5) & 0x7ff ;
+
 				int seq = (*dta >> 20) & 0xfff;
 
 				dta++ ;
@@ -322,9 +327,19 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 				int capid = *dta & 0xFF ;
 				int nhits = (*dta >> 8) & 0x7F ;
 				int is_error = (*dta >> 15) & 1 ;
-				int refadc = (*dta >> 16) & 0xFFF ;
-				int ntim = (*dta >> 28) & 0x7 ;
-				int is_0 = *dta & 0x80000000 ;
+
+				int refadc,ntim,is_0;
+				if ((fmt==1)||(fmt==2)) {             // old formats used in run 12 FGT, retired 11/2012
+				  refadc = (*dta >> 16) & 0xFFF ;
+				  ntim = (*dta >> 28) & 0x7 ;
+				  is_0 = *dta & 0x80000000 ;
+				}
+				else {
+				  refadc = (*dta >> 16) & 0x7FF ;
+				  ntim = (*dta >> 27) & 0x1f ;
+				  is_0 = 0 ;
+				}
+
 
 				dta++ ;
 
@@ -350,11 +365,11 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 #endif
 				}
 
-				if((ntim < 0) || (ntim > 7)) {  // 0 is a valid value (used to encode NHITS=0)
+				if((ntim < 0) || (ntim > 31)) {  // 0 is a valid value (used to encode NHITS=0)
 					LOG(ERR,"Ntim %d ?!",ntim) ;
 					continue ;
 				}
-				if((fmt != 1)&&(fmt != 2)) {
+				if((fmt != 1)&&(fmt != 2)&&(fmt != 3)) {
 					LOG(ERR,"Invalid FMT %d (evt %d)",fmt,get_global_event_num()) ;
 					continue ;
 				}
@@ -384,17 +399,22 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 				  }
 				}
 				// END of the hacks to deal with skipped APV's
-	
+
+// GV TO TONKO:
+// This is some kind of dynamic memory allocation, right? Wouldn't it be better to use the actual number of timebins as decoded from header, to be a little
+// more efficient in memory usage. Highly unlikely we run 31 timebins for FGT or IST production, much less than that.
 				fgt_adc_t *fgt_d = (fgt_adc_t *) adc->request(FGT_TB_COU*FGT_CH_COU) ;
 				int cou = 0 ;
 
 				// extract data here...
 
 				u_short *d16 = (u_short *) dta ;
-				u_short wfm[2720] ;       // actually use 1000 for 7 timebins, less for less, but better cover worst case length from header
+// GV TO TONKO:
+// is it ok to just use this array declaration or you should convert to some dynamic memory allocation? well, whatever is best, I certainly don't know...
+				u_short wfm[((2047-2)/3)*8] ;       // worst case wfm length (from header max length value 2047)
 				int i = 0 ;
 				
-				// it is important to note, this is specifically for format 1 or 2, and the length will always be of form 2+3*n
+				// it is important to note, this is specifically for the non-ZS formats, and the length will always be of form 2+3*n
 				for(int j=0;j<((length-2)/3)*2;j++) {
 					u_short wtmp ;
 
