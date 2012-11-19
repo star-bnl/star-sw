@@ -4,7 +4,9 @@
 #include <assert.h>
 #include <map>
 #include <string>
+#include "TClass.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TCanvas.h"
 #include "TSystem.h"
 #include "TString.h"
@@ -13,7 +15,7 @@ int StvDebug::mgDebug=1; //0=no debug, 1=Normal, 2=count is on
 int StvDebug::mgRecov=1;
 int StvDebug::mgCheck=1;
 
-typedef std::map<std::string, TH1F*>   myDebMap_t;
+typedef std::map<std::string, TH1*>   myDebMap_t;
 typedef myDebMap_t::const_iterator myDebIter_t;
 static  myDebMap_t  myDebMap;
 
@@ -45,9 +47,17 @@ int StvDebug::Break(double x,double y,double z)
 void StvDebug::Count(const char *key,double val)
 {
   if (mgDebug<2) return;
-  TH1F *&h = myDebMap[key];
+  TH1 *&h = myDebMap[key];
   if (!h) { h = new TH1F(key,key,100,0.,0.);}
   h->Fill(val);
+}
+//______________________________________________________________________________ 
+void StvDebug::Count(const char *key,double valx,double valy)
+{
+  if (mgDebug<2) return;
+  TH1 *&h = myDebMap[key];
+  if (!h) { h = new TH2F(key,key,100,0.,0.,100,0.,0.);}
+  ((TH2F*)h)->Fill(valx,valy);
 }
 //______________________________________________________________________________ 
 void StvDebug::Sumary()
@@ -56,7 +66,9 @@ void StvDebug::Sumary()
   TH1 *H[4];
   int nH = 0,n=0;
   for (myDebIter_t iter = myDebMap.begin();iter != myDebMap.end();++iter) {
-    TH1F *h = (*iter).second; n++;
+    TH1 *h = (*iter).second; n++;
+    if (h->IsA()->InheritsFrom("TH2")) continue;
+
     int nEnt = h->GetEntries();
     double mean = h->GetMean();
     double rms  = h->GetRMS();
@@ -66,6 +78,18 @@ void StvDebug::Sumary()
     H[nH++] = h;
   }
   if (nH) Draw(nH,H);
+
+  for (myDebIter_t iter = myDebMap.begin();iter != myDebMap.end();++iter) {
+    TH1 *h = (*iter).second; n++;
+    if (!h->IsA()->InheritsFrom("TH2")) continue;
+    int nEnt = h->GetEntries();
+    double mean = h->GetMean();
+    double rms  = h->GetRMS();
+    printf("%2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
+    if (rms<=0) continue;
+    H[0]=h;Draw(1,H);
+  }
+
   if (!n) return;
   while(!gSystem->ProcessEvents()){}; 
 
