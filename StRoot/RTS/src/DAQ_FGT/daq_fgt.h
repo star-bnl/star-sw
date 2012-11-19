@@ -10,7 +10,7 @@
 #define FGT_APV_COU		24
 #define FGT_CH_COU		128
 
-#define FGT_TB_COU		10	//???
+#define FGT_TB_COU		31	//???
 
 
 
