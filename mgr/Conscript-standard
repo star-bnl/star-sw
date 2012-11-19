@@ -42,7 +42,7 @@ my @PlainObj = ();
 
 if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
      ($Dir =~ m/StRoot.*Client\// && $Dir !~ /StRoot.*Client\/St/) ||
-     ($Dir =~ m/StarVMC\/minicern/ )
+     ($Dir =~ m/StarVMC\/minicern/  || $Dir =~ m/StarGenerator/ )
      ) {
     # Added 2003. In Construct, the logic is such
     # that the Pool directories have their sub-directories
@@ -52,16 +52,23 @@ if ( ($Dir =~ m/StRoot.*Pool\//   && $Dir !~ /StRoot.*Pool\/St/)   ||
     $pkg = $Dir;
     $pkg =~ s/StRoot\///;
 
-    if ( $Dir =~ m/GeneratorPool/ ){
-	$pkg =~ s/.*Pool\///;
-	#$pkg = "lib$pkg";
+    if ( $Dir =~ m/StarGenerator/ ){
+	if ( $Dir =~ m/(StarGenerator)(\/)([A-Z]+$)/ ){
+	    # camel case
+	    $pkg =  $1.substr($3,0,1).lc(substr($3,1,length($3)));
+	} else {
+	    # normal case, use subdir name
+	    $pkg =~ s/.*StarGenerator\///;
+	}
+	#print "\t[".File::Basename::basename($Dir)."] changed to $pkg\n";
     } else {
 	$pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/  );
 	$pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
 	$pkg = "StarMiniCern"       if ($pkg =~ m/minicern/);
+	print "\t[".File::Basename::basename($Dir)."] (possible name clash) changed to $pkg\n";
     }
     $PKG = $pkg;
-    print "\t[".File::Basename::basename($Dir)."] (possible name clash) changed to $pkg\n";
+
 } else {
     $pkg = File::Basename::basename($Dir);               # print "Run cons in $Dir for $PKG\n";
     $PKG = $pkg;
@@ -571,9 +578,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    "#" . $Dir . $main::PATH_SEPARATOR ."#". $basep ."/include";
 	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
+
+
 	# This block can be used for ANY Maker or Pool having a 2 level
 	# directory structure using auto-globbing for include purposes
-
     } elsif ( $pkg =~ m/^StAssociationMaker$/ ||
 	      $pkg =~ m/EmcUtil$/             ||
 	      $pkg =~ m/St_geant_Maker$/      ||

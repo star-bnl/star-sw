@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.177 2012/08/14 16:33:39 fisyak Exp $
+# $Id: Construct,v 1.178 2012/11/19 23:33:26 jeromel Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -352,12 +352,12 @@ my $sub_DIR = $dir . "/" . $sub_dir;
 		    next;
                 }
 		
-                if ( ( $sub_dir =~ /^sim$/    ||
-		       $sub_dir =~ /^gen$/    ||
-		       $sub_dir =~ /Pool$/    ||
-#		       $sub_dir =~ /StJetMaker/ ||
+		# this forces the globing of subdirs but the main tree needs excluding
+                if ( ( $sub_dir =~ /^sim$/         ||
+		       $sub_dir =~ /^gen$/         ||
+		       $sub_dir =~ /Pool$/         ||
+		       $sub_dir =~ /Generator$/    ||
 		       $sub_dir =~ /StRTSClient$/) ){
-#                    if ( $SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir ) {
                     if ( $items && $sub_dir =~ /$items/ ) {
                         print "skip dir: $subsub_dir \t=> $items\n";
                         next;
@@ -368,8 +368,9 @@ my $sub_DIR = $dir . "/" . $sub_dir;
                 }
             }
         }
-        if ( $sub_dir =~ /Pool$/ )   { next; }
-        if ( $sub_dir =~ /Client$/ ) { next; }
+        if ( $sub_dir =~ /Pool$/ )    { next; }
+        if ( $sub_dir =~ /Client$/ )  { next; }
+        if ( $sub_dir =~ /Generator$/){ next; } 
         push @subdirs, $sub_DIR;
         print "================== add $sub_DIR\n" if ($param::debug);
     }
