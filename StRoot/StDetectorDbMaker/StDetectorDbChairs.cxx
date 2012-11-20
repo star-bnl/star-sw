@@ -32,16 +32,17 @@ MakeChairInstance2(TpcSecRowCor,St_TpcSecRowXC,Calibrations/tpc/TpcSecRowX);
 #include "St_tpcCorrectionC.h"
 ClassImp(St_tpcCorrectionC);
 //________________________________________________________________________________
-Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z) {
+Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z, Int_t NparMax) {
   tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
-  return SumSeries(cor, x, z);
+  return SumSeries(cor, x, z, NparMax);
 }
 //________________________________________________________________________________
-Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double_t z) {
+Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double_t z, Int_t NparMax) {
   Double_t Sum = 0;
   if (! cor) return Sum;
   Int_t N = TMath::Abs(cor->npar)%100;
   if (N == 0) return Sum;
+  if (NparMax > 0) N = NparMax;
   static Double_t T0, T1, T2;
   // parameterization variable
   Double_t X = x;
@@ -435,7 +436,12 @@ Float_t St_tss_tssparC::gain(Int_t sec, Int_t row) {
     St_tpcGainCorrectionC *gC = St_tpcGainCorrectionC::instance();
     Double_t v = V - V_nominal;
     if (gC->GetNRows() < l || v < gC->min(l) || v > gC->max(l)) return gain;
-    gain  = TMath::Exp(gC->CalcCorrection(l,v));
+    if (gC->min(l) < -150) {
+      // if range was expanded below 150 V then use only the linear approximation
+      gain  = TMath::Exp(gC->CalcCorrection(l,v, 0., 2));
+    } else {
+      gain  = TMath::Exp(gC->CalcCorrection(l,v));
+    }
   }
   return gain;
 }
@@ -443,9 +449,6 @@ Float_t St_tss_tssparC::gain(Int_t sec, Int_t row) {
 #include "St_tpcMaxHitsC.h"
 MakeChairInstance(tpcMaxHits,Calibrations/tracker/tpcMaxHits);
 //__________________Calibrations/rich______________________________________________________________
-#include "StDetectorDbRichScalers.h"
-StDetectorDbRichScalers *StDetectorDbRichScalers::fgInstance = 0;
-ClassImp(StDetectorDbRichScalers);
 #include "St_richvoltagesC.h"
 MakeChairInstance(richvoltages,Calibrations/rich/richvoltages);
 #include "St_y1MultC.h"
