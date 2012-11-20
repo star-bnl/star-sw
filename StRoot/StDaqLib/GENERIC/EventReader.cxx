@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.60 2009/08/24 20:27:10 jml Exp $
+ * $Id: EventReader.cxx,v 1.60.2.1 2012/11/20 19:59:54 didenko Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,21 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.60.2.1  2012/11/20 19:59:54  didenko
+ * updates for SSD
+ *
+ * Revision 1.64  2012/11/06 21:25:41  fisyak
+ * Jeff's fix for SSD
+ *
+ * Revision 1.63  2012/06/11 16:38:35  fisyak
+ * std namespace, remove clash with rtsSystems.h
+ *
+ * Revision 1.62  2010/01/15 19:51:25  fine
+ * RT #1803 Fix side effect for DAT files
+ *
+ * Revision 1.61  2010/01/13 21:50:45  fine
+ * Rt #1803. treat zero DAQ time as error. Print error message
+ *
  * Revision 1.60  2009/08/24 20:27:10  jml
  * fixed typos
  *
@@ -247,8 +262,8 @@ static const char *detnams[] =
   LOG_INFO<<"===============  Event # "<<EventSeqNo<<"  ============="<<endm;
   LOG_INFO<<"Ev len (wds) "<<EventLength<<endm;
   LOG_INFO<<"Creation Time: "<<ts<<endm;
-  LOG_INFO<<"Trigger word "<< hex << (void *)TrigWord<<
-        "\t\tTrigger Input word "<< hex << (void *)TrigInputWord<<endm;
+  LOG_INFO<<"Trigger word "<< std::hex << (void *)TrigWord<<
+        "\t\tTrigger Input word "<< std::hex << (void *)TrigInputWord<<endm;
   LOG_INFO<<"Token: "<<Token<<endm;
   LOG_INFO<<"Detectors present: ";
   unsigned const char* p=0; int i=0;
@@ -418,7 +433,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
   if((MMAPP = (char *)mmap(0, mapsize, PROT_READ | PROT_WRITE,
 			   MAP_PRIVATE, fd, mmap_offset)) == (caddr_t) -1) { 
     LOG_ERROR<<strerror(errno)<<"mapping file request "
-                              <<hex<<(void*)mapsize<<" bytes"<<endm;
+                              <<std::hex<<(void*)mapsize<<" bytes"<<endm;
     ERROR(ERR_MEM);
   }
 
@@ -738,7 +753,7 @@ int EventReader::system_present(Bank_DATAP *datap, int sys)
   datap->swap();
 
   if(sys >= 10) {
-    pointer = &datap->EXT_ID;
+    pointer = &datap->EXTY_ID;
     if((pointer->offset == 0) || (pointer->length == 0)) {
       return 0;
     }
@@ -798,12 +813,14 @@ EventInfo EventReader::getEventInfo()
     ei.TrigWord      = dp->TriggerWord;
     ei.TrigInputWord = dp->TriggerInWord;
     int detpre       = dp->DetectorPresence;
+    //?yf    ei.UnixTime      = -1;// special case: time was not defined (=0 means : now() )
+    ei.EventLength   = -1;// special case: time was not defined (=0 means : now() )
     LOG_INFO<<"EventReader::getEventInfo  detector presence = "<<detpre<<endm;
 
     int sys = 0;
     for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
-      if(system_present(dp, sys)) *p = 1;
-      else *p = 0;
+      *p = 0;
+      if(system_present(dp, sys) || (detpre & (1<<sys))) *p = 1;
       sys++;
     }
     ei.EMCPresent = (ei.BTOWPresent|ei.ETOWPresent|ei.BSMDPresent|ei.ESMDPresent|ei.TRGPresent);
