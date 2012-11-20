@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.64 2012/11/06 21:25:41 fisyak Exp $
+ * $Id: EventReader.cxx,v 1.65 2012/11/20 21:25:34 fisyak Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.65  2012/11/20 21:25:34  fisyak
+ * Make aware that SSD old format fix is valid only till end of 2007
+ *
  * Revision 1.64  2012/11/06 21:25:41  fisyak
  * Jeff's fix for SSD
  *
@@ -817,7 +820,9 @@ EventInfo EventReader::getEventInfo()
     int sys = 0;
     for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
       *p = 0;
-      if(system_present(dp, sys) || (detpre & (1<<sys))) *p = 1;
+      if(system_present(dp, sys) || 
+	 (ei.UnixTime < 1197676800 && (detpre & (1<<sys))) // Dec 15 00:00:00 2007 fix for SSD
+	 ) *p = 1;
       sys++;
     }
     ei.EMCPresent = (ei.BTOWPresent|ei.ETOWPresent|ei.BSMDPresent|ei.ESMDPresent|ei.TRGPresent);
