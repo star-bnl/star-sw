@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.5 2012/09/14 13:45:40 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.4 2012/04/29 22:52:59 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -125,8 +125,6 @@ class StTpcdEdxCorrection : public TObject {
   St_TpcSecRowCor     *m_TpcSecRowC;            //!
   Double_t             mAdc2GeV;               //! Outer/Inner conversion factors from ADC -> GeV
   dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
-  Int_t                mNumberOfRows;
-  Int_t                mNumberOfInnerRows;
   Int_t                m_Debug;                //!
   ClassDef(StTpcdEdxCorrection,0)   //StAF chain virtual base class for Makers
 };
