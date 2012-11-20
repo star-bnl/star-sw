@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.35 2012/11/15 19:36:37 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.36 2012/11/20 22:55:56 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -34,7 +34,7 @@
 #  include "DAQ_TPX/daq_tpx.h"
 #  include "DAQ_READER/daq_dta.h"
 #  include "DAQ_READER/daqReader.h"
-#include "fcfClass.hh"
+#include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 ClassImp(StTpcRTSHitMaker); 
 #define __DEBUG__
 #ifdef __DEBUG__
