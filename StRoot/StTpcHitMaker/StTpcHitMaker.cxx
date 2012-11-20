@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.44 2012/10/24 13:36:06 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.45 2012/11/20 22:55:56 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.45  2012/11/20 22:55:56  fisyak
+ * Set the same cuts for online cluster maker as for offline one
+ *
  * Revision 1.44  2012/10/24 13:36:06  fisyak
  * Increase no. of pad rows
  *
@@ -461,6 +464,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	Int_t ncounts = tpc->cl_counts[padrow];
 	for(Int_t j=0;j<ncounts;j++,c++) {
 	  if (! c || ! c->charge) continue;
+	  if (c->flags & (FCF_DEAD_EDGE | FCF_BROKEN_EDGE | FCF_ROW_EDGE)) continue;
 	  Int_t iok = hitCollection->addHit(CreateTpcHit(*c,sector,padrow+1));
 	  assert(iok);
 	}
@@ -487,6 +491,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
       }
       if (! cld->pad || ! cld->charge) continue;
       if (cld->tb >= __MaxNumberOfTimeBins__) continue;
+      if (cld->flags & (FCF_DEAD_EDGE | FCF_BROKEN_EDGE | FCF_ROW_EDGE)) continue;
       Int_t iok = hitCollection->addHit(CreateTpcHit(*cld,sector,row));
       assert(iok);
     }
