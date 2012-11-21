@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.12 2012/11/16 21:19:05 prindle Exp $
+ * $Id: StEStructCuts.cxx,v 1.13 2012/11/21 17:45:43 fisyak Exp $
  *
  * Author: Jeff Porter 
  *
@@ -19,7 +19,7 @@
 #include "Stsstream.h"
 #include "TFile.h"
 #include "TH1.h"
-
+using namespace std;
 ClassImp(StEStructCuts)
 
 //-------------------------------------------------------------------
@@ -480,6 +480,9 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.13  2012/11/21 17:45:43  fisyak
+ * add using namespace std for gcc 4.5.1
+ *
  * Revision 1.12  2012/11/16 21:19:05  prindle
  * Moved EventCuts, TrackCuts to EventReader. Affects most readers.
  * Added support to write and read EStructEvents.
