@@ -1704,8 +1704,8 @@ MediumGas::LoadIonMobility(const std::string filename) {
   // The E/N values in the file are supposed to be in Td (10^-17 V cm2).
   const double scaleField = 1.e-17 * GetNumberDensity();
   // The reduced mobilities in the file are supposed to be in cm2/(V s).
-  const double scaleMobility = 1.e-9 * (pressure / AtmosphericPressure) * 
-                                       (ZeroCelsius / temperature);
+  const double scaleMobility = 1.e-9 * (AtmosphericPressure / pressure) * 
+                                       (temperature / ZeroCelsius);
   for (int j = ne; j--;) {
     // Scale the fields and mobilities.
     efields[j] *= scaleField;
@@ -1714,7 +1714,7 @@ MediumGas::LoadIonMobility(const std::string filename) {
   
   std::cout << className << "::LoadIonMobility:\n";
   std::cout << "    Read " << ne << " values from file " 
-              << filename << "\n";
+            << filename << "\n";
 
   
   return SetIonMobility(efields, mobilities);
