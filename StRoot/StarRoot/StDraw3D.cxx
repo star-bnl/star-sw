@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.103 2011/10/03 23:55:34 perev Exp $
+// $Id: StDraw3D.cxx,v 1.104 2012/11/22 01:11:16 perev Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -810,7 +810,7 @@ TObject *StDraw3D::Line(int n,  const double *xyz, Color_t col,Style_t sty,Size_
    // with ROOT TPolyline3D class
    // with the ROOT color, style, size attributes
    //
-   poly_line_3D *plLine  = new poly_line_3D(n,(Float_t*)xyz);
+   poly_line_3D *plLine  = new poly_line_3D(n,(Double_t*)xyz);
    if (col != colorDefault) plLine->SetLineColor(col);
    if (sty != styDefault)   plLine->SetLineStyle(sty);
    if (siz != sizDefault)   plLine->SetLineWidth(Width_t(siz));
