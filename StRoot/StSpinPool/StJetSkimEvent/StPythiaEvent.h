@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.8 2012/11/24 03:12:43 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.9 2012/11/24 17:16:03 pibero Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.9  2012/11/24 17:16:03  pibero
+// small bug fix
+//
 // Revision 1.8  2012/11/24 03:12:43  pibero
 // Add LSS2010 and BB2010
 //
@@ -219,7 +222,7 @@ inline float StPythiaEvent::ALL(PDF scenario) const
     case(DSSV2009a): return (mDF1[DSSV2009a]/mF1[1])*(mDF2[DSSV2009a]/mF2[1])*mPartonALL;
     case(LSS2010_delGpos): return (mDF1[LSS2010_delGpos]/mF1[1])*(mDF2[LSS2010_delGpos]/mF2[1])*mPartonALL;
     case(LSS2010_chsign_delG): return (mDF1[LSS2010_chsign_delG]/mF1[1])*(mDF2[LSS2010_chsign_delG]/mF2[1])*mPartonALL;
-    case(BB2010): return (mDF1[BB2010]/mF1[1])*(mDF2[BB2010]/mF2[BB2010])*mPartonALL;
+    case(BB2010): return (mDF1[BB2010]/mF1[1])*(mDF2[BB2010]/mF2[1])*mPartonALL;
     default:    return -999;
     }
 }
