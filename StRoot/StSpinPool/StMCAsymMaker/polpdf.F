@@ -132,9 +132,9 @@ c     D 0.97500D+00, 0.10000D+01 /
 *     open input unit for NLO data
 *
          CALL GETENV('STAR',FILENAME)
-         FILENAME = TRIM(FILENAME)
+         FILENAME = FILENAME(1:LEN_TRIM(FILENAME))
      1        //'/StRoot/StSpinPool/StMCAsymMaker/qcd_nlo_907_0.grid'
-         OPEN(UNIT=LIN,FILE=TRIM(FILENAME),
+         OPEN(UNIT=LIN,FILE=FILENAME(1:LEN_TRIM(FILENAME)),
      1        STATUS='OLD')
 *
       ELSE
