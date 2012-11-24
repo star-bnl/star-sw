@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.7 2012/01/18 18:11:36 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.8 2012/11/24 03:12:43 pibero Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.8  2012/11/24 03:12:43  pibero
+// Add LSS2010 and BB2010
+//
 // Revision 1.7  2012/01/18 18:11:36  pibero
 // Added PYTHIA variables: MSTU(72), MSTU(73), and MSTP(111)
 //
@@ -67,8 +70,8 @@ public:
   virtual ~StPythiaEvent();
   StPythiaEvent(const StPythiaEvent& other);
   StPythiaEvent& operator=(const StPythiaEvent& rhs);
-  enum { NPDF=31 };
-  enum PDF { LO=0, NLO=1, STD=1, ZERO=2, MAX=3, MIN=4, M015=5, M030=6, M045=7, M060=8, M075=9, M090=10, M105=11, P030=12, P045=13, P060=14, P070=15, GS_NLOA=16, GS_NLOB=17, GS_NLOC=18, DSSV=19, LSS1=20, LSS2=21, LSS3=22, AAC1=23, AAC2=24, AAC3=25, BB1=26, BB2=27, DNS1=28, DNS2=29, DSSV2009a=30 };
+  enum { NPDF=34 };
+  enum PDF { LO=0, NLO=1, STD=1, ZERO=2, MAX=3, MIN=4, M015=5, M030=6, M045=7, M060=8, M075=9, M090=10, M105=11, P030=12, P045=13, P060=14, P070=15, GS_NLOA=16, GS_NLOB=17, GS_NLOC=18, DSSV=19, LSS1=20, LSS2=21, LSS3=22, AAC1=23, AAC2=24, AAC3=25, BB1=26, BB2=27, DNS1=28, DNS2=29, DSSV2009a=30, LSS2010_delGpos=31, LSS2010_chsign_delG=32, BB2010=33 };
   int runId() const;
   int eventId() const;
   int processId() const;
@@ -137,14 +140,14 @@ private:
   int mMstu73;
   int mMstp111;
   float mPartonALL;
-  float mDF1[NPDF];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2][DSSV2009a]
-  float mDF2[NPDF];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2][DSSV2009a]
+  float mDF1[NPDF];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2][DSSV2009a][LSS2010_delGpos][LSS2010_chsign_delG][BB2010]
+  float mDF2[NPDF];  //[LO][NLO][ZERO][MAX][MIN][M015][M030][M045][M060][M075][M090][M105][P030][P045][P060][P070][NLOA][NLOB][NLOC][DSSV][LSS1][LSS2][LSS3][AAC1][AAC2][AAC3][BB1][BB2][DNS1][DNS2][DSSV2009a][LSS2010_delGpos][LSS2010_chsign_delG][BB2010]
   float mF1[2];   //[LO][NLO]
   float mF2[2];   //[LO][NLO]
   
   TClonesArray* mParticles;
   
-  ClassDef(StPythiaEvent,6);
+  ClassDef(StPythiaEvent,7);
 };
 
 inline int StPythiaEvent::runId() const { return mRunId; }
@@ -214,6 +217,9 @@ inline float StPythiaEvent::ALL(PDF scenario) const
     case(DNS1):  return (mDF1[28]*mDF2[28]*mPartonALL) / (mF1[1]*mF2[1]);
     case(DNS2):  return (mDF1[29]*mDF2[29]*mPartonALL) / (mF1[1]*mF2[1]);
     case(DSSV2009a): return (mDF1[DSSV2009a]/mF1[1])*(mDF2[DSSV2009a]/mF2[1])*mPartonALL;
+    case(LSS2010_delGpos): return (mDF1[LSS2010_delGpos]/mF1[1])*(mDF2[LSS2010_delGpos]/mF2[1])*mPartonALL;
+    case(LSS2010_chsign_delG): return (mDF1[LSS2010_chsign_delG]/mF1[1])*(mDF2[LSS2010_chsign_delG]/mF2[1])*mPartonALL;
+    case(BB2010): return (mDF1[BB2010]/mF1[1])*(mDF2[BB2010]/mF2[BB2010])*mPartonALL;
     default:    return -999;
     }
 }
