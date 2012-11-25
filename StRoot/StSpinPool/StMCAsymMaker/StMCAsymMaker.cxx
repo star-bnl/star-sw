@@ -1281,10 +1281,10 @@ Double_t StMCAsymMaker::get_polPDF_NLO_LSS2010_delGpos(int flavor, double x, dou
   if (iini == 0) iini = 1;
 
   switch (flavor) {
-  case 1: return ddb;
-  case 2: return uub;
-  case -1: return db;
-  case -2: return ub;
+  case 1: return ddb/x;
+  case 2: return uub/x;
+  case -1: return db/x;
+  case -2: return ub/x;
   case 3:
   case 4:
   case 5:
@@ -1292,8 +1292,8 @@ Double_t StMCAsymMaker::get_polPDF_NLO_LSS2010_delGpos(int flavor, double x, dou
   case -3:
   case -4:
   case -5:
-  case -6: return st;
-  case 21: return gl;
+  case -6: return st/x;
+  case 21: return gl/x;
   }
 
   return 1000;
@@ -1313,10 +1313,10 @@ Double_t StMCAsymMaker::get_polPDF_NLO_LSS2010_chsign_delG(int flavor, double x,
   if (iini == 0) iini = 1;
 
   switch (flavor) {
-  case 1: return ddb;
-  case 2: return uub;
-  case -1: return db;
-  case -2: return ub;
+  case 1: return ddb/x;
+  case 2: return uub/x;
+  case -1: return db/x;
+  case -2: return ub/x;
   case 3:
   case 4:
   case 5:
@@ -1324,8 +1324,8 @@ Double_t StMCAsymMaker::get_polPDF_NLO_LSS2010_chsign_delG(int flavor, double x,
   case -3:
   case -4:
   case -5:
-  case -6: return st;
-  case 21: return gl;
+  case -6: return st/x;
+  case 21: return gl/x;
   }
 
   return 1000;
@@ -1460,8 +1460,8 @@ Double_t StMCAsymMaker::get_polPDF_NLO_BB2010(int flavor, double x, double Q2)
   if (iini == 0) iini = 1;
 
   switch (flavor) {
-  case 1: return dv+qb;
-  case 2: return uv+qb;
+  case 1: return (dv+qb)/x;
+  case 2: return (uv+qb)/x;
   case 3:
   case 4:
   case 5:
@@ -1471,8 +1471,8 @@ Double_t StMCAsymMaker::get_polPDF_NLO_BB2010(int flavor, double x, double Q2)
   case -3:
   case -4:
   case -5:
-  case -6: return qb;
-  case 21: return gl;
+  case -6: return qb/x;
+  case 21: return gl/x;
   }
 
   return 1000;
