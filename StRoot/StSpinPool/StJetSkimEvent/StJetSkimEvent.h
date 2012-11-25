@@ -12,6 +12,7 @@
 #include "TObjString.h"
 #include "TRef.h"
 #include "TLorentzVector.h"
+#include "TDatime.h"
 
 class StPythiaEvent;
 
@@ -371,6 +372,17 @@ public:
 
   void setEmcLayer2(int value);
 
+  // Event time stamp (GMT)
+  const TDatime& dateTime() const { return mDatime; }
+  int year  () const { return mDatime.GetYear  (); }
+  int month () const { return mDatime.GetMonth (); }
+  int day   () const { return mDatime.GetDay   (); }
+  int hour  () const { return mDatime.GetHour  (); }
+  int minute() const { return mDatime.GetMinute(); }
+  int second() const { return mDatime.GetSecond(); }
+  unsigned int unixTime() const { return mDatime.Convert(); }
+  void setDateTime(const TDatime& datime) { mDatime = datime; }
+
 private:
   // returns value of bit from x at position pos
   int btest(int x, int pos) const { return x >> pos & 1; }
@@ -436,7 +448,9 @@ private:
 
   int mEmcLayer2;
 
-  ClassDef(StJetSkimEvent,5);
+  TDatime mDatime;
+
+  ClassDef(StJetSkimEvent,6);
 };
 
 // Getters
