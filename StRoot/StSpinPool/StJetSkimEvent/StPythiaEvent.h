@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.9 2012/11/24 17:16:03 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.10 2012/11/25 21:56:58 pibero Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.10  2012/11/25 21:56:58  pibero
+// small bug fix
+//
 // Revision 1.9  2012/11/24 17:16:03  pibero
 // small bug fix
 //
@@ -219,10 +222,10 @@ inline float StPythiaEvent::ALL(PDF scenario) const
     case(BB2):  return (mDF1[27]*mDF2[27]*mPartonALL) / (mF1[1]*mF2[1]);
     case(DNS1):  return (mDF1[28]*mDF2[28]*mPartonALL) / (mF1[1]*mF2[1]);
     case(DNS2):  return (mDF1[29]*mDF2[29]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(DSSV2009a): return (mDF1[DSSV2009a]/mF1[1])*(mDF2[DSSV2009a]/mF2[1])*mPartonALL;
-    case(LSS2010_delGpos): return (mDF1[LSS2010_delGpos]/mF1[1])*(mDF2[LSS2010_delGpos]/mF2[1])*mPartonALL;
-    case(LSS2010_chsign_delG): return (mDF1[LSS2010_chsign_delG]/mF1[1])*(mDF2[LSS2010_chsign_delG]/mF2[1])*mPartonALL;
-    case(BB2010): return (mDF1[BB2010]/mF1[1])*(mDF2[BB2010]/mF2[1])*mPartonALL;
+    case(DSSV2009a): return (mDF1[DSSV2009a]*mDF2[DSSV2009a]*mPartonALL)/(mF1[1]*mF2[1]);
+    case(LSS2010_delGpos): return (mDF1[LSS2010_delGpos]*mDF2[LSS2010_delGpos]*mPartonALL)/(mF1[1]*mF2[1]);
+    case(LSS2010_chsign_delG): return (mDF1[LSS2010_chsign_delG]*mDF2[LSS2010_chsign_delG]*mPartonALL)/(mF1[1]*mF2[1]);
+    case(BB2010): return (mDF1[BB2010]*mDF2[BB2010]*mPartonALL)/(mF1[1]*mF2[1]);
     default:    return -999;
     }
 }
@@ -254,7 +257,7 @@ inline void StPythiaEvent::Clear(Option_t* option)
     mMstu73 = 0;
     mMstp111 = 0;
     mPartonALL = 0;
-    for (int ii=0; ii<30; ii++) {
+    for (int ii=0; ii<NPDF; ii++) {
       mDF1[ii] = 0;
       mDF2[ii] = 0;
     }
