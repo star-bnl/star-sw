@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.21 2012/11/08 16:57:53 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.22 2012/11/25 22:22:45 fisyak Exp $
  *
  */
 
@@ -450,7 +450,8 @@ void StAnalysisMaker::PrintRnDHits() {
 void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   if (! event) event = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
   static const UInt_t NoFitPointCutForGoodTrack = StVertex::NoFitPointCutForGoodTrack();
-  LOG_QA << "StAnalysisMaker,  Reading Event: " << mEventCounter
+  LOG_QA << "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << endm
+	 << "StAnalysisMaker,  Reading Event: " << mEventCounter
 	 << "  Type: " << event->type()
 	 << "  Run: " << event->runId() 
 	 << "  EventId: " << event->id() <<   endm;
@@ -504,8 +505,12 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	  << "(T)of/ctb matches:" << nToFMatched << " :(E)mc matches: " << nEmcMatched
 	  << " :Only W:" << nWestTpcOnly << " E:" << nEastTpcOnly;
   if (event->btofCollection()) {
-    if (event->btofCollection()->tofHeader() && event->btofCollection()->tofHeader()->vpdVz() > -250) 
+    if (event->btofCollection()->tofHeader() && event->btofCollection()->tofHeader()->vpdVz() > -250){
       LOG_QA  << " VpdZ:" << Form("%7.2f",event->btofCollection()->tofHeader()->vpdVz());
+    }
+  }
+  if (event->triggerData()) {
+    LOG_QA  << ": ZdcZ:" << Form("%7.2f",event->triggerData()->zdcVertexZ());
   }
   LOG_QA  << endm;
   // Report for jobTracking Db        
@@ -787,8 +792,8 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 	  Adcs[0] || Adcs[1] || Adcs[2] || Adcs[3] ||
 	  Cls[0]  || Cls[1]  || Cls[2]  || Cls[3] ) {
 	LOG_QA << Form("# %s points:%5i",Names[be],np);
-	LOG_QA << Form(": Adc(T/p/E/P) %4i/%4i/%4i/%4i",Adcs[0],Adcs[1],Adcs[2],Adcs[3]);
-	LOG_QA << Form(": Cls(T/p/E/P) %4i/%4i/%4i/%4i",Cls[0],Cls[1],Cls[2],Cls[3]);
+	LOG_QA << Form(": Adc(T/p/E/P) %4i/%4i/%5i/%5i",Adcs[0],Adcs[1],Adcs[2],Adcs[3]);
+	LOG_QA << Form(": Cls(T/p/E/P) %4i/%4i/%5i/%5i",Cls[0],Cls[1],Cls[2],Cls[3]);
 	LOG_QA << endm;
       }
     }
@@ -835,10 +840,14 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
   if (event->numberOfPsds()) {
     LOG_QA << "# PSDs:                " << event->numberOfPsds() << endm;
   }
+  LOG_QA << "*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-" << endm;
 }
 //________________________________________________________________________________
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.22  2012/11/25 22:22:45  fisyak
+ * Add separators for summary
+ *
  * Revision 2.21  2012/11/08 16:57:53  fisyak
  * Add pmd to summary
  *
