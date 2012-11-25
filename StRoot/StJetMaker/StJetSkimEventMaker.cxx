@@ -211,6 +211,7 @@ Int_t StJetSkimEventMaker::Make()
     assert(chain);
     TObjString inputfile(chain->GetFile()->GetName());
     mEvent->setMudstFileName(inputfile);
+    mEvent->setDateTime(GetDateTime());
     
     //bbc info:
     mEvent->setBbcTimeBin( muEvent->bbcTriggerDetector().onlineTimeDifference() );
