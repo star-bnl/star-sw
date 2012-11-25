@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.595 2012/11/14 00:01:26 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.596 2012/11/25 22:24:08 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -362,7 +362,8 @@ Int_t StBFChain::Instantiate()
 	if (GetOption("flux")) mk->SetAttr("flux",kTRUE);
 	if (GetOption("pythia")) {
 	  mk->SetAttr("Pythia",kTRUE);
-	  if (GetOption("beamLine")) mk->SetAttr("beamLine",kTRUE);
+	  if (GetOption("Wenu")) mk->SetAttr("Wenu",kTRUE);
+	  if (GetOption("beamLine"))  mk->SetAttr("beamLine",kTRUE);
 	}
       }
       else mk->SetActive(kFALSE);
@@ -1670,11 +1671,9 @@ void StBFChain::SetDbOptions(StMaker *mk){
     if (! GetOption("SsdDb")||!GetOption("SsdCalDb")) {mk->SetAttr("blacklist", "ssd");  gMessMgr->QAInfo() << "blacklist ssd" << endm;}
     if (! GetOption("EemcDb")                       ) {mk->SetAttr("blacklist", "eemc"); gMessMgr->QAInfo() << "blacklist eemc"<< endm;}
     if (! GetOption("FmsDb")                        ) {mk->SetAttr("blacklist", "fms");  gMessMgr->QAInfo() << "blacklist fms" << endm;}
-#if 0
   } else {// for Embedding chain trigger black list by NoSsdIT and NoSvtIT, could be some problems if you try to run svt or ssd clusters, ...
     if (GetOption("NoSvtIt"))                         {mk->SetAttr("blacklist", "svt");  gMessMgr->QAInfo() << "blacklist svt" << endm;}
     if (GetOption("NoSsdIt"))                         {mk->SetAttr("blacklist", "ssd");  gMessMgr->QAInfo() << "blacklist ssd" << endm;}
-#endif
   }
 }
 //_____________________________________________________________________
