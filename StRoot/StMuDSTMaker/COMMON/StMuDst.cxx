@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.58 2012/11/15 22:26:13 sangalin Exp $
+ * $Id: StMuDst.cxx,v 1.59 2012/11/26 23:14:32 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -128,9 +128,9 @@ void StMuDst::set(StMuDstMaker* maker) {
 
 #ifndef __NO_STRANGE_MUDST__
   StStrangeEvMuDst* ev = strangeEvent();
-  int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
-  int nXis = xis()->GetEntries(); for (int i=0;i<nXis; i++) xis(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
-  //  int nKinks = kinks()->GetEntries(); for (int i=0;i<nKinks; i++) kinks(i)->SetEvent(ev);
+  int nV0s = v0s()->GetEntriesFast(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
+  int nXis = xis()->GetEntriesFast(); for (int i=0;i<nXis; i++) xis(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
+  //  int nKinks = kinks()->GetEntriesFast(); for (int i=0;i<nKinks; i++) kinks(i)->SetEvent(ev);
 #endif
 }
 //-----------------------------------------------------------------------
@@ -232,8 +232,8 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
                  " for productions with FTPC >= SL04d and <= SL05g" << endm;
      warningPrinted = 1;
   }
-  int nGlobals = global->GetEntries();
-  int nPrimaries = primary->GetEntries();
+  int nGlobals = global->GetEntriesFast();
+  int nPrimaries = primary->GetEntriesFast();
   // map to keep track of index numbers, key is track->id(), value is index of track in MuDst
   map<short,unsigned short> globalIndex;
 
@@ -245,7 +245,7 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
     }
   }
   // set the indices for the primary tracks
-  DEBUGVALUE2(primary->GetEntries());
+  DEBUGVALUE2(primary->GetEntriesFast());
   for (int i=0; i<nPrimaries; i++) {
     StMuTrack *p = (StMuTrack*) primary->UncheckedAt(i);
     if (p) {
@@ -267,11 +267,11 @@ void StMuDst::fixTrackIndicesG(int mult) {
 			int startpos = 0;
 			int tid, pid;
 			if(!globalTracks()) return;
-			for (int i=0;i<globalTracks()->GetEntries();i++){
+			for (int i=0;i<globalTracks()->GetEntriesFast();i++){
 				tid = globalTracks(i)->id();
 				globalTracks(i)->setIndex2Global(-2);
 				if(!primaryTracks()) return;
-				for(int j=startpos;j<primaryTracks()->GetEntries();j++){
+				for(int j=startpos;j<primaryTracks()->GetEntriesFast();j++){
 					pid = primaryTracks(j)->id();
 					if(pid==tid) {
 						globalTracks(i)->setIndex2Global(j);
@@ -286,7 +286,7 @@ void StMuDst::fixTrackIndicesG(int mult) {
 	}
 	//New MuDsts with multiple vertices....	
 	if(!primaryVertices()) return;
-	const int Nvert = primaryVertices()->GetEntries();
+	const int Nvert = primaryVertices()->GetEntriesFast();
 	if(!Nvert) return;
 	int curVer =  currentVertexIndex();
 	int startpos[Nvert];
@@ -294,7 +294,7 @@ void StMuDst::fixTrackIndicesG(int mult) {
 	int tid, pid;
 	if(!globalTracks()) return;
 
-	for (int i=0;i<globalTracks()->GetEntries();i++){
+	for (int i=0;i<globalTracks()->GetEntriesFast();i++){
 		tid = globalTracks(i)->id();
 		globalTracks(i)->setIndex2Global(-2);
 		globalTracks(i)->setVertexIndex(-2);			
@@ -303,7 +303,7 @@ void StMuDst::fixTrackIndicesG(int mult) {
 			if(globalTracks(i)->index2Global() >= 0) break;
 			setVertexIndex(j);
 			if(!primaryTracks()) continue;
-			for(int k=startpos[j];k<primaryTracks()->GetEntries();k++){
+			for(int k=startpos[j];k<primaryTracks()->GetEntriesFast();k++){
 				pid = primaryTracks(k)->id();
 				if(pid==tid) {
 					globalTracks(i)->setIndex2Global(k);
@@ -336,9 +336,9 @@ void StMuDst::fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, T
   StTimer timer;
   timer.start();
 
-  int nPrimarys = primary->GetEntries();
-  int nGlobals = global->GetEntries();
-  int nBTofHits = btofHit->GetEntries();
+  int nPrimarys = primary->GetEntriesFast();
+  int nGlobals = global->GetEntriesFast();
+  int nBTofHits = btofHit->GetEntriesFast();
   // map to keep track of index numbers, key is track->id(), value is index of track in MuDst
   map<short,unsigned short> tofIndex;
   map<short,unsigned short> globalIndex;
@@ -448,7 +448,7 @@ StEvent* StMuDst::createStEvent() {
   ev->addPrimaryVertex(vp);
   vp->setPosition( mu->eventSummary().primaryVertexPosition() );
 
-  int nGlobals = arrays[muGlobal]->GetEntries();
+  int nGlobals = arrays[muGlobal]->GetEntriesFast();
 
   StSPtrVecTrackNode &trackNodes = ev->trackNodes();
   TArrayI global_indices(nGlobals); // Temporary array to keep track of index numbers on trackNodes
@@ -473,7 +473,7 @@ StEvent* StMuDst::createStEvent() {
 
   TObjArray *prim_tracks=primaryTracks();
 
-  int nPrimaries = prim_tracks->GetEntries();
+  int nPrimaries = prim_tracks->GetEntriesFast();
   for (int i=0; i<nPrimaries; i++) if(primaryTracks(i)) {
     StTrack* t = createStTrack((StMuTrack*)prim_tracks->At(i));
     Int_t global_idx=primaryTracks(i)->index2Global();
@@ -493,7 +493,7 @@ StEvent* StMuDst::createStEvent() {
   /// we do this later
   
   // add detector states
-  int nStates = arrays[muState]->GetEntries();
+  int nStates = arrays[muState]->GetEntriesFast();
   for (int i=0; i<nStates; i++) {
       StDetectorState* det = new StDetectorState(*detectorStates(i));
       ev->addDetectorState(det);
@@ -525,7 +525,7 @@ StEvent* StMuDst::createStEvent() {
 // now get tof (after fix from Xin)
   StTofCollection *tofcoll = new StTofCollection();
   ev->setTofCollection(tofcoll);
-  int nTofData = tofArrays[muTofData]->GetEntries();
+  int nTofData = tofArrays[muTofData]->GetEntriesFast();
   for(int i=0;i<nTofData;i++) {
     StTofData *aData;
     if(tofData(i)) {
@@ -542,7 +542,7 @@ StEvent* StMuDst::createStEvent() {
     tofcoll->addData(aData);
   }
   // run 5 - dongx
-  int nTofRawData = tofArrays[muTofRawData]->GetEntries();
+  int nTofRawData = tofArrays[muTofRawData]->GetEntriesFast();
   for(int i=0;i<nTofRawData;i++) {
     StTofRawData *aRawData;
     if(tofRawData(i)) {
@@ -562,7 +562,7 @@ StEvent* StMuDst::createStEvent() {
   // now create, fill the StBTofCollection - dongx
   StBTofCollection *btofcoll = new StBTofCollection();
   ev->setBTofCollection(btofcoll);
-  int nBTofRawHits = btofArrays[muBTofRawHit]->GetEntries();
+  int nBTofRawHits = btofArrays[muBTofRawHit]->GetEntriesFast();
   for(int i=0;i<nBTofRawHits;i++) {
     StBTofRawHit *aRawHit;
     if(btofRawHit(i)) {
@@ -750,6 +750,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.59  2012/11/26 23:14:32  fisyak
+ * Replace GetEntries() by GetEntriesFast(), fix print outs
+ *
  * Revision 1.58  2012/11/15 22:26:13  sangalin
  * Added the FGT. Fixed bugs in array offsets for the MTD.
  *

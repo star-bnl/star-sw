@@ -3,7 +3,7 @@
  * A simple class to store porimary vertex information
  * All functions are inline
  *
- * $Id: StMuPrimaryVertex.cxx,v 1.9 2012/09/16 21:58:16 fisyak Exp $ 
+ * $Id: StMuPrimaryVertex.cxx,v 1.10 2012/11/26 23:14:33 fisyak Exp $ 
  */
 
 #include "StMuPrimaryVertex.h"
@@ -72,18 +72,21 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
   else                                os <<       "*/";
   if ((v.nBEMCMatch()+v.nBTOFMatch()) < 10) os << Form("%i/",(v.nBEMCMatch()+v.nBTOFMatch()));
   else                                os <<       "*/";
-  if ((v.nBEMCMatch()+v.nEEMCMatch()) < 10) os << Form("%i",(v.nBEMCMatch()+v.nEEMCMatch()));
+  if ((v.nBEMCMatch()+v.nEEMCMatch()) < 10) os << Form("%i/",(v.nBEMCMatch()+v.nEEMCMatch()));
+  else                                os <<       "*/";
+  if (v.nTpcWestOnly() < 10) os << Form("%i/",v.nTpcWestOnly());
+  else                                os <<       "*/";
+  if (v.nTpcEastOnly() < 10) os << Form("%i",v.nTpcEastOnly());
   else                                os <<       "*";
   os << Form(" %8.3f+/-%6.3f %8.3f+/-%6.3f %8.3f+/-%6.3f",
 	     v.position().x(),v.posError().x(),
 	     v.position().y(),v.posError().y(),
 	     v.position().z(),v.posError().z());
   os << Form(" Rank:%6.0f",v.ranking());
-  os << Form(" M:%4i:R%4i",v.noTracks(),v.refMult());
+  //  os << Form(" M:%4i:R%4i",v.noTracks(),v.refMult());
+  os << Form(" M:%4i",v.noTracks());
   //  os << Form(" RefMult:%4i(%4i%4i)",v.refMult(),v.refMultPos(),-v.refMultNeg());
   os << Form(" U:%4i ",v.nTracksUsed());
-  os << Form(" W:%4i ",v.nTpcWestOnly());
-  os << Form(" E:%4i ",v.nTpcEastOnly());
   if (v.qaTruth())
   os << Form(" QA:%3i",v.qaTruth());
   return os;
@@ -92,6 +95,9 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
 void StMuPrimaryVertex::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________
 // $Log: StMuPrimaryVertex.cxx,v $
+// Revision 1.10  2012/11/26 23:14:33  fisyak
+// Replace GetEntries() by GetEntriesFast(), fix print outs
+//
 // Revision 1.9  2012/09/16 21:58:16  fisyak
 // Make use of Tpc West and East Only no. of tracks
 //

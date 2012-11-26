@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.44 2012/11/15 22:26:13 sangalin Exp $
+ * $Id: StMuDst.h,v 1.45 2012/11/26 23:14:32 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -74,7 +74,7 @@ class StMuMtdHeader;
 
 
 #define ARRAY(NAME)  static TClonesArray* (NAME)##s() { return tca_##NAME##s;}
-#define OBJECT(TYPE,FUNC) static TYPE FUNC##(unsigned int i=0) { if (FUNC##s() && (i<(unsigned int)FUNC##s()->GetEntries()) ) return (##TYPE##)FUNC##s()->UncheckedAt(i); return 0;}
+#define OBJECT(TYPE,FUNC) static TYPE FUNC##(unsigned int i=0) { if (FUNC##s() && (i<(unsigned int)FUNC##s()->GetEntriesFast()) ) return (##TYPE##)FUNC##s()->UncheckedAt(i); return 0;}
 
 #define DO(TYPE,NAME) ARRAY(NAME)    OBJECT(TYPE,NAME)
 
@@ -356,40 +356,40 @@ public:
   static  EztEmcRawData* eztESmd() 
         { return (EztEmcRawData*)eztArrays[muEztESmd]->UncheckedAt(0); }
 
-  static unsigned int numberOfPrimaryVertices()  { return arrays[muPrimaryVertex]->GetEntries(); }
-  static unsigned int numberOfPrimaryTracks()  { return mCurrPrimaryTracks->GetEntries(); }
-  static unsigned int numberOfGlobalTracks()   { return arrays[muGlobal]->GetEntries(); }
-  static unsigned int numberOfOtherTracks()    { return arrays[muOther]->GetEntries(); }
-  static unsigned int numberOfL3Tracks()       { return arrays[muL3]->GetEntries(); }
-  static unsigned int numberOfRichSpectras()   { return arrays[muRich]->GetEntries(); }
-  static unsigned int numberOfDetectorStates() { return arrays[muState]->GetEntries(); }
-  static unsigned int numberOfL3AlgoAccepts()  { return arrays[muAccept]->GetEntries(); }
-  static unsigned int numberOfL3AlgoRejects()  { return arrays[muReject]->GetEntries(); }
-  static unsigned int numberOfCovGlobTracks()  { return arrays[muCovGlobTrack]->GetEntries(); }
-  static unsigned int numberOfCovPrimTracks()  { return arrays[muCovPrimTrack]->GetEntries(); }
+  static unsigned int numberOfPrimaryVertices()  { return arrays[muPrimaryVertex]->GetEntriesFast(); }
+  static unsigned int numberOfPrimaryTracks()  { return mCurrPrimaryTracks->GetEntriesFast(); }
+  static unsigned int numberOfGlobalTracks()   { return arrays[muGlobal]->GetEntriesFast(); }
+  static unsigned int numberOfOtherTracks()    { return arrays[muOther]->GetEntriesFast(); }
+  static unsigned int numberOfL3Tracks()       { return arrays[muL3]->GetEntriesFast(); }
+  static unsigned int numberOfRichSpectras()   { return arrays[muRich]->GetEntriesFast(); }
+  static unsigned int numberOfDetectorStates() { return arrays[muState]->GetEntriesFast(); }
+  static unsigned int numberOfL3AlgoAccepts()  { return arrays[muAccept]->GetEntriesFast(); }
+  static unsigned int numberOfL3AlgoRejects()  { return arrays[muReject]->GetEntriesFast(); }
+  static unsigned int numberOfCovGlobTracks()  { return arrays[muCovGlobTrack]->GetEntriesFast(); }
+  static unsigned int numberOfCovPrimTracks()  { return arrays[muCovPrimTrack]->GetEntriesFast(); }
 #ifndef __NO_STRANGE_MUDST__
-  static unsigned int numberOfV0s()            { return strangeArrays[smuV0]->GetEntries(); }
-  static unsigned int numberOfV0sMc()          { return strangeArrays[smuV0Mc]->GetEntries(); }
-  static unsigned int numberOfV0Assoc()        { return strangeArrays[smuV0Assoc]->GetEntries(); }
-  static unsigned int numberOfXis()            { return strangeArrays[smuXi]->GetEntries(); }
-  static unsigned int numberOfXisMc()          { return strangeArrays[smuXiMc]->GetEntries(); }
-  static unsigned int numberOfXiAssoc()        { return strangeArrays[smuXiAssoc]->GetEntries(); }  
-  static unsigned int numberOfKinks()          { return strangeArrays[smuKink]->GetEntries(); }
-  static unsigned int numberOfKinksMc()        { return strangeArrays[smuKinkMc]->GetEntries(); } 
-  static unsigned int numberOfKinkAssoc()      { return strangeArrays[smuKinkAssoc]->GetEntries(); }
-  static unsigned int numberOfStrangeCuts()    { return strangeArrays[smuCut]->GetEntries(); }
+  static unsigned int numberOfV0s()            { return strangeArrays[smuV0]->GetEntriesFast(); }
+  static unsigned int numberOfV0sMc()          { return strangeArrays[smuV0Mc]->GetEntriesFast(); }
+  static unsigned int numberOfV0Assoc()        { return strangeArrays[smuV0Assoc]->GetEntriesFast(); }
+  static unsigned int numberOfXis()            { return strangeArrays[smuXi]->GetEntriesFast(); }
+  static unsigned int numberOfXisMc()          { return strangeArrays[smuXiMc]->GetEntriesFast(); }
+  static unsigned int numberOfXiAssoc()        { return strangeArrays[smuXiAssoc]->GetEntriesFast(); }  
+  static unsigned int numberOfKinks()          { return strangeArrays[smuKink]->GetEntriesFast(); }
+  static unsigned int numberOfKinksMc()        { return strangeArrays[smuKinkMc]->GetEntriesFast(); } 
+  static unsigned int numberOfKinkAssoc()      { return strangeArrays[smuKinkAssoc]->GetEntriesFast(); }
+  static unsigned int numberOfStrangeCuts()    { return strangeArrays[smuCut]->GetEntriesFast(); }
 #endif
   // tofr
-  static unsigned int numberOfTofHit()        { return tofArrays[muTofHit]->GetEntries(); }
-  static unsigned int numberOfTofData()       { return tofArrays[muTofData]->GetEntries(); }
+  static unsigned int numberOfTofHit()        { return tofArrays[muTofHit]->GetEntriesFast(); }
+  static unsigned int numberOfTofData()       { return tofArrays[muTofData]->GetEntriesFast(); }
   // run 5 - dongx
-  static unsigned int numberOfTofRawData()    { return tofArrays[muTofRawData]->GetEntries(); }
+  static unsigned int numberOfTofRawData()    { return tofArrays[muTofRawData]->GetEntriesFast(); }
   // dongx
-  static unsigned int numberOfBTofHit()       { return btofArrays[muBTofHit]->GetEntries(); }
-  static unsigned int numberOfBTofRawHit()    { return btofArrays[muBTofRawHit]->GetEntries(); }
+  static unsigned int numberOfBTofHit()       { return btofArrays[muBTofHit]->GetEntriesFast(); }
+  static unsigned int numberOfBTofRawHit()    { return btofArrays[muBTofRawHit]->GetEntriesFast(); }
 
-  static unsigned int numberOfMTDHit()       { return mtdArrays[muMTDHit]->GetEntries(); }
-  static unsigned int numberOfBMTDRawHit()    { return mtdArrays[muMTDRawHit]->GetEntries(); }
+  static unsigned int numberOfMTDHit()       { return mtdArrays[muMTDHit]->GetEntriesFast(); }
+  static unsigned int numberOfBMTDRawHit()    { return mtdArrays[muMTDRawHit]->GetEntriesFast(); }
     
   static unsigned int GetNPrimaryVertex()    { return numberOfPrimaryVertices(); }  
   static unsigned int GetNPrimaryTrack()    { return numberOfPrimaryTracks(); }  
@@ -440,6 +440,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.45  2012/11/26 23:14:32  fisyak
+ * Replace GetEntries() by GetEntriesFast(), fix print outs
+ *
  * Revision 1.44  2012/11/15 22:26:13  sangalin
  * Added the FGT. Fixed bugs in array offsets for the MTD.
  *

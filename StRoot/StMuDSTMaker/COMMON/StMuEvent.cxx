@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.26 2011/08/30 14:41:26 fisyak Exp $
+ * $Id: StMuEvent.cxx,v 1.27 2012/11/26 23:14:33 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -216,7 +216,7 @@ unsigned short StMuEvent::grefmult(int vtx_id){
 	//For old MuDsts where there was one vertex per event
 	if (StMuDst::numberOfPrimaryVertices()==0 && (vtx_id == 0 || vtx_id == -1)){
 		if(!(fabs(mEventSummary.primaryVertexPosition().x()) < 1.e-5 && fabs(mEventSummary.primaryVertexPosition().y()) < 1.e-5 && fabs(mEventSummary.primaryVertexPosition().z()) < 1.e-5)){	
-			for (int i=0;i<StMuDst::globalTracks()->GetEntries();i++){
+			for (int i=0;i<StMuDst::globalTracks()->GetEntriesFast();i++){
 				glob = StMuDst::globalTracks(i);
 				if (fabs(glob->eta()) <  0.5 && fabs(glob->dcaGlobal().mag()) < 3 && glob->nHitsFit(kTpcId) >= 10) grefmult++;            
 			}
@@ -229,7 +229,7 @@ unsigned short StMuEvent::grefmult(int vtx_id){
 		vtx_id = StMuDst::currentVertexIndex();
 
 	if (StMuDst::primaryVertex(vtx_id)){
-        for (int i=0;i<StMuDst::globalTracks()->GetEntries();i++){
+        for (int i=0;i<StMuDst::globalTracks()->GetEntriesFast();i++){
 			glob = StMuDst::globalTracks(i);
 			if (fabs(glob->eta()) <  0.5 && fabs(glob->dcaGlobal(vtx_id).mag()) < 3 && glob->nHitsFit(kTpcId) >= 10) grefmult++;            
         }
@@ -251,7 +251,7 @@ float StMuEvent::nearestVertexZ(int vtx_id){
 	float dz = 999.0;
 	//For old MuDsts where there was one vertex per event
 	if (StMuDst::numberOfPrimaryVertices()==0) return dz;
-	const int Nvert = StMuDst::primaryVertices()->GetEntries();
+	const int Nvert = StMuDst::primaryVertices()->GetEntriesFast();
 	if(Nvert < 2) return dz;
 	
 	if (vtx_id == -1) vtx_id = StMuDst::currentVertexIndex();	
@@ -267,6 +267,9 @@ float StMuEvent::nearestVertexZ(int vtx_id){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.27  2012/11/26 23:14:33  fisyak
+ * Replace GetEntries() by GetEntriesFast(), fix print outs
+ *
  * Revision 1.26  2011/08/30 14:41:26  fisyak
  * Keep DAQ time for the event untouched
  *
