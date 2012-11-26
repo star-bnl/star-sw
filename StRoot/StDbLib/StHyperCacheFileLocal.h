@@ -52,6 +52,10 @@ protected:
 	int m_MaxItemSizeKb;
 	std::string m_IgnoreKeywords;
 
+	std::string m_StartEmpty;
+
+	void doCacheCleanup();
+
 };
 
 StHyperCacheI* getStHyperCacheFileLocal();

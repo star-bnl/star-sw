@@ -15,7 +15,8 @@
 
 StHyperCacheFileLocal::StHyperCacheFileLocal()
     : m_Name("FILE_LOCAL"), m_Version("1.0.0"), m_Type("ST_HYPERCACHE_FILE_LOCAL"),
-	m_BasePath("/tmp/HyperCache/"), m_AltBasePath("/scratch/HyperCache/"), m_Path(""), m_MaxCacheSizeMb(0), m_MaxItemSizeKb(0)
+	m_BasePath("/tmp/HyperCache/"), m_AltBasePath("/scratch/HyperCache/"), m_Path(""), m_MaxCacheSizeMb(0), m_MaxItemSizeKb(0),
+	m_StartEmpty("no")
 {
 }
 
@@ -34,6 +35,8 @@ bool StHyperCacheFileLocal::init()
 	m_MaxCacheSizeMb = cfg.getParameter<int>(m_Name+"_max_cache_size_mb");
 	m_MaxItemSizeKb  = cfg.getParameter<int>(m_Name+"_max_item_size_kb");
 	m_IgnoreKeywords = cfg.getParameter<int>(m_Name+"_ignore");
+	m_StartEmpty     = cfg.getParameter<std::string>(m_Name+"_start_empty");
+	std::transform(m_StartEmpty.begin(), m_StartEmpty.end(), m_StartEmpty.begin(), ::tolower);
 
 	//std::cout << "FILELOCAL CONFIG COMPLETE \n" ;
 
@@ -51,7 +54,22 @@ bool StHyperCacheFileLocal::init()
 	} else {
 		m_Path = m_BasePath;
 	};
+
+	StHyperUtilGeneric::rtrim(m_Path, " /\\\n\r\t");
+	m_Path += '/';
+
+	if (m_StartEmpty == "yes" || m_StartEmpty == "1") {
+		doCacheCleanup();
+		if (!StHyperUtilFilesystem::path_exists(m_Path)) {
+			StHyperUtilFilesystem::create_dir_recursive(m_Path);
+		}
+	}
+
 	return true;
+}
+
+void StHyperCacheFileLocal::doCacheCleanup() {
+	StHyperUtilFilesystem::remove_dir_recursive(m_Path, m_Path);
 }
 
 const char* StHyperCacheFileLocal::get(const std::string& group_key, const std::string& key, size_t& value_length) {

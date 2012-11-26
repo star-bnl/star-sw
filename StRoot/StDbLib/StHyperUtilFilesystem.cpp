@@ -1,5 +1,7 @@
 #include "StHyperUtilFilesystem.h"
 
+#include "StHyperUtilGeneric.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -9,6 +11,8 @@
 #include <sstream>
 #include <limits.h>
 #include <sys/statvfs.h>
+
+#include <iostream>
 
 namespace StHyperUtilFilesystem
 {
@@ -65,8 +69,10 @@ void create_dir_recursive(std::string path) {
 unsigned long remove_dir_recursive(std::string unlink_path, const std::string& base_path)
 {
     std::string path_resolved = resolve_path(unlink_path);
+	StHyperUtilGeneric::rtrim(unlink_path, " /\\\n\r\t");
+
     if (path_resolved != unlink_path) {
-        //LOG_DEBUG << "ERR: RESOLVED PATH != UNLINK_PATH. " << path_resolved << " != " << unlink_path << LOG_EOM;
+        //std::cerr << "ERR: RESOLVED PATH != UNLINK_PATH. " << path_resolved << " != " << unlink_path << std::endl; //FIXME
         return 0;
     } // path should be fully specified, no relative paths allowed
     unsigned long count = 1;
@@ -75,7 +81,7 @@ unsigned long remove_dir_recursive(std::string unlink_path, const std::string& b
     dp = NULL;
     dp = opendir(path_resolved.c_str());
     if (dp == NULL) {
-        //LOG_DEBUG << "ERR: BASE DIRECTORY CANNOT BE OPENED. " << path_resolved << LOG_EOM;
+        //std::cerr << "ERR: BASE DIRECTORY CANNOT BE OPENED. " << path_resolved << std::endl; // FIXME
         return count;
     }
     while ( (ep = readdir(dp) ) ) {
@@ -95,7 +101,7 @@ unsigned long remove_dir_recursive(std::string unlink_path, const std::string& b
             count += remove_dir_recursive(fullname_resolved, base_path);
         } else {
             if (fullname_resolved.compare(0, base_path.size(), base_path) != 0) {
-                //LOG_DEBUG << "ATTEMPT TO DELETE OUTSIDE OF BASE PATH: " << fullname_resolved << LOG_EOM;
+                //std::cerr << "ATTEMPT TO DELETE OUTSIDE OF BASE PATH: " << fullname_resolved << std::endl; // FIXME
                 continue;
             }
             remove(fullname_resolved.c_str());
@@ -106,7 +112,7 @@ unsigned long remove_dir_recursive(std::string unlink_path, const std::string& b
         if (path_resolved.compare(0, base_path.size(), base_path) == 0) {
             remove(path_resolved.c_str());
         } else {
-            //LOG_DEBUG << "ATTEMPT TO DELETE OUTSIDE OF BASE PATH: " << path_resolved << LOG_EOM;
+            //std::cerr << "ATTEMPT TO DELETE OUTSIDE OF BASE PATH: " << path_resolved << std::endl; // FIXME
         }
     }
     return count;
