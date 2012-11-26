@@ -1,12 +1,14 @@
-// $Id: StMuMcTrack.cxx,v 1.2 2012/05/07 14:47:06 fisyak Exp $
+// $Id: StMuMcTrack.cxx,v 1.3 2012/11/26 23:08:23 fisyak Exp $
 #include "StMuMcTrack.h"
 #include "Stiostream.h"
 #include "TString.h"
+#include "TMath.h"
 ClassImp(StMuMcTrack);
 //________________________________________________________________________________
 ostream&              operator<<(ostream& os,  const StMuMcTrack& v) {
   os << Form("Tk:%4i Vx:%4i Ge:%4i NoHits:%3i",v.Id(),v.IdVx(),v.GePid(),v.NoHits());
-  os << Form(" q:%2i pT:%7.3f eta:%6.3f phi:%6.3f, p:%8.3f %8.3f %8.3f",v.Charge(),v.Pxyz().x(),v.Pxyz().y(),v.Pxyz().z());
+  os << Form(" q:%2i pT:%7.3f eta:%6.3f phi:%6.3f p:%8.3f px:%8.3f py:%8.3f pz:%8.3f",v.Charge(),v.pT(), v.Eta(), 
+	     TMath::ATan2(v.Pxyz().y(),v.Pxyz().x()), v.Ptot(), v.Pxyz().x(),v.Pxyz().y(),v.Pxyz().z());
   return os;
 }
 //________________________________________________________________________________
@@ -58,6 +60,9 @@ const Char_t *StMuMcTrack::GeName() {
 void StMuMcTrack::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________
 // $Log: StMuMcTrack.cxx,v $
+// Revision 1.3  2012/11/26 23:08:23  fisyak
+// Fix print out, thanks to Jonathan (bug #2442)
+//
 // Revision 1.2  2012/05/07 14:47:06  fisyak
 // Add handles for track to fast detector matching
 //
