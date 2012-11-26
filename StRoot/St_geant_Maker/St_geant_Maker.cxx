@@ -1,7 +1,7 @@
-// $Id: St_geant_Maker.cxx,v 1.142 2012/11/14 00:02:12 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.143 2012/11/26 18:22:47 didenko Exp $
 // $Log: St_geant_Maker.cxx,v $
-// Revision 1.142  2012/11/14 00:02:12  fisyak
-// Add flux histograms, use Attributes intead of m_Mode
+// Revision 1.143  2012/11/26 18:22:47  didenko
+// updates for StarGenerator from Jason
 //
 // Revision 1.141  2012/01/24 03:13:29  perev
 // Etr added
@@ -488,10 +488,11 @@
 #include "TGeoPcon.h"
 #include "TGeoPgon.h"
 #include "TObjString.h"
-#include "TGraph.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "TH3.h"
+#ifdef __CC5__
+#include <TGiant3.h>
+#else
+#include "TGiant3.h"
+#endif
 #include "StarMagField.h"
 //#include "tables/St_g2t_run_Table.h"
 #include "tables/St_g2t_event_Table.h"
@@ -552,7 +553,6 @@
 #ifdef DetectorIndex
 #include "StarDetectorMap.h"
 #endif
-#include "StDetectorDbMaker/St_vertexSeedC.h"
 #ifdef F77_NAME
 #define    geometry	 F77_NAME(geometry,GEOMETRY)
 #define    agstroot	 F77_NAME(agstroot,AGSTROOT)
@@ -625,21 +625,16 @@ R__EXTERN "C" {
 }
 Char_t type_of_call *acfromr(Float_t r=8009359);
 
-Quest_t  *St_geant_Maker::cquest; 
-Gclink_t *St_geant_Maker::clink; 
-Gcflag_t *St_geant_Maker::cflag; 
-Gcvolu_t *St_geant_Maker::cvolu; 
-Gcnum_t  *St_geant_Maker::cnum; 
-Int_t    *St_geant_Maker::z_iq, *St_geant_Maker::z_lq; 
-Float_t  *St_geant_Maker::z_q; 
-Gcsets_t *St_geant_Maker::csets;
-Gckine_t *St_geant_Maker::ckine;
-Gcking_t *St_geant_Maker::cking;
-Gctrak_t *St_geant_Maker::ctrak;
-Gcmate_t *St_geant_Maker::cmate;
-Gccuts_t *St_geant_Maker::ccuts;
-Gcphys_t *St_geant_Maker::cphys;
-Int_t     St_geant_Maker::nlev;
+
+Quest_t  *cquest; 
+Gclink_t *clink; 
+Gcflag_t *cflag; 
+Gcvolu_t *cvolu; 
+Gcnum_t  *cnum; 
+Int_t    *z_iq, *z_lq; 
+Float_t  *z_q; 
+Gcsets_t *csets;
+Int_t   nlev;
 static Int_t irot = 0;
 static TVolume *topnode=0;
 typedef struct {
@@ -751,17 +746,12 @@ Int_t St_geant_Maker::Init(){
   z_lq   = (Int_t    *) geant3->Lq();
   z_q    = (Float_t  *) geant3->Q();
   csets  = (Gcsets_t *) geant3->Gcsets();
-  ckine  = (Gckine_t *) geant3->Gckine();
-  cking  = (Gcking_t *) geant3->Gcking();
-  ctrak  = (Gctrak_t *) geant3->Gctrak();
-  cmate  = (Gcmate_t *) geant3->Gcmate();
-  ccuts  = (Gccuts_t *) geant3->Gccuts();
-  cphys  = (Gcphys_t *) geant3->Gcphys();
-  Do("kuip/s/filecase KEEP");
+
   TString InputFile(fInputFile);
+
   if (fInputFile != "") {//check that first word contains .fz then add "gfile p" 
     //                                       -"-          .nt then add "user/input user" 
-    if (Debug()) LOG_INFO << "St_geant_Maker::Init File " << fInputFile.Data() << endm;
+    if (Debug()) gMessMgr->Info() << "St_geant_Maker::Init File " << fInputFile.Data() << endm;
     TString kuip("");
     if      (InputFile.Contains(".fz"))    {ifz = 1; kuip = "gfile p ";         kuip += InputFile;}
     else if (InputFile.Contains(".nt"))    {kuip = "user/input user "; kuip += InputFile;}
@@ -769,112 +759,81 @@ Int_t St_geant_Maker::Init(){
       if (! MuDstIter) MuDstIter = new TTreeIter();
       MuDstIter->AddFile(InputFile); 
       kuip = "user/input please MuDst.Dst";
-      //      m_Mode = 10*(m_Mode/10);
-      //      m_Mode += 1; // take time stamp from MuDst
-      SetAttr("Don'tTouchTimeStamp",kTRUE);
+      m_Mode = 10*(m_Mode/10);
+      m_Mode += 1; // take time stamp from MuDst
       SetDatimeFromMuDst();
     }
     if (kuip != "") {
-      if (Debug()) LOG_INFO << "St_geant_Maker::Init kuip " << kuip.Data() << endm;
+      if (Debug()) gMessMgr->Info() << "St_geant_Maker::Init kuip " << kuip.Data() << endm;
       Do(kuip.Data()); 
       if (cquest->iquest[0] > kStOK) {
-	LOG_INFO << "St_geant_Maker::Init File " << InputFile.Data() << " cannot be opened. Exit!" << endm;
+	gMessMgr->Info() << "St_geant_Maker::Init File " << InputFile.Data() << " cannot be opened. Exit!" << endm;
 	gSystem->Exit(1);
       }
       InputFile = "";
     }
-  } else {  
+  } 
+
+  else {  
+
     if (IsActive()) {// default
       Do("subevent 0;");
-      if (IAttr("Pythia")) { 
-	Do("call bpythia");
-	//   ** These particles will be decayed by geant instead of pythia **
-	Do("MDCY (102,1)=0");//  ! PI0 111
-	Do("MDCY (106,1)=0");//  ! PI+ 211
-	Do("MDCY (109,1)=0");//  ! ETA 221
-	Do("MDCY (116,1)=0");//  ! K+ 321
-	Do("MDCY (112,1)=0");//  ! K_SHORT 310
-	Do("MDCY (105,1)=0");//  ! K_LONG 130
-	Do("MDCY (164,1)=0");//  ! LAMBDA0 3122
-	Do("MDCY (167,1)=0");//  ! SIGMA0 3212
-	Do("MDCY (162,1)=0");//  ! SIGMA- 3112
-	Do("MDCY (169,1)=0");//  ! SIGMA+ 3222
-	Do("MDCY (172,1)=0");//  ! Xi- 3312
-	Do("MDCY (174,1)=0");//  ! Xi0 3322
-	Do("MDCY (176,1)=0");//  ! OMEGA- 3334
-	Do("frame CMS");
-	Do("beam  p p");
-	Double_t sqrtS = 510;
-	Do(Form("ener  %f",sqrtS));
-	Do("CALL PyTUNE(329)"); // set the pythia tune
-	Do("stat");
-	Do("gspread   0.015 0.015 42.00");
-     //?   GKINE -4 0 0. 510. -3.0 +3.0
-      } else {
-	// gkine #particles partid ptrange yrange phirange vertexrange
-	Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
-      }
+      // gkine #particles partid ptrange yrange phirange vertexrange
+      Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
       Do("mode g2tm prin 1;");
       //  Do("next;");
       //  Do("dcut cave z 1 10 10 0.03 0.03;");
-      //      if ((m_Mode/1000)%10 == 1) {// phys_off
+      if ((m_Mode/1000)%10 == 1) {// phys_off
+	gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
+	Do("DCAY 0");
+	Do("ANNI 0");
+	Do("BREM 0");
+	Do("COMP 0");
+	Do("HADR 0");
+	Do("MUNU 0");
+	Do("PAIR 0");
+	Do("PFIS 0");
+	Do("PHOT 0");
+	Do("RAYL 0");
+	Do("LOSS 4"); // no fluctuations 
+	//  Do("LOSS 1"); // with delta electron above dcute
+	Do("DRAY 0");
+	Do("MULS 0");
+	Do("STRA 0");
+	//  CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
+	Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
+	Do("gclose all");
+	Do("physi");
+      }	
       if (Debug() > 1) {
 	Do("debug on;");
 	Do("swit 2 2;");
       }
     }
+
   }
   return kStOK;
 }
 //________________________________________________________________________________
 Int_t St_geant_Maker::InitRun(Int_t run){
   if (mInitialization != "") {
-    LOG_INFO << "St_geant_Maker::InitRun -- Do geometry initialization" << endm;
-    LOG_INFO << "St_geant_Maker::InitRun -- with " << mInitialization.Data() << endm;
+    gMessMgr->Info() << "St_geant_Maker::InitRun -- Do geometry initialization" << endm;
     Do(mInitialization.Data()); 
     Geometry();
     mInitialization = "";
-    if (IAttr("phys_off")) 	{
-      LOG_INFO << "St_geant_Maker::Init switch off physics" << endm;
-      Do("DCAY 0");
-      Do("ANNI 0");
-      Do("BREM 0");
-      Do("COMP 0");
-      Do("HADR 0");
-      Do("MUNU 0");
-      Do("PAIR 0");
-      Do("PFIS 0");
-      Do("PHOT 0");
-      Do("RAYL 0");
-      Do("LOSS 4"); // no fluctuations 
-      //  Do("LOSS 1"); // with delta electron above dcute
-      Do("DRAY 0");
-      Do("MULS 0");
-      Do("STRA 0");
-      //  CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-      Do("CUTS     1e-3   1e-3   1e-3   1e-3   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3 50.e-6");
-      Do("physi");
-    } else if (IAttr("flux")) {
-      Do("call agustep");
-      Do("HADR 6"); // gcalor
-      //  CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-      Do("CUTS     1e-5   1e-5   1e-3  1e-14   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3     10");
-      Do("physi");
-    }
     Do("gclose all");
   }
   Agstroot();
-  LOG_INFO << "St_geant_Maker::InitRun -- Do mag.field initialization" << endm;
+  gMessMgr->Info() << "St_geant_Maker::InitRun -- Do mag.field initialization" << endm;
   m_geom_gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
   if (m_geom_gdat)  {
     AddRunco(new St_geom_gdat(*m_geom_gdat));
   }
-  //  if (m_Mode%10 != 1 && IsActive() ) {// Mixer mode == 1 or reco - do not modify EvtHddr and MagF
-  if (! IAttr("Don'tTouchTimeStamp") && IsActive() ) {// Mixer mode == 1 or reco - do not modify EvtHddr and MagF
-    fEvtHddr = (StEvtHddr*) GetTopChain()->GetDataSet("EvtHddr");
+  if (m_Mode%10 != 1 && IsActive() ) { // Mixer mode == 1 or reco - do not modify EvtHddr and MagF
+    fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
     if (!fEvtHddr) {                            // Standalone run
       fEvtHddr = new StEvtHddr(m_ConstSet);
-      fEvtHddr->SetRunNumber(0);                // to have run positive and < 1000000 (to avoid mess with RunLog)
+      fEvtHddr->SetRunNumber(1);                // to have run positive and < 1000000 (to avoid mess with RunLog)
       SetOutput(fEvtHddr);	              //Declare this "EvtHddr" for output
     }
     if (! ifz ) {
@@ -892,17 +851,17 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 	// set mag field
 	if (StarMagField::Instance() && StarMagField::Instance()->IsLocked()) {
 	  // Passive mode, do not change scale factor
-	  LOG_INFO << "St_geant_Maker::InitRun passive mode. Don't update Mag.Field from DB" << endm;
+	  gMessMgr->Info() << "St_geant_Maker::InitRun passive mode. Don't update Mag.Field from DB" << endm;
 	} else {
 	  Float_t  fScale = St_MagFactorC::instance()->ScaleFactor();
 	  if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
-	  LOG_INFO << "St_geant_Maker::InitRun active mode ";
+	  gMessMgr->Info() << "St_geant_Maker::InitRun active mode ";
 	  if (! StarMagField::Instance()) {
 	    new StarMagField ( StarMagField::kMapped, fScale);
-	    LOG_INFO << "Initialize STAR magnetic field with scale factor " << fScale << endm;
+	    gMessMgr->Info() << "Initialize STAR magnetic field with scale factor " << fScale << endm;
 	  }  else {
 	    StarMagField::Instance()->SetFactor(fScale);
-	    LOG_INFO << "Reset STAR magnetic field with scale factor " << fScale << endm;
+	    gMessMgr->Info() << "Reset STAR magnetic field with scale factor " << fScale << endm;
 	  }
 	}
       } else {
@@ -910,18 +869,17 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 	if (m_geom_gdat)  {
 	  geom_gdat_st *gdat = m_geom_gdat->GetTable();
 	  mfscale = gdat->mfscale;
-	  LOG_INFO << "St_geant_Maker::Init geom_gdata is found in fz-file ! ";
+	  gMessMgr->Info() << "St_geant_Maker::Init geom_gdata is found in fz-file ! ";
 	} else {
 	  St_mfld_mflg *mfld_mflg = (St_mfld_mflg *) Find(".const/geom/mfld_mflg");
 	  if (mfld_mflg) {
-	    LOG_INFO << "St_geant_Maker::Init mfld_mflg is found in fz-file ! ";
+	    gMessMgr->Info() << "St_geant_Maker::Init mfld_mflg is found in fz-file ! ";
 	    mfld_mflg_st *s = mfld_mflg->GetTable();
 	    mfscale = s->bfield/5.0;
-	  } else {
-	    LOG_INFO << "St_geant_Maker::Init geom_gdata is missing in fz-file ! Use default mag.field scale factor ";
-	  }
+	  } else 
+	    gMessMgr->Info() << "St_geant_Maker::Init geom_gdata is missing in fz-file ! Use default mag.field scale factor ";
 	}
-	LOG_INFO  << "St_geant_Maker::Init mfscale = " << mfscale		       << endm;
+	gMessMgr->Info()  << "St_geant_Maker::Init mfscale = " << mfscale		       << endm;
 	struct Field_t {
 	  const Char_t *name;
 	  Float_t scale;
@@ -942,45 +900,29 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 	}
 	if (FieldOption != "") {
 	  SetFlavor(FieldOption.Data(),        "MagFactor");
-	  LOG_INFO << "St_geant_Maker::Init  SetFlavor(\"" << FieldOption.Data() 
+	  gMessMgr->QAInfo() << "St_geant_Maker::Init  SetFlavor(\"" << FieldOption.Data() 
 			     << "\",\"MagFactor\")" << endm;
 	}
 	if (! StarMagField::Instance()) {
 	  new StarMagField ( StarMagField::kMapped, mfscale, kTRUE);
-	  LOG_INFO << "St_geant_Maker::Init  Create StarMagField and lock it"
+	  gMessMgr->QAInfo() << "St_geant_Maker::Init  Create StarMagField and lock it"
 			     << endm;
-	}
+	  }
 	else {
 	  StarMagField::Instance()->SetFactor(mfscale);
 	  StarMagField::Instance()->SetLock();
-	  LOG_INFO << "St_geant_Maker::Init  Reset StarMagField and lock it"
+	  gMessMgr->QAInfo() << "St_geant_Maker::Init  Reset StarMagField and lock it"
 			     << endm;
 	}
       }
     }
-  }
-  if (IsActive() && IAttr("Pythia") && IAttr("beamLine")) {
-    if (IAttr("beamLine")) {
-      St_vertexSeedC* vSeed = St_vertexSeedC::instance();
-      if (vSeed) {
-	Double_t x0   = vSeed->x0()  ; 
-	Double_t y0   = vSeed->y0()  ; 
-	Double_t dxdz = vSeed->dxdz(); 
-	Double_t dydz = vSeed->dydz(); 
-	Do(Form("gvertex   %f %f 1",x0,y0)); // ** setup the vertex
-	Do(Form("gslope  %f %f", dxdz, dydz));
-      }
-    }
-  }
-  if (IAttr("RunG")) {
-    LOG_INFO << "St_geant_Maker::InitRun -- Set RunG " << IAttr("RunG") << endl;
-    Do(Form("rung %d 1",IAttr("RunG")));
-    Do(Form("rndm %d",IAttr("RunG")));
   }
   return kStOK;
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Make() {
+Int_t St_geant_Maker::Make()
+{
+
   Int_t    nhits,nhit1,nhit2,nhit3,nhit4,link=1,ide=1,npart,irun,ievt,iwtfl;
   Float_t  vert[4],weigh;
   if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
@@ -1000,8 +942,7 @@ Int_t St_geant_Maker::Make() {
   Char_t   cgnam[21] = "                   \0";                               
   Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
   geant3->Gfhead(Nwhead,Ihead,Nwbuf,Ubuf);
-  //  if (m_Mode%10 != 1) {
-  if (! IAttr("Don'tTouchTimeStamp")) {
+  if (m_Mode%10 != 1) {
     if (fEvtHddr) {
       if (clink->jhead) {
 	if (fEvtHddr->GetRunNumber() != *(z_iq+clink->jhead+1)) 
@@ -1015,8 +956,21 @@ Int_t St_geant_Maker::Make() {
 #endif
     }
   }
+
+  //
+  // We have particles
+  // 
+  
   if (npart>0) {  
-    St_particle  *particle   = new St_particle("particle",npart);
+
+    
+    St_particle  *particle   =  0;
+
+    particle = (St_particle *)GetDataSet("particle");
+    if ( !particle ) {
+      particle = new St_particle("particle",npart);
+    }
+
     m_DataSet->Add(particle);  iRes = g2t_particle(particle);
     //    =======================
     if (Debug() > 1) particle->Print(0,10);
@@ -1025,8 +979,7 @@ Int_t St_geant_Maker::Make() {
     // 20030508 --max-- found a bug: 9999999
     // "istat==10" on the following line, changing to >=11
     // This "if should now work with both "old" and "new" ntuple conventions
-    //    if (m_Mode%10 != 1) {
-    if (! IAttr("Don'tTouchTimeStamp")) {
+    if (m_Mode%10 != 1) {
       if ( (p->isthep == 10 && p->idhep  == 9999999 && fEvtHddr) ||
 	   (p->isthep >= 11 && p->idhep  == 999998  && fEvtHddr)) {
 	
@@ -1042,8 +995,7 @@ Int_t St_geant_Maker::Make() {
 	// 	fEvtHddr->SetAEast(east);
 	
 	// Update the run number, if necessary
-	//	if ( m_Mode%100 != 1 && 
-	if (! IAttr("KeepRunNumber") && 
+	if ( m_Mode%100 != 1 && 
 	     p->vhep[0] > 0 && p->vhep[0] < 10000 && 
 	     fEvtHddr->GetRunNumber() != p->vhep[0]) {
 	  fEvtHddr->SetRunNumber((int)p->vhep[0]);
@@ -1083,13 +1035,12 @@ Int_t St_geant_Maker::Make() {
   if(iRes>=10) { // means there was Pythia information detected in the input, see g2t_get_event code
     St_g2t_pythia *g2t_pythia = new St_g2t_pythia("g2t_pythia",1); // prepare an empty g2t_pythia
     m_DataSet->Add(g2t_pythia);
-    LOG_INFO << "Pythia event header captured" << endm;
+    gMessMgr->Info() << "Pythia event header captured" << endm;
     iRes = g2t_get_pythia(g2t_pythia);
   }
   
   // --max-- Filling the event header, addition due to the new coding
-  //  if (m_Mode%10 != 1) {
-  if (! IAttr("Don'tTouchTimeStamp") ) {
+  if (m_Mode%10 != 1) {
     if(fEvtHddr) {
       fEvtHddr->SetAEast((*g2t_event)[0].n_wounded_east);
       fEvtHddr->SetAWest((*g2t_event)[0].n_wounded_west);
@@ -1262,7 +1213,7 @@ Int_t St_geant_Maker::Make() {
   geant3->Gfnhit("RICH","RCSI", nhit2);
   geant3->Gfnhit("RICH","FREO", nhit3);
   geant3->Gfnhit("RICH","QUAR", nhit4);
-  //  LOG_INFO  << nhit1 << " " << nhit2 << " " << nhit3 << " " << nhit4 << endm;
+  //  gMessMgr->QAInfo()  << nhit1 << " " << nhit2 << " " << nhit3 << " " << nhit4 << endm;
   nhits=nhit1+nhit2+nhit3+nhit4;
   if (nhits>0) {
     St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
@@ -1401,36 +1352,6 @@ Int_t St_geant_Maker::Make() {
   
   if (cflag->ieorun) return kStEOF; 
   if (cflag->ieotri) return kStErr; 
-  if (IAttr("flux")) {
-    static TH1D *Vx = 0, *Vy = 0, *Vz = 0;
-    static TH2D *BbcC = 0;
-    if (! Vx) {
-      if (GetChain()->GetTFile()) GetChain()->GetTFile()->cd();
-      Vx = new TH1D("Vx","Geant primary vertex X",50,-5.0,5.0);
-      Vy = new TH1D("Vy","Geant primary vertex Y",50,-5.0,5.0);
-      Vz = new TH1D("Vz","Geant primary vertex Z",50,-100,100);
-    }
-    St_g2t_vertex *geantVertex=(St_g2t_vertex *) GetDataSet("g2t_vertex"); 
-    g2t_vertex_st *gvt=geantVertex->GetTable();
-    Vx->Fill(gvt->ge_x[0]);
-    Vy->Fill(gvt->ge_x[1]);
-    Vz->Fill(gvt->ge_x[2]);
-    if (! BbcC) {
-      BbcC = new TH2D("BbcC","BBC East versus BBC West",100,-1,9,100,-1,9);
-    }
-    Double_t BbcW = 0, BbcE = 0;
-    St_g2t_ctf_hit *g2t_bbc_hit = (St_g2t_ctf_hit *) GetDataSet("g2t_bbc_hit");
-    Int_t N = g2t_bbc_hit->GetNRows();
-    g2t_ctf_hit_st *bbc = g2t_bbc_hit->GetTable();
-    for (Int_t i = 0; i < N; i++, bbc++) {
-      if (bbc->tof > 100e-9) continue;
-      if (bbc->volume_id < 2000) BbcW++;
-      else                       BbcE++;
-    }
-    if (BbcW  <= 0) BbcW = 0.1;
-    if (BbcE  <= 0) BbcE = 0.1;
-    BbcC->Fill(TMath::Log10(BbcW),TMath::Log10(BbcE));
-  }
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -1799,12 +1720,12 @@ void St_geant_Maker::Mark(TVolume *topvol) {
       Int_t NWHI=z_iq[JD+7];
       Int_t NWDI=z_iq[JD+8];
       memcpy (Udet, &z_iq[JS+IDET], 4);
-      LOG_INFO  << "  Set " << Uset << " Detector " << Udet
+      gMessMgr->QAInfo()  << "  Set " << Uset << " Detector " << Udet
 	   << "  NV " << NV << " NWHI " << NWHI << " NWDI " << NWDI << endm;
       Int_t JDU = z_lq[JD-3];
       if (JDU > 0) {
 	Int_t i1 = (int)z_q[JDU+3], i2 = (int)z_q[JDU+5];
-	LOG_INFO  << " Volume/Bits :" << i1 << "/" << i2 <<  endm;
+	gMessMgr->QAInfo()  << " Volume/Bits :" << i1 << "/" << i2 <<  endm;
 	for (Int_t i=i1;i<i2;i += 3) {
 	  Int_t j   = JDU+i;
 	  Int_t iv  = (int)z_q[j+1];
@@ -1812,17 +1733,17 @@ void St_geant_Maker::Mark(TVolume *topvol) {
 	  Int_t Nam = (int)z_iq[clink->jvolum+iv];
 	  Int_t Nb  = (int)z_q[j+3];
 	  memcpy (Uvol, &Nam, 4);
-	  LOG_INFO  << "\t" << Uvol << "\t" << Nmx << "\t" << Nb << endm;
+	  gMessMgr->QAInfo()  << "\t" << Uvol << "\t" << Nmx << "\t" << Nb << endm;
 	}
       }
       else {
 	if (NV > 0) {
-	  LOG_INFO  << " Volume/Bits ";
+	  gMessMgr->QAInfo()  << " Volume/Bits ";
 	  for (Int_t I=1; I<=NV; I++) {
 	    memcpy (Uvol, &z_iq[JD+2*I+9], 4);
-	    LOG_INFO  << "\t" << Uvol << "/\t" << z_iq[JD+2*I+10];
+	    gMessMgr->QAInfo()  << "\t" << Uvol << "/\t" << z_iq[JD+2*I+10];
 	  }
-	  LOG_INFO  << endm;
+	  gMessMgr->QAInfo()  << endm;
 	}
       }
     }
@@ -1830,7 +1751,7 @@ void St_geant_Maker::Mark(TVolume *topvol) {
 #if 0
   geant3->Gfinds();
   if (csets->iset && csets->idet) {
-    LOG_INFO  << "Set/Det \t" << csets->iset << "/" << csets->idet 
+    gMessMgr->QAInfo()  << "Set/Det \t" << csets->iset << "/" << csets->idet 
 	 << "\tidtype = \t" << csets->idtype
 	 << "\tnvname = \t" << csets->nvname << endm; 
     Int_t nLev, lNam[15], lNum[15];
@@ -1839,9 +1760,9 @@ void St_geant_Maker::Mark(TVolume *topvol) {
     Int_t four = 4;
     for (Int_t i=0; i< nLev; i++) {
       uhtoc(lNam[i],four,PASSCHARD(Name),four PASSCHARL(Name));
-      LOG_INFO  << "\t" << Name << "\t" << lNum[i];
+      gMessMgr->QAInfo()  << "\t" << Name << "\t" << lNum[i];
     }
-    LOG_INFO  << endm;
+    gMessMgr->QAInfo()  << endm;
   }
 #endif
 }
@@ -1953,7 +1874,7 @@ void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec,
       Int_t N = table->GetNRows(); 
       if (N > 10) N = 10; table->Print(0,N);
     }
-    else LOG_DEBUG << "St_geant_Maker::Dictionary for table :" << t.Data() 
+    else gMessMgr->Debug() << "St_geant_Maker::Dictionary for table :" << t.Data() 
 			   << " has not been defined yet. Skip it" 
 			   << endm;
   }
@@ -2022,10 +1943,9 @@ void St_geant_Maker::Dzddiv(Int_t& idiv ,Int_t &Ldummy,const Char_t* path,const 
 }
 //________________________________________________________________________________
 void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
-  //  if ( m_Mode%100 == 1 || ! fEvtHddr ) return;
-  if (IAttr("KeepRunNumber") || ! fEvtHddr ) return;
+  if ( m_Mode%100 == 1 || ! fEvtHddr ) return;
   if (! m_geom_gdat) { // taken from starsim/agzio/agfinfo.age
-    LOG_INFO << "St_geant_Maker:: geom_gdat table is missing. Try to get it from GEANT." << endm;
+    gMessMgr->Info() << "St_geant_Maker:: geom_gdat table is missing. Try to get it from GEANT." << endm;
     Int_t jrung = clink->jrung;
     if (jrung > 0 && z_iq[jrung-1]>=10) {
       Int_t jrunh = z_lq[jrung-1];
@@ -2034,7 +1954,7 @@ void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
 	Char_t *buf = new Char_t[4*l+1];
 	memcpy (buf,  &z_iq[jrunh+1], 4*l);
 	buf[4*l] = '\0';
-	LOG_INFO << "St_geant_Maker::SetDateTime runh buffer: " << buf << endm;
+	gMessMgr->Info() << "St_geant_Maker::SetDateTime runh buffer: " << buf << endm;
 	TString C(buf);
 	delete [] buf;
 	Ssiz_t begin, index;
@@ -2048,7 +1968,7 @@ void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
 	  if (index > begin) {
 	    TString line(C(begin,index-begin));
 	    line.ToLower();
-	    if (Debug()) LOG_INFO  << line << endm;
+	    if (Debug()) gMessMgr->QAInfo()  << line << endm;
 	    if (line.Contains("detp")) {
 	      Int_t indx = line.Index("year");
 	      if (indx) {
@@ -2091,7 +2011,7 @@ void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
       Int_t id = St_db_Maker::AliasDate(version.Data());
       Int_t it = St_db_Maker::AliasTime(version.Data());
       if (id &&  GetDate() >= 20330101) {
-	LOG_INFO << "St_geant_Maker::SetDateTime Date/Time = " 
+	gMessMgr->Info() << "St_geant_Maker::SetDateTime Date/Time = " 
 			 << id << "/" << it << "\tas " << version << endm;
 	fEvtHddr->SetDateTime(id,it);
       }
@@ -2106,9 +2026,9 @@ Char_t *acfromr(Float_t r) {// 'TYPE'
   Int_t k = (int) r;
   for (int i = 3; i >= 0; i--) {
     int j = 077 & k; k = k >> 6; charm[i] = S[j];
-    //    LOG_INFO  << "i\t" << i << "\tj\t" << j << "\tk\t" << k << "\t" << charm[i] << endm;
+    //    gMessMgr->QAInfo()  << "i\t" << i << "\tj\t" << j << "\tk\t" << k << "\t" << charm[i] << endm;
   }
-  //  LOG_INFO  << charm << endm;
+  //  gMessMgr->QAInfo()  << charm << endm;
   return charm;
 }
 //________________________________________________________________________________
@@ -2138,7 +2058,7 @@ Int_t St_geant_Maker::AgstHits()
       Int_t NWDI=z_iq[JD+8];
       memcpy (Udet, &z_iq[JS+IDET], 4);
       if (Debug()) {
-	LOG_INFO  << "  Set " << Uset << " Detector " << Udet
+	gMessMgr->QAInfo()  << "  Set " << Uset << " Detector " << Udet
 	     << "  NV " << NV << " NWHI " << NWHI << " NWDI " << NWDI << endm;
       }
       Int_t JDU = z_lq[JD-3];
@@ -2161,16 +2081,16 @@ Int_t St_geant_Maker::AgstHits()
 	rowU.Iprin   = (int) z_q[JDU+10];
 	detu->AddAt(&rowU);
 	if (Debug()) {
-	  LOG_INFO  << " displacement for hit description part    = 10                " << rowU.i0 << endm;     
-	  LOG_INFO  << " Number of all hit descriptors (both in non- and cum. parts)  " << rowU.N  << endm;     
-	  LOG_INFO  << " displacement for volume description part=10+10*Nh            " << rowU.i1 << endm;     
-	  LOG_INFO  << " Number of all volume descriptors (branching or not)          " << rowU.Nva << endm;    
-	  LOG_INFO  << " displacement for the free space   = 10+10*Nh+3*Nv            " << rowU.i2 << endm;     
-	  LOG_INFO  << " number of real volume branchings for NUMBV                   " << rowU.Nvb << endm;    
-	  LOG_INFO  << " Hit option: 1 - single step, 4 - Calorimetry                 " << rowU.Goption << endm;
-	  LOG_INFO  << " Valid serial number for this subset                          " << rowU.Serial << endm; 
-	  LOG_INFO  << " USER detector number                                         " << rowU.IdType << endm; 
-	  LOG_INFO  << " current print flag both for HITS and DIGI                    " << rowU.Iprin << endm;  
+	  gMessMgr->QAInfo()  << " displacement for hit description part    = 10                " << rowU.i0 << endm;     
+	  gMessMgr->QAInfo()  << " Number of all hit descriptors (both in non- and cum. parts)  " << rowU.N  << endm;     
+	  gMessMgr->QAInfo()  << " displacement for volume description part=10+10*Nh            " << rowU.i1 << endm;     
+	  gMessMgr->QAInfo()  << " Number of all volume descriptors (branching or not)          " << rowU.Nva << endm;    
+	  gMessMgr->QAInfo()  << " displacement for the free space   = 10+10*Nh+3*Nv            " << rowU.i2 << endm;     
+	  gMessMgr->QAInfo()  << " number of real volume branchings for NUMBV                   " << rowU.Nvb << endm;    
+	  gMessMgr->QAInfo()  << " Hit option: 1 - single step, 4 - Calorimetry                 " << rowU.Goption << endm;
+	  gMessMgr->QAInfo()  << " Valid serial number for this subset                          " << rowU.Serial << endm; 
+	  gMessMgr->QAInfo()  << " USER detector number                                         " << rowU.IdType << endm; 
+	  gMessMgr->QAInfo()  << " current print flag both for HITS and DIGI                    " << rowU.Iprin << endm;  
 	}
 	St_det_path *detuV = new St_det_path("Path",rowU.Nva);
 	St_det_hit  *detuH = new St_det_hit("Hit",rowU.N);
@@ -2208,8 +2128,8 @@ Int_t St_geant_Maker::AgstHits()
 //                XX YY ZZ  PX   PY   PZ   SLEN PTOT LPTO rese )
 	  if (Debug()) {
 	    if (! i) 
-	    LOG_INFO  << "\thit \toption \tNb \tFmin \tFmax \tOrigin \tFactor \tNbit \tIext \tIfun" << endm;
-	    LOG_INFO  << "\t"  << setw(4) << rowH.hit 
+	    gMessMgr->QAInfo()  << "\thit \toption \tNb \tFmin \tFmax \tOrigin \tFactor \tNbit \tIext \tIfun" << endm;
+	    gMessMgr->QAInfo()  << "\t"  << setw(4) << rowH.hit 
 		 << "\t"  << rowH.option
 		 << "\t"  << rowH.Nb    
 		 << "\t"  << rowH.Fmin  //<< "/" << alim[i]
@@ -2238,7 +2158,7 @@ Int_t St_geant_Maker::AgstHits()
 	    memcpy (Udvol, &Namd, 4);
 	  }
 	  if (Debug()) {
-	    LOG_INFO  << "\t" << setw(4) << rowV.VName <<  "/" << Udvol 
+	    gMessMgr->QAInfo()  << "\t" << setw(4) << rowV.VName <<  "/" << Udvol 
 		 << "\t" << rowV.Ncopy << "\t" << rowV.Nb << endm;
 	  }
 	  detuV->AddAt(&rowV);
@@ -2248,7 +2168,7 @@ Int_t St_geant_Maker::AgstHits()
 	    Int_t Namd = (int) z_iq[JD+2*ivd+11]; ivd++;
 	    Char_t Udvol[] = "     ";
 	    memcpy (Udvol, &Namd, 4);
-	    LOG_INFO  << "\t" << "    " <<  "/" << Udvol << endm;
+	    gMessMgr->QAInfo()  << "\t" << "    " <<  "/" << Udvol << endm;
 	  }
 	  Int_t n = detuV->GetNRows();
 	  detuV->Print(0,n);
@@ -2263,7 +2183,7 @@ Int_t St_geant_Maker::AgstHits()
 void St_geant_Maker::DetSetIndex() {
   TString vers = mInitialization;
   vers.ReplaceAll("detp geometry ","");
-  LOG_INFO  << "St_geant_Maker::DetSetIndex for geometry version " << vers << endm;
+  gMessMgr->QAInfo()  << "St_geant_Maker::DetSetIndex for geometry version " << vers << endm;
   Int_t JSET = clink->jset;
   if (JSET <= 0) return;
   Int_t  NSET=z_iq[JSET-1];
@@ -2289,7 +2209,7 @@ void St_geant_Maker::DetSetIndex() {
 	Int_t i2      = (int) z_q[JDU+5];
 	Int_t Nva     = (int) z_q[JDU+4]; 
 	Int_t Nvb     = (int) z_q[JDU+6]; 
-	LOG_INFO  << "  Set " << Uset << " Detector " << Udet << "\tNva = " << Nva << "\tNvb = " << Nvb << endm;
+	gMessMgr->QAInfo()  << "  Set " << Uset << " Detector " << Udet << "\tNva = " << Nva << "\tNvb = " << Nvb << endm;
 	TArrayI NVmax(Nvb);
 	Int_t ivv = 0;
 	TString fmt("");
@@ -2300,7 +2220,7 @@ void St_geant_Maker::DetSetIndex() {
 	  Int_t Nam   = (int) z_iq[clink->jvolum+iv];
 	  Int_t Nb    = (int) z_q[j+3];
 	  memcpy (&Uvol[0], &Nam, 4);
-	  //	  LOG_INFO  <<  Uvol << " copy " << Ncopy << " bits " << Nb << endm;  
+	  //	  gMessMgr->QAInfo()  <<  Uvol << " copy " << Ncopy << " bits " << Nb << endm;  
 	  fmt += "/";
 	  fmt += Uvol;
 	  if (Nb <= 0) fmt += "_1";
@@ -2319,10 +2239,10 @@ void St_geant_Maker::DetSetIndex() {
 	  continue;
 	}
         Int_t Nelem = 1;
-	LOG_INFO  << "format: " << fmt << endm;
-	LOG_INFO  << "NVmax";
-	for (Int_t i = 0; i < Nvb; i++) {Nelem *= NVmax[i]; LOG_INFO  << "[" << NVmax[i] << "]";}
-	LOG_INFO  << endm;
+	gMessMgr->QAInfo()  << "format: " << fmt << endm;
+	gMessMgr->QAInfo()  << "NVmax";
+	for (Int_t i = 0; i < Nvb; i++) {Nelem *= NVmax[i]; gMessMgr->QAInfo()  << "[" << NVmax[i] << "]";}
+	gMessMgr->QAInfo()  << endm;
 	Int_t numbv[15];
 	memset (numbv, 0, 15*sizeof(Int_t));
 	TArrayI Ids(Nelem);
@@ -2351,7 +2271,7 @@ void St_geant_Maker::DumpIndex(const Char_t *name, const Char_t *vers, const Cha
   fOut += vers;
   fOut += ".C";
   ofstream out;
-  LOG_INFO  << "Create " << fOut << endm;
+  gMessMgr->QAInfo()  << "Create " << fOut << endm;
   out.open(fOut.Data());
   out << "TDataSet *CreateTable() {" << endl;
   out << "  if (!gROOT->GetClass(\"StarVMCDetector\")) return 0;" << endl;
@@ -2431,7 +2351,7 @@ Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
   static const Int_t*&      PrimaryTracks_mNSigmaKaon                = muDstIter("PrimaryTracks.mNSigmaKaon");
   static const Int_t*&      PrimaryTracks_mNSigmaProton              = muDstIter("PrimaryTracks.mNSigmaProton");
   static const Short_t*&    GlobalTracks_mFlag                       = muDstIter("GlobalTracks.mFlag");
-  //#define __USE_GLOBAL__
+#define __USE_GLOBAL__
 #ifdef __USE_GLOBAL__
   static const Int_t&       NoGlobalTracks                           = muDstIter("GlobalTracks");
   static const Float_t*&    GlobalTracks_mP_mX1                      = muDstIter("GlobalTracks.mP.mX1");
@@ -2556,205 +2476,4 @@ Int_t St_geant_Maker::KinematicsFromMuDst(Int_t flag) {
   }
   return kStOK;
 }
-//________________________________________________________________________________
-Int_t St_geant_Maker::ipartx(Int_t id) {
-  Int_t                            ipartxf = -1;
-  if      (id == 1)                ipartxf = 1;  // gamma
-  else if (id == 2 || id == 3)     ipartxf = 2;  // e+/-
-  else if (id == 5 || id == 6)     ipartxf = 3;  // mu+/-
-  else if (id == 13)               ipartxf = 4;  // neutron
-  else if ((id >=  8 && id <=  9) ||
-	   (id >= 11 && id <= 15)) ipartxf = 0;  // all other charged particles
-  return ipartxf;
-}
-//________________________________________________________________________________
-Float_t St_geant_Maker::dose(Float_t Z) {
-  /*                                                                      *
-   *  Function    : Interpolation of gamma dose rate                      *
-   *                                                                      *
-   *  Arguments   : Z   Atom number                                       */
-  static TGraph *graph = 0;
-  if (! graph) {
-    Int_t n = 43;
-    Double_t x[] = {11., 12., 13., 14., 15., 17., 18., 19., 20., 22.,
-		    23., 24., 25., 26., 27., 28., 29., 30., 32., 33.,
-		    34., 35., 38., 40., 41., 42., 43., 46., 47., 48.,
-		    49., 50., 51., 53., 57., 66., 73., 74., 78., 79.,
-		    80., 82., 83.}; // Z
-    Double_t y[] = {8.8033795E-02, 0.1175197    , 0.1043398    , 8.3658338E-02,
-		    7.6843806E-02, 5.7563554E-02, 4.0977564E-02, 4.6153713E-02,
-		    4.0977564E-02, 0.1257856    , 0.1797267    , 0.1679161    ,
-		    0.1650867    , 0.1828069    , 0.1828069    , 0.1956649    ,
-		    0.2094273    , 0.1923680    , 0.1923680    , 0.2612006    ,
-		    0.2795725    , 0.3095814    , 0.4499212    , 0.6880791    ,
-		    0.7240669    , 0.6213810    , 0.5          , 0.5          ,
-		    0.5          , 0.3546627    , 0.3796084    , 0.3428115    ,
-		    0.2941946    , 0.3370352    , 0.3          , 0.2702305    ,
-		    0.2941946    , 0.2567994    , 0.3607410    , 0.3607410    ,
-		    0.3428115    , 0.3          , 0.4}; // Dose
-    graph = new TGraph(n,x,y);
-  }
-  return 13.1286072899874E-6*TMath::Max(0., TMath::Min(0.5, graph->Eval(Z)));
-}
-//________________________________________________________________________________
-void St_geant_Maker::usflux() {
-  Int_t        id;
-  Float_t      OmegaN;
-  Int_t        i;
-  Float_t      ZZ, RR;
-  Int_t        NstepB;
-  Float_t      stepF, destepF, XYZ[3];
-  Float_t      RADIUS;
-  Int_t        p;
-  enum {Nregions = 1, Nparts = 5, NH1T = 3, NH2T = 9};
-  const Char_t *NameV[Nregions] = {""};//,"Wall","Tunnel"};
-  static TH1D *histV1[Nregions][NH1T][Nparts];
-  static TH2D *histV2[Nregions][NH2T][Nparts];
-  static TH2D *tofg = 0;
-  static Bool_t first = kTRUE;
-  if (first) {
-    assert(GetChain()->GetTFile());
-    GetChain()->GetTFile()->cd();
-    first = kFALSE;
-    memset(histV1, 0, sizeof(histV1));
-    memset(histV2, 0, sizeof(histV2));
-    Double_t xstep =  5;
-    Double_t ystep =  2;
-    Double_t xmax  = 2000, xmin = - xmax;
-    Double_t ymax  = 1000, ymin =      0;
-    Int_t nx = (xmax - xmin)/xstep;
-    Int_t ny = (ymax - ymin)/ystep;
-    struct Name_t {
-      const Char_t *Name;
-      const Char_t *Title;
-    };
-    struct NameX_t {
-      Name_t name;
-      Int_t nX;
-      Double_t xMin, xMax;
-      Int_t nY;
-      Double_t yMin, yMax;
-    };
-    tofg = new TH2D("tofg","log_{10} (tof [nsec]) @ step versus particle type",140,-1,13,50,0.5,50.5);
-    Name_t Particles[Nparts] = {
-      {"", "#pi/K/p and others"}, // 0
-      {"g","#gamma"},             // 1
-      {"e","e^{#pm}"},            // 2
-      {"m","#mu^{#pm}"},          // 3
-      {"n","neutron"}             // 4
-    };
-    NameX_t Types1[NH1T] = {
-      {{"Ekin10"    ,"Log_{10}(GEKIN) for %s for %s"                 }, 340, -14., 3.0, 0, 0, 0},  //5 -> 0 300
-      {{"Ekin10s"   ,"Log_{10}(GEKIN) for %s at step for %s Z < 0"   }, 340, -14., 3.0, 0, 0, 0},  //6 -> 1 320
-      {{"Ekin10V"   ,"Log_{10}(GEKIN) for %s at production Vx for %s"}, 340, -14., 3.0, 0, 0, 0}   //7 -> 2 400
-    };
-    NameX_t Types2[NH2T] = {
-      {{"flux"      ,"flux from %s * step for %s"                    }, nx, xmin, xmax, ny, ymin, ymax},  //0 100
-      {{"flux100keV","flux from %s * step E_{kin} > 100 keV for %s"  }, nx, xmin, xmax, ny, ymin, ymax},  //1 800
-      {{"flux250meV","flux from %s * step E_{kin} < 250 meV for %s"  }, nx, xmin, xmax, ny, ymin, ymax},  //2 500
-      {{"entries"   ,"entries from %s for %s"                        }, nx, xmin, xmax, ny, ymin, ymax},  //3 900
-      {{"VxProd"    ,"Vertex Production of %s for %s"                }, nx, xmin, xmax, ny, ymin, ymax},  //4 200
-      {{"dose"      ,"dose from charged particles and #gamma for %s" }, nx, xmin, xmax, ny, ymin, ymax},  //8 ->5  600
-      {{"star"      ,"star density for %s"                           }, nx, xmin, xmax, ny, ymin, ymax},  //9 ->6 700
-      {{"RD"        ,"Residual Dose for %s"                          }, nx, xmin, xmax, ny, ymin, ymax},  //0 ->7 701
-      {{"DepEnergy" ,"Deposited energy at step (keV) for %s"         }, nx, xmin, xmax, ny, ymin, ymax}
-    };
-    for (p = 0; p < Nparts; p++) {
-      for (Int_t r = 0; r < Nregions; r++) {
-	for (Int_t t = 0; t < NH1T; t++) {
-	  TString Name(Types1[t].name.Name); Name += Particles[p].Name; Name += NameV[r];
-	  TString Title(Form(Types1[t].name.Title,Particles[p].Title,NameV[r]));
-	  histV1[r][t][p] = 
-	    new TH1D(Name,Title,Types1[t].nX,Types1[t].xMin,Types1[t].xMax);
-	}
-	for (Int_t t = 0; t < NH2T; t++) {
-	  TString Name(Types2[t].name.Name); Name += Particles[p].Name; Name += NameV[r];
-	  TString Title(Form(Types2[t].name.Title,Particles[p].Title,NameV[r]));
-	  histV2[r][t][p] = 
-	    new TH2D(Name,Title,Types2[t].nX,Types2[t].xMin,Types2[t].xMax,Types2[t].nY,Types2[t].yMin,Types2[t].yMax);//24,-180,180);
-	}
-      }
-    }
-    return;
-  }
-  // Fill histograms
-  Int_t Ipart = ckine->ipart%100;
-  p = ipartx (Ipart);
-  Double_t tofg10 = - 1;
-  if (ctrak->tofg > 0) tofg10 = TMath::Log10(1e9*ctrak->tofg);
-  tofg->Fill(tofg10,Ipart);
-  if (p < 0) return;
-  if (ctrak->gekin <= 0.0)       {
-    ctrak->istop = 2;
-    return;
-  }
-  if (ctrak->upwght < 1) ctrak->upwght = 1;
-  Int_t r = 0;
-  RR = TMath::Sqrt(ctrak->vect[0]*ctrak->vect[0] + ctrak->vect[1]*ctrak->vect[1]);
-  ZZ = ctrak->vect[2];
-  Double_t Phi = TMath::RadToDeg()*TMath::ATan2(ctrak->vect[1],ctrak->vect[0]);
-  if (Phi < -180) Phi += 360;
-  if (Phi >  180) Phi -= 360;
-  // calculate particle flux in sensitive volumes
-  if (! (ckine->charge == 0 && p < 0)) {
-    /*
-     * *** step cannot be bigger then 10 cm => suppose stright line in R/Z
-     */
-    if (ctrak->step > 0.0)        {
-      NstepB = ctrak->step + 0.5;
-      NstepB = TMath::Max (1, NstepB);
-      stepF  = ctrak->step/NstepB;
-      destepF  = 1e6*ctrak->destep/NstepB;
-      for (i = 1; i <= NstepB; i++) {
-	XYZ[0] = ctrak->vect[0] + ctrak->vect[3]*stepF*(0.5 - i);
-	XYZ[1] = ctrak->vect[1] + ctrak->vect[4]*stepF*(0.5 - i);
-	XYZ[2] = ctrak->vect[2] + ctrak->vect[5]*stepF*(0.5 - i);
-	RADIUS = TMath::Sqrt(XYZ[0]*XYZ[0] + XYZ[1]*XYZ[1]);
-	Double_t phi = TMath::RadToDeg()*TMath::ATan2(XYZ[1],XYZ[0]);
-	if (phi < -180) phi += 360;
-	if (phi >  180) phi -= 360;
-	histV2[r][0][p]->Fill(XYZ[2], RADIUS, stepF);
-	if (ctrak->gekin >= 1.E-4)    histV2[r][1][p]->Fill(XYZ[2], RADIUS, stepF);
-	if (ctrak->gekin <= 0.25E-9)  histV2[r][2][p]->Fill(XYZ[2], RADIUS, stepF);
-	if (cmate->dens > 2.E-3 && ctrak->destep > 0.0) 
-	  histV2[r][5][p]->Fill(XYZ[2], RADIUS, destepF/cmate->dens);
-	histV2[r][8][p]->Fill(XYZ[2], RADIUS, destepF);
-      }
-      histV1[r][0][p]->Fill(TMath::Log10(ctrak->gekin));
-      if (ctrak->vect[2] < 0.0) histV1[r][1][p]->Fill(TMath::Log10(ctrak->gekin));
-      if (ctrak->inwvol == 1) {
-	histV2[r][3][p]->Fill(ZZ, RR);
-      }
-      for (Int_t i = 0; i < cking->ngkine; i++) {
-	id = ((Int_t)cking->gkin[i][4])%100;
-	p = ipartx (id);
-	if (p >= 0) {
-	  Char_t name[12];
-	  Int_t itrtyp;
-	  Float_t mass, charge, tlife;
-	  TGiant3::Geant3()->Gfpart(id,name,itrtyp,mass,charge,tlife);
-	  histV2[r][4][p]->Fill(ZZ, RR);
-	  Double_t ekin = 
-	    TMath::Sqrt(cking->gkin[i][0]*cking->gkin[i][0] +
-			cking->gkin[i][1]*cking->gkin[i][1] +
-			cking->gkin[i][2]*cking->gkin[i][2] + mass*mass) - mass;
-	  ekin = TMath::Max (1e-14, ekin);
-	  histV1[r][2][p]->Fill(TMath::Log10(ekin));
-	}
-      }
-    }
-    // Star density
-    if (cking->ngkine > 0)        {
-      if (ctrak->vect[6] > 0.300 && p <= 0) {
-	for (Int_t i = 0; i < ctrak->nmec; i++) {
-	  if (ctrak->lmec[i] >= 12 && ctrak->lmec[i] <= 20) {
-	    histV2[r][6][p]->Fill(ZZ, RR); 
-	    OmegaN = dose(cmate->z);
-	    histV2[r][7][p]->Fill(ZZ, RR, OmegaN ); 
-	    break;
-	  }
-	}
-      }
-    }
-  }
-}
+  

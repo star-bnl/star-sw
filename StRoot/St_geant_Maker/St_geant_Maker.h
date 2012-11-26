@@ -1,7 +1,7 @@
-// $Id: St_geant_Maker.h,v 1.52 2012/11/14 00:02:12 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.53 2012/11/26 18:22:47 didenko Exp $
 // $Log: St_geant_Maker.h,v $
-// Revision 1.52  2012/11/14 00:02:12  fisyak
-// Add flux histograms, use Attributes intead of m_Mode
+// Revision 1.53  2012/11/26 18:22:47  didenko
+// updates for StarGenerator from Jason
 //
 // Revision 1.51  2011/09/11 20:57:14  fisyak
 // Add kinematics definition via MuDst, Clean up
@@ -103,13 +103,15 @@
 #ifdef DetectorIndex
 #include "TArrayI.h"
 #endif
-#include "TGiant3.h"
 class TVolume;
+class TGiant3;
 class TRotMatrix;
+class TH1F;
 class TShape;
 class TGeoVolume;
 class St_geom_gdat;
 class TFileSet;
+
 class St_geant_Maker : public StMaker {
 protected:
   Int_t  fNwGeant;     // No. of words in GCBANK common block
@@ -192,9 +194,7 @@ protected:
   Int_t   KinematicsFromMuDst(Int_t flag=0);
   Int_t   SetDatimeFromMuDst();
   static St_geant_Maker *instance() {return fgGeantMk;}
-  static void usflux();
-  static Int_t ipartx(Int_t id);
-  static Float_t dose(Float_t Z);
+  TGiant3 *Geant3(){ return geant3; }
  protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -204,24 +204,8 @@ protected:
    static St_geant_Maker *fgGeantMk; //!
    TString           mInitialization; // !
    TString           mFieldOpt; // !
-   static Quest_t   *cquest; //! 
-   static Gclink_t  *clink; //! 
-   static Gcflag_t  *cflag; //! 
-   static Gcvolu_t  *cvolu; //! 
-   static Gcnum_t   *cnum; //! 
-   static Int_t     *z_iq, *z_lq; //! 
-   static Float_t   *z_q; //! 
-   static Gcsets_t  *csets; //!
-   static Gckine_t  *ckine; //!
-   static Gcking_t  *cking; //!
-   static Gctrak_t  *ctrak; //!
-   static Gcmate_t  *cmate; //!
-   static Gccuts_t  *ccuts; //!
-   static Gcphys_t  *cphys; //!
-   static Int_t      nlev; //!
-
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.52 2012/11/14 00:02:12 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.53 2012/11/26 18:22:47 didenko Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
