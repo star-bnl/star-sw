@@ -46,8 +46,6 @@ void trig( Int_t n=0 )
 void Pythia8( TString config="pp:W" )
 {
 
-  gSystem->Load( "StarPythia8.so"   );
-
   //
   // Create the pythia 8 event generator and add it to 
   // the primary generator
@@ -88,10 +86,12 @@ void starsim( Int_t nevents=10 )
   }
 
   gSystem->Load( "libVMC.so");
-  
+
   gSystem->Load( "StarGeneratorUtil.so");
   gSystem->Load( "StarGeneratorEvent.so");
   gSystem->Load( "StarGeneratorBase.so" );
+
+  gSystem->Load( "Pythia8_1_62.so");
 
   gSystem->Load( "libMathMore.so"   );  
 
