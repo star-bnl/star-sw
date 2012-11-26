@@ -10,7 +10,7 @@
 /// finding and summary tools are also available.                        //
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
-#include <assert.h>
+#include <assert.h> 
 #include <stdlib.h>
 
 #ifdef __ROOT__
@@ -29,7 +29,7 @@
    PrintLogger(text,'D',"");           \
    NDC::pop();                         \
 }
-#endif
+#endif 
 //           echo -e "\033[31m ME \033[0m COOL"
 #define COLOR_NORMAL "\033[0m"
 #define COLOR_RED    "\033[31m"
@@ -39,7 +39,7 @@
 #define COLOR_PINK   "\033[35m"
 
 #include "StLoggerManager.h"
-bool StLoggerManager::mColorEnabled = false;
+bool StLoggerManager::mColorEnabled = true;
 
 #include <log4cxx/basicconfigurator.h>
 #include <log4cxx/propertyconfigurator.h>
@@ -80,17 +80,17 @@ static void Log4cxx4RootErrorHandler(Int_t level, Bool_t abort, const char *loca
    // The default error handler function. It prints the message on stderr and
    // if abort is set it aborts the application.
 
-
+   
  //  The level is defined by the current logger level
    NDC::push("ROOT");
-
+         
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,00,0)
 if (gErrorIgnoreLevel == kUnset) {
-
+      
        R__LOCKGUARD2(gErrorMutex);
-#else
-       {
-#endif
+#else 
+       {       
+#endif       
 
       gErrorIgnoreLevel = 0;
       if (gEnv) {
@@ -112,15 +112,15 @@ if (gErrorIgnoreLevel == kUnset) {
 
    if (level < gErrorIgnoreLevel)
       return;
-
+   
 
    if (level >= kFatal) {
         LOG_FATAL << location << msg << endm;
      } else if (level >= kSysError) {
-        LOG_FATAL << location << " : " << msg << endm;
+        LOG_FATAL << location << " : " << msg << endm;  
      } else if (level >= kBreak) {
-        LOG_FATAL << location << " : " << msg << endm;
-     } else if (level >= kError) {
+        LOG_FATAL << location << " : " << msg << endm;  
+     } else if (level >= kError) { 
         LOG_ERROR << location << " : " << msg << endm;
 //   else if (level >= kWarning)
 //        LOG_WARN << location << " : " << msg << endm;
@@ -168,16 +168,16 @@ StMessMgr* StLoggerManager::mInstance = 0;
 ClassImp(StLoggerManager)
 #endif
 //_____________________________________________________________________________
-StLoggerManager::StLoggerManager(const char *loggerName)
+StLoggerManager::StLoggerManager(const char *loggerName) 
                 : StMessMgr(), fCurType(0),fAllowRepeat(-1),fLastRepeatCounter(0),fStarOptionFilter(0)
 {
 //
 // Constructor - only called once when the library is loaded to
 // instantiate the global message manager.
 //
-// Format
+// Format 
 //   %c  - logger name %c{2} = b.c  ( a.b.c. )
-//   %d  - date        %d{%H:%M:%S} or %d{%d %b %Y %H:%M:%S}.
+//   %d  - date        %d{%H:%M:%S} or %d{%d %b %Y %H:%M:%S}. 
 //                      a - short week date name, A - full week date name
 //                      b - short month name,     B - full month name  m - month number (1-12)
 //                      d - day of the month
@@ -188,13 +188,13 @@ StLoggerManager::StLoggerManager(const char *loggerName)
 //   %m  - the application supplied message associated with the logging event
 //   %n  - the platform dependent line separator character or characters
 //   %p  - the level(priority) of the logging event
-//   %r  - the number of milliseconds elapsed since the start
-//   %x  - the NDC (nested diagnostic context)
+//   %r  - the number of milliseconds elapsed since the start 
+//   %x  - the NDC (nested diagnostic context) 
 //
 //   This is essentially the TTCC layout.
 //   %-6r [%15.15t] %-5p %30.30c %x - %m
 
-
+  
   unsigned int i;
   for (i=0;i<strlen(fgLevels);i++){
      fSourceFileNames.push_back("");
@@ -203,7 +203,7 @@ StLoggerManager::StLoggerManager(const char *loggerName)
   fLogger   = Logger::getLogger(_T(loggerName));
   fDefaultLevel = fLogger->getLevel();
 //  fCurType     = new char[ 2];  fCurType[0] = 0; fCurType[1] = 0;
-  fCurOpt      = new char[32];  fCurOpt [0] = 0;
+  fCurOpt      = new char[32];  fCurOpt [0] = 0; 
   SwitchOff("D");
   MemoryOn();
 }
@@ -224,7 +224,7 @@ StLoggerManager::~StLoggerManager() {
 
 }
 //_____________________________________________________________________________
-StMessMgr* StLoggerManager::Instantiate()
+StMessMgr* StLoggerManager::Instantiate() 
 {return StLoggerManager::StarLoggerInit(); }
 
 //_____________________________________________________________________________
@@ -232,7 +232,7 @@ StMessMgr* StLoggerManager::Instantiate(const char *loggerName)
 {return StLoggerManager::StarLoggerInit(loggerName); }
 
 //_____________________________________________________________________________
-StMessMgr* StLoggerManager::StarLoggerInit(const char *loggerName)
+StMessMgr* StLoggerManager::StarLoggerInit(const char *loggerName) 
 {
    return  new StLoggerManager(loggerName);
 }
@@ -248,8 +248,8 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
 #ifndef __ROOT__
     String propertyFile = "log4j.xml";
 #else
-    TString Color = gEnv->GetValue("Logger.Color","yes");
-    mColorEnabled = Color.CompareTo("yes",TString::kIgnoreCase);
+    TString Color = gEnv->GetValue("Logger.Color","no");
+    mColorEnabled = Color.CompareTo("no",TString::kIgnoreCase);
     TString fullPropertyFileName = gEnv->GetValue("Logger.Configuration","log4j.xml");
     gSystem->ExpandPathName(fullPropertyFileName);
     String propertyFile = (const char*)fullPropertyFileName;
@@ -260,16 +260,16 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
     if (!gSystem->AccessPathName(propertyFile.c_str())) {
        xml::DOMConfigurator::configure(propertyFile);
 //             PropertyConfigurator::configure(propertyFile);
-    } else {
+    } else {       
      	// BasicConfigurator::configure();
        LoggerPtr root = Logger::getRootLogger();
        // Add the STAR default appender
        ConsoleAppenderPtr appender = new ConsoleAppender(
 		      new PatternLayout("%-3c{2}:%-5p - %m%n"));
 //		      new PatternLayout(PatternLayout::TTCC_CONVERSION_PATTERN)));
-       appender->setName(_T("defaultAppender"));
+       appender->setName(_T("defaultAppender"));       
        root->addAppender(appender);
-       //Set the default threashold to be
+       //Set the default threashold to be 
        root->setLevel(LOG4CXX_LEVEL_INFO);
     }
     LoggerPtr root = Logger::getRootLogger();
@@ -282,7 +282,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
     if (ucmenv == "UCM" && gSystem->Getenv("JOBINDEX") && gSystem->Getenv("REQUESTID") ) {
        StUCMAppenderPtr appender(new StUCMAppender(ucmenv.Data()));
        appender->setLayout(new PatternLayout("%m"));
-       appender->setName(_T("UCM"));
+       appender->setName(_T("UCM"));       
        fgUCMLogger->addAppender(appender);
        StringMatchFilterPtr filter(new StringMatchFilter());
        filter->setStringToMatch(_T("StageID="));
@@ -290,7 +290,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
        appender->addFilter(filter);
        appender->addFilter( DenyAllFilterPtr(new DenyAllFilter));
 
-       //Set the default threashold to be
+       //Set the default threashold to be 
        fgUCMLogger->setLevel(LOG4CXX_LEVEL_DEBUG);
     }
 #endif
@@ -350,21 +350,21 @@ ostrstream& StLoggerManager::Message(const char* mess, const char* type,
 //
 //
 // Instantiate an StMessage and place on the lists of known messages
-// type =
+// type = 
 //   'E' - error
 //   'W' - warning
 //   'I' - info
 //   'D' - debug
-//   'Q' - QA
-//   'U' - UCM
+//   'Q' - QA 
+//   'U' - UCM 
 //------------------------------
 //
-// opt =
+// opt = 
 //   'O' - stdout
 //   'E' - stderr
 //   'S' - skip "St"
 //   'P' - plain output no decoration
-//   'T' - print timestampt
+//   'T' - print timestampt  
 //------------------------------
   unsigned char typeChar = 'I';
   if (type && type[0]) typeChar = type[0];
@@ -374,11 +374,11 @@ ostrstream& StLoggerManager::Message(const char* mess, const char* type,
   fCurType = typeChar;
   strcpy(fCurOpt,opt);
 //  if (tellp() > 0 ) *this << endm;  // print out the previous line if any
-
+  
   if (sourceFileName && sourceFileName[0] ) fSourceFileNames[LevelIndex(fCurType)] = sourceFileName;
   else fSourceFileNames[LevelIndex(fCurType)].clear();
   fLineNumbers[LevelIndex(fCurType)]     = lineNumber;
-
+ 
 //  if (messSize > 0) *this << mess << endm; // print out the previous this message if present
 //   return *((StMessMgr*) this);
   return Stream();
@@ -388,22 +388,22 @@ void StLoggerManager::BuildMessage(const char* mess, unsigned char type,
   const char* opt,const char *sourceFileName, int lineNumber) {
 //
 // Instantiate an StMessage and place on the lists of known messages
-// type =
+// type = 
 //   'F' - fatal
 //   'E' - error
 //   'W' - warning
 //   'I' - info
 //   'D' - debug
-//   'Q' - QA
-//   'U' - UCM
+//   'Q' - QA 
+//   'U' - UCM 
 //------------------------------
 //
-// opt =
+// opt = 
 //   'O' - stdout
 //   'E' - stderr
 //   'S' - skip "St"
 //   'P' - plain output no decoartion
-//   'T' - print timestampt
+//   'T' - print timestampt  
 //------------------------------
 
      if (!opt) opt = "";
@@ -411,18 +411,18 @@ void StLoggerManager::BuildMessage(const char* mess, unsigned char type,
 }
 //_____________________________________________________________________________
 void StLoggerManager::PrintLogger(const char* mess, unsigned char type,
-    const char* opt,const char *sourceFileName, int lineNumber)
+    const char* opt,const char *sourceFileName, int lineNumber) 
 {
   if (!opt) opt = "";
   unsigned char typeChar = 'I';
   //  if (type && type[0]) typeChar = type[0];
   if (type) typeChar = type;
-  if (!(sourceFileName || fSourceFileNames[LevelIndex(typeChar)].empty() ) )
+  if (!(sourceFileName || fSourceFileNames[LevelIndex(typeChar)].empty() ) ) 
     {
       sourceFileName = fSourceFileNames[LevelIndex(typeChar)].c_str();
     }
-
-  if ( lineNumber == -1)
+  
+  if ( lineNumber == -1) 
     lineNumber = fLineNumbers[LevelIndex(typeChar)];
   bool canPrint = true;
   if (fAllowRepeat >= 0 ) {
@@ -436,32 +436,19 @@ void StLoggerManager::PrintLogger(const char* mess, unsigned char type,
     }
   }
   if (canPrint) {
-    if ( (mess == 0) || (mess[0] == 0)) mess = "."; // logger doesn't like the empty messages
+    if ( (mess == 0) || (mess[0] == 0)) mess = "."; // logger doesn't like the empty messages 
     // fprintf(stderr, " **** LOGGER **** %c %s\n", typeChar, mess);
     if (mColorEnabled) {
-      //TString Mess(mess);
-      //
-      // fLogger->XXX does not take TSring but char * under older log4cxx version
-      //
+      TString Mess(mess);
       switch (typeChar)  {
-      case 'F': fLogger->fatal   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'E': fLogger->error   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'W': fLogger->warn    (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'I': fLogger->info    (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'D': fLogger->debug   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'Q': fgQALogger->info (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-      case 'U': fgUCMLogger->info(_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-      default: fLogger->info     (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
-
-
-	//case 'F': fLogger->fatal   (_T(COLOR_PINK   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-	//case 'E': fLogger->error   (_T(COLOR_RED    + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-	//case 'W': fLogger->warn    (_T(COLOR_YELLOW + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-	//case 'I': fLogger->info    (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-	//case 'D': fLogger->debug   (_T(COLOR_BLUE   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-	//case 'Q': fgQALogger->info (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-	//case 'U': fgUCMLogger->info(_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
-	//default: fLogger->info     (_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'F': fLogger->fatal   (_T(COLOR_PINK   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'E': fLogger->error   (_T(COLOR_RED    + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'W': fLogger->warn    (_T(COLOR_YELLOW + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'I': fLogger->info    (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'D': fLogger->debug   (_T(COLOR_BLUE   + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'Q': fgQALogger->info (_T(COLOR_GREEN  + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      case 'U': fgUCMLogger->info(_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
+      default: fLogger->info     (_T(COLOR_NORMAL + Mess + COLOR_NORMAL),LocationInfo(sourceFileName,"",lineNumber)); break;
       };
     } else {
       switch (typeChar)  {
@@ -554,7 +541,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.45 2012/10/05 17:16:33 jeromel Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.46 2012/11/26 01:41:51 fisyak Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -568,15 +555,15 @@ void StLoggerManager::PrintInfo() {
 ostrstream& StLoggerManager::Info(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "I", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
-int StLoggerManager::PrintInfos()
+int StLoggerManager::PrintInfos() 
 {
    _NO_IMPLEMENTATION_;
    return 0;
-   // return PrintList(messCollection[1]);
+   // return PrintList(messCollection[1]); 
 }
 //_____________________________________________________________________________
-const messVec* StLoggerManager::GetInfos()
-{
+const messVec* StLoggerManager::GetInfos() 
+{   
    _NO_IMPLEMENTATION_;
    return 0;
    // return (messCollection[1]);
@@ -592,7 +579,7 @@ StMessage* StLoggerManager::FindInfo(const char* s1, const char* s2,
 //_____________________________________________________________________________
 messVec* StLoggerManager::FindInfoList(const char* s1, const char* s2,
                                        const char* s3, const char* s4)
-{
+{   
    _NO_IMPLEMENTATION_;
    return 0;
    // return FindMessageList(s1,s2,s3,s4,messCollection[1]);
@@ -605,14 +592,14 @@ messVec* StLoggerManager::FindInfoList(const char* s1, const char* s2,
 ostrstream& StLoggerManager::Warning(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "W", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
-int StLoggerManager::PrintWarnings()
-{
+int StLoggerManager::PrintWarnings() 
+{  
    _NO_IMPLEMENTATION_;
    return 0;
-   // return PrintList(messCollection[2]);
+   // return PrintList(messCollection[2]); 
 }
 //_____________________________________________________________________________
-const messVec* StLoggerManager::GetWarnings()
+const messVec* StLoggerManager::GetWarnings() 
 {
    _NO_IMPLEMENTATION_;
    return 0;
@@ -642,14 +629,14 @@ messVec* StLoggerManager::FindWarningList(const char* s1, const char* s2,
 ostrstream& StLoggerManager::Error(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "E", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
-int StLoggerManager::PrintErrors()
+int StLoggerManager::PrintErrors() 
 {
    _NO_IMPLEMENTATION_;
    return 0;
-   //return PrintList(messCollection[3]);
+   //return PrintList(messCollection[3]); 
 }
 //_____________________________________________________________________________
-const messVec* StLoggerManager::GetErrors()
+const messVec* StLoggerManager::GetErrors() 
 {
    _NO_IMPLEMENTATION_;
    return 0;
@@ -666,7 +653,7 @@ StMessage* StLoggerManager::FindError(const char* s1, const char* s2,
 //_____________________________________________________________________________
 messVec* StLoggerManager::FindErrorList(const char* s1, const char* s2,
                                         const char* s3, const char* s4)
-{
+{  
    _NO_IMPLEMENTATION_;
    return 0;
     // return FindMessageList(s1,s2,s3,s4,messCollection[3]);
@@ -679,14 +666,14 @@ messVec* StLoggerManager::FindErrorList(const char* s1, const char* s2,
 ostrstream& StLoggerManager::Debug(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "D", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
-int StLoggerManager::PrintDebug()
+int StLoggerManager::PrintDebug() 
 {
    _NO_IMPLEMENTATION_;
    return 0;
-   //   return PrintList(messCollection[4]);
+   //   return PrintList(messCollection[4]); 
 }
 //_____________________________________________________________________________
-const messVec* StLoggerManager::GetDebugs()
+const messVec* StLoggerManager::GetDebugs() 
 {
 _NO_IMPLEMENTATION_;   return 0;
 
@@ -702,7 +689,7 @@ StMessage* StLoggerManager::FindDebug(const char* s1, const char* s2,
 //_____________________________________________________________________________
 messVec* StLoggerManager::FindDebugList(const char* s1, const char* s2,
                                         const char* s3, const char* s4)
-{
+{    
 _NO_IMPLEMENTATION_;   return 0;
     // return FindMessageList(s1,s2,s3,s4,messCollection[4]);
 }
@@ -721,20 +708,20 @@ ostrstream& StLoggerManager::UCMInfo(const char* mess, const char* opt,const cha
 { return Message(mess, "U", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
 void StLoggerManager::IgnoreRepeats()
-{
+{ 
     AllowRepeats(0);
 }
 
 //_____________________________________________________________________________
 void StLoggerManager::AllowRepeats(int nRepeats)
-{
+{  
    // fAllowRepeat   > 0 the max number to repeat one and the same message
    //               == 0 the repating is not allowed
    //               == -1 there is no limit;
    fAllowRepeat       = nRepeats;
    fLastRepeatCounter = 0;
    StarOptionFilterPtr& filter = ((StLoggerManager *)mInstance)->GetStarOptionFilter();
-   if (filter != 0 )
+   if (filter != 0 ) 
        filter->setRepeatCounterOption(nRepeats);
 
 }
@@ -742,19 +729,19 @@ void StLoggerManager::AllowRepeats(int nRepeats)
 
 //_____________________________________________________________________________
 void StLoggerManager::AllowRepeats()
-{
+{ 
    AllowRepeats(-1);
 }
 
 
 //_____________________________________________________________________________
-int StLoggerManager::PrintQAInfo()
-{
+int StLoggerManager::PrintQAInfo() 
+{ 
 _NO_IMPLEMENTATION_;   return 0;
-    // return PrintList(messCollection[5]);
+    // return PrintList(messCollection[5]); 
 }
 //_____________________________________________________________________________
-const messVec* StLoggerManager::GetQAInfos()
+const messVec* StLoggerManager::GetQAInfos() 
 {
 _NO_IMPLEMENTATION_;   return 0;
   // return (messCollection[5]);
@@ -775,13 +762,13 @@ _NO_IMPLEMENTATION_;   return 0;
 }
 
 //_____________________________________________________________________________
-int StLoggerManager::PrintUCMInfo()
-{
+int StLoggerManager::PrintUCMInfo() 
+{ 
 _NO_IMPLEMENTATION_;   return 0;
-    // return PrintList(messCollection[5]);
+    // return PrintList(messCollection[5]); 
 }
 //_____________________________________________________________________________
-const messVec* StLoggerManager::GetUCMInfos()
+const messVec* StLoggerManager::GetUCMInfos() 
 {
 _NO_IMPLEMENTATION_;   return 0;
   // return (messCollection[5]);
@@ -817,18 +804,18 @@ ostrstream& StLoggerManager::err(const char* mess)
 
 // Dummy methods
 //_____________________________________________________________________________
-int StLoggerManager::PrintAll()
-{
+int StLoggerManager::PrintAll() 
+{  
 _NO_IMPLEMENTATION_;   return 0;
-  //  return PrintList(&messList);
+  //  return PrintList(&messList);        
 }
 
 //_____________________________________________________________________________
-const messVec* StLoggerManager::GetAll()
+const messVec* StLoggerManager::GetAll() 
 {
 _NO_IMPLEMENTATION_;   return 0;
-
-//   return (&messList);
+ 
+//   return (&messList);                 
 }
 
 //_____________________________________________________________________________
@@ -838,7 +825,7 @@ int StLoggerManager::RemoveMessage(const char* s1, const char* s2,
 
 //_____________________________________________________________________________
 void StLoggerManager::SetLimit(const char* str, int n)
-{
+{  
      if (str && str[0] && str[1]) {
         LoggerPtr root = Logger::getRootLogger();
          AppenderPtr defaultAppender = root->getAppender(_T("defaultAppender"));
@@ -846,25 +833,25 @@ void StLoggerManager::SetLimit(const char* str, int n)
            StarOptionFilterPtr filter = new StarOptionFilter();
            filter->setRepeatCounterOption(n);
            filter->setOption(_T("StringToCount"),str);
-//           cout << endl<< "--  Appedner " << defaultAppender->getName() << " -* -* -* -* -* -* -* -* "
-//                 << str << "n = " << n << " -* -* -* -* -* -* -* -* " << endl << endl;
+//           cout << endl<< "--  Appedner " << defaultAppender->getName() << " -* -* -* -* -* -* -* -* " 
+//                 << str << "n = " << n << " -* -* -* -* -* -* -* -* " << endl << endl;               
            defaultAppender->addFilter(filter);
         }
     }
-
-//   messCounter->SetLimit(str,n);
+  
+//   messCounter->SetLimit(str,n);                               
 }
 //_____________________________________________________________________________
 int StLoggerManager::GetLimit(const char* str)
-{
+{  
 _NO_IMPLEMENTATION_;   return -1;
-   // return messCounter->GetLimit(str);
+   // return messCounter->GetLimit(str);                          
 }
 //_____________________________________________________________________________
-void StLoggerManager::ListLimits()
-{
+void StLoggerManager::ListLimits() 
+{  
 _NO_IMPLEMENTATION_;
-// messCounter->ListLimits();
+// messCounter->ListLimits();                                  
 }
 //_____________________________________________________________________________
 void StLoggerManager::Close()
@@ -875,44 +862,44 @@ void StLoggerManager::Close()
    if (fgUCMLogger) fgUCMLogger->closeNestedAppenders();
 }
 //_____________________________________________________________________________
-void StLoggerManager::RemoveLimit(const char* str)
+void StLoggerManager::RemoveLimit(const char* str) 
 {  SetLimit(str,-1);                                           }
 //_____________________________________________________________________________
-void StLoggerManager::SwitchOff(const char* str)
+void StLoggerManager::SwitchOff(const char* str) 
 { SetLimit(str,0);                                             }
 //_____________________________________________________________________________
-void StLoggerManager::SwitchOn(const char* str)
+void StLoggerManager::SwitchOn(const char* str) 
 {  RemoveLimit(str);                                           }
 //_____________________________________________________________________________
-void StLoggerManager::FixOn(const char* str)
+void StLoggerManager::FixOn(const char* str) 
 {  SetLimit(str,-5);                                           }
 //_____________________________________________________________________________
-void StLoggerManager::NoLimits()
-{
+void StLoggerManager::NoLimits() 
+{  
 _NO_IMPLEMENTATION_;
-// messCounter->NoLimits();
+// messCounter->NoLimits();                                    
 }
 //_____________________________________________________________________________
-void StLoggerManager::MemoryOn()
-{
+void StLoggerManager::MemoryOn() 
+{  
 _NO_IMPLEMENTATION_;
-//   remember=1;
+//   remember=1;                                                 
 }
 //_____________________________________________________________________________
-void StLoggerManager::MemoryOff()
+void StLoggerManager::MemoryOff() 
 {
 _NO_IMPLEMENTATION_;
-// remember=0;
+// remember=0;                                                 
 }
 //_____________________________________________________________________________
-int StLoggerManager::ListTypes()
-{
+int StLoggerManager::ListTypes() 
+{ 
 _NO_IMPLEMENTATION_;   return 5;
-//   return messTypeList->ListTypes();
+//   return messTypeList->ListTypes();                           
 }
 
 //_____________________________________________________________________________
-void StLoggerManager::SetLevel(Int_t level)
+void StLoggerManager::SetLevel(Int_t level) 
 {
    // Map STAR level to the logger level and set the logger level
    switch (level) {
@@ -930,7 +917,7 @@ void StLoggerManager::SetLevel(Int_t level)
          break;
       case kAll:
       case kDebug:
-      case kDebug2:
+      case kDebug2: 
          fLogger->setLevel(LOG4CXX_LEVEL_DEBUG);
          break;
       case kDefault:
@@ -939,17 +926,17 @@ void StLoggerManager::SetLevel(Int_t level)
          break;
       default:
          fLogger->setLevel(LOG4CXX_LEVEL_DEBUG);
-         break;
-   };
+         break;            
+   };   
 }
 //_____________________________________________________________________________
-Int_t StLoggerManager::GetLevel(Int_t) const
+Int_t StLoggerManager::GetLevel(Int_t) const 
 {
    // Map the current logger level to the STAR one
 #if 0
    const LevelPtr &level = fLogger->getLevel();
-        if (level == &LOG4CXX_LEVEL_DEBUG)  return kDebug;
-   else if (level == &LOG4CXX_LEVEL_FATAL)  return kFatal;
+        if (level == &LOG4CXX_LEVEL_DEBUG)  return kDebug; 
+   else if (level == &LOG4CXX_LEVEL_FATAL)  return kFatal;  
    else if (level == &LOG4CXX_LEVEL_ERROR)  return kError;
    else if (level == &LOG4CXX_LEVEL_WARN )  return kWarning;
    else if (level == &LOG4CXX_LEVEL_INFO )  return kInfo;
@@ -973,13 +960,13 @@ void StLoggerManager:: DestroyInstance()
 }
 #if 0
 //_____________________________________________________________________________
-const char *GetName()
+const char *GetName() 
 {
   // Returns the name of the current logger
   CurrentMessager()
 }
 #endif
-
+   
 //_____________________________________________________________________________
   // Instantiate the (singleton) class upon loading
   //
@@ -987,20 +974,10 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.45 2012/10/05 17:16:33 jeromel Exp $
+// $Id: StLoggerManager.cxx,v 1.46 2012/11/26 01:41:51 fisyak Exp $
 // $Log: StLoggerManager.cxx,v $
-// Revision 1.45  2012/10/05 17:16:33  jeromel
-// [no real change, trim trailing spaces]
-//
-// Revision 1.44  2012/10/05 17:14:32  jeromel
-// Made no color the default (set yes to Logger.color to yes if one wants to enable)
-//
-// For now, restored no color as fLogger->XXX does not take TSring but char * under
-// older log4cxx version (compilation would break). Other solution to be found later.
-//
-// A side note that a xml based setting for colors (including which color goes to
-// what level of messages) is likely the proper approach to avoid mixing config
-// approach.
+// Revision 1.46  2012/11/26 01:41:51  fisyak
+// Restore color
 //
 // Revision 1.43  2012/10/05 14:16:48  fisyak
 // Change default from color => non color
