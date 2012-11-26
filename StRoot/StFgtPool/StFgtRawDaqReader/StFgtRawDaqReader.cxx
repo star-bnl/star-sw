@@ -178,15 +178,21 @@ Int_t StFgtRawDaqReader::Make() {
             apv=dd->pad;
             rdo=dd->rdo;
             timebin=f[i].tb;
-	    //corrupted data in non existing channels
-	    if(apv>=22 || apv <  0 || apv ==10|| apv==11)   	continue;
-	    if(arm<0 || arm> 4)		                        continue;
-	    if(timebin>7)		                        continue;
-	    if(channel>=128)		                        continue;
-	    if(rdo<1 || rdo > 2)		                continue;
-            Short_t discIdx=0;  // will be set with getNaivePhysCoordFromElecCoord
 
-#if 1
+	    int flag=0;
+	    //corrupted data in non existing channels
+	    if(rdo<1 || rdo > kFgtNumRdos)	                flag=1;
+	    if(arm<0 || arm>=kFgtNumArms)	                flag=1;
+	    if(apv>=22 || apv <  0 || apv ==10|| apv==11)   	flag=1;
+	    if(channel<0 || channel>=kFgtNumChannels)	        flag=1;
+	    if(timebin<0 || timebin>=kFgtNumTimeBins)	        flag=1;
+	    //LOG_INFO<< "rdo: " << rdo <<" arm: " << arm <<" apv: " << apv <<" channel: " << channel <<" tbin: "<<timebin<<endm;
+	    if(flag==1){
+	      LOG_INFO<< "Corrupt data  rdo: " << rdo <<" arm: " << arm <<" apv: " << apv <<" channel: " << channel <<" tbin: "<<timebin<<endm;
+	      continue;
+	    }
+	    
+#if 0
 	    // year 2012 exclusions -- adjusted (bug fixed) 02/29/12 by sgliske
 	    //            if( ( (rdo==1 && arm==1) || (rdo==2 && arm==2) || (rdo==1 && arm==4) ) && apv>4 && apv<10 ) continue;
 	    //            if( ( (rdo==2 && arm==1) || (rdo==1 && arm==3) || (rdo==2 && arm==4) ) && apv<5 ) continue;
@@ -194,24 +200,24 @@ Int_t StFgtRawDaqReader::Make() {
 	    //            if( ( (rdo==1 && arm==2) || (rdo==2 && arm==3) || (rdo==2 && arm==4) ) && apv>9 && apv<17) continue;
             // end of 2012 exclusions
 #endif 
+            Short_t discIdx=0;  // will be set with getNaivePhysCoordFromElecCoord
             Short_t quad, strip;
             Char_t layer;
             Int_t geoId = ( mIsCosmic
-                              ? StFgtCosmicTestStandGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel)
-                              : fgtTables->getGeoIdFromElecCoord(rdo, arm, apv, channel) 
-                              );
+			    ? StFgtCosmicTestStandGeom::getNaiveGeoIdFromElecCoord(rdo,arm,apv,channel)
+			    : fgtTables->getGeoIdFromElecCoord(rdo, arm, apv, channel) 
+			    );
             StFgtGeom::decodeGeoId( geoId, discIdx, quad, layer, strip );
-	    if(apv>21)
-	      cout <<"is cosmic: " << mIsCosmic << " rdo: " << rdo <<" arm: " << arm <<" apv: " << apv <<" channel: " << channel <<endl;
-	    if(strip <0)
-	      {
-	      cout <<"geoId: " << geoId <<" discIdx: " << discIdx << " quad: " << quad << " layer: " << layer <<" strip: " << strip <<endl;
-	      cout <<"is cosmic: " << mIsCosmic << " rdo: " << rdo <<" arm: " << arm <<" apv: " << apv <<" channel: " << channel <<endl;
-	      }
-            assert( discIdx > -1 );
-            assert( quad > -1 );
-            assert( strip > -1 );
-
+            if(discIdx < 0 || discIdx >= kFgtNumDiscs)  flag=1;
+            if(quad <0 || quad >= kFgtNumQuads)         flag=1;
+            if(layer != 'P' && layer != 'R')            flag=1;
+	    if(strip < 0 || strip >= kFgtNumStrips)     flag=1;
+	    if(flag==1){
+	      LOG_INFO<<"Wrong geoId: " << geoId <<" discIdx: " << discIdx << " quad: " << quad << " layer: " << layer <<" strip: " << strip
+		      <<" is cosmic: " << mIsCosmic << " rdo: " << rdo <<" arm: " << arm <<" apv: " << apv <<" channel: " << channel <<endm;
+	      continue;
+	    }
+	      
 	    // cout << "AAA " << GetEventNumber() << " | " << rdo << ' ' << arm << ' ' << apv << ' ' << channel << " | " << geoId << ' ' << discIdx << ' ' << quad << ' ' << layer << ' ' << strip << ' '<<timebin<<endl;
             /* DEBUGGING
                if( timebin == 1 ){
@@ -279,8 +285,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.10 2012/08/23 20:05:35 avossen Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.11 2012/11/26 15:20:35 akio Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.11  2012/11/26 15:20:35  akio
+ * remove some hardcoded numbers, and use StEnumeration
+ *
  * Revision 1.10  2012/08/23 20:05:35  avossen
  * commented out year 12 exclusions
  *
