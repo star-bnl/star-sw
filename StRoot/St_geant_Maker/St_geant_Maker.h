@@ -1,7 +1,11 @@
-// $Id: St_geant_Maker.h,v 1.53 2012/11/26 18:22:47 didenko Exp $
+// $Id: St_geant_Maker.h,v 1.54 2012/11/26 18:45:55 jwebb Exp $
 // $Log: St_geant_Maker.h,v $
-// Revision 1.53  2012/11/26 18:22:47  didenko
-// updates for StarGenerator from Jason
+// Revision 1.54  2012/11/26 18:45:55  jwebb
+// Restoring to previous version of St_geant_Maker and adding in changes needed
+// for new generator framework (i.e. exposing TGiant3 instance).
+//
+// Revision 1.52  2012/11/14 00:02:12  fisyak
+// Add flux histograms, use Attributes intead of m_Mode
 //
 // Revision 1.51  2011/09/11 20:57:14  fisyak
 // Add kinematics definition via MuDst, Clean up
@@ -103,15 +107,13 @@
 #ifdef DetectorIndex
 #include "TArrayI.h"
 #endif
+#include "TGiant3.h"
 class TVolume;
-class TGiant3;
 class TRotMatrix;
-class TH1F;
 class TShape;
 class TGeoVolume;
 class St_geom_gdat;
 class TFileSet;
-
 class St_geant_Maker : public StMaker {
 protected:
   Int_t  fNwGeant;     // No. of words in GCBANK common block
@@ -138,9 +140,11 @@ protected:
    virtual Int_t  InitRun(Int_t run);
    virtual void   SetDateTime(int idat=0,int itim=0);//
            void   SetFieldOpt(const char *opt) {mFieldOpt = opt;}
+   /// Executes a KUIP command
    virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
    virtual void   Draw(const char* opt="IN");
    virtual Int_t  Make();
+   /// Specifies GEANT3 geometry command
    virtual void   LoadGeometry (const Char_t *option = "detp geometry field_only");  // *MENU
    virtual void   SetNwGEANT (Int_t n=2) {fNwGeant = n;}
    virtual void   SetNwPAW   (Int_t n=0) {fNwPaw   = n;}
@@ -194,6 +198,10 @@ protected:
   Int_t   KinematicsFromMuDst(Int_t flag=0);
   Int_t   SetDatimeFromMuDst();
   static St_geant_Maker *instance() {return fgGeantMk;}
+  static void usflux();
+  static Int_t ipartx(Int_t id);
+  static Float_t dose(Float_t Z);
+  /// Returns a pointer to the GEANT3 VMC interface
   TGiant3 *Geant3(){ return geant3; }
  protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
@@ -204,8 +212,24 @@ protected:
    static St_geant_Maker *fgGeantMk; //!
    TString           mInitialization; // !
    TString           mFieldOpt; // !
+   static Quest_t   *cquest; //! 
+   static Gclink_t  *clink; //! 
+   static Gcflag_t  *cflag; //! 
+   static Gcvolu_t  *cvolu; //! 
+   static Gcnum_t   *cnum; //! 
+   static Int_t     *z_iq, *z_lq; //! 
+   static Float_t   *z_q; //! 
+   static Gcsets_t  *csets; //!
+   static Gckine_t  *ckine; //!
+   static Gcking_t  *cking; //!
+   static Gctrak_t  *ctrak; //!
+   static Gcmate_t  *cmate; //!
+   static Gccuts_t  *ccuts; //!
+   static Gcphys_t  *cphys; //!
+   static Int_t      nlev; //!
+
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.53 2012/11/26 18:22:47 didenko Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.54 2012/11/26 18:45:55 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
