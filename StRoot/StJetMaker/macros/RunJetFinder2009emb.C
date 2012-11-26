@@ -5,8 +5,8 @@
 //
 
 void RunJetFinder2009emb(int nevents = 1e6,
-			 const char* mudstfile = "../eliza14/SL11d_embed/10148002/pt11_15_10148002_1.MuDst.root",
-                         const char* geantfile = "../eliza14/SL11d_embed/10148002/pt11_15_10148002_1.geant.root",
+			 const char* mudstfile = "../eliza17/SL11d_embed/10120032/pt11_15_10120032_1.MuDst.root",
+                         const char* geantfile = "../eliza17/SL11d_embed/10120032/pt11_15_10120032_1.geant.root",
 			 const char* jetfile   = "jets.root",
 			 const char* skimfile  = "skim.root",
 			 bool useL2 = true)
@@ -87,7 +87,7 @@ void RunJetFinder2009emb(int nevents = 1e6,
   if (useL2) {
     simL2Mk = new StL2_2009EmulatorMaker;
     simL2Mk->setSetupPath("/home/pibero/public/StarTrigSimuSetup/");
-    simL2Mk->setOutPath("../eliza17/L2/");
+    simL2Mk->setOutPath("../eliza14/L2/");
   }
   StTriggerSimuMaker* simuTrig = new StTriggerSimuMaker;
   simuTrig->setMC(2); // 0=data, 1=simulation, 2=embedding
@@ -301,7 +301,7 @@ void RunJetFinder2009emb(int nevents = 1e6,
   CdfMidpointR070Pars->setRparam(coneRadius);
   CdfMidpointR070Pars->setRecombinationScheme(StFastJetPars::E_scheme);
   CdfMidpointR070Pars->setStrategy(StFastJetPars::plugin_strategy);
-  CdfMidpointR070Pars->setPtMin(5.0);
+  CdfMidpointR070Pars->setPtMin(3.0);
 
   const double overlapThreshold = 0.75;
   const double seedThreshold = 0.5;
@@ -316,7 +316,7 @@ void RunJetFinder2009emb(int nevents = 1e6,
   AntiKtR060Pars->setRparam(0.6);
   AntiKtR060Pars->setRecombinationScheme(StFastJetPars::E_scheme);
   AntiKtR060Pars->setStrategy(StFastJetPars::Best);
-  AntiKtR060Pars->setPtMin(5.0);
+  AntiKtR060Pars->setPtMin(3.0);
 
   // Set anti-kt R=0.5 parameters
   StFastJetPars* AntiKtR050Pars = new StFastJetPars;
@@ -324,7 +324,7 @@ void RunJetFinder2009emb(int nevents = 1e6,
   AntiKtR050Pars->setRparam(0.5);
   AntiKtR050Pars->setRecombinationScheme(StFastJetPars::E_scheme);
   AntiKtR050Pars->setStrategy(StFastJetPars::Best);
-  AntiKtR050Pars->setPtMin(5.0);
+  AntiKtR050Pars->setPtMin(3.0);
 
   jetmaker->addBranch("CdfMidpointR070NHits12",anapars12,CdfMidpointR070Pars);
   jetmaker->addBranch("CdfMidpointR070NHits5",anapars5,CdfMidpointR070Pars);
