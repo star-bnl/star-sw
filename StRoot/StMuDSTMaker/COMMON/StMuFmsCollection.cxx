@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFmsCollection.cxx,v 1.1 2010/01/25 03:57:39 tone421 Exp $
+ * $Id: StMuFmsCollection.cxx,v 1.2 2012/11/26 23:14:33 fisyak Exp $
  *
  * Author: Jingguo Ma, Dec 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuFmsCollection.cxx,v $
+ * Revision 1.2  2012/11/26 23:14:33  fisyak
+ * Replace GetEntries() by GetEntriesFast(), fix print outs
+ *
  * Revision 1.1  2010/01/25 03:57:39  tone421
  * Added FMS and Roman pot arrays
  *
@@ -17,7 +20,7 @@
 #include "StMuFmsCollection.h"
 #include "StMuFmsHit.h"
 
-static const char rcsid[] = "$Id: StMuFmsCollection.cxx,v 1.1 2010/01/25 03:57:39 tone421 Exp $";
+static const char rcsid[] = "$Id: StMuFmsCollection.cxx,v 1.2 2012/11/26 23:14:33 fisyak Exp $";
 
 ClassImp(StMuFmsCollection)
 
@@ -36,7 +39,7 @@ void StMuFmsCollection::addHit(){
 
 unsigned int StMuFmsCollection::numberOfHits() const{
   if(!mHits) return 0;
-  return mHits->GetEntries();
+  return mHits->GetEntriesFast();
 }
 
 StMuFmsHit*  StMuFmsCollection::getHit(int hitId){

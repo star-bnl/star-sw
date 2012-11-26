@@ -216,7 +216,7 @@ int StMuEmcCollection::getNClusters(int detector) const
   //cout << "DEBUG :: detector bemc bsmdp " 
   //     << detector << " " << bemc << " " << bsmdp << endl;
 
-  if (tca) return tca->GetEntries();
+  if (tca) return tca->GetEntriesFast();
   else     return 0;
 }
 
@@ -227,7 +227,7 @@ StMuEmcCluster* StMuEmcCollection::getCluster(int clusterId,int detector)
   TClonesArray *tca = NULL;
   if(detector>=bemc && detector <= bsmdp) tca = mEmcClusters[detector-bemc];
   else tca = mEndcapEmcClusters[detector-eemc];
-  int counter = tca->GetEntries();
+  int counter = tca->GetEntriesFast();
   if(clusterId<0 || clusterId>counter) return NULL;
   return (StMuEmcCluster*)tca->At(clusterId);
 }
@@ -239,7 +239,7 @@ const StMuEmcCluster* StMuEmcCollection::getCluster(int clusterId,int detector) 
   const TClonesArray *tca = NULL;
   if(detector>=bemc && detector <= bsmdp) tca = mEmcClusters[detector-bemc];
   else tca = mEndcapEmcClusters[detector-eemc];
-  int counter = tca->GetEntries();
+  int counter = tca->GetEntriesFast();
   if(clusterId<0 || clusterId>counter) return NULL;
   return (const StMuEmcCluster*)tca->At(clusterId);
 }
@@ -248,7 +248,7 @@ int StMuEmcCollection::getNPoints() const
 {
   if (!mPrsHits) return 0;
   const TClonesArray *tca =mEmcPoints;
-  if (tca)  return tca->GetEntries();
+  if (tca)  return tca->GetEntriesFast();
   else      return 0;
 }
 
@@ -256,7 +256,7 @@ int StMuEmcCollection::getNEndcapPoints() const
 {
   if (!mPrsHits) return 0;
   const TClonesArray *tca =mEndcapEmcPoints;
-  if (tca)  return tca->GetEntries();
+  if (tca)  return tca->GetEntriesFast();
   else      return 0;
 }
 
@@ -264,7 +264,7 @@ StMuEmcPoint* StMuEmcCollection::getPoint(int pointId)
 {
   if (!mPrsHits) return 0;
   TClonesArray *tca =mEmcPoints;
-  int counter = tca->GetEntries();
+  int counter = tca->GetEntriesFast();
   if(pointId<0 || pointId>counter) return NULL;
   return (StMuEmcPoint*)tca->At(pointId);
 }
@@ -273,7 +273,7 @@ const StMuEmcPoint* StMuEmcCollection::getPoint(int pointId) const
 {
   if (!mPrsHits) return 0;
   const TClonesArray *tca =mEmcPoints;
-  int counter = tca->GetEntries();
+  int counter = tca->GetEntriesFast();
   if(pointId<0 || pointId>counter) return NULL;
   return (const StMuEmcPoint*)tca->At(pointId);
 }
@@ -284,7 +284,7 @@ StMuEmcPoint* StMuEmcCollection::getEndcapPoint(int pointId)
   TClonesArray *tca =mEndcapEmcPoints;
 
   if (tca){
-    int counter = tca->GetEntries();
+    int counter = tca->GetEntriesFast();
     if(pointId<0 || pointId>counter) return NULL;
     return (StMuEmcPoint*)tca->At(pointId);
   } else {
@@ -298,7 +298,7 @@ const StMuEmcPoint* StMuEmcCollection::getEndcapPoint(int pointId) const
   const TClonesArray *tca =mEndcapEmcPoints;
 
   if (tca){
-    int counter = tca->GetEntries();
+    int counter = tca->GetEntriesFast();
     if(pointId<0 || pointId>counter) return NULL;
     return (const StMuEmcPoint*)tca->At(pointId);
   } else {
@@ -371,7 +371,7 @@ void StMuEmcCollection::addPoint()
 {
   if (!mPrsHits) init();
   TClonesArray *tca =mEmcPoints;
-  int counter = tca->GetEntries();
+  int counter = tca->GetEntriesFast();
   new ((*tca)[counter]) StMuEmcPoint();
   return;
 }
@@ -379,7 +379,7 @@ void StMuEmcCollection::addEndcapPoint()
 {
   if (!mPrsHits) init();
   TClonesArray *tca =mEndcapEmcPoints;
-  int counter = tca->GetEntries();
+  int counter = tca->GetEntriesFast();
   new ((*tca)[counter]) StMuEmcPoint();
   return;
 }

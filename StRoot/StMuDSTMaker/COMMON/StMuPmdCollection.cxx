@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdCollection.cxx,v 1.6 2004/10/19 01:39:35 mvl Exp $
+ * $Id: StMuPmdCollection.cxx,v 1.7 2012/11/26 23:14:33 fisyak Exp $
  *
  * Class : StMuPmdCollection
  * Author: Supriya Das & Subhasis Chattopadhyay
@@ -8,6 +8,9 @@
  * Description: This class holds the PMD clusters for MuDst
  * ****************************************************************
  * $Log: StMuPmdCollection.cxx,v $
+ * Revision 1.7  2012/11/26 23:14:33  fisyak
+ * Replace GetEntries() by GetEntriesFast(), fix print outs
+ *
  * Revision 1.6  2004/10/19 01:39:35  mvl
  * Changed for splitting on file. Added support for hits
  *
@@ -94,7 +97,7 @@ int StMuPmdCollection::getNClusters(int detector)
 
   if (tca) {
     //cout << "Got tca"<<endl;
-    return tca->GetEntries();
+    return tca->GetEntriesFast();
   } else  {
     //cout << "StMuPmdCollection::getNClusters No tca" << endl;
     return 0;
@@ -109,7 +112,7 @@ int StMuPmdCollection::getNHits(int detector)
 
   if (tca) {
     //cout << "Got tca"<<endl;
-    return tca->GetEntries();
+    return tca->GetEntriesFast();
   } else  {
     //cout << "StMuPmdCollection::getNClusters No tca" << endl;
     return 0;
@@ -149,7 +152,7 @@ void StMuPmdCollection::addCluster(int detector)
   if(tca) counter=tca->GetEntriesFast();
   //cout << "addcluster: entry "<<counter<<" "<<detector-pmd<<endl;
   new ((*tca)[counter]) StMuPmdCluster();
-  // cout<<"counter after2  "<<tca->GetEntries()<<endl;
+  // cout<<"counter after2  "<<tca->GetEntriesFast()<<endl;
   return;
 }
 
@@ -167,6 +170,6 @@ void StMuPmdCollection::addHit(int detector)
   if(tca) counter=tca->GetEntriesFast();
   //cout << "addcluster: entry "<<counter<<" "<<detector-pmd<<endl;
   new ((*tca)[counter]) StMuPmdHit();
-  // cout<<"counter after2  "<<tca->GetEntries()<<endl;
+  // cout<<"counter after2  "<<tca->GetEntriesFast()<<endl;
   return;
 }
