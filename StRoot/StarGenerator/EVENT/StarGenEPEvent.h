@@ -29,6 +29,8 @@ class StarGenEPEvent : public StarGenEvent
   Double_t xPdf;      // PDF times x for the struck parton
   Double_t Q2;        // Virtuality of the photon
 
+  Bool_t   valence;   // true if valence quark
+
   Double_t y;
   Double_t W2;
   Double_t nu;
