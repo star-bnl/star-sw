@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.21 2012/11/08 18:28:15 akio Exp $
+ * $Id: StFgtA2CMaker.h,v 1.22 2012/11/27 17:32:51 akio Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -36,6 +36,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.22  2012/11/27 17:32:51  akio
+ * Adding option to read ped & status from text file. Default is reading from DB.
+ *
  * Revision 1.21  2012/11/08 18:28:15  akio
  * - Split seedTypes3 into raising (kFgtSeedTypes3) and falling (kFgtSeedTypes4)
  * - Adding new seed Type (kFgtSeedTypes5) with 3 timebins in row above 3 sigma, and not raising nor falling
@@ -131,6 +134,7 @@
 #include <string>
 #include "StMaker.h"
 #include "StRoot/StEvent/StFgtStrip.h"
+#include "StRoot/StEvent/StEnumerations.h"
 
 class StFgtDb;
 
@@ -163,9 +167,13 @@ class StFgtA2CMaker : public StMaker {
    void setPedSigFactor4Charge( Float_t factor);
    void useLeastRestrictiveSeed(Bool_t v);
 
-  // cvs tag
+   // reading pedestal from text file. filename="" (default) forces to read from DB
+   void setPedestalFile(const Char_t* filename);
+   void setStatusFile(const Char_t* filename);
+
+   // cvs tag
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.21 2012/11/08 18:28:15 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.22 2012/11/27 17:32:51 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    Short_t checkValidPulse(StFgtStrip* pStrip, Float_t ped);
@@ -174,10 +182,21 @@ class StFgtA2CMaker : public StMaker {
    UChar_t mStatusMask;
    Float_t mAbsThres, mRelThres,mClusterThreshold,mPedSigFactor4Charge;
    Bool_t mUseLeastRestrictiveSeed;
+
+   // for reading pedestal from a text file
+   std::string mPedFilename;
+   Float_t mPed[kFgtNumElecIds],mPedRMS[kFgtNumElecIds];
+   Bool_t mReadPedFile;
+   std::string mStatusFilename;
+   Int_t mStatus[kFgtNumElecIds];
+   Bool_t mReadStatusFile;
+
    // pointer to the DB
    StFgtDb* mDb;
 
  private:   
+   void readPedFile(Int_t elecId, Float_t &ped, Float_t &pedrms);
+   void readStatusFile(Int_t elecId, UInt_t &status);
    ClassDef(StFgtA2CMaker,1);
 }; 
 
@@ -196,4 +215,7 @@ inline void StFgtA2CMaker::doCutBadStatus(){                         mStatusMask
 inline void StFgtA2CMaker::setStatusMask( UChar_t mask ){            mStatusMask = mask; };
 inline void StFgtA2CMaker::setPedSigFactor4Charge( Float_t factor){  mPedSigFactor4Charge=factor;}
 inline void StFgtA2CMaker::useLeastRestrictiveSeed(Bool_t v){        mUseLeastRestrictiveSeed=v;}
+inline void StFgtA2CMaker::setPedestalFile(const Char_t* filename ){ mPedFilename = filename; };
+inline void StFgtA2CMaker::setStatusFile(const Char_t* filename ){ mStatusFilename = filename; };
+
 #endif
