@@ -1,6 +1,18 @@
 ///
-// $Id: StFgtSeededClusterAlgo.h,v 1.5 2012/03/16 19:41:15 avossen Exp $
+// $Id: StFgtSeededClusterAlgo.h,v 1.6 2012/11/27 18:00:07 akio Exp $
 // $Log: StFgtSeededClusterAlgo.h,v $
+// Revision 1.6  2012/11/27 18:00:07  akio
+// - Filling NStrip/SeedType/MaxTimebin/EvenOddChargeAsy in StFgtHit
+// - Accepting kFgtSeedTypes4 & 5 for clustring
+// - Setting kFgtClusterTooBig instead of kFgtClusterNo into strips when cluster is too big
+//   (Seedtype of the seed strip will not be overwritten)
+// - Adding setThreshold2AddStrip() [proposed default 2 ~ 3 from cosmic data... no idea for run12 data]
+//   This will be used in isSameCluster() and this number times ChargeUncert() will be the threshold on charge
+//   (timebin sum) for a strip to be included in cluster if neighbore. It was hard coded to be 1.0 before.
+//   Too low threshold sometimes kill cluster because "cluster too big"
+// - Slight code change to make trying different weight for getting R/PHI easy...
+// - Slight code change for phi/even strip logic... hopefully improved
+//
 // Revision 1.5  2012/03/16 19:41:15  avossen
 // added option to allow to jump strips
 //
@@ -61,6 +73,7 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
   virtual Int_t Init();
   virtual ~StFgtSeededClusterAlgo();
   virtual void setJumpSingleStrip(Bool_t jump);
+  void setThreshold2AddStrip(Float_t v); // this value * charge uncertaintly is threshold on strip charge to add to the cluster
 
  protected:
   ///migrated to A2C maker
@@ -72,6 +85,7 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
   Bool_t up;
   Bool_t down;
   Bool_t stepTwo;
+  Float_t mThreshold2AddStrip;
   ClassDef(StFgtSeededClusterAlgo,1);
 
 };
@@ -81,3 +95,4 @@ inline void StFgtSeededClusterAlgo::setJumpSingleStrip(Bool_t jump)
 {
   stepTwo=jump;
 }
+inline void StFgtSeededClusterAlgo::setThreshold2AddStrip(Float_t v){ mThreshold2AddStrip=v;}
