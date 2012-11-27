@@ -15,6 +15,8 @@ daq_dta::daq_dta()
 	store_cur = 0 ;
 	do_swap = 0 ;	// obviosly
 	nitems = 0 ;
+	
+	meta = 0 ;
 } ;
 
 
@@ -132,6 +134,7 @@ void daq_dta::clear()
 
 	hdr = (daq_store_hdr *) (store + 1) ;
 	hdr->bytes_used = sizeof(daq_store) + hdr->hdr_bytes ;
+
 
 	store_cur = (daq_store *)((char *)store + hdr->bytes_used) ;
 

@@ -144,7 +144,7 @@ public:
 	}
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.6 2010/12/02 07:28:20 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.7 2012/11/27 11:45:54 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
@@ -214,7 +214,9 @@ public:
 	} ;
 
 	int pad ;
-		
+
+	void *meta ;	// detector specific info bank...
+
 	u_int ncontent ;
 
 } ;
