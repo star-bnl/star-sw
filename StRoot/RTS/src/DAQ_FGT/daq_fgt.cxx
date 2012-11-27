@@ -115,6 +115,11 @@ daq_fgt::daq_fgt(daqReader *rts_caller)
 	phys = new daq_dta ;
 	ped = new daq_dta ;
 
+
+	adc->meta = (void *) &apv_meta ;	// meta exists for adc data only!
+
+	memset(&apv_meta,0,sizeof(apv_meta)) ;
+
 #if 0
 	// zap maps to unknown first
 	memset(adc_to_phys,0xff,sizeof(adc_to_phys)) ;
@@ -143,6 +148,9 @@ daq_fgt::~daq_fgt()
 
 daq_dta *daq_fgt::get(const char *bank, int sec, int rdo, int pad, void *p1, void *p2) 
 {	
+
+	memset(&apv_meta,0,sizeof(apv_meta)) ;
+
 	Make() ;
 
 	if(present == 0) return 0 ;
@@ -227,19 +235,18 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 {
 	int r_start, r_stop ;
 	int s = 1 ;	// for now...
-
+	
 	adc->create(1000,"fgt_adc",rts_id,DAQ_DTA_STRUCT(fgt_adc_t)) ;
 
 	LOG(NOTE,"FGT: doing ADC") ;
 
-	if((rdo <= 0) || (rdo > 6)){
+	if((rdo <= 0) || (rdo > FGT_RDO_COU)){
 		r_start = 1 ;
-		r_stop = 6 ;
+		r_stop = FGT_RDO_COU ;
 	}
 	else {
 		r_start = r_stop = rdo ;
 	}
-
 
 
 	for(int r=r_start;r<=r_stop;r++) {
@@ -262,6 +269,7 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 		}
 
 
+		
 
 		int format_code = (d[2] >> 8) & 0xFF ;
 		// 0: normal code
@@ -271,9 +279,14 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 		int arm_mask = (d[3] >> 8) & 0x3F ;
 		LOG(NOTE,"[evt %d]: RDO %d: ARC Header: format %d, ARM mask 0x%02x",get_global_event_num(),r,format_code,arm_mask);
 
+		apv_meta.arc[r].present = 1 ;
+		apv_meta.arc[r].format_code = format_code ;
+		apv_meta.arc[r].arm_mask = arm_mask ;
+
+
 		u_int *dta = d + 6 ;	// start at the 6th word
 
-		for(int arm=0;arm<6;arm++) {
+		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 			if(arm_mask & (1<<arm)) ;
 			else continue ;
 
@@ -289,22 +302,30 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 			dta++ ;
 			// word 2, would get monitor register values from this word (not implemented yet, still need to skip over of course)
 			dta++ ;
-
+			
+			apv_meta.arc[r].arm[arm].present = 1 ;
+			apv_meta.arc[r].arm[arm].arm_id = arm_id ;
+			apv_meta.arc[r].arm[arm].arm_seq = arm_seq ;
+			apv_meta.arc[r].arm[arm].arm_err = arm_err ;
+			apv_meta.arc[r].arm[arm].apv_mask = apv_mask ;
+			
 			LOG(NOTE,"[evt %d]: ARM_ID %d SEQ %d ERR %1x APV_MASK %06x",get_global_event_num(),
 			    arm_id,arm_seq,arm_err,apv_mask);
 
 			if(arm_id != arm) {
+				apv_meta.arc[r].arm[arm].error = 1 ;
 				LOG(ERR,"[evt %d]: RDO %d ARM %d: Bad ARM ID is %d",get_global_event_num(),r,arm,arm_id) ;
 				goto unrecoverable_error ;
 			}
 
 			if(arm_err != 0) {
+				apv_meta.arc[r].arm[arm].error = 1 ;
 				LOG(ERR,"[evt %d]: RDO %d ARM %d: Error code 0x%x",get_global_event_num(),r,arm,arm_err) ;
 				continue ;  // I think we can leave this as a 'recoverable' error for now ??
 			}
 
 
-			for(int apv=0;apv<24;apv++) {
+			for(int apv=0;apv<FGT_APV_COU;apv++) {
 				if(apv_mask & (1<<apv)) ;
 				else continue ;
 
@@ -348,10 +369,22 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 				LOG(NOTE,"  capid %d, nhits %d, is_error 0x%X, refadc %d, ntim %d, is_0 0x%X",
 				    capid, nhits, is_error, refadc, ntim, is_0) ;
 
+				apv_meta.arc[r].arm[arm].apv[apv].present = 1 ;
 
+				apv_meta.arc[r].arm[arm].apv[apv].apv_id = apv_id ;
+				apv_meta.arc[r].arm[arm].apv[apv].fmt = fmt ;
+				apv_meta.arc[r].arm[arm].apv[apv].length = length ;
+				apv_meta.arc[r].arm[arm].apv[apv].seq = seq ;
+				apv_meta.arc[r].arm[arm].apv[apv].capid = capid ;
+				apv_meta.arc[r].arm[arm].apv[apv].nhits = nhits ;
+				apv_meta.arc[r].arm[arm].apv[apv].is_error = is_error ;
+				apv_meta.arc[r].arm[arm].apv[apv].refadc = refadc ;
+				apv_meta.arc[r].arm[arm].apv[apv].ntim = ntim ;
+				
 				// sanity checks
 				if(apv != apv_id) {
-				  LOG(ERR,"[evt %d]: RDO %d ARM %d APV %d: Bad APV ID, got %d",get_global_event_num(),r,arm,apv,apv_id) ;
+					apv_meta.arc[r].arm[arm].apv[apv].error = 1 ;
+					LOG(ERR,"[evt %d]: RDO %d ARM %d APV %d: Bad APV ID, got %d",get_global_event_num(),r,arm,apv,apv_id) ;
 					goto unrecoverable_error ;
 				}
 
@@ -360,16 +393,19 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 #if 0
 					LOG(WARN,"[evt %d]: RDO %d ARM %d APV %d: Sequence number mismatch, expect %d have %d",get_global_event_num(),r,arm,apv,arm_seq,seq);
 #else
+					apv_meta.arc[r].arm[arm].apv[apv].error = 1 ;
 					LOG(ERR,"[evt %d]: RDO %d ARM %d APV %d: Sequence number mismatch, expect %d have %d",get_global_event_num(),r,arm,apv,arm_seq,seq);
 					goto unrecoverable_error ;
 #endif
 				}
 
 				if((ntim < 0) || (ntim > 31)) {  // 0 is a valid value (used to encode NHITS=0)
+					apv_meta.arc[r].arm[arm].apv[apv].error = 1 ;
 					LOG(ERR,"Ntim %d ?!",ntim) ;
 					continue ;
 				}
 				if((fmt != 1)&&(fmt != 2)&&(fmt != 3)) {
+					apv_meta.arc[r].arm[arm].apv[apv].error = 1 ;
 					LOG(ERR,"Invalid FMT %d (evt %d)",fmt,get_global_event_num()) ;
 					continue ;
 				}
@@ -436,6 +472,7 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 				*/
 
 				if ((ntim>0) && ( 27+127+(ntim-1)*140 >= ((length-2)/3)*8 )) {
+				apv_meta.arc[r].arm[arm].apv[apv].error = 1 ;
 				  LOG(ERR,"[evt %d]: RDO %d ARM %d APV %d: Trouble in APV block content, it's shorter than required to unpack %d timebins",
 				      get_global_event_num(),r,arm,apv,ntim);
 				  continue;  // this is a recoverable error
@@ -461,6 +498,7 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 		}
 		continue;
 unrecoverable_error:
+		apv_meta.arc[r].error = 1 ;
 		LOG(WARN,"[evt %d]: RDO %d: Cannot reliably recover pointer to next item, dropping the rest of this event on this rdo");
 	}
 
@@ -535,7 +573,7 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
 	const int FGT_BYTES_MIN = ((6)*4) ;	// this is the minimum
 	const int FGT_BYTES_MAX = (32768*4) ;
-	const u_int FGT_VERSION = 0x0034 ;		 
+//	const u_int FGT_VERSION = 0x0034 ;		 
 	const u_int FGT_SIGNATURE = 0x46475420 ;	// "FGT"
 
 	int t_cou = 0 ;

@@ -5,16 +5,18 @@
 #include <DAQ_READER/daq_det.h>
 
 // logical maps
-#define FGT_RDO_COU		2
-#define FGT_ARM_COU		6
-#define FGT_APV_COU		24
-#define FGT_CH_COU		128
+// represent the _maximums_ over any APV-type detector: FGT, GMT, IST
 
-#define FGT_TB_COU		31	//???
+#define FGT_RDO_COU		6	// aka ARC; but counts from 1..6
+#define FGT_ARM_COU		6	// from 0..5
+#define FGT_APV_COU		24	// from 0..23
+#define FGT_CH_COU		128	// from 0..127
+
+#define FGT_TB_COU		31	// from 0..30
 
 
 
-// physical maps
+// physical maps: UNUSED
 #define FGT_DISK_COU		6	// 0..5
 #define FGT_QUADRANT_COU	4	// A-D
 #define FGT_STRIP_TYPE_COU	2	// 2 types: see below
@@ -29,7 +31,7 @@
 // when asking for the "adc" or "phys"bank
 struct fgt_adc_t {
 	unsigned short ch ;	// 0..127 for adc ch, 0..1137 for phys strip
-	unsigned char tb ;	// 0..9 (?)
+	unsigned char tb ;
 	unsigned short adc ;
 } ;
 
@@ -39,6 +41,47 @@ struct fgt_pedrms_t {
 	unsigned char tb ;
 	float ped ;
 	float rms ;
+} ;
+
+struct apv_meta_t {
+	u_int version ;	
+
+	struct {
+		char present ;
+		char error ;
+
+		int format_code ;
+		int arm_mask ;
+
+		struct {
+			char present ;
+			char error ;
+
+			int arm_id ;
+			int arm_seq ;
+			int arm_err ;
+			int apv_mask ;
+
+			struct {
+				char present ;
+				char error ;
+
+				int apv_id ;
+				int fmt ;
+				int length ;
+				int seq ;
+				int capid ;
+				int nhits ;
+				int is_error ;
+				int refadc ;
+				int ntim ;
+
+			} apv[FGT_APV_COU] ; // from 0..23
+
+		} arm[FGT_ARM_COU] ;	// from 0..23...
+
+	} arc[FGT_RDO_COU+1] ;	// or RDO; from 1..6
+	
 } ;
 
 class daq_fgt : public daq_det {
@@ -56,7 +99,7 @@ private:
 	static const char *help_string ;
 
 protected:
-
+	struct apv_meta_t apv_meta ;
 
 public:
 	daq_fgt(daqReader *rts_caller=0) ;
