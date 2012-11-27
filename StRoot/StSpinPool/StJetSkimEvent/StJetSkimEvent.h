@@ -176,6 +176,12 @@ public:
     void setRefMultFtpcEast( UShort_t i) { mRefMultFtpcEast = i;}
     
     //gets
+    float x() const { return mPosition[0]; }
+    float y() const { return mPosition[1]; }
+    float z() const { return mPosition[2]; }
+    float dx() const { return  mPosError[0]; }
+    float dy() const { return mPosError[1]; }
+    float dz() const { return mPosError[2]; }
     const float* position() const { return mPosition;}
     const float*  posError() const { return mPosError;}
     int vertexFinderId() const { return mVertexFinderId;} 
