@@ -1076,6 +1076,49 @@ static int fgt_doer(daqReader *rdr, const char *do_print)
 
 	// one can get the data in the electronics/logical layout
 	dd = rdr->det("fgt")->get("adc") ;
+
+	// let's dump the meta-data first
+	if(dd && dd->meta && do_print) {
+		apv_meta_t *meta = (apv_meta_t *)dd->meta ;
+				
+		printf("FGT meta data:\n") ;
+		for(int r=1;r<=FGT_RDO_COU;r++) {
+			if(meta->arc[r].present == 0) continue ;
+				
+			printf("  ARC %d: error %c; format %d, ARM mask 0x%X\n",r,meta->arc[r].error?'Y':'N',
+			       meta->arc[r].format_code,
+			       meta->arc[r].arm_mask) ;
+
+			for(int arm=0;arm<FGT_ARM_COU;arm++) {
+				if(meta->arc[r].arm[arm].present == 0) continue ;
+
+				printf("    ARM %d: error %c\n",arm,meta->arc[r].arm[arm].error?'Y':'N') ;
+				printf("         : arm_id %d, arm_seq %d, arm_err %d, apv_mask 0x%X\n",
+				       meta->arc[r].arm[arm].arm_id,
+				       meta->arc[r].arm[arm].arm_seq,
+				       meta->arc[r].arm[arm].arm_err,
+				       meta->arc[r].arm[arm].apv_mask) ;
+
+				for(int apv=0;apv<FGT_APV_COU;apv++) {
+					if(meta->arc[r].arm[arm].apv[apv].present == 0) continue ;
+							
+					printf("      APV %2d: error %c\n",apv,meta->arc[r].arm[arm].apv[apv].error?'Y':'N') ;
+					printf("            : apv_id %d, fmt %d, length %d, seq %d, capid %d, nhits %d, is_error %d, refadc %d, ntim %d\n",
+					       meta->arc[r].arm[arm].apv[apv].apv_id,
+					       meta->arc[r].arm[arm].apv[apv].fmt,
+					       meta->arc[r].arm[arm].apv[apv].length,
+					       meta->arc[r].arm[arm].apv[apv].seq,
+					       meta->arc[r].arm[arm].apv[apv].capid,
+					       meta->arc[r].arm[arm].apv[apv].nhits,
+					       meta->arc[r].arm[arm].apv[apv].is_error,
+					       meta->arc[r].arm[arm].apv[apv].refadc,
+					       meta->arc[r].arm[arm].apv[apv].ntim) ;
+				}
+			}
+		}
+
+	}
+
 	while(dd && dd->iterate()) {
 		found = 1 ;
 
@@ -1091,40 +1134,6 @@ static int fgt_doer(daqReader *rdr, const char *do_print)
 	}
 				
 
-	// one can get the data in the physical layout
-	dd = rdr->det("fgt")->get("phys") ;
-	while(dd && dd->iterate()) {
-		found = 1 ;
-
-		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
-
-		if(do_print) {
-			printf("FGT phys: disk %d, quadrant %d, type %s: %d values\n",dd->sec,dd->rdo,
-			       (dd->pad==FGT_STRIP_TYPE_R)?"r-strip":"phi_strip",
-			       dd->ncontent) ;
-
-			for(u_int i=0;i<dd->ncontent;i++) {
-				printf(" strip %3d, tb %d = %3d\n",f[i].ch,f[i].tb,f[i].adc) ;
-			}
-		}
-	}
-				
-
-	// and this is for the rms and pedestal
-	dd = rdr->det("fgt")->get("pedrms") ;
-	while(dd && dd->iterate()) {
-		found = 1 ;
-
-		fgt_pedrms_t *f = (fgt_pedrms_t *) dd->Void ;
-
-		if(do_print) {
-			printf("FGT pedrms: RDO %d, ARM %d, APV %d: %d values\n",dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
-
-			for(u_int i=0;i<dd->ncontent;i++) {
-				printf(" ch %3d, tb %d = %.3f +-%.3f\n",f[i].ch,f[i].tb,f[i].ped,f[i].rms) ;
-			}
-		}
-	}
 
 
 	return found ;
