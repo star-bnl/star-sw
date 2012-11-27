@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.50 2012/11/08 18:28:15 akio Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.51 2012/11/27 17:32:51 akio Exp $
  *
  ***************************************************************************
  *
@@ -9,6 +9,9 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.51  2012/11/27 17:32:51  akio
+ * Adding option to read ped & status from text file. Default is reading from DB.
+ *
  * Revision 1.50  2012/11/08 18:28:15  akio
  * - Split seedTypes3 into raising (kFgtSeedTypes3) and falling (kFgtSeedTypes4)
  * - Adding new seed Type (kFgtSeedTypes5) with 3 timebins in row above 3 sigma, and not raising nor falling
@@ -204,8 +207,8 @@
 
 /// Class constructors - does nothing else than setting name
 StFgtA2CMaker::StFgtA2CMaker( const Char_t* name ) : StMaker( name ), mAcceptLongPulses(true), 
-						     mStatusMask(0xfe), mAbsThres(-10000), mRelThres(4.0),mClusterThreshold(1.0), 
-						     mPedSigFactor4Charge(1.0), mUseLeastRestrictiveSeed(true) ,mDb(0) {
+						     mStatusMask(0xff), mAbsThres(-10000), mRelThres(4.0),mClusterThreshold(1.0), 
+						     mPedSigFactor4Charge(1.0), mUseLeastRestrictiveSeed(true) ,mReadPedFile(0), mReadStatusFile(0), mDb(0) {
   // do nothing
 }
 
@@ -308,15 +311,19 @@ Int_t StFgtA2CMaker::Make(){
                   Float_t sumC=0;
 
                   // get the pedestal
-                  ped = mDb->getPedestalFromElecId( elecId );
+		  if(mPedFilename.empty()){
+		    ped = mDb->getPedestalFromElecId( elecId );
+		    pedErr = mDb->getPedestalSigmaFromElecId( elecId );
+	          }else{
+		    readPedFile(elecId,ped,pedErr);
+		  }
 
-                  pedErr = mDb->getPedestalSigmaFromElecId( elecId );
                   strip->setPed(ped);
                   strip->setPedErr(pedErr);
 		  //cout <<"we got ped: " << ped << " error: " << pedErr <<endl;
 
                   if( ped > kFgtMaxAdc || ped < 0 ){
-                     strip->setGeoId( -1 );      // flag for removal
+                    strip->setGeoId( -1 );      // flag for removal
                   } else {
                      for( Int_t timebin = 0; timebin < kFgtNumTimeBins && strip->getGeoId() > -1; ++timebin ){
                         Int_t adc = strip->getAdc( timebin );
@@ -370,10 +377,14 @@ Int_t StFgtA2CMaker::Make(){
                   };
 		  
                   if( mStatusMask != 0x0 ){
-                     UInt_t status=mDb->getStatusFromElecId( elecId );
-
-                     if( status & mStatusMask )
-                        strip->setClusterSeedType(kFgtDeadStrip);
+		    UInt_t status;
+		    if(mStatusFilename.empty()){
+		      status=mDb->getStatusFromElecId( elecId );
+		    }else{
+		      readStatusFile(elecId,status);
+		    }
+		    if( status & mStatusMask )
+		      strip->setClusterSeedType(kFgtDeadStrip);
                   }
 
 		  if(idebug==1){
@@ -487,26 +498,27 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    //   if(pStrip->getAdc(0) <3*ped && numHighBins==1 && peakAdc > pStrip->getAdc(6)&& numHighBinsAfterLeadingEdge>=1&& numAlmostHighBins>=2)
 
 
+   //Akio Adding a requirement that sum is above sqrt(3bins)*5*mClusterThreshold*pedrms
+   if(pStrip->getCharge() < 1.732*mClusterThreshold*5*ped) return kFgtSeedTypeNo;
+
    int iseed=0;
    for( Int_t timebin = 0; timebin < (kFgtNumTimeBins-2) && pStrip->getGeoId() > -1; timebin++ ) {
-      Float_t adc1=pStrip->getAdc(timebin);
-      Float_t adc2=pStrip->getAdc(timebin+1);
-      Float_t adc3=pStrip->getAdc(timebin+2);
-      //   if(pStrip->getGeoId() >=13092 && pStrip->getGeoId()<=13105)
-      //     {
-      //       cout <<"adc1: " << adc1 << " adc2: " << adc2 <<" adc3: " << adc3 << endl;
-      //     }
-      //      cout <<" looking at tb: " << timebin <<" " << timebin+1 <<" " << timebin+2 <<" ped: "<< ped <<endl;
-      if(adc1> mClusterThreshold*5*ped && adc2 > mClusterThreshold*5*ped && adc3 > mClusterThreshold*5*ped)
-	{
-	  //found some sort of rising edge
-	  if(adc1 < adc2 && adc2 < adc3) {iseed=10; break;}
-	  //falling edge for grossly out of time pulses
-	  if(adc1 > adc2 && adc2 > adc3 && iseed<10) {iseed=9;}
-	  // Akio-- adding if charge sum is above x3 threshold
-	  if(pStrip->getCharge()> mClusterThreshold*15*ped && mUseLeastRestrictiveSeed && iseed<9) {iseed=8;}
-	}
-      
+     Float_t adc1=pStrip->getAdc(timebin);
+     Float_t adc2=pStrip->getAdc(timebin+1);
+     Float_t adc3=pStrip->getAdc(timebin+2);
+     //   if(pStrip->getGeoId() >=13092 && pStrip->getGeoId()<=13105)
+     //     {
+     //       cout <<"adc1: " << adc1 << " adc2: " << adc2 <<" adc3: " << adc3 << endl;
+     //     }
+     //      cout <<" looking at tb: " << timebin <<" " << timebin+1 <<" " << timebin+2 <<" ped: "<< ped <<endl;
+     if(adc1> mClusterThreshold*5*ped && adc2 > mClusterThreshold*5*ped && adc3 > mClusterThreshold*5*ped){
+       //found some sort of rising edge
+       if(adc1 < adc2 && adc2 < adc3) {iseed=10; break;}
+       //falling edge for grossly out of time pulses
+       if(adc1 > adc2 && adc2 > adc3 && iseed<10) {iseed=9;}
+       // Akio-- adding if charge sum is above x3 threshold
+       if(pStrip->getCharge()> mClusterThreshold*15*ped && mUseLeastRestrictiveSeed && iseed<9) {iseed=8;}
+     }  
    }
    switch(iseed){
    case 10: return kFgtSeedType3;
@@ -514,10 +526,60 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    case  8: return kFgtSeedType5;
    default: return kFgtSeedTypeNo; 
    }
-
    //   cout <<" no seed found! " << endl;
    //	      if(pStrip->getGeoId() >=13092 && pStrip->getGeoId()<=13105)
    //		cout <<"nope..." << endl;
+}
+
+void StFgtA2CMaker::readPedFile(Int_t elecid, Float_t &ped, Float_t &pedrms){
+  if(mReadPedFile==0){
+    LOG_INFO << "Reading pedestal from a text file ="<<mPedFilename.data()<<endm;
+    int eid,tbin;
+    float p,s;
+    ifstream file;
+    memset(mPed,0,sizeof(mPed));
+    memset(mPedRMS,0,sizeof(mPedRMS));
+    file.open(mPedFilename.data());
+    if(file.is_open()){
+      while(file.good()){
+	file>>eid>>tbin>>p>>s;
+	LOG_DEBUG<<"Reading Ped: "<<eid<<" "<<tbin<<" "<<p<<" "<<s<<endm;
+	mPed[eid]=p;
+	mPedRMS[eid]=s;
+      }      
+    }else{
+      LOG_INFO<<"Reading pedestal from a text file failed"<<endm;
+    }
+    file.close();
+    mReadPedFile=1;
+  }
+  ped=mPed[elecid];
+  pedrms=mPedRMS[elecid];
+}
+
+void StFgtA2CMaker::readStatusFile(Int_t elecid, UInt_t &status){
+  if(mReadStatusFile==0){
+    LOG_INFO << "Reading status from a text file ="<<mStatusFilename.data()<<endm;
+    unsigned int eid,stat;
+    TString statread;
+    ifstream file;
+    memset(mStatus,1,sizeof(mStatus));
+    file.open(mStatusFilename.data());
+    if(file.is_open()){
+      while(file.good()){
+        file>>eid>>statread;
+	statread.Remove(0,2);
+	stat = statread.Atoi();
+        LOG_DEBUG<<"Reading Status: "<<eid<<" "<<stat<<endm;
+        mStatus[eid]=stat;
+      }
+    }else{
+      LOG_INFO<<"Reading status from a text file failed"<<endm;
+    }
+    mReadStatusFile=1;
+    file.close();
+  }
+  status=mStatus[elecid];
 }
 
 ClassImp(StFgtA2CMaker);
