@@ -19,7 +19,7 @@ ClassImp(StvKalmanTrackFitter)
 #define DIST2(a,b) ((a[0]-b[0])*(a[0]-b[0])+(a[1]-b[1])*(a[1]-b[1])+(a[2]-b[2])*(a[2]-b[2]))
 
 static const double kMaxCorr = 1.1;
-static const int    kNodesEnough = 3;	//min number of nodes to define helix
+static const int    kNodesEnough = -1;	//min number of nodes to define helix
 static const int    kXtendFactor  = 100;//Xi2 factor that fit sure failed
 
 //_____________________________________________________________________________
