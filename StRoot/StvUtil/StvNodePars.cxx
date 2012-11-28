@@ -229,7 +229,7 @@ static StvFitPars fp;
   double a = (_psi -sub._psi );
   if      (a < -M_PI) {a += M_PI*2;}
   else if (a >  M_PI) {a -= M_PI*2;}
-  fp.mA = a;
+  fp.mA = a*cosL;
   fp.mP = (_ptin-sub._ptin);
   double tL = (_tanl-sub._tanl)/(1+_tanl*sub._tanl);
   fp.mL = tL*(1+tL*tL*(-1./3+tL*tL/5)); 
@@ -246,9 +246,10 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   _y +=  _cosCA*fp.mH - sinL*_sinCA*fp.mZ;
   _z +=                 cosL       *fp.mZ;
 
-  double a = fp.mA/cosL,cA,sA;
-  if (fabs(a) < 0.01) {sA = a*(1-a*a/6); cA = 1-a*a/2;}
-  else                {sA = sin(a);      cA = cos(a) ;} 
+  double a = 0,cA,sA;
+  if (fabs(cosL) > 1e-3)	{a  = fp.mA/cosL;               }
+  if (fabs(a) < 0.01)   	{sA = a*(1-a*a/6); cA = 1-a*a/2;}
+  else                		{sA = sin(a);      cA = cos(a) ;} 
  _psi   += a;
   if (_psi < -M_PI) _psi += 2*M_PI;
   if (_psi >  M_PI) _psi -= 2*M_PI;
@@ -1047,7 +1048,7 @@ StvFitErrs iE,oE,oER;
 THEmx_t oHE,oHER;
 double dia[5],*e,*er,*vtx;
   iP._cosCA = 0.99999209770847208, iP._sinCA = 0.0039754899835676982, iP._x = 153.15599597873157, 
-  iP._y = 61.139971243562862, iP._z = -165.47715347045698, iP._psi = 0.0039755004554277579, iP._ptin = 3.000133812200076, iP._tanl = -1.1705121686438043, 
+  iP._y = 61.139971243562862, iP._z = -165.47715347045698, iP._psi = 0.0039755004554277579, iP._ptin = 3.000133812200076, iP._tanl = 9, 
   iP._curv = 0.0044971007445879334, iP._hz = 0.0014989667215176954;
 
   iE.mHH = 0.008422599212098222, iE.mHZ = -0.0091916832962463078, iE.mZZ = 0.019038123366318632, iE.mHA = -0.00039625080910056564, 
@@ -1204,9 +1205,11 @@ void StvNodeParsTest::TestMtx()
   double maxEps = 0;  
   double hz = 0.0014880496061989194;
   int nErr=0;
-  int iR = 10+ gRandom->Rndm()*100;
-  int iAlf=10+ gRandom->Rndm()*100;
-  int iLam=10+ gRandom->Rndm()*100;
+  int iR   =100 + gRandom->Rndm()*100;
+  int iAlf = 10 + gRandom->Rndm()*100;
+  int iLam = 10 + gRandom->Rndm()*100;
+iLam=80;
+
   double alf = iAlf/180.*M_PI;
   double lam = iLam/180.*M_PI;
   StvNodePars basePar,modiPar,baseEndPar,modiEndPar;
@@ -1231,7 +1234,7 @@ void StvNodeParsTest::TestMtx()
   baseEndPar.convert(mtxStv , mtxHlx);
 
   double stpArr[]={0.1, 0.1, 3.14/180, 3.14/180, 0.1*basePar._ptin+1e-2};
-  double fak=0.1;
+  double fak=0.01;
   memset(mtxNum[0],0,sizeof(mtxNum));
   for (int ip=0;ip<5; ip++) { //Loop thru input parameters
     StvFitPars fp; fp.Arr()[ip]=stpArr[ip]*fak;
@@ -1241,9 +1244,6 @@ void StvNodeParsTest::TestMtx()
     modiEndHlx = modiHlx;
     modiEndHlx.Move(len);
     double myLen = modiEndHlx.Path(baseEndHlx.Pos());
-    modiEndHlx.Move(myLen);
-    myLen = (TVector3(modiEndHlx.Pos())-TVector3(baseEndHlx.Pos()))*TVector3(baseEndHlx.Dir());
-    myLen/=-(TVector3(modiEndHlx.Dir())*TVector3(baseEndHlx.Dir()));
     modiEndHlx.Move(myLen);
     modiEndPar.set(&modiEndHlx,hz);
     fp = modiEndPar-baseEndPar;
