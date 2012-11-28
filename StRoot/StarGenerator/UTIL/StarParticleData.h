@@ -38,6 +38,9 @@ class StarParticleData : public TObjectSet
 
   /// Returns a reference to the single instance of this class
   static StarParticleData &instance(){ return sInstance; }
+
+  TParticlePDG *operator()( const Char_t *name ){ return sInstance.GetParticle(name); }
+  TParticlePDG *operator()( const Int_t  id    ){ return sInstance.GetParticle(id)  ; }
   
  private:
  protected:
