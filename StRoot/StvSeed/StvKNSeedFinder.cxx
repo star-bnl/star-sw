@@ -76,7 +76,7 @@ StvDebug::Break(nCall);
     fstHit = (*(*f1stHitMapIter)).second;
     assert(fstHit);
     if (fstHit->timesUsed()) continue;
-
+    const StHitPlane *fstPlane = fstHit->detector();
     fSeedHits.clear();
     mRej.Reset(fstHit->x());
     mRej.Prepare();
@@ -91,6 +91,8 @@ StvDebug::Break(nCall);
       StvHit *nexHit = (StvHit*)node->GetObj();
       if (nexHit==fstHit)	continue;
       if (nexHit->timesUsed()) 	continue;
+      if (nexHit->detector()==fstPlane) 	continue;
+
       nTotHits++;
       int ans = mRej.Reject(nexHit->x());
       if (ans) continue;
