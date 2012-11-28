@@ -12,8 +12,8 @@ enum {kKNumber=4};
 
 class StvKNAux {
 public:
-  StvKNAux() { for (int i=0;i<kKNumber;i++) {mDist[i]=1e11;};}
-    void Update(StvKNAux *aux);
+  StvKNAux() 		{ Reset();}
+  void Reset() 		{ for (int i=0;i<kKNumber;i++) {mDist[i]=1e11;};}
 public:
   void *mHit;
   float mLen;
@@ -36,14 +36,18 @@ public:
 const VoidVec &Get() const { return mSel; } 
       void Show() const;
 private:
+      void Relink();
       void Update(int ia,int ib);
       void Insert(int ia,int ib,float dis);
       void Pass(int iux);
     double Width();
 private:  
+ int  mState;		//Status, &1 =narrow trace
 void *mStartHit;
 float mStartPos[3];
+float mStartDir[3];
 float mAveDir[3];
+float mSidDir[3];
 float mStartRad;
 float mKNNDist;	//minimal KN distance
 int   mMinIdx;	//index of aux with minimal KN distance
