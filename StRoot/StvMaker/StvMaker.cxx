@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.22 2012/11/16 01:29:01 perev Exp $
+// $Id: StvMaker.cxx,v 1.23 2012/11/28 01:05:05 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -75,9 +75,10 @@ More detailed: 				<br>
 #include "Stv/StvDiver.h"
 #include "StvHitLoader.h"
 #include "Stv/StvToolkit.h"
-#include "Stv/StvDefaultSeedFinder.h"
+#include "Stv/StvSeedFinder.h"
+#include "StvSeed/StvDefaultSeedFinder.h"
 #include "StvSeed/StvKNSeedFinder.h"
-#include "Stv/StvCASeedFinder.h"
+#include "StvSeed/StvCASeedFinder.h"
 #include "Stv/StvKalmanTrackFinder.h"
 #include "StvTGSelectors.h"
 #include "StvUtil/StvHitErrCalculator.h"
