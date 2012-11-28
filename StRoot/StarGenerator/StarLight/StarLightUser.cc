@@ -55,7 +55,7 @@ extern "C" {
 	first = false;
       }
 
-    int         npar = ku_npar(); // number of kuip parameters
+//  int         npar = ku_npar(); // number of kuip parameters
     std::string path = ku_path(); // Command path
     
     //
@@ -74,6 +74,7 @@ extern "C" {
 
   }
 
+#if 0 /* agusread is implemented in the StarGenerator framework */
   void agusread_()
   {
     static bool first = true;
@@ -133,6 +134,7 @@ extern "C" {
 
     
   }
+#endif
 
 }
 
