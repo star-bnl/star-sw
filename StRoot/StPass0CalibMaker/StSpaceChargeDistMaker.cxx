@@ -26,6 +26,9 @@
 #include "TMatrixD.h"
 #include "TVectorD.h"
 
+static const Int_t nz = 105;
+static const Double_t zmin = -205;
+static const Double_t zmax =  205;
 static const Int_t nr = 17; //85
 static const Double_t rmin = 40.;
 static const Double_t rmax = 210;
@@ -38,14 +41,10 @@ static const Double_t ZdcMax = 2e6;
 
 static const Double_t MINGAIN = 0.1;
 
-static TMatrixD RPMatE(nrph,nrph);
-static TVectorD RPMatEH(nrph);
-static TMatrixD RPMatW(nrph,nrph);
-static TVectorD RPMatWH(nrph);
-static TMatrixD RMatE(nr,nr);
-static TVectorD RMatEH(nr);
-static TMatrixD RMatW(nr,nr);
-static TVectorD RMatWH(nr);
+static TMatrixD* RPMats[nz];
+static TMatrixD* RMats[nz];
+static TVectorD* RPMatHs[nz];
+static TVectorD* RMatHs[nz];
 
 ClassImp(StSpaceChargeDistMaker)
   
@@ -93,87 +92,94 @@ Int_t StSpaceChargeDistMaker::Finish() {
   rpGeom->SetName("rpGeom");
   rpGeom->Divide(thrownRP);
 
+  TH3D* S3CPRZ = new TH3D(*Space3ChargePRZ);
+  S3CPRZ->SetName(Form("%sOrig",Space3ChargePRZ->GetName()));
+  TH3D* S3CU = new TH3D(*Space3ChargeU);
+  S3CU->SetName(Form("%sOrig",Space3ChargeU->GetName()));
+
+  TFile* ff = new TFile(Form("SCdist_%d.root",run),"RECREATE");
+  S3CPRZ->Write();
+  S3CU->Write();
+  rGeom->Write();
+  phGeom->Write();
+  rpGeom->Write();
+  ZdcC->Write();
+
   // De-smear the real data if possible
   // Start with matrix of found (rows) and generated (columns),
   //   invert, then apply to found data
   LOG_INFO << "StSpaceChargeDistMaker: attempting to de-smear..." << endm;
-  TH3D* S3CPRZ = 0;
-  TH3D* S3CU   = 0;
-  Int_t bingen,binfnd,desmearing_mode = -1;
-  TMatrixD& InvE = RPMatE;
-  TMatrixD& InvW = RPMatW;
-  Double_t DetE = 0;
-  Double_t DetW = 0;
+  for (Int_t zbin=1; zbin<=nz; zbin++) { // do the matrices for each z bin one at a time 
 
-  for (bingen=0;bingen<nrph;bingen++) {
-    for (binfnd=0;binfnd<nrph;binfnd++) {
-      Double_t denom = RPMatEH[bingen];
-      if (denom > 0) RPMatE[binfnd][bingen] /= denom;
-      else if (binfnd==bingen) RPMatE[binfnd][bingen] = 1.0; // diagonals should be ~1
-      denom = RPMatWH[bingen];
-      if (denom > 0) RPMatW[binfnd][bingen] /= denom;
-      else if (binfnd==bingen) RPMatW[binfnd][bingen] = 1.0;
-    }
-  }
-  for (bingen=0;bingen<nr;bingen++) {
-    for (binfnd=0;binfnd<nr;binfnd++) {
-      Double_t denom = RMatEH[bingen];
-      if (denom > 0) RMatE[binfnd][bingen] /= denom;
-      else if (binfnd==bingen) RMatE[binfnd][bingen] = 1.0;
-      denom = RMatWH[bingen];
-      if (denom > 0) RMatW[binfnd][bingen] /= denom;
-      else if (binfnd==bingen) RMatW[binfnd][bingen] = 1.0;
-    }
-  }
+    Int_t bingen,binfnd,desmearing_mode = -1;
+    Double_t denom,Det;
 
-  RPMatE.Invert(&DetE);
-  if (DetE) RPMatW.Invert(&DetW);
-  if (DetW) {
-    LOG_INFO << "StSpaceChargeDistMaker: will use r-phi matrices" << endm;
-    desmearing_mode = 2; // r-phi
-  } else {
-    LOG_INFO << "StSpaceChargeDistMaker: could not invert r-phi matrices, trying r..." << endm;
-    RMatE.Invert(&DetE);
-    if (DetE) RPMatW.Invert(&DetW);
-    if (DetW) {
-      LOG_INFO << "StSpaceChargeDistMaker: will use r matrices" << endm;
-      InvE = RMatE;
-      InvW = RMatW;
-      desmearing_mode = 1; // r
+    Det = 1.0;
+    TMatrixD& MatM = *(RPMats[zbin-1]);
+    TVectorD& MatH = *(RPMatHs[zbin-1]);
+    for (bingen=0; bingen<nrph; bingen++) {
+      denom = MatH[bingen];
+      for (binfnd=0; binfnd<nrph; binfnd++) {
+        if (denom > 0) MatM[binfnd][bingen] /= denom;
+        else if (binfnd==bingen) MatM[binfnd][bingen] = 1.0; // diagonals should be ~1
+      }
+    }
+    if (MatH.Sum()) {
+      MatM.Invert(&Det);
+      MatM.Write(Form("RPMat%03d",zbin));
+      MatH.Write(Form("RPMatH%03d",zbin));
+    }
+
+    if (Det) {
+      desmearing_mode = 2; // r-phi
     } else {
-      LOG_WARN << "StSpaceChargeDistMaker: could not invert r matrices, giving up!" << endm;
-      desmearing_mode = 0; // cannot do smearing
+      Det = 1.0;
+      MatM = *(RMats[zbin-1]);
+      MatH = *(RMatHs[zbin-1]);
+      for (bingen=0; bingen<nr; bingen++) {
+        denom = MatH[bingen];
+        for (binfnd=0; binfnd<nr; binfnd++) {
+          if (denom > 0) MatM[binfnd][bingen] /= denom;
+          else if (binfnd==bingen) MatM[binfnd][bingen] = 1.0;
+        }
+      }
+      if (MatH.Sum()) {
+        MatM.Invert(&Det);
+        MatM.Write(Form("RMat%03d",zbin));
+        MatH.Write(Form("RMatH%03d",zbin));
+      }
+
+      if (Det) {
+        LOG_INFO << "StSpaceChargeDistMaker: z bin " << zbin
+                 << " will use r matrices instead of r-phi" << endm;
+        desmearing_mode = 1; // r
+      } else {
+        LOG_WARN << "StSpaceChargeDistMaker: z bin " << zbin
+                 << " could not invert matrices, giving up!" << endm;
+        desmearing_mode = 0; // cannot do de-smearing
+      }
     }
-  }
-  
-  if (desmearing_mode>0) {
-    Double_t newcontPRZ, newcontU, invcoef;
-    Int_t nz = Space3ChargePRZ->GetNbinsZ();
-    S3CPRZ = new TH3D(*Space3ChargePRZ);
-    S3CPRZ->SetName(Form("%sOrig",Space3ChargePRZ->GetName()));
-    S3CU = new TH3D(*Space3ChargeU);
-    S3CU->SetName(Form("%sOrig",Space3ChargeU->GetName()));
-    for (Int_t rbin=1; rbin<=nr; rbin++) {
-      for (Int_t phibin=1; phibin<=nph; phibin++) {
-        bingen = (rbin-1) + (desmearing_mode == 2 ? nr*(phibin-1) : 0);
-        for (Int_t zbin=1; zbin<=nz; zbin++) {
+
+
+    if (desmearing_mode > 0) {
+      Double_t newcontPRZ, newcontU, coef;
+      for (Int_t rbin=1; rbin<=nr; rbin++) {
+        for (Int_t phibin=1; phibin<=nph; phibin++) {
+          bingen = (rbin-1) + (desmearing_mode == 2 ? nr*(phibin-1) : 0);
           newcontPRZ = 0;
           newcontU   = 0;
           for (Int_t rbin2=1; rbin2<=nr; rbin2++) {
             for (Int_t phibin2=1; phibin2<=nph; phibin2++) {
               if (desmearing_mode == 1 && phibin2 != phibin) continue;
               binfnd = (rbin2-1) + (desmearing_mode == 2 ? nr*(phibin2-1) : 0);
-              // east or west, or average in middle
-              invcoef = (nz%2==1 && zbin==(nz+1)/2 ?
-                0.5 * (InvE[bingen][binfnd] + InvW[bingen][binfnd]) : // average
-                (zbin <= nz/2 ? InvE[bingen][binfnd] : InvW[bingen][binfnd])); // east/west
-              if (TMath::IsNaN(invcoef)) {
-                LOG_ERROR << "StSpaceChargeDistMaker: inversion matrix element ["
+              coef = MatM[bingen][binfnd];
+              if (TMath::IsNaN(coef)) {
+                LOG_ERROR << "StSpaceChargeDistMaker: de-smearing matrix element ["
                   << bingen << "][" << binfnd << "] (zbin=" << zbin << ") is NaN !"
                   << endm;
               } else {
-                newcontPRZ += invcoef * S3CPRZ->GetBinContent(phibin2,rbin2,zbin);
-                newcontU   += invcoef * S3CU  ->GetBinContent(phibin2,rbin2,zbin);
+                newcontPRZ += coef * S3CPRZ->GetBinContent(phibin2,rbin2,zbin);
+                newcontU   += coef * S3CU  ->GetBinContent(phibin2,rbin2,zbin);
               }
             }
           }
@@ -182,26 +188,12 @@ Int_t StSpaceChargeDistMaker::Finish() {
         }
       }
     }
-  }
 
-  TFile* ff = new TFile(Form("SCdist_%d.root",run),"RECREATE");
+  } // z bins
+
 
   Space3ChargePRZ->Write();
   Space3ChargeU->Write();
-  if (S3CPRZ) S3CPRZ->Write();
-  if (S3CU) S3CU->Write();
-  rGeom->Write();
-  phGeom->Write();
-  rpGeom->Write();
-  ZdcC->Write();
-  RPMatE.Write("RPMatE");
-  RPMatEH.Write("RPMatEH");
-  RPMatW.Write("RPMatW");
-  RPMatWH.Write("RPMatWH");
-  RMatE.Write("RMatE");
-  RMatEH.Write("RMatEH");
-  RMatW.Write("RMatW");
-  RMatWH.Write("RMatWH");
 
   ff->Close();
 
@@ -218,9 +210,9 @@ Int_t StSpaceChargeDistMaker::InitRun(Int_t run) {
 //_____________________________________________________________________________
 Int_t StSpaceChargeDistMaker::Init() {
   Space3ChargePRZ  = new TH3D("Space3ChargePRZ","Space charged versus Phi(rads), Rho and Z",
-                              nph,phmin,phmax,nr,rmin,rmax,105,-210.,210.);
+                              nph,phmin,phmax,nr,rmin,rmax,nz,zmin,zmax);
   Space3ChargeU    = new TH3D("Space3ChargeU"  ,"Space charged versus Phi(rads), Rho and Z (on tracks)",
-                              nph,phmin,phmax,nr,rmin,rmax,105,-210.,210.);
+                              nph,phmin,phmax,nr,rmin,rmax,nz,zmin,zmax);
   Space3ChargePRZ->Sumw2();
   Space3ChargeU->Sumw2();
   thrownR = new TH2D("R","r",nr,rmin,rmax,3,-1.5,1.5);
@@ -231,6 +223,14 @@ Int_t StSpaceChargeDistMaker::Init() {
   acceptedP = new TH2D("PP","pads phi",nph,phmin,phmax,3,-1.5,1.5);
   ZdcC = new TH1D("ZdcC","ZDC coincidence rate",1024,0,ZdcMax);
 
+  for (int i=0;i<nz;i++) {
+    RPMats[i] = new TMatrixD(nrph,nrph);
+    RPMatHs[i] = new TVectorD(nrph);
+    RMats[i] = new TMatrixD(nr,nr);
+    RMatHs[i] = new TVectorD(nr);
+    RPMats[i]->SetTol(1e-6);
+    RMats[i]->SetTol(1e-6);
+  }
 
   return StMaker::Init();
 }
@@ -310,9 +310,8 @@ Int_t StSpaceChargeDistMaker::Make() {
               StTpcHit* tpcHit = TpcHitCollection->sector(i)->padrow(j)->hits().at(k);
               const StThreeVectorF& positionG = tpcHit->position();
 
-              // Discard post-central-membrane and hist at gated grid opening
-              if (positionG.z() * (((Float_t) i)-11.5) > 0) continue;
-              if (TMath::Abs(positionG.z()) > 180) continue;
+              // Discard hits near endcaps
+              if (TMath::Abs(positionG.z()) > 200) continue;
 
               // Discard outermost 4 pads on any row (pad is [1..Npad])
               if (tpcHit->pad() < 5 || tpcHit->pad() > Npads[j]-4) continue;
@@ -327,6 +326,10 @@ Int_t StSpaceChargeDistMaker::Make() {
               transform(coorG,coorLT,i+1,j+1);
               StThreeVectorD& positionL = coorLT.position();
               //transform(coorLT,coorLS);
+
+              // Discard post-central-membrane and hits at gated grid opening
+              if (positionL.z() * (((Float_t) i)-11.5) > 0) continue;
+              if (TMath::Abs(positionL.z()) > 180) continue;
 
               // dE/dx corrections to charge copied from StTpcRSMaker
               memset(&CdEdx, 0, sizeof(dEdxY2_t));
@@ -377,8 +380,9 @@ Int_t StSpaceChargeDistMaker::Make() {
                                     positionL.perp(),
                                     positionL.z(),
                                     charge);
-              if (throws<1 && k%((Int_t) (1.0/throws))==0)
-                GeomFill(tpcHit);
+              for (Double_t throwi = throws; throwi>0; throwi--)
+                if (throwi>=1 || ((Int_t) (gRandom->Rndm()/throwi))==0)
+                  GeomFill(positionL.z());
             }
           }
         }
@@ -451,7 +455,7 @@ void StSpaceChargeDistMaker::GeomInit() {
 
 }
 //_____________________________________________________________________________
-void StSpaceChargeDistMaker::GeomFill(StTpcHit* hit) {
+void StSpaceChargeDistMaker::GeomFill(Float_t z) {
 
   // Monte Carlo approach to determining geometrical acceptance
   Float_t pitch;
@@ -459,16 +463,13 @@ void StSpaceChargeDistMaker::GeomFill(StTpcHit* hit) {
 
   // phi0 and phi3 will be in sector 3 local coordinates
   // phi and phi2 are in TPC local coordinates
-  Float_t phi0,phi,phi2,phi3,phi4,r,r2,r4,x,y,z,zbin,zpileup;
+  // already required z as correct side for sector before GeomFill()
+  Float_t phi0,phi,phi2,phi3,phi4,r,r2,r4,x,y,zbin,zpileup;
   Float_t pos1[3];
   Float_t pos2[3];
   Float_t pos4[3];
-  Int_t ix,iy,isec;
+  Int_t ix,iy;
   Int_t rbin,phibin,tempbin,bingen,binfnd,bingenR,binfndR;
-
-  z = hit->position().z();
-  isec = hit->sector(); // 1..24
-  // already required z as correct side for sector before GeomFill()
 
   // must use StEvtTrigDetSumsMaker if reading from event.root
   StMagUtilities* mExB = StMagUtilities::Instance();
@@ -492,7 +493,7 @@ void StSpaceChargeDistMaker::GeomFill(StTpcHit* hit) {
     j = (Int_t) (12*gRandom->Rndm());
     zpileup = GGZ*gRandom->Rndm();
     if (j>=12) j-=12;
-    if (isec < 13) {  // west end
+    if (z > 0) {  // west end
       zbin = 1;
       k = j; // k = [0..11]
       phi = phi0 - (k-2)*TMath::Pi()/6.0;
@@ -570,17 +571,11 @@ void StSpaceChargeDistMaker::GeomFill(StTpcHit* hit) {
     acceptedRP->GetBinXYZ(acceptedRP->FindBin(r4,phi4,0),rbin,phibin,tempbin);
     binfnd = (rbin-1) + nr*(phibin-1);
     binfndR = rbin-1;
-    if (zbin<0) {
-      RPMatE[binfnd][bingen]++;
-      RPMatEH[bingen]++;
-      RMatE[binfndR][bingenR]++;
-      RMatEH[bingenR]++;
-    } else {
-      RPMatW[binfnd][bingen]++;
-      RPMatWH[bingen]++;
-      RMatW[binfndR][bingenR]++;
-      RMatWH[bingenR]++;
-    }
+    int zbin4 = Space3ChargePRZ->GetZaxis()->FindBin(z) - 1;
+    (*(RPMats[zbin4]))[binfnd][bingen]++;
+    (*(RPMatHs[zbin4]))[bingen]++;
+    (*(RMats[zbin4]))[binfndR][bingenR]++;
+    (*(RMatHs[zbin4]))[bingenR]++;
 
     acceptedR->Fill(r,0);
     acceptedP->Fill(phi,0);
@@ -594,8 +589,11 @@ void StSpaceChargeDistMaker::GeomFill(StTpcHit* hit) {
 
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.cxx,v 1.4 2012/11/13 22:05:19 genevb Exp $
+// $Id: StSpaceChargeDistMaker.cxx,v 1.5 2012/11/28 02:08:52 genevb Exp $
 // $Log: StSpaceChargeDistMaker.cxx,v $
+// Revision 1.5  2012/11/28 02:08:52  genevb
+// Remove de-smearing bias in z and treat z more differentially
+//
 // Revision 1.4  2012/11/13 22:05:19  genevb
 // Use TPC dE/dx correction code, and introduce de-smearing
 //
