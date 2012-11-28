@@ -26,8 +26,7 @@ public:
   virtual void      Reset()		=0;
   virtual void      Clear(const char* opt="");
   virtual int       Again(){return 0;}
-  virtual int       GetMinHits()  const {return fMinHits ;}
-  virtual int       GetGoodHits() const {return fGoodHits;}
+  virtual void      FeedBack(int success){if(success){};}
 
 virtual const StvHits *GetHits() const 	{return &fSeedHits;}
 
