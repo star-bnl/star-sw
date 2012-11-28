@@ -18,7 +18,6 @@ class StEvent;
 class TH1D;
 class TH2D;
 class TH3D;
-class StTpcHit;
 
 class StSpaceChargeDistMaker : public StMaker {
  
@@ -35,13 +34,13 @@ public:
   void AcceptTrigger(Int_t trig); // negative value accepts all triggers
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeDistMaker.h,v 1.3 2012/11/13 22:05:19 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeDistMaker.h,v 1.4 2012/11/28 02:08:52 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
 
   void   GeomInit();
-  void   GeomFill(StTpcHit* hit);
+  void   GeomFill(Float_t z);
   StEvent* event;
   TH3D* Space3ChargePRZ;
   TH3D* Space3ChargeU;
@@ -74,8 +73,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeDistMaker.h,v 1.3 2012/11/13 22:05:19 genevb Exp $
+// $Id: StSpaceChargeDistMaker.h,v 1.4 2012/11/28 02:08:52 genevb Exp $
 // $Log: StSpaceChargeDistMaker.h,v $
+// Revision 1.4  2012/11/28 02:08:52  genevb
+// Remove de-smearing bias in z and treat z more differentially
+//
 // Revision 1.3  2012/11/13 22:05:19  genevb
 // Use TPC dE/dx correction code, and introduce de-smearing
 //
