@@ -9,7 +9,6 @@ ClassImp(StvSeedFinder)
 //_____________________________________________________________________________
 StvSeedFinder::StvSeedFinder(const char *name):TNamed(name,"")
 { fDraw=0;fDoShow=0;
-  fMinHits = 10; fGoodHits = 10;
 }
 //_____________________________________________________________________________
 void StvSeedFinder::Clear(const char*)
