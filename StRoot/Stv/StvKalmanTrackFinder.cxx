@@ -142,6 +142,7 @@ static const StvConst  *kons = StvConst::Inst();
 	if (!mCurrTrak) mCurrTrak = kit->GetTrack();
 	mCurrTrak->CutTail();	//Clean track from previous failure
 	nAdded = FindTrack(0);
+        sf->FeedBack(nAdded);
 
 	if (!nAdded) 				continue;
 { double tlen = mCurrTrak->GetLength();
@@ -242,12 +243,10 @@ StvFitDers derivFit;
       idive = 99;
       if (!nNode)		continue;	//No nodes yet, OK
       mySkip = hitCount->Skip();
-      if (mySkip) StvDebug::Count("hitCountSkip",mySkip);
       if (!mySkip) 		continue;	//No Skip, OK
       if (idir)   		break;
       mySkip = hitCount->Reject();
-      if (mySkip) StvDebug::Count("hitCountReje",mySkip);
-      if (mySkip) 	break;
+      if (mySkip) 		break;
       mDive->SetSkip();
     } while ((idive=0));
     if (idive) 			break;
@@ -416,9 +415,7 @@ static int nCall=0;nCall++;
 static StvTrackFitter *tkf = StvTrackFitter::Inst();
 static const double kEps = 1e-2;
 enum {kTryFitMax = 5,kBadHits=5};
-
-//return 0; //??????????????????????????????????????????
-
+return 0;//??????????????????????????????????????
   StvNode *node = 0;
   int ans=0,lane = 1;
   StvNode *tstNode = (idir)? mCurrTrak->front(): mCurrTrak->back();
@@ -429,7 +426,7 @@ enum {kTryFitMax = 5,kBadHits=5};
 //        ==================================
 
        if (ans>0) { return 130113;}	//Very bad
-  else if (ans<=0) { 			//Try to fix
+  else if (ans<0) { 			//Try to fix
 //	Now do helix fit only to find bad hits
 //??    ans = tkf->Helix(mCurrTrak,1|2);
 //??    if (ans)  	return 130213;
