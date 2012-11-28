@@ -43,6 +43,7 @@
 #define RUN_TYPE_PED_B		201
 #define RUN_TYPE_PULSER_A	202
 #define RUN_TYPE_HLT_DEBUG	203	// special pedestal setup to simulate clusters
+#define RUN_TYPE_BACKOFF	204	// used for special DDL link debugging & backoff
 
 /* special DAQ commands sent out via Trigger */
 /* Note that the daq_cmd is mostly a bit mask! */
