@@ -173,7 +173,7 @@ Int_t StarLight::Generate()
   const std::vector<starlightParticle> &particles = *(event.getParticles());
 
     // Loop over all particles in the event
-    for ( Int_t i=0;i<particles.size();i++ )
+  for ( UInt_t i=0;i<particles.size();i++ )
       { 
         Int_t q         = particles[i].getCharge();
         Int_t id        = particles[i].getPdgCode();
