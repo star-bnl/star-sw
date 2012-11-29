@@ -145,11 +145,11 @@ ViewMedium::PlotElectronDiffusion() {
   SetupCanvas();
   AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]", 
-              "diffusion coefficient [1/#sqrt{cm}]", 1);
+              "diffusion coefficient [#sqrt{cm}]", 1);
   keep = true;
   AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]",
-              "diffusion coefficient [1/#sqrt{cm}]", 2);
+              "diffusion coefficient [#sqrt{cm}]", 2);
 
   canvas->Update();
 
@@ -162,11 +162,11 @@ ViewMedium::PlotHoleDiffusion() {
   SetupCanvas();
   AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]", 
-              "diffusion coefficient [1/#sqrt{cm}]", 11);
+              "diffusion coefficient [#sqrt{cm}]", 11);
   keep = true;
   AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]",
-              "diffusion coefficient [1/#sqrt{cm}]", 12);
+              "diffusion coefficient [#sqrt{cm}]", 12);
   canvas->Update();
 
 }
@@ -178,11 +178,11 @@ ViewMedium::PlotIonDiffusion() {
   SetupCanvas();
   AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]", 
-              "diffusion coefficient [1/#sqrt{cm}]", 21);
+              "diffusion coefficient [#sqrt{cm}]", 21);
   keep = true;
   AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]",
-              "diffusion coefficient [1/#sqrt{cm}]", 22);
+              "diffusion coefficient [#sqrt{cm}]", 22);
   canvas->Update();
 
 }
