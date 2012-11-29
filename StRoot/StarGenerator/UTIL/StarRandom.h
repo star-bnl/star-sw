@@ -48,6 +48,10 @@ class StarRandom : public TObject
   /// Return a random number uniformly distributed between mn and mx
   Double_t operator()( const Double_t mn, const Double_t mx ) const;
 
+  /// 
+  Double_t operator()( Int_t *idummy ){ return (*this)(); }
+
+
   /// Return a random number uniformly distributed between 0 and 1  
   Double_t flat() const;
   /// Return a random number uniformly distributed between mn and mx
