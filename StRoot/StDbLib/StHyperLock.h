@@ -1,0 +1,25 @@
+#ifndef __ST_HYPERHASH_SHA256_H
+#define __ST_HYPERHASH_SHA256_H
+
+#include <string>
+#include <ctime>
+#include <unistd.h>
+
+class StHyperLock {
+	public:
+		StHyperLock(const std::string& filename);
+		~StHyperLock();
+
+		bool try_lock(useconds_t usec = 0); // 1 sec = 1000000 usec
+		void unlock();
+
+	private:
+		StHyperLock(const StHyperLock&);
+  		StHyperLock& operator=(const StHyperLock&);
+
+		bool mIsLocked;
+		std::string mFileName;
+		int mFileDescriptor;
+};
+
+#endif
