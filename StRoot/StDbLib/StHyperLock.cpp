@@ -5,8 +5,8 @@
 #include <sys/file.h>
 #include <fcntl.h>
 
-StHyperLock::StHyperLock(const std::string& filename) 
-	: mIsLocked(false), mFileName(filename), mFileDescriptor(-1)
+StHyperLock::StHyperLock(const std::string& filename, bool create_lock_file) 
+	: mIsLocked(false), mCreateLockFile(create_lock_file), mFileName(filename), mFileDescriptor(-1)
 {
 
 }
@@ -18,9 +18,12 @@ StHyperLock::~StHyperLock()
 
 bool StHyperLock::try_lock(useconds_t usec) { // 1 second = 1000000 usec
 	if ( usec < 0 || mFileName.empty() ) return false;
-
+	int flags = O_RDONLY;
+	if (mCreateLockFile) {
+		flags = O_RDWR|O_CREAT;
+	}
 	while(mIsLocked == false && usec > 0) {
-		mFileDescriptor = open(mFileName.c_str(), O_RDONLY, 0666 );
+		mFileDescriptor = open(mFileName.c_str(), flags, 0666 );			
 		if( mFileDescriptor >= 0 && flock( mFileDescriptor, LOCK_EX | LOCK_NB ) < 0 ) {
     	    close( mFileDescriptor );
 			mFileDescriptor = -1;
@@ -48,3 +51,6 @@ void StHyperLock::unlock() {
 	}
 	return;
 }
+
+
+

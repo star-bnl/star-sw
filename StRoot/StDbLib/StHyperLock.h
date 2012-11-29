@@ -7,7 +7,7 @@
 
 class StHyperLock {
 	public:
-		StHyperLock(const std::string& filename);
+		StHyperLock(const std::string& filename, bool create_lock_file = false);
 		~StHyperLock();
 
 		bool try_lock(useconds_t usec = 0); // 1 sec = 1000000 usec
@@ -18,6 +18,7 @@ class StHyperLock {
   		StHyperLock& operator=(const StHyperLock&);
 
 		bool mIsLocked;
+		bool mCreateLockFile;
 		std::string mFileName;
 		int mFileDescriptor;
 };
