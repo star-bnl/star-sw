@@ -41,6 +41,7 @@ void StHyperLock::unlock() {
 	} else if (mFileDescriptor == -1) {
 		mIsLocked = false;
 	} else if (mIsLocked && mFileDescriptor >= 0) {
+		flock( mFileDescriptor, LOCK_UN );
     	close( mFileDescriptor );
 		mIsLocked = false;
 		mFileDescriptor = -1;
