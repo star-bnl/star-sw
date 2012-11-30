@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.110 2012/11/16 12:31:37 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.111 2012/11/30 20:29:41 sangalin Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -1266,7 +1266,6 @@ void StMuDstMaker::fillMtd(StEvent* ev) {
 	const StMtdCollection *mtd=ev->mtdCollection();
 	if(!mtd) return;
     StMuMtdCollection mMTD(*mtd); 
-    cout<<"In mtd with raw hits"<<mMTD.rawHitsPresent()<<endl;
         
     for(size_t i=0; i < (size_t)mMTD.hitsPresent(); i++) {
         StMuMtdHit* mtdHit = (StMuMtdHit*)mMTD.MtdHit(i);
@@ -1274,7 +1273,6 @@ void StMuDstMaker::fillMtd(StEvent* ev) {
     }
     
     for(size_t i=0; i < (size_t)mMTD.rawHitsPresent(); i++) {
-        cout<<"In for ?"<<endl;
         StMtdRawHit* mtdHit = (StMtdRawHit*)mMTD.RawMtdHit(i);
         addType( mMtdArrays[muMTDRawHit], *mtdHit );
     }
@@ -1786,6 +1784,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.111  2012/11/30 20:29:41  sangalin
+ * Removed cout debug statements in fillMtd().
+ *
  * Revision 1.110  2012/11/16 12:31:37  jeromel
  * Fix catch without try
  *
