@@ -100,7 +100,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    void setUseChargeMatch(Bool_t use=true);
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.18 2012/09/17 18:41:04 rfatemi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.19 2012/11/30 19:24:10 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
@@ -120,7 +120,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    StFgtCollection *mFgtCollectionPtr;
    void saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi,Int_t maxR, Int_t maxPhi, Int_t discId, Int_t quad);
    Double_t getRPhiRatio(vector<generalCluster>::iterator hitIterBegin, vector<generalCluster>::iterator hitIterEnd);
-   Double_t findClosestPoint(double xE, double yE, Int_t iD);
+   Double_t findClosestPoint(float mx, float bx, float my, float by, double xE, double yE, Int_t iD);
    Bool_t isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t iq);
    void fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t iq);
    Double_t findClosestStrip(Char_t layer, double ord, Int_t iD, Int_t iQ);
@@ -282,6 +282,11 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    TH1D* hBx;
    TH1D* hBy;
    TH1D* hResidua;
+   TH2D* hResiduaX;
+   TH2D* hResiduaY;
+   TH2D* hResiduaR;
+   TH2D* hResiduaP;
+
 
    TH1D* hMx;
    TH1D* hMy;

@@ -15,6 +15,7 @@
 #include "StarClassLibrary/StThreeVectorF.hh"
 
 
+
 #include <TH2D.h>
 #include <TROOT.h>
 #include <TStyle.h>
@@ -28,8 +29,11 @@
 //max num clusters any disk is allowed to have
 
 #define COSMIC
+#ifdef COSMIC
+#include "StFgtCosmicAlignment.h"
+#endif
 #define MAX_PHI_DIFF 0.5//the maximal difference in phi a track is allowed 
-#define MAX_CLUSTERS 5
+#define MAX_CLUSTERS 2
 #define CHARGE_MEASURE clusterCharge
 #define MAX_DIST_STRIP_R 0.7
 #define MAX_DIST_STRIP_PHI 0.03
@@ -72,7 +76,7 @@
 
 Bool_t StFgtGenAVEMaker::fitTheStrip(generalStrip* pStrip, generalStrip* pStripOtherLayer,float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin, Char_t layer)
 {
-  if(fitCounter>20000)
+  if(fitCounter>2000)
     return true;
   fitCounter++;
   char buffer[100];
@@ -853,8 +857,9 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::findCluChargeSize(Int_t iD,Char_t laye
   return pair<Double_t,Double_t>(charge,cluSize);
 }
 
-Double_t StFgtGenAVEMaker::findClosestPoint(double xE, double yE, Int_t iD)
+Double_t StFgtGenAVEMaker::findClosestPoint(float mx, float bx, float my, float by, double xE, double yE, Int_t iD)
 {
+  cout <<"expecting point at " << xE <<", " <<yE <<endl;
   if(iD<0 || iD >5)
     {
       return 99999;
@@ -881,10 +886,24 @@ Double_t StFgtGenAVEMaker::findClosestPoint(double xE, double yE, Int_t iD)
 
 	  Float_t x=r*cos(phi);
 	  Float_t y=r*sin(phi);
+	  cout <<"we have " << x <<", " << y <<endl;
 	  Double_t mDist=(x-xE)*(x-xE)+(y-yE)*(y-yE);
 	  if(mDist<dist2)
 	    {
 	      dist2=mDist;
+	      //recalculate distance with proper alignment
+	      float tmpX, tmpY,tmpZ,tmpP,tmpR;
+	      getAlign(iD,phi,r,tmpX,tmpY,tmpZ,tmpP,tmpR);
+	      Double_t xExpUpdate=mx*tmpZ+bx;
+	      Double_t yExpUpdate=my*tmpZ+by;
+	      cout<<"tmpx: " << tmpX <<" old: " << x <<" xE old: " << xE << " updated: " << xExpUpdate;
+	      cout<<"tmpy: " << tmpY <<" old: " << y <<" yE old: " << yE << " updated: " << yExpUpdate<<endl;
+	      mDist=(tmpX-xExpUpdate)*(tmpX-xExpUpdate)+(tmpY-yExpUpdate)*(tmpY-yExpUpdate);
+	      dist2=mDist;
+	      ///Double_t xExp=mx*StFgtGeom::getDiscZ(i)+bx;
+	      //	    Double_t yExp=my*StFgtGeom::getDiscZ(i)+by;
+
+
 	      //	      (*outTxtFile) <<"point found, x: " << x <<" y: " << y << " dist: " << dist2 <<endl;
 	    }
 	}
@@ -1171,7 +1190,23 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 
   //LOG_INFO << " --------------------------> calling makeLine with " << points.size() << " 0x" << std::hex << discBitArray << std::dec << endm;
   //  cout <<"get track2" <<endl;
+  //do the alignment		   
+#ifdef COSMIC
+  float tmpX, tmpY,tmpZ,tmpP,tmpR;
   for( ; iter != points.end(); ++iter ){
+    getAlign(iter->dID,iter->phi,iter->r,tmpX,tmpY,tmpZ,tmpP,tmpR);
+    cout <<"before: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
+    iter->phi=tmpP;
+    iter->r=tmpR;
+    iter->x=tmpX;
+    iter->y=tmpY;
+    iter->z=tmpZ;
+    cout <<"after: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
+  }
+#endif
+   
+
+  for( iter=points.begin(); iter != points.end(); ++iter ){
 
     Double_t x = iter->x;
     Double_t y = iter->y;
@@ -1374,8 +1409,9 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	//  cout <<"get track11" <<endl;
 	for(int i=0;i<6;i++)
 	  {
-	    Double_t xExp=mx*StFgtGeom::getDiscZ(i)+bx;
-	    Double_t yExp=my*StFgtGeom::getDiscZ(i)+by;
+	    Double_t xExp=mx*getLocDiscZ(i)+bx;
+	    Double_t yExp=my*getLocDiscZ(i)+by;
+	    cout <<"expecting x: " << xExp << ", " << yExp<<endl;
 	    Int_t quad=-1;
 	    //x=r*cos(phi)
 	    //y=r*sin(phi)
@@ -1431,7 +1467,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	      {
 		//		    cout <<"not somewhat eff: " << xExp <<" y: " << yExp <<endl;
 		radioPlotsNonEffLoose[i]->Fill(xExp,yExp);
-		  }
+	      }
 	    
 	    if(i==m_effDisk && quad==QUAD_EFF)
 	      {
@@ -1452,14 +1488,24 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 		    radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
 		  }
 	      }
-		Double_t closestPoint=findClosestPoint(xExp,yExp,i);
+
+	    Double_t closestPoint=findClosestPoint(mx,bx,my,by,xExp,yExp,i);
+	    cout <<" closest point is " << closestPoint <<" away " <<endl;
 		//		 (*outTxtFile) <<"closest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
-		if(findClosestPoint(xExp,yExp,i)<MAX_DIST2_EFF)
+
+	    if(findClosestPoint(mx,bx,my,by,xExp,yExp,i)<MAX_DIST2_EFF)
 		  {
 		    //		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<", dist: " << findClosestPoint(xExp,yExp,i) <<endl;
 		    radioPlotsEff[i]->Fill(xExp,yExp);
 		    if(i==m_effDisk)
-		      hResidua->Fill(sqrt(closestPoint));
+		    //		    if(i==1)
+		      {
+			hResidua->Fill(sqrt(closestPoint));
+			hResiduaX->Fill(xExp,sqrt(closestPoint));
+			hResiduaY->Fill(yExp,sqrt(closestPoint));
+			hResiduaR->Fill(r,sqrt(closestPoint));
+			hResiduaP->Fill(phi,sqrt(closestPoint));
+		      }
 
 		    (*outTxtFile) <<"***** found hit in disk " <<i << " quad: " << quad << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
 
@@ -1670,8 +1716,8 @@ Int_t StFgtGenAVEMaker::Make()
 
     }
   set<Int_t> usedPoints;//saves the points that have been used for tracks (and shouldn't be reused)
-  Double_t D1Pos=StFgtGeom::getDiscZ(0);
-  Double_t D6Pos=StFgtGeom::getDiscZ(5);
+  Double_t D1Pos=getLocDiscZ(0);
+  Double_t D6Pos=getLocDiscZ(5);
   Double_t zArm=D6Pos-D1Pos;
   vector<generalCluster>::iterator hitIterD1,hitIterD6, hitIterD1R, hitIterD6R, hitIter, hitIter2;
 
@@ -1700,8 +1746,8 @@ Int_t StFgtGenAVEMaker::Make()
 	  vector<generalCluster> &hitVecSeed1=*(pClusters[iSeed1]);
 	  vector<generalCluster> &hitVecSeed2=*(pClusters[iSeed2]);
 
-	  D1Pos=StFgtGeom::getDiscZ(iSeed1);
-	  D6Pos=StFgtGeom::getDiscZ(iSeed2);
+	  D1Pos=getLocDiscZ(iSeed1);
+	  D6Pos=getLocDiscZ(iSeed2);
 	  zArm=D6Pos-D1Pos;
 
 	  for(hitIterD1=hitVecSeed1.begin();hitIterD1 != hitVecSeed1.end();hitIterD1++)
@@ -1860,7 +1906,7 @@ Int_t StFgtGenAVEMaker::Make()
 			      Bool_t found=false;
 			      Bool_t foundR=false;
 			      //check for hit
-			      Double_t diskZ=StFgtGeom::getDiscZ(iD);
+			      Double_t diskZ=getLocDiscZ(iD);
 			      //expected
 
 			      Double_t xPosExp=xD1+(xD6-xD1)*(diskZ-D1Pos)/zArm;
@@ -2402,6 +2448,15 @@ Int_t StFgtGenAVEMaker::Finish(){
 
   hResidua->Draw();
   hResidua->Write();
+  hResiduaX->Draw();
+  hResiduaX->Write();
+
+  hResiduaY->Draw();
+  hResiduaY->Write();
+  hResiduaR->Draw();
+  hResiduaR->Write();
+  hResiduaP->Draw();
+  hResiduaP->Write();
   ///---->  cIPProj.SaveAs("hResidua.png");
 
   hChi2->Draw();
@@ -2759,7 +2814,13 @@ Int_t StFgtGenAVEMaker::Init(){
 
   hIpDca=new TH1D("ipDCA","ipDCA",50,-100,100);
   hTrkZ=new TH1D("z_Vtx_From_trk_fit","z_Vtx_From_trk_fit",50,-100,100);
-  hResidua=new TH1D("residua","residua",100,0,10);
+  hResidua=new TH1D("residua","residua",100,0,2);
+  hResiduaX=new TH2D("residuaX","residuaX",100,-10,10,200,0,1.0);
+  hResiduaY=new TH2D("residuaY","residuaY",100,-40,-20,200,0,1.0);
+  hResiduaR=new TH2D("residuaR","residuaR",100,12,32,200,0,1.0);
+  hResiduaP=new TH2D("residuaP","residuaP",100,0,0.8,200,0,1.0);
+
+
   hChi2=new TH1D("chi2","chi2",50,0,2);
   tpcFgtZVertexCorr=new TH2D("tpc_fgt_corr","tpc_fgt_corr",100,-120,120,100,-120,120);
   tpcFgtZVertexCorr2=new TH2D("tpc_fgt_corr2","tpc_fgt_corr2",100,-120,120,100,-120,120);
