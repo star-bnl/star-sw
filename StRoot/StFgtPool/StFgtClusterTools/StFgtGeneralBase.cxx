@@ -8,6 +8,7 @@
 #include "StRoot/StMuDSTMaker/COMMON/StMuDst.h"
 #include "StRoot/StMuDSTMaker/COMMON/StMuFgtStrip.h"
 #include "StRoot/StMuDSTMaker/COMMON/StMuFgtCluster.h"
+#include "StRoot/StMuDSTMaker/COMMON/StMuFgtStripAssociation.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -15,11 +16,14 @@
 
 #include <set>
 #define FILL_FROM_EVENT
-
-
-
+//#define COSMIC
 //#define ONE_HIT_PER_QUAD
 //#define USE_VTX
+
+#ifdef COSMIC
+//#include "StFgtCosmicAlignment.h"
+#endif
+
 
 StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), chargeMatchCut(1.5),evtNr(0),m_effDisk(2)
 {
@@ -191,12 +195,28 @@ Int_t StFgtGeneralBase::fillFromStEvent()
                for( hitIter = hitVec.begin(); hitIter != hitVec.end(); ++hitIter, ++idx )
 		 {
 		   Short_t quad, discK, strip;
-		   Char_t layer; 
+		   Char_t layer;
+
+ 
 		   Double_t posR=(*hitIter)->getPositionR();
 		   Double_t posPhi=(*hitIter)->getPositionPhi();
+
+		   Double_t discZ=getLocDiscZ(disc);
+		   float tmpX, tmpY,tmpZ,tmpP,tmpR;
+		   tmpR=posR;
+		   tmpP=posPhi;
+		   tmpZ=discZ;
+#ifdef COSMIC
+		   ///can't do it here since we don't know the space points yet...?.... shouldn't matter...?
+		   //		   getAlign(disc,posPhi,posR,tmpX,tmpY,tmpZ,tmpP,tmpR);
+#endif
+		   posR=tmpR;
+		   posPhi=tmpP;
+		   discZ=tmpZ;
+
 		   Int_t geoId=(*hitIter)->getCentralStripGeoId();
 		   //		   cout <<"central geoId in cluster:" << geoId <<endl;
-		   Double_t discZ=StFgtGeom::getDiscZ(disc);
+	
 		   StFgtGeom::decodeGeoId((*hitIter)->getCentralStripGeoId(),discK, quad, layer, strip);
 		   if(quad<0 && discK<0)//Ithink these are the error conditions
 		     {
@@ -216,6 +236,7 @@ Int_t StFgtGeneralBase::fillFromStEvent()
 		   Int_t clusterSize=(*hitIter)->getStripWeightMap().size();
 		   Double_t clusterCharge=(*hitIter)->charge();
 		   Double_t clusterUncert=(*hitIter)->getChargeUncert();
+		   cout <<" r pos : " << posR << " phi: " << posPhi << " charge: " << clusterCharge << " unert: " << clusterUncert <<endl;
 		   //sometimes (rarely two clusters have the same geo id (some split I guess), don't insert twice, that messes the indexing up
 		   if(mapGeoId2Cluster.find(geoId)==mapGeoId2Cluster.end())
 		     {
@@ -434,33 +455,55 @@ Int_t StFgtGeneralBase::fillFromMuDst()
    if( muDst ){
       TClonesArray *fgtClusters = muDst->fgtArray( muFgtClusters );
       TClonesArray *fgtStrips=muDst->fgtArray(muFgtStrips);
+      TClonesArray *fgtStripAssoc=muDst->fgtArray(muFgtStripAssociations );
+
+      if(fgtStripAssoc)
+	{
+         ierr = kStOk;
+	 cout <<" got fgt asso" <<endl;
+	 Int_t nAssoc=fgtStripAssoc->GetEntriesFast();
+	 cout <<"there are " << nAssoc <<" associations" <<endl;
+         for( Int_t i = 0; i < nAssoc; ++i )
+	   {
+	     StMuFgtStripAssociation* assoc = static_cast< StMuFgtStripAssociation* >( (*fgtStripAssoc)[i] );
+	     if( assoc )
+	       {
+		 cout <<" cluster: " << assoc->getClusIdx() <<" strip id: " << assoc->getStripIdx() <<endl;
+	       }
+	     else
+	       {
+		 cout <<"no assoc..." << assoc <<endl;
+	       }
+	 }
+	}
+
       if( fgtClusters ){
          // flag this is the correct input
          ierr = kStOk;
-	 //	 cout <<" got fgt clust" <<endl;
+	 	 cout <<" got fgt clust" <<endl;
          Int_t nClusters = fgtClusters->GetEntriesFast();
 
          for( Int_t i = 0; i < nClusters; ++i ){
             StMuFgtCluster* clus = static_cast< StMuFgtCluster* >( (*fgtClusters)[i] );
             if( clus )
 	      {
-		//		cout<<"found cluster in muDST " << endl;
+				cout<<"found cluster in muDST " << endl;
 		   Int_t geoId=clus->getCentralStripGeoId();
-		   //		   cout <<"cluster from muDst: geoId: " << geoId <<endl;
+		   cout <<"cluster " << i << " from muDst: geoId: " << geoId <<endl;
 		   Short_t quad, disc, strip;
 		   Char_t layer;
 		   StFgtGeom::decodeGeoId(geoId,disc, quad, layer, strip);
 		   Double_t posR=clus->getR();
 		   Double_t posPhi=clus->getPhi();
-		   Double_t discZ=StFgtGeom::getDiscZ(disc);
+		   Double_t discZ=getLocDiscZ(disc);
 		   StFgtGeom::decodeGeoId(geoId,disc, quad, layer, strip);
 		   Int_t clusterSize=clus->getNumStrips();
 		   Double_t clusterCharge=clus->getCharge();
 		   Double_t clusterUncert=clus->getChargeUncert();
+		   cout <<"posR: " << posR <<" Phi: " << posPhi << " charge: " << clusterCharge <<" uncert: " << clusterUncert <<endl;
 
-
-		   //		   cout <<"looking at geoID: " << geoId <<" r: " << posR <<" phi: " << posPhi <<" charge: " << clusterCharge <<" size: " << clusterSize <<endl;
-		   //		   cout <<" disc: " << disc <<" quad: " << quad << " layer: " << layer <<endl;
+		   		   cout <<"looking at geoID: " << geoId <<" r: " << posR <<" phi: " << posPhi <<" charge: " << clusterCharge <<" size: " << clusterSize <<endl;
+		  	   cout <<" disc: " << disc <<" quad: " << quad << " layer: " << layer <<endl;
 		   pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip,clusterSize,clusterCharge,clusterUncert));
 		   mapGeoId2Cluster[geoId]=((pClusters[disc]->size()-1));
 	      }
@@ -472,16 +515,17 @@ Int_t StFgtGeneralBase::fillFromMuDst()
       if(fgtStrips)
       //      if(false)
 	{
-	  //	  cout <<"got strip " <<endl;
+	  	  cout <<"got strip " <<endl;
 	  ierr = kStOk;
          Int_t nStrips = fgtStrips->GetEntriesFast();
          for( Int_t i = 0; i < nStrips; ++i ){
             StMuFgtStrip* strip = static_cast< StMuFgtStrip* >( (*fgtStrips)[i] );
-	    //	    cout <<"got strip" <<endl;
+	     cout <<"got strip" <<endl;
             if( strip )
 	      {
-		//		cout <<"got strip again" <<endl;
+
 		Int_t geoId=strip->getGeoId();
+		cout <<"got strip again, geoId: " << geoId <<endl;
 		Int_t cSeedType=strip->getClusterSeedType();
 		Double_t charge=strip->getCharge();
 		Double_t chargeUncert=strip->getChargeUncert();
@@ -513,16 +557,17 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		    if(mapGeoId2Cluster.find(geoId)!=mapGeoId2Cluster.end())
 		      {
 			//have to find all strips...
-			//			cout << "hoping to see " << geoId << " have: " << (*pClusters[disc])[mapGeoId2Cluster[geoId]].centralStripGeoId<<endl;
+						cout << "hoping to see " << geoId << " have: " << (*pClusters[disc])[mapGeoId2Cluster[geoId]].centralStripGeoId<<endl;
+
 			(*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=(pStrips[disc*4+quad].size()-1);
 			(*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdc=maxAdc;
-			//			cout <<"maxAdc of cluster: "<< maxAdc <<" "<< geoId <<" center strip geo:" << (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centralStripGeoId;
-		      }
+			cout <<"maxAdc of cluster: "<< maxAdc <<" "<< geoId <<" center strip geo:" << (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centralStripGeoId <<" set id to : " <<(pStrips[disc*4+quad].size()-1) << " disc: " << disc << " quad: " << quad <<" dq index: " << disc*4+quad <<endl;
+		      } 
 		  }
 		
 	      }
 	 }
-	 //	 cout <<"finding the other strip " <<endl;
+	 	 cout <<"finding the other strip " <<endl;
 	 ///find the other strips for clusters....
 	 for(int iDx=0;iDx<6;iDx++)
 	   {
@@ -532,19 +577,21 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		 //when we are at it, set the matched flag for cluster from file, we don't want to loose them
 		 //it->hasMatch=true;
 		 Int_t centerStripId=it->centerStripIdx;
-		 //		 cout <<"looking at cluster with center strip id:" << it->centralStripGeoId <<endl;
+		 cout <<"looking at cluster with center strip id:" << it->centralStripGeoId  <<" idx: " << centerStripId <<endl;
 		 if(centerStripId<0)
-
+		   {
+		     cout <<" is <0: " << centerStripId <<endl;
 		   continue;
-		 //		 cout << " strip geo id is " << pStrips[iDx*2+it->quad][centerStripId].geoId <<endl;
+		   }
+		 cout << " strip geo id is " << pStrips[iDx*4+it->quad][centerStripId].geoId <<endl;
 		 Int_t stripCounter=(centerStripId-1);
 		 if(centerStripId>=pStrips[iDx*4+it->quad].size())
 		   continue;
 		 Double_t maxChargeInt=it->maxAdc;
-		 //		 cout <<"max charge:" <<maxChargeInt<<endl;
+		 		 cout <<"max charge:" <<maxChargeInt<<endl;
 		 Int_t oldGeoId=(pStrips[iDx*4+it->quad])[centerStripId].geoId;
 		 Int_t m_seedType=(pStrips[iDx*4+it->quad])[centerStripId].seedType;
-		 //		 cout <<" going down " <<endl;
+		 		 cout <<" going down " <<endl;
 		 while(stripCounter>=0)     
 		   {
 		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
@@ -552,7 +599,7 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 		       {
 			 m_seedType=seedType;
 		       }
-		     //		     cout <<"looking at geo id: " << (pStrips[iDx*2+it->quad])[stripCounter].geoId <<endl;
+		     //		     cout <<"looking at geo id: " << (pStrips[iDx*4+it->quad])[stripCounter].geoId <<endl;
 		     //		     cout <<"seedtype:" << seedType <<endl;
 		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
 		       break;
@@ -793,7 +840,7 @@ void StFgtGeneralBase::doLooseClustering()
 		  Int_t geoId=it->geoId;
 		   Short_t quad, disc, strip;
 		   Double_t ordinate, lowerSpan, upperSpan;
-		   Double_t discZ=StFgtGeom::getDiscZ(disc);
+		   Double_t discZ=getLocDiscZ(disc);
 		   Int_t clusterSize=3;
 		   StFgtGeom::getPhysicalCoordinate(it->geoId,disc,quad,layer,ordinate,lowerSpan,upperSpan);
 		   if((it+1)<pStrips[iDx*4+iQ].end())

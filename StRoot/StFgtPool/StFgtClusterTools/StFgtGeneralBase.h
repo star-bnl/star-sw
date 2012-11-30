@@ -14,6 +14,8 @@
 #include "StRoot/StFgtDbMaker/StFgtDb.h"
 
 #include "StRoot/StFgtUtil/StFgtConsts.h"
+#define COSMIC
+
 //#include "StRoot/StEvent/StFgtCollection.h"
 /*
 this class is basically just to fill general clusters from StEvent and MuDsts
@@ -97,6 +99,29 @@ class StFgtGeneralBase : public StMaker {
   Int_t fillFromStEvent();
   Int_t fillFromMuDst();
   void setChargeMatchCut(Float_t cut);
+
+  float getLocDiscZ(int iD)
+  {
+#ifndef COSMIC
+    return StFgtGeom::getDiscZ(iD);
+#endif
+
+    switch(iD)
+      {
+      case 0:
+	return 0.0;
+      case 1: 
+	return 16.51;
+      case 2:
+	return 2.0*16.51;
+      default:
+	return -100;
+      }
+    return -100;
+
+  }
+
+
   void SetEffDisk(Int_t disk)
   {
     m_effDisk=disk;

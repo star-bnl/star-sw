@@ -54,7 +54,9 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
    //   dbMkr->SetDateTime(20120223,201805);      
    ///   dbMkr->SetDateTime(20120316,033657); ///
    //          dbMkr->SetDateTime(20120404,043459); ///
-             dbMkr->SetDateTime(20120622,043459); ///
+   //////--->for run12             dbMkr->SetDateTime(20120622,043459); ///
+     dbMkr->SetDateTime(20120803,043459); ///for cosmic teststand
+   //  dbMkr->SetDateTime(20120903,043459); ///for cosmic teststand
 
    ///     dbMkr->SetDateTime(20120307,000717); ///
    //      dbMkr->SetDateTime(20120128,204320);      // run ???
@@ -78,12 +80,12 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
    a2cMkr->setFgtDb(fgtDbMkr->getDbTables());
    a2cMkr ->setAbsThres( -5000 );  // set to below -4096 to skip cut
     //    a2cMkr ->setAbsThres( 300 );  // set to below -4096 to skip cut
-   a2cMkr ->setRelThres( 3.);  // set to zero to skip cut
+   a2cMkr ->setRelThres( 4.);  // set to zero to skip cut
    //      a2cMkr->doCutBadStatus(true);//parameter is useless from looking at the function
    a2cMkr->doCutBadStatus();
    a2cMkr->acceptLongPulses(true);
    ////you have to set the relative threshold to 3 if you set the cluster threshold to 0.6 (meaning 3)
-   a2cMkr->setClusterThreshold(0.6);
+   a2cMkr->setClusterThreshold(0.8);
 
    ///this cuts ~10% of the events
    //   a2cMkr->doRemoveNonSignal(false);
@@ -102,8 +104,8 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
   //  StFgtAVEfficiencyMaker* effMkr=new StFgtAVEfficiencyMaker("FgtAVEfficiencyMaker");
   //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
   fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
-  fgtAVEffMkr->setChargeMatchCut(2.0);
-  fgtAVEffMkr->setUseChargeMatch();
+  //  fgtAVEffMkr->setChargeMatchCut(2.0);
+  //  fgtAVEffMkr->setUseChargeMatch();
   fgtAVEffMkr->SetEffDisk(effDisk);
   //   fgtGenPlotter = new StFgtGenPlotter( "genPlotter" );
 
