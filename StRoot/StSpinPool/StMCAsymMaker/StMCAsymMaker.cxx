@@ -675,7 +675,7 @@ void StMCAsymMaker::fillPythiaEvent(StPythiaEvent* pythia)
 
     particle_st* particleTable = particleTabPtr->GetTable();
 
-    for (int i = 4; i < 8; ++i)
+    for (int i = 0; i < particleTabPtr->GetNRows(); ++i)
       pythia->addParticle(TParticle(particleTable[i].idhep,
 				    particleTable[i].isthep,
 				    particleTable[i].jmohep[0],
