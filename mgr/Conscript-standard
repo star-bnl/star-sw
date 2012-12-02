@@ -95,24 +95,24 @@ my $CPPFLAGS = $env1->{CPPFLAGS};
 
 
 #my $ROOTCINT_CPPFLAGS = "";
-my @idlL    = script::find_idl($Dir);
+my @idlL    = script::find_idl($Dir); # print "find_idlL: ======== @idlL ======\n";
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
 foreach my $Rep(@Repo) {
   my $RepDir = $Rep . "/" . $Dir;
   print "RepDir = $RepDir\n" if $param::debug;
   if ( -d $RepDir ) {
-    my @idlR = script::find_idl($RepDir);
+    my @idlR = script::find_idl($RepDir); # print "find_idlL: ======== @idlR ======\n";
     foreach my $i(@idlR) { push @idlL, $i; }
   }
 }
 @idlL = script::sortu(@idlL);
-
-my @idlML    = script::find_idlM($Dir);
-my @srcL     = script::find_sources($Dir);
-my @h_filesL = script::find_hfiles($Dir);
-my @uiQT     = script::find_ui($Dir);
-my @xpmQT    = script::find_xpm($Dir);
-my @qrcQT    = script::find_qrc($Dir);
+                                          print "find in $Dir ========\n" if $param::debug;
+my @idlML    = script::find_idlM($Dir);   print "find_idl in $Dir ======== @idlML ======\n" if $param::debug;
+my @srcL     = script::find_sources($Dir);print "find_sources in in $Dir ======== @srcL ======\n" if $param::debug;
+my @h_filesL = script::find_hfiles($Dir); print "find_hfiles in $Dir ======== @h_filesL ======\n" if $param::debug;
+my @uiQT     = script::find_ui($Dir);     print "find_ui in $Dir ======== @uiQT ======\n" if $param::debug;
+my @xpmQT    = script::find_xpm($Dir);    print "find_ui in $Dir ======== @uiQT ======\n" if $param::debug;
+my @qrcQT    = script::find_qrc($Dir);    print "find_qrc in $Dir ======== @qrcQT ======\n" if $param::debug;
 
 
 print "idlL = @idlL\n"   if $param::debug;
@@ -122,11 +122,15 @@ my (@src, @h_files, @idlM);
 my $CPPPATH = $env1->{CPPPATH};
 
 if ($pkg eq "RTS") {
-    $CPPFLAGS .= ' -D_LARGEFILE64_SOURCE -DNEW_DAQ_READER -DRTS_PROJECT_STAR -DTPXREADER '
+  if ($STAR_SYS =~ /^x86_darwin/) {}
+  else {
+    $CPPFLAGS .= ' -D_LARGEFILE64_SOURCE';
+  }
+    $CPPFLAGS .= ' -DNEW_DAQ_READER -DRTS_PROJECT_STAR -DTPXREADER '
 	      .  '-DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
     $CPPFLAGS =~ s/-D__ROOT__//;# print " ------------  CPPFLAGS ==== " .  $CPPFLAGS . "\n";
     $CFLAGS =~   s/-D__ROOT__//;# print " ------------  CFLAGS WHERE \"__ROOT__\" coming from ??? ==== " .  $CFLAGS . "\n";
-    $CPPPATH = $main::PATH_SEPARATOR . "#StRoot/RTS/include" 
+    $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/RTS/include" 
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include" 
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC" 
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS" 
@@ -148,7 +152,7 @@ if ($pkg eq "RTS") {
 # Some directories will need extra includes for the RTS DAQ reader
 my @DAQ_pkgs = qw(StDAQMaker StTofHitMaker StTpcHitMaker StEEmcPoolmuEztPanitkin  
 		  StBEMCPlots StBTofHitMaker StMtdHitMaker StPmdReadMaker St_pp2pp_Maker
-		  StFmsTriggerMaker
+		  StFmsTriggerMaker StDaqLib Stl3Util StTriggerUtilities
 		); 
 #		  StTriggerUtilities 
 # But any *Raw* in StRoot/ would have this automatically done / handled
@@ -156,18 +160,25 @@ if ( $pkg =~ m/Raw/ ){
 #    print "Found [$pkg] as Raw package\n";
     push(@DAQ_pkgs,$pkg);
 }
-
+my $DAQ_pkgs = join('|',@DAQ_pkgs);
 
 my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src" 
                      . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
                      . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include";
 
 
-if (!$OnlinePackage) { $OnlinePackage=grep(m/$pkg/,@DAQ_pkgs); }
-
+#if (!$OnlinePackage) { $OnlinePackage=grep(m/$pkg/,@DAQ_pkgs); }
 if ($OnlinePackage) {
-    $CPPPATH = $main::PATH_SEPARATOR . "#OnlTools" . $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH;
+  $CPPPATH = $main::PATH_SEPARATOR . "#OnlTools" . $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH;
+}
+#print "==> $pkg => $DAQ_pkgs =======\n";
+if ( $pkg =~ /$DAQ_pkgs/ )  {
+  $CPPPATH = $main::PATH_SEPARATOR . "#" . $Dir . $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH; 
+#  print "=========> $CPPPATH\n";
 #. "/usr/include/libxml2" . $main::PATH_SEPARATOR 
+#ifdef ____MAC_____
+#    if ($pkg =~ /StDaqLib/) {$CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir;}
+#endif /* ____MAC_____ */
 }
 if ( $pkg eq "OnlinePlots") {
   $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure"
@@ -187,8 +198,9 @@ if ( $pkg eq "Jevp") {
 	      .   $main::PATH_SEPARATOR .  $CPPPATH;
     $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
 } 
-
-
+if ( $pkg eq "GeoTestMaker") {
+  $LIBS = "-lQtGui"; 
+}
 
 $CPPFLAGS .= " -DNEW_DAQ_READER";
 if ($pkg eq "StDAQMaker") {
@@ -263,7 +275,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	# but we do not want to add the source (hence the derived .o) twice
 	# and use fcheck for tetsing that
 	my $RepDir = $Dir; $RepDir =~ s/$1/G/;
-	my @xmlGeo   = script::find_xml($RepDir);
+	my @xmlGeo   = script::find_xml($RepDir); # print "find_xml: ======== @xmlGeo ======\n";
 	my @src=undef;
 	my @inc=undef;
 	my $fcheck;
@@ -315,7 +327,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#}
 
     } elsif ( $Dir =~ m/Geometry/ ){
-	my @xmlGeo   = script::find_xml($Dir);
+	my @xmlGeo   = script::find_xml($Dir); # print "find_xml: ======== @xmlGeo ======\n";
 	
 	#print "DEBUG Found ".($#xmlGeo+1)." XML files in $Dir\n";
 
@@ -395,19 +407,18 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     # <-- end generating geometries
 
 
-
     foreach my $Rep(@Repo) {
 	my $RepDir = $Rep . "/" . $Dir;
 	print "RepDir = $RepDir\n" if $param::debug;
     
 	if ( -d $RepDir and $pkg ne "RTS") {
 	    my @srcR =
-		script::find_sources($RepDir);
+		script::find_sources($RepDir); # print "find_sources: ======== @srcR ======\n";
 	    foreach my $i(@srcR) { push @srcL, $i; }
-	    my @idlMR = script::find_idlM($RepDir);
+	    my @idlMR = script::find_idlM($RepDir); # print "find_idlM: ======== @idlMR ======\n";
       
 	    foreach my $i(@idlMR) { push @idlML, $i; }
-	    my @h_filesR = script::find_hfiles($RepDir);
+	    my @h_filesR = script::find_hfiles($RepDir); # print "find_hfiles: ======== @h_filesR ======\n";
 	    foreach my $i(@h_filesR) { push @h_filesL, $i; }
 	}
     }
@@ -597,7 +608,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	      $pkg =~ m/^Stv$/                ||
 	      $pkg =~ m/^Sti/ && $pkg !~ m/StiVMC/) {
 
-	$CPPPATH = "#" . $Dir;
+      $CPPPATH .=  $main::PATH_SEPARATOR . "#" . $Dir; 
 
 	print "WARNING Package $pkg requires a glob() to be called\n" if $param::debug;
     
@@ -623,10 +634,17 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CXXFLAGS .=  " -I".$env1->{ENV}->{OPTSTAR}."/include";
 
 
-    } elsif ( $pkg =~ m/^StDaqLib$/ ) {
-	$CPPPATH = "#" . $Dir;
-	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
-	print "CPPPATH = $CPPPATH\n" if $param::debug;
+##ifndef ____MAC_____
+##    } elsif ( $pkg =~ m/^StDaqLib$/ ) {
+##	$CPPPATH = "#" . $Dir;
+##	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+##	print "CPPPATH = $CPPPATH\n" if $param::debug;
+##else /* ____MAC_____ */
+#    } elsif ( $pkg =~ m/^StDaqLib$/ ) {
+#	$CPPPATH = "#" . $Dir;
+#	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
+#	print "CPPPATH = $CPPPATH\n" if $param::debug;
+##endif /* ____MAC_____ */
     
     } elsif ( $pkg =~ m/^gcalor$/ || $pkg =~ m/^geant321$/) {
 	$LIBPKG = "lib" . $pkg . "." . $env1->{SUFLIB};
@@ -744,7 +762,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	Command $env ["#StRoot/StBFChain/doc/BFC.h"], ("#StRoot/StBFChain/BigFullChain.h"), qq (%CPP %< > %>);
 	Command $env ["#StRoot/StBFChain/doc/BFC2.h"],("#StRoot/StBFChain/BigFullChain.h"), qq (%CPP -D__BFC2__ %< > %>);
 	Command $env [("#StRoot/StBFChain/doc/index.html","#StRoot/StBFChain/doc/StBFChain.cxx_doc")],
-	("#StRoot/StBFChain/doc/BFC.h","#StRoot/StBFChain/doc/BFC.h","#StRoot/StBFChain/doc/BFC2.h"),
+	("#StRoot/StBFChain/doc/BFC.h","#StRoot/StBFChain/doc/BFC.h", "#StRoot/StBFChain/doc/BFC2.h"),
 	qq(BFCOpt2Html.pl);
     }
   
@@ -779,8 +797,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#      "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include";
 	#    print "CPPPATH => $CPPPATH\n";
 	$CXXFLAGS .= " -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics";
-	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
-	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE";}
+	$CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
+#	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
+#	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE";}
 	my @srcC = ();
 	foreach my $s (@src) {
 	    #      print "$s\n";
@@ -809,7 +828,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#    $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/TBB/include";
 	#    print "CPPPATH => $CPPPATH\n";
 	
-	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION  -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
+	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
 #	my $extraCXXFLAGS = " -DDO_TPCCATRACKER_EFF_PERFORMANCE -DDRAW -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
 #	my $extraCXXFLAGS = " -DDO_TPCCATRACKER_EFF_PERFORMANCE -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
 #	my $extraCXXFLAGS = " -DNVALGRIND -DENABLE_VECTORIZATION -DVC_IMPL=SSE -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts";
@@ -821,8 +840,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#	$extraCXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE"; # uncomment for CA Efficiencies output
 	$extraCXXFLAGS .= " -DNODEBUG";
 	$CXXFLAGS .= $extraCXXFLAGS;
-	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
-	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE";}
+	$CXXFLAGS .= $env->{Packages}->{Vc}->{CPP};
+#	if ($STAR_SYS =~ 'gcc432$' || $STAR_SYS =~ 'gcc445$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
+#	if ($STAR_SYS =~ 'gcc432$') {$CXXFLAGS .= " -DVC_IMPL=Scalar";}
+#	else                        {$CXXFLAGS .= " -DVC_IMPL=SSE"}
 	# c++ `root-config --ldflags` -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
 	$LIBS = "-lVc";
 	if ($extraCXXFLAGS =~ /USE_TBB/) {$LIBS .= " -lTBB";}
@@ -973,7 +994,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     my $DIR = Cwd::cwd();
     print "DIR = $DIR\n" if $param::debug;
     my $line;
-    my @Defs = ();
+    my @Defs = (); 
 
 	
     if ( $#idlM > -1 ) {
@@ -1414,6 +1435,10 @@ if ( $#src > -1 ) {
 	    . $main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS"
 	      . $main::PATH_SEPARATOR . "#StRoot/RTS/src"
 		. $main::PATH_SEPARATOR . "StRoot/RTS/src/EVP_READER";
+##else /* ____MAC_____ */
+#		. $main::PATH_SEPARATOR . "StRoot/RTS/src/EVP_READER"
+#		  . $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSYS} . "/include";
+##endif /* ____MAC_____ */
       $envRTS = $env2->clone('Package'  => $pkg,
 			     'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
 			     'CPPPATH'  => $cpppath,
