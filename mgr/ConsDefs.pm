@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.131 2011/10/10 20:28:15 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.132 2012/12/02 17:26:31 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -17,12 +17,13 @@
     *topnlink = *File::Find::topnlink;
 
     #use strict;
-    if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; } # print "OPTSTAR = $OPTSTAR\n"; die;
     if ( !$STAR_SYS ) {
         $STAR_SYS = `sys`;
         chop($STAR_SYS);
         $STAR_HOST_SYS = $STAR_SYS;
     }
+    if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; } # print "OPTSTAR = $OPTSTAR\n"; die;
+    if ( !$XOPTSTAR ) { $XOPTSTAR = $OPTSTAR;} # print "OPTSTAR = $OPTSTAR\n"; die;
     $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD\n" unless ($param::quiet);
     $INCLUDE = $BUILD  . "/include";
 
@@ -158,7 +159,6 @@
     $CXX           = "g++";
     $LDFLAGS       = "";
     $SOFLAGS       = "";
-
     # $XMACHOPT would switch to -m32 or -m64
     $CXXFLAGS = $CFLAGS = $LDFLAGS = $SOFLAGS = "$XMACHOPT";
 
@@ -186,9 +186,11 @@
     $ARFLAGS       = "rvu";
     $LD            = $CXX;
 #    $LDFLAGS       = "$XMACHOPT ";#--no-warn-mismatch";#$CXXFLAGS;
+ if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
     $LDEXPORT      = " -Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
     $LDALL         = " -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs";
     $LDNONE        = " -Wl,--no-whole-archive -Wl,-Bdynamic";
+  } 
     $EXTRA_LDFLAGS = "";
     $F77LD         = $LD;
     $F77LDFLAGS    = $LDFLAGS;
@@ -262,15 +264,24 @@
 
     $CINTSYSDIR    = $ROOTSYS . "/cint";
     $ARCOM  = "%AR %ARFLAGS %> %< ; %RANLIB %>"; # "%AR %ARFLAGS %> %<;%RANLIB %>",
-
-    $CXXCOM =
+    my $gccfilter = "";
+    if (-e "$STAR/mgr/gccfilter") { 
+      $gccfilter = "$STAR/mgr/gccfilter -c -w -a ";
+      my $flag = system($gccfilter);
+#      print "$gccfilter   ===========> $flag\n";
+      if ($flag) { $gccfilter = "";}
+#      print "gccfilter = $gccfilter ==============\n";
+#      die;
+    } 
+    $CXXCOM = $gccfilter .
  "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %CXXinp%< %Cout%>";
-    $CCCOM = "%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %Cinp%< %Cout%>";
-    $MAKELIB .= "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
+    $CCCOM =  $gccfilter .
+ "%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %Cinp%< %Cout%>";
+    $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
     $LINKCOM =
       "%LD %DEBUG %LDFLAGS %EXTRA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
- my $FCCOM = "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>;";
- my $FCCOM = "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>;";
+ my $FCCOM = 
+ "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>;";
  my $FCviaAGETOFCOM
  = " test -f %>:b.g && rm %>:b.g; %FPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;"
  . " test -f %>:b.for && rm %>:b.for; %AGETOF %AGETOFLAGS -V f %<:b.g -o %>:b.for;";
@@ -287,10 +298,6 @@
     $NoKeep = undef;
     $_ = $STAR_HOST_SYS;
     print "System: ", $_, "\n" unless ($param::quiet);
-
-
-
-
     # ============================================================
     # Platform support should be concentrated here
     # Above was a generic gcc support
@@ -334,7 +341,8 @@
 	} else {
 	    print "WARNING: using cernlib from the default path\n"
 		unless ($param::quiet);
-	    $cernl = "cernlib -s";
+#	    $cernl = "cernlib -s";
+	    $cernl = "cernlib";
 	    $packl = "packlib";
 	    $kernl = "kernlib";
 	}
@@ -347,7 +355,7 @@
 
 	chop($CERNLIBS);
 	
-	if ( $STAR_HOST_SYS !~ /^x86_darwin / ) {
+	if ( $STAR_HOST_SYS !~ /^x86_darwin/ ) {
 	  $CERNLIBS =~ s#lX11#L/usr/X11R6/lib -lX11#;
 	}
 	print "CERNLIB = $CERNLIBS\n" unless ($param::quiet);
@@ -360,8 +368,7 @@
 #   print "DEBUG >>> We will select architecture/compiler based on $STAR_HOST_SYS\n" if ($param::debug);
 
 
-    if ( ($STAR_HOST_SYS =~ m/^rh/ && $STAR_HOST_SYS =~ /_icc/) ||
-	 ($STAR_HOST_SYS =~ m/^sl/ && $STAR_HOST_SYS =~ /_icc/) ) {
+    if ( $STAR_HOST_SYS =~ /_icc/ && ($STAR_HOST_SYS =~ m/^rh/ || $STAR_HOST_SYS =~ m/^sl/ )) {
 	#
 	# Intel ICC
 	#
@@ -514,7 +521,7 @@
     } elsif ($STAR_HOST_SYS =~ /^i386_/ ||
 	     $STAR_HOST_SYS =~ /^rh/    ||
 	     $STAR_HOST_SYS =~ /^sl/    ||
-	     $STAR_HOST_SYS =~ /gcc/    ) {
+	     $STAR_HOST_SYS =~ /gcc/ && $STAR_HOST_SYS !~ /^x86_darwin/ ) {
         #
         # Case linux
         #
@@ -574,31 +581,24 @@
 	}
         $CFLAGS   .= " -pipe -fPIC -Wall -Wshadow";
         $SOFLAGS  .= " -shared -Wl,-Bdynamic";
-#        $CFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Wshadow";
-#        $SOFLAGS   = "-shared -Wl,-Bdynamic";
 
 	$XLIBS     = "-L/usr/X11R6/$LLIB -lXpm -lX11";
 
         $THREAD    = "-lpthread";
         $CRYPTLIBS = "-lcrypt";
 
-	if ($CXX_VERSION >= 4 && $STAR_HOST_SYS =~ m/macintosh/ ){
-	    # Either a version 4 issue but made this for Mac
-	    # 2009/08 -> not an issue with gcc4
-	    $SYSLIBS   = "-lm -ldl -lrt -dynamiclib -single_module ";
-	    $CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl -lrt -dynamiclib -single_module ";
-	} else {
-	    $SYSLIBS   = "-lm -ldl -lrt -rdynamic";
-	    $CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl -lrt -rdynamic ";
-	}
+	$SYSLIBS   = "-lm -ldl";
+	$CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl";
+	$SYSLIBS   .= " -lrt -rdynamic";
+	$CLIBS     .= " -lrt -rdynamic";
 	# print "*** $CXX_VERSION $SYSLIBS\n";
-
+	
         if ($PGI) {
-            # under SL5 where PGI is installed, this test make PGI used
+	  # under SL5 where PGI is installed, this test make PGI used
 	    # but eventually fail at link-time - TBC [TODO: JL 200908]
-	    $FC    = "pgf77";
-	    $FFLAGS = "";
-	    $FEXTEND = "-Mextend";
+	  $FC    = "pgf77";
+	  $FFLAGS = "";
+	  $FEXTEND = "-Mextend";
 	} else {
 	    $FC      = $G77;
 	    $FFLAGS  = $G77FLAGS;
@@ -610,7 +610,7 @@
 #	  $FLIBS     =  $LIBFRTBEGIN;
 #	  $FLIBS    .= " -lgfortran";
 	} else {
-	    if ($CXX_VERSION >= 4 && $STAR_HOST_SYS =~ m/macintosh/ ){
+	    if ($CXX_VERSION >= 4 && $STAR_HOST_SYS =~ m/^x86_darwin/ ){
 		# Same comment, not sure if V4 or a Mac issue
 		# 2009/08 -> not an issue with gcc4
 		$FLIBS = " -lg2c";
@@ -618,8 +618,7 @@
 		$FLIBS = " -lg2c -lnsl";
 	    }
 	}
-
-    } elsif (/x86_darwin/) {
+    } elsif ( $STAR_HOST_SYS =~ /x86_darwin/) {
       $CXX_VERSION  = `$CXX -dumpversion`;
       chomp($CXX_VERSION);
       ($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;  
@@ -638,16 +637,30 @@
       }
       $CXX           = "g++";
       $CC            = "gcc";
-      $CXXFLAGS      = "-pipe -W -Wall -Woverloaded-virtual -fsigned-char -fno-common";
+      
+      if ($USE_64BITS){
+	$CXXFLAGS = "-m64";
+	$CFLAG    = "-m64";
+	$LDFLAGS  = "-m64";
+      } else {
+	$CXXFLAGS = "-m32";
+	$CFLAG    = "-m32";
+	$LDFLAGS  = "-m32";
+      }
+      $CXXFLAGS      .= " -pipe -Wshadow  -W -Wall -Woverloaded-virtual -fsigned-char -fno-common";
+      if ($CXX_MAJOR > 4 or $CXX_MAJOR == 4 and $CXX_MINOR >= 6) {$CXXFLAGS .= " -fpermissive";}
+      $CXXFLAGS      .= " -Wshadow -Wunused-parameter -Wwrite-strings";
       if (! $EXTRA_CPPPATH) {$EXTRA_CPPPATH  =                         $FINK_CXXFLAGS;}
       else                  {$EXTRA_CPPPATH .= $main::PATH_SEPARATOR . $FINK_CXXFLAGS;}
       $CFLAGS       .= " -pipe -W -Wall -fsigned-char -fno-common";# -Df2cFortran";
-      $CINTCXXFLAGS  = "-pipe -W -Wall -Woverloaded-virtual " .
-	"-fsigned-char -fno-common $FINK_CXXFLAGS " .
+      $CFLAGS      .= " -Wshadow -Wunused-parameter -Wwrite-strings";
+      
+      $CINTCXXFLAGS  = $CXXFLAGS .
+	" -fsigned-char -fno-common $FINK_CXXFLAGS " .
 	  "-DG__REGEXP -DG__UNIX -DG__SHAREDLIB " .
 	  "-DG__ROOT -DG__REDIRECTIO -DG__OSFDLL " .
 	  "-DG__STD_EXCEPTION";
-      $CINTCFLAGS    = "-pipe -W -Wall -fsigned-char -fno-common " .
+      $CINTCFLAGS    = $CFLAGS .
 	" $FINK_CFLAGS -DG__REGEXP -DG__UNIX -DG__SHAREDLIB " .
 	  "-DG__ROOT -DG__REDIRECTIO -DG__OSFDLL -DG__STD_EXCEPTION";
 
@@ -659,13 +672,15 @@
 #    $LDALL         = " -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs";
 #    $LDNONE        = " -Wl,--no-whole-archive -Wl,-Bdynamic";
       $LD            = $CXX;
-      $LDFLAGS       = "-bind_at_load";
+#      $LDFLAGS       = "-bind_at_load";
+      $LDFLAGS       .= " -mmacosx-version-min=10.$MACOSX_MINOR";
 #      $LDFLAGS      .= " -expect_unresolved \"*\"";
       #FORCELINK     = yes
       #NEEDFINK      = yes
       if ($MACOSX_MINOR == 5) {$MACOSX_MINOR  = 4;}
       if ($MACOSX_MINOR == 4) {
-	$SOFLAGS       = "-dynamiclib -single_module -undefined dynamic_lookup";# -install_name $(LIBDIR)/"
+	$SOFLAGS       = "-dynamiclib -single_module -undefined dynamic_lookup";# -install_name $(LIBDIR)/
+#	$SOFLAGS       = "-dynamiclib -single_module -Wl,-dead_strip_dylibs -install_name $LIB/";
 	#FORCELINK     = no
 	#NEEDFINK      = no
 	$CXXFLAGS     .= " -fvisibility-inlines-hidden";
@@ -678,13 +693,17 @@
 	$CINTCXXFLAGS .= " -Wno-long-double";
 	$CINTCFLAGS   .= " -Wno-long-double";
       }
+      elsif ($MACOSX_MINOR == 6) {
+	$SOFLAGS       = "-dynamiclib -single_module -undefined dynamic_lookup";# suppress";# -install_name $(LIBDIR)/
+      }
       else {
-	$SOFLAGS       = "-dynamiclib -single_module -undefined suppress";# -install_name $(LIBDIR)/
+	$SOFLAGS       = "-dynamiclib -single_module -undefined dynamic_lookup";#  suppress";# -install_name $(LIBDIR)/
 	$CXXFLAGS     .= " -Wno-long-double";
 	$CFLAGS       .= " -Wno-long-double";
 	$CINTCXXFLAGS .= " -Wno-long-double";
 	$CINTCFLAGS   .= " -Wno-long-double";
       }
+        $SOFLAGS  .= " -install_name \@rpath/%>";
       #      $SOEXT         = "dylib";
       # System libraries:
       $OSTHREADLIBDIR = "";
@@ -752,8 +771,6 @@
 #    if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;}
     $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;
 
-
-
     $OSFID    .= " __ROOT__";
     $CPPFLAGS .= " -D" . join ( " -D", split ( " ", $OSFID ) );
     $CFLAGS   .= " -D" . join ( " -D", split ( " ", $OSFID ) );
@@ -773,7 +790,7 @@
     my $path2bin = $pwd . "/." . $STAR_HOST_SYS . "/bin";
     if ($PATH !~ /$STAR_BIN/) {$PATH = $STAR_BIN . ":" . $PATH;}
     $PATH = $path2bin .":". $PATH;  #print "PATH = $PATH\n";
-    $FCPATH = $INCLUDE . $main::PATH_SEPARATOR . $CERNINO;
+    $FCPATH = $INCLUDE . $main::PATH_SEPARATOR . $CERNINO . $main::PATH_SEPARATOR . "#";
 
 
     # ------- packages -------
@@ -781,12 +798,12 @@
     # my $os_name = `uname`;
     # chomp($os_name);
     #
-    # *** Standard package first, then OPTSTAR ***
+    # *** Standard package first, then XOPTSTAR ***
     #	
     my ($MYSQLINCDIR,$mysqlheader);
     if ( defined($ENV{USE_LOCAL_MYSQL}) ){
 	($MYSQLINCDIR,$mysqlheader) =
-	    script::find_lib( $OPTSTAR . "/include " .  $OPTSTAR . "/include/mysql ".
+	    script::find_lib( $XOPTSTAR . "/include " .  $XOPTSTAR . "/include/mysql ".
 			      $MYSQL . " " .
 			      "/sw/include/mysql ".
 			      "/include /usr/include ".
@@ -802,27 +819,27 @@
 			      "/usr/include/mysql  ".
 			      "/usr/mysql/include  ".
 			      "/usr/mysql  ".
-			      $OPTSTAR . "/include " .  $OPTSTAR . "/include/mysql " ,
+			      $XOPTSTAR . "/include " .  $XOPTSTAR . "/include/mysql " ,
 			      "mysql.h");
     }
 
     if (! $MYSQLINCDIR) {
-	die "Can't find mysql.h in standard path and $OPTSTAR/include  $OPTSTAR/include/mysql\n";
+	die "Can't find mysql.h in standard path and $XOPTSTAR/include  $XOPTSTAR/include/mysql\n";
     }
 
     # search for the config    
     my ($MYSQLCONFIG,$mysqlconf);
     if ( defined($ENV{USE_LOCAL_MYSQL}) ){
 	($MYSQLCONFIG,$mysqlconf) =
-	    script::find_lib($OPTSTAR . "/bin " .  $OPTSTAR . "/bin/mysql ".
+	    script::find_lib($XOPTSTAR . "/bin " .  $XOPTSTAR . "/bin/mysql ".
 			     $MYSQL . " ".
-			     "/usr/bin /usr/bin/mysql ",
+			     "/usr/bin /usr/bin/mysql /sw/bin ",
 			     "mysql_config");
     } else {
 	($MYSQLCONFIG,$mysqlconf) =
 	    script::find_lib($MYSQL . " ".
 			     "/usr/bin /usr/bin/mysql ".
-			     $OPTSTAR . "/bin " .  $OPTSTAR . "/bin/mysql ",
+			     $XOPTSTAR . "/bin " .  $XOPTSTAR . "/bin/mysql ",
 			     "mysql_config");
     }
 
@@ -837,7 +854,7 @@
     #        USE_LOCAL_MYSQL switch. This may not have been obvious.
     my ($MYSQLLIBDIR,$MYSQLLIB) =
 	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
-			 $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
+			 $XOPTSTAR . "/lib " .  $XOPTSTAR . "/lib/mysql ",
 			 "libmysqlclient");
 			 #"libmysqlclient_r libmysqlclient");
     #print "*** $MYSQLLIBDIR,$MYSQLLIB\n";
@@ -920,7 +937,7 @@
 	#    }
 	#    print "*** ATTENTION *** IVROOT $IVROOT\n";
 	#}
-	if ( ! defined($IVROOT) ){  $IVROOT = $OPTSTAR;}
+	if ( ! defined($IVROOT) ){  $IVROOT = $XOPTSTAR;}
 	if ( defined($IVROOT) &&  -d $IVROOT) {
 	    # This is an initial logic relying on IVROOT to be defined
 	    if (-e $IVROOT . "/bin/coin-config") {
@@ -935,10 +952,10 @@
 	    }
 
 	} else {
-	    # try finding it in $OPTSTAR
+	    # try finding it in $XOPTSTAR
 	    my($coin);
-	    if ( -e "$OPTSTAR/bin/coin-config"){
-		$coin = "$OPTSTAR/bin/coin-config";
+	    if ( -e "$XOPTSTAR/bin/coin-config"){
+		$coin = "$XOPTSTAR/bin/coin-config";
 	    }
 	    if ( defined($coin) ){
 		chomp($COIN3DINCDIR = `$coin --includedir`);
@@ -958,11 +975,11 @@
     }
 
     # Logger
-    $LoggerDir = $OPTSTAR . "/include/log4cxx";
+    $LoggerDir = $XOPTSTAR . "/include/log4cxx";
 
     if (-d $LoggerDir) {
-	$LoggerINCDIR = $OPTSTAR . "/include";
-	$LoggerLIBDIR = $OPTSTAR . "/lib";
+	$LoggerINCDIR = $XOPTSTAR . "/include";
+	$LoggerLIBDIR = $XOPTSTAR . "/lib";
 	$LoggerLIBS   = "-llog4cxx";
 	print
 	    "Use Logger  ",
@@ -971,7 +988,7 @@
     }
     # xml2
     my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
-    my ($xml) =  script::find_lib($OPTSTAR . "/bin /usr/bin",
+    my ($xml) =  script::find_lib($XOPTSTAR . "/bin /usr/bin",
 				  "xml2-config");
     if ($xml) {
 	$xml .= "/xml2-config";
@@ -1016,6 +1033,13 @@
     } else {
 	print "Could not find xml libs\n" if (! $param::quiet);
     }
+ #Vc check SSE support
+ my $cmd = "touch temp_gccflags.c; $CXX -E -dM -o - temp_gccflags.c | grep -q SSE";
+ my $VcCPPFLAGS = " -DVC_IMPL=SSE";
+ if ($STAR_HOST_SYS =~ 'gcc432$' || system($cmd)) {# No SSE
+   $VcCPPFLAGS = " -DVC_IMPL=Scalar";
+   if (-e "temp_gccflags.c") {`rm temp_gccflags.c`;}
+ }
     my @params = (
 		  'Package'        => 'None',
 		  'CPP'            => $CPP,
@@ -1143,7 +1167,7 @@
 		      'STAR_HOST_SYS'   => $STAR_HOST_SYS,
 		      'STAR_VERSION'    => $STAR_VERSION,
 		      'PERL5LIB'        => $PERL5LIB,
-		      'OPTSTAR'         => $OPTSTAR,
+		      'OPTSTAR'         => $XOPTSTAR,
 		      'QTDIR'           => $QTDIR,
 		      'COIN3DIR'        => $COIN3DIR,
 		      'IVROOT'          => $IVROOT,
@@ -1198,7 +1222,10 @@
 			     'INCDIR'=> $LoggerINCDIR,
 			     'LIBDIR'=> $LoggerLIBDIR,
 			     'LIBS'  => $LoggerLIBS
-			     }
+			     },
+		       'Vc' => {
+			   'CPP'   => $VcCPPFLAGS
+			   },
 		  }
 		  );
 

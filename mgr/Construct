@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.178 2012/11/19 23:33:26 jeromel Exp $
+# $Id: Construct,v 1.179 2012/12/02 17:26:31 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -186,7 +186,7 @@ print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
 foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
   print "---> looking for include in $dir\n" if ($param::debug);
   next if ! -r $dir;
-  opendir( DIR, $dir ) or die "Can't open $sub_DIR\n";
+  opendir( DIR, $dir ) or die "Can't open $dir\n";
   my @incs = readdir DIR; print "incs = @incs\n" if ($param::debug);
   closedir DIR;
   my @incT = ();
@@ -196,15 +196,15 @@ foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
 	 || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/
 	 || $inc =~ /\.idl$/ ) {
       push @incT, $dir . "/" . $inc;
-      print "+++ add $inc from $sub_DIR\n" if ($param::debug);
+      print "+++ add $inc from $dir\n" if ($param::debug);
     }
   }
   if ( $#incT > -1 && !$param::rflag ) {
     Install $env $INCLUDE, @incT;
   }
 }
-foreach my $dir qw(StRoot/Vc/include/Vc StRoot/Vc/common  StRoot/Vc/scalar StRoot/Vc/sse StRoot/Vc/include/Vc/internal
-		   StRoot/TBB/include/tbb StRoot/TBB/include/tbb/machine) {
+foreach my $dir (qw(StRoot/Vc/include/Vc StRoot/Vc/common  StRoot/Vc/scalar StRoot/Vc/sse StRoot/Vc/include/Vc/internal
+		   StRoot/TBB/include/tbb StRoot/TBB/include/tbb/machine)) {
   next if ! -r $dir;
   my $installdir = $INCLUDE;
   if ($dir =~ /Vc/) {
@@ -238,9 +238,7 @@ foreach my $dir qw(StRoot/Vc/include/Vc StRoot/Vc/common  StRoot/Vc/scalar StRoo
 }
 my @excludeDirList = qw(\. \.\. macros CVS html doc inc idl local run wrk example include kumac.*);
 #my  $excludeDirList = "^(\.|\.\.|macros|CVS|html|doc|inc|idl|local|run|wrk|example|include|kumac.*)\$";
-my  $excludeDirList = "^(" . join ("|", @excludeDirList) . ")\$";
-
-
+my  $excludeDirList = join ("|", @excludeDirList);
 #
 # Open exclusion list 
 # Note: Please start new list with "|XX" to exclude XX
@@ -250,149 +248,121 @@ my  $excludeDirList = "^(" . join ("|", @excludeDirList) . ")\$";
 #   used) or a trigger on conditions (CXX version, compiler presence). In
 #   such a case, those packages shouldbe stricly optional.
 #
-my  $items=""; 
-if ( defined($SKIP_DIRS) ){ $items .= "|".join("|",split(" ",$SKIP_DIRS));}
+my  @items = qw(StBTofPool StFgtPool); # 
 if ($USE_64BITS and $USE_64BITS != "0"){
-  $items .= "|gstar|control"; 
+  push @items, "gstar";
+  push @items, "control";
+  push @items, "St_geant_Maker";
 }
 #print "CXX MAJOR = $env->{CXX_MAJOR} CXX MINOR =  $env->{CXX_MINOR}\n";
 #if ($env->{CXX_MAJOR} < 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 4)) {
 #    $items .= "|Vc|TBB|TPCCATracker";
 #}
 if ($STAR_SYS =~ /x86_darwin/) {
-    $items .= "|StStarLogger|StEventDisplayMaker|St_geom_Maker"; # if no QT
+  push @items, "St_geom_Maker"; # if no QT |StStarLogger
+#ifdef ____MAC_____
+  push @items, "StEStructPool";
+  push @items, "StMCFilter";
+  push @items, "StTriggerUtilities";
+  push @items, "StSpinPool";
+#endif /* ____MAC_____ */
 }
-#if ($items ne '(') {$items .= "|";}
 #$items .= "StBTofPool|StTriggerUtilities|StFgtPool|StPeCMaker";
+#$items .= "StBTofPool|StFgtPool|StPeCMaker";
 # closing exclusion list
-if ( $items ne ""){  
-    $items = "(".substr($items,1,length($items)-1).")";
-    print "SKIP_DIRS is now: $items\n";
+my $items = "";# print "items $#items  = @items\n";
+if ( defined($SKIP_DIRS) ){ $items = join("|",split(" ",$SKIP_DIRS));}
+if ( $#items > -1){
+  if (! $item) {$items  =       join("|",@items);}
+  else         {$items .= "|" . join("|",@items);}
+  print "SKIP_DIRS is now: $#items $items\n";
 }
-
-
-
-
 # Search for directories (one level down) and make
 # list of targets
 #
-foreach my $dir( "pams", "StRoot", "StDb" ,"StPiD", "StarVMC" ) {
+foreach my $dir( "pams", "StRoot", "StPiD", "StarVMC" ) {
   next if !-d $dir and !-l $dir;
   opendir( DIR, $dir ) or die "Can't open $dir\n";
-  my @subdirS = readdir DIR;
+  my @subdirS = readdir DIR;  print "subdirS = @subdirS\n" if ($param::debug);
   closedir DIR;
-  foreach my $sub_dir (@subdirS) {# print "sub_dir = $sub_dir\n";
-      next if $sub_dir eq '.' || $sub_dir eq '..';
-#      print "$sub_dir => $items\n";
+  foreach my $sub_dir (@subdirS) { 
+    next if $sub_dir eq '.' || $sub_dir eq '..';
+    next if ( $sub_dir =~ $excludeDirList);
+    my $sub_Dir = $dir . "/" . $sub_dir; 
+    next if !-d $sub_Dir and !-l $sub_Dir;
+    print "dir = $dir \t sub_dir = $sub_dir sub_Dir = $sub_Dir\n" if ($param::debug);
+#    print "$sub_dir => $items\n";
 #      if ($items and $sub_dir =~ /$items/) {print "skip dir: $sub_dir \t=> $items\n"; next;}
-      if ($sub_dir =~ $items and ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) {
-	  #   print "param::include = $param::include $subsub_dir \n";
-	  if ($STAR_LEVEL !~ /\.dev/ and $STAR_LEVEL !~ /\.DEV/) {
-	      print  "skip ";
-	      printf("%40s","$sub_dir");
-	      printf("\tto build it you need to add %25s","+$sub_dir");
-	      print  " in cons command line\n";
-	  }
-	  next;
+    print "items = $items sub_dir = $sub_dir $param::include\n" if ($param::debug);
+    if ($items and $sub_dir =~ /$items/ and ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) { 
+      print "====== param::include = $param::include $subsub_dir \n" if ($param::debug);
+      if ($STAR_LEVEL !~ /\.dev/ and $STAR_LEVEL !~ /\.DEV/) {
+	print  "skip ";
+	printf("%40s","$sub_dir");
+	printf("\tto build it you need to add %25s","+$sub_dir");
+	print  " in cons command line\n";
       }
-
-#	# The above pattern survived for some time but is 
-#	# COMPLETELY wrong.
-#	#
-#        #if ( $SKIP_DIRS && $SKIP_DIRS =~ $sub_dir ) {
-#	# Although longer to search, this is the only secure way I
-#	# could come up with. J.lauret August 2001
-#        if ( $SKIP_DIRS ) {
-#	    my $el;
-#	    my $sts=1;
-#	    foreach $el (@items){
-#		if( $sub_dir =~ m/$el/){
-#		    print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
-#		    $sts = 0;
-#		    last;
-#		}
-#	    }
-#	    next if (! $sts);
-#        }
-
-my $sub_DIR = $dir . "/" . $sub_dir;
-
-				   if (! -d $sub_DIR and ! -l $sub_DIR ) 		{
-  print "$sub_DIR does exist"  if ($param::debug);
-  next;
-}
- if (#$sub_dir != 'l3' and 
-     $sub_dir =~ $excludeDirList){
-#   print "-0- $sub_dir is in excludeDirList = $excludeDirList =>$1|\n";# if ($param::debug);
-#   die if $sub_dir eq 'l3';
-   next;
- }
-	
-        opendir( DIR, $sub_DIR ) or die "Can't open $sub_DIR\n";
-        my @subsubdirS = readdir DIR;
-        closedir DIR;
-
-        foreach my $subsub_dir(@subsubdirS) {
-            my $subsub_DIR = $sub_DIR . "/" . $subsub_dir;
-            if ( -d $subsub_DIR  or -l $subsub_DIR ) {
-		if ( $subsub_dir =~ $excludeDirList) {
-		    #print "=== Skipping $subsub_dir in $subsub_DIR\n";
-		    print "-1- $subsub_dir is in excludeDirList\n"  if ($param::debug);
-		    next;
-		}
-		if (($STAR =~ /\.dev/ or $STAR =~ /\.DEV/) and
-		    $items and $subsub_dir =~ /$items/ and
-		    ( ! $param::include or  $subsub_dir !~ /$param::include/o )    ) {
-		    if ($STAR_LEVEL !~ /\.dev/ and $STAR_LEVEL !~ /\.DEV/) {
-			print  "skip ";
-			printf("%40s","$sub_dir/$subsub_dir");
-			printf("\tto build it you need to add %25s","+$sub_dir/$subsub_dir");
-			print  " in cons command line\n";
-		    }
-		    next;
-                }
-		
-		# this forces the globing of subdirs but the main tree needs excluding
-                if ( ( $sub_dir =~ /^sim$/         ||
-		       $sub_dir =~ /^gen$/         ||
-		       $sub_dir =~ /Pool$/         ||
-		       $sub_dir =~ /Generator$/    ||
-		       $sub_dir =~ /StRTSClient$/) ){
-                    if ( $items && $sub_dir =~ /$items/ ) {
-                        print "skip dir: $subsub_dir \t=> $items\n";
-                        next;
-                    }
-                    push @subdirs, $subsub_DIR;
-                    print "================== add $subsub_DIR\n"
-                      if ($param::debug);
-                }
-            }
-        }
-        if ( $sub_dir =~ /Pool$/ )    { next; }
-        if ( $sub_dir =~ /Client$/ )  { next; }
-        if ( $sub_dir =~ /Generator$/){ next; } 
-        push @subdirs, $sub_DIR;
-        print "================== add $sub_DIR\n" if ($param::debug);
+      next;
     }
+    if ( ( $sub_dir =~ /^sim$/    ||
+	   $sub_dir =~ /^gen$/    ||
+	   $sub_dir =~ /Pool$/    ||
+	   $sub_dir =~ /Generator$/ ||
+	   $sub_dir =~ /StRTSClient$/) ){
+      if ( $items && $subsub_dir =~ /$items/ ) {
+	print "skip dir: $subsub_dir \t=> $items\n" if ($param::debug);
+	next;
+      }
+      if ( $sub_dir =~ /^sim$/    ||
+	   $sub_dir =~ /^gen$/) {
+	push @subdirs, $sub_Dir;
+      }
+      opendir( DIR, $sub_Dir ) or die "Can't open $sub_Dir\n";
+      my @subsubdirS = readdir DIR; print "subsubdirS = @subsubdirS\n" if ($param::debug);
+      closedir DIR;
+      
+      foreach my $subsub_dir(@subsubdirS) {
+	next if $sub_dir eq '.' || $sub_dir eq '..';
+	if ( $subsub_dir =~ $excludeDirList) {
+	  #print "=== Skipping $subsub_dir in $subsub_Dir\n";
+	  print "-1- $subsub_dir is in excludeDirList\n" if ($param::debug);
+	  next;
+	}
+	my $subsub_Dir = $sub_Dir . "/" . $subsub_dir;
+	next if !-d $subsub_Dir and !-l $subsub_Dir;
+	print "dir = $dir \t sub_dir = $sub_dir\tsub_Dir $sub_Dir\tsubsub_Dir $subsub_Dir\n" if ($param::debug);
+	if ($items and $subsub_dir =~ /$items/ and
+	    ( ! $param::include or  $subsub_dir !~ /$param::include/o )    ) {
+	  print  "skip ";
+	  printf("%40s","$sub_dir/$subsub_dir");
+	  printf("\tto build it you need to add %25s","+$sub_dir/$subsub_dir");
+	  print  " in cons command line\n";
+	  next;
+	}
+	push @subdirs, $subsub_Dir;
+	print "================== add $subsub_Dir\n"  if ($param::debug);
+      }
+    } else {
+      push @subdirs, $sub_Dir;
+      print "================== add $sub_Dir\n" if ($param::debug);
+    }
+  }
 }
-
-
-
-
 print "subdirs = @subdirs\n" if $param::debug;
 my @Targets = ();
 
 # List of targets
 my @sysdirlist = qw(asps/Simulation/agetof 
 		    asps/staf/sdd 
-		    asps/DAQBrowser
 		    StDb 
 		   );
-
-if (!($USE_64BITS and $USE_64BITS != "0")){
-  push @sysdirlist, "asps/rexe";
+if ($STAR_SYS !~ /x86_darwin/) {
+  push @sysdirlist, "asps/DAQBrowser";
+}
+if (!($USE_64BITS and $USE_64BITS != "0") && $STAR_SYS !~ /x86_darwin/){
   push @sysdirlist, "asps/Simulation/geant321";
   push @sysdirlist, "asps/Simulation/gcalor";
+  push @sysdirlist, "asps/rexe";
   push @sysdirlist, "asps/Simulation/starsim";
   push @sysdirlist, "OnlTools/OnlinePlots";
   push @sysdirlist, "OnlTools/PDFUtil";
@@ -497,22 +467,21 @@ sub find_PACKAGE {
 sub wanted_PACKAGE {
 #    print "wanted ",$_,"\n";
   my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if (! -d _  and ! -l _) {return;}
-  if ( (-d _ or -l _) &&
-       (/^\./ || 
-	/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^images$/ ||
-	/^local$/ ||
-	/^hold$/ ||
-	/^wrk$/)
-     ) {$File::Find::prune = 1; return;}
+  if (! -r  _) {return;}
+  if (/^\./ || 
+      /^CVS$/ ||
+      /^macros$/ ||
+      /^html$/ ||
+      /^idl$/ ||
+      /^exa$/ ||
+      /^doc$/ ||
+      /^run$/ ||
+      /^examples$/ ||
+      /^images$/ ||
+      /^local$/ ||
+      /^hold$/ ||
+      /^wrk$/)
+    {$File::Find::prune = 1; return;}
   if ( /^\.\#/) {return;}
   if ( -r _ . "/PACKAGE") {
     $File::Find::prune = 1;
