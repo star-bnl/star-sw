@@ -130,7 +130,7 @@ if ($pkg eq "RTS") {
 	      .  '-DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
     $CPPFLAGS =~ s/-D__ROOT__//;# print " ------------  CPPFLAGS ==== " .  $CPPFLAGS . "\n";
     $CFLAGS =~   s/-D__ROOT__//;# print " ------------  CFLAGS WHERE \"__ROOT__\" coming from ??? ==== " .  $CFLAGS . "\n";
-    $CPPPATH .= $main::PATH_SEPARATOR . "#StRoot/RTS/include" 
+    $CPPPATH = $main::PATH_SEPARATOR . "#StRoot/RTS/include" 
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include" 
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC" 
 	    .  $main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS" 
