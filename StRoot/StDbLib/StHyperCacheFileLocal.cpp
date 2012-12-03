@@ -12,6 +12,7 @@
 #include "StHyperUtilPlatform.h"
 #include "StHyperUtilFilesystem.h"
 #include "StHyperCacheConfig.h"
+#include "StHyperLock.h"
 
 StHyperCacheFileLocal::StHyperCacheFileLocal()
     : m_Name("FILE_LOCAL"), m_Version("1.0.0"), m_Type("ST_HYPERCACHE_FILE_LOCAL"),
@@ -69,49 +70,71 @@ bool StHyperCacheFileLocal::init()
 }
 
 void StHyperCacheFileLocal::doCacheCleanup() {
-	StHyperUtilFilesystem::remove_dir_recursive(m_Path, m_Path);
+	StHyperLock lock(m_Path+"global.lock", true); // global lock on "cache cleanup"
+	if ( lock.try_lock(15000000) ) { // 15 seconds
+		StHyperUtilFilesystem::remove_dir_recursive(m_Path, m_Path);
+	}
 }
 
 const char* StHyperCacheFileLocal::get(const std::string& group_key, const std::string& key, size_t& value_length) {
 	std::string cache_file = m_Path + StHyperHash::md5sum(group_key + key)+std::string(".cache");
 	if (!StHyperUtilFilesystem::path_exists(cache_file)) { value_length = 0; return 0; }
 
-	std::ifstream cf(cache_file.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
-	std::ifstream::pos_type file_size = cf.tellg();
-	if ((size_t)file_size == (size_t)0) { return 0; }
-	char* memblock = new char[(size_t)(file_size)+(size_t)(1)];
-    cf.seekg (0, std::ios::beg);
-    cf.read (memblock, file_size);
-    cf.close();
-	memblock[(size_t)(file_size)] = '\0';
-	value_length = file_size;
-	return memblock;
+	StHyperLock lock(cache_file); // local file lock
+	if ( lock.try_lock(5000000) ) {
+		std::ifstream cf(cache_file.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
+		std::ifstream::pos_type file_size = cf.tellg();
+		if ((size_t)file_size == (size_t)0) { return 0; }
+		char* memblock = new char[(size_t)(file_size)+(size_t)(1)];
+	    cf.seekg (0, std::ios::beg);
+	    cf.read (memblock, file_size);
+	    cf.close();
+		memblock[(size_t)(file_size)] = '\0';
+		value_length = file_size;
+		return memblock;
+	};
+ 
+	return 0;
 }
 
 bool StHyperCacheFileLocal::set(const std::string& group_key, const std::string& key, const char* data, size_t dataLength, time_t expirationTime) {
 	std::string cache_file = m_Path + StHyperHash::md5sum(group_key + key)+std::string(".cache");
-	std::ofstream cf(cache_file.c_str(), std::ios::out | std::ios::binary);
-    cf.write (data, dataLength);
-//	cf << " | " << group_key << " | " << key << " |";
-	cf.close();
+
+	StHyperLock lock(m_Path+"global.lock", true); // global lock on "add file"
+
+	if ( lock.try_lock(5000000) ) { // 5 seconds
+		std::ofstream cf(cache_file.c_str(), std::ios::out | std::ios::binary);
+	    cf.write (data, dataLength);
+		cf.close();
+		return true;
+	}
+
 	return false;
 }
 
 bool StHyperCacheFileLocal::replace(const std::string& group_key, const std::string& key, const char* data, size_t dataLength, time_t expirationTime) {
 	std::string cache_key = StHyperHash::md5sum(group_key + key);
-	if (!remove(group_key, key)) {
-		return false;
-	}	
+
+	StHyperLock lock(m_Path+"global.lock", true); // global lock on "add file"
+	if ( lock.try_lock(5000000) ) {
+		if (!remove(group_key, key)) {
+			return false;
+		}	
+	}
 	return set(group_key, key, data, dataLength, expirationTime);
 }
 
 bool StHyperCacheFileLocal::remove(const std::string& group_key, const std::string& key) {
 	std::string cache_file = m_Path + StHyperHash::md5sum(group_key + key)+std::string(".cache");
-	return unlink(cache_file.c_str());
+	StHyperLock lock(m_Path+"global.lock", true);
+	if ( lock.try_lock(5000000) ) {
+		return unlink(cache_file.c_str());
+	}
+	return false;
 }
 
 void StHyperCacheFileLocal::clear() {
-	// FIXME
+	doCacheCleanup();
 }
 
 std::string StHyperCacheFileLocal::getStat() {
