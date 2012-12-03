@@ -1,6 +1,7 @@
 #include "StHyperUtilFilesystem.h"
 
 #include "StHyperUtilGeneric.h"
+#include "StHyperLock.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -104,7 +105,12 @@ unsigned long remove_dir_recursive(std::string unlink_path, const std::string& b
                 //std::cerr << "ATTEMPT TO DELETE OUTSIDE OF BASE PATH: " << fullname_resolved << std::endl; // FIXME
                 continue;
             }
-            remove(fullname_resolved.c_str());
+			StHyperLock lock(fullname_resolved);
+			if (lock.try_lock(0)) {
+				lock.unlock();
+            	remove(fullname_resolved.c_str());
+			}
+			
         }
     }
     closedir(dp);

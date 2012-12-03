@@ -1,5 +1,5 @@
-#ifndef __ST_HYPERHASH_SHA256_H
-#define __ST_HYPERHASH_SHA256_H
+#ifndef __ST_HYPERLOCK_H
+#define __ST_HYPERLOCK_H
 
 #include <string>
 #include <ctime>
