@@ -276,7 +276,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
 
     fgQALogger  = Logger::getLogger("QA");
     fgUCMLogger = Logger::getLogger("UCM");
-#if 1
+    //#if 1
     // Check the mandatory UCM appender
     TString ucmenv = gSystem->Getenv("LOGGING");
     if (ucmenv == "UCM" && gSystem->Getenv("JOBINDEX") && gSystem->Getenv("REQUESTID") ) {
@@ -293,7 +293,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
        //Set the default threashold to be
        fgUCMLogger->setLevel(LOG4CXX_LEVEL_DEBUG);
     }
-#endif
+    // #endif
     //Almost all QA messages are on the info level
     NDC::push(_T(":"));
 
@@ -437,7 +437,8 @@ void StLoggerManager::PrintLogger(const char* mess, unsigned char type,
   }
   if (canPrint) {
     if ( (mess == 0) || (mess[0] == 0)) mess = "."; // logger doesn't like the empty messages
-#if __GNUC__ > 3
+    // #if __GNUC__ > 3
+#if (STAR_LOG4CXX_VERSION >= 10)
     if (mColorEnabled) 
       {
 	TString Mess(mess);
@@ -544,7 +545,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.48 2012/11/26 23:02:17 fisyak Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.49 2012/12/04 15:31:03 jeromel Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -977,8 +978,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.48 2012/11/26 23:02:17 fisyak Exp $
+// $Id: StLoggerManager.cxx,v 1.49 2012/12/04 15:31:03 jeromel Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.49  2012/12/04 15:31:03  jeromel
+// Replaced GNUC by STAR_LOG4CXX_VERSION for consistency, comment if 1
+//
 // Revision 1.48  2012/11/26 23:02:17  fisyak
 // Add color by demand for __GNUC__ > 3
 //
