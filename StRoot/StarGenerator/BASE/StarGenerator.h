@@ -43,16 +43,24 @@ class StarGenerator : public StMaker
   const Double_t cm;
 
  public:
-  /// Developer must provide initialization routine  
+  /// Developer must provide initialization routine.  This method should call
+  /// any functions, subroutines and/or methods on the concrete event generator
+  /// necessary for its initialization.
   virtual Int_t Init() = 0;
-  /// Developer may not provide run initialization
+
+  /// Developer may not provide run initialization.
   Int_t InitRun( Int_t runnumber ) { return kStOK; };
 
-  /// Developer may provide a pre-generate method. 
-  virtual Int_t PreGenerate(){ return kStOK; };
-  /// Developer may provide a post-generate method
+  /// Developers may provide a pre-generate method which will execute before Generate().
+  virtual Int_t PreGenerate(){ return kStOK; }
+  /// Developers may provide a post-generate method which will execute after Generate().
   virtual Int_t PostGenerate(){ return kStOK;  };
-  /// Developer must provide a generate method
+
+  /// Developers must provide a generate method.  In this method, the event generation 
+  /// machinery should be called.   It is expected that the event record is filled in
+  /// the Generate method, so that particles and event characteristics are available to
+  /// subsequent generators and the primary generator maker.  The primary maker is 
+  /// responsible for pushing particles out to the concrete simulation package.
   virtual Int_t Generate() = 0;
 
   /// (Optional) Method to fill a PP event
@@ -146,7 +154,7 @@ class StarGenerator : public StMaker
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StarGenerator.h,v 1.1 2012/11/26 17:11:28 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StarGenerator.h,v 1.2 2012/12/05 22:59:15 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  private:

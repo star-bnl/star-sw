@@ -21,15 +21,51 @@ class TFile;
    \author Jason C. Webb
    \brief Main steering class for event generation
 
-   StarPrimaryMaker is the class which is responsible for running the event generators
-   used in a simulation, pushing particles out to the geant stack for simulation, aggregating
-   particles from multiple event generators into a common event record, and performing I/O 
-   so that event records are persistent.
+   StarPrimaryMaker is the main steering maker for event generators in the (new) STAR
+   event generator framework.  Users add one or more event generators (derived from
+   StarGenerator) to the maker.  The primary maker is responsible for calling the 
+   event generators in a well-defined calling sequence:
 
-   The StarGenerator class is the interface class between the concrete event generator
-   and the STAR software chain.  
+   1) PreGenerate Phase
+
+   During the PreGenerate phase, the PreGenerate() method will be called on all generators
+   in the order in which they were added to the primary maker.  This (optional) method on
+   event generators is provided for the developer to perform any event-by-event configuration
+   which may be required by the event generator.
+
+   2) Generate Phase
+
+   During the Generate phase, the event generation machinery of the concrete event generator
+   is called.  Generate will be called on all event generators, in the order in which they
+   were added to the primary maker.  Generate will be called on all generatos before the 
+   PostGenerate phase is entered.  At the end of Generate, it is expected that event generators
+   have filled their event records.
+
+   3) PostGenerate Phase
+
+   After Generate has been called on all generators, PostGenerate will be called on each 
+   generator in the order in which they were added to the primary maker.  Developers may
+   at this point access the results from event generators which were found earlier in the
+   chain.  This is the last point at which a developer may interact with the event record.
+
+   After PostGenerate, the event is finalized.  The primary maker will loop over all event
+   generators in its list, set the vertex, and accumulate the particles from each generator
+   at an appropriate vertex.  Two modes are available on generators:  standard and pileup 
+   mode.  Standard mode (which is the default) places all events at the same vertex.  
+   Pileup mode places pileup events, with some probability, at an independent vertex.
+
+   Event Record
+
+   The event record, which records the particle-wise and event-wise inforamtion from each
+   event generator, is saved in a TTree format.  The results from each generator are saved
+   in a separate branch, whose name corresponds to the assigned name of the generator.
+
+   Particle-wise information is stored as an array of StarGenParticle s.  The main event
+   record lists all particles which were generated, with inices refering to their position
+   in their parent event generator, their position in the event record of the main event 
+   generator, and their position on the GEANT stack (aka ID truth).
+
    
-
 */
 
 class StarPrimaryMaker : public StMaker
@@ -44,6 +80,7 @@ class StarPrimaryMaker : public StMaker
   void  Clear( const Option_t *opts="" );
   Int_t Finish();
 
+  /// Set the filename of the output TTree
   void  SetFileName( const Char_t *name ){ mFileName = name; }
 
   /// Returns a pointer to a particle class containing
@@ -70,13 +107,13 @@ class StarPrimaryMaker : public StMaker
 		Double_t phimin=0, Double_t phimax=-1,
 		Double_t zmin=0,   Double_t zmax=-1 );
 
-  /// Set PT range
+  /// Set PT range.  Particles falling outside this range will be dropped from simulation.
   void SetPtRange( Double_t ptmin, Double_t ptmax=-1 ){ mPtMin = ptmin; mPtMax = ptmax; }
-  /// Set rapidity range
+  /// Set rapidity range.  Particles falling outside this range will be dropped from simulation.
   void SetEtaRange( Double_t etamin, Double_t etamax ){ mRapidityMin = etamin; mRapidityMax = etamax; }
-  /// Set phi range
+  /// Set phi range.  Particles falling outside this range will be dropped from simulation.
   void SetPhiRange( Double_t phimin, Double_t phimax ){ mPhiMin = phimin; mPhiMax = phimax; }
-  /// Set z-vertex range
+  /// Set z-vertex range.  Particles falling outside this range will be dropped from simulation.
   void SetZvertexRange( Double_t zmin, Double_t zmax ){ mZMin = zmin; mZMax = zmax; }
 
   /// Return a pointer to the event
@@ -84,7 +121,7 @@ class StarPrimaryMaker : public StMaker
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.1 2012/11/26 17:11:28 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StarPrimaryMaker.h,v 1.2 2012/12/05 22:59:15 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
  protected:
