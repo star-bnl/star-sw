@@ -417,4 +417,8 @@ void StJetMaker2009::copyParticle(const StMcTrackEmu* t, StJetParticle* particle
   particle->mE      = t->e();
   particle->mPdg    = t->pdg();
   particle->mStatus = t->status();
+  particle->mFirstMother   = t->firstMother();
+  particle->mLastMother    = t->lastMother();
+  particle->mFirstDaughter = t->firstDaughter();
+  particle->mLastDaughter  = t->lastDaughter();
 }
