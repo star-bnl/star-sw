@@ -9,7 +9,7 @@
 #include "TTree.h"
 #include "StAnaPars.h"
 #include "StjTPCMuDst.h"
-#include "StjTPCRandomMuDst.h"
+//#include "StjTPCRandomMuDst.h"
 #include "StjBEMCMuDst.h"
 #include "StjEEMCMuDst.h"
 #include "StjMCMuDst.h"
@@ -79,10 +79,11 @@ int StJetMaker2009::Make()
     jetbranch->event->mDatime = GetDateTime();
 
     if (jetbranch->anapars->useTpc) {
-      StjTPCRandomMuDst tpc((StMuDstMaker*)0,
-			    jetbranch->anapars->randomSelectorProb,
-			    jetbranch->anapars->randomSelectorAt,
-			    jetbranch->anapars->randomSelectorSeed);
+//       StjTPCRandomMuDst tpc((StMuDstMaker*)0,
+// 			    jetbranch->anapars->randomSelectorProb,
+// 			    jetbranch->anapars->randomSelectorAt,
+// 			    jetbranch->anapars->randomSelectorSeed);
+      StjTPCMuDst tpc;
 
       // Save vertex index
       int savedVertexIndex = tpc.currentVertexIndex();
