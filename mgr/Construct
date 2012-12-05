@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.179 2012/12/02 17:26:31 fisyak Exp $
+# $Id: Construct,v 1.180 2012/12/05 15:20:48 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -248,7 +248,7 @@ my  $excludeDirList = join ("|", @excludeDirList);
 #   used) or a trigger on conditions (CXX version, compiler presence). In
 #   such a case, those packages shouldbe stricly optional.
 #
-my  @items = qw(StBTofPool StFgtPool); # 
+my  @items = qw(); #  StBTofPool StFgtPool
 if ($USE_64BITS and $USE_64BITS != "0"){
   push @items, "gstar";
   push @items, "control";
@@ -258,8 +258,13 @@ if ($USE_64BITS and $USE_64BITS != "0"){
 #if ($env->{CXX_MAJOR} < 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} < 4)) {
 #    $items .= "|Vc|TBB|TPCCATracker";
 #}
+if ($STAR_HOST_SYS =~ /sl61_gcc445/) {# broken Qt4
+  push @items, "St_geom_Maker";
+}
 if ($STAR_SYS =~ /x86_darwin/) {
   push @items, "St_geom_Maker"; # if no QT |StStarLogger
+  push @items, "GeoTestMaker"; # if no QT |StStarLogger
+  push @items, "Pythia6"; # problem with pythia6_common_address.c
 #ifdef ____MAC_____
   push @items, "StEStructPool";
   push @items, "StMCFilter";
@@ -364,9 +369,11 @@ if (!($USE_64BITS and $USE_64BITS != "0") && $STAR_SYS !~ /x86_darwin/){
   push @sysdirlist, "asps/Simulation/gcalor";
   push @sysdirlist, "asps/rexe";
   push @sysdirlist, "asps/Simulation/starsim";
-  push @sysdirlist, "OnlTools/OnlinePlots";
-  push @sysdirlist, "OnlTools/PDFUtil";
-  push @sysdirlist, "OnlTools/StOnlineDisplay";
+  if ($STAR_HOST_SYS !~ /sl61_gcc445/) {# broken Qt
+    push @sysdirlist, "OnlTools/OnlinePlots";
+    push @sysdirlist, "OnlTools/PDFUtil";
+    push @sysdirlist, "OnlTools/StOnlineDisplay";
+  }
 }
 
 #print "sysdirlist = @sysdirlist \n subdirs = @subdirs\n";
