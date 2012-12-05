@@ -27,6 +27,10 @@ struct StjMCParticleToStMuTrackFourVec {
     mctrack->_id     = mcparticle.mcparticleId;
     mctrack->_pdg    = mcparticle.pdg;
     mctrack->_status = mcparticle.status;
+    mctrack->_firstMother   = mcparticle.firstMotherId;
+    mctrack->_lastMother    = mcparticle.lastMotherId;
+    mctrack->_firstDaughter = mcparticle.firstDaughterId;
+    mctrack->_lastDaughter  = mcparticle.lastDaughterId;
     return new StMuTrackFourVec(0,0,mctrack,p,0,mcparticle.mcparticleId-1,kUnknownId);
   }
 };

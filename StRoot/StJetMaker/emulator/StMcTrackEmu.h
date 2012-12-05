@@ -19,6 +19,10 @@ public:
     , _id(0)
     , _pdg(0)
     , _status(0)
+    , _firstMother(0)
+    , _lastMother(0)
+    , _firstDaughter(0)
+    , _lastDaughter(0)
   {
   }
 
@@ -30,6 +34,10 @@ public:
   int        id() const { return _id    ; }
   int       pdg() const { return _pdg   ; }
   int    status() const { return _status; }
+  int   firstMother() const { return _firstMother; }
+  int    lastMother() const { return _lastMother; }
+  int firstDaughter() const { return _firstDaughter; }
+  int  lastDaughter() const { return _lastDaughter; }
 
 private:
 
@@ -43,6 +51,10 @@ private:
   int    _id;			// line in Pythia record
   int    _pdg;			// PDG code
   int    _status;               // 1=stable, 2=unstable, 3=incoming and parton
+  int    _firstMother;		// first mother
+  int    _lastMother;		// last mother
+  int    _firstDaughter;	// first daughter
+  int    _lastDaughter;		// last daughter
 };
 
 #endif	// ST_MC_TRACK_EMU_H
