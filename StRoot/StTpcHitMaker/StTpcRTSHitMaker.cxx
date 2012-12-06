@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.36 2012/11/20 22:55:56 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.37 2012/12/06 14:33:47 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -245,15 +245,6 @@ Int_t StTpcRTSHitMaker::Make() {
 	LOG_INFO << Form("CLD sec %2d: row %2d: %d clusters",dta->sec, dta->row, dta->ncontent) << endm;
       }
       for(UInt_t i=0;i<dta->ncontent;i++) {
-	if (! dta->sim_cld[i].cld.pad) continue;
-	if (dta->sim_cld[i].cld.tb >= __MaxNumberOfTimeBins__) continue;
-	if (dta->sim_cld[i].cld.charge < fminCharge) continue;
-	/*tpxFCF.h
-	  #define FCF_ROW_EDGE            16      // 0x10 touched end of row
-	  #define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
-	  #define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad 
-	*/
-	if (dta->sim_cld[i].cld.flags & (FCF_DEAD_EDGE | FCF_BROKEN_EDGE | FCF_ROW_EDGE)) continue;
 	if (Debug()) {
 	  //	  if (Debug() > 1 || ( dta->sim_cld[i].cld.p2 - dta->sim_cld[i].cld.p1 <= 1 )) {
 	    LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
@@ -271,6 +262,21 @@ Int_t StTpcRTSHitMaker::Make() {
 	    iBreak++;
 	    //	  }
 	}
+	if (dta->sim_cld[i].cld.p1 > dta->sim_cld[i].cld.p2) continue;
+	if (dta->sim_cld[i].cld.t1 > dta->sim_cld[i].cld.t2) continue;
+	if (dta->sim_cld[i].cld.tb >= __MaxNumberOfTimeBins__) continue;
+	if (dta->sim_cld[i].cld.charge < fminCharge) continue;
+	/*tpxFCF.h
+	  #define FCF_ONEPAD              1
+	  #define FCF_DOUBLE_PAD          2       // offline: merged
+	  #define FCF_MERGED              2
+	  #define FCF_BIG_CHARGE          8
+	  #define FCF_ROW_EDGE           16      // 0x10 touched end of row
+	  #define FCF_BROKEN_EDGE        32      // 0x20 touches one of the mezzanine edges
+	  #define FCF_DEAD_EDGE          64      // 0x40 touches a dead pad 
+	*/
+	if ( dta->sim_cld[i].cld.flags &&
+	    (dta->sim_cld[i].cld.flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE))) continue;
 	if (! hitCollection )  {
 	  hitCollection = new StTpcHitCollection();
 	  rEvent->setTpcHitCollection(hitCollection);
