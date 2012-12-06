@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.10 2012/11/25 21:56:58 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.11 2012/12/06 20:37:26 pibero Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.11  2012/12/06 20:37:26  pibero
+// Print PYTHIA record
+//
 // Revision 1.10  2012/11/25 21:56:58  pibero
 // small bug fix
 //
@@ -67,6 +70,7 @@
 #ifndef ST_PYTHIA_EVENT
 #define ST_PYTHIA_EVENT
 
+#include <cstdio>
 #include "TParticle.h"
 #include "TClonesArray.h"
 
@@ -128,6 +132,8 @@ public:
   void setF2(PDF scenario, float val);
   
   void addParticle(const TParticle& particle);
+  void print();
+  void printHelper(int first, int last);
   
 private:
   int mRunId;
@@ -296,6 +302,40 @@ inline void StPythiaEvent::setF2(PDF scenario, float val)
 {
     if(scenario == LO) mF2[0] = val;
     mF2[1] = val;
+}
+
+
+inline void StPythiaEvent::print()
+{
+  // Header
+  puts("                            Event listing (standard)\n");
+  puts("    I  particle/jet  K(I,1)   K(I,2) K(I,3)     K(I,4)      K(I,5)       P(I,1)       P(I,2)       P(I,3)       P(I,4)       P(I,5)\n");
+
+  // Colliding protons
+  printHelper(0,2);
+  puts(" ==================================================================================================================================");
+
+  // Hard collision
+  printHelper(2,mstu72());
+  puts(" ==================================================================================================================================");
+
+  // Fragmentation
+  printHelper(mstu72(),mstu73());
+  puts(" ==================================================================================================================================");
+
+  // Hadronization
+  printHelper(mstu73(),numberOfParticles());
+  puts(" ==================================================================================================================================");
+}
+
+inline void StPythiaEvent::printHelper(int first, int last)
+{
+  for (int i = first; i < last; ++i) {
+    const TParticle* part = particle(i);
+    TLorentzVector mom;
+    part->Momentum(mom);
+    printf("%5d%14s%8d%9d%7d%11d%12d%13f%13f%13f%13f%13f\n",i+1,part->GetName(),part->GetStatusCode(),part->GetPdgCode(),part->GetFirstMother(),part->GetFirstDaughter(),part->GetLastDaughter(),mom.Px(),mom.Py(),mom.Pz(),mom.E(),mom.M());
+  }
 }
 
 #endif
