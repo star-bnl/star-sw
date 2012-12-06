@@ -138,6 +138,13 @@ Int_t StarPrimaryMaker::Finish()
 {
   if (mFile) 
     { 
+
+      // Add the instance of the particle data so we have a record of
+      // the particles used as input to the generator
+      mTree->GetUserInfo()->Add( &StarParticleData::instance() );
+
+      ///\todo add random number state to user info
+
       mFile -> Write();
       mFile -> Close();
     }
