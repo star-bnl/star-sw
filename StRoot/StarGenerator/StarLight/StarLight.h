@@ -10,6 +10,12 @@ class StarGenAAEvent;
 
 //class inputParameters;
 
+/**
+   \class StarLight
+   \brief Interface to the StarLight (c++ version) event generator
+   
+ */
+
 class StarLight : public StarGenerator
 {
 
@@ -23,7 +29,7 @@ class StarLight : public StarGenerator
   //void Set( const Char_t *s ){ mSTARlight -> readString(s); }
 
   //void const char *GetCVS() const
-  //{static const char cvs[]="Tag $Name:  $ $Id: StarLight.h,v 1.1 2012/11/27 22:27:31 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  //{static const char cvs[]="Tag $Name:  $ $Id: StarLight.h,v 1.2 2012/12/06 22:07:45 jwebb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
  protected:

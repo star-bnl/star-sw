@@ -9,7 +9,7 @@
 /**
 
    \class StarGenParticle
-   \author Jason C. Webb
+
    \brief Yet another particle class
  
    The StarGenParticle class is the class which represents event-generator particles
@@ -62,11 +62,7 @@
              2, with a generator-dependent classification of its nature.
    o 201- : at the disposal of the user, in particular for event tracking in the detector
 
-
-  Possible extentions of the class, if needed for a particular event generator
-
-  o Add polarization
-  o Add user-defined weights
+  \author Jason C. Webb
 
 */
 
@@ -212,6 +208,11 @@ class StarGenParticle : public TObject
   // framework
   void *get_hepevt_address(){ return &mStatus; }
   // ------------------------------------------------------  
+
+
+  ///\todo Add user-defined weight (or optionally a parallel array of particle attributes users can populate)
+  ///\todo Add polarization
+
 
  protected:
   Int_t mIndex;
