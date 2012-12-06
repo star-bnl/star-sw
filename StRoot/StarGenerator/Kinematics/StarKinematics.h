@@ -3,7 +3,7 @@
 
 /**
    \class StarKinematics
-   \author Jason Webb
+
    \brief Star Simple Kinematics Generator
 
    StarKinematics provides a simple event generator capable of injecting single particles, 
@@ -11,6 +11,7 @@
 
    Usage:
 
+   \code
    // Create primary generator (main steering code)
    StarPrimaryMaker *primary = new StarPrimaryMaker();
 
@@ -49,7 +50,14 @@
       chain->Make();
 
    }
+   \endcode
+
+   \example ../macros/starsim.kinematics.C
+   This is an example macro for generating single particle spectra according to flat distributions and user-
+   defined distributions in pt and eta.
       
+   \author Jason Webb
+
    
 */
 

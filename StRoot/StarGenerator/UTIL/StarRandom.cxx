@@ -34,6 +34,10 @@ extern "C"
 };
 
 
+/**
+   \todo Allow multiple instances of generator per maker to facilitate debugging, reproducability
+ */
+
 
 // ----------------------------------------------------------------------------
 StarRandom::StarRandom() : TObject()

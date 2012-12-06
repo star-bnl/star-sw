@@ -9,7 +9,7 @@
 
 /**
    \class StarRandom
-   \author Jason C. Webb
+
    \brief A class for providing random number generation
 
    StarRandom is a singleton class which allows users to implement a common
@@ -22,6 +22,8 @@
          return StarRandom::Instance().flat();
       };
    };
+
+   \author Jason C. Webb
    
  */
 
