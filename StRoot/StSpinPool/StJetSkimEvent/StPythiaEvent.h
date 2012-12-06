@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.11 2012/12/06 20:37:26 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.12 2012/12/06 20:45:41 pibero Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.12  2012/12/06 20:45:41  pibero
+// const correctess
+//
 // Revision 1.11  2012/12/06 20:37:26  pibero
 // Print PYTHIA record
 //
@@ -132,8 +135,8 @@ public:
   void setF2(PDF scenario, float val);
   
   void addParticle(const TParticle& particle);
-  void print();
-  void printHelper(int first, int last);
+  void print() const;
+  void printHelper(int first, int last) const;
   
 private:
   int mRunId;
@@ -305,7 +308,7 @@ inline void StPythiaEvent::setF2(PDF scenario, float val)
 }
 
 
-inline void StPythiaEvent::print()
+inline void StPythiaEvent::print() const
 {
   // Header
   puts("                            Event listing (standard)\n");
@@ -328,7 +331,7 @@ inline void StPythiaEvent::print()
   puts(" ==================================================================================================================================");
 }
 
-inline void StPythiaEvent::printHelper(int first, int last)
+inline void StPythiaEvent::printHelper(int first, int last) const
 {
   for (int i = first; i < last; ++i) {
     const TParticle* part = particle(i);
