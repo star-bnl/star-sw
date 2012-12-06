@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.45 2012/11/20 22:55:56 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.46 2012/12/06 14:33:47 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.46  2012/12/06 14:33:47  fisyak
+ * Keep only clusters with flag == 0 or FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE. Tonko's instruction
+ *
  * Revision 1.45  2012/11/20 22:55:56  fisyak
  * Set the same cuts for online cluster maker as for offline one
  *
@@ -464,7 +467,8 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	Int_t ncounts = tpc->cl_counts[padrow];
 	for(Int_t j=0;j<ncounts;j++,c++) {
 	  if (! c || ! c->charge) continue;
-	  if (c->flags & (FCF_DEAD_EDGE | FCF_BROKEN_EDGE | FCF_ROW_EDGE)) continue;
+	  if (c->flags &&
+	     (c->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
 	  Int_t iok = hitCollection->addHit(CreateTpcHit(*c,sector,padrow+1));
 	  assert(iok);
 	}
@@ -491,7 +495,8 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
       }
       if (! cld->pad || ! cld->charge) continue;
       if (cld->tb >= __MaxNumberOfTimeBins__) continue;
-      if (cld->flags & (FCF_DEAD_EDGE | FCF_BROKEN_EDGE | FCF_ROW_EDGE)) continue;
+      if (cld->flags &&
+	 (cld->flags & ~(FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE)))  continue;
       Int_t iok = hitCollection->addHit(CreateTpcHit(*cld,sector,row));
       assert(iok);
     }
