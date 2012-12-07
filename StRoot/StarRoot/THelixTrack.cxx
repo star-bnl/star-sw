@@ -868,7 +868,7 @@ const static char* T="HACZL";
   int iAlf=30+ gRandom->Rndm()*100;
   int iLam=10+ gRandom->Rndm()*60;
   step = gRandom->Rndm()*6*iR;
-//??iLam=0;
+iLam=80; 				//******* Tested for big lambda
     Rho[0] = 1./iR;
     double alf = iAlf/180.*M_PI;
     double lam = iLam/180.*M_PI;
@@ -1247,7 +1247,7 @@ void THelixTrack::TestDer()
   int iAlf=30+ gRandom->Rndm()*100;
   int iLam=10+ gRandom->Rndm()*60;
   step = gRandom->Rndm()*6*iR;
-//??iLam=0;
+iLam=80;			//*********Tested for big lamda
   Rho[0] = 1./iR;
   double alf = iAlf/180.*M_PI;
   double lam = iLam/180.*M_PI;
@@ -2906,9 +2906,10 @@ static const char *h3Nams[]={"dcaXY","dcaXYNor","dcaZ","dcaZNor",0};
 
 
   int nFit = 0,isgn;
-for (double idip=-1;idip<=1;idip+=0.2){
-  double dip = idip;
-//  dip = 0;
+//??for (double idip=-80;idip<=80;idip+=20){
+for (int idip=80;idip<=80;idip+=20){
+  double dip = idip/180.*3.1415;
+
   double cosDip = cos(dip);
   double sinDip = sin(dip);
   double tanDip = tan(dip); if(tanDip){};
@@ -3225,6 +3226,8 @@ public:
  void Set(const THelixTrack &th);
  void Get(      THelixTrack &th);
 void operator+=(const myTHFits &fp);
+operator const double  *() const {return &_x;}
+operator       double  *()       {return &_x;}
 public:
   /// sin and cosin of cross angle
   double _cosCA;
@@ -3354,71 +3357,46 @@ double THelixKFitter::Fit()
 
 static const int konv[15] ={0,6,9,3,8,5,1,7,4,2,10,13,12,11,14};
 static const double bigErr[5] = {3,1,1,3,1};
+  if (fFitingShow) fFitingShow->clear();
   myTHPars P;
   THelixTrack th;
   th.SetEmx(0);
   double *emx = *th.Emx();
-  for (int i=0,li=0;i<5;li+=++i) {emx[li+i]=bigErr[i]*bigErr[i]/10;}
+  for (int i=0,li=0;i<5;li+=++i) {emx[li+i]=bigErr[i]*bigErr[i]*9;}
   double dir[3],myXi2;
   TCL::vsub(fAux[1].x,fAux[0].x,dir,3);
   th.Set(fAux[0].x,dir,0.);
-  for (int iter=0;iter<2;iter++) {  
-    fChi2=0;
-    *th.Emx()*=10.;
+  fChi2=0;
 
-    for (int ip=0;ip<(int)fAux.size();ip++) {
-      double s = th.Path(fAux[ip].x);
-      th.Move(s);
-      P.Set(th);
-      double T[2][3] = {{-P._sinCA,P._cosCA,0}
-                       ,{         0,      0,1}};
-
-      double hG[3], hit[3];
-      TCL::trasat(T[0],fAux[ip].e,hG,2,3); 
-      TCL::vsub(fAux[ip].x,&P._x,hit,3);
-      double hz[2]={ hit[0]*T[0][0]+hit[1]*T[0][1]
-                   , hit[2]                       };
-
-      myTHFits iF,oF;
-      double iG[15],oG[15];
-
-      for (int jj=0;jj<15;jj++) {iG[konv[jj]]=emx[jj];}
-#if 0
-{
-      TVectorD HZ(5); HZ[0]=hz[0]; HZ[1]=hz[1];
-      TMatrixDSym hGmx(5),iGmx(5),hGmxI(5),iGmxI(5),oGmx(5),oGmxI(5);
-      for (int i=0,li=0;i<5;li+=++i) {
-        hGmx[i][i] = 1e3; iGmx[i][i] = 1e3;
-        for (int j=0;j<=i;j++) {
-          iGmx[i][j] = iG[li+j]; iGmx[j][i] = iGmx[i][j]; 
-          if (i>1) continue;
-          hGmx[i][j]=hG[li+j]; hGmx[j][i]=hGmx[i][j];
-      } }
-      iGmxI = iGmx; iGmxI.Invert();
-      hGmxI = hGmx; hGmxI.Invert();
-      oGmxI  = hGmxI+iGmxI; 
-     
-      oGmx=oGmxI; oGmx.Invert();
-      TVectorD res = (oGmx*(hGmxI*HZ));
-            
-      myXi2 = HZ*(oGmxI*HZ);
-      TCL::trpck(oGmx.GetMatrixArray(),oG,5);
-      TCL::ucopy( res.GetMatrixArray(),oF,5);
-
-}
-#else
-      myXi2 = JoinTwo(2,hz,hG,5,iF,iG,oF,oG,0);
-#endif
-      for (int jj=0;jj<15;jj++) {emx[jj]=oG[konv[jj]];}
-
-      fChi2+=myXi2; fAux[ip].xi2=myXi2;
-      P+= oF; P.Get(th);
-    }
-    double s = th.Path(fAux[0].x);
+  for (int ip=0;ip<(int)fAux.size();ip++) {
+    double s = th.Path(fAux[ip].x[0],fAux[ip].x[1]);
     th.Move(s);
-    *((THelixTrack*)this) = th;
-    fChi2/= Ndf()+1e-10;
-  }//endIter
+    P.Set(th);
+    double T[2][3] = {{-P._sinCA,P._cosCA,0}
+                     ,{        0,       0,1}};
+
+    double hG[3], hit[3];
+    TCL::trasat(T[0],fAux[ip].e,hG,2,3); 
+    TCL::vsub(fAux[ip].x,&P._x,hit,3);
+    double hz[2]={ hit[0]*T[0][0]+hit[1]*T[0][1]
+                 , hit[2]                       };
+
+    myTHFits iF,oF;
+    double iG[15],oG[15];
+
+    for (int jj=0;jj<15;jj++) {iG[konv[jj]]=emx[jj];}
+    myXi2 = JoinTwo(2,hz,hG,5,iF,iG,oF,oG,0);
+    for (int jj=0;jj<15;jj++) {emx[jj]=oG[konv[jj]];}
+
+    fChi2+=myXi2; fAux[ip].xi2=myXi2;
+    P+= oF; P.Get(th);
+    if (fFitingShow) { //fill xyz of local fit
+      for (int i=0;i<3;i++) {fFitingShow->push_back(P[i]);}}
+  }
+  double s = th.Path(fAux[0].x);
+  th.Move(s);
+  *((THelixTrack*)this) = th;
+  fChi2/= Ndf()+1e-10;
   return fChi2;
 }
 //______________________________________________________________________________
@@ -3430,14 +3408,14 @@ static const char *hNams[]={
 "pHKalmn","pAKalmn","pCKalmn","pZKalmn","pLKalmn","Xi2Kalmn",
 "pHDubna","pADubna","pCDubna","pZDubna","pLDubna","Xi2Dubna"};
 
-static const double lims[][2]={{-5 ,5},{-5 ,5},{-5 ,5},{-5 ,5},{-5 ,5},{ 0 ,10}
-                              ,{-5 ,5},{-5 ,5},{-5 ,5},{-5 ,5},{-5 ,5},{ 0 ,10}};
+static const double lims[][2]={{-20 ,20},{-20 ,20},{-20 ,20},{-20 ,20},{-20 ,20},{ 0 ,10}
+                              ,{-20 ,20},{-20 ,20},{-20 ,20},{-20 ,20},{-20 ,20},{ 0 ,10}};
 const int maxPads=3;
 const int nPads = sizeof(hNams)/sizeof(void*);
 const int nCans = nPads/maxPads;
   for (int jCan=0;jCan<nCans;jCan++) {
     if(!myCanvas[jCan]) {
-      TString ts("TCircleKFitter_Test"); ts+=jCan;
+      TString ts("THelixKKFitter_Test"); ts+=jCan;
       myCanvas[jCan]=new TCanvas(ts,ts,600,800);
     }
     myCanvas[jCan]->Clear(); myCanvas[jCan]->Divide(1,maxPads);
@@ -3455,7 +3433,7 @@ const int kHits = 50;
    double S = 2*R;
       int iPhi0 =  360*gRandom->Rndm();
       int iLam0 =  100*(gRandom->Rndm()-0.5);
-
+iLam0  = 80;    
    double ToRad = M_PI/180;
    double Phi0 = ToRad*iPhi0;
    double Lam0 = ToRad*iLam0;
@@ -3486,7 +3464,10 @@ const int kHits = 50;
        ht.Move(step);
      }
      double myXi2[2];
+     if (!iEv) kf.SetFitingShow();
      myXi2[0] = kf.Fit();
+     if (!iEv) kf.Show();
+
      myXi2[1] = hf.Fit(); 
      hf.MakeErrs();
      double ds = hf.Path(POS[0],POS[1]); hf.Move(ds);
@@ -3498,13 +3479,13 @@ const int kHits = 50;
        hh[jk*6+5]->Fill(myXi2[jk]);
        TCL::vadd(GG[jk+2],*hlx->Emx(),GG[jk+2],15);
        TCL::vsub(hlx->Pos(),POS,dif,3);
-       d[0] = TCL::vdot(dif,NOR,2);
-       d[1] = TVector3(hlx->Dir()).DeltaPhi(TVector3(DIR));
-       d[2] = hlx->GetRho()-1./R;
-       d[3] = dif[2];
+       d[0] = TCL::vdot(dif,NOR,2);				//dH   of helix
+       d[1] = TVector3(hlx->Dir()).DeltaPhi(TVector3(DIR));	//dPhi of helix
+       d[2] = hlx->GetRho()-1./R;				//dRho of helix
+       d[3] = dif[2];						//dZ   of helix
        d[4] = -(TVector3(hlx->Dir()).Theta()-TVector3(DIR).Theta());
        if (d[4]<=-M_PI) d[4]+=M_PI*2;
-       if (d[4]>= M_PI) d[4]-=M_PI*2;
+       if (d[4]>= M_PI) d[4]-=M_PI*2;				//dLam of helix
        double *e = GG[jk];
        for (int i=0,li=0;i<5;li+=++i) { 
          double err = (*(hlx->Emx()))[li+i]; err = sqrt(err);
@@ -3552,14 +3533,41 @@ static const char *tsk[2]={"KalmanFit","DubnaFit"};
 void THelixKFitter::Print(const char* txt) const
 { if(txt){}; }
 //______________________________________________________________________________
-void THelixKFitter::Show() const
-{ ; }
 
+#include "StarRoot/StDraw3D.h"
+//______________________________________________________________________________
+void THelixKFitter::Show() const
+{ 
+static StDraw3D *draw = new StDraw3D("");
+
+
+std::vector<double> Pts;
+std::vector<double> Fts;
+
+  THelixTrack th(*this);
+  for (int ip=0;ip<(int)fAux.size();ip++) {
+    double s = th.Path(fAux[ip].x[0],fAux[ip].x[1]);
+    for (int i=0;i<3;i++) {Pts.push_back(fAux[ip].x[i]);}
+                           
+    if (!ip)	{th.Move(s);continue;}
+    double delta = s/10;
+    for (int j=0;j<10;j++) {
+      for (int i=0;i<3;i++) {Fts.push_back(th.Pos()[i]);}
+      th.Move(delta);
+    }
+  }
+  if (fFitingShow)  draw->Points(*fFitingShow,kUnusedHit); 
+  draw->Points(Pts,kUsedHit);
+  draw->Line(Fts,kGlobalTrack);
+  draw->UpdateModified();
+  draw->Animate();
+
+}
 //______________________________________________________________________________
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.59 2012/07/21 18:46:38 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.60 2012/12/07 17:47:42 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3575,6 +3583,9 @@ void THelixKFitter::Show() const
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.60  2012/12/07 17:47:42  perev
+ * Cleanup
+ *
  * Revision 1.59  2012/07/21 18:46:38  perev
  * Method MaxCorr() added
  *
