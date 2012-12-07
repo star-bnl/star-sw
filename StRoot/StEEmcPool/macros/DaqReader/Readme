@@ -17,3 +17,5 @@ which produces an executable emchist* which reads the daq file by executing
 ./emchist /star/data03/daq/2012/100/13100049w_js/st_W_13100049_raw_1340001.daq
 
 for the daq file of interest.
+
+To process all the daq files for a given run which are stored on some NFS disk space there is a script provided (submitAll.sh) which loops over a given runList to do this. 
