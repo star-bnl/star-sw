@@ -2,14 +2,17 @@
 /// \author Victorb Perev 01/2010
 #ifndef StvKNSeedFinder_HH
 #define StvKNSeedFinder_HH
+#ifndef __NOSTV__
 #include "Stv/StvSeedFinder.h"
 #include "StvConeRejector.h"
 #include "StvKNSeedSelector.h"
+#endif
 #include <map>
 #include <vector>
 /// \class StvKNSeedFinder
 
 class StvHit;
+class StvHits;
 class StMultiKeyMap;
 typedef std::multimap<float,StvHit*> Stv1stHitMap;
 typedef Stv1stHitMap::iterator Stv1stHitMapIter;
@@ -31,7 +34,7 @@ public:
   virtual void Show();
 protected:
 
-private:
+protected:
 char mBeg[1];
 int fIPass,fNSeeds[2],fNUsed[2];
 char mMed[1];
@@ -42,7 +45,9 @@ Stv1stHitMapIter  	*f1stHitMapIter;
 char mEnd[1];
 StvConeRejector       mRej;
 StvKNSeedSelector     mSel;
+#ifndef __NOSTV__
 ClassDef(StvKNSeedFinder,0);
+#endif
 };
 
 
