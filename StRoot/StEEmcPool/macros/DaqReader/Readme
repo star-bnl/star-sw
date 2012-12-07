@@ -18,4 +18,6 @@ which produces an executable emchist* which reads the daq file by executing
 
 for the daq file of interest.
 
-To process all the daq files for a given run which are stored on some NFS disk space there is a script provided (submitAll.sh) which loops over a given runList to do this. 
+To process all the daq files for a given run which are stored on some NFS disk space there is a script provided (submitAll.sh) which loops over a given runList to do this.  Once histogram files have been produced for each daqfile in a run it is useful to hadd them together which can be done simply with the following script
+
+addFiles.sh 
