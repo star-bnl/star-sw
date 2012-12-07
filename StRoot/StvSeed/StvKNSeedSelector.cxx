@@ -6,9 +6,9 @@
 #include "StvKNSeedSelector.h"
 #include "StvSeedConst.h"
 
-static const float kMaxAng =  4*3.14/180;	//???Maximal angle allowed for connected hits
+static const float kMaxAng =  9*3.14/180;	//???Maximal angle allowed for connected hits
 static const float kMinAng =  kMaxAng*pow(0.1,1./(2*kKNumber+1));	//KN angle allowed
-static const float kWidMax =  1.5*3.14/180;	//KN width angle allowed, narrow width of ellips
+static const float kWidMax =  3*3.14/180;	//KN width angle allowed, narrow width of ellips
 static const float kWidMin =  .01*3.14/180;	//KN width angle allowed, narrow width of ellips
 static const float kErrFact=  1./3;		//bigErr/kErrFact/len is angle error
 
@@ -33,11 +33,6 @@ static inline void Ave( float A[3],const float B[3])
   for (int i=0;i<3;i++) { A[i]/=nor;}
 }
 //_____________________________________________________________________________
-static inline void Cop( float A[3],const float B[3]) 
-{
- A[0] = B[0]; A[1] = B[1]; A[2] = B[2];
-}
-//_____________________________________________________________________________
 static inline void Add( float A[3],const float B[3],float len) 
 {
 float wt=len*len;
@@ -57,7 +52,7 @@ static inline double Nor(float A[3])
    return sum;
 }
 //_____________________________________________________________________________
-static inline float Dot(const  float A[3],const float B[3]) 
+static inline float D0t(const  float A[3],const float B[3]) 
 {
  return A[0]*B[0]+A[1]*B[1]+A[2]*B[2];
 }
@@ -163,10 +158,11 @@ static int nCall=0; nCall++;
       if (!mAux[iux].mHit) 	continue;		//ignore discarded hit
       if ( mAux[iux].mSel) 	continue;
       float ang = Ang(mAveDir,mAux[iux].mDir);
-      if (ang>mKNNDist)		continue;
+      if (ang>kMinAng)		continue;
+//    if (ang>mKNNDist)		continue;
       if (ang>kWidMax)	{
 	if (!(mState&1))  	continue;
-	float dot = Dot(mAux[iux].mDir,mSidDir);
+	float dot = D0t(mAux[iux].mDir,mSidDir);
 	if (fabs(dot) > kWidMax) 	continue;
       }
       mNHits++;mAux[iux].mSel=1;
