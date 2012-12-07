@@ -380,7 +380,7 @@ typedef std::vector<THelixKFitterAux> THelixKFitterAuxV;
 class THelixKFitter: public THelixTrack
 {
 public:
-       THelixKFitter()				{Clear();}
+       THelixKFitter()				{fFitingShow=0;Clear();}
       ~THelixKFitter(){;}
 void   Add (const double x[3]); 
 void   AddErr(const double err[6]); 
@@ -388,13 +388,14 @@ double Fit();
 double Chi2() const 				{return fChi2		;}
 int    Ndf()  const			        {return 2*fAux.size()-5	;}
 int    Size() const 				{return fAux.size()	;}
-const THelixKFitterAux* GetAux(int i) const   	{return &fAux[i]	;}
-void   Clear(const char *opt ="")		{fAux.clear();fChi2=0	;}
+const THelixKFitterAux* GetAux(int i) const	{return &fAux[i]	;}
+void   Clear(const char * ="")		{fAux.clear();fChi2=0	;}
 void   Print(const char* chopt = "") const;
 void   Show() const;
-
+void   SetFitingShow() 			{fFitingShow = new std::vector<double>;}
 static void Test(int nev=10000);
 private:
+std::vector<double> *fFitingShow;
 THelixKFitterAuxV fAux;
 double fChi2;
 ClassDef(THelixKFitter,0)
