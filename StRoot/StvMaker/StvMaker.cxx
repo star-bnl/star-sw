@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.23 2012/11/28 01:05:05 perev Exp $
+// $Id: StvMaker.cxx,v 1.24 2012/12/07 17:51:56 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -98,6 +98,7 @@ ClassImp(StvMaker)
 StvMaker::StvMaker(const char *name) : StMaker(name)
 
 {
+  assert(strcmp(gProgName,"root.exe")==0);
   memset(mBeg,0,mEnd-mBeg+1);
   cout <<"StvMaker::StvMaker() -I- Starting"<<endl;
 
