@@ -3,26 +3,28 @@
 #include <assert.h>
 #include "TCernLib.h"
 #include "TVector3.h"
-#include "StvKNSeedFinder.h"
 #include "StMultiKeyMap.h"
-#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
-#include "Stv/StvHit.h"
 #include "THelixTrack.h"
-//#define APPROX_DEBUG
+#include "StvSeed/StvSeedConst.h"
+
+#ifndef __NOSTV__
+#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
+#include "StvKNSeedFinder.h"
+#include "Stv/StvHit.h"
+#include "StvUtil/StvDebug.h"
+#include "Stv/StvDraw.h"
+#endif
+
 #ifdef APPROX_DEBUG
 #include "TCanvas.h"
 #include "TH1F.h"
 #include "TProfile.h"
 #endif //APPROX_DEBUG
-#include "StvUtil/StvDebug.h"
-#include "Stv/StvDraw.h"
 void myBreak(int);
-enum {kMinHits=5,kMaxHits = 10,kFstAng=88,kErrFakt=5,kLenFakt=5,kStpFakt=3};
-static const double kFstTan = tan(kFstAng*M_PI/180);
-static const double kMinCos = 0.1;
 
+#ifndef __NOSTV__
 ClassImp(StvKNSeedFinder)
-static const float TpcOuterDeltaR = 15, kTpcHitErr = 0.2;
+#endif
 
 //_____________________________________________________________________________
 StvKNSeedFinder::StvKNSeedFinder(const char *name):StvSeedFinder(name)
@@ -45,19 +47,21 @@ void StvKNSeedFinder::Clear(const char*)
 //_____________________________________________________________________________
 void StvKNSeedFinder::Reset()
 {
+#ifndef __NOSTV__
+
   memset(mBeg,0,mMed-mBeg+1);
   const StVoidArr *hitArr =  StTGeoHelper::Inst()->GetSeedHits();
   int nHits =  hitArr->size();
   for (int iHit=0;iHit<nHits;iHit++) {
     StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
     const float *x = stiHit->x();
-//    float r2 = x[0]*x[0] + x[1]*x[1]+ x[2]*x[2];
     float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
     f1stHitMap->insert(std::pair<float,StvHit*>(-r2, stiHit));
     fMultiHits->Add(stiHit,x);
   } 
   fMultiHits->MakeTree();
   *f1stHitMapIter = f1stHitMap->begin();
+#endif
 }    
 //_____________________________________________________________________________
 int StvKNSeedFinder::Again()
@@ -69,14 +73,12 @@ int StvKNSeedFinder::Again()
 const THelixTrack* StvKNSeedFinder::NextSeed()
 {
 static int nCall=0; nCall++;
-StvDebug::Break(nCall);
   StvHit *fstHit; 
 
   for (;(*f1stHitMapIter)!=f1stHitMap->end();++(*f1stHitMapIter)) {//1st hit loop
     fstHit = (*(*f1stHitMapIter)).second;
     assert(fstHit);
     if (fstHit->timesUsed()) continue;
-    const StHitPlane *fstPlane = fstHit->detector();
     fSeedHits.clear();
     mRej.Reset(fstHit->x());
     mRej.Prepare();
@@ -91,7 +93,6 @@ StvDebug::Break(nCall);
       StvHit *nexHit = (StvHit*)node->GetObj();
       if (nexHit==fstHit)	continue;
       if (nexHit->timesUsed()) 	continue;
-      if (nexHit->detector()==fstPlane) 	continue;
 
       nTotHits++;
       int ans = mRej.Reject(nexHit->x());
