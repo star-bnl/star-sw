@@ -10,7 +10,8 @@ St_StvKonst *tableSet = new St_StvKonst("StvKonst",1);
 //
 memset(&row,0,tableSet->GetRowSize());
   double Nstd = 5.0;
-  row.mXi2Hit = 2*Nstd*Nstd;		//Xi2 to accept new hit
+  row.mXi2Hit = 9*Nstd*Nstd;		//Xi2 to accept new hit
+  row.mXi2Trk = 1*Nstd*Nstd;		//Xi2 to accept new track
   row.mXi2Vtx = 5*Nstd*Nstd;		//Xi2 to accept vertex
   row.mXi2Joi = 5*Nstd*Nstd;		//Xi2 in Refit join left & right subtrack
   row.mXi2Hlx = row.mXi2Hit*9;  //Xi2 in Helix, .
