@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.51 2012/10/31 20:05:10 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.52 2012/12/10 22:46:33 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.52  2012/12/10 22:46:33  genevb
+ * Handle multiple runs by reinitialization at reinstantiation, introduce corrections modes, enable iterative UndoDistortions
+ *
  * Revision 1.51  2012/10/31 20:05:10  genevb
  * Row radii stored in arrays of doubles
  *
@@ -179,6 +182,10 @@ enum   DistortSelect
   kGGVoltError       = 0x10000,  // Bit 17
   kSectorAlign       = 0x20000   // Bit 18
 } ;
+enum   CorrectSelect
+{
+  kIterateUndo       = 0x1       // Bit 1
+} ;
 enum   EBMapSizes
 {
   BMap_nZ    =          57,           // Number of Z points in table. Measured STAR B field Maps from Steve T. 
@@ -265,6 +272,8 @@ class StMagUtilities {
 				       const Int_t ITERATIONS, const Int_t SYMMETRY) ;
 
   Int_t    mDistortionMode;             // Distortion mode - determines which corrections are run
+  UInt_t   mCorrectionsMode;            // Corrections mode - determines how corrections are run
+  Bool_t   DoOnce ;                     // First pass: initializations
 
   Float_t  StarDriftV ;                 // Drift Velocity (cm/microSec) Magnitude
   Float_t  TPC_Z0 ;                     // Z location of STAR TPC Ground Wire Plane (cm) Magnitude
@@ -311,6 +320,8 @@ class StMagUtilities {
   Float_t  deltaVGGEast               ; // Voltage error on the East Gated Grid
   Float_t  deltaVGGWest               ; // Voltage error on the West Gated Grid
   Bool_t   useManualSCForPredict      ; // Flag on using fixed SC value or manually set one for Predict()
+  Bool_t   iterateDistortion          ; // Flag on whether to iterate in determining distortions
+  Int_t    iterationFailCounter       ; // Count of number of iteration fails
 
 
   Float_t  Bz[BMap_nZ][BMap_nR], Br[BMap_nZ][BMap_nR] ;         
@@ -414,8 +425,10 @@ class StMagUtilities {
   virtual Double_t CurrentSpaceChargeR2() {return SpaceChargeR2;}
   virtual Float_t  CurrentSpaceChargeEWRatio() { return SpaceChargeEWRatio ; }
   virtual Bool_t   UpdateShortedRing();
-  virtual void     UseManualSCForPredict(Bool_t flag=kTRUE) { useManualSCForPredict=flag; };
+  virtual void     UseManualSCForPredict(Bool_t flag=kTRUE) { useManualSCForPredict=flag; }
   virtual void     ManualGGVoltError(Double_t east, Double_t west);
+  virtual void     UseIterativeUndoDistortion(Bool_t flag=kTRUE) { iterateDistortion=flag; }
+  virtual Int_t    IterationFailCount(); // must be called once before first actual use
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
 
