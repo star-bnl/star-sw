@@ -13,6 +13,8 @@ class St_tpcOmegaTauC : public TChair {
   Float_t 	tensorV2(Int_t i = 0) 	     {return Struct(i)->tensorV2;}
   Float_t 	getOmegaTauTensorV1()        {return tensorV1();}
   Float_t 	getOmegaTauTensorV2()        {return tensorV2();}
+  UInt_t        distortionCorrectionsMode(Int_t i = 0)
+                                             {return Struct(i)->distortionCorrectionsMode;}
  protected:
   St_tpcOmegaTauC(St_tpcOmegaTau *table=0) : TChair(table) {}
   virtual ~St_tpcOmegaTauC() {fgInstance = 0;}
