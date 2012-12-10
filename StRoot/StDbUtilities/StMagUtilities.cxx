@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.90 2012/10/31 20:05:10 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.91 2012/12/10 22:46:33 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.91  2012/12/10 22:46:33  genevb
+ * Handle multiple runs by reinitialization at reinstantiation, introduce corrections modes, enable iterative UndoDistortions
+ *
  * Revision 1.90  2012/10/31 20:05:10  genevb
  * Row radii stored in arrays of doubles
  *
@@ -562,7 +565,7 @@ Bool_t StMagUtilities::UpdateShortedRing ()
 
   St_tpcFieldCageShortC* shortedRingsChair = St_tpcFieldCageShortC::instance();
   tpcFieldCageShort_st* new_shortsTable = shortedRingsChair->Struct();
-  Bool_t update = (new_shortsTable != shortsTable);
+  Bool_t update = (new_shortsTable != shortsTable) || DoOnce;
   if (update) { GetShortedRing(); shortsTable = new_shortsTable; }
   return update;
 }
@@ -596,6 +599,7 @@ void StMagUtilities::GetOmegaTau ()
   fOmegaTau  =  StDetectorDbTpcOmegaTau::instance();
   TensorV1   =  fOmegaTau->getOmegaTauTensorV1();
   TensorV2   =  fOmegaTau->getOmegaTauTensorV2();
+  mCorrectionsMode = fOmegaTau->distortionCorrectionsMode(); // default is 0 (important for old calibs)
 }
 
 /// Space Charge Correction Mode
@@ -765,6 +769,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
           else               
 	    TPCROWR[i] = 127.195 + (i-INNER)*2.0 ;
         }
+      mCorrectionsMode = 0;
 
       cout << "StMagUtilities::CommonSta  WARNING -- Using hard-wired TPC parameters. " << endl ; 
     }
@@ -810,6 +815,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
     }
   else  cout << "StMagUtilities::CommonSta  Using HV planes parameters from the DB."   << endl ; 
 
+
   // Parse the mode switch which was received from the Tpt maker
   // To turn on and off individual distortions, set these higher bits
   // Default behavior: no bits set gives you the following defaults
@@ -827,6 +833,10 @@ void StMagUtilities::CommonStart ( Int_t mode )
     } 
   else printf("StMagUtilities::CommonSta  Using mode option 0x%X\n",mode);
  
+  printf("StMagUtilities::CommonSta  Using correction mode 0x%X\n",mCorrectionsMode);
+  iterateDistortion = mCorrectionsMode & kIterateUndo;
+  iterationFailCounter = -1;
+
   Float_t  B[3], X[3] = { 0, 0, 0 } ;
   Float_t  OmegaTau ;                       // For an electron, OmegaTau carries the sign opposite of B 
 
@@ -884,6 +894,8 @@ void StMagUtilities::CommonStart ( Int_t mode )
   cout << "StMagUtilities::deltaVGG      =  " << deltaVGGEast << " V (east) : " << deltaVGGWest << " V (west)" << endl;
   cout << "StMagUtilities::GLWeights     =  " ;
   for ( Int_t i = 1 ; i < 25 ; i++ ) cout << GLWeights[i] << " " ; cout << endl;
+
+  DoOnce = kTRUE;
 
 }
 
@@ -982,6 +994,41 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
 
   SectorNumber( Sector, x ) ;
 
+  if (iterateDistortion) {
+    // iteration to determine UndoDistortion()
+    iterateDistortion = kFALSE;
+
+    int asize = 3 * sizeof(Float_t);
+    memcpy(Xprime1,x,asize);
+    memcpy(Xprime,x,asize);
+    const Float_t MINDIST = 1e-4; // ~1 micron accuracy
+    Float_t dist = 2000;
+    int iter =0;
+    while (dist > MINDIST) { // iterate to a precision of 10 microns
+      UndoDistortion ( Xprime1, Xprime2, Sector ) ;
+      Xprime1[0] = x[0] - (Xprime1[0] - Xprime2[0]) ;
+      Xprime1[1] = x[1] - (Xprime1[1] - Xprime2[1]) ;
+      Xprime1[2] = x[2] - (Xprime1[2] - Xprime2[2]) ;
+      dist = TMath::Sqrt( (Xprime1[0]-Xprime[0])*(Xprime1[0]-Xprime[0])
+                        + (Xprime1[1]-Xprime[1])*(Xprime1[1]-Xprime[1])
+                        + (Xprime1[2]-Xprime[2])*(Xprime1[2]-Xprime[2]) );
+      if (++iter > 20 && dist > MINDIST) { // Not converging
+        // Take average of last two solutions
+        Xprime[0] = 0.5*(Xprime[0] + Xprime1[0]);
+        Xprime[1] = 0.5*(Xprime[1] + Xprime1[1]);
+        Xprime[2] = 0.5*(Xprime[2] + Xprime1[2]);
+        dist = 0;
+        if (iterationFailCounter >=0) iterationFailCounter++;
+      } else {
+        memcpy(Xprime,Xprime1,asize);
+      }
+    }
+
+    iterateDistortion = kTRUE;
+    return;
+  } // end of iteration
+
+
   // Set it up
   for (unsigned int i=0; i<3; ++i) {
       Xprime1[i] = x[i];
@@ -1077,7 +1124,7 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
   }
 
   if ((mDistortionMode & kSpaceCharge) && (mDistortionMode & kSpaceChargeR2)) {
-      cout << "StMagUtilities ERROR **** Do not use kSpaceCharge and kspaceChargeR2 at the same time" << endl ;
+      cout << "StMagUtilities ERROR **** Do not use kSpaceCharge and kSpaceChargeR2 at the same time" << endl ;
       cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
       exit(1) ;
   }
@@ -1128,6 +1175,8 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
   for (unsigned int i=0; i<3; ++i) {
       Xprime[i] = Xprime1[i];
   }
+
+  DoOnce = kFALSE;
   
 }
 
@@ -1138,12 +1187,16 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t
 /// Main Entry Point for requests to DO the E and B field distortions (for simulations)
 void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
+  Bool_t tempIterDist = iterateDistortion;
+  iterateDistortion = kFALSE; // Do not iterate for DoDistortion()
 
   UndoDistortion ( x, Xprime, Sector ) ;
 
   Xprime[0] = 2*x[0] - Xprime[0] ;
   Xprime[1] = 2*x[1] - Xprime[1] ;
   Xprime[2] = 2*x[2] - Xprime[2] ;
+
+  iterateDistortion = tempIterDist;
 
 }
 
@@ -1246,7 +1299,6 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] , 
 
   static  Float_t dx3D[EMap_nPhi][EMap_nR][EMap_nZ], dy3D[EMap_nPhi][EMap_nR][EMap_nZ] ;
   static  Int_t   ilow = 0, jlow = 0, klow = 0 ;
-  static  Int_t   DoOnce = 0 ;
   const   Int_t   PHIORDER = 1 ;                    // Linear interpolation = 1, Quadratic = 2 ... PHI Table is crude so use linear interp
   const   Int_t   ORDER    = 1 ;                    // Linear interpolation = 1, Quadratic = 2         
 
@@ -1260,7 +1312,7 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] , 
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
 
-  if ( DoOnce == 0 )
+  if ( DoOnce )
     {
       cout << "StMagUtilities::FastUndoD  Please wait for the tables to fill ... ~90 seconds" << endl ;
       for ( k = 0 ; k < EMap_nPhi ; k++ )
@@ -1278,7 +1330,6 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] , 
 		}
 	    }
 	}
-      DoOnce = 1 ;
     }
 
   Search( EMap_nPhi, ePhiList, phi, klow ) ;
@@ -1325,7 +1376,6 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
 
   static  Float_t dR[EMap_nR][EMap_nZ], dRPhi[EMap_nR][EMap_nZ] ;
   static  Int_t   ilow = 0, jlow = 0 ;
-  static  Int_t   DoOnce = 0 ;
   const   Int_t   ORDER  = 1 ;                      // Linear interpolation = 1, Quadratic = 2         
 
   Int_t   i, j ;
@@ -1338,7 +1388,7 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
   if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
   Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
 
-  if ( DoOnce == 0 )
+  if ( DoOnce )
     {
       cout << "StMagUtilities::FastUndo2  Please wait for the tables to fill ...  ~5 seconds" << endl ;
       for ( i = 0 ; i < EMap_nR ; i++ )
@@ -1353,7 +1403,6 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
 	      dRPhi[i][j] = Xprime[1] ;
 	    }
 	}
-      DoOnce = 1 ;
     }
 
   Search( EMap_nR, eRList, r, ilow ) ;
@@ -1459,14 +1508,13 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
 				     198., 200. } ;  
 
   static Double_t C[TERMS] ;                     // Coefficients for series
-  static Int_t    DoOnce = 0 ;                   // Calculate only once
   static Float_t  SumArray[NZDRIFT][NYARRAY] ;
   static Int_t    ilow = 0, jlow = 0 ;
   
   Float_t  y, z, Zdrift, save_sum[3] ;
   Double_t r, phi, phi0, sum = 0.0 ;
 
-  if ( DoOnce == 0 ) 
+  if ( DoOnce ) 
     {                          // Put these coefficients in a table to save time
       cout << "StMagUtilities::PadRow13   Please wait for the tables to fill ...  ~5 seconds" << endl ;
       C[0] = WIREGAP * GG * SCALE / ( 2 * BOX ) ;   
@@ -1487,7 +1535,6 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , 
 	      SumArray[i][j] = sum ;
 	    }
 	}
-      DoOnce = 1 ;
     }
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
@@ -1666,10 +1713,9 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
   Float_t  Er_integral, Ephi_integral ;
   Double_t r, phi, z ;
 
-  static Int_t DoOnce = 0 ;
   const   Int_t ORDER = 1 ;                         // Linear interpolation = 1, Quadratic = 2         
 
-  if ( DoOnce == 0 )
+  if ( DoOnce )
     {
       cout << "StMagUtilities::IFCShift   Please wait for the tables to fill ...  ~5 seconds" << endl ;
       Int_t Nterms = 100 ;
@@ -1702,7 +1748,6 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 	      if  ( eZList[i] < 0 )  IntegralOverZ = -1 * IntegralOverZ ;  // Force AntiSymmetry of solutions in Z
 	      shiftEr[i][j] = IntegralOverZ ; 	    }
 	}
-      DoOnce = 1 ;
     }
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
@@ -1743,10 +1788,9 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   Float_t  Er_integral, Ephi_integral ;
   Double_t r, phi, z ;
 
-  static Int_t DoOnce = 0 ;
   const   Int_t ORDER = 1 ;                         // Linear interpolation = 1, Quadratic = 2         
 
-  if ( DoOnce == 0 )
+  if ( DoOnce )
     {
       Int_t Nterms = 100 ;
       for ( Int_t i = 0 ; i < EMap_nZ ; ++i ) 
@@ -1782,7 +1826,6 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 	      spaceEr[i][j] = IntegralOverZ ; 
 	    }
 	}
-      DoOnce = 1 ;
     }
   
   r   =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
@@ -1841,9 +1884,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
   Float_t   Er_integral, Ephi_integral ;
   Double_t  r, phi, z ;
 
-  static Int_t DoOnce = 0 ;
-
-  if ( DoOnce == 0 )
+  if ( DoOnce )
     {
       cout << "StMagUtilities::UndoSpace  Please wait for the tables to fill ...  ~5 seconds" << endl ;
       TMatrix  ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS) ;
@@ -1921,8 +1962,6 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	    }
 	}
 
-      DoOnce = 1 ;      
-
     }
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
@@ -1995,15 +2034,15 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   const   Float_t Pitch     = 1.150 ;            // Ring to Ring pitch (cm)
   const   Float_t Z01       = 1.225 ;            // Distance from CM to center of first ring (cm)
   
-  static  Bool_t DoOnce = true ;  // Note that this is the reverse logic compared to DoOnce elsewhere in StMagUtilities.
+  static  Bool_t DoOnceLocal = true ;
   static  Int_t  NumberOfEastInnerShorts = 0, NumberOfEastOuterShorts = 0 , NumberOfWestInnerShorts = 0, NumberOfWestOuterShorts = 0 ;
  
   Float_t  Er_integral, Ephi_integral ;
   Double_t r, phi, z ;
 
-  if (fTpcVolts) DoOnce = UpdateShortedRing() ;
+  if (fTpcVolts) DoOnceLocal = UpdateShortedRing() ;
 
-  if ( DoOnce )  // Note reversed logic compared to other methods in StMagUtilities
+  if ( DoOnceLocal )
     {
 
       cout << "StMagUtilities::UndoShort  Please wait for the tables to fill ...  ~5 seconds" << endl ;
@@ -2114,7 +2153,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 	      shortEr[i][j] = IntegralOverZ ;
  	    }
 	}
-      DoOnce = false ;     // Note reversed logic compared to other methods in StMagUtilies
+      DoOnceLocal = false ;
     }
   
   if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
@@ -2160,14 +2199,12 @@ void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprim
   
   const   Int_t   ORDER     = 1     ;               // Linear interpolation = 1, Quadratic = 2         
 
-  static  Bool_t  DoOnce    = true  ;               // Note that this is the reverse logic compared to DoOnce elsewhere in StMagUtilities.
- 
   Float_t  Er_integral, Ephi_integral ;
   Double_t r, phi, z ;
 
-  // if (fTpcVolts) DoOnce = UpdateGGVoltError() ;  // Reserved for Gene VB to do this correctly
+  // if (fTpcVolts) DoOnceLocal = UpdateGGVoltError() ;  // Reserved for Gene VB to do this correctly
 
-  if ( DoOnce )  // Note reversed logic compared to other methods in StMagUtilities
+  if ( DoOnce )
     {
 
       cout << "StMagUtilities::UndoGG VE  Please wait for the tables to fill ...  ~5 seconds" << endl ;
@@ -2216,7 +2253,6 @@ void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprim
 	      GGVoltErrorEr[i][j] = IntegralOverZ ;
  	    }
 	}
-      DoOnce = false ;     // Note reversed logic compared to other methods in StMagUtilies
     }
   
   if ( deltaVGGEast == 0.0 && deltaVGGWest == 0 ) 
@@ -4273,9 +4309,7 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
   if ( InnerGridLeakStrength == 0 && MiddlGridLeakStrength == 0 && OuterGridLeakStrength == 0 )
     { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; return ; }
 
-  static Int_t DoOnce = 0 ;
-
-  if ( DoOnce == 0 )
+  if ( DoOnce )
     {
       cout << "StMagUtilities::UndoGridL  Please wait for the tables to fill ... ~30 seconds" << endl ;
       TMatrix  ArrayE(ROWS,COLUMNS), ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS) ;
@@ -4321,8 +4355,6 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
 	}
 
       PoissonRelaxation( ArrayV, Charge, EroverEz, ITERATIONS ) ;
-
-      DoOnce = 1 ;      
 
     }
   
@@ -4390,8 +4422,6 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 
   static Float_t  Rlist[ROWS], Zedlist[COLUMNS] ;
 
-  static Int_t DoOnce = 0 ;
-
   static TMatrix *ArrayoftiltEr[PHISLICES] ;
   static TMatrix *ArrayoftiltEphi[PHISLICES] ;
 
@@ -4425,7 +4455,7 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 
   if ( MiddlGridLeakStrength == 0 ) return ; 
 
-  if ( DoOnce == 0 )
+  if ( DoOnce )
     {
       cout << "StMagUtilities::Undo3DGrid Please wait for the tables to fill ...  ~5 seconds * PHISLICES" << endl ;
     
@@ -4534,8 +4564,6 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 	  ArrayofEPhioverEz[k] -> Delete() ;  
 	}
 
-      DoOnce = 1 ;      
-
     }
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
@@ -4620,8 +4648,6 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
 
   static Float_t  Rlist[ROWS], Zedlist[COLUMNS] ;
 
-  static Int_t DoOnce = 0 ;
-
   static TMatrix *ArrayoftiltEr[PHISLICES1] ;
   static TMatrix *ArrayoftiltEphi[PHISLICES1] ;
 
@@ -4653,7 +4679,7 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
   Xprime[1] = x[1] ; 
   Xprime[2] = x[2] ; 
 
-  if ( DoOnce == 0 )
+  if ( DoOnce )
     {
       cout << "StMagUtilities::UndoSectorAlign Please wait for the tables to fill ...  ~5 seconds * PHISLICES" << endl ;
       Int_t   SeclistW[PHISLICES1] ;
@@ -4834,8 +4860,6 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
           ArrayofEPhioverEzE[k] -> Delete() ;  
         }
           
-      DoOnce = 1 ;      
-      
     }
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
@@ -4859,5 +4883,20 @@ void StMagUtilities::UndoSectorAlignDistortion( const Float_t x[], Float_t Xprim
   
 }
 
+
+//________________________________________
+
+// Must call IterationFailCount once to initialize it
+// before it starts counting (will return a negative number)
+// Each call resets the count to zero, so it gives the counts
+// since the last time it was called.
+Int_t StMagUtilities::IterationFailCount()
+{ 
+
+  Int_t temp = iterationFailCounter;
+  iterationFailCounter = 0;
+  return temp;
+
+}
 
 //________________________________________
