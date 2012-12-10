@@ -1,6 +1,9 @@
 ///
-// $Id: StFgtSeededClusterAlgo.h,v 1.6 2012/11/27 18:00:07 akio Exp $
+// $Id: StFgtSeededClusterAlgo.h,v 1.7 2012/12/10 23:18:01 avossen Exp $
 // $Log: StFgtSeededClusterAlgo.h,v $
+// Revision 1.7  2012/12/10 23:18:01  avossen
+// merged cluster finder
+//
 // Revision 1.6  2012/11/27 18:00:07  akio
 // - Filling NStrip/SeedType/MaxTimebin/EvenOddChargeAsy in StFgtHit
 // - Accepting kFgtSeedTypes4 & 5 for clustring
@@ -46,10 +49,15 @@
 
 #ifndef STAR_StFgtSeededClusterAlgo_HH
 #define STAR_StFgtSeededClusterAlgo_HH
+#include "TH1D.h"
+#include "TH2D.h"
 
-//#include "StRoot/StEvent/StFgtHit.h"
 #include "StFgtIClusterAlgo.h"
+//#include "StRoot/StEvent/StFgtHit.h"
+
 //#include "StRoot/StEvent/StFgtStripCollection.h"
+
+
 class StFgtHit;
 class StFgtStrip;
 class StFgtStripCollection;
@@ -65,12 +73,12 @@ Copy constructor and assignment operator omitted deliberately
 
 class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
 {
-
  public:
   StFgtSeededClusterAlgo();
   ///the main function, using a collection of strips tht fired to build clusters of neighbouring strips
   virtual Int_t doClustering(  StFgtStripCollection& strips, StFgtHitCollection& clusters );
   virtual Int_t Init();
+  virtual Int_t Finish();
   virtual ~StFgtSeededClusterAlgo();
   virtual void setJumpSingleStrip(Bool_t jump);
   void setThreshold2AddStrip(Float_t v); // this value * charge uncertaintly is threshold on strip charge to add to the cluster
@@ -81,18 +89,37 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
   Int_t addStrips2Cluster(StFgtHit* clus, StFgtStrip** itSeed, StFgtStrip** itVecBegin, StFgtStrip** itVecEnd,Bool_t direction, Int_t sidedSize, Char_t seedLayer);
   Bool_t isSameCluster(StFgtStrip** itSeed,StFgtStrip** nextStrip);
   void FillClusterInfo(StFgtHit* cluster);
+  void doStripFit(void* stripsT);
+  Float_t doClusterShapeFit(void* stripsT);
+
+
  private:
   Bool_t up;
   Bool_t down;
   Bool_t stepTwo;
   Float_t mThreshold2AddStrip;
+
+  TH1D* hGaussFitStatus;
+  TH1D* hGaussFitChi2;
+  TH1D* hTbFitStatus;
+  TH1D* hTbFitChi2;
+
+  TH2D* hTbMaxCorr;
+  TH1D* hTbMaxRatio;
+
+  TH2D* hTbSideCorr;
+  TH1D* hTbSideRatio;
+
   ClassDef(StFgtSeededClusterAlgo,1);
 
 };
-#endif
 
 inline void StFgtSeededClusterAlgo::setJumpSingleStrip(Bool_t jump)
 {
   stepTwo=jump;
 }
 inline void StFgtSeededClusterAlgo::setThreshold2AddStrip(Float_t v){ mThreshold2AddStrip=v;}
+
+
+#endif
+

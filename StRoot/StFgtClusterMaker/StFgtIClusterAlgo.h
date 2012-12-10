@@ -1,5 +1,8 @@
-// $Id: StFgtIClusterAlgo.h,v 1.7 2012/03/08 17:43:40 avossen Exp $
+// $Id: StFgtIClusterAlgo.h,v 1.8 2012/12/10 23:18:01 avossen Exp $
 // $Log: StFgtIClusterAlgo.h,v $
+// Revision 1.8  2012/12/10 23:18:01  avossen
+// merged cluster finder
+//
 // Revision 1.7  2012/03/08 17:43:40  avossen
 // added default cluster algo, made StFgtIClusterAlgo destructor =0
 //
@@ -42,6 +45,7 @@ class StFgtIClusterAlgo
   //are at the beginning or end of a cluster*/
   virtual Int_t doClustering( StFgtStripCollection&, StFgtHitCollection& )=0;
   virtual Int_t Init()=0;
+  virtual Int_t Finish()=0;
   virtual ~StFgtIClusterAlgo()=0;
 
  private:

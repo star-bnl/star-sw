@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.33 2012/07/31 21:45:25 jeromel Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.34 2012/12/10 23:18:00 avossen Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -30,8 +30,9 @@ StFgtClusterMaker::~StFgtClusterMaker()
 
 Int_t StFgtClusterMaker::Make()
 {
+  cout <<"cluster maker make " <<endl;
    Int_t ierr = kStOk;
-
+   cout <<"cluster maker " <<endl;
    StEvent* eventPtr = 0;
    eventPtr = (StEvent*)GetInputDS("StEvent");
 
@@ -83,6 +84,7 @@ Int_t StFgtClusterMaker::Make()
 	   StFgtGeom::getPhysicalCoordinate( centralStripGeoId, disc, quad, layer, ordinate, lowerSpan, upperSpan );
 	   if( layer == 'R' ){
 	     mR = (*it)->getPositionR();
+
 	     mErrR = (*it)->getErrorR();
 	     // mid point of the strip
 	     mPhi = 0.5*(upperSpan + lowerSpan);  
@@ -93,6 +95,7 @@ Int_t StFgtClusterMaker::Make()
 	     mR = 0.5*(upperSpan + lowerSpan);   // mid point of the strip
 	     mErrR = upperSpan - lowerSpan;      // length of the strip
 	   };
+	   cout <<"r pos is: " << mR << " phi : " << mPhi <<endl;
 	   mPhi+=StFgtGeom::phiQuadXaxis(quad);
 	   if(mPhi>TMath::Pi())
 	     mPhi-=(2*TMath::Pi());
@@ -114,7 +117,7 @@ Int_t StFgtClusterMaker::Make()
 
      }
    }
-   
+     cout <<"cluster maker end " <<endl;
    LOG_DEBUG << "End of fgt-clust-maker, print all strips & clusters: " << endm;
    LOG_DEBUG <<"  fgtCollnumDisc=" << fgtCollectionPtr->getNumDiscs()<<", tot strip=" <<fgtCollectionPtr->getNumStrips()<<"  totClust=" <<  fgtCollectionPtr->getNumHits() <<endm;
    for(int iDisc=0; iDisc <(int)fgtCollectionPtr->getNumDiscs(); iDisc++) {
@@ -160,6 +163,7 @@ Int_t StFgtClusterMaker::setClusterAlgo(StFgtIClusterAlgo* algo)
   return kStOk;
 }
 
+
 Int_t StFgtClusterMaker::Init()
 {
   //  cout <<"cluster init " <<endl;
@@ -182,6 +186,17 @@ Int_t StFgtClusterMaker::Init()
   return ierr;
 }
   
+
+Int_t StFgtClusterMaker::Finish()
+{
+  cout <<"cluster maker finish!" << endl;
+  Int_t ierr=kStOk;
+  if( mClusterAlgoPtr ){
+     ierr = mClusterAlgoPtr->Finish();
+  }
+  return ierr;
+}
+
   
 
     
@@ -189,6 +204,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.34  2012/12/10 23:18:00  avossen
+//   merged cluster finder
+//
 //   Revision 1.33  2012/07/31 21:45:25  jeromel
 //   Misc reshapes
 //

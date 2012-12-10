@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.22 2012/11/27 18:00:07 akio Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.23 2012/12/10 23:18:01 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.23  2012/12/10 23:18:01  avossen
+//  merged cluster finder
+//
 //  Revision 1.22  2012/11/27 18:00:07  akio
 //  - Filling NStrip/SeedType/MaxTimebin/EvenOddChargeAsy in StFgtHit
 //  - Accepting kFgtSeedTypes4 & 5 for clustring
@@ -81,9 +84,10 @@
 // \class StFgtSeededClusterAlgo
 // \author Anselm Vossen (avossen@indiana.edu)
 //
+#include "TStyle.h"
 #include "StFgtSeededClusterAlgo.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
-
+#include <TCanvas.h>
 #include "StRoot/StEvent/StFgtStripCollection.h"
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "StRoot/StEvent/StFgtHitCollection.h"
@@ -91,6 +95,14 @@
 #include "StRoot/StFgtUtil/StFgtConsts.h"
 //for floor
 #include <math.h>
+#include <TH1F.h>
+#include <TH2F.h>
+#include <TF1.h>
+//#include <TFitResult.h>
+#include <TGraphErrors.h>
+#include <TGraph.h>
+//#define KEEP_BIG_AND_NOISY_CLUSTERS
+
 
 StFgtSeededClusterAlgo::StFgtSeededClusterAlgo():up(true),down(false),stepTwo(true),mThreshold2AddStrip(3.0)
 {
@@ -99,8 +111,171 @@ StFgtSeededClusterAlgo::StFgtSeededClusterAlgo():up(true),down(false),stepTwo(tr
 
 Int_t StFgtSeededClusterAlgo::Init()
 {
+  hGaussFitStatus=new TH1D("fgt_gFitStatus","gFitStatus",10,-1,8);
+  hGaussFitChi2=new TH1D("fgt_gFitChi2overNdf","gFitChi2overNdf",100,0,10);
+  hTbFitStatus=new  TH1D("fgt_tbFitStatus","tbFitStatus",10,-1,8);
+  hTbFitChi2=new  TH1D("fgt_tbFitChi2","tbFitChi2",100,0,10);
+
+  hTbMaxCorr=new TH2D("fgt_tbmaxcorr","tbmaxcorr",200,0,1000,200,0,1000);
+  hTbMaxRatio=new TH1D("fgt_tbmaxratio","tbmaxratio",200,0,1);
+  hTbSideCorr=new TH2D("fgt_tbsidecorr","tbsidecorr",200,0,1000,200,0,1000);
+  hTbSideRatio=new TH1D("fgt_tbsideratio","tbsideratio",200,0,1);
+
   return kStOk;
 };
+
+//void StFgtSeededClusterAlgo::doStripFit(stripWeightMap_t &strips)
+void StFgtSeededClusterAlgo::doStripFit(void* stripsT)
+{
+  stripWeightMap_t& strips = *((stripWeightMap_t*) stripsT);
+  Double_t x[40];
+  Double_t y[40];
+  Double_t ex[40];
+  Double_t ey[40];
+  int numStripsInClu=strips.size();
+  //    TF1 *func = new TF1("func","[0]*(x>[1])*(x-[1])**2*exp(-(x-[1])*[2])");
+        TF1 *func = new TF1("func","[0]*(x>[1])*(x-[1])**2*exp(-(x-[1])*0.55)");
+  func->SetParName(0,"A");
+  func->SetParName(1,"t0");
+  //  func->SetParName(2,"invtau");
+
+  int stripIt=0;
+  int stripMaxPos=-1;
+  int stripMaxAdc=-1;
+  for(stripWeightMap_t::iterator it=strips.begin();it!=strips.end();it++)
+    {
+      //      cout <<"setting bin " << binCounter << " to " << it->first->getCharge()<<endl;
+      //      h1->SetBinContent(binCounter,it->first->getCharge());
+      //      StFgtGeom::getPhysicalCoordinate(it->first->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+
+      for(int tb=0;tb<7;tb++)
+	{
+	  y[tb]=it->first->getAdc(tb);
+	  if(y[tb]>stripMaxAdc)
+	    {
+	      stripMaxPos=stripIt;
+	      stripMaxAdc=y[tb];
+	    }
+	}
+      stripIt++;
+    }
+  stripIt=0;
+  for(stripWeightMap_t::iterator it=strips.begin();it!=strips.end();it++)
+    {
+      //      cout <<"setting bin " << binCounter << " to " << it->first->getCharge()<<endl;
+      //      h1->SetBinContent(binCounter,it->first->getCharge());
+      //      StFgtGeom::getPhysicalCoordinate(it->first->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+      cout <<"adc vals: ";
+      for(int tb=0;tb<7;tb++)
+	{
+	  x[tb]=tb;
+	  y[tb]=it->first->getAdc(tb);
+	  ey[tb]=it->first->getPedErr();
+	  ex[tb]=0;
+	  cout <<y[tb] <<", ";
+	}
+      cout <<endl;
+      TGraphErrors* tg1=new TGraphErrors(7,x,y,ex,ey);
+      Int_t tbFitStatus=tg1->Fit(func);
+      float amp,t0,invtau,chi2Ndf, chi2;
+      amp=func->GetParameter(0);
+      t0=func->GetParameter(1);
+      //      invtau=func->GetParameter(2);
+      chi2Ndf=func->GetChisquare()/(float)func->GetNDF();
+      chi2=func->GetChisquare();
+      if(chi2Ndf>0.1 && chi2Ndf<2&& tbFitStatus==0)
+	{
+	 if(stripIt==stripMaxPos)
+	   {
+	     hTbMaxCorr->Fill(it->first->getCharge(),amp);
+	     hTbMaxRatio->Fill(amp/it->first->getCharge());
+	   }
+	 else
+	   {
+	     hTbSideCorr->Fill(it->first->getCharge(),amp);
+	     hTbSideRatio->Fill(amp/it->first->getCharge());
+	   }
+	 it->first->setCharge(amp);
+	}
+      stripIt++;
+      hTbFitStatus->Fill(tbFitStatus);
+      hTbFitChi2->Fill(chi2Ndf);
+      delete tg1;
+    }
+  delete func;
+}
+
+
+Float_t StFgtSeededClusterAlgo::doClusterShapeFit(void* stripsT)
+{
+  stripWeightMap_t& strips = *((stripWeightMap_t*) stripsT);
+  Double_t x[40];
+  Double_t y[40];
+  Double_t ex[40];
+  Double_t ey[40];
+  Double_t ordinate, lowerSpan, upperSpan;
+  Short_t disc, quadrant;
+  Char_t layer;
+  Double_t firstOrd,lastOrd;
+  StFgtGeom::getPhysicalCoordinate(strips.begin()->first->getGeoId(),disc,quadrant,layer,firstOrd,lowerSpan,upperSpan);
+  StFgtGeom::getPhysicalCoordinate((strips.rbegin())->first->getGeoId(),disc,quadrant,layer,lastOrd,lowerSpan,upperSpan);
+  if(firstOrd>lastOrd)
+    {
+      Double_t tmpOrd=lastOrd;
+      lastOrd=firstOrd;
+      firstOrd=tmpOrd;
+    }
+  Double_t sigGuess=(lastOrd-firstOrd)/2;
+  Double_t ampGuess=-9999;//set later
+  Double_t meanGuess=0;//set later
+
+  //    TH1F* h1=new TH1F("h1","h1",numStripsInClu,firstOrd,lastOrd);
+
+  int binCounter=0;//1 for histo
+
+  for(stripWeightMap_t::iterator it=strips.begin();it!=strips.end();it++)
+    {
+      //      cout <<"setting bin " << binCounter << " to " << it->first->getCharge()<<endl;
+      //      h1->SetBinContent(binCounter,it->first->getCharge());
+      StFgtGeom::getPhysicalCoordinate(it->first->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+      x[binCounter]=ordinate;
+      y[binCounter]=it->first->getCharge();
+      if(y[binCounter]>ampGuess)
+	ampGuess=y[binCounter];
+      meanGuess+=ordinate;
+      ey[binCounter]=it->first->getChargeUncert()*1.6;//akio's factor
+      ex[binCounter]=0;
+      cout <<"counter: " << binCounter << " x: " << ordinate <<" charge: "<< y[binCounter] <<" error: " << ey[binCounter] <<endl;
+      binCounter++;
+    }
+  meanGuess/=strips.size();
+
+  TGraphErrors* tg=new TGraphErrors(binCounter,x,y,ex,ey);
+  //  h1->Fit("gaus");
+
+
+  TF1* f1=new TF1("f1","gaus",firstOrd-0.001,lastOrd+0.001);
+  f1->SetParameters(ampGuess,meanGuess,sigGuess);  
+
+  Int_t fitStatus=tg->Fit("f1");
+  hGaussFitChi2->Fill(f1->GetChisquare()/(float)f1->GetNDF());
+  hGaussFitStatus->Fill(fitStatus);
+  //  TF1* f1=(TF1*)h1->GetFunction("gaus");
+  //  TF1* f1=(TF1*)tg->GetFunction("gaus");
+  float fAmp=f1->GetParameter(1);
+  //  delete h1;
+  delete f1;
+  delete tg;
+  //  cout <<"del function" << endl;
+  //probably not a good idea...
+  //  delete f1;
+
+  /////end fitting
+    if(binCounter>=3&&fitStatus==0&& fAmp>=firstOrd && fAmp<=lastOrd)
+      return fAmp;
+    else 
+      return -1;
+}
 
 ///fill in cluster info like charge from the strips 
 void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
@@ -134,6 +309,17 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
 
   int a[kFgtNumTimeBins]; memset(a,0,sizeof(a)); // adc vs timebin (sum of all strips in cluster)
   int seedtype=0;
+
+
+  ///begin fitting
+  #ifdef DO_FGT_STRIP_FIT
+  doStripFit(&strips);
+  #endif
+
+  Float_t clusterShapeFitAmp=-1;
+#ifdef DO_FGT_CLUSTER_SHAPE_FIT
+  clusterShapeFitAmp=doClusterShapeFit(&strips);
+#endif
 
   for(stripWeightMap_t::iterator it=strips.begin();it!=strips.end();it++)
     {
@@ -233,6 +419,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
       if(strips.begin()->first->getClusterSeedType()==kFgtClusterPart)
 	(strips.begin())->first->setClusterSeedType(kFgtClusterEndDown);
       //    }
+
       if(chargeEven)
 	{
 	  cluster->setCharge(accuChargeEven);
@@ -274,6 +461,10 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
   Double_t pitch = ( layer == 'R' ? StFgtGeom::radStrip_pitch() : StFgtGeom::phiStrip_pitch() );
   //cout <<" pitch is : " <<pitch <<endl;
   //  if( meanSqOrdinate < 2*pitch )
+  //  cout <<"got " << meanOrdinate << " as weighted result " <<endl;
+  //replace with fit result
+  if(clusterShapeFitAmp>0)
+    meanOrdinate=clusterShapeFitAmp;
   if( meanSqOrdinate < 0.001 )
     meanSqOrdinate = pitch;
   if(layer=='R')
@@ -308,11 +499,36 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
   
 }/////end of fill clusterinfo
 
+
+
+Int_t StFgtSeededClusterAlgo::Finish()
+{
+  TCanvas c;
+  hGaussFitStatus->Write();
+  hGaussFitChi2->Write();
+  hTbFitStatus->Write();
+  hTbFitChi2->Write();
+  hTbMaxCorr->Write();
+  hTbMaxRatio->Write();
+  hTbSideCorr->Write();
+  hTbSideRatio->Write();
+
+  return kStOk;
+}
+
+
 ///function to check if the strip belongs to the cluster. If it returns false we stop adding strips to the cluster
 Bool_t StFgtSeededClusterAlgo::isSameCluster(StSPtrVecFgtStripIterator itSeed,StSPtrVecFgtStripIterator nextStrip)
 {
   //  Float_t chargeUncert = (*itSeed)->getChargeUncert() > (*nextStrip)->getChargeUncert() ? (*itSeed)->getChargeUncert() : (*nextStrip)->getChargeUncert();
   //  if((*itSeed)->getCharge()  > (*nextStrip)->getCharge() - 2*chargeUncert && (*nextStrip)->getCharge() > 2*(*nextStrip)->getChargeUncert())
+
+
+  //prevent problems in the pedstals so that low noise makes the cluster go on forever and thus makes it look like a cluster that is too big:
+  //if two relatively low strips  follow each other, end cluster. We could check in addition if the ratio between the two is close to one
+  if((*nextStrip)->getCharge()< 2*(*nextStrip)->getChargeUncert() && ((*itSeed)->getCharge()<2*(*itSeed)->getChargeUncert()))
+    return false;
+
   if((*nextStrip)->getCharge() > mThreshold2AddStrip*(*nextStrip)->getChargeUncert() && (*nextStrip)->getChargeUncert() >0 && (*nextStrip)->getClusterSeedType()!=kFgtDeadStrip)
     return true;
   else
@@ -351,6 +567,7 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
      //the next printout might lead to a crash...
      //if(debug) cout <<"\n    Dead strip ("<<deadStripsSkipped<<"). Skip and looking at next gid="<< (*nextStrip)->getGeoId()<<endl;
     }
+
 
    bool isHit = false;
    bool adjacentStrip = false;
@@ -408,6 +625,7 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
      }
    }
    return true;
+
 }
 
 /**
@@ -490,7 +708,9 @@ run over all strips, find seeds, use those to start clusters
 	  if(stripsW_Charge>searchRange && stripsW_Charge > kFgtMaxClusterSize)
 	    {
 	      (*it)->setClusterSeedType(kFgtClusterSeedInSeaOfNoise);
+#ifndef KEEP_BIG_AND_NOISY_CLUSTERS
 	      continue;
+#endif
 	    }
 
 	  /////
@@ -510,6 +730,9 @@ run over all strips, find seeds, use those to start clusters
 	    {
 	      //cout <<"cluster too big!, begin at: " << newCluster->getStripWeightMap().begin()->first->getGeoId()<<endl;
 	      //reset strips
+
+#ifndef KEEP_BIG_AND_NOISY_CLUSTERS
+	      //akio's change: keep seed flags
 	      for(stripWeightMap_t::iterator it=newCluster->getStripWeightMap().begin();it!=newCluster->getStripWeightMap().end();it++)
 		{
 		  if(it->first->getClusterSeedType()<kFgtSeedType1 || it->first->getClusterSeedType()>kFgtSeedTypeMax)
@@ -517,10 +740,14 @@ run over all strips, find seeds, use those to start clusters
 		}
 	      delete newCluster;
 	      continue;
+#endif
 	    }
 	  //add strips to cluster going up
 	  if(addStrips2Cluster(newCluster, it, strips.getStripVec().begin(),strips.getStripVec().end(), up,0,layer)==kFgtClusterTooBig)
 	    {
+
+#ifndef KEEP_BIG_AND_NOISY_CLUSTERS
+
 	      cout <<"cluster too big!, begin at: " << newCluster->getStripWeightMap().begin()->first->getGeoId()<<endl;
 	      for(stripWeightMap_t::iterator it=newCluster->getStripWeightMap().begin();it!=newCluster->getStripWeightMap().end();it++)
 		{
@@ -529,7 +756,91 @@ run over all strips, find seeds, use those to start clusters
 		}
 	      delete newCluster;
 	      continue;
+#endif
 	    }
+
+	  /////make sure that cluster is at least 3 strips wide for fit
+	  stripWeightMap_t &stripWM = newCluster->getStripWeightMap();
+	  //	  if(stripWM.size()==1)
+	  if(false)
+	    {
+	      cout <<"only one strip in cluster ..." <<endl;
+	      StSPtrVecFgtStripIterator stripInClu=0;
+	      for(StSPtrVecFgtStripIterator it=firstStrip;it<=lastStrip&&it!=strips.getStripVec().end();it++)
+		{
+		  if((*it)->getGeoId()==stripWM.begin()->first->getGeoId())
+		    stripInClu=it;
+		  break;
+		}
+	      if(stripInClu!=0)
+		{
+		  StSPtrVecFgtStripIterator stripLow=stripInClu;
+		  stripLow--;
+		  if(stripLow>=strips.getStripVec().begin())
+		    {
+		      cout <<"adding low " <<endl;
+		      stripWM[*stripLow]=1;
+		    }
+		  StSPtrVecFgtStripIterator stripHigh=stripInClu;
+		  stripHigh++;
+		  if(stripHigh<strips.getStripVec().end())
+		    {
+		      cout <<"adding high " <<endl;
+		      stripWM[*stripHigh]=1;
+		    }
+		}
+	    }
+	  //	  if(stripWM.size()==2)
+	  if(false)
+	    {
+	      cout <<"only two strips in cluster " <<endl;
+	      StSPtrVecFgtStripIterator stripInClu=0;
+	      for(StSPtrVecFgtStripIterator it=firstStrip;it<=lastStrip&& it<=lastStrip&&it!=strips.getStripVec().end();it++)
+		{
+		  cout <<"looping" <<endl;
+		  //		  cout <<"checking "<<(*it)->getGeoId() <<" with: "<<stripWM.begin()->first->getGeoId()<<" last: "<< (*lastStrip)->getGeoId()<<endl;
+		  if((*it)->getGeoId()==stripWM.begin()->first->getGeoId())
+		    {
+		    stripInClu=it;
+		    cout <<"found " <<endl;
+		    break;
+		    }
+
+		}
+	      cout <<"end of loop " << endl;
+
+	      if(stripInClu!=0)
+		{
+		  cout <<"found one geo id: " << (*stripInClu)->getGeoId()<<endl;
+		  StSPtrVecFgtStripIterator stripHigh=stripInClu;
+		  StSPtrVecFgtStripIterator stripNew=stripInClu;
+		  stripHigh++;
+		  //must be since we have two strips
+		  if(stripHigh< strips.getStripVec().end())
+		    {
+	       if((*stripHigh)->getCharge() >(*stripInClu)->getCharge())
+		 {
+		   stripNew=stripHigh;
+		   stripNew++;
+		 }
+	       else
+		 {
+		   stripNew=stripInClu;
+		   stripNew--;
+		 }
+
+	       if(stripNew>=strips.getStripVec().begin()&& stripNew<strips.getStripVec().end())
+		 {
+		   cout <<"adding strip with geo id: " << (*stripNew)->getGeoId()<<endl;
+		   stripWM[*stripNew]=1;
+		 }
+		}
+		}
+	    }
+	  ////
+
+
+
 	  //
 	  //compute errors etc
 	  FillClusterInfo(newCluster);
