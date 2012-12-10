@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.13 2012/12/10 21:40:06 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.14 2012/12/10 21:52:46 pibero Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.14  2012/12/10 21:52:46  pibero
+// More simplifications...
+//
 // Revision 1.13  2012/12/10 21:40:06  pibero
 // Simplify code
 //
@@ -193,14 +196,12 @@ inline float StPythiaEvent::dF2(PDF scenario) const { return mDF2[scenario]; }
 
 inline float StPythiaEvent::f1(PDF scenario) const 
 {
-    if(scenario == LO) return mF1[LO];
-    return mF1[NLO];
+  return (scenario == LO) ? mF1[LO] : mF1[NLO];
 }
 
 inline float StPythiaEvent::f2(PDF scenario) const 
 {
-    if(scenario == LO) return mF2[LO];
-    return mF2[NLO];
+  return (scenario == LO) ? mF2[LO] : mF2[NLO];
 }
 
 inline float StPythiaEvent::ALL(PDF scenario) const

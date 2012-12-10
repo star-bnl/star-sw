@@ -4,6 +4,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.cxx,v $
+// Revision 1.6  2012/12/10 21:52:46  pibero
+// More simplifications...
+//
 // Revision 1.5  2012/01/18 18:11:36  pibero
 // Added PYTHIA variables: MSTU(72), MSTU(73), and MSTP(111)
 //
@@ -35,7 +38,10 @@
 // use Pibero's StPythiaEvent class to supply mcAsymMaker results to user
 //
 
+#include <algorithm>
 #include "StPythiaEvent.h"
+
+using std::copy;
 
 ClassImp(StPythiaEvent);
 
@@ -71,17 +77,13 @@ StPythiaEvent::StPythiaEvent(const StPythiaEvent& t)
     mMstu73     = t.mMstu73;
     mMstp111    = t.mMstp111;
     mPartonALL  = t.mPartonALL;
-    
-    for(int i=0; i<NPDF; i++) {
-        mDF1[i] = t.mDF1[i];
-        mDF2[i] = t.mDF2[i];
-    }
-    
-    for(int i=0; i<2; i++) {
-        mF1[i]  = t.mF1[i];
-        mF2[i]  = t.mF2[i];
-    }
 
+    copy(t.mDF1,t.mDF1+NPDF,mDF1);
+    copy(t.mDF2,t.mDF2+NPDF,mDF2);
+    
+    copy(t.mF1,t.mF1+2,mF1);
+    copy(t.mF2,t.mF2+2,mF2);
+    
     mParticles = new TClonesArray("TParticle");
 
     for (int i = 0; i < t.mParticles->GetEntriesFast(); ++i) {
@@ -111,16 +113,12 @@ StPythiaEvent& StPythiaEvent::operator=(const StPythiaEvent& rhs)
     mMstp111    = rhs.mMstp111;
     mPartonALL  = rhs.mPartonALL;
     
-    for(int i=0; i<NPDF; i++) {
-        mDF1[i] = rhs.mDF1[i];
-        mDF2[i] = rhs.mDF2[i];
-    }
+    copy(rhs.mDF1,rhs.mDF1+NPDF,mDF1);
+    copy(rhs.mDF2,rhs.mDF2+NPDF,mDF2);
     
-    for(int i=0; i<2; i++) {
-        mF1[i]  = rhs.mF1[i];
-        mF2[i]  = rhs.mF2[i];
-    }
-
+    copy(rhs.mF1,rhs.mF1+2,mF1);
+    copy(rhs.mF2,rhs.mF2+2,mF2);
+    
     mParticles->Clear();
     
     for (int i = 0; i < rhs.mParticles->GetEntriesFast(); ++i) {
