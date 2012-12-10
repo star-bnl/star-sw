@@ -141,7 +141,9 @@ Int_t StarPrimaryMaker::Finish()
 
       // Add the instance of the particle data so we have a record of
       // the particles used as input to the generator
-      mTree->GetUserInfo()->Add( &StarParticleData::instance() );
+      TObjArray particles = StarParticleData::instance().GetParticles();
+      mTree->GetUserInfo()->Add( &particles );
+      //      mTree->GetUserInfo()->Add( &(StarParticleData::instance().GetParticles()) );
 
       ///\todo add random number state to user info
 
