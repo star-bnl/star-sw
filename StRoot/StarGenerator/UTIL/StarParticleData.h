@@ -41,6 +41,9 @@ class StarParticleData : public TObjectSet
 
   TParticlePDG *operator()( const Char_t *name ){ return sInstance.GetParticle(name); }
   TParticlePDG *operator()( const Int_t  id    ){ return sInstance.GetParticle(id)  ; }
+
+  /// Returns a reference to the list of particles.
+  const TObjArray &GetParticles() const { return mParticleList; }
   
  private:
  protected:
