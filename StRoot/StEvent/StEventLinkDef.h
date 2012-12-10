@@ -33,6 +33,7 @@
 #pragma link C++ class StTriggerData2008+;
 #pragma link C++ class StTriggerData2009-;
 #pragma link C++ class StTriggerData2012-;
+#pragma link C++ class StTriggerData2013-;
 
 //IncFile=StDaqLib/TRG/trgStructures.h
 #pragma link C++ class TrgDataType+;
@@ -131,6 +132,21 @@
 #pragma link C++ class BELayerBlock2012+;
 #pragma link C++ class FMSBlock2012+;
 #pragma link C++ class TrgOfflen2012+;
+
+//IncFile=StDaqLib/TRG/trgStructures2012.h
+#pragma link C++ class TriggerDataBlk2013+;
+#pragma link C++ class EvtDescData2013+;
+#pragma link C++ class TrgSumData2013+;
+#pragma link C++ class L1_DSM_Data2013+;
+#pragma link C++ class DataBlock2013+;
+#pragma link C++ class BBCBlock2013+;
+#pragma link C++ class MIXBlock2013+;
+#pragma link C++ class QTBlock2013+;
+#pragma link C++ class BEastBlock2013+;
+#pragma link C++ class BWestBlock2013+;
+#pragma link C++ class BELayerBlock2013+;
+#pragma link C++ class FMSBlock2013+;
+#pragma link C++ class TrgOfflen2013+;
 
 #pragma link C++ function operator<<(ostream&, const StTpcPixel&);        
 #pragma link C++ function operator<<(ostream&, const StMeasuredPoint&);        
