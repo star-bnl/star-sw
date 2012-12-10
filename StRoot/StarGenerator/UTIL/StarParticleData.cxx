@@ -50,8 +50,6 @@ StarParticleData::StarParticleData( const Char_t *name, TDataSet *parent ) :
   while(  (particle=(TParticlePDG *)Next())  )
     {
 
-      particle->Print();
-
       TString name = particle->GetName();
       Int_t   code = particle->PdgCode();
 

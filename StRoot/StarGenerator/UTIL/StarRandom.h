@@ -42,8 +42,18 @@ class StarRandom : public TObject
   /// Capture gRandom random number generator
   static void capture();
 
-  /// Set the seed for this simulation 
+  /// Set the seed for this simulation.  Note:  Most RNG engines in GSL
+  /// utilize a 32-bit seed.  Those which use a smaller seed will take
+  /// the provided seed modulo 32 bits.  There may not be a warning 
+  /// issued when this occurs.
+  /// @param seed is an unsigned integer (32-bit word) providing a seed for tne RNG.
   static void seed( UInt_t s );
+
+  /// Set a pair of seeds for this simulation.  The two seeds will be combined
+  /// into a single 32-bit word, and passed to the RNG engine.
+  /// @param seed1 is the first RNG seed.
+  /// @param seed2 is the second RNG seed.
+  static void seed( UShort_t seed1, UShort_t seed2 );
 
   /// Return a random number uniformly distributed between 0 and 1
   Double_t operator()() const;

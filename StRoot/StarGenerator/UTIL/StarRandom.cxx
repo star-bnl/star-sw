@@ -115,9 +115,15 @@ StarRandom &StarRandom::Instance()
 }
 // ----------------------------------------------------------------------------
 void StarRandom::set( ROOT::Math::GSLRandomEngine *engine ){ mEngine = engine; }
+// ----------------------------------------------------------------------------
 void StarRandom::seed( UInt_t s ){ 
   if (!sInstance) Instance(); 
   mEngine->SetSeed(s); 
   sInstance->mSeed = s;
 }
 // ----------------------------------------------------------------------------
+void StarRandom::seed( UShort_t seed1, UShort_t seed2 ) {
+  Int_t myseed1 = seed1;
+  Int_t myseed2 = seed2;
+  seed( (myseed1<<16)|(myseed2) );
+};
