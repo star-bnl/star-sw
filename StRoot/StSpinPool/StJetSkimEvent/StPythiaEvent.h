@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.12 2012/12/06 20:45:41 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.13 2012/12/10 21:40:06 pibero Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.13  2012/12/10 21:40:06  pibero
+// Simplify code
+//
 // Revision 1.12  2012/12/06 20:45:41  pibero
 // const correctess
 //
@@ -74,8 +77,11 @@
 #define ST_PYTHIA_EVENT
 
 #include <cstdio>
+#include <algorithm>
 #include "TParticle.h"
 #include "TClonesArray.h"
+
+using std::fill;
 
 class StPythiaEvent : public TObject {
 public:
@@ -187,56 +193,19 @@ inline float StPythiaEvent::dF2(PDF scenario) const { return mDF2[scenario]; }
 
 inline float StPythiaEvent::f1(PDF scenario) const 
 {
-    if(scenario == LO) return mF1[0];
-    return mF1[1];
+    if(scenario == LO) return mF1[LO];
+    return mF1[NLO];
 }
 
 inline float StPythiaEvent::f2(PDF scenario) const 
 {
-    if(scenario == LO) return mF2[0];
-    return mF2[1];
+    if(scenario == LO) return mF2[LO];
+    return mF2[NLO];
 }
 
 inline float StPythiaEvent::ALL(PDF scenario) const
 {
-  switch(scenario) 
-    {
-    case(LO):   return (mDF1[0]*mDF2[0]*mPartonALL) / (mF1[0]*mF2[0]);
-    case(NLO):  return (mDF1[1]*mDF2[1]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(ZERO): return (mDF1[2]*mDF2[2]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(MAX):  return (mDF1[3]*mDF2[3]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(MIN):  return (mDF1[4]*mDF2[4]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M015):  return (mDF1[5]*mDF2[5]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M030):  return (mDF1[6]*mDF2[6]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M045):  return (mDF1[7]*mDF2[7]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M060):  return (mDF1[8]*mDF2[8]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M075):  return (mDF1[9]*mDF2[9]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M090):  return (mDF1[10]*mDF2[10]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(M105):  return (mDF1[11]*mDF2[11]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(P030):  return (mDF1[12]*mDF2[12]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(P045):  return (mDF1[13]*mDF2[13]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(P060):  return (mDF1[14]*mDF2[14]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(P070):  return (mDF1[15]*mDF2[15]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(GS_NLOA):  return (mDF1[16]*mDF2[16]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(GS_NLOB):  return (mDF1[17]*mDF2[17]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(GS_NLOC):  return (mDF1[18]*mDF2[18]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(DSSV):  return (mDF1[19]*mDF2[19]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(LSS1):  return (mDF1[20]*mDF2[20]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(LSS2):  return (mDF1[21]*mDF2[21]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(LSS3):  return (mDF1[22]*mDF2[22]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(AAC1):  return (mDF1[23]*mDF2[23]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(AAC2):  return (mDF1[24]*mDF2[24]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(AAC3):  return (mDF1[25]*mDF2[25]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(BB1):  return (mDF1[26]*mDF2[26]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(BB2):  return (mDF1[27]*mDF2[27]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(DNS1):  return (mDF1[28]*mDF2[28]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(DNS2):  return (mDF1[29]*mDF2[29]*mPartonALL) / (mF1[1]*mF2[1]);
-    case(DSSV2009a): return (mDF1[DSSV2009a]*mDF2[DSSV2009a]*mPartonALL)/(mF1[1]*mF2[1]);
-    case(LSS2010_delGpos): return (mDF1[LSS2010_delGpos]*mDF2[LSS2010_delGpos]*mPartonALL)/(mF1[1]*mF2[1]);
-    case(LSS2010_chsign_delG): return (mDF1[LSS2010_chsign_delG]*mDF2[LSS2010_chsign_delG]*mPartonALL)/(mF1[1]*mF2[1]);
-    case(BB2010): return (mDF1[BB2010]*mDF2[BB2010]*mPartonALL)/(mF1[1]*mF2[1]);
-    default:    return -999;
-    }
+  return (dF1(scenario)*dF2(scenario)*partonALL())/(f1(scenario)*f2(scenario));
 }
 
 inline const TClonesArray* StPythiaEvent::particles() const { return mParticles; }
@@ -266,10 +235,8 @@ inline void StPythiaEvent::Clear(Option_t* option)
     mMstu73 = 0;
     mMstp111 = 0;
     mPartonALL = 0;
-    for (int ii=0; ii<NPDF; ii++) {
-      mDF1[ii] = 0;
-      mDF2[ii] = 0;
-    }
+    fill(mDF1,mDF1+NPDF,0);
+    fill(mDF2,mDF2+NPDF,0);
     mF1[0] = 0; mF1[1] = 0;
     mF2[0] = 0; mF2[1] = 0;
 
