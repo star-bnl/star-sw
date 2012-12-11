@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.596 2012/11/25 22:24:08 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.597 2012/12/11 15:05:20 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1270,6 +1270,10 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	SetOption("MagF","Default,TGiant3");
       }
 #endif
+      if (GetOption("xgeometry")) {
+	SetOption("-geometry","Default,-xgeometry");
+	SetOption("-geomNoField","Default,-xgeometry");
+      }
     } else {                                  // root
       if (GetOption("fzin")) {
 	gMessMgr->Error() << "Option fzin cannot be used in root.exe. Use root4star" << endm;
