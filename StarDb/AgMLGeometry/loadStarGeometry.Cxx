@@ -29,7 +29,8 @@ void loadStarGeometry( const Char_t *mytag="y2009a" )
   //
   if ( AgModule::Find("HALL") )
     {
-      std::cout << Form(">>> AgML geometry detected.  Loading from %s <<<",filename.Data()) << std::endl;
+      std::cout << Form(">>> AgML geometry detected.  Loading from %s <<<",filename.Data()) << std::endl;      
+      gGeoManager = 0;// Prevent ROOT deleting existing geometry
       TGeoManager::Import( filename );
       assert(gGeoManager);
       return;
