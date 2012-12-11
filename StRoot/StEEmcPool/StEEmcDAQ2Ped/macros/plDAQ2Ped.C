@@ -9,7 +9,7 @@ plDAQ2Ped(char *core0 = "" ) {
   
   char *path=""; 
   TString fullInpName=path;  fullInpName+=core0;
-  fullInpName+=".ushist.root";  
+  fullInpName+=".hist.root";  
   fd=new TFile(fullInpName);
   if(! fd->IsOpen()) {
     printf("ERROR: input histo file not found, quit\n",fullInpName.Data());
