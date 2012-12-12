@@ -6,7 +6,7 @@
 #include <cassert>
 
 #include "L2DbConfig.h"
-
+using namespace std;
 // ---------------------------------------------------------------------------
 L2DbConfig::L2DbConfig( const Char_t *fname )
 {
