@@ -5,6 +5,9 @@ Mikhail Kopytine </a> on Aug 20, 2002.
 Here are
 <A HREF="http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/St_TLA_Maker/README"> Victor Perevoztchikov's instructions on how to write an St***Maker </A>
  */
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include "StBbcSimulationMaker.h"
 #include "g2t/St_g2t_bbc_Module.h"
 #include "TDataSetIter.h"

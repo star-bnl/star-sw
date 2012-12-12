@@ -14,6 +14,9 @@
  **************************************************************************/
 #ifndef _StEEMCReader_
 #define _StEEMCReader_
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 
 
 class EEMC_Reader;
