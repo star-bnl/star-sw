@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMem.cxx,v 1.4 2001/03/13 18:41:24 perev Exp $
+ * $Id: StMem.cxx,v 1.5 2012/12/12 23:50:40 fisyak Exp $
  *
  ***************************************************************************
  *
@@ -10,15 +10,21 @@
  **************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include <unistd.h>
 #include "StMem.h"
 double  StMem::fUsed=0;
 double StMem::Used()
 {
+#ifndef __APPLE__
   struct mallinfo info;
   info = mallinfo();
   return double(info.uordblks + info.usmblks)/1000000;
+#else
+  return 0;
+#endif
 }
 
 double StMem::ESize()
