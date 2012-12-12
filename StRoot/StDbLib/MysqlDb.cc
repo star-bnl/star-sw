@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.61 2012/05/04 17:19:14 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.62 2012/12/12 21:58:37 fisyak Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.62  2012/12/12 21:58:37  fisyak
+ * Add check for HAVE_CLOCK_GETTIME flag and for APPLE
+ *
  * Revision 1.61  2012/05/04 17:19:14  dmitry
  * Part One integration for Hyper Cache. HyperCache added to workflow, but config is set to DISABLE
  *
@@ -235,6 +238,7 @@
  * each header and src file
  *
  **************************************************************************/
+#include <assert.h>
 #include "MysqlDb.h"
 #include "StDbManager.hh" // for now & only for getting the message service
 #include "stdb_streams.h"
@@ -296,8 +300,12 @@ namespace {
 
 time_t get_time_nanosec() {
     timespec ts;
+#ifdef HAVE_CLOCK_GETTIME
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (ts.tv_sec*1000 + ts.tv_nsec/1000000);
+#else
+    return 0;
+#endif
 }
 
 }
@@ -368,8 +376,9 @@ bool MysqlDb::reConnect(){
 
     // always returns 0, no way to check for SSL validity     
 	// "AES-128-SHA" = less CPU-intensive than AES-256                                                                                               
+#ifndef __APPLE__
     mysql_ssl_set(&mData, NULL, NULL, NULL, NULL, "AES128-SHA");
-
+#endif
 	unsigned long client_flag = CLIENT_COMPRESS;
 
     if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,client_flag)) {
