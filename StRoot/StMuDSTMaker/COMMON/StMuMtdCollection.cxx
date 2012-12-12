@@ -1,3 +1,6 @@
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include "StMuMtdCollection.h"
 #include "StMuMtdRawHit.h"
 #include "StMuMtdHit.h"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHltMaker.cxx,v 1.1 2011/02/01 18:24:02 xueliang Exp $
+ * $Id: StHltMaker.cxx,v 1.2 2012/12/12 22:10:35 fisyak Exp $
  *
  * Author: L. Xue, H. Qiu, A. Tang, Jan 2011
  ***************************************************************************
@@ -11,11 +11,17 @@
  ***************************************************************************
  *
  * $Log: StHltMaker.cxx,v $
+ * Revision 1.2  2012/12/12 22:10:35  fisyak
+ * add sys/types.h include for APPLE
+ *
  * Revision 1.1  2011/02/01 18:24:02  xueliang
  * *** empty log message ***
  *
  **************************************************************************/
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 
 
 #include <iostream>

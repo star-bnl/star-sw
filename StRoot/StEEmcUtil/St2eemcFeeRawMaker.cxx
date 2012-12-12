@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.15 2009/02/04 20:33:28 ogrebeny Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.16 2012/12/12 22:02:49 fisyak Exp $
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include <Stiostream.h>
 #include <math.h>
 
@@ -200,6 +203,9 @@ Int_t St2eemcFeeRawMaker::Make(){
 
 
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.16  2012/12/12 22:02:49  fisyak
+// add sys/types.h include for APPLE
+//
 // Revision 1.15  2009/02/04 20:33:28  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //

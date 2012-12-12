@@ -1,6 +1,9 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StBarrelMonitorMaker.cxx,v 1.4 2009/08/25 16:17:48 fine Exp $
+// $Id: StBarrelMonitorMaker.cxx,v 1.5 2012/12/12 22:05:09 fisyak Exp $
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 
 #include <TFile.h>
 #include <TH1.h>
@@ -381,6 +384,9 @@ StBarrelMonitorMaker::populateBprsEveA(){
 
 //---------------------------------------------------
 // $Log: StBarrelMonitorMaker.cxx,v $
+// Revision 1.5  2012/12/12 22:05:09  fisyak
+// add sys/types.h include for APPLE
+//
 // Revision 1.4  2009/08/25 16:17:48  fine
 // fix the compilation issues under SL5_64_bits  gcc 4.3.2
 //

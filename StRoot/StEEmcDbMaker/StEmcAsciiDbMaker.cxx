@@ -1,8 +1,11 @@
-//  $Id: StEmcAsciiDbMaker.cxx,v 1.5 2009/02/26 20:30:54 balewski Exp $ 
+//  $Id: StEmcAsciiDbMaker.cxx,v 1.6 2012/12/12 22:00:59 fisyak Exp $ 
 // Emulates  L2 in offline for algorithm testing
 // Interface to online/L2jetAlgo/
 // Jan Balewski, Fall 2005
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include <stdio.h>
 #include <TH2.h>
 #include <TFile.h>
@@ -302,6 +305,9 @@ void StEmcAsciiDbMaker::initAuxHisto() {
 
 /* *******************************
  $Log: StEmcAsciiDbMaker.cxx,v $
+ Revision 1.6  2012/12/12 22:00:59  fisyak
+ add sys/types.h include for APPLE
+
  Revision 1.5  2009/02/26 20:30:54  balewski
  now mask from DB s NOT written to asscii files
 

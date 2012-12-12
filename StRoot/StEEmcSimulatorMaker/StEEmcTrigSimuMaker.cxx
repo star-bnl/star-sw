@@ -1,7 +1,10 @@
 //*-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StEEmcTrigSimuMaker.cxx,v 1.7 2007/04/28 17:56:03 perev Exp $
+// $Id: StEEmcTrigSimuMaker.cxx,v 1.8 2012/12/12 22:02:28 fisyak Exp $
 // $Log: StEEmcTrigSimuMaker.cxx,v $
+// Revision 1.8  2012/12/12 22:02:28  fisyak
+// add sys/types.h include for APPLE
+//
 // Revision 1.7  2007/04/28 17:56:03  perev
 // Redundant StChain.h removed
 //
@@ -27,6 +30,9 @@
 // star
 //
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include <StMessMgr.h>
 
 #include "StEEmcTrigSimuMaker.h"
