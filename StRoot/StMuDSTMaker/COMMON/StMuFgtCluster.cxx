@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFgtCluster.cxx,v 1.1 2012/11/15 22:27:24 sangalin Exp $
+ * $Id: StMuFgtCluster.cxx,v 1.2 2012/12/12 00:36:03 sangalin Exp $
  * Author: S. Gliske, Jan. 2012
  *
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMuFgtCluster.cxx,v $
- * Revision 1.1  2012/11/15 22:27:24  sangalin
- * Copied over from StFgtDevel.
+ * Revision 1.2  2012/12/12 00:36:03  sangalin
+ * Merged in updated StMuFgtCluster class format from Anselm Vossen.
  *
  * Revision 1.3  2012/07/20 16:11:24  sgliske
  * Added StFgtStripAssociation, and removed all dynamically
@@ -31,16 +31,19 @@
 #include "StRoot/StEvent/StFgtHit.h"
 
 // constructor
-StMuFgtCluster::StMuFgtCluster( Int_t centralStripGeoId, Int_t firstStripAssociationIdx, Int_t numStrips, Float_t charge, Float_t chargeUncert, Float_t r, Float_t errR, Float_t phi, Float_t errPhi ) :
+StMuFgtCluster::StMuFgtCluster( Int_t centralStripGeoId, Int_t firstStripAssociationIdx, Int_t maxTimeBin, Int_t maxAdc,Int_t numStrips,  Float_t charge, Float_t chargeUncert, Float_t r, Float_t errR, Float_t phi, Float_t errPhi, Float_t evenOddChargeAsy ) :
    mCentralStripGeoId( centralStripGeoId ),
    mFirstStripAssociationIdx( firstStripAssociationIdx ),
+   mMaxTimeBin( maxTimeBin ),
+   mMaxAdc( maxAdc ),
    mNumStrips( numStrips ),
    mCharge( charge ),
    mChargeUncert( chargeUncert ),
    mR( r ),
    mErrR( errR ),
    mPhi( phi ),
-   mErrPhi( errPhi ){ /* */ };
+   mErrPhi( errPhi ),
+   mEvenOddChargeAsy(evenOddChargeAsy){ /* */ };
 
 
 // converting from StFgtHit
@@ -53,6 +56,9 @@ StMuFgtCluster::StMuFgtCluster( const StFgtHit& fgtHit ) :
    mPhi( fgtHit.getPositionPhi() ),
    mErrPhi( fgtHit.getErrorPhi() ){
    mNumStrips = fgtHit.getStripWeightMap().size();
+   mMaxTimeBin = fgtHit.getMaxTimeBin();
+   mMaxAdc= fgtHit.getMaxAdc();
+   mEvenOddChargeAsy = fgtHit.getEvenOddChargeAsy();
 };
 
 ClassImp( StMuFgtCluster );
