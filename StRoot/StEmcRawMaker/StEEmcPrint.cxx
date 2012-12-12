@@ -1,6 +1,9 @@
 //*-- Author : Wei-Ming Zhang
-// $Id: StEEmcPrint.cxx,v 1.3 2007/02/06 16:06:40 balewski Exp $
+// $Id: StEEmcPrint.cxx,v 1.4 2012/12/12 22:05:30 fisyak Exp $
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include <iostream>
 #include <StMessMgr.h>
 

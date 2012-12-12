@@ -1,3 +1,6 @@
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include <stdio.h>
 #include "StBemcStatusMaker.h"
 

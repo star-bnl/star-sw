@@ -3,10 +3,13 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of ppLMV
- * $Id: StppLMVVertexFinder.h,v 1.11 2010/01/26 21:01:49 fisyak Exp $
+ * $Id: StppLMVVertexFinder.h,v 1.12 2012/12/12 22:09:58 fisyak Exp $
  *
  */
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include <vector>
 #include <StThreeVectorD.hh>
 #include <StPhysicalHelixD.hh>
@@ -72,6 +75,9 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
 /***************************************************************************
  *
  * $Log: StppLMVVertexFinder.h,v $
+ * Revision 1.12  2012/12/12 22:09:58  fisyak
+ * add sys/types.h include for APPLE
+ *
  * Revision 1.11  2010/01/26 21:01:49  fisyak
  * Clean up, switch from bit mask to attributes
  *

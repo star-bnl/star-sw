@@ -3,9 +3,12 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.15 2010/09/10 21:08:35 rjreed Exp $
+ * $Id: StPPVertexFinder.h,v 1.16 2012/12/12 22:09:58 fisyak Exp $
  *
  */
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
 
 #include "StPhysicalHelixD.hh" // dongx
@@ -120,6 +123,9 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.16  2012/12/12 22:09:58  fisyak
+ * add sys/types.h include for APPLE
+ *
  * Revision 1.15  2010/09/10 21:08:35  rjreed
  * Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
  * Added functions, and variables necessary to use the TOF in PPV for vertex finding.  Includes matching tracks to the TOF and changing the track weight based on its matched status with the TOF.

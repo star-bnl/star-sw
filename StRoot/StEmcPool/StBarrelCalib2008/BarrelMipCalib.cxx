@@ -1,3 +1,6 @@
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include <TH1F.h>
 #include <TH2F.h>
 #include <TObjArray.h>
