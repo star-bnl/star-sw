@@ -1,8 +1,11 @@
 #ifndef EEdsm1_h
 #define EEdsm1_h
 /**************************************************************
- * $Id: EEdsm1.h,v 1.1 2009/10/12 18:04:26 pibero Exp $
+ * $Id: EEdsm1.h,v 1.2 2012/12/12 22:54:03 fisyak Exp $
  **************************************************************/
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include <stdlib.h>
 
 class EEdsm1  {
@@ -54,6 +57,9 @@ class EEdsm1  {
 
 /* container for STAR trigger data
  * $Log: EEdsm1.h,v $
+ * Revision 1.2  2012/12/12 22:54:03  fisyak
+ * Add include for APPLE
+ *
  * Revision 1.1  2009/10/12 18:04:26  pibero
  * Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
  *
