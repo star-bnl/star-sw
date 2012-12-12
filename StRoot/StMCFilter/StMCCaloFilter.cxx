@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-
+#include <stdio.h>
 #include "StMCFilter/StGenParticle.h"
 #include "StMCFilter/StMCCaloFilter.h"
 
