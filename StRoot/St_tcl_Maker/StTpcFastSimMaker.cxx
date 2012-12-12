@@ -1,5 +1,8 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.5 2012/05/07 14:54:45 fisyak Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.6 2012/12/12 23:53:36 fisyak Exp $
     $Log: StTpcFastSimMaker.cxx,v $
+    Revision 1.6  2012/12/12 23:53:36  fisyak
+    Clean up, extend no. of pad rows
+
     Revision 1.5  2012/05/07 14:54:45  fisyak
     Add printout
 
@@ -36,9 +39,11 @@
 #include "TDataSetIter.h"
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
+#include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 ClassImp(StTpcFastSimMaker);
 //____________________________________________________________
 Int_t StTpcFastSimMaker::Make() {
+  static Int_t iBreak = 0;
   mExB = gStTpcDb->ExB();
   if (! gRandom) gRandom = new TRandom();
   // Get the input data structures from StEvent
@@ -86,22 +91,25 @@ Int_t StTpcFastSimMaker::Make() {
       StThreeVector<double> newPos(posMoved[0],posMoved[1],posMoved[2]);
       coorLTD.setPosition(newPos);
     }
-    static StTpcLocalSectorAlignedCoordinate  coorLSA;
-    transform(coorLTD,coorLSA); //
     static StTpcLocalSectorCoordinate  coorLS;
-    transform(coorLSA,coorLS); // alignment
+    transform(coorLTD,coorLS); // alignment
     Double_t xyzL[3] = {coorLS.position().x(),coorLS.position().y(),coorLS.position().z()};
-    if (Debug() && TMath::Abs(xyzL[1]-transform.yFromRow(row)) > 0.1000) {
-      cout << "Id: " << tpc_hit[i].volume_id  
-	   << "\txyzL :" << xyzL[0] << "\t" << xyzL[1] << "\t" << xyzL[2] 
-	   << "\tdR :" << xyzL[1]-transform.yFromRow(row) << endl;
+    if (TMath::Abs(xyzL[1]-transform.yFromRow(row)) > 0.1000) {
+      if (Debug()) {
+	LOG_DEBUG << "Id: " << tpc_hit[i].volume_id  
+		  << "\txyzL :" << xyzL[0] << "\t" << xyzL[1] << "\t" << xyzL[2] 
+		  << "\tdR :" << xyzL[1]-transform.yFromRow(row) << endm;
+      }
+      iBreak++;
     }
     Double_t Z = xyzL[2];
     Double_t eta = TMath::PiOver2() - TMath::Abs(dirL.position().phi());
     Double_t tanl = dirL.position().z()/dirL.position().perp();
     Double_t sigmaY2, sigmaZ2;
-    if (row <= 13)  StiTpcInnerHitErrorCalculator::instance()->calculateError(Z,eta,tanl,sigmaY2, sigmaZ2);
-    else            StiTpcOuterHitErrorCalculator::instance()->calculateError(Z,eta,tanl,sigmaY2, sigmaZ2);
+    if (row <= St_tpcPadPlanesC::instance()->innerPadRows())  
+      StiTpcInnerHitErrorCalculator::instance()->calculateError(Z,eta,tanl,sigmaY2, sigmaZ2);
+    else            
+      StiTpcOuterHitErrorCalculator::instance()->calculateError(Z,eta,tanl,sigmaY2, sigmaZ2);
     Double_t sigmaY = TMath::Sqrt(sigmaY2);
     Double_t sigmaZ = TMath::Sqrt(sigmaZ2);
     StThreeVectorF e(0, sigmaY, sigmaZ);
@@ -117,18 +125,20 @@ Int_t StTpcFastSimMaker::Make() {
     Float_t  timebkt =  Pad.timeBucket() + 1.e6*gStTpcDb->Electronics()->samplingFrequency()*tof;
     if (timebkt < 0 || timebkt > 512) continue;
     StTpcPadCoordinate newPad(Pad.sector(),Pad.row(), Pad.pad(),timebkt );
+    Short_t pad = newPad.pad();
+    Short_t tmb = newPad.timeBucket();
     static StTpcLocalCoordinate global; // leave coordinates in TpcLocalCoordinate because StTpcHitMover expects that.
     transform(newPad,global,kFALSE); // alignment
-    StThreeVectorF p(global.position().x(),global.position().y(),global.position().z());
     UInt_t hw = 1;   // detid_tpc
     hw += sector << 4;     // (row/100 << 4);   // sector
     hw += row    << 9;     // (row%100 << 9);   // row
-    StTpcHit *tpcHit = new StTpcHit(p,e, 
-				    hw,TMath::Abs(tpc_hit[i].de), i+1,   // hw, q, c
-				    tpc_hit[i].track_p, 100,             // idTruth, quality
-				    0,                                   // id
-				    0,  0, 0,                            // mnpad, mxpad, mntmbk
-				    0, Pad.pad(), Pad.timeBucket());     // mxtmbk, cl_x , cl_t
+    StTpcHit *tpcHit = new StTpcHit(global.position(),e, hw,TMath::Abs(tpc_hit[i].de)// hw, q
+				    , 0                                              // c
+				    , tpc_hit[i].track_p, 100                        // idTruth, quality
+				    , i                                              // id
+				    , pad, pad+1,tmb,tmb+1                           // mnpad, mxpad, mntmbk, mxtmbk
+				    , newPad.pad(), newPad.timeBucket()              // mxtmbk, cl_x , cl_t
+				    , 0);                                            // Adc
     if (Debug() > 1) tpcHit->Print();
     rCol->addHit(tpcHit);
   }
