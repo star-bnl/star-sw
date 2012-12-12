@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.111 2012/11/30 20:29:41 sangalin Exp $
+ * $Id: StMuDstMaker.cxx,v 1.112 2012/12/12 00:36:03 sangalin Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -1191,13 +1191,18 @@ void StMuDstMaker::fillFgt(StEvent* ev) {
             if( stripType == kFgtSeedType1 ||
                 stripType == kFgtSeedType2 ||
                 stripType == kFgtSeedType3 ||
+                stripType == kFgtSeedType4 ||
+                stripType == kFgtSeedType5 ||
+                stripType == kFgtSeedTypeMax ||
                 stripType == kFgtClusterPart ||
+                stripType == kFgtNextToDeadGuy ||
                 stripType == kFgtClusterEndUp ||
                 stripType == kFgtClusterEndDown ||
                 stripType == kFgtStripShared ||
+                stripType == kFgtClusterTooBig ||
+                stripType == kFgtClusterSeedInSeaOfNoise ||
 		stripType == kFgtNextToCluster ||
-		stripType == kFgtKeepStrip ||
-                stripType == kFgtClusterTooBig ){
+		stripType == kFgtKeepStrip){
 
                // add strip to the TClonesArray
                Int_t idx = addType( mFgtArrays[muFgtStrips], *(*stripIter), stripClassType );
@@ -1784,6 +1789,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.112  2012/12/12 00:36:03  sangalin
+ * Merged in updated StMuFgtCluster class format from Anselm Vossen.
+ *
  * Revision 1.111  2012/11/30 20:29:41  sangalin
  * Removed cout debug statements in fillMtd().
  *
