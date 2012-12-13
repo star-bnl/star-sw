@@ -60,7 +60,7 @@
  *
  *    float range;           // range used in defining mass windows
  *
- * $Id: StStrangeTagsMaker.h,v 1.12 2008/04/02 23:46:41 fisyak Exp $
+ * $Id: StStrangeTagsMaker.h,v 1.13 2012/12/13 20:28:39 fisyak Exp $
  *
  */
 
@@ -100,7 +100,7 @@ private:
     Float_t         mMasska2;
     
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.12 2008/04/02 23:46:41 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.13 2012/12/13 20:28:39 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StStrangeTagsMaker,0)   // macro for rootcint
 };
@@ -110,6 +110,9 @@ private:
 /***************************************************************************
  *
  * $Log: StStrangeTagsMaker.h,v $
+ * Revision 1.13  2012/12/13 20:28:39  fisyak
+ * suppress warning
+ *
  * Revision 1.12  2008/04/02 23:46:41  fisyak
  * remove //0 after #endif
  *
@@ -117,7 +120,7 @@ private:
  * WarnOff
  *
  * Revision 1.10  2004/07/28 07:47:45  lbarnby
- * Corrected typo which prevented parsing of comments: '/ *' -> '/*'
+ * Corrected typo which prevented parsing of comments: '/ *' -> '\/*'
  *
  * Revision 1.9  2004/07/27 14:29:09  lbarnby
  * Updated documentation for doxygen
