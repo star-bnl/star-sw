@@ -13,9 +13,12 @@ call geometry
 
 <!-- 
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.10 2012/11/02 15:03:29 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.11 2012/12/14 16:13:39 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.11  2012/12/14 16:13:39  jwebb
+  Force update for y2013 geometry.
+
   Revision 1.10  2012/11/02 15:03:29  jwebb
   Fix format statement for SL4.4, force xgeometry recompile.
 
@@ -29,8 +32,6 @@ call geometry
   Force recompilation of xgeometry for dev14 modifications.
 
   Revision 1.6  2012/06/29 14:56:21  jwebb
-  Added DEV14 geometry tag for HFT studies. 
-
-  -->
+  Added DEV14 geometry tag for HFT studies.  -->
 
 </Document>
