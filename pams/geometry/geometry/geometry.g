@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.249 2012/11/02 15:03:21 jwebb Exp $
+* $Id: geometry.g,v 1.250 2012/12/14 16:13:56 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.250  2012/12/14 16:13:56  jwebb
+* Updates for y2013 geometry.
+*
 * Revision 1.249  2012/11/02 15:03:21  jwebb
 * Fix format statement for SL4.4.
 *
@@ -1952,6 +1955,7 @@ REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
     exe ECALv6;      "several bugfixes in eemc geometry";
     exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+
     exe BBCMon;      "beam beam counters";
     exe FPDM03;      "Latest version of FPD";
     exe VPDD07;      "Latest version of VPD";
@@ -1966,6 +1970,33 @@ REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
     exe IDSM02;      "Inner detector support";
     exe FGTDv32;     "FGT v3 6 disks";
 
+    exe PXST01;      "PIXEL detector support version 1";
+    exe PIXL02;      "Development version of the pixl detector";
+]
+
+REPLACE [exe y2013;] with ["Y2013 first cut geometry";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD05;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPEv1;      "The beam pipe";
+
+    exe IDSM02;      "Inner detector support";
+    exe FGTDv32;     "FGT v3 6 disks";
+
+    exe PXST01;      "PIXEL detector support version 1";
     exe PIXL02;      "Development version of the pixl detector";
 ]
 
@@ -2819,6 +2850,10 @@ If LL>0
   Case dev13 { dev13 : y2013 studies;
                  Geom = 'dev13   ';
                  exe dev13; }
+
+  Case y2013 { y2013 : y2013 first cut geometry;
+                 Geom = 'y2013   ';
+                 exe y2013; }
 
   Case dev14 { dev14 : y2014 studies;
                  Geom = 'dev14   ';
