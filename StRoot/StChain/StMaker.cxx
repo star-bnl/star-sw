@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.253 2012/11/07 23:05:45 fisyak Exp $
+// $Id: StMaker.cxx,v 1.254 2012/12/14 17:14:36 jwebb Exp $
 //
 //
 /*!
@@ -271,6 +271,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2012",       20111215,     0, "y2012",    "y2012 Very preliminary"},
   {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry"},
   {"y2012b",      20111215,     2, "y2012b",   "y2012 + wall"},
+  {"y2013",       20121215,     0, "y2013",    "y2013 first cut geometry"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -1960,6 +1961,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.254  2012/12/14 17:14:36  jwebb
+// Added y2013 geometry tag with date/time 20121215/0.
+//
 // Revision 1.253  2012/11/07 23:05:45  fisyak
 // Add geometries y2011b, y2012b (wall), devT? (iTpx upgrade)
 //
