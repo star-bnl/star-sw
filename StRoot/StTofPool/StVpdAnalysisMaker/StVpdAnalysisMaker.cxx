@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdAnalysisMaker.cxx,v 1.1 2008/09/02 18:27:21 dongx Exp $
+ * $Id: StVpdAnalysisMaker.cxx,v 1.2 2012/12/14 06:35:56 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdAnalysisMaker.cxx,v $
+ * Revision 1.2  2012/12/14 06:35:56  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
  * Revision 1.1  2008/09/02 18:27:21  dongx
  * first release.
  * - Vpd analysis maker from MuDst to extract vz, Tstart, Tdiff etc.
@@ -154,7 +157,7 @@ Int_t StVpdAnalysisMaker::initParameters(int runnumber)
   /// initialize the calibrations parameters from dbase
   /// read in and check the size
   LOG_INFO << "   -- retrieving run parameters from Calibrations_tof" << endm;
-  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
+  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof/tofTotCorr");
   if (!mDbDataSet){
     gMessMgr->Error("unable to get TOF run parameters","OS");
     return kStErr;

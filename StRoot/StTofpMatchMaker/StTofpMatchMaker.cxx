@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.12 2007/04/17 23:01:03 dongx Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.13 2012/12/14 06:36:02 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.13  2012/12/14 06:36:02  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
  * Revision 1.12  2007/04/17 23:01:03  dongx
  * replaced with standard STAR Loggers
  *
@@ -159,7 +162,7 @@ Int_t StTofpMatchMaker::InitRun(int runnumber){
   mTofGeom->init(this);
 
   gMessMgr->Info("                 -- retrieving run parameters","OS");
-  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
+  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof/pvpdStrobeDef");
   if (!mDbDataSet){
     gMessMgr->Error("unable to get TOF run parameters","OS");
     //    assert(mDbDataSet);

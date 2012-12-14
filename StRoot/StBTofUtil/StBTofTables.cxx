@@ -1,10 +1,13 @@
 /*******************************************************************
  *
- * $Id: StBTofTables.cxx,v 1.1 2009/08/28 17:22:11 dongx Exp $
+ * $Id: StBTofTables.cxx,v 1.2 2012/12/14 06:35:41 geurts Exp $
  *
  *****************************************************************
  *
  * $Log: StBTofTables.cxx,v $
+ * Revision 1.2  2012/12/14 06:35:41  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
  * Revision 1.1  2009/08/28 17:22:11  dongx
  * first release
  *
@@ -36,7 +39,7 @@ void StBTofTables::loadTables(StMaker* maker) {
 
   LOG_INFO << "StBTofTables -- loading the BTOF tray/channel status tables ..." << endm;
 
-  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTrayConfig");
   if(!mDbTOFDataSet) {
     LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
     //    assert(mDbTOFDataSet);

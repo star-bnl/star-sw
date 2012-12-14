@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.11 2011/02/23 20:00:52 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.12 2012/12/14 06:36:05 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.12  2012/12/14 06:36:05  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
  * Revision 1.11  2011/02/23 20:00:52  geurts
  * Change MaxBin for ToT arrays from 60 to 128 (in agreement with the IDL definition of vpdTotCorr)
  * Move the log message that informs the user about the start-timing mode outside the tube loop ... no need to see the same message 38 times.
@@ -219,13 +222,6 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
     /// Get all calibration parameters from the database
     LOG_INFO << "Initializing VPD calibration parameters from database" << endm;
 
-// read in and check the size
-//     TDataSet *dbDataSet = GetDataBase("Calibrations/tof");
-//     if (!dbDataSet){
-//       LOG_ERROR  << "unable to get VPD/TOF run parameters" << endm;
-//       return kStErr;
-//     }
-  
     // read vpdTotCorr table
     TDataSet *dbDataSet = GetDataBase("Calibrations/tof/vpdTotCorr");
     if (dbDataSet){

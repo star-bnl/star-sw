@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.9 2008/06/05 18:33:45 dongx Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.10 2012/12/14 06:35:52 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.cxx,v $
+ * Revision 1.10  2012/12/14 06:35:52  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
  * Revision 1.9  2008/06/05 18:33:45  dongx
  * -added members in tree: tDiff, tofcorr and beta for check
  * -beamLine read from database
@@ -126,7 +129,7 @@ Int_t StTofrNtupleMaker::InitRun(int runnumber) {
   }
 
   gMessMgr->Info("    -- retrieving run parameters from Calibrations_tof","OS");
-  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
+  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof/pvpdStrobeDef");
   if (!mDbDataSet){
     gMessMgr->Error("unable to get TOF run parameters","OS");
     assert(mDbDataSet);
