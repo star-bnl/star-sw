@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.13 2008/08/28 18:43:20 dongx Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.14 2012/12/14 06:35:59 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
+ * Revision 1.14  2012/12/14 06:35:59  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
  * Revision 1.13  2008/08/28 18:43:20  dongx
  * Added MRPC-TOF simulation parameters
  * Added TOF/VPD fast simulation parameters
@@ -82,7 +85,7 @@ void StTofrDaqMap::initFromDbase(StMaker *maker) {
   //    need "[shell] setenv Calibrations_tof reconV0"
   ///////////////////////////////////////////////////////
 
-  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofModuleConfig");
   if(!mDbTOFDataSet) {
     gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
     //    assert(mDbTOFDataSet);
@@ -151,7 +154,7 @@ void StTofrDaqMap::initFromDbaseY5(StMaker *maker) {
   //    need "[shell] setenv Calibrations_tof reconV0"
   ///////////////////////////////////////////////////////
 
-  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofr5Maptable");
   if(!mDbTOFDataSet) {
     gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
     //    assert(mDbTOFDataSet);
@@ -184,7 +187,7 @@ void StTofrDaqMap::initFromDbaseGeneral(StMaker *maker) {
   //    need "[shell] setenv Calibrations_tof reconV0"
   ///////////////////////////////////////////////////////
 
-  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofDaqMap");
   if(!mDbTOFDataSet) {
     gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
     //    assert(mDbTOFDataSet);

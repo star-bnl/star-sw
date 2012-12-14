@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.30 2009/07/28 16:06:42 geurts Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.31 2012/12/14 06:36:04 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.31  2012/12/14 06:36:04  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
  * Revision 1.30  2009/07/28 16:06:42  geurts
  * Bug Ticket #1591: explicit initialization of mStrobeTdcMin, mStrobeTdcMax, and mPedTOFr.
  *
@@ -354,7 +357,7 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
       //    need "[shell] setenv Calibrations_tof reconV0"
       ///////////////////////////////////////////////////////
       gMessMgr->Info("    -- retrieving run parameters from Calibrations_tof","OS");
-      TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
+      TDataSet *mDbDataSet = GetDataBase("Calibrations/tof/pvpdStrobeDef");
       if (!mDbDataSet){
 	gMessMgr->Error("unable to get TOF run parameters","OS");
 	//    assert(mDbDataSet);
@@ -427,55 +430,6 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
 	LOG_INFO  << "InitRun():i="<<i<<" tray=" << map[0] << "  module=" << map[1] << "  cell=" << map[2] << endm;
       }
     }
-    
-    /* move INL calibration to StTofCalibMaker
-    // read INL table
-    LOG_INFO  << "read in INL table" << endm;
-    TDataSet *mDbTOFDataSet = this->GetDataBase("Calibrations/tof");
-    if(!mDbTOFDataSet) {
-      gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
-      //    assert(mDbTOFDataSet);
-      return kStErr;
-    }
-    
-    St_tofr5INLtable* tofr5INLtable = static_cast<St_tofr5INLtable*>(mDbTOFDataSet->Find("tofr5INLtable"));
-    if(!tofr5INLtable) {
-      gMessMgr->Error("unable to get tofr5 INL table parameters","OS");
-      //    assert(tofr5INLtable);
-      return kStErr;
-    }
-    tofr5INLtable_st* inltable = static_cast<tofr5INLtable_st*>(tofr5INLtable->GetArray());
-    Int_t numRows = tofr5INLtable->GetNRows();
-    
-    LOG_INFO  << " Number of rows read in: " << numRows << endm;
-    
-    Char_t *boardName;
-    Short_t boardId;
-    Short_t tdcId;
-    Float_t INLcorr[1024];
-    
-    for (Int_t i=0;i<numRows;i++) {
-      boardName = "";
-      boardId = -1;
-      tdcId = -1;
-      for(int j=0;j<mTdcChannel;j++) {
-	INLcorr[j] = 0.0;
-      }
-      
-      boardName = (Char_t *)(inltable[i].boardID);
-      boardId = inltable[i].boardNumber;
-      tdcId = inltable[i].TDCID;
-      if(Debug())
-	LOG_INFO  << " name = " << boardName << " bId = " << boardId << " tdcId = " << tdcId << endm;
-      for(int j=0;j<mTdcChannel;j++) {
-	INLcorr[j] = inltable[i].INLcorrection[j];
-	if(Debug()&&j%100==0) LOG_INFO  << " j=" << j << " inlcorr=" << INLcorr[j] << endm;
-	mINLtable[boardId][tdcId][j] = INLcorr[j];
-      }
-            
-    }
-    */
-
   } else if(mYear8) {
     mDaqMap->setNValidTrays(mNValidTrays_Run8);
     mDaqMap->initFromDbaseGeneral(this);

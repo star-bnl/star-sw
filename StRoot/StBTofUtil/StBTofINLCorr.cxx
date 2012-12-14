@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.cxx,v 1.9 2012/02/11 02:13:23 geurts Exp $
+ * $Id: StBTofINLCorr.cxx,v 1.10 2012/12/14 06:35:41 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.cxx,v $
+ * Revision 1.10  2012/12/14 06:35:41  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
  * Revision 1.9  2012/02/11 02:13:23  geurts
  * allow direct access to INL corrections given TDIG-Id
  *
@@ -72,12 +75,6 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
   ///////////////////////////////////////////////////////
   // Load configuration parameters from dbase
   ///////////////////////////////////////////////////////
-
-//   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
-//   if(!mDbTOFDataSet) {
-//     LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
-//     return;
-//   }
 
   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTDIGOnTray");
   St_tofTDIGOnTray* tofTDIGOnTray = static_cast<St_tofTDIGOnTray*>(mDbTOFDataSet->Find("tofTDIGOnTray"));

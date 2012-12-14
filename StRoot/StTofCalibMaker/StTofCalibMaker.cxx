@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.21 2011/05/27 18:25:32 genevb Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.22 2012/12/14 06:35:48 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.22  2012/12/14 06:35:48  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
  * Revision 1.21  2011/05/27 18:25:32  genevb
  * Propagate StTrack::key => Int_t to other codes
  *
@@ -337,7 +340,7 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
   /// initialize the calibrations parameters from dbase
   /// read in and check the size
   gMessMgr->Info("","OS") << "   -- retrieving run parameters from Calibrations_tof" << endm;
-  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
+  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof/tofTzero");
   if (!mDbDataSet){
     gMessMgr->Error("unable to get TOF run parameters","OS");
     return kStErr;
@@ -874,7 +877,7 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
     double dydz = 0.;
     
     // Get Current Beam Line Constraint from database
-    TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic");
+    TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic/vertexSeed");
     
     if (dbDataSet) {
       vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();

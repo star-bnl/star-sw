@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofINLCorr.cxx,v 1.4 2008/08/05 19:36:48 dongx Exp $
+ * $Id: StTofINLCorr.cxx,v 1.5 2012/12/14 06:35:59 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofINLCorr.cxx,v $
+ * Revision 1.5  2012/12/14 06:35:59  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
  * Revision 1.4  2008/08/05 19:36:48  dongx
  * fixed a bug of empty lines in log file under no-debug mode
  * LOGGER print corrected with an if statement
@@ -57,7 +60,7 @@ void StTofINLCorr::initFromDbase(StMaker *maker) {
   //    need "[shell] setenv Calibrations_tof reconV0"
   ///////////////////////////////////////////////////////
 
-  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTDIGOnTray");
   if(!mDbTOFDataSet) {
     gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
     //    assert(mDbTOFDataSet);

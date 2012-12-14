@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofDaqMap.cxx,v 1.4 2010/05/25 22:09:44 geurts Exp $
+ * $Id: StBTofDaqMap.cxx,v 1.5 2012/12/14 06:35:41 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofDaqMap.cxx,v $
+ * Revision 1.5  2012/12/14 06:35:41  geurts
+ * Changed global database calls to direct table access and/or removed deprecated database access code.
+ *
  * Revision 1.4  2010/05/25 22:09:44  geurts
  * improved database handling and reduced log output
  *
@@ -52,13 +55,6 @@ void StBTofDaqMap::Init(StMaker *maker) {
   // Load configuration parameters from dbase
   //    need "[shell] setenv Calibrations_tof reconV0"
   ///////////////////////////////////////////////////////
-
-//   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
-//   if(!mDbTOFDataSet) {
-//     LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
-//     //    assert(mDbTOFDataSet);
-//     return; // kStErr;
-//   }
 
   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofDaqMap");
   St_tofDaqMap* tofDaqMap = static_cast<St_tofDaqMap*>(mDbTOFDataSet->Find("tofDaqMap"));
