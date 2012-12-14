@@ -130,6 +130,7 @@ void cacheGeometry( const Char_t *tag, const Char_t *addons )
 
       const Char_t *path  = ".:./StarVMC/Geometry/macros/:$STAR/StarVMC/Geometry/macros/";
       Char_t *file = gSystem->Which(path,"loadStarGeometry.C",kReadPermission);
+      cout << "Loading macro: " << file << endl;
       gROOT -> ProcessLine(Form(".L %s",file));
 
       // Load development geometry

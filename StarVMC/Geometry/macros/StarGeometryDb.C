@@ -20,11 +20,10 @@ void StarGeometryDb()
   geom.idsmFlag = "IDSMof"; geom.idsmStat=0; // IDSM defaults to off
   geom.fgtdFlag = "FGTDof"; geom.fgtdStat=0; // FGTD defaults to off
 
-  geom.fsceFlag = "FSCEof";  geom.fsceStat = 0;
-  geom.eiddFlag = "EIDDof";  geom.eiddStat = 0;
-
-  geom.tpcxFlag = "TPCXof";  geom.tpcxStat = 0;
-
+  geom.fsceFlag = "FSCEof";  geom.fsceStat = 0; // FWD calo off by default
+  geom.eiddFlag = "EIDDof";  geom.eiddStat = 0; // EIDD off by default
+  geom.tpcxFlag = "TPCXof";  geom.tpcxStat = 0; // TPC eXtreme off by default
+  geom.istdFlag = "ISTDof";  geom.istdStat = 0; // ISTD off by default
 
   //
   // Setup STAR Geometries y2000 to present
@@ -42,14 +41,14 @@ void StarGeometryDb()
   y2009(); geom.Last(); setTitle("Year 2009 Production Geometry");  geom.select="y2009pro"; geom.fill();
   y2010(); geom.Last(); setTitle("Year 2010 Production Geometry");  geom.select="y2010pro"; geom.fill();
   y2011(); geom.Last(); setTitle("Year 2011 Production Geometry");  geom.select="y2011pro"; geom.fill();
-  y2012(); geom.Last(); setTitle("Year 2012 Development Geometry"); geom.select="y2012dev"; geom.fill();
+  y2012(); geom.Last(); setTitle("Year 2012 Production Geometry");  geom.select="y2012pro"; geom.fill();
+  y2013(); geom.Last(); setTitle("Year 2013 First Cut Geometry");   geom.select="y2013fist"; geom.fill();
 
   test();
 
   //
   // Upgrade studies tagged with a year (2000+)
   //
-  dev13(); geom.Last(); setTitle("Year 2013 Development Geometry"); geom.select="dev13pro"; geom.fill();
   dev14(); geom.Last(); setTitle("Year 2014 Development Geometry"); geom.select="dev14pro"; geom.fill();
 
   //
@@ -957,42 +956,42 @@ void y2012()
 
 }
 
-void dev13()
-{
-  std::cout << " dev13 "<< std::flush;;
-  geom.select = "dev13"; {
-    // ================================================ 
-    geom.caveFlag = "CAVE04";  geom.caveStat = 1;
-    // ================================================ 
-    geom.sconFlag = "SCONof";  geom.sconStat = 0;
-    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
-    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
-    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
-    geom.phmdFlag = "PHMDof"; geom.phmdStat = 0;
-    // ================================================ 
-    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
-    geom.btofFlag = "BTOF67";  geom.btofStat = 1;
-    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
-    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
-    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
-    geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1;
-    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
-    geom.mutdFlag = "MUTD04";  geom.mutdStat = 1;
-    geom.pipeFlag = "PIPEv1";  geom.pipeStat = 1;
-    // ================================================ 
-    geom.pixlFlag = "PIXL02";  geom.pixlStat = 1; 
-    // ================================================ 
-    geom.idsmFlag = "IDSM02";  geom.idsmStat = 1;
-    geom.fgtdFlag = "FGTD32";  geom.fgtdStat=1;
-    // ================================================ 
-    //
-    setTitle("Upgrade studies with 6 complete FGT disks");
-    //
-    // ================================================ 
-    geom.fill();
-  };
+// void dev13()
+// {
+//   std::cout << " dev13 "<< std::flush;;
+//   geom.select = "dev13"; {
+//     // ================================================ 
+//     geom.caveFlag = "CAVE04";  geom.caveStat = 1;
+//     // ================================================ 
+//     geom.sconFlag = "SCONof";  geom.sconStat = 0;
+//     geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+//     geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+//     geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+//     geom.phmdFlag = "PHMDof"; geom.phmdStat = 0;
+//     // ================================================ 
+//     geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
+//     geom.btofFlag = "BTOF67";  geom.btofStat = 1;
+//     geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+//     geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+//     geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+//     geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1;
+//     geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
+//     geom.mutdFlag = "MUTD05";  geom.mutdStat = 1;
+//     geom.pipeFlag = "PIPEv1";  geom.pipeStat = 1;
+//     // ================================================ 
+//     geom.idsmFlag = "IDSM02";  geom.idsmStat = 1;
+//     geom.fgtmFlag = "FGTD32";  geom.fgtdStat = 1;
+//     geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
+//     geom.pixlFlag = "PIXL02";  geom.pixlStat = 1; 
+//     // ================================================ 
+//     //
+//     setTitle("Upgrade studies with 6 complete FGT disks");
+//     //
+//     // ================================================ 
+//     geom.fill();
+//   };
 
-}
+// }
 
 
 void dev14()
@@ -1201,26 +1200,72 @@ void y2013()
 
   std::cout << " y2013 "<< std::flush;;
 
-  geom.Use("select","upgr2012");
-  geom.select = "upgr2013"; {
-    geom.pipeFlag = "PIPE12";  geom.pipeStat = 0; // User pipe
-    geom.magpFlag = "MAGPof";  geom.magpStat = 0;
-    geom.upstFlag = "UPSTof";  geom.upstStat = 0;
-    geom.zcalFlag = "ZCALof";  geom.zcalStat = 0;
-    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 0; 
-    geom.btofFlag = "BTOF67";  geom.btofStat = 0;
-    geom.calbFlag = "CALB02";  geom.calbStat = 0; geom.calbCuts = 1;
-    geom.ecalFlag = "ECALv6";  geom.ecalStat = 0; geom.ecalCuts = 1;
-    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1; // Keep the BBC
-    geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 0; 
-    geom.vpddFlag = "VPDD07";  geom.vpddStat = 0;
-    geom.phmdFlag = "PHMD02"; geom.phmdStat = 0;
-    geom.sisdFlag = "SISDof"; geom.sisdStat = 0;
-    geom.ftroFlag = "FTRO01"; geom.ftroStat = 0;
-    geom.mutdFlag = "MUTD04"; geom.mutdStat = 0;
-    geom.caveFlag = "CAVE04"; geom.caveStat = 1;
+  geom.select = "dev13"; {
+    // ================================================ 
+    geom.caveFlag = "CAVE04";  geom.caveStat = 1;
+    // ================================================ 
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    geom.phmdFlag = "PHMDof"; geom.phmdStat = 0;
+    // ================================================ 
+    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
+    geom.btofFlag = "BTOF67";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1;
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD05";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPEv1";  geom.pipeStat = 1;
+    // ================================================ 
+    geom.idsmFlag = "IDSM02";  geom.idsmStat = 1;
+    geom.fgtdFlag = "FGTD32";  geom.fgtdStat = 1;
+    geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
+    geom.pixlFlag = "PIXL02";  geom.pixlStat = 1; 
+    // ================================================ 
+    //
+    setTitle("Upgrade studies with 6 complete FGT disks");
+    //
+    // ================================================ 
     geom.fill();
-  }
+  };
+
+
+  geom.select = "y2013"; {
+    // ================================================ 
+    geom.caveFlag = "CAVE04";  geom.caveStat = 1;
+    // ================================================ 
+    geom.sconFlag = "SCONof";  geom.sconStat = 0;
+    geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof";  geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof";  geom.svttStat = 0;
+    geom.phmdFlag = "PHMDof"; geom.phmdStat = 0;
+    // ================================================ 
+    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
+    geom.btofFlag = "BTOF67";  geom.btofStat = 1;
+    geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
+    geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1;
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
+    geom.mutdFlag = "MUTD05";  geom.mutdStat = 1;
+    geom.pipeFlag = "PIPEv1";  geom.pipeStat = 1;
+    // ================================================ 
+    geom.idsmFlag = "IDSM02";  geom.idsmStat = 1;
+    geom.fgtdFlag = "FGTD32";  geom.fgtdStat = 1;
+    geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
+    geom.pixlFlag = "PIXL02";  geom.pixlStat = 1; 
+    // ================================================ 
+    //
+    setTitle("Upgrade studies with 6 complete FGT disks");
+    //
+    // ================================================ 
+    geom.fill();
+  };
+
+
 	   
   
 

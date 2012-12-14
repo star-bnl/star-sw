@@ -210,13 +210,20 @@ void Geometry::StarsimGeometry( const Char_t *tag )
 AgModule *Geometry::CreateModule( const Char_t *module, const Char_t *top )
 {
 
-
+  /*
   if (top) {
     std::cout << ">>> Setting top volume = " << top << " <<<" << std::endl;
   }
   else {
     std::cout << ">>> Creating module    = " << module << " <<<" << std::endl;
   }
+  */
+  Info( GetName(), Form("AgML/Geometry creating module %s",module) );
+  if ( top )
+    Info( GetName(), Form("AgML/Geometry setting top module %s / volume %s", module, top) );
+	
+
+
   // Set the current module to this
   _module = this;
 
@@ -1142,6 +1149,8 @@ Bool_t Geometry::FpdmInit()
 // ----------------------------------------------------------------------------
 Bool_t Geometry::FsceInit()
 {
+  fsceGeom.SetTitle("Forward Something Calorimeter");
+  fsceGeom.select="FSCEof"; fsceGeom.config=0; fsceGeom.module="NONE";    fsceGeom.fill();
   fsceGeom.select="FSCEv0"; fsceGeom.config=1; fsceGeom.module="FsceGeo"; fsceGeom.fill();
   return true;
 }
@@ -1150,6 +1159,7 @@ Bool_t Geometry::FsceInit()
 // ----------------------------------------------------------------------------
 Bool_t Geometry::EiddInit()
 {
+  eiddGeom.select="EIDDof"; eiddGeom.config=0; eiddGeom.module="NONE"   ; eiddGeom.fill();
   eiddGeom.select="EIDDv0"; eiddGeom.config=1; eiddGeom.module="EiddGeo"; eiddGeom.fill();
   return true;
 }
@@ -1362,17 +1372,15 @@ Bool_t Geometry::PixlInit() // Probably breaks config=-1 scheme
 // ----------------------------------------------------------------------------
 Bool_t Geometry::IstdInit() // Probably breaks config=-1 scheme
 {
-  istdGeom.select="ISTD01";
-  istdGeom.config=1;
-  istdGeom.module="IstdGeo0";
-  istdGeom.fill(); 
+  istdGeom.select="ISTDof";  istdGeom.config=0;  istdGeom.module="NONE"    ;  istdGeom.fill(); 
+  istdGeom.select="ISTD01";  istdGeom.config=1;  istdGeom.module="IstdGeo0";  istdGeom.fill(); 
   return true;
 }
 // ----------------------------------------------------------------------------
 Bool_t Geometry::PxstInit() // Probably breaks config=-1 scheme
 {
-  pxstGeom.module="PxstGeo1";
-  pxstGeom.select="PXST01"; pxstGeom.config=-1; pxstGeom.fill(); 
+  pxstGeom.module="NONE"    ;  pxstGeom.select="PXSTof"; pxstGeom.config=-0; pxstGeom.fill(); 
+  pxstGeom.module="PxstGeo1";  pxstGeom.select="PXST01"; pxstGeom.config=-1; pxstGeom.fill(); 
   return true;
 }
 // ----------------------------------------------------------------------------
@@ -1380,11 +1388,8 @@ Bool_t Geometry::PxstInit() // Probably breaks config=-1 scheme
 // ----------------------------------------------------------------------------
 Bool_t Geometry::SconInit()
 {
-  sconGeom.select="SCONof"; {
-    sconGeom.module="NONE";
-    sconGeom.config=0;
-    sconGeom.SetTitle("Support Cone Master Geometry: OFF");
-  }
+  sconGeom.SetTitle("Support Cone Master Geometry");
+  sconGeom.select="SCONof"; sconGeom.module="NONE";    sconGeom.config=0; sconGeom.fill();
   sconGeom.select="SCON02"; sconGeom.module="NONE";    sconGeom.config=2; sconGeom.fill();
   sconGeom.select="SCON12"; sconGeom.module="SconGeo"; sconGeom.config=2; sconGeom.fill();
   sconGeom.select="SCON13"; sconGeom.module="SconGeo"; sconGeom.config=3; sconGeom.fill();
@@ -1783,7 +1788,7 @@ Bool_t Geometry::TpcxInit()
     tpcxGeom.module = "TpcxGeo1";
     tpcxGeom.fill();
   };
-
+  return true;
 }
 // ----------------------------------------------------------------------------
 //
