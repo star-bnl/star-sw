@@ -36,6 +36,8 @@ class St_spaceChargeCorC : public TChair {
   Float_t  getSpaceChargeFactor(Int_t i = 0)  {return factor(i);}
   Float_t  getSpaceChargeDetector(Int_t i = 0){return detector(i);}
   Float_t  getSpaceChargeOffset(Int_t i = 0)  {return offset(i);}
+  TString  getSpaceChargeString(Double_t scaleFactor);
+  TString  getSpaceChargeString(){return getSpaceChargeString(StDetectorDbMagnet::instance()->getScaleFactor());}
 
  protected:
   St_spaceChargeCorC(St_spaceChargeCor *table=0) : TChair(table) {}
