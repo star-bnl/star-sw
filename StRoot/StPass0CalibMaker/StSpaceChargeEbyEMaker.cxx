@@ -13,7 +13,6 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcDbMaker.h"
 #include "St_db_Maker/St_db_Maker.h"
-#include "tables/St_spaceChargeCor_Table.h"
 #include "StEvent/StDcaGeometry.h"
 #include "StBTofCollection.h"
 #include "StBTofHit.h"
@@ -21,7 +20,8 @@
 #include "StBTofPidTraits.h"
 #include "StTrackPidTraits.h"
 #include "StDetectorDbMaker/St_trigDetSumsC.h"
-#include "StDetectorDbMaker/StDetectorDbRichScalers.h"
+#include "StDetectorDbMaker/St_tpcGridLeakC.h"
+#include "StDetectorDbMaker/St_spaceChargeCorC.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/projection/StEmcPosition.h"
 
@@ -77,7 +77,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     inGapRow(0),
     vtxEmcMatch(1), vtxTofMatch(0), vtxMinTrks(5),
     minTpcHits(25), reqEmcMatch(kTRUE), reqTofMatch(kTRUE),
-    m_ExB(0),
+    m_ExB(0), SCcorrection(0), GLcorrection(0),
     scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
     myhistE(0), myhistW(0), dczhist(0), dcehist(0), dcphist(0),
     dcahist(0), dcahistN(0), dcahistP(0), dcahistE(0), dcahistW(0),
@@ -246,6 +246,14 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   // Keep time and event number
   times[curhist] = thistime;
   evts[curhist]=evt;
+
+  // Keep calibrations used
+  if (!SCcorrection) {
+    SCcorrection = new TNamed("SCcorrection",
+      (St_spaceChargeCorR2C::instance()->getSpaceChargeString()).Data());
+    GLcorrection = new TNamed("GLcorrection",Form("%f",
+      St_tpcGridLeakC::instance()->MiddlGLStrength()));
+  }
 
   // Keep track of # of events in the same time bin
   if (thistime == lasttime) evtsnow++;
@@ -486,11 +494,11 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
   if (doGaps) DetermineGaps();
   if (doNtuple) {
-      static float X[42];
+      static float X[43];
       static float ntent = 0.0;
       static float nttrk = 0.0;
 
-      if (ntent == 0.0) for (i=0; i<42; i++) X[i] = 0.0;
+      if (ntent == 0.0) for (i=0; i<43; i++) X[i] = 0.0;
       ntent++;  // # entries since last reset, including this one
       float last_nttrk = nttrk;
       nttrk = ntrks[curhist];  // # tracks since last reset, including these
@@ -547,9 +555,10 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       X[34] = gapZdivslopewest;
       X[35] = s0*X[35] + s1*runinfo->spaceCharge();
       X[36] = s0*X[36] + s1*((float) (runinfo->spaceChargeCorrectionMode()));
-      X[37] = s0*X[37] + s1*St_trigDetSumsC::Nc(runinfo->zdcCoincidenceRate(),
+      X[37] = St_tpcGridLeakC::instance()->MiddlGLStrength();
+      X[38] = s0*X[38] + s1*St_trigDetSumsC::Nc(runinfo->zdcCoincidenceRate(),
                                  runinfo->zdcEastRate(),runinfo->zdcWestRate());
-      X[38] = s0*X[38] + s1*St_trigDetSumsC::Nc(runinfo->bbcCoincidenceRate(),
+      X[39] = s0*X[39] + s1*St_trigDetSumsC::Nc(runinfo->bbcCoincidenceRate(),
                                  runinfo->bbcEastRate(),runinfo->bbcWestRate());
 
       // VPD data:
@@ -559,10 +568,9 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       // rs11 stores VPD coincidence rate as of 2007-12-19
       // rs16 stores MTD rate as of Run 9
       // VPD east and west are rs8 and 9, and are not stored in StEvent
-      StDetectorDbRichScalers* richScalers = StDetectorDbRichScalers::instance();
-      X[39] = s0*X[39] + s1*runinfo->backgroundRate();
-      X[40] = s0*X[40] + s1*richScalers->getPVPDWest();
-      X[41] = s0*X[41] + s1*richScalers->getPVPDEast();
+      X[40] = s0*X[40] + s1*runinfo->backgroundRate();
+      X[41] = s0*X[41] + s1*St_trigDetSumsC::instance()->getPVPDWest();
+      X[42] = s0*X[42] + s1*St_trigDetSumsC::instance()->getPVPDEast();
 
       // In calib mode, only fill when doReset (we found an sc)
       if (doReset || !Calibmode) ntup->Fill(X);
@@ -779,8 +787,7 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
   }
 
   if (doNtuple) ntup = new TNtuple("SC","Space Charge",
-    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:zdcc:bbcc:vpdx:vpdw:vpde");
-    //"sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:sce:scw:dcae:dcaw:gapf:gapd:gapfn:gapdn:gapfp:gapdp:gapfe:gapde:gapfw:gapdw:usc:uscmode");
+    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:ugl:zdcc:bbcc:vpdx:vpdw:vpde");
 
   if (doGaps) {
     gapZhist = new TH2F("Gaps","Gaps",GN,GL,GH,GZN,GZL,GZH);
@@ -837,6 +844,10 @@ void StSpaceChargeEbyEMaker::WriteQAHists() {
     gapZhistpos->Write();
   }
   if (doNtuple) ntup->Write();
+  if (SCcorrection) {
+    SCcorrection->Write();
+    GLcorrection->Write();
+  }
   ff.Close();
 
   gMessMgr->Info() << "QA hists file: " << fname.Data() << endm;
@@ -1188,8 +1199,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.44 2012/10/01 17:50:07 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.45 2012/12/15 03:13:50 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.45  2012/12/15 03:13:50  genevb
+// Store used calibrations in histogram files
+//
 // Revision 1.44  2012/10/01 17:50:07  genevb
 // Reduce some overhead DB queries by being more specific about needed tables
 //
