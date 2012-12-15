@@ -1,10 +1,10 @@
 #include "St_spaceChargeCorC.h"
-#include "StDetectorDbRichScalers.h"
+#include "St_trigDetSumsC.h"
 #include "StMemStat.h"
 
- Double_t St_spaceChargeCorC::getSpaceChargeCoulombs(Double_t scaleFactor)
- {
-    StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
+Double_t St_spaceChargeCorC::getSpaceChargeCoulombs(Double_t scaleFactor)
+  {
+    St_trigDetSumsC* scalers = St_trigDetSumsC::instance();
     if (! scalers ) return 0;
     Double_t zf = zeroField(0); // potential validity margin for scalers
     if (zf>0 && zf<1) scalers->setValidityMargin(zf);
@@ -47,4 +47,57 @@
       else coulombs += factor * (intens-offset) * correction ;
     }
     return coulombs;
- }
+  }
+TString St_spaceChargeCorC::getSpaceChargeString(Double_t scaleFactor)
+  {
+    TString str,mult;
+    int idate  = StMaker::GetChain()->GetDate();
+    bool use_powers = idate > 20090101;
+    for (int row=0;row< (int) getNumRows();row++) {
+      switch ((int) getSpaceChargeDetector(row)) {
+        case (0) : mult = "vpdx"; break; // vpdx as of 2007-12-19
+        case (1) : mult = "bbcx"; break;
+        case (2) : mult = "zdcx"; break;
+        case (3) : mult = "(zdce+zdcw)"; break;
+        case (4) : mult = "(bbce+bbcw)"; break;
+        case (5) : mult = "zdce"; break;
+        case (6) : mult = "zdcw"; break;
+        case (7) : mult = "bbce"; break;
+        case (8) : mult = "bbcw"; break;
+        case (9) : mult = "bbcyb"; break;
+        case (10): mult = "bbcbb"; break;
+        case (11): mult = "vpde"; break;
+        case (12): mult = "vpdw"; break;
+        default  : mult = "";
+      }
+      Double_t correction = getSpaceChargeCorrection(scaleFactor,row);
+      Double_t factor     = getSpaceChargeFactor(row);
+      Double_t offset     = getSpaceChargeOffset(row);
+      if (factor==0 || correction==0 || mult.Length()==0) continue;
+      if (str.Length()) str += "+";
+      str += Form("(%g)*(",correction);
+      Bool_t factorIsInt = (TMath::Abs(factor-TMath::Floor(factor)) < 1e-6);
+      if (factorIsInt && factor>0.5 && factor<1.5) {
+        str += mult;
+      } else {
+        if (use_powers) {
+          if (factorIsInt && factor>1.5) {
+            // use scaler*scaler*... form
+            while (factor>1.5) {
+              (str += mult) += "*";
+              factor--;
+            }
+            str += mult;
+          } else {
+            // use pow(scaler,factor) form
+            str += Form("pow(%s,%f)",mult.Data(),factor);
+          }
+        } else  {
+          (str += Form("%g)*(",factor)) += mult;
+        }
+      }
+      if (offset!=0) str += Form("-(%g)",offset);
+      str += ")";
+    }
+    return str;
+  }
