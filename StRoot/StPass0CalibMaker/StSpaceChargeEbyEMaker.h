@@ -52,7 +52,7 @@ public:
           void   setReqTofMatch(Bool_t match = kTRUE) { reqTofMatch = match; }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.13 2011/02/10 18:31:45 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.14 2012/12/15 03:13:50 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -104,6 +104,8 @@ protected:
   int evts[96];
   float evtstbin[96];
   float evtsnow;
+  TNamed* SCcorrection;
+  TNamed* GLcorrection;
   
   // PrePass info
   TString tabname;
@@ -171,8 +173,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.13 2011/02/10 18:31:45 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.14 2012/12/15 03:13:50 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.14  2012/12/15 03:13:50  genevb
+// Store used calibrations in histogram files
+//
 // Revision 1.13  2011/02/10 18:31:45  genevb
 // Restore corrected coincidence rates, add QA histogram of where events/tracks are cut
 //
