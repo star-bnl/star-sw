@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.14 2012/12/14 06:35:59 geurts Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.15 2012/12/17 22:57:20 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
+ * Revision 1.15  2012/12/17 22:57:20  geurts
+ * bugfix (tickets #2456/#2457)
+ *
  * Revision 1.14  2012/12/14 06:35:59  geurts
  * Changed global database calls to direct table access and/or removed deprecated database access code.
  *
@@ -87,7 +90,7 @@ void StTofrDaqMap::initFromDbase(StMaker *maker) {
 
   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofModuleConfig");
   if(!mDbTOFDataSet) {
-    gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
+    gMessMgr->Error("unable to access TOF tofModuleConfig table","OS");
     //    assert(mDbTOFDataSet);
     return; // kStErr;
   }
@@ -117,6 +120,12 @@ void StTofrDaqMap::initFromDbase(StMaker *maker) {
     }
   }
 
+  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofCamacDaqMap");
+  if(!mDbTOFDataSet) {
+    gMessMgr->Error("unable to access TOF tofCamacDaqMap table","OS");
+    //    assert(mDbTOFDataSet);
+    return; // kStErr;
+  }
   St_tofCamacDaqMap* tofDaqMap = static_cast<St_tofCamacDaqMap*>(mDbTOFDataSet->Find("tofCamacDaqMap"));
   if(!tofDaqMap) {
     gMessMgr->Error("unable to get tof daq map","OS");
@@ -189,7 +198,7 @@ void StTofrDaqMap::initFromDbaseGeneral(StMaker *maker) {
 
   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofDaqMap");
   if(!mDbTOFDataSet) {
-    gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
+    gMessMgr->Error("unable to access TOF tofDaqMap table","OS");
     //    assert(mDbTOFDataSet);
     return; // kStErr;
   }
@@ -228,6 +237,12 @@ void StTofrDaqMap::initFromDbaseGeneral(StMaker *maker) {
   }
 
   // valid tray Id
+  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTrayConfig");
+  if(!mDbTOFDataSet) {
+    gMessMgr->Error("unable to access TOF tofTrayConfig table","OS");
+    //    assert(mDbTOFDataSet);
+    return; // kStErr;
+  }
   St_tofTrayConfig* trayConfig = static_cast<St_tofTrayConfig*>(mDbTOFDataSet->Find("tofTrayConfig"));
   if(!trayConfig) {
     gMessMgr->Error("unable to get tof tray configuration","OS");

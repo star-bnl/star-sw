@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofINLCorr.cxx,v 1.5 2012/12/14 06:35:59 geurts Exp $
+ * $Id: StTofINLCorr.cxx,v 1.6 2012/12/17 22:57:20 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofINLCorr.cxx,v $
+ * Revision 1.6  2012/12/17 22:57:20  geurts
+ * bugfix (tickets #2456/#2457)
+ *
  * Revision 1.5  2012/12/14 06:35:59  geurts
  * Changed global database calls to direct table access and/or removed deprecated database access code.
  *
@@ -62,7 +65,7 @@ void StTofINLCorr::initFromDbase(StMaker *maker) {
 
   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTDIGOnTray");
   if(!mDbTOFDataSet) {
-    gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
+    gMessMgr->Error("unable to access TOF tofTDIGonTray table","OS");
     //    assert(mDbTOFDataSet);
     return; // kStErr;
   }
@@ -101,6 +104,12 @@ void StTofINLCorr::initFromDbase(StMaker *maker) {
 
   }
 
+  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofINLCorr");
+  if(!mDbTOFDataSet) {
+    gMessMgr->Error("unable to access TOF tofINLCorr table","OS");
+    //    assert(mDbTOFDataSet);
+    return; // kStErr;
+  }
   St_tofINLCorr* tofINLCorr = static_cast<St_tofINLCorr*>(mDbTOFDataSet->Find("tofINLCorr"));
   if(!tofINLCorr) {
     gMessMgr->Error("unable to get tof INL correction parameters","OS");
