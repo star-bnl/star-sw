@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.31 2012/12/14 06:36:04 geurts Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.32 2012/12/17 22:57:29 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.32  2012/12/17 22:57:29  geurts
+ * bugfix (tickets #2456/#2457)
+ *
  * Revision 1.31  2012/12/14 06:36:04  geurts
  * Changed global database calls to direct table access and/or removed deprecated database access code.
  *
@@ -359,7 +362,7 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
       gMessMgr->Info("    -- retrieving run parameters from Calibrations_tof","OS");
       TDataSet *mDbDataSet = GetDataBase("Calibrations/tof/pvpdStrobeDef");
       if (!mDbDataSet){
-	gMessMgr->Error("unable to get TOF run parameters","OS");
+	gMessMgr->Error("unable to get TOF pvpdStrobeDef table","OS");
 	//    assert(mDbDataSet);
 	return kStErr;
       }
@@ -382,6 +385,12 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
       }
       
       //TOFr pedestals
+      mDbDataSet = GetDataBase("Calibrations/tof/tofPedestal");
+      if (!mDbDataSet){
+	gMessMgr->Error("unable to access TOF tofPedestal table","OS");
+	//    assert(mDbDataSet);
+	return kStErr;
+      }
       St_tofPedestal* tofPed = static_cast<St_tofPedestal*>(mDbDataSet->Find("tofPedestal"));
       if (!tofPed){
 	gMessMgr->Error("unable to find TOF pedestal table","OS");
