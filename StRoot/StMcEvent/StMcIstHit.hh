@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.hh,v 2.10 2011/10/17 00:24:00 fisyak Exp $
+ * $Id: StMcIstHit.hh,v 2.11 2012/12/18 21:01:18 perev Exp $
  * $Log: StMcIstHit.hh,v $
+ * Revision 2.11  2012/12/18 21:01:18  perev
+ * Ist development (Jonathan)
+ *
  * Revision 2.10  2011/10/17 00:24:00  fisyak
  * Add time of flight for hits
  *
@@ -67,16 +70,18 @@ public:
   void  operator delete(void* p) { mPool.free(p); }
 #endif
   
-  unsigned long layer() const; // 
-  unsigned long ladder() const; // 
+  ULong_t layer()  const {return 1;} // 
+  ULong_t ladder() const {return mVolumeId/1000000 -1;}
+  ULong_t wafer()  const {return  (mVolumeId%1000000)/10000;} 
+  ULong_t side()   {return (mVolumeId%10);} //1=inner; 2=outer;
   
   // Willie: Added function wafer() to return wafer number (1-12)
-  unsigned long wafer() const;
-  
+  // unsigned long wafer() const;
   // Willie: Added function wafer() to return wafer number (1-10,1-13 for layers 1,2)
   // and side() to return ladder side (1=inner,2=outer)
-  ULong_t wafer() {return ((mVolumeId/100)%20);}
-  ULong_t side() {return (mVolumeId%10);} //1=inner; 2=outer;
+  // ULong_t wafer() {return ((mVolumeId/100)%20);}
+  // ULong_t side() {return (mVolumeId%10);} //1=inner; 2=outer;
+
   virtual void Print(Option_t *option="") const; // *MENU* 
   
 private:
