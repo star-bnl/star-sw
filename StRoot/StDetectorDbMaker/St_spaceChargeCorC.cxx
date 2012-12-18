@@ -76,25 +76,16 @@ TString St_spaceChargeCorC::getSpaceChargeString(Double_t scaleFactor)
       if (factor==0 || correction==0 || mult.Length()==0) continue;
       if (str.Length()) str += "+";
       str += Form("(%g)*(",correction);
-      Bool_t factorIsInt = (TMath::Abs(factor-TMath::Floor(factor)) < 1e-6);
-      if (factorIsInt && factor>0.5 && factor<1.5) {
-        str += mult;
-      } else {
+      Bool_t factorIsInt = (TMath::Abs(factor - ((double) TMath::Nint(factor))) < 1e-6);
+      if (factorIsInt && factor>0.5 && factor<1.5) str += mult;
+      else {
         if (use_powers) {
           if (factorIsInt && factor>1.5) {
             // use scaler*scaler*... form
-            while (factor>1.5) {
-              (str += mult) += "*";
-              factor--;
-            }
+            while (factor>1.5) { (str += mult) += "*"; factor--; }
             str += mult;
-          } else {
-            // use pow(scaler,factor) form
-            str += Form("pow(%s,%f)",mult.Data(),factor);
-          }
-        } else  {
-          (str += Form("%g)*(",factor)) += mult;
-        }
+          } else str += Form("pow(%s,%f)",mult.Data(),factor);
+        } else (str += Form("%g)*(",factor)) += mult;
       }
       if (offset!=0) str += Form("-(%g)",offset);
       str += ")";
