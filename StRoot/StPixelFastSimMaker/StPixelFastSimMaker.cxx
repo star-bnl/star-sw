@@ -5,6 +5,9 @@
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.44  2012/12/18 18:46:59  margetis
+ * update for DEV13 geometry
+ *
  * Revision 1.43  2010/09/01 20:31:47  fisyak
  * clean up unused varaibles
  *
@@ -346,11 +349,11 @@ Int_t StPixelFastSimMaker::Make()
 	for(int jj=0;jj<g2t_pix_hit->GetTableSize();jj++)
 	  {
 	    rad  = TMath::Sqrt(g2tPix[jj].x[0]*g2tPix[jj].x[0] + g2tPix[jj].x[1]*g2tPix[jj].x[1]);  
-	    if((rad>2.2) && (rad<2.7)) {
+	    if((rad>2.2) && (rad<3.0)) {
 	      counter_layer1++;
 	      LOG_DEBUG <<"radius="<<rad<<" id="<<g2tPix[jj].id <<" x="<<g2tPix[jj].x[0]<<" y="<<g2tPix[jj].x[1]<<" z="<<g2tPix[jj].x[2]<<" truth is "<<g2tPix[jj].track_p<<" dE= "<<g2tPix[jj].de <<" counter layer 1 =" << counter_layer1 << endm;
 	    }
-	    else if((rad>7.9) && (rad<8.2)) {
+	    else if((rad>7.9) && (rad<8.5)) {
 	      counter_layer2++;
 	      LOG_DEBUG <<"radius="<<rad<<" id="<<g2tPix[jj].id <<" x="<<g2tPix[jj].x[0]<<" y="<<g2tPix[jj].x[1]<<" z="<<g2tPix[jj].x[2]<<" truth is "<<g2tPix[jj].track_p<<" dE= "<<g2tPix[jj].de <<" counter layer 2 =" << counter_layer2 <<endm;
 	    }
@@ -358,14 +361,15 @@ Int_t StPixelFastSimMaker::Make()
       }
       LOG_DEBUG << " there is " << counter_layer1 << " hits in the first layer " << endm;
       LOG_DEBUG << " there is " << counter_layer2 << " hits in the second layer " << endm;
+      LOG_DEBUG <<" # of sectors : " << pixHitCol->numberOfLayers() << endm;
       //for(int k=0;k<g2t_pix_hit->GetNRows();k++){
       for (UInt_t k=0; k<pixHitCol->numberOfLayers(); k++){
 	if (pixHitCol->layer(k)){
-	  LOG_DEBUG<<"Layer "<<k+1<<endm;
+	  LOG_DEBUG<<"Sector "<<k+1<<endm;
 	  //simple simulator for perfect hits that just converts StMcPixelHit to StRnDHit
 	  //as of 11/21/08, hits are now smeared with resolution taken from hit error table
 	  UInt_t nh = pixHitCol->layer(k)->hits().size();
-	  LOG_DEBUG << " Number of hits in layer "<< k+1 <<" =" << nh << endm;
+	  LOG_DEBUG << " Number of hits in sector "<< k+1 <<" =" << nh << endm;
 	  for (UInt_t i = 0; i < nh; i++){
 	    counter++;
 	    int vid=g2tPix[k].volume_id;
@@ -374,9 +378,11 @@ Int_t StPixelFastSimMaker::Make()
 	    StMcHit *mcH = pixHitCol->layer(k)->hits()[i];
 	    StMcPixelHit* mcPix=dynamic_cast<StMcPixelHit*>(mcH);
 	    TString Path("");
-	    if(k==0) Path= Form("/HALL_1/CAVE_1/PXMO_1/PXLA_1/PLMI_%i/PLAC_1",mcPix->ladder());
-	    else Path=Form("/HALL_1/CAVE_1/PXMO_1/PXL1_2/PLM1_%i/PLA1_1",mcPix->ladder());
-	    //LOG_DEBUG<<"mc pixel hit location x: "<<g2tPix[k].x[0]<<"; y: "<<g2tPix[k].x[1]<<"; z: "<<g2tPix[k].x[2]<<endm;
+	    //if(k==0) Path= Form("/HALL_1/CAVE_1/PXMO_1/PXLA_1/PLMI_%i/PLAC_1",mcPix->ladder());
+	    //else Path=Form("/HALL_1/CAVE_1/PXMO_1/PXL1_2/PLM1_%i/PLA1_1",mcPix->ladder());
+	    Path= Form("/HALL_1/CAVE_1/IDSM_1/PXMO_1/PXLA_%i/LADR_%i/PLAC_1",layer,ladder);
+	    LOG_DEBUG<<"mc pixel hit location x: "<<g2tPix[k].x[0]<<"; y: "<<g2tPix[k].x[1]<<"; z: "<<g2tPix[k].x[2]<<endm;
+	    LOG_DEBUG <<" PATH: " << Path << endm;
 	    LOG_DEBUG<<"pixel hit layer/ladder is "<<layer<<"/"<<ladder<<" and volume id "<<vid<<endm;
 	    gGeoManager->RestoreMasterVolume();
 	    gGeoManager->CdTop();
@@ -409,9 +415,9 @@ Int_t StPixelFastSimMaker::Make()
 	      }
 	    tempHit->setIdTruth(truth,100);
 	    LOG_DEBUG<<"key() : "<< mcPix->key()-1 << " idTruth: "<< truth <<endm;
-	    //LOG_DEBUG <<"from g2t : x= " << g2tPix[k].x[0] <<"  y= " << g2tPix[k].x[1] <<"  z= " << g2tPix[k].x[2] << endm;
+	    LOG_DEBUG <<"from g2t : x= " << g2tPix[k].x[0] <<"  y= " << g2tPix[k].x[1] <<"  z= " << g2tPix[k].x[2] << endm;
 	    LOG_DEBUG<<"pixel rnd hit location x: "<<tempHit->position().x()<<"; y: "<<tempHit->position().y()<<"; z: "<<tempHit->position().z()<<endm;
-	    //LOG_DEBUG<<"pixel rnd hit location x: "<<tempHit->position().x()<<"; y: "<<tempHit->position().y()<<"; z: "<<tempHit->position().z()<<endm;
+LOG_DEBUG<<"pixel rnd hit location x: "<<tempHit->position().x()<<"; y: "<<tempHit->position().y()<<"; z: "<<tempHit->position().z()<<endm;
 	    col->addHit(tempHit);
 	  }
 	}
@@ -444,7 +450,7 @@ Int_t StPixelFastSimMaker::Make()
 	  StMcIstHit* mcI=dynamic_cast<StMcIstHit*>(mcH);
 	  LOG_DEBUG<<"mc ist hit location x: "<<mcI->position().x()<<"; y: "<<mcI->position().y()<<"; z: "<<mcI->position().z()<<endm;
 	  TString Path("");
-	  Path=Form("/HALL_1/CAVE_1/IBMO_1/IBMY_1/IBAM_%i/IBLM_%i/IBSS_1",mcI->ladder(),mcI->wafer());
+	  Path=Form("/HALL_1/CAVE_1/IDSM_1/IBMO_1/IBAM_%i/IBLM_%i/IBSS_1",mcI->ladder(),mcI->wafer());
 	  gGeoManager->RestoreMasterVolume();
 	  gGeoManager->CdTop();
 	  gGeoManager->cd(Path);
@@ -462,7 +468,7 @@ Int_t StPixelFastSimMaker::Make()
 	  tempHit->setDetectorId(kIstId); 
 	  tempHit->setVolumeId(mcI->volumeId());
 	  tempHit->setKey(mcI->key());
-	  tempHit->setLayer(1);           
+	  tempHit->setLayer(mcI->layer());           
 	  tempHit->setLadder(mcI->ladder());           
 	  tempHit->setWafer(mcI->wafer());
 	  tempHit->setIdTruth(g2tIst[kk].track_p,100);
