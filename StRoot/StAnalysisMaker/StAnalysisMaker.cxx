@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.22 2012/11/25 22:22:45 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.23 2012/12/18 17:16:26 fisyak Exp $
  *
  */
 
@@ -173,6 +173,39 @@ void StAnalysisMaker::PrintStEvent(TString opt) {
   }
 }
 //________________________________________________________________________________
+void StAnalysisMaker::PrintVertex(UInt_t ivx) {
+  // opt = vpg => "v" print vertex, "p" and primary tracks, "g" print global tracks 
+  StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
+  if (!pEvent) return;
+  cout << "Event: Run "<< pEvent->runId() << " Event No: " << pEvent->id() << endl;
+  UInt_t NpVX = pEvent->numberOfPrimaryVertices();
+  if (NpVX) {
+    for (UInt_t i = 0; i < NpVX; i++) {
+      if (i != ivx) continue;
+      const StPrimaryVertex *vx = pEvent->primaryVertex(i);
+      cout << Form("Vertex: %3i ",i) << *vx << endl;
+      UInt_t nDaughters = vx->numberOfDaughters();
+      for (UInt_t j = 0; j < nDaughters; j++) {
+	StPrimaryTrack* pTrack = (StPrimaryTrack*) vx->daughter(j);
+	if (! pTrack) continue;
+	cout << *pTrack << endl;
+	StPtrVecHit hvec = pTrack->detectorInfo()->hits();
+	for (UInt_t j=0; j<hvec.size(); j++) {// hit loop
+	  if (hvec[j]->detector() == kTpcId) {
+	    StTpcHit *tpcHit = static_cast<StTpcHit *> (hvec[j]);
+	    if (! tpcHit) continue;
+	    cout << *tpcHit << endl;
+	  } else {
+	    cout << *hvec[j] << endl;
+	  }
+	}
+      }
+    }
+  } else {
+    cout << "Event: Vertex Not Found" << endl;
+  }
+}
+//________________________________________________________________________________
 void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t IdTruth) {
   // plot = 1 => All hits;
   // plot = 2 => prompt hits only |z| > 190
@@ -211,6 +244,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 	      Long64_t NoHits = hits.size();
 	      TArrayL64 idxT(NoHits); Long64_t *idx = idxT.GetArray();
 #endif
+	      if (! NoHits) continue;
 	      TotalNoOfTpcHits += NoHits;
 	      TArrayD dT(NoHits);   Double_t *d = dT.GetArray();
 	      for (Long64_t k = 0; k < NoHits; k++) {
@@ -218,7 +252,8 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Int_t plot, Int_t Id
 		const StThreeVectorF& xyz = tpcHit->position();
 		d[k] = xyz.z();
 	      }
-	      TMath::Sort(NoHits,d,idx,kFALSE);
+	      idx[0] = 0;
+	      if (NoHits > 1) TMath::Sort(NoHits,d,idx,kFALSE);
 	      for (Long64_t k = 0; k < NoHits; k++) {
 		Int_t l = idx[k];
 		StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[l]);
@@ -263,6 +298,8 @@ void StAnalysisMaker::PrintEmcHits(Int_t det, Int_t mod, const Option_t *opt) {
   if (det >= 0 && det <= 7) {d1 = d2 = det;}
   for(Int_t d = d1; d <= d2; d++)  {  
     StDetectorId id = static_cast<StDetectorId>(d+kBarrelEmcTowerId);
+    if (id != kBarrelEmcTowerId && id != kEndcapEmcTowerId &&
+	! Opt.Contains("Pre",TString::kIgnoreCase)) continue;
     const StEmcDetector* detector=emccol->detector(id);
     if(detector) {                          
       Int_t maxMod = 121;
@@ -845,6 +882,9 @@ void StAnalysisMaker::summarizeEvent(StEvent *event, Int_t mEventCounter) {
 //________________________________________________________________________________
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.23  2012/12/18 17:16:26  fisyak
+ * Add PrintVertex
+ *
  * Revision 2.22  2012/11/25 22:22:45  fisyak
  * Add separators for summary
  *
