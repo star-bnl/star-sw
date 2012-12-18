@@ -1,6 +1,12 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.22 2010/10/20 20:05:06 fisyak Exp $
+// 12/12/2012 : modification of the builder to take into account the new geometry path names
+// backward compatibility with upgr15 geometry is lost
+
+// $Id: StiIstDetectorBuilder.cxx,v 1.23 2012/12/18 20:52:32 bouchet Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.23  2012/12/18 20:52:32  bouchet
+// update for DEV13 geometry
+//
 // Revision 1.22  2010/10/20 20:05:06  fisyak
 // Move SROD and SBSP from StiSvtDetectorBuilder to StiStarDetectorBuilder to account configurations without SVT detector installed (bug #2025)
 //
@@ -127,8 +133,8 @@ void StiIstDetectorBuilder::useVMCGeometry() {
   // Build the volume map and loop over all found volumes
   const VolumeMap_t IstVolumes[] = 
         { 
-          {"IBSS", "active silicon",  "HALL_1/CAVE_1/IBMO_1","",""}, 
-	  {"IBSP", "inactive silicon","HALL_1/CAVE_1/IBMO_1","",""}
+          {"IBSS", "active silicon",  "HALL_1/CAVE_1/IDSM_1/IBMO_1","",""}, 
+	  {"IBSP", "inactive silicon","HALL_1/CAVE_1/IDSM_1/IBMO_1","",""}
         };
   Int_t NoIstVols = sizeof(IstVolumes)/sizeof(VolumeMap_t);
   gGeoManager->RestoreMasterVolume(); 
@@ -154,10 +160,11 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   // decode detector ------------------------------
   nameP.ReplaceAll("HALL_1/CAVE_1/","");
   TString temp=nameP;
-  temp.ReplaceAll("/IBMO_1/IBMY","");
+  temp.ReplaceAll("IDSM_1/IBMO_1","");
   int q=temp.Index("_");
   temp.Replace(0,q+1,"");
-  TString num0=temp(0,1);
+  TString num0=temp(0,2);
+  if(!num0.IsDigit()) num0=temp(0,1);
   int layer=num0.Atoi();
   q=temp.Index("_");
   temp.Replace(0,q+1,"");
@@ -173,7 +180,7 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   temp.Replace(0,q+1,"");
   TString num3=temp(0,1);
   //  int side=num3.Atoi();
-  if(wafer!=1) return;
+  if(ladder!=1) return;
 
   // Check whether this is an active volume
   Bool_t ActiveVolume = kFALSE;
@@ -242,14 +249,18 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   StiDetector *pDetector = getDetectorFactory()->getInstance();
   pDetector->setName(nameP.Data());
   pDetector->setIsOn(false);
+  //addLayer is used to "create" another layer
+  //if hits are from the inactive silicon (addLayer==2), they will not be used
+  Int_t addLayer =0;
   if (ActiveVolume) {
     pDetector->setIsActive(new StiIstIsActiveFunctor);
     cout<<"active volume: "<<nameP<<endl;
+    addLayer = 1;
   }
   else {
     pDetector->setIsActive(new StiNeverActiveFunctor);
     cout<<"inactive volume: "<<nameP<<endl;
-    layer++;
+    addLayer =2;
   }
   pDetector->setIsContinuousMedium(false);
   pDetector->setIsDiscreteScatterer(true);
@@ -262,7 +273,7 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
 
   // Adding detector, note that no keys are set in IST!
   //add(ladder,wafer,pDetector);
-  add(layer,ladder,pDetector);
+  add(addLayer,layer,pDetector);
 
   LOG_INFO << "StiIstDetectorBuilder: Added detector -I- " << pDetector->getName() << endm;
 

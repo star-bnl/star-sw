@@ -72,9 +72,9 @@ void StiIstHitLoader::loadHits(StEvent* source,
 	//                             ladder    module           side    
 	//        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 	//MLM cout <<"retrieve detector"<<endl;
-	int layer=hit->layer();
-	int ladder=hit->ladder();
-	int wafer=hit->wafer();
+	int layer  = hit->layer();
+	int ladder = hit->ladder();
+	int wafer  = hit->wafer();
 	LOG_DEBUG<<"StiIstHitLoader: hit has ladder: "<<ladder<<"; wafer: "<<wafer<<endm;
 	LOG_DEBUG<<"StiIstHitLoader: hit volume id: "<<hit->volumeId()<<endm;
 	StiDetector* detector=0;
