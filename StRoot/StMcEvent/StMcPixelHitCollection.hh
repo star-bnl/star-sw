@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHitCollection.hh,v 2.4 2012/03/22 00:45:54 perev Exp $
+ * $Id: StMcPixelHitCollection.hh,v 2.5 2012/12/18 21:02:26 perev Exp $
  * $Log: StMcPixelHitCollection.hh,v $
+ * Revision 2.5  2012/12/18 21:02:26  perev
+ * Pixel development (Jonathan)
+ *
  * Revision 2.4  2012/03/22 00:45:54  perev
  * private => protected
  *
@@ -37,7 +40,7 @@ public:
     StMcPixelLayerHitCollection*       layer(unsigned int);
     const StMcPixelLayerHitCollection* layer(unsigned int) const;
 protected:
-    enum { mNumberOfLayers = 2 };
+    enum { mNumberOfLayers = 10 };
     StMcPixelLayerHitCollection mLayers[mNumberOfLayers];
     ClassDef(StMcPixelHitCollection,1)
 };
