@@ -132,15 +132,14 @@ void tofStatus(){
 
 
 
-	//Output values
-	if (0){
-	  for(int tray=0;tray<NTRAY;tray++){
-	    for(int channel=0;channel<NCHANNELTRAY;channel++){
-	      cout <<"Tray, channel, map: "<<tray<<", "<<channel<<", "<< tofmap[tray*NCHANNELTRAY+channel]<<endl;
-	      Status[0].status[channel+tray*NCHANNELTRAY]=tofmap[tray*NCHANNELTRAY+channel];
-	    }//channel
-	  }
+	// Move values to Status table.
+	for(int tray=0;tray<NTRAY;tray++){
+	  for(int channel=0;channel<NCHANNELTRAY;channel++){
+	    if (0)  cout <<"Tray, channel, map: "<<tray<<", "<<channel<<", "<< tofmap[tray*NCHANNELTRAY+channel]<<endl;
+	    Status[0].status[channel+tray*NCHANNELTRAY]=tofmap[tray*NCHANNELTRAY+channel];
+	  }//channel
 	}
+	
 
 	//Upload to Database.
 	tofStatus->SetTable((char*)Status,1);
