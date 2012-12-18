@@ -21,6 +21,8 @@ public:
 
  protected:
     StiMaterial * _fcMaterial;
+    StiMaterial *_siMat;
+    StiMaterial *_hybridMat;
 };
 
 inline double StiPixelDetectorBuilder::phiForSector(unsigned int sector) const

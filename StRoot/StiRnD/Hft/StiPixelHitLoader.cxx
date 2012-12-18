@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelHitLoader.cxx,v 1.23 2011/04/22 22:00:18 fisyak Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.24 2012/12/18 20:52:32 bouchet Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.24  2012/12/18 20:52:32  bouchet
+ * update for DEV13 geometry
+ *
  * Revision 1.23  2011/04/22 22:00:18  fisyak
  * warn off
  *
@@ -141,9 +144,7 @@ void StiPixelHitLoader::loadHits(StEvent* source,
       
       StiHit *stiHit=_hitFactory->getInstance();
 	if(!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
-	stiHit->reset();
-	
-	
+	stiHit->reset();	
 	
 	stiHit->setGlobal(detector, pxlH,
                           pxlH->position().x(), pxlH->position().y(),

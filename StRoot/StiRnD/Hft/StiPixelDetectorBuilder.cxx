@@ -1,7 +1,12 @@
+// 12/12/2012 : modification of the builder to take into account the new geometry path names
+// backward compatibility with upgr15 geometry is lost
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.27 2011/04/22 22:00:18 fisyak Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.28 2012/12/18 20:52:32 bouchet Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.28  2012/12/18 20:52:32  bouchet
+ * update for DEV13 geometry
+ *
  * Revision 1.27  2011/04/22 22:00:18  fisyak
  * warn off
  *
@@ -109,17 +114,27 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
   //_gas is the gas that the pixel detector lives in
   _gasMat            = add(new StiMaterial("PixelAir",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
   //_fcMaterial is the (average) material that makes up the detector elements.  Here I use ~silicon
-  StiMaterial * material = add(new StiMaterial("PixelSi", 14.,  28.0855,   2.33,     21.82,   14.*12.*1e-9) );
-
+  //StiMaterial * material = add(new StiMaterial("PixelSi", 14.,  28.0855,   2.33,     21.82,   14.*12.*1e-9) );
+  _siMat     = add(new StiMaterial("PixelSi", 14.,  28.0855,   2.33,     21.82,   14.*12.*1e-9) );
+  _hybridMat = add(new StiMaterial("PixelHyb", 14.,  28.0855,   2.33,     21.82,   14.*12.*1e-9) );
 
   //Instantiate energy loss detector for si material  
   //const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
-  double ionization = material->getIonization();
-  StiElossCalculator * siElossCalculator = new StiElossCalculator(material->getZOverA(),
+  //double ionization = material->getIonization();
+  double ionization = _siMat->getIonization();
+  /*
+    StiElossCalculator * siElossCalculator = new StiElossCalculator(material->getZOverA(),
+    ionization*ionization,
+    material->getA(),
+    material->getZ(),
+    material->getDensity());
+  */
+
+  StiElossCalculator * siElossCalculator = new StiElossCalculator(_siMat->getZOverA(),
 								  ionization*ionization,
-								  material->getA(),
-								  material->getZ(),
-								  material->getDensity());
+								  _siMat->getA(),
+								  _siMat->getZ(),
+								  _siMat->getDensity());
   StiPlanarShape *pShape;
   for (unsigned int row=0; row<nRows; row++) 
     {
@@ -153,7 +168,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 	  pDetector->setIsActive(new StiPixelIsActiveFunctor);
 	  pDetector->setIsContinuousMedium(true);
 	  pDetector->setIsDiscreteScatterer(false);
-	  pDetector->setMaterial(material);
+	  pDetector->setMaterial(_siMat);
 	  pDetector->setGas(_gasMat);
 	  pDetector->setGroupId(kPxlId);
 	  pDetector->setShape(pShape);
@@ -194,7 +209,8 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
   };
   Material_t map[] = {
     {"AIR", &_gasMat},
-    {"SILICON", &_fcMaterial} 
+    {"SILICON", &_siMat},
+    {"SILICON", &_hybridMat} 
   };
   Int_t M = sizeof(map)/sizeof(Material_t);
   for (Int_t i = 0; i < M; i++) 
@@ -218,14 +234,13 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
   // through loop over StiDetectorBuilder::AverageVolume
   const VolumeMap_t PxlVolumes[] = 
     { 
-      {"PLAC","Active ladder volume",   "HALL_1/CAVE_1/PXMO_1","",""},
-      {"PLA1","Active ladder volume",   "HALL_1/CAVE_1/PXMO_1","",""},
-      {"PLPS","Inactive ladder volume", "HALL_1/CAVE_1/PXMO_1","",""},
-      {"PLP1","Inactive ladder volume", "HALL_1/CAVE_1/PXMO_1","",""}
+      {"PLAC","Active ladder volume",     "HALL_1/CAVE_1/IDSM_1/PXMO_1","",""},
+      {"SIFL","InActive ladder volume",   "HALL_1/CAVE_1/IDSM_1/PXMO_1","",""},
+      {"SIFR","InActive ladder volume",   "HALL_1/CAVE_1/IDSM_1/PXMO_1","",""}
     };
 
   Int_t NoPxlVols = sizeof(PxlVolumes)/sizeof(VolumeMap_t);
-  TString pathT("HALL_1/CAVE_1/PXMO_1");
+  TString pathT("HALL_1/CAVE_1/IDSM_1/PXMO_1");
   gGeoManager->RestoreMasterVolume(); 
   gGeoManager->CdTop();
   TString path("");
@@ -326,12 +341,12 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     StiPlacement *pPlacement = new StiPlacement;
     pPlacement->setZcenter(0);
     pPlacement->setLayerRadius(centerVector.perp()); //this is only used for ordering in detector container...
-    pPlacement->setLayerAngle(centerVector.phi()); //this is only used for ordering in detector container...
-    /*
-    LOG_INFO << " -I- Setting detector center angle: " << centerVector.phi()
-	     << " offset: " << dY << " Ist style offset: "
-	     << centerVector.magnitude()*TMath::Sin(normalVector.phi() - centerVector.phi()) << endm;
-    */
+    if(nameP.Contains("PLAC")){ pPlacement->setLayerAngle(centerVector.phi());} //this is only used for ordering in detector container...
+    if(nameP.Contains("SIFL")){ pPlacement->setLayerAngle(centerVector.phi()-.05);}
+    if(nameP.Contains("SIFR")){ pPlacement->setLayerAngle(centerVector.phi()-.06);}
+    LOG_DEBUG << " -I- Setting detector center angle: " << centerVector.phi()
+	      << " offset: " << dY << " Ist style offset: "
+	      << centerVector.magnitude()*TMath::Sin(normalVector.phi() - centerVector.phi()) << endm;
     pPlacement->setRegion(StiPlacement::kMidRapidity);
     pPlacement->setNormalRep(normalVector.phi(), r, dY); 
 
@@ -364,10 +379,10 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     p->setName(nameP.Data());
 
     TString temp=nameP;
-    temp.ReplaceAll("HALL_1/CAVE_1/PXMO_1/","");
+    temp.ReplaceAll("HALL_1/CAVE_1/IDSM_1/PXMO_1/","");
     int q=temp.Index("_");
     temp.Replace(0,q+1,"");
-    TString numlay=temp(0,1);
+    TString numlay=temp(0,2);
     int layer=numlay.Atoi();
     q=temp.Index("_");
     temp.Replace(0,q+1,"");
@@ -376,14 +391,14 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     int ladder=numlad.Atoi();
 
     p->setIsOn(false);
-
-    p->setIsOn(false);
     if (ActiveVolume) {
       p->setIsActive(new StiPixelIsActiveFunctor);
     }
     else {
       p->setIsActive(new StiNeverActiveFunctor);
-      layer=layer+2;
+      //layer=layer+10;
+      if(nameP.Contains("SIFL")) {layer=layer+10;}
+      if(nameP.Contains("SIFR")) {layer=layer+20;}
     }
 
     p->setIsContinuousMedium(false);
