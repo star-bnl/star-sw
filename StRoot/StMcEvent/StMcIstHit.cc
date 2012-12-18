@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.cc,v 2.9 2011/10/17 00:24:00 fisyak Exp $
+ * $Id: StMcIstHit.cc,v 2.10 2012/12/18 21:01:53 perev Exp $
  * $Log: StMcIstHit.cc,v $
+ * Revision 2.10  2012/12/18 21:01:53  perev
+ * Ist development (Jonathan)
+ *
  * Revision 2.9  2011/10/17 00:24:00  fisyak
  * Add time of flight for hits
  *
@@ -46,7 +49,7 @@
 
 #include "StMcIstHit.hh"
 
-static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.9 2011/10/17 00:24:00 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.10 2012/12/18 21:01:53 perev Exp $";
 #ifdef POOL
 StMemoryPool StMcIstHit::mPool(sizeof(StMcIstHit));
 #endif
@@ -59,47 +62,6 @@ ostream&  operator<<(ostream& os, const StMcIstHit& h)
     return os;
 }
 
-ULong_t
-StMcIstHit::layer() const
-{
-  //Only one ist layer now (WL, 03/13/08)
-  /*
-  unsigned long iLayer = mVolumeId/1000000;
-  unsigned long layer;
-  if(iLayer<4) layer=iLayer-1;
-  else 
-    {
-      cout << "StMcIstHit::layer() -E- volumeId not known!" << endl;
-      layer = 10000; 
-    }
-  
-  return layer;
-  */
-  return 1;
-}
-
-ULong_t
-StMcIstHit::ladder() const
-{
-  //unsigned long iModule = (mVolumeId%1000000)/10000;
-  unsigned long iLadder=mVolumeId/1000000-1;
-  /*
-  unsigned long iLadder = 0;
-  if(iModule<=24) iLadder=iModule;
-  else 
-    {
-      cout << "StMcIstHit::ladder() -E- volumeId not known!" << endl;
-      iLadder = 10000; 
-    }
-  */
-  return iLadder;
-}
-
-unsigned long StMcIstHit::wafer() const
-{
-  unsigned long iWafer=(mVolumeId%1000000)/10000;
-  return iWafer;
-}
 //________________________________________________________________________________
 void StMcIstHit::Print(Option_t *option) const {
   cout << "IstHit\t"; 
