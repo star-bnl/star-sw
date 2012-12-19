@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.250 2012/12/14 16:13:56 jwebb Exp $
+* $Id: geometry.g,v 1.251 2012/12/19 14:48:39 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.251  2012/12/19 14:48:39  jwebb
+* Updates to support y2013 version of MTD.
+*
 * Revision 1.250  2012/12/14 16:13:56  jwebb
 * Updates for y2013 geometry.
 *
@@ -1145,10 +1148,12 @@ replace [exe MFLD54;] with [ MFLD=on; magField = 5.0; MfldConfig=4;]
 
 *                                                                                       Muon Telescope 
 
-replace [exe MUTD01;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 1;]
-replace [exe MUTD03;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 3;]
-replace [exe MUTD04;] with [ "MTD Run 11 - single backleg, 3 trays"; MUTD = on; MutdConfig = 4;]
-replace [exe MUTD05;] with [ "MTD Run 13 - 27 backlegs, 117 trays"; MUTD = on; MutdConfig = 5;]
+Replace [exe MUTD01;] with [ "Muon Trigger System";                   MUTD=on;   MutdConfig= 1;]
+Replace [exe MUTD03;] with [ "Muon Trigger System";                   MUTD=on;   MutdConfig= 3;]
+Replace [exe MUTD04;] with [ "MTD Run 11 - single backleg, 3 trays";  MUTD=on;   MutdConfig= 4;]
+Replace [exe MUTD05;] with [ "MTD Run 28 backlegs, 118 trays";        MUTD=on;   MutdConfig= 5;]
+Replace [exe MUTD12;] with [ "MTD Run 12 - 3  backlegs, 13 trays";    MUTD=on;   MutdConfig=12;]
+Replace [exe MUTD13;] with [ "MTD Run 13 - 15 backlegs, 75 trays";    MUTD=on;   MutdConfig=13;]
 
 
 
@@ -1915,7 +1920,7 @@ REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe SVTTof;      "No SVT";
     exe PHMDof;      "Photon mult detector on";
     exe SISDof;      "No sisd";
-    exe MUTD05;      "Muon telescope detector";
+    exe MUTD12;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
 
@@ -1937,7 +1942,7 @@ REPLACE [exe y2012a;] with ["y2012a production geometry tag";
     exe SVTTof;      "No SVT";
     exe PHMDof;      "Photon mult detector on";
     exe SISDof;      "No sisd";
-    exe MUTD05;      "Muon telescope detector";
+    exe MUTD12;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
     exe IDSM01;      "Inner detector support";
@@ -1963,7 +1968,7 @@ REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
     exe SVTTof;      "No SVT";
     exe PHMDof;      "Photon mult detector on";
     exe SISDof;      "No sisd";
-    exe MUTD05;      "Muon telescope detector";
+    exe MUTD13;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
     exe PIPEv1;      "The beam pipe";
 
@@ -1989,7 +1994,7 @@ REPLACE [exe y2013;] with ["Y2013 first cut geometry";
     exe SVTTof;      "No SVT";
     exe PHMDof;      "Photon mult detector on";
     exe SISDof;      "No sisd";
-    exe MUTD05;      "Muon telescope detector";
+    exe MUTD13;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
     exe PIPEv1;      "The beam pipe";
 
