@@ -588,8 +588,7 @@ Bool_t Geometry::ConstructMutd( const Char_t *flag, Bool_t go )
   if (!go) return true;
 
   AgStructure::AgDetpNew( mutdGeom.module, Form("Muon Tagging Detector with configuration %s",flag));
-  if ( mutdGeom.config == 4 ||
-       mutdGeom.config == 5 ) 
+  if ( mutdGeom.config >= 4 ) 
     AgStructure::AgDetpAdd( "Mtdg_t", "config", (Float_t)mutdGeom.config );
 
   if ( !CreateModule( mutdGeom.module ) )
@@ -1217,48 +1216,15 @@ Bool_t Geometry::MfldInit()
 Bool_t Geometry::MutdInit()
 {
 
-  mutdGeom.select="MUTDof";
-  {
-    mutdGeom.module = "None";
-    mutdGeom.config = 0;
-    mutdGeom.fill();
-  }
-  
+  mutdGeom.select="MUTDof";    mutdGeom.module = "None";    mutdGeom.config=0;      mutdGeom.fill();
+  mutdGeom.select="MUTD01";    mutdGeom.module="MutdGeo";   mutdGeom.config=1;      mutdGeom.fill();
+  mutdGeom.select="MUTD02";    mutdGeom.module="MutdGeo2";  mutdGeom.config=2;      mutdGeom.fill();
+  mutdGeom.select="MUTD03";    mutdGeom.module="MutdGeo3";  mutdGeom.config=3;      mutdGeom.fill();
+  mutdGeom.select="MUTD04";    mutdGeom.module="MutdGeo4";  mutdGeom.config=4;      mutdGeom.fill();
+  mutdGeom.select="MUTD05";    mutdGeom.module="MutdGeo4";  mutdGeom.config=5;      mutdGeom.fill();   
+  mutdGeom.select="MUTD12";    mutdGeom.module="MutdGeo4";  mutdGeom.config=12;     mutdGeom.fill();
+  mutdGeom.select="MUTD13";    mutdGeom.module="MutdGeo4";  mutdGeom.config=13;     mutdGeom.fill();
 
-  //replace [exe MUTD01;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 1;]
-  mutdGeom.select="MUTD01"; 
-  { 
-    mutdGeom.module="MutdGeo"; 
-    mutdGeom.config=1; 
-    mutdGeom.fill();
-  }
-  mutdGeom.select="MUTD02"; 
-  { 
-    mutdGeom.module="MutdGeo2"; 
-    mutdGeom.config=2; 
-    mutdGeom.fill();
-  }
-  //replace [exe MUTD03;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 3;]
-  mutdGeom.select="MUTD03"; 
-  {
-    mutdGeom.module="MutdGeo3"; 
-    mutdGeom.config=3; 
-    mutdGeom.fill();
-  }
-  //replace [exe MUTD04;] with [ "MTD Run 11 - single backleg, 3 trays"; MUTD = on; MutdConfig = 4;]
-  mutdGeom.select="MUTD04"; 
-  {
-    mutdGeom.module="MutdGeo4"; 
-    mutdGeom.config=4; 
-    mutdGeom.fill();
-  }
-  //replace [exe MUTD05;] with [ "MTD Run 13 - 27 backlegs, 117 trays"; MUTD = on; MutdConfig = 5;]
-  mutdGeom.select="MUTD05"; 
-  {
-    mutdGeom.module="MutdGeo4"; 
-    mutdGeom.config=5; 
-    mutdGeom.fill();  
-  }
   return true;
 }
 // ----------------------------------------------------------------------------
