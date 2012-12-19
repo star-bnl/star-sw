@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.50 2012/10/03 18:50:55 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.51 2012/12/19 17:22:40 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -69,7 +69,12 @@ daqReader::daqReader(char *mem, int size)
   input_type = pointer;
   
   data_memory = mem;
+  event_memory = mem;
+
   data_size = size;  
+  
+  file_size = size;
+  // LOG("JEFF", "filesize=%d mem=%p",file_size,mem);
 
   crit_cou = 0;
 
@@ -317,415 +322,427 @@ daqReader::~daqReader(void)
 
 char *daqReader::get(int num, int type)
 {
-  //  static int crit_cou = 30 ;
-  //static struct LOGREC lrhd ;
-  int ret ;
-  //int leftover, tmp ;
-  // char _evp_basedir_[40];
-  //static char _last_evp_dir_[40];
+    //  static int crit_cou = 30 ;
+    //static struct LOGREC lrhd ;
+    int ret ;
+    //int leftover, tmp ;
+    // char _evp_basedir_[40];
+    //static char _last_evp_dir_[40];
 
-  memset(trgIds, 0xffffffff, sizeof(trgIds));
-  trgIdsSet = 0;
-  trgIdsNotPresent = 0;
+    memset(trgIds, 0xffffffff, sizeof(trgIds));
+    trgIdsSet = 0;
+    trgIdsNotPresent = 0;
 
-  event_number++;
-  LOG(DBG, "processing nth event.  n=%d from %s %lld",event_number, getInputType(),evt_offset_in_file);
+    event_number++;
+    LOG(DBG, "processing nth event.  n=%d from %s %lld",event_number, getInputType(),evt_offset_in_file);
   
-  // nix some variables which may have no meaning for all streams...
-  evb_type = 0 ;
-  evb_type_cou = 0 ;
-  evb_cou = 0 ;
-  run = 0 ;
+    // nix some variables which may have no meaning for all streams...
+    evb_type = 0 ;
+    evb_type_cou = 0 ;
+    evb_cou = 0 ;
+    run = 0 ;
 
-  // check status of constructor or previous get()
+    // check status of constructor or previous get()
 	
-  int delay = getStatusBasedEventDelay();
-  if(delay) {
-    if(delay == -1) {
-      LOG(CRIT, "Exiting because of critical errors");
-      exit(0);
-    }
+    int delay = getStatusBasedEventDelay();
+    if(delay) {
+	if(delay == -1) {
+	    LOG(CRIT, "Exiting because of critical errors");
+	    exit(0);
+	}
 
-    LOG(DBG, "Delay of %d usec because of previous event status %d",delay, status);
-    usleep(delay);
-  }
+	LOG(DBG, "Delay of %d usec because of previous event status %d",delay, status);
+	usleep(delay);
+    }
 	  
-  // unmap previous event if any...
-  if(memmap->mem) {
-    memmap->unmap();
-  }
+    // unmap previous event if any...
+    if(memmap->mem) {
+	memmap->unmap();
+    }
 
-  if((input_type == dir) ||
-     (input_type == live)) {
+    if((input_type == dir) ||
+       (input_type == live)) {
     
-    if(getNextEventFilename(num, type) < 0) {
-      event_number--;
-      return NULL;
-    }
+	if(getNextEventFilename(num, type) < 0) {
+	    event_number--;
+	    return NULL;
+	}
 
-    if(openEventFile() < 0) {
-      if(input_type == dir) {
-	LOG(NOTE,"No File, but didn't see token 0 - stopping...",event_number) ;
-	status = EVP_STAT_EOR ;
-	event_number--;
-	//event_number = 1;
-      }
-      return NULL;
+	if(openEventFile() < 0) {
+	    if(input_type == dir) {
+		LOG(NOTE,"No File, but didn't see token 0 - stopping...",event_number) ;
+		status = EVP_STAT_EOR ;
+		event_number--;
+		//event_number = 1;
+	    }
+	    return NULL;
+	}
     }
-  }
   
-  // at this point:
-  //     1.  there is no file and we are memory mapped already
-  //     2.  (or) the file is opened...
-  //
-  // Why? either: 
-  //
-  //  1. Is a single event file in which case it was opened above
-  //     the current position is set to the begining of the file
-  // 
-  // (or)
-  // 
-  //  2. it is a multi-event file and the file is opened in the constructer
-  //     or remains open from the previous event.   The current position is set to 
-  //     the begining of the next event   (points at:  LRHD or DATAP or sfs FILE record)
-  //    
-  //if((input_type == file) || (input_type == pointer)) event_number++ ;
+    // at this point:
+    //     1.  there is no file and we are memory mapped already
+    //     2.  (or) the file is opened...
+    //
+    // Why? either: 
+    //
+    //  1. Is a single event file in which case it was opened above
+    //     the current position is set to the begining of the file
+    // 
+    // (or)
+    // 
+    //  2. it is a multi-event file and the file is opened in the constructer
+    //     or remains open from the previous event.   The current position is set to 
+    //     the begining of the next event   (points at:  LRHD or DATAP or sfs FILE record)
+    //    
+    //if((input_type == file) || (input_type == pointer)) event_number++ ;
 	
-  if(input_type == pointer) {   // start at beginning...
-    if(event_memory == NULL) event_memory = data_memory;
-  }
+    if(input_type == pointer) {   // start at beginning...
+	if(event_memory == NULL) 
+	    event_memory = data_memory;
+    }
 
-  // Sets:
-  //     event_size, lrhd_offset, datap_offset & status if failure...
+    // Sets:
+    //     event_size, lrhd_offset, datap_offset & status if failure...
 
  repeat:
 
-  int error = getEventSize();  
+    int error = getEventSize();  
 
-  if(status == EVP_STAT_LOG) { 
-    // we know this is a stand alone SFS file
-    // and we know it is a log message, or at least has no event
-    // try the next directory
+    if(status == EVP_STAT_LOG) { 
+	// we know this is a stand alone SFS file
+	// and we know it is a log message, or at least has no event
+	// try the next directory
 
-    LOG(DBG, "Skipping a non-event SFS file...");
+	LOG(DBG, "Skipping a non-event SFS file...");
 
-    lseek64(desc, event_size, SEEK_CUR);
-    evt_offset_in_file += event_size;
-    event_size = 0;
-    goto repeat;
-  }
+	lseek64(desc, event_size, SEEK_CUR);
+	evt_offset_in_file += event_size;
+	//LOG("JEFF", "evt_offset_in_file = %d",evt_offset_in_file);
+	event_size = 0;
+	goto repeat;
+    }
   
-  // We handle the possible padding bug by
-  // searching and tacking the extra padding to the end of the event
-  // where it can do us no harm...
-  //
-  int padchecks = 0;
-  for(;;) {
-    padchecks++;
-    int inc = addToEventSize(event_size);
+    // We handle the possible padding bug by
+    // searching and tacking the extra padding to the end of the event
+    // where it can do us no harm...
+    //
+    int padchecks = 0;
+    for(;;) {
+	padchecks++;
+	int inc = addToEventSize(event_size);
   
-    if(inc == 0) {
-      LOG(DBG, "No extra increment... event size=%d",event_size);
-      break;
+	if(inc == 0) {
+	    LOG(DBG, "No extra increment... event size=%d",event_size);
+	    break;
+	}
+
+	LOG(WARN, "Found a padding bug.  Adding %d to event size",inc);
+	event_size += inc;
+
+	if(padchecks > 5) {
+	    LOG(ERR, "Error finding next event...");
+	    status = EVP_STAT_EOR;
+	    return NULL;
+	}
     }
 
-    LOG(WARN, "Found a padding bug.  Adding %d to event size",inc);
-    event_size += inc;
+    LOG(DBG, "Event size is %d (%d) %d",event_size, error, status); 
 
-    if(padchecks > 5) {
-      LOG(ERR, "Error finding next event...");
-      status = EVP_STAT_EOR;
-      return NULL;
+    if(status == EVP_STAT_EOR) {
+	LOG(DBG, "Status = EOR");
+	return NULL;
     }
-  }
 
-  LOG(DBG, "Event size is %d (%d) %d",event_size, error, status); 
+    if(error == 0) {
+	status = EVP_STAT_EOR;
+	return NULL;
+    }
 
-  if(status == EVP_STAT_EOR) {
-    LOG(DBG, "Status = EOR");
-    return NULL;
-  }
+    if(error < 0) {
+	status = EVP_STAT_EVT;
+	return NULL;
+    }
 
-  if(error == 0) {
-    status = EVP_STAT_EOR;
-    return NULL;
-  }
+    if((event_size + evt_offset_in_file) > file_size) {
+	LOG(WARN,"This event is truncated... Good events %d [%d+%d > %d]...", total_events,evt_offset_in_file,event_size,file_size,0) ;
+	if((input_type == pointer) ||
+	   (input_type == dir)) {
+	    status = EVP_STAT_EVT ;
+	}
+	else {
+	    status = EVP_STAT_EOR ;
+	}
 
-  if(error < 0) {
-    status = EVP_STAT_EVT;
-    return NULL;
-  }
+	return NULL;
+    }
+    
 
-  if((event_size + evt_offset_in_file) > file_size) {
-    LOG(WARN,"This event is truncated... Good events %d [%d+%d > %d]...", total_events,evt_offset_in_file,event_size,file_size,0) ;
-    if((input_type == pointer) ||
-       (input_type == dir)) {
-      status = EVP_STAT_EVT ;
+    if(input_type != pointer) {
+	LOG(DBG, "Mapping event file %s, offset %d, size %d",
+	    file_name, evt_offset_in_file, event_size);
+    
+	char *mapmem = memmap->map(desc, evt_offset_in_file, event_size);
+	if(!mapmem) {
+	    LOG(CRIT, "Error mapping memory for event");
+	    exit(0);
+	}
     }
     else {
-      status = EVP_STAT_EOR ;
+	memmap->map_real_mem(event_memory, event_size);
     }
 
-    return NULL;
-  }
-    
+    LOG(DBG, "Event is now in memory:  start=0x%x, length=%d",memmap->mem,event_size);
 
-  if(input_type != pointer) {
-    LOG(DBG, "Mapping event file %s, offset %d, size %d",
-	file_name, evt_offset_in_file, event_size);
-    
-    char *mapmem = memmap->map(desc, evt_offset_in_file, event_size);
-    if(!mapmem) {
-      LOG(CRIT, "Error mapping memory for event");
-      exit(0);
-    }
-  }
-
-  LOG(DBG, "Event is now in memory:  start=0x%x, length=%d",memmap->mem,event_size);
-
-  // Neccessary?
-  if(input_type == pointer) {
-    if(run == 0) {
-      LOG(DBG, "Does this ever get called?");
-      run = readall_run;
-    }
-  }
-
-  LOG(DBG, "about to mount sfs file: %s %d 0x%x",file_name, evt_offset_in_file, sfs);
-
-  // Now, mount the sfs file...
-  // The mount unmounts and closes previous mount... 
-  LOG(DBG, "mounting single dir(mem): off=%d sz=%d",evt_offset_in_file, event_size);
-  ret = sfs->mountSingleDirMem(memmap->mem, event_size, evt_offset_in_file);
-
-  if(ret < 0) {
-    LOG(ERR, "Error mounting sfs?");
-    status = EVP_STAT_EVT;
-    return NULL;
-  }
-
-  // CD to the current event...
-  fs_dir *fsdir = sfs->opendir("/");
-  for(;;) {
-    fs_dirent *ent = sfs->readdir(fsdir);
-    if(!ent) {
-      sfs->closedir(fsdir);
-      LOG(ERR, "Error finding event directory in sfs?");
-
-      // Skip directory... go to next
-      status = EVP_STAT_EVT;
-      return NULL;
+    // Neccessary?
+    if(input_type == pointer) {
+	if(run == 0) {
+	    LOG(DBG, "Does this ever get called?");
+	    run = readall_run;
+	}
     }
 
-    LOG(DBG, "does dir (%s) satisfy '/#' or '/nnnn'",ent->full_name);
+    LOG(DBG, "about to mount sfs file: %s %d 0x%x",file_name, evt_offset_in_file, sfs);
 
-    if(memcmp(ent->full_name, "/#", 2) == 0) {
-      LOG(DBG, "change sfs dir to %s",ent->full_name);
+    // Now, mount the sfs file...
+    // The mount unmounts and closes previous mount... 
+    LOG(DBG, "mounting single dir(mem): off=%d sz=%d",evt_offset_in_file, event_size);
 
-      seq = atoi(&ent->full_name[2]);
 
-      sfs->cd(ent->full_name);
-      sfs->closedir(fsdir);
-      break;
+     
+    LOG(DBG, "[%c%c%c%c]",memmap->mem[0],memmap->mem[1],memmap->mem[2],memmap->mem[3]);
+
+    ret = sfs->mountSingleDirMem(memmap->mem, event_size, evt_offset_in_file);
+
+
+    if(ret < 0) {
+	LOG(ERR, "Error mounting sfs?");
+	status = EVP_STAT_EVT;
+	return NULL;
     }
 
-    if(allnumeric(&ent->full_name[1])) {
-      seq = atoi(&ent->full_name[1]);
-      sfs->cd(ent->full_name);
-      sfs->closedir(fsdir);
-      break;
-    }
+    // CD to the current event...
+    fs_dir *fsdir = sfs->opendir("/");
+    for(;;) {
+	fs_dirent *ent = sfs->readdir(fsdir);
+	if(!ent) {
+	    sfs->closedir(fsdir);
+	    LOG(ERR, "Error finding event directory in sfs?");
+
+	    // Skip directory... go to next
+	    status = EVP_STAT_EVT;
+	    return NULL;
+	}
+
+	LOG(DBG, "does dir (%s) satisfy '/#' or '/nnnn'",ent->full_name);
+
+	if(memcmp(ent->full_name, "/#", 2) == 0) {
+	    LOG(DBG, "change sfs dir to %s",ent->full_name);
+
+	    seq = atoi(&ent->full_name[2]);
+
+	    sfs->cd(ent->full_name);
+	    sfs->closedir(fsdir);
+	    break;
+	}
+
+	if(allnumeric(&ent->full_name[1])) {
+	    seq = atoi(&ent->full_name[1]);
+	    sfs->cd(ent->full_name);
+	    sfs->closedir(fsdir);
+	    break;
+	}
      
 
-    LOG(DBG, "SFS event directory not yet found: %s",ent->full_name);
-  }
-    
-  fs_dirent *datap = sfs->opendirent("legacy");
-  if(datap) {
-    mem = memmap->mem + datap->offset;
-    LOG(DBG, "Event has a datap bank at 0x%x",mem);
-  }
-  else {
-    mem = NULL;
-    LOG(DBG, "Event has no DATAP bank");
-  }
-
-
-  bytes = 0;
-  if(mem) {
-    bytes = event_size - (mem - memmap->mem);
-    LOG(DBG, "size = %d %d",event_size, bytes);
-  }
-
-  // Fill in run number
-  //
-  run = 0;
-  fs_dirent *lrhd_ent = sfs->opendirent("lrhd");
-  if(lrhd_ent) {
-    char *lrhd_buff = memmap->mem + lrhd_ent->offset;
-    LOGREC *lrhd_rec = (LOGREC *)lrhd_buff;
-    run = lrhd_rec->lh.run;
-
-    if(lrhd_rec->lh.byte_order != 0x04030201) {
-      run = swap32(run);
+	LOG(DBG, "SFS event directory not yet found: %s",ent->full_name);
     }
-  }
-
-
-  // Now we need to fill in the summary information from datap
-  //
-  SummaryInfo info;
-  fs_dirent *summary = sfs->opendirent("EventSummary");
-  if(summary) {
-    char *buff = memmap->mem + summary->offset;
-    fillSummaryInfo(&info,(gbPayload *)buff);
-    copySummaryInfoIn(&info);
-  }
-  else { // take it from datap
-    LOG(DBG, "No EventSummary, search for legacy datap");
-    summary = sfs->opendirent("legacy");
-    if(!summary) {
-      LOG(DBG, "No EventSummary and no DATAP... hacking summary info");
-      hackSummaryInfo();
+    
+    fs_dirent *datap = sfs->opendirent("legacy");
+    if(datap) {
+	mem = memmap->mem + datap->offset;
+	LOG(DBG, "Event has a datap bank at 0x%x",mem);
     }
     else {
-      char *buff = memmap->mem + summary->offset;
-      fillSummaryInfo(&info,(DATAP *)buff);
-      copySummaryInfoIn(&info);
+	mem = NULL;
+	LOG(DBG, "Event has no DATAP bank");
     }
-  }
-
-  // all done - all OK
-  status = EVP_STAT_OK ;
-  //tot_bytes += bytes ;
-  total_events++ ;
 
 
-  // move to next event although it may make no sense...
-  long long int endpos = lseek64(desc, 0, SEEK_CUR);
+    bytes = 0;
+    if(mem) {
+	bytes = event_size - (mem - memmap->mem);
+	LOG(DBG, "size = %d %d",event_size, bytes);
+    }
 
-  long long int nexteventpos = lseek64(desc, event_size, SEEK_CUR) ;
-	
-  LOG(DBG,"End of event:  start_offset=%d  end_offset=%lld, file size %lld",endpos,nexteventpos,file_size) ;
+    // Fill in run number
+    //
+    run = 0;
+    fs_dirent *lrhd_ent = sfs->opendirent("lrhd");
+    if(lrhd_ent) {
+	char *lrhd_buff = memmap->mem + lrhd_ent->offset;
+	LOGREC *lrhd_rec = (LOGREC *)lrhd_buff;
+	run = lrhd_rec->lh.run;
 
-  evt_offset_in_file = nexteventpos;
-
-  // Now we want to get detsinrun/evpgroupsinrun
-  // First read from the EvbSummary
-
-  fs_dirent *esum = sfs->opendirent("EvbSummary");
-  if(esum) {
-    LOG(DBG, "We've got an EvbSummary");
-    char *buff = (char *)memmap->mem + esum->offset;
-    EvbSummary *evbsum = (EvbSummary *)buff;
-    detsinrun = evbsum->detectorsInRun;
-    evpgroupsinrun = 0xffffffff;
-  }
-  else {
-    LOG(DBG, "No EvbSummary Record");
-    if(run != (unsigned int)runconfig->run) {
-      char rccnf_file[256];
-
-      runconfig->run = 0;   // set invalid to start...
-      
-      
-      if(input_type == live) {
-	sprintf(rccnf_file,"%s%s/%d/0",evp_disk,_evp_basedir_,run) ;
-      }
-      else if(input_type == dir) {
-	sprintf(rccnf_file,"%s/0",fname);
-      }
-      else if (input_type == file) {
-	sprintf(rccnf_file,"rccnf_%d.txt",run);
-      }
-      
-      if(input_type != pointer) {
-	if(getRccnf(rccnf_file, runconfig) < 0) {
-	  LOG(DBG, "No runconfig file %s",rccnf_file,0,0,0,0);
+	if(lrhd_rec->lh.byte_order != 0x04030201) {
+	    run = swap32(run);
 	}
-      }
-      
-      if(runconfig->run == 0) {
-	detsinrun = 0xffffffff;
+    }
+
+
+    // Now we need to fill in the summary information from datap
+    //
+    SummaryInfo info;
+    fs_dirent *summary = sfs->opendirent("EventSummary");
+    if(summary) {
+	char *buff = memmap->mem + summary->offset;
+	fillSummaryInfo(&info,(gbPayload *)buff);
+	copySummaryInfoIn(&info);
+    }
+    else { // take it from datap
+	LOG(DBG, "No EventSummary, search for legacy datap");
+	summary = sfs->opendirent("legacy");
+	if(!summary) {
+	    LOG(DBG, "No EventSummary and no DATAP... hacking summary info");
+	    hackSummaryInfo();
+	}
+	else {
+	    char *buff = memmap->mem + summary->offset;
+	    fillSummaryInfo(&info,(DATAP *)buff);
+	    copySummaryInfoIn(&info);
+	}
+    }
+
+    // all done - all OK
+    status = EVP_STAT_OK ;
+    //tot_bytes += bytes ;
+    total_events++ ;
+
+
+    // move to next event although it may make no sense...
+    long long int endpos = lseek64(desc, 0, SEEK_CUR);
+
+    long long int nexteventpos = lseek64(desc, event_size, SEEK_CUR) ;
+	
+    LOG(DBG,"End of event:  start_offset=%d  end_offset=%lld, file size %lld",endpos,nexteventpos,file_size) ;
+
+    evt_offset_in_file = nexteventpos;
+    //LOG("JEFF", "evt_offset_in_file = %d",evt_offset_in_file);
+
+    // Now we want to get detsinrun/evpgroupsinrun
+    // First read from the EvbSummary
+
+    fs_dirent *esum = sfs->opendirent("EvbSummary");
+    if(esum) {
+	LOG(DBG, "We've got an EvbSummary");
+	char *buff = (char *)memmap->mem + esum->offset;
+	EvbSummary *evbsum = (EvbSummary *)buff;
+	detsinrun = evbsum->detectorsInRun;
 	evpgroupsinrun = 0xffffffff;
-      }
-      else {
-	detsinrun = runconfig->detMask;
-	evpgroupsinrun = runconfig->grpMask;
-      }
     }
-  }
+    else {
+	LOG(DBG, "No EvbSummary Record");
+	if(run != (unsigned int)runconfig->run) {
+	    char rccnf_file[256];
 
-  /* Tonko; May 11, 2012
-     Catch the TPC FY12 UU future-protection bug
-  */
-  detector_bugs = 0;	// clear them all first
+	    runconfig->run = 0;   // set invalid to start...
+      
+      
+	    if(input_type == live) {
+		sprintf(rccnf_file,"%s%s/%d/0",evp_disk,_evp_basedir_,run) ;
+	    }
+	    else if(input_type == dir) {
+		sprintf(rccnf_file,"%s/0",fname);
+	    }
+	    else if (input_type == file) {
+		sprintf(rccnf_file,"rccnf_%d.txt",run);
+	    }
+      
+	    if(input_type != pointer) {
+		if(getRccnf(rccnf_file, runconfig) < 0) {
+		    LOG(DBG, "No runconfig file %s",rccnf_file,0,0,0,0);
+		}
+	    }
+      
+	    if(runconfig->run == 0) {
+		detsinrun = 0xffffffff;
+		evpgroupsinrun = 0xffffffff;
+	    }
+	    else {
+		detsinrun = runconfig->detMask;
+		evpgroupsinrun = runconfig->grpMask;
+	    }
+	}
+    }
 
-  if(detectors & (1 << TPX_ID)) {
-    if((run >= 13114025) && (run < 13130030)) {
-      if(trgcmd == 4) {
+    /* Tonko; May 11, 2012
+       Catch the TPC FY12 UU future-protection bug
+    */
+    detector_bugs = 0;	// clear them all first
 
-	for(int s=1;s<=24;s++) {
-	  for(int r=1;r<=6;r++) {
-	    // skip known dead RDOs during this period
-	    if((s==5) && (r==1)) continue ;
-	    if((s==6) && (r==1)) continue ;
-	    if((s==7) && (r==1)) continue ;
-	    if((s==14) && (r==3)) continue ;
-	    if((s==21) && (r==1)) continue ;
-	    if((s==22) && (r==2)) continue ;
+    if(detectors & (1 << TPX_ID)) {
+	if((run >= 13114025) && (run < 13130030)) {
+	    if(trgcmd == 4) {
+
+		for(int s=1;s<=24;s++) {
+		    for(int r=1;r<=6;r++) {
+			// skip known dead RDOs during this period
+			if((s==5) && (r==1)) continue ;
+			if((s==6) && (r==1)) continue ;
+			if((s==7) && (r==1)) continue ;
+			if((s==14) && (r==3)) continue ;
+			if((s==21) && (r==1)) continue ;
+			if((s==22) && (r==2)) continue ;
 
 	
-	    char name[32] ;
+			char name[32] ;
 
-	    sprintf(name,"tpx/sec%02d/cld%02d",s,r) ;
-	    if(!get_sfs_name(name)) {
-	      detectors &= ~(1<<TPX_ID) ;
-	      LOG(WARN,"run %d, seq %d -- removing TPX due to FY12 UU future-protection bug",run,seq) ;
+			sprintf(name,"tpx/sec%02d/cld%02d",s,r) ;
+			if(!get_sfs_name(name)) {
+			    detectors &= ~(1<<TPX_ID) ;
+			    LOG(WARN,"run %d, seq %d -- removing TPX due to FY12 UU future-protection bug",run,seq) ;
 
-	      detector_bugs |= (1<<TPX_ID) ;	// set tje bug status
-	      goto bug_check_done ;
+			    detector_bugs |= (1<<TPX_ID) ;	// set tje bug status
+			    goto bug_check_done ;
+			}
+		    }
+		}
 	    }
-	  }
 	}
-      }
+    bug_check_done:;
     }
-  bug_check_done:;
-  }
 
-  // Tonko: before we return, call Make which prepares the DETs for operation...
-  //Make() ;
+    // Tonko: before we return, call Make which prepares the DETs for operation...
+    //Make() ;
 
-  // *****
-  // jml 2/13/07
-  // now we return pointer to this
-  // get datap by evp->mem
-  //
-  // why? each reader needs to know whether it is acting on 
-  // a sfs file or a .daq buffer
-  //
-  // the current design is messed up in that every detector bank
-  // is global and static while the evpReader is a class
-  // that can have multiple instances.   the detReader functions
-  // used to take datap pointers so nothing at all could be passed
-  // to them.   At least this hack doesn't require modifications to
-  // existing code...
-  //
+    // *****
+    // jml 2/13/07
+    // now we return pointer to this
+    // get datap by evp->mem
+    //
+    // why? each reader needs to know whether it is acting on 
+    // a sfs file or a .daq buffer
+    //
+    // the current design is messed up in that every detector bank
+    // is global and static while the evpReader is a class
+    // that can have multiple instances.   the detReader functions
+    // used to take datap pointers so nothing at all could be passed
+    // to them.   At least this hack doesn't require modifications to
+    // existing code...
+    //
 
-  // ****
-  // old false comment...
-  // return the pointer at the beginning of DATAP!
-  // at this point we return the pointer to READ_ONLY DATAP
-  // the event size is "bytes"
-  // ****
-  return (char *)this;
+    // ****
+    // old false comment...
+    // return the pointer at the beginning of DATAP!
+    // at this point we return the pointer to READ_ONLY DATAP
+    // the event size is "bytes"
+    // ****
+    return (char *)this;
 }
 
 
 // Skip n events then, call get...
 char *daqReader::skip_then_get(int numToSkip, int num, int type)
 {
-  LOG("JEFF", "into skip");
+    //LOG("JEFF", "into skip");
   if(input_type != file) {
     LOG(CRIT, "Can't call skip_then_get unless running from file...");
     status = EVP_STAT_EVT;
@@ -745,6 +762,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     if(status == EVP_STAT_LOG) {  
       lseek64(desc, event_size, SEEK_CUR);
       evt_offset_in_file += event_size;
+      //LOG("JEFF", "evt_offset_in_file = %d",evt_offset_in_file);
       event_size = 0;
       goto repeat2;
     }
@@ -795,6 +813,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     LOG(DBG, "skip evt pos = %lld", nexteventpos);
 
     evt_offset_in_file += event_size;
+    //LOG("JEFF", "evt_offset_in_file = %d",evt_offset_in_file);
   }
 
   LOG(DBG, "out of skip");
@@ -858,12 +877,17 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     long long int offset = 0;
     long long int space_left;
 
+    //LOG("JEFF", "Get event size");
+
     status = EVP_STAT_OK;
     event_size = 0;
 
     if(input_type == pointer) {
       m = event_memory;
       space_left = data_size - (m - data_memory);
+
+
+      //LOG("JEFF", "space_left=%d ds=%d m-dm=%d",space_left,data_size,m-data_memory);
     }
     else {
       offset = lseek64(desc, 0, SEEK_CUR);
@@ -884,6 +908,8 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     }
 
   
+    //LOG("JEFF", "space_left=%d",space_left);
+
     if(space_left == 0) return 0;
     if(space_left < (long long int)sizeof(LOGREC)) {
       LOG(NOTE, "File truncated: only %lld bytes left",space_left);
@@ -898,12 +924,12 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     while((memcmp(m, "LRHD", 4) != 0) &&
 	  (memcmp(m, "DATAP", 5) != 0)) {
     
-      LOG(DBG, "Event starts with %c%c%c%c%c not LRHD or DATAP.  Check if sfs file...",m[0],m[1],m[2],m[3],m[4]);
+	//LOG("JEFF", "Event starts with %c%c%c%c%c not LRHD or DATAP.  Check if sfs file...",m[0],m[1],m[2],m[3],m[4]);
     
       sfs_index *tmp_sfs = new sfs_index();
       int sz = tmp_sfs->getSingleDirSize(file_name, evt_offset_in_file);
 
-      LOG(DBG, "single dir size = %d",sz);
+      //LOG("JEFF", "single dir size = %d",sz);
 
       // Check to see if its a valid directory...
       if(sz > 0) {
@@ -938,6 +964,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
 
 	if(satisfy == 0) {
 	  status = EVP_STAT_LOG;
+	  //LOG("JEFF", "STATLOG");
 	} 
 
 	tmp_sfs->umount();
@@ -956,6 +983,8 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       ret = 0;
       goto done;
     }
+
+    // LOG("JEFF", "here?");
 
     //  Now at the start of the real event!
     //
@@ -1019,15 +1048,21 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       }
     }
 
+    //LOG("JEFF", "here");
+
     // This is a valid event!
     ret = 0;
 
     // Have the DATA LRHD in *m	
+    //LOG("JEFF", "event_size=%d",event_size);
+
     swap = (lrhd->lh.byte_order == 0x04030201) ? 0 : 1;
     event_size += qswap32(swap,lrhd->length) * 4;
 
+    //LOG("JEFF", "here %d",event_size);
   done:
 
+    //LOG("JEFF", "event_size=%d",event_size);
     if(ret == 0) {
       ret = event_size;
     }
@@ -1183,25 +1218,25 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
 
     u_int version = pay->gbPayloadVersion;
 
-    LOG(NOTE, "version = 0x%x", version);
+    LOG(DBG, "version = 0x%x", version);
 
     if(((version & 0xff000000) != 0xda000000) && ((b2h32(version) & 0x000000ff ) != 0x40)) {   // Version 0x01
-      LOG(NOTE, "gbPayload version 0x10");
+      LOG(DBG, "gbPayload version 0x10");
 
       gbPayload_0x01 *pv = (gbPayload_0x01 *)pay;
-      LOG(NOTE, "gbPayload 0x01:  v#=0x%x",b2h32(version));    // picked up from big endian evtdes
+      LOG(DBG, "gbPayload 0x01:  v#=0x%x",b2h32(version));    // picked up from big endian evtdes
       return fillSummaryInfo_v01(info, pv);
     }
 
     if(((version & 0xff000000) != 0xda000000) && ((b2h32(version) & 0x000000ff ) == 0x40)) {   // Version 0x01a
-      LOG(NOTE, "gbPayload version 0x01a");
+      LOG(DBG, "gbPayload version 0x01a");
       gbPayload_0x01a *pv = (gbPayload_0x01a *)pay;
-      LOG(NOTE, "gbPayload 0x01a:  v#=0x%x", b2h32(version));  // picked up from big endian evtdesc
+      LOG(DBG, "gbPayload 0x01a:  v#=0x%x", b2h32(version));  // picked up from big endian evtdesc
       return fillSummaryInfo_v01a(info, pv);
     }
 
     if(version == GB_PAYLOAD_VERSION) {
-      LOG(NOTE, "gbPayload 0x02: v#=0x%x",b2h32(version));
+      LOG(DBG, "gbPayload 0x02: v#=0x%x",b2h32(version));
       return fillSummaryInfo_v02(info, pay);
     }
 
@@ -1213,7 +1248,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
   int daqReader::fillSummaryInfo_v02(SummaryInfo *info, gbPayload *pay) {
     // gbPayload is mostly little endian...
 
-    LOG(NOTE, "gbPayloadVersion=0x%x, trgVersion=0x%x", pay->gbPayloadVersion, pay->EventDescriptor.TrgDataFmtVer);
+    LOG(DBG, "gbPayloadVersion=0x%x, trgVersion=0x%x", pay->gbPayloadVersion, pay->EventDescriptor.TrgDataFmtVer);
 
     info->token = l2h32(pay->token);
     info->evt_time = l2h32(pay->sec);
@@ -1238,7 +1273,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
 
   int daqReader::fillSummaryInfo_v01a(SummaryInfo *info, gbPayload_0x01a *pay)
   {  
-    LOG(NOTE, "gbPayloadVersion=0xda000001, trgVersion=0x%x", pay->EventDescriptor.TrgDataFmtVer);
+    LOG(DBG, "gbPayloadVersion=0xda000001, trgVersion=0x%x", pay->EventDescriptor.TrgDataFmtVer);
 
     // gbPayload is mostly little endian...
     info->token = l2h32(pay->token);
@@ -1264,7 +1299,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
 
   int daqReader::fillSummaryInfo_v01(SummaryInfo *info, gbPayload_0x01 *pay)
   {  
-    LOG(NOTE, "gbPayloadVersion=0xda000001, trgVersion=0x%x", pay->EventDescriptor.TrgDataFmtVer);
+    LOG(DBG, "gbPayloadVersion=0xda000001, trgVersion=0x%x", pay->EventDescriptor.TrgDataFmtVer);
 
     // gbPayload is mostly little endian...
     info->token = l2h32(pay->token);
@@ -1372,6 +1407,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
     //if((num == 0) || !readall_rundone) {
     if(!readall_rundone) {
       int timedout=0;
+
       ret = evtwait(evpDesc, &m) ;
 
       // got some reply here so nix issued
@@ -1581,7 +1617,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
 	}
       }
 
-      LOG(NOTE,"det %s not yet created... attempting through factory...",which) ;
+      LOG(DBG,"det %s not yet created... attempting through factory...",which) ;
       int id = -1000 ;	// assume not found
 
       // not yet created; try real dets first...
@@ -1912,6 +1948,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
 
   static int ask(int desc, ic_msg *m)
     {
+
       int ret ;
       time_t tm ;
       int jj ;
@@ -2140,7 +2177,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       actual_mem_start=NULL; 
       actual_size=0; 
       fd = -1;
-
+      real_mem = 0;
       page_size = sysconf(_SC_PAGESIZE);
     }
 
@@ -2149,6 +2186,15 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       unmap();    
     }
 
+char *MemMap::map_real_mem(char *buffer, int _size)
+{
+    offset = 0;
+    size = _size;
+    fd = 0;
+    real_mem = 1;
+    mem = buffer;
+    return mem;
+}
 
   char *MemMap::map(int _fd, long long int _offset, int _size)
     {
@@ -2189,8 +2235,13 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
   {
     if(mem==NULL) return;
 
-    madvise(actual_mem_start, actual_size, MADV_DONTNEED);
-    munmap(actual_mem_start, actual_size);
+    if(real_mem) {
+	real_mem = 0;
+    }
+    else {
+	madvise(actual_mem_start, actual_size, MADV_DONTNEED);
+	munmap(actual_mem_start, actual_size);
+    }
 
     mem=NULL;
     offset=0;
@@ -2239,7 +2290,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       return ret;
     }
     if(ret == 0) {
-      LOG(NOTE, "End of file reading next dir...");
+      LOG(DBG, "End of file reading next dir...");
       delete nsfs;
       return ret;
     }

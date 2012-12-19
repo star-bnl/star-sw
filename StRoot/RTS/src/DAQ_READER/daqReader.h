@@ -306,6 +306,9 @@ class MemMap {
 
   long long int offset;
   int size;
+
+  int real_mem;  // map real mem?
+  char *map_real_mem(char *buffer, int _size);
  private:
   int page_size;
   long long int actual_offset;
