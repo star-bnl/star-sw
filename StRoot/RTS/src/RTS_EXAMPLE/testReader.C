@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 
   for(;;) {
     timer.reset();
+    //char *ret = evp->skip_then_get(4700,0,EVP_TYPE_ANY);
     char *ret = evp->get(0,EVP_TYPE_ANY);
     t = timer.currtime();
 
@@ -61,18 +62,25 @@ int main(int argc, char *argv[])
       case EVP_STAT_OK:   // just a burp!
 	LOG("JEFF", "Got empty in %lf seconds",t);
 	continue;
+
       case EVP_STAT_EOR:
 	LOG("JEFF", "Got   EOR in %lf seconds", t);
-	break;        // file, we're done...
+	break;
+
       case EVP_STAT_EVT:
 	bad++;
 	LOG("JEFF", "Got   ERR in %lf seconds", t);
 	continue;
+
       case EVP_STAT_CRIT:
 	LOG(CRIT,"evp->status CRITICAL (?)") ;
 	return -1;
       }
+      break;
     }
+
+
+    printf("evp->seq=%d n=%d\n",evp->seq,evp->event_number);
   }
   
   delete evp ; 
