@@ -473,6 +473,7 @@ so we keep it here for source compatibility
 #define L4_NODES(x)     ((EXT2_SYSTEM<<12) | (L4_SYSTEM<<7) | (x))
 #define L4_CAL_INSTANCE  120
 #define L4_EVP_INSTANCE  121
+#define L4_CAL_NODE     ((EXT2_SYSTEM<<12) | (L4_SYSTEM<<7) | L4_CAL_INSTANCE)
 #define L4_EVP          ((EXT2_SYSTEM<<12) | (L4_SYSTEM<<7) | L4_EVP_INSTANCE)
 #define L4_EVB(x)       ((EXT2_SYSTEM<<12) | (L4_SYSTEM<<7) | (L4_EVP_INSTANCE + 1 + x))
 
