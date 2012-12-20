@@ -4,9 +4,11 @@
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtHitCollection.h"
 #include "StRoot/StEvent/StFgtHit.h"
+#include "StRoot/StEvent/StFgtStrip.h"
 
 #include "StRoot/StMuDSTMaker/COMMON/StMuDst.h"
 #include "StRoot/StMuDSTMaker/COMMON/StMuFgtStrip.h"
+#include "StRoot/StMuDSTMaker/COMMON/StMuFgtAdc.h"
 #include "StRoot/StMuDSTMaker/COMMON/StMuFgtCluster.h"
 #include "StRoot/StMuDSTMaker/COMMON/StMuFgtStripAssociation.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
@@ -25,8 +27,9 @@
 #endif
 
 
-StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), chargeMatchCut(1.5),evtNr(0),m_effDisk(2)
+StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ),evtNr(0),m_effDisk(2), fgtCollection(0)
 {
+  chargeMatchCut=1.5;
   pClusters=new vector<generalCluster>*[6];
   pClusters[0]=&clustersD1;
   pClusters[1]=&clustersD2;
@@ -40,53 +43,53 @@ StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ), chargeM
   if( !fgtDbMkr ){
     LOG_FATAL << "StFgtDb not provided and error finding StFgtDbMaker" << endm;
   }
-    mDb = fgtDbMkr->getDbTables();
-    if( !mDb ){
-      LOG_FATAL << "StFgtDb not provided and error retrieving pointer from StFgtDbMaker '"
-		<< fgtDbMkr->GetName() << endm;
-    }
+  mDb = fgtDbMkr->getDbTables();
+  if( !mDb ){
+    LOG_FATAL << "StFgtDb not provided and error retrieving pointer from StFgtDbMaker '"
+	      << fgtDbMkr->GetName() << endm;
+  }
   chargeMaxAdcCorr=new TH2D("chargeMaxAdcCorr","chargeMaxAdcCorr",50,0,10000,50,0,1000);
-    chargeMaxAdcIntCorr=new TH2D("chargeMaxIntAdcCorr","chargeMaxAdcIntCorr",50,0,10000,50,0,1000);
-    hIpZEv=new TH1D("IP_ZEv","IP_ZEv",70,-150,150);
-    clusWChargeMatch=new TH1D("clusWChargeMatch","clusWChargeMatch",101,0,100);
-    clusWOChargeMatch=new TH1D("clusWOChargeMatch","clusWOChargeMatch",101,0,100);
-    char buffer[100];
-    hNumPulsesP=new TH1D*[6*4];
-    hNumChargesP=new TH1D*[6*4];
-    hNumPulsesR=new TH1D*[6*4];
-    hNumChargesR=new TH1D*[6*4];
-    hNumClustersP=new TH1D*[6*4];
-    hNumClustersR=new TH1D*[6*4];
+  chargeMaxAdcIntCorr=new TH2D("chargeMaxIntAdcCorr","chargeMaxAdcIntCorr",50,0,10000,50,0,1000);
+  hIpZEv=new TH1D("IP_ZEv","IP_ZEv",70,-150,150);
+  clusWChargeMatch=new TH1D("clusWChargeMatch","clusWChargeMatch",101,0,100);
+  clusWOChargeMatch=new TH1D("clusWOChargeMatch","clusWOChargeMatch",101,0,100);
+  char buffer[100];
+  hNumPulsesP=new TH1D*[6*4];
+  hNumChargesP=new TH1D*[6*4];
+  hNumPulsesR=new TH1D*[6*4];
+  hNumChargesR=new TH1D*[6*4];
+  hNumClustersP=new TH1D*[6*4];
+  hNumClustersR=new TH1D*[6*4];
 
 
-    for(int iD=0;iD<6;iD++)
-      {
-	for(int iQ=0;iQ<4;iQ++)
-	  {
-	    sprintf(buffer,"validPulsesP_D%d_Q%d",iD+1,iQ);
-	    hNumPulsesP[iD*4+iQ]=new TH1D(buffer,buffer,100,0,100);
-	    sprintf(buffer,"validPulsesR_D%d_Q%d",iD+1,iQ);
-	    hNumPulsesR[iD*4+iQ]=new TH1D(buffer,buffer,100,0,100);
-	    sprintf(buffer,"validChargesR_D%d_Q%d",iD+1,iQ);
-	    hNumChargesR[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
-	    sprintf(buffer,"validChargesP_D%d_Q%d",iD+1,iQ);
-	    hNumChargesP[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
-	    sprintf(buffer,"validClustersP_D%d_Q%d",iD+1,iQ);
-	    hNumClustersP[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
-	    sprintf(buffer,"validClustersR_D%d_Q%d",iD+1,iQ);
-	    hNumClustersR[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
-	  }
-      }
-    sprintf(fileBase,".");
+  for(int iD=0;iD<6;iD++)
+    {
+      for(int iQ=0;iQ<4;iQ++)
+	{
+	  sprintf(buffer,"validPulsesP_D%d_Q%d",iD+1,iQ);
+	  hNumPulsesP[iD*4+iQ]=new TH1D(buffer,buffer,100,0,100);
+	  sprintf(buffer,"validPulsesR_D%d_Q%d",iD+1,iQ);
+	  hNumPulsesR[iD*4+iQ]=new TH1D(buffer,buffer,100,0,100);
+	  sprintf(buffer,"validChargesR_D%d_Q%d",iD+1,iQ);
+	  hNumChargesR[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
+	  sprintf(buffer,"validChargesP_D%d_Q%d",iD+1,iQ);
+	  hNumChargesP[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
+	  sprintf(buffer,"validClustersP_D%d_Q%d",iD+1,iQ);
+	  hNumClustersP[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
+	  sprintf(buffer,"validClustersR_D%d_Q%d",iD+1,iQ);
+	  hNumClustersR[iD*4+iQ]=new TH1D(buffer,buffer,200,0,200);
+	}
+    }
+
 
 }
-
 
 void StFgtGeneralBase::SetFileBase(const Char_t* m_filebase)
 {
   cout <<"setting file base to " << m_filebase <<endl;
   sprintf(fileBase,"%s",m_filebase);
 }
+
 
 Int_t StFgtGeneralBase::Finish()
 {
@@ -101,28 +104,28 @@ Int_t StFgtGeneralBase::Finish()
   ///---->  c.SaveAs("ipZEv.png");
   cout <<"done saving" <<endl;
   char buffer[100];
-  sprintf(buffer,"%s/pulses.root",fileBase);
+
   TFile f(buffer,"recreate");
   clusWChargeMatch->Write();
   clusWOChargeMatch->Write();
-    for(int iD=0;iD<6;iD++)
-      {
-	for(int iQ=0;iQ<4;iQ++)
-	  {
-	    hNumPulsesP[iD*4+iQ]->Write();
-	    hNumChargesP[iD*4+iQ]->Write();
-	    hNumClustersP[iD*4+iQ]->Write();
-	    hNumPulsesR[iD*4+iQ]->Write();
-	    hNumChargesR[iD*4+iQ]->Write();
-	    hNumClustersR[iD*4+iQ]->Write();
-	  }
-      }
-    cout <<"writing..." <<endl;
-    f.Write();
-    cout <<"closing file" <<endl;
-    f.Close();
-    cout <<"return" <<endl;
-    return kStOk;
+  for(int iD=0;iD<6;iD++)
+    {
+      for(int iQ=0;iQ<4;iQ++)
+	{
+	  hNumPulsesP[iD*4+iQ]->Write();
+	  hNumChargesP[iD*4+iQ]->Write();
+	  hNumClustersP[iD*4+iQ]->Write();
+	  hNumPulsesR[iD*4+iQ]->Write();
+	  hNumChargesR[iD*4+iQ]->Write();
+	  hNumClustersR[iD*4+iQ]->Write();
+	}
+    }
+  cout <<"writing..." <<endl;
+  f.Write();
+  cout <<"closing file" <<endl;
+  f.Close();
+  cout <<"return" <<endl;
+  return kStOk;
 }
 
 Bool_t StFgtGeneralBase::validPulse(generalStrip& strip)
@@ -130,15 +133,15 @@ Bool_t StFgtGeneralBase::validPulse(generalStrip& strip)
   for(int i=0;i<4;i++)
     {
 
-	  Float_t adc1=strip.adc[i];
-	  Float_t adc2=strip.adc[i+1];
-	  Float_t adc3=strip.adc[i+2];
-	  Float_t cut=5*strip.pedErr;
-	  if(adc1>cut && adc2 >cut && adc3 > cut)
-	    {
-	      if(adc1 <adc2 && adc2 < adc3)
-		return true;
-	    }
+      Float_t adc1=strip.adc[i];
+      Float_t adc2=strip.adc[i+1];
+      Float_t adc3=strip.adc[i+2];
+      Float_t cut=5*strip.pedErr;
+      if(adc1>cut && adc2 >cut && adc3 > cut)
+	{
+	  if(adc1 <adc2 && adc2 < adc3)
+	    return true;
+	}
     }
   return false;
 }
@@ -146,6 +149,14 @@ Bool_t StFgtGeneralBase::validPulse(generalStrip& strip)
 
 Int_t StFgtGeneralBase::Make()
 {
+#ifdef FILL_FROM_EVENT
+  //if we constructed fgtCollection ourself, delete it ourself
+  if(fgtCollection)
+    {
+      fgtCollection->Clear();
+      delete fgtCollection;
+    }
+#endif
   Int_t ierr=kStOk;
   evtNr++;
   clustersD1.clear();
@@ -161,262 +172,296 @@ Int_t StFgtGeneralBase::Make()
     }
   //  cout << " done" <<endl;
 #ifdef FILL_FROM_EVENT
-  fillFromStEvent();
+  StEvent* eventPtr = (StEvent*)GetInputDS("StEvent");
+  fgtCollection=eventPtr->fgtCollection();
+  if( eventPtr ) {
+    fillFromStEvent(fgtCollection);
+  }
 #else
-   fillFromMuDst();
+  fgtCollection=new StFgtCollection();
+  fillFromMuDst(*fgtCollection);
+  fillFromStEvent(fgtCollection);
 #endif
+  //do associations
+  doEvAssoc();
 
-   mapGeoId2Cluster.clear();
+
+  mapGeoId2Cluster.clear();
+
   return ierr;
 }
 
 
-Int_t StFgtGeneralBase::fillFromStEvent()
+void StFgtGeneralBase::doEvAssoc()
 {
-   Int_t ierr = kStFatal;
-   StEvent* eventPtr = 0;
-   StFgtCollection *fgtCollectionPtr = 0;
-   StFgtHitCollection *fgtHitColPtr = 0;
+  for(int i=0;i<6;i++)
+    {
+      for(vector<generalCluster>::iterator it=pClusters[i]->begin();it!=pClusters[i]->end();it++)
+	{
+	  Int_t geoId=it->centralStripGeoId;
+	  StFgtHitCollection *fgtHitColPtr = 0;
+	  fgtHitColPtr = fgtCollection->getHitCollection( i );
+	  if( fgtHitColPtr )
+	    {
+	      const StSPtrVecFgtHit& hitVec = fgtHitColPtr->getHitVec();
+	      StSPtrVecFgtHitConstIterator hitIter;
+	      for( hitIter = hitVec.begin(); hitIter != hitVec.end(); ++hitIter )
+		{
+		  Int_t geoId2=(*hitIter)->getCentralStripGeoId();
+		  if(geoId==geoId2)//found match
+		    {
+		      it->fgtHit=(*hitIter);
+		    }
+		}
+	    }
 
-   eventPtr = (StEvent*)GetInputDS("StEvent");
-   if( eventPtr ) {
-      fgtCollectionPtr = eventPtr->fgtCollection();
-      if( fgtCollectionPtr ){
-         // got this far, so flag that this is the right input.
-         ierr = kStOk;
-         // loop over discs
-         for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc ){
-            fgtHitColPtr = fgtCollectionPtr->getHitCollection( disc );
-            if( fgtHitColPtr ){
-               const StSPtrVecFgtHit& hitVec = fgtHitColPtr->getHitVec();
-               StSPtrVecFgtHitConstIterator hitIter;
-	       set<int> quadsHit;
-               Int_t idx = 0;
-               for( hitIter = hitVec.begin(); hitIter != hitVec.end(); ++hitIter, ++idx )
-		 {
-		   Short_t quad, discK, strip;
-		   Char_t layer;
+	}
+    }
+}
+Int_t StFgtGeneralBase::fillFromStEvent(StFgtCollection* fgtCollectionPtr)
+{
+  Int_t ierr = kStFatal;
 
+  StFgtHitCollection *fgtHitColPtr = 0;
+  if( fgtCollectionPtr ){
+    // got this far, so flag that this is the right input.
+    ierr = kStOk;
+    // loop over discs
+    for( Int_t disc = 0; disc < kFgtNumDiscs; ++disc ){
+      fgtHitColPtr = fgtCollectionPtr->getHitCollection( disc );
+      if( fgtHitColPtr ){
+	const StSPtrVecFgtHit& hitVec = fgtHitColPtr->getHitVec();
+	StSPtrVecFgtHitConstIterator hitIter;
+	set<int> quadsHit;
+
+	for( hitIter = hitVec.begin(); hitIter != hitVec.end(); ++hitIter)
+	  {
+	    Short_t quad, discK, strip;
+	    Char_t layer;
  
-		   Double_t posR=(*hitIter)->getPositionR();
-		   Double_t posPhi=(*hitIter)->getPositionPhi();
+	    Double_t posR=(*hitIter)->getPositionR();
+	    Double_t posPhi=(*hitIter)->getPositionPhi();
 
-		   Double_t discZ=getLocDiscZ(disc);
-		   float tmpX, tmpY,tmpZ,tmpP,tmpR;
-		   tmpR=posR;
-		   tmpP=posPhi;
-		   tmpZ=discZ;
+	    Double_t discZ=getLocDiscZ(disc);
+	    float tmpX, tmpY,tmpZ,tmpP,tmpR;
+	    tmpR=posR;
+	    tmpP=posPhi;
+	    tmpZ=discZ;
 #ifdef COSMIC
-		   ///can't do it here since we don't know the space points yet...?.... shouldn't matter...?
-		   //		   getAlign(disc,posPhi,posR,tmpX,tmpY,tmpZ,tmpP,tmpR);
+	    ///can't do it here since we don't know the space points yet...?.... shouldn't matter...?
+	    //		   getAlign(disc,posPhi,posR,tmpX,tmpY,tmpZ,tmpP,tmpR);
 #endif
-		   posR=tmpR;
-		   posPhi=tmpP;
-		   discZ=tmpZ;
+	    posR=tmpR;
+	    posPhi=tmpP;
+	    discZ=tmpZ;
 
-		   Int_t geoId=(*hitIter)->getCentralStripGeoId();
-		   //		   cout <<"central geoId in cluster:" << geoId <<endl;
+	    Int_t geoId=(*hitIter)->getCentralStripGeoId();
+	    //		   cout <<"central geoId in cluster:" << geoId <<endl;
 	
-		   StFgtGeom::decodeGeoId((*hitIter)->getCentralStripGeoId(),discK, quad, layer, strip);
-		   if(quad<0 && discK<0)//Ithink these are the error conditions
-		     {
-		       if(discK!=disc)
-			 cout <<" disc - geo id mismatch...disk: " <<disc <<" or " << discK <<" geo id is " << (*hitIter)->getCentralStripGeoId()<<endl;
-		       cout <<"bad read1" <<endl;
-		     continue;
-		     }
+	    StFgtGeom::decodeGeoId((*hitIter)->getCentralStripGeoId(),discK, quad, layer, strip);
+	    if(quad<0 && discK<0)//Ithink these are the error conditions
+	      {
+		if(discK!=disc)
+		  cout <<" disc - geo id mismatch...disk: " <<disc <<" or " << discK <<" geo id is " << (*hitIter)->getCentralStripGeoId()<<endl;
+		cout <<"bad read1" <<endl;
+		continue;
+	      }
 #ifdef ONE_HIT_PER_QUAD
-		   if(quadsHit.find(quad)!=quadsHit.end())
-		     {
-		       continue;
-		     }
-		   quadsHit.insert(quad);
+	    if(quadsHit.find(quad)!=quadsHit.end())
+	      {
+		continue;
+	      }
+	    quadsHit.insert(quad);
 #endif
-		   //				  Int_t clusterSizePhi=(*hitIter)->getStripWeightMap().size();
-		   Int_t clusterSize=(*hitIter)->getStripWeightMap().size();
-		   Double_t clusterCharge=(*hitIter)->charge();
-		   Double_t clusterUncert=(*hitIter)->getChargeUncert();
-		   cout <<" r pos : " << posR << " phi: " << posPhi << " charge: " << clusterCharge << " unert: " << clusterUncert <<endl;
-		   //sometimes (rarely two clusters have the same geo id (some split I guess), don't insert twice, that messes the indexing up
-		   if(mapGeoId2Cluster.find(geoId)==mapGeoId2Cluster.end())
-		     {
-		       pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge,clusterUncert));
-		       //		       cout <<"inserting geo id " << geoId <<" into map at pos: " << ((pClusters[disc]->size()-1)) <<" disc " << disc <<endl;
-		       mapGeoId2Cluster[geoId]=((pClusters[disc]->size()-1));
-		     }
-		   else
-		     {
-		       //		       cout <<"geoId  " << geoId << " already exists " <<endl;
-		     }
-		 }
-            };
-         }
-	 ///////////////////////
-         for( Int_t disc = 0; disc < kFgtNumDiscs; disc++ )
-	   {
-	     StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( disc);
-	     if( stripCollectionPtr)
-	       {
-		 StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
-		 StSPtrVecFgtStripIterator stripIter;
-		 //		 cout <<"we have " << stripVec.size() << " strips in disc: " << disc <<endl;
-		 for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
-		   StFgtStrip *strip = *stripIter;
-		   //		   Float_t ped = 0, pedErr = 0;
-		   if( strip ){
-		     Int_t geoId=strip->getGeoId();
-		     Int_t cSeedType=strip->getClusterSeedType();
-		     //		     if(cSeedType==kFgtClusterSeedInSeaOfNoise)
-		     //		       cout <<"noisy strip " << geoId <<endl;
-		     Double_t charge=strip->getCharge();
-		     Double_t chargeUncert=strip->getChargeUncert();
-		     Short_t quad, discK, stripI;
-		     Char_t layer;
-		     StFgtGeom::decodeGeoId(geoId,discK, quad, layer, stripI);
-		     //		     cout <<"quad: " << quad <<endl;
-		     if(discK<0 || discK>6 || quad <0 || quad > 4 || (layer!='P' && layer !='R'))
-		       {
-		       cout <<"bad read2" <<endl;
-		       continue;
-		       }
-		     Double_t ped=0.0; //get from DB
-		     Double_t pedErr=0.0; 
-		     Int_t rdo, arm, apv, chan; 
-		     mDb->getElecCoordFromGeoId(geoId, rdo,arm,apv,chan);
-		     Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
-		     ped = mDb->getPedestalFromElecId( elecId );
-		     pedErr = mDb->getPedestalSigmaFromElecId( elecId );
-		     if(quad<4)
-		       {
-			 if(quad<0)
-			   cout <<"bad read3"<<endl;
-			 //		  cout <<"looking at disc: " << disc <<  " quad: " << quad <<" index: " << disc*4+quad <<endl;
-			 //			 cout <<"pushing back to disc: "<< disc <<" quad: " << quad <<endl;
-			 pStrips[disc*4+quad].push_back(generalStrip(geoId,ped,pedErr,cSeedType,charge, chargeUncert));
-			 Double_t maxAdc=-9999;
-			 for(int j=0;j<7;j++)
-			   {
-			     pStrips[disc*4+quad].back().adc[j]=strip->getAdc(j);
-			     if(strip->getAdc(j)>maxAdc)
-			       maxAdc=strip->getAdc(j);
-			   }
-			 pStrips[disc*4+quad].back().maxAdc=maxAdc;
-			 if(mapGeoId2Cluster.find(geoId)!=mapGeoId2Cluster.end())
-			   {
-			     //			     cout <<"this strip geo ID ("<<geoId<<") supposedly belongs to cluster with geo " << (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centralStripGeoId <<" int index: " << mapGeoId2Cluster[geoId] <<endl;
-			     //			     cout <<" strip disc: " << disc <<" cluster disc: " << (*pClusters[disc])[mapGeoId2Cluster[geoId] ].disc <<  " index: " << (pStrips[disc*4+quad].size()-1) << " quad: " << quad <<endl;
-			     if(mapGeoId2Cluster[geoId]>=(*pClusters[disc]).size())
-			       {
-				 //				 cout <<" bad read5" <<endl;
-				 //				 cout <<"geo id: " << geoId << " map: " << mapGeoId2Cluster[geoId] <<" size:" << (*pClusters[disc]).size() <<" disc: " << disc <<endl;
-			       }
-			     (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=(pStrips[disc*4+quad].size()-1);
-			     (*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdc=maxAdc;
-			   }
-		       }
+	    //				  Int_t clusterSizePhi=(*hitIter)->getStripWeightMap().size();
+	    Int_t clusterSize=(*hitIter)->getStripWeightMap().size();
+	    Double_t clusterCharge=(*hitIter)->charge();
+	    Double_t clusterUncert=(*hitIter)->getChargeUncert();
+	    cout <<" r pos : " << posR << " phi: " << posPhi << " charge: " << clusterCharge << " unert: " << clusterUncert <<endl;
+	    //sometimes (rarely two clusters have the same geo id (some split I guess), don't insert twice, that messes the indexing up
+	    if(mapGeoId2Cluster.find(geoId)==mapGeoId2Cluster.end())
+	      {
+		pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge,clusterUncert));
+		//		       cout <<"inserting geo id " << geoId <<" into map at pos: " << ((pClusters[disc]->size()-1)) <<" disc " << disc <<endl;
+		mapGeoId2Cluster[geoId]=((pClusters[disc]->size()-1));
+	      }
+	    else
+	      {
+		//		       cout <<"geoId  " << geoId << " already exists " <<endl;
+	      }
+	  }
+      };
+    }
+    ///////////////////////
+    for( Int_t disc = 0; disc < kFgtNumDiscs; disc++ )
+      {
+	StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( disc);
+	if( stripCollectionPtr)
+	  {
+	    StSPtrVecFgtStrip& stripVec = stripCollectionPtr->getStripVec();
+	    StSPtrVecFgtStripIterator stripIter;
+	    //		 cout <<"we have " << stripVec.size() << " strips in disc: " << disc <<endl;
+	    for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
+	      StFgtStrip *strip = *stripIter;
+	      //		   Float_t ped = 0, pedErr = 0;
+	      if( strip ){
+		Int_t geoId=strip->getGeoId();
+		Int_t cSeedType=strip->getClusterSeedType();
+		//		     if(cSeedType==kFgtClusterSeedInSeaOfNoise)
+		//		       cout <<"noisy strip " << geoId <<endl;
+		Double_t charge=strip->getCharge();
+		Double_t chargeUncert=strip->getChargeUncert();
+		Short_t quad, discK, stripI;
+		Char_t layer;
+		StFgtGeom::decodeGeoId(geoId,discK, quad, layer, stripI);
+		//		     cout <<"quad: " << quad <<endl;
+		if(discK<0 || discK>6 || quad <0 || quad > 4 || (layer!='P' && layer !='R'))
+		  {
+		    cout <<"bad read2" <<endl;
+		    continue;
+		  }
+		Double_t ped=0.0; //get from DB
+		Double_t pedErr=0.0; 
+		Int_t rdo, arm, apv, chan; 
+		mDb->getElecCoordFromGeoId(geoId, rdo,arm,apv,chan);
+		Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
+		ped = mDb->getPedestalFromElecId( elecId );
+		pedErr = mDb->getPedestalSigmaFromElecId( elecId );
+		if(quad<4)
+		  {
+		    if(quad<0)
+		      cout <<"bad read3"<<endl;
+		    //		  cout <<"looking at disc: " << disc <<  " quad: " << quad <<" index: " << disc*4+quad <<endl;
+		    //			 cout <<"pushing back to disc: "<< disc <<" quad: " << quad <<endl;
+		    pStrips[disc*4+quad].push_back(generalStrip(geoId,ped,pedErr,cSeedType,charge, chargeUncert));
+		    Double_t maxAdc=-9999;
+		    for(int j=0;j<7;j++)
+		      {
+			pStrips[disc*4+quad].back().adc[j]=strip->getAdc(j);
+			if(strip->getAdc(j)>maxAdc)
+			  maxAdc=strip->getAdc(j);
+		      }
+		    pStrips[disc*4+quad].back().maxAdc=maxAdc;
+		    if(mapGeoId2Cluster.find(geoId)!=mapGeoId2Cluster.end())
+		      {
+			//			     cout <<"this strip geo ID ("<<geoId<<") supposedly belongs to cluster with geo " << (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centralStripGeoId <<" int index: " << mapGeoId2Cluster[geoId] <<endl;
+			//			     cout <<" strip disc: " << disc <<" cluster disc: " << (*pClusters[disc])[mapGeoId2Cluster[geoId] ].disc <<  " index: " << (pStrips[disc*4+quad].size()-1) << " quad: " << quad <<endl;
+			if(mapGeoId2Cluster[geoId]>=(*pClusters[disc]).size())
+			  {
+			    //				 cout <<" bad read5" <<endl;
+			    //				 cout <<"geo id: " << geoId << " map: " << mapGeoId2Cluster[geoId] <<" size:" << (*pClusters[disc]).size() <<" disc: " << disc <<endl;
+			  }
+			(*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=(pStrips[disc*4+quad].size()-1);
+			(*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdc=maxAdc;
+		      }
+		  }
 
-		   }
-		 }
-	       }
-	   }
+	      }
+	    }
+	  }
+      }
 
 	 
-	 ///////////----
+    ///////////----
 
 
 
-	 for(int iDx=0;iDx<6;iDx++)
-	   {
-	     int dCounter=0;
-	     vector<generalCluster>::iterator it=pClusters[iDx]->begin();
-	     for(;it!=pClusters[iDx]->end();it++)
-	       {
-		 dCounter++;
-		 //		 it->hasMatch=true;
-		 Int_t centerStripId=it->centerStripIdx;
-		 if(centerStripId<0)
-		   {
-		     //		     cout <<"bad read4 for cluster with geoid: "<< it->centralStripGeoId <<" index: " << it->centerStripIdx <<" quad: " << it->quad << "index: " <<dCounter-1<< " disc: " << iDx  <<" phi " << it->posPhi <<" r: " << it->posR <<endl;
-		       continue;
-		   }
+    for(int iDx=0;iDx<6;iDx++)
+      {
+	int dCounter=0;
+	vector<generalCluster>::iterator it=pClusters[iDx]->begin();
+	for(;it!=pClusters[iDx]->end();it++)
+	  {
+	    dCounter++;
+	    //		 it->hasMatch=true;
+	    Int_t centerStripId=it->centerStripIdx;
+	    if(centerStripId<0)
+	      {
+		//		     cout <<"bad read4 for cluster with geoid: "<< it->centralStripGeoId <<" index: " << it->centerStripIdx <<" quad: " << it->quad << "index: " <<dCounter-1<< " disc: " << iDx  <<" phi " << it->posPhi <<" r: " << it->posR <<endl;
+		continue;
+	      }
 
-		 Double_t maxChargeInt=it->maxAdc;
-		 //		 cout <<"center strip" << centerStripId<<" idx: " << iDx << " quad: " << it->quad <<endl;
-		 //		 cout <<" size:" <<pStrips[iDx*4+it->quad].size()<<endl;
-		 if(centerStripId>=pStrips[iDx*4+it->quad].size())
-		   {
-		       cout <<"bad read5" <<endl;
-		       continue;
-		   }
-		 Int_t oldGeoId=(pStrips[iDx*4+it->quad])[centerStripId].geoId;
-		 Int_t m_seedType=(pStrips[iDx*4+it->quad])[centerStripId].seedType;
-		 Int_t stripCounter=(centerStripId-1);
-		 while(stripCounter>=0)     
-		   {
-		     //		     cout <<"stripcounter"<< stripCounter <<endl;
-		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
-		     if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
-		       {
-			 m_seedType=seedType;
-		       }
-		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
-		       break;
-		     if(fabs(oldGeoId-(pStrips[iDx*4+it->quad])[stripCounter].geoId)>1)
-		       break;
-		     maxChargeInt+=(pStrips[iDx*4+it->quad])[stripCounter].maxAdc;
-		     oldGeoId=(pStrips[iDx*4+it->quad])[stripCounter].geoId;
-		     stripCounter--;
-		   }
-		 //and go up
-		 stripCounter=(centerStripId+1);
-		 //should be strictly smaller
-		 while(stripCounter<(pStrips[iDx*4+it->quad]).size())
-		   {
-		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
-		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
-		       break;
-		     if(fabs(oldGeoId-(pStrips[iDx*4+it->quad])[stripCounter].geoId)>1)
-		       break;
-		     maxChargeInt+=(pStrips[iDx*4+it->quad])[stripCounter].maxAdc;
-		     oldGeoId=(pStrips[iDx*4+it->quad])[stripCounter].geoId;
-		     stripCounter++;
-		     if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
-		       {
-			 m_seedType=seedType;
-		       }
-		   }
-		 it->maxAdcInt=maxChargeInt;
-		 it->seedType=m_seedType;
-		 chargeMaxAdcCorr->Fill(it->clusterCharge,it->maxAdc);
-		 chargeMaxAdcIntCorr->Fill(it->clusterCharge,maxChargeInt);
-	       }
-	   }
-	 //////////////////////////////
+	    Double_t maxChargeInt=it->maxAdc;
+	    //		 cout <<"center strip" << centerStripId<<" idx: " << iDx << " quad: " << it->quad <<endl;
+	    //		 cout <<" size:" <<pStrips[iDx*4+it->quad].size()<<endl;
+	    if(centerStripId>=pStrips[iDx*4+it->quad].size())
+	      {
+		cout <<"bad read5" <<endl;
+		continue;
+	      }
+	    Int_t oldGeoId=(pStrips[iDx*4+it->quad])[centerStripId].geoId;
+	    Int_t m_seedType=(pStrips[iDx*4+it->quad])[centerStripId].seedType;
+	    Int_t stripCounter=(centerStripId-1);
+	    while(stripCounter>=0)     
+	      {
+		//		     cout <<"stripcounter"<< stripCounter <<endl;
+		Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
+		if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
+		  {
+		    m_seedType=seedType;
+		  }
+		if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
+		  break;
+		if(fabs(oldGeoId-(pStrips[iDx*4+it->quad])[stripCounter].geoId)>1)
+		  break;
+		maxChargeInt+=(pStrips[iDx*4+it->quad])[stripCounter].maxAdc;
+		oldGeoId=(pStrips[iDx*4+it->quad])[stripCounter].geoId;
+		stripCounter--;
+	      }
+	    //and go up
+	    stripCounter=(centerStripId+1);
+	    //should be strictly smaller
+	    while(stripCounter<(pStrips[iDx*4+it->quad]).size())
+	      {
+		Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
+		if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
+		  break;
+		if(fabs(oldGeoId-(pStrips[iDx*4+it->quad])[stripCounter].geoId)>1)
+		  break;
+		maxChargeInt+=(pStrips[iDx*4+it->quad])[stripCounter].maxAdc;
+		oldGeoId=(pStrips[iDx*4+it->quad])[stripCounter].geoId;
+		stripCounter++;
+		if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
+		  {
+		    m_seedType=seedType;
+		  }
+	      }
+	    it->maxAdcInt=maxChargeInt;
+	    it->seedType=m_seedType;
+	    chargeMaxAdcCorr->Fill(it->clusterCharge,it->maxAdc);
+	    chargeMaxAdcIntCorr->Fill(it->clusterCharge,maxChargeInt);
+	  }
       }
-   }
+    //////////////////////////////
+      
+   
 
-   //   cout <<"filled from event " <<endl;
-   checkMatches();
-      checkNumPulses();
-   return ierr;
+    //   cout <<"filled from event " <<endl;
+    checkMatches();
+    checkNumPulses();
+    return ierr;
 
+  }
 }
 
-Int_t StFgtGeneralBase::fillFromMuDst()
+Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 {
   //    cout <<"general base, muDST filler" <<endl;
-   Int_t ierr = kStFatal;
-
-   // get pointer to input
-   const StMuDst* muDst = (const StMuDst*)GetInputDS("MuDst");
+  Int_t ierr = kStOk;
+  StFgtStripCollection* stripCollectionPtr[kFgtNumDiscs];
+  StFgtHitCollection* hitCollectionPtr[kFgtNumDiscs];
+  for(int discIdx=0;discIdx<kFgtNumDiscs;discIdx++)
+    {
+      stripCollectionPtr[discIdx] = fgtCollection.getStripCollection( discIdx );
+      hitCollectionPtr[discIdx] = fgtCollection.getHitCollection( discIdx );
+    }
+  // get pointer to input
+  const StMuDst* muDst = (const StMuDst*)GetInputDS("MuDst");
   if( muDst )
     {
       StMuEvent *event = static_cast<StMuEvent*>(muDst->event());
       if( event ){
 	const StThreeVectorF& v = event->primaryVertexPosition();
-	
-	//	ipZ=v.z();
-
 	StEventInfo &info=event->eventInfo();
 	int nPrimV=muDst->numberOfPrimaryVertices();
 	if(1 && nPrimV>0) { // copy vertex info
@@ -439,7 +484,7 @@ Int_t StFgtGeneralBase::fillFromMuDst()
 	  else
 	    {
 #ifdef USE_VTX
-	           return false; //primary vertex is not good...
+	      return false; //primary vertex is not good...
 #endif
 	    }
 	}
@@ -452,201 +497,117 @@ Int_t StFgtGeneralBase::fillFromMuDst()
     {
       cout <<"no muDST!!!" <<endl;
     }
-   if( muDst ){
-      TClonesArray *fgtClusters = muDst->fgtArray( muFgtClusters );
-      TClonesArray *fgtStrips=muDst->fgtArray(muFgtStrips);
-      TClonesArray *fgtStripAssoc=muDst->fgtArray(muFgtStripAssociations );
 
-      if(fgtStripAssoc)
-	{
-         ierr = kStOk;
-	 cout <<" got fgt asso" <<endl;
-	 Int_t nAssoc=fgtStripAssoc->GetEntriesFast();
-	 cout <<"there are " << nAssoc <<" associations" <<endl;
-         for( Int_t i = 0; i < nAssoc; ++i )
-	   {
-	     StMuFgtStripAssociation* assoc = static_cast< StMuFgtStripAssociation* >( (*fgtStripAssoc)[i] );
-	     if( assoc )
-	       {
-		 cout <<" cluster: " << assoc->getClusIdx() <<" strip id: " << assoc->getStripIdx() <<endl;
-	       }
-	     else
-	       {
-		 cout <<"no assoc..." << assoc <<endl;
-	       }
-	 }
-	}
+  if( muDst ){
+    TClonesArray *fgtClusters = muDst->fgtArray( muFgtClusters );
+    TClonesArray *fgtStrips=muDst->fgtArray(muFgtStrips);
+    TClonesArray *fgtStripAssoc=muDst->fgtArray(muFgtStripAssociations );
+    TClonesArray *fgtAdc=muDst->fgtArray(muFgtAdcs);
 
-      if( fgtClusters ){
-         // flag this is the correct input
-         ierr = kStOk;
-	 	 cout <<" got fgt clust" <<endl;
-         Int_t nClusters = fgtClusters->GetEntriesFast();
-
-         for( Int_t i = 0; i < nClusters; ++i ){
-            StMuFgtCluster* clus = static_cast< StMuFgtCluster* >( (*fgtClusters)[i] );
-            if( clus )
+    if(fgtStripAssoc && fgtClusters && fgtStrips && fgtAdc)
+      {
+	ierr = kStOk;
+	cout <<" got fgt asso" <<endl;
+	Int_t nAssoc=fgtStripAssoc->GetEntriesFast();
+	Int_t nClus=fgtClusters->GetEntriesFast();
+	Int_t nStrips=fgtStrips->GetEntriesFast();
+	Int_t nAdc=fgtAdc->GetEntriesFast();
+	//	 cout <<"there are " << nAssoc <<" associations" <<endl;
+	Int_t oldClusIdx=-1;
+	Int_t rdo, arm, apv, chan; 
+	Int_t geoId;
+	Int_t clusKey=0;
+	Short_t quad, disc, stripNum;
+	Char_t layer;
+	for( Int_t i = 0; i < nAssoc; ++i )
+	  {
+	    StMuFgtStripAssociation* assoc = static_cast< StMuFgtStripAssociation* >( (*fgtStripAssoc)[i] );
+	    StFgtHit* pFgtHit=0;
+	    if( assoc )
 	      {
-				cout<<"found cluster in muDST " << endl;
-		   Int_t geoId=clus->getCentralStripGeoId();
-		   cout <<"cluster " << i << " from muDst: geoId: " << geoId <<endl;
-		   Short_t quad, disc, strip;
-		   Char_t layer;
-		   StFgtGeom::decodeGeoId(geoId,disc, quad, layer, strip);
-		   Double_t posR=clus->getR();
-		   Double_t posPhi=clus->getPhi();
-		   Double_t discZ=getLocDiscZ(disc);
-		   StFgtGeom::decodeGeoId(geoId,disc, quad, layer, strip);
-		   Int_t clusterSize=clus->getNumStrips();
-		   Double_t clusterCharge=clus->getCharge();
-		   Double_t clusterUncert=clus->getChargeUncert();
-		   cout <<"posR: " << posR <<" Phi: " << posPhi << " charge: " << clusterCharge <<" uncert: " << clusterUncert <<endl;
-
-		   		   cout <<"looking at geoID: " << geoId <<" r: " << posR <<" phi: " << posPhi <<" charge: " << clusterCharge <<" size: " << clusterSize <<endl;
-		  	   cout <<" disc: " << disc <<" quad: " << quad << " layer: " << layer <<endl;
-		   pClusters[disc]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip,clusterSize,clusterCharge,clusterUncert));
-		   mapGeoId2Cluster[geoId]=((pClusters[disc]->size()-1));
-	      }
-		     //               addClus( i, clus->getCentralStripGeoId(), clus->getR(), clus->getPhi() );
-         };
-      }
-
-
-      if(fgtStrips)
-      //      if(false)
-	{
-	  	  cout <<"got strip " <<endl;
-	  ierr = kStOk;
-         Int_t nStrips = fgtStrips->GetEntriesFast();
-         for( Int_t i = 0; i < nStrips; ++i ){
-            StMuFgtStrip* strip = static_cast< StMuFgtStrip* >( (*fgtStrips)[i] );
-	     cout <<"got strip" <<endl;
-            if( strip )
-	      {
-
-		Int_t geoId=strip->getGeoId();
-		cout <<"got strip again, geoId: " << geoId <<endl;
-		Int_t cSeedType=strip->getClusterSeedType();
-		Double_t charge=strip->getCharge();
-		Double_t chargeUncert=strip->getChargeUncert();
-		Short_t quad, disc, stripI;
-		Char_t layer;
-		StFgtGeom::decodeGeoId(geoId,disc, quad, layer, stripI);
-		Double_t ped=0.0; //get from DB
-		Double_t pedErr=0.0; 
-		Int_t rdo, arm, apv, chan; 
-		mDb->getElecCoordFromGeoId(geoId, rdo,arm,apv,chan);
-		Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
-		ped = mDb->getPedestalFromElecId( elecId );
-		pedErr = mDb->getPedestalSigmaFromElecId( elecId );
-
-		if(quad<4)
+		//only construct clusters for which we have the strips...
+		Int_t clusIdx=assoc->getClusIdx();
+		if(oldClusIdx!=clusIdx) //looking at new clusters
 		  {
-		    pStrips[disc*4+quad].push_back(generalStrip(geoId,ped,pedErr,cSeedType,charge, chargeUncert));
-		    Double_t maxAdc=-9999;
-		    for(int j=0;j<7;j++)
-		      {
-			pStrips[disc*4+quad].back().adc[j]=strip->getAdc(j);
-			if(strip->getAdc(j)>maxAdc)
-			  maxAdc=strip->getAdc(j);
-		      }
+		    //construct new cluster
+		    oldClusIdx=clusIdx;
+		    if(pFgtHit>0)
+		      hitCollectionPtr[disc]->getHitVec().push_back(pFgtHit);
+		    
+		    StMuFgtCluster* clus = static_cast< StMuFgtCluster* >( (*fgtClusters)[clusIdx] );
+		    Int_t clusCentGeoId=clus->getCentralStripGeoId();
+		    Float_t clusCharge=clus->getCharge();
+		    Float_t R=clus->getR();
+		    Float_t Phi=clus->getPhi();
+		    Float_t Z=getLocDiscZ(disc);
+		    Float_t ErrR=clus->getErrR();
+		    Float_t ErrPhi=clus->getErrPhi();
+		    Float_t ErrZ=0.0;
+		    StFgtGeom::decodeGeoId(clusCentGeoId,disc, quad, layer, stripNum);
+		    pFgtHit=new StFgtHit(clusKey,clusCentGeoId,clusCharge, disc, quad, layer, R, ErrR,Phi, ErrPhi,Z,ErrZ);
+		    clusKey++;
+		   
 
-		    pStrips[disc*4+quad].back().maxAdc=maxAdc;
-		    //		    	    cout <<"just set max Adc to " << maxAdc <<endl;
-
-		    if(mapGeoId2Cluster.find(geoId)!=mapGeoId2Cluster.end())
-		      {
-			//have to find all strips...
-						cout << "hoping to see " << geoId << " have: " << (*pClusters[disc])[mapGeoId2Cluster[geoId]].centralStripGeoId<<endl;
-
-			(*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=(pStrips[disc*4+quad].size()-1);
-			(*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdc=maxAdc;
-			cout <<"maxAdc of cluster: "<< maxAdc <<" "<< geoId <<" center strip geo:" << (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centralStripGeoId <<" set id to : " <<(pStrips[disc*4+quad].size()-1) << " disc: " << disc << " quad: " << quad <<" dq index: " << disc*4+quad <<endl;
-		      } 
+		    pFgtHit->setEvenOddChargeAsy(clus->getEvenOddChargeAsy());
+		    pFgtHit->setMaxTimeBin(clus->getMaxTimeBin());
+		    pFgtHit->setMaxAdc(clus->getMaxAdc());
+		    pFgtHit->setNstrip(clus->getNumStrips());//should check if that corresponds to the number of strips...
+		    //not in mdst??
+		    ///		    pFgtHit->setSeedType(clus->getSeedType());
 		  }
-		
+		Int_t stripIdx=assoc->getStripIdx();
+		StMuFgtStrip* strip = static_cast< StMuFgtStrip* >( (*fgtStrips)[stripIdx] );
+		geoId=strip->getGeoId();
+		Float_t stripCharge=strip->getCharge();
+		mDb->getElecCoordFromGeoId(geoId, rdo,arm,apv,chan);
+		StFgtGeom::decodeGeoId(geoId,disc, quad, layer, stripNum);
+		Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
+		//strips are dynamically created by the strip collection
+		StFgtStrip* stripPtr = stripCollectionPtr[disc]->getStrip( elecId );
+		stripPtr->setGeoId(geoId);
+		stripPtr->setCharge(stripCharge);
+
+		stripPtr->setElecCoords(rdo,arm,apv,chan);
+		Double_t ped = mDb->getPedestalFromElecId( elecId );
+		Double_t pedErr = mDb->getPedestalSigmaFromElecId( elecId );
+		stripPtr->setPed(ped);
+		stripPtr->setPedErr(pedErr);
+		stripPtr->setChargeUncert(strip->getChargeUncert());
+		Int_t seedType=strip->getClusterSeedType();
+		stripPtr->setClusterSeedType(seedType);
+		if(seedType>=kFgtSeedType1&& seedType<=kFgtSeedType5 )
+		  {
+		    pFgtHit->setSeedType(seedType);
+		  }
+		//fill in strip info
+		//fill in adc info
+
+		for(Int_t iAdc=strip->getAdcStartIdx();iAdc<strip->getAdcStartIdx()+strip->getNumSavedTimeBins();iAdc++)
+		  {
+		    if(iAdc>=0 && (iAdc<nAdc))
+		      {
+			StMuFgtAdc* adc=0;
+			adc=static_cast< StMuFgtAdc* >((*fgtAdc)[iAdc]);
+			stripPtr->setAdc(adc->getAdc(),adc->getTimeBin());
+		      }
+		  }
+		//even though the "strips" container can be invalidaded by added to it, the *it is a pointer to a StFgtStrip, so should stay
+		(pFgtHit->getStripWeightMap())[stripPtr]=1;
 	      }
-	 }
-	 	 cout <<"finding the other strip " <<endl;
-	 ///find the other strips for clusters....
-	 for(int iDx=0;iDx<6;iDx++)
-	   {
-	     vector<generalCluster>::iterator it=pClusters[iDx]->begin();
-	     for(;it!=pClusters[iDx]->end();it++)
-	       {
-		 //when we are at it, set the matched flag for cluster from file, we don't want to loose them
-		 //it->hasMatch=true;
-		 Int_t centerStripId=it->centerStripIdx;
-		 cout <<"looking at cluster with center strip id:" << it->centralStripGeoId  <<" idx: " << centerStripId <<endl;
-		 if(centerStripId<0)
-		   {
-		     cout <<" is <0: " << centerStripId <<endl;
-		   continue;
-		   }
-		 cout << " strip geo id is " << pStrips[iDx*4+it->quad][centerStripId].geoId <<endl;
-		 Int_t stripCounter=(centerStripId-1);
-		 if(centerStripId>=pStrips[iDx*4+it->quad].size())
-		   continue;
-		 Double_t maxChargeInt=it->maxAdc;
-		 		 cout <<"max charge:" <<maxChargeInt<<endl;
-		 Int_t oldGeoId=(pStrips[iDx*4+it->quad])[centerStripId].geoId;
-		 Int_t m_seedType=(pStrips[iDx*4+it->quad])[centerStripId].seedType;
-		 		 cout <<" going down " <<endl;
-		 while(stripCounter>=0)     
-		   {
-		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
-		     if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
-		       {
-			 m_seedType=seedType;
-		       }
-		     //		     cout <<"looking at geo id: " << (pStrips[iDx*4+it->quad])[stripCounter].geoId <<endl;
-		     //		     cout <<"seedtype:" << seedType <<endl;
-		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
-		       break;
-		     //		     cout <<"seed fulfilled " << endl;
-		     if(fabs(oldGeoId-(pStrips[iDx*4+it->quad])[stripCounter].geoId)>1)
-		       break;
-
-		     maxChargeInt+=(pStrips[iDx*4+it->quad])[stripCounter].maxAdc;
-		     //		     		     cout <<"found another strip, " <<  (pStrips[iDx*4+it->quad])[stripCounter].geoId << " maxChargenow:" << maxChargeInt <<endl;
-		     oldGeoId=(pStrips[iDx*4+it->quad])[stripCounter].geoId;
-		     stripCounter--;
-		   }
-		 //and go up
-		 stripCounter=(centerStripId+1);
-		 //		 cout <<"going up:" << centerStripId <<endl;
-		 while(stripCounter<(pStrips[iDx*4+it->quad]).size())
-		   {
-		     Int_t seedType=(pStrips[iDx*4+it->quad])[stripCounter].seedType;
-		     if((seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3))
-		       {
-			 m_seedType=seedType;
-		       }
-		     if(!((seedType==kFgtClusterPart)||(seedType==kFgtClusterEndUp)||(seedType==kFgtClusterEndDown)||(seedType==kFgtSeedType1)||(seedType==kFgtSeedType2)||(seedType==kFgtSeedType3)))
-		       break;
-		     if(fabs(oldGeoId-(pStrips[iDx*4+it->quad])[stripCounter].geoId)>1)
-		       break;
-		     //		     		     cout <<"found another strip, maxCharge now (up):" <<  (pStrips[iDx*4+it->quad])[stripCounter].geoId  <<" maxChargeInt "<<endl;
-		     maxChargeInt+=(pStrips[iDx*4+it->quad])[stripCounter].maxAdc;
-		     oldGeoId=(pStrips[iDx*4+it->quad])[stripCounter].geoId;
-		     stripCounter++;
-		   }
-		 //		 cout <<"setting max adcInt to :" << maxChargeInt <<endl;
-		 it->maxAdcInt=maxChargeInt;
-		 it->seedType=m_seedType;
-		 chargeMaxAdcCorr->Fill(it->clusterCharge,it->maxAdc);
-		 chargeMaxAdcIntCorr->Fill(it->clusterCharge,maxChargeInt);
-	       }
-
-	     //kFgtClusterPart kFgtClusterEndUp kFgtClusterEndDown kFgtSeedType1 kFgtSeedType2 kFgtSeedType3
-	   }
-
+	    else
+	      {
+		cout <<"no assoc..." << assoc <<endl;
+	      }
+	  }
+      }
+      else
+	{
+	  //doesn't make sense to continue w/o clusters/strips
+	  return kStErr;
 	}
-   }
-   //      doLooseClustering();
-   checkMatches();
-   checkNumPulses();
-   return ierr;
+  }
+								    
+return ierr;
 };
 
 void StFgtGeneralBase::checkNumPulses()
@@ -754,7 +715,7 @@ Bool_t StFgtGeneralBase::arePointsMatched(vector<generalCluster>::iterator  c1, 
 void StFgtGeneralBase::checkMatches()
 {
   //  cout <<"checkmatches.." <<endl;
- for(int iDx=0;iDx<6;iDx++)
+  for(int iDx=0;iDx<6;iDx++)
     {
       Int_t numMatched=0;
       Int_t numNotMatched=0;
@@ -838,42 +799,42 @@ void StFgtGeneralBase::doLooseClustering()
 		  Char_t layerPrv, layerNext, layer;
 		  Double_t posR, posPhi;
 		  Int_t geoId=it->geoId;
-		   Short_t quad, disc, strip;
-		   Double_t ordinate, lowerSpan, upperSpan;
-		   Double_t discZ=getLocDiscZ(disc);
-		   Int_t clusterSize=3;
-		   StFgtGeom::getPhysicalCoordinate(it->geoId,disc,quad,layer,ordinate,lowerSpan,upperSpan);
-		   if((it+1)<pStrips[iDx*4+iQ].end())
-		     StFgtGeom::getPhysicalCoordinate((it+1)->geoId,disc,quad,layerNext,ordinate,lowerSpan,upperSpan);
-		   if((it-1)>=pStrips[iDx*4+iQ].begin())
-		     StFgtGeom::getPhysicalCoordinate(it->geoId,disc,quad,layerPrv,ordinate,lowerSpan,upperSpan);
+		  Short_t quad, disc, strip;
+		  Double_t ordinate, lowerSpan, upperSpan;
+		  Double_t discZ=getLocDiscZ(disc);
+		  Int_t clusterSize=3;
+		  StFgtGeom::getPhysicalCoordinate(it->geoId,disc,quad,layer,ordinate,lowerSpan,upperSpan);
+		  if((it+1)<pStrips[iDx*4+iQ].end())
+		    StFgtGeom::getPhysicalCoordinate((it+1)->geoId,disc,quad,layerNext,ordinate,lowerSpan,upperSpan);
+		  if((it-1)>=pStrips[iDx*4+iQ].begin())
+		    StFgtGeom::getPhysicalCoordinate(it->geoId,disc,quad,layerPrv,ordinate,lowerSpan,upperSpan);
 
 		  if((it+1)<pStrips[iDx*4+iQ].end() && layerNext==layer && (it+1)->charge > it->charge)
 		    continue;
 		   
-		   Double_t clusterCharge=it->charge;
-		   if((it+1)<pStrips[iDx*4+iQ].end() && (layer==layerNext))
-		     clusterCharge+=(it+1)->charge;
-		   if((it-1)>=pStrips[iDx*4+iQ].begin() && (layer==layerPrv))
-		     clusterCharge+=(it-1)->charge;
+		  Double_t clusterCharge=it->charge;
+		  if((it+1)<pStrips[iDx*4+iQ].end() && (layer==layerNext))
+		    clusterCharge+=(it+1)->charge;
+		  if((it-1)>=pStrips[iDx*4+iQ].begin() && (layer==layerPrv))
+		    clusterCharge+=(it-1)->charge;
 
-		   StFgtGeom::decodeGeoId(geoId,disc, quad, layer, strip);
-		   StFgtGeom::getPhysicalCoordinate(it->geoId,disc,quad,layer,ordinate,lowerSpan,upperSpan);
-		   if( layer == 'R' ){
-		     posR = ordinate;
-		     posPhi = 0.5*(upperSpan + lowerSpan);  
-		   } else {
-		     posPhi=ordinate;
-		     posR = 0.5*(upperSpan + lowerSpan);   // mid point of the strip
-		   };		   
-		   posPhi+=StFgtGeom::phiQuadXaxis(quad);
+		  StFgtGeom::decodeGeoId(geoId,disc, quad, layer, strip);
+		  StFgtGeom::getPhysicalCoordinate(it->geoId,disc,quad,layer,ordinate,lowerSpan,upperSpan);
+		  if( layer == 'R' ){
+		    posR = ordinate;
+		    posPhi = 0.5*(upperSpan + lowerSpan);  
+		  } else {
+		    posPhi=ordinate;
+		    posR = 0.5*(upperSpan + lowerSpan);   // mid point of the strip
+		  };		   
+		  posPhi+=StFgtGeom::phiQuadXaxis(quad);
 
-		   pClusters[iDx]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge,0.0));		  
-		   mapGeoId2Cluster[geoId]=(pClusters[iDx]->size()-1);
-		   (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=stripCounter;
-		   (*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdc=it->maxAdc;
-		   //don't care for now
-		   (*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdcInt=it->maxAdc;
+		  pClusters[iDx]->push_back(generalCluster(geoId,layer,discZ,posPhi,posR,quad,disc,strip, clusterSize, clusterCharge,0.0));		  
+		  mapGeoId2Cluster[geoId]=(pClusters[iDx]->size()-1);
+		  (*pClusters[disc])[mapGeoId2Cluster[geoId] ].centerStripIdx=stripCounter;
+		  (*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdc=it->maxAdc;
+		  //don't care for now
+		  (*pClusters[disc])[mapGeoId2Cluster[geoId] ].maxAdcInt=it->maxAdc;
 		}
 	      stripCounter++;
 	    }

@@ -12,9 +12,14 @@
 #include <TVector3.h>
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 #include "StRoot/StFgtDbMaker/StFgtDb.h"
-
 #include "StRoot/StFgtUtil/StFgtConsts.h"
+
+
 #define COSMIC
+class StFgtStrip;
+class StFgtCollection;
+class StFgtHit;
+//class StFgtCollection;
 
 //#include "StRoot/StEvent/StFgtCollection.h"
 /*
@@ -34,6 +39,7 @@ struct generalStrip
     maxAdc=-1;
 
   };
+  StFgtStrip* fgtStrip;
   Int_t geoId;
   Int_t ped;
   Int_t pedErr;
@@ -68,7 +74,7 @@ struct generalCluster
     };
 
 
-
+  StFgtHit* fgtHit;
   Int_t seedType;
   Int_t centralStripGeoId;
     Char_t layer;
@@ -89,18 +95,19 @@ struct generalCluster
 
 class StFgtGeneralBase : public StMaker {
  public:
+  Double_t vtxZ;
   StFgtGeneralBase(const Char_t* name="FgtGeneralBase");
-  void SetFileBase(const Char_t* filebase);
+
   void doLooseClustering();
   //check if cluster has energy match in other layer
   void checkMatches();
   Int_t Make();
   Int_t Finish();
-  Int_t fillFromStEvent();
-  Int_t fillFromMuDst();
+  Int_t fillFromStEvent(StFgtCollection* fgtCollectionPtr);
+  Int_t fillFromMuDst(StFgtCollection&);
   void setChargeMatchCut(Float_t cut);
 
-  float getLocDiscZ(int iD)
+static float getLocDiscZ(int iD)
   {
 #ifndef COSMIC
     return StFgtGeom::getDiscZ(iD);
@@ -126,8 +133,20 @@ class StFgtGeneralBase : public StMaker {
   {
     m_effDisk=disk;
   }
+
+  vector<generalCluster>** getClusters()
+    {
+      return pClusters;
+    }
+
+  vector<generalStrip>* getStrips()
+    {
+      return pStrips;
+    }
+  static Bool_t arePointsMatched(vector<generalCluster>::iterator  c1, vector<generalCluster>::iterator  c2);
  protected:
-  Bool_t arePointsMatched(vector<generalCluster>::iterator  c1, vector<generalCluster>::iterator  c2);
+
+  Char_t fileBase[300];
 enum evStatCodes
   {
     numEvents,
@@ -136,7 +155,8 @@ enum evStatCodes
     numCluSeed2,
     numCluSeed3
   };
-  Char_t fileBase[300];
+ StFgtCollection* fgtCollection;
+
   TH1D* clusWChargeMatch;
   TH1D* clusWOChargeMatch;
   TH1D* evStatistics;
@@ -154,8 +174,8 @@ enum evStatCodes
 
   map<Int_t, Int_t> mapGeoId2Cluster;
   StFgtDb* mDb;
-  Double_t vtxZ;
-  Float_t chargeMatchCut;
+
+  static Float_t chargeMatchCut;
   Int_t vtxRank;
   Int_t evtNr;
   Int_t m_effDisk;
@@ -169,8 +189,8 @@ enum evStatCodes
   vector<generalStrip>* pStrips;
   Bool_t validPulse(generalStrip& strip);
   void checkNumPulses();
-
-
+   void doEvAssoc();
+   void SetFileBase(const Char_t* filebase);
  private:   
   ClassDef(StFgtGeneralBase,1);
 };

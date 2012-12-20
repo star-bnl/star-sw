@@ -1,5 +1,6 @@
 ///////estimate efficiencies of disks using straight line
-#include "StFgtGenAVEMaker.h"
+#include "StFgtStraightPlotter.h"
+#include "StFgtGeneralBase.h"
 #include "StRoot/StEvent/StFgtCollection.h"
 #include "StRoot/StEvent/StFgtHitCollection.h"
 #include "StRoot/StEvent/StFgtHit.h"
@@ -73,8 +74,59 @@
 #else
 #define NUM_EFF_BIN 100
 #endif
+Bool_t StFgtStraightPlotter::arePointsMatched(vector<generalCluster>::iterator  c1, vector<generalCluster>::iterator  c2)
+{
+  Float_t tUncert1;
+  Float_t tCharge1;
 
-Bool_t StFgtGenAVEMaker::fitTheStrip(generalStrip* pStrip, generalStrip* pStripOtherLayer,float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin, Char_t layer)
+  Float_t tUncert2;
+  Float_t tCharge2;
+
+  if(c1->clusterCharge<20 || c2->clusterCharge<20)
+    return false;
+  if(c1->clusterCharge<c2->clusterCharge)
+    {
+      tCharge1=c2->clusterCharge;
+      tUncert1=c2->clusterChargeUncert;
+      tCharge2=c1->clusterCharge;
+      tUncert2=c1->clusterChargeUncert;
+    }
+  else
+    {
+      tCharge1=c1->clusterCharge;
+      tUncert1=c1->clusterChargeUncert;
+      tCharge2=c2->clusterCharge;
+      tUncert2=c2->clusterChargeUncert;
+    }
+
+
+  if(((tCharge1/tCharge2) <chargeMatchCut) ||((tCharge1-tUncert1)/(tCharge2+tUncert2))<chargeMatchCut)
+    return true;
+  else 
+    return false;
+}
+
+
+Bool_t StFgtStraightPlotter::validPulse(generalStrip& strip)
+{
+  for(int i=0;i<4;i++)
+    {
+      Float_t adc1=strip.adc[i];
+      Float_t adc2=strip.adc[i+1];
+      Float_t adc3=strip.adc[i+2];
+      Float_t cut=5*strip.pedErr;
+      if(adc1>cut && adc2 >cut && adc3 > cut)
+	{
+	  if(adc1 <adc2 && adc2 < adc3)
+	    return true;
+	}
+    }
+  return false;
+}
+
+
+
+Bool_t StFgtStraightPlotter::fitTheStrip(generalStrip* pStrip, generalStrip* pStripOtherLayer,float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin, Char_t layer)
 {
   if(fitCounter>2000)
     return true;
@@ -136,7 +188,7 @@ Bool_t StFgtGenAVEMaker::fitTheStrip(generalStrip* pStrip, generalStrip* pStripO
       tmpPulseHisto->Draw();
       mHistPtr2->Draw("SAME");
       tmpCnv->Write();
-  }
+    }
   pulsePictureFile->cd();
   myRootFile->cd();
   return true;
@@ -200,7 +252,7 @@ template<class T> void createPlots(T*** pH, int numH, const char* nameBase, int 
 template void createPlots(TH1I*** pH, int numH,const char* nameBase, int numBin, int first, int last);
 template void createPlots(TH1F*** pH, int numH, const char* nameBase, int numBin, int first, int last);
 
-void StFgtGenAVEMaker::doNormalize(TH2D** hEff, TH2D** hNonEff)
+void StFgtStraightPlotter::doNormalize(TH2D** hEff, TH2D** hNonEff)
 {
   for(Int_t iD=0;iD<kFgtNumDiscs;iD++)
     {
@@ -221,14 +273,14 @@ void StFgtGenAVEMaker::doNormalize(TH2D** hEff, TH2D** hNonEff)
 		}
 	    }
 	}
-  delete tmpAllCounts;
+      delete tmpAllCounts;
     }
 
 }
 
 
 
-void StFgtGenAVEMaker::saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi, Int_t maxR, Int_t maxPhi, Int_t discId, Int_t quad)
+void StFgtStraightPlotter::saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi, Int_t maxR, Int_t maxPhi, Int_t discId, Int_t quad)
 {
   Char_t buffer[200];
   sprintf(buffer,"Sig_Disc%d_quad%d_Phi_Evt_%d_R_%f_Phi_%f",discId,quad,evtNr,r,phi);
@@ -255,7 +307,7 @@ void StFgtGenAVEMaker::saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Doub
   v_hClusR.push_back(histoR);
 }
 
-pair<double,double> StFgtGenAVEMaker::getDca(  vector<AVTrack>::iterator it)
+pair<double,double> StFgtStraightPlotter::getDca(  vector<AVTrack>::iterator it)
 {
 
   float oldDist=100000;
@@ -266,13 +318,13 @@ pair<double,double> StFgtGenAVEMaker::getDca(  vector<AVTrack>::iterator it)
     {
       float x=it->mx*z+it->ax;
       float y=it->my*z+it->ay;
-       dist=x*x+y*y;
+      dist=x*x+y*y;
       if(dist>oldDist)
 	{
-      ///we go away
+	  ///we go away
 	  dist=oldDist;
 	  optZ=z-zStep;//last z was better
-	break;
+	  break;
 	}
       else
 	oldDist=dist;
@@ -281,7 +333,7 @@ pair<double,double> StFgtGenAVEMaker::getDca(  vector<AVTrack>::iterator it)
 }
 
 
-Double_t StFgtGenAVEMaker::findClosestStrip(Char_t layer, double ord, Int_t iD, Int_t iQ)
+Double_t StFgtStraightPlotter::findClosestStrip(Char_t layer, double ord, Int_t iD, Int_t iQ)
 {
   if(iD<0 || iD >5)
     {
@@ -312,7 +364,7 @@ Double_t StFgtGenAVEMaker::findClosestStrip(Char_t layer, double ord, Int_t iD, 
 
 ///careful here if called for every disk. The function now checks for chargeCorr, cluster size histos if it is you are 
 ///looking at m_effDisk and only fills then. Assuming that for the other discs you use the points from the found tracks
-void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t iq)
+void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
 
   //  cout <<"filling strip histos " <<endl;
@@ -645,17 +697,17 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
     {
 
       //      cout <<" part of p cluster " << endl;
-	    float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
-	    float chi2Ndf;
-	    float amp;
-	    float t0;
-	    ///do the fitting...
-	    if(partOfClusterR)
-	      fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),&(pStrips[iD*4+iq][maxRInd]),&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
-	    else
-	      fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),0,&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
+      float intPCharge=(float)pStrips[iD*4+iq][maxPInd].charge+(float)pStrips[iD*4+iq][maxPInd-1].charge+(float)pStrips[iD*4+iq][maxPInd+1].charge;
+      float chi2Ndf;
+      float amp;
+      float t0;
+      ///do the fitting...
+      if(partOfClusterR)
+	fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),&(pStrips[iD*4+iq][maxRInd]),&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
+      else
+	fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),0,&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
 
-	    APVfitChi2P[iD*40+APVmaxPAdc]->Fill(chi2Ndf);
+      APVfitChi2P[iD*40+APVmaxPAdc]->Fill(chi2Ndf);
 
 
       firstTbSigTrackClusterP[iD*4+iq]->Fill(firstTbSigP);
@@ -683,16 +735,16 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
     {
 
       //      cout <<" part of R cluster " << endl;
-	    float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
-	    float chi2Ndf;
-	    float amp;
-	    float t0;
-	    ///do the fitting...
-	    if(partOfClusterP)
-	      fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),&pStrips[iD*4+iq][maxPInd],&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
-	    else
-	      fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),0,&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
-	    APVfitChi2R[iD*40+APVmaxRAdc]->Fill(chi2Ndf);
+      float intRCharge=(float)pStrips[iD*4+iq][maxRInd].charge+(float)pStrips[iD*4+iq][maxRInd-1].charge+(float)pStrips[iD*4+iq][maxRInd+1].charge;
+      float chi2Ndf;
+      float amp;
+      float t0;
+      ///do the fitting...
+      if(partOfClusterP)
+	fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),&pStrips[iD*4+iq][maxPInd],&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
+      else
+	fitTheStrip(&(pStrips[iD*4+iq][maxRInd]),0,&amp,&t0,&chi2Ndf, iD, iq, APVmaxRAdc,'R');
+      APVfitChi2R[iD*40+APVmaxRAdc]->Fill(chi2Ndf);
 
 
       firstTbSigTrackClusterR[iD*4+iq]->Fill(firstTbSigR);
@@ -716,110 +768,110 @@ void StFgtGenAVEMaker::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int_t i
   
 }
 //is this a good hit in the loose term. We can implement different criteria, so either pulse or some charge sum
-//Bool_t StFgtGenAVEMaker::isGoodHit(
+//Bool_t StFgtStraightPlotter::isGoodHit(
 
 
 //is there something where we expect it? Again, here phi is relative to the quadrant!!
-Bool_t StFgtGenAVEMaker::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t iq)
+Bool_t StFgtStraightPlotter::isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
-      Double_t maxRCharge=-9999;
-      Double_t maxPhiCharge=-9999;
-      Double_t maxRChargeUncert=-9999;
-      Double_t maxPhiChargeUncert=-9999;
-      Int_t maxRInd=-1;
-      Int_t maxPInd=-1;
-      Bool_t validPhiPulse=false;
-      Bool_t validRPulse=false;
-      for(unsigned int i=0;i<  pStrips[iD*4+iq].size();i++)
+  Double_t maxRCharge=-9999;
+  Double_t maxPhiCharge=-9999;
+  Double_t maxRChargeUncert=-9999;
+  Double_t maxPhiChargeUncert=-9999;
+  Int_t maxRInd=-1;
+  Int_t maxPInd=-1;
+  Bool_t validPhiPulse=false;
+  Bool_t validRPulse=false;
+  for(unsigned int i=0;i<  pStrips[iD*4+iq].size();i++)
+    {
+      Int_t geoId=pStrips[iD*4+iq][i].geoId;
+      generalStrip& pStrip=pStrips[iD*4+iq][i];
+      Short_t disc, quadrant,strip;
+      Char_t layer;
+      Double_t ordinate, lowerSpan, upperSpan;//, prvOrdinate;
+      StFgtGeom::getPhysicalCoordinate(geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+      StFgtGeom::decodeGeoId(geoId,disc, quadrant, layer, strip);
+      //      if(layer=='P' && disc==iD && iq==quadrant)
+      //	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
+      if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<0.7) || (layer=='P' && fabs(ordinate-phi)<0.04) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.04)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.04)))
 	{
-	  Int_t geoId=pStrips[iD*4+iq][i].geoId;
-	  generalStrip& pStrip=pStrips[iD*4+iq][i];
-	  Short_t disc, quadrant,strip;
-	  Char_t layer;
-	  Double_t ordinate, lowerSpan, upperSpan;//, prvOrdinate;
-	  StFgtGeom::getPhysicalCoordinate(geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
-	  StFgtGeom::decodeGeoId(geoId,disc, quadrant, layer, strip);
-	  //      if(layer=='P' && disc==iD && iq==quadrant)
-	  //	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
-	  if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<0.7) || (layer=='P' && fabs(ordinate-phi)<0.04) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.04)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.04)))
+	  if(layer=='P')
 	    {
-	      if(layer=='P')
-		{
-		  if(validPulse(pStrip))
-		    validPhiPulse=true;
+	      if(validPulse(pStrip))
+		validPhiPulse=true;
 
-		  if(pStrip.charge>maxPhiCharge)
-		    {
-		      maxPhiCharge=pStrip.charge;
-		      maxPhiChargeUncert=pStrip.chargeUncert;
-		      maxPInd=i;
-		    }
+	      if(pStrip.charge>maxPhiCharge)
+		{
+		  maxPhiCharge=pStrip.charge;
+		  maxPhiChargeUncert=pStrip.chargeUncert;
+		  maxPInd=i;
 		}
-	      else
-		{
-		  if(validPulse(pStrip))
-		    validRPulse=true;
+	    }
+	  else
+	    {
+	      if(validPulse(pStrip))
+		validRPulse=true;
 
-		  if(pStrip.charge>maxRCharge)
-		    {
-		      maxRCharge=pStrip.charge;
-		      maxRInd=i;
-		      maxRChargeUncert=pStrip.chargeUncert;
-		    }
+	      if(pStrip.charge>maxRCharge)
+		{
+		  maxRCharge=pStrip.charge;
+		  maxRInd=i;
+		  maxRChargeUncert=pStrip.chargeUncert;
 		}
 	    }
 	}
+    }
 #ifdef PULSE_CONDITION
-      if(validPhiPulse && validRPulse)
-      	return true;
+  if(validPhiPulse && validRPulse)
+    return true;
 #endif
 
 
-      if(maxRInd>=0 && maxPInd>=0)
-	{
+  if(maxRInd>=0 && maxPInd>=0)
+    {
 #ifdef LEN_CONDITION
-	  if(maxRCharge>1000 && maxPhiCharge>1000)
-	    return true;
+      if(maxRCharge>1000 && maxPhiCharge>1000)
+	return true;
 #endif
 
-	  /////add neighbouring strips
-	  if(maxRInd>0)
-	    maxRCharge+=pStrips[iD*4+iq][maxRInd-1].charge;
-	  if(maxRInd< (int)(pStrips[iD*4+iq].size()-1))
-	    maxRCharge+=pStrips[iD*4+iq][maxRInd+1].charge;
-	  if(maxPInd>0)
-	    maxPhiCharge+=pStrips[iD*4+iq][maxPInd-1].charge;
-	  if(maxPInd< (int)(pStrips[iD*4+iq].size()-1))
-	    maxPhiCharge+=pStrips[iD*4+iq][maxPInd+1].charge;
-	  ///////////////////////////////////
+      /////add neighbouring strips
+      if(maxRInd>0)
+	maxRCharge+=pStrips[iD*4+iq][maxRInd-1].charge;
+      if(maxRInd< (int)(pStrips[iD*4+iq].size()-1))
+	maxRCharge+=pStrips[iD*4+iq][maxRInd+1].charge;
+      if(maxPInd>0)
+	maxPhiCharge+=pStrips[iD*4+iq][maxPInd-1].charge;
+      if(maxPInd< (int)(pStrips[iD*4+iq].size()-1))
+	maxPhiCharge+=pStrips[iD*4+iq][maxPInd+1].charge;
+      ///////////////////////////////////
 
-	  //	  cout <<"charge: "<< maxRCharge<< " 3* uncert " << 3*maxRChargeUncert <<" maxPhiCharge " << maxPhiCharge<<" 3*phi "<< 3*maxPhiChargeUncert <<endl;
-	  if(maxRCharge>3*maxRChargeUncert && maxPhiCharge>3*maxPhiChargeUncert)
+      //	  cout <<"charge: "<< maxRCharge<< " 3* uncert " << 3*maxRChargeUncert <<" maxPhiCharge " << maxPhiCharge<<" 3*phi "<< 3*maxPhiChargeUncert <<endl;
+      if(maxRCharge>3*maxRChargeUncert && maxPhiCharge>3*maxPhiChargeUncert)
+	{
+	  //if we don't care about charge ratio
+	  //  return true;
+	  if(maxRCharge>maxPhiCharge)
 	    {
-	      //if we don't care about charge ratio
-	      //  return true;
-	      if(maxRCharge>maxPhiCharge)
-		{
-		  if(maxRCharge/maxPhiCharge<4)
-		    return true;
-		  else
-		    return false;
-		   }
+	      if(maxRCharge/maxPhiCharge<4)
+		return true;
 	      else
-		{
-		  if(maxPhiCharge/maxPhiCharge<4)
-		    return true;
-		  else
-		    return false;
-		}
+		return false;
 	    }
-	  
+	  else
+	    {
+	      if(maxPhiCharge/maxPhiCharge<4)
+		return true;
+	      else
+		return false;
+	    }
 	}
-      return false;
+	  
+    }
+  return false;
 }
 
 //if required only return clusters with matches...
-pair<Double_t,Double_t> StFgtGenAVEMaker::findCluChargeSize(Int_t iD,Char_t layer, Double_t ordinate)
+pair<Double_t,Double_t> StFgtStraightPlotter::findCluChargeSize(Int_t iD,Char_t layer, Double_t ordinate)
 {
   if(iD<0 || iD >5)
     {
@@ -857,7 +909,7 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::findCluChargeSize(Int_t iD,Char_t laye
   return pair<Double_t,Double_t>(charge,cluSize);
 }
 
-Double_t StFgtGenAVEMaker::findClosestPoint(float mx, float bx, float my, float by, double xE, double yE, Int_t iD)
+Double_t StFgtStraightPlotter::findClosestPoint(float mx, float bx, float my, float by, double xE, double yE, Int_t iD)
 {
   cout <<"expecting point at " << xE <<", " <<yE <<endl;
   if(iD<0 || iD >5)
@@ -914,7 +966,7 @@ Double_t StFgtGenAVEMaker::findClosestPoint(float mx, float bx, float my, float 
 
 
 ///this is too naive..., assumes non-rotated quads
-Short_t StFgtGenAVEMaker::getQuadFromCoo(Double_t x, Double_t y)
+Short_t StFgtStraightPlotter::getQuadFromCoo(Double_t x, Double_t y)
 {
   cout <<"do not use this function!!!" <<endl;
   if(x>0 && y>0)
@@ -930,7 +982,7 @@ Short_t StFgtGenAVEMaker::getQuadFromCoo(Double_t x, Double_t y)
 }
 
 
-Bool_t StFgtGenAVEMaker::printArea1D(Int_t iD,Int_t iq, Int_t centerGeoId)
+Bool_t StFgtStraightPlotter::printArea1D(Int_t iD,Int_t iq, Int_t centerGeoId)
 {
   
   for(unsigned int i=0;i<pStrips[iD*4+iq].size();i++)
@@ -980,7 +1032,7 @@ Bool_t StFgtGenAVEMaker::printArea1D(Int_t iD,Int_t iq, Int_t centerGeoId)
 	}
 
       //     if(layer=='P' && disc==iD && iq==quadrant)
-	//	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
+      //	cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
       if(abs(geoId-centerGeoId)<8)
 	{
 	  //	  cout <<" found!!!" << endl;
@@ -1000,7 +1052,7 @@ Bool_t StFgtGenAVEMaker::printArea1D(Int_t iD,Int_t iq, Int_t centerGeoId)
 }
 
 //print the strips around the place where we expect hit
-Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
+Bool_t StFgtStraightPlotter::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
   //just print the first 1000 clusters
 
@@ -1062,7 +1114,7 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 	}
 
       //          if(layer=='P' && disc==iD && iq==quadrant)
-	    //	    cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
+      //	    cout <<"looking for " << phi << " have: " << ordinate <<" diff: " << fabs(ordinate-phi) <<endl;
       //          if(layer=='R' && disc==iD && iq==quadrant)
       //	    cout <<"looking for r=" << r << " have: " << ordinate <<" diff: " << fabs(ordinate-r) <<endl;
       if(disc==iD && iq==quadrant && ((layer =='R' && fabs(ordinate-r)<1.0) || (layer=='P' && fabs(ordinate-phi)<0.04) || (layer=='P' && fabs(ordinate-phi+2*MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-2*MY_PI)<0.04)|| (layer=='P' && fabs(ordinate-phi+MY_PI)<0.04 ) || (layer=='P' && fabs(ordinate-phi-MY_PI)<0.04)))
@@ -1103,13 +1155,13 @@ Bool_t StFgtGenAVEMaker::printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 
 
 //print the strips around the place where we expect hit
-pair<Double_t,Double_t> StFgtGenAVEMaker::getChargeRatio(Float_t r, Float_t phi, Int_t iD, Int_t iq)
+pair<Double_t,Double_t> StFgtStraightPlotter::getChargeRatio(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
   //first r: 
-      Double_t maxRCharge=-9999;
-      Double_t maxPhiCharge=-9999;
-      Int_t maxRInd=-1;
-      Int_t maxPInd=-1;
+  Double_t maxRCharge=-9999;
+  Double_t maxPhiCharge=-9999;
+  Int_t maxRInd=-1;
+  Int_t maxPInd=-1;
   for(unsigned int i=0;i<  pStrips[iD*4+iq].size();i++)
     {
       Int_t geoId=pStrips[iD*4+iq][i].geoId;
@@ -1125,19 +1177,19 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::getChargeRatio(Float_t r, Float_t phi,
 	{
 	  if(layer=='P')
 	    {
-	    if(pStrip.charge>maxPhiCharge)
-	      {
-		maxPhiCharge=pStrip.charge;
-		maxPInd=i;
-	      }
+	      if(pStrip.charge>maxPhiCharge)
+		{
+		  maxPhiCharge=pStrip.charge;
+		  maxPInd=i;
+		}
 	    }
 	  else
 	    {
-	    if(pStrip.charge>maxRCharge)
-	      {
-		maxRCharge=pStrip.charge;
-		maxRInd=i;
-	      }
+	      if(pStrip.charge>maxRCharge)
+		{
+		  maxRCharge=pStrip.charge;
+		  maxRInd=i;
+		}
 	    }
 	}
     }
@@ -1163,399 +1215,9 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::getChargeRatio(Float_t r, Float_t phi,
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
+Double_t StFgtStraightPlotter::getRPhiRatio(vector<generalCluster>::iterator hitIterBegin, vector<generalCluster>::iterator hitIterEnd)
 {
-  //  (*outTxtFile) <<"getTrack" <<endl;
-  //  cout <<"get track" <<endl;
-  ipZ=-9999; //get ourselves
-  ipZ=vtxZ;
-  vector<AVPoint>::iterator iter=points.begin();
-  Double_t A = 0, B = 0, Cx = 0, Cy = 0, D = 0, Ex = 0, Ey = 0;
-  Double_t dist = 0;
-
-  //LOG_INFO << " --------------------------> calling makeLine with " << points.size() << " 0x" << std::hex << discBitArray << std::dec << endm;
-  //  cout <<"get track2" <<endl;
-  //do the alignment		   
-#ifdef COSMIC
-  float tmpX, tmpY,tmpZ,tmpP,tmpR;
-  for( ; iter != points.end(); ++iter ){
-    getAlign(iter->dID,iter->phi,iter->r,tmpX,tmpY,tmpZ,tmpP,tmpR);
-    cout <<"before: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
-    iter->phi=tmpP;
-    iter->r=tmpR;
-    iter->x=tmpX;
-    iter->y=tmpY;
-    iter->z=tmpZ;
-    cout <<"after: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
-  }
-#endif
-   
-
-  for( iter=points.begin(); iter != points.end(); ++iter ){
-
-    Double_t x = iter->x;
-    Double_t y = iter->y;
-    Double_t z = iter->z;
-
-    A += z*z;
-    B += z;
-    Cx += x*z;
-    Cy += y*z;
-    Ex += x;
-    Ey += y;
-
-    //    cout << "*** Point located at " << x << ' ' << y << ' ' << z << " Disk: " << iter->dID <<endl;
-  }
-  //  cout <<"ipZ: " << ipZ <<endl;
-  //  cout <<"get track3" <<endl;
-  D = points.size();
-  //invalid is -999
-#ifdef FIT_WITH_VERTEX
-      if(muDst && ipZ>-100 && ipZ<100)
-        {
-          A+=ipZ*ipZ;
-          B+=ipZ;
-          D++;
-        }
-#endif
-    //cout << "*** Consts " << A << ' ' << B << ' ' << Cx << ' ' << Cy << ' ' << D << ' ' << Ex << ' ' << Ey << endl;
-  Double_t denom = D*A - B*B;
-  if( denom ){
-    Double_t bx = (-B*Cx + A*Ex)/denom;
-    Double_t by = (-B*Cy + A*Ey)/denom;
-    Double_t mx = ( D*Cx - B*Ex)/denom;
-    Double_t my = ( D*Cy - B*Ey)/denom;
-    //    cout <<"bx: " << bx <<" by: " << by <<" mx: " << mx << " my: " << my <<endl;    
-    for( iter = points.begin(); iter != points.end(); ++iter ){
-      (*outTxtFile) << "--- Location at each disc, " << iter->dID <<" "
-              << "X: " << mx*iter->z+bx << " vs " << iter->x << ' '
-		    << "Y: " << my*iter->z+by << " vs " << iter->y << " " <<" charge r: " << iter->rCharge <<" phi: " << iter->phiCharge <<
-	" r: " << iter->r <<" phi: " << iter->phi <<endl;
-    };
-    dist = 0;
-    //  cout <<"get track4" <<endl;
-    vector<AVPoint> redPoints;
-    // find closest points...
-    for(int iDx=0;iDx<6;iDx++)
-      {
-	Double_t minDistance=9999;
-	Int_t pointIdx=-1;
-	Int_t cnt=0;
-	for( iter = points.begin(); iter != points.end(); ++iter ){
-	  Int_t dId=iter->dID;
-	  Double_t distX=fabs((iter->z*mx+bx)-(iter->x));
-	  Double_t distY=fabs((iter->z*my+by)-(iter->y));
-	  //	  cout <<"distX: " << distX <<" distY: " << distY <<endl;
-	  Double_t distance=distX*distX+distY*distY;
-	  //	  cout << " got distance " << distance << endl;
-	  if((iDx==dId)&&(distance<minDistance))
-	    {
-	      minDistance=distance;
-	      pointIdx=cnt;
-	      //	      cout <<"min dist now:" << minDistance<<" for this dik " << iDx <<" pointIdx: " << pointIdx <<endl;
-	    }
-	  cnt++;
-	}
-	if(pointIdx>=0)
-	  {
-	    ///	    cout <<"pushing back " << pointIdx <<endl;
-	    redPoints.push_back(points[pointIdx]);
-	  }
-      }//end of looping over discs
-
- //// reduced points
-    //////have to do a refit now..
-    //    cout <<"doing refit... " <<endl;
-//  cout <<"get track5" <<endl;
-    A=0.0;
-    B=0.0;
-    Cx=0.0;
-    Cy=0.0;
-    Ex=0.0;
-    Ey=0.0;
-
-    for(vector<AVPoint>::iterator iterR=redPoints.begin() ; iterR != redPoints.end(); ++iterR )
-      {
-	Double_t x = iterR->x;
-	Double_t y = iterR->y;
-	Double_t z = iterR->z;
-	
-	A += z*z;
-	B += z;
-	Cx += x*z;
-	Cy += y*z;
-	Ex += x;
-	Ey += y;
-      }
-    D = redPoints.size();
-#ifdef REFIT_WITH_VERTEX
-          if(muDst && ipZ>-100 && ipZ<100)
-            {
-              A+=ipZ*ipZ;
-              B+=ipZ;
-              D++;
-            }
-#endif
-    Double_t denom = D*A - B*B;
-    //      cout <<"get track6" <<endl;
-    if( denom ){
-      bx = (-B*Cx + A*Ex)/denom;
-      by = (-B*Cy + A*Ey)/denom;
-     mx = ( D*Cx - B*Ex)/denom;
-     my = ( D*Cy - B*Ey)/denom;
-    }
-  //    cout <<"after refit: bx: " << bx <<" by: " << by <<" mx: " << mx << " my: " << my <<endl;    
-  //    cout <<"we have refit line: "<< bx << " by: " << by <<" mx: " << mx << " my: " << my <<endl;
-    ///end of refit
-
-    for(vector<AVPoint>::iterator iterR = redPoints.begin(); iterR != redPoints.end(); ++iterR )
-      {
-	Double_t distX, distY;
-	distX=fabs((iterR->z*mx+bx)-(iterR->x));
-	distY=fabs((iterR->z*my+by)-(iterR->y));
-	//	cout <<"distX: " << distX <<" distY: " << distY <<endl;
-	dist += (distX*distX+distY*distY);
-	//	cout <<"adding " << (distX*distX+distY*distY) <<" to chi2: " << endl;
-	//cout << "*** DistSq " << dist << endl;
-      }
-    //          cout <<"get track8" <<endl;
-    dist/=D;
-    //       cout <<" end chi2: " <<dist <<endl;
-    m_tracks.push_back(AVTrack(mx,my,bx,by,ipZ,dist));
-    //    cout <<" we have " <<m_tracks.size() <<" track now " <<endl;
-    
-    points.clear();
-    for(vector<AVPoint>::iterator it=redPoints.begin();it!=redPoints.end();it++)
-      {
-	points.push_back(*it);
-      }
-    // copy to pointer, if one provided
-    ///      if( linePtr )
-    ////         *linePtr = line;
-
-    // #ifdef DEBUG
-    //       cout << "*** Event " << GetEventNumber() << " final distSQ " << dist << endl;
-    // #endif
-
-    // add to vector, if thes OK
-    ///      if( line.res > mFitThres )
-    ///         mLineVec.pop_back();
-
-    //  cout <<"get track9" <<endl;
-    //Double_t zIpExpX0=0;//x(D6Pos-(xD6/xD1)*D1Pos)*1/(1-xD6/xD1);
-			  ///at y = 0
-    //Double_t zIpExpY0=0;//(D6Pos-yD6/yD1*D1Pos)*1/(1-yD6/yD1);
-
-    for(vector<AVPoint>::iterator iter = points.begin(); iter != points.end(); ++iter ){
-      //           cout << "--- Location at each disc at z: " << iter->z << " "
-      //             << "X: " << mx*iter->z+bx << " vs " << iter->x << ' '
-      //           	   << "Y: " << my*iter->z+by << " vs " << iter->y << " "
-      //		<< " charge phi: " << iter->phiCharge <<" rcharge: "<< iter->rCharge <<endl;
-
-    };
-    //    cout <<endl<<endl;
-    //    cout <<"dist again:  " <<dist <<endl;
-    vector<AVTrack>::iterator it_lastTrack=m_tracks.end();
-    it_lastTrack--;
-    pair<double,double> dca=getDca(it_lastTrack);
-    Double_t vertZ = (  -( it_lastTrack->mx*it_lastTrack->ax + it_lastTrack->my*it_lastTrack->ay )/(it_lastTrack->mx*it_lastTrack->mx+it_lastTrack->my*it_lastTrack->my));
-    (it_lastTrack)->trkZ=vertZ;
-    it_lastTrack->dca=dca.second;
-    it_lastTrack->ipZ=dca.first;
-
-    //  cout <<"get track10" <<endl;
-    if(dist< MAX_DIST_CHI && fabs(vertZ)<VERTEX_CUT)// && fabs(bx)<40 && fabs(by)<40)
-      {
-	//	cout <<" track accepted " <<endl;
-	//  cout <<"get track10-10" <<endl;
-	//		cout <<"track cuts passed " <<endl;
-	set<Short_t> disksHit;
-	//	cout <<"track has " << points.size() <<" points " <<endl;
-	for(vector<AVPoint>::iterator iterP = points.begin(); iterP != points.end(); ++iterP ){
-	  //	  cout <<"testing" << endl;
-	  //	  cout <<"get track10-3, " << iterP->dID<<" quad: " << iterP->quadID << endl;
-	  //	  cout <<" filling disk " << iterP->dID <<" quad " << iterP->quadID <<" with r charge: " << iterP->rCharge <<" phic " << iterP->phiCharge<<endl;
-	  //	  if(iterP->r>20)
-	    {
-	      chargeCorr[iterP->dID*4+iterP->quadID]->Fill(iterP->rCharge,iterP->phiCharge);
-	      clusterSizeP[iterP->dID*4+iterP->quadID]->Fill(iterP->phiSize);
-	      clusterSizeR[iterP->dID*4+iterP->quadID]->Fill(iterP->rSize);
-	    }
-	  //	  cout <<"get track10-31" <<endl;
-	  h_clusterChargeR[iterP->dID]->Fill(iterP->rCharge);
-	  //	  cout <<"get track10-4" <<endl;
-	  h_clusterChargePhi[iterP->dID]->Fill(iterP->phiCharge);
-	  h_clusterSizeR[iterP->dID]->Fill(iterP->rSize);
-	  //  cout <<"get track10-5" <<endl;
-	  h_clusterSizePhi[iterP->dID]->Fill(iterP->phiSize);
-	  disksHit.insert(iterP->dID);
-	  //  cout <<"get track10-6" <<endl;
-	}
-	//  cout <<"get track11" <<endl;
-	for(int i=0;i<6;i++)
-	  {
-	    Double_t xExp=mx*getLocDiscZ(i)+bx;
-	    Double_t yExp=my*getLocDiscZ(i)+by;
-	    cout <<"expecting x: " << xExp << ", " << yExp<<endl;
-	    Int_t quad=-1;
-	    //x=r*cos(phi)
-	    //y=r*sin(phi)
-	    Double_t r=sqrt(xExp*xExp+yExp*yExp);
-	    //if both, x and y, are negative we get the wrong angle
-	    Double_t phi=atan(yExp/xExp);
-	    if(xExp <0 && yExp <0)
-	      phi-=TMath::Pi();
-	    //	    cout <<"phi: "<<phi << " from x: " << xExp <<" y: " << yExp<<endl;
-	    if(phi<-MY_PI)
-	      phi+=2*MY_PI;
-	    if(phi>MY_PI)
-	      phi-=2*MY_PI;
-	    //	    if(phi<-MY_PI)
-	    //	      phi+=2*MY_PI;
-
-	    //	    quad=getQuadFromCoo(xExp,yExp);
-	    quad=StFgtGeom::getQuad(phi);
-	    //	    cout <<"got quad : " << quad << " for phi: " << phi <<endl;
-	    //convert to phi in quad.., so we have to subtract that axis...
-	    phi-=StFgtGeom::phiQuadXaxis(quad);
-
-	   if(phi>TMath::Pi())
-	     phi-=(2*TMath::Pi());
-	   if(phi<((-1)*TMath::Pi()))
-	     phi+=(2*TMath::Pi());
-
-	   if(phi<0)
-	     phi+=MY_PI;
-	    (*outTxtFile) << " looking at Track with chi2/ndf *[cm}: " << it_lastTrack->chi2 << " z vertex: " << it_lastTrack->ipZ << endl;
-
-	    //this snipplet is only good for the disks in which we don't look for efficiencies, otherwise it overcounts the nonEff
-	    //so either use the findClosest point for all, or check if we look at efficient disk or not...
-	    /*	    if(disksHit.find(i)!=disksHit.end())
-	      {
-		radioPlotsEff[i]->Fill(xExp,yExp);
-	      }
-	    else//not efficient
-	      {
-		radioPlotsNonEff[i]->Fill(xExp,yExp);
-
-		}*/
-	    ///for disk for which we want to compute effi:
-
-	    //	    cout <<"fill strip histos " << endl;
-	    fillStripHistos(r,phi,i,quad);
-	    if(isSomewhatEff(r,phi,i,quad))
-	      {
-		//		cout <<" somewhat eff: " << xExp <<" y: " << yExp <<" disk: " << i <<endl;
-		radioPlotsEffLoose[i]->Fill(xExp,yExp);
-	      }
-	    else
-	      {
-		//		    cout <<"not somewhat eff: " << xExp <<" y: " << yExp <<endl;
-		radioPlotsNonEffLoose[i]->Fill(xExp,yExp);
-	      }
-	    
-	    if(i==m_effDisk && quad==QUAD_EFF)
-	      {
-		//do the r/phi thing
-		if(findClosestStrip('R',r,i,quad)<MAX_DIST_STRIP_R)
-		  radioPlotsEffR[i]->Fill(xExp,yExp);
-		else
-		  radioPlotsNonEffR[i]->Fill(xExp,yExp);
-		//correct phi again, so it is absolute in space, like the quads
-		if(findClosestStrip('P',phi+StFgtGeom::phiQuadXaxis(quad),i,quad)<MAX_DIST_STRIP_PHI)
-		  {
-		    //		    cout <<" found phi " <<endl;
-		    radioPlotsEffPhi[i]->Fill(xExp,yExp);
-		  }
-		else
-		  {
-		    //		    cout << " not found, dist is:" <<findClosestStrip('P',phi,i,quad) <<endl;
-		    radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
-		  }
-	      }
-
-	    Double_t closestPoint=findClosestPoint(mx,bx,my,by,xExp,yExp,i);
-	    cout <<" closest point is " << closestPoint <<" away " <<endl;
-		//		 (*outTxtFile) <<"closest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
-
-	    if(findClosestPoint(mx,bx,my,by,xExp,yExp,i)<MAX_DIST2_EFF)
-		  {
-		    //		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<", dist: " << findClosestPoint(xExp,yExp,i) <<endl;
-		    radioPlotsEff[i]->Fill(xExp,yExp);
-		    if(i==m_effDisk)
-		    //		    if(i==1)
-		      {
-			hResidua->Fill(sqrt(closestPoint));
-			hResiduaX->Fill(xExp,sqrt(closestPoint));
-			hResiduaY->Fill(yExp,sqrt(closestPoint));
-			hResiduaR->Fill(r,sqrt(closestPoint));
-			hResiduaP->Fill(phi,sqrt(closestPoint));
-		      }
-
-		    (*outTxtFile) <<"***** found hit in disk " <<i << " quad: " << quad << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
-
-#ifdef DO_PRINT
-		    //		if(i==m_effDisk)
-		  printArea(r,phi,i,quad);
-#endif
-		    //		    chargeCorrInEffDisk->Fill(rPhiRatio.first,rPhiRatio.second);
-		  }
-		else
-		  {
-		    //		    cout <<"non eff disk, x: " << xExp <<" y: " << yExp <<endl;
-		    radioPlotsNonEff[i]->Fill(xExp,yExp);
-		    //		    if(i==m_effDisk)
-		    (*outTxtFile) <<"expected (but haven't found)  point on disk " << i <<", x: " << xExp <<" y: " << yExp << " r: " << r  <<" phi: " << phi << " quad:: " << quad << endl;
-		////		cout <<" expect hit at disc " << iD <<" quad: " << iq  << " r: " <<  r <<" phi: "<< phi <<endl;
-#ifdef DO_PRINT
-		    //    if(i==m_effDisk)
-		      printArea(r,phi,i,quad);
-#endif
-		  }
-		pair<Double_t,Double_t> rPhiRatio=getChargeRatio(r,phi,i,quad);
-
-		if(rPhiRatio.first>0 && rPhiRatio.second>0)
-		  {
-		    double asym=fabs((Double_t)1-rPhiRatio.first/rPhiRatio.second);
-		    double ratio=rPhiRatio.first/rPhiRatio.second;
-
-		    //		      cout <<" filling with : r charge: " << rPhiRatio.first <<" , " << rPhiRatio.second <<" ratio: " << ratio <<" asym: " << asym<<endl;
-		    if(asym<2 && ratio <2)
-		      {
-			hChargeAsym->Fill(asym);
-			hChargeRatio->Fill(ratio);
-			chargeRatioInEffDisk->Fill(xExp,yExp,ratio);
-			chargeAsymInEffDisk->Fill(xExp,yExp,asym);
-		      }
-		  }
-
-	  }
-      }
-    //    cout <<" returning true " <<endl;
-    return true;
-  }
-  //  cout <<" false... " <<endl;
-  return false;
-};
-
-Double_t StFgtGenAVEMaker::getRPhiRatio(vector<generalCluster>::iterator hitIterBegin, vector<generalCluster>::iterator hitIterEnd)
-{
-    Short_t quad;
+  Short_t quad;
   Char_t layer; 
   Int_t numR=0;
   Int_t numPhi=0;
@@ -1580,571 +1242,165 @@ Double_t StFgtGenAVEMaker::getRPhiRatio(vector<generalCluster>::iterator hitIter
 /** grab the cluster container, fill histograms
 
 */
-Int_t StFgtGenAVEMaker::Make()
+Int_t StFgtStraightPlotter::Make()
 {
+  evtNr++;
+  StFgtGeneralBase *fgtGenMkr = static_cast<StFgtGeneralBase * >( GetMaker("fgtGenBase"));
+  pClusters=fgtGenMkr->getClusters();
+  pStrips=fgtGenMkr->getStrips();
   //  cout <<"ave make " <<endl;
   Int_t ierr = kStOk;
   (*outTxtFile) <<"----------------------------- Event Nr: " << evtNr<<" -----------------" <<endl;
-  StFgtGeneralBase::Make();
+
+  StFgtStraightTrackMaker *fgtSTracker = static_cast<StFgtStraightTrackMaker * >( GetMaker("fgtStraightTracker"));
+  vector<AVTrack>& tracks=fgtSTracker->getTracks();
   unsigned int oldNumTracks=m_tracks.size();
-  //  cout <<" mtracks size: " << m_tracks.size() << " oldnum: "<< oldNumTracks <<endl;
-  for(int iD=0;iD<6;iD++)
+  for(vector<AVTrack>::iterator it=tracks.begin();it!=tracks.end();it++)
     {
-      (*outTxtFile) <<" In Disc " << iD << " we have clusters with geo id: ";
-      vector<generalCluster>::iterator hitIter;
-      vector<generalCluster> &hitVec=*(pClusters[iD]);
-      for(hitIter=hitVec.begin();hitIter != hitVec.end();hitIter++)
+      Double_t mx=it->mx;
+      Double_t my=it->my;
+      Double_t bx=it->ax;
+      Double_t by=it->ay;
+
+	for(int i=0;i<6;i++)
+	  {
+	    Double_t xExp=mx*StFgtGeneralBase::getLocDiscZ(i)+bx;
+	    Double_t yExp=my*StFgtGeneralBase::getLocDiscZ(i)+by;
+	    cout <<"expecting x: " << xExp << ", " << yExp<<endl;
+	    Int_t quad=-1;
+	    //x=r*cos(phi)
+	    //y=r*sin(phi)
+	    Double_t r=sqrt(xExp*xExp+yExp*yExp);
+	    //if both, x and y, are negative we get the wrong angle
+  Double_t phi=atan(yExp/xExp);
+  if(xExp <0 && yExp <0)
+    phi-=TMath::Pi();
+  //	    cout <<"phi: "<<phi << " from x: " << xExp <<" y: " << yExp<<endl;
+  if(phi<-MY_PI)
+    phi+=2*MY_PI;
+  if(phi>MY_PI)
+    phi-=2*MY_PI;
+  //	    if(phi<-MY_PI)
+  //	      phi+=2*MY_PI;
+
+  //	    quad=getQuadFromCoo(xExp,yExp);
+  quad=StFgtGeom::getQuad(phi);
+  //	    cout <<"got quad : " << quad << " for phi: " << phi <<endl;
+  //convert to phi in quad.., so we have to subtract that axis...
+  phi-=StFgtGeom::phiQuadXaxis(quad);
+
+  if(phi>TMath::Pi())
+    phi-=(2*TMath::Pi());
+  if(phi<((-1)*TMath::Pi()))
+    phi+=(2*TMath::Pi());
+
+  if(phi<0)
+    phi+=MY_PI;
+  fillStripHistos(r,phi,i,quad);
+  if(isSomewhatEff(r,phi,i,quad))
+    {
+      //		cout <<" somewhat eff: " << xExp <<" y: " << yExp <<" disk: " << i <<endl;
+      radioPlotsEffLoose[i]->Fill(xExp,yExp);
+    }
+  else
+    {
+      //		    cout <<"not somewhat eff: " << xExp <<" y: " << yExp <<endl;
+      radioPlotsNonEffLoose[i]->Fill(xExp,yExp);
+    }
+	    
+  if(i==m_effDisk && quad==QUAD_EFF)
+    {
+      //do the r/phi thing
+      if(findClosestStrip('R',r,i,quad)<MAX_DIST_STRIP_R)
+	radioPlotsEffR[i]->Fill(xExp,yExp);
+      else
+	radioPlotsNonEffR[i]->Fill(xExp,yExp);
+      //correct phi again, so it is absolute in space, like the quads
+      if(findClosestStrip('P',phi+StFgtGeom::phiQuadXaxis(quad),i,quad)<MAX_DIST_STRIP_PHI)
 	{
-	  (*outTxtFile) << hitIter->centralStripGeoId << ", ";
-	  clusterGeoId[iD]->Fill(hitIter->centralStripGeoId);
-	  //Adding to fill APV noise histograms for disk 1, quad A, RDO=1, ARM=0, APV 0-4, 17-21
-	  Int_t rdo, arm,  apv, chan;
-	  mDb->getElecCoordFromGeoId(hitIter->centralStripGeoId, rdo,arm,apv,chan);		      
-	  //cout<<"  WHAT IS APV="<<apv<<" rdo="<<rdo<<" iD="<<iD<<" arm="<<arm<<endl;
-	  if(iD==0 && rdo==1 && arm==0){
-	    disk1QuadA[apv]->Fill(chan);
+	  //		    cout <<" found phi " <<endl;
+	  radioPlotsEffPhi[i]->Fill(xExp,yExp);
+	}
+      else
+	{
+	  //		    cout << " not found, dist is:" <<findClosestStrip('P',phi,i,quad) <<endl;
+	  radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
+	}
+    }
+
+  Double_t closestPoint=findClosestPoint(mx,bx,my,by,xExp,yExp,i);
+  cout <<" closest point is " << closestPoint <<" away " <<endl;
+  //		 (*outTxtFile) <<"closest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
+
+  if(findClosestPoint(mx,bx,my,by,xExp,yExp,i)<MAX_DIST2_EFF)
+    {
+      //		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<", dist: " << findClosestPoint(xExp,yExp,i) <<endl;
+      radioPlotsEff[i]->Fill(xExp,yExp);
+      if(i==m_effDisk)
+	//		    if(i==1)
+	{
+	  hResidua->Fill(sqrt(closestPoint));
+	  hResiduaX->Fill(xExp,sqrt(closestPoint));
+	  hResiduaY->Fill(yExp,sqrt(closestPoint));
+	  hResiduaR->Fill(r,sqrt(closestPoint));
+	  hResiduaP->Fill(phi,sqrt(closestPoint));
+	}
+
+      (*outTxtFile) <<"***** found hit in disk " <<i << " quad: " << quad << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
+
+#ifdef DO_PRINT
+      //		if(i==m_effDisk)
+      printArea(r,phi,i,quad);
+#endif
+      //		    chargeCorrInEffDisk->Fill(rPhiRatio.first,rPhiRatio.second);
+    }
+  else
+    {
+      //		    cout <<"non eff disk, x: " << xExp <<" y: " << yExp <<endl;
+      radioPlotsNonEff[i]->Fill(xExp,yExp);
+      //		    if(i==m_effDisk)
+      (*outTxtFile) <<"expected (but haven't found)  point on disk " << i <<", x: " << xExp <<" y: " << yExp << " r: " << r  <<" phi: " << phi << " quad:: " << quad << endl;
+      ////		cout <<" expect hit at disc " << iD <<" quad: " << iq  << " r: " <<  r <<" phi: "<< phi <<endl;
+#ifdef DO_PRINT
+      //    if(i==m_effDisk)
+      printArea(r,phi,i,quad);
+#endif
+    }
+  pair<Double_t,Double_t> rPhiRatio=getChargeRatio(r,phi,i,quad);
+
+  if(rPhiRatio.first>0 && rPhiRatio.second>0)
+    {
+      double asym=fabs((Double_t)1-rPhiRatio.first/rPhiRatio.second);
+      double ratio=rPhiRatio.first/rPhiRatio.second;
+
+      //		      cout <<" filling with : r charge: " << rPhiRatio.first <<" , " << rPhiRatio.second <<" ratio: " << ratio <<" asym: " << asym<<endl;
+      if(asym<2 && ratio <2)
+	{
+	  hChargeAsym->Fill(asym);
+	  hChargeRatio->Fill(ratio);
+	  chargeRatioInEffDisk->Fill(xExp,yExp,ratio);
+	  chargeAsymInEffDisk->Fill(xExp,yExp,asym);
+	}
+    }
 	  }
-	  if(hitIter->layer=='R')
-	    {
-	      (*outTxtFile) <<"R ordinate: " << hitIter->posR<<endl;
-	      //added this line under hitIter layer R
-	      clustersR[iD]->Fill(hitIter->posR);
-	    }
-	  else
-	    {
-	      Double_t phiQ=StFgtGeom::phiQuadXaxis(hitIter->quad);
-	      (*outTxtFile) <<"Phi ordinate: " << hitIter->posPhi-phiQ<<endl;
-			  //added this line under phi ordinate
-	      clustersP[iD]->Fill(hitIter->posPhi);
-	    }
-	  
-	}
-      (*outTxtFile)<<endl;
-      
-      for(int iq=0;iq<4;iq++)
-	{
-	  for(unsigned int i=0;i<  pStrips[iD*4+iq].size();i++)
-	    {
-	      generalStrip& pStrip=pStrips[iD*4+iq][i];
-	      if(pStrip.seedType==kFgtSeedType1|| pStrip.seedType==kFgtSeedType2 || pStrip.seedType==kFgtSeedType3)
-		{
-		  
-		  for(hitIter=hitVec.begin();hitIter != hitVec.end();hitIter++)
-		    {
-		      if(abs(hitIter->centralStripGeoId-pStrip.geoId)<2)
-			{
-			  (*outTxtFile) <<"found cluster with geo id: " << hitIter->centralStripGeoId;
-			  Double_t phiQ=StFgtGeom::phiQuadXaxis(iq);
-			  if(hitIter->layer=='R')
-			    (*outTxtFile) <<"R ordinate: " << hitIter->posR<<endl;
-			  else
-			    (*outTxtFile) <<"Phi ordinate: " << hitIter->posPhi-phiQ<<endl;
-			}
-		    }
-#ifdef PRINT_1D
-		  printArea1D(iD,iq,pStrip.geoId);
-#endif
-		}
-	    }
-	}
     }
 
-  
-  Float_t x;
-  Float_t y;
-  //  if(vtxRank<=1)
-  //    return kStOk;
-
-  //look at the r phi ratio for each disk
-  //  for(int i=0;i<6;i++)
-  //    {
-  //      Double_t ratio=getRPhiRatio(pClusters[i]->begin(),pClusters[i]->end());
-  //      rPhiRatioPlots[i]->Fill(ratio);
-      //      cout << "ratio for disk: " << i << " is " << ratio <<" disk has: " << tmpClusterCol->getHitVec().size() << "hits" <<endl;
-  //    }
-
-  //vector<generalCluster> &hitVecD1=*(pClusters[0]);
-  //vector<generalCluster> &hitVecD6=*(pClusters[5]);
-
-
-  for(int iD=0;iD<6;iD++)
-    {
-      //            cout << " there are " << pClusters[iD]->size() <<" cluster in disk : " << iD+1 <<endl;
-      int clusCounts[8];
-      memset(clusCounts,0,sizeof(int)*8);
-      vector<generalCluster> &tHitVec=*(pClusters[iD]);
-      vector<generalCluster>::iterator tHit=tHitVec.begin();
-      for(;tHit!=tHitVec.end();tHit++)
-	{
-
-	  if(!useChargeMatch || tHit->hasMatch)
-	    {
-	      if(tHit->quad<3)
-		{
-		  if(tHit->layer=='R')
-		    clusCounts[tHit->quad]++;
-		  else
-		clusCounts[tHit->quad+4]++;
-		}
-	    }
-	}
-      for(int iq=0;iq<4;iq++)
-	{
-	  numClustersR[iD*4+iq]->Fill(clusCounts[iq]);
-	  numClustersPhi[iD*4+iq]->Fill(clusCounts[iq+4]);
-	}
-
-      int numClus=0;
-      int numPulses=0;
-
-      for(int iq=0;iq<4;iq++)
-	{
-	  for(unsigned int i=0;i<  pStrips[iD*4+iq].size();i++)
-	    {
-	      if(pStrips[iD*4+iq][i].charge>1000)
-		{
-		  numClus++;
-		}
-	      if(validPulse(pStrips[iD*4+iq][i]))
-		numPulses++;
-	    }
-	  //	  cout <<"disk " << iD+1 << " quad " << iq <<" has " << numClus << " charges and " << numPulses <<" pulses " << endl;
-	}
-
-    }
-  set<Int_t> usedPoints;//saves the points that have been used for tracks (and shouldn't be reused)
-  Double_t D1Pos=getLocDiscZ(0);
-  Double_t D6Pos=getLocDiscZ(5);
-  Double_t zArm=D6Pos-D1Pos;
-  vector<generalCluster>::iterator hitIterD1,hitIterD6, hitIterD1R, hitIterD6R, hitIter, hitIter2;
-
-  int clusCountsTemp[24];
-  int clusCounts[24];
-  memset(clusCounts,0,sizeof(int)*24);
-  memset(clusCountsTemp,0,sizeof(int)*24);
-
-  for(int iSeed1=0;iSeed1<5;iSeed1++)
-    {
-      for(int iSeed2=iSeed1+1;iSeed2<6;iSeed2++)
-	{
-	  //	  (*outTxtFile) << " using " << iSeed1 <<" and " << iSeed2 << " as seeds " << endl;
-	  if((iSeed2-iSeed1)<1)//to have large enough lever arm. Also, since three points are required shouldn't matter?
-	    continue;
-	  if(iSeed1==m_effDisk || iSeed2==m_effDisk)
-	    continue;
-	  if(pClusters[iSeed1]->size() > MAX_CLUSTERS || pClusters[iSeed2]->size() > MAX_CLUSTERS)
-	    {
-	      //	      cout <<"too many clusters in the disk!!!"<<endl<<endl;
-	      continue;
-	    }
-	  //track where we have hits in disks
-
-	  //	  	  cout <<"using " << iSeed1 << " and " << iSeed2 << " as seed " <<endl;
-	  vector<generalCluster> &hitVecSeed1=*(pClusters[iSeed1]);
-	  vector<generalCluster> &hitVecSeed2=*(pClusters[iSeed2]);
-
-	  D1Pos=getLocDiscZ(iSeed1);
-	  D6Pos=getLocDiscZ(iSeed2);
-	  zArm=D6Pos-D1Pos;
-
-	  for(hitIterD1=hitVecSeed1.begin();hitIterD1 != hitVecSeed1.end();hitIterD1++)
-	    {
-	      //this is from the loose clustering and the cluster doesn't have energy match
-	      if(useChargeMatch && !hitIterD1->hasMatch)
-		continue;
-	      Short_t quadP=hitIterD1->quad;
-	      //Short_t disc=hitIterD1->disc;
-	      //Short_t strip=hitIterD1->strip;
-	      Char_t layer=hitIterD1->layer;
-	      
-	      Double_t seed1ChargePhi=hitIterD1->CHARGE_MEASURE;
-	      Double_t seed1SizePhi=hitIterD1->clusterSize;
-
-	      //	      if(quadP>2)
-	      //		continue;
-
-	      //do 1D 'fit' with r strips and the (x,y) thing
-	      Int_t geoIdSeed1=hitIterD1->centralStripGeoId;
-	      if(usedPoints.find(geoIdSeed1)!=usedPoints.end())
-		continue;
-	      if(layer!='P')
-		continue;
-	      //    cout <<"ave make1 " <<endl;
-	      Float_t phiD1=hitIterD1->posPhi;
-	      for(hitIterD6=hitVecSeed2.begin();hitIterD6 != hitVecSeed2.end();hitIterD6++)
-		{
-		  if(useChargeMatch &&  !hitIterD6->hasMatch)
-		    continue;
-
-		  Int_t geoIdSeed2=hitIterD6->centralStripGeoId;
-		  Short_t quadP_2=hitIterD6->quad;
-		  //Short_t disc=hitIterD6->disc;
-		  //Short_t strip=hitIterD6->strip;
-		  Char_t layer=hitIterD6->layer;
-		  Double_t seed2ChargePhi=hitIterD6->CHARGE_MEASURE;
-		  Double_t seed2SizePhi=hitIterD6->clusterSize;
-		  if(layer!='P')
-		    continue;
-		  if(usedPoints.find(geoIdSeed2)!=usedPoints.end())
-		    continue;
-		  Float_t phiD6=hitIterD6->posPhi;
-		  if(fabs(phiD6-phiD1)>MAX_PHI_DIFF)
-		    continue;
-
-		  for(hitIterD1R=hitVecSeed1.begin();hitIterD1R != hitVecSeed1.end();hitIterD1R++)
-		    {
-		      if(useChargeMatch && !hitIterD1R->hasMatch)
-			continue;
-		      Int_t geoIdSeed1R=hitIterD1R->centralStripGeoId;
-		      Short_t quadR=hitIterD1R->quad;
-		      //Short_t disc=hitIterD1R->disc;
-		      //Short_t strip=hitIterD1R->strip;
-		      Char_t layer=hitIterD1R->layer;
-		      Double_t seed1ChargeR=hitIterD1R->CHARGE_MEASURE;
-		      Double_t seed1SizeR=hitIterD1R->clusterSize;
-		      Int_t quadSeed1=-1;
-		      if(layer!='R')
-			continue;
-
-		      if(quadR!=quadP)
-			continue;
-		      quadSeed1=quadR;
-		      if(usedPoints.find(geoIdSeed1R)!=usedPoints.end())
-			continue;
-		  
-		      Float_t rD1=hitIterD1R->posR;
-		      Float_t xD1=rD1*cos(phiD1);
-		      Float_t yD1=rD1*sin(phiD1);
-		      //		      cout <<"disk: " << iSeed1<<", phiD1: " << phiD1 <<" xD1: " << xD1 <<" yD1: " << yD1 <<" rD1: " << rD1 <<endl;
-		      //    cout <<"ave make3 " <<endl;
-
-		      for(hitIterD6R=hitVecSeed2.begin();hitIterD6R != hitVecSeed2.end();hitIterD6R++)
-			{
-			  if(useChargeMatch && !hitIterD6R->hasMatch)
-			    continue;
-			  Int_t geoIdSeed2R=hitIterD6R->centralStripGeoId;
-			  Short_t quadR_2=hitIterD6R->quad;
-			  //Short_t disc=hitIterD6R->disc;
-			  //Short_t strip=hitIterD6R->strip;
-			  Char_t layer=hitIterD6R->layer;
-			  Double_t seed2ChargeR=hitIterD6R->CHARGE_MEASURE;
-
-			  Double_t seed2SizeR=hitIterD6R->clusterSize;
-			  Int_t quadSeed2=-1;
-
-			  if(quadP_2!=quadR_2)
-			    continue;
-			  quadSeed2=quadP_2;
-			  if(layer!='R')
-			    continue;
-
-
-			  clusCountsTemp[iSeed1*4+quadR]++;
-			  clusCountsTemp[iSeed2*4+quadR_2]++;
-			  if(usedPoints.find(geoIdSeed2R)!=usedPoints.end())
-			    continue;
-			  Float_t rD6=hitIterD6R->posR;
-
-			  			  //track goes towards smaller radii
-#ifndef COSMIC
-			  			  if(rD1>rD6)
-			  			    continue;		  
-#endif
-
-			  vector<AVPoint> v_points;
-			  //add the seed points to the points
-
-			  Double_t xD6=rD6*cos(phiD6);
-			  Double_t yD6=rD6*sin(phiD6);
-			  //			  cout <<"Disk " << iSeed2 <<", phiD6: " << phiD6 <<" xD6: " << xD6 <<" yD6: " << yD6 <<" rD6: " << rD6 <<endl;
-			  v_points.push_back(AVPoint(xD1,yD1,D1Pos,rD1,phiD1,iSeed1,quadSeed1,seed1ChargeR, seed1ChargePhi, seed1SizeR, seed1SizePhi));
-			  v_points.push_back(AVPoint(xD6,yD6,D6Pos,rD6,phiD6,iSeed2,quadSeed2,seed2ChargeR, seed2ChargePhi, seed2SizeR, seed2SizePhi));
-			  ///for each combination in d1,d6
-			  vector< pair<Int_t,Double_t> > v_x;
-			  vector< pair<Int_t,Double_t> > v_y;
-			  vector< pair<Int_t,Double_t> > v_r;
-
-			  vector< pair<Int_t,Double_t> > v_xFail;
-			  vector< pair<Int_t,Double_t> > v_yFail;
-			  vector< pair<Int_t,Double_t> > v_rFail;
-
-			  vector< pair< Int_t, Double_t> > v_rCharge;
-			  vector< pair< Int_t, Double_t> > v_phiCharge;
-
-			  vector<Int_t> v_clusterSizeR;
-			  vector<Int_t> v_clusterSizePhi;
-
-			  vector<Int_t> v_geoIDsR;
-			  vector<Int_t> v_geoIDsPhi;
-
-			  int iFound=0;
-			  int iFoundR=0;
-			  //    cout <<"ave make4 " <<endl;
-			  //zarm is d6 position - D1
-			  //Double_t xIpExp=xD1+(xD6-xD1)*(-D1Pos)/zArm;
-			  //Double_t yIpExp=yD1+(yD6-yD1)*(-D1Pos)/zArm;
-			  ////at x = 0
-			  //Double_t zIpExpX0=(D6Pos-(xD6/xD1)*D1Pos)*1/(1-xD6/xD1);
-			  ///at y = 0
-			  //Double_t zIpExpY0=(D6Pos-yD6/yD1*D1Pos)*1/(1-yD6/yD1);
-			  //		  cout <<" 
-			  //now find other points
-			  vector<generalCluster>::iterator iterClosestPhi;
-			  vector<generalCluster>::iterator iterClosestR;
-
-			  Double_t closestDist=999999;
-			  Int_t quadTestR=-1;
-			  for(int iD=0;iD<6;iD++)
-			    {
-			      //			      cout <<"testting disk: " << iD <<endl;
-			      if(iD==iSeed1 || iD==iSeed2 || iD==m_effDisk)
-				continue;
-			      //			      cout <<"not seed " << endl;
-			      Bool_t found=false;
-			      Bool_t foundR=false;
-			      //check for hit
-			      Double_t diskZ=getLocDiscZ(iD);
-			      //expected
-
-			      Double_t xPosExp=xD1+(xD6-xD1)*(diskZ-D1Pos)/zArm;
-			      Double_t yPosExp=yD1+(yD6-yD1)*(diskZ-D1Pos)/zArm;
-			      Double_t rPosExp=rD1+(rD6-rD1)*(diskZ-D1Pos)/zArm;
-			      vector<generalCluster> &hitVec=*(pClusters[iD]);
-			      for(hitIter=hitVec.begin();hitIter!=hitVec.end();hitIter++)
-				{
-				  if(useChargeMatch &&  !hitIter->hasMatch)
-				    continue;
-				  //do 1D 'fit' with r strips and the (x,y) thing
-				  Int_t geoIdPhi=hitIter->centralStripGeoId;
-				  Short_t quad=hitIter->quad;
-				  Int_t quadTestPhi=quad;
-				  Short_t disc=hitIter->disc;
-				  Short_t strip=hitIter->strip;
-				  Char_t layer=hitIter->layer;
-
-				  if(usedPoints.find(geoIdPhi)!=usedPoints.end())
-				    continue;
-				  if(layer!='P')
-				    continue;
-				  Float_t phi=hitIter->posPhi;
-
-				  if(fabs(phi-phiD1)>MAX_PHI_DIFF)
-				    continue;
-				  if(fabs(phi-phiD6)>MAX_PHI_DIFF)
-				    continue;
-
-				  //Double_t phiCharge=hitIter->CHARGE_MEASURE;
-
-				  //				  								  Double_t phiCharge=hitIter->maxAdc;
-				  //			  Int_t clusterSizePhi=hitIter->clusterSize;
-				  //				  if(clusterSizePhi<=1)
-				  //				    continue;
-				  //    cout <<"ave make5 " <<endl;
-				  for(hitIter2=hitVec.begin();hitIter2!=hitVec.end();hitIter2++)
-				    {
-				      if(useChargeMatch && !hitIter2->hasMatch)
-					continue;
-				      Int_t geoIdR=hitIter2->centralStripGeoId;
-				      StFgtGeom::decodeGeoId(geoIdR,disc, quad, layer, strip);//ok
-				      //				      cout <<" r? " <<endl;
-				      if(usedPoints.find(geoIdR)!=usedPoints.end())
-					continue;
-				      //				      cout <<"not used yet " <<endl;
-				      if(layer!='R')
-					continue;
-				      quadTestR=quad;
-				      if(quadTestR!=quadTestPhi)
-					continue;
-				      Float_t r=hitIter2->posR;
-				      //make sure that the radius makes sense for a track that goes from inner to outer radious
-#ifndef COSMIC
-				      if(r>rD6 || r<rD1)
-					continue;
-#endif
-				      x=r*cos(phi);
-				      y=r*sin(phi);
-				      //				      cout <<"checking with x: " << x << " y: " << y << " phi: " << phi <<" r: " << r <<endl;
-				      //				      cout <<" x, y: " << x <<", " << y << " exp: " << xPosExp << " , " << yPosExp <<endl;
-				      Double_t dist2=(x-xPosExp)*(x-xPosExp)+(y-yPosExp)*(y-yPosExp);
-				      //				      cout <<" dist2: " << dist2 <<endl;
-
-#ifdef ADD_MULTIPLE
-				      if(dist2<MAX_DIST2)
-					{
-					  Double_t rCharge=hitIter2->CHARGE_MEASURE;
-					  Double_t phiCharge=hitIter->CHARGE_MEASURE;
-					  Int_t clusterSizeR=hitIter2->clusterSize;
-					  Int_t clusterSizePhi=hitIter->clusterSize;
-					  v_points.push_back(AVPoint(x,y,diskZ,r,phi,iD,quadTestR, rCharge,phiCharge, clusterSizeR,clusterSizePhi));
-					}
-
-#endif
-				      if(dist2<closestDist)
-					{
-					  closestDist=dist2;
-					  iterClosestPhi=hitIter;
-					  iterClosestR=hitIter2;
-					}
-				    }
-				}
-			      //			      cout <<"closest dist for disk: "<< iD <<" is : " << closestDist <<endl;
-			      //    cout <<"ave make6 " <<endl;
-			      if(closestDist<1000 && closestDist<MAX_DIST2)
-				{
-				  found=true;
-				  clusCountsTemp[iD*4+quadTestR]++;
-
-				  //				  cout <<"accepted "  <<endl;
-				  double r=iterClosestR->posR;
-				  double phi=iterClosestPhi->posPhi;
-				  //				  cout <<"found closest phi in disk " << iD <<" : " << phi << ", r: " << r << " x: " << x <<" y: " << y << ", this is good enough, distance: " << closestDist <<endl;
-				  Int_t geoIdR=iterClosestR->centralStripGeoId;
-				  Int_t geoIdPhi=iterClosestPhi->centralStripGeoId;
-
-				  double x=r*cos(phi);
-				  double y=r*sin(phi);
-
-				  Double_t rCharge=iterClosestR->CHARGE_MEASURE;
-				  Double_t phiCharge=iterClosestPhi->CHARGE_MEASURE;
-				  Int_t clusterSizeR=iterClosestR->clusterSize;
-				  Int_t clusterSizePhi=iterClosestPhi->clusterSize;
-				  //				  cout <<"charge R of middle disk: "<<  iD<<": "<< rCharge <<" phicharge: " << phiCharge<<endl;
-
-				  v_x.push_back(pair<Int_t,Double_t>(iD,x));
-				  v_y.push_back(pair<Int_t,Double_t>(iD,y));
-				  v_rCharge.push_back(pair<Int_t, Double_t>(iD,rCharge));
-				  v_phiCharge.push_back(pair<Int_t, Double_t>(iD,phiCharge));
-				  //to avoid double counting, t
-				  v_geoIDsPhi.push_back(geoIdPhi);
-				  v_geoIDsR.push_back(geoIdR);
-				  v_clusterSizeR.push_back(clusterSizeR);
-				  v_clusterSizePhi.push_back(clusterSizePhi);
-				  v_points.push_back(AVPoint(x,y,diskZ,r,phi,iD,quadTestR, rCharge,phiCharge, clusterSizeR,clusterSizePhi));
-				}
-			      //    cout <<"ave make8 " <<endl;
-			      //only one per disk
-			      if(found)
-				iFound++;
-			      else
-				{
-				  v_xFail.push_back(pair<Int_t,Double_t>(iD,xPosExp));
-				  v_yFail.push_back(pair<Int_t,Double_t>(iD,yPosExp));
-				}
-			      if(foundR)
-				iFoundR++;
-			      else
-				{
-				  //			  cout <<"failed to find r " << rPosExp<<endl;
-				  v_rFail.push_back(pair<Int_t, Double_t>(iD,rPosExp));
-				}
-			      closestDist=999999;
-
-			    }
-
-			  //    cout <<"ave make9 " <<endl;
-			  //		  if(iFound>=2 && fabs(xIpExp)<20 && fabs(yIpExp)<20 && fabs(zIpExpX0)<40 && fabs(zIpExpY0)<40) //at least one hit plus seed and pointing roughly to the interaction region
-			  //with hard cuts on the track we can get the whole vertex distribution
-			  //			  cout << " we found " << iFound <<" points " << endl;
-			  if(iFound>=(MIN_NUM_POINTS-2)) //at least one hit plus seed and pointing roughly to the interaction region
-			    {
-			           cout <<"found " <<endl;
-			      Bool_t validTrack=false;
-			      //			      if(v_x.size()>iFound)
-			      {
-				Double_t ipZ;
-				//				cout <<"about to get track" <<endl;
-				//				cout <<"check for valid track " << endl;
-				validTrack=getTrack(v_points, ipZ);
-
-				//			      cout <<"found 2" <<endl;
-				if(validTrack)
-				  {
-				    for(Int_t iD=0;iD<kFgtNumDiscs;iD++){
-				      for(int iq=0;iq<4;iq++){
-					clusCounts[iD*4+iq]+=clusCountsTemp[iD*4+iq];
-				      }}
-
-
-				    //				    cout <<"track was valid, phi1: " << phiD1 <<" phiD6: " << phiD6;
-				    //				    cout <<", rD1: " << rD1 <<" rD6: " << rD6<<endl;
-				    //				    cout <<"was valid " << endl;
-				  }
-			      }
-
-			      //			      cout <<"found4 " <<endl;
-			      //			      else
-			      {
-				//    cout <<"ave make8]10 " <<endl;
-				//			  		  cout <<"filled hip with " << xIpExp << " / " << yIpExp <<endl;
-				for(unsigned int i=0;i<v_x.size();i++)
-				  {
-				    if(validTrack)
-				      {
-					//at least don't duplicate seeds..., the other ones might belong to multiple tracks
-					usedPoints.insert(geoIdSeed1);
-					usedPoints.insert(geoIdSeed1R);
-					usedPoints.insert(geoIdSeed2);
-					usedPoints.insert(geoIdSeed2R);
-					//					usedPoints.insert(v_geoIDsPhi[i]);
-					//					usedPoints.insert(v_geoIDsR[i]);
-					//					Int_t disk=v_x[i].first;
-					//					Double_t x=v_x[i].second;
-					//					Double_t y=v_y[i].second;
-					//					Double_t rCharge=v_rCharge[i].second;
-					//					Double_t phiCharge=v_phiCharge[i].second;
-					//				      cout <<"filling disk: " << disk <<" with: " << x <<" / " <<y <<endl;
-					//				    				    radioPlotsEff[disk]->Fill(x,y);
-					//				    chargeCorr[disk]->Fill(rCharge,phiCharge);
-					//				    h_clusterSizeR[disk]->Fill(v_clusterSizeR[i]);
-					//				    h_clusterSizePhi[disk]->Fill(v_clusterSizePhi[i]);
-					//				    h_clusterChargeR[disk]->Fill(rCharge);
-					//				    h_clusterChargePhi[disk]->Fill(phiCharge);
-				      }
-				  }
-				hitCounter++;
-			      }
-			    }
-			  //    cout <<"ave make8]11 " <<endl;
-
-			  //start over
-			  iFound=0;
-			  iFoundR=0;
-			  v_x.clear();
-			  v_points.clear();
-			  v_y.clear();
-			  v_r.clear();
-			  v_xFail.clear();
-			  v_yFail.clear();
-			  v_rFail.clear();
-			  memset(clusCountsTemp,0,sizeof(int)*24);
-			}
-
-		    }
-
-		}
-
-	    }
-
-	}
-
-    }
-  for(Int_t iD=0;iD<kFgtNumDiscs;iD++){
-    for(int iq=0;iq<4;iq++){
-      //      cout <<"filling clus2: " << iD<<" iq: " << iq << " overall: " << iD*4+iq <<endl;
-      //            cout <<"fill disk " << iD <<" quad: " << iq << " with " << clusCounts[iD*4+iq] <<" clusters from tracks"<<endl;
-      numTrackHits[iD*4+iq]->Fill(clusCounts[iD*4+iq]);
-
-    }}
-  //  cout <<"we have " << m_tracks.size()-oldNumTracks<< " tracks in this event " <<endl;
-  //  cout <<"oldNumtracsk: " << oldNumTracks << " new size: " << m_tracks.size() <<endl;
-  numTracks->Fill(m_tracks.size()-oldNumTracks);
 
   return ierr;
 
 };
  
-StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0),fitCounter(0)
+StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0),fitCounter(0)
 {
+  StFgtDbMaker *fgtDbMkr = static_cast< StFgtDbMaker* >( GetMakerInheritsFrom( "StFgtDbMaker" ) );
+  if( !fgtDbMkr ){
+    LOG_FATAL << "StFgtDb not provided and error finding StFgtDbMaker" << endm;
+  }
+  mDb = fgtDbMkr->getDbTables();
+  if( !mDb ){
+    LOG_FATAL << "StFgtDb not provided and error retrieving pointer from StFgtDbMaker '"
+	      << fgtDbMkr->GetName() << endm;
+  }
   //  cout <<"AVE constructor!!" <<endl;
   int numTb=7;
   mPulseShapePtr=new TF1("pulseShape","[0]*(x>[4])*(x-[4])**[1]*exp(-[2]*(x-[4]))+[3]",0,numTb);
@@ -2162,21 +1418,28 @@ StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name 
   mCanvas=new TCanvas("tmpCnvs","tmpCnvs");
 };
 
-StFgtGenAVEMaker::~StFgtGenAVEMaker()
+StFgtStraightPlotter::~StFgtStraightPlotter()
 {
 
   //delete histogram arrays
 };
+void StFgtStraightPlotter::SetFileBase(const Char_t* m_filebase)
+{
+  cout <<"setting file base to " << m_filebase <<endl;
+  sprintf(fileBase,"%s",m_filebase);
+}
 
-Int_t StFgtGenAVEMaker::Finish(){
-  StFgtGeneralBase::Finish();
+Int_t StFgtStraightPlotter::Finish(){
   cout <<" closing txt file " << endl;
   outTxtFile->close();
   gStyle->SetPalette(1);
   cout <<"AVE finish function " <<endl;
   Int_t ierr = kStOk;
 
-  ///////////////////////////track collection
+  ///////////////////////////track collection//does this make sense? Not if m_tracks gets erased for every event...
+  StFgtStraightTrackMaker *fgtSTracker = static_cast<StFgtStraightTrackMaker * >( GetMaker("fgtStraightTracker"));
+  vector<AVTrack>& tracks=fgtSTracker->getTracks();
+  unsigned int oldNumTracks=m_tracks.size();
   vector<AVTrack>::iterator it=m_tracks.begin();
   cout <<"we found " << m_tracks.size() <<" tracks" <<endl;
   int counter=0;
@@ -2298,7 +1561,7 @@ Int_t StFgtGenAVEMaker::Finish(){
   for(int xx=0; xx<22; xx++){
 
     disk1QuadA[xx]->Write();
-   }
+  }
 
   
   
@@ -2627,7 +1890,7 @@ Int_t StFgtGenAVEMaker::Finish(){
 // construct histograms
 
 
-Int_t StFgtGenAVEMaker::Init(){
+Int_t StFgtStraightPlotter::Init(){
   outTxtFile=new ofstream;
   outTxtFile->open("clusExpectations.txt");
   cluNotFoundTxt=new ofstream;
@@ -2888,4 +2151,4 @@ Int_t StFgtGenAVEMaker::Init(){
 
   return ierr;
 };
-ClassImp(StFgtGenAVEMaker);
+ClassImp(StFgtStraightPlotter);
