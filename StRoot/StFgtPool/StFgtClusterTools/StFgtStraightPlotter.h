@@ -1,6 +1,6 @@
 ///
-#ifndef _ST_FGT_GEN_AGV_EFF_MAKER_
-#define _ST_FGT_GEN_AGV_EFF_MAKER_
+#ifndef _ST_FGT_STRAIGHT_PLOTTER__
+#define _ST_FGT_STRAIGHT_PLOTTER__
 
 #include "StMaker.h"
 //#include "StFgtQaMaker.h"
@@ -10,101 +10,33 @@
 #include <TCanvas.h>
 #include <TFile.h>
 #include <TF1.h>
-#include "StFgtGeneralBase.h"
+#include "StFgtStraightTrackMaker.h"
 //#include "StRoot/StEvent/StFgtCollection.h"
 
-class StFgtHit;
 
-
-struct AVPoint
-{
-  Double_t x;
-  Double_t y;
-  Double_t z;
-  Double_t r;
-  Double_t phi;
-  Double_t rCharge;
-  Double_t phiCharge;
-  Double_t rSize;
-  Double_t phiSize;
-  Int_t rMaxAdc;
-  Int_t phiMaxAdc;
-  Int_t rMaxAdcInt;
-  Int_t phiMaxAdcInt;
-  Int_t geoIdR;
-  Int_t geoIdPhi;
-  Int_t dID;
-  Int_t quadID;
-  StFgtHit* fgtHitR;
-  StFgtHit* fgtHitPhi;
-
-  AVPoint(){};
-  AVPoint(Double_t mx, Double_t my, Double_t mz, Double_t mr, Double_t mPhi, Int_t mdID,Int_t mQuad,  Double_t mRCharge, Double_t mPhiCharge, Double_t mRSize, Double_t mPhiSize)
-  {
-    geoIdR=-1;
-    geoIdPhi=-1;
-    x=mx;
-    y=my;
-    z=mz;
-    r=mr;
-    phi=mPhi;
-    dID=mdID;
-    quadID=mQuad;
-    rCharge=mRCharge;
-    phiCharge=mPhiCharge;
-    rSize=mRSize;
-    phiSize=mPhiSize;
-    rMaxAdc=-1;
-    phiMaxAdc=-1;
-    rMaxAdcInt=-1;
-    phiMaxAdcInt=-1;
-
-
-  }
-};
-
-struct AVTrack
-{
-  Double_t mx;
-  Double_t my;
-  Double_t ax;
-  Double_t ay;
-  Double_t ipZEv;
-  Double_t ipZ;
-  Double_t chi2;
-  Double_t dca;
-  Double_t trkZ;
-  vector<AVPoint>* points;
-  AVTrack(){};
-  AVTrack(Double_t m_mx, Double_t m_my, Double_t m_ax, Double_t m_ay, Double_t m_ipZ=0.0,Double_t m_chi2=0.0)
-  {
-    mx=m_mx;
-    my=m_my;
-    ax=m_ax;
-    ay=m_ay;
-    ipZEv=m_ipZ;
-    chi2=m_chi2;
-    dca=-9999;
-    trkZ=-9999;
-    ipZ=-9999;
-  }
-};
 
 class StFgtCollection;
 
-class StFgtGenAVEMaker : public StFgtGeneralBase {
+class StFgtStraightPlotter : public StMaker {
  public:
-  StFgtGenAVEMaker(const Char_t* name="FgtGenAVEMaker");
+  StFgtStraightPlotter(const Char_t* name="FgtStraightPlotter");
   pair<Double_t,Double_t> findCluChargeSize(Int_t iD,Char_t layer, Double_t ordinate);
-  virtual ~StFgtGenAVEMaker();
+  virtual ~StFgtStraightPlotter();
    Int_t Init();
    Int_t Make();
    Int_t Finish();
    void setUseChargeMatch(Bool_t use=true);
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtGenAVEMaker.h,v 1.20 2012/12/20 20:32:07 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightPlotter.h,v 1.1 2012/12/20 20:32:07 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  void SetEffDisk(Int_t disk)
+  {
+    m_effDisk=disk;
+  }
  protected:
+  Char_t fileBase[300];
+   StFgtDb* mDb;
+  Int_t m_effDisk;
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
    Bool_t useChargeMatch;
@@ -112,6 +44,11 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    Int_t fitCounter;
    ofstream* outTxtFile;
    ofstream* cluNotFoundTxt;
+  Float_t chargeMatchCut;
+   vector<generalCluster>** pClusters;
+   vector<generalStrip>* pStrips;
+  void setChargeMatchCut(Float_t cut);
+  Bool_t arePointsMatched(vector<generalCluster>::iterator  c1, vector<generalCluster>::iterator  c2);
    Short_t getQuadFromCoo(Double_t x, Double_t y);
    pair<Double_t,Double_t> getChargeRatio(Float_t r, Float_t phi, Int_t iD, Int_t iq);
    Bool_t printArea(Float_t r, Float_t phi, Int_t iD, Int_t iq);
@@ -121,8 +58,8 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    vector<AVTrack> m_tracks;
    // for accessing the data
    StFgtCollection *mFgtCollectionPtr;
-   void doNormalize(TH2D** hEff, TH2D** hNonEff);
    void saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi,Int_t maxR, Int_t maxPhi, Int_t discId, Int_t quad);
+   void doNormalize(TH2D** hEff, TH2D** hNonEff);
    Double_t getRPhiRatio(vector<generalCluster>::iterator hitIterBegin, vector<generalCluster>::iterator hitIterEnd);
    Double_t findClosestPoint(float mx, float bx, float my, float by, double xE, double yE, Int_t iD);
    Bool_t isSomewhatEff(Float_t r, Float_t phi, Int_t iD, Int_t iq);
@@ -130,7 +67,7 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    Double_t findClosestStrip(Char_t layer, double ord, Int_t iD, Int_t iQ);
    // for knowing what & how to plot
    Bool_t fitTheStrip(generalStrip* pStrip, generalStrip* pStripOtherLayer, float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin, Char_t layer);
-
+  Bool_t validPulse(generalStrip& strip);
    // threshold, in units of # sigma above average
    Float_t mPedThres;
    //   Double_t getRPhiRatio(StSPtrVecFgtHitConstIterator hitIterBegin, StSPtrVecFgtHitConstIterator hitIterEnd);
@@ -298,15 +235,18 @@ class StFgtGenAVEMaker : public StFgtGeneralBase {
    TFile* pulsePictureFile;
    TFile* myRootFile;
    int runningEvtNr;
+   Int_t evtNr;
    int hitCounter;
    int hitCounterR;
    //THD2** 
-
+   void SetFileBase(const Char_t* filebase);
 
  private:   
-      ClassDef(StFgtGenAVEMaker,1);
+      ClassDef(StFgtStraightPlotter,1);
 
 };
-inline void StFgtGenAVEMaker::setUseChargeMatch(Bool_t use){useChargeMatch=use;};
+inline void StFgtStraightPlotter::setUseChargeMatch(Bool_t use){useChargeMatch=use;};
+inline void StFgtStraightPlotter::setChargeMatchCut(Float_t cut)
+{chargeMatchCut=cut;};
 #endif
 

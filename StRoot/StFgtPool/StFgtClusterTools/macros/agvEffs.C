@@ -96,10 +96,12 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
 	  gSystem->Load(myMaker);//  TString ts("load "; ts+=myMaker; StMemStat::PrintMem(ts.Data());
   }
   StFgtClusterMaker* myMk =new StFgtClusterMaker("FgtClustMaker"); 
+  StFgtPointMaker* myPoMk =new StFgtPointMaker("FgtPoint bMaker"); 
   //  simpleClusAlgo = new StFgtSimpleClusterAlgo();
   seededClusAlgo = new StFgtSeededClusterAlgo();
   seededClusAlgo->setJumpSingleStrip(true); // if a strip in cluster has no charge 
   myMk->setClusterAlgo( seededClusAlgo );
+
   cout <<"1" <<endl;
   //  StFgtAVEfficiencyMaker* effMkr=new StFgtAVEfficiencyMaker("FgtAVEfficiencyMaker");
   //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
