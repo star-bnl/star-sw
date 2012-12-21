@@ -132,7 +132,7 @@ public:
   void scale(Float_t s){ mScale=s; }
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StEEmcA2EMaker.h,v 1.6 2011/04/11 19:35:40 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StEEmcA2EMaker.h,v 1.7 2012/12/21 00:34:15 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 protected:
   
@@ -160,13 +160,13 @@ protected:
   /// \param eta: etabin [0,12)
   /// \param adc: adc value
   /// \param layer: layer [0,4)
-  void addTowerHit(Int_t sec, Int_t sub, Int_t eta, Float_t adc, Int_t layer);
+  Float_t addTowerHit(Int_t sec, Int_t sub, Int_t eta, Float_t adc, Int_t layer);
   /// Add an smd hit
   /// \param sec: sector [0,12)
   /// \param plane: plane [0,2) = U,V
   /// \param str: strip number [0,288)
   /// \param adc: adc value
-  void addSmdHit(Int_t sec, Int_t plane, Int_t str, Float_t adc );
+  Float_t addSmdHit(Int_t sec, Int_t plane, Int_t str, Float_t adc );
 
   /// Array of 720 x 4 tower objects 
   StEEmcTower mTowers[kEEmcNumSectors*kEEmcNumSubSectors*kEEmcNumEtas][4];
