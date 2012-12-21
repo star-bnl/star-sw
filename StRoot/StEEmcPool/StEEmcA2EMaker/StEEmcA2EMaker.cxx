@@ -7,8 +7,8 @@
  * as input. 
  *
  * \author Jason C. Webb
- * $Date: 2010/08/26 22:49:21 $
- * $Revision: 1.5 $
+ * $Date: 2012/12/21 00:34:15 $
+ * $Revision: 1.6 $
  *
  */
 
@@ -170,24 +170,15 @@ Int_t StEEmcA2EMaker::Init()
 // ----------------------------------------------------------------------------
 Int_t StEEmcA2EMaker::Make()
 {
-  Int_t result = StMaker::Make();
   /// Lack of EEMC data, issue a warning
   if ( !readData() ) return kStWarn;
-  return result;
+  return kStOK;
 }
 
 // ----------------------------------------------------------------------------
 Bool_t StEEmcA2EMaker::readData()
 {
   /// Verify that we have a pointer to input data
-  const StMuDst* muDst = (const StMuDst*)GetInputDS("MuDst");
-  if (muDst) {
-	const StMuEmcCollection *emc = muDst->muEmcCollection();
-	if (emc) {
-	    {LOG_DEBUG << "Reading from MuDst..." << endm;}
-	    return fillFromMuDst(emc);
-	}
-  }
   const StEvent *event = (const StEvent*)GetInputDS("StEvent");
   if (event) {
 	const StEmcCollection *emc = event->emcCollection();
@@ -195,8 +186,19 @@ Bool_t StEEmcA2EMaker::readData()
 	    {LOG_DEBUG << "Reading from StEvent..." << endm;}
 	    return fillFromSt(emc);
 	}
+	{LOG_WARN << "Cannot find emc in the event" << endm;}
+	return false;
   }
-  {LOG_WARN << "Cannot find event" << endm;}
+  const StMuDst* muDst = (const StMuDst*)GetInputDS("MuDst");
+  if (muDst) {
+	const StMuEmcCollection *emc = muDst->muEmcCollection();
+	if (emc) {
+	    {LOG_DEBUG << "Reading from MuDst..." << endm;}
+	    return fillFromMuDst(emc);
+	}
+  } else {
+    {LOG_WARN << "Cannot find neither event or mudst" << endm;}
+  }
   return false;
 }
 
@@ -209,7 +211,7 @@ Bool_t StEEmcA2EMaker::fillFromMuDst(const StMuEmcCollection *emc)
   }
 
   LOG_DEBUG<<GetName()<<"::fillFromMuDst() N tower ADC = "<<emc -> getNEndcapTowerADC()<<endm;
-
+  
   /// Loop over all towers
   for ( Int_t ihit = 0; ihit < emc -> getNEndcapTowerADC(); ihit++ ) {
 
@@ -271,29 +273,30 @@ Bool_t StEEmcA2EMaker::fillFromMuDst(const StMuEmcCollection *emc)
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, Int_t layer )
+Float_t StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, Int_t layer )
 {
+  Float_t energy = 0;
   if (!((sec>=0 && sec<12) && (sub>=0 && sub<5) && (eta>=0 && eta<12) && (layer>=0 && layer < 4))) {
-    return;
+    return energy;
   }
   Int_t index=60*sec+12*sub+eta;
   if (!((0<=index) && (index<720))) {
     // Just can't stay in bounds today
-    return;
+    return energy;
   }
 
   static const Char_t subsectors[] = { 'A','B','C','D','E' };
   static const Char_t detectors[] = { 'T', 'P', 'Q', 'R' };
-
-  /// Get the database entry for this detector (note, DB expects 
+  
+  /// Get the database entry for this detector note, DB expects 
   /// sectors, eta counted from 1 not 0 for conformity with Star's ... 
-  /// conventions.)
-
+  /// conventions.
+    
   const EEmcDbItem *dbitem = mDbMaker ? mDbMaker -> getTile( sec+1,subsectors[sub],eta+1, detectors[layer] ) : 0;
   if (!dbitem) {
-    return;
+    return energy;
   }
-
+  
   /// Copy fail and status bits
   mTowers[index][layer].fail( dbitem -> fail );
   mTowers[index][layer].stat( dbitem -> stat );
@@ -302,24 +305,24 @@ void StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, 
   mTowers[index][layer].raw(adc);
 
   /// Abort if the db has this marked as a bad or questionable channel
-  if ( dbitem -> fail ) return;  
-  //if ( dbitem -> stat ) return;
+  if ( dbitem -> fail ) return energy; 
+  //if ( dbitem -> stat ) return energy;
 
   Float_t ped       = dbitem -> ped;
   Float_t gain      = dbitem -> gain;
   Float_t threshold = ped + dbitem -> sigPed * mSigmaPed[layer];
 
   /// Ignore all ADC below a user-specified threshold
-  if ( adc < threshold ) return;
+  if ( adc < threshold ) return energy;
   mHits[sec][layer]++; 
 
   /// Raw and ped subtracted adc
   mTowers[index][layer].adc(adc-ped);
 
   /// Make sure gain is positive, nonzero
-  if ( gain <= 0. ) return;
+  if ( gain <= 0. ) return energy;
   /// Determine energy
-  Float_t energy = ( adc - ped + 0.5 ) / gain;
+  energy = ( adc - ped + 0.5 ) / gain;
   
   /// And set detector response
   mTowers[index][layer].energy( energy * mScale );
@@ -346,14 +349,15 @@ void StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, 
 #if 0
   mTowers[index][layer].print();
 #endif  
-
+  return energy;
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcA2EMaker::addSmdHit( Int_t sec, Int_t plane, Int_t strip, Float_t adc )
+Float_t StEEmcA2EMaker::addSmdHit( Int_t sec, Int_t plane, Int_t strip, Float_t adc )
 {
+  Float_t energy = 0;
   if (!((0 <= sec) && (sec < 12) && (0 <= plane) && (plane < 2) && (0 <= strip) && (strip < 288))) {
-    return;
+    return energy;
   }
 
   /// Access the database.  Note that the DB counts from 1, not zero.
@@ -361,7 +365,7 @@ void StEEmcA2EMaker::addSmdHit( Int_t sec, Int_t plane, Int_t strip, Float_t adc
   const EEmcDbItem *dbitem = mDbMaker ? mDbMaker -> getByStrip ( sec+1, planes[plane], strip+1 ) : 0;
 
   /// Check if null
-  if ( dbitem == 0 ) return;
+  if ( dbitem == 0 ) return energy;
 
   /// Copy fail and status bits
   mStrips[sec][plane][strip].fail( dbitem -> fail );
@@ -371,32 +375,32 @@ void StEEmcA2EMaker::addSmdHit( Int_t sec, Int_t plane, Int_t strip, Float_t adc
   mStrips[sec][plane][strip].raw(adc);
 
   /// Abort if the db has this marked as bad or questionable 
-  if ( dbitem -> fail ) return;
-  //if ( dbitem -> stat ) return;
+  if ( dbitem -> fail ) return energy;
+  //if ( dbitem -> stat ) return energy;
 
   Float_t ped       = dbitem -> ped;
   Float_t gain      = dbitem -> gain;
   Float_t threshold = ped + dbitem -> sigPed * mSigmaPed[4+plane];
 
   /// Ignore all ADC below a user-specified threshold
-  if ( adc < threshold ) return;
+  if ( adc < threshold ) return energy;
   mHits[sec][plane+4]++; 
 
   /// Set raw and ped subtracted ADC
   mStrips[sec][plane][strip].adc(adc-ped);
 
  /// Make sure gain is positive, nonzero
-  if ( gain <= 0. ) return;
+  if ( gain <= 0. ) return energy;
 
   /// Determine energy
-  Float_t energy = ( adc - ped + 0.5 ) / gain;
+  energy = ( adc - ped + 0.5 ) / gain;
 
   mStrips[sec][plane][strip].energy(energy);
 
   mHitStrips[sec][plane].push_back( mStrips[sec][plane][strip] );
 
   mEnergy[sec][plane+4] += energy;
-
+  return energy;
 }
 
 // ----------------------------------------------------------------------------
@@ -501,8 +505,8 @@ Bool_t StEEmcA2EMaker::fillFromSt(const StEmcCollection *emc)
 	  /// must come after any operation on mTowers[0][ii]
 	  /// for changes to tower to be propagated to the
 	  /// array of hit towers.
-	  addTowerHit(isector,isubsector,ietabin,(Float_t)adc,0);
-
+	  Float_t energy = addTowerHit(isector,isubsector,ietabin,(Float_t)adc,0);
+	  hits[ihit]->setEnergy(energy);
 	}
 
     }
@@ -567,8 +571,8 @@ Bool_t StEEmcA2EMaker::fillFromSt(const StEmcCollection *emc)
 	  
 	  /// add this hit to our tower/layer.  See comments
 	  /// in tower loop.
-	  addTowerHit( isector, isubsector, ietabin, (Float_t)adc, ilayer );
-
+	  Float_t energy = addTowerHit( isector, isubsector, ietabin, (Float_t)adc, ilayer );
+	  hits[ihit]->setEnergy(energy);
 	}
 
     }
@@ -608,8 +612,8 @@ Bool_t StEEmcA2EMaker::fillFromSt(const StEmcCollection *emc)
 	      mStrips[isector][iplane][istrip].stemc( hits[ihit] );
 
 	      /// sett comments in tower loop.
-	      addSmdHit( isector, iplane, istrip, (Float_t)adc);
-
+	      Float_t energy = addSmdHit( isector, iplane, istrip, (Float_t)adc);
+	      hits[ihit]->setEnergy(energy);
 	    }
 
 	}
