@@ -17,7 +17,7 @@
 #include "StarClassLibrary/StThreeVectorF.hh"
 
 #include <set>
-#define FILL_FROM_EVENT
+//#define FILL_FROM_EVENT
 //#define COSMIC
 //#define ONE_HIT_PER_QUAD
 //#define USE_VTX
@@ -446,7 +446,8 @@ Int_t StFgtGeneralBase::fillFromStEvent(StFgtCollection* fgtCollectionPtr)
 
 Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 {
-  //    cout <<"general base, muDST filler" <<endl;
+
+      cout <<"general base, muDST filler" <<endl;
   Int_t ierr = kStOk;
   StFgtStripCollection* stripCollectionPtr[kFgtNumDiscs];
   StFgtHitCollection* hitCollectionPtr[kFgtNumDiscs];
@@ -503,11 +504,11 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
     TClonesArray *fgtStrips=muDst->fgtArray(muFgtStrips);
     TClonesArray *fgtStripAssoc=muDst->fgtArray(muFgtStripAssociations );
     TClonesArray *fgtAdc=muDst->fgtArray(muFgtAdcs);
-
+    cout <<"got mdsts" <<endl;
     if(fgtStripAssoc && fgtClusters && fgtStrips && fgtAdc)
       {
+
 	ierr = kStOk;
-	cout <<" got fgt asso" <<endl;
 	Int_t nAssoc=fgtStripAssoc->GetEntriesFast();
 	Int_t nClus=fgtClusters->GetEntriesFast();
 	Int_t nStrips=fgtStrips->GetEntriesFast();
@@ -519,21 +520,21 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 	Int_t clusKey=0;
 	Short_t quad, disc, stripNum;
 	Char_t layer;
+	StFgtHit* pFgtHit=0;
 	for( Int_t i = 0; i < nAssoc; ++i )
 	  {
 	    StMuFgtStripAssociation* assoc = static_cast< StMuFgtStripAssociation* >( (*fgtStripAssoc)[i] );
-	    StFgtHit* pFgtHit=0;
 	    if( assoc )
 	      {
 		//only construct clusters for which we have the strips...
 		Int_t clusIdx=assoc->getClusIdx();
 		if(oldClusIdx!=clusIdx) //looking at new clusters
 		  {
+
 		    //construct new cluster
 		    oldClusIdx=clusIdx;
 		    if(pFgtHit>0)
 		      hitCollectionPtr[disc]->getHitVec().push_back(pFgtHit);
-		    
 		    StMuFgtCluster* clus = static_cast< StMuFgtCluster* >( (*fgtClusters)[clusIdx] );
 		    Int_t clusCentGeoId=clus->getCentralStripGeoId();
 		    Float_t clusCharge=clus->getCharge();
@@ -546,7 +547,7 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 		    StFgtGeom::decodeGeoId(clusCentGeoId,disc, quad, layer, stripNum);
 		    pFgtHit=new StFgtHit(clusKey,clusCentGeoId,clusCharge, disc, quad, layer, R, ErrR,Phi, ErrPhi,Z,ErrZ);
 		    clusKey++;
-		   
+		    pFgtHit->setChargeUncert(clus->getChargeUncert());
 
 		    pFgtHit->setEvenOddChargeAsy(clus->getEvenOddChargeAsy());
 		    pFgtHit->setMaxTimeBin(clus->getMaxTimeBin());
@@ -554,6 +555,9 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 		    pFgtHit->setNstrip(clus->getNumStrips());//should check if that corresponds to the number of strips...
 		    //not in mdst??
 		    ///		    pFgtHit->setSeedType(clus->getSeedType());
+		  }
+		else
+		  {
 		  }
 		Int_t stripIdx=assoc->getStripIdx();
 		StMuFgtStrip* strip = static_cast< StMuFgtStrip* >( (*fgtStrips)[stripIdx] );
@@ -566,7 +570,6 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 		StFgtStrip* stripPtr = stripCollectionPtr[disc]->getStrip( elecId );
 		stripPtr->setGeoId(geoId);
 		stripPtr->setCharge(stripCharge);
-
 		stripPtr->setElecCoords(rdo,arm,apv,chan);
 		Double_t ped = mDb->getPedestalFromElecId( elecId );
 		Double_t pedErr = mDb->getPedestalSigmaFromElecId( elecId );
@@ -581,7 +584,6 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 		  }
 		//fill in strip info
 		//fill in adc info
-
 		for(Int_t iAdc=strip->getAdcStartIdx();iAdc<strip->getAdcStartIdx()+strip->getNumSavedTimeBins();iAdc++)
 		  {
 		    if(iAdc>=0 && (iAdc<nAdc))
@@ -842,4 +844,5 @@ void StFgtGeneralBase::doLooseClustering()
     }
 
 }
+Float_t StFgtGeneralBase::chargeMatchCut=1.5;
 ClassImp(StFgtGeneralBase);

@@ -28,7 +28,7 @@
 //#define PRINT_1D
 //max num clusters any disk is allowed to have
 
-#define COSMIC
+//#define COSMIC
 #ifdef COSMIC
 #include "StFgtCosmicAlignment.h"
 #endif
