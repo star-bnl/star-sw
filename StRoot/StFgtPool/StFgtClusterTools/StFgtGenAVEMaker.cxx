@@ -66,7 +66,7 @@
 #define MAX_DIST2_EFF 1.0
 #define MAX_DIST2 1.0
 
-#define MIN_NUM_POINTS 2
+#define MIN_NUM_POINTS 3
 #define DISK_DIM 40
 #ifndef COSMIC
 #define NUM_EFF_BIN 30

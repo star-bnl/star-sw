@@ -13,6 +13,10 @@ class StDbConfigNode;
 class StDbManager;
 class StFgtGenPlotter;
 class StFgtGenAVEMaker;
+class StFgtGeneralBase;
+class StFgtStraightTrackMaker;
+class StFgtStraightPlotter;
+class StFgtPointMaker;
 
 StChain           *analysisChain = 0;
 St_db_Maker       *dbMkr         = 0;
@@ -20,10 +24,14 @@ StFgtDbMaker      *fgtDbMkr      = 0;
 StFgtRawDaqReader *daqRdr        = 0;
 StFgtGenPlotter    *fgtGenPlotter     = 0;
 StFgtGenAVEMaker    *fgtAVEffMkr     = 0;
+StFgtGeneralBase    *fgtGenBase     = 0;
+StFgtStraightTrackMaker    *fgtStraightTracker     = 0;
 /// /star/data03/daq/2012/064/13064033p_jb/st_physics_13064033_raw_1010001.daq
 ///star/data03/daq/2012/061/13061024fR/st_fgt_13061024_raw_1340001.daq",
-int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/st_physics_13064033_raw_1010001.daq",
-		       Int_t runnumber = 13064033,
+
+
+int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/st_physics_13174038_raw_1010001.daq",
+		       Int_t runnumber = 13074038,
 	     Int_t nevents = 100, Int_t effDisk=2,
 	     Bool_t cutShortEvents = 1 ){
    LoadLibs();   
@@ -55,7 +63,8 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
    ///   dbMkr->SetDateTime(20120316,033657); ///
    //          dbMkr->SetDateTime(20120404,043459); ///
    //////--->for run12             dbMkr->SetDateTime(20120622,043459); ///
-     dbMkr->SetDateTime(20120803,043459); ///for cosmic teststand
+            dbMkr->SetDateTime(20120622,043459); ///z
+   //     dbMkr->SetDateTime(20120803,043459); ///for cosmic teststand
    //  dbMkr->SetDateTime(20120903,043459); ///for cosmic teststand
 
    ///     dbMkr->SetDateTime(20120307,000717); ///
@@ -95,20 +104,29 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/064/13064033p_jb/
   if (gClassTable->GetID(myMaker) < 0) {
 	  gSystem->Load(myMaker);//  TString ts("load "; ts+=myMaker; StMemStat::PrintMem(ts.Data());
   }
+  if (gClassTable->GetID("StFgtPointMaker") < 0) {
+	  gSystem->Load("StFgtPointMaker");//  TString ts("load "; ts+=myMaker; StMemStat::PrintMem(ts.Data());
+  }
   StFgtClusterMaker* myMk =new StFgtClusterMaker("FgtClustMaker"); 
-  StFgtPointMaker* myPoMk =new StFgtPointMaker("FgtPoint bMaker"); 
+  //simplePointAlgo is default
+  StFgtPointMaker* myPoMk =new StFgtPointMaker("FgtPointMaker"); 
   //  simpleClusAlgo = new StFgtSimpleClusterAlgo();
   seededClusAlgo = new StFgtSeededClusterAlgo();
   seededClusAlgo->setJumpSingleStrip(true); // if a strip in cluster has no charge 
+
   myMk->setClusterAlgo( seededClusAlgo );
 
   cout <<"1" <<endl;
   //  StFgtAVEfficiencyMaker* effMkr=new StFgtAVEfficiencyMaker("FgtAVEfficiencyMaker");
   //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
-  fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
+  //  fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
+    fgtGenBase = new StFgtGeneralBase( "fgtGenBase" );
+
+    fgtStraightTracker = new StFgtStraightTrackMaker( "fgtStraightTracker" );
+  //  fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
   //  fgtAVEffMkr->setChargeMatchCut(2.0);
   //  fgtAVEffMkr->setUseChargeMatch();
-  fgtAVEffMkr->SetEffDisk(effDisk);
+    //  fgtAVEffMkr->SetEffDisk(effDisk);
   //   fgtGenPlotter = new StFgtGenPlotter( "genPlotter" );
 
    // debug
