@@ -88,7 +88,6 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    std::cout << "***** Initializing all makers in the analysis chain *****" << std::endl;
    analysisChain->Init();
    std::cout << "***** Initialization done *****" << std::endl;
-
    //
    // Finally ready to loop over the events 
    //
@@ -109,8 +108,6 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    };
  
    //---------------------------------------------------------------
-
-
    //
    // Calls the ::Finish() method on all makers
    //
@@ -148,8 +145,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.5 2012/12/22 02:19:15 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.6 2012/12/22 04:13:33 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.6  2012/12/22 04:13:33  avossen
+*** empty log message ***
+
 Revision 1.5  2012/12/22 02:19:15  avossen
 some bugfixes
 

@@ -17,7 +17,7 @@
 #include "StarClassLibrary/StThreeVectorF.hh"
 
 #include <set>
-//#define FILL_FROM_EVENT
+#define FILL_FROM_EVENT
 //#define COSMIC
 //#define ONE_HIT_PER_QUAD
 //#define USE_VTX
@@ -149,7 +149,7 @@ Bool_t StFgtGeneralBase::validPulse(generalStrip& strip)
 
 Int_t StFgtGeneralBase::Make()
 {
-#ifdef FILL_FROM_EVENT
+#ifndef FILL_FROM_EVENT
   //if we constructed fgtCollection ourself, delete it ourself
   if(fgtCollection)
     {
@@ -277,7 +277,7 @@ Int_t StFgtGeneralBase::fillFromStEvent(StFgtCollection* fgtCollectionPtr)
 	    Int_t clusterSize=(*hitIter)->getStripWeightMap().size();
 	    Double_t clusterCharge=(*hitIter)->charge();
 	    Double_t clusterUncert=(*hitIter)->getChargeUncert();
-	    cout <<" r pos : " << posR << " phi: " << posPhi << " charge: " << clusterCharge << " unert: " << clusterUncert <<endl;
+	    //	    cout <<" r pos : " << posR << " phi: " << posPhi << " charge: " << clusterCharge << " unert: " << clusterUncert <<endl;
 	    //sometimes (rarely two clusters have the same geo id (some split I guess), don't insert twice, that messes the indexing up
 	    if(mapGeoId2Cluster.find(geoId)==mapGeoId2Cluster.end())
 	      {
@@ -446,8 +446,6 @@ Int_t StFgtGeneralBase::fillFromStEvent(StFgtCollection* fgtCollectionPtr)
 
 Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 {
-
-      cout <<"general base, muDST filler" <<endl;
   Int_t ierr = kStOk;
   StFgtStripCollection* stripCollectionPtr[kFgtNumDiscs];
   StFgtHitCollection* hitCollectionPtr[kFgtNumDiscs];
@@ -504,7 +502,7 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
     TClonesArray *fgtStrips=muDst->fgtArray(muFgtStrips);
     TClonesArray *fgtStripAssoc=muDst->fgtArray(muFgtStripAssociations );
     TClonesArray *fgtAdc=muDst->fgtArray(muFgtAdcs);
-    cout <<"got mdsts" <<endl;
+    //    cout <<"got mdsts" <<endl;
     if(fgtStripAssoc && fgtClusters && fgtStrips && fgtAdc)
       {
 

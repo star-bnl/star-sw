@@ -493,6 +493,7 @@ Double_t StFgtStraightTrackMaker::getRPhiRatio(vector<generalCluster>::iterator 
 */
 Int_t StFgtStraightTrackMaker::Make()
 {
+  cout <<"trakcer! had " << m_tracks.size() << " old tracks" <<endl;
   for(vector<AVTrack>::iterator it=m_tracks.begin();it!=m_tracks.end();it++)
     {
       if(it->points)
@@ -506,7 +507,7 @@ Int_t StFgtStraightTrackMaker::Make()
   pClusters=fgtGenMkr->getClusters();
   pStrips=fgtGenMkr->getStrips();
 
-  unsigned int oldNumTracks=m_tracks.size();
+
   //  cout <<" mtracks size: " << m_tracks.size() << " oldnum: "<< oldNumTracks <<endl;
 
   
@@ -548,7 +549,7 @@ Int_t StFgtStraightTrackMaker::Make()
 	      continue;
 	    }
 	  //track where we have hits in disks
-
+	  cout <<"seed 1: " << iSeed1 <<" seed2: "<< iSeed2 <<endl;
 	  vector<generalCluster> &hitVecSeed1=*(pClusters[iSeed1]);
 	  vector<generalCluster> &hitVecSeed2=*(pClusters[iSeed2]);
 
