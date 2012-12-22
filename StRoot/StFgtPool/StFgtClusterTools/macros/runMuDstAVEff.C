@@ -62,6 +62,7 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    muDstMaker->SetStatus("FgtStrip",1);
    muDstMaker->SetStatus("FgtCluster",1);
    muDstMaker->SetStatus("FgtStripAssociation",1);
+   muDstMaker->SetStatus("FgtAdc",1);
 
    //
    // now the QA maker
@@ -147,8 +148,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.4 2012/10/24 14:28:57 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.5 2012/12/22 02:19:15 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.5  2012/12/22 02:19:15  avossen
+some bugfixes
+
 Revision 1.4  2012/10/24 14:28:57  avossen
 adapted macro to new mDst structure
 

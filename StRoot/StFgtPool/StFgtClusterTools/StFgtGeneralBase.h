@@ -144,6 +144,7 @@ static float getLocDiscZ(int iD)
       return pStrips;
     }
   static Bool_t arePointsMatched(vector<generalCluster>::iterator  c1, vector<generalCluster>::iterator  c2);
+   void SetFileBase(const Char_t* filebase);
  protected:
 
   Char_t fileBase[300];
@@ -190,7 +191,7 @@ enum evStatCodes
   Bool_t validPulse(generalStrip& strip);
   void checkNumPulses();
    void doEvAssoc();
-   void SetFileBase(const Char_t* filebase);
+
  private:   
   ClassDef(StFgtGeneralBase,1);
 };
