@@ -62,6 +62,8 @@ string ACCESS_MODE = "accessMode";
 string WRITER = "writer";
 string POWER = "machinePower";
 string CAP = "cap"; // max # connections to a server
+string INTERACTIVE = "interactive";
+
 
 static MYSQL *conn;
 
@@ -109,7 +111,22 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
       DayOrNight = "night";
     }
 
-  string ServerAttr =  USER+"="+(string)whoami+";"+WHEN_ACTIVE+"="+DayOrNight+";"+ACCESS_MODE+"="+access_mode;
+  // test for the interactive user session
+  std::string isInteractive = "no";
+  char* testInteractive = 0;
+  testInteractive = getenv ("INTERACTIVE");
+
+  if (testInteractive) { // result would be either "yes" or "no", all lowercase
+	isInteractive = testInteractive; 
+    if (isInteractive == "1" || isInteractive == "YES" || isInteractive == "yes" 
+		|| isInteractive == "Yes" || isInteractive == "true" || isInteractive == "TRUE") {
+	  isInteractive = "yes";
+    } else {
+	  isInteractive = "no";
+	};
+  } 
+
+  string ServerAttr =  USER+"="+(string)whoami+";"+WHEN_ACTIVE+"="+DayOrNight+";"+ACCESS_MODE+"="+access_mode+";"+INTERACTIVE+"="+isInteractive;
   if (strcmp(whoami,"starreco")==0)
   {
     ServerAttr = SCOPE+"=Production;"+ServerAttr;
