@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.91 2012/12/10 22:46:33 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.92 2012/12/26 17:45:53 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.92  2012/12/26 17:45:53  genevb
+ * reinitialization fixed for PredictSpaceCharge functions
+ *
  * Revision 1.91  2012/12/10 22:46:33  genevb
  * Handle multiple runs by reinitialization at reinstantiation, introduce corrections modes, enable iterative UndoDistortions
  *
@@ -3824,6 +3827,10 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
    if (!useManualSCForPredict) ManualSpaceChargeR2(0.01,SpaceChargeEWRatio); // Set "medium to large" value of the spacecharge parameter for tests, not critical.
                                                  // but keep EWRatio that was previously defined
+   if (DoOnce) {
+     xx[0] = R[0]; xx[1] = 0; xx[2] = 50;
+     DoDistortion ( xx, xxprime ) ;
+   }
    Float_t x[3] = { 0, 0, 0 } ;
    BField(x,B) ;
    ChargeB  = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
@@ -4027,7 +4034,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    if ( OuterTPCHits < MinOuterTPCHits )                     return(0) ; // No action if too few hits in the TPC   
 
    Int_t    ChargeB, HitSector ;
-   Float_t  B[3], xx[3], xx2[3], xxprime[3] ;
+   Float_t  B[3], xx[3], xxprime[3] ;
    Double_t Xtrack[BITS], Ytrack[BITS], Ztrack[BITS] ;
    Double_t R[BITS], X0, Y0, X0Prime, Y0Prime, R0, Pz_over_Pt, Z_coef, DeltaTheta ;
    Double_t Xprime[BITS+1], Yprime[BITS+1], Zprime[BITS+1], dX[BITS+1], dY[BITS+1] ;  
@@ -4039,6 +4046,15 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
    if (!useManualSCForPredict) ManualSpaceChargeR2(0.01,SpaceChargeEWRatio); // Set "medium to large" value of the spacecharge parameter for tests, not critical.
                                                    // but keep EWRatio that was previously defined 
+   if (DoOnce) {
+     xx[0] = R[TPCOFFSET]; xx[1] = 0; xx[2] = 50;
+     DoDistortion ( xx, xxprime ) ;
+   }
+   Int_t tempDistortionMode = mDistortionMode;
+   mDistortionMode = (tempDistortionMode & kSpaceChargeR2);
+   if (tempDistortionMode & k3DGridLeak) mDistortionMode |= k3DGridLeak ;
+   else if (tempDistortionMode & kGridLeak) mDistortionMode |= kGridLeak ;
+ 
    Float_t x[3] = { 0, 0, 0 } ;  // Get the B field at the vertex 
    BField(x,B) ;
    ChargeB = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
@@ -4121,14 +4137,11 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
        Ztrack[i]  =   VertexZ + DeltaTheta*Z_coef;
        
        // Rotate by Phi - PhiPrime
-       xx2[0] = cosPhiMPrime*Xtrack[i] - sinPhiMPrime*Ytrack[i];
-       xx2[1] = sinPhiMPrime*Xtrack[i] + cosPhiMPrime*Ytrack[i];
-       xx2[2] = Ztrack[i];
+       xx[0] = cosPhiMPrime*Xtrack[i] - sinPhiMPrime*Ytrack[i];
+       xx[1] = sinPhiMPrime*Xtrack[i] + cosPhiMPrime*Ytrack[i];
+       xx[2] = Ztrack[i];
 
-       xx[0] = xx2[0] ; xx[1] = xx2[1] ; xx[2] = xx2[2];
-
-       if (mDistortionMode & kGridLeak ||
-           mDistortionMode & k3DGridLeak) { 
+       if (mDistortionMode & (kGridLeak | k3DGridLeak)) {
          HitPhi = TMath::ATan2(xx[1],xx[0]) ;
          while ( HitPhi < 0 ) HitPhi += TMath::TwoPi() ;
          while ( HitPhi >= TMath::TwoPi() ) HitPhi -= TMath::TwoPi() ;
@@ -4138,38 +4151,15 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
            // Restore settings for spacechargeR2
            fSpaceChargeR2  =  tempfSpaceChargeR2 ;
            SpaceChargeR2   =  tempSpaceChargeR2  ;
+           mDistortionMode =  tempDistortionMode ;
            return(0); // Fail on unknown GridLeak weights
          }
        }
 
-       if (mDistortionMode & kSpaceChargeR2) {    // Daisy Chain all possible distortions and sort on flags
-	 UndoSpaceChargeR2Distortion ( xx, xxprime ) ;
-	 for ( unsigned int j = 0 ; j < 3; ++j ) 
-	   {
-	     xx[j] = xxprime[j];
-	   }
-       }
-       if (mDistortionMode & kGridLeak) { 
-	 UndoGridLeakDistortion ( xx, xxprime ) ;
-	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
-	   {
-	     xx[j] = xxprime[j];
-	 }
-       }
-       if (mDistortionMode & k3DGridLeak) { 
-	 Undo3DGridLeakDistortion ( xx, xxprime ) ;
-	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
-	   {
-	     xx[j] = xxprime[j];
-	 }
-       }
-
-       xx2[0] = 2*xx2[0] - xx[0] ;   // Distort the tracks
-       xx2[1] = 2*xx2[1] - xx[1] ;  
-       xx2[2] = 2*xx2[2] - xx[2] ; 
-       Xtrack[i] =  cosPhi*xx2[0] + sinPhi*xx2[1] ; // Rotate by -Phi
-       Ytrack[i] = -sinPhi*xx2[0] + cosPhi*xx2[1] ;
-       Ztrack[i] = xx2[2] ;
+       DoDistortion ( xx, xxprime) ; // Distort the tracks
+       Xtrack[i] =  cosPhi*xxprime[0] + sinPhi*xxprime[1] ; // Rotate by -Phi
+       Ytrack[i] = -sinPhi*xxprime[0] + cosPhi*xxprime[1] ;
+       Ztrack[i] = xxprime[2] ;
        
      }
    
@@ -4218,6 +4208,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    // Restore settings for spacechargeR2
    fSpaceChargeR2  =  tempfSpaceChargeR2 ;
    SpaceChargeR2   =  tempSpaceChargeR2  ;
+   mDistortionMode =  tempDistortionMode ;
    
    return(1) ; // Success 
 
