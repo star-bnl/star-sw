@@ -702,13 +702,13 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
 void StSpaceChargeEbyEMaker::FindSpaceCharge() {
   esc = 0.;
   double res = FindPeak(schist,esc);
-  if (res > -500.) sc = res;
+  sc = (res > -500. ? res : 0.0);
 }
 //_____________________________________________________________________________
 double StSpaceChargeEbyEMaker::FindPeak(TH1* hist,float& pkwidth) {
 
   pkwidth = 0.;
-  if (hist->Integral() < 100.0) return -998.;
+  if (hist->Integral() < 100.0) return -997.;
   double mn = hist->GetMean();
   double rms = TMath::Abs(hist->GetRMS());
   mn *= 1.1; rms *= 1.5;
@@ -717,11 +717,16 @@ double StSpaceChargeEbyEMaker::FindPeak(TH1* hist,float& pkwidth) {
   double pmax = TMath::Max(hist->GetMaximum(),0.);
   double lp = pmax*0.001;
   double up = pmax*10.0;
+  double lw = rms*0.001;
+  double uw = rms*10.0;
   ga1.SetParameters(pmax,mn,rms*0.5);
   ga1.SetRange(lr,ur);
   ga1.SetParLimits(0,lp,up); // Loglikelihood only works with positive functions
+  ga1.SetParLimits(2,lw,uw); // To help the fit
   int fitResult = hist->Fit(&ga1,
-    (gROOT->GetVersionInt() >= 53000 ? "WLR0Q" : "LLR0Q")); // Loglikelihood options changed!
+    (gROOT->GetVersionInt() >= 53000 ? "WLRB0Q" : "LLRB0Q")); // Loglikelihood options changed!
+  ga1.ReleaseParameter(0);
+  ga1.ReleaseParameter(2);
   if (fitResult != 0) return -999.;
   double rp = ga1.GetParameter(0);
   if (rp == lp || rp == up) return -998;
@@ -1093,7 +1098,8 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* gh,
 
   ga1.SetParameters(gh->GetEntries()/(16.*2.*10.),0.,0.1);
   ga1.SetParLimits(0,0.001,10.0*gh->GetEntries()); // Loglikelihood only works with positive functions
-  gh->FitSlicesX(&ga1,1,0,20,"L0Q"); // gapZhist bin contents are integers
+  gh->FitSlicesX(&ga1,1,0,20,"LB0Q"); // gapZhist bin contents are integers
+  ga1.ReleaseParameter(0);
   const char* hn = gh->GetName();
   TH1D* GapsChi2 = (TH1D*) gDirectory->Get(Form("%s_chi2",hn));
   TH1D* GapsAmp  = (TH1D*) gDirectory->Get(Form("%s_0",hn));
@@ -1199,8 +1205,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.45 2012/12/15 03:13:50 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.46 2012/12/28 22:04:25 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.46  2012/12/28 22:04:25  genevb
+// Improve chances of fits succeeding
+//
 // Revision 1.45  2012/12/15 03:13:50  genevb
 // Store used calibrations in histogram files
 //
