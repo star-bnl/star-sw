@@ -34,16 +34,25 @@ double RndmUniformPos() {
 inline
 double RndmGaussian() {
 
+  static bool cached = false;
+  static double u = 0.;
+  if (cached) {
+    cached = false;
+    return u;
+  } 
   // Box-Muller algorithm
-  double v1 = 2. * RndmUniform() - 1.;
-  double v2 = 2. * RndmUniform() - 1.;
-  double r2 = v1 * v1 + v2 * v2;
+  u = 2. * RndmUniform() - 1.;
+  double v = 2. * RndmUniform() - 1.;
+  double r2 = u * u + v * v;
   while (r2 > 1.) {
-    v1 = 2. * RndmUniform() - 1.;
-    v2 = 2. * RndmUniform() - 1.;
-    r2 = v1 * v1 + v2 * v2;
+    u = 2. * RndmUniform() - 1.;
+    v = 2. * RndmUniform() - 1.;
+    r2 = u * u + v * v;
   }
-  return v1 * sqrt(-2. * log(r2) / r2);
+  const double p = sqrt(-2. * log(r2) / r2);
+  u *= p;
+  cached = true;
+  return v * p;
 
 }
 

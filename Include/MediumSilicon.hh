@@ -169,6 +169,7 @@ class MediumSilicon : public Medium {
     double eMobility, hMobility;
     // High-field mobility parameters
     double eBetaCanali, hBetaCanali;
+    double eBetaCanaliInv, hBetaCanaliInv;
     // Saturation velocity
     double eSatVel, hSatVel;
     // Hall factor

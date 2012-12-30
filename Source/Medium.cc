@@ -444,13 +444,11 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
 
   // If no data available, calculate 
   // the diffusion coefficients using the Einstein relation
-  if (!hasElectronDiffLong) {
-    dl = sqrt(2. * BoltzmannConstant * temperature / e);
-  }
-  if (!hasElectronDiffTrans) {
-    dt = sqrt(2. * BoltzmannConstant * temperature / e);
-  }
-  
+  if (!hasElectronDiffLong || !hasElectronDiffTrans) {
+    const double d = sqrt(2. * BoltzmannConstant * temperature / e);
+    if (!hasElectronDiffLong) dl = d;
+    if (!hasElectronDiffTrans) dt = d;
+  } 
   // Verify values and apply scaling.
   if (dl < 0.) dl = 0.;
   if (dt < 0.) dt = 0.;

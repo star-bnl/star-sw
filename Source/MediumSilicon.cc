@@ -22,6 +22,7 @@ MediumSilicon::MediumSilicon() :
   eLatticeMobility(1.35e-6), hLatticeMobility(0.45e-6),
   eMobility(1.35e-6), hMobility(0.45e-6),
   eBetaCanali(1.109), hBetaCanali(1.213),
+  eBetaCanaliInv(1. / 1.109), hBetaCanaliInv(1. / 1.213),
   eSatVel(1.02e-2), hSatVel(0.72e-2),
   eHallFactor(1.15), hHallFactor(0.7),
   eTrapCs(1.e-15), hTrapCs(1.e-15),
@@ -1804,6 +1805,8 @@ MediumSilicon::UpdateHighFieldMobilityCanali() {
   // Temperature dependent exponent in high-field mobility formula
   eBetaCanali = 1.109 * pow(temperature / 300., 0.66);
   hBetaCanali = 1.213 * pow(temperature / 300., 0.17);
+  eBetaCanaliInv = 1. / eBetaCanali;
+  hBetaCanaliInv = 1. / hBetaCanali;
 
 }
 
@@ -1883,7 +1886,7 @@ MediumSilicon::ElectronMobilityCanali(const double e, double& mu) const {
     mu = 0.;
   } else {
     mu = eMobility / 
-         pow(1. + pow(eMobility * e / eSatVel, eBetaCanali), 1. / eBetaCanali);
+         pow(1. + pow(eMobility * e / eSatVel, eBetaCanali), eBetaCanaliInv);
   }  
   return true;
   
@@ -1971,7 +1974,7 @@ MediumSilicon::HoleMobilityCanali(const double e, double& mu) const {
     mu = 0.;
   } else {
     mu = hMobility / 
-         pow(1. + pow(hMobility * e / hSatVel, hBetaCanali), 1. / hBetaCanali);
+         pow(1. + pow(hMobility * e / hSatVel, hBetaCanali), hBetaCanaliInv);
   }  
   return true;
   

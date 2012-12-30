@@ -27,7 +27,9 @@ AvalancheMC::AvalancheMC() :
   debug(false) {
   
   className = "AvalancheMC";
-   
+  
+  drift.reserve(10000);
+ 
 }
 
 AvalancheMC::~AvalancheMC() {
