@@ -5,6 +5,9 @@
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.45  2013/01/02 15:27:46  bouchet
+ * remove FGT codes
+ *
  * Revision 1.44  2012/12/18 18:46:59  margetis
  * update for DEV13 geometry
  *
@@ -483,41 +486,7 @@ LOG_DEBUG<<"pixel rnd hit location x: "<<tempHit->position().x()<<"; y: "<<tempH
   else{
     LOG_INFO <<"No Ist hits found."<<endm;
   }
-  
-  
-  const StMcFgtHitCollection* fgtHitCol = mcEvent->fgtHitCollection();
-  if (fgtHitCol)
-    {
-      Int_t nhits = fgtHitCol->numberOfHits();
-      if (nhits)
-	{
-	  Int_t id = 0;
-	  //StSPtrVecHit *cont = new StSPtrVecHit();
-	  //rcEvent->addHitCollection(cont, # Name );
-	  for (UInt_t k=0; k<fgtHitCol->numberOfLayers(); k++){
-	    if (fgtHitCol->layer(k))
-	      {
-		UInt_t nh = fgtHitCol->layer(k)->hits().size();
-		for (UInt_t i = 0; i < nh; i++) {
-		  StMcHit *mcH = fgtHitCol->layer(k)->hits()[i];
-		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++);
-		  tempHit->setVolumeId(mcH->volumeId());
-		  tempHit->setKey(mcH->key());
-
-		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH);
-		  if(mcI){
-		    tempHit->setLayer(mcI->layer());
-		    tempHit->setLadder(mcI->ladder());
-		    tempHit->setWafer(mcI->wafer());
-		    //tempHit->setExtraByte0(mcI->side());
-		  }
-		  col->addHit(tempHit);
-		}
-	      }
-	  }
-	}
-    }
-  
+    
   rcEvent->setRnDHitCollection(col);
   return kStOK;
     }
