@@ -133,7 +133,7 @@ Int_t StEEmcStripClusterFinderTSIU_t::find( const ESmdLayer_t& stripArray, StSim
                   ++numStrips;
             };
 
-            if( passes && clusE > mMinEnergyPerCluster && numStrips > mMinStripsPerCluster ){
+            if( passes && clusE > mMinEnergyPerCluster && numStrips >= mMinStripsPerCluster ){
                // cluster passes, add a new cluster and set some values
 
                clusters.push_back( StSimpleCluster_t( ++mLastClusterID ) );
@@ -179,8 +179,12 @@ Int_t StEEmcStripClusterFinderTSIU_t::find( const ESmdLayer_t& stripArray, StSim
 ClassImp( StEEmcStripClusterFinderTSIU_t );
 
 /*
- * $Id: StEEmcStripClusterFinderTSIU.cxx,v 1.1 2012/11/26 19:05:55 sgliske Exp $ 
+ * $Id: StEEmcStripClusterFinderTSIU.cxx,v 1.2 2013/01/02 20:30:31 sgliske Exp $ 
  * $Log: StEEmcStripClusterFinderTSIU.cxx,v $
+ * Revision 1.2  2013/01/02 20:30:31  sgliske
+ * numStrips >= mMinStripsPerCluster rather than
+ * numStrips > mMinStripsPerCluster
+ *
  * Revision 1.1  2012/11/26 19:05:55  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcHitMaker to StRoot/StEEmcPool/StEEmcHitMaker
  *
