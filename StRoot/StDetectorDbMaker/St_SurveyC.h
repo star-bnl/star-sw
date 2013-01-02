@@ -3,7 +3,7 @@
 
 #include "TChair.h"
 #include "tables/St_Survey_Table.h"
-
+#include "TGeoMatrix.h"
 class St_SurveyC : public TChair {
  public:
   static St_SurveyC   *instance(const Char_t *name);
@@ -30,6 +30,9 @@ class St_SurveyC : public TChair {
   Double_t 	sigmaTrZ(Int_t i = 0) 	const {return Struct(i)->sigmaTrZ;}
   Char_t* 	comment(Int_t i = 0) 	const {return Struct(i)->comment;}
   void          GetAngles(Double_t &phi, Double_t &the, Double_t &psi, Int_t i = 0);
+  const Double_t  *Rotation(Int_t i = 0)     const {return &Struct(i)->r00;} 
+  const Double_t  *Translation(Int_t i = 0)  const {return &Struct(i)->t0;} 
+  const TGeoHMatrix  &GetMatrix(Int_t i);
   const Double_t *r(Int_t i = 0)        const {return &Struct(i)->r00;}
   const Double_t *t(Int_t i = 0)        const {return &Struct(i)->t0;}
  protected:

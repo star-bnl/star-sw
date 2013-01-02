@@ -3,7 +3,7 @@ Module ZCALGEO is the geometry of the Zero deg. Quartz Calorimeter
 Created 10-Feb-1997
 Author  W.B.Christie
 ****************************************************************
-+CDE,AGECOM,GCUNIT
++CDE,AGECOM,GCUNIT.
 *
         Content ZCAL, QCAL, QDIV, QSCI, PIPH, PVAH, PLAT, PLVA,
                 PIPJ, PVAJ                                                 

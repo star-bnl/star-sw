@@ -9,11 +9,26 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.26 2007/10/16 19:49:20 fisyak Exp $
+ * $Id: StMcTrack.cc,v 2.32.2.1 2011/11/22 16:01:18 didenko Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.32.2.1  2011/11/22 16:01:18  didenko
+ * bug fixed
+ *
+ * Revision 2.32  2011/11/17 20:16:20  genevb
+ * For SL10k_embed, fixes from 2.28 and 2.29, minus FPD inclusion from 2.27
+ *
+ * Revision 2.29  2011/03/22 22:30:33  perev
+ * Bug#2111 Remove redundant zeroing
+ *
+ * Revision 2.28  2011/02/16 00:47:59  perev
+ * mGeantId>=0 && mGeantId<=0
+ *
+ * Revision 2.27  2011/01/26 19:46:24  perev
+ * FPD ==> STAR Soft
+ *
  * Revision 2.26  2007/10/16 19:49:20  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -62,8 +77,23 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.26 2007/10/16 19:49:20 fisyak Exp $
+ * $Id: StMcTrack.cc,v 2.32.2.1 2011/11/22 16:01:18 didenko Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.32.2.1  2011/11/22 16:01:18  didenko
+ * bug fixed
+ *
+ * Revision 2.32  2011/11/17 20:16:20  genevb
+ * For SL10k_embed, fixes from 2.28 and 2.29, minus FPD inclusion from 2.27
+ *
+ * Revision 2.29  2011/03/22 22:30:33  perev
+ * Bug#2111 Remove redundant zeroing
+ *
+ * Revision 2.28  2011/02/16 00:47:59  perev
+ * mGeantId>=0 && mGeantId<=0
+ *
+ * Revision 2.27  2011/01/26 19:46:24  perev
+ * FPD ==> STAR Soft
+ *
  * Revision 2.26  2007/10/16 19:49:20  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -167,6 +197,7 @@
  *
  **************************************************************************/
 #include <algorithm>
+#include <assert.h>
 #ifndef ST_NO_NAMESPACES
 using std::find;
 #endif
@@ -180,7 +211,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.26 2007/10/16 19:49:20 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.32.2.1 2011/11/22 16:01:18 didenko Exp $";
 
 ClassImp(StMcTrack);
 
@@ -199,6 +230,8 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mFourMomentum.setE(trk->e);
     mIsShower = trk->is_shower;
     mGeantId = trk->ge_pid;
+    assert(mGeantId>=0);
+    if ( mGeantId>0xFFFF)  mGeantId = 0;
     mPdgId   = trk->eg_pid;
     mKey     = trk->id;
     mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
@@ -431,7 +464,7 @@ void StMcTrack::setFgtHits(StPtrVecMcFgtHit& val) { mFgtHits = val; }
 
 void StMcTrack::setShower(char val) { mIsShower = val; }
 
-void StMcTrack::setGeantId(long val) { mGeantId = val; }
+void StMcTrack::setGeantId(long val) { mGeantId = val; assert(mGeantId>=0 && mGeantId<=0xFFFF); }
 
 void StMcTrack::setPdgId(long val) { mPdgId = val; }
 

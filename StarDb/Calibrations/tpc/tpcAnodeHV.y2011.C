@@ -7,7 +7,7 @@ TDataSet *CreateTable() {
     for (UShort_t socket = 1; socket <= 19; socket++) {
       row.sector = sector;
       row.socket = socket;
-      if (socket <= 8 || socket == 17) row.voltage = 1135;
+      if (socket <= 8 || socket == 17) row.voltage = 1100;
       else                             row.voltage = 1390;
       tableSet->AddAt(&row);
     }

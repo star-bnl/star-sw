@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.17 2010/10/04 19:06:13 fisyak Exp $
+ * $Id: StTpcHit.h,v 2.16 2010/08/31 20:01:04 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
- * Revision 2.17  2010/10/04 19:06:13  fisyak
- * Add reference to FCF flag definition
- *
  * Revision 2.16  2010/08/31 20:01:04  fisyak
  * Fix no. of padsInHit, accounting afterburner
  *
@@ -76,7 +73,6 @@
 #include "StHit.h"
 #include "StMemoryPool.hh"
 #include "TMath.h"
-#include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 class StTpcHit : public StHit {
 public:
   StTpcHit() : StHit() {mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0; mMcl_x = mMcl_t = 0; mChargeModified = 0;}
