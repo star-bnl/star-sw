@@ -20,8 +20,21 @@ void loadStarGeometry( const Char_t *mytag="y2009a" )
   // This is the name of the file in which we cache the AgML
   // geometry
   //
+#if 0  
   TString filename = ((StBFChain*)StMaker::GetTopChain())->GetFileOut();
-  filename.ReplaceAll(".root",".geom.root");
+#else /* NOTE: this assumes that "chain" is in scope in CINT */
+  TString filename = "";  if ( chain ) chain -> GetFileOut();
+#endif
+  if ( filename == "" ) 
+    {
+      filename = chain -> GetFileIn();
+    }
+  if ( filename == "" )
+    {
+      filename = mytag;
+    }
+  filename.ReplaceAll(".root","");
+  filename += ".geom.root";
 
   ///////////////////////////////////////////////////////////
   //
