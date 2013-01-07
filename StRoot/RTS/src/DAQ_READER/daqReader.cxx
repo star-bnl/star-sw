@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.51 2012/12/19 17:22:40 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.52 2013/01/07 15:26:02 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -70,6 +70,7 @@ daqReader::daqReader(char *mem, int size)
   
   data_memory = mem;
   event_memory = mem;
+  evt_offset_in_file = 0;
 
   data_size = size;  
   
