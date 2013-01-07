@@ -23,17 +23,23 @@ void loadStarGeometry( const Char_t *mytag="y2009a" )
 #if 0  
   TString filename = ((StBFChain*)StMaker::GetTopChain())->GetFileOut();
 #else /* NOTE: this assumes that "chain" is in scope in CINT */
-  TString filename = "";  if ( chain ) chain -> GetFileOut();
+  TString filename = "";  
+  if ( chain ) {
+      filename = chain -> GetFileOut();
+      filename.ReplaceAll(".root","");
+  }
 #endif
   if ( filename == "" ) 
     {
       filename = chain -> GetFileIn();
+      filename.ReplaceAll("@","");      // special case for filelist
+      filename.ReplaceAll(".list","");
     }
   if ( filename == "" )
     {
       filename = mytag;
     }
-  filename.ReplaceAll(".root","");
+
   filename += ".geom.root";
 
   ///////////////////////////////////////////////////////////
