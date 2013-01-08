@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.48 2012/11/05 18:18:45 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.49 2013/01/08 18:56:03 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.49  2013/01/08 18:56:03  ullrich
+ * Changed value of kFgtNumTimeBins
+ *
  * Revision 2.48  2012/11/05 18:18:45  ullrich
  * Add 3 new members to StFgtClusterSeedType.
  *
@@ -477,7 +480,7 @@ enum StFgtPhysConsts {
  */
 // unsorted constants
 enum StFgtGeneralConsts {
-    kFgtNumTimeBins = 9,
+    kFgtNumTimeBins = 15,
     kFgtMaxAdc = 4096,
 };
 
