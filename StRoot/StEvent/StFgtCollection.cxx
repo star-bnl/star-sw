@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtCollection.cxx,v 2.1 2012/04/16 20:20:49 ullrich Exp $
+ * $Id: StFgtCollection.cxx,v 2.2 2013/01/08 19:54:03 ullrich Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtCollection.cxx,v $
+ * Revision 2.2  2013/01/08 19:54:03  ullrich
+ * Added mNumTimeBins and access functions.
+ *
  * Revision 2.1  2012/04/16 20:20:49  ullrich
  * Initial Revision
  *
@@ -25,6 +28,7 @@ StFgtCollection::StFgtCollection() : StObject() {
         mStripCollection[i].setDisc( i );
         mHitCollection[i].setDisc( i );
     }
+    mNumTimeBins=7; //reasonable default
 }
 
 // deconstructor
