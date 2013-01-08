@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.52 2013/01/07 15:26:02 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.53 2013/01/08 18:46:19 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -65,19 +65,19 @@ daqReader::daqReader(char *mem, int size)
 {
 
 
-  init();
-  input_type = pointer;
+    init();
+    input_type = pointer;
   
-  data_memory = mem;
-  event_memory = mem;
-  evt_offset_in_file = 0;
+    data_memory = mem;
+    event_memory = mem;
+    evt_offset_in_file = 0;
 
-  data_size = size;  
+    data_size = size;  
   
-  file_size = size;
-  // LOG("JEFF", "filesize=%d mem=%p",file_size,mem);
+    file_size = size;
+    // LOG("JEFF", "filesize=%d mem=%p",file_size,mem);
 
-  crit_cou = 0;
+    crit_cou = 0;
 
 
 }
@@ -85,6 +85,10 @@ daqReader::daqReader(char *mem, int size)
 daqReader::daqReader(char *name) 
 {
   struct stat64 stat_buf ;
+
+  // Default map flags
+  map_prot = PROT_READ;
+  map_flags = MAP_SHARED | MAP_NORESERVE;
 
   init();
 
@@ -482,7 +486,7 @@ char *daqReader::get(int num, int type)
 	LOG(DBG, "Mapping event file %s, offset %d, size %d",
 	    file_name, evt_offset_in_file, event_size);
     
-	char *mapmem = memmap->map(desc, evt_offset_in_file, event_size);
+	char *mapmem = memmap->map(desc, evt_offset_in_file, event_size, map_prot, map_flags);
 	if(!mapmem) {
 	    LOG(CRIT, "Error mapping memory for event");
 	    exit(0);
@@ -901,7 +905,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       if(space_left == 0) return 0;
       if(space_left < (long long int)sizeof(LOGREC)) return -1;
 
-      m = headermap.map(desc, offset, space_left);
+      m = headermap.map(desc, offset, space_left, map_prot, map_flags);
       if(!m) {
 	LOG(ERR, "Error mapping header information");
 	return -1;
@@ -2197,26 +2201,31 @@ char *MemMap::map_real_mem(char *buffer, int _size)
     return mem;
 }
 
-  char *MemMap::map(int _fd, long long int _offset, int _size)
-    {
-      offset = _offset;
-      size = _size;
-      fd = _fd;
+void daqReader::setCopyOnWriteMapping() {
+    map_prot = PROT_READ | PROT_WRITE;
+    map_flags = MAP_PRIVATE | MAP_NORESERVE;
+}
 
-      LOG(DBG, "Calling mmap fd=%d offset=%d size=%d",
-	  _fd, _offset, _size);
+char *MemMap::map(int _fd, long long int _offset, int _size, int map_prot, int map_flags)
+{
+    offset = _offset;
+    size = _size;
+    fd = _fd;
 
-      int excess = offset % page_size;
-      actual_offset = offset - excess;
-      actual_size = size + excess;                 // actual size need not be a multiple of pagesize...
+    LOG(DBG, "Calling mmap fd=%d offset=%d size=%d",
+	_fd, _offset, _size);
 
-      LOG(DBG, "       mmap excess=%d      aoffset=%d asize=%d",
-	  excess, actual_offset, actual_size);
+    int excess = offset % page_size;
+    actual_offset = offset - excess;
+    actual_size = size + excess;                 // actual size need not be a multiple of pagesize...
 
-      actual_mem_start = (char *) mmap64(NULL, actual_size, PROT_READ,MAP_SHARED|MAP_NORESERVE, fd, actual_offset) ;
-      madvise(actual_mem_start, actual_size, MADV_SEQUENTIAL);
+    LOG(DBG, "       mmap excess=%d      aoffset=%d asize=%d",
+	excess, actual_offset, actual_size);
+
+    actual_mem_start = (char *) mmap64(NULL, actual_size,  map_prot, map_flags, fd, actual_offset) ;
+    madvise(actual_mem_start, actual_size, MADV_SEQUENTIAL);
   
-      if(((void *)actual_mem_start) == MAP_FAILED) {
+    if(((void *)actual_mem_start) == MAP_FAILED) {
 	LOG(ERR,"Error in mmap (%s)",strerror(errno),0,0,0,0) ;
 
 	mem=NULL;
@@ -2226,11 +2235,11 @@ char *MemMap::map_real_mem(char *buffer, int _size)
 	actual_mem_start=NULL;
 	actual_size=0;
 	return NULL;
-      }
-
-      mem = actual_mem_start + excess;
-      return mem;
     }
+
+    mem = actual_mem_start + excess;
+    return mem;
+}
 
   void MemMap::unmap()
   {
@@ -2308,7 +2317,7 @@ char *MemMap::map_real_mem(char *buffer, int _size)
     }
   
     MemMap *nmem = new MemMap();
-    char *mymem = nmem->map(fd, nsfs->singleDirOffset, nsfs->singleDirSize);
+    char *mymem = nmem->map(fd, nsfs->singleDirOffset, nsfs->singleDirSize, map_prot, map_flags);
     if(!mymem) {
       LOG(ERR, "Couldn't map memory");
       delete nmem;

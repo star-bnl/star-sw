@@ -255,7 +255,14 @@ class daqReader {
 
   char *EVP_HOSTNAME;
 
+  void setCopyOnWriteMapping();
+
+
+
  private:	// one shouldn't care... 
+
+  int map_prot;
+  int map_flags;
 
   char _static_str_return_[256];
   int crit_cou;
@@ -301,7 +308,7 @@ class MemMap {
   ~MemMap();
 
   char *mem;
-  char *map(int fd, long long int _offset, int _size);
+  char *map(int fd, long long int _offset, int _size, int map_prot, int map_flags);
   void unmap();
 
   long long int offset;
