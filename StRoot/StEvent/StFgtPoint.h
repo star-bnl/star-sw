@@ -1,6 +1,10 @@
+/*! \class StFgtPoint
+ \brief Represents a point in the FGT 
+ 
+ */
 /***************************************************************************
  *
- * $Id: StFgtPoint.h,v 2.2 2012/07/21 03:32:34 perev Exp $
+ * $Id: StFgtPoint.h,v 2.3 2013/01/08 19:53:15 ullrich Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -12,34 +16,48 @@
  ***************************************************************************
  *
  * $Log: StFgtPoint.h,v $
- * Revision 2.2  2012/07/21 03:32:34  perev
- * BugFix define detector()
+ * Revision 2.3  2013/01/08 19:53:15  ullrich
+ * Added comparison operators.
  *
- * Revision 2.1  2012/04/16 20:20:49  ullrich
- * Initial Revision
+ * Revision 1.3  2012/12/11 00:13:10  avossen
+ * update of StFgtPoint
+ *
+ * Revision 1.4  2012/03/07 19:20:43  sgliske
+ * updated based on reviewer comments
+ *
+ * Revision 1.3  2012/03/06 22:28:01  sgliske
+ * asserts removed in StFgtPoint constructor.
+ * Now must check key after constructing
+ *
+ * Revision 1.2  2011/11/01 18:42:57  sgliske
+ * Added ::Clear(Option_t*) and few other missing things to FGT containers
+ *
+ * Revision 1.1  2011/10/31 21:51:30  sgliske
+ * creation: StEvent containers, take 2
  *
  *
  **************************************************************************/
-
 #ifndef _ST_FGT_POINT_H_
 #define _ST_FGT_POINT_H_
 
 #include "StHit.h"
-
-class StFgtHit;
+#include "StFgtHit.h"
 
 class StFgtPoint : public StHit {
 public:
     // constructors
     StFgtPoint();
-    StFgtPoint( StFgtHit* hit1, StFgtHit* hit2, int key );
+    StFgtPoint( StFgtHit* hit1, StFgtHit* hit2, int key, int rank );
     
     // StFgtPoint(const StFgtPoint&);             --> use default
     // StFgtPoint& operator=(const StFgtPoint&);  --> use default
-    
+    const bool operator < (const StFgtPoint& rhs) const;
+    const bool operator > (const StFgtPoint& rhs) const;
+    const bool operator >= (const StFgtPoint& rhs) const;
+    const bool operator <= (const StFgtPoint& rhs) const;
     // deconstructor
     ~StFgtPoint();
-virtual StDetectorId detector() const           {return kFgtId;}    
+    
     // other accessors
     int getKey();
     int getDisc();
@@ -49,14 +67,21 @@ virtual StDetectorId detector() const           {return kFgtId;}
     
     float getPositionR() const;
     float getPositionPhi() const;
+    float getChargeAsymmetry() const;
+    int getRank() const;
+    void setRank(int rank);
     
 protected:
     // data members
-    Int_t mKey;                         // unique label
-    StFgtHit *mHitR, *mHitPhi;
+    Int_t   mKey;                         // unique label
+    Float_t mChargeAsymmetry;
+    Int_t   mRank;
+    
+    StFgtHit *mHitR;   //! do not stream pointers
+    StFgtHit *mHitPhi;  //!
     
 private:   
-    ClassDef(StFgtPoint,1);
+    ClassDef(StFgtPoint,2);
 }; 
 
 
@@ -85,5 +110,42 @@ inline const StFgtHit* StFgtPoint::getHitR() const {
 inline const StFgtHit* StFgtPoint::getHitPhi() const {
     return mHitPhi;
 };
+
+inline float StFgtPoint::getPositionR() const {
+    return mHitR->getPositionR();
+};
+
+inline float StFgtPoint::getPositionPhi() const {
+    return mHitPhi->getPositionPhi();
+};
+
+inline float StFgtPoint::getChargeAsymmetry() const {
+    return mChargeAsymmetry;
+};
+
+inline int StFgtPoint::getRank() const {
+    return mRank;
+};
+
+inline void StFgtPoint::setRank(int rank) {
+    mRank=rank;
+};
+
+inline const bool StFgtPoint::operator >(const StFgtPoint& rhs) const {
+    return mRank>rhs.mRank;
+};
+
+inline const bool StFgtPoint::operator >=(const StFgtPoint& rhs) const {
+    return mRank>=rhs.mRank;
+};
+
+inline const bool StFgtPoint::operator <(const StFgtPoint& rhs) const {
+    return mRank<rhs.mRank;
+};
+
+inline const bool StFgtPoint::operator <=(const StFgtPoint& rhs) const {
+    return mRank<=rhs.mRank;
+};
+
 
 #endif
