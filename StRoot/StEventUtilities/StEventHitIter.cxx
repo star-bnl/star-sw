@@ -187,8 +187,16 @@ protected:
 StTpcHitIter::StTpcHitIter()
 {
   StHitIter *obj=this,*hi;
-  obj->SetDowIter((hi=new StTpcSectorHitIter())); obj = hi;
-  obj->SetDowIter((hi=new StTpcPadrowHitIter())); obj = hi;
+  
+  // Create a new iterator over sectors and register it with tpc hit iter
+  hi = new StTpcSectorHitIter();
+  obj->SetDowIter(hi);
+  obj = hi;
+		
+  // Create a new iterator over padrows and register it with sector iter
+  hi = new StTpcPadrowHitIter();
+  obj->SetDowIter(hi);
+  obj = hi;
 }
 //________________________________________________________________________________
 const TObject *StTpcHitIter::Reset(const TObject *cont)
