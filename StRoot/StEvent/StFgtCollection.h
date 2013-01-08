@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtCollection.h,v 2.1 2012/04/16 20:20:49 ullrich Exp $
+ * $Id: StFgtCollection.h,v 2.2 2013/01/08 19:54:03 ullrich Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFgtCollection.h,v $
+ * Revision 2.2  2013/01/08 19:54:03  ullrich
+ * Added mNumTimeBins and access functions.
+ *
  * Revision 2.1  2012/04/16 20:20:49  ullrich
  * Initial Revision
  *
@@ -41,7 +44,8 @@ public:
     size_t getNumHits() const;                     // overall
     size_t getNumHits( unsigned short discIdx ) const;   // per disc
     size_t getNumPoints() const;
-    
+    size_t getNumTimeBins() const;
+    void setNumTimeBins(size_t nTimebin);    
     // note: ownership of all pointers is retained by the containers.
     // Do not deleted any pointers received from this class.
     
@@ -62,9 +66,9 @@ protected:
     StFgtStripCollection mStripCollection[kFgtNumDiscs];
     StFgtHitCollection mHitCollection[kFgtNumDiscs];
     StFgtPointCollection mPointCollection;
-    
+    size_t mNumTimeBins;
 private:   
-    ClassDef(StFgtCollection,1);
+    ClassDef(StFgtCollection,2);
 }; 
 
 
@@ -72,6 +76,14 @@ private:
 
 inline StFgtStripCollection* StFgtCollection::getStripCollection( unsigned short discIdx ) {
     return (discIdx < kFgtNumDiscs ? &mStripCollection[discIdx] : 0 );
+};
+
+inline size_t StFgtCollection::getNumTimeBins() const {
+    return mNumTimeBins;
+};
+
+inline void StFgtCollection::setNumTimeBins(size_t nTimeBins) {
+    mNumTimeBins=nTimeBins;
 };
 
 inline const StFgtStripCollection* StFgtCollection::getStripCollection( unsigned short discIdx ) const {
