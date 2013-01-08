@@ -103,6 +103,11 @@ inline int get_sfsFileSize(SFS_File *file)
   return seeksize(strlen(file->name)+1) + sizeof(SFS_File) - 4;
 }
 
+inline int get_sfsFileSize(char *file)
+{
+  return seeksize(strlen(file)+1) + sizeof(SFS_File) - 4;
+}
+
 // sfs_lib prototypes
 void write_env(char *var, char *value);
 char *read_env(char *var);
