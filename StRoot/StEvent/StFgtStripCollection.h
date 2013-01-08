@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtStripCollection.h,v 2.1 2012/04/16 20:20:49 ullrich Exp $
+ * $Id: StFgtStripCollection.h,v 2.2 2013/01/08 19:52:43 ullrich Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFgtStripCollection.h,v $
+ * Revision 2.2  2013/01/08 19:52:43  ullrich
+ * Changes in streamer.
+ *
  * Revision 2.1  2012/04/16 20:20:49  ullrich
  * Initial Revision
  *
@@ -75,10 +78,10 @@ protected:
     
     // temporary copy of the pointers, indexed by elec Id.
     // used for the addStripInfo class
-    StPtrVecFgtStrip mStripElecIdVec; 
+    StPtrVecFgtStrip mStripElecIdVec; //!  do not save none structural containers
     
 private:   
-    ClassDef(StFgtStripCollection,1);
+    ClassDef(StFgtStripCollection,2);
 }; 
 
 
