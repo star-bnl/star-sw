@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.26 2012/11/15 22:26:13 sangalin Exp $
+ * $Id: StMuArrays.h,v 1.27 2013/01/08 22:57:33 sangalin Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -18,7 +18,7 @@
 enum emcTypes {muEmcTow=0, muEmcPrs, muEmcSmde, muEmcSmdp, muEEmcPrs, muEEmcSmdu, muEEmcSmdv};
 
 /// @enum fgtTypes enumeration to to index the fgtArrays
-enum fgtTypes {muFgtStrips=0, muFgtClusters, muFgtStripAssociations };
+enum fgtTypes {muFgtStrips=0, muFgtClusters, muFgtStripAssociations, muFgtAdcs };
 
 enum fmsTypes {muFmsHit=0};
 #ifndef __NO_STRANGE_MUDST__
@@ -59,7 +59,7 @@ __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArray
 __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NBTOFARRAYS__    =3 ,  /// dongx
 __NMTDARRAYS__    =3,
- __NFGTARRAYS__    =3 ,	///< size of the fgt arrays, i.e. number of TClonesArrays  
+ __NFGTARRAYS__    =4 ,	///< size of the fgt arrays, i.e. number of TClonesArrays  
 __NEZTARRAYS__     =5 ,  ///< size of the ez arrays >
      
 /// dongx
@@ -141,6 +141,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.27  2013/01/08 22:57:33  sangalin
+ * Merged in FGT changes allowing for a variable number of timebins to be read out for each strip.
+ *
  * Revision 1.26  2012/11/15 22:26:13  sangalin
  * Added the FGT. Fixed bugs in array offsets for the MTD.
  *

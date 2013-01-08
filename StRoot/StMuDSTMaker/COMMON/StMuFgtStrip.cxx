@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFgtStrip.cxx,v 1.1 2012/11/15 22:27:24 sangalin Exp $
+ * $Id: StMuFgtStrip.cxx,v 1.2 2013/01/08 22:57:33 sangalin Exp $
  * Author: S. Gliske, Jan. 2012
  *
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMuFgtStrip.cxx,v $
+ * Revision 1.2  2013/01/08 22:57:33  sangalin
+ * Merged in FGT changes allowing for a variable number of timebins to be read out for each strip.
+ *
  * Revision 1.1  2012/11/15 22:27:24  sangalin
  * Copied over from StFgtDevel.
  *
@@ -45,33 +48,32 @@
 #include "StFgtUtil/StFgtConsts.h"
 #include <assert.h>
 
-StMuFgtStrip::StMuFgtStrip() : mGeoId(-1), mClusterSeedType(kFgtSeedTypeNo), mCharge(-1), mChargeUncert(10000) {
-   assert( kFgtNumTimeBins == kMuFgtNumTimeBins ); // fix the StFgtConsts.h file if this fails
+StMuFgtStrip::StMuFgtStrip() : mGeoId(-1), mAdcStartIdx(-1), mNumSavedTimeBins(-1), mClusterSeedType(kFgtSeedTypeNo), mCharge(-1), mChargeUncert(10000) {
+  ///   assert( kFgtNumTimeBins == kMuFgtNumTimeBins ); // fix the StFgtConsts.h file if this fails
+  //above assert not necessary anymore since we take number of time bins from the StFgtCollection, should be the same
 
-   for( Int_t i = 0; i < kFgtNumTimeBins; ++i )
-      mAdc[i] = -1;
 };
 
 StMuFgtStrip::StMuFgtStrip(const StFgtStrip& other ) :
    mGeoId( other.getGeoId() ),
+   mAdcStartIdx(-1),
+   mNumSavedTimeBins(-1), 
    mClusterSeedType( other.getClusterSeedType() ),
    mCharge( other.getCharge() ),
    mChargeUncert( other.getChargeUncert() ){
 
    assert( kFgtNumTimeBins == kMuFgtNumTimeBins ); // fix the StFgtConsts.h file if this fails
-   for( Int_t i = 0; i < kFgtNumTimeBins; ++i )
-      mAdc[i] = other.getAdc(i);
 };
 
 StMuFgtStrip& StMuFgtStrip::operator=(const StFgtStrip& other ){
    mGeoId = other.getGeoId();
+   mAdcStartIdx = -1;
+   mNumSavedTimeBins = -1;
    mClusterSeedType = other.getClusterSeedType();
    mCharge = other.getCharge();
    mChargeUncert = other.getChargeUncert();
 
    assert( kFgtNumTimeBins == kMuFgtNumTimeBins ); // fix the StFgtConsts.h file if this fails
-   for( Int_t i = 0; i < kFgtNumTimeBins; ++i )
-      mAdc[i] = other.getAdc(i);
  
    return *this;
 };

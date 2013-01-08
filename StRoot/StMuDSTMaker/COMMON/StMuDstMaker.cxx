@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.112 2012/12/12 00:36:03 sangalin Exp $
+ * $Id: StMuDstMaker.cxx,v 1.113 2013/01/08 22:57:33 sangalin Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -66,6 +66,7 @@
 #include "StMuFgtStrip.h"
 #include "StMuFgtCluster.h"
 #include "StMuFgtStripAssociation.h"
+#include "StMuFgtAdc.h"
 #include "StMuPmdCollection.h"
 #include "StMuPmdUtil.h"
 #include "StMuPmdHit.h"
@@ -456,6 +457,7 @@ void  StMuDstMaker::streamerOff() {
   StMuFgtStrip::Class()->IgnoreTObjectStreamer();
   StMuFgtCluster::Class()->IgnoreTObjectStreamer();
   StMuFgtStripAssociation::Class()->IgnoreTObjectStreamer();
+  StMuFgtAdc::Class()->IgnoreTObjectStreamer();
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1171,7 +1173,6 @@ void StMuDstMaker::fillFgt(StEvent* ev) {
       assert( mFgtArrays[muFgtStripAssociations] );
 
       // need pointer types to enforce conversions in StMuDstMaker::addType
-      StMuFgtStrip*   stripClassType = 0;
       StMuFgtCluster* clusterClassType = 0;
 
       // need a map to keep track of the index of each strip.
@@ -1204,11 +1205,37 @@ void StMuDstMaker::fillFgt(StEvent* ev) {
 		stripType == kFgtNextToCluster ||
 		stripType == kFgtKeepStrip){
 
+               // make the strip using the "casting" constructor
+               StMuFgtStrip fgtStrip( *(*stripIter) );
+
+               // Set the range for the time bins to save.
+               // Note: for now, use the obvious.  Update the
+               // following two lines later.`1
+               Int_t nTBstart = 0;
+               Int_t nTBend = nTBstart + fgtCollPtr->getNumTimeBins();
+
+               // to do: comment about ensuring tb in same range as StFgtStrip class in StEvent
+
+               for( Int_t tb = nTBstart; tb < nTBend; ++tb ){
+                  // make an StMuFgtAdc object
+                  StMuFgtAdc fgtAdc( (*stripIter)->getAdc( tb ), tb );
+
+                  Int_t adcIdx = addType( mFgtArrays[muFgtAdcs], fgtAdc );
+
+                  // just the first time
+                  if( tb == nTBstart ){
+
+                     // set the strip to know where the first ADC is and how many there are
+                     fgtStrip.setAdcInfo( adcIdx, nTBend-nTBstart );
+                  };
+               };
+
                // add strip to the TClonesArray
-               Int_t idx = addType( mFgtArrays[muFgtStrips], *(*stripIter), stripClassType );
+               Int_t idx = addType( mFgtArrays[muFgtStrips], fgtStrip );
 
                // add to the map
                stripGeoIdIdxMap[ (*stripIter)->getGeoId() ] = idx;
+
             };
          };
 
@@ -1789,6 +1816,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.113  2013/01/08 22:57:33  sangalin
+ * Merged in FGT changes allowing for a variable number of timebins to be read out for each strip.
+ *
  * Revision 1.112  2012/12/12 00:36:03  sangalin
  * Merged in updated StMuFgtCluster class format from Anselm Vossen.
  *
