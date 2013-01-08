@@ -29,7 +29,13 @@
 #ifndef _RTS_H_
 #define _RTS_H_
 
-#ifndef __CINT__
+// jml 1/8/13
+//    This ifndef __CINT__ made its way into the code
+//    when the APPLE changes were made.   It causes the endianness to
+//    remain unset when CINT is processing.   I've no idea what it was
+//    for, so if it is needed please figure out a way to implement it
+//    without breaking the CINT endiness...
+//#ifndef __CINT__
 #ifndef __GNUC__
 #warning "This may NOT work on non-GNUC compilers!"
 #endif
@@ -108,7 +114,7 @@
 #endif
 
 #endif	/* TARGET_SYSTEM */
-#endif  /* !__CINT__ */
+//#endif  /* !__CINT__ */
 
 /******************** if any of RTS_PROJECT_XXX variables are not defined, we'll define it here ******/
 #ifdef RTS_PROJECT_STAR
