@@ -31,10 +31,6 @@ TrackElectron::TrackElectron() :
   
 }
 
-TrackElectron::~TrackElectron() {
-      
-}
-
 void
 TrackElectron::SetParticle(std::string particle) {
 

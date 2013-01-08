@@ -1,4 +1,4 @@
-// Interface to Magboltz (version 8)
+// Interface to Magboltz (version 9)
 
 #ifndef G_MAGBOLTZ_INTERFACE
 #define G_MAGBOLTZ_INTERFACE
@@ -37,7 +37,6 @@ extern "C" {
     double api;
     double estart;
     double theta, phi;
-    double tcfmax[8];
     double rstart;
     double efield;
     long long nmax;
@@ -103,7 +102,9 @@ extern "C" {
   void gasmix_(long long* ngs, double* q, 
         double* qin, long long* nin, double* e, double* ei, char* name, 
         double* virl, double* eb, double* peqel, double* peqin, 
-        double* penfra, long long* kel, long long* kin, char scrpt[226][30]);
+        double* penfra, long long* kel, long long* kin, 
+        double* qion, double* peqion, double* eion, long long* nion,
+        char scrpt[260][50]);
 
   void setup1_();
 

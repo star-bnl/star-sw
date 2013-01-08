@@ -12,7 +12,7 @@ class ComponentNeBem2d : public ComponentBase {
   public:
     // Constructor
     ComponentNeBem2d();
-    ~ComponentNeBem2d() {};
+    ~ComponentNeBem2d() {}
 
     // Calculate the drift field [V/cm] at (x, y, z)
     void ElectricField(const double x, const double y, const double z,

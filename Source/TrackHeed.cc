@@ -86,8 +86,7 @@ field_map(const point& pt, vec& efield, vec& bfield, vfloat& mrange) {
 }
 
 // This function is called by Heed after each step
-void
-check_point(gparticle* gp) { }
+void check_point(gparticle* /*gp*/) {}
 
 // Particle id number for book-keeping
 long last_particle_number;

@@ -116,58 +116,42 @@ void gparticle::step(void)
 }
      
 void gparticle::curvature(int& fs_cf, vec& frelcen, vfloat& fmrange, 
-                          vfloat prec)
-{
-  fs_cf=0; frelcen=vec(0,0,0); fmrange=max_vfloat;
+                          vfloat /*prec*/) {
+  fs_cf = 0; 
+  frelcen = vec(0,0,0); 
+  fmrange = max_vfloat;
   /* The following is for debug
-     vec field(0,1,0);
-     vfloat rad=10;
-     if(length(currpos.dir)>0 && check_par(currpos.dir, field)==0)
-     {
-     fs_cf=1;
-     vfloat coef=sin2vec(currpos.dir,field);
-     rad=rad/coef;
-     frelcen=unit_vec(currpos.dir||field)*rad;
-     fmrange=max_vfloat;
-     }
-     else
-     {
-     fs_cf=0; frelcen=vec(0,0,0); fmrange=max_vfloat;
-     }
+  vec field(0,1,0);
+  vfloat rad = 10;
+  if (length(currpos.dir) > 0 && check_par(currpos.dir, field) == 0) {
+    fs_cf = 1;
+    vfloat coef = sin2vec(currpos.dir, field);
+    rad = rad / coef;
+    frelcen = unit_vec(currpos.dir || field) * rad;
+  } 
   */
 }
 
-void gparticle::physics_mrange(double& fmrange) {;}
+void gparticle::physics_mrange(double& /*fmrange*/) {}
 
 // calculate next point as step to border
-stvpoint gparticle::calc_step_to_bord()
-{ 
-
+stvpoint gparticle::calc_step_to_bord() { 
   pvecerror("stvpoint gparticle::calc_step_to_bord()");
-  int sb;
-  //vfloat rng;
-  point pte;
   curr_relcen = dv0;
-  if(currpos.sb > 0) // it does not do step, but switch to new volume
-  {
+  if (currpos.sb > 0) {
+    // it does not do step, but switch to new volume 
     //return switch_new_vol(currpos.amvol, currpos.namvol);
     return switch_new_vol();
-  }
-  else
-  {
+  } else {
     manip_absvol_eid faeid;        //manip_absvol* famvol;
     /*
-    if(currpos.s_ent > 0 && 
-       currpos.tid.G_lavol()->mandatory()==1) 
-      // to find volume again,
-      // borders can be common for many volumes,
+    if(currpos.s_ent > 0 && currpos.tid.G_lavol()->mandatory()==1) { 
+      // to find volume again, borders can be common for many volumes,
       // or mandatory volume can be thin.
-    {
-      //manip_absvol* ffamvol[pqamvol];
+      // manip_absvol* ffamvol[pqamvol];
       manip_absvol_treeid tidl;
       //int ffnamvol=0;
-      currpos.tid.eid[0].amvol->
-        find_embed_vol(currpos.pt, currpos.dir, &tidl);
+      currpos.tid.eid[0].amvol->find_embed_vol(currpos.pt, currpos.dir, &tidl);
       if(currpos.tid != tidl)
         //currpos.namvol != ffnamvol ||
         //currpos.amvol[currpos.namvol-1] != ffamvol[ffnamvol-1])
@@ -186,8 +170,8 @@ stvpoint gparticle::calc_step_to_bord()
     //mcout<<"gparticle::calc_step_to_bord(): now running the curvature()\n";
     curvature(s_cf, relcen, mrange, gtrajlim.max_straight_arange);
     curr_relcen = relcen;
-    if(mrange<=0)
-    {   // preserves currpos for modification by physics
+    if (mrange <= 0) {
+      // preserves currpos for modification by physics
       stvpoint temp(currpos);
       temp.s_ent=0;
       return temp;
@@ -202,8 +186,7 @@ stvpoint gparticle::calc_step_to_bord()
                  s_cf, relcen, mrange, 
                  currpos.tid.G_laeid()->amvol->Gavol()->prec );
     //s_cf, relcen, mrange, currpos.next_eid.amvol->Gavol()->prec );
-    if(ts.mrange<=0)
-    {
+    if (ts.mrange <= 0) {
       stvpoint temp(currpos);
       temp.s_ent=0;
       return temp;
@@ -220,17 +203,20 @@ stvpoint gparticle::calc_step_to_bord()
     //currpos.tid.G_lavol()->print(mcout, 1);
 
     // Here the range is calculated:
-    int i=currpos.tid.G_lavol()->range(ts, 1, sb, &faeid);  
+    int sb;
+    currpos.tid.G_lavol()->range(ts, 1, sb, &faeid);  
     // 1 means inside the volume and makes
     // the program checking embraced volumes
-
+    // point pte;
     // range(currpos.pt, currpos.dir, 
     //            1, sb, rng, pte, &faeid);
     //mcout<<"calc_step_to_bord: sb="<<sb<<" ts="<<ts;
-    if(ts.s_prec==0)  // point is crossed
+    if (ts.s_prec == 0) {
+      // point is crossed
       return stvpoint(currpos, ts, sb, 0, faeid );
-    else
-      return stvpoint(currpos, ts, ts.mrange, sb, 0, faeid ); 
+    } else {
+      return stvpoint(currpos, ts, ts.mrange, sb, 0, faeid );
+    } 
     /*
     vec dir;
     ts.Gnextpoint(ts.mrange, pte, dir);
@@ -247,8 +233,8 @@ stvpoint gparticle::calc_step_to_bord()
 //vfloat gparticle::precision_of_switch=PRECISION_OF_SWITCH;
 
 //stvpoint gparticle::switch_new_vol(manip_absvol* famvol[pqamvol], int fnamvol)
-stvpoint gparticle::switch_new_vol(void)
-{               // generates next position in new volume
+stvpoint gparticle::switch_new_vol(void) {
+  // generates next position in new volume
   mfunname("stvpoint gparticle::switch_new_vol(void)");
   /*
   mcout<<"gparticle::switch_new_vol:\n";

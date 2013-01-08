@@ -420,8 +420,7 @@ int ulsvolume::range_ext(trajestep& fts, int s_ext) const
 	}
       }
     }
-    if(ss==1)
-    {
+    if (ss==1) {
       fts.s_prec=0;
     }
 #ifdef DEBUG_ulsvolume_range_ext
@@ -452,34 +451,21 @@ int ulsvolume::range_ext(trajestep& fts, int s_ext) const
 //proportional  number_of_surf**2
 */
 
-ulsvolume::ulsvolume(void):qsurf(0)
-{
-  name=String("not inited ulsvolume");
-  //name=new char[strlen("ulsvolume")+1]; 
-  //strcpy(name,"ulsvolume"); 
-  //mcout<<"ulsvolume::ulsvolume(void)\n";
+ulsvolume::ulsvolume(void) : qsurf(0) {
+  name = String("not inited ulsvolume");
 }
+
 void ulsvolume::ulsvolume_init(surface *fsurf[pqqsurf], 
 			       int fqsurf, 
-			       const String& fname, vfloat fprec)
-{
-  int n;
-  prec= fprec;
-  //long l = strlen(fname);
-  //mcerr<<"ulsvolume::ulsvolume_init:\n";
-  //mcerr<<"l="<<l<<'\n';
-  //if(name != NULL) delete name;
-  //name=new char[l+1];
-  name=fname;
-  //strcpy(name,fname);
-  if( qsurf>0)
-  {
-    for(n=0; n<qsurf; n++) surf[n].put(NULL);
+			       const String& fname, vfloat fprec) {
+  prec = fprec;
+  name = fname;
+  if (qsurf > 0) {
+    for (int n = 0; n < qsurf; ++n) surf[n].put(NULL);
   }
-  qsurf=fqsurf;
+  qsurf = fqsurf;
   //mcerr<<"ulsvolume::ulsvolume_init:\n";
-  for(n=0; n<qsurf; n++)
-  {
+  for (int n = 0; n < qsurf; ++n) {
     //mcerr<<"n="<<n<<'\n';
     //fsurf[n]->print(mcerr) ;
     surf[n].put(fsurf[n]);
@@ -490,57 +476,44 @@ void ulsvolume::ulsvolume_init(surface *fsurf[pqqsurf],
 
 ulsvolume::ulsvolume(surface *fsurf[pqqsurf], int fqsurf, char* fname,
 		     vfloat fprec)
-  :qsurf(fqsurf), name(fname)
-{
+  : qsurf(fqsurf), name(fname) {
   mfunname("ulsvolume::ulsvolume(...)");
   check_econd12(fqsurf , > , pqqsurf , mcerr);
-  int n;
   prec = fprec;
-  for(n=0; n<qsurf; n++)
-    surf[n].put(fsurf[n]);
+  for (int n = 0; n < qsurf; ++n) surf[n].put(fsurf[n]);
 }
-ulsvolume::ulsvolume(ulsvolume& f): qsurf(f.qsurf), name(f.name)
-{  
+
+ulsvolume::ulsvolume(ulsvolume& f): absref(f), absvol(f), qsurf(f.qsurf), name(f.name) {  
   mfunname("ulsvolume::ulsvolume(...)");
   check_econd12(f.qsurf , > , pqqsurf , mcerr);
-  int n;
   prec = f.prec;
-  for(n=0; n<qsurf; n++)
-    surf[n].put(f.surf[n].get());
-  //mcout<<"ulsvolume::ulsvolume(ulsvolume& f): qsurf="<<qsurf<<'\n';
+  for (int n = 0; n < qsurf; ++n) surf[n].put(f.surf[n].get());
 }
   
-ulsvolume::ulsvolume(const ulsvolume& f): qsurf(f.qsurf), name(f.name)
-{  
+ulsvolume::ulsvolume(const ulsvolume& f): absref(f), absvol(f), qsurf(f.qsurf), name(f.name) {  
   mfunname("ulsvolume::ulsvolume(...)");
   check_econd12(f.qsurf , > , pqqsurf , mcerr);
-  int n;
   prec = f.prec;
-  for(n=0; n<qsurf; n++)
-    surf[n].put(f.surf[n].get());
-  //mcout<<"ulsvolume::ulsvolume(const ulsvolume& f): qsurf="<<qsurf<<'\n';
+  for (int n = 0; n < qsurf; ++n) surf[n].put(f.surf[n].get());
 }
-//ulsvolume& ulsvolume::operator=(const ulsvolume& fv)
-//{
+
+//ulsvolume& ulsvolume::operator=(const ulsvolume& fv) {
 //  //delete name;
-//  //for( int n=0; n<qsurf; n++) delete surf[n];
+//  //for(int n=0; n<qsurf; n++) delete surf[n];
 //  ulsvolume_init(((ulsvolume&)fv).surf, fv.qsurf, fv.name, fv.prec);
 //  return *this;
 //}
 
 macro_copy_body(ulsvolume)
 
-void ulsvolume::print(ostream& file, int l) const 
-{
+void ulsvolume::print(ostream& file, int l) const {
   char s[1000];
   chname(s);
   Ifile<<"ulsvolume::print(l="<<l<<"): "<<s<<'\n';
-  if(l>0)
-  {
+  if (l > 0) {
     indn.n+=2;
     Ifile<<"qsurf="<<qsurf<<" prec="<<prec<<'\n';
-    for( int n=0; n<qsurf; n++)
-    {
+    for (int n = 0; n < qsurf; ++n) {
       Ifile<<" nsurf="<<n<<'\n';
       surf[n].get()->print(file,l);
     }
@@ -549,44 +522,30 @@ void ulsvolume::print(ostream& file, int l) const
   }
 }
 
-manip_ulsvolume::manip_ulsvolume(manip_ulsvolume& f):
-  ulsvolume((ulsvolume&)f), manip_absvol(f) 
-{
+manip_ulsvolume::manip_ulsvolume(manip_ulsvolume& f) : 
+  absref(f), manip_absvol(f), ulsvolume((ulsvolume&)f) {
 }
-manip_ulsvolume::manip_ulsvolume(const manip_ulsvolume& f):
-  ulsvolume(f), manip_absvol(f) 
-{
-  // Now it is all right
-  //@@ !!!!!!!!! It is absolutely surprising that neither call 
-  // ulsvolume((ulsvolume&)f) no simple ulsvolume(f)
-  // actually calls ulsvolume::ulsvolume(ulsvolume f).
-  //ulsvolume::operator=(f);
-  //mcout<<"manip_ulsvolume::manip_ulsvolume(const): qsurf="<<qsurf<<'\n';
-  //f.print(mcout,5);
+
+manip_ulsvolume::manip_ulsvolume(const manip_ulsvolume& f) :
+  absref(f), manip_absvol(f), ulsvolume(f) {
 }
 macro_copy_body(manip_ulsvolume)
 /*
-ulsvolume* manip_ulsvolume::copy(void) const 
-{
+ulsvolume* manip_ulsvolume::copy(void) const {
   return new manip_ulsvolume(*this); 
 }
 */
-void manip_ulsvolume::print(ostream& file, int l) const 
-{
-  if(l>0)
-  {
-    char s[1000];
-    chname(s);
-    Ifile<<"manip_ulsvolume::print(l="<<l<<"): "<<s<<'\n';
-    l=l-1;
-    if(l>0)
-    {
-      indn.n+=2;
-      //manip_absvol::print(file, l-1); 
-      // If to call this^ it calls manip_ulsvolume::print again and loop...
-      
-      ulsvolume::print(file, l-1);
-      indn.n-=2;
-    }
+void manip_ulsvolume::print(ostream& file, int l) const {
+  if (l <= 0) return;
+  char s[1000];
+  chname(s);
+  Ifile<<"manip_ulsvolume::print(l="<<l<<"): "<<s<<'\n';
+  l=l-1;
+  if (l > 0) {
+    indn.n+=2;
+    //manip_absvol::print(file, l-1); 
+    // If to call this it calls manip_ulsvolume::print again and loop...
+    ulsvolume::print(file, l-1);
+    indn.n-=2;
   }
 }

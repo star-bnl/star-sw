@@ -26,10 +26,6 @@ TrackPAI::TrackPAI() :
   
 }
 
-TrackPAI::~TrackPAI() {
-      
-}
-
 bool 
 TrackPAI::NewTrack(const double x0, const double y0, const double z0,
                    const double t0, 

@@ -66,7 +66,7 @@ HEEDOBJS += \
 	$(OBJDIR)/Heed/PhotoAbsCSLib.o
 
 # Compilation flags
-CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long \
+CFLAGS = -Wall -Wextra -pedantic -ansi -Wabi -Wno-long-long \
         `root-config --cflags` \
         -fpic -Os -c \
 	-I$(INCDIR) -I$(HEEDDIR) \

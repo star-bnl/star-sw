@@ -36,7 +36,6 @@ for more detailed descriptions.
 2004, I. Smirnov
 
 */
-  
 
 const double Thomas_sum_rule_const = 2.0*M_PI*M_PI/(FSCON*ELMAS);  // [1/MeV]
 // constant per one electron.
@@ -61,7 +60,7 @@ double glin_integ_ar(DynLinArr< double > e, DynLinArr< double > cs,
 // fit table by a straight line or by inverse power function 
 // (see comment above)
 // and integrate the area below it.
-// the function is assumed to be non-negative, and the result of integration
+// The function is assumed to be non-negative, and the result of integration
 // as well.
 // The tail is not added right here, but added after the call of this function.
 // The theshold is used to restrict this function from the left.
@@ -448,8 +447,7 @@ const int s_scale_to_normalize_if_more = 1;
 const double low_boundary_of_excitations = 0.7; // from ionization threshold
 
 // With exitation:
-class ExAtomPhotoAbsCS: public AtomPhotoAbsCS
-{
+class ExAtomPhotoAbsCS: public AtomPhotoAbsCS {
 public:
   // photo-absorption cross section, energy in MeV, CS in Mbarns.
   virtual double get_threshold(int nshell) const ;
@@ -471,7 +469,7 @@ public:
                                  long fmax_q_step);
   virtual void print(std::ostream& file, int l) const;
   macro_copy_total(ExAtomPhotoAbsCS);
-  ExAtomPhotoAbsCS(void);
+  ExAtomPhotoAbsCS(void) : AtomPhotoAbsCS() {}
   ExAtomPhotoAbsCS(int fZ, 
                    const String& fthreshold_file_name,
                    const String& fsimple_table_file_name,

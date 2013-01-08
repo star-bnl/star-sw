@@ -287,12 +287,11 @@ public:
   friend std::ostream& operator<<(std::ostream& file, const spquadr& p);
 private:
   spquadr(const point& fpiv, 
-	  const straight& sl1, const straight& sl2, // They are not need, Why?
+	  const straight& /*sl1*/, const straight& /*sl2*/, 
 	  const vec& fdir1, const vec& fdir2, polygon& fplgn):
-    polygon(fplgn),piv(fpiv),dir1(unit_vec(fdir1)),dir2(unit_vec(fdir2))
-    {
+    polygon(fplgn),piv(fpiv),dir1(unit_vec(fdir1)),dir2(unit_vec(fdir2)) {
       awidth = acos(cos2vec(dir1,dir2));
-    }    
+    }
 };
   
 std::ostream& operator<<(std::ostream& file, const spquadr& p);

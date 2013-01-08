@@ -10,9 +10,9 @@ class OpticalData {
 
   public:
     // Constructor
-    OpticalData();
+    OpticalData() : debug(false) {}
     // Destructor
-    ~OpticalData();
+    ~OpticalData() {}
 
     bool IsAvailable(const std::string material) const;
     

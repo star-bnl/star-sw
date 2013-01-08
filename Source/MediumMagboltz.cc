@@ -474,8 +474,8 @@ MediumMagboltz::PrintGas() {
     int type = csType[i] % nCsTypes;
     int ngas = int(csType[i] / nCsTypes);
     // Description (from Magboltz)
-    std::string descr = "                              ";
-    for (int j = 30; j--;) descr[j] = description[i][j];
+    std::string descr = std::string(50, ' ');
+    for (int j = 50; j--;) descr[j] = description[i][j];
     // Threshold energy
     double e = rgas[ngas] * energyLoss[i];
     std::cout << "    Level " << i << ": " << descr << "\n";
@@ -1202,8 +1202,8 @@ MediumMagboltz::GetLevel(const int i, int& ngas, int& type,
   type = csType[i] % nCsTypes;
   ngas = int(csType[i] / nCsTypes);
   // Description (from Magboltz)
-  descr = "                              ";
-  for (int j = 30; j--;) descr[j] = description[i][j];
+  descr = std::string(50, ' ');
+  for (int j = 50; j--;) descr[j] = description[i][j];
   // Threshold energy
   e = rgas[ngas] * energyLoss[i];
   if (debug) {
@@ -1606,12 +1606,18 @@ MediumMagboltz::Mixer(const bool verbose) {
   static double pEqEl[nEnergySteps][6];
   // Inelastic cross-sections
   static double qIn[nEnergySteps][nMaxInelasticTerms];
+  // Ionisation cross-sections
+  static double qIon[nEnergySteps][8];
   // Parameters for angular distribution in inelastic collisions
-  static double pEqIn[nEnergySteps][nMaxInelasticTerms]; 
+  static double pEqIn[nEnergySteps][nMaxInelasticTerms];
+  // Parameters for angular distribution in ionising collisions
+  static double pEqIon[nEnergySteps][8]; 
+  // Opal-Beaty parameter
+  static double eoby[nEnergySteps];
   // Penning transfer parameters
   static double penFra[nMaxInelasticTerms][3];
   // Description of cross-section terms
-  static char scrpt[226][30];
+  static char scrpt[260][50];
 
   // Check the gas composition and establish the gas numbers.
   int gasNumber[nMaxGases];
@@ -1655,31 +1661,34 @@ MediumMagboltz::Mixer(const bool verbose) {
   
     // Number of inelastic cross-section terms
     long long nIn = 0;
+    long long nIon = 0;
     // Threshold energies
     double e[6] = {0., 0., 0., 0., 0., 0.};
     double eIn[nMaxInelasticTerms] = {0.};
+    double eIon[8] = {0.};
     // Virial coefficient (not used)
     double virial = 0.;
-    // Splitting function parameter
-    double w = 0.;
     // Scattering algorithms
     long long kIn[nMaxInelasticTerms] = {0};
     long long kEl[6] = {0, 0, 0, 0, 0, 0};    
-    char name[15];  
+    char name[] = "                         ";
 
     // Retrieve the cross-section data for this gas from Magboltz.
     long long ngs = gasNumber[iGas];
-    Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
-                      pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, scrpt);
+    Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, eoby, 
+                      pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, 
+                      qIon[0], pEqIon[0], eIon, &nIon, scrpt);
     if (debug || verbose) {
       const double massAmu = (2. / e[1]) * 
                              ElectronMass / AtomicMassUnitElectronVolt;
       std::cout << "    " << name << "\n";
-      std::cout << "      mass:                 " << massAmu << " amu\n"; 
-      std::cout << "      ionisation threshold: " << e[2] << " eV\n";
-      // std::cout << "      attachment threshold: " << e[3] << " eV\n";
-      std::cout << "      splitting parameter:  " << w << " eV\n";
-      if (e[3] > 0. || e[4] > 0.) {
+      std::cout << "      mass:                 " << massAmu << " amu\n";
+      if (nIon > 1) {
+        std::cout << "      ionisation threshold: " << eIon[0] << " eV\n";
+      } else {
+        std::cout << "      ionisation threshold: " << e[2] << " eV\n";
+      }
+      if (e[3] > 0. && e[4] > 0.) {
         std::cout << "      cross-sections at minimum ionising energy:\n";
         std::cout << "        excitation: " << e[3] * 1.e18 << " Mbarn\n";
         std::cout << "        ionisation: " << e[4] * 1.e18 << " Mbarn\n";
@@ -1688,7 +1697,7 @@ MediumMagboltz::Mixer(const bool verbose) {
     int np0 = nTerms;
     
     // Make sure there is still sufficient space.
-    if (np0 + nIn + 2 >= nMaxLevels) {
+    if (np0 + nIn + nIon + 1 >= nMaxLevels) {
       std::cerr << className << "::Mixer:\n";
       std::cerr << "    Max. number of levels (" << nMaxLevels 
                 << ") exceeded.\n";
@@ -1699,10 +1708,9 @@ MediumMagboltz::Mixer(const bool verbose) {
         
     int np = np0;
     if (useCsOutput) {
+      outfile << "# cross-sections for " << name << "\n";
+      outfile << "# cross-section types:\n";
       outfile << "# elastic\n";
-      outfile << "# ionisation (gross)\n";
-      outfile << "# attachment\n";
-      outfile << "# ionisation (counting)\n";
     }
     // Elastic scattering
     ++nTerms;
@@ -1710,36 +1718,68 @@ MediumMagboltz::Mixer(const bool verbose) {
     const double r = 1. + e[1] / 2.;
     rgas[iGas] = r;
     energyLoss[np] = 0.; 
-    for (int j = 0; j < 30; ++j) {
+    for (int j = 0; j < 50; ++j) {
       description[np][j] = scrpt[1][j];
     }
     csType[np] = nCsTypes * iGas + ElectronCollisionTypeElastic;
-    bool withIon = false, withAtt = false;
+    bool withIon = false;
     // Ionisation
-    if (eFinal >= e[2]) {
-      withIon = true;
-      ++nTerms; ++np;
-      scatModel[np] = kEl[2];
-      energyLoss[np] = e[2] / r;
-      wOpalBeaty[np] = w;
-      gsGreenSawada[iGas] = w;
-      tbGreenSawada[iGas] = 2 * e[2];
-      ionPot[iGas] = e[2];
-      for (int j = 0; j < 30; ++j) {
-        description[np][j] = scrpt[2][j];
+    if (nIon > 1) {
+      for (int j = 0; j < nIon; ++j) {
+        if (eFinal < eIon[j]) continue;
+        withIon = true;
+        ++nTerms; ++np;
+        scatModel[np] = kEl[2];
+        energyLoss[np] = eIon[j] / r;
+        // TODO
+        wOpalBeaty[np] = eoby[j];
+        if (gas[iGas] == "CH4") {
+          if (fabs(eIon[j] - 21.) < 0.1) {
+            wOpalBeaty[np] = 14.;
+          } else if (fabs(eIon[j] - 291.) < 0.1) {
+            wOpalBeaty[np] = 200.;
+          }
+        }
+        for (int k = 0; k < 50; ++k) {
+          description[np][k] = scrpt[2 + j][k];
+        }
+        csType[np] = nCsTypes * iGas + ElectronCollisionTypeIonisation;
+        if (useCsOutput) {
+          outfile << "# " << description[np] << "\n";
+        } 
       }
-      csType[np] = nCsTypes * iGas + ElectronCollisionTypeIonisation;
+      gsGreenSawada[iGas] = eoby[0];
+      tbGreenSawada[iGas] = 2 * eIon[0];
+      ionPot[iGas] = eIon[0];
+    } else {
+      if (eFinal >= e[2]) {
+        withIon = true;
+        ++nTerms; ++np;
+        scatModel[np] = kEl[2];
+        energyLoss[np] = e[2] / r;
+        wOpalBeaty[np] = eoby[0];
+        gsGreenSawada[iGas] = eoby[0];
+        tbGreenSawada[iGas] = 2 * e[2];
+        ionPot[iGas] = e[2];
+        for (int j = 0; j < 50; ++j) {
+          description[np][j] = scrpt[2][j];
+        }
+        csType[np] = nCsTypes * iGas + ElectronCollisionTypeIonisation;
+        if (useCsOutput) { 
+          outfile << "# ionisation (gross)\n";
+        }
+      }
     }
     // Attachment
-    if (eFinal >= e[3]) {
-      withAtt = true;
-      ++nTerms; ++np;
-      scatModel[np] = kEl[3];
-      energyLoss[np] = 0.;
-      for (int j = 0; j < 30; ++j) {
-        description[np][j] = scrpt[3][j];
-      }
-      csType[np] = nCsTypes * iGas + ElectronCollisionTypeAttachment;
+    ++nTerms; ++np;
+    scatModel[np] = 0;
+    energyLoss[np] = 0.;
+    for (int j = 0; j < 50; ++j) {
+      description[np][j] = scrpt[2 + nIon][j];
+    }
+    csType[np] = nCsTypes * iGas + ElectronCollisionTypeAttachment;
+    if (useCsOutput) { 
+      outfile << "# attachment\n";
     }
     // Inelastic terms
     int nExc = 0, nSuperEl = 0;
@@ -1747,8 +1787,8 @@ MediumMagboltz::Mixer(const bool verbose) {
       ++np;
       scatModel[np] = kIn[j];
       energyLoss[np] = eIn[j] / r;
-      for (int k = 0; k < 30; ++k) {
-        description[np][k] = scrpt[6 + j][k];
+      for (int k = 0; k < 50; ++k) {
+        description[np][k] = scrpt[5 + nIon + j][k];
       }
       if ((description[np][1] == 'E' && description[np][2] == 'X') ||
           (description[np][0] == 'E' && description[np][1] == 'X') ||
@@ -1765,7 +1805,7 @@ MediumMagboltz::Mixer(const bool verbose) {
         csType[np] = nCsTypes * iGas + ElectronCollisionTypeInelastic;
       }
       if (useCsOutput) {
-        outfile << "#" << description[np] << "\n";
+        outfile << "# " << description[np] << "\n";
       } 
     }
     nTerms += nIn;
@@ -1773,9 +1813,7 @@ MediumMagboltz::Mixer(const bool verbose) {
     for (int iE = 0; iE < nEnergySteps; ++iE) {
       np = np0;
       if (useCsOutput) {
-        outfile << (iE + 0.5) * eStep << "  " 
-                << q[iE][1] << "  " << q[iE][2] << "  " 
-                << q[iE][3] << "  " << q[iE][4] << "  ";
+        outfile << (iE + 0.5) * eStep << "  " << q[iE][1] << "  ";
       }
       // Elastic scattering
       cf[iE][np] = q[iE][1] * van;
@@ -1787,19 +1825,41 @@ MediumMagboltz::Mixer(const bool verbose) {
       }
       // Ionisation
       if (withIon) {
-        ++np;
-        cf[iE][np] = q[iE][2] * van;
-        if (scatModel[np] == 1) {
-          ComputeAngularCut(pEqEl[iE][2], scatCut[iE][np], 
-                            scatParameter[iE][np]);
-        } else if (scatModel[np] == 2) {
-          scatParameter[iE][np] = pEqEl[iE][2];
+        if (nIon > 1) {
+          for (int j = 0; j < nIon; ++j) {
+            if (eFinal < eIon[j]) continue;
+            ++np;
+            cf[iE][np] = qIon[iE][j] * van;
+            if (scatModel[np] == 1) {
+              ComputeAngularCut(pEqIon[iE][j], scatCut[iE][np], 
+                                scatParameter[iE][np]);
+            } else if (scatModel[np] == 2) {
+              scatParameter[iE][np] = pEqIon[iE][j];
+            }
+            if (useCsOutput) {
+              outfile << qIon[iE][j] << "  ";
+            }
+          }
+        } else {
+          ++np;
+          cf[iE][np] = q[iE][2] * van;
+          if (scatModel[np] == 1) {
+            ComputeAngularCut(pEqEl[iE][2], scatCut[iE][np], 
+                              scatParameter[iE][np]);
+          } else if (scatModel[np] == 2) {
+            scatParameter[iE][np] = pEqEl[iE][2];
+          }
+          if (useCsOutput) {
+            outfile << q[iE][2] << "  ";
+          }
         }
       }
       // Attachment
-      if (withAtt) {
-        ++np;
-        cf[iE][np] = q[iE][3] * van;
+      ++np;
+      cf[iE][np] = q[iE][3] * van;
+      scatParameter[iE][np] = 0.5;
+      if (useCsOutput) {
+        outfile << q[iE][3] << "  ";
       }
       // Inelastic terms
       for (int j = 0; j < nIn; ++j) {
@@ -1853,14 +1913,12 @@ MediumMagboltz::Mixer(const bool verbose) {
     for (int iE = 0; iE < nEnergyStepsLog; ++iE) {
       Magboltz::inpt_.estep = emax / (nEnergySteps - 0.5);
       Magboltz::inpt_.efinal = emax + 0.5 * Magboltz::inpt_.estep;
-      Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
-                        pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, scrpt);
+      Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, eoby, 
+                        pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, 
+                        qIon[0], pEqIon[0], eIon, &nIon, scrpt);
       np = np0;
       if (useCsOutput) {
-        outfile << emax << "  " << q[imax][1] 
-                        << "  " << q[imax][2] 
-                        << "  " << q[imax][3] 
-                        << "  " << q[imax][4] << "  ";
+        outfile << emax << "  " << q[imax][1] << "  "; 
       }
       // Elastic scattering
       cfLog[iE][np] = q[imax][1] * van;
@@ -1873,23 +1931,42 @@ MediumMagboltz::Mixer(const bool verbose) {
       }
       // Ionisation
       if (withIon) {
-        ++np;
-        // Gross cross-section
-        cfLog[iE][np] = q[imax][2] * van;
-        // Counting cross-section
-        // cfLog[iE][np] = q[imax][4] * van;
-        if (scatModel[np] == 1) {
-          ComputeAngularCut(pEqEl[imax][2], 
-                            scatCutLog[iE][np], 
-                            scatParameterLog[iE][np]);
-        } else if (scatModel[np] == 2) {
-          scatParameterLog[iE][np] = pEqEl[imax][2];
+        if (nIon > 1) {
+          for (int j = 0; j < nIon; ++j) {
+            if (eFinal < eIon[j]) continue;
+            ++np;
+            cfLog[iE][np] = qIon[imax][j] * van;
+            if (scatModel[np] == 1) {
+              ComputeAngularCut(pEqIon[imax][j], 
+                                scatCutLog[iE][np], 
+                                scatParameterLog[iE][np]);
+            } else if (scatModel[np] == 2) {
+              scatParameterLog[iE][np] = pEqIon[imax][j];
+            }
+            if (useCsOutput) {
+              outfile << qIon[imax][j] << "  ";
+            }
+          }
+        } else {
+          ++np;
+          // Gross cross-section
+          cfLog[iE][np] = q[imax][2] * van;
+          // Counting cross-section
+          // cfLog[iE][np] = q[imax][4] * van;
+          if (scatModel[np] == 1) {
+            ComputeAngularCut(pEqEl[imax][2], 
+                              scatCutLog[iE][np], 
+                              scatParameterLog[iE][np]);
+          } else if (scatModel[np] == 2) {
+            scatParameterLog[iE][np] = pEqEl[imax][2];
+          }
         }
       }
       // Attachment
-      if (withAtt) {
-        ++np;
-        cfLog[iE][np] = q[imax][3] * van;
+      ++np;
+      cfLog[iE][np] = q[imax][3] * van;
+      if (useCsOutput) {
+        outfile << q[imax][3] << "  ";
       }
       // Inelastic terms
       for (int j = 0; j < nIn; ++j) {

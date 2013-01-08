@@ -16,7 +16,7 @@ class TrackElectron : public Track {
     // Constructor
     TrackElectron();
     // Destructor
-    ~TrackElectron();
+    ~TrackElectron() {}
 
     void SetParticle(std::string particle);
     

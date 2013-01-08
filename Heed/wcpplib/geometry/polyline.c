@@ -19,63 +19,54 @@ void polyline::get_components(ActivePtr<absref_transmit>& aref_tran)
   aref_tran.pass(new absref_transmit(qpt+qsl, aref));
 }
 
-polyline::polyline(      polyline &pl) 
-{ 
+polyline::polyline(polyline &pl) : absref(pl) { 
   mfunname("polyline::polyline(      polyline &pl)");
   polyline_init(pl.pt, pl.qpt); 
 }
-polyline::polyline(const polyline &pl) 
-{ 
+polyline::polyline(const polyline &pl) : absref(pl) { 
   mfunname("polyline::polyline(const polyline &pl)");
   polyline_init(pl.pt, pl.qpt); 
 }
-polyline::polyline(const point* fpt, int fqpt) 
-{ 
+polyline::polyline(const point* fpt, int fqpt) { 
   mfunname("polyline::polyline(const point* fpt, int fqpt)");
   polyline_init(fpt, fqpt); 
 }
-polyline::polyline(const point& fpt1, const point& fpt2) // interval
-{ 
+polyline::polyline(const point& fpt1, const point& fpt2) {
+  // interval
   mfunname("polyline::polyline(const point& fpt1, const point& fpt2)");
   point fpt[2]; fpt[0]=fpt1; fpt[1]=fpt2; polyline_init(fpt, 2); 
 }
 
-polyline& polyline::operator=(const polyline& fpl)
-{ 
+polyline& polyline::operator=(const polyline& fpl) { 
   mfunname("polyline& polyline::operator=(const polyline& fpl)");
   polyline_del(); polyline_init(fpl.pt, fpl.qpt); return *this; 
 }
 
-
-void polyline::polyline_init(const point* fpt, int fqpt)
-{
+void polyline::polyline_init(const point* fpt, int fqpt) {
   pvecerror("void polyline::polyline_init(const point* fpt, int fqpt)");
   //static char* FunNameIIII1="polyline::polyline_init,  1";  
   //static char* FunNameIIII2="polyline::polyline_init,  2";  
-  int n=0;
   check_econd11(fqpt,<0,mcerr)
-  if(fqpt>=1)
-  {
-    pt=new point[fqpt];
-    for( qpt=0; qpt<fqpt; qpt++) pt[qpt]=fpt[qpt];
-    if(fqpt>=2)
-    {   
+  if (fqpt>= 1) {
+    pt = new point[fqpt];
+    for (qpt = 0; qpt < fqpt; ++qpt) pt[qpt] = fpt[qpt];
+    if (fqpt >= 2) {   
       //funnamestack.put(FunNameIIII1);
-      sl=new straight[qpt-1];
-      for( qsl=0; qsl<qpt-1; qsl++) sl[qsl]=straight(pt[qsl],pt[qsl+1]);
+      sl = new straight[qpt-1];
+      for (qsl = 0; qsl < qpt - 1; ++qsl) {
+        sl[qsl] = straight(pt[qsl],pt[qsl+1]);
+      }
+    } else {
+      sl = NULL;
     }
-    else
-      sl=NULL;
     //mcout<<"qpt="<<qpt<<" qsl="<<qsl<<'\n';
     //funnamestack.put(FunNameIIII2);
     aref = new absref* [qpt+qsl];
-    for( n=0; n<qpt; n++) aref[n]=&pt[n];
-    for( n=0; n<qsl; n++) aref[n+qpt]=&sl[n];
-  }
-  else
-  {
-    qpt=0; qsl=0;
-    pt=NULL; sl=NULL; aref=NULL;
+    for (int n = 0; n < qpt; ++n) aref[n] = &pt[n];
+    for (int n = 0; n < qsl; ++n) aref[n+qpt] = &sl[n];
+  } else {
+    qpt = 0; qsl = 0;
+    pt = NULL; sl = NULL; aref = NULL;
   }
 }
 /*
@@ -136,25 +127,17 @@ void polyline::polyline_init(straight* fsl, int fqsl)
 }
 */
 
-int polyline::check_point_in(const point& fpt, vfloat prec) const 
-{
+int polyline::check_point_in(const point& fpt, vfloat prec) const {
   pvecerror("int polyline::check_point_in(point& fpt, vfloat prec)");
-  int n;
-  for(n=0; n<qpt; n++)
-  {
-    if(apeq(pt[n], fpt, prec))
-    {
-      return 1;
-    }
+  for (int n = 0; n < qpt; ++n) {
+    if (apeq(pt[n], fpt, prec)) return 1;
   }
-  for(n=0; n<qsl; n++)
-  {
-    if(sl[n].check_point_in(fpt, prec)==1)
-    {
-      vec v1=fpt-pt[n];
-      vec v2=fpt-pt[n+1];
-      if(check_par( v1 , v2 , prec ) == -1 ) 
-      {        // anti-parallel vectors, point inside borders
+  for (int n = 0; n < qsl; ++n) {
+    if (sl[n].check_point_in(fpt, prec) == 1) {
+      vec v1 = fpt - pt[n];
+      vec v2 = fpt - pt[n + 1];
+      if (check_par( v1 , v2 , prec ) == -1 ) { 
+        // anti-parallel vectors, point inside borders
 	return 2;
       }
     }
@@ -164,41 +147,36 @@ int polyline::check_point_in(const point& fpt, vfloat prec) const
 
 int polyline::cross(const straight& fsl, 
 		    point *pc, int& qpc, 
-		    polyline *pl, int& qpl, vfloat prec) const 
-{
+		    polyline *pl, int& qpl, vfloat prec) const {
   pvecerror("void polyline::cross(const straight& fsl, ...)");
-  int n;
   //pc=new point[qpt];
-  qpc=0;
-  qpl=0;
-  for(n=0; n<qsl; n++)
-  {
-    pc[qpc]=sl[n].cross(fsl, prec);
-    if(vecerror==1 || vecerror==2 )  // lines do not cross
-      vecerror=0;
-    else if(vecerror==3 ) // the same straight line
-    {
-      pl[qpl++]=polyline(&(pt[n]),2);
-    }
-    else
-    {
-      vec v1=pc[qpc]-pt[n];
-      if(length(v1)<prec)
+  qpc = 0;
+  qpl = 0;
+  for (int n = 0; n < qsl; ++n) {
+    pc[qpc] = sl[n].cross(fsl, prec);
+    if (vecerror == 1 || vecerror == 2) {  
+      // lines do not cross
+      vecerror = 0;
+    } else if (vecerror == 3) {
+      // the same straight line
+      pl[qpl++] = polyline(&(pt[n]), 2);
+    } else {
+      vec v1 = pc[qpc] - pt[n];
+      if (length(v1) < prec) {
 	qpc++;
-      else
-      {
-	vec v2=pc[qpc]-pt[n+1];
-	if(length(v2)<prec)
+      } else {
+	vec v2 = pc[qpc] - pt[n + 1];
+	if (length(v2) < prec) {
 	  qpc++;
-	else if(check_par( v1 , v2, prec ) == -1 ) 
-	{        // anti-parallel vectors, point inside borders
+	} else if(check_par( v1 , v2, prec ) == -1) { 
+          // anti-parallel vectors, point inside borders
 	  qpc++;
 	}
       }
     }
   }
-  if(qpc>0 || qpl>0) return 1;
-  else return 0;
+  if (qpc > 0 || qpl > 0) return 1;
+  return 0;
 }
 /*
 int polyline::vecdistance(const vec normal, const straight& slt, point& outpt)

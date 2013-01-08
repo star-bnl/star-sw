@@ -1,7 +1,7 @@
-// Interface to Magboltz (version 8)
+// Interface to Magboltz (version 9)
 
-#ifndef G_MEDIUM_MAGBOLTZ_8
-#define G_MEDIUM_MAGBOLTZ_8
+#ifndef G_MEDIUM_MAGBOLTZ_9
+#define G_MEDIUM_MAGBOLTZ_9
 
 #include <vector>
 
@@ -146,7 +146,7 @@ class MediumMagboltz : public MediumGas {
     static const int nEnergySteps = 20000;
     static const int nEnergyStepsLog = 200;
     static const int nEnergyStepsGamma = 5000;
-    static const int nMaxInelasticTerms = 220;
+    static const int nMaxInelasticTerms = 250;
     static const int nMaxLevels = 512;
     static const int nCsTypes = 6;
     static const int nCsTypesGamma = 4;
@@ -189,7 +189,7 @@ class MediumMagboltz : public MediumGas {
     double scatCutLog[nEnergyStepsLog][nMaxLevels];
     
     // Level description
-    char description[nMaxLevels][30]; 
+    char description[nMaxLevels][50]; 
     
     // Total collision frequency
     double cfTot[nEnergySteps];

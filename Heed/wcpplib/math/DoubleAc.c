@@ -426,8 +426,7 @@ DoubleAc& DoubleAc::operator*=(const DoubleAc& f)
 }
 */
 
-DoubleAc& DoubleAc::operator/=(DoubleAc f)
-{
+DoubleAc& DoubleAc::operator/=(DoubleAc f) {
   mfunnamep("DoubleAc& DoubleAc::operator/=(const DoubleAc& f)");
   check_econd11(f.d , == 0 , mcerr); 
   //check_econd24( f.di , < , 0 , && , f.da , > , 0 , mcerr);
@@ -459,80 +458,54 @@ DoubleAc& DoubleAc::operator/=(DoubleAc f)
 #endif
 
   d/=f.d;
-  if(f.di < 0  &&  f.da  >  0)
-  {
+  if(f.di < 0  &&  f.da  >  0) {
     di=-DBL_MAX;
     da=DBL_MAX;
-  }
-  else if(di >= 0)
-  {
-    if(f.di > 0)
-    {
+  } else if(di >= 0) {
+    if(f.di > 0) {
       di/=f.da;
       da /= f.di;
-    }
-    else if(f.di == 0)
-    {
+    } else if(f.di == 0) {
       di/=f.da;
       da = DBL_MAX;
-    }
-    else
-    {
-      if(f.da == 0)
-      {
+    } else {
+      if(f.da == 0) {
 	da = di/f.di;
 	di = -DBL_MAX;
-      }
-      else
-      {
+      } else {
 	double ti=da/f.da;
 	//mcout<<"d="<<d<<" ti="<<ti<<'\n';
 	da = di/f.di;
 	di = ti;
       }
     }
-  }
-  else if(da >= 0)
-  {
-    if(f.di > 0)
-    {
+  } else if(da >= 0) {
+    if(f.di > 0) {
       di /= f.di;
       da /= f.di;
-    }
-    else if(f.di == 0)
-    {
+    } else if(f.di == 0) {
       di=-DBL_MAX;
       da=DBL_MAX;
-    }
-    else
-    {
-      if(f.da == 0)
-      {
+    } else {
+      if(f.da == 0) {
 	da = DBL_MAX;
 	di = -DBL_MAX;
-      }
-      else
-      {
+      } else {
 	double ti=da/f.da;
 	da = di/f.da;
 	di=ti;
       }
     }
-  }
-  else  
-  {         // assumed da < 0
-    if(f.di > 0)
-    {
+  } else  {
+    // assumed da < 0
+    if(f.di > 0) {
       di /= f.di;
       da /= f.da;
-    }
-    else if(f.di == 0)
-    {      
+    } else if(f.di == 0) {      
       di = -DBL_MAX;
       //check_econd11(f.da ,  == 0 , mcerr); // otherwise f.d == 0 which 
                             // was already rejected 
-      if(f.da == 0)
-      {
+      if(f.da == 0) {
 	funnw.ehdr(mcerr);
 	mcerr<<"f.da  == 0\n";
 	mcerr<<"This means that f.d == 0 which should been already "
@@ -544,16 +517,11 @@ DoubleAc& DoubleAc::operator/=(DoubleAc f)
 	spexit(mcerr);
       }
       da /= f.da;
-    }
-    else
-    {      
-      if(f.da == 0)
-      {
+    } else {      
+      if(f.da == 0) {
 	di = da/f.di;
 	da = DBL_MAX;
-      }
-      else
-      {
+      } else {
 	double ti=da/f.di;
 	da = di/f.da;
 	di = ti;
@@ -561,8 +529,7 @@ DoubleAc& DoubleAc::operator/=(DoubleAc f)
     }
   }
 #ifdef CHECK_CORRECTNESS_AT_MULT
-  if(d  <  di)
-  {
+  if (d < di) {
     funnw.ehdr(mcerr);
     mcerr<<"d  <  di at the end of computations\n";
     mcerr<<"This number:\n";
@@ -574,8 +541,7 @@ DoubleAc& DoubleAc::operator/=(DoubleAc f)
     //temp.print(mcerr, 6);
     spexit(mcerr);
   }
-  if(d  >  da)
-  {
+  if (d > da) {
     funnw.ehdr(mcerr);
     mcerr<<"d  >  di at the end of computations\n";
     mcerr<<"This number:\n";
@@ -593,10 +559,8 @@ DoubleAc& DoubleAc::operator/=(DoubleAc f)
   return *this;
 }
 
-DoubleAc sqrt(const DoubleAc& f)
-{
-  if(f.get() < 0)
-  {
+DoubleAc sqrt(const DoubleAc& f) {
+  if(f.get() < 0) {
     mcerr<<"error in DoubleAc sqrt(const DoubleAc& f): f.get() < 0, f.get()="
 	 <<f.get()<<'\n';
     spexit(mcerr);
@@ -623,18 +587,14 @@ DoubleAc sqrt(const DoubleAc& f)
   //		  sqrt( double(f.get_right_limit()) )
   //		  );
 }
-  */  
+*/  
 
-DoubleAc square(const DoubleAc& f)
-{
-  if(f.left_limit() >= 0.0)
-  {
+DoubleAc square(const DoubleAc& f) {
+  if(f.left_limit() >= 0.0) {
     return DoubleAc(f.get() * f.get(),
 		    f.left_limit() * f.left_limit(),
 		    f.right_limit() * f.right_limit());
-  }
-  else if(f.right_limit() >= 0.0)
-  {
+  } else if(f.right_limit() >= 0.0) {
     double t=find_max(-f.left_limit(), f.right_limit());
     return DoubleAc(f.get() * f.get(),
 		    0.0,
@@ -645,52 +605,38 @@ DoubleAc square(const DoubleAc& f)
 		  f.left_limit() * f.left_limit());
 }  
 
-DoubleAc pow(const DoubleAc& f, double p)
-{
+DoubleAc pow(const DoubleAc& f, double p) {
   if(p == 1) return f;
   if(p == 0) return DoubleAc(1.0);
-  if(p > 0)
-  {
+  if(p > 0) {
     double d =  std::pow( f.get(), p);
     double di = std::pow( f.left_limit(), p);
     double da = std::pow( f.right_limit(), p);
-    if(f.left_limit() >= 0.0)
-    {
+    if(f.left_limit() >= 0.0) {
       return DoubleAc(d, di, da);
-    }
-    else if(f.right_limit() >= 0.0)
-    {
+    } else if(f.right_limit() >= 0.0) {
       if(di < 0.0)
 	return DoubleAc(d, di, da);
       else  // the power is even
 	return DoubleAc(d, 0.0, find_max( di, da) );
-    }
-    else
-    {
+    } else {
       if(di < 0.0)
 	return DoubleAc(d, di, da);
       else  // the power is even
 	return DoubleAc(d, da, di);
     }
-  }
-  else
-  {
+  } else {
     double d =  std::pow( f.get(), -p);
     double di = std::pow( f.left_limit(), -p);
     double da = std::pow( f.right_limit(), -p);
-    if(f.left_limit() >= 0.0)
-    {
+    if(f.left_limit() >= 0.0) {
       return 1.0/DoubleAc(d, di, da);
-    }
-    else if(f.right_limit() >= 0.0)
-    {
+    } else if(f.right_limit() >= 0.0) {
       if(di < 0.0)
 	return 1.0/DoubleAc(d, di, da);
       else  // the power is even
 	return 1.0/DoubleAc(d, 0.0, find_max( di, da) );
-    }
-    else
-    {
+    } else {
       if(di < 0.0)
 	return 1.0/DoubleAc(d, di, da);
       else  // the power is even
@@ -699,16 +645,14 @@ DoubleAc pow(const DoubleAc& f, double p)
   }
 }
 
-DoubleAc exp(const DoubleAc& f)
-{
+DoubleAc exp(const DoubleAc& f) {
   double d  = std::exp(f.get());
   double di = std::exp(f.left_limit());
   double da = std::exp(f.right_limit());
   return DoubleAc( d, di, da);
 }
 
-DoubleAc sin(const DoubleAc& f)
-{
+DoubleAc sin(const DoubleAc& f) {
   //mcout<<"DoubleAc sin is starting, f="; f.print(mcout, 3);
   double d  = std::sin(f.get());
   double di = std::sin(f.left_limit());
@@ -724,37 +668,26 @@ DoubleAc sin(const DoubleAc& f)
   //Iprintn(mcout, na);
   int seven=even_num(n);
   //Iprintn(mcout, seven);
-  if(seven == 1)
-  {
-    if(ni<n)
-    {
+  if(seven == 1) {
+    if(ni<n) {
       di = -1.0;
       da=find_max(di,da);
-      if(na>n)
-      {
+      if(na>n) {
 	da = 1.0;
       }
-    }
-    else if(na>n)
-    {  
+    } else if(na>n) {  
       da = 1.0;
       di=find_min(di,da);
     }
-  }
-  else
-  {
+  } else {
     double temp=di; di=da; da=temp;
-    if(ni<n)
-    {
+    if(ni<n) {
       da = 1.0;
       di=find_min(di,da);
-      if(na>n)
-      {
+      if(na>n) {
 	di = -1.0;
       }
-    }
-    else if(na>n)
-    {  
+    } else if(na>n) {  
       di = -1.0;
       da=find_max(di,da);
     }
@@ -765,8 +698,7 @@ DoubleAc sin(const DoubleAc& f)
   return DoubleAc(d,di,da);
 }
 
-DoubleAc cos(const DoubleAc& f)
-{
+DoubleAc cos(const DoubleAc& f) {
   double d  = std::cos(f.get());
   double di = std::cos(f.left_limit());
   double da = std::cos(f.right_limit());
@@ -774,37 +706,26 @@ DoubleAc cos(const DoubleAc& f)
   long ni = left_round(f.left_limit()/M_PI-1.0);
   long na = left_round(f.right_limit()/M_PI-1.0);
   int seven=even_num(n);
-  if(seven == 1)
-  {
-    if(ni<n)
-    {
+  if(seven == 1) {
+    if(ni<n) {
       di = -1.0;
       da=find_max(di,da);
-      if(na>n)
-      {
+      if(na>n)  {
 	da = 1.0;
       }
-    }
-    else if(na>n)
-    {  
+    } else if(na>n) {  
       da = 1.0;
       di=find_min(di,da);
     }
-  }
-  else
-  {
+  } else {
     double temp=di; di=da; da=temp;
-    if(ni<n)
-    {
+    if(ni<n) {
       da = 1.0;
       di=find_min(di,da);
-      if(na>n)
-      {
+      if(na>n) {
 	di = -1.0;
       }
-    }
-    else if(na>n)
-    {  
+    } else if(na>n) {  
       di = -1.0;
       da=find_max(di,da);
     }
@@ -812,10 +733,8 @@ DoubleAc cos(const DoubleAc& f)
   return DoubleAc(d,di,da);
 }
 
-DoubleAc asin(const DoubleAc& f)
-{
-  if(fabs(f.get()) > 1)
-  {
+DoubleAc asin(const DoubleAc& f) {
+  if(fabs(f.get()) > 1) {
     mcerr<<"ERROR in inline DoubleAc asin(const DoubleAc& f):\n"
 	 <<"fabs(f.get()) > 1: f.get()="<<f.get()<<'\n';
     spexit(mcerr);
@@ -830,10 +749,8 @@ DoubleAc asin(const DoubleAc& f)
   return DoubleAc(d,di,da);
 } 
 
-DoubleAc acos(const DoubleAc& f)
-{
-  if(fabs(f.get()) > 1)
-  {
+DoubleAc acos(const DoubleAc& f) {
+  if(fabs(f.get()) > 1) {
     mcerr<<"ERROR in inline DoubleAc acos(const DoubleAc& f):\n"
 	 <<"fabs(f.get()) > 1: f.get()="<<f.get()<<'\n';
     spexit(mcerr);
@@ -848,38 +765,25 @@ DoubleAc acos(const DoubleAc& f)
   return DoubleAc(d,di,da);
 } 
 
-
-void DoubleAc::print(std::ostream& file, int l) const
-{
-  if(l<=0) return;
-  if(l==1)
-  { 
+void DoubleAc::print(std::ostream& file, int l) const {
+  if (l<=0) return;
+  if (l==1) { 
     file<<d;
-  }
-  else if(l==2)
-  {
+  } else if (l==2) {
     file<<d<<" [ "<<di<<" , "<<da<<" ] ";
-  }
-  else if(l==3)
-  {
+  } else if (l==3) {
     file<<d;
     int t=file.precision(2);
     file<<" ["<<std::setw(8)<<d-di<<","<<std::setw(8)<<da-d<<"] ";
     file.precision(t);
-  }
-  else if(l==4) 
-  {
+  }  else if (l==4) {
     file<<d<<" [ "<<di<<" , "<<da<<" ] \n";
-  }
-  else if(l==5)
-  {
+  } else if (l==5) {
     file<<d;
     int t=file.precision(2);
     file<<" ["<<std::setw(8)<<d-di<<","<<std::setw(8)<<da-d<<"] \n";
     file.precision(t);
-  }
-  else
-  {
+  } else {
     int t=file.precision(16);
     file<<"DoubleAc: d="<<std::setw(20)<<d
 	<<" di="<<std::setw(20)<<di<<" da="<<std::setw(20)<<da<<'\n';
@@ -887,7 +791,7 @@ void DoubleAc::print(std::ostream& file, int l) const
   }
 }
 
-DoubleAc pow(const DoubleAc& f, const DoubleAc& p) {
+DoubleAc pow(const DoubleAc& /*f*/, const DoubleAc& /*p*/) {
   mcerr<<"ERROR in inline DoubleAc pow(const DoubleAc& f, const DoubleAc& p):\n";
   mcerr<<"not implemented yet\n";
   spexit(mcerr);
@@ -906,7 +810,7 @@ DoubleAc pow(const DoubleAc& f, const DoubleAc& p) {
                     pow( f.get_left_limit() , p.get_left_limit() )
                     );
   */
-  return 0.0;  // to calm Solaris
+  return 0.0;
 }
 
 std::ostream& operator<<(std::ostream& file, const DoubleAc& f) {

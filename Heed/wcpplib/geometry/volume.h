@@ -106,14 +106,15 @@ coordinate system inherent to this volume.
 For interface with external system please use manip_absvol.
 */
 //           ********  absvol  *******
-class absvol: virtual public absref, public RegPassivePtr
+class absvol : virtual public absref, public RegPassivePtr {
 // public RegPassivePtr is not necessary for general package
 // but may be useful in applications
-{public:
+public:
   vfloat prec;
-  virtual ~absvol() {;}
+  // Destructor
+  virtual ~absvol() {}
   virtual int check_point_inside(const point& fpt, 
-				 const vec& dir) const  =0;
+				 const vec& dir) const = 0;
   // If two volumes are exactly adjusted, it may happens that the point
   // belongs to both volumes, to their borders. To avoid this confusion
   // the parameter dir is applyed. 
@@ -127,8 +128,7 @@ class absvol: virtual public absref, public RegPassivePtr
 				 const vec& fdir) const;
 
   virtual int find_embed_vol(const point& fpt, const vec& dir, 
-  			     manip_absvol_treeid* atid) 
-    const; 
+  			     manip_absvol_treeid* atid) const; 
   //virtual int find_embed_vol(const point& fpt, 
   //			     manip_absvol* amvol[pqamvol], 
   //			     int& namvol) const =0;
@@ -303,9 +303,9 @@ class manip_absvol: virtual public absref, public RegPassivePtr
 
 
 
-//          *********  sh_manip_absvol  *********
-class sh_manip_absvol: public manip_absvol 
-{protected: 
+// *********  sh_manip_absvol  *********
+class sh_manip_absvol: public manip_absvol {
+protected: 
   fixsyscoor csys; 
   //point *acnt;
   //basis* abas;

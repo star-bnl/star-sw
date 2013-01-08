@@ -3,9 +3,7 @@
 #include "wcpplib/util/FunNameStack.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 
-GasDef::GasDef(void):MatterDef(), pressureh(0.0), qmolech(0) 
-{
-}
+GasDef::GasDef(void):MatterDef(), pressureh(0.0), qmolech(0) {}
 
 GasDef::GasDef(const String& fname, const String& fnotation,
                long fqmolec, const DynLinArr< String >& fmolec_not,
@@ -14,13 +12,11 @@ GasDef::GasDef(const String& fname, const String& fnotation,
   pressureh(fpressure),
   qmolech(fqmolec), molech(fqmolec),
   weight_quan_molech(fqmolec),
-  weight_mass_molech(fqmolec)
-{
+  weight_mass_molech(fqmolec) {
   mfunname("GasDef::GasDef(...many molecules...)");
 
-  long n, k;
   // Finding pointers to all molec. by notations
-  for (k = 0; k < fqmolec; k++) {
+  for (long k = 0; k < fqmolec; ++k) {
     MoleculeDef* amd = MoleculeDef::get_MoleculeDef(fmolec_not[k]);
     check_econd11a(amd , == NULL , 
                    "No molecule with such notation: "<<fmolec_not[k]<<'\n', 
@@ -33,27 +29,27 @@ GasDef::GasDef(const String& fname, const String& fnotation,
     }
   }
   double s = 0.0;
-  for (n = 0; n < fqmolec; n++) {
+  for (long n = 0; n < fqmolec; ++n) {
     weight_quan_molech[n] = fweight_quan_molec[n]; 
     check_econd11( weight_quan_molech[n] , <= 0 , mcerr );
     s += weight_quan_molech[n];
   }
   check_econd11( s , <= 0 , mcerr );
   if (s != 1.0) {
-    for (n = 0; n < fqmolec; n++) {
+    for (long n = 0; n < fqmolec; ++n) {
       weight_quan_molech[n] /= s;
     }
   }
-  for (n = 0; n < fqmolec; n++) {
+  for (long n = 0; n < fqmolec; ++n) {
     weight_mass_molech[n]=weight_quan_molech[n] * molech[n]->A_total();
   }
   s = 0.0;
-  for (n = 0; n < fqmolec; n++) {
+  for (long n = 0; n < fqmolec; ++n) {
     s += weight_mass_molech[n];
   }
   check_econd11( s , <= 0 , mcerr );
   if (s != 1.0) {
-    for (n = 0; n < fqmolec; n++) {
+    for (long n = 0; n < fqmolec; ++n) {
       weight_mass_molech[n] /= s;
     }
   }
@@ -61,8 +57,8 @@ GasDef::GasDef(const String& fname, const String& fnotation,
   long qat = 0;
   DynLinArr< String > fatom_not(1000);  
   DynLinArr< double > weight_qa(1000, 0.0);
-  for (k = 0; k < fqmolec; k++) {
-    for (n = 0; n < molech[k]->qatom(); n++) {
+  for (long k = 0; k < fqmolec; ++k) {
+    for (long n = 0; n < molech[k]->qatom(); ++n) {
       /*
       This is originally designed to avoid duplication of an atom
       in the list if it presents twice in different moleculas.
@@ -84,7 +80,7 @@ GasDef::GasDef(const String& fname, const String& fnotation,
       weight_qa[qat] = fweight_quan_molec[k] * molech[k]->qatom_ps(n);
       //mcout << "qat=" << qat << " fatom_not[qat]=" << fatom_not[qat]
       //      << " weight_qa[qat]=" << weight_qa[qat] << '\n';
-      qat++;
+      ++qat;
       //mark2: ;
     }
   }
@@ -103,14 +99,12 @@ GasDef::GasDef(const String& fname, const String& fnotation,
                long fqmolec, const DynLinArr< String >& fmolec_not,
                const DynLinArr< double >& fweight_volume_molec,
                double fpressure, double ftemperature, 
-               int s1, int s2) 
-{
+               int /*s1*/, int /*s2*/) {
   // s1 and s2 are to distinguish the constructor
   mfunname("GasDef::GasDef(...many molecules... Waals)");
   DynLinArr< MoleculeDef* > amolec(fqmolec);
   int s_have_Waals = 0;
-  long n;
-  for (n = 0; n < fqmolec; n++) {
+  for (long n = 0; n < fqmolec; ++n) {
     //Iprint2n(mcout, fqmolec, n);
     amolec[n] = MoleculeDef::get_MoleculeDef( fmolec_not[n] );
     check_econd11a(amolec[n]  , == NULL , 
@@ -124,19 +118,19 @@ GasDef::GasDef(const String& fname, const String& fnotation,
   DynLinArr< double > fw(fqmolec);
   // normalized volume weights
   double s = 0.0;
-  for (n = 0; n < fqmolec; n++) {
+  for (long n = 0; n < fqmolec; ++n) {
     s += fweight_volume_molec[n];
   }
   check_econd11( s , <= 0 , mcerr );
-  for (n = 0; n < fqmolec; n++) {
-    fw[n] = fweight_volume_molec[n]/s;
+  for (long n = 0; n < fqmolec; ++n) {
+    fw[n] = fweight_volume_molec[n] / s;
   }
 
   // calculate number of molecules or moles and mass of each component  
   DynLinArr< double > fweight_quan_molec(fqmolec);
   double mass_t = 0.0;
   double ridberg = k_Boltzmann * Avogadro;  // more precise
-  for (n = 0; n < fqmolec; n++) {
+  for (long n = 0; n < fqmolec; ++n) {
     VanDerVaals* aw = amolec[n]->awls().get();
     if (aw == NULL) {
       // ideal gas case
@@ -168,8 +162,7 @@ GasDef::GasDef(const String& fname, const String& fnotation,
 
 GasDef::GasDef(const String& fname, const String& fnotation,
                const String& fmolec_not,
-               double fpressure, double ftemperature, double fdensity)
-{
+               double fpressure, double ftemperature, double fdensity) {
   mfunname("GasDef::GasDef(...1 molecule...)");
   DynLinArr< String > fmolec_noth(1, fmolec_not);
   DynLinArr< double > fweight_quan_molec(1, 1.0);
@@ -183,8 +176,7 @@ GasDef::GasDef(const String& fname, const String& fnotation,
 
 GasDef::GasDef(const String& fname, const String& fnotation,
                const String& fmolec_not,
-               double fpressure, double ftemperature, int s1, int s2)
-{
+               double fpressure, double ftemperature, int s1, int s2) {
   mfunname("GasDef::GasDef(...1 molecule...)");
   DynLinArr< String > fmolec_noth(1, fmolec_not);
   DynLinArr< double > fweight_volume_molec(1, 1.0);
@@ -199,8 +191,7 @@ GasDef::GasDef(const String& fname, const String& fnotation,
 GasDef::GasDef(const String& fname, const String& fnotation,
                const String& fmolec_not1, double fweight_quan_molec1,
                const String& fmolec_not2, double fweight_quan_molec2,
-               double fpressure, double ftemperature, double fdensity)
-{
+               double fpressure, double ftemperature, double fdensity) {
   mfunname("GasDef::GasDef(...2 molecules...)");
   DynLinArr< String > fmolec_noth(2);
   DynLinArr< double > fweight_quan_molec(2, 0.0);
@@ -219,8 +210,7 @@ GasDef::GasDef(const String& fname, const String& fnotation,
 GasDef::GasDef(const String& fname, const String& fnotation,
                const String& fmolec_not1, double fweight_volume_molec1,
                const String& fmolec_not2, double fweight_volume_molec2,
-               double fpressure, double ftemperature, int s1, int s2)
-{
+               double fpressure, double ftemperature, int s1, int s2) {
   mfunname("GasDef::GasDef(...2 molecules...)");
   DynLinArr< String > fmolec_noth(2);
   DynLinArr< double > fweight_volume_molec(2, 0.0);
@@ -240,8 +230,7 @@ GasDef::GasDef(const String& fname, const String& fnotation,
                const String& fmolec_not1, double fweight_quan_molec1,
                const String& fmolec_not2, double fweight_quan_molec2,
                const String& fmolec_not3, double fweight_quan_molec3,
-               double fpressure, double ftemperature, double fdensity)
-{
+               double fpressure, double ftemperature, double fdensity) {
   mfunname("GasDef::GasDef(...3 molecules...)");
   DynLinArr< String > fmolec_noth(3);
   DynLinArr< double > fweight_quan_molec(3, 0.0);
@@ -263,8 +252,7 @@ GasDef::GasDef(const String& fname, const String& fnotation,
                const String& fmolec_not1, double fweight_volume_molec1,
                const String& fmolec_not2, double fweight_volume_molec2,
                const String& fmolec_not3, double fweight_volume_molec3,
-               double fpressure, double ftemperature, int s1, int s2)
-{
+               double fpressure, double ftemperature, int s1, int s2) {
   mfunname("GasDef::GasDef(...3 molecules...)");
   DynLinArr< String > fmolec_noth(3);
   DynLinArr< double > fweight_volume_molec(3, 0.0);
@@ -284,14 +272,12 @@ GasDef::GasDef(const String& fname, const String& fnotation,
 
 GasDef::GasDef(const String& fname, const String& fnotation,
                const GasDef& gd, 
-               double fpressure, double ftemperature, double fdensity)
-{
+               double fpressure, double ftemperature, double fdensity) {
   mfunname("GasDef::GasDef( another GasDef with different pres)");
   long fqmolec = gd.qmolec(); 
   DynLinArr< String > fmolec_not(fqmolec);
   DynLinArr< double > fweight_quan_molec(fqmolec);
-  long n;
-  for (n = 0; n < fqmolec; n++) {
+  for (long n = 0; n < fqmolec; ++n) {
     fmolec_not[n] = gd.molec(n)->notation();
     fweight_quan_molec[n] = gd.weight_quan_molec(n);
   }
@@ -303,20 +289,16 @@ GasDef::GasDef(const String& fname, const String& fnotation,
 }
 
 // mean charge of molecule
-double GasDef::Z_mean_molec(void) const 
-{
+double GasDef::Z_mean_molec(void) const  {
   mfunname("double GasDef::Z_mean_molec(void) const ");
   double s = 0.0;
-  long n;
-  for (n = 0; n < qmolech; n++) {
+  for (long n = 0; n < qmolech; ++n) {
     s += molech[n]->Z_total() * weight_quan_molech[n];
   }
   return s;
 }
 
-
-void GasDef::print(std::ostream& file, int l) const
-{
+void GasDef::print(std::ostream& file, int l) const {
   if (l > 0) file << (*this);
 }
 
@@ -324,8 +306,7 @@ const double mm_rt_st_in_atmosphere = 760;
 // This corresponds to 133.322 pascal in one mm 
 //( 101325 pascal in one atmosphere )
 
-std::ostream& operator << (std::ostream & file, const GasDef& f)
-{
+std::ostream& operator << (std::ostream & file, const GasDef& f) {
   mfunname("std::ostream& operator << (std::ostream& file, const GasDef& f)");
   Ifile << "GasDef: \n";
   indn.n += 2;
@@ -339,8 +320,7 @@ std::ostream& operator << (std::ostream & file, const GasDef& f)
 
   file << "qmolec()=" << f.qmolec() << '\n';
   indn.n += 2;
-  long n;
-  for (n = 0; n < f.qmolec(); n++) {
+  for (long n = 0; n < f.qmolec(); ++n) {
     Ifile << "n=" << n 
           << " molec(n)->notation=" << f.molec(n)->notation() << '\n';
     indn.n += 2;
@@ -359,13 +339,11 @@ std::ostream& operator << (std::ostream & file, const GasDef& f)
 double gasdensity(double temperature, double pressure,
                   DynLinArr< ProtPtr<MoleculeDef> >molec,
                   DynLinArr< double > weight_quan_molec,
-                  long qmolec)
-{
+                  long qmolec) {
   mfunname("double gasdensity(...)");
   double sw = 0.0;
   double sa = 0.0;
-  long n;
-  for (n = 0; n < qmolec; n++) {
+  for (long n = 0; n < qmolec; ++n) {
     sa += weight_quan_molec[n] * molec[n]->A_total();
     sw += weight_quan_molec[n];
   }
@@ -375,5 +353,4 @@ double gasdensity(double temperature, double pressure,
   //     << ridberg/(joule/(kelvin*mole))<<'\n';
   return sa * pressure / (ridberg * temperature * sw);
 }
-
 

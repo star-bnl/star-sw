@@ -71,8 +71,8 @@ class surface: public absref virt_common_base_pcomma       // abstract class
 
 //             **** splane ****
 
-class splane: public surface
-{public:
+class splane: public surface {
+public:
   plane pn;
   vec dir_ins;  // direction to inside, supposed to be unit length (What for?)
 protected:
@@ -96,14 +96,14 @@ public:
   //    return new splane(*this); 
   //  }
       //return new splane(*this); } 
-  splane(void):pn(){;}
-  splane(const splane &fsp):pn(fsp.pn),dir_ins(fsp.dir_ins){};
-  splane(const plane &fpn, const vec& fdir_ins):pn(fpn),
-    dir_ins(unit_vec(fdir_ins)){};
-  int check_point_inside(const point& fpt, const vec& dir, vfloat fprec) 
-    const; 
-  int check_point_inside1(const point& fpt, int s_ext, vfloat fprec) 
-    const; 
+  splane(void) : pn() {}
+  splane(const splane &fsp) : surface(fsp), pn(fsp.pn), dir_ins(fsp.dir_ins) {}
+  splane(const plane &fpn, const vec& fdir_ins) : pn(fpn), dir_ins(unit_vec(fdir_ins)) {}
+  // Destructor
+  virtual ~splane() {;}
+
+  int check_point_inside(const point& fpt, const vec& dir, vfloat fprec) const; 
+  int check_point_inside1(const point& fpt, int s_ext, vfloat fprec) const; 
   // s_ext=0 - entering
   //       1 - exitting
   // 15.02.2006: Remark on check_point_inside vs. check_point_inside1.
@@ -122,27 +122,25 @@ public:
 
 
   int range(const trajestep& fts, 
-	    vfloat* crange, point* cpt, int* s_ext) const ;
+	    vfloat* crange, point* cpt, int* s_ext) const;
   // Does not change fts
   // If no cross, returns 0 a
   // If there are crosses, returns number of them and 
   // assign crange and cpt
 
-  int cross(const polyline& fpl, point *cntrpt, int& qcntrpt, vfloat prec) 
-    const 
-    {
-      polyline *plh=new polyline[fpl.Gqsl()];
-      int qplh;
-      int i = pn.cross(fpl, cntrpt, qcntrpt, plh, qplh, prec);
-      delete plh;
-      return i;
-    }
-  virtual void print(ostream& file, int l) const ;
-  virtual ~splane() {;}
+  int cross(const polyline& fpl, point *cntrpt, int& qcntrpt, vfloat prec) const { 
+    polyline *plh=new polyline[fpl.Gqsl()];
+    int qplh;
+    int i = pn.cross(fpl, cntrpt, qcntrpt, plh, qplh, prec);
+    delete plh;
+    return i;
+  }
+  virtual void print(ostream& file, int l) const;
+
 };
 
 
-//             **** ulsvolume ****
+// **** ulsvolume ****
 
 class ulsvolume: public absvol  // unlimited surfaces volume
 // It is volume corstructed by unlimited surfaces.
@@ -207,7 +205,7 @@ public:
   //  for( int n=0; n<qsurf; n++) delete surf[n];}
   macro_copy_header(ulsvolume);
   //virtual ulsvolume* copy(void) const ;
-  virtual void income(gparticle* gp){;}
+  virtual void income(gparticle* /*gp*/) {;}
   virtual void chname(char *nm) const 
 #ifdef USE_STLSTRING
     { strcpy(nm,"ulsvolume: "); strcat(nm,name.c_str()); }

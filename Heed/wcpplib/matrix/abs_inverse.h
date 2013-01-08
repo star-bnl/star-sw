@@ -102,7 +102,7 @@ X abstract_determinant(M& mi, long q)
 #else
 
 template<class M, class X> 
-X abstract_determinant(M& mi, long q, X fict) // fict - fictitious parameters,
+X abstract_determinant(M& mi, long q, X /*fict*/) // fict - fictitious parameters,
   // any value
 #endif
 

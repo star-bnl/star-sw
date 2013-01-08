@@ -19,8 +19,8 @@ The file is provided "as is" without express or implied warranty.
 
 // ********  box (3-dimensional rectangle (rectangular parallelogram)  *******
 // center of coordinate system is meant in the center of the box
-class box: public absvol
-{public:
+class box: public absvol {
+public:
   vfloat dx, dy, dz;       // lengths of sides
   vfloat dxh, dyh, dzh;    // half-lengths of sides
   ulsvolume ulsv;
@@ -29,33 +29,28 @@ class box: public absvol
   //	            int& fqareff, absref **&fareff); // free memory
 protected:
   virtual void get_components(ActivePtr<absref_transmit>& aref_tran);
-public:      
+public:
+  // Constructors 
   box(void);
-
+  // Compute precision as a ratio vprecision from mean of dimensions
   box(vfloat fdx, vfloat fdy, vfloat fdz, const String& fname);
-  // computes precision by init_prec as a ratio vprecision from mean of
-  // dimensions
-
-  box(vfloat fdx, vfloat fdy, vfloat fdz, vfloat fprec, const String& fname);
   // Use user-provided precision
-
+  box(vfloat fdx, vfloat fdy, vfloat fdz, vfloat fprec, const String& fname);
   box(box& fb);
   box(const box& fb);
+  // Destructor
+  virtual ~box() {}
 
-  virtual ~box()
-    { //delete name; 
-    }
   //box& operator=(const box& fb);
 
   void init_prec(void);
   void init_planes(void);
 
-  virtual int check_point_inside(const point& fpt, const vec& dir) const ;
+  virtual int check_point_inside(const point& fpt, const vec& dir) const;
 
-    //virtual int find_embed_vol(const point& fpt, const vec& dir,
-    //	                     manip_absvol_treeid* atid) const 
-
-//			     manip_absvol* amvol[pqamvol], int& namvol) const 
+  // virtual int find_embed_vol(const point& fpt, const vec& dir,
+  //	                        manip_absvol_treeid* atid) const 
+  //                            manip_absvol* amvol[pqamvol], int& namvol) const 
     //{return 0;}
   
   //It starts from imbraced manipulators, if any
@@ -72,19 +67,20 @@ public:
   // s_ext=1 inside
   // s_ext=0 outside
 
+  // Range till exit from given volume or to entry only
   virtual int range_ext(trajestep& fts, int s_ext) const ;
-  // range till exit from given volume or to entry only
+
 public:
   macro_copy_header(box);
   //virtual absvol* copy(void) const ;
   virtual void income(gparticle* gp);
   virtual void chname(char *nm) const ;
   virtual void print(ostream& file, int l) const ;
-  //virtual int mandatory(void) const ;  
-                          // for control surfaces, thin volumes
+  // virtual int mandatory(void) const;  
+  // for control surfaces, thin volumes
 };
 
-//            *****   manip_box  ********         
+// *****   manip_box  ********         
 
 class manip_box: public manip_absvol, public box
 {public:

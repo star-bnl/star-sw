@@ -7,15 +7,6 @@
 
 namespace Garfield {
 
-OpticalData::OpticalData() :
-  debug(false) {
-  
-}
-
-OpticalData::~OpticalData() {
-
-}
-
 bool
 OpticalData::IsAvailable(const std::string material) const {
 

@@ -15,7 +15,7 @@ class AvalancheMC {
     // Constructor
     AvalancheMC();
     // Destructor
-    ~AvalancheMC();
+    ~AvalancheMC() {}
   
     void SetSensor(Sensor* s);
 
