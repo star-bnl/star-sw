@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.26 2012/11/15 22:26:13 sangalin Exp $
+ * $Id: StMuArrays.cxx,v 1.27 2013/01/08 22:57:33 sangalin Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -34,7 +34,7 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVer
 							   "TofRawData",
 /*btofArrayNames   [__NBTOFARRAYS__   ]*/                  "BTofHit","BTofRawHit","BTofHeader", // dongx
 /*mtdArrayNames    [__NMTDARRAYS__    ]*/                  "MTDHit","MTDRawHit","MTDHeader",
-/*fgtArrayNames    [__NFGTARRAYS__    ]*/                  "FgtStrip","FgtCluster","FgtStripAssociation",
+/*fgtArrayNames    [__NFGTARRAYS__    ]*/                  "FgtStrip","FgtCluster","FgtStripAssociation","FgtAdc",
     /*eztArrayNames    [__NEZTARRAYS__    ]*/              "EztHead","EztTrig","EztETow","EztESmd","EztFpd"};
                                                             
 #ifndef __NO_STRANGE_MUDST__
@@ -74,7 +74,7 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrim
 /*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData","StTofRawData",
 /*btofArrayTypes  [__NBTOFARRAYS__    ]*/                  "StMuBTofHit","StBTofRawHit","StBTofHeader",  // dongx
 /*mtdArrayNames   [__NMTDARRAYS__     ]*/                  "StMuMtdHit","StMuMtdRawHit","StMuMtdHeader",
-/*fgtArrayTypes   [__NFGTARRAYS__     ]*/                  "StMuFgtStrip","StMuFgtCluster","StMuFgtStripAssociation",
+/*fgtArrayTypes   [__NFGTARRAYS__     ]*/                  "StMuFgtStrip","StMuFgtCluster","StMuFgtStripAssociation","StMuFgtAdc",
 /*eztArrayTypes   [__NEZTARRAYS__     ]*/                  "EztEventHeader","EztTrigBlob","EztEmcRawData","EztEmcRawData","EztFpdBlob"};
 #ifndef __NO_STRANGE_MUDST__
 const char** StMuArrays::strangeArrayTypes = StMuArrays::arrayTypes    +__NARRAYS__;
@@ -107,7 +107,7 @@ int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,10,1000,1000,1000,1
 /*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200, 1000,
 /*btofArraySizes   [__NBTOFARRAYS__   ]*/                  1000,1000,1,   // dongx
 /*mtdArraySizes    [__NMTDARRAYS__    ]*/                  1000,1000,1,
-/*fgtArraySizes    [__NFGTARRAYS__    ]*/                  500, 50, 500,
+/*fgtArraySizes    [__NFGTARRAYS__    ]*/                  500, 50, 500, 2000,
     /*eztArraySizes    [__NEZTARRAYS__    ]*/                  1, 1, 1, 1, 1};
 #ifndef __NO_STRANGE_MUDST__
 int* StMuArrays::strangeArraySizes = StMuArrays::arraySizes    +__NARRAYS__;
@@ -137,7 +137,7 @@ int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,0,0
 /*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0, 0,
 /*btofArrayCounters   [__NBTOFARRAYS__   ]*/               0, 0, 0,      // dongx
 /*mtdArrayCounters    [__NMTDARRAYS__    ]*/               0, 0, 0,
-/*fgtArrayCounters    [__NFGTARRAYS__    ]*/               0, 0, 0,
+/*fgtArrayCounters    [__NFGTARRAYS__    ]*/               0, 0, 0, 0,
     /*eztArrayCounters    [__NEZTARRAYS__    ]*/            0, 0, 0, 0, 0};
 
 StMuArrays test;
@@ -182,6 +182,9 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.27  2013/01/08 22:57:33  sangalin
+ * Merged in FGT changes allowing for a variable number of timebins to be read out for each strip.
+ *
  * Revision 1.26  2012/11/15 22:26:13  sangalin
  * Added the FGT. Fixed bugs in array offsets for the MTD.
  *

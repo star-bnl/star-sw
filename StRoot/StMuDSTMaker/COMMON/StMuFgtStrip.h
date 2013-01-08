@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFgtStrip.h,v 1.1 2012/11/15 22:27:24 sangalin Exp $
+ * $Id: StMuFgtStrip.h,v 1.2 2013/01/08 22:57:33 sangalin Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMuFgtStrip.h,v $
+ * Revision 1.2  2013/01/08 22:57:33  sangalin
+ * Merged in FGT changes allowing for a variable number of timebins to be read out for each strip.
+ *
  * Revision 1.1  2012/11/15 22:27:24  sangalin
  * Copied over from StFgtDevel.
  *
@@ -80,14 +83,15 @@ class StMuFgtStrip : public TObject {
 
    // accessors
    Int_t   getGeoId() const;
-   Short_t getAdc( Int_t tb ) const;
+   Int_t   getAdcStartIdx() const;
+   Short_t getNumSavedTimeBins() const;
    Short_t getClusterSeedType() const;
    Float_t getCharge() const;
    Float_t getChargeUncert() const;
 
    // modifiers
    void setGeoId           ( Int_t geoId );
-   void setAdc             ( Short_t adc, Int_t tb );
+   void setAdcInfo         ( Int_t adcIdx, Short_t numAdc );
    void setClusterSeedType ( Short_t type );
    void setCharge          ( Float_t charge );
    void setChargeUncert    ( Float_t uncert );
@@ -95,35 +99,31 @@ class StMuFgtStrip : public TObject {
  protected:
    // data members
    Int_t   mGeoId;                   // indexing: 6 disk * 4 quad * 2 planes * 720 strips
-   Short_t mAdc[kMuFgtNumTimeBins];  // 
+   Int_t   mAdcStartIdx;             // index of ADC for first time bin in the ADC TClonesArray
+   Short_t mNumSavedTimeBins;        // the number of time bins saved in the ADC TClonesArray for this strip
    Short_t mClusterSeedType;         // as defined in StEvent/StEnumerations.h
    Float_t mCharge;                  // before GEM, units (C), relation: ADC = ped + charge*gain(r,phi,disc)
    Float_t mChargeUncert;            // 
 
  private:   
-   ClassDef(StMuFgtStrip,4);
+   ClassDef(StMuFgtStrip,5);
 }; 
 
 // inline functions
 
 inline Int_t   StMuFgtStrip::getGeoId()           const { return mGeoId; };
+inline Int_t   StMuFgtStrip::getAdcStartIdx()     const { return mAdcStartIdx; };
+inline Short_t StMuFgtStrip::getNumSavedTimeBins()const { return mNumSavedTimeBins; };
 inline Float_t StMuFgtStrip::getCharge()          const { return mCharge; };
 inline Float_t StMuFgtStrip::getChargeUncert()    const { return mChargeUncert; };
 inline Short_t StMuFgtStrip::getClusterSeedType() const { return mClusterSeedType; };
-
-inline Short_t StMuFgtStrip::getAdc( Int_t tb ) const {
-   return (tb > -1 && tb < kMuFgtNumTimeBins) ? mAdc[tb] : 0;
-};
 
 inline void StMuFgtStrip::setGeoId           ( Int_t geoId ){ mGeoId = geoId; };
 inline void StMuFgtStrip::setCharge          ( Float_t charge ){ mCharge = charge; };
 inline void StMuFgtStrip::setChargeUncert    ( Float_t charge ){ mCharge = charge; };
 inline void StMuFgtStrip::setClusterSeedType ( Short_t type ){ mClusterSeedType = type; };
 
-inline void StMuFgtStrip::setAdc( Short_t adc, Int_t tb ) {
-   if( tb > -1 && tb < kMuFgtNumTimeBins ) 
-      mAdc[tb] = adc;
-};
+inline void StMuFgtStrip::setAdcInfo( Int_t adcIdx, Short_t numAdc ) { mAdcStartIdx = adcIdx; mNumSavedTimeBins = numAdc; };
 
 #endif
 
