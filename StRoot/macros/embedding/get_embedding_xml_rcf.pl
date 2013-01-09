@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml_rcf.pl,v 1.20 2012/10/07 01:20:32 huck Exp $
+# $Id: get_embedding_xml_rcf.pl,v 1.21 2013/01/09 21:36:06 huck Exp $
 # $Log: get_embedding_xml_rcf.pl,v $
+# Revision 1.21  2013/01/09 21:36:06  huck
+# fix missing </job> for localStRoot=0
+#
 # Revision 1.20  2012/10/07 01:20:32  huck
 # tagging get_embedding_xml_rcf.pl with r 1.20
 #
@@ -596,9 +599,9 @@ if( $localStRoot ) {
   print OUT "    <File>file:./pams/</File>\n";
   print OUT "  </Package>\n";
   print OUT "</SandBox>\n";
-  print OUT "</job>\n";
-  print OUT "\n";
 }
+print OUT "</job>\n";
+print OUT "\n";
 
 #----------------------------------------------------------------------------------------------------
 # Close xml file
