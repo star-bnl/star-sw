@@ -17,10 +17,16 @@ readme files:
 > cvs co OnlTools/Jevp
 > cvs co OnlTools/PDFUtil
 > cvs co StRoot/RTS
-> cvs co StRoot/StDaqLib
-> cvs co StRoot/StEvent
-> source OnlTools/Jevp/level.source
+> cvs co mgr
+
+Modify the file mgr/construct with the following changes:
+#   diff -r1.180 Construct
+#   375a376
+#   >     push @sysdirlist, "OnlTools/Jevp"; 
+
+> starlevel SL12d
 > cons
+
 
 Should build everything.   The "executables" will be in the form
 of shared object libraries stored in the directory tree
