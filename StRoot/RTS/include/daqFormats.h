@@ -32,9 +32,11 @@ typedef unsigned char UINT8 ;
 #define NOTRGD
 #if (TRG_VERSION == 0x40)
 #include <trgDataDefs_40.h>
+#elif (TRG_VERSION == 0x41) 
+#include <trgDataDefs_41.h>
 #else
 #ifndef TRG_VERSION
-#define TRG_VERSION 0x41	// changed on Feb 22, 2007
+#define TRG_VERSION 0x42       
 #endif
 #include <trgDataDefs.h>
 #endif
