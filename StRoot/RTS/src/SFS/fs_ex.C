@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     printf("Bad file...%s\n",argv[1]);
   }
 
-  printf("Sizeof inode=%d\n",sizeof(fs_inode));
+  printf("Sizeof inode=%ld\n",sizeof(fs_inode));
   fs_index *idx;
 
   char ff[4];
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
   int i=0;
   while((entry = idx->readdir(dir))) {
     
-    printf("%lld %lld (%s)(%s)%c\n",entry->offset, entry->sz, idx->cwd,entry->d_name,entry->has_child ? '/' : ' ');
+      printf("%lld %d (%s)(%s)%c\n",entry->offset, entry->sz, idx->cwd,entry->d_name,entry->has_child ? '/' : ' ');
 
     
     if(i++ > 10) break;

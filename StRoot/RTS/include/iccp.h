@@ -355,6 +355,12 @@ struct ic_l4_startevent {
     uint buff_id;   // event buffer id
 };
 
+struct ic_l4_shipevent {
+    uint buff_id;
+    uint evt_sz;
+    uint l4_sz;
+};
+
 struct ic_l4_eventdecision {
     uint trg_lo;   // lo 32 bits of the trigger mask
     uint trg_hi;   // hi 32 bits of the trigger mask
@@ -627,6 +633,7 @@ union ic_load
  
   ic_l4_startevent                 l4_startevent;
   ic_l4_eventdecision              l4_eventdecision;
+    ic_l4_shipevent  l4_shipevent;
   
 #endif /* NOT_DAQ */
   //  ic_qdsend_announce_chunk         qdsend_announce_chunk;
