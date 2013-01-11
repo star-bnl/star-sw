@@ -170,6 +170,8 @@
 #define L4_CFGDONE                     0xa2
 #define L4_RUNSTARTDONE                0xa3
 #define L4_RUNSTOPDONE                 0xa4
+#define L4_SHIPEVENT                   0xa5
+#define L4_SHIPEVENTDONE               0xa6
 
 
 // SL3
