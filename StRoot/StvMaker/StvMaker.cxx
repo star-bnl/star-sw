@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.24 2012/12/07 17:51:56 perev Exp $
+// $Id: StvMaker.cxx,v 1.25 2013/01/11 17:23:36 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -222,6 +222,7 @@ static int initialized = 0;
   StvToolkit *kit =StvToolkit::Inst();
 
 //		Choose seed finders
+  assert(gSystem->Load("StvSeed.so")>=0);
   TString seeds = SAttr("seedFinders");
   if (!seeds.Length()) seeds = "Default";
   TObjArray *tokens = seeds.Tokenize(" .,");
@@ -234,7 +235,6 @@ static int initialized = 0;
     if (chunk.CompareTo("Default",TString::kIgnoreCase)==0 ) {
       kit->SetSeedFinder (new StvDefaultSeedFinder);	continue;}
     if (chunk.CompareTo("KN",TString::kIgnoreCase)==0 ) {
-      assert(gSystem->Load("StvSeed.so")		>=0);
       kit->SetSeedFinder (new StvKNSeedFinder);	continue;}
   };
   delete tokens;
