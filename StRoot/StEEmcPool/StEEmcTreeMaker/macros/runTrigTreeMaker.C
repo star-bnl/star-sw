@@ -48,9 +48,8 @@ void runTrigTreeMaker( const Char_t *file="rcf10063_2_6000evts.MuDst.root", cons
     assert( !gSystem->Load("StEpcMaker"));
   }
   assert( !gSystem->Load("StTriggerUtilities"));
-
+   assert( !gSystem->Load("StSpinDbMaker") );
   assert( !gSystem->Load("StEEmcPoolEEmcTreeContainers") );
-  assert( !gSystem->Load("StSpinInfo") );
   assert( !gSystem->Load("StEEmcTreeMaker") );
 
   gROOT->Macro("LoadLogger.C");
@@ -192,7 +191,7 @@ void runTrigTreeMaker( const Char_t *file="rcf10063_2_6000evts.MuDst.root", cons
         eemcDsmSetup[3]=1;  // TPthr0
         eemcDsmSetup[4]=21; // TPthr1
         eemcDsmSetup[5]=31; // TPthr2
-   } else if ( trigVer == 'h' ){
+   } else if ( trigVer == 'h' || trigVer == 'i' ){
       // test trigger, ht1 & tp2 are 2 DSM (roughly 10%) higher than 'e'
       eemcDsmSetup[0]=6;  // HTthr0
       eemcDsmSetup[1]=19; // HTthr1
@@ -306,8 +305,11 @@ void runTrigTreeMaker( const Char_t *file="rcf10063_2_6000evts.MuDst.root", cons
 }
 
 /*
- * $Id: runTrigTreeMaker.C,v 1.1 2013/01/11 16:14:21 sgliske Exp $
+ * $Id: runTrigTreeMaker.C,v 1.2 2013/01/11 17:32:29 sgliske Exp $
  * $Log: runTrigTreeMaker.C,v $
+ * Revision 1.2  2013/01/11 17:32:29  sgliske
+ * bug fix
+ *
  * Revision 1.1  2013/01/11 16:14:21  sgliske
  * copied from users/sgliske CVS area
  *
