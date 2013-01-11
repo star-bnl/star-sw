@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.19 2012/05/07 14:06:07 fisyak Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.20 2013/01/11 21:43:57 geurts Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -86,6 +86,9 @@ Int_t StBTofHitMaker::InitRun(Int_t runnumber)
   LOG_DEBUG << "Initializing StBTofSortRawHit:" << endm;
   mBTofSortRawHit = new StBTofSortRawHit();
   mBTofSortRawHit->Init(this, mBTofDaqMap);
+
+  // Find out what year we're in: relevant for GMT-related TDIG Id modifications for Run 13+
+  mYear = (Int_t)runnumber/1e6 - 1;
 
   return kStOK;
 }
@@ -237,8 +240,20 @@ Int_t StBTofHitMaker::UnpackTofRawData()
       temphit.trayID  = (UChar_t)trayid;
       unsigned int timeinbin = ((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  /// time in tdc bin
       temphit.tdc     = timeinbin;
-      /// global channel number here
-      temphit.globaltdcchan = (UChar_t)(tdcchan + (tdcid%4)*8+tdigid*24+halftrayid*96); /// 0-191 for tray
+      /// global channel numbers defined here:
+      /// For Run13+ the GMT trays (8,23,93,108) the  TDIGs at tdigid==1 identifies itself as tdigid==0.
+	bool isGMT = (trayid==8) || (trayid==23) || (trayid==93) || (trayid==108);
+      /// The following code corrects for that offline. This is a permanent fixture for Run13+
+	  if ((mYear >= 13) && (isGMT) &&  (tdigid==0)){
+	temphit.globaltdcchan = (UChar_t)(tdcchan + (tdcid%4)*8+ 1*24 +halftrayid*96); /// 0-191 for tray
+      }
+	  else if ((mYear >= 13) && (isGMT) &&  ((tdigid==1) || (tdigid==7))){
+		LOG_ERROR<<"Unexpected TDIG-Id (" << tdigid << ") in TOF GMT tray (" << trayid << "). Should not happen" << endm;
+      }
+      else{
+	temphit.globaltdcchan = (UChar_t)(tdcchan + (tdcid%4)*8+tdigid*24+halftrayid*96); /// 0-191 for tray
+      }
+
       temphit.dataword      = dataword;
 
 //      printf("\t%d: 0x%08X [%u dec]\n",iword,fTof->ddl[ifib][iword],fTof->ddl[ifib][iword]) ;

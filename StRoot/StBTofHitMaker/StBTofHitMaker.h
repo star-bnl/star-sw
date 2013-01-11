@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.h,v 1.9 2010/05/27 17:03:19 geurts Exp $
+ * $Id: StBTofHitMaker.h,v 1.10 2013/01/11 21:43:57 geurts Exp $
  * StBTofHitMaker - class to fille the StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -59,6 +59,7 @@ class StBTofHitMaker:public StRTSBaseMaker
    private: 
       StEvent *mStEvent;
       tof_t   *fTof;
+      Int_t mYear;  //! year time stamp of raw data
 
       Int_t UnpackTofRawData();
       void fillBTofHeader();
