@@ -3,7 +3,7 @@
  * A simple class to store porimary vertex information
  * All functions are inline
  *
- * $Id: StMuPrimaryVertex.cxx,v 1.10 2012/11/26 23:14:33 fisyak Exp $ 
+ * $Id: StMuPrimaryVertex.cxx,v 1.11 2013/01/14 23:34:29 fisyak Exp $ 
  */
 
 #include "StMuPrimaryVertex.h"
@@ -82,7 +82,7 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
 	     v.position().x(),v.posError().x(),
 	     v.position().y(),v.posError().y(),
 	     v.position().z(),v.posError().z());
-  os << Form(" Rank:%6.0f",v.ranking());
+  os << Form(" Rank:%7.0f",v.ranking());
   //  os << Form(" M:%4i:R%4i",v.noTracks(),v.refMult());
   os << Form(" M:%4i",v.noTracks());
   //  os << Form(" RefMult:%4i(%4i%4i)",v.refMult(),v.refMultPos(),-v.refMultNeg());
@@ -95,6 +95,9 @@ ostream&              operator<<(ostream& os,  const StMuPrimaryVertex& v) {
 void StMuPrimaryVertex::Print(Option_t *option) const {cout << *this << endl;}
 //________________________________________________________________________________
 // $Log: StMuPrimaryVertex.cxx,v $
+// Revision 1.11  2013/01/14 23:34:29  fisyak
+// Fix print out
+//
 // Revision 1.10  2012/11/26 23:14:33  fisyak
 // Replace GetEntries() by GetEntriesFast(), fix print outs
 //
