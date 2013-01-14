@@ -34,6 +34,7 @@
 #include <DAQ_TPX/daq_tpx.h>
 #include <DAQ_TRG/daq_trg.h>
 #include <DAQ_HLT/daq_hlt.h>
+#include <DAQ_L4/daq_l4.h>
 #include <DAQ_FGT/daq_fgt.h>	//includes GMT & IST
 #include <DAQ_MTD/daq_mtd.h>
 #include <DAQ_PXL/daq_pxl.h>
@@ -54,6 +55,7 @@ static int trg_doer(daqReader *rdr, const char *do_print) ;
 static int ftp_doer(daqReader *rdr, const char *do_print) ;
 static int pmd_doer(daqReader *rdr, const char *do_print) ;
 static int hlt_doer(daqReader *rdr, const char *do_print) ;
+static int l4_doer(daqReader *rdr, const char *do_print) ;
 
 static int pp2pp_doer(daqReader *rdr, const char *do_print) ;
 static int l3_doer(daqReader *rdr, const char *do_print) ;
@@ -282,6 +284,14 @@ int main(int argc, char *argv[])
 		/*************************** HLT10 **************************/
 		if(hlt_doer(evp,print_det)) LOG(INFO,"HLT_FY10 found") ;
 
+		/*************************** L4 (HLT 12) *******************/
+		if(l4_doer(evp,print_det)) {
+		    LOG(INFO, "HLT FY12 found");
+		}
+		else {
+		    LOG(INFO, "No HLT HY12");
+		}
+
 		/*************************** FGT **************************/
 		if(fgt_doer(evp,print_det)) LOG(INFO,"FGT found") ;
 
@@ -409,6 +419,54 @@ static int hlt_doer(daqReader *rdr, const char  *do_print)
 		if(do_print) {
 			hlt_gl3_t *h = (hlt_gl3_t *) dd->Void ;
 			printf("HLT GL3 sec %02d: bytes %d: %d %s\n",dd->sec,dd->ncontent,h->bytes,h->name) ;
+		}
+	}
+
+
+
+	return found ;
+}
+
+static int l4_doer(daqReader *rdr, const char  *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"l4")) ;	// leave as is...
+	else do_print = 0 ;
+
+	for(int s=1;s<=24;s++) {
+		dd = rdr->det("l4")->get("tpx",s) ;
+		while(dd && dd->iterate()) {
+			found = 1 ;
+			if(do_print) {
+				printf("L4 TPX sec %02d: bytes %d\n",dd->sec,dd->ncontent) ;
+			}
+		}
+	}
+
+	dd = rdr->det("l4")->get("trg") ;
+	while(dd && dd->iterate()) {
+		found = 1 ;
+		if(do_print) {
+			printf("l4 TRG sec %02d: bytes %d\n",dd->sec,dd->ncontent) ;
+		}
+	}
+
+	dd = rdr->det("l4")->get("tof") ;
+	while(dd && dd->iterate()) {
+		found = 1 ;
+		if(do_print) {
+			printf("l4 TOF sec %02d: bytes %d\n",dd->sec,dd->ncontent) ;
+		}
+	}
+
+	dd = rdr->det("l4")->get("gl3") ;
+	while(dd && dd->iterate()) {
+		found = 1 ;
+		if(do_print) {
+			l4_gl3_t *h = (l4_gl3_t *) dd->Void ;
+			printf("L4 GL3 sec %02d: bytes %d: %d %s\n",dd->sec,dd->ncontent,h->bytes,h->name) ;
 		}
 	}
 

@@ -22,14 +22,15 @@ void printittr(SFS_ittr *ittr, int ctr) {
   char type[5];
   memcpy(type, ittr->entry.type, 4);
   type[4] = '\0';
-  printf("#%05d@%12lld: %s %s %s [S:%s] [P:%s] [F:%s]\n",
+  printf("#%05d@%12lld: %s %s %s [S:%s] [P:%s] [F:%s] (totsz=%d)\n",
 	 ctr,ittr->fileoffset,
 	 type,
 	 attr,
 	 ittr->entry.name,
 	 ittr->stickypath,
 	 ittr->ppath,
-	 ittr->fullpath);
+	 ittr->fullpath,
+	 ittr->entry.sz + ittr->entry.head_sz);
 }
 
 int main(int argc, char *argv[])
