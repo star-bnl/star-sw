@@ -194,11 +194,21 @@ void StiHit::setGlobal(const StiDetector * detector,
   if (!detector) return;
   double pos = detector->getPlacement()->getNormalRadius();
   double dif = mx-pos;
-  if (fabs(dif)<0.05*pos) return;
+  static Double_t scale = 0.05;
+  static Int_t counts = 0;
+  if (fabs(dif)<scale*pos) return; // increase by 2 due to large distortions
   LOG_WARN <<
-     Form("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
+     Form("**** StiHit.%s too far: x=%f pos=%g dif=%g ****"
           ,detector->getName().c_str(),mx,pos,dif)
   << endm;
+  counts++;
+  if (counts > 13) {
+    LOG_WARN <<
+      Form("**** StiHit.%s increase scale to %f ****"
+	   ,detector->getName().c_str(),scale);
+    scale *= 2;
+    counts = 0;
+  }
   assert(fabs(dif)<0.30*pos);
 }
 
