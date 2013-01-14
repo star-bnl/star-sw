@@ -343,10 +343,10 @@ StiDebug::Break(nCall);
     double accu,errr;
     accu = mJoinPars.ptin() - mBestParentPars.ptin()*(1+mMcs._ptinCorr);
     errr = sqrt(0.5*(fabs(mJoinErrs._cPP)+fabs(mBestParentErrs._cPP)));
-    mCurvQa.add(accu/errr);    
+    if (errr > 0) mCurvQa.add(accu/errr);    
     accu = mJoinPars.tanl() - mBestParentPars.tanl();
     errr = sqrt(0.5*(fabs(mJoinErrs._cTT)+fabs(mBestParentErrs._cTT)));
-    mTanlQa.add(accu/errr);    
+    if (errr > 0) mTanlQa.add(accu/errr);    
   }while(0);
     
   return 0;
@@ -1156,7 +1156,7 @@ double QaFit::getNStd(int k)
 {
   finish();
   int n = mTally-k;
-  if (!n) return 0;
+  if (n <= 0) return 0;
   return mAver[k]*sqrt(double(n));
 }  
 //_____________________________________________________________________________
@@ -1164,7 +1164,7 @@ double QaFit::getNSgn(int k)
 {
   finish();
   int n = mTally-k;
-  if (!n) return 0;
+  if (n <= 0) return 0;
   return (n-2*mNega[k])/sqrt(double(n));
 }  
 //_____________________________________________________________________________
