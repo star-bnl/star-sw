@@ -2,6 +2,7 @@
 #include "TGeoManager.h"
 #include "StiDetector.h"
 #include "StMaker.h"
+#include "TClassTable.h"
 StiMasterDetectorBuilder::StiMasterDetectorBuilder(bool active)
   : StiDetectorBuilder("MasterDetectorBuilder",active,"none")
 {}
@@ -23,6 +24,10 @@ void StiMasterDetectorBuilder::reset()
 void StiMasterDetectorBuilder::build(StMaker&source)
 {
   TGeoManager *gGeoManagerSV = gGeoManager; gGeoManager = 0;
+  if (gClassTable->GetID("TGiant3") >= 0) {
+    gGeoManager = gGeoManagerSV;
+    gGeoManagerSV = 0;
+  }
   if (StMaker::GetChain()) {
     cout << "StiMasterDetectorBuilder::build() -I- Create clone of VmcGeometry by reinitialization for recontruction" <<endl;
     TDataSet *set = StMaker::GetChain()->GetDataBase("VmcGeometry/Geometry", &StMaker::GetChain()->StMaker::GetDBTime());
