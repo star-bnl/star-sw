@@ -707,7 +707,42 @@ MakeChairInstance(tofGeomAlign,Calibrations/tof/tofGeomAlign);
 #include "St_tofTrayConfigC.h"
 MakeChairInstance(tofTrayConfig,Calibrations/tof/tofTrayConfig);
 #include "St_tofStatusC.h"
+#if 1
 MakeChairInstance(tofStatus,Calibrations/tof/tofStatus);
+#else
+ClassImp(St_tofStatusC); 
+St_tofStatusC *St_tofStatusC::fgInstance = 0; 
+St_tofStatusC *St_tofStatusC::instance() { 
+  if (! fgInstance) {
+    St_tofStatus *table = (St_tofStatus *) StMaker::GetChain()->GetDataBase("Calibrations/tof/tofStatus"); 
+    if (! table) {							
+      LOG_WARN << "St_tofStatusC::instance " << "Calibrations/tof/tofStatus" << "\twas not found" 
+	       << "c struct address " << table->GetTable()
+	       << endm; 
+      assert(table);							
+    }									
+    TDatime t[2];								
+    if (St_db_Maker::GetValidity(table,t) > 0) {				
+      Int_t Nrows = table->GetNRows();					
+      LOG_WARN << "St_tofStatusC::instance found table " << table->GetName() 
+	       << " with NRows = " << Nrows << " in db" << endm;		
+      LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	
+	       << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;	
+      if (Nrows > 10) Nrows = 10;						
+      static Int_t maxsize = 256;
+      if (table->GetRowSize() < maxsize) 
+	table->Print(0,Nrows);		
+    }
+    fgInstance = new St_tofStatusC(table);				
+  }
+  LOG_WARN << "St_tofStatusC::instance c struct address " << ((St_tofStatus *) fgInstance->Table())->GetTable() << endm;
+  static Bool_t d = kFALSE;
+  if (d) {
+    fgInstance->Print(0,1);
+  }
+  return fgInstance;							
+}
+#endif
 //____________________________Calibrations/emc____________________________________________________
 #include "St_emcPedC.h"
 MakeChairInstance2(emcPed,St_bemcPedC,Calibrations/emc/y3bemc/bemcPed);
