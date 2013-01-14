@@ -30,6 +30,7 @@
 #include "TPCCATracker/code/AliHLTTPCCAMergerPerformance.h"
 #include "StDetectorDbMaker/St_tpcPadPlanesC.h"
 #include "StiKalmanTrack.h"
+#include "StiKalmanTrackNode.h"
 
 #include <vector>
 #include <algorithm>
@@ -56,7 +57,7 @@ StiTPCCATrackerInterface::StiTPCCATrackerInterface()
   fPerformance = &(AliHLTTPCCAPerformance::Instance());
   fPerformance->SetOutputFile(fOutFile);
 
-  SetNewEvent();
+  //yf   SetNewEvent();
 } // StiTPCCATrackerInterface::StiTPCCATrackerInterface()
 
 StiTPCCATrackerInterface::~StiTPCCATrackerInterface(  )
@@ -292,12 +293,13 @@ void StiTPCCATrackerInterface::MakeSettings()
   const int NRows = St_tpcPadPlanesC::instance()->padRows();
   for ( int iSlice = 0; iSlice < NSlices; iSlice++ ) {
     AliHLTTPCCAParam SlicePar;
-    memset(&SlicePar, 0, sizeof(AliHLTTPCCAParam));
+    //    memset(&SlicePar, 0, sizeof(AliHLTTPCCAParam));
 
     Int_t sector = iSlice+1;
       // Int_t sector = iSlice;
     SlicePar.SetISlice( iSlice );
     SlicePar.SetNRows ( NRows ); 
+    SlicePar.SetNInnerRows ( NoOfInnerRows ); 
     Double_t beta = 0;
     if (sector > 12) beta = (24-sector)*2.*TMath::Pi()/12.;
     else             beta =     sector *2.*TMath::Pi()/12.;
@@ -313,9 +315,11 @@ void StiTPCCATrackerInterface::MakeSettings()
     SlicePar.SetErrY     (   0.12 ); // 0.06  for Inner                        //TODO initialize from StRoot
     SlicePar.SetErrZ     (   0.16 ); // 0.12  for Inner                NodePar->fitPars()        //TODO initialize from StRoot
       //   SlicePar.SetPadPitch (   0.675 );// 0.335 -"-
-    float x[3]={0,0,0},b[3];
-    StarMagField::Instance()->BField(x,b);
-    SlicePar.SetBz       ( - b[2] );   // change sign because change z
+    if (! StiKalmanTrackNode::IsLaser()) {
+      float x[3]={0,0,0},b[3];
+      StarMagField::Instance()->BField(x,b);
+      SlicePar.SetBz       ( - b[2] );   // change sign because change z
+    } else SlicePar.SetBz (0.);
     if (sector <= 12) {
       SlicePar.SetZMin     (   0. );                                        //TODO initialize from StRoot
       SlicePar.SetZMax     ( 210. );                                        //TODO initialize from StRoot
@@ -324,11 +328,7 @@ void StiTPCCATrackerInterface::MakeSettings()
       SlicePar.SetZMax     (   0. );                                        //TODO initialize from StRoot
     }
     for( int iR = 0; iR < NRows; iR++){
-      if (iR < NoOfInnerRows) {
-	SlicePar.SetRowX(iR, St_tpcPadPlanesC::instance()->innerRowRadii()[iR]);
-      } else {
-	SlicePar.SetRowX(iR, St_tpcPadPlanesC::instance()->outerRowRadii()[iR-NoOfInnerRows]);
-      }
+      SlicePar.SetRowX(iR, St_tpcPadPlanesC::instance()->radialDistanceAtRow(iR+1));
     }
 
     Double_t *coeffInner = StiTpcInnerHitErrorCalculator::instance()->coeff();
@@ -400,10 +400,12 @@ void StiTPCCATrackerInterface::MakeHits()
 
         // obtain seed Hit
       SeedHit_t hitc;
+#if 0
       hitc.mMinPad  = tpcHit->minPad();
       hitc.mMaxPad  = tpcHit->maxPad();
       hitc.mMinTmbk = tpcHit->minTmbk();
       hitc.mMaxTmbk = tpcHit->maxTmbk();
+#endif
       hitc.padrow = tpcHit->padrow()-1;
       hitc.x = loc.position().x();
       hitc.y = loc.position().y();
@@ -469,8 +471,7 @@ void StiTPCCATrackerInterface::ConvertPars(const AliHLTTPCCATrackParam& caPar, d
   double h2 = - fTracker->Slice(0).Param().Bz(); // change sign because change z
 #endif // 1
   h2 *= EC;
-  if (fabs(h2) < ZEROHZ) h2 = 0;
-
+  if (fabs(h2) < ZEROHZ || StiKalmanTrackNode::IsLaser()) h2 = 0;
     // get parameters. continue
   nodePars.hz() = h2;  // Z component magnetic field in units Pt(Gev) = Hz * RCurv(cm)
   nodePars.ready(); // set cosCA, sinCA & curv
