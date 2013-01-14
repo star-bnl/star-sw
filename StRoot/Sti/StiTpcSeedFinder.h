@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.h,v 2.3 2012/05/07 14:55:38 fisyak Exp $
+// $Id: StiTpcSeedFinder.h,v 2.4 2013/01/14 22:21:14 fisyak Exp $
 #ifndef __StiTpcSeedFinder_h__
 #define __StiTpcSeedFinder_h__
 #ifdef DO_TPCCATRACKER
@@ -7,7 +7,10 @@
 class StiTPCCATrackerInterface;
 
 struct SeedHit_t {
-  Int_t mMinPad, mMaxPad, mMinTmbk, mMaxTmbk, padrow, status, taken, track_key ; //"m" for modified
+#if 0
+  Int_t mMinPad, mMaxPad, mMinTmbk, mMaxTmbk;
+#endif
+  Int_t padrow, status, taken, track_key ; //"m" for modified
   Double_t x,y,z;
   StiHit   *hit;
 };
@@ -25,6 +28,9 @@ class StiTpcSeedFinder {
   static void     findTpcTracks(StiTPCCATrackerInterface &caTrackerInt);
 };
 // $Log: StiTpcSeedFinder.h,v $
+// Revision 2.4  2013/01/14 22:21:14  fisyak
+// Clean up unused variables
+//
 // Revision 2.3  2012/05/07 14:55:38  fisyak
 // Clean up from hard coded Tpc parameters
 //
