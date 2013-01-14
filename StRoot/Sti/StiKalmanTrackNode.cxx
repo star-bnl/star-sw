@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.133 2011/11/21 17:05:26 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.134 2013/01/14 22:19:48 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.134  2013/01/14 22:19:48  fisyak
+ * Set Bz = 0 for laser tracks
+ *
  * Revision 2.133  2011/11/21 17:05:26  fisyak
  * Correct no. of possible point for CA case
  *
@@ -594,11 +597,13 @@ double StiKalmanTrackNode::getHz() const
   
 static const double EC = 2.99792458e-4,ZEROHZ = 2e-6;
    if (mHz<999) return mHz;
-   double h[3];
-   StarMagField::Instance()->BField(&(getGlobalPoint().x()),h);
-   h[2] = EC*h[2];
-   if (fabs(h[2]) < ZEROHZ) h[2]=0;
-   mHz = h[2];
+   if (! _laser) {
+     double h[3];
+     StarMagField::Instance()->BField(&(getGlobalPoint().x()),h);
+     h[2] = EC*h[2];
+     if (fabs(h[2]) < ZEROHZ) h[2]=0;
+     mHz = h[2];
+   } else mHz = 0;
    return mHz;
 }
 //______________________________________________________________________________
@@ -1251,6 +1256,10 @@ inline double StiKalmanTrackNode::length(const StThreeVector<double>& delta, dou
   
   double m = delta.perp();
   double as = 0.5*m*curv;
+  if (TMath::Abs(as) > 1) {
+    cout << "StiKalmanTrackNode::length m = " << m << " curv = " << curv << " as = " << as << " illegal. reset to 1" << endl;
+    as = 1;
+  }
   double lxy=0;
   if (fabs(as)<0.01) { lxy = m*(1.+as*as/24);}
   else               { lxy = 2.*asin(as)/curv;}
