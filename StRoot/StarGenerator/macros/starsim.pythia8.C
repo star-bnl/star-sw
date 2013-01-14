@@ -150,7 +150,7 @@ void starsim( Int_t nevents=10 )
   //
   // EXIT starsim
   //
-  command("EXIT");
+  command("call agexit");  // Make sure that STARSIM exits properly
 
 }
 // ----------------------------------------------------------------------------

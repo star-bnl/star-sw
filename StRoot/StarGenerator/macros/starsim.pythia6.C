@@ -132,6 +132,7 @@ void starsim( Int_t nevents=1 )
   //
   trig( nevents );
 
+  command("call agexit");  // Make sure that STARSIM exits properly
 }
 // ----------------------------------------------------------------------------
 
