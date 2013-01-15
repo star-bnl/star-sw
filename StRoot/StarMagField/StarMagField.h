@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.h,v 1.9 2013/01/15 17:35:23 fisyak Exp $
+ * $Id: StarMagField.h,v 1.10 2013/01/15 23:45:02 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.h,v $
+ * Revision 1.10  2013/01/15 23:45:02  fisyak
+ * Account ROOT version with TVirtualMagField
+ *
  * Revision 1.9  2013/01/15 17:35:23  fisyak
  * Create clean versions of ROOT and non ROOT StarMagField
  *
@@ -65,12 +68,17 @@
 #include <stdlib.h>
 #include <Stiostream.h>
 #include <Rtypes.h>
-#ifdef __ROOT__
+#if defined (__ROOT__)
+#if ROOT_VERSION_CODE >= 335360 /* ROOT_VERSION(5,30,0) */
 #include "TVirtualMagField.h"
-class StarMagField : public TVirtualMagField {
+class StarMagField : public TVirtualMagField 
 #else
-class StarMagField {
+class StarMagField : public TObject
 #endif
+#else
+class StarMagField 
+#endif
+{
  public:
   enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
   enum   ESmFSizes {nZ = 57, nR = 28, nPhi = 37, nZSteel = 16, nRSteel = 115, nPhiSteel = 25};
