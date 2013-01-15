@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.19 2013/01/15 17:35:23 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.20 2013/01/15 23:45:02 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.20  2013/01/15 23:45:02  fisyak
+ * Account ROOT version with TVirtualMagField
+ *
  * Revision 1.19  2013/01/15 17:35:23  fisyak
  * Create clean versions of ROOT and non ROOT StarMagField
  *
@@ -354,7 +357,9 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
 			     Float_t BDipole, Float_t RmaxDip,
 			     Float_t ZminDip, Float_t ZmaxDip) :
 #ifdef __ROOT__
+#if ROOT_VERSION_CODE >= 335360 /* ROOT_VERSION(5,30,0) */
   TVirtualMagField("StarMagField"),
+#endif
 #endif
   fMap(map), 
   fFactor(factor),   fRescale(rescale),
