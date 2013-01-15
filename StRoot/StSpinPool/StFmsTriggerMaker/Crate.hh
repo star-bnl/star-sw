@@ -7,7 +7,24 @@
 #ifndef CRATE_HH
 #define CRATE_HH
 
+#if defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__) 
+/* linux has its own (fast) swaps */
 #include <byteswap.h>
+#else /* __APPLE__ */
+//#warning "byteswap.h is an unportable GNU extension!  Don't use!"
+static inline unsigned short bswap_16(unsigned short x) {
+  return ((((x) >> 8) & 0xff) | (((x) & 0xff) << 8)) ;
+}
+static inline unsigned int bswap_32(unsigned int x) {
+  return (bswap_16(x&0xffff)<<16) | (bswap_16(x>>16));
+}
+static inline unsigned long long bswap_64(unsigned long long x) {
+  return (((unsigned long long)bswap_32(x&0xffffffffull))<<32) |
+(bswap_32(x>>32));
+}
+#endif /* __APPLE__ */
+#endif /* __linux__ || __APPLE__ */
 #include <cassert>
 #include <cstring>
 #include <algorithm>
