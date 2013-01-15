@@ -1109,7 +1109,7 @@ Bfc_st BFC[] = { // standard chains
   {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
   {"geant3"      ,"" ,"","",""   ,"Geom,EG,Pythia6,EGPythia6,VMC,geant3","TGeo version of geant321",kFALSE},
   {"geometry"    ,"" ,"","",""                                     ,"geometry","geometry+Mag.Field",kFALSE},
-  {"StarMagField","", "","magF"                         ,"","geom,StarMagField","Load StarMagField",kFALSE},
+  {"StarMagField","", "","magF"                          ,"","VMC,StarMagField","Load StarMagField",kFALSE},
   {"geomNoField" ,"" ,"","-geometry,StarMagField"        ,"","geometryNoField","geometry-Mag.Field",kFALSE},
   {"xgeometry"   ,"" ,"","-geometry,-geomNoField"         ,"","xgeometry","AgML geometry-Mag.Field",kFALSE},
   {"UseProjectedVertex" ,"" ,"",""                ,"","","Run StBTofCalibMaker w/wo Primary Vertex",kFALSE},
