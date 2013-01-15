@@ -374,13 +374,17 @@ void KFParticleBase::AddDaughter( const KFParticleBase &Daughter )
   if( fNDF<-1 ){ // first daughter -> just copy
     fNDF   = -1;
     fQ     =  Daughter.GetQ();
-    for( Int_t i=0; i<7; i++) fP[i] = Daughter.fP[i];
-    for( Int_t i=0; i<28; i++) fC[i] = Daughter.fC[i];
+    if( Daughter.fC[35]>0 ){ //TODO Check this: only the first daughter is used here!
+      Daughter.GetMeasurement( fVtxGuess, fP, fC );
+    } else {
+      for( Int_t i=0; i<8; i++ ) fP[i] = Daughter.fP[i];
+      for( Int_t i=0; i<36; i++ ) fC[i] = Daughter.fC[i];
+    }
     fSFromDecay = 0;
     return;
   }
 
-  TransportToDecayVertex();
+//   TransportToDecayVertex();
 
   Double_t b[3]; 
   Int_t maxIter = 1;
@@ -430,30 +434,10 @@ void KFParticleBase::AddDaughter( const KFParticleBase &Daughter )
 
     //*
 
-    Double_t mS[6];
-    {
-      Double_t mSi[6] = { ffC[0]+mV[0], 
-			  ffC[1]+mV[1], ffC[2]+mV[2], 
-			  ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
-      
-      mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4];
-      mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5];
-      mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3];
-      mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3];
-      mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4];
-      mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];	 
-      
-      Double_t s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] );      
-
-      s = ( s > 1.E-20 )  ?1./s :0;	  
-      mS[0]*=s;
-      mS[1]*=s;
-      mS[2]*=s;
-      mS[3]*=s;
-      mS[4]*=s;
-      mS[5]*=s;
-    }
-    
+    Double_t mS[6]= { ffC[0]+mV[0], 
+                      ffC[1]+mV[1], ffC[2]+mV[2], 
+                      ffC[3]+mV[3], ffC[4]+mV[4], ffC[5]+mV[5] };
+    InvertCholetsky3(mS);
     //* Residual (measured - estimated)
     
     Double_t zeta[3] = { m[0]-ffP[0], m[1]-ffP[1], m[2]-ffP[2] };    
@@ -555,8 +539,9 @@ void KFParticleBase::SetProductionVertex( const KFParticleBase &Vtx )
   }
 
   Double_t mAi[6];
-
-  InvertSym3( fC, mAi );
+  for(int i=0; i<6; i++) mAi[i] = fC[i];
+  InvertCholetsky3(mAi);
+  //InvertCholetsky3( fC, mAi );
 
   Double_t mB[5][3];
 
@@ -586,7 +571,9 @@ void KFParticleBase::SetProductionVertex( const KFParticleBase &Vtx )
     Double_t mAVi[6] = { fC[0]-mV[0], fC[1]-mV[1], fC[2]-mV[2], 
 			fC[3]-mV[3], fC[4]-mV[4], fC[5]-mV[5] };
     
-    if( !InvertSym3( mAVi, mAVi ) ){
+    //if( !InvertCholetsky3( mAVi, mAVi ) )
+    InvertCholetsky3( mAVi);
+    {
 
       Double_t dChi2 = ( +(mAVi[0]*z[0] + mAVi[1]*z[1] + mAVi[3]*z[2])*z[0]
 			 +(mAVi[1]*z[0] + mAVi[2]*z[1] + mAVi[4]*z[2])*z[1]
@@ -1552,29 +1539,10 @@ void KFParticleBase::SubtractFromVertex( KFParticleBase &Vtx ) const
      
   //* 
 	    
-  Double_t mS[6];
-  {
-    Double_t mSi[6] = { mV[0]-Vtx.fC[0], 
+  Double_t mS[6] = { mV[0]-Vtx.fC[0], 
 			mV[1]-Vtx.fC[1], mV[2]-Vtx.fC[2], 
 			mV[3]-Vtx.fC[3], mV[4]-Vtx.fC[4], mV[5]-Vtx.fC[5] };
-    
-    mS[0] = mSi[2]*mSi[5] - mSi[4]*mSi[4];
-    mS[1] = mSi[3]*mSi[4] - mSi[1]*mSi[5];
-    mS[2] = mSi[0]*mSi[5] - mSi[3]*mSi[3];
-    mS[3] = mSi[1]*mSi[4] - mSi[2]*mSi[3];
-    mS[4] = mSi[1]*mSi[3] - mSi[0]*mSi[4];
-    mS[5] = mSi[0]*mSi[2] - mSi[1]*mSi[1];	 
-    
-    Double_t s = ( mSi[0]*mS[0] + mSi[1]*mS[1] + mSi[3]*mS[3] );
-    s = ( s > 1.E-20 )  ?1./s :0;	  
-    mS[0]*=s;
-    mS[1]*=s;
-    mS[2]*=s;
-    mS[3]*=s;
-    mS[4]*=s;
-    mS[5]*=s;
-  }
-    
+  InvertCholetsky3(mS);    
   //* Residual (measured - estimated)
     
   Double_t zeta[3] = { m[0]-Vtx.fP[0], m[1]-Vtx.fP[1], m[2]-Vtx.fP[2] };
@@ -1600,13 +1568,13 @@ void KFParticleBase::SubtractFromVertex( KFParticleBase &Vtx ) const
   //* New estimation of the vertex position r += K*zeta
     
   Double_t dChi2 = -(mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
-    +      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
-    +      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2];
+    -      (mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
+    -      (mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2];
 
   if( Vtx.fChi2 - dChi2 < 0 ) return;
 
   for(Int_t i=0;i<3;++i) 
-    Vtx.fP[i] -= k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2];       
+    Vtx.fP[i] -= (k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2]);       
     
   //* New covariance matrix C -= K*(mCH')'
     
@@ -1618,10 +1586,102 @@ void KFParticleBase::SubtractFromVertex( KFParticleBase &Vtx ) const
   //* Calculate Chi^2 
 
   Vtx.fNDF  -= 2;
-  Vtx.fChi2 -= dChi2;
+  Vtx.fChi2 += dChi2;
 }
 
+void KFParticleBase::SubtractFromParticle(  KFParticleBase &Vtx ) const
+{
+  //* Subtract the particle from the mother particle  
 
+  Double_t m[8];
+  Double_t mV[36];
+
+  if( Vtx.fIsLinearized ){
+    GetMeasurement( Vtx.fVtxGuess, m, mV );
+  } else {
+    GetMeasurement( Vtx.fP, m, mV );
+  }
+
+  Double_t mS[6]= { mV[0] - Vtx.fC[0],
+                mV[1] - Vtx.fC[1], mV[2] - Vtx.fC[2],
+                mV[3] - Vtx.fC[3], mV[4] - Vtx.fC[4], mV[5] - Vtx.fC[5] };
+  InvertCholetsky3(mS);
+
+  //* Residual (measured - estimated)
+
+  Double_t zeta[3] = { m[0]-Vtx.fP[0], m[1]-Vtx.fP[1], m[2]-Vtx.fP[2] };    
+
+  //* CHt = CH' - D'
+
+  Double_t mCHt0[7], mCHt1[7], mCHt2[7];
+
+  mCHt0[0]=mV[ 0] ;           mCHt1[0]=mV[ 1] ;           mCHt2[0]=mV[ 3] ;
+  mCHt0[1]=mV[ 1] ;           mCHt1[1]=mV[ 2] ;           mCHt2[1]=mV[ 4] ;
+  mCHt0[2]=mV[ 3] ;           mCHt1[2]=mV[ 4] ;           mCHt2[2]=mV[ 5] ;
+  mCHt0[3]=Vtx.fC[ 6]-mV[ 6]; mCHt1[3]=Vtx.fC[ 7]-mV[ 7]; mCHt2[3]=Vtx.fC[ 8]-mV[ 8];
+  mCHt0[4]=Vtx.fC[10]-mV[10]; mCHt1[4]=Vtx.fC[11]-mV[11]; mCHt2[4]=Vtx.fC[12]-mV[12];
+  mCHt0[5]=Vtx.fC[15]-mV[15]; mCHt1[5]=Vtx.fC[16]-mV[16]; mCHt2[5]=Vtx.fC[17]-mV[17];
+  mCHt0[6]=Vtx.fC[21]-mV[21]; mCHt1[6]=Vtx.fC[22]-mV[22]; mCHt2[6]=Vtx.fC[23]-mV[23];
+
+  //* Kalman gain K = mCH'*S
+    
+  Double_t k0[7], k1[7], k2[7];
+    
+  for(Int_t i=0;i<7;++i){
+    k0[i] = mCHt0[i]*mS[0] + mCHt1[i]*mS[1] + mCHt2[i]*mS[3];
+    k1[i] = mCHt0[i]*mS[1] + mCHt1[i]*mS[2] + mCHt2[i]*mS[4];
+    k2[i] = mCHt0[i]*mS[3] + mCHt1[i]*mS[4] + mCHt2[i]*mS[5];
+  }
+
+    //* Add the daughter momentum to the particle momentum
+    
+  Vtx.fP[ 3] -= m[ 3];
+  Vtx.fP[ 4] -= m[ 4];
+  Vtx.fP[ 5] -= m[ 5];
+  Vtx.fP[ 6] -= m[ 6];
+  
+  Vtx.fC[ 9] -= mV[ 9];
+  Vtx.fC[13] -= mV[13];
+  Vtx.fC[14] -= mV[14];
+  Vtx.fC[18] -= mV[18];
+  Vtx.fC[19] -= mV[19];
+  Vtx.fC[20] -= mV[20];
+  Vtx.fC[24] -= mV[24];
+  Vtx.fC[25] -= mV[25];
+  Vtx.fC[26] -= mV[26];
+  Vtx.fC[27] -= mV[27];
+
+   //* New estimation of the vertex position r += K*zeta
+    
+  for(Int_t i=0;i<3;++i) 
+    Vtx.fP[i] = m[i] - (k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2]);
+  for(Int_t i=3;i<7;++i) 
+    Vtx.fP[i] = Vtx.fP[i] - (k0[i]*zeta[0] + k1[i]*zeta[1] + k2[i]*zeta[2]);
+
+    //* New covariance matrix C -= K*(mCH')'
+
+  Double_t ffC[28] = { -mV[ 0],
+                   -mV[ 1], -mV[ 2],
+                   -mV[ 3], -mV[ 4], -mV[ 5],
+                    mV[ 6],  mV[ 7],  mV[ 8], Vtx.fC[ 9],
+                    mV[10],  mV[11],  mV[12], Vtx.fC[13], Vtx.fC[14],
+                    mV[15],  mV[16],  mV[17], Vtx.fC[18], Vtx.fC[19], Vtx.fC[20],
+                    mV[21],  mV[22],  mV[23], Vtx.fC[24], Vtx.fC[25], Vtx.fC[26], Vtx.fC[27] };
+
+  for(Int_t i=0, k=0;i<7;++i){
+    for(Int_t j=0;j<=i;++j,++k){
+      Vtx.fC[k] = ffC[k] + (k0[i]*mCHt0[j] + k1[i]*mCHt1[j] + k2[i]*mCHt2[j] );
+    }
+  }
+
+    //* Calculate Chi^2 
+  Vtx.fNDF  -= 2;
+  Vtx.fQ    -= GetQ();
+  Vtx.fSFromDecay = 0;    
+  Vtx.fChi2 -= ((mS[0]*zeta[0] + mS[1]*zeta[1] + mS[3]*zeta[2])*zeta[0]
+               +(mS[1]*zeta[0] + mS[2]*zeta[1] + mS[4]*zeta[2])*zeta[1]
+               +(mS[3]*zeta[0] + mS[4]*zeta[1] + mS[5]*zeta[2])*zeta[2]);     
+}
 
 void KFParticleBase::TransportLine( Double_t dS, 
 				       Double_t P[], Double_t C[] ) const 
@@ -1745,7 +1805,9 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
       daughters[id]->GetMeasurement( v0, p, mC );
       
       Double_t mAi[6];
-      InvertSym3(mC, mAi );
+      for(int i=0; i<6; i++) mAi[i] = mC[i];
+      InvertCholetsky3(mAi);
+      //InvertSym3(mC, mAi );
       
       Double_t mB[3][3];
       
@@ -1899,7 +1961,8 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
 			  mHCHt[3]+mV[3], mHCHt[4]+mV[4], mHCHt[5]+mV[5]    };	
       
 
-      InvertSym3(mS,mS);
+      //InvertSym3(mS,mS);
+      InvertCholetsky3(mS);
 	
       //* Residual (measured - estimated)
     
@@ -1967,7 +2030,9 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
     const Double_t *m = fP, *mV = fC;
     
     Double_t mAi[6];
-    InvertSym3(mC, mAi );
+    for(int i=0; i<6; i++) mAi[i] = mC[i];
+    InvertCholetsky3(mAi);
+    //InvertSym3(mC, mAi );
 
     Double_t mB[4][3];
 
@@ -1995,12 +2060,14 @@ void KFParticleBase::ConstructGammaBz( const KFParticleBase &daughter1,
 			  mC[3]-mV[3], mC[4]-mV[4], mC[5]-mV[5] };
       
       Double_t mAVi[6];
-      if( !InvertSym3(mAV, mAVi) ){
+      for(int i=0; i<6; i++) mAVi[i] = mAV[i];
+      InvertCholetsky3(mAVi);
+//      if( !InvertSym3(mAV, mAVi) ){
 	Double_t dChi2 = ( +(mAVi[0]*z[0] + mAVi[1]*z[1] + mAVi[3]*z[2])*z[0]
 			   +(mAVi[1]*z[0] + mAVi[2]*z[1] + mAVi[4]*z[2])*z[1]
 			   +(mAVi[3]*z[0] + mAVi[4]*z[1] + mAVi[5]*z[2])*z[2] );
 	fChi2+= TMath::Abs( dChi2 );
-      }
+  //    }
       fNDF  += 2;
     }
 
@@ -2083,6 +2150,61 @@ Bool_t KFParticleBase::InvertSym3( const Double_t A[], Double_t Ai[] )
   Ai[4] = ( a1*a3 - a0*A[4] )*det;
   Ai[5] = ( a0*a2 - a1*a1 )*det;
   return ret;
+}
+
+void KFParticleBase::InvertCholetsky3(Double_t a[6])
+{
+  Double_t d[3], uud, u[3][3];
+  for(int i=0; i<3; i++) 
+  {
+    d[i]=0;
+    for(int j=0; j<3; j++) 
+      u[i][j]=0;
+  }
+
+  for(int i=0; i<3 ; i++)
+  {
+    uud=0;
+    for(int j=0; j<i; j++) 
+      uud += u[j][i]*u[j][i]*d[j];
+    uud = a[i*(i+3)/2] - uud;
+
+    if(fabs(uud)<1.e-12f) uud = 1.e-12f;
+
+    d[i] = uud/fabs(uud);
+    u[i][i] = sqrt(fabs(uud));
+
+    for(int j=i+1; j<3; j++) 
+    {
+      uud = 0;
+      for(int k=0; k<i; k++)
+        uud += u[k][i]*u[k][j]*d[k];
+      uud = a[j*(j+1)/2+i] - uud;
+      u[i][j] = d[i]/u[i][i]*uud;
+    }
+  }
+
+  Double_t u1[3];
+
+  for(int i=0; i<3; i++)
+  {
+    u1[i] = u[i][i];
+    u[i][i] = 1/u[i][i];
+  }
+  for(int i=0; i<2; i++)
+  {
+    u[i][i+1] = - u[i][i+1]*u[i][i]*u[i+1][i+1];
+  }
+  for(int i=0; i<1; i++)
+  {
+    u[i][i+2] = u[i][i+1]*u1[i+1]*u[i+1][i+2]-u[i][i+2]*u[i][i]*u[i+2][i+2];
+  }
+
+  for(int i=0; i<3; i++)
+    a[i+3] = u[i][2]*u[2][2]*d[2];
+  for(int i=0; i<2; i++)
+    a[i+1] = u[i][1]*u[1][1]*d[1] + u[i][2]*u[1][2]*d[2];
+  a[0] = u[0][0]*u[0][0]*d[0] + u[0][1]*u[0][1]*d[1] + u[0][2]*u[0][2]*d[2];
 }
 
 void KFParticleBase::MultQSQt( const Double_t Q[], const Double_t S[], Double_t SOut[] )
