@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.19 2013/01/15 23:21:06 fisyak Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.20 2013/01/15 23:31:05 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.20  2013/01/15 23:31:05  fisyak
+ * Soft requirement for matching with EMC
+ *
  * Revision 2.19  2013/01/15 23:21:06  fisyak
  * improve printouts
  *
@@ -80,7 +83,7 @@
 #include "StTrackGeometry.h"
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.19 2013/01/15 23:21:06 fisyak Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.20 2013/01/15 23:31:05 fisyak Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 {init();}
@@ -199,8 +202,8 @@ void StPrimaryVertex::setTrackNumbers() {
     if (pTrack->isToFMatched()    ) 	   mNumMatchesWithTOF++;    
     if (pTrack->isToFNotMatched() ) 	   mNumNotMatchesWithTOF++; 
     if ((pTrack->flagExtension() & 7) > 0) {
-      if (pTrack->isBemcMatched()   ) 	   mNumMatchesWithBEMC    += 1 << ((pTrack->flagExtension() & 7) - 1);
-      if (pTrack->isEemcMatched()   ) 	   mNumMatchesWithEEMC    += 1 << ((pTrack->flagExtension() & 7) - 1);
+      if (pTrack->isBemcMatched()   ) 	   mNumMatchesWithBEMC    += 1;// << ((pTrack->flagExtension() & 7) - 1);
+      if (pTrack->isEemcMatched()   ) 	   mNumMatchesWithEEMC    += 1;// << ((pTrack->flagExtension() & 7) - 1);
     }
     if (pTrack->isBemcNotMatched())        mNumNotMatchesWithBEMC++;
     if (pTrack->isEemcNotMatched()) 	   mNumNotMatchesWithEEMC++;
