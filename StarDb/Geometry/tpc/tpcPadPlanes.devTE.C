@@ -7,11 +7,12 @@ TDataSet *CreateTable() {
   if (!TClass::GetClass("St_tpcPadPlanes")) return 0;
   tpcPadPlanes_st row;
   St_tpcPadPlanes *tableSet = new St_tpcPadPlanes("tpcPadPlanes",1);
-  enum {NinnerRows = 32};
-  Int_t nPadsInner[NinnerRows]  = {42,44,46,48,50,50,52,54,56,58,
-				   58,60,62,64,66,66,68,70,72,74,
-				   74,76,78,80,82,82,84,86,88,90,
-			   90,92};
+  enum {NinnerRows = 50};
+  Int_t nPadsInner[NinnerRows]  = { 80, 82, 84, 86, 88, 90, 92, 94, 96, 98,
+				    100,102,104,106,108,110,112,114,116,118,
+				    120,122,124,126,128,130,132,134,138,140,
+				    142,144,146,148,150,152,154,156,158,160,
+				    162,164,166,168,170,172,174,176,178,180};
   Int_t nPadsOuter[32]  = {    98 ,    100,    102,    104,    106,    106,    108,    110,    112,    112,
 			       114,    116,    118,    120,    122,    122,    124,    126,    128,    128,
 			       130,    132,    134,    136,    138,    138,    140,    142,    144,    144,    
@@ -23,9 +24,9 @@ TDataSet *CreateTable() {
   //  row.innerPadRows48	     =          8; // ;		       
   //  row.innerPadRows52	     =          5; // ;		       
   row.superInnerPadRows	     =          3; // ;		       
-  row.innerSectorPadWidth    =       0.62; // 0.285;	       
-  row.innerSectorPadLength   =       1.95; //  1.15;	       
-  row.innerSectorPadPitch    = row.innerSectorPadWidth  + 0.05;  
+  row.innerSectorPadPitch    =       0.335;
+  row.innerSectorPadLength   =       1.23; //  1.15;	       
+  row.innerSectorPadWidth    = row.innerSectorPadPitch - 0.05;
   row.innerSectorRowPitch1   = row.innerSectorPadLength + 0.05;  
   //  row.innerSectorRowPitch2   = row.innerSectorPadLength + 0.05;  
   row.innerSectorEdge	     =     51.905; // ;		       
