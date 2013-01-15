@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.109 2012/11/25 22:22:06 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.110 2013/01/15 17:33:17 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TPRegexp.h"
@@ -1027,7 +1027,7 @@ Bfc_st BFC[] = {
   {"libPhysics" ,"" ,"","","" ,"libPhysics","TVector",kFALSE},
   {"geant3" ,"" ,"","","" ,"Geom,EG,Pythia6,EGPythia6,VMC,geant3","TGeo version of geant321",kFALSE},
   {"geometry" ,"" ,"","","" ,"geometry","geometry+Mag.Field",kFALSE},
-  {"StarMagField","", "","magF" ,"","geom,StarMagField","Load StarMagField",kFALSE},
+  {"StarMagField","", "","magF" ,"","VMC,StarMagField","Load StarMagField",kFALSE},
   {"geomNoField" ,"" ,"","-geometry,StarMagField" ,"","geometryNoField","geometry-Mag.Field",kFALSE},
   {"xgeometry" ,"" ,"","-geometry,-geomNoField" ,"","xgeometry","AgML geometry-Mag.Field",kFALSE},
   {"UseProjectedVertex" ,"" ,"","" ,"","","Run StBTofCalibMaker w/wo Primary Vertex",kFALSE},
@@ -1230,6 +1230,9 @@ Bfc_st BFC[] = {
   {"EEmcMixer", "","","", "StEEmcMixerMaker","StEEmcSimulatorMaker","EEMC mixer",kFALSE},
   {"btof" ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib,geant","StMaker"
    , "StChain","BTOF Chain",kFALSE},
+  {"btofSim" ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker"
+   , "BTOF Simulator",kFALSE},
+  {"mtdSim" ,"","MtdChain","","StMtdSimMaker", "StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
   {"BtofDat" ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    , "BTOF hit maker",kFALSE},
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker" ,"StVpdCalibMaker","VPD calibration",kFALSE},
@@ -2436,7 +2439,7 @@ Bfc_st BFC[] = {
   {"libPhysics" ,"" ,"","","" ,"libPhysics","TVector",kFALSE},
   {"geant3" ,"" ,"","","" ,"Geom,EG,Pythia6,EGPythia6,VMC,geant3","TGeo version of geant321",kFALSE},
   {"geometry" ,"" ,"","","" ,"geometry","geometry+Mag.Field",kFALSE},
-  {"StarMagField","", "","magF" ,"","geom,StarMagField","Load StarMagField",kFALSE},
+  {"StarMagField","", "","magF" ,"","VMC,StarMagField","Load StarMagField",kFALSE},
   {"geomNoField" ,"" ,"","-geometry,StarMagField" ,"","geometryNoField","geometry-Mag.Field",kFALSE},
   {"xgeometry" ,"" ,"","-geometry,-geomNoField" ,"","xgeometry","AgML geometry-Mag.Field",kFALSE},
   {"UseProjectedVertex" ,"" ,"","" ,"","","Run StBTofCalibMaker w/wo Primary Vertex",kFALSE},
@@ -2639,6 +2642,9 @@ Bfc_st BFC[] = {
   {"EEmcMixer", "","","", "StEEmcMixerMaker","StEEmcSimulatorMaker","EEMC mixer",kFALSE},
   {"btof" ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib,geant","StMaker"
    , "StChain","BTOF Chain",kFALSE},
+  {"btofSim" ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker"
+   , "BTOF Simulator",kFALSE},
+  {"mtdSim" ,"","MtdChain","","StMtdSimMaker", "StEvent,StMtdSimMaker","MTD Simulator",kFALSE},
   {"BtofDat" ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    , "BTOF hit maker",kFALSE},
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker" ,"StVpdCalibMaker","VPD calibration",kFALSE},
@@ -3168,7 +3174,8 @@ Int_t StBFChain::Instantiate()
 	if (GetOption("flux")) mk->SetAttr("flux",kTRUE);
 	if (GetOption("pythia")) {
 	  mk->SetAttr("Pythia",kTRUE);
-	  if (GetOption("beamLine")) mk->SetAttr("beamLine",kTRUE);
+	  if (GetOption("Wenu")) mk->SetAttr("Wenu",kTRUE);
+	  if (GetOption("beamLine"))  mk->SetAttr("beamLine",kTRUE);
 	}
       }
       else mk->SetActive(kFALSE);
@@ -4075,6 +4082,10 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	SetOption("MagF","Default,TGiant3");
       }
 #endif
+      if (GetOption("xgeometry")) {
+	SetOption("-geometry","Default,-xgeometry");
+	SetOption("-geomNoField","Default,-xgeometry");
+      }
     } else {                                  // root
       if (GetOption("fzin")) {
 	gMessMgr->Error() << "Option fzin cannot be used in root.exe. Use root4star" << endm;
@@ -4476,11 +4487,9 @@ void StBFChain::SetDbOptions(StMaker *mk){
     if (! GetOption("SsdDb")||!GetOption("SsdCalDb")) {mk->SetAttr("blacklist", "ssd");  gMessMgr->QAInfo() << "blacklist ssd" << endm;}
     if (! GetOption("EemcDb")                       ) {mk->SetAttr("blacklist", "eemc"); gMessMgr->QAInfo() << "blacklist eemc"<< endm;}
     if (! GetOption("FmsDb")                        ) {mk->SetAttr("blacklist", "fms");  gMessMgr->QAInfo() << "blacklist fms" << endm;}
-#if 0
   } else {// for Embedding chain trigger black list by NoSsdIT and NoSvtIT, could be some problems if you try to run svt or ssd clusters, ...
     if (GetOption("NoSvtIt"))                         {mk->SetAttr("blacklist", "svt");  gMessMgr->QAInfo() << "blacklist svt" << endm;}
     if (GetOption("NoSsdIt"))                         {mk->SetAttr("blacklist", "ssd");  gMessMgr->QAInfo() << "blacklist ssd" << endm;}
-#endif
   }
 }
 //_____________________________________________________________________
