@@ -1,4 +1,4 @@
-// $Id: Wevent2011.h,v 1.6 2012/09/21 16:59:10 balewski Exp $
+// $Id: Wevent2011.h,v 1.7 2013/01/15 23:26:35 fisyak Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -8,6 +8,9 @@
 #ifndef W_EVENT_2011_HH
 #define W_EVENT_2011_HH
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#endif
 #include <TVector3.h>
 #include <TH1.h>
 //get L2
@@ -364,6 +367,9 @@ class Wevent2011 : public TObject {
 
 
 // $Log: Wevent2011.h,v $
+// Revision 1.7  2013/01/15 23:26:35  fisyak
+// add sys/types.h for APPLE
+//
 // Revision 1.6  2012/09/21 16:59:10  balewski
 // added ESMD peak adjustement - partialy finished
 //
