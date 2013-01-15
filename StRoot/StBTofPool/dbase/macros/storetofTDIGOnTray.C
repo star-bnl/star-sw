@@ -26,7 +26,7 @@ void storetofTDIGOnTray() {
 //-- year10/year11
   const Int_t NTRAY = 120;
   const Int_t NVPDTRAY = 2;
-  const Int_t NMAX = 200; //123;
+  const Int_t NMAX = 300; //123;
 
 //-- load dBase and Table definition libraries
   gSystem->Load("St_base");
@@ -49,7 +49,8 @@ void storetofTDIGOnTray() {
   //  TString ZStoreTime = "2009-11-01 00:00:00";
   //  TString ZStoreTime = "2010-12-20 00:00:01";
   //  TString ZStoreTime = "2011-04-20 00:00:00";
-  TString ZStoreTime = "2011-12-20 00:00:00";
+  //  TString ZStoreTime = "2011-12-20 00:00:00";
+  TString ZStoreTime = "2012-12-20 00:00:00";
 
 //-- add table to the container with descriptor given by Database
   StDbTable* tofTDIGOnTray = configNode->addDbTable("tofTDIGOnTray");
@@ -106,25 +107,42 @@ void storetofTDIGOnTray() {
 // ------------------------------
 //-- year12
 //  changed trays at W8, W23, E93
-  ifstream infile("data/run12/INL/tdigs_120106.txt");
-  Short_t trayId[NTRAY] = { 68, 58, 63,  6,106, 67, 61, 81, 57, 71,
+//  ifstream infile("data/run12/INL/tdigs_120106.txt");
+//  Short_t trayId[NTRAY] = { 68, 58, 63,  6,106, 67, 61, 81, 57, 71,
+//			    47, 46, 87,133, 64, 72, 62, 42, 14, 11,
+//			    28,  7,  3, 33, 19, 17, 37, 21, 30, 35,
+//			     8, 20, 31, 27, 12,  9, 10, 29, 34, 13,
+//			    16, 77, 89, 36, 39, 23, 32, 15, 24, 18,
+//			    59, 66, 70, 38, 41, 45, 52, 54, 53, 55,
+//			    84,105, 94, 91, 95, 48, 44, 22, 26, 49,
+//			     5,  2, 75, 40,117,  4,121, 99,120,122,
+//			   111,116,118,119,109,101,100,107, 98, 56,
+//			    88,115, 78,108,112,110,113,114,123, 90,
+//			    93, 65, 51, 73, 76, 83, 69, 60, 82, 74,
+//			    97, 79, 43, 86, 85,132,104, 92, 96,103};
+//                            // B-132;  C-133  renamed
+// ------------------------------
+//-- year13
+//  changed trays at W8, W23, W38, E93, E95, E109
+// see http://www.star.bnl.gov/HyperNews-star/protected/get/startof/2675.html
+  ifstream infile("data/run13/INL/tdigs_20130115.txt");
+  Short_t trayId[NTRAY] = { 68, 58, 63,  6,106, 67, 61, 50, 57, 71,
 			    47, 46, 87,133, 64, 72, 62, 42, 14, 11,
-			    28,  7,  3, 33, 19, 17, 37, 21, 30, 35,
-			     8, 20, 31, 27, 12,  9, 10, 29, 34, 13,
+			    28,  7, 25, 33, 19, 17, 37, 21, 30, 35,
+			     8, 20, 31, 27, 12,  9, 10,  3, 34, 13,
 			    16, 77, 89, 36, 39, 23, 32, 15, 24, 18,
 			    59, 66, 70, 38, 41, 45, 52, 54, 53, 55,
 			    84,105, 94, 91, 95, 48, 44, 22, 26, 49,
 			     5,  2, 75, 40,117,  4,121, 99,120,122,
 			   111,116,118,119,109,101,100,107, 98, 56,
-			    88,115, 78,108,112,110,113,114,123, 90,
-			    93, 65, 51, 73, 76, 83, 69, 60, 82, 74,
+			    88,115,102,108, 81,110,113,114,123, 90,
+			    93, 65, 51, 73, 76, 83, 69, 80, 82, 74,
 			    97, 79, 43, 86, 85,132,104, 92, 96,103};
                             // B-132;  C-133  renamed
 // ------------------------------
   Short_t tdigId[NTRAY][NBOARD];
 
-//-- run 11 AuAu@18GeV
-//-- run 12
+//-- run 11 AuAu@18GeV, run 12, run 13
   Short_t tdigId_Vpd[NVPDTRAY][NBOARD] = { 89, 91,  495, 0, 885, 82, 0, 0,
                                            85, 79, 1101, 0,  80, 83, 0, 0};
 
@@ -149,9 +167,10 @@ void storetofTDIGOnTray() {
 	tId[++i] = (Short_t)trayNum;
 	oldTrayNum = trayNum;
       }
-      boardId[i][iboard-1] = (Short_t)boardNum;
       // increment general counter (total# of TDIGs, only for debugging) and dump data
       if (Debug) cout << j++ << " " << i << "  " << trayNum << " "<< iboard << "  " << boardNum << endl;
+
+      boardId[i][iboard-1] = (Short_t)boardNum;
     }
   }
   infile.close();
