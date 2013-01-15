@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.29 2012/09/16 21:36:09 fisyak Exp $
+ * $Id: StTrack.h,v 2.30 2013/01/15 23:21:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -58,6 +58,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.30  2013/01/15 23:21:06  fisyak
+ * improve printouts
+ *
  * Revision 2.29  2012/09/16 21:36:09  fisyak
  * Handlers for Tpc Only West and Only East bits
  *
@@ -159,6 +162,8 @@
 #include "StTrackTopologyMap.h"
 #include "StFunctional.h"
 #include "StTrackFitTraits.h"
+class StTrack;
+ostream&  operator<<(ostream& os,  const StTrack& t);
 
 class StParticleDefinition;
 class StVertex;
@@ -202,26 +207,26 @@ public:
     StTrackNode*                   node();
     const StTrackNode*             node() const;
     UShort_t                       seedQuality() const {return mSeedQuality;}
-    Bool_t       isCtbMatched()            {return testBit(kCtbMatched);}   
-    Bool_t       isToFMatched()  	   {return testBit(kToFMatched);}   
-    Bool_t       isBToFMatched()  	   {return testBit(kToFMatched);}   
-    Bool_t       isBemcMatched() 	   {return testBit(kBemcMatched);}  
-    Bool_t       isEemcMatched() 	   {return testBit(kEemcMatched);}  
+    Bool_t       isCtbMatched()            const {return testBit(kCtbMatched);}   
+    Bool_t       isToFMatched()  	   const {return testBit(kToFMatched);}   
+    Bool_t       isBToFMatched()  	   const {return testBit(kToFMatched);}   
+    Bool_t       isBemcMatched() 	   const {return testBit(kBemcMatched);}  
+    Bool_t       isEemcMatched() 	   const {return testBit(kEemcMatched);}  
 
-    Bool_t       isCtbNotMatched()         {return testBit(kCtbNotMatched);}   
-    Bool_t       isToFNotMatched()  	   {return testBit(kToFNotMatched);}   
-    Bool_t       isBToFNotMatched()  	   {return testBit(kToFNotMatched);}   
-    Bool_t       isBemcNotMatched() 	   {return testBit(kBemcNotMatched);}  
-    Bool_t       isEemcNotMatched() 	   {return testBit(kEemcNotMatched);}  
+    Bool_t       isCtbNotMatched()         const {return testBit(kCtbNotMatched);}   
+    Bool_t       isToFNotMatched()  	   const {return testBit(kToFNotMatched);}   
+    Bool_t       isBToFNotMatched()  	   const {return testBit(kToFNotMatched);}   
+    Bool_t       isBemcNotMatched() 	   const {return testBit(kBemcNotMatched);}  
+    Bool_t       isEemcNotMatched() 	   const {return testBit(kEemcNotMatched);}  
 
-    Bool_t       isDecayTrack()  	   {return testBit(kDecayTrack);}   
-    Bool_t       isPromptTrack() 	   {return testBit(kPromptTrack);}       
-    Bool_t       isPostXTrack()            {return testBit(kPostXTrack);} 
-    Bool_t       isMembraneCrossingTrack() {return testBit(kXMembrane);} 
-    Bool_t       isShortTrack2EMC()        {return testBit(kShortTrack2EMC);}
-    Bool_t       isRejected()              {return testBit(kRejectedTrack);}
-    Bool_t       isWestTpcOnly()           {return testBit(kWestTpcOnlyTrack);}
-    Bool_t       isEastTpcOnly()           {return testBit(kEastTpcOnlyTrack);}
+    Bool_t       isDecayTrack()  	   const {return testBit(kDecayTrack);}   
+    Bool_t       isPromptTrack() 	   const {return testBit(kPromptTrack);}       
+    Bool_t       isPostXTrack()            const {return testBit(kPostXTrack);} 
+    Bool_t       isMembraneCrossingTrack() const {return testBit(kXMembrane);} 
+    Bool_t       isShortTrack2EMC()        const {return testBit(kShortTrack2EMC);}
+    Bool_t       isRejected()              const {return testBit(kRejectedTrack);}
+    Bool_t       isWestTpcOnly()           const {return testBit(kWestTpcOnlyTrack);}
+    Bool_t       isEastTpcOnly()           const {return testBit(kEastTpcOnlyTrack);}
 
     virtual void setCtbMatched()           {setBit(kCtbMatched);}   
     virtual void setToFMatched()  	   {setBit(kToFMatched);}   
@@ -271,11 +276,10 @@ public:
     Bool_t       testBit(UInt_t f) const { return (Bool_t) ((mFlagExtension & f) != 0); }
     Int_t        testBits(UInt_t f) const { return (Int_t) (mFlagExtension & f); }
     void         invertBit(UInt_t f) { mFlagExtension ^= f; }
+    void Print(Option_t *option="") const {cout << option << *this << endl; }
     
 protected:
     void         setNumberOfPossiblePoints(UShort_t); // obsolete
-    
-protected:
     Char_t                  mBeg[1]; //!
     Int_t                   mKey;
     Short_t                 mFlag;

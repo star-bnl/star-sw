@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.cxx,v 2.10 2012/10/23 20:18:33 fisyak Exp $
+ * $Id: StEmcRawHit.cxx,v 2.11 2013/01/15 23:21:05 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.cxx,v $
+ * Revision 2.11  2013/01/15 23:21:05  fisyak
+ * improve printouts
+ *
  * Revision 2.10  2012/10/23 20:18:33  fisyak
  * Add/modify print outs
  *
@@ -45,7 +48,7 @@
 #include "StEmcRawHit.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
-static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.10 2012/10/23 20:18:33 fisyak Exp $";
+static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.11 2013/01/15 23:21:05 fisyak Exp $";
 
 ClassImp(StEmcRawHit)
 
@@ -166,7 +169,17 @@ StEmcRawHit::setEnergy(const float energy) {mEnergy=energy;}
 
 ostream&  operator<<(ostream& os, const StEmcRawHit& v) {
   os << Form("EmcRawHit d/m %3i/%3i eta/sub  %3i/%3i adc/enery %4i/%f",v.detector(),v.module(), v.eta(), v.sub(), v.adc(), v.energy());
-  if (v.energy() > 0.300) os << " > MIP";
+  if (v.detector() == kBarrelEmcTowerId || v.detector() == kEndcapEmcTowerId) {
+    if      (v.energy() <=  0.0) os << " Junk";
+    else if (v.energy() <=  0.1) os << " Noise";
+    else if (v.energy() <=  0.5) os << " MIP";
+    else if (v.energy() <=  1.0) os << " Hadron?";
+    else if (v.energy() <=  4.0) os << " electron";// lowest HT threshold (4 GeV for Run7)
+    else if (v.energy() <= 10.0) os << " Tower";// lowest HT threshold (4 GeV for Run7)
+    else if (v.energy() <= 20.0) os << " W";// lowest HT threshold (4 GeV for Run7)
+    else if (v.energy() <=100.0) os << " Z";// lowest HT threshold (4 GeV for Run7)
+    else                         os << " Hot ?";
+  }
   return os;
 }
 void   StEmcRawHit::Print(Option_t *option) const {cout << *this << endl;}
