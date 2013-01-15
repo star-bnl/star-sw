@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.cxx,v 2.11 2012/10/23 20:18:33 fisyak Exp $
+ * $Id: StEmcPoint.cxx,v 2.12 2013/01/15 23:21:05 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.cxx,v $
+ * Revision 2.12  2013/01/15 23:21:05  fisyak
+ * improve printouts
+ *
  * Revision 2.11  2012/10/23 20:18:33  fisyak
  * Add/modify print outs
  *
@@ -48,7 +51,7 @@
 #include <Stiostream.h>
 #include "StEmcPoint.h"
 #include "StEmcCluster.h"
-static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.11 2012/10/23 20:18:33 fisyak Exp $";
+static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.12 2013/01/15 23:21:05 fisyak Exp $";
 
 ClassImp(StEmcPoint)
 
@@ -231,7 +234,7 @@ operator<<(ostream &os, const StEmcPoint& pnt)
 {
   os << "Point Energy " << pnt.energy() 
      << " size "    << pnt.size() << " #tracks " << pnt.nTracks() << endl; 
-  Int_t Ids[34] = {kBarrelEmcTowerId, kBarrelEmcPreShowerId, kEndcapEmcTowerId, kEndcapEmcPreShowerId};
+  Int_t Ids[4] = {kBarrelEmcTowerId, kBarrelEmcPreShowerId, kEndcapEmcTowerId, kEndcapEmcPreShowerId};
   for (Int_t k = 0; k < 4; k++) {
     const StPtrVecEmcCluster &cl = pnt.cluster(Ids[k]);
     Int_t ncl = (Int_t) cl.size();

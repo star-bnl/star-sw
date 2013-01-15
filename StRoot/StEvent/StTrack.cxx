@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.39 2012/05/07 14:42:58 fisyak Exp $
+ * $Id: StTrack.cxx,v 2.40 2013/01/15 23:21:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.40  2013/01/15 23:21:06  fisyak
+ * improve printouts
+ *
  * Revision 2.39  2012/05/07 14:42:58  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -148,7 +151,7 @@
 #include "StG2TrackVertexMap.h"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.39 2012/05/07 14:42:58 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.40 2013/01/15 23:21:06 fisyak Exp $";
 
 StTrack::StTrack()
 {
@@ -545,4 +548,44 @@ void StTrack::setIdTruth() // match with IdTruth
   setIdTruth(tkBest,avgQua);
   Int_t IdVx = StG2TrackVertexMap::instance()->IdVertex(tkBest);
   setIdParentVx(IdVx);
+}
+//________________________________________________________________________________
+ostream&  operator<<(ostream& os,  const StTrack& track) {
+  os << Form("%4i ",track.key());
+  if (track.type() == global)                       os << "global";
+  else                                              os << "primary";
+  os << Form(" %4i",track.flag());
+  if (track.isPostXTrack())                         os << "C";
+  else if (track.isPromptTrack())                   os << "P";
+  else                                              os << " ";
+  if (track.isCtbMatched() || track.isToFMatched()) os << "T";
+  else                                              os << " ";
+  if (track.isBemcMatched() || track.isEemcMatched()) {
+    if (track.isBemcMatched())                      os << "b";
+    else                                            os << "e";
+    UInt_t fext = track.flagExtension() & 07;
+    switch (fext) {
+    case 0:    os << " "; break;
+    case 1:    os << "M"; break;
+    case 2:    os << "H"; break;
+    case 3:    os << "E"; break;
+    case 4:    os << "T"; break;
+    case 5:    os << "W"; break;
+    case 6:    os << "Z"; break;
+    default:   os << "?"; break;
+    }
+  }  else                                           os << "  ";
+  if (track.isMembraneCrossingTrack())              os << "X";
+  else if (track.isWestTpcOnly())                   os << "W";
+  else if (track.isEastTpcOnly())                   os << "E";
+  else                                              os << " ";
+  if (track.isShortTrack2EMC())                     os << "S";
+  else                                              os << " ";
+  if (track.isRejected())                           os << "R";
+  else                                              os << " ";
+  Double_t length = track.length();
+  if (length > 9999.) length = 9999.;
+  os << Form(" NP %2d L %8.3f", track.numberOfPossiblePoints(),length);
+  os << Form(" IdT: %4i Q:%3i", track.idTruth(), track.qaTruth());
+  return os;
 }
