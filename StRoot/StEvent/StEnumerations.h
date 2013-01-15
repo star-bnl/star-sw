@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.49 2013/01/08 18:56:03 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.50 2013/01/15 23:18:12 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.50  2013/01/15 23:18:12  fisyak
+ * Add more bits for track quality matching to EMC
+ *
  * Revision 2.49  2013/01/08 18:56:03  ullrich
  * Changed value of kFgtNumTimeBins
  *
@@ -301,7 +304,14 @@ enum ETrackStatusBits {
   kShortTrack2EMC  = BIT(26),   // Short track pointing to EEMC
   kRejectedTrack   = BIT(27),   // track rejected by small no. of fit points (< 10)
   kWestTpcOnlyTrack= BIT(28),   // track has hits only from West Tpc (sector <= 12)
-  kEastTpcOnlyTrack= BIT(29)    // track has hits only from East Tpc (sector >  12)
+  kEastTpcOnlyTrack= BIT(29),   // track has hits only from East Tpc (sector >  12)
+  kEmcEnergyByte   =       0    // bits  0- 2: 1 ==> 0.3 < energy <=  0.6 Mip	 
+  //                                           2 ==> 0.6 < energy <=  1.0 Hadron 
+  // 	                                       3 ==> 1.0 < energy <=  4.0 Electon
+  // 	                                       4 ==> 4.0 < energy <= 10.0 Tower	 
+  // 	                                       5 ==>10.0 < energy <= 20.0 W	 
+  // 	                                       6 ==>20.0 < energy <=100.0 Z	 
+  // 	                                       7 ==>       energy > 100.0 ?       
 };			     
 /*!
  * \enum StVertexId
