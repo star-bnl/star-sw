@@ -295,7 +295,7 @@ AvalancheMicroscopic::GetElectronEndpoint(const int i,
     std::cerr << className << "::GetElectronEndpoint:\n";
     std::cerr << "    Endpoint index " << i << " out of range.\n";
     x0 = y0 = z0 = t0 = e0 = 0.;
-    x1 = y1 = t1 = t1 = e1 = 0.;
+    x1 = y1 = z1 = t1 = e1 = 0.;
     status = 0;
     return;
   }
@@ -325,7 +325,7 @@ AvalancheMicroscopic::GetElectronEndpoint(const int i,
     std::cerr << className << "::GetElectronEndpoint:\n";
     std::cerr << "    Endpoint index " << i << " out of range.\n";
     x0 = y0 = z0 = t0 = e0 = 0.;
-    x1 = y1 = t1 = t1 = e1 = 0.;
+    x1 = y1 = z1 = t1 = e1 = 0.;
     dx1 = dy1 = dz1 = 0.;
     status = 0;
     return;
@@ -358,7 +358,7 @@ AvalancheMicroscopic::GetHoleEndpoint(const int i,
     std::cerr << className << "::GetHoleEndpoint:\n";
     std::cerr << "    Endpoint index " << i << " out of range.\n";
     x0 = y0 = z0 = t0 = e0 = 0.;
-    x1 = y1 = t1 = t1 = e1 = 0.;
+    x1 = y1 = z1 = t1 = e1 = 0.;
     status = 0;
     return;
   }
@@ -675,8 +675,6 @@ AvalancheMicroscopic::TransportElectron(
   double ex = 0., ey = 0., ez = 0., emag = 0.;
   double bx = 0., by = 0., bz = 0., bmag = 0.;
   int status = 0;
-  // Angle between electric and magnetic field
-  double cbtheta = 1., sbtheta = 0.;
   // Cyclotron frequency
   double cwt = 1., swt = 0.;
   double wb = 0.;
@@ -990,21 +988,14 @@ AvalancheMicroscopic::TransportElectron(
         if (useBfield && bOk) {
           // Calculate the cyclotron frequency.
           wb = OmegaCyclotronOverB * bmag;
-          // Calculate the angle between E and B vector.
-          cbtheta = (ex * bx + ey * by + ez * bz) / (emag * bmag);
-          sbtheta = sqrt(1. - cbtheta * cbtheta);
-          
           // Rotate the direction vector into the local coordinate system.
           ComputeRotationMatrix(bx, by, bz, bmag, ex, ey, ez);
           RotateGlobal2Local(kx, ky, kz);
- 
           // Calculate the electric field in the rotated system.
           RotateGlobal2Local(ex, ey, ez);
-
           // Calculate the velocity vector in the local frame.
           const double v = c1 * sqrt(energy);
           vx = v * kx; vy = v * ky; vz = v * kz;
-          
           a1 = vx * ex;
           a2 = c2 * ex * ex;
           a3 = ez / bmag - vy;

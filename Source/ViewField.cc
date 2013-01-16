@@ -56,8 +56,16 @@ ViewField::SetSensor(Sensor* s) {
   component = 0;
   // Get the bounding box.
   bool ok = sensor->GetArea(pxmin, pymin, pzmin, pxmax, pymax, pzmax);
+  if (!ok) {
+    std::cerr << className << "::SetSensor:\n";
+    std::cerr << "    Warning: bounding box of sensor is not defined.\n";
+  }
   // Get the voltage range.
   ok = sensor->GetVoltageRange(fmin, fmax);
+  if (!ok) {
+    std::cerr << className << "::SetSensor:\n";
+    std::cerr << "    Warning: voltage range of sensor is not defined.\n";
+  }
 
 }
 
@@ -75,8 +83,16 @@ ViewField::SetComponent(ComponentBase* c) {
   // Get the bounding box.
   bool ok = component->GetBoundingBox(pxmin, pymin, pzmin, 
                                       pxmax, pymax, pzmax);
+  if (!ok) {
+    std::cerr << className << "::SetComponent:\n";
+    std::cerr << "    Warning: bounding box of component is not defined.\n";
+  }
   // Get the voltage range.
   ok = component->GetVoltageRange(fmin, fmax);
+  if (!ok) {
+    std::cerr << className << "::SetComponent:\n";
+    std::cerr << "    Warning: voltage range of component is not defined.\n";
+  }
 
 }
 

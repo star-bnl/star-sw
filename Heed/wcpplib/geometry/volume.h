@@ -348,12 +348,13 @@ class absref_transmit_2manip: public absref_transmit
 {public:
   ActivePtr<manip_absvol>* amvol1;
   ActivePtr<manip_absvol>* amvol2;
-  virtual absref* get_other(int n)
-  {
-    if(n == 0) return amvol1->get();
-    if(n == 1) return amvol2->get();
+  virtual absref* get_other(int n) {
+    absref* vol = 0;
+    if (n == 0) vol = amvol1->get();
+    if (n == 1) vol = amvol2->get();
     mcerr<<"absref_transmit_2manip::get_other: should never happen\n";
     spexit(mcerr);
+    return vol;
   }
   absref_transmit_2manip(void): absref_transmit() {;}
   absref_transmit_2manip(ActivePtr<manip_absvol>* famvol1,

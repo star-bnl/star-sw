@@ -1210,8 +1210,6 @@ ComponentAnalyticField::CellCheck() {
 //-----------------------------------------------------------------------
   
 
-  bool ok = true;
-    
   // Checks on the planes, first move the x planes to the basic cell.
   if (perx) {
     double conew1 = coplan[0] - sx * int(round(coplan[0] / sx));
@@ -1238,7 +1236,6 @@ ComponentAnalyticField::CellCheck() {
                 << " does not match the period.\b";
       std::cerr << "    The periodicity is cancelled.\n";
       perx = false;
-      ok = false;
     }
     // If there are two planes left, they should have identical V's.
     if (ynplan[0] && ynplan[1] && vtplan[0] != vtplan[1]) {
@@ -1246,7 +1243,6 @@ ComponentAnalyticField::CellCheck() {
       std::cerr << "    The voltages of the two x (or r) planes differ.\n";
       std::cerr << "    The periodicity is cancelled.\n";
       perx = false;
-      ok = false;
     }
   }
   
@@ -1276,7 +1272,6 @@ ComponentAnalyticField::CellCheck() {
                 << " does not match the period.\b";
       std::cerr << "    The periodicity is cancelled.\n";
       pery = false;
-      ok = false;
     }
     // If there are two planes left, they should have identical V's.
     if (ynplan[2] && ynplan[3] && vtplan[2] != vtplan[3]) {
@@ -1284,7 +1279,6 @@ ComponentAnalyticField::CellCheck() {
       std::cerr << "    The voltages of the two y planes differ.\n";
       std::cerr << "    The periodicity is cancelled.\n";
       pery = false;
-      ok = false;
     }
   }
   
@@ -1296,7 +1290,6 @@ ComponentAnalyticField::CellCheck() {
         std::cerr << "    Conflicting potential of 2 crossing planes.\n";
         std::cerr << "    One y (or phi) plane is removed.\n";
         ynplan[j] = false;
-        ok = false;
       }
     }
   }
@@ -1309,7 +1302,6 @@ ComponentAnalyticField::CellCheck() {
         std::cerr << "    Two planes are on top of each other.\n";
         std::cerr << "    One of them is removed.\n";
         ynplan[i + 1] = false;
-        ok = false;
       }
       if (coplan[i] > coplan[i + 1]) {
         if (debug) {
@@ -1488,7 +1480,6 @@ ComponentAnalyticField::CellCheck() {
                   << ") is located outside the tube.\n";
         std::cerr << "    This wire is removed.\n";
         wrong[i] = true;
-        ok = false;
       }
     } else if (wrong[i]) {
       double xprt = w[i].x;
@@ -1499,7 +1490,6 @@ ComponentAnalyticField::CellCheck() {
                 << xprt << ", " << yprt 
                 << ") is located outside the planes.\n";
       std::cerr << "    This wire is removed.\n";
-      ok = false;
     } else if ((perx && w[i].d >= sx) || (pery && w[i].d >= sy)) {
       double xprt = w[i].x;
       double yprt = w[i].y;
@@ -1510,7 +1500,6 @@ ComponentAnalyticField::CellCheck() {
                 << ") exceeds 1 period.\n";
       std::cerr << "    This wire is removed.\n";
       wrong[i] = true;
-      ok = false;
     }
   }
 
@@ -1558,7 +1547,6 @@ ComponentAnalyticField::CellCheck() {
                   << ") overlap at least partially.\n";
         std::cerr << "    The latter wire is removed.\n";
         wrong[j] = true;
-        ok = false;
       }
     }
   }
@@ -1589,7 +1577,6 @@ ComponentAnalyticField::CellCheck() {
     std::cerr << className << "::CellCheck:\n";
     std::cerr << "    At least 2 elements are necessary.\n";
     std::cerr << "    Cell rejected.\n";
-    ok = false;
     return false;
   }
   
@@ -1722,7 +1709,6 @@ ComponentAnalyticField::CellCheck() {
     std::cerr << className << "::CellCheck:\n";
     std::cerr << "    Unable to establish" 
               << " default dimensions in all directions.\n";
-    ok = false;
   }
   
   // Check that at least some different voltages are present.
@@ -1730,7 +1716,6 @@ ComponentAnalyticField::CellCheck() {
     std::cerr << className << "::CellCheck:\n";
     std::cerr << "    All potentials in the cell are the same.\n";
     std::cerr << "    There is no point in going on.\n";
-    ok = false;
     return false;
   }
   
@@ -3205,7 +3190,6 @@ ComponentAnalyticField::FieldB1Y(const double xpos, const double ypos,
 //               ECOMPL     : EX + I*EY                   ; I**2=-1
 //-----------------------------------------------------------------------
        
-  const std::complex<double> icons = std::complex<double>(0., 1.);
   
   std::complex<double> zz, ecompl, zzmirr;
   

@@ -395,10 +395,10 @@ ComponentNeBem2d::ComputeInfluenceMatrix() {
   if (matrixInversionFlag) return true;
 
   // Coordinates, rotation and length of target and source element
-  double xF, yF, phiF, lenF;
+  double xF, yF, phiF;
   double xS, yS, phiS, lenS;
-  // Geometric type of target and source element
-  int gtF, gtS;
+  // Geometric type
+  int gtS;
   // Boundary type of target element
   int etF;
 
@@ -419,9 +419,7 @@ ComponentNeBem2d::ComputeInfluenceMatrix() {
 
   // Loop over the target elements (F)
   for (int iF = 0; iF < nElements; ++iF) {
-    gtF = elements[iF].geoType;
     phiF = elements[iF].phi;
-    lenF = elements[iF].len;
     // Boundary type
     etF = elements[iF].bcType;
     // Collocation point
@@ -434,12 +432,9 @@ ComponentNeBem2d::ComputeInfluenceMatrix() {
       xS = elements[jS].cX; yS = elements[jS].cY;
       phiS = elements[jS].phi;
       lenS = elements[jS].len;
-        
-        
       // Transform to local coordinate system of source element
       dx = xF - xS; dy = yF - yS;
       Rotate(dx, dy, phiS, Global2Local, du, dv);
-      
       infCoeff = 0.;
       // Depending on the element type at the field point 
       // different boundary conditions need to be applied

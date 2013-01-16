@@ -156,57 +156,45 @@ inline void fcopy(T ar_source, T ar_dest, long q)
 }
 */
 template<class T>
-inline void fcopy(T ar_source, T ar_dest, long q)
-{
-  long n;
-  for( n=0; n<q; n++) ar_dest[n] = ar_source[n];
+inline void fcopy(T ar_source, T ar_dest, long q) {
+  for (long n = 0; n < q; ++n) ar_dest[n] = ar_source[n];
 }
 
 template<class T>
-inline void arr_copy(const T* ar_source, T* ar_dest, long q)
-{
-  long n;
-  for( n=0; n<q; n++) ar_dest[n] = ar_source[n];
+inline void arr_copy(const T* ar_source, T* ar_dest, long q) {
+  for (long n = 0; n < q; ++n) ar_dest[n] = ar_source[n];
 }
 
 template<class T>
-inline void arr_assign(const T source, T* ar_dest, long q)
-{
-  long n;
-  for( n=0; n<q; n++) ar_dest[n] = source;
+inline void arr_assign(const T source, T* ar_dest, long q) {
+  for (long n = 0; n < q; ++n) ar_dest[n] = source;
 }
 
 template<class T>
-inline long fmax_ar(T ar, long q)
-{
-  if( q <= 0 )
-  {
+inline long fmax_ar(T ar, long q) {
+  if (q <= 0) {
     mcerr<<"inline long fmax_ar(T ar, long q): q<=0\n";
     spexit(mcerr);
   }
-  long nmval=0;
-  long n;
-  for( n=1; n<q; n++)
-  {
-    if(ar[n]>ar[nmval]) { nmval=n; }
-  }  
+  long nmval = 0;
+  for (long n = 1; n < q; ++n) {
+    if (ar[n] > ar[nmval]) nmval = n;
+  }
   return nmval;
 }
 
 template<class T> 
-inline T tabs(const T& x) 
-{
+inline T tabs(const T& x) {
   return x >= 0 ? x : -x;
 }
 
 template<class T>
-int apeq_mant(const T& x1, const T& x2, T prec)
-{
-  if(x1 == x2) return 1;
-  if(prec == 0) return 0;
-  if(x1 == 0 && x2 == 0) return 1;
-  if(x1 < 0 && x2 > 0 || x1 > 0 && x2 < 0) return 0;
-  if(tabs((x1 - x2)/(x1 + x2))<= prec) return 1;
+int apeq_mant(const T& x1, const T& x2, T prec) {
+  if (x1 == x2) return 1;
+  if (prec == 0) return 0;
+  if (x1 == 0 && x2 == 0) return 1;
+  if ((x1 < 0 && x2 > 0) || (x1 > 0 && x2 < 0)) return 0;
+  if (tabs((x1 - x2) / (x1 + x2)) <= prec) return 1;
   return 0;
 }
 

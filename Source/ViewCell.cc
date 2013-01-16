@@ -570,11 +570,7 @@ ViewCell::Plot(const bool use3d) {
   canvas->cd();
 
   // Get the cell type.
-  bool hasTube = false;
   std::string cellType = component->GetCellType();
-  if (cellType == "D1" || cellType == "D2" || cellType == "D3") {
-    hasTube = true;
-  }
 
   // Get the periodicities.
   double sx = 0., sy = 0.;

@@ -72,19 +72,17 @@ class Cubic
   inline double y(double x) const 
     { return da * x*x*x + db * x*x + dc * x + dd; }
  
-  void  find_zero(double_complex &z1, 
-		  double_complex &z2, 
-		  double_complex &z3) const ;  
+  void find_zero(double_complex &z1, 
+                 double_complex &z2, 
+                 double_complex &z3) const;  
   // They are not ordered and analysed
-
-  int  find_real_zero(double z[3]) const ;  
+  int  find_real_zero(double z[3]) const;  
   // returns number of solutions
   // Analysed and ordered real solutions
 
-
   //int find_zero(double_complex xzero[3]) const ;  
   // returns number of solutions
-    // first is the least.
+  // first is the least.
   int find_maxmin(double xmm[2], double ymm[2], 
   		  int s_mm[2]) const;  // 1 - maximum, -1 - minimum, 0 - non
 private:
@@ -102,7 +100,5 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& file, const Cubic& f);
-
-
 
 #endif

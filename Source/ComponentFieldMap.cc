@@ -1328,7 +1328,8 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
 
   // Loop
   bool converged = false;
-  double diff[2], corr[2];
+  double diff[3] = {0., 0., 0.};
+  double corr[3] = {0., 0., 0.};
   for (int iter=0; iter < 10; iter++) {
     if (debug) {
       std::cout << className << "::Coordinates3:\n";

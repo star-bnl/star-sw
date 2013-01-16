@@ -257,8 +257,7 @@ void mparticle::new_speed(void)
 		 mcerr);
   
 
-  if(i==0 && j==0 || f_mean == dv0) 
-  {
+  if ( (i == 0 && j == 0) || f_mean == dv0) {
     curr_kin_energy=prev_kin_energy;
     curr_gamma_1=prev_gamma_1;
     currpos.speed=prevpos.speed;  // new change

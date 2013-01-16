@@ -417,12 +417,10 @@ MediumMagboltz::SetExcitationScalingFactor(const double r,
 
   // Look for this gas in the present gas mixture.
   bool found = false;
-  int iGas = -1;
   for (int i = nComponents; i--;) {
     if (gas[i] == gasname) {
       scaleExc[i] = r;
       found = true;
-      iGas = i;
       break;
     }
   }
@@ -2262,8 +2260,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
   OpticalData optData;
 
   // Presence flags, concentrations and indices of "de-excitable" gases.
-  bool withAr = false; double cAr = 0.; int iAr = 0;
-  bool withNe = false; double cNe = 0.; int iNe = 0;
+  bool withAr = false; int iAr = 0; double cAr = 0.; 
+  bool withNe = false; 
 
   std::map<std::string, int> mapLevels;
   // Make a mapping of all excitation levels.
@@ -2335,8 +2333,6 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       // Neon
       if (!withNe) {
         withNe = true;
-        iNe = ngas;
-        cNe = fraction[iNe];
       }
       std::string level = "       ";
       for (int j = 0; j < 7; ++j) level[j] = description[i][3 + j];

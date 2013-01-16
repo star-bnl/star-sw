@@ -154,6 +154,7 @@ MediumGas::SetComposition(const std::string gas1, const double f1,
       if (gas[i] == gasOld[j]) {
         if (rPenningGasOld[j] > 0.) {
           rPenningGas[i] = rPenningGasOld[j];
+	  lambdaPenningGas[i] = lambdaPenningGasOld[i];
           std::cout << className << "::SetComposition:\n";
           std::cout << "    Adopting Penning transfer parameters for " 
                     << gas[i] << " from previous mixture.\n";
@@ -862,25 +863,25 @@ MediumGas::LoadGasFile(const std::string filename) {
           if (token != NULL) interpMeth[i] = atoi(token);
         }
       } else if(strcmp(token, "A") == 0) {
-        // Parameter for energy loss distribution
-        double a;
         token = strtok(NULL, " :,%=\t");
-        if (token != NULL) a = atof(token);
+        // Parameter for energy loss distribution, currently not used
+        // double a;
+        // if (token != NULL) a = atof(token);
       } else if (strcmp(token, "Z") == 0) {
-        // Parameter for energy loss distribution
-        double z;
+        // Parameter for energy loss distribution, currently not used
         token = strtok(NULL, " :,%=\t");
-        if (token != NULL) z = atof(token);
+        // double z;
+        // if (token != NULL) z = atof(token);
       } else if (strcmp(token, "EMPROB") == 0) {
-        // Parameter for energy loss distribution
-        double emprob;
+        // Parameter for energy loss distribution, currently not used
         token = strtok(NULL, " :,%=\t");
-        if (token != NULL) emprob = atof(token);
+        // double emprob;
+        // if (token != NULL) emprob = atof(token);
       } else if (strcmp(token, "EPAIR") == 0) {
-        // Parameter for energy loss distribution
-        double epair;
+        // Parameter for energy loss distribution, currently not used
         token = strtok(NULL, " :,%=\t");
-        if (token != NULL) epair = atof(token);
+        // double epair;
+        // if (token != NULL) epair = atof(token);
       } else if (strcmp(token, "Ion") == 0) {
         // Ion diffusion coefficients
         token = strtok(NULL, " :,%=\t");
@@ -889,15 +890,15 @@ MediumGas::LoadGasFile(const std::string filename) {
         token = strtok(NULL, " :,%=\t");
         if (token != NULL) ionDiffTrans = atof(token);
       } else if (strcmp(token, "CMEAN") == 0) {
-        // Cluster parameter
-        double clsPerCm;
+        // Cluster parameter, currently not used
         token = strtok(NULL, " :,%=\t");
-        if (token != NULL) clsPerCm = atof(token);
+        // double clsPerCm;
+        // if (token != NULL) clsPerCm = atof(token);
       } else if (strcmp(token, "RHO") == 0) {
-        // Parameter for energy loss distribution
-        double rho;
+        // Parameter for energy loss distribution, currently not used
         token = strtok(NULL, " :,%=\t"); 
-        if (token != NULL) rho = atof(token);
+        // double rho;
+        // if (token != NULL) rho = atof(token);
       } else if (strcmp(token, "PGAS") == 0) {
         token = strtok(NULL, " :,%=\t");
         double pTorr = 760.;

@@ -322,12 +322,13 @@ ViewMedium::AddFunction(const double xmin, const double xmax,
   if (nEfields <= 0 || nBfields <= 0 || nBangles <= 0) {
     withGraph = false;
   }
-  bool withBfield = false;
-  if (nBfields > 1) {
-    withBfield = true;
-  } else if (nBfields == 1 && bfields[0] > 0.) {
-    withBfield = true;
-  }
+  // TODO: plots for different B fields
+  // bool withBfield = false;
+  // if (nBfields > 1) {
+  //   withBfield = true;
+  // } else if (nBfields == 1 && bfields[0] > 0.) {
+  //   withBfield = true;
+  // }
 
   if (withGraph) {
     TGraph graph(nEfields);

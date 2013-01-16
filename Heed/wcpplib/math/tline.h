@@ -80,17 +80,17 @@ template<class T> class EqualStepCoorMesh
 
  
   virtual int get_interval(T x,                // is coordinate
-			   long& n1 ) const ;  // is the bin number
+                           long& n1 ) const ;  // is the bin number
  
   // The same as above, but returns more information:  
   virtual int get_interval(T x, 
-			   long& n1, T& b1, // the bin number and left border
-			   long& n2, T& b2) // the next bin number and its left
+                           long& n1, T& b1, // the bin number and left border
+                           long& n2, T& b2) // the next bin number and its left
     const ;    
   
   virtual int get_interval_extrap(T x, 
-				  long& n1, T& b1, 
-				  long& n2, T& b2) const ;  
+                                  long& n1, T& b1, 
+                                  long& n2, T& b2) const ;  
   // returns 1 if x inside xmin and xmax and therefore b1 and b2,
   // returns 0 if x < xmin
   //   In this case n1 = 0, n2 = 1, b1 and b2 are corresponding.
@@ -131,21 +131,21 @@ EqualStepCoorMesh<T>::EqualStepCoorMesh(long fq, T fxmin, T fxmax):
   if(q < 0)
   {
     mcerr<<"ERROR in EqualStepCoorMesh<T>::get_interval_extrap:\n"
-	 <<"q < 0\n";
+         <<"q < 0\n";
     Iprintn(mcerr, q);
     spexit(mcerr);
   }
   if(q <= 1 && xmin < xmax)
   {
     mcerr<<"ERROR in EqualStepCoorMesh<T>::get_interval_extrap:\n"
-	 <<"q <= 1 && xmin < xmax\n";
+         <<"q <= 1 && xmin < xmax\n";
     Iprintn(mcerr, q);
     spexit(mcerr);
   }
   if(xmin > xmax)
   {
     mcerr<<"ERROR in EqualStepCoorMesh<T>::get_interval_extrap:\n"
-	 <<"xmin > xmax\n";
+         <<"xmin > xmax\n";
     Iprint2n(mcout, xmin, xmax);
     spexit(mcerr);
   }
@@ -156,7 +156,7 @@ EqualStepCoorMesh<T>::EqualStepCoorMesh(long fq, T fxmin, T fxmax):
 
 template<class T>
 int EqualStepCoorMesh<T>::get_interval(T x, 
-				       long& n1 ) const 
+                                       long& n1 ) const 
 {
   if(x < xmin || x >= xmax)
   {
@@ -167,12 +167,12 @@ int EqualStepCoorMesh<T>::get_interval(T x,
   if(n1 < 0 )
   {
     mcerr<<"ERROR in EqualStepCoorMesh<T>::get_interval:\n"
-	 <<"n1 < 0 \n";
+         <<"n1 < 0 \n";
     //if(n1 < 0 || n1 >= q || n2 < 0 || n2 > q || 
     //  b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax )
     //{
     //mcerr<<"ERROR in EqualStepCoorMesh<T>::get_interval:\n"
-    //	 <<"n1 < 0 || n1 >= q || n2 < 0 || n2 > q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
+    //         <<"n1 < 0 || n1 >= q || n2 < 0 || n2 > q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
     print(mcerr);
     Iprintn(mcerr, x);
     Iprintn(mcerr, n1);
@@ -183,8 +183,8 @@ int EqualStepCoorMesh<T>::get_interval(T x,
 
 template<class T>
 int EqualStepCoorMesh<T>::get_interval(T x, 
-				       long& n1, T& b1, 
-				       long& n2, T& b2) const 
+                                       long& n1, T& b1, 
+                                       long& n2, T& b2) const 
 {
   if(x < xmin || x >= xmax)
   {
@@ -198,12 +198,12 @@ int EqualStepCoorMesh<T>::get_interval(T x,
   if(n1 < 0 || n2 > q || b2 > xmax )
   {
     mcerr<<"ERROR in EqualStepCoorMesh<T>::get_interval:\n"
-	 <<"n1 < 0 || n2 > q || b2 > xmax\n";
+         <<"n1 < 0 || n2 > q || b2 > xmax\n";
     //if(n1 < 0 || n1 >= q || n2 < 0 || n2 > q || 
     //  b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax )
     //{
     //mcerr<<"ERROR in EqualStepCoorMesh<T>::get_interval:\n"
-    //	 <<"n1 < 0 || n1 >= q || n2 < 0 || n2 > q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
+    //         <<"n1 < 0 || n1 >= q || n2 < 0 || n2 > q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
     print(mcerr);
     Iprintn(mcerr, x);
     Iprint4n(mcerr, n1, n2, b1, b2);
@@ -214,8 +214,8 @@ int EqualStepCoorMesh<T>::get_interval(T x,
 
 template<class T>
 int EqualStepCoorMesh<T>::get_interval_extrap(T x, 
-					      long& n1, T& b1, 
-					      long& n2, T& b2) const 
+                                              long& n1, T& b1, 
+                                              long& n2, T& b2) const 
 {
   int i_ret = 1;
 
@@ -250,16 +250,16 @@ int EqualStepCoorMesh<T>::get_interval_extrap(T x,
       b2 = b1 + step;
       if(n1 < 0 || n2 > q || b2 > xmax )
       {
-	mcerr<<"ERROR in EqualStepCoorMesh<T>::get_interval_extrap:\n"
-	     <<"n1 < 0 || n2 > q || b2 > xmax\n";
-	//if(n1 < 0 || n1 >= q || n2 < 0 || n2 > q || 
-	//   b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax )
-	//{
-	//  mcerr<<"ERROR in EqualStepCoorMesh<T>::get_interval_extrap:\n"
-	//	   <<"n1 < 0 || n1 >= q || n2 < 0 || n2 > q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
-	print(mcerr);
-	Iprint4n(mcerr, n1, n2, b1, b2);
-	spexit(mcerr);
+        mcerr<<"ERROR in EqualStepCoorMesh<T>::get_interval_extrap:\n"
+             <<"n1 < 0 || n2 > q || b2 > xmax\n";
+        //if(n1 < 0 || n1 >= q || n2 < 0 || n2 > q || 
+        //   b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax )
+        //{
+        //  mcerr<<"ERROR in EqualStepCoorMesh<T>::get_interval_extrap:\n"
+        //           <<"n1 < 0 || n1 >= q || n2 < 0 || n2 > q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
+        print(mcerr);
+        Iprint4n(mcerr, n1, n2, b1, b2);
+        spexit(mcerr);
       }
     }
   }
@@ -289,7 +289,7 @@ std::istream& operator>>(std::istream& file, EqualStepCoorMesh<T>& f)
   mfunname("istream& operator>>(istream& file, EqualStepCoorMesh<T>& f)");
   definp_endpar dep(&file, 0, 1, 0);
   set_position("Type of T is (in internal notations)", 
-	       *dep.istrm, dep.s_rewind, dep.s_req_sep); 
+               *dep.istrm, dep.s_rewind, dep.s_req_sep); 
   long q; 
   T xmin;
   T xmax;
@@ -311,7 +311,7 @@ int operator==(const EqualStepCoorMesh<T>& f1, const EqualStepCoorMesh<T>& f2)
 
 template<class T>
 int apeq_mant(const EqualStepCoorMesh<T>& f1, const EqualStepCoorMesh<T>& f2, 
-	      T prec)
+              T prec)
 {
   if(f1.get_qi() != f2.get_qi() || 
      !apeq_mant(f1.get_xmin(), f2.get_xmin(), prec) ||
@@ -335,7 +335,7 @@ int operator!=(const EqualStepCoorMesh<T>& f1, const EqualStepCoorMesh<T>& f2)
 
 template<class T, class D>  // D is anything allowing indexing
 long t_find_interval(double x, 
-		     long q, const D& coor)
+                     long q, const D& coor)
 {
   long n1,n2,n3;
 #ifndef TLINE_REDUCE_TO_RAW_ARR
@@ -381,7 +381,7 @@ long t_find_interval(double x,
  
 template<class T, class D>
 long t_find_interval_end(double x, 
-			 long q, const D& coor, long n_start)
+                         long q, const D& coor, long n_start)
 {
   long n1,n2,n3;
   if(n_start < 0 || n_start > q-1)
@@ -475,15 +475,15 @@ template<class T, class D> class PointCoorMesh
   }
 
   int get_interval(T x, 
-		   long& n1) const ;
+                   long& n1) const ;
   
   int get_interval(T x, 
-		   long& n1, T& b1, 
-		   long& n2, T& b2) const ;  
+                   long& n1, T& b1, 
+                   long& n2, T& b2) const ;  
   
   int get_interval_extrap(T x, 
-			  long& n1, T& b1, 
-			  long& n2, T& b2) const ;  
+                          long& n1, T& b1, 
+                          long& n2, T& b2) const ;  
 
   inline int get_step(long n, T& fstep) const
     { 
@@ -497,8 +497,8 @@ template<class T, class D> class PointCoorMesh
   PointCoorMesh<T,D>(void): q(0), xmin(0), xmax(0), x_old(0), n_old(-1), 
   amesh(NULL) {;}
   PointCoorMesh<T,D>(long fq, // number of points, number of intervals
-		     // is fq - 1.
-		     D* famesh); // dimension is fq and the last index is fq-1
+                     // is fq - 1.
+                     D* famesh); // dimension is fq and the last index is fq-1
   // This is the end point of the last interval
   virtual ~PointCoorMesh<T,D>() {}
   void check(void); // check that the points are sequencial.
@@ -532,7 +532,7 @@ PointCoorMesh<T,D>::PointCoorMesh(long fq, D* famesh):
   if(q <= 1)
   {
     mcerr<<"ERROR in PointCoorMesh<T,D>::PointCoorMesh<T,D>:\n"
-	 <<"q <= 1\n";
+         <<"q <= 1\n";
     Iprintn(mcerr, q);
     spexit(mcerr);
   }
@@ -550,7 +550,7 @@ PointCoorMesh<T,D>::PointCoorMesh(long fq, D* famesh):
   if(xmin > xmax)
   {
     mcerr<<"ERROR in PointCoorMesh<T,D>::PointCoorMesh<T,D>:\n"
-	 <<"xmin > xmax\n";
+         <<"xmin > xmax\n";
     Iprint2n(mcerr, xmin, xmax);
     spexit(mcerr);
   }
@@ -565,7 +565,7 @@ PointCoorMesh<T,D>::PointCoorMesh(long fq, D* famesh):
 #endif
     {
       mcerr<<"ERROR in PointCoorMesh<T,D>::PointCoorMesh<T,D>:\n"
-	   <<"amesh[n] >= amesh[n+1]\n";
+           <<"amesh[n] >= amesh[n+1]\n";
 #ifndef TLINE_REDUCE_TO_RAW_ARR
       Iprint3n(mcerr, n, (*amesh)[n] , (*amesh)[n+1]);
 #else
@@ -591,7 +591,7 @@ void PointCoorMesh<T,D>::check(void)
 #endif
     {
       mcerr<<"ERROR in PointCoorMesh<T,D>::check(void):\n"
-	   <<"amesh[n] >= amesh[n+1]\n";
+           <<"amesh[n] >= amesh[n+1]\n";
 #ifndef TLINE_REDUCE_TO_RAW_ARR
       Iprint3n(mcerr, n, (*amesh)[n] , (*amesh)[n+1]);
 #else
@@ -605,7 +605,7 @@ void PointCoorMesh<T,D>::check(void)
   
 template<class T, class D>
 int PointCoorMesh<T,D>::get_interval(T x, 
-				     long& n1) const 
+                                     long& n1) const 
 {
   if(x < xmin || x >= xmax)
   {
@@ -637,7 +637,7 @@ int PointCoorMesh<T,D>::get_interval(T x,
   if(n1 < 0 )
   {
     mcerr<<"ERROR in PointCoorMesh<T,D>::get_interval:\n"
-	 <<"n1 < 0\n";
+         <<"n1 < 0\n";
     print(mcerr);
     Iprintn(mcerr, n1);
     spexit(mcerr);
@@ -649,8 +649,8 @@ int PointCoorMesh<T,D>::get_interval(T x,
   
 template<class T, class D>
 int PointCoorMesh<T,D>::get_interval(T x, 
-				     long& n1, T& b1, 
-				     long& n2, T& b2) const 
+                                     long& n1, T& b1, 
+                                     long& n2, T& b2) const 
 {
   if(x < xmin || x >= xmax)
   {
@@ -690,7 +690,7 @@ int PointCoorMesh<T,D>::get_interval(T x,
      b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax )
   {
     mcerr<<"ERROR in PointCoorMesh<T,D>::get_interval:\n"
-	 <<"n1 < 0 || n1 >= q || n2 < 0 || n2 >= q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
+         <<"n1 < 0 || n1 >= q || n2 < 0 || n2 >= q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
     print(mcerr);
     Iprint4n(mcerr, n1, n2, b1, b2);
     spexit(mcerr);
@@ -703,8 +703,8 @@ int PointCoorMesh<T,D>::get_interval(T x,
 
 template<class T, class D>
 int PointCoorMesh<T,D>::get_interval_extrap(T x, 
-					    long& n1, T& b1, 
-					    long& n2, T& b2) const 
+                                            long& n1, T& b1, 
+                                            long& n2, T& b2) const 
 {
   int i_ret = 1;
 
@@ -767,7 +767,7 @@ int PointCoorMesh<T,D>::get_interval_extrap(T x,
        b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax )
     {
       mcerr<<"ERROR in PointCoorMesh<T,D>::get_interval:\n"
-	   <<"n1 < 0 || n1 >= q || n2 < 0 || n2 >= q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
+           <<"n1 < 0 || n1 >= q || n2 < 0 || n2 >= q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
       print(mcerr);
       Iprint4n(mcerr, n1, n2, b1, b2);
       spexit(mcerr);
@@ -854,15 +854,15 @@ template<class T> class CopiedPointCoorMesh
   }
 
   int get_interval(T x, 
-		   long& n1) const ;
+                   long& n1) const ;
   
   int get_interval(T x, 
-		   long& n1, T& b1, 
-		   long& n2, T& b2) const ;  
+                   long& n1, T& b1, 
+                   long& n2, T& b2) const ;  
   
   int get_interval_extrap(T x, 
-			  long& n1, T& b1, 
-			  long& n2, T& b2) const ;  
+                          long& n1, T& b1, 
+                          long& n2, T& b2) const ;  
 
   inline int get_step(long n, T& fstep) const
     { 
@@ -933,7 +933,7 @@ CopiedPointCoorMesh<T>::CopiedPointCoorMesh(long fq, T* famesh):
   if(q <= 1)
   {
     mcerr<<"ERROR in CopiedPointCoorMesh<T>::CopiedPointCoorMesh<T>:\n"
-	 <<"q <= 1\n";
+         <<"q <= 1\n";
     Iprintn(mcerr, q);
     spexit(mcerr);
   }
@@ -951,7 +951,7 @@ CopiedPointCoorMesh<T>::CopiedPointCoorMesh(long fq, T* famesh):
   if(xmin > xmax)
   {
     mcerr<<"ERROR in CopiedPointCoorMesh<T>::PointCoorMesh<T>:\n"
-	 <<"xmin > xmax\n";
+         <<"xmin > xmax\n";
     Iprint2n(mcerr, xmin, xmax);
     spexit(mcerr);
   }
@@ -966,7 +966,7 @@ CopiedPointCoorMesh<T>::CopiedPointCoorMesh(long fq, T* famesh):
 #endif
     {
       mcerr<<"ERROR in CopiedPointCoorMesh<T>::PointCoorMesh<T>:\n"
-	   <<"mesh[n] >= mesh[n+1]\n";
+           <<"mesh[n] >= mesh[n+1]\n";
       Iprint3n(mcerr, n, mesh[n] , mesh[n+1]);
       spexit(mcerr);
     }
@@ -982,7 +982,7 @@ CopiedPointCoorMesh<T>::CopiedPointCoorMesh(DynLinArr< T >& fmesh):
   if(q <= 1)
   {
     mcerr<<"ERROR in CopiedPointCoorMesh<T>::CopiedPointCoorMesh<T>:\n"
-	 <<"q <= 1\n";
+         <<"q <= 1\n";
     Iprintn(mcerr, q);
     spexit(mcerr);
   }
@@ -1000,7 +1000,7 @@ CopiedPointCoorMesh<T>::CopiedPointCoorMesh(DynLinArr< T >& fmesh):
   if(xmin > xmax)
   {
     mcerr<<"ERROR in CopiedPointCoorMesh<T>::PointCoorMesh<T>:\n"
-	 <<"xmin > xmax\n";
+         <<"xmin > xmax\n";
     Iprint2n(mcerr, xmin, xmax);
     spexit(mcerr);
   }
@@ -1015,7 +1015,7 @@ CopiedPointCoorMesh<T>::CopiedPointCoorMesh(DynLinArr< T >& fmesh):
 #endif
     {
       mcerr<<"ERROR in CopiedPointCoorMesh<T>::PointCoorMesh<T>:\n"
-	   <<"mesh[n] >= mesh[n+1]\n";
+           <<"mesh[n] >= mesh[n+1]\n";
       Iprint3n(mcerr, n, mesh[n] , mesh[n+1]);
       spexit(mcerr);
     }
@@ -1026,7 +1026,7 @@ CopiedPointCoorMesh<T>::CopiedPointCoorMesh(DynLinArr< T >& fmesh):
   
 template<class T>
 int CopiedPointCoorMesh<T>::get_interval(T x, 
-				     long& n1) const 
+                                     long& n1) const 
 {
   if(x < xmin || x >= xmax)
   {
@@ -1058,7 +1058,7 @@ int CopiedPointCoorMesh<T>::get_interval(T x,
   if(n1 < 0 )
   {
     mcerr<<"ERROR in CopiedPointCoorMesh<T>::get_interval:\n"
-	 <<"n1 < 0\n";
+         <<"n1 < 0\n";
     print(mcerr);
     Iprintn(mcerr, n1);
     spexit(mcerr);
@@ -1070,8 +1070,8 @@ int CopiedPointCoorMesh<T>::get_interval(T x,
   
 template<class T>
 int CopiedPointCoorMesh<T>::get_interval(T x, 
-				     long& n1, T& b1, 
-				     long& n2, T& b2) const 
+                                     long& n1, T& b1, 
+                                     long& n2, T& b2) const 
 {
   if(x < xmin || x >= xmax)
   {
@@ -1111,7 +1111,7 @@ int CopiedPointCoorMesh<T>::get_interval(T x,
      b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax )
   {
     mcerr<<"ERROR in CopiedPointCoorMesh<T>::get_interval:\n"
-	 <<"n1 < 0 || n1 >= q || n2 < 0 || n2 >= q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
+         <<"n1 < 0 || n1 >= q || n2 < 0 || n2 >= q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
     print(mcerr);
     Iprint4n(mcerr, n1, n2, b1, b2);
     spexit(mcerr);
@@ -1124,8 +1124,8 @@ int CopiedPointCoorMesh<T>::get_interval(T x,
 
 template<class T>
 int CopiedPointCoorMesh<T>::get_interval_extrap(T x, 
-						long& n1, T& b1, 
-						long& n2, T& b2) const 
+                                                long& n1, T& b1, 
+                                                long& n2, T& b2) const 
 {
   int i_ret = 1;
 
@@ -1188,7 +1188,7 @@ int CopiedPointCoorMesh<T>::get_interval_extrap(T x,
        b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax )
     {
       mcerr<<"ERROR in CopiedPointCoorMesh<T>::get_interval:\n"
-	   <<"n1 < 0 || n1 >= q || n2 < 0 || n2 >= q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
+           <<"n1 < 0 || n1 >= q || n2 < 0 || n2 >= q || b1 < xmin || b1 > xmax || b2 < xmin || b2 > xmax\n";
       print(mcerr);
       Iprint4n(mcerr, n1, n2, b1, b2);
       spexit(mcerr);
@@ -1240,7 +1240,7 @@ std::istream& operator>>(std::istream& file, CopiedPointCoorMesh<T>& f)
   mfunname("istream& operator>>(istream& file, CopiedPointCoorMesh<T>& f)");
   definp_endpar dep(&file, 0, 1, 0);
   set_position("Type of T is (in internal notations)", 
-	       *dep.istrm, dep.s_rewind, dep.s_req_sep); 
+               *dep.istrm, dep.s_rewind, dep.s_req_sep); 
   DynLinArr< T > mesh;
   f = CopiedPointCoorMesh<T>(mesh);
   return file;
@@ -1259,7 +1259,7 @@ int operator==(const CopiedPointCoorMesh<T>& f1, const CopiedPointCoorMesh<T>& f
 
 template<class T>
 int apeq_mant(const CopiedPointCoorMesh<T>& f1, 
-	      const CopiedPointCoorMesh<T>& f2, T prec)
+              const CopiedPointCoorMesh<T>& f2, T prec)
 {
   if(f1.get_qi() != f2.get_qi() || 
      !apeq_mant(f1.get_xmin(), f2.get_xmin(), prec) ||
@@ -1286,7 +1286,7 @@ int operator!=(const CopiedPointCoorMesh<T>& f1, const CopiedPointCoorMesh<T>& f
 // See check_equat.c for details.
  
 template<class T, class B> int verify_types(const T* ths, const B* b2, 
-					    const T** tb2)
+                                            const T** tb2)
 {
   mfunnamep("template<class T> verify_types(const T* ths, const B* b2, const T* tb2)");
   //mcout<<"verify_types is working\n";
@@ -1323,17 +1323,17 @@ template<class T> class AbsCoorMesh: public RegPassivePtr
   virtual int get_interval(long n, T& b1, T& b2) const = 0;
  
   virtual int get_interval(T x,                // is coordinate
-			   long& n1 ) const = 0 ;  // is the bin number
+                           long& n1 ) const = 0 ;  // is the bin number
  
   // The same as above, but returns more information:  
   virtual int get_interval(T x, 
-			   long& n1, T& b1, // the bin number and left border
-			   long& n2, T& b2) // the next bin number and its left
+                           long& n1, T& b1, // the bin number and left border
+                           long& n2, T& b2) // the next bin number and its left
     const  = 0;    
   
   virtual int get_interval_extrap(T x, 
-				  long& n1, T& b1, 
-				  long& n2, T& b2) const  = 0 ;  
+                                  long& n1, T& b1, 
+                                  long& n2, T& b2) const  = 0 ;  
   // returns 1 if x inside xmin and xmax and therefore b1 and b2,
   // 0 if x < xmin
   // 2 if x > xmax 
@@ -1404,20 +1404,20 @@ template<class T> class VirtEqualStepCoorMesh:
   { return EqualStepCoorMesh< T >::get_interval(n, b1, b2); }
  
   virtual int get_interval(T x,                // is coordinate
-			   long& n1 ) const    // is the bin number
+                           long& n1 ) const    // is the bin number
   { return EqualStepCoorMesh< T >::get_interval(x, n1 ); }
  
   // The same as above, but returns more information:  
   virtual int get_interval(T x, 
-			   long& n1, T& b1, // the bin number and left border
-			   long& n2, T& b2) // the next bin number and its left
+                           long& n1, T& b1, // the bin number and left border
+                           long& n2, T& b2) // the next bin number and its left
     const 
     { return EqualStepCoorMesh< T >::get_interval(x, n1, b1, n2, b2); }
   
   
   virtual int get_interval_extrap(T x, 
-				  long& n1, T& b1, 
-				  long& n2, T& b2) const  
+                                  long& n1, T& b1, 
+                                  long& n2, T& b2) const  
     { return EqualStepCoorMesh< T >::get_interval_extrap(x, n1, b1, n2, b2); }
  
   // returns 1 if x inside xmin and xmax and therefore b1 and b2,
@@ -1448,7 +1448,7 @@ template<class T> class VirtEqualStepCoorMesh:
     // the same object. Put here but not in the first line in order
     // to detect missing operators== for derived casses as soon as possible.
     return ::operator==(static_cast< const EqualStepCoorMesh<T> > (*this) ,
-			static_cast< const EqualStepCoorMesh<T> > (*tm2));
+                        static_cast< const EqualStepCoorMesh<T> > (*tm2));
   }
   virtual int operator!=(const AbsCoorMesh<T>& m2)
   {
@@ -1465,7 +1465,7 @@ template<class T> class VirtEqualStepCoorMesh:
     // the same object. Put here but not in the first line in order
     // to detect missing operators== for derived casses as soon as possible.
     return ::apeq_mant(static_cast< const EqualStepCoorMesh<T> > (*this) ,
-		       static_cast< const EqualStepCoorMesh<T> > (*tm2), prec);
+                       static_cast< const EqualStepCoorMesh<T> > (*tm2), prec);
   }
 };
 
@@ -1482,7 +1482,7 @@ std::istream& operator>>(std::istream& file, VirtEqualStepCoorMesh<T>& f)
   mfunname("istream& operator>>(istream& file, VirtEqualStepCoorMesh<T>& f)");
   definp_endpar dep(&file, 0, 1, 0);
   set_position("EqualStepCoorMesh<T>:", *dep.istrm, 
-	       dep.s_rewind, dep.s_req_sep); 
+               dep.s_rewind, dep.s_req_sep); 
   //file>>f;
   //file>>(static_cast< EqualStepCoorMesh<T> >(f));
   EqualStepCoorMesh<T>& ft = f;
@@ -1493,24 +1493,24 @@ std::istream& operator>>(std::istream& file, VirtEqualStepCoorMesh<T>& f)
 /*
 template<class T>
 int operator==(const VirtEqualStepCoorMesh<T>& f1, 
-	       const VirtEqualStepCoorMesh<T>& f2)
+               const VirtEqualStepCoorMesh<T>& f2)
 {
   return operator==(static_cast< const EqualStepCoorMesh<T>& >(f1), 
-		    static_cast< const EqualStepCoorMesh<T>& >(f2));
+                    static_cast< const EqualStepCoorMesh<T>& >(f2));
 }
 template<class T>
 int apeq_mant(const VirtEqualStepCoorMesh<T>& f1, 
-	      const VirtEqualStepCoorMesh<T>& f2, T prec)
+              const VirtEqualStepCoorMesh<T>& f2, T prec)
 {
   return apeq_mant(static_cast< const EqualStepCoorMesh<T>& >(f1), 
-		   static_cast< const EqualStepCoorMesh<T>& >(f2), prec);
+                   static_cast< const EqualStepCoorMesh<T>& >(f2), prec);
 }
 template<class T>
 int operator!=(const VirtEqualStepCoorMesh<T>& f1, 
-	       const VirtEqualStepCoorMesh<T>& f2)
+               const VirtEqualStepCoorMesh<T>& f2)
 {
   return operator!=(static_cast< const EqualStepCoorMesh<T>& >(f1), 
-		    static_cast< const EqualStepCoorMesh<T>& >(f2));
+                    static_cast< const EqualStepCoorMesh<T>& >(f2));
 }
 */
 
@@ -1534,20 +1534,20 @@ template<class T> class VirtCopiedPointCoorMesh:
   { return CopiedPointCoorMesh< T >::get_interval(n, b1, b2); }
  
   virtual int get_interval(T x,                // is coordinate
-			   long& n1 ) const    // is the bin number
+                           long& n1 ) const    // is the bin number
   { return CopiedPointCoorMesh< T >::get_interval(x, n1 ); }
  
   // The same as above, but returns more information:  
   virtual int get_interval(T x, 
-			   long& n1, T& b1, // the bin number and left border
-			   long& n2, T& b2) // the next bin number and its left
+                           long& n1, T& b1, // the bin number and left border
+                           long& n2, T& b2) // the next bin number and its left
     const 
     { return CopiedPointCoorMesh< T >::get_interval(x, n1, b1, n2, b2); }
   
   
   virtual int get_interval_extrap(T x, 
-				  long& n1, T& b1, 
-				  long& n2, T& b2) const  
+                                  long& n1, T& b1, 
+                                  long& n2, T& b2) const  
     { 
       return CopiedPointCoorMesh< T >::get_interval_extrap(x, n1, b1, n2, b2); 
     }
@@ -1582,7 +1582,7 @@ template<class T> class VirtCopiedPointCoorMesh:
     // the same object. Put here but not in the first line in order
     // to detect missing operators== for derived casses as soon as possible.
     return ::operator==(static_cast< const CopiedPointCoorMesh<T> > (*this) ,
-			static_cast< const CopiedPointCoorMesh<T> > (*tm2));
+                        static_cast< const CopiedPointCoorMesh<T> > (*tm2));
   }
   virtual int operator!=(const AbsCoorMesh<T>& m2)
   {
@@ -1599,7 +1599,7 @@ template<class T> class VirtCopiedPointCoorMesh:
     // the same object. Put here but not in the first line in order
     // to detect missing operators== for derived casses as soon as possible.
     return ::apeq_mant(static_cast< const CopiedPointCoorMesh<T> > (*this) ,
-		       static_cast< const CopiedPointCoorMesh<T> > (*tm2), prec);
+                       static_cast< const CopiedPointCoorMesh<T> > (*tm2), prec);
   }
 };
 
@@ -1617,7 +1617,7 @@ std::istream& operator>>(std::istream& file, VirtCopiedPointCoorMesh<T>& f)
   mfunname("istream& operator>>(istream& file, VirtCopiedPointCoorMesh<T>& f)");
   definp_endpar dep(&file, 0, 1, 0);
   set_position("CopiedPointCoorMesh<T>:", *dep.istrm, 
-	       dep.s_rewind, dep.s_req_sep); 
+               dep.s_rewind, dep.s_req_sep); 
   // file>>f;  // this would lead to loop
   //file>>(static_cast< CopiedPointCoorMesh<T> >(f));
   CopiedPointCoorMesh<T>& ft = f;
@@ -1627,25 +1627,25 @@ std::istream& operator>>(std::istream& file, VirtCopiedPointCoorMesh<T>& f)
 /*
 template<class T>
 int operator==(const VirtCopiedPointCoorMesh<T>& f1, 
-	       const VirtCopiedPointCoorMesh<T>& f2)
+               const VirtCopiedPointCoorMesh<T>& f2)
 {
   return operator==(static_cast< const CopiedPointCoorMesh<T> >(f1) , 
-		    static_cast< const CopiedPointCoorMesh<T>& >(f2));
+                    static_cast< const CopiedPointCoorMesh<T>& >(f2));
 }
 template<class T>
 int apeq_mant(const VirtCopiedPointCoorMesh<T>& f1, 
-	      const VirtCopiedPointCoorMesh<T>& f2, T prec)
+              const VirtCopiedPointCoorMesh<T>& f2, T prec)
 {
   return apeq_mant(static_cast< const CopiedPointCoorMesh<T> >(f1) , 
-		   static_cast< const CopiedPointCoorMesh<T>& >(f2), prec);
+                   static_cast< const CopiedPointCoorMesh<T>& >(f2), prec);
 }
 
 template<class T>
 int operator!=(const VirtCopiedPointCoorMesh<T>& f1, 
-	       const VirtCopiedPointCoorMesh<T>& f2)
+               const VirtCopiedPointCoorMesh<T>& f2)
 {
   return operator!=(static_cast< const CopiedPointCoorMesh<T> >(f1) , 
-		    static_cast< const CopiedPointCoorMesh<T>& >(f2));
+                    static_cast< const CopiedPointCoorMesh<T>& >(f2));
 }
 */
 
@@ -1655,7 +1655,7 @@ Is it possible to make it allowing any derivatives? (to think in future).
 /*
 template<class T>
 int operator==(const AbsCoorMesh<T>& f1, 
-	       const AbsCoorMesh<T>& f2)
+               const AbsCoorMesh<T>& f2)
 {
   const VirtEqualStepCoorMesh<T>* af1 = 
     dynamic_cast< const VirtEqualStepCoorMesh<T>* >(&f1);
@@ -1678,7 +1678,7 @@ int operator==(const AbsCoorMesh<T>& f1,
 
 template<class T>
 int apeq_mant(const AbsCoorMesh<T>& f1, 
-	      const AbsCoorMesh<T>& f2, T prec)
+              const AbsCoorMesh<T>& f2, T prec)
 {
   const VirtEqualStepCoorMesh<T>* af1 = 
     dynamic_cast< const VirtEqualStepCoorMesh<T>* >(&f1);
@@ -1701,7 +1701,7 @@ int apeq_mant(const AbsCoorMesh<T>& f1,
 
 template<class T>
 int operator!=(const AbsCoorMesh<T>& f1, 
-	       const AbsCoorMesh<T>& f2)
+               const AbsCoorMesh<T>& f2)
 {
   if(f1 == f2) return 0;
   return 1;
@@ -1761,9 +1761,9 @@ ActivePtr< AbsCoorMesh<T> > read_AbsCoorMesh(std::istream& file)
 // Extract value defined by this array for abscissa x
 template<class T, class D, class M>
 T t_value_step_ar(const M& mesh,              
-		  const D& y,       // array of function values          
-		  T x,
-		  int s_include_last_point = 0)
+                  const D& y,       // array of function values          
+                  T x,
+                  int s_include_last_point = 0)
                   // 0 - not include, 1 - include  
 {
   mfunname("double t_value_step_ar(...)");
@@ -1780,8 +1780,8 @@ T t_value_step_ar(const M& mesh,
   T b1, b2;
   int i_ret=0;
   i_ret = mesh.get_interval(x, 
-			    n1, b1, 
-			    n2, b2);
+                            n1, b1, 
+                            n2, b2);
   check_econd11(i_ret , != 1 , mcerr);
   return y[n1];
 }
@@ -1789,9 +1789,9 @@ T t_value_step_ar(const M& mesh,
 // The same for two-dimensional array D
 template<class T, class D, class M1, class M2>
 T t_value_step_ar(const M1& mesh1, const M2& mesh2,   
-		  const D& y,       // array of function values          
-		  T x1, T x2, 
-		  int s_include_last_point = 0)
+                  const D& y,       // array of function values          
+                  T x1, T x2, 
+                  int s_include_last_point = 0)
                   // 0 - not include, 1 - include  
 {
   mfunname("double t_value_step_ar(...)");
@@ -1819,13 +1819,13 @@ T t_value_step_ar(const M1& mesh1, const M2& mesh2,
   int i_ret=0;
 
   i_ret = mesh1.get_interval(x1, 
-			     n11, b1, 
-			     n12, b2);
+                             n11, b1, 
+                             n12, b2);
   check_econd11(i_ret , != 1 , mcerr);
 
   i_ret = mesh2.get_interval(x2, 
-			     n21, b1, 
-			     n22, b2);
+                             n21, b1, 
+                             n22, b2);
 
   check_econd11(i_ret , != 1 , mcerr);
   return y[n11][n21];
@@ -1835,9 +1835,9 @@ T t_value_step_ar(const M1& mesh1, const M2& mesh2,
 // corresponding to abscissa x
 template<class T, class D, class M>
 void t_hfill_step_ar(const M& mesh,              
-		     const D& y,    // array of function values             
-		     T x, T val = 1,
-		     int s_include_last_point = 0)
+                     const D& y,    // array of function values             
+                     T x, T val = 1,
+                     int s_include_last_point = 0)
   // 0 - not include, 1 - include  
 {
   mfunname("double t_hfill_step_ar(...)");
@@ -1853,7 +1853,7 @@ void t_hfill_step_ar(const M& mesh,
   long n1;
   int i_ret=0;
   i_ret = mesh.get_interval(x, 
-			    n1);
+                            n1);
   check_econd11(i_ret , != 1 , mcerr);
   y[n1] += val;
   return;
@@ -1865,9 +1865,9 @@ void t_hfill_step_ar(const M& mesh,
  
 template<class T, class D, class M>
 void t_hfill_step_ar_ac(const M& mesh,              
-		     const D& y,    // array of function values             
-		     T x, T val = 1,
-		     int s_include_last_point = 0)
+                     const D& y,    // array of function values             
+                     T x, T val = 1,
+                     int s_include_last_point = 0)
   // 0 - not include, 1 - include  
 {
   mfunname("double t_hfill_step_ar(...)");
@@ -1883,7 +1883,7 @@ void t_hfill_step_ar_ac(const M& mesh,
   long n1;
   int i_ret=0;
   i_ret = mesh.get_interval(x, 
-			    n1);
+                            n1);
   check_econd11(i_ret , != 1 , mcerr);
   y.ac(n1) += val;
   return;
@@ -1892,9 +1892,9 @@ void t_hfill_step_ar_ac(const M& mesh,
 // The same but for two-dimensional array:
 template<class T, class D, class M1, class M2>
 void t_hfill_step_ar_ac(const M1& mesh1, const M2& mesh2,              
-			const D& y,    // array of function values             
-			T x1, T x2, T val = 1,
-			int s_include_last_point = 0)
+                        const D& y,    // array of function values             
+                        T x1, T x2, T val = 1,
+                        int s_include_last_point = 0)
   // 0 - not include, 1 - include  
 {
   mfunname("double t_hfill_step_ar(...)");
@@ -1939,9 +1939,9 @@ the integration of product of function by x).
 
 template<class T, class D, class M>
 T t_integ_step_ar(const M& mesh, 
-		  const D& y,     // array of function values         
-		  T x1, T x2, 
-		  int xpower)   // currently 0 or 1
+                  const D& y,     // array of function values         
+                  T x1, T x2, 
+                  int xpower)   // currently 0 or 1
 {
   mfunname("double t_integ_step_ar(...)");
 
@@ -1966,8 +1966,8 @@ T t_integ_step_ar(const M& mesh,
     T b1, b2;
     int i_ret = 0;
     i_ret = mesh.get_interval(x1, 
-			      n1, b1, 
-			      n2, b2);
+                              n1, b1, 
+                              n2, b2);
     //Iprint2n(mcout, x1, i_ret);
     //Iprint4n(mcout, n1, b1, n2, b2);
     check_econd11(i_ret , != 1 , mcerr);
@@ -1996,8 +1996,8 @@ T t_integ_step_ar(const M& mesh,
     T b1, b2;
     int i_ret=0;
     i_ret = mesh.get_interval(x2, 
-			      n1, b1, 
-			      n2, b2); 
+                              n1, b1, 
+                              n2, b2); 
     //Iprint2n(mcout, x2, i_ret);
     //Iprint4n(mcout, n1, b1, n2, b2);
     check_econd11(i_ret , != 1 , mcerr);
@@ -2042,12 +2042,12 @@ It can be used to obtain weight in a global array.
 */
 template<class T, class D, class M>
 T t_integ_generic_step_ar(const M& mesh, 
-			  const D& y,   // array of function values  
-			  T (*fun)( long np, T xp1, T xp2, T yp, 
-				    T xmin, T xmax, T x1, T x2), 
-			  // This function should produce integral
-			  // form x1 to x2.
-			  T x1, T x2) 
+                          const D& y,   // array of function values  
+                          T (*fun)( long np, T xp1, T xp2, T yp, 
+                                    T xmin, T xmax, T x1, T x2), 
+                          // This function should produce integral
+                          // form x1 to x2.
+                          T x1, T x2) 
 {
   mfunname("double t_integ_step_ar(...)");
 
@@ -2071,8 +2071,8 @@ T t_integ_generic_step_ar(const M& mesh,
     T b1, b2;
     int i_ret=0;
     i_ret = mesh.get_interval(x1, 
-			      n1, b1, 
-			      n2, b2);
+                              n1, b1, 
+                              n2, b2);
     //Iprint2n(mcout, x1, i_ret);
     //Iprint4n(mcout, n1, b1, n2, b2);
     check_econd11(i_ret , != 1 , mcerr);
@@ -2080,14 +2080,14 @@ T t_integ_generic_step_ar(const M& mesh,
     {
       if(x2 <= b2)  // if x2 in the same interval
       {
-	s = fun(n1, b1, b2, y[n1],   
-		xmin, xmax,
-		x1, x2);
-	return s;
+        s = fun(n1, b1, b2, y[n1],   
+                xmin, xmax,
+                x1, x2);
+        return s;
       }
       s = fun(n1, b1, b2, y[n1],   
-	       xmin, xmax,
-	       x1, x2);
+               xmin, xmax,
+               x1, x2);
     }
     istart = n2;
   }
@@ -2099,15 +2099,15 @@ T t_integ_generic_step_ar(const M& mesh,
     T b1, b2;
     int i_ret=0;
     i_ret = mesh.get_interval(x2, 
-			      n1, b1, 
-			      n2, b2); 
+                              n1, b1, 
+                              n2, b2); 
     //Iprint2n(mcout, x2, i_ret);
     //Iprint4n(mcout, n1, b1, n2, b2);
     check_econd11(i_ret , != 1 , mcerr);
     if(x2 - b1 > 0) {
       s += fun(n1, b1, b2, y[n1],   
-	       xmin, xmax,
-	       b1, x2);
+               xmin, xmax,
+               b1, x2);
     }
     iafterend = n1;
   }
@@ -2135,8 +2135,8 @@ T t_integ_generic_step_ar(const M& mesh,
 
 template<class T, class D, class M>
 T t_total_integ_step_ar(const M& mesh, 
-			const D& y     // array of function values         
-			)   
+                        const D& y     // array of function values         
+                        )   
 {
   mfunname("double t_total_integ_step_ar(...)");
 
@@ -2167,8 +2167,8 @@ T t_total_integ_step_ar(const M& mesh,
 
 template<class T, class D, class M1, class M2>
 T t_total_integ_step_ar(const M1& mesh1, const M2& mesh2, 
-			const D& y     // array of function values         
-			)   
+                        const D& y     // array of function values         
+                        )   
 {
   mfunname("double t_total_integ_step_ar(...)");
 
@@ -2218,8 +2218,8 @@ T t_total_integ_step_ar(const M1& mesh1, const M2& mesh2,
 
 template<class T, class M1, class M2>
 T t_total_integ_step_ar(const M1& mesh1, const M2& mesh2, 
-			const DynArr< T >& y  // array of function values
-			)   
+                        const DynArr< T >& y  // array of function values
+                        )   
 {
   mfunname("double t_total_integ_step_ar(...)");
 
@@ -2282,9 +2282,9 @@ is equal to integ.
 
 template<class T, class D, class M>
 T t_find_x_for_integ_step_ar(const M& mesh,               
-			     const D& y,   // array of function values   
-			     T integ,  
-			     int* s_err)   // for power = 0 only
+                             const D& y,   // array of function values   
+                             T integ,  
+                             int* s_err)   // for power = 0 only
 {
   mfunname("double t_integ_step_ar(...)");
 
@@ -2463,9 +2463,9 @@ long t_find_entire_x_for_already_integ_step_ar
 
 template<class T, class D, class M>
 T t_hispre_step_ar(const M& mesh,               
-		   const D& y,       // array of function values           
-		   D& integ_y   // return integrated array  
-		   ) 
+                   const D& y,       // array of function values           
+                   D& integ_y   // return integrated array  
+                   ) 
 {
   mfunname("double t_hispre_step_ar(...)");
 
@@ -2485,7 +2485,7 @@ T t_hispre_step_ar(const M& mesh,
     mesh.get_scoor(n+1, xp2); 
     T step = xp2 - xp1;
     check_econd11a(y[n] , < 0.0 , "n="<<n<<" xp1="<<xp1<<" xp2="<<xp2<<'\n' ,
-		   mcerr);
+                   mcerr);
     s = s + y[n] * step;
     integ_y[n] = s;
     //Iprint3n(mcout, n, s1, integ);
@@ -2502,13 +2502,8 @@ T t_hispre_step_ar(const M& mesh,
 // generate random number
 
 template<class T, class D, class M>
-T t_hisran_step_ar(const M& mesh,              
-		   const D& integ_y,                 
-		   T rannum)  
-{
+T t_hisran_step_ar(const M& mesh, const D& integ_y, T rannum) {
   mfunname("double t_hisran_step_ar(...)");
-
-
   //mcout<<"start t_step_integ_ar\n";
   //check_econd11(xpower , != 0 , mcerr);
   long qi = mesh.get_qi();
@@ -2525,8 +2520,8 @@ T t_hisran_step_ar(const M& mesh,
      rannum,  
      &s_err);
   check_econd11a(s_err , !=  0 , 
-  		 "mesh="<<mesh<<" integ_y="<<integ_y<<" rannum="<<rannum<<'\n' 
-  		 , mcerr);
+                   "mesh="<<mesh<<" integ_y="<<integ_y<<" rannum="<<rannum<<'\n' 
+                   , mcerr);
   return ret;
   //return  t_find_x_for_already_integ_step_ar
   // (mesh,               // dimension q 
@@ -2540,8 +2535,8 @@ T t_hisran_step_ar(const M& mesh,
 
 template<class T, class D, class M>
 T t_opposite_hisran_step_ar(const M& mesh,              
-			    const D& integ_y,                 
-			    T x)  
+                            const D& integ_y,                 
+                            T x)  
 {
   mfunname("double t_opposite_hisran_step_ar(...)");
 
@@ -2558,8 +2553,8 @@ T t_opposite_hisran_step_ar(const M& mesh,
   T b2;
 
   mesh.get_interval_extrap(x, 
-			   n1, b1, 
-			   n2, b2);  
+                           n1, b1, 
+                           n2, b2);  
   T y1;
   T y2;
   if(n1 == 0)
@@ -2580,8 +2575,8 @@ T t_opposite_hisran_step_ar(const M& mesh,
 
 template<class T, class D, class M>
 long t_entire_hisran_step_ar(const M& mesh,              
-			  const D& integ_y,                 
-			  T rannum)  
+                          const D& integ_y,                 
+                          T rannum)  
 {
   mfunname("double t_entire_hisran_step_ar(...)");
 
@@ -2600,8 +2595,8 @@ long t_entire_hisran_step_ar(const M& mesh,
      rannum,  
      &s_err);   
   check_econd11a(s_err , !=  0 , 
-		 "mesh="<<mesh<<" integ_y="<<integ_y<<" rannum="<<rannum<<'\n' 
-		, mcerr);
+                 "mesh="<<mesh<<" integ_y="<<integ_y<<" rannum="<<rannum<<'\n' 
+                , mcerr);
   return ret;
   //return  t_find_entire_x_for_already_integ_step_ar
   //   (mesh,               // dimension q 
@@ -2615,8 +2610,8 @@ This is mean of "step array".
 */
 template<class T, class D, class M>
 T t_mean_step_ar(const M& mesh,  
-		 const D& y,             // array of function values  
-		 T x1, T x2, int& s_err)   
+                 const D& y,             // array of function values  
+                 T x1, T x2, int& s_err)   
 {
   mfunname("double t_mean_step_ar(...)");
   s_err = 0;
@@ -2696,11 +2691,11 @@ T t_integ_straight_2point
       T xz = x1 - b / a;
       if(yl < 0.0)
       {
-	xl = xz; yl = 0.0;
+        xl = xz; yl = 0.0;
       }
       else
       {
-	xr = xz; yr = 0.0;
+        xr = xz; yr = 0.0;
       }
     }
   }
@@ -2716,39 +2711,29 @@ T t_integ_straight_2point
 // Extract value defined by this array for abscissa x
 // y have dimension q or qi+1.
 template<class T, class D, class M>
-T t_value_straight_point_ar
-(const M& mesh,  
- const D& y,     // array of function values          
- T x,
- int s_ban_neg,
- int s_extrap_left, T left_bond,
- int s_extrap_right, T right_bond
-)
+T t_value_straight_point_ar(const M& mesh,  
+                            const D& y,     // array of function values 
+                            T x,
+                            int s_ban_neg,
+                            int s_extrap_left, T left_bond,
+                            int s_extrap_right, T right_bond) {
   // 0 - not include, 1 - include  
-{
   mfunname("double t_value_straight_point_ar(...)");
   double xmin = mesh.get_xmin();
   double xmax = mesh.get_xmax();
   //Iprint3n(mcout, x, xmin, xmax);
-  if(x < left_bond ) return 0.0;
-  if(x > right_bond ) return 0.0;
-  if(x < xmin && s_extrap_left == 0) return 0.0;
-  if(x > xmax && s_extrap_right == 0) return 0.0;
+  if (x < left_bond ) return 0.0;
+  if (x > right_bond ) return 0.0;
+  if (x < xmin && s_extrap_left == 0) return 0.0;
+  if (x > xmax && s_extrap_right == 0) return 0.0;
   long n1, n2;
   T b1, b2;
-  int i_ret=0;
-  i_ret = mesh.get_interval_extrap(x, 
-				   n1, b1, 
-				   n2, b2);
+  mesh.get_interval_extrap(x, n1, b1, n2, b2);
   T x1;
   mesh.get_scoor(n1, x1); 
   T x2;
   mesh.get_scoor(n2, x2); 
-  return t_value_straight_2point
-    (x1, y[n1], x2, y[n2],   
-     x,
-     s_ban_neg
-     );
+  return t_value_straight_2point(x1, y[n1], x2, y[n2], x, s_ban_neg);
   /*
   T a = (y[n2] - y[n1])/(x2 - x1);
   // Less numerical precision
@@ -2790,32 +2775,26 @@ T t_value_straight_point_ar
 
 // Extract value defined by this array for abscissa x
 template<class T, class D, class M>
-T t_value_generic_point_ar
-(const M& mesh,  
- const D& y,             // array of function values
- T (*funval)( T xp1, T yp1, T xp2, T yp2, 
-	      T xmin, T xmax,  // may be necessary for shape determination
-	      T x), 
- T x,
- int s_extrap_left, T left_bond,
- int s_extrap_right, T right_bond
-)
+T t_value_generic_point_ar(const M& mesh,  
+  const D& y,  // array of function values
+  T(*funval)(T xp1, T yp1, T xp2, T yp2,  
+             T xmin, T xmax,  // may be necessary for shape determination
+             T x), 
+   T x,
+   int s_extrap_left, T left_bond,
+   int s_extrap_right, T right_bond) {
   // 0 - not include, 1 - include  
-{
   mfunname("double t_value_generic_point_ar(...)");
   double xmin = mesh.get_xmin();
   double xmax = mesh.get_xmax();
   //Iprint3n(mcout, x, xmin, xmax);
-  if(x < left_bond ) return 0.0;
-  if(x > right_bond ) return 0.0;
-  if(x < xmin && s_extrap_left == 0) return 0.0;
-  if(x > xmax && s_extrap_right == 0) return 0.0;
+  if (x < left_bond ) return 0.0;
+  if (x > right_bond ) return 0.0;
+  if (x < xmin && s_extrap_left == 0) return 0.0;
+  if (x > xmax && s_extrap_right == 0) return 0.0;
   long n1, n2;
   T b1, b2;
-  int i_ret=0;
-  i_ret = mesh.get_interval_extrap(x, 
-				   n1, b1, 
-				   n2, b2);
+  mesh.get_interval_extrap(x, n1, b1, n2, b2);
   T x1;
   mesh.get_scoor(n1, x1); 
   T x2;
@@ -2923,12 +2902,12 @@ T t_integ_power_2point
   
 template<class T, class D, class M>
 T t_integ_straight_point_ar(const M& mesh,   
-			    const D& y,      // array of function values
-			    T x1, T x2, // intervals of integration
-			    int xpower,   // currently 0 or 1
-			    int s_ban_neg,
-			    int s_extrap_left, T left_bond,
-			    int s_extrap_right, T right_bond)
+                            const D& y,      // array of function values
+                            T x1, T x2, // intervals of integration
+                            int xpower,   // currently 0 or 1
+                            int s_ban_neg,
+                            int s_extrap_left, T left_bond,
+                            int s_extrap_right, T right_bond)
 
 {
   mfunname("double t_integ_straight_point_ar(...)");
@@ -2958,8 +2937,8 @@ T t_integ_straight_point_ar(const M& mesh,
   int i_ret=0;
   // restore the interval in which x1 reside
   i_ret = mesh.get_interval_extrap(x1, 
-				   np1, bp1, 
-				   np2, bp2);
+                                   np1, bp1, 
+                                   np2, bp2);
   // restore the x-coordinates of given points 
   T xp1;
   mesh.get_scoor(np1, xp1); 
@@ -2997,30 +2976,30 @@ T t_integ_straight_point_ar(const M& mesh,
       x1i = x2i;
       if(xp2 >= x2) 
       { 
-	x2i = x2;   // till end of integral
-	s_stop = 1;
+        x2i = x2;   // till end of integral
+        s_stop = 1;
       }
       else
       {
-	if(np2 == qi) // end of the mesh, but x2 is farther
-	{
-	  x2i = x2;   // till end of integral
-	  s_stop = 1;
-	}
-	else
-	{
-	  x2i = xp2;  // till end of current interval 
-	  s_stop = 0;
-	}
+        if(np2 == qi) // end of the mesh, but x2 is farther
+        {
+          x2i = x2;   // till end of integral
+          s_stop = 1;
+        }
+        else
+        {
+          x2i = xp2;  // till end of current interval 
+          s_stop = 0;
+        }
       }
       yp1 = yp2;
       yp2 = y[np2];
       res += t_integ_straight_2point<T>
-	(xp1, yp1, xp2, yp2,   
-	 x1i, x2i,
-	 xpower,  
-	 s_ban_neg
-	 );
+        (xp1, yp1, xp2, yp2,   
+         x1i, x2i,
+         xpower,  
+         s_ban_neg
+         );
       //Iprint2n(mcout, xp1, xp2);
       //Iprint2n(mcout, x1i, x2i);
       //Iprint2n(mcout, yp1, yp2);
@@ -3035,11 +3014,11 @@ T t_integ_straight_point_ar(const M& mesh,
  
 template<class T, class D, class M>
 T t_mean_straight_point_ar(const M& mesh,  
-			   const D& y,       // array of function values
-			   T x1, T x2,
-			   int s_extrap_left, T left_bond,
-			   int s_extrap_right, T right_bond,
-			   int& s_err)   
+                           const D& y,       // array of function values
+                           T x1, T x2,
+                           int s_extrap_left, T left_bond,
+                           int s_extrap_right, T right_bond,
+                           int& s_err)   
 {
   mfunname("double t_mean_straight_point_ar(...)");
   s_err = 0;
@@ -3060,19 +3039,19 @@ T t_mean_straight_point_ar(const M& mesh,
 
 //template<class T>
 //typedef T(*GENERICFUN)(T xp1, T yp1, T xp2, T yp2, 
-//			T xmin, T xmax, T x1, T x2);
+//                        T xmin, T xmax, T x1, T x2);
 //typedef T(*GENERICFUN)(T, T, T, T, 
-//			T, T, T, T);
+//                        T, T, T, T);
   
 template<class T, class D, class M>
 T t_integ_generic_point_ar(const M& mesh,  
-			   const D& y,        // array of function values
-			   //GENERICFUN fun,
-			   T (*fun)( T xp1, T yp1, T xp2, T yp2, 
-			   	     T xmin, T xmax, T x1, T x2), 
-			   T x1, T x2, 
-			   int s_extrap_left, T left_bond,
-			   int s_extrap_right, T right_bond)
+                           const D& y,        // array of function values
+                           //GENERICFUN fun,
+                           T (*fun)( T xp1, T yp1, T xp2, T yp2, 
+                                        T xmin, T xmax, T x1, T x2), 
+                           T x1, T x2, 
+                           int s_extrap_left, T left_bond,
+                           int s_extrap_right, T right_bond)
 
 {
   mfunname("double t_integ_generic_point_ar(...)");
@@ -3101,8 +3080,8 @@ T t_integ_generic_point_ar(const M& mesh,
   int i_ret=0;
   // restore the interval in which x1 reside
   i_ret = mesh.get_interval_extrap(x1, 
-				   np1, bp1, 
-				   np2, bp2);
+                                   np1, bp1, 
+                                   np2, bp2);
   // restore the x-coordinates of given points 
   T xp1;
   mesh.get_scoor(np1, xp1); 
@@ -3114,8 +3093,8 @@ T t_integ_generic_point_ar(const M& mesh,
   if(i_ret == 2 || x2 <= xp2)  // then all in one interval
   {
     res = fun(xp1, yp1, xp2, yp2,   
-	      xmin, xmax,
-	      x1, x2);
+              xmin, xmax,
+              x1, x2);
   }
   else
   {
@@ -3123,8 +3102,8 @@ T t_integ_generic_point_ar(const M& mesh,
     T x1i = x1;
     T x2i = xp2;
     res = fun(xp1, yp1, xp2, yp2,   
-	      xmin, xmax,
-	      x1i, x2i);
+              xmin, xmax,
+              x1i, x2i);
     //x2i = x1;  // prepere for loop
     int s_stop = 0;
     do
@@ -3136,27 +3115,27 @@ T t_integ_generic_point_ar(const M& mesh,
       x1i = x2i;
       if(xp2 >= x2) 
       { 
-	x2i = x2;   // till end of integral
-	s_stop = 1;
+        x2i = x2;   // till end of integral
+        s_stop = 1;
       }
       else
       {
-	if(np2 == qi) // end of the mesh, but x2 is farther
-	{
-	  x2i = x2;   // till end of integral
-	  s_stop = 1;
-	}
-	else
-	{
-	  x2i = xp2;  // till end of current interval 
-	  s_stop = 0;
-	}
+        if(np2 == qi) // end of the mesh, but x2 is farther
+        {
+          x2i = x2;   // till end of integral
+          s_stop = 1;
+        }
+        else
+        {
+          x2i = xp2;  // till end of current interval 
+          s_stop = 0;
+        }
       }
       yp1 = yp2;
       yp2 = y[np2];
       res += fun(xp1, yp1, xp2, yp2,   
-		xmin, xmax,
-		x1i, x2i);
+                xmin, xmax,
+                x1i, x2i);
       //Iprint2n(mcout, xp1, xp2);
       //Iprint2n(mcout, x1i, x2i);
       //Iprint2n(mcout, yp1, yp2);
@@ -3177,38 +3156,29 @@ T t_integ_generic_point_ar(const M& mesh,
 // not accurate, although the result is anyway reasonable.
 
 template<class T, class D, class M>
-T t_width_at_hheight_step_ar(const M& mesh,    
-					  const D& y)
+T t_width_at_hheight_step_ar(const M& mesh, const D& y) {
   // 0 - not include, 1 - include  
-{
   mfunname("double t_width_at_hheight_step_ar(...)");
   //mcout<<"t_width_at_hheight_step_ar is started\n";
   long qi = mesh.get_qi();
   long n;
   T ymax = 0;
   long nmax;
-  for(n=0; n<qi; n++)
-  {
-    if(y[n] > ymax)
-    {
+  for (n = 0; n < qi; ++n) {
+    if (y[n] > ymax) {
       check_econd11(y[n], < 0.0 , mcerr);
       ymax = y[n];
       nmax = n;
     }
   }
   //Iprint2n(mcout, ymax, nmax);
-  if(ymax == 0)
-  {
-    return 0;
-  }
-  T ylev = ymax/2.0;
+  if (ymax == 0) return 0;
+  T ylev = ymax / 2.0;
   T s2 = 0;
   long q = 0;
-  for(n=nmax; n<qi; n++)
-  {
+  for (n = nmax; n < qi; n++) {
 
-    if(y[n] > ylev && y[n+1] <= ylev)
-    {
+    if (y[n] > ylev && y[n+1] <= ylev) {
       T x1, x2; 
       mesh.get_interval(n, x1, x2);
       T step1, step2;
@@ -3228,11 +3198,8 @@ T t_width_at_hheight_step_ar(const M& mesh,
   s2 = s2 / q;
   T s1 = 0;
   q = 0;
-  for(n=nmax; n>= 0; n--)
-  {
-
-    if(y[n] > ylev && y[n-1] <= ylev)
-    {
+  for (n = nmax; n >= 0; n--) {
+    if (y[n] > ylev && y[n-1] <= ylev) {
       T x1, x2; 
       mesh.get_interval(n-1, x1, x2);
       T step1, step2;

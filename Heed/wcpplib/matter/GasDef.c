@@ -103,16 +103,13 @@ GasDef::GasDef(const String& fname, const String& fnotation,
   // s1 and s2 are to distinguish the constructor
   mfunname("GasDef::GasDef(...many molecules... Waals)");
   DynLinArr< MoleculeDef* > amolec(fqmolec);
-  int s_have_Waals = 0;
   for (long n = 0; n < fqmolec; ++n) {
-    //Iprint2n(mcout, fqmolec, n);
     amolec[n] = MoleculeDef::get_MoleculeDef( fmolec_not[n] );
     check_econd11a(amolec[n]  , == NULL , 
                    "No molecule with such notation: " << fmolec_not[n] << '\n', 
                    mcerr)
-    //amolec[n]->print(mcout);
-    VanDerVaals* aw = amolec[n]->awls().get();
-    if (aw != NULL) s_have_Waals = 1;
+    // Van der Waals correction currently not used. 
+    // VanDerVaals* aw = amolec[n]->awls().get();
   }
   // first normalize volumes to total unity
   DynLinArr< double > fw(fqmolec);
