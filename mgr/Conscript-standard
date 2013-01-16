@@ -878,19 +878,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	}
       }
     }
-#    if ( $pkg =~ m/^StChain$/) {  
-#      if ($STAR_SYS =~ /gcc471/) { # hack for StRtsTable gcc471
-#	my $cxxflags = $env->{CXXFLAGS} . " -fpermissive"; print "cxxflags = $cxxflags\n";
-#	$envHack = $env->clone('CXXFLAGS' => $cxxflags); print "==> $envHack->{CXXFLAGS}\n";
-#	for ($i = 0; $i < $#src; $i++) {
-#	  if ($src[$i] =~ /StRtsTable\.cxx/) {
-#	    my @objfiles = Objects $envHack ($src[$i]);
-#	    $src[$i] = $objfiles[0];
-#	    last;
-#	  }
-#	}
-#      }
-#    }
     if ( $pkg =~ m/^StiMaker/) {  
       if ($DEBUG =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for StiMaker with gcc432
 	$DEBUG = "-g";
@@ -1316,13 +1303,12 @@ if ( $#src > -1 ) {
   if ($SO_PKG) {
     script::Keep $SO_PKG;
     if ($pkg =~ m/StarMagField/) {
-#      my @o = Objects $env2 (@src);
-#      @src = @o;
-      $envNoROOT = $env->clone('CPPFLAGS' => "", 'SUFOBJ'   => "NoDict.o",);
-      @PlainObj =  Objects $envNoROOT(qw(StarMagField.cxx));
-#      foreach my $s (@o) {
-#	if ($s !~ /Cint/) {push @PlainObj, $s;}
-#      }
+      my @o = Objects $env2 (@src);
+      @src = @o;
+      @PlainObj = ();
+      foreach my $s (@o) {
+	if ($s !~ /Cint/) {push @PlainObj, $s;}
+      }
       $SO_PKG_PLAIN = $pkg . "NoDict";
       printf( "Run Conscript-standard in %-30s  for %-20s\n", $Dir, $SO_PKG_PLAIN );
       $SO_PKG_PLAIN .= "." . $env2->{SUFSOLIB};
