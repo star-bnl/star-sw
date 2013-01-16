@@ -1,5 +1,5 @@
 //
-// $Id: StTrackMateMaker.cxx,v 1.3 2011/09/11 01:27:10 fisyak Exp $
+// $Id: StTrackMateMaker.cxx,v 1.4 2013/01/16 21:56:45 fisyak Exp $
 //
 #include <iostream>
 #include <map>
@@ -39,7 +39,7 @@ using std::vector;
 size_t buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<StHit*,StTrack*>& htMap);
 float getTpcDedx(StTrack* trk);
 
-static const char rcsid[] = "$Id: StTrackMateMaker.cxx,v 1.3 2011/09/11 01:27:10 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrackMateMaker.cxx,v 1.4 2013/01/16 21:56:45 fisyak Exp $";
 ClassImp(StTrackMateMaker)
 // tpt => old
 // sti => new
@@ -105,12 +105,12 @@ Int_t StTrackMateMaker::Init() {
   if (f) {
     f->cd();
   }
-  gMessMgr->QAInfo() << "StTrackMateMaker::Init() - creating histogram" << endm;
+  LOG_INFO << "StTrackMateMaker::Init() - creating histogram" << endm;
   TString evNames = "refMult/F";
   trackTree = new TTree("trackMateComp","trackMateComp");
   trackBr = trackTree->Branch("data_array",&data.oldPtGl,names.Data());
   eventBr = trackTree->Branch("ev_array",evOutput,evNames.Data());
-  gMessMgr->QAInfo() << "StTrackMateMaker::Init() - successful" << endm;
+  LOG_INFO << "StTrackMateMaker::Init() - successful" << endm;
   
   return StMaker::Init();
 }
@@ -121,7 +121,7 @@ void StTrackMateMaker::Clear(const char* c)
 }
 //________________________________________________________________________________
 Int_t StTrackMateMaker::Make(){
-    gMessMgr->QAInfo() << "In StTrackMateMaker::Make " << endm;
+    LOG_INFO << "In StTrackMateMaker::Make " << endm;
     StEvent* rEvent1 = 0;
     StEvent* rEvent2 = 0;
     
@@ -129,60 +129,60 @@ Int_t StTrackMateMaker::Make(){
     rEvent1 = (StEvent*) GetDataSet("IO1/.make/IO1_Root/.data/bfcTree/eventBranch/StEvent");
     rEvent2 = (StEvent*) GetDataSet("IO2/.make/IO2_Root/.data/bfcTree/eventBranch/StEvent");
 
-    gMessMgr->QAInfo() << "Pointers obtained from GetDataSet" << endm;
-    gMessMgr->QAInfo() << "Event1 At: " << rEvent1 << endm;
-    gMessMgr->QAInfo() << "Event2 At: " << rEvent2 << endm;
+    LOG_INFO << "Pointers obtained from GetDataSet" << endm;
+    LOG_INFO << "Event1 At: " << rEvent1 << endm;
+    LOG_INFO << "Event2 At: " << rEvent2 << endm;
 
     if (!rEvent1 || !rEvent2) {
-      gMessMgr->Warning() << "Bailing out! One of the StEvent's is missing!" << endm;
+      LOG_WARN << "Bailing out! One of the StEvent's is missing!" << endm;
       return kStWarn;
     }
-    gMessMgr->QAInfo() << "Run # and Event #, should be the same for both StEvents" << endm;
-    gMessMgr->QAInfo() << "Event1: Run "<< rEvent1->runId() << " Event1 No: " << rEvent1->id() << endm;
-    gMessMgr->QAInfo() << "Event2: Run "<< rEvent2->runId() << " Event2 No: " << rEvent2->id() << endm;
-    gMessMgr->QAInfo() << "Vertex Positions" << endm;
+    LOG_INFO << "Run # and Event #, should be the same for both StEvents" << endm;
+    LOG_INFO << "Event1: Run "<< rEvent1->runId() << " Event1 No: " << rEvent1->id() << endm;
+    LOG_INFO << "Event2: Run "<< rEvent2->runId() << " Event2 No: " << rEvent2->id() << endm;
+    LOG_INFO << "Vertex Positions" << endm;
     assert (rEvent1->runId() == rEvent2->runId() && rEvent1->id() == rEvent2->id());
     if (rEvent1->primaryVertex() ) {
-	gMessMgr->QAInfo() << "Event1: Vertex Position " << rEvent1->primaryVertex()->position() << endm;
+	LOG_INFO << "Event1: Vertex Position " << rEvent1->primaryVertex()->position() << endm;
     }
     else {
-	gMessMgr->QAInfo() << "Event1: Vertex Not Found" << endm;
+	LOG_INFO << "Event1: Vertex Not Found" << endm;
     }
     if (rEvent2->primaryVertex() ) {
-	gMessMgr->QAInfo() << "Event2: Vertex Position " << rEvent2->primaryVertex()->position() << endm;
+	LOG_INFO << "Event2: Vertex Position " << rEvent2->primaryVertex()->position() << endm;
     }
     else {
-	gMessMgr->QAInfo() << "Event2: Vertex Not Found" << endm;
+	LOG_INFO << "Event2: Vertex Not Found" << endm;
     }
 #if 0
     if (rEvent1->runInfo()->spaceChargeCorrectionMode() != 21 ||
 	rEvent2->runInfo()->spaceChargeCorrectionMode() != 21) {
-      gMessMgr->QAInfo() << "Event1:  spaceChargeCorrectionMode "
+      LOG_INFO << "Event1:  spaceChargeCorrectionMode "
 			 << rEvent1->runInfo()->spaceChargeCorrectionMode() << endm;
-      gMessMgr->QAInfo() << "Event2:  spaceChargeCorrectionMode "
+      LOG_INFO << "Event2:  spaceChargeCorrectionMode "
 			 << rEvent2->runInfo()->spaceChargeCorrectionMode() << endm;
-      gMessMgr->QAInfo() << " Skip it " << endm;
+      LOG_INFO << " Skip it " << endm;
       return kStWarn;
     }
 #endif
-    gMessMgr->QAInfo() << "Size of track containers" << endm;
+    LOG_INFO << "Size of track containers" << endm;
     const StSPtrVecTrackNode& trackNodes1 = rEvent1->trackNodes();
-    gMessMgr->QAInfo() << "Event1: Track Nodes " << trackNodes1.size() << endm;
+    LOG_INFO << "Event1: Track Nodes " << trackNodes1.size() << endm;
 
     const StSPtrVecTrackNode& trackNodes2 = rEvent2->trackNodes();
-    gMessMgr->QAInfo() << "Event2: Track Nodes " << trackNodes2.size() << endm;
+    LOG_INFO << "Event2: Track Nodes " << trackNodes2.size() << endm;
     if (! trackNodes1.size() || ! trackNodes2.size()) return kStWarn;
     //eventwise info
     evOutput[0] = uncorrectedNumberOfPrimaries(*rEvent2);
     //eventBr->Fill();
-    gMessMgr->Debug() << "Tpc Hits" << endm;
+    LOG_INFO << "Tpc Hits" << endm;
     // Note:
     // For StTpcHits: sector = [1-24], padrow = [1-45]
     // For StTpcHitCollections: sector [0-23], padrow = [0,44]
     const StTpcHitCollection* tpchitcoll1 = rEvent1->tpcHitCollection();
     const StTpcHitCollection* tpchitcoll2 = rEvent2->tpcHitCollection();
     if (! tpchitcoll1 || ! tpchitcoll2) {
-      gMessMgr->Warning() << "Empty tpc hit collection in one of the events" << endm;
+      LOG_WARN << "Empty tpc hit collection in one of the events" << endm;
       return kStWarn;
     }
     if (Debug()>2) {
@@ -192,12 +192,12 @@ Int_t StTrackMateMaker::Make(){
 	    for (size_t iPadR=0; iPadR<sectorcoll1->numberOfPadrows(); ++iPadR) { //[0,44]
 		const StTpcPadrowHitCollection* padrowcoll1 = sectorcoll1->padrow(iPadR);
 		const StTpcPadrowHitCollection* padrowcoll2 = sectorcoll2->padrow(iPadR);
-		gMessMgr->Debug() << "Sector(+1) " << iSec+1 << ", Padrow(+1) " << iPadR+1 << endm;
-		gMessMgr->Debug() << "hits1 " << padrowcoll1->hits().size() << endm;
-		gMessMgr->Debug() << "hits2 " << padrowcoll2->hits().size() << endm;
+		LOG_INFO << "Sector(+1) " << iSec+1 << ", Padrow(+1) " << iPadR+1 << endm;
+		LOG_INFO << "hits1 " << padrowcoll1->hits().size() << endm;
+		LOG_INFO << "hits2 " << padrowcoll2->hits().size() << endm;
 		if (padrowcoll1->hits().size()) {
-		    gMessMgr->Debug() << "hits1[0] position " << padrowcoll1->hits()[0]->position() << endm;
-		    gMessMgr->Debug() << "hits2[0] position " << padrowcoll2->hits()[0]->position() << endm;
+		    LOG_INFO << "hits1[0] position " << padrowcoll1->hits()[0]->position() << endm;
+		    LOG_INFO << "hits2[0] position " << padrowcoll2->hits()[0]->position() << endm;
 		}
 		// Here we assume (CHECK!) that the hits are the same for both events.
 		// So we don't need to associate them.  That is, if there is are hits in this
@@ -228,10 +228,10 @@ Int_t StTrackMateMaker::Make(){
     //buildRecHitTrackMap(trackNodes1,hitTrackMap1);
     map<StHit*,StTrack*> hitTrackMap2;
     size_t failedTries = buildRecHitTrackMap(trackNodes2,hitTrackMap2);
-    gMessMgr->QAInfo() << "Hits used by more than 1 track: " << failedTries << endm;
+    LOG_INFO << "Hits used by more than 1 track: " << failedTries << endm;
     
     // Do Track association.
-    gMessMgr->QAInfo() << "Begin Track Association..." << endm;
+    LOG_INFO << "Begin Track Association..." << endm;
     int matcTrkCounter = 0;
     int origTrkCounter = 0;
     int oldOnlyCounter = 0;
@@ -260,7 +260,7 @@ Int_t StTrackMateMaker::Make(){
 	StTrack* trk1 = trackNodes1[iTrk]->track(global);
 	if (!trk1 || trk1->flag()<=0 || trk1->topologyMap().trackFtpc()) continue;
 	StTrack* ptrk1 = trackNodes1[iTrk]->track(primary);
-	if (Debug()>2) gMessMgr->QAInfo() << "Processing Track " << iTrk << endm;
+	if (Debug()>2) LOG_INFO << "Processing Track " << iTrk << endm;
 	++origTrkCounter;
 	vector<StTrackPing> candidates(20,initTrackPing); //make sure it's filled with null pointers and zeros
 	size_t nCandidates = 0;
@@ -271,13 +271,17 @@ Int_t StTrackMateMaker::Make(){
 	    // get the hit from the track
 	    const StTpcHit* hit1 = static_cast<const StTpcHit*>(*hIterTrk);
 	    // go to the hit collection and get the hit container for its sector,padrow
+	    if (! tpchitcoll1->sector(hit1->sector()-1)->padrow(hit1->padrow()-1)) continue;
 	    const StSPtrVecTpcHit& hits1 = tpchitcoll1->sector(hit1->sector()-1)->padrow(hit1->padrow()-1)->hits();
+	    if (! hits1.size()) continue;
 	    // find the hit in this container and get the index
 	    StPtrVecTpcHitConstIterator hIterColl =  find(hits1.begin(),hits1.end(),hit1);
 	    int index = hIterColl - hits1.begin();
 	    // get the hit container for the sector,padrow in event 2
 	    // using the SAME sector, padrow as for hit 1
+	    if (! tpchitcoll2->sector(hit1->sector()-1)->padrow(hit1->padrow()-1)) continue;
 	    const StSPtrVecTpcHit& hits2 = tpchitcoll2->sector(hit1->sector()-1)->padrow(hit1->padrow()-1)->hits();
+	    if (! hits2.size()) continue;
 	    // use the index found above to find the hit in event 2
 	    StTpcHit* hit2 = hits2[index];
 	    // use the map to find its track!
@@ -311,7 +315,7 @@ Int_t StTrackMateMaker::Make(){
 			// if so increase the size of the vector in steps of 20 candidates
 			if (nCandidates>=candidates.size()) {
 			    candidates.resize(nCandidates+20);
-			    if (Debug()) gMessMgr->QAInfo() << "Resizing in the TPC hits of the track " << endm;
+			    if (Debug()) LOG_INFO << "Resizing in the TPC hits of the track " << endm;
 			}
 			break;
 		    }
@@ -333,7 +337,7 @@ Int_t StTrackMateMaker::Make(){
 	vector<StTrackPing>::iterator max = max_element(candidates.begin(),candidates.end(),compStTrackPing);
 	
 	if (Debug()>2) {
-	    gMessMgr->Debug() << "Matching track " << (*max).mTrack << " has " << (*max).mNPings << ", index " << max-candidates.begin() << endm;
+	    LOG_INFO << "Matching track " << (*max).mTrack << " has " << (*max).mNPings << ", index " << max-candidates.begin() << endm;
 	}
 	
 	StTrack* trk2 = (*max).mTrack;
@@ -375,13 +379,13 @@ Int_t StTrackMateMaker::Make(){
 	}
     }    
     if (Debug()) {
-	gMessMgr->Debug() << "Old+EGR  Global Tracks (flag>0) " << origTrkCounter << endm;
-	gMessMgr->Debug() << "New      Global Tracks (flag>0) " << newgTrkCounter << endm;
-	gMessMgr->Debug() << "Matched  Global Tracks (flag>0) " << matcTrkCounter << endm;
-	gMessMgr->Debug() << "Old+EGR  Only   Tracks (flag>0) " << oldOnlyCounter << endm;
-	gMessMgr->Debug() << "Old+EGR  Double Matches to New  " << oldDoubCounter << endm;
-	gMessMgr->Debug() << "size of Set, should = Matched.. " << assocTracks2.size() << endm; 
-	gMessMgr->Debug() << "New      Only   Tracks (flag>0) " << newOnlyCounter << endm;
+	LOG_INFO << "Old+EGR  Global Tracks (flag>0) " << origTrkCounter << endm;
+	LOG_INFO << "New      Global Tracks (flag>0) " << newgTrkCounter << endm;
+	LOG_INFO << "Matched  Global Tracks (flag>0) " << matcTrkCounter << endm;
+	LOG_INFO << "Old+EGR  Only   Tracks (flag>0) " << oldOnlyCounter << endm;
+	LOG_INFO << "Old+EGR  Double Matches to New  " << oldDoubCounter << endm;
+	LOG_INFO << "size of Set, should = Matched.. " << assocTracks2.size() << endm; 
+	LOG_INFO << "New      Only   Tracks (flag>0) " << newOnlyCounter << endm;
     }
 	
     return kStOK;
