@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.h,v 1.10 2013/01/15 23:45:02 fisyak Exp $
+ * $Id: StarMagField.h,v 1.11 2013/01/16 00:05:27 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.h,v $
+ * Revision 1.11  2013/01/16 00:05:27  fisyak
+ * Add TObject
+ *
  * Revision 1.10  2013/01/15 23:45:02  fisyak
  * Account ROOT version with TVirtualMagField
  *
@@ -73,6 +76,7 @@
 #include "TVirtualMagField.h"
 class StarMagField : public TVirtualMagField 
 #else
+#include "TObject.h"
 class StarMagField : public TObject
 #endif
 #else
