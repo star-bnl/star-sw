@@ -24,7 +24,7 @@ const Int_t kFgtNumAdditionalStrips = 5;
 
 // For some reason, the MuDst directory fails during linking, so a seperate value is needed.
 // For now, it is required that kMuFgtNumTimeBins == kFgtNumTimeBins
-const Int_t kMuFgtNumTimeBins = 9;
+const Int_t kMuFgtNumTimeBins = 15;
 
 
 
@@ -52,8 +52,11 @@ const Int_t kMuFgtNumTimeBins = 9;
 #endif
 
 /*
- * $Id: StFgtConsts.h,v 1.19 2012/11/05 15:43:34 akio Exp $
+ * $Id: StFgtConsts.h,v 1.20 2013/01/16 19:31:53 avossen Exp $
  * $Log: StFgtConsts.h,v $
+ * Revision 1.20  2013/01/16 19:31:53  avossen
+ * updated number of tb
+ *
  * Revision 1.19  2012/11/05 15:43:34  akio
  * FgtSlowSimu related fixes for r/phi consistency & speed up
  *
