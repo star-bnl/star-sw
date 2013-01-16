@@ -1,4 +1,6 @@
+#if 0
 #include "Ask.h"
+#endif
 //________________________________________________________________________________
 void RunTbyT(Int_t nevents=999,
 	     const char *eventFile1="/star/data98/reco/AuAu200_production/FullField/eval_Sti/2010/030/11030018/st_physics_11030018_raw_1020001.event.root",
@@ -7,7 +9,7 @@ void RunTbyT(Int_t nevents=999,
 	     //"./new/st_physics_11035026_raw_2010001_1_200.event.root",
 	     const char* tFile="TbyT.root") {
   gROOT->LoadMacro("bfc.C");
-  TString Chain("in,StEvent,nodefault");
+  TString Chain("StEvent,nodefault");
   bfc(-2,Chain.Data(),0,0,tFile);
   gSystem->Load("StTrackMateMaker");
   cout << "Job will run on    File: " << eventFile1 << endl;
@@ -57,9 +59,11 @@ void RunTbyT(Int_t nevents=999,
 	continue;
       }
     }
+#if 0
     if (! gROOT->IsBatch()) {
       if (Ask()) return;
     } else {_debugAsk = 0;}
+#endif
     goodStuff->Make();
     events[0] = events[1] = 0;
   }
