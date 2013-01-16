@@ -1,7 +1,10 @@
+#include "Ask.h"
 //________________________________________________________________________________
 void RunTbyT(Int_t nevents=999,
-	     const char *eventFile1="./old/st_physics_11035026_raw_2010001.event.root",
-	     const char *eventFile2="./new/st_physics_11035026_raw_2010001_1_200.event.root",
+	     const char *eventFile1="/star/data98/reco/AuAu200_production/FullField/eval_Sti/2010/030/11030018/st_physics_11030018_raw_1020001.event.root",
+	     //"./old/st_physics_11035026_raw_2010001.event.root",
+	     const char *eventFile2="/star/data99/reco/AuAu200_production/FullField/eval_Stv/2010/030/11030018/st_physics_11030018_raw_1020001.event.root",
+	     //"./new/st_physics_11035026_raw_2010001_1_200.event.root",
 	     const char* tFile="TbyT.root") {
   gROOT->LoadMacro("bfc.C");
   TString Chain("in,StEvent,nodefault");
@@ -54,6 +57,9 @@ void RunTbyT(Int_t nevents=999,
 	continue;
       }
     }
+    if (! gROOT->IsBatch()) {
+      if (Ask()) return;
+    } else {_debugAsk = 0;}
     goodStuff->Make();
     events[0] = events[1] = 0;
   }
