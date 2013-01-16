@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.70 2012/03/20 20:45:06 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.71 2013/01/16 16:51:31 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.71  2013/01/16 16:51:31  jwebb
+* Update BTOF volume id's to support GMT in y2013.
+*
 * Revision 1.70  2012/03/20 20:45:06  jwebb
 * Changes to g2t_volume_id to support reconfiguration of the inner TPAD
 * volumes for inner TPC upgrade studies.
@@ -509,6 +512,16 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             sector     = numbv(2)        !  tray(1-60)
             module     = numbv(3)        !  module (eta)
             layer      = numbv(4)        !  layer (1-6, gap in module)
+         else if (btog_choice==13) then  ! full TOF with GMT trays (Run 13+)
+            rileft     = numbv(1)        !  west(1)/east(2)
+            sector     = numbv(2)        !  tray(1-60)
+            module     = numbv(3)        !  module (eta)
+            layer      = numbv(4)        !  layer (1-6, gap in module)
+*           GMT replacement only affects trays 8 (W8), 23 (W23), 93 (E33), and 108 (E48)
+            if ((rileft==1 .and. (sector== 8 .or. sector==23)) .or.
+     +          (rileft==2 .and. (sector==33 .or. sector==48))) then 
+            module     = module + 4    ! account for 4 modules that have replaced with GMT
+            endif
          else
             print *,' g2t_volume_id: unknown TOFr choice.'
             print *,' g2t_volume_id: btog_choice=',btog_choice
