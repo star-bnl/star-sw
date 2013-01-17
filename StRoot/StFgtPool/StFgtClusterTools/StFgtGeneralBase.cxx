@@ -17,7 +17,6 @@
 #include "StarClassLibrary/StThreeVectorF.hh"
 
 #include <set>
-#define FILL_FROM_EVENT
 //#define COSMIC
 //#define ONE_HIT_PER_QUAD
 //#define USE_VTX
@@ -27,7 +26,7 @@
 #endif
 
 
-StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ),evtNr(0),m_effDisk(2), fgtCollection(0)
+StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ),m_fillFromEvent(false),evtNr(0),m_effDisk(2), fgtCollection(0)
 {
   chargeMatchCut=1.5;
   pClusters=new vector<generalCluster>*[6];
@@ -149,14 +148,17 @@ Bool_t StFgtGeneralBase::validPulse(generalStrip& strip)
 
 Int_t StFgtGeneralBase::Make()
 {
-#ifndef FILL_FROM_EVENT
-  //if we constructed fgtCollection ourself, delete it ourself
-  if(fgtCollection)
+  if(!m_fillFromEvent)
     {
-      fgtCollection->Clear();
-      delete fgtCollection;
+
+  //if we constructed fgtCollection ourself, delete it ourself
+      if(fgtCollection)
+	{
+	  fgtCollection->Clear();
+	  delete fgtCollection;
     }
-#endif
+    }
+
   Int_t ierr=kStOk;
   evtNr++;
   clustersD1.clear();
@@ -171,23 +173,26 @@ Int_t StFgtGeneralBase::Make()
       pStrips[i].clear();
     }
   //  cout << " done" <<endl;
-#ifdef FILL_FROM_EVENT
-  StEvent* eventPtr = (StEvent*)GetInputDS("StEvent");
-  fgtCollection=eventPtr->fgtCollection();
-  if( eventPtr ) {
-    fillFromStEvent(fgtCollection);
-  }
-#else
-  fgtCollection=new StFgtCollection();
-  fillFromMuDst(*fgtCollection);
-  fillFromStEvent(fgtCollection);
-#endif
+  if(m_fillFromEvent)
+    {
+      StEvent* eventPtr = (StEvent*)GetInputDS("StEvent");
+      fgtCollection=eventPtr->fgtCollection();
+      if( eventPtr ) {
+	fillFromStEvent(fgtCollection);
+      }
+    }
+  else
+    {
+      fgtCollection=new StFgtCollection();
+      fillFromMuDst(*fgtCollection);
+      cout <<"read mDst " <<endl;
+      fillFromStEvent(fgtCollection);
+      cout <<"filled event" <<endl;
+    }
+
   //do associations
   doEvAssoc();
-
-
   mapGeoId2Cluster.clear();
-
   return ierr;
 }
 
@@ -256,7 +261,7 @@ Int_t StFgtGeneralBase::fillFromStEvent(StFgtCollection* fgtCollectionPtr)
 	    discZ=tmpZ;
 
 	    Int_t geoId=(*hitIter)->getCentralStripGeoId();
-	    //		   cout <<"central geoId in cluster:" << geoId <<endl;
+	    cout <<"central geoId in cluster:" << geoId <<endl;
 	
 	    StFgtGeom::decodeGeoId((*hitIter)->getCentralStripGeoId(),discK, quad, layer, strip);
 	    if(quad<0 && discK<0)//Ithink these are the error conditions
@@ -377,7 +382,7 @@ Int_t StFgtGeneralBase::fillFromStEvent(StFgtCollection* fgtCollectionPtr)
 	    Int_t centerStripId=it->centerStripIdx;
 	    if(centerStripId<0)
 	      {
-		//		     cout <<"bad read4 for cluster with geoid: "<< it->centralStripGeoId <<" index: " << it->centerStripIdx <<" quad: " << it->quad << "index: " <<dCounter-1<< " disc: " << iDx  <<" phi " << it->posPhi <<" r: " << it->posR <<endl;
+				     cout <<"bad read4 for cluster with geoid: "<< it->centralStripGeoId <<" index: " << it->centerStripIdx <<" quad: " << it->quad << "index: " <<dCounter-1<< " disc: " << iDx  <<" phi " << it->posPhi <<" r: " << it->posR <<endl;
 		continue;
 	      }
 
@@ -528,13 +533,13 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 		Int_t clusIdx=assoc->getClusIdx();
 		if(oldClusIdx!=clusIdx) //looking at new clusters
 		  {
-
 		    //construct new cluster
 		    oldClusIdx=clusIdx;
 		    if(pFgtHit>0)
 		      hitCollectionPtr[disc]->getHitVec().push_back(pFgtHit);
 		    StMuFgtCluster* clus = static_cast< StMuFgtCluster* >( (*fgtClusters)[clusIdx] );
 		    Int_t clusCentGeoId=clus->getCentralStripGeoId();
+		    cout <<" looking at : " << clusCentGeoId <<endl;
 		    Float_t clusCharge=clus->getCharge();
 		    Float_t R=clus->getR();
 		    Float_t Phi=clus->getPhi();
@@ -556,6 +561,7 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 		  }
 		else
 		  {
+
 		  }
 		Int_t stripIdx=assoc->getStripIdx();
 		StMuFgtStrip* strip = static_cast< StMuFgtStrip* >( (*fgtStrips)[stripIdx] );
@@ -599,6 +605,9 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 		cout <<"no assoc..." << assoc <<endl;
 	      }
 	  }
+	//put last cluster in...
+	if(pFgtHit>0)
+	  hitCollectionPtr[disc]->getHitVec().push_back(pFgtHit);
       }
       else
 	{
@@ -757,6 +766,12 @@ void StFgtGeneralBase::checkMatches()
       //      cout <<"disk: " << iDx<<" found " << numMatched <<" clusters and " << numNotMatched << " clusters that were not matched" <<endl;
     }
 
+}
+
+void StFgtGeneralBase::fillFromEvent(Bool_t fillFromEv) //default, no, use mDsts
+{
+  m_fillFromEvent=fillFromEv;
+  //  cout <<"m_fillFromEvent: " << m_fillFromEvent <<endl;
 }
 
 void StFgtGeneralBase::doLooseClustering()
