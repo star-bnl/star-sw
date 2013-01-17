@@ -1,4 +1,4 @@
-// $Id: StKFVertexMaker.cxx,v 2.2 2012/09/16 21:38:42 fisyak Exp $
+// $Id: StKFVertexMaker.cxx,v 2.3 2013/01/17 15:57:25 fisyak Exp $
 #include "RVersion.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -166,6 +166,7 @@ Int_t StKFVertexMaker::Make() {
     if (gTrack->flag()     <   0) continue;     // Bad fit
     if (gTrack->flag()     > 700) continue;     // FTPC
     if (gTrack->flag()%100 == 11) continue;     // Short track pointing to EEMC
+    if ((gTrack->isWestTpcOnly() || gTrack->isEastTpcOnly()) && gTrack->isPostXTrack()) continue; // wrong TPC side track
     Int_t kg = gTrack->key();
     TrackNodeMap[kg] = node;
     KFParticle *particle = AddTrackAt(dca,kg);
@@ -333,12 +334,12 @@ Int_t StKFVertexMaker::Make() {
       StiStEventFiller::instance()->fillDetectorInfo(detInfo,kTrack,kFALSE); //3d argument used to increase/not increase the refCount. MCBS oct 04.
       //      StiStEventFiller::instance()->fillPulls(kTrack,1); 
       StPrimaryTrack* pTrack = new StPrimaryTrack;
+      node->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
       pTrack->setKey( gTrack->key());
       pTrack->setFlagExtension( gTrack->flagExtension());
       StiStEventFiller::instance()->fillTrack(pTrack,kTrack, detInfo);
       // set up relationships between objects
       detInfoVec.push_back(detInfo);
-      node->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
       primV->addDaughter(pTrack);
       //________________________________________________________________________________      
     }
@@ -454,9 +455,17 @@ void StKFVertexMaker::Fit() {
     }
     Double_t *zOfPeaks = new Double_t[nfound];
     Int_t npeaks = 0;
+#if ROOT_VERSION_CODE > 336641 /* ROOT_VERSION(5,35,1) */
+    Double_t *xpeaks = fSpectrum->GetPositionX();
+#else
     Float_t *xpeaks = fSpectrum->GetPositionX();
+#endif
     for (Int_t p = 0; p < nfound; p++) {
+#if ROOT_VERSION_CODE > 336641 /* ROOT_VERSION(5,35,1) */
+      Double_t xp = xpeaks[p];
+#else
       Float_t xp = xpeaks[p];
+#endif
       Int_t bin = fVtx->GetXaxis()->FindBin(xp);
       Double_t yp = fVtx->GetBinContent(bin);
       Double_t ep = fVtx->GetBinError(bin);
@@ -579,6 +588,9 @@ Double_t StKFVertexMaker::AnnelingFcn(Double_t TInv) {
 }
 //________________________________________________________________________________
 // $Log: StKFVertexMaker.cxx,v $
+// Revision 2.3  2013/01/17 15:57:25  fisyak
+// Add handles for debugging
+//
 // Revision 2.2  2012/09/16 21:38:42  fisyak
 // use of Tpc West Only and East Only tracks, clean up
 //

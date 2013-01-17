@@ -13,6 +13,17 @@ const Char_t *StPhiEtaHitList::names[3] = {"Active","Fired","Track"};
 static Int_t _debug = 0;
 void StPhiEtaHitList::SetDebug(Int_t k) {_debug = k;}
 Int_t StPhiEtaHitList::Debug() {return _debug;}
+Double_t StPhiEtaHitList::W(Double_t energy) {
+  Double_t W = 0;
+  if (energy >  0.1) W = 1; // 1 ==> 0.1 < energy <=  0.5 Mip	 
+  if (energy >  0.5) W = 2; // 2 ==> 0.5 < energy <=  1.0 Hadron 
+  if (energy >  1.0) W = 3; // 3 ==> 1.0 < energy <=  4.0 Electon
+  if (energy >  4.0) W = 4; // 4 ==> 4.0 < energy <= 10.0 Tower	 
+  if (energy > 10.0) W = 5; // 5 ==>10.0 < energy <= 20.0 W	 
+  if (energy > 20.0) W = 6; // 6 ==>20.0 < energy <=100.0 Z	 
+  if (energy >100.0) W = 7; // 7 ==>       energy > 100.0 ?      
+  return W;
+}
 //________________________________________________________________________________
 StPhiEtaHitList::StPhiEtaHitList() : Wmatch(4), Wveto(0.75) {
   memset(beg, 0, end - beg + 1);
@@ -51,18 +62,19 @@ Bool_t StPhiEtaHitList::isVetoed(Int_t iBin) {
   return veto;
 }
 //________________________________________________________________________________
-#include "StBTofUtil/StBTofTables.h"
+#include "StDetectorDbMaker/St_tofStatusC.h"
 #include "StBTofCollection.h"
 ClassImp(StBtofHitList);
+StBtofHitList *StBtofHitList::fgInstance = 0;
 //________________________________________________________________________________
 StBtofHitList::StBtofHitList() : StPhiEtaHitList() { 
-  myTable = new StBTofTables();
+  fgInstance = this;
   Int_t    nPhi   = mxHalfTray*mxCell;
   phiMin = 0.5;
   Double_t phiMax = phiMin + nPhi;
   Int_t    nEta   = 2*mxModule;
-  Double_t etaMin = -0.5 - mxModule;
-  Double_t etaMax = +0.5 + mxModule;
+  Double_t etaMin =  - mxModule;
+  Double_t etaMax =  + mxModule;
   TH2C **histList[3] = {&mActive, &mFired, &mTrack};
   for (Int_t i = 0; i < 3; i++) {
     *histList[i] = new TH2C(Form("%sBToF",names[i]),Form("List of %s cells in BToF",names[i]),nPhi,phiMin,phiMax,nEta,etaMin,etaMax);
@@ -71,17 +83,25 @@ StBtofHitList::StBtofHitList() : StPhiEtaHitList() {
   }
 }
 //________________________________________________________________________________
-StBtofHitList::~StBtofHitList() {SafeDelete(myTable); }
+StBtofHitList::~StBtofHitList() {fgInstance = 0;}
 //________________________________________________________________________________
 void StBtofHitList::initRun() {
   LOG_INFO <<Form("StBtofHitList::initRun() start")<<endm;
-  myTable->loadTables(StMaker::GetChain());
+  if (Debug() > 1) {
+    St_tofStatusC::instance()->Table()->Print(0,1);
+  }
   Int_t nB=0; Int_t nA=0;
   for(Int_t tray = 1; tray <= mxTray;tray++) 
     for(Int_t module = 1; module <= mxModule;module++) 
       for(Int_t cell = 1; cell <= mxCell;cell++) {
         nB++;
-	if (myTable->status(tray,module,cell) != 1) continue;
+	if (Debug()) {
+	  LOG_INFO << "StBtofHitList::initRun() tray = " << tray
+		   << " module " << module 
+		   << " cell "   << cell 
+		   << " status " << St_tofStatusC::instance()->status(tray,module,cell) << endm;
+	}
+	if (St_tofStatusC::instance()->status(tray,module,cell) != 1) continue;
 	nA++;
 	mActive->Fill(Phi(tray,module,cell),Eta(tray,module,cell));
       }
@@ -161,10 +181,12 @@ Float_t StBtofHitList::getWeight(IntVec ibinVec) {
 #include <StTriggerData.h>
 //________________________________________________________________________________
 ClassImp(StCtbHitList);
+StCtbHitList *StCtbHitList::fgInstance = 0;
 //________________________________________________________________________________
 StCtbHitList::StCtbHitList() : StPhiEtaHitList(), // CTB clibration: 2 MeV==5 ADC
 			   mCtbThres_mev(1),//to reject slats with low dE for M-C data
 			   mCtbThres_ch(2) {//to reject slats with low ADC for real data
+  fgInstance = this;
   Int_t    nPhi   = 60;
   phiMin = -TMath::Pi()/60.;
   Double_t phiMax =  phiMin + TMath::Pi();
@@ -325,8 +347,10 @@ void  StCtbHitList::ctb_get_slat_from_data(Int_t slat, Int_t tray, Float_t & phi
 //Rxy = 222, 242, 262 cm
 //________________________________________________________________________________
 ClassImp(StBemcHitList);
+StBemcHitList *StBemcHitList::fgInstance = 0;
 //________________________________________________________________________________
 StBemcHitList::StBemcHitList() : StPhiEtaHitList(), kSigPed(5.0) {
+  fgInstance = this;
   myTable = new StBemcTables();
   geomB = StEmcGeom::instance("bemc");
   Int_t    nPhi   = 120;
@@ -378,6 +402,7 @@ void StBemcHitList::build ( StEmcDetector*det, Float_t adcMin){
     assert(module);
     StSPtrVecEmcRawHit& rawHit=module->hits();
     for(UInt_t k=0;k<rawHit.size();k++) { //loop on hits in modules
+      if (rawHit[k]->energy() <= 0) continue;
       // check geometry
       Int_t m=rawHit[k]->module();
       Int_t e=rawHit[k]->eta();
@@ -387,17 +412,32 @@ void StBemcHitList::build ( StEmcDetector*det, Float_t adcMin){
       geomB->getPhi(m,s,phi);  // -pi <= phi < pi
       if( phi < phiMin                ) phi += 2*TMath::Pi(); // I want phi in [0,2Pi]
       if (phi > phiMin + 2*TMath::Pi()) phi -= 2*TMath::Pi(); 
+#if 0
       Int_t id;
       geomB->getId(m,e,s,id); // to get the software id    
-      Float_t ped,sig;
+      Float_t ped,sig,calib;
       myTable->getPedestal(BTOW, id, 0, ped,sig); 
       Float_t rawAdc = rawHit[k]->adc();
       if( rawAdc<ped+ kSigPed*sig ) continue;
-      Float_t adc= rawAdc -ped;
+      Float_t adc = rawAdc -ped;
       if(adc< adcMin) continue;
-      Int_t iBin = mFired->Fill(phi,eta);
-      if (StPhiEtaHitList::Debug()) {
-	LOG_INFO << "StBemcHitList::build add fired at iBin = " << iBin << " with phi = " << phi << " eta = " << eta << endm;
+      myTable->getCalib(BTOW, id, 1, calib);
+      Float_t energy = calib * (rawAdc - ped);  
+      Float_t energy = rawHit[k].energy();
+      Double_t W = 1;
+      if (energy >  0.3) W = 2; // MIP
+      if (energy >  1.0) W = 3; // Above  
+      if (energy >  4.0) W = 4; // lowest HT threshold (4 GeV for Run7)
+      if (energy > 30.0) W = 5; //
+#endif
+      Double_t w = W(rawHit[k]->energy());
+      if (w > 0) {
+	Int_t iBin = mFired->Fill(phi,eta,w);
+	if (StPhiEtaHitList::Debug()) {
+	  LOG_INFO << "StBemcHitList::build add fired at iBin = " << iBin << " with phi = " << phi << " eta = " << eta 
+		   << " energy " << rawHit[k]->energy() << " with W = " << w 
+		   << endm;
+	}
       }
     }
   }
@@ -416,11 +456,13 @@ void StBemcHitList::build ( StEmcDetector*det, Float_t adcMin){
 //Z=270, 288,306 cm 
 //________________________________________________________________________________
 ClassImp(StEemcHitList);
+StEemcHitList *StEemcHitList::fgInstance = 0;
 //________________________________________________________________________________
 StEemcHitList::StEemcHitList(StEEmcDb* x, UInt_t y, EEmcGeomSimple *z) :
   StPhiEtaHitList(), eeDb(x), geomE(z), killStatEEmc(y) {
   assert(eeDb);
   assert(geomE);
+  fgInstance = this;
   Float_t  kSigPed=5.0; 
   eeDb-> setThreshold( kSigPed);
   Int_t    nPhi   = 60;
@@ -475,13 +517,13 @@ void StEemcHitList::build ( StEmcDetector*det, Float_t adcMin){
   for(UInt_t mod=1;mod<=det->numberOfModules();mod++) {
     StEmcModule*     module=det->module(mod);
     //printf("ETOW sector=%d nHit=%d\n",mod,module->numberOfHits());
-    StSPtrVecEmcRawHit&     hit=  module->hits();
+    StSPtrVecEmcRawHit&     rawHit=  module->hits();
     Int_t sec=mod; // range 1-12
-    for(UInt_t ih=0;ih<hit.size();ih++){ // over cesctors
-      StEmcRawHit *h=hit[ih];
+    for(UInt_t k=0;k<rawHit.size();k++){ // over cesctors
+      if (rawHit[k]->energy() <= 0) continue;
+      StEmcRawHit *h=rawHit[k];
       Char_t sub='A'+h->sub()-1;// range A-E
       Int_t eta=h->eta();// range 1-12
-      Int_t rawAdc=h->adc();
       //Db ranges: sec=1-12,sub=A-E,eta=1-12; slow method
       const EEmcDbItem *x=eeDb->getT(sec,sub,eta);
       if(! x) continue;
@@ -493,13 +535,21 @@ void StEemcHitList::build ( StEmcDetector*det, Float_t adcMin){
       Int_t isub=x->sub-'A';
       Float_t Phi=geomE->getPhiMean(isec,isub); //   // -pi <= phi < pi
       Float_t Eta=geomE->getEtaMean(ieta);  
+#if 0
+      Int_t rawAdc=h->adc();
       if(rawAdc< x->thr) continue; // still only ped
       Float_t adc=rawAdc - x->ped ;
       if(adc < adcMin) continue; // too low response for MIP
       // printf("add Eemc hit %s adc=%.1f\n",x->name,adc);
-      Int_t iBin = mFired->Fill(Phi,Eta);
-      if (StPhiEtaHitList::Debug()) {
-	LOG_INFO << "StEemcHitList::build add fired at iBin = " << iBin << " with phi = " << Phi << " eta = " << Eta << endm;
+#endif
+      Double_t w = W(rawHit[k]->energy());
+      if (w > 0) {
+	Int_t iBin = mFired->Fill(Phi,Eta,w);
+	if (StPhiEtaHitList::Debug()) {
+	  LOG_INFO << "StEemcHitList::build add fired at iBin = " << iBin << " with phi = " << Phi << " eta = " << Eta 
+		   << " energy " << rawHit[k]->energy() << " with W = " << w 
+		   << endm;
+	}
       }
     }
   }
