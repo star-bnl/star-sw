@@ -1,7 +1,7 @@
 /*!
  * \class StTrack2FastDetectorMatcher
  * \author Jan Balewski, July 2004
- * $Id: StTrack2FastDetectorMatcher.h,v 2.1 2012/05/07 14:56:14 fisyak Exp $
+ * $Id: StTrack2FastDetectorMatcher.h,v 2.2 2013/01/17 15:57:26 fisyak Exp $
  *
  */
 #include "TObject.h"
@@ -13,11 +13,7 @@ class StEEmcDb;
 class StEvent;
 class EEmcGeomSimple;
 class StBTofGeometry; // dongx
-
-class  StBtofHitList;  // dongx
-class  StCtbHitList;
-class  StBemcHitList;
-class  StEemcHitList;
+#include "StPhiEtaHitList.h"
 struct TrackData {
   TrackData() {btofBin = ctbBin = bemcBin = eemcBin = -1; anyMatch=anyVeto=kFALSE; mBtof=mCtb=mBemc=mEemc=mTpc=0; weight = 1;}
   // 3-stat logic: 1=match, -1=veto, 0=dunno
@@ -78,6 +74,9 @@ class StTrack2FastDetectorMatcher: public TObject {
 /***************************************************************************
  *
  * $Log: StTrack2FastDetectorMatcher.h,v $
+ * Revision 2.2  2013/01/17 15:57:26  fisyak
+ * Add handles for debugging
+ *
  * Revision 2.1  2012/05/07 14:56:14  fisyak
  * Add StKFVertexMaker
  *

@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.100 2012/11/09 18:28:10 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.101 2013/01/17 15:57:26 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.101  2013/01/17 15:57:26  fisyak
+ * Add handles for debugging
+ *
  * Revision 2.100  2012/11/09 18:28:10  perev
  * fillpull development
  *
@@ -770,11 +773,11 @@ void StiStEventFiller::fillEventPrimaries()
       fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
       StPrimaryTrack* pTrack = new StPrimaryTrack;
       pTrack->setKey( gTrack->key());
+      nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
       fillTrack(pTrack,kTrack, detInfo);
       // set up relationships between objects
       detInfoVec.push_back(detInfo);
 
-      nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
       vertex->addDaughter(pTrack);
       fillPulls(kTrack,gTrack,1); 
       fillTrackCount2++;
@@ -1114,25 +1117,43 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
   }
   
   gTrack->setFlag( flag);
-  // Match with fast detectors
-  StPhysicalHelixD hlx = gTrack->outerGeometry()->helix();
-  TrackData t;
-  mFastDetectorMatcher->matchTrack2FastDetectors(&hlx,&t);
-  if (t.btofBin > 0) {
-    if (t.mBtof > 0) gTrack->setToFMatched();
-    else             gTrack->setToFNotMatched();
-  }
-  if (t.ctbBin > 0) {
-    if (t.mCtb  > 0) gTrack->setCtbMatched();
-    else             gTrack->setCtbNotMatched();
-  }
-  if (t.bemcBin > 0) {
-    if (t.mBemc  > 0) gTrack->setBemcMatched();
-    else              gTrack->setBemcNotMatched();
-  }
-  if (t.eemcBin > 0) {
-    if (t.mEemc  > 0) gTrack->setEemcMatched();
-    else              gTrack->setEemcNotMatched();
+  if (gTrack->type()==global) {
+    // Match with fast detectors
+    StPhysicalHelixD hlx = gTrack->outerGeometry()->helix();
+    TrackData t;
+    mFastDetectorMatcher->matchTrack2FastDetectors(&hlx,&t);
+    if (t.btofBin > 0) {
+      if (t.mBtof > 0) gTrack->setToFMatched();
+      else             gTrack->setToFNotMatched();
+    }
+    if (t.ctbBin > 0) {
+      if (t.mCtb  > 0) gTrack->setCtbMatched();
+      else             gTrack->setCtbNotMatched();
+    }
+    Int_t W = 0;
+    if (t.bemcBin > 0) {
+      gTrack->setBemcMatched();
+      W = StBemcHitList::instance()->getFired(t.bemcBin);
+    } else
+      gTrack->setBemcNotMatched();
+    if (t.eemcBin > 0) {
+      gTrack->setEemcMatched();
+      W = StEemcHitList::instance()->getFired(t.bemcBin);
+    }  else
+      gTrack->setEemcNotMatched();
+    if (W > 0) {
+      UInt_t fext = gTrack->flagExtension();
+      if (W > 7) W = 7;
+      fext &= ~7;
+      fext += W;
+      gTrack->setFlagExtension(fext);
+    }
+  } else if (gTrack->type()==primary) {
+    StTrackNode *n = gTrack->node();
+    assert(n);
+    StTrack *t = n->track(global);
+    assert(t);
+    gTrack->setFlagExtension(t->flagExtension());
   }
 }
 //_____________________________________________________________________________

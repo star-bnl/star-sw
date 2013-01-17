@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.2 2012/11/06 20:54:09 fisyak Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.3 2013/01/17 15:57:26 fisyak Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -17,8 +17,6 @@
 #include "StEEmcUtil/database/EEmcDbItem.h"
 #include "StEEmcUtil/database/cstructs/eemcConstDB.hh"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
-#include "StPhiEtaHitList.h"
-
 #include "StEmcCollection.h"
 #include "StBTofCollection.h" // dongx
 #include "StBTofUtil/StBTofGeometry.h"
@@ -173,18 +171,19 @@ StTrack2FastDetectorMatcher::matchTrack2BTOF(const StPhysicalHelixD *hlx,TrackDa
       sensor->Master2Local(&global[0],&local[0]);
       if(local[2]<mMinZBtof||local[2]>mMaxZBtof) continue;
       Int_t iBin = btofList->addBtofTrack(tray, module, cell);
+      if (iBin < 0) continue;
       iBinVec.push_back(iBin);
       btofList->addBtofTrack(tray, module, cell);
     }
   }
-
+  if (! iBinVec.size()) return;
   Bool_t  btofMatch=btofList->isMatched(iBinVec);
   Bool_t  btofVeto =btofList->isVetoed(iBinVec);
   Float_t btofW    =btofList->getWeight(iBinVec);
   LOG_DEBUG << " ** BTOF ** match/veto/weight = " << btofMatch << " " << btofVeto << " " << btofW << endm;
   t->updateAnyMatch(btofMatch,btofVeto,t->mBtof);
   t->weight*=btofW;
-  t->btofBin= iBinVec.size() ? iBinVec[0] : -1;
+  t->btofBin= iBinVec.size();
 }
 //________________________________________________________________________________
 void  
@@ -211,7 +210,7 @@ StTrack2FastDetectorMatcher::matchTrack2CTB(const StPhysicalHelixD *hlx,TrackDat
   //1 cout<<"#e @ctbNode xyz="<<posCTB<<" eta="<<eta<<" phi/deg="<<phi/3.1416*180<<" path/cm="<<path<<endl;
 
   Int_t iBin=ctbList->addTrack(eta,phi);
-  
+  if (iBin < 0) return;
   Bool_t  ctbMatch=ctbList->isMatched(iBin);
   Bool_t  ctbVeto =ctbList->isVetoed(iBin);
   Float_t ctbW    =ctbList->getWeight(iBin);
@@ -247,6 +246,7 @@ StTrack2FastDetectorMatcher::matchTrack2BEMC(const StPhysicalHelixD *hlx,TrackDa
   // cout<<"#e @bemcNode xyz="<<posCyl<<" etaDet="<<eta<<" phi/deg="<<phi/3.1416*180<<" path/cm="<<path<<endl;
 
   Int_t iBin=bemcList->addTrack(eta,phi);
+  if (iBin < 0) return;
   Bool_t  bemcMatch=bemcList->isMatched(iBin);
   Bool_t  bemcVeto =bemcList->isVetoed(iBin);
   Float_t bemcW    =bemcList->getWeight(iBin);
@@ -285,6 +285,7 @@ StTrack2FastDetectorMatcher::matchTrack2EEMC(const StPhysicalHelixD *hlx,TrackDa
   Float_t eta=r.pseudoRapidity();
 
   Int_t iBin=eemcList->addTrack(eta,phi);
+  if (iBin < 0) return;
   Bool_t  eemcMatch=eemcList->isMatched(iBin);
   Bool_t  eemcVeto =eemcList->isVetoed(iBin);
   Float_t eemcW    =eemcList->getWeight(iBin);
@@ -303,6 +304,9 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.3  2013/01/17 15:57:26  fisyak
+ * Add handles for debugging
+ *
  * Revision 2.2  2012/11/06 20:54:09  fisyak
  * Fix a bug with misplacement of TObjectSet
  *
