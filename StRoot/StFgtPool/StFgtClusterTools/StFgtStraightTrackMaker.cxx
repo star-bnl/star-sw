@@ -28,12 +28,12 @@
 //#define PRINT_1D
 //max num clusters any disk is allowed to have
 
-#define COSMIC
+//#define COSMIC
 #ifdef COSMIC
 #include "StFgtCosmicAlignment.h"
 #endif
 #define MAX_PHI_DIFF 0.5//the maximal difference in phi a track is allowed 
-#define MAX_CLUSTERS 2
+#define MAX_CLUSTERS 10
 #define CHARGE_MEASURE clusterCharge
 #define MAX_DIST_STRIP_R 0.7
 #define MAX_DIST_STRIP_PHI 0.03
@@ -66,7 +66,7 @@
 #define MAX_DIST2_EFF 1.0
 #define MAX_DIST2 1.0
 
-#define MIN_NUM_POINTS 2
+#define MIN_NUM_POINTS 3
 #define DISK_DIM 40
 #ifndef COSMIC
 #define NUM_EFF_BIN 30
@@ -142,7 +142,7 @@ pair<Double_t,Double_t> StFgtStraightTrackMaker::findCluChargeSize(Int_t iD,Char
 
 Double_t StFgtStraightTrackMaker::findClosestPoint(float mx, float bx, float my, float by, double xE, double yE, Int_t iD)
 {
-  cout <<"expecting point at " << xE <<", " <<yE <<endl;
+  //  cout <<"expecting point at " << xE <<", " <<yE <<endl;
   if(iD<0 || iD >5)
     {
       return 99999;
@@ -169,13 +169,14 @@ Double_t StFgtStraightTrackMaker::findClosestPoint(float mx, float bx, float my,
 
 	  Float_t x=r*cos(phi);
 	  Float_t y=r*sin(phi);
-	  cout <<"we have " << x <<", " << y <<endl;
+	  //	  cout <<"we have " << x <<", " << y <<endl;
 	  Double_t mDist=(x-xE)*(x-xE)+(y-yE)*(y-yE);
 	  if(mDist<dist2)
 	    {
 	      dist2=mDist;
 	      //recalculate distance with proper alignment
 	      float tmpX, tmpY,tmpZ,tmpP,tmpR;
+#ifdef COSMIC
 	      getAlign(iD,phi,r,tmpX,tmpY,tmpZ,tmpP,tmpR);
 	      Double_t xExpUpdate=mx*tmpZ+bx;
 	      Double_t yExpUpdate=my*tmpZ+by;
@@ -183,6 +184,7 @@ Double_t StFgtStraightTrackMaker::findClosestPoint(float mx, float bx, float my,
 	      cout<<"tmpy: " << tmpY <<" old: " << y <<" yE old: " << yE << " updated: " << yExpUpdate<<endl;
 	      mDist=(tmpX-xExpUpdate)*(tmpX-xExpUpdate)+(tmpY-yExpUpdate)*(tmpY-yExpUpdate);
 	      dist2=mDist;
+#endif
 	      ///Double_t xExp=mx*StFgtGeom::getDiscZ(i)+bx;
 	      //	    Double_t yExp=my*StFgtGeom::getDiscZ(i)+by;
 
@@ -317,7 +319,7 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     Ex += x;
     Ey += y;
 
-    //    cout << "*** Point located at " << x << ' ' << y << ' ' << z << " Disk: " << iter->dID <<endl;
+        cout << "*** Point located at " << x << ' ' << y << ' ' << z << " Disk: " << iter->dID <<endl;
   }
   //  cout <<"ipZ: " << ipZ <<endl;
   //  cout <<"get track3" <<endl;
@@ -493,7 +495,7 @@ Double_t StFgtStraightTrackMaker::getRPhiRatio(vector<generalCluster>::iterator 
 */
 Int_t StFgtStraightTrackMaker::Make()
 {
-  cout <<"trakcer! had " << m_tracks.size() << " old tracks" <<endl;
+  cout <<"tracker! had " << m_tracks.size() << " old tracks" <<endl;
   for(vector<AVTrack>::iterator it=m_tracks.begin();it!=m_tracks.end();it++)
     {
       if(it->points)
@@ -505,11 +507,29 @@ Int_t StFgtStraightTrackMaker::Make()
   Int_t ierr = kStOk;
   StFgtGeneralBase *fgtGenMkr = static_cast<StFgtGeneralBase * >( GetMaker("fgtGenBase"));
   pClusters=fgtGenMkr->getClusters();
+  for(int i=0;i<6;i++)
+    {
+      cout <<"there are " << pClusters[i]->size() << " clusters in disk " << i <<endl;
+      for(int j=0;j<pClusters[i]->size();j++)
+	{
+
+	  if((*(pClusters[i]))[j].layer=='R')
+	    cout <<"R layer, ";
+	  else
+	    cout <<"Phi layer, ";
+
+	  Double_t posPhi=(*(pClusters[i]))[j].posPhi;
+	  Double_t posR=(*(pClusters[i]))[j].posR;
+	  Int_t clusSize=(*(pClusters[i]))[j].clusterSize;
+	  Double_t charge=(*(pClusters[i]))[j].clusterCharge;
+	  Int_t cntGeoId=(*(pClusters[i]))[j].centralStripGeoId;
+	  Int_t seedType=(*(pClusters[i]))[j].seedType;
+	  cout <<"cluster pos phi: " << posPhi <<" posR: " << posR <<" clusSize: " << clusSize << " charge: "<< charge <<" geoId: "<< cntGeoId <<" seedT : " << seedType<<endl;
+	}
+    }
   pStrips=fgtGenMkr->getStrips();
 
-
   //  cout <<" mtracks size: " << m_tracks.size() << " oldnum: "<< oldNumTracks <<endl;
-
   
   Float_t x;
   Float_t y;
@@ -526,7 +546,6 @@ Int_t StFgtStraightTrackMaker::Make()
 
   //vector<generalCluster> &hitVecD1=*(pClusters[0]);
   //vector<generalCluster> &hitVecD6=*(pClusters[5]);
-
   set<Int_t> usedPoints;//saves the points that have been used for tracks (and shouldn't be reused)
   Double_t D1Pos=StFgtGeneralBase::getLocDiscZ(0);
   Double_t D6Pos=StFgtGeneralBase::getLocDiscZ(5);
@@ -546,6 +565,7 @@ Int_t StFgtStraightTrackMaker::Make()
 	    continue;
 	  if(pClusters[iSeed1]->size() > MAX_CLUSTERS || pClusters[iSeed2]->size() > MAX_CLUSTERS)
 	    {
+	           cout <<"too many clusters in the disk!!!"<<endl<<endl;
 	      continue;
 	    }
 	  //track where we have hits in disks
@@ -565,11 +585,8 @@ Int_t StFgtStraightTrackMaker::Make()
 	      Short_t quadP=hitIterD1->quad;
 	      Char_t layer=hitIterD1->layer;
 
-
-	      
 	      Double_t seed1ChargePhi=hitIterD1->CHARGE_MEASURE;
 	      Double_t seed1SizePhi=hitIterD1->clusterSize;
-
 	      //	      if(quadP>2)
 	      //		continue;
 
@@ -618,7 +635,6 @@ Int_t StFgtStraightTrackMaker::Make()
 		      fgtHitD1R=hitIterD1R->fgtHit;
 		      if(layer!='R')
 			continue;
-
 		      if(quadR!=quadP)
 			continue;
 		      quadSeed1=quadR;
@@ -653,11 +669,9 @@ Int_t StFgtStraightTrackMaker::Make()
 			    continue;
 
 
-
 			  if(usedPoints.find(geoIdSeed2R)!=usedPoints.end())
 			    continue;
 			  Float_t rD6=hitIterD6R->posR;
-
 			  			  //track goes towards smaller radii
 #ifndef COSMIC
 			  if(rD1>rD6)
@@ -669,7 +683,7 @@ Int_t StFgtStraightTrackMaker::Make()
 			  //add the seed points to the points
 			  Double_t xD6=rD6*cos(phiD6);
 			  Double_t yD6=rD6*sin(phiD6);
-			  //			  cout <<"Disk " << iSeed2 <<", phiD6: " << phiD6 <<" xD6: " << xD6 <<" yD6: " << yD6 <<" rD6: " << rD6 <<endl;
+			  cout <<"Disk " << iSeed2 <<", phiD6: " << phiD6 <<" xD6: " << xD6 <<" yD6: " << yD6 <<" rD6: " << rD6 <<endl;
 			  AVPoint avp1(xD1,yD1,D1Pos,rD1,phiD1,iSeed1,quadSeed1,seed1ChargeR, seed1ChargePhi, seed1SizeR, seed1SizePhi);
 			  avp1.fgtHitR=fgtHitD1R;
 			  avp1.fgtHitPhi=fgtHitD1Phi;
@@ -679,8 +693,6 @@ Int_t StFgtStraightTrackMaker::Make()
 			  avp2.fgtHitPhi=fgtHitD6Phi;
 			  v_points->push_back(avp2);
 			  ///for each combination in d1,d6
-
-
 
 			  int iFound=0;
 			  int iFoundR=0;
@@ -699,11 +711,14 @@ Int_t StFgtStraightTrackMaker::Make()
 
 			  Double_t closestDist=999999;
 			  Int_t quadTestR=-1;
+			  cout <<"looking for more hits..." <<endl;
 			  for(int iD=0;iD<6;iD++)
 			    {
 			      //			      cout <<"testting disk: " << iD <<endl;
 			      if(iD==iSeed1 || iD==iSeed2 || iD==m_effDisk)
 				continue;
+
+			      cout <<"looking at disk: " << iD <<" seed1: " << iSeed1 << " seed2: " << iSeed2 <<endl;
 			      //			      cout <<"not seed " << endl;
 			      Bool_t found=false;
 			      Bool_t foundR=false;
@@ -713,6 +728,7 @@ Int_t StFgtStraightTrackMaker::Make()
 
 			      Double_t xPosExp=xD1+(xD6-xD1)*(diskZ-D1Pos)/zArm;
 			      Double_t yPosExp=yD1+(yD6-yD1)*(diskZ-D1Pos)/zArm;
+			      cout <<"hope to see something x: " << xPosExp <<" y: " << yPosExp <<endl;
 			      Double_t rPosExp=rD1+(rD6-rD1)*(diskZ-D1Pos)/zArm;
 			      vector<generalCluster> &hitVec=*(pClusters[iD]);
 			      for(hitIter=hitVec.begin();hitIter!=hitVec.end();hitIter++)
@@ -732,12 +748,14 @@ Int_t StFgtStraightTrackMaker::Make()
 				  if(layer!='P')
 				    continue;
 				  Float_t phi=hitIter->posPhi;
+				  cout <<"phi : " << phi << " phiD1: " << phiD1 <<" phiD6: " << phiD6 <<endl;
 				  StFgtHit* fgtHitPhi=hitIter->fgtHit;
 				  if(fabs(phi-phiD1)>MAX_PHI_DIFF)
 				    continue;
 				  if(fabs(phi-phiD6)>MAX_PHI_DIFF)
 				    continue;
 
+				  cout <<" survived max_phi_diff cuts " <<endl;
 				  //Double_t phiCharge=hitIter->CHARGE_MEASURE;
 
 				  //				  								  Double_t phiCharge=hitIter->maxAdc;
@@ -769,10 +787,10 @@ Int_t StFgtStraightTrackMaker::Make()
 #endif
 				      x=r*cos(phi);
 				      y=r*sin(phi);
-				      //				      cout <<"checking with x: " << x << " y: " << y << " phi: " << phi <<" r: " << r <<endl;
-				      //				      cout <<" x, y: " << x <<", " << y << " exp: " << xPosExp << " , " << yPosExp <<endl;
+				      		      cout <<"checking with x: " << x << " y: " << y << " phi: " << phi <<" r: " << r <<endl;
+				      				      cout <<" x, y: " << x <<", " << y << " exp: " << xPosExp << " , " << yPosExp <<endl;
 				      Double_t dist2=(x-xPosExp)*(x-xPosExp)+(y-yPosExp)*(y-yPosExp);
-				      //				      cout <<" dist2: " << dist2 <<endl;
+				      				      cout <<" dist2: " << dist2 <<endl;
 
 #ifdef ADD_MULTIPLE
 				      if(dist2<MAX_DIST2)
@@ -811,7 +829,7 @@ Int_t StFgtStraightTrackMaker::Make()
 
 				  double x=r*cos(phi);
 				  double y=r*sin(phi);
-
+				  cout<<" adding point with r: "<< r <<" phi: " << phi <<" x: " << x <<" y: " << y <<endl;
 				  Double_t rCharge=iterClosestR->CHARGE_MEASURE;
 				  Double_t phiCharge=iterClosestPhi->CHARGE_MEASURE;
 				  Int_t clusterSizeR=iterClosestR->clusterSize;
@@ -820,6 +838,7 @@ Int_t StFgtStraightTrackMaker::Make()
 
 #ifndef ADD_MULTIPLE//then we already added it
 				  AVPoint avp(x,y,diskZ,r,phi,iD,quadTestR, rCharge,phiCharge, clusterSizeR,clusterSizePhi);
+				  cout<<" adding point with r: "<< r <<" phi: " << phi <<" x: " << x <<" y: " << y <<endl;
 				  avp.fgtHitR=fgtHitR;
 				  avp.fgtHitPhi=fgtHitPhi;
 				  v_points->push_back(avp);
