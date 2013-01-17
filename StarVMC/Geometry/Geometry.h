@@ -207,11 +207,13 @@ class MagpGeom_t: public AgStructure
   MagpGeom_t(): AgStructure("MagpGeom_t","STAR Magnet Master Geometry Table")
     {
       select="default";
-      module="MagpGeo";
+      module="MagpGeo";      
+      version=1.0;
     };
   ~MagpGeom_t(){ /* nada */ };
   TString select;
   TString module;
+  Float_t version;
 };
   
 // ----------------------------------------------------------------------
