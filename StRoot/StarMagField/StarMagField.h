@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.h,v 1.12 2013/01/16 18:17:33 fisyak Exp $
+ * $Id: StarMagField.h,v 1.13 2013/01/17 15:11:33 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,8 +11,17 @@
  ***********************************************************************
  *
  * $Log: StarMagField.h,v $
- * Revision 1.12  2013/01/16 18:17:33  fisyak
- * Step back
+ * Revision 1.13  2013/01/17 15:11:33  fisyak
+ * More clear handling ROOT and non ROOT versions
+ *
+ * Revision 1.11  2013/01/16 00:05:27  fisyak
+ * Add TObject
+ *
+ * Revision 1.10  2013/01/15 23:45:02  fisyak
+ * Account ROOT version with TVirtualMagField
+ *
+ * Revision 1.9  2013/01/15 17:35:23  fisyak
+ * Create clean versions of ROOT and non ROOT StarMagField
  *
  * Revision 1.8  2009/12/11 14:19:07  fisyak
  * switch from define to enum
@@ -65,7 +74,18 @@
 #include <stdlib.h>
 #include <Stiostream.h>
 #include <Rtypes.h>
-class StarMagField  {
+#if defined (__ROOT__)
+#if ROOT_VERSION_CODE >= 335360 /* ROOT_VERSION(5,30,0) */
+#include "TVirtualMagField.h"
+class StarMagField : public TVirtualMagField 
+#else
+#include "TObject.h"
+class StarMagField : public TObject
+#endif
+#else
+class StarMagField 
+#endif
+{
  public:
   enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
   enum   ESmFSizes {nZ = 57, nR = 28, nPhi = 37, nZSteel = 16, nRSteel = 115, nPhiSteel = 25};
@@ -119,14 +139,17 @@ class StarMagField  {
 		 Bool_t  Lock    =  kFALSE, Float_t Rescale =      1, 
 		 Float_t Bdipole =  -42.67, Float_t Rmaxdip =  15.34,
 		 Float_t Zmindip =   980.0, Float_t Zmaxdip = 1350.0) ;
-  static StarMagField *Instance() {return fgInstance;}
+  static StarMagField *Instance();
   virtual ~StarMagField () { fgInstance = 0; }
 
 
   virtual void    BField   ( const Float_t x[], Float_t B[] ) ;
   virtual void    BField   ( const Double_t x[], Double_t B[] ) ;
+  virtual void    Field    ( const Float_t x[], Float_t B[] ) {BField(x,B);}
+  virtual void    Field    ( const Double_t x[], Double_t B[] ) {BField(x,B);}
   virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    B3DField ( const Float_t x[], Float_t B[] ) ;
+  virtual void    B3DField ( const Double_t x[], Double_t B[] ) ;
   virtual void    BrBz3DField ( const Float_t r, const Float_t z, const Float_t phi,
   				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
   virtual void    SetFactor (Float_t factor = 1);
@@ -140,9 +163,10 @@ class StarMagField  {
   virtual Float_t GetFactor()  {return fFactor;}
   virtual Float_t GetRescale() {return fRescale;}
   virtual Bool_t  IsLocked()   {return fLock;}
-  virtual void    Print();
-  //  ClassDef(StarMagField,1)    // Base class for all STAR MagField
-
+  virtual void    Print(Option_t* opt="") const;
+#ifdef __ROOT__
+  ClassDef(StarMagField,1)    // Base class for all STAR MagField
+#endif
 };
 
 #endif

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.21 2013/01/16 18:17:33 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.22 2013/01/17 15:11:33 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,8 +11,14 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
- * Revision 1.21  2013/01/16 18:17:33  fisyak
- * Step back
+ * Revision 1.22  2013/01/17 15:11:33  fisyak
+ * More clear handling ROOT and non ROOT versions
+ *
+ * Revision 1.20  2013/01/15 23:45:02  fisyak
+ * Account ROOT version with TVirtualMagField
+ *
+ * Revision 1.19  2013/01/15 17:35:23  fisyak
+ * Create clean versions of ROOT and non ROOT StarMagField
  *
  * Revision 1.18  2011/07/21 16:52:10  fisyak
  * Comment out Lijuan correction which broke B3DField
@@ -139,9 +145,13 @@ StarMagField *StarMagField::fgInstance = 0;
 #define agufld           F77_NAME(agufld,AGUFLD)
 #define  gufld           F77_NAME( gufld, GUFLD)
 #define mfldgeo          F77_NAME(mfldgeo,MFLDGEO)
+#ifdef __ROOT__
+ClassImp(StarMagField);
+#endif
+//________________________________________________________________________________
+StarMagField* StarMagField::Instance() {return fgInstance;}
 //________________________________________________________________________________
 R__EXTERN  "C" {
-  Float_t type_of_call  gufld(Float_t *x, Float_t *bf);
 
   Float_t type_of_call agufld(Float_t *x, Float_t *bf) {
     bf[0] = bf[1] = bf[2] = 0;
@@ -153,24 +163,24 @@ R__EXTERN  "C" {
     }
     return 0;
   }
+  Float_t type_of_call  gufld(Float_t *x, Float_t *bf);// {agufld(x,bf);}
 //________________________________________________________________________________
-  void type_of_call mfldgeo(float &factor) {
+  void type_of_call mfldgeo(Float_t &factor) {
     if (StarMagField::Instance()) {
       printf("StarMagField  mfldgeo: The field has been already instantiated.\n");
     } else {
       printf("StarMagField  instantiate starsim field=%g\n",factor);
       (new StarMagField(StarMagField::kMapped,factor/5.))->SetLock();
     }
-    float x[3]={0},b[3];
+    Float_t x[3]={0},b[3];
     gufld(x,b);
     printf("StarMagField:mfldgeo(%g) Bz=%g\n",factor,b[2]);
   }
 }
 //________________________________________________________________________________
-//ClassImp(StarMagField);
 struct BFLD_t { 
   Int_t version; 
-  Char_t *code; 
+  const Char_t *code; 
   Float_t date; Int_t kz; Float_t rmaxx, zmaxx, rrm, zz1, zz2;
   Float_t RmaxInn, ZmaxInn;
   Int_t   nrp, nzp;
@@ -351,6 +361,11 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
 			     Bool_t lock, Float_t rescale, 
 			     Float_t BDipole, Float_t RmaxDip,
 			     Float_t ZminDip, Float_t ZmaxDip) :
+#ifdef __ROOT__
+#if ROOT_VERSION_CODE >= 335360 /* ROOT_VERSION(5,30,0) */
+  TVirtualMagField("StarMagField"),
+#endif
+#endif
   fMap(map), 
   fFactor(factor),   fRescale(rescale),
   fBDipole(BDipole), fRmaxDip(RmaxDip), 
@@ -514,12 +529,12 @@ void StarMagField::B3DField( const Float_t x[], Float_t B[] )
   return ;
   
 }
-
-
-
-
-
-
+void StarMagField::B3DField( const Double_t x[], Double_t B[] ) {
+  Float_t xx[3] = {x[0], x[1], x[2]};
+  Float_t bb[3];
+  B3DField(xx,bb);
+  B[0] = bb[0]; B[1] = bb[1]; B[2] = bb[2];
+}
 
 /// B field in Radial coordinates - 2D field (ie Phi symmetric)
 
@@ -1135,7 +1150,7 @@ void StarMagField::SetLock () {
 }
 //________________________________________________________________________________
 #define PrintPar(A) printf("StarMagField:: "#A"\t%f\n",f ## A)
-void StarMagField::Print () {
+void StarMagField::Print (Option_t*) const {
   if (fLock) printf("StarMagField parameters are locked\n");
   printf("StarMagField:: Map\t%i\n",fMap  );
   PrintPar(Factor );
