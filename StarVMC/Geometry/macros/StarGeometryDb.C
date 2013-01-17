@@ -1234,7 +1234,12 @@ void y2013()
   };
 
 
-	   
+  geom.select = "y2013x"; {
+    // Inherits y2013 and
+    geom.magpFlag = "MAGPv1"; geom.magpStat = 1;
+    setTitle("Asymptotic y2013");
+    geom.fill();
+  }
   
 
 }
