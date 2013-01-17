@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.8 2012/06/03 06:34:45 zhux Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.9 2013/01/17 15:09:19 fisyak Exp $
  *
  */
 
@@ -219,11 +219,11 @@ Int_t StPrepEmbedMaker::InitRun(const int runnum)
     LOG_INFO << "StPrepEmbedMaker::InitRun  Open FZ file: " << mFzFile << endm;
     Do("user/output o " + mFzFile);
   }
-  
+#if 0 /* Please don't do this. starsim make in root4star has distroied table on virtual functions. */
   // Common geant settings
   Do("make gstar"); // Make user-defined particles available
+#endif   
   gSystem->Load("libgstar");
-   
   Do("detp  hadr_on");
   TString cmd("rndm ");
   cmd+=mSettings->rnd1; cmd+=" "; cmd+=mSettings->rnd2;
@@ -828,6 +828,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.9  2013/01/17 15:09:19  fisyak
+ * Remove starsim make, which destroys virtual function tables, bug #2487
+ *
  * Revision 1.8  2012/06/03 06:34:45  zhux
  * Added a switch to cut on the ranking of primary vertex
  *
