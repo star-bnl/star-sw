@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemoryInfo.cc,v 1.4 2012/06/11 15:29:26 fisyak Exp $
+ * $Id: StMemoryInfo.cc,v 1.5 2013/01/17 14:40:04 fisyak Exp $
  *
  * Author: Thomas Ullrich, June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMemoryInfo.cc,v $
+ * Revision 1.5  2013/01/17 14:40:04  fisyak
+ * Add APPLE
+ *
  * Revision 1.4  2012/06/11 15:29:26  fisyak
  * std namespace
  *
@@ -36,7 +39,7 @@ StMemoryInfo* StMemoryInfo::instance()
 
 StMemoryInfo::StMemoryInfo()
 {
-#if !defined(__SUNPRO_CC)
+#if !defined(__SUNPRO_CC) && !defined(__APPLE__)
     mInfo = mOldInfo = mallinfo();
 #endif
     mCounter = 0;
@@ -49,8 +52,10 @@ StMemoryInfo::operator=(const StMemoryInfo &) {/* private */ return *this;}
 
 void StMemoryInfo::snapshot()
 {
+#ifndef __APPLE__
     mOldInfo = mInfo;
-#if !defined(__SUNPRO_CC)
+#endif
+#if !defined(__SUNPRO_CC) && !defined(__APPLE__)
     mInfo = mallinfo();
 #endif
     mCounter++;
@@ -72,7 +77,7 @@ void StMemoryInfo::printLine(ostream& os, const char* str, int cur, int old, con
 void StMemoryInfo::print(ostream& os)
 {   
     os << "---------- Memory Status (snapshot #" << mCounter << ") ----------" << endl;
-#if defined(__SUNPRO_CC)
+#if defined(__SUNPRO_CC) || defined(__APPLE__)
     os << "Sorry, StMemoryInfo is not supported on SUN." << endl;    
 #elif defined(__GNUC__)
     printLine(os, "total space allocated from system", mInfo.arena, mOldInfo.arena);

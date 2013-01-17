@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemoryInfo.hh,v 1.4 2003/09/02 17:59:35 perev Exp $
+ * $Id: StMemoryInfo.hh,v 1.5 2013/01/17 14:40:04 fisyak Exp $
  *
  * Author: Thomas Ullrich, June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMemoryInfo.hh,v $
+ * Revision 1.5  2013/01/17 14:40:04  fisyak
+ * Add APPLE
+ *
  * Revision 1.4  2003/09/02 17:59:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -27,7 +30,9 @@
 #ifndef StMemoryInfo_hh
 #define StMemoryInfo_hh
 
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include <Stiostream.h>
 
 class StMemoryInfo {
@@ -45,8 +50,10 @@ private:
 
     void   printLine(ostream&, const char*, int, int, const char* = 0);
     static StMemoryInfo* mMemoryInfo;
+#ifndef __APPLE__
     struct mallinfo      mInfo;
     struct mallinfo      mOldInfo;
+#endif
     size_t               mCounter;
 };
 
