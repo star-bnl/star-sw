@@ -98,6 +98,7 @@ class StFgtGeneralBase : public StMaker {
   Double_t vtxZ;
   StFgtGeneralBase(const Char_t* name="FgtGeneralBase");
 
+  void fillFromEvent(Bool_t fillFromEv=true); //default, no, use mDsts
   void doLooseClustering();
   //check if cluster has energy match in other layer
   void checkMatches();
@@ -157,7 +158,7 @@ enum evStatCodes
     numCluSeed3
   };
  StFgtCollection* fgtCollection;
-
+ Bool_t m_fillFromEvent;
   TH1D* clusWChargeMatch;
   TH1D* clusWOChargeMatch;
   TH1D* evStatistics;
