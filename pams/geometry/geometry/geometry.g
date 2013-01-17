@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.251 2012/12/19 14:48:39 jwebb Exp $
+* $Id: geometry.g,v 1.252 2013/01/17 21:04:52 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.252  2013/01/17 21:04:52  jwebb
+* Support for improved magnet model, improved trim coil description, in y2013x
+* geometry tag.
+*
 * Revision 1.251  2012/12/19 14:48:39  jwebb
 * Updates to support y2013 version of MTD.
 *
@@ -1054,8 +1058,7 @@
 
 replace [exe BBCMon;] with [;BBCM=on;]
 
-*                                                                                   Barrel Calorimeter 
-
+replace [exe MAGPv1;] with [;MagpConfig = 2; """Improved magnet model"""; ]
 
 replace [exe CALBof;] with [;CALB=off;]
 replace [exe CALB00;] with [;"Full barrel in 2007"; CALB=on;
@@ -2005,6 +2008,10 @@ REPLACE [exe y2013;] with ["Y2013 first cut geometry";
     exe PIXL02;      "Development version of the pixl detector";
 ]
 
+REPLACE [exe y2013x;] with ["Y2013 asymptotic";
+    EXE y2013;    "first cut 2013";
+    EXE MAGPv1;   "version 1 of the magnet";
+]
 
 c ===============================================================================
 c ===============================================================================
@@ -2260,7 +2267,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
               FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig, EiddConfig, TpcxConfig, TpadConfig,
-              IstdConfig,PxstConfig
+              IstdConfig, PxstConfig, MagpConfig
 
    Integer    FpdmPosition / 0 /
 
@@ -2385,6 +2392,7 @@ replace[;Case#{#;] with [
    EiddConfig  = 0 ! EAst side, Trd, Tof and Calo for eSTAR studies
    TpcxConfig  = 0 ! Tpc Experimental 
    TpadConfig  = 0 ! Tpad configuration
+   MagpConfig  = 1 ! Default magnet configuration
 
    pipeFlag = 3 ! pipe wrap + svt shield
 
@@ -2859,6 +2867,10 @@ If LL>0
   Case y2013 { y2013 : y2013 first cut geometry;
                  Geom = 'y2013   ';
                  exe y2013; }
+
+  Case y2013x { y2013x : y2013 asymptotic;
+                  Geom = 'y2013x  ';
+                  exe y2013x; }
 
   Case dev14 { dev14 : y2014 studies;
                  Geom = 'dev14   ';
