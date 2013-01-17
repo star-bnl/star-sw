@@ -15,7 +15,7 @@
 #include "StRoot/StFgtUtil/StFgtConsts.h"
 
 
-#define COSMIC
+//#define COSMIC
 class StFgtStrip;
 class StFgtCollection;
 class StFgtHit;
