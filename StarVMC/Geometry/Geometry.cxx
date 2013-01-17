@@ -111,7 +111,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   }
 
   // The magnet
-  geom.success_magp = ConstructMagp("MAGPon",       geom.magpStat );
+  geom.success_magp = ConstructMagp( geom.magpFlag, geom.magpStat );
 
   // Beam pipe is always there, but configuration may change
   geom.success_pipe = ConstructPipe( geom.pipeFlag, geom.pipeStat );
@@ -748,6 +748,8 @@ Bool_t Geometry::ConstructSisd( const Char_t *flag, Bool_t go )
 Bool_t Geometry::ConstructMagp( const Char_t *flag, Bool_t go )
 { if (!go) return false;
 
+  cout << "magp select = " << flag << endl;
+
   if ( !magpGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
@@ -755,6 +757,9 @@ Bool_t Geometry::ConstructMagp( const Char_t *flag, Bool_t go )
     }
 
   AgStructure::AgDetpNew( "MagpGeo", Form("Magnet configuration %s",flag));
+  AgStructure::AgDetpAdd( "Magg_t", "version", magpGeom.version );
+
+  //  cout << "Magg_t version = " << magpGeom.version << endl;
 
   if ( go )
   if ( !CreateModule( magpGeom.module  ) )
@@ -1876,6 +1881,7 @@ Bool_t Geometry::MagpInit()
 {
   magpGeom.select="MAGPon"; magpGeom.module="MagpGeo"; magpGeom.fill();
   magpGeom.select="MAGPof"; magpGeom.module="None";    magpGeom.fill();
+  magpGeom.select="MAGPv1"; magpGeom.module="MagpGeo"; magpGeom.version=2.0; magpGeom.fill();
   return true;
 };
 // ----------------------------------------------------------------------------
