@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.144 2012/11/26 18:45:55 jwebb Exp $
+// $Id: St_geant_Maker.cxx,v 1.145 2013/01/17 15:10:55 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.145  2013/01/17 15:10:55  fisyak
+// Add handle for setting runG, be more careful with setting mag.field
+//
 // Revision 1.144  2012/11/26 18:45:55  jwebb
 // Restoring to previous version of St_geant_Maker and adding in changes needed
 // for new generator framework (i.e. exposing TGiant3 instance).
@@ -665,8 +668,8 @@ St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int
   StMaker(name), 
    fNwGeant(nwgeant), fNwPaw(nwpaw), fIwType(iwtype),
    fVolume(0), fTopGeoVolume(0), 
-   fInputFile(""),fGeoDirectory(0), fEvtHddr(0)
- , fRemakeGeometry(kFALSE),mInitialization(""), mFieldOpt("")
+  fInputFile(""),fGeoDirectory(0), fEvtHddr(0), 
+  fRemakeGeometry(kFALSE),m_geom_gdat(0),mInitialization(""), mFieldOpt("")
 {
   fgGeantMk = this;
   fgGeom  = new TDataSet("geom");  
@@ -811,12 +814,24 @@ Int_t St_geant_Maker::Init(){
 	Double_t sqrtS = 510;
 	Do(Form("ener  %f",sqrtS));
 	Do("CALL PyTUNE(329)"); // set the pythia tune
-	Do("stat");
 	Do("gspread   0.015 0.015 42.00");
-     //?   GKINE -4 0 0. 510. -3.0 +3.0
+	if (IAttr("Wenu")) {
+	  //  select W --> e nu production
+	  Do("ckin 3=10.0");
+	  Do("ckin 4=-1.0");
+	  Do("msel  12");
+	}
+	if (IAttr("Wenu")) {
+	  //  close all decay channels
+	  Do("call closeDecays(24)"); // real call
+	  //   ** enable W+/- --> e+/- nu
+	  Do("call openDecay(24,206,1)");
+	}
+	//?   GKINE -4 0 0. 510. -3.0 +3.0
+	Do("call pystat(1)");
       } else {
 	// gkine #particles partid ptrange yrange phirange vertexrange
-	Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
+	Do("gkine        80      6    1. 1. -2. 2. 0 6.28      0. 0.;");
       }
       Do("mode g2tm prin 1;");
       //  Do("next;");
@@ -832,6 +847,9 @@ Int_t St_geant_Maker::Init(){
 }
 //________________________________________________________________________________
 Int_t St_geant_Maker::InitRun(Int_t run){
+  static Bool_t InitRunDone = kFALSE;
+  if (InitRunDone) return kStOK;
+  InitRunDone = kTRUE;
   if (mInitialization != "") {
     LOG_INFO << "St_geant_Maker::InitRun -- Do geometry initialization" << endm;
     LOG_INFO << "St_geant_Maker::InitRun -- with " << mInitialization.Data() << endm;
@@ -868,10 +886,20 @@ Int_t St_geant_Maker::InitRun(Int_t run){
     Do("gclose all");
   }
   Agstroot();
+  if (IAttr("RunG")) {
+    LOG_INFO << "St_geant_Maker::InitRun -- Set RunG/rndm " << IAttr("RunG") << endl;
+    Do(Form("rung %d 1",IAttr("RunG")));
+    Do(Form("rndm %d",IAttr("RunG")));
+    Do("rndm");
+  }
   LOG_INFO << "St_geant_Maker::InitRun -- Do mag.field initialization" << endm;
-  m_geom_gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
-  if (m_geom_gdat)  {
-    AddRunco(new St_geom_gdat(*m_geom_gdat));
+  m_geom_gdat = (St_geom_gdat *) Find(".runco/geom/geom_gdat");
+  if (! m_geom_gdat) {
+    St_geom_gdat *geom_gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
+    if ( geom_gdat)  {
+      m_geom_gdat = new St_geom_gdat(*geom_gdat);
+      AddRunco(m_geom_gdat);
+    }
   }
   //  if (m_Mode%10 != 1 && IsActive() ) {// Mixer mode == 1 or reco - do not modify EvtHddr and MagF
   if (! IAttr("Don'tTouchTimeStamp") && IsActive() ) {// Mixer mode == 1 or reco - do not modify EvtHddr and MagF
@@ -949,6 +977,7 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 	  LOG_INFO << "St_geant_Maker::Init  SetFlavor(\"" << FieldOption.Data() 
 			     << "\",\"MagFactor\")" << endm;
 	}
+	delete StarMagField::Instance();
 	if (! StarMagField::Instance()) {
 	  new StarMagField ( StarMagField::kMapped, mfscale, kTRUE);
 	  LOG_INFO << "St_geant_Maker::Init  Create StarMagField and lock it"
@@ -963,7 +992,7 @@ Int_t St_geant_Maker::InitRun(Int_t run){
       }
     }
   }
-  if (IsActive() && IAttr("Pythia") && IAttr("beamLine")) {
+  if (IsActive() && IAttr("Pythia")) {
     if (IAttr("beamLine")) {
       St_vertexSeedC* vSeed = St_vertexSeedC::instance();
       if (vSeed) {
@@ -975,11 +1004,6 @@ Int_t St_geant_Maker::InitRun(Int_t run){
 	Do(Form("gslope  %f %f", dxdz, dydz));
       }
     }
-  }
-  if (IAttr("RunG")) {
-    LOG_INFO << "St_geant_Maker::InitRun -- Set RunG " << IAttr("RunG") << endl;
-    Do(Form("rung %d 1",IAttr("RunG")));
-    Do(Form("rndm %d",IAttr("RunG")));
   }
   return kStOK;
 }
@@ -1460,7 +1484,7 @@ void St_geant_Maker::Draw(const char* opt)
 //_____________________________________________________________________________
 void St_geant_Maker::Do(const Char_t *job)
 {  
-  int l=strlen(job);
+  Int_t l=strlen(job);
   if (l) geant3->Kuexel(job);
 }
 //_____________________________________________________________________________
