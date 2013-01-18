@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCorrFctn.hh,v 1.10 2001/06/21 19:06:48 laue Exp $
+ * $Id: StHbtCorrFctn.hh,v 1.11 2013/01/18 16:13:04 yyang Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtCorrFctn.hh,v $
+ * Revision 1.11  2013/01/18 16:13:04  yyang
+ * Add PairCut for CFs that share same cuts, but pair cuts
+ *
  * Revision 1.10  2001/06/21 19:06:48  laue
  * Some minor structural changes (forward declarations, etc)
  *
@@ -53,6 +56,7 @@
 #define StHbtCorrFctn_hh
 
 #include "StHbtMaker/Base/StHbtBaseAnalysis.h"
+#include "StHbtMaker/Base/StHbtPairCut.h"
 #include "StHbtMaker/Infrastructure/StParityTypes.hh"  // can not forward declare typedefs
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
@@ -62,9 +66,9 @@
 class StHbtCorrFctn{
 
 public:
-  StHbtCorrFctn(){/* no-op */};
+  StHbtCorrFctn() { mPairCut = 0; }
   StHbtCorrFctn(const StHbtCorrFctn& );
-  virtual ~StHbtCorrFctn(){/* no-op */};
+  virtual ~StHbtCorrFctn(){/* no-op */}
 
   virtual StHbtString Report() = 0;
 
@@ -82,6 +86,8 @@ public:
 
   virtual StHbtCorrFctn* Clone() { return 0;}
 
+  virtual StHbtPairCut* GetPairCut() { return mPairCut; }
+
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
   friend class StHbtBaseAnalysis;
   StHbtBaseAnalysis* HbtAnalysis(){return myAnalysis;};
@@ -89,6 +95,7 @@ public:
 
 protected:
   StHbtBaseAnalysis* myAnalysis;
+  StHbtPairCut* mPairCut;
 
 private:
 
@@ -100,7 +107,7 @@ inline void StHbtCorrFctn::AddMixedPair(const StHbtPair*) { cout << "Not impleme
 inline void StHbtCorrFctn::AddRealTriplet(const StHbtTriplet*) { cout << "Not implemented" << endl; }
 inline void StHbtCorrFctn::AddMixedTriplet(const StHbtTriplet*) { cout << "Not implemented" << endl; }
 
-inline StHbtCorrFctn::StHbtCorrFctn(const StHbtCorrFctn& c) { myAnalysis =0; }
+inline StHbtCorrFctn::StHbtCorrFctn(const StHbtCorrFctn& c) { myAnalysis =0; mPairCut = c.mPairCut; }
 inline void StHbtCorrFctn::SetAnalysis(StHbtBaseAnalysis* analysis) { myAnalysis = analysis; }
 
 #endif
