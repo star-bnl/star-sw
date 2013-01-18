@@ -13,10 +13,10 @@
 #include "TF2.h"
 #endif
 
-#ifndef ROOT_TH3
+//#ifndef ROOT_TH3
 #include "TH3.h"
 #include "TF3.h"
-#endif
+//#endif
 
 #include "StHbtMaker/Infrastructure/CTH.hh"
 
