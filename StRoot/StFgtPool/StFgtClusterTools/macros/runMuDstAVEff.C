@@ -5,6 +5,9 @@ class StMuDstMaker;
 class StMuFgtOccTxtMkr;
 class StFgtGenPlotter;
 class StFgtGenAVEMaker;
+class StFgtGeneralBase;
+class StFgtStraightTrackMaker;
+class StFgtStraightPlotter;
 class StFgtDbMaker;
 
 // global variables
@@ -12,10 +15,13 @@ StChain            *analysisChain = 0;
 StMuDstMaker       *muDstMaker    = 0;
 StFgtGenPlotter    *fgtGenPlotter     = 0;
 StFgtGenAVEMaker    *fgtAVEffMkr     = 0;
+StFgtGeneralBase * fgtGenBase =0;
+StFgtStraightTrackMaker* fgtStraightTrackMaker;
+StFgtStraightPlotter* fgtStraightPlotter;
 StFgtDbMaker *fgtDbMkr=0;
 
 void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
-                             Int_t neventsIn = 200 ){
+                             Int_t neventsIn = 400 ){
   cout <<" looking at file: " << filename << endl;
    // load the shared libraries
    std::cout << "***** Loading libraries *****" << endl;
@@ -38,7 +44,7 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    TString dir1 = "$STAR/StarDb";
    //db maker should not be needed...
    St_db_Maker *dbMkr = new St_db_Maker( "dbMkr", dir0, dir1 );
-   dbMkr->SetDateTime(20120310,152618); ///
+      dbMkr->SetDateTime(20120622,152618); ///
 
    //for 13063034
    //     dbMkr->SetDateTime(20120303,130411); ///D
@@ -48,8 +54,6 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    fgtDbMkr = new StFgtDbMaker( "fgtDbMkr" );
    //fgtDbMkr->SetFlavor("ideal",""); // mapping is wrong, but at least the code runs...
    fgtDbMkrName = fgtDbMkr->GetName();
-
-
    //
    // MuDst maker for reading input
    //
@@ -75,8 +79,13 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    //   fgtTrkMkr = new StFgtHHTracking( "fgtTrkMkr" );
    cout <<"construction genplotter " <<endl;
    //fgtGenPlotter = new StFgtGenPlotter( "fgtGenPlotter" );
-   fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
-   fgtAVEffMkr->SetFileBase(baseFilename);
+   //   fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
+   fgtGenBase=new StFgtGeneralBase("fgtGenBase");
+   fgtStraightTrackMaker =new StFgtStraightTrackMaker("fgtStraightTracker");
+   fgtStraightPlotter=new StFgtStraightPlotter("fgtStraightPlotter");
+
+
+   //   fgtAVEffMkr->SetFileBase(baseFilename);
 
    // debugging info
    std::cout << "***** Done instanciating all the classes *****" << endl;
@@ -145,8 +154,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.6 2012/12/22 04:13:33 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.7 2013/01/18 15:47:15 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.7  2013/01/18 15:47:15  avossen
+update for new mdsts
+
 Revision 1.6  2012/12/22 04:13:33  avossen
 *** empty log message ***
 
