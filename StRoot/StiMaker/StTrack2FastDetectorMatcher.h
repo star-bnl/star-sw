@@ -1,12 +1,12 @@
 /*!
  * \class StTrack2FastDetectorMatcher
  * \author Jan Balewski, July 2004
- * $Id: StTrack2FastDetectorMatcher.h,v 2.2 2013/01/17 15:57:26 fisyak Exp $
+ * $Id: StTrack2FastDetectorMatcher.h,v 2.3 2013/01/18 15:03:37 fisyak Exp $
  *
  */
 #include "TObject.h"
 #include "StPhysicalHelixD.hh" // dongx
-class TrackData;
+class StiTrack2FastDetector;
 class VertexData;
 class TGraphErrors;
 class StEEmcDb;
@@ -14,8 +14,8 @@ class StEvent;
 class EEmcGeomSimple;
 class StBTofGeometry; // dongx
 #include "StPhiEtaHitList.h"
-struct TrackData {
-  TrackData() {btofBin = ctbBin = bemcBin = eemcBin = -1; anyMatch=anyVeto=kFALSE; mBtof=mCtb=mBemc=mEemc=mTpc=0; weight = 1;}
+struct StiTrack2FastDetector {
+  StiTrack2FastDetector() {btofBin = ctbBin = bemcBin = eemcBin = -1; anyMatch=anyVeto=kFALSE; mBtof=mCtb=mBemc=mEemc=mTpc=0; weight = 1;}
   // 3-stat logic: 1=match, -1=veto, 0=dunno
   Int_t mBtof,mCtb,mBemc,mEemc,mTpc; 
   Bool_t anyMatch,anyVeto;
@@ -44,11 +44,11 @@ class StTrack2FastDetectorMatcher: public TObject {
   StTrack2FastDetectorMatcher();
   virtual  ~StTrack2FastDetectorMatcher();
   void fillArrays(StEvent *);
-  void matchTrack2BTOF(const StPhysicalHelixD* hlx, TrackData *t);  // dongx
-  void matchTrack2CTB(const StPhysicalHelixD* hlx, TrackData *t);
-  void matchTrack2EEMC(const StPhysicalHelixD* hlx, TrackData *t, Float_t z);
-  void matchTrack2BEMC(const StPhysicalHelixD* hlx, TrackData *t, Float_t rxy);
-  void matchTrack2FastDetectors(const StPhysicalHelixD *hlx,TrackData *t);
+  void matchTrack2BTOF(const StPhysicalHelixD* hlx, StiTrack2FastDetector *t);  // dongx
+  void matchTrack2CTB(const StPhysicalHelixD* hlx, StiTrack2FastDetector *t);
+  void matchTrack2EEMC(const StPhysicalHelixD* hlx, StiTrack2FastDetector *t, Float_t z);
+  void matchTrack2BEMC(const StPhysicalHelixD* hlx, StiTrack2FastDetector *t, Float_t rxy);
+  void matchTrack2FastDetectors(const StPhysicalHelixD *hlx,StiTrack2FastDetector *t);
   virtual void  Clear(const Char_t *opt=""); 
   enum {kSwitchOneHighPT=1}; 
  private:
@@ -74,6 +74,9 @@ class StTrack2FastDetectorMatcher: public TObject {
 /***************************************************************************
  *
  * $Log: StTrack2FastDetectorMatcher.h,v $
+ * Revision 2.3  2013/01/18 15:03:37  fisyak
+ * Fix TrackData data name clash with StiPPVertexFinder
+ *
  * Revision 2.2  2013/01/17 15:57:26  fisyak
  * Add handles for debugging
  *

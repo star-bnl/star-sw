@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StTrack2FastDetectorMatcher.cxx,v 2.3 2013/01/17 15:57:26 fisyak Exp $
+ * $Id: StTrack2FastDetectorMatcher.cxx,v 2.4 2013/01/18 15:03:37 fisyak Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -45,7 +45,7 @@ StTrack2FastDetectorMatcher::Clear(const Char_t *opt){
 }
 //________________________________________________________________________________
 StTrack2FastDetectorMatcher::~StTrack2FastDetectorMatcher() {
-  //x delete mTrackData;
+  //x delete mStiTrack2FastDetector;
   //x delete mVertexData;
   SafeDelete(geomE);
   SafeDelete(btofGeom); // dongx
@@ -147,7 +147,7 @@ void StTrack2FastDetectorMatcher::fillArrays(StEvent* event) {
 }
 //________________________________________________________________________________
 void  
-StTrack2FastDetectorMatcher::matchTrack2BTOF(const StPhysicalHelixD *hlx,TrackData *t){
+StTrack2FastDetectorMatcher::matchTrack2BTOF(const StPhysicalHelixD *hlx,StiTrack2FastDetector *t){
   IntVec idVec;
   DoubleVec pathVec;
   PointVec crossVec;
@@ -187,7 +187,7 @@ StTrack2FastDetectorMatcher::matchTrack2BTOF(const StPhysicalHelixD *hlx,TrackDa
 }
 //________________________________________________________________________________
 void  
-StTrack2FastDetectorMatcher::matchTrack2CTB(const StPhysicalHelixD *hlx,TrackData *t){
+StTrack2FastDetectorMatcher::matchTrack2CTB(const StPhysicalHelixD *hlx,StiTrack2FastDetector *t){
   const Double_t Rctb=213.6; // (cm) radius of the CTB 
   StThreeVectorD posCTB;
   Float_t path=-1;
@@ -221,7 +221,7 @@ StTrack2FastDetectorMatcher::matchTrack2CTB(const StPhysicalHelixD *hlx,TrackDat
 }
 //________________________________________________________________________________
 void  
-StTrack2FastDetectorMatcher::matchTrack2BEMC(const StPhysicalHelixD *hlx,TrackData *t, Float_t Rxy){
+StTrack2FastDetectorMatcher::matchTrack2BEMC(const StPhysicalHelixD *hlx,StiTrack2FastDetector *t, Float_t Rxy){
   StThreeVectorD posCyl;
   Float_t path=-1;
   pairD  d2;
@@ -258,7 +258,7 @@ StTrack2FastDetectorMatcher::matchTrack2BEMC(const StPhysicalHelixD *hlx,TrackDa
 }
 //________________________________________________________________________________
 void  
-StTrack2FastDetectorMatcher::matchTrack2EEMC(const StPhysicalHelixD *hlx,TrackData *t,Float_t z){
+StTrack2FastDetectorMatcher::matchTrack2EEMC(const StPhysicalHelixD *hlx,StiTrack2FastDetector *t,Float_t z){
   
   const Float_t maxPath=200 ;// tmp, cut too long extrapolation
 
@@ -296,7 +296,7 @@ StTrack2FastDetectorMatcher::matchTrack2EEMC(const StPhysicalHelixD *hlx,TrackDa
 
 }
 //________________________________________________________________________________
-void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHelixD *hlx,TrackData *t) {
+void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHelixD *hlx,StiTrack2FastDetector *t) {
   if (btofList && btofList->NoHits()) matchTrack2BTOF(hlx,t);     // matching track to btofGeometry
   if (ctbList  && ctbList->NoHits() ) matchTrack2CTB(hlx,t);
   if (bemcList && bemcList->NoHits()) matchTrack2BEMC(hlx,t,242); // middle of tower in Rxy
@@ -304,6 +304,9 @@ void  StTrack2FastDetectorMatcher::matchTrack2FastDetectors(const StPhysicalHeli
 }
 /**************************************************************************
  * $Log: StTrack2FastDetectorMatcher.cxx,v $
+ * Revision 2.4  2013/01/18 15:03:37  fisyak
+ * Fix TrackData data name clash with StiPPVertexFinder
+ *
  * Revision 2.3  2013/01/17 15:57:26  fisyak
  * Add handles for debugging
  *

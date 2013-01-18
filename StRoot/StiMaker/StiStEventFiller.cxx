@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.101 2013/01/17 15:57:26 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.102 2013/01/18 15:03:37 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.102  2013/01/18 15:03:37  fisyak
+ * Fix TrackData data name clash with StiPPVertexFinder
+ *
  * Revision 2.101  2013/01/17 15:57:26  fisyak
  * Add handles for debugging
  *
@@ -1120,7 +1123,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
   if (gTrack->type()==global) {
     // Match with fast detectors
     StPhysicalHelixD hlx = gTrack->outerGeometry()->helix();
-    TrackData t;
+    StiTrack2FastDetector t;
     mFastDetectorMatcher->matchTrack2FastDetectors(&hlx,&t);
     if (t.btofBin > 0) {
       if (t.mBtof > 0) gTrack->setToFMatched();
