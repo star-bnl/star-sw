@@ -33,7 +33,7 @@
 #include "StFgtCosmicAlignment.h"
 #endif
 #define MAX_PHI_DIFF 0.5//the maximal difference in phi a track is allowed 
-#define MAX_CLUSTERS 2
+#define MAX_CLUSTERS 10
 #define CHARGE_MEASURE clusterCharge
 #define MAX_DIST_STRIP_R 0.7
 #define MAX_DIST_STRIP_PHI 0.03
@@ -888,17 +888,21 @@ Double_t StFgtGenAVEMaker::findClosestPoint(float mx, float bx, float my, float 
 	  Float_t y=r*sin(phi);
 	  cout <<"we have " << x <<", " << y <<endl;
 	  Double_t mDist=(x-xE)*(x-xE)+(y-yE)*(y-yE);
+
 	  if(mDist<dist2)
 	    {
 	      dist2=mDist;
 	      //recalculate distance with proper alignment
 	      float tmpX, tmpY,tmpZ,tmpP,tmpR;
+#ifdef COSMIC
 	      getAlign(iD,phi,r,tmpX,tmpY,tmpZ,tmpP,tmpR);
 	      Double_t xExpUpdate=mx*tmpZ+bx;
 	      Double_t yExpUpdate=my*tmpZ+by;
 	      cout<<"tmpx: " << tmpX <<" old: " << x <<" xE old: " << xE << " updated: " << xExpUpdate;
 	      cout<<"tmpy: " << tmpY <<" old: " << y <<" yE old: " << yE << " updated: " << yExpUpdate<<endl;
+
 	      mDist=(tmpX-xExpUpdate)*(tmpX-xExpUpdate)+(tmpY-yExpUpdate)*(tmpY-yExpUpdate);
+#endif
 	      dist2=mDist;
 	      ///Double_t xExp=mx*StFgtGeom::getDiscZ(i)+bx;
 	      //	    Double_t yExp=my*StFgtGeom::getDiscZ(i)+by;
@@ -1167,21 +1171,10 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::getChargeRatio(Float_t r, Float_t phi,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 {
   //  (*outTxtFile) <<"getTrack" <<endl;
-  //  cout <<"get track" <<endl;
+   cout <<"get track" <<endl;
   ipZ=-9999; //get ourselves
   ipZ=vtxZ;
   vector<AVPoint>::iterator iter=points.begin();
@@ -1219,7 +1212,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     Ex += x;
     Ey += y;
 
-    //    cout << "*** Point located at " << x << ' ' << y << ' ' << z << " Disk: " << iter->dID <<endl;
+        cout << "*** Point located at " << x << ' ' << y << ' ' << z << " Disk: " << iter->dID <<endl;
   }
   //  cout <<"ipZ: " << ipZ <<endl;
   //  cout <<"get track3" <<endl;
@@ -1334,6 +1327,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	//cout << "*** DistSq " << dist << endl;
       }
     //          cout <<"get track8" <<endl;
+    cout <<"dist : " << dist <<" D: "<< D <<endl;
     dist/=D;
     //       cout <<" end chi2: " <<dist <<endl;
     m_tracks.push_back(AVTrack(mx,my,bx,by,ipZ,dist));
@@ -1373,12 +1367,14 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     vector<AVTrack>::iterator it_lastTrack=m_tracks.end();
     it_lastTrack--;
     pair<double,double> dca=getDca(it_lastTrack);
+    cout <<"mx: " << it_lastTrack->mx <<" ax: " << it_lastTrack->ax <<" my: " << it_lastTrack->my <<" ay: " << it_lastTrack->ay <<endl;
     Double_t vertZ = (  -( it_lastTrack->mx*it_lastTrack->ax + it_lastTrack->my*it_lastTrack->ay )/(it_lastTrack->mx*it_lastTrack->mx+it_lastTrack->my*it_lastTrack->my));
     (it_lastTrack)->trkZ=vertZ;
     it_lastTrack->dca=dca.second;
     it_lastTrack->ipZ=dca.first;
-
+    cout <<"dca: " << dca.first <<" vertZ: " << vertZ <<endl;
     //  cout <<"get track10" <<endl;
+    cout <<"dist: "<< dist <<" vertZ: " << vertZ <<endl;
     if(dist< MAX_DIST_CHI && fabs(vertZ)<VERTEX_CUT)// && fabs(bx)<40 && fabs(by)<40)
       {
 	//	cout <<" track accepted " <<endl;
@@ -1582,17 +1578,39 @@ Double_t StFgtGenAVEMaker::getRPhiRatio(vector<generalCluster>::iterator hitIter
 */
 Int_t StFgtGenAVEMaker::Make()
 {
-  //  cout <<"ave make " <<endl;
+    cout <<"ave make " <<endl;
   Int_t ierr = kStOk;
   (*outTxtFile) <<"----------------------------- Event Nr: " << evtNr<<" -----------------" <<endl;
   StFgtGeneralBase::Make();
   unsigned int oldNumTracks=m_tracks.size();
-  //  cout <<" mtracks size: " << m_tracks.size() << " oldnum: "<< oldNumTracks <<endl;
+    cout <<" mtracks size: " << m_tracks.size() << " oldnum: "<< oldNumTracks <<endl;
+  for(int i=0;i<6;i++)
+    {
+      cout <<"there are " << pClusters[i]->size() << " clusters in disk " << i <<endl;
+      for(int j=0;j<pClusters[i]->size();j++)
+	{
+	  if((*(pClusters[i]))[j].layer=='R')
+	    cout <<"R layer, ";
+	  else
+	    cout <<"Phi layer, ";
+	  Int_t seedType=(*(pClusters[i]))[j].seedType;
+	  Double_t posPhi=(*(pClusters[i]))[j].posPhi;
+	  Double_t posR=(*(pClusters[i]))[j].posR;
+	  Int_t clusSize=(*(pClusters[i]))[j].clusterSize;
+	  Double_t charge=(*(pClusters[i]))[j].clusterCharge;
+	  Int_t cntGeoId=(*(pClusters[i]))[j].centralStripGeoId;
+	  cout <<"cluster pos phi: " << posPhi <<" posR: " << posR <<" clusSize: " << clusSize << " charge: "<< charge <<" geoId: "<< cntGeoId <<" seedT : " << seedType<<endl;
+	}
+    }
+
   for(int iD=0;iD<6;iD++)
     {
-      (*outTxtFile) <<" In Disc " << iD << " we have clusters with geo id: ";
+          (*outTxtFile) <<" In Disc " << iD << " we have clusters with geo id: ";
+
+      //      cout <<" In Disc " << iD << " we have clusters with geo id: ";
       vector<generalCluster>::iterator hitIter;
       vector<generalCluster> &hitVec=*(pClusters[iD]);
+
       for(hitIter=hitVec.begin();hitIter != hitVec.end();hitIter++)
 	{
 	  (*outTxtFile) << hitIter->centralStripGeoId << ", ";
@@ -1727,6 +1745,7 @@ Int_t StFgtGenAVEMaker::Make()
     {
       for(int iSeed2=iSeed1+1;iSeed2<6;iSeed2++)
 	{
+	  //	  cout<< " using " << iSeed1 <<" and " << iSeed2 << " as seeds " << endl;
 	  //	  (*outTxtFile) << " using " << iSeed1 <<" and " << iSeed2 << " as seeds " << endl;
 	  if((iSeed2-iSeed1)<1)//to have large enough lever arm. Also, since three points are required shouldn't matter?
 	    continue;
@@ -1734,12 +1753,12 @@ Int_t StFgtGenAVEMaker::Make()
 	    continue;
 	  if(pClusters[iSeed1]->size() > MAX_CLUSTERS || pClusters[iSeed2]->size() > MAX_CLUSTERS)
 	    {
-	      //	      cout <<"too many clusters in the disk!!!"<<endl<<endl;
+	           cout <<"too many clusters in the disk!!!"<<endl<<endl;
 	      continue;
 	    }
 	  //track where we have hits in disks
 
-	  //	  	  cout <<"using " << iSeed1 << " and " << iSeed2 << " as seed " <<endl;
+	  cout <<"using " << iSeed1 << " and " << iSeed2 << " as seed " <<endl;
 	  vector<generalCluster> &hitVecSeed1=*(pClusters[iSeed1]);
 	  vector<generalCluster> &hitVecSeed2=*(pClusters[iSeed2]);
 
@@ -1759,7 +1778,6 @@ Int_t StFgtGenAVEMaker::Make()
 	      
 	      Double_t seed1ChargePhi=hitIterD1->CHARGE_MEASURE;
 	      Double_t seed1SizePhi=hitIterD1->clusterSize;
-
 	      //	      if(quadP>2)
 	      //		continue;
 
@@ -1805,7 +1823,6 @@ Int_t StFgtGenAVEMaker::Make()
 		      Int_t quadSeed1=-1;
 		      if(layer!='R')
 			continue;
-
 		      if(quadR!=quadP)
 			continue;
 		      quadSeed1=quadR;
@@ -1838,17 +1855,15 @@ Int_t StFgtGenAVEMaker::Make()
 			  if(layer!='R')
 			    continue;
 
-
 			  clusCountsTemp[iSeed1*4+quadR]++;
 			  clusCountsTemp[iSeed2*4+quadR_2]++;
 			  if(usedPoints.find(geoIdSeed2R)!=usedPoints.end())
 			    continue;
 			  Float_t rD6=hitIterD6R->posR;
-
 			  			  //track goes towards smaller radii
 #ifndef COSMIC
-			  			  if(rD1>rD6)
-			  			    continue;		  
+			  if(rD1>rD6)
+			    continue;		  
 #endif
 
 			  vector<AVPoint> v_points;
@@ -1856,7 +1871,7 @@ Int_t StFgtGenAVEMaker::Make()
 
 			  Double_t xD6=rD6*cos(phiD6);
 			  Double_t yD6=rD6*sin(phiD6);
-			  //			  cout <<"Disk " << iSeed2 <<", phiD6: " << phiD6 <<" xD6: " << xD6 <<" yD6: " << yD6 <<" rD6: " << rD6 <<endl;
+			  cout <<"Disk " << iSeed2 <<", phiD6: " << phiD6 <<" xD6: " << xD6 <<" yD6: " << yD6 <<" rD6: " << rD6 <<endl;
 			  v_points.push_back(AVPoint(xD1,yD1,D1Pos,rD1,phiD1,iSeed1,quadSeed1,seed1ChargeR, seed1ChargePhi, seed1SizeR, seed1SizePhi));
 			  v_points.push_back(AVPoint(xD6,yD6,D6Pos,rD6,phiD6,iSeed2,quadSeed2,seed2ChargeR, seed2ChargePhi, seed2SizeR, seed2SizePhi));
 			  ///for each combination in d1,d6
@@ -1908,6 +1923,9 @@ Int_t StFgtGenAVEMaker::Make()
 
 			      Double_t xPosExp=xD1+(xD6-xD1)*(diskZ-D1Pos)/zArm;
 			      Double_t yPosExp=yD1+(yD6-yD1)*(diskZ-D1Pos)/zArm;
+			      cout <<"using disk: " << iD <<" diskZ: " << diskZ <<endl;
+			      cout <<"hope to see something x: " << xPosExp <<" y: " << yPosExp <<endl;
+			      cout <<"phi1: " << phiD1 <<" phi6: " << phiD6 <<endl;
 			      Double_t rPosExp=rD1+(rD6-rD1)*(diskZ-D1Pos)/zArm;
 			      vector<generalCluster> &hitVec=*(pClusters[iD]);
 			      for(hitIter=hitVec.begin();hitIter!=hitVec.end();hitIter++)
@@ -1963,8 +1981,8 @@ Int_t StFgtGenAVEMaker::Make()
 #endif
 				      x=r*cos(phi);
 				      y=r*sin(phi);
-				      //				      cout <<"checking with x: " << x << " y: " << y << " phi: " << phi <<" r: " << r <<endl;
-				      //				      cout <<" x, y: " << x <<", " << y << " exp: " << xPosExp << " , " << yPosExp <<endl;
+				      			      cout <<"checking with x: " << x << " y: " << y << " phi: " << phi <<" r: " << r <<endl;
+				      				      cout <<" x, y: " << x <<", " << y << " exp: " << xPosExp << " , " << yPosExp <<endl;
 				      Double_t dist2=(x-xPosExp)*(x-xPosExp)+(y-yPosExp)*(y-yPosExp);
 				      //				      cout <<" dist2: " << dist2 <<endl;
 
@@ -2020,6 +2038,7 @@ Int_t StFgtGenAVEMaker::Make()
 				  v_clusterSizeR.push_back(clusterSizeR);
 				  v_clusterSizePhi.push_back(clusterSizePhi);
 				  v_points.push_back(AVPoint(x,y,diskZ,r,phi,iD,quadTestR, rCharge,phiCharge, clusterSizeR,clusterSizePhi));
+				  cout<<" adding point with r: "<< r <<" phi: " << phi <<" x: " << x <<" y: " << y <<endl;
 				}
 			      //    cout <<"ave make8 " <<endl;
 			      //only one per disk
