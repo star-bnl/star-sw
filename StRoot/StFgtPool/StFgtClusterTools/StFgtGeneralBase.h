@@ -134,6 +134,10 @@ static float getLocDiscZ(int iD)
   {
     m_effDisk=disk;
   }
+  StFgtCollection* getFgtCollection()
+    {
+ return fgtCollection;
+    }
 
   vector<generalCluster>** getClusters()
     {
