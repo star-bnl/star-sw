@@ -30,35 +30,30 @@ class StFgtStraightTrackMaker : public StMaker {
    void setUseChargeMatch(Bool_t use=true);
    //   Bool_t checkPulse(StFgtHit* pClus);
    vector<AVTrack>& getTracks();
-   void setPrint(Bool_t print);
+
    void setMinNumFitPoints(Int_t numFP);
    void addMultiplePoints(Bool_t addMult);
    void setMaxClusters(Int_t maxC);
-   void setMaxDistChi(Float_t maxDChi);
+
    void setMaxDist2(Float_t d);
    void setFitWithVertex(Bool_t f);
    void setRefitWithVertex(Bool_t f);
    void setMaxPhiDiff(Float_t pd);
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.3 2013/01/20 02:05:32 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.4 2013/01/20 02:47:33 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    Bool_t isCosmic;
+
+
    Float_t maxPhiDiff;//for points belonging to same track
    Int_t maxClusters; //per disk
-   Float_t vertexCut;
-   Bool_t doPrint;
-   Bool_t pulseCondition;
-   Bool_t lenCondition;
-   Float_t maxDistStrip_R;
-   Float_t maxDistStrip_Phi;
+
    Bool_t doFitWithVertex;
    Bool_t doRefitWithVertex;
    Bool_t doAddMultiplePoints;
    Bool_t isMuDst;
    Float_t maxDist2;
-   Float_t maxDistChi;
-   Float_t maxDist2Eff;
    Int_t minNumFitPoints;
 
    Int_t m_effDisk;
@@ -68,10 +63,6 @@ class StFgtStraightTrackMaker : public StMaker {
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
    Bool_t useChargeMatch;
-   Int_t printCounter;
-   Int_t fitCounter;
-   ofstream* outTxtFile;
-   ofstream* cluNotFoundTxt;
    Short_t getQuadFromCoo(Double_t x, Double_t y);
    pair<Double_t,Double_t> getChargeRatio(Float_t r, Float_t phi, Int_t iD, Int_t iq);
 
@@ -120,10 +111,7 @@ inline void StFgtStraightTrackMaker::setUseChargeMatch(Bool_t use){useChargeMatc
 inline    vector<AVTrack>& StFgtStraightTrackMaker::getTracks(){return m_tracks;};
 
 
-  inline void StFgtStraightTrackMaker::setPrint(Bool_t print)
-{
-  doPrint=print;
-}
+
 inline   void StFgtStraightTrackMaker::setMinNumFitPoints(Int_t numFP)
 {
   minNumFitPoints=numFP;
@@ -136,10 +124,7 @@ inline   void StFgtStraightTrackMaker::setMaxClusters(Int_t maxC)
 {
   maxClusters=maxC;
 }
-inline   void StFgtStraightTrackMaker::setMaxDistChi(Float_t maxDChi)
-{
-  maxDistChi=maxDChi;
-}
+
 inline   void StFgtStraightTrackMaker::setMaxDist2(Float_t d)
 {
   maxDist2=d;

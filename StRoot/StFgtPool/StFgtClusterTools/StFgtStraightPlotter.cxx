@@ -16,7 +16,6 @@
 #include "StarClassLibrary/StThreeVectorF.hh"
 
 
-
 #include <TH2D.h>
 #include <TROOT.h>
 #include <TStyle.h>
@@ -29,24 +28,15 @@
 //#define PRINT_1D
 //max num clusters any disk is allowed to have
 
-#define COSMIC
-#ifdef COSMIC
 #include "StFgtCosmicAlignment.h"
-#endif
-#define MAX_PHI_DIFF 0.5//the maximal difference in phi a track is allowed 
-#define MAX_CLUSTERS 2
-#define CHARGE_MEASURE clusterCharge
+
 #define MAX_DIST_STRIP_R 0.7
 #define MAX_DIST_STRIP_PHI 0.03
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 //#define LEN_CONDITION
 #define PULSE_CONDITION
 #define DO_PRINT
-#ifndef COSMIC
-#define VERTEX_CUT 50
-#else
-#define VERTEX_CUT 100000000
-#endif
+
 
 #include "StRoot/StEvent/StEvent.h"
 #include "StRoot/StEvent/StFgtCollection.h"
@@ -59,21 +49,17 @@
 //#define DISK_EFF 2
 #define QUAD_EFF 1
 #define MY_PI 3.14159265359
-//#define  REFIT_WITH_VERTEX
-//#define FIT_WITH_VERTEX
 
 
-#define MAX_DIST_CHI 1.0
+
 #define MAX_DIST2_EFF 1.0
 #define MAX_DIST2 1.0
 
 #define MIN_NUM_POINTS 2
 #define DISK_DIM 40
-#ifndef COSMIC
+
 #define NUM_EFF_BIN 30
-#else
-#define NUM_EFF_BIN 100
-#endif
+
 Bool_t StFgtStraightPlotter::arePointsMatched(vector<generalCluster>::iterator  c1, vector<generalCluster>::iterator  c2)
 {
   Float_t tUncert1;
@@ -1397,7 +1383,7 @@ Int_t StFgtStraightPlotter::Make()
 
       pair<double,double> dca=getDca(it);
       cout <<"dca: " << dca.second <<" z vertex: " << vertZ <<" or " << dca.first <<endl;
-      if(it->chi2<MAX_DIST_CHI && fabs(vertZ)< VERTEX_CUT )
+      if(it->chi2<maxDistChi && fabs(vertZ)< vertexCut )
 	{
 	  hIpZ->Fill(dca.first);
 	  hIp->Fill(dca.first,dca.second);
@@ -1429,8 +1415,22 @@ StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name )
 	      << fgtDbMkr->GetName() << endm;
   }
   sprintf(fileBase,"%s",".");
+  pulseCondition=true;
+  lenCondition=false;
+  maxDistStrip_R=0.7;
+  maxDistStrip_Phi=0.03;
+  maxDist2Eff=1.0;
+  doPrint=false;
+  StFgtGeneralBase *fgtGenMkr = static_cast<StFgtGeneralBase * >( GetMaker("fgtGenBase"));
+  isCosmic=fgtGenMkr->isCosmic();
+
+  if(!isCosmic)
+      vertexCut=50;
+  else
+    vertexCut=100000000;
 
 
+  maxDistChi=1.0;
   //  cout <<"AVE constructor!!" <<endl;
   int numTb=7;
   mPulseShapePtr=new TF1("pulseShape","[0]*(x>[4])*(x-[4])**[1]*exp(-[2]*(x-[4]))+[3]",0,numTb);
