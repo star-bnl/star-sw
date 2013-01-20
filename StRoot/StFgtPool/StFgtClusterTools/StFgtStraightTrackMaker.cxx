@@ -929,7 +929,7 @@ StFgtStraightTrackMaker::StFgtStraightTrackMaker( const Char_t* name): StMaker( 
 {
   //  cout <<"AVE constructor!!" <<endl;
   int numTb=7;
-  m_effDisk=2;
+  m_effDisk=10;//
   isMuDst=true; //might want to change this...
   maxPhiDiff=0.5;
   maxClusters=10;
