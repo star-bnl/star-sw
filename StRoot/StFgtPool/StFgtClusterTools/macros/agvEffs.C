@@ -69,8 +69,6 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
 
    ///     dbMkr->SetDateTime(20120307,000717); ///
    //      dbMkr->SetDateTime(20120128,204320);      // run ???
-
-
    
    cout << "Constructing StFgtDbMaker" << endl;
    fgtDbMkr = new StFgtDbMaker( "fgtDbMkr" );
@@ -105,7 +103,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
 	  gSystem->Load(myMaker);//  TString ts("load "; ts+=myMaker; StMemStat::PrintMem(ts.Data());
   }
   if (gClassTable->GetID("StFgtPointMaker") < 0) {
-	  gSystem->Load("StFgtPointMaker");//  TString ts("load "; ts+=myMaker; StMemStat::PrintMem(ts.Data());
+    gSystem->Load("StFgtPointMaker");//  TString ts("load "; ts+=myMaker; StMemStat::PrintMem(ts.Data());
   }
   StFgtClusterMaker* myMk =new StFgtClusterMaker("FgtClustMaker"); 
   //simplePointAlgo is default
@@ -120,10 +118,12 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
   //  StFgtAVEfficiencyMaker* effMkr=new StFgtAVEfficiencyMaker("FgtAVEfficiencyMaker");
   //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
   //  fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
-    fgtGenBase = new StFgtGeneralBase( "fgtGenBase" );
+  fgtGenBase = new StFgtGeneralBase( "fgtGenBase" );
 
-    fgtStraightTracker = new StFgtStraightTrackMaker( "fgtStraightTracker" );
-  //  fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
+  fgtStraightTracker = new StFgtStraightTrackMaker( "fgtStraightTracker" );
+    fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
+
+
   //  fgtAVEffMkr->setChargeMatchCut(2.0);
   //  fgtAVEffMkr->setUseChargeMatch();
     //  fgtAVEffMkr->SetEffDisk(effDisk);

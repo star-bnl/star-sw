@@ -30,10 +30,36 @@ class StFgtStraightTrackMaker : public StMaker {
    void setUseChargeMatch(Bool_t use=true);
    //   Bool_t checkPulse(StFgtHit* pClus);
    vector<AVTrack>& getTracks();
+   void setPrint(Bool_t print);
+   void setMinNumFitPoints(Int_t numFP);
+   void addMultiplePoints(Bool_t addMult);
+   void setMaxClusters(Int_t maxC);
+   void setMaxDistChi(Float_t maxDChi);
+   void setMaxDist2(Float_t d);
+   void setFitWithVertex(Bool_t f);
+   void setRefitWithVertex(Bool_t f);
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.1 2012/12/20 20:32:07 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.2 2013/01/20 00:42:56 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
+   Bool_t isCosmic;
+   Float_t maxPhiDiff;//for points belonging to same track
+   Int_t maxClusters; //per disk
+   Float_t vertexCut;
+   Bool_t doPrint;
+   Bool_t pulseCondition;
+   Bool_t lenCondition;
+   Float_t maxDistStrip_R;
+   Float_t maxDistStrip_Phi;
+   Bool_t doFitWithVertex;
+   Bool_t doRefitWithVertex;
+   Bool_t doAddMultiplePoints;
+   Bool_t isMuDst;
+   Float_t maxDist2;
+   Float_t maxDistChi;
+   Float_t maxDist2Eff;
+   Int_t minNumFitPoints;
+
    Int_t m_effDisk;
    vector<generalCluster>** pClusters;
    vector<generalStrip>* pStrips;
@@ -85,5 +111,40 @@ inline void StFgtStraightTrackMaker::SetEffDisk(Int_t disk)
   }
 inline void StFgtStraightTrackMaker::setUseChargeMatch(Bool_t use){useChargeMatch=use;};
 inline    vector<AVTrack>& StFgtStraightTrackMaker::getTracks(){return m_tracks;};
+
+
+  inline void StFgtStraightTrackMaker::setPrint(Bool_t print)
+{
+  doPrint=print;
+}
+inline   void StFgtStraightTrackMaker::setMinNumFitPoints(Int_t numFP)
+{
+  minNumFitPoints=numFP;
+}
+inline   void StFgtStraightTrackMaker::addMultiplePoints(Bool_t addMult)
+{
+  doAddMultiplePoints=addMult;
+}
+inline   void StFgtStraightTrackMaker::setMaxClusters(Int_t maxC)
+{
+  maxClusters=maxC;
+}
+inline   void StFgtStraightTrackMaker::setMaxDistChi(Float_t maxDChi)
+{
+  maxDistChi=maxDChi;
+}
+inline   void StFgtStraightTrackMaker::setMaxDist2(Float_t d)
+{
+  maxDist2=d;
+}
+inline   void StFgtStraightTrackMaker::setFitWithVertex(Bool_t f)
+{
+  doFitWithVertex=f;
+}
+inline   void StFgtStraightTrackMaker::setRefitWithVertex(Bool_t f)
+{
+  doRefitWithVertex=f;
+}
+
 #endif
 
