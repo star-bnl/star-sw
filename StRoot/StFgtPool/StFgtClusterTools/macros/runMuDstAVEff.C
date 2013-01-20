@@ -82,6 +82,7 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    //   fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
    fgtGenBase=new StFgtGeneralBase("fgtGenBase");
    fgtStraightTrackMaker =new StFgtStraightTrackMaker("fgtStraightTracker");
+   fgtStraightTrackMaker->setMinNumFitPoints(4);
    fgtStraightPlotter=new StFgtStraightPlotter("fgtStraightPlotter");
 
 
@@ -154,8 +155,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.7 2013/01/18 15:47:15 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.8 2013/01/20 02:06:37 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.8  2013/01/20 02:06:37  avossen
+changed defines in attributes
+
 Revision 1.7  2013/01/18 15:47:15  avossen
 update for new mdsts
 

@@ -24,7 +24,7 @@ class StFgtStraightTrackMaker : public StMaker {
   StFgtStraightTrackMaker(const Char_t* name="FgtStraightTrackMaker");
   pair<Double_t,Double_t> findCluChargeSize(Int_t iD,Char_t layer, Double_t ordinate);
   virtual ~StFgtStraightTrackMaker();
-   Int_t Init();
+    Int_t Init();
    Int_t Make();
    Int_t Finish();
    void setUseChargeMatch(Bool_t use=true);
@@ -38,9 +38,10 @@ class StFgtStraightTrackMaker : public StMaker {
    void setMaxDist2(Float_t d);
    void setFitWithVertex(Bool_t f);
    void setRefitWithVertex(Bool_t f);
+   void setMaxPhiDiff(Float_t pd);
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.2 2013/01/20 00:42:56 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightTrackMaker.h,v 1.3 2013/01/20 02:05:32 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  protected:
    Bool_t isCosmic;
    Float_t maxPhiDiff;//for points belonging to same track
@@ -105,6 +106,12 @@ class StFgtStraightTrackMaker : public StMaker {
       ClassDef(StFgtStraightTrackMaker,1);
 
 };
+
+inline void StFgtStraightTrackMaker::setMaxPhiDiff(Float_t pd)
+{
+  maxPhiDiff=pd;
+};
+
 inline void StFgtStraightTrackMaker::SetEffDisk(Int_t disk)
   {
     m_effDisk=disk;
