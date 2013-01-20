@@ -28,6 +28,7 @@
 
 StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ),m_fillFromEvent(false),evtNr(0),m_effDisk(2), fgtCollection(0)
 {
+  m_isCosmic=false;
   chargeMatchCut=1.5;
   pClusters=new vector<generalCluster>*[6];
   pClusters[0]=&clustersD1;

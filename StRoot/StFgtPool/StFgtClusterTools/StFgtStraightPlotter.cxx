@@ -1254,7 +1254,8 @@ Int_t StFgtStraightPlotter::Make()
 
   StFgtStraightTrackMaker *fgtSTracker = static_cast<StFgtStraightTrackMaker * >( GetMaker("fgtStraightTracker"));
   vector<AVTrack>& tracks=fgtSTracker->getTracks();
-  unsigned int oldNumTracks=m_tracks.size();
+  cout <<"plotter: we have " << tracks.size() << "tracks " <<endl;
+  intNumTracks+=tracks.size();
   for(vector<AVTrack>::iterator it=tracks.begin();it!=tracks.end();it++)
     {
       Double_t mx=it->mx;
@@ -1385,12 +1386,38 @@ Int_t StFgtStraightPlotter::Make()
 	  }
     }
 
+  int counter=0;
+  for(vector<AVTrack>::iterator it=tracks.begin();it!=tracks.end();it++)
+    {
+      cout <<" looking at track " << counter <<endl;
+      counter++;
+      //      cout <<"This track has parameters: ";
+      cout <<" mx: " << it->mx <<" my: " << it->my <<" bx: " << it->ax << " by: " << it->ay << " chi2: " << it->chi2 <<endl;
+      Double_t vertZ = (  -( it->mx*it->ax + it->my*it->ay )/(it->mx*it->mx+it->my*it->my));
 
+      pair<double,double> dca=getDca(it);
+      cout <<"dca: " << dca.second <<" z vertex: " << vertZ <<" or " << dca.first <<endl;
+      if(it->chi2<MAX_DIST_CHI && fabs(vertZ)< VERTEX_CUT )
+	{
+	  hIpZ->Fill(dca.first);
+	  hIp->Fill(dca.first,dca.second);
+	  hTrkZ->Fill(vertZ);
+	  hMx->Fill(it->mx);	  
+	  hMy->Fill(it->my);
+	  hBx->Fill(it->ax);	  
+	  hBy->Fill(it->ay);
+	  hChi2->Fill(it->chi2);
+	  tpcFgtZVertexCorr->Fill(dca.first,it->ipZEv);
+	  tpcFgtZVertexCorr2->Fill(vertZ,it->ipZEv);
+	  tpcFgtZVertexCorr3->Fill(vertZ,dca.first);
+	  hIpDca->Fill(dca.second);
+	}
+    }
   return ierr;
 
 };
  
-StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0),fitCounter(0)
+StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name ),intNumTracks(0),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0),fitCounter(0)
 {
   StFgtDbMaker *fgtDbMkr = static_cast< StFgtDbMaker* >( GetMakerInheritsFrom( "StFgtDbMaker" ) );
   if( !fgtDbMkr ){
@@ -1401,6 +1428,9 @@ StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name )
     LOG_FATAL << "StFgtDb not provided and error retrieving pointer from StFgtDbMaker '"
 	      << fgtDbMkr->GetName() << endm;
   }
+  sprintf(fileBase,"%s",".");
+
+
   //  cout <<"AVE constructor!!" <<endl;
   int numTb=7;
   mPulseShapePtr=new TF1("pulseShape","[0]*(x>[4])*(x-[4])**[1]*exp(-[2]*(x-[4]))+[3]",0,numTb);
@@ -1435,40 +1465,11 @@ Int_t StFgtStraightPlotter::Finish(){
   gStyle->SetPalette(1);
   cout <<"AVE finish function " <<endl;
   Int_t ierr = kStOk;
-
+  cout <<"we found " << intNumTracks << " tracks " <<endl;
   ///////////////////////////track collection//does this make sense? Not if m_tracks gets erased for every event...
   StFgtStraightTrackMaker *fgtSTracker = static_cast<StFgtStraightTrackMaker * >( GetMaker("fgtStraightTracker"));
   vector<AVTrack>& tracks=fgtSTracker->getTracks();
-  unsigned int oldNumTracks=m_tracks.size();
-  vector<AVTrack>::iterator it=m_tracks.begin();
-  cout <<"we found " << m_tracks.size() <<" tracks" <<endl;
-  int counter=0;
-  for(;it!=m_tracks.end();it++)
-    {
-      cout <<" looking at track " << counter <<endl;
-      counter++;
-      //      cout <<"This track has parameters: ";
-      cout <<" mx: " << it->mx <<" my: " << it->my <<" bx: " << it->ax << " by: " << it->ay << " chi2: " << it->chi2 <<endl;
-      Double_t vertZ = (  -( it->mx*it->ax + it->my*it->ay )/(it->mx*it->mx+it->my*it->my));
 
-      pair<double,double> dca=getDca(it);
-      cout <<"dca: " << dca.second <<" z vertex: " << vertZ <<" or " << dca.first <<endl;
-      if(it->chi2<MAX_DIST_CHI && fabs(vertZ)< VERTEX_CUT )
-	{
-	  hIpZ->Fill(dca.first);
-	  hIp->Fill(dca.first,dca.second);
-	  hTrkZ->Fill(vertZ);
-	  hMx->Fill(it->mx);	  
-	  hMy->Fill(it->my);
-	  hBx->Fill(it->ax);	  
-	  hBy->Fill(it->ay);
-	  hChi2->Fill(it->chi2);
-	  tpcFgtZVertexCorr->Fill(dca.first,it->ipZEv);
-	  tpcFgtZVertexCorr2->Fill(vertZ,it->ipZEv);
-	  tpcFgtZVertexCorr3->Fill(vertZ,dca.first);
-	  hIpDca->Fill(dca.second);
-	}
-    }
   ///  cout <<"canvases etc.. " << endl;
   //////////////////////////////////////////////////
   TCanvas* cRadio=new TCanvas("radioPlots","radioPlot",1000,1500);

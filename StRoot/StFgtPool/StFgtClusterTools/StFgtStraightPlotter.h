@@ -28,12 +28,13 @@ class StFgtStraightPlotter : public StMaker {
    void setUseChargeMatch(Bool_t use=true);
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightPlotter.h,v 1.1 2012/12/20 20:32:07 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightPlotter.h,v 1.2 2013/01/20 00:42:56 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   void SetEffDisk(Int_t disk)
   {
     m_effDisk=disk;
   }
  protected:
+  Int_t intNumTracks;
   Char_t fileBase[300];
    StFgtDb* mDb;
   Int_t m_effDisk;
@@ -55,7 +56,7 @@ class StFgtStraightPlotter : public StMaker {
    Bool_t printArea1D(Int_t iD, Int_t iq,Int_t centerGeoId);
    Bool_t getTrack(vector<AVPoint>& points, Double_t ipZ);
    pair<double,double> getDca(  vector<AVTrack>::iterator it);
-   vector<AVTrack> m_tracks;
+
    // for accessing the data
    StFgtCollection *mFgtCollectionPtr;
    void saveSigs(Double_t* sigR, Double_t* sigP, Double_t r, Double_t phi,Int_t maxR, Int_t maxPhi, Int_t discId, Int_t quad);

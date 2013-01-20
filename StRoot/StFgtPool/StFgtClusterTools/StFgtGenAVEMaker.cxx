@@ -859,7 +859,7 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::findCluChargeSize(Int_t iD,Char_t laye
 
 Double_t StFgtGenAVEMaker::findClosestPoint(float mx, float bx, float my, float by, double xE, double yE, Int_t iD)
 {
-  cout <<"expecting point at " << xE <<", " <<yE <<endl;
+  //  cout <<"expecting point at " << xE <<", " <<yE <<endl;
   if(iD<0 || iD >5)
     {
       return 99999;
@@ -886,7 +886,7 @@ Double_t StFgtGenAVEMaker::findClosestPoint(float mx, float bx, float my, float 
 
 	  Float_t x=r*cos(phi);
 	  Float_t y=r*sin(phi);
-	  cout <<"we have " << x <<", " << y <<endl;
+	  ////	  cout <<"we have " << x <<", " << y <<endl;
 	  Double_t mDist=(x-xE)*(x-xE)+(y-yE)*(y-yE);
 
 	  if(mDist<dist2)
@@ -898,8 +898,8 @@ Double_t StFgtGenAVEMaker::findClosestPoint(float mx, float bx, float my, float 
 	      getAlign(iD,phi,r,tmpX,tmpY,tmpZ,tmpP,tmpR);
 	      Double_t xExpUpdate=mx*tmpZ+bx;
 	      Double_t yExpUpdate=my*tmpZ+by;
-	      cout<<"tmpx: " << tmpX <<" old: " << x <<" xE old: " << xE << " updated: " << xExpUpdate;
-	      cout<<"tmpy: " << tmpY <<" old: " << y <<" yE old: " << yE << " updated: " << yExpUpdate<<endl;
+	      //	      cout<<"tmpx: " << tmpX <<" old: " << x <<" xE old: " << xE << " updated: " << xExpUpdate;
+	      //	      cout<<"tmpy: " << tmpY <<" old: " << y <<" yE old: " << yE << " updated: " << yExpUpdate<<endl;
 
 	      mDist=(tmpX-xExpUpdate)*(tmpX-xExpUpdate)+(tmpY-yExpUpdate)*(tmpY-yExpUpdate);
 #endif
@@ -920,7 +920,7 @@ Double_t StFgtGenAVEMaker::findClosestPoint(float mx, float bx, float my, float 
 ///this is too naive..., assumes non-rotated quads
 Short_t StFgtGenAVEMaker::getQuadFromCoo(Double_t x, Double_t y)
 {
-  cout <<"do not use this function!!!" <<endl;
+    cout <<"do not use this function!!!" <<endl;
   if(x>0 && y>0)
     return 0;
   if(x>0 && y<0)
@@ -1174,7 +1174,7 @@ pair<Double_t,Double_t> StFgtGenAVEMaker::getChargeRatio(Float_t r, Float_t phi,
 Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 {
   //  (*outTxtFile) <<"getTrack" <<endl;
-   cout <<"get track" <<endl;
+  //   cout <<"get track" <<endl;
   ipZ=-9999; //get ourselves
   ipZ=vtxZ;
   vector<AVPoint>::iterator iter=points.begin();
@@ -1188,13 +1188,13 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
   float tmpX, tmpY,tmpZ,tmpP,tmpR;
   for( ; iter != points.end(); ++iter ){
     getAlign(iter->dID,iter->phi,iter->r,tmpX,tmpY,tmpZ,tmpP,tmpR);
-    cout <<"before: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
+    //    cout <<"before: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
     iter->phi=tmpP;
     iter->r=tmpR;
     iter->x=tmpX;
     iter->y=tmpY;
     iter->z=tmpZ;
-    cout <<"after: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
+    //    cout <<"after: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
   }
 #endif
    
@@ -1212,7 +1212,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     Ex += x;
     Ey += y;
 
-        cout << "*** Point located at " << x << ' ' << y << ' ' << z << " Disk: " << iter->dID <<endl;
+    //        cout << "*** Point located at " << x << ' ' << y << ' ' << z << " Disk: " << iter->dID <<endl;
   }
   //  cout <<"ipZ: " << ipZ <<endl;
   //  cout <<"get track3" <<endl;
@@ -1327,7 +1327,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	//cout << "*** DistSq " << dist << endl;
       }
     //          cout <<"get track8" <<endl;
-    cout <<"dist : " << dist <<" D: "<< D <<endl;
+    //    cout <<"dist : " << dist <<" D: "<< D <<endl;
     dist/=D;
     //       cout <<" end chi2: " <<dist <<endl;
     m_tracks.push_back(AVTrack(mx,my,bx,by,ipZ,dist));
@@ -1367,14 +1367,14 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     vector<AVTrack>::iterator it_lastTrack=m_tracks.end();
     it_lastTrack--;
     pair<double,double> dca=getDca(it_lastTrack);
-    cout <<"mx: " << it_lastTrack->mx <<" ax: " << it_lastTrack->ax <<" my: " << it_lastTrack->my <<" ay: " << it_lastTrack->ay <<endl;
+    //    cout <<"mx: " << it_lastTrack->mx <<" ax: " << it_lastTrack->ax <<" my: " << it_lastTrack->my <<" ay: " << it_lastTrack->ay <<endl;
     Double_t vertZ = (  -( it_lastTrack->mx*it_lastTrack->ax + it_lastTrack->my*it_lastTrack->ay )/(it_lastTrack->mx*it_lastTrack->mx+it_lastTrack->my*it_lastTrack->my));
     (it_lastTrack)->trkZ=vertZ;
     it_lastTrack->dca=dca.second;
     it_lastTrack->ipZ=dca.first;
-    cout <<"dca: " << dca.first <<" vertZ: " << vertZ <<endl;
+    //    cout <<"dca: " << dca.first <<" vertZ: " << vertZ <<endl;
     //  cout <<"get track10" <<endl;
-    cout <<"dist: "<< dist <<" vertZ: " << vertZ <<endl;
+    //    cout <<"dist: "<< dist <<" vertZ: " << vertZ <<endl;
     if(dist< MAX_DIST_CHI && fabs(vertZ)<VERTEX_CUT)// && fabs(bx)<40 && fabs(by)<40)
       {
 	//	cout <<" track accepted " <<endl;
@@ -1407,7 +1407,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	  {
 	    Double_t xExp=mx*getLocDiscZ(i)+bx;
 	    Double_t yExp=my*getLocDiscZ(i)+by;
-	    cout <<"expecting x: " << xExp << ", " << yExp<<endl;
+	    //	    cout <<"expecting x: " << xExp << ", " << yExp<<endl;
 	    Int_t quad=-1;
 	    //x=r*cos(phi)
 	    //y=r*sin(phi)
@@ -1486,7 +1486,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	      }
 
 	    Double_t closestPoint=findClosestPoint(mx,bx,my,by,xExp,yExp,i);
-	    cout <<" closest point is " << closestPoint <<" away " <<endl;
+	    //	    cout <<" closest point is " << closestPoint <<" away " <<endl;
 		//		 (*outTxtFile) <<"closest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
 
 	    if(findClosestPoint(mx,bx,my,by,xExp,yExp,i)<MAX_DIST2_EFF)
@@ -1583,10 +1583,10 @@ Int_t StFgtGenAVEMaker::Make()
   (*outTxtFile) <<"----------------------------- Event Nr: " << evtNr<<" -----------------" <<endl;
   StFgtGeneralBase::Make();
   unsigned int oldNumTracks=m_tracks.size();
-    cout <<" mtracks size: " << m_tracks.size() << " oldnum: "<< oldNumTracks <<endl;
+  //    cout <<" mtracks size: " << m_tracks.size() << " oldnum: "<< oldNumTracks <<endl;
   for(int i=0;i<6;i++)
     {
-      cout <<"there are " << pClusters[i]->size() << " clusters in disk " << i <<endl;
+      //      cout <<"there are " << pClusters[i]->size() << " clusters in disk " << i <<endl;
       for(int j=0;j<pClusters[i]->size();j++)
 	{
 	  if((*(pClusters[i]))[j].layer=='R')
@@ -1599,7 +1599,7 @@ Int_t StFgtGenAVEMaker::Make()
 	  Int_t clusSize=(*(pClusters[i]))[j].clusterSize;
 	  Double_t charge=(*(pClusters[i]))[j].clusterCharge;
 	  Int_t cntGeoId=(*(pClusters[i]))[j].centralStripGeoId;
-	  cout <<"cluster pos phi: " << posPhi <<" posR: " << posR <<" clusSize: " << clusSize << " charge: "<< charge <<" geoId: "<< cntGeoId <<" seedT : " << seedType<<endl;
+	  //	  cout <<"cluster pos phi: " << posPhi <<" posR: " << posR <<" clusSize: " << clusSize << " charge: "<< charge <<" geoId: "<< cntGeoId <<" seedT : " << seedType<<endl;
 	}
     }
 

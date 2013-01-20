@@ -99,6 +99,16 @@ class StFgtGeneralBase : public StMaker {
   StFgtGeneralBase(const Char_t* name="FgtGeneralBase");
 
   void fillFromEvent(Bool_t fillFromEv=true); //default, no, use mDsts
+  Bool_t isCosmic()
+  {
+    return m_isCosmic;
+  }
+  void setCosmic(Bool_t iC)
+  {
+    m_isCosmic=iC;
+  }
+
+
   void doLooseClustering();
   //check if cluster has energy match in other layer
   void checkMatches();
@@ -163,6 +173,9 @@ enum evStatCodes
   };
  StFgtCollection* fgtCollection;
  Bool_t m_fillFromEvent;
+ Bool_t m_isCosmic;
+
+
   TH1D* clusWChargeMatch;
   TH1D* clusWOChargeMatch;
   TH1D* evStatistics;
