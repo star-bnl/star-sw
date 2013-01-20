@@ -22,22 +22,33 @@ class StFgtStraightPlotter : public StMaker {
   StFgtStraightPlotter(const Char_t* name="FgtStraightPlotter");
   pair<Double_t,Double_t> findCluChargeSize(Int_t iD,Char_t layer, Double_t ordinate);
   virtual ~StFgtStraightPlotter();
+   void setMaxDistChi(Float_t maxDChi);
    Int_t Init();
    Int_t Make();
    Int_t Finish();
    void setUseChargeMatch(Bool_t use=true);
+   void setPrint(Bool_t print);
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightPlotter.h,v 1.2 2013/01/20 00:42:56 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightPlotter.h,v 1.3 2013/01/20 02:47:33 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   void SetEffDisk(Int_t disk)
   {
     m_effDisk=disk;
   }
  protected:
   Int_t intNumTracks;
+  Bool_t isCosmic;
+  Float_t vertexCut;
+   Bool_t pulseCondition;
+   Bool_t lenCondition;
+   Float_t maxDistStrip_R;
+   Float_t maxDistStrip_Phi;
+   Float_t maxDist2Eff;
+   Bool_t doPrint;
   Char_t fileBase[300];
    StFgtDb* mDb;
   Int_t m_effDisk;
+   Float_t maxDistChi;
    vector<TH2D*> v_hClusP;
    vector<TH2D*> v_hClusR;
    Bool_t useChargeMatch;
@@ -249,5 +260,13 @@ class StFgtStraightPlotter : public StMaker {
 inline void StFgtStraightPlotter::setUseChargeMatch(Bool_t use){useChargeMatch=use;};
 inline void StFgtStraightPlotter::setChargeMatchCut(Float_t cut)
 {chargeMatchCut=cut;};
+inline   void StFgtStraightPlotter::setMaxDistChi(Float_t maxDChi)
+{
+  maxDistChi=maxDChi;
+}
+inline void StFgtStraightPlotter::setPrint(Bool_t print)
+{
+  doPrint=print;
+}
 #endif
 

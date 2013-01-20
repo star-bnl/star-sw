@@ -481,7 +481,7 @@ Double_t StFgtStraightTrackMaker::getRPhiRatio(vector<generalCluster>::iterator 
 */
 Int_t StFgtStraightTrackMaker::Make()
 {
-   cout <<"tracker! had " << m_tracks.size() << " old tracks" <<endl;
+  cout <<"tracker! had " << m_tracks.size() << " old tracks" <<endl;
   for(vector<AVTrack>::iterator it=m_tracks.begin();it!=m_tracks.end();it++)
     {
       if(it->points)
@@ -492,11 +492,7 @@ Int_t StFgtStraightTrackMaker::Make()
   //  cout <<"ave make " <<endl;
   Int_t ierr = kStOk;
   StFgtGeneralBase *fgtGenMkr = static_cast<StFgtGeneralBase * >( GetMaker("fgtGenBase"));
-  isCosmic=fgtGenMkr->isCosmic();
-  if(!isCosmic)
-      vertexCut=50;
-  else
-    vertexCut=100000000;
+
 
   pClusters=fgtGenMkr->getClusters();
   for(int i=0;i<6;i++)
@@ -925,7 +921,7 @@ Int_t StFgtStraightTrackMaker::Make()
 
 };
 
-StFgtStraightTrackMaker::StFgtStraightTrackMaker( const Char_t* name): StMaker( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0),fitCounter(0)
+StFgtStraightTrackMaker::StFgtStraightTrackMaker( const Char_t* name): StMaker( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0)
 {
   //  cout <<"AVE constructor!!" <<endl;
   int numTb=7;
@@ -933,18 +929,11 @@ StFgtStraightTrackMaker::StFgtStraightTrackMaker( const Char_t* name): StMaker( 
   isMuDst=true; //might want to change this...
   maxPhiDiff=0.5;
   maxClusters=10;
-  doPrint=false;
-  pulseCondition=true;
-  lenCondition=false;
-  maxDistStrip_R=0.7;
-  maxDistStrip_Phi=0.03;
+
   doFitWithVertex=false;
   doRefitWithVertex=false;
- doAddMultiplePoints=false;
-  maxDistChi=1.0;
-  maxDist2Eff=1.0;
+  doAddMultiplePoints=false;
   maxDist2=1.0;
-
  minNumFitPoints=3;
 
 
@@ -958,7 +947,6 @@ StFgtStraightTrackMaker::~StFgtStraightTrackMaker()
 
 Int_t StFgtStraightTrackMaker::Finish(){
   //  cout <<" closing txt file " << endl;
-  outTxtFile->close();
   gStyle->SetPalette(1);
   //  cout <<"AVE finish function " <<endl;
   Int_t ierr = kStOk;
