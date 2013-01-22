@@ -437,7 +437,7 @@
         </Structure>
 
         <Fill name="TPCC" comment="Selected TPCG version subversion">
-	  <var name="version" value="3.1" comment="Default is 3.0" />
+	  <var name="version" value="3.0" comment="Default is 3.0" />
 	</Fill>
         
         <Fill name="TPCG" comment="// TPC basic dimensions"  >
