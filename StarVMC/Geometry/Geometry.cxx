@@ -1826,7 +1826,7 @@ Bool_t Geometry::TpceInit()
     tpceGeom.fill();
   }
 
-  tpceGeom.select="TPCE41";
+  tpceGeom.select="TPCE31";
   {
     tpceGeom.config = 4;
     tpceGeom.dens   = 1;

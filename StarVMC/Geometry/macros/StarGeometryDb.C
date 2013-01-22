@@ -1211,7 +1211,7 @@ void y2013()
     geom.svttFlag = "SVTTof";  geom.svttStat = 0;
     geom.phmdFlag = "PHMDof"; geom.phmdStat = 0;
     // ================================================ 
-    geom.tpceFlag = "TPCE41";  geom.tpceStat = 1;    
+    geom.tpceFlag = "TPCE04r";  geom.tpceStat = 1;    
     geom.btofFlag = "BTOF67";  geom.btofStat = 1;
     geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
     geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
@@ -1237,6 +1237,7 @@ void y2013()
   geom.select = "y2013x"; {
     // Inherits y2013 and
     geom.magpFlag = "MAGPv1"; geom.magpStat = 1;
+    geom.tpceFlag = "TPCE31"; geom.tpceStat = 1;
     setTitle("Asymptotic y2013");
     geom.fill();
   }
