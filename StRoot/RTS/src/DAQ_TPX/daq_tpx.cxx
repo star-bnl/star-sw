@@ -1360,6 +1360,14 @@ static int cmpr_sim_adc(const void *first, const void *second)
 /*
 	cld_sim works on sector row!
 */
+daq_dta *daq_tpx::handle_cld_2d_sim(int sec, int row)
+{
+	return 0 ;
+}
+
+/*
+	cld_sim works on sector row!
+*/
 daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 {
 
