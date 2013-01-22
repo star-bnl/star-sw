@@ -24,7 +24,7 @@ endif
 
 
 
-OBJS := tpxCore.o tpxPed.o tpxGain.o tpxFCF.o tpxStat.o daq_tpx.o
+OBJS := tpxCore.o tpxPed.o tpxGain.o tpxFCF.o tpxFCF_2D.o tpxStat.o daq_tpx.o
 
 LIBS = libtpx.a
 #BINS = sim_tester
@@ -63,6 +63,8 @@ daq_tpx.o: tpxGain.h
 daq_tpx.o: tpxPed.h
 daq_tpx.o: tpxFCF.h
 daq_tpx.o: tpxFCF_flags.h
+daq_tpx.o: tpxFCF_2D.h
+daq_tpx.o: ../DAQ_TPX/tpxFCF.h
 daq_tpx.o: tpxStat.h
 tpxCore.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
@@ -70,6 +72,15 @@ tpxCore.o: ../../../../StRoot/RTS/include/DAQ1000/ddl_struct.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPC/fee_readout.h
 tpxCore.o: tpxCore.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
+tpxFCF_2D.o: ../../../../StRoot/RTS/include/rtsLog.h
+tpxFCF_2D.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
+tpxFCF_2D.o: ../DAQ_TPX/tpxCore.h
+tpxFCF_2D.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
+tpxFCF_2D.o: ../DAQ_TPX/tpxFCF_flags.h
+tpxFCF_2D.o: ../DAQ_TPX/tpxGain.h
+tpxFCF_2D.o: tpxCore.h
+tpxFCF_2D.o: tpxFCF_2D.h
+tpxFCF_2D.o: ../DAQ_TPX/tpxFCF.h
 tpxFCF.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxFCF.o: ../../../../StRoot/RTS/include/I386/i386Lib.h
 tpxFCF.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
@@ -100,8 +111,12 @@ tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
 tpxStat.o: tpxCore.h
 tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxStat.o: tpxStat.h
+tpxDecodeGains.o: ../DAQ_TPX/tpxGain.h
+tpxDecodeGains.o: tpxCore.h
+tpxDecodeGains.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 daq_tpx.o: ../DAQ_READER/daq_det.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
+tpxFCF_2D.o: ../DAQ_TPX/tpxFCF.h
 tpxFCF.o: tpxFCF_flags.h
 tpxGain.o: tpxCore.h
 tpxGain.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h

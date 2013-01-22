@@ -11,6 +11,7 @@ class tpxGain ;
 class tpxFCF ;
 class tpxStat ;
 class daqReader;
+class tpxFCF_2D ;
 
 class daq_tpx : public daq_det {
 private:
@@ -20,6 +21,7 @@ private:
 	class daq_dta *handle_cld(int sec, int rdo) ;
 	class daq_dta *handle_cld_raw(int sec, int rdo) ;
 	class daq_dta *handle_cld_sim(int sec, int row) ;
+	class daq_dta *handle_cld_2d_sim(int sec, int row) ;
 	class daq_dta *handle_ped(int sec) ;
 
 	// direct maps to file content:
@@ -83,6 +85,7 @@ public:
 
 
 	class tpxFCF *fcf_algo[25] ;
+	class tpxFCF_2D *fcf2d_algo[25] ;
 
 	int InitRun(int run_num) ;	// used in send_config
 	int FinishRun(int old_run) ;	// used in inject_token0

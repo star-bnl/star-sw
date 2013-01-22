@@ -111,11 +111,48 @@ public:
 	static int afterburner(int cou, daq_cld *store[]) ;
 	static char *fcf_flags(u_char flags) ;
 
+	// new functions for FY13 which assist in running FCF on any sector and rdo
+	void config2(int sec, int rdo, int modes=0, int rows=0, unsigned char *rowlen=0) ;
+	void apply_gains2(tpxGain *gains) ;
+	void start_evt2(int sec1, int rdo1) ;
+	void set_id(int id) {
+		my_id = id ;
+	}
+	int fcf_style ;	// new for FY13!
+
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.14 2012/04/27 09:15:15 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.15 2013/01/22 12:34:57 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
+	int sector ;	// counts from 1
+	int rdo ;	// counts from 1
 
+protected:
+	unsigned char *tpx_rowlen ;
+
+	struct s_static_storage {
+		unsigned short f ;
+		double g ;
+		double t0 ;
+	} ;
+
+	static struct s_storage_stuff {
+		struct s_static_storage *storage ;
+		int row_ix[256] ;
+	} gain_storage[24][6] ;
+
+
+	inline struct s_static_storage *get_static(int row, int pad)
+	{
+		int s = sector -1 ;
+		int r = rdo - 1 ;
+
+		if(gain_storage[s][r].storage == 0) return 0 ;
+		if(gain_storage[s][r].row_ix[row] < 0) return 0 ;
+
+		return gain_storage[s][r].storage + gain_storage[s][r].row_ix[row] + (pad-1) ;
+
+	}
 
 private:
 
@@ -124,14 +161,14 @@ private:
 	int cur_row_clusters ;
 
 	int row_count ;	// will default to 45 in the constructor unless overriden!
-	unsigned char *tpx_rowlen ;
+
 	int tpx_padplane ;
 
 	int cl_marker ;
 
-	struct stage1 {
-		unsigned short count ;
-		unsigned short f ;	// flags?
+	struct stage1 {	// per pad, indexed as (row,pad)
+		unsigned short count ;	// count of 1D clusters found...
+		unsigned short f ;	// initial flags: dead edge, broken RDO edge, etc.
 		double g ;	// gain
 		double t0 ;	// t0
 		struct tpxFCF_cl cl[FCF_MAX_CL] ;		
@@ -154,8 +191,27 @@ private:
 	int row_ix[256] ;	// we exaggerate! normally was "46"
 
 	unsigned int rbs ;
-	int sector ;
-	tpxGain *gains ;
+	int my_id ;
+
+
+	static const int max_tot_count = 1152 ;	// maximum pads per RDO
+
+	struct stage1 *working_storage ;
+	
+
+	inline struct stage1  *get_working(int row, int pad)
+	{
+		int s = sector -1 ;
+		int r = rdo - 1 ;
+
+		if(gain_storage[s][r].storage == 0) return 0 ;
+		if(gain_storage[s][r].row_ix[row] < 0) return 0 ;
+
+		return working_storage + gain_storage[s][r].row_ix[row] + (pad-1) ;
+	}
+
+
+//	tpxGain *gains ;
 
 	unsigned int do_version ;
 	unsigned int read_version ;
