@@ -24,6 +24,7 @@
 #include "tpxGain.h"
 #include "tpxPed.h"
 #include "tpxFCF.h"
+#include "tpxFCF_2D.h"
 #include "tpxStat.h"
 
 
@@ -118,6 +119,7 @@ daq_tpx::daq_tpx(daqReader *rts_caller)
 	ped_algo = 0 ;
 	for(int i=0;i<=24;i++) {
 		fcf_algo[i] = 0 ;
+		fcf2d_algo[i] = 0 ;
 	}
 	fcf_tmp_storage = 0 ;
 
@@ -177,6 +179,7 @@ daq_tpx::~daq_tpx()
 
 	for(int i=0;i<=24;i++) {
 		if(fcf_algo[i]) delete fcf_algo[i] ;
+		if(fcf2d_algo[i]) delete fcf2d_algo[i] ;
 	}
 	LOG(DBG,"%s: DEstructor done",name) ;
 	if(fcf_tmp_storage) free(fcf_tmp_storage) ;
@@ -433,6 +436,16 @@ int daq_tpx::FinishRun(int old)
 		}
 	}
 
+
+	// we free FCF 2D storage, if any!
+	for(int i=0;i<=24;i++) {
+		if(fcf2d_algo[i]) {
+			delete fcf2d_algo[i] ;
+			fcf2d_algo[i] = 0 ;
+		}
+	}
+
+
 	if(fcf_tmp_storage) {
 		free(fcf_tmp_storage) ;
 		fcf_tmp_storage = 0 ;
@@ -447,8 +460,6 @@ int daq_tpx::FinishRun(int old)
 daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, void *p2) 
 {
 	const char *bank ;
-
-
 
 	if(in_bank==0) {	// just wants to know if I'm here so return some read-only non-NULL memory
 		bank = "cld" ;	// default		
@@ -474,7 +485,9 @@ daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, 
 	else if(strcasecmp(bank,"cld_sim")==0) {
 		return handle_cld_sim(sec,row) ;
 	}
-
+	else if(strcasecmp(bank,"cld_2d_sim")==0) {
+		return handle_cld_2d_sim(sec,row) ;
+	}
 
 	// after this all the banks need to be in the file...
 	Make() ;
@@ -1425,7 +1438,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 			}
 		}
 
-		u_short track_id[512] ;
+		//u_short track_id[512] ;
 		tpx_altro_struct a ;
 
 		a.row = sim->row ;
@@ -1440,7 +1453,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 		for(u_int i=0;i<sim->ncontent;i++) {
 			a.adc[i] = sim->sim_adc[i].adc ;
 			a.tb[i] = sim->sim_adc[i].tb ;
-			track_id[i] = sim->sim_adc[i].track_id ;
+			//track_id[i] = sim->sim_adc[i].track_id ;
 			a.count++ ;
 		}
 

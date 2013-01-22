@@ -99,7 +99,7 @@ void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 	row = tpx_altro_to_pad[rdo][a][ch].row ;
 	pad = tpx_altro_to_pad[rdo][a][ch].pad ;
 
-
+#ifdef ESB_TEST_ETTIE
 	// This is a hack for ETTIE's test!
 	// Should not happen for normal TPX data so I will leave it in the formal code.
 	if(rdo==1) {
@@ -109,7 +109,7 @@ void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 			pad = ch + 1 ;
 		}
 	}
-
+#endif
 //#ifdef TEST_ETTIE
 //	row = a - 210 ;
 //	pad = ch + 1 ;

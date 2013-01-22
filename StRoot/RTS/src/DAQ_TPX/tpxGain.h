@@ -39,10 +39,16 @@
 //#define TPX_TCD_TIME_0		176.6
 
 //FY12
+//#define TPX_TCD_PED_STOP		173
+//define TPX_TCD_START			174
+//#define TPX_TCD_STOP			177
+//#define TPX_TCD_TIME_0			175.667713
+
+//FY13, TCD
 #define TPX_TCD_PED_STOP		173
-#define TPX_TCD_START			174
-#define TPX_TCD_STOP			177
-#define TPX_TCD_TIME_0			175.667713
+#define TPX_TCD_START			177
+#define TPX_TCD_STOP			180
+#define TPX_TCD_TIME_0			178.679
 
 /* FY10 and previous value.
    In FY11 this will change due to:
