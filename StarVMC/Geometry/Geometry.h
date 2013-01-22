@@ -362,7 +362,7 @@ class TpceGeom_t : public AgStructure
   ClassDef(TpceGeom_t,1);
   TpceGeom_t(): AgStructure("TpceGeom_t","STAR Time Projection Chamber Master Geometry Table")
     {
-      select="default"; module="TpceGeom"; config=-1; dens=-1; rmax=-1;
+      select="default"; module="TpceGeom"; config=-1; dens=-1; rmax=-1; subversion=-1;
     };
  ~TpceGeom_t(){ };
   TString select;
@@ -370,6 +370,7 @@ class TpceGeom_t : public AgStructure
   Int_t config;
   Int_t dens;
   Int_t rmax;
+  Float_t subversion;
 };
 
 class TpcxGeom_t : public AgStructure

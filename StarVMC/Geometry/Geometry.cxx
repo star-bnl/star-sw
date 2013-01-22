@@ -406,6 +406,10 @@ Bool_t Geometry::ConstructTpce( const Char_t *flag, Bool_t go )
     {
       AgStructure::AgDetpAdd( "Tpcg_t", "rmax", (Float_t)207.77 );
     }
+  if ( tpceGeom.subversion > 0 )
+    {
+      AgStructure::AgDetpAdd( "Tpcc_t", "version", tpceGeom.subversion );
+    }
 
   if ( go )
   if ( !CreateModule( tpceGeom.module ) )
@@ -1817,6 +1821,17 @@ Bool_t Geometry::TpceInit()
     tpceGeom.config = 4;
     tpceGeom.dens  = 1;
     tpceGeom.rmax   = 1;
+    tpceGeom.subversion = 3.0;
+    tpceGeom.module="TpceGeo3a";
+    tpceGeom.fill();
+  }
+
+  tpceGeom.select="TPCE41";
+  {
+    tpceGeom.config = 4;
+    tpceGeom.dens   = 1;
+    tpceGeom.rmax   = 1;
+    tpceGeom.subversion = 3.1;
     tpceGeom.module="TpceGeo3a";
     tpceGeom.fill();
   }

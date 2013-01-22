@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.252 2013/01/17 21:04:52 jwebb Exp $
+* $Id: geometry.g,v 1.253 2013/01/22 18:27:10 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.253  2013/01/22 18:27:10  jwebb
+* Defined Y2013x geometry.
+*
 * Revision 1.252  2013/01/17 21:04:52  jwebb
 * Support for improved magnet model, improved trim coil description, in y2013x
 * geometry tag.
@@ -1290,6 +1293,20 @@ replace [exe BTOFc6;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call b
 replace [exe BTOFc7;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=7 " call btofgeo7 ";]
 
 
+""" ----------------------------------------------------------------------- """
+""" TPC Configurations                                                      """
+"""     Naming convention is offset by 1 from the corresponding module.     """
+"""                                                                         """
+""" TPCE00  Module: tpcegeo                                                 """
+""" TPCE01  Module: tpcegeo                                                 """
+""" TPCE02  Module: tpcegeo1                                                """
+""" TPCE03  Module: tpcegeo2                                                """
+""" TPCE04  Module: tpcegeo3                                                """
+""" TPCE04r Module: tpcegeo3 with reduced rmax                              """
+"""                                                                         """
+""" TPCE31 revises this scheme.  It corresponds to the version number (3)   """
+"""        and subversion number (1). TPCE30 == TPCE04r.                    """
+
 
 replace [exe TPCE00;] with [;"New version of the TPC backplane "; TpceConfig = 1;]
 replace [exe TPCE01;] with [;"New version of the TPC backplane "; TpceConfig = 1;
@@ -1303,6 +1320,9 @@ replace [exe TPCE04;] with [;"New version of the TPC backplane "; TpceConfig = 4
 replace [exe TPCE04r;] with [;"New version of the TPC backplane "; TpceConfig = 4;
                               "gas density correction";            DensConfig = 1;
                               "radius correction";                 RmaxConfig = 1;]
+
+replace [exe TPCE30;] with [;"Equivalent to TPCE04r"; exe TPCE30; ]
+replace [exe TPCE31;] with [;"                     "; TpceConfig = 31; ]
 
 replace [exe tpcx10;] with [;"TPC test version";    TpcxConfig=1;
                             ;"Disable old TPC";     TpceConfig=0;
@@ -2008,9 +2028,10 @@ REPLACE [exe y2013;] with ["Y2013 first cut geometry";
     exe PIXL02;      "Development version of the pixl detector";
 ]
 
-REPLACE [exe y2013x;] with ["Y2013 asymptotic";
+REPLACE [exe y2013x;] with [                                      "Y2013 asymptotic";
     EXE y2013;    "first cut 2013";
     EXE MAGPv1;   "version 1 of the magnet";
+    EXE TPCE31;   "version 3.1 of the TPC (increase deadzone and integration time)";
 ]
 
 c ===============================================================================
@@ -4389,11 +4410,11 @@ c     write(*,*) 'TPC';
      if (TpceConfig==2)          Call tpcegeo1
      if (TpceConfig==3)          Call tpcegeo2
      if (TpceConfig==4) {
-     if ( RmaxConfig>0) {        Call AgDetp add ('tpcg.rmax=',207.77,1);     }
+     if ( RmaxConfig>0) {        Call AgDetp add ('tpcg.rmax=',207.77,1); }
                                  Call tpcegeo3
                         }
-
-     IF TpcxConfig==1 { Call TpcxGeo1; }
+     IF TpcxConfig==1   {                                                    Call TpcxGeo1;  }
+     IF TpceConfig==31 {         Call AgDETP add('tpcc.version=', 3.1, 1 );  Call TpceGeo3a; }
 
    }
    if (ftpc) then
