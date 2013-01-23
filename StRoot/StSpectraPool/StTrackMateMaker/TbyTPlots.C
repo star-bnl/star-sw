@@ -893,8 +893,8 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
       TString Title(set->GetTitle());
       if (Title != "file") continue;
       TString Name(set->GetName());
-      if (! Name.BeginsWith("trackMateFile") ||
-	  ! Name.EndsWith(".root")) continue;
+      if (! Name.EndsWith(".root")) continue;
+      if (! (Name.BeginsWith("trackMateFile") || Name.BeginsWith("TbyT"))) continue;
       f = new TFile(Name);
       TChain *tree = (TChain *) f->Get(TreeName);
       if (tree) {
