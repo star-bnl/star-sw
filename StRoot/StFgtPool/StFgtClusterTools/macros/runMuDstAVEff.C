@@ -83,6 +83,7 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    fgtGenBase=new StFgtGeneralBase("fgtGenBase");
    fgtStraightTrackMaker =new StFgtStraightTrackMaker("fgtStraightTracker");
    fgtStraightTrackMaker->setMinNumFitPoints(4);
+   fgtStraightTrackMaker->setMaxClusters(20);
    fgtStraightPlotter=new StFgtStraightPlotter("fgtStraightPlotter");
 
 
@@ -155,8 +156,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.8 2013/01/20 02:06:37 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.9 2013/01/23 20:36:41 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.9  2013/01/23 20:36:41  avossen
+less printouts, no crash
+
 Revision 1.8  2013/01/20 02:06:37  avossen
 changed defines in attributes
 

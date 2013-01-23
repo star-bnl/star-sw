@@ -897,7 +897,7 @@ pair<Double_t,Double_t> StFgtStraightPlotter::findCluChargeSize(Int_t iD,Char_t 
 
 Double_t StFgtStraightPlotter::findClosestPoint(float mx, float bx, float my, float by, double xE, double yE, Int_t iD)
 {
-  cout <<"expecting point at " << xE <<", " <<yE <<endl;
+  //  cout <<"expecting point at " << xE <<", " <<yE <<endl;
   if(iD<0 || iD >5)
     {
       return 99999;
@@ -924,7 +924,7 @@ Double_t StFgtStraightPlotter::findClosestPoint(float mx, float bx, float my, fl
 
 	  Float_t x=r*cos(phi);
 	  Float_t y=r*sin(phi);
-	  cout <<"we have " << x <<", " << y <<endl;
+	  //	  cout <<"we have " << x <<", " << y <<endl;
 	  Double_t mDist=(x-xE)*(x-xE)+(y-yE)*(y-yE);
 	  if(mDist<dist2)
 	    {
@@ -934,8 +934,8 @@ Double_t StFgtStraightPlotter::findClosestPoint(float mx, float bx, float my, fl
 	      getAlign(iD,phi,r,tmpX,tmpY,tmpZ,tmpP,tmpR);
 	      Double_t xExpUpdate=mx*tmpZ+bx;
 	      Double_t yExpUpdate=my*tmpZ+by;
-	      cout<<"tmpx: " << tmpX <<" old: " << x <<" xE old: " << xE << " updated: " << xExpUpdate;
-	      cout<<"tmpy: " << tmpY <<" old: " << y <<" yE old: " << yE << " updated: " << yExpUpdate<<endl;
+	      //	      cout<<"tmpx: " << tmpX <<" old: " << x <<" xE old: " << xE << " updated: " << xExpUpdate;
+	      //	      cout<<"tmpy: " << tmpY <<" old: " << y <<" yE old: " << yE << " updated: " << yExpUpdate<<endl;
 	      mDist=(tmpX-xExpUpdate)*(tmpX-xExpUpdate)+(tmpY-yExpUpdate)*(tmpY-yExpUpdate);
 	      dist2=mDist;
 	      ///Double_t xExp=mx*StFgtGeom::getDiscZ(i)+bx;
@@ -1240,8 +1240,9 @@ Int_t StFgtStraightPlotter::Make()
 
   StFgtStraightTrackMaker *fgtSTracker = static_cast<StFgtStraightTrackMaker * >( GetMaker("fgtStraightTracker"));
   vector<AVTrack>& tracks=fgtSTracker->getTracks();
-  cout <<"plotter: we have " << tracks.size() << "tracks " <<endl;
+  //  cout <<"plotter: we have " << tracks.size() << "tracks " <<endl;
   intNumTracks+=tracks.size();
+
   for(vector<AVTrack>::iterator it=tracks.begin();it!=tracks.end();it++)
     {
       Double_t mx=it->mx;
@@ -1249,11 +1250,12 @@ Int_t StFgtStraightPlotter::Make()
       Double_t bx=it->ax;
       Double_t by=it->ay;
 
+
 	for(int i=0;i<6;i++)
 	  {
 	    Double_t xExp=mx*StFgtGeneralBase::getLocDiscZ(i)+bx;
 	    Double_t yExp=my*StFgtGeneralBase::getLocDiscZ(i)+by;
-	    cout <<"expecting x: " << xExp << ", " << yExp<<endl;
+	    //	    cout <<"expecting x: " << xExp << ", " << yExp<<endl;
 	    Int_t quad=-1;
 	    //x=r*cos(phi)
 	    //y=r*sin(phi)
@@ -1316,7 +1318,7 @@ Int_t StFgtStraightPlotter::Make()
     }
 
   Double_t closestPoint=findClosestPoint(mx,bx,my,by,xExp,yExp,i);
-  cout <<" closest point is " << closestPoint <<" away " <<endl;
+  //  cout <<" closest point is " << closestPoint <<" away " <<endl;
   //		 (*outTxtFile) <<"closest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
 
   if(findClosestPoint(mx,bx,my,by,xExp,yExp,i)<MAX_DIST2_EFF)
@@ -1375,14 +1377,14 @@ Int_t StFgtStraightPlotter::Make()
   int counter=0;
   for(vector<AVTrack>::iterator it=tracks.begin();it!=tracks.end();it++)
     {
-      cout <<" looking at track " << counter <<endl;
+      //      cout <<" looking at track " << counter <<endl;
       counter++;
       //      cout <<"This track has parameters: ";
-      cout <<" mx: " << it->mx <<" my: " << it->my <<" bx: " << it->ax << " by: " << it->ay << " chi2: " << it->chi2 <<endl;
+      //      cout <<" mx: " << it->mx <<" my: " << it->my <<" bx: " << it->ax << " by: " << it->ay << " chi2: " << it->chi2 <<endl;
       Double_t vertZ = (  -( it->mx*it->ax + it->my*it->ay )/(it->mx*it->mx+it->my*it->my));
 
       pair<double,double> dca=getDca(it);
-      cout <<"dca: " << dca.second <<" z vertex: " << vertZ <<" or " << dca.first <<endl;
+      //      cout <<"dca: " << dca.second <<" z vertex: " << vertZ <<" or " << dca.first <<endl;
       if(it->chi2<maxDistChi && fabs(vertZ)< vertexCut )
 	{
 	  hIpZ->Fill(dca.first);
@@ -1460,10 +1462,8 @@ void StFgtStraightPlotter::SetFileBase(const Char_t* m_filebase)
 }
 
 Int_t StFgtStraightPlotter::Finish(){
-  cout <<" closing txt file " << endl;
   outTxtFile->close();
   gStyle->SetPalette(1);
-  cout <<"AVE finish function " <<endl;
   Int_t ierr = kStOk;
   cout <<"we found " << intNumTracks << " tracks " <<endl;
   ///////////////////////////track collection//does this make sense? Not if m_tracks gets erased for every event...
@@ -1896,7 +1896,7 @@ Int_t StFgtStraightPlotter::Init(){
   outTxtFile->open("clusExpectations.txt");
   cluNotFoundTxt=new ofstream;
   cluNotFoundTxt->open("clusNotFound.txt");
-  cout <<"AVE!!" <<endl;
+
   myRootFile=new TFile("clusterEff.root","RECREATE");
   pulsePictureFile=new TFile("pulsePics.root","RECREATE");
 

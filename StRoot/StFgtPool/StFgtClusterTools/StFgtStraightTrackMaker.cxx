@@ -481,7 +481,7 @@ Double_t StFgtStraightTrackMaker::getRPhiRatio(vector<generalCluster>::iterator 
 */
 Int_t StFgtStraightTrackMaker::Make()
 {
-  cout <<"tracker! had " << m_tracks.size() << " old tracks" <<endl;
+  //  cout <<"tracker! had " << m_tracks.size() << " old tracks" <<endl;
   for(vector<AVTrack>::iterator it=m_tracks.begin();it!=m_tracks.end();it++)
     {
       if(it->points)
@@ -553,7 +553,7 @@ Int_t StFgtStraightTrackMaker::Make()
 	    continue;
 	  if(pClusters[iSeed1]->size() > maxClusters || pClusters[iSeed2]->size() > maxClusters)
 	    {
-	           cout <<"too many clusters in the disk!!!"<<endl<<endl;
+	      //	           cout <<"too many clusters in the disk!!!"<<endl<<endl;
 	      continue;
 	    }
 	  //track where we have hits in disks
@@ -873,6 +873,7 @@ Int_t StFgtStraightTrackMaker::Make()
 				//				cout <<"about to get track" <<endl;
 				//				cout <<"check for valid track " << endl;
 				//this also manipulates the points vector to only put points in there that fit
+				//get Track gets the ipZ, so it is ok to put in a random value here, but it is not a reference! So you don't get ipZ back
 				validTrack=getTrack(*v_points, ipZ);
 				if(validTrack)
 				  {
@@ -934,8 +935,7 @@ StFgtStraightTrackMaker::StFgtStraightTrackMaker( const Char_t* name): StMaker( 
   doRefitWithVertex=false;
   doAddMultiplePoints=false;
   maxDist2=1.0;
- minNumFitPoints=3;
-
+  minNumFitPoints=3;
 
 };
 
@@ -946,19 +946,20 @@ StFgtStraightTrackMaker::~StFgtStraightTrackMaker()
 };
 
 Int_t StFgtStraightTrackMaker::Finish(){
+  cout<<" straight tracker finish" <<endl;
   //  cout <<" closing txt file " << endl;
-  gStyle->SetPalette(1);
+  //  gStyle->SetPalette(1);
   //  cout <<"AVE finish function " <<endl;
   Int_t ierr = kStOk;
 
   ///////////////////////////track collection
-  vector<AVTrack>::iterator it=m_tracks.begin();
+  //  vector<AVTrack>::iterator it=m_tracks.begin();
   //  cout <<"we found " << m_tracks.size() <<" tracks" <<endl;
   int counter=0;
 
   ///  cout <<"canvases etc.. " << endl;
   //////////////////////////////////////////////////
-
+  cout <<"st done " <<endl;
   return ierr;
 };
 

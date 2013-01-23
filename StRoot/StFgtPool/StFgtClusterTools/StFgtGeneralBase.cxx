@@ -93,16 +93,16 @@ void StFgtGeneralBase::SetFileBase(const Char_t* m_filebase)
 
 Int_t StFgtGeneralBase::Finish()
 {
-
+  cout <<"gb finish" <<endl;
   evStatistics=new TH1D("fgtEventStatistics","fgtEventStatistics",10,0,9);
-  TCanvas c;
-  chargeMaxAdcCorr->Draw("colz");
+  //  TCanvas c;
+  //  chargeMaxAdcCorr->Draw("colz");
   ///---->  c.SaveAs("chargeMaxAdcCorr.png");
-  chargeMaxAdcIntCorr->Draw("colz");
+  //  chargeMaxAdcIntCorr->Draw("colz");
   ///---->  c.SaveAs("chargeMaxAdcIntCorr.png");
-  hIpZEv->Draw();
+  //  hIpZEv->Draw();
   ///---->  c.SaveAs("ipZEv.png");
-  cout <<"done saving" <<endl;
+  //  cout <<"done saving" <<endl;
   char buffer[100];
 
   TFile f(buffer,"recreate");
@@ -120,11 +120,9 @@ Int_t StFgtGeneralBase::Finish()
 	  hNumClustersR[iD*4+iQ]->Write();
 	}
     }
-  cout <<"writing..." <<endl;
   f.Write();
-  cout <<"closing file" <<endl;
   f.Close();
-  cout <<"return" <<endl;
+  cout <<"done" <<endl;
   return kStOk;
 }
 
@@ -186,9 +184,9 @@ Int_t StFgtGeneralBase::Make()
     {
       fgtCollection=new StFgtCollection();
       fillFromMuDst(*fgtCollection);
-      cout <<"read mDst " <<endl;
+      //      cout <<"read mDst " <<endl;
       fillFromStEvent(fgtCollection);
-      cout <<"filled event" <<endl;
+      //      cout <<"filled event" <<endl;
     }
 
   //do associations
@@ -262,7 +260,7 @@ Int_t StFgtGeneralBase::fillFromStEvent(StFgtCollection* fgtCollectionPtr)
 	    discZ=tmpZ;
 
 	    Int_t geoId=(*hitIter)->getCentralStripGeoId();
-	    cout <<"central geoId in cluster:" << geoId <<endl;
+	    //	    cout <<"central geoId in cluster:" << geoId <<endl;
 	
 	    StFgtGeom::decodeGeoId((*hitIter)->getCentralStripGeoId(),discK, quad, layer, strip);
 	    if(quad<0 && discK<0)//Ithink these are the error conditions
@@ -312,6 +310,7 @@ Int_t StFgtGeneralBase::fillFromStEvent(StFgtCollection* fgtCollectionPtr)
 	      //		   Float_t ped = 0, pedErr = 0;
 	      if( strip ){
 		Int_t geoId=strip->getGeoId();
+		//		cout <<"looking at strip geo id: "<< strip->getGeoId()<<endl;
 		Int_t cSeedType=strip->getClusterSeedType();
 		//		     if(cSeedType==kFgtClusterSeedInSeaOfNoise)
 		//		       cout <<"noisy strip " << geoId <<endl;
@@ -323,7 +322,7 @@ Int_t StFgtGeneralBase::fillFromStEvent(StFgtCollection* fgtCollectionPtr)
 		//		     cout <<"quad: " << quad <<endl;
 		if(discK<0 || discK>6 || quad <0 || quad > 4 || (layer!='P' && layer !='R'))
 		  {
-		    cout <<"bad read2" <<endl;
+		    //		    cout <<"bad read2" <<endl;
 		    continue;
 		  }
 		Double_t ped=0.0; //get from DB
@@ -335,8 +334,11 @@ Int_t StFgtGeneralBase::fillFromStEvent(StFgtCollection* fgtCollectionPtr)
 		pedErr = mDb->getPedestalSigmaFromElecId( elecId );
 		if(quad<4)
 		  {
+
 		    if(quad<0)
-		      cout <<"bad read3"<<endl;
+		      {
+		      		      cout <<"bad read3"<<endl;
+		      }
 		    //		  cout <<"looking at disc: " << disc <<  " quad: " << quad <<" index: " << disc*4+quad <<endl;
 		    //			 cout <<"pushing back to disc: "<< disc <<" quad: " << quad <<endl;
 		    pStrips[disc*4+quad].push_back(generalStrip(geoId,ped,pedErr,cSeedType,charge, chargeUncert));
@@ -383,7 +385,8 @@ Int_t StFgtGeneralBase::fillFromStEvent(StFgtCollection* fgtCollectionPtr)
 	    Int_t centerStripId=it->centerStripIdx;
 	    if(centerStripId<0)
 	      {
-				     cout <<"bad read4 for cluster with geoid: "<< it->centralStripGeoId <<" index: " << it->centerStripIdx <<" quad: " << it->quad << "index: " <<dCounter-1<< " disc: " << iDx  <<" phi " << it->posPhi <<" r: " << it->posR <<endl;
+		//don't worry, probably a cluster at low r where the center strip is missing
+		//				     cout <<"bad read4 for cluster with geoid: "<< it->centralStripGeoId <<" index: " << it->centerStripIdx <<" quad: " << it->quad << "index: " <<dCounter-1<< " disc: " << iDx  <<" phi " << it->posPhi <<" r: " << it->posR <<endl;
 		continue;
 	      }
 
@@ -540,7 +543,7 @@ Int_t StFgtGeneralBase::fillFromMuDst(StFgtCollection& fgtCollection)
 		      hitCollectionPtr[disc]->getHitVec().push_back(pFgtHit);
 		    StMuFgtCluster* clus = static_cast< StMuFgtCluster* >( (*fgtClusters)[clusIdx] );
 		    Int_t clusCentGeoId=clus->getCentralStripGeoId();
-		    cout <<" looking at : " << clusCentGeoId <<endl;
+		    //		    cout <<" looking at : " << clusCentGeoId <<endl;
 		    Float_t clusCharge=clus->getCharge();
 		    Float_t R=clus->getR();
 		    Float_t Phi=clus->getPhi();
