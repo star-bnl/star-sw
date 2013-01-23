@@ -415,5 +415,32 @@ struct rtsMonSC {
 	u_int phys_off ;
 };
 
+struct rts2013_L4Mon {
+    rtsMonHeader head;
+
+    // By trigger Information
+    struct {
+	u_int off_id ;	   // offline id number i.e. 5001
+	
+	u_int daq_cnt ;	   // received from EVB
+	u_int daq_rate;
+	
+	u_int l4_abort;
+	u_int l4_abort_rate;
+    } trgs[TRIGGERS_MAX+1] ;
+};
+
+struct rts2013_L4EvbMon {
+    rtsMonHeader head;
+
+    // General
+    u_int mb_run;     // total data size for this run
+    u_int gb_free;    // free disk space
+    u_int gb_all;     // total disk space
+
+    // RCF
+    u_int files_sent;     // sent within last resets on the hour
+    u_int files_waiting;  // waiting to be sent
+};
 
 #endif
