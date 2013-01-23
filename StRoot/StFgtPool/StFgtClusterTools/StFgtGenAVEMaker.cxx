@@ -2208,7 +2208,7 @@ Int_t StFgtGenAVEMaker::Finish(){
       Double_t vertZ = (  -( it->mx*it->ax + it->my*it->ay )/(it->mx*it->mx+it->my*it->my));
 
       pair<double,double> dca=getDca(it);
-      cout <<"dca: " << dca.second <<" z vertex: " << vertZ <<" or " << dca.first <<endl;
+      //      cout <<"dca: " << dca.second <<" z vertex: " << vertZ <<" or " << dca.first <<endl;
       if(it->chi2<MAX_DIST_CHI && fabs(vertZ)< VERTEX_CUT )
 	{
 	  hIpZ->Fill(dca.first);

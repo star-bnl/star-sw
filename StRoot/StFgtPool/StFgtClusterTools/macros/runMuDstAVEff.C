@@ -111,9 +111,9 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    Int_t ierr  = kStOK;  // err flag
    Int_t nevents = 0;    // cumulative number of events in
    for( ; nevents < neventsIn && !ierr; ++nevents ){
-     cout <<"event: "<< nevents <<endl;
+     //     cout <<"event: "<< nevents <<endl;
       analysisChain->Clear();
-          cout <<"making ... " << endl;
+      //          cout <<"making ... " << endl;
       // make
       ierr = analysisChain->Make();
    };
@@ -156,8 +156,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.9 2013/01/23 20:36:41 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.10 2013/01/23 22:52:17 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.10  2013/01/23 22:52:17  avossen
+fixed uninitialized bufffer for filename
+
 Revision 1.9  2013/01/23 20:36:41  avossen
 less printouts, no crash
 
