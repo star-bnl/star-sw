@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2013.cxx,v 2.1 2012/12/10 15:59:30 ullrich Exp $
+ * $Id: StTriggerData2013.cxx,v 2.2 2013/01/23 20:28:55 ullrich Exp $
  *
  * Author: Akio Ogawa,Nov 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2013.cxx,v $
+ * Revision 2.2  2013/01/23 20:28:55  ullrich
+ * Improve code to avoid compiler warning when shifting bits.
+ *
  * Revision 2.1  2012/12/10 15:59:30  ullrich
  * Initial Revision
  *
@@ -959,7 +962,9 @@ unsigned long long StTriggerData2013::l2sum() const
 {
     //printf("L2sum0=%08o\n",TrgSum->L2Sum[0]);
     //printf("L2sum1=%08o\n",TrgSum->L2Sum[1]);
-    unsigned long long mask=(TrgSum->L2Sum[1]<<32) | TrgSum->L2Sum[0];
+    unsigned long long hi = TrgSum->L2Sum[1];
+    unsigned long long lo = TrgSum->L2Sum[0];
+    unsigned long long mask=(hi<<32) | lo;
     return mask;
 }
 

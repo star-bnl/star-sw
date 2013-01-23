@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2012.cxx,v 2.3 2012/04/30 15:19:11 ullrich Exp $
+ * $Id: StTriggerData2012.cxx,v 2.4 2013/01/23 20:28:55 ullrich Exp $
  *
  * Author: Akio Ogawa,Nov 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2012.cxx,v $
+ * Revision 2.4  2013/01/23 20:28:55  ullrich
+ * Improve code to avoid compiler warning when shifting bits.
+ *
  * Revision 2.3  2012/04/30 15:19:11  ullrich
  * Added access function for l2sum (Akio)
  *
@@ -966,7 +969,9 @@ unsigned long long StTriggerData2012::l2sum() const
 {
   //printf("L2sum0=%08o\n",TrgSum->L2Sum[0]);
   //printf("L2sum1=%08o\n",TrgSum->L2Sum[1]);
-  unsigned long long mask=(TrgSum->L2Sum[1]<<32) | TrgSum->L2Sum[0];
+  unsigned long long hi = TrgSum->L2Sum[1];
+  unsigned long long lo = TrgSum->L2Sum[0];
+  unsigned long long mask=(hi<<32) | lo;
   return mask;
 }
 
