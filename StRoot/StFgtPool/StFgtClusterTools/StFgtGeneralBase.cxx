@@ -28,6 +28,7 @@
 
 StFgtGeneralBase::StFgtGeneralBase(const Char_t* name): StMaker( name ),m_fillFromEvent(false),evtNr(0),m_effDisk(2), fgtCollection(0)
 {
+  sprintf(fileBase,"%s",".");
   m_isCosmic=false;
   chargeMatchCut=1.5;
   pClusters=new vector<generalCluster>*[6];
@@ -104,7 +105,7 @@ Int_t StFgtGeneralBase::Finish()
   ///---->  c.SaveAs("ipZEv.png");
   //  cout <<"done saving" <<endl;
   char buffer[100];
-
+  sprintf(buffer,"%s/general.root",fileBase);
   TFile f(buffer,"recreate");
   clusWChargeMatch->Write();
   clusWOChargeMatch->Write();
