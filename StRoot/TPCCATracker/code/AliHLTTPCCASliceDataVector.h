@@ -198,13 +198,13 @@ inline const short *AliHLTTPCCASliceData::HitLinkDownData( const AliHLTTPCCARow 
 
 inline short_v AliHLTTPCCASliceData::HitLinkUpData  ( const AliHLTTPCCARow &row, const short_i &hitIndex ) const
 {
-  assert( hitIndex * sizeof( short_v::EntryType ) % VectorAlignment == 0 );
+  //Matthias 01.24.13  assert( hitIndex * sizeof( short_v::EntryType ) % VectorAlignment == 0 );
   return short_v( &row.fLinkUpData[hitIndex] );
 }
 
 inline short_v AliHLTTPCCASliceData::HitLinkDownData( const AliHLTTPCCARow &row, const short_i &hitIndex ) const
 {
-  assert( hitIndex * sizeof( short_v::EntryType ) % VectorAlignment == 0 );
+  //Matthias 01.24.13  assert( hitIndex * sizeof( short_v::EntryType ) % VectorAlignment == 0 );
   return short_v( &row.fLinkDownData[hitIndex] );
 }
 
@@ -228,13 +228,13 @@ inline short_v AliHLTTPCCASliceData::HitLinkDownData( const AliHLTTPCCARow &row,
 
 inline void AliHLTTPCCASliceData::SetHitLinkUpData  ( const AliHLTTPCCARow &row, const short_i &hitIndex, const short_v &value )
 {
-  assert( hitIndex * sizeof( short_v::EntryType ) % VectorAlignment == 0 );
+  //Matthias 01.24.13  assert( hitIndex * sizeof( short_v::EntryType ) % VectorAlignment == 0 );
   value.store( &row.fLinkUpData[hitIndex] );
 }
 
 inline void AliHLTTPCCASliceData::SetHitLinkDownData( const AliHLTTPCCARow &row, const short_i &hitIndex, const short_v &value )
 {
-  assert( hitIndex * sizeof( short_v::EntryType ) % VectorAlignment == 0 );
+  //Matthias 01.24.13  assert( hitIndex * sizeof( short_v::EntryType ) % VectorAlignment == 0 );
   value.store( &row.fLinkDownData[hitIndex] );
 }
 
@@ -311,13 +311,13 @@ inline void AliHLTTPCCASliceData::SetHitAsUsed( const AliHLTTPCCARow &row, const
 
 inline sfloat_v AliHLTTPCCASliceData::HitDataY( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const
 {
-  assert( hitIndex * sizeof( sfloat_v::EntryType ) % VectorAlignment == 0 );
+  //Matthias 01.24.13  assert( hitIndex * sizeof( sfloat_v::EntryType ) % VectorAlignment == 0 );
   return sfloat_v( &row.fHitDataY[hitIndex] );
 }
 
 inline sfloat_v AliHLTTPCCASliceData::HitDataZ( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const
 {
-  assert( hitIndex * sizeof( sfloat_v::EntryType ) % VectorAlignment == 0 );
+  //Matthias 01.24.13  assert( hitIndex * sizeof( sfloat_v::EntryType ) % VectorAlignment == 0 );
   return sfloat_v( &row.fHitDataZ[hitIndex] );
 }
 
