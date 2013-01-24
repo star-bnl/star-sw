@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.28 2012/06/13 15:45:42 ramdebbe Exp $
+// $Id: StPeCMaker.cxx,v 1.29 2013/01/24 15:43:08 ramdebbe Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.29  2013/01/24 15:43:08  ramdebbe
+// added more flags to choose input or output tracks tof etc.
+//
 // Revision 1.28  2012/06/13 15:45:42  ramdebbe
 // Added flags to include TOF and Vertex branches in tree
 //
@@ -123,7 +126,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.28 2012/06/13 15:45:42 ramdebbe Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.29 2013/01/24 15:43:08 ramdebbe Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -145,6 +148,9 @@ Int_t StPeCMaker::Init() {
    LOG_INFO << "StPeCMake INIT: tree output file:  " << treeFileName << endm;
    infoLevel = 0;
    LOG_INFO << "StPeCMake INIT: infoLevel:  " << infoLevel << endm;
+   LOG_INFO <<"StPeCMaker INIT: readStMuDst " << readStMuDst << endm;
+   LOG_INFO <<"StPeCMaker INIT: readStEvent " << readStEvent << endm;
+   LOG_INFO <<"StPeCMaker INIT: readBoth "    << readStMuDst_and_StEvent << endm;
 
    //Get the standard root format to be independent of Star IO   
    m_outfile = new TFile(treeFileName, "recreate");
@@ -154,33 +160,35 @@ Int_t StPeCMaker::Init() {
    uDstTree = new TTree("uDst", "Pcol uDst", 99);
 
    //Instantiate StPeCEvent
-   pevent = new StPeCEvent(useBemc, useTOF, useVertex);
+
+   pevent = new StPeCEvent(useBemc, useTOF, useVertex, useTracks, readStMuDst, readStEvent, readStMuDst_and_StEvent);
    pevent->setInfoLevel(infoLevel);
 
    trigger = new StPeCTrigger();
    trigger->setInfoLevel(infoLevel);
 
    geant = new StPeCGeant();
-
+    LOG_INFO << "StPeCMaker Init: before branch add ---------- " << endm;
 
    //Add branches
    uDstTree->Branch("Event", "StPeCEvent", &pevent, 94000, 99);
    uDstTree->Branch("Trigger", "StPeCTrigger", &trigger, 64000, 99);
    uDstTree->Branch("Geant", "StPeCGeant", &geant, 64000, 99);
-
+    LOG_INFO << "StPeCMaker Init: after branch add ---------- " << endm;
    //define 2-D histogram to display snapshots of individual events
    //store then in another directory
    TDirectory * saveDir = gDirectory;
    TDirectory * snapShots = gDirectory->mkdir("snapShots");
    snapShots->cd();
    fSnapShots = new TList();
-   Int_t snapLimit = 100;
+//    Int_t snapLimit = 100;
    for (Int_t i=0;i<snapLimit;i++){
 
      fSnapShots->Add(new TH2F(Form("snapShot%d",i), Form("y z view of event %d", i) , 100, -250., 250., 100, -200., 200.));
    }
    fSnapShots->Add(new TH1F("hNumVtx", "number of vertices in event" , 100, 0., 20.));
    gDirectory = saveDir;
+    LOG_INFO << "StPeCMaker leaving Init ---------- " << endm;
    return StMaker::Init();
 }
 
@@ -226,72 +234,81 @@ Int_t StPeCMaker::Make()
 
    Int_t NTracks = 0 ;
    int tw        = 0 ;
+   int ok = 0 ;
+   int returnValue = 0;
    //
    // 26-APR 2012 RD we comment the whole muDst part NEEDS TO BE FIXED
-//    if(muDst )  //rd 12-OCT-2010 had && !useBemc
-//    {
-//       LOG_INFO << "StPeCMaker make: using muDst---------- "  << endm;
-//       NTracks = muDst->globalTracks()->GetEntries();
+   // 12-JULY2012 RD this is still in need of a fix, I return to StMuDst for triggerEfficiency studies
+   //
+   if(readStMuDst){
+    if(!muDst )  LOG_INFO << "StPeCMaker make: muDst not present "  << endm;
+
+      LOG_INFO << "StPeCMaker make: using muDst---------- "  << endm;
+      NTracks = muDst->globalTracks()->GetEntries();
        
-//       StL0Trigger &trig = muDst->event()->l0Trigger();
-//       tw = trig.triggerWord();
+      StL0Trigger &trig = muDst->event()->l0Trigger();
+      tw = trig.triggerWord();
 
-//       trigger->process(muDst);
-
-//    }
+      returnValue = trigger->process(muDst);
+//       LOG_INFO << "StPeCMaker make: trigger return ---------- "  <<returnValue<< endm;
+      ok = pevent->fill(muDst);
+   }   // was commented up to here  //commented mudst ends here
 //    else
-//    {                                           //this needs fix RD 9DEC09
-      LOG_INFO << "StPeCMaker make: using StEvent---------- "  << endm;
-      event = (StEvent *)GetInputDS("StEvent");
-      if (!event)
-      {
+//   {                                           //this needs fix RD 9DEC09
+   if(readStEvent){
+     LOG_INFO << "StPeCMaker make: using StEvent---------- "  << endm;  //to read StEvent 18-NOV-2012
+     event = (StEvent *)GetInputDS("StEvent");
+     if (!event)
+       {
 	 LOG_ERROR << "There was no StEvent! Exiting..." << endm;
 	 return kStOK; 
-      }
-      //Process StEvent trigger simulations
-      trigger->process(event);
+       }
+     //Process StEvent trigger simulations
+     trigger->process(event);
 
-      StSPtrVecTrackNode& tempn = event->trackNodes();
-      NTracks = tempn.size();
+     StSPtrVecTrackNode& tempn = event->trackNodes();
+     NTracks = tempn.size();
 
-      tw = event->l0Trigger()->triggerWord();
+     tw = event->l0Trigger()->triggerWord();                  // end of StEvent 18-NOV
+     ok = pevent->fill(event);
 
-      //   }         //rd 9DEC09
+   }         //rd 9DEC09
+   if(readStMuDst_and_StEvent){
+     event = (StEvent *)GetInputDS("StEvent");
+     if (!event)
+       {
+	 LOG_ERROR << "There was no StEvent! Exiting..." << endm;
+	 return kStOK; 
+       }
+      LOG_INFO << "StPeCMaker make: using both StMuDst and StEvent ---------- "  << endm;
+      NTracks = muDst->globalTracks()->GetEntries();
+       
+      StL0Trigger &trig = muDst->event()->l0Trigger();
+      tw = trig.triggerWord();
 
+      trigger->process(muDst);
+      ok = pevent->fill(event, muDst);
+   }   
    
-   //Fill geant simulations
-   TDataSet* geantBranch = GetInputDS("geantBranch");
-   if (geantBranch)
-   {
-     geant->fill(geantBranch);
-   }
+//    //Fill geant simulations             //RD
+//    TDataSet* geantBranch = GetInputDS("geantBranch");
+//    if (geantBranch)
+//    {
+//      geant->fill(geantBranch);
+//    }                                   //RD 15-SEP-2012
    
-   //  Check number of tracks
-   // FTPC tracks make this more complex to separate peripheral and nonperipheral events, 
-   // Use the test on return 'ok' of the 'fill' function to decide if event is ok 
-   // flk 07/17/03
-   
-   //    if(NTracks > StPeCnMaxTracks) {
-   LOG_INFO << "StPeCMaker::Make Number of tracks nodes: " << NTracks << endm;
-   //       cout << "Not a peripheral event (NTracks > 15)" << endl;
-   //       //flag = kStErr;
-   //    }
-   //    if(NTracks <= 1) {
-   //       cout << "Event has no tracks" << endl;
-   //       // Trigger studies, keep empty events 
-   //       //flag = kStErr;
-   //    }
+
 
    //Fill StPeCEvent
    // old: event flag was set from global multiplicities above
    // if ( geantBranch || (flag == kStOk) ) {
      
-   int ok = 0 ;
+
 //    if (event) ok = pevent->fill(event);
 //    else       ok = pevent->fill(muDst);
-   if (event) ok = pevent->fill(event, muDst);  //RD 
+//    if (event) ok = pevent->fill(event, muDst);  //RD 
    //   ok = pevent->fill(muDst); // 11-DEC-2011 for embedding work
-   if ( !ok|| geantBranch  ) {
+   if ( !ok && returnValue>0) {    // || geantBranch  ) {  RD 15-SEP
      //LOG_INFO << "Fill Event to Tree!**********************" << endm;
      uDstTree->Fill();
 
@@ -306,7 +323,7 @@ Int_t StPeCMaker::Make()
      // 	 flag = Cuts4Prong(event, pevent);
      //        }
    } else {
-     LOG_INFO << "Do Not fill Event to Tree!**********************" << endm;
+//      LOG_INFO << "Do Not fill Event to Tree!**********************" << endm;
    }
    
    //Cleanup
@@ -389,7 +406,7 @@ Int_t StPeCMaker::Cuts4Prong(StEvent *event, StPeCEvent *pevent)
 
 Int_t StPeCMaker::Finish()
 {
-	cout << "Entering StPeCMaker::Finish()" << endl;
+// 	cout << "Entering StPeCMaker::Finish()" << endl;
 	TDirectory * saveDir = gDirectory;
 	m_outfile->cd("snapshots");
 	fSnapShots->Write();

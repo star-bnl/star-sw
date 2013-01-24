@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.19 2012/07/08 00:40:20 ramdebbe Exp $
+// $Id: StPeCEvent.cxx,v 1.20 2013/01/24 15:41:16 ramdebbe Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.20  2013/01/24 15:41:16  ramdebbe
+// added more flags to choose input or output tracks tof etc.
+//
 // Revision 1.19  2012/07/08 00:40:20  ramdebbe
 // initialized variables per Gene VB advice
 //
@@ -97,12 +100,12 @@
 
 ClassImp(StPeCEvent)
 
-  StPeCEvent::StPeCEvent(bool useBemc, bool useTOF, bool useVertex) :
+  StPeCEvent::StPeCEvent(bool useBemc, bool useTOF, bool useVertex, bool useTracks, bool readStMuDst, bool readStEvent, bool readBothInputs) :
     muDst(0), eventP(0), treecalo(0), tofHits(0), tofTracks(0), vertices(0) {
   // StPeCMaxTracks ..... looks more like Fortran......
   pPairs    = new TClonesArray ("StPeCPair", StPeCnMaxTracks);
   sPairs    = new TClonesArray ("StPeCPair", StPeCnMaxTracks);
-  tracks    = new TClonesArray ("StPeCTrack",StPeCnMaxTracks);
+
   if((useTOFlocal = useTOF)){
     tofHits   = new TClonesArray ("StMuBTofHit",5*StPeCnMaxTracks);
     tofTracks = new TClonesArray ("StMuTrack",5*StPeCnMaxTracks);
@@ -117,6 +120,25 @@ ClassImp(StPeCEvent)
   if((useVertexLocal = useVertex)){
     vertices  = new TClonesArray ("StMuPrimaryVertex",5*StPeCnMaxTracks);
     LOG_INFO << "StPeCEvent constructor: useVertex ---------- " <<useVertex << endm;
+
+  }
+  if((useTracksLocal = useTracks)){
+ 
+    LOG_INFO << "StPeCEvent constructor: useTracks ---------- " <<useTracks << endm;
+//        tracks    = new TClonesArray ("StPeCTrack",StPeCnMaxTracks);
+    tracks    = new TClonesArray ("StMuTrack", StPeCnMaxTracks);
+  }
+  if((readStMuDstLocal = readStMuDst)){
+ 
+    LOG_INFO << "StPeCEvent constructor: readStMuDst ---------- " <<readStMuDst << endm;
+
+  }  if((readStEventLocal = readStEvent)){
+ 
+    LOG_INFO << "StPeCEvent constructor: readStEvent ---------- " <<readStEvent << endm;
+
+  }  if((readBothInputsLocal = readBothInputs)){
+ 
+    LOG_INFO << "StPeCEvent constructor: both inputs ---------- " <<readBothInputs << endm;
 
   }
   nPPairs  = 0 ;
@@ -140,7 +162,7 @@ ClassImp(StPeCEvent)
   zVertex = 0;
   rVertex = 0;
   infoLevel = 0;
-
+    LOG_INFO << "StPeCEvent constructor: leaving constructor ---------- " << endm;
 
 }
 
@@ -174,7 +196,9 @@ void  StPeCEvent::clear ( ) {
 
    pPairs->Clear();
    sPairs->Clear();
-   tracks->Clear();
+
+   if(useTracksLocal)tracks->Clear();
+
    if(useTOFlocal) {
      tofHits->Clear();
      tofTracks->Clear();
@@ -415,7 +439,7 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
 
 //===========================================================================================
 Int_t StPeCEvent::fill(StMuDst *mudst) {
-   //cout << "Entering StPeCEvent::fill(StMuDst *mudst)" << endl;
+//    cout << "Entering StPeCEvent::fill(StMuDst *mudst)" << endl;
   // Int_t nGlobals = 0, SumQ = 0; 
   // Float_t SumPx = 0.0, SumPy = 0.0;  
   // float px, py;
@@ -590,6 +614,7 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
   LOG_INFO << "StPeCEvent fill(muDst StEvent): useBemc ---------- " <<useBemcLocal << endm;
   LOG_INFO << "StPeCEvent fill(muDst StEvent): useTOF ---------- " <<useTOFlocal << endm;
   LOG_INFO << "StPeCEvent fill(muDst StEvent): useVertex ---------- " <<useVertexLocal << endm;
+  LOG_INFO << "StPeCEvent fill(muDst StEvent): useTracks ---------- " <<useTracksLocal << endm;
   //
   // Get Magnetic field from event summary
   //
@@ -746,7 +771,12 @@ Int_t StPeCEvent::fill(StEvent * eventP, StMuDst *mudst) {
      
        // do not fill track list for now to save space 
        // nTracks should be the same as nPrim afterwards
-       // new((*tracks)[nTracks++])StPeCTrack(0, tp);
+       if(useTracksLocal){
+//           new((*tracks)[nTracks++])StPeCTrack(0, tp);  //old scheme
+// 	 new((*tracks)[nTracks++]) StPeCTrack((const StPeCTrack &) *tp);
+	 new((*tracks)[nTracks++]) StMuTrack((const StMuTrack &) *tp);
+
+       }
      }
    LOG_INFO << "Number of primary  TPC  tracks: " << nPrimaryTPC << " FTPC tracks " << nPrimaryFTPC<<endm; 
    LOG_INFO << "Number of primary  tracks event summary: " << nPrimaryTracks << " global tracks " << nGlobalTracks<<endm;  
