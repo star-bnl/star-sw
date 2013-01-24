@@ -20,7 +20,7 @@
 //   (12) AJP for BEMC and EEMC but NOT the boundary (1)
 //   (13) BAJP for the BEMC-only patches (1)
 //   (14) EAJP for the EEMC-only patches (1)
-//   (15) Unused
+//   (15) JP0, unified over the BEMC+EEMC
 //
 // J.M. Engelage, C. Gagliardi, E.G. Judd: The Recabling Scheme and the New Algorithms for the EMC Trigger (April 5, 2010)
 //
@@ -72,6 +72,7 @@ public:
   void SetAJP (int value = 1) { mMask.set(12,value); }
   void SetBAJP(int value = 1) { mMask.set(13,value); }
   void SetEAJP(int value = 1) { mMask.set(14,value); }
+  void SetJP0 (int value = 1) { mMask.set(15,value); }
 
   void changeJPThresh(int dsm);	/// Changes the JP Thresholds by dsm
   void SetOkAllEvents  (int ok   = 1) { mOkAllEvents   = ok  ; }
