@@ -264,6 +264,7 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
   StFgtGeneralBase *fgtGenMkr = static_cast<StFgtGeneralBase * >( GetMaker("fgtGenBase"));
 
   ipZ=fgtGenMkr->vtxZ;
+  Int_t vtxRank=fgtGenMkr->vtxRank;
   vector<AVPoint>::iterator iter=points.begin();
   Double_t A = 0, B = 0, Cx = 0, Cy = 0, D = 0, Ex = 0, Ey = 0;
   Double_t dist = 0;
@@ -310,7 +311,7 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 
   if(doFitWithVertex)
     {
-      if(isMuDst && ipZ>-100 && ipZ<100)
+      if(isMuDst && vtxRank>0&&ipZ>-100 && ipZ<100)
         {
           A+=ipZ*ipZ;
           B+=ipZ;
@@ -384,7 +385,7 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     D = redPoints.size();
     if(doRefitWithVertex)
       {
-          if(isMuDst && ipZ>-100 && ipZ<100)
+          if(isMuDst && vtxRank>0&&ipZ>-100 && ipZ<100)
             {
               A+=ipZ*ipZ;
               B+=ipZ;
@@ -419,7 +420,7 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     //       cout <<" end chi2: " <<dist <<endl;
     m_tracks.push_back(AVTrack(mx,my,bx,by,ipZ,dist));
     //    cout <<" we have " <<m_tracks.size() <<" track now " <<endl;
-    
+    (m_tracks.back()).vtxRank=vtxRank;
     points.clear();
     for(vector<AVPoint>::iterator it=redPoints.begin();it!=redPoints.end();it++)
       {

@@ -1395,9 +1395,13 @@ Int_t StFgtStraightPlotter::Make()
 	  hBx->Fill(it->ax);	  
 	  hBy->Fill(it->ay);
 	  hChi2->Fill(it->chi2);
-	  tpcFgtZVertexCorr->Fill(dca.first,it->ipZEv);
-	  tpcFgtZVertexCorr2->Fill(vertZ,it->ipZEv);
-	  tpcFgtZVertexCorr3->Fill(vertZ,dca.first);
+	  if(it->vtxRank>0)
+	    {
+	      tpcFgtZVertexCorr->Fill(dca.first,it->ipZEv);
+	      tpcFgtZVertexCorr2->Fill(vertZ,it->ipZEv);
+	    }
+	      tpcFgtZVertexCorr3->Fill(vertZ,dca.first);
+
 	  hIpDca->Fill(dca.second);
 	}
     }

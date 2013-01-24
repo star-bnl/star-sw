@@ -96,6 +96,7 @@ struct generalCluster
 class StFgtGeneralBase : public StMaker {
  public:
   Double_t vtxZ;
+  Int_t vtxRank;
   StFgtGeneralBase(const Char_t* name="FgtGeneralBase");
 
   void fillFromEvent(Bool_t fillFromEv=true); //default, no, use mDsts
@@ -195,7 +196,7 @@ enum evStatCodes
   StFgtDb* mDb;
 
   static Float_t chargeMatchCut;
-  Int_t vtxRank;
+
   Int_t evtNr;
   Int_t m_effDisk;
   vector<generalCluster> clustersD1;
