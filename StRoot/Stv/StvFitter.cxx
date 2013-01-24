@@ -371,7 +371,7 @@ int StvFitter::Hpdate()
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
 		        ,  myJrkPars.Arr(),mOtErrs->Arr());
   if (myXi2>kXtraBigXi2) { mFailed=99; return mFailed;}
-  assert(fabs(myXi2-mXi2)<1e-3*(myXi2+mXi2+1));
+  assert(fabs(myXi2-mXi2)<1e-1*(myXi2+mXi2+1));
   for (int i=0;i<5;i++) {
     if (myJrkPars[i]<-mDelta[i]) {mFailed=-1; myJrkPars[i]= -mDelta[i];}
     if (myJrkPars[i]> mDelta[i]) {mFailed=-1; myJrkPars[i]=  mDelta[i];}
