@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.17 2012/07/03 19:38:09 ramdebbe Exp $
+// $Id: StPeCMaker.h,v 1.18 2013/01/24 15:43:14 ramdebbe Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.18  2013/01/24 15:43:14  ramdebbe
+// added more flags to choose input or output tracks tof etc.
+//
 // Revision 1.17  2012/07/03 19:38:09  ramdebbe
 // raised ClassDef from 1 to 2
 //
@@ -99,15 +102,25 @@ public:
 	void setFilter(Int_t fi) {filter = fi;};
 	void setMuDst(StMuDst* mu) {muDst = mu;};	//Accessor for muDst pointer
 	void setFileName ( TString name ) { treeFileName = name ; } ;
-	void setUseBemc ( Bool_t includeBemc = kFALSE ) { useBemc = includeBemc ; } ;
-	void setUseTOF ( Bool_t includeTOF = kFALSE ) { useTOF = includeTOF ; } ;
+	void setUseBemc   ( Bool_t includeBemc = kFALSE ) { useBemc = includeBemc ; } ;
+	void setUseTOF    ( Bool_t includeTOF = kFALSE ) { useTOF = includeTOF ; } ;
 	void setUseVertex ( Bool_t includeVertex = kFALSE ) { useVertex = includeVertex ; } ;
+	void setUseTracks ( Bool_t includeTracks = kFALSE ) { useTracks = includeTracks ; } ;
+
+	void setReadStMuDst    ( Bool_t includeStMuDst = kFALSE ) { readStMuDst             = includeStMuDst ; } ;
+	void setReadStEvent    ( Bool_t includeStEvent = kFALSE ) { readStEvent             = includeStEvent ; } ;
+	void setReadBothInputs ( Bool_t includeBoth = kFALSE )    { readStMuDst_and_StEvent = includeBoth ; } ;
 	void setOutputPerRun ( Int_t in = 1 ) { outputPerRun = in ; } ;
 
 	TString treeFileName ;
 	Bool_t   useBemc;     //if TRUE BEMC information is written to ntuple
 	Bool_t   useTOF;      //if TRUE TOF information is written to ntuple
 	Bool_t   useVertex;   //if TRUE Vertex information is written to ntuple
+	Bool_t   useTracks;   //if TRUE track information is written to ntuple
+	Bool_t readStMuDst;               //if TRUE will work with information passed in StMuDst format
+	Bool_t readStEvent;               //if TRUE will work with information passed in StEvent format
+	Bool_t readStMuDst_and_StEvent;   //if TRUE will work with information passed in both StMuDst and StEvent format
+
 protected:
 	TFile* m_outfile;
 
@@ -134,7 +147,7 @@ private:
 	Int_t triggerSim(StEvent*);
 
 	virtual const char *GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.17 2012/07/03 19:38:09 ramdebbe Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.18 2013/01/24 15:43:14 ramdebbe Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 	ClassDef(StPeCMaker,2)
 };

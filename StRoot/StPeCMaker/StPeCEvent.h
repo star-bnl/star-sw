@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.11 2012/07/03 20:44:44 ramdebbe Exp $
+// $Id: StPeCEvent.h,v 1.12 2013/01/24 15:41:24 ramdebbe Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.12  2013/01/24 15:41:24  ramdebbe
+// added more flags to choose input or output tracks tof etc.
+//
 // Revision 1.11  2012/07/03 20:44:44  ramdebbe
 // removed some comments
 //
@@ -68,7 +71,7 @@ class StPeCEvent: public TObject {
 
 public:
 
-  StPeCEvent(bool useBemc, bool useTOF, bool useVertex);
+  StPeCEvent(bool useBemc, bool useTOF, bool useVertex, bool useTracks, bool readStMuDst, bool readStEvent, bool readBothInputs);
   virtual                         ~StPeCEvent();
 
 
@@ -134,6 +137,11 @@ private:
   Bool_t                          useBemcLocal;
   Bool_t                          useTOFlocal;
   Bool_t                          useVertexLocal;
+  Bool_t                          useTracksLocal;
+
+  Bool_t                          readStMuDstLocal;
+  Bool_t                          readStEventLocal;
+  Bool_t                          readBothInputsLocal;
 
   ClassDef(StPeCEvent,2)
 };
