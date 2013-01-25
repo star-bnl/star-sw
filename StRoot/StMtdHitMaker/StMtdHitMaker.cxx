@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.cxx,v 1.6 2012/07/18 03:31:24 geurts Exp $ 
+ * $Id: StMtdHitMaker.cxx,v 1.7 2013/01/25 16:47:02 geurts Exp $ 
  *
  * Author: Frank Geurts (Rice)
  ***************************************************************************
@@ -698,7 +698,7 @@ void StMtdHitMaker::fillMtdHitCollection() {
 			if(!leTdc.size() || !teTdc.size()) continue;
 			int chan = validchan[iv]; // global tdc chan (0-23)
 			int channel = chan;
-			int tdigboardid = getTdigBoardId(backleg,chan);
+			int tdigboardid = getTdigBoardId(backleg,tray,chan);
 			int ilocalchan = getLocalTdcChan(backleg,tray,chan);
 			unsigned int tmptdc = leTdc[0];
 			int bin = tmptdc&0x3ff;
@@ -831,10 +831,9 @@ void StMtdHitMaker::fillStEvent() {
 }
 
 
-Int_t StMtdHitMaker::getTdigBoardId(Int_t backlegid, Int_t chn) {
+Int_t StMtdHitMaker::getTdigBoardId(Int_t backlegid, Int_t tray, Int_t chn) {
 
-	int   trayId  = (chn-1)/24+1;
-	int   itdigid = mTray2TdigMap[backlegid-1][trayId-1]; 
+	int   itdigid = mTray2TdigMap[backlegid-1][tray-1]; 
 
 	Int_t tdigboardid = -1;
 	if(mYear==11){

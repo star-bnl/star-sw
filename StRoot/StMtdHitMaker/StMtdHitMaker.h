@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.6 2012/07/18 03:31:24 geurts Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.7 2013/01/25 16:47:02 geurts Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -76,7 +76,7 @@ class StMtdHitMaker:public StRTSBaseMaker {
   Int_t mUseMuDst;
 
   Int_t UnpackMtdRawData();
-  Int_t getTdigBoardId(Int_t backlegid, Int_t chn);
+  Int_t getTdigBoardId(Int_t backlegid, Int_t tray, Int_t chn);
   Int_t getLocalTdcChan(Int_t backlegid, Int_t tray, Int_t chn);
   Int_t getTdigLocalChan(Int_t backlegid, Int_t itdigid);
   void fillMtdHeader();
