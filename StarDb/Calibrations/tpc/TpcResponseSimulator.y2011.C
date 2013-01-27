@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2011.C,v 1.8 2012/04/11 14:21:55 fisyak Exp $
+// $Id: TpcResponseSimulator.y2011.C,v 1.9 2013/01/27 15:44:17 fisyak Exp $
 // $Log: TpcResponseSimulator.y2011.C,v $
+// Revision 1.9  2013/01/27 15:44:17  fisyak
+// Correct T0offset from run 11 Au+Au 19.6 GeV
+//
 // Revision 1.8  2012/04/11 14:21:55  fisyak
 // Fix T0offset from comparison with AuAu27
 //
@@ -100,7 +103,8 @@ TDataSet *CreateTable() {
   // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   // The corection has to be added                                                                    M             P
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
-  row.T0offset   = 0.50 -1.43663e-01 -0.00932877;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  //row.T0offset   = 0.50 -1.43663e-01 -0.00932877;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  row.T0offset   = 0.598;// 01/27/13 Xianglei Zhu from SL11d_embed with a pi+ in run 11 Au+Au 19.6 GeV test sample
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
