@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.46 2012/12/06 14:33:47 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.47 2013/01/28 20:26:50 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.47  2013/01/28 20:26:50  fisyak
+ * Simplify loop over clusters
+ *
  * Revision 1.46  2012/12/06 14:33:47  fisyak
  * Keep only clusters with flag == 0 or FCF_ONEPAD | FCF_MERGED | FCF_BIG_CHARGE. Tonko's instruction
  *
@@ -879,19 +882,22 @@ StTpcDigitalSector *StTpcHitMaker::GetDigitalSector(Int_t sector) {
 }
 //________________________________________________________________________________
 Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
+  Short_t  ADCs2[512];
+  UShort_t IDTs2[512];
   memset(ADCs, 0, sizeof(ADCs));
   memset(IDTs, 0, sizeof(IDTs));
   StTpcDigitalSector *digitalSector = 0;
-  Int_t some_data = 0;
   Int_t r_old = -1;
   Int_t p_old = -1;
   Int_t Total_data = 0;
   Int_t r=Row() ;	// I count from 1
-  if(r==0) return 0 ;	// TPC does not support unphy. rows so we skip em
+  if(r==0) return 0 ;	// TPC does not support unphysical rows so we skip them
   r-- ;			// TPC wants from 0
   Int_t p = Pad() - 1 ;	// ibid.
   if (p < 0 || p >= St_tpcPadPlanesC::instance()->padsPerRow(r+1)) return 0;
-  if (r_old != r || p_old != p) {
+  TGenericTable::iterator iword = DaqDta()->begin();
+  Int_t some_data = 0;
+  do {
     if (some_data) {
       Total_data += some_data;
       some_data = 0;
@@ -899,38 +905,30 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
       Int_t ntbold = digitalSector->numberOfTimeBins(r_old+1,p_old+1);
       if (ntbold) {
 	LOG_INFO << "digitalSector " << sector 
-		 << " already has " << ntbold << " at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
+		 << " already has " << ntbold << " time bins at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
+	digitalSector->getTimeAdc(r_old+1,p_old+1,ADCs2,IDTs2);
+	for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
+	  if (! ADCs2[i]) continue;
+	  if ((IDTs[i] || IDTs2[i]) && ADCs[i] < ADCs2[i]) IDTs[i] = IDTs2[i];
+	  ADCs[i] += ADCs2[i];
+	}
       }
       digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
       memset(ADCs, 0, sizeof(ADCs));
       memset(IDTs, 0, sizeof(IDTs));
     }
-    r_old = r;
-    p_old = p;
-  }
-  TGenericTable::iterator iword = DaqDta()->begin();
-  for (;iword != DaqDta()->end();++iword) {
-    daq_adc_tb &daqadc = (*(daq_adc_tb *)*iword);
-    Int_t tb   = daqadc.tb;
-    Int_t adc  = daqadc.adc;
-    ADCs[tb] = adc;
-    IDTs[tb] = 65535;
-    some_data++ ;	// I don't know the bytecount but I'll return something...
-  }
-  
-  if (some_data) {
-    Total_data += some_data;
-    some_data = 0;
-    if (! digitalSector) digitalSector = GetDigitalSector(sector);
-    Int_t ntbold = digitalSector->numberOfTimeBins(r_old+1,p_old+1);
-    if (ntbold) {
-      LOG_INFO << "digitalSector " << sector 
-	       << " already has " << ntbold << " at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
+    if (r_old != r || p_old != p) {
+      r_old = r;
+      p_old = p;
     }
-    digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
-    memset(ADCs, 0, sizeof(ADCs));
-    memset(IDTs, 0, sizeof(IDTs));
-  }
+    for (;iword != DaqDta()->end();++iword) {
+      daq_adc_tb &daqadc = (*(daq_adc_tb *)*iword);
+      Int_t tb   = daqadc.tb;
+      Int_t adc  = daqadc.adc;
+      ADCs[tb] = adc;
+      some_data++ ;	// I don't know the bytecount but I'll return something...
+    }
+  } while (some_data);
   return Total_data;
 }
 //________________________________________________________________________________
