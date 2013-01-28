@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.102 2013/01/18 15:03:37 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.103 2013/01/28 21:51:17 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.103  2013/01/28 21:51:17  fisyak
+ * Correct ranking
+ *
  * Revision 2.102  2013/01/18 15:03:37  fisyak
  * Fix TrackData data name clash with StiPPVertexFinder
  *
@@ -878,22 +881,22 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
   StiHit *ihit = node->getHit();
   StThreeVectorF origin(node->x_g(),node->y_g(),node->z_g());
   StThreeVectorF hitpos(ihit->x_g(),ihit->y_g(),ihit->z_g());
-
-  double dif = (hitpos-origin).mag();
-
-  if (dif>3.) {
-    dif = node->z_g()-ihit->z_g();
-    double nowChi2 = node->evaluateChi2(ihit);
-    printf("***Track(%d) DIFF TOO BIG %g chi2 = %g %g\n",track->getId(),dif,node->getChi2(),nowChi2);
-    printf("H=%g %g %g N =%g %g %g\n",ihit->x()   ,ihit->y()   ,ihit->z()
-		                     ,node->getX(),node->getY(),node->getZ());
-    const StMeasuredPoint *mp = ihit->stHit();
-    printf("H=%g %g %g N =%g %g %g\n",mp->position().x(),mp->position().y(),mp->position().z()
-		                     ,origin.x(),origin.y(),origin.z());
-     
-    assert(fabs(dif)<50.);
+  if (node->getDetector()) {
+    double dif = (hitpos-origin).mag();
+    
+    if (dif>3.) {
+      dif = node->z_g()-ihit->z_g();
+      double nowChi2 = node->evaluateChi2(ihit);
+      printf("***Track(%d) DIFF TOO BIG %g chi2 = %g %g\n",track->getId(),dif,node->getChi2(),nowChi2);
+      printf("H=%g %g %g N =%g %g %g\n",ihit->x()   ,ihit->y()   ,ihit->z()
+	     ,node->getX(),node->getY(),node->getZ());
+      const StMeasuredPoint *mp = ihit->stHit();
+      printf("H=%g %g %g N =%g %g %g\n",mp->position().x(),mp->position().y(),mp->position().z()
+	     ,origin.x(),origin.y(),origin.z());
+      
+      assert(fabs(dif)<50.);
+    }
   }
-
     // making some checks.  Seems the curvature is infinity sometimes and
   // the origin is sometimes filled with nan's...
   
@@ -1133,23 +1136,24 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
       if (t.mCtb  > 0) gTrack->setCtbMatched();
       else             gTrack->setCtbNotMatched();
     }
-    Int_t W = 0;
-    if (t.bemcBin > 0) {
-      gTrack->setBemcMatched();
-      W = StBemcHitList::instance()->getFired(t.bemcBin);
-    } else
-      gTrack->setBemcNotMatched();
-    if (t.eemcBin > 0) {
-      gTrack->setEemcMatched();
-      W = StEemcHitList::instance()->getFired(t.bemcBin);
-    }  else
-      gTrack->setEemcNotMatched();
-    if (W > 0) {
-      UInt_t fext = gTrack->flagExtension();
-      if (W > 7) W = 7;
-      fext &= ~7;
-      fext += W;
-      gTrack->setFlagExtension(fext);
+    if (t.bemcBin > 0 || t.eemcBin > 0) {
+      Int_t W = 0;
+      if (t.bemcBin > 0) {
+	W = StBemcHitList::instance()->getFired(t.bemcBin);
+	if (W > 0) gTrack->setBemcMatched();
+	else      gTrack->setBemcNotMatched();
+      } else if (t.eemcBin > 0) {
+	W = StEemcHitList::instance()->getFired(t.eemcBin);
+	if (W > 0) gTrack->setEemcMatched();
+	else      gTrack->setEemcNotMatched();
+      }
+      if (W > 0) {
+	UInt_t fext = gTrack->flagExtension();
+	if (W > 7) W = 7;
+	fext &= ~7;
+	fext += W;
+	gTrack->setFlagExtension(fext);
+      }
     }
   } else if (gTrack->type()==primary) {
     StTrackNode *n = gTrack->node();

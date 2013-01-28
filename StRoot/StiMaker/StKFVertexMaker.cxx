@@ -1,4 +1,4 @@
-// $Id: StKFVertexMaker.cxx,v 2.3 2013/01/17 15:57:25 fisyak Exp $
+// $Id: StKFVertexMaker.cxx,v 2.4 2013/01/28 21:51:17 fisyak Exp $
 #include "RVersion.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -366,9 +366,11 @@ void StKFVertexMaker::calculateRank(StPrimaryVertex *primV) {
   rank -= Wveto*primV->numPostXTracks();
   rank += Wmatch*primV->numTracksWithPromptHit();
   rank += Wmatch*primV->numTracksCrossingCentralMembrane();
-  rank += Wmatch*(primV->numMatchesWithCTB() + primV->numMatchesWithBTOF()) 
-    -     Wveto*(primV->numNotMatchesWithCTB() + primV->numNotMatchesWithBTOF());
-  rank += Wmatch*(primV->numMatchesWithBEMC() + primV->numMatchesWithEEMC()) 
+  rank += Wmatch*primV->numMatchesWithCTB()
+    -     Wveto*primV->numNotMatchesWithCTB();
+  rank += Wmatch*primV->numMatchesWithBTOF() 
+    -     Wveto*primV->numNotMatchesWithBTOF();
+  rank += Wmatch*(primV->numMatchesWithBEMC() + primV->numMatchesWithEEMC());
     -     Wveto*(primV->numNotMatchesWithBEMC() + primV->numNotMatchesWithEEMC());
   if (primV->numTracksTpcWestOnly() > 0 && primV->numTracksTpcEastOnly() > 0) 
     rank += Wmatch*TMath::Min(primV->numTracksTpcWestOnly(),primV->numTracksTpcEastOnly());
@@ -588,6 +590,9 @@ Double_t StKFVertexMaker::AnnelingFcn(Double_t TInv) {
 }
 //________________________________________________________________________________
 // $Log: StKFVertexMaker.cxx,v $
+// Revision 2.4  2013/01/28 21:51:17  fisyak
+// Correct ranking
+//
 // Revision 2.3  2013/01/17 15:57:25  fisyak
 // Add handles for debugging
 //
