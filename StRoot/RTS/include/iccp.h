@@ -365,8 +365,19 @@ struct ic_l4_eventdecision {
     uint trg_lo;   // lo 32 bits of the trigger mask
     uint trg_hi;   // hi 32 bits of the trigger mask
     uint buff_id;  // event buffer id for the hlt data
-    uint len;      // length of the output buffer
+    uint evt_sz;   // sz of the original event
+    uint l4_sz;    // sz of the l4 output buffer
 };
+
+
+// Payloads for the l4 taping commands
+struct ic_l4_evt_descriptor {
+    uint buff_id;
+    uint sz;
+    uint disk;
+    uint fd;
+};
+
 
 //struct ic_announce_trg_sum {uint* addr ;};
 // SB
@@ -634,6 +645,9 @@ union ic_load
   ic_l4_startevent                 l4_startevent;
   ic_l4_eventdecision              l4_eventdecision;
     ic_l4_shipevent  l4_shipevent;
+    ic_l4_evt_descriptor l4_evt_descriptor;
+
+
   
 #endif /* NOT_DAQ */
   //  ic_qdsend_announce_chunk         qdsend_announce_chunk;
