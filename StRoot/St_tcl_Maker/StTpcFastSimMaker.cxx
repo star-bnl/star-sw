@@ -1,5 +1,8 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.6 2012/12/12 23:53:36 fisyak Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.7 2013/01/28 20:27:25 fisyak Exp $
     $Log: StTpcFastSimMaker.cxx,v $
+    Revision 1.7  2013/01/28 20:27:25  fisyak
+    Move cluters to global coordinatate system
+
     Revision 1.6  2012/12/12 23:53:36  fisyak
     Clean up, extend no. of pad rows
 
@@ -127,7 +130,7 @@ Int_t StTpcFastSimMaker::Make() {
     StTpcPadCoordinate newPad(Pad.sector(),Pad.row(), Pad.pad(),timebkt );
     Short_t pad = newPad.pad();
     Short_t tmb = newPad.timeBucket();
-    static StTpcLocalCoordinate global; // leave coordinates in TpcLocalCoordinate because StTpcHitMover expects that.
+    static StGlobalCoordinate global; // StTpcHitMover will not move it because of EmbeddingShortCut flag.
     transform(newPad,global,kFALSE); // alignment
     UInt_t hw = 1;   // detid_tpc
     hw += sector << 4;     // (row/100 << 4);   // sector
