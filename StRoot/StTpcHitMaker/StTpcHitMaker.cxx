@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.47 2013/01/28 20:26:50 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.48 2013/01/29 23:28:16 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.48  2013/01/29 23:28:16  fisyak
+ * comment out occupancy print outs
+ *
  * Revision 1.47  2013/01/28 20:26:50  fisyak
  * Simplify loop over clusters
  *
@@ -904,8 +907,10 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
       if (! digitalSector) digitalSector = GetDigitalSector(sector);
       Int_t ntbold = digitalSector->numberOfTimeBins(r_old+1,p_old+1);
       if (ntbold) {
+#if 0
 	LOG_INFO << "digitalSector " << sector 
 		 << " already has " << ntbold << " time bins at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
+#endif
 	digitalSector->getTimeAdc(r_old+1,p_old+1,ADCs2,IDTs2);
 	for (Int_t i = 0; i < __MaxNumberOfTimeBins__; i++) {
 	  if (! ADCs2[i]) continue;
@@ -955,8 +960,10 @@ Int_t StTpcHitMaker::RawTpcData(Int_t sector) {
          }
          Int_t ntbold = digitalSector->numberOfTimeBins(row,pad);
          if (ntbold) {
+#if 0
             LOG_INFO << "digitalSector " << sector 
                      << " already has " << ntbold << " at row/pad " << row <<  "/" << pad << endm;
+#endif
          }
          digitalSector->putTimeAdc(row,pad,ADCs,IDTs);
       }
