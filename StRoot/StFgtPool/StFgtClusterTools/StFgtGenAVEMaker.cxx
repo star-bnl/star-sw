@@ -33,7 +33,7 @@
 #include "StFgtCosmicAlignment.h"
 #endif
 #define MAX_PHI_DIFF 0.5//the maximal difference in phi a track is allowed 
-#define MAX_CLUSTERS 10
+#define MAX_CLUSTERS 20
 #define CHARGE_MEASURE clusterCharge
 #define MAX_DIST_STRIP_R 0.7
 #define MAX_DIST_STRIP_PHI 0.03
@@ -66,7 +66,7 @@
 #define MAX_DIST2_EFF 1.0
 #define MAX_DIST2 1.0
 
-#define MIN_NUM_POINTS 3
+#define MIN_NUM_POINTS 4
 #define DISK_DIM 40
 #ifndef COSMIC
 #define NUM_EFF_BIN 30
@@ -920,7 +920,7 @@ Double_t StFgtGenAVEMaker::findClosestPoint(float mx, float bx, float my, float 
 ///this is too naive..., assumes non-rotated quads
 Short_t StFgtGenAVEMaker::getQuadFromCoo(Double_t x, Double_t y)
 {
-    cout <<"do not use this function!!!" <<endl;
+      cout <<"do not use this function!!!" <<endl;
   if(x>0 && y>0)
     return 0;
   if(x>0 && y<0)
@@ -1184,8 +1184,10 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
   //LOG_INFO << " --------------------------> calling makeLine with " << points.size() << " 0x" << std::hex << discBitArray << std::dec << endm;
   //  cout <<"get track2" <<endl;
   //do the alignment		   
+
 #ifdef COSMIC
   float tmpX, tmpY,tmpZ,tmpP,tmpR;
+
   for( ; iter != points.end(); ++iter ){
     getAlign(iter->dID,iter->phi,iter->r,tmpX,tmpY,tmpZ,tmpP,tmpR);
     //    cout <<"before: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
@@ -1198,13 +1200,13 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
   }
 #endif
    
-
+  //  cout <<" we have " << points.size() << " points " << endl;
   for( iter=points.begin(); iter != points.end(); ++iter ){
 
     Double_t x = iter->x;
     Double_t y = iter->y;
     Double_t z = iter->z;
-
+    //    cout <<"x: " << x << " y: " << y << " z: " << z <<endl;
     A += z*z;
     B += z;
     Cx += x*z;
@@ -1212,9 +1214,9 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     Ex += x;
     Ey += y;
 
-    //        cout << "*** Point located at " << x << ' ' << y << ' ' << z << " Disk: " << iter->dID <<endl;
+    //    cout << "*** Point located at " << x << ' ' << y << ' ' << z << " Disk: " << iter->dID <<endl;
   }
-  //  cout <<"ipZ: " << ipZ <<endl;
+  //    cout <<"ipZ: " << ipZ <<endl;
   //  cout <<"get track3" <<endl;
   D = points.size();
   //invalid is -999
@@ -1226,7 +1228,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
           D++;
         }
 #endif
-    //cout << "*** Consts " << A << ' ' << B << ' ' << Cx << ' ' << Cy << ' ' << D << ' ' << Ex << ' ' << Ey << endl;
+      //    cout << "*** Consts " << A << ' ' << B << ' ' << Cx << ' ' << Cy << ' ' << D << ' ' << Ex << ' ' << Ey << endl;
   Double_t denom = D*A - B*B;
   if( denom ){
     Double_t bx = (-B*Cx + A*Ex)/denom;
@@ -1235,6 +1237,10 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     Double_t my = ( D*Cy - B*Ey)/denom;
     //    cout <<"bx: " << bx <<" by: " << by <<" mx: " << mx << " my: " << my <<endl;    
     for( iter = points.begin(); iter != points.end(); ++iter ){
+      //  cout << "--- Location at each disc, " << iter->dID <<" "
+      //        << "X: " << mx*iter->z+bx << " vs " << iter->x << ' '
+      //		    << "Y: " << my*iter->z+by << " vs " << iter->y << " " <<" charge r: " << iter->rCharge <<" phi: " << iter->phiCharge <<
+      //	" r: " << iter->r <<" phi: " << iter->phi <<endl;
       (*outTxtFile) << "--- Location at each disc, " << iter->dID <<" "
               << "X: " << mx*iter->z+bx << " vs " << iter->x << ' '
 		    << "Y: " << my*iter->z+by << " vs " << iter->y << " " <<" charge r: " << iter->rCharge <<" phi: " << iter->phiCharge <<
@@ -1253,27 +1259,27 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	  Int_t dId=iter->dID;
 	  Double_t distX=fabs((iter->z*mx+bx)-(iter->x));
 	  Double_t distY=fabs((iter->z*my+by)-(iter->y));
-	  //	  cout <<"distX: " << distX <<" distY: " << distY <<endl;
+	  //	  	  cout <<"distX: " << distX <<" distY: " << distY <<endl;
 	  Double_t distance=distX*distX+distY*distY;
-	  //	  cout << " got distance " << distance << endl;
+	  //	  	  cout << " got distance " << distance << endl;
 	  if((iDx==dId)&&(distance<minDistance))
 	    {
 	      minDistance=distance;
 	      pointIdx=cnt;
-	      //	      cout <<"min dist now:" << minDistance<<" for this dik " << iDx <<" pointIdx: " << pointIdx <<endl;
+	      //	      	      cout <<"min dist now:" << minDistance<<" for this dik " << iDx <<" pointIdx: " << pointIdx <<endl;
 	    }
 	  cnt++;
 	}
 	if(pointIdx>=0)
 	  {
-	    ///	    cout <<"pushing back " << pointIdx <<endl;
+	    //	    	    cout <<"pushing back " << pointIdx <<endl;
 	    redPoints.push_back(points[pointIdx]);
 	  }
       }//end of looping over discs
 
  //// reduced points
     //////have to do a refit now..
-    //    cout <<"doing refit... " <<endl;
+    //       cout <<"doing refit... " <<endl;
 //  cout <<"get track5" <<endl;
     A=0.0;
     B=0.0;
@@ -1312,8 +1318,8 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
      mx = ( D*Cx - B*Ex)/denom;
      my = ( D*Cy - B*Ey)/denom;
     }
-  //    cout <<"after refit: bx: " << bx <<" by: " << by <<" mx: " << mx << " my: " << my <<endl;    
-  //    cout <<"we have refit line: "<< bx << " by: " << by <<" mx: " << mx << " my: " << my <<endl;
+    //      cout <<"after refit: bx: " << bx <<" by: " << by <<" mx: " << mx << " my: " << my <<endl;    
+    //      cout <<"we have refit line: "<< bx << " by: " << by <<" mx: " << mx << " my: " << my <<endl;
     ///end of refit
 
     for(vector<AVPoint>::iterator iterR = redPoints.begin(); iterR != redPoints.end(); ++iterR )
@@ -1321,17 +1327,17 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	Double_t distX, distY;
 	distX=fabs((iterR->z*mx+bx)-(iterR->x));
 	distY=fabs((iterR->z*my+by)-(iterR->y));
-	//	cout <<"distX: " << distX <<" distY: " << distY <<endl;
+	//		cout <<"distX: " << distX <<" distY: " << distY <<endl;
 	dist += (distX*distX+distY*distY);
 	//	cout <<"adding " << (distX*distX+distY*distY) <<" to chi2: " << endl;
-	//cout << "*** DistSq " << dist << endl;
+	//	cout << "*** DistSq " << dist << endl;
       }
     //          cout <<"get track8" <<endl;
-    //    cout <<"dist : " << dist <<" D: "<< D <<endl;
+    //        cout <<"dist : " << dist <<" D: "<< D <<endl;
     dist/=D;
-    //       cout <<" end chi2: " <<dist <<endl;
+    //    cout <<" end chi2: " <<dist <<endl;
     m_tracks.push_back(AVTrack(mx,my,bx,by,ipZ,dist));
-    //    cout <<" we have " <<m_tracks.size() <<" track now " <<endl;
+    //  cout <<" we have " <<m_tracks.size() <<" track now " <<endl;
     
     points.clear();
     for(vector<AVPoint>::iterator it=redPoints.begin();it!=redPoints.end();it++)
@@ -1356,28 +1362,28 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     //Double_t zIpExpY0=0;//(D6Pos-yD6/yD1*D1Pos)*1/(1-yD6/yD1);
 
     for(vector<AVPoint>::iterator iter = points.begin(); iter != points.end(); ++iter ){
-      //           cout << "--- Location at each disc at z: " << iter->z << " "
-      //             << "X: " << mx*iter->z+bx << " vs " << iter->x << ' '
-      //           	   << "Y: " << my*iter->z+by << " vs " << iter->y << " "
-      //		<< " charge phi: " << iter->phiCharge <<" rcharge: "<< iter->rCharge <<endl;
+      //               cout << "--- Location at each disc at z: " << iter->z << " "
+      //                   << "X: " << mx*iter->z+bx << " vs " << iter->x << ' '
+      //                 	   << "Y: " << my*iter->z+by << " vs " << iter->y << " "
+      //      		<< " charge phi: " << iter->phiCharge <<" rcharge: "<< iter->rCharge <<endl;
 
     };
     //    cout <<endl<<endl;
-    //    cout <<"dist again:  " <<dist <<endl;
+    //        cout <<"dist again:  " <<dist <<endl;
     vector<AVTrack>::iterator it_lastTrack=m_tracks.end();
     it_lastTrack--;
     pair<double,double> dca=getDca(it_lastTrack);
-    //    cout <<"mx: " << it_lastTrack->mx <<" ax: " << it_lastTrack->ax <<" my: " << it_lastTrack->my <<" ay: " << it_lastTrack->ay <<endl;
+    //        cout <<"mx: " << it_lastTrack->mx <<" ax: " << it_lastTrack->ax <<" my: " << it_lastTrack->my <<" ay: " << it_lastTrack->ay <<endl;
     Double_t vertZ = (  -( it_lastTrack->mx*it_lastTrack->ax + it_lastTrack->my*it_lastTrack->ay )/(it_lastTrack->mx*it_lastTrack->mx+it_lastTrack->my*it_lastTrack->my));
     (it_lastTrack)->trkZ=vertZ;
     it_lastTrack->dca=dca.second;
     it_lastTrack->ipZ=dca.first;
-    //    cout <<"dca: " << dca.first <<" vertZ: " << vertZ <<endl;
+    //        cout <<"dca: " << dca.first <<" vertZ: " << vertZ <<endl;
     //  cout <<"get track10" <<endl;
-    //    cout <<"dist: "<< dist <<" vertZ: " << vertZ <<endl;
+    //        cout <<"dist: "<< dist <<" vertZ: " << vertZ <<endl;
     if(dist< MAX_DIST_CHI && fabs(vertZ)<VERTEX_CUT)// && fabs(bx)<40 && fabs(by)<40)
       {
-	//	cout <<" track accepted " <<endl;
+	//		cout <<" track accepted " <<endl;
 	//  cout <<"get track10-10" <<endl;
 	//		cout <<"track cuts passed " <<endl;
 	set<Short_t> disksHit;
@@ -1491,7 +1497,7 @@ Bool_t StFgtGenAVEMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 
 	    if(findClosestPoint(mx,bx,my,by,xExp,yExp,i)<MAX_DIST2_EFF)
 		  {
-		    //		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<", dist: " << findClosestPoint(xExp,yExp,i) <<endl;
+		    //		    		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<", dist: " <<closestPoint <<endl;
 		    radioPlotsEff[i]->Fill(xExp,yExp);
 		    if(i==m_effDisk)
 		    //		    if(i==1)
@@ -1578,21 +1584,24 @@ Double_t StFgtGenAVEMaker::getRPhiRatio(vector<generalCluster>::iterator hitIter
 */
 Int_t StFgtGenAVEMaker::Make()
 {
-    cout <<"ave make " <<endl;
+  //    cout <<"ave make " <<endl;
   Int_t ierr = kStOk;
   (*outTxtFile) <<"----------------------------- Event Nr: " << evtNr<<" -----------------" <<endl;
   StFgtGeneralBase::Make();
   unsigned int oldNumTracks=m_tracks.size();
+
+  //  cout <<"eff disk : " << m_effDisk <<endl;
+
   //    cout <<" mtracks size: " << m_tracks.size() << " oldnum: "<< oldNumTracks <<endl;
   for(int i=0;i<6;i++)
     {
       //      cout <<"there are " << pClusters[i]->size() << " clusters in disk " << i <<endl;
       for(int j=0;j<pClusters[i]->size();j++)
 	{
-	  if((*(pClusters[i]))[j].layer=='R')
+	  /*	  if((*(pClusters[i]))[j].layer=='R')
 	    cout <<"R layer, ";
 	  else
-	    cout <<"Phi layer, ";
+	  cout <<"Phi layer, ";*/
 	  Int_t seedType=(*(pClusters[i]))[j].seedType;
 	  Double_t posPhi=(*(pClusters[i]))[j].posPhi;
 	  Double_t posR=(*(pClusters[i]))[j].posR;
@@ -1753,12 +1762,12 @@ Int_t StFgtGenAVEMaker::Make()
 	    continue;
 	  if(pClusters[iSeed1]->size() > MAX_CLUSTERS || pClusters[iSeed2]->size() > MAX_CLUSTERS)
 	    {
-	           cout <<"too many clusters in the disk!!!"<<endl<<endl;
+	      //     cout <<"too many clusters in the disk!!!"<<endl<<endl;
 	      continue;
 	    }
 	  //track where we have hits in disks
 
-	  cout <<"using " << iSeed1 << " and " << iSeed2 << " as seed " <<endl;
+	  //	  cout <<"using " << iSeed1 << " and " << iSeed2 << " as seed " <<endl;
 	  vector<generalCluster> &hitVecSeed1=*(pClusters[iSeed1]);
 	  vector<generalCluster> &hitVecSeed2=*(pClusters[iSeed2]);
 
@@ -1871,7 +1880,7 @@ Int_t StFgtGenAVEMaker::Make()
 
 			  Double_t xD6=rD6*cos(phiD6);
 			  Double_t yD6=rD6*sin(phiD6);
-			  cout <<"Disk " << iSeed2 <<", phiD6: " << phiD6 <<" xD6: " << xD6 <<" yD6: " << yD6 <<" rD6: " << rD6 <<endl;
+			  //			  cout <<"Disk " << iSeed2 <<", phiD6: " << phiD6 <<" xD6: " << xD6 <<" yD6: " << yD6 <<" rD6: " << rD6 <<endl;
 			  v_points.push_back(AVPoint(xD1,yD1,D1Pos,rD1,phiD1,iSeed1,quadSeed1,seed1ChargeR, seed1ChargePhi, seed1SizeR, seed1SizePhi));
 			  v_points.push_back(AVPoint(xD6,yD6,D6Pos,rD6,phiD6,iSeed2,quadSeed2,seed2ChargeR, seed2ChargePhi, seed2SizeR, seed2SizePhi));
 			  ///for each combination in d1,d6
@@ -1923,9 +1932,9 @@ Int_t StFgtGenAVEMaker::Make()
 
 			      Double_t xPosExp=xD1+(xD6-xD1)*(diskZ-D1Pos)/zArm;
 			      Double_t yPosExp=yD1+(yD6-yD1)*(diskZ-D1Pos)/zArm;
-			      cout <<"using disk: " << iD <<" diskZ: " << diskZ <<endl;
-			      cout <<"hope to see something x: " << xPosExp <<" y: " << yPosExp <<endl;
-			      cout <<"phi1: " << phiD1 <<" phi6: " << phiD6 <<endl;
+			      //			      cout <<"using disk: " << iD <<" diskZ: " << diskZ <<endl;
+			      //			      cout <<"hope to see something x: " << xPosExp <<" y: " << yPosExp <<endl;
+			      //			      cout <<"phi1: " << phiD1 <<" phi6: " << phiD6 <<endl;
 			      Double_t rPosExp=rD1+(rD6-rD1)*(diskZ-D1Pos)/zArm;
 			      vector<generalCluster> &hitVec=*(pClusters[iD]);
 			      for(hitIter=hitVec.begin();hitIter!=hitVec.end();hitIter++)
@@ -1981,8 +1990,8 @@ Int_t StFgtGenAVEMaker::Make()
 #endif
 				      x=r*cos(phi);
 				      y=r*sin(phi);
-				      			      cout <<"checking with x: " << x << " y: " << y << " phi: " << phi <<" r: " << r <<endl;
-				      				      cout <<" x, y: " << x <<", " << y << " exp: " << xPosExp << " , " << yPosExp <<endl;
+				      //				      			      cout <<"checking with x: " << x << " y: " << y << " phi: " << phi <<" r: " << r <<endl;
+				      //				      				      cout <<" x, y: " << x <<", " << y << " exp: " << xPosExp << " , " << yPosExp <<endl;
 				      Double_t dist2=(x-xPosExp)*(x-xPosExp)+(y-yPosExp)*(y-yPosExp);
 				      //				      cout <<" dist2: " << dist2 <<endl;
 
@@ -2038,7 +2047,7 @@ Int_t StFgtGenAVEMaker::Make()
 				  v_clusterSizeR.push_back(clusterSizeR);
 				  v_clusterSizePhi.push_back(clusterSizePhi);
 				  v_points.push_back(AVPoint(x,y,diskZ,r,phi,iD,quadTestR, rCharge,phiCharge, clusterSizeR,clusterSizePhi));
-				  cout<<" adding point with r: "<< r <<" phi: " << phi <<" x: " << x <<" y: " << y <<endl;
+				  //				  cout<<" adding point with r: "<< r <<" phi: " << phi <<" x: " << x <<" y: " << y <<endl;
 				}
 			      //    cout <<"ave make8 " <<endl;
 			      //only one per disk
@@ -2066,7 +2075,7 @@ Int_t StFgtGenAVEMaker::Make()
 			  //			  cout << " we found " << iFound <<" points " << endl;
 			  if(iFound>=(MIN_NUM_POINTS-2)) //at least one hit plus seed and pointing roughly to the interaction region
 			    {
-			           cout <<"found " <<endl;
+			      //			           cout <<"found " <<endl;
 			      Bool_t validTrack=false;
 			      //			      if(v_x.size()>iFound)
 			      {
@@ -2164,6 +2173,7 @@ Int_t StFgtGenAVEMaker::Make()
  
 StFgtGenAVEMaker::StFgtGenAVEMaker( const Char_t* name): StFgtGeneralBase( name ),useChargeMatch(false),runningEvtNr(0),hitCounter(0),hitCounterR(0),printCounter(0),fitCounter(0)
 {
+
   //  cout <<"AVE constructor!!" <<endl;
   int numTb=7;
   mPulseShapePtr=new TF1("pulseShape","[0]*(x>[4])*(x-[4])**[1]*exp(-[2]*(x-[4]))+[3]",0,numTb);
@@ -2199,6 +2209,7 @@ Int_t StFgtGenAVEMaker::Finish(){
   vector<AVTrack>::iterator it=m_tracks.begin();
   cout <<"we found " << m_tracks.size() <<" tracks" <<endl;
   int counter=0;
+  int goodTracks=0;
   for(;it!=m_tracks.end();it++)
     {
       cout <<" looking at track " << counter <<endl;
@@ -2211,6 +2222,8 @@ Int_t StFgtGenAVEMaker::Finish(){
       //      cout <<"dca: " << dca.second <<" z vertex: " << vertZ <<" or " << dca.first <<endl;
       if(it->chi2<MAX_DIST_CHI && fabs(vertZ)< VERTEX_CUT )
 	{
+	  goodTracks++;
+	  cout <<"looking at track with mx: " << it->mx <<" ax: " << it->ax <<" my: " << it->my <<" ay: " << it->ay <<endl;
 	  hIpZ->Fill(dca.first);
 	  hIp->Fill(dca.first,dca.second);
 	  hTrkZ->Fill(vertZ);
@@ -2225,6 +2238,7 @@ Int_t StFgtGenAVEMaker::Finish(){
 	  hIpDca->Fill(dca.second);
 	}
     }
+  cout <<" we found " << goodTracks << " good Tracks " <<endl;
   ///  cout <<"canvases etc.. " << endl;
   //////////////////////////////////////////////////
   TCanvas* cRadio=new TCanvas("radioPlots","radioPlot",1000,1500);

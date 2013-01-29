@@ -259,7 +259,7 @@ pair<Double_t,Double_t> StFgtStraightTrackMaker::getChargeRatio(Float_t r, Float
 Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 {
   //  (*outTxtFile) <<"getTrack" <<endl;
-  //  cout <<"get track" <<endl;
+  //      cout <<"get track" <<endl;
   ipZ=-9999; //get ourselves
   StFgtGeneralBase *fgtGenMkr = static_cast<StFgtGeneralBase * >( GetMaker("fgtGenBase"));
 
@@ -275,26 +275,30 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
   if(isCosmic)
     {
 
-  float tmpX, tmpY,tmpZ,tmpP,tmpR;
-  for( ; iter != points.end(); ++iter ){
-    getAlign(iter->dID,iter->phi,iter->r,tmpX,tmpY,tmpZ,tmpP,tmpR);
-    //    cout <<"before: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
-    iter->phi=tmpP;
-    iter->r=tmpR;
-    iter->x=tmpX;
-    iter->y=tmpY;
-    iter->z=tmpZ;
-    //    cout <<"after: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
-  }
+      float tmpX, tmpY,tmpZ,tmpP,tmpR;
+      for( ; iter != points.end(); ++iter ){
+	getAlign(iter->dID,iter->phi,iter->r,tmpX,tmpY,tmpZ,tmpP,tmpR);
+	//    cout <<"before: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
+	iter->phi=tmpP;
+	iter->r=tmpR;
+	iter->x=tmpX;
+	iter->y=tmpY;
+	iter->z=tmpZ;
+	//    cout <<"after: " << iter->phi << ", " << iter->r <<" " << iter->x <<" " << iter->y << ", " << iter->z <<endl;
+      }
     }
-   
-
+  else
+    {
+      //      cout <<"no cosmic" <<endl;
+    }
+  
+  //  cout <<" we have " << points.size() << " points " << endl;
   for( iter=points.begin(); iter != points.end(); ++iter ){
 
     Double_t x = iter->x;
     Double_t y = iter->y;
     Double_t z = iter->z;
-
+    //    cout <<"x: " << x << " y: " << y << " z: " << z <<endl;
     A += z*z;
     B += z;
     Cx += x*z;
@@ -347,13 +351,13 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	    {
 	      minDistance=distance;
 	      pointIdx=cnt;
-	      //	      cout <<"min dist now:" << minDistance<<" for this dik " << iDx <<" pointIdx: " << pointIdx <<endl;
+	      	      //	      cout <<"min dist now:" << minDistance<<" for this dik " << iDx <<" pointIdx: " << pointIdx <<endl;
 	    }
 	  cnt++;
 	}
 	if(pointIdx>=0)
 	  {
-	    ///	    cout <<"pushing back " << pointIdx <<endl;
+	    //	    	    cout <<"pushing back " << pointIdx <<endl;
 	    redPoints.push_back(points[pointIdx]);
 	  }
       }//end of looping over discs
@@ -402,22 +406,23 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
 	mx = ( D*Cx - B*Ex)/denom;
 	my = ( D*Cy - B*Ey)/denom;
       }
-  //    cout <<"after refit: bx: " << bx <<" by: " << by <<" mx: " << mx << " my: " << my <<endl;    
-  //    cout <<"we have refit line: "<< bx << " by: " << by <<" mx: " << mx << " my: " << my <<endl;
+    //   cout <<"after refit: bx: " << bx <<" by: " << by <<" mx: " << mx << " my: " << my <<endl;    
+    //          cout <<"we have refit line: "<< bx << " by: " << by <<" mx: " << mx << " my: " << my <<endl;
     ///end of refit
     for(vector<AVPoint>::iterator iterR = redPoints.begin(); iterR != redPoints.end(); ++iterR )
       {
 	Double_t distX, distY;
 	distX=fabs((iterR->z*mx+bx)-(iterR->x));
 	distY=fabs((iterR->z*my+by)-(iterR->y));
-	//	cout <<"distX: " << distX <<" distY: " << distY <<endl;
+	//		cout <<"distX: " << distX <<" distY: " << distY <<endl;
 	dist += (distX*distX+distY*distY);
-	//	cout <<"adding " << (distX*distX+distY*distY) <<" to chi2: " << endl;
-	//cout << "*** DistSq " << dist << endl;
+	//		cout <<"adding " << (distX*distX+distY*distY) <<" to chi2: " << endl;
+	//       cout << "*** DistSq " << dist << endl;
       }
     //          cout <<"get track8" <<endl;
     dist/=D;
-    //       cout <<" end chi2: " <<dist <<endl;
+    //    cout <<" end chi2: " <<dist << ", ip: " << ipZ <<endl;
+    //this ipZ is the TPC vertex! Is reset below...
     m_tracks.push_back(AVTrack(mx,my,bx,by,ipZ,dist));
     //    cout <<" we have " <<m_tracks.size() <<" track now " <<endl;
     (m_tracks.back()).vtxRank=vtxRank;
@@ -428,12 +433,12 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
       }
 
     for(vector<AVPoint>::iterator iter = points.begin(); iter != points.end(); ++iter ){
-      //           cout << "--- Location at each disc at z: " << iter->z << " "
-      //             << "X: " << mx*iter->z+bx << " vs " << iter->x << ' '
-      //           	   << "Y: " << my*iter->z+by << " vs " << iter->y << " "
-      //		<< " charge phi: " << iter->phiCharge <<" rcharge: "<< iter->rCharge <<endl;
+      //                 cout << "--- Location at each disc at z: " << iter->z << " "
+      //                   << "X: " << mx*iter->z+bx << " vs " << iter->x << ' '
+      //                 	   << "Y: " << my*iter->z+by << " vs " << iter->y << " "
+      //      		<< " charge phi: " << iter->phiCharge <<" rcharge: "<< iter->rCharge <<endl;
 
-    };
+    }
     //    cout <<endl<<endl;
     //    cout <<"dist again:  " <<dist <<endl;
     vector<AVTrack>::iterator it_lastTrack=m_tracks.end();
@@ -441,6 +446,7 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
     pair<double,double> dca=getDca(it_lastTrack);
     Double_t vertZ = (  -( it_lastTrack->mx*it_lastTrack->ax + it_lastTrack->my*it_lastTrack->ay )/(it_lastTrack->mx*it_lastTrack->mx+it_lastTrack->my*it_lastTrack->my));
     (it_lastTrack)->trkZ=vertZ;
+    //    cout <<"reset vertex to: " << vertZ <<endl;
     it_lastTrack->dca=dca.second;
     it_lastTrack->ipZ=dca.first;
 
@@ -544,6 +550,8 @@ Int_t StFgtStraightTrackMaker::Make()
   StFgtHit* fgtHitD1R;
   StFgtHit* fgtHitD6Phi;
   StFgtHit* fgtHitD6R;
+
+  //  cout <<"eff disk : " << m_effDisk <<endl;
   for(int iSeed1=0;iSeed1<5;iSeed1++)
     {
       for(int iSeed2=iSeed1+1;iSeed2<6;iSeed2++)
@@ -947,7 +955,7 @@ StFgtStraightTrackMaker::~StFgtStraightTrackMaker()
 };
 
 Int_t StFgtStraightTrackMaker::Finish(){
-  cout<<" straight tracker finish" <<endl;
+  //  cout<<" straight tracker finish" <<endl;
   //  cout <<" closing txt file " << endl;
   //  gStyle->SetPalette(1);
   //  cout <<"AVE finish function " <<endl;
@@ -960,7 +968,7 @@ Int_t StFgtStraightTrackMaker::Finish(){
 
   ///  cout <<"canvases etc.. " << endl;
   //////////////////////////////////////////////////
-  cout <<"st done " <<endl;
+  //  cout <<"st done " <<endl;
   return ierr;
 };
 

@@ -59,7 +59,6 @@ for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
 	    Int_t numNonEff=hNonEff->GetBinContent(i,j);
 	    Int_t numCounts=numEff+numNonEff;
 
-
 	    Double_t efficiency=0;
 	    if(numCounts>minCounts)
 	      {
