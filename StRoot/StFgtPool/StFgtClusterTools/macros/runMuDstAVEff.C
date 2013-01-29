@@ -82,6 +82,7 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    //   fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
    fgtGenBase=new StFgtGeneralBase("fgtGenBase");
    fgtStraightTrackMaker =new StFgtStraightTrackMaker("fgtStraightTracker");
+   fgtStraightTrackMaker->SetEffDisk(2);
    fgtStraightTrackMaker->setMinNumFitPoints(4);
    fgtStraightTrackMaker->setMaxClusters(20);
    fgtStraightPlotter=new StFgtStraightPlotter("fgtStraightPlotter");
@@ -111,7 +112,7 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    Int_t ierr  = kStOK;  // err flag
    Int_t nevents = 0;    // cumulative number of events in
    for( ; nevents < neventsIn && !ierr; ++nevents ){
-     //     cout <<"event: "<< nevents <<endl;
+       cout <<"event: "<< nevents <<endl;
       analysisChain->Clear();
       //          cout <<"making ... " << endl;
       // make
@@ -156,8 +157,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.10 2013/01/23 22:52:17 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.11 2013/01/29 21:58:25 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.11  2013/01/29 21:58:25  avossen
+new/old efficiency computation now consistent
+
 Revision 1.10  2013/01/23 22:52:17  avossen
 fixed uninitialized bufffer for filename
 

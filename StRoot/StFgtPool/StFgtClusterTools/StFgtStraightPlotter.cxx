@@ -931,12 +931,17 @@ Double_t StFgtStraightPlotter::findClosestPoint(float mx, float bx, float my, fl
 	      dist2=mDist;
 	      //recalculate distance with proper alignment
 	      float tmpX, tmpY,tmpZ,tmpP,tmpR;
-	      getAlign(iD,phi,r,tmpX,tmpY,tmpZ,tmpP,tmpR);
-	      Double_t xExpUpdate=mx*tmpZ+bx;
-	      Double_t yExpUpdate=my*tmpZ+by;
-	      //	      cout<<"tmpx: " << tmpX <<" old: " << x <<" xE old: " << xE << " updated: " << xExpUpdate;
-	      //	      cout<<"tmpy: " << tmpY <<" old: " << y <<" yE old: " << yE << " updated: " << yExpUpdate<<endl;
-	      mDist=(tmpX-xExpUpdate)*(tmpX-xExpUpdate)+(tmpY-yExpUpdate)*(tmpY-yExpUpdate);
+	      if(isCosmic)
+		{
+		  getAlign(iD,phi,r,tmpX,tmpY,tmpZ,tmpP,tmpR);
+		
+
+		  Double_t xExpUpdate=mx*tmpZ+bx;
+		  Double_t yExpUpdate=my*tmpZ+by;
+		  //	      cout<<"tmpx: " << tmpX <<" old: " << x <<" xE old: " << xE << " updated: " << xExpUpdate;
+		  //	      cout<<"tmpy: " << tmpY <<" old: " << y <<" yE old: " << yE << " updated: " << yExpUpdate<<endl;
+		  mDist=(tmpX-xExpUpdate)*(tmpX-xExpUpdate)+(tmpY-yExpUpdate)*(tmpY-yExpUpdate);
+		}
 	      dist2=mDist;
 	      ///Double_t xExp=mx*StFgtGeom::getDiscZ(i)+bx;
 	      //	    Double_t yExp=my*StFgtGeom::getDiscZ(i)+by;
@@ -1239,139 +1244,151 @@ Int_t StFgtStraightPlotter::Make()
   (*outTxtFile) <<"----------------------------- Event Nr: " << evtNr<<" -----------------" <<endl;
 
   StFgtStraightTrackMaker *fgtSTracker = static_cast<StFgtStraightTrackMaker * >( GetMaker("fgtStraightTracker"));
+
   vector<AVTrack>& tracks=fgtSTracker->getTracks();
-  //  cout <<"plotter: we have " << tracks.size() << "tracks " <<endl;
-  intNumTracks+=tracks.size();
+  //    cout <<"plotter: we have " << tracks.size() << "tracks " <<endl;
+    //  intNumTracks+=tracks.size();
 
   for(vector<AVTrack>::iterator it=tracks.begin();it!=tracks.end();it++)
     {
+      //	  cout <<"plotter chi2: "<< it->chi2 <<" vertex: " << it->trkZ <<endl;
+      if(it->chi2>maxDistChi || fabs(it->trkZ)> vertexCut )
+	{
+
+	  continue;
+	}
+      //only add tracks that pass our cut criteria....
+      intNumTracks++; 
       Double_t mx=it->mx;
       Double_t my=it->my;
       Double_t bx=it->ax;
       Double_t by=it->ay;
 
-
-	for(int i=0;i<6;i++)
-	  {
-	    Double_t xExp=mx*StFgtGeneralBase::getLocDiscZ(i)+bx;
-	    Double_t yExp=my*StFgtGeneralBase::getLocDiscZ(i)+by;
-	    //	    cout <<"expecting x: " << xExp << ", " << yExp<<endl;
-	    Int_t quad=-1;
-	    //x=r*cos(phi)
-	    //y=r*sin(phi)
-	    Double_t r=sqrt(xExp*xExp+yExp*yExp);
-	    //if both, x and y, are negative we get the wrong angle
-  Double_t phi=atan(yExp/xExp);
-  if(xExp <0 && yExp <0)
-    phi-=TMath::Pi();
-  //	    cout <<"phi: "<<phi << " from x: " << xExp <<" y: " << yExp<<endl;
-  if(phi<-MY_PI)
-    phi+=2*MY_PI;
-  if(phi>MY_PI)
-    phi-=2*MY_PI;
-  //	    if(phi<-MY_PI)
-  //	      phi+=2*MY_PI;
-
-  //	    quad=getQuadFromCoo(xExp,yExp);
-  quad=StFgtGeom::getQuad(phi);
-  //	    cout <<"got quad : " << quad << " for phi: " << phi <<endl;
-  //convert to phi in quad.., so we have to subtract that axis...
-  phi-=StFgtGeom::phiQuadXaxis(quad);
-
-  if(phi>TMath::Pi())
-    phi-=(2*TMath::Pi());
-  if(phi<((-1)*TMath::Pi()))
-    phi+=(2*TMath::Pi());
-
-  if(phi<0)
-    phi+=MY_PI;
-  fillStripHistos(r,phi,i,quad);
-  if(isSomewhatEff(r,phi,i,quad))
-    {
-      //		cout <<" somewhat eff: " << xExp <<" y: " << yExp <<" disk: " << i <<endl;
-      radioPlotsEffLoose[i]->Fill(xExp,yExp);
-    }
-  else
-    {
-      //		    cout <<"not somewhat eff: " << xExp <<" y: " << yExp <<endl;
-      radioPlotsNonEffLoose[i]->Fill(xExp,yExp);
-    }
+      //      cout <<"looking at track with mx: " << it->mx <<" ax: " << it->ax <<" my: " << it->my <<" ay: " << it->ay <<endl;
+      for(int i=0;i<6;i++)
+	{
+	  //	  cout <<"checking on disk " << i <<endl;
+	  Double_t xExp=mx*StFgtGeneralBase::getLocDiscZ(i)+bx;
+	  Double_t yExp=my*StFgtGeneralBase::getLocDiscZ(i)+by;
+	  //	    cout <<"expecting x: " << xExp << ", " << yExp<<endl;
+	  Int_t quad=-1;
+	  //x=r*cos(phi)
+	  //y=r*sin(phi)
+	  Double_t r=sqrt(xExp*xExp+yExp*yExp);
+	  //if both, x and y, are negative we get the wrong angle
+	  Double_t phi=atan(yExp/xExp);
+	  if(xExp <0 && yExp <0)
+	    phi-=TMath::Pi();
+	  //	    cout <<"phi: "<<phi << " from x: " << xExp <<" y: " << yExp<<endl;
+	  if(phi<-MY_PI)
+	    phi+=2*MY_PI;
+	  if(phi>MY_PI)
+	    phi-=2*MY_PI;
+	  //	    if(phi<-MY_PI)
+	  //	      phi+=2*MY_PI;
 	    
-  if(i==m_effDisk && quad==QUAD_EFF)
-    {
-      //do the r/phi thing
-      if(findClosestStrip('R',r,i,quad)<MAX_DIST_STRIP_R)
-	radioPlotsEffR[i]->Fill(xExp,yExp);
-      else
-	radioPlotsNonEffR[i]->Fill(xExp,yExp);
-      //correct phi again, so it is absolute in space, like the quads
-      if(findClosestStrip('P',phi+StFgtGeom::phiQuadXaxis(quad),i,quad)<MAX_DIST_STRIP_PHI)
-	{
-	  //		    cout <<" found phi " <<endl;
-	  radioPlotsEffPhi[i]->Fill(xExp,yExp);
-	}
-      else
-	{
-	  //		    cout << " not found, dist is:" <<findClosestStrip('P',phi,i,quad) <<endl;
-	  radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
-	}
-    }
+	  //	    quad=getQuadFromCoo(xExp,yExp);
+	  quad=StFgtGeom::getQuad(phi);
+	  //	    cout <<"got quad : " << quad << " for phi: " << phi <<endl;
+	  //convert to phi in quad.., so we have to subtract that axis...
+	  phi-=StFgtGeom::phiQuadXaxis(quad);
+	    
+	  if(phi>TMath::Pi())
+	    phi-=(2*TMath::Pi());
+	  if(phi<((-1)*TMath::Pi()))
+	    phi+=(2*TMath::Pi());
+	    
+	  if(phi<0)
+	    phi+=MY_PI;
+	  fillStripHistos(r,phi,i,quad);
+	  if(isSomewhatEff(r,phi,i,quad))
+	    {
+	      //		cout <<" somewhat eff: " << xExp <<" y: " << yExp <<" disk: " << i <<endl;
+	      radioPlotsEffLoose[i]->Fill(xExp,yExp);
+	    }
+	  else
+	    {
+	      //		    cout <<"not somewhat eff: " << xExp <<" y: " << yExp <<endl;
+	      radioPlotsNonEffLoose[i]->Fill(xExp,yExp);
+	    }
+	    
+	  if(i==m_effDisk && quad==QUAD_EFF)
+	    {
+	      //do the r/phi thing
+	      if(findClosestStrip('R',r,i,quad)<MAX_DIST_STRIP_R)
+		radioPlotsEffR[i]->Fill(xExp,yExp);
+	      else
+		radioPlotsNonEffR[i]->Fill(xExp,yExp);
+	      //correct phi again, so it is absolute in space, like the quads
+	      if(findClosestStrip('P',phi+StFgtGeom::phiQuadXaxis(quad),i,quad)<MAX_DIST_STRIP_PHI)
+		{
+		  //		    cout <<" found phi " <<endl;
+		  radioPlotsEffPhi[i]->Fill(xExp,yExp);
+		}
+	      else
+		{
+		  //		    cout << " not found, dist is:" <<findClosestStrip('P',phi,i,quad) <<endl;
+		  radioPlotsNonEffPhi[i]->Fill(xExp,yExp);
+		}
+	    }
+	    
+	  Double_t closestPoint=findClosestPoint(mx,bx,my,by,xExp,yExp,i);
+	  //	  cout <<" closest point is " << closestPoint <<" away " <<endl;
 
-  Double_t closestPoint=findClosestPoint(mx,bx,my,by,xExp,yExp,i);
-  //  cout <<" closest point is " << closestPoint <<" away " <<endl;
-  //		 (*outTxtFile) <<"closest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
 
-  if(findClosestPoint(mx,bx,my,by,xExp,yExp,i)<MAX_DIST2_EFF)
-    {
-      //		    cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<", dist: " << findClosestPoint(xExp,yExp,i) <<endl;
-      radioPlotsEff[i]->Fill(xExp,yExp);
-      if(i==m_effDisk)
-	//		    if(i==1)
-	{
-	  hResidua->Fill(sqrt(closestPoint));
-	  hResiduaX->Fill(xExp,sqrt(closestPoint));
-	  hResiduaY->Fill(yExp,sqrt(closestPoint));
-	  hResiduaR->Fill(r,sqrt(closestPoint));
-	  hResiduaP->Fill(phi,sqrt(closestPoint));
-	}
+	  //		 (*outTxtFile) <<"closest point t " << xExp <<" , " << yExp << " is : " << closestPoint << " away " << endl;
 
-      (*outTxtFile) <<"***** found hit in disk " <<i << " quad: " << quad << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
+	  if(findClosestPoint(mx,bx,my,by,xExp,yExp,i)<MAX_DIST2_EFF)
+	    {
+	      //	      cout <<"found point on eff disk, x: " << xExp <<" y: " << yExp <<", dist: " << closestPoint <<endl;
+	      radioPlotsEff[i]->Fill(xExp,yExp);
+	      if(i==m_effDisk)
+		//		    if(i==1)
+		{
+		  hResidua->Fill(sqrt(closestPoint));
+		  hResiduaX->Fill(xExp,sqrt(closestPoint));
+		  hResiduaY->Fill(yExp,sqrt(closestPoint));
+		  hResiduaR->Fill(r,sqrt(closestPoint));
+		  hResiduaP->Fill(phi,sqrt(closestPoint));
+		}
+
+	      (*outTxtFile) <<"***** found hit in disk " <<i << " quad: " << quad << " at " << xExp<<", " << yExp<<" r: " << r <<" phi: " <<phi << endl;
 
 #ifdef DO_PRINT
-      //		if(i==m_effDisk)
-      printArea(r,phi,i,quad);
+	      //		if(i==m_effDisk)
+	      printArea(r,phi,i,quad);
 #endif
-      //		    chargeCorrInEffDisk->Fill(rPhiRatio.first,rPhiRatio.second);
-    }
-  else
-    {
-      //		    cout <<"non eff disk, x: " << xExp <<" y: " << yExp <<endl;
-      radioPlotsNonEff[i]->Fill(xExp,yExp);
-      //		    if(i==m_effDisk)
-      (*outTxtFile) <<"expected (but haven't found)  point on disk " << i <<", x: " << xExp <<" y: " << yExp << " r: " << r  <<" phi: " << phi << " quad:: " << quad << endl;
-      ////		cout <<" expect hit at disc " << iD <<" quad: " << iq  << " r: " <<  r <<" phi: "<< phi <<endl;
+	      //		    chargeCorrInEffDisk->Fill(rPhiRatio.first,rPhiRatio.second);
+	    }
+	  else
+	    {
+	      //		    cout <<"non eff disk, x: " << xExp <<" y: " << yExp <<endl;
+	      radioPlotsNonEff[i]->Fill(xExp,yExp);
+	      //		    if(i==m_effDisk)
+	      (*outTxtFile) <<"expected (but haven't found)  point on disk " << i <<", x: " << xExp <<" y: " << yExp << " r: " << r  <<" phi: " << phi << " quad:: " << quad << endl;
+	      ////		cout <<" expect hit at disc " << iD <<" quad: " << iq  << " r: " <<  r <<" phi: "<< phi <<endl;
 #ifdef DO_PRINT
-      //    if(i==m_effDisk)
-      printArea(r,phi,i,quad);
+	      //    if(i==m_effDisk)
+	      printArea(r,phi,i,quad);
 #endif
-    }
-  pair<Double_t,Double_t> rPhiRatio=getChargeRatio(r,phi,i,quad);
+	    }
+	  pair<Double_t,Double_t> rPhiRatio=getChargeRatio(r,phi,i,quad);
 
-  if(rPhiRatio.first>0 && rPhiRatio.second>0)
-    {
-      double asym=fabs((Double_t)1-rPhiRatio.first/rPhiRatio.second);
-      double ratio=rPhiRatio.first/rPhiRatio.second;
+	  if(rPhiRatio.first>0 && rPhiRatio.second>0)
+	    {
+	      double asym=fabs((Double_t)1-rPhiRatio.first/rPhiRatio.second);
+	      double ratio=rPhiRatio.first/rPhiRatio.second;
 
-      //		      cout <<" filling with : r charge: " << rPhiRatio.first <<" , " << rPhiRatio.second <<" ratio: " << ratio <<" asym: " << asym<<endl;
-      if(asym<2 && ratio <2)
-	{
-	  hChargeAsym->Fill(asym);
-	  hChargeRatio->Fill(ratio);
-	  chargeRatioInEffDisk->Fill(xExp,yExp,ratio);
-	  chargeAsymInEffDisk->Fill(xExp,yExp,asym);
+	      //		      cout <<" filling with : r charge: " << rPhiRatio.first <<" , " << rPhiRatio.second <<" ratio: " << ratio <<" asym: " << asym<<endl;
+	      if(asym<2 && ratio <2)
+		{
+		  hChargeAsym->Fill(asym);
+		  hChargeRatio->Fill(ratio);
+		  chargeRatioInEffDisk->Fill(xExp,yExp,ratio);
+		  chargeAsymInEffDisk->Fill(xExp,yExp,asym);
+		}
+	    }
 	}
-    }
-	  }
     }
 
   int counter=0;
@@ -1400,7 +1417,7 @@ Int_t StFgtStraightPlotter::Make()
 	      tpcFgtZVertexCorr->Fill(dca.first,it->ipZEv);
 	      tpcFgtZVertexCorr2->Fill(vertZ,it->ipZEv);
 	    }
-	      tpcFgtZVertexCorr3->Fill(vertZ,dca.first);
+	  tpcFgtZVertexCorr3->Fill(vertZ,dca.first);
 
 	  hIpDca->Fill(dca.second);
 	}
@@ -1420,6 +1437,8 @@ StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name )
     LOG_FATAL << "StFgtDb not provided and error retrieving pointer from StFgtDbMaker '"
 	      << fgtDbMkr->GetName() << endm;
   }
+  //count from 0--> third disk
+  m_effDisk=2;
   sprintf(fileBase,"%s",".");
   pulseCondition=true;
   lenCondition=false;
@@ -1431,7 +1450,7 @@ StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name )
   isCosmic=fgtGenMkr->isCosmic();
 
   if(!isCosmic)
-      vertexCut=50;
+    vertexCut=50;
   else
     vertexCut=100000000;
 
@@ -1469,7 +1488,7 @@ Int_t StFgtStraightPlotter::Finish(){
   outTxtFile->close();
   gStyle->SetPalette(1);
   Int_t ierr = kStOk;
-  cout <<"we found " << intNumTracks << " tracks " <<endl;
+  //  cout <<"we found " << intNumTracks << " tracks " <<endl;
   ///////////////////////////track collection//does this make sense? Not if m_tracks gets erased for every event...
   StFgtStraightTrackMaker *fgtSTracker = static_cast<StFgtStraightTrackMaker * >( GetMaker("fgtStraightTracker"));
   vector<AVTrack>& tracks=fgtSTracker->getTracks();
@@ -1509,7 +1528,7 @@ Int_t StFgtStraightPlotter::Finish(){
 
 
   sprintf(buffer,"%s/clusterPics.root",fileBase);
-  cout <<"setting cluster pic file to : " << buffer <<endl;
+   cout <<"setting cluster pic file to : " << buffer <<endl;
   TFile *fClu = new TFile(buffer,"recreate");
   fClu->cd();
 
@@ -1659,7 +1678,7 @@ Int_t StFgtStraightPlotter::Finish(){
 
   cout <<"writen and closed " << endl;
 
-  cout <<"drawing hits2 " <<endl;
+
   ///---->   cRadioHits->SaveAs("radioPlotsHits.png");
   ///---->  cRadioNonHits->SaveAs("radioPlotsNonHits.png");
 
