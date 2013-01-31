@@ -78,6 +78,7 @@ class StFgtGeom
 	
 
 	//Similar to getPhysicalCoordinate but returns phi in STAR coordinate system
+        //This returns ideal position without alignments. Use StFgtDb::getStarXYZ() to get XYZ in STAR coordinate with alignment
 	static Int_t getGlobalPhysicalCoordinate( Int_t geoId, Short_t & disc,
 					    Short_t & quadrant, Char_t & layer,
 					    Double_t & ordinate, 
@@ -85,12 +86,16 @@ class StFgtGeom
 					    Double_t & upperSpan );
 
 	//Similar to getPhysicalCoordinate but returns phi in STAR coordinate system
+        //This returns ideal position without alignments. Use StFgtDb::getStarXYZ() to get XYZ in STAR coordinate with alignment
 	static Int_t getGlobalPhysicalCoordinate( const std::string & geoName,
 					    Short_t & disc, Short_t & quadrant,
 					    Char_t & layer, Double_t & ordinate,
 					    Double_t & lowerSpan,
 					    Double_t & upperSpan );
 
+        // This gives center of quadrant XYZ in STAR coordinate
+        // This does NOT get modified by alignment parameters.
+        static void getQuadCenterXYZ(Short_t disc, Short_t quad, TVector3 &xyz);
   
 	//  Please note that the following functions do NOT access the STAR
 	//  database to find mapping information. They assume the most
@@ -291,8 +296,11 @@ inline Int_t StFgtGeom::getNaivePhysCoordFromElecCoord
 
 
 /*
- *  $Id: StFgtGeom.h,v 1.44 2012/08/15 18:02:59 rfatemi Exp $
+ *  $Id: StFgtGeom.h,v 1.45 2013/01/31 15:44:27 akio Exp $
  *  $Log: StFgtGeom.h,v $
+ *  Revision 1.45  2013/01/31 15:44:27  akio
+ *  Adding getQuadCenterXYZ
+ *
  *  Revision 1.44  2012/08/15 18:02:59  rfatemi
  *  Bug fix in getGlobalPhysicalCoordinate by pnord, computation now done by computeGlobalPhysicalCoordinate
  *

@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "StFgtGeom.h"
 #include "StMessMgr.h"
+#include "fgtAlignment.h"
 
 //ClassImp(StFgtGeom)
 
@@ -4190,9 +4191,25 @@ Int_t StFgtGeom::mNaiveMapping[] =
     1437
 };
 
+// This gives center of quadrant XYZ in STAR coordinate
+// This does NOT get modified by alignment parameters.
+void StFgtGeom::getQuadCenterXYZ(Short_t disc, Short_t quad, TVector3 &xyz){
+  char l;
+  short d,q;  
+  double p,p1,p2,r,r1,r2;
+  int gidp=encodeGeoId(disc,quad,'P',(short)(kFgtNumStrips/2));
+  getGlobalPhysicalCoordinate(gidp,d,q,l,p,p1,p2);
+  int gidr=encodeGeoId(disc,quad,'R',(short)(kFgtNumRstripsPerOctant/2));
+  getGlobalPhysicalCoordinate(gidr,d,q,l,r,r1,r2);
+  xyz.SetXYZ(r*cos(p),r*sin(p),getDiscZ(disc));
+}
+
 /*
- *  $Id: StFgtGeom.cxx,v 1.36 2012/11/05 15:43:40 akio Exp $
+ *  $Id: StFgtGeom.cxx,v 1.37 2013/01/31 15:44:27 akio Exp $
  *  $Log: StFgtGeom.cxx,v $
+ *  Revision 1.37  2013/01/31 15:44:27  akio
+ *  Adding getQuadCenterXYZ
+ *
  *  Revision 1.36  2012/11/05 15:43:40  akio
  *  FgtSlowSimu related fixes for r/phi consistency & speed up
  *
