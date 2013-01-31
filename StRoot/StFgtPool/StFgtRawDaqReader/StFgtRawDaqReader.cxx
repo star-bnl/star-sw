@@ -25,7 +25,7 @@
 #include <string.h>
 
 StFgtRawDaqReader::StFgtRawDaqReader( const Char_t* name, const Char_t *daqFileName, const Char_t* dbMkrName ) :
-   StMaker( name ), mCutShortEvents(0), mIsCosmic(0), mFgtCollectionPtr(0), mDaqFileName( daqFileName ), mDbMkrName( dbMkrName ), mRdr(0), mFgtDbMkr(0) {
+  StMaker( name ), mCutShortEvents(0), mIsCosmic(0), mFgtCollectionPtr(0), mDaqFileName( daqFileName ), mDbMkrName( dbMkrName ), mRdr(0), mFgtDbMkr(0), mDataType(0){
 
    // set to being cosmic if filename ends in .sfs
    // otherwise, assume is not
@@ -165,9 +165,36 @@ Int_t StFgtRawDaqReader::Make() {
          LOG_DEBUG <<"End of File reached..."<<endm;
          return kStEOF;	
       }
+
       daq_dta *dd = 0;
-      dd = mRdr->det("fgt")->get("adc");
-      
+      if(mDataType==0){
+	dd = mRdr->det("fgt")->get("adc");
+	if(!dd) dd = mRdr->det("fgt")->get("zs");
+      }else if(mDataType==1){
+	dd = mRdr->det("fgt")->get("adc");
+      }else if(mDataType==2){
+	dd = mRdr->det("fgt")->get("zs");
+      }
+
+      int ntimebin=0;
+      if(dd && dd->meta){
+	apv_meta_t *meta = (apv_meta_t *)dd->meta;
+	for(int r=1;r<=FGT_RDO_COU;r++) {
+	  if(meta->arc[r].present == 0) continue ;
+	  for(int arm=0;arm<FGT_ARM_COU;arm++) {
+	    if(meta->arc[r].arm[arm].present == 0) continue ;
+	    for(int apv=0;apv<FGT_APV_COU;apv++) {
+	      if(meta->arc[r].arm[arm].apv[apv].present == 0) continue ;
+	      int nt=meta->arc[r].arm[arm].apv[apv].ntim;
+	      //printf("RDO=%1d ARM=%1d APV=%02d Number of time bin =%d\n",r,arm,apv,nt);
+	      if(ntimebin!=0 && nt!=0 && ntimebin!=nt) printf("Different number of timebins in different APV!!! Taking larger one!!!\n");
+	      if(ntimebin<nt) ntimebin=nt;
+	    }
+	  }
+	}
+      }
+      printf("Max Number of Timebin=%d\n",ntimebin);
+
       while(dd && dd->iterate()) {
          fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
 
@@ -285,8 +312,12 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.11 2012/11/26 15:20:35 akio Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.12 2013/01/31 20:00:32 akio Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.12  2013/01/31 20:00:32  akio
+ * adding obtaining number of timebins from meta data
+ * adding options for zero suppressed data
+ *
  * Revision 1.11  2012/11/26 15:20:35  akio
  * remove some hardcoded numbers, and use StEnumeration
  *
