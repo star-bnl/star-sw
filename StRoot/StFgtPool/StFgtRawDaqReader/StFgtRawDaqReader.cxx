@@ -193,6 +193,7 @@ Int_t StFgtRawDaqReader::Make() {
 	  }
 	}
       }
+      mFgtCollectionPtr->setNumTimeBins(ntimebin);
       printf("Max Number of Timebin=%d\n",ntimebin);
 
       while(dd && dd->iterate()) {
@@ -312,8 +313,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.12 2013/01/31 20:00:32 akio Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.13 2013/01/31 20:44:55 akio Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.13  2013/01/31 20:44:55  akio
+ * Adding StFgtCollection::setNumTimeBins()
+ *
  * Revision 1.12  2013/01/31 20:00:32  akio
  * adding obtaining number of timebins from meta data
  * adding options for zero suppressed data
