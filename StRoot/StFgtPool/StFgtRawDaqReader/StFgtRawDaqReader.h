@@ -35,6 +35,10 @@ class StFgtRawDaqReader : public StMaker {
    void cutShortEvents( Bool_t doIt = 1 );
    void setIsCosmic( Bool_t itIs = 1 );
 
+   void setAlldata()       {mDataType=0;};
+   void setNoneZSdataOnly(){mDataType=1;};
+   void setZSdataOnly()    {mDataType=2;};
+
    // Get CVS
    virtual const char *GetCVS() const;
 
@@ -47,6 +51,7 @@ class StFgtRawDaqReader : public StMaker {
    std::string mDaqFileName, mDbMkrName;
    daqReader *mRdr;
    StFgtDbMaker *mFgtDbMkr;
+   int mDataType; //!  0=adc, and if not there zs. 1=adc only, 2=zs only
 
    ClassDef(StFgtRawDaqReader,1);
 };
@@ -57,15 +62,19 @@ inline void StFgtRawDaqReader::setFilename( std::string filename ){ mDaqFileName
 inline void StFgtRawDaqReader::cutShortEvents( Bool_t doIt ){ mCutShortEvents = doIt; };
 inline void StFgtRawDaqReader::setIsCosmic( Bool_t itIs ){ mIsCosmic = itIs; };
 inline const char *StFgtRawDaqReader::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.3 2012/01/31 11:23:34 sgliske Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.4 2013/01/31 20:00:32 akio Exp $ built "__DATE__" "__TIME__ ;
    return cvs;
 };
 
 #endif
 
 /*
- * $Id: StFgtRawDaqReader.h,v 1.3 2012/01/31 11:23:34 sgliske Exp $
+ * $Id: StFgtRawDaqReader.h,v 1.4 2013/01/31 20:00:32 akio Exp $
  * $Log: StFgtRawDaqReader.h,v $
+ * Revision 1.4  2013/01/31 20:00:32  akio
+ * adding obtaining number of timebins from meta data
+ * adding options for zero suppressed data
+ *
  * Revision 1.3  2012/01/31 11:23:34  sgliske
  * No longer requires passing name of StFgtDbMaker
  *
