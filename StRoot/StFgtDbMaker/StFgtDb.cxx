@@ -1,5 +1,7 @@
 #include "StMessMgr.h"
 #include "StFgtDb.h"
+#include <TVector3.h>
+#include <TRotation.h>
 #include <fstream>
 using namespace std;
 
@@ -289,6 +291,34 @@ bool StFgtDb::isR(
 	return (layer == 'R');
 }
 
-
-
-
+// This gives XYZ from R and PHI obtained by StFgtGeom::getPhysicalCoordinate(STAR coordinate)
+// If option=0, no alighment parameter is considered and gives ideal position
+// If option=1 (default), then alignment parameter is taken from DB, and it will apply offsets and rotation around StFgtGeom::getQuadCenterXYZ()
+// If option=2, then alignment parameter is taken from last argument, and it will apply offsets and rotation around StFgtGeom::getQuadCenterXYZ()
+void StFgtDb::getStarXYZ(Short_t disc, Short_t quad, Double_t r, Double_t phi, TVector3 &xyz, Int_t opt, fgtAlignment_st* par){
+  xyz.SetXYZ(0,0,0);                                                //initialize to zero
+  if(disc<0 || disc>=kFgtNumDiscs) return;
+  if(quad<0 || quad>=kFgtNumQuads) return;
+  TVector3 org(r*cos(phi),r*sin(phi),StFgtGeom::getDiscZ(disc));    //Get STAR xyz (ideal position w/o alignment)
+  if(opt==0) {xyz=org; return;}                                     //opt=0 return ideal position
+  fgtAlignment_st* alg;
+  if(opt==1) { alg = m_alignment;}                                  //use DB
+  else { alg = par; }                                               //use user input instead of DB
+  int i=disc*4+quad;
+  //printf("i=%d\n",i);
+  TVector3 center; StFgtGeom::getQuadCenterXYZ(disc,quad,center);   //get xyz of center of quadrant
+  TVector3 local=org-center;                                        //move to center of quadrant
+  //printf("center x=%8.3f y=%8.3f z=%8.3f\n",center.X(),center.Y(),center.Z());
+  //printf("org    x=%8.3f y=%8.3f z=%8.3f\n",org.X(),org.Y(),org.Z());
+  //printf("local  x=%8.3f y=%8.3f z=%8.3f\n",local.X(),local.Y(),local.Z());
+  TRotation rot;
+  rot.SetXEulerAngles(par->phi[i], par->theta[i], par->psi[i]);     //set up Euler angles
+  TVector3 rotated = local.Transform(rot);                          //rotate
+  //printf("rot    x=%8.3f y=%8.3f z=%8.3f\n",rotated.X(),rotated.Y(),rotated.Z());
+  TVector3 global=rotated+center;                                   //move back to STAR coordinate
+  //printf("global x=%8.3f y=%8.3f z=%8.3f\n",global.X(),global.Y(),global.Z());
+  TVector3 offset(alg->xoff[i],alg->yoff[i],alg->zoff[i]);          //offsets
+  //printf("offset x=%8.3f y=%8.3f z=%8.3f\n",offset.X(),offset.Y(),offset.Z());
+  xyz = global + offset;                                            //add offsets
+  //printf("xyz    x=%8.3f y=%8.3f z=%8.3f\n",xyz.X(),xyz.Y(),xyz.Z());
+}
