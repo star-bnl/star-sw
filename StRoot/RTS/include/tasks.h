@@ -177,4 +177,7 @@
 
 #define EVP_ETH_RCV_TASK 51
 
+
+#define L4_TASK 80        // use L3 task
+#define L4_EVB_TASK 82
 #endif 

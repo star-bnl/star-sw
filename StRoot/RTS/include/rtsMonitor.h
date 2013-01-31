@@ -425,8 +425,8 @@ struct rts2013_L4Mon {
 	u_int daq_cnt ;	   // received from EVB
 	u_int daq_rate;
 	
-	u_int l4_abort;
-	u_int l4_abort_rate;
+	u_int l4_accept;
+	u_int l4_accept_rate;
     } trgs[TRIGGERS_MAX+1] ;
 };
 
