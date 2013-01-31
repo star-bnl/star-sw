@@ -1,7 +1,10 @@
 
-* $Id: gstar_part.g,v 1.35 2012/06/25 16:02:09 jwebb Exp $
+* $Id: gstar_part.g,v 1.36 2013/01/31 18:21:50 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.36  2013/01/31 18:21:50  jwebb
+* Updated StarClassLibrary and gstar_part.g to add the H Dibaryon.
+*
 * Revision 1.35  2012/06/25 16:02:09  jwebb
 * Added Xi0(1530).
 *
@@ -577,7 +580,7 @@ MODULE gstar_part Is the STAR Particle Database
                              trktyp    = kGtHION
 
 
-   """Define all hyper-nuclei with offset 60000"""
+   """Define all hyper-nuclei and exotics with offset 60000"""
 * Particle hyperTriton  code      = 60053            ,   ! Placeholder for hypertriton
 *                       mass      = 2.911            ,   ! with all decay modes
 *                       charge    = 1                ,
@@ -626,6 +629,17 @@ Particle anti_hyperTriton_db_pb_pi code      = 62054  ,
                                   bratio    = {1,}             ,
                                   mode      = {081553,}
 
+
+   """Define all dibaryons / dimesons with offset=70000 """
+
+Particle H_dibaryon               code      = 60001,
+                                  mass      = 2.192,
+                                  charge    = 0,
+                                  tlife     = 0.26320E-9/2,
+                                  pdg       = UNDEFINED,
+                                  trktyp    = kGtHADR,
+                                  bratio    = {1,},
+                                  mode      = { 98 14 09, }
 
                         
 

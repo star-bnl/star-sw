@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.17 2012/06/25 16:02:05 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.18 2013/01/31 18:21:46 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.18  2013/01/31 18:21:46  jwebb
+ * Updated StarClassLibrary and gstar_part.g to add the H Dibaryon.
+ *
  * Revision 1.17  2012/06/25 16:02:05  jwebb
  * Added Xi0(1530).
  *
@@ -91,7 +94,7 @@
 
 #include "StarPDGEncoding.hh"
 #define kUndefined _undefined_particle_id++
-long _undefined_particle_id = 2000000000;
+long _undefined_particle_id = 2000000000; /* Unique PDG ID for each undefined particle */
 
 #if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
 #include <ospace/stl/src/treeaux.cpp> // CC4.2 with ObjectSpace only
@@ -103,6 +106,7 @@ long _undefined_particle_id = 2000000000;
 #include "StAntiHelium3.hh"
 #include "StAntiHyperTriton.hh"
 #include "StHyperTriton.hh"
+#include "StHDibaryon.hh"
 
 
 StParticleTable* StParticleTable::mParticleTable = 0;
@@ -324,6 +328,12 @@ StParticleTable::StParticleTable()
        Geant2Pdg( 62054, kAntiHyperTriton, AntiH3(Lambda) --> dbar pbar piplus );	
     ///@}
 
+    ///@addtogroup EXOTICS
+    ///Definitions of exotics, e.g. H-dibaryon
+    ///@{
+       Geant2Pdg( 60001, kUndefined,         H-Dibaryon --> Lambda + piminus + proton );
+    ///@}
+
 
 #undef Geant2Pdg
 
@@ -427,9 +437,13 @@ StParticleDefinition* StParticleTable::findParticleByGeantId(int geantId) const
     case 60054:
     case 61054:
     case 62054:
-      p = StAntiHyperTriton::instance();
+      p = StAntiHyperTriton::instance();      
       break;
       
+      
+    case 60001:
+      p = StHDibaryon::instance();
+      break;
 
 
 
