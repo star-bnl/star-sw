@@ -16,6 +16,7 @@
 #include "tables/St_fgtMapping_Table.h"
 #include "tables/St_fgtGain_Table.h"
 #include "tables/St_fgtStatus_Table.h"
+#include "tables/St_fgtAlignment_Table.h"
 #include "StFgtUtil/geometry/StFgtGeom.h"
 
 class StFgtDb 
@@ -26,7 +27,7 @@ class StFgtDb
 	//  in the class being observed by this DB interface implementation.
 
           StFgtDb(
-        ) : m_map(NULL), m_rmap(NULL), m_status(NULL), m_pedestal(NULL), m_gain(NULL)
+        ) : m_map(NULL), m_rmap(NULL), m_status(NULL), m_pedestal(NULL), m_gain(NULL), m_alignment(NULL)
 	{ }
 	    
 	  StFgtDb(
@@ -34,9 +35,10 @@ class StFgtDb
 	    fgtMapping_st * rmap, 
 	    fgtStatus_st * status,
 	    fgtPedestal_st * pedestal,
-	    fgtGain_st * gain
+	    fgtGain_st * gain,
+	    fgtAlignment_st * alignment
 	) : m_map(map), m_rmap(rmap), m_status(status),
-	    m_pedestal(pedestal), m_gain(gain)
+	    m_pedestal(pedestal), m_gain(gain), m_alignment(alignment)
 	{ }
 
 	virtual void updateTables(
@@ -46,7 +48,8 @@ class StFgtDb
 	    fgtPedestal_st * pedestal,
 	    fgtGain_st * gain,
 	    fgtElosCutoff_st* mLossTab,
-	    fgtSimuParams_st* mSimuParTab
+	    fgtSimuParams_st* mSimuParTab,
+	    fgtAlignment_st* alignment
 	)
 	{
 	    m_map = map;
@@ -56,6 +59,7 @@ class StFgtDb
 	    m_gain = gain;
 	    m_eLoss=mLossTab;
 	    m_simPar= mSimuParTab;
+	    m_alignment = alignment;
 	}
 
 	//----------------------------------------------------------
@@ -319,13 +323,20 @@ class StFgtDb
 	{
 	  return m_simPar[0].param[bin];
 	};
+  
+        virtual fgtAlignment_st* getAlignment() {return m_alignment;}
 
+        // This gives XYZ from R and PHI obtained by StFgtGeom::getPhysicalCoordinate(STAR coordinate)
+        // If option=0, no alighment parameter is considered and gives ideal position
+        // If option=1 (default), then alignment parameter is taken from DB, and it will apply offsets and rotation around StFgtGeom::getQuadCenterXYZ()
+        // If option=2, then alignment parameter is taken from last argument, and it will apply offsets and rotation around StFgtGeom::getQuadCenterXYZ()
+        virtual void getStarXYZ(Short_t disc, Short_t quad, Double_t r, Double_t phi, TVector3 &xyz, Int_t opt=1, fgtAlignment_st* par=0);         
 
 	//dump of FGT status/peds/pedSigma for each strip
 	void printFgtDumpCSV1(TString fname, int myDate, int myTime);
 
 	virtual ~StFgtDb() {}
-
+  
 
     private:
 	fgtMapping_st * m_map;
@@ -335,6 +346,7 @@ class StFgtDb
 	fgtGain_st * m_gain;
 	fgtElosCutoff_st* m_eLoss;
 	fgtSimuParams_st* m_simPar;
+        fgtAlignment_st* m_alignment;
 };
 
 

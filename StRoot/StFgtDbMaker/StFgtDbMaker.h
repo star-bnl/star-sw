@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.h,v 1.17 2012/07/31 18:24:30 jeromel Exp $
+// $Id: StFgtDbMaker.h,v 1.18 2013/01/31 15:42:19 akio Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 
@@ -47,17 +47,21 @@ private:
   StFgtGeom        *m_geom;
   StFgtDb          *m_tables;
   fgtMapping_st    *m_rmap;
+  fgtAlignment_st  *m_alignment;
 
  public:
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.17 2012/07/31 18:24:30 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtDbMaker.h,v 1.18 2013/01/31 15:42:19 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StFgtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 // $Log: StFgtDbMaker.h,v $
+// Revision 1.18  2013/01/31 15:42:19  akio
+// Adding Alignment table and getStarXYZ()
+//
 // Revision 1.17  2012/07/31 18:24:30  jeromel
 // Removed virtual + fixed name
 //

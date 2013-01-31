@@ -1,4 +1,4 @@
-// $Id: StFgtDbMaker.cxx,v 1.21 2012/07/31 18:24:30 jeromel Exp $
+// $Id: StFgtDbMaker.cxx,v 1.22 2013/01/31 15:42:19 akio Exp $
 /* \class StFgtDbMaker        
 \author Stephen Gliske
 */
@@ -12,6 +12,7 @@
 #include "tables/St_fgtMapping_Table.h"
 #include "tables/St_fgtGain_Table.h"
 #include "tables/St_fgtStatus_Table.h"
+#include "tables/St_fgtAlignment_Table.h"
 #include "St_db_Maker/St_db_Maker.h"
 
 ClassImp(StFgtDbMaker)
@@ -61,12 +62,11 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
     ////start here
     St_fgtElosCutoff *eLossDataset=0;
     St_fgtSimuParams *simuParamsDataset=0;
-
     St_fgtMapping * mapDataset = 0;
     St_fgtGain * gainDataset = 0;
     St_fgtPedestal * pedDataset = 0;
     St_fgtStatus * statusDataset = 0;
-
+    St_fgtAlignment *alignmentDataset = 0;
 
     /// Go get database tables
     LOG_INFO <<  "::RequestDataBase() for Elos cut off ..."<< endl;    
@@ -117,6 +117,13 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	  << "ERROR: no table found in db for pedestals, or malformed local db config" 
 	  << endm;
       }
+    TDataSet *AlignmentDB = GetDataBase("Calibrations/fgt/fgtAlignment");
+    if (!AlignmentDB)
+      {
+	LOG_FATAL
+	  << "ERROR: no table found in db for pedestals, or malformed local db config" 
+	  << endm;
+      }
     
     
     eLossDataset=(St_fgtElosCutoff*)ELossDB->Find("fgtElosCutoff"); 
@@ -145,6 +152,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	LOG_FATAL   << " found INDEXED table for mapping with " << rows
 		    << " rows, this is fatal, fix DB content" << endm;
       }
+
     gainDataset = (St_fgtGain*)
       GainDB->Find("fgtGain");
     rows = gainDataset->GetNRows();
@@ -153,6 +161,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	LOG_FATAL   << " found INDEXED table for gains with " << rows
 		    << " rows, this is fatal, fix DB content" << endm;
       }
+
     pedDataset = (St_fgtPedestal*)
       PedDB->Find("fgtPedestal");
     rows = pedDataset->GetNRows();
@@ -170,8 +179,16 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 		    << " rows, this is fatal, fix DB content" << endm;
       }
     
+    alignmentDataset = (St_fgtAlignment*) AlignmentDB->Find("fgtAlignment");
+    rows = alignmentDataset->GetNRows();
+    if (rows > 1)
+      {
+        LOG_FATAL   << " found INDEXED table for alignment with " << rows
+                    << " rows, this is fatal, fix DB content" << endm;
+      }
+
     
-    if (pedDataset && statusDataset && mapDataset && gainDataset && eLossDataset && simuParamsDataset)
+    if (pedDataset && statusDataset && mapDataset && gainDataset && eLossDataset && simuParamsDataset && alignmentDataset)
       {
 	if ( m_rmap )
 	  delete m_rmap;
@@ -192,7 +209,8 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	    pedDataset->GetTable(),
 	    gainDataset->GetTable(),
 	    eLossDataset->GetTable(),
-	    simuParamsDataset->GetTable()
+	    simuParamsDataset->GetTable(),
+	    alignmentDataset->GetTable()
 	);
 
 	LOG_INFO
@@ -207,6 +225,7 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	displayBeginEndTime(statusDataset);
 	displayBeginEndTime(pedDataset);
 	displayBeginEndTime(gainDataset);
+	displayBeginEndTime(alignmentDataset); 
 	displayBeginEndTime(eLossDataset);  LOG_INFO <<eLossDataset->GetTable()->comment<<endl;
 	displayBeginEndTime(simuParamsDataset); LOG_INFO <<simuParamsDataset->GetTable()->comment<<endl;
 
@@ -241,6 +260,11 @@ Int_t StFgtDbMaker::InitRun(Int_t runNumber)
 	if ( !simuParamsDataset )
 	{
 	    LOG_FATAL << Form("%s :: SimuParams table failed,",GetName())
+		      << endm;
+	}
+	if ( !alignmentDataset )
+	{
+	    LOG_FATAL << Form("%s :: Alignment table failed,",GetName())
 		      << endm;
 	}
     }
@@ -299,6 +323,9 @@ Int_t StFgtDbMaker::Finish()
 
 
 // $Log: StFgtDbMaker.cxx,v $
+// Revision 1.22  2013/01/31 15:42:19  akio
+// Adding Alignment table and getStarXYZ()
+//
 // Revision 1.21  2012/07/31 18:24:30  jeromel
 // Removed virtual + fixed name
 //
