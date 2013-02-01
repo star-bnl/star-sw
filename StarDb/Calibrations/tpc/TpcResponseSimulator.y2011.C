@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2011.C,v 1.9 2013/01/27 15:44:17 fisyak Exp $
+// $Id: TpcResponseSimulator.y2011.C,v 1.10 2013/02/01 15:58:51 fisyak Exp $
 // $Log: TpcResponseSimulator.y2011.C,v $
+// Revision 1.10  2013/02/01 15:58:51  fisyak
+// Add handle for separate Inner and Outer sector time off set
+//
 // Revision 1.9  2013/01/27 15:44:17  fisyak
 // Correct T0offset from run 11 Au+Au 19.6 GeV
 //
@@ -82,8 +85,8 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01;//- TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.09117e-02;
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 1.19154e-02;
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 6.99114715017355337e-01 -8.07784e-03;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.79357470004933006e-01 +1.95399e-02;
   // SecRow3CGFdaq_2011_pp500LowLum => Inner: 3.26428e-01 - -5.01720e-04*y; Outer: 2.68883e-01 + 1.23403e-04*y
   //                                          3.22907e-01                          2.72715e-01
   // SecRow3CGFTpcRS_2011_pp500LowLum_f     : 3.09711e-01                          2.65342e-01
@@ -105,6 +108,9 @@ TDataSet *CreateTable() {
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
   //row.T0offset   = 0.50 -1.43663e-01 -0.00932877;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
   row.T0offset   = 0.598;// 01/27/13 Xianglei Zhu from SL11d_embed with a pi+ in run 11 Au+Au 19.6 GeV test sample
+  // root.exe T0offset.C; 
+  row.T0offsetI = 1.97502e-01;
+  row.T0offsetO = 7.23048e-02;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

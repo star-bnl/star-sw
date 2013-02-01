@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2010.C,v 1.13 2012/12/21 17:55:25 fisyak Exp $
+// $Id: TpcResponseSimulator.y2010.C,v 1.14 2013/02/01 15:58:51 fisyak Exp $
 // $Log: TpcResponseSimulator.y2010.C,v $
+// Revision 1.14  2013/02/01 15:58:51  fisyak
+// Add handle for separate Inner and Outer sector time off set
+//
 // Revision 1.13  2012/12/21 17:55:25  fisyak
 // set T0offset from Xianglei Zhu from SL10k_embed_Kplus_AuAu62
 //
@@ -79,8 +82,9 @@ TDataSet *CreateTable() {
   row.OmegaTauScaleO        = 1.8  *1.201;  //HC 1.;// 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
-  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 1.03997021501735532e+00;// - TMath::Log(0.533*0.843485) -5.84129e-01 + 4.52885e-01 + 3.99488e-01 -2.77208e-02;
-  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.87120370004933023e-01;//- TMath::Log(0.512*0.725267) -5.47141e-01 + 5.23937e-01 + 3.25737e-02 -1.28954e-02;
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 1.03997021501735532e+00 -5.20617e-02;
+  row.SecRowCorIW[1] = row.SecRowCorIE[1] = 1.18001e-03;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 9.87120370004933023e-01 +9.46730e-03;
   /* SecRow3CGFTpcRS_2005_CuCu22_a :  FitP->Draw("sigma:y>>s(45,0.5,45.5)","(i&&j)/dsigma**2","profg")
      SecRow3CGFTpcRS_2010_AuAu200_f: Inner :  3.34389e-01, Outer : 2.85770e-01
      SecRow3CGFdaq_2010_AuAu200    :          3.68904e-01          2.98815e-01
@@ -99,8 +103,11 @@ TDataSet *CreateTable() {
   //  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
   // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>T(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
-  // The corection has to be added                                                                    M             P
-  row.T0offset   = 0.598;// 12/21/12 Xianglei Zhu from SL10k_embed_Kplus_AuAu62
+  // The corection has to be added                     
+  row.T0offset   = 0.598 -3.05221e-01;// 01/08/13 TpcRS; 12/21/12 Xianglei Zhu from SL10k_embed_Kplus_AuAu62
+  // root.exe T0offset.C; 
+  row.T0offsetI = 1.78038e-01;
+  row.T0offsetO = 6.44008e-02;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

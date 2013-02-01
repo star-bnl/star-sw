@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2012.C,v 1.1 2012/04/03 14:06:55 fisyak Exp $
+// $Id: TpcResponseSimulator.y2012.C,v 1.2 2013/02/01 15:58:51 fisyak Exp $
 // $Log: TpcResponseSimulator.y2012.C,v $
+// Revision 1.2  2013/02/01 15:58:51  fisyak
+// Add handle for separate Inner and Outer sector time off set
+//
 // Revision 1.1  2012/04/03 14:06:55  fisyak
 // Speed up using  GetSaveL (__PAD_BLOCK__), sluggish shape histograms, Heed electron generation
 //
@@ -101,6 +104,10 @@ TDataSet *CreateTable() {
   // The corection has to be added                                                                    M             P
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
   row.T0offset   = 0.50 -1.43663e-01;//g // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>TI(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90&&fMcHit.mVolumeId%100<=13","colz"); TI->FitSlicesY(); TI_1->Fit("pol2","er","",-100,100);
+  // TpcT->Draw("fMcHit.mMcl_t+0.165*Frequency-fRcHit.mMcl_t/64:fMcHit.mPosition.mX3>>TO(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90&&fMcHit.mVolumeId%100>13","colz"); TO->FitSlicesY(); TO_1->Fit("pol2","er","",-100,100);
+  row.T0offsetI =  1.17437e-01 + 8.43584e-03;
+  row.T0offsetO = -9.36725e-03 + 5.74947e-03;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
