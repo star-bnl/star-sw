@@ -18,7 +18,7 @@ class StFgtStraightTrackMaker;
 class StFgtStraightPlotter;
 class StFgtPointMaker;
 class StFgtSimplePointAlgo;
-
+class StFgtPointPlotter;
 
 StChain           *analysisChain = 0;
 St_db_Maker       *dbMkr         = 0;
@@ -29,6 +29,7 @@ StFgtGenAVEMaker    *fgtAVEffMkr     = 0;
 StFgtGeneralBase    *fgtGenBase     = 0;
 StFgtStraightTrackMaker    *fgtStraightTracker     = 0;
 StFgtPointMaker    *fgtPointMkr =0;
+StFgtPointPlotter *fgtPointPlotter=0;
 StFgtSimplePointAlgo *fgtSimplePointAlgo =0;
 
 /// /star/data03/daq/2012/064/13064033p_jb/st_physics_13064033_raw_1010001.daq
@@ -37,7 +38,7 @@ StFgtSimplePointAlgo *fgtSimplePointAlgo =0;
 
 int agvEffsPoints( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/st_physics_13174038_raw_1010001.daq",
 		       Int_t runnumber = 13074038,
-	     Int_t nevents = 100, Int_t effDisk=2,
+	     Int_t nevents = 10000, Int_t effDisk=2,
 	     Bool_t cutShortEvents = 1 ){
    LoadLibs();   
 
@@ -122,15 +123,13 @@ int agvEffsPoints( const Char_t *filenameIn = "/star/data03/daq/2012/174/1317403
   //  StFgtAVEfficiencyMaker* effMkr=new StFgtAVEfficiencyMaker("FgtAVEfficiencyMaker");
   //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
   //  fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
-  fgtGenBase = new StFgtGeneralBase( "fgtGenBase" );
-
-  fgtStraightTracker = new StFgtStraightTrackMaker( "fgtStraightTracker" );
-  fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
 
   fgtPointMkr = new StFgtPointMaker("fgtPointMaker");
   fgtSimplePointAlgo=new StFgtSimplePointAlgo();
   fgtPointMkr->setPointAlgo(fgtSimplePointAlgo);
-
+  //  fgtStraightTracker = new StFgtStraightTrackMaker( "fgtStraightTracker" );
+  //  fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
+  fgtPointPlotter=new StFgtPointPlotter("fgtPointPlotter");
 
   //  fgtAVEffMkr->setChargeMatchCut(2.0);
   //  fgtAVEffMkr->setUseChargeMatch();
