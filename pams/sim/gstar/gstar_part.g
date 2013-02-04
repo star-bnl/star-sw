@@ -1,7 +1,10 @@
-
-* $Id: gstar_part.g,v 1.36 2013/01/31 18:21:50 jwebb Exp $
+* $Id: gstar_part.g,v 1.37 2013/02/04 20:41:15 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.37  2013/02/04 20:41:15  jwebb
+* Update to H-Dibaryon mass, to provide sufficient CMS energy for phase space
+* decay.
+*
 * Revision 1.36  2013/01/31 18:21:50  jwebb
 * Updated StarClassLibrary and gstar_part.g to add the H Dibaryon.
 *
@@ -633,7 +636,7 @@ Particle anti_hyperTriton_db_pb_pi code      = 62054  ,
    """Define all dibaryons / dimesons with offset=70000 """
 
 Particle H_dibaryon               code      = 60001,
-                                  mass      = 2.192,
+                                  mass      = 2.232,
                                   charge    = 0,
                                   tlife     = 0.26320E-9/2,
                                   pdg       = UNDEFINED,
