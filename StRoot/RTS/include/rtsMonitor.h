@@ -432,9 +432,12 @@ struct rts2013_L4Mon {
 
 struct rts2013_L4EvbMon {
     rtsMonHeader head;
+};
+
+struct rts2013_L4RcfMon {    
+    rtsMonHeader head;
 
     // General
-    u_int mb_run;     // total data size for this run
     u_int gb_free;    // free disk space
     u_int gb_all;     // total disk space
 
@@ -442,5 +445,6 @@ struct rts2013_L4EvbMon {
     u_int files_sent;     // sent within last resets on the hour
     u_int files_waiting;  // waiting to be sent
 };
+
 
 #endif
