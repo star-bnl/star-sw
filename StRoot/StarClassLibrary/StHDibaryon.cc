@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHDibaryon.cc,v 1.1 2013/01/31 18:21:46 jwebb Exp $
+ * $Id: StHDibaryon.cc,v 1.2 2013/02/04 20:41:54 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHDibaryon.cc,v $
+ * Revision 1.2  2013/02/04 20:41:54  jwebb
+ * Typo fix, and mass increase.
+ *
  * Revision 1.1  2013/01/31 18:21:46  jwebb
  * Updated StarClassLibrary and gstar_part.g to add the H Dibaryon.
  *
@@ -57,7 +60,7 @@ StHDibaryon::StHDibaryon(const string  &  aName,
 //             stable         lifetime   
 //
 StHDibaryon StHDibaryon::mHDibaryon(
-             "hdibaruon",    2.192*GeV,       0.0*MeV,         0.0, 
+             "hdibaryon",    2.232*GeV,       0.0*MeV,         0.0, 
 		    2,              +1,             0,          
 		    0,               0,             0,             
 	     "dibaryon",             0,            +2,           0,
