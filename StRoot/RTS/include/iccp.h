@@ -355,15 +355,11 @@ struct ic_l4_startevent {
     uint buff_id;   // event buffer id
 };
 
-struct ic_l4_shipevent {
-    uint buff_id;
-    uint evt_sz;
-    uint l4_sz;
-};
-
-struct ic_l4_eventdecision {
-    uint trg_lo;   // lo 32 bits of the trigger mask
-    uint trg_hi;   // hi 32 bits of the trigger mask
+struct ic_l4_event {
+    uint l2trg_lo;
+    uint l2trg_hi;
+    uint l4trg_lo;   // lo 32 bits of the trigger mask
+    uint l4trg_hi;   // hi 32 bits of the trigger mask
     uint buff_id;  // event buffer id for the hlt data
     uint evt_sz;   // sz of the original event
     uint l4_sz;    // sz of the l4 output buffer
@@ -643,8 +639,7 @@ union ic_load
   ic_eth_announce                  eth_announce;
  
   ic_l4_startevent                 l4_startevent;
-  ic_l4_eventdecision              l4_eventdecision;
-    ic_l4_shipevent  l4_shipevent;
+    ic_l4_event l4_event;
     ic_l4_evt_descriptor l4_evt_descriptor;
 
 
