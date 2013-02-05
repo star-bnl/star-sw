@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.253 2013/01/22 18:27:10 jwebb Exp $
+* $Id: geometry.g,v 1.254 2013/02/05 16:58:36 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.254  2013/02/05 16:58:36  jwebb
+* Definition of the y2013 and y2013x geometry tags.
+*
 * Revision 1.253  2013/01/22 18:27:10  jwebb
 * Defined Y2013x geometry.
 *
@@ -1179,6 +1182,7 @@ replace [exe PIPE14;] with [ "The new pipe according to Kai"; PipeConfig = 4;
                              "pipe wrap only" ;               PipeFlag   = 1;]
 
 replace [exe PIPEv1;] with [ "The beam pipe for the HFT";     PipeConfig = 10;]
+replace [exe PIPEv2;] with [ "The beam pipe for the HFT";     PipeConfig = 20;]
 
 
 *                                                                                       Pixel Detector
@@ -1186,6 +1190,8 @@ replace [exe PIPEv1;] with [ "The beam pipe for the HFT";     PipeConfig = 10;]
 replace [exe PIXL00;] with [ "Simplest.Gerrit" PIXL=on; PixlConfig=-1;]
 replace [exe PIXL01;] with [ "Put the pixel detector in" PIXL=on; PixlConfig=1;]
 replace [exe PIXL02;] with [ "Add the pixle detector to the IDSM"; PIXL=on; PixlConfig=6; ]
+
+replace [exe PIXL05;] with [ "Add pixel detector to the IDSM"; PIXL=on;     PixlConfig=50; ]
 
 replace [exe ISTD01;] with [ "Add the ist detector to the IDSM"; ISTD=on; IstdConfig=1; ]
 replace [exe PXST01;] with [ "Add the PST to the IDSM"; PXST=on; PxstConfig=0; ]
@@ -1292,7 +1298,7 @@ replace [exe BTOFb7;] with [;" X.Dong";BTOF=on;
 replace [exe BTOFc6;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call btofgeo6 ";]
 replace [exe BTOFc7;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=7 " call btofgeo7 ";]
 
-
+replace [exe BTOFv8;] with [;BTOF=on; BtofConfig=13; Itof=8 "call btofgeo8";]
 """ ----------------------------------------------------------------------- """
 """ TPC Configurations                                                      """
 """     Naming convention is offset by 1 from the corresponding module.     """
@@ -2003,8 +2009,10 @@ REPLACE [exe dev13;] with ["DEV13 upgrade geometry";
 ]
 
 REPLACE [exe y2013;] with ["Y2013 first cut geometry";
+    exe CAVE04;      "Cave version 4";
+    exe MAGPv1;      "New magnet with H20";
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
-    exe BTOF67;      "time of flight";
+    exe BTOFv8;      "time of flight";
     exe CALB02;      "updated bemc model";
     exe ECALv6;      "several bugfixes in eemc geometry";
     exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
@@ -2019,13 +2027,13 @@ REPLACE [exe y2013;] with ["Y2013 first cut geometry";
     exe SISDof;      "No sisd";
     exe MUTD13;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
-    exe PIPEv1;      "The beam pipe";
+    exe PIPEv2;      "The beam pipe";
 
     exe IDSM02;      "Inner detector support";
     exe FGTDv32;     "FGT v3 6 disks";
 
     exe PXST01;      "PIXEL detector support version 1";
-    exe PIXL02;      "Development version of the pixl detector";
+    exe PIXL05;      "Production version of the pixl detector";
 ]
 
 REPLACE [exe y2013x;] with [                                      "Y2013 asymptotic";
@@ -4320,6 +4328,7 @@ c     write(*,*) 'CAVE'
      IF      PipeConfig == -1 { Call pipegeo00; "Simple beam pipe"   }
      ELSE IF PipeConfig  < 10 { Call pipegeo;   "Standard beam pipe" }
      ELSE IF PipeConfig == 10 { Call pipegeo1;  "HFT era beam pipe"  }
+     ELSE IF PipeConfig == 20 { Call pipegeo2;  "HFT era beam pipe as built" }
 
    }
 
@@ -4440,14 +4449,14 @@ c    write(*,*) 'BTOF'
          call AgDETP add ('btog.Z0=',tofZ0,1)
      }
 * X.Dong.end
-
-      if(Itof.eq.1) write(*,*) '*****  ATTENTION : OLD VERSION OF BTOF NOT IMPLEMENTED - NO TOF CREATED *****'
-      if(Itof.eq.2) call btofgeo2
-      if(Itof.eq.4) call btofgeo4
-      if(Itof.eq.5) call btofgeo5
-      if(Itof.eq.6) call btofgeo6       !X.Dong + F.Geurts
-      if(Itof.ge.7) call btofgeo7       !F.Geurts fixes to sensitive volumes
-   }
+      IF (Itof=1)  write(*,*) '*****  ATTENTION : OLD VERSION OF BTOF NOT IMPLEMENTED - NO TOF CREATED *****'
+      IF (Itof=2)  call btofgeo2
+      IF (Itof=4)  call btofgeo4
+      IF (Itof=5)  call btofgeo5
+      IF (Itof=6)  call btofgeo6       !X.Dong + F.Geurts
+      IF (Itof=7)  call btofgeo7       !F.Geurts fixes to sensitive volumes
+      IF (Itof=8)  call btofgeo8     
+   } 
 
    Call AGSFLAG('SIMU',1)
 
@@ -4622,6 +4631,15 @@ c    write(*,*) 'CALB'
            call AgDetp add ('PXLV.location=',2.0,1)
            call pixlgeo4
      }
+
+     IF PixlConfig==50 {               "Y2013 Pixel Configuration"
+           call AgDetp new ('PIXL')
+           call AgDetp add ('PXLV.location=',2.0,1);
+           call PixlGeo5   """ Pixl Detector """
+           call DtubGeo1   """ Electronics etc... """
+     }
+
+
    }
    if (ISTB){
 c    write(*,*) 'ISTB'
