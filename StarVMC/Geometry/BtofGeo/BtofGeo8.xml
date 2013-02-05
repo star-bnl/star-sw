@@ -975,18 +975,17 @@
         </Block>
         
         <Block name="BTRA" comment="is one full tray plus supporting structure for CTB/TOF"  >
+
             <Attribute for="BTRA" seen="1" colo="2"/>
             <Shape type="BOX" dx="(tray_SupFullH+tray_height+tray_StripT)/2" dy="tray_Width/2"  />
-            <If expr="tof!=-1"  >
-                <Create block="BXTR"  />
-                <Placement x="(tray_SupFullH+tray_StripT)/2" z="(btog_dz-tray_length)/2" block="BXTR"  >
-                </Placement>
-                
+
+	    <If expr="tof!=-1"  >
+            <Create    block="BXTR"  />
+            <Placement block="BXTR" x="(tray_SupFullH+tray_StripT)/2" z="(btog_dz-tray_length)/2" />
             </If>
             
-            <Create block="BUND"  />
-            <Placement x="-(tray_height+tray_StripT)/2" z="(btog_dz-tray_SupLen)/2" block="BUND"  >
-            </Placement>
+            <Create    block="BUND"  />
+            <Placement block="BUND" x="-(tray_height+tray_StripT)/2" z="(btog_dz-tray_SupLen)/2"/>
             
         </Block>
         
@@ -997,33 +996,29 @@
         </Block>
         
         <Block name="BXTR" comment="is a Main TRay covering box for CTB or TOF"  >
+
             <Attribute for="BXTR" seen="0" colo="2"  />
             <Material name="Aluminium"  />
-
             <Shape type="BOX" dz="tray_length/2" dx="tray_height/2"  />
+
             <If expr="tof==1"  >
-                <Create block="BTTC"  />
-                <Placement block="BTTC"  >
-                </Placement>
+	      <Create   block="BTTC"  />
+	      <Placement block="BTTC" />
                 
-                <Elif expr="tof&gt;=2"  >
-                    <Create block="BRTC"  />
-                    <Placement x="-(tray_CoverH+tray_TopThk-tray_WallThk)/2" block="BRTC"  >
-                    </Placement>
+	    <Elif expr="tof&gt;=2"  >
+
+	      <Create     block="BRTC"  />
+	      <Placement  block="BRTC"  x="-(tray_CoverH+tray_TopThk-tray_WallThk)/2"/>
                     
-                    <Create block="BUPC"  />
-                    <Placement x="(tray_Height-tray_CoverH)/2-tray_CoverThk/2" block="BUPC"  >
-                    </Placement>
-                    
-                </Elif>
+	      <Create     block="BUPC"  />
+	      <Placement  block="BUPC"  x="(tray_Height-tray_CoverH)/2-tray_CoverThk/2"/>
+	      
+	    </Elif>
                 
-                <Else  >
-                    <Create block="BMTC"  />
-                    <Placement block="BMTC"  >
-                    </Placement>
-                    
-                </Else>
-                
+	    <Else  >
+	      <Create    block="BMTC"  />
+	      <Placement block="BMTC"/>
+	    </Else>                
             </If>
             
         </Block>
@@ -1667,9 +1662,9 @@ x0 = mod4_X0Offset
                 <Rotation thetax="270"  />
             </Placement>
             
-            <Create block="BCOV"  />
-            <Placement x="-tray_SupFullH/2+tray_CoolOutR" block="BCOV"  >
-            </Placement>
+            <Create    block="BCOV"  />
+            <Placement block="BCOV"  x="-tray_SupFullH/2+tray_CoolOutR"  />
+
             
         </Block>
         
@@ -1696,10 +1691,8 @@ x0 = mod4_X0Offset
         <Block name="BCOV" comment="is a whole TPC cooling channel"  >
             <Attribute for="BCOV" seen="0" colo="2"  />
             <Shape type="TUBE" rmax="tray_CoolOutR" rmin="0"  />
-            <Create block="BWAT" rmin="0" rmax="tray_CoolInnR" />
-            <Placement  block="BWAT"  >
-            </Placement>
-            
+            <Create     block="BWAT"  />
+            <Placement  block="BWAT"  />
         </Block>
         
         <Block name="BWAT" comment="is TPC cooling water"  >
@@ -1708,7 +1701,7 @@ x0 = mod4_X0Offset
                 <Component name="H2" a="1" z="1" w="2"  />
                 <Component name="O" a="16" z="8" w="1"  />
             </Mixture>
-            <Shape type="TUBE" rmax="0" rmin="0"  />
+            <Shape type="TUBE" rmin="0" rmax="tray_CoolInnR"  />
         </Block>
         
 
@@ -1908,71 +1901,56 @@ x0 = mod4_X0Offset
 
 <!-- Here starts GMT -->
 		
-    <Block name="GMTS" comment="is the space for the geometry pertaining to the GMT"  >
-        <Attribute for="GMTS" seen="1" colo="2"  />
-<!-- FG note: dimensions based on priv. comm. with Dick Majka -->
-        <Shape type="BOX" dx="(gmtr_GSBThkb + gmtr_GSBThkb + gmtr_GSBThk + gmtr_GSThk)/2" dy="(gmtr_GINW)/2" dz="(gmtr_GINL)/2"  />
+<Block name="GMTS" comment="is the space for the geometry pertaining to the GMT"  >
+
+  <Attribute for="GMTS" seen="1" colo="2"  />
+  <!-- FG note: dimensions based on priv. comm. with Dick Majka -->
+  <Shape type="BOX" dx="(gmtr_GSBThkb + gmtr_GSBThkb + gmtr_GSBThk + gmtr_GSThk)/2" dy="(gmtr_GINW)/2" dz="(gmtr_GINL)/2"  />
         
-        <Create block="GSBX"  />
-        <Placement x="(gmtr_GSThk)/2"  y="(gmtr_GINW)/2" z="(gmtr_GINL)/2"  block="GSBX"  >
-        </Placement>
+  <Create     block="GSBX"  />
+  <Placement  block="GSBX"  x="(gmtr_GSThk)/2"  y="(gmtr_GINW)/2" z="(gmtr_GINL)/2" />
         
-        <Create block="GSBY"  />
-        <Placement x="gmtr_GSThk+(gmtr_GSBThk)/2" y="(gmtr_GINW)/2" z="(gmtr_GINL)/2+(gmtr_GSBTL)/2-(gmtr_GSBSL)/2"  block="GSBY"  >
-        </Placement>
+  <Create    block="GSBY"  />
+  <Placement block="GSBY"   x="gmtr_GSThk+(gmtr_GSBThk)/2" y="(gmtr_GINW)/2" z="(gmtr_GINL)/2+(gmtr_GSBTL)/2-(gmtr_GSBSL)/2"  />        
+  <Placement block="GSBY"   x="gmtr_GSThk+(gmtr_GSBThk)/2" y="(gmtr_GINW)/2" z="(gmtr_GINL)/2-(gmtr_GSBTL)/2-(gmtr_GSBSL)/2"  />
         
-        <Placement x="gmtr_GSThk+(gmtr_GSBThk)/2" y="(gmtr_GINW)/2" z="(gmtr_GINL)/2-(gmtr_GSBTL)/2-(gmtr_GSBSL)/2"  block="GSBY"  >
-        </Placement>
+  <Create    block="GSBZ"  />
+  <Placement block="GSBZ" x="gmtr_GSThk+gmtr_GSBThk/2" y="gmtr_GINW/2+gmtr_GSBTW/2+gmtr_GSBFBW/2" z="gmtr_GINL/2" />
+  <Placement block="GSBZ" x="gmtr_GSThk+gmtr_GSBThk/2" y="gmtr_GINW/2-gmtr_GSBTW/2-gmtr_GSBFBW/2" z="gmtr_GINL/2" />
         
-        <Create block="GSBZ"  />
-        <Placement x="gmtr_GSThk+gmtr_GSBThk/2" y="gmtr_GINW/2+gmtr_GSBTW/2+gmtr_GSBFBW/2" z="gmtr_GINL/2"  block="GSBZ"  >
-        </Placement>
+  <Create    block="GNSF"  />
+  <Placement block="GNSF" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk/2" y="gmtr_GINW/2" z="gmtr_GINL/2"   />
         
-        <Placement x="gmtr_GSThk+gmtr_GSBThk/2" y="gmtr_GINW/2-gmtr_GSBTW/2-gmtr_GSBFBW/2" z="gmtr_GINL/2"  block="GSBZ"  >
-        </Placement>
+  <Create    block="GSBB"  />
+  <Placement block="GSBB" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb/2" y="gmtr_GINW/2" z="gmtr_GINL/2" />	
         
-        <Create block="GNSF"  />
-        <Placement  x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk/2" y="gmtr_GINW/2" z="gmtr_GINL/2"  block="GNSF"  >
-        </Placement>
-        
-        <Create block="GSBB"  />
-        <Placement x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb/2" y="gmtr_GINW/2" z="gmtr_GINL/2"  block="GSBB"  >	
-        </Placement>
-        
-        <Create block="GINO"  />
-        <Placement x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk/2" y="gmtr_GINW/2" z="gmtr_GINL/2"   block="GINO"  > 
-        </Placement>
+  <Create    block="GINO"  />
+  <Placement block="GINO" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk/2" y="gmtr_GINW/2" z="gmtr_GINL/2"    /> 
+
+  <Create    block="GHVB"  />
+  <Placement block="GHVB" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_HVThk/2" y="gmtr_GINW-gmtr_GtoHVW+gmtr_HVW/2" z="gmtr_GINL-gmtr_GtoHVL-gmtr_HVL/2" />
 	
-	<Create block="GHVB"  />
-	<Placement x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_HVThk/2" y="gmtr_GINW-gmtr_GtoHVW+gmtr_HVW/2" z="gmtr_GINL-gmtr_GtoHVL-gmtr_HVL/2"  block="GHVB"  >
-	</Placement>
+  <Create    block="GVBC"  />
+  <Placement block="GVBC" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_HVThk/2" y="gmtr_GINW-gmtr_GtoHVW+gmtr_HVW/2" z="gmtr_GINL/2-gmtr_GtoHVL-gmtr_HVL-gmtr_GVL/2" />
 	
-	<Create block="GVBC"  />
-	<Placement x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_HVThk/2" y="gmtr_GINW-gmtr_GtoHVW+gmtr_HVW/2" z="gmtr_GINL/2-gmtr_GtoHVL-gmtr_HVL-gmtr_GVL/2"  block="GVBC"  >
-	</Placement>
+  <Create    block="GFBO"  /> 
+  <Placement block="GFBO" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGFL+gmtr_GBL/2" /> 	
+  <!-- JCW double placement
+  <Placement block="GFBO" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGBL+gmtr_GBL/2" /> 
+  -->
 	
-	<Create block="GFBO"  />
-	<Placement x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGFL+gmtr_GBL/2"  block="GFBO"  > 
-	</Placement>
-	
-	<Placement x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGBL+gmtr_GBL/2"  block="GFBO"  > 
-	</Placement>
-	
-	<Create block="GFBC"  />
-	<Placement x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGFL-gmtr_GCL/2" block="GFBC"  >
-	</Placement>
-	
-	<Placement x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGBL-gmtr_GCL/2" block="GFBC"  >
-	</Placement>
-	
-	<Create block="GSBE"  />
-	<Placement x="gmtr_GSThk+gmtr_GSBThk/2" y="gmtr_GINW/2" z="gmtr_GINL/2"  block="GSBE"  >
-	</Placement>
-	
-	<Create block="GSBE"  />
-	<Placement x="gmtr_GSThk+gmtr_GSBThk/2" y="gmtr_GINW/2" z="gmtr_GINL/2"  block="GSBE"  >
-        </Placement>
-    </Block>
+  <Create    block="GFBC"  /> 
+  <Placement block="GFBC" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGFL-gmtr_GCL/2" />
+  <!-- JCW double placement
+  <Placement block="GFBC" x="gmtr_GSThk+gmtr_GSBThk+gmtr_GSBThkb+gmtr_GNFThk+gmtr_GINThk+gmtr_GBThk/2" y="gmtr_GINW-gmtr_GtoGFW-gmtr_GBW/2" z="gmtr_GINL-gmtr_GtoGBL-gmtr_GCL/2" />
+  -->
+  
+  <Create    block="GSBE"  />  <Placement block="GSBE" x="gmtr_GSThk+gmtr_GSBThk/2" y="gmtr_GINW/2" z="gmtr_GINL/2"    />	
+  <!-- JCW double create double place
+  <Create    block="GSBE"  />  <Placement block="GSBE" x="gmtr_GSThk+gmtr_GSBThk/2" y="gmtr_GINW/2" z="gmtr_GINL/2"    />
+  -->
+
+</Block>
     
     <Block name="GSBX" comment="is the gas seal bonnet cover top"  >
         <Attribute for="GSBX" seen="1" colo="5"  />
