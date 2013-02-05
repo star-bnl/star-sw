@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.254 2013/02/05 16:58:36 jwebb Exp $
+* $Id: geometry.g,v 1.255 2013/02/05 21:26:31 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.255  2013/02/05 21:26:31  jwebb
+* Corrected double placement of volume in PixlGeo5
+*
 * Revision 1.254  2013/02/05 16:58:36  jwebb
 * Definition of the y2013 and y2013x geometry tags.
 *
@@ -1193,6 +1196,8 @@ replace [exe PIXL02;] with [ "Add the pixle detector to the IDSM"; PIXL=on; Pixl
 
 replace [exe PIXL05;] with [ "Add pixel detector to the IDSM"; PIXL=on;     PixlConfig=50; ]
 
+replace [exe DTUB01;] with [ "Add DTUB (no op)"; ]
+
 replace [exe ISTD01;] with [ "Add the ist detector to the IDSM"; ISTD=on; IstdConfig=1; ]
 replace [exe PXST01;] with [ "Add the PST to the IDSM"; PXST=on; PxstConfig=0; ]
 
@@ -2034,6 +2039,7 @@ REPLACE [exe y2013;] with ["Y2013 first cut geometry";
 
     exe PXST01;      "PIXEL detector support version 1";
     exe PIXL05;      "Production version of the pixl detector";
+    exe DTUB01;      "DTUB";
 ]
 
 REPLACE [exe y2013x;] with [                                      "Y2013 asymptotic";

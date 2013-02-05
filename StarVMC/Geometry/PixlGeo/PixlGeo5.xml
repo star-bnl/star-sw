@@ -258,9 +258,9 @@
      <!-- it is always present -->
      <Create block="PXSE"/>
      <Placement block="PXSE" x="xpos" y="ypos" z="zpos" konly="'MANY'" ncopy="jj">
-     <Rotation alphaz="-1*angle-(PARA_DG*PARA_mult*PARA_sec(jj))"/>
-     <Rotation alphax="-1*(PARA_DA*PARA_mult)*PARA_sec(jj)"/>
-     <Rotation alphay="-1*(PARA_DB*PARA_mult)*PARA_sec(jj)"/>
+       <Rotation alphaz="-1*angle-(PARA_DG*PARA_mult*PARA_sec(jj))"/>
+       <Rotation alphax="-1*(PARA_DA*PARA_mult)*PARA_sec(jj)"/>
+       <Rotation alphay="-1*(PARA_DB*PARA_mult)*PARA_sec(jj)"/>
      </Placement>
     </Do>
 
@@ -570,10 +570,11 @@
 
     <!-- DoveTail Extrusion Sector Right upper side --> 
 
-    <Create block="DESH" />
+<!--    <Create block="DESH" />
     <Placement block="DESH" x="-0.977794" y="2.89742" z="DoveTailExtrusionZOffset">
     <Rotation alphaz="357.396" />
-    </Placement>
+    </Placement> -->
+
     <Create block="PTRA" />
     <Placement block="PTRA" x="-0.844273" y="7.31126" z="0.85+DoveTailShapeOffset">
     <Rotation alphaz="-174" />
