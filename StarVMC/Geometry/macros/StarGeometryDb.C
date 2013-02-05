@@ -1138,6 +1138,7 @@ void test()
     // ================================================
     geom.pixlFlag = "PIXLof";  geom.pixlFlag = 0;
     geom.pxstFlag = "PXSTof";  geom.pxstFlag = 0;
+    geom.dtubFlag = "DTUBof";  geom.dtubFlag = 0;
     // ================================================
     setTitle("== test geometry ==");
     // ================================================
@@ -1204,6 +1205,7 @@ void y2013()
   geom.select = "y2013"; {
     // ================================================ 
     geom.caveFlag = "CAVE04";  geom.caveStat = 1;
+    geom.magpFlag = "MAGPv1"; geom.magpStat = 1;
     // ================================================ 
     geom.sconFlag = "SCONof";  geom.sconStat = 0;
     geom.ftroFlag = "FTROof";  geom.ftroStat = 0;
@@ -1212,19 +1214,20 @@ void y2013()
     geom.phmdFlag = "PHMDof"; geom.phmdStat = 0;
     // ================================================ 
     geom.tpceFlag = "TPCE04r";  geom.tpceStat = 1;    
-    geom.btofFlag = "BTOF67";  geom.btofStat = 1;
+    geom.btofFlag = "BTOFv8";  geom.btofStat = 1;
     geom.calbFlag = "CALB02";  geom.calbStat = 1; geom.calbCuts = 1;
     geom.ecalFlag = "ECALv6";  geom.ecalStat = 1; geom.ecalCuts = 1;
     geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1;
     geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1;
     geom.vpddFlag = "VPDD07";  geom.vpddStat = 1;
     geom.mutdFlag = "MUTD13";  geom.mutdStat = 1;
-    geom.pipeFlag = "PIPEv1";  geom.pipeStat = 1;
+    geom.pipeFlag = "PIPEv2";  geom.pipeStat = 1;
     // ================================================ 
     geom.idsmFlag = "IDSM02";  geom.idsmStat = 1;
     geom.fgtdFlag = "FGTD32";  geom.fgtdStat = 1;
     geom.pxstFlag = "PXST01";  geom.pxstStat = 1;
-    geom.pixlFlag = "PIXL02";  geom.pixlStat = 1; 
+    geom.pixlFlag = "PIXL05";  geom.pixlStat = 1; 
+    geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
     // ================================================ 
     //
     setTitle("Upgrade studies with 6 complete FGT disks");
@@ -1236,7 +1239,6 @@ void y2013()
 
   geom.select = "y2013x"; {
     // Inherits y2013 and
-    geom.magpFlag = "MAGPv1"; geom.magpStat = 1;
     geom.tpceFlag = "TPCE31"; geom.tpceStat = 1;
     setTitle("Asymptotic y2013");
     geom.fill();

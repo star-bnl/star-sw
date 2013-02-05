@@ -142,6 +142,7 @@ void cacheGeometry( const Char_t *tag, const Char_t *addons )
       for ( Int_t i = 0; i<array->GetEntries(); i++ )
 	{
 	  TObjString *str = (TObjString *)array->At(i);
+	  cout << "Adding module " << str->String().Data() << endl;
 	  addModule ( str->String() );
 	}
       
