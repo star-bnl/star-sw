@@ -16,7 +16,7 @@
 //#include "TGiant3.h"
 
 // ----------------------------------------------------------------------
-ClassImp(Geometry);
+//ClassImp(Geometry);
 
 // ----------------------------------------------------------------------
 /* ClassImp(Geom_t); */     Geom_t geom;
@@ -50,6 +50,7 @@ ClassImp(Geometry);
 /* ClassImp(TpcxGeom_t); */ TpcxGeom_t tpcxGeom;
 
 /* ClassImp(PxstGeom_t); */ PxstGeom_t pxstGeom;
+/* ClassImp(DtubGeom_t); */ DtubGeom_t dtubGeom;
 
 // ----------------------------------------------------------------------
 Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
@@ -141,6 +142,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   geom.success_sisd = ConstructSisd( geom.sisdFlag, geom.sisdStat ); // 
 
   geom.success_pixl = ConstructPixl( geom.pixlFlag, geom.pixlStat ); // OLD development pixel detector (must follow idsm, scon)
+  geom.success_dtub = ConstructDtub( geom.dtubFlag, geom.dtubStat );
   geom.success_istd = ConstructIstd( geom.istdFlag, geom.istdStat ); // JB : ist 
   geom.success_pxst = ConstructPxst( geom.pxstFlag, geom.pxstStat ); // JB : ist 
 
@@ -950,7 +952,6 @@ Bool_t Geometry::ConstructPixl( const Char_t *flag, Bool_t go )
      AgStructure::AgDetpAdd("Pxlv_t","location", pixlGeom.location );
   */
 
-
   if (go) if ( !CreateModule(pixlGeom.module) ) {
     Warning(GetName(),Form("Could not create module %s",pixlGeom.module.Data()));
     return false;
@@ -959,7 +960,25 @@ Bool_t Geometry::ConstructPixl( const Char_t *flag, Bool_t go )
   return true;
 
 }
+// ----------------------------------------------------------------------
+Bool_t Geometry::ConstructDtub( const Char_t *flag, Bool_t go )
+{                                                     if (!go) return false;
 
+  if ( !dtubGeom.Use("select",flag) )
+    {
+      Error(GetName(), Form("Cannot locate configuration %s",flag) );
+      return false;
+    }
+
+  AgStructure::AgDetpNew( dtubGeom.module, Form("DTUB Configuration %s",flag) );
+
+  if (go ) if ( !CreateModule(dtubGeom.module) ) {
+    Warning(GetName(),Form("Could not create module %s",dtubGeom.module.Data()));
+    return false;
+  }
+  return true;
+
+}
 // ----------------------------------------------------------------------
 Bool_t Geometry::ConstructIstd( const Char_t *flag, Bool_t go )
 {                                                  if (!go) return false;
@@ -1329,6 +1348,15 @@ Bool_t Geometry::PipeInit() // Does this break the config=-1 scheme?
     pipeGeom.fill();
   }
 
+  // Run 13 beam pipe
+  pipeGeom.select="PIPEv2"; {
+    pipeGeom.config=0;
+    pipeGeom.flag  =0;
+    pipeGeom.module="PipeGeo2";
+    pipeGeom.fill();
+  }
+
+
   return true;
 }
 // ----------------------------------------------------------------------------
@@ -1342,6 +1370,13 @@ Bool_t Geometry::PixlInit() // Probably breaks config=-1 scheme
 
   pixlGeom.module="PixlGeo4";
   pixlGeom.select="PIXL02"; pixlGeom.config=1; pixlGeom.location=2.0; pixlGeom.fill();
+
+  pixlGeom.module="PixlGeo5";
+  dtubGeom.module="DtubGeo1";  
+  pixlGeom.select="PIXL05"; pixlGeom.config=1; pixlGeom.location=2.0; pixlGeom.fill();
+  dtubGeom.select="DTUB01"; dtubGeom.config=1; dtubGeom.location=2.0; dtubGeom.fill();
+  
+  
   return true;
 }
 // ----------------------------------------------------------------------------
@@ -1742,6 +1777,21 @@ Bool_t Geometry::BtofInit()
     btofGeom.module="BtofGeo7"; 
     btofGeom.fill();
   }
+
+
+  // -------------------------------------------------------------------------
+  btofGeom.select="BTOFv8";
+  {
+    btofGeom.config = 13;        // 
+    btofGeom.itof   = 8;         // BtofGeo8
+    btofGeom.module = "BtofGeo8"; 
+    btofGeom.tofX0=0.0;
+    btofGeom.tofZ0=0.0;
+    btofGeom.fill();
+  }
+
+
+
   return true;
 }
 // ----------------------------------------------------------------------------

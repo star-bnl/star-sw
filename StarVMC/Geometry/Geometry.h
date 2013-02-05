@@ -31,6 +31,8 @@ class Geom_t : public AgStructure
   SetDetector(tpcx); // eXtended TPC
 
   SetDetector(pxst);
+  SetDetector(dtub);
+
       ecalCuts=1;
       calbCuts=1;
       
@@ -62,6 +64,7 @@ class Geom_t : public AgStructure
   AddDetector(tpcx); // eXtended TPC
 
   AddDetector(pxst);
+  AddDetector(dtub);
 
   Int_t ecalCuts;
   Int_t calbCuts;
@@ -285,11 +288,24 @@ class PixlGeom_t : public AgStructure
     }
   ~PixlGeom_t(){ };
   TString select;
-  TString module;
-  Int_t config;
+  TString module;  // Geometry module
+  Int_t   config;  // Geometry module configuration
   Float_t location;
 };
-
+// ----------------------------------------------------------------------
+class DtubGeom_t : public AgStructure 
+{ public:
+  ClassDef(DtubGeom_t,1);
+  DtubGeom_t(): AgStructure("DtubGeom_t","STAR Pixel Detector DtubGeo Geometry Table")
+    {
+      select="default"; module="DtubGeo1"; config=-1; location=1.0;      
+    }
+    ~DtubGeom_t(){ /* nada */ }
+    TString select;
+    TString module;
+    Int_t   config;
+    Float_t location;
+};
 // ----------------------------------------------------------------------
 class SconGeom_t : public AgStructure
 { public:
@@ -581,6 +597,7 @@ class Geometry : public AgModule
   Bool_t ConstructRich( const Char_t *flag, Bool_t go=false ); // RICH is deprecated
 
   Bool_t ConstructPixl( const Char_t *flag, Bool_t go=true );
+  Bool_t ConstructDtub( const Char_t *flag, Bool_t go=true );
 
   // FGT and new inner support cone
   Bool_t ConstructFgtd( const Char_t *flag, Bool_t go=true );
