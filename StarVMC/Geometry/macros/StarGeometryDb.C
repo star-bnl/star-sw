@@ -956,6 +956,13 @@ void y2012()
     geom.fill();
   };
 
+  // Y2012b is identical to y2012a.  New tag defined because starsim/geometry.g
+  // did not create the MTD in either y2012 or y2012a tags.
+  geom.select = "y2012b"; {
+    setTitle("Y2012b production geometry tag");
+    geom.fill();
+  }
+
 
 }
 
