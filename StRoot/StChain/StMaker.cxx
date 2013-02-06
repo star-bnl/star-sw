@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.254 2012/12/14 17:14:36 jwebb Exp $
+// $Id: StMaker.cxx,v 1.255 2013/02/06 21:58:39 jwebb Exp $
 //
 //
 /*!
@@ -269,8 +269,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2011a",      20101215,     1, "y2011a",   "y2011a == y2011 now "},
   {"y2011b",      20101215,     2, "y2011b",   "y2011a + wall "},
   {"y2012",       20111215,     0, "y2012",    "y2012 Very preliminary"},
-  {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry"},
-  {"y2012b",      20111215,     2, "y2012b",   "y2012 + wall"},
+  {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry (MTD missing)"},
+  {"y2012b",      20111215,     2, "y2012b",   "y2012 geometry (now with MTD)"},
   {"y2013",       20121215,     0, "y2013",    "y2013 first cut geometry"},
 
   // development tags
@@ -1961,6 +1961,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.255  2013/02/06 21:58:39  jwebb
+// Addition of y2012b geometry tag to properly include the MTD.
+//
 // Revision 1.254  2012/12/14 17:14:36  jwebb
 // Added y2013 geometry tag with date/time 20121215/0.
 //
