@@ -23,6 +23,7 @@
 #include "StRoot/StFgtUtil/StFgtConsts.h"
 
 #include <string.h>
+#include <time.h>
 
 StFgtRawDaqReader::StFgtRawDaqReader( const Char_t* name, const Char_t *daqFileName, const Char_t* dbMkrName ) :
   StMaker( name ), mCutShortEvents(0), mIsCosmic(0), mFgtCollectionPtr(0), mDaqFileName( daqFileName ), mDbMkrName( dbMkrName ), mRdr(0), mFgtDbMkr(0), mDataType(0){
@@ -80,6 +81,20 @@ Int_t StFgtRawDaqReader::Init(){
       ierr = kStFatal;
    };
 
+   if( !ierr ){
+      //LOG_INFO << "constructing daqReader" << endm;
+
+      // unfortunately, the daqReader has some constness issues to be
+      // fixed.  Until they are, must remove constness of the filename.
+      mRdr = new daqReader( const_cast< Char_t* >( mDaqFileName.data() ) ); 	
+   };
+   mRdr->get(0,EVP_TYPE_ANY);
+   int unixtime=mRdr->evt_time;
+   struct tm* local = localtime((const time_t*)&unixtime);
+   int date=(local->tm_year+1900)*10000 + (local->tm_mon+1)*100 + local->tm_mday;
+   int time=local->tm_hour*10000 + local->tm_min*100 + local->tm_sec;
+   printf("Event Unix Time = %d %08d %06d\n",mRdr->evt_time,date,time);
+   
    if( !ierr && !mIsCosmic ){
       if( !mDbMkrName.empty() ){
          // get the maker pointer
@@ -105,16 +120,9 @@ Int_t StFgtRawDaqReader::Init(){
          };
       };
 
+      if(date<21000000 && date>19990000) mFgtDbMkr->SetDateTime(date,time);
       LOG_INFO << "Using date and time " << mFgtDbMkr->GetDateTime().GetDate() << ", "
                << mFgtDbMkr->GetDateTime().GetTime() << endm;
-   };
-
-   if( !ierr ){
-      //LOG_INFO << "constructing daqReader" << endm;
-
-      // unfortunately, the daqReader has some constness issues to be
-      // fixed.  Until they are, must remove constness of the filename.
-      mRdr = new daqReader( const_cast< Char_t* >( mDaqFileName.data() ) ); 	
    };
 
    //LOG_INFO << "done with init" << endm;
@@ -125,6 +133,7 @@ Int_t StFgtRawDaqReader::Init(){
 //read next event from daq file and fill the fgtevent
 Int_t StFgtRawDaqReader::Make() {
    Int_t ierr = kStOk;
+
 
    StFgtDb *fgtTables = 0;
    if( !mIsCosmic ){
@@ -313,8 +322,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.13 2013/01/31 20:44:55 akio Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.14 2013/02/06 18:10:54 akio Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.14  2013/02/06 18:10:54  akio
+ * getting date & time from data
+ *
  * Revision 1.13  2013/01/31 20:44:55  akio
  * Adding StFgtCollection::setNumTimeBins()
  *
