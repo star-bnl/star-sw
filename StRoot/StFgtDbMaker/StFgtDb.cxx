@@ -312,7 +312,7 @@ void StFgtDb::getStarXYZ(Short_t disc, Short_t quad, Double_t r, Double_t phi, T
   //printf("org    x=%8.3f y=%8.3f z=%8.3f\n",org.X(),org.Y(),org.Z());
   //printf("local  x=%8.3f y=%8.3f z=%8.3f\n",local.X(),local.Y(),local.Z());
   TRotation rot;
-  rot.SetXEulerAngles(par->phi[i], par->theta[i], par->psi[i]);     //set up Euler angles
+  rot.SetXEulerAngles(alg->phi[i], alg->theta[i], alg->psi[i]);     //set up Euler angles
   TVector3 rotated = local.Transform(rot);                          //rotate
   //printf("rot    x=%8.3f y=%8.3f z=%8.3f\n",rotated.X(),rotated.Y(),rotated.Z());
   TVector3 global=rotated+center;                                   //move back to STAR coordinate
