@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.255 2013/02/05 21:26:31 jwebb Exp $
+* $Id: geometry.g,v 1.256 2013/02/06 21:58:09 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.256  2013/02/06 21:58:09  jwebb
+* Corrections to y2013 geometry tag.  Addition of y2012b geometry tag to
+* properly include the MTD.
+*
 * Revision 1.255  2013/02/05 21:26:31  jwebb
 * Corrected double placement of volume in PixlGeo5
 *
@@ -1954,7 +1958,7 @@ REPLACE [exe y2012;] with ["y2012 FGT upgrade studies";
     exe SVTTof;      "No SVT";
     exe PHMDof;      "Photon mult detector on";
     exe SISDof;      "No sisd";
-    exe MUTD12;      "Muon telescope detector";
+   "exe MUTD12; executable code was not present when tag defined... no effect"
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
 
@@ -1976,11 +1980,16 @@ REPLACE [exe y2012a;] with ["y2012a production geometry tag";
     exe SVTTof;      "No SVT";
     exe PHMDof;      "Photon mult detector on";
     exe SISDof;      "No sisd";
-    exe MUTD12;      "Muon telescope detector";
+   "exe MUTD12; executable code not present when tag defined ... no effect"
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
     exe IDSM01;      "Inner detector support";
     exe FGTDv31;     "FGT v3 5 half + 1 full disks";
+]
+
+REPLACE [exe y2012b;] with ["y2012b production geometry tag";
+    exe y2012a; "Y2012a baseline";
+    exe MUTD12; "Adds in code to activate MTD";
 ]
 
 c ===============================================================================
@@ -2894,6 +2903,10 @@ If LL>0
   Case y2012a { y2012a : Y2012a production geometry tag;
                  Geom = 'y2012a  ';
                  exe y2012a; }
+
+  Case y2012b { y2012b : Y2012b production geometry tag;
+                 Geom = 'y2012b  ';
+                 exe y2012b; }
 
   Case dev13 { dev13 : y2013 studies;
                  Geom = 'dev13   ';
@@ -4550,7 +4563,11 @@ c     write(*,*) 'CALB';
 
    }
    if (ZCAL)   { write(*,*) 'ZCAL';Call zcalgeo;}
-   if (MAGP)   { write(*,*) 'MAGP';Call magpgeo;}
+   if (MAGP)   {
+        call AgDetp NEW ('MAGP')
+        call AgDetp ADD ('magg.version=', magpConfig, 1 );
+        call MagpGeo
+   }
 
    IF IDSM { "Inner detector support module" 
       write(*,*) 'IDSM is built'
@@ -4613,11 +4630,12 @@ c      write(*,*) 'SVT'
      if (MutdConfig==1) Call mutdgeo;
      if (MutdConfig==2) Call mutdgeo2;
      if (MutdConfig==3) Call mutdgeo3;
-     if (MutdConfig==4 | MutdConfig==5) 
+     if (MutdConfig==4 | MutdConfig==5 | MutdConfig==12 | MutdConfig==13 )
      { 
          Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);   
          Call mutdgeo4;
      } 
+
    }
    if (PIXL){
 c    write(*,*) 'CALB'
