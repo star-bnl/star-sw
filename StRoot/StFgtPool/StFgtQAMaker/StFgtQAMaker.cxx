@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtQAMaker.cxx,v 1.1 2013/02/06 17:43:18 akio Exp $
+ * $Id: StFgtQAMaker.cxx,v 1.2 2013/02/06 21:17:18 akio Exp $
  *
  */
 
@@ -64,14 +64,14 @@ void StFgtQAMaker::bookHist(){
   char c[50];
   int ns=kFgtNumStrips;
   const char* cquad[kFgtNumQuads]={"A","B","C","D"};  
-  const char* cHist[NHist]={"MaxTimeBin","ADC"};
-  const int   nHist[NHist]={          15, 200}; 
-  const float lHist[NHist]={           0,   0};
-  const float hHist[NHist]={          15,4000};
+  const char* cHist[NHist]={"MaxTimeBin","ADC","DataSize"};
+  const int   nHist[NHist]={          15,  200,       256}; 
+  const float lHist[NHist]={           0,    0,         0};
+  const float hHist[NHist]={          15, 4000,     30975};
   const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","ChargeAsy"};
-  const int   n1dHist[N1dHist]={         40,       ns,       ns,         15,           15,            100,        50};
+  const int   n1dHist[N1dHist]={        100,       ns,       ns,         25,           15,            100,        50};
   const float l1dHist[N1dHist]={          0,        0,        0,          0,            0,              0,       -0.5};
-  const float h1dHist[N1dHist]={         40,float(ns),float(ns),       15.0,           15,          30000,        0.5};
+  const float h1dHist[N1dHist]={         50,float(ns),float(ns),       25.0,           15,          30000,        0.5};
   const char* c2dHist[N1dHist]={       "XY"};
   const int   n2dHist[N1dHist]={         50};
   const float l2dHist[N1dHist]={        -40};
@@ -137,18 +137,14 @@ void StFgtQAMaker::fillHist(){
     return;
   };
   
-  StFgtStripCollection *cstrip[6];
-  StFgtHitCollection   *chit[6];
-  for (int disc=0; disc<6; disc++){
-    chit[disc]   = fgtCollectionPtr->getHitCollection(disc);
-  }
-
+  int datasize=0;
   for (int disc=0; disc<kFgtNumDiscs; disc++){    
     //Strips
     int nhit[kFgtNumQuads]; memset(nhit,0,sizeof(nhit));
     StFgtStripCollection *cstrip = fgtCollectionPtr->getStripCollection(disc);
     StSPtrVecFgtStrip &strip=cstrip->getStripVec();
     for(StSPtrVecFgtStripIterator it=strip.begin(); it!=strip.end(); it++) {
+      datasize++;
       int geoid   =(*it)->getGeoId();
       int maxadc  =(*it)->getMaxAdc();
       float pederr=(*it)->getPedErr();
@@ -163,9 +159,12 @@ void StFgtQAMaker::fillHist(){
 	hist1[disc][iquad][1+ipr]->Fill(float(istr));
       }	
     }
-    for (int quad=0; disc<kFgtNumQuads; quad++) hist1[disc][quad][0]->Fill(float(nhit[quad]));
-    
-    //Clusters
+    for (int quad=0; quad<kFgtNumQuads; quad++) hist1[disc][quad][0]->Fill(float(nhit[quad]));
+  }
+  hist0[2]->Fill(float(datasize));
+
+  //Clusters
+  for (int disc=0; disc<kFgtNumDiscs; disc++){    
     int ncluster[kFgtNumQuads]; memset(ncluster,0,sizeof(ncluster));
     StFgtHitCollection *chit = fgtCollectionPtr->getHitCollection(disc);
     StSPtrVecFgtHit    &hit=chit->getHitVec();
@@ -179,7 +178,7 @@ void StFgtQAMaker::fillHist(){
       hist1[disc][iquad][4]->Fill(float((*it)->getNstrip()));
       hist1[disc][iquad][5]->Fill((*it)->charge());
     }
-    for (int quad=0; disc<kFgtNumQuads; quad++) hist1[disc][quad][3]->Fill(float(ncluster[quad]));
+    for (int quad=0; quad<kFgtNumQuads; quad++) hist1[disc][quad][3]->Fill(float(ncluster[quad]));
   }
   //Points
   StFgtPointCollection *cpoint = fgtCollectionPtr->getPointCollection();
