@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.9 2013/01/17 15:09:19 fisyak Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.10 2013/02/06 22:04:24 fisyak Exp $
  *
  */
 
@@ -222,8 +222,10 @@ Int_t StPrepEmbedMaker::InitRun(const int runnum)
 #if 0 /* Please don't do this. starsim make in root4star has distroied table on virtual functions. */
   // Common geant settings
   Do("make gstar"); // Make user-defined particles available
-#endif   
+#else
   gSystem->Load("libgstar");
+  Do("call gstar");
+#endif   
   Do("detp  hadr_on");
   TString cmd("rndm ");
   cmd+=mSettings->rnd1; cmd+=" "; cmd+=mSettings->rnd2;
@@ -828,6 +830,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.10  2013/02/06 22:04:24  fisyak
+ * add missing call to gstar
+ *
  * Revision 1.9  2013/01/17 15:09:19  fisyak
  * Remove starsim make, which destroys virtual function tables, bug #2487
  *
