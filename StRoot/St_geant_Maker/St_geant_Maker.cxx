@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.145 2013/01/17 15:10:55 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.146 2013/02/06 22:04:45 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.146  2013/02/06 22:04:45  fisyak
+// Add attribute hadr_off
+//
 // Revision 1.145  2013/01/17 15:10:55  fisyak
 // Add handle for setting runG, be more careful with setting mag.field
 //
@@ -468,6 +471,7 @@
 #include "TInterpreter.h"
 #include "TClassTable.h"    
 #include "TVolume.h"
+#include "TFile.h"
 #include "TFileSet.h"
 #include "TMath.h"
 #include "TBRIK.h"
@@ -872,6 +876,25 @@ Int_t St_geant_Maker::InitRun(Int_t run){
       //  Do("LOSS 1"); // with delta electron above dcute
       Do("DRAY 0");
       Do("MULS 0");
+      Do("STRA 0");
+      //  CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
+      Do("CUTS     1e-3   1e-3   1e-3   1e-3   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3 50.e-6");
+      Do("physi");
+    } else if (IAttr("hadr_off")) 	{
+      LOG_INFO << "St_geant_Maker::Init switch off hadron interactions" << endm;
+      Do("DCAY 1");
+      Do("ANNI 0");
+      Do("BREM 0");
+      Do("COMP 0");
+      Do("HADR 0");
+      Do("MUNU 0");
+      Do("PAIR 0");
+      Do("PFIS 0");
+      Do("PHOT 0");
+      Do("RAYL 0");
+      Do("LOSS 1"); 
+      Do("DRAY 0");
+      Do("MULS 1");
       Do("STRA 0");
       //  CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
       Do("CUTS     1e-3   1e-3   1e-3   1e-3   1e-3  1e-3  1e-3  1e-3  1e-3   1e-3 50.e-6");
