@@ -1,6 +1,12 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.20 2011/04/01 05:05:49 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.22 2012/03/05 10:32:19 cpowell Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.22  2012/03/05 10:32:19  cpowell
+ * Functions added to cut on refMult
+ *
+ * Revision 1.21  2011/08/31 18:04:48  cpowell
+ * Extended the range of hGeantId
+ *
  * Revision 1.20  2011/04/01 05:05:49  hmasui
  * Track selections by StEmbeddingQAUtilities. Added 1/pt(RC)-1/pt(MC) vs pt, and pt dependent Ncommon vs NhitFit histograms
  *
@@ -123,6 +129,8 @@ void StEmbeddingQA::clear()
   LOG_DEBUG << "StEmbeddingQA::clear()" << endm;
 
   /// Delete histograms if they have been defined before
+  if ( mhRef ) delete mhRef ;
+  if ( mhRefAccepted ) delete mhRefAccepted ;
   if ( mhVz ) delete mhVz ;
   if ( mhVzAccepted ) delete mhVzAccepted ;
   if ( mhVyVx ) delete mhVyVx ;
@@ -179,6 +187,8 @@ void StEmbeddingQA::init()
   mOutput = 0;
   mVz = -9999. ;
 
+  mhRef = 0 ;
+  mhRefAccepted = 0 ;
   mhVz = 0 ;
   mhVzAccepted = 0 ;
   mhVyVx = 0 ;
@@ -200,6 +210,18 @@ void StEmbeddingQA::init()
 }
 
 //__________________________________________________________________________________________
+void StEmbeddingQA::setRefMultMinCut(const Int_t refMultMin)
+{
+  StEmbeddingQAUtilities::instance()->setRefMultMinCut(refMultMin) ;
+}
+
+//__________________________________________________________________________________________
+void StEmbeddingQA::setRefMultMaxCut(const Int_t refMultMax)
+{
+  StEmbeddingQAUtilities::instance()->setRefMultMaxCut(refMultMax) ;
+}
+
+//__________________________________________________________________________________________
 void StEmbeddingQA::setZVertexCut(const Float_t vz)
 {
   StEmbeddingQAUtilities::instance()->setZVertexCut(vz) ;
@@ -218,6 +240,13 @@ void StEmbeddingQA::setRapidityCut(const Float_t ycut)
 {
   /// Set rapidity cut
   StEmbeddingQAUtilities::instance()->setRapidityCut(ycut) ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQA::isRefMultOk(const StMiniMcEvent& mcevent) const
+{
+  /// Apply refMult cut for embedding track nodes
+  return StEmbeddingQAUtilities::instance()->isRefMultOk(mcevent.nUncorrectedPrimaries()) ;
 }
 
 //__________________________________________________________________________________________
@@ -274,11 +303,17 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
 
   // Event-wise informations
+  mhRef         = new TH1D("hRef", "refMult", 1000, 0, 1000);
+  mhRefAccepted = new TH1D("hRefAccepted", "refMult", 1000, 0, 1000);
   mhVz         = new TH1D("hVz", "z-vertex", 400, -200, 200);
   mhVzAccepted = new TH1D("hVzAccepted", "z-vertex with z-vertex cut", 400, -200, 200);
+  mhRef->SetXTitle("refMult");
+  mhRefAccepted->SetXTitle("refMult");
   mhVz->SetXTitle("v_{z} (cm)");
   mhVzAccepted->SetXTitle("v_{z} (cm)");
 
+  utility->setStyle(mhRef);
+  utility->setStyle(mhRefAccepted);
   utility->setStyle(mhVz);
   utility->setStyle(mhVzAccepted);
 
@@ -333,7 +368,7 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
     utility->setStyle(mhNParticles[ic]);
 
     // Initialize geantid histogram. Increase the bin and maximum in order to cover id > 10k
-    mhGeantId[ic] = new TH1D(Form("hGeantId_%d", ic), Form("Geantid, %s", utility->getCategoryTitle(ic).Data()), 60000, 0, 60000) ;
+    mhGeantId[ic] = new TH1D(Form("hGeantId_%d", ic), Form("Geantid, %s", utility->getCategoryTitle(ic).Data()), 100000, 0, 100000) ;
     mhGeantId[ic]->SetXTitle("Geantid");
 
     utility->setStyle(mhGeantId[ic]);
@@ -425,6 +460,9 @@ Bool_t StEmbeddingQA::fillEmbedding(const TString inputFileName)
     const Float_t vxmc = mMiniMcEvent->mcVertexX() ;
     const Float_t vymc = mMiniMcEvent->mcVertexY() ;
     const Float_t vzmc = mMiniMcEvent->mcVertexZ() ;
+    const Int_t nprimaries = mMiniMcEvent->nUncorrectedPrimaries(); 
+
+    mhRef->Fill(nprimaries);
     mhVz->Fill(vz);
 
     mVz = vz ;
@@ -432,7 +470,11 @@ Bool_t StEmbeddingQA::fillEmbedding(const TString inputFileName)
     /// z-vertex cut
     if( !isZVertexOk(*mMiniMcEvent) ) continue ;
 
+    /// refMult cut
+    if( !isRefMultOk(*mMiniMcEvent) ) continue ;
+
     /// Event vertecies
+    mhRefAccepted->Fill(nprimaries);
     mhVzAccepted->Fill(vz);
     mhVyVx->Fill(vx, vy);
     mhVxVz->Fill(vz, vx);
@@ -493,8 +535,11 @@ Bool_t StEmbeddingQA::fillRealData(const TString inputFileName)
     const Double_t vx = muEvent->primaryVertexPosition().x() ;
     const Double_t vy = muEvent->primaryVertexPosition().y() ;
     const Double_t vz = muEvent->primaryVertexPosition().z() ;
+    const Int_t refMult = muEvent->refMult() ;
+    mhRef->Fill(refMult);
 //    const Bool_t isVertexBad = TMath::Abs(vz) >= mVertexCut
     const Bool_t isVertexBad = !StEmbeddingQAUtilities::instance()->isZVertexOk(vz)
+      || !StEmbeddingQAUtilities::instance()->isRefMultOk(refMult)
       || ( TMath::Abs(vx) < 1.0e-5 && TMath::Abs(vy) < 1.0e-5 && TMath::Abs(vz) < 1.0e-5 )
       || ( TMath::Abs(vx) > 1000 || TMath::Abs(vy) > 1000 || TMath::Abs(vz) > 1000 )
       ;
@@ -503,6 +548,7 @@ Bool_t StEmbeddingQA::fillRealData(const TString inputFileName)
     /// Trigger id cut
     if( !isTriggerOk(muEvent) ) continue ;
 
+    mhRefAccepted->Fill(refMult);
     mhVz->Fill(vz);
     mhVyVx->Fill(vx, vy);
 
