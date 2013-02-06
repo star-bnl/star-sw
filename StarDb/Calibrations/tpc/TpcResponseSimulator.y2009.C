@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2009.C,v 1.11 2012/04/03 14:06:55 fisyak Exp $
+// $Id: TpcResponseSimulator.y2009.C,v 1.12 2013/02/06 14:34:17 fisyak Exp $
 // $Log: TpcResponseSimulator.y2009.C,v $
+// Revision 1.12  2013/02/06 14:34:17  fisyak
+// Set T0offset from Run 9 pp 200 GeV embedding
+//
 // Revision 1.11  2012/04/03 14:06:55  fisyak
 // Speed up using  GetSaveL (__PAD_BLOCK__), sluggish shape histograms, Heed electron generation
 //
@@ -100,7 +103,7 @@ TDataSet *CreateTable() {
   // TpcT->Draw("fMcHit.mPosition.mX3-fRcHit.mPosition.mX3:fMcHit.mPosition.mX3>>Z(210,-210,210,100,-2,3)","fNoMcHit==1&&fNoRcHit==1&&fRcHit.mQuality>90","colz")
   // The corection has to be added                                                                    M             P
   //row.T0offset   = 0.50 + 1.65431e-01 -  3.45247e-01 -1.54583e+00 -2.90686e-03+ 1.54353e+00 + 0.0191135  -1.20938e-03 ; //E
-  row.T0offset   = 0.50-5.73196e-01; // 01/18/12 Xianglei Zhu from Run 11 AuAu 27 & 19.6 GeV embedding 
+  row.T0offset   = 0.25; // 02/06/13 Xianglei Zhu from Run 9 pp 200 GeV embedding 
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
