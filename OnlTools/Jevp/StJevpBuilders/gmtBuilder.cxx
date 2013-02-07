@@ -91,7 +91,7 @@ void gmtBuilder::initialize(int argc, char *argv[]) {
       
       sprintf(tmp,"pedestalsAPV%d",i);  //0-7 ARM =0 and 8-15 ARM =2
       sprintf(tmp1,"pulse height for all channels in ARM:%d, APV%d",iarm,i);
-      hPedContents.hPedArray[i]=new TH2F(tmp,tmp1,128*numTimebins,0,128,4096,0,4096);
+      hPedContents.hPedArray[i]=new TH2F(tmp,tmp1,200,0,128,200,0,4096);
       hPedContents.hPedArray[i]->GetXaxis()->SetTitle("X = Channel+timebin/numTimebins");
       hPedContents.hPedArray[i]->GetYaxis()->SetTitle("ADC value");
       hPedContents.hPedArray[i]->GetXaxis()->SetNdivisions(8,false);
