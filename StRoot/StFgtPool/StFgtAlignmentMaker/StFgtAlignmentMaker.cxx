@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtAlignmentMaker.cxx,v 1.1 2013/02/05 21:08:01 akio Exp $
+ * $Id: StFgtAlignmentMaker.cxx,v 1.2 2013/02/07 00:39:33 akio Exp $
  *
  */
 
@@ -357,7 +357,7 @@ ClassImp(StFgtAlignmentMaker);
 StFgtAlignmentMaker::StFgtAlignmentMaker(const Char_t *name) : StMaker(name),mEventCounter(0),mDataSource(0),mTrackType(0),
 							       mOutTreeFile(0),mInTreeFile(0),
 							       mFgtXerr(0.05), mFgtYerr(0.05), mFgtZerr(0.2),
-							       mDcaCut(5.0),mChi2Cut(0.02){
+							       mDcaCut(5.0),mChi2Cut(0.02),mRunNumber(0) {
 }
 
 Int_t StFgtAlignmentMaker::Init(){
@@ -431,18 +431,18 @@ Int_t StFgtAlignmentMaker::Finish() {
 
       //doAlignment(&result,0x3f,quadmask,0x38,0xc0,mTrackType,3,0,&result); //writePar(&result);
       //doAlignment(&result,0x3f,quadmask,0x20,0xff,mTrackType,3,0,&result); //writePar(&result);
-      doAlignment(&result,0x3e,quadmask,0x39,0x7f,mTrackType,3,0,&result);   //writePar(&result);
+      //doAlignment(&result,0x3e,quadmask,0x39,0x7f,mTrackType,3,0,&result);   //writePar(&result);
       //doAlignment(&result,0x3f,quadmask,0x39,0x3f,mTrackType,3,0,&result); //writePar(&result);
 
     }
   }
   writePar(&result);  
 
-  cout << "Creating Hist after alignment with trackType="<<mTrackType<<endl;
-  mFillHist=2;
-  resetHist();
-  for(int quad=0; quad<kFgtNumQuads; quad++){ mQuad=quad; doAlignment(&result,0,0,0,0x3f,mTrackType,3,0,&result);}
-  saveHist();
+  //cout << "Creating Hist after alignment with trackType="<<mTrackType<<endl;
+  //mFillHist=2;
+  //resetHist();
+  //for(int quad=0; quad<kFgtNumQuads; quad++){ mQuad=quad; doAlignment(&result,0,0,0,0x3f,mTrackType,3,0,&result);}
+  //saveHist();
 
   return kStOK;
 }
@@ -738,7 +738,10 @@ void StFgtAlignmentMaker::getPar(TMinuit* m, fgtAlignment_st* algpar){
 }
 
 void StFgtAlignmentMaker::writePar(fgtAlignment_st* algpar){
-  FILE *f=fopen("fgt_alignment.dat","w");
+  char fname[50]="fgt_alignment.dat";
+  if(mRunNumber>0) sprintf(fname,"fgt_alignment_%d.dat",mRunNumber);
+  printf("Writing %s\n",fname);
+  FILE *f=fopen(fname,"w");
   for(int disc=0; disc<6; disc++){
     for(int quad=0; quad<4; quad++){
       int i=disc*4+quad;
@@ -818,7 +821,12 @@ void StFgtAlignmentMaker::resetHist(){
 }
 
 void StFgtAlignmentMaker::saveHist(){
-  char *fname[3]={"alignment.root","alignment_before.root","alignment_after.root"};
+  char fname[3][50]={"alignment.root","alignment_before.root","alignment_after.root"};
+  if(mRunNumber>0) {
+    sprintf(fname[0],"alignment_%d.root",mRunNumber);
+    sprintf(fname[1],"alignment_before_%d.root",mRunNumber);
+    sprintf(fname[2],"alignment_after_%d.root",mRunNumber);
+  }
   cout << "Writing " << fname[mFillHist] << endl;
   TFile *hfile = new TFile(fname[mFillHist],"update");  
   for(int disc=0; disc<kFgtNumDiscs; disc++){
