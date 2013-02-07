@@ -4,11 +4,14 @@
  * \author Akio
  * \date   Dec2012
  *
- * $Id: StFgtAlignmentMaker.h,v 1.1 2013/02/05 21:08:01 akio Exp $
+ * $Id: StFgtAlignmentMaker.h,v 1.2 2013/02/07 00:39:33 akio Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StFgtAlignmentMaker.h,v $
+ * Revision 1.2  2013/02/07 00:39:33  akio
+ * Adding run# for naming output files
+ *
  * Revision 1.1  2013/02/05 21:08:01  akio
  * *** empty log message ***
  *
@@ -44,9 +47,10 @@ public:
   inline void setFgtErr(Float_t x, Float_t y, Float_t z) {mFgtXerr=x; mFgtZerr=y; mFgtZerr=z;} // [0.05,0.05,0.2]
   inline void setDcaCut(Float_t v) {mDcaCut=v;}
   inline void setChi2Cut(Float_t v) {mChi2Cut=v;}
+  inline void setRunNumber(Int_t v) {mRunNumber=v;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtAlignmentMaker.h,v 1.1 2013/02/05 21:08:01 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtAlignmentMaker.h,v 1.2 2013/02/07 00:39:33 akio Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   };
   
@@ -85,6 +89,7 @@ private:
   Int_t   mTrackType;    //!  0= straight line 1=helix
   Float_t mDcaCut;       //!  Dca Cut
   Float_t mChi2Cut;      //!  Track chi2 cut
+  Int_t   mRunNumber;    //!  Run# for output file name
 
   ClassDef(StFgtAlignmentMaker,0)
 };
