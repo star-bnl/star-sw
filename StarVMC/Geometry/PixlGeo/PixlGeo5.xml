@@ -245,7 +245,7 @@
    
      <If expr="debug==1"  >
        <Info format="angle(deg)={6.3f}"> angle </Info>
-       <Info format="sector={2d}"> jj </Info>
+       <Info format="sector={2i}"> jj </Info>
        <Info format="xpos={6.2f}"> xpos*1000000 </Info>
        <Info format="ypos={6.2f}"> ypos*1000000 </Info>
        <Info format="zpos={6.2f}"> zpos </Info>
