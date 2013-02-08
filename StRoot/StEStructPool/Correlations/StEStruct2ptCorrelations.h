@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.18 2012/11/16 21:22:27 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.19 2013/02/08 19:32:43 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -82,12 +82,33 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   TH2D*  mHMixCdC;
   // my local hist for cutbin usage
   TH2D*  mHcb;
+  TH1D **mHMeanPtTot;
   TH1D **mHMeanPtP;
   TH1D **mHMeanPtM;
+  TH1D **mHMeanYtTot;
   TH1D **mHMeanYtP;
   TH1D **mHMeanYtM;
+  TH1D **mHEtaTot;
   TH1D **mHEtaP;
   TH1D **mHEtaM;
+  TH2D *mHPtTot[4];
+  TH2D *mHPtP[4];
+  TH2D *mHPtM[4];
+  TH2D *mHYtTot[4];
+  TH2D *mHYtP[4];
+  TH2D *mHYtM[4];
+  TH2D *mHPhiAssocTot;
+  TH2D *mHPhiAssocP;
+  TH2D *mHPhiAssocM;
+  TH2D *mHPhiAssocPtTot;
+  TH2D *mHPhiAssocPtP;
+  TH2D *mHPhiAssocPtM;
+  TH1D *mHPtTrigTot;
+  TH1D *mHPtTrigP;
+  TH1D *mHPtTrigM;
+  TH1D *mHYtTrigTot;
+  TH1D *mHYtTrigP;
+  TH1D *mHYtTrigM;
 
   // HBT parameters
   qBins * mQinv[8]; //!  1D
@@ -410,6 +431,12 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.19  2013/02/08 19:32:43  prindle
+ * Added "Triggered" histograms in StEStruct2ptCorrelations.
+ * Protected against using tracks cuts in StEStruct2ptCorrelations when reading EStruct format events.
+ * Added comment in EventMaker/StEStructTrack.cxx pointing out need to set BField correctly
+ * when reading EStruct format events. (This should be read from file somehow, but...)
+ *
  * Revision 1.18  2012/11/16 21:22:27  prindle
  * 2ptCorrelations: SS, AS histograms.  Get eta limits from cuts. Fit PtAll histogram. Add histograms to keep track of eta, phi limits. A few more histograms
  * Binning: Add quality cut.

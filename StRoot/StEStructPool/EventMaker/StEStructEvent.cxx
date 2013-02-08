@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.14 2012/11/16 21:24:37 prindle Exp $
+ * $Id: StEStructEvent.cxx,v 1.15 2013/02/08 19:32:52 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -104,6 +104,13 @@ void StEStructEvent::FillChargeCollections(){
 
   int num=Ntrack();
   if(num<=0) return;
+
+  int id = mRunID;
+  int time = mEventTime;
+  double vx = mVx;
+  double vy = mVy;
+  double vz = mVz;
+  double b = mBField;
 
   for(int i=0;i<num;i++){
     StEStructTrack* aTrack=(StEStructTrack*)Tracks()->UncheckedAt(i);
@@ -257,6 +264,12 @@ void StEStructEvent::SetPhiWgt(const char* weightFile) {
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.15  2013/02/08 19:32:52  prindle
+ * Added "Triggered" histograms in StEStruct2ptCorrelations.
+ * Protected against using tracks cuts in StEStruct2ptCorrelations when reading EStruct format events.
+ * Added comment in EventMaker/StEStructTrack.cxx pointing out need to set BField correctly
+ * when reading EStruct format events. (This should be read from file somehow, but...)
+ *
  * Revision 1.14  2012/11/16 21:24:37  prindle
  * Changes to support reading/writing of EStructEvent. Fill helix as transient and
  * get BField from file (?).
