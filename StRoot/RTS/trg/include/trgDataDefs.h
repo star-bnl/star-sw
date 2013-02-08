@@ -18,8 +18,7 @@
 *     Note:  PrePost data will only be available on local trigger disks and
 *     will not be present in event files.
 ******************************************************************************/
-#include "daqFormats.h"
-#define FORMAT_VERSION        0x11110141      /* Format yymmddvv */
+#define FORMAT_VERSION        0x12112942      /* Format: yymmddvv */
 #define MAX_TRG_BLK_SIZE          122896      /* Current total: 113.25k bytes for pre/post non-zero suppressed data.  Allow 120k */
 #define MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
 
@@ -61,7 +60,6 @@ typedef struct {
   unsigned short     VTX[8];                  /* Separate VPD, ZDC and BBC DSMs have been replaced with this one */
   unsigned short     EMC[8];                  /* Contents of 1 EMC IB - results of separate BEMC and EEMC DSMs */
   unsigned short     TPCMask[8];              /* TPC mask for DAQ10K */
-  
   unsigned short     BCdata[16];              /* Contents of 2 Bunch Crossing DSMs IB's */       
   unsigned short     specialTriggers[8];      /* Contents of 1 Special Trigger DSM - all the special trigger requests */
   unsigned short     FPD[8];                  /* Contents of 1 FMS and FPD IB */
@@ -101,6 +99,7 @@ typedef struct {
   unsigned char  MTD_P2PLayer1[16];           /* Data from MTD and PP2PP */
   unsigned short TOFLayer1[8];                /* This is TOF Layer 1 */
   unsigned short TOF[48];                     /* TOF data */
+  unsigned short TPCpreMask[24];              /* EMC, MTD, & TOF TPC Grid Masks */
 } MIXBlock;
 
 typedef struct  {
@@ -152,7 +151,6 @@ typedef struct {
   int PrePostList[10];                        /* Offsets to offset/length pairs to Pre and Post crossing */
   int raw_data[MAX_TRG_BLK_SIZE/4];           /* Storage for raw data */
 } TriggerDataBlk;
-  
 
 
 
@@ -194,8 +192,8 @@ typedef struct {
 // aligned so that elements of an array remain 8 byte aligned.
 typedef struct {
   L1_Data_Block2011 l1;
-  UINT32 currentBusy;
-  //unsigned int pad;
+  UINT32 currentBusy;    // keep padded though!
+  // UINT32 pad;
 } L1_Data_Storage2011;
 
 #endif
