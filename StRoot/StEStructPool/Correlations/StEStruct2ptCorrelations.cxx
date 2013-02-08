@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.30 2012/11/16 21:22:27 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.31 2013/02/08 19:32:43 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -218,7 +218,9 @@ void StEStruct2ptCorrelations::init() {
   }
   
   StEStructCutBin* cb = StEStructCutBin::Instance();
-  cb->setMaxDEta(mReader->mTCuts->maxVal("Eta")-mReader->mTCuts->minVal("Eta"));
+  if (mReader->mTCuts) {
+      cb->setMaxDEta(mReader->mTCuts->maxVal("Eta")-mReader->mTCuts->minVal("Eta"));
+  }
   int ncutbins = cb->getNumBins();
   int nQAbins  = cb->getNumQABins();
 
@@ -256,33 +258,104 @@ void StEStruct2ptCorrelations::init() {
         nzb = kNumBuffers;
     }
 
+    mHMeanPtTot = new TH1D*[numParentBins*nzb];
     mHMeanPtP = new TH1D*[numParentBins*nzb];
     mHMeanPtM = new TH1D*[numParentBins*nzb];
+    mHMeanYtTot = new TH1D*[numParentBins*nzb];
     mHMeanYtP = new TH1D*[numParentBins*nzb];
     mHMeanYtM = new TH1D*[numParentBins*nzb];
+    mHEtaTot    = new TH1D*[numParentBins*nzb];
     mHEtaP    = new TH1D*[numParentBins*nzb];
     mHEtaM    = new TH1D*[numParentBins*nzb];
     TString hname;
     StEStructBinning* b = StEStructBinning::Instance();
-    b->setEtaRange(mReader->mTCuts->minVal("Eta"),mReader->mTCuts->maxVal("Eta"));
+    if (mReader->mTCuts) {
+        b->setEtaRange(mReader->mTCuts->minVal("Eta"),mReader->mTCuts->maxVal("Eta"));
+    }
     for(int p=0;p<numParentBins;p++){
         for (int z=0;z<nzb;z++) {
             int pz = p*nzb + z;
+            hname = "meanPtTot_parentBin"; hname += p; hname += "_zBuf_"; hname += z;
+            mHMeanPtTot[pz] = new TH1D(hname.Data(),hname.Data(),200,b->ptMin(),b->ptMax());
             hname = "meanPtP_parentBin"; hname += p; hname += "_zBuf_"; hname += z;
             mHMeanPtP[pz] = new TH1D(hname.Data(),hname.Data(),200,b->ptMin(),b->ptMax());
             hname = "meanPtM_parentBin"; hname += p; hname += "_zBuf_"; hname += z;
             mHMeanPtM[pz] = new TH1D(hname.Data(),hname.Data(),200,b->ptMin(),b->ptMax());
+            hname = "meanYtTot_parentBin"; hname += p; hname += "_zBuf_"; hname += z;
+            mHMeanYtTot[pz] = new TH1D(hname.Data(),hname.Data(),200,b->ytMin(),b->ytMax());
             hname = "meanYtP_parentBin"; hname += p; hname += "_zBuf_"; hname += z;
             mHMeanYtP[pz] = new TH1D(hname.Data(),hname.Data(),200,b->ytMin(),b->ytMax());
             hname = "meanYtM_parentBin"; hname += p; hname += "_zBuf_"; hname += z;
             mHMeanYtM[pz] = new TH1D(hname.Data(),hname.Data(),200,b->ytMin(),b->ytMax());
+            hname = "etaTot_parentBin"; hname += p; hname += "_zBuf_"; hname += z;
+            mHEtaTot[pz] = new TH1D(hname.Data(),hname.Data(),100,b->etaMin(),b->etaMax());
             hname = "etaP_parentBin"; hname += p; hname += "_zBuf_"; hname += z;
             mHEtaP[pz] = new TH1D(hname.Data(),hname.Data(),100,b->etaMin(),b->etaMax());
             hname = "etaM_parentBin"; hname += p; hname += "_zBuf_"; hname += z;
             mHEtaM[pz] = new TH1D(hname.Data(),hname.Data(),100,b->etaMin(),b->etaMax());
         }
     }
-  
+    hname = "ptTot_toward";
+    mHPtTot[0] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ptP_toward";
+    mHPtP[0] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ptM_toward";
+    mHPtM[0] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ptTot_transverse";
+    mHPtTot[1] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ptP_transverse";
+    mHPtP[1] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ptM_transverse";
+    mHPtM[1] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ptTot_away";
+    mHPtTot[2] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ptP_away";
+    mHPtP[2] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ptM_awayAway";
+    mHPtM[2] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ptTot_awayAway";
+    mHPtTot[3] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ptP_awayAway";
+    mHPtP[3] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ptM_away";
+    mHPtM[3] = new TH2D(hname.Data(),hname.Data(),200,0,10,20,0,5);
+    hname = "ytTot_toward";
+    mHYtTot[0] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    hname = "ytP_toward";
+    mHYtP[0] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    hname = "ytM_toward";
+    mHYtM[0] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    hname = "ytTot_transverse";
+    mHYtTot[1] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    hname = "ytP_transverse";
+    mHYtP[1] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    hname = "ytM_transverse";
+    mHYtM[1] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    hname = "ytTot_away";
+    mHYtTot[2] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    hname = "ytP_away";
+    mHYtP[2] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    hname = "ytM_away";
+    mHYtM[2] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    hname = "ytTot_awayAway";
+    mHYtTot[3] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    hname = "ytP_awayAway";
+    mHYtP[3] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    hname = "ytM_awayAway";
+    mHYtM[3] = new TH2D(hname.Data(),hname.Data(),25,1,4.5,25,1,4.5);
+    mHPhiAssocTot = new TH2D("phiAssocTot","phiAssocTot",90,0,3.1415926,16,1,4.5);
+    mHPhiAssocP = new TH2D("phiAssocP","phiAssocP",90,0,3.1415926,16,1,4.5);
+    mHPhiAssocM = new TH2D("phiAssocM","phiAssocM",90,0,3.1415926,16,1,4.5);
+    mHPhiAssocPtTot = new TH2D("phiAssocPtTot","phiAssocPtTot",90,0,3.1415926,40,0,5);
+    mHPhiAssocPtP = new TH2D("phiAssocPtP","phiAssocPtP",90,0,3.1415926,40,0,5);
+    mHPhiAssocPtM = new TH2D("phiAssocPtM","phiAssocPtM",90,0,3.1415926,40,0,5);
+    mHPtTrigTot = new TH1D("PtTrigTot","PtTrigTot",40,0,5);
+    mHPtTrigP = new TH1D("PtTrigP","PtTrigP",40,0,5);
+    mHPtTrigM = new TH1D("PtTrigM","PtTrigM",40,0,5);
+    mHYtTrigTot = new TH1D("YtTrigTot","YtTrigTot",25,1,4.5);
+    mHYtTrigP = new TH1D("YtTrigP","YtTrigP",25,1,4.5);
+    mHYtTrigM = new TH1D("YtTrigM","YtTrigM",25,1,4.5);
+
 
   /* Event Mixing Parameters */
   mHMixZdN = new TH2D("Mixed_Z_dN","Event Mixing: average-Z vs delta-N",50,-25,25, 50,-25,25);
@@ -456,8 +529,10 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
 
   StEStructCutBin* cb = StEStructCutBin::Instance();
 
-  int numParent = cb->getNumParentBins();
-  StEStructTrackIterator *occupied = new StEStructTrackIterator[numParent];
+  StEStructTrackIterator iTotTrigger = 0;
+  double pTotTrigger = 0;
+  double yTotTrigger = 0;
+  double phiTotTrigger = 0;
 
   StEStructTrackCollection *tc;
   for(int ich=0;ich<2;ich++){
@@ -467,19 +542,108 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
        tc=mCurrentEvent->TrackCollectionM();
     }
 
+    // Define event class by highest pt track.
+    // For each event class increment away, transverse and toward 
+    // Within the ich loop we only have positive or negative. I had been adding plus and minus
+    // together thinking I was getting CD. With triggered stuff it doesn't work that way.
+    // Need one loop through to get trigger, another to get associated.
+    StEStructTrackIterator iTrigger = 0;
+    double pTrigger = 0;
+    double yTrigger = 0;
+    double phiTrigger = 0;
+    for(StEStructTrackIterator iter = tc->begin(); iter != tc->end(); iter++) {
+        if ((*iter)->Pt()>pTrigger) {
+            pTrigger = (*iter)->Pt();
+            yTrigger = (*iter)->Yt();
+            phiTrigger = (*iter)->Phi();
+            iTrigger = iter;
+        }
+        if ((*iter)->Pt()>pTotTrigger) {
+            pTotTrigger = (*iter)->Pt();
+            yTotTrigger = (*iter)->Yt();
+            phiTotTrigger = (*iter)->Phi();
+            iTotTrigger = iter;
+        }
+    }
+    if (pTrigger>5.0) {
+        pTrigger = 5.0;
+    }
+    if (yTrigger>4.5) {
+        yTrigger = 4.5;
+    }
+    double pi = acos(-1);
+    for(StEStructTrackIterator iter = tc->begin(); iter != tc->end(); iter++) {
+        double phi = (*iter)->Phi();
+        double dphi = phi - phiTrigger;
+        double pt = (*iter)->Pt();
+        double yt = (*iter)->Yt();
+        if (dphi<-pi) {
+            dphi += 2*pi;
+        } else if (dphi>pi) {
+            dphi -= 2*pi;
+        }
+        dphi = fabs(dphi);
+        if (iter == iTrigger) {
+            if (ich==0) {
+                mHPtTrigP->Fill(pTrigger);
+                mHYtTrigP->Fill(yTrigger);
+            } else if (ich==1) {
+                mHPtTrigM->Fill(pTrigger);
+                mHYtTrigM->Fill(yTrigger);
+            }
+        } else {
+            if (ich==0) {
+                mHPhiAssocP->Fill(dphi,yTrigger);
+                mHPhiAssocPtP->Fill(dphi,pTrigger);
+                if (dphi<pi/3) {
+                    mHPtP[0]->Fill(pt,pTrigger);
+                    mHYtP[0]->Fill(yt,yTrigger);
+                } else if (dphi<2*pi/3) {
+                    mHPtP[1]->Fill(pt,pTrigger);
+                    mHYtP[1]->Fill(yt,yTrigger);
+                } else if (dphi<5*pi/6) {
+                    mHPtP[2]->Fill(pt,pTrigger);
+                    mHYtP[2]->Fill(yt,yTrigger);
+                } else  {
+                    mHPtP[3]->Fill(pt,pTrigger);
+                    mHYtP[3]->Fill(yt,yTrigger);
+                }
+            } else if (ich==1) {
+                mHPhiAssocM->Fill(dphi,yTrigger);
+                mHPhiAssocPtM->Fill(dphi,pTrigger);
+                if (dphi<pi/3) {
+                    mHPtM[0]->Fill(pt,pTrigger);
+                    mHYtM[0]->Fill(yt,yTrigger);
+                } else if (dphi<2*pi/3) {
+                    mHPtM[1]->Fill(pt,pTrigger);
+                    mHYtM[1]->Fill(yt,yTrigger);
+                } else if (dphi<5*pi/6) {
+                    mHPtM[2]->Fill(pt,pTrigger);
+                    mHYtM[2]->Fill(yt,yTrigger);
+                } else {
+                    mHPtM[3]->Fill(pt,pTrigger);
+                    mHYtM[3]->Fill(yt,yTrigger);
+                }
+            }
+        }
+    }
+
     for(StEStructTrackIterator iter = tc->begin(); iter != tc->end(); iter++) {
         int parentClass = cb->getParentBin(mPairCuts,(*iter));
         int ipb = parentClass*nZBin + iZBin;
+        mHMeanPtTot[ipb]->Fill((*iter)->Pt());
+        mHMeanYtTot[ipb]->Fill((*iter)->Yt());
+        mHEtaTot[ipb]->Fill((*iter)->Eta());
         if (0 == ich) {
-            mHMeanYtP[ipb]->Fill((*iter)->Yt());
             mHMeanPtP[ipb]->Fill((*iter)->Pt());
+            mHMeanYtP[ipb]->Fill((*iter)->Yt());
             mHEtaP[ipb]->Fill((*iter)->Eta());
-         } else {
-            mHMeanYtM[ipb]->Fill((*iter)->Yt());
+        } else {
             mHMeanPtM[ipb]->Fill((*iter)->Pt());
+            mHMeanYtM[ipb]->Fill((*iter)->Yt());
             mHEtaM[ipb]->Fill((*iter)->Eta());
-         }
-         mQAHists->fillTrackHistograms(*iter,parentClass);
+        }
+        mQAHists->fillTrackHistograms(*iter,parentClass);
 
 if (0) {
         // Choose mass according to dEdx (in which case transverse and longitudinal
@@ -505,7 +669,56 @@ if (0) {
 }
     }
   }
-  delete occupied;
+
+    // Fill uncharged triggered histograms
+    for (int ich=0;ich<2;ich++) {
+        if (ich==0) {
+            tc=mCurrentEvent->TrackCollectionP();
+        } else {
+            tc=mCurrentEvent->TrackCollectionM();
+        }
+        if (pTotTrigger>5.0) {
+            pTotTrigger = 5.0;
+        }
+        if (yTotTrigger>4.5) {
+            yTotTrigger = 4.5;
+        }
+        double pi = acos(-1);
+        for (StEStructTrackIterator iter = tc->begin(); iter != tc->end(); iter++) {
+            double phi = (*iter)->Phi();
+            double dphi = phi - phiTotTrigger;
+            double pt = (*iter)->Pt();
+            double yt = (*iter)->Yt();
+            if (dphi<-pi) {
+                dphi += 2*pi;
+            } else if (dphi>pi) {
+                dphi -= 2*pi;
+            }
+            dphi = fabs(dphi);
+
+            if (iter == iTotTrigger) {
+                mHPtTrigTot->Fill(pTotTrigger);
+                mHYtTrigTot->Fill(yTotTrigger);
+            } else {
+                mHPhiAssocTot->Fill(dphi,yTotTrigger);
+                mHPhiAssocPtTot->Fill(dphi,pTotTrigger);
+                if (dphi<pi/3) {
+                    mHPtTot[0]->Fill(pt,pTotTrigger);
+                    mHYtTot[0]->Fill(yt,yTotTrigger);
+                } else if (dphi<2*pi/3) {
+                    mHPtTot[1]->Fill(pt,pTotTrigger);
+                    mHYtTot[1]->Fill(yt,yTotTrigger);
+                } else if (dphi<5*pi/6) {
+                    mHPtTot[2]->Fill(pt,pTotTrigger);
+                    mHYtTot[2]->Fill(yt,yTotTrigger);
+                } else  {
+                    mHPtTot[3]->Fill(pt,pTotTrigger);
+                    mHYtTot[3]->Fill(yt,yTotTrigger);
+                }
+            }
+        }
+    }
+
 
   // Set magnetic field for pair cuts
   mPairCuts->SetBField( mCurrentEvent->BField() );
@@ -1754,13 +1967,52 @@ void StEStruct2ptCorrelations::writeHistograms() {
 
   mHptAll->Write();
   for(int j=0;j<numParentBins;j++){
+     mHMeanPtTot[j]->Write();
      mHMeanPtP[j]->Write();
      mHMeanPtM[j]->Write();
+     mHMeanYtTot[j]->Write();
      mHMeanYtP[j]->Write();
      mHMeanYtM[j]->Write();
+     mHEtaTot[j]->Write();
      mHEtaP[j]->Write();
      mHEtaM[j]->Write();
   }
+  mHPtTot[0]->Write();
+  mHPtP[0]->Write();
+  mHPtM[0]->Write();
+  mHPtTot[1]->Write();
+  mHPtP[1]->Write();
+  mHPtM[1]->Write();
+  mHPtTot[2]->Write();
+  mHPtP[2]->Write();
+  mHPtM[2]->Write();
+  mHPtTot[3]->Write();
+  mHPtP[3]->Write();
+  mHPtM[3]->Write();
+  mHYtTot[0]->Write();
+  mHYtP[0]->Write();
+  mHYtM[0]->Write();
+  mHYtTot[1]->Write();
+  mHYtP[1]->Write();
+  mHYtM[1]->Write();
+  mHYtTot[2]->Write();
+  mHYtP[2]->Write();
+  mHYtM[2]->Write();
+  mHYtTot[3]->Write();
+  mHYtP[3]->Write();
+  mHYtM[3]->Write();
+  mHPhiAssocTot->Write();
+  mHPhiAssocP->Write();
+  mHPhiAssocM->Write();
+  mHPhiAssocPtTot->Write();
+  mHPhiAssocPtP->Write();
+  mHPhiAssocPtM->Write();
+  mHPtTrigTot->Write();
+  mHPtTrigP->Write();
+  mHPtTrigM->Write();
+  mHYtTrigTot->Write();
+  mHYtTrigP->Write();
+  mHYtTrigM->Write();
   for(int i=0;i<8;i++){
     for(int j=0;j<numCutBins;j++){
       if (!mdontFillYtYt) {
@@ -2408,13 +2660,52 @@ void StEStruct2ptCorrelations::deleteHistograms(){
 
   delete mHEtaPhi;
   for(int j=0;j<numParentBins;j++){
+    delete mHMeanPtTot[j];
     delete mHMeanPtP[j];
     delete mHMeanPtM[j];
+    delete mHMeanYtTot[j];
     delete mHMeanYtP[j];
     delete mHMeanYtM[j];
+    delete mHEtaTot[j];
     delete mHEtaP[j];
     delete mHEtaM[j];
   }
+  delete mHPtTot[0];
+  delete mHPtP[0];
+  delete mHPtM[0];
+  delete mHPtTot[1];
+  delete mHPtP[1];
+  delete mHPtM[1];
+  delete mHPtTot[2];
+  delete mHPtP[2];
+  delete mHPtM[2];
+  delete mHPtTot[3];
+  delete mHPtP[3];
+  delete mHPtM[3];
+  delete mHYtTot[0];
+  delete mHYtP[0];
+  delete mHYtM[0];
+  delete mHYtTot[1];
+  delete mHYtP[1];
+  delete mHYtM[1];
+  delete mHYtTot[2];
+  delete mHYtP[2];
+  delete mHYtM[2];
+  delete mHYtTot[3];
+  delete mHYtP[3];
+  delete mHYtM[3];
+  delete mHPhiAssocTot;
+  delete mHPhiAssocP;
+  delete mHPhiAssocM;
+  delete mHPhiAssocPtTot;
+  delete mHPhiAssocPtP;
+  delete mHPhiAssocPtM;
+  delete mHPtTrigTot;
+  delete mHPtTrigP;
+  delete mHPtTrigM;
+  delete mHYtTrigTot;
+  delete mHYtTrigP;
+  delete mHYtTrigM;
   for(int i=0;i<8;i++){
     for(int j=0;j<numCutBins;j++){
       if (!mdontFillYtYt) {
@@ -2643,6 +2934,12 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.31  2013/02/08 19:32:43  prindle
+ * Added "Triggered" histograms in StEStruct2ptCorrelations.
+ * Protected against using tracks cuts in StEStruct2ptCorrelations when reading EStruct format events.
+ * Added comment in EventMaker/StEStructTrack.cxx pointing out need to set BField correctly
+ * when reading EStruct format events. (This should be read from file somehow, but...)
+ *
  * Revision 1.30  2012/11/16 21:22:27  prindle
  * 2ptCorrelations: SS, AS histograms.  Get eta limits from cuts. Fit PtAll histogram. Add histograms to keep track of eta, phi limits. A few more histograms
  * Binning: Add quality cut.

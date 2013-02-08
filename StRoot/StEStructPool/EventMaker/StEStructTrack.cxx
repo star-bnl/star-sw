@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.cxx,v 1.11 2012/11/16 21:24:37 prindle Exp $
+ * $Id: StEStructTrack.cxx,v 1.12 2013/02/08 19:32:52 prindle Exp $
  *
  * Author: Jeff Porter merge of code from Aya Ishihara and Jeff Reid
  *
@@ -20,7 +20,15 @@ using namespace units;
 
 ClassImp(StEStructTrack)
 
-Float_t StEStructTrack::BField = 0;
+// Setting BField is important when we read EStruct format events and we need to reconstruct the helix.
+// We should somehow be getting BField from the file, or somewhere. Can change event to event in principle.
+// For now we force person running EStruct correlation analysis to set BField appropriately.
+// Set it to 0 when reading MuDst (and helix is calculated properly) or to the correct signed valuem to recalculate the helix.
+// For 200 GeV AuAu run in 2011 following is good.
+//Float_t StEStructTrack::BField = 4.9845;
+Float_t StEStructTrack::BField = 4.9845;
+
+
 StThreeVectorD StEStructTrack::PrimVertex = StThreeVectorD(0,0,0);
 StEStructTrack::StEStructTrack(StEStructTrack *track) : TObject() {
   mPx = track->Px();
@@ -278,6 +286,8 @@ void StEStructTrack::evalCurvature(){
     // Seems that curvature from helix is _not_ signed.
     // Sign of curvature is -helicity. (When magnetic field along +Z direction
     // helicity of a positive particle is negative.)
+    double b = mHelix.h();
+    double c = mHelix.curvature();
     mCurvature = -mHelix.h()*fabs(mHelix.curvature());
 };
 
@@ -420,6 +430,12 @@ Float_t StEStructTrack::DcaGlobal() const {
 /**********************************************************************
  *
  * $Log: StEStructTrack.cxx,v $
+ * Revision 1.12  2013/02/08 19:32:52  prindle
+ * Added "Triggered" histograms in StEStruct2ptCorrelations.
+ * Protected against using tracks cuts in StEStruct2ptCorrelations when reading EStruct format events.
+ * Added comment in EventMaker/StEStructTrack.cxx pointing out need to set BField correctly
+ * when reading EStruct format events. (This should be read from file somehow, but...)
+ *
  * Revision 1.11  2012/11/16 21:24:37  prindle
  * Changes to support reading/writing of EStructEvent. Fill helix as transient and
  * get BField from file (?).

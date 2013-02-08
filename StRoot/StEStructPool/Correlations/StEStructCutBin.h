@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.15 2012/11/16 21:22:27 prindle Exp $
+ * $Id: StEStructCutBin.h,v 1.16 2013/02/08 19:32:43 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -35,7 +35,7 @@ class StEStructCutBin : public TObject {
   TH1D** mHCutBinHists[8];
 
   static StEStructCutBin* mInstance;
-  StEStructCutBin(): mcutMode(0), mnumBins(1), mcutModeName(0), mcutBinHistMode(0), mMaxDEta(1) { setMode(0); };
+  StEStructCutBin(): mcutMode(0), mnumBins(1), mcutModeName(0), mcutBinHistMode(0), mMaxDEta(2) { setMode(0); };
   //  StEStructCutBin(int mode){ setMode(mode); };
 
   int getCutBinMode1(StEStructPairCuts *pc);
@@ -341,6 +341,12 @@ inline int StEStructCutBin::notSymmetrizedXX(int cutBin, int pairCharge) {
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.16  2013/02/08 19:32:43  prindle
+ * Added "Triggered" histograms in StEStruct2ptCorrelations.
+ * Protected against using tracks cuts in StEStruct2ptCorrelations when reading EStruct format events.
+ * Added comment in EventMaker/StEStructTrack.cxx pointing out need to set BField correctly
+ * when reading EStruct format events. (This should be read from file somehow, but...)
+ *
  * Revision 1.15  2012/11/16 21:22:27  prindle
  * 2ptCorrelations: SS, AS histograms.  Get eta limits from cuts. Fit PtAll histogram. Add histograms to keep track of eta, phi limits. A few more histograms
  * Binning: Add quality cut.
