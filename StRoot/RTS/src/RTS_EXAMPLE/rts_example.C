@@ -59,11 +59,11 @@ static int l4_doer(daqReader *rdr, const char *do_print) ;
 
 static int pp2pp_doer(daqReader *rdr, const char *do_print) ;
 static int l3_doer(daqReader *rdr, const char *do_print) ;
-static int fgt_doer(daqReader *rdr, const char *do_print) ;
+static int fgt_doer(daqReader *rdr, const char *do_print, int which) ;
 static int mtd_doer(daqReader *rdr, const char *do_print) ;
 static int tinfo_doer(daqReader *rdr, const char *do_print);
 
-static int gmt_doer(daqReader *rdr, const char *do_print) ;
+//static int gmt_doer(daqReader *rdr, const char *do_print) ;
 //static int ist_doer(daqReader *rdr, const char *do_print) ;
 
 static int pxl_doer(daqReader *rdr, const char *do_print) ;
@@ -288,18 +288,20 @@ int main(int argc, char *argv[])
 		if(l4_doer(evp,print_det)) {
 		    LOG(INFO, "HLT FY12 found");
 		}
-		else {
-		    LOG(INFO, "No HLT HY12");
-		}
 
 		/*************************** FGT **************************/
-		if(fgt_doer(evp,print_det)) LOG(INFO,"FGT found") ;
+		fgt_doer(evp,print_det,0) ;
 
 		/*************************** MTD **************************/
 		if(mtd_doer(evp,print_det)) LOG(INFO,"MTD found") ;
 
+
 		/*************************** GMT **************************/
-		if(gmt_doer(evp,print_det)) LOG(INFO,"GMT found") ;
+		fgt_doer(evp,print_det,1) ;
+
+		/*************************** IST **************************/
+		fgt_doer(evp,print_det,2) ;
+
 
 		/*************************** PXL **************************/
 		if(pxl_doer(evp,print_det)) LOG(INFO,"PXL found") ;
@@ -314,7 +316,7 @@ int main(int argc, char *argv[])
 
 	}
 
-	delete evp ;	// cleanup i.e. if running through a set of files.
+//	delete evp ;	// cleanup i.e. if running through a set of files.
 
 	return 0 ;
 }
@@ -1101,27 +1103,49 @@ static int l3_doer(daqReader *rdr, const char *do_print)
 	return found ;
 }
 
-static int fgt_doer(daqReader *rdr, const char *do_print)
+static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 {
 	int found = 0 ;
-
+	char s_found[128] ;
 	daq_dta *dd ;
 
-	if(strcasestr(do_print,"fgt")) ;	// leave as is...
+	char *d_name = 0 ;
+
+
+	switch(which) {
+	case 1 :
+		d_name = "GMT" ;
+		break ;
+	case 2 :
+		d_name = "IST" ;
+		break ;
+	case 0 :
+	default :
+		d_name = "FGT" ;
+	}
+
+
+	if(strcasestr(do_print,d_name)) ;	// leave as is...
 	else do_print = 0 ;
 
+	s_found[0] = 0 ;
 
-	dd = rdr->det("fgt")->get("raw") ;
+	short adc_data[2][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][15] ;
+	short zs_data[2][FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][15] ;
+	memset(adc_data,0,sizeof(adc_data)) ;
+	memset(zs_data,0,sizeof(zs_data)) ;
+
+	dd = rdr->det(d_name)->get("raw") ;
 	if(dd) {
 		while(dd->iterate()) {
-			found = 1 ;
+			found |= 1 ;
 
 			// point to the start of the DDL raw data
 			u_int *d = (u_int *) dd->Void ;	
 
 
 			if(do_print) {
-				printf("FGT RAW: RDO %d: %d bytes, %d words\n",dd->rdo,dd->ncontent,dd->ncontent/4) ;
+				printf("%s RAW: RDO %d: %d bytes, %d words\n",d_name,dd->rdo,dd->ncontent,dd->ncontent/4) ;
 				// dump a few ints
 				for(int i=0;i<10;i++) {
 					printf(" %3d: 0x%08X\n",i,d[i]) ;
@@ -1133,13 +1157,13 @@ static int fgt_doer(daqReader *rdr, const char *do_print)
 
 
 	// one can get the data in the electronics/logical layout
-	dd = rdr->det("fgt")->get("adc") ;
+	dd = rdr->det(d_name)->get("adc") ;
 
 	// let's dump the meta-data first
 	if(dd && dd->meta && do_print) {
 		apv_meta_t *meta = (apv_meta_t *)dd->meta ;
 				
-		printf("FGT meta data:\n") ;
+		printf("%s meta data:\n",d_name) ;
 		for(int r=1;r<=FGT_RDO_COU;r++) {
 			if(meta->arc[r].present == 0) continue ;
 				
@@ -1178,14 +1202,15 @@ static int fgt_doer(daqReader *rdr, const char *do_print)
 	}
 
 	while(dd && dd->iterate()) {
-		found = 1 ;
+		found |= 2 ;
 
 		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
 
 		if(do_print) {
-			printf("FGT ADC: RDO %d, ARM %d, APV %d: %d values\n",dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
+			printf("%s ADC: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
+				adc_data[dd->rdo-1][dd->sec][dd->pad][f[i].ch][f[i].tb] = f[i].adc ;
 				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
 			}
 		}
@@ -1193,6 +1218,125 @@ static int fgt_doer(daqReader *rdr, const char *do_print)
 				
 
 
+
+
+
+	// one can get the data in the electronics/logical layout
+	dd = rdr->det(d_name)->get("zs") ;
+
+
+	// let's dump the meta-data first
+	if(dd && dd->meta && do_print) {
+		apv_meta_t *meta = (apv_meta_t *)dd->meta ;
+				
+		printf("%s ZS meta data:\n",d_name) ;
+		for(int r=1;r<=FGT_RDO_COU;r++) {
+			if(meta->arc[r].present == 0) continue ;
+				
+			printf("  ARC %d: error %c; format %d, ARM mask 0x%X\n",r,meta->arc[r].error?'Y':'N',
+			       meta->arc[r].format_code,
+			       meta->arc[r].arm_mask) ;
+
+			for(int arm=0;arm<FGT_ARM_COU;arm++) {
+				if(meta->arc[r].arm[arm].present == 0) continue ;
+
+				printf("    ARM %d: error %c\n",arm,meta->arc[r].arm[arm].error?'Y':'N') ;
+				printf("         : arm_id %d, arm_seq %d, arm_err %d, apv_mask 0x%X\n",
+				       meta->arc[r].arm[arm].arm_id,
+				       meta->arc[r].arm[arm].arm_seq,
+				       meta->arc[r].arm[arm].arm_err,
+				       meta->arc[r].arm[arm].apv_mask) ;
+
+				for(int apv=0;apv<FGT_APV_COU;apv++) {
+					if(meta->arc[r].arm[arm].apv[apv].present == 0) continue ;
+							
+					printf("      APV %2d: error %c\n",apv,meta->arc[r].arm[arm].apv[apv].error?'Y':'N') ;
+					printf("            : apv_id %d, fmt %d, length %d, seq %d, capid %d, nhits %d, is_error %d, refadc %d, ntim %d\n",
+					       meta->arc[r].arm[arm].apv[apv].apv_id,
+					       meta->arc[r].arm[arm].apv[apv].fmt,
+					       meta->arc[r].arm[arm].apv[apv].length,
+					       meta->arc[r].arm[arm].apv[apv].seq,
+					       meta->arc[r].arm[arm].apv[apv].capid,
+					       meta->arc[r].arm[arm].apv[apv].nhits,
+					       meta->arc[r].arm[arm].apv[apv].is_error,
+					       meta->arc[r].arm[arm].apv[apv].refadc,
+					       meta->arc[r].arm[arm].apv[apv].ntim) ;
+				}
+			}
+		}
+
+	}
+
+	while(dd && dd->iterate()) {
+		found |= 4 ;
+
+		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
+
+		if(do_print) {
+			printf("%s ZS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
+
+			for(u_int i=0;i<dd->ncontent;i++) {
+				zs_data[dd->rdo-1][dd->sec][dd->pad][f[i].ch][f[i].tb] = f[i].adc ;
+				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
+			}
+		}
+	}
+				
+	if(do_print) {	// only then...
+
+	for(int r=0;r<2;r++) {
+	for(int arm=0;arm<FGT_ARM_COU;arm++) {
+	for(int apv=0;apv<FGT_APV_COU;apv++) {
+	for(int ch=0;ch<FGT_CH_COU;ch++) {
+	for(int tb=0;tb<15;tb++) {
+		int zs = zs_data[r][arm][apv][ch][tb] ;
+		int adc = adc_data[r][arm][apv][ch][tb] ;
+		
+		if(zs && (zs != adc)) {
+			printf("ZS ERROR: %d %d %d %d %d = zs %d, adc %d\n",r+1,arm,apv,ch,tb,zs,adc) ;
+		}
+
+	}}}}}
+	}
+
+
+	dd = rdr->det(d_name)->get("pedrms") ;
+	while(dd && dd->iterate()) {
+		found |= 8 ;
+
+		fgt_pedrms_t *f = (fgt_pedrms_t *) dd->Void ;
+
+		if(do_print) {
+			int arc = dd->rdo ;
+			int arm = dd->sec ;
+			int apv = dd->pad ;
+
+			//printf("%s PEDRMS: RDO %d, ARM %d, APV %d: %d values\n",d_name,dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
+
+			for(u_int i=0;i<dd->ncontent;i++) {
+				printf("%d %d %2d %3d %2d: %.3f +- %.3f\n",arc,arm,apv,f[i].ch,f[i].tb,f[i].ped,f[i].rms) ;
+				//printf(" %5d: ch %3d, tb %d = %.3f +- %.3f\n",i,f[i].ch,f[i].tb,f[i].ped,f[i].rms) ;
+			}
+		}
+
+		
+
+	}
+
+	if(found & 1) {
+		strcat(s_found,"RAW ") ;
+	}
+	if(found & 2) {
+		strcat(s_found,"ADC ") ;
+	}
+	if(found & 4) {
+		strcat(s_found,"ZS ") ;
+	}
+	if(found & 8) {
+		strcat(s_found,"PEDRMS ") ;
+	}
+
+	if(found) LOG(INFO,"%s found: %s",d_name,s_found) ;
 
 	return found ;
 }
@@ -1230,6 +1374,7 @@ static int mtd_doer(daqReader *rdr, const char *do_print)
 	return found ;
 }
 
+#if 0
 static int gmt_doer(daqReader *rdr, const char *do_print)
 {
 	int found = 0 ;
@@ -1263,6 +1408,51 @@ static int gmt_doer(daqReader *rdr, const char *do_print)
 
 	// one can get the data in the electronics/logical layout
 	dd = rdr->det("gmt")->get("adc") ;
+
+
+	// let's dump the meta-data first
+	if(dd && dd->meta && do_print) {
+		apv_meta_t *meta = (apv_meta_t *)dd->meta ;
+				
+		printf("GMT meta data:\n") ;
+		for(int r=1;r<=FGT_RDO_COU;r++) {
+			if(meta->arc[r].present == 0) continue ;
+				
+			printf("  ARC %d: error %c; format %d, ARM mask 0x%X\n",r,meta->arc[r].error?'Y':'N',
+			       meta->arc[r].format_code,
+			       meta->arc[r].arm_mask) ;
+
+			for(int arm=0;arm<FGT_ARM_COU;arm++) {
+				if(meta->arc[r].arm[arm].present == 0) continue ;
+
+				printf("    ARM %d: error %c\n",arm,meta->arc[r].arm[arm].error?'Y':'N') ;
+				printf("         : arm_id %d, arm_seq %d, arm_err %d, apv_mask 0x%X\n",
+				       meta->arc[r].arm[arm].arm_id,
+				       meta->arc[r].arm[arm].arm_seq,
+				       meta->arc[r].arm[arm].arm_err,
+				       meta->arc[r].arm[arm].apv_mask) ;
+
+				for(int apv=0;apv<FGT_APV_COU;apv++) {
+					if(meta->arc[r].arm[arm].apv[apv].present == 0) continue ;
+							
+					printf("      APV %2d: error %c\n",apv,meta->arc[r].arm[arm].apv[apv].error?'Y':'N') ;
+					printf("            : apv_id %d, fmt %d, length %d, seq %d, capid %d, nhits %d, is_error %d, refadc %d, ntim %d\n",
+					       meta->arc[r].arm[arm].apv[apv].apv_id,
+					       meta->arc[r].arm[arm].apv[apv].fmt,
+					       meta->arc[r].arm[arm].apv[apv].length,
+					       meta->arc[r].arm[arm].apv[apv].seq,
+					       meta->arc[r].arm[arm].apv[apv].capid,
+					       meta->arc[r].arm[arm].apv[apv].nhits,
+					       meta->arc[r].arm[arm].apv[apv].is_error,
+					       meta->arc[r].arm[arm].apv[apv].refadc,
+					       meta->arc[r].arm[arm].apv[apv].ntim) ;
+				}
+			}
+		}
+
+	}
+
+
 	while(dd && dd->iterate()) {
 		found = 1 ;
 
@@ -1281,7 +1471,7 @@ static int gmt_doer(daqReader *rdr, const char *do_print)
 
 	return found ;
 }
-
+#endif
 
 
 

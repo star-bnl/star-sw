@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
 
 	// need this specific construct so that the cluster finder can initialize!
 	daq_tpx *tpx = new daq_tpx(dr) ;	// insert the TPX detector explicitly in the DAQ_READER
+	tpx->fcf_run_compatibility = 10 ;
+
 	tpx->InitRun(123) ;			// initialize the run with some dummy run number...
 
 
@@ -39,7 +41,16 @@ int main(int argc, char *argv[])
 	dd = dr->det("tpx")->get("cld") ;
 	while(dd && dd->iterate()) {
 		for(u_int i=0;i<dd->ncontent;i++) {
-//			if(dd->cld[i].tb < 15.0)
+			switch(dd->cld[i].flags) {
+			case 0 :	// normal
+			case 1 :	// normal
+			case 2 :	// normal
+			case 3 :	// should not really use
+				continue ;
+			default :
+				break ;
+			}
+
 			printf("in file: row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X\n",dd->row,
 			       dd->cld[i].pad,
 			       dd->cld[i].p1,
@@ -58,6 +69,8 @@ int main(int argc, char *argv[])
 		
 #endif
 
+//#define DO_CLD
+#ifdef DO_CLD
 	dd = dr->det("tpx")->get("adc") ;	// get the ADC data
 	if(dd == 0) {
 		LOG(WARN,"No adc data in this event...") ;
@@ -121,6 +134,14 @@ int main(int argc, char *argv[])
 #endif
 
 #if 1
+			switch(dd->sim_cld[i].cld.flags) {
+			case 0 :
+			case 2 :
+				continue ;
+			default:
+				break ;
+			}
+
 //			if(dd->sim_cld[i].cld.tb < 15.0) 
 			printf("rerun: row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X: track %d, Q %d\n",dd->row,
 			       dd->sim_cld[i].cld.pad,
@@ -137,7 +158,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-
+#endif
 
 	}	// end of ebent
 

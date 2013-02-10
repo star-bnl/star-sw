@@ -61,9 +61,6 @@ rts_example.o: ../DAQ_READER/daq_dta.h
 rts_example.o: ../../../../StRoot/RTS/include/rts.h
 rts_example.o: ../DAQ_READER/daq_dta_structs.h
 rts_example.o: ../../../../StRoot/RTS/trg/include/trgDataDefs.h
-rts_example.o: ../../../../StRoot/RTS/include/daqFormats.h
-rts_example.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-rts_example.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 rts_example.o: ../DAQ_BSMD/daq_bsmd.h
 rts_example.o: ../DAQ_READER/daq_det.h
 rts_example.o: ../DAQ_EMC/daq_emc.h
@@ -73,6 +70,9 @@ rts_example.o: ../DAQ_ETOW/daq_etow.h
 rts_example.o: ../DAQ_FPD/daq_fpd.h
 rts_example.o: ../DAQ_FTP/daq_ftp.h
 rts_example.o: ../DAQ_L3/daq_l3.h
+rts_example.o: ../../../../StRoot/RTS/include/daqFormats.h
+rts_example.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
+rts_example.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 rts_example.o: ../DAQ_PMD/daq_pmd.h
 rts_example.o: ../DAQ_PP2PP/daq_pp2pp.h
 rts_example.o: ../DAQ_RIC/daq_ric.h
