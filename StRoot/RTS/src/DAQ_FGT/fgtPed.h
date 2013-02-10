@@ -17,11 +17,12 @@ public:
 
 	void init(int active_rbs) ;					// mallocs (if nece) and clears ped_store
 
-	void accum(char *evbuff, int bytes, int rdo) ;
+	void accum(char *evbuff, int bytes, int rdo1) ;
+
 	void calc() ;					// calculates mean/rms into ped_store
 	int to_evb(char *buff) ;			// to EVB format from ped_store
 
-	void do_thresh(double n_sigma) ;
+	void do_thresh(double n_sigma, int k_seq) ;
 
 	int do_zs(char *src, int in_bytes, char *dst, int rdo1) ;
 
@@ -33,27 +34,32 @@ public:
 
 
 
-private:
+//private:
 	// allocated per RDO
 
 	// Note: just 1 pedestal/threshold per channel.
 	// Pedestal calc uses tb 1 (or 2nd tb).
 	struct peds {
-		double ped[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
-		double rms[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
-		u_short thr[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;	//  just 1 thr per channel!
-		u_short cou[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
+		float ped[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][FGT_TB_COU] ;
+		float rms[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][FGT_TB_COU] ;
+		u_short thr[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;
+		u_short cou[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU][FGT_TB_COU] ;	// no need for TB cou!
+		u_short expect_cou[FGT_ARM_COU][FGT_APV_COU] ;
 	} *ped_store ;
 
 
-	daq_fgt *fgt_rdr ;
+	daq_fgt *fgt_rdr[FGT_RDO_COU] ;
 
 	int sizeof_ped ;
 
-	u_int evts[2] ;	// RDOs count from 0 here!
-	u_int valid_evts[2] ;
+	u_int evts[FGT_RDO_COU] ;	// RDOs count from 0 here!
+	u_int valid_evts[FGT_RDO_COU] ;
 	int rb_mask ;
 
+	int k_seq ;
+	double n_sigma ;
+
+	int tb_cou ;
 } ;
 
 #endif

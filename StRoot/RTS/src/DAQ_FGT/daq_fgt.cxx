@@ -112,21 +112,12 @@ daq_fgt::daq_fgt(daqReader *rts_caller)
 
 	raw = new daq_dta ;
 	adc = new daq_dta ;
-	phys = new daq_dta ;
+	zs = new daq_dta ;
 	ped = new daq_dta ;
 
 
 	adc->meta = (void *) &apv_meta ;	// meta exists for adc data only!
-
-	memset(&apv_meta,0,sizeof(apv_meta)) ;
-
-#if 0
-	// zap maps to unknown first
-	memset(adc_to_phys,0xff,sizeof(adc_to_phys)) ;
-	memset(phys_to_adc,0xff,sizeof(phys_to_adc)) ;
-
-	// create/load maps...
-#endif
+	zs->meta = (void *) &apv_meta ;
 
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
@@ -138,7 +129,7 @@ daq_fgt::~daq_fgt()
 
 	delete raw ;
 	delete adc ;
-	delete phys ;
+	delete zs ;
 	delete ped ;
 
 	return ;
@@ -149,12 +140,13 @@ daq_fgt::~daq_fgt()
 daq_dta *daq_fgt::get(const char *bank, int sec, int rdo, int pad, void *p1, void *p2) 
 {	
 
-	memset(&apv_meta,0,sizeof(apv_meta)) ;
-
 	Make() ;
 
 	if(present == 0) return 0 ;
 
+
+	zs->meta = 0 ;
+	adc->meta = 0 ;
 
 	if(strcasecmp(bank,"raw")==0) {
 		return handle_raw(sec,rdo) ;
@@ -164,6 +156,9 @@ daq_dta *daq_fgt::get(const char *bank, int sec, int rdo, int pad, void *p1, voi
 	}
 	else if(strcasecmp(bank,"pedrms")==0) {
 		return handle_ped(sec,rdo) ;
+	}
+	else if(strcasecmp(bank,"zs")==0) {
+		return handle_zs(sec,rdo) ;
 	}
 
 
@@ -230,6 +225,198 @@ daq_dta *daq_fgt::handle_raw(int sec, int rdo)
 }
 
 	
+daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
+{
+	int r_start, r_stop ;
+	int s = 1 ;	// for now...
+	
+	zs->create(1000,"fgt_zs",rts_id,DAQ_DTA_STRUCT(fgt_adc_t)) ;
+
+	LOG(NOTE,"FGT: doing ZS") ;
+	memset(&apv_meta,0,sizeof(apv_meta)) ;
+
+	if((rdo <= 0) || (rdo > FGT_RDO_COU)){
+		r_start = 1 ;
+		r_stop = FGT_RDO_COU ;
+	}
+	else {
+		r_start = r_stop = rdo ;
+	}
+
+	int found_some = 0 ;
+
+	for(int r=r_start;r<=r_stop;r++) {
+		u_short *d ;
+		int bytes ;
+
+		if(rdobuff == 0) {
+			char str[128] ;
+			char *full_name ;
+
+			sprintf(str,"%s/sec%02d/rb%02d/zs",sfs_name, s, r) ;
+			full_name = caller->get_sfs_name(str) ;
+		
+			if(!full_name) continue ;
+			bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+			d = (u_short *) malloc(bytes) ;
+			
+			int ret = caller->sfs->read(str, (char *)d, bytes) ;
+			if(ret != bytes) {
+				LOG(ERR,"ret is %d") ;
+			}
+
+		}
+		else {
+			d = (u_short *) rdobuff ;
+			bytes = inbytes ;
+		}
+
+		if(d == 0) continue ;
+
+		
+		int *d32 = (int *) d ;
+
+		if(d32[0]  != (int)0xFEEDBEEF) {
+			LOG(ERR,"Bad signature 0x%04X",d32[0]) ;
+			continue ;
+		}
+
+		if(d32[1] != META_ZS_VERSION) {
+			LOG(ERR,"Unknown version 0x%04X",d32[1]) ;
+			continue ;
+		}
+
+		found_some = 1 ;
+
+		bytes = d32[2] ;
+
+		int meta_bytes = d32[3] ;
+
+
+
+		// grab the count of dumped channels from the trailer
+		int dumped_chs = d[bytes/2-1] ;
+		int got_chs = 0 ;
+
+
+		// do meta...
+		apv_meta_zs_t *meta_zs = (apv_meta_zs_t *) (d32+4) ;
+
+
+		for(int arm=0;arm<FGT_ARM_COU;arm++) {
+		for(int apv=0;apv<FGT_APV_COU;apv++) {
+			if(meta_zs->status[arm][apv]) {
+				apv_meta.arc[r].arm[arm].present = 1 ;
+				apv_meta.arc[r].present = 1 ;
+
+				apv_meta.arc[r].arm[arm].apv[apv].present = 1 ;
+				apv_meta.arc[r].arm[arm].apv[apv].ntim = meta_zs->tb_cou ;
+
+				if(meta_zs->status[arm][apv] != 1) {
+					apv_meta.arc[r].arm[arm].apv[apv].error = 1 ;
+				}
+			}
+
+		}}
+
+
+		LOG(TERR,"Expect %d dumped CHs in %d bytes, meta_bytes %d, tb_cou %d",dumped_chs,bytes,meta_bytes,meta_zs->tb_cou) ;
+
+//		for(int i=0;i<100;i++) {
+//			LOG(TERR,"%d: 0x%04X",i,d[i]) ;
+//		}
+
+		int ix = 2*4 + meta_bytes/2 ;
+
+		bytes -= 4*4 ;	// 3 header d-words...
+		bytes -= meta_bytes ;	// apv_meta_zs_t ;
+		bytes -= 1*2 ;	// 1 trailer s_word
+
+//		LOG(TERR,"ix %d, bytes left %d",ix,bytes) ;
+
+		int arc = 0 ;
+		int arm = 0 ;
+		int apv = 0 ;
+
+		int cou = 0 ;
+
+		fgt_adc_t *fgt_d = 0 ;
+
+		while(bytes>0) {
+
+
+			while((d[ix] & 0xFF00) == 0xAB00) {
+				//LOG(TERR,"%d %d %d %d",cou,arm,arc,apv) ;
+
+				if(cou) {
+					//LOG(TERR,"finalize: %d %d %d %d",cou,arm,arc,apv) ;
+					zs->finalize(cou,arm,arc,apv) ;
+				}
+				cou = 0 ;
+
+				arc = d[ix] & 0xFF ;
+				ix++ ;
+			
+				arm = d[ix] >> 8 ;
+				apv = d[ix] & 0xFF ;
+				ix++ ;
+
+				bytes -= 4 ;
+
+			}
+		
+
+			if(bytes <= 0) continue ;
+
+			//LOG(TERR,"r: %d %d %d (%d)",arc,arm,apv,cou) ;
+
+			if(cou==0) {
+				//LOG(TERR,"request: %d %d %d %d",cou,arm,arc,apv) ;
+				fgt_d = (fgt_adc_t *) zs->request(FGT_CH_COU*FGT_TB_COU) ;
+			}
+
+			int ch = d[ix] & 0xFF ;
+			int tb_cou = d[ix] >> 8 ;
+			ix++ ;
+
+			got_chs++ ;
+
+			
+			bytes -= 2*(1+tb_cou) ;
+			for(int i=0;i<tb_cou;i++) {
+				fgt_d[cou].ch = ch ;
+				fgt_d[cou].tb = i ;
+				fgt_d[cou].adc = d[ix] ;
+				cou++ ;
+
+				//printf("ZS: %d %d %d %d %d = %d\n",arc,arm,apv,ch,i,d[ix]) ;
+
+
+				ix++ ;
+			}
+		}
+
+		if(got_chs != dumped_chs) {
+			LOG(ERR,"Mismatch: got %d, expect %d",got_chs,dumped_chs) ;
+		}
+
+		if(rdobuff == 0) free(d) ;
+
+	}
+
+	zs->rewind() ;
+	
+	if(found_some) {
+		zs->meta = (void *) &apv_meta ;
+	}
+	else {
+		return 0 ;
+	}
+
+	return zs ;
+}
+
 
 daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 {
@@ -237,6 +424,8 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 	int s = 1 ;	// for now...
 	
 	adc->create(1000,"fgt_adc",rts_id,DAQ_DTA_STRUCT(fgt_adc_t)) ;
+
+	memset(&apv_meta,0,sizeof(apv_meta)) ;
 
 	LOG(NOTE,"FGT: doing ADC") ;
 
@@ -248,6 +437,8 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 		r_start = r_stop = rdo ;
 	}
 
+
+	int found_some = 0 ;
 
 	for(int r=r_start;r<=r_stop;r++) {
 		u_int *d ;
@@ -269,7 +460,7 @@ daq_dta *daq_fgt::handle_adc(int sec, int rdo, char *rdobuff)
 		}
 
 
-		
+		found_some = 1 ;
 
 		int format_code = (d[2] >> 8) & 0xFF ;
 		// 0: normal code
@@ -504,6 +695,15 @@ unrecoverable_error:
 
 	adc->rewind() ;
 
+	if(found_some) {
+		adc->meta = (void *) &apv_meta ;
+	}
+	else {
+		return 0 ;
+	}
+
+
+
 	return adc ;
 			
 }
@@ -511,53 +711,86 @@ unrecoverable_error:
 daq_dta *daq_fgt::handle_ped(int sec, int rdo)
 {
 
-	int r_start, r_stop ;
-	
-
-	LOG(NOTE,"FGT PED is not yet supported") ;
-	return 0 ;
-
 	ped->create(1000,"fgt_pedrms",rts_id,DAQ_DTA_STRUCT(fgt_pedrms_t)) ;
 
 
+	char str[128] ;
+	char *full_name ;
+	int bytes ;
+	u_short *d ;
 
-	if((rdo <= 0) || (rdo > FGT_RDO_COU)){
-		r_start = 1 ;
-		r_stop = FGT_RDO_COU ;
+	sprintf(str,"%s/sec%02d/pedrms",sfs_name, 1) ;
+	full_name = caller->get_sfs_name(str) ;
+		
+	if(full_name) {
+		LOG(TERR,"full_name %s",full_name) ;
 	}
-	else {
-		r_start = r_stop = rdo ;
+
+	if(!full_name) return 0  ;
+	bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+	LOG(TERR,"bytes %d",bytes) ;
+
+	d = (u_short *) malloc(bytes) ;
+			
+	int ret = caller->sfs->read(str, (char *)d, bytes) ;
+	if(ret != bytes) {
+		LOG(ERR,"ret is %d") ;
 	}
 
 
-	// HACK! EMULATION!!!
-	for(int r=r_start;r<=r_stop;r++) {
-		for(int arm=0;arm<FGT_ARM_COU;arm++) {
-		for(int apv=0;apv<FGT_APV_COU;apv++) {
+	if(d[0] != 0xBEEF) {
+		LOG(ERR,"Bad pedestal version") ;
+	}
 
-			fgt_pedrms_t *d = (fgt_pedrms_t *) ped->request(FGT_TB_COU*FGT_CH_COU) ;
+	if(d[1] != 1 ) {
+		LOG(ERR,"Bad pedestal version") ;
+	}
+
+	int arm_cou = d[2] ;
+	int apv_cou = d[3] ;
+	int ch_cou = d[4] ;
+	int tb_cou = d[5] ;
+
+	int ix = 6 ;
+	int max_ix = (bytes/2) ;
+
+	fgt_pedrms_t *f_ped = 0 ;
+
+	while(ix < max_ix) {
+		int arc = d[ix++] ;
+		int apvs = d[ix++] ;
+
+		while(apvs) {
+			int arm = d[ix++] ;
+			int apv = d[ix++] ;
+
+			f_ped = (fgt_pedrms_t *) ped->request(ch_cou * tb_cou) ;
 
 			int cou = 0 ;
+			for(int ch=0;ch<ch_cou;ch++) {
+				for(int t=0;t<tb_cou;t++) {
+					u_short ped = d[ix++] ;
+					u_short rms = d[ix++] ;
 
-			for(int tb=0;tb<FGT_TB_COU;tb++) {
-			for(int ch=0;ch<FGT_CH_COU;ch++) {
-			
-				d[cou].ch = ch ;
-				d[cou].tb = tb ;
-				d[cou].ped = drand48() * 1024.0 ;
-				d[cou].rms = 1.0/((double)(ch+1)) ;
-				cou++ ;
-
+					f_ped[cou].ch = ch ;
+					f_ped[cou].tb = t ;
+					f_ped[cou].ped = ((float)ped) / 16.0 ;
+					f_ped[cou].rms = ((float)rms) / 16.0 ;
+					cou++ ;
+				}
 			}
-			}
 
-			ped->finalize(cou,r,arm,apv) ;
+			ped->finalize(cou,arm,arc,apv) ;
+			apvs-- ;
+		}
 
-		}
-		}
 	}
 
+	free(d) ;
+
 	ped->rewind() ;
+
 
 	return ped ;
 			
@@ -572,7 +805,7 @@ daq_dta *daq_fgt::handle_ped(int sec, int rdo)
 int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
 	const int FGT_BYTES_MIN = ((6)*4) ;	// this is the minimum
-	const int FGT_BYTES_MAX = (32768*4) ;
+	const int FGT_BYTES_MAX = (512*1024) ;
 //	const u_int FGT_VERSION = 0x0034 ;		 
 	const u_int FGT_SIGNATURE = 0x46475420 ;	// "FGT"
 

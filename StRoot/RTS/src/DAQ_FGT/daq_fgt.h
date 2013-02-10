@@ -5,18 +5,17 @@
 #include <DAQ_READER/daq_det.h>
 
 // logical maps
-// represent the _maximums_ over any APV-type detector: FGT, GMT, IST
+// represent the _maximums_ over any APV-type detector: FGT, GMT, IST...
 
 #define FGT_RDO_COU		6	// aka ARC; but counts from 1..6
 #define FGT_ARM_COU		6	// from 0..5
 #define FGT_APV_COU		24	// from 0..23
 #define FGT_CH_COU		128	// from 0..127
-
 #define FGT_TB_COU		31	// from 0..30
 
 
 
-// physical maps: UNUSED
+/* physical maps: UNUSED
 #define FGT_DISK_COU		6	// 0..5
 #define FGT_QUADRANT_COU	4	// A-D
 #define FGT_STRIP_TYPE_COU	2	// 2 types: see below
@@ -26,7 +25,7 @@
 #define FGT_STRIP_R_COU		326
 #define FGT_STRIP_PHI_COU	1138
 
-
+*/
 
 // when asking for the "adc" or "phys"bank
 struct fgt_adc_t {
@@ -84,27 +83,35 @@ struct apv_meta_t {
 	
 } ;
 
+const short META_ZS_VERSION = 0x0001 ;
+
+struct apv_meta_zs_t {	// used in the header of the ZS bank
+	u_char tb_cou ;
+
+	u_char status[FGT_ARM_COU][FGT_APV_COU] ;	// bits: 1 present; 2 error
+} ;
+
+	
 class daq_fgt : public daq_det {
 private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
-
-	class daq_dta *handle_phys(int disk, int quadrant, int strip_type) ;
 	class daq_dta *handle_ped(int sec, int rdo) ;
 
 	class daq_dta *raw ;	// "raw"
 	class daq_dta *adc ;	// "adc"
-	class daq_dta *phys ;	// "phys"
-	class daq_dta *ped ;	// "pedrms" 
+	class daq_dta *ped ;	// "ped"
+	class daq_dta *zs ;	// "zs" 
 
 	static const char *help_string ;
 
 protected:
-	struct apv_meta_t apv_meta ;
+
 
 public:
 	daq_fgt(daqReader *rts_caller=0) ;
 	~daq_fgt() ;
 
+	struct apv_meta_t apv_meta ;
 
 	void set_flavor(int id) ;
 
@@ -118,7 +125,7 @@ public:
 
 
 	class daq_dta *handle_adc(int sec, int rdo, char *rdobuff = 0 ) ;
-
+	class daq_dta *handle_zs(int sec, int rdo, char *rdobuff = 0, int inbytes = 0 ) ;
 
 	u_int rdo_warns[7] ;	// number of warnings issued, per rdo; count from 1
 	u_char rdo_id[7] ;	// for RDO checks in get_l2; count from 1
