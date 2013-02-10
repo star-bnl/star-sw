@@ -759,12 +759,14 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/include";
     
     } elsif ( $pkg =~ m/^StBFChain$/ && (! $IsRepo || $IsDotDev) ) {
+	my($cmd)="BFCOpt2Html.pl";
+	$cmd = "mgr/BFCOpt2Html.pl" if ( -e "mgr/BFCOpt2Html.pl");
 	print "\t add documentation for $pkg\n";
-	Command $env ["#StRoot/StBFChain/doc/BFC.h"], ("#StRoot/StBFChain/BigFullChain.h"), qq (%CPP %< > %>);
+	Command $env ["#StRoot/StBFChain/doc/BFC.h"], ("#StRoot/StBFChain/BigFullChain.h"), qq (%CPP            %< > %>);
 	Command $env ["#StRoot/StBFChain/doc/BFC2.h"],("#StRoot/StBFChain/BigFullChain.h"), qq (%CPP -D__BFC2__ %< > %>);
 	Command $env [("#StRoot/StBFChain/doc/index.html","#StRoot/StBFChain/doc/StBFChain.cxx_doc")],
 	("#StRoot/StBFChain/doc/BFC.h","#StRoot/StBFChain/doc/BFC.h", "#StRoot/StBFChain/doc/BFC2.h"),
-	qq(BFCOpt2Html.pl);
+	qq($cmd);
     }
   
     # mysql and Db related linking separate
