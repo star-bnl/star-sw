@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.54 2013/01/14 22:38:01 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.55 2013/02/10 13:42:40 tonko Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1643,7 +1643,7 @@ char *daqReader::skip_then_get(int numToSkip, int num, int type)
       if(strcasecmp(which,"emc_pseudo")==0) id = -BTOW_ID ;	// by definition...
       if(strcasecmp(which,"hlt")==0) id = -L3_ID ;	// by definition...
 
-      if(strcasecmp(which,"l4")==0) id = -L4_ID ;
+//      if(strcasecmp(which,"l4")==0) id = -L4_ID ;
 
       if(id < -32) {	// not found even in pseudo
 	LOG(CRIT,"Requested det \"%s\" not created -- check spelling!",which) ;

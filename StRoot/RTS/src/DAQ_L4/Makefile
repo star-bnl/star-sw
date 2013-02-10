@@ -25,3 +25,19 @@ libl4.a : $(OBJS)
 	@$(RTS_AR)
 
 # DO NOT DELETE
+
+daq_l4.o: ../../../../StRoot/RTS/include/rtsLog.h
+daq_l4.o: ../../../../StRoot/RTS/include/rtsSystems.h
+daq_l4.o: ../SFS/sfs_index.h
+daq_l4.o: ../SFS/fs_index.h
+daq_l4.o: ../SFS/sfs_base.h
+daq_l4.o: ../DAQ_READER/daqReader.h
+daq_l4.o: ../DAQ_READER/daqConfig.h
+daq_l4.o: ../DAQ_READER/daq_dta.h
+daq_l4.o: ../../../../StRoot/RTS/include/rts.h
+daq_l4.o: ../DAQ_READER/daq_dta_structs.h
+daq_l4.o: daq_l4.h
+daq_l4.o: ../DAQ_READER/daq_det.h
+daq_l4.o: ../DAQ_READER/daq_det.h
+l4_gl3.o: daq_l4.h
+l4_gl3.o: ../DAQ_READER/daq_det.h

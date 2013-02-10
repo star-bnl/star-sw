@@ -23,7 +23,7 @@ class daq_det_l4_factory : public daq_det_factory
 {
 public:
 	daq_det_l4_factory() {
-		daq_det_factory::pseudo_factories[L4_ID] = this ;
+		daq_det_factory::det_factories[L4_ID] = this ;
 	}
 
 	daq_det *create() {
@@ -36,9 +36,9 @@ static daq_det_l4_factory l4_factory ;
 
 daq_l4::daq_l4(daqReader *rts_caller) 
 {
-	rts_id = -L3_ID ;	// note negative number!!!
+	rts_id = L4_ID ;	// note negative number!!!
 
-	name = "l4" ;
+	name = "L4" ;
 	sfs_name = "l4" ;
 	caller = rts_caller ;
 	
