@@ -324,7 +324,7 @@ int daq_mtd::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 
 		if(w[1] != 0xDEADFACE) {
 			err |= 1 ;
-			LOG(ERR,"[%d] bad DEADCODE 0x%08X",rdo,w[1]);
+			LOG(ERR,"[%d] bad DEADFACE 0x%08X",rdo,w[1]);
 		}
 
 
