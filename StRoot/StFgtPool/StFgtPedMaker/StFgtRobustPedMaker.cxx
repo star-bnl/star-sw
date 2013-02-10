@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtRobustPedMaker.cxx,v 1.2 2012/01/31 16:47:47 wwitzke Exp $
+ * $Id: StFgtRobustPedMaker.cxx,v 1.3 2013/02/10 14:43:55 akio Exp $
  * Author: S. Gliske, Jan 2012
  *
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StFgtRobustPedMaker.cxx,v $
+ * Revision 1.3  2013/02/10 14:43:55  akio
+ * slightly modified to gain better accuracy
+ *
  * Revision 1.2  2012/01/31 16:47:47  wwitzke
  * Changed for cosmic test stand change.
  *
@@ -104,18 +107,20 @@ Int_t StFgtRobustPedMaker::Make(){
 
             for( stripIter = stripVec.begin(); stripIter != stripVec.end(); ++stripIter ){
                for( Int_t timeBin = 0; timeBin < kFgtNumTimeBins; ++timeBin ){
-                  Bool_t pass = (( 1<<timeBin & mTimeBinMask ) && timeBin > 0 && timeBin < kFgtNumTimeBins);
-
+		 Bool_t pass = ((mTimeBinMask==0 || ( (1<<timeBin) & mTimeBinMask)) && timeBin >= 0 && timeBin < kFgtNumTimeBins);
                   if( pass ){
                      Short_t adc = (*stripIter)->getAdc( timeBin );
 
                      if( adc ){
 
+		        Int_t t = timeBin;
+		        if(mTimeBinMask==0) t=0;
+
                         Int_t rdo, arm, apv, channel;
                         (*stripIter)->getElecCoords( rdo, arm, apv, channel );
                         Int_t elecId = StFgtGeom::getElectIdFromElecCoord( rdo, arm, apv, channel );
 
-                        Int_t code = kFgtNumTimeBins * elecId + timeBin;
+                        Int_t code = kFgtNumTimeBins * elecId + t;
 
                         TH1F* hist = mHistVec[ code ];
                         if( !hist ){
@@ -126,7 +131,7 @@ Int_t StFgtRobustPedMaker::Make(){
                            mHistVec[ code ] = hist;
                         };
 
-                        hist->Fill( adc );
+                        hist->Fill( float(adc) );
                      };
                   };
                };
@@ -155,13 +160,13 @@ Int_t StFgtRobustPedMaker::Finish(){
 
          if( hist ){
             // smooth for good measure
-            if( mNumSmooth )
-               hist->Smooth( mNumSmooth );
+            if( mNumSmooth ) hist->Smooth( mNumSmooth );
 
             // pedistal value is MPV
             Int_t maxLoc = hist->GetMaximumBin();
             Float_t halfMax = 0.5*hist->GetBinContent( maxLoc );
             Float_t pedValue = hist->GetBinCenter( maxLoc );
+            Float_t mean = hist->GetMean();
 
             // estimate the half width at half max on both sides
             Int_t binIdxR;
@@ -175,16 +180,19 @@ Int_t StFgtRobustPedMaker::Finish(){
 
             // estimate sigma
             Float_t sigma = ( HWHML + HWHMR ) * ONE_OVER_TWICE_SQRT_LOG_TWO;
-
+            Float_t rms = hist->GetRMS();
+	    Float_t sig3 = 3.0*rms;
+	    if(sig3<100) sig3=100;
+	    
             // restrict to with three sigma
-            hist->GetXaxis()->SetRangeUser( pedValue-3*sigma, pedValue+3*sigma );
+            hist->GetXaxis()->SetRangeUser(mean-sig3, mean+sig3);
 
             // update mean and sigma
-            //mean = hist->GetMean();
-            sigma = hist->GetRMS();
+            Float_t mean2 = hist->GetMean();
+            Float_t rms2  = hist->GetRMS();
 
             // estimate percentage in one sigma
-            Float_t fracClose = hist->Integral( hist->FindBin( pedValue-sigma ), hist->FindBin( pedValue+sigma) ) / hist->GetEntries();
+            Float_t fracClose = hist->Integral(hist->FindBin(mean2-rms2), hist->FindBin(mean2+rms2)) / hist->GetEntries();
 
             // save to map, note:
             // sum == mean
@@ -193,9 +201,14 @@ Int_t StFgtRobustPedMaker::Finish(){
             Int_t code = std::distance( mHistVec.begin(), mHistVecIter );
             pedData_t &data = mDataVec[ code ];
             data.n = hist->GetEntries();
-            data.ped = pedValue;
-            data.RMS = sigma;
+	    data.ped = mean2;
+            data.RMS = rms2;
             data.fracClose = fracClose;
+
+	    //int eid=code/kFgtNumTimeBins;
+	    //printf("Eleid=%5d Max=%6.2f Mean=%6.2f %6.2f %6.2f  RMS=%6.2f %6.2f %6.2f  f=%6.2f\n",
+	    // 	      eid,halfMax*2,pedValue,mean,mean2,sigma,rms,rms2,fracClose);
+
          };
       };
 
