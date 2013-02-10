@@ -38,9 +38,9 @@ daq_det *daq_det_factory::make_det(int wh)
 		case -L3_ID :
 			sprintf(libname,"libdaqhlt.so") ;
 			break ;
-		case -L4_ID:
-		    sprintf(libname,"libdaql4.so");
-		    break;
+//		case -L4_ID:
+//		    sprintf(libname,"libdaql4.so");
+//		    break;
 		}
 	}
 	else {
