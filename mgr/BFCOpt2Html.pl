@@ -51,6 +51,7 @@ if ( -e "$REL/doc/BFC.h" && -e "$REL/doc/BFC2.h"){
     print "All in source mode\n";
 }
 
+print "$0 $IN $OUT\n";
 
 
 if ( ! open(FI,"$IN") ){ die "Could not open $IN for reading\n";}
@@ -118,9 +119,12 @@ do {
     for ($i=0 ; $i <= $#lines ; $i++){
 	chomp($line  = $lines[$i]);
 
-	while ($line !~ /\}/){
+	# advance to form a full line 
+	while ($line !~ /\}/ && $i != $#lines){
+	    #print "[$line]\n";
 	    $i++;
-	    $line .= $lines[$i];
+	    $line .= $lines[$i]; # keep concatenating until terminated
+	    chomp($line);        # may span multiple lines
 	}
 	push(@items,split(/\"\s*,/,$line)); # not that the STR_OBSOLETE lines will not show up
 
