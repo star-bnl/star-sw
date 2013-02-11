@@ -29,9 +29,9 @@
 
 // when asking for the "adc" or "phys"bank
 struct fgt_adc_t {
-	unsigned short ch ;	// 0..127 for adc ch, 0..1137 for phys strip
+	unsigned short ch ;
 	unsigned char tb ;
-	unsigned short adc ;
+	short adc ;
 } ;
 
 	
@@ -84,6 +84,7 @@ struct apv_meta_t {
 } ;
 
 const short META_ZS_VERSION = 0x0001 ;
+const short META_PED_ZS_VERSION = 0x0101 ;
 
 struct apv_meta_zs_t {	// used in the header of the ZS bank
 	u_char tb_cou ;

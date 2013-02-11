@@ -9,6 +9,7 @@
 
 #include <rtsLog.h>
 #include <daqModes.h>
+#include <rtsSystems.h>
 
 #include <DAQ_READER/daq_dta.h>
 
@@ -34,6 +35,8 @@ fgtPed::fgtPed()
 	k_seq = 0 ;	
 	n_sigma = 0.0 ;
 
+	rts_id = 0 ;
+
 	return ;
 }
 
@@ -57,7 +60,7 @@ fgtPed::~fgtPed()
 
 
 
-void fgtPed::init(int active_rbs)
+void fgtPed::init(int active_rbs, int rts)
 {
 	valid = 0 ;
 
@@ -73,28 +76,15 @@ void fgtPed::init(int active_rbs)
 	if(fgt_rdr[0] == 0) {
 		fgt_rdr[0] = new daq_fgt(0) ;
 		fgt_rdr[1] = new daq_fgt(0) ;
+
+		
 	}
 
+
+	rts_id = rts ;
 
 	memset(ped_store,0,sizeof_ped) ;
-
-/* wrong! Do it in from_cache
-	for(int r=0;r<FGT_RDO_COU;r++) {
-		struct peds *p = ped_store + r ;
-
-		for(int arm=0;arm<FGT_ARM_COU;arm++) {
-		for(int apv=0;apv<FGT_APV_COU;apv++) {
-		for(int c=0;c<FGT_CH_COU;c++) {
-		for(int t=0;t<FGT_TB_COU;t++) {
-			p->rms[arm][apv][c][t] = -1.0 ;
-		}
-		}
-		}
-		}
-	}
-*/
-
-
+	err_counter = 0 ;
 
 	LOG(TERR,"Pedestals zapped: rb_mask 0x%02X",rb_mask) ;
 }
@@ -106,7 +96,7 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 	int dumped_cou = 0 ;
 	int all_cou = 0 ;
 
-	u_short *d16 = (u_short *) dst ;
+	short *d16 = (short *) dst ;
 	u_int *d32 = (u_int *)dst ;
 
 
@@ -124,18 +114,26 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 
 	for(int arm=0;arm<FGT_ARM_COU;arm++) {
 	for(int apv=0;apv<FGT_APV_COU;apv++) {
+#if 0
 		printf("ARC %d, ARM %d, APV %d: %d %d %d %d\n",rdo1,arm,apv,
 		       meta->arc[rdo1].arm[arm].apv[apv].present,
 		       meta->arc[rdo1].arm[arm].apv[apv].ntim,
 		       meta->arc[rdo1].arm[arm].apv[apv].error,
 		       meta->arc[rdo1].arm[arm].error) ;
-
+#endif
 		if(meta->arc[rdo1].arm[arm].apv[apv].present) {
 			int err = 0 ;
 
 			meta_zs.status[arm][apv] |= 1 ;
 
 			int tb_cou = meta->arc[rdo1].arm[arm].apv[apv].ntim ;
+
+			if(tb_cou != 15) {
+				if(err_counter < 100) {
+					LOG(WARN,"tb %2d: ARC %d, ARM %d, APV %d",tb_cou,rdo1,arm,apv) ;
+				}
+				err_counter++ ;
+			}
 
 			if(tb_cou == 0) {
 				err = 1 ;
@@ -162,8 +160,10 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 		switch(meta_zs.status[arm][apv]) {
 		case 0 :
 		case 1 :
+		case 3 :
 			break ;
 		default :
+
 			LOG(ERR,"ARC %d, ARM %d, APV %d: meta_zs 0x%X",rdo1,arm,apv,meta_zs.status[arm][apv]) ;
 		}
 
@@ -176,12 +176,24 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 	while(meta_bytes % 2) meta_bytes++ ;
 
 	*d32++ = 0xFEEDBEEF ;	// signature
-	*d32++ = META_ZS_VERSION ;		// version
+
+	int do_ped_sub = 0 ;	// non ped-sub
+	switch(rts_id) {
+	default :
+	case FGT_ID :
+		*d32++ = META_ZS_VERSION ;		// version
+		break ;
+	case GMT_ID :
+		do_ped_sub = 1 ;	// subtract peds
+		*d32++ = META_PED_ZS_VERSION ;	// zs _AND_ ped subtracted
+		break ;
+	}
+
 	u_int *dta_bytes = d32++ ;	// reserve space
 	*d32++ = meta_bytes ;
 
 	memcpy(d32,&meta_zs,meta_bytes) ;
-	d16 = (u_short *)d32 + meta_bytes/2 ;
+	d16 = (short *)d32 + meta_bytes/2 ;
 
 	while(dd && dd->iterate()) {
 		int arc, arm, apv ;
@@ -222,7 +234,13 @@ int fgtPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 
 					for(int i=0;i<cou_tb;i++) {
 
-						*d16++ = f[i_save+i].adc ;
+						if(do_ped_sub) {
+							*d16++ = (short)((float)f[i_save+i].adc - p_thr->ped[arm][apv][ch][i] + 0.2);
+						}
+						else {
+							*d16++ = f[i_save+i].adc ;
+						}
+						
 
 //						printf("   *** ch %d: %d %d\n",
 //						       f[i_save+i].ch,
@@ -341,7 +359,10 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 
 
 			if(meta->arc[rdo1].arm[arm].apv[apv].ntim != 15) {
-				LOG(WARN,"evt %d: RDO %d, ARM %d, APV %d: ntim %d??",evts[rdo],rdo1,arm,apv,meta->arc[rdo1].arm[arm].apv[apv].ntim) ;
+				if(err_counter < 100) {
+					LOG(WARN,"evt %d: RDO %d, ARM %d, APV %d: ntim %d??",evts[rdo],rdo1,arm,apv,meta->arc[rdo1].arm[arm].apv[apv].ntim) ;
+				}
+				err_counter++ ;
 			}
 
 			need[arm][apv] |= 1 ;
@@ -351,7 +372,7 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 
 
 			if(meta->arc[rdo1].arm[arm].apv[apv].apv_id != apv) {
-				LOG(WARN,"RDO %d, ARM %d, APV %d: %d",rdo1,arm,apv,meta->arc[rdo1].arm[arm].apv[apv].apv_id) ;
+				LOG(ERR,"RDO %d, ARM %d, APV %d: %d",rdo1,arm,apv,meta->arc[rdo1].arm[arm].apv[apv].apv_id) ;
 				need[arm][apv] |= 2 ;	// error
 			}
 
@@ -479,7 +500,7 @@ void fgtPed::do_thresh(double ns, int k)
 void fgtPed::calc()
 {
 
-	const u_int MIN_EVENTS = 2 ;
+	const u_int MIN_EVENTS = 100 ;
 
 
 	LOG(NOTE,"Calculating pedestals") ;

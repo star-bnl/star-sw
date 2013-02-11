@@ -40,6 +40,7 @@ daq_fgt.o: daq_fgt.h
 daq_fgt.o: ../DAQ_READER/daq_det.h
 fgtPed.o: ../../../../StRoot/RTS/include/rtsLog.h
 fgtPed.o: ../../../../StRoot/RTS/include/daqModes.h
+fgtPed.o: ../../../../StRoot/RTS/include/rtsSystems.h
 fgtPed.o: ../DAQ_READER/daq_dta.h
 fgtPed.o: ../../../../StRoot/RTS/include/rts.h
 fgtPed.o: ../DAQ_READER/daq_dta_structs.h
