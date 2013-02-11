@@ -676,7 +676,7 @@ extern inline int rts2tcd(int rts)
 		-1,		//23 IST
 		TCD_SST,	//24 SST
 		-1,		//25 RPII
-		TCD_GMT		//26 GMT
+		TCD_GMT,	//26 GMT
 		-1,		//27
 		-1,		//28
 		-1,		//29
