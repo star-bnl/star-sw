@@ -1281,7 +1281,8 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 			}
 		}
 	}
-				
+
+#if 0 				
 	if(do_print) {	// only then...
 
 	for(int r=0;r<2;r++) {
@@ -1298,7 +1299,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 	}}}}}
 	}
-
+#endif
 
 	dd = rdr->det(d_name)->get("pedrms") ;
 	while(dd && dd->iterate()) {
