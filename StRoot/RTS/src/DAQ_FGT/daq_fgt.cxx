@@ -282,7 +282,12 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 			continue ;
 		}
 
-		if(d32[1] != META_ZS_VERSION) {
+
+		switch(d32[1]) {
+		case META_ZS_VERSION :
+		case META_PED_ZS_VERSION :
+			break ;
+		default :
 			LOG(ERR,"Unknown version 0x%04X",d32[1]) ;
 			continue ;
 		}
@@ -747,8 +752,8 @@ daq_dta *daq_fgt::handle_ped(int sec, int rdo)
 		LOG(ERR,"Bad pedestal version") ;
 	}
 
-	int arm_cou = d[2] ;
-	int apv_cou = d[3] ;
+//	int arm_cou = d[2] ;
+//	int apv_cou = d[3] ;
 	int ch_cou = d[4] ;
 	int tb_cou = d[5] ;
 

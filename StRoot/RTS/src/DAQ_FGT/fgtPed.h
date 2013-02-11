@@ -15,7 +15,7 @@ public:
 	int sector ; // if fee is overriden...
 	int valid ;	// when calced or loaded
 
-	void init(int active_rbs) ;					// mallocs (if nece) and clears ped_store
+	void init(int active_rbs, int rts) ;					// mallocs (if nece) and clears ped_store
 
 	void accum(char *evbuff, int bytes, int rdo1) ;
 
@@ -32,7 +32,9 @@ public:
 
 	int special_setup(int run_type, int sub_type) ;
 
+	int rts_id ;
 
+	int err_counter ;
 
 //private:
 	// allocated per RDO
