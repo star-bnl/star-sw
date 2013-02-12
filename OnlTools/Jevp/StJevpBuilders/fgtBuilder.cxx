@@ -125,7 +125,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   hContents.h2->GetXaxis()->SetTitle("#sigma");
   hContents.h2->SetFillColor(kYellow-9);
   hContents.h2->SetStats(false);
-  hContents.hSumBad=new TH1F("Number of good channels per APV","Number of good channels per APV",190,0,190);
+  hContents.hSumBad=new TH1F("Number of good channels per APV","Number of good channels per APV",240,0,240);
   //  hContents.hSumBad->GetXaxis()->SetNdivisions(19,false);
   hContents.hSumBad->SetFillColor(kYellow-9);
   hContents.hSumBad->SetStats(false);
@@ -139,14 +139,14 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
 
 
 
-  hSumContents.hSumPed=new TH2F("Pedestal per APV","Pedestal per APV",190,0,190,1497,0,1496);
+  hSumContents.hSumPed=new TH2F("Pedestal per APV","Pedestal per APV",240,0,240,1497,0,1496);
   hSumContents.hSumPed->SetStats(false);
-  hSumContents.hSumSig=new TH2F("Pedestal StdDev per APV","Pedestal StdDev per APV",190,0,190,201,0,200);
+  hSumContents.hSumSig=new TH2F("Pedestal StdDev per APV","Pedestal StdDev per APV",240,0,240,201,0,200);
   hSumContents.hSumSig->SetStats(false);
-  hSumContents.hSumFrac=new TH2F("Fraction in #sigma per APV","Fraction in #sigma per APV",190,0,190,100,0,1);
+  hSumContents.hSumFrac=new TH2F("Fraction in #sigma per APV","Fraction in #sigma per APV",240,0,240,100,0,1);
   hSumContents.hSumFrac->SetStats(false);
 
-  for(int i=0;i<19;i++)
+  for(int i=0;i<24;i++)
     {
       //bin 0 is underflow
       hContents.hSumBad->GetXaxis()->SetBinLabel(i*10+1,Gid2Label[Indx2Gid[i]].c_str());
@@ -172,7 +172,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   plots[np+3]=new JevpPlot(hContents.hApvCorpt);
   plots[np+3]->logy=true;
   plots[np+3]->setOptStat(10);
-  JLine* line=new JLine(0,128,190,128);
+  JLine* line=new JLine(0,128,240,128);
   line->SetLineColor(kRed);
   plots[np+2]->addElement(line);
 
@@ -231,22 +231,51 @@ void fgtBuilder::startrun(daqReader *rdr) {
 
 void fgtBuilder::event(daqReader *rdr)
 {
+  //default: 7 timebins
+  Int_t numTb=7;
+
   //Jan's request
   memset(chCntDaq,0,sizeof(chCntDaq));
   //  contents.h2_tmp->Fill(tRnd.Rndm(0));
   if(!(evtCt %1000))
     LOG(DBG, "Looking at evt %d",evtCt);
   daq_dta *dd=rdr->det("fgt")->get("adc");
+
+  if(dd && dd->meta)
+    {
+      Bool_t gotTB=false;
+      apv_meta_t *meta = (apv_meta_t *)dd->meta ;
+      for(int r=1;r<=FGT_RDO_COU;r++) {
+	if(meta->arc[r].present == 0) continue ;
+	                                 
+	for(int arm=0;arm<FGT_ARM_COU;arm++) {
+	  if(meta->arc[r].arm[arm].present == 0) continue ;
+	  for(int apv=0;apv<FGT_APV_COU;apv++) {
+	    if(meta->arc[r].arm[arm].apv[apv].present == 0) continue ;
+	    numTb=meta->arc[r].arm[arm].apv[apv].ntim;
+	    gotTB=true;
+	    break;//should all be the same, so break after we got it once...
+	  }
+	  if(gotTB)
+	    break;
+	}
+	if(gotTB)
+	  break;
+      }
+
+    }
+
+
   while(dd && dd->iterate()) {
     fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
     for(u_int i=0;i<dd->ncontent;i++)
       {
-	//corrupted data
+	//corrupted data, should be fine for run 13 as well, these apvs do not exst
 	if(dd->pad>21 || dd->pad<0 || dd->pad==10 || dd->pad==11)
 	  continue;
 	if(dd->rdo<1 || dd->rdo > 2 || dd->sec <0 || dd->sec> 4)
 	  continue;
-	if(f[i].ch>127 || f[i].ch<0|| f[i].tb>7)
+	if(f[i].ch>127 || f[i].ch<0|| f[i].tb>numTb)
 	  continue;
 
 
@@ -267,14 +296,14 @@ void fgtBuilder::event(daqReader *rdr)
 	int gid=(dd->rdo-1)*10+dd->sec*2;
 	if(dd->pad>10)
 	  gid+=1;
-	if(gid>18)
+	if(gid>24)
 	  cout <<"gid: " << gid <<" to high "<<endl;
 	int quad=(dd->rdo-1)*12+dd->sec*2;
 	if(dd->pad>10)
 	  quad+=1;
 	int channel;
 
-	if(gid<20)
+	if(gid<25)
 	  {
 	    channel=(dd->pad%12)*128+f[i].ch;
 	    //	    if(gid==2 && channel==768)
@@ -477,10 +506,12 @@ void fgtBuilder::main(int argc, char *argv[])
 }
 
 //const string fgtBuilder::Gid2Label[19]={"1AB","1BC","1CD","1DA","2AB","2BC","2DA","3AB","3BC","3DA","4AB","4BC","4DA","5AB","5BC","5DA","6AB","6BC","6DA"};
-const string fgtBuilder::Gid2Label[19]={"1DA","1AB","2DA","2AB","3AB","3BC","4BC","5DA","6DA","6AB","1BC","1CD","2BC","3DA","4DA","4AB","5AB","5BC","6BC"};
-const int fgtBuilder::Indx2Gid[19]={1,10,11,0,3,12,2,4,5,13,15,6,14,16,17,7,9,18,8};
-const int fgtBuilder::Gid2Indx[19]={3,0,6,4,7,8,11,15,18,16,1,2,5,9,12,10,13,14,17};
-const int fgtBuilder::maxA=19;
+///--->old aactie const string fgtBuilder::Gid2Label[19]={"1DA","1AB","2DA","2AB","3AB","3BC","4BC","5DA","6DA","6AB","1BC","1CD","2BC","3DA","4DA","4AB","5AB","5BC","6BC"};
+const string fgtBuilder::Gid2Label[24]={"3DA","6AB","2DA","5DA","1BC","3BC","4BC","6DA","3CD","6CD","5CD","5BC","2AB","1CD","3AB","1DA","4DA","2BC", "5AB","6BC","4AB","4CD","2CD","1AB"};
+const int fgtBuilder::Indx2Gid[24]={23,4,13,15,12,17,22,2,14,5,8,0,20,6,21,16,18,11,10,3,1,19,9,7};
+//const int fgtBuilder::Gid2Indx[24]={3,0,6,4,7,8,11,15,18,16,1,2,5,9,12,10,13,14,17};
+const int fgtBuilder::Gid2Indx[24]={11,20,7,19,1,9,13,23,10,22,18,17,4,2,8,3,15,5,16,21,12,14,6,0};
+const int fgtBuilder::maxA=24;
 //const int fgtBuilder::maxC=1400;
 const int fgtBuilder::maxC=1280;
 const int fgtBuilder::maxPedVal=1500;
