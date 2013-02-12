@@ -37,10 +37,10 @@ public:
 
 
 
-  static const string Gid2Label[19];
+  static const string Gid2Label[24];
   //the gid encodes rdo etc. but since this is consecutive, we have to have another mapping
-  static const int Indx2Gid[19];
-  static const int Gid2Indx[19];
+  static const int Indx2Gid[24];
+  static const int Gid2Indx[24];
 
 
   //*** Histogram Declarations...
@@ -68,6 +68,11 @@ public:
       TH2* q17;
       TH2* q18;
       TH2* q19;
+      TH2* q20;
+      TH2* q21;
+      TH2* q22;
+      TH2* q23;
+      TH2* q24;
     };
   } contents;
 
@@ -111,20 +116,20 @@ public:
   JevpPlot** plots;
   daq_dta *dd;
   //*** End Histogram Declarations...
-  float meanVals[19*1400];
-  float oldStdDevs[19*1400];
+  float meanVals[24*1400];
+  float oldStdDevs[24*1400];
 
-  int aVals[19*1400];
-  int numVals[19*1400];
+  int aVals[24*1400];
+  int numVals[24*1400];
   //  int rmsVals[19*1400];
 
 
-  int numOverOneSig[19*1400];
-  bool isChannelBad[19*1400];
+  int numOverOneSig[24*1400];
+  bool isChannelBad[24*1400];
 
 
-  double runningAvg[19*1400];
-  double runningStdDevSq[19*1400];
+  double runningAvg[24*1400];
+  double runningStdDevSq[24*1400];
   //num RDOs, ARM, APV, keep track of channel count per apv
   int chCntDaq[2][6][24];
 
