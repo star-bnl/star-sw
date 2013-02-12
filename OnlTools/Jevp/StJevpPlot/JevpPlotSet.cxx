@@ -851,7 +851,8 @@ StTriggerData *JevpPlotSet::getStTriggerData(daqReader *rdr)
     }
     else {
       LOG("ERR", "TRG RAW: version mismatch 0x%2x-0x%2x-0x%2x-0x%2x", td[0], td[1], td[2], td[3]);
-      return NULL;
+      //return NULL;
+	trgd = (StTriggerData *)trgd2012;
     }
 
     return trgd;
