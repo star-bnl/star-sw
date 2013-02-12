@@ -622,15 +622,15 @@ void mtdBuilder::event(daqReader *rdr) {
  		int islot		= slots[kslot];
  		for (int iaddr=0;iaddr<32;iaddr++){
  			int kh		= islot*32 + iaddr;
- 			if (trgd->mtdAtSlotAddress(iaddr,0,islot)){
- 				contents.hMTD_trig2D->Fill(kh,trgd->mtdAtSlotAddress(iaddr,0,islot)); 				
- 				contents.hMTD_trig[mh]->Fill(trgd->mtdAtSlotAddress(iaddr,0,islot));
+ 			if (trgd->mxqAtSlotAddress(iaddr,0,islot)){
+ 				contents.hMTD_trig2D->Fill(kh,trgd->mxqAtSlotAddress(iaddr,0,islot)); 				
+ 				contents.hMTD_trig[mh]->Fill(trgd->mxqAtSlotAddress(iaddr,0,islot));
  				if (isADC[mh]){
  					kbin	= isADC[mh];
-	 				contents.hMTD_trig2D_adc->Fill(kbin,trgd->mtdAtSlotAddress(iaddr,0,islot)); 				
+	 				contents.hMTD_trig2D_adc->Fill(kbin,trgd->mxqAtSlotAddress(iaddr,0,islot)); 				
  				} else if (isTAC[mh]){
  					kbin	= isTAC[mh];
-	 				contents.hMTD_trig2D_tac->Fill(kbin,trgd->mtdAtSlotAddress(iaddr,0,islot)); 				
+	 				contents.hMTD_trig2D_tac->Fill(kbin,trgd->mxqAtSlotAddress(iaddr,0,islot)); 				
  				} 
  			}
  			++mh;

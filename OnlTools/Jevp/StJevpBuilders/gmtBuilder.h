@@ -40,6 +40,7 @@ public:
     else if(i_arm ==1 &&  i_port==1 && i_apv ==1 ) {return 13;}
     else if(i_arm ==1 &&  i_port==1 && i_apv ==2 ) {return 14;}
     else if(i_arm ==1 &&  i_port==1 && i_apv ==3 ) {return 15;}
+    return -1;
   }
 
   int getLayer(int iarm, int iport, int iapv){
