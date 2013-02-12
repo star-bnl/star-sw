@@ -91,7 +91,7 @@ void gmtBuilder::initialize(int argc, char *argv[]) {
       
       sprintf(tmp,"pedestalsAPV%d",i);  //0-7 ARM =0 and 8-15 ARM =2
       sprintf(tmp1,"pulse height for all channels in ARM:%d, APV%d",iarm,i);
-      hPedContents.hPedArray[i]=new TH2F(tmp,tmp1,200,0,128,200,0,4096);
+      hPedContents.hPedArray[i]=new TH2F(tmp,tmp1,130,-1,129,512,0,4096);
       hPedContents.hPedArray[i]->GetXaxis()->SetTitle("X = Channel+timebin/numTimebins");
       hPedContents.hPedArray[i]->GetYaxis()->SetTitle("ADC value");
       hPedContents.hPedArray[i]->GetXaxis()->SetNdivisions(8,false);
@@ -138,7 +138,7 @@ void gmtBuilder::initialize(int argc, char *argv[]) {
 
       sprintf(TBbuffer,"Timebins in Chamber%d",i);
       sprintf(TBbuffer1,"Timebin Charge Distributions for Chamber%d",i);
-      hTimebinContents.hTimebinArray[i]=new TH1D(TBbuffer,TBbuffer1,15,0,15);
+      hTimebinContents.hTimebinArray[i]=new TH1D(TBbuffer,TBbuffer1,15,-0.5,14.5);
       hTimebinContents.hTimebinArray[i]->GetXaxis()->SetTitle("");
       hTimebinContents.hTimebinArray[i]->GetYaxis()->SetTitle("");
       hTimebinContents.hTimebinArray[i]->GetXaxis()->SetNdivisions(15,false);
@@ -151,7 +151,7 @@ void gmtBuilder::initialize(int argc, char *argv[]) {
       //hTimebinContents.hTimebinArray[i]->GetYaxis()->SetLabelSize(0.06);
     }
   
-  hSumContents.h1SumAllsignals = new TH1D("SumAllsignals","Sum of signals from all chambers per time bin",15,0,15);
+  hSumContents.h1SumAllsignals = new TH1D("SumAllsignals","Sum of signals from all chambers per time bin",15,-0.5,14.5);
   hSumContents.h1SumAllsignals->GetXaxis()->SetNdivisions(15,false);
 
   // Add root histograms to Plots
@@ -159,6 +159,9 @@ void gmtBuilder::initialize(int argc, char *argv[]) {
 
   int n=0;
   plots[n] = new JevpPlot( hSumContents.h1SumAllsignals);
+  	plots[n]->optstat=1111111;
+  
+  
   for(int i=0;i<numAPVs;i++)plots[++n] = new JevpPlot(hPedContents.hPedArray[i]);
   for(int i=0;i<numLayers;i++) plots[++n]=new JevpPlot(hSignalContents.hSignalArray[i]);
   for(int i=0;i<numLayers;i++) plots[++n]=new JevpPlot(hTimebinContents.hTimebinArray[i]);
@@ -209,7 +212,7 @@ void gmtBuilder::event(daqReader *rdr)
 	for ( int i_apv = 0; i_apv < numAPVs; i_apv++ ) {
 	  for(int i_ch =0; i_ch<numChannels; i_ch++){
 	    for(int i_tb=0;i_tb<numTimebins; i_tb++){
-	  SignalPedCorrected[i_arm][i_port][i_apv][i_ch][i_tb] = 9999.00;
+		  SignalPedCorrected[i_arm][i_port][i_apv][i_ch][i_tb] = 9999.00;
 	    }
 	  }
 	}
@@ -219,13 +222,11 @@ void gmtBuilder::event(daqReader *rdr)
     
     for( int ilayer = 0; ilayer<numLayers; ilayer++){
       	sumSignal_AllTimebins[ilayer] = 0.0;
-	SumSignalPedCorrected1[ilayer] = 0.0;
-      for (int tb = 0; tb<numTimebins; tb++){
-	SumSignalPedCorrected[tb][ilayer] = 0.0;
-	
-
-	sumSignal_AllChambers[tb] = 0.0;
-      }
+		SumSignalPedCorrected1[ilayer] = 0.0;
+     	 for (int tb = 0; tb<numTimebins; tb++){
+			SumSignalPedCorrected[tb][ilayer] = 0.0;
+			sumSignal_AllChambers[tb] = 0.0;
+     	 }
     }
     
     daq_dta *dd=rdr->det("gmt")->get("adc");
@@ -267,17 +268,17 @@ void gmtBuilder::event(daqReader *rdr)
 	      //cout<<"arm" << arm <<"\t port "<< port<<"\t apv "<<apv<<"\t apvs "<<apvs<<endl;
 	      
 	      if(apvs >=0 && apvs <numAPVs){                           
-		hPedContents.hPedArray[apvs]->Fill(ch_seq,adc); 
+			hPedContents.hPedArray[apvs]->Fill(ch_seq,adc); 
 	      }
 	      
 	      //======================= calculation of pedestals ========================
 	      
 	      if(timebin < 4){
-	      double adc_tb3 = f[ii].adc;
-		int ch_tb3 = f[ii].ch;
-		sumADC[arm][port][apv][ch_tb3] += adc_tb3;
-		counters[arm][port][apv][ch_tb3]++ ;
-		} //tb
+		    double adc_tb3 = f[ii].adc;
+			int ch_tb3 = f[ii].ch;
+			sumADC[arm][port][apv][ch_tb3] += adc_tb3;
+			counters[arm][port][apv][ch_tb3]++ ;
+		  } //tb
 	      
 	    }  //dd-> cnotent
 	}  //usedAPV  loop
@@ -286,12 +287,19 @@ void gmtBuilder::event(daqReader *rdr)
       } //1st dd->iterate
 	double pedestals[numARMs][numPORTs][numAPVs][numChannels];
 	
-	for (int iarm=0; iarm<numARMs; iarm++){
-	  for (int iport=0; iport<numPORTs; iport++){
-	    for (int iapv=0; iapv<numAPVs; iapv++){
-	      for (int ichannel = 0;ichannel<numChannels;ichannel++){
-		pedestals[iarm][iport][iapv][ichannel] = sumADC[iarm][iport][iapv][ichannel]/counters[iarm][iport][iapv][ichannel];
-		//cout << "sumADC = "<<sumADC[iarm][iport][iapv][ichannel]<<"\t counters = "<<counters[iarm][iport][iapv][ichannel]<<"\t avg. pedestals = "<<pedestals[iarm][iport][iapv][ichannel]<<endl;
+	for (int iarm=0; iarm<numARMs; iarm++){							// 2
+	  for (int iport=0; iport<numPORTs; iport++){					// 2
+	    for (int iapv=0; iapv<numAPVs; iapv++){						// 4
+	      for (int ichannel = 0;ichannel<numChannels;ichannel++){	// 128
+	      	if (counters[iarm][iport][iapv][ichannel] != 0){
+				pedestals[iarm][iport][iapv][ichannel] = sumADC[iarm][iport][iapv][ichannel]/counters[iarm][iport][iapv][ichannel];
+				//cout << "sumADC = "<<sumADC[iarm][iport][iapv][ichannel]<<"\t counters = "<<counters[iarm][iport][iapv][ichannel]<<"\t avg. pedestals = "<<pedestals[iarm][iport][iapv][ichannel]<<endl;
+			} else {
+				pedestals[iarm][iport][iapv][ichannel] = 0;
+				//if (ichannel==0){
+				//	cout<<iarm<<" "<<iport<<" "<<iapv<<" "<<ichannel<<"\t"<<counters[iarm][iport][iapv][ichannel]<<endl;
+				//}
+			}
 	      }
 	    }
 	  }
@@ -353,29 +361,29 @@ void gmtBuilder::event(daqReader *rdr)
       
       int nlayerhits =0;
       for(int tb=0; tb<numTimebins; tb++){
-      for(int ilayer=0; ilayer<numLayers; ilayer++){
-	if(SumSignalPedCorrected[tb][ilayer]>0.0)nlayerhits ++;
-      }
+    	  for(int ilayer=0; ilayer<numLayers; ilayer++){
+			if(SumSignalPedCorrected[tb][ilayer]>0.0)nlayerhits ++;
+    	  }
       }
 
       //if(nlayerhits>=2){
 	      
 	for(int ilayer=0; ilayer<numLayers; ilayer++){
-	for (int tb =3; tb<numTimebins; tb++){
-	  
-	  sumSignal_AllTimebins[ilayer] = sumSignal_AllTimebins[ilayer] + SumSignalPedCorrected[tb][ilayer];
-	  
-	}
-	
-	if(sumSignal_AllTimebins[ilayer]>0)hSignalContents.hSignalArray[ilayer]->Fill(sumSignal_AllTimebins[ilayer]);  
+		for (int tb =3; tb<numTimebins; tb++){	  
+		  sumSignal_AllTimebins[ilayer] = sumSignal_AllTimebins[ilayer] + SumSignalPedCorrected[tb][ilayer];
+		}
+		if(sumSignal_AllTimebins[ilayer]>0)hSignalContents.hSignalArray[ilayer]->Fill(sumSignal_AllTimebins[ilayer]);  
       }
       
        for (int tb =0; tb<numTimebins; tb++){
-      for(int ilayer=0; ilayer<numLayers; ilayer++){
-	  sumSignal_AllChambers[tb] = sumSignal_AllChambers[tb] + SumSignalPedCorrected[tb][ilayer];
-	  hTimebinContents.hTimebinArray[ilayer]->Fill(tb,SumSignalPedCorrected[tb][ilayer]);
-	}
-      hSumContents.h1SumAllsignals->Fill(tb,sumSignal_AllChambers[tb]);
+      	for(int ilayer=0; ilayer<numLayers; ilayer++){
+	  		sumSignal_AllChambers[tb] = sumSignal_AllChambers[tb] + SumSignalPedCorrected[tb][ilayer];
+	  		hTimebinContents.hTimebinArray[ilayer]->Fill(tb,SumSignalPedCorrected[tb][ilayer]);
+		}
+      	hSumContents.h1SumAllsignals->Fill(tb,sumSignal_AllChambers[tb]);
+      	if (sumSignal_AllChambers[tb]!=0){
+	      	cout<<tb<<" "<<sumSignal_AllChambers[tb]<<endl;
+	    }
       }
        //}  //nLayerhits loop
 
@@ -386,7 +394,7 @@ void gmtBuilder::event(daqReader *rdr)
   //if(evtCount%1000 == 0.)cout <<"evnts = "<< evtCount<<endl;
   } //event cut lop
 
-  cout<< "Total no. of events = " <<evtCount<<endl;
+//WJL  cout<< "Total no. of events = " <<evtCount<<endl;
   }  //event loop
 
 
