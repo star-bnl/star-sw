@@ -13,6 +13,7 @@
 #include <TSystem.h>
 #include "StEvent/StTriggerData2009.h"
 #include "StEvent/StTriggerData2012.h"
+#include "StEvent/StTriggerData2013.h"
 #include "PdfFileBuilder.h"
 
 #include <DAQ_READER/daqReader.h>
@@ -849,10 +850,17 @@ StTriggerData *JevpPlotSet::getStTriggerData(daqReader *rdr)
       StTriggerData2012 *trgd2012 = new StTriggerData2012(trgdatablock2012, run);
       trgd = (StTriggerData *)trgd2012;
     }
+    else if(td[3] == 0x42) {
+      TriggerDataBlk2013 *trgdatablock2013 = (TriggerDataBlk2013 *)td;
+      StTriggerData2013 *trgd2013 = new StTriggerData2013(trgdatablock2013, run);
+      trgd = (StTriggerData *)trgd2013;
+    }
     else {
       LOG("ERR", "TRG RAW: version mismatch 0x%2x-0x%2x-0x%2x-0x%2x", td[0], td[1], td[2], td[3]);
       //return NULL;
-	trgd = (StTriggerData *)trgd2012;
+        TriggerDataBlk2013 *trgdatablock2013 = (TriggerDataBlk2013 *)td;
+	StTriggerData2013 *trgd2013 = new StTriggerData2013(trgdatablock2013, run);
+	trgd = (StTriggerData *)trgd2013;
     }
 
     return trgd;
