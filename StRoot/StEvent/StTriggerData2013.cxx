@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2013.cxx,v 2.2 2013/01/23 20:28:55 ullrich Exp $
+ * $Id: StTriggerData2013.cxx,v 2.3 2013/02/12 19:40:33 ullrich Exp $
  *
  * Author: Akio Ogawa,Nov 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2013.cxx,v $
+ * Revision 2.3  2013/02/12 19:40:33  ullrich
+ * Add two new methods: mxqAtSlotAddress and mtd3AtAddress (Llope).
+ *
  * Revision 2.2  2013/01/23 20:28:55  ullrich
  * Improve code to avoid compiler warning when shifting bits.
  *
@@ -1122,6 +1125,17 @@ unsigned short* StTriggerData2013::getDsm1_FMS(int prepost) const
 
 unsigned short* StTriggerData2013::getDsm2_FMS() const {return L1_DSM->FPD;}
 
+unsigned short StTriggerData2013::mxqAtSlotAddress(int address, int prepost, int slot) const
+{
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && address>=0 && address<32){
+       if (slot >= 0 && slot<16){
+    	 return mxq[buffer][slot][address];
+       }
+    }
+    return 0;
+}
+
 unsigned short StTriggerData2013::mtdAtAddress(int address, int prepost) const
 {
     int buffer = prepostAddress(prepost);
@@ -1134,6 +1148,14 @@ unsigned short StTriggerData2013::mtdgemAtAddress(int address, int prepost) cons
     if (mRun<=12003001) return 0;
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && address>=0 && address<32) return mxq[buffer][10][address];
+    return 0;
+}
+
+unsigned short StTriggerData2013::mtd3AtAddress(int address, int prepost) const
+{
+    if (mRun<=14001001) return 0;			// Run-13 onwards...
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && address>=0 && address<32) return mxq[buffer][12][address];
     return 0;
 }
 

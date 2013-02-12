@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.20 2012/04/30 15:19:11 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.21 2013/02/12 19:40:32 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.21  2013/02/12 19:40:32  ullrich
+ * Add two new methods: mxqAtSlotAddress and mtd3AtAddress (Llope).
+ *
  * Revision 2.20  2012/04/30 15:19:11  ullrich
  * Added access function for l2sum (Akio)
  *
@@ -73,7 +76,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.20 2012/04/30 15:19:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.21 2013/02/12 19:40:32 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -241,8 +244,10 @@ unsigned short StTriggerData::vpdTDCHighThr(StBeamDirection eastwest, int pmt, i
 unsigned short StTriggerData::vpdEarliestTDC(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::vpdTimeDifference() const {return 0;}
+unsigned short StTriggerData::mxqAtSlotAddress(int address, int prepost, int slot) const {return 0;}
 unsigned short StTriggerData::mtdAtAddress(int address, int prepost) const {return 0;}
 unsigned short StTriggerData::mtdgemAtAddress(int address, int prepost) const {return 0;}
+unsigned short StTriggerData::mtd3AtAddress(int address, int prepost) const {return 0;}
 unsigned short StTriggerData::mtdAdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 unsigned short StTriggerData::mtdTdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 unsigned char  StTriggerData::mtdDsmAtCh(int ch, int prepost) const {return 0;}
