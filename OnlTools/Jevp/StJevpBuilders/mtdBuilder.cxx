@@ -12,18 +12,25 @@
 #include "StEvent/StTriggerData.h"
 #include <TH1I.h>
 #include <TH2F.h>
+#include <TString.h>
 
 #include <math.h>
 #include "mtdBuilder.h"
 #include <RTS/include/rtsLog.h>
 
 // Backleg lists
-int tray3bl[1] = {26};
-int tray5bl[2] = {27, 28};
-int tray[3]={26, 27, 28};
+const int nTray3bl		= 0;
+      int tray3bl[1] 	= {0};
+const int nTray5bl		= 15;
+      int tray5bl[15]	= {22,25,26,27,28,29,30,1,2,3,4,5,6,7,10};
+int tray[15]			= {22,25,26,27,28,29,30,1,2,3,4,5,6,7,10};
 
-int nGlobalSlot=sizeof(tray3bl)/sizeof(int)*3+sizeof(tray5bl)/sizeof(int)*5;
-int ntray=sizeof(tray)/sizeof(int);
+//                   BL        1 2  3  4  5  6  7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
+const int HitmapXbyTray[30] = {8,9,10,11,12,13,14,0,0,15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 3, 4, 5, 6, 7};
+const int TrayToRDO[30]     = {2,2, 2, 2, 2, 2, 2,2,2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+int nGlobalSlot	= nTray3bl*3 + nTray5bl*5;
+int ntray		= nTray3bl   + nTray5bl;
 
 ClassImp(mtdBuilder);
   
@@ -45,95 +52,156 @@ mtdBuilder::~mtdBuilder() {
   for(int i=0;i<n;i++) {
     if(plots[i]) delete plots[i];
   }
-  
   delete plots;
 }
 
 void mtdBuilder::initialize(int argc, char *argv[]) {
-  // Build Root Histograms...
+
+  //---- get bunchid offsets...
+  //
+  ReadValidBunchidPhase();
+
+  //---- get QT board map information...
+  //
+  for (int i=0;i<nMTDtrig;i++){ isADC[i] = isTAC[i] = 0; }
+  SetMtdQTmap();
+
+  //---- build Root Histograms...
+  //
   char tmpchr[200];
+  char tmpchrt[200];
+  
+  sprintf(tmpchr,"MTD strips vs BL");
+  contents.hMTD_hitmap2D = new TH2F(tmpchr,tmpchr,15,0.5,15.5,120.,0.5,120.5);		// 15 active backlegs
+  for (int i=0;i<15;i++){
+	sprintf(tmpchr, "%d", tray[i]);
+  	contents.hMTD_hitmap2D->GetXaxis()->SetBinLabel(i+1,tmpchr);
+  }
   
   contents.hMTD_hitmap = new TH1 **[nMTDtrays];
-  for(int itray=0;itray<nMTDtrays;itray++)
+  for(int itray=0;itray<nMTDtrays;itray++){
     contents.hMTD_hitmap[itray] = new TH1*[5];
+  }
   for(int i=0;i<nMTDtrays;i++){
     for(int j=0; j<5; j++){
       sprintf(tmpchr, "MTD_tray_%d_position_%d", i+1, j+1);
       contents.hMTD_hitmap[i][j] = new TH1F(tmpchr, tmpchr, 24, 0.5, 24.5);
     }
   }
+  
+	sprintf(tmpchr,"MTD_Trig2D");
+//    contents.hMTD_trig2D = new TH2F(tmpchr,tmpchr,96,-0.5,95.5,60,0,3000);
+    contents.hMTD_trig2D     = new TH2F(tmpchr,tmpchr,512,-0.5,511.5,164, 0, 4100);
+	sprintf(tmpchr,"MTD_Trig2D_adc");
+    contents.hMTD_trig2D_adc = new TH2F(tmpchr,tmpchr,42,0.5,42.5,164, 0, 4100);
+	sprintf(tmpchr,"MTD_Trig2D_tac");
+    contents.hMTD_trig2D_tac = new TH2F(tmpchr,tmpchr,42,0.5,42.5,164, 0, 4100);
+	//
+	int kadc,ktac,kadctac;
+	TString adctac[2];
+			adctac[0] = TString("ADC");
+			adctac[1] = TString("TAC");
+	TString names[nMTDtrig];
+ 	for (int i=0;i<nMTDtrig;i++){
+ 		//
+ 		kadc = ktac = 0; kadctac = -1;
+ 		if (isADC[i]){ kadc=isADC[i]; }else{ ktac=isTAC[i]; }
+ 		if (kadc){ kadctac=0; } else if (ktac){ kadctac=1; }
+		if (kadctac>=0){
+	 		sprintf(tmpchrt,"%s %s %s",QTboard[i].Data(),adctac[kadctac].Data(),QTcable[i].Data()); 
+	 		//cout<<i<<" "<<tmpchrt<<endl;
+	 		names[i] = TString(tmpchrt);
+	 	} else {
+	 		names[i] = TString("no QT connection");
+	 	}
+ 		//
+ 	}
+    contents.hMTD_trig = new TH1 *[nMTDtrig];
+	for (int i=0;i<nMTDtrig;i++){
+		sprintf(tmpchr,"MTD_Trig%d",i);
+		contents.hMTD_trig[i] = new TH1F(tmpchr, names[i].Data(), 164, 0, 4100);
+	}
+
   // Run12 MTD trigger
-  contents.hMTD_trig = new TH1 *[nMTDtrig];
   // keep the same format as the trigger experts'
-  // for backleg 27-2
-  sprintf(tmpchr,"MTD_Trigger27_2_outadc");contents.hMTD_trig[0] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_2_outtdc");contents.hMTD_trig[1] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_2_inadc"); contents.hMTD_trig[2] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_2_intdc"); contents.hMTD_trig[3] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  
-  //for backleg 27-3
-  sprintf(tmpchr,"MTD_Trigger27_3_outadc");contents.hMTD_trig[4] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_3_outtdc");contents.hMTD_trig[5] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_3_inadc"); contents.hMTD_trig[6] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_3_intdc"); contents.hMTD_trig[7] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  
-  //for backleg 27-4
-  sprintf(tmpchr,"MTD_Trigger27_4_outadc");contents.hMTD_trig[8] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_4_outtdc");contents.hMTD_trig[9] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_4_inadc"); contents.hMTD_trig[10] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_4_intdc"); contents.hMTD_trig[11] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  
-  // for backleg 27-1
-  sprintf(tmpchr,"MTD_Trigger27_1_outadc");contents.hMTD_trig[12] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_1_outtdc");contents.hMTD_trig[13] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_1_inadc"); contents.hMTD_trig[14] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_1_intdc"); contents.hMTD_trig[15] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  
-  //for backleg 27-5
-  sprintf(tmpchr,"MTD_Trigger27_5_outadc");contents.hMTD_trig[16] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_5_outtdc");contents.hMTD_trig[17] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_5_inadc"); contents.hMTD_trig[18] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
-  sprintf(tmpchr,"MTD_Trigger27_5_intdc"); contents.hMTD_trig[19] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+// 
+//   // for backleg 27-2
+//   sprintf(tmpchr,"MTD_Trigger27_2_outadc");contents.hMTD_trig[0] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_2_outtdc");contents.hMTD_trig[1] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_2_inadc"); contents.hMTD_trig[2] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_2_intdc"); contents.hMTD_trig[3] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   
+//   //for backleg 27-3
+//   sprintf(tmpchr,"MTD_Trigger27_3_outadc");contents.hMTD_trig[4] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_3_outtdc");contents.hMTD_trig[5] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_3_inadc"); contents.hMTD_trig[6] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_3_intdc"); contents.hMTD_trig[7] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   
+//   //for backleg 27-4
+//   sprintf(tmpchr,"MTD_Trigger27_4_outadc");contents.hMTD_trig[8] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_4_outtdc");contents.hMTD_trig[9] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_4_inadc"); contents.hMTD_trig[10] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_4_intdc"); contents.hMTD_trig[11] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   
+//   // for backleg 27-1
+//   sprintf(tmpchr,"MTD_Trigger27_1_outadc");contents.hMTD_trig[12] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_1_outtdc");contents.hMTD_trig[13] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_1_inadc"); contents.hMTD_trig[14] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_1_intdc"); contents.hMTD_trig[15] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   
+//   //for backleg 27-5
+//   sprintf(tmpchr,"MTD_Trigger27_5_outadc");contents.hMTD_trig[16] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_5_outtdc");contents.hMTD_trig[17] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_5_inadc"); contents.hMTD_trig[18] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
+//   sprintf(tmpchr,"MTD_Trigger27_5_intdc"); contents.hMTD_trig[19] = new TH1F(tmpchr, tmpchr, 150, 0, 3000);
 
   //mtd bunchid
-  contents.MTD_bunchid = new TH2F("MTD_bunchid", "MTD_bunchid", 3, 25.5, 28.5, 30, -14.5, 15.5);
+  contents.MTD_bunchid = new TH2F("MTD_bunchid", "MTD_bunchid", 30, 0.5, 30.5, 30, -14.5, 15.5);
 
   //mtd error check
-  sprintf(tmpchr,"MTD_Error1");contents.MTD_Error1 = new TH1F(tmpchr, "MTD electronics errors", 2, -0.5, 1.5);
-  contents.MTD_Error1->GetXaxis()->SetBinLabel(1, "THUB1");  contents.MTD_Error1->GetXaxis()->SetBinLabel(2, "THUB2");
-  sprintf(tmpchr,"MTD_Error2");contents.MTD_Error2 = new TH1F(tmpchr, "MTD incorrect bunchid errors", 3, 25.5, 28.5);
-  for(int i=0;i<ntray;i++){
-    sprintf(tmpchr,"Tray%d", tray[i]); 
-    contents.MTD_Error2->GetXaxis()->SetBinLabel(i+1, tmpchr); 
-  }
-  sprintf(tmpchr,"MTD_Error3");contents.MTD_Error3 = new TH1F(tmpchr, "MTD trays not read out (bunchid not found)", 3, 25.5, 28.5);
-  for(int i=0;i<ntray;i++){
-    sprintf(tmpchr,"Tray%d", tray[i]); 
-    contents.MTD_Error3->GetXaxis()->SetBinLabel(i+1, tmpchr); 
-  }
+  //
+  sprintf(tmpchr,"MTD_Error1");contents.MTD_Error1 = new TH1F(tmpchr, "MTD electronics errors (by RDO)", 2, 0.5, 2.5);
+  //contents.MTD_Error1->GetXaxis()->SetBinLabel(1, "THUB1");  contents.MTD_Error1->GetXaxis()->SetBinLabel(2, "THUB2");
+  //
+  sprintf(tmpchr,"MTD_Error2");contents.MTD_Error2 = new TH1F(tmpchr, "MTD incorrect bunchid errors (by Tray)", 30, 0.5, 30.5);
+  //for(int i=0;i<ntray;i++){
+  //  sprintf(tmpchr,"Tray%d", tray[i]); 
+  //  contents.MTD_Error2->GetXaxis()->SetBinLabel(i+1, tmpchr); 
+  //}
+  //
+  sprintf(tmpchr,"MTD_Error3");contents.MTD_Error3 = new TH1F(tmpchr, "MTD trays not read out (bunchid not found)", 30, 0.5, 30.5);
+  //for(int i=0;i<ntray;i++){
+  //  sprintf(tmpchr,"Tray%d", tray[i]); 
+  //  contents.MTD_Error3->GetXaxis()->SetBinLabel(i+1, tmpchr); 
+  //}
   
-  contents.MTD_Tray_hits=new TH1F("MTD_Tray_hits","MTD Hits by Tray",nGlobalSlot, 1, nGlobalSlot+1);
-  int i=0;
-  for (unsigned int itray3bl=0; itray3bl<sizeof(tray3bl)/sizeof(int); itray3bl++) {
-    int val3tray=tray3bl[itray3bl];
-    for(int islot=2;islot<=4;islot++){
-      sprintf(tmpchr, "Tray%d-%d", val3tray, islot);
-      contents.MTD_Tray_hits->GetXaxis()->SetBinLabel(++i, tmpchr);
-    }
-  }
-  for (unsigned int itray5bl=0; itray5bl<sizeof(tray5bl)/sizeof(int); itray5bl++) {
-    int val5tray=tray5bl[itray5bl];
-    for(int islot=1;islot<=5;islot++){
-      sprintf(tmpchr, "Tray%d-%d", val5tray, islot);
-      contents.MTD_Tray_hits->GetXaxis()->SetBinLabel(++i, tmpchr);
-    }
-  }
+//  contents.MTD_Tray_hits=new TH1F("MTD_Tray_hits","MTD Hits by Tray",150,0.5,150.5);
+  contents.MTD_Tray_hits=new TH1F("MTD_Tray_hits","MTD Hits by Tray",75,0.5,75.5);
+  contents.MTD_Tray_hitsEvenOdd=new TH1F("MTD_Tray_hitsEvenOdd","MTD Hits by Tray",75,0.5,75.5);
+  contents.MTD_Tray_hitsBinEven=new TH1F("MTD_Tray_hitsBinEven","MTD Hits by Tray",75,0.5,75.5);
+  
+//  int i=0;
+//   for (unsigned int itray3bl=0; itray3bl<nTray3bl; itray3bl++) {
+//     int val3tray=tray3bl[itray3bl];
+//     for(int islot=2;islot<=4;islot++){
+//       sprintf(tmpchr, "Tray%d-%d", val3tray, islot);
+//       contents.MTD_Tray_hits->GetXaxis()->SetBinLabel(++i, tmpchr);
+//     }
+//   }
+//   for (unsigned int itray5bl=0; itray5bl<nTray5bl; itray5bl++) {
+//     int val5tray=tray5bl[itray5bl];
+//     for(int islot=1;islot<=5;islot++){
+//       sprintf(tmpchr, "Tray%d-%d", val5tray, islot);
+//       contents.MTD_Tray_hits->GetXaxis()->SetBinLabel(++i, tmpchr);
+//     }
+//   }
   
   //Counter
-  contents.MTD_EventCount=new TH1F("MTD_EventCount","MTD_EventCount",2,0,2);
+  contents.MTD_EventCount=new TH1F("MTD_EventCount","MTD_Events by RDO number",2,0.5,2.5);
 
   // Add root histograms to Plots
-  JevpPlot *plots[100];
+  LOG("====MTD====", "Adding Plots...........................");
+  JevpPlot *plots[200];				// was 100
   int nhhit=0;
   int nhtrig=0;
   int n=0;
@@ -141,106 +209,191 @@ void mtdBuilder::initialize(int argc, char *argv[]) {
   JLatex *latexW, *latexE;
   latexW = new JLatex(4., 0.8, "West");
   latexE = new JLatex(16., 0.8, "East");
-  JLine *ln;
-  ln = new JLine(12.5, 0.1, 12.5, 0.9 );
-  ln -> SetLineColor(4);
+  JLine *ln = new JLine(12.5, 0.1, 12.5, 0.9 );
+  		 ln -> SetLineColor(4);
+
+  TLatex *qtid[42];						// Run-13 - 42 connections to TRG.
+  int kadctacind;
+  for (int i=0;i<nMTDtrig;i++){
+    kadctacind	= 0;
+	if (isADC[i]){ kadctacind=isADC[i]; }else if (isTAC[i]){ kadctacind=isTAC[i]; }
+	if (kadctacind){		
+		sprintf(tmpchr,"%s %s",QTboard[i].Data(),QTcable[i].Data());
+		//cout<<kadctacind<<" "<<tmpchr<<endl;
+		qtid[kadctacind-1]	= new TLatex(kadctacind+0.3,3300.,tmpchr);
+		qtid[kadctacind-1]->SetTextAngle(90);
+		qtid[kadctacind-1]->SetTextSize(0.02);
+	}
+  }
+  TLine *qtlines[2];
+  for (int i=0;i<2;i++){
+	qtlines[i] = new TLine(16.5+14.*i,0.,16.5+14.*i,4095.);		// Run-13 config....
+	qtlines[i]->SetLineColor(1);
+	qtlines[i]->SetLineWidth(2);
+  }
   
-  for (unsigned int itray3bl=0; itray3bl<sizeof(tray3bl)/sizeof(int); itray3bl++) {
+  plots[nhhit++] = new JevpPlot(contents.hMTD_hitmap2D);
+  //
+  for (int itray3bl=0; itray3bl<nTray3bl; itray3bl++) {
     int val3tray=tray3bl[itray3bl];
     for(int islot=2;islot<=4;islot++){
       plots[nhhit++] = new JevpPlot(contents.hMTD_hitmap[val3tray-1][islot-1]);
     }
-  }
-  for (unsigned int itray5bl=0; itray5bl<sizeof(tray5bl)/sizeof(int); itray5bl++) {
+  }  
+  for (int itray5bl=0; itray5bl<nTray5bl; itray5bl++) {
     int val5tray=tray5bl[itray5bl];
     for(int islot=1;islot<=5;islot++){
       plots[nhhit++] = new JevpPlot(contents.hMTD_hitmap[val5tray-1][islot-1]);
     }
   }
-  
-  for (int i=0; i<20; i++) {
+  LOG("====MTD====", "n=%d nhhit=%d nhtrig=%d", nhhit+nhtrig, nhhit, nhtrig);
+  //
+  plots[nhhit+(nhtrig++)] = new JevpPlot(contents.hMTD_trig2D);
+  plots[nhhit+(nhtrig++)] = new JevpPlot(contents.hMTD_trig2D_adc);
+  plots[nhhit+(nhtrig++)] = new JevpPlot(contents.hMTD_trig2D_tac);
+  for (int i=0; i<nMTDtrig; i++) {
     plots[nhhit+(nhtrig++)] = new JevpPlot(contents.hMTD_trig[i]);
   }
   LOG("====MTD====", "n=%d nhhit=%d nhtrig=%d", nhhit+nhtrig, nhhit, nhtrig);
+
   // Add Plots to plot set...
-  for(int i=0;i<nhhit;i++) {
-    LOG("MTD", "Adding plot %d",i);
+  //
+  for(int i=0;i<nhhit;i++) {		// 1D hitmaps are after the 2D hitmap		
+    //LOG("MTD", "Adding plot %d",i);
     addPlot(plots[i]);
-    plots[i]->getHisto(0)->histo->SetFillColor(19);
-    plots[i]->getHisto(0)->histo->SetMinimum(0);
-    plots[i]->getHisto(0)->histo->SetFillStyle(1001);
-    plots[i]->optstat=1111111;
-    plots[i]->gridx = 0;
-    plots[i]->gridy = 0;
-    plots[i]->addElement(latexW);
-    plots[i]->addElement(latexE);
-    plots[i]->addElement(ln);
+	plots[i]->gridx = 0;
+	plots[i]->gridy = 0;
+    if (i==0){
+		plots[i]->optstat=0;
+	} else {
+		plots[i]->getHisto(0)->histo->SetFillColor(19);
+		plots[i]->getHisto(0)->histo->SetMinimum(0);
+		plots[i]->getHisto(0)->histo->SetFillStyle(1001);
+		plots[i]->optstat=1111111;
+		plots[i]->addElement(latexW);
+		plots[i]->addElement(latexE);
+		plots[i]->addElement(ln);
+    }
   }
   LOG("====MTD====", "%d hitmap plots added",nhhit);
+  //
   for(int i=nhhit;i<nhhit+nhtrig;i++) {
-    LOG("MTD", "Adding plot %d",i);
+    //LOG("MTD", "Adding plot %d",i);
     addPlot(plots[i]);
-    plots[i]->getHisto(0)->histo->SetFillColor(19);
-    plots[i]->getHisto(0)->histo->SetMinimum(0);
-    plots[i]->getHisto(0)->histo->SetFillStyle(1001);
-    plots[i]->optstat=1111111;
-    plots[i]->gridx = 0;
-    plots[i]->gridy = 0;
+	plots[i]->gridx = 0;
+	plots[i]->gridy = 0;
+	if (i>=nhhit&&i<nhhit+3){				// TRG data 2D plots...
+		plots[i]->optstat=0;
+		if (i==nhhit+1||i==nhhit+2){
+			for (int j=0;j<42;j++){			// Run-13 42 trg connections...
+				plots[i]->addElement(qtid[j]);
+			}
+			for (int j=0;j<2;j++){			// Run-13 3 QT boards...
+				//cout<<qtlines[j]<<endl;
+				plots[i]->addElement(qtlines[j]);
+			}
+		}
+	} else {								// TRG data 1D plots...
+		plots[i]->getHisto(0)->histo->SetFillColor(19);
+		plots[i]->getHisto(0)->histo->SetMinimum(0);
+		plots[i]->getHisto(0)->histo->SetFillStyle(1001);
+		plots[i]->logy		= 1;
+		plots[i]->optstat	= 1111111;
+	}
   }
   LOG("====MTD====", "%d trig plots added", nhtrig);
 
   n = nhhit+nhtrig-1;
   plots[++n] = new JevpPlot(contents.MTD_bunchid);
+  //LOG("MTD", "Adding plot %d",n);
   addPlot(plots[n]);
   plots[n]->setDrawOpts("colz");
   plots[n]->optstat=1111111;
-  LOG("====MTD====", "mtd bunchid plots added");
+  LOG("====MTD====", "mtd bunchid plots added %d",n);
   
   plots[++n] = new JevpPlot(contents.MTD_Error1);
+  //LOG("MTD", "Adding plot %d",n);
   addPlot(plots[n]);
   plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
   plots[n]->getHisto(0)->histo->SetMinimum(0);
   MTD_Error1_label = new TLatex();
   MTD_Error1_label->SetNDC(); 
   plots[n]->addElement(MTD_Error1_label);
-  LOG("====MTD====", "MTD_Error1 added");
+  LOG("====MTD====", "MTD_Error1 added %d",n);
   
   plots[++n] = new JevpPlot(contents.MTD_Error2);
+  //LOG("MTD", "Adding plot %d",n);
   addPlot(plots[n]);
   plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 0;
   plots[n]->getHisto(0)->histo->SetMinimum(0);
   MTD_Error2_label = new TLatex();
   MTD_Error2_label->SetNDC(); 
   plots[n]->addElement(MTD_Error2_label);
-  LOG("====MTD====", "MTD_Error2 added");
+  LOG("====MTD====", "MTD_Error2 added %d",n);
   
   plots[++n] = new JevpPlot(contents.MTD_Error3);
+  //LOG("MTD", "Adding plot %d",n);
   addPlot(plots[n]);
   plots[n]->getHisto(0)->histo->SetFillColor(45);plots[n]->optstat = 1111111;
   plots[n]->getHisto(0)->histo->SetMinimum(0);
   MTD_Error3_label = new TLatex();
   MTD_Error3_label->SetNDC(); 
   plots[n]->addElement(MTD_Error3_label);
-  LOG("====MTD====", "MTD_Error3 added");
+  LOG("====MTD====", "MTD_Error3 added %d",n);
   
   plots[++n] = new JevpPlot(contents.MTD_EventCount);
+  //LOG("MTD", "Adding plot %d",n);
   addPlot(plots[n]);
   plots[n]->optstat=1111111;
+  plots[n]->getHisto(0)->histo->SetFillColor(19);
+  plots[n]->getHisto(0)->histo->SetFillStyle(1001);
   plots[n]->getHisto(0)->histo->SetMinimum(0);
-  LOG("====MTD====", "MTD_EventCount added");
+  LOG("====MTD====", "MTD_EventCount added %d",n);
   
   plots[++n] = new JevpPlot(contents.MTD_Tray_hits);
+  //LOG("MTD", "Adding plot %d",n);
   addPlot(plots[n]);
+  plots[n]->optstat=0;
+  plots[n]->gridx = 0;
+  plots[n]->gridy = 0;
   plots[n]->logy=1;
-  plots[n]->getHisto(0)->histo->SetFillColor(18);plots[n]->optstat = 0;
-  LOG("====MTD====", "MTD_Tray_hits added");
+  plots[n]->getHisto(0)->histo->SetFillColor(18);
+  JLine *vlines[15];								// Run-13, 15 backlegs
+  for (int i=0;i<15;i++){			
+  	vlines[i] = new JLine(5.5+i*5,1.,5.5+i*5,100000);
+	vlines[i]->SetLineColor(3);
+	plots[n]->addElement(vlines[i]);
+  }
+  LOG("====MTD====", "MTD_Tray_hits added %d",n);
+
+  plots[++n] = new JevpPlot(contents.MTD_Tray_hitsEvenOdd);
+  //LOG("MTD", "Adding plot %d",n);
+  addPlot(plots[n]);
+  plots[n]->optstat=0;
+  plots[n]->addHisto(contents.MTD_Tray_hitsBinEven);
+  plots[n]->gridx = 0;
+  plots[n]->gridy = 0;
+  plots[n]->logy=1;
+  plots[n]->getHisto(0)->histo->SetFillColor(7);
+  plots[n]->getHisto(1)->histo->SetFillColor(5);
+  plots[n]->getHisto(0)->histo->SetMinimum(0.5);
+  plots[n]->getHisto(1)->histo->SetMinimum(0.5);
+  for (int i=0;i<15;i++){
+	sprintf(tmpchr, "%d", tray[i]);
+  	MTD_BL_label[i]=new TLatex(3.+i*5,1.1,tmpchr);
+  	MTD_BL_label[i]->SetTextAlign(21);
+    plots[n]->addElement(MTD_BL_label[i]);
+  }
+  LOG("====MTD====", "MTD_Tray_hits(odd/even) added %d",n);
   
   LOG("====MTD====", "MTD initialization done");
 }
   
 void mtdBuilder::startrun(daqReader *rdr) {
+  //
   LOG("MTD", "TriggerPlotBuilder starting run #%d",rdr->run);
   resetAllPlots();
+  //
 }
 
 void mtdBuilder::event(daqReader *rdr) {
@@ -252,7 +405,7 @@ void mtdBuilder::event(daqReader *rdr) {
   leadinghits.clear();
   trailinghits.clear();
   int allbunchid[2][30];
-  for(int i=0;i<2;i++) for(int j=0;j<30;j++) allbunchid[i][j] = -9999;
+  for(int i=0;i<2;i++){ for(int j=0;j<30;j++){ allbunchid[i][j] = -9999; }}
 	
   daq_dta *dd = rdr->det("mtd")->get("legacy");
   mtd_t *mtd;
@@ -261,99 +414,122 @@ void mtdBuilder::event(daqReader *rdr) {
   } else {
     while(dd->iterate()) {
       mtd = (mtd_t *)dd->Void;
-			
-      int ifib=0;
-      int ndataword = mtd->ddl_words[ifib];    
-      if(ndataword<=0) continue;
-      for(int iword=0;iword<ndataword;iword++){
-		int dataword=mtd->ddl[ifib][iword];
-					
-		int packetid = (dataword&0xF0000000)>>28;
-		if(!ValidDataword(packetid))
-		  contents.MTD_Error1->Fill(ifib); 
-	
-	//	if( (dataword&0xF0000000)>>28 == 0x2) continue;  //TDC header, moved to later
-		if( (dataword&0xF0000000)>>28 == 0xD) continue;  //Header tag
-		if( (dataword&0xF0000000)>>28 == 0xE) continue;  //TDIG Separator
-		if( (dataword&0xF0000000)>>28 == 0xA) {  // header trigger data flag
-		  // do nothing at this moment.
-		  continue;
-		}
-					
-		// geographical data words for tray number.
-		if( (dataword&0xF0000000)>>28 == 0xC) { //Geographical Data
-		  halftrayid = dataword&0x01;    
-		  trayid     = (dataword&0x0FE)>>1;
-		  continue;
-		}
-	
-		if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
-					
-		if( (dataword&0xF0000000)>>28 == 0x6) {continue;} //error
-	
-		if( (dataword&0xF0000000)>>28 == 0x2) {
-		  bunchid=dataword&0xFFF;
-		  allbunchid[halftrayid][trayid-1] = bunchid;
-		  continue;  
-		}
-	
-		int edgeid =int( (dataword & 0xf0000000)>>28 );
-		//if((edgeid !=4) && (edgeid!=5)) continue; //leading edge or trailing edge
-		if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
-					
-		int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
-		int tdigboardid= ( (tdcid & 0xC) >> 2) + halftrayid*4;
-		int tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
-		//int globaltdcchan=tdcchan + (tdcid%4)*8+tdigboardid*24+96*halftrayid; // 0-191 for tray
-		timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
-		time = timeinbin * 25./1024;   // time in ns 
-					
-		//int moduleid=-1;
-		int globalstripid=-1;
-		int stripid=-1;
-		int zendid=-1;
-		int slot=-1;
-		//				
-		if(trayid){
-		  globalstripid=tdcchan2globalstrip(tdigboardid,tdcid,tdcchan);
-		  stripid=(globalstripid-1)%12+1;
-		  zendid=(globalstripid-1)/12; //0 for Lo Z end; 1 for Hi Z end
-		  slot=tdig2slot(tdigboardid, trayid);
-		}				
-	
-		if( istray3bl(trayid) && (slot<2||slot>4) ) continue;
-		if( istray5bl(trayid) && (slot<1||slot>5) ) continue;
-		if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
+	  for (int ifib=0;ifib<2;ifib++){				// THUB-S is fiber 0, THUB-N is fiber 1
+		  int ndataword = mtd->ddl_words[ifib];    
+		  if(ndataword<=0) continue;
+		  contents.MTD_EventCount->Fill(ifib+1);
+		  for(int iword=0;iword<ndataword;iword++){
+			int dataword=mtd->ddl[ifib][iword];
+						
+			int packetid = (dataword&0xF0000000)>>28;
+			if(!ValidDataword(packetid)){ contents.MTD_Error1->Fill(ifib); }
 		
-        contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);        
-  		contents.MTD_Tray_hits->Fill(iGlobalSlot(trayid,slot));
-
-      }  // end loop nword
+		//	if( (dataword&0xF0000000)>>28 == 0x2) continue;  //TDC header, moved to later
+			if( (dataword&0xF0000000)>>28 == 0xD) continue;  //Header tag
+			if( (dataword&0xF0000000)>>28 == 0xE) continue;  //TDIG Separator
+			if( (dataword&0xF0000000)>>28 == 0xA) {  // header trigger data flag
+			  // do nothing at this moment.
+			  continue;
+			}
+						
+			// geographical data words for tray number.
+			if( (dataword&0xF0000000)>>28 == 0xC) { //Geographical Data
+			  halftrayid = dataword&0x01;    
+			  trayid     = (dataword&0x0FE)>>1;
+			  continue;
+			}
+		
+			if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
+						
+			if( (dataword&0xF0000000)>>28 == 0x6) {continue;} //error
+		
+			if( (dataword&0xF0000000)>>28 == 0x2) {
+			  bunchid=dataword&0xFFF;
+			  allbunchid[halftrayid][trayid-1] = bunchid;
+			  continue;  
+			}
+		
+			int edgeid =int( (dataword & 0xf0000000)>>28 );
+			//if((edgeid !=4) && (edgeid!=5)) continue; //leading edge or trailing edge
+			if (edgeid != 4) continue; //kx: plot LE only. Requested by Bill Llope
+						
+			int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
+			int tdigboardid= ( (tdcid & 0xC) >> 2) + halftrayid*4;
+			int tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
+			//int globaltdcchan=tdcchan + (tdcid%4)*8+tdigboardid*24+96*halftrayid; // 0-191 for tray
+			timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
+			time = timeinbin * 25./1024;   // time in ns 
+						
+			//int moduleid=-1;
+			int globalstripid=-1;
+			int stripid=-1;
+			int zendid=-1;
+			int slot=-1;
+			//				
+			if(trayid){
+			  globalstripid=tdcchan2globalstrip(tdigboardid,tdcid,tdcchan);
+			  stripid=(globalstripid-1)%12+1;
+			  zendid=(globalstripid-1)/12; //0 for Lo Z end; 1 for Hi Z end
+			  slot=tdig2slot(tdigboardid, trayid);
+			}				
+		
+			if( istray3bl(trayid) && (slot<2||slot>4) ) continue;
+			if( istray5bl(trayid) && (slot<1||slot>5) ) continue;
+			if(!istray3bl(trayid) && !istray5bl(trayid)) continue;
+			
+//			contents.hMTD_hitmap2D->Fill(trayid,24*(slot-1)+globalstripid);
+			contents.hMTD_hitmap2D->Fill(HitmapXbyTray[trayid-1],24*(slot-1)+globalstripid);
+			contents.hMTD_hitmap[trayid-1][slot-1]->Fill(globalstripid);        
+//			contents.MTD_Tray_hits->Fill(iGlobalSlot(trayid,slot));
+			contents.MTD_Tray_hits->Fill(5*(HitmapXbyTray[trayid-1]-1)+slot);
+			if (HitmapXbyTray[trayid-1]%2==0){
+				contents.MTD_Tray_hitsBinEven->Fill(5*(HitmapXbyTray[trayid-1]-1)+slot);
+			} else {
+				contents.MTD_Tray_hitsEvenOdd->Fill(5*(HitmapXbyTray[trayid-1]-1)+slot);
+			}
+		  }  // end loop nword
+      } // end loop over fibers
     } //end dd iterate
   } //end if dd
-	
-  contents.MTD_EventCount->Fill(1);
-  
+	  
   //check bunchid
-  int mReferenceTray=26;
-  int bunchidref1 =   allbunchid[0][mReferenceTray-1];
-  int bunchidref2 =   allbunchid[1][mReferenceTray-1];
-  int diff = bunchidref2-bunchidref1;
-  if(diff>2048)   {diff =diff-4096;} 
-  else if(diff<-2048) {diff =diff+4096;}
+//  int mReferenceTray=26;				// now read from config file
+  int bunchidref1 	= allbunchid[0][mReferenceTray-1];
+  int bunchidref2 	= allbunchid[1][mReferenceTray-1];
+  int diff 			= bunchidref2-bunchidref1;
+  if (diff> 2048){ diff = diff-4096; } else 
+  if (diff<-2048){ diff = diff+4096; }
   
   contents.MTD_bunchid->Fill(mReferenceTray, diff);
   if(bunchidref2!=-9999 && diff) contents.MTD_Error2->Fill(mReferenceTray);
   if(bunchidref1==-9999 || bunchidref2==-9999) contents.MTD_Error3->Fill(mReferenceTray);
 
+  int BunchIdError	= 1;
   for(int ihalf=0; ihalf<2; ihalf++){
-    for(int i=1; i<ntray; i++){ // skip mReferenceTray
-      int traynum=tray[i]; 
-      int itray=traynum-1;
-      diff = allbunchid[ihalf][itray]-allbunchid[0][mReferenceTray-1];
-      if(allbunchid[ihalf][itray]!=-9999) contents.MTD_bunchid->Fill(traynum, diff);
-      if(allbunchid[ihalf][itray]!=-9999 && diff) contents.MTD_Error2->Fill(traynum); // real bunchid errors
-      if(allbunchid[ihalf][itray]==-9999) contents.MTD_Error3->Fill(traynum); //missing bunchids
+    for(int i=0; i<ntray; i++){
+	  int traynum	= tray[i]; 
+	  if (traynum != mReferenceTray){		// skip reference tray here...
+		  int itray		= traynum-1;
+          int irdo		= TrayToRDO[itray] - 1;
+		  diff 			= allbunchid[ihalf][itray]-allbunchid[0][mReferenceTray-1];
+		  if (diff>= 2048){ diff -= 4096; }
+		  if (diff<=-2048){ diff += 4096; }
+		  //
+		  BunchIdError		= 0;
+		  if (diff!=mValidShiftTray[0][irdo]&&diff!=mValidShiftTray[1][irdo]){
+			  BunchIdError	= 1;
+		  }
+          //
+		  if (BunchIdError && traynum!=10){	
+		    LOG("====MTD====","bunchid error or not found ... tray=%d   ref=%d,%d   bunchid=%d   diff=%d",
+		  			traynum,allbunchid[0][mReferenceTray-1],allbunchid[1][mReferenceTray-1],
+		  			allbunchid[ihalf][itray],diff);
+		  }
+		  //
+		  if(allbunchid[ihalf][itray]!=-9999)                 contents.MTD_bunchid->Fill(traynum, diff);
+		  if(allbunchid[ihalf][itray]!=-9999 && BunchIdError) contents.MTD_Error2->Fill(traynum); 	// real bunchid errors
+		  if(allbunchid[ihalf][itray]==-9999)                 contents.MTD_Error3->Fill(traynum); 	// missing bunchids
+      }
     }
   }
   
@@ -406,34 +582,61 @@ void mtdBuilder::event(daqReader *rdr) {
 
   //MTD trigger Run12
   // for backleg 27-2
-  float outadc0= trgd->mtdAtAddress(8, 0); if(outadc0) contents.hMTD_trig[0]->Fill(outadc0);
-  float outtdc0= trgd->mtdAtAddress(12, 0); if(outtdc0) contents.hMTD_trig[1]->Fill(outtdc0);
-  float inadc0= trgd->mtdAtAddress(9, 0); if(inadc0) contents.hMTD_trig[2]->Fill(inadc0);
-  float intdc0= trgd->mtdAtAddress(13, 0); if(intdc0) contents.hMTD_trig[3]->Fill(intdc0);
-  
-  //for backleg 27-3
-  float outadc1= trgd->mtdAtAddress(16, 0); if(outadc1) contents.hMTD_trig[4]->Fill(outadc1);
-  float outtdc1= trgd->mtdAtAddress(20, 0); if(outtdc1) contents.hMTD_trig[5]->Fill(outtdc1);
-  float inadc1= trgd->mtdAtAddress(17, 0); if(inadc1) contents.hMTD_trig[6]->Fill(inadc1);
-  float intdc1= trgd->mtdAtAddress(21, 0); if(intdc1) contents.hMTD_trig[7]->Fill(intdc1);
-  
-  //for backleg 27-4
-  float outadc2= trgd->mtdAtAddress(24, 0); if(outadc2) contents.hMTD_trig[8]->Fill(outadc2);
-  float outtdc2= trgd->mtdAtAddress(28, 0); if(outtdc2) contents.hMTD_trig[9]->Fill(outtdc2);
-  float inadc2= trgd->mtdAtAddress(25, 0); if(inadc2) contents.hMTD_trig[10]->Fill(inadc2);
-  float intdc2= trgd->mtdAtAddress(29, 0);  if(intdc2) contents.hMTD_trig[11]->Fill(intdc2);
-  
-  // for backleg 27-1
-  float outadc3= trgd->mtdgemAtAddress(8, 0); if(outadc3) contents.hMTD_trig[12]->Fill(outadc3);
-  float outtdc3= trgd->mtdgemAtAddress(12, 0); if(outtdc3) contents.hMTD_trig[13]->Fill(outtdc3);
-  float inadc3= trgd->mtdgemAtAddress(9, 0); if(inadc3) contents.hMTD_trig[14]->Fill(inadc3);
-  float intdc3= trgd->mtdgemAtAddress(13, 0); if(intdc3) contents.hMTD_trig[15]->Fill(intdc3);
-  
-  //for backleg 27-5
-  float outadc4= trgd->mtdgemAtAddress(16, 0); if(outadc4) contents.hMTD_trig[16]->Fill(outadc4);
-  float outtdc4= trgd->mtdgemAtAddress(20, 0); if(outtdc4) contents.hMTD_trig[17]->Fill(outtdc4);
-  float inadc4= trgd->mtdgemAtAddress(17, 0); if(inadc4) contents.hMTD_trig[18]->Fill(inadc4);
-  float intdc4= trgd->mtdgemAtAddress(21, 0); if(intdc4) contents.hMTD_trig[19]->Fill(intdc4);
+//   float outadc0= trgd->mtdAtAddress(8, 0); if(outadc0) contents.hMTD_trig[0]->Fill(outadc0);
+//   float outtdc0= trgd->mtdAtAddress(12, 0); if(outtdc0) contents.hMTD_trig[1]->Fill(outtdc0);
+//   float inadc0= trgd->mtdAtAddress(9, 0); if(inadc0) contents.hMTD_trig[2]->Fill(inadc0);
+//   float intdc0= trgd->mtdAtAddress(13, 0); if(intdc0) contents.hMTD_trig[3]->Fill(intdc0);
+//   
+//   //for backleg 27-3
+//   float outadc1= trgd->mtdAtAddress(16, 0); if(outadc1) contents.hMTD_trig[4]->Fill(outadc1);
+//   float outtdc1= trgd->mtdAtAddress(20, 0); if(outtdc1) contents.hMTD_trig[5]->Fill(outtdc1);
+//   float inadc1= trgd->mtdAtAddress(17, 0); if(inadc1) contents.hMTD_trig[6]->Fill(inadc1);
+//   float intdc1= trgd->mtdAtAddress(21, 0); if(intdc1) contents.hMTD_trig[7]->Fill(intdc1);
+//   
+//   //for backleg 27-4
+//   float outadc2= trgd->mtdAtAddress(24, 0); if(outadc2) contents.hMTD_trig[8]->Fill(outadc2);
+//   float outtdc2= trgd->mtdAtAddress(28, 0); if(outtdc2) contents.hMTD_trig[9]->Fill(outtdc2);
+//   float inadc2= trgd->mtdAtAddress(25, 0); if(inadc2) contents.hMTD_trig[10]->Fill(inadc2);
+//   float intdc2= trgd->mtdAtAddress(29, 0);  if(intdc2) contents.hMTD_trig[11]->Fill(intdc2);
+//   
+//   // for backleg 27-1
+//   float outadc3= trgd->mtdgemAtAddress(8, 0); if(outadc3) contents.hMTD_trig[12]->Fill(outadc3);
+//   float outtdc3= trgd->mtdgemAtAddress(12, 0); if(outtdc3) contents.hMTD_trig[13]->Fill(outtdc3);
+//   float inadc3= trgd->mtdgemAtAddress(9, 0); if(inadc3) contents.hMTD_trig[14]->Fill(inadc3);
+//   float intdc3= trgd->mtdgemAtAddress(13, 0); if(intdc3) contents.hMTD_trig[15]->Fill(intdc3);
+//   
+//   //for backleg 27-5
+//   float outadc4= trgd->mtdgemAtAddress(16, 0); if(outadc4) contents.hMTD_trig[16]->Fill(outadc4);
+//   float outtdc4= trgd->mtdgemAtAddress(20, 0); if(outtdc4) contents.hMTD_trig[17]->Fill(outtdc4);
+//   float inadc4= trgd->mtdgemAtAddress(17, 0); if(inadc4) contents.hMTD_trig[18]->Fill(inadc4);
+//   float intdc4= trgd->mtdgemAtAddress(21, 0); if(intdc4) contents.hMTD_trig[19]->Fill(intdc4);
+
+//	mtdAtAddress(ich,iprepost=0) -> mxq[iprepost=0][0][ich]			ich=[0,31]
+//	mtdgemAtAddress(ich,iprepost=0) -> mxq[iprepost=0][10][ich]		ich=[0,31]
+
+ 	const int nslots 	= 3;
+ 	int slots[nslots]	= {0,10,12};
+ 	int mh				= 0;
+ 	int kbin;
+ 	for (int kslot=0;kslot<nslots;kslot++){
+ 		int islot		= slots[kslot];
+ 		for (int iaddr=0;iaddr<32;iaddr++){
+ 			int kh		= islot*32 + iaddr;
+ 			if (trgd->mtdAtSlotAddress(iaddr,0,islot)){
+ 				contents.hMTD_trig2D->Fill(kh,trgd->mtdAtSlotAddress(iaddr,0,islot)); 				
+ 				contents.hMTD_trig[mh]->Fill(trgd->mtdAtSlotAddress(iaddr,0,islot));
+ 				if (isADC[mh]){
+ 					kbin	= isADC[mh];
+	 				contents.hMTD_trig2D_adc->Fill(kbin,trgd->mtdAtSlotAddress(iaddr,0,islot)); 				
+ 				} else if (isTAC[mh]){
+ 					kbin	= isTAC[mh];
+	 				contents.hMTD_trig2D_tac->Fill(kbin,trgd->mtdAtSlotAddress(iaddr,0,islot)); 				
+ 				} 
+ 			}
+ 			++mh;
+ 		}
+ 	}
+ 
 	
   if(trgd) delete trgd;
   return;
@@ -481,7 +684,7 @@ int mtdBuilder::tdig2slot(int tdigboardid, int trayid){
 
 int mtdBuilder::istray3bl(int trayid){
   int is3 = 0;
-   for (unsigned int itray3bl=0; itray3bl<sizeof(tray3bl)/sizeof(int); itray3bl++) {
+   for (int itray3bl=0; itray3bl<nTray3bl; itray3bl++) {
     if (trayid==tray3bl[itray3bl]) is3 = 1;
    }
   return is3;
@@ -489,7 +692,7 @@ int mtdBuilder::istray3bl(int trayid){
 
 int mtdBuilder::istray5bl(int trayid){
   int is5 = 0;
-   for (unsigned int itray5bl=0; itray5bl<sizeof(tray5bl)/sizeof(int); itray5bl++) {
+   for (int itray5bl=0; itray5bl<nTray5bl; itray5bl++) {
     if (trayid==tray5bl[itray5bl]) is5 = 1;
    }
   return is5;
@@ -510,10 +713,200 @@ bool mtdBuilder::ValidDataword(int packetid)
 
 }
       
-int mtdBuilder::iGlobalSlot(int trayid, int slot){ // 1-13, subject to change with detector update
-  if(trayid==26) return slot-1;
-  if(trayid==27) return 3+slot;
-  if(trayid==28) return 8+slot;
-  return -1;
+int mtdBuilder::iGlobalSlot(int trayid, int slot){ 
+  int igs = -1;
+  if (trayid>=1&&trayid<=30){ igs = (trayid-1)*5 + slot; } 
+                       else { LOG("====MTD====", "MTD Tray ID issue: %d",trayid); }
+  return igs;
+}
+
+void mtdBuilder::ReadValidBunchidPhase(){
+  
+  TString buffer;
+  char mBunchShiftList[256];
+  char mBunchShiftListLocal[256];
+  
+  sprintf(mBunchShiftList, "%s/mtd/%s",confdatadir,"MTD_ValidBunchidPhase.txt");
+  ifstream filein(mBunchShiftList);
+  
+  mReferenceTray=26;
+  int count=0;
+  
+  //try local if not in conf dir
+  if(!filein) {
+    filein.close(); 
+    sprintf(mBunchShiftListLocal, "mtdconfig/%s","MTD_ValidBunchidPhase.txt");
+    filein.open(mBunchShiftListLocal);
+  }
+
+  if(filein){
+    while(!filein.eof()){
+      buffer.ReadLine(filein);
+      if(buffer.BeginsWith("/")) continue;
+      if(buffer.BeginsWith("#")) continue;
+      int number=atoi(buffer.Data());
+      if(count==0){ 
+        mReferenceTray = number;
+        LOG("====MTD====", "mReferenceTray=%d",mReferenceTray);
+      }
+      if(count>=1 && count<=4){
+      	mValidShiftTray[(count-1)%2][(count-1)/2]=number;
+        LOG("====MTD====", "Found BunchId Shift RDO=%d, Value=%d", 1+((count-1)/2), number);
+      }
+      count++;
+    }
+  } else {
+      LOG("====MTD====", "Can not open file: %s or %s", mBunchShiftList, mBunchShiftListLocal);
+  }
+}
+
+int mtdBuilder::SetMtdQTmap(){
+	char buf[200];
+	const char* MtdQTmap[96] = {
+	"06 (0x10) MT001 QT8A-J1 (ch01) MTD 25-1-J2 (TPC sectors 21,22)",
+	"06 (0x10) MT001 QT8A-J2 (ch02) MTD 25-1-J3 (TPC sectors 21,22)",
+	"06 (0x10) MT001 QT8A-J3 (ch03) MTD 25-5-J2 (TPC sectors 2,3)",
+	"06 (0x10) MT001 QT8A-J4 (ch04) MTD 25-5-J3 (TPC sectors 2,3)",
+	"06 (0x10) MT001 QT8A-J5 (ch05) MTD TAC 25-1-J2",
+	"06 (0x10) MT001 QT8A-J6 (ch06) MTD TAC 25-1-J3",
+	"06 (0x10) MT001 QT8A-J7 (ch07) MTD TAC 25-5-J2",
+	"06 (0x10) MT001 QT8A-J8 (ch08) MTD TAC 25-5-J3",
+	"06 (0x10) MT001 QT8B-J1 (ch09) MTD 25-2-J2 (TPC sectors 21,22)",
+	"06 (0x10) MT001 QT8B-J2 (ch10) MTD 25-2-J3 (TPC sectors 21,22)",
+	"06 (0x10) MT001 QT8B-J3 (ch11) MTD 25-4-J2 (TPC sectors 2,3)",
+	"06 (0x10) MT001 QT8B-J4 (ch12) MTD 25-4-J3 (TPC sectors 2,3)",
+	"06 (0x10) MT001 QT8B-J5 (ch13) MTD TAC 25-2-J2",
+	"06 (0x10) MT001 QT8B-J6 (ch14) MTD TAC 25-2-J3",
+	"06 (0x10) MT001 QT8B-J7 (ch15) MTD TAC 25-4-J2",
+	"06 (0x10) MT001 QT8B-J8 (ch16) MTD TAC 25-4-J3",
+	"06 (0x10) MT001 QT8C-J1 (ch17) MTD 25-3-J2 (TPC sectors 21,22,2,3)",
+	"06 (0x10) MT001 QT8C-J2 (ch18) MTD 25-3-J3 (TPC sectors 21,22,2,3)",
+	"06 (0x10) MT001 QT8C-J3 (ch19) MTD 30-3-J2 (TPC sectors 23,24,1,12)",
+	"06 (0x10) MT001 QT8C-J4 (ch20) MTD 30-3-J3 (TPC sectors 23,24,1,12)",
+	"06 (0x10) MT001 QT8C-J5 (ch21) MTD TAC 25-3-J2",
+	"06 (0x10) MT001 QT8C-J6 (ch22) MTD TAC 25-3-J3",
+	"06 (0x10) MT001 QT8C-J7 (ch23) MTD TAC 30-3-J2",
+	"06 (0x10) MT001 QT8C-J8 (ch24) MTD TAC 30-3-J3",
+	"06 (0x10) MT001 QT8D-J1 (ch25) MTD 30-1-J2 (TPC sectors 23,24)",
+	"06 (0x10) MT001 QT8D-J2 (ch26) MTD 30-1-J3 (TPC sectors 23,24)",
+	"06 (0x10) MT001 QT8D-J3 (ch27) MTD 30-5-J2 (TPC sectors 1,12)",
+	"06 (0x10) MT001 QT8D-J4 (ch28) MTD 30-5-J3 (TPC sectors 1,12)",
+	"06 (0x10) MT001 QT8D-J5 (ch29) MTD TAC 30-1-J2",
+	"06 (0x10) MT001 QT8D-J6 (ch30) MTD TAC 30-1-J3",
+	"06 (0x10) MT001 QT8D-J7 (ch31) MTD TAC 30-5-J2",
+	"06 (0x10) MT001 QT8D-J8 (ch32) MTD TAC 30-5-J3",
+	"16 (0x1a) MT002 QT8A-J1 (ch01) MTD 05-1-J2 (TPC sectors 13,14)",
+	"16 (0x1a) MT002 QT8A-J2 (ch02) MTD 05-1-J3 (TPC sectors 13,14)",
+	"16 (0x1a) MT002 QT8A-J3 (ch03) MTD 05-5-J2 (TPC sectors 10,11)",
+	"16 (0x1a) MT002 QT8A-J4 (ch04) MTD 05-5-J3 (TPC sectors 10,11)",
+	"16 (0x1a) MT002 QT8A-J5 (ch05) MTD TAC 05-1-J2",
+	"16 (0x1a) MT002 QT8A-J6 (ch06) MTD TAC 05-1-J2",
+	"16 (0x1a) MT002 QT8A-J7 (ch07) MTD TAC 05-5-J2",
+	"16 (0x1a) MT002 QT8A-J8 (ch08) MTD TAC 05-5-J3",
+	"16 (0x1a) MT002 QT8B-J1 (ch09) MTD 05-2-J2 (TPC sectors 13,14)",
+	"16 (0x1a) MT002 QT8B-J2 (ch10) MTD 05-2-J3 (TPC sectors 13,14)",
+	"16 (0x1a) MT002 QT8B-J3 (ch11) MTD 05-4-J2 (TPC sectors 10,11)",
+	"16 (0x1a) MT002 QT8B-J4 (ch12) MTD 05-4-J3 (TPC sectors 10,11)",
+	"16 (0x1a) MT002 QT8B-J5 (ch13) MTD TAC 05-2-J2",
+	"16 (0x1a) MT002 QT8B-J6 (ch14) MTD TAC 05-2-J3",
+	"16 (0x1a) MT002 QT8B-J7 (ch15) MTD TAC 05-4-J2",
+	"16 (0x1a) MT002 QT8B-J8 (ch16) MTD TAC 05-4-J3",
+	"16 (0x1a) MT002 QT8C-J1 (ch17) MTD 05-3-J2 (TPC sectors 13,14,10,11)",
+	"16 (0x1a) MT002 QT8C-J2 (ch18) MTD 05-3-J3 (TPC sectors 13,14,10,11)",
+	"16 (0x1a) MT002 QT8C-J3 (ch19) MTD",
+	"16 (0x1a) MT002 QT8C-J4 (ch20) MTD",
+	"16 (0x1a) MT002 QT8C-J5 (ch21) MTD TAC 05-3-J2",
+	"16 (0x1a) MT002 QT8C-J6 (ch22) MTD TAC 05-3-J3",
+	"16 (0x1a) MT002 QT8C-J7 (ch23) MTD",
+	"16 (0x1a) MT002 QT8C-J8 (ch24) MTD",
+	"16 (0x1a) MT002 QT8D-J1 (ch25) MTD 30-2-J2 (TPC sectors 23,24)",
+	"16 (0x1a) MT002 QT8D-J2 (ch26) MTD 30-2-J3 (TPC sectors 23,24)",
+	"16 (0x1a) MT002 QT8D-J3 (ch27) MTD 30-4-J2 (TPC sectors 1,12)",
+	"16 (0x1a) MT002 QT8D-J4 (ch28) MTD 30-4-J3 (TPC sectors 1,12)",
+	"16 (0x1a) MT002 QT8D-J5 (ch29) MTD TAC 30-2-J2",
+	"16 (0x1a) MT002 QT8D-J6 (ch30) MTD TAC 30-2-J3",
+	"16 (0x1a) MT002 QT8D-J7 (ch31) MTD TAC 30-4-J2",
+	"16 (0x1a) MT002 QT8D-J8 (ch32) MTD TAC 30-4-J3",
+	"18 (0x1c) MT003 QT8A-J1 (ch09) MTD 10-2-J2 (TPC sectors 8,16)",
+	"18 (0x1c) MT003 QT8A-J2 (ch10) MTD 10-2-J3 (TPC sectors 8,16)",
+	"18 (0x1c) MT003 QT8A-J3 (ch11) MTD 22-2-J2 (TPC sectors 4,20)",
+	"18 (0x1c) MT003 QT8A-J4 (ch12) MTD 22-2-J3 (TPC sectors 4,20)",
+	"18 (0x1c) MT003 QT8A-J5 (ch13) MTD TAC 10-2-J2",
+	"18 (0x1c) MT003 QT8A-J6 (ch14) MTD TAC 10-2-J3",
+	"18 (0x1c) MT003 QT8A-J7 (ch15) MTD TAC 22-2-J2",
+	"18 (0x1c) MT003 QT8A-J8 (ch16) MTD TAC 22-2-J3",
+	"18 (0x1c) MT003 QT8B-J1 (ch09) MTD 10-3-J2 (TPC sectors 8,16)",
+	"18 (0x1c) MT003 QT8B-J2 (ch10) MTD 10-3-J3 (TPC sectors 8,16)",
+	"18 (0x1c) MT003 QT8B-J3 (ch11) MTD 22-3-J2 (TPC sectors 4,20)",
+	"18 (0x1c) MT003 QT8B-J4 (ch12) MTD 22-3-J3 (TPC sectors 4,20)",
+	"18 (0x1c) MT003 QT8B-J5 (ch13) MTD TAC 10-3-J2",
+	"18 (0x1c) MT003 QT8B-J6 (ch14) MTD TAC 10-3-J3",
+	"18 (0x1c) MT003 QT8B-J7 (ch15) MTD TAC 22-3-J2",
+	"18 (0x1c) MT003 QT8B-J8 (ch16) MTD TAC 22-3-J3",
+	"18 (0x1c) MT003 QT8C-J1 (ch17) MTD",
+	"18 (0x1c) MT003 QT8C-J2 (ch18) MTD",
+	"18 (0x1c) MT003 QT8C-J3 (ch19) MTD",
+	"18 (0x1c) MT003 QT8C-J4 (ch20) MTD",
+	"18 (0x1c) MT003 QT8C-J5 (ch21) MTD",
+	"18 (0x1c) MT003 QT8C-J6 (ch22) MTD",
+	"18 (0x1c) MT003 QT8C-J7 (ch23) MTD",
+	"18 (0x1c) MT003 QT8C-J8 (ch24) MTD",
+	"18 (0x1c) MT003 QT8D-J1 (ch25) MTD 10-4-J2 (TPC sectors 8,16)",
+	"18 (0x1c) MT003 QT8D-J2 (ch26) MTD 10-4-J3 (TPC sectors 8,16)",
+	"18 (0x1c) MT003 QT8D-J3 (ch27) MTD 22-4-J2 (TPC sectors 4,20)",
+	"18 (0x1c) MT003 QT8D-J4 (ch28) MTD 22-4-J3 (TPC sectors 4,20)",
+	"18 (0x1c) MT003 QT8D-J5 (ch29) MTD TAC 10-4-J2",
+	"18 (0x1c) MT003 QT8D-J6 (ch30) MTD TAC 10-4-J3",
+	"18 (0x1c) MT003 QT8D-J7 (ch31) MTD TAC 22-4-J2",
+	"18 (0x1c) MT003 QT8D-J8 (ch32) MTD TAC 22-4-J3"
+	};
+	
+	TString QTmap[96];
+	//
+	int nTAC=0,nADC=0,nOPEN=0;
+	bool thisisADC,thisisOPEN;
+	//
+	for (int i=0;i<96;i++){
+		sprintf(buf,"%s",MtdQTmap[i]);
+		QTmap[i]	= TString(buf);
+		//cout<<QTmap[i].Data()<<endl;
+		//
+		QTslot[i]		= QTmap[i](0,2);
+		QTslothex[i]	= QTmap[i](4,4);
+		QTboard[i]		= QTmap[i](10,5);
+		QTchanname[i]	= QTmap[i](16,7);
+		QTchanno[i]		= QTmap[i](27,2);
+		QTchanstring[i]	= QTmap[i](35,QTmap[i].Length()-1);
+		//
+		thisisADC = thisisOPEN = false;
+ 		if (QTchanstring[i].Length()==0){ ++nOPEN; thisisOPEN=true; } else 
+		if (QTchanstring[i].Contains("TAC", TString::kIgnoreCase)){ 
+			++nTAC; isTAC[i]=nTAC; 
+		} else {
+			thisisADC = true;
+ 		    ++nADC; isADC[i]=nADC; 
+ 		}
+ 		if (!thisisOPEN){
+ 			if (thisisADC){
+ 				QTcable[i] = QTchanstring[i](0,7);
+ 				QTtpcsector[i] = QTchanstring[i](21,QTchanstring[i].Length()-21-1);
+ 			} else {
+ 				QTcable[i] = QTchanstring[i](4,7);
+ 			}
+ 		}
+		//
+		//cout<<QTmap[i].Length()<<"  ..."<<QTslot[i].Data()<<"..."<<QTslothex[i].Data()<<"..."
+		//	<<QTboard[i].Data()<<"..."
+		//	<<QTchanname[i].Data()<<"..."
+		//	<<QTchanno[i].Data()<<"..."
+		//	<<QTchanstring[i].Data()<<"\t"
+		//	<<isADC[i]<<" "<<isTAC[i]<<"\t..."
+		//	<<QTcable[i].Data()<<"..."
+		//	<<QTtpcsector[i].Data()<<"..."			
+		//	<<endl;
+		//
+	}
+	//cout<<nADC<<" "<<nTAC<<" "<<nOPEN<<endl;
+	return 1;
 }
 
