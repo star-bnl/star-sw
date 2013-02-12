@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.42 2012/05/07 14:42:58 fisyak Exp $
+ * $Id: StTriggerData.h,v 2.43 2013/02/12 19:40:32 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.43  2013/02/12 19:40:32  ullrich
+ * Add two new methods: mxqAtSlotAddress and mtd3AtAddress (Llope).
+ *
  * Revision 2.42  2012/05/07 14:42:58  fisyak
  * Add handilings for Track to Fast Detectors Matching
  *
@@ -292,9 +295,13 @@ public:
     virtual unsigned short vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short vpdTimeDifference() const;
 
+    //MXQ crate
+    virtual unsigned short mxqAtSlotAddress(int address, int prepost=0, int slot=0) const;
+
     //MTD
     virtual unsigned short mtdAtAddress(int address, int prepost=0) const;
     virtual unsigned short mtdgemAtAddress(int address, int prepost=0) const;
+    virtual unsigned short mtd3AtAddress(int address, int prepost=0) const;
     virtual unsigned short mtdAdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short mtdTdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned char  mtdDsmAtCh(int ch, int prepost=0) const;

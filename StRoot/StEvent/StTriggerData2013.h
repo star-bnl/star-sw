@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2013.h,v 2.2 2012/12/10 16:03:37 ullrich Exp $
+ * $Id: StTriggerData2013.h,v 2.3 2013/02/12 19:40:33 ullrich Exp $
  *
  * Author: Akio Ogawa, Nov 2011
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2013.h,v $
+ * Revision 2.3  2013/02/12 19:40:33  ullrich
+ * Add two new methods: mxqAtSlotAddress and mtd3AtAddress (Llope).
+ *
  * Revision 2.2  2012/12/10 16:03:37  ullrich
  * Initial Revision
  *
@@ -156,13 +159,17 @@ public:
     unsigned short vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost=0) const;
     unsigned short vpdTimeDifference() const;
     
+    //MXQ crate
+    unsigned short mxqAtSlotAddress(int address, int prepost=0, int slot=0) const;
+
     //MTD
     unsigned short mtdAtAddress(int address, int prepost=0) const;
+    unsigned short mtdgemAtAddress(int address, int prepost=0) const;
+    unsigned short mtd3AtAddress(int address, int prepost=0) const;
     unsigned short mtdAdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short mtdTdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned char  mtdDsmAtCh(int ch, int prepost=0) const;
     bool           mtdDsmHit(int pmt, int prepost=0) const;
-    unsigned short mtdgemAtAddress(int address, int prepost=0) const;
     unsigned short mtdVpdTacDiff() const;
     
     //TOF
