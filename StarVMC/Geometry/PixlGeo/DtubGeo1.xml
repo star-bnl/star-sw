@@ -15,7 +15,7 @@
   cables are using structures :
   1) SCSD for the short cables
   2) LCSD for the long cables
-  3) RADD for the vertical cables : for these cables, I used the opening angle of the cables ( values obtained from SoliwWork ), 
+  3) RADD for the vertical cables : for these cables, I used the opening angle of the cables ( values obtained from SolidWork ), 
   then I calculate the arc length which is divided in small TUBE section
   For a given number of iteration (10), one can get a relatively curvated tube
 -->
@@ -108,7 +108,7 @@
 
    <varlist type="float" comment="ZOffsetDTube">zoffd/-40.25/ </varlist>
    <!-- SW gives an offset for the Dtube from (0,0,0) of -40.25, we may need to add a bit more to adjust --> 
-   <varlist type="float" comment="ZOffsetDTubeMore : additional offset">zoffdm/-2.5/ </varlist>
+   <varlist type="float" comment="ZOffsetDTubeMore : additional offset">zoffdm/-1.63/ </varlist>
    <varlist type="float" comment="ZOffsetSectorPlenum">zoffp/-21.65/ </varlist>
 
    <varlist type="int"   comment="internal computations"> ii,jj,kk,ll </varlist> 
@@ -175,14 +175,16 @@
    <Material a="12" z="6" name="CFRPMix" dens="1.3" radl="23.9"/>
 
    <Create    block="DTUB" />
-   <Placement block="DTUB" in="IDSM" x="0" y="0" z="0" />
+   <Placement z="zoffd+zoffdm" block="DTUB" in="IDSM" konly="'MANY'"/>
 
    <Volume name="DTUB" comment="Main volume in the AGML tutorial geometry">
 
    <Material  name="Air"      /> 
    <Medium    name="Standard" />
    <Attribute seen="0"        />
-   <Shape type="TUBE" dz="(DSEA+DSEB+DSEC+DSED+1)/2." rmin="(DTubeW-1)/2." rmax="(DTubeH+1)/2." />
+   <Shape type="TUBS" dz="37/2." rmin="2.1" rmax="9" phi1="0" phi2="360" />
+   <!--<Shape type="BOX" dz="(DSEA+DSEB+DSEC+DSED+100)/2." dx="(DTubeW+5)/2." dy="(DTubeH+5)/2." />-->
+   <!--<Shape type="BOX" dz="80/2." dx="40/2." dy="40/2." />-->
    
    OuterTubeLength = 360-2*AngleTopLeft
    zoffd = zoffd+zoffdm
@@ -190,21 +192,19 @@
    twopiratio=(2*PI)/360
 
    <Create block="DTUH"/>
-   <Placement block="DTUH" x="0" y="0" z="0">
-   </Placement>
-
-   <Create block="DTUH"/>
-   <Placement block="DTUH" x="0" y="0" z="0" konly="'MANY'">
+   <Placement block="DTUH" in="DTUB" konly="'MANY'" x="0" y="0" z="0"/>
+   <Placement block="DTUH" in="DTUB" konly="'MANY'" x="0" y="0" z="0">
    <Rotation alphay="180" />
    <Rotation ort="XY-Z"/> 
    </Placement>
-
    </Volume>
 
    <Volume name="DTUH" comment="half DTube">
    <Material name="Air"/>
    <Attribute for="DTUH" seen="0" colo="1"/>
-   <Shape type="BOX" dz="(DSEA+DSEB+DSEC+DSED)/2." dx="DTubeW/2." dy="DTubeH/2." />
+<!--   <Shape type="BOX" dz="(DSEA+DSEB+DSEC+DSED+20)/2." dx="(DTubeW+4)/2." dy="(DTubeH+4)/2." />-->
+   <!--<Shape type="BOX" dz="35/2." dx="16/2." dy="16/2." />-->
+   <Shape type="TUBS" dz="36/2." rmin="2.15" rmax="8.9" phi1="-270" phi2="-90"/>
 
    <!--placement of vertcial cables -->
 
@@ -217,176 +217,181 @@
             xcable=RADD_radius*cos(angle)
             ycable=RADD_radius*sin(angle)
             <Create    block="TUBA" />  
-            <Placement block="TUBA" x="xcable" y="ycable" z="RADD_zpos(kk)">
+            <!--<Placement block="TUBA" x="-1*xcable" y="ycable" z="RADD_zpos(kk)">-->
+            <Placement block="TUBA" in="DTUH" x="-1*xcable" y="ycable" z="RADD_zpos(kk)-zoffd">
+<!--
             <Rotation alphax="-90"/>
             <Rotation alphaz="angleori*(ii-1)+0.5*angleori+RADD_anglemin(kk)"/>
+-->
+            <Rotation alphax="90"/>
+            <Rotation alphaz="-1*(angleori*(ii-1)+0.5*angleori+RADD_anglemin(kk))"/>
             </Placement>
           </Do>
       </Do>
 
    <Create    block="APTO" />
-   <Placement block="APTO" x="-0.8-Thk/2." y="5.1887" z="zoffd"/>
+   <Placement block="APTO" x="-0.8-Thk/2." y="5.1887" z="0"/>
 
    <Create    block="UCTO" />
-   <Placement block="UCTO" x="-1.22" y="7.0756" z="zoffd"/>
+   <Placement block="UCTO" x="-1.22" y="7.0756" z="0"/>
 
    <Create    block="OUCY" />
-   <Placement block="OUCY" x="0" y="0" z="zoffd"/>
+   <Placement block="OUCY" x="0" y="0" z="0"/>
 
    <Create    block="DCBO" />
-   <Placement block="DCBO" x="-1.22" y="-7.0756" z="zoffd"/>
+   <Placement block="DCBO" x="-1.22" y="-7.0756" z="0"/>
 
    <Create    block="APBM" />
-   <Placement block="APBM" x="-.8-Thk/2." y="-5.1887" z="zoffd"/>
+   <Placement block="APBM" x="-.8-Thk/2." y="-5.1887" z="0"/>
 
    <Create    block="UCBO" />
-   <Placement block="UCBO" x="-1.22" y="3.3018" z="zoffd"/>
+   <Placement block="UCBO" x="-1.22" y="3.3018" z="0"/>
 
    <Create    block="DCTO" />
-   <Placement block="DCTO" x="-1.22" y="-3.3018" z="zoffd"/>
+   <Placement block="DCTO" x="-1.22" y="-3.3018" z="0"/>
 
    <Create    block="INCY" />
-   <Placement block="INCY" x="0" y="0" z="zoffd"/>
+   <Placement block="INCY" x="0" y="0" z="0"/>
 
    <Create    block="CYTR" />
-   <Placement block="CYTR" x="0" y="0" z="zoffd"/>
+   <Placement block="CYTR" x="0" y="0" z="0"/>
 
    <Create    block="APTE" />
-   <Placement block="APTE" x="-0.8-Thk/2." y="4.9624" z="DSEA/2. + DSEB + DSEC/2.+zoffd"/>
+   <Placement block="APTE" x="-0.8-Thk/2." y="4.9624" z="DSEA/2. + DSEB + DSEC/2.+0"/>
 
    <Create    block="UCTE" />
-   <Placement block="UCTE" x="-1.22" y="7.0756" z="DSEA/2. + DSEB + DSEC/2.+zoffd"/>
+   <Placement block="UCTE" x="-1.22" y="7.0756" z="DSEA/2. + DSEB + DSEC/2.+0"/>
 
    <Create    block="APBE" />
-   <Placement block="APBE" x="-0.8-Thk/2." y="-4.9624" z="DSEA/2. + DSEB + DSEC/2.+zoffd"/>
+   <Placement block="APBE" x="-0.8-Thk/2." y="-4.9624" z="DSEA/2. + DSEB + DSEC/2.+0"/>
 
    <Create    block="DCBE" />
-   <Placement block="DCBE" x="-1.22" y="-7.0756" z="DSEA/2. + DSEB + DSEC/2.+zoffd"/>
+   <Placement block="DCBE" x="-1.22" y="-7.0756" z="DSEA/2. + DSEB + DSEC/2.+0"/>
 
    <Create    block="OUCE" />
-   <Placement block="OUCE" x="0" y="0" z="DSEA/2. + DSEB + DSEC/2.+zoffd"/>
+   <Placement block="OUCE" x="0" y="0" z="DSEA/2. + DSEB + DSEC/2.+0"/>
 
    <Create    block="OUCI" />
-   <Placement block="OUCI" x="0" y="0" z="DSEA/2. + DSEB/2.+zoffd"/>
+   <Placement block="OUCI" x="0" y="0" z="DSEA/2. + DSEB/2.+0"/>
   
    <Create    block="UCTI" />
-   <Placement block="UCTI" x="-1.22" y="7.0756" z="DSEA/2. + DSEB/2.+zoffd"/>
+   <Placement block="UCTI" x="-1.22" y="7.0756" z="DSEA/2. + DSEB/2.+0"/>
 
    <Create    block="DCBI" />
-   <Placement block="DCBI" x="-1.22" y="-7.0756" z="DSEA/2. + DSEB/2.+zoffd"/>
+   <Placement block="DCBI" x="-1.22" y="-7.0756" z="DSEA/2. + DSEB/2.+0"/>
 
    <Create    block="ATTI"/>
-   <Placement block="ATTI" x="-0.8-Thk/2." y="5.0705" z="15.0806+zoffd">
+   <Placement block="ATTI" x="-0.8-Thk/2." y="5.0705" z="15.0806+0">
    <Rotation alphay="90"/>
    <Rotation alphax="-90"/>
    <Rotation alphaz="180"/>
    </Placement>
 
    <Create    block="ATBI"/>
-   <Placement block="ATBI" x="-0.8-Thk/2." y="-5.0705" z="15.0806+zoffd">
+   <Placement block="ATBI" x="-0.8-Thk/2." y="-5.0705" z="15.0806+0">
    <Rotation alphay="90"/>
    <Rotation alphax="-90"/>
    </Placement>
 
    <Create    block="DCTH" />
-   <Placement block="DCTH" x="-0.8-Thk/2.0+Thk/2.-0.32+0.02" y="2.4967+Thk/2.+0.32-0.02" z="DSEA/2.+DSEB+(DSEC+DSED)/2.+zoffd"/> 
+   <Placement block="DCTH" x="-0.8-Thk/2.0+Thk/2.-0.32+0.02" y="2.4967+Thk/2.+0.32-0.02" z="DSEA/2.+DSEB+(DSEC+DSED)/2.+0"/> 
 
    <Create    block="TCTH" />
-   <Placement block="TCTH" x="-0.8-Thk/2.0+Thk/2.-0.32+0.02" y="-1*(2.4967+Thk/2.+0.32-0.02)" z="DSEA/2.+DSEB+(DSEC+DSED)/2.+zoffd"/> 
+   <Placement block="TCTH" x="-0.8-Thk/2.0+Thk/2.-0.32+0.02" y="-1*(2.4967+Thk/2.+0.32-0.02)" z="DSEA/2.+DSEB+(DSEC+DSED)/2.+0"/> 
  
   <!-- this piece is adjusted by hand -->
    <Create    block="CSTI" />
-   <Placement block="CSTI" x="-.8-.2*Thk-.32+.02" y="-1*(2.4967+2*Thk+.4)" z="DSEA/2.+DSEB/2.+.1+zoffd">
+   <Placement block="CSTI" x="-.8-.2*Thk-.32+.02" y="-1*(2.4967+2*Thk+.4)" z="DSEA/2.+DSEB/2.+.1+0">
    <Rotation alphax="-8.75"/>
    <Rotation alphay="6"/>
    </Placement> 
 
    <Create    block="CSBI" />
-   <Placement block="CSBI" x="-.8-.2*Thk-.32+.02" y="(2.4967+2*Thk+.4)" z="DSEA/2.+DSEB/2.+.1+zoffd">
+   <Placement block="CSBI" x="-.8-.2*Thk-.32+.02" y="(2.4967+2*Thk+.4)" z="DSEA/2.+DSEB/2.+.1+0">
    <Rotation alphax="8.75"/>
    <Rotation alphay="6"/>
    </Placement> 
 
    <Create    block="APET" />
-   <Placement block="APET" x="-0.8-Thk/2." y="4.9624" z="DSEA/2.+DSEB+DSEC+DSED/2.+zoffd"/>
+   <Placement block="APET" x="-0.8-Thk/2." y="4.9624" z="DSEA/2.+DSEB+DSEC+DSED/2.+0"/>
 
    <Create    block="APEB" />
-   <Placement block="APEB" x="-0.8-Thk/2." y="-4.9624" z="DSEA/2.+DSEB+DSEC+DSED/2.+zoffd"/>
+   <Placement block="APEB" x="-0.8-Thk/2." y="-4.9624" z="DSEA/2.+DSEB+DSEC+DSED/2.+0"/>
 
    <Create    block="OCYE" />
-   <Placement block="OCYE" x="0" y="0" z="DSEA/2.+DSEB+DSEC+(DSED-0.475)/2.+zoffd"/>
+   <Placement block="OCYE" x="0" y="0" z="DSEA/2.+DSEB+DSEC+(DSED-0.475)/2.+0"/>
 
    <Create    block="OCEA" />
-   <Placement block="OCEA" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+zoffd"/>
+   <Placement block="OCEA" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+0"/>
 
    <Create    block="OCEB" />
-   <Placement block="OCEB" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+zoffd"/>
+   <Placement block="OCEB" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+0"/>
 
    <Create    block="OCEC" />
-   <Placement block="OCEC" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+zoffd"/>
+   <Placement block="OCEC" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+0"/>
 
    <Create    block="OCED" />
-   <Placement block="OCED" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+zoffd"/>
+   <Placement block="OCED" x="0" y="0" z="DSEA/2.+DSEB+DSEC+DSED-0.475/2.+0"/>
 
    <Create    block="UPTE" />
-   <Placement block="UPTE" x="-1.22" y="7.0756" z="DSEA/2.+DSEB+DSEC+DSED/2.+zoffd"/>
+   <Placement block="UPTE" x="-1.22" y="7.0756" z="DSEA/2.+DSEB+DSEC+DSED/2.+0"/>
 
    <Create    block="BOTE" />
-   <Placement block="BOTE" x="-1.22" y="-7.0756" z="DSEA/2.+DSEB+DSEC+DSED/2.+zoffd"/>
+   <Placement block="BOTE" x="-1.22" y="-7.0756" z="DSEA/2.+DSEB+DSEC+DSED/2.+0"/>
 
    <!--cables -->
 
    <!-- placement of cables section A -->
 
       <Create    block="LSAA" />  
-      <Placement block="LSAA" x="-4.8024" y="6.5352" z="-35.9334" />
+      <Placement block="LSAA" x="-4.8024" y="6.5352" z="-35.9334-zoffd" />
       <Create    block="LSAB" />  
-      <Placement block="LSAB" x="-5.4216" y="6.0305" z="-36.2522" />
+      <Placement block="LSAB" x="-5.4216" y="6.0305" z="-36.2522-zoffd" />
       <Create    block="LSAC" />  
-      <Placement block="LSAC" x="-5.9902" y="5.4672" z="-36.5991" />
+      <Placement block="LSAC" x="-5.9902" y="5.4672" z="-36.5991-zoffd" />
       <Create    block="LSAD" />  
-      <Placement block="LSAD" x="-6.4995" y="4.8506" z="-36.9485" />
+      <Placement block="LSAD" x="-6.4995" y="4.8506" z="-36.9485-zoffd" />
       <Create    block="LSAE" />  
-      <Placement block="LSAE" x="-6.9456" y="4.187" z="-37.2614" />
+      <Placement block="LSAE" x="-6.9456" y="4.187" z="-37.2614-zoffd" />
       <Create    block="LSAF" />  
-      <Placement block="LSAF" x="-7.3242" y="3.4826" z="-37.57" />
+      <Placement block="LSAF" x="-7.3242" y="3.4826" z="-37.57-zoffd" />
       <Create    block="LSAG" />  
-      <Placement block="LSAG" x="-7.6316" y="2.7443" z="-37.9149" />
+      <Placement block="LSAG" x="-7.6316" y="2.7443" z="-37.9149-zoffd" />
       <Create    block="LSAH" />  
-      <Placement block="LSAH" x="-7.8647" y="1.9794" z="-38.2654" />
+      <Placement block="LSAH" x="-7.8647" y="1.9794" z="-38.2654-zoffd" />
       <Create    block="LSAI" />  
-      <Placement block="LSAI" x="-8.0214" y="1.1952" z="-38.5812" />
+      <Placement block="LSAI" x="-8.0214" y="1.1952" z="-38.5812-zoffd" />
       <Create    block="LSAJ" />  
-      <Placement block="LSAJ" x="-8.1002" y="0.3995" z="-38.9488" />
+      <Placement block="LSAJ" x="-8.1002" y="0.3995" z="-38.9488-zoffd" />
       <Create    block="LSAK" />  
-      <Placement block="LSAK" x="-8.1001" y="-0.4002" z="-39.287" />
+      <Placement block="LSAK" x="-8.1001" y="-0.4002" z="-39.287-zoffd" />
       <Create    block="LSAL" />  
-      <Placement block="LSAL" x="-8.0213" y="-1.196" z="-39.6531" />
+      <Placement block="LSAL" x="-8.0213" y="-1.196" z="-39.6531-zoffd" />
       <Create    block="LSAM" />  
-      <Placement block="LSAM" x="-7.8645" y="-1.9802" z="-40.0446" />
+      <Placement block="LSAM" x="-7.8645" y="-1.9802" z="-40.0446-zoffd" />
       <Create    block="LSAN" />  
-      <Placement block="LSAN" x="-7.6313" y="-2.7451" z="-40.4339" />
+      <Placement block="LSAN" x="-7.6313" y="-2.7451" z="-40.4339-zoffd" />
       <Create    block="LSAO" />  
-      <Placement block="LSAO" x="-7.3239" y="-3.4833" z="-40.7774" />
+      <Placement block="LSAO" x="-7.3239" y="-3.4833" z="-40.7774-zoffd" />
       <Create    block="LSAP" />  
-      <Placement block="LSAP" x="-6.9452" y="-4.1876" z="-41.1379" />
+      <Placement block="LSAP" x="-6.9452" y="-4.1876" z="-41.1379-zoffd" />
       <Create    block="LSAQ" />  
-      <Placement block="LSAQ" x="-6.499" y="-4.8513" z="-41.5212" />
+      <Placement block="LSAQ" x="-6.499" y="-4.8513" z="-41.5212-zoffd" />
       <Create    block="LSAR" />  
-      <Placement block="LSAR" x="-5.9897" y="-5.4677" z="-41.8994" />
+      <Placement block="LSAR" x="-5.9897" y="-5.4677" z="-41.8994-zoffd" />
       <Create    block="LSAS" />  
-      <Placement block="LSAS" x="-5.4221" y="-6.031" z="-42.24405" />
+      <Placement block="LSAS" x="-5.4221" y="-6.031" z="-42.24405-zoffd" />
       <Create    block="LSAT" />  
-      <Placement block="LSAT" x="-4.8017" y="-6.5357" z="-42.6021" />
+      <Placement block="LSAT" x="-4.8017" y="-6.5357" z="-42.6021-zoffd" />
 
       <Do var="jj" from="1" to="SCSD_numberOfCables">
         <Create    block="SCAD" />  
-        <Placement block="SCAD" x="SCSD_xpos(jj)" y="SCSD_ypos(jj)" z="zoffCableS" />  
+        <Placement block="SCAD" x="SCSD_xpos(jj)" y="SCSD_ypos(jj)" z="zoffCableS-zoffd" />  
        </Do>
 
      <Do var="ll" from="1" to="LCSD_numberOfCables">
       <Create    block="LCAD" />  
-      <Placement block="LCAD" x="LCSD_xpos(ll)" y="LCSD_ypos(ll)" z="zoffCableL" />   
+      <Placement block="LCAD" x="LCSD_xpos(ll)" y="LCSD_ypos(ll)" z="zoffCableL-zoffd" />   
      </Do>
 
    </Volume>

@@ -2,7 +2,12 @@
 <!--
     AgML tutorial geometry
   -->
-
+<!--
+JB : Fev/2013 : 
+1)update in dimensions : maxRadius for PSTM is 45.34 cm so mother volume -PSTM- is increased to 455
+2)extension in Z : [-277, 60]
+3) use of PCON instead of TUB to have an asymetric mother volume
+-->
      <Module name="PxstGeo1" comment="Geometry for Pixel Support Tube">
 
      <Author  name="JB" />
@@ -45,9 +50,9 @@
               APRC, <!-- Rail inside the PIT-->
               APRD  <!-- Rail inside the PIT-->
      </Content>
-     <varlist type="float" comment="maxRadius of PSTM volume">                     maxRadPSTM/48/</varlist>
+     <varlist type="float" comment="maxRadius of PSTM volume">                     maxRadPSTM/45.5/</varlist>
      <varlist type="float" comment="minRadius of PSTM volume">                     minRadPSTM/2.3/</varlist>
-     <varlist type="float" comment="totZ of PSTM volume">                          maxZPSTM/800/</varlist>    
+     <varlist type="float" comment="totZ of PSTM volume">                          maxZPSTM/500/</varlist>    
      <varlist type="float" comment="WidthRingTP">                                  WidthRingTP/.6/ </varlist>
      <varlist type="float" comment="WidthInnerRingTP">                             WidthInnerRingTP/2.6/ </varlist>
      <varlist type="float" comment="LengthInsideRing">                             LengthInsideRing/1.3495/ </varlist>
@@ -251,7 +256,12 @@
      <Material  name="Air"      /> 
      <Medium    name="Standard" />
      <Attribute seen="0"        />
-     <Shape type="TUBE" rmin="minRadPSTM" rmax="maxRadPSTM" dz="maxZPSTM/2." />
+ <!--    <Shape type="TUBE" rmin="minRadPSTM" rmax="maxRadPSTM" dz="maxZPSTM/2." />-->
+     <Shape type="PCON" nz="2" phi1="0" dphi="360" 
+                        zi="{-277,60}"
+                        rmn="{minRadPSTM, minRadPSTM}"
+                        rmx="{maxRadPSTM/2,maxRadPSTM/2}"
+      />
 
      <!-- placement tube -->
      <Use struct="PSTS" select="version" value="1.0"/>
@@ -654,25 +664,25 @@
      </Volume>
 
      <Volume name="APRA" comment="A PIt Rail placed A test">
-     <Material name="IRON"/>
+     <Material name="CFRPMix"/>
      <Attribute seen="1" colo="2" />
      <Shape type="Tube" rmin="PITR_rmin/2." rmax="PITR_rmax/2." dz="PITR_dz/2." />
      <!--<Shape type="Tube" rmin="InnerRail/2." rmax="OuterRail/2." dz="PitLength/2." />-->
      </Volume>
      <Volume name="APRB" comment="A PIt Rail placed A test">
-     <Material name="IRON"/>
+     <Material name="CFRPMix"/>
      <Attribute seen="1" colo="2" />
      <Shape type="Tube" rmin="PITR_rmin/2." rmax="PITR_rmax/2." dz="PITR_dz/2." />
      <!--<Shape type="Tube" rmin="InnerRail/2." rmax="OuterRail/2." dz="PitLength/2." />-->
      </Volume>
      <Volume name="APRC" comment="A PIt Rail placed A test">
-     <Material name="IRON"/>
+     <Material name="CFRPMix"/>
      <Attribute seen="1" colo="2" />
      <Shape type="Tube" rmin="PITR_rmin/2." rmax="PITR_rmax/2." dz="PITR_dz/2." />
      <!--<Shape type="Tube" rmin="InnerRail/2." rmax="OuterRail/2." dz="PitLength/2." />-->
      </Volume>
      <Volume name="APRD" comment="A PIt Rail placed A test">
-     <Material name="IRON"/>
+     <Material name="CFRPMix"/>
      <Attribute seen="1" colo="2" />
      <Shape type="Tube" rmin="PITR_rmin/2." rmax="PITR_rmax/2." dz="PITR_dz/2." />
      <!--<Shape type="Tube" rmin="InnerRail/2." rmax="OuterRail/2." dz="PitLength/2." />-->
