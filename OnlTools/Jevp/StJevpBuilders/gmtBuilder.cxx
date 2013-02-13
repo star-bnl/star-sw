@@ -273,7 +273,7 @@ void gmtBuilder::event(daqReader *rdr)
 	      
 	      //======================= calculation of pedestals ========================
 	      
-	      if(timebin < 4){
+	      if(timebin < 2){
 		    double adc_tb3 = f[ii].adc;
 			int ch_tb3 = f[ii].ch;
 			sumADC[arm][port][apv][ch_tb3] += adc_tb3;
@@ -284,6 +284,9 @@ void gmtBuilder::event(daqReader *rdr)
 	}  //usedAPV  loop
 	//================ start added for signal ===========================
 
+
+
+
       } //1st dd->iterate
 	double pedestals[numARMs][numPORTs][numAPVs][numChannels];
 	
@@ -291,15 +294,22 @@ void gmtBuilder::event(daqReader *rdr)
 	  for (int iport=0; iport<numPORTs; iport++){					// 2
 	    for (int iapv=0; iapv<numAPVs; iapv++){						// 4
 	      for (int ichannel = 0;ichannel<numChannels;ichannel++){	// 128
-	      	if (counters[iarm][iport][iapv][ichannel] != 0){
-				pedestals[iarm][iport][iapv][ichannel] = sumADC[iarm][iport][iapv][ichannel]/counters[iarm][iport][iapv][ichannel];
-				//cout << "sumADC = "<<sumADC[iarm][iport][iapv][ichannel]<<"\t counters = "<<counters[iarm][iport][iapv][ichannel]<<"\t avg. pedestals = "<<pedestals[iarm][iport][iapv][ichannel]<<endl;
-			} else {
-				pedestals[iarm][iport][iapv][ichannel] = 0;
-				//if (ichannel==0){
-				//	cout<<iarm<<" "<<iport<<" "<<iapv<<" "<<ichannel<<"\t"<<counters[iarm][iport][iapv][ichannel]<<endl;
-				//}
+
+// 	      	if (counters[iarm][iport][iapv][ichannel] != 0){
+// 				pedestals[iarm][iport][iapv][ichannel] = sumADC[iarm][iport][iapv][ichannel]/counters[iarm][iport][iapv][ichannel];
+// 				//cout << "sumADC = "<<sumADC[iarm][iport][iapv][ichannel]<<"\t counters = "<<counters[iarm][iport][iapv][ichannel]<<"\t avg. pedestals = "<<pedestals[iarm][iport][iapv][ichannel]<<endl;
+// 			} else {
+// 				pedestals[iarm][iport][iapv][ichannel] = 0;
+// 				//if (ichannel==0){
+// 				//	cout<<iarm<<" "<<iport<<" "<<iapv<<" "<<ichannel<<"\t"<<counters[iarm][iport][iapv][ichannel]<<endl;
+// 				//}
+// 			}
+
+			 if(usedAPV(1,iarm,iport,iapv)){
+				pedestals[iarm][iport][iapv][ichannel] =
+				sumADC[iarm][iport][iapv][ichannel]/counters[iarm][iport][iapv][ichannel];
 			}
+
 	      }
 	    }
 	  }
@@ -325,7 +335,7 @@ void gmtBuilder::event(daqReader *rdr)
 	  apv = apv -12;
 	}
 
-	int channel, ch_seq, timebin;
+	int channel, timebin;
 	double adc;
 	
       if(usedAPV(rdo,arm,port,apv)){
@@ -339,7 +349,7 @@ void gmtBuilder::event(daqReader *rdr)
 	    adc = f[ii].adc;
 	    channel = f[ii].ch;
 
-	    if(timebin>=4){
+	    if(timebin>=2){
 	      SignalPedCorrected[arm][port][apv][channel][timebin] = adc - pedestals[arm][port][apv][channel];
 	      int layer=getLayer(arm,port,apv);
 	      if(layer>=0 && layer<numLayers){
