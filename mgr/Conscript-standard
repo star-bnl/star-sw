@@ -111,7 +111,7 @@ my @idlML    = script::find_idlM($Dir);   print "find_idl in $Dir ======== @idlM
 my @srcL     = script::find_sources($Dir);print "find_sources in in $Dir ======== @srcL ======\n" if $param::debug;
 my @h_filesL = script::find_hfiles($Dir); print "find_hfiles in $Dir ======== @h_filesL ======\n" if $param::debug;
 my @uiQT     = script::find_ui($Dir);     print "find_ui in $Dir ======== @uiQT ======\n" if $param::debug;
-my @xpmQT    = script::find_xpm($Dir);    print "find_ui in $Dir ======== @uiQT ======\n" if $param::debug;
+my @xpmQT    = script::find_xpm($Dir);    print "find_xpm in $Dir ======== @xpmQT ======\n" if $param::debug;
 my @qrcQT    = script::find_qrc($Dir);    print "find_qrc in $Dir ======== @qrcQT ======\n" if $param::debug;
 
 
