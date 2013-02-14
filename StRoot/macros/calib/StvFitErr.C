@@ -24,12 +24,16 @@
 #include "TPolinom.h"
 #include <vector>
 //#define APPROX
+static const double kWeight = 0.9;	//pars = oldPars*(1-kWeight) + newPars*kWeight
+
+
+
 //______________________________________________________________________________
 class FEEvent;
 class StvHitErrCalculator;
 class StvTpcHitErrCalculator;
 int StvFitErr(const char *file="pulls.root");
-
+int MyTest();
 #if !defined(__MAKECINT__)
 enum {kMaxPars = StvHitErrCalculator::kMaxPars};
 TMatrixD T(TMatrixD a) { TMatrixD mx(a); return mx.T();}
@@ -57,11 +61,13 @@ void Add(double x, double y, double w);
 double Xi2() const  			{return fXi2;}
 double LiH() const  			{return fXi2-fLiH;}
 double Xi2(int ipt) const; 		
-double Res2(int ipt) const; 		
+double Res(int ipt) const; 		
 double EvalXi2() const; 		
 int    Pw()  const 			{return fPw ;}
 int    NPt() const 			{return fN  ;}
 double Fun( double x ) const;
+double FunErr2( double x ) const;
+double Pull( double x ,double y,double yErr2) const;
 double dXi2dW( int ipt ) const;
 double d2Xi2dW( int k, int l ) const;
 double dLiHdW( int ipt ) const;
@@ -72,6 +78,7 @@ void   TestIt() const;
 void   MyTest() const;
 static void Test();
 static void Test2();
+static void TestErr();
 private:
 int fPw;
 char   fBeg[1];
@@ -178,19 +185,19 @@ float  s;
 float  yz[2]; 
 float  detId;
 };
+typedef std::vector<FENode> FENodes;
+
 //______________________________________________________________________________
 class FETrak
 {
 public:
-int    GetNWords() const 		{return int(mNWords);}
-int    GetNNodes() const 		{return (sizeof(float)*(GetNWords()-1))/sizeof(FENode);}
-const FENode *GetNode(int idx) const	{return mNodes+idx;}
-FETrak *Next()     const 		{float *f=(float*)this+GetNWords();
-                           	 	 return (*f)? (FETrak*)f:0;}
+void  Add(const FENode &node)		{mNodes.push_back(node);}
+int   NNodes() const    		{return mNodes.size();  }
+const FENodes &Nodes()      		{return mNodes;         }
 private:
-float mNWords;
-FENode mNodes[1];
+FENodes mNodes;
 };
+typedef std::vector<FETrak> FETraks;
 //______________________________________________________________________________
 class FEFcn 
 {
@@ -201,16 +208,15 @@ public:
     void DbLoad();
     void DbSave();
      int Add(FEEvent *event);
-    void End()	{mTks.push_back(0.);}
 
     void InitFitter();
      int GetNPars() const 		{return mNPars;}
 double*  GetPars()       		{return mPars ;}
+     int GetIPar(const char* name) const;
      int GetNFixd() const 		{return mNFixd;}
     void Update(const double *upd);
     void Synchro(char from,const double *par=0);
     void Approx(int nonBias);
-const FETrak* GetTrak()  	        {return (FETrak*)&mTks[0];}
 FECalcHolder *GetCalc(int id,const float hiPos[3]);
    void  Eval(int  npar, double* grad, double& fval, double* par, int flag);
    void  FixPar(int iPar,int fix=1);
@@ -233,10 +239,13 @@ int  mNCall;
 double mPars[100];
 double mFist[100];
 double mVal00;
-double mXi2;
+double mXi2[3];
+double mRes[4];
+
 char mEnd[1];
+TString mNams[100];
 std::vector<FECalcHolder*> 	mCas;
-std::vector<float> 		mTks;
+FETraks 			mTks;
 static FEFcn *mgInst;
 };
 #ifdef APPROX
@@ -269,6 +278,13 @@ void CalcInit();
 FEFcn myFcn;
 TMinuit myFitter(100);
 //______________________________________________________________________________
+int MyTest() 
+{
+  Poli2::Test();
+  Poli2::TestErr();
+  return 0;
+} 
+//______________________________________________________________________________
 int StvFitErr(const char *file)
 {
 
@@ -289,7 +305,6 @@ int StvFitErr(const char *file)
     if (eot) break;
   }
   printf ("StvFitErr: %d Events used\n",nEv);
-  myFcn.End();
 #ifdef APPROX
   FEApprox app(&myFcn);
 #endif
@@ -396,16 +411,37 @@ double Poli2::Fun( double x ) const
   return fP*XX + fY0;
 }
 //______________________________________________________________________________
+//______________________________________________________________________________
+double Poli2::FunErr2( double x ) const
+{
+  x -= fX0;
+  double xx[3]={1,x,x*x};
+  TVectorD XX(fPw+1,xx);
+  return XX*(fAi*XX);
+}
+//______________________________________________________________________________
+double Poli2::Pull( double x ,double y,double yErr2) const
+{
+  double dif = y-Fun(x);
+  double err = yErr2-FunErr2(x);
+  if (err<1e-10) {
+    printf("Poli2::Pull Error2 too small %g replaced tp 1e-10\n",err);
+    err = 1e-10;
+  }
+  return dif/sqrt(err);
+}
+//______________________________________________________________________________
 double Poli2::Xi2(int ipt) const
 {
    double dy = Fun(fX[ipt]+fX0) - (fY[ipt]+fY0);
    return dy*dy*fW[ipt];
 }
 //______________________________________________________________________________
-double Poli2::Res2(int ipt) const
+double Poli2::Res(int ipt) const
 {
+   assert(ipt<fN);
    double dy = Fun(fX[ipt]+fX0) - (fY[ipt]+fY0);
-   return dy*dy;
+   return dy;
 }
 //______________________________________________________________________________
 double Poli2::EvalXi2() const
@@ -520,11 +556,13 @@ void Poli2::MyTest() const
 //______________________________________________________________________________
 void Poli2::Test()
 {
+  double A[3]={3,0.02,0.05};
+
   int npw=2;
   double X[20],Y[20],W[20],YY[20];
   for (int i=0;i<20;i++) {
     X[i]=i;
-    Y[i]= 3+X[i]*(.02+.03*X[i]);
+    Y[i]= A[0]+X[i]*(A[1]+A[2]*X[i]);
     W[i]= 1+10./Y[i];
     YY[i]=Y[i];
     Y[i]+=gRandom->Gaus(0,sqrt(1./W[i]));
@@ -633,10 +671,43 @@ void Poli2::TestIt() const
 
 }
 //______________________________________________________________________________
+void Poli2::TestErr()
+{
+  double A[3]={3,0.02,0.05};
+
+  int npw=2;
+  double X[20],Y[20],W[20],YY[20];
+  for (int i=0;i<20;i++) {
+    X[i]=i;
+    YY[i]= A[0]+X[i]*(A[1]+A[2]*X[i]);
+    W[i]= 1+10./YY[i];
+  }
+  int nEv=10000,nTot=0;
+  double av=0,rms=0;
+  for (int iev=0;iev<nEv;iev++) 
+  {
+
+    for (int i=0;i<20;i++) {
+      Y[i]= gRandom->Gaus(YY[i],sqrt(1./W[i]));
+    }
+    Poli2 pp(npw,20,X,Y,W);
+    pp.Fit(); 
+    for (int ix=0;ix<20;ix++) {
+      double delta = (pp.Fun(X[ix])-YY[ix])/sqrt(pp.FunErr2(X[ix]));
+      av+=delta;rms+=delta*delta;nTot++;
+    }
+  }
+  av/=nTot; rms/=nTot; rms=sqrt(rms);
+
+
+  printf ("TestErr Av=%g Rms=%g\n",av,rms);
+}
+//______________________________________________________________________________
 void poli2()
 {
 Poli2::Test();
 Poli2::Test2();
+Poli2::TestErr();
 }
 
 //______________________________________________________________________________
@@ -778,9 +849,9 @@ void FECalcHolder::AvAdd(const double hRR[3])
 void FECalcHolder::AvEnd()
 {
     for (int i=1;i<5;i++) {mAve[i]/=mAve[0];}
-    for (int i=2;i<5;i+=2){mAve[i] -= pow(mAve[i-1],2);
-                           mAve[i]  = sqrt(fabs(mAve[i]))   ;}
+    for (int i=2;i<5;i+=2){mAve[i] -= pow(mAve[i-1],2);}
 
+    printf(" yRes=%g  zRes=%g \n\n",sqrt(myFcn.mRes[1]),sqrt(myFcn.mRes[3]));
     printf(" %s\t yErr = %5.2g(+-%5.2g) \tzErr = %5.2g(+-%5.2g)  Hits=%g\n"
           ,GetName()
           ,sqrt(mAve[1]), mAve[2]/(2*sqrt(mAve[1]))   
@@ -841,6 +912,13 @@ void FEFcn::FixPar(int ipar,int fix)
   else     {myFitter.Release(ipar)     ;mNFixd--;}
 }
 //______________________________________________________________________________
+int FEFcn::GetIPar(const char* name) const
+{
+   for (int ip=0;ip<mNPars;ip++) {if (mNams[ip]==name) return ip;}
+   printf("FEFcn::GetIPar Parameter %s NOT FOUND\n",name);
+   return -1;
+}
+//______________________________________________________________________________
 void FEFcn::Add(FECalcHolder* holder)
 { 
   holder->SetOffset(mNPars);
@@ -859,9 +937,9 @@ void FEFcn::InitFitter()
   printf("mCas[1]->GetName()=%s\n",mCas[1]->GetName());
   assert(strstr(mCas[0]->GetName(),"TpcInner"));
   assert(strstr(mCas[1]->GetName(),"TpcOuter"));
-//??  assert(myFitter.GetNumPars()==12);
-//???   FixPar(StvHitErrCalculator::kThkDet+0,2);
-//???  FixPar(StvHitErrCalculator::kThkDet+6,2);
+  assert(myFitter.GetNumPars()==12);
+  FixPar(StvHitErrCalculator::kWidTrk+0,2);
+  FixPar(StvHitErrCalculator::kWidTrk+6,2);
   myFitter.SetFCN(&Fcn);
 }
 //______________________________________________________________________________
@@ -897,14 +975,14 @@ int FEFcn::Fit()
   for (int it=0;it<10;it++) {  
     Approx(0);
     stat = myFitter.Migrad();
-    printf("Migrad() == %d\n",stat);
+    printf("%d Migrad() == %d\n",it,stat);
     if (!stat) break;
     stat = myFitter.Command("SCAN");
     printf("Scan() == %d\n",stat);
   }
   myFitter.Command("IMPROVE");
   Approx(1);
-  printf("FEFcn::Fit() Average Xi2/Ndf = %g\n",mXi2);
+  printf("FEFcn::Fit() Average Xi2/Ndf = %g(y) %g(z) %g\n",mXi2[0],mXi2[1],mXi2[2]);
   return 0;
 
 }
@@ -923,26 +1001,29 @@ FECalcHolder *FEFcn::GetCalc(int id,const float hiPos[3])
 //______________________________________________________________________________
 int FEFcn::Add(FEEvent* ev)
 { 
+static const float maxDY=1.0,maxDZ=1.0,maxCur=1./100;
+enum {kMinNodes = 15,kMinHits=20,kMinXi2=20};
   mNEvs++;
   int jl,jr;
   FENode node;
   while ((jl=ev->NextTrack(jr))>-1) 
   {
-    if (fabs(ev->mCurv[jl])>1./300) 	continue;
-///    if (fabs(ev->mPt[jl])<0.5) continue;
-    if (ev->nAllHits[jl] < 15) 		continue;
+    if (fabs(ev->mCurv[jl])>maxCur) 	continue;
+    if (ev->nAllHits[jl] < kMinHits) 	continue;
     assert(jr-jl+1>=15);
     int nNodes=0;
-    int jN = mTks.size(); mTks.resize(jN+1);
     double y00=0,z00=0;
+    FETrak myTrak;
 
 //		drop 5 worst hits
-    int n = jr-jl+1;
-    int idx[100];
-    TMath::Sort(n,ev->mChi2+jl,idx);
-    float minXi2 = ev->mChi2[jl+idx[4]];
+//     int n = jr-jl+1;
+//     int idx[100];
+//     TMath::Sort(n,ev->mChi2+jl,idx);
+//     float minXi2 = ev->mChi2[jl+idx[4]];
     for (int j=jl;j<=jr;j++) {   
-      if (ev->mChi2[j]>=minXi2) continue;
+      if (ev->mChi2[j]>=kMinXi2) 	continue;
+      if (fabs(ev->lYHit[j])>maxDY) 	continue;
+      if (fabs(ev->lZHit[j])>maxDZ) 	continue;
       double psi = ev->gPsi[j];
       double dip = ev->gDip[j];
       node.tkDir[0] = cos(dip)*cos(psi);
@@ -979,13 +1060,16 @@ int FEFcn::Add(FEEvent* ev)
       node.yz[1] = ev->lZHit[j]-z00;
       node.detId = ev->mDetector[j];
       nNodes++;
-      int n = mTks.size(); mTks.resize(n+sizeof(FENode)/sizeof(float));
-      memcpy(&mTks[n],&node,sizeof(FENode));
+      myTrak.Add(node);
     }    
-    mTks[jN] = nNodes*sizeof(FENode)/sizeof(float)+1;
+    assert(myTrak.NNodes()==nNodes);
+    if (nNodes<kMinNodes) continue;
     mNHits += nNodes;
     mNTks++;
+    mTks.push_back(myTrak);
+    assert(nNodes==mTks.back().NNodes());
   }        
+  assert(mTks.size());
   mN00 = (int)(log(double(mNHits))/log(2.)+1); 
   mN00 = 1<<mN00; 
   return 0;
@@ -994,48 +1078,63 @@ int FEFcn::Add(FEEvent* ev)
 void FEFcn::Eval(int npar, double* gradp, double& fvalp, double* par, int flag)
 {
 static const double oleg = 1e-6;
-static const double igor = 1;
+static const double igor = 0;
    assert(npar<=mNPars);
    mNCall++;
-   long double grad[100]={0},fval=0,myXi2=0;
+   long double grad[100]={0},fval=0,myXi2[3]={0};
    long double gra2[100]={0},fval2=0;
-   int myN=0;
+   int myN=0,myNy=0,myNz=0;
 
+   memset(mRes,0,sizeof(mRes));
+   int myNHits = 0;
 //	Update calc's params by current ones
    Synchro('A',par);
-   Poli2 poliSY(2),poliSZ(1);
-   const FETrak* trak = GetTrak();
-   for (;trak;trak=trak->Next()) {   //Loop over tracks 
-     int nNodes = trak->GetNNodes();
+//??   Poli2 poliSY(2),poliSZ(1);
+   Poli2 poliSY(2),poliSZ(2);
+   for (int itk=0;itk<(int)mTks.size();itk++) {//Loop over tracks
+     const FENodes &nodes = mTks[itk].Nodes();
+     int nNodes = nodes.size();;
      poliSY.Clear(); poliSZ.Clear();
      FECalcHolder *hold[100];
      double hRR[3],dRR[10][3];
      for (int iNode=0;iNode<nNodes;iNode++) {//1st Loop over nodes
-       const FENode *n = trak->GetNode(iNode);
-       hold[iNode] = GetCalc((int)n->detId,n->hiPos);
+       const FENode &n = nodes[iNode];
+       hold[iNode] = GetCalc((int)n.detId,n.hiPos);
        StvHitErrCalculator *calc = hold[iNode]->GetCalc();
-       calc->SetTrack(n->tkDir);
-       calc->CalcDcaErrs(n->hiPos,n->hiDir,hRR);
+       calc->SetTrack(n.tkDir);
+       calc->CalcDcaErrs(n.hiPos,n.hiDir,hRR);
        assert(hRR[0]>0);
        assert(hRR[2]>0);
-       poliSY.Add(n->s,n->yz[0],1./hRR[0]); 
-       poliSZ.Add(n->s,n->yz[1],1./hRR[2]); 
+       poliSY.Add(n.s,n.yz[0],1./hRR[0]); 
+       poliSZ.Add(n.s,n.yz[1],1./hRR[2]); 
      } // end 1st Loop over nodes
 
      poliSY.Fit(); 
      poliSZ.Fit(); 
-     fval += ((poliSY.LiH()+poliSZ.LiH()));
-     myXi2 += poliSY.Xi2()-(nNodes-3)+poliSZ.Xi2()-(nNodes-2);
-     fval2 += poliSY.Xi2()+poliSZ.Xi2()- 2*nNodes;
-     myN+=(nNodes-3)+(nNodes-2);
+     fval += ((poliSY.LiH()+poliSZ.LiH())) - (3*nNodes-5);
+     myXi2[0] += poliSY.Xi2()-(nNodes-3);
+     myXi2[1] += poliSZ.Xi2()-(nNodes-2);
 
+     myXi2[2] = 0.5*(myXi2[0]+myXi2[1]);
+     fval2 += poliSY.Xi2()+poliSZ.Xi2()- 3*nNodes;
+     myNy+=(nNodes-3);
+     myNz+=(nNodes-2);
+     myN+=myNy+myNz;
+
+     myNHits+=nNodes;
+     for (int iNode=0;iNode<nNodes;iNode++) {//residuals
+       double resY = poliSY.Res(iNode);
+       mRes[0]+=resY; mRes[1]+=resY*resY;
+       double resZ = poliSZ.Res(iNode);
+       mRes[2]+=resZ; mRes[3]+=resZ*resZ;
+     }
      if (flag==2) {
 
        for (int iNode=0;iNode<nNodes;iNode++) {//2nd Loop over nodes
-	 const FENode *n=trak->GetNode(iNode);
+	 const FENode &n=nodes[iNode];
 	 StvHitErrCalculator *calc = hold[iNode]->GetCalc();
-	 calc->SetTrack(n->tkDir);
-	 calc->CalcDcaErrs(n->hiPos,n->hiDir,hRR);
+	 calc->SetTrack(n.tkDir);
+	 calc->CalcDcaErrs(n.hiPos,n.hiDir,hRR);
 	 calc->CalcDcaDers(dRR);
   //		dLih/dW*dW/dErr2
 	 double dLihdErrY = -poliSY.dLiHdW(iNode)/(hRR[0]*hRR[0]);
@@ -1056,12 +1155,17 @@ static const double igor = 1;
 
     }//endif flag==2
   }//End tracks
-  mXi2 = 1+myXi2/myN;
+  mXi2[0] = 1+myXi2[0]/myNy;
+  mXi2[1] = 1+myXi2[1]/myNz;
+  mXi2[2] = 1+myXi2[2]/myN;
   fval2 /= mN00; fval  /= mN00;
   fval = fval + igor*0.5*(fval2*fval2);
   for (int ip=0;ip<npar;ip++) { fval += oleg*0.5*par[ip]*par[ip];}
   if (!mVal00) mVal00 = fval;
   fvalp = fval-mVal00;
+  TCL::vscale(mRes,(1./myNHits),mRes,4);
+
+
   if (flag==2)   {
     for (int i=0;i<mNPars;i++){
       gradp[i]=(grad[i]+igor*(fval2)*gra2[i])/mN00  +oleg*par[i];}}
@@ -1070,45 +1174,73 @@ static const double igor = 1;
 void FEFcn::Approx(int nonBias)
 {
    Synchro('M');
-   long double myXi2=0;
+   long double myXi2[3]={0},myPull=0;
    int myN=0;
+   if (nonBias) {//Dempfer result , weighting with the previous one
+     TCL::vlinco(mPars,kWeight,mFist,1.-kWeight,mPars,mNPars);
+   }
 
 //	Update calc's params by current ones
-   Poli2 poliSY(2),poliSZ(1);
-   const FETrak* trak = GetTrak();
-   for (;trak;trak=trak->Next()) {   //Loop over tracks 
-     int nNodes = trak->GetNNodes();
+//??   Poli2 poliSY(2),poliSZ(1);
+   Poli2 poliSY(2),poliSZ(2);
+   for (int itk=0;itk<(int)mTks.size();itk++) {//Loop over tracks 
+     const FENodes &nodes = mTks[itk].Nodes();
+     int nNodes = nodes.size();
      poliSY.Clear(); poliSZ.Clear();
      FECalcHolder *hold[100];
      double hRR[3];
      for (int iNode=0;iNode<nNodes;iNode++) {//1st Loop over nodes
-       const FENode *n = trak->GetNode(iNode);
-       hold[iNode] = GetCalc((int)n->detId,n->hiPos);
+       const FENode &n = nodes[iNode];
+       hold[iNode] = GetCalc((int)n.detId,n.hiPos);
        StvHitErrCalculator *calc = hold[iNode]->GetCalc();
-       calc->SetTrack(n->tkDir);
-       calc->CalcDcaErrs(n->hiPos,n->hiDir,hRR);
+       calc->SetTrack(n.tkDir);
+       calc->CalcDcaErrs(n.hiPos,n.hiDir,hRR);
        assert(hRR[0]>0);
        assert(hRR[2]>0);
-       poliSY.Add(n->s,n->yz[0],1./hRR[0]); 
-       poliSZ.Add(n->s,n->yz[1],1./hRR[2]); 
+       poliSY.Add(n.s,n.yz[0],1./hRR[0]); 
+       poliSZ.Add(n.s,n.yz[1],1./hRR[2]); 
      } // end 1st Loop over nodes
 
      poliSY.Fit(); 
      poliSZ.Fit(); 
-     myXi2 += poliSY.Xi2()+poliSZ.Xi2() - 2*nNodes;
-     myN+=2*nNodes;
+     myXi2[0] += poliSY.Xi2()-nNodes;
+     myXi2[1] += poliSZ.Xi2()-nNodes;
+
+     myXi2[2]  = 0.5*(myXi2[0]+myXi2[1]);
+     myN+=nNodes;
+
+     for (int iNode=0;iNode<nNodes;iNode++) {//1st Loop over nodes
+       const FENode &n = nodes[iNode];
+       hold[iNode] = GetCalc((int)n.detId,n.hiPos);
+       StvHitErrCalculator *calc = hold[iNode]->GetCalc();
+       calc->SetTrack(n.tkDir);
+       calc->CalcDcaErrs(n.hiPos,n.hiDir,hRR);
+       assert(hRR[0]>0);
+       assert(hRR[2]>0);
+       myPull += pow(poliSY.Pull(n.s,n.yz[0],hRR[0]),2);
+       myPull += pow(poliSZ.Pull(n.s,n.yz[1],hRR[2]),2);
+
+     } // end 1st Loop over nodes
+
   }//End tracks
   
-  mXi2 = 1+myXi2/myN;
-  if (nonBias) mXi2 = 1+(myXi2)/double(myN -mNTks*5);
-  printf("FEFcn::Approx(%d) = %g\n",nonBias,mXi2);
-  TCL::vscale(mPars,mXi2,mPars,mNPars);
+  mXi2[0] = 1+myXi2[0]/myN;
+  mXi2[1] = 1+myXi2[1]/myN;
+  mXi2[2] = 0.5*(mXi2[0]+mXi2[1]);
+  myPull /=(2*myN);
+  printf("Approx::Aver: Xi2=%g(y) %g(z) %g Pull=%g\n"
+        ,mXi2[0],mXi2[1],mXi2[2],double(myPull));
+
+  if (!nonBias)  {TCL::vscale(mPars,mXi2[2]       ,mPars,mNPars);}
+  else           {TCL::vscale(mPars,double(myPull),mPars,mNPars);}
+
+
   Synchro('P');
 }
 //______________________________________________________________________________
 void FEFcn::Synchro(char from,const double* Arr )
 {
-// from: 0=from StvHitErrCals's; 1=from Minuit; 2 = FEFcn::mPar; 3=from array
+// from: 0=from StvHitErrCalc's; 1=from Minuit; 2 = FEFcn::mPar; 3=from array
 
   switch (from) {
   case 'C': {// input from StvHitErrCals's
@@ -1122,6 +1254,7 @@ void FEFcn::Synchro(char from,const double* Arr )
         double qwe = p[ip]; if (qwe<1e-8) qwe=1e-8;
         double stp = qwe*0.1; if (stp<1e-8) stp = 0.8e-6;
         myFitter.DefineParameter(nump,ts.Data(), qwe, stp, 0, 0.1);
+        mNams[nump] = ts;
         mPars[nump] = qwe;
         nump++;
       }
@@ -1172,17 +1305,17 @@ void FEFcn::AvErr(const char *tit)
   {
     FECalcHolder *hold = mCas[ih]; hold->AvInit();
   }
-  const FETrak* trak = GetTrak();
-  for (;trak;trak=trak->Next()) {   
-    int nNodes = trak->GetNNodes();
+  for (int itk=0;itk<(int)mTks.size();itk++) {   
+    const FENodes &nodes = mTks[itk].Nodes();
+    int nNodes = nodes.size();
     double hRR[3];
     for (int iNode=0;iNode<nNodes;iNode++) {//1st Loop over nodes
-      const FENode *n = trak->GetNode(iNode);
-      int detId = n->detId;
-      FECalcHolder *hold = GetCalc(detId,n->hiPos);
+      const FENode &n = nodes[iNode];
+      int detId = n.detId;
+      FECalcHolder *hold = GetCalc(detId,n.hiPos);
       StvHitErrCalculator *calc = hold->GetCalc();
-      calc->SetTrack(n->tkDir);
-      calc->CalcDcaErrs(n->hiPos,n->hiDir,hRR);
+      calc->SetTrack(n.tkDir);
+      calc->CalcDcaErrs(n.hiPos,n.hiDir,hRR);
       hold->AvAdd(hRR);
     } // end Loop over nodes
   }//End tracks
@@ -1207,8 +1340,11 @@ int FEFcn::IsEnded() const
     double myDlt = fabs(mPars[i]-mFist[i]);
     if (dlt<myDlt) dlt=myDlt;
   }
-  printf(" *** IsEnded *** %g\n",dlt/sum);
-  return dlt < 1e-2*sum;
+  dlt /= sum/mNPars;
+  printf(" *** IsEnded with*** %g\n",dlt);
+  if (dlt > 1e-2) return 0;
+  printf(" *** Fit CONVERGED Hurragh***\n");
+  return 1;
 }  
   
   
@@ -1241,7 +1377,8 @@ int FEApprox::Prepare()
    TMatrixD dWdSy,dWdSz,d2WdSSy,d2WdSSz;
    TVectorD dLdWy,dLdWz;
 
-   Poli2 poliSY(2),poliSZ(1);
+//??   Poli2 poliSY(2),poliSZ(1);
+   Poli2 poliSY(2),poliSZ(2);
    const FETrak* trak = mFcn->GetTrak();
    for (;trak;trak=trak->Next()) {   
      int nNodes = trak->GetNNodes();
