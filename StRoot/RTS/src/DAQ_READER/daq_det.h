@@ -78,7 +78,7 @@ protected:
 	daqReader *caller ;
 
 	const char *sfs_name ;	// name in sfs bank (if any) i.e. "tpx"
-	int rts_id ;		// RTS_ID
+
 
 
 private:
@@ -127,7 +127,7 @@ public:
 	} ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.8 2012/05/11 09:30:58 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.9 2013/02/14 14:41:58 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	} ;
 
@@ -148,9 +148,7 @@ public:
 	char *out_buffer ;
 	int out_bytes ;
 
-	// used for the container only and not subclases!
-//	daq_det *mydet[32] ;
-//	u_int multi_mask ;
+	int rts_id ;		// RTS_ID
 
 } ;
 
