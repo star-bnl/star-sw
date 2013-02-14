@@ -452,15 +452,20 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	my $uilocal = $dirbase . File::Basename::basename( $ui );
 	my @dep = ($uilocal, @uih);
 	if ($qt4) {
-	    my $out = "$dirbase". "ui_". $stem . ".h"; # print "Qt4: out : $out ==> $uilocal\n"; # if $param::debug ;
+	    my $out = "$dirbase". "ui_". $stem . ".h"; 
+            # print "Qt4: out : $out ==> $uilocal\n"; # if $param::debug ;
+	    Depends $env [$out], ($uilocal);
 	    Command $env [$out], ($uilocal), qq(cd %1:d; $uic %1:f -o %>:f );
-	    push @QtDefs, $out; print "QtDefs from $ui  @QtDefs\n"; # if $param::debug;
+	    push @QtDefs, $out;    print "Qt4/QtDefs from $ui -> $out\n"; # if $param::debug;
 	} else {
-	    my @out = ($dirbase . $stem . ".cxx", $dirbase . $stem . ".h") ; #   print "Qt3:$out[1]:d \n out @dep : @out ==> $uilocal\n";
+	    my @out = ($dirbase . $stem . ".cxx", $dirbase . $stem . ".h") ; 
+            #   print "Qt3:$out[1]:d \n out @dep : @out ==> $uilocal\n";
+	    Depends $env [$out[1]], (@dep); 
+	    Depends $env [@out[0]], ($uilocal,$out[1]);
 	    Command $env [$out[1]], @dep, qq(cd %1:d; $uic %1:f -o %>:f );
 	    Command $env [@out[0]], ($uilocal,$out[1]), qq(cd %1:d; $uic %1:f  -i %2:f -o %>:f);
 	    push @src, $out[0];
-	    push @QtDefs, $out[1]; # print "QtDefs from $ui  @QtDefs\n" if $param::debug;
+	    push @QtDefs, $out[1]; print "Qt3/QtDefs from $ui -> $out[1]\n"; # if $param::debug;
 	}
     }
     if ($#xpmQT >= 0) {
