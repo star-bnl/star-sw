@@ -326,7 +326,7 @@ daq_dta *daq_fgt::handle_zs(int sec, int rdo, char *rdobuff, int inbytes)
 		}}
 
 
-		LOG(TERR,"Expect %d dumped CHs in %d bytes, meta_bytes %d, tb_cou %d",dumped_chs,bytes,meta_bytes,meta_zs->tb_cou) ;
+		LOG(NOTE,"Expect %d dumped CHs in %d bytes, meta_bytes %d, tb_cou %d",dumped_chs,bytes,meta_bytes,meta_zs->tb_cou) ;
 
 //		for(int i=0;i<100;i++) {
 //			LOG(TERR,"%d: 0x%04X",i,d[i]) ;
