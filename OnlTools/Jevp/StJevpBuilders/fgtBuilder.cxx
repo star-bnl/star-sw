@@ -94,12 +94,12 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   for(int gid=0;gid<np;gid++)
     {
       int rdo;
-      if(gid<10)
+      if(gid<12)
 	rdo=1;
       else 
 	rdo=2;
 
-      int sec=floor(gid%10)/2;
+      int sec=floor(gid%12)/2;
       int group=gid%2;
 
       sprintf(buffer,"Assembly %s",Gid2Label[gid].c_str());
@@ -273,7 +273,7 @@ void fgtBuilder::event(daqReader *rdr)
 	//corrupted data, should be fine for run 13 as well, these apvs do not exst
 	if(dd->pad>21 || dd->pad<0 || dd->pad==10 || dd->pad==11)
 	  continue;
-	if(dd->rdo<1 || dd->rdo > 2 || dd->sec <0 || dd->sec> 4)
+	if(dd->rdo<1 || dd->rdo > 2 || dd->sec <0 || dd->sec> 5)
 	  continue;
 	if(f[i].ch>127 || f[i].ch<0|| f[i].tb>numTb)
 	  continue;
@@ -293,7 +293,7 @@ void fgtBuilder::event(daqReader *rdr)
 	  }
 	//	cout <<"down  " <<endl;
 	//see ben's spreadsheet, first rdo has 10, second 9 assemblies attached
-	int gid=(dd->rdo-1)*10+dd->sec*2;
+	int gid=(dd->rdo-1)*12+dd->sec*2;
 	if(dd->pad>10)
 	  gid+=1;
 	if(gid>24)
