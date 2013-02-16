@@ -18,12 +18,12 @@
 void myBreak(int);
 enum {kFstAng=88,kErrFakt=5,kLenFakt=5,kStpFakt=3};
 static const double kFstTan = tan(kFstAng*M_PI/180);
-static const double kMinCos = 0.1;
+static const double kMinTan = 0.1;
+static const double kImpFakt = 0.5;
+static const float  kDeltaR = 40;
+static const float  kDeltaZ = 40;
 
 ClassImp(StvDefaultSeedFinder)
-//static const float TpcOuterDeltaR = 15, kTpcHitErr = 0.2;
-//static const float TpcOuterDeltaR = 30, kTpcHitErr = 0.2;
-static const float TpcOuterDeltaR = 40, kTpcHitErr = 0.2;
 
 //_____________________________________________________________________________
 StvDefaultSeedFinder::StvDefaultSeedFinder(const char *name):StvSeedFinder(name)
@@ -124,7 +124,8 @@ static int myDeb = 0;
 std::vector<TObject*> mySeedObjs;
 
   StvHit *fstHit,*selHit=0; 
-  mSel.SetXYStep(TpcOuterDeltaR);
+  mSel.SetXYStep(kDeltaR);
+  mSel.SetZStep (kDeltaZ);
 
   for (;(*f1stHitMapIter)!=f1stHitMap->end();++(*f1stHitMapIter)) {//1st hit loop
     fstHit = (*(*f1stHitMapIter)).second;
@@ -304,14 +305,13 @@ void  StvConeSelector::UpdateLims()
 //_____________________________________________________________________________
 int  StvConeSelector::Reject(const float x[3])
 {
-static const double kImpFakt = 0.75;
    float myRxy2 = x[0]*x[0]+x[1]*x[1];
    if (myRxy2>mRxy2 && fabs(x[2])>fabs(mHit[2])) 	return 1;
    if (myRxy2>mRxy2 ) 					return 2;
    float xx[3] = {x[0]-mHit[0],x[1]-mHit[1],x[2]-mHit[2]};
    float r2xy = xx[0]*xx[0]+xx[1]*xx[1];
    float z2 = xx[2]*xx[2];
-   if (r2xy < (kMinCos*kMinCos)*z2) 	return 3;		
+   if (r2xy < (kMinTan*kMinTan)*z2) 	return 3;		
    mHitLen = (r2xy+z2);
    if (mHitLen  < 1e-8) 		return 4;
    mHitPrj = Dot(xx,mDir);
