@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.25 2013/01/11 17:23:36 perev Exp $
+// $Id: StvMaker.cxx,v 1.26 2013/02/16 01:16:57 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -150,15 +150,19 @@ Int_t StvMaker::InitDetectors()
   if (IAttr("activeFgt")) { assert(tgh->SetActive(kFgtId                   ));}
 //		Now Initialize TGeo helper
   tgh->Init(1+2+4);
+//	Check is Stv is running in fit hit error utility
+
+  int isFitErr = IAttr("fiterr");
 
 //		TGeo herlper is ready, add error calculators
   if (IAttr("activeTpc")) {	//TPC error calculators
   
     const char*  innOutNames[2]  ={"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs"    };
     for (int io=0;io<2;io++) {
-      StvHitErrCalculator *hec = new StvTpcHitErrCalculator(innOutNames[io]);
+      TString myName(innOutNames[io]); if (isFitErr) myName+="FE";
+      StvHitErrCalculator *hec = new StvTpcHitErrCalculator(myName);
       TString ts("Calibrations/tracker/");
-      ts+=innOutNames[io];
+      ts+=myName;
       TTable *tt = (TTable*)GetDataBase(ts);
       assert(tt);
       hec->SetPars((double*)tt->GetArray());
@@ -169,16 +173,18 @@ Int_t StvMaker::InitDetectors()
   } }
 
   if (IAttr("activeEtr")) {	//Etr error calculators
-      StvHitErrCalculator *hec = new StvHitErrCalculator("EtrHitErrs",2);
-      double etrPars[StvHitErrCalculator::kMaxPars]={9e-4,9e-4};
-      hec->SetPars(etrPars);
-      int nHP = tgh->SetHitErrCalc(kEtrId,hec,0);
-      Info("Init","%s: %d HitPlanes","EtrHitErrs",nHP);
-      assert(nHP);
+    TString myName("EtrHitErrs"); if (isFitErr) myName+="FE";
+    StvHitErrCalculator *hec = new StvHitErrCalculator(myName,2);
+    double etrPars[StvHitErrCalculator::kMaxPars]={9e-4,9e-4};
+    hec->SetPars(etrPars);
+    int nHP = tgh->SetHitErrCalc(kEtrId,hec,0);
+    Info("Init","%s: %d HitPlanes","EtrHitErrs",nHP);
+    assert(nHP);
   }
 
   if (IAttr("activeFgt")) {    // FGT error calculator
-    StvHitErrCalculator *hec = new StvHitErrCalculator( "FgtHitErrs", 2);
+    TString myName("FgtHitErrs"); if (isFitErr) myName+="FE";
+    StvHitErrCalculator *hec = new StvHitErrCalculator(myName, 2);
     Double_t fgtPars[ StvHitErrCalculator::kMaxPars]={
       9e-4,9e-4,
     };
@@ -239,8 +245,11 @@ static int initialized = 0;
   };
   delete tokens;
 
-  kit->SetTrackFinder(new StvKalmanTrackFinder);
-
+  StvKalmanTrackFinder *tf = new StvKalmanTrackFinder;
+  kit->SetTrackFinder(tf);
+  int iRefit = IAttr("Refit");
+  tf->SetRefit(iRefit);
+  
   new StvConst();
   new StvFitter();
   new StvKalmanTrackFitter();
