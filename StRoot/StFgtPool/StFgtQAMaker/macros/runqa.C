@@ -1,59 +1,58 @@
 #include <TSystem.h>
 
-int runqa( Int_t runnumber = 0, Bool_t ped=0, Int_t nevents = 100000, 
-	   const Char_t *dir = "/evp/a/",
-	   Float_t chargrms=1.0, Float_t thr=4.0, Float_t thr2add=3.0, Bool_t useSeed5=true, Bool_t cutShortEvents = 0){
+int runqa( Int_t runnumber = 14032027, int day=14000, Int_t ped=0, Int_t nevents = 100000, 
+	   const Char_t *evpdir = "/evp/a/",
+	   Float_t chargrms=1.0, Float_t thr=4.0, Float_t thr2add=3.0, Bool_t useSeed5=true, Bool_t cutShortEvents = 0, int zs=1){
   
   LoadLibs();   
   Int_t ierr = 0;
-  const char* fgtDbMkrName ="fgtDb";
-
+  
   cout << "Constructing the chain" << endl;
   StChain* analysisChain = new StChain("fgtQAChain");
   
   TString dir0 = "MySQL:StarDb";
   TString dir1 = "$STAR/StarDb";
   St_db_Maker *dbMkr = new St_db_Maker( "dbMkr", dir0, dir1 );  
-
+  
   cout << "Constructing StFgtDbMaker" << endl;
-  //fgtDbMkr = new StFgtDbMaker( fgtDbMkrName );
   fgtDbMkr = new StFgtDbMaker();
   //dbMkr->SetDateTime(20120401,000000); //run2012???
-
-  cout << "Constructing the FGR raw daq reader" << endl;
+  
+  cout << "Constructing the FGT raw daq reader" << endl;
   char filename[200]; 
-  if(runnumber>0){ sprintf(filename,"%s/%d",dir,runnumber); }
-  else{ sprintf(filename,"/star/data03/daq/2012/174/13174002p_rf/st_physics_13174002_raw_1010001.daq"); }
-  daqRdr = new StFgtRawDaqReader( "daqReader", filename, fgtDbMkrName );
+  sprintf(filename,"%s/%d",evpdir,runnumber);
+  //sprintf(filename,"%s/%d_DELETE",evpdir,runnumber);
+  daqRdr = new StFgtRawDaqReader( "daqReader", filename);
   daqRdr->setIsCosmic( false );
   daqRdr->cutShortEvents( cutShortEvents );
+  if(zs>0){daqRdr->setZSdataOnly();}
   
-  if(ped) {
+  if(ped==1) {
     cout << "Loading and Constructing the StFgtPedMaker" << endl;
     gSystem->Load("StFgtPedMaker");
-    StFgtRobustPedMaker* pedMkr  = new StFgtRobustPedMaker(  "FgtPedMaker" );
-    pedMkr->setFgtDbMkrName("fgtDbMkr");
-    pedMkr->setTimeBinMask(0x04);
-    //pedMkr->setTimeBinMask(0x7f);
-    pedMkr->setNumBins( 100 );
-    pedMkr->setMaxAdc( 1200 );
+    StFgtRobustPedMaker* pedMkr  = new StFgtRobustPedMaker();
+    pedMkr->setFgtDbMkrName("fgtDb");
+    pedMkr->setTimeBinMask(0x0);
+    pedMkr->setNumBins(4200);
+    pedMkr->setMaxAdc(4200);
     pedMkr->setNumSmooth(0);
-    sprintf(filename,"ped/ped.%d.txt",runnumber);
+    sprintf(filename,"%d/ped/ped.%d.txt",day,runnumber);
     pedMkr->setToSaveToFile(filename);
-    //sprintf(filename,"status/status.%d.txt",runnumber);
-    //pedMkr->setToSaveToHist(filename);  
 
     cout << "Loading and Constructing the Status Maker" << endl;
     gSystem->Load("StFgtStatusMaker");
     StFgtStatusMaker *statMkr = new StFgtStatusMaker( "FgtStatusMaker", "FgtPedMaker" );
-    sprintf(filename,"status/status.%d.txt",runnumber);
+    sprintf(filename,"%d/status/status.%d.txt",day,runnumber);
     statMkr->setToSaveToFile(filename);
-    statMkr->setTimeBin(2);
+    statMkr->setTimeBin(0);
+    statMkr->setPedRange(100,1000);
+    statMkr->setRmsRange(5,200);
+    statMkr->setFracRange(0.0,1.0);
     statMkr->setMaxDeadPerApv(128);
   }else{
     cout << "Loading and Constructing the StFgtA2CMaker" << endl;
     gSystem->Load("StFgtA2CMaker");
-    StFgtA2CMaker* a2cMkr  = new StFgtA2CMaker();
+    StFgtA2CMaker* a2cMkr  = new StFgtA2CMaker(  "FgtA2CMaker" );
     a2cMkr->setFgtDb(fgtDbMkr->getDbTables());
     a2cMkr ->setAbsThres( -5000 );  // set to below -4096 to skip cut
     //    a2cMkr ->setAbsThres( 300 );  // set to below -4096 to skip cut
@@ -70,13 +69,14 @@ int runqa( Int_t runnumber = 0, Bool_t ped=0, Int_t nevents = 100000,
     ///this cuts ~10% of the events
     //   a2cMkr->doRemoveNonSignal(false);
     //   a2cMkr->doRemoveNonPulse(false);
-    //a2cMkr->setPedestalFile("ped.txt");
-    //a2cMkr->setStatusFile("status.txt");
+    a2cMkr->setPedestalFile("ped.txt");
+    a2cMkr->setStatusFile("status.txt");
     
     gSystem->Load("StFgtClusterMaker");
     Char_t *myMaker = "StFgtClusterMaker";
-    StFgtClusterMaker* clusterMk =new StFgtClusterMaker(); 
+    StFgtClusterMaker* clusterMk =new StFgtClusterMaker("FgtClustMaker"); 
     clusterMk->SetDEBUG();
+    //  simpleClusAlgo = new StFgtSimpleClusterAlgo();
     seededClusAlgo = new StFgtSeededClusterAlgo();
     seededClusAlgo->setJumpSingleStrip(true); // if a strip in cluster has no charge 
     seededClusAlgo->setThreshold2AddStrip(thr2add); //threshold to add strips to cluster 
@@ -87,6 +87,7 @@ int runqa( Int_t runnumber = 0, Bool_t ped=0, Int_t nevents = 100000,
     StFgtSimplePointAlgo * simplePointAlgo = new StFgtSimplePointAlgo();    
     pointMk->setPointAlgo( simplePointAlgo );
 
+    /*
     gSystem->Load("StFgtClusterTools");
     fgtGenBase=new StFgtGeneralBase("fgtGenBase");
     fgtStraightTrackMaker =new StFgtStraightTrackMaker("fgtStraightTracker");
@@ -98,9 +99,11 @@ int runqa( Int_t runnumber = 0, Bool_t ped=0, Int_t nevents = 100000,
     algMk->setDataSource(2);
     algMk->setRunNumber(runnumber);
     algMk->setWriteTree("alignment_trkout.root");
+    */
 
     gSystem->Load("StFgtQAMaker");
-    StFgtQAMaker* qaMk =new StFgtQAMaker();
+    StFgtQAMaker* qaMkr =new StFgtQAMaker();
+    qaMkr->setRunNumber(runnumber);
   }
    
   cout << "Initializing" << endl;
@@ -116,8 +119,7 @@ int runqa( Int_t runnumber = 0, Bool_t ped=0, Int_t nevents = 100000,
   
   cout << "max nevents = " << nevents << endl;
   for( int i=0; i<nevents && !ierr; ++i ){
-    // if( i+1 % 100 == 1 )
-    //cout << "\ton event number **************" << i << endl;
+    if( i+1 % 100 == 1 ) cout << "\t on event number **************" << i << endl;
     //cout << "clear (agv)" << endl;
     analysisChain->Clear();
     //cout << "make" << endl;

@@ -3,7 +3,7 @@ static const int kFgtNumQuads=4;
 
 static const int NHist=3;     
 static const int N1dHist=7;   
-static const int N2dHist=1;   
+static const int N2dHist=2;   
 static const int NTrkHist=4;
 
 static TH1F *hist0[NHist];                               //! Histos for whole fgt
@@ -15,23 +15,26 @@ static const char* cquad[kFgtNumQuads]={"A","B","C","D"};
 static const char* cHist[NHist]={"MaxTimeBin","ADC","DataSize"};
 
 static const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","ChargeAsy"};
-static const int   l1dHist[N1dHist]={          0,        1,        1,          0,            0,              0,          0};
+static const int   l1dHist[N1dHist]={          1,        1,        1,          1,            1,              0,          0};
 static const int   m1dHist[N1dHist]={          0,        1,        1,          0,            0,              0,          0};
-static const int   s1dHist[N1dHist]={          0,        1,        1,          0,            0,              0,          0};
 
-static const char* c2dHist[N1dHist]={"XY"};
+static const char* c2dHist[N1dHist]={"XY","ADCvsTB"};
 
 static const int color[kFgtNumDiscs]={1,2,8,4,6,9};
 
 
 TCanvas *c1;
 static TFile* file;
-static int runnum, png, pdf;
+static int runnum, yearday, png, pdf;
 
 void save(char* name){
   char fname[100];
   if(png){
-    sprintf(fname,"%d_%s.png",runnum,name);    
+    if(yearday==0){
+      sprintf(fname,"plot/%d_%s.png",runnum,name);    
+    }else{
+      sprintf(fname,"%d/%d_%s.png",yearday,runnum,name);    
+    }
     c1->SaveAs(fname);
   }  
 }
@@ -65,13 +68,21 @@ void plot1d(int hid) {
 	h->SetLineWidth(3);
 	h->Draw("SAME");  
 	float mean=h->GetMean();
-	sprintf(c,"%1d%s mean=%6.1f",disc+1,cquad[quad],mean);
+	sprintf(c,"%1d%s mean=%6.2f",disc+1,cquad[quad],mean);
         TText *t1;
-	float x1=xmin*0.9 + 0.1*xmax;
-	float x2=xmin*0.5 + 0.5*xmax;
-        if(disc<3) { t1 = new TText(x1,ymax*(1.1-0.1*disc),c); }
-        else       { t1 = new TText(x2,ymax*(1.1-0.1*(disc-3)),c); }
-        t1->SetTextSize(0.05); t1->SetTextColor(color[disc]); t1->Draw();
+	//	float x1=xmin*0.9 + 0.1*xmax;
+	//      float x2=xmin*0.5 + 0.5*xmax;
+        //if(disc<3) { t1 = new TText(x1,ymax*(1.1-0.1*disc),c); }
+        //else       { t1 = new TText(x2,ymax*(1.1-0.1*(disc-3)),c); }
+	float x1= 0.2, x2= 0.5;
+	float y1=0.8 - 0.07*disc;
+	float y2=0.8 - 0.07*(disc-3);
+        if(disc<3) { t1 = new TText(x1,y1,c); }
+        else       { t1 = new TText(x2,y2,c); }
+	t1->SetNDC();
+	t1->SetTextSize(0.05); 
+	t1->SetTextColor(color[disc]); 
+	t1->Draw();
       }
     }
   }else{
@@ -104,11 +115,12 @@ void plot2d(int hid) {
     h->Draw("COLZ");  
   }
   c1->Update();
-  save(c1dHist[hid]);
+  save(c2dHist[hid]);
 }
 
-void makeqaplot(int run=0, int plt=0, int save=1){
+void makeqaplot(int run=0, int plt=0, int save=1, int day=0){
   runnum=run;
+  yearday=day;
   if(save==0) {png=0; pdf=0;}
   if(save==1) {png=1; pdf=0;}
   if(save==2) {png=0; pdf=1;}
@@ -132,14 +144,16 @@ void makeqaplot(int run=0, int plt=0, int save=1){
     c1->Divide(1,3); 
     for(int i=0; i<NHist; i++){
       c1->cd(i+1);
-      gPad-> SetLogy();
+      int log=0;
+      if(i>0) {log=1;} 
+      gPad->SetLogy(log); 
       hist0[i]=(TH1F*) file->Get(cHist[i]);
       hist0[i]->SetFillColor(kBlue); 
       hist0[i]->Draw();
     }
     c1->Update();
+    c1->Update();
     save("plot");
-    gPad->SetLogy(0);
   }  
   for(int i=0; i<N1dHist; i++) { if(plt==0 || plt==10+i) plot1d(i);}
   for(int i=0; i<N2dHist; i++) { if(plt==0 || plt==20+i) plot2d(i);}

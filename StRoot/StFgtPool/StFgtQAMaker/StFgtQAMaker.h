@@ -4,11 +4,14 @@
  * \author Akio
  * \date   Dec2012
  *
- * $Id: StFgtQAMaker.h,v 1.2 2013/02/06 21:17:18 akio Exp $
+ * $Id: StFgtQAMaker.h,v 1.3 2013/02/16 14:25:55 akio Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StFgtQAMaker.h,v $
+ * Revision 1.3  2013/02/16 14:25:55  akio
+ * *** empty log message ***
+ *
  * Revision 1.2  2013/02/06 21:17:18  akio
  * some adjustments & adding macro
  *
@@ -47,7 +50,7 @@ public:
   inline void setRunNumber(Int_t v) {mRunNumber=v;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.2 2013/02/06 21:17:18 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.3 2013/02/16 14:25:55 akio Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   };
   
@@ -63,7 +66,7 @@ private:
 
   static const int NHist=3;     //!
   static const int N1dHist=7;   //!
-  static const int N2dHist=1;   //!
+  static const int N2dHist=2;   //!
   static const int NTrkHist=4;  //!
   TH1F *hist0[NHist];                               //! Histos for whole fgt
   TH1F *hist1[kFgtNumDiscs][kFgtNumQuads][N1dHist]; //! 1d histos for each disc/quad
