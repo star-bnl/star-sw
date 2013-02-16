@@ -53,6 +53,8 @@ void StvConeRejector::Reset(const float pos[3],const float dir[3]
     if (mLen>kMaxLen) mLen=kMaxLen;
   }
   mLen2 = mLen*mLen;
+  mRad2 = mPos[0]*mPos[0]+mPos[1]*mPos[1];
+  mRad  = sqrt(mRad2);
 
   if (dir) { 	//Direction defined
     Cop(mDir,dir);
@@ -105,6 +107,7 @@ void StvConeRejector::Prepare()
 int StvConeRejector::Reject(const float x[3]) const
 {
   float xx[3];
+  if (x[0]*x[0]+x[1]*x[1]>mRad2 - 2*mRad*mErr) return 4;
   Sub(xx,x,mPos);
   float r2 = xx[0]*xx[0]+xx[1]*xx[1]+xx[2]*xx[2];
   if (r2>mLen2)	return 1;
