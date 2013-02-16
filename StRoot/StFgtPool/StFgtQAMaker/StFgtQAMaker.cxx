@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtQAMaker.cxx,v 1.2 2013/02/06 21:17:18 akio Exp $
+ * $Id: StFgtQAMaker.cxx,v 1.3 2013/02/16 14:25:55 akio Exp $
  *
  */
 
@@ -69,13 +69,16 @@ void StFgtQAMaker::bookHist(){
   const float lHist[NHist]={           0,    0,         0};
   const float hHist[NHist]={          15, 4000,     30975};
   const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","ChargeAsy"};
-  const int   n1dHist[N1dHist]={        100,       ns,       ns,         25,           15,            100,        50};
+  const int   n1dHist[N1dHist]={         50,       ns,       ns,         25,           15,             50,        50};
   const float l1dHist[N1dHist]={          0,        0,        0,          0,            0,              0,       -0.5};
   const float h1dHist[N1dHist]={         50,float(ns),float(ns),       25.0,           15,          30000,        0.5};
-  const char* c2dHist[N1dHist]={       "XY"};
-  const int   n2dHist[N1dHist]={         50};
-  const float l2dHist[N1dHist]={        -40};
-  const float h2dHist[N1dHist]={         40};
+  const char* c2dHist[N2dHist] ={       "XY", "ADCvsTB"};
+  const int   xn2dHist[N2dHist]={         50,        15}; 
+  const float xl2dHist[N2dHist]={        -40,         0};
+  const float xh2dHist[N2dHist]={         40,        15};
+  const int   yn2dHist[N2dHist]={         50,       200}; 
+  const float yl2dHist[N2dHist]={        -40,         0};
+  const float yh2dHist[N2dHist]={         40,      4000};
   //histos for whole FGT
   for(int i=0; i<NHist; i++){
     hist0[i]=new TH1F(cHist[i],cHist[i],nHist[i],lHist[i],hHist[i]);
@@ -93,7 +96,7 @@ void StFgtQAMaker::bookHist(){
   for(int disc=0; disc<kFgtNumDiscs; disc++){
     for(int i=0; i<N2dHist; i++){
       sprintf(c,"Disc%1d%s",disc+1,c2dHist[i]);
-      hist2[disc][i]=new TH2F(c,c,n2dHist[i],l2dHist[i],h2dHist[i],n2dHist[i],l2dHist[i],h2dHist[i]);
+      hist2[disc][i]=new TH2F(c,c,xn2dHist[i],xl2dHist[i],xh2dHist[i],yn2dHist[i],yl2dHist[i],yh2dHist[i]);
     }
   }
 }
@@ -137,6 +140,7 @@ void StFgtQAMaker::fillHist(){
     return;
   };
   
+  int ntimebin=fgtCollectionPtr->getNumTimeBins();
   int datasize=0;
   for (int disc=0; disc<kFgtNumDiscs; disc++){    
     //Strips
@@ -153,10 +157,17 @@ void StFgtQAMaker::fillHist(){
       StFgtGeom::decodeGeoId(geoid,idisc,iquad,layer,istr);
       if(layer=='P') {ipr=0;}
       if(layer=='R') {ipr=1;}
-      if(maxadc>3*pederr) {
+      if(disc==2 && (iquad==0 || iquad==3)) continue;
+      if(idisc==4 && iquad==3) continue;
+      hist0[1]->Fill(float(maxadc));	  
+      if(maxadc>4*pederr && maxadc>160) {
 	nhit[iquad]++;	
-	hist0[1]->Fill(float(maxadc));	  
 	hist1[disc][iquad][1+ipr]->Fill(float(istr));
+      }
+      if(maxadc>10*pederr && maxadc>400) {
+	for(int tb=0; tb<ntimebin; tb++){
+	  hist2[idisc][1]->Fill(float(tb),float((*it)->getAdc(tb)));
+	}
       }	
     }
     for (int quad=0; quad<kFgtNumQuads; quad++) hist1[disc][quad][0]->Fill(float(nhit[quad]));
@@ -173,10 +184,14 @@ void StFgtQAMaker::fillHist(){
       char layer;
       short idisc,iquad,istr;
       StFgtGeom::decodeGeoId(geoid,idisc,iquad,layer,istr);
-      ncluster[iquad]++;
-      hist0[0]->Fill(float((*it)->getMaxTimeBin()));
+      if(idisc==2 && (iquad==0 || iquad==3)) continue;
+      if(idisc==4 && iquad==3) continue;
+      ncluster[iquad]++;      
       hist1[disc][iquad][4]->Fill(float((*it)->getNstrip()));
       hist1[disc][iquad][5]->Fill((*it)->charge());
+      if((*it)->getMaxAdc() > 500){
+	hist0[0]->Fill(float((*it)->getMaxTimeBin()));
+      }
     }
     for (int quad=0; quad<kFgtNumQuads; quad++) hist1[disc][quad][3]->Fill(float(ncluster[quad]));
   }
@@ -189,6 +204,8 @@ void StFgtQAMaker::fillHist(){
     float phi = (*it)->getPositionPhi();
     float r   = (*it)->getPositionR();
     TVector3 xyz;
+    if(idisc==2 && (iquad==0 || iquad==3)) continue;
+    if(idisc==4 && iquad==3) continue;
     mDb->getStarXYZ(idisc,iquad,r,phi,xyz);      
     hist2[idisc][0]->Fill(xyz.X(),xyz.Y());
     hist1[idisc][iquad][6]->Fill((*it)->getChargeAsymmetry());		       
