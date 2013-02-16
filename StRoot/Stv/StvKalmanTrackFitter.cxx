@@ -11,6 +11,7 @@
 #include "StvUtil/StvNodePars.h"
 #include "StvUtil/StvDebug.h"
 #include "Stv/StvFitter.h"
+#include "Stv/StvEnum.h"
 #include "Stv/StvConst.h"
 #include "Stv/StvStl.h"
 #include "Stv/StvNode.h"
@@ -115,8 +116,8 @@ enum myCase {kNull=0,kLeft=1,kRite=2,kHit=4,kFit=8  };
       case kNull: {	// Empty leading node
 //		It was not fits before(left) get params from previous dir
 //		and set huge errors
-        node->mPP[lane] = node->mFP[2];		//prediction from opposite fit
-        node->mPE[lane] = node->mFP[2].deltaErrs();	//Big errors
+        node->mPP[lane] = node->mFP[2];					//prediction from opposite fit
+        node->mPE[lane] = node->mFE[2];	node->mPE[lane]*=kKalmanErrFact;	//Big errors
         break;
       }  
       case kLeft: 		// Left fits only, no  Hit
