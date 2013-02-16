@@ -92,18 +92,9 @@ void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][
 /// track is along x axis, Y axis comes thru hit point 
 
   float *NtG = mNG[0];		   
-  float  NL[3][3], *Nt=NL[0],*Np=NL[1],*Nl=NL[2],Pz=0,Lz=0;
+  float  NL[3][3], *Nt=NL[0],*Np=NL[1],*Nl=NL[2];
   for (int j=0;j<3;j++) {
     Nt[j] = (hiDir[j][0]*NtG[0]+hiDir[j][1]*NtG[1]+hiDir[j][2]*NtG[2]);}
-//	In new coordinate system Phi vector may be not orthogonal to Z axis
-//	Rotation around track is the mTT transformation
-  Pz    = (hiDir[2][0]*mNG[1][0]+hiDir[2][1]*mNG[1][1]+hiDir[2][2]*mNG[1][2]);
-  Lz    = (hiDir[2][0]*mNG[2][0]+hiDir[2][1]*mNG[2][1]+hiDir[2][2]*mNG[2][2]);
-  mTT[0][0]= Lz; mTT[0][1]=-Pz; 
-  float myNor = sqrt(mTT[0][0]*mTT[0][0]+mTT[0][1]*mTT[0][1]);
-  assert(myNor>1e-6);
-  mTT[0][0]/=  myNor;    mTT[0][1]/= myNor;
-  mTT[1][0] = -mTT[0][1];mTT[1][1] = mTT[0][0];
 
 
 //		Nt = (cos(Lam)*cos(Phi),cos(Lam)*sin(Phi),sin(Lam))
@@ -113,7 +104,7 @@ void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][
   Np[0]=-mSp;     Np[1]=mCp;     Np[2]=0;
   Nl[0]=-mSl*mCp; Nl[1]=-mSl*mSp;Nl[2]=mCl;
 
-  float g[3],G[3];
+  float g[3];
   memset(mDD[0],0,sizeof(mDD));
 ////  g[0] = mPar[kThkDet]*mSp*mSp 	   + mPar[kWidTrk] + mPar[kYErr]*mCp*mCp;
 ////  g[2] = mPar[kThkDet]*mCp*mCp*mSl*mSl + mPar[kWidTrk] + mPar[kYErr]*(mSl*mSp)*(mSl*mSp)+ mPar[kZErr]*mCl*mCl;
@@ -135,8 +126,7 @@ void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][
   g[1] = mDD[kThkDet][1]*mPar[kThkDet];
   g[2] = mDD[kThkDet][2]*mPar[kThkDet]+mDD[kWidTrk][2]*mPar[kWidTrk]+mDD[kYErr][2]*mPar[kYErr]+mDD[kZErr][2]*mPar[kZErr];
 
-  TCL::trasat(mTT[0], g, G, 2,2);
-  hRr[0]=G[0]; hRr[1]=G[1]; hRr[2]=G[2];
+  hRr[0]=g[0]; hRr[1]=g[1]; hRr[2]=g[2];
 } 
 //______________________________________________________________________________
 double StvHitErrCalculator::Trace(const float*) {
@@ -148,11 +138,7 @@ void StvHitErrCalculator::CalcDcaDers(double dRR[kMaxPars][3])
 // Calculate deriavatives of err matrix.
 // must be called after CalcDcaErrs(...)
   memset(dRR[0],0,sizeof(double)*3*kMaxPars);
-  float G[3];
-  for (int ip=0;ip<4;ip++) {
-    TCL::trasat(mTT[0], mDD[ip], G, 2,2);
-    for (int j=0;j<3;j++) {dRR[ip][j]=G[j];};
-  }
+  TCL::ucopy(mDD[0],dRR[0],mNPar*3);
 }
   
 //______________________________________________________________________________
@@ -297,6 +283,13 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
    calc.CalcDetErrs(0,hiDir,hitErr);
    printf("Det Rot   :  \tYY=%g \tYZ=%g \tZZ=%g \tTrace=%g\n"
         ,hitErr[0],hitErr[1],hitErr[2],hitErr[0]+hitErr[2]);
+
+   double myHitErr[3];
+   double myT[2][2]= {{cP,0},{-sL*sP,cL}};
+   TCL::trasat(myT[0],hitErr,myHitErr,2,2); 
+   printf("DCAtest   : \tBB=%g \tBG=%g \tGG=%g \tTrace=%g\n"
+        ,myHitErr[0],myHitErr[1],myHitErr[2],myHitErr[0]+myHitErr[2]);
+
 
    calc.CalcDcaErrs(0,hiDir,hitErr);
    printf("DCA Rot   : \tBB=%g \tBG=%g \tGG=%g \tTrace=%g\n"
