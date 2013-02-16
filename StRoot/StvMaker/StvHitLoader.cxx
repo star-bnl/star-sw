@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.12 2012/04/27 00:22:40 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.13 2013/02/16 01:14:05 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -135,7 +135,21 @@ StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath)
    
    const StHitPlane *hp = StTGeoHelper::Inst()->AddHit(stiHit,xyz,hard,seed);
    if (!hp) { StvToolkit::Inst()->FreeHit(stiHit);return 0;}
-   
+
+   if (did == kTpcId) {// TPC hit check for being in sector
+     const float* ort = hp->GetDir(xyz)[0];
+     const float* org = hp->GetOrg(xyz);
+     double art = atan2(ort[1],ort[0])*180/M_PI;
+     double arg = atan2(org[1],org[0])*180/M_PI;
+     assert(fabs(art-arg)<1.e-3);
+
+     double dang = (atan2(ort[1],ort[0])-atan2(xyz[1],xyz[0]))*57.3;
+     if (dang> 180) dang-=360;
+     if (dang<-180) dang+=360;
+     if (fabs(dang)>16) printf("dang = %g\n",dang);
+  // assert(fabs(dang)<16);
+     assert(fabs(dang)<22);
+   }
    stiHit->set(hp,stHit,xyz);
    return stiHit;
 }
