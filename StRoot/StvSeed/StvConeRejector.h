@@ -27,6 +27,8 @@ float mPos[3]; 		// start position
 float mDir[3]; 		// track direction
 float mLen;		// cone length (height)
 float mLen2;		// mLen**2
+float mRad;		// Rxy    of 1st hit
+float mRad2;		// Rxy**2 of 1st hit
 float mThet;
 float mCosThet;
 float mSinThet;
