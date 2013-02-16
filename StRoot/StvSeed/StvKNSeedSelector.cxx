@@ -7,10 +7,12 @@
 #include "StvSeedConst.h"
 
 static const float kMaxAng =  9*3.14/180;	//???Maximal angle allowed for connected hits
-static const float kMinAng =  kMaxAng*pow(0.1,1./(2*kKNumber+1));	//KN angle allowed
+static const float kMinAng =  kMaxAng*pow(0.1,1./(2*kKNumber));	//KN angle allowed
 static const float kWidMax =  3*3.14/180;	//KN width angle allowed, narrow width of ellips
 static const float kWidMin =  .01*3.14/180;	//KN width angle allowed, narrow width of ellips
 static const float kErrFact=  1./3;		//bigErr/kErrFact/len is angle error
+static const float kMaxNearFak = 1.1;
+static const float kMaxAccuFak = 3.3;
 
 #define Sq(x) ((x)*(x))
 
@@ -114,9 +116,11 @@ void  StvKNSeedSelector::Relink()
 
   for (int i1=0;i1<(int)mAux.size();i1++) {
     if (!mAux[i1].mHit) continue;
+    if ( mAux[i1].mSel) continue;
     mAux[i1].Reset(); mAux[i1].mSel=0; 
     for (int i2=0;i2<i1;i2++) {
       if (!mAux[i2].mHit) continue;
+      if ( mAux[i2].mSel) continue;
       Update(i1,i2);
   } }
 
@@ -135,6 +139,7 @@ static int nCall=0; nCall++;
     for (int i=0;i<(int)mAux.size();i++) 
     { 
       if (!mAux[i].mHit) continue;		//ignore discarded hit
+      if ( mAux[i].mSel) continue;		//ignore used hit
       float qwe = mAux[i].mDist[kKNumber-1];
       if (qwe>=mKNNDist) continue;
       mKNNDist=qwe; mMinIdx = i;
@@ -146,28 +151,21 @@ static int nCall=0; nCall++;
   ///		define the best direction
     std::map<float,int>::iterator myIt;
     mNHits=0; Zer(mAveDir);
-    Pass(mMinIdx);
+    mMaxNear = mKNNDist*kMaxNearFak;
+    mMaxAccu = mKNNDist*kMaxAccuFak;
+    Pass(mMinIdx,0.);
     Nor(mAveDir);
     double wid = Width();
     if (wid>100 ||wid<kWidMin*kWidMin || wid>kWidMax*kWidMax)	{mAux[mMinIdx].mHit=0; continue; }
-  StvDebug::Count("KNDis:MinEig"       ,sqrt(mEigen[0])*57,mKNNDist       *57);
-  StvDebug::Count("KnDis/MinEig:MinEig",sqrt(mEigen[0])*57,log(mKNNDist/(1e-9+mEigen[0]))/log(10));
-  StvDebug::Count("MaxEig:MinEig"      ,sqrt(mEigen[0])*57,sqrt(mEigen[1])*57);
 
-    for (int iux=0;iux<(int)mAux.size();iux++) {
-      if (!mAux[iux].mHit) 	continue;		//ignore discarded hit
-      if ( mAux[iux].mSel) 	continue;
-      float ang = Ang(mAveDir,mAux[iux].mDir);
-      if (ang>kMinAng)		continue;
-//    if (ang>mKNNDist)		continue;
-      if (ang>kWidMax)	{
-	if (!(mState&1))  	continue;
-	float dot = D0t(mAux[iux].mDir,mSidDir);
-	if (fabs(dot) > kWidMax) 	continue;
-      }
-      mNHits++;mAux[iux].mSel=1;
-      mMapLen[mAux[iux].mLen]=iux;
-    }
+
+double ei0 = sqrt(mEigen[0])*57;
+double ei1 = sqrt(mEigen[1])*57;
+StvDebug::Count("KNNDis",mKNNDist *57);
+StvDebug::Count("MinEig",sqrt(mEigen[0])*57);
+StvDebug::Count("KNNDis:MinEig" ,ei0,mKNNDist*57);
+StvDebug::Count("MaxEig:MinEig",ei0,ei1);
+
     mSel.push_back(mStartHit);
     for (myIt = mMapLen.begin(); myIt !=mMapLen.end(); ++myIt) {
        int i = (*myIt).second;
@@ -178,21 +176,19 @@ static int nCall=0; nCall++;
   return 0;
 }
 //_____________________________________________________________________________
-void StvKNSeedSelector::Pass(int iux)
+void StvKNSeedSelector::Pass(int iux, double accuAng)
 {
   StvKNAux &aux = mAux[iux];
   aux.mSel=1; mNHits++;
   ::Add(mAveDir,aux.mDir,aux.mLen);
   mMapLen[aux.mLen]=iux;
   for (int ifan=0;ifan<kKNumber;ifan++) {
-//??    if (aux.mDist[ifan]>mMaxSel)	continue;
+    if (aux.mDist[ifan]>mMaxNear)	continue;
+    float myAccu = accuAng+aux.mDist[ifan];
+    if (myAccu>mMaxAccu)		continue;
     int idx = aux.mNbor[ifan];
     if (mAux[idx].mSel) 		continue; 
-//??    Pass(idx);
-    StvKNAux &aax = mAux[idx];
-    aax.mSel=1; mNHits++;
-    ::Add(mAveDir,aax.mDir,aax.mLen);
-    mMapLen[aax.mLen]=idx;
+    Pass(idx,myAccu);
   }
 }
 //_____________________________________________________________________________

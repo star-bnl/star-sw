@@ -15,12 +15,12 @@ public:
   StvKNAux() 		{ Reset();}
   void Reset() 		{ for (int i=0;i<kKNumber;i++) {mDist[i]=1e11;};}
 public:
-  void *mHit;
-  float mLen;
-  float mDir[3];
-  float mDist[kKNumber];
-  int   mNbor[kKNumber];
-  int   mSel;
+  void *mHit;			//void pointer to hit
+  float mLen;			//distance from the 1st hit
+  float mDir[3];		//direction from the 1st hit
+  float mDist[kKNumber];	//sorted angles to nearest hits
+  int   mNbor[kKNumber];	//indices in Aux array to nearest hits
+  int   mSel;			//hit selected
 };
 
 class StvKNSeedSelector
@@ -39,7 +39,7 @@ private:
       void Relink();
       void Update(int ia,int ib);
       void Insert(int ia,int ib,float dis);
-      void Pass(int iux);
+      void Pass(int iux,double accuAng);
     double Width();
 private:  
  int  mState;		//Status, &1 =narrow trace
@@ -53,6 +53,8 @@ float mKNNDist;	//minimal KN distance
 int   mMinIdx;	//index of aux with minimal KN distance
 float mEigen[2];//Eigen numbers of uu,uv,vv matrix in most dense place
 float mMaxSel;	//Max angle deviation between hits
+float mMaxAccu;	//Max accumulated angle between hit & bestHit in Pass()
+float mMaxNear;	//Max angle between hits in Pass()
 float mErr;	//Estimated space error
 int   mNHits;	//number of selected hits
 VoidVec mSel;
