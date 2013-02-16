@@ -531,7 +531,6 @@ StSPtrVecObject& V = ev->content();
     if (!to) continue;
     if (!strstr(to->ClassName(),className)) continue;
     V[i] = 0; delete to;
-    break;
   }
 }  
 
