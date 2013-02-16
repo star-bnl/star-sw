@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.21 2012/10/21 22:56:56 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.22 2013/02/16 01:25:10 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.22  2013/02/16 01:25:10  perev
+ * fix double count in nallhits
+ *
  * Revision 1.21  2012/10/21 22:56:56  perev
  * Add IdTruth into pulls
  *
@@ -790,6 +793,14 @@ void StvStEventFiller::fillEvent()
   //cout << "StvStEventFiller::fillEvent() -I- Started"<<endl;
   StEventHelper::Remove(mEvent,"StSPtrVecTrackNode");
   StEventHelper::Remove(mEvent,"StSPtrVecPrimaryVertex");
+
+/////////////?????????? Bad HACK ??????????????????
+  StEventHelper::Remove(mEvent,"Emc");
+  StEventHelper::Remove(mEvent,"Tof");
+  StEventHelper::Remove(mEvent,"Track");
+  StEventHelper::Remove(mEvent,"Vertex");
+
+
   mGloPri=0;
   gTrkNodeMap.clear();  // need to reset for this event
   StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
@@ -1075,7 +1086,7 @@ static int nCall=0; nCall++;
 
   int dets[kMaxDetectorId][3]; 
   getAllPointCount(track,dets);
-  for (int i=0;i<kMaxDetectorId;i++) {
+  for (int i=1;i<kMaxDetectorId;i++) {
     if (!dets[i][2]) continue;
     fitTraits.setNumberOfFitPoints((unsigned char)dets[i][2],(StDetectorId)i);
   }
@@ -1128,7 +1139,8 @@ void StvStEventFiller::fillFlags(StTrack* gTrack) {
   }
   const StTrackFitTraits &fitTrait = gTrack->fitTraits();
   int totFitPoints = fitTrait.numberOfFitPoints();
-//int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
+  int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
+  assert(tpcFitPoints*2 > totFitPoints);
   const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
   if (dinfo) {
     Int_t NoTpcFitPoints = dinfo->numberOfPoints(kTpcId);
