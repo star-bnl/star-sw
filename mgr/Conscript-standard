@@ -583,7 +583,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    $CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/" . $subdir;
 	}
 	if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
-	$CPPPATH .= $main::PATH_SEPARATOR . "/opt/star/include";
+	# $CPPPATH .= $main::PATH_SEPARATOR . "/opt/star/include";
+	$CPPPATH .= $main::PATH_SEPARATOR . $env1->{ENV}->{OPTSTAR}."/include";
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 	# According to description, all client requirering this
 	# should be added here.
