@@ -25,7 +25,7 @@ int mNPar;			//Size of mPar
 double mPar[kMaxPars];		// mPar[0]=
 float mNG[3][3];
 float mCp,mSp,mCl,mSl;
-float mTT[2][2],mDD[4][3];
+float mDD[kMaxPars][3];
 ClassDef(StvHitErrCalculator,0)
 };
 
