@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.22 2012/05/06 02:28:51 perev Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.23 2013/02/16 02:19:14 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.23  2013/02/16 02:19:14  perev
+ * Bug fix, double counting of fitpoints
+ *
  * Revision 2.22  2012/05/06 02:28:51  perev
  * Again the new logic for total numbers of fit points. bugFixed
  *
@@ -95,7 +98,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.22 2012/05/06 02:28:51 perev Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.23 2013/02/16 02:19:14 perev Exp $";
 
 //_____________________________________________________________________________
 StTrackFitTraits::StTrackFitTraits()
@@ -119,7 +122,7 @@ StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
                  float chi[2], float cov[15])
 {
     mPidHypothesis = pid;
-    mNumberOfFitPoints = nfp|0x8000;
+    mNumberOfFitPoints = 0x8000;
     copy(chi, chi+2, mChi2);
     mCovariantMatrix.Set(15, cov);
     mNumberOfFitPointsTpc = 0;
@@ -203,8 +206,15 @@ unsigned short StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
 	case kIstId:
 	    return mNumberOfFitPointsIst;
 	    break;
-	default:
-            return mNumberOfFitPoints&0x7FFF;
+	default:	//sum of all
+            return mNumberOfFitPoints&0x7FFF
+	    + mNumberOfFitPointsFtpcWest
+	    + mNumberOfFitPointsFtpcEast
+	    + mNumberOfFitPointsTpc
+	    + mNumberOfFitPointsSvt
+	    + mNumberOfFitPointsSsd
+	    + mNumberOfFitPointsPxl
+	    + mNumberOfFitPointsIst;
 	}
     }
 }
@@ -262,6 +272,8 @@ void StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
 {
     mNumberOfFitPoints|=  0x8000;  // make sure old method is NOT active
     switch (det) {
+    case kUnknownId:
+        break;
     case kFtpcWestId:
 	mNumberOfFitPointsFtpcWest = val;
 	break;
@@ -284,7 +296,7 @@ void StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
 	mNumberOfFitPointsIst = val;
 	break;
     default:
-        mNumberOfFitPoints += val|0x8000;
+        mNumberOfFitPoints += val; mNumberOfFitPoints|=0x8000;
 	break;
     }
 }
