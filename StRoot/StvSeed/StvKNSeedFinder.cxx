@@ -48,6 +48,34 @@ void StvKNSeedFinder::Clear(const char*)
 void StvKNSeedFinder::Reset()
 {
 #ifndef __NOSTV__
+  memset(mBeg,0,mMed-mBeg+1);
+  std::map<double,StvHit*> myMap;
+  const StVoidArr *hitArr =  StTGeoHelper::Inst()->GetSeedHits();
+  int nHits =  hitArr->size();
+  for (int iHit=0;iHit<nHits;iHit++) {
+    StvHit *hit = (StvHit*)(*hitArr)[iHit];
+    if (hit->timesUsed()) continue;
+    const float *x = hit->x();
+    double qwe = x[0]+300*(x[1]+300*x[2]);
+    myMap[qwe]=hit;
+  }  
+
+  for (std::map<double,StvHit*>::const_iterator it=myMap.begin()
+    ;it != myMap.end();++it) {
+    StvHit *hit = (*it).second;
+    const float *x = hit->x();
+    float r2 = x[0]*x[0] + x[1]*x[1] + x[2]*x[2];
+    f1stHitMap->insert(std::pair<float,StvHit*>(-r2, hit));
+    fMultiHits->Add(hit,x);
+  } 
+  fMultiHits->MakeTree();
+  *f1stHitMapIter = f1stHitMap->begin();
+#endif
+}    
+#if 0
+//_____________________________________________________________________________
+void StvKNSeedFinder::Reset()
+{
 
   memset(mBeg,0,mMed-mBeg+1);
   const StVoidArr *hitArr =  StTGeoHelper::Inst()->GetSeedHits();
@@ -61,8 +89,8 @@ void StvKNSeedFinder::Reset()
   } 
   fMultiHits->MakeTree();
   *f1stHitMapIter = f1stHitMap->begin();
-#endif
 }    
+#endif
 //_____________________________________________________________________________
 int StvKNSeedFinder::Again()
 {
