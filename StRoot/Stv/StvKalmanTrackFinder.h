@@ -22,13 +22,12 @@ public:
    int	FindPrimaries(const StvHits &vtxs);
    void	Reset();
    void	Clear(const char *opt="");
-//   void	Add(const StvPars *par);
-//   void	Add(const StvHitVector *hitV);
-   
+   void SetRefit(int r=1)  			{mRefit = r;} 
    
 
 protected:
 char mBeg[1];
+int  mRefit; 	//refit flag
 const THelixTrack *mSeedHelx;
       StvTrack    *mCurrTrak;
 StvDiver *mDive;
