@@ -44,10 +44,67 @@ int StvDebug::Break(double x,double y,double z)
   return 1;
 }
 //______________________________________________________________________________ 
+//______________________________________________________________________________ 
+
+class TH2Hack: public TH2F
+{
+public: 
+TH2Hack(const char *key);
+int Fill(double x,double y);
+double GetEntries() const;
+void Save();
+private:
+int mEnt;
+double mXLow;
+double mXUpp;
+double mYLow;
+double mYUpp;
+double buf[1000][2];
+};
+
+//______________________________________________________________________________ 
+TH2Hack::TH2Hack(const char *key):TH2F(key,key,100,0,0,100,0,0)
+{
+mEnt= 0;
+mXLow =  3e33;
+mXUpp = -3e33;
+mYLow =  3e33;
+mYUpp = -3e33;
+
+}
+//______________________________________________________________________________ 
+int TH2Hack::Fill(double x,double y)
+{
+ mEnt++;
+ if (mEnt<1001) 	{
+   if (mXLow>x) mXLow=x;
+   if (mYLow>y) mYLow=y;
+   if (mXUpp<x) mXUpp=x;
+   if (mYUpp<y) mYUpp=y;
+   buf[mEnt-1][0]=x; buf[mEnt-1][1]=y; 
+   return 0;
+ } else if (mEnt==1001) 	{Save();}
+ return TH2F::Fill(x,y);
+}
+//______________________________________________________________________________ 
+void TH2Hack::Save()
+{
+  if(GetEntries()) return;
+  GetXaxis()->Set(100,mXLow,mXUpp);
+  GetYaxis()->Set(100,mXLow,mXUpp);
+  for (int l=0;l<mEnt;l++) {TH2F::Fill(buf[l][0],buf[l][1]);}
+}
+//______________________________________________________________________________ 
+double TH2Hack::GetEntries() const
+{
+  if (mEnt<=1000) ((TH2Hack*)this)->Save();
+  return TH2F::GetEntries();
+}
+//______________________________________________________________________________ 
 void StvDebug::Count(const char *key,double val)
 {
   if (mgDebug<2) return;
-  TH1 *&h = myDebMap[key];
+  TH1 *&h = (TH1*&)myDebMap[key];
   if (!h) { h = new TH1F(key,key,100,0.,0.);}
   h->Fill(val);
 }
@@ -56,8 +113,8 @@ void StvDebug::Count(const char *key,double valx,double valy)
 {
   if (mgDebug<2) return;
   TH1 *&h = myDebMap[key];
-  if (!h) { h = new TH2F(key,key,100,0.,0.,100,0.,0.);}
-  ((TH2F*)h)->Fill(valx,valy);
+  if (!h) { h = new TH2Hack(key);}
+  h->Fill(valx,valy);
 }
 //______________________________________________________________________________ 
 void StvDebug::Sumary()
@@ -72,7 +129,7 @@ void StvDebug::Sumary()
     int nEnt = h->GetEntries();
     double mean = h->GetMean();
     double rms  = h->GetRMS();
-    printf("%2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
+    printf("TH1 %2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
     if (rms<=0) continue;
     if (nH==4) {Draw(nH,H);nH=0;}
     H[nH++] = h;
@@ -85,7 +142,7 @@ void StvDebug::Sumary()
     int nEnt = h->GetEntries();
     double mean = h->GetMean();
     double rms  = h->GetRMS();
-    printf("%2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
+    printf("TH2 %2d - %12s:\t %5d %g(+-%g)\n",n,h->GetName(),nEnt,mean,rms);
     if (rms<=0) continue;
     H[0]=h;Draw(1,H);
   }
