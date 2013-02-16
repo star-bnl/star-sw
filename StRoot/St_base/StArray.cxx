@@ -24,8 +24,12 @@ void StObjLink::Streamer(TBuffer &R__b)
      StXRefManager::fgManager->AddColl(urr);
 
    } else {
-
-     if (!fLink || fLink->IsZombie()) R__b << UInt_t(0);
+const static UInt_t kMustBeOne  = kIsOnHeap  | kNotDeleted;
+const static UInt_t kMustBeZero = kCanDelete | kObjInCanvas  | kHasUUID
+                                | kCannotPick| kNoContextMenu| kZombie;
+     if (!fLink || !fLink->TestBits(kMustBeZero|kMustBeOne) !=kMustBeOne)
+          fLink = 0;
+     if (!fLink) R__b << UInt_t(0);
      else        fLink->Ztreamer(R__b);
    }
 }
