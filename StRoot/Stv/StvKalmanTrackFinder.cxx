@@ -14,6 +14,7 @@
 #include "Stv/StvHit.h"
 #include "StvUtil/StvNodePars.h"
 #include "StvUtil/StvDebug.h"
+#include "Stv/StvEnum.h"
 #include "Stv/StvConst.h"
 #include "Stv/StvDiver.h"
 #include "Stv/StvHitter.h"
@@ -30,72 +31,6 @@ ClassImp(StvKalmanTrackFinder)
 typedef std::vector<StvNode*> 		StvNodeVec;
 typedef std::map<double,StvNode*> 	StvNodeMap;
 typedef StvNodeMap::iterator 		StvNodeMapIter ;
-
-
-class StvRefitPermutator
-{
-public:
-enum {kPermNodes=3, kMaxKont=(1<<kPermNodes)-1};
-  StvRefitPermutator(StvTrack *trak,int lane);
-  int operator++();
-  int Kont() 		{return mKont;}
-private:
-int mKont;		//Counter for permutation
-StvNodeVec mNodes;
-StvHit  *mHits[kPermNodes];
-};
-
-
-//______________________________________________________________________________
-StvRefitPermutator::StvRefitPermutator(StvTrack *trak,int lane)
-{
-  mNodes.clear();
-  mKont = 0;
-  StvNodeMap myMap;
-  for (StvNodeIter it=trak->begin(); it!=trak->end();++it) 
-  {
-    StvNode *node = *it;
-    if (!node->GetHit()) 	continue;
-    double Xi2 = node->GetXi2(lane);
-    if (Xi2>1e5) 		continue;
-    myMap[-Xi2] = node;
-  }
-  int iNode=-1;
-  StvNode *node=0, *preNode = 0;
-  for (StvNodeMapIter it = myMap.begin();it!=myMap.end();++it) 
-  {  
-    preNode = node;
-    node = (*it).second; iNode++;
-    assert(!preNode || preNode->GetXi2(lane)>node->GetXi2(lane));
-    mNodes.push_back(node);
-    if (iNode>=kPermNodes) continue;
-    mHits[iNode]=node->GetHit();
-  }
-}  
-//______________________________________________________________________________
-int StvRefitPermutator::operator++()
-{
-  mKont++;
-  int nBadHits = 0;
-  if ( mKont < kMaxKont) { // permutations
-    for (int jk=0,msk=1; jk<kPermNodes;jk++,msk<<=1) {
-      if (jk>=(int)mNodes.size()) return 999;
-      StvNode *node=mNodes[jk];
-      if ((mKont&msk)==0)	{ node->SetHit(mHits[jk]);} 
-      else            		{ node->SetHit(0); nBadHits++;} 
-    }
-  } else 			{ //No permutations, sequentional hit cancelation
-    int jk = mKont-kMaxKont+kPermNodes;
-    if (jk>=(int)mNodes.size()) return 999;
-    StvNode *node=mNodes[jk];node->SetHit(0);
-    nBadHits = jk+1;
-  }
-  return nBadHits;
-}
-  
-  
-
-
 
 //_____________________________________________________________________________
 StvKalmanTrackFinder::StvKalmanTrackFinder(const char *name):StvTrackFinder(name)
@@ -151,6 +86,7 @@ static const StvConst  *kons = StvConst::Inst();
 	int ans = 0,fail=13;
     //		Refit track   
 	do {
+	  if (!mRefit) {fail=0; 		break;};
 	  ans = Refit(1);
 	  if (ans) 				break;
 	  nAdded = FindTrack(1);
@@ -215,7 +151,7 @@ hitCount->Clear();
     assert(!idir);
     double Hz = kit->GetHz(mSeedHelx->Pos());
     par[0].set(mSeedHelx,Hz); par[0].reverse();			//Set seed pars into par[0]
-    err[0]=par[0].deltaErrs(); 
+    err[0].Set(mSeedHelx,Hz); err[0]*= kKalmanErrFact; err[0].Backward();
   } else 	{//Forward or backward tracking
  
     curNode =(idir)? mCurrTrak->back(): mCurrTrak->front();
@@ -415,11 +351,10 @@ static int nCall=0;nCall++;
 static StvTrackFitter *tkf = StvTrackFitter::Inst();
 static const double kEps = 1e-2;
 enum {kTryFitMax = 5,kBadHits=5};
-return 0;//??????????????????????????????????????
+
   StvNode *node = 0;
   int ans=0,lane = 1;
   StvNode *tstNode = (idir)? mCurrTrak->front(): mCurrTrak->back();
-//??  double ptiErr = tstNode->mFE[2].mPP;
 
   int tryFit = 0,nBadHits=0;
   ans = tkf->Refit(mCurrTrak,idir,lane,1);
@@ -427,10 +362,6 @@ return 0;//??????????????????????????????????????
 
        if (ans>0) { return 130113;}	//Very bad
   else if (ans<0) { 			//Try to fix
-//	Now do helix fit only to find bad hits
-//??    ans = tkf->Helix(mCurrTrak,1|2);
-//??    if (ans)  	return 130213;
-    StvRefitPermutator perm(mCurrTrak,2);
 
 
     for (int refIt=0; refIt<55; refIt++)  	//Start iterations
@@ -452,7 +383,7 @@ return 0;//??????????????????????????????????????
 
       if ( dif < kEps || tryFit > kTryFitMax) {//Tired to try, probably alien hit 
 	if (!ans) break;
-	nBadHits =  ++perm;  tryFit=0;
+	nBadHits++;  tryFit=0;
 	if (nBadHits >kBadHits) return 130613;
       }  
 
