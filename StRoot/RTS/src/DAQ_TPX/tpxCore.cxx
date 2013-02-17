@@ -948,7 +948,8 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 	    ) ;
 
 	for(int i=0;i<5;i++) {
-		if(expected_usercode[i] != rdo->fpga_usercode[i]) {
+//		if(expected_usercode[i] != rdo->fpga_usercode[i]) {
+		if(rdo->fpga_usercode[i] != (u_int)(i+1)) {
 			LOG(WARN,"msc: RDO %d: FPGA %d usercode is 0x%08X, expect 0x%08X!?",rdo->rdo,i,rdo->fpga_usercode[i],expected_usercode[i]) ;
 		}
 	}
