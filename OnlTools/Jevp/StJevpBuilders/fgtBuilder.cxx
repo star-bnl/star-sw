@@ -129,7 +129,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   //  hContents.hSumBad->GetXaxis()->SetNdivisions(19,false);
   hContents.hSumBad->SetFillColor(kYellow-9);
   hContents.hSumBad->SetStats(false);
-  hContents.hApvCorpt=new TH1F("APV Corruption","Frequency of visible APVs per event", 150,-0.5,149.5);
+  hContents.hApvCorpt=new TH1F("APV Corruption","Frequency of visible APVs per event", 241,-0.5,240.5);
   hContents.hApvCorpt->GetXaxis()->SetTitle("number of visible APVs");
   hContents.hApvCorpt->SetFillColor(kYellow-9);
   //  cout <<"seting statis"<<endl;
@@ -233,14 +233,12 @@ void fgtBuilder::event(daqReader *rdr)
 {
   //default: 7 timebins
   Int_t numTb=7;
-
   //Jan's request
   memset(chCntDaq,0,sizeof(chCntDaq));
   //  contents.h2_tmp->Fill(tRnd.Rndm(0));
   if(!(evtCt %1000))
     LOG(DBG, "Looking at evt %d",evtCt);
   daq_dta *dd=rdr->det("fgt")->get("adc");
-
   if(dd && dd->meta)
     {
       Bool_t gotTB=false;
