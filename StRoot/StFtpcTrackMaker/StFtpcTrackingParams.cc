@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.38 2012/11/07 23:30:18 fisyak Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.39 2013/02/18 16:30:42 fisyak Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.39  2013/02/18 16:30:42  fisyak
+// gufld => agufld
+//
 // Revision 1.38  2012/11/07 23:30:18  fisyak
 // Supress warnings
 //
@@ -140,11 +143,6 @@
 
 #ifndef ST_NO_NAMESPACES
 using namespace units;
-#endif
-
-#ifndef gufld
-#define gufld gufld_
-extern "C" void gufld(float *, float *);
 #endif
 
 #include "TMath.h"
