@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.87 2011/01/18 14:40:15 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.88 2013/02/18 16:31:13 fisyak Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.88  2013/02/18 16:31:13  fisyak
+// gufld => agufld
+//
 // Revision 1.87  2011/01/18 14:40:15  fisyak
 // Clean up TpcDb interfaces and Tpc coordinate transformation
 //
@@ -357,9 +360,9 @@ using std::max;
 
 #include "StSimpleMagneticField.hh"
 #ifdef __ROOT__
-#define gufld   gufld_
-//#define gufld   GUFLD
-extern "C" {void gufld(Float_t *, Float_t *);}
+#define agufld   agufld_
+//#define agufld   AGUFLD
+extern "C" {void agufld(Float_t *, Float_t *);}
 #endif
 #include "StTrsDeDx.hh"
 
@@ -403,7 +406,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.87 2011/01/18 14:40:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.88 2013/02/18 16:31:13 fisyak Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -467,7 +470,7 @@ Int_t StTrsMaker::InitRun(int runnumber)
   
    float x[3] = {0,0,0};
    float B[3];
-   gufld(x,B);
+   agufld(x,B);
    StThreeVector<double> Bfield(B[0],B[1],B[2]);
    Bfield*=kilogauss;
    PR(Bfield/tesla);

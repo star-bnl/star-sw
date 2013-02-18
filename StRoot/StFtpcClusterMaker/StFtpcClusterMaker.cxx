@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.107  2013/02/18 16:30:42  fisyak
+// gufld => agufld
+//
 // Revision 1.106  2011/08/31 16:39:37  jcs
 // output ampSlope contents to LOG_INFO
 //
@@ -366,9 +369,9 @@
 #include "TObjectSet.h"
 #include "PhysicalConstants.h"
 
-#ifndef gufld
-#define gufld gufld_
-extern "C" void gufld(float *, float *);
+#ifndef agufld
+#define agufld agufld_
+extern "C" void agufld(float *, float *);
 #endif
 
 #include "tables/St_fcl_ftpcsqndx_Table.h"
@@ -428,7 +431,7 @@ StFtpcClusterMaker::~StFtpcClusterMaker(){
 Int_t StFtpcClusterMaker::InitRun(int runnumber){
   Float_t x[3] = {0,0,0};
   Float_t b[3];
-  gufld(x,b);
+  agufld(x,b);
   Double_t gFactor = b[2]/4.980;
 
   mDbMaker     = (St_db_Maker*)GetMaker("db");

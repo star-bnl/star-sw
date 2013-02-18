@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.47 2010/09/25 16:17:50 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.48 2013/02/18 16:30:42 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.48  2013/02/18 16:30:42  fisyak
+ * gufld => agufld
+ *
  * Revision 1.47  2010/09/25 16:17:50  caines
  * Add iteration to transformation routines so local -> wafer followed by wafer->local come to same point, needed because of dirft velocity assumptions
  *
@@ -191,8 +194,8 @@ using namespace std;
 #include "StMcEvent.hh"
 #include "StMcTrack.hh"
 #include "StMcSvtHit.hh"
-#define gufld   gufld_
-extern "C" {void gufld(Float_t *, Float_t *);}
+#define agufld   agufld_
+extern "C" {void agufld(Float_t *, Float_t *);}
 
 ClassImp(StSvtSimulationMaker)
 
@@ -358,7 +361,7 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   // Get BField;
   Float_t x[3] = {0,0,0};
   Float_t b[3];
-  gufld(x,b);
+  agufld(x,b);
   mBField = b[2]*tesla;
 
   LOG_DEBUG << "StSvtSimulationMaker::InitRun()-END"<<endm;
