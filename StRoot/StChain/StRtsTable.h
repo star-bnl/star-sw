@@ -9,6 +9,8 @@ class StRtsTable : public TGenericTable {
      Int_t  fRow ;
      Int_t  fRdo ;
      Int_t  fPad ;
+     void*  fMeta;  //meta data is not copied, and just getting pointer. 
+                    //No gurantee to be valid after another reqquest is made to daqReader.
 
      //  the global daqReader paramenters (see daqReader.h for details)
      static UInt_t fToken ;       // current token
@@ -34,11 +36,13 @@ class StRtsTable : public TGenericTable {
       void  SetPad (Int_t p);
       void  SetRdo (Int_t r);
       void  SetRow (Int_t r);
+      void  SetMeta (void* v);
 
       Int_t Sector () const;
       Int_t Pad () const;
       Int_t Rdo () const;
-      Int_t Row () const;
+      Int_t Row () const; 
+      const void* Meta() const;
 
       static UInt_t Token();               // current token
       static void   SetToken(UInt_t token);
@@ -69,6 +73,7 @@ inline  Int_t StRtsTable::Sector() const {return fSector;}
 inline  Int_t StRtsTable::Pad() const    {return fPad;}
 inline  Int_t StRtsTable::Rdo() const    {return fRdo;}
 inline  Int_t StRtsTable::Row() const    {return fRow;}
+inline  const void*  StRtsTable::Meta() const {return fMeta;}
 
 inline  UInt_t StRtsTable::Token()        {return fToken;   }    // current token
 inline  UInt_t StRtsTable::Trgcmd()       {return fTrgcmd;  }    // current trigger command
@@ -95,6 +100,7 @@ inline void  StRtsTable::SetSector (Int_t s) {fSector= s;}
 inline void  StRtsTable::SetPad    (Int_t p) {fPad   = p;}
 inline void  StRtsTable::SetRdo    (Int_t r) {fRdo   = r;}
 inline void  StRtsTable::SetRow    (Int_t r) {fRow   = r;}
+inline void  StRtsTable::SetMeta   (void* v) {fMeta  = v;}
 
 inline void   StRtsTable::SetToken(UInt_t token)          { fToken      = token;      }
 inline void   StRtsTable::SetTrgcmd(UInt_t trgcmd)        { fTrgcmd     = trgcmd;     }

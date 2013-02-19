@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.33 2012/09/13 20:01:49 fisyak Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.34 2013/02/19 20:10:19 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.34  2013/02/19 20:10:19  fisyak
+ * Akio & Valery modification for meta data, bug #2452
+ *
  * Revision 1.33  2012/09/13 20:01:49  fisyak
  * Clean up, use Jeff's skip_then_get
  *
@@ -332,7 +335,8 @@ TDataSet *StRtsReaderMaker::FillTable()
       fRtsTable->SetAll(  fBank->sec
                         , fBank->pad
                         , fBank->rdo
-                        , fBank->row);
+			, fBank->row);
+      fRtsTable->SetMeta(fBank->meta);
 
       fRtsTable->SetNRows(0);
       if (Debug()) {
