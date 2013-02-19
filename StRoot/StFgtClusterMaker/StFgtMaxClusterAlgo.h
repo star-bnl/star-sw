@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.h,v 1.7 2012/03/08 17:43:40 avossen Exp $
+//  $Id: StFgtMaxClusterAlgo.h,v 1.8 2013/02/19 18:29:05 avossen Exp $
 //  $Log: StFgtMaxClusterAlgo.h,v $
+//  Revision 1.8  2013/02/19 18:29:05  avossen
+//  signature of max cluster algo now updated to conform with interface
+//
 //  Revision 1.7  2012/03/08 17:43:40  avossen
 //  added default cluster algo, made StFgtIClusterAlgo destructor =0
 //
@@ -42,7 +45,7 @@ class StFgtMaxClusterAlgo :public StFgtIClusterAlgo
  public:
   StFgtMaxClusterAlgo();
   ///main work functions getting strips above pedestal for each disk
-  virtual Int_t doClustering( StFgtStripCollection&, StFgtHitCollection& );
+  virtual Int_t doClustering(const StFgtCollection& fgtCollection, StFgtStripCollection& strips, StFgtHitCollection& clusters );
   virtual Int_t Init();
   virtual ~StFgtMaxClusterAlgo();
 
