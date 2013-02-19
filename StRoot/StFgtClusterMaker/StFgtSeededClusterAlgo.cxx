@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.23 2012/12/10 23:18:01 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.24 2013/02/19 18:24:04 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.24  2013/02/19 18:24:04  avossen
+//  *** empty log message ***
+//
 //  Revision 1.23  2012/12/10 23:18:01  avossen
 //  merged cluster finder
 //
@@ -123,7 +126,6 @@ Int_t StFgtSeededClusterAlgo::Init()
 
   return kStOk;
 };
-
 //void StFgtSeededClusterAlgo::doStripFit(stripWeightMap_t &strips)
 void StFgtSeededClusterAlgo::doStripFit(void* stripsT)
 {
@@ -165,16 +167,16 @@ void StFgtSeededClusterAlgo::doStripFit(void* stripsT)
       //      cout <<"setting bin " << binCounter << " to " << it->first->getCharge()<<endl;
       //      h1->SetBinContent(binCounter,it->first->getCharge());
       //      StFgtGeom::getPhysicalCoordinate(it->first->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
-      cout <<"adc vals: ";
+      //      cout <<"adc vals: ";
       for(int tb=0;tb<7;tb++)
 	{
 	  x[tb]=tb;
 	  y[tb]=it->first->getAdc(tb);
 	  ey[tb]=it->first->getPedErr();
 	  ex[tb]=0;
-	  cout <<y[tb] <<", ";
+	  //	  cout <<y[tb] <<", ";
 	}
-      cout <<endl;
+      //      cout <<endl;
       TGraphErrors* tg1=new TGraphErrors(7,x,y,ex,ey);
       Int_t tbFitStatus=tg1->Fit(func);
       float amp,t0,invtau,chi2Ndf, chi2;
@@ -245,7 +247,7 @@ Float_t StFgtSeededClusterAlgo::doClusterShapeFit(void* stripsT)
       meanGuess+=ordinate;
       ey[binCounter]=it->first->getChargeUncert()*1.6;//akio's factor
       ex[binCounter]=0;
-      cout <<"counter: " << binCounter << " x: " << ordinate <<" charge: "<< y[binCounter] <<" error: " << ey[binCounter] <<endl;
+      //      cout <<"counter: " << binCounter << " x: " << ordinate <<" charge: "<< y[binCounter] <<" error: " << ey[binCounter] <<endl;
       binCounter++;
     }
   meanGuess/=strips.size();
@@ -337,6 +339,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
 	if(seedtype==0) {seedtype=type;}
 	else if(type<seedtype) {seedtype=type;}   //take smallest seedtype besides kFgtSeedTypeNo as cluster seed type
       }
+      //      cout <<"looking at geo id " << it->first->getGeoId() <<" for cluster info filling " <<endl;
       StFgtGeom::getPhysicalCoordinate(it->first->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
       if(it->first->getGeoId()%2)
 	accuChargeUneven+=charge;
@@ -369,6 +372,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
       //meanGeoId+=((it->first->getGeoId())*(charge));
       meanGeoId+=((it->first->getGeoId())*(weight));
     }
+  //  cout <<"setting seedtype: " << seedtype <<endl;
   cluster->setSeedType(seedtype);
 
   int maxtbin, maxadc=0.0;
@@ -386,6 +390,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
   cluster->setEvenOddChargeAsy(asy);
   if(asy>0.8 && layer=='P' && numStripsEven>=2)
     {
+      //      cout <<"charge even cluster " << endl;
       chargeEven=true;
       //cout <<"r probably < 20"<<endl;
       //r is probably in r<20
@@ -396,7 +401,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
 	  // cout <<"strip geoId: "<< it->first->getGeoId() << endl;
 	  if(it->first->getGeoId()%2)
 	    {
-	      cout <<"erased! " << endl;
+	      //	      cout <<"erased! " << endl;
 	      it->first->setClusterSeedType(kFgtSeedTypeNo);
 	      strips.erase(it);
 	      if(!strips.empty())
@@ -481,6 +486,7 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
     {
       //      cout <<"geo id < 0, " <<" even? " << chargeEven <<" accuChargeWeight: " << accuChargeWeight <<endl;
     }
+  //  cout <<"mean geo Id: " << meanGeoId << " setting to: " <<floor(meanGeoId+0.5) <<endl;
   cluster->setCentralStripGeoId(floor(meanGeoId+0.5));
   //  cout <<"setting geo id cluster: " << cluster->getCentralStripGeoId()<<endl;
   //  if(cluster->getCentralStripGeoId()<=0)
@@ -631,7 +637,7 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
 /**
 main interface to the clustering. 
  */
-Int_t StFgtSeededClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitCollection& clusters )
+Int_t StFgtSeededClusterAlgo::doClustering(const StFgtCollection& fgtCollection, StFgtStripCollection& strips, StFgtHitCollection& clusters )
 {
   //  cout.precision(10);
   //we make use of the fact, that the hits are already sorted by geoId
@@ -665,16 +671,16 @@ run over all strips, find seeds, use those to start clusters
       //found seed for a cluster
       if( (*it)->getClusterSeedType() >=kFgtSeedType1 && (*it)->getClusterSeedType() < kFgtSeedTypeMax ) 
 	{
-	  /*	  cout <<"found seed for geo id: " << (*it)->getGeoId() <<endl;
-	  if((*it)->getGeoId()==18975)
+	  //	  cout <<"found seed for geo id: " << (*it)->getGeoId() <<endl;
+	  	  if((*it)->getGeoId()==31318)
 	    {
-	      cout <<"seed type:  "<< (*it)->getClusterSeedType()<< "charge: " << (*it)->getCharge()<<" adc: ";
+	      //    	      cout <<"seed type:  "<< (*it)->getClusterSeedType()<< "charge: " << (*it)->getCharge()<<" adc: ";
 	      for(int i=0;i<7;i++)
 		{
-		  cout <<(*it)->getAdc(i) <<" ";
+		  //		  cout <<(*it)->getAdc(i) <<" ";
 		}
-	   cout <<endl;
-	   }*/
+	      //	   cout <<endl;
+	   }
 	  ////
 	  ///check for ringing around cluster
 	  //	  if(ringing( it, strips.getStripVec().begin(),strips.getStripVec().end(), down,0,layer))
@@ -748,7 +754,7 @@ run over all strips, find seeds, use those to start clusters
 
 #ifndef KEEP_BIG_AND_NOISY_CLUSTERS
 
-	      cout <<"cluster too big!, begin at: " << newCluster->getStripWeightMap().begin()->first->getGeoId()<<endl;
+	      //	      cout <<"cluster too big!, begin at: " << newCluster->getStripWeightMap().begin()->first->getGeoId()<<endl;
 	      for(stripWeightMap_t::iterator it=newCluster->getStripWeightMap().begin();it!=newCluster->getStripWeightMap().end();it++)
 		{
 		  if(it->first->getClusterSeedType()<kFgtSeedType1 || it->first->getClusterSeedType()>kFgtSeedTypeMax)
@@ -764,7 +770,6 @@ run over all strips, find seeds, use those to start clusters
 	  //	  if(stripWM.size()==1)
 	  if(false)
 	    {
-	      cout <<"only one strip in cluster ..." <<endl;
 	      StSPtrVecFgtStripIterator stripInClu=0;
 	      for(StSPtrVecFgtStripIterator it=firstStrip;it<=lastStrip&&it!=strips.getStripVec().end();it++)
 		{
@@ -778,14 +783,14 @@ run over all strips, find seeds, use those to start clusters
 		  stripLow--;
 		  if(stripLow>=strips.getStripVec().begin())
 		    {
-		      cout <<"adding low " <<endl;
+		      //		      cout <<"adding low " <<endl;
 		      stripWM[*stripLow]=1;
 		    }
 		  StSPtrVecFgtStripIterator stripHigh=stripInClu;
 		  stripHigh++;
 		  if(stripHigh<strips.getStripVec().end())
 		    {
-		      cout <<"adding high " <<endl;
+		      //		      cout <<"adding high " <<endl;
 		      stripWM[*stripHigh]=1;
 		    }
 		}
@@ -793,25 +798,25 @@ run over all strips, find seeds, use those to start clusters
 	  //	  if(stripWM.size()==2)
 	  if(false)
 	    {
-	      cout <<"only two strips in cluster " <<endl;
+	      //	      cout <<"only two strips in cluster " <<endl;
 	      StSPtrVecFgtStripIterator stripInClu=0;
 	      for(StSPtrVecFgtStripIterator it=firstStrip;it<=lastStrip&& it<=lastStrip&&it!=strips.getStripVec().end();it++)
 		{
-		  cout <<"looping" <<endl;
+		  //		  cout <<"looping" <<endl;
 		  //		  cout <<"checking "<<(*it)->getGeoId() <<" with: "<<stripWM.begin()->first->getGeoId()<<" last: "<< (*lastStrip)->getGeoId()<<endl;
 		  if((*it)->getGeoId()==stripWM.begin()->first->getGeoId())
 		    {
 		    stripInClu=it;
-		    cout <<"found " <<endl;
+		    //		    cout <<"found " <<endl;
 		    break;
 		    }
 
 		}
-	      cout <<"end of loop " << endl;
+	      //	      cout <<"end of loop " << endl;
 
 	      if(stripInClu!=0)
 		{
-		  cout <<"found one geo id: " << (*stripInClu)->getGeoId()<<endl;
+		  //		  cout <<"found one geo id: " << (*stripInClu)->getGeoId()<<endl;
 		  StSPtrVecFgtStripIterator stripHigh=stripInClu;
 		  StSPtrVecFgtStripIterator stripNew=stripInClu;
 		  stripHigh++;
@@ -831,7 +836,7 @@ run over all strips, find seeds, use those to start clusters
 
 	       if(stripNew>=strips.getStripVec().begin()&& stripNew<strips.getStripVec().end())
 		 {
-		   cout <<"adding strip with geo id: " << (*stripNew)->getGeoId()<<endl;
+		   //		   cout <<"adding strip with geo id: " << (*stripNew)->getGeoId()<<endl;
 		   stripWM[*stripNew]=1;
 		 }
 		}
