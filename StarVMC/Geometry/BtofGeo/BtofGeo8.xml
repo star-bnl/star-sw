@@ -738,7 +738,7 @@
 
         
         <Create    block="BTOF"  />
-        <Placement block="BTOF" in="Cave" />
+        <Placement block="BTOF" in="Cave" group="TpcRefSys" />
 
         
         <Block name="BTOF" comment="is the whole CTF system envelope"  >

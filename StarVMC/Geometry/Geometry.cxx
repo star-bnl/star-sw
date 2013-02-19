@@ -110,7 +110,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
     TGeoVolume *HALL = gGeoManager->FindVolumeFast("HALL");
     gGeoManager->SetTopVolume(HALL);
   }
-
+  
   // The magnet
   geom.success_magp = ConstructMagp( geom.magpFlag, geom.magpStat );
 
@@ -786,6 +786,11 @@ Bool_t Geometry::ConstructCave( const Char_t *flag, Bool_t go )
     }
 
   AgStructure::AgDetpNew( "CaveGeo", Form("Wide Angle Hall configuration %s",flag));
+  AgStructure::AgDetpAdd( "Cvcf_t", "config", int(caveGeom.config) );
+  if ( geom.tpcRefSys )
+    {
+      AgStructure::AgDetpAdd( "Cvcf_t", "tpcrefsys", int(1) );    
+    }
 
   if ( go )
   if ( !CreateModule( caveGeom.module, "HALL"  ) )

@@ -231,7 +231,7 @@
 <!--  ASSEMBLE GEOMETRY, start with placing main volume in cave -->
 
 <Create    block="IDSM"  />
-<Placement block="IDSM"   >                   
+<Placement block="IDSM"   group="TpcRefSys" >
     
     <Translation  x="IDSA_x"  y="IDSA_y"  z="IDSA_z" />
 

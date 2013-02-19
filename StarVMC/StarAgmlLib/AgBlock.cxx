@@ -64,7 +64,7 @@ void AgBlock::Create( const Char_t *name )
 
 void AgBlock::AddGroup( const Char_t *name )
 {
-  mGroups.push_back(name);
+  //$$$  mGroups.push_back(name);
   _stacker -> AddGroup(name);
 }
 
