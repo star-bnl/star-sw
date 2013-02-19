@@ -42,7 +42,7 @@ StFgtSimplePointAlgo *fgtSimplePointAlgo =0;
 
 int agvEffsPoints( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174002p_rf/st_physics_13174002_raw_1010001.daq",
 		       Int_t runnumber = 13074038,
-	     Int_t nevents = 10000, Int_t effDisk=2,
+	     Int_t nevents = 500, Int_t effDisk=2,
 	     Bool_t cutShortEvents = 1 ){
    LoadLibs();   
 
