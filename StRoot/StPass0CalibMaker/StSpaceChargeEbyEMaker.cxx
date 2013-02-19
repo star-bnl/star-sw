@@ -253,6 +253,9 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       (St_spaceChargeCorR2C::instance()->getSpaceChargeString()).Data());
     GLcorrection = new TNamed("GLcorrection",Form("%f",
       St_tpcGridLeakC::instance()->MiddlGLStrength()));
+    gMessMgr->Info() << "Using the following corrections:"  << endm;
+    gMessMgr->Info() << "sc = " << SCcorrection->GetTitle() << endm;
+    gMessMgr->Info() << "GL = " << GLcorrection->GetTitle() << endm;
   }
 
   // Keep track of # of events in the same time bin
@@ -1205,8 +1208,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.46 2012/12/28 22:04:25 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.47 2013/02/19 21:07:58 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.47  2013/02/19 21:07:58  genevb
+// Print out the sc and GL correction formulas
+//
 // Revision 1.46  2012/12/28 22:04:25  genevb
 // Improve chances of fits succeeding
 //
