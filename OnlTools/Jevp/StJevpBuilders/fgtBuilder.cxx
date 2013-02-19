@@ -34,6 +34,7 @@ fgtBuilder::fgtBuilder(JevpServer *parent):JevpPlotSet(parent),evtCt(0) {
   plotsetname = (char *)"fgt";
   // start with histograms undefined...
   memset(&contents, 0, sizeof(contents));
+  memset(&tbVsAdcContents,0,sizeof(tbVsAdcContents));
   memset(&hContents,0,sizeof(hContents));
   memset(&hSumContents,0,sizeof(hSumContents));
 }
@@ -42,19 +43,26 @@ fgtBuilder::~fgtBuilder() {
 
   // Delete any existing histograms...
 
-    int n = sizeof(contents) / sizeof(TH2 *);
-    int hNp=sizeof(hContents)/sizeof(TH1 *);
-    int hSNp=sizeof(hSumContents)/sizeof(TH2 *);
+  int n = sizeof(contents) / sizeof(TH2 *);
+  int hNp=sizeof(hContents)/sizeof(TH1 *);
+  int hSNp=sizeof(hSumContents)/sizeof(TH2 *);
+  int nTbVsAdc=sizeof(tbVsAdcContents)/sizeof(TH2 *);
+
+
   for(int i=0;i<n;i++) {
-        if(contents.array[i]) delete contents.array[i];
+    if(contents.array[i]) delete contents.array[i];
   }
+  for(int i=0;i<nTbVsAdc;i++)
+    {
+      if(tbVsAdcContents.tbVsAdcArray[i])delete tbVsAdcContents.tbVsAdcArray[i];
+    }
   for(int i=0;i<hNp;i++){
     if(hContents.hArray[i]) delete hContents.hArray[i];
   }
 
-    for(int i=0;i<hSNp;i++){
-      if(hSumContents.sumHArray[i]) delete hSumContents.sumHArray[i];
-    }
+  for(int i=0;i<hSNp;i++){
+    if(hSumContents.sumHArray[i]) delete hSumContents.sumHArray[i];
+  }
 
 }
 
@@ -76,7 +84,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
       isChannelBad[i]=false;
       runningAvg[i]=0;
       runningStdDevSq[i]=0;
-  }
+    }
 
 
   //////////////////////////////////add bad channels here///////////////////////
@@ -89,6 +97,8 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   np = sizeof(contents) / sizeof(TH2 *);
   hNp=sizeof(hContents)/sizeof(TH1 *);
   hSNp=sizeof(hSumContents)/sizeof(TH2 *);
+  nTbVsAdc=sizeof(tbVsAdcContents)/sizeof(TH2 *);
+
   char buffer[50];
   char buffer2[50];
   for(int gid=0;gid<np;gid++)
@@ -111,11 +121,32 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
       contents.array[gid]->SetStats(false);
       //      contents.array[gid]->GetXaxis()->SetTitleOffset(0.9);
       //      contents.array[gid]->GetXaxis()->SetTitleSize(0.06);
-//      contents.array[gid]->GetXaxis()->SetLabelSize(0.06);
-            contents.array[gid]->GetYaxis()->SetTitleOffset(1.2);
+      //      contents.array[gid]->GetXaxis()->SetLabelSize(0.06);
+      contents.array[gid]->GetYaxis()->SetTitleOffset(1.2);
       //     contents.array[gid]->GetYaxis()->SetTitleSize(0.06);
       //      contents.array[gid]->GetYaxis()->SetLabelSize(0.06);
     }
+
+  for(int iD=0;iD<nTbVsAdc;iD++)
+    {
+      sprintf(buffer,"ADC_Vs_Tb_Disk %d",iD);
+      sprintf(buffer2,"ADC vs. Timebin, Disk:%d",iD);
+      tbVsAdcContents.tbVsAdcArray[iD]=new TH2F(buffer,buffer2,7,-0.5,6.5,100,0,4096);
+      tbVsAdcContents.tbVsAdcArray[iD]->GetXaxis()->SetTitle("Timebin");
+      tbVsAdcContents.tbVsAdcArray[iD]->GetYaxis()->SetTitle("ADC value");
+      tbVsAdcContents.tbVsAdcArray[iD]->GetXaxis()->SetNdivisions(7,false);
+      for(int iB=1;iB<=7;iB++)
+	{
+	  sprintf(buffer,"TB %d",iB);
+	  tbVsAdcContents.tbVsAdcArray[iD]->GetXaxis()->SetBinLabel(iB,buffer);
+	}
+      tbVsAdcContents.tbVsAdcArray[iD]->SetStats(false);
+      //      tbVsAdcContents.tbVsAdcArray[gid]->GetXaxis()->SetTitleOffset(0.9);
+      //      tbVsAdcContents.tbVsAdcArray[gid]->GetXaxis()->SetTitleSize(0.06);
+      //      tbVsAdcContents.tbVsAdcArray[gid]->GetXaxis()->SetLabelSize(0.06);
+      tbVsAdcContents.tbVsAdcArray[iD]->GetYaxis()->SetTitleOffset(1.2);
+    }
+
 
   hContents.h1=new TH1F("MeanPeds","Mean Pedestal Values",300,minPedVal,maxPedVal);
   hContents.h1->GetXaxis()->SetTitle("Mean Pedestal Value");
@@ -134,6 +165,10 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   hContents.hApvCorpt->SetFillColor(kYellow-9);
   //  cout <<"seting statis"<<endl;
   hContents.hApvCorpt->SetStats(true);
+  hContents.hEventSize=new TH1F("FGT Event Size","FGT Event Size",100,-0.5,6000+0.5);
+  hContents.hEventSize->GetXaxis()->SetTitle("Event size [kB]");
+  hContents.hEventSize->SetFillColor(kYellow-9);
+  hContents.hEventSize->SetStats(true);
   //
   //  cout <<"done"  <<endl;
 
@@ -158,7 +193,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
 
 
   //  JevpPlot *plots[np+hNp];
-  plots=new JevpPlot*[np+hNp+hSNp];
+  plots=new JevpPlot*[np+hNp+nTbVsAdc+hSNp];
 
   for(int i=0;i<np;i++)
     {
@@ -166,31 +201,37 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
       plots[i] = new JevpPlot(contents.array[Indx2Gid[i]]);
       //    plots[i] = new JevpPlot(contents.array[i]);
     }
-  plots[np]=new JevpPlot(hContents.h1);
-  plots[np+1]=new JevpPlot(hContents.h2);
-  plots[np+2]=new JevpPlot(hContents.hSumBad);
-  plots[np+3]=new JevpPlot(hContents.hApvCorpt);
-  plots[np+3]->logy=true;
-  plots[np+3]->setOptStat(10);
+
+
+  for(int i=0;i<nTbVsAdc;i++)
+    {
+      tbVsAdcContents.tbVsAdcArray[i]->SetOption("colz");
+      plots[np+i]=new JevpPlot(tbVsAdcContents.tbVsAdcArray[i]);
+    }
+
+  plots[nTbVsAdc+np]=new JevpPlot(hContents.h1);
+  plots[nTbVsAdc+np+1]=new JevpPlot(hContents.h2);
+  plots[nTbVsAdc+np+2]=new JevpPlot(hContents.hSumBad);
+  plots[nTbVsAdc+np+3]=new JevpPlot(hContents.hApvCorpt);
+  plots[nTbVsAdc+np+4]=new JevpPlot(hContents.hEventSize);
+  plots[nTbVsAdc+np+3]->logy=true;
+  plots[nTbVsAdc+np+3]->setOptStat(10);
   JLine* line=new JLine(0,128,240,128);
   line->SetLineColor(kRed);
-  plots[np+2]->addElement(line);
+  plots[nTbVsAdc+np+2]->addElement(line);
 
   for(int i=0;i<hSNp;i++)
     {
       hSumContents.sumHArray[i]->SetOption("colz");
-      plots[np+hNp+i]=new JevpPlot(hSumContents.sumHArray[i]);
+      plots[np+nTbVsAdc+hNp+i]=new JevpPlot(hSumContents.sumHArray[i]);
       hSumContents.sumHArray[i]->SetStats(false);
     }
   //  cout <<"adding plots... " <<endl;  
   // Add Plots to plot set...
-  for(int i=0;i<np+hNp+hSNp;i++) {
+  for(int i=0;i<np+nTbVsAdc+hNp+hSNp;i++) {
     LOG(DBG, "Adding plot %d",i);
     addPlot(plots[i]);
   }
-
-
-
 
 
   // cout <<"2" <<endl;
@@ -199,9 +240,9 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   errorMsg->SetTextSize(0.035);
   errorMsg->SetTextAlign(13);
   errorMsg->SetTextAngle(45);
-  plots[np]->addElement(errorMsg);
+  plots[nTbVsAdc+np]->addElement(errorMsg);
 
-//    cout <<" done " <<endl;
+  //    cout <<" done " <<endl;
 }
 
 void fgtBuilder::startrun(daqReader *rdr) {
@@ -219,7 +260,7 @@ void fgtBuilder::startrun(daqReader *rdr) {
       isChannelBad[i]=false;
       runningAvg[i]=0;
       runningStdDevSq[i]=0;
-  }
+    }
   errorMsg->SetText("No Error Message");    
   sumHistogramsFilled=0;  
   t_2min = time(NULL);
@@ -239,6 +280,7 @@ void fgtBuilder::event(daqReader *rdr)
   if(!(evtCt %1000))
     LOG(DBG, "Looking at evt %d",evtCt);
   daq_dta *dd=rdr->det("fgt")->get("adc");
+
   if(dd && dd->meta)
     {
       Bool_t gotTB=false;
@@ -262,12 +304,26 @@ void fgtBuilder::event(daqReader *rdr)
       }
 
     }
-
+  //check if we have to look for the zs data
+  size_t evtSize=0;
+  daq_dta *ddZS=rdr->det("fgt")->get("zs");
+  if(ddZS)
+    {
+      while(ddZS && ddZS->iterate())
+	{
+	  evtSize+=ddZS->ncontent*sizeof(fgt_adc_t);
+	}
+    }
+      //don't use zs data to fill histos...
 
   while(dd && dd->iterate()) {
     fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
+    evtSize+=dd->ncontent*sizeof(fgt_adc_t);
+    //    cout<<" adding " << dd->ncontent  <<" * " << sizeof(fgt_adc_t) <<" to evt size : " << dd->ncontent*sizeof(fgt_adc_t) <<" now: " << evtSize <<endl;
     for(u_int i=0;i<dd->ncontent;i++)
       {
+	//not zs data
+
 	//corrupted data, should be fine for run 13 as well, these apvs do not exst
 	if(dd->pad>21 || dd->pad<0 || dd->pad==10 || dd->pad==11)
 	  continue;
@@ -300,12 +356,13 @@ void fgtBuilder::event(daqReader *rdr)
 	if(dd->pad>10)
 	  quad+=1;
 	int channel;
-
+	Int_t disk=-1;
 	if(gid<25)
 	  {
+	    disk=Gid2Disk[gid];
 	    channel=(dd->pad%12)*128+f[i].ch;
 	    //	    if(gid==2 && channel==768)
-	      //	      cout <<"before test, rdo: " << dd->rdo <<" pad: " << dd->sec*2 << " channel: " << channel <<  " adc: " << f[i].adc <<endl;
+	    //	      cout <<"before test, rdo: " << dd->rdo <<" pad: " << dd->sec*2 << " channel: " << channel <<  " adc: " << f[i].adc <<endl;
 	    if(isChannelBad[gid*maxC+channel])
 	      continue;
 	    //apvs go 0-9 then 12-...
@@ -316,10 +373,18 @@ void fgtBuilder::event(daqReader *rdr)
 	    runningAvg[gid*maxC+channel]+=(f[i].adc-runningAvg[gid*maxC+channel])/numVals[gid*maxC+channel];
 	    runningStdDevSq[gid*maxC+channel]+=((float)numVals[gid*maxC+channel]-1)/(numVals[gid*maxC+channel])*(f[i].adc-runningAvg[gid*maxC+channel])*(f[i].adc-runningAvg[gid*maxC+channel]);
 
-	      oldStdDevs[gid*maxC+channel]=sqrt(runningStdDevSq[gid*maxC+channel]/numVals[gid*maxC+channel]);
-	      //	      cout <<"channel:  " <<gid*maxC+channel <<" stddevsq: " << runningStdDevSq[gid*maxC+channel] <<" oldStddev: " << oldStdDevs[gid*maxC+channel] <<" avg: " << runningAvg[gid*maxC+channel] <<endl;
+	    oldStdDevs[gid*maxC+channel]=sqrt(runningStdDevSq[gid*maxC+channel]/numVals[gid*maxC+channel]);
+	    //	      cout <<"channel:  " <<gid*maxC+channel <<" stddevsq: " << runningStdDevSq[gid*maxC+channel] <<" oldStddev: " << oldStdDevs[gid*maxC+channel] <<" avg: " << runningAvg[gid*maxC+channel] <<endl;
+	    Bool_t isBad=false;
 
-	      if(f[i].adc-runningAvg[gid*maxC+channel]>oldStdDevs[gid*maxC+channel] && oldStdDevs[gid*maxC+channel]>0)
+	  if(runningAvg[gid*maxC+channel]<250 || runningAvg[gid*maxC+channel]>maxPedVal)
+	    isBad=true;
+	  if(oldStdDevs[gid*maxC+channel]<5 || oldStdDevs[gid*maxC+channel]> maxRMSVal)
+	    isBad=true;
+	  if(!isBad)
+	    tbVsAdcContents.tbVsAdcArray[disk]->Fill(f[i].tb,f[i].adc);
+
+	  if(f[i].adc-runningAvg[gid*maxC+channel]>oldStdDevs[gid*maxC+channel] && oldStdDevs[gid*maxC+channel]>0)
 	      {
 		numOverOneSig[gid*maxC+channel]++;
 	      }
@@ -342,26 +407,31 @@ void fgtBuilder::event(daqReader *rdr)
   }
   //Fill Jan's histo
   //	cout <<" fill histo" <<endl;
-  int goodAPVs=0;
-  for(int iRdo=0;iRdo<numRDO;iRdo++)
+  //do for zs and non-zs data
+  //fill with num kB
+  hContents.hEventSize->Fill(evtSize/1024);
+  //  cout <<"evt size: " << evtSize <<endl;
+  //makes only sense for non zero suppressed data....
+  if(dd)
     {
 
-      for(int iArm=0;iArm<numARM;iArm++)
+      int goodAPVs=0;
+      for(int iRdo=0;iRdo<numRDO;iRdo++)
 	{
-	  for(int iApv=0;iApv<numAPV;iApv++)
+	  for(int iArm=0;iArm<numARM;iArm++)
 	    {
-	      if(chCntDaq[iRdo][iArm][iApv]>goodChCut)
-		goodAPVs++;
+	      for(int iApv=0;iApv<numAPV;iApv++)
+		{
+		  if(chCntDaq[iRdo][iArm][iApv]>goodChCut)
+		    goodAPVs++;
+		}
 	    }
 	}
+      hContents.hApvCorpt->Fill(goodAPVs);
+      //  cout <<"done" <<endl;
+    
+      evtCt++;
     }
-  hContents.hApvCorpt->Fill(goodAPVs);
-  //  cout <<"done" <<endl;
-  evtCt++;
-  
-
-
-  
   // Fill Histograms...
   //  int tpc_size = rdr->getDetectorSize("tpx");
   //  contents.h2_tpc->Fill(safelog(tpc_size));
@@ -371,7 +441,7 @@ void fgtBuilder::event(daqReader *rdr)
   if((tm > t_10min + 10) || (!(evtCt%50)))
     {
       t_10min = tm;
-            fillSumHistos();
+      fillSumHistos();
     }
 
   //  contents.h155_time_size_2min->Fill(tm-t_2min, safelog(sz));
@@ -385,88 +455,88 @@ void fgtBuilder::fillSumHistos()
 
   //  cout <<"fill..: "<<endl;
   char buffer[200];
-    hContents.h1->Reset();
-    hContents.h2->Reset();
-    hContents.hSumBad->Reset();
-    hSumContents.hSumSig->Reset();
-    hSumContents.hSumPed->Reset();
-    hSumContents.hSumFrac->Reset();
+  hContents.h1->Reset();
+  hContents.h2->Reset();
+  hContents.hSumBad->Reset();
+  hSumContents.hSumSig->Reset();
+  hSumContents.hSumPed->Reset();
+  hSumContents.hSumFrac->Reset();
 
-    int numBad=0;
-    //    int numTB=5;
-    sumHistogramsFilled++;
+  int numBad=0;
+  //    int numTB=5;
+  sumHistogramsFilled++;
 
-    //rms actually returns sigma
-    for(int gid=0;gid<maxA;gid++){
-	for(int iApv=0;iApv<10;iApv++){
-	    for(int iCh=0;iCh<128;iCh++){
-	      //	      int index=Gid2Indx[gid]*maxC+iApv*128+iCh;
-	      int gIndex=gid*maxC+iApv*128+iCh;
-	      //should not be a memory leak, since histogram exists and should just be refilled...
-	      //+1 due to underflow bin
-	      //	      projX=contents.array[gid]->ProjectionY("_px",iApv*128+iCh+1,iApv*128+iCh+1,"o");
-	      //	      cout <<"getting proj from gid: " << gid <<" channel: " << iApv*128+iCh << endl;
-	      //	      float mean=projX->GetMean();
-	      //	      float sig=projX->GetRMS();
-	      float mean=runningAvg[gIndex];
-	      float sig=oldStdDevs[gIndex];
-	      //	      cout <<"mean: " << mean <<" sig: " << sig <<endl;
-	      hContents.h1->Fill(mean);
-	      if(sig>0)
-		{
-		 hContents.h2->Fill(sig);
-		 hSumContents.hSumSig->Fill(Gid2Indx[gid]*10+iApv,sig);
-		 }
-	      hSumContents.hSumPed->Fill(Gid2Indx[gid]*10+iApv,mean);
-	      //	      meanVals[gIndex]=mean;
-	      //	      oldStdDevs[gIndex]=sig;
-	    }}}
-
-    for(int i=0;i<maxC*maxA;i++) 
-      {
-	int gid=floor(i/maxC);
-	int index=Gid2Indx[gid];
-	//maxC is 1280
-	int apvNr=10*index+floor((i%maxC)/128);
-//	cout <<"apv nr is : " << apvNr << " gid: " << gid <<" i : " << i <<endl;
-//       	cout <<" 10 gid: " << 10*gid <<" i%maxC: " << (i%maxC) <<" add: " << floor((i%maxC)/128) <<" aVals: " << aVals[i] << " num: " << numVals[i] <<endl;
-	bool isBad=false;
-	if(numVals[i] > 0) 
+  //rms actually returns sigma
+  for(int gid=0;gid<maxA;gid++){
+    for(int iApv=0;iApv<10;iApv++){
+      for(int iCh=0;iCh<128;iCh++){
+	//	      int index=Gid2Indx[gid]*maxC+iApv*128+iCh;
+	int gIndex=gid*maxC+iApv*128+iCh;
+	//should not be a memory leak, since histogram exists and should just be refilled...
+	//+1 due to underflow bin
+	//	      projX=contents.array[gid]->ProjectionY("_px",iApv*128+iCh+1,iApv*128+iCh+1,"o");
+	//	      cout <<"getting proj from gid: " << gid <<" channel: " << iApv*128+iCh << endl;
+	//	      float mean=projX->GetMean();
+	//	      float sig=projX->GetRMS();
+	float mean=runningAvg[gIndex];
+	float sig=oldStdDevs[gIndex];
+	//	      cout <<"mean: " << mean <<" sig: " << sig <<endl;
+	hContents.h1->Fill(mean);
+	if(sig>0)
 	  {
-	    //	    hContents.h1->Fill(aVals[i]/numVals[i]);
-	    //	    meanVals[i]=aVals[i]/numVals[i];
-	    //	    hSumContents.hSumPed->Fill(apvNr,meanVals[i]);
-	    //	    cout <<"filling with " << numOverOneSig[i] <<" / "<< numVals[i]<< "=" <<numOverOneSig[i]/(float)numVals[i]<<endl;
-	    //numOverOneSig is filled according to gid
-	    hSumContents.hSumFrac->Fill(apvNr,numOverOneSig[i]/(float)numVals[i]);
-	    if(runningAvg[i]<250 || runningAvg[i]>maxPedVal)
-	      isBad=true;
+	    hContents.h2->Fill(sig);
+	    hSumContents.hSumSig->Fill(Gid2Indx[gid]*10+iApv,sig);
 	  }
-	if(numVals[i]>1) 
-	  {
-	    //cout <<"numVals: " << numVals[i] <<" rms val: " << rmsVals[i] << " filling with : " << sqrt(rmsVals[i]/(numVals[i]-1)) <<endl;
-	    //	    double rms=sqrt(rmsVals[i]/(numVals[i]-1));
-	    //	    hContents.h2->Fill(rms);
-	    //	    oldStdDevs[i]=rms;
-	    //	    cout <<" rms: " << rms <<endl;
-	    //	    hSumContents.hSumSig->Fill(apvNr,rms);
+	hSumContents.hSumPed->Fill(Gid2Indx[gid]*10+iApv,mean);
+	//	      meanVals[gIndex]=mean;
+	//	      oldStdDevs[gIndex]=sig;
+      }}}
 
-	    //filled before from the histos
-	    double rms=oldStdDevs[i];
-	    if(rms<5 || rms> maxRMSVal)
-	      isBad=true;
-	    else
-	      hContents.hSumBad->Fill(apvNr);
-	  }
+  for(int i=0;i<maxC*maxA;i++) 
+    {
+      int gid=floor(i/maxC);
+      int index=Gid2Indx[gid];
+      //maxC is 1280
+      int apvNr=10*index+floor((i%maxC)/128);
+      //	cout <<"apv nr is : " << apvNr << " gid: " << gid <<" i : " << i <<endl;
+      //       	cout <<" 10 gid: " << 10*gid <<" i%maxC: " << (i%maxC) <<" add: " << floor((i%maxC)/128) <<" aVals: " << aVals[i] << " num: " << numVals[i] <<endl;
+      bool isBad=false;
+      if(numVals[i] > 0) 
+	{
+	  //	    hContents.h1->Fill(aVals[i]/numVals[i]);
+	  //	    meanVals[i]=aVals[i]/numVals[i];
+	  //	    hSumContents.hSumPed->Fill(apvNr,meanVals[i]);
+	  //	    cout <<"filling with " << numOverOneSig[i] <<" / "<< numVals[i]<< "=" <<numOverOneSig[i]/(float)numVals[i]<<endl;
+	  //numOverOneSig is filled according to gid
+	  hSumContents.hSumFrac->Fill(apvNr,numOverOneSig[i]/(float)numVals[i]);
+	  if(runningAvg[i]<250 || runningAvg[i]>maxPedVal)
+	    isBad=true;
+	}
+      if(numVals[i]>1) 
+	{
+	  //cout <<"numVals: " << numVals[i] <<" rms val: " << rmsVals[i] << " filling with : " << sqrt(rmsVals[i]/(numVals[i]-1)) <<endl;
+	  //	    double rms=sqrt(rmsVals[i]/(numVals[i]-1));
+	  //	    hContents.h2->Fill(rms);
+	  //	    oldStdDevs[i]=rms;
+	  //	    cout <<" rms: " << rms <<endl;
+	  //	    hSumContents.hSumSig->Fill(apvNr,rms);
 
-	///      aVals[i]=0;
+	  //filled before from the histos
+	  double rms=oldStdDevs[i];
+	  if(rms<5 || rms> maxRMSVal)
+	    isBad=true;
+	  else
+	    hContents.hSumBad->Fill(apvNr);
+	}
+
+      ///      aVals[i]=0;
       //      rmsVals[i]=0;
       if(isBad)
 	numBad++;
     }
-    sprintf(buffer,"#color[4]{You seem to have %d bad channels that are not masked}", numBad);  
-    errorMsg->SetText(buffer);    
-  }
+  sprintf(buffer,"#color[4]{You seem to have %d bad channels that are not masked}", numBad);  
+  errorMsg->SetText(buffer);    
+}
 
 
 
@@ -476,23 +546,23 @@ void fgtBuilder::stoprun(daqReader *rdr) {
   //here I should refill the histograms with the overall statistics (the summary histos)
 
   //if this is 0 we only have the means, 1 means we have not yet computed the stdDev, greater, equal 2 means that they should be filled
-    for(int i=0;i<maxC*maxA;i++) 
-      {
-	numVals[i]=0;
-	numOverOneSig[i]=0;
-	runningAvg[i]=0;
-	runningStdDevSq[i]=0;
-	oldStdDevs[i]=0;
-	meanVals[i]=0;
-	aVals[i]=0;
-	//      rmsVals[i]=0;
-	isChannelBad[i]=false;
-      }
-    //no effect anyways, since stoprun is only called after the histos are drawn
-    //  if(sumHistogramsFilled<2)
-    //    {
-    //      fillSumHistos();
-    //    }
+  for(int i=0;i<maxC*maxA;i++) 
+    {
+      numVals[i]=0;
+      numOverOneSig[i]=0;
+      runningAvg[i]=0;
+      runningStdDevSq[i]=0;
+      oldStdDevs[i]=0;
+      meanVals[i]=0;
+      aVals[i]=0;
+      //      rmsVals[i]=0;
+      isChannelBad[i]=false;
+    }
+  //no effect anyways, since stoprun is only called after the histos are drawn
+  //  if(sumHistogramsFilled<2)
+  //    {
+  //      fillSumHistos();
+  //    }
 }
 
 void fgtBuilder::main(int argc, char *argv[])
@@ -509,6 +579,7 @@ const string fgtBuilder::Gid2Label[24]={"3DA","6AB","2DA","5DA","1BC","3BC","4BC
 const int fgtBuilder::Indx2Gid[24]={23,4,13,15,12,17,22,2,14,5,8,0,20,6,21,16,18,11,10,3,1,19,9,7};
 //const int fgtBuilder::Gid2Indx[24]={3,0,6,4,7,8,11,15,18,16,1,2,5,9,12,10,13,14,17};
 const int fgtBuilder::Gid2Indx[24]={11,20,7,19,1,9,13,23,10,22,18,17,4,2,8,3,15,5,16,21,12,14,6,0};
+const int fgtBuilder::Gid2Disk[24]={3,6,2,5,1,3,4,6,3,6,5,5,2,1,3,1,4,2,5,6,4,4,2,1};
 const int fgtBuilder::maxA=24;
 //const int fgtBuilder::maxC=1400;
 const int fgtBuilder::maxC=1280;
@@ -516,7 +587,7 @@ const int fgtBuilder::maxPedVal=1500;
 const int fgtBuilder::maxRMSVal=250;
 const int fgtBuilder::minPedVal=0;
 const int fgtBuilder::minRMSVal=0;
- const int fgtBuilder::numRDO=2;
- const int fgtBuilder::numARM=6;
- const int fgtBuilder::numAPV=24;
+const int fgtBuilder::numRDO=2;
+const int fgtBuilder::numARM=6;
+const int fgtBuilder::numAPV=24;
 const int fgtBuilder::goodChCut=64;
