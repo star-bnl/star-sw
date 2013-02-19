@@ -1,5 +1,8 @@
-// $Id: StFgtIClusterAlgo.h,v 1.8 2012/12/10 23:18:01 avossen Exp $
+// $Id: StFgtIClusterAlgo.h,v 1.9 2013/02/19 18:24:04 avossen Exp $
 // $Log: StFgtIClusterAlgo.h,v $
+// Revision 1.9  2013/02/19 18:24:04  avossen
+// *** empty log message ***
+//
 // Revision 1.8  2012/12/10 23:18:01  avossen
 // merged cluster finder
 //
@@ -36,6 +39,7 @@
 #include "Stypes.h"
 class StFgtStripCollection;
 class StFgtHitCollection;
+class StFgtCollection;
 
 class StFgtIClusterAlgo
 {
@@ -43,7 +47,7 @@ class StFgtIClusterAlgo
   /**subclasses must implement this function that takes raw hits from StEvent and fills the Cluster collection
   //the input might be modified, since the clustering checks if the seeds are legitimate and adds the info to the strips if they 
   //are at the beginning or end of a cluster*/
-  virtual Int_t doClustering( StFgtStripCollection&, StFgtHitCollection& )=0;
+  virtual Int_t doClustering(const StFgtCollection& fgtCollection, StFgtStripCollection&, StFgtHitCollection& )=0;
   virtual Int_t Init()=0;
   virtual Int_t Finish()=0;
   virtual ~StFgtIClusterAlgo()=0;

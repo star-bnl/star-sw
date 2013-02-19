@@ -1,6 +1,9 @@
 ///
-// $Id: StFgtSimpleClusterAlgo.h,v 1.9 2012/03/08 17:43:40 avossen Exp $
+// $Id: StFgtSimpleClusterAlgo.h,v 1.10 2013/02/19 18:24:04 avossen Exp $
 // $Log: StFgtSimpleClusterAlgo.h,v $
+// Revision 1.10  2013/02/19 18:24:04  avossen
+// *** empty log message ***
+//
 // Revision 1.9  2012/03/08 17:43:40  avossen
 // added default cluster algo, made StFgtIClusterAlgo destructor =0
 //
@@ -44,7 +47,7 @@ class StFgtSimpleClusterAlgo :public StFgtIClusterAlgo
  public:
   StFgtSimpleClusterAlgo();
   ///the main function, using a collection of strips tht fired to build clusters of neighbouring strips
-  virtual Int_t doClustering(  StFgtStripCollection& strips, StFgtHitCollection& clusters );
+  virtual Int_t doClustering(const StFgtCollection& fgtCollection, StFgtStripCollection& strips, StFgtHitCollection& clusters );
   virtual Int_t Init();
   virtual ~StFgtSimpleClusterAlgo();
  protected:

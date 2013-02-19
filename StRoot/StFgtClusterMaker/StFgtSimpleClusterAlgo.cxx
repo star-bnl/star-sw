@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.24 2012/03/08 17:43:40 avossen Exp $
+//  $Id: StFgtSimpleClusterAlgo.cxx,v 1.25 2013/02/19 18:24:04 avossen Exp $
 //  $Log: StFgtSimpleClusterAlgo.cxx,v $
+//  Revision 1.25  2013/02/19 18:24:04  avossen
+//  *** empty log message ***
+//
 //  Revision 1.24  2012/03/08 17:43:40  avossen
 //  added default cluster algo, made StFgtIClusterAlgo destructor =0
 //
@@ -91,7 +94,7 @@ Int_t StFgtSimpleClusterAlgo::Init()
 
 
 */
-Int_t StFgtSimpleClusterAlgo::doClustering( StFgtStripCollection& strips, StFgtHitCollection& clusters )
+Int_t StFgtSimpleClusterAlgo::doClustering(const StFgtCollection& fgtCollection, StFgtStripCollection& strips, StFgtHitCollection& clusters )
 {
   //  cout.precision(10);
   //we make use of the fact, that the hits are already sorted by geoId

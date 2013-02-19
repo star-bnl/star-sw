@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.34 2012/12/10 23:18:00 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.35 2013/02/19 18:24:04 avossen Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -61,7 +61,7 @@ Int_t StFgtClusterMaker::Make()
        
        if( stripCollectionPtr && hitCollectionPtr ){
 	 //	 cout <<"doing clustering ..." <<endl;
-	 Int_t loc_ierr = mClusterAlgoPtr->doClustering( *stripCollectionPtr, *hitCollectionPtr );
+	 Int_t loc_ierr = mClusterAlgoPtr->doClustering(*fgtCollectionPtr, *stripCollectionPtr, *hitCollectionPtr );
 	 //	 cout <<"done ..." <<endl;
 	 if(loc_ierr!=kStOk) {
 	   LOG_WARN <<"StClusterMaker::Make(): clustering for disc " << discIdx << " returned " << loc_ierr <<endm;
@@ -95,7 +95,7 @@ Int_t StFgtClusterMaker::Make()
 	     mR = 0.5*(upperSpan + lowerSpan);   // mid point of the strip
 	     mErrR = upperSpan - lowerSpan;      // length of the strip
 	   };
-	   cout <<"r pos is: " << mR << " phi : " << mPhi <<endl;
+	   //	   cout <<"r pos is: " << mR << " phi : " << mPhi <<endl;
 	   mPhi+=StFgtGeom::phiQuadXaxis(quad);
 	   if(mPhi>TMath::Pi())
 	     mPhi-=(2*TMath::Pi());
@@ -204,6 +204,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.35  2013/02/19 18:24:04  avossen
+//   *** empty log message ***
+//
 //   Revision 1.34  2012/12/10 23:18:00  avossen
 //   merged cluster finder
 //

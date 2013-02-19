@@ -1,6 +1,9 @@
 ///
-// $Id: StFgtSeededClusterAlgo.h,v 1.7 2012/12/10 23:18:01 avossen Exp $
+// $Id: StFgtSeededClusterAlgo.h,v 1.8 2013/02/19 18:24:04 avossen Exp $
 // $Log: StFgtSeededClusterAlgo.h,v $
+// Revision 1.8  2013/02/19 18:24:04  avossen
+// *** empty log message ***
+//
 // Revision 1.7  2012/12/10 23:18:01  avossen
 // merged cluster finder
 //
@@ -76,7 +79,7 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
  public:
   StFgtSeededClusterAlgo();
   ///the main function, using a collection of strips tht fired to build clusters of neighbouring strips
-  virtual Int_t doClustering(  StFgtStripCollection& strips, StFgtHitCollection& clusters );
+  virtual Int_t doClustering(const StFgtCollection& fgtCollection, StFgtStripCollection& strips, StFgtHitCollection& clusters );
   virtual Int_t Init();
   virtual Int_t Finish();
   virtual ~StFgtSeededClusterAlgo();
