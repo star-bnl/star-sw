@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtPoint.cxx,v 2.3 2013/02/07 16:58:35 ullrich Exp $
+ * $Id: StFgtPoint.cxx,v 2.4 2013/02/19 21:55:57 ullrich Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFgtPoint.cxx,v $
- * Revision 2.3  2013/02/07 16:58:35  ullrich
- * Fixed bug in computation of charge asymmetry.
+ * Revision 2.4  2013/02/19 21:55:57  ullrich
+ * Modified charge asymmetry calculation (Anselm).
  *
  * Revision 2.2  2013/01/08 19:53:15  ullrich
  * Added comparison operators.
@@ -73,7 +73,7 @@ StFgtPoint::StFgtPoint( StFgtHit* hit1, StFgtHit* hit2, int key, int rank ) : St
 
    mHardwarePosition = mHitR->hardwarePosition();
    mCharge = hit1->charge() + hit2->charge();
-   mChargeAsymmetry=fabs((hit1->charge()-hit2->charge())/(hit1->charge()+hit2->charge()));
+   mChargeAsymmetry=(mHitPhi->charge()-mHitR->charge())/mCharge;
    mRank=1;
 };
 
