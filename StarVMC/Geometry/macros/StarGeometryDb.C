@@ -1247,6 +1247,7 @@ void y2013()
   geom.select = "y2013x"; {
     // Inherits y2013 and
     geom.tpceFlag = "TPCE31"; geom.tpceStat = 1;
+    geom.tpcRefSys = true; // Create TPC reference system
     setTitle("Asymptotic y2013");
     geom.fill();
   }

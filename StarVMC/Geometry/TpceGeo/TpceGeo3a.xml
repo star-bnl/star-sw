@@ -760,7 +760,7 @@
         </Mixture>
         
         <Create    block="TPCE"  />
-        <Placement block="TPCE" in="CAVE"  />
+        <Placement block="TPCE" in="CAVE" group="TpcRefSys" />
 
 	<!--                                                                                        TPCE -->
         <Block name="TPCE" comment="is the TPC envelope"  >

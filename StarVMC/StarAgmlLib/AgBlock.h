@@ -20,7 +20,8 @@ class AgModule;
 
 #include <assert.h>
 
-class StarAgmlStacker;
+//class StarAgmlStacker;
+#include "StarAgmlStacker.h"
 
 class AgBlock : public TNamed
 {
@@ -134,7 +135,7 @@ class AgBlock : public TNamed
   void AddGroup( const Char_t *name );//{ mGroups.push_back( name ); }
   
   /// Get the list of alignment groups
-  const vector<TString> &groups(){ return mGroups; }
+  //  const vector<TString> &groups(){ return mGroups; }
 
     
 

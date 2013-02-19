@@ -42,6 +42,9 @@ class Geom_t : public AgStructure
       upstFlag="UPSTon";
       zcalFlag="ZCALon";
 
+      // By default, do not create TpcRefSys
+      tpcRefSys = false;
+
       // By default close the geometry
       closeGeometry = 1;
 
@@ -68,6 +71,8 @@ class Geom_t : public AgStructure
 
   Int_t ecalCuts;
   Int_t calbCuts;
+
+  Int_t tpcRefSys;
 
   Int_t closeGeometry; // Flag which closes the geometry at end of construct.  If set false, the user is responsible for closing the geometry before drawing, simulation, etc...
 
