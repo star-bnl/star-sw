@@ -129,8 +129,8 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
 
   for(int iD=0;iD<nTbVsAdc;iD++)
     {
-      sprintf(buffer,"ADC_Vs_Tb_Disk %d",iD);
-      sprintf(buffer2,"ADC vs. Timebin, Disk:%d",iD);
+      sprintf(buffer,"ADC_Vs_Tb_Disk_%d",iD+1);
+      sprintf(buffer2,"ADC vs. Timebin, Disk:%d",iD+1);
       tbVsAdcContents.tbVsAdcArray[iD]=new TH2F(buffer,buffer2,7,-0.5,6.5,100,0,4096);
       tbVsAdcContents.tbVsAdcArray[iD]->GetXaxis()->SetTitle("Timebin");
       tbVsAdcContents.tbVsAdcArray[iD]->GetYaxis()->SetTitle("ADC value");
@@ -382,7 +382,7 @@ void fgtBuilder::event(daqReader *rdr)
 	  if(oldStdDevs[gid*maxC+channel]<5 || oldStdDevs[gid*maxC+channel]> maxRMSVal)
 	    isBad=true;
 	  if(!isBad)
-	    tbVsAdcContents.tbVsAdcArray[disk]->Fill(f[i].tb,f[i].adc);
+	    tbVsAdcContents.tbVsAdcArray[disk-1]->Fill(f[i].tb,f[i].adc);
 
 	  if(f[i].adc-runningAvg[gid*maxC+channel]>oldStdDevs[gid*maxC+channel] && oldStdDevs[gid*maxC+channel]>0)
 	      {
