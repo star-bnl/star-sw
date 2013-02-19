@@ -2,9 +2,12 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen
 //
-//   $Id: StFgtRawMaker.cxx,v 1.33 2012/07/31 18:25:53 jeromel Exp $
+//   $Id: StFgtRawMaker.cxx,v 1.34 2013/02/19 20:57:01 akio Exp $
 //
 //  $Log: StFgtRawMaker.cxx,v $
+//  Revision 1.34  2013/02/19 20:57:01  akio
+//  Added getting timebin from meta data, and also support for zero suppresed data
+//
 //  Revision 1.33  2012/07/31 18:25:53  jeromel
 //  Remove virtual + add InitRun to get Db point (previous method implied passing from outside a pointer to a maker (sigh!) not appropriate)
 //
@@ -177,6 +180,7 @@ Int_t StFgtRawMaker::Make()
     }
   else
     {
+      mEvent++;
       return fillHits();
     }
 }
@@ -202,9 +206,43 @@ Int_t StFgtRawMaker::fillHits()
   Short_t discIdx=0;
 
   //now grab the constants from the header file, loop over the raw data and fill the hits...
-  while(GetNextDaqElement("fgt/adc"))
-    {
-      StRtsTable* rts_tbl=DaqDta();
+  StRtsTable* rts_tbl=0;
+  int flag=0;
+  int ntimebin=0;
+  while(1){
+      if(flag==0){
+	if(mDataType==0){
+	  rts_tbl = GetNextDaqElement("fgt/adc"); flag=1;
+	  if(!rts_tbl) { rts_tbl = GetNextDaqElement("fgt/zs"); flag=2; }
+	}else if(mDataType==1){
+	  rts_tbl = GetNextDaqElement("fgt/adc"); flag=1;
+	}else if(mDataType==2){
+	  rts_tbl = GetNextDaqElement("fgt/zs");  flag=2;
+	}
+      }
+      else if(flag==1){ rts_tbl = GetNextDaqElement("fgt/adc"); }
+      else if(flag==2){ rts_tbl = GetNextDaqElement("fgt/zs"); }
+      if(!rts_tbl) break;
+      
+      apv_meta_t *meta = (apv_meta_t *)rts_tbl->Meta();
+      if(meta){
+	for(int r=1;r<=FGT_RDO_COU;r++) {
+	  if(meta->arc[r].present == 0) continue ;
+	  for(int arm=0;arm<FGT_ARM_COU;arm++) {
+	    if(meta->arc[r].arm[arm].present == 0) continue ;
+	    for(int apv=0;apv<FGT_APV_COU;apv++) {
+	      if(meta->arc[r].arm[arm].apv[apv].present == 0) continue ;
+	      int nt=meta->arc[r].arm[arm].apv[apv].ntim;
+	      //printf("RDO=%1d ARM=%1d APV=%02d Number of time bin =%d\n",r,arm,apv,nt);
+	      if(ntimebin!=0 && nt!=0 && ntimebin!=nt) {
+		LOG_ERROR << "Different number of timebins in different APV!!! Taking larger one!!!" << endm;
+	      }
+	      if(ntimebin<nt) ntimebin=nt;
+	    }
+	  }
+	}
+      }
+      
       //works because '*' operator is giving your the row
       for(StRtsTable::iterator it=rts_tbl->begin();it!=rts_tbl->end();it++)
 	{
@@ -217,13 +255,13 @@ Int_t StFgtRawMaker::fillHits()
 	  adc=mFgtRawData->adc;
 	  arm=rts_tbl->Sector();
 	  apv=rts_tbl->Pad();
-
+	  //printf("rdo=%1d arm=%1d apv=%2d ch=%3d tb=%1d adc=%4d\n",rdo,arm,apv,channel,timebin,adc);
 
 	  if(apv>=22 || apv <  0 || apv ==10|| apv==11)	 continue;
-	  if(arm<0 || arm> 4)		 continue;
-	  if(timebin>7)		 continue;
-	  if(channel>=128)		 continue;
-	  if(rdo<1 || rdo > 2)		 continue;
+	  if(arm<0 || arm>5)		    continue;
+	  if(timebin<0 || timebin>ntimebin) continue;
+	  if(channel<0 || channel>=128)	    continue;
+	  if(rdo<1 || rdo>2)		    continue;
 
 	  // year 2012 exclusions
 	  //	  if( ( (rdo==1 && arm==1) || (rdo==2 && arm==2) || (rdo==1 && arm==4)) && apv>4 && apv<10 ) continue;
@@ -265,7 +303,10 @@ Int_t StFgtRawMaker::fillHits()
 	  else
 	    { LOG_WARN << "StFgtRawMaker::Make() -- Could not access disc " << discIdx << endm; }
 	}
-    }
+      }
+      
+  if(mEvent<3) LOG_INFO << "StFgtRawMaker:: Number of Timebin from meta data = " << Form("%d",ntimebin) << endm;
+  mFgtCollectionPtr->setNumTimeBins(ntimebin);
 
   return kStOK;
 }
@@ -307,7 +348,7 @@ constructor.
 */
 StFgtRawMaker::StFgtRawMaker(const Char_t* name) :
   StRTSBaseMaker( "adc", name ),
-  mFgtCollectionPtr(0), mFgtDb(0)
+  mFgtCollectionPtr(0), mFgtDb(0), mEvent(0), mDataType(0)
 {
 }
 

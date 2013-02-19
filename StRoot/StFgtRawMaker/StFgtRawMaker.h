@@ -1,8 +1,11 @@
 // \class StFgtRawMaker
 // \author Anselm Vossen (avossen@indiana.edu)
 // 
-//  $Id: StFgtRawMaker.h,v 1.22 2012/07/31 18:25:53 jeromel Exp $
+//  $Id: StFgtRawMaker.h,v 1.23 2013/02/19 20:57:01 akio Exp $
 //  $Log: StFgtRawMaker.h,v $
+//  Revision 1.23  2013/02/19 20:57:01  akio
+//  Added getting timebin from meta data, and also support for zero suppresed data
+//
 //  Revision 1.22  2012/07/31 18:25:53  jeromel
 //  Remove virtual + add InitRun to get Db point (previous method implied passing from outside a pointer to a maker (sigh!) not appropriate)
 //
@@ -75,6 +78,10 @@ class StFgtRawMaker : public StRTSBaseMaker
   */
   void setFgtDb(StFgtDb *x) {mFgtDb=x;}
 
+  void setAlldata() {mDataType=0;};
+  void setNoneZSdataOnly(){mDataType=1;};
+  void setZSdataOnly() {mDataType=2;};
+
  protected:
 
   /**
@@ -97,8 +104,11 @@ class StFgtRawMaker : public StRTSBaseMaker
      private asignment operator
   */
   //  StFgtRawMaker& operator=(const StFgtRawMaker &source);
-  StFgtDb *mFgtDb;
-  ClassDef(StFgtRawMaker,1);
+  StFgtDb *mFgtDb; //!
+  int mEvent;      //!
+  int mDataType;   //!  0=adc, and if not there zs. 1=adc only, 2=zs only
+
+  ClassDef(StFgtRawMaker,2);
 };
 
 #endif
