@@ -41,6 +41,7 @@ public:
   //the gid encodes rdo etc. but since this is consecutive, we have to have another mapping
   static const int Indx2Gid[24];
   static const int Gid2Indx[24];
+  static const int Gid2Disk[24];
 
 
   //*** Histogram Declarations...
@@ -75,6 +76,18 @@ public:
       TH2* q24;
     };
   } contents;
+union
+{
+  TH2 *tbVsAdcArray[];
+  struct{
+    TH2* tbVsAdcD1;
+    TH2* tbVsAdcD2;
+    TH2* tbVsAdcD3;
+    TH2* tbVsAdcD4;
+    TH2* tbVsAdcD5;
+    TH2* tbVsAdcD6;
+  };
+}tbVsAdcContents;
 
   union {
     TH1 *hArray[];
@@ -83,6 +96,7 @@ public:
       TH1* h2;
       TH1* hSumBad;
       TH1* hApvCorpt;
+      TH1* hEventSize;
       //other possible plots:
       //hits over pedestal for each timebin, shows in time, collision condition etc.
     };
@@ -110,6 +124,7 @@ public:
   static const int goodChCut;
 
   int np;
+  int nTbVsAdc;
   int hNp;
   int hSNp;
 
