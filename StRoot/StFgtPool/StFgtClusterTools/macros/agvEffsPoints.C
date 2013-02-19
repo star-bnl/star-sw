@@ -32,11 +32,15 @@ StFgtPointMaker    *fgtPointMkr =0;
 StFgtPointPlotter *fgtPointPlotter=0;
 StFgtSimplePointAlgo *fgtSimplePointAlgo =0;
 
-/// /star/data03/daq/2012/064/13064033p_jb/st_physics_13064033_raw_1010001.daq
-///star/data03/daq/2012/061/13061024fR/st_fgt_13061024_raw_1340001.daq",
 
 
-int agvEffsPoints( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/st_physics_13174038_raw_1010001.daq",
+///This macro is for testing the point maker.
+///Note that the data file might not be there anymore. If you change the file you should update the db timestamp.
+///The code needs the StRoot/StFgtPool/StFgtClusterTools/ library. Since Pool is not necessarily in the nightly build you should check out StRoot/StFgtPool/ and compile yourself 
+//(note: some directories might not compile, remove or ignore these)
+///in the end a file pointPlots.root is created containing radio plots of the fgt disks with the reconstructed points
+
+int agvEffsPoints( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174002p_rf/st_physics_13174002_raw_1010001.daq",
 		       Int_t runnumber = 13074038,
 	     Int_t nevents = 10000, Int_t effDisk=2,
 	     Bool_t cutShortEvents = 1 ){

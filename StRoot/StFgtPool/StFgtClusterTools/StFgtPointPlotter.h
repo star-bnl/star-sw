@@ -23,6 +23,8 @@ class StFgtPointPlotter : public StMaker
 
    TFile* outRootFile;
    TH2D** histos;
+   TH2D* tbCorrelation;
+   TH1D** tbHistos;
 
 
  private:
