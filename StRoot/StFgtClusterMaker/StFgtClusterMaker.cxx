@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.36 2013/02/20 01:32:27 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.37 2013/02/20 23:33:28 avossen Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -34,7 +34,7 @@ StFgtClusterMaker::~StFgtClusterMaker()
 Int_t StFgtClusterMaker::Make()
 {
     Int_t ierr = kStOk;
-   cout <<"cluster maker " <<endl;
+    //   cout <<"cluster maker " <<endl;
    StEvent* eventPtr = 0;
    eventPtr = (StEvent*)GetInputDS("StEvent");
 
@@ -119,7 +119,6 @@ Int_t StFgtClusterMaker::Make()
 
      }
    }
-     cout <<"cluster maker end " <<endl;
    LOG_DEBUG << "End of fgt-clust-maker, print all strips & clusters: " << endm;
    LOG_DEBUG <<"  fgtCollnumDisc=" << fgtCollectionPtr->getNumDiscs()<<", tot strip=" <<fgtCollectionPtr->getNumStrips()<<"  totClust=" <<  fgtCollectionPtr->getNumHits() <<endm;
    for(int iDisc=0; iDisc <(int)fgtCollectionPtr->getNumDiscs(); iDisc++) {
@@ -219,6 +218,33 @@ Int_t StFgtClusterMaker::Init()
   if( !ierr )
      ierr = mClusterAlgoPtr->Init();
 
+
+  if( !ierr )
+    {
+      LOG_INFO << "StFgtClusterMaker::Init  "  << endm;
+      if( !mDb ){
+	LOG_INFO << "No fgtDb yet, trying to get a hold" << endm;
+	//StFgtDbMaker *fgtDbMkr = static_cast< StFgtDbMaker* >( GetMakerInheritsFrom( "StFgtDbMaker" ) );
+	StFgtDbMaker *fgtDbMkr = static_cast<StFgtDbMaker * >( GetMaker("fgtDb"));
+	if( !fgtDbMkr ){
+	  LOG_FATAL << "StFgtDb not provided and error finding StFgtDbMaker" << endm;
+	  ierr = kStFatal;
+
+	} else {
+	  mDb = fgtDbMkr->getDbTables();
+
+	  if( !mDb ){
+            LOG_FATAL << "StFgtDb not provided and error retrieving pointer from StFgtDbMaker '"
+                      << fgtDbMkr->GetName() << endm;
+            ierr = kStFatal;
+	  } else {
+	    LOG_INFO << "Got on hold on fgtDb, all OK" << endm;
+	  }
+	}
+      }
+    }
+  mClusterAlgoPtr->setDb(mDb);
+
   return ierr;
 }
   
@@ -240,6 +266,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.37  2013/02/20 23:33:28  avossen
+//   add strips on both sides of the cluster
+//
 //   Revision 1.36  2013/02/20 01:32:27  avossen
 //   added n strips before and after cluster
 //
