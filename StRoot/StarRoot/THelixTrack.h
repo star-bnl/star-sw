@@ -377,6 +377,7 @@ ClassDef(THelixFitter,0)
 #include <vector>
 class THelixKFitterAux { public: double x[3],e[6],wt,xi2; };
 typedef std::vector<THelixKFitterAux> THelixKFitterAuxV;
+
 class THelixKFitter: public THelixTrack
 {
 public:
