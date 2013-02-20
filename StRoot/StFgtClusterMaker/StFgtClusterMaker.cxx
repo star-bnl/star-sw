@@ -2,7 +2,7 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.cxx,v 1.35 2013/02/19 18:24:04 avossen Exp $
+//   $Id: StFgtClusterMaker.cxx,v 1.36 2013/02/20 01:32:27 avossen Exp $
 
 #include "StFgtClusterMaker.h"
 #include "StRoot/StEvent/StEvent.h"
@@ -11,13 +11,16 @@
 #include "StEvent/StFgtHit.h"
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include "StFgtSeededClusterAlgo.h"
+#include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
+#include "StRoot/StFgtDbMaker/StFgtDb.h"
+
 /*void StFgtClusterMaker::Clear(Option_t *opts)
 {
 
 };*/
 
 
-StFgtClusterMaker::StFgtClusterMaker( const Char_t* name ) : StMaker(name),mClusterAlgoPtr(0)
+StFgtClusterMaker::StFgtClusterMaker( const Char_t* name ) : StMaker(name),mClusterAlgoPtr(0), mDb(0)
 {
   // noop
 };
@@ -30,8 +33,7 @@ StFgtClusterMaker::~StFgtClusterMaker()
 
 Int_t StFgtClusterMaker::Make()
 {
-  cout <<"cluster maker make " <<endl;
-   Int_t ierr = kStOk;
+    Int_t ierr = kStOk;
    cout <<"cluster maker " <<endl;
    StEvent* eventPtr = 0;
    eventPtr = (StEvent*)GetInputDS("StEvent");
@@ -163,7 +165,41 @@ Int_t StFgtClusterMaker::setClusterAlgo(StFgtIClusterAlgo* algo)
   return kStOk;
 }
 
+Int_t StFgtClusterMaker::InitRun(Int_t runnumber)
+{
+   Int_t ierr = kStOk;
+  if( !mClusterAlgoPtr ){
+     LOG_INFO << "No fgt cluster algorithm specified, using default seededAlgo" << endm;
+     mClusterAlgoPtr=new StFgtSeededClusterAlgo();
+  }
 
+  if( !ierr )
+    {
+      LOG_INFO << "StFgtClusterMaker::InitRun for "  << runnumber << endm;
+      if( !mDb ){
+	LOG_INFO << "No fgtDb yet, trying to get a hold" << endm;
+	//StFgtDbMaker *fgtDbMkr = static_cast< StFgtDbMaker* >( GetMakerInheritsFrom( "StFgtDbMaker" ) );
+	StFgtDbMaker *fgtDbMkr = static_cast<StFgtDbMaker * >( GetMaker("fgtDb"));
+	if( !fgtDbMkr ){
+	  LOG_FATAL << "StFgtDb not provided and error finding StFgtDbMaker" << endm;
+	  ierr = kStFatal;
+
+	} else {
+	  mDb = fgtDbMkr->getDbTables();
+
+	  if( !mDb ){
+            LOG_FATAL << "StFgtDb not provided and error retrieving pointer from StFgtDbMaker '"
+                      << fgtDbMkr->GetName() << endm;
+            ierr = kStFatal;
+	  } else {
+	    LOG_INFO << "Got on hold on fgtDb, all OK" << endm;
+	  }
+	}
+      }
+    }
+  mClusterAlgoPtr->setDb(mDb);
+  return ierr;
+}
 Int_t StFgtClusterMaker::Init()
 {
   //  cout <<"cluster init " <<endl;
@@ -204,6 +240,9 @@ ClassImp(StFgtClusterMaker);
     
 
 //   $Log: StFgtClusterMaker.cxx,v $
+//   Revision 1.36  2013/02/20 01:32:27  avossen
+//   added n strips before and after cluster
+//
 //   Revision 1.35  2013/02/19 18:24:04  avossen
 //   *** empty log message ***
 //

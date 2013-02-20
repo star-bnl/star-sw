@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtMaxClusterAlgo.cxx,v 1.15 2013/02/19 18:29:05 avossen Exp $
+//  $Id: StFgtMaxClusterAlgo.cxx,v 1.16 2013/02/20 01:32:27 avossen Exp $
 //  $Log: StFgtMaxClusterAlgo.cxx,v $
+//  Revision 1.16  2013/02/20 01:32:27  avossen
+//  added n strips before and after cluster
+//
 //  Revision 1.15  2013/02/19 18:29:05  avossen
 //  signature of max cluster algo now updated to conform with interface
 //
@@ -49,6 +52,8 @@
 #include "StRoot/StEvent/StFgtStrip.h"
 #include "StRoot/StEvent/StFgtHitCollection.h"
 #include "StRoot/StEvent/StFgtHit.h"
+#include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
+#include "StRoot/StFgtDbMaker/StFgtDb.h"
 
 StFgtMaxClusterAlgo::StFgtMaxClusterAlgo()
 {
@@ -60,8 +65,9 @@ Int_t StFgtMaxClusterAlgo::Init()
   return kStOk;
 };
 
+
 ///algo just loops over the strips and selects the one with the highest charge in each layer
-Int_t StFgtSeededClusterAlgo::doClustering(const StFgtCollection& fgtCollection, StFgtStripCollection& strips, StFgtHitCollection& clusters )
+Int_t StFgtMaxClusterAlgo::doClustering(const StFgtCollection& fgtCollection, StFgtStripCollection& strips, StFgtHitCollection& clusters )
 {
 
   //we make use of the fact, that the hits are already sorted by geoId

@@ -1,6 +1,9 @@
 ///
-// $Id: StFgtSeededClusterAlgo.h,v 1.8 2013/02/19 18:24:04 avossen Exp $
+// $Id: StFgtSeededClusterAlgo.h,v 1.9 2013/02/20 01:32:27 avossen Exp $
 // $Log: StFgtSeededClusterAlgo.h,v $
+// Revision 1.9  2013/02/20 01:32:27  avossen
+// added n strips before and after cluster
+//
 // Revision 1.8  2013/02/19 18:24:04  avossen
 // *** empty log message ***
 //
@@ -64,6 +67,7 @@
 class StFgtHit;
 class StFgtStrip;
 class StFgtStripCollection;
+class StFgtDb;
 
 /**
 This class implements the IClusterAlgo interface, in particular the doClustering function.
@@ -85,22 +89,29 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
   virtual ~StFgtSeededClusterAlgo();
   virtual void setJumpSingleStrip(Bool_t jump);
   void setThreshold2AddStrip(Float_t v); // this value * charge uncertaintly is threshold on strip charge to add to the cluster
+  void setDb(StFgtDb* pDb);
 
  protected:
   ///migrated to A2C maker
   //  Bool_t checkPulse(StFgtHit* pClus);
   Int_t addStrips2Cluster(StFgtHit* clus, StFgtStrip** itSeed, StFgtStrip** itVecBegin, StFgtStrip** itVecEnd,Bool_t direction, Int_t sidedSize, Char_t seedLayer);
   Bool_t isSameCluster(StFgtStrip** itSeed,StFgtStrip** nextStrip);
-  void FillClusterInfo(StFgtHit* cluster);
+  void FillClusterInfo(StFgtHit* cluster,StFgtStripCollection& allStrips);
   void doStripFit(void* stripsT);
   Float_t doClusterShapeFit(void* stripsT);
-
+  void setNumAdditionalStrips(Int_t numStrips);
+   // pointer to the DB
+  Int_t numAdditionalStrips;
+  StFgtDb* mDb;
 
  private:
   Bool_t up;
   Bool_t down;
   Bool_t stepTwo;
   Float_t mThreshold2AddStrip;
+  /// the number of strips to save on both sides of the cluster
+
+
 
   TH1D* hGaussFitStatus;
   TH1D* hGaussFitChi2;
@@ -122,6 +133,9 @@ inline void StFgtSeededClusterAlgo::setJumpSingleStrip(Bool_t jump)
   stepTwo=jump;
 }
 inline void StFgtSeededClusterAlgo::setThreshold2AddStrip(Float_t v){ mThreshold2AddStrip=v;}
+
+inline void StFgtSeededClusterAlgo::setNumAdditionalStrips(Int_t numStrips){numAdditionalStrips=numStrips;}
+inline void StFgtSeededClusterAlgo::setDb(StFgtDb* pDb){mDb=pDb;}
 
 
 #endif
