@@ -4,8 +4,11 @@
 //\author Anselm Vossen (avossen@indiana.edu)
 //
 // 
-//   $Id: StFgtClusterMaker.h,v 1.19 2012/12/10 23:18:00 avossen Exp $
+//   $Id: StFgtClusterMaker.h,v 1.20 2013/02/20 01:32:27 avossen Exp $
 //   $Log: StFgtClusterMaker.h,v $
+//   Revision 1.20  2013/02/20 01:32:27  avossen
+//   added n strips before and after cluster
+//
 //   Revision 1.19  2012/12/10 23:18:00  avossen
 //   merged cluster finder
 //
@@ -55,7 +58,7 @@
 #include "StMaker.h"
 
 class StFgtIClusterAlgo;
-
+class StFgtDb;
 /**
 The cluster maker. It uses an external algorithm which has to implement StFgtIClusterAlgo to do the actual clustering by calling doClustering with the fgt hits in StEvent.
 
@@ -68,6 +71,7 @@ class StFgtClusterMaker : public StMaker
   ~StFgtClusterMaker();
   /// Init function. Checks if there is a cluster algo and initializes the same.
   virtual Int_t Init();
+  Int_t InitRun(Int_t runumber);
   virtual Int_t Finish();
 
 
@@ -86,11 +90,12 @@ The simple cluster algorithm is the default one. The max cluster only selects on
   Int_t setClusterAlgo(StFgtIClusterAlgo*);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.19 2012/12/10 23:18:00 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFgtClusterMaker.h,v 1.20 2013/02/20 01:32:27 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
   StFgtIClusterAlgo* mClusterAlgoPtr;
-
+   // pointer to the DB
+   StFgtDb* mDb;
   ClassDef(StFgtClusterMaker,1);
 
 };

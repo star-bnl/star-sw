@@ -1,5 +1,8 @@
-// $Id: StFgtIClusterAlgo.h,v 1.9 2013/02/19 18:24:04 avossen Exp $
+// $Id: StFgtIClusterAlgo.h,v 1.10 2013/02/20 01:32:27 avossen Exp $
 // $Log: StFgtIClusterAlgo.h,v $
+// Revision 1.10  2013/02/20 01:32:27  avossen
+// added n strips before and after cluster
+//
 // Revision 1.9  2013/02/19 18:24:04  avossen
 // *** empty log message ***
 //
@@ -40,6 +43,7 @@
 class StFgtStripCollection;
 class StFgtHitCollection;
 class StFgtCollection;
+class StFgtDb;
 
 class StFgtIClusterAlgo
 {
@@ -50,6 +54,8 @@ class StFgtIClusterAlgo
   virtual Int_t doClustering(const StFgtCollection& fgtCollection, StFgtStripCollection&, StFgtHitCollection& )=0;
   virtual Int_t Init()=0;
   virtual Int_t Finish()=0;
+  virtual void setDb(StFgtDb* pDb)=0;
+
   virtual ~StFgtIClusterAlgo()=0;
 
  private:

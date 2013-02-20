@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.24 2013/02/19 18:24:04 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.25 2013/02/20 01:32:27 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.25  2013/02/20 01:32:27  avossen
+//  added n strips before and after cluster
+//
 //  Revision 1.24  2013/02/19 18:24:04  avossen
 //  *** empty log message ***
 //
@@ -96,6 +99,10 @@
 #include "StRoot/StEvent/StFgtHitCollection.h"
 #include "StRoot/StEvent/StFgtHit.h"
 #include "StRoot/StFgtUtil/StFgtConsts.h"
+#include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
+#include "StRoot/StFgtDbMaker/StFgtDb.h"
+
+
 //for floor
 #include <math.h>
 #include <TH1F.h>
@@ -107,10 +114,11 @@
 //#define KEEP_BIG_AND_NOISY_CLUSTERS
 
 
-StFgtSeededClusterAlgo::StFgtSeededClusterAlgo():up(true),down(false),stepTwo(true),mThreshold2AddStrip(3.0)
+StFgtSeededClusterAlgo::StFgtSeededClusterAlgo():up(true),down(false),stepTwo(true),mThreshold2AddStrip(3.0),numAdditionalStrips(2),mDb(0)
 {
   //nothing else to do....
 };
+
 
 Int_t StFgtSeededClusterAlgo::Init()
 {
@@ -136,7 +144,7 @@ void StFgtSeededClusterAlgo::doStripFit(void* stripsT)
   Double_t ey[40];
   int numStripsInClu=strips.size();
   //    TF1 *func = new TF1("func","[0]*(x>[1])*(x-[1])**2*exp(-(x-[1])*[2])");
-        TF1 *func = new TF1("func","[0]*(x>[1])*(x-[1])**2*exp(-(x-[1])*0.55)");
+  TF1 *func = new TF1("func","[0]*(x>[1])*(x-[1])**2*exp(-(x-[1])*0.55)");
   func->SetParName(0,"A");
   func->SetParName(1,"t0");
   //  func->SetParName(2,"invtau");
@@ -187,17 +195,17 @@ void StFgtSeededClusterAlgo::doStripFit(void* stripsT)
       chi2=func->GetChisquare();
       if(chi2Ndf>0.1 && chi2Ndf<2&& tbFitStatus==0)
 	{
-	 if(stripIt==stripMaxPos)
-	   {
-	     hTbMaxCorr->Fill(it->first->getCharge(),amp);
-	     hTbMaxRatio->Fill(amp/it->first->getCharge());
-	   }
-	 else
-	   {
-	     hTbSideCorr->Fill(it->first->getCharge(),amp);
-	     hTbSideRatio->Fill(amp/it->first->getCharge());
-	   }
-	 it->first->setCharge(amp);
+	  if(stripIt==stripMaxPos)
+	    {
+	      hTbMaxCorr->Fill(it->first->getCharge(),amp);
+	      hTbMaxRatio->Fill(amp/it->first->getCharge());
+	    }
+	  else
+	    {
+	      hTbSideCorr->Fill(it->first->getCharge(),amp);
+	      hTbSideRatio->Fill(amp/it->first->getCharge());
+	    }
+	  it->first->setCharge(amp);
 	}
       stripIt++;
       hTbFitStatus->Fill(tbFitStatus);
@@ -273,14 +281,14 @@ Float_t StFgtSeededClusterAlgo::doClusterShapeFit(void* stripsT)
   //  delete f1;
 
   /////end fitting
-    if(binCounter>=3&&fitStatus==0&& fAmp>=firstOrd && fAmp<=lastOrd)
-      return fAmp;
-    else 
-      return -1;
+  if(binCounter>=3&&fitStatus==0&& fAmp>=firstOrd && fAmp<=lastOrd)
+    return fAmp;
+  else 
+    return -1;
 }
 
 ///fill in cluster info like charge from the strips 
-void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
+void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollection& allStrips)
 {
   Double_t ordinate, lowerSpan, upperSpan;
   Short_t disc, quadrant;
@@ -314,9 +322,9 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
 
 
   ///begin fitting
-  #ifdef DO_FGT_STRIP_FIT
+#ifdef DO_FGT_STRIP_FIT
   doStripFit(&strips);
-  #endif
+#endif
 
   Float_t clusterShapeFitAmp=-1;
 #ifdef DO_FGT_CLUSTER_SHAPE_FIT
@@ -397,15 +405,17 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
       //      accuCharge-=accuChargeUneven;
       stripWeightMap_t::iterator it=strips.begin();
       while(it!=strips.end())
-	 {
+	{
 	  // cout <<"strip geoId: "<< it->first->getGeoId() << endl;
 	  if(it->first->getGeoId()%2)
 	    {
 	      //	      cout <<"erased! " << endl;
-	      it->first->setClusterSeedType(kFgtSeedTypeNo);
+	      //      it->first->setClusterSeedType(kFgtSeedTypeNo);
+	      ///let's keep it though...
+	      it->first->setClusterSeedType(kFgtNextToCluster);
 	      strips.erase(it);
 	      if(!strips.empty())
-		 it=strips.begin();
+		it=strips.begin();
 	      else
 		break;
 	    }
@@ -418,48 +428,48 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
   stripWeightMap_t::reverse_iterator itBack=strips.rbegin();
   //  if(strips.size()>1)
   //    {
-      if(itBack->first->getClusterSeedType()==kFgtClusterPart)
-	itBack->first->setClusterSeedType(kFgtClusterEndUp);
-      //      if(strips.begin()->first->getClusterSeedType()>=kFgtSeedType1 && strips.begin()->first->getClusterSeedType()<=kFgtSeedType3)
-      if(strips.begin()->first->getClusterSeedType()==kFgtClusterPart)
-	(strips.begin())->first->setClusterSeedType(kFgtClusterEndDown);
-      //    }
+  if(itBack->first->getClusterSeedType()==kFgtClusterPart)
+    itBack->first->setClusterSeedType(kFgtClusterEndUp);
+  //      if(strips.begin()->first->getClusterSeedType()>=kFgtSeedType1 && strips.begin()->first->getClusterSeedType()<=kFgtSeedType3)
+  if(strips.begin()->first->getClusterSeedType()==kFgtClusterPart)
+    (strips.begin())->first->setClusterSeedType(kFgtClusterEndDown);
+  //    }
 
-      if(chargeEven)
-	{
-	  cluster->setCharge(accuChargeEven);
-	  meanOrdinateEven /= (Double_t)accuChargeEven;
-	  meanOrdinateEvenWeight /= (Double_t)accuChargeWeightEven;
-	  //	  	  cout <<" event charge: geoevn: " << meanGeoIdEven <<" charge: " << accuChargeWeightEven << " geo: " << meanGeoIdEven/accuChargeWeightEven <<endl;
-	  meanGeoIdEven /= accuChargeWeightEven;
-	  meanSqOrdinateEven /= (Double_t)accuChargeSqEven;
+  if(chargeEven)
+    {
+      cluster->setCharge(accuChargeEven);
+      meanOrdinateEven /= (Double_t)accuChargeEven;
+      meanOrdinateEvenWeight /= (Double_t)accuChargeWeightEven;
+      //	  	  cout <<" event charge: geoevn: " << meanGeoIdEven <<" charge: " << accuChargeWeightEven << " geo: " << meanGeoIdEven/accuChargeWeightEven <<endl;
+      meanGeoIdEven /= accuChargeWeightEven;
+      meanSqOrdinateEven /= (Double_t)accuChargeSqEven;
 
-	  meanGeoId=meanGeoIdEven;
-	  meanOrdinate=meanOrdinateEven;
-	  meanOrdinateWeight=meanOrdinateEvenWeight;
-	  //	  meanSqOrdinate -= meanOrdinateEven*meanOrdinateEven;
-	  meanSqOrdinate=meanSqOrdinateEven;
-	  meanSqOrdinate=-meanOrdinate*meanOrdinate;
-	  accuChargeError=accuChargeErrorEven;
-	  numStrips=numStripsEven;
-	}
-      else
-	{
-	  cluster->setCharge(accuCharge);
-	  meanOrdinate /= (Double_t)accuCharge;
-	  meanOrdinateWeight /= (Double_t)accuChargeWeight;
-	  meanGeoId /= accuChargeWeight;
-	  meanSqOrdinate /= (Double_t)accuChargeSq;
-	  meanSqOrdinate -= meanOrdinate*meanOrdinate;
-	}
-      numStrips > 1 ? cluster->setChargeUncert(sqrt(accuChargeError/((Double_t)numStrips-1))) : cluster->setChargeUncert(sqrt(accuChargeError/((Double_t)numStrips)));
+      meanGeoId=meanGeoIdEven;
+      meanOrdinate=meanOrdinateEven;
+      meanOrdinateWeight=meanOrdinateEvenWeight;
+      //	  meanSqOrdinate -= meanOrdinateEven*meanOrdinateEven;
+      meanSqOrdinate=meanSqOrdinateEven;
+      meanSqOrdinate=-meanOrdinate*meanOrdinate;
+      accuChargeError=accuChargeErrorEven;
+      numStrips=numStripsEven;
+    }
+  else
+    {
+      cluster->setCharge(accuCharge);
+      meanOrdinate /= (Double_t)accuCharge;
+      meanOrdinateWeight /= (Double_t)accuChargeWeight;
+      meanGeoId /= accuChargeWeight;
+      meanSqOrdinate /= (Double_t)accuChargeSq;
+      meanSqOrdinate -= meanOrdinate*meanOrdinate;
+    }
+  numStrips > 1 ? cluster->setChargeUncert(sqrt(accuChargeError/((Double_t)numStrips-1))) : cluster->setChargeUncert(sqrt(accuChargeError/((Double_t)numStrips)));
 
 
-      //cout <<" meanOrdinate: " << meanOrdinate <<" error: " << meanSqOrdinate <<endl;
-      //cout <<" meanOrdinate= " << meanOrdinate <<"  meanOrdinateWeight=" << meanOrdinateWeight <<endl;
+  //cout <<" meanOrdinate: " << meanOrdinate <<" error: " << meanSqOrdinate <<endl;
+  //cout <<" meanOrdinate= " << meanOrdinate <<"  meanOrdinateWeight=" << meanOrdinateWeight <<endl;
 
-      if( meanSqOrdinate > 0 )
-	meanSqOrdinate = sqrt(meanSqOrdinate);
+  if( meanSqOrdinate > 0 )
+    meanSqOrdinate = sqrt(meanSqOrdinate);
   // meanSqOrdinate is now the st. dev. of the ordinate
   // avoid unreasonable small uncertainty, due to small cluster sizes
 
@@ -493,16 +503,86 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster)
   //if(cluster->getCentralStripGeoId()==18974)
   /*    {
   //      cout <<" cluster has strips: " <<endl;
-      for(stripWeightMap_t::iterator it=strips.begin();it!=strips.end();it++)
-	{
- 	  Double_t charge=it->first->getCharge();
-	    cout <<"charge: " <<	  it->first->getCharge() << " geoId: "<< it->first->getGeoId() <<endl;
-	}
-      cout <<"cluster charge: "<< cluster->charge() <<endl;
-      }*/
+  for(stripWeightMap_t::iterator it=strips.begin();it!=strips.end();it++)
+  {
+  Double_t charge=it->first->getCharge();
+  cout <<"charge: " <<	  it->first->getCharge() << " geoId: "<< it->first->getGeoId() <<endl;
+  }
+  cout <<"cluster charge: "<< cluster->charge() <<endl;
+  }*/
 
   cluster->setNstrip(numStrips);
   
+  ////now also add strips on both sides of the cluster:
+
+
+  stripWeightMap_t::iterator itFirstStrip=strips.begin();
+  stripWeightMap_t::reverse_iterator itLastStrip=strips.rbegin();
+  Int_t firstGeoId=itFirstStrip->first->getGeoId();
+  Int_t lastGeoId=itLastStrip->first->getGeoId();
+  StFgtGeom::getPhysicalCoordinate(firstGeoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+  //lets assume that the strip exist, since it is part of the cluster
+  Int_t clusterQuad=quadrant;
+  Int_t clusterLayer=layer;
+  Int_t clusterDisk=disc;
+  Int_t rdo, arm, apv, chan; 
+  firstGeoId--;
+
+  //  cout <<"last geo Id: " << lastGeoId <<endl;
+  lastGeoId++;
+  //  cout <<"looking at cluster with first geo: " << firstGeoId <<" and last: " << lastGeoId <<endl;
+  for(int iGeo=firstGeoId;iGeo>(firstGeoId-(chargeEven+1)*numAdditionalStrips);iGeo--)
+    {
+      Int_t ret=StFgtGeom::getPhysicalCoordinate(iGeo,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+      if(ret!=kFgtError)
+	{
+	  if(disc==clusterDisk&&layer==clusterLayer&&quadrant==clusterQuad)
+	    {
+	      if(mDb)
+		{
+		  mDb->getElecCoordFromGeoId(iGeo, rdo,arm,apv,chan);
+		  Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
+		  StFgtStrip* stripPtr = allStrips.getStrip( elecId );
+		  //existed data
+		  if(stripPtr->getGeoId()>=0)
+		  {
+		    stripPtr->setClusterSeedType(kFgtNextToCluster);
+		    //		    cout <<"added geo: " << iGeo <<endl;
+		  }
+		}
+	      else
+		{
+		  //		  cout <<"no db! " <<endl;
+		}
+	    }
+	}
+    }
+  for(int iGeo=lastGeoId;iGeo<(lastGeoId+(chargeEven+1)*numAdditionalStrips);iGeo++)
+    {
+      Int_t ret=StFgtGeom::getPhysicalCoordinate(iGeo,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+      if(ret!=kFgtError)
+	{
+	  if(disc==clusterDisk&&layer==clusterLayer&&quadrant==clusterQuad)
+	    {
+	      if(mDb)
+		{
+		  mDb->getElecCoordFromGeoId(iGeo, rdo,arm,apv,chan);
+		  Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
+		  StFgtStrip* stripPtr = allStrips.getStrip( elecId );
+		  //existed data
+		  if(stripPtr->getGeoId()>=0)
+		    {
+		      stripPtr->setClusterSeedType(kFgtNextToCluster);
+		      //		      cout <<"added geo: " << iGeo <<endl;
+		    }
+		}
+	    }
+	}
+    }
+
+
+
+
 }/////end of fill clusterinfo
 
 
@@ -567,76 +647,76 @@ Int_t StFgtSeededClusterAlgo::addStrips2Cluster(StFgtHit* clus, StSPtrVecFgtStri
   //if(debug) cout << " Next strip gid="<<(*nextStrip)->getGeoId();
 
   //jump over dead strips
-   while(nextStrip>=itVecBegin && nextStrip <itVecEnd && (*nextStrip)->getClusterSeedType()==kFgtDeadStrip)    {
-     nextStrip+=inc;
-     deadStripsSkipped++;
-     //the next printout might lead to a crash...
-     //if(debug) cout <<"\n    Dead strip ("<<deadStripsSkipped<<"). Skip and looking at next gid="<< (*nextStrip)->getGeoId()<<endl;
-    }
+  while(nextStrip>=itVecBegin && nextStrip <itVecEnd && (*nextStrip)->getClusterSeedType()==kFgtDeadStrip)    {
+    nextStrip+=inc;
+    deadStripsSkipped++;
+    //the next printout might lead to a crash...
+    //if(debug) cout <<"\n    Dead strip ("<<deadStripsSkipped<<"). Skip and looking at next gid="<< (*nextStrip)->getGeoId()<<endl;
+  }
 
 
-   bool isHit = false;
-   bool adjacentStrip = false;
-   if(nextStrip >=itVecBegin && nextStrip <itVecEnd){
-     //cout <<"still looking at "<< (*nextStrip)->getGeoId()<<endl;
-     StFgtGeom::getPhysicalCoordinate((*nextStrip)->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
-     //      if(isPhi)
-     //cout <<"stepTwo: " << stepTwo << " nextStripID: " << (*nextStrip)->getGeoId() << " seedLayer: " << seedLayer <<" layer: " << layer <<endl;
-     ///doesn't matter if it is adjacent... dead strips are deleted, so the the next strip can be further away and there is no telling how far.
-     //in the end we check what range the geoId's of the clusters span, then we know if it is too big
-     // bool adjacentStrip=((abs((*nextStrip)->getGeoId()-(*itSeed)->getGeoId()))<(2+deadStripsSkipped));
-     adjacentStrip=((layer==seedLayer)&&((abs((*nextStrip)->getGeoId()-(*itSeed)->getGeoId()))<(2+deadStripsSkipped)));
-     //cout <<"looking at "<< (*nextStrip)->getGeoId()<< " adjacent: " << adjacentStrip <<endl;
-     if(adjacentStrip) isHit=isSameCluster(itSeed,nextStrip);
+  bool isHit = false;
+  bool adjacentStrip = false;
+  if(nextStrip >=itVecBegin && nextStrip <itVecEnd){
+    //cout <<"still looking at "<< (*nextStrip)->getGeoId()<<endl;
+    StFgtGeom::getPhysicalCoordinate((*nextStrip)->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+    //      if(isPhi)
+    //cout <<"stepTwo: " << stepTwo << " nextStripID: " << (*nextStrip)->getGeoId() << " seedLayer: " << seedLayer <<" layer: " << layer <<endl;
+    ///doesn't matter if it is adjacent... dead strips are deleted, so the the next strip can be further away and there is no telling how far.
+    //in the end we check what range the geoId's of the clusters span, then we know if it is too big
+    // bool adjacentStrip=((abs((*nextStrip)->getGeoId()-(*itSeed)->getGeoId()))<(2+deadStripsSkipped));
+    adjacentStrip=((layer==seedLayer)&&((abs((*nextStrip)->getGeoId()-(*itSeed)->getGeoId()))<(2+deadStripsSkipped)));
+    //cout <<"looking at "<< (*nextStrip)->getGeoId()<< " adjacent: " << adjacentStrip <<endl;
+    if(adjacentStrip) isHit=isSameCluster(itSeed,nextStrip);
      
-     //So the next strip is not dead (we skipped those) and the same layer. So if it is not in the cluster, we give one more chance to the one after that if it is even. 
-     //But the condition is that it is exactly 2 away. If it is more and still even (so it could be that there is an even
-     //hit then nothing due to short phi and then a dead strip and then nothing due to short and then a signal... that would be quite a stretch..
-     //adjacent strip is only checking if in same layer, if that is not true, the strip after that will not be in the same layer either
-     if(stepTwo && isPhi && adjacentStrip && !isHit && (*itSeed)->getGeoId()%2==0){
-       if(debug) cout <<"\n    adjacent has no charge but phi and even. Looking for next gid="<<(*(nextStrip+inc))->getGeoId();
-       if((nextStrip+inc) >=itVecBegin && (nextStrip+inc <itVecEnd))
-	 {
-	   ///this only goes on for a maximum distance of two, and has to be same layer and even as well
-	   StFgtGeom::getPhysicalCoordinate((*(nextStrip+inc))->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);	   
-	   adjacentStrip=(layer==seedLayer && (abs((*(nextStrip+inc))->getGeoId()-(*itSeed)->getGeoId()==(2+deadStripsSkipped))) && (*(nextStrip+inc))->getGeoId()%2==0);
-	   if(adjacentStrip) nextStrip=nextStrip+inc;
-	   isHit=isSameCluster(itSeed,nextStrip);	    
-	   if(debug){
-	     cout <<"geoid of next next: " << (*(nextStrip+inc))->getGeoId() <<" of seed: " << (*itSeed)->getGeoId() <<" deadStrips skipped: " << deadStripsSkipped<<endl;
-	     cout <<"diff in geo: " <<(abs((*nextStrip+inc)->getGeoId()-(*itSeed)->getGeoId()==(2+deadStripsSkipped)))<< endl;
-	     cout <<"adjacentStrip="<<adjacentStrip;
-	   }
-	 }
-     }
-   }
+    //So the next strip is not dead (we skipped those) and the same layer. So if it is not in the cluster, we give one more chance to the one after that if it is even. 
+    //But the condition is that it is exactly 2 away. If it is more and still even (so it could be that there is an even
+    //hit then nothing due to short phi and then a dead strip and then nothing due to short and then a signal... that would be quite a stretch..
+    //adjacent strip is only checking if in same layer, if that is not true, the strip after that will not be in the same layer either
+    if(stepTwo && isPhi && adjacentStrip && !isHit && (*itSeed)->getGeoId()%2==0){
+      if(debug) cout <<"\n    adjacent has no charge but phi and even. Looking for next gid="<<(*(nextStrip+inc))->getGeoId();
+      if((nextStrip+inc) >=itVecBegin && (nextStrip+inc <itVecEnd))
+	{
+	  ///this only goes on for a maximum distance of two, and has to be same layer and even as well
+	  StFgtGeom::getPhysicalCoordinate((*(nextStrip+inc))->getGeoId(),disc,quadrant,layer,ordinate,lowerSpan,upperSpan);	   
+	  adjacentStrip=(layer==seedLayer && (abs((*(nextStrip+inc))->getGeoId()-(*itSeed)->getGeoId()==(2+deadStripsSkipped))) && (*(nextStrip+inc))->getGeoId()%2==0);
+	  if(adjacentStrip) nextStrip=nextStrip+inc;
+	  isHit=isSameCluster(itSeed,nextStrip);	    
+	  if(debug){
+	    cout <<"geoid of next next: " << (*(nextStrip+inc))->getGeoId() <<" of seed: " << (*itSeed)->getGeoId() <<" deadStrips skipped: " << deadStripsSkipped<<endl;
+	    cout <<"diff in geo: " <<(abs((*nextStrip+inc)->getGeoId()-(*itSeed)->getGeoId()==(2+deadStripsSkipped)))<< endl;
+	    cout <<"adjacentStrip="<<adjacentStrip;
+	  }
+	}
+    }
+  }
    
-   //if the new strip is adjacent and it seems to belong to the same cluster, add it
-   if(isHit){
-     (*nextStrip)->setClusterSeedType(kFgtClusterPart);
-     stripWeightMap_t &stripWeightMap = clus->getStripWeightMap();
-     stripWeightMap[ *nextStrip ] = 1;
-     ///if the last add was successful and the cluster is not too big, go to next one...
-     if(sidedSize+1<=kFgtMaxClusterSize/2){
-       if(debug) cout << " Added\n";      
-       return addStrips2Cluster(clus,nextStrip,itVecBegin,itVecEnd,direction,sidedSize+1,seedLayer); //to return a kFgtClusterTooBig which is discovered downthe line
-     }else{
-       //cout <<" Cluster too big, stopping here : sidedSize+1="<<sidedSize+1<<" kFgtMaxClusterSize="<<kFgtMaxClusterSize<<endl;       
-       return kFgtClusterTooBig;
-     }
-   }else{     
-     if(debug) {
-       if(adjacentStrip) {cout << " Not added because not adjacent"<<endl;}
-       else              {cout << " Not added because no charge"<<endl;}
-     }
-   }
-   return true;
+  //if the new strip is adjacent and it seems to belong to the same cluster, add it
+  if(isHit){
+    (*nextStrip)->setClusterSeedType(kFgtClusterPart);
+    stripWeightMap_t &stripWeightMap = clus->getStripWeightMap();
+    stripWeightMap[ *nextStrip ] = 1;
+    ///if the last add was successful and the cluster is not too big, go to next one...
+    if(sidedSize+1<=kFgtMaxClusterSize/2){
+      if(debug) cout << " Added\n";      
+      return addStrips2Cluster(clus,nextStrip,itVecBegin,itVecEnd,direction,sidedSize+1,seedLayer); //to return a kFgtClusterTooBig which is discovered downthe line
+    }else{
+      //cout <<" Cluster too big, stopping here : sidedSize+1="<<sidedSize+1<<" kFgtMaxClusterSize="<<kFgtMaxClusterSize<<endl;       
+      return kFgtClusterTooBig;
+    }
+  }else{     
+    if(debug) {
+      if(adjacentStrip) {cout << " Not added because not adjacent"<<endl;}
+      else              {cout << " Not added because no charge"<<endl;}
+    }
+  }
+  return true;
 
 }
 
 /**
-main interface to the clustering. 
- */
+   main interface to the clustering. 
+*/
 Int_t StFgtSeededClusterAlgo::doClustering(const StFgtCollection& fgtCollection, StFgtStripCollection& strips, StFgtHitCollection& clusters )
 {
   //  cout.precision(10);
@@ -656,8 +736,8 @@ Int_t StFgtSeededClusterAlgo::doClustering(const StFgtCollection& fgtCollection,
   //const 
 
   /**
-run over all strips, find seeds, use those to start clusters
-   */
+     run over all strips, find seeds, use those to start clusters
+  */
   Int_t lastGeoIdInCluster=-1;
   for( StSPtrVecFgtStripIterator it=strips.getStripVec().begin();it!=strips.getStripVec().end();++it)
     {
@@ -672,7 +752,7 @@ run over all strips, find seeds, use those to start clusters
       if( (*it)->getClusterSeedType() >=kFgtSeedType1 && (*it)->getClusterSeedType() < kFgtSeedTypeMax ) 
 	{
 	  //	  cout <<"found seed for geo id: " << (*it)->getGeoId() <<endl;
-	  	  if((*it)->getGeoId()==31318)
+	  if((*it)->getGeoId()==31318)
 	    {
 	      //    	      cout <<"seed type:  "<< (*it)->getClusterSeedType()<< "charge: " << (*it)->getCharge()<<" adc: ";
 	      for(int i=0;i<7;i++)
@@ -680,7 +760,7 @@ run over all strips, find seeds, use those to start clusters
 		  //		  cout <<(*it)->getAdc(i) <<" ";
 		}
 	      //	   cout <<endl;
-	   }
+	    }
 	  ////
 	  ///check for ringing around cluster
 	  //	  if(ringing( it, strips.getStripVec().begin(),strips.getStripVec().end(), down,0,layer))
@@ -806,9 +886,9 @@ run over all strips, find seeds, use those to start clusters
 		  //		  cout <<"checking "<<(*it)->getGeoId() <<" with: "<<stripWM.begin()->first->getGeoId()<<" last: "<< (*lastStrip)->getGeoId()<<endl;
 		  if((*it)->getGeoId()==stripWM.begin()->first->getGeoId())
 		    {
-		    stripInClu=it;
-		    //		    cout <<"found " <<endl;
-		    break;
+		      stripInClu=it;
+		      //		    cout <<"found " <<endl;
+		      break;
 		    }
 
 		}
@@ -823,32 +903,31 @@ run over all strips, find seeds, use those to start clusters
 		  //must be since we have two strips
 		  if(stripHigh< strips.getStripVec().end())
 		    {
-	       if((*stripHigh)->getCharge() >(*stripInClu)->getCharge())
-		 {
-		   stripNew=stripHigh;
-		   stripNew++;
-		 }
-	       else
-		 {
-		   stripNew=stripInClu;
-		   stripNew--;
-		 }
+		      if((*stripHigh)->getCharge() >(*stripInClu)->getCharge())
+			{
+			  stripNew=stripHigh;
+			  stripNew++;
+			}
+		      else
+			{
+			  stripNew=stripInClu;
+			  stripNew--;
+			}
 
-	       if(stripNew>=strips.getStripVec().begin()&& stripNew<strips.getStripVec().end())
-		 {
-		   //		   cout <<"adding strip with geo id: " << (*stripNew)->getGeoId()<<endl;
-		   stripWM[*stripNew]=1;
-		 }
-		}
+		      if(stripNew>=strips.getStripVec().begin()&& stripNew<strips.getStripVec().end())
+			{
+			  //		   cout <<"adding strip with geo id: " << (*stripNew)->getGeoId()<<endl;
+			  stripWM[*stripNew]=1;
+			}
+		    }
 		}
 	    }
 	  ////
 
 
-
 	  //
 	  //compute errors etc
-	  FillClusterInfo(newCluster);
+	  FillClusterInfo(newCluster,strips);
 	  clusters.getHitVec().push_back(newCluster);
 	  //now of course we have to check where the cluster ends so that we don't start another cluster if there is another seed
 	  lastGeoIdInCluster=newCluster->getStripWeightMap().rbegin()->first->getGeoId();
