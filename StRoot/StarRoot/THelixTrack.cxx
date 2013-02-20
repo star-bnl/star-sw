@@ -15,11 +15,15 @@
 #include "TRandom2.h"
 #include "TRandomVector.h"
 #include "TError.h"
+#include "TMatrixD.h"
+
 #include "THelixTrack.h"
 #include "StMatrixD.hh"
 #include "TComplex.h"
 #include "TH1.h"
 #include <cassert>
+static double *myQQQ = 0;
+static double EmxSign(int n,const double *e);
 
 // Complex numbers
 const TComplex Im(0,1);
@@ -46,6 +50,7 @@ inline static TComplex expOneD(TComplex x)
     return (TComplex::Exp(x)-1.-x)/(x*x);
   }
 }
+
 
 //______________________________________________________________________________
 void TCEmx_t::Set(const double *err)  	
@@ -861,7 +866,7 @@ void THelixTrack::TestMtx()
 {
   enum {kH=0,kA,kC,kZ,kL};
 const static char* T="HACZL";
-  double Dir[4][3],X[4][3]={{0}},Rho[2],step,F[5][5],Del,Dif;
+  double Dir[4][3],X[4][3]={{0}},Rho[2],step,F[5][5],Del,Dif,Fi[5][5];
   double maxEps = 0;  
   int nErr=0;
   int iR = 10+ gRandom->Rndm()*100;
@@ -877,9 +882,12 @@ iLam=80; 				//******* Tested for big lambda
     Dir[0][2] = sin(lam);
     THelixTrack tc(X[0],Dir[0],Rho[0]);
     tc.Eval(step,X[1],Dir[1]);
-//    tc.MakeMtx(step,F);
     tc.Move(step,F);
-
+    memcpy(Fi[0],F[0],sizeof(F));
+    tc.InvertMtx(Fi);
+    TMatrixD one = TMatrixD(5,5,F[0])*TMatrixD(5,5,Fi[0]);
+    one.Print();
+    
     printf("TestMtx: Angle=%d Lam=%d \tRad=%d Step=%d \n",iAlf,iLam,iR,int(step));
 
     for (int iHAR=0;iHAR<5;iHAR++) {
@@ -1013,11 +1021,6 @@ double THelixTrack::Eval(double step, double *xyz, double *dir,double &rho) cons
 //_____________________________________________________________________________
 double THelixTrack::Eval(double step, double *xyz, double *dir) const
 {
-  if (!step) {
-    if (xyz) memcpy(xyz,fX,sizeof(fX));
-    if (dir) memcpy(dir,fP,sizeof(fP));
-    return 0.;
-  }
 
   double ztep = step*fCosL;
   double teta = ztep*(fRho+0.5*ztep*fDRho);
@@ -3210,16 +3213,24 @@ return ans;
 //______________________________________________________________________________
 class myTHFits {
 public:
-operator const double* ()	{return &mH;}		
+myTHFits(double h,double z,double c,double a,double l):mH(h),mZ(z),mC(c),mA(a),mL(l){}
+operator const double* () const	{return &mH;}		
 operator       double* ()	{return &mH;}		
 myTHFits()	{memset(this,0,sizeof(*this));}
 public:
+static const myTHFits& GetRange() { return mgRange;}
+public:
 double mH;	// direction perpendicular movement and Z
 double mZ;	// Z, direction 
-double mC;	// 1/pt with curvature sign
+double mC;	// curvature with sign
 double mA;	// Angle in XY. cos(A),sin(A),T moving direction
 double mL;	// Angle lambda in Rxy/Z
+static myTHFits mgRange;
 };
+
+myTHFits myTHFits::mgRange(1,1,1,30*3.14/180,30*3.14/180);
+
+
 //______________________________________________________________________________
 class myTHPars {
 public:
@@ -3289,53 +3300,59 @@ th.Set(&_x,d,_curv);
 }
 
 //______________________________________________________________________________
-static double JoinTwo(int nP1,const double *P1,const double *E1
-                     ,int nP2,const double *P2,const double *E2
-	             ,              double *PJ,      double *EJ
-		     ,int mode)
+static double JoinTwo(int nP1,const double *P1,const double *C1
+                     ,int nP2,const double *P2,const double *C2
+	             ,              double *PJ,      double *CJ
+		     ,int mode,const double *range=0)
 {
 // 		mode=0 normal case
 //		mode=1 assign to vertex where 1st nP1 words of PJ must be == P1
   assert(nP1<=nP2);
-  int nE1 = nP1*(nP1+1)/2;
-  int nE2 = nP2*(nP2+1)/2;
-  TArrayD ard(nE2*6+nP2*nP2+nP1*nP2);
+  assert(!P2);		//must be zero
+  int nC1 = nP1*(nP1+1)/2;
+  int nC2 = nP2*(nP2+1)/2;
+  TArrayD ard(nC2*6);
   double *a = ard.GetArray();  
-  double *sumE 		= (a);
-  double *sumEI 	= (a+=nE2);
-  double *e2sumEIe2 	= (a+=nE2);
-  double *subP 		= (a+=nE2);
-  double *sumEIsubP	= (a+=nE2);
-  double *E2U           = (a+=nE2);
-  double *E2UsumEI      = (a+=nP2*nP2);
+  double *sumC 		= (a);
+  double *sumCI 	= (a+=nC2);
+  double *sumEI 	= (a+=nC2);
+  double *C1P1   	= (a+=nC2);
+  double *subP 		= (a+=nC2);
 
   double chi2=3e33;
 
 
-  do {//empty loop
-//  	Join errors
-    if (!mode) {TCL::vadd (E2,E1,sumE,nE1);}
-    else       {TCL::ucopy(E2,   sumE,nE1);}
-    TCL::trsinv(sumE,sumEI,nP1);
-    TCL::vsub  (P1  ,P2   ,subP   ,nP1);
+//  	Join Covariant marices
+  TCL::ucopy(C2,sumC,     nC2);
+  TCL::vadd (C1,sumC,sumC,nC1);
+  if (CJ) TCL::ucopy(sumC,CJ,nC2);
+//   if (range) {
+//     for (int i=0,li=0;i<nP2;li+=++i) {
+//       if (i<nP1) continue;
+//       sumC[li+i]+=0.01/(range[i]*range[i]);
+//   } }
+
+  if (C2[0]<=0) { 	//C2 covariant  matrix ==0
+    if (!PJ) return 0;;
+    TCL::ucopy(P1,PJ+0  ,nP1    );
+    TCL::vzero(   PJ+nP1,nP2-nP1);
+    return 0;
+  } else {
+    TCL::trsa(C1   ,P1  ,C1P1,nP1,1);
+    myQQQ = C1P1;
+    assert(EmxSign(nP2,sumC)>1e-10);
+    TCL::trsinv(sumC,sumCI,nP2);		// 1/ (1/C1+1/C2)
+    TCL::ucopy(P1,subP   ,nP1);
+
+    TCL::trqsq (C2  ,sumCI,sumEI,nP2); 
+    TCL::vsub(C2,sumEI,sumEI,nC2);		//sumEi = 1/(E1+E2)==C2-C2/CJ*C2
     TCL::trasat(subP,sumEI,&chi2,1,nP1); 
-    if (!EJ) 	break;
 
-    TCL::trqsq (E2  ,sumEI,e2sumEIe2,nP2); 
-    TCL::vsub(E2,e2sumEIe2,EJ,nE2);
-    if (!mode)  break;
-    TCL::trupck(E2,E2U,nP2);
-    TCL::trats(E2U,sumEI,E2UsumEI,nP2,nP1);
-    TCL::trasat(E2UsumEI,E1,E2U,nP2,nP1);
-    TCL::vadd(E2U,EJ,EJ,nE2);
-      
-  } while(0);
 //  	Join params
-  if (!PJ) return chi2;
-  TCL::tras(subP     ,sumEI,sumEIsubP,1,nP1);
-  TCL::tras(sumEIsubP,E2   ,PJ       ,1,nP2);
-  TCL::vadd(PJ       ,P2   ,PJ         ,nP2);
-
+    if (!PJ) return chi2;
+    TCL::trsa(C1   ,P1  ,C1P1,nP1,1);
+    TCL::trsa(sumCI,C1P1,PJ  ,nP2,1);
+  }
   return chi2;
 }
 //______________________________________________________________________________
@@ -3356,43 +3373,58 @@ double THelixKFitter::Fit()
 {
 
 static const int konv[15] ={0,6,9,3,8,5,1,7,4,2,10,13,12,11,14};
-static const double bigErr[5] = {3,1,1,3,1};
+//static const double bigErr[5] = {3,1,1,3,1};
+  double cmx[15]={0},tmp[15];
+  
   if (fFitingShow) fFitingShow->clear();
   myTHPars P;
   THelixTrack th;
-  th.SetEmx(0);
-  double *emx = *th.Emx();
-  for (int i=0,li=0;i<5;li+=++i) {emx[li+i]=bigErr[i]*bigErr[i]*9;}
   double dir[3],myXi2;
   TCL::vsub(fAux[1].x,fAux[0].x,dir,3);
   th.Set(fAux[0].x,dir,0.);
   fChi2=0;
 
+  double F[5][5];
   for (int ip=0;ip<(int)fAux.size();ip++) {
     double s = th.Path(fAux[ip].x[0],fAux[ip].x[1]);
-    th.Move(s);
+    th.Move(s,F);
+    TMatrixD Fm(5,5,F[0]); Fm.Invert(); TCL::ucopy(Fm.GetMatrixArray(),F[0],5*5);
+    TCL::tratsa(F[0],cmx,tmp,5,5); 
+    TCL::ucopy(tmp,cmx,15);
+
     P.Set(th);
     double T[2][3] = {{-P._sinCA,P._cosCA,0}
                      ,{        0,       0,1}};
 
     double hG[3], hit[3];
     TCL::trasat(T[0],fAux[ip].e,hG,2,3); 
+    TCL::trsinv(hG,hG,2);
+    
     TCL::vsub(fAux[ip].x,&P._x,hit,3);
     double hz[2]={ hit[0]*T[0][0]+hit[1]*T[0][1]
                  , hit[2]                       };
 
-    myTHFits iF,oF;
+    myTHFits oF;
     double iG[15],oG[15];
-
-    for (int jj=0;jj<15;jj++) {iG[konv[jj]]=emx[jj];}
-    myXi2 = JoinTwo(2,hz,hG,5,iF,iG,oF,oG,0);
-    for (int jj=0;jj<15;jj++) {emx[jj]=oG[konv[jj]];}
+    if (ip==1) {//Two points not enought for calc curvature.
+      static const int kRho = 2;
+      for (int i=0,li=0;i<5;li+=++i) { 
+        if (i<kRho) continue;
+        cmx[li+kRho]=0;
+        if (i==kRho) cmx[li+kRho] = 1e-20;
+    } }
+  
+    for (int jj=0;jj<15;jj++) {iG[konv[jj]]=cmx[jj];}
+    myXi2 = JoinTwo(2,hz,hG,5,0,iG,oF,oG,0,myTHFits::GetRange());
+    for (int jj=0;jj<15;jj++) {cmx[jj]=oG[konv[jj]];}
 
     fChi2+=myXi2; fAux[ip].xi2=myXi2;
     P+= oF; P.Get(th);
     if (fFitingShow) { //fill xyz of local fit
       for (int i=0;i<3;i++) {fFitingShow->push_back(P[i]);}}
   }
+  TCL::trsinv(cmx,cmx,5);
+  th.SetEmx(cmx);
   double s = th.Path(fAux[0].x);
   th.Move(s);
   *((THelixTrack*)this) = th;
@@ -3563,11 +3595,39 @@ std::vector<double> Fts;
   draw->Animate();
 
 }
+#include "TMatrixT.h"
+#include "TMatrixTSym.h"
+#include "TVectorT.h"
+//_____________________________________________________________________________
+double EmxSign(int n,const double *e)
+{
+  TMatrixDSym S(n);  
+  TVectorD coe(n);
+  for (int i=0,li=0;i< n;li+=++i) {
+    double qwe = e[li+i];
+    if(qwe<=0) return qwe;
+    qwe = pow(2.,-int(log(qwe)/(2*log(2))));
+    coe[i]=qwe;
+    for (int j=0;j<=i;j++    ) {
+       S[i][j]=e[li+j]*coe[i]*coe[j]; S[j][i]=S[i][j];
+  } }
+  TMatrixD EigMtx(n,n);
+  TVectorD EigVal(n);  
+  EigMtx = S.EigenVectors(EigVal);
+  TVectorD EigB = EigMtx*TVectorD(n,myQQQ);
+  double ans = 3e33;
+  for (int i=0;i<n;i++) {if (EigVal[i]<ans) ans = EigVal[i];}
+  if (ans>1e-10) return ans;
+  EigVal.Print("EigVal");
+  EigB.Print("EigB");
+  TVectorD(n,myQQQ).Print();
+  return ans;
+} 
 //______________________________________________________________________________
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.60 2012/12/07 17:47:42 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.61 2013/02/20 02:01:44 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -3583,6 +3643,9 @@ std::vector<double> Fts;
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.61  2013/02/20 02:01:44  perev
+ * Cleanup
+ *
  * Revision 1.60  2012/12/07 17:47:42  perev
  * Cleanup
  *
