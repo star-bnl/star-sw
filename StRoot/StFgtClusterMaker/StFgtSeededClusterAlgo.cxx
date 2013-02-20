@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.26 2013/02/20 02:18:19 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.27 2013/02/20 23:33:28 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.27  2013/02/20 23:33:28  avossen
+//  add strips on both sides of the cluster
+//
 //  Revision 1.26  2013/02/20 02:18:19  avossen
 //  *** empty log message ***
 //
@@ -518,49 +521,70 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollect
   
   ////now also add strips on both sides of the cluster:
 
-  if(false)
+    if(!strips.empty())
+  //  if(false)
     {
-  stripWeightMap_t::iterator itFirstStrip=strips.begin();
-  stripWeightMap_t::reverse_iterator itLastStrip=strips.rbegin();
-  Int_t firstGeoId=itFirstStrip->first->getGeoId();
-  Int_t lastGeoId=itLastStrip->first->getGeoId();
-  StFgtGeom::getPhysicalCoordinate(firstGeoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
-  //lets assume that the strip exist, since it is part of the cluster
-  Int_t clusterQuad=quadrant;
-  Int_t clusterLayer=layer;
-  Int_t clusterDisk=disc;
-  Int_t rdo, arm, apv, chan; 
-  firstGeoId--;
-
-    cout <<"last geo Id: " << lastGeoId <<endl;
-  lastGeoId++;
-    cout <<"looking at cluster with first geo: " << firstGeoId <<" and last: " << lastGeoId <<endl;
-  for(int iGeo=firstGeoId;iGeo>(firstGeoId-(chargeEven+1)*numAdditionalStrips);iGeo--)
+      stripWeightMap_t::iterator itFirstStrip=strips.begin();
+      stripWeightMap_t::reverse_iterator itLastStrip=strips.rbegin();
+      Int_t firstGeoId=itFirstStrip->first->getGeoId();
+      Int_t lastGeoId=itLastStrip->first->getGeoId();
+      StFgtGeom::getPhysicalCoordinate(firstGeoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+      //lets assume that the strip exist, since it is part of the cluster
+      Int_t clusterQuad=quadrant;
+      Int_t clusterLayer=layer;
+      Int_t clusterDisk=disc;
+      //      cout <<" looking at disk: " << disc <<endl;
+      Int_t rdo, arm, apv, chan; 
+      firstGeoId--;
+      
+      //      cout <<"last geo Id: " << lastGeoId <<endl;
+      lastGeoId++;
+      //      cout <<"looking at cluster with first geo: " << firstGeoId <<" and last: " << lastGeoId <<endl;
+      for(int iGeo=firstGeoId;iGeo>(firstGeoId-(chargeEven+1)*numAdditionalStrips);iGeo--)
     {
       Int_t ret=StFgtGeom::getPhysicalCoordinate(iGeo,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
+      ///      cout <<"disc: " <<disc << endl;
       if(ret!=kFgtError)
 	{
 	  if(disc==clusterDisk&&layer==clusterLayer&&quadrant==clusterQuad)
 	    {
+	      for( StSPtrVecFgtStripIterator it=allStrips.getStripVec().begin();it!=allStrips.getStripVec().end();++it)
+		{
+		  if((*it)->getGeoId()==iGeo)
+		    {
+		      (*it)->setClusterSeedType(kFgtNextToCluster);
+		    }
+		  
+		}
+	      /////////////doesn't work because of the implementation of the getStrip, returning invalid pointer
+	      /////probably not updated after sortByGeoId....
+	      /*
 	      if(mDb)
 		{
 		  mDb->getElecCoordFromGeoId(iGeo, rdo,arm,apv,chan);
 		  Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
 		  StFgtStrip* stripPtr = allStrips.getStrip( elecId );
+		  if(elecId>=kFgtNumElecIds)
+		    cout <<"wrong elec id!!!!!!!!!!!!!!" << endl;
 		  //existed data
 		  if(!stripPtr)
-		    cout <<"no Strip!!!  " <<endl; //shouldn't happen
+		  cout <<"no Strip!!!  " <<endl;
+ //shouldn't happen
 		  if(stripPtr->getGeoId()>=0)
 		  {
-		    cout <<"read geo id: " << stripPtr->getGeoId() <<endl;
-		    stripPtr->setClusterSeedType(kFgtNextToCluster);
-		    cout <<"added geo: " << iGeo <<endl;
+		    //		    cout <<"read geo id: " << stripPtr->getGeoId() <<endl;
+		    //		    cout <<" the pointer is: " << stripPtr <<endl;
+
+		    //	    stripPtr->setClusterSeedType(kFgtNextToCluster);
+		    //		    cout <<"added geo: " << iGeo <<endl;
 		  }
 		}
 	      else
 		{
 		  //		  cout <<"no db! " <<endl;
 		}
+	      */
+
 	    }
 	}
     }
@@ -571,29 +595,47 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollect
 	{
 	  if(disc==clusterDisk&&layer==clusterLayer&&quadrant==clusterQuad)
 	    {
+
+	      for( StSPtrVecFgtStripIterator it=allStrips.getStripVec().begin();it!=allStrips.getStripVec().end();++it)
+		{
+		  if((*it)->getGeoId()==iGeo)
+		    {
+		      //			  cout <<"from vec: "<< (*it) <<endl;
+			    (*it)->setClusterSeedType(kFgtNextToCluster);
+		    }
+		  
+		}
+
+	      ///////////
+	      /*
 	      if(mDb)
 		{
 		  cout <<"got db " <<endl;
 		  mDb->getElecCoordFromGeoId(iGeo, rdo,arm,apv,chan);
 		  Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
+		  if(elecId>=kFgtNumElecIds)
+		    cout <<"wrong elec id!!!!!!!!!!!!!!" << endl;
 		  StFgtStrip* stripPtr = allStrips.getStrip( elecId );
 		  //existed data
 		  if(!stripPtr)
 		    cout <<"no Strip!!!  " <<endl; //shouldn't happen
 		  if(stripPtr->getGeoId()>=0)
 		    {
-		    cout <<"read geo id: " << stripPtr->getGeoId() <<endl;
+		      cout <<"read geo id: " << stripPtr->getGeoId() <<endl;
 		      stripPtr->setClusterSeedType(kFgtNextToCluster);
-		     	      cout <<"added geo: " << iGeo <<endl;
+		      cout <<"added geo: " << iGeo <<endl;
 		    }
 		}
+	      */
+	      ////////
+
 	    }
 	}
     }
     }
 
 
-
+//  cout <<"end fill.." <<endl;
 }/////end of fill clusterinfo
 
 
