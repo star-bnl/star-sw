@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.22 2013/02/16 01:25:10 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.23 2013/02/20 00:26:59 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.23  2013/02/20 00:26:59  perev
+ * remove deleteing Emc data in fillEvent()
+ *
  * Revision 1.22  2013/02/16 01:25:10  perev
  * fix double count in nallhits
  *
@@ -795,7 +798,7 @@ void StvStEventFiller::fillEvent()
   StEventHelper::Remove(mEvent,"StSPtrVecPrimaryVertex");
 
 /////////////?????????? Bad HACK ??????????????????
-  StEventHelper::Remove(mEvent,"Emc");
+///  StEventHelper::Remove(mEvent,"Emc");
   StEventHelper::Remove(mEvent,"Tof");
   StEventHelper::Remove(mEvent,"Track");
   StEventHelper::Remove(mEvent,"Vertex");
