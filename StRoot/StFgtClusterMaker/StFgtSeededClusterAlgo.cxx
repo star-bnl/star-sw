@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.25 2013/02/20 01:32:27 avossen Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.26 2013/02/20 02:18:19 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.26  2013/02/20 02:18:19  avossen
+//  *** empty log message ***
+//
 //  Revision 1.25  2013/02/20 01:32:27  avossen
 //  added n strips before and after cluster
 //
@@ -515,7 +518,8 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollect
   
   ////now also add strips on both sides of the cluster:
 
-
+  if(false)
+    {
   stripWeightMap_t::iterator itFirstStrip=strips.begin();
   stripWeightMap_t::reverse_iterator itLastStrip=strips.rbegin();
   Int_t firstGeoId=itFirstStrip->first->getGeoId();
@@ -528,9 +532,9 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollect
   Int_t rdo, arm, apv, chan; 
   firstGeoId--;
 
-  //  cout <<"last geo Id: " << lastGeoId <<endl;
+    cout <<"last geo Id: " << lastGeoId <<endl;
   lastGeoId++;
-  //  cout <<"looking at cluster with first geo: " << firstGeoId <<" and last: " << lastGeoId <<endl;
+    cout <<"looking at cluster with first geo: " << firstGeoId <<" and last: " << lastGeoId <<endl;
   for(int iGeo=firstGeoId;iGeo>(firstGeoId-(chargeEven+1)*numAdditionalStrips);iGeo--)
     {
       Int_t ret=StFgtGeom::getPhysicalCoordinate(iGeo,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
@@ -544,10 +548,13 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollect
 		  Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
 		  StFgtStrip* stripPtr = allStrips.getStrip( elecId );
 		  //existed data
+		  if(!stripPtr)
+		    cout <<"no Strip!!!  " <<endl; //shouldn't happen
 		  if(stripPtr->getGeoId()>=0)
 		  {
+		    cout <<"read geo id: " << stripPtr->getGeoId() <<endl;
 		    stripPtr->setClusterSeedType(kFgtNextToCluster);
-		    //		    cout <<"added geo: " << iGeo <<endl;
+		    cout <<"added geo: " << iGeo <<endl;
 		  }
 		}
 	      else
@@ -566,20 +573,24 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollect
 	    {
 	      if(mDb)
 		{
+		  cout <<"got db " <<endl;
 		  mDb->getElecCoordFromGeoId(iGeo, rdo,arm,apv,chan);
 		  Int_t elecId = StFgtGeom::encodeElectronicId( rdo, arm, apv, chan );
 		  StFgtStrip* stripPtr = allStrips.getStrip( elecId );
 		  //existed data
+		  if(!stripPtr)
+		    cout <<"no Strip!!!  " <<endl; //shouldn't happen
 		  if(stripPtr->getGeoId()>=0)
 		    {
+		    cout <<"read geo id: " << stripPtr->getGeoId() <<endl;
 		      stripPtr->setClusterSeedType(kFgtNextToCluster);
-		      //		      cout <<"added geo: " << iGeo <<endl;
+		     	      cout <<"added geo: " << iGeo <<endl;
 		    }
 		}
 	    }
 	}
     }
-
+    }
 
 
 
