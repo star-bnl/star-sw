@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TUnixTime.cxx,v 1.3 2007/06/06 04:01:12 perev Exp $
+ * $Id: TUnixTime.cxx,v 1.4 2013/02/20 01:59:13 perev Exp $
  *
  ***************************************************************************
  *
@@ -18,7 +18,7 @@
 
 ClassImp(TUnixTime)
 //______________________________________________________________________________
-TUnixTime::TUnixTime(UInt_t utime)
+TUnixTime::TUnixTime(ULong_t utime)
 {
   fUTime = utime;
   if (!fUTime) fUTime = time(0);
@@ -147,7 +147,7 @@ void TUnixTime::SetGTime(const TDatime &gmt)
   SetGTime(gmt.GetDate(), gmt.GetTime());
 }
 //______________________________________________________________________________
-UInt_t TUnixTime::Convert(const TDatime &dt,int gmt)
+ULong_t TUnixTime::Convert(const TDatime &dt,int gmt)
 {
    TUnixTime ux;
    if (gmt) {ux.SetGTime(dt);}
