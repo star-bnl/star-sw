@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.13 2013/02/16 01:14:05 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.14 2013/02/20 23:20:23 perev Exp $
 /*!
 \author V Perev 2010  
 
@@ -147,8 +147,7 @@ StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath)
      if (dang> 180) dang-=360;
      if (dang<-180) dang+=360;
      if (fabs(dang)>16) printf("dang = %g\n",dang);
-  // assert(fabs(dang)<16);
-     assert(fabs(dang)<22);
+     assert(fabs(dang)<31);
    }
    stiHit->set(hp,stHit,xyz);
    return stiHit;
