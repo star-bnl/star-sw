@@ -166,7 +166,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
   //  cout <<"seting statis"<<endl;
   hContents.hApvCorpt->SetStats(true);
   hContents.hEventSize=new TH1F("FGT Event Size","FGT Event Size",100,-0.5,6000+0.5);
-  hContents.hEventSize->GetXaxis()->SetTitle("Event size [kB]");
+  hContents.hEventSize->GetXaxis()->SetTitle("Unpacked Event size [kB]");
   hContents.hEventSize->SetFillColor(kYellow-9);
   hContents.hEventSize->SetStats(true);
   //
