@@ -183,9 +183,12 @@ Int_t StFgtRawDaqReader::Make() {
 	dd = mRdr->det("fgt")->get("adc");
       }else if(mDataType==2){
 	dd = mRdr->det("fgt")->get("zs");
+      }else if(mDataType==3){
+	dd = mRdr->det("fgt")->get("zs");
+	if(!dd) dd = mRdr->det("fgt")->get("adc");
       }
 
-      int ntimebin=0;
+      static int ntimebin=15;
       if(dd && dd->meta){
 	apv_meta_t *meta = (apv_meta_t *)dd->meta;
 	for(int r=1;r<=FGT_RDO_COU;r++) {
@@ -322,8 +325,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.14 2013/02/06 18:10:54 akio Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.15 2013/02/21 20:30:26 akio Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.15  2013/02/21 20:30:26  akio
+ * added ZS data first option
+ *
  * Revision 1.14  2013/02/06 18:10:54  akio
  * getting date & time from data
  *
