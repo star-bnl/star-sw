@@ -1,7 +1,9 @@
 This is FGT offline chain monitor README
+(http://www.star.bnl.gov/cgi-bin/protected/cvsweb.cgi/StRoot/StFgtPool/StFgtQAMaker/macros/README)
 
 How to setup:
 
+  ssh -t -A -Y stargw.starp.bnl.gov ssh -A -Y onl01
   klog
   cd <your working dir>
   cvs co StRoot/StFgtPool/StFgtQAMaker
@@ -11,9 +13,16 @@ How to setup:
   ln -s /onlineweb/www/fgtStatus/<your web dir> www
   mv links.php www/
 
+  Webpage will be at http://online.star.bnl.gov/fgtStatus/<your web dir>
+
+  You may need to adjust in makepage.pl at near top:
+    $year = 14   
+    $start = `date -d "Feb 6 00:00:00" +%s`; $start=~s/\n//g;
+  for new RHIC run.
+
 How to run : 
 
-  run#s(14046056/110) and year/date(14046) need to be ones available on /evp/a
+  run#s(14046056/110) and year/date(14046) need to be ones available on eventpool (/evp/a).
   First you need a good pedestal run to create ped & status, then analyze physics run.
          
   runs 14046                              make runlist 14046/run.txt and fgtrun.txt from DB
