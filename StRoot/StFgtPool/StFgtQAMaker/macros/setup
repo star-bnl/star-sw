@@ -1,9 +1,14 @@
 cp StRoot/StFgtPool/StFgtQAMaker/macros/* .
 
+\rm crontab.txt
+\rm makeplot
+\rm makepage.pl
+
 sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macros/crontab.txt > crontab.txt
 sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macros/makeplot > makeplot
-chmod +x makeplot
 sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macros/makepage.pl > makepage.pl
+
+chmod +x makeplot
 chmod +x makepage.pl
 
 cp $STAR/.$STAR_HOST_SYS/include/fgtPedestal.h .

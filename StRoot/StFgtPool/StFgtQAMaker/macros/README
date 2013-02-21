@@ -5,7 +5,7 @@ How to setup:
   klog
   cd <your working dir>
   cvs co StRoot/StFgtPool/StFgtQAMaker
-  StRoot/StFgtPool/StFgtQAMaker/macro/setup
+  source StRoot/StFgtPool/StFgtQAMaker/macros/setup
   ln -s /onlineweb/www/fgtStatus/<your web dir> www
   mv links.php www/
 
