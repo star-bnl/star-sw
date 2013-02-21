@@ -15,19 +15,20 @@
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
 
-#include "StRoot/StEEmcPool/./EEmcTreeContainers/EEmcEnergy.h"
-#include "StRoot/StEEmcPool/./EEmcTreeContainers/EEmcSmdCluster.h"
-#include "StRoot/StEEmcPool/./EEmcTreeContainers/EEmcHit.h"
-#include "StRoot/StEEmcPool/./EEmcTreeContainers/EEmcParticleCandidate.h"
-#include "StRoot/StEEmcPool/./EEmcTreeContainers/EEmc2ParticleCandidate.h"
-#include "StRoot/StEEmcPool/./EEmcTreeContainers/TrigSet.h"
+#include "StRoot/StEEmcPool/EEmcTreeContainers/EEmcEnergy.h"
+#include "StRoot/StEEmcPool/EEmcTreeContainers/EEmcSmdCluster.h"
+#include "StRoot/StEEmcPool/EEmcTreeContainers/EEmcHit.h"
+#include "StRoot/StEEmcPool/EEmcTreeContainers/EEmcParticleCandidate.h"
+#include "StRoot/StEEmcPool/EEmcTreeContainers/EEmc2ParticleCandidate.h"
+#include "StRoot/StEEmcPool/EEmcTreeContainers/TrigSet.h"
 
-#include "StRoot/StEEmcPool/./StEEmcTreeMaker/StSpinInfoMaker.h"
-#include "StRoot/StEEmcPool/./EEmcTreeContainers/StSpinInfo.h"
-#include "StRoot/StEEmcPool/./StEEmcHitMaker/StEEmcHitMaker.h"
-#include "StRoot/StEEmcPool/./StEEmcHitMaker/StESMDClustersPerSector.h"
+#include "StRoot/StEEmcPool/StEEmcTreeMaker/StSpinInfoMaker.h"
+#include "StRoot/StEEmcPool/EEmcTreeContainers/StSpinInfo.h"
+#include "StRoot/StEEmcPool/StEEmcHitMaker/StEEmcHitMaker.h"
+#include "StRoot/StEEmcPool/StEEmcHitMaker/StESMDClustersPerSector.h"
 
 #include "StRoot/StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
@@ -522,20 +523,32 @@ Int_t StEEmcTreeMaker_t::fillPart3(){
          vertexPtr->SetX( 0 );
          vertexPtr->SetY( 0 );
 
-         if( bbcTimeBin <= 5 )
-            vertexPtr->SetZ( 41.59 );
+         if( bbcTimeBin <= 2 )
+            vertexPtr->SetZ( 40.1377 );
+         else if( bbcTimeBin == 3 )
+            vertexPtr->SetZ( 54.1733 );
+         else if( bbcTimeBin == 4 )
+            vertexPtr->SetZ( 75.2597 );
+         else if( bbcTimeBin == 5 )
+            vertexPtr->SetZ( 66.9572 );
          else if( bbcTimeBin == 6 )
-            vertexPtr->SetZ( 24.16 );
+            vertexPtr->SetZ( 38.324 );
          else if( bbcTimeBin == 7 )
-            vertexPtr->SetZ( -3.086 );
+            vertexPtr->SetZ( 5.83516 );
          else if( bbcTimeBin == 8 )
-            vertexPtr->SetZ( -33.76 );
+            vertexPtr->SetZ( -27.6028 );
          else if( bbcTimeBin == 9 )
-            vertexPtr->SetZ( -65.12 );
+            vertexPtr->SetZ( -60.6408 );
          else if( bbcTimeBin == 10 )
-            vertexPtr->SetZ( -95.29 );
-         else 
-            vertexPtr->SetZ( -109.56 );
+            vertexPtr->SetZ( -91.4053 );
+         else if( bbcTimeBin == 11 )
+            vertexPtr->SetZ( -105.579 );
+         else if( bbcTimeBin == 12 )
+            vertexPtr->SetZ( -95.7182 );
+         else if( bbcTimeBin == 13 )
+            vertexPtr->SetZ( -85.9305 );
+         else if( bbcTimeBin >= 14 )
+            vertexPtr->SetZ( -87.5347 );
       };
 
       EEmcHit_t *hitPtr1 = 0;
@@ -854,8 +867,11 @@ void StEEmcTreeMaker_t::copyStEEmcHitToEEmcHit( const EEmcEnergy_t& eemcEnergy, 
 ClassImp( StEEmcTreeMaker_t );
 
 /*
- * $Id: StEEmcTreeMaker.cxx,v 1.2 2013/02/21 21:28:50 sgliske Exp $
+ * $Id: StEEmcTreeMaker.cxx,v 1.3 2013/02/21 21:57:12 sgliske Exp $
  * $Log: StEEmcTreeMaker.cxx,v $
+ * Revision 1.3  2013/02/21 21:57:12  sgliske
+ * updated values of vertexZ for BBC time bins (affects part 3)
+ *
  * Revision 1.2  2013/02/21 21:28:50  sgliske
  * added vertex rank
  *
