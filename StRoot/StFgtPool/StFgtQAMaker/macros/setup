@@ -1,10 +1,9 @@
-cvs co StRoot/StFgtPool/StFgtQAMaker
-cp StRoot/StFgtPool/StFgtQAMaker/macro/* .
+cp StRoot/StFgtPool/StFgtQAMaker/macros/* .
 
-sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macro/crontab.txt > crontab.txt
-sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macro/makeplot > makeplot
+sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macros/crontab.txt > crontab.txt
+sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macros/makeplot > makeplot
 chmod +x makeplot
-sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macro/makepage.pl > makepage.pl
+sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macros/makepage.pl > makepage.pl
 chmod +x makepage.pl
 
 cp $STAR/.$STAR_HOST_SYS/include/fgtPedestal.h .
