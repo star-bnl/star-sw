@@ -1,4 +1,4 @@
-<Document file="StarVMC/Geometry/Compat/xgeometry.xml">
+<Document file="StarVMC/Geometry/Compat/xgeometry.xml">  
 
 <Export language="Mortran">
 <Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
@@ -13,9 +13,12 @@ call geometry
 
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.14 2013/02/06 22:06:39 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.15 2013/02/21 22:50:58 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.15  2013/02/21 22:50:58  jwebb
+  Force xgeometry.so recreation.
+
   Revision 1.14  2013/02/06 22:06:39  jwebb
   Force xgeometry recompilation.
 
