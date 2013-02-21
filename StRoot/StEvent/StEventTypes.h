@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.37 2012/11/07 21:37:54 fisyak Exp $
+ * $Id: StEventTypes.h,v 2.38 2013/02/21 00:24:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.38  2013/02/21 00:24:14  ullrich
+ * Added StMtdPidTraits.
+ *
  * Revision 2.37  2012/11/07 21:37:54  fisyak
  * Add includes for Fgt
  *
@@ -174,6 +177,7 @@
 #include "StMtdHit.h"
 #include "StMtdRawHit.h"
 #include "StMtdHeader.h"
+#include "StMtdPidTraits.h"
 #include "StKinkVertex.h"
 #include "StL0Trigger.h"
 #include "StL1Trigger.h"
