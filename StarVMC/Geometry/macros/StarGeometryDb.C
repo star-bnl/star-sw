@@ -1209,6 +1209,8 @@ void y2013()
   };
 
 
+
+
   geom.select = "y2013"; {
     // ================================================ 
     geom.caveFlag = "CAVE04";  geom.caveStat = 1;
@@ -1237,21 +1239,44 @@ void y2013()
     geom.dtubFlag = "DTUB01";  geom.dtubStat = 1;
     // ================================================ 
     //
-    setTitle("Upgrade studies with 6 complete FGT disks");
+    setTitle("Y2013 baseline");
     //
     // ================================================ 
     geom.fill();
   };
 
+  /// Y2013 Baseline Configuration ///////////////////////////////
+  geom.select = "y2013_1"; {
+    setTitle("Y2013 baseline");
+    geom.fill();
+  }
+  geom.select = "y2013_2"; {
+    setTitle("Y2013 baseline sans PIXL");
+    geom.pxstStat = 0;
+    geom.pixlStat = 0;
+    geom.dtubStat = 0;
+    geom.fill();
+  }
+  geom.Use("select","y2013"); // Back to baseline
 
-  geom.select = "y2013x"; {
+  
+
+  /// Y2013 Asymptotic Configuration /////////////////////////////
+  geom.select = "y2013_1x"; {
     // Inherits y2013 and
     geom.tpceFlag = "TPCE31"; geom.tpceStat = 1;
     geom.tpcRefSys = true; // Create TPC reference system
     setTitle("Asymptotic y2013");
     geom.fill();
   }
-  
+  geom.select = "y2013_2x"; {
+    setTitle("Asymptotic y2013 sans PIXL");
+    geom.pxstStat = 0;
+    geom.pixlStat = 0;
+    geom.dtubStat = 0;
+    geom.fill();
+  }
+  geom.Use("select","y2013_1x");  // Restore asymptotic values  
 
 }
 

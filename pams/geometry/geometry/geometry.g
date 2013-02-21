@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.256 2013/02/06 21:58:09 jwebb Exp $
+* $Id: geometry.g,v 1.257 2013/02/21 22:51:24 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.257  2013/02/21 22:51:24  jwebb
+* Defined pixel detector in and out geometries.
+*
 * Revision 1.256  2013/02/06 21:58:09  jwebb
 * Corrections to y2013 geometry tag.  Addition of y2012b geometry tag to
 * properly include the MTD.
@@ -2051,11 +2054,20 @@ REPLACE [exe y2013;] with ["Y2013 first cut geometry";
     exe DTUB01;      "DTUB";
 ]
 
+""" Configuration 1 baseline, 2 without pixl """
+REPLACE [exe y2013_1;] with ["Y2013 first cut"          ; exe Y2013; ];
+REPLACE [exe y2013_2;] with ["Y2013 first cut sans PIXL"; exe Y2013;  PIXL=off; PXST=off; ];
+
+
+
 REPLACE [exe y2013x;] with [                                      "Y2013 asymptotic";
     EXE y2013;    "first cut 2013";
     EXE MAGPv1;   "version 1 of the magnet";
     EXE TPCE31;   "version 3.1 of the TPC (increase deadzone and integration time)";
 ]
+REPLACE [exe y2013_1x;] with [ "Y2013 asymptotic"; EXE Y2013x; ]
+REPLACE [exe y2013_2x;] with [ "Y2013 asymptotic sans PIXL"; EXE y2013x; PIXL=off; PXST=off; ]
+
 
 c ===============================================================================
 c ===============================================================================
@@ -2919,6 +2931,22 @@ If LL>0
   Case y2013x { y2013x : y2013 asymptotic;
                   Geom = 'y2013x  ';
                   exe y2013x; }
+
+  Case Y2013_1 { Y2013_1 : Y2013 baseline; 
+                  Geom = 'y2013_1 ';
+                  exe y2013_1; }
+
+  Case Y2013_2 { Y2013_2 : Y2013 baseline sans PIXL; 
+                  Geom = 'y2013_2; ';
+                  exe y2013_2; }
+
+  Case Y2013_1x { Y2013_1x : Y2013 asymptotic; 
+                  Geom = 'y2013_1x';
+                  exe y2013_1x; }
+
+  Case Y2013_2x { Y2013_2x : Y2013 asymptotic sans PIXL; 
+                  Geom = 'y2013_2x; ';
+                  exe y2013_2x; }
 
   Case dev14 { dev14 : y2014 studies;
                  Geom = 'dev14   ';
