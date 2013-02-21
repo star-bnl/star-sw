@@ -33,9 +33,9 @@
 
 StEEmcTreeMaker_t::StEEmcTreeMaker_t( const Char_t *myName ) : StMaker( myName ), mNumEvents(0), mNumPart1EventsWritten(0), mMaxNumEvents(-1),
                                                                mSpinInfoIO(1), mEventHddrIO(1),
-                                                               mDoMakePairs(1), mHTthres( 2 ), mTPthres( 4 ),
+                                                               mDoMakePairs(1), mNumTowers( 0 ), mHTthres( 2 ), mTPthres( 4 ),
                                                                mEventHddr(0), mSpinInfo(0), mEEmcEnergy(0), 
-                                                               mBbcOnlineTimeDiff(0), mVertex(0), mHrdTrigSet(0), mSftTrigSet(0), mClusArr(0), mHitArr(0),
+                                                               mBbcOnlineTimeDiff(0), mVertexRank(-999), mVertex(0), mHrdTrigSet(0), mSftTrigSet(0), mClusArr(0), mHitArr(0),
                                                                mParticleArr1(0), mParticleArr2(0), mET0ht(0), mET0tp(0),
                                                                mSpinInfoMkr(0), mEnMkr(0), mHitMkr(0) {
    for( Int_t i=0; i<NUM_TREE_PARTS; ++i ){
@@ -114,7 +114,8 @@ Int_t StEEmcTreeMaker_t::Init(){
             mEEmcEnergy = 0;
             mTree[PART_1]->SetBranchAddress( "eemcEnergy", &mEEmcEnergy );
             mTree[PART_1]->SetBranchAddress( "vertex",     &mVertex );
-            mTree[PART_1]->SetBranchAddress( "bbcOnlineTimeDiff", &mBbcOnlineTimeDiff );
+            mTree[PART_1]->SetBranchAddress( "vertexRank",         &mVertexRank );
+            mTree[PART_1]->SetBranchAddress( "bbcOnlineTimeDiff",  &mBbcOnlineTimeDiff );
             mTree[PART_1]->SetBranchAddress( "hardwareTriggers",   &mHrdTrigSet );
             mTree[PART_1]->SetBranchAddress( "softwareTriggers",   &mSftTrigSet );
 
@@ -162,7 +163,8 @@ Int_t StEEmcTreeMaker_t::Init(){
             if( mSpinInfoIO )
                mTree[PART_1]->Branch( "spinInfo", &mSpinInfo );
 
-            mTree[PART_1]->Branch( "vertex", &mVertex );
+            mTree[PART_1]->Branch( "vertex",     &mVertex );
+            mTree[PART_1]->Branch( "vertexRank", &mVertexRank );
 
             mTree[PART_1]->Branch( "hardwareTriggers", &mHrdTrigSet, 32000, 1 );
             mTree[PART_1]->Branch( "softwareTriggers", &mSftTrigSet, 32000, 1 );
@@ -290,7 +292,7 @@ Int_t StEEmcTreeMaker_t::Make(){
          if( mTreeRdr ){
             mEEmcEnergy = mTreeRdr->getEEmcEnergy();
          } else if ( mEnMkr ){
-            mEnMkr->getEEmcEnergyPtr();
+            mEEmcEnergy = mEnMkr->getEEmcEnergyPtr();
          } else {
             LOG_FATAL << "Cannot find valid pointer for EEmcEnergy_t" << endm;
             ierr = kStFatal;
@@ -342,7 +344,7 @@ Int_t StEEmcTreeMaker_t::fillPart1(){
    assert( mEEmcEnergy );
 
    // check if passes the simple filter
-   if( mEEmcEnergy->nTowers > 0 ){
+   if( mEEmcEnergy->nTowers > mNumTowers ){
 
       // fill the hardware trigger
       const StMuDst* muDst = (const StMuDst*)GetInputDS( "MuDst" );
@@ -385,12 +387,16 @@ Int_t StEEmcTreeMaker_t::fillPart1(){
       if( !ierr ){
          const StMuDst* muDst = (const StMuDst*)GetInputDS( "MuDst" );
          mVertex->SetXYZ( -999, -999, -999 );
+         mVertexRank = -999;
+
          if( muDst ){
             StMuEvent *event = muDst->event();
 
             if( event ){
                const StThreeVectorF& v = event->primaryVertexPosition();
                mVertex->SetXYZ( v.x(), v.y(), v.z() );
+               mVertexRank = muDst->primaryVertex()->ranking();
+
 #ifdef DEBUG
                cout << "vertex at " << v.x() << ' ' << v.y() << ' ' << v.z() << " | " << mVertex->X() << ' ' << mVertex->Y() << ' ' << mVertex->Z() << endl;
 #endif
@@ -646,6 +652,7 @@ void StEEmcTreeMaker_t::Clear(Option_t *opts ){
          mEEmcEnergy->Clear();
       if( mVertex )
          mVertex->SetXYZ( -999, -999, -999 );
+      mVertexRank = -999;
       mBbcOnlineTimeDiff = 0;
    };
 
@@ -847,8 +854,11 @@ void StEEmcTreeMaker_t::copyStEEmcHitToEEmcHit( const EEmcEnergy_t& eemcEnergy, 
 ClassImp( StEEmcTreeMaker_t );
 
 /*
- * $Id: StEEmcTreeMaker.cxx,v 1.1 2012/11/26 19:06:10 sgliske Exp $
+ * $Id: StEEmcTreeMaker.cxx,v 1.2 2013/02/21 21:28:50 sgliske Exp $
  * $Log: StEEmcTreeMaker.cxx,v $
+ * Revision 1.2  2013/02/21 21:28:50  sgliske
+ * added vertex rank
+ *
  * Revision 1.1  2012/11/26 19:06:10  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcTreeMaker to StRoot/StEEmcPool/StEEmcTreeMaker
  *
