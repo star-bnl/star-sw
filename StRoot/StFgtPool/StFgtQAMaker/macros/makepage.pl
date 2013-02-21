@@ -2,8 +2,9 @@
 
 $anadir="/ldaphome/akio/fgt";
 $datadir="/evp/a";
-
 $year=14;
+$start = `date -d "Feb 6 00:00:00" +%s`; $start=~s/\n//g;
+
 $yday=0;
 $day=0;
 $debug=0;
@@ -41,7 +42,6 @@ $dtoday = ` date +"%Y %b %d %a"`; $dtoday=~s/\n//g;
 $itoday = ` date +%j`;            $itoday=~s/\n//g;          
 if($debug) {print "today = $today $dtoday $itoday\n";}
 
-$start = `date -d "Feb 6 00:00:00" +%s`; $start=~s/\n//g;
 $dstart=`date -d \"UTC 1970-01-01 $start secs\" +"%Y %b %d %a"`;  $dstart=~s/\n//g;
 $istart=`date -d \"UTC 1970-01-01 $start secs\" +%j`;  $istart=~s/\n//g;
 if($debug) {print "start = $start $dstart $istart\n";}
@@ -143,9 +143,10 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $length = $end - $begin;
 	    $ago = $now - $end;
 	    if($end==0){$length=-1; $ago=-1;}
-	    if($config eq "pedAsPhys_tcd_only") {$type="pedestal";}
+	    if($type eq "pedestal") {next;}
+	    if($config eq "pedAsPhys_tcd_only" || $config eq " fgtPedestals") {$type="pedestal";}
 	    
-	    if($donefile==0 && $ago>60 && ($type eq "pedestal" || $length>180) && $run>=14046117 ) {
+	    if($donefile==0 && $ago>60 && ($type eq "pedestal" || $length>180) ) {
 		
 		$evpcount=0;
 		if(-d "$datadir/$run") {
