@@ -1,0 +1,67 @@
+#!/bin/csh 
+
+set run=$1
+set dir=$2
+set type=$3
+
+echo makeplot $run $dir $type
+
+stardev
+cd /ldaphome/akio/fgt
+
+if ( "$type" == "pedestal" ) then
+  set ped=1
+  echo This is pedestal run
+else
+  set ped=0
+  echo This is physics run
+endif
+
+if ( ! -e $dir ) then 
+    mkdir $dir
+endif
+if ( ! -e www/$dir ) then 
+    mkdir www/$dir
+endif
+if ( ! -e $dir/ped ) then 
+    mkdir $dir/ped
+endif
+if ( ! -e $dir/status ) then 
+    mkdir $dir/status
+endif
+if ( ! -e $dir/log ) then 
+    mkdir $dir/log
+endif
+if ( ! -e $dir/condor ) then 
+    mkdir $dir/condor
+endif
+if ( -e $dir/log/$run.log ) then 
+    \rm $dir/log/$run.log
+endif
+
+echo root4star -q runqa.C"($run,$dir,$ped)"
+root4star -q runqa.C"($run,$dir,$ped)" > $dir/log/$run.log
+
+if ( "$type" == "pedestal" ) then
+  if ( -e $dir/ped/ped.$run.txt ) then	
+    if (-e ped.txt) then
+      \rm ped.txt
+    endif
+    ln -s $dir/ped/ped.$run.txt ped.txt
+  endif
+  if ( -e $dir/status/status.$run.txt ) then	
+    if (-e status.txt) then
+      \rm status.txt	
+    endif
+    ln -s $dir/status/status.$run.txt status.txt
+  endif
+  echo root -q makepedplot.C"($run,$dir)"
+  root -q makepedplot.C"($run,$dir)"
+else
+  echo root -q makeqaplot.C"($run,0,1,$dir)"
+  root -q makeqaplot.C"($run,0,1,$dir)"
+endif
+
+\mv $dir/*${run}*.png www/$dir/	
+\mv $dir/*${run}*.pdf www/$dir/	
+makepage.pl $dir
