@@ -1,3 +1,10 @@
+cvs co StRoot/StFgtPool/StFgtRawDaqReader
+cvs co StRoot/StFgtPool/StFgyPedMaker
+cvs co StRoot/StFgtPool/StFgtStatusMaker
+cvs co StRoot/StFgtPool/StFgtClusterTools
+cvs co StRoot/StFgtPool/StFgtAlignmentMaker
+cp -r /ldaphome/akio/fgt/StRoot/StFgtPointMaker StRoot/
+
 cp StRoot/StFgtPool/StFgtQAMaker/macros/* .
 
 \rm crontab.txt
@@ -10,9 +17,9 @@ sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macros/makepage.
 
 chmod +x makeplot
 chmod +x makepage.pl
-
+ 
 cp $STAR/.$STAR_HOST_SYS/include/fgtPedestal.h .
-cp $STAR/.$STAR_HOST_SYS/include/fgtSattus.h .
+cp $STAR/.$STAR_HOST_SYS/include/fgtStatus.h .
 
 stardev
 cons

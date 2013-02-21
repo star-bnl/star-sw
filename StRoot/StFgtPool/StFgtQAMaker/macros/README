@@ -6,27 +6,53 @@ How to setup:
   cd <your working dir>
   cvs co StRoot/StFgtPool/StFgtQAMaker
   source StRoot/StFgtPool/StFgtQAMaker/macros/setup
+ 
+  mkdir /onlineweb/www/fgtStatus/<your web dir>
   ln -s /onlineweb/www/fgtStatus/<your web dir> www
   mv links.php www/
 
-How to run:
+How to run : 
+
+  run#s(14046056/110) and year/date(14046) need to be ones available on /evp/a
+  First you need a good pedestal run to create ped & status, then analyze physics run.
+         
   runs 14046                              make runlist 14046/run.txt and fgtrun.txt from DB
 
-  root4star runqa.c"(14046099,0,100)"     runqa.C code with run#, physics (1 or ped) and 100 events
+  root4star runqa.C"(14046056,1)"         runqa.C code with run#, pedestal 
+  root makepedplot.C"(14046059)"          make plots for pedesral runs from ped/status text file created by runqa.C
+   or
+  makeplot 14046059 pedestal              run runqa.C and makepedplot.C, link pedestal.txt and status.txt to new one
 
-  root makeqaplot.C"(14046099,0,1)"       make plots for physics runs from .root file created by runqa.C
-
-  root makepedplot.C"(14046099)"          make plots for pedesral runs from ped/status text file created by runqa.C
-
-  makeplot 14046099 physics               run runqa.C and makeqaplot.C, and copy png and pdf file to web area
-  makeplot 14046099 pedestal              run runqa.C and makepedplot.C, link pedestal.txt and status.txt to new one
+  root4star runqa.C"(14046110,1,100)"     runqa.C code with run#, as physics run, and limit to  100 events
+  root makeqaplot.C"(14046110,0,1)"       make plots for physics runs from .root file created by runqa.C
+   or
+  makeplot 14046110 physics               run runqa.C and makeqaplot.C, and copy png and pdf file to web area
 
   makepage                just make web page for today (not running qa nor making plots)
   makepage 0 submit       make web page for today, and submit makeplot job as needed
   makepage 0 run          make web page for today, and run makeplot as needed
   makepage 14046          make web page for day 14046
 
+  cron                    see if crontab is set
   cron set                setup cron job with crontab.txt
   cron remove             remove cron job
 
-  
+Files generated:
+   www/index.php              main web page listing days
+   www/<yearday>.php          webpage with plots and links for a day
+   www/<yearday>/*.png .pdf   QA plots
+
+   crontab.txt                crontab file to be used... edit this to change cronjob setup
+   pedestal.txt               pedestal file linked to last one in <yearday>/ped/ped.<run>.txt
+   status.txt                 status file linked to last one in <yearday>/statusstatus.<run>.txt
+
+   <yearday>/run.txt          runlist from DB
+   <yearday>/fgtrun.txt       runlist with FGT from DB
+   <yearday>/log/*            log from running QA
+   <yearday>/ped/*            pedestal text files
+   <yearday>/status/*         status text files
+   <yearday>/condor/*         condor files
+   <yearday>/<run>.done       if file exist, it indicated script have done (or is doing) QA, remove this to redo 
+   <yearday>/fgtQA_<run>.root root file containing QA hists
+
+

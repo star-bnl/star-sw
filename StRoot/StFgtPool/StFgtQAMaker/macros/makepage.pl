@@ -126,7 +126,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	
 	$tgt=" onclick=\"openwin(this.href); return false;\"";
 	$siz=" Width=100 ";
-	foreach $run (@revruns){
+	foreach $run (@sortruns){
 	    
 	    $donefile=0;
 	    if(-e "$id/$run.done") {$donefile++;}
