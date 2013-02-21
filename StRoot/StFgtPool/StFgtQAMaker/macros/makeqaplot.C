@@ -133,7 +133,7 @@ void makeqaplot(int run=0, int plt=0, int save=1){
 
   char fname[50];
   if(run==0) {sprintf(fname,"fgtQA.root");}
-  else {sprintf(fname,"%d/fgtQA_%d.root",day,run);}
+  else {sprintf(fname,"%d/fgtQA_%d.root",yearday,run);}
 
   cout << "Opening "<<fname<<endl;
   file=new TFile(fname,"old");
