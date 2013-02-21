@@ -22,7 +22,7 @@ class StFgtCollection;
 
 class StFgtRawDaqReader : public StMaker {
  public: 
-   StFgtRawDaqReader( const Char_t* name = "fgtRawDaqReader", const Char_t *daqFileName = "", const Char_t* dbMkrName = "" );
+   StFgtRawDaqReader( const Char_t* name = "fgtRawDaqReader", const Char_t *daqFileName = "", const Char_t* dbMkrName = "fgtDb" );
    virtual ~StFgtRawDaqReader();
 
    void setFilename( std::string filename );
@@ -38,6 +38,7 @@ class StFgtRawDaqReader : public StMaker {
    void setAlldata()       {mDataType=0;};
    void setNoneZSdataOnly(){mDataType=1;};
    void setZSdataOnly()    {mDataType=2;};
+   void setZSfirst()       {mDataType=3;};
 
    // Get CVS
    virtual const char *GetCVS() const;
@@ -62,15 +63,18 @@ inline void StFgtRawDaqReader::setFilename( std::string filename ){ mDaqFileName
 inline void StFgtRawDaqReader::cutShortEvents( Bool_t doIt ){ mCutShortEvents = doIt; };
 inline void StFgtRawDaqReader::setIsCosmic( Bool_t itIs ){ mIsCosmic = itIs; };
 inline const char *StFgtRawDaqReader::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.4 2013/01/31 20:00:32 akio Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.5 2013/02/21 20:30:26 akio Exp $ built "__DATE__" "__TIME__ ;
    return cvs;
 };
 
 #endif
 
 /*
- * $Id: StFgtRawDaqReader.h,v 1.4 2013/01/31 20:00:32 akio Exp $
+ * $Id: StFgtRawDaqReader.h,v 1.5 2013/02/21 20:30:26 akio Exp $
  * $Log: StFgtRawDaqReader.h,v $
+ * Revision 1.5  2013/02/21 20:30:26  akio
+ * added ZS data first option
+ *
  * Revision 1.4  2013/01/31 20:00:32  akio
  * adding obtaining number of timebins from meta data
  * adding options for zero suppressed data
