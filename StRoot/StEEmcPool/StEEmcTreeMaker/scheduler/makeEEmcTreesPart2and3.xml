@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+
+<job simulateSubmission="false" filesPerHour="3.1" nProcesses="20" >
+
+<!--  Use this xml to make parts 2 and 3, given part 1 has already been computed. -->
+<!--  Edit the "nProcesses" and "filesPerHour" parameters above to adjust how many
+      simultaneous jobs and which queue they'll be in. -->
+
+<command>
+
+<!-- Edit this line to adjust the directory where the trees are stored. -->
+set LOCATION=/star/institutions/anl/sgliske/data/EEmcTrees/2006.Feb21
+
+echo User code starting at
+date
+
+# sleep a random number of seconds, so that multiple instances do not all start at once
+set SEC=`echo 'r=$RANDOM; let "r %= 60"; echo $r' | zsh`
+echo sleeping $SEC sec
+sleep ${SEC}s
+
+<!-- Edit the following line to restrict the number of files considered. -->
+foreach FILE1 ( ${LOCATION}/*EEmcTree_Part1.*root )
+
+     <!--  Edit the following line to adjust for which algorithms trees are made. -->
+     foreach ALGO ( TSIU )
+          set FILE2=${FILE1:t:s/Part1.trig-h.root/Part2.trig-h/}.${ALGO}.root
+          set FILE3=${FILE1:t:s/Part1.trig-h.root/Part3.trig-h/}.${ALGO}.root
+
+          if ( ! -e ${FILE1:h}/$FILE2 ) then
+               echo $FILE1 $FILE2 $FILE3
+               echo In progress $JOBID >>! ${FILE1:h}/$FILE2
+               date >> ${FILE1:h}/$FILE2
+
+               # Make Part 2 and 3 for this ALGO
+               echo root4star -b -q makeEEmcTreePart2and3_${ALGO}.C\(\"${FILE1}\",\"${FILE2}\",\"${FILE3}\"\)
+               time root4star -b -q makeEEmcTreePart2and3_${ALGO}.C\(\"${FILE1}\",\"${FILE2}\",\"${FILE3}\"\)
+
+               echo $FILE2 $FILE3 ${FILE1:h}
+               cp $FILE2 $FILE3 ${FILE1:h}
+          endif
+     end
+end
+
+echo All done at
+date
+
+ls -lh
+
+</command>
+
+<SandBox>
+   <Package>
+      <File>file:./macros/makeEEmcTreePart2and3_*.C</File>
+   </Package>
+</SandBox>
+
+<stdout URL="file:./log/output.$JOBID.stdout.txt" />
+<stderr URL="file:./log/output.$JOBID.stderr.txt" />
+
+<Generator>
+   <Location>./condor</Location>
+</Generator>
+
+</job>
