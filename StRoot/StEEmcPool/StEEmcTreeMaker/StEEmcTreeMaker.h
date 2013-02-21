@@ -77,6 +77,8 @@ class StEEmcTreeMaker_t : public StMaker {
    /// modifiers
    void setTreeStatus( treeTypeEnum_t type, iostatus_t iostatus, const Char_t* fileName );
    void setMaxNumEvents( Int_t maxNum );
+   void setStartingEvent( Int_t num ){ mNumEvents = num; };
+   void setNumTowerThres( UInt_t num );   // for placing a cut on the number of "high" towers
 
    void setSpinInfoMkr( StSpinInfoMaker_t* spinInfoMkr );
    void setEEmcEnergyMkr( StEEmcEnergyMaker_t* eMkr );
@@ -143,6 +145,7 @@ class StEEmcTreeMaker_t : public StMaker {
    Bool_t mDoMakePairs;
 
    /// thresholds for keeping the event
+   UInt_t mNumTowers;
    Double_t mHTthres, mTPthres;
 
    /// The data
@@ -154,6 +157,9 @@ class StEEmcTreeMaker_t : public StMaker {
 
    /// BBC time difference
    UInt_t mBbcOnlineTimeDiff;
+
+   // vertex rank
+   Float_t mVertexRank;
 
    /// the following pointers are owned by the class
    TVector3 *mVertex;
@@ -216,11 +222,16 @@ inline Int_t StEEmcTreeMaker_t::getNumPart1EventsWritten() const { return mNumPa
 
 inline void StEEmcTreeMaker_t::doMakePairs( Bool_t doIt ){ mDoMakePairs = doIt; };
 
+inline void StEEmcTreeMaker_t::setNumTowerThres( UInt_t num ){ mNumTowers = num; };
+
 #endif
 
 /*
- * $Id: StEEmcTreeMaker.h,v 1.1 2012/11/26 19:06:10 sgliske Exp $
+ * $Id: StEEmcTreeMaker.h,v 1.2 2013/02/21 21:28:50 sgliske Exp $
  * $Log: StEEmcTreeMaker.h,v $
+ * Revision 1.2  2013/02/21 21:28:50  sgliske
+ * added vertex rank
+ *
  * Revision 1.1  2012/11/26 19:06:10  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcTreeMaker to StRoot/StEEmcPool/StEEmcTreeMaker
  *
