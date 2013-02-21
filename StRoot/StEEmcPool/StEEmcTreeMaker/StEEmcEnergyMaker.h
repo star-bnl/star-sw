@@ -36,8 +36,9 @@ class StEEmcEnergyMaker_t : public StMaker {
    const EEmcEnergy_t* getEEmcEnergyPtr() const;
 
    // modifiers for parameters
-   void setTowerThres( Float_t thres );
-   void setStripThres( Float_t thres );
+   void setTowerThres( Float_t thres );  // for counting number of "high" towers
+   void setStripThres( Float_t thres );  // for counting number of "high" strips
+   void setNumTowerThres( UInt_t num );   // for placing a cut on the number of "high" towers
 
    /// TODO: write copy constructor and equals operator.  Should not
    /// ever be used anyhow, but for completeness should eventually
@@ -52,6 +53,7 @@ class StEEmcEnergyMaker_t : public StMaker {
    StEEmcA2EMaker *mA2EMkr;
 
    // parameters
+   UInt_t mNumTowers;
    Float_t mTowerThres, mStripThres;
 
  private:
@@ -67,12 +69,16 @@ inline const EEmcEnergy_t* StEEmcEnergyMaker_t::getEEmcEnergyPtr() const { retur
 
 inline void StEEmcEnergyMaker_t::setTowerThres( Float_t thres ){ mTowerThres = thres; };
 inline void StEEmcEnergyMaker_t::setStripThres( Float_t thres ){ mStripThres = thres; };
+inline void StEEmcEnergyMaker_t::setNumTowerThres( UInt_t num ){ mNumTowers = num; };
 
 #endif
 
 /*
- * $Id: StEEmcEnergyMaker.h,v 1.1 2012/11/26 19:06:10 sgliske Exp $
+ * $Id: StEEmcEnergyMaker.h,v 1.2 2013/02/21 21:59:02 sgliske Exp $
  * $Log: StEEmcEnergyMaker.h,v $
+ * Revision 1.2  2013/02/21 21:59:02  sgliske
+ * general update
+ *
  * Revision 1.1  2012/11/26 19:06:10  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcTreeMaker to StRoot/StEEmcPool/StEEmcTreeMaker
  *

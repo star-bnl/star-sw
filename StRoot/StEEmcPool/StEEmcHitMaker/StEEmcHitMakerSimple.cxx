@@ -93,6 +93,9 @@ Int_t StEEmcHitMakerSimple_t::Init(){
    if( ierr )
       LOG_FATAL << "StEEmcHitMakerSimple_t cannot initialize" << endm;
 
+   // initialize finer event number
+   StFinderAlg_t::setEventNum( -1 );
+
    return ierr;
 };
 
@@ -102,7 +105,12 @@ Int_t StEEmcHitMakerSimple_t::Init(){
 Int_t StEEmcHitMakerSimple_t::Make(){
    //LOG_INFO << "==========> " << ClassName() << "::Make(), Event " << GetEventNumber() << endm;
 
-   StFinderAlg_t::setEventNum( GetEventNumber() );
+   Int_t evNum = GetEventNumber();
+   if( evNum == -1 ){
+      evNum = StFinderAlg_t::getEventNum();
+      ++evNum;
+   };
+   StFinderAlg_t::setEventNum( evNum );
 
    // ----------> LOAD DATA <----------
    Int_t ierr = StEEmcHitMaker_t::Make();
@@ -131,7 +139,7 @@ Int_t StEEmcHitMakerSimple_t::Make(){
       //LOG_INFO << "----------> Point Finding <----------" << endm;
 
       if( !ierr )
-         ierr = mPointFinder->find( *mEEmcEnergy, mTowerClusterVec[ TOWER ], mESMDClusterVec, mHitVec );
+         ierr = mPointFinder->find( *mEEmcEnergy, mTowerClusterVec[ TOWER ], mESMDClusterVec, mSmdEuEvRatio, mHitVec );
 
       //LOG_INFO << "-----> Found " << mHitVec.size() << " points" << endm;
 
@@ -205,6 +213,8 @@ Int_t StEEmcHitMakerSimple_t::clusterStrips(){
 
       ESmdEnergy_t& eSMD = mEEmcEnergy->eSmd;
 
+      mSmdEuEvRatio[sector] = 1;
+
       // make sure there are at least some hit strips in this sector
       if( mEEmcEnergy->nStrips ){
          // add a new element for clusters from this sector
@@ -228,9 +238,27 @@ Int_t StEEmcHitMakerSimple_t::clusterStrips(){
          //LOG_INFO << "-----> found " << vClusVec.size() << " v clusters." << endm;
          //LOG_INFO << "zzz\tSec " << sector << ": uSMD clus = " << uClusVec.size() << ", vSMD clus = " << vClusVec.size() << endm;
 
-         // delete the last element if there were no clusters found in either layer
-         if( uClusVec.empty() && vClusVec.empty() )
+         if( uClusVec.empty() && vClusVec.empty() ){
+            // delete the last element if there were no clusters found in either layer
             mESMDClusterVec.pop_back();
+         } else {
+
+            Double_t E[2] = { 0, 0 };
+
+            // compute total energy in each layer
+            for( Int_t layer = 0; layer < 2; ++layer ){
+               ESmdLayer_t &smdLayer = eSMD.sec[sector].layer[layer];
+
+               for( Int_t strip=0; strip<288; ++strip ){
+                  EEmcElement_t& elem = smdLayer.strip[strip];
+
+                  if( !elem.fail )
+                     E[layer] += elem.energy;
+               };
+            };
+
+            mSmdEuEvRatio[sector] = ( E[1] != 0 ? E[0] / E[1] : 1e50 );
+         };
       };
    };
 
@@ -240,8 +268,11 @@ Int_t StEEmcHitMakerSimple_t::clusterStrips(){
 ClassImp( StEEmcHitMakerSimple_t );
 
 /*
- * $Id: StEEmcHitMakerSimple.cxx,v 1.1 2012/11/26 19:05:54 sgliske Exp $ 
+ * $Id: StEEmcHitMakerSimple.cxx,v 1.2 2013/02/21 22:00:44 sgliske Exp $ 
  * $Log: StEEmcHitMakerSimple.cxx,v $
+ * Revision 1.2  2013/02/21 22:00:44  sgliske
+ * general update
+ *
  * Revision 1.1  2012/11/26 19:05:54  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcHitMaker to StRoot/StEEmcPool/StEEmcHitMaker
  *

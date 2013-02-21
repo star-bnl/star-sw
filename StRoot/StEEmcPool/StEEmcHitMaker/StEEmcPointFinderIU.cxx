@@ -56,6 +56,7 @@ StEEmcPointFinderIU_t::StEEmcPointFinderIU_t() : StEEmcPointFinder_t(),
 Int_t StEEmcPointFinderIU_t::find( const EEmcEnergy_t& eemcEnergy,
                                    const StSimpleClusterVec_t &towerClusterVec,
                                    const StESMDClustersVec_t &smdClusterVec,
+                                   const Double_t* smdEuEvRatio,                  // not used
                                    StEEmcHitVec_t& hitVec ){
 
    //LOG_INFO << "********** StEEmcPointFinderIU_t::find(...) **********" << endm;
@@ -708,8 +709,11 @@ Int_t StEEmcPointFinderIU_t::findPoints( const EEmcEnergy_t& eemcEnergy,
 ClassImp( StEEmcPointFinderIU_t );
 
 /*
- * $Id: StEEmcPointFinderIU.cxx,v 1.1 2012/11/26 19:05:55 sgliske Exp $ 
+ * $Id: StEEmcPointFinderIU.cxx,v 1.2 2013/02/21 22:00:44 sgliske Exp $ 
  * $Log: StEEmcPointFinderIU.cxx,v $
+ * Revision 1.2  2013/02/21 22:00:44  sgliske
+ * general update
+ *
  * Revision 1.1  2012/11/26 19:05:55  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcHitMaker to StRoot/StEEmcPool/StEEmcHitMaker
  *

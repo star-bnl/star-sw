@@ -12,7 +12,7 @@
 
 /// constructor
 StEEmcEnergyMaker_t::StEEmcEnergyMaker_t( const Char_t *myName, const Char_t *a2EMakerName ) : StMaker( myName ), mA2EMkrName( a2EMakerName ),
-                                                                                               mTowerThres( 1 ), mStripThres( 0.0005 ) { /* */ };
+                                                                                               mNumTowers( 0 ), mTowerThres( 1 ), mStripThres( 0.0005 ) { /* */ };
 
 /// deconstructor
 StEEmcEnergyMaker_t::~StEEmcEnergyMaker_t(){ /* */ };
@@ -69,7 +69,7 @@ Int_t StEEmcEnergyMaker_t::Make(){
             element.energy = towIter->energy();
             element.fail = towIter->fail() || towIter->stat();
 
-            if( !iLayer && element.energy > mTowerThres && !element.fail )
+            if( iLayer == 0 && element.energy > mTowerThres && !element.fail )
                ++mEEmcEnergy.nTowers;
 
 #ifdef DEBUG2
@@ -77,6 +77,9 @@ Int_t StEEmcEnergyMaker_t::Make(){
 #endif
          };
       };
+
+      if( iLayer == 0 && mEEmcEnergy.nTowers < mNumTowers )
+         return kStOk;
    };
 
    for( Int_t sector = 0; sector < kEEmcNumSectors; ++sector ){
@@ -119,8 +122,11 @@ void StEEmcEnergyMaker_t::Clear(Option_t *opts ){
 ClassImp( StEEmcEnergyMaker_t );
 
 /*
- * $Id: StEEmcEnergyMaker.cxx,v 1.1 2012/11/26 19:06:10 sgliske Exp $
+ * $Id: StEEmcEnergyMaker.cxx,v 1.2 2013/02/21 21:59:02 sgliske Exp $
  * $Log: StEEmcEnergyMaker.cxx,v $
+ * Revision 1.2  2013/02/21 21:59:02  sgliske
+ * general update
+ *
  * Revision 1.1  2012/11/26 19:06:10  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcTreeMaker to StRoot/StEEmcPool/StEEmcTreeMaker
  *

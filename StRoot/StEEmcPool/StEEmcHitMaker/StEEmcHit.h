@@ -51,7 +51,7 @@ class StEEmcHit_t : public StSimpleHit_t {
    Int_t getTowerIdx() const { return mTowerIdx; };
    Float_t getEnergyU() const { return mEnergyU; };
    Float_t getEnergyV() const { return mEnergyV; };
-   Float_t getTtest2() const { return mTtest2; };
+   Float_t getTtest2() const { return mTtest2; };    // this is really the energy asymmetry squared
    Float_t getWeightU() const { return mWeightU; };
    Float_t getWeightV() const { return mWeightV; };
    Bool_t isValid() const { return mIsValid; };
@@ -112,8 +112,11 @@ std::ostream &operator<<( std::ostream &out, const StEEmcHit_t &hit );
 #endif
 
 /*
- * $Id: StEEmcHit.h,v 1.1 2012/11/26 19:05:54 sgliske Exp $ 
+ * $Id: StEEmcHit.h,v 1.2 2013/02/21 22:00:44 sgliske Exp $ 
  * $Log: StEEmcHit.h,v $
+ * Revision 1.2  2013/02/21 22:00:44  sgliske
+ * general update
+ *
  * Revision 1.1  2012/11/26 19:05:54  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcHitMaker to StRoot/StEEmcPool/StEEmcHitMaker
  *
