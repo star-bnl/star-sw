@@ -39,6 +39,7 @@ class StEEmcPointFinderIU_t : public StEEmcPointFinder_t {
    virtual Int_t find( const EEmcEnergy_t& eemcEnergy,
                        const StSimpleClusterVec_t &towerClusterVec,
                        const StESMDClustersVec_t &smdClusterVec,
+                       const Double_t* smdEuEvRatio,
                        StEEmcHitVec_t& hitVec );
 
    // modifiers
@@ -58,6 +59,18 @@ class StEEmcPointFinderIU_t : public StEEmcPointFinder_t {
             return false;
          } else {
             return a->getSeedMember() < b->getSeedMember();
+         };
+      };
+   };
+   struct clusterMoreThan {
+      const Bool_t operator()( const StSimpleCluster_t *a, const StSimpleCluster_t *b) const {
+         // check for 0
+         if (b == 0) {
+            return a != 0; // if a is also 0, then they are equal, hence a is not > than b
+         } else if (a == 0) {
+            return false;
+         } else {
+            return a->getSeedMember() > b->getSeedMember();
          };
       };
    };
@@ -104,8 +117,11 @@ class StEEmcPointFinderIU_t : public StEEmcPointFinder_t {
 #endif
 
 /*
- * $Id: StEEmcPointFinderIU.h,v 1.1 2012/11/26 19:05:55 sgliske Exp $ 
+ * $Id: StEEmcPointFinderIU.h,v 1.2 2013/02/21 22:00:44 sgliske Exp $ 
  * $Log: StEEmcPointFinderIU.h,v $
+ * Revision 1.2  2013/02/21 22:00:44  sgliske
+ * general update
+ *
  * Revision 1.1  2012/11/26 19:05:55  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcHitMaker to StRoot/StEEmcPool/StEEmcHitMaker
  *

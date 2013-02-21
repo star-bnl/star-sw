@@ -56,6 +56,8 @@ Int_t StEEmcStripClusterFinderTSIU_t::find( const ESmdLayer_t& stripArray, StSim
    UInt_t smallestIdx = kEEmcNumStrips;
    UInt_t largestIdx = 0;
 
+   Bool_t existsStripOverThres = 0;
+
    UInt_t stripIdx = 0;
    for( const EEmcElement_t *strip = stripArray.strip; strip != &stripArray.strip[288]; ++strip, ++stripIdx ){
       if( !strip->fail && strip->energy ){
@@ -66,10 +68,13 @@ Int_t StEEmcStripClusterFinderTSIU_t::find( const ESmdLayer_t& stripArray, StSim
 
          mStripEnergyArray[    stripIdx ] = strip->energy;
          mSmoothedEnergyArray[ stripIdx ] = strip->energy;
+
+         if( strip->energy > mSeedAbsThres )
+            existsStripOverThres = 1;
       };
    };
 
-   if( smallestIdx < largestIdx ){
+   if( smallestIdx < largestIdx && existsStripOverThres ){
       // i.e. there are some strips that do not fail and have non-zero energy
 
       // include one extra (empty) strip on either side
@@ -179,8 +184,11 @@ Int_t StEEmcStripClusterFinderTSIU_t::find( const ESmdLayer_t& stripArray, StSim
 ClassImp( StEEmcStripClusterFinderTSIU_t );
 
 /*
- * $Id: StEEmcStripClusterFinderTSIU.cxx,v 1.2 2013/01/02 20:30:31 sgliske Exp $ 
+ * $Id: StEEmcStripClusterFinderTSIU.cxx,v 1.3 2013/02/21 22:00:44 sgliske Exp $ 
  * $Log: StEEmcStripClusterFinderTSIU.cxx,v $
+ * Revision 1.3  2013/02/21 22:00:44  sgliske
+ * general update
+ *
  * Revision 1.2  2013/01/02 20:30:31  sgliske
  * numStrips >= mMinStripsPerCluster rather than
  * numStrips > mMinStripsPerCluster

@@ -28,6 +28,7 @@ class StEEmcPointFinder_t : public StFinderAlg_t {
    virtual Int_t find( const EEmcEnergy_t& eemcEnergy,
                        const StSimpleClusterVec_t &towerClusterVec,
                        const StESMDClustersVec_t &smdClusterVec,
+                       const Double_t* smdEuEvRatio,
                        StEEmcHitVec_t& hitVec ) = 0;
  private:
    ClassDef( StEEmcPointFinder_t, 1 );
@@ -37,8 +38,11 @@ class StEEmcPointFinder_t : public StFinderAlg_t {
 #endif
 
 /*
- * $Id: StEEmcPointFinder.h,v 1.1 2012/11/26 19:05:55 sgliske Exp $ 
+ * $Id: StEEmcPointFinder.h,v 1.2 2013/02/21 22:00:44 sgliske Exp $ 
  * $Log: StEEmcPointFinder.h,v $
+ * Revision 1.2  2013/02/21 22:00:44  sgliske
+ * general update
+ *
  * Revision 1.1  2012/11/26 19:05:55  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcHitMaker to StRoot/StEEmcPool/StEEmcHitMaker
  *

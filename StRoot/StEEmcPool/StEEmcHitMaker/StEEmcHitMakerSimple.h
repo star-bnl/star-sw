@@ -66,6 +66,9 @@ class StEEmcHitMakerSimple_t : public StEEmcHitMaker_t {
    // whether to cluster towers before or after the SMD strips
    Bool_t mClusterStripsFirst;
 
+   // to keep track of total energy per layer
+   Double_t mSmdEuEvRatio[kEEmcNumSectors];
+
  private:
    ClassDef( StEEmcHitMakerSimple_t, 1 );
 };
@@ -73,8 +76,11 @@ class StEEmcHitMakerSimple_t : public StEEmcHitMaker_t {
 #endif
 
 /*
- * $Id: StEEmcHitMakerSimple.h,v 1.1 2012/11/26 19:05:54 sgliske Exp $ 
+ * $Id: StEEmcHitMakerSimple.h,v 1.2 2013/02/21 22:00:44 sgliske Exp $ 
  * $Log: StEEmcHitMakerSimple.h,v $
+ * Revision 1.2  2013/02/21 22:00:44  sgliske
+ * general update
+ *
  * Revision 1.1  2012/11/26 19:05:54  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcHitMaker to StRoot/StEEmcPool/StEEmcHitMaker
  *
