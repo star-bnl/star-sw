@@ -2,13 +2,23 @@
 
 $anadir="/ldaphome/akio/fgt";
 $datadir="/evp/a";
-$webdir="/onlineweb/www/fgtStatus/offline";
 
 $year=14;
 $yday=0;
 $day=0;
-$debug=1;
+$debug=0;
 $submit=0;
+
+$out = `ps -elf | grep $anadir/makepage.pl | grep -v grep | grep -v emacs | grep -v csh | wc -l`;
+$out=~s/\n//g;
+if($debug) {print("ps reports $out $anadir/makepage.pl jobs found\n");}
+if ($out > 1) {
+    print("There are other $anadir/makepage.pl running. Stop\n");
+    `ps -elf | grep $anadir/makepage.pl | grep -v grep | grep -v emacs | grep -v csh`;
+    exit;
+}else{
+    print("No $anadir/makepage.pl running. Go ahead\n");
+}
 
 if($#ARGV>-1) {
     if($ARGV[0] eq "all") {$yday=-1;} 
@@ -34,7 +44,7 @@ if($debug) {print "today = $today $dtoday $itoday\n";}
 $start = `date -d "Feb 6 00:00:00" +%s`; $start=~s/\n//g;
 $dstart=`date -d \"UTC 1970-01-01 $start secs\" +"%Y %b %d %a"`;  $dstart=~s/\n//g;
 $istart=`date -d \"UTC 1970-01-01 $start secs\" +%j`;  $istart=~s/\n//g;
-if($debug) {print "start=$start $dstart $istart\n";}
+if($debug) {print "start = $start $dstart $istart\n";}
 
 open(OUT,"> $anadir/html/index.php");
 print(OUT "<HTML><head><META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html\">");
@@ -52,7 +62,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
     $dd=~s/\n//g;
     $id=~s/\n//g;
     $id="$year$id";    
-    print("id=$id\n");
+    print("id=$id   ");
     
     if (-e "$anadir/$id") {} else {`mkdir $anadir/$id`;}
     if ($d == $today) {`runs $id`;}
@@ -62,7 +72,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
     $nrun=~s/\n//g;
     $nfgt=`wc -l $id/fgtrun.txt | cut -d " " -f 1`;
     $nfgt=~s/\n//g;
-    if($debug) {print("nrun=$nrun nfgtrun=$nfgt\n");}
+    printf("nrun=%4d nfgtrun=%4d\n",$nrun,$nfgt);
 
     if($nfgt==0) {next;}    
     print(OUT "<tr><td><a href=\"$id.php\">$id</a></td><td>$dd</td><td>$nrun</td><td>$nfgt</td>\n");    
@@ -99,7 +109,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	@sortruns=sort(@fruns);
 	@revruns=reverse(@sortruns);
 	
-	$plotdir="$webdir/$id/";
+	$plotdir="$anadir/www/$id/";
 	if (-e "$plotdir") {} else {`mkdir -p $plotdir`;}
 	
 	print("Creating $id.php\n");
@@ -147,7 +157,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 		if($evpcount<50 && $submit>0) {		    
 		    `touch $id/$run.done`;
 		    if($submit==2){
-			`makeplot $run $id $type`;
+			`makeplot $run $type`;
 		    }elsif($submit==1){
 			$condor="$id/condor/submit_$run.txt";
 			if (-e "$condor") {} else {`\rm $condor`;}
@@ -158,7 +168,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 			print(OUTC "notification = never\n");
 			print(OUTC "getenv       = True\n");
 			print(OUTC "Priority    = +1\n");
-			print(OUTC "Arguments = $run $id $type\n");
+			print(OUTC "Arguments = $run $type\n");
 			print(OUTC "Log    = $anadir/$id/log/$run.log\n");
 			print(OUTC "Output = $anadir/$id/log/$run.log\n");
 			print(OUTC "Error  = $anadir/$id/log/$run.log\n");
@@ -200,4 +210,4 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 print(OUT "</table>\n");
 print(OUT "</BODY></HTML>\n");
 
-`\mv html/*.php $webdir/`;
+`\mv html/*.php $anadir/www/`;

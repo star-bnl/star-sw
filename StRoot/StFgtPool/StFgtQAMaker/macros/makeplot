@@ -1,13 +1,17 @@
 #!/bin/csh 
 
 set run=$1
-set dir=$2
-set type=$3
+set type=$2
 
-echo makeplot $run $dir $type
+set anadir=/ldaphome/akio/fgt
+set dir=$run
+@ dir /= 1000
+
+echo makeplot $run $type  anadir=$anadir yearday=$dir
+exit
 
 stardev
-cd /ldaphome/akio/fgt
+cd $anadir
 
 if ( "$type" == "pedestal" ) then
   set ped=1

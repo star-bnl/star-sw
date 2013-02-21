@@ -118,9 +118,9 @@ void plot2d(int hid) {
   save(c2dHist[hid]);
 }
 
-void makeqaplot(int run=0, int plt=0, int save=1, int day=0){
+void makeqaplot(int run=0, int plt=0, int save=1){
   runnum=run;
-  yearday=day;
+  yearday=run/1000;
   if(save==0) {png=0; pdf=0;}
   if(save==1) {png=1; pdf=0;}
   if(save==2) {png=0; pdf=1;}
