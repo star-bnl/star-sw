@@ -14,8 +14,6 @@
 #include "StSpinInfoMaker.h"
 
 Int_t StSpinInfoMaker_t::Init(){
-   //LOG_INFO << "StSpinInfoMaker_t::Init()" << endm;
-
    int ierr = kStOK;
 
    StMuDst *mudst = (StMuDst*)GetDataSet("MuDst");
@@ -24,14 +22,10 @@ Int_t StSpinInfoMaker_t::Init(){
       ierr = kStFatal;
    };
 
-   //LOG_INFO << "\t DONE" << endm;
-
    return ierr;
 };
 
 Int_t StSpinInfoMaker_t::Make(){
-   //LOG_INFO << "StSpinInfoMaker_t::Make()" << endm;
-
    //
    // COPY DETAILS FROM MuDst
    //
@@ -48,12 +42,7 @@ Int_t StSpinInfoMaker_t::Make(){
       return kStFatal;
    };
 
-   //LOG_INFO << "A" << endm;
-
    mSpinInfo.setDsmVertex( event->bbcTriggerDetector().onlineTimeDifference() );
-
-   //LOG_INFO << "B" << endm;
-
 
    //
    // COPY DETAILS FROM StSpinDb
@@ -69,75 +58,63 @@ Int_t StSpinInfoMaker_t::Make(){
       LOG_WARN << "StSpinInfoMaker_t::Make(), SpinDB reports invalid for run " << GetRunNumber() << ", " << GetEventNumber() << "." << endm;
    };
 
-   // 
-   // MASKS
-   //
-
    StL0Trigger *trig  =&(event->l0Trigger());
    if( !trig ){
       LOG_FATAL << "Cannot get 'StL0Trigger' pointer from MuDst" << endm;
       return kStFatal;
    };
     
-   //LOG_INFO << "C" << endm;
-
-
-   //StMuTriggerIdCollection& tic = event->triggerIdCollection();
-   //const StTriggerId& l1trig = tic.l1();
-    
    UShort_t bx48   = static_cast< UShort_t >( trig->bunchCrossingId() );
    UShort_t bx7    = static_cast< UShort_t >( trig->bunchCrossingId7bit( event->runNumber() ));
    UShort_t bxStar = static_cast< UShort_t >( spinDB->BXyellowUsingBX48(bx48) );
 
-   //LOG_INFO << "D" << endm;
-
-   // If bunch crossing is masked out skip event
-   if( spinDB->isMaskedUsingBX48(bx48) )
-      return kStOK;
-
-   if( spinDB->offsetBX48minusBX7(bx48,bx7) != 0 ) {
-      LOG_WARN << " ++++ spindb indicates 7bit and 48bit bunch crossings are inconsistent... event invalid ++++" << endm;
-      return kStOK; // returns and leaves spin info in an "invalidated" state
-   }
-
-   Int_t spin4 = spinDB->spin4usingBX48(bx48);
-
-   // Finanlly, store the spin information
-
-   //LOG_INFO << "E" << endm;
-
+   mSpinInfo.setbXingIsMaskedInSpinDB( spinDB->isMaskedUsingBX48(bx48) );
    mSpinInfo.setValidDB( spinDB->isValid() );
-   mSpinInfo.setSpin4( static_cast< UShort_t >( spin4 ) );
    mSpinInfo.setBunchCrossing7bit( bx7 );
    mSpinInfo.setBunchCrossing48bit( bx48 );
    mSpinInfo.setBunchCrossingStar( bxStar );
-    
-   if( spinDB->isPolDirLong() )
-      mSpinInfo.setPolarizationType( StSpinInfo_t::LONG_LONG_POLARIZATION );
 
-   if( spinDB->isPolDirTrans() )
-      mSpinInfo.setPolarizationType( StSpinInfo_t::TRANS_TRANS_POLARIZATION );
+   //
+   // SPIN PART
+   //
+
+   mSpinInfo.setSpin4( -1 );
+   if( !spinDB->isMaskedUsingBX48(bx48) ){
+
+      if( spinDB->offsetBX48minusBX7(bx48,bx7) != 0 ) {
+         LOG_WARN << " ++++ spindb indicates 7bit and 48bit bunch crossings are inconsistent... event invalid ++++" << endm;
+         return kStOK; // returns and leaves spin info in an "invalidated" state
+      }
+
+      // Finanlly, store the spin information
+      Int_t spin4 = spinDB->spin4usingBX48(bx48);
+
+      mSpinInfo.setSpin4( static_cast< UShort_t >( spin4 ) );
     
-   //LOG_INFO << "\t DONE" << endm;
+      if( spinDB->isPolDirLong() )
+         mSpinInfo.setPolarizationType( StSpinInfo_t::LONG_LONG_POLARIZATION );
+
+      if( spinDB->isPolDirTrans() )
+         mSpinInfo.setPolarizationType( StSpinInfo_t::TRANS_TRANS_POLARIZATION );
+   };
 
    return kStOK;
 };
 
 /// Clear for next event
 void StSpinInfoMaker_t::Clear(Option_t *opts){
-   //LOG_INFO << "StSpinInfoMaker_t::Clear()" << endm;
-
    mSpinInfo.clear();
-
-   //LOG_INFO << "\t DONE" << endm;
 };
 
 
 ClassImp( StSpinInfoMaker_t );
 
 /*
- * $Id: StSpinInfoMaker.cxx,v 1.1 2012/11/26 19:06:11 sgliske Exp $
+ * $Id: StSpinInfoMaker.cxx,v 1.2 2013/02/21 21:58:14 sgliske Exp $
  * $Log: StSpinInfoMaker.cxx,v $
+ * Revision 1.2  2013/02/21 21:58:14  sgliske
+ * added mask field, cleaned up comments, and adjusted the logic
+ *
  * Revision 1.1  2012/11/26 19:06:11  sgliske
  * moved from offline/users/sgliske/StRoot/StEEmcPool/StEEmcTreeMaker to StRoot/StEEmcPool/StEEmcTreeMaker
  *
