@@ -126,14 +126,14 @@ void makeqaplot(int run=0, int plt=0, int save=1, int day=0){
   if(save==2) {png=0; pdf=1;}
   if(save==3) {png=1; pdf=1;}
 
-  c1 = new TCanvas("c1","QA",1200,1000);
+  c1 = new TCanvas("c1","QA",50,0,800,800);
   gStyle->SetLabelSize(0.04,"xy");
   gStyle->SetPalette(1);
   gStyle->SetStatW(0.4);
 
   char fname[50];
   if(run==0) {sprintf(fname,"fgtQA.root");}
-  else {sprintf(fname,"fgtQA_%d.root",run);}
+  else {sprintf(fname,"%d/fgtQA_%d.root",day,run);}
 
   cout << "Opening "<<fname<<endl;
   file=new TFile(fname,"old");

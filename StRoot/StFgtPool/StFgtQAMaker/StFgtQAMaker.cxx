@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtQAMaker.cxx,v 1.3 2013/02/16 14:25:55 akio Exp $
+ * $Id: StFgtQAMaker.cxx,v 1.4 2013/02/21 15:16:18 akio Exp $
  *
  */
 
@@ -22,13 +22,32 @@
 
 static const int mDebug=0;      // debug mesasge level
 
+inline void getPRC(int rdo, int arm, int apv, int& page, int& row, int& col){
+  page = ((rdo-1)*6 + arm)/2;
+  row = (((rdo-1)*6 + arm)%2)*4 + (apv/12)*2 + (apv%12)/5;
+  col = (apv%12)%5;
+  //printf("rdo=%1d arm=%1d apv=%2d page=%d row=%d col=%d\n",rdo,arm,apv,page,row,col);
+}
+
 ClassImp(StFgtQAMaker);
 
-StFgtQAMaker::StFgtQAMaker(const Char_t *name) : StMaker(name),mEventCounter(0),mRunNumber(0) {
+StFgtQAMaker::StFgtQAMaker(const Char_t *name) : StMaker(name),mEventCounter(0),mRunNumber(0),mSigmaCut(10),mAdcCut(500){
 }
 
 Int_t StFgtQAMaker::Init(){
   bookHist();
+  for(int i=0; i<7; i++){
+    char c[40];
+    sprintf(c,"QA%d",i);
+    mCanvas[i] = new TCanvas(c,c,50,0,700,800);
+    TH2F* frame;
+    sprintf(c,"ScopeTrace%d",i);
+    if(i==6) { frame = new TH2F(c,c,1,0,15*4,1,-1000,5000*6); frame->GetXaxis()->SetNdivisions(1504,kFALSE);}
+    else     { frame = new TH2F(c,c,1,0,15*5,1,-1000,5000*8); frame->GetXaxis()->SetNdivisions(1505,kFALSE);}    
+    frame->SetStats(0); frame->Draw();  
+  }
+  memset(mNTrace,0,sizeof(mNTrace));
+  memset(mNTrace2,0,sizeof(mNTrace2));
   return kStOK; 
 }
 
@@ -51,13 +70,93 @@ Int_t StFgtQAMaker::InitRun(Int_t runnum){
 
 Int_t StFgtQAMaker::Make() {
   fillHist();
+  mEventCounter++;
   return kStOK;
 }
 
 Int_t StFgtQAMaker::Finish() {
   gMessMgr->Info() << "StFgtQAMaker::Finish()" << endm;
   saveHist();
+  saveTrace();
   return kStOK;
+}
+
+void StFgtQAMaker::saveTrace(){
+  char cq[4][3]={"DA","AB","BC","CD"};
+  char c[20];
+
+  char cthr[100];
+  sprintf(cthr,"MaxADC>%2.0f*sigma and %4.0f",mSigmaCut,mAdcCut);
+  TText *tthr = new TText(0.6,0.95,cthr);
+  tthr->SetNDC(); tthr->SetTextSize(0.03);
+
+  for(int rdo=1; rdo<=kFgtNumRdos; rdo++){
+    for(int arm=0; arm<kFgtNumArms; arm++){
+      for(int apv=0; apv<kFgtMaxApvId; apv++){
+	if(apv==10 || apv==11 || apv==22 || apv==23) continue;
+	int page,row,col;
+	getPRC(rdo,arm,apv,page,row,col);
+	mCanvas[page]->cd();
+
+	sprintf(c,"Apv%1d",apv);
+	float x = 2 + col*15;   
+	float y = 4000 + (7-row)*5000;
+	TText *t1 = new TText(x,y,c);
+	t1->SetTextSize(0.02); t1->Draw();	
+	
+	if(apv==9|| apv==21){
+	  Short_t disc, quad, strip;
+	  Char_t layer;
+	  int geoid=mDb->getGeoIdFromElecCoord(rdo,arm,apv-9,0);
+	  StFgtGeom::decodeGeoId(geoid,disc,quad,layer,strip);
+	  sprintf(c,"Rdo%1dArm%1d/%1d%2s",rdo,arm,disc+1,cq[quad]);
+	  float x = 18 + col*15;   
+	  float y = 1000 + (7-row)*5000;
+	  TText *t1 = new TText(x,y,c);
+	  t1->SetTextSize(0.022); t1->SetTextAngle(90); t1->Draw();	
+	}
+      }
+    }
+  }
+  for(int i=0; i<6; i++){
+    mCanvas[i]->cd();
+    tthr->Draw();
+    char ff[50],fname[50]="fgtScopeTrace.pdf";
+    if(mRunNumber>0) {
+      sprintf(fname,"%d/fgtScopeTrace_%d.pdf",mRunNumber/1000,mRunNumber);
+    }
+    if(i==0) {
+      cout << "Writing " << fname << endl;
+      sprintf(ff,"%s(",fname);
+    }else if(i==5){ 
+      sprintf(ff,"%s)",fname);
+    }else{
+      sprintf(ff,"%s",fname);
+    }       
+    mCanvas[i]->Update();
+    mCanvas[i]->Print(ff,"pdf");
+  }
+  mCanvas[6]->cd();
+  tthr->Draw();
+  for(int disc=0; disc<kFgtNumDiscs; disc++){
+    sprintf(c,"Disc%1d",disc+1);
+    float y=0.82-disc*0.13;
+    TText *t1 = new TText(0.91,y,c);
+    t1->SetNDC(); t1->SetTextSize(0.03); t1->Draw();      
+  }
+  for(int quad=0; quad<kFgtNumQuads; quad++){
+    sprintf(c,"Quad%1c",'A'+quad);
+    float x=0.15 + quad*0.20;    
+    TText *t1 = new TText(x,0.91,c);
+    t1->SetNDC(); t1->SetTextSize(0.03); t1->Draw();      
+  }
+  char fname[50]="fgtScopeTrace.png";
+  if(mRunNumber>0) {
+    sprintf(fname,"%d/fgtScopeTrace_%d.png",mRunNumber/1000,mRunNumber);
+  }
+  cout << "Writing " << fname << endl;
+  mCanvas[6]->Update();
+  mCanvas[6]->SaveAs(fname);
 }
 
 void StFgtQAMaker::bookHist(){
@@ -104,7 +203,7 @@ void StFgtQAMaker::bookHist(){
 void StFgtQAMaker::saveHist(){
   char fname[50]="fgtQA.root";
   if(mRunNumber>0) {
-    sprintf(fname,"fgtQA_%d.root",mRunNumber);
+    sprintf(fname,"%d/fgtQA_%d.root",mRunNumber/1000,mRunNumber);
   }
   cout << "Writing " << fname << endl;
   TFile *hfile = new TFile(fname,"update");  
@@ -157,14 +256,38 @@ void StFgtQAMaker::fillHist(){
       StFgtGeom::decodeGeoId(geoid,idisc,iquad,layer,istr);
       if(layer=='P') {ipr=0;}
       if(layer=='R') {ipr=1;}
-      if(disc==2 && (iquad==0 || iquad==3)) continue;
+      Int_t rdo, arm, apv, chan;
+      (*it)->getElecCoords( rdo, arm, apv, chan );
+      if(maxadc>mSigmaCut*pederr && maxadc>mAdcCut){
+	if(mNTrace2[rdo-1][arm][apv]<MAXTRACE) {
+	  mNTrace2[rdo-1][arm][apv]++;
+	  TGraph* g = new TGraph();
+	  int page,row,col;
+	  getPRC(rdo,arm,apv,page,row,col);
+	  for(int tb=0; tb<ntimebin; tb++){
+	    g->SetPoint(tb,float(tb+col*15),float((*it)->getAdc(tb)+(7-row)*5000));
+	  }
+	  mCanvas[page]->cd(); 
+	  g->SetLineColor(kBlue); g->SetLineWidth(0.5); g->Draw("C"); 	
+	}
+	if(mNTrace[idisc][iquad]<MAXTRACE) {
+	  mNTrace[idisc][iquad]++;
+	  TGraph* g = new TGraph();
+	  for(int tb=0; tb<ntimebin; tb++){
+	    g->SetPoint(tb,float(tb+iquad*15),float((*it)->getAdc(tb)+25000-idisc*5000));
+	  }
+	  mCanvas[6]->cd(); 
+	  g->SetLineColor(kBlue); g->SetLineWidth(1); g->Draw("C"); 
+	}
+      }
+      if(idisc==2 && (iquad==0 || iquad==3)) continue;
       if(idisc==4 && iquad==3) continue;
       hist0[1]->Fill(float(maxadc));	  
       if(maxadc>4*pederr && maxadc>160) {
 	nhit[iquad]++;	
 	hist1[disc][iquad][1+ipr]->Fill(float(istr));
       }
-      if(maxadc>10*pederr && maxadc>400) {
+      if(maxadc>mSigmaCut*pederr && maxadc>mAdcCut){
 	for(int tb=0; tb<ntimebin; tb++){
 	  hist2[idisc][1]->Fill(float(tb),float((*it)->getAdc(tb)));
 	}
@@ -173,6 +296,7 @@ void StFgtQAMaker::fillHist(){
     for (int quad=0; quad<kFgtNumQuads; quad++) hist1[disc][quad][0]->Fill(float(nhit[quad]));
   }
   hist0[2]->Fill(float(datasize));
+  if(mEventCounter%500==0) {printf("Event=%d Updating canvas...\n",mEventCounter); mCanvas[6]->Update(); printf("...Done\n");}
 
   //Clusters
   for (int disc=0; disc<kFgtNumDiscs; disc++){    

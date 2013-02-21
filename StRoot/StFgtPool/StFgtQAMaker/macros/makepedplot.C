@@ -76,7 +76,7 @@ makepedplot(int run, int day, int comp=0){
       }
       // printf("%6d %8.2f %8.2f %8.2f   %8.2f %8.2f%8.2f\n",i,ped[i],ped2[i],d,rms[i],rms2[i],e);      
     }
-    TCanvas * c1 = new TCanvas("ped","ped",50,0,1200,800);
+    TCanvas * c1 = new TCanvas("ped","ped",50,0,800,800);
     c1->Divide(2,2);
     gStyle->SetOptStat(1111110);
     c1->cd(1); hd->Draw();
