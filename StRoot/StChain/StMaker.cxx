@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.255 2013/02/06 21:58:39 jwebb Exp $
+// $Id: StMaker.cxx,v 1.256 2013/02/21 22:53:05 jwebb Exp $
 //
 //
 /*!
@@ -272,6 +272,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry (MTD missing)"},
   {"y2012b",      20111215,     2, "y2012b",   "y2012 geometry (now with MTD)"},
   {"y2013",       20121215,     0, "y2013",    "y2013 first cut geometry"},
+  {"y2013_1",     20121215,     1, "y2013",    "y2013 first cut geometry"},
+  {"y2013_2",     20121215,  1001, "y2013",    "y2013 first cut geometry sans pixel"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -1961,6 +1963,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.256  2013/02/21 22:53:05  jwebb
+// Defined first cut geometries with and without pixel detector.
+//
 // Revision 1.255  2013/02/06 21:58:39  jwebb
 // Addition of y2012b geometry tag to properly include the MTD.
 //
