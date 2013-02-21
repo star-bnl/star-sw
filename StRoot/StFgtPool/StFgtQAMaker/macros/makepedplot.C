@@ -3,13 +3,14 @@
 
 static const int MAX=2*6*20*128;
 
-makepedplot(int run, int day, int comp=0){
+makepedplot(int run, int comp=0){
   char filename[100];
   float ped[MAX],rms[MAX],frac[MAX],p,r,f;
   float ped2[MAX],rms2[MAX];
   int eleId[MAX],status[MAX],eid,s,t,i; 
   TString statread;
 
+  int day=run/1000;
   sprintf(filename,"%d/ped/ped.%d.txt",day,run);
   cout<<"Reading File "<<filename<<endl;
   std::ifstream in(filename);
