@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.23 2013/02/22 17:20:30 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.24 2013/02/22 18:40:03 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.24  2013/02/22 18:40:03  perev
+ * Remove gufld definition
+ *
  * Revision 1.23  2013/02/22 17:20:30  fisyak
  * gufld => agufld
  *
@@ -146,7 +149,6 @@ StarMagField *StarMagField::fgInstance = 0;
 //________________________________________________________________________________
 
 #define agufld           F77_NAME(agufld,AGUFLD)
-#define  gufld           F77_NAME( gufld, GUFLD)
 #define mfldgeo          F77_NAME(mfldgeo,MFLDGEO)
 #ifdef __ROOT__
 ClassImp(StarMagField);
@@ -166,7 +168,6 @@ R__EXTERN  "C" {
     }
     return 0;
   }
-  Float_t type_of_call  gufld(Float_t *x, Float_t *bf);// {agufld(x,bf);}
 //________________________________________________________________________________
   void type_of_call mfldgeo(Float_t &factor) {
     if (StarMagField::Instance()) {
