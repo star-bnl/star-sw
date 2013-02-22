@@ -26,7 +26,6 @@
 #include "phys_constants.h"
 #include "SystemOfUnits.h"
 
-
 static const int BLOCK=1024;
 
 
@@ -201,8 +200,6 @@ Int_t StV0FinderMaker::Init()
  
  return StMaker::Init();
 }
-
-
 //_____________________________________________________________________________
 Int_t StV0FinderMaker::Prepare() {
 
@@ -469,8 +466,8 @@ Int_t StV0FinderMaker::Make() {
 
       //Cut: number of hits
       //Now cut directly when filling the table of tracks in Prepare().
-      /*if ((hits[i] < pars2->n_point) ||
-          (hits[j] < pars2->n_point)) continue;*/
+//      if ((hits[i] < pars2->n_point) ||
+//          (hits[j] < pars2->n_point)) continue;
 
       //Cut: Initial cut on dca of tracks to primary vertex
       // (perform as early as possible)
@@ -835,8 +832,11 @@ void StV0FinderMaker::ExpandVectors(unsigned short size) {
   trkID.resize(newsize);
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.33 2013/02/22 17:06:10 fisyak Exp $
+// $Id: StV0FinderMaker.cxx,v 1.34 2013/02/22 18:37:39 perev Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.34  2013/02/22 18:37:39  perev
+// Cleanu
+//
 // Revision 1.33  2013/02/22 17:06:10  fisyak
 // Remove reference to gufld, which is not used
 //
