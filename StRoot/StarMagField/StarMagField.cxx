@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.22 2013/01/17 15:11:33 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.23 2013/02/22 17:20:30 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.23  2013/02/22 17:20:30  fisyak
+ * gufld => agufld
+ *
  * Revision 1.22  2013/01/17 15:11:33  fisyak
  * More clear handling ROOT and non ROOT versions
  *
@@ -173,7 +176,7 @@ R__EXTERN  "C" {
       (new StarMagField(StarMagField::kMapped,factor/5.))->SetLock();
     }
     Float_t x[3]={0},b[3];
-    gufld(x,b);
+    agufld(x,b);
     printf("StarMagField:mfldgeo(%g) Bz=%g\n",factor,b[2]);
   }
 }
