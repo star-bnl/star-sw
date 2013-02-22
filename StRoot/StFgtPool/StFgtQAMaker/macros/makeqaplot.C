@@ -15,8 +15,12 @@ static const char* cquad[kFgtNumQuads]={"A","B","C","D"};
 static const char* cHist[NHist]={"MaxTimeBin","ADC","DataSize"};
 
 static const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","ChargeAsy"};
+//Log 0=linear 1=log
 static const int   l1dHist[N1dHist]={          1,        1,        1,          1,            1,              0,          0};
+//Mode 0=4pad 6discs on a plot, 1=24pads for each quad
 static const int   m1dHist[N1dHist]={          0,        1,        1,          0,            0,              0,          0};
+//Fit 0=no fit show mean, 1=gaussian fit show rms, 2=landau fit, show peak
+static const int   f1dHist[N1dHist]={          0,        0,        0,          0,            0,              2,          1};
 
 static const char* c2dHist[N1dHist]={"XY","ADCvsTB"};
 
@@ -64,23 +68,39 @@ void plot1d(int hid) {
       TH2F *frame = new TH2F(c,c,1,xmin,xmax,1,ymin,ymax*1.2); frame->SetStats(0); frame->Draw();
       for(int disc=0; disc<kFgtNumDiscs; disc++){
 	TH1F *h=hist1[disc][quad][hid];
-	h->SetLineColor(color[disc]); 
-	h->SetLineWidth(3);
-	h->Draw("SAME");  
-	float mean=h->GetMean();
-	sprintf(c,"%1d%s mean=%6.2f",disc+1,cquad[quad],mean);
-        TText *t1;
-	//	float x1=xmin*0.9 + 0.1*xmax;
-	//      float x2=xmin*0.5 + 0.5*xmax;
-        //if(disc<3) { t1 = new TText(x1,ymax*(1.1-0.1*disc),c); }
-        //else       { t1 = new TText(x2,ymax*(1.1-0.1*(disc-3)),c); }
-	float x1= 0.2, x2= 0.5;
+	h->SetLineColor(color[disc]); h->SetLineWidth(3); h->Draw("SAME");  
+	if(f1dHist[hid]==0){
+	  float mean=h->GetMean();
+	  sprintf(c,"%1d%s mean=%6.2f",disc+1,cquad[quad],mean);
+	}else if(f1dHist[hid]==1){	  
+	  int res = h->Fit("gaus","0");
+	  TF1 *f = h->GetFunction("gaus");
+	  float sig = f->GetParameter(2);	
+	  if(res==0 && sig>0.0001 && h->GetEntries()>5){
+	    f->SetLineColor(color[disc]); f->SetLineWidth(2); f->Draw("SAME");
+	    sprintf(c,"%1d%s sig=%6.3f",disc+1,cquad[quad],sig);
+	  }else{
+	    sprintf(c,"%1d%s",disc+1,cquad[quad]);
+	  }
+	}else if(f1dHist[hid]==2){	  
+	  int res = h->Fit("landau","0");
+	  TF1 *f = h->GetFunction("landau");
+	  float peak = f->GetParameter(1);	
+	  if(res==0 && peak>0 && h->GetEntries()>5){
+	    f->SetLineColor(color[disc]); f->SetLineWidth(2); f->Draw("SAME");
+	    sprintf(c,"%1d%s mpv=%6.0f",disc+1,cquad[quad],peak);
+	  }else{
+	    sprintf(c,"%1d%s",disc+1,cquad[quad]);
+	  }
+	}
+	TText *t1;
+	float x1= 0.2, x2= 0.55;
 	float y1=0.8 - 0.07*disc;
 	float y2=0.8 - 0.07*(disc-3);
         if(disc<3) { t1 = new TText(x1,y1,c); }
         else       { t1 = new TText(x2,y2,c); }
 	t1->SetNDC();
-	t1->SetTextSize(0.05); 
+	t1->SetTextSize(0.04); 
 	t1->SetTextColor(color[disc]); 
 	t1->Draw();
       }
@@ -118,7 +138,7 @@ void plot2d(int hid) {
   save(c2dHist[hid]);
 }
 
-void makeqaplot(int run=0, int plt=0, int save=1){
+void makeqaplot(int run=0, int plt=0, int save=0){
   runnum=run;
   yearday=run/1000;
   if(save==0) {png=0; pdf=0;}
