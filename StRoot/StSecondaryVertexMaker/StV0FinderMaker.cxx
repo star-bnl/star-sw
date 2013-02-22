@@ -26,10 +26,6 @@
 #include "phys_constants.h"
 #include "SystemOfUnits.h"
 
-//Stuff to get correct Bfield
-/*#include "StarCallf77.h"   
- extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}   
- #define gufld F77_NAME(gufld,GUFLD) */
 
 static const int BLOCK=1024;
 
@@ -206,26 +202,6 @@ Int_t StV0FinderMaker::Init()
  return StMaker::Init();
 }
 
-//____________________________________________________________________________
-
-/*Int_t StV0FinderMaker::InitRun( int RunNumber){
-          float gufldX[3]= {0,0,0};
-          float gufldB[3];
-          gufld(gufldX,gufldB);
-          Bfield = gufldB[2]*kilogauss;
-          return 0;
-}*/
-
-
-
-
-
-
-
-
-
-
-
 
 //_____________________________________________________________________________
 Int_t StV0FinderMaker::Prepare() {
@@ -251,12 +227,14 @@ Int_t StV0FinderMaker::Prepare() {
     StMuDst* mu = mMuDstMaker->muDst();
     if(mu) cout<<"V0Finder :: found a MuDst"<<endl;
     if(mu->event())cout<<"see a muEvent ... "<<endl;
-    Int_t nV0s = mu->GetNV0();
     if(mu) event = mu->createStEvent();
     
     if(event) AddData(event);
     if(event)cout<<"see a recreated StEvent!"<<endl;
+#if 0
+    Int_t nV0s = mu->GetNV0();
     cout<<"the number of existing v0's is "<<nV0s<<endl;
+#endif
   }
   ///end of Betty
   
@@ -857,8 +835,11 @@ void StV0FinderMaker::ExpandVectors(unsigned short size) {
   trkID.resize(newsize);
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.32 2008/03/05 04:20:18 genevb Exp $
+// $Id: StV0FinderMaker.cxx,v 1.33 2013/02/22 17:06:10 fisyak Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.33  2013/02/22 17:06:10  fisyak
+// Remove reference to gufld, which is not used
+//
 // Revision 1.32  2008/03/05 04:20:18  genevb
 // Change to DB table of V0FinderParameters, reduce logger output, improve Bfield calc
 //
