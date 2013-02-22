@@ -94,7 +94,7 @@ foreach arch ( _ _x8664_ )
     echo "Checking possible backward compatibility through refos $refos"
     if ( -e .$refos || -e $refos ) then
 	foreach ospf ( sl rh )
-	    foreach vers ( 55 56 57 58 )
+	    foreach vers ( 55 56 57 58 59 )
 		set dir=$ospf$vers$arch"gcc432"
 		if ( ! -e .$dir && -e .$refos ) then
 		    echo "  Backward compatibility assumed between $dir -> $refos "
