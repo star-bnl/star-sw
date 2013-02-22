@@ -68,4 +68,5 @@ endif
 
 \mv $dir/*${run}*.png www/$dir/	
 \mv $dir/*${run}*.pdf www/$dir/	
+./maketiny.pl www/$dir
 #makepage.pl $dir

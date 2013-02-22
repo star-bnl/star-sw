@@ -126,6 +126,8 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	
 	$tgt=" onclick=\"openwin(this.href); return false;\"";
 	$siz=" Width=100 ";
+	$p="png";
+	$t="tiny.png";
 	foreach $run (@sortruns){
 	    
 	    $donefile=0;
@@ -186,22 +188,22 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    print(OUT1 "<tr><td><a href=\"http://online.star.bnl.gov/RunLog/index.php?r=$run\">$run</a></td>");	   
 	    print(OUT1 "<td>$time</td><td>$length</td><td>$config</td><td>$type</td>");
 	    
-	    $f="fgtScopeTrace_${run}";if(-e "$plotdir/$f.pdf") {print(OUT1 "<td><a href=\"$id\/$f.pdf\" $tgt>pdf                           </a></td>");} else {print(OUT1 "<td></td>");}
-	    if($type eq "pedestal" || $run == 14039028){
-	    $f="${run}_ped";          if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="fgtScopeTrace_${run}";if(-e "$plotdir/$f.pdf"){print(OUT1 "<td><a href=\"$id\/$f.pdf\" $tgt>pdf                         </a></td>");} else {print(OUT1 "<td></td>");}
+	    if($type eq "pedestal"){
+	    $f="${run}_ped";          if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    }else{
-	    $f="${run}_plot";         if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_plot";         if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
      	    }
-	    $f="${run}_ADCvsTB";      if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    $f="fgtScopeTrace_${run}";if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    $f="${run}_NHitStrip";    if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    $f="${run}_PhiHit";       if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    $f="${run}_RHit";         if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    $f="${run}_NCluster";     if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    $f="${run}_ClusterSize";  if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    $f="${run}_ClusterCharge";if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    $f="${run}_ChargeAsy";    if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    $f="${run}_XY";           if(-e "$plotdir/$f.png") {print(OUT1 "<td><a href=\"$id\/$f.png\" $tgt><img src=\"$id\/$f.png\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_ADCvsTB";      if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="fgtScopeTrace_${run}";if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_NHitStrip";    if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_PhiHit";       if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_RHit";         if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_NCluster";     if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_ClusterSize";  if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_ClusterCharge";if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_ChargeAsy";    if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_XY";           if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    print(OUT1 "<tr>\n");
 	}
 	print(OUT1 "</table>\n");
