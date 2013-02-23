@@ -2,7 +2,7 @@
 
 int runqa( Int_t runnumber = 14032027, Int_t ped=0, Int_t nevents = 100000, 
 	   const Char_t *evpdir = "/evp/a/",
-	   Float_t chargrms=1.0, Float_t thr=4.0, Float_t thr2add=3.0, Bool_t useSeed5=true, Bool_t cutShortEvents = 0, int zs=1){
+	   Float_t chargrms=1.0, Float_t thr=4.0, Float_t thr2add=3.0, Bool_t useSeed5=true, Bool_t cutShortEvents = 0, int zs=0){
   
   int day=runnumber/1000;
 
@@ -30,6 +30,7 @@ int runqa( Int_t runnumber = 14032027, Int_t ped=0, Int_t nevents = 100000,
   if(zs>0){daqRdr->setZSdataOnly();}
   
   if(ped==1) {
+    daqRdr->setNoneZSdataOnly();
     cout << "Loading and Constructing the StFgtPedMaker" << endl;
     gSystem->Load("StFgtPedMaker");
     StFgtRobustPedMaker* pedMkr  = new StFgtRobustPedMaker();

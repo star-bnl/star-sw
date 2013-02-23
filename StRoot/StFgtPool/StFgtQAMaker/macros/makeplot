@@ -8,7 +8,6 @@ set dir=$run
 @ dir /= 1000
 
 echo makeplot $run $type  anadir=$anadir yearday=$dir
-exit
 
 stardev
 cd $anadir
@@ -43,8 +42,8 @@ if ( -e $dir/log/$run.log ) then
     \rm $dir/log/$run.log
 endif
 
-echo root4star -q runqa.C"($run,$dir,$ped)"
-root4star -q runqa.C"($run,$dir,$ped)" > $dir/log/$run.log
+echo root4star -b -q runqa.C"($run,$ped)"
+root4star -b -q runqa.C"($run,$ped)" > $dir/log/$run.log
 
 if ( "$type" == "pedestal" ) then
   if ( -e $dir/ped/ped.$run.txt ) then	
@@ -59,14 +58,14 @@ if ( "$type" == "pedestal" ) then
     endif
     ln -s $dir/status/status.$run.txt status.txt
   endif
-  echo root -q makepedplot.C"($run,$dir)"
-  root -q makepedplot.C"($run,$dir)"
+  echo root -b -q makepedplot.C"($run)"
+  root -b -q makepedplot.C"($run)"
 else
-  echo root -q makeqaplot.C"($run,0,1,$dir)"
-  root -q makeqaplot.C"($run,0,1,$dir)"
+  echo root -b -q makeqaplot.C"($run,0,1)"
+  root -b -q makeqaplot.C"($run,0,1)"
+  \mv $dir/*${run}*.pdf www/$dir/	
 endif
 
 \mv $dir/*${run}*.png www/$dir/	
-\mv $dir/*${run}*.pdf www/$dir/	
 ./maketiny.pl www/$dir
 #makepage.pl $dir
