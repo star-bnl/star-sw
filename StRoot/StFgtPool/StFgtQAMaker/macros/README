@@ -43,7 +43,7 @@ How to run :
   makepage 14046          make web page for day 14046
 
   cron                    see if crontab is set
-  cron set                setup cron job with crontab.txt
+  cron set                setup cron job with crontab.txt. output will be send by email on your account at onlxx
   cron remove             remove cron job
 
 Files generated:

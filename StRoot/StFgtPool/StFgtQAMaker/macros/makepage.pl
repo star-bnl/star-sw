@@ -36,7 +36,6 @@ if($#ARGV>0) {
 print("year=$year day=$day submit=$submit\n");
 
 if (-e "$anadir/html")     {} else {`mkdir $anadir/html`;}
-if (-e "$anadir/db")       {} else {`mkdir $anadir/db`;}
 $today = ` date +%s`;             $today=~s/\n//g;
 $dtoday = ` date +"%Y %b %d %a"`; $dtoday=~s/\n//g;                      
 $itoday = ` date +%j`;            $itoday=~s/\n//g;          
@@ -63,14 +62,14 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
     $id=~s/\n//g;
     $id="$year$id";    
     print("id=$id   ");
-    
+
     if (-e "$anadir/$id") {} else {`mkdir $anadir/$id`;}
-    if ($d == $today) {`runs $id`;}
-    if (-e "$anadir/$id/run.txt") {} else {`runs $id`;}
+    if ($d == $today) {printf("Getting run list from DB ... "); `runs $id`;}
+    if (-e "$anadir/$id/run.txt") {} else {printf("Getting run list from DB\n"); `runs $id`;}
     
-    $nrun=`wc -l $id/run.txt | cut -d " " -f 1`;
+    $nrun=`wc -l $anadir/$id/run.txt | cut -d " " -f 1`;
     $nrun=~s/\n//g;
-    $nfgt=`wc -l $id/fgtrun.txt | cut -d " " -f 1`;
+    $nfgt=`wc -l $anadir/$id/fgtrun.txt | cut -d " " -f 1`;
     $nfgt=~s/\n//g;
     printf("nrun=%4d nfgtrun=%4d\n",$nrun,$nfgt);
 
@@ -80,7 +79,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
     $diff=$today-$d;
     if($diff<60*60*24) {$isToday=1;}
     else {$isToday=0;}
-    # if($debug) {print("isToday=$isToday\n");}
+    if($debug) {print("isToday=$isToday\n");}
     if($yday==-1 || ($yday==0 && $isToday==1) || $yday==$id){	
 	open(RUNS,"$anadir/$id/run.txt");
 	@runlogdb=<RUNS>;
@@ -94,7 +93,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $runs[$nrun]=$run;
 	    $nrun++;
 	}
-	print("Found $nrun runs in DB\n");
+	if($debug) {print("Found $nrun runs in DB\n");}
 	open(FRUNS,"$anadir/$id/fgtrun.txt");
 	@frunlogdb=<FRUNS>;
 	$nfrun=0;
@@ -105,7 +104,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $fruns[$nfrun]=$frun;
 	    $nfrun++;
 	}
-	print("Found $nfrun runs with FGT\n");
+	if($debug) {print("Found $nfrun runs with FGT\n");}
 	@sortruns=sort(@fruns);
 	@revruns=reverse(@sortruns);
 	
@@ -131,7 +130,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	foreach $run (@sortruns){
 	    
 	    $donefile=0;
-	    if(-e "$id/$run.done") {$donefile++;}
+	    if(-e "$anadir/$id/$run.done") {$donefile++;}
 	    
 	    $_=`grep $run $anadir/$id/run.txt`;
 	    @db = split;
@@ -157,12 +156,14 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 		}
 		
 		printf("Run$run has no $id/$run.done, $datadir/$run/ has $evpcount events, and run ends $ago (sec) ago, and submit=$submit\n");
-		if($evpcount<50 && $submit>0) {		    
-		    `touch $id/$run.done`;
+		if($evpcount>50 && $submit>0) {		    
+		    `touch $anadir/$id/$run.done`;
 		    if($submit==2){
-			`makeplot $run $type`;
+			$cmd="$anadir/makeplot $run $type";
+			printf("$cmd\n");
+			system("$cmd");
 		    }elsif($submit==1){
-			$condor="$id/condor/submit_$run.txt";
+			$condor="$anadir/$id/condor/submit_$run.txt";
 			if (-e "$condor") {} else {`\rm $condor`;}
 			print("Creating $condor\n");
 			open(OUTC, "> $condor\n");
@@ -213,4 +214,4 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 print(OUT "</table>\n");
 print(OUT "</BODY></HTML>\n");
 
-`\mv html/*.php $anadir/www/`;
+`\mv $anadir/html/*.php $anadir/www/`;
