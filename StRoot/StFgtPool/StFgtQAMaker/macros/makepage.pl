@@ -18,7 +18,7 @@ if ($out > 1) {
     `ps -elf | grep $anadir/makepage.pl | grep -v grep | grep -v emacs | grep -v csh`;
     exit;
 }else{
-    print("No $anadir/makepage.pl running. Go ahead\n");
+    if($debug) {print("No $anadir/makepage.pl running. Go ahead\n");}
 }
 
 if($#ARGV>-1) {
@@ -33,7 +33,7 @@ if($#ARGV>0) {
     if($ARGV[1] eq "submit") {$submit=1;}
     if($ARGV[1] eq "run")    {$submit=2;}
 }
-print("year=$year day=$day submit=$submit\n");
+if($debug) { print("year=$year day=$day submit=$submit\n"); } 
 
 if (-e "$anadir/html")     {} else {`mkdir $anadir/html`;}
 $today = ` date +%s`;             $today=~s/\n//g;
@@ -61,17 +61,23 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
     $dd=~s/\n//g;
     $id=~s/\n//g;
     $id="$year$id";    
-    print("id=$id   ");
+    if($debug) {print("id=$id   ");}
 
     if (-e "$anadir/$id") {} else {`mkdir $anadir/$id`;}
-    if ($d == $today) {printf("Getting run list from DB ... "); `runs $id`;}
-    if (-e "$anadir/$id/run.txt") {} else {printf("Getting run list from DB\n"); `runs $id`;}
+    if ($d == $today) { 
+	if($debug) { printf("Getting run list from DB ... "); }
+	`cd $anadir; $anadir/runs $id`;
+    }
+    if (-e "$anadir/$id/run.txt") {} else {
+	if($debug){ printf("Getting run list from DB\n");}
+	`cd $anadir; $anadir/runs $id`;
+    }
     
     $nrun=`wc -l $anadir/$id/run.txt | cut -d " " -f 1`;
     $nrun=~s/\n//g;
     $nfgt=`wc -l $anadir/$id/fgtrun.txt | cut -d " " -f 1`;
     $nfgt=~s/\n//g;
-    printf("nrun=%4d nfgtrun=%4d\n",$nrun,$nfgt);
+    if($debug) { printf("nrun=%4d nfgtrun=%4d\n",$nrun,$nfgt); }
 
     if($nfgt==0) {next;}    
     print(OUT "<tr><td><a href=\"$id.php\">$id</a></td><td>$dd</td><td>$nrun</td><td>$nfgt</td>\n");    

@@ -48,7 +48,7 @@ int runqa( Int_t runnumber = 14032027, Int_t ped=0, Int_t nevents = 100000,
     sprintf(filename,"%d/status/status.%d.txt",day,runnumber);
     statMkr->setToSaveToFile(filename);
     statMkr->setTimeBin(0);
-    statMkr->setPedRange(100,1000);
+    statMkr->setPedRange(200,1000);
     statMkr->setRmsRange(5,200);
     statMkr->setFracRange(0.0,1.0);
     statMkr->setMaxDeadPerApv(128);
