@@ -400,6 +400,9 @@ AgMaterial AgMaterial::CopyMaterial( const Char_t *name )
       return (*mMaterialTable[matname]);
     }
 
+  cout << "AgML Error detected.  Copy of nonexistant material." << endl;
+  cout << Form("<Material name=\"%s\" />",name) << endl;
+
   assert(0); // should never get here
 }
 
