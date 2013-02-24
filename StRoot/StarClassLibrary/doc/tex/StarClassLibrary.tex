@@ -2,13 +2,16 @@
 %
 % STAR Class Library - User Guide and Reference Manual -- LaTeX Source 
 %
-% $Id: StarClassLibrary.tex,v 1.25 2009/08/04 23:18:06 fine Exp $
+% $Id: StarClassLibrary.tex,v 1.26 2013/02/24 17:11:06 ullrich Exp $
 %
 % Author: LaTeX template by Thomas Ullrich, March 19 1998
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StarClassLibrary.tex,v $
+% Revision 1.26  2013/02/24 17:11:06  ullrich
+% Fixed problems in SystemOfUnits example.
+%
 % Revision 1.25  2009/08/04 23:18:06  fine
 % remove the unfinished yet StHelixHelper doc
 %
@@ -174,8 +177,8 @@
   \mbox{\includegraphics[width=\textwidth]{StarClassLibraryTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.25 $ $}  \\[5mm] % replaced by cvs with current revision  
-  {\LARGE $ $Date: 2009/08/04 23:18:06 $ $}  % replaced by cvs with current revision  
+  {\LARGE $ $Revision: 1.26 $ $}  \\[5mm] % replaced by cvs with current revision  
+  {\LARGE $ $Date: 2013/02/24 17:11:06 $ $}  % replaced by cvs with current revision  
   \vfill
 \end{center}
 \cleardoublepage
@@ -4313,6 +4316,8 @@ default operators new/delete will be called.
 {\footnotesize
 \begin{verbatim}
 #include "StPhysicalHelix.hh"
+#include "SystemOfUnits.h"
+#include <iostream>
 
 int main(int, char*)
 {
@@ -4336,8 +4341,8 @@ int main(int, char*)
 
     for (double s=0; s<=2*meter; s+=40*centimeter) {
         p = track.momentumAt(s, B);
-        cout << "s=" << s << " mm" << "\t-> p = " << p
-             << " MeV" << "\t |p| = " << abs(p) << endl; 
+        cout << "s=" << s/millimeter << " mm" << "\t-> p = " << p/MeV
+             << " MeV" << "\t |p| = " << abs(p) << " GeV" << endl; 
     }
     
     return 0;
@@ -4348,20 +4353,19 @@ int main(int, char*)
 {\footnotesize
 \begin{verbatim}
 Creating helix with:
-momentum = (1000, 1200, 30)
-origin   = (0, 0, 0)
+momentum = 1	1.2	0.03
+origin   = 0	0	0
 charge   = -1
-B field  = 0.0005
+B field  = 5e-14
 The helix parameters are:
-(curvature = 9.59612e-05, dip angle = 0.0192032,
- phase = -0.694738, h = 1, origin = (0, 0, 0))
+(curvature = 0.000959612, dip angle = 0.0192032, phase = -0.694738, h = 1, origin = 0	0	0)
 Scanning from s=0 to s=2 m:
-s=0 mm    -> p = (1000, 1200, 30) MeV         |p| = 1562.34
-s=400 mm  -> p = (953.222, 1237.48, 30) MeV   |p| = 1562.34
-s=800 mm  -> p = (905.04, 1273.15, 30) MeV    |p| = 1562.34
-s=1200 mm -> p = (855.526, 1306.93, 30) MeV   |p| = 1562.34
-s=1600 mm -> p = (804.752, 1338.8, 30) MeV    |p| = 1562.34
-s=2000 mm -> p = (752.792, 1368.69, 30) MeV   |p| = 1562.34
+s=0 mm	-> p = 1000	1200	30 MeV	 |p| = 1.56234 GeV
+s=400 mm	-> p = 953.222	1237.48	30 MeV	 |p| = 1.56234 GeV
+s=800 mm	-> p = 905.04	1273.15	30 MeV	 |p| = 1.56234 GeV
+s=1200 mm	-> p = 855.526	1306.93	30 MeV	 |p| = 1.56234 GeV
+s=1600 mm	-> p = 804.752	1338.8	30 MeV	 |p| = 1.56234 GeV
+s=2000 mm	-> p = 752.792	1368.69	30 MeV	 |p| = 1.56234 GeV
 \end{verbatim}
 } %footnotesize
 \end{Entry}
