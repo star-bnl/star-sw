@@ -7,19 +7,8 @@ $start = `date -d "Feb 6 00:00:00" +%s`; $start=~s/\n//g;
 
 $yday=0;
 $day=0;
-$debug=0;
+$debug=1;
 $submit=0;
-
-$out = `ps -elf | grep $anadir/makepage.pl | grep -v grep | grep -v emacs | grep -v csh | wc -l`;
-$out=~s/\n//g;
-if($debug) {print("ps reports $out $anadir/makepage.pl jobs found\n");}
-if ($out > 1) {
-    print("There are other $anadir/makepage.pl running. Stop\n");
-    `ps -elf | grep $anadir/makepage.pl | grep -v grep | grep -v emacs | grep -v csh`;
-    exit;
-}else{
-    if($debug) {print("No $anadir/makepage.pl running. Go ahead\n");}
-}
 
 if($#ARGV>-1) {
     if($ARGV[0] eq "all") {$yday=-1;} 
@@ -33,17 +22,33 @@ if($#ARGV>0) {
     if($ARGV[1] eq "submit") {$submit=1;}
     if($ARGV[1] eq "run")    {$submit=2;}
 }
+if($#ARGV>1) {
+    if($ARGV[2] eq "debug")   {$debug=2;}
+    if($ARGV[2] eq "noprint") {$debug=0;}
+}
+
+$out = `ps -elf | grep $anadir/makepage.pl | grep -v grep | grep -v emacs | grep -v csh | wc -l`;
+$out=~s/\n//g;
+if($debug) {print("ps reports $out $anadir/makepage.pl jobs found\n");}
+if ($out > 1) {
+    print("There are other $anadir/makepage.pl running. Stop\n");
+    `ps -elf | grep $anadir/makepage.pl | grep -v grep | grep -v emacs | grep -v csh`;
+    exit;
+}else{
+    if($debug) {print("No $anadir/makepage.pl running. Go ahead\n");}
+}
+
 if($debug) { print("year=$year day=$day submit=$submit\n"); } 
 
 if (-e "$anadir/html")     {} else {`mkdir $anadir/html`;}
 $today = ` date +%s`;             $today=~s/\n//g;
 $dtoday = ` date +"%Y %b %d %a"`; $dtoday=~s/\n//g;                      
 $itoday = ` date +%j`;            $itoday=~s/\n//g;          
-if($debug) {print "today = $today $dtoday $itoday\n";}
+if($debug>1) {print "today = $today $dtoday $itoday\n";}
 
 $dstart=`date -d \"UTC 1970-01-01 $start secs\" +"%Y %b %d %a"`;  $dstart=~s/\n//g;
 $istart=`date -d \"UTC 1970-01-01 $start secs\" +%j`;  $istart=~s/\n//g;
-if($debug) {print "start = $start $dstart $istart\n";}
+if($debug>1) {print "start = $start $dstart $istart\n";}
 
 open(OUT,"> $anadir/html/index.php");
 print(OUT "<HTML><head><META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html\">");
@@ -85,7 +90,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
     $diff=$today-$d;
     if($diff<60*60*24) {$isToday=1;}
     else {$isToday=0;}
-    if($debug) {print("isToday=$isToday\n");}
+    if($debug>1) {print("isToday=$isToday\n");}
     if($yday==-1 || ($yday==0 && $isToday==1) || $yday==$id){	
 	open(RUNS,"$anadir/$id/run.txt");
 	@runlogdb=<RUNS>;
@@ -99,7 +104,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $runs[$nrun]=$run;
 	    $nrun++;
 	}
-	if($debug) {print("Found $nrun runs in DB\n");}
+	if($debug>1) {print("Found $nrun runs in DB\n");}
 	open(FRUNS,"$anadir/$id/fgtrun.txt");
 	@frunlogdb=<FRUNS>;
 	$nfrun=0;
@@ -110,7 +115,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $fruns[$nfrun]=$frun;
 	    $nfrun++;
 	}
-	if($debug) {print("Found $nfrun runs with FGT\n");}
+	if($debug>1) {print("Found $nfrun runs with FGT\n");}
 	@sortruns=sort(@fruns);
 	@revruns=reverse(@sortruns);
 	

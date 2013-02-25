@@ -2,6 +2,7 @@
 #include "fgtPedestal.h"   
 
 static const int MAX=2*6*20*128;
+static const float markerSize=0.3;
 
 makepedplot(int run, int comp=0){
   char filename[100];
@@ -84,8 +85,8 @@ makepedplot(int run, int comp=0){
     c1->cd(2); he->Draw();
     de->GetHistogram()->SetTitle("PED:Offline-Tonko:Id");
     dp->GetHistogram()->SetTitle("PED:Offline-Tonko:Ped");
-    c1->cd(3); de->SetMarkerStyle(22); de->SetMarkerSize(0.6); de->Draw("AP");
-    c1->cd(4); dp->SetMarkerStyle(22); dp->SetMarkerSize(0.6); dp->Draw("AP");
+    c1->cd(3); de->SetMarkerStyle(22); de->SetMarkerSize(markerSize); de->Draw("AP");
+    c1->cd(4); dp->SetMarkerStyle(22); dp->SetMarkerSize(markerSize); dp->Draw("AP");
     return;
   }
 
@@ -130,17 +131,17 @@ makepedplot(int run, int comp=0){
   c1->cd(1);
   gped->GetHistogram()->SetTitle("Pedestals;ElecId;ADC");
   gped->SetMinimum(0); gped->SetMaximum(1500); gped->GetXaxis()->SetRangeUser(0,float(MAX+1));
-  gped->SetMarkerStyle(21); gped->SetMarkerSize(0.6); gped->SetMarkerColor(kBlue); gped->SetLineColor(kBlue);
+  gped->SetMarkerStyle(21); gped->SetMarkerSize(markerSize); gped->SetMarkerColor(kBlue); gped->SetLineColor(kBlue);
   gped->Draw("AP");
-  bped->SetMarkerStyle(22); bped->SetMarkerSize(0.6); bped->SetMarkerColor(kRed); bped->SetLineColor(kRed);
+  bped->SetMarkerStyle(22); bped->SetMarkerSize(markerSize); bped->SetMarkerColor(kRed); bped->SetLineColor(kRed);
   bped->Draw("P");
 
   c1->cd(2);
   grms->GetHistogram()->SetTitle("PedRMS;ElecId;ADC");
   grms->SetMinimum(0); grms->SetMaximum(200); grms->GetXaxis()->SetRangeUser(0,float(MAX+1));
-  grms->SetMarkerStyle(21); grms->SetMarkerSize(0.6); grms->SetMarkerColor(kBlue); grms->SetLineColor(kBlue);
+  grms->SetMarkerStyle(21); grms->SetMarkerSize(markerSize); grms->SetMarkerColor(kBlue); grms->SetLineColor(kBlue);
   grms->Draw("AP");
-  brms->SetMarkerStyle(22); brms->SetMarkerSize(0.6); brms->SetMarkerColor(kRed); brms->SetLineColor(kRed);
+  brms->SetMarkerStyle(22); brms->SetMarkerSize(markerSize); brms->SetMarkerColor(kRed); brms->SetLineColor(kRed);
   brms->Draw("P");
 
   const char c[200]; Double_t x=500, y=160;
@@ -152,9 +153,9 @@ makepedplot(int run, int comp=0){
   c1->cd(3); gPad->cd(1);
   gcor->GetHistogram()->SetTitle("PEDvsRMS;PED;RMS");
   gcor->SetMinimum(0); gcor->SetMaximum(100); gcor->GetXaxis()->SetRangeUser(0,1200);
-  gcor->SetMarkerStyle(21); gcor->SetMarkerSize(0.6); gcor->SetMarkerColor(kBlue); gcor->SetLineColor(kBlue);
+  gcor->SetMarkerStyle(21); gcor->SetMarkerSize(markerSize); gcor->SetMarkerColor(kBlue); gcor->SetLineColor(kBlue);
   gcor->Draw("AP");
-  bcor->SetMarkerStyle(22); bcor->SetMarkerSize(0.6); bcor->SetMarkerColor(kRed); bcor->SetLineColor(kRed);
+  bcor->SetMarkerStyle(22); bcor->SetMarkerSize(markerSize); bcor->SetMarkerColor(kRed); bcor->SetLineColor(kRed);
   bcor->Draw("P");
 
   c1->cd(3); gPad->cd(2); gPad->SetLogy(); hgped->SetFillColor(kBlue);  hgped->Draw();  hbped->SetFillColor(kRed);  hbped->Draw("same");  
