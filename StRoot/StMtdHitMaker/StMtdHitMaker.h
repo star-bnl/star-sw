@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StMtdHitMaker.h,v 1.7 2013/01/25 16:47:02 geurts Exp $ 
+ * $Id: StMtdHitMaker.h,v 1.8 2013/02/25 18:31:00 geurts Exp $ 
  * StMtdHitMaker - class to fill StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -36,6 +36,7 @@ struct MtdRawHit {
 };
 
 struct MTDSingleHit{
+	Int_t 			fiberId;
 	Int_t           backleg; // 1-30
 	Int_t           tray;  // 1-5
 	Int_t           channel; // 0-23
@@ -74,6 +75,8 @@ class StMtdHitMaker:public StRTSBaseMaker {
   mtd_t   *fMtd;
   
   Int_t mUseMuDst;
+  
+  bool mTriggerWndSelection;
 
   Int_t UnpackMtdRawData();
   Int_t getTdigBoardId(Int_t backlegid, Int_t tray, Int_t chn);
@@ -92,6 +95,7 @@ class StMtdHitMaker:public StRTSBaseMaker {
   vector<MtdRawHit> MtdLeadingHits;
   vector<MtdRawHit> MtdTrailingHits;
   
+  static const Int_t nTHUB    = 2;
   static const Int_t mNTRAY    = 5;
   static const Int_t mNBACKLEG = 30;
   static const Int_t mNCHAN    = 24;
@@ -125,6 +129,7 @@ class StMtdHitMaker:public StRTSBaseMaker {
   StMtdHitMaker(const char *name="mtd_raw");     
   ~StMtdHitMaker() ;
   void setUseMuDst(Int_t val);
+  void setTriggerWndSelection(Bool_t val);
 
   void   Clear(Option_t* option="");
   Int_t  Init();
@@ -150,5 +155,6 @@ class StMtdHitMaker:public StRTSBaseMaker {
 inline vector<MtdRawHit> StMtdHitMaker::getLeadingHits()  { return MtdLeadingHits; }
 inline vector<MtdRawHit> StMtdHitMaker::getTrailingHits() { return MtdTrailingHits;}
 inline void StMtdHitMaker::setUseMuDst(Int_t val) { mUseMuDst = val; return;}
+inline void StMtdHitMaker::setTriggerWndSelection(Bool_t val) { mTriggerWndSelection = val; return;}
 
 #endif
