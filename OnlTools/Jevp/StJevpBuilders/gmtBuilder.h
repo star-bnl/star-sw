@@ -40,7 +40,6 @@ public:
     else if(i_arm ==1 &&  i_port==1 && i_apv ==1 ) {return 13;}
     else if(i_arm ==1 &&  i_port==1 && i_apv ==2 ) {return 14;}
     else if(i_arm ==1 &&  i_port==1 && i_apv ==3 ) {return 15;}
-    return -1;
   }
 
   int getLayer(int iarm, int iport, int iapv){
@@ -108,11 +107,17 @@ bool usedAPV(int i_rdo,int i_arm,int i_port,int i_apv){
     TH1 *hSumArray[];
     struct {
       TH1* h1SumAllsignals; 
-           
+                 
     };
   } hSumContents;
+  union {
+  TH2 *hSigtb[];
+    struct {
+      TH2* h2SignalTimebins; 
+    };
+  } hSigtbContents;
 
-  static const int ADCcut = 200;  //Can be changed 
+  static const int ADCcut = 800;  //Can be changed 
   //========= Fixed Values ===================
   static const int numLayers = 8;
   static const int numRDOs = 1;
@@ -137,11 +142,6 @@ bool usedAPV(int i_rdo,int i_arm,int i_port,int i_apv){
  
   double  SignalPedCorrected[numARMs][numPORTs][numAPVs][numChannels][numTimebins];
   double  SumSignalPedCorrected[numTimebins][numLayers];
-
-  double  SumSignalPedCorrected1[numLayers];
-
-  double sumADC[numARMs][numPORTs][numAPVs][numChannels];
-  double counters[numARMs][numPORTs][numAPVs][numChannels];
 
   double sumSignal_AllChambers[numTimebins];
   double sumSignal_AllTimebins[numLayers];
