@@ -1248,11 +1248,13 @@ void y2013()
   /// Y2013 Baseline Configuration ///////////////////////////////
   geom.select = "y2013_1"; {
     setTitle("Y2013 baseline");
+    geom.tpcRefSys = true; // Create TPC reference system
     geom.fill();
   }
   geom.select = "y2013_2"; {
     setTitle("Y2013 baseline sans PIXL");
     // geom.pxstStat = 1; // support tube always on
+    geom.tpcRefSys = true; // Create TPC reference system
     geom.pixlStat = 0;
     geom.dtubStat = 0;
     geom.fill();
@@ -1271,6 +1273,7 @@ void y2013()
   }
   geom.select = "y2013_2x"; {
     setTitle("Asymptotic y2013 sans PIXL");
+    geom.tpcRefSys = true; // Create TPC reference system
     // geom.pxstStat = 1; // support tube always on
     geom.pixlStat = 0;
     geom.dtubStat = 0;
