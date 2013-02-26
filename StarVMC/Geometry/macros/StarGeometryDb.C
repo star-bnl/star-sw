@@ -1252,7 +1252,7 @@ void y2013()
   }
   geom.select = "y2013_2"; {
     setTitle("Y2013 baseline sans PIXL");
-    geom.pxstStat = 0;
+    // geom.pxstStat = 1; // support tube always on
     geom.pixlStat = 0;
     geom.dtubStat = 0;
     geom.fill();
@@ -1271,7 +1271,7 @@ void y2013()
   }
   geom.select = "y2013_2x"; {
     setTitle("Asymptotic y2013 sans PIXL");
-    geom.pxstStat = 0;
+    // geom.pxstStat = 1; // support tube always on
     geom.pixlStat = 0;
     geom.dtubStat = 0;
     geom.fill();
