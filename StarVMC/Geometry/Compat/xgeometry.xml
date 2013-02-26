@@ -10,12 +10,16 @@
 call geometry 
 </Export>
 </Module>
-
+   
 <!--    
   Author:           $Author: jwebb $
-  Current Revision: $Id: xgeometry.xml,v 1.15 2013/02/21 22:50:58 jwebb Exp $
+  Current Revision: $Id: xgeometry.xml,v 1.16 2013/02/26 15:25:23 jwebb Exp $
 
   $Log: xgeometry.xml,v $
+  Revision 1.16  2013/02/26 15:25:23  jwebb
+  Updates to the Y2013 first cut and asymptotic tags.  Pixel support tube
+  remains in place when pixel detector is removed.
+
   Revision 1.15  2013/02/21 22:50:58  jwebb
   Force xgeometry.so recreation.
 

@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.257 2013/02/21 22:51:24 jwebb Exp $
+* $Id: geometry.g,v 1.258 2013/02/26 15:25:32 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.258  2013/02/26 15:25:32  jwebb
+* Updates to the Y2013 first cut and asymptotic tags.  Pixel support tube
+* remains in place when pixel detector is removed.
+*
 * Revision 1.257  2013/02/21 22:51:24  jwebb
 * Defined pixel detector in and out geometries.
 *
@@ -2056,7 +2060,7 @@ REPLACE [exe y2013;] with ["Y2013 first cut geometry";
 
 """ Configuration 1 baseline, 2 without pixl """
 REPLACE [exe y2013_1;] with ["Y2013 first cut"          ; exe Y2013; ];
-REPLACE [exe y2013_2;] with ["Y2013 first cut sans PIXL"; exe Y2013;  PIXL=off; PXST=off; ];
+REPLACE [exe y2013_2;] with ["Y2013 first cut sans PIXL"; exe Y2013;  PIXL=off; PXST=on; ];
 
 
 
@@ -2066,7 +2070,7 @@ REPLACE [exe y2013x;] with [                                      "Y2013 asympto
     EXE TPCE31;   "version 3.1 of the TPC (increase deadzone and integration time)";
 ]
 REPLACE [exe y2013_1x;] with [ "Y2013 asymptotic"; EXE Y2013x; ]
-REPLACE [exe y2013_2x;] with [ "Y2013 asymptotic sans PIXL"; EXE y2013x; PIXL=off; PXST=off; ]
+REPLACE [exe y2013_2x;] with [ "Y2013 asymptotic sans PIXL"; EXE y2013x; PIXL=off; PXST=on; ]
 
 
 c ===============================================================================
