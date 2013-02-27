@@ -2,7 +2,7 @@
 #include "fgtPedestal.h"   
 
 static const int MAX=2*6*20*128;
-static const float markerSize=0.3;
+static const float markerSize=0.38;
 
 makepedplot(int run, int comp=0){
   char filename[100];
@@ -152,7 +152,7 @@ makepedplot(int run, int comp=0){
 
   c1->cd(3); gPad->cd(1);
   gcor->GetHistogram()->SetTitle("PEDvsRMS;PED;RMS");
-  gcor->SetMinimum(0); gcor->SetMaximum(100); gcor->GetXaxis()->SetRangeUser(0,1200);
+  gcor->SetMinimum(0); gcor->SetMaximum(150); gcor->GetXaxis()->SetRangeUser(0,1200);
   gcor->SetMarkerStyle(21); gcor->SetMarkerSize(markerSize); gcor->SetMarkerColor(kBlue); gcor->SetLineColor(kBlue);
   gcor->Draw("AP");
   bcor->SetMarkerStyle(22); bcor->SetMarkerSize(markerSize); bcor->SetMarkerColor(kRed); bcor->SetLineColor(kRed);
