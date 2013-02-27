@@ -122,7 +122,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	$plotdir="$anadir/www/$id/";
 	if (-e "$plotdir") {} else {`mkdir -p $plotdir`;}
 	
-	print("Creating $id.php\n");
+	if($debug) {print("Creating $id.php\n");}
 	open(OUT1,"> $anadir/html/$id.php");
 	
 	print(OUT1 "<HTML><head><META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html\">");
@@ -156,7 +156,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $ago = $now - $end;
 	    if($end==0){$length=-1; $ago=-1;}
 	    if($type eq "pedestal") {next;}
-	    if($config eq "pedAsPhys_tcd_only" || $config eq " fgtPedestals") {$type="pedestal";}
+	    if($config eq "pedAsPhys_tcd_only" || $config eq "pedAsPhys" || $config eq "fgtPedAsPhys") {$type="pedestal";}
 	    
 	    if($donefile==0 && $ago>60 && ($type eq "pedestal" || $length>180) ) {
 		
@@ -166,8 +166,8 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 		    $evpcount =~ s/\n//g;
 		}
 		
-		printf("Run$run has no $id/$run.done, $datadir/$run/ has $evpcount events, and run ends $ago (sec) ago, and submit=$submit\n");
 		if($evpcount>50 && $submit>0) {		    
+		    printf("Run$run has no $id/$run.done, $datadir/$run/ has $evpcount events, and run ends $ago (sec) ago, and submit=$submit\n");
 		    `touch $anadir/$id/$run.done`;
 		    if($submit==2){
 			$cmd="$anadir/makeplot $run $type";

@@ -9,12 +9,10 @@ closedir DIR;
 
 foreach $file (@files){
     if($file =~ /.png/){
-	if($file =~ /.tiny./){
-	}else{
+	if($file !~ /.tiny./){
 	    $tfile = $file;
 	    $tfile =~ s/.png/.tiny.png/g;
-	    if(-e $file){}
-	    else{
+	    if(!-e "$dir/$tfile"){
 		$cmd = "convert $dir/$file -equalize -geometry 100x100 $dir/$tfile";
 		print $cmd,"\n";
 		$out = `$cmd`;
