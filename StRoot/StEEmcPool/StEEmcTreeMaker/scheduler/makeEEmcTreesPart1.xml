@@ -16,6 +16,8 @@
 echo User code starting at
 date
 
+stardev
+
 <!-- Edit this line to adjust the directory where the trees are stored. -->
 set OUTDIR=/star/institutions/anl/sgliske/data/EEmcTrees/2006.Feb21
 
@@ -33,8 +35,8 @@ set FILE1=run${RUN}.EEmcTree_Part1.trig-&TRIGVER;.root
 
 if ( ! -e $OUTDIR/$FILE1 ) then
      # Make Part 1
-     echo root4star -b -q makeEEmcTreePart1.C\(-1,-1,\"runfiles.lis\",\"$FILE1\",1000,\'&TRIGVER;\',\"./\"\)
-     time root4star -b -q makeEEmcTreePart1.C\(-1,-1,\"runfiles.lis\",\"$FILE1\",1000,\'&TRIGVER;\',\"./\"\) | \
+     echo root4star -b -q macros/makeEEmcTreePart1.C\(-1,-1,\"runfiles.lis\",\"$FILE1\",1000,\'&TRIGVER;\',\"./\"\)
+     time root4star -b -q macros/makeEEmcTreePart1.C\(-1,-1,\"runfiles.lis\",\"$FILE1\",1000,\'&TRIGVER;\',\"./\"\) | \
                      egrep -v '(Number\ of|Invariant|Events\ seen|Events\ accepted|Processing\ time\ |Energy\ of\ L|-----------------------------------------------)'
 
      echo cp $FILE1 $OUTDIR/.
@@ -49,7 +51,7 @@ ls -lh
 
 <SandBox>
    <Package>
-      <File>file:.//macros/makeEEmcTreePart1.C</File>
+      <File>file:./macros/makeEEmcTreePart1.C</File>
       <File>file:./L0</File>
       <File>file:./L2</File>
    </Package>
@@ -69,10 +71,12 @@ ls -lh
 
 <!-- CVS
 
-$Id: makeEEmcTreesPart1.xml,v 1.1 2013/02/21 22:53:17 sgliske Exp $
+$Id: makeEEmcTreesPart1.xml,v 1.2 2013/02/28 17:22:14 sgliske Exp $
 $Log: makeEEmcTreesPart1.xml,v $
+Revision 1.2  2013/02/28 17:22:14  sgliske
+bug fixes and updated comments
+
 Revision 1.1  2013/02/21 22:53:17  sgliske
 first added to CVS
-
 
 -->
