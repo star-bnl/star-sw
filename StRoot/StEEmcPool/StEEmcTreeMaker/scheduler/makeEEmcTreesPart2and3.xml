@@ -2,9 +2,10 @@
 
 <job simulateSubmission="false" filesPerHour="3.1" nProcesses="20" >
 
-<!--  Use this xml to make parts 2 and 3, given part 1 has already been computed. -->
+<!--  Use this xml to make parts 2 and 3, given part 1 has already been computed.  -->
 <!--  Edit the "nProcesses" and "filesPerHour" parameters above to adjust how many
-      simultaneous jobs and which queue they'll be in. -->
+      simultaneous jobs and which queue they'll be in.  Five minutes per run is a
+      decent estimate. -->
 
 <command>
 
@@ -33,8 +34,8 @@ foreach FILE1 ( ${LOCATION}/*EEmcTree_Part1.*root )
                date >> ${FILE1:h}/$FILE2
 
                # Make Part 2 and 3 for this ALGO
-               echo root4star -b -q makeEEmcTreePart2and3_${ALGO}.C\(\"${FILE1}\",\"${FILE2}\",\"${FILE3}\"\)
-               time root4star -b -q makeEEmcTreePart2and3_${ALGO}.C\(\"${FILE1}\",\"${FILE2}\",\"${FILE3}\"\)
+               echo root4star -b -q macros/makeEEmcTreePart2and3_${ALGO}.C\(\"${FILE1}\",\"${FILE2}\",\"${FILE3}\"\)
+               time root4star -b -q macros/makeEEmcTreePart2and3_${ALGO}.C\(\"${FILE1}\",\"${FILE2}\",\"${FILE3}\"\)
 
                echo $FILE2 $FILE3 ${FILE1:h}
                cp $FILE2 $FILE3 ${FILE1:h}
@@ -63,3 +64,13 @@ ls -lh
 </Generator>
 
 </job>
+
+<!-- CVS
+
+$Id: makeEEmcTreesPart2and3.xml,v 1.2 2013/02/28 17:22:14 sgliske Exp $
+$Log: makeEEmcTreesPart2and3.xml,v $
+Revision 1.2  2013/02/28 17:22:14  sgliske
+bug fixes and updated comments
+
+
+-->
