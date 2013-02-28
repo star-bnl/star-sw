@@ -396,7 +396,8 @@ Int_t StEEmcTreeMaker_t::fillPart1(){
             if( event ){
                const StThreeVectorF& v = event->primaryVertexPosition();
                mVertex->SetXYZ( v.x(), v.y(), v.z() );
-               mVertexRank = muDst->primaryVertex()->ranking();
+               if( muDst->primaryVertex() )
+                  mVertexRank = muDst->primaryVertex()->ranking();
 
 #ifdef DEBUG
                cout << "vertex at " << v.x() << ' ' << v.y() << ' ' << v.z() << " | " << mVertex->X() << ' ' << mVertex->Y() << ' ' << mVertex->Z() << endl;
@@ -867,8 +868,11 @@ void StEEmcTreeMaker_t::copyStEEmcHitToEEmcHit( const EEmcEnergy_t& eemcEnergy, 
 ClassImp( StEEmcTreeMaker_t );
 
 /*
- * $Id: StEEmcTreeMaker.cxx,v 1.3 2013/02/21 21:57:12 sgliske Exp $
+ * $Id: StEEmcTreeMaker.cxx,v 1.4 2013/02/28 02:34:48 sgliske Exp $
  * $Log: StEEmcTreeMaker.cxx,v $
+ * Revision 1.4  2013/02/28 02:34:48  sgliske
+ * bug fix for copying vertex rank
+ *
  * Revision 1.3  2013/02/21 21:57:12  sgliske
  * updated values of vertexZ for BBC time bins (affects part 3)
  *
