@@ -35,6 +35,11 @@ class StTrigCounter : public StMaker {
    /// monitering status
    void printStatus();
 
+   /// get values
+   UInt_t getTrigID() const;
+   Int_t getNumEventsTot() const;
+   Int_t getNumEventsInCut() const;
+
    /// TODO: write copy constructor and equals operator.  Should not
    /// ever be used anyhow, but for completeness should eventually
    /// write them.
@@ -42,9 +47,6 @@ class StTrigCounter : public StMaker {
  protected:
    UInt_t mTrigID;
    Int_t mNumEvents, mNumEventsInCut;
-
-   /// BBC time difference
-   UInt_t mBbcOnlineTimeDiff;
 
  private:
    // for ROOT
@@ -54,8 +56,12 @@ class StTrigCounter : public StMaker {
 #endif
 
 /*
- * $Id: StTrigCounter.h,v 1.1 2012/12/17 20:58:56 sgliske Exp $
+ * $Id: StTrigCounter.h,v 1.2 2013/02/28 23:37:22 sgliske Exp $
  * $Log: StTrigCounter.h,v $
+ * Revision 1.2  2013/02/28 23:37:22  sgliske
+ * Updated so result of StTrigCounter gets saved in EEmcTree Part1
+ * rather than just being output to the console (log file)
+ *
  * Revision 1.1  2012/12/17 20:58:56  sgliske
  * first added to official StEEmcPool
  *
