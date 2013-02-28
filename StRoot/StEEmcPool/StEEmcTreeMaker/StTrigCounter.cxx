@@ -44,8 +44,8 @@ Int_t StTrigCounter::Make(){
       if( event && event->triggerIdCollection().nominal().isTrigger( mTrigID ) ){
          ++mNumEvents;
 
-         UInt_t mBbcOnlineTimeDiff = event->bbcTriggerDetector().onlineTimeDifference()/32;
-         if( mBbcOnlineTimeDiff >= 6 && mBbcOnlineTimeDiff <= 10 )
+         UInt_t bbcOnlineTimeDiff = event->bbcTriggerDetector().onlineTimeDifference()/32;
+         if( bbcOnlineTimeDiff >= 6 && bbcOnlineTimeDiff <= 10 )
             ++mNumEventsInCut;
       };
    };
@@ -62,18 +62,36 @@ void StTrigCounter::printStatus(){
    cout << "status: event " << GetEventNumber() << ", counts for trigger ID " << mTrigID << " are " << mNumEventsInCut << " and " << mNumEvents << endl;
 };
 
-/// Write everything to file
+/// Output to console
 Int_t StTrigCounter::Finish(){
    cout << "RESULT: Counts for trigger ID " << mTrigID << " are " << mNumEventsInCut << " and " << mNumEvents << endl;
 
    return kStOk;
 };
 
+
+/// get values
+UInt_t StTrigCounter::getTrigID() const {
+   return mTrigID;
+};
+
+Int_t StTrigCounter::getNumEventsTot() const {
+   return mNumEvents;
+};
+
+Int_t StTrigCounter::getNumEventsInCut() const {
+   return mNumEventsInCut;
+};
+
 ClassImp( StTrigCounter );
 
 /*
- * $Id: StTrigCounter.cxx,v 1.1 2012/12/17 20:58:56 sgliske Exp $
+ * $Id: StTrigCounter.cxx,v 1.2 2013/02/28 23:37:18 sgliske Exp $
  * $Log: StTrigCounter.cxx,v $
+ * Revision 1.2  2013/02/28 23:37:18  sgliske
+ * Updated so result of StTrigCounter gets saved in EEmcTree Part1
+ * rather than just being output to the console (log file)
+ *
  * Revision 1.1  2012/12/17 20:58:56  sgliske
  * first added to official StEEmcPool
  *

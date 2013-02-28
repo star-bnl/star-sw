@@ -26,6 +26,7 @@
 #include "StRoot/StEEmcPool/EEmcTreeContainers/TrigSet.h"
 
 #include "StRoot/StEEmcPool/StEEmcTreeMaker/StSpinInfoMaker.h"
+#include "StRoot/StEEmcPool/StEEmcTreeMaker/StTrigCounter.h"
 #include "StRoot/StEEmcPool/EEmcTreeContainers/StSpinInfo.h"
 #include "StRoot/StEEmcPool/StEEmcHitMaker/StEEmcHitMaker.h"
 #include "StRoot/StEEmcPool/StEEmcHitMaker/StESMDClustersPerSector.h"
@@ -684,6 +685,24 @@ void StEEmcTreeMaker_t::Clear(Option_t *opts ){
 
 /// Write everything to file
 Int_t StEEmcTreeMaker_t::Finish(){
+
+   // write out the trigger count information
+
+   if( mIOStat[ PART_1 ] == WRITE ){
+      StTrigCounter* trigCounter = (StTrigCounter*)StMaker::GetChain()->GetMaker("trigCounter");
+      if( !trigCounter ){
+         LOG_WARN << "ERROR cannot find the trigger counter" << endl;
+      } else {
+         TArrayI trigArray(3);
+         trigArray[0] = trigCounter->getTrigID();
+         trigArray[1] = trigCounter->getNumEventsTot();
+         trigArray[2] = trigCounter->getNumEventsInCut();
+
+         cout << "Writing trigger counts " << trigArray[0] << ' ' << trigArray[1] << ' ' << trigArray[2] << endl;
+         mFile[ PART_1 ]->WriteObject( &trigArray, "trigCounts" );
+      };
+   };
+
    for( Int_t ipart=0; ipart<NUM_TREE_PARTS; ++ipart ){
       if( mIOStat[ ipart ] == WRITE ){
          mFile[ ipart ]->Write();
@@ -868,8 +887,12 @@ void StEEmcTreeMaker_t::copyStEEmcHitToEEmcHit( const EEmcEnergy_t& eemcEnergy, 
 ClassImp( StEEmcTreeMaker_t );
 
 /*
- * $Id: StEEmcTreeMaker.cxx,v 1.4 2013/02/28 02:34:48 sgliske Exp $
+ * $Id: StEEmcTreeMaker.cxx,v 1.5 2013/02/28 23:37:18 sgliske Exp $
  * $Log: StEEmcTreeMaker.cxx,v $
+ * Revision 1.5  2013/02/28 23:37:18  sgliske
+ * Updated so result of StTrigCounter gets saved in EEmcTree Part1
+ * rather than just being output to the console (log file)
+ *
  * Revision 1.4  2013/02/28 02:34:48  sgliske
  * bug fix for copying vertex rank
  *
