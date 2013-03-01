@@ -131,8 +131,9 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	
 	print(OUT1 "<H1>FGT Monitor Day$id ($dd)</H1>\n");
 	print(OUT1 "<a href=\"index.php\">Back to day list</a>\n");
-	print(OUT1 "<table border=1><tr><td>Run</td><td>Time</td><td>Length[sec]</td><td>Config</td><td>Type</td>\n");
-	print(OUT1 "<td>pdf</td><td>Plots</td><td>ADCvsTB</td><td>Trace</td><td>NHitStrip</td><td>PhiHits</td><td>RHits</td><td>NCluster</td><td>ClusterSize</td><td>Charge</td><td>ChargeAsy</td><td>XY</td></tr>\n");
+	print(OUT1 "<table border=1><tr><td>Run</td><td>Time</td><td>Length</td><td>Config</td><td>Type</td>\n");
+	print(OUT1 "<td>pdf</td><td>Plots</td><td>ADCvsTB</td><td>Trace</td><td>NHitStrip</td><td>PhiHits</td>");
+	print(OUT1 "<td>RHits</td><td>NCluster</td><td>ClusterSize</td><td>Charge</td><td>MaxADC</td><td>ChargeAsy</td><td>XY</td></tr>\n");
 	
 	$tgt=" onclick=\"openwin(this.href); return false;\"";
 	$siz=" Width=100 ";
@@ -154,6 +155,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $now=time;
 	    $length = $end - $begin;
 	    $ago = $now - $end;
+	    $time=`date -d \"UTC 1970-01-01 $begin secs\" +"%H:%M:%S"`;  $time=~s/\n//g;
 	    if($end==0){$length=-1; $ago=-1;}
 	    if($type eq "pedestal") {next;}
 	    if($config eq "pedAsPhys_tcd_only" || $config eq "pedAsPhys" || $config eq "fgtPedAsPhys") {$type="pedestal";}
@@ -214,6 +216,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $f="${run}_NCluster";     if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_ClusterSize";  if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_ClusterCharge";if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_MaxAdc";       if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_ChargeAsy";    if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_XY";           if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    print(OUT1 "<tr>\n");

@@ -90,10 +90,12 @@ int runqa( Int_t runnumber = 14032027, Int_t ped=0, Int_t nevents = 100000,
     StFgtSimplePointAlgo * simplePointAlgo = new StFgtSimplePointAlgo();    
     pointMk->setPointAlgo( simplePointAlgo );
 
-    /*
     gSystem->Load("StFgtClusterTools");
     fgtGenBase=new StFgtGeneralBase("fgtGenBase");
     fgtStraightTrackMaker =new StFgtStraightTrackMaker("fgtStraightTracker");
+    fgtStraightTrackMaker->setMinNumFitPoints(4);
+    fgtStraightTrackMaker->setMaxClusters(20);
+    fgtStraightPlotter=new StFgtStraightPlotter("fgtStraightPlotter");
 
     gSystem->Load("libMinuit");
     gSystem->Load("StFgtAlignmentMaker");
@@ -101,8 +103,7 @@ int runqa( Int_t runnumber = 14032027, Int_t ped=0, Int_t nevents = 100000,
     algMk->setTrackType(0);
     algMk->setDataSource(2);
     algMk->setRunNumber(runnumber);
-    algMk->setWriteTree("alignment_trkout.root");
-    */
+    //algMk->setWriteTree("alignment_trkout.root");
 
     gSystem->Load("StFgtQAMaker");
     StFgtQAMaker* qaMkr =new StFgtQAMaker();
