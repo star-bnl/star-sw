@@ -2,7 +2,7 @@ static const int kFgtNumDiscs=6;
 static const int kFgtNumQuads=4;  
 
 static const int NHist=3;     
-static const int N1dHist=7;   
+static const int N1dHist=8;   
 static const int N2dHist=2;   
 static const int NTrkHist=4;
 
@@ -14,13 +14,13 @@ static TH1F *histTrk[kFgtNumQuads][NTrkHist];            //! Histos for tracks
 static const char* cquad[kFgtNumQuads]={"A","B","C","D"}; 
 static const char* cHist[NHist]={"MaxTimeBin","ADC","DataSize"};
 
-static const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","ChargeAsy"};
+static const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","MaxAdc","ChargeAsy"};
 //Log 0=linear 1=log
-static const int   l1dHist[N1dHist]={          1,        1,        1,          1,            1,              0,          0};
+static const int   l1dHist[N1dHist]={          1,        1,        1,          1,            1,              0,       0,          0};
 //Mode 0=4pad 6discs on a plot, 1=24pads for each quad
-static const int   m1dHist[N1dHist]={          0,        1,        1,          0,            0,              0,          0};
+static const int   m1dHist[N1dHist]={          0,        1,        1,          0,            0,              0,       0,          0};
 //Fit 0=no fit show mean, 1=gaussian fit show rms, 2=landau fit, show peak
-static const int   f1dHist[N1dHist]={          0,        0,        0,          0,            0,              2,          1};
+static const int   f1dHist[N1dHist]={          0,        0,        0,          0,            0,              2,       2,          1};
 
 static const char* c2dHist[N1dHist]={"XY","ADCvsTB"};
 

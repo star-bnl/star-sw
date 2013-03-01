@@ -3,7 +3,7 @@ This is FGT offline chain monitor README
 
 How to setup:
 
-  ssh -t -A -Y stargw.starp.bnl.gov ssh -A -Y onl0<N>
+  ssh -t -A -Y rssh.rhic.bnl.gov -t -A -Y stargw.starp.bnl.gov ssh -A -Y onl0<N>
   klog
   cd <your working dir>
   cvs co StRoot/StFgtPool/StFgtQAMaker
@@ -40,10 +40,10 @@ How to run :
    or
   makeplot 14046110 physics               run runqa.C and makeqaplot.C (or makepedplot.C for pedestal) and copy png and pdf file to web area
 
-  makepage                just make web page for today (not running qa nor making plots)
-  makepage 0 submit       make web page for today, and submit makeplot job to condor as needed
-  makepage 0 run          make web page for today, and run makeplot in this process (not on condor) as needed
-  makepage 14046          make web page for day 14046
+  makepage.pl                just make web page for today (not running qa nor making plots)
+  makepage.pl 0 submit       make web page for today, and submit makeplot job to condor as needed
+  makepage.pl 0 run          make web page for today, and run makeplot in this process (not on condor) as needed
+  makepage.pl 14046          make web page for day 14046
 
   emacs crontab.txt       edit cron jobb specification: time interval to run "makepage" job
   cron                    see if crontab is set
