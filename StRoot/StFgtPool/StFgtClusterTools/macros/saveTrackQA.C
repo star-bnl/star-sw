@@ -23,7 +23,7 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
       h->Draw();
       h->GetYaxis()->SetTitle("dN");
       h->GetXaxis()->SetTitle("number of tracks in ev");
-  hContents.h1->SetFillColor(kYellow-9);
+      h->SetFillColor(kYellow-9);
       c.SaveAs("numTrkPerEv.png");
     }
   
@@ -32,7 +32,7 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
     {
       h->SetTitle("Number of Points per Track");
       h->SetName(numPointsPerTrack);
-  hContents.h1->SetFillColor(kYellow-9);
+      h->SetFillColor(kYellow-9);
       h->Draw();
       c.SaveAs("numPointsPerTrack.png");
     }
@@ -44,7 +44,7 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
       h->SetName(vtxDist);
       h->GetXaxis()->SetTitle("z [cm]");
       h->GetYaxis()->SetTitle("dN");
-      hContents.h1->SetFillColor(kYellow-9);
+      h->SetFillColor(kYellow-9);
       h->Draw();
       c.SaveAs("zVtxDist.png");
 
@@ -84,7 +84,7 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
 	      TH1D* h=(TH1D*)f.Get(buffer);
 	      h->GetXaxis()->SetTitle("cluster charge [ACD counts]");
 	      h->GetYaxis()->SetTitle("dN");
-	      hContents.h1->SetFillColor(kYellow-9);
+	      h->SetFillColor(kYellow-9);
 	      h->Draw();
 	      sprintf(buffer,"%s.png",buffer);
 	      cout <<"save as " << buffer <<endl;
