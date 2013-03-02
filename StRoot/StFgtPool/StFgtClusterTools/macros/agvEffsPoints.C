@@ -73,7 +73,8 @@ int agvEffsPoints( const Char_t *filenameIn = "/star/data03/daq/2012/174/1317400
    ///   dbMkr->SetDateTime(20120316,033657); ///
    //          dbMkr->SetDateTime(20120404,043459); ///
    //////--->for run12             dbMkr->SetDateTime(20120622,043459); ///
-            dbMkr->SetDateTime(20120622,043459); ///z
+   //            dbMkr->SetDateTime(20120622,043459); ///z
+   dbMkr->SetDateTime(20130301,043459); ///
    //     dbMkr->SetDateTime(20120803,043459); ///for cosmic teststand
    //  dbMkr->SetDateTime(20120903,043459); ///for cosmic teststand
 
@@ -92,6 +93,8 @@ int agvEffsPoints( const Char_t *filenameIn = "/star/data03/daq/2012/174/1317400
    daqRdr = new StFgtRawDaqReader( "daqReader", filenameIn, fgtDbMkrName.data() );
    daqRdr->setIsCosmic( false );
    daqRdr->cutShortEvents( cutShortEvents );
+   daqRdr->setIsCosmic( false );
+   daqRdr->setZSdataOnly();
    gSystem->Load("libStFgtA2CMaker");
    StFgtA2CMaker* a2cMkr  = new StFgtA2CMaker(  "FgtA2CMaker" );
    a2cMkr->setFgtDb(fgtDbMkr->getDbTables());

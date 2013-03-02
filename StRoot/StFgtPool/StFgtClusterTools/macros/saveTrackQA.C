@@ -1,6 +1,7 @@
 
 void saveTrackQA(Char_t* signalFile="signalShapes.root")
 {
+  gStyle->SetPalette(1);
   TFile f(signalFile);
   Char_t buffer[100];
   Char_t quadName[10];
@@ -11,6 +12,8 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
   Char_t* numTrkPerEv="numTracksPerEvent";
   Char_t* numPointsPerTrack="numPointsPerTrack";
   Char_t* vtxDist="z_Vtx_From_trk_fit";
+  Char_t* ipProj="Proj_To_IP";
+
   TCanvas c;
   TH1D* h=(TH1D*)f.Get(numTrkPerEv);
   if(h!=0)
@@ -39,4 +42,41 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
       c.SaveAs("zVtxDist.png");
     }
 
+      TH2D* h2=(TH2D*)f.Get(ipProj);
+      if(h2!=0)
+	{
+	  h2->SetTitle("Vertex Distribution");
+	  h2->SetName(vtxDist);
+	  h2->Draw("colz");
+	  c.SaveAs("z_Dca.png");
+	}
+
+  for(int iD=1;iD<7;iD++)
+    {
+      for(int iQ=0;iQ<4;iQ++)
+	{
+	  if(iQ==0)
+	    sprintf(quadName,"A");
+	  if(iQ==1)
+	    sprintf(quadName,"B");
+	  if(iQ==2)
+	    sprintf(quadName,"C");
+	  if(iQ==3)
+	    sprintf(quadName,"D");
+	  for(int iL=0;iL<2;iL++)
+	    {
+	      if(iL==0)
+		sprintf(layerName,"P");
+	      else
+		sprintf(layerName,"R");
+	      sprintf(buffer,"chargeTrackCluster%s_disc%d_quad%d",layerName,iD,iQ);
+	      cout <<"loading " << buffer <<endl;
+	      TH1D* h=(TH1D*)f.Get(buffer);
+	      h->Draw();
+	      sprintf(buffer,"%s.png",buffer);
+	      cout <<"save as " << buffer <<endl;
+	      c.SaveAs(buffer);
+	    }
+	}
+    }
 }

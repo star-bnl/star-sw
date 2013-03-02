@@ -665,17 +665,19 @@ void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int
       chargeCorrInEffDisk->Fill(clusterChargeR,clusterChargeP);
       StFgtGeom::getPhysicalCoordinate((float)pStrips[iD*4+iq][maxRInd].geoId,disc,quadrant,layer,ordinate,lowerSpan,upperSpan);
       //	    if(ordinate>20)
-      {///this is what is plotted lateron
-	chargeCorr[iD*4+iq]->Fill(clusterChargeR,clusterChargeP);
-      }
-      //basically only here we fill with the estimated cluster, for the other disks we fill with the cluster on the track
-      //	   if(r>20)
-      {
-	clusterSizeR[iD*4+iq]->Fill(mClusterSizeR);
-	clusterSizeP[iD*4+iq]->Fill(mClusterSizeP);
-      }
+
     }
-  
+  if(partOfClusterR&& partOfClusterP)
+    {///this is what is plotted lateron
+      chargeCorr[iD*4+iq]->Fill(clusterChargeR,clusterChargeP);
+    
+  //basically only here we fill with the estimated cluster, for the other disks we fill with the cluster on the track
+  //	   if(r>20)
+  {
+    clusterSizeR[iD*4+iq]->Fill(mClusterSizeR);
+	clusterSizeP[iD*4+iq]->Fill(mClusterSizeP);
+  } 
+    } 
   
   if(partOfClusterP)
     {
@@ -1238,6 +1240,38 @@ Int_t StFgtStraightPlotter::Make()
   StFgtGeneralBase *fgtGenMkr = static_cast<StFgtGeneralBase * >( GetMaker("fgtGenBase"));
   pClusters=fgtGenMkr->getClusters();
   pStrips=fgtGenMkr->getStrips();
+  Int_t tmpCluCount[6*4*2];
+  memset(tmpCluCount,0,6*4*2*sizeof(Int_t));
+  for(int iD=0;iD<6;iD++)
+    {
+      vector<generalCluster> &hitVec=*(pClusters[iD]);
+
+      for( vector<generalCluster>::iterator hitIter=hitVec.begin();hitIter != hitVec.end();hitIter++)
+	{
+
+	  Int_t iq=hitIter->quad;
+	  if(hitIter->layer=='R')
+	    {
+	      tmpCluCount[iD*4+iq]++;
+	      h_clusterChargeR[iD]->Fill(hitIter->clusterCharge);
+	    }
+	  else
+	    {
+		tmpCluCount[6*4+iD*4+iq]++;
+		h_clusterChargePhi[iD]->Fill(hitIter->clusterCharge);
+	    }
+	    
+	}
+    }
+  for(int iD=0;iD<6;iD++)
+    {
+      for(int iq=0;iq<4;iq++)
+	{
+	  numClustersR[iD*4+iq]->Fill(tmpCluCount[iD*4+iq]);
+	  numClustersPhi[iD*4+iq]->Fill(tmpCluCount[6*4+iD*4+iq]);
+	}
+    }
+
   //  cout <<"ave make " <<endl;
   Int_t ierr = kStOk;
   (*outTxtFile) <<"----------------------------- Event Nr: " << evtNr<<" -----------------" <<endl;
@@ -1258,6 +1292,17 @@ Int_t StFgtStraightPlotter::Make()
       intNumTracks++; 
       numTracksInCurrEv++;
       numPointsPerTrack->Fill(it->points->size());
+      for(int i=0;i<it->points->size();i++)
+	{
+	  Int_t iD=(*(it->points))[i].dID;
+	  Int_t iq=(*(it->points))[i].quadID;
+	  if(iD<6 && iD>=0 && iq<4 && iq>=0)
+	    {
+	      chargeTrackClusterR[iD*4+iq]->Fill((*(it->points))[i].rCharge);
+	      chargeTrackClusterP[iD*4+iq]->Fill((*(it->points))[i].phiCharge);
+	    }
+	}
+
       Double_t mx=it->mx;
       Double_t my=it->my;
       Double_t bx=it->ax;
@@ -1625,6 +1670,9 @@ Int_t StFgtStraightPlotter::Finish(){
 	  firstTbSigCloseClusterR[iD*4+iq]->Write();
 	  firstTbSigCloseClusterP[iD*4+iq]->Write();
 
+
+	  chargeTrackClusterR[iD*4+iq]->Write();
+	  chargeTrackClusterP[iD*4+iq]->Write();
 	  maxTbTrackClusterP[iD*4+iq]->Write();
 	  maxTbTrackClusterR[iD*4+iq]->Write();
 	  maxAdcTrackClusterP[iD*4+iq]->Write();
@@ -1674,7 +1722,7 @@ Int_t StFgtStraightPlotter::Finish(){
           APVsecondToLastRatioCloseClusterR[iD*40+binAPVi]->Write();
         }
     }
-
+  hIp->Write();
 
   cout <<"writen and closed " << endl;
 
@@ -1694,8 +1742,8 @@ Int_t StFgtStraightPlotter::Finish(){
   TCanvas* cClusterChargeR=new TCanvas("clusterChargeR","clusterChargeR",1000,1500);
   cClusterChargeR->Divide(2,3);
 
-  TCanvas cIPProj;
-  hIp->Draw("colz");
+  //  TCanvas cIPProj;
+  //  hIp->Draw("colz");
   hIp->Write();
   ///---->  cIPProj.SaveAs("ipProj.png");
 
@@ -2002,6 +2050,8 @@ Int_t StFgtStraightPlotter::Init(){
   createPlots(&firstTbSigTrackClusterP,kFgtNumDiscs*4,"firstTbSigTrackClusterP",100,0,20);
 
 
+  createPlots(&chargeTrackClusterR,kFgtNumDiscs*4,"chargeTrackClusterR",100,0,10000);
+  createPlots(&chargeTrackClusterP,kFgtNumDiscs*4,"chargeTrackClusterP",100,0,10000);
   createPlots(&maxAdcTrackClusterR,kFgtNumDiscs*4,"maxAdcTrackClusterR",100,0,5000);
   createPlots(&maxAdcCloseClusterR,kFgtNumDiscs*4,"maxAdcCloseClusterR",100,0,5000);
   createPlots(&maxSigTrackClusterR,kFgtNumDiscs*4,"maxSigTrackClusterR",100,1,200);
@@ -2086,7 +2136,7 @@ Int_t StFgtStraightPlotter::Init(){
   h_clusterChargePhi=new TH1D*[kFgtNumDiscs];
 
 
-  hIp=new TH2D("Proj_to_IP","Proj_to_Ip",50,-100,100,50,-100,100);
+  hIp=new TH2D("Proj_to_IP","Proj_to_Ip",50,-100,100,50,0,10);
   hBx=new TH1D("hBx","hBx",50,-100,100);
   hBy=new TH1D("hBy","hBy",50,-100,100);
   hMx=new TH1D("hMx","hMx",50,-100,100);

@@ -31,7 +31,7 @@ StFgtStraightTrackMaker    *fgtStraightTracker     = 0;
 
 
 int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/st_physics_13174038_raw_1010001.daq",
-	     Int_t nevents = 100, Int_t effDisk=2,
+	     Int_t nevents = 100, Int_t effDisk=20,
 	     Bool_t cutShortEvents = 1 ){
    LoadLibs();   
 
@@ -63,13 +63,14 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
    ///   dbMkr->SetDateTime(20120316,033657); ///
    //          dbMkr->SetDateTime(20120404,043459); ///
    //////--->for run12             dbMkr->SetDateTime(20120622,043459); ///
-   dbMkr->SetDateTime(20120622,043459); ///
+   //   dbMkr->SetDateTime(20120622,043459); ///
    ///            dbMkr->SetDateTime(20120622,043459); ///z
    //     dbMkr->SetDateTime(20120803,043459); ///for cosmic teststand
    //  dbMkr->SetDateTime(20120903,043459); ///for cosmic teststand
 
    ///     dbMkr->SetDateTime(20120307,000717); ///
    //      dbMkr->SetDateTime(20120128,204320);      // run ???
+   dbMkr->SetDateTime(20130301,043459); ///
    
    cout << "Constructing StFgtDbMaker" << endl;
    fgtDbMkr = new StFgtDbMaker( "fgtDb" );
@@ -82,6 +83,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
    cout << "Constructing the daq reader" << endl;
    daqRdr = new StFgtRawDaqReader( "daqReader", filenameIn, fgtDbMkrName.data() );
    daqRdr->setIsCosmic( false );
+     daqRdr->setZSdataOnly();
    daqRdr->cutShortEvents( cutShortEvents );
    gSystem->Load("libStFgtA2CMaker");
    StFgtA2CMaker* a2cMkr  = new StFgtA2CMaker(  "FgtA2CMaker" );
@@ -123,7 +125,8 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
   fgtGenBase->fillFromEvent();
 
   fgtStraightTracker = new StFgtStraightTrackMaker( "fgtStraightTracker" );
-  fgtStraightTracker->setMinNumFitPoints(3);
+  fgtStraightTracker->setMinNumFitPoints(4);
+  fgtStraightTracker->SetEffDisk(effDisk);
   fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
 
 
@@ -148,7 +151,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
 
    cout << "max nevents = " << nevents << endl;
    for( int i=0; i<nevents && !ierr; ++i ){
-      if( i+1 % 100 == 1 )
+     if( i+1 % 100 == 1 )
          cout << "\ton event number **************" << i << endl;
 	 cout << "clear (agv)" << endl;
 	 analysisChain->Clear();
