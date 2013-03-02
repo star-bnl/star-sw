@@ -207,6 +207,7 @@ void fgtBuilder::initialize(int argc, char *argv[]) {
     {
       tbVsAdcContents.tbVsAdcArray[i]->SetOption("colz");
       plots[np+i]=new JevpPlot(tbVsAdcContents.tbVsAdcArray[i]);
+      plots[np+i]->optlogz=true;
     }
 
   plots[nTbVsAdc+np]=new JevpPlot(hContents.h1);
