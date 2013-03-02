@@ -83,7 +83,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
    cout << "Constructing the daq reader" << endl;
    daqRdr = new StFgtRawDaqReader( "daqReader", filenameIn, fgtDbMkrName.data() );
    daqRdr->setIsCosmic( false );
-     daqRdr->setZSdataOnly();
+   daqRdr->setZSdataOnly();
    daqRdr->cutShortEvents( cutShortEvents );
    gSystem->Load("libStFgtA2CMaker");
    StFgtA2CMaker* a2cMkr  = new StFgtA2CMaker(  "FgtA2CMaker" );
@@ -125,7 +125,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
   fgtGenBase->fillFromEvent();
 
   fgtStraightTracker = new StFgtStraightTrackMaker( "fgtStraightTracker" );
-  fgtStraightTracker->setMinNumFitPoints(4);
+  fgtStraightTracker->setMinNumFitPoints(3);
   fgtStraightTracker->SetEffDisk(effDisk);
   fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
 

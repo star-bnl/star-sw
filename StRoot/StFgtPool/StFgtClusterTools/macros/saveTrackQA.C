@@ -12,7 +12,7 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
   Char_t* numTrkPerEv="numTracksPerEvent";
   Char_t* numPointsPerTrack="numPointsPerTrack";
   Char_t* vtxDist="z_Vtx_From_trk_fit";
-  Char_t* ipProj="Proj_To_IP";
+  Char_t* ipProj="ProjToIP";
 
   TCanvas c;
   TH1D* h=(TH1D*)f.Get(numTrkPerEv);
@@ -57,7 +57,7 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
 	  h2->SetName(vtxDist);
 	  h2->Draw("colz");
 	  h2->GetXaxis()->SetTitle("z [cm]");
-	  h2->GetYaxis()->SetTitle("dcz [cm]");
+	  h2->GetYaxis()->SetTitle("dca [cm]");
 	  c.SaveAs("z_Dca.png");
 	}
 

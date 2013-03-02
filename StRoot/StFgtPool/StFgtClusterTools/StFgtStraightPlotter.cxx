@@ -1588,10 +1588,16 @@ Int_t StFgtStraightPlotter::Finish(){
   fClu->Write();
   fClu->Close();
   sprintf(buffer,"%s/signalShapes.root",fileBase);
-  cout <<"setting signal shapes file to : " << buffer <<endl;
+  //  cout <<"setting signal shapes file to : " << buffer <<endl;
   TFile *f1 = new TFile(buffer,"recreate");
   f1->cd();
-
+  cout <<"writing hip..."<<endl;
+  TCanvas ctmp;
+  hIp->Draw();
+  hIp->Write();
+  f1->Write();
+  ctmp.SaveAs("tmp.png");
+  cout <<"done " <<endl;
   //normalize
   for(int iB=1;iB<8;iB++)
     {
@@ -1722,14 +1728,14 @@ Int_t StFgtStraightPlotter::Finish(){
           APVsecondToLastRatioCloseClusterR[iD*40+binAPVi]->Write();
         }
     }
-  hIp->Write();
+
 
   cout <<"writen and closed " << endl;
 
 
   ///---->   cRadioHits->SaveAs("radioPlotsHits.png");
   ///---->  cRadioNonHits->SaveAs("radioPlotsNonHits.png");
-
+  
   TCanvas* cClusterSizeR=new TCanvas("clusterSizeR","clusterSizeR",1000,1500);
   cClusterSizeR->Divide(2,3);
   TCanvas* cClusterSizePhi=new TCanvas("clusterSizePhi","clusterSizePhi",1000,1500);
@@ -1744,9 +1750,8 @@ Int_t StFgtStraightPlotter::Finish(){
 
   //  TCanvas cIPProj;
   //  hIp->Draw("colz");
-  hIp->Write();
-  ///---->  cIPProj.SaveAs("ipProj.png");
 
+  ///---->  cIPProj.SaveAs("ipProj.png");
   hBx->Draw();
   hBx->Write();
   ///---->  cIPProj.SaveAs("hBx.png");
@@ -2136,12 +2141,12 @@ Int_t StFgtStraightPlotter::Init(){
   h_clusterChargePhi=new TH1D*[kFgtNumDiscs];
 
 
-  hIp=new TH2D("Proj_to_IP","Proj_to_Ip",50,-100,100,50,0,10);
+  hIp=new TH2D("ProjToIP","Proj_to_Ip",50,-100,100,50,0,10);
   hBx=new TH1D("hBx","hBx",50,-100,100);
   hBy=new TH1D("hBy","hBy",50,-100,100);
   hMx=new TH1D("hMx","hMx",50,-100,100);
   hMy=new TH1D("hMy","My",50,-0.1,0.1);
-  hIpZ=new TH1D("IP_Z","IP_Z",50,-100,100);
+  hIpZ=new TH1D("IPZ","IP_Z",50,-100,100);
 
   hIpDca=new TH1D("ipDCA","ipDCA",50,-100,100);
   hTrkZ=new TH1D("z_Vtx_From_trk_fit","z_Vtx_From_trk_fit",50,-100,100);
