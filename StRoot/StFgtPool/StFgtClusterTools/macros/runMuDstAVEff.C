@@ -51,7 +51,7 @@ void runMuDstAVEff( const Char_t *filename, const Char_t* baseFilename=".",
    //      dbMkr->SetDateTime(20120128,204320);      // run ???
 
    cout << "Constructing StFgtDbMaker" << endl;
-   fgtDbMkr = new StFgtDbMaker( "fgtDbMkr" );
+   fgtDbMkr = new StFgtDbMaker( "fgtDb" );
    //fgtDbMkr->SetFlavor("ideal",""); // mapping is wrong, but at least the code runs...
    fgtDbMkrName = fgtDbMkr->GetName();
    //
@@ -157,8 +157,11 @@ void LoadLibs() {
 };
 
 /*
-$Id: runMuDstAVEff.C,v 1.11 2013/01/29 21:58:25 avossen Exp $
+$Id: runMuDstAVEff.C,v 1.12 2013/03/02 03:11:24 avossen Exp $
 $Log: runMuDstAVEff.C,v $
+Revision 1.12  2013/03/02 03:11:24  avossen
+*** empty log message ***
+
 Revision 1.11  2013/01/29 21:58:25  avossen
 new/old efficiency computation now consistent
 

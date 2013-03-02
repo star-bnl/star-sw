@@ -504,7 +504,7 @@ Int_t StFgtStraightTrackMaker::Make()
   pClusters=fgtGenMkr->getClusters();
   for(int i=0;i<6;i++)
     {
-      //      cout <<"there are " << pClusters[i]->size() << " clusters in disk " << i <<endl;
+      //     cout <<"there are " << pClusters[i]->size() << " clusters in disk " << i <<endl;
       for(int j=0;j<pClusters[i]->size();j++)
 	{
 

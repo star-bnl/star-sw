@@ -31,7 +31,6 @@ StFgtStraightTrackMaker    *fgtStraightTracker     = 0;
 
 
 int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/st_physics_13174038_raw_1010001.daq",
-		       Int_t runnumber = 13074038,
 	     Int_t nevents = 100, Int_t effDisk=2,
 	     Bool_t cutShortEvents = 1 ){
    LoadLibs();   
@@ -59,11 +58,13 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
    //run 13064033
    //   dbMkr->SetDateTime(20120304,173144);      // run 13025001 2012-01-25 08:03:34 GMT
    //for 1305459
-   //   dbMkr->SetDateTime(20120223,201805);      
+   //  dbMkr->SetDateTime(20120223,201805);      
+   //  dbMkr->SetDateTime(20120223,201805);      
    ///   dbMkr->SetDateTime(20120316,033657); ///
    //          dbMkr->SetDateTime(20120404,043459); ///
    //////--->for run12             dbMkr->SetDateTime(20120622,043459); ///
-            dbMkr->SetDateTime(20120622,043459); ///z
+   dbMkr->SetDateTime(20120622,043459); ///
+   ///            dbMkr->SetDateTime(20120622,043459); ///z
    //     dbMkr->SetDateTime(20120803,043459); ///for cosmic teststand
    //  dbMkr->SetDateTime(20120903,043459); ///for cosmic teststand
 
@@ -71,7 +72,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
    //      dbMkr->SetDateTime(20120128,204320);      // run ???
    
    cout << "Constructing StFgtDbMaker" << endl;
-   fgtDbMkr = new StFgtDbMaker( "fgtDbMkr" );
+   fgtDbMkr = new StFgtDbMaker( "fgtDb" );
    //fgtDbMkr->SetFlavor("ideal",""); // mapping is wrong, but at least the code runs...
    fgtDbMkrName = fgtDbMkr->GetName();
    
@@ -119,9 +120,11 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
   //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
   //  fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
   fgtGenBase = new StFgtGeneralBase( "fgtGenBase" );
+  fgtGenBase->fillFromEvent();
 
   fgtStraightTracker = new StFgtStraightTrackMaker( "fgtStraightTracker" );
-    fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
+  fgtStraightTracker->setMinNumFitPoints(3);
+  fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
 
 
   //  fgtAVEffMkr->setChargeMatchCut(2.0);
@@ -145,7 +148,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
 
    cout << "max nevents = " << nevents << endl;
    for( int i=0; i<nevents && !ierr; ++i ){
-     // if( i+1 % 100 == 1 )
+      if( i+1 % 100 == 1 )
          cout << "\ton event number **************" << i << endl;
 	 cout << "clear (agv)" << endl;
 	 analysisChain->Clear();
