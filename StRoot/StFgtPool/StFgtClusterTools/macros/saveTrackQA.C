@@ -24,6 +24,7 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
       h->GetYaxis()->SetTitle("dN");
       h->GetXaxis()->SetTitle("number of tracks in ev");
       h->SetFillColor(kYellow-9);
+      c.SetLogy();
       c.SaveAs("numTrkPerEv.png");
     }
   
