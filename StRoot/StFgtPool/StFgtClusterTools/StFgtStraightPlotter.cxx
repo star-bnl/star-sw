@@ -110,8 +110,6 @@ Bool_t StFgtStraightPlotter::validPulse(generalStrip& strip)
   return false;
 }
 
-
-
 Bool_t StFgtStraightPlotter::fitTheStrip(generalStrip* pStrip, generalStrip* pStripOtherLayer,float* amp, float* t0, float* chi2Ndf, int iD, int iq, int apvBin, Char_t layer)
 {
   if(fitCounter>2000)
@@ -1236,6 +1234,7 @@ Double_t StFgtStraightPlotter::getRPhiRatio(vector<generalCluster>::iterator hit
 Int_t StFgtStraightPlotter::Make()
 {
   evtNr++;
+  Int_t numTracksInCurrEv=0;
   StFgtGeneralBase *fgtGenMkr = static_cast<StFgtGeneralBase * >( GetMaker("fgtGenBase"));
   pClusters=fgtGenMkr->getClusters();
   pStrips=fgtGenMkr->getStrips();
@@ -1247,18 +1246,18 @@ Int_t StFgtStraightPlotter::Make()
 
   vector<AVTrack>& tracks=fgtSTracker->getTracks();
   //    cout <<"plotter: we have " << tracks.size() << "tracks " <<endl;
-    //  intNumTracks+=tracks.size();
-
+  //  intNumTracks+=tracks.size();
   for(vector<AVTrack>::iterator it=tracks.begin();it!=tracks.end();it++)
     {
       //	  cout <<"plotter chi2: "<< it->chi2 <<" vertex: " << it->trkZ <<endl;
       if(it->chi2>maxDistChi || fabs(it->trkZ)> vertexCut )
 	{
-
 	  continue;
 	}
       //only add tracks that pass our cut criteria....
       intNumTracks++; 
+      numTracksInCurrEv++;
+      numPointsPerTrack->Fill(it->points->size());
       Double_t mx=it->mx;
       Double_t my=it->my;
       Double_t bx=it->ax;
@@ -1422,6 +1421,7 @@ Int_t StFgtStraightPlotter::Make()
 	  hIpDca->Fill(dca.second);
 	}
     }
+  numTracks->Fill(numTracksInCurrEv);
   return ierr;
 
 };
@@ -1580,7 +1580,7 @@ Int_t StFgtStraightPlotter::Finish(){
   exPulseMaxAdcNormTrackR->Write();
   exPulseSigTrackR->Write();
   numTracks->Write();
-
+  numPointsPerTrack->Write();
   
   for(int xx=0; xx<22; xx++){
 
@@ -1993,7 +1993,8 @@ Int_t StFgtStraightPlotter::Init(){
   createPlots(&numClustersR,kFgtNumDiscs*4,"numClustersR",101,0,100);
   createPlots(&numClustersPhi,kFgtNumDiscs*4,"numClustersPhi",101,0,100);
   createPlots(&numTrackHits,kFgtNumDiscs*4,"numTrackHits",101,0,100);
-  numTracks=new TH1I("numTracksPerEvent","numTracksPerEvent",101,0,100);
+  numTracks=new TH1I("numTracksPerEvent","numTracksPerEvent",10,0,9);
+  numPointsPerTrack=new TH1I("numPointsPerTrack","numPointsPerTrack",7,0,6);
 
   createPlots(&firstTbSigCloseClusterR,kFgtNumDiscs*4,"firstTbSigCloseClusterR",100,0,20);
   createPlots(&firstTbSigCloseClusterP,kFgtNumDiscs*4,"firstTbSigCloseClusterP",100,0,20);

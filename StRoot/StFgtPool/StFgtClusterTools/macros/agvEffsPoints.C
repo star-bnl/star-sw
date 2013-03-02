@@ -81,7 +81,7 @@ int agvEffsPoints( const Char_t *filenameIn = "/star/data03/daq/2012/174/1317400
    //      dbMkr->SetDateTime(20120128,204320);      // run ???
    
    cout << "Constructing StFgtDbMaker" << endl;
-   fgtDbMkr = new StFgtDbMaker( "fgtDbMkr" );
+   fgtDbMkr = new StFgtDbMaker( "fgtDb" );
    //fgtDbMkr->SetFlavor("ideal",""); // mapping is wrong, but at least the code runs...
    fgtDbMkrName = fgtDbMkr->GetName();
    
@@ -128,12 +128,14 @@ int agvEffsPoints( const Char_t *filenameIn = "/star/data03/daq/2012/174/1317400
   //  StFgtClusterPlotter* clusPlot=new StFgtClusterPlotter("FgtClusterPlotter");
   //  fgtAVEffMkr = new StFgtGenAVEMaker( "avEffMkr" );
 
-  fgtPointMkr = new StFgtPointMaker("fgtPointMaker");
-  fgtSimplePointAlgo=new StFgtSimplePointAlgo();
-  fgtPointMkr->setPointAlgo(fgtSimplePointAlgo);
+    fgtPointMkr = new StFgtPointMaker("fgtPointMaker");
+    fgtSimplePointAlgo=new StFgtSimplePointAlgo();
+    fgtPointMkr->setPointAlgo(fgtSimplePointAlgo);
+
   //  fgtStraightTracker = new StFgtStraightTrackMaker( "fgtStraightTracker" );
   //  fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
-  fgtPointPlotter=new StFgtPointPlotter("fgtPointPlotter");
+
+   fgtPointPlotter=new StFgtPointPlotter("fgtPointPlotter");
 
   //  fgtAVEffMkr->setChargeMatchCut(2.0);
   //  fgtAVEffMkr->setUseChargeMatch();
