@@ -185,14 +185,14 @@ for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
 
      if(i==0)
        {
-	 sprintf(buffer2,"overallFound_D%d.pdf(",diskNr);
+	 sprintf(buffer2,"overallFound_D%d.png(",diskNr);
        }
      else
        {
 	 if(i==9)
-	   sprintf(buffer2,"overallFound_D%d.pdf)",diskNr);
+	   sprintf(buffer2,"overallFound_D%d.png)",diskNr);
 	 else
-	   sprintf(buffer2,"overallFound_D%d.pdf",diskNr);
+	   sprintf(buffer2,"overallFound_D%d.png",diskNr);
        }
      OverallEff.Draw("colz");
      outerA.Draw();

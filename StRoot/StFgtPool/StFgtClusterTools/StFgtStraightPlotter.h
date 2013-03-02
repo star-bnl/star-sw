@@ -30,7 +30,7 @@ class StFgtStraightPlotter : public StMaker {
    void setPrint(Bool_t print);
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightPlotter.h,v 1.4 2013/03/02 03:11:24 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightPlotter.h,v 1.5 2013/03/02 18:32:47 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   void SetEffDisk(Int_t disk)
   {
     m_effDisk=disk;
@@ -143,6 +143,9 @@ class StFgtStraightPlotter : public StMaker {
 
    TH1I** maxAdcTrackClusterP;
    TH1I** maxAdcCloseClusterP;
+
+   TH1F** chargeTrackClusterR;
+   TH1F** chargeTrackClusterP;
 
    TH1F** maxSigTrackClusterP;
    TH1F** maxSigCloseClusterP;
