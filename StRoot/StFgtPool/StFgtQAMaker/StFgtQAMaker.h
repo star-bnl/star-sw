@@ -4,11 +4,14 @@
  * \author Akio
  * \date   Dec2012
  *
- * $Id: StFgtQAMaker.h,v 1.4 2013/02/21 15:16:18 akio Exp $
+ * $Id: StFgtQAMaker.h,v 1.5 2013/03/03 04:58:14 akio Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StFgtQAMaker.h,v $
+ * Revision 1.5  2013/03/03 04:58:14  akio
+ * reduce # of traces, and fixes some histo ranges
+ *
  * Revision 1.4  2013/02/21 15:16:18  akio
  * update
  *
@@ -56,7 +59,7 @@ public:
   inline void setRunNumber(Int_t v) {mRunNumber=v;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.4 2013/02/21 15:16:18 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.5 2013/03/03 04:58:14 akio Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   };
   
@@ -72,7 +75,7 @@ private:
   StFgtDb* mDb;          //!
 
   static const int NHist=3;     //!
-  static const int N1dHist=7;   //!
+  static const int N1dHist=8;   //!
   static const int N2dHist=2;   //!
   static const int NTrkHist=4;  //!
   TH1F *hist0[NHist];                               //! Histos for whole fgt
@@ -81,7 +84,7 @@ private:
   TH1F *histTrk[kFgtNumQuads][NTrkHist];            //! Histos for tracks
 
   TCanvas* mCanvas[7]; //!
-  static const int MAXTRACE=1000; //!
+  static const int MAXTRACE=100; //!
   int mNTrace[kFgtNumDiscs][kFgtNumQuads]; //!
   int mNTrace2[kFgtNumRdos][kFgtNumArms][kFgtMaxApvId]; //!
   float mSigmaCut;

@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtQAMaker.cxx,v 1.4 2013/02/21 15:16:18 akio Exp $
+ * $Id: StFgtQAMaker.cxx,v 1.5 2013/03/03 04:58:14 akio Exp $
  *
  */
 
@@ -167,10 +167,10 @@ void StFgtQAMaker::bookHist(){
   const int   nHist[NHist]={          15,  200,       256}; 
   const float lHist[NHist]={           0,    0,         0};
   const float hHist[NHist]={          15, 4000,     30975};
-  const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","ChargeAsy"};
-  const int   n1dHist[N1dHist]={         50,       ns,       ns,         25,           15,             50,        50};
-  const float l1dHist[N1dHist]={          0,        0,        0,          0,            0,              0,       -0.5};
-  const float h1dHist[N1dHist]={         50,float(ns),float(ns),       25.0,           15,          30000,        0.5};
+  const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","MaxADC","ChargeAsy"};
+  const int   n1dHist[N1dHist]={         50,       ns,       ns,         25,           15,             50,      50,         50};
+  const float l1dHist[N1dHist]={          0,        0,        0,          0,            0,              0,       0,       -0.3};
+  const float h1dHist[N1dHist]={        100,float(ns),float(ns),       25.0,           15,          10000,    4000,        0.3};
   const char* c2dHist[N2dHist] ={       "XY", "ADCvsTB"};
   const int   xn2dHist[N2dHist]={         50,        15}; 
   const float xl2dHist[N2dHist]={        -40,         0};
@@ -260,6 +260,7 @@ void StFgtQAMaker::fillHist(){
       (*it)->getElecCoords( rdo, arm, apv, chan );
       if(maxadc>mSigmaCut*pederr && maxadc>mAdcCut){
 	if(mNTrace2[rdo-1][arm][apv]<MAXTRACE) {
+	  printf("ntrace %d %d %d %d\n",rdo,arm,apv,mNTrace2[rdo-1][arm][apv]);
 	  mNTrace2[rdo-1][arm][apv]++;
 	  TGraph* g = new TGraph();
 	  int page,row,col;
@@ -268,7 +269,7 @@ void StFgtQAMaker::fillHist(){
 	    g->SetPoint(tb,float(tb+col*15),float((*it)->getAdc(tb)+(7-row)*5000));
 	  }
 	  mCanvas[page]->cd(); 
-	  g->SetLineColor(kBlue); g->SetLineWidth(0.5); g->Draw("C"); 	
+	  g->SetLineColor(kBlue); g->SetLineWidth(0.3); g->Draw("C"); 	
 	}
 	if(mNTrace[idisc][iquad]<MAXTRACE) {
 	  mNTrace[idisc][iquad]++;
@@ -277,7 +278,7 @@ void StFgtQAMaker::fillHist(){
 	    g->SetPoint(tb,float(tb+iquad*15),float((*it)->getAdc(tb)+25000-idisc*5000));
 	  }
 	  mCanvas[6]->cd(); 
-	  g->SetLineColor(kBlue); g->SetLineWidth(1); g->Draw("C"); 
+	  g->SetLineColor(kBlue); g->SetLineWidth(0.5); g->Draw("C"); 
 	}
       }
       if(idisc==2 && (iquad==0 || iquad==3)) continue;
@@ -289,14 +290,17 @@ void StFgtQAMaker::fillHist(){
       }
       if(maxadc>mSigmaCut*pederr && maxadc>mAdcCut){
 	for(int tb=0; tb<ntimebin; tb++){
-	  hist2[idisc][1]->Fill(float(tb),float((*it)->getAdc(tb)));
+	  float a=float((*it)->getAdc(tb));
+	  if(a>200) hist2[idisc][1]->Fill(float(tb),a);
 	}
       }	
     }
     for (int quad=0; quad<kFgtNumQuads; quad++) hist1[disc][quad][0]->Fill(float(nhit[quad]));
   }
   hist0[2]->Fill(float(datasize));
-  if(mEventCounter%500==0) {printf("Event=%d Updating canvas...\n",mEventCounter); mCanvas[6]->Update(); printf("...Done\n");}
+  if(mEventCounter==100 || mEventCounter==500 || mEventCounter==1000){
+    printf("Event=%d Updating canvas...\n",mEventCounter); mCanvas[6]->Update(); printf("...Done\n");
+  }
 
   //Clusters
   for (int disc=0; disc<kFgtNumDiscs; disc++){    
@@ -313,6 +317,7 @@ void StFgtQAMaker::fillHist(){
       ncluster[iquad]++;      
       hist1[disc][iquad][4]->Fill(float((*it)->getNstrip()));
       hist1[disc][iquad][5]->Fill((*it)->charge());
+      hist1[disc][iquad][6]->Fill((*it)->getMaxAdc());
       if((*it)->getMaxAdc() > 500){
 	hist0[0]->Fill(float((*it)->getMaxTimeBin()));
       }
@@ -332,6 +337,6 @@ void StFgtQAMaker::fillHist(){
     if(idisc==4 && iquad==3) continue;
     mDb->getStarXYZ(idisc,iquad,r,phi,xyz);      
     hist2[idisc][0]->Fill(xyz.X(),xyz.Y());
-    hist1[idisc][iquad][6]->Fill((*it)->getChargeAsymmetry());		       
+    hist1[idisc][iquad][7]->Fill((*it)->getChargeAsymmetry());		       
   }    
 }
