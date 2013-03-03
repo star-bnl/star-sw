@@ -158,9 +158,11 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $time=`date -d \"UTC 1970-01-01 $begin secs\" +"%H:%M:%S"`;  $time=~s/\n//g;
 	    if($end==0){$length=-1; $ago=-1;}
 	    if($type eq "pedestal") {next;}
-	    if($config eq "pedAsPhys_tcd_only" || $config eq "pedAsPhys" || $config eq "fgtPedAsPhys") {$type="pedestal";}
-	    
-	    if($donefile==0 && $ago>60 && ($type eq "pedestal" || $length>180) ) {
+	    if($config =~ /Jack/) {next;}
+	    if($config =~ /Chris/) {next;}
+	    if($config eq "fgtPedAsPhys") {$type="pedestal";}
+	    else if($config =~ /ped/) {next;}
+	    if($donefile==0 && $ago>60 && ($type eq "pedestal" || $length>120) ) {
 		
 		$evpcount=0;
 		if(-d "$datadir/$run") {
@@ -180,21 +182,21 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 			if (-e "$condor") {} else {`\rm $condor`;}
 			print("Creating $condor\n");
 			open(OUTC, "> $condor\n");
-			print(OUTC "Executable   = makeplot\n");
+			print(OUTC "Executable   = $anadir/makeplot\n");
 			print(OUTC "Universe     = vanilla\n");
 			print(OUTC "notification = never\n");
 			print(OUTC "getenv       = True\n");
 			print(OUTC "Priority    = +1\n");
 			print(OUTC "Arguments = $run $type\n");
-			print(OUTC "Log    = $anadir/$id/log/$run.log\n");
-			print(OUTC "Output = $anadir/$id/log/$run.log\n");
-			print(OUTC "Error  = $anadir/$id/log/$run.log\n");
+			print(OUTC "Log    = $anadir/$id/log/$run.condor.log\n");
+			print(OUTC "Output = $anadir/$id/log/$run.condor.log\n");
+			print(OUTC "Error  = $anadir/$id/log/$run.condor.log\n");
 			print(OUTC "Queue\n\n");
 			close(OUTC);
 			print(OUTC "\n");
 			$cmd = "condor_submit ${condor}\n";
 			print $cmd;
-			#system("condor_submit ${condor}\n");
+			system("$cmd");
 		    }
 		}
 	    }
@@ -216,7 +218,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $f="${run}_NCluster";     if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_ClusterSize";  if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_ClusterCharge";if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    $f="${run}_MaxAdc";       if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_MaxADC";       if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_ChargeAsy";    if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_XY";           if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    print(OUT1 "<tr>\n");

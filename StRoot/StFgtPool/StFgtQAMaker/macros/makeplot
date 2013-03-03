@@ -51,12 +51,14 @@ if ( "$type" == "pedestal" ) then
       \rm ped.txt
     endif
     ln -s $dir/ped/ped.$run.txt ped.txt
+    ln -s $dir/ped/ped.$run.txt ped/ped.$run.txt
   endif
   if ( -e $dir/status/status.$run.txt ) then	
     if (-e status.txt) then
       \rm status.txt	
     endif
     ln -s $dir/status/status.$run.txt status.txt
+    ln -s $dir/status/status.$run.txt status/status.$run.txt
   endif
   echo root -b -q makepedplot.C"($run)"
   root -b -q makepedplot.C"($run)"
@@ -64,6 +66,9 @@ else
   echo root -b -q makeqaplot.C"($run,0,1)"
   root -b -q makeqaplot.C"($run,0,1)"
   \mv $dir/*${run}*.pdf www/$dir/	
+
+#  echo root -b -q resid.C"($run,0,1)"
+#  root -b -q resid.C"($run,0,1)"
 endif
 
 \mv $dir/*${run}*.png www/$dir/	
