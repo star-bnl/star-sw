@@ -161,7 +161,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    if($config =~ /Jack/) {next;}
 	    if($config =~ /Chris/) {next;}
 	    if($config eq "fgtPedAsPhys") {$type="pedestal";}
-	    else if($config =~ /ped/) {next;}
+	    elsif($config =~ /ped/) {next;}
 	    if($donefile==0 && $ago>60 && ($type eq "pedestal" || $length>120) ) {
 		
 		$evpcount=0;
