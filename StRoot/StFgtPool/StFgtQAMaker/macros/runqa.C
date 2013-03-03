@@ -1,8 +1,8 @@
 #include <TSystem.h>
 
-int runqa( Int_t runnumber = 14032027, Int_t ped=0, Int_t nevents = 100000, 
+int runqa( Int_t runnumber = 14032027, Int_t ped=0, Int_t nevents = 5000, 
 	   const Char_t *evpdir = "/evp/a/",
-	   Float_t chargrms=1.0, Float_t thr=4.0, Float_t thr2add=3.0, Bool_t useSeed5=true, Bool_t cutShortEvents = 0, int zs=0){
+	   Float_t chargrms=1.0, Float_t thr=4.0, Float_t thr2add=3.0, Bool_t useSeed5=true, Bool_t cutShortEvents = 0, int zs=1){
   
   int day=runnumber/1000;
 
@@ -89,7 +89,9 @@ int runqa( Int_t runnumber = 14032027, Int_t ped=0, Int_t nevents = 100000,
     StFgtPointMaker* pointMk =new StFgtPointMaker();
     StFgtSimplePointAlgo * simplePointAlgo = new StFgtSimplePointAlgo();    
     pointMk->setPointAlgo( simplePointAlgo );
+    simplePointAlgo->setMaxChargeAsym(0.2);
 
+    /*
     gSystem->Load("StFgtClusterTools");
     fgtGenBase=new StFgtGeneralBase("fgtGenBase");
     fgtStraightTrackMaker =new StFgtStraightTrackMaker("fgtStraightTracker");
@@ -97,6 +99,7 @@ int runqa( Int_t runnumber = 14032027, Int_t ped=0, Int_t nevents = 100000,
     fgtStraightTrackMaker->setMaxClusters(20);
     fgtStraightPlotter=new StFgtStraightPlotter("fgtStraightPlotter");
 
+    
     gSystem->Load("libMinuit");
     gSystem->Load("StFgtAlignmentMaker");
     StFgtAlignmentMaker* algMk =new StFgtAlignmentMaker();
@@ -104,6 +107,7 @@ int runqa( Int_t runnumber = 14032027, Int_t ped=0, Int_t nevents = 100000,
     algMk->setDataSource(2);
     algMk->setRunNumber(runnumber);
     //algMk->setWriteTree("alignment_trkout.root");
+    */
 
     gSystem->Load("StFgtQAMaker");
     StFgtQAMaker* qaMkr =new StFgtQAMaker();
