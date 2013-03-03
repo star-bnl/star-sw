@@ -206,7 +206,7 @@ Int_t StFgtRawDaqReader::Make() {
 	}
       }
       mFgtCollectionPtr->setNumTimeBins(ntimebin);
-      printf("Max Number of Timebin=%d\n",ntimebin);
+      //printf("Max Number of Timebin=%d\n",ntimebin);
 
       while(dd && dd->iterate()) {
          fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
@@ -325,8 +325,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.15 2013/02/21 20:30:26 akio Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.16 2013/03/03 04:59:12 akio Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.16  2013/03/03 04:59:12  akio
+ * less printing
+ *
  * Revision 1.15  2013/02/21 20:30:26  akio
  * added ZS data first option
  *
