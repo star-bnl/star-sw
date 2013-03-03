@@ -166,8 +166,9 @@ void plot2d(int hid) {
   c1->Clear();
   c1->Divide(2,3);
   for(int disc=0; disc<kFgtNumDiscs; disc++){
-    c1->cd(disc+1);
-    gPad->SetLogz(1);
+    TPad *pad = c1->cd(disc+1);
+    pad->SetLogz(1);
+    pad->SetTopMargin(0.01);   pad->SetBottomMargin(0.02);
     sprintf(c,"Disc%1d%s",disc+1,c2dHist[hid]);
     printf("Getting %s\n",c);
     TH2F *h = hist2[disc][hid] = (TH2F*)file->Get(c);
