@@ -49,7 +49,7 @@ int runqa( Int_t runnumber = 14032027, Int_t ped=0, Int_t nevents = 5000,
     statMkr->setToSaveToFile(filename);
     statMkr->setTimeBin(0);
     statMkr->setPedRange(200,1000);
-    statMkr->setRmsRange(5,200);
+    statMkr->setRmsRange(15,200);
     statMkr->setFracRange(0.0,1.0);
     statMkr->setMaxDeadPerApv(128);
   }else{
