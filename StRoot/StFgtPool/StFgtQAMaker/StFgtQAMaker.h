@@ -4,11 +4,14 @@
  * \author Akio
  * \date   Dec2012
  *
- * $Id: StFgtQAMaker.h,v 1.5 2013/03/03 04:58:14 akio Exp $
+ * $Id: StFgtQAMaker.h,v 1.6 2013/03/03 07:41:00 akio Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StFgtQAMaker.h,v $
+ * Revision 1.6  2013/03/03 07:41:00  akio
+ * adding nsigma hist
+ *
  * Revision 1.5  2013/03/03 04:58:14  akio
  * reduce # of traces, and fixes some histo ranges
  *
@@ -59,7 +62,7 @@ public:
   inline void setRunNumber(Int_t v) {mRunNumber=v;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.5 2013/03/03 04:58:14 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.6 2013/03/03 07:41:00 akio Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   };
   
@@ -74,7 +77,7 @@ private:
   Int_t   mRunNumber;    //!  Run# for output file name
   StFgtDb* mDb;          //!
 
-  static const int NHist=3;     //!
+  static const int NHist=6;     //!
   static const int N1dHist=8;   //!
   static const int N2dHist=2;   //!
   static const int NTrkHist=4;  //!
