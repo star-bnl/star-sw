@@ -1,7 +1,8 @@
 static const int kFgtNumDiscs=6;
 static const int kFgtNumQuads=4;  
+static const int kFgtNumElecIds=30720;
 
-static const int NHist=3;     
+static const int NHist=6;     
 static const int N1dHist=8;   
 static const int N2dHist=2;   
 static const int NTrkHist=4;
@@ -12,7 +13,7 @@ static TH2F *hist2[kFgtNumDiscs][N2dHist];               //! 2d histos for each 
 static TH1F *histTrk[kFgtNumQuads][NTrkHist];            //! Histos for tracks
 
 static const char* cquad[kFgtNumQuads]={"A","B","C","D"}; 
-static const char* cHist[NHist]={"MaxTimeBin","ADC","DataSize"};
+static const char* cHist[NHist]={"MaxTimeBin","ADC","DataSize","ZSdata","10sigma","Nevt"};
 
 static const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","MaxADC","ChargeAsy"};
 //Log 0=linear 1=log
@@ -202,7 +203,7 @@ void makeqaplot(int run=0, int plt=0, int save=0){
   if(plt==0 || plt==1) {
     gStyle->SetOptStat(111110);
     c1->Divide(1,3); 
-    for(int i=0; i<NHist; i++){
+    for(int i=0; i<3; i++){
       c1->cd(i+1);
       int log=0;
       if(i>0) {log=1;} 
@@ -215,6 +216,102 @@ void makeqaplot(int run=0, int plt=0, int save=0){
     c1->Update();
     save("plot");
   }  
+  if(plt==0 || plt==2) {
+    gStyle->SetOptStat(0);
+    gStyle->SetOptTitle(0);
+    c1->Divide(1,3);
+    for(int i=3; i<6; i++){ hist0[i]=(TH1F*) file->Get(cHist[i]); }
+    int nevt=hist0[5]->GetEntries();
+    printf("Nevent=%d\n",nevt);
+    TVirtualPad* pad;
+    pad=c1->cd(1); pad->SetLogy(); pad->SetTopMargin(0.01); pad->SetRightMargin(0.01);
+    hist0[3]->GetXaxis()->SetLabelSize(0.07); hist0[3]->GetYaxis()->SetLabelSize(0.07);     
+    hist0[3]->SetFillColor(kRed);  hist0[3]->Scale(1/float(nevt)); hist0[3]->Draw();
+    TText *tx= new TText(0.87,0.0,"EleID"); tx->SetNDC(); tx->SetTextSize(0.1); tx->Draw();
+    TText *t3= new TText(0.05,0.1,"F3=frac in 3sig/2tb"); t3->SetNDC(); t3->SetTextSize(0.08); t3->SetTextAngle(90); t3->Draw();
+
+    pad=c1->cd(2); pad->SetLogy(); pad->SetTopMargin(0.01); pad->SetRightMargin(0.01);
+    hist0[4]->GetXaxis()->SetLabelSize(0.07); hist0[4]->GetYaxis()->SetLabelSize(0.07); 
+    hist0[4]->SetFillColor(kBlue); hist0[4]->Scale(1/float(nevt)); hist0[4]->Draw(); 
+    tx->Draw();
+    TText *t4= new TText(0.05,0.1,"F10=frac in 10sig & >500"); t4->SetNDC(); t4->SetTextSize(0.08); t4->SetTextAngle(90); t4->Draw();
+
+    float min=-4;
+    int max=hist0[3]->GetNbinsX();
+    printf("Max=%d\n",max);
+    TH1F *h1 = new TH1F("ZSdataFrac","ZSdataFrac",50,min,0);
+    TH1F *h2 = new TH1F("10SigmaFrac","10SigmaFrac",50,min,0);
+    float f1[kFgtNumElecIds],f2[kFgtNumElecIds];
+    for(int i=0; i<max; i++){
+      f1[i] = log10(hist0[3]->GetBinContent(i+1)); if(f1[i]<min) {f1[i]=min;} h1->Fill(f1[i]);
+      f2[i] = log10(hist0[4]->GetBinContent(i+1)); if(f2[i]<min) {f2[i]=min;} h2->Fill(f2[i]);
+    }
+    pad = c1->cd(3); pad->Divide(2,1);
+    TVirtualPad *pad2;
+    pad2 = pad->cd(1);
+    pad2->SetLogy(); pad2->SetTopMargin(0.01); pad2->SetRightMargin(0.01);
+    h1->GetXaxis()->SetLabelSize(0.1); h1->GetYaxis()->SetLabelSize(0.1);
+    h2->GetXaxis()->SetLabelSize(0.1); h2->GetYaxis()->SetLabelSize(0.1);
+    h1->SetLineColor(kRed);  h2->SetLineColor(kBlue); 
+    if(h1->GetMaximum()>h2->GetMaximum()){
+      h1->Draw(); h2->Draw("SAME");
+    }else{
+      h2->Draw(); h1->Draw("SAME");
+    }
+    TText *t5= new TText(0.2,0.88,"Log(F3)");  t5->SetNDC(); t5->SetTextSize(0.1); t5->SetTextColor(2); t5->Draw();
+    TText *t6= new TText(0.6,0.88,"Log(F10)"); t6->SetNDC(); t6->SetTextSize(0.1); t6->SetTextColor(4); t6->Draw();
+
+    //read ped file
+    int eid, t;
+    float ped[kFgtNumElecIds],rms[kFgtNumElecIds],p,r;
+    cout<<"Reading Ped File "<<endl;
+    std::ifstream in("ped.txt");
+    if (!in.is_open()) {
+      cout << "Can't find file!\n"; 
+      exit(0); 
+    }   
+    while (!in.eof()){
+      in >> eid >> t >> p >> r;
+      ped[eid]=p;
+      rms[eid]=r;
+    }  
+    in.close();
+    TH1F * hr1= new TH1F("RMS","RMS",60,0,120);
+    TH1F * hr2= new TH1F("RMS2","RMS2",60,0,120);
+    TH1F * hr3= new TH1F("RMS3","RMS3",60,0,120);
+    TH1F * hr4= new TH1F("RMS4","RMS4",60,0,120);
+    TH1F * hr5= new TH1F("RMS5","RMS5",60,0,120);
+    float f1l=-3.5, f1h=-0.5;
+    float f2l=-3.5, f2h=-1.2;
+    for(int i=0; i<kFgtNumElecIds; i++){
+      hr1->Fill(rms[i]);
+      if(f1[i]<f1l) {hr2->Fill(rms[i]);}
+      if(f1[i]<f1l || f1[i]>f1h) {hr3->Fill(rms[i]);}
+      if(f1[i]<f1l || f1[i]>f1h || f2[i]<f2l) {hr4->Fill(rms[i]);} 
+      if(f1[i]<f1l || f1[i]>f1h || f2[i]<f2l || f2[i]>f2h) {hr5->Fill(rms[i]);} 
+    }
+    pad2 = pad->cd(2);
+    pad2->SetLogy(0); pad2->SetTopMargin(0.01); pad2->SetRightMargin(0.01);
+    hr1->GetXaxis()->SetLabelSize(0.1); hr1->GetYaxis()->SetLabelSize(0.05);
+    hr1->SetFillColor(3); hr1->Draw(); 
+    hr5->SetFillColor(9); hr5->Draw("same"); 
+    hr4->SetFillColor(4); hr4->Draw("same"); 
+    hr3->SetFillColor(6); hr3->Draw("same"); 
+    hr2->SetFillColor(2); hr2->Draw("same"); 
+    char cc1[100]; sprintf(cc1,"Log(F3)<%4.1f",f1l);
+    char cc2[100]; sprintf(cc2,"Log(F3)>%4.1f",f1h);
+    char cc3[100]; sprintf(cc3,"Log(F10)<%4.1f",f2l);
+    char cc4[100]; sprintf(cc4,"Log(F10)>%4.1f",f2h);
+    TText *t7 = new TText(0.6,0.88,cc1);   t7->SetNDC();  t7->SetTextSize(0.07);  t7->SetTextColor(2);  t7->Draw();
+    TText *t8 = new TText(0.6,0.78,cc2);   t8->SetNDC();  t8->SetTextSize(0.07);  t8->SetTextColor(6);  t8->Draw();
+    TText *t9 = new TText(0.6,0.68,cc3);   t9->SetNDC();  t9->SetTextSize(0.07);  t9->SetTextColor(4);  t9->Draw();
+    TText *t10= new TText(0.6,0.58,cc4);   t10->SetNDC(); t10->SetTextSize(0.07); t10->SetTextColor(9); t10->Draw();
+    TText *t11= new TText(0.6,0.48,"OK");  t11->SetNDC(); t11->SetTextSize(0.07); t11->SetTextColor(3); t11->Draw();
+    TText *t12= new TText(0.8,0.15,"PedRMS"); t12->SetNDC(); t12->SetTextSize(0.07); t12->Draw();
+    c1->Update();
+    save("frac");
+  }
+
   for(int i=0; i<N1dHist; i++) { if(plt==0 || plt==10+i) plot1d(i);}
   for(int i=0; i<N2dHist; i++) { if(plt==0 || plt==20+i) plot2d(i);}
 }
