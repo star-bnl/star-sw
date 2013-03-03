@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtQAMaker.cxx,v 1.5 2013/03/03 04:58:14 akio Exp $
+ * $Id: StFgtQAMaker.cxx,v 1.6 2013/03/03 07:40:59 akio Exp $
  *
  */
 
@@ -163,10 +163,10 @@ void StFgtQAMaker::bookHist(){
   char c[50];
   int ns=kFgtNumStrips;
   const char* cquad[kFgtNumQuads]={"A","B","C","D"};  
-  const char* cHist[NHist]={"MaxTimeBin","ADC","DataSize"};
-  const int   nHist[NHist]={          15,  200,       256}; 
-  const float lHist[NHist]={           0,    0,         0};
-  const float hHist[NHist]={          15, 4000,     30975};
+  const char* cHist[NHist]={"MaxTimeBin","ADC","DataSize",       "ZSdata",      "10sigma", "Nevt"};
+  const int   nHist[NHist]={          15,  200,       256, kFgtNumElecIds, kFgtNumElecIds,      1}; 
+  const float lHist[NHist]={           0,    0,         0,              0,              0,      0};
+  const float hHist[NHist]={          15, 4000,     30975, kFgtNumElecIds, kFgtNumElecIds,      1};
   const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","MaxADC","ChargeAsy"};
   const int   n1dHist[N1dHist]={         50,       ns,       ns,         25,           15,             50,      50,         50};
   const float l1dHist[N1dHist]={          0,        0,        0,          0,            0,              0,       0,       -0.3};
@@ -257,8 +257,11 @@ void StFgtQAMaker::fillHist(){
       if(layer=='P') {ipr=0;}
       if(layer=='R') {ipr=1;}
       Int_t rdo, arm, apv, chan;
-      (*it)->getElecCoords( rdo, arm, apv, chan );
+      (*it)->getElecCoords(rdo, arm, apv, chan);
+      int eid = StFgtGeom::encodeElectronicId(rdo, arm, apv, chan);
+      hist0[3]->Fill(float(eid));
       if(maxadc>mSigmaCut*pederr && maxadc>mAdcCut){
+	hist0[4]->Fill(float(eid));
 	if(mNTrace2[rdo-1][arm][apv]<MAXTRACE) {
 	  printf("ntrace %d %d %d %d\n",rdo,arm,apv,mNTrace2[rdo-1][arm][apv]);
 	  mNTrace2[rdo-1][arm][apv]++;
@@ -281,8 +284,6 @@ void StFgtQAMaker::fillHist(){
 	  g->SetLineColor(kBlue); g->SetLineWidth(0.5); g->Draw("C"); 
 	}
       }
-      if(idisc==2 && (iquad==0 || iquad==3)) continue;
-      if(idisc==4 && iquad==3) continue;
       hist0[1]->Fill(float(maxadc));	  
       if(maxadc>4*pederr && maxadc>160) {
 	nhit[iquad]++;	
@@ -298,6 +299,7 @@ void StFgtQAMaker::fillHist(){
     for (int quad=0; quad<kFgtNumQuads; quad++) hist1[disc][quad][0]->Fill(float(nhit[quad]));
   }
   hist0[2]->Fill(float(datasize));
+  if(datasize>0) hist0[5]->Fill(0);
   if(mEventCounter==100 || mEventCounter==500 || mEventCounter==1000){
     printf("Event=%d Updating canvas...\n",mEventCounter); mCanvas[6]->Update(); printf("...Done\n");
   }
@@ -312,8 +314,6 @@ void StFgtQAMaker::fillHist(){
       char layer;
       short idisc,iquad,istr;
       StFgtGeom::decodeGeoId(geoid,idisc,iquad,layer,istr);
-      if(idisc==2 && (iquad==0 || iquad==3)) continue;
-      if(idisc==4 && iquad==3) continue;
       ncluster[iquad]++;      
       hist1[disc][iquad][4]->Fill(float((*it)->getNstrip()));
       hist1[disc][iquad][5]->Fill((*it)->charge());
@@ -333,8 +333,6 @@ void StFgtQAMaker::fillHist(){
     float phi = (*it)->getPositionPhi();
     float r   = (*it)->getPositionR();
     TVector3 xyz;
-    if(idisc==2 && (iquad==0 || iquad==3)) continue;
-    if(idisc==4 && iquad==3) continue;
     mDb->getStarXYZ(idisc,iquad,r,phi,xyz);      
     hist2[idisc][0]->Fill(xyz.X(),xyz.Y());
     hist1[idisc][iquad][7]->Fill((*it)->getChargeAsymmetry());		       
