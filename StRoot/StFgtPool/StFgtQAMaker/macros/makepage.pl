@@ -40,7 +40,8 @@ if ($out > 1) {
 
 if($debug) { print("year=$year day=$day submit=$submit\n"); } 
 
-if (-e "$anadir/html")     {} else {`mkdir $anadir/html`;}
+if (-e "$anadir/html")   {} else {`mkdir $anadir/html`;}
+
 $today = ` date +%s`;             $today=~s/\n//g;
 $dtoday = ` date +"%Y %b %d %a"`; $dtoday=~s/\n//g;                      
 $itoday = ` date +%j`;            $itoday=~s/\n//g;          
@@ -68,7 +69,10 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
     $id="$year$id";    
     if($debug) {print("id=$id   ");}
 
-    if (-e "$anadir/$id") {} else {`mkdir $anadir/$id`;}
+    if (-e "$anadir/$id")        {} else {`mkdir $anadir/$id`;}
+    if (-e "$anadir/$id/condor") {} else {`mkdir $anadir/$id/condor`;}
+    if (-e "$anadir/$id/log")    {} else {`mkdir $anadir/$id/log`;}
+
     if ($d == $today) { 
 	if($debug) { printf("Getting run list from DB ... "); }
 	`cd $anadir; $anadir/runs $id`;
@@ -157,16 +161,18 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $ago = $now - $end;
 	    $time=`date -d \"UTC 1970-01-01 $begin secs\" +"%H:%M:%S"`;  $time=~s/\n//g;
 	    if($end==0){$length=-1; $ago=-1;}
+
 	    if($type eq "pedestal") {next;}
 	    if($config =~ /Jack/) {next;}
 	    if($config =~ /Chris/) {next;}
 	    if($config eq "fgtPedAsPhys") {$type="pedestal";}
-	    elsif($config =~ /ped/) {next;}
+	    if($config =~ /ped/) {next;}
+
 	    if($donefile==0 && $ago>60 && ($type eq "pedestal" || $length>120) ) {
 		
 		$evpcount=0;
 		if(-d "$datadir/$run") {
-		    $evpcount = `ls $datadir/$run/?* | wc -l`;
+		    $evpcount = `ls -1 $datadir/$run/?* | wc -l`;
 		    $evpcount =~ s/\n//g;
 		}
 		

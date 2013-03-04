@@ -217,6 +217,7 @@ void makeqaplot(int run=0, int plt=0, int save=0){
     save("plot");
   }  
   if(plt==0 || plt==2) {
+    c1->Clear();  
     gStyle->SetOptStat(0);
     gStyle->SetOptTitle(0);
     c1->Divide(1,3);
