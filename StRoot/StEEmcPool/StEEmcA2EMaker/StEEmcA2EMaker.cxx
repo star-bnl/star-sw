@@ -7,8 +7,8 @@
  * as input. 
  *
  * \author Jason C. Webb
- * $Date: 2012/12/21 00:34:15 $
- * $Revision: 1.6 $
+ * $Date: 2013/03/04 19:55:51 $
+ * $Revision: 1.7 $
  *
  */
 
@@ -179,6 +179,14 @@ Int_t StEEmcA2EMaker::Make()
 Bool_t StEEmcA2EMaker::readData()
 {
   /// Verify that we have a pointer to input data
+  const StMuDst* muDst = (const StMuDst*)GetInputDS("MuDst");
+  if (muDst) {
+	const StMuEmcCollection *emc = muDst->muEmcCollection();
+	if (emc) {
+	    {LOG_DEBUG << "Reading from MuDst..." << endm;}
+	    return fillFromMuDst(emc);
+	}
+  }
   const StEvent *event = (const StEvent*)GetInputDS("StEvent");
   if (event) {
 	const StEmcCollection *emc = event->emcCollection();
@@ -188,14 +196,6 @@ Bool_t StEEmcA2EMaker::readData()
 	}
 	{LOG_WARN << "Cannot find emc in the event" << endm;}
 	return false;
-  }
-  const StMuDst* muDst = (const StMuDst*)GetInputDS("MuDst");
-  if (muDst) {
-	const StMuEmcCollection *emc = muDst->muEmcCollection();
-	if (emc) {
-	    {LOG_DEBUG << "Reading from MuDst..." << endm;}
-	    return fillFromMuDst(emc);
-	}
   } else {
     {LOG_WARN << "Cannot find neither event or mudst" << endm;}
   }
