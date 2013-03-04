@@ -50,14 +50,14 @@ if ( "$type" == "pedestal" ) then
     if (-e ped.txt) then
       \rm ped.txt
     endif
-    ln -s $dir/ped/ped.$run.txt ped.txt
+#    ln -s $dir/ped/ped.$run.txt ped.txt
     ln -s $dir/ped/ped.$run.txt ped/ped.$run.txt
   endif
   if ( -e $dir/status/status.$run.txt ) then	
     if (-e status.txt) then
       \rm status.txt	
     endif
-    ln -s $dir/status/status.$run.txt status.txt
+#    ln -s $dir/status/status.$run.txt status.txt
     ln -s $dir/status/status.$run.txt status/status.$run.txt
   endif
   echo root -b -q makepedplot.C"($run)"
