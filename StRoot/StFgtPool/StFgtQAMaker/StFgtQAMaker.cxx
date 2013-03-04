@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtQAMaker.cxx,v 1.6 2013/03/03 07:40:59 akio Exp $
+ * $Id: StFgtQAMaker.cxx,v 1.7 2013/03/04 05:22:23 akio Exp $
  *
  */
 
@@ -263,7 +263,7 @@ void StFgtQAMaker::fillHist(){
       if(maxadc>mSigmaCut*pederr && maxadc>mAdcCut){
 	hist0[4]->Fill(float(eid));
 	if(mNTrace2[rdo-1][arm][apv]<MAXTRACE) {
-	  printf("ntrace %d %d %d %d\n",rdo,arm,apv,mNTrace2[rdo-1][arm][apv]);
+	  //printf("ntrace %d %d %d %d\n",rdo,arm,apv,mNTrace2[rdo-1][arm][apv]);
 	  mNTrace2[rdo-1][arm][apv]++;
 	  TGraph* g = new TGraph();
 	  int page,row,col;
