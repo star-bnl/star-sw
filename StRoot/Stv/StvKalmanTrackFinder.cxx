@@ -57,6 +57,7 @@ void StvKalmanTrackFinder::Reset()
 //_____________________________________________________________________________
 int StvKalmanTrackFinder::FindTracks()
 {
+static int nCall = 0; nCall++;
 static StvToolkit *kit = StvToolkit::Inst();
 static const StvConst  *kons = StvConst::Inst();
   int nTrk = 0,nTrkTot=0,nAdded=0,nHits=0,nSeed=0,nSeedTot=0;
@@ -89,7 +90,11 @@ static const StvConst  *kons = StvConst::Inst();
 	  if (!mRefit) {fail=0; 		break;};
 	  ans = Refit(1);
 	  if (ans) 				break;
+          nHits = mCurrTrak->GetNHits();
+          if (nHits<=1) 			break;
 	  nAdded = FindTrack(1);
+          nHits = mCurrTrak->GetNHits();
+          if (nHits<=3) 			break;
           if (nAdded<=0)			continue;;
 {  double tlen = mCurrTrak->GetLength();
   assert(tlen >0.0 && tlen<1000.);}
