@@ -37,7 +37,7 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
       h->Draw();
       c.SaveAs("numPointsPerTrack.png");
     }
-
+      c.SetLogy(false);
 	h=(TH1D*)f.Get(vtxDist);
       if(h!=0)
     {
@@ -62,6 +62,7 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
 	  c.SaveAs("z_Dca.png");
 	}
 
+      c.SetLogy(false);
   for(int iD=1;iD<7;iD++)
     {
       for(int iQ=0;iQ<4;iQ++)
@@ -83,6 +84,8 @@ void saveTrackQA(Char_t* signalFile="signalShapes.root")
 	      sprintf(buffer,"chargeTrackCluster%s_disc%d_quad%d",layerName,iD,iQ);
 	      cout <<"loading " << buffer <<endl;
 	      TH1D* h=(TH1D*)f.Get(buffer);
+	      TF1* fLandau=new TF1("fLandau","landau(0)",0,10000);
+	      h->Fit(fLandau);
 	      h->GetXaxis()->SetTitle("cluster charge [ACD counts]");
 	      h->GetYaxis()->SetTitle("dN");
 	      h->SetFillColor(kYellow-9);
