@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.52 2013/03/05 14:42:45 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.53 2013/03/05 14:49:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.53  2013/03/05 14:49:44  ullrich
+ * Added PxlHits to statistics().
+ *
  * Revision 2.52  2013/03/05 14:42:45  ullrich
  * Added StPxl hits and Containers.
  *
@@ -225,8 +228,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.52 2013/03/05 14:42:45 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.52 2013/03/05 14:42:45 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.53 2013/03/05 14:49:44 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.53 2013/03/05 14:49:44 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -1338,6 +1341,7 @@ void StEvent::statistics()
     cout << "\tStFtpcHitCollection:         " << static_cast<void*>(ftpcHitCollection());
     cout << "\tStSvtHitCollection:          " << static_cast<void*>(svtHitCollection());
     cout << "\tStSsdHitCollection:          " << static_cast<void*>(ssdHitCollection());
+    cout << "\tStPxlHitCollection:          " << static_cast<void*>(pxlHitCollection());
     cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection());
     cout << "\tStFmsCollection:             " << static_cast<void*>(fmsCollection());
     cout << "\tStRichCollection:            " << static_cast<void*>(richCollection());
@@ -1362,6 +1366,7 @@ void StEvent::statistics()
     cout << "\t# of FTPC hits:              " << (ftpcHitCollection() ? ftpcHitCollection()->numberOfHits() : 0) << endl;
     cout << "\t# of SVT hits:               " << (svtHitCollection() ? svtHitCollection()->numberOfHits() : 0) << endl;
     cout << "\t# of SSD hits:               " << (ssdHitCollection() ? ssdHitCollection()->numberOfHits() : 0) << endl;
+    cout << "\t# of PXL hits:               " << (pxlHitCollection() ? pxlHitCollection()->numberOfHits() : 0) << endl;
     cout << "\t# of track nodes:            " << trackNodes().size() << endl;
     cout << "\t# of primary tracks:         " << (primaryVertex(0) ? primaryVertex(0)->numberOfDaughters() : 0) << endl;
     cout << "\t# of V0s:                    " << v0Vertices().size() << endl;
