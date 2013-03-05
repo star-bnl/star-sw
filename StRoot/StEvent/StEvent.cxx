@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.51 2012/04/16 20:22:16 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.52 2013/03/05 14:42:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.52  2013/03/05 14:42:45  ullrich
+ * Added StPxl hits and Containers.
+ *
  * Revision 2.51  2012/04/16 20:22:16  ullrich
  * Changes necessary to add Fgt package.
  *
@@ -214,7 +217,7 @@
 #include "StEventBranch.h"
 #include "StHltEvent.h"
 #include "StFgtCollection.h"
-
+#include "StPxlHitCollection.h"
 #include "StTrackNode.h"
 #include "StTrack.h"
 
@@ -222,8 +225,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.51 2012/04/16 20:22:16 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.51 2012/04/16 20:22:16 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.52 2013/03/05 14:42:45 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.52 2013/03/05 14:42:45 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -773,6 +776,22 @@ StEvent::fgtCollection() const
     return fgtCollection;
 }
 
+StPxlHitCollection*
+StEvent::pxlHitCollection()
+{
+    StPxlHitCollection *pxlHitCollection = 0;
+    _lookup(pxlHitCollection, mContent);
+    return pxlHitCollection;
+}
+
+const StPxlHitCollection*
+StEvent::pxlHitCollection() const
+{
+    StPxlHitCollection *pxlHitCollection = 0;
+    _lookup(pxlHitCollection, mContent);
+    return pxlHitCollection;
+}
+
 StSPtrVecTrackDetectorInfo&
 StEvent::trackDetectorInfo()
 {
@@ -1201,6 +1220,12 @@ StEvent::setHltEvent(StHltEvent* val)
 
 void
 StEvent::setFgtCollection(StFgtCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
+StEvent::setPxlHitCollection(StPxlHitCollection* val)
 {
     _lookupAndSet(val, mContent);
 }
