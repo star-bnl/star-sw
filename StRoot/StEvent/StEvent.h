@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.45 2012/04/16 20:22:16 ullrich Exp $
+ * $Id: StEvent.h,v 2.46 2013/03/05 14:42:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.46  2013/03/05 14:42:45  ullrich
+ * Added StPxl hits and Containers.
+ *
  * Revision 2.45  2012/04/16 20:22:16  ullrich
  * Changes necessary to add Fgt package.
  *
@@ -196,6 +199,7 @@ class StPsd;
 class StRnDHitCollection;
 class StHltEvent;
 class StFgtCollection;
+class StPxlHitCollection;
 
 class StEvent : public StXRefMain {
 public:
@@ -255,6 +259,8 @@ public:
     const StHltEvent*                   hltEvent() const;
     StFgtCollection*                    fgtCollection();
     const StFgtCollection*              fgtCollection() const;
+    StPxlHitCollection*                 pxlHitCollection();
+    const StPxlHitCollection*           pxlHitCollection() const;
     
     StL0Trigger*                        l0Trigger();
     const StL0Trigger*                  l0Trigger() const;
@@ -324,6 +330,7 @@ public:
     void setFtpcHitCollection(StFtpcHitCollection*);
     void setSvtHitCollection(StSvtHitCollection*);
     void setSsdHitCollection(StSsdHitCollection*);
+    void setPxlHitCollection(StPxlHitCollection*);
     void setEmcCollection(StEmcCollection*);
     void setFmsCollection(StFmsCollection*);
     void setRichCollection(StRichCollection*);

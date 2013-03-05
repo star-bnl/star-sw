@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.38 2013/02/21 00:24:14 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.39 2013/03/05 14:42:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.39  2013/03/05 14:42:45  ullrich
+ * Added StPxl hits and Containers.
+ *
  * Revision 2.38  2013/02/21 00:24:14  ullrich
  * Added StMtdPidTraits.
  *
@@ -196,6 +199,11 @@
 #include "StPrimaryTrack.h"
 #include "StPrimaryVertex.h"
 #include "StPsd.h"
+#include "StPxlHit.h"
+#include "StPxlHitCollection.h"
+#include "StPxlSensorHitCollection.h"
+#include "StPxlSectorHitCollection.h"
+#include "StPxlLadderHitCollection.h"
 #include "StRichCluster.h"
 #include "StRichCollection.h"
 #include "StRichHit.h"

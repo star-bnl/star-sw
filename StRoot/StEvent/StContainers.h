@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.28 2012/04/16 20:22:16 ullrich Exp $
+ * $Id: StContainers.h,v 2.29 2013/03/05 14:42:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.29  2013/03/05 14:42:45  ullrich
+ * Added StPxl hits and Containers.
+ *
  * Revision 2.28  2012/04/16 20:22:16  ullrich
  * Changes necessary to add Fgt package.
  *
@@ -142,6 +145,7 @@ class StKinkVertex;
 class StL3AlgorithmInfo;
 class StPhmdHit;
 class StPhmdCluster;
+class StPxlHit;
 class StRnDHit;
 class StHltBEmcTowerHit;
 class StHltBTofHit;
@@ -198,6 +202,7 @@ StCollectionDef(KinkVertex)
 StCollectionDef(L3AlgorithmInfo)
 StCollectionDef(PhmdHit)
 StCollectionDef(PhmdCluster)
+StCollectionDef(PxlHit)
 StCollectionDef(RnDHit)
 StCollectionDef(HltBEmcTowerHit)
 StCollectionDef(HltBTofHit)

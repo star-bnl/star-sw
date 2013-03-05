@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.25 2012/04/16 20:22:16 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.26 2013/03/05 14:42:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.26  2013/03/05 14:42:45  ullrich
+ * Added StPxl hits and Containers.
+ *
  * Revision 2.25  2012/04/16 20:22:16  ullrich
  * Changes necessary to add Fgt package.
  *
@@ -139,6 +142,7 @@
 #include "StFgtStrip.h"
 #include "StFgtPoint.h"
 #include "StFgtHit.h"
+#include "StPxlHit.h"
 
 StCollectionImp(Object)
 StCollectionImp(CalibrationVertex)
@@ -195,3 +199,5 @@ StCollectionImp(HltTriggerReason)
 StCollectionImp(FgtHit)
 StCollectionImp(FgtStrip)
 StCollectionImp(FgtPoint)
+StCollectionImp(PxlHit)
+

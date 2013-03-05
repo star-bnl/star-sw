@@ -148,6 +148,7 @@
 #pragma link C++ class FMSBlock2013+;
 #pragma link C++ class TrgOfflen2013+;
 
+#pragma link C++ function operator<<(ostream&, const StPxlHit&);        
 #pragma link C++ function operator<<(ostream&, const StTpcPixel&);        
 #pragma link C++ function operator<<(ostream&, const StMeasuredPoint&);        
 #pragma link C++ function operator<<(ostream&, const StHit&);        
