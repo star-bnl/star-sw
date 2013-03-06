@@ -1,6 +1,7 @@
 
 void saveSignalChar(Char_t* signalFile="signalShapes.root")
 {
+  gStyle->SetPalette(1);
   TFile f(signalFile);
   Char_t buffer[100];
   Char_t quadName[10];
@@ -39,6 +40,7 @@ void saveSignalChar(Char_t* signalFile="signalShapes.root")
 		{
 		  h->SetTitle(buffer);
 		  h->SetName(buffer);
+		  h->SetFillColor(kYellow-9);
 		  h->Draw();
 		}
 	      sprintf(buffer,"numFSigCloseCluster%s_disc%d_quad%s.png",layerName,iD,quadName);
@@ -52,6 +54,7 @@ void saveSignalChar(Char_t* signalFile="signalShapes.root")
 		{
 		  h->SetName(buffer);
 		  h->SetTitle(buffer);
+		  h->SetFillColor(kYellow-9);
 		  h->Draw();
 		}
 	      c.cd(3);
@@ -63,6 +66,7 @@ void saveSignalChar(Char_t* signalFile="signalShapes.root")
 		{
 		  h->SetName(buffer);
 		  h->SetTitle(buffer);
+		  h->SetFillColor(kYellow-9);
 		  h->Draw();
 		}
 
@@ -75,6 +79,7 @@ void saveSignalChar(Char_t* signalFile="signalShapes.root")
 		{
 		  h->SetName(buffer);
 		  h->SetTitle(buffer);
+		  h->SetFillColor(kYellow-9);
 		  h->Draw();
 		}
 	      c.cd(5);
@@ -86,6 +91,7 @@ void saveSignalChar(Char_t* signalFile="signalShapes.root")
 		{
 		  h->SetName(buffer);
 		  h->SetTitle(buffer);
+		  h->SetFillColor(kYellow-9);
 		  h->Draw();
 		}
 	      c.cd(6);
@@ -97,6 +103,8 @@ void saveSignalChar(Char_t* signalFile="signalShapes.root")
 		{
 		  h2->SetName(buffer);
 		  h2->SetTitle(buffer);
+		  h2->GetXaxis()->SetRangeUser(0,15000);
+		  h2->GetYaxis()->SetRangeUser(0,15000);
 		  h2->Draw("colz");
 		}
 	      sprintf(buffer,"EnergyForDisk%d_Quad%s_layerR.png",iD,quadName,layerName);
@@ -104,11 +112,24 @@ void saveSignalChar(Char_t* signalFile="signalShapes.root")
 	      sprintf(buffer,"EnergyForDisk%d_Quad%s_layerP.png",iD,quadName,layerName);
 	      TH1D* projP=h2->ProjectionY(buffer);
 	      c.cd(7);
+	      projR->SetFillColor(kYellow-9);
 	      projR->Draw();
 	      c.cd(8);
+	      projP->SetFillColor(kYellow-9);
 	      projP->Draw();
+	      c.cd(9);
+	      sprintf(buffer,"clusterSize%sInDisk_%d_quad_%d",layerName,iD,iQ);
+	      TH1D* hClusSize=(TH1D*)f.Get(buffer);
+	      if(hClusSize!=0)
+		{
+		  hClusSize->SetFillColor(kYellow-9);
+		  hClusSize->GetXaxis()->SetTitle("number of strips");
+		  hClusSize->GetXaxis()->SetRangeUser(0,10);
+		  hClusSize->Draw();
+		}
 	      sprintf(buffer,"signalInfoForDisk%d_Quad%s_layer%s.png",iD,quadName,layerName);
 	      c.SaveAs(buffer);
+
 	    }
 	}
     }

@@ -434,7 +434,7 @@ void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int
 	    {
 	      if(pStrip.charge>maxPhiCharge)
 		{
-		  if(pStrip.seedType==kFgtSeedType1|| pStrip.seedType==kFgtSeedType2 || pStrip.seedType==kFgtSeedType3 || pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
+		  if((pStrip.seedType>=kFgtSeedType1 && pStrip.seedType<=kFgtSeedType5)|| pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
 		    {
 		      partOfClusterP=true;
 		      pair<Double_t, Double_t> cluSize=findCluChargeSize(iD,'P',ordinate);
@@ -503,7 +503,7 @@ void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int
 	    {
 	      if(pStrip.charge>maxRCharge)
 		{
-		  if(pStrip.seedType==kFgtSeedType1|| pStrip.seedType==kFgtSeedType2 || pStrip.seedType==kFgtSeedType3 || pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
+		  if((pStrip.seedType>=kFgtSeedType1 && pStrip.seedType<=kFgtSeedType5)|| pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
 		    {
 		      partOfClusterR=true;
 		      pair<Double_t, Double_t> cluSize=findCluChargeSize(iD,'R',ordinate);
@@ -573,6 +573,8 @@ void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int
 	    }
 	}
     }
+
+      Float_t InnerRad=19;
   //fill histos
   if(maxPhiCharge>200)
     {
@@ -587,8 +589,11 @@ void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int
       //	  cout <<"firstFSigtbP: " << firstFSigTbP <<endl;
       //	  cout <<"filling ratio with : " << secondToLastRatioP <<endl;
       secondToLastRatioCloseClusterP[iD*4+iq]->Fill(secondToLastRatioP);
-      
-      if(APVfirstTbSigP>-1 && APVmaxPAdc>-1 && APVmaxPTb>-1 && APVnumFSigP>-1 && APVfirstFSigTbP>-1 && APVmaxSigAdcP>-1 && APVsecondToLastRatioP>-1)
+      ////with radius cut!!!!!!!!!!!!!
+
+
+
+      if(r>InnerRad&& APVfirstTbSigP>-1 && APVmaxPAdc>-1 && APVmaxPTb>-1 && APVnumFSigP>-1 && APVfirstFSigTbP>-1 && APVmaxSigAdcP>-1 && APVsecondToLastRatioP>-1)
         {
           APVfirstTbSigCloseClusterP[iD*40+APVfirstTbSigP]->Fill(firstTbSigP);
           APVmaxAdcCloseClusterP[iD*40+APVmaxPAdc]->Fill(maxPAdc);
@@ -622,7 +627,7 @@ void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int
       //	  cout <<"filling ratio R with : " << secondToLastRatioR <<endl;
       secondToLastRatioCloseClusterR[iD*4+iq]->Fill(secondToLastRatioR);
 
-      if(APVfirstTbSigR>-1 && APVmaxRAdc>-1 && APVmaxRTb>-1 && APVnumFSigR>-1 && APVfirstFSigTbR>-1 && APVmaxSigAdcR>-1 && APVsecondToLastRatioR>-1)
+      if(r> InnerRad && APVfirstTbSigR>-1 && APVmaxRAdc>-1 && APVmaxRTb>-1 && APVnumFSigR>-1 && APVfirstFSigTbR>-1 && APVmaxSigAdcR>-1 && APVsecondToLastRatioR>-1)
         {
           APVfirstTbSigCloseClusterR[iD*40+APVfirstTbSigR]->Fill(firstTbSigR);
           APVmaxTbCloseClusterR[iD*40+APVmaxRTb]->Fill(maxRTb);
@@ -670,13 +675,12 @@ void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int
   if(partOfClusterR&& partOfClusterP)
     {///this is what is plotted lateron
       chargeCorr[iD*4+iq]->Fill(clusterChargeR,clusterChargeP);
-    
   //basically only here we fill with the estimated cluster, for the other disks we fill with the cluster on the track
   //	   if(r>20)
-  {
-    clusterSizeR[iD*4+iq]->Fill(mClusterSizeR);
+      {
+	clusterSizeR[iD*4+iq]->Fill(mClusterSizeR);
 	clusterSizeP[iD*4+iq]->Fill(mClusterSizeP);
-  } 
+      } 
     } 
   
   if(partOfClusterP)
@@ -1000,6 +1004,12 @@ Bool_t StFgtStraightPlotter::printArea1D(Int_t iD,Int_t iq, Int_t centerGeoId)
 	case kFgtSeedType3:
 	  sprintf(buffer,"Seed3");
 	  break;
+	case kFgtSeedType4:
+	  sprintf(buffer,"Seed4");
+	  break;
+	case kFgtSeedType5:
+	  sprintf(buffer,"Seed5");
+	  break;
 	case kFgtClusterPart:
 	  sprintf(buffer,"PartOfCluster");
 	  break;
@@ -1081,6 +1091,12 @@ Bool_t StFgtStraightPlotter::printArea(Float_t r, Float_t phi, Int_t iD, Int_t i
 	  break;
 	case kFgtSeedType3:
 	  sprintf(buffer,"Seed3");
+	  break;
+	case kFgtSeedType4:
+	  sprintf(buffer,"Seed4");
+	  break;	
+	case kFgtSeedType5:
+	  sprintf(buffer,"Seed5");
 	  break;
 	case kFgtClusterPart:
 	  sprintf(buffer,"PartOfCluster");
@@ -1245,7 +1261,6 @@ Int_t StFgtStraightPlotter::Make()
   for(int iD=0;iD<6;iD++)
     {
       vector<generalCluster> &hitVec=*(pClusters[iD]);
-
       for( vector<generalCluster>::iterator hitIter=hitVec.begin();hitIter != hitVec.end();hitIter++)
 	{
 
@@ -1284,7 +1299,7 @@ Int_t StFgtStraightPlotter::Make()
   for(vector<AVTrack>::iterator it=tracks.begin();it!=tracks.end();it++)
     {
       //	  cout <<"plotter chi2: "<< it->chi2 <<" vertex: " << it->trkZ <<endl;
-      if(it->chi2>maxDistChi || fabs(it->trkZ)> vertexCut )
+      if(it->chi2>maxDistChi || fabs(it->trkZ)> vertexCut || it->dca> dcaCut )
 	{
 	  continue;
 	}
@@ -1499,6 +1514,9 @@ StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name )
   else
     vertexCut=100000000;
 
+  //  dcaCut=2;
+  //no cut 
+   dcaCut=100;
 
   maxDistChi=1.0;
   //  cout <<"AVE constructor!!" <<endl;

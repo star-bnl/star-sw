@@ -1,5 +1,5 @@
 
-void getCluAvgEff(Char_t* signalFile="signalShapes.root", Bool_t onlyQuadB=true, Int_t diskNr=3)
+void getCluAvgEff(Char_t* signalFile="signalShapes.root", Int_t diskNr=3, Bool_t onlyQuadB=false)
 {
   gStyle->SetPalette(1);
   gStyle->SetOptStat(0);
@@ -11,8 +11,11 @@ void getCluAvgEff(Char_t* signalFile="signalShapes.root", Bool_t onlyQuadB=true,
 
  sprintf(buffer,"allClusterCountsDisk_%d",diskNr);//counting different for this histo
  TH2D* hEff=(TH2D*)f.Get(buffer);
+
  sprintf(buffer,"radioDiskNonEff_%d",diskNr-1);
  TH2D* hNonEff=(TH2D*)f.Get(buffer);
+ // hEff->Rebin2D(2,2); //merge wo bins...
+ // hNonEff->Rebin2D(2,2);
 
  Double_t max=hEff->GetXaxis()->GetXmax();
  Double_t min=hEff->GetXaxis()->GetXmin();
@@ -58,7 +61,7 @@ for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
 	    Int_t numEff=hEff->GetBinContent(i,j);
 	    Int_t numNonEff=hNonEff->GetBinContent(i,j);
 	    Int_t numCounts=numEff+numNonEff;
-
+	    //	    cout <<"numEff: " << numEff <<" nonEff: " << numNonEff << " counts: " << numCounts<<endl;
 	    Double_t efficiency=0;
 	    if(numCounts>minCounts)
 	      {
@@ -72,6 +75,7 @@ for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
 	    OverallEff.SetBinContent(i,j,efficiency);
 	    OverallCounts.SetBinContent(i,j,numCounts);
 	    OverallFound.SetBinContent(i,j,numEff);
+
 	if(numCounts>minCounts)
 	  {
 	    //
@@ -129,6 +133,17 @@ for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
      if(i==0)
        {
 	 sprintf(buffer2,"overallEff_D%d.pdf(",diskNr);
+	 Char_t buffer3[100];
+	 sprintf(buffer3,"overallEff_D%d.png",diskNr);
+     OverallEff.Draw("colz");
+     outerA.Draw();
+     innerA.Draw();
+     OverallEff.Draw("same colz");
+
+     t1.Draw();
+     l1.Draw();
+     l2.Draw();
+	 c2.SaveAs(buffer3);
        }
      else
        {
@@ -145,7 +160,7 @@ for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
      t1.Draw();
      l1.Draw();
      l2.Draw();
-     sprintf(buffer,"overallEff_D%d_APV%d.png",diskNr,apvMap[i]);
+     sprintf(buffer,"overallEff_D%d_APV%d.pdf",diskNr,apvMap[i]);
      plAPV(apvMap[i],1,'B');
      c2->SaveAs(buffer);
      cout <<"printing to " << buffer2 <<endl;
@@ -182,23 +197,32 @@ for(Int_t i=1;i<hEff->GetNbinsX()+1;i++)
  TLatex t2(-30,0,buffer);
  for(int i=0;i<10;i++)
    {
-
      if(i==0)
        {
-	 sprintf(buffer2,"overallFound_D%d.png(",diskNr);
+	 sprintf(buffer2,"overallFound_D%d.pdf(",diskNr);
+	 Char_t buffer3[100];
+	 sprintf(buffer3,"overallFound_D%d.png",diskNr);
+	 sprintf(buffer2,"overallFound_D%d.pdf(",diskNr);
+	 OverallFound.Draw("colz");
+     outerA.Draw();
+     innerA.Draw();
+	 OverallFound.Draw("same colz");
+ l1.Draw();
+ l2.Draw();
+	 c2.SaveAs(buffer3);
        }
      else
        {
 	 if(i==9)
-	   sprintf(buffer2,"overallFound_D%d.png)",diskNr);
+	   sprintf(buffer2,"overallFound_D%d.pdf)",diskNr);
 	 else
-	   sprintf(buffer2,"overallFound_D%d.png",diskNr);
+	   sprintf(buffer2,"overallFound_D%d.pdf",diskNr);
        }
      OverallEff.Draw("colz");
      outerA.Draw();
      innerA.Draw();
      
-     OverallFound.Draw("same colz");
+     //     OverallFound.Draw("same colz");
      t2.Draw();
      l1.Draw();
      l2.Draw();

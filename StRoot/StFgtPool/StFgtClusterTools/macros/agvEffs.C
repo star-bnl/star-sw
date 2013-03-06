@@ -70,7 +70,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
 
    ///     dbMkr->SetDateTime(20120307,000717); ///
    //      dbMkr->SetDateTime(20120128,204320);      // run ???
-   dbMkr->SetDateTime(20130301,043459); ///
+   /////// begin of run 13   dbMkr->SetDateTime(20130301,043459); ///
    
    cout << "Constructing StFgtDbMaker" << endl;
    fgtDbMkr = new StFgtDbMaker( "fgtDb" );
@@ -125,7 +125,7 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
   fgtGenBase->fillFromEvent();
 
   fgtStraightTracker = new StFgtStraightTrackMaker( "fgtStraightTracker" );
-  fgtStraightTracker->setMinNumFitPoints(3);
+  fgtStraightTracker->setMinNumFitPoints(4);
   fgtStraightTracker->SetEffDisk(effDisk);
   fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
 
