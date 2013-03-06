@@ -62,10 +62,6 @@ static int l3_doer(daqReader *rdr, const char *do_print) ;
 static int fgt_doer(daqReader *rdr, const char *do_print, int which) ;
 static int mtd_doer(daqReader *rdr, const char *do_print) ;
 static int tinfo_doer(daqReader *rdr, const char *do_print);
-
-//static int gmt_doer(daqReader *rdr, const char *do_print) ;
-//static int ist_doer(daqReader *rdr, const char *do_print) ;
-
 static int pxl_doer(daqReader *rdr, const char *do_print) ;
 
 static int good ;
@@ -522,12 +518,14 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 		dd = rdr->det("tpx")->get("adc",s) ;
 		if(dd) 	{
 
+			s_mask[dd->sec-1]=1 ;
+
 			while(dd->iterate()) {
 				found = 1 ;	// any sector...
 				sec_found = 1 ;
 				adc_found = 1 ;	// any sector...
 
-				s_mask[dd->sec-1]=1 ;
+
 
 				if(do_print) {
 					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
@@ -599,6 +597,9 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 		while(dd && dd->iterate()) {
 			found = 1 ;
 			ped_found = 1 ;
+
+			s_mask[dd->sec-1]=1 ;
+
 			if(do_print) {
 				printf("TPX: sec %02d, row %2d, pad %3d (%d pix)\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				daq_det_pedrms *ped = (daq_det_pedrms *)dd->Void ;
@@ -610,7 +611,7 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 	}
 
-	char fstr[64] ;
+	char fstr[128] ;
 	fstr[0] = 0 ;	// EOS marker...
 
 	if(cld_found) {
@@ -626,7 +627,12 @@ static int tpx_doer(daqReader *rdr, const char  *do_print)
 
 	int s_cou = 0 ;
 	for(int s=0;s<24;s++) {
-		if(s_mask[s]) s_cou++ ;
+		if(s_mask[s]) {
+			char stmp[8] ;
+			sprintf(stmp,"%d ",s+1) ;
+			strcat(fstr,stmp) ;
+			s_cou++ ;
+		}
 	}
 
 	if(found) {
@@ -1223,7 +1229,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print, int which)
 
 	// one can get the data in the electronics/logical layout
 	dd = rdr->det(d_name)->get("zs") ;
-
+	if(dd) found |= 4 ;
 
 	// let's dump the meta-data first
 	if(dd && dd->meta && do_print) {
@@ -1363,8 +1369,8 @@ static int mtd_doer(daqReader *rdr, const char *do_print)
 
 			if(do_print) {
 				printf("MTD: RDO %d: %d bytes\n",dd->rdo,dd->ncontent) ;
-				// dump a few
-				for(int i=0;i<10;i++) {
+				
+				for(u_int i=0;i<dd->ncontent/4;i++) {
 					printf(" %2d: 0x%08X\n",i,d[i]) ;
 				}
 			}
@@ -1530,7 +1536,7 @@ static int pxl_doer(daqReader *rdr, const char *do_print)
 
 
 			if(do_print) {
-				printf("PXL RAW: RDO %d: %d bytes (%d words)\n",dd->rdo,dd->ncontent,dd->ncontent/4) ;
+				printf("PXL RAW: Sector %d, RDO %d: %d bytes (%d words)\n",dd->sec,dd->rdo,dd->ncontent,dd->ncontent/4) ;
 				// dump a few
 				for(int i=0;i<10;i++) {
 					printf(" %2d: 0x%08X\n",i,d[i]) ;
