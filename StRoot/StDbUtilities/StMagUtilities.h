@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.52 2012/12/10 22:46:33 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.53 2013/03/07 23:02:48 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.53  2013/03/07 23:02:48  genevb
+ * Accessor functions for Const_n parameters
+ *
  * Revision 1.52  2012/12/10 22:46:33  genevb
  * Handle multiple runs by reinitialization at reinstantiation, introduce corrections modes, enable iterative UndoDistortions
  *
@@ -429,6 +432,10 @@ class StMagUtilities {
   virtual void     ManualGGVoltError(Double_t east, Double_t west);
   virtual void     UseIterativeUndoDistortion(Bool_t flag=kTRUE) { iterateDistortion=flag; }
   virtual Int_t    IterationFailCount(); // must be called once before first actual use
+
+          Float_t  GetConst_0() { return Const_0; }
+          Float_t  GetConst_1() { return Const_1; }
+          Float_t  GetConst_2() { return Const_2; }
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
 
