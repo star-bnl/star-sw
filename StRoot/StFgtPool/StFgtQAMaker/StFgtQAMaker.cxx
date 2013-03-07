@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtQAMaker.cxx,v 1.7 2013/03/04 05:22:23 akio Exp $
+ * $Id: StFgtQAMaker.cxx,v 1.8 2013/03/07 22:46:44 akio Exp $
  *
  */
 
@@ -17,10 +17,18 @@
 #include "StRoot/StFgtUtil/geometry/StFgtGeom.h"
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 #include "StRoot/StFgtDbMaker/StFgtDb.h"
+#include "StRoot/StFgtPool/StFgtClusterTools/StFgtGeneralBase.h"
+#include "StRoot/StFgtPool/StFgtClusterTools/StFgtStraightTrackMaker.h"
 
 #include "StarClassLibrary/StThreeVectorF.hh"
 
 static const int mDebug=0;      // debug mesasge level
+
+inline int globalapv(int rdo, int arm, int apv){
+  return (rdo-1)*6*2 + arm*2 + apv/12;
+  //  if(apv<10) { return (rdo-1)*6*2*10 + arm*2*10 + apv;}
+  //else       { return (rdo-1)*6*2*10 + arm*2*10 + apv - 2;}
+}
 
 inline void getPRC(int rdo, int arm, int apv, int& page, int& row, int& col){
   page = ((rdo-1)*6 + arm)/2;
@@ -167,17 +175,21 @@ void StFgtQAMaker::bookHist(){
   const int   nHist[NHist]={          15,  200,       256, kFgtNumElecIds, kFgtNumElecIds,      1}; 
   const float lHist[NHist]={           0,    0,         0,              0,              0,      0};
   const float hHist[NHist]={          15, 4000,     30975, kFgtNumElecIds, kFgtNumElecIds,      1};
-  const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","MaxADC","ChargeAsy"};
-  const int   n1dHist[N1dHist]={         50,       ns,       ns,         25,           15,             50,      50,         50};
-  const float l1dHist[N1dHist]={          0,        0,        0,          0,            0,              0,       0,       -0.3};
-  const float h1dHist[N1dHist]={        100,float(ns),float(ns),       25.0,           15,          10000,    4000,        0.3};
-  const char* c2dHist[N2dHist] ={       "XY", "ADCvsTB"};
-  const int   xn2dHist[N2dHist]={         50,        15}; 
-  const float xl2dHist[N2dHist]={        -40,         0};
-  const float xh2dHist[N2dHist]={         40,        15};
-  const int   yn2dHist[N2dHist]={         50,       200}; 
-  const float yl2dHist[N2dHist]={        -40,         0};
-  const float yh2dHist[N2dHist]={         40,      4000};
+  const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","MaxADC","ChargeAsy","CluChargeT","MaxADCT","ChargeAsyTrk"};
+  const int   n1dHist[N1dHist]={         50,       ns,       ns,         25,           15,             50,      50,         25,          50,       50,            25};
+  const float l1dHist[N1dHist]={          0,        0,        0,          0,            0,              0,       0,       -0.3,           0,        0,          -0.3};
+  const float h1dHist[N1dHist]={        100,float(ns),float(ns),       25.0,           15,          10000,    4000,        0.3,       10000,     4000,           0.3};
+  const char* c2dHist[N2dHist] ={       "XY", "ADCvsTB", "APVTB", "XYT"};
+  const int   xn2dHist[N2dHist]={         50,        15,      15,    50}; 
+  const float xl2dHist[N2dHist]={        -40,         0,       0,   -40};
+  const float xh2dHist[N2dHist]={         40,        15,      15,    40};
+  const int   yn2dHist[N2dHist]={         50,       200,      24,    50}; 
+  const float yl2dHist[N2dHist]={        -40,         0,       0,   -40};
+  const float yh2dHist[N2dHist]={         40,      4000,      24,    40};
+  const char* cTHist[NTrkHist]={ "NTrk","NHitTrk","DCA","ZVTX","Chi2","HitDisc"};
+  const int   nTHist[NTrkHist]={     10,        7,   60,    50,    50,        6};
+  const float lTHist[NTrkHist]={      0,        0,    0,  -100,     0,      0.5};
+  const float hTHist[NTrkHist]={     10,        7,    6,   100, 0.025,      6.5};
   //histos for whole FGT
   for(int i=0; i<NHist; i++){
     hist0[i]=new TH1F(cHist[i],cHist[i],nHist[i],lHist[i],hHist[i]);
@@ -197,7 +209,14 @@ void StFgtQAMaker::bookHist(){
       sprintf(c,"Disc%1d%s",disc+1,c2dHist[i]);
       hist2[disc][i]=new TH2F(c,c,xn2dHist[i],xl2dHist[i],xh2dHist[i],yn2dHist[i],yl2dHist[i],yh2dHist[i]);
     }
-  }
+  }  
+  //1d histos per quad
+  for(int quad=0; quad<kFgtNumQuads; quad++){
+    for(int i=0; i<NTrkHist; i++){
+      sprintf(c,"Quad%1s-%s",cquad[quad],cTHist[i]);
+      histTrk[quad][i]=new TH1F(c,c,nTHist[i],lTHist[i],hTHist[i]);
+    }
+  }  
 }
 
 void StFgtQAMaker::saveHist(){
@@ -222,6 +241,12 @@ void StFgtQAMaker::saveHist(){
   for(int disc=0; disc<kFgtNumDiscs; disc++){
     for(int i=0; i<N2dHist; i++){
       hist2[disc][i]->Write();
+    }
+  }
+  //1d histos per quad
+  for(int quad=0; quad<kFgtNumQuads; quad++){
+    for(int i=0; i<NTrkHist; i++){
+      histTrk[quad][i]->Write();
     }
   }
   hfile->Close();
@@ -258,6 +283,7 @@ void StFgtQAMaker::fillHist(){
       if(layer=='R') {ipr=1;}
       Int_t rdo, arm, apv, chan;
       (*it)->getElecCoords(rdo, arm, apv, chan);
+      int gapv = globalapv(rdo,arm,apv);
       int eid = StFgtGeom::encodeElectronicId(rdo, arm, apv, chan);
       hist0[3]->Fill(float(eid));
       if(maxadc>mSigmaCut*pederr && maxadc>mAdcCut){
@@ -290,10 +316,15 @@ void StFgtQAMaker::fillHist(){
 	hist1[disc][iquad][1+ipr]->Fill(float(istr));
       }
       if(maxadc>mSigmaCut*pederr && maxadc>mAdcCut){
+	float max=0;
+        int maxtb=0;
 	for(int tb=0; tb<ntimebin; tb++){
 	  float a=float((*it)->getAdc(tb));
 	  if(a>200) hist2[idisc][1]->Fill(float(tb),a);
+	  if(a>max) {max=a; maxtb=tb;}
+	  hist2[0][2]->Fill(float(tb), float(gapv), a);
 	}
+	hist2[1][2]->Fill(float(maxtb), float(gapv));
       }	
     }
     for (int quad=0; quad<kFgtNumQuads; quad++) hist1[disc][quad][0]->Fill(float(nhit[quad]));
@@ -319,7 +350,13 @@ void StFgtQAMaker::fillHist(){
       hist1[disc][iquad][5]->Fill((*it)->charge());
       hist1[disc][iquad][6]->Fill((*it)->getMaxAdc());
       if((*it)->getMaxAdc() > 500){
-	hist0[0]->Fill(float((*it)->getMaxTimeBin()));
+	float tb = float((*it)->getMaxTimeBin());
+	//float tb = (*it)->getLandauPeak();
+	hist0[0]->Fill(tb);
+	int rdo,arm,apv,ch;
+	mDb->getElecCoordFromGeoId(geoid,rdo,arm,apv,ch);	
+	int gapv=globalapv(rdo,arm,apv);
+	hist2[2][2]->Fill(tb, float(gapv));
       }
     }
     for (int quad=0; quad<kFgtNumQuads; quad++) hist1[disc][quad][3]->Fill(float(ncluster[quad]));
@@ -337,4 +374,36 @@ void StFgtQAMaker::fillHist(){
     hist2[idisc][0]->Fill(xyz.X(),xyz.Y());
     hist1[idisc][iquad][7]->Fill((*it)->getChargeAsymmetry());		       
   }    
+
+  //Tracks
+  StFgtStraightTrackMaker *fgtSTracker = static_cast<StFgtStraightTrackMaker * >( GetMaker("fgtStraightTracker"));
+  if (fgtSTracker){
+    vector<AVTrack>& tracks=fgtSTracker->getTracks();
+    int ntrk[kFgtNumQuads]; memset(ntrk,0,sizeof(ntrk));
+    for(vector<AVTrack>::iterator t=tracks.begin();t!=tracks.end();t++){
+      if(mDebug>0) cout<<Form("Trk chi2=%8.3f dca=%8.3f",t->chi2,t->dca)<<endl;
+      if(t->dca>5 || t->chi2>0.02) continue;
+      vector<AVPoint>* points=t->points;
+      int quad=-1,disc=-1,nhit=0;
+      for(vector<AVPoint>::iterator p=points->begin(); p!=points->end();p++){
+	nhit++;
+	disc=p->dID;
+	quad=p->quadID;
+	histTrk[quad][5]->Fill(float(disc));
+	hist1[disc][quad][8]->Fill(p->rCharge);
+	hist1[disc][quad][8]->Fill(p->phiCharge);	
+	hist1[disc][quad][9]->Fill(p->fgtHitR->getMaxAdc());
+	hist1[disc][quad][9]->Fill(p->fgtHitPhi->getMaxAdc());
+	hist1[disc][quad][10]->Fill((p->phiCharge-p->rCharge)/(p->phiCharge+p->rCharge));
+	hist2[disc][3]->Fill(p->x,p->y);	
+      }
+      histTrk[quad][1]->Fill(nhit);
+      histTrk[quad][2]->Fill(t->dca);
+      histTrk[quad][3]->Fill(t->trkZ);
+      histTrk[quad][4]->Fill(t->chi2);
+      ntrk[quad]++;
+    }    
+    for(int quad=0; quad<kFgtNumQuads; quad++) {histTrk[quad][0]->Fill(float(ntrk[quad]));}
+  }
 }
+
