@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtAlignmentMaker.cxx,v 1.3 2013/03/07 22:47:11 akio Exp $
+ * $Id: StFgtAlignmentMaker.cxx,v 1.4 2013/03/07 22:59:16 akio Exp $
  *
  */
 
@@ -740,7 +740,8 @@ void StFgtAlignmentMaker::getPar(TMinuit* m, fgtAlignment_st* algpar){
 
 void StFgtAlignmentMaker::writePar(fgtAlignment_st* algpar){
   char fname[50]="fgt_alignment.dat";
-  if(mRunNumber>0) sprintf(fname,"%d/fgt_alignment_%d.dat",int(mRunNumber/1000),mRunNumber);
+  int yearday=mRunNumber/1000;
+  if(mRunNumber>0) sprintf(fname,"%d/fgt_alignment_%d.dat",yearday,mRunNumber);
   printf("Writing %s\n",fname);
   FILE *f=fopen(fname,"w");
   for(int disc=0; disc<6; disc++){
@@ -824,9 +825,10 @@ void StFgtAlignmentMaker::resetHist(){
 void StFgtAlignmentMaker::saveHist(){
   char fname[3][50]={"alignment.root","alignment_before.root","alignment_after.root"};
   if(mRunNumber>0) {
-    sprintf(fname[0],"%d/alignment_%d.root",int(mRunNumber/1000),mRunNumber);
-    sprintf(fname[1],"%d/alignment_before_%d.root",int(mRunNumber/1000),mRunNumber);
-    sprintf(fname[2],"%d/alignment_after_%d.root",int(mRunNumber/1000),mRunNumber);
+    int yearday=mRunNumber/1000;
+    sprintf(fname[0],"%d/alignment_%d.root",yearday,mRunNumber);
+    sprintf(fname[1],"%d/alignment_before_%d.root",yearday,mRunNumber);
+    sprintf(fname[2],"%d/alignment_after_%d.root",yearday,mRunNumber);
   }
   cout << "Writing " << fname[mFillHist] << endl;
   TFile *hfile = new TFile(fname[mFillHist],"update");  
