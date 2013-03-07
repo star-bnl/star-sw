@@ -497,11 +497,11 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
   if (doGaps) DetermineGaps();
   if (doNtuple) {
-      static float X[43];
+      static float X[45];
       static float ntent = 0.0;
       static float nttrk = 0.0;
 
-      if (ntent == 0.0) for (i=0; i<43; i++) X[i] = 0.0;
+      if (ntent == 0.0) for (i=0; i<45; i++) X[i] = 0.0;
       ntent++;  // # entries since last reset, including this one
       float last_nttrk = nttrk;
       nttrk = ntrks[curhist];  // # tracks since last reset, including these
@@ -574,6 +574,10 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       X[40] = s0*X[40] + s1*runinfo->backgroundRate();
       X[41] = s0*X[41] + s1*St_trigDetSumsC::instance()->getPVPDWest();
       X[42] = s0*X[42] + s1*St_trigDetSumsC::instance()->getPVPDEast();
+
+      // StMagUtilities distortion correction parameters
+      X[43] = s0*X[43] + s1*m_ExB->GetConst_0();
+      X[44] = s0*X[44] + s1*m_ExB->GetConst_1();
 
       // In calib mode, only fill when doReset (we found an sc)
       if (doReset || !Calibmode) ntup->Fill(X);
@@ -714,7 +718,8 @@ double StSpaceChargeEbyEMaker::FindPeak(TH1* hist,float& pkwidth) {
   if (hist->Integral() < 100.0) return -997.;
   double mn = hist->GetMean();
   double rms = TMath::Abs(hist->GetRMS());
-  mn *= 1.1; rms *= 1.5;
+  double range = hist->GetXaxis()->GetXmax() - hist->GetXaxis()->GetXmin();
+  mn *= 1.0 + (rms/range); rms *= 1.5;
   double lr = mn-rms;
   double ur = mn+rms;
   double pmax = TMath::Max(hist->GetMaximum(),0.);
@@ -795,7 +800,7 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
   }
 
   if (doNtuple) ntup = new TNtuple("SC","Space Charge",
-    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:ugl:zdcc:bbcc:vpdx:vpdw:vpde");
+    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:ugl:zdcc:bbcc:vpdx:vpdw:vpde:const0:const1");
 
   if (doGaps) {
     gapZhist = new TH2F("Gaps","Gaps",GN,GL,GH,GZN,GZL,GZH);
@@ -1208,8 +1213,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.47 2013/02/19 21:07:58 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.48 2013/03/07 23:12:30 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.48  2013/03/07 23:12:30  genevb
+// Improve FindPeak(), particularly for sc hists at high lumi, and add StMagUtil:const0,1 to ntuple
+//
 // Revision 1.47  2013/02/19 21:07:58  genevb
 // Print out the sc and GL correction formulas
 //
