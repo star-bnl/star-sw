@@ -4,15 +4,19 @@
 static const int MAX=2*6*20*128;
 static const float markerSize=0.38;
 
-makepedplot(int run, int comp=0){
+makepedplot(int run, int statonly=0, int comp=0){
   char filename[100];
   float ped[MAX],rms[MAX],frac[MAX],p,r,f;
   float ped2[MAX],rms2[MAX];
   int eleId[MAX],status[MAX],eid,s,t,i; 
   TString statread;
-
+  
   int day=run/1000;
-  sprintf(filename,"%d/ped/ped.%d.txt",day,run);
+  if(run>0 && statonly==0){
+    sprintf(filename,"%d/ped/ped.%d.txt",day,run);
+  }else{
+    sprintf(filename,"ped.txt");
+  }
   cout<<"Reading File "<<filename<<endl;
   std::ifstream in(filename);
   if (!in.is_open()) {
@@ -30,7 +34,11 @@ makepedplot(int run, int comp=0){
   }  
   in.close();
 
-  sprintf(filename,"%d/status/status.%d.txt",day,run);
+  if(run>0){
+    sprintf(filename,"%d/status/status.%d.txt",day,run);
+  }else{
+    sprintf(filename,"status.txt");
+  }
   cout<<"Reading File "<<filename<<endl;
   std::ifstream in2(filename);
   if (!in2.is_open()) {
@@ -45,7 +53,7 @@ makepedplot(int run, int comp=0){
   }  
   in2.close();
 
-  if(comp){
+  if(comp==2){
     memset(ped2,0,sizeof(ped2));
     memset(rms2,0,sizeof(rms2));
     TH1F * hd = new TH1F("PED Offline-Tonko","PED Offline-Tonko",50,-30,30);
