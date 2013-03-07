@@ -17,9 +17,13 @@ sed "s#/ldaphome/akio/fgt#$PWD#g" StRoot/StFgtPool/StFgtQAMaker/macros/makepage.
 
 chmod +x makeplot
 chmod +x makepage.pl
+chmod +x maketiny.pl
 chmod +x cron
 chmod +x runs
- 
+chmod +x writeped.pl
+chmod +x writestatus.pl 
+chmod +x runtime
+
 cp $STAR/.$STAR_HOST_SYS/include/fgtPedestal.h .
 cp $STAR/.$STAR_HOST_SYS/include/fgtStatus.h .
 
