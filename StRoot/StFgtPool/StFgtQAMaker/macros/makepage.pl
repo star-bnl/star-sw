@@ -138,7 +138,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	print(OUT1 "<table border=1><tr><td>Run</td><td>Time</td><td>Length</td><td>Config</td><td>Type</td>\n");
 	print(OUT1 "<td>pdf</td><td>Trace</td><td>Ped/Stat</td><td>Status</td><td>Plot</td><td>ADCvsTB</td><td>APVTB</td><td>NHitStrip</td><td>PhiHits</td>");
 	print(OUT1 "<td>RHits</td><td>NCluster</td><td>ClusterSize</td><td>Charge</td><td>MaxADC</td><td>ChargeAsy</td><td>XY</td><");
-	print(OUT1 "<td>XYTrk</td><td>Trk</td><td>ClusterChrgTrk</td><td>MaxAdcTrk</td><td>ChgAsyTrk</tr>\n");
+	print(OUT1 "<td>XYTrk</td><td>Trk</td><td>ClusterChrgTrk</td><td>MaxAdcTrk</td><td>ChgAsyTrk</td><td>Residual</td></tr>\n");
 	
 	$tgt=" onclick=\"openwin(this.href); return false;\"";
 	$siz=" Width=100 ";
@@ -232,6 +232,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $f="${run}_CluChargeT";   if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_MaxADCT";      if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_ChargeAsyTrk"; if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="resid1d.${run}";      if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    print(OUT1 "<tr>\n");
 	}
 	print(OUT1 "</table>\n");
