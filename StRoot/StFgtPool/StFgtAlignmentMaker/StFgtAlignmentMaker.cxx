@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtAlignmentMaker.cxx,v 1.2 2013/02/07 00:39:33 akio Exp $
+ * $Id: StFgtAlignmentMaker.cxx,v 1.3 2013/03/07 22:47:11 akio Exp $
  *
  */
 
@@ -553,7 +553,8 @@ void StFgtAlignmentMaker::readFromStraightTrackMaker(){
     mHit[quad][ntrk].chi2=t->chi2;
     mNtrk[quad]++;
   }
-  cout << Form("StFgtAlignmentMaker::readFromStraightTrackMaker NTRK=%d %d %d %d",mNtrk[0],mNtrk[1],mNtrk[2],mNtrk[3])<<endl;
+  if(mEventCounter%100==0) cout << Form("StFgtAlignmentMaker::readFromStraightTrackMaker EVT=%d NTRK=%d %d %d %d",
+				       mEventCounter,mNtrk[0],mNtrk[1],mNtrk[2],mNtrk[3])<<endl;
 }
 
 void StFgtAlignmentMaker::readFromStEvent() {
@@ -739,7 +740,7 @@ void StFgtAlignmentMaker::getPar(TMinuit* m, fgtAlignment_st* algpar){
 
 void StFgtAlignmentMaker::writePar(fgtAlignment_st* algpar){
   char fname[50]="fgt_alignment.dat";
-  if(mRunNumber>0) sprintf(fname,"fgt_alignment_%d.dat",mRunNumber);
+  if(mRunNumber>0) sprintf(fname,"%d/fgt_alignment_%d.dat",int(mRunNumber/1000),mRunNumber);
   printf("Writing %s\n",fname);
   FILE *f=fopen(fname,"w");
   for(int disc=0; disc<6; disc++){
@@ -823,9 +824,9 @@ void StFgtAlignmentMaker::resetHist(){
 void StFgtAlignmentMaker::saveHist(){
   char fname[3][50]={"alignment.root","alignment_before.root","alignment_after.root"};
   if(mRunNumber>0) {
-    sprintf(fname[0],"alignment_%d.root",mRunNumber);
-    sprintf(fname[1],"alignment_before_%d.root",mRunNumber);
-    sprintf(fname[2],"alignment_after_%d.root",mRunNumber);
+    sprintf(fname[0],"%d/alignment_%d.root",int(mRunNumber/1000),mRunNumber);
+    sprintf(fname[1],"%d/alignment_before_%d.root",int(mRunNumber/1000),mRunNumber);
+    sprintf(fname[2],"%d/alignment_after_%d.root",int(mRunNumber/1000),mRunNumber);
   }
   cout << "Writing " << fname[mFillHist] << endl;
   TFile *hfile = new TFile(fname[mFillHist],"update");  
