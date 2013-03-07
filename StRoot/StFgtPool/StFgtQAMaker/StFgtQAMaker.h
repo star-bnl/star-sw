@@ -4,11 +4,14 @@
  * \author Akio
  * \date   Dec2012
  *
- * $Id: StFgtQAMaker.h,v 1.6 2013/03/03 07:41:00 akio Exp $
+ * $Id: StFgtQAMaker.h,v 1.7 2013/03/07 22:46:45 akio Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StFgtQAMaker.h,v $
+ * Revision 1.7  2013/03/07 22:46:45  akio
+ * added track and timing per apvboard
+ *
  * Revision 1.6  2013/03/03 07:41:00  akio
  * adding nsigma hist
  *
@@ -62,7 +65,7 @@ public:
   inline void setRunNumber(Int_t v) {mRunNumber=v;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.6 2013/03/03 07:41:00 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.7 2013/03/07 22:46:45 akio Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   };
   
@@ -78,9 +81,9 @@ private:
   StFgtDb* mDb;          //!
 
   static const int NHist=6;     //!
-  static const int N1dHist=8;   //!
-  static const int N2dHist=2;   //!
-  static const int NTrkHist=4;  //!
+  static const int N1dHist=11;   //!
+  static const int N2dHist=4;   //!
+  static const int NTrkHist=6;  //!
   TH1F *hist0[NHist];                               //! Histos for whole fgt
   TH1F *hist1[kFgtNumDiscs][kFgtNumQuads][N1dHist]; //! 1d histos for each disc/quad
   TH2F *hist2[kFgtNumDiscs][N2dHist];               //! 2d histos for each disc
