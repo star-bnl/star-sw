@@ -8,7 +8,7 @@ $opt=$ARGV[1];
 $option=0;
 if($opt eq "insert") {$option=1;}
 
-$unixtime=`runtime $run`; $unixtime=~s/\n//g; $unixtime-=10;
+$unixtime=`./runtime $run`; $unixtime=~s/\n//g; $unixtime-=10;
 $_=`date -d \"UTC 1970-01-01 $unixtime secs\" +\"%Y-%m-%d %k:%M:%S\"`; 
 $_=~s/\n//g;
 @dt=split;
