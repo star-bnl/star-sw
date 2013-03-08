@@ -434,7 +434,7 @@ void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int
 	    {
 	      if(pStrip.charge>maxPhiCharge)
 		{
-		  if((pStrip.seedType>=kFgtSeedType1 && pStrip.seedType<=kFgtSeedType5)|| pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
+		  if((pStrip.seedType>=kFgtSeedType1 && pStrip.seedType<=kFgtSeedTypeMax)|| pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
 		    {
 		      partOfClusterP=true;
 		      pair<Double_t, Double_t> cluSize=findCluChargeSize(iD,'P',ordinate);
@@ -503,7 +503,7 @@ void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int
 	    {
 	      if(pStrip.charge>maxRCharge)
 		{
-		  if((pStrip.seedType>=kFgtSeedType1 && pStrip.seedType<=kFgtSeedType5)|| pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
+		  if((pStrip.seedType>=kFgtSeedType1 && pStrip.seedType<=kFgtSeedTypeMax)|| pStrip.seedType==kFgtClusterPart || pStrip.seedType==kFgtClusterEndUp ||pStrip.seedType==kFgtClusterEndDown)
 		    {
 		      partOfClusterR=true;
 		      pair<Double_t, Double_t> cluSize=findCluChargeSize(iD,'R',ordinate);
@@ -675,6 +675,10 @@ void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int
   if(partOfClusterR&& partOfClusterP)
     {///this is what is plotted lateron
       chargeCorr[iD*4+iq]->Fill(clusterChargeR,clusterChargeP);
+      //      cout <<"disk: " << iD << " quad: " << iq <<endl;
+      //      cout <<"looking at cluster (part of track?) at r: " << r <<" phi: " << phi <<" size r: " << mClusterSizeR <<" phi: " << mClusterSizeP;
+      //      cout << "extr charge r: " <<clusterChargeR <<" charge phi: " << clusterChargeP <<endl;
+
   //basically only here we fill with the estimated cluster, for the other disks we fill with the cluster on the track
   //	   if(r>20)
       {
@@ -698,7 +702,6 @@ void StFgtStraightPlotter::fillStripHistos(Float_t r, Float_t phi, Int_t iD, Int
 	fitTheStrip(&(pStrips[iD*4+iq][maxPInd]),0,&amp,&t0,&chi2Ndf,iD,iq,APVmaxPAdc,'P');
 
       APVfitChi2P[iD*40+APVmaxPAdc]->Fill(chi2Ndf);
-
 
       firstTbSigTrackClusterP[iD*4+iq]->Fill(firstTbSigP);
       maxAdcTrackClusterP[iD*4+iq]->Fill(maxPAdc);
@@ -1313,8 +1316,13 @@ Int_t StFgtStraightPlotter::Make()
 	  Int_t iq=(*(it->points))[i].quadID;
 	  if(iD<6 && iD>=0 && iq<4 && iq>=0)
 	    {
+	      //	      cout <<"disk :  " << iD << " iq: " << iq <<endl;
 	      chargeTrackClusterR[iD*4+iq]->Fill((*(it->points))[i].rCharge);
 	      chargeTrackClusterP[iD*4+iq]->Fill((*(it->points))[i].phiCharge);
+	      //	      cout <<" r charge: " << (*(it->points))[i].rCharge <<  " phi : " << (*(it->points))[i].phiCharge <<endl;
+	      //	      cout << "point on track: R hit: " << (*(it->points))[i].fgtHitR->getPositionR()<< " geoId: " <<  (*(it->points))[i].fgtHitR->getCentralStripGeoId() <<" size: " <<(*(it->points))[i].fgtHitR->getNstrip()<< endl;
+	      //	      cout << "point on track: Phi hit: " << (*(it->points))[i].fgtHitPhi->getPositionPhi()<< " geoId: " <<  (*(it->points))[i].fgtHitPhi->getCentralStripGeoId()<<" size: " << (*(it->points))[i].fgtHitPhi->getNstrip() <<endl;
+
 	    }
 	}
 
@@ -1350,6 +1358,7 @@ Int_t StFgtStraightPlotter::Make()
 	  quad=StFgtGeom::getQuad(phi);
 	  //	    cout <<"got quad : " << quad << " for phi: " << phi <<endl;
 	  //convert to phi in quad.., so we have to subtract that axis...
+
 	  phi-=StFgtGeom::phiQuadXaxis(quad);
 	    
 	  if(phi>TMath::Pi())
@@ -1359,6 +1368,7 @@ Int_t StFgtStraightPlotter::Make()
 	    
 	  if(phi<0)
 	    phi+=MY_PI;
+
 	  fillStripHistos(r,phi,i,quad);
 	  if(isSomewhatEff(r,phi,i,quad))
 	    {
@@ -1514,7 +1524,7 @@ StFgtStraightPlotter::StFgtStraightPlotter( const Char_t* name): StMaker( name )
   else
     vertexCut=100000000;
 
-  //  dcaCut=2;
+  //   dcaCut=2;
   //no cut 
    dcaCut=100;
 

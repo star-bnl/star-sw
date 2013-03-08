@@ -128,7 +128,8 @@ int agvEffs( const Char_t *filenameIn = "/star/data03/daq/2012/174/13174038p_rf/
   fgtStraightTracker->setMinNumFitPoints(4);
   fgtStraightTracker->SetEffDisk(effDisk);
   fgtStraightPlotter = new StFgtStraightPlotter( "fgtStraightPlotter" );
-
+  //dca in cm for track associated clusters...
+  fgtStraightPlotter->setDcaCut(2);
 
   //  fgtAVEffMkr->setChargeMatchCut(2.0);
   //  fgtAVEffMkr->setUseChargeMatch();
