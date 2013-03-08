@@ -155,8 +155,10 @@ hitCount->Clear();
   if (mCurrTrak->empty()) {//Track empty, Backward tracking, to beam
     assert(!idir);
     double Hz = kit->GetHz(mSeedHelx->Pos());
-    par[0].set(mSeedHelx,Hz); par[0].reverse();			//Set seed pars into par[0]
-    err[0].Set(mSeedHelx,Hz); err[0]*= kKalmanErrFact; err[0].Backward();
+    par[0].set(mSeedHelx,Hz); 		//Set seed pars into par[0] and err[0]
+    err[0].Set(mSeedHelx,Hz); err[0]*= kKalmanErrFact; 
+    par[0].reverse();			//Seed direction OutIn but track direction is allways InOut	
+    err[0].Backward();
   } else 	{//Forward or backward tracking
  
     curNode =(idir)? mCurrTrak->back(): mCurrTrak->front();
@@ -209,8 +211,6 @@ StvFitDers derivFit;
     if (par[0].getRxy()  > myConst->mRxyMax) 	break;
 
     		
-    if (err[0].Check("AfterDive"))		break;
-//    assert(idive || !err[0].Check("AfterDive"));
     const StvHits *localHits = 0; 
     if (idive== kDiveHits) {
 static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};   
@@ -218,7 +218,7 @@ static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};
     }
 
 
-//	Create and add nodemyTrak
+//	Create and add node to myTrak
     preNode = curNode;
     curNode = kit->GetNode();      
     if (!idir)  {mCurrTrak->push_front(curNode);innNode=curNode;outNode=preNode;}
@@ -229,14 +229,12 @@ static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};
       return 0;
     }
 
-//    assert(!idive || !par[0].check("FindTrack.1"));
     curNode->mLen = (!idir)? totLen:-totLen;
 		// Set prediction
     StvELossData eld = mDive->GetELossData();
     innNode->SetELoss(eld,idir);
     err[0].Add(innNode->mELossData,par[0]);
     curNode->SetPre(par[0],err[0],0);
-//    assert(idir || !preNode || innNode->GetFP().getRxy()<outNode->GetFP().getRxy());
     innNode->SetDer(derivFit,idir);
 
     if (idive==kDiveDca) {
