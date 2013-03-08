@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.27 2013/03/04 17:32:00 perev Exp $
+// $Id: StvMaker.cxx,v 1.28 2013/03/08 19:16:32 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -87,6 +87,7 @@ More detailed: 				<br>
 #include "StvStEventFiller.h"
 #include "StvStarVertexFinder.h"
 #include "StvTpcActive.h"
+#include "StvStEventMaker.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
 /// But zero errors could to unpredicted problems
@@ -133,7 +134,9 @@ Int_t StvMaker::Finish()
 //_____________________________________________________________________________
 Int_t StvMaker::Init()
 {
-
+//		Add maker immediately after Input maker to cleanup StEvent
+  StvStEventMaker *mk =StvStEventMaker::Inst();
+  if (mk) mk->Init();
   return StMaker::Init();
 }
 
@@ -165,6 +168,7 @@ Int_t StvMaker::InitDetectors()
       TString ts("Calibrations/tracker/");
       ts+=myName;
       TTable *tt = (TTable*)GetDataBase(ts);
+      if (!tt) Error("Make","Table %s NOT FOUND",ts.Data());
       assert(tt);
       hec->SetPars((double*)tt->GetArray());
       StvTpcSelector*sel = new StvTpcSelector(innOutNames[io]);
