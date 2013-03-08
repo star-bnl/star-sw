@@ -28,9 +28,10 @@ class StFgtStraightPlotter : public StMaker {
    Int_t Finish();
    void setUseChargeMatch(Bool_t use=true);
    void setPrint(Bool_t print);
+   void setDcaCut(Int_t dca_in_cm);
    //   Bool_t checkPulse(StFgtHit* pClus);
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightPlotter.h,v 1.6 2013/03/06 13:01:34 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtStraightPlotter.h,v 1.7 2013/03/08 02:11:53 avossen Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   void SetEffDisk(Int_t disk)
   {
     m_effDisk=disk;
@@ -273,5 +274,9 @@ inline void StFgtStraightPlotter::setPrint(Bool_t print)
 {
   doPrint=print;
 }
+inline void StFgtStraightPlotter::setDcaCut(Int_t dca_in_cm)
+{
+  dcaCut=dca_in_cm;
+};
 #endif
 
