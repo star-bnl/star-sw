@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.23 2013/02/20 00:26:59 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.24 2013/03/08 19:18:37 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.24  2013/03/08 19:18:37  perev
+ * not setting huge impact if no vertice
+ *
  * Revision 1.23  2013/02/20 00:26:59  perev
  * remove deleteing Emc data in fillEvent()
  *
@@ -794,14 +797,6 @@ StvStEventFiller::~StvStEventFiller()
 void StvStEventFiller::fillEvent()
 {
   //cout << "StvStEventFiller::fillEvent() -I- Started"<<endl;
-  StEventHelper::Remove(mEvent,"StSPtrVecTrackNode");
-  StEventHelper::Remove(mEvent,"StSPtrVecPrimaryVertex");
-
-/////////////?????????? Bad HACK ??????????????????
-///  StEventHelper::Remove(mEvent,"Emc");
-  StEventHelper::Remove(mEvent,"Tof");
-  StEventHelper::Remove(mEvent,"Track");
-  StEventHelper::Remove(mEvent,"Vertex");
 
 
   mGloPri=0;
@@ -952,8 +947,10 @@ void StvStEventFiller::fillEventPrimaries()
       fillTrackCountG++;
       break;
     } //end of verteces
-      gTrack->setImpactParameter(minDca);
-      if (pTrack) pTrack->setImpactParameter(minDca);
+      if (minDca<1000) {
+        gTrack->setImpactParameter(minDca);
+        if (pTrack) pTrack->setImpactParameter(minDca);
+      }
 
   } // kalman track loop
   gTrkNodeMap.clear();  // need to reset for the next event
