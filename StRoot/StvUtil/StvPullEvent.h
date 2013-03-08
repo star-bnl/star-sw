@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StvPullEvent.h,v 1.6 2012/10/21 22:59:41 perev Exp $
+ * $Id: StvPullEvent.h,v 1.7 2013/03/08 03:42:55 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StvPullEvent.h,v $
+ * Revision 1.7  2013/03/08 03:42:55  perev
+ * Define empty Finish()
+ *
  * Revision 1.6  2012/10/21 22:59:41  perev
  * Add IdTruth into pulls
  *
@@ -78,10 +81,9 @@ class StvPullTrk : public TObject {
 public:
     StvPullTrk();
    ~StvPullTrk(){}
-    void Finish();
+    void Finish(){;}
     void Clear(const char *opt = "");
     void Print(const char* option = "") const;
-int TestIt();
 public:
 char mBeg[1];
 short mTrackNumber; 		//track number 
