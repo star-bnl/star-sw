@@ -44,6 +44,18 @@ int SC_Reader::ZDCX() {
   return sc.rich_scalers[7];
 } 
 
+int SC_Reader::ZDCEastNoKiller() {
+  return sc.rich_scalers[12];
+} 
+
+int SC_Reader::ZDCWestNoKiller() {
+  return sc.rich_scalers[11];
+} 
+
+int SC_Reader::ZDCXNoKiller() {
+  return sc.rich_scalers[14];
+} 
+
 int SC_Reader::PVPDEast() {
   return sc.rich_scalers[8];
 } 

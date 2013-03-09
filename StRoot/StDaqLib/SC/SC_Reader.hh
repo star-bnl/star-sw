@@ -13,6 +13,9 @@ public:
   int ZDCWest();
   int ZDCEast();
   int ZDCX();
+  int ZDCWestNoKiller();
+  int ZDCEastNoKiller();
+  int ZDCXNoKiller();
   int Mult();
   int L0();
   int BBCX();

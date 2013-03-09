@@ -37,6 +37,7 @@ void StSCReader::FillTime(  unsigned int utime)
   time_t UTime = utime; //er->getEventInfo().UnixTime;
   struct tm *time=gmtime(&UTime);
   flipBBCBkg = (time->tm_year > 95 && time->tm_year < 109 ? 1 : 0) ;
+  useNoKillers = (time->tm_year > 110 ? 1 : 0);;
 }
 
 double StSCReader::getCTBWest() {
@@ -65,6 +66,18 @@ double StSCReader::getZDCEast() {
 
 double StSCReader::getZDCX() {
   return sc.rich_scalers[7];
+}
+
+double StSCReader::getZDCWestNoKiller() {
+  return sc.rich_scalers[11];
+}
+
+double StSCReader::getZDCEastNoKiller() {
+  return sc.rich_scalers[12];
+}
+
+double StSCReader::getZDCXNoKiller() {
+  return sc.rich_scalers[14];
 }
 
 double StSCReader::getMult() {
@@ -148,9 +161,15 @@ char StSCReader::thereIsSCData() {
 TDataSet* StSCReader::getSCTable(unsigned long runno) {
   St_trigDetSums* table = new St_trigDetSums("trigDetSums",1);
   trigDetSums_st* tb = table->GetTable();
-  tb->ctbWest      = getCTBWest();
-  tb->ctbEast      = getCTBEast();
-  tb->ctbTOFp      = getCTBOrTOFp();
+  if (useNoKillers) { // use otherwise empty space
+    tb->ctbWest      = getZDCWestNoKiller();
+    tb->ctbEast      = getZDCEastNoKiller();
+    tb->ctbTOFp      = getZDCXNoKiller();
+  } else {
+    tb->ctbWest      = getCTBWest();
+    tb->ctbEast      = getCTBEast();
+    tb->ctbTOFp      = getCTBOrTOFp();
+  }
   tb->tofp         = getTOFp();
   tb->zdcWest      = getZDCWest();
   tb->zdcEast      = getZDCEast();
