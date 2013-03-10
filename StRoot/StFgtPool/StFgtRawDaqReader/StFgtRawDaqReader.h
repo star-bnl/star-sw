@@ -40,6 +40,9 @@ class StFgtRawDaqReader : public StMaker {
    void setZSdataOnly()    {mDataType=2;};
    void setZSfirst()       {mDataType=3;};
 
+   void setStartTbin(int v) {mStartTbin=v;}
+   void setNumTbin(int v) {mNumTbin=v;}
+
    // Get CVS
    virtual const char *GetCVS() const;
 
@@ -53,6 +56,8 @@ class StFgtRawDaqReader : public StMaker {
    daqReader *mRdr;
    StFgtDbMaker *mFgtDbMkr;
    int mDataType; //!  0=adc, and if not there zs. 1=adc only, 2=zs only
+   int mStartTbin; // move this tb to 0 [default=0]
+   int mNumTbin;   // take only this # of tbin after mStartTbin as long as there is data [default=15]
 
    ClassDef(StFgtRawDaqReader,1);
 };
@@ -63,15 +68,18 @@ inline void StFgtRawDaqReader::setFilename( std::string filename ){ mDaqFileName
 inline void StFgtRawDaqReader::cutShortEvents( Bool_t doIt ){ mCutShortEvents = doIt; };
 inline void StFgtRawDaqReader::setIsCosmic( Bool_t itIs ){ mIsCosmic = itIs; };
 inline const char *StFgtRawDaqReader::GetCVS() const {
-   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.5 2013/02/21 20:30:26 akio Exp $ built "__DATE__" "__TIME__ ;
+   static const char cvs[] = "Tag $Name:  $ $Id: StFgtRawDaqReader.h,v 1.6 2013/03/10 05:45:29 akio Exp $ built "__DATE__" "__TIME__ ;
    return cvs;
 };
 
 #endif
 
 /*
- * $Id: StFgtRawDaqReader.h,v 1.5 2013/02/21 20:30:26 akio Exp $
+ * $Id: StFgtRawDaqReader.h,v 1.6 2013/03/10 05:45:29 akio Exp $
  * $Log: StFgtRawDaqReader.h,v $
+ * Revision 1.6  2013/03/10 05:45:29  akio
+ * added option to limit timebins to feed rest of makers
+ *
  * Revision 1.5  2013/02/21 20:30:26  akio
  * added ZS data first option
  *

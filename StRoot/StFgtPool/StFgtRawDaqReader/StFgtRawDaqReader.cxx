@@ -26,7 +26,8 @@
 #include <time.h>
 
 StFgtRawDaqReader::StFgtRawDaqReader( const Char_t* name, const Char_t *daqFileName, const Char_t* dbMkrName ) :
-  StMaker( name ), mCutShortEvents(0), mIsCosmic(0), mFgtCollectionPtr(0), mDaqFileName( daqFileName ), mDbMkrName( dbMkrName ), mRdr(0), mFgtDbMkr(0), mDataType(0){
+  StMaker( name ), mCutShortEvents(0), mIsCosmic(0), mFgtCollectionPtr(0), mDaqFileName( daqFileName ), mDbMkrName( dbMkrName ), 
+  mRdr(0), mFgtDbMkr(0), mDataType(0), mStartTbin(0), mNumTbin(15) {
 
    // set to being cosmic if filename ends in .sfs
    // otherwise, assume is not
@@ -205,19 +206,22 @@ Int_t StFgtRawDaqReader::Make() {
 	  }
 	}
       }
-      mFgtCollectionPtr->setNumTimeBins(ntimebin);
+      mFgtCollectionPtr->setNumTimeBins(ntimebin);      
+      if(mNumTbin < ntimebin) mFgtCollectionPtr->setNumTimeBins(mNumTbin);
       //printf("Max Number of Timebin=%d\n",ntimebin);
 
       while(dd && dd->iterate()) {
          fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
 
          for(u_int i=0;i<dd->ncontent;i++) {
+            timebin=f[i].tb - mStartTbin;
+	    if(timebin<0 || timebin>=mNumTbin) continue;
+
             channel=f[i].ch;
             adc=f[i].adc;
             arm=dd->sec;
             apv=dd->pad;
-            rdo=dd->rdo;
-            timebin=f[i].tb;
+            rdo=dd->rdo;	    
 
 	    int flag=0;
 	    //corrupted data in non existing channels
@@ -325,8 +329,11 @@ void StFgtRawDaqReader::Clear( Option_t *opts )
 ClassImp(StFgtRawDaqReader);
 
 /*
- * $Id: StFgtRawDaqReader.cxx,v 1.16 2013/03/03 04:59:12 akio Exp $
+ * $Id: StFgtRawDaqReader.cxx,v 1.17 2013/03/10 05:45:29 akio Exp $
  * $Log: StFgtRawDaqReader.cxx,v $
+ * Revision 1.17  2013/03/10 05:45:29  akio
+ * added option to limit timebins to feed rest of makers
+ *
  * Revision 1.16  2013/03/03 04:59:12  akio
  * less printing
  *
