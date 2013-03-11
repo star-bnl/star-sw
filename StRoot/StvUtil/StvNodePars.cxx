@@ -487,7 +487,7 @@ int StvFitErrs::Check(const char *tit) const
   double dia[5];const double *e=&mHH;
   for (int i=0,li=0;i< 5;li+=++i) {
     dia[i]=e[li+i];
-    if (dia[i]< 1e-8*kFitErrs[i]*kFitErrs[i]) {ierr = i+1; goto ERR;}
+//  if (dia[i]< 1e-8*kFitErrs[i]*kFitErrs[i]) {ierr = i+1; goto ERR;}
     if (dia[i]> 1e+4*kFitErrs[i]*kFitErrs[i]) {ierr = i+6; goto ERR;}
     for (int j=0;j<i;j++) {
        if (e[li+j]*e[li+j]>=dia[i]*dia[j]){ierr = 100+10*i+j;goto ERR;}
