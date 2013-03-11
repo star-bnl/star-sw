@@ -31,31 +31,31 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
   // VPD lo
 
   sprintf(tmp,"vpd_east_ADClo");
-  sprintf(tmp1,"vpd east ADC lowTH");
+  sprintf(tmp1,"VPD-vtx east ADC");
   contents.cdb[0] = new TH2D(tmp,tmp1,16,-0.5,15.5,400,-0.5,4095.5);
   contents.cdb[0]->SetXTitle("Channel # (east)");
   contents.cdb[0]->SetYTitle("Low-Th ADC (east)");
 
   sprintf(tmp,"vpd_east_TAClo");
-  sprintf(tmp1,"vpd east TAC lowTH");
+  sprintf(tmp1,"VPD-vtx east TAC");
   contents.cdb[1] = new TH2D(tmp,tmp1,16,-0.5,15.5,400,-0.5,4095.5);
   contents.cdb[1]->SetXTitle("Channel # (east)");
   contents.cdb[1]->SetYTitle("Low-Th TAC (east)");
 
   sprintf(tmp,"vpd_west_ADClo");
-  sprintf(tmp1,"vpd west ADC lowTH");
+  sprintf(tmp1,"VPD-vtx west ADC");
   contents.cdb[2] = new TH2D(tmp,tmp1,16,-0.5,15.5,400,-0.5,4095.5);
   contents.cdb[2]->SetXTitle("Channel # (west)");
   contents.cdb[2]->SetYTitle("Low-Th ADC (west)");
 
   sprintf(tmp,"vpd_west_TAClo");
-  sprintf(tmp1,"vpd west TAC lowTH");
+  sprintf(tmp1,"VPD-vtx west TAC");
   contents.cdb[3] = new TH2D(tmp,tmp1,16,-0.5,15.5,400,-0.5,4095.5);
   contents.cdb[3]->SetXTitle("Channel # (west)");
   contents.cdb[3]->SetYTitle("Low-Th TAC (west)");
   
   sprintf(tmp,"vpd_tac_east_vs_tac_west");
-  contents.tac_east_vs_tac_west = new TH2D(tmp,"VPDlo TAC East vs. TAC West", 400, -1.5, 4095.5, 400, -1.5, 4095.5);
+  contents.tac_east_vs_tac_west = new TH2D(tmp,"VPD-vtx TAC East vs. TAC West", 400, -1.5, 4095.5, 400, -1.5, 4095.5);
   contents.tac_east_vs_tac_west->SetXTitle("TAC West");
   contents.tac_east_vs_tac_west->SetYTitle("TAC East");
   
@@ -66,13 +66,13 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
   //contents.vertex_vs_l3_vertex->SetYTitle("VPD TAC Difference");
 
   sprintf(tmp,"vpd_earliestTAC_vs_chan_east");
-  contents.earliestTAC_vs_eastchan = new TH2D(tmp,"VPDlo EarliestTAC vs chan east", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  contents.earliestTAC_vs_eastchan = new TH2D(tmp,"VPD-vtx EarliestTAC vs chan east", 16, -0.5, 15.5, 200, -1.5, 4095.5);
   contents.earliestTAC_vs_eastchan->SetXTitle("Chan#(east)");
   contents.earliestTAC_vs_eastchan->SetYTitle("Earliest TAC");
 
 
   sprintf(tmp,"vpd_earliestTAC_vs_chan_west");
-  contents.earliestTAC_vs_westchan = new TH2D(tmp,"VPDlo EarliestTAC vs chan west", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  contents.earliestTAC_vs_westchan = new TH2D(tmp,"VPD-vtx EarliestTAC vs chan west", 16, -0.5, 15.5, 200, -1.5, 4095.5);
   contents.earliestTAC_vs_westchan->SetXTitle("Chan#(west)");
   contents.earliestTAC_vs_westchan->SetYTitle("Earliest TAC");
   
@@ -81,31 +81,31 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
 
 
   sprintf(tmp,"vpd_east_ADChi");
-  sprintf(tmp1,"vpd east ADC highTH");
+  sprintf(tmp1,"VPD-mtd east ADC");
   contents.hi_cdb[0] = new TH2D(tmp,tmp1,16,-0.5,15.5,400,-0.5,4095.5);
   contents.hi_cdb[0]->SetXTitle("Channel # (east)");
   contents.hi_cdb[0]->SetYTitle("High-Th ADC (east)");
 
   sprintf(tmp,"vpd_east_TAChi");
-  sprintf(tmp1,"vpd east TAC highTH");
+  sprintf(tmp1,"VPD-mtd east TAC");
   contents.hi_cdb[1] = new TH2D(tmp,tmp1,16,-0.5,15.5,400,-0.5,4095.5);
   contents.hi_cdb[1]->SetXTitle("Channel # (east)");
   contents.hi_cdb[1]->SetYTitle("High-Th TAC (east)");
 
   sprintf(tmp,"vpd_west_ADChi");
-  sprintf(tmp1,"vpd west ADC highTH");
+  sprintf(tmp1,"VPD-mtd west ADC");
   contents.hi_cdb[2] = new TH2D(tmp,tmp1,16,-0.5,15.5,400,-0.5,4095.5);
   contents.hi_cdb[2]->SetXTitle("Channel # (west)");
   contents.hi_cdb[2]->SetYTitle("High-Th ADC (west)");
 
   sprintf(tmp,"vpd_west_TAChi");
-  sprintf(tmp1,"vpd west TAC highTH");
+  sprintf(tmp1,"VPD-mtd west TAC");
   contents.hi_cdb[3] = new TH2D(tmp,tmp1,16,-0.5,15.5,400,-0.5,4095.5);
   contents.hi_cdb[3]->SetXTitle("Channel # (west)");
   contents.hi_cdb[3]->SetYTitle("High-Th TAC (west)");
   
   sprintf(tmp,"vpd_hi_tac_east_vs_tac_west");
-  contents.hi_tac_east_vs_tac_west = new TH2D(tmp,"VPDhi TAC East vs. TAC West", 400, -1.5, 4095.5, 400, -1.5, 4095.5);
+  contents.hi_tac_east_vs_tac_west = new TH2D(tmp,"VPD-mtd TAC East vs. TAC West", 400, -1.5, 4095.5, 400, -1.5, 4095.5);
   contents.hi_tac_east_vs_tac_west->SetXTitle("TAC West");
   contents.hi_tac_east_vs_tac_west->SetYTitle("TAC East");
   
@@ -116,13 +116,13 @@ void vpdBuilder::initialize(int argc, char *argv[]) {
   //contents.hi_vertex_vs_l3_vertex->SetYTitle("VPD TAC Difference");
 
   sprintf(tmp,"vpd_hi_earliestTAC_vs_chan_east");
-  contents.hi_earliestTAC_vs_eastchan = new TH2D(tmp,"VPDhi EarliestTAC vs chan east", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  contents.hi_earliestTAC_vs_eastchan = new TH2D(tmp,"VPD-mtd EarliestTAC vs chan east", 16, -0.5, 15.5, 200, -1.5, 4095.5);
   contents.hi_earliestTAC_vs_eastchan->SetXTitle("Chan#(east)");
   contents.hi_earliestTAC_vs_eastchan->SetYTitle("Earliest TAC");
 
 
   sprintf(tmp,"vpd_hi_earliestTAC_vs_chan_west");
-  contents.hi_earliestTAC_vs_westchan = new TH2D(tmp,"VPDhi EarliestTAC vs chan west", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  contents.hi_earliestTAC_vs_westchan = new TH2D(tmp,"VPD-mtd EarliestTAC vs chan west", 16, -0.5, 15.5, 200, -1.5, 4095.5);
   contents.hi_earliestTAC_vs_westchan->SetXTitle("Chan#(west)");
   contents.hi_earliestTAC_vs_westchan->SetYTitle("Earliest TAC");
   
