@@ -411,9 +411,7 @@ int tofBuilder::parseData(daqReader *rdr)
 		  // error stuff...
 		  int packetid = (dataword&0xF0000000)>>28;
 		  if(!ValidDataword(packetid)) {
-			// ignore tray95-0 error until bad HPTDC replaced!!!!! 
-		  // Contact kefeng.xin@rice.edu
-			if(trayid != 95) {
+			if(trayid!=46 && trayid!=102 && trayid!=106) {				// IGNORE - should use mask here
 			  contents.TOF_Error1->Fill(trayid-0.5+0.5*halftrayid); 
 			}
 		  }
