@@ -558,7 +558,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       X[34] = gapZdivslopewest;
       X[35] = s0*X[35] + s1*runinfo->spaceCharge();
       X[36] = s0*X[36] + s1*((float) (runinfo->spaceChargeCorrectionMode()));
-      X[37] = St_tpcGridLeakC::instance()->MiddlGLStrength();
+      X[37] = s0*X[37] + s1*St_tpcGridLeakC::instance()->MiddlGLStrength();
       X[38] = s0*X[38] + s1*St_trigDetSumsC::Nc(runinfo->zdcCoincidenceRate(),
                                  runinfo->zdcEastRate(),runinfo->zdcWestRate());
       X[39] = s0*X[39] + s1*St_trigDetSumsC::Nc(runinfo->bbcCoincidenceRate(),
@@ -1221,8 +1221,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.49 2013/03/09 23:37:35 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.50 2013/03/11 20:04:31 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.50  2013/03/11 20:04:31  genevb
+// make ugl and average over data
+//
 // Revision 1.49  2013/03/09 23:37:35  genevb
 // Add NoKiller ZDC data to ntuple
 //
