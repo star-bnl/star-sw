@@ -79,13 +79,13 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   
   //contents.TOF_L1mult_vs_ZDCadcsum=new TH2F("TOF_L1_vs_ZDCadcsum","TOF_L1_vs_ZDCadcsum",144,0.5,2880.5,150,0,3000);//auau
   contents.TOF_L1mult_vs_ZDCadcsum=new TH2F("TOF_L1_vs_ZDCadcsum","TOF_L1_vs_ZDCadcsum",200,0.5,200.5,200,0.5,200.5);//pp200
-  contents.TOF_L1mult_vs_ZDCadcsum->SetXTitle("TOF L1 Mult");
+  contents.TOF_L1mult_vs_ZDCadcsum->SetXTitle("TOF Mult in TRG");
   contents.TOF_L1mult_vs_ZDCadcsum->SetYTitle("ZDC hardware adc Sum");
 
   //contents.TOF_L1mult_vs_sumL0=new TH2F("TOF_L1_vs_sumL0","TOF_L1_vs_sumL0",144,0.5,2880.5,144,0.5,2880.5);//auau
-  contents.TOF_L1mult_vs_sumL0=new TH2F("TOF_L1_vs_sumL0","TOF_L1_vs_sumL0",200,0.5,200.5,200,0.5,200.5);//pp
-  contents.TOF_L1mult_vs_sumL0->SetXTitle("TOF L1 Mult");
-  contents.TOF_L1mult_vs_sumL0->SetYTitle("Sum L0 of hits");
+  contents.TOF_L1mult_vs_sumL0=new TH2F("TOF_L1_vs_sumL0","TOF hit mult: sum(TOF) vs sum(TRG)",200,0.5,200.5,200,0.5,200.5);//pp
+  contents.TOF_L1mult_vs_sumL0->SetXTitle("TOF Mult in TRG data");
+  contents.TOF_L1mult_vs_sumL0->SetYTitle("TOF Mult in TOF data");
 
 
   contents.TOF_Error1 = new TH1F("TOF_Error1","TOF electronics errors",244,0.5,122.5);
@@ -358,21 +358,39 @@ int tofBuilder::parseData(daqReader *rdr)
 //
 // now 122 trays... expanded to fix bug in hit pattern plot 3/22/2012 WJL 
 //                  (as well as several bugs in the VPD plots)
-      float trigwindowCenterpertray[122]={	 //run12 13082005
-		2907.9,2908.3,2908.0,2908.4,2915.6,2915.9,2915.2,2915.5,2915.2,2915.7,
-		2916.0,2915.9,2914.0,2914.2,2916.4,2916.6,2908.8,2908.7,2909.3,2909.2,
-		2835.9,2835.5,2835.4,2835.0,2833.2,2833.3,2840.7,2843.5,2840.0,2840.0,
-		2840.3,2848.6,2849.8,2848.4,2849.6,2848.1,2849.6,2848.0,2849.4,2841.9,
-		2843.0,2842.7,2842.5,2839.5,2832.8,2832.4,2834.7,2835.0,2835.3,2832.7,
-		2890.6,2893.0,2890.8,2898.6,2899.0,2900.8,2901.0,2900.7,2907.9,2908.2,
-		2902.7,2902.3,2894.8,2895.3,2895.3,2899.7,2897.8,2899.8,2897.7,2899.8,
-		2900.0,2905.5,2908.3,2903.9,2906.9,2904.0,2912.6,2914.0,2914.6,2913.3,
-		2913.0,2913.3,2913.2,2913.2,2904.3,2905.4,2904.8,2904.1,2903.9,2897.7,
-		2897.9,2898.1,2898.1,2898.4,   0.0,2911.0,2911.1,2911.3,2911.3,2919.8,
-		2919.9,   0.0,2919.7,2918.4,2918.7,2918.5,2919.8,2918.4,2918.0,2918.4,
-		2917.8,2910.1,2913.0,2909.8,2910.1,2910.8,2910.2,2901.7,2901.5,2902.4,
-		259.5,271.7
+//       float trigwindowCenterpertray[122]={	 //run12 13082005
+// 		2907.9,2908.3,2908.0,2908.4,2915.6,2915.9,2915.2,2915.5,2915.2,2915.7,
+// 		2916.0,2915.9,2914.0,2914.2,2916.4,2916.6,2908.8,2908.7,2909.3,2909.2,
+// 		2835.9,2835.5,2835.4,2835.0,2833.2,2833.3,2840.7,2843.5,2840.0,2840.0,
+// 		2840.3,2848.6,2849.8,2848.4,2849.6,2848.1,2849.6,2848.0,2849.4,2841.9,
+// 		2843.0,2842.7,2842.5,2839.5,2832.8,2832.4,2834.7,2835.0,2835.3,2832.7,
+// 		2890.6,2893.0,2890.8,2898.6,2899.0,2900.8,2901.0,2900.7,2907.9,2908.2,
+// 		2902.7,2902.3,2894.8,2895.3,2895.3,2899.7,2897.8,2899.8,2897.7,2899.8,
+// 		2900.0,2905.5,2908.3,2903.9,2906.9,2904.0,2912.6,2914.0,2914.6,2913.3,
+// 		2913.0,2913.3,2913.2,2913.2,2904.3,2905.4,2904.8,2904.1,2903.9,2897.7,
+// 		2897.9,2898.1,2898.1,2898.4,   0.0,2911.0,2911.1,2911.3,2911.3,2919.8,
+// 		2919.9,   0.0,2919.7,2918.4,2918.7,2918.5,2919.8,2918.4,2918.0,2918.4,
+// 		2917.8,2910.1,2913.0,2909.8,2910.1,2910.8,2910.2,2901.7,2901.5,2902.4,
+// 		259.5,271.7
+//       };
+ 
+// run-13 pp500 from 14070026
+      float trigwindowCenterpertray[122]={
+		2884.6,2883.5,2884.1,2883.8,2891.2,2891.6,2891.0,2892.4,2891.4,2891.6,
+		2891.4,2891.2,2889.4,2889.6,2892.4,2892.2,2885.0,2884.7,2884.5,2884.8,
+		2810.9,2811.4,2811.5,2810.6,2808.7,2808.3,2815.9,2818.6,2816.0,2816.0,
+		2815.9,2824.8,2825.4,2824.0,2825.3,2824.2,2825.3,2824.2,2824.4,2818.5,
+		2818.6,2819.0,2818.7,2815.1,2807.8,  0.0,2810.8,2810.3,2811.8,2808.6,
+		2866.6,2869.7,2866.0,2874.8,2874.2,2876.6,2877.1,2876.6,2884.7,2883.6,
+		2879.2,2877.5,2871.0,2870.1,2870.9,2876.3,2874.2,2875.6,2874.0,2876.2,
+		2875.9,2881.2,2884.5,2881.2,2883.5,2881.6,2889.4,2890.8,2890.3,2888.6,
+		2889.0,2890.1,2888.4,2889.1,2880.1,2880.9,2880.1,2880.5,2881.5,2873.3,
+		2873.3,2874.6,2874.4,2874.2,2874.2,2887.3,2887.1,2887.9,2887.2,2896.1,
+		2895.5,  0.0,2895.7,2894.3,2894.0,  0.0,2896.1,2896.3,2895.4,2894.5,
+		2894.2,2885.9,2888.5,2886.3,2886.0,2887.1,2886.6,2878.4,2877.7,2878.1,
+		234.7,247.1
       };
+
       
       int trigwindowHighpertray[122];
       int trigwindowLowpertray[122];
@@ -383,105 +401,105 @@ int tofBuilder::parseData(daqReader *rdr)
         trigwindowLowpertray[iii]	= center - triggeredcrossinghalfwindow;
         trigwindowHighpertray[iii]	= center + triggeredcrossinghalfwindow;
       }
-      
-      for(int ifib=0;ifib<4;ifib++){
-	int ndataword = tof->ddl_words[ifib];
-	if(ndataword<=0) continue;
-	for(int iword=0;iword<ndataword;iword++){
-	  unsigned int dataword = tof->ddl[ifib][iword];
-
-	  // error stuff...
-	  int packetid = (dataword&0xF0000000)>>28;
-	  if(!ValidDataword(packetid)) {
-	    // ignore tray95-0 error until bad HPTDC replaced!!!!! 
-      // Contact kefeng.xin@rice.edu
-	    if(trayid != 95) {
-	      contents.TOF_Error1->Fill(trayid-0.5+0.5*halftrayid); 
-	    }
-	  }
-
-	  if(ndataword<=0) continue;
-	  if( (dataword&0xF0000000)>>28 == 0xD) continue;  
-	  if( (dataword&0xF0000000)>>28 == 0xE) continue;  
-	  if( (dataword&0xF0000000)>>28 == 0xA) {  // header trigger data flag
-	    // do nothing at this moment.
-	    continue;
-	  }
-	  // geographical data words for tray number.
-	  if( (dataword&0xF0000000)>>28 == 0xC) {
-	    halftrayid = dataword&0x01;    
-	    trayid     = (dataword&0x0FE)>>1;
-	    continue;
-	  }
-
-	  if(trayid < 1 || trayid > 122) continue;
-	  if( (dataword&0xF0000000)>>28 == 0x6) {continue;}
-	  if( (dataword&0xF0000000)>>28 == 0x2) {
-	    bunchid=dataword&0xFFF;
-	    allbunchid[halftrayid][trayid-1] = bunchid;
-	    continue;  
-	  }
-	  int edgeid =int( (dataword & 0xf0000000)>>28 );
-
-	  int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
-	  int tdigboardid=tdcid/4;   // 0-3 for half tray.
-	  int tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
-	  int globaltdcchan=tdcchan + (tdcid%4)*8+tdigboardid*24+96*halftrayid; // 0-191 for tray
-
-	  int timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
-	  int time = timeinbin * 25./1024;   // time in ns 
-
-	  float trgTime = 25.*bunchid;
-	  float timeDiff = time - trgTime;
-	  while(timeDiff<0) timeDiff += 51200;
-
-	  if((trayid == 121) || (trayid == 122)) {    // handle upvpd...
-	    int moduleid=-1;
-	    int modulechan=-1;
-	    int globalmodulechan=-1;
-	    moduleid=trayid;
-	    modulechan=tdcchan2upvpdPMTchan(globaltdcchan,edgeid,trayid);
-	    globalmodulechan=modulechan;
-		if ( timeDiff >= trigwindowLowpertray[trayid-1] 
-		  && timeDiff <= trigwindowHighpertray[trayid-1] ){ 
-			contents.upvpd_hitmap[edgeid-4]->Fill(modulechan);  
-			numberforsort= time+globalmodulechan*1.e5+trayid*1.e8;
-			if(edgeid==4) leadinghits.push_back(numberforsort);
-			if(edgeid==5) trailinghits.push_back(numberforsort);
-		}
-	  }
-
-	  if(edgeid==4) {
-	    if((trayid >= 1) && (trayid<=120))
-	      contents.TOF_Tray_LEhitmap[trayid-1]->Fill(globaltdcchan);
-	  }
-
-	  if(edgeid==5) {
-	    if((trayid >= 1) && (trayid<=120))
-	      extra.TOF_Tray_TEhitmap[trayid-1]->Fill(globaltdcchan);
-	  }
-
-	  if(edgeid !=4) continue;    // leading edge data is enough
-
-	  if ( timeDiff<trigwindowLowpertray[trayid-1] 
-	    || timeDiff>trigwindowHighpertray[trayid-1] ) continue;
-
-	  int atdig = globaltdcchan/24;     // [0,7]
-	  int atdcid  = globaltdcchan/8;    // [0,23]    
-	  int ahptdcid = atdcid%3;
-	  int atdcchan = globaltdcchan%8;
-	  int tinoid=TDIGChan2TINOChan(ahptdcid,atdcchan);
-	  int tinoidx = atdig*3 + tinoid;
-      
-      if (trayid>=1 && trayid<=120 && tinoidx>=0 && tinoidx<=23){   //WJL
-	       tinohit[trayid-1][tinoidx]++; 
-	  }                                                             //WJL
-	  
-	  if((edgeid !=4) && (edgeid != 5)) continue;
-	  
-	  if(halftrayid==0) contents.TOF_Tray_hits1->Fill(trayid-0.5);
-	  if(halftrayid==1) contents.TOF_Tray_hits2->Fill(trayid);
-	}  // end loop nword
+			
+      for(int ifib=0;ifib<4;ifib++){    
+		int ndataword = tof->ddl_words[ifib];
+		if(ndataword<=0) continue;
+		for(int iword=0;iword<ndataword;iword++){
+		  unsigned int dataword = tof->ddl[ifib][iword];
+	
+		  // error stuff...
+		  int packetid = (dataword&0xF0000000)>>28;
+		  if(!ValidDataword(packetid)) {
+			// ignore tray95-0 error until bad HPTDC replaced!!!!! 
+		  // Contact kefeng.xin@rice.edu
+			if(trayid != 95) {
+			  contents.TOF_Error1->Fill(trayid-0.5+0.5*halftrayid); 
+			}
+		  }
+	
+		  if(ndataword<=0) continue;
+		  if( (dataword&0xF0000000)>>28 == 0xD) continue;  
+		  if( (dataword&0xF0000000)>>28 == 0xE) continue;  
+		  if( (dataword&0xF0000000)>>28 == 0xA) {  // header trigger data flag
+			// do nothing at this moment.
+			continue;
+		  }
+		  // geographical data words for tray number.
+		  if( (dataword&0xF0000000)>>28 == 0xC) {
+			halftrayid = dataword&0x01;    
+			trayid     = (dataword&0x0FE)>>1;
+			continue;
+		  }
+	
+		  if(trayid < 1 || trayid > 122) continue;
+		  if( (dataword&0xF0000000)>>28 == 0x6) {continue;}
+		  if( (dataword&0xF0000000)>>28 == 0x2) {
+			bunchid=dataword&0xFFF;
+			allbunchid[halftrayid][trayid-1] = bunchid;
+			continue;  
+		  }
+		  int edgeid =int( (dataword & 0xf0000000)>>28 );
+	
+		  int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
+		  int tdigboardid=tdcid/4;   // 0-3 for half tray.
+		  int tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
+		  int globaltdcchan=tdcchan + (tdcid%4)*8+tdigboardid*24+96*halftrayid; // 0-191 for tray
+	
+		  int timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
+		  int time = timeinbin * 25./1024;   // time in ns 
+	
+		  float trgTime = 25.*bunchid;
+		  float timeDiff = time - trgTime;
+		  while(timeDiff<0) timeDiff += 51200;
+	
+		  if((trayid == 121) || (trayid == 122)) {    // handle upvpd...
+			int moduleid=-1;
+			int modulechan=-1;
+			int globalmodulechan=-1;
+			moduleid=trayid;
+			modulechan=tdcchan2upvpdPMTchan(globaltdcchan,edgeid,trayid);
+			globalmodulechan=modulechan;
+			if ( timeDiff >= trigwindowLowpertray[trayid-1] 
+			  && timeDiff <= trigwindowHighpertray[trayid-1] ){ 
+				contents.upvpd_hitmap[edgeid-4]->Fill(modulechan);  
+				numberforsort= time+globalmodulechan*1.e5+trayid*1.e8;
+				if(edgeid==4) leadinghits.push_back(numberforsort);
+				if(edgeid==5) trailinghits.push_back(numberforsort);
+			}
+		  }
+	
+		  if(edgeid==4) {
+			if((trayid >= 1) && (trayid<=120))
+			  contents.TOF_Tray_LEhitmap[trayid-1]->Fill(globaltdcchan);
+		  }
+	
+		  if(edgeid==5) {
+			if((trayid >= 1) && (trayid<=120))
+			  extra.TOF_Tray_TEhitmap[trayid-1]->Fill(globaltdcchan);
+		  }
+	
+		  if(edgeid !=4) continue;    // leading edge data is enough
+	
+		  if ( timeDiff<trigwindowLowpertray[trayid-1] 
+			|| timeDiff>trigwindowHighpertray[trayid-1] ) continue;
+	
+		  int atdig = globaltdcchan/24;     // [0,7]
+		  int atdcid  = globaltdcchan/8;    // [0,23]    
+		  int ahptdcid = atdcid%3;
+		  int atdcchan = globaltdcchan%8;
+		  int tinoid=TDIGChan2TINOChan(ahptdcid,atdcchan);
+		  int tinoidx = atdig*3 + tinoid;
+		  
+		  if (trayid>=1 && trayid<=120 && tinoidx>=0 && tinoidx<=23){   //WJL
+			   tinohit[trayid-1][tinoidx]++; 
+		  }                                                             //WJL
+		  
+		  if((edgeid !=4) && (edgeid != 5)) continue;
+		  
+		  if(halftrayid==0) contents.TOF_Tray_hits1->Fill(trayid-0.5);
+		  if(halftrayid==1) contents.TOF_Tray_hits2->Fill(trayid);
+		}  // end loop nword
       }  // end loop fiber
     }
     return 1;
@@ -568,12 +586,15 @@ void tofBuilder::event(daqReader *rdr)
   int npre1=trgd->numberOfPreXing();
   int npost1=trgd->numberOfPostXing();
 
+  float TOF_L1mult		= (float)trgd->tofMultiplicity(0);
+  float TOF_L1mult_sum	= 0;
   for( int ipost=-npre1; ipost<npost1+1; ipost++) {
     int prepost=ipost;
     if(prepost != 0) continue;    // only look at prepost =0 data.
 
     for(int tray=1;tray<=120;tray++){
-      int trigger_mult=trgd->tofTrayMultiplicity(tray,prepost);
+      int trigger_mult	 = trgd->tofTrayMultiplicity(tray,prepost);
+      TOF_L1mult_sum	+= trigger_mult;
       if(trigger_mult > 31) trigger_mult=31;
       contents.TOF_L0_trg[tray-1]->Fill(trigger_mult);
     }
@@ -597,8 +618,7 @@ void tofBuilder::event(daqReader *rdr)
     for(int i=0;i<24;i++){if(tinohit[itray][i]>0) hit_mult++;}
     sum_L0_hit += hit_mult;
   }
-
-  float TOF_L1mult = (float)trgd->tofMultiplicity(0);
+  //cout<<TOF_L1mult<<" "<<TOF_L1mult_sum<<endl;
 
   float zdcHardwaresum = float(trgd->zdcAttenuated(east)) + float(trgd->zdcAttenuated(west));
   contents.TOF_L1mult_vs_ZDCadcsum->Fill(TOF_L1mult, zdcHardwaresum);
