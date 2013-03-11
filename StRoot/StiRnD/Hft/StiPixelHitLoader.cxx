@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelHitLoader.cxx,v 1.24 2012/12/18 20:52:32 bouchet Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.25 2013/03/11 17:24:08 bouchet Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.25  2013/03/11 17:24:08  bouchet
+ * StiRnD for Y2013
+ *
  * Revision 1.24  2012/12/18 20:52:32  bouchet
  * update for DEV13 geometry
  *
@@ -50,6 +53,8 @@
 #include "Sti/StiHit.h"
 #include "StRnDHit.h"
 #include "StRnDHitCollection.h"
+#include "StPxlHit.h"
+#include "StPxlHitCollection.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
@@ -80,60 +85,50 @@ void StiPixelHitLoader::loadHits(StEvent* source,
     if(!_hitContainer)
 	throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
     
-    StRnDHitCollection *col = source->rndHitCollection();
+    StPxlHitCollection *col = source->pxlHitCollection();
     if (!col) {
 	LOG_ERROR <<"StiPixelHitLoader::loadHits\tERROR:\tcol==0"
 		  <<"You must not have pixelFastSim in your chain"
 		  <<"will return with no action taken"<<endm;
 	return;
     }
-    StSPtrVecRnDHit& vec = col->hits();
+    StSPtrVecPxlHit& vec = col->hits();
     
     StiDetector *detector=0;
     int nHit=0;
     for(unsigned int j=0; j<vec.size(); j++)	{
-      StRnDHit *pxlH = vec[j];
+      StPxlHit *pxlH = vec[j];
       if(!pxlH)
 	throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL hit in container");
       
       if (pxlH->detector()!=kPxlId) continue;
-      
-      // Because of a screw up with the layout in the pixlgeo3.g file, the detectors are not 
-      // sequential in phi. List (geant,ittf): (1,2),(2,1),(3,0),(4,5),(5,4),(6,3),(7,8),(8,7),(9,6)
-      // This works to: 
-      //    ittfL = 3*n - geantL
-      //    n = 1,3,5 (or 2k+1, k=0,1,2)
-      //    k= int[( geantL -1 )/3]
-      //Resolve the layer and ladder ids.
-      
-      //detector= _detector->getDetector(pxlH->layer()-1, pxlH->ladder()-1);
-      //      int ittfLadder;
-      //assert(row<_detectors.size());
-      //assert(sector<_detectors[row].size());
-      //MLM 
-      LOG_DEBUG <<Form("hit layer: %i ladder: %i\n",pxlH->layer(), pxlH->ladder()) << endm;
-      /*
-	if(pxlH->layer()==1)
-	ittfLadder= ( 2* int( (pxlH->ladder()-1.) /3. ) +1)*3 - pxlH->ladder();
-	else
-	ittfLadder=( 2* int( (pxlH->ladder()-1.) /8. ) +1)*8 - pxlH->ladder();
-      */
-      //MLM 
-      //printf("row<==> pxlH()-1:%i sector<==>ittfLadder: %i\n",pxlH->layer()-1,ittfLadder);
-      //detector= _detector->getDetector(pxlH->layer(), ittfLadder);
 
-      detector= _detector->getDetector(pxlH->layer(), pxlH->ladder());
+      LOG_DEBUG <<Form("hit layer: %i ladder: %i\n",pxlH->layer(), pxlH->ladder()) << endm;
+
+      int LAY=0, LAD=0;
+
+      if(pxlH->layer()==1)
+        {
+          LAY=0;//(int)pxlH->layer()-1;
+          LAD=(int)pxlH->sector()-1;
+        }
+      else
+        {
+          LAY=1;//(int)pxlH->layer()-1;
+          LAD=(((int)pxlH->sector()-1)*3 + (int)pxlH->ladder()-1);
+        }
+      LOG_DEBUG << " layer : "<< LAY <<" ladder :  "<< LAD << endm;
+      LOG_DEBUG << "X/Y/Z    : " << pxlH->position().x()<<"/"<< pxlH->position().y()<<"/"<<pxlH->position().z()<<endm;
+      LOG_DEBUG << "Xl/Yl/Zl : " << pxlH->localPosition(0)<<"/"<< pxlH->localPosition(1)<<"/"<<pxlH->localPosition(2)<<endm;
+      LOG_DEBUG <<" test1 : " << LAY <<" test 2 : " << (int)pxlH->sector()*100+(int)pxlH->ladder()*10+(int)pxlH->sensor() << endm;
+      detector= _detector->getDetector(LAY,LAD);
       
       if(!detector)
 	throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
       LOG_DEBUG <<"add hit to detector:\t"<<detector->getName()<<endm;
-      //double angle   = detector->getPlacement()->getNormalRefAngle();
-      //double radius  = detector->getPlacement()->getNormalRadius();
-      //double zcenter = detector->getPlacement()->getZcenter();
-      //LOG_DEBUG << " radius = "<< radius << " angle = " << angle << " zCenter = " << zcenter << endm;
-      double angle    = detector->getPlacement()->getNormalRefAngle();
-      double radius   = detector->getPlacement()->getNormalRadius();
-      double zcenter  = detector->getPlacement()->getZcenter();
+      double angle   = detector->getPlacement()->getNormalRefAngle();
+      double radius  = detector->getPlacement()->getNormalRadius();
+      double zcenter = detector->getPlacement()->getZcenter();
       double halfDepth = detector->getShape()->getHalfDepth();
       double halfWidth = detector->getShape()->getHalfWidth();
       double thick     = detector->getShape()->getThickness();
@@ -143,22 +138,27 @@ void StiPixelHitLoader::loadHits(StEvent* source,
       LOG_DEBUG << " key 1 : " << detector->getKey(1) <<" key 2 : " << detector->getKey(2) << endm; 
       
       StiHit *stiHit=_hitFactory->getInstance();
-	if(!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
-	stiHit->reset();	
-	
-	stiHit->setGlobal(detector, pxlH,
-                          pxlH->position().x(), pxlH->position().y(),
-			  pxlH->position().z(), pxlH->charge());
-	
-	_hitContainer->add(stiHit);
-	LOG_DEBUG <<" nHit = "<<nHit<<" Layer = "<<pxlH->layer()<<" Ladder = "<<pxlH->ladder()<<" x = "<<pxlH->position().x()<<" y = "<<pxlH->position().y()<<" z = "<<pxlH->position().z()<<endm;
-	
-	//done loop over hits
-	nHit++;
-      }
-
+      if(!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
+      stiHit->reset();	
+      
+      stiHit->setGlobal(detector, pxlH,
+			pxlH->position().x(), pxlH->position().y(),
+			pxlH->position().z(), pxlH->charge());
+      
+      _hitContainer->add(stiHit);
+      LOG_DEBUG <<" nHit = "<<nHit<<" Layer = "<<(int)pxlH->layer()<<" Ladder = "<<(int)pxlH->ladder()<<" x = "<<pxlH->position().x()<<" y = "<<pxlH->position().y()<<" z = "<<pxlH->position().z()<<endm;
+      LOG_DEBUG <<"  stiHit.xl:" << stiHit->x() 
+		<<"  stiHit.yl:" << stiHit->y() 
+		<<"  stiHit.zl:" << stiHit->z() 
+		<<"  stiHit.xg:" << stiHit->x_g() 
+		<<"  stiHit.yg:" << stiHit->y_g() 
+		<<"  stiHit.zg:" << stiHit->z_g() 
+		<<"  stiHit.det:" << stiHit->detector() 
+		<< endl;
+      
+      //done loop over hits
+      nHit++;
+    }
     LOG_INFO <<"StiPixelHitLoader:loadHits -I- Loaded "<<nHit<<" pixel hits."<<endm;
-
-
 }
 
