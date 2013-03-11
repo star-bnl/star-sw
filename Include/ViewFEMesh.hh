@@ -22,10 +22,10 @@
 
 namespace Garfield {
 
-class ViewFEMesh { 
+class ViewFEMesh {
 
   RQ_OBJECT("ViewFEMesh")
-  
+
   public:
     // Constructor
     ViewFEMesh();
@@ -33,10 +33,10 @@ class ViewFEMesh {
     ~ViewFEMesh();
 
     TCanvas* GetCanvas();
-    
+
     void SetCanvas(TCanvas* c);
     void SetComponent(ComponentFieldMap* comp);
-    
+
     // Set area to be plotted
     void SetArea();
     void SetArea(double xmin, double ymin, double zmin,
@@ -44,7 +44,7 @@ class ViewFEMesh {
 
     // Projection plane
     void SetDefaultProjection();
-    void SetPlane(double fx, double fy, double fz, 
+    void SetPlane(double fx, double fy, double fz,
                   double x0, double y0, double z0);
 
     // Axes
@@ -78,7 +78,10 @@ class ViewFEMesh {
 
     // Create a default set of custom-made axes.
     void CreateDefaultAxes();
-  
+
+    // Disable a material so that its mesh cells are not drawn
+    void DisableMaterial(int materialID){ disabledMaterial[materialID] = true;}
+
   private:
 
     std::string className;
@@ -95,7 +98,7 @@ class ViewFEMesh {
     // Viewing plane
     double project[3][3];
     double plane[4];
-    
+
     // Box dimensions
     bool hasUserArea;
     double xMin, yMin, zMin, xMax, yMax, zMax;
@@ -120,22 +123,25 @@ class ViewFEMesh {
     std::map<int,int> colorMap;
     std::map<int,int> colorMap_fill;
 
+    // Disabaled materials -> not shown in the mesh view
+    std::map<int,bool> disabledMaterial;
+
     // Element plotting methods
     void DrawElements();
     void DrawCST(ComponentCST* componentCST);
     bool InView(double x, double y);
     bool LinesCrossed(double x1, double y1, double x2, double y2,
-             double u1, double v1, double u2, double v2, 
+             double u1, double v1, double u2, double v2,
              double & xc, double & yc);
     bool OnLine(double x1, double y1, double x2, double y2, double u, double v);
     void RemoveCrossings(std::vector<double> & x, std::vector<double> & y);
-    bool PlaneCut(double x1, double y1, double z1, double x2, double y2, 
+    bool PlaneCut(double x1, double y1, double z1, double x2, double y2,
                   double z2, TMatrixD & xMat);
-    bool PlaneCoords(double x, double y, double z, const TMatrixD& projMat, 
+    bool PlaneCoords(double x, double y, double z, const TMatrixD& projMat,
                      TMatrixD& xMat);
     void ClipToView(std::vector<double> & px, std::vector<double> & py,
                        std::vector<double> & cx, std::vector<double> & cy);
-    bool IsInPolygon(double x, double y,  std::vector<double> & px, 
+    bool IsInPolygon(double x, double y,  std::vector<double> & px,
                        std::vector<double> & py, bool & edge);
 
     // Plot method to be called by Plot() for CST cubic elements
