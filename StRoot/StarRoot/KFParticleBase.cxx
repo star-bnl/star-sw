@@ -2238,7 +2238,7 @@ std::ostream&  operator<<(std::ostream& os, const KFParticleBase& particle) {
   static const Char_t *vn[11] = {"x","y","z","px","py","pz","E","S","Q","Chi2","NDF"};
   os << "KFP:";
   for (Int_t i = 0; i < 8; i++) 
-    os << Form(" %s: %7.2f +/- %7.2f", vn[i],
+    os << Form(" %s:%8.3f+/-%7.3f", vn[i],
 	       particle.GetParameter(i), 
 	       (particle.GetCovariance(i,i) >= 0) ? TMath::Sqrt(particle.GetCovariance(i,i)) : -13);
   os << " Q:" << particle.GetQ() << " chi2/NDF : " << particle.GetChi2() << "/" << particle.GetNDF();
