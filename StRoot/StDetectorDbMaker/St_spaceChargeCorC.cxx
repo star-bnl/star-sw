@@ -32,6 +32,10 @@ Double_t St_spaceChargeCorC::getSpaceChargeCoulombs(Double_t scaleFactor)
         case (10): mult = scalers->getBBCBlueBkg(); break;
         case (11): mult = scalers->getPVPDEast(); break;
         case (12): mult = scalers->getPVPDWest(); break;
+        case (13) : mult = scalers->getCTBOrTOFp(); break; // zdcx-no-killer as of 2011
+        case (14) : mult = scalers->getCTBEast(); break; // zdce-no-killer as of 2011
+        case (15) : mult = scalers->getCTBWest(); break; // zdcw-no-killer as of 2011
+
         default  : mult = 0.;
       }
       if (mult < 0) {
