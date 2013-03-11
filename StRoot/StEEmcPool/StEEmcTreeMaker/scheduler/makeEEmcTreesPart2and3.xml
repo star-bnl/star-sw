@@ -27,17 +27,22 @@ foreach FILE1 ( ${LOCATION}/*EEmcTree_Part1.*root )
 
      <!--  Edit the following line to adjust for which algorithms trees are made. -->
      foreach ALGO ( TSIU )
+
+          <!--  Edit the following two lines to adjust which trigger flag the files have. -->
+          <!--  Typically, data from run 6 is flag 'h' and MC for run 6 is 'f'.           -->
           set FILE2=${FILE1:t:s/Part1.trig-h.root/Part2.trig-h/}.${ALGO}.root
           set FILE3=${FILE1:t:s/Part1.trig-h.root/Part3.trig-h/}.${ALGO}.root
 
+          <!--  This is statement makes it so that existing files in the directory are not overwritten. -->
           if ( ! -e ${FILE1:h}/$FILE2 ) then
                echo $FILE1 $FILE2 $FILE3
                echo In progress $JOBID >>! ${FILE1:h}/$FILE2
                date >> ${FILE1:h}/$FILE2
 
                # Make Part 2 and 3 for this ALGO
-               echo root4star -b -q macros/makeEEmcTreePart2and3_${ALGO}.C\(\"${FILE1}\",\"${FILE2}\",\"${FILE3}\"\)
-               time root4star -b -q macros/makeEEmcTreePart2and3_${ALGO}.C\(\"${FILE1}\",\"${FILE2}\",\"${FILE3}\"\)
+               <!--  Change the last parameter 0 to a 1 if using MC data instead of real data. -->
+               echo root4star -b -q macros/makeEEmcTreePart2and3_${ALGO}.C\(\"${FILE1}\",\"${FILE2}\",\"${FILE3}\",-1,0\)
+               time root4star -b -q macros/makeEEmcTreePart2and3_${ALGO}.C\(\"${FILE1}\",\"${FILE2}\",\"${FILE3}\",-1,0\)
 
                echo $FILE2 $FILE3 ${FILE1:h}
                cp $FILE2 $FILE3 ${FILE1:h}
@@ -69,8 +74,12 @@ ls -lh
 
 <!-- CVS
 
-$Id: makeEEmcTreesPart2and3.xml,v 1.3 2013/02/28 17:29:14 sgliske Exp $
+$Id: makeEEmcTreesPart2and3.xml,v 1.4 2013/03/11 18:18:28 sgliske Exp $
 $Log: makeEEmcTreesPart2and3.xml,v $
+Revision 1.4  2013/03/11 18:18:28  sgliske
+added comments for things to change if MC.
+Also, added explicit parameters -1,0 to the argument list for the .C file
+
 Revision 1.3  2013/02/28 17:29:14  sgliske
 forgot the stardev
 
