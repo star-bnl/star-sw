@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuFixTopoMap.cxx,v 1.3 2009/11/10 20:46:18 fisyak Exp $
+ * $Id: StuFixTopoMap.cxx,v 1.4 2013/03/11 09:42:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, May 2000
  ***************************************************************************
@@ -72,86 +72,87 @@
 bool StuFixTopoMap(StTrack* track)
 {
     if (!track) return false;
-
+    
     const StTrackDetectorInfo *info = track->detectorInfo();
     if (!info) return false;
-
+    
     const StPtrVecHit& hits = info->hits();
-
+    
     unsigned long word1 = 0;
     unsigned long word2 = 0;
-
+    
     // Primary vertex used or not
     if (track->type() == primary) word1 |= 1U;
-
+    
     //
     // Different coding for FTPC and TPC/SVT/SSD tracks
     //
     unsigned int i, k, s;
     if (info->numberOfReferencedPoints(kFtpcWestId) ||
-	info->numberOfReferencedPoints(kFtpcEastId)) {
-
-	//
-	// FTPC
-	//
-	word2 |= 1U<<31; 
-	for (i=0; i<hits.size(); i++) {
-	    if (hits[i]->detector() == kFtpcEastId ||
-		hits[i]->detector() == kFtpcEastId) {
-		k = dynamic_cast<const StFtpcHit*>(hits[i])->plane();
-		if (word1 & 1U<<k) word2 |= 1U<<30; // turnaround flag    
-		word1 |= 1U<<k;
-	    }
-	}
+        info->numberOfReferencedPoints(kFtpcEastId)) {
+        
+        //
+        // FTPC
+        //
+        word2 |= 1U<<31; 
+        for (i=0; i<hits.size(); i++) {
+            if (hits[i]->detector() == kFtpcEastId ||
+                hits[i]->detector() == kFtpcEastId) {
+                k = dynamic_cast<const StFtpcHit*>(hits[i])->plane();
+                if (word1 & 1U<<k) word2 |= 1U<<30; // turnaround flag    
+                word1 |= 1U<<k;
+            }
+        }
     }
     else {
-
-	//
-	// TPC/SVT/SSD
-	//
-	for (i=0; i<hits.size(); i++) {
-	    if (hits[i]->detector() == kSvtId) {
-		k = dynamic_cast<const StSvtHit*>(hits[i])->layer();
-		if (word1 & 1U<<k) word2 |= 1U<<30; // turnaround flag    
-		word1 |= 1U<<k;
-	    }
-	    if (hits[i]->detector() == kPxlId) {
-		k = dynamic_cast<const StRnDHit*>(hits[i])->layer();
-		LOG_DEBUG<<"track has hit in pixel detector, layer "<<k<<endm;
-		if (word1 & 1U<<k) word2 |= 1U<<30; // turnaround flag    
-		word1 |= 1U<<k;
-		LOG_DEBUG<<"word1: "<<word1<<endm;
-	    }
-	    if (hits[i]->detector() == kIstId) {
-		k = dynamic_cast<const StRnDHit*>(hits[i])->layer();
-		s = dynamic_cast<const StRnDHit*>(hits[i])->extraByte0();
-		LOG_DEBUG<<"track has hit in ist, layer "<<k<<", side "<<s<<endm;
-		if(k==2) k=k+s-1;
-		LOG_DEBUG<<"set bit for layer "<<k<<" to 1"<<endm;
-		if (word1 & 1U<<(k+2)) word2 |= 1U<<30; // turnaround flag    
-		word1 |= 1U<<(k+2);
-		LOG_DEBUG<<"word1: "<<word1<<endm;
-	    }
-	    else if (hits[i]->detector() == kSsdId) {
-		if (word1 & 1U<<7) word2 |= 1U<<30; // turnaround flag    
-		LOG_DEBUG<<"track has hit in ssd"<<endm;
-		word1 |= 1U<<7;
-		LOG_DEBUG<<"word1: "<<endm;
-	    }
-	    else if (hits[i]->detector() == kTpcId) {
-		k = dynamic_cast<const StTpcHit*>(hits[i])->padrow();
-		if (k < 25) {
-		  if (word1 & 1U<<(k+7)) word2 |= 1U<<30; // turnaround flag    
-		  word1 |= 1U<<(k+7);
-		}
-		else {
-		  if (word2 & 1U<<(k-25)) word2 |= 1U<<30; // turnaround flag    
-		  word2 |= 1U<<(k-25);
-		}
-	    }		
-	}	
+        
+        //
+        // TPC/SVT/SSD
+        //
+        for (i=0; i<hits.size(); i++) {
+            if (hits[i]->detector() == kSvtId) {
+                k = dynamic_cast<const StSvtHit*>(hits[i])->layer();
+                if (word1 & 1U<<k) word2 |= 1U<<30; // turnaround flag    
+                word1 |= 1U<<k;
+            }
+            if (hits[i]->detector() == kPxlId) {
+                // k = dynamic_cast<const StRnDHit*>(hits[i])->layer();
+                k = dynamic_cast<const StPxlHit*>(hits[i])->layer();                
+                LOG_DEBUG<<"track has hit in pixel detector, layer "<<k<<endm;
+                if (word1 & 1U<<k) word2 |= 1U<<30; // turnaround flag    
+                word1 |= 1U<<k;
+                LOG_DEBUG<<"word1: "<<word1<<endm;
+            }
+            if (hits[i]->detector() == kIstId) {
+                k = dynamic_cast<const StRnDHit*>(hits[i])->layer();
+                s = dynamic_cast<const StRnDHit*>(hits[i])->extraByte0();
+                LOG_DEBUG<<"track has hit in ist, layer "<<k<<", side "<<s<<endm;
+                if(k==2) k=k+s-1;
+                LOG_DEBUG<<"set bit for layer "<<k<<" to 1"<<endm;
+                if (word1 & 1U<<(k+2)) word2 |= 1U<<30; // turnaround flag    
+                word1 |= 1U<<(k+2);
+                LOG_DEBUG<<"word1: "<<word1<<endm;
+            }
+            else if (hits[i]->detector() == kSsdId) {
+                if (word1 & 1U<<7) word2 |= 1U<<30; // turnaround flag    
+                LOG_DEBUG<<"track has hit in ssd"<<endm;
+                word1 |= 1U<<7;
+                LOG_DEBUG<<"word1: "<<endm;
+            }
+            else if (hits[i]->detector() == kTpcId) {
+                k = dynamic_cast<const StTpcHit*>(hits[i])->padrow();
+                if (k < 25) {
+                    if (word1 & 1U<<(k+7)) word2 |= 1U<<30; // turnaround flag    
+                    word1 |= 1U<<(k+7);
+                }
+                else {
+                    if (word2 & 1U<<(k-25)) word2 |= 1U<<30; // turnaround flag    
+                    word2 |= 1U<<(k-25);
+                }
+            }		
+        }	
     }
-
+    
     StTrackTopologyMap newmap(word1, word2);
     track->setTopologyMap(newmap);
     return true;
