@@ -2,6 +2,7 @@
 
 # pro as of 10/28/11
 #starver SL11d
-stardev
+#stardev
+starver SL13a
 
 echo `STAR_LEVELS`
