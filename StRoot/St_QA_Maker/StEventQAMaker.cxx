@@ -323,7 +323,9 @@ Int_t StEventQAMaker::Make() {
       gMessMgr->Warning("StEventQAMaker::Make(): No trigger info");
     }
   }  // allTrigs
-  if (run_year >=13) {
+  if (run_year >=14) {
+    if (realData) histsSet = StQA_run13; // for now, everything from run13 on uses this set
+  } else if (run_year >=13) {
     if (realData) histsSet = StQA_run12; // for now, everything from run12 on uses this set
   } else if (run_year >=9) {
     if (realData) histsSet = StQA_run8; // for now, everything from run8 on uses this set
@@ -2421,10 +2423,45 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
   }
   return PCT;
 }
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistFMS() {
+
+  // Get trigger data for the current event.
+  StTriggerData* trigger = event->triggerData();
+  if (!trigger) return;
+  // We don't want to include LED events when filling the histograms.
+  const unsigned short dsm = trigger->lastDSM(4);
+  if(dsm & 0x1) {
+    return;
+  } // if
+  // Loop over histograms for each QT crate (FMS and FPD are
+  // accessed via the same method in StTriggerData).
+  TH1PtrMap::iterator i;
+  for(i = mFMShistograms.begin(); i not_eq mFMShistograms.end(); ++i) {
+    TH1* histogram = i->second;
+    // Fill the histogram for each channel by looping over
+    // each slot and each channel-in-slot.
+    int crate = i->first;
+    for(int slot(0); slot < kNQtSlotsPerCrate; ++slot) {
+      for(int channel(0); channel < kNQtChannelsPerSlot; ++channel) {
+        int index = slot * kNQtChannelsPerSlot + channel;
+        float adc = trigger->fmsADC(crate, slot, channel, 0);
+        histogram->Fill(index, adc);
+      } // for
+    } // for
+  } // for
+
+
+   
+
+}
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.111 2012/04/23 02:54:36 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.112 2013/03/12 03:06:02 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.112  2013/03/12 03:06:02  genevb
+// Add FMS/FPD histograms for Run 13+
+//
 // Revision 2.111  2012/04/23 02:54:36  genevb
 // Reduce pile-up contributions in impact parameter plots
 //

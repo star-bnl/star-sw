@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.43 2012/05/01 16:01:35 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.44 2013/03/12 03:06:02 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.44  2013/03/12 03:06:02  genevb
+// Add FMS/FPD histograms for Run 13+
+//
 // Revision 2.43  2012/05/01 16:01:35  genevb
 // correction on required detectors for EmcCat4 plots
 //
@@ -245,6 +248,11 @@
   "QaBbcTdcEL",
   "QaBbcTdcWS",
   "QaBbcTdcWL",
+  "fms_qt_channel_adc_crate_1",
+  "fms_qt_channel_adc_crate_2",
+  "fms_qt_channel_adc_crate_3",
+  "fms_qt_channel_adc_crate_4",
+  "fpd_channel_adc",
   ":fpd:QaFpdTop0",
   ":fpd:QaFpdTop1",
   ":fpd:QaFpdBottom0",
