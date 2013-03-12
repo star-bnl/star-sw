@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.19 2012/03/05 03:42:32 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.20 2013/03/12 03:06:02 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.20  2013/03/12 03:06:02  genevb
+// Add FMS/FPD histograms for Run 13+
+//
 // Revision 2.19  2012/03/05 03:42:32  genevb
 // Remove TPC XY dist, add TPC RPhi charge
 //
@@ -76,7 +79,8 @@ enum StQAHistSetType {
   StQA_AuAu = 4,
   StQA_run8 = 5,
   StQA_run12all = 6,
-  StQA_run12 = 7
+  StQA_run12 = 7,
+  StQA_run13 = 8
 };
 
 #include "StMaker.h"
@@ -84,6 +88,20 @@ class StQABookHist;
 class TObjArray;
 class TH1F;
 class TH2F;
+
+// FMS needs
+typedef std::map<int, TH1*> TH1PtrMap;
+// Enumerate QT crate numbers 1-5 (1-4 are FMS, 5 is FPD).
+enum StFmsQtCrateNumber {kQt1 = 1, kQt2, kQt3, kQt4, kFpd, kQtError};
+/*
+ Basic QT crate geometry.
+ Note that physically there are 16 slots per crate, but only 12
+ at most are currently actually used.
+ */   
+const int kNQtSlotsPerCrate = 12;
+const int kNQtChannelsPerSlot = 32;
+const int kNChannels = kNQtSlotsPerCrate * kNQtChannelsPerSlot;
+const int kNAdc = 4096;
 
 class StQAMakerBase : public StMaker {
 
@@ -98,7 +116,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.19 2012/03/05 03:42:32 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.20 2013/03/12 03:06:02 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -129,6 +147,11 @@ class StQAMakerBase : public StMaker {
   TH1F     *m_ftpc_fcl_radialW;  //! ftpc west cluster radial position
   TH1F     *m_ftpc_fcl_radialE;  //! ftpc east cluster radial position
 
+  // FMS histograms
+  // ADC vs. channel histograms keyed by QT crate number.
+  // Stores both FMS and FPD histograms.
+  TH1PtrMap mFMShistograms;
+
 
 // **************** Members For Internal Use ***************************
  protected:
@@ -153,6 +176,7 @@ class StQAMakerBase : public StMaker {
   virtual void BookHistGeneral();
   virtual void BookHistTrigger();
   virtual void BookHistFcl();
+  virtual void BookHistFMS();
 
   virtual void MakeHistGlob() = 0;
   virtual void MakeHistDE() = 0;
@@ -166,6 +190,7 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistFPD() {}
   virtual void MakeHistPMD() {}
   virtual void MakeHistTOF() {}
+  virtual void MakeHistFMS() {}
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT
 };

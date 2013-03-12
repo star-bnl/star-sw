@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.68 2012/03/05 03:42:32 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.69 2013/03/12 03:06:02 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.69  2013/03/12 03:06:02  genevb
+// Add FMS/FPD histograms for Run 13+
+//
 // Revision 2.68  2012/03/05 03:42:32  genevb
 // Remove TPC XY dist, add TPC RPhi charge
 //
@@ -766,11 +769,8 @@ void StQABookHist::BookHist(Int_t histsSet){
     mNullPrimVtxClass->SetXTitle("has primary vertex? (yes = 1, no = -1)");
     mNullPrimVtxClass->SetYTitle("# of events");
   }
-  if (!(histsSet==StQA_run8     ||
-        histsSet==StQA_run12all ||
-        histsSet==StQA_run12      )) silHists = kTRUE;
-  if (!(histsSet==StQA_run12all ||
-        histsSet==StQA_run12      )) ftpHists = kTRUE;
+  if (histsSet<StQA_run8) silHists = kTRUE;
+  if (histsSet<StQA_run12all) ftpHists = kTRUE;
   BookHistPoint();
   BookHistEMC();
   if (histsSet == StQA_AuAuOld) {
@@ -782,12 +782,9 @@ void StQABookHist::BookHist(Int_t histsSet){
   BookHistDE();
   BookHistPID();
   BookHistVertex();
-  if (!(histsSet==StQA_run12all ||
-        histsSet==StQA_run12      )) BookHistPMD();
+  if (histsSet<StQA_run12all) BookHistPMD();
   if (histsSet==StQA_MC) BookHistEval();
-  if (histsSet==StQA_run8     ||
-      histsSet==StQA_run12all ||
-      histsSet==StQA_run12      ) BookHistTOF();
+  if (histsSet>=StQA_run8) BookHistTOF();
   
 }
 //_____________________________________________________________________________

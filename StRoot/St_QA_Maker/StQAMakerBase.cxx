@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.38 2012/03/05 03:42:32 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.39 2013/03/12 03:06:02 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.39  2013/03/12 03:06:02  genevb
+// Add FMS/FPD histograms for Run 13+
+//
 // Revision 2.38  2012/03/05 03:42:32  genevb
 // Remove TPC XY dist, add TPC RPhi charge
 //
@@ -242,12 +245,11 @@ Int_t StQAMakerBase::Make() {
   // histograms from FPD in StEvent
   if (histsSet==StQA_AuAuOld) MakeHistFPD();
   // histograms from PMD in StEvent
-  if (!(histsSet==StQA_run12all ||
-        histsSet==StQA_run12      )) MakeHistPMD();
+  if (histsSet<StQA_run12all) MakeHistPMD();
   // histograms from TOF in StEvent
-  if (histsSet==StQA_run8     ||
-      histsSet==StQA_run12all ||
-      histsSet==StQA_run12      ) MakeHistTOF();
+  if (histsSet>=StQA_run8) MakeHistTOF(); 
+  // histograms from FMS in StEvent
+  if (histsSet>=StQA_run13) MakeHistFMS(); 
 
   eventCount++;
   return kStOk;
@@ -298,6 +300,7 @@ void StQAMakerBase::BookHist() {
 
   // Real data with event classes for different triggers
 
+    case (StQA_run13) :
     case (StQA_run12) :
     case (StQA_run8) :
     case (StQA_AuAu) : {
@@ -338,6 +341,7 @@ void StQAMakerBase::BookHist() {
   BookHistTrigger();
   BookHistGeneral();
   BookHistFcl();
+  if (histsSet>=StQA_run13) BookHistFMS(); 
 
   Int_t tempClass2 = eventClass;
   // Must book the histograms with no special prefix now
@@ -427,5 +431,61 @@ void StQAMakerBase::BookHistFcl(){
       }
     }
   }
+}
+//_____________________________________________________________________________
+void StQAMakerBase::BookHistFMS(){
+
+  for(int qt = kQt1; qt < kQtError; ++qt) {
+
+    std::string s;
+    switch(qt) {
+      case kQt1:
+        s = "south-top";
+        break;
+      case kQt2:
+        s = "south-bottom";
+        break;
+      case kQt3:
+        s = "north-top";
+        break;
+      case kQt4:
+        s = "north-bottom";
+        break;
+      case kFpd:
+        s = "FPD";
+        break;
+    } // switch
+
+    std::string name;
+    std::string title;
+    // Generate histogram names and titles for FMS QT crates.
+    if(qt >= kQt1 and qt <= kQt4) {
+      std::stringstream stream;
+      stream << "fms_qt_channel_adc_crate_" << qt;
+      name = stream.str();
+      stream.str("");
+      stream.clear();
+      stream << "Input to FMS QT crate " << qt << " (" << s << ")";
+      title = stream.str();
+    } // if
+    // ... or the FPD.
+    else if(kFpd == qt) {
+      name = "fpd_channel_adc";
+      title = "Input to FPD QT crate";
+    } // else if
+
+    // Create the histogram.
+    TH2F* h = new TH2F(name.c_str(),
+                       title.c_str(),
+                       kNChannels, 0., kNChannels,  // Channel axis bins
+                       200, 0., kNAdc);             // ADC axis bins
+    h->SetBit(TH1::kCanRebin);
+    h->SetXTitle("slot * 32 + channel");
+    h->SetYTitle("ADC");
+    // Store the histogram.
+    AddHist(h);
+    mFMShistograms.insert(std::make_pair(qt, h));
+  } // for
+
 }
 //_____________________________________________________________________________

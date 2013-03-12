@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.88 2012/05/01 18:37:19 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.89 2013/03/12 03:05:43 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.89  2013/03/12 03:05:43  genevb
+// Add FMS/FPD histograms for Run 13+
+//
 // Revision 2.88  2012/05/01 18:37:19  genevb
 // ZCol for Vtx XY distribution
 //
@@ -861,6 +864,8 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 
 // Set logZ scale
           if (oName.EndsWith("PVsDedx") ||
+              oName.Contains("fms_qt_") ||
+              oName.Contains("fpd_channel_adc") ||
               oName.Contains("TpcSector") ||
               oName.Contains("PointRPTpc") ||
               oName.Contains("PointXYTpc") ) {
