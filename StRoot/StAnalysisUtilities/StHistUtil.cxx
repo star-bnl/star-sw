@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.89 2013/03/12 03:05:43 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.90 2013/03/12 03:41:18 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.90  2013/03/12 03:41:18  genevb
+// handle fms/fpd naming for now
+//
 // Revision 2.89  2013/03/12 03:05:43  genevb
 // Add FMS/FPD histograms for Run 13+
 //
@@ -865,7 +868,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 // Set logZ scale
           if (oName.EndsWith("PVsDedx") ||
               oName.Contains("fms_qt_") ||
-              oName.Contains("fpd_channel_adc") ||
+              oName.Contains("fpd_channel_") ||
               oName.Contains("TpcSector") ||
               oName.Contains("PointRPTpc") ||
               oName.Contains("PointXYTpc") ) {
@@ -1947,7 +1950,9 @@ void StHistUtil::SetDefaultLogYList(const Char_t *dirName)
   Int_t ilg = 0;
   for (ilg=0;ilg<lengofList;ilg++) {
     TString listString = sdefList[ilg];
-    if (!listString.BeginsWith("fcl")) {
+    if (!(ilgString.BeginsWith("fcl") ||
+          ilgString.BeginsWith("fms_qt_") ||
+          ilgString.BeginsWith("fpd_channel_"))) {
       for (Int_t k=0; k<numOfPosPrefixes; k++) {
         ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
         numLog = AddToLogYList(listString.Data());
@@ -1990,7 +1995,9 @@ void StHistUtil::SetDefaultLogXList(const Char_t *dirName)
   Int_t ilg = 0;
   for (ilg=0;ilg<lengofList;ilg++) {
     TString listString = sdefList[ilg];
-    if (!listString.BeginsWith("fcl")) {
+    if (!(ilgString.BeginsWith("fcl") ||
+          ilgString.BeginsWith("fms_qt_") ||
+          ilgString.BeginsWith("fpd_channel_"))) {
       for (Int_t k=0; k<numOfPosPrefixes; k++) {
         ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
         numLog = AddToLogXList(listString.Data());
@@ -2168,7 +2175,9 @@ void StHistUtil::SetDefaultPrintList(const Char_t *dirName, const Char_t *analTy
       if (addIt) ilgString.Remove(0,endDetSpec);
     }
     if (addIt) {
-      if (!ilgString.BeginsWith("fcl")) {
+      if (!(ilgString.BeginsWith("fcl") ||
+            ilgString.BeginsWith("fms_qt_") ||
+            ilgString.BeginsWith("fpd_channel_"))) {
         for (Int_t k=0; k<numOfPosPrefixes; k++) {
           TString listString = type;
           (listString += possiblePrefixes[k]) += ilgString;
