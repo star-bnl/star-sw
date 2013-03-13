@@ -5,7 +5,7 @@
  */
 /***************************************************************************
  * 
- * $Id: StPxlHit.cxx,v 2.1 2013/03/05 14:40:40 ullrich Exp $
+ * $Id: StPxlHit.cxx,v 2.2 2013/03/13 08:01:45 ullrich Exp $
  *
  * Author: S. MArgetis, J. Bouchet, Jan 2013 
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPxlHit.cxx,v $
+ * Revision 2.2  2013/03/13 08:01:45  ullrich
+ * Set correct detector ID kPxlId in constructors,
+ *
  * Revision 2.1  2013/03/05 14:40:40  ullrich
  * Initial Revision.
  * 
@@ -31,7 +34,7 @@ StPxlHit::~StPxlHit() { /* noop */ }
 StPxlHit::StPxlHit()
 {
     mSector = mLadder = mSensor = -1;
-    mDetectorId = kUnknownId;
+    mDetectorId = kPxlId;
 }
 
 StPxlHit::StPxlHit(const StThreeVectorF& p,
@@ -40,7 +43,7 @@ StPxlHit::StPxlHit(const StThreeVectorF& p,
 : StHit(p, e, hw, q, c)
 { 
     mSector = mLadder = mSensor = -1;
-    mDetectorId = kUnknownId;
+    mDetectorId = kPxlId;
 }
 
 StDetectorId StPxlHit::detector() const {return mDetectorId;}
