@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.256 2013/02/21 22:53:05 jwebb Exp $
+// $Id: StMaker.cxx,v 1.257 2013/03/13 22:12:29 jeromel Exp $
 //
 //
 /*!
@@ -256,24 +256,27 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   // 
 
   {"y2009",       20081215,     0, "y2009",    "based on TGeomanager of YF"},
-
   {"y2009a",      20081215,     1, "y2009a",   "y2009+ecalgeo6(JW)"},
   {"y2009b",      20081215,     2, "y2009b",   "y2009+ecalgeo6(JW) w/ old tracking cuts in eemc."},
   {"y2009c",      20081215,     3, "y2009c",   "TOF fix & TPCE redused"},
   {"y2009d",      20081215,     4, "y2009d",   "Honey sandwich fix"},
+
   {"y2010",       20091215,     0, "y2010",    "y2009+full BTOF"},
   {"y2010a",      20091215,     1, "y2010a",   "y2010 production tag"},
   {"y2010b",      20091215,     2, "y2010b",   "TOF fix & TPCE redused"},
   {"y2010c",      20091215,     3, "y2010c",   "Honey sandwich fix"},
+
   {"y2011",       20101215,     0, "y2011",    "y2011 TOF fix & TPCE redused & honey"},
   {"y2011a",      20101215,     1, "y2011a",   "y2011a == y2011 now "},
   {"y2011b",      20101215,     2, "y2011b",   "y2011a + wall "},
+
   {"y2012",       20111215,     0, "y2012",    "y2012 Very preliminary"},
   {"y2012a",      20111215,     1, "y2012a",   "y2012 geometry (MTD missing)"},
   {"y2012b",      20111215,     2, "y2012b",   "y2012 geometry (now with MTD)"},
+
   {"y2013",       20121215,     0, "y2013",    "y2013 first cut geometry"},
-  {"y2013_1",     20121215,     1, "y2013",    "y2013 first cut geometry"},
-  {"y2013_2",     20121215,  1001, "y2013",    "y2013 first cut geometry sans pixel"},
+  {"y2013_1",     20121215,     1, "y2013_1",  "y2013 first cut geometry"},
+  {"y2013_2",     20121215,  1001, "y2013_2",  "y2013 first cut geometry sans pixel"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -1963,6 +1966,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.257  2013/03/13 22:12:29  jeromel
+// Some spacing + DbAlias geo name should be _1 and _2
+//
 // Revision 1.256  2013/02/21 22:53:05  jwebb
 // Defined first cut geometries with and without pixel detector.
 //
