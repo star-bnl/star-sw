@@ -45,7 +45,7 @@ Int_t StFgtPointMaker::Make()
    if( !ierr ){
      StFgtPointCollection *pointCollectionPtr = fgtCollectionPtr->getPointCollection();
      ierr = mPointAlgoPtr->makePoints( *fgtCollectionPtr );
-      }
+   }
       
    return ierr;
 };
@@ -75,22 +75,27 @@ Int_t StFgtPointMaker::Init()
  
 StFgtPointMaker::StFgtPointMaker( const Char_t* name ) : StMaker(name),mPointAlgoPtr(0)
 {
-
-
-   /* */
+   /* noop */
 };
 
 StFgtPointMaker::~StFgtPointMaker()
 {
-	
+  /* noop */	
+  if (mPointAlgoPtr){
+    LOG_INFO << "Cleaning up point Algo" << endm;
+    delete mPointAlgoPtr;
+  }
 };
 
     
 ClassImp(StFgtPointMaker);
     
 /*
- * $Id: StFgtPointMaker.cxx,v 1.1 2013/03/13 20:36:28 jeromel Exp $ 
+ * $Id: StFgtPointMaker.cxx,v 1.2 2013/03/13 21:31:47 jeromel Exp $ 
  * $Log: StFgtPointMaker.cxx,v $
+ * Revision 1.2  2013/03/13 21:31:47  jeromel
+ * Minor modif
+ *
  * Revision 1.1  2013/03/13 20:36:28  jeromel
  * Initial revision, Anselm Vossen
  *
