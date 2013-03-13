@@ -1,6 +1,10 @@
 ///
-// $Id: StFgtSeededClusterAlgo.h,v 1.9 2013/02/20 01:32:27 avossen Exp $
+// $Id: StFgtSeededClusterAlgo.h,v 1.10 2013/03/13 15:57:35 akio Exp $
 // $Log: StFgtSeededClusterAlgo.h,v $
+// Revision 1.10  2013/03/13 15:57:35  akio
+// Fix a bug with ZS data and phi-even strip clustering logic
+// Also remove some kStFgtNumTimebins and use dynamic local mMaxTimeBin from StFgtCollection
+//
 // Revision 1.9  2013/02/20 01:32:27  avossen
 // added n strips before and after cluster
 //
@@ -94,7 +98,7 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
  protected:
   ///migrated to A2C maker
   //  Bool_t checkPulse(StFgtHit* pClus);
-  Int_t addStrips2Cluster(StFgtHit* clus, StFgtStrip** itSeed, StFgtStrip** itVecBegin, StFgtStrip** itVecEnd,Bool_t direction, Int_t sidedSize, Char_t seedLayer);
+  Int_t addStrips2Cluster(StFgtHit* clus, StFgtStrip** itSeed, StFgtStrip** itVecBegin, StFgtStrip** itVecEnd,Bool_t direction, Int_t sidedSize);
   Bool_t isSameCluster(StFgtStrip** itSeed,StFgtStrip** nextStrip);
   void FillClusterInfo(StFgtHit* cluster,StFgtStripCollection& allStrips);
   void doStripFit(void* stripsT);
@@ -103,6 +107,7 @@ class StFgtSeededClusterAlgo :public StFgtIClusterAlgo
    // pointer to the DB
   Int_t numAdditionalStrips;
   StFgtDb* mDb;
+  int mMaxTimeBin;
 
  private:
   Bool_t up;
