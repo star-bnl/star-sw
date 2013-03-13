@@ -965,6 +965,16 @@ Bfc_st BFC[] = {
    ,                      "","","Production chain for 2011 data - no Corr (+ l3, bcc/fpd, e/b-emc)",kFALSE},
 
 
+  // Year 13 chains - geom should be ry2013_2 but does not work for now
+  {"B2013","","","ry2013_2,in,tpcX,ITTF,AgML,UseXgeom,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
+   ,                                                               "Base chain for 2013 ITTF (tpc)",kFALSE},
+  {"pp2013a","" ,"",
+   "B2013,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
+   "","",                "Production chain for 2013 data - no Corr (+ l3, bcc/fpd, e/b-emc, no VF)",kFALSE},
+
+
+
+
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
    ,                                                                "Laser Calibration Chain (tcl)",kFALSE},
