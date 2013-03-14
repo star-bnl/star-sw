@@ -40,8 +40,7 @@ if ($out > 1) {
 
 if($debug) { print("year=$year day=$day submit=$submit\n"); } 
 
-if (-e "$anadir/html")   {} else {`mkdir $anadir/html`;}
-
+if (-e "$anadir/html")     {} else {`mkdir $anadir/html`;}
 $today = ` date +%s`;             $today=~s/\n//g;
 $dtoday = ` date +"%Y %b %d %a"`; $dtoday=~s/\n//g;                      
 $itoday = ` date +%j`;            $itoday=~s/\n//g;          
@@ -69,10 +68,9 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
     $id="$year$id";    
     if($debug) {print("id=$id   ");}
 
-    if (-e "$anadir/$id")        {} else {`mkdir $anadir/$id`;}
+    if (-e "$anadir/$id") {} else {`mkdir $anadir/$id`;}
     if (-e "$anadir/$id/condor") {} else {`mkdir $anadir/$id/condor`;}
-    if (-e "$anadir/$id/log")    {} else {`mkdir $anadir/$id/log`;}
-
+    if (-e "$anadir/$id/log") {} else {`mkdir $anadir/$id/log`;}
     if ($d == $today) { 
 	if($debug) { printf("Getting run list from DB ... "); }
 	`cd $anadir; $anadir/runs $id`;
@@ -136,9 +134,9 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	print(OUT1 "<H1>FGT Monitor Day$id ($dd)</H1>\n");
 	print(OUT1 "<a href=\"index.php\">Back to day list</a>\n");
 	print(OUT1 "<table border=1><tr><td>Run</td><td>Time</td><td>Length</td><td>Config</td><td>Type</td>\n");
-	print(OUT1 "<td>pdf</td><td>Trace</td><td>Ped/Stat</td><td>Status</td><td>Plot</td><td>ADCvsTB</td><td>APVTB</td><td>NHitStrip</td><td>PhiHits</td>");
+	print(OUT1 "<td>pdf</td><td>Trace</td><td>Ped/Stat</td><td>Status</td><td>Plot</td><td>Landau</td><td>ADCvsTB</td><td>APVTB</td><td>NHitStrip</td><td>PhiHits</td>");
 	print(OUT1 "<td>RHits</td><td>NCluster</td><td>ClusterSize</td><td>Charge</td><td>MaxADC</td><td>ChargeAsy</td><td>XY</td><");
-	print(OUT1 "<td>XYTrk</td><td>Trk</td><td>ClusterChrgTrk</td><td>MaxAdcTrk</td><td>ChgAsyTrk</td><td>Residual</td></tr>\n");
+	print(OUT1 "<td>XYTrk</td><td>Trk</td><td>ClusterChrgTrk</td><td>Landau</td><td>MaxAdcTrk</td><td>ChgAsyTrk</tr>\n");
 	
 	$tgt=" onclick=\"openwin(this.href); return false;\"";
 	$siz=" Width=100 ";
@@ -162,18 +160,16 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $ago = $now - $end;
 	    $time=`date -d \"UTC 1970-01-01 $begin secs\" +"%H:%M:%S"`;  $time=~s/\n//g;
 	    if($end==0){$length=-1; $ago=-1;}
-
 	    if($type eq "pedestal") {next;}
 	    if($config =~ /Jack/) {next;}
 	    if($config =~ /Chris/) {next;}
 	    if($config eq "fgtPedAsPhys") {$type="pedestal";}
-	    if($config =~ /ped/) {next;}
-
+	    elsif($config =~ /ped/) {next;}
 	    if($donefile==0 && $ago>60 && ($type eq "pedestal" || $length>120) ) {
 		
 		$evpcount=0;
 		if(-d "$datadir/$run") {
-		    $evpcount = `ls -1 $datadir/$run/?* | wc -l`;
+		    $evpcount = `ls $datadir/$run/?* | wc -l`;
 		    $evpcount =~ s/\n//g;
 		}
 		
@@ -211,11 +207,14 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    print(OUT1 "<tr><td><a href=\"http://online.star.bnl.gov/RunLog/index.php?r=$run\">$run</a></td>");	   
 	    print(OUT1 "<td>$time</td><td>$length</td><td>$config</td><td>$type</td>");
 	    
-	    $f="fgtScopeTrace_${run}";if(-e "$plotdir/$f.pdf"){print(OUT1 "<td><a href=\"$id\/$f.pdf\" $tgt>pdf                         </a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="fgtScopeTrace_${run}";if(-e "$plotdir/$f.pdf"){print(OUT1 "<td><a href=\"$id\/$f.pdf\" $tgt>trace</a><br>"                        );} else {print(OUT1 "<td>"     );}
+	    $f="${run}.pulsefit";     if(-e "$plotdir/$f.pdf"){print(OUT1     "<a href=\"$id\/$f.pdf\" $tgt>fit</a><br>"                          );} else {print(OUT1 ""         );}
+	    $f="resid1d.${run}";      if(-e "$plotdir/$f.pdf"){print(OUT1     "<a href=\"$id\/$f.pdf\" $tgt>resid</a></td>"                       );} else {print(OUT1 "</td>"    );}
 	    $f="fgtScopeTrace_${run}";if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_ped";          if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_frac";         if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_plot";         if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_pfit";         if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_ADCvsTB";      if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_APVTB";        if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_NHitStrip";    if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
@@ -230,10 +229,10 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $f="${run}_XYT";          if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_trk";          if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_CluChargeT";   if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
+	    $f="${run}_LandauN";      if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_MaxADCT";      if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_ChargeAsyTrk"; if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    $f="resid1d.${run}";      if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
-	    print(OUT1 "<tr>\n");
+	    print(OUT1 "<td>$run</td><tr>\n");
 	}
 	print(OUT1 "</table>\n");
 	print(OUT1 "</BODY></HTML>\n");

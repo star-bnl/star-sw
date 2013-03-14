@@ -2,6 +2,7 @@
 
 set run=$1
 set type=$2
+set skip=$3
 
 set anadir=/ldaphome/akio/fgt
 set dir=$run
@@ -42,8 +43,12 @@ if ( -e $dir/log/$run.log ) then
     \rm $dir/log/$run.log
 endif
 
-echo root4star -b -q runqa.C"($run,$ped)"
-root4star -b -q runqa.C"($run,$ped)" > $dir/log/$run.log
+if ( "$skip" == "skip" ) then
+  echo skipping runqa.C
+else
+  echo root4star -b -q runqa.C"($run,$ped)"
+  root4star -b -q runqa.C"($run,$ped)" > $dir/log/$run.log
+endif
 
 if ( "$type" == "pedestal" ) then
   if ( -e $dir/ped/ped.$run.txt ) then	
@@ -73,8 +78,9 @@ else
   echo root -b -q makepedplot.C"($run,1)"
   root -b -q makepedplot.C"($run,1)"
 
-  echo root -b -q resid.C"($run,0,1)"
-  root -b -q resid.C"($run,0,1)"
+  echo root -b -q resid.C"($run,0,-1,2)"
+  root -b -q resid.C"($run,0,-1,2)"
+  \mv $dir/*${run}*.pdf www/$dir/	
 endif
 
 \mv $dir/*${run}*.png www/$dir/	

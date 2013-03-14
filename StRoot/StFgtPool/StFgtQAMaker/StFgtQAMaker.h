@@ -4,11 +4,14 @@
  * \author Akio
  * \date   Dec2012
  *
- * $Id: StFgtQAMaker.h,v 1.7 2013/03/07 22:46:45 akio Exp $
+ * $Id: StFgtQAMaker.h,v 1.8 2013/03/14 13:45:56 akio Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StFgtQAMaker.h,v $
+ * Revision 1.8  2013/03/14 13:45:56  akio
+ * A lot of changes
+ *
  * Revision 1.7  2013/03/07 22:46:45  akio
  * added track and timing per apvboard
  *
@@ -44,12 +47,13 @@
 #include "TGraph.h"
 #include "TText.h"
 #include "TCanvas.h"
+#include "TString.h"
 
 #include "StMaker.h"
-#include "TString.h"
 #include "StEnumerations.h"
 #include "StRoot/StFgtDbMaker/StFgtDbMaker.h"
 #include "StRoot/StFgtDbMaker/StFgtDb.h"
+class StFgtHit;
 
 class StFgtQAMaker : public StMaker {
 public:
@@ -65,7 +69,7 @@ public:
   inline void setRunNumber(Int_t v) {mRunNumber=v;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.7 2013/03/07 22:46:45 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.8 2013/03/14 13:45:56 akio Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   };
   
@@ -74,16 +78,19 @@ protected:
   void fillHist();
   void saveHist();
   void saveTrace();
-  
+  void pulseFit(StFgtHit* cluster);
+  void textDump();
+
 private:
   Int_t   mEventCounter; //!
   Int_t   mRunNumber;    //!  Run# for output file name
   StFgtDb* mDb;          //!
+  Int_t   mNTimeBin;     //!  # of timebin for event
 
-  static const int NHist=6;     //!
-  static const int N1dHist=11;   //!
-  static const int N2dHist=4;   //!
-  static const int NTrkHist=6;  //!
+  static const int NHist=10;     //!
+  static const int N1dHist=12;   //!
+  static const int N2dHist=4;    //!
+  static const int NTrkHist=6;   //!
   TH1F *hist0[NHist];                               //! Histos for whole fgt
   TH1F *hist1[kFgtNumDiscs][kFgtNumQuads][N1dHist]; //! 1d histos for each disc/quad
   TH2F *hist2[kFgtNumDiscs][N2dHist];               //! 2d histos for each disc
@@ -95,7 +102,7 @@ private:
   int mNTrace2[kFgtNumRdos][kFgtNumArms][kFgtMaxApvId]; //!
   float mSigmaCut;
   float mAdcCut;
-
+  
   ClassDef(StFgtQAMaker,0)
 };
 #endif
