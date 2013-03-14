@@ -274,8 +274,8 @@ void gmtBuilder::event(daqReader *rdr)
     if(usedAPV(rdo,arm,port,apv)){
       
       
-      fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
-      for(u_int ii=0; ii<dd->ncontent;ii++)
+      fgt_adc_t *f = (fgt_adc_t *) dd1->Void ;
+      for(u_int ii=0; ii<dd1->ncontent;ii++)
 	{
 	  
 	  timebin = f[ii].tb;
@@ -293,7 +293,7 @@ void gmtBuilder::event(daqReader *rdr)
 	} // dd->content loop
     }	// usedAPV loop
     
-  }//dd iterate loop
+  }//dd1 iterate loop
   
   
   for(int ilayer=0; ilayer<numLayers; ilayer++){
