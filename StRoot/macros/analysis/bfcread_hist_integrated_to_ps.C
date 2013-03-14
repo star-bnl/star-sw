@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_integrated_to_ps.C,v 3.2 2010/03/16 16:23:08 fisyak Exp $
+// $Id: bfcread_hist_integrated_to_ps.C,v 3.3 2013/03/14 17:28:31 genevb Exp $
 // $Log: bfcread_hist_integrated_to_ps.C,v $
+// Revision 3.3  2013/03/14 17:28:31  genevb
+// StTpcDb.so now depends on StEvent.so
+//
 // Revision 3.2  2010/03/16 16:23:08  fisyak
 // StTpcDb requires StDetectorDbMaker
 //
@@ -92,8 +95,8 @@ void bfcread_hist_integrated_to_ps(
     gSystem->Load("libtpc_Tables");
     gSystem->Load("libStDb_Tables.so");
     gSystem->Load("StDetectorDbMaker");
-    gSystem->Load("StTpcDb");
     gSystem->Load("StEvent");
+    gSystem->Load("StTpcDb");
     gSystem->Load("StPmdUtil");
     gSystem->Load("St_QA_Maker");
 

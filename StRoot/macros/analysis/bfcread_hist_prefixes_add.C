@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_prefixes_add.C,v 3.3 2011/06/03 00:09:21 genevb Exp $
+// $Id: bfcread_hist_prefixes_add.C,v 3.4 2013/03/14 17:28:31 genevb Exp $
 // $Log: bfcread_hist_prefixes_add.C,v $
+// Revision 3.4  2013/03/14 17:28:31  genevb
+// StTpcDb.so now depends on StEvent.so
+//
 // Revision 3.3  2011/06/03 00:09:21  genevb
 // Calling CopyHist twice was dangerous, AddHist handles copying if not found after first CopyHist
 //
@@ -57,8 +60,8 @@ void bfcread_hist_prefixes_add(
   gSystem->Load("libtpc_Tables");
   gSystem->Load("libStDb_Tables.so");
   gSystem->Load("StDetectorDbMaker");
-  gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StPmdUtil");
   gSystem->Load("St_QA_Maker");
   gSystem->Load("StTreeMaker");
