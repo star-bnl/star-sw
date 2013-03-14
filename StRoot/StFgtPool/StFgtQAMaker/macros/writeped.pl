@@ -8,8 +8,8 @@ $opt=$ARGV[1];
 $option=0;
 if($opt eq "insert") {$option=1;}
 
-$unixtime=`./runtime $run`; $unixtime=~s/\n//g; $unixtime-=10;
-$_=`date -d \"UTC 1970-01-01 $unixtime secs\" +\"%Y-%m-%d %k:%M:%S\"`; 
+$unixtime=`runtime $run`; $unixtime=~s/\n//g; $unixtime-=10;
+$_=`date -u -d \"UTC 1970-01-01 $unixtime secs\" +\"%Y-%m-%d %k:%M:%S\"`; 
 $_=~s/\n//g;
 @dt=split;
 print("run$run unixtime=$unixtime date=$dt[0] time=$dt[1]\n");
