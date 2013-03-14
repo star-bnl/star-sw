@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.18 2013/01/31 18:21:46 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.19 2013/03/14 18:27:26 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,13 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.19  2013/03/14 18:27:26  jwebb
+ * Added pi0    --> e+e- gamma 100% gid=10007
+ * Added K0long --> nu e- pi+  100% gid=10010
+ * Added K0long --> nu e+ pi-  100% gid=10110
+ *
+ * http://www.star.bnl.gov/rt2/Ticket/Display.html?id=2549
+ *
  * Revision 1.18  2013/01/31 18:21:46  jwebb
  * Updated StarClassLibrary and gstar_part.g to add the H Dibaryon.
  *
@@ -270,6 +277,11 @@ StParticleTable::StParticleTable()
     ///@addtogroup Embedding
     /// Embedding particle definitions
     ///@{
+
+    Geant2Pdg( 10007, 130, pi0 --> e+ e- gamma );
+
+    Geant2Pdg( 10010, 130, K0 Long --> nu e- pi+ );
+    Geant2Pdg( 10110, 130, K0 Long --> nu e+ pi- );
 
        Geant2Pdg(10017,  221, eta --> e+ e- gamma);
        Geant2Pdg(10018, 3122, lambda --> p + pi- );
