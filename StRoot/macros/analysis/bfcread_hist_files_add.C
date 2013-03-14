@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.19 2010/03/17 02:53:06 genevb Exp $
+// $Id: bfcread_hist_files_add.C,v 2.20 2013/03/14 17:28:31 genevb Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.20  2013/03/14 17:28:31  genevb
+// StTpcDb.so now depends on StEvent.so
+//
 // Revision 2.19  2010/03/17 02:53:06  genevb
 // Add hists even if not in first file
 //
@@ -105,8 +108,8 @@ void bfcread_hist_files_add(
   gSystem->Load("StDetectorDbMaker");
   gSystem->Load("libtpc_Tables");
   gSystem->Load("libStDb_Tables.so");
-  gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StPmdUtil");
   gSystem->Load("St_QA_Maker");
   gSystem->Load("StTreeMaker");

@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.16 2011/03/09 22:17:10 genevb Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.17 2013/03/14 17:28:31 genevb Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.17  2013/03/14 17:28:31  genevb
+// StTpcDb.so now depends on StEvent.so
+//
 // Revision 1.16  2011/03/09 22:17:10  genevb
 // Update dependence on StEEmcUtil
 //
@@ -115,12 +118,12 @@ void bfcread_event_QA_outhistfile(
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StDetectorDbMaker");
+  gSystem->Load("StEvent");
   gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StEvent");
   gSystem->Load("StEmcUtil");
   gSystem->Load("StEEmcUtil");
   gSystem->Load("StMcEvent");
