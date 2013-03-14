@@ -5,7 +5,7 @@
 
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.h,v 1.22 2012/11/27 17:32:51 akio Exp $
+ * $Id: StFgtA2CMaker.h,v 1.23 2013/03/14 01:45:43 akio Exp $
  * Author: S. Gliske, Oct 2011
  *
  ***************************************************************************
@@ -36,6 +36,12 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.h,v $
+ * Revision 1.23  2013/03/14 01:45:43  akio
+ * fix some kStFgtNumTimebins -> dynamic local mMaxTimeBin from StFgtCollection
+ * Seed Type 3 & 4 changed, and 5 goone
+ * 3 = 3 timbins in row above thr, tbin0<peak/3, last tbin<peak
+ * 4 = 3 timbins in row above thr, tbin0<peak/3
+ *
  * Revision 1.22  2012/11/27 17:32:51  akio
  * Adding option to read ped & status from text file. Default is reading from DB.
  *
@@ -173,7 +179,7 @@ class StFgtA2CMaker : public StMaker {
 
    // cvs tag
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.22 2012/11/27 17:32:51 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: StFgtA2CMaker.h,v 1.23 2013/03/14 01:45:43 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
    Short_t checkValidPulse(StFgtStrip* pStrip, Float_t ped);
@@ -198,6 +204,7 @@ class StFgtA2CMaker : public StMaker {
    void readPedFile(Int_t elecId, Float_t &ped, Float_t &pedrms);
    void readStatusFile(Int_t elecId, UInt_t &status);
    ClassDef(StFgtA2CMaker,1);
+   int mMaxTimeBin;
 }; 
 
 // inline functions

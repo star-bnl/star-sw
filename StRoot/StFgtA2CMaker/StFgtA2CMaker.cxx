@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFgtA2CMaker.cxx,v 1.51 2012/11/27 17:32:51 akio Exp $
+ * $Id: StFgtA2CMaker.cxx,v 1.52 2013/03/14 01:45:43 akio Exp $
  *
  ***************************************************************************
  *
@@ -9,6 +9,12 @@
  ***************************************************************************
  *
  * $Log: StFgtA2CMaker.cxx,v $
+ * Revision 1.52  2013/03/14 01:45:43  akio
+ * fix some kStFgtNumTimebins -> dynamic local mMaxTimeBin from StFgtCollection
+ * Seed Type 3 & 4 changed, and 5 goone
+ * 3 = 3 timbins in row above thr, tbin0<peak/3, last tbin<peak
+ * 4 = 3 timbins in row above thr, tbin0<peak/3
+ *
  * Revision 1.51  2012/11/27 17:32:51  akio
  * Adding option to read ped & status from text file. Default is reading from DB.
  *
@@ -285,6 +291,8 @@ Int_t StFgtA2CMaker::Make(){
    }
 
    if( !ierr ){
+      mMaxTimeBin=fgtCollectionPtr->getNumTimeBins();
+      if(mMaxTimeBin==0) return 0;
       for( UInt_t discIdx=0; discIdx<fgtCollectionPtr->getNumDiscs(); ++discIdx ){
 	//cout <<"looking at disc: " << discIdx << endl;
          StFgtStripCollection *stripCollectionPtr = fgtCollectionPtr->getStripCollection( discIdx );
@@ -325,7 +333,7 @@ Int_t StFgtA2CMaker::Make(){
                   if( ped > kFgtMaxAdc || ped < 0 ){
                     strip->setGeoId( -1 );      // flag for removal
                   } else {
-                     for( Int_t timebin = 0; timebin < kFgtNumTimeBins && strip->getGeoId() > -1; ++timebin ){
+                     for( Int_t timebin = 0; timebin < mMaxTimeBin && strip->getGeoId() > -1; ++timebin ){
                         Int_t adc = strip->getAdc( timebin );
 
                         // subract the ped, and set
@@ -352,10 +360,10 @@ Int_t StFgtA2CMaker::Make(){
                   // set the charge
                   strip->setCharge( sumC/gain );
 		  int idebug=0;
-		  if(sumC/gain==4713.0 || sumC/gain==5250.0) {
-		    idebug=1;
-		    printf("charge=%f\n ",sumC/gain);
-		  }
+		  //if(sumC/gain==4713.0 || sumC/gain==5250.0) {
+		  // idebug=1;
+		  // printf("charge=%f\n ",sumC/gain);
+		  //}
                   // for seven timebins... change to some variable...., but does this actuall make sense for high nTB?? then the 
                   // error on the charge is higher than it should be.... (Anselm)
                   strip->setChargeUncert(gain ? mPedSigFactor4Charge*sqrt(7)*pedErr/gain : 10000);
@@ -387,23 +395,23 @@ Int_t StFgtA2CMaker::Make(){
 		      strip->setClusterSeedType(kFgtDeadStrip);
                   }
 
-		  if(idebug==1){
+		  //if(idebug==1){
 		    //if(nTbAboveThres>2 && strip->getCharge()>500 && strip->getClusterSeedType()==0)
-		    printf("geoid=%5d %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f  gain=%3.1f sum=%6.1f pedrms=%6.1f nTbAboveThres=%1d  type=%5d\n",
-			   strip->getGeoId(),
-			   strip->getAdc(0)/pedErr,
-			   strip->getAdc(1)/pedErr,
-			   strip->getAdc(2)/pedErr,
-			   strip->getAdc(3)/pedErr,
-			   strip->getAdc(4)/pedErr,
-			   strip->getAdc(5)/pedErr,
-			   strip->getAdc(6)/pedErr,
-			   gain,
-			   strip->getCharge(),
-			   pedErr,
-			   nTbAboveThres,
-			   strip->getClusterSeedType());
-		  }
+		    //printf("geoid=%5d %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f  gain=%3.1f sum=%6.1f pedrms=%6.1f nTbAboveThres=%1d  type=%5d\n",
+		  //   strip->getGeoId(),
+		  //   strip->getAdc(0)/pedErr,
+		  //   strip->getAdc(1)/pedErr,
+		  //   strip->getAdc(2)/pedErr,
+		  //   strip->getAdc(3)/pedErr,
+		  //   strip->getAdc(4)/pedErr,
+		  //   strip->getAdc(5)/pedErr,
+		  //   strip->getAdc(6)/pedErr,
+		  //   gain,
+		  //   strip->getCharge(),
+		  //   pedErr,
+		  //   nTbAboveThres,
+		  //   strip->getClusterSeedType());
+		  //}
 		  
 		  //	    if(strip->getGeoId() >=13092 && strip->getGeoId()<=13105)
 		  //	      cout <<" seed type is: " << strip->getSeedType() <<endl;
@@ -440,7 +448,9 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    Int_t numMaxPlateau = 0;
    Float_t prvAdc = -1;
 
-   for( Int_t timebin = 0; timebin < kFgtNumTimeBins && pStrip->getGeoId() > -1; ++timebin ) {
+   if(pStrip->getGeoId()<0) return kFgtSeedTypeNo;
+
+   for( Int_t timebin = 0; timebin < mMaxTimeBin; ++timebin ) {
       Float_t adc=pStrip->getAdc(timebin);
 
       // to remove seeds where all tbs are high and close together
@@ -501,31 +511,36 @@ Short_t StFgtA2CMaker::checkValidPulse( StFgtStrip* pStrip, Float_t ped ){
    //Akio Adding a requirement that sum is above sqrt(3bins)*5*mClusterThreshold*pedrms
    if(pStrip->getCharge() < 1.732*mClusterThreshold*5*ped) return kFgtSeedTypeNo;
 
-   int iseed=0;
-   for( Int_t timebin = 0; timebin < (kFgtNumTimeBins-2) && pStrip->getGeoId() > -1; timebin++ ) {
-     Float_t adc1=pStrip->getAdc(timebin);
-     Float_t adc2=pStrip->getAdc(timebin+1);
-     Float_t adc3=pStrip->getAdc(timebin+2);
-     //   if(pStrip->getGeoId() >=13092 && pStrip->getGeoId()<=13105)
-     //     {
-     //       cout <<"adc1: " << adc1 << " adc2: " << adc2 <<" adc3: " << adc3 << endl;
-     //     }
-     //      cout <<" looking at tb: " << timebin <<" " << timebin+1 <<" " << timebin+2 <<" ped: "<< ped <<endl;
-     if(adc1> mClusterThreshold*5*ped && adc2 > mClusterThreshold*5*ped && adc3 > mClusterThreshold*5*ped){
-       //found some sort of rising edge
-       if(adc1 < adc2 && adc2 < adc3) {iseed=10; break;}
-       //falling edge for grossly out of time pulses
-       if(adc1 > adc2 && adc2 > adc3 && iseed<10) {iseed=9;}
-       // Akio-- adding if charge sum is above x3 threshold
-       if(pStrip->getCharge()> mClusterThreshold*15*ped && mUseLeastRestrictiveSeed && iseed<9) {iseed=8;}
-     }  
+   float maxadc=0, adc[kFgtNumTimeBins]; 
+   int maxt=-1;
+   for( Int_t t=0; t < mMaxTimeBin; t++ ) {
+     adc[t]=pStrip->getAdc(t);
+     if(adc[t]>maxadc) {maxadc=adc[t]; maxt=t;}
    }
-   switch(iseed){
-   case 10: return kFgtSeedType3;
-   case  9: return kFgtSeedType4;
-   case  8: return kFgtSeedType5;
-   default: return kFgtSeedTypeNo; 
+   if(maxt==0) return kFgtSeedTypeNo; //eaarly pulse
+   if(maxt>=9) return kFgtSeedTypeNo; //late pulse
+   int flag=0;
+   for( Int_t t = 0; t < mMaxTimeBin-2; t++ ) {
+     float thr=mClusterThreshold*5*ped;
+     if(adc[t]>thr && adc[t+1]>thr && adc[t+2]>thr) {flag=1; break;}
+     //found some sort of rising edge
+     //if(adc1 < adc2 && adc2 < adc3) {iseed=10; break;}
+     //falling edge for grossly out of time pulses
+     //if(adc1 > adc2 && adc2 > adc3 && iseed<10) {iseed=9;}
+     // Akio-- adding if charge sum is above x3 threshold
+     //if(pStrip->getCharge()> mClusterThreshold*15*ped && mUseLeastRestrictiveSeed && iseed<9) {iseed=8;}   }
    }
+   if(flag==0) return kFgtSeedTypeNo; //no 3 tbin in row above threshold
+   if(adc[0]>=maxadc/3.0) return kFgtSeedTypeNo; //first timebin is not low enough
+   //we may have a good pulse....
+   if(adc[mMaxTimeBin-1]<maxadc) return kFgtSeedType3;  // saw falling edge as well
+   return kFgtSeedType4;  //didn't see falling edge... but maybe ok?
+   //switch(iseed){
+   //case 10: return kFgtSeedType3;
+   //case  9: return kFgtSeedType4;
+   //case  8: return kFgtSeedType5;
+   //default: return kFgtSeedTypeNo; 
+   //}
    //   cout <<" no seed found! " << endl;
    //	      if(pStrip->getGeoId() >=13092 && pStrip->getGeoId()<=13105)
    //		cout <<"nope..." << endl;
