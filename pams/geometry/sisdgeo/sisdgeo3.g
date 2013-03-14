@@ -1,5 +1,8 @@
-* $Id: sisdgeo3.g,v 1.1 2006/03/21 23:44:36 potekhin Exp $
+* $Id: sisdgeo3.g,v 1.2 2011/02/28 16:36:38 jwebb Exp $
 * $Log: sisdgeo3.g,v $
+* Revision 1.2  2011/02/28 16:36:38  jwebb
+* Cosmetic changes needed for AgML syntax matching.
+*
 * Revision 1.1  2006/03/21 23:44:36  potekhin
 * A new and much improved source by Lilian Martin, valid for
 * years 2005 onward. Specs are in the comment below. Minor
@@ -79,8 +82,8 @@ Module  SISDGEO3  is the Silicon Strip Detector
                        SFAA_Dz,  SFAA_Px1, SFAA_Px2, SFAA_Px3, 
                        SFAA_Pz1, SFAA_Pz2, SFAA_Pz3, SFSD_Dx, SFSD_Dy, SFSD_Dz,  SFLA_Px,  SFLA_Py,
                        SFLC_Px,  SFLC_Py,  SFES_Px,  SFES_Py, SFES_Pz,
-                       SFEB_Px ,  SFEB_Py
-                     }
+                       SFEB_Px ,  SFEB_Py        }
+
 
 
       structure SFPB { Hhight,   Khight,   Hbase,   Kbase, Fsize,
@@ -91,8 +94,8 @@ Module  SISDGEO3  is the Silicon Strip Detector
                        ssLen,    wpLen,    sdlen,    tilt,     
                        cprad,    cpral,    cfrad,    gpThk,
                        Int ladderMap(20),
-                       ladderAngle(20), ladderTilt(20),LadderRadius(20)
-                       }
+                       ladderAngle(20), ladderTilt(20),LadderRadius(20)    }
+
 
 *
       Integer   ilad,iwaf,jwaf,nc

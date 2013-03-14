@@ -4,7 +4,8 @@
 #include "TChair.h"
 #include <math.h>
 #include "tables/St_trigDetSums_Table.h"
-
+#include "StDetectorDbClock.h"
+#include "St_richvoltagesC.h"
 class St_trigDetSumsC : public TChair {
  public:
   St_trigDetSumsC(St_trigDetSums *table) : TChair(table) {SafeDelete(fgInstance); fgInstance = this; fMargin = 0;}
@@ -31,8 +32,41 @@ class St_trigDetSumsC : public TChair {
   Double_t 	bbcBlueBkg(Int_t i = 0) 	{return validity(Struct(i)->bbcBlueBkg);}
   Double_t 	pvpdWest(Int_t i = 0) 	        {return validity(Struct(i)->pvpdWest);}
   Double_t 	pvpdEast(Int_t i = 0) 	        {return validity(Struct(i)->pvpdEast);}
+  Double_t 	zdcCoin(Int_t i = 0)            {return Nc(zdcX(i),zdcEast(i),zdcWest(i));}
+  Double_t 	bbcCoin(Int_t i = 0)            {return Nc(bbcX(i),bbcEast(i),bbcWest(i));}
   static St_trigDetSums* fgTableCopy;
   void		validityMargin(Double_t margin=0) {fMargin = margin;}
+  Double_t getCTBWest() {return ctbWest();}
+  Double_t getCTBEast() {return ctbEast();}
+  Double_t getCTBOrTOFp() {return ctbTOFp();}
+  Double_t getTOFp() {return tofp();}
+  Double_t getZDCWest() {return zdcWest();}
+  Double_t getZDCEast() {return zdcEast();}
+  Double_t getZDCX() {return zdcX();}
+  Double_t getZDCCoin() {return zdcCoin();}
+  Double_t getMult() {return mult();}
+  Double_t getL0() {return L0();}
+  Double_t getBBCX() {return bbcX();}
+  Double_t getBBCCoin() {return bbcCoin();}
+  Double_t getBBCXCTB() {return bbcXctbTOFp();}
+  Double_t getBBCWest() {return bbcWest();}
+  Double_t getBBCEast() {return bbcEast();}
+  Double_t getBBCYellowBkg() {return bbcYellowBkg();}
+  Double_t getBBCBlueBkg() {return bbcBlueBkg();}
+  Double_t getPVPDWest() {return pvpdWest();}
+  Double_t getPVPDEast() {return pvpdEast();}
+  UInt_t   getRichHVStatus() {return St_richvoltagesC::instance()->status();}
+  void     setValidityMargin(Double_t margin=0) {validityMargin(margin);}
+
+  // The following code attempts to correct coincidence rates for accidentals and multiples
+  // See STAR Note 528
+  static Double_t Nc(Double_t New, Double_t Ne, Double_t Nw, Int_t n_bunches=111) {
+    // 111 is a guess using the maximum seen filled bunches in RHIC so far
+    // (not always the case, but we don't have access to this number)
+    Double_t Nbc = StDetectorDbClock::instance()->CurrentFrequency() * ((Double_t) n_bunches) / 120.;
+    return -Nbc * TMath::Log(1. - ((New - (Ne*Nw/Nbc)) / (Nbc+New-Ne-Nw)));
+  }
+
  protected:
  private:
   static St_trigDetSumsC* fgInstance;
@@ -70,6 +104,6 @@ class St_trigDetSumsC : public TChair {
   }
 
   ClassDefChair(St_trigDetSums, trigDetSums_st )
-  ClassDef(St_trigDetSumsC,2) //C++ TChair for trigDetSums table class
+  ClassDef(St_trigDetSumsC,3) //C++ TChair for trigDetSums table class
 };
 #endif

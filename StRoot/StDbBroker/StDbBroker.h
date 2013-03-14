@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.30 2008/01/15 20:37:44 deph Exp $
+ * $Id: StDbBroker.h,v 1.32 2011/11/28 17:03:07 dmitry Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,12 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.32  2011/11/28 17:03:07  dmitry
+ * dbv override support in StDbLib,StDbBroker,St_db_Maker
+ *
+ * Revision 1.31  2011/02/10 17:31:01  dmitry
+ * added an option to blacklist domains
+ *
  * Revision 1.30  2008/01/15 20:37:44  deph
  * Removed DbFill and corresponding calls from StDbBroker
  *
@@ -120,6 +126,9 @@
 //#include "tableDescriptor.h" 
 #include "St_tableDescriptor.h" 
 
+#include <map>
+#include <utility>
+
 class StDbConfigNode;
 class StDbManager;
 class StTableDescriptorI;
@@ -180,6 +189,8 @@ struct oldDescriptor {
 
     char*        m_flavor;
     unsigned int m_prodTime;
+    std::map<std::pair<char*,char*>,unsigned int> m_prodTimeOverride; // DBV override for specific subsystems
+
     dbConfig_st*  buildConfig(int& numRows);
     int           buildNodes(StDbConfigNode* node, int pID);
 
@@ -226,6 +237,7 @@ const char *GetFlavor();
     UInt_t GetEndTimeStamp()         {return m_endTimeStamp; }
     UInt_t GetProdTime()             {return m_prodTime;}
     Bool_t   IsZombie()              {return m_isZombie; }
+
 
     StTableDescriptorI* GetTableDescriptor();
 
@@ -283,9 +295,11 @@ const char *GetFlavor();
     void   SetBeginTimeStamp(UInt_t utime)   {m_beginTimeStamp   = utime; }
     void   SetEndTimeStamp(UInt_t utime)     {m_endTimeStamp     = utime; }
     void   SetProdTime(UInt_t ptime);
+    void   AddProdTimeOverride(UInt_t ptime, char* dbType = 0, char* dbDomain = 0); // DBV override
     void   SetFlavor(const char* flavor);
     void   SetZombie(Bool_t zombie)          { m_isZombie=true; }
-    
+
+	void   addBlacklistedDomain(const char* domainName);
 
     static int DbInit(const char *);  		//Sasha's dbInit 
     void   setVerbose(int isVerbose) { m_isVerbose = isVerbose; } 

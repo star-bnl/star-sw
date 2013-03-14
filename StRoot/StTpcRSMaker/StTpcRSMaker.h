@@ -27,6 +27,7 @@ using namespace units;
 #include "StTpcDb/StTpcDb.h"
 #include "StdEdxY2Maker/StTpcdEdxCorrection.h" 
 #include "StMagF.h"
+#include "TArrayF.h"
 class Altro;
 struct SignalSum_t {
   Float_t      Sum;
@@ -48,14 +49,13 @@ class StTpcRSMaker : public StMaker {
   virtual Int_t         Make();
   virtual Int_t  	Finish();
   TF1F *GetShaperResponse(Int_t io = 0, Int_t sector = 1) {return (TF1F *) mShaperResponses[io][sector-1];}          
-  TF1F *GetChargeFractionInner()     {return (TF1F *) mChargeFractionInner;}     
-  TF1F *GetPadResponseFunctionInner(){return (TF1F *) mPadResponseFunctionInner;}
-  TF1F *GetChargeFractionOuter()     {return (TF1F *) mChargeFractionOuter;}     
-  TF1F *GetPadResponseFunctionOuter(){return (TF1F *) mPadResponseFunctionOuter;}
+  TF1F *GetChargeFraction(Int_t io = 0)     {return (TF1F *) mChargeFraction[io];}     
+  TF1F *GetPadResponseFunction(Int_t io = 0){return (TF1F *) mPadResponseFunction[io];}
   TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
   TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
   TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
-  Double_t GetNoPrimaryClusters(Double_t betaGamma);
+  TF1  *GetHeed()                    {return mHeed;}
+  Double_t GetNoPrimaryClusters(Double_t betaGamma, Int_t charge);
   virtual void Print(Option_t *option="") const;
   void DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
@@ -72,27 +72,33 @@ class StTpcRSMaker : public StMaker {
   SignalSum_t  *ResetSignalSum();
   void SettauIntegrationX(Double_t p =      74.6e-9, Int_t io=0) {mtauIntegrationX[io] = p;}
   void SettauCX(Double_t           p =    1000.0e-9, Int_t io=0) {mtauCX[io] = p;}
-  void SetCutEle(Double_t p = 1e-3)                  {mCutEle = p;}
+  void SetCutEle(Double_t p = 1e-4)                  {mCutEle = p;}
+  static Double_t Ec(Double_t *x, Double_t *p); // minimal energy to create an ion pair
+  static TF1 *fEc(Double_t w = 26.2);           // HEED function to generate Ec
  private:
-  TTree   *fTree;                     //!
-  SignalSum_t     *m_SignalSum;       //!
-  TH1D*    mdNdx;                     //!
-  TH1D*    mdNdE;                     //!
   static Double_t ShaperFunc(Double_t *x, Double_t *p);
   static Double_t PadResponseFunc(Double_t *x, Double_t *p);
   static Double_t Gatti(Double_t *x, Double_t *p);
   static Double_t InducedCharge(Double_t s, Double_t h, Double_t ra, Double_t Va, Double_t &t0);
   static TF1F     *fgTimeShape3[2];   //!
   static TF1F     *fgTimeShape0[2];   //!
+  Char_t   beg[1];                    //!
+  TTree   *fTree;                     //!
+  SignalSum_t     *m_SignalSum;       //!
+  TH1D*    mdNdx;                     //!
+  TH1D*    mdNdE;                     //!
   TF1F  *mShaperResponses[2][24];     //!
-  TF1F  *mChargeFractionInner;        //!
-  TF1F  *mPadResponseFunctionInner;   //!
-  TF1F  *mChargeFractionOuter;        //!
-  TF1F  *mPadResponseFunctionOuter;   //!
+  TF1F  *mChargeFraction[2];          //!
+  TF1F  *mPadResponseFunction[2];     //!
   TF1F  *mPolya[2];                   //!
   TF1F  *mGG;                         //! Gating Grid Transperency
+  TF1   *mHeed;                       //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   PAI  *mPAI;                         //!
+  Double_t InnerAlphaVariation;       //!
+  Double_t OuterAlphaVariation;       //!
+  Altro *mAltro;                      //!
+  Char_t end[1];                      //!
   Double_t             mLaserScale;   //!
   // local variables
   Int_t NumberOfInnerRows;            //!
@@ -110,8 +116,6 @@ class StTpcRSMaker : public StMaker {
   Double_t numberOfElectronsPerADCcount; //!
   Double_t anodeWireRadius;           //!
   const Double_t minSignal;           //!
-  Double_t InnerAlphaVariation;       //!
-  Double_t OuterAlphaVariation;       //!
   Double_t innerSectorAnodeVoltage;   //!
   Double_t outerSectorAnodeVoltage;   //!
   const Double_t ElectronRange;       //!
@@ -120,23 +124,40 @@ class StTpcRSMaker : public StMaker {
   Double_t      mtauIntegrationX[2];  //! for TPX inner=0/outer=1
   Double_t      mtauCX[2];            //! -"- 
   const Int_t NoOfSectors;            //!
-  const Int_t NoOfRows;               //!
-  const Int_t NoOfInnerRows;          //!
+  Int_t       NoOfRows;               //!
+  Int_t       NoOfInnerRows;          //!
   const Int_t NoOfPads;               //!
   const Int_t NoOfTimeBins;           //!
-  Altro *mAltro;                      //!
   Double_t   mCutEle;                 //! cut for delta electrons
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.18 2010/06/14 23:34:26 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.25 2012/05/07 15:36:22 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.18 2010/06/14 23:34:26 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.25 2012/05/07 15:36:22 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.25  2012/05/07 15:36:22  fisyak
+// Remove hardcoded TPC parameters
+//
+// Revision 1.24  2012/04/03 14:05:18  fisyak
+// Speed up using  GetSaveL (__PAD_BLOCK__), sluggish shape histograms, Heed electron generation
+//
+// Revision 1.23  2011/12/13 17:23:22  fisyak
+// remove YXTProd, add WIREHISTOGRAM and WIREMAP, use particle definition from StarClassLibrary
+//
+// Revision 1.22  2011/10/14 23:27:51  fisyak
+// Back to standard version
+//
+// Revision 1.20  2011/09/18 22:39:48  fisyak
+// Extend dN/dx table (H.Bichsel 09/12/2011) to fix bug #2174 and #2181, clean-up
+//
+// Revision 1.19  2011/03/17 14:29:31  fisyak
+// Add extrapolation in region beta*gamma < 0.3
+//
 // Revision 1.18  2010/06/14 23:34:26  fisyak
 // Freeze at Version V
 //

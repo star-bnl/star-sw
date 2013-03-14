@@ -3,6 +3,7 @@
 
 #include "TChair.h"
 #include "tables/St_tpcRDOMasks_Table.h"
+#include "St_tpcPadPlanesC.h"
 
 class St_tpcRDOMasksC : public TChair {
  public:
@@ -20,7 +21,7 @@ class St_tpcRDOMasksC : public TChair {
     else if (row >13 && row <= 21) rdo = 3;
     else if (row >21 && row <= 29) rdo = 4;
     else if (row >29 && row <= 37) rdo = 5;
-    else if (row >37 && row <= 45) rdo = 6;
+    else if (row >37 && row <= St_tpcPadPlanesC::instance()->padRows()) rdo = 6;
     return rdo;
   }
   Bool_t        isOn(UInt_t sector,UInt_t rdo)  {    
