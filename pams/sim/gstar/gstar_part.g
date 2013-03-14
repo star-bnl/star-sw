@@ -1,6 +1,13 @@
-* $Id: gstar_part.g,v 1.37 2013/02/04 20:41:15 jwebb Exp $
+* $Id: gstar_part.g,v 1.38 2013/03/14 18:27:29 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.38  2013/03/14 18:27:29  jwebb
+* Added pi0    --> e+e- gamma 100% gid=10007
+* Added K0long --> nu e- pi+  100% gid=10010
+* Added K0long --> nu e+ pi-  100% gid=10110
+*
+* http://www.star.bnl.gov/rt2/Ticket/Display.html?id=2549
+*
 * Revision 1.37  2013/02/04 20:41:15  jwebb
 * Update to H-Dibaryon mass, to provide sufficient CMS energy for phase space
 * decay.
@@ -244,6 +251,7 @@ MODULE gstar_part Is the STAR Particle Database
 * special pi0 decay: 50% normal, 50% dalitz
   Particle Dalitz    code=149        TrkTyp=4 mass=0.135  charge=0 tlife=8.4e-17,
                      pdg=100111 bratio= { 0.5, 0.5}  mode= { 101, 10203}
+
 ************************************************************************************ 
   Particle omega     code=150 TrkTyp=3 mass=.782   charge=0  tlife=7.79E-23,
                      pdg=223  bratio  = { .888, .085, .021 },  
@@ -343,6 +351,11 @@ MODULE gstar_part Is the STAR Particle Database
 
 
 *************************************************************************************
+*  Pion0 GID=6
+
+  Particle Dalitz    code=10007       TrkTyp=4 mass=0.135  charge=0 tlife=8.4e-17,
+                     pdg=100111 bratio= { 1.0,}  mode= {10203,}
+
 *  KAON+ GID=11
 
    PARTICLE KAON_PLUS code=10011 pdg=0 mass=0.4937E+00 charge=+1 tlife=0.12370E-07 ,
@@ -380,6 +393,16 @@ MODULE gstar_part Is the STAR Particle Database
 
    PARTICLE KAON_MINUS code=15012 pdg=0 mass=0.4937E+00 charge=-1 tlife=0.12370E-07 ,
                       trktyp=4 bratio={1.0,} mode={090707,}
+
+
+* KAON 0 LONG GID=10
+
+   Particle K0L_pi_ele_nu code=10010 pdg=0 mass=0.4977E+00 charge=0 tlife=0.51700E-07 ,
+                       trktyp=3 bratio={1.0,} mode={040803,}
+   Particle K0L_pi_pos_nu code=10110 pdg=0 mass=0.4977E+00 charge=0 tlife=0.51700E-07 ,
+                       trktyp=3 bratio={1.0,} mode={040902,}
+
+
 
 
 
