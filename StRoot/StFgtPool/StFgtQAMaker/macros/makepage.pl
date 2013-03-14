@@ -129,6 +129,9 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	
 	print(OUT1 "<HTML><head><META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html\">");
 	print(OUT1 "<title>FGT Monitor Day$id</title></header><BODY>\n");	    
+        print(OUT1 "<script type=\"text/javascript\"><!--\n");
+        print(OUT1 "   function openwin(url) {window.open(url, \"\", \"width=800,height=800\")\;} \n");
+        print(OUT1 "   // --></script>\n");
 	print(OUT1 "<?php require('links.php'); links(); ?>\n");
 	
 	print(OUT1 "<H1>FGT Monitor Day$id ($dd)</H1>\n");
