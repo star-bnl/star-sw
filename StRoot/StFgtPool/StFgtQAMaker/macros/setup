@@ -3,7 +3,6 @@ cvs co StRoot/StFgtPool/StFgtPedMaker
 cvs co StRoot/StFgtPool/StFgtStatusMaker
 cvs co StRoot/StFgtPool/StFgtClusterTools
 cvs co StRoot/StFgtPool/StFgtAlignmentMaker
-cp -r /ldaphome/akio/fgt/StRoot/StFgtPointMaker StRoot/
 
 cp StRoot/StFgtPool/StFgtQAMaker/macros/* .
 
