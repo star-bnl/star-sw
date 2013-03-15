@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtQAMaker.cxx,v 1.9 2013/03/14 13:45:56 akio Exp $
+ * $Id: StFgtQAMaker.cxx,v 1.10 2013/03/15 01:31:15 akio Exp $
  *
  */
 
@@ -180,7 +180,7 @@ void StFgtQAMaker::bookHist(){
   const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","MaxADC","ChargeAsy","CluChargeT","MaxADCT","ChargeAsyTrk","LandauN"};
   const int   n1dHist[N1dHist]={         50,       ns,       ns,         25,           15,             50,      50,         25,          50,       50,            25,       50};
   const float l1dHist[N1dHist]={          0,        0,        0,          0,            0,              0,       0,       -0.3,           0,        0,          -0.3,        0};
-  const float h1dHist[N1dHist]={        100,float(ns),float(ns),       25.0,           15,          15000,    4000,        0.3,       15000,     4000,           0.3,    15000};
+  const float h1dHist[N1dHist]={        100,float(ns),float(ns),       25.0,           15,          30000,    4000,        0.3,       30000,     4000,           0.3,    30000};
   const char* c2dHist[N2dHist] ={       "XY", "ADCvsTB",   "APVTB", "XYT"};
   const int   xn2dHist[N2dHist]={         50,       NTB,        60,    50}; 
   const float xl2dHist[N2dHist]={        -40,         0,         0,   -40};
@@ -394,7 +394,7 @@ void StFgtQAMaker::fillHist(){
       for(vector<AVPoint>::iterator p=points->begin(); p!=points->end();p++){
 	nhit++;
 	disc=p->dID;
-	quad=p->quadID;
+	quad = p->quadID;
 	histTrk[quad][5]->Fill(float(disc+1));
 	hist1[disc][quad][8]->Fill(p->rCharge);
 	hist1[disc][quad][8]->Fill(p->phiCharge);	
