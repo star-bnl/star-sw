@@ -67,6 +67,8 @@ if ( "$type" == "pedestal" ) then
   endif
   echo root -b -q makepedplot.C"($run)"
   root -b -q makepedplot.C"($run)"
+  \mv $dir/*${run}*.png www/$dir/	
+  ./maketiny.pl www/$dir
 else
   echo root -b -q makeqaplot.C"($run,0,1)"
   root -b -q makeqaplot.C"($run,0,1)"
@@ -85,7 +87,3 @@ else
   root -b -q resid.C"($run,0,-1,2)"
   \mv $dir/*${run}*.pdf www/$dir/	
 endif
-
-\mv $dir/*${run}*.png www/$dir/	
-./maketiny.pl www/$dir
-#makepage.pl $dir
