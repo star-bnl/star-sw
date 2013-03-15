@@ -26,6 +26,7 @@ Int_t AggregateVtxSeed(char* dir, const char* cuts) {
   gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
+  gSystem->Load("StdEdxY2Maker");
   gSystem->Load("StPass0CalibMaker");
 
   StVertexSeedMaker vtxSeedMk;
@@ -34,8 +35,11 @@ Int_t AggregateVtxSeed(char* dir, const char* cuts) {
   return nfiles;
 }
 
-// $Id: AggregateVtxSeed.C,v 1.2 2008/04/29 23:30:57 genevb Exp $
+// $Id: AggregateVtxSeed.C,v 1.3 2013/03/15 01:52:28 genevb Exp $
 // $Log: AggregateVtxSeed.C,v $
+// Revision 1.3  2013/03/15 01:52:28  genevb
+// library dependence
+//
 // Revision 1.2  2008/04/29 23:30:57  genevb
 // Added cuts capability to Aggregate
 //
