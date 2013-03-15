@@ -4,7 +4,7 @@
  * \author Torre Wenaus, BNL, Thomas Ullrich
  * \date   Nov 1999
  *
- * $Id: StFgtQAMaker.cxx,v 1.10 2013/03/15 01:31:15 akio Exp $
+ * $Id: StFgtQAMaker.cxx,v 1.11 2013/03/15 20:07:41 akio Exp $
  *
  */
 
@@ -21,10 +21,12 @@
 #include "StRoot/StFgtPool/StFgtClusterTools/StFgtStraightTrackMaker.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
 
+#include <TMath.h>
 #include <TGraphAsymmErrors.h>
 
 static const int mDebug=0;      // debug mesasge level
 static const int NTB=15;
+static const char* cquad[kFgtNumQuads]={"A","B","C","D"};  
 
 inline int globalapv(int rdo, int arm, int apv){
   return (rdo-1)*6*2 + arm*2 + apv/12;
@@ -37,6 +39,15 @@ inline void getPRC(int rdo, int arm, int apv, int& page, int& row, int& col){
   row = (((rdo-1)*6 + arm)%2)*4 + (apv/12)*2 + (apv%12)/5;
   col = (apv%12)%5;
   //printf("rdo=%1d arm=%1d apv=%2d page=%d row=%d col=%d\n",rdo,arm,apv,page,row,col);
+}
+
+inline double localphi(int quad, double phi){
+  static const double mPi = TMath::Pi();
+  static const double phioff[kFgtNumQuads] = {-15.0*mPi/180.0, -105.0*mPi/180.0, 165.0*mPi/180.0, 165.0*mPi/180.0};
+  double local=phi - phioff[quad];
+  while(local<0.0) {local+=2.0*mPi;}
+  while(local>2.0*mPi) {local-=2.0*mPi;}
+  return local;
 }
 
 ClassImp(StFgtQAMaker);
@@ -172,11 +183,15 @@ void StFgtQAMaker::saveTrace(){
 void StFgtQAMaker::bookHist(){
   char c[50];
   int ns=kFgtNumStrips;
-  const char* cquad[kFgtNumQuads]={"A","B","C","D"};  
+  const int nbin= 512;
+  const int max=30720;
+  const int binwid=max/nbin;
+  const float min=0.5-binwid;
+  const float max2=max+0.5; 
   const char* cHist[NHist]={"MaxTimeBin","ADC","DataSize",       "ZSdata",      "10sigma", "Nevt", "LandauChi2","LandauSig","LandauMpv",  "Mpv-3Sig"};
-  const int   nHist[NHist]={         NTB,  200,       256, kFgtNumElecIds, kFgtNumElecIds,      1,           40,         40,         60,          60}; 
-  const float lHist[NHist]={           0,    0,         0,              0,              0,      0,            0,          0,          0,          -3};    
-  const float hHist[NHist]={  float(NTB), 4200,     30975, kFgtNumElecIds, kFgtNumElecIds,      1,           20,          4, float(NTB),float(NTB-3)}; 
+  const int   nHist[NHist]={         NTB,  200,    nbin+1, kFgtNumElecIds, kFgtNumElecIds,      1,           40,         40,         60,          60}; 
+  const float lHist[NHist]={           0,    0,       min,              0,              0,      0,            0,          0,          0,          -3};    
+  const float hHist[NHist]={  float(NTB), 4200,      max2, kFgtNumElecIds, kFgtNumElecIds,      1,           20,          4, float(NTB),float(NTB-3)}; 
   const char* c1dHist[N1dHist]={"NHitStrip", "PhiHit",   "RHit", "NCluster","ClusterSize","ClusterCharge","MaxADC","ChargeAsy","CluChargeT","MaxADCT","ChargeAsyTrk","LandauN"};
   const int   n1dHist[N1dHist]={         50,       ns,       ns,         25,           15,             50,      50,         25,          50,       50,            25,       50};
   const float l1dHist[N1dHist]={          0,        0,        0,          0,            0,              0,       0,       -0.3,           0,        0,          -0.3,        0};
@@ -551,8 +566,11 @@ void StFgtQAMaker::pulseFit(StFgtHit* cluster){
   }
 }
 
+void StFgtQAMaker::dip(){
+}
+
 void StFgtQAMaker::textDump(){
-  static int MAXEVT=20;
+  static int MAXEVT=100;
   static int NEVT=0;
   static FILE *mTextFile=0;
   if(NEVT==0){
@@ -573,8 +591,47 @@ void StFgtQAMaker::textDump(){
   StFgtStraightTrackMaker *fgtSTracker = static_cast<StFgtStraightTrackMaker * >( GetMaker("fgtStraightTracker"));
   if (! fgtSTracker){ return; }
   vector<AVTrack>& tracks=fgtSTracker->getTracks();
+  int missedhit[kFgtNumGeoIds]; memset(missedhit,0,sizeof(missedhit));
 
   for(int quad=0; quad<kFgtNumQuads; quad++){
+    //print tracks
+    for(vector<AVTrack>::iterator t=tracks.begin();t!=tracks.end();t++){
+      vector<AVPoint>* points=t->points;
+      int nhit=0, quad2=-1; 
+      int dischit[kFgtNumDiscs]; memset(dischit,0,sizeof(dischit));
+      for(vector<AVPoint>::iterator p=points->begin(); p!=points->end();p++){
+	quad2=p->quadID;
+	if(quad2 != quad) break;	  
+	int disc=p->dID;
+	dischit[disc]=1;
+	if(nhit==0) fprintf(mTextFile,"TRK quad=%1s chi2=%6.3f dca=%6.2f vtxz=%6.2f\n",
+			   cquad[quad],t->chi2,t->dca,t->trkZ);
+	fprintf(mTextFile,"TRK quad=%1s hit=%1d disc=%1d Pchg=%6.0f Rchg=%6.0f x=%6.2f y=%6.2f\n",
+	       cquad[quad], nhit, disc+1, p->fgtHitPhi->getLandauNorm(),p->fgtHitR->getLandauNorm(),p->x,p->y);
+	//printf("TRK quad=%1s hit=%1d disc=%1d Pchg=%6.0f Rchg=%6.0f x=%6.2f y=%6.2f\n",
+	//      cquad[quad], nhit, disc+1, p->fgtHitPhi->getLandauNorm(),p->fgtHitR->getLandauNorm(),p->x,p->y);
+	nhit++;
+      }
+      if(quad2 != quad) break;
+      for(int disc=0; disc<kFgtNumDiscs; disc++){
+	if(dischit[disc]==0){ //this track is in this quad, but no hit in this disc
+	  double binFrac[1];
+	  double z=StFgtGeom::getDiscZ(disc);
+	  double x=t->mx*z+t->ax;
+	  double y=t->my*z+t->ay;
+	  double r=sqrt(x*x+y*y);
+	  double p=atan2(y,x);
+	  double localp=localphi(quad,p);	  
+	  int ip = StFgtGeom::phi2LocalStripId(r,localp,binFrac);
+	  int ir = StFgtGeom::rad2LocalStripId(r,localp,binFrac);
+	  int gp= StFgtGeom::encodeGeoId(disc,quad,'P',ip); missedhit[gp]=1;
+	  int gr= StFgtGeom::encodeGeoId(disc,quad,'R',ir); missedhit[gr]=1;
+	  //printf("%1d%1s x=%6.2f y=%6.2f r=%6.2f ir=%3d phi=%6.2f local=%6.2f ip=%3d\n",
+	  //	 disc+1,cquad[quad],x,y,r,ir,p,localp,ip);
+	}
+      }
+    }
+    //Print strips & clusters (with track if associated)
     for (int disc=0; disc<kFgtNumDiscs; disc++){
       StFgtStripCollection *cstrip = fgtCollectionPtr->getStripCollection(disc);
       StSPtrVecFgtStrip &strips=cstrip->getStripVec();
@@ -601,16 +658,16 @@ void StFgtQAMaker::textDump(){
 	  for(vector<AVTrack>::iterator t=tracks.begin();t!=tracks.end();t++){
 	    vector<AVPoint>* points=t->points;
 	    for(vector<AVPoint>::iterator p=points->begin(); p!=points->end();p++){
+	      if(p->quadID != quad) break;
 	      if(p->dID != disc) continue;
-	      if(p->quadID != quad) continue;
 	      StFgtHit* thit;
 	      if(ipr==0) {thit=p->fgtHitPhi;}
 	      else       {thit=p->fgtHitR;}
-	      if(thit->getCentralStripGeoId() != geoid) continue;
+	      if(thit->getCentralStripGeoId() != geoid) continue; //hit is in same disc/quad but somewhere else
 	      flagt=1;
-	      //trk=t;
 	    }
 	  }
+	  if(missedhit[geoid]>0) flagt=2;
 	  if(flags>0 || flagc>0 || flagt>0){
 	    int rdo, arm, apv, ch;
 	    mDb->getElecCoordFromGeoId(geoid,rdo,arm,apv,ch);
@@ -620,8 +677,8 @@ void StFgtQAMaker::textDump(){
 	    short id,iq;	    
 	    double rphi,l,h;
 	    StFgtGeom::getGlobalPhysicalCoordinate(geoid,id,iq,cl,rphi,l,h);
-	    fprintf(mTextFile,"%5d=D%1dQ%1d%1c%3d|Rdo%1dArm%1dAPV%02dCh%03d|",
-		    geoid,disc,quad,layer[ipr],strip,rdo,arm,apv,ch);
+	    fprintf(mTextFile,"%05d=%1d%1s%1c%03d|%05d=R%1dA%1dAPV%02dC%03d|",
+		    geoid,disc+1,cquad[quad],layer[ipr],strip,elecId,rdo,arm,apv,ch);
 	    if(str){ 
 	      fprintf(mTextFile,"s=%1d psig=%3.0f|adc=", status,str->getPedErr()); 
 	      for(int i=0; i<mNTimeBin; i++){ fprintf(mTextFile,"%4d ", str->getAdc(i)); }
@@ -641,7 +698,8 @@ void StFgtQAMaker::textDump(){
 		       hit->charge(),hit->getPositionR(),hit->getNstrip(),hit->getSeedType());
 	      }	      
 	    }	
-	    if(flagt==1) {fprintf(mTextFile,"TRK!");}
+	    if(flagt==1) {fprintf(mTextFile," Track!");}
+	    if(flagt==2) {fprintf(mTextFile," Miss (track should have left hit here)");}
 	    fprintf(mTextFile,"\n");
 	  }
 	}//strip

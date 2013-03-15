@@ -4,11 +4,14 @@
  * \author Akio
  * \date   Dec2012
  *
- * $Id: StFgtQAMaker.h,v 1.8 2013/03/14 13:45:56 akio Exp $
+ * $Id: StFgtQAMaker.h,v 1.9 2013/03/15 20:07:41 akio Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StFgtQAMaker.h,v $
+ * Revision 1.9  2013/03/15 20:07:41  akio
+ * *** empty log message ***
+ *
  * Revision 1.8  2013/03/14 13:45:56  akio
  * A lot of changes
  *
@@ -69,7 +72,7 @@ public:
   inline void setRunNumber(Int_t v) {mRunNumber=v;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.8 2013/03/14 13:45:56 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtQAMaker.h,v 1.9 2013/03/15 20:07:41 akio Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   };
   
@@ -80,6 +83,7 @@ protected:
   void saveTrace();
   void pulseFit(StFgtHit* cluster);
   void textDump();
+  void dip();
 
 private:
   Int_t   mEventCounter; //!
@@ -95,6 +99,7 @@ private:
   TH1F *hist1[kFgtNumDiscs][kFgtNumQuads][N1dHist]; //! 1d histos for each disc/quad
   TH2F *hist2[kFgtNumDiscs][N2dHist];               //! 2d histos for each disc
   TH1F *histTrk[kFgtNumQuads][NTrkHist];            //! Histos for tracks
+  TH1F *histDip[2];                                 //! Hist for dip
 
   TCanvas* mCanvas[7]; //!
   static const int MAXTRACE=100; //!
