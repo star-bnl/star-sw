@@ -1,6 +1,9 @@
 //
-//  $Id: StFgtSeededClusterAlgo.cxx,v 1.28 2013/03/13 15:57:35 akio Exp $
+//  $Id: StFgtSeededClusterAlgo.cxx,v 1.29 2013/03/15 15:53:49 avossen Exp $
 //  $Log: StFgtSeededClusterAlgo.cxx,v $
+//  Revision 1.29  2013/03/15 15:53:49  avossen
+//  check seed before overwriting w/ next to cluster flag
+//
 //  Revision 1.28  2013/03/13 15:57:35  akio
 //  Fix a bug with ZS data and phi-even strip clustering logic
 //  Also remove some kStFgtNumTimebins and use dynamic local mMaxTimeBin from StFgtCollection
@@ -448,7 +451,8 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollect
 	      //	      cout <<"erased! " << endl;
 	      //      it->first->setClusterSeedType(kFgtSeedTypeNo);
 	      ///let's keep it though...
-	      it->first->setClusterSeedType(kFgtNextToCluster);
+	      if(it->first->getClusterSeedType()==kFgtSeedTypeNo || it->first->getClusterSeedType()>kFgtClusterSeedInSeaOfNoise)
+		it->first->setClusterSeedType(kFgtNextToCluster);
 	      strips.erase(it);
 	      if(!strips.empty())
 		it=strips.begin();
@@ -582,7 +586,8 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollect
 		{
 		  if((*it)->getGeoId()==iGeo)
 		    {
-		      (*it)->setClusterSeedType(kFgtNextToCluster);
+		      if((*it)->getClusterSeedType()==kFgtSeedTypeNo || (*it)->getClusterSeedType()>kFgtClusterSeedInSeaOfNoise)
+			(*it)->setClusterSeedType(kFgtNextToCluster);
 		    }
 		  
 		}
@@ -631,7 +636,8 @@ void StFgtSeededClusterAlgo::FillClusterInfo(StFgtHit* cluster,StFgtStripCollect
 		  if((*it)->getGeoId()==iGeo)
 		    {
 		      //			  cout <<"from vec: "<< (*it) <<endl;
-			    (*it)->setClusterSeedType(kFgtNextToCluster);
+		      if((*it)->getClusterSeedType()==kFgtSeedTypeNo || (*it)->getClusterSeedType()>kFgtClusterSeedInSeaOfNoise)
+			(*it)->setClusterSeedType(kFgtNextToCluster);
 		    }
 		  
 		}
