@@ -21,7 +21,7 @@ chmod +x maketiny.pl
 chmod +x cron
 chmod +x runs
 chmod +x writeped.pl
-chmod +x writestatus.pl 
+chmod +x writestat.pl 
 chmod +x runtime
 
 cp $STAR/.$STAR_HOST_SYS/include/fgtPedestal.h .
