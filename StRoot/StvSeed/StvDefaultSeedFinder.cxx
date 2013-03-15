@@ -19,9 +19,10 @@ void myBreak(int);
 enum {kFstAng=88,kErrFakt=5,kLenFakt=5,kStpFakt=3};
 static const double kFstTan = tan(kFstAng*M_PI/180);
 static const double kMinTan = 0.1;
-static const double kImpFakt = 0.5;
+static const double kImpFakt = 0.95;
 static const float  kDeltaR = 40;
 static const float  kDeltaZ = 40;
+static const float  kRangeZ = 1000; //range of zVertex
 
 ClassImp(StvDefaultSeedFinder)
 
@@ -216,6 +217,8 @@ StvDebug::Break(nCall);
   
     case 0: {
       for (int i=0;i<3;i++) {mDir[i]=-mHit[i];}
+//	if Z is inside of range direction to Z=0 is senseless 
+      if (fabs(mDir[2]) < kRangeZ) mDir[2] = 0;
       stp=0;
       for (int i=0;i<3;i++) {stp+=mDir[i]*mDir[i];}
       stp = sqrt(stp);
@@ -306,7 +309,7 @@ void  StvConeSelector::UpdateLims()
 int  StvConeSelector::Reject(const float x[3])
 {
    float myRxy2 = x[0]*x[0]+x[1]*x[1];
-   if (myRxy2>mRxy2 && fabs(x[2])>fabs(mHit[2])) 	return 1;
+//VP   if (myRxy2>mRxy2 && fabs(x[2])>fabs(mHit[2])) 	return 1;
    if (myRxy2>mRxy2 ) 					return 2;
    float xx[3] = {x[0]-mHit[0],x[1]-mHit[1],x[2]-mHit[2]};
    float r2xy = xx[0]*xx[0]+xx[1]*xx[1];
@@ -317,10 +320,10 @@ int  StvConeSelector::Reject(const float x[3])
    mHitPrj = Dot(xx,mDir);
    if (mHitPrj<1e-4)			return 5;
    if (mHitPrj>mLen) 			return 6;
-   float imp = (Impact2(mDir,xx));
+   float imp =mHitLen-mHitPrj*mHitPrj; if (imp<=0) imp = 0;
    float lim = (mErr) + mHitPrj*mTan;
    if (imp > lim*lim)          		return 7;
-   mHitLen = imp*kImpFakt+ r2xy*(1-kImpFakt);
+   mHitLen = imp*kImpFakt+ mHitPrj*mHitPrj*(1-kImpFakt);
    return -1;
 }
 //_____________________________________________________________________________
