@@ -136,10 +136,11 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	
 	print(OUT1 "<H1>FGT Monitor Day$id ($dd)</H1>\n");
 	print(OUT1 "<a href=\"index.php\">Back to day list</a>\n");
-	print(OUT1 "<table border=1><tr><td>Run</td><td>Time</td><td>Length</td><td>Config</td><td>Type</td>\n");
-	print(OUT1 "<td>pdf</td><td>Trace</td><td>Ped/Stat</td><td>Status</td><td>Plot</td><td>Landau</td><td>ADCvsTB</td><td>APVTB</td><td>NHitStrip</td><td>PhiHits</td>");
-	print(OUT1 "<td>RHits</td><td>NCluster</td><td>ClusterSize</td><td>Charge</td><td>MaxADC</td><td>ChargeAsy</td><td>XY</td><");
-	print(OUT1 "<td>XYTrk</td><td>Trk</td><td>ClusterChrgTrk</td><td>Landau</td><td>MaxAdcTrk</td><td>ChgAsyTrk</tr>\n");
+	print(OUT1 "<table border=1>");
+	print(OUT1 "<tr><td>Run</td><td>Time</td><td>Length</td><td>Config</td><td>Type</td>\n");
+	print(OUT1 "<td>link</td><td>Trace</td><td>Ped/Stat</td><td>Status</td><td>Plot</td><td>Landau</td><td>ADCvsTB</td><td>APVTB</td><td>NHitStrip</td><td>PhiHits</td>");
+	print(OUT1 "<td>RHits</td><td>NCluster</td><td>ClusterSize</td><td>Charge</td><td>MaxADC</td><td>ChargeAsy</td><td>XY</td>");
+	print(OUT1 "<td>XYTrk</td><td>Trk</td><td>ClusterChrgTrk</td><td>Landau</td><td>MaxAdcTrk</td><td>ChgAsyTrk</td><td>Run</td></tr>\n");
 	
 	$tgt=" onclick=\"openwin(this.href); return false;\"";
 	$siz=" Width=100 ";
@@ -212,6 +213,7 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    
 	    $f="fgtScopeTrace_${run}";if(-e "$plotdir/$f.pdf"){print(OUT1 "<td><a href=\"$id\/$f.pdf\" $tgt>trace</a><br>"                        );} else {print(OUT1 "<td>"     );}
 	    $f="${run}.pulsefit";     if(-e "$plotdir/$f.pdf"){print(OUT1     "<a href=\"$id\/$f.pdf\" $tgt>fit</a><br>"                          );} else {print(OUT1 ""         );}
+	    $f="${run}.evtdump";      if(-e "$plotdir/$f.txt"){print(OUT1     "<a href=\"$id\/$f.txt\" $tgt>txt</a><br>"                          );} else {print(OUT1 ""         );}
 	    $f="resid1d.${run}";      if(-e "$plotdir/$f.pdf"){print(OUT1     "<a href=\"$id\/$f.pdf\" $tgt>resid</a></td>"                       );} else {print(OUT1 "</td>"    );}
 	    $f="fgtScopeTrace_${run}";if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    $f="${run}_ped";          if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
@@ -237,7 +239,12 @@ for ($d = $today; $d>=$start; $d-=60*60*24){
 	    $f="${run}_ChargeAsyTrk"; if(-e "$plotdir/$f.$p") {print(OUT1 "<td><a href=\"$id\/$f.$p\" $tgt><img src=\"$id\/$f.$t\" $siz></a></td>");} else {print(OUT1 "<td></td>");}
 	    print(OUT1 "<td>$run</td><tr>\n");
 	}
+	print(OUT1 "<tr><td>Run</td><td>Time</td><td>Length</td><td>Config</td><td>Type</td>\n");
+	print(OUT1 "<td>link</td><td>Trace</td><td>Ped/Stat</td><td>Status</td><td>Plot</td><td>Landau</td><td>ADCvsTB</td><td>APVTB</td><td>NHitStrip</td><td>PhiHits</td>");
+	print(OUT1 "<td>RHits</td><td>NCluster</td><td>ClusterSize</td><td>Charge</td><td>MaxADC</td><td>ChargeAsy</td><td>XY</td>");
+	print(OUT1 "<td>XYTrk</td><td>Trk</td><td>ClusterChrgTrk</td><td>Landau</td><td>MaxAdcTrk</td><td>ChgAsyTrk</td><td>Run</td></tr>\n");
 	print(OUT1 "</table>\n");
+	print(OUT1 "<a href=\"index.php\">Back to day list</a>\n");
 	print(OUT1 "</BODY></HTML>\n");
     }
 }

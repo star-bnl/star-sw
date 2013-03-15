@@ -405,7 +405,7 @@ void makeqaplot(int run=0, int plt=0, int save=0){
   if(save==2) {png=0; pdf=1;}
   if(save==3) {png=1; pdf=1;}
 
-  c1 = new TCanvas("c1","QA",50,0,800,800);
+  c1 = new TCanvas("c1","QA",50,50,800,800);
   gStyle->SetLabelSize(0.04,"xy");
   //colortable();
   gStyle->SetPalette(1);
@@ -430,6 +430,26 @@ void makeqaplot(int run=0, int plt=0, int save=0){
       hist0[i]=(TH1F*) file->Get(cHist[i]);
       hist0[i]->SetFillColor(kBlue); 
       hist0[i]->Draw();
+      if(i==2){
+	float ntot  = float(hist0[i]->GetEntries());
+	if(ntot>0.0){
+	  int    nbin = hist0[i]->GetNbinsX();
+	  float nofgt = hist0[i]->Integral(1,1);	
+	  int     bin = hist0[i]->FindBin(float(kFgtNumElecIds));
+	  float nonzs = hist0[i]->Integral(bin-1,nbin+1);
+	  float    zs = hist0[i]->Integral(2,bin-2);
+	  hist0[i]->GetXaxis()->SetRange(2, bin-2);
+	  float mean =  hist0[i]->GetMean() / float(kFgtNumElecIds);
+	  char c[100];
+	  sprintf(c,"Total  %d",ntot);                         TText *t1 = new TText(0.3,0.8,c); t1->SetNDC(); t1->SetTextSize(0.06); t1->Draw();
+	  sprintf(c,"NoFGT  %d (%5.2f)",nofgt,nofgt/ntot);     TText *t2 = new TText(0.3,0.7,c); t2->SetNDC(); t2->SetTextSize(0.06); t2->Draw();
+	  sprintf(c,"NoneZS %d (%5.2f)",nonzs,nonzs/ntot);     TText *t3 = new TText(0.3,0.6,c); t3->SetNDC(); t3->SetTextSize(0.06); t3->Draw();
+	  sprintf(c,"ZS     %d (%5.2f)",zs,zs/ntot);           TText *t4 = new TText(0.3,0.5,c); t4->SetNDC(); t4->SetTextSize(0.06); t4->Draw();
+	  sprintf(c,"Mean ZS data size/fullsize= %5.3f",mean); TText *t5 = new TText(0.3,0.4,c); t5->SetNDC(); t5->SetTextSize(0.06); t5->Draw();
+	  if(mean>0.08) { t5->SetTextColor(2); }
+	  else          { t5->SetTextColor(4); }
+	}
+      }
     }
     c1->Update();
     save("plot");
@@ -518,7 +538,7 @@ void makeqaplot(int run=0, int plt=0, int save=0){
     sprintf(filename,"%d/status/status.%d.txt",yearday,run);
     FILE* pfile=fopen(filename,"w");
     if(!pfile){
-      printf("Couldn't open $file\n",filename);
+      printf("Couldn't open file %s\n",filename);
     }else{
       printf("Writing %s\n",filename);
       for(int i=0; i<kFgtNumElecIds; i++){
