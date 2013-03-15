@@ -61,13 +61,13 @@ pair<double,double> StFgtStraightTrackMaker::getDca(  vector<AVTrack>::iterator 
     {
       float x=it->mx*z+it->ax;
       float y=it->my*z+it->ay;
-       dist=x*x+y*y;
+      dist=x*x+y*y;
       if(dist>oldDist)
 	{
-      ///we go away
+	  ///we go away
 	  dist=oldDist;
 	  optZ=z-zStep;//last z was better
-	break;
+	  break;
 	}
       else
 	oldDist=dist;
@@ -155,13 +155,13 @@ Double_t StFgtStraightTrackMaker::findClosestPoint(float mx, float bx, float my,
 	      if(isCosmic)
 		{
 
-	      getAlign(iD,phi,r,tmpX,tmpY,tmpZ,tmpP,tmpR);
-	      Double_t xExpUpdate=mx*tmpZ+bx;
-	      Double_t yExpUpdate=my*tmpZ+by;
-	      //	      cout<<"tmpx: " << tmpX <<" old: " << x <<" xE old: " << xE << " updated: " << xExpUpdate;
-	      //	      cout<<"tmpy: " << tmpY <<" old: " << y <<" yE old: " << yE << " updated: " << yExpUpdate<<endl;
-	      mDist=(tmpX-xExpUpdate)*(tmpX-xExpUpdate)+(tmpY-yExpUpdate)*(tmpY-yExpUpdate);
-	      dist2=mDist;
+		  getAlign(iD,phi,r,tmpX,tmpY,tmpZ,tmpP,tmpR);
+		  Double_t xExpUpdate=mx*tmpZ+bx;
+		  Double_t yExpUpdate=my*tmpZ+by;
+		  //	      cout<<"tmpx: " << tmpX <<" old: " << x <<" xE old: " << xE << " updated: " << xExpUpdate;
+		  //	      cout<<"tmpy: " << tmpY <<" old: " << y <<" yE old: " << yE << " updated: " << yExpUpdate<<endl;
+		  mDist=(tmpX-xExpUpdate)*(tmpX-xExpUpdate)+(tmpY-yExpUpdate)*(tmpY-yExpUpdate);
+		  dist2=mDist;
 
 		}
 	      ///Double_t xExp=mx*StFgtGeom::getDiscZ(i)+bx;
@@ -198,10 +198,10 @@ Short_t StFgtStraightTrackMaker::getQuadFromCoo(Double_t x, Double_t y)
 pair<Double_t,Double_t> StFgtStraightTrackMaker::getChargeRatio(Float_t r, Float_t phi, Int_t iD, Int_t iq)
 {
   //first r: 
-      Double_t maxRCharge=-9999;
-      Double_t maxPhiCharge=-9999;
-      Int_t maxRInd=-1;
-      Int_t maxPInd=-1;
+  Double_t maxRCharge=-9999;
+  Double_t maxPhiCharge=-9999;
+  Int_t maxRInd=-1;
+  Int_t maxPInd=-1;
   for(unsigned int i=0;i<  pStrips[iD*4+iq].size();i++)
     {
       Int_t geoId=pStrips[iD*4+iq][i].geoId;
@@ -217,19 +217,19 @@ pair<Double_t,Double_t> StFgtStraightTrackMaker::getChargeRatio(Float_t r, Float
 	{
 	  if(layer=='P')
 	    {
-	    if(pStrip.charge>maxPhiCharge)
-	      {
-		maxPhiCharge=pStrip.charge;
-		maxPInd=i;
-	      }
+	      if(pStrip.charge>maxPhiCharge)
+		{
+		  maxPhiCharge=pStrip.charge;
+		  maxPInd=i;
+		}
 	    }
 	  else
 	    {
-	    if(pStrip.charge>maxRCharge)
-	      {
-		maxRCharge=pStrip.charge;
-		maxRInd=i;
-	      }
+	      if(pStrip.charge>maxRCharge)
+		{
+		  maxRCharge=pStrip.charge;
+		  maxRInd=i;
+		}
 	    }
 	}
     }
@@ -322,7 +322,7 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
           D++;
         }
     }
-    //cout << "*** Consts " << A << ' ' << B << ' ' << Cx << ' ' << Cy << ' ' << D << ' ' << Ex << ' ' << Ey << endl;
+  //cout << "*** Consts " << A << ' ' << B << ' ' << Cx << ' ' << Cy << ' ' << D << ' ' << Ex << ' ' << Ey << endl;
   Double_t denom = D*A - B*B;
   if( denom )
     {
@@ -332,136 +332,136 @@ Bool_t StFgtStraightTrackMaker::getTrack(vector<AVPoint>& points, Double_t ipZ)
       Double_t my = ( D*Cy - B*Ey)/denom;
       //    cout <<"bx: " << bx <<" by: " << by <<" mx: " << mx << " my: " << my <<endl;    
       dist = 0;
-    //  cout <<"get track4" <<endl;
-    vector<AVPoint> redPoints;
-    // find closest points...
-    for(int iDx=0;iDx<6;iDx++)
-      {
-	Double_t minDistance=9999;
-	Int_t pointIdx=-1;
-	Int_t cnt=0;
-	for( iter = points.begin(); iter != points.end(); ++iter ){
-	  Int_t dId=iter->dID;
-	  Double_t distX=fabs((iter->z*mx+bx)-(iter->x));
-	  Double_t distY=fabs((iter->z*my+by)-(iter->y));
-	  //	  cout <<"distX: " << distX <<" distY: " << distY <<endl;
-	  Double_t distance=distX*distX+distY*distY;
-	  //	  cout << " got distance " << distance << endl;
-	  if((iDx==dId)&&(distance<minDistance))
-	    {
-	      minDistance=distance;
-	      pointIdx=cnt;
-	      	      //	      cout <<"min dist now:" << minDistance<<" for this dik " << iDx <<" pointIdx: " << pointIdx <<endl;
-	    }
-	  cnt++;
-	}
-	if(pointIdx>=0)
-	  {
-	    //	    	    cout <<"pushing back " << pointIdx <<endl;
-	    redPoints.push_back(points[pointIdx]);
+      //  cout <<"get track4" <<endl;
+      vector<AVPoint> redPoints;
+      // find closest points...
+      for(int iDx=0;iDx<6;iDx++)
+	{
+	  Double_t minDistance=9999;
+	  Int_t pointIdx=-1;
+	  Int_t cnt=0;
+	  for( iter = points.begin(); iter != points.end(); ++iter ){
+	    Int_t dId=iter->dID;
+	    Double_t distX=fabs((iter->z*mx+bx)-(iter->x));
+	    Double_t distY=fabs((iter->z*my+by)-(iter->y));
+	    //	  cout <<"distX: " << distX <<" distY: " << distY <<endl;
+	    Double_t distance=distX*distX+distY*distY;
+	    //	  cout << " got distance " << distance << endl;
+	    if((iDx==dId)&&(distance<minDistance))
+	      {
+		minDistance=distance;
+		pointIdx=cnt;
+		//	      cout <<"min dist now:" << minDistance<<" for this dik " << iDx <<" pointIdx: " << pointIdx <<endl;
+	      }
+	    cnt++;
 	  }
-      }//end of looping over discs
+	  if(pointIdx>=0)
+	    {
+	      //	    	    cout <<"pushing back " << pointIdx <<endl;
+	      redPoints.push_back(points[pointIdx]);
+	    }
+	}//end of looping over discs
 
- //// reduced points
-    //////have to do a refit now..
-    //    cout <<"doing refit... " <<endl;
-//  cout <<"get track5" <<endl;
-    A=0.0;
-    B=0.0;
-    Cx=0.0;
-    Cy=0.0;
-    Ex=0.0;
-    Ey=0.0;
+      //// reduced points
+      //////have to do a refit now..
+      //    cout <<"doing refit... " <<endl;
+      //  cout <<"get track5" <<endl;
+      A=0.0;
+      B=0.0;
+      Cx=0.0;
+      Cy=0.0;
+      Ex=0.0;
+      Ey=0.0;
 
-    for(vector<AVPoint>::iterator iterR=redPoints.begin() ; iterR != redPoints.end(); ++iterR )
-      {
-	Double_t x = iterR->x;
-	Double_t y = iterR->y;
-	Double_t z = iterR->z;
+      for(vector<AVPoint>::iterator iterR=redPoints.begin() ; iterR != redPoints.end(); ++iterR )
+	{
+	  Double_t x = iterR->x;
+	  Double_t y = iterR->y;
+	  Double_t z = iterR->z;
 	
-	A += z*z;
-	B += z;
-	Cx += x*z;
-	Cy += y*z;
-	Ex += x;
-	Ey += y;
-      }
-    D = redPoints.size();
-    if(doRefitWithVertex)
-      {
+	  A += z*z;
+	  B += z;
+	  Cx += x*z;
+	  Cy += y*z;
+	  Ex += x;
+	  Ey += y;
+	}
+      D = redPoints.size();
+      if(doRefitWithVertex)
+	{
           if(isMuDst && vtxRank>0&&ipZ>-100 && ipZ<100)
             {
               A+=ipZ*ipZ;
               B+=ipZ;
               D++;
             }
-      }
+	}
 
-    Double_t denom = D*A - B*B;
-    //      cout <<"get track6" <<endl;
-    if( denom )
-      {
-	bx = (-B*Cx + A*Ex)/denom;
-	by = (-B*Cy + A*Ey)/denom;
-	mx = ( D*Cx - B*Ex)/denom;
-	my = ( D*Cy - B*Ey)/denom;
-      }
-    //   cout <<"after refit: bx: " << bx <<" by: " << by <<" mx: " << mx << " my: " << my <<endl;    
-    //          cout <<"we have refit line: "<< bx << " by: " << by <<" mx: " << mx << " my: " << my <<endl;
-    ///end of refit
-    for(vector<AVPoint>::iterator iterR = redPoints.begin(); iterR != redPoints.end(); ++iterR )
-      {
-	Double_t distX, distY;
-	distX=fabs((iterR->z*mx+bx)-(iterR->x));
-	distY=fabs((iterR->z*my+by)-(iterR->y));
-	//		cout <<"distX: " << distX <<" distY: " << distY <<endl;
-	dist += (distX*distX+distY*distY);
-	//		cout <<"adding " << (distX*distX+distY*distY) <<" to chi2: " << endl;
-	//       cout << "*** DistSq " << dist << endl;
-      }
-    //          cout <<"get track8" <<endl;
-    dist/=D;
-    //    cout <<" end chi2: " <<dist << ", ip: " << ipZ <<endl;
-    //this ipZ is the TPC vertex! Is reset below...
-    m_tracks.push_back(AVTrack(mx,my,bx,by,ipZ,dist));
-    //    cout <<" we have " <<m_tracks.size() <<" track now " <<endl;
-    (m_tracks.back()).vtxRank=vtxRank;
-    points.clear();
-    for(vector<AVPoint>::iterator it=redPoints.begin();it!=redPoints.end();it++)
-      {
-	points.push_back(*it);
-      }
+      Double_t denom = D*A - B*B;
+      //      cout <<"get track6" <<endl;
+      if( denom )
+	{
+	  bx = (-B*Cx + A*Ex)/denom;
+	  by = (-B*Cy + A*Ey)/denom;
+	  mx = ( D*Cx - B*Ex)/denom;
+	  my = ( D*Cy - B*Ey)/denom;
+	}
+      //   cout <<"after refit: bx: " << bx <<" by: " << by <<" mx: " << mx << " my: " << my <<endl;    
+      //          cout <<"we have refit line: "<< bx << " by: " << by <<" mx: " << mx << " my: " << my <<endl;
+      ///end of refit
+      for(vector<AVPoint>::iterator iterR = redPoints.begin(); iterR != redPoints.end(); ++iterR )
+	{
+	  Double_t distX, distY;
+	  distX=fabs((iterR->z*mx+bx)-(iterR->x));
+	  distY=fabs((iterR->z*my+by)-(iterR->y));
+	  //		cout <<"distX: " << distX <<" distY: " << distY <<endl;
+	  dist += (distX*distX+distY*distY);
+	  //		cout <<"adding " << (distX*distX+distY*distY) <<" to chi2: " << endl;
+	  //       cout << "*** DistSq " << dist << endl;
+	}
+      //          cout <<"get track8" <<endl;
+      dist/=D;
+      //    cout <<" end chi2: " <<dist << ", ip: " << ipZ <<endl;
+      //this ipZ is the TPC vertex! Is reset below...
+      m_tracks.push_back(AVTrack(mx,my,bx,by,ipZ,dist));
+      //    cout <<" we have " <<m_tracks.size() <<" track now " <<endl;
+      (m_tracks.back()).vtxRank=vtxRank;
+      points.clear();
+      for(vector<AVPoint>::iterator it=redPoints.begin();it!=redPoints.end();it++)
+	{
+	  points.push_back(*it);
+	}
 
-    for(vector<AVPoint>::iterator iter = points.begin(); iter != points.end(); ++iter ){
-      //                 cout << "--- Location at each disc at z: " << iter->z << " "
-      //                   << "X: " << mx*iter->z+bx << " vs " << iter->x << ' '
-      //                 	   << "Y: " << my*iter->z+by << " vs " << iter->y << " "
-      //      		<< " charge phi: " << iter->phiCharge <<" rcharge: "<< iter->rCharge <<endl;
+      for(vector<AVPoint>::iterator iter = points.begin(); iter != points.end(); ++iter ){
+	//                 cout << "--- Location at each disc at z: " << iter->z << " "
+	//                   << "X: " << mx*iter->z+bx << " vs " << iter->x << ' '
+	//                 	   << "Y: " << my*iter->z+by << " vs " << iter->y << " "
+	//      		<< " charge phi: " << iter->phiCharge <<" rcharge: "<< iter->rCharge <<endl;
 
+      }
+      //    cout <<endl<<endl;
+      //    cout <<"dist again:  " <<dist <<endl;
+      vector<AVTrack>::iterator it_lastTrack=m_tracks.end();
+      it_lastTrack--;
+      pair<double,double> dca=getDca(it_lastTrack);
+      Double_t vertZ = (  -( it_lastTrack->mx*it_lastTrack->ax + it_lastTrack->my*it_lastTrack->ay )/(it_lastTrack->mx*it_lastTrack->mx+it_lastTrack->my*it_lastTrack->my));
+      (it_lastTrack)->trkZ=vertZ;
+      //    cout <<"reset vertex to: " << vertZ <<endl;
+      it_lastTrack->dca=dca.second;
+      it_lastTrack->ipZ=dca.first;
+
+      //  cout <<"get track10" <<endl;
+
+      //    cout <<" returning true " <<endl;
+      return true;
     }
-    //    cout <<endl<<endl;
-    //    cout <<"dist again:  " <<dist <<endl;
-    vector<AVTrack>::iterator it_lastTrack=m_tracks.end();
-    it_lastTrack--;
-    pair<double,double> dca=getDca(it_lastTrack);
-    Double_t vertZ = (  -( it_lastTrack->mx*it_lastTrack->ax + it_lastTrack->my*it_lastTrack->ay )/(it_lastTrack->mx*it_lastTrack->mx+it_lastTrack->my*it_lastTrack->my));
-    (it_lastTrack)->trkZ=vertZ;
-    //    cout <<"reset vertex to: " << vertZ <<endl;
-    it_lastTrack->dca=dca.second;
-    it_lastTrack->ipZ=dca.first;
-
-    //  cout <<"get track10" <<endl;
-
-    //    cout <<" returning true " <<endl;
-    return true;
-  }
   //  cout <<" false... " <<endl;
   return false;
 };
 
 Double_t StFgtStraightTrackMaker::getRPhiRatio(vector<generalCluster>::iterator hitIterBegin, vector<generalCluster>::iterator hitIterEnd)
 {
-    Short_t quad;
+  Short_t quad;
   Char_t layer; 
   Int_t numR=0;
   Int_t numPhi=0;
@@ -510,8 +510,8 @@ Int_t StFgtStraightTrackMaker::Make()
 
 	  /*	  if((*(pClusters[i]))[j].layer=='R')
 	    cout <<"R layer, ";
-	  else
-	  cout <<"Phi layer, ";*/
+	    else
+	    cout <<"Phi layer, ";*/
 
 	  Double_t posPhi=(*(pClusters[i]))[j].posPhi;
 	  Double_t posR=(*(pClusters[i]))[j].posR;
@@ -536,7 +536,7 @@ Int_t StFgtStraightTrackMaker::Make()
   //    {
   //      Double_t ratio=getRPhiRatio(pClusters[i]->begin(),pClusters[i]->end());
   //      rPhiRatioPlots[i]->Fill(ratio);
-      //      cout << "ratio for disk: " << i << " is " << ratio <<" disk has: " << tmpClusterCol->getHitVec().size() << "hits" <<endl;
+  //      cout << "ratio for disk: " << i << " is " << ratio <<" disk has: " << tmpClusterCol->getHitVec().size() << "hits" <<endl;
   //    }
 
   //vector<generalCluster> &hitVecD1=*(pClusters[0]);
@@ -669,11 +669,11 @@ Int_t StFgtStraightTrackMaker::Make()
 			  if(usedPoints.find(geoIdSeed2R)!=usedPoints.end())
 			    continue;
 			  Float_t rD6=hitIterD6R->posR;
-			  			  //track goes towards smaller radii
+			  //track goes towards smaller radii
 			  if(!isCosmic)
 			    {
-			  if(rD1>rD6)
-			    continue;		  
+			      if(rD1>rD6)
+				continue;		  
 			    }
 			  vector<AVPoint>* v_points=new vector<AVPoint>;
 			  vvPoints.push_back(v_points);
@@ -708,6 +708,7 @@ Int_t StFgtStraightTrackMaker::Make()
 			  vector<generalCluster>::iterator iterClosestR;
 
 			  Double_t closestDist=999999;
+			  Int_t closestQuad;
 			  Int_t quadTestR=-1;
 			  //			  cout <<"looking for more hits..." <<endl;
 			  for(int iD=0;iD<6;iD++)
@@ -793,23 +794,23 @@ Int_t StFgtStraightTrackMaker::Make()
 
 				      if(doAddMultiplePoints)
 					{
-
-				      if(dist2<maxDist2)
-					{
-					  Double_t rCharge=hitIter2->CHARGE_MEASURE;
-					  Double_t phiCharge=hitIter->CHARGE_MEASURE;
-					  Int_t clusterSizeR=hitIter2->clusterSize;
-					  Int_t clusterSizePhi=hitIter->clusterSize;
-					  AVPoint avp(x,y,diskZ,r,phi,iD,quadTestR, rCharge,phiCharge, clusterSizeR,clusterSizePhi);
-					  avp.fgtHitR=fgtHitR;
-					  avp.fgtHitPhi=fgtHitPhi;
-					  v_points->push_back(avp);
-					}
+					  if(dist2<maxDist2)
+					    {
+					      Double_t rCharge=hitIter2->CHARGE_MEASURE;
+					      Double_t phiCharge=hitIter->CHARGE_MEASURE;
+					      Int_t clusterSizeR=hitIter2->clusterSize;
+					      Int_t clusterSizePhi=hitIter->clusterSize;
+					      AVPoint avp(x,y,diskZ,r,phi,iD,quadTestR, rCharge,phiCharge, clusterSizeR,clusterSizePhi);
+					      avp.fgtHitR=fgtHitR;
+					      avp.fgtHitPhi=fgtHitPhi;
+					      v_points->push_back(avp);
+					    }
 					}
 
 				      if(dist2<closestDist)
 					{
 					  closestDist=dist2;
+					  closestQuad=quadTestR;
 					  iterClosestPhi=hitIter;
 					  iterClosestR=hitIter2;
 					}
@@ -839,10 +840,10 @@ Int_t StFgtStraightTrackMaker::Make()
 				  //				  cout <<"charge R of middle disk: "<<  iD<<": "<< rCharge <<" phicharge: " << phiCharge<<endl;
 
 
-				  if(!doAddMultiplePoints)// already added
+				  if(!doAddMultiplePoints)// already added before if this flag is set
 				    {
-				      AVPoint avp(x,y,diskZ,r,phi,iD,quadTestR, rCharge,phiCharge, clusterSizeR,clusterSizePhi);
-				  //				  cout<<" adding point with r: "<< r <<" phi: " << phi <<" x: " << x <<" y: " << y <<endl;
+				      AVPoint avp(x,y,diskZ,r,phi,iD,closestQuad, rCharge,phiCharge, clusterSizeR,clusterSizePhi);
+				      //				  cout<<" adding point with r: "<< r <<" phi: " << phi <<" x: " << x <<" y: " << y <<endl;
 				      avp.fgtHitR=fgtHitR;
 				      avp.fgtHitPhi=fgtHitPhi;
 				      v_points->push_back(avp);
@@ -896,16 +897,16 @@ Int_t StFgtStraightTrackMaker::Make()
 				  }
 			      }
 
-				    if(validTrack)
-				      {
-					//at least don't duplicate seeds..., the other ones might belong to multiple tracks
-					usedPoints.insert(geoIdSeed1);
-					usedPoints.insert(geoIdSeed1R);
-					usedPoints.insert(geoIdSeed2);
-					usedPoints.insert(geoIdSeed2R);
+			      if(validTrack)
+				{
+				  //at least don't duplicate seeds..., the other ones might belong to multiple tracks
+				  usedPoints.insert(geoIdSeed1);
+				  usedPoints.insert(geoIdSeed1R);
+				  usedPoints.insert(geoIdSeed2);
+				  usedPoints.insert(geoIdSeed2R);
 
-				  }
-				hitCounter++;
+				}
+			      hitCounter++;
 			    }
 			  //start over
 			  iFound=0;
