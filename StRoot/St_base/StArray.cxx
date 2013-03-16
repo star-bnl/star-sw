@@ -27,7 +27,7 @@ void StObjLink::Streamer(TBuffer &R__b)
 const static UInt_t kMustBeOne  = kIsOnHeap  | kNotDeleted;
 const static UInt_t kMustBeZero = kCanDelete | kObjInCanvas  | kHasUUID
                                 | kCannotPick| kNoContextMenu| kZombie;
-     if (!fLink || fLink->TestBits(kMustBeZero|kMustBeOne) !=kMustBeOne)
+     if (!fLink || fLink->TestBits(kMustBeZero|kMustBeOne) !=(int)kMustBeOne)
           fLink = 0;
      if (!fLink) R__b << UInt_t(0);
      else        fLink->Ztreamer(R__b);
