@@ -54,7 +54,7 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 
 	if(likely(cou == 0)) return 0 ;	// most cases like this...
 
-	//printf("Start\n") ;
+	//printf("Start afterburner: cou %d\n",cou) ;
 
 	merged = 0 ;
 
@@ -127,7 +127,7 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 			double charge = l->charge + r->charge ;
 
 			/*
-			printf("can merge %d: L%d: [%d:%d] %f, f %d, R%d: [%d:%d] %f f %d\n",
+			printf("can merge %d: L%d: [%d:%d] %f, f 0x%02X, R%d: [%d:%d] %f f 0x%02X\n",
 			       type,
 			       i,l->p1,l->p2,l->tb,l->flags,
 			       merge_ix,r->p1,r->p2,r->tb,r->flags) ;
@@ -372,6 +372,10 @@ void tpxFCF::config2(int sec1, int rdo1, int mode, int rows, unsigned char *rowl
 		tpx_padplane = 1 ;	// new padplane
 	}
 
+	if(gain_storage[sec0][rdo0].storage) {
+		LOG(WARN,"config2(%d,%d) -- already allocated",sec1,rdo1) ;
+		return ;
+	}
 	
 
 	for(int a=0;a<256;a++) {
@@ -395,11 +399,11 @@ void tpxFCF::config2(int sec1, int rdo1, int mode, int rows, unsigned char *rowl
 		}
 	}
 
-	LOG(TERR,"config2: [%d] S%02d:%d: allocated %d pads (%d bytes)",my_id,sec1,rdo1,tot_count,tot_count * sizeof(struct s_static_storage)) ;
+	LOG(NOTE,"config2: [%d] S%02d:%d: allocated %d pads (%d bytes)",my_id,sec1,rdo1,tot_count,tot_count * sizeof(struct s_static_storage)) ;
 
 	// allocate storage
 	if(gain_storage[sec0][rdo0].storage) {
-		LOG(WARN,"Whoa! Storage already allocated!") ;
+		LOG(WARN,"Whoa! Storage already allocated, sec %d, rdo %d!",sec0+1,rdo0+1) ;
 		free(gain_storage[sec0][rdo0].storage) ;
 	}
 
@@ -430,7 +434,7 @@ void tpxFCF::config2(int sec1, int rdo1, int mode, int rows, unsigned char *rowl
 	}
 
 
-
+	// HACK: this needs adjustment for iTPX!
 	sector = sec1 ;
 	rdo = rdo1 ;
 
@@ -443,7 +447,7 @@ void tpxFCF::config2(int sec1, int rdo1, int mode, int rows, unsigned char *rowl
 		if(row > 250) continue ;
 		if(row == 0) continue ;
 
-		get_static(row, pad)->f = 0x8000 | FCF_ONEPAD ;
+		get_static(row, pad)->f = FCF_NEED_PAD | FCF_ONEPAD ;
 		get_static(row, pad)->g = 1.0 ;
 		get_static(row, pad)->t0 = 0.0 ;
 
@@ -551,7 +555,7 @@ void tpxFCF::config(u_int mask, int mode, int rows, unsigned char *rowlen)
 	if(tpx_padplane) {
 		for(row=1;row<=row_count;row++) {
 			for(pad=1;pad<=tpx_rowlen[row];pad++) {
-				get_stage1(row,pad)->f = 0x8000 | FCF_ONEPAD ;
+				get_stage1(row,pad)->f = FCF_NEED_PAD | FCF_ONEPAD ;
 				get_stage1(row,pad)->g = 1.0 ;
 				get_stage1(row,pad)->t0 = 0.0 ;
 			}
@@ -568,7 +572,7 @@ void tpxFCF::config(u_int mask, int mode, int rows, unsigned char *rowlen)
 				if(row > 250) continue ;
 				if(row == 0) continue ;
 
-				get_stage1(row, pad)->f = 0x8000 | FCF_ONEPAD ;
+				get_stage1(row, pad)->f = FCF_NEED_PAD | FCF_ONEPAD ;
 				get_stage1(row, pad)->g = 1.0 ;
 				get_stage1(row, pad)->t0 = 0.0 ;
 
@@ -597,7 +601,7 @@ void tpxFCF::apply_gains2(tpxGain *gain)
 		LOG(NOTE,"Applying gains to sector %d [%p ?]",sector,gain) ;
 	}
 
-	// clear all flags but the existing ones
+	// clear all flags but the existing higher ones
 	for(int s=0;s<24;s++) {
 	for(int r=0;r<6;r++) {
 		if(gain_storage[s][r].storage == 0) continue ;
@@ -628,9 +632,10 @@ void tpxFCF::apply_gains2(tpxGain *gain)
 		for(int row=1;row<=row_count;row++) {
 		for(int pad=1;pad<=tpx_rowlen[row];pad++) {
 			s_static_storage *ss = get_static(row,pad) ;
+			int kill = 0 ;
 
 			if(ss==0) continue ;
-
+			
 			if(gain) {
 				ss->g = gain->get_gains(sector,row,pad)->g ;
 				ss->t0 = gain->get_gains(sector,row,pad)->t0 ;
@@ -642,15 +647,16 @@ void tpxFCF::apply_gains2(tpxGain *gain)
 			
 			int fl = 0 ;
 
-			if(!(ss->f & 0x8000)) {
+			if(!(ss->f & FCF_NEED_PAD)) {	// not in this RDO i.e. row 8 is split between RDO1 and RDO2
 				fl |= FCF_BROKEN_EDGE ;
 			}
 
 			if(ss->g < 0.001) {
 				fl |= FCF_DEAD_EDGE ;
+				kill |= FCF_KILLED_PAD ;	// this pad is really dead!!!
 			}
 
-			if(fl) {
+			if(fl) {	// apply the above flags to adjecant pads as well
 				if(pad>1) {
 					get_static(row,pad-1)->f |= fl ;
 				}
@@ -664,7 +670,7 @@ void tpxFCF::apply_gains2(tpxGain *gain)
 				fl |= FCF_ROW_EDGE ;
 			}
 			
-			ss->f |= fl | FCF_ONEPAD ;
+			ss->f |= fl | FCF_ONEPAD | kill ;
 
 			
 		}
@@ -723,7 +729,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 			u_int fl = 0 ;
 
-			if(!(s->f & 0x8000)) {	// not really here; missing in the RDO...
+			if(!(s->f & FCF_NEED_PAD)) {	// not really here; missing in the RDO...
 				//LOG(WARN,"Applying broken edge to row:pad %d:%d",row,pad) ;
 				fl |= FCF_BROKEN_EDGE ;
 			}
@@ -856,6 +862,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 	// After run 10065096.
 	// Tonko.
 	// Actually, I will leave this cut in and lower to 400
+
 	if(unlikely(a->count >= 400)) {
 		//LOG(WARN,"count %d on r:p %d:%d",a->count,a->row,a->pad) ;
 		return 0 ;
@@ -868,14 +875,20 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 		struct s_static_storage *ss ;
 
 		ss = get_static(a->row,a->pad) ;
-		if(unlikely(ss->g <= 0.001)) return 0 ;
+		if(unlikely(ss->g <= 0.001)) {
+			//LOG(WARN,"Killed %d:%d",a->row,a->pad) ;
+			return 0 ;
+		}
 
 		orig_flags = flags =  ss->f & 0xFF ;
 	}
 	else {
 		// kill, by hand, the pad which has 0.0 gain just to avoid confusion
 		// when the gains i.e. in Offline are misapplied
-		if(unlikely(s->g <= 0.001)) return 0 ;
+		if(unlikely(s->g <= 0.001)) {
+			//LOG(WARN,"Killed %d:%d",a->row,a->pad) ;
+			return 0 ;
+		}
 
 		orig_flags = flags =  s->f & 0xFF ;
 	}

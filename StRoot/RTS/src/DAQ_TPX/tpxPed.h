@@ -18,17 +18,18 @@ public:
 
 
 	int clock_source ;	// 0 TCD, 1 RCC-local, 3 RCC-RHIC, 9-unknown
-	int sector ; // if fee is overriden...
-	int valid ;	// when calced or loaded
 
-	void init(int active_rbs) ;					// mallocs (if nece) and clears ped_store
+	int valid ;		// when calced or loaded
+
+	void init(int sec, int active_rbs) ;					// mallocs (if nece) and clears ped_store
+	void clear() ;	// zaps storage
+
 	void accum(char *evbuff, int bytes) ;
 	void calc() ;					// calculates mean/rms into ped_store
 
-	int to_altro(char *buff, int rb, int timebins) ;		// to ALTRO format from ped_store
+	int to_altro(char *buff, int rb, int timebins) ;// to ALTRO format from ped_store
 
 	int to_evb(char *buff) ;			// to EVB format from ped_store
-	int from_evb(char *buff, int bytes) ;		// decode from EVB to ped_store
 
 	int from_cache(char *fname = 0, u_int r_mask = 0x3F) ;		// from cached file to ped_store
 	int to_cache(char *fname = 0, u_int run = 0) ;			// to cached file from ped_store
@@ -36,37 +37,62 @@ public:
 	int special_setup(int run_type, int sub_type) ;
 	int hlt_debug_setup(int param) ;
 
-	void kill_bad(int row, int pad) ;		// kills this specific pad in ped_store
-
+	int kill_bad(int r0_logical,int row, int pad) ;		// kills this specific pad in ped_store
 
 	void smooth() ;					// from ped_store to ped_store
-	int summarize(FILE *log=0) ;
 
 	int max_events ;	// max events allowed in the calculation
 
-	int rb_mask ;
+
 private:
-	struct peds {
-		double ped[512] ;
-		double rms[512] ;
-		u_short cou[512] ;
-	} *ped_store ;
+
+	int sector ;		// logical (1..36)!
+	int rb_mask ;	// logical mask
 
 	int smoothed ;	// boolean
 
 
+	struct peds {
+		double ped[512] ;
+		double rms[512] ;
+		u_short cou[512] ;
+	} ; // *ped_store ;
 
-	int sizeof_ped ;
+	struct peds_rdo_t {
+		int start_row ;
+		int row_count ;
+		int r_real ;
+		int s_real ;
 
-	u_int evts[6] ;	// RDOs count from 0 here!
-	u_int valid_evts[6] ;
+		struct peds *peds ;
+	} ped_rdo_store[6] ;	// indexed by logical r0
+
+
+	u_int evts[6] ;		// logical r0: RDOs count from 0 here!
+	u_int valid_evts[6] ;	// logical r0
 
 
 	void accum(tpx_altro_struct *a) ;	// adds values into ped_store
 
-	struct peds *get(int row, int pad) {		// returns pointer to ped_store
-		return (ped_store + row*183 + pad) ;
+	struct peds *get(int r0_logical, int row, int pad) {		// returns pointer to ped_store
+		if(rb_mask & (1<<r0_logical)) ;
+		else return 0 ;	// not enabled!
+
+		if(row==0) {	// non-physical pads go first
+		}
+		else {
+			row = row - ped_rdo_store[r0_logical].start_row  ;
+			
+			if(row < 0) return 0 ;	// not in this RDO!
+			if(row >= ped_rdo_store[r0_logical].row_count) return 0 ;	// not in this RDO!
+
+			row++ ;
+		}
+
+		return (ped_rdo_store[r0_logical].peds + row*183 + pad) ;
 	}
+
+
 } ;
 
 #endif

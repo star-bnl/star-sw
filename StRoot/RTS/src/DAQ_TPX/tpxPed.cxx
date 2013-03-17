@@ -11,6 +11,7 @@
 #include <TPC/rowlen.h>
 #include <daqModes.h>
 #include <TPX/tpx_altro_to_pad.h>
+#include <SFS/sfs_index.h>
 
 #include "tpxCore.h"
 #include "tpxPed.h"
@@ -28,47 +29,110 @@ tpxPed::tpxPed()
 	memset(evts,0,sizeof(evts)) ;
 	memset(valid_evts,0,sizeof(valid_evts)) ;
 	
-	sizeof_ped = sizeof(struct peds) * 46 * 183 ;
-
-	ped_store = 0 ;	// unassigned!
-
 	max_events = 1000 ;
 	
 	clock_source = 9 ; // non-existant
 	sector = -1 ;	// uniti...
+
+	memset(ped_rdo_store,0,sizeof(ped_rdo_store)) ;
+
+
+
 	return ;
 }
 
 
 tpxPed::~tpxPed()
 {
-	if(ped_store) free(ped_store) ;
+	tpxPed::clear() ;
 
 	return ;
 }
 
-#if 0
-tpxPed::peds *tpxPed::get(int row, int pad)
-{
-	return (ped_store + row*183 + pad) ;
-}
-#endif
 
-void tpxPed::init(int active_rbs)
+void tpxPed::clear()
 {
+	for(int r=0;r<6;r++) {
+		if(ped_rdo_store[r].peds) {
+			free(ped_rdo_store[r].peds) ;
+			ped_rdo_store[r].peds = 0 ;
+		}
+	}
+
+	return ;
+}
+
+
+// called at start of run...
+void tpxPed::init(int sec, int active_rbs)
+{
+
 	smoothed = 0 ;
 	valid = 0 ;
 
 	memset(evts,0,sizeof(evts)) ;
 	memset(valid_evts,0,sizeof(valid_evts)) ;
-	rb_mask = active_rbs ;
 
-	if(ped_store == 0) {
-		ped_store = (struct peds *) malloc(sizeof_ped) ;
+	rb_mask = active_rbs ;
+	sector = sec ;
+
+	tpxPed::clear() ;	// zap storage ;
+
+	for(int r=0;r<6;r++) {
+		if(rb_mask & (1<<r)) ;
+		else continue ;
+
+		int s_real, r_real ;
+
+		ped_rdo_store[r].row_count = 8 ;
+
+		tpx36_to_real(sector,r+1,s_real,r_real) ;
+
+		ped_rdo_store[r].r_real = r_real ;
+		ped_rdo_store[r].s_real = s_real ;
+
+		switch(r_real) {
+		case 1 :
+			ped_rdo_store[r].start_row = 1 ;
+			break ;
+		case 2 :
+			ped_rdo_store[r].start_row = 8 ;
+			break ;
+		case 3 :
+			ped_rdo_store[r].start_row = 14 ;
+			break ;
+		case 4 :
+			ped_rdo_store[r].start_row = 22 ;
+			break ;
+		case 5 :
+			ped_rdo_store[r].start_row = 30 ;
+			break ;
+		case 6 :
+			ped_rdo_store[r].start_row = 38 ;
+			break ;
+		default:
+			LOG(ERR,"S%02d:%d: not done!",s_real,r_real) ;
+			break ;
+		}
+
+
 	}
 
-	memset(ped_store,0,sizeof_ped) ;
 
+	for(int r=0;r<6;r++) {
+		if(rb_mask & (1<<r)) ;
+		else continue ;
+
+		// add one more row for the row==0 unphysical pads
+		int bytes = (ped_rdo_store[r].row_count+1)*183*sizeof(struct peds) ;
+
+
+		ped_rdo_store[r].peds = (struct peds *) malloc(bytes) ;
+	
+
+		memset(ped_rdo_store[r].peds,0,bytes) ;
+	}
+	
 	LOG(TERR,"Pedestals zapped: sector %2d, rb_mask 0x%02X.", sector, rb_mask) ;
 }
 
@@ -81,7 +145,7 @@ void tpxPed::accum(char *evbuff, int bytes)
 	u_int *data_end ;
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
-
+	int r0_logical ;
 
 	t = tpx_get_start(evbuff, bytes/4, &rdo, 0) ;
 
@@ -95,23 +159,27 @@ void tpxPed::accum(char *evbuff, int bytes)
 	a.sector = rdo.sector ;
 	a.log_err = 0 ;
 
-	evts[a.rdo]++ ;
+	r0_logical = tpx36_from_real(sector,rdo.sector,rdo.rdo) - 1 ;
+	
+	evts[r0_logical]++ ;
 
 
 	// skip first few events!
-	if(evts[a.rdo] <= 3) {
-		LOG(NOTE,"RDO %d: skipping event %d < 3",rdo.rdo,evts[a.rdo]) ;
+	if(evts[r0_logical] <= 3) {
+		LOG(NOTE,"RDO %d: skipping event %d < 3",rdo.rdo,evts[r0_logical]) ;
 		return ;
 	}
-	if(tpx_rdo_dbg[a.rdo].delta < 200000) {
-		LOG(WARN,"RDO %d: skipping event %d: delta %u too small",rdo.rdo,evts[a.rdo],tpx_rdo_dbg[a.rdo].delta) ;
+
+	// what to do with this!!!???
+	if(tpx_rdo_dbg[a.sector-1][a.rdo].delta < 200000) {
+		LOG(WARN,"RDO %d: skipping event %d: delta %u too small",rdo.rdo,evts[r0_logical],tpx_rdo_dbg[a.sector-1][a.rdo].delta) ;
 		usleep(10000) ;
 		return ;
 	}
 
-	valid_evts[a.rdo]++ ;
+	valid_evts[r0_logical]++ ;
 
-        LOG(NOTE,"RDO %d: event %d: delta %u OK",rdo.rdo,evts[a.rdo],tpx_rdo_dbg[a.rdo].delta) ;
+        LOG(NOTE,"RDO %d: event %d: delta %u OK",rdo.rdo,evts[r0_logical],tpx_rdo_dbg[a.sector-1][a.rdo].delta) ;
 
 	data_end = rdo.data_end ;
 
@@ -130,17 +198,20 @@ void tpxPed::accum(tpx_altro_struct *a)
 	int i ;
 	int row, pad ;
 	struct peds *p ;
+	int r0_logical ;
 
-
+	r0_logical = tpx36_from_real(sector, a->sector, a->rdo+1) ;
+	r0_logical-- ;	// need from 0 later on...
 
 	row = a->row ;
 	pad = a->pad ;
 
 
+	p = get(r0_logical,row, pad) ;
 
-	p = get(row, pad) ;
 	if(p==0) {
 		LOG(ERR,"ped::accum for row %d, pad %d, A %d:%d bad?",row,pad,a->id,a->ch) ;
+		LOG(ERR,"Slog %d:%d, Shw %d:%d",sector,r0_logical+1,a->sector,a->rdo+1) ;
 		return ;
 	}
 
@@ -167,6 +238,7 @@ void tpxPed::accum(tpx_altro_struct *a)
 void tpxPed::calc()
 {
 	int r,p,t ;
+	int rl0 ;
 	int bad ;
 
 
@@ -174,9 +246,11 @@ void tpxPed::calc()
 
 	bad = 0 ;
 
+	for(rl0=0;rl0<6;rl0++) {
 	for(r=0;r<=45;r++) {
 	for(p=0;p<=182;p++) {
-		struct peds *ped = get(r,p) ;
+		struct peds *ped = get(rl0,r,p) ;
+		if(ped==0) continue ;
 
 		for(t=0;t<512;t++) {
 			if(ped->cou[t] == 0) {
@@ -197,6 +271,7 @@ void tpxPed::calc()
 				ped->rms[t] = rr ;
 			}
 		}
+	}
 	}
 	}
 
@@ -228,6 +303,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 {
 	int row, pad, t ;
 	int a, ch ;
+	int s_real, r_real ;
 
 	FILE *fff = 0 ;
 	char fname[128] ;
@@ -245,12 +321,16 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		LOG(ERR,"ped::to_altro peds are bad: RDO %d: valid %d, smoothed %d",rb+1,valid,smoothed) ;
 	}
 
-	LOG(NOTE,"Preparing pedestals for RDO %d...",rb) ;
+
+
+	tpx36_to_real(sector,rb+1,s_real,r_real) ;
+
+	LOG(TERR,"Preparing pedestals for Slo%02d:%d (Shw%02d:%d)...",sector,rb+1,s_real,r_real) ;
 
 	for(a=0;a<256;a++) {
 	for(ch=0;ch<16;ch++) {
 
-		tpx_from_altro(rb,a,ch,row,pad) ;
+		tpx_from_altro(r_real-1,a,ch,row,pad) ;
 
 		if(row > 45) continue ;	// not here...
 
@@ -266,11 +346,14 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 
 		// get the corresponding row & pad
 
-		struct peds *ped = get(row,pad) ;
-
+		struct peds *ped = get(rb,row,pad) ;
+		if(ped==0) {
+			LOG(ERR,"RDO %d (real %d): row %d, pad %d",rb+1,r_real,row,pad) ;
+			continue ;
+		}
 
 		for(t=0;t<timebins+15;t++) {
-			if(fff) fprintf(fff,"%3d %2d %3d %3d\n",a,ch,t,(u_short)ped->ped[t]) ;
+			if(fff) fprintf(fff,"%d %d %d %d %d %d\n",row,pad,a,ch,t,(u_short)ped->ped[t]) ;
 		}
 #if 0
 		// copy as shorts BUT:
@@ -374,8 +457,8 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 
 		int aid = a ;
 		for(int i=0;i<tpx_fee_override_cou;i++) {
-			if(sector == tpx_fee_override[i].sector) {
-			if(rb == (tpx_fee_override[i].rdo-1)) {
+			if(s_real == tpx_fee_override[i].sector) {
+			if(r_real == (tpx_fee_override[i].rdo)) {
 			int fee = a & 0xFE ;
 			if(fee == tpx_fee_override[i].orig_altro) {
 				
@@ -408,6 +491,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 int tpxPed::to_evb(char *buff)
 {
 	int r, p, t ;
+	sfs_index sfs ;
 
 	char *rbuff = buff ;	// remember
 
@@ -418,12 +502,27 @@ int tpxPed::to_evb(char *buff)
 
 	LOG(NOTE,"Preparing pedestals for later EVB...") ;
 
+	for(int rl0=0;rl0<4;rl0++) {
+
+	char sname[32] ;
+	int s_real, r_real ;
+	tpx36_to_real(sector,rl0+1,s_real,r_real) ;
+
+	sprintf(sname,"sec%02d/rb%02d/pedrms",s_real,r_real) ;
+	char *save_rbuff = rbuff ;
+	int h_bytes = sfs.putfileheader(save_rbuff,sname,0) ;
+
+	rbuff += h_bytes ;
+
+	u_short *addr = (u_short *) rbuff ;
+
 	for(r=0;r<=45;r++) {
 		for(p=1;p<=tpc_rowlen[r];p++) {
-			struct peds *ped = get(r, p) ;
+			struct peds *ped = get(rl0,r, p) ;
+			if(ped==0) continue ;
 
-			u_short *addr = (u_short *) rbuff ;	// remember address
-			*(addr+1) = (r<<8)|p ;	// row/pad
+			addr = (u_short *) rbuff ;	// remember address
+			*(addr+1) = (r<<8) | p ;	// row/pad
 			
 			u_short *ptr = addr + 2;	// read to store
 
@@ -446,6 +545,9 @@ int tpxPed::to_evb(char *buff)
 			rbuff = (char *) ptr ;
 		}
 	}
+	sfs.putfileheader(save_rbuff,sname,rbuff-save_rbuff-h_bytes) ;
+
+	}
 	// short cou
 	// short row|pad
 	// short: 6bit RMS, 10bit ped
@@ -460,8 +562,6 @@ int tpxPed::from_cache(char *fname, u_int rb_msk)
 	char fn[64]  ;
 	char *pn ;
 
-	init(rb_msk) ;	// to clear
-	
 	// trivial load from disk...
 	if(fname) {
 		pn = fname ;
@@ -477,7 +577,11 @@ int tpxPed::from_cache(char *fname, u_int rb_msk)
 		if(rb_mask & (1<<(rdo-1))) ;
 		else continue ;
 		
-		sprintf(fn,"%s_r%d.txt",pn,rdo) ;
+		int s_real, r_real ;
+
+		tpx36_to_real(sector,rdo,s_real,r_real) ;
+
+		sprintf(fn,"%s_s%02d_r%d.txt",pn,s_real,r_real) ;
 		f = fopen(fn,"r") ;
 
 		if(f==0) {
@@ -492,11 +596,20 @@ int tpxPed::from_cache(char *fname, u_int rb_msk)
 		while(!feof(f)) {
 			int r, p , t ;
 			float pp, rr ;
+			char buff[64] ;
 
-			int ret = fscanf(f,"%d %d %d %f %f",&r,&p,&t,&pp,&rr) ;
+			if(fgets(buff,sizeof(buff),f)==0) continue ;
+			
+			switch(buff[0]) {
+			case '#' :
+			case '/' :
+				continue ;
+			}
+
+			int ret = sscanf(buff,"%d %d %d %f %f",&r,&p,&t,&pp,&rr) ;
 			if(ret != 5) continue ;
 
-			struct peds *peds = get(r,p) ;
+			struct peds *peds = get(rdo-1,r,p) ;
 
 			//if((r==12) && (p==158) && (t==0)) LOG(TERR,"peds row %d, pad %d: %f %f",r,p,pp,rr) ;
 
@@ -530,15 +643,19 @@ int tpxPed::to_cache(char *fname, u_int run)
 	char fn[64] ;
 	char f_sum_name[128] ;
 	char *pn ;
+	char *asc_date ;
 
 	static float old_sum[46][183] ;
-
 
 
 	if(!valid || smoothed) {
 		LOG(ERR,"ped::to_cache peds are bad: valid %d, smoothed %d -- not caching",valid,smoothed) ;
 		return -1 ;
 	}
+
+
+	time_t tm = time(0) ;
+	asc_date = ctime(&tm) ;
 
 	if(fname) {
 		pn = fname ;
@@ -550,19 +667,26 @@ int tpxPed::to_cache(char *fname, u_int run)
 	// changed to per-RDO on Jan 13, 2010.
 
 	for(int rdo=1;rdo<=6;rdo++) {
+		int s_real, r_real ;
 
+		if(rb_mask & (1<<(rdo-1))) ;
+		else continue ;
 
+		// need real sector and real RDO here!!!
+		tpx36_to_real(sector,rdo,s_real,r_real) ;
+		
 		// check if the RDO was present!
 		if(valid_evts[rdo-1] < MIN_EVENTS) {
 			LOG(ERR,"Sector %2d, RDO %d has %d events -- not caching!",sector,rdo,valid_evts[rdo-1]) ;
 			continue ;
 		}
 
-		sprintf(fn,"%s_r%d.txt",pn,rdo) ;
+		sprintf(fn,"%s_s%02d_r%d.txt",pn,s_real,r_real) ;
 
 		// first read old peds...
 
 		memset(old_sum,0,sizeof(old_sum)) ;
+
 		f = fopen(fn,"r") ;
 		if(f==0) {
 			LOG(ERR,"ped::to_cache can't open input file \"%s\" [%s]",fn,strerror(errno)) ;
@@ -571,7 +695,17 @@ int tpxPed::to_cache(char *fname, u_int run)
 
 			while(!feof(f)) {
 				float fped, frms ;
-				fscanf(f,"%d %d %d %f %f",&r,&p,&t,&fped,&frms) ;
+				char buff[64] ;
+
+				if(fgets(buff,sizeof(buff),f)==0) continue ;
+
+				switch(buff[0]) {
+				case '#' :
+				case '/' :
+					continue ;
+				}
+
+				sscanf(buff,"%d %d %d %f %f",&r,&p,&t,&fped,&frms) ;
 
 				if(t < 22) {
 					old_sum[r][p] += fped ;
@@ -595,10 +729,10 @@ int tpxPed::to_cache(char *fname, u_int run)
 		}
 
 		if(run==0) {
-			sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_r%d_%u_%d.txt",sector,rdo,(u_int)time(NULL),clock_source) ;
+			sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_r%d_%u_%d.txt",s_real,r_real,(u_int)time(NULL),clock_source) ;
 		}
 		else {
-			sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_r%d_%08u_%d.txt",sector,rdo,run,clock_source) ;
+			sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_r%d_%08u_%d.txt",s_real,r_real,run,clock_source) ;
 		}
 
 		f_sum = fopen(f_sum_name,"w") ;
@@ -609,6 +743,11 @@ int tpxPed::to_cache(char *fname, u_int run)
 
 		LOG(NOTE,"Writing pedestals to cache \"%s\"...",fn) ;
 
+		fprintf(f,"# Run %09u, Date %s",run,asc_date) ;
+		fprintf(f,"# Logical sector %d, logical RDO %d\n",sector,rdo) ;
+		fprintf(f,"# Hardware sector %d, hardware RDO %d\n",s_real, r_real) ;
+
+
 		for(r=0;r<=45;r++) {
 
 		// ONLY from 1 to rowlen!
@@ -616,9 +755,13 @@ int tpxPed::to_cache(char *fname, u_int run)
 			int t_rdo, t_a, t_ch ;
 
 			tpx_to_altro(r,p,t_rdo,t_a,t_ch) ;
-			if(t_rdo != rdo) continue ;
+			if(t_rdo != r_real) continue ;
 
-			struct peds *peds = get(r, p) ;
+			struct peds *peds = get(rdo-1,r, p) ;
+			if(peds == 0) {
+				LOG(WARN,"Shouldnt %d %d %d %d",r_real,t_rdo,r,p) ;
+				continue ;
+			}
 
 			double sum = 0.0 ;
 			int cou = 0 ;
@@ -632,7 +775,7 @@ int tpxPed::to_cache(char *fname, u_int run)
 
 			double p_diff = sum - old_sum[r][p] ;
 			if(fabs(p_diff)>1.0) {
-				LOG(WARN,"RDO %d: ped_compare r:p %d:%d = %.1f",rdo,r,p,p_diff) ;
+				LOG(WARN,"RDO %d (S%02d:%d): ped_compare r:p %d:%d = %.1f",rdo,s_real,r_real,r,p,p_diff) ;
 			}
 
 
@@ -666,12 +809,15 @@ int tpxPed::hlt_debug_setup(int param)
 
 	hits = 0 ;
 
+	for(int rl0=0;rl0<4;rl0++) {
+
 	for(int r=1;r<=45;r++) {
 
 	for(int p=3;p<=(tpc_rowlen[r]-delta_pad-2);p+=delta_pad) {
 
 		for(int pd=0;pd<2;pd++) {
-			struct peds *ped = get(r,p+pd) ;
+			struct peds *ped = get(rl0,r,p+pd) ;
+			if(ped==0) continue ;
 
 			for(int t=15;t<400;t+=delta_tb) {
 
@@ -688,6 +834,7 @@ int tpxPed::hlt_debug_setup(int param)
 				}
 			}
 		}
+	}
 	}
 	}
 
@@ -721,10 +868,11 @@ int tpxPed::special_setup(int run_type, int sub_type)
 		return 1 ;
 	}
 
+	for(int rl0=0;rl0<4;rl0++) {
 	for(r=0;r<=45;r++) {
 	for(p=0;p<=182;p++) {
-		struct peds *ped = get(r,p) ;
-
+		struct peds *ped = get(rl0,r,p) ;
+		if(ped==0) continue ;
 		
 		switch(run_type) {
 		case RUN_TYPE_PULSER_A :
@@ -788,6 +936,7 @@ int tpxPed::special_setup(int run_type, int sub_type)
 
 	}
 	}	
+	}
 
 	valid = 1 ;
 	smoothed = 1 ;
@@ -817,9 +966,12 @@ void tpxPed::smooth()
 
 	LOG(NOTE,"Smoothing pedestals...") ;
 
+	for(int rl0=0;rl0<4;rl0++) {
 	for(r=0;r<=45;r++) {
 	for(p=0;p<=182;p++) {
-		struct peds *ped = get(r,p) ;
+		struct peds *ped = get(rl0,r,p) ;
+		if(ped==0) continue ;
+
 		double smoother[513] ;
 		double ripple[24] ;
 
@@ -882,6 +1034,7 @@ void tpxPed::smooth()
 
 	}
 	}
+	}
 
 	LOG(TERR,"Pedestals smoothed: sector %2d",sector) ;
 	smoothed = 1 ;
@@ -890,39 +1043,19 @@ void tpxPed::smooth()
 }
 
 
-void tpxPed::kill_bad(int row, int pad)
+int tpxPed::kill_bad(int r0_logical,int row, int pad)
 {
 	struct peds *p ;
-	int t ;
 
-	p = get(row, pad) ;
+	p = get(r0_logical,row, pad) ;
+	if(p==0) return 0 ;
 
-	for(t=0;t<512;t++) {
+	for(int t=0;t<512;t++) {
 		p->ped[t] = 1023.0 ;
 		p->rms[t] = 9.999 ;
 	}
 
-	return ;
+	return 1 ;
 }
 
-// what's this???
-int tpxPed::from_evb(char *buff, int bytes) 
-{
-	init(0x3F) ;	// zap struct
-	valid = 0 ;
-	smoothed = 0 ;
-
-
-
-	return 0 ;
-}
-
-// unused....
-int tpxPed::summarize(FILE *log)
-{
-	int notes = 0 ;
-
-
-	return notes ;
-}
 

@@ -26,7 +26,7 @@ public:
 
 
 	static const int MAX_BLOB_COUNT		= 400 ;
-	static const int MAX_SEQ_PER_BLOB	= 128 ; // was 64 ;
+	static const int MAX_SEQ_PER_BLOB	= 256 ; // was 64 ;
 	static const int MAX_PEAKS_PER_BLOB	= 30 ; // was 10 ;
 	static const int MAX_LATE_MERGE		= 64 ;
 	static const int MAX_PADS_PER_RDO	= 1152 ;
@@ -35,10 +35,10 @@ public:
 
 
 	int stage_2d(u_int  *outbuff, int max_bytes) ;
-	int do_pad_2d(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc) ;
+	int do_pad_2d(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc=0) ;
 
 	void start_evt_2d(int sec1, int rdo1) {
-//		LOG(TERR,"start_evt_2d: %d %d",sec1,rdo1) ;
+
 		sector = sec1 ;
 		rdo = rdo1 ;
 
@@ -81,10 +81,13 @@ public:
 			
 		short p1, p2 ;
 		short t1, t2 ;
-		short i, j ;
 
+		short i, j ;
 		short flags ;
 		short pix_cou ;
+
+		short aux_flags ;
+		
 	} peaks[MAX_PEAKS_PER_BLOB] ;
 
 	int do_peaks(int row, int peaks_cou) ;

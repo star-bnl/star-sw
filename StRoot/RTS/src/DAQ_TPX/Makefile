@@ -23,6 +23,7 @@ ifeq ($(HOST_NAME),ettie.star.bnl.gov)
 endif
 
 
+DEFINES += -DDO_DBG
 
 OBJS := tpxCore.o tpxPed.o tpxGain.o tpxFCF.o tpxFCF_2D.o tpxStat.o daq_tpx.o
 
@@ -101,6 +102,9 @@ tpxPed.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxPed.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
 tpxPed.o: ../../../../StRoot/RTS/include/daqModes.h
 tpxPed.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
+tpxPed.o: ../SFS/sfs_index.h
+tpxPed.o: ../SFS/fs_index.h
+tpxPed.o: ../SFS/sfs_base.h
 tpxPed.o: tpxCore.h
 tpxPed.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxPed.o: tpxPed.h
@@ -113,12 +117,16 @@ tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxStat.o: tpxStat.h
 tpxDecodeGains.o: ../DAQ_TPX/tpxGain.h
 tpxDecodeGains.o: tpxCore.h
+tpxDecodeGains.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxDecodeGains.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 daq_tpx.o: ../DAQ_READER/daq_det.h
+tpxCore.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxFCF_2D.o: ../DAQ_TPX/tpxFCF.h
 tpxFCF.o: tpxFCF_flags.h
 tpxGain.o: tpxCore.h
+tpxGain.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxGain.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxPed.o: tpxCore.h
+tpxPed.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxPed.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h

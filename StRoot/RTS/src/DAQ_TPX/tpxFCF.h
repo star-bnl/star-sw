@@ -21,7 +21,7 @@
 #define FCF_V_FY08	0x0000		// used in the FY08 run; has the /32 "bug"
 #define FCF_V_FY09	0x0001		// /32 bug fixed 
 
-
+#define FCF_2D_V_FY13	0x1000		// first version of FCF_2D!
 
 
 
@@ -121,11 +121,19 @@ public:
 	int fcf_style ;	// new for FY13!
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.15 2013/01/22 12:34:57 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.16 2013/03/17 21:40:24 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
 	int sector ;	// counts from 1
 	int rdo ;	// counts from 1
+
+	inline int is_pad_valid(int row, int pad)
+	{
+		s_static_storage *ss = get_static(row,pad) ;
+		if(ss==0) return 0 ;
+		if(ss->f & FCF_KILLED_PAD) return 0 ;
+		return 1 ;
+	}
 
 protected:
 	unsigned char *tpx_rowlen ;
@@ -147,12 +155,22 @@ protected:
 		int s = sector -1 ;
 		int r = rdo - 1 ;
 
+		if(r < 0) {	// figure out from the row & pad
+			int a, ch ;
+			tpx_to_altro(row,pad,r,a,ch) ;
+
+			r-- ;	// need to start from 0
+
+//			LOG(TERR,"r:p %d:%d - rdo is %d",row,pad,r) ;
+		}
+
 		if(gain_storage[s][r].storage == 0) return 0 ;
 		if(gain_storage[s][r].row_ix[row] < 0) return 0 ;
 
 		return gain_storage[s][r].storage + gain_storage[s][r].row_ix[row] + (pad-1) ;
 
 	}
+
 
 private:
 
