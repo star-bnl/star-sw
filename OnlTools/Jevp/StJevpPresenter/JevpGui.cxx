@@ -1228,7 +1228,7 @@ void JevpGui::UpdatePlots()
   
       double t1 = clock.record_time();
       if(t1 > .25)
-	LOG("JEFF", "Ethernet: Drawplots (%lf)",t1);
+	LOG("JEFF", "Ethernet: Drawplots %s: (%lf)",currentScreen->plot->c_str(),t1);
     }
     
   }
