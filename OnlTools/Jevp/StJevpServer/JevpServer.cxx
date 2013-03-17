@@ -152,7 +152,7 @@ void JevpServer::main(int argc, char *argv[])
   rtsLogAddDest(serv.log_dest, serv.log_port);
   rtsLogLevel(serv.log_level);
 
-  LOG(DBG, "Starting JevpServer: port=%d pid=%d", serv.myport, (int)getpid());
+  LOG("JEFF", "Starting JevpServer: port=%d pid=%d", serv.myport, (int)getpid());
 
   // Each time we start, archive the existing display file...
   serv.init(serv.myport, argc, argv);
